@@ -1328,6 +1328,12 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 						CqVector2D vecP(pie->SamplePoint(m,n));
 						QGetRenderContext()->Stats().IncSamples();
 	
+						if(vecP.x()>bmaxx)
+						{
+							brkHoriz=TqTrue;
+							break;
+						}
+
 						TqFloat t=pie->SampleTime(m,n);
 						// First, check if the subsample point lies within the micropoly bound
 						if(t>=time0 && t<=time1 && Bound.Contains2D(vecP))
@@ -1392,9 +1398,7 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 						}
 						else
 						{
-							if(vecP.x()>Bound.vecMax().x())
-								brkHoriz=TqTrue;
-							if(vecP.y()>Bound.vecMax().y())
+							if(vecP.y()>bmaxy)
 								brkVert=TqTrue;
 						}
 					}
