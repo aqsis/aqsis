@@ -38,6 +38,9 @@ The following people have contributed to the development of Aqsis Renderer
 	2002 Matthäus G. Chajdas	Documentation.
 								Web site.
 								Various changes to information output.	
+	2003 Tristan Colgate		DSO shadeop support.
+								RiProcedural
+								RiDelayedReadArchive
 
 	If anyone is missing from this list, please contact me at pgregory@aqsis.com.
 
