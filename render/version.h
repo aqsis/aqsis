@@ -32,7 +32,7 @@
 #define	STRNAME		"Aqsis"
 
 #define	VERMAJOR 0
-#define	VERMINOR 8
+#define	VERMINOR 9
 #define	BUILD 0
 
 #define	STRX(x)	#x
