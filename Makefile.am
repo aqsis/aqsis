@@ -14,7 +14,7 @@ endif
 
 SUBDIRS = $(MAINDIRS) $(GLUTDIRS) $(PLUGINSDIRS)
 
-EXTRA_DIST = Doxyfile Renderer.dsw bootstrap prep_install.bat ribber.cfg ddmsock.ini doxygen.dsp
+EXTRA_DIST = Doxyfile Renderer.dsw bootstrap ddmsock.ini doxygen.dsp
 
 .PHONY: test
 test:
