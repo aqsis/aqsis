@@ -10,9 +10,9 @@ SUBDIRS = . $(MAINDIRS) $(PLUGINSDIRS)
 
 EXTRA_DIST = Doxyfile Renderer.dsw bootstrap doxygen.dsp Renderer.sln
 
-.PHONY: test
-test:
-	cd aqsl/tests; $(MAKE) $(AM_MAKEFLAGS) test
+.PHONY: strace
+strace:
+	cd aqsis; $(MAKE) $(AM_MAKEFLAGS) strace
 
 all-local: $(top_srcdir)/render/ri.inl $(top_srcdir)/render/ri_cache.inl $(top_srcdir)/render/ri_validate.inl
 

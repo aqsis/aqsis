@@ -1604,8 +1604,7 @@ procedurecall
 unresolvedcall
 	:	IDENTIFIER '(' proc_arguments ')'
 							{
-								std::cerr << warning << "Hit unresolved call to function: " << $1->c_str() << 
-														"We will attempt to resolve this with a DSO at runtime" << std::endl;
+								std::cerr << warning << "Unresolved function " << $1->c_str() << " will be treated as a DSO at runtime" << std::endl;
 								CqParseNode* pArgs=$3;
 								CqString strArgTypes("");
 								if(pArgs)
@@ -1631,8 +1630,7 @@ unresolvedcall
 								// This should in theory be the eaiest case to handle
 								// since there are no arguments that might need casting
 								// later.
-								std::cerr << warning << "Hit unresolved call to function: " << $1->c_str() << 
-														"We will attempt to resolve this with a DSO at runtime" << std::endl;
+								std::cerr << warning << "Unresolved function " << $1->c_str() << " will be treated as a DSO at runtime" << std::endl;
 								CqFuncDef func_spec(Type_Nil, $1->c_str(), "unresolved","");
 								CqParseNodeUnresolvedCall* pUFunc=new CqParseNodeUnresolvedCall(func_spec);
 								pUFunc->SetPos(ParseLineNumber,ParseStreamName.c_str());

@@ -17,3 +17,7 @@ clean-local:
 	rm -f *.map
 	rm -f *.tif
 
+.PHONY: strace
+strace:
+	for file in $(top_srcdir)/ribfiles/*.rib; do echo "Rendering $$file ..."; strace $(top_builddir)/aqsis/aqsis --displays="$(top_srcdir)/display" --shaders="$(top_srcdir)/shaders" -v3 $$file; done
+	
