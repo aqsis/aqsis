@@ -633,7 +633,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 	for ( TqInt bound_num = 0; bound_num < bound_max ; bound_num++ )
 	{
 		TqFloat time0;
-		CqBound& Bound = pMPG->SubBound( bound_num, time0 );
+		CqBound Bound = pMPG->SubBound( bound_num, time0 );
 		TqFloat time1 = 1.0f;
 		if ( bound_num != bound_max_1 )
 			pMPG->SubBound( bound_num + 1, time1 );
