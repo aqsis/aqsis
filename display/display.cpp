@@ -350,11 +350,25 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		if(strcmp(drivername, "file")==0 || strcmp(drivername, "tiff")==0)
 			pImage->m_imageType = Type_File;
 		else if(strcmp(drivername, "framebuffer")==0)
+#ifndef AQSIS_SYSTEM_MACOSX
 			pImage->m_imageType = Type_Framebuffer;
+#else
+        {
+            std::cout << "framebuffer display type not supported under MacOSX, reverting to 'file'" << std::endl;
+            pImage->m_imageType = Type_File;
+        }
+#endif
 		else if(strcmp(drivername, "zfile")==0)
 			pImage->m_imageType = Type_ZFile;
 		else if(strcmp(drivername, "zframebuffer")==0)
+#ifndef AQSIS_SYSTEM_MACOSX
 			pImage->m_imageType = Type_ZFramebuffer;
+#else
+        {
+            std::cout << "zframebuffer display type not supported under MacOSX, reverting to 'zfile'" << std::endl;
+            pImage->m_imageType = Type_ZFile;
+        }
+#endif
 		else if(strcmp(drivername, "shadow")==0)
 			pImage->m_imageType = Type_Shadowmap;
 		pImage->m_iFormatCount = iFormatCount;
@@ -403,6 +417,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			}
 			widestFormat = PkDspyUnsigned8;
 
+#ifndef AQSIS_SYSTEM_MACOSX
 			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
 			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, pImage->m_iFormatCount, reinterpret_cast<unsigned char*>(pImage->m_data));
 			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
@@ -410,6 +425,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_theWindow->end();
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
+#endif
 		}
         else
 		{
@@ -441,6 +457,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		// If in "zframebuffer" mode, we need another buffer for the displayed depth data.
 		if(pImage->m_imageType == Type_ZFramebuffer)
 		{
+#ifndef AQSIS_SYSTEM_MACOSX
 			pImage->m_zfbdata = reinterpret_cast<unsigned char*>(malloc( pImage->m_width * pImage->m_height * 3 * sizeof(unsigned char)));
 
 			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
@@ -450,6 +467,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_theWindow->end();
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
+#endif
 		}
 
 		// If we are recieving "rgba" data, ensure that it is in the correct order.
@@ -636,6 +654,7 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 
 	if(pImage)
 	{
+#ifndef AQSIS_SYSTEM_MACOSX
 		if(pImage->m_imageType == Type_Framebuffer || pImage->m_imageType == Type_ZFramebuffer)
 		{
 			if( pImage->m_imageType == Type_ZFramebuffer )
@@ -699,6 +718,7 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 			}
 			Fl::run();
 		}
+#endif
 		return(DspyImageClose(image));
 	}
 	return(PkDspyErrorNone);
