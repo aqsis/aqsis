@@ -31,10 +31,10 @@
 
 #define	STRNAME		"Aqsis"
 
-#define	VERMAJOR 0
-#define	VERMINOR 9
-#define	BUILD 4
-#define	VERSION_STR	"0.9.4"
+#define	VERMAJOR 1
+#define	VERMINOR 1
+#define	BUILD 0
+#define	VERSION_STR	"1.1.0"
 
 #define GET_VERSION_FROM_STRING(a,b,c) TqInt __s=0,__e; \
 			__s+=strVersion.find_first_of("0123456789",__s);	__e=strVersion.find_first_of(".",__s); \

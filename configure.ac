@@ -1,6 +1,6 @@
 AC_INIT()
 dnl AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(aqsis, 0.9.4)
+AM_INIT_AUTOMAKE(aqsis, 1.1.0)
 AM_CONFIG_HEADER(libaqsistypes/config.h)
 
 AC_DEFINE(STRNAME,"Aqsis", [Application Name] )

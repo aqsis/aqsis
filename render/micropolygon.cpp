@@ -302,7 +302,7 @@ void CqMicroPolyGrid::Shade()
     {
     if ( USES( lUses, EnvVars_du ) )
     {
-            TqFloat v1, v2;
+/*            TqFloat v1, v2;
             TqInt GridX = i % ( uRes + 1 );
 
             if ( GridX < uRes )
@@ -316,11 +316,13 @@ void CqMicroPolyGrid::Shade()
                 pVar(EnvVars_u) ->GetValue( v1, i );
                 pVar(EnvVars_u) ->GetValue( v2, i - 1 );
                 pVar(EnvVars_du) ->SetFloat( v1 - v2, i );
-            }
+            }*/
+            pVar(EnvVars_du) ->SetFloat( 1.0f, i );
+
         }
     if ( USES( lUses, EnvVars_dv ) )
     {
-            TqFloat v1, v2;
+/*            TqFloat v1, v2;
             TqInt GridY = ( i / ( uRes + 1 ) );
 
             if ( GridY < vRes )
@@ -334,7 +336,8 @@ void CqMicroPolyGrid::Shade()
                 pVar(EnvVars_v) ->GetValue( v1, i );
                 pVar(EnvVars_v) ->GetValue( v2, i - ( uRes + 1 ) );
                 pVar(EnvVars_dv) ->SetFloat( v1 - v2, i );
-            }
+            }*/
+            pVar(EnvVars_dv) ->SetFloat( 1.0f, i );
         }
 		switch ( proj )
 		{
