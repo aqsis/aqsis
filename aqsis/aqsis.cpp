@@ -21,7 +21,11 @@ void RenderFile(std::istream& file, const char* name);
 void GetOptions();
 
 bool g_pause;
+#ifdef	_DEBUG
+int g_endofframe=3;
+#else
 int g_endofframe=0;
+#endif
 bool g_nostandard=0;
 bool g_help=0;
 bool g_version=0;
