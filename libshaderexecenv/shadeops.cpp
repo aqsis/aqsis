@@ -2903,9 +2903,15 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 {
 	INIT_SO
 
-	IqShaderData * pnV = m_pAttributes->pshadSurface() ->CreateTemporaryStorage( type_vector, class_varying );
-	IqShaderData* pnN = m_pAttributes->pshadSurface() ->CreateTemporaryStorage( type_normal, class_varying );
-	IqShaderData* pR = m_pAttributes->pshadSurface() ->CreateTemporaryStorage( type_vector, class_varying );
+	IqShaderData * pnV = pShader ->CreateTemporaryStorage( type_vector, class_varying );
+	IqShaderData* pnN = pShader ->CreateTemporaryStorage( type_normal, class_varying );
+	IqShaderData* pR = pShader ->CreateTemporaryStorage( type_vector, class_varying );
+
+	/// note: Not happy about this, the shader should take care of this at construction time,
+	/// but at the moment, it can't guarantee the validity of the m_u/vGridRes data members.
+	pnV->Initialise( uGridRes(), vGridRes() );
+	pnN->Initialise( uGridRes(), vGridRes() );
+	pR->Initialise( uGridRes(), vGridRes() );
 
 	SO_normalize( V, pnV );
 	SO_normalize( N, pnN );
@@ -2918,6 +2924,9 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 	END_VARYING_SECTION
 
 	SO_reflect( pnV, pnN, pR );
+
+	pShader->DeleteTemporaryStorage( pnV );
+	pShader->DeleteTemporaryStorage( pnN );
 
 	// If the illuminance cache is already OK, then we don't need to bother filling in the illuminance parameters.
 	if ( !m_IlluminanceCacheValid )
@@ -2968,6 +2977,7 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 		while ( SO_advance_illuminance() );
 	}
 	pShader->DeleteTemporaryStorage( pDefAngle );
+	pShader->DeleteTemporaryStorage( pR );
 }
 
 
