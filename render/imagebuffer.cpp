@@ -461,37 +461,6 @@ TqInt	CqBucket::m_YPixelSamples;
 std::vector<CqImagePixel>	CqBucket::m_aieImage;
 std::vector<TqFloat> CqBucket::m_aFilterValues;
 
-//----------------------------------------------------------------------
-/** Get a reference to pixel data.
- * \param iXPos Integer pixel coordinate.
- * \param iYPos Integer pixel coordinate.
- * \param pie Pointer to CqImagePixel to fill in.
- * \return Boolean indicating success, could fail if the specified pixel is not within the specified bucket.
- */
-
-TqBool CqBucket::ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
-{
-	iXPos -= m_XOrigin;
-	iYPos -= m_YOrigin;
-
-	TqInt fxo2 = m_XMax;
-	TqInt fyo2 = m_YMax;
-
-	// Check within renderable range
-	if ( iXPos >= -fxo2 && iXPos <= m_XSize + fxo2 &&
-	        iYPos >= -fyo2 && iYPos <= m_YSize + fyo2 )
-	{
-		TqInt i = ( ( iYPos + fyo2 ) * ( m_XSize + m_XFWidth ) ) + ( iXPos + fxo2 );
-		pie = &m_aieImage[ i ];
-		return ( TqTrue );
-	}
-	else
-	{
-		std::cerr << "CqBucket::ImageElement() outside bucket boundary!\n";
-		return ( TqFalse );
-	}
-}
-
 
 //----------------------------------------------------------------------
 /** Initialise the static image storage area.
@@ -636,7 +605,8 @@ void CqBucket::CombineElements()
 CqColor CqBucket::Color( TqInt iXPos, TqInt iYPos )
 {
 	CqImagePixel * pie;
-	if ( ImageElement( iXPos, iYPos, pie ) )
+	ImageElement( iXPos, iYPos, pie );
+	if( NULL != pie )
 		return ( pie->Color() );
 	else
 		return ( gColBlack);
@@ -652,7 +622,8 @@ CqColor CqBucket::Color( TqInt iXPos, TqInt iYPos )
 CqColor CqBucket::Opacity( TqInt iXPos, TqInt iYPos )
 {
 	CqImagePixel * pie;
-	if ( ImageElement( iXPos, iYPos, pie ) )
+	ImageElement( iXPos, iYPos, pie );
+	if( NULL != pie )
 		return ( pie->Opacity() );
 	else
 		return ( gColBlack);
@@ -669,7 +640,8 @@ CqColor CqBucket::Opacity( TqInt iXPos, TqInt iYPos )
 TqFloat CqBucket::Coverage( TqInt iXPos, TqInt iYPos )
 {
 	CqImagePixel * pie;
-	if ( ImageElement( iXPos, iYPos, pie ) )
+	ImageElement( iXPos, iYPos, pie );
+	if( NULL != pie )
 		return ( pie->Coverage() );
 	else
 		return ( 0.0f );
@@ -686,7 +658,8 @@ TqFloat CqBucket::Coverage( TqInt iXPos, TqInt iYPos )
 TqFloat CqBucket::Depth( TqInt iXPos, TqInt iYPos )
 {
 	CqImagePixel * pie;
-	if ( ImageElement( iXPos, iYPos, pie ) )
+	ImageElement( iXPos, iYPos, pie );
+	if( NULL != pie )
 		return ( pie->Depth() );
 	else
 		return ( FLT_MAX );
@@ -703,7 +676,8 @@ TqFloat CqBucket::Depth( TqInt iXPos, TqInt iYPos )
 TqFloat CqBucket::MaxDepth( TqInt iXPos, TqInt iYPos )
 {
 	CqImagePixel * pie;
-	if ( ImageElement( iXPos, iYPos, pie ) )
+	ImageElement( iXPos, iYPos, pie );
+	if( NULL != pie )
 		return ( pie->MaxDepth() );
 	else
 		return ( FLT_MAX );
@@ -744,6 +718,7 @@ void CqBucket::FilterBucket()
 
 	TqFloat endy = YOrigin() + YSize();
 	TqFloat endx = XOrigin() + XSize();
+
 	for ( y = YOrigin(); y < endy ; y++ )
 	{
 		TqFloat ycent = y + 0.5f;
@@ -1491,7 +1466,6 @@ void CqImageBuffer::RenderMPGs( TqInt iBucket, long xmin, long xmax, long ymin, 
 		RenderMicroPoly( *i, iBucket, xmin, xmax, ymin, ymax );
 		( *i ) ->Release();
 	}
-
 	m_aBuckets[ iBucket ].aMPGs().clear();
 }
 
@@ -1575,7 +1549,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 		if ( sY < ymin ) sY = ymin;
 		if ( sX < xmin ) sX = xmin;
 
-		CqImagePixel* pie;
+		CqImagePixel* pie, *pie2;
 
 		TqInt iXSamples = PixelXSamples();
 		TqInt iYSamples = PixelYSamples();
@@ -1596,11 +1570,15 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 		if( QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Oi" ) )
 			colMPGOpacity = pMPG->colOpacity();
 
+		TqInt nextx = Bucket.XSize() + Bucket.XFWidth();
+		Bucket.ImageElement( sX, sY, pie );
+
 		while ( iY < eY )
 		{
 			register long iX = sX;
 
-			Bucket.ImageElement( iX, iY, pie );
+			pie2 = pie;
+			pie += nextx;
 
 			while ( iX < eX )
 			{
@@ -1618,10 +1596,10 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 					TqBool brkHoriz = TqFalse;
 					for ( m = start_m; m < end_m && !brkHoriz; m++ )
 					{
-						CqVector2D vecP( pie->SamplePoint( m, n ) );
+						const CqVector2D& vecP = pie2->SamplePoint( m, n );
 						theStats.IncSamples();
 
-						TqFloat t = pie->SampleTime( m, n );
+						TqFloat t = pie2->SampleTime( m, n );
 						// First, check if the subsample point lies within the micropoly bound
 						if ( t >= time0 && t <= time1 && Bound.Contains2D( vecP ) )
 						{
@@ -1630,7 +1608,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 							// Check to see if the sample is within the sample's level of detail
 							if ( UsingLevelOfDetail )
 							{
-								TqFloat LevelOfDetail = pie->SampleLevelOfDetail( m, n );
+								TqFloat LevelOfDetail = pie2->SampleLevelOfDetail( m, n );
 								if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
 								{
 									continue;
@@ -1638,12 +1616,12 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 							}
 
 							// Now check if the subsample hits the micropoly
-							if ( pMPG->Sample( vecP, t, ImageVal.m_Depth ) )
+							if ( pMPG->Sample( vecP, ImageVal.m_Depth, t ) )
 							{
 								theStats.IncSampleHits();
 								pMPG->BeenHit();
 								// Sort the color/opacity into the visible point list
-								std::vector<SqImageSample>& aValues = pie->Values( m, n );
+								std::vector<SqImageSample>& aValues = pie2->Values( m, n );
 								int i = 0;
 								int c = aValues.size();
 								if ( c > 0 && aValues[ 0 ].m_Depth < ImageVal.m_Depth )
@@ -1664,8 +1642,8 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 								// Update max depth values
 								if ( !( DisplayMode() & ModeZ ) && Occludes )
 								{
-									CqOcclusionBox::MarkForUpdate( pie->OcclusionBoxId() );
-									pie->MarkForZUpdate();
+									CqOcclusionBox::MarkForUpdate( pie2->OcclusionBoxId() );
+									pie2->MarkForZUpdate();
 								}
 
 
@@ -1698,7 +1676,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 					}
 				}
 				iX++;
-				pie++;
+				pie2++;
 			}
 			iY++;
 		}
@@ -1747,9 +1725,9 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 		MaxEyeSplits = poptEyeSplits[ 0 ];
 
 	// Render any waiting micro polygon grids.
-	QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
+//	QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
 	RenderMPGs( iBucket, xmin, xmax, ymin, ymax );
-	QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
+//	QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
 
 	CqBucket& Bucket = m_aBuckets[ iBucket ];
 	
@@ -1837,9 +1815,9 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 		pSurface->Release();
 		pSurface = Bucket.pTopSurface();
 		// Render any waiting micro polygon grids.
-		QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
+//		QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
 		RenderMPGs( iBucket, xmin, xmax, ymin, ymax );
-		QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
+//		QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
 
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
 		// Update our occlusion hierarchy after each grid that gets drawn.

@@ -127,36 +127,42 @@ class CqBoundList
 		{}
 		~CqBoundList()
 		{
-			for ( std::vector<CqBound*>::iterator i = m_Bounds.begin(); i != m_Bounds.end(); i++ )
-				delete ( *i );
+			//for ( std::vector<CqBound*>::iterator i = m_Bounds.begin(); i != m_Bounds.end(); i++ )
+			//	delete ( *i );
 		}
 
 		/** Clear the list
 		 */
 		void Clear()
 		{
-			for ( std::vector<CqBound*>::iterator i = m_Bounds.begin(); i != m_Bounds.end(); i++ )
-				delete ( *i );
+			//for ( std::vector<CqBound*>::iterator i = m_Bounds.begin(); i != m_Bounds.end(); i++ )
+			//	delete ( *i );
 			m_Bounds.clear();
 			m_Times.clear();
 		}
 
+		void SetSize( TqInt size )
+		{
+			m_Bounds.resize( size );
+			m_Times.resize( size );
+		}
 		/** Add a bound to the current list
 		 *\param bound The CqBound to add
 		 *\param time The shutter time that this bound becomes valid at. The bound
 		 * is valid until the time of the next bound or until 1.0 if there are no more bounds.
 		 */
-		void	Add( CqBound* bound, TqFloat time )
+		void	Set( TqInt index, CqBound bound, TqFloat time )
 		{
-			m_Bounds.push_back( bound );
-			m_Times.push_back( time );
+			assert( index < Size() );
+			m_Bounds[ index ] = bound;
+			m_Times[ index ] = time;
 		}
 		TqInt Size()
 		{
 			return m_Bounds.size();
 		}
 
-		CqBound* GetBound( TqInt i )
+		CqBound& GetBound( TqInt i )
 		{
 			return m_Bounds[ i ];
 		}
@@ -166,7 +172,7 @@ class CqBoundList
 		}
 
 	private:
-		std::vector<CqBound*> m_Bounds;
+		std::vector<CqBound> m_Bounds;
 		std::vector<TqFloat> m_Times;
 };
 

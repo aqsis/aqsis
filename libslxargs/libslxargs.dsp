@@ -19,6 +19,7 @@ CFG=libslxargs - Win32 Debug
 !MESSAGE 
 !MESSAGE "libslxargs - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "libslxargs - Win32 Debug" (based on "Win32 (x86) Static Library")
+!MESSAGE "libslxargs - Win32 Profile" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -76,12 +77,38 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
+!ELSEIF  "$(CFG)" == "libslxargs - Win32 Profile"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "libslxargs___Win32_Profile"
+# PROP BASE Intermediate_Dir "libslxargs___Win32_Profile"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\Library\Profile"
+# PROP Intermediate_Dir "..\Object\Profile\libslxargs"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GR /GX /O2 /I "..\render" /I "..\librib2ri" /I "..\librib2" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libshadervm" /I "..\libshaderexecenv" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSLXARGS /D BUILD_LIBSLXARGS=1 /FD /c
+# SUBTRACT BASE CPP /YX
+# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\render" /I "..\librib2ri" /I "..\librib2" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libshadervm" /I "..\libshaderexecenv" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSLXARGS /D BUILD_LIBSLXARGS=1 /FD /c
+# SUBTRACT CPP /YX
+# ADD BASE RSC /l 0x809 /d "NDEBUG"
+# ADD RSC /l 0x809 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo
+# ADD LIB32 /nologo
+
 !ENDIF 
 
 # Begin Target
 
 # Name "libslxargs - Win32 Release"
 # Name "libslxargs - Win32 Debug"
+# Name "libslxargs - Win32 Profile"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"

@@ -484,7 +484,7 @@ class CqMicroPolygonBase
 		 * \param D storage to put the depth at the sample point if success.
 		 * \return Boolean success.
 		 */
-		virtual	TqBool	Sample( CqVector2D& vecSample, TqFloat time, TqFloat& D ) = 0;
+		virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time ) = 0;
 
 		/** Set the flag to state that the MPG has eben hit by a sample point.
 		 */
@@ -526,6 +526,8 @@ class CqMicroPolygonStaticBase
 		{}
 
 	public:
+		virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
+
 		CqMicroPolygonStaticBase& operator=( const CqMicroPolygonStaticBase& From )
 		{
 			m_vecPoints[ 0 ] = From.m_vecPoints[ 0 ];
@@ -536,11 +538,40 @@ class CqMicroPolygonStaticBase
 			m_D = From.m_D;
 			return ( *this );
 		}
+		/** Get a pointer to the array of points.
+		 */
+		CqVector3D* GetpPoints()
+		{
+			return( m_vecPoints );
+		}
+		/** Get a constant pointer to the array of points.
+		 */
+		const CqVector3D* GetpPoints() const
+		{
+			return( m_vecPoints );
+		}
+		/** Get a reference to the normal vector for this MPG.
+		 */
+		CqVector3D& GetN()
+		{
+			return( m_vecN );
+		}
+		/** Get a constant reference to the normal vector for this MPG.
+		 */
+		const CqVector3D& GetN() const
+		{
+			return( m_vecN );
+		}
+		/** Get the D value for this MPG.
+		 */
+		TqFloat GetD() const
+		{
+			return( m_D );
+		}
 		CqBound	GetTotalBound() const;
 		void	Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD );
-		TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth );
 		CqMicroPolygonStaticBase&	LinearInterpolate( TqFloat Fraction, const CqMicroPolygonStaticBase& MPA, const CqMicroPolygonStaticBase& MPB );
-		CqVector2D ReverseBilinear( CqVector2D& v );
+		CqVector2D ReverseBilinear( const CqVector2D& v );
 
 	protected:
 		CqVector3D	m_vecPoints[ 4 ];		///< Array of 4 3D vectors representing the micropoly.
@@ -589,7 +620,7 @@ class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonSta
 			return ( m_Bound );
 		}
 
-		virtual	TqBool	Sample( CqVector2D& vecSample, TqFloat time, TqFloat& D );
+		virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
 
 		virtual void	MarkTrimmed()
 		{
@@ -634,6 +665,7 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 		{}
 
 		// Overrides from CqMicroPolygonBase
+		virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
 		virtual	CqBound&	GetTotalBound( TqBool fForce = TqFalse );
 		/** Pure virtual, get the bound of the micropoly.
 		 * \return CqBound representing the conservative bound.
@@ -654,11 +686,11 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 				BuildBoundList();
 			assert( iIndex < m_BoundList.Size() );
 			time = m_BoundList.GetTime( iIndex );
-			return ( *m_BoundList.GetBound( iIndex ) );
+			return ( m_BoundList.GetBound( iIndex ) );
 		}
 		virtual void	BuildBoundList();
 
-		virtual	TqBool	Sample( CqVector2D& vecSample, TqFloat time, TqFloat& D );
+		virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
 
 		// Overrides from CqMotionSpec
 		void	ClearMotionObject( CqMicroPolygonStaticBase& A ) const

@@ -244,6 +244,17 @@ class CqMotionSpec
 				return ( m_DefObject );
 			}
 		}
+
+		/** Get the motion object at the specified index.
+		 * \param iIndex Index in the array of time slots.
+		 * \return Reference to the object at the appropriate timeslot.
+		 */
+		const	T&	GetMotionObject( TqInt iIndex ) const
+		{
+			assert( iIndex >= 0 && iIndex < cTimes() );
+			return ( m_aObjects[ iIndex ] );
+		}
+
 		/** Set the motion object to use as the default when expanding the timeslot list.
 		 * \param a The new default motion object.
 		 */

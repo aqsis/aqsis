@@ -347,7 +347,18 @@ class CqBucket : public IqBucket
 
 		static	void	InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqInt xfwidth, TqInt yfwidth, TqInt xsamples, TqInt ysamples, TqBool fJitter = TqTrue );
 		static	void	InitialiseFilterValues();
-		static	TqBool	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie );
+		static	void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
+		{
+			iXPos -= m_XOrigin;
+			iYPos -= m_YOrigin;
+
+			// Check within renderable range
+			assert( iXPos < -m_XMax && iXPos < m_XSize + m_XMax &&
+					iYPos < -m_YMax && iYPos < m_YSize + m_YMax );
+
+			TqInt i = ( ( iYPos + m_YMax ) * ( m_XSize + m_XFWidth ) ) + ( iXPos + m_XMax );
+			pie = &m_aieImage[ i ];
+		}
 		static	void	CombineElements();
 		void	FilterBucket();
 		void	ExposeBucket();

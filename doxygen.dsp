@@ -19,6 +19,7 @@ CFG=doxygen - Win32 Debug
 !MESSAGE 
 !MESSAGE "doxygen - Win32 Release" (based on "Win32 (x86) Generic Project")
 !MESSAGE "doxygen - Win32 Debug" (based on "Win32 (x86) Generic Project")
+!MESSAGE "doxygen - Win32 Profile" (based on "Win32 (x86) Generic Project")
 !MESSAGE 
 
 # Begin Project
@@ -36,7 +37,7 @@ MTL=midl.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "Release"
+# PROP Output_Dir "..\Library\Release"
 # PROP Intermediate_Dir "Release"
 # PROP Target_Dir ""
 
@@ -49,8 +50,21 @@ MTL=midl.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Debug"
+# PROP Output_Dir "..\Library\Debug"
 # PROP Intermediate_Dir "Debug"
+# PROP Target_Dir ""
+
+!ELSEIF  "$(CFG)" == "doxygen - Win32 Profile"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "doxygen___Win32_Profile"
+# PROP BASE Intermediate_Dir "doxygen___Win32_Profile"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\Library\Profile"
+# PROP Intermediate_Dir "..\Object\Profile\doxygen"
 # PROP Target_Dir ""
 
 !ENDIF 
@@ -59,6 +73,7 @@ MTL=midl.exe
 
 # Name "doxygen - Win32 Release"
 # Name "doxygen - Win32 Debug"
+# Name "doxygen - Win32 Profile"
 # Begin Source File
 
 SOURCE=.\Doxyfile
@@ -74,6 +89,8 @@ InputPath=.\Doxyfile
 	doxygen
 
 # End Custom Build
+
+!ELSEIF  "$(CFG)" == "doxygen - Win32 Profile"
 
 !ENDIF 
 
