@@ -708,7 +708,7 @@ static bool LoadShaderInfo ( char *name )
 //	{
 //		doLoop = false;
 //	}
-	currentShaderSearchPath = (char*)malloc(strlen(""));
+	currentShaderSearchPath = (char*)malloc(strlen("")+1);
 	strcpy(currentShaderSearchPath, "");
 	while ( doLoop == true )
 	{
