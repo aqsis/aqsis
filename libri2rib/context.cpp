@@ -22,6 +22,10 @@
  *  \author Lionel J. Lacour (intuition01@online.fr)
  */
 
+#ifdef	WIN32
+#pragma warning( disable : 4786 )
+#endif //WIN32
+
 #include "context.h"
 #include "ascii.h"
 #include "binary.h"
