@@ -233,10 +233,15 @@ class CqRenderer : public IqRenderer
 				msg.Severity() << " : ";
 			std::cout << msg.strMessage().c_str() << std::endl;
 		}
+
+		/**	Get the global log class instance
+		 * @return	The pointer to IqLog
+		 */
 		virtual	IqLog*	Logger()
 		{
-			return( &m_theLog );
+			return( m_theLog );
 		}
+
 		// Contect change callbacks
 		virtual	SqParameterDeclaration FindParameterDecl( const char* strDecl );
 		virtual	void	AddParameterDecl( const char* strName, const char* strType );
@@ -330,8 +335,8 @@ class CqRenderer : public IqRenderer
 		void WhichMatWorldTo(CqMatrix &a, TqUlong thash);
 		void WhichMatToWorld(CqMatrix &b, TqUlong thash);
 
-		CqLog			m_theLog;
-		CqMessageTable	m_theTable;
+		IqLog*			m_theLog;	///< Pointer to the global log.
+		IqMessageTable*	m_theTable;	///< Pointer to the global message table, used by the log. 
 	public:
 		std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.
 }

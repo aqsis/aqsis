@@ -98,7 +98,12 @@ CqRenderer::CqRenderer() :
 	if ( chash == 0 ) chash = CqParameter::hash( "camera" );
 	if ( cuhash == 0 ) cuhash = CqParameter::hash( "current" );
 
-	m_theLog.setMessageTable( &m_theTable );
+	// Create the log on the heap, delete it in the destructor
+	m_theLog = new CqLog;
+	m_theTable = new CqMessageTable;
+
+	// Connect the message table with the log
+	m_theLog->setMessageTable( m_theTable );
 }
 
 //---------------------------------------------------------------------
@@ -126,6 +131,10 @@ CqRenderer::~CqRenderer()
 
 	// Close down the Display device manager.
 	m_pDDManager->Shutdown();
+
+	// Delete log & message table
+	delete m_theLog;
+	delete m_theTable;
 }
 
 
@@ -1018,7 +1027,7 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 			CqShaderVM * pShader = new CqShaderVM();
 			const CqString *poptDSOPath = QGetRenderContext()->optCurrent().GetStringOption( "searchpath","dsolibs" );
 			pShader->SetDSOPath( poptDSOPath );
-			pShader->SetLogger( &m_theLog );
+			pShader->SetLogger( m_theLog );
 			pShader->SetstrName( strName );
 			pShader->LoadProgram( SLXFile );
 			RegisterShader( strName, type, pShader );
