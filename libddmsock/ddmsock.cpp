@@ -380,7 +380,7 @@ TqInt CqDDManager::Shutdown()
 TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments )
 {
     CqDDClient New( name, type, mode, modeID, dataOffset, dataSize );
-    TqInt error = 0;
+    TqInt result = 0;
     m_aDisplayRequests.push_back( New );
     try
     {
@@ -389,10 +389,10 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
     catch( CqString str )
     {
         std::cerr << error << str.c_str() << std::endl;
-        error = 1;
+        result = 1;
         m_aDisplayRequests.pop_back();
     }
-    return ( error );
+    return ( result );
 }
 
 TqInt CqDDManager::ClearDisplays()

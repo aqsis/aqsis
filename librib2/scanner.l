@@ -224,7 +224,7 @@ ReadArchive				{ BEGIN(incl); }
 							CqRibBinaryDecoder* newstream = new CqRibBinaryDecoder(filepath);
 							if(newstream->fail())
 								{
-									std::cerr << "librib > scanner > Unable to open archive file " << filepath << std::endl;
+									std::cerr << error << "Unable to open archive file " << filepath << std::endl;
 									delete newstream;
 								}
 							else

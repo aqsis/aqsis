@@ -67,8 +67,8 @@ TqBool Parse( std::istream& InputStream, const CqString StreamName, std::ostream
     }
     catch(CqString error)
     {
-        ( *ParseErrorStream ) << error.c_str() << std::endl;
-        ( *ParseErrorStream ) << "ERROR: Shader not compiled" << std::endl;
+        ( *ParseErrorStream ) << error << error.c_str() << std::endl;
+        ( *ParseErrorStream ) << error << "Shader not compiled" << std::endl;
         ParseSucceeded = false;
         return( false );
     }

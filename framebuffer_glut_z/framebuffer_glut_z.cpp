@@ -246,6 +246,7 @@ int main( int argc, char** argv )
     std::auto_ptr<std::streambuf> reset_level( new reset_level_buf(std::cerr) );
     std::auto_ptr<std::streambuf> show_timestamps( new timestamp_buf(std::cerr) );
     std::auto_ptr<std::streambuf> fold_duplicates( new fold_duplicates_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> show_color( new color_level_buf(std::cerr) );
     std::auto_ptr<std::streambuf> show_level( new show_level_buf(std::cerr) );
     std::auto_ptr<std::streambuf> filter_level( new filter_by_level_buf(INFO, std::cerr) );
 

@@ -28,6 +28,29 @@
 START_NAMESPACE( Aqsis )
 
 ///////////////////////////////////////////////////////////
+// tag_buf
+
+/// When attached to an output stream, prepends a string "tag" to the beginning of every line of output
+class tag_buf :
+	public std::streambuf
+{
+public:
+	tag_buf(const std::string& Tag, std::ostream& Stream);
+	~tag_buf();
+
+protected:
+	int overflow(int);
+	int sync();
+
+private:
+	
+	std::ostream& m_stream;
+	std::streambuf* const m_streambuf;
+	bool m_start_new_line;
+	const std::string m_tag;
+};
+
+///////////////////////////////////////////////////////////
 // timestamp_buf
 
 /// When attached to an output stream, prefixes every line of output with a timestamp
@@ -67,6 +90,27 @@ private:
     std::ostream& m_stream;
     std::streambuf* const m_streambuf;
     bool m_start_new_line;
+};
+
+///////////////////////////////////////////////////////////
+// color_level_buf
+
+/// When attached to an output stream, colors output based on its log level (if any)
+class color_level_buf :
+	public std::streambuf
+{
+public:
+	color_level_buf(std::ostream& Stream);
+	~color_level_buf();
+
+protected:
+	int overflow(int);
+	int sync();
+
+private:
+	std::ostream& m_stream;
+	std::streambuf* const m_streambuf;
+	bool m_start_new_line;
 };
 
 ///////////////////////////////////////////////////////////

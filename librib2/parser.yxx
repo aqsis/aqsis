@@ -18,6 +18,7 @@ namespace std
 using namespace librib;
 
 #include "libribtypes.h"
+#include "logging.h"
 
 #include <algorithm>
 #include <iostream>
@@ -1658,7 +1659,7 @@ tvpairs
 static void yyerror(const std::string Message)
 {
 	ParseSucceeded = false;
-	(*ParseErrorStream) << "librib > parser > error: " << Message << " at " << ParseStreamName << " line " << ParseLineNumber << std::endl;
+	(*ParseErrorStream) << Aqsis::error << Message << " at " << ParseStreamName << " line " << ParseLineNumber << std::endl;
 }
 
 static void ExpectRequest()

@@ -83,6 +83,49 @@ std::ostream& debug(std::ostream& Stream)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
+// tag_buf
+
+tag_buf::tag_buf(const std::string& Tag, std::ostream& Stream) :
+	m_stream(Stream),
+	m_streambuf(Stream.rdbuf()),
+	m_start_new_line(true),
+	m_tag(Tag + " ")
+{
+	setp(0, 0);
+	m_stream.rdbuf(this);
+}
+
+tag_buf::~tag_buf()
+{
+	m_stream.rdbuf(m_streambuf);
+}
+
+int tag_buf::overflow(int c)
+{
+	if(c == EOF)
+		return 0;
+
+	if(m_start_new_line)
+		{
+			m_start_new_line = false;
+
+			if(static_cast<size_t>(m_streambuf->sputn(&m_tag[0], m_tag.size())) != m_tag.size())
+				return EOF;
+		}
+		
+	if(c == '\n')
+		m_start_new_line = true;
+	
+	return m_streambuf->sputc(c);
+}
+
+int tag_buf::sync()
+{
+	m_streambuf->pubsync();
+	return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 // timestamp_buf
 
 timestamp_buf::timestamp_buf(std::ostream& Stream) :
@@ -189,6 +232,76 @@ int show_level_buf::overflow(int c)
 }
 
 int show_level_buf::sync()
+{
+	m_streambuf->pubsync();
+	return 0;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// color_level_buf
+
+color_level_buf::color_level_buf(std::ostream& Stream) :
+	m_stream(Stream),
+	m_streambuf(Stream.rdbuf()),
+	m_start_new_line(true)
+{
+	setp(0, 0);
+	m_stream.rdbuf(this);
+}
+
+color_level_buf::~color_level_buf()
+{
+	m_stream.rdbuf(m_streambuf);
+}
+
+int color_level_buf::overflow(int c)
+{
+	if(c == EOF)
+		return 0;
+
+	if(m_start_new_line)
+		{
+			m_start_new_line = false;
+
+			std::string buffer;	
+			switch(detail::log_level(m_stream))
+				{
+					case CRITICAL:
+						buffer = "\e[1;31m";
+						break;
+					case ERROR:
+						buffer = "\e[1;31m";
+						break;
+					case WARNING:
+						buffer = "\e[1;33m";
+						break;
+					case INFO:
+						buffer = "\e[0m";
+						break;
+					case DEBUG:
+						buffer = "\e[1;32m";
+						break;
+					default:
+						buffer = "\e[0m";
+				}
+
+			if(static_cast<size_t>(m_streambuf->sputn(buffer.c_str(), buffer.size())) != buffer.size())
+				return EOF;
+		}
+	
+	if(c == '\n')
+		{
+			m_start_new_line = true;
+			
+			const std::string buffer = "\e[0m";
+			if(static_cast<size_t>(m_streambuf->sputn(buffer.c_str(), buffer.size())) != buffer.size())
+				return EOF;
+		}
+	
+	return m_streambuf->sputc(c);
+}
+
+int color_level_buf::sync()
 {
 	m_streambuf->pubsync();
 	return 0;

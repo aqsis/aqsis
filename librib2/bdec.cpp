@@ -32,6 +32,8 @@
 #pragma warning(disable : 4786)
 #endif
 
+#include "logging.h"
+
 #include <iostream>
 
 #include <stdio.h>
@@ -842,7 +844,8 @@ TqInt CqRibBinaryDecoder::read( TqPchar buffer, TqUint size )
     }
     catch ( std::string & s )
     {
-        if ( s != "" ) std::cerr << s << std::endl;
+        if ( s != "" )
+			std::cerr << Aqsis::error << s << std::endl;
     }
 
     n = writeToBuffer( buffer, size );

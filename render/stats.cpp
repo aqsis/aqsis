@@ -23,20 +23,16 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-#include	"aqsis.h"
+#include "aqsis.h"
+#include "attributes.h"
+#include "imagebuffer.h"
+#include "renderer.h"
+#include "stats.h"
+#include "transform.h"
 
-#include  <strstream>
-#include  <math.h>
-#include  <iomanip>
-
-#include	"renderer.h"
-#include	"attributes.h"
-#include	"transform.h"
-#include	"stats.h"
-//#include	"messages.h"
-#include	"imagebuffer.h"
-#include	<iostream>
-#include	<iomanip>
+#include <iomanip>
+#include <iostream>
+#include <math.h>
 
 START_NAMESPACE( Aqsis )
 
@@ -172,7 +168,7 @@ void CqStats::PrintStats( TqInt level ) const
     	Max		:= 3
     */
 
-    std::strstream MSG;
+    std::ostream& MSG = std::cout;
 
 
     TqFloat timeTotal = m_timeSurface.TimeTotal() +
@@ -196,13 +192,15 @@ void CqStats::PrintStats( TqInt level ) const
                         m_timeOthers.TimeTotal();
 
     //! level >= 0
-    MSG << "Total render time   : ";
-    TimeToString( MSG, m_timeTotal.TimeTotal(), -1 ) << std::endl;
-    MSG << "Last frame          : ";
-    TimeToString( MSG, m_timeTotalFrame.TimeTotal(), -1 ) << std::endl;
+    std::cerr << info << "Total render time: ";
+    TimeToString( std::cerr, m_timeTotal.TimeTotal(), -1 ) << std::endl;
+    std::cerr << info << "Last frame: ";
+    TimeToString( std::cerr, m_timeTotalFrame.TimeTotal(), -1 ) << std::endl;
 
     if ( level >= 1 )
     {
+    	MSG << std::endl;
+
         MSG << "Parsing             : ";
         TimeToString( MSG, m_timeParse.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
         MSG << "Diceable check      : ";
@@ -786,13 +784,6 @@ void CqStats::PrintStats( TqInt level ) const
         }
         MSG << std::endl;
     }
-
-    MSG << std::ends;
-
-    CqString strMSG( MSG.str() );
-    MSG.freeze(false);
-    //CqBasicError( 0, Severity_Normal, strMSG.c_str() );
-    std::cout << strMSG.c_str();
 }
 
 
