@@ -1,25 +1,25 @@
 # Microsoft Developer Studio Project File - Name="aqsl" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
-# ** DO NOT EDIT **
+# ** NICHT BEARBEITEN **
 
 # TARGTYPE "Win32 (x86) Console Application" 0x0103
 
 CFG=aqsl - Win32 Debug
-!MESSAGE This is not a valid makefile. To build this project using NMAKE,
-!MESSAGE use the Export Makefile command and run
+!MESSAGE Dies ist kein gültiges Makefile. Zum Erstellen dieses Projekts mit NMAKE
+!MESSAGE verwenden Sie den Befehl "Makefile exportieren" und führen Sie den Befehl
 !MESSAGE 
 !MESSAGE NMAKE /f "aqsl.mak".
 !MESSAGE 
-!MESSAGE You can specify a configuration when running NMAKE
-!MESSAGE by defining the macro CFG on the command line. For example:
+!MESSAGE Sie können beim Ausführen von NMAKE eine Konfiguration angeben
+!MESSAGE durch Definieren des Makros CFG in der Befehlszeile. Zum Beispiel:
 !MESSAGE 
 !MESSAGE NMAKE /f "aqsl.mak" CFG="aqsl - Win32 Debug"
 !MESSAGE 
-!MESSAGE Possible choices for configuration are:
+!MESSAGE Für die Konfiguration stehen zur Auswahl:
 !MESSAGE 
-!MESSAGE "aqsl - Win32 Release" (based on "Win32 (x86) Console Application")
-!MESSAGE "aqsl - Win32 Debug" (based on "Win32 (x86) Console Application")
-!MESSAGE "aqsl - Win32 Profile" (based on "Win32 (x86) Console Application")
+!MESSAGE "aqsl - Win32 Release" (basierend auf  "Win32 (x86) Console Application")
+!MESSAGE "aqsl - Win32 Debug" (basierend auf  "Win32 (x86) Console Application")
+!MESSAGE "aqsl - Win32 Profile" (basierend auf  "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
@@ -51,7 +51,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 log4cpp.lib libslpp.lib libargparse.lib libcodegenvm.lib libslparse.lib libaqsistypes.lib /nologo /subsystem:console /machine:I386 /libpath:"..\lib" /libpath:"..\bin" /libpath:"..\..\win32libs\lib"
+# ADD LINK32 libslpp.lib libargparse.lib libcodegenvm.lib libslparse.lib libaqsistypes.lib /nologo /subsystem:console /machine:I386 /libpath:"..\lib" /libpath:"..\bin" /libpath:"..\..\win32libs\lib"
 
 !ELSEIF  "$(CFG)" == "aqsl - Win32 Debug"
 
@@ -75,7 +75,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 libslpp.lib log4cppD.lib libargparse.lib libcodegenvm.lib libslparse.lib libaqsistypes.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /libpath:"..\lib\Debug" /libpath:"..\bin\Debug" /libpath:"..\..\win32libs\lib"
+# ADD LINK32 libslpp.lib libargparse.lib libcodegenvm.lib libslparse.lib libaqsistypes.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /libpath:"..\lib\Debug" /libpath:"..\bin\Debug" /libpath:"..\..\win32libs\lib"
 
 !ELSEIF  "$(CFG)" == "aqsl - Win32 Profile"
 
@@ -99,7 +99,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 log4cpp.lib libslpp.lib libargparse.lib libcodegenvm.lib libslparse.lib libaqsistypes.lib /nologo /subsystem:console /machine:I386 /libpath:"..\lib\Profile" /libpath:"..\bin\Profile" /libpath:"..\..\win32libs\lib"
+# ADD LINK32 libslpp.lib libargparse.lib libcodegenvm.lib libslparse.lib libaqsistypes.lib /nologo /subsystem:console /machine:I386 /libpath:"..\lib\Profile" /libpath:"..\bin\Profile" /libpath:"..\..\win32libs\lib"
 
 !ENDIF 
 
