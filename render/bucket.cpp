@@ -590,6 +590,7 @@ void CqBucket::AddGPrim( CqBasicSurface* pGPrim )
 				if ( surf->GetCachedRasterBound().vecMin().z() > pGPrim->GetCachedRasterBound().vecMin().z() )
 				{
 					pGPrim->LinkBefore( surf );
+					pGPrim->AddRef();
 					return ;
 				}
 			}

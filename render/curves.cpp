@@ -45,6 +45,7 @@ CqCurve::CqCurve() : CqSurface()
 {
 	m_widthParamIndex = -1;
 	m_constantwidthParamIndex = -1;
+	m_splitDecision = Split_Undecided;
 }
 
 
@@ -413,64 +414,18 @@ void CqLinearCurveSegment::NaturalSubdivide(
  */
 TqInt CqLinearCurveSegment::Split( std::vector<CqBasicSurface*>& aSplits )
 {
-
-	// OK, here the CqLinearCurveSegment line has two options:
-	//  1. split into two more lines
-	//  2. turn into a bilinear patch for rendering
-	// We don't want to go turning into a patch unless absolutely
-	// necessary, since patches cost more.  We only want to become a patch
-	// if the current curve is "best handled" as a patch.  For now, I'm
-	// choosing to define that the curve is best handled as a patch under
-	// one or more of the following two conditions:
-	//  1. If the maximum width is a significant fraction of the length of
-	//      the line (width greater than 0.75 x length; ignoring normals).
-	//  2. If the length of the line (ignoring the width; cos' it's
-	//      covered by point 1) is such that it's likely a bilinear
-	//      patch would be diced immediately if we created one (so that
-	//      patches don't have to get split!).
-	//  3. If the curve crosses the eye plane (m_fDiceable == false).
-
-	// find the length of the CqLinearCurveSegment line in raster space
-	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace(
-	                               "camera", "raster"
-	                           );
-	CqVector2D hull[ 2 ];     // control hull
-	hull[ 0 ] = matCtoR * ( *P() ) [ 0 ];
-	hull[ 1 ] = matCtoR * ( *P() ) [ 1 ];
-	CqVector2D lengthVector = hull[ 1 ] - hull[ 0 ];
-	TqFloat lengthraster = lengthVector.Magnitude();
-
-	// find the maximum width of the line in raster space
-	CqVector3D pp0 = hull[ 0 ] -
-	                 matCtoR * ( ( *P() ) [ 0 ] + CqVector4D( ( *width() ) [ 0 ], 0, 0, 1 ) );
-	CqVector3D pp1 = hull[ 1 ] -
-	                 matCtoR * ( ( *P() ) [ 1 ] + CqVector4D( ( *width() ) [ 1 ], 0, 0, 1 ) );
-	TqFloat width0 = pp0.Magnitude();
-	TqFloat width1 = pp1.Magnitude();
-	TqFloat maxwidthraster = ( width0 > width1 ) ? width0 : width1;
-
-	// find the approximate "length" of a diced patch in raster space
-	TqFloat gridlength = GetGridLength();
-
-
-	// decide whether to split into more curve segments or a patch
-	if (
-	    ( maxwidthraster > ( 0.75 * lengthraster ) ) ||
-	    ( lengthraster <= gridlength ) ||
-	    ( !m_fDiceable )
-	)
+	// Split based on the decision
+	switch( m_splitDecision )
 	{
-
-		// split into a patch
-		return SplitToPatch( aSplits );
+		case Split_Patch:
+			// split into a patch
+			return SplitToPatch( aSplits );
+		case Split_Curve:
+			// split into smaller curves
+			return SplitToCurves( aSplits );
+		default:
+			throw;
 	}
-	else
-	{
-		// split into smaller curves
-		return SplitToCurves( aSplits );
-
-	}
-
 }
 
 
@@ -931,61 +886,17 @@ void CqCubicCurveSegment::VaryingNaturalSubdivide(
  */
 TqInt CqCubicCurveSegment::Split( std::vector<CqBasicSurface*>& aSplits )
 {
-
-	// OK, here the CqCubicCurveSegment line has two options:
-	//  1. split into two more lines
-	//  2. turn into a bilinear patch for rendering
-	// We don't want to go turning into a patch unless absolutely
-	// necessary, since patches cost more.  We only want to become a patch
-	// if the current curve is "best handled" as a patch.  For now, I'm
-	// choosing to define that the curve is best handled as a patch under
-	// one or more of the following two conditions:
-	//  1. If the maximum width is a significant fraction of the length of
-	//      the line (width greater than 0.75 x length; ignoring normals).
-	//  2. If the length of the line (ignoring the width; cos' it's
-	//      covered by point 1) is such that it's likely a bilinear
-	//      patch would be diced immediately if we created one (so that
-	//      patches don't have to get split!).
-	//  3. If the curve crosses the eye plane (m_fDiceable == false).
-
-	// find the length of the CqLinearCurveSegment line in raster space
-	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace(
-	                               "camera", "raster"
-	                           );
-	CqVector2D hull[ 2 ];     // control hull
-	hull[ 0 ] = matCtoR * ( *P() ) [ 0 ];
-	hull[ 1 ] = matCtoR * ( *P() ) [ 1 ];
-	CqVector2D lengthVector = hull[ 1 ] - hull[ 0 ];
-	TqFloat lengthraster = lengthVector.Magnitude();
-
-	// find the maximum width of the line in raster space
-	CqVector3D pp0 = hull[ 0 ] -
-	                 matCtoR * ( ( *P() ) [ 0 ] + CqVector4D( ( *width() ) [ 0 ], 0, 0, 1 ) );
-	CqVector3D pp1 = hull[ 1 ] -
-	                 matCtoR * ( ( *P() ) [ 1 ] + CqVector4D( ( *width() ) [ 1 ], 0, 0, 1 ) );
-	TqFloat width0 = pp0.Magnitude();
-	TqFloat width1 = pp1.Magnitude();
-	TqFloat maxwidthraster = ( width0 > width1 ) ? width0 : width1;
-
-	// find the approximate "length" of a diced patch in raster space
-	TqFloat gridlength = GetGridLength();
-
-
-	// decide whether to split into more curve segments or a patch
-	if (
-	    ( maxwidthraster > ( 0.75 * lengthraster ) ) ||
-	    ( lengthraster <= gridlength ) ||
-	    ( !m_fDiceable )
-	)
+	// Split based on the decision
+	switch( m_splitDecision )
 	{
-
-		// split into a patch
-		return SplitToPatch( aSplits );
-	}
-	else
-	{
-		// split into smaller curves
-		return SplitToCurves( aSplits );
+		case Split_Patch:
+			// split into a patch
+			return SplitToPatch( aSplits );
+		case Split_Curve:
+			// split into smaller curves
+			return SplitToCurves( aSplits );
+		default:
+			throw;
 	}
 }
 

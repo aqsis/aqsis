@@ -180,6 +180,15 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		{
 			m_fDiscard = TqTrue;
 		}
+		/** Copy the information about splitting and dicing from the specified GPrim.
+		 * \param From A CqBasicSurface reference to copy the information from.
+		 */
+		virtual void CopySplitInfo( const CqBasicSurface* From )
+		{
+			m_uDiceSize = From->m_uDiceSize;
+			m_vDiceSize = From->m_vDiceSize;
+			m_SplitDir = From->m_SplitDir;
+		}
 
 		/** Determine whether this GPrim is to be discardrd.
 		 */
@@ -210,15 +219,6 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		void	SetSplitDir( EqSplitDir SplitDir )
 		{
 			m_SplitDir = SplitDir;
-		}
-		/** Copy the information about splitting and dicing from the specified GPrim.
-		 * \param From A CqBasicSurface reference to copy the information from.
-		 */
-		void	CopySplitInfo( const CqBasicSurface& From )
-		{
-			m_uDiceSize = From.m_uDiceSize;
-			m_vDiceSize = From.m_vDiceSize;
-			m_SplitDir = From.m_SplitDir;
 		}
 
 		/** Cache the calculated bound for further reference
@@ -752,8 +752,13 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<CqBasicSur
 			aaMotionSplits.resize( cTimes() );
 			TqInt cSplits = 0;
 			TqInt i;
-			for ( i = 0; i < cTimes(); i++ )
-				cSplits = GetMotionObject( Time( i ) ) ->Split( aaMotionSplits[ i ] );
+
+			cSplits = GetMotionObject( Time( 0 ) ) ->Split( aaMotionSplits[ 0 ] );
+			for ( i = 1; i < cTimes(); i++ )
+			{
+				TqInt numsplits = GetMotionObject( Time( i ) ) ->Split( aaMotionSplits[ i ] );
+				assert( numsplits == cSplits);
+			}
 
 			// Now build motion surfaces from the splits and pass them back.
 			for ( i = 0; i < cSplits; i++ )
@@ -779,7 +784,7 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<CqBasicSur
 			// Copy the split info so that at each time slot, the gprims split the same.
 			TqInt i;
 			for ( i = 1; i < cTimes(); i++ )
-				GetMotionObject( Time( i ) ) ->CopySplitInfo( *GetMotionObject( Time( 0 ) ) );
+				GetMotionObject( Time( i ) ) ->CopySplitInfo( GetMotionObject( Time( 0 ) ) );
 			return ( f );
 		}
 
