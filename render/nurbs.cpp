@@ -1401,8 +1401,8 @@ TqBool	CqSurfaceNURBS::Diceable()
 	ShadingRate=static_cast<TqFloat>(sqrt(ShadingRate));
 	MaxuLen/=ShadingRate;
 	MaxvLen/=ShadingRate;
-	m_uDiceSize=static_cast<TqUint>(MAX(MaxuLen,1));
-	m_vDiceSize=static_cast<TqUint>(MAX(MaxvLen,1));
+	m_uDiceSize=static_cast<TqUint>(MAX(ROUND(MaxuLen),1));
+	m_vDiceSize=static_cast<TqUint>(MAX(ROUND(MaxvLen),1));
 	TqFloat Area=m_uDiceSize*m_vDiceSize;
 
 	if(MaxuLen<FLT_EPSILON || MaxvLen<FLT_EPSILON)

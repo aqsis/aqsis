@@ -644,8 +644,8 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 	// TODO: Should ensure powers of half to prevent cracking.
 	uLen*=3;
 	vLen*=3;
-	m_uDiceSize=static_cast<TqInt>(MAX(uLen,1));
-	m_vDiceSize=static_cast<TqInt>(MAX(vLen,1));
+	m_uDiceSize=static_cast<TqInt>(MAX(ROUND(uLen),1));
+	m_vDiceSize=static_cast<TqInt>(MAX(ROUND(vLen),1));
 	TqFloat Area=m_uDiceSize*m_vDiceSize;
 
 	if(uLen<FLT_EPSILON || vLen<FLT_EPSILON)
@@ -997,9 +997,11 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 		return(TqFalse);
 
 	// TODO: Should ensure powers of half to prevent cracking.
-	TqFloat Area=(MAX(uLen,1))*(MAX(vLen,1));
-	m_uDiceSize=static_cast<TqInt>(MAX(uLen,1));
-	m_vDiceSize=static_cast<TqInt>(MAX(vLen,1));
+	uLen=MAX(ROUND(uLen),1);
+	vLen=MAX(ROUND(vLen),1);
+	TqFloat Area=uLen*vLen;
+	m_uDiceSize=static_cast<TqInt>(uLen);
+	m_vDiceSize=static_cast<TqInt>(vLen);
 
 	if(uLen<FLT_EPSILON || vLen<FLT_EPSILON)
 	{

@@ -159,8 +159,8 @@ void CqQuadric::EqtimateGridSize()
 //			rate=pattrShadowShadingRate[0];
 //	}	
 	
-	TqInt us=MAX(4,(TqInt)(ESTIMATEGRIDSIZE*maxusize/(rate)));
-	TqInt vs=MAX(4,(TqInt)(ESTIMATEGRIDSIZE*maxvsize/(rate)));
+	TqInt us=MAX(4,ROUND(ESTIMATEGRIDSIZE*maxusize/(rate)));
+	TqInt vs=MAX(4,ROUND(ESTIMATEGRIDSIZE*maxvsize/(rate)));
 	// Make size a power of 2
 	us=1<<(TqInt)(log(us)/log(2));
 	vs=1<<(TqInt)(log(vs)/log(2));
