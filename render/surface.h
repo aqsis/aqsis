@@ -395,6 +395,16 @@ class CqSurface : public CqBasicSurface
 			else
 				return ( NULL );
 		}
+		/** Get a reference the to an indexed primitive variable.
+		 */
+		virtual const	CqParameter* pVar(TqInt index) const
+		{
+			assert( index >= EnvVars_Cs && index < EnvVars_Last );
+			if ( m_aiStdPrimitiveVars[ index ] >= 0 )
+				return ( m_aUserParams[ m_aiStdPrimitiveVars[ index ] ] );
+			else
+				return ( NULL );
+		}
 		/** Get a reference the to Cq default parameter.
 		 */
 		virtual const	CqParameterTyped<CqColor, CqColor>* Cs() const
@@ -449,6 +459,16 @@ class CqSurface : public CqBasicSurface
 			else
 				return ( NULL );
 		}
+		/** Get a reference the to an indexed primitive variable.
+		 */
+		virtual CqParameter* pVar(TqInt index)
+		{
+			assert( index >= EnvVars_Cs && index < EnvVars_Last );
+			if ( m_aiStdPrimitiveVars[ index ] >= 0 )
+				return ( m_aUserParams[ m_aiStdPrimitiveVars[ index ] ] );
+			else
+				return ( NULL );
+		}
 
 		/** Determine whether this surface has per vertex normals.
 		 */
@@ -495,6 +515,13 @@ class CqSurface : public CqBasicSurface
 		virtual const	TqBool	bHasv() const
 		{
 			return ( m_aiStdPrimitiveVars[ EnvVars_v ] >= 0 );
+		}
+		/** Determine whether this surface has a specified primitive variable based on index
+		 */
+		virtual const	TqBool bHasVar(TqInt index) const
+		{
+			assert( index >= EnvVars_Cs && index < EnvVars_Last );
+			return ( m_aiStdPrimitiveVars[ index ] >= 0 );
 		}
 
 		/** Get a reference to the user parameter variables array

@@ -478,11 +478,48 @@ CqMicroPolyGridBase* CqSurface::Dice()
 	TqInt lDone = DiceAll( pGrid );
 
 	// Dice the primitive variables.
+
+	// Special cases for s and t if "st" exists, it should override s and t.
+	CqParameter* pParam;
+	if( ( pParam = FindUserParam("st") ) != NULL )
+	{
+		if ( !isDONE( lDone, EnvVars_s ) && USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) )
+			pParam ->DiceOne( m_uDiceSize, m_vDiceSize, pGrid->s(), this, 0 );
+		if ( !isDONE( lDone, EnvVars_t ) && USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) )
+			pParam ->DiceOne( m_uDiceSize, m_vDiceSize, pGrid->t(), this, 1 );
+		DONE( lDone, EnvVars_s);
+		DONE( lDone, EnvVars_t);
+	}
+
+	// Loop over all the variables checking if they have been specified in the scene, and
+	// if they are needed by the shaders, and id the grid can accept them.
+	// If all the tests pass, dice them into the grid based on their type.
+	TqInt varID;
+	for( varID = EnvVars_Cs; varID != EnvVars_Last; varID++ )
+	{
+		if ( !isDONE( lDone, varID ) && USES( lUses, varID ) && ( NULL != pGrid->pVar(varID) ) )
+		{
+			// Check if Cs has been specified by the user.
+			if ( bHasVar(varID) )
+			{
+				if( pVar(varID)->Class() == class_vertex || pVar(varID)->Class() == class_facevarying )
+					// "vertex" and "facevarying" need to be dealt with by the surface as they are diced using the 
+					// natural subdivision algorithms for that particular surface.
+					NaturalDice( pVar(varID), m_uDiceSize, m_vDiceSize, pGrid->pVar(varID) );
+				else
+					// "varying" are just bilinearly interpolated, so can be handled by the primitive variable.
+					pVar(varID) ->Dice( m_uDiceSize, m_vDiceSize, pGrid->pVar(varID), this );
+					
+				// Mark this as done, so that the special case default handlers later don't need to worry about it.
+				DONE(lDone, varID);	
+			}
+		}
+	}
+	
+	// Special case handlers for primitive variables that have defaults.
 	if ( !isDONE( lDone, EnvVars_Cs ) && USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) )
 	{
-		if ( bHasCs() )
-			Cs() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->Cs(), this );
-		else if ( NULL != pAttributes() ->GetColorAttribute( "System", "Color" ) )
+		if ( NULL != pAttributes() ->GetColorAttribute( "System", "Color" ) )
 			pGrid->Cs() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
 		else
 			pGrid->Cs() ->SetColor( CqColor( 1, 1, 1 ) );
@@ -490,48 +527,15 @@ CqMicroPolyGridBase* CqSurface::Dice()
 
 	if ( !isDONE( lDone, EnvVars_Os ) && USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) )
 	{
-		if ( bHasOs() )
-			Os() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->Os(), this );
-		else if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
+		if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
 			pGrid->Os() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
 		else
 			pGrid->Os() ->SetColor( CqColor( 1, 1, 1 ) );
 	}
 
-	if ( !isDONE( lDone, EnvVars_s ) && USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) )
-	{
-		CqParameter* pParam;
-		if( ( pParam = FindUserParam("st") ) != NULL )
-			pParam ->DiceOne( m_uDiceSize, m_vDiceSize, pGrid->s(), this, 0 );
-		else if( bHass() )
-			s() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->s(), this );
-	}
-
-	if ( !isDONE( lDone, EnvVars_t ) && USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) )
-	{
-		CqParameter* pParam;
-		if( ( pParam = FindUserParam("st") ) != NULL )
-			pParam ->DiceOne( m_uDiceSize, m_vDiceSize, pGrid->t(), this, 1 );
-		else if( bHast() )
-			t() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->t(), this );
-	}
-
-	if ( !isDONE( lDone, EnvVars_u ) && USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && bHasu() )
-		u() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->u(), this );
-
-	if ( !isDONE( lDone, EnvVars_v ) && USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && bHasv() )
-		v() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->v(), this );
-
-
-	if ( !isDONE( lDone, EnvVars_P ) && NULL != pGrid->P() )
-		NaturalDice( P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
-
 	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
-	if ( !isDONE( lDone, EnvVars_N ) && USES( lUses, EnvVars_N ) && ( NULL != pGrid->N() ) && bHasN() )
-	{
-		N() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->N(), this );
+	if ( isDONE( lDone, EnvVars_N ) )
 		pGrid->SetbShadingNormals( TqTrue );
-	}
 
 	if ( !isDONE( lDone, EnvVars_Ng ) && CanGenerateNormals() && USES( lUses, EnvVars_Ng ) )
 	{

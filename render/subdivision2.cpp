@@ -792,6 +792,7 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 				(*iVertLath )->SetpClockwiseVertex( apFaceLaths[i].pD );
 		}
 	}
+	//OutputInfo("out.dat");
 }
 
 
@@ -853,7 +854,8 @@ void CqSubdivision2::OutputInfo(const char* fname, std::vector<CqLath*>* paFaces
 	{
 		CqLath* pL = (*paLaths)[i];
 		file << i << " - 0x" << pL << " - "	<<
-			pL->VertexIndex() << " - (cf) ";
+			pL->VertexIndex() << " - " <<
+			pL->FaceVertexIndex() << " - (cf) ";
 		if( pL->cf() )
 			file << "0x" << pL->cf();
 		else
@@ -1081,7 +1083,6 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 			pGrid->t()->SetValueFromVariable( pGrid->v() );
 		}
 	}
-
 	if( apGrids.size() == 1 )
 		return( apGrids[ 0 ] );
 	else
@@ -1211,7 +1212,6 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoin
 	}
 }
 
-
 TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 {
 	assert( NULL != pTopology() );
@@ -1227,50 +1227,66 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 		std::vector<TqInt>	aiVertices;
 		std::vector<TqInt>	aiFVertices;
 
+		// 0,0
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 0,1
 		pPoint = pPoint->ccf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 0,2
 		pPoint = pPoint->cv()->ccf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 0,3
 		pPoint = pPoint->cv()->ccf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 1,0
 		pRow = pPoint = pRow->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 1,1
 		pPoint = pPoint->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 1,2
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 1,3
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 2,0
 		pRow = pPoint = pRow->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 2,1
 		pPoint = pPoint->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 2,2
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 2,3
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 3,0
 		pPoint = pRow->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 3,1
 		pPoint = pPoint->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 3,2
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
+		// 3,3
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		aiFVertices.push_back( pPoint->FaceVertexIndex() );
@@ -1411,7 +1427,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 	
 		if( apSurfaces.size() == 1 )
 			aSplits.push_back(apSurfaces[ 0 ]);
-		else
+		else if( apSurfaces.size() > 1 )
 		{
 			CqDeformingSurface* pMotionSurface = new CqDeformingSurface( 0 );
 			for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
@@ -1576,6 +1592,23 @@ TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
 			    CornerSharpness((*iFV)) != 0.0f )
 				return( TqFalse );
 		}
+	}
+
+	// Finally check if the "facevarying" indexes match, as patches can't have
+	// different facevarying indexes across the parameter lines.
+	for( iFV = aQfv.begin(); iFV != aQfv.end(); iFV++ )
+	{
+		std::vector<CqLath*> aQvv;
+		(*iFV)->Qvv(aQvv);
+		// We already know this must have 4 entries to have passed the previous tests.
+		if( !( aQvv[0]->FaceVertexIndex() == aQvv[1]->FaceVertexIndex() == aQvv[2]->FaceVertexIndex() == aQvv[3]->FaceVertexIndex() ) )
+			return( TqFalse );
+
+		// Check the edge parameter lines from this face vertex.
+		if( (*iFV)->ccv()->ccf()->FaceVertexIndex() != (*iFV)->ccv()->ccf()->ccv()->FaceVertexIndex() )
+			return( TqFalse );
+		if( (*iFV)->ccv()->ccv()->ccf()->FaceVertexIndex() != (*iFV)->ccv()->ccv()->ccf()->ccv()->FaceVertexIndex() )
+			return( TqFalse );
 	}
 
 	return( TqTrue );

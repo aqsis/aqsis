@@ -309,6 +309,10 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 		{
 			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ns() );
 		}
+		virtual IqShaderData* pVar(TqInt index)
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->pVar(index) );
+		}
 		virtual	IqShaderData* FindStandardVar( const char* pname )
 		{
 			IqShaderData* pVar = NULL;
