@@ -26,7 +26,10 @@
 #include	<strstream>
 
 #include	<time.h>
+
+#ifdef AQSIS_SYSTEM_WIN32
 #include	<process.h>
+#endif // AQSIS_SYSTEM_WIN32
 
 #include	"aqsis.h"
 #include	"imagebuffer.h"
@@ -1079,7 +1082,9 @@ void CqRenderer::AddDisplayDriver(const TqChar* name, const TqChar* type, const 
 
 void CqRenderer::ClearDisplayDrivers()
 {
+#ifdef AQSIS_SYSTEM_WIN32
 	m_aDisplayDrivers.clear();
+#endif // AQSIS_SYSTEM_WIN32
 }
 
 

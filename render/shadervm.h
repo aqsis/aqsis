@@ -454,12 +454,6 @@ static CqString temp_string;
 static bool temp_bool;
 static CqMatrix temp_matrix;
 
-#ifndef AQSIS_SYSTEM_WIN32
-// Eliminates "defined but not used" warnings in gcc 2.96
-static TqFloat& temp_float_reference = temp_float;
-static bool& temp_bool_reference = temp_bool;
-#endif // !AQSIS_SYSTEM_WIN32
-
 //----------------------------------------------------------------------
 /** \class CqShaderVM
  * Main class handling the execution of a program in shader language bytecodes.
