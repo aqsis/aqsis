@@ -75,7 +75,7 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
     if ( m_pShader )
     {
         Uses |= m_pShader->Uses();
-        m_pShaderExecEnv->Initialise( uGridRes, vGridRes, m_pAttributes, 0, m_pShader.get(), Uses );
+        m_pShaderExecEnv->Initialise( uGridRes, vGridRes, m_pAttributes, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
     }
 
     if ( m_pShader )

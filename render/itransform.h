@@ -4,8 +4,8 @@
  *	@author	Authors name
  *	@brief	Brief description of the file contents
  *
- *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2004/03/23 22:26:55 $
+ *	Last change by:		$Author: pseudonym $
+ *	Last change date:	$Date: 2004/07/13 06:24:10 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___itransform_Loaded___
@@ -23,8 +23,8 @@ struct IqTransform
     /** Get a writable copy of this, if the reference count is greater than 1
      * create a new copy and retirn that.
      */
-    virtual void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans ) = 0;;
-    virtual	void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans ) = 0;
+    // virtual void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans ) = 0;;
+    // virtual	void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans ) = 0;
     virtual	const CqMatrix&	matObjectToWorld( TqFloat time ) const = 0;
     virtual	TqFloat	Time( TqInt index ) const = 0;
     virtual	TqInt	cTimes() const = 0;
@@ -33,15 +33,7 @@ struct IqTransform
 	virtual	TqBool GetHandedness(TqFloat time) const=0;
 	/** Flip the handedness of the current coordinate system.
 	 */
-	virtual void FlipHandedness(TqFloat time)=0;
-
-#ifndef _DEBUG
-    virtual	void	Release() = 0;
-    virtual	void	AddRef() = 0;
-#else
-    virtual void AddRef(const TqChar* file, TqInt line) = 0;
-    virtual void Release(const TqChar* file, TqInt line) = 0;
-#endif
+	// virtual void FlipHandedness(TqFloat time)=0;
 };
 
 

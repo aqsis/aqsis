@@ -124,8 +124,10 @@ public:
     virtual	CqOptions&	optCurrent() const;
     virtual	const CqAttributes*	pattrCurrent();
     virtual	CqAttributes*	pattrWriteCurrent();
-    virtual	const CqTransform*	ptransCurrent();
-    virtual	CqTransform*	ptransWriteCurrent();
+    virtual	CqTransformPtr	ptransCurrent();
+    void	ptransSetTime( const CqMatrix& matTrans );
+    void	ptransSetCurrentTime( const CqMatrix& matTrans );
+    void	ptransConcatCurrentTime( const CqMatrix& matTrans );
 
     virtual	TqFloat	Time() const;
     virtual	void	AdvanceTime();
@@ -277,14 +279,14 @@ public:
     /** Set the world to camera transform.
      * \param ptrans A pointer to the transformation object which represents the world to camera transform.
      */
-    virtual	void	SetCameraTransform( const CqTransform* ptrans )
+    virtual	void	SetCameraTransform( const CqTransformPtr& ptrans )
     {
-        (*m_pTransCamera) = *ptrans;
+        m_pTransCamera = ptrans;
     }
     /** Get the world to camera tramsform.
      * \return A pointer to the transformation object which represents the world to camera transform.
      */
-    virtual	CqTransform*	GetCameraTransform( )
+    virtual	CqTransformPtr	GetCameraTransform( )
     {
         return( m_pTransCamera );
     }
@@ -450,7 +452,7 @@ private:
 	boost::shared_ptr<CqModeBlock>	m_pconCurrent;					///< Pointer to the current context.
     CqStats	m_Stats;						///< Global statistics.
     CqAttributes*	m_pAttrDefault;					///< Default attributes.
-    CqTransform*	m_pTransDefault;				///< Default transformation.
+    CqTransformPtr	m_pTransDefault;				///< Default transformation.
     CqImageBuffer*	m_pImageBuffer;					///< Pointer to the current image buffer.
 
     IqDDManager*	m_pDDManager;
@@ -461,7 +463,7 @@ private:
     std::map< CqShaderKey, boost::shared_ptr<IqShader> > m_Shaders;
     
     TqBool	m_fSaveGPrims;
-    CqTransform*	m_pTransCamera;					///< The camera transform.
+    CqTransformPtr	m_pTransCamera;					///< The camera transform.
     std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
 
     TqFloat			m_DofMultiplier;

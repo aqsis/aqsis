@@ -45,7 +45,7 @@
 #include	"matrix.h"
 
 #include	"iattributes.h"
-#include	"itransform.h"
+#include	"transform.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -134,7 +134,7 @@ public:
 #endif
 
     // Overidden from IqShaderExecEnv, see ishaderexecenv.h for descriptions.
-    virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqAttributes* pAttr, IqTransform* pTrans, IqShader* pShader, TqInt Uses );
+    virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses );
     virtual	TqInt	uGridRes() const
     {
         return ( m_uGridRes );
@@ -152,9 +152,9 @@ public:
     {
         return ( m_pAttributes );
     }
-    const IqTransform*	pTransform() const
+    boost::shared_ptr<const IqTransform>	pTransform() const
     {
-        return ( m_pTransform );
+        return ( boost::static_pointer_cast<const IqTransform>(m_pTransform) );
     }
 	virtual void SetCurrentSurface(IqSurface* pEnv)
 	{
@@ -368,7 +368,7 @@ private:
     TqInt	m_Illuminate;
     TqBool	m_IlluminanceCacheValid;	///< Flag indicating whether the illuminance cache is valid.
     IqAttributes* m_pAttributes;	///< Pointer to the associated attributes.
-    IqTransform* m_pTransform;		///< Pointer to the associated transform.
+    CqTransformPtr m_pTransform;		///< Pointer to the associated transform.
     CqBitVector	m_CurrentState;			///< SIMD execution state bit vector accumulator.
     CqBitVector	m_RunningState;			///< SIMD running execution state bit vector.
     std::stack<CqBitVector>	m_stkState;				///< Stack of execution state bit vectors.

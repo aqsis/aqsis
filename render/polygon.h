@@ -114,7 +114,7 @@ public:
     virtual	IqAttributes*	pAttributes() const = 0;
     /** Get a pointer to the transfrom associated with this polygon.
      */
-    virtual	IqTransform*	pTransform() const = 0;
+    virtual	boost::shared_ptr<IqTransform>	pTransform() const = 0;
 
     /** Get the index of this polygon if it is a member of a polygon mesh
      */
@@ -253,7 +253,7 @@ public:
     {
         return ( CqSurface::pAttributes() );
     }
-    virtual	IqTransform*	pTransform() const
+    virtual	boost::shared_ptr<IqTransform>	pTransform() const
     {
         return ( CqSurface::pTransform() );
     }
@@ -501,7 +501,7 @@ public:
     {
         return ( m_pPoints->pAttributes() );
     }
-    virtual	IqTransform*	pTransform() const
+    virtual	boost::shared_ptr<IqTransform>	pTransform() const
     {
         return ( m_pPoints->pTransform() );
     }

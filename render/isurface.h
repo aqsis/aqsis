@@ -4,8 +4,8 @@
  *	@author	Authors name
  *	@brief	Brief description of the file contents
  *
- *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2004/06/07 23:00:48 $
+ *	Last change by:		$Author: pseudonym $
+ *	Last change date:	$Date: 2004/07/13 06:24:10 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___isurface_Loaded___
@@ -69,7 +69,7 @@ struct IqSurface
     /** Get a pointer to the transformation state associated with this GPrim.
      * \return A pointer to a CqTransform class.
      */
-    virtual IqTransform* pTransform() const = 0;
+    virtual boost::shared_ptr<IqTransform> pTransform() const = 0;
     /** Perform any precalculation required before dicing.
      *  \param uDiceSize Size that the surface will be diced to in u.
      *  \param vDiceSize Size that the surface will be diced to in u.

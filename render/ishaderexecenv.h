@@ -125,7 +125,7 @@ struct IqShaderExecEnv
     virtual	~IqShaderExecEnv()
     {}
 
-    virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqAttributes* pAttr, IqTransform* pTrans, IqShader* pShader, TqInt Uses ) = 0;
+    virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses ) = 0;
     /** Get grid size in u
      */
     virtual	TqInt	uGridRes() const = 0;
@@ -143,7 +143,7 @@ struct IqShaderExecEnv
     virtual	const IqAttributes*	pAttributes() const = 0;
     /** Get a pointer to the associated transform.
      */
-    virtual	const IqTransform*	pTransform() const = 0;
+    virtual	boost::shared_ptr<const IqTransform>	pTransform() const = 0;
 	/** Set the pointer to the currently being lit surface
 	 */
 	virtual void SetCurrentSurface(IqSurface* pEnv) = 0;

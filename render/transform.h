@@ -28,7 +28,9 @@
 #define TRANSFORM_H_INCLUDED 1
 
 #include	<vector>
-#include	<list>
+#include	<boost/utility.hpp>
+#include	<boost/shared_ptr.hpp>
+#include	<boost/enable_shared_from_this.hpp>
 
 #include	"aqsis.h"
 
@@ -47,51 +49,41 @@ struct SqTransformation
 };
 
 
+class CqTransform;
+
+typedef boost::shared_ptr<CqTransform> CqTransformPtr;
+
 //----------------------------------------------------------------------
 /** \class CqTransform
  * Container class for the transform definitions of the graphics state.
  */
 
-class CqTransform : public CqMotionSpec<SqTransformation>, public CqRefCount, public IqTransform
+class CqTransform : public CqMotionSpec<SqTransformation>, public IqTransform, public boost::enable_shared_from_this<CqTransform>, private boost::noncopyable
 {
 public:
+    class Set {};
+    class ConcatCurrent {};
+    class SetCurrent {};
+
     CqTransform();
-    CqTransform( const CqTransform& From );
+    // CqTransform( const CqTransform& From );
+    CqTransform( const CqTransformPtr& From );
+    CqTransform( const CqTransformPtr& From, TqFloat time,
+	         const CqMatrix& matTrans, const Set& set );
+    CqTransform( const CqTransformPtr& From, TqFloat time,
+	         const CqMatrix& matTrans, const ConcatCurrent& concatCurrent );
+    CqTransform( const CqTransformPtr& From, TqFloat time,
+	         const CqMatrix& matTrans, const SetCurrent& setCurrent );
     virtual	~CqTransform();
 
 #ifdef _DEBUG
     CqString className() const { return CqString("CqTransform"); }
 #endif
 
-    /** Get a writable copy of this, if the reference count is greater than 1
-     * create a new copy and retirn that.
-     */
-    CqTransform* Write()
-    {
-        // We are about to write to this attribute,so clone if references exist.
-        if ( RefCount() > 1 )
-        {
-            CqTransform * pWrite = Clone();
-            ADDREF( pWrite );
-            RELEASEREF( this );
-            return ( pWrite );
-        }
-        else
-            return ( this );
-    }
+    // virtual	CqTransform& operator=( const CqTransform& From );
 
-    virtual	CqTransform& operator=( const CqTransform& From );
-
-    /** Get a duplicate of this transform.
-     */
-    CqTransform*	Clone() const
-    {
-        return ( new CqTransform( *this ) );
-    }
-
-    virtual	void	SetTransform( TqFloat time, const CqMatrix& matTrans );
-    virtual	void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
-    virtual	void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
+    void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
+    void	ResetTransform(const CqMatrix& mat, TqBool hand, TqBool makeStatic=TqTrue);
 
     virtual	const CqMatrix&	matObjectToWorld( TqFloat time ) const;
 
@@ -107,48 +99,27 @@ public:
 			return( 1 );
     }
 
-	virtual void ResetTransform(const CqMatrix& mat, TqBool hand, TqBool makeStatic=TqTrue);
 	virtual	TqBool GetHandedness(TqFloat time ) const;
-	virtual void FlipHandedness(TqFloat time )
-	{
-		m_Handedness = !m_Handedness;
-	}
-
-#ifndef _DEBUG
-    virtual	void	Release()
-    {
-        CqRefCount::Release();
-    }
-    virtual	void	AddRef()
-    {
-        CqRefCount::AddRef();
-    }
-#else
-    virtual void AddRef(const TqChar* file, TqInt line)
-    {
-        CqRefCount::AddRef(file, line);
-    }
-    virtual void Release(const TqChar* file, TqInt line)
-    {
-        CqRefCount::Release(file, line);
-    }
-#endif
 
     virtual	void	ClearMotionObject( SqTransformation& A ) const;
     virtual	SqTransformation	ConcatMotionObjects( const SqTransformation& A, const SqTransformation& B ) const;
     virtual	SqTransformation	LinearInterpolateMotionObjects( TqFloat Fraction, const SqTransformation& A, const SqTransformation& B ) const;
 
 private:
-    TqInt	m_cReferences;		///< Number of references to this transform.
+    void	InitialiseDefaultObject( const CqTransformPtr& From );
+    void	SetTransform( TqFloat time, const CqMatrix& matTrans );
+    void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
+	void FlipHandedness(TqFloat time )
+	{
+		m_Handedness = !m_Handedness;
+	}
+
+
 	TqBool	m_IsMoving;			///< Flag indicating this transformation describes a changing transform.
 	CqMatrix	m_StaticMatrix;	///< Matrix storing the transformation should there be no motion involved.
-    std::list<CqTransform*>::iterator	m_StackIterator;		///< Iterator in the transform stack for this transform.
 	TqBool	m_Handedness;	///< Current coordinate system orientation.
 }
 ;
-
-/// Global transform
-extern std::list<CqTransform*>	Transform_stack;
 
 
 //-----------------------------------------------------------------------

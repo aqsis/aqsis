@@ -40,7 +40,7 @@ START_NAMESPACE( Aqsis )
 
 CqModeBlock::CqModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent, EqModeBlock modetype ) :
         m_pattrCurrent( 0 ),
-        m_ptransCurrent( 0 ),
+        m_ptransCurrent( ),
         m_pconParent( pconParent ),
         m_modetype( modetype)
 {
@@ -64,8 +64,7 @@ CqMainModeBlock::CqMainModeBlock( const boost::shared_ptr<CqModeBlock>& pconPare
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes();
     ADDREF( m_pattrCurrent );
-    m_ptransCurrent = new CqTransform();
-    ADDREF( m_ptransCurrent );
+    m_ptransCurrent = CqTransformPtr( new CqTransform() );
 }
 
 
@@ -76,7 +75,6 @@ CqMainModeBlock::CqMainModeBlock( const boost::shared_ptr<CqModeBlock>& pconPare
 CqMainModeBlock::~CqMainModeBlock()
 {
     RELEASEREF( m_pattrCurrent );
-    RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -89,8 +87,7 @@ CqFrameModeBlock::CqFrameModeBlock( const boost::shared_ptr<CqModeBlock>& pconPa
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
     ADDREF( m_pattrCurrent );
-    m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-    ADDREF( m_ptransCurrent );
+    m_ptransCurrent = CqTransformPtr( new CqTransform( pconParent->m_ptransCurrent ) );
 }
 
 
@@ -101,7 +98,6 @@ CqFrameModeBlock::CqFrameModeBlock( const boost::shared_ptr<CqModeBlock>& pconPa
 CqFrameModeBlock::~CqFrameModeBlock()
 {
     RELEASEREF( m_pattrCurrent );
-    RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -114,8 +110,7 @@ CqWorldModeBlock::CqWorldModeBlock( const boost::shared_ptr<CqModeBlock>& pconPa
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
     ADDREF( m_pattrCurrent );
-    m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-    ADDREF( m_ptransCurrent );
+    m_ptransCurrent = CqTransformPtr( new CqTransform( pconParent->m_ptransCurrent ) );
 }
 
 
@@ -131,7 +126,6 @@ CqWorldModeBlock::~CqWorldModeBlock()
         RELEASEREF( ( *i ) );
 
     RELEASEREF( m_pattrCurrent );
-    RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -155,8 +149,7 @@ CqAttributeModeBlock::CqAttributeModeBlock( const boost::shared_ptr<CqModeBlock>
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
     ADDREF( m_pattrCurrent );
-    m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-    ADDREF( m_ptransCurrent );
+    m_ptransCurrent = CqTransformPtr( new CqTransform( pconParent->m_ptransCurrent ) );
 }
 
 
@@ -167,7 +160,6 @@ CqAttributeModeBlock::CqAttributeModeBlock( const boost::shared_ptr<CqModeBlock>
 CqAttributeModeBlock::~CqAttributeModeBlock()
 {
     RELEASEREF( m_pattrCurrent );
-    RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -186,8 +178,7 @@ CqTransformModeBlock::CqTransformModeBlock( const boost::shared_ptr<CqModeBlock>
         ADDREF( m_pattrCurrent );
     }
 
-    m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-    ADDREF( m_ptransCurrent );
+    m_ptransCurrent = CqTransformPtr( new CqTransform( pconParent->m_ptransCurrent ) );
 }
 
 
@@ -197,11 +188,6 @@ CqTransformModeBlock::CqTransformModeBlock( const boost::shared_ptr<CqModeBlock>
 
 CqTransformModeBlock::~CqTransformModeBlock()
 {
-    if ( m_ptransCurrent != NULL)
-    {
-        RELEASEREF( m_ptransCurrent );
-        m_ptransCurrent = NULL;
-    }
 }
 
 
@@ -214,8 +200,7 @@ CqSolidModeBlock::CqSolidModeBlock( CqString& type, const boost::shared_ptr<CqMo
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
     ADDREF( m_pattrCurrent );
-    m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-    ADDREF( m_ptransCurrent );
+    m_ptransCurrent = CqTransformPtr( new CqTransform( pconParent->m_ptransCurrent ) );
 
     // Create a new CSG tree node of the appropriate type.
     m_pCSGNode = CqCSGTreeNode::CreateNode( type );
@@ -245,7 +230,6 @@ CqSolidModeBlock::CqSolidModeBlock( CqString& type, const boost::shared_ptr<CqMo
 CqSolidModeBlock::~CqSolidModeBlock()
 {
     RELEASEREF( m_pattrCurrent );
-    RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -258,8 +242,7 @@ CqObjectModeBlock::CqObjectModeBlock( const boost::shared_ptr<CqModeBlock>& pcon
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes();
     ADDREF( m_pattrCurrent );
-    m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-    ADDREF( m_ptransCurrent );
+    m_ptransCurrent = CqTransformPtr( new CqTransform( pconParent->m_ptransCurrent ) );
 }
 
 
@@ -270,7 +253,6 @@ CqObjectModeBlock::CqObjectModeBlock( const boost::shared_ptr<CqModeBlock>& pcon
 CqObjectModeBlock::~CqObjectModeBlock()
 {
     RELEASEREF( m_pattrCurrent );
-    RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -302,8 +284,7 @@ CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], const boost::sha
     }
     else
     {
-        m_ptransCurrent = new CqTransform();
-        ADDREF( m_ptransCurrent );
+        m_ptransCurrent = CqTransformPtr( new CqTransform() );
     }
 
 
@@ -321,7 +302,8 @@ CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], const boost::sha
  */
 
 CqMotionModeBlock::~CqMotionModeBlock()
-{}
+{
+}
 
 /** Delete the object context.
  * \attention This is the only valid context deletion from within this block.

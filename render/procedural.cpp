@@ -92,7 +92,6 @@ TqInt CqProcedural::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSpl
 	ADDREF(m_pAttributes);
 
 	m_pconStored->m_ptransCurrent = m_pTransform;
-	ADDREF(m_pTransform);
 
     /// \note: The bound is in "raster" coordinates by now, as during posting to the imagebuffer
 	/// the the Culling routines do the job for us, see CqBasicSurface::CacheRasterBound.

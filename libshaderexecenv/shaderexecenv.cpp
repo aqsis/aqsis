@@ -132,7 +132,7 @@ TqInt	gDefLightUses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_L ) | ( 1 << EnvVars_P
 /** Constructor.
  */
 
-CqShaderExecEnv::CqShaderExecEnv() : m_LocalIndex( 0 ), m_li( 0 ), m_Illuminate( 0 ), m_pAttributes( 0 ), m_pTransform( 0 )
+CqShaderExecEnv::CqShaderExecEnv() : m_LocalIndex( 0 ), m_li( 0 ), m_Illuminate( 0 ), m_pAttributes( 0 )
 {
     m_apVariables.resize( EnvVars_Last );
     TqInt i;
@@ -152,14 +152,13 @@ CqShaderExecEnv::~CqShaderExecEnv()
         delete( m_apVariables[ i ] );
 
     if ( m_pAttributes ) RELEASEREF( m_pAttributes );
-    if ( m_pTransform ) RELEASEREF( m_pTransform );
 }
 
 //---------------------------------------------------------------------
 /** Initialise variables to correct size for current grid.
  */
 
-void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, IqAttributes* pAttr, IqTransform* pTrans, IqShader* pShader, TqInt Uses )
+void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, IqAttributes* pAttr, const boost::shared_ptr<IqTransform>& pTrans, IqShader* pShader, TqInt Uses )
 {
     m_uGridRes = uGridRes;
     m_vGridRes = vGridRes;
@@ -178,15 +177,10 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Iq
 	    m_pAttributes = NULL;
 
     // Store a pointer to the transform.
-    if ( NULL != pTrans )
+    if (pTrans)
     {
-		if( NULL != m_pTransform )
-			RELEASEREF(m_pTransform);
-        m_pTransform = pTrans;
-		ADDREF(m_pTransform);
+        m_pTransform = boost::static_pointer_cast<CqTransform>(pTrans);
     }
-    else
-	    m_pTransform = NULL;
 
     m_li = 0;
     m_Illuminate = 0;

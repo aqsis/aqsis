@@ -171,26 +171,18 @@ public:
     /** Get a read only pointer to the current transform.
      * \return a pointer to the current transform.
      */
-    virtual	const	CqTransform*	ptransCurrent() const
+    virtual	CqTransformPtr	ptransCurrent() const
     {
         return ( m_ptransCurrent );
     }
     /** Set the current transform.
      * \return a pointer to the old transform.
      */
-    virtual	const	CqTransform*	ptransCurrent(CqTransform* newtrans)
+    virtual	CqTransformPtr	ptransSetCurrent(const CqTransformPtr& NewTrans)
     {
-        CqTransform *prev = m_ptransCurrent;
-        m_ptransCurrent = newtrans;
+        CqTransformPtr prev = m_ptransCurrent;
+        m_ptransCurrent = NewTrans;
         return ( prev );
-    }
-    /** Get a pointer to the current transform suitable for writing.
-     * \return a transform pointer.
-     */
-    virtual	CqTransform*	ptransWriteCurrent()
-    {
-        m_ptransCurrent = m_ptransCurrent->Write();
-        return ( m_ptransCurrent );
     }
     /** Get the current time, used only within Motion blocks, all other contexts return 0.
      * \return the current frame time as a float.
@@ -262,7 +254,7 @@ public:
 
 public:
     CqAttributes* m_pattrCurrent;		///< The current attributes.
-    CqTransform* m_ptransCurrent;		///< The current transformation.
+    CqTransformPtr m_ptransCurrent;		///< The current transformation.
 
 private:
     boost::shared_ptr<CqModeBlock>	m_pconParent;			///< The previous context.

@@ -31,7 +31,8 @@
 #include	"matrix.h"
 #include	"sstring.h"
 #include	"color.h"
-#include	"renderer.h"
+#include	"stats.h"
+#include	"irenderer.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -50,7 +51,7 @@ CqParameter::CqParameter( const char* strName, TqInt Count ) :
 
 	assert( Count >= 1 );
     
-	STATS_INC( PRM_created );
+    STATS_INC( PRM_created );
     STATS_INC( PRM_current );
     TqInt cPRM = STATS_GETI( PRM_current );
     TqInt cPeak = STATS_GETI( PRM_peak );

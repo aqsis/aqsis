@@ -94,7 +94,7 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 
     TqInt Uses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi | ( 1 << EnvVars_ncomps ) | ( 1 << EnvVars_time ) | ( 1 << EnvVars_alpha ) );
 
-    m_pShaderExecEnv->Initialise( uGridRes, vGridRes, 0, 0, m_pShader.get(), Uses );
+    m_pShaderExecEnv->Initialise( uGridRes, vGridRes, 0, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
 
     // Initialise the geometric parameters in the shader exec env.
 

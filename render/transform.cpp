@@ -30,32 +30,12 @@
 
 START_NAMESPACE( Aqsis )
 
-std::list<CqTransform*> Transform_stack;
-
 //---------------------------------------------------------------------
 /** Constructor.
  */
 
-CqTransform::CqTransform() : CqMotionSpec<SqTransformation>(SqTransformation()), m_cReferences( 0 ), m_IsMoving(TqFalse)
+CqTransform::CqTransform() : CqMotionSpec<SqTransformation>(SqTransformation()), m_IsMoving(TqFalse)
 {
-	// Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
-	// if the previous level has motion specification, the value will be interpolated.
-	CqMatrix matOtoWLast;
-	TqBool handLast = TqFalse;
-	if ( !Transform_stack.empty() )
-	{
-		matOtoWLast =  Transform_stack.front() ->matObjectToWorld(Transform_stack.front()->Time(0));
-		handLast =  Transform_stack.front() ->GetHandedness(Transform_stack.front()->Time(0));
-	}
-
-	SqTransformation ct;
-	ct.m_Handedness = handLast;
-	ct.m_matTransform = matOtoWLast;
-	SetDefaultObject( ct );
-
-	// Register ourself with the global transform stack.
-	Transform_stack.push_front( this );
-	m_StackIterator = Transform_stack.begin();
 }
 
 
@@ -63,7 +43,8 @@ CqTransform::CqTransform() : CqMotionSpec<SqTransformation>(SqTransformation()),
 /** Copy constructor.
  */
 
-CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<SqTransformation>( From ), m_cReferences( 0 ), m_IsMoving(TqFalse)
+#if 0
+CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<SqTransformation>( From ), m_IsMoving(TqFalse)
 {
     *this = From;
 
@@ -82,10 +63,79 @@ CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<SqTransformat
 	ct.m_Handedness = handLast;
 	ct.m_matTransform = matOtoWLast;
 	SetDefaultObject( ct );
+}
+#endif
 
-   // Register ourself with the global transform stack.
-	Transform_stack.push_front( this );
-	m_StackIterator = Transform_stack.begin();
+
+//---------------------------------------------------------------------
+/** Initialise the default object.
+ */
+void	CqTransform::InitialiseDefaultObject( const CqTransformPtr& From )
+{
+	// Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
+	// if the previous level has motion specification, the value will be interpolated.
+	TqFloat time = QGetRenderContext()->Time();
+	CqMatrix matOtoWLast =  From->matObjectToWorld( time );
+	TqBool handLast =  From->GetHandedness( time );
+
+	SqTransformation ct;
+	ct.m_Handedness = handLast;
+	ct.m_matTransform = matOtoWLast;
+	SetDefaultObject( ct );
+}
+
+
+//---------------------------------------------------------------------
+/** Copy constructor.
+ */
+
+CqTransform::CqTransform( const CqTransformPtr& From )
+    : CqMotionSpec<SqTransformation>( *From ),
+      m_IsMoving(TqFalse),
+      m_StaticMatrix( From->m_StaticMatrix ),
+      m_Handedness( From->m_Handedness )
+{
+	InitialiseDefaultObject( From );
+}
+
+
+//---------------------------------------------------------------------
+/** Concatenation constructors.
+ */
+
+CqTransform::CqTransform( const CqTransformPtr& From, TqFloat time,
+	         const CqMatrix& matTrans, const Set& /* set */ )
+    : CqMotionSpec<SqTransformation>( *From ),
+      m_IsMoving(TqFalse),
+      m_StaticMatrix( From->m_StaticMatrix ),
+      m_Handedness( From->m_Handedness )
+{
+	InitialiseDefaultObject( From );
+	SetTransform( time, matTrans );
+}
+
+
+CqTransform::CqTransform( const CqTransformPtr& From, TqFloat time,
+	         const CqMatrix& matTrans, const ConcatCurrent& /* concatCurrent */ )
+    : CqMotionSpec<SqTransformation>( *From ),
+      m_IsMoving(TqFalse),
+      m_StaticMatrix( From->m_StaticMatrix ),
+      m_Handedness( From->m_Handedness )
+{
+	InitialiseDefaultObject( From );
+	ConcatCurrentTransform( time, matTrans );
+}
+
+
+CqTransform::CqTransform( const CqTransformPtr& From, TqFloat time,
+	         const CqMatrix& matTrans, const SetCurrent& /* setCurrent */ )
+    : CqMotionSpec<SqTransformation>( *From ),
+      m_IsMoving(TqFalse),
+      m_StaticMatrix( From->m_StaticMatrix ),
+      m_Handedness( From->m_Handedness )
+{
+	InitialiseDefaultObject( From );
+	SetCurrentTransform( time, matTrans );
 }
 
 
@@ -95,12 +145,9 @@ CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<SqTransformat
 
 CqTransform::~CqTransform()
 {
-    assert( RefCount() == 0 );
-
-	// Remove ourself from the stack
-	Transform_stack.erase(m_StackIterator);
 }
 
+#if 0
 //---------------------------------------------------------------------
 /** Copy function.
  */
@@ -115,6 +162,7 @@ CqTransform& CqTransform::operator=( const CqTransform& From )
 
     return ( *this );
 }
+#endif
 
 
 //---------------------------------------------------------------------

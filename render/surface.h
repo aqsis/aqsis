@@ -63,9 +63,6 @@ public:
         if ( m_pAttributes )
             RELEASEREF( m_pAttributes );
         m_pAttributes = 0;
-        if ( m_pTransform )
-            RELEASEREF( m_pTransform );
-        m_pTransform = 0;
 
         STATS_DEC( GPR_current );
     }
@@ -158,9 +155,9 @@ CqString className() const { return CqString("CqBasicSurface"); }
     /** Get a pointer to the transformation state associated with this GPrim.
      * \return A pointer to a CqTransform class.
      */
-    virtual IqTransform* pTransform() const
+    virtual boost::shared_ptr<IqTransform> pTransform() const
     {
-        return ( m_pTransform );
+        return ( boost::static_pointer_cast<IqTransform>( m_pTransform ) );
     }
     virtual	void	SetSurfaceParameters( const CqBasicSurface& From );
     /** Force this GPrim to be undiceable, usually if it crosses the epsilon and eye plane.
@@ -261,7 +258,7 @@ CqString className() const { return CqString("CqBasicSurface"); }
     TqInt	m_EyeSplitCount;	///< The number of times this GPrim has been split because if crossing the epsilon and eye planes.
 protected:
     CqAttributes* m_pAttributes;	///< Pointer to the attributes state associated with this GPrim.
-    CqTransform* m_pTransform;		///< Pointer to the transformation state associated with this GPrim.
+    CqTransformPtr m_pTransform;		///< Pointer to the transformation state associated with this GPrim.
 
     TqInt	m_uDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.
     TqInt	m_vDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.

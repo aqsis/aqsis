@@ -39,14 +39,13 @@ TqFloat CqBasicSurface::m_fGridSize = sqrt(256.0);
  */
 
 CqBasicSurface::CqBasicSurface() : m_fDiceable( TqTrue ), m_fDiscard( TqFalse ), m_EyeSplitCount( 0 ),
-        m_pAttributes( 0 ), m_pTransform( 0 ), m_SplitDir( SplitDir_U )
+        m_pAttributes( 0 ), m_SplitDir( SplitDir_U )
 {
     // Set a refernce with the current attributes.
     m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
     ADDREF( m_pAttributes );
 
-    m_pTransform = const_cast<CqTransform*>( QGetRenderContext() ->ptransCurrent() );
-    ADDREF( m_pTransform );
+    m_pTransform = QGetRenderContext() ->ptransCurrent();
 
     m_CachedBound = TqFalse;
 
@@ -88,7 +87,6 @@ CqBasicSurface::CqBasicSurface( const CqBasicSurface& From ) : m_fDiceable( TqTr
     ADDREF( m_pAttributes );
 
     m_pTransform = From.m_pTransform;
-    ADDREF( m_pTransform );
 
     m_CachedBound = From.m_CachedBound;
     m_Bound = From.m_Bound;
@@ -125,14 +123,12 @@ void CqBasicSurface::SetSurfaceParameters( const CqBasicSurface& From )
 {
     // If we already have attributes, unreference them now as we don't need them anymore.
     if ( m_pAttributes ) RELEASEREF( m_pAttributes );
-    if ( m_pTransform ) RELEASEREF( m_pTransform );
 
     // Now store and reference our new attributes.
     m_pAttributes = From.m_pAttributes;
     ADDREF( m_pAttributes );
 
     m_pTransform = From.m_pTransform;
-    ADDREF( m_pTransform );
 
     m_pCSGNode = From.m_pCSGNode;
 }

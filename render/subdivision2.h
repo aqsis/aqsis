@@ -508,7 +508,7 @@ public:
     {
         return ( pTopology()->pPoints()->pAttributes() );
     }
-    virtual	IqTransform*	pTransform() const
+    virtual	boost::shared_ptr<IqTransform>	pTransform() const
     {
         return ( pTopology()->pPoints()->pTransform() );
     }

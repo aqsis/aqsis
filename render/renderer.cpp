@@ -92,11 +92,9 @@ CqRenderer::CqRenderer() :
 
     // Initialize the default attributes, transform and camera transform
     m_pAttrDefault  = new CqAttributes;
-    m_pTransDefault = new CqTransform;
-    m_pTransCamera  = new CqTransform;
     ADDREF( m_pAttrDefault );
-    ADDREF( m_pTransDefault );
-    ADDREF( m_pTransCamera );
+    m_pTransDefault = CqTransformPtr( new CqTransform );
+    m_pTransCamera  = CqTransformPtr( new CqTransform );
 
     // Initialise the array of coordinate systems.
     m_aCoordSystems.resize( CoordSystem_Last );
@@ -167,16 +165,6 @@ CqRenderer::~CqRenderer()
     {
         RELEASEREF( m_pAttrDefault );
         m_pAttrDefault = NULL;
-    }
-    if ( m_pTransDefault )
-    {
-        RELEASEREF( m_pTransDefault );
-        m_pTransDefault = NULL;
-    }
-    if ( m_pTransCamera )
-    {
-        RELEASEREF( m_pTransCamera );
-        m_pTransCamera = NULL;
     }
 
 	if( m_pRaytracer )	// MGC: MEMLEAK_FIX
@@ -585,7 +573,7 @@ CqAttributes* CqRenderer::pattrWriteCurrent()
 /** Return a pointer to the current transform.
  */
 
-const CqTransform* CqRenderer::ptransCurrent()
+CqTransformPtr CqRenderer::ptransCurrent()
 {
     if ( m_pconCurrent )
         return ( m_pconCurrent->ptransCurrent() );
@@ -595,15 +583,50 @@ const CqTransform* CqRenderer::ptransCurrent()
 
 
 //----------------------------------------------------------------------
-/** Return a writable pointer to the current transform.
+/** Modify the current transformation.
  */
 
-CqTransform* CqRenderer::ptransWriteCurrent()
+#if 0
+CqTransformPtr CqRenderer::ptransWriteCurrent()
 {
     if ( m_pconCurrent )
         return ( m_pconCurrent->ptransWriteCurrent() );
     else
         return ( m_pTransDefault );
+}
+#endif
+
+void	CqRenderer::ptransSetTime( const CqMatrix& matTrans )
+{
+	if ( !m_pconCurrent )
+	{
+		throw 0;
+	}
+
+	CqTransformPtr newTrans( new CqTransform( m_pconCurrent->ptransCurrent(), Time(), matTrans, CqTransform::Set() ) );
+	m_pconCurrent->ptransSetCurrent( newTrans );
+}
+
+void	CqRenderer::ptransSetCurrentTime( const CqMatrix& matTrans )
+{
+	if ( !m_pconCurrent )
+	{
+		throw 0;
+	}
+
+	CqTransformPtr newTrans( new CqTransform( m_pconCurrent->ptransCurrent(), Time(), matTrans, CqTransform::SetCurrent() ) );
+	m_pconCurrent->ptransSetCurrent( newTrans );
+}
+
+void	CqRenderer::ptransConcatCurrentTime( const CqMatrix& matTrans )
+{
+	if ( !m_pconCurrent )
+	{
+		throw 0;
+	}
+
+	CqTransformPtr newTrans( new CqTransform( m_pconCurrent->ptransCurrent(), Time(), matTrans, CqTransform::ConcatCurrent() ) );
+	m_pconCurrent->ptransSetCurrent( newTrans );
 }
 
 
