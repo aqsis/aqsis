@@ -182,10 +182,6 @@ SOURCE=.\vector4d.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\aqerror.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\aqsis.h
 # End Source File
 # Begin Source File
@@ -279,6 +275,10 @@ SOURCE=.\spline.h
 # Begin Source File
 
 SOURCE=.\sstring.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\validate.h
 # End Source File
 # Begin Source File
 

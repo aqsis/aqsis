@@ -67,7 +67,7 @@
 #include	"mtable.h"
 #include	"ilog.h"
 #include	"share.h"
-#include	"aqerror.h"
+#include	"validate.h"
 
 using namespace Aqsis;
 
