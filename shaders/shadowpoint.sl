@@ -1,4 +1,4 @@
-/* $Id: shadowpoint.sl,v 1.1 2002/08/12 15:18:34 pgregory Exp $  (Pixar - RenderMan Division)  $Date: 2002/08/12 15:18:34 $ */
+/* $Id: shadowpoint.sl,v 1.2 2003/02/03 12:04:42 pgregory Exp $  (Pixar - RenderMan Division)  $Date: 2003/02/03 12:04:42 $ */
 /*
 ** Copyright (c) 1999 PIXAR.  All rights reserved.  This program or
 ** documentation contains proprietary confidential information and trade
@@ -32,6 +32,7 @@ shadowpoint(
     string    sfnz    = "";
     uniform float width      = 1.0;
     uniform float samples    = 16.0;
+	float     falloff = 2;
 )
 {
     float    attenuation = 0.0;
@@ -74,7 +75,14 @@ shadowpoint(
                                       "twidth", width, "swidth", width );
 	}
 
-        /* calculate light contribution  distance square fall off */
-        Cl = (1.0 - attenuation) * intensity * lightcolor / L.L;
+        if( falloff == 2 )
+			/* calculate light contribution  distance square fall off */
+			Cl = (1.0 - attenuation) * intensity * lightcolor / L.L;
+		else if( falloff == 1 )
+			/* calculate light contribution  distance linear fall off */
+			Cl = (1.0 - attenuation) * intensity * lightcolor / (length(L)/2);
+		else
+			/* calculate light contribution  distance no fall off */
+			Cl = (1.0 - attenuation) * intensity * lightcolor;
     }
 }
