@@ -282,6 +282,11 @@ class	CqLogRangeCheckCallback	: public CqRangeCheckCallback
 			m_prio = priority;
 		}
 
+		void set( const char* name )
+		{
+			m_name = name;
+		}
+
         virtual void operator()( int res )
         { 
             switch( res )
@@ -558,6 +563,23 @@ RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio 
 //
 RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 {
+	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+
+	bool valid = true;
+
+	rc.set( "frameratio", "ERROR" );
+	if( !CheckMinMax( frameratio, 0.0f, RI_INFINITY, &rc ) )
+	{
+		valid = false;
+	}
+	
+	if( !valid )
+	{
+		QGetRenderContext() ->Logger()->error( "Invalid RiFrameAspectRatio, aborting" );
+		throw( "INVALID_VALUE" );
+		return;
+	}
+
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "FrameAspectRatio" ) [ 0 ] = frameratio ;
 
 	// Inform the system that RiFrameAspectRatio has been called, as this takes priority.
@@ -593,6 +615,41 @@ RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top 
 //
 RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 {
+	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+
+	bool valid = true;
+
+	rc.set( "left", "ERROR" );
+	if( !CheckMinMax( left, 0.0f, 1.0f, &rc ) )
+	{
+		valid = false;
+	}
+
+	rc.set( "right" );
+	if( !CheckMinMax( right, 0.0f, 1.0f, &rc ) )
+	{
+		valid = false;
+	}
+
+	rc.set( "top" );
+	if( !CheckMinMax( top, 0.0f, 1.0f, &rc ) )
+	{
+		valid = false;
+	}
+
+	rc.set( "bottom" );
+	if( !CheckMinMax( bottom, 0.0f, 1.0f, &rc ) )
+	{
+		valid = false;
+	}
+	
+	if( !valid )
+	{
+		QGetRenderContext() ->Logger()->error( "Invalid RiFrameAspectRatio, aborting" );
+		throw( "INVALID_VALUE" );
+		return;
+	}
+
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "CropWindow" ) [ 0 ] = left ;
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "CropWindow" ) [ 1 ] = right ;
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "CropWindow" ) [ 2 ] = top ;
@@ -652,6 +709,29 @@ RtVoid	RiProjectionV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 {
+	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+
+	bool valid = true;
+
+	rc.set( "near", "WARN" );
+	if( !CheckMinMax( cnear, RI_EPSILON, cfar, &rc ) )
+	{
+		valid = false;
+	}
+
+	rc.set( "far" );
+	if( !CheckMinMax( cfar, cnear, RI_INFINITY, &rc ) )
+	{
+		valid = false;
+	}
+
+	if( !valid )
+	{
+		QGetRenderContext() ->Logger()->error( "Invalid RiClipping, clipping planes set to RI_EPSILON, RI_INFINITY" );
+		cnear	= RI_EPSILON;
+		cfar	= RI_INFINITY;
+	}
+
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Clipping" ) [ 0 ] = cnear ;
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Clipping" ) [ 1 ] = cfar ;
 
@@ -675,13 +755,13 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 		valid = false;
 	}
 	
-	rc.set( "focallength", "WARN" );
+	rc.set( "focallength" );
 	if( !CheckMinMax( focallength, 0.0f, RI_INFINITY, &rc ) )
 	{
 		valid = false;
 	}
 
-	rc.set( "focaldistance", "WARN" );
+	rc.set( "focaldistance" );
 	if( !CheckMinMax( focaldistance, 0.0f, RI_INFINITY, &rc ) )
 	{
 		valid = false;
@@ -707,6 +787,29 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 //
 RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 {
+	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+
+	bool valid = true;
+
+	rc.set( "opentime", "WARN" );
+	if( !CheckMinMax( opentime, 0.0f, RI_INFINITY, &rc ) )
+	{
+		valid = false;
+	}
+	
+	rc.set( "closetime" );
+	if( !CheckMinMax( closetime, 0.0f, RI_INFINITY, &rc ) )
+	{
+		valid = false;
+	}
+
+	if( !valid )
+	{
+		QGetRenderContext() ->Logger()->warn( "Invalid Shutter, shutter set to 0, 1" );
+		opentime = 0;
+		closetime = 1;
+	}
+
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 0 ] = opentime ;
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 1 ] = closetime ;
 
@@ -721,6 +824,22 @@ RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 //
 RtVoid	RiPixelVariance( RtFloat variance )
 {
+	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+
+	bool valid = true;
+
+	rc.set( "variance", "WARN" );
+	if( !CheckMinMax( variance, 0.0f, RI_INFINITY, &rc ) )
+	{
+		valid = false;
+	}
+
+	if( !valid )
+	{
+		QGetRenderContext() ->Logger()->warn( "Invalid PixelVariance, PixelVariance set to 0" );
+		variance = 0;
+	}
+
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "PixelVariance" ) [ 0 ] = variance ;
 
 	return ;
@@ -733,6 +852,29 @@ RtVoid	RiPixelVariance( RtFloat variance )
 //
 RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 {
+	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+
+	bool valid = true;
+
+	rc.set( "xsamples", "WARN" );
+	if( !CheckMinMax( xsamples, 1.0f, RI_INFINITY, &rc ) )
+	{
+		valid = false;
+	}
+
+	rc.set( "ysamples" );
+	if( !CheckMinMax( ysamples, 1.0f, RI_INFINITY, &rc ) )
+	{
+		valid = false;
+	}
+
+	if( !valid )
+	{
+		QGetRenderContext() ->Logger()->warn( "Invalid PixelSamples, PixelSamples set to 1, 1" );
+		xsamples = 1;
+		ysamples = 1;
+	}
+
 	QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "PixelSamples" ) [ 0 ] = static_cast<TqInt>( xsamples ) ;
 	QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "PixelSamples" ) [ 1 ] = static_cast<TqInt>( ysamples ) ;
 
@@ -1746,6 +1888,22 @@ RtVoid	RiExteriorV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiShadingRate( RtFloat size )
 {
+	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+
+	bool valid = true;
+
+	rc.set( "size", "WARN" );
+	if( !CheckMinMax( size, 0.0f, RI_INFINITY, &rc ) )
+	{
+		valid = false;
+	}
+
+	if( !valid )
+	{
+		QGetRenderContext() ->Logger()->warn( "Invalid ShadingRate, ShadingRate set to 1" );
+		size = 1;
+	}
+
 	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ] = size;
 	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRateSqrt" ) [ 0 ] = sqrt( size );
 	QGetRenderContext() ->AdvanceTime();
