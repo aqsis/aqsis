@@ -101,7 +101,7 @@ void* g_DriverHandle = NULL;
 PtDspyImageHandle g_ImageHandle;
 PtFlagStuff g_Flags;
 CqSimplePlugin g_DspyDriver;
-PtDspyDevFormat	g_Formats[3];
+PtDspyDevFormat	g_Formats[4];
 CqString g_strName( "" );
 /// Storage for the output file name.
 std::string	strFilename( "output.tif" );
@@ -173,14 +173,20 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 	if( NULL != g_OpenMethod )
 	{
 		// \todo: need to pass the proper mode string.
-		g_Formats[0].name = "r";
-		g_Formats[0].type = PkDspyUnsigned8;
-		g_Formats[1].name = "g";
-		g_Formats[1].type = PkDspyUnsigned8;
-		g_Formats[2].name = "b";
-		g_Formats[2].type = PkDspyUnsigned8;
+		TqInt formatindex = 0;
+		if( SamplesPerElement >=4 )
+		{
+			g_Formats[formatindex  ].name = "a";
+			g_Formats[formatindex++].type = PkDspyUnsigned8;
+		}
+		g_Formats[formatindex  ].name = "r";
+		g_Formats[formatindex++].type = PkDspyUnsigned8;
+		g_Formats[formatindex  ].name = "g";
+		g_Formats[formatindex++].type = PkDspyUnsigned8;
+		g_Formats[formatindex  ].name = "b";
+		g_Formats[formatindex++].type = PkDspyUnsigned8;
 		std::cout << strFilename.c_str() << std::endl;
-		PtDspyError err = (*g_OpenMethod)(&g_ImageHandle, "sdchwnd", strFilename.c_str(), XRes, YRes, 0, NULL, 3, g_Formats, &g_Flags);
+		PtDspyError err = (*g_OpenMethod)(&g_ImageHandle, "sdchwnd", strFilename.c_str(), XRes, YRes, 0, NULL, 4, g_Formats, &g_Flags);
 		PtDspySizeInfo size;
 		err = (*g_QueryMethod)(g_ImageHandle, PkSizeQuery, sizeof(size), &size);
 		PtDspyOverwriteInfo owinfo;
@@ -230,30 +236,58 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 		{
 			TqInt so = ( ( y - ymin ) * linelen ) + ( ( x - xmin ) * SamplesPerElement );
 
-			TqInt i = 0;
-			while ( i < SamplesPerElement )
+			TqFloat rvalue = reinterpret_cast<TqFloat*>( pBucket ) [ 0 ];
+			TqFloat gvalue = reinterpret_cast<TqFloat*>( pBucket ) [ 1 ];
+			TqFloat bvalue = reinterpret_cast<TqFloat*>( pBucket ) [ 2 ];
+
+			TqFloat avalue = 0.0f;
+			if( SamplesPerElement >= 4 )
+				avalue = reinterpret_cast<TqFloat*>( pBucket ) [ 3 ];
+
+			if( !( quantize_zeroval == 0.0f &&
+				   quantize_oneval  == 0.0f &&
+				   quantize_minval  == 0.0f &&
+				   quantize_maxval  == 0.0f ) )
 			{
-				TqFloat value = reinterpret_cast<TqFloat*>( pBucket ) [ i ];
-
-				if( !( quantize_zeroval == 0.0f &&
-					   quantize_oneval  == 0.0f &&
-					   quantize_minval  == 0.0f &&
-					   quantize_maxval  == 0.0f ) )
+				rvalue = ROUND(quantize_zeroval + rvalue * (quantize_oneval - quantize_zeroval) + dither_val );
+				rvalue = CLAMP(rvalue, quantize_minval, quantize_maxval) ;
+				gvalue = ROUND(quantize_zeroval + gvalue * (quantize_oneval - quantize_zeroval) + dither_val );
+				gvalue = CLAMP(gvalue, quantize_minval, quantize_maxval) ;
+				bvalue = ROUND(quantize_zeroval + bvalue * (quantize_oneval - quantize_zeroval) + dither_val );
+				bvalue = CLAMP(bvalue, quantize_minval, quantize_maxval) ;
+				if( SamplesPerElement >= 4 )
 				{
-					value = ROUND(quantize_zeroval + value * (quantize_oneval - quantize_zeroval) + dither_val );
-					value = CLAMP(value, quantize_minval, quantize_maxval) ;
+					avalue = ROUND(quantize_zeroval + avalue * (quantize_oneval - quantize_zeroval) + dither_val );
+					avalue = CLAMP(avalue, quantize_minval, quantize_maxval) ;
 				}
+			}
 
-				if ( g_Formats[0].type == PkDspyUnsigned8  )
+			if ( g_Formats[0].type == PkDspyUnsigned8  )
+			{
+				if( BitsPerSample == 8 )
 				{
-					if( BitsPerSample == 8 )
-						pByteData[ so++ ] = static_cast<char>( value );
-					else
-						pByteData[ so++ ] = static_cast<char>( value * 255.0f );
+					pByteData[ so + 1 ] = static_cast<char>( rvalue );
+					pByteData[ so + 2 ] = static_cast<char>( gvalue );
+					pByteData[ so + 3 ] = static_cast<char>( bvalue );
+					if( SamplesPerElement >= 4 )
+						pByteData[ so + 0 ] = static_cast<char>( avalue );
 				}
 				else
-					pFloatData[ so++ ] = value;
-				i++;
+				{
+					pByteData[ so + 1 ] = static_cast<char>( rvalue * 255.0f );
+					pByteData[ so + 2 ] = static_cast<char>( gvalue * 255.0f );
+					pByteData[ so + 3 ] = static_cast<char>( bvalue * 255.0f );
+					if( SamplesPerElement >= 4 )
+						pByteData[ so + 0 ] = static_cast<char>( avalue * 255.0f );
+				}
+			}
+			else
+			{
+				pFloatData[ so + 1 ] = rvalue;
+				pFloatData[ so + 2 ] = gvalue;
+				pFloatData[ so + 3 ] = bvalue;
+				if( SamplesPerElement >= 4 )
+					pFloatData[ so + 0 ] = avalue;
 			}
 			pBucket += pMsg->m_ElementSize;
 		}
