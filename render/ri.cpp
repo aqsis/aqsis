@@ -2499,6 +2499,21 @@ RtVoid	RiNuPatchV(RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat
 
 	// Set up the default primitive variables.
 	pSurface->SetDefaultPrimitiveVariables();
+
+	TqInt bUses=pSurface->Uses();
+
+	if(USES(bUses,EnvVars_u))
+	{
+		pSurface->u().pValue()[0]=pSurface->u().pValue()[2]=umin;
+		pSurface->u().pValue()[1]=pSurface->u().pValue()[3]=umax;
+	}
+	
+	if(USES(bUses,EnvVars_v))
+	{
+		pSurface->v().pValue()[0]=pSurface->v().pValue()[1]=vmin;
+		pSurface->v().pValue()[2]=pSurface->v().pValue()[3]=vmax;	
+	}
+
 	// Process any specified parameters
 	if(ProcessPrimitiveVariables(pSurface,count,tokens,values))
 	{
