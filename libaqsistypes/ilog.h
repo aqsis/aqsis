@@ -5,7 +5,7 @@
  *	@brief	Declare the interface structure for the log class.
  *
  *	Last change by:		$Author: mw_matti $
- *	Last change date:	$Date: 2003/02/07 14:35:10 $
+ *	Last change date:	$Date: 2003/02/08 18:02:55 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___ilog_Loaded___
@@ -85,11 +85,6 @@ struct IqLog
 		 */
 		virtual const char* getError( int table, int error_id ) = 0;
 
-				
-	private:
-		
-		virtual void createFileLog( std::string filename, std::string name)  = 0;
-		virtual void createCOUTLog( std::string name ) = 0;
 };
 
 //-----------------------------------------------------------------------
