@@ -130,6 +130,10 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		CqShaderExecEnv();
 		virtual	~CqShaderExecEnv();
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqShaderExecEnv"); }
+#endif
+
 		// Overidden from IqShaderExecEnv, see ishaderexecenv.h for descriptions.
 		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqSurface* pSurface, IqShader* pShader, TqInt Uses );
 		virtual	TqInt	uGridRes() const
@@ -360,6 +364,14 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		TqInt	m_LocalIndex;			///< Local cached variable index to speed repeated access to the same local variable.
 
 	public:
+#ifndef _DEBUG
+		virtual void AddRef()  { CqRefCount::AddRef();  }
+		virtual void Release() { CqRefCount::Release(); }
+#else
+		virtual void AddRef(const TqChar* file, TqInt line)  { CqRefCount::AddRef(file, line);  }
+		virtual void Release(const TqChar* file, TqInt line) { CqRefCount::Release(file, line); }
+#endif
+
 		virtual	TqBool	SO_init_illuminance();
 		virtual	TqBool	SO_advance_illuminance();
 
