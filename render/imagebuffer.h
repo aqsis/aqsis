@@ -249,7 +249,25 @@ class CqBucket : public IqBucket
 
 
 //-----------------------------------------------------------------------
-/** The main image and related data, also responsible for processing the rendering loop.
+/** 
+  The main image and related data, also responsible for processing the rendering loop.
+
+  Before the image can be rendered the image buffer has to be initialised by calling the
+  SetImage() method. The parameters for the creation of the buffer are read from the
+  current options (this includes things like the image resolution, bucket size,
+  number of pixel samples, etc.).
+  
+  After the buffer is initialized the surfaces (gprims) that are to be rendered 
+  can be added to the buffer. This is done by calling PostSurface() for each gprim.
+  (note: before calling this method the gprim has to be transformed into camera space!)
+  All the gprims that can be culled at this point (i.e. CullSurface() returns true) 
+  won't be stored inside the buffer. If a gprim can't be culled it is assigned to
+  the first bucket that touches its bound.
+
+  Once all the gprims are posted to the buffer the image can be rendered by calling
+  RenderImage(). Now all buckets will be processed one after another. 
+
+  \see CqBucket, CqBasicSurface, CqRenderer
  */
 
 class _qShareC	CqImageBuffer
@@ -352,7 +370,7 @@ class _qShareC	CqImageBuffer
 	_qShareM			void	RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax);
 	_qShareM			void	RenderSurfaces(TqInt iBucket, long xmin, long xmax, long ymin, long ymax);
 	_qShareM			void	RenderImage();
-								/** Get comlpetion status of this rendered image.
+								/** Get completion status of this rendered image.
 								 * \return bool indicating finished or not.
 								 */
 	_qShareM			TqBool	fDone() const		{return(m_fDone);}
@@ -375,7 +393,7 @@ class _qShareC	CqImageBuffer
 			TqInt				m_cXBuckets;		///< Integer horizontal bucket count.
 			TqInt				m_cYBuckets;		///< Integer vertical bucket count.
 			TqInt				m_XBucketSize;		///< Integer horizontal bucket size.
-			TqInt				m_YBucketSize;		///< Imteger vertical bucket count.
+			TqInt				m_YBucketSize;		///< Integer vertical bucket size.
 			TqInt				m_PixelXSamples;	///< Integer horizontal sample per pixel count.
 			TqInt				m_PixelYSamples;	///< Integer vertical sample per pixel count.
 			TqInt				m_FilterXWidth;		///< Integer horizontal pixel filter width in pixels.

@@ -635,7 +635,8 @@ TqInt CqImageBuffer::Bucket(TqInt X, TqInt Y) const
 
 //----------------------------------------------------------------------
 /** Get the screen position for the specified bucket index.
- * \param iBucket Integer bucket index.
+ * \param iBucket Integer bucket index (0-based).
+ * \return Bucket position as 2d vector (xpos, ypos).
  */
 
 CqVector2D	CqImageBuffer::Position(TqInt iBucket) const
@@ -651,7 +652,13 @@ CqVector2D	CqImageBuffer::Position(TqInt iBucket) const
 
 //----------------------------------------------------------------------
 /** Get the bucket size for the specified index.
+
+    Usually the return value is just (XBucketSize, YBucketSize) except
+    for the buckets on the right and bottom side of the image where the
+    size can be smaller. The crop window is not taken into account.
+
  * \param iBucket Integer bucket index.
+ * \return Bucket size as 2d vector (xsize, ysize).
  */
 
 CqVector2D CqImageBuffer::Size(TqInt iBucket) const
@@ -726,10 +733,22 @@ void	CqImageBuffer::Release()
 
 
 //----------------------------------------------------------------------
-/** Check if a surface can be culled.
+/** Check if a surface can be culled and transform bound.
+
+    This method checks if the surface lies outside the viewing volume
+    and returns true if it does.
+    Additionally it checks if the surface spans the eye plane and marks it
+    as undiceable if it does (it might even be marked as discarded).
+    It also grows the bound by half the filter width and transforms it
+    into raster space.
+
  * \param Bound CqBound containing the geometric bound in camera space.
  * \param pSurface Pointer to the CqBasicSurface derived class being processed.
  * \return Boolean indicating that the GPrim can be culled.
+
+  \bug If the gprim spans the eye plane the bound is not transformed into raster
+   space (how could it anyway), but PostSurface() relies on this behaviour and
+   inserts EVERY gprim into buckets (using a bound that is still in camera space).
  */
 
 TqBool CqImageBuffer::CullSurface(CqBound& Bound, CqBasicSurface* pSurface)
@@ -757,7 +776,7 @@ TqBool CqImageBuffer::CullSurface(CqBound& Bound, CqBasicSurface* pSurface)
 		return(TqFalse);
 	}
 
-	// Convert the bounds to screen space.
+	// Convert the bounds to raster space.
 	Bound.Transform(QGetRenderContext()->matSpaceToSpace("camera","raster"));
 	Bound.vecMin().x(Bound.vecMin().x()-m_FilterXWidth/2);
 	Bound.vecMin().y(Bound.vecMin().y()-m_FilterYWidth/2);
@@ -875,7 +894,13 @@ void CqImageBuffer::AddMPG(CqMicroPolygonBase* pmpgNew)
 
 
 //----------------------------------------------------------------------
-/** Render any waiting MPGs
+/** Render any waiting MPGs.
+
+    All micro polygon grids in the specified bucket are bust into
+    individual micro polygons which are assigned to their appropriate
+    bucket. Then RenderMicroPoly() is called for each micro polygon in
+    the current bucket.
+
  * \param iBucket Integer index of bucket being processed.
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
@@ -915,13 +940,16 @@ void CqImageBuffer::RenderMPGs(TqInt iBucket, long xmin, long xmax, long ymin, l
 
 
 //----------------------------------------------------------------------
-/** Render a particular micopolygon.
- * \param pMPG Pointer to the micrpolygon to process.
+/** Render a particular micropolygon.
+
+ * \param pMPG Pointer to the micropolygon to process.
  * \param iBucket Integer index of bucket being processed.
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
+
+   \see CqBucket, CqImageElement
  */
 
 inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax)
@@ -947,6 +975,8 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 		return;
 
 	// Now go across all pixels touched by the micropolygon bound.
+	// The first pixel position is at (initX, initY), the last one
+	// at (eX, eY).
 	long eX=static_cast<TqInt>(ceil(bmaxx));
 	long eY=static_cast<TqInt>(ceil(bmaxy));
 	if(eX>=xmax)	eX=xmax-1;
@@ -978,7 +1008,10 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 
 		while(iX<=eX)
 		{
-			register int m,n;
+			// Now sample the micropolygon at several subsample positions
+			// within the pixel. The subsample indices range from (start_m, n)
+			// to (end_m-1, end_n-1).
+		  	register int m,n;
 			n=(iY==initY)?in:0;
 			int end_n=(iY==eY)?en:iYSamples;
 			int start_m=(iX==initX)?im:0;
@@ -991,14 +1024,17 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 				{
 					CqVector2D vecP(pie->SamplePoint(m,n));
 					QGetRenderContext()->Stats().cSamples()++;
+					// First, check if the subsample point lies within the micropoly bound
 					if(Bound.Contains2D(vecP))
 					{
 						QGetRenderContext()->Stats().cSampleBoundHits()++;
 
 						TqFloat t=pie->SampleTime(m,n);
+						// Now check if the subsample hits the micropoly
 						if(pMPG->Sample(vecP,t,ImageVal.m_Depth))
 						{									
 							QGetRenderContext()->Stats().cSampleHits()++;
+							// Sort the color/opacity into the visible point list
 							std::vector<SqImageValue>& aValues=pie->Values(m,n);
 							int i=0;
 							int c=aValues.size();
@@ -1006,7 +1042,7 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 							{
 								SqImageValue* p=&aValues[0];
 								while(i<c && p[i].m_Depth<ImageVal.m_Depth)	i++;
-								// If it is exaclty the same, chances are we've hit a MPG grid line.
+								// If it is exactly the same, chances are we've hit a MPG grid line.
 								if(i<c && p[i].m_Depth==ImageVal.m_Depth)
 								{
 									p[i].m_colColor=(p[i].m_colColor+pMPG->colColor())*0.5f;
@@ -1037,7 +1073,30 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 
 //----------------------------------------------------------------------
 /** Render any waiting Surfaces
- * \param iBucket Integer index of bucket being processed.
+
+    This method loops through all the gprims stored in the specified bucket
+    and checks if the gprim can be diced and turned into a grid of micro
+    polygons or if it is still too large and has to be split (this check 
+    is done in CqBasicSurface::Diceable()).
+
+    The dicing is done by the gprim in CqBasicSurface::Dice(). After that
+    the entire grid is shaded by calling CqMicroPolyGridBase::Shade().
+    The shaded grid is then stored in the current bucket and will eventually 
+    be further processed by RenderMPGs().
+
+    If the gprim could not yet be diced, it is split into a number of
+    smaller gprims (CqBasicSurface::Split()) which are again assigned to
+    buckets (this doesn't necessarily have to be the current one again)
+    by calling PostSurface() (just as if it were regular gprims).
+
+    Finally, when all the gprims are diced and the resulting micro polygons
+    are rendered, the individual subpixel samples are combined into one
+    pixel color and opacity which is then exposed and quantized.
+    After that the method BucketComplete() and IqDDManager::DisplayBucket()
+    is called which can be used to display the bucket inside a window or
+    save it to disk.
+
+ * \param iBucket Integer index of bucket being processed (0-based).
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
@@ -1101,6 +1160,10 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 
 //----------------------------------------------------------------------
 /** Render any waiting Surfaces
+
+    Starting from the upper left corner of the image every bucket is
+    processed by computing its extent and calling RenderSurfaces().
+    After the image is complete ImageComplete() is called.
  */
 
 void CqImageBuffer::RenderImage()
