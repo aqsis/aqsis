@@ -57,7 +57,7 @@ static int scannerinput(char* Buffer, int MaxSize);
 
 %}
 
-delim				[ \t]
+delim				[ \t\\]
 whitespace		{delim}+
 letter				[A-Za-z]
 digit					[0-9]
@@ -145,6 +145,7 @@ Disk				{ return REQUEST_TOKEN_DISK; }
 DiskFilter			{ return REQUEST_TOKEN_DISKFILTER; }
 Displacement			{ return REQUEST_TOKEN_DISPLACEMENT; }
 Display				{ return REQUEST_TOKEN_DISPLAY; }
+ElseIf				{ return REQUEST_TOKEN_ELSEIF; }
 ErrorHandler			{ return REQUEST_TOKEN_ERRORHANDLER; }
 Exposure			{ return REQUEST_TOKEN_EXPOSURE; }
 Exterior			{ return REQUEST_TOKEN_EXTERIOR; }
@@ -162,6 +163,8 @@ Identity			{ return REQUEST_TOKEN_IDENTITY; }
 Illuminate			{ return REQUEST_TOKEN_ILLUMINATE; }
 Imager				{ return REQUEST_TOKEN_IMAGER; }
 Interior			{ return REQUEST_TOKEN_INTERIOR; }
+IfBegin				{ return REQUEST_TOKEN_IFBEGIN; }
+IfEnd				{ return REQUEST_TOKEN_IFEND; }
 LightSource			{ return REQUEST_TOKEN_LIGHTSOURCE; }
 MakeBump			{ return REQUEST_TOKEN_MAKEBUMP; }
 MakeCubeFaceEnvironment 	{ return REQUEST_TOKEN_MAKECUBEFACEENVIRONMENT; }

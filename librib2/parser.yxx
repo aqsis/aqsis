@@ -149,6 +149,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %token	<ctype>	REQUEST_TOKEN_DISKFILTER
 %token	<ctype>	REQUEST_TOKEN_DISPLACEMENT
 %token	<ctype>	REQUEST_TOKEN_DISPLAY
+%token	<ctype>	REQUEST_TOKEN_ELSEIF
 %token	<ctype>	REQUEST_TOKEN_ERRORABORT
 %token	<ctype>	REQUEST_TOKEN_ERRORHANDLER
 %token	<ctype>	REQUEST_TOKEN_ERRORIGNORE
@@ -166,6 +167,8 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %token	<ctype>	REQUEST_TOKEN_HIDER
 %token	<ctype>	REQUEST_TOKEN_HYPERBOLOID
 %token	<ctype>	REQUEST_TOKEN_IDENTITY
+%token	<ctype>	REQUEST_TOKEN_IFBEGIN
+%token	<ctype>	REQUEST_TOKEN_IFEND
 %token	<ctype>	REQUEST_TOKEN_ILLUMINATE
 %token	<ctype>	REQUEST_TOKEN_IMAGER
 %token	<ctype>	REQUEST_TOKEN_INTERIOR
@@ -257,6 +260,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %type	<ctype>	disk
 %type	<ctype>	displacement
 %type	<ctype>	display
+%type	<ctype>	elseif
 %type	<ctype>	errorabort
 %type	<ctype>	errorhandler
 %type	<ctype>	errorignore
@@ -273,6 +277,8 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %type	<ctype>	hider
 %type	<ctype>	hyperboloid
 %type	<ctype>	identity
+%type	<ctype>	ifbegin
+%type	<ctype>	ifend
 %type	<ctype>	illuminate
 %type	<ctype>	imager
 %type	<ctype>	interior
@@ -433,6 +439,8 @@ complete_request
 
 				DiscardStringValue($2);
 			}
+	|	elseif string
+			{ }
 	|	exposure float float
 			{ ParseCallbackInterface->RiExposure($2, $3); }
 	|	imager string opttvpairs
@@ -563,6 +571,12 @@ complete_request
 				DiscardStringValue($2);
 				DiscardStringValue($3);
 				DiscardTokenValuePairs($4);
+			}
+	|	ifbegin string
+			{
+			}
+	|	ifend 
+			{
 			}
 	|	illuminate integer integer
 			{
@@ -1263,6 +1277,7 @@ detailrange : REQUEST_TOKEN_DETAILRANGE	{ ExpectParams(); };
 disk : REQUEST_TOKEN_DISK	{ ExpectParams(); };
 displacement : REQUEST_TOKEN_DISPLACEMENT	{ ExpectParams(); };
 display : REQUEST_TOKEN_DISPLAY	{ ExpectParams(); };
+elseif : REQUEST_TOKEN_ELSEIF	{  ExpectParams();};
 errorabort : REQUEST_TOKEN_ERRORABORT	{ ExpectParams(); };
 errorhandler : REQUEST_TOKEN_ERRORHANDLER	{ ExpectParams(); };
 errorignore : REQUEST_TOKEN_ERRORIGNORE	{ ExpectParams(); };
@@ -1279,6 +1294,8 @@ geometry : REQUEST_TOKEN_GEOMETRY	{ ExpectParams(); };
 hider : REQUEST_TOKEN_HIDER	{ ExpectParams(); };
 hyperboloid : REQUEST_TOKEN_HYPERBOLOID	{ ExpectParams(); };
 identity : REQUEST_TOKEN_IDENTITY	{ ExpectParams(); };
+ifbegin : REQUEST_TOKEN_IFBEGIN	{ ExpectParams(); };
+ifend : REQUEST_TOKEN_IFEND	{ ExpectParams(); };
 illuminate : REQUEST_TOKEN_ILLUMINATE	{ ExpectParams(); };
 imager : REQUEST_TOKEN_IMAGER	{ ExpectParams(); };
 interior : REQUEST_TOKEN_INTERIOR	{ ExpectParams(); };
