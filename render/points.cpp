@@ -194,8 +194,8 @@ CqMicroPolyGridBase* CqPoints::Dice()
         TqUint u;
         for ( u = 0; u <= nVertices(); u++ )
         {
-		    TqInt CSO = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 1 ];
-            TqInt O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
+			TqBool CSO = pTransform()->GetHandedness();
+			TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
             N = ( O == CSO ) ? N : -N;
             pGrid->pVar(EnvVars_Ng)->SetNormal( N, u );
         }

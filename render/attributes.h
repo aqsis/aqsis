@@ -165,17 +165,8 @@ public:
      */
     void	FlipeOrientation( TqFloat time = 0.0f )
     {
-        TqInt co = GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
-        GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = ( co == OrientationLH ) ? OrientationRH : OrientationLH;
-    }
-
-    /** Flip the orientation of the coordinate system between left and right handed.
-     * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-     */
-    void	FlipeCoordsysOrientation( TqFloat time = 0.0f )
-    {
-        TqInt co = GetIntegerAttribute( "System", "Orientation" ) [ 1 ];
-        GetIntegerAttributeWrite( "System", "Orientation" ) [ 1 ] = ( co == OrientationLH ) ? OrientationRH : OrientationLH;
+        TqBool co = GetIntegerAttribute( "System", "Orientation" ) [ 0 ] == 0;
+        GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = ( co ) ? 0 : 1;
     }
 
     virtual IqShader*	pshadDisplacement( TqFloat time = 0.0f ) const

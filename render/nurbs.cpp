@@ -1467,8 +1467,8 @@ void CqSurfaceNURBS::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize,
     // the coordinate system specified, to check for normal flipping.
     assert( NULL != P() );
 
-    TqInt CSO = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 1 ];
-    TqInt O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
+    TqBool CSO = pTransform()->GetHandedness();
+    TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
 
     CqVector3D	N;
     CqVector4D P;

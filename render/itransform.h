@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/12/28 18:26:21 $
+ *	Last change date:	$Date: 2004/03/07 13:49:15 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___itransform_Loaded___
@@ -28,6 +28,12 @@ struct IqTransform
     virtual	const CqMatrix&	matObjectToWorld( TqFloat time = 0.0f ) const = 0;
     virtual	TqFloat	Time( TqInt index ) const = 0;
     virtual	TqInt	cTimes() const = 0;
+	/** Set the handedness of the current transform 
+	 */
+	virtual	TqBool GetHandedness(TqFloat time = 0.0f) const=0;
+	/** Flip the handedness of the current coordinate system.
+	 */
+	virtual void FlipHandedness(TqFloat time = 0.0f)=0;
 
 #ifndef _DEBUG
     virtual	void	Release() = 0;

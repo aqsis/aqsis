@@ -295,7 +295,10 @@ CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], const boost::sha
         // Set the default 'new time slot' matrix to the current 0 time matrix, this
         // takes care of the case of moving from non-Motion to Motion.
         //m_ptransCurrent->SetDefaultObject( m_ptransCurrent->GetMotionObject( m_ptransCurrent->Time( 0 ) ) );
-		m_ptransCurrent->SetDefaultObject( m_ptransCurrent->matObjectToWorld( m_ptransCurrent->Time( 0 ) ) );
+		SqTransformation ct;
+		ct.m_matTransform = m_ptransCurrent->matObjectToWorld( m_ptransCurrent->Time( 0 ) );
+		ct.m_Handedness = m_ptransCurrent->GetHandedness( m_ptransCurrent->Time( 0 ) );
+		m_ptransCurrent->SetDefaultObject( ct );
     }
     else
     {

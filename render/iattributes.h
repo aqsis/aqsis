@@ -5,7 +5,7 @@
  *	@brief	Declare the interface class for common attributes access.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/12/28 18:26:20 $
+ *	Last change date:	$Date: 2004/03/07 13:49:15 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -22,13 +22,6 @@
 
 
 START_NAMESPACE( Aqsis )
-
-/// The options for the orientation of a coordinate system.
-enum EqOrientation
-{
-    OrientationLH,    	///< Left hand coordinate system.
-    OrientationRH,    	///< Right and coordinate system.
-};
 
 enum	ShadingInterpolation
 {

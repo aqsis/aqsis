@@ -27,6 +27,8 @@
 #ifndef BITVECTOR_H_INCLUDED
 #define BITVECTOR_H_INCLUDED 1
 
+#include	<iostream>
+
 #include	"aqsis.h"
 
 START_NAMESPACE( Aqsis )
@@ -228,6 +230,22 @@ public:
         return ( *this );
     }
 
+    /** Get the number of bytes required to represent the whole bitvector.
+     * \param size the required size of the bitvector.
+     * \return an integer count of bytes needed.
+     */
+	TqInt ArraySize()
+	{
+		return( NumberOfInts(m_cLength) );
+	}
+
+    /** Get a pointer to the ints representing the bitvector.
+     * \return a pointer to the char array.
+     */
+    bit* IntArray()
+    {
+        return ( m_aBits );
+    }
     /** Get the number of bytes required to represent the specified number of bits.
      * \param size the required size of the bitvector.
      * \return an integer count of bytes needed.
@@ -236,6 +254,7 @@ public:
     {
         return ( ( size + ( CHAR_BIT ) - 1 ) / ( CHAR_BIT ) );
     }
+    friend std::ostream &operator<<( std::ostream &Stream, CqBitVector &Vector );
 private:
     bit*	m_aBits;			///< the array of bytes to store the bit vector.
     TqInt	m_cLength;			///< the size of the bitvector in bits.

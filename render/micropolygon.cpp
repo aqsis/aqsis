@@ -148,8 +148,8 @@ void CqMicroPolyGrid::CalcNormals()
 
     // Get the handedness of the coordinate system (at the time of creation) and
     // the coordinate system specified, to check for normal flipping.
-    TqInt CSO = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 1 ];
-    TqInt O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
+    TqBool CSO = this->pSurface()->pTransform()->GetHandedness();
+    TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
     const CqVector3D* vecMP[ 4 ];
     CqVector3D	vecN, vecTemp;
     CqVector3D	vecFailsafeN;

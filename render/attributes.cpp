@@ -130,7 +130,7 @@ CqAttributes::CqAttributes() :
     ADD_SYSTEM_ATTR4( DetailRange, TqFloat, TqFloat, type_float, 0.0f, 0.0f, FLT_MAX, FLT_MAX );	// the detail range minimum visible distance.
     ADD_SYSTEM_ATTR2( Basis, CqMatrix, CqMatrix, type_matrix, RiBezierBasis, RiBezierBasis );	// the basis matrix for the u direction.
     ADD_SYSTEM_ATTR2( BasisStep, TqInt, TqFloat, type_integer, 3, 3 );	// the steps to advance the evaluation window in the u direction.
-    ADD_SYSTEM_ATTR2( Orientation, TqInt, TqFloat, type_integer, OrientationLH, OrientationLH );	// the orientation associated primitives are described in.
+    ADD_SYSTEM_ATTR( Orientation, TqInt, TqFloat, type_integer, 0 );	// the orientation associated primitives are described in.
     ADD_SYSTEM_ATTR( Sides, TqInt, TqFloat, type_integer, 2 );		// the number of visible sides associated primitives have.
     ADD_SYSTEM_ATTR( LevelOfDetailRulerSize, TqFloat, TqFloat, type_float, FLT_MAX );		// current LOD ruler size
     ADD_SYSTEM_ATTR2( LevelOfDetailBounds, TqFloat, TqFloat, type_float, 0.0f, 1.0f );	// relative importance bounds for this LOD representation

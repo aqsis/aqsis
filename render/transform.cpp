@@ -36,15 +36,22 @@ std::list<CqTransform*> Transform_stack;
 /** Constructor.
  */
 
-CqTransform::CqTransform() : CqMotionSpec<CqMatrix>( CqMatrix() ), m_cReferences( 0 ), m_IsMoving(TqFalse)
+CqTransform::CqTransform() : CqMotionSpec<SqTransformation>(SqTransformation()), m_cReferences( 0 ), m_IsMoving(TqFalse)
 {
 	// Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
 	// if the previous level has motion specification, the value will be interpolated.
 	CqMatrix matOtoWLast;
+	TqBool handLast = TqFalse;
 	if ( !Transform_stack.empty() )
+	{
 		matOtoWLast =  Transform_stack.front() ->matObjectToWorld();
+		handLast =  Transform_stack.front() ->GetHandedness();
+	}
 
-	SetDefaultObject( matOtoWLast );
+	SqTransformation ct;
+	ct.m_Handedness = handLast;
+	ct.m_matTransform = matOtoWLast;
+	SetDefaultObject( ct );
 
 	// Register ourself with the global transform stack.
 	Transform_stack.push_front( this );
@@ -56,17 +63,24 @@ CqTransform::CqTransform() : CqMotionSpec<CqMatrix>( CqMatrix() ), m_cReferences
 /** Copy constructor.
  */
 
-CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<CqMatrix>( From ), m_cReferences( 0 ), m_IsMoving(TqFalse)
+CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<SqTransformation>( From ), m_cReferences( 0 ), m_IsMoving(TqFalse)
 {
     *this = From;
 
 	// Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
 	// if the previous level has motion specification, the value will be interpolated.
 	CqMatrix matOtoWLast;
+	TqBool handLast = TqFalse;
 	if ( !Transform_stack.empty() )
+	{
 		matOtoWLast =  Transform_stack.front() ->matObjectToWorld();
+		handLast =  Transform_stack.front() ->GetHandedness();
+	}
 
-	SetDefaultObject( matOtoWLast );
+	SqTransformation ct;
+	ct.m_Handedness = handLast;
+	ct.m_matTransform = matOtoWLast;
+	SetDefaultObject( ct );
 
    // Register ourself with the global transform stack.
 	Transform_stack.push_front( this );
@@ -92,10 +106,11 @@ CqTransform::~CqTransform()
 
 CqTransform& CqTransform::operator=( const CqTransform& From )
 {
-    CqMotionSpec<CqMatrix>::operator=( From );
+    CqMotionSpec<SqTransformation>::operator=( From );
 
 	m_IsMoving = From.m_IsMoving;
 	m_StaticMatrix = From.m_StaticMatrix;
+	m_Handedness = From.m_Handedness;
 
     return ( *this );
 }
@@ -107,17 +122,28 @@ CqTransform& CqTransform::operator=( const CqTransform& From )
 
 void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 {
+	TqBool flip = ( matTrans.Determinant() < 0 );
+	SqTransformation ct;
+	ct.m_matTransform = matTrans;
+
     if ( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
 	{
-		AddTimeSlot( time, matTrans );
+		AddTimeSlot( time, ct );
 		m_IsMoving = TqTrue;
 	}
 	else
 	{
 		if( m_IsMoving )
-			AddTimeSlot( time, matTrans );
+		{
+			AddTimeSlot( time, ct );
+		}
 		else
+		{
 			m_StaticMatrix = matTrans;
+			m_Handedness = flip;
+			ct.m_Handedness = flip;
+			SetDefaultObject( ct );
+		}
 	}
 }
 
@@ -125,9 +151,15 @@ void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 
 void CqTransform::SetTransform( TqFloat time, const CqMatrix& matTrans )
 {
+	TqBool flip = ( matTrans.Determinant() < 0 );
+	TqBool camhand = ( QGetRenderContext()->matSpaceToSpace("world", "camera").Determinant() < 0 );
+
     if ( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
 	{
-		AddTimeSlot( time, matTrans );
+		SqTransformation ct;
+		ct.m_Handedness = (flip)? !camhand : camhand;
+		ct.m_matTransform = matTrans;
+		AddTimeSlot( time, ct );
 		m_IsMoving = TqTrue;
 	}
 	else
@@ -136,17 +168,28 @@ void CqTransform::SetTransform( TqFloat time, const CqMatrix& matTrans )
 		if( m_IsMoving )
 		{
 			CqMatrix mat0 = matObjectToWorld(Time(0));
-			//mat0 = mat0.Inverse();
-			AddTimeSlot( Time(0), matTrans );
+			
+			SqTransformation ct;
+			ct.m_Handedness = (flip)? !camhand : camhand;
+			TqBool hand0 = ct.m_Handedness;
+			ct.m_matTransform = matTrans;
+
+			AddTimeSlot( Time(0), ct );
 			TqInt i;
 			for(i=1; i<cTimes(); i++)
 			{
 				CqMatrix matOffset = mat0 * matObjectToWorld(Time(i)).Inverse();
-				AddTimeSlot( Time(i), matOffset * matTrans);
+				ct.m_matTransform = matOffset * matTrans;
+				TqBool flip2 = ( matOffset.Determinant() < 0 );
+				ct.m_Handedness = (flip2)? !hand0 : hand0;
+				AddTimeSlot( Time(i), ct);
 			}
 		}
 		else
+		{
 			m_StaticMatrix = matTrans;
+			m_Handedness = (flip)? !camhand : camhand;
+		}
 	}
 }
 
@@ -157,26 +200,33 @@ void CqTransform::SetTransform( TqFloat time, const CqMatrix& matTrans )
 
 void CqTransform::ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 {
+	TqBool flip = ( matTrans.Determinant() < 0 );
+
+	SqTransformation ct;
+	ct.m_matTransform = matTrans;
+	ct.m_Handedness = (flip)? !m_Handedness : m_Handedness;
+
     // If we are actually in a motion block, and we already describe a moving transform,
 	// concatenate this transform with the existing one at that time slot,
+	// ConcatTimeSlot will take care of making sure that the matrix is initially set to the 
+	// static matrix, as long as we ensure that the default is kept up to date.
     if ( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
 	{
-		if( m_IsMoving )
-			ConcatTimeSlot( time, matTrans );
-		else
-		{
-			AddTimeSlot( time, m_StaticMatrix );
-			ConcatTimeSlot( time, matTrans );
-			m_IsMoving = TqTrue;
-		}
+		ConcatTimeSlot( time, ct );
+		m_IsMoving = TqTrue;
 	}
     else
     // else, if we are moving, apply this transform at all time slots, otherwise apply to static matrix.
 	{
 		if( m_IsMoving )
-			ConcatAllTimeSlots( matTrans );
+			ConcatAllTimeSlots( ct );
 		else
+		{
 			m_StaticMatrix = m_StaticMatrix * matTrans;
+			m_Handedness = (flip)? !m_Handedness : m_Handedness;
+			ct.m_Handedness = m_Handedness;
+			SetDefaultObject( ct );
+		}
 	}
 }
 
@@ -188,9 +238,22 @@ void CqTransform::ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans
 const CqMatrix& CqTransform::matObjectToWorld( TqFloat time ) const
 {
 	if( m_IsMoving )
-		return ( GetMotionObject( time ) );
+		return ( GetMotionObject( time ).m_matTransform );
 	else
 		return ( m_StaticMatrix );
+}
+
+
+//---------------------------------------------------------------------
+/** Get the handedness at the specified time.
+ */
+
+TqBool CqTransform::GetHandedness( TqFloat time ) const
+{
+	if( m_IsMoving )
+		return ( GetMotionObject( time ).m_Handedness );
+	else
+		return ( m_Handedness );
 }
 
 
@@ -199,13 +262,14 @@ const CqMatrix& CqTransform::matObjectToWorld( TqFloat time ) const
  *  then make the transform static and clear the motion keyframes.
  */
 
-void CqTransform::ResetTransform(const CqMatrix& mat, TqBool makeStatic)
+void CqTransform::ResetTransform(const CqMatrix& mat, TqBool hand, TqBool makeStatic)
 {
 	if( makeStatic )
 	{
 		Reset();
 		m_IsMoving=TqFalse;
 		m_StaticMatrix = mat;
+		m_Handedness = hand;
 	}
 	else
 	{
@@ -220,15 +284,19 @@ void CqTransform::ResetTransform(const CqMatrix& mat, TqBool makeStatic)
 //---------------------------------------------------------------------
 // Overrides from CqMotionSpec reequired for any object subject to motion specification.
 
-void CqTransform::ClearMotionObject( CqMatrix& A ) const
+void CqTransform::ClearMotionObject( SqTransformation& A ) const
     {}
 
-CqMatrix CqTransform::ConcatMotionObjects( const CqMatrix& A, const CqMatrix& B ) const
+SqTransformation CqTransform::ConcatMotionObjects( const SqTransformation& A, const SqTransformation& B ) const
 {
-    return ( A * B );
+    SqTransformation res;
+	res.m_matTransform = A.m_matTransform * B.m_matTransform;
+	TqBool flip = ( B.m_matTransform.Determinant() < 0 );
+	res.m_Handedness = (flip)? !A.m_Handedness : A.m_Handedness;
+	return ( res );
 }
 
-CqMatrix CqTransform::LinearInterpolateMotionObjects( TqFloat Fraction, const CqMatrix& A, const CqMatrix& B ) const
+SqTransformation CqTransform::LinearInterpolateMotionObjects( TqFloat Fraction, const SqTransformation& A, const SqTransformation& B ) const
 {
     // TODO: Should we do anything with this???
     return ( A );

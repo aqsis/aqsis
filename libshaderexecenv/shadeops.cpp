@@ -2111,11 +2111,11 @@ STD_SOIMPL CqShaderExecEnv::SO_calculatenormal( POINTVAL p, DEFPARAMIMPL )
     INIT_SO
 
     // Find out if the orientation is inverted.
-    TqInt O = OrientationLH;
+    TqBool O = TqFalse;
 	if( m_pAttributes )
-		O = m_pAttributes ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
+		O = m_pTransform->GetHandedness();
     TqFloat neg = 1;
-    if ( O != OrientationLH ) neg = -1;
+    if ( !O ) neg = -1;
 
     CHECKVARY( p )
     CHECKVARY( Result )
@@ -3206,10 +3206,7 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
             GETNORMAL( N );
             CqColor colCl;
             Cl() ->GetColor( colCl, __iGrid );
-            //std::cout << COLOR( Result ) << std::endl;
-            //std::cout << colCl * ( Ln * NORMAL( N ) ) << std::endl;
             SETCOLOR( Result, COLOR( Result ) + colCl * ( Ln * NORMAL( N ) ) );
-            //std::cout << COLOR( Result ) << std::endl << std::endl;
 
             END_VARYING_SECTION
             PopState();
@@ -3507,7 +3504,6 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminance( STRINGVAL Category, POINTVAL P, VECT
                 m_CurrentState.SetValue( __iGrid, TqFalse );
             else
                 m_CurrentState.SetValue( __iGrid, TqTrue );
-
             END_VARYING_SECTION
         }
     }
@@ -3554,7 +3550,7 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminate( POINTVAL P, VECTORVAL Axis, FLOATVAL 
         if ( NULL != Angle ) Angle->GetFloat( fAngle, __iGrid );
         TqFloat cosangle = Ln * vecAxis;
         cosangle = CLAMP( cosangle, -1, 1 );
-        if ( acos( cosangle ) > fAngle )
+		if ( acos( cosangle ) > fAngle )
         {
             // Make sure we set the light color to zero in the areas that won't be lit.
             Cl() ->SetColor( CqColor( 0, 0, 0 ), __iGrid );

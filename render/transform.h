@@ -40,13 +40,19 @@
 
 START_NAMESPACE( Aqsis )
 
+struct SqTransformation
+{
+	CqMatrix m_matTransform;
+	TqBool	m_Handedness;
+};
+
 
 //----------------------------------------------------------------------
 /** \class CqTransform
  * Container class for the transform definitions of the graphics state.
  */
 
-class CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount, public IqTransform
+class CqTransform : public CqMotionSpec<SqTransformation>, public CqRefCount, public IqTransform
 {
 public:
     CqTransform();
@@ -91,17 +97,22 @@ public:
 
     virtual	TqFloat	Time( TqInt index ) const
     {
-        return( CqMotionSpec<CqMatrix>::Time( index ) );
+        return( CqMotionSpec<SqTransformation>::Time( index ) );
     }
     virtual	TqInt	cTimes() const
     {
 		if(m_IsMoving)
-			return( CqMotionSpec<CqMatrix>::cTimes() );
+			return( CqMotionSpec<SqTransformation>::cTimes() );
 		else
 			return( 1 );
     }
 
-	virtual void ResetTransform(const CqMatrix& mat, TqBool makeStatic=TqTrue);
+	virtual void ResetTransform(const CqMatrix& mat, TqBool hand, TqBool makeStatic=TqTrue);
+	virtual	TqBool GetHandedness(TqFloat time = 0.0f) const;
+	virtual void FlipHandedness(TqFloat time = 0.0f)
+	{
+		m_Handedness = !m_Handedness;
+	}
 
 #ifndef _DEBUG
     virtual	void	Release()
@@ -123,15 +134,16 @@ public:
     }
 #endif
 
-    virtual	void	ClearMotionObject( CqMatrix& A ) const;
-    virtual	CqMatrix	ConcatMotionObjects( const CqMatrix& A, const CqMatrix& B ) const;
-    virtual	CqMatrix	LinearInterpolateMotionObjects( TqFloat Fraction, const CqMatrix& A, const CqMatrix& B ) const;
+    virtual	void	ClearMotionObject( SqTransformation& A ) const;
+    virtual	SqTransformation	ConcatMotionObjects( const SqTransformation& A, const SqTransformation& B ) const;
+    virtual	SqTransformation	LinearInterpolateMotionObjects( TqFloat Fraction, const SqTransformation& A, const SqTransformation& B ) const;
 
 private:
     TqInt	m_cReferences;		///< Number of references to this transform.
 	TqBool	m_IsMoving;			///< Flag indicating this transformation describes a changing transform.
 	CqMatrix	m_StaticMatrix;	///< Matrix storing the transformation should there be no motion involved.
     std::list<CqTransform*>::iterator	m_StackIterator;		///< Iterator in the transform stack for this transform.
+	TqBool	m_Handedness;	///< Current coordinate system orientation.
 }
 ;
 

@@ -23,6 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include	<iomanip>
 #include	"aqsis.h"
 
 #include "bitvector.h"
@@ -127,6 +128,25 @@ TqInt CqBitVector::Count()
     for ( count = 0L, i = 0; i < m_cNumInts; i++ )
         count += bitcount[ m_aBits[ i ] ];
     return ( count );
+}
+
+
+//----------------------------------------------------------------------
+/** Outputs a vector to an output stream.
+ * \param Stream Stream to output the matrix to.
+ * \param Vector The vector to output.
+ * \return The new state of Stream.
+ */
+
+std::ostream &operator<<( std::ostream &Stream, CqBitVector &Vector )
+{
+    TqInt numints = Vector.ArraySize();
+	Vector.Canonize();
+
+    TqInt i;
+    for ( i = 0; i < numints; i++ )
+		Stream << std::hex << (int)Vector.IntArray()[i];
+    return ( Stream );
 }
 
 
