@@ -41,11 +41,13 @@
 #include	"aqsis.h"
 
 #include	"tiffio.h" 
-//#include	"tiffiop.h"
 
 #include	"sstring.h"
 #include	"color.h"
-#include	"lights.h"
+//#include	"lights.h"
+#include	"matrix.h"
+#include	"itexturemap.h"
+#include	"ri.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -64,42 +66,6 @@ START_NAMESPACE( Aqsis )
 #define	MIPMAP_HEADER		"Aqsis MIP MAP"
 
 
-//----------------------------------------------------------------------
-/** \enum EqMapType
- * Enum defining the various image map types.
- */
-
-enum	EqMapType
-{
-    MapType_Invalid = 0,
-
-    MapType_Texture = 1,  		///< Plain texture map.
-    MapType_Environment,  	///< Cube face environment map.
-    MapType_Bump,  			///< Bump map (not used).
-    MapType_Shadow,  			///< Shadow map.
-    MapType_LatLong
-};
-
-
-/** \enum EqWrapMode
- * Enum defining the various modes of handling texture access outside of the normal range.
- */
-enum	EqWrapMode
-{
-    WrapMode_Black = 0,  		///< Return black.
-    WrapMode_Periodic,  		///< Wrap round to the opposite side.
-    WrapMode_Clamp,  			///< Clamp to in range.
-};
-
-
-/** \enum EqTexFormat
- * Enum defining the possible storage types for image maps.
- */
-enum EqTexFormat
-{
-    TexFormat_Plain = 0,  		///< Plain TIFF image.
-    TexFormat_MIPMAP = 1,  		///< Aqsis MIPMAP format.
-};
 
 
 //----------------------------------------------------------------------
@@ -128,7 +94,7 @@ class _qShareC CqTextureMapBuffer
 		 * \param samples Number of samples per pixel.
 		 * \param directory The directory within the TIFF image map, used for multi image formats, i.e. cubeface environment map.
 		 */
-		_qShareM	CqTextureMapBuffer( unsigned long xorigin, unsigned long yorigin, unsigned long width, unsigned long height, int samples, int directory = 0 ) :
+		_qShareM	CqTextureMapBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt samples, TqInt directory = 0 ) :
 				m_pBufferData( 0 ),
 				m_sOrigin( xorigin ),
 				m_tOrigin( yorigin ),
@@ -153,7 +119,7 @@ class _qShareC CqTextureMapBuffer
 		 * \param samples Number of samples per pixel.
 		 * \param directory The directory within the TIFF image map, used for multi image formats, i.e. cubeface environment map.
 		 */
-		_qShareM	void	Init( unsigned long xorigin, unsigned long yorigin, unsigned long width, unsigned long height, int samples, int directory = 0 )
+		_qShareM	void	Init( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt samples, TqInt directory = 0 )
 		{
 			Release();
 			m_sOrigin = xorigin;
@@ -179,7 +145,7 @@ class _qShareC CqTextureMapBuffer
 		 * \param directory TIFF directory index.
 		 * \return Boolean indicating sample is within this buffer.
 		 */
-		_qShareM	TqBool	IsValid( unsigned long s, unsigned long t, int directory = 0 )
+		_qShareM	TqBool	IsValid( TqUlong s, TqUlong t, TqInt directory = 0 )
 		{
 
 			return (
@@ -189,55 +155,55 @@ class _qShareC CqTextureMapBuffer
 
 		/** Get a pointer to the data for this buffer segment.
 		 */
-		_qShareM	unsigned char*	pBufferData()
+		_qShareM	TqPuchar	pBufferData()
 		{
 			return ( m_pBufferData );
 		}
 		/** Get the origin of this buffer segment.
 		 */
-		_qShareM	unsigned long sOrigin() const
+		_qShareM	TqUlong sOrigin() const
 		{
 			return ( m_sOrigin );
 		}
 		/** Get the origin of this buffer segment.
 		 */
-		_qShareM	unsigned long tOrigin() const
+		_qShareM	TqUlong tOrigin() const
 		{
 			return ( m_tOrigin );
 		}
 		/** Get the width of this buffer segment.
 		 */
-		_qShareM	unsigned long Width() const
+		_qShareM	TqUlong Width() const
 		{
 			return ( m_Width );
 		}
 		/** Get the height of this buffer segment.
 		 */
-		_qShareM	unsigned long Height() const
+		_qShareM	TqUlong Height() const
 		{
 			return ( m_Height );
 		}
 		/** Get the directory index of this buffer segment.
 		 */
-		_qShareM	int	Directory() const
+		_qShareM	TqInt	Directory() const
 		{
 			return ( m_Directory );
 		}
 
 
-		_qShareM unsigned char* AllocSegment( unsigned long width, unsigned long height, int samples );
-		_qShareM void	FreeSegment( unsigned char* pBufferData, unsigned long width, unsigned long height, int samples );
+		_qShareM TqPuchar AllocSegment( TqUlong width, TqUlong height, TqInt samples );
+		_qShareM void	FreeSegment( TqPuchar pBufferData, TqUlong width, TqUlong height, TqInt samples );
 
 
 
 	private:
-		unsigned char*	m_pBufferData;	///< Pointer to the image data.
-		unsigned long	m_sOrigin;		///< Horizontal segment origin.
-		unsigned long	m_tOrigin;		///< Vertical segment origin.
-		unsigned long	m_Width;		///< Width of segment.
-		unsigned long	m_Height;		///< Height of segment.
-		int	m_Samples;		///< Number of samples per pixel.
-		int	m_Directory;	///< TIFF directory index. Used for multi image textures, i.e. cubeface environment.
+		TqPuchar	m_pBufferData;	///< Pointer to the image data.
+		TqUlong	m_sOrigin;		///< Horizontal segment origin.
+		TqUlong	m_tOrigin;		///< Vertical segment origin.
+		TqUlong	m_Width;		///< Width of segment.
+		TqUlong	m_Height;		///< Height of segment.
+		TqInt	m_Samples;		///< Number of samples per pixel.
+		TqInt	m_Directory;	///< TIFF directory index. Used for multi image textures, i.e. cubeface environment.
 
 
 }
@@ -248,10 +214,10 @@ class _qShareC CqTextureMapBuffer
  * Base class from which all texture maps are derived.
  */
 
-class _qShareC CqTextureMap
+class _qShareC CqTextureMap : public IqTextureMap
 {
 	public:
-		_qShareM CqTextureMap( const char* strName ) :
+		_qShareM CqTextureMap( const CqString& strName ) :
 				m_MinZ( RI_FLOATMAX ),
 				m_XRes( 0 ),
 				m_YRes( 0 ),
@@ -282,25 +248,25 @@ class _qShareC CqTextureMap
 
 		/** Get the horizontal resolution of this image.
 		 */
-		_qShareM	TqUint	XRes() const
+		_qShareM virtual	TqUint	XRes() const
 		{
 			return ( m_XRes );
 		}
 		/** Get the vertical resolution of this image.
 		 */
-		_qShareM	TqUint	YRes() const
+		_qShareM virtual	TqUint	YRes() const
 		{
 			return ( m_YRes );
 		}
 		/** Get the number of samples per pixel.
 		 */
-		_qShareM	TqInt	SamplesPerPixel() const
+		_qShareM virtual	TqInt	SamplesPerPixel() const
 		{
 			return ( m_SamplesPerPixel );
 		}
 		/** Get the storage format of this image.
 		 */
-		_qShareM	EqTexFormat	Format() const
+		_qShareM virtual	EqTexFormat	Format() const
 		{
 			return ( m_Format );
 		}
@@ -341,32 +307,32 @@ class _qShareC CqTextureMap
 		 * \param t Vertical sample position.
 		 * \param directory TIFF directory index.
 		 */
-		_qShareM	virtual	CqTextureMapBuffer*	GetBuffer( unsigned long s, unsigned long t, int directory = 0 );
+		_qShareM	virtual	CqTextureMapBuffer*	GetBuffer( TqUlong s, TqUlong t, TqInt directory = 0 );
 		void	CreateMIPMAP();
 
-		_qShareM	virtual	void	SampleMIPMAP( float s1, float t1, float swidth, float twidth, float sblur, float tblur,
-		                                    std::valarray<float>& val );
-		_qShareM	virtual	void	SampleMIPMAP( float s1, float t1, float s2, float t2, float s3, float t3, float s4, float t4,
-		                                    float sblur, float tblur,
-		                                    std::valarray<float>& val );
-		_qShareM	virtual	void	SampleMIPMAP( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, float sblur, float tblur,
-		                                    std::valarray<float>& val )
+		_qShareM	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, TqFloat sblur, TqFloat tblur,
+		                                    std::valarray<TqFloat>& val );
+		_qShareM	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
+		                                    TqFloat sblur, TqFloat tblur,
+		                                    std::valarray<TqFloat>& val );
+		_qShareM	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur,
+		                                    std::valarray<TqFloat>& val )
 		{}
-		_qShareM	virtual	void	SampleMIPMAP( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-		                                    float sblur, float tblur,
-		                                    std::valarray<float>& val )
+		_qShareM	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
+		                                    TqFloat sblur, TqFloat tblur,
+		                                    std::valarray<TqFloat>& val )
 		{}
 
-		_qShareM	virtual	void	GetSample( TqFloat ss1, TqFloat tt1, TqFloat ss2, TqFloat tt2, std::valarray<float>& val );
+		_qShareM	virtual	void	GetSample( TqFloat ss1, TqFloat tt1, TqFloat ss2, TqFloat tt2, std::valarray<TqFloat>& val );
 
-		_qShareM	static	CqTextureMap* GetTextureMap( const char* strName );
-		_qShareM	static	CqTextureMap* GetEnvironmentMap( const char* strName );
-		_qShareM	static	CqTextureMap* GetShadowMap( const char* strName );
-		_qShareM	static	CqTextureMap* GetLatLongMap( const char* strName );
+		_qShareM	static	CqTextureMap* GetTextureMap( const CqString& strName );
+		_qShareM	static	CqTextureMap* GetEnvironmentMap( const CqString& strName );
+		_qShareM	static	CqTextureMap* GetShadowMap( const CqString& strName );
+		_qShareM	static	CqTextureMap* GetLatLongMap( const CqString& strName );
 
 		_qShareM TqUlong	ImageFilterVal( uint32* p, TqInt x, TqInt y, TqInt directory );
 
-		_qShareM void Interpreted( char *mode );
+		_qShareM void Interpreted( TqPchar mode );
 
 		/** Clear the cache of texture maps.
 		 */
@@ -379,10 +345,10 @@ class _qShareC CqTextureMap
 			m_TextureMap_Cache.clear();
 
 		}
-		_qShareM static void WriteImage( TIFF* ptex, float *raster, unsigned long width, unsigned long length, int samples );
-		_qShareM static void WriteTileImage( TIFF* ptex, float *raster, unsigned long width, unsigned long length, unsigned long twidth, unsigned long tlength, int samples );
-		_qShareM static void WriteImage( TIFF* ptex, unsigned char *raster, unsigned long width, unsigned long length, int samples );
-		_qShareM static void WriteTileImage( TIFF* ptex, unsigned char *raster, unsigned long width, unsigned long length, unsigned long twidth, unsigned long tlength, int samples );
+		_qShareM static void WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples );
+		_qShareM static void WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples );
+		_qShareM static void WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples );
+		_qShareM static void WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples );
 
 
 	protected:
@@ -403,7 +369,7 @@ class _qShareC CqTextureMap
 		enum EqWrapMode m_smode;        ///< Periodic, black, clamp
 		enum EqWrapMode m_tmode;        ///< Periodic, black, clamp
 		RtFilterFunc m_FilterFunc;       ///< Catmull-Rom, sinc, disk, ... pixelfilter
-		float m_swidth, m_twidth;   ///< for the pixel's filter
+		TqFloat m_swidth, m_twidth;   ///< for the pixel's filter
 		std::vector<CqTextureMapBuffer*>	m_apSegments;	///< Array of cache segments related to this image.
 }
 ;
@@ -418,7 +384,7 @@ class _qShareC CqTextureMap
 class _qShareC CqEnvironmentMap : public CqTextureMap
 {
 	public:
-		_qShareM CqEnvironmentMap( const char* strName ) :
+		_qShareM CqEnvironmentMap( const CqString& strName ) :
 				CqTextureMap( strName )
 		{}
 		_qShareM	virtual	~CqEnvironmentMap()
@@ -429,14 +395,14 @@ class _qShareC CqEnvironmentMap : public CqTextureMap
 			return ( IsValid() ? MapType_Environment : MapType_Invalid );
 		}
 
-		_qShareM	virtual	void	SampleMIPMAP( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, float sblur, float tblur,
-		                                    std::valarray<float>& val );
-		_qShareM	virtual	void	SampleMIPMAP( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-		                                    float sblur, float tblur,
-		                                    std::valarray<float>& val );
+		_qShareM	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur,
+		                                    std::valarray<TqFloat>& val );
+		_qShareM	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
+		                                    TqFloat sblur, TqFloat tblur,
+		                                    std::valarray<TqFloat>& val );
 
 	private:
-		void	Getst( CqVector3D& R, unsigned long fullwidth, unsigned long fulllength, float& s, float& t );
+		void	Getst( CqVector3D& R, TqUlong fullwidth, TqUlong fulllength, TqFloat& s, TqFloat& t );
 };
 
 //----------------------------------------------------------------------
@@ -448,7 +414,7 @@ class _qShareC CqEnvironmentMap : public CqTextureMap
 class _qShareC CqLatLongMap : public CqEnvironmentMap
 {
 	public:
-		_qShareM CqLatLongMap( const char* strName ) :
+		_qShareM CqLatLongMap( const CqString& strName ) :
 				CqEnvironmentMap( strName )
 		{}
 		_qShareM	virtual	~CqLatLongMap()
@@ -471,7 +437,7 @@ class _qShareC CqLatLongMap : public CqEnvironmentMap
 class _qShareC CqShadowMap : public CqTextureMap
 {
 	public:
-		_qShareM CqShadowMap( const char* strName ) :
+		_qShareM CqShadowMap( const CqString& strName ) :
 				CqTextureMap( strName )
 		{}
 		_qShareM	virtual	~CqShadowMap()
@@ -499,12 +465,14 @@ class _qShareC CqShadowMap : public CqTextureMap
 		_qShareM	TqFloat	Sample( const CqVector3D&	vecPoint );
 		_qShareM	void	SaveZFile();
 		_qShareM	void	LoadZFile();
-		_qShareM	void	SaveShadowMap( const char* strShadowName );
+		_qShareM	void	SaveShadowMap( const CqString& strShadowName );
 		_qShareM	void	ReadMatrices();
 
-		_qShareM	virtual	void	SampleMap( const CqVector3D& R, const CqVector3D& swidth, const CqVector3D& twidth, float sblur, float tblur, float& val );
-		_qShareM	virtual	void	SampleMap( const CqVector3D& R1, const CqVector3D& R2, const CqVector3D& R3, const CqVector3D& R4, float sblur, float tblur, float& val );
-		_qShareM	virtual	void	SampleMap( const CqVector3D& R1, const CqVector3D& R2, const CqVector3D& R3, const CqVector3D& R4, float sblur, float tblur, float& val, float& depth );
+		_qShareM	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val );
+		_qShareM	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val );
+
+
+		_qShareM	virtual	void	SampleMap( const CqVector3D& R1, const CqVector3D& R2, const CqVector3D& R3, const CqVector3D& R4, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val, TqFloat& depth );
 
 	private:
 		static	TqInt	m_rand_index;			///< Static random number table index.

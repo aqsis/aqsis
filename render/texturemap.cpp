@@ -32,6 +32,8 @@
 #include	"rifile.h"
 #include	"exception.h"
 #include	"irenderer.h"
+#include	"random.h"
+#include	"version.h"
 
 #include	"renderer.h"
 
@@ -41,9 +43,9 @@ START_NAMESPACE( Aqsis )
 IqRenderer* QGetRenderContextI();
 
 
-static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, int* face );
-static void get_edge_intersection( CqVector3D* n1, CqVector3D* n2, int edge, CqVector3D* pt );
-static void project( int face );
+static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, TqInt* face );
+static void get_edge_intersection( CqVector3D* n1, CqVector3D* n2, TqInt edge, CqVector3D* pt );
+static void project( TqInt face );
 
 #define	max_no	30
 
@@ -70,7 +72,7 @@ static void project( int face );
 
 
 CqVector3D	cube[ max_no ];	// Stores the projection of the reflected beam onto the cube.
-int	cube_no; 		// Stores the number of points making up the projection.
+TqInt	cube_no; 		// Stores the number of points making up the projection.
 TqFloat	uv[ max_no ][ 2 ];	// Stores the values of this projection for a given face.
 
 TqInt	CqShadowMap::m_rand_index = 0;
@@ -85,14 +87,14 @@ std::vector<CqTextureMap*>	CqTextureMap::m_TextureMap_Cache;
 #undef ALLOCSEGMENTSTATUS
 
 #ifdef ALLOCSEGMENTSTATUS
-static int alloc_cnt = 0;
-static int free_cnt = 0;
+static TqInt alloc_cnt = 0;
+static TqInt free_cnt = 0;
 #endif 
 //---------------------------------------------------------------------
 /** Allocate a cache segment to hold the specified image tile.
  */
 
-unsigned char* CqTextureMapBuffer::AllocSegment( unsigned long width, unsigned long height, int samples )
+TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt samples )
 {
 	static TqInt limit = -1;
 	static TqInt report = 1;
@@ -121,7 +123,7 @@ unsigned char* CqTextureMapBuffer::AllocSegment( unsigned long width, unsigned l
 			// We need to zap the cache we are exceeding the required texturememory demand
 			// For now, we will just warn the user the texturememory's demand will exceed the
 			// request number.
-			char warnings[ 400 ];
+			TqChar warnings[ 400 ];
 
 			sprintf( warnings, "Exceeding the allocated texturememory by %d",
 			         more - limit );
@@ -135,14 +137,14 @@ unsigned char* CqTextureMapBuffer::AllocSegment( unsigned long width, unsigned l
 
 	// just do a malloc since the texturemapping will set individual member of the allocated buffer
 	// a calloc is wastefull operation in this case.
-	return ( static_cast<unsigned char*>( malloc( demand ) ) );
+	return ( static_cast<TqPuchar>( malloc( demand ) ) );
 }
 
 //---------------------------------------------------------------------
 /** Static array of cached texture maps.
  */
 
-void	CqTextureMapBuffer::FreeSegment( unsigned char* pBufferData, unsigned long width, unsigned long height, int samples )
+void	CqTextureMapBuffer::FreeSegment( TqPuchar pBufferData, TqUlong width, TqUlong height, TqInt samples )
 {
 	TqInt demand = ( width * height * samples );
 #ifdef ALLOCSEGMENTSTATUS
@@ -183,7 +185,7 @@ CqTextureMap::~CqTextureMap()
 #ifdef ALLOCSEGMENTSTATUS
 	{
 		// We count each allocation/free at the end they should match
-		char report[ 200 ];
+		TqChar report[ 200 ];
 
 		sprintf( report, "alloc/free %d %d\n Memory Usage %d", alloc_cnt, free_cnt, QGetRenderContext() ->Stats().GetTextureMemory() );
 		RiErrorPrint( 0, 1, report );
@@ -205,20 +207,20 @@ CqTextureMap::~CqTextureMap()
 
 TqInt CqTextureMap::Convert( CqString &strName )
 {
-	int result = 0;
-	int lenght = 0;
+	TqInt result = 0;
+	TqInt lenght = 0;
 
 	void *handle = NULL;
-	char * ( *function_pt ) ( char * ) = NULL;
-	char dynamiclibrary[ 1024 ];
-	char dynamicfunction[ 1024 ];
+	TqPchar ( *function_pt ) ( TqPchar ) = NULL;
+	TqChar dynamiclibrary[ 1024 ];
+	TqChar dynamicfunction[ 1024 ];
 	char *convert = NULL;
 	char *ext = NULL;
 	char *aqsis_home = getenv( "AQSIS_BASE_PATH" );
 
 	if ( aqsis_home == NULL ) return 0;
 
-	ext = ( char* ) strName.c_str();
+	ext = ( TqPchar ) strName.c_str();
 	if ( ext && *ext )
 		lenght = strlen( ext );
 
@@ -252,7 +254,7 @@ TqInt CqTextureMap::Convert( CqString &strName )
 		handle = LoadLibrary( dynamiclibrary );
 	if ( handle )
 	{
-		function_pt = ( char * ( * ) ( char * ) ) GetProcAddress( ( HINSTANCE ) handle, dynamicfunction );
+		function_pt = ( TqPchar ( * ) ( TqPchar ) ) GetProcAddress( ( HINSTANCE ) handle, dynamicfunction );
 	}
 #elif defined(AQSIS_SYSTEM_MACOSX)
 	// We probably need an interface for CFPlugins here
@@ -274,14 +276,14 @@ TqInt CqTextureMap::Convert( CqString &strName )
 		handle = dlopen( dynamiclibrary, RTLD_LAZY );
 	if ( handle )
 	{
-		function_pt = ( char * ( * ) ( char * ) ) dlsym( handle, dynamicfunction );
+		function_pt = ( TqPchar ( * ) ( TqPchar ) ) dlsym( handle, dynamicfunction );
 	}
 
 #endif
 
 	if ( function_pt )
 	{
-		convert = ( char * ) ( *function_pt ) ( ( char * ) strName.c_str() );
+		convert = ( TqPchar ) ( *function_pt ) ( ( TqPchar ) strName.c_str() );
 		if ( convert )
 		{
 			strName = convert;
@@ -310,9 +312,9 @@ TqInt CqTextureMap::Convert( CqString &strName )
 
 void CqTextureMap::Open()
 {
-	char swrap[ 80 ], twrap[ 80 ], filterfunc[ 80 ];
-	float swidth, twidth;
-	int wasconverted = 0;
+	TqChar swrap[ 80 ], twrap[ 80 ], filterfunc[ 80 ];
+	TqFloat swidth, twidth;
+	TqInt wasconverted = 0;
 
 	m_IsValid = TqFalse;
 
@@ -336,8 +338,8 @@ void CqTextureMap::Open()
 	m_pImage = TIFFOpen( strRealName.c_str(), "r" );
 	if ( m_pImage )
 	{
-		char * pFormat = 0;
-		char*pModes = 0;
+		TqPchar pFormat = 0;
+		TqPchar pModes = 0;
 
 		TIFFGetField( m_pImage, TIFFTAG_IMAGEWIDTH, &m_XRes );
 		TIFFGetField( m_pImage, TIFFTAG_IMAGELENGTH, &m_YRes );
@@ -459,7 +461,7 @@ void CqTextureMap::Close()
  * load it if possible..
  */
 
-CqTextureMap* CqTextureMap::GetTextureMap( const char* strName )
+CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 {
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -493,7 +495,7 @@ CqTextureMap* CqTextureMap::GetTextureMap( const char* strName )
  * load it if possible..
  */
 
-CqTextureMap* CqTextureMap::GetEnvironmentMap( const char* strName )
+CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 {
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -511,7 +513,7 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const char* strName )
 	m_TextureMap_Cache.push_back( pNew );
 	pNew->Open();
 
-	char* ptexfmt;
+	TqPchar ptexfmt;
 
 	// Invalid if the m_pImage is not there or it is not cube or latlong env. map file
 	if ( pNew->m_pImage == 0 ||
@@ -542,7 +544,7 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const char* strName )
  * load it if possible..
  */
 
-CqTextureMap* CqTextureMap::GetShadowMap( const char* strName )
+CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 {
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -560,7 +562,7 @@ CqTextureMap* CqTextureMap::GetShadowMap( const char* strName )
 	m_TextureMap_Cache.push_back( pNew );
 	pNew->Open();
 
-	char* ptexfmt;
+	TqPchar ptexfmt;
 	if ( pNew->m_pImage == 0 ||
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        strcmp( ptexfmt, SHADOWMAP_HEADER ) != 0 )
@@ -580,7 +582,7 @@ CqTextureMap* CqTextureMap::GetShadowMap( const char* strName )
  * load it if possible..
  */
 
-CqTextureMap* CqTextureMap::GetLatLongMap( const char* strName )
+CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 {
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -598,7 +600,7 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const char* strName )
 	m_TextureMap_Cache.push_back( pNew );
 	pNew->Open();
 
-	char* ptexfmt;
+	TqPchar ptexfmt;
 
 	// Invalid only if this is not a LatLong Env. map file
 	if ( pNew->m_pImage == 0 ||
@@ -620,7 +622,7 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const char* strName )
  * already cached.
  */
 
-CqTextureMapBuffer* CqTextureMap::GetBuffer( unsigned long s, unsigned long t, int directory )
+CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory )
 {
 	// Search already cached segments first.
 	for ( std::vector<CqTextureMapBuffer*>::iterator i = m_apSegments.begin(); i != m_apSegments.end(); i++ )
@@ -649,41 +651,41 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( unsigned long s, unsigned long t, i
 	if ( m_pImage )
 	{
 		uint32 tsx, tsy;
-		int ret = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
+		TqInt ret = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
 		TIFFGetField( m_pImage, TIFFTAG_TILELENGTH, &tsy );
 		// If a tiled image, read the appropriate tile.
 		if ( ret )
 		{
 			// Work out the coordinates of this tile.
-			unsigned long ox = ( s / tsx ) * tsx;
-			unsigned long oy = ( t / tsy ) * tsy;
+			TqUlong ox = ( s / tsx ) * tsx;
+			TqUlong oy = ( t / tsy ) * tsy;
 			if ( Type() == MapType_Shadow )
-				pTMB = new CqTextureMapBuffer( ox, oy, tsx, tsy, sizeof( float ) * m_SamplesPerPixel, directory );
+				pTMB = new CqTextureMapBuffer( ox, oy, tsx, tsy, sizeof( TqFloat ) * m_SamplesPerPixel, directory );
 			else
 				pTMB = new CqTextureMapBuffer( ox, oy, tsx, tsy, m_SamplesPerPixel, directory );
 
 			TIFFSetDirectory( m_pImage, directory );
 
-			unsigned char* pData = pTMB->pBufferData();
+			TqPuchar pData = pTMB->pBufferData();
 			TIFFReadTile( m_pImage, pData, s, t, 0, 0 );
 			m_apSegments.push_back( pTMB );
 		}
 		else
 		{
 			if ( Type() == MapType_Shadow )
-				pTMB = new CqTextureMapBuffer( 0, 0, sizeof( float ) * m_XRes, m_YRes, m_SamplesPerPixel, directory );
+				pTMB = new CqTextureMapBuffer( 0, 0, sizeof( TqFloat ) * m_XRes, m_YRes, m_SamplesPerPixel, directory );
 			else
 				pTMB = new CqTextureMapBuffer( 0, 0, m_XRes, m_YRes, m_SamplesPerPixel, directory );
 
 
 			TIFFSetDirectory( m_pImage, directory );
-			unsigned char* pdata = pTMB->pBufferData();
+			TqPuchar pdata = pTMB->pBufferData();
 			TqUint i;
 			for ( i = 0; i < m_YRes; i++ )
 			{
 				TIFFReadScanline( m_pImage, pdata, i );
 				if ( Type() == MapType_Shadow )
-					pdata += m_XRes * m_SamplesPerPixel * sizeof( float );
+					pdata += m_XRes * m_SamplesPerPixel * sizeof( TqFloat );
 				else
 					pdata += m_XRes * m_SamplesPerPixel;
 			}
@@ -700,9 +702,9 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( unsigned long s, unsigned long t, i
  **/
 void CqTextureMap::Interpreted( char *mode )
 {
-	char filter[ 80 ];
-	char smode[ 80 ];
-	char tmode[ 80 ];
+	TqChar filter[ 80 ];
+	TqChar smode[ 80 ];
+	TqChar tmode[ 80 ];
 
 	sscanf( mode, "%s %s %s %f %f", smode, tmode, filter, &m_swidth, &m_twidth );
 
@@ -816,9 +818,9 @@ void CqTextureMap::CreateMIPMAP()
 	{
 		uint32 * pImage = static_cast<uint32*>( _TIFFmalloc( m_XRes * m_YRes * sizeof( uint32 ) ) );
 		TIFFReadRGBAImage( m_pImage, m_XRes, m_YRes, pImage, 0 );
-		int m_xres = m_XRes;
-		int m_yres = m_YRes;
-		int directory = 0;
+		TqInt m_xres = m_XRes;
+		TqInt m_yres = m_YRes;
+		TqInt directory = 0;
 
 		do
 		{
@@ -828,7 +830,7 @@ void CqTextureMap::CreateMIPMAP()
 
 			if ( pTMB->pBufferData() != NULL )
 			{
-				unsigned char * pMIPMAP = pTMB->pBufferData();
+				TqPuchar pMIPMAP = pTMB->pBufferData();
 				long rowlen = m_xres * m_SamplesPerPixel;
 
 				if ( pImage != NULL )
@@ -871,11 +873,11 @@ void CqTextureMap::CreateMIPMAP()
 }
 
 
-void CqTextureMap::SampleMIPMAP( float s1, float t1, float swidth, float twidth, float sblur, float tblur,
-                                 std::valarray<float>& val )
+void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, TqFloat sblur, TqFloat tblur,
+                                 std::valarray<TqFloat>& val )
 {
 	// T(s2,t2)-T(s2,t1)-T(s1,t2)+T(s1,t1)
-	int i;
+	TqInt i;
 
 
 	if ( !IsValid() ) return ;
@@ -887,10 +889,10 @@ void CqTextureMap::SampleMIPMAP( float s1, float t1, float swidth, float twidth,
 	TqFloat ss2 = s1 + swidth;
 	TqFloat tt2 = t1 + twidth;
 
-	std::valarray<float> val1;
-	std::valarray<float> val2;
-	std::valarray<float> val3;
-	std::valarray<float> val4;
+	std::valarray<TqFloat> val1;
+	std::valarray<TqFloat> val2;
+	std::valarray<TqFloat> val3;
+	std::valarray<TqFloat> val4;
 	val1.resize( m_SamplesPerPixel );
 	val2.resize( m_SamplesPerPixel );
 	val3.resize( m_SamplesPerPixel );
@@ -979,7 +981,7 @@ void CqTextureMap::SampleMIPMAP( float s1, float t1, float swidth, float twidth,
 }
 
 
-void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<float>& val )
+void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<TqFloat>& val )
 {
 	// u/v is average of sample positions.
 	TqFloat u = ( ( u2 - u1 ) * 0.5f ) + u1;
@@ -1034,17 +1036,17 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 	iv -= pTMBa->tOrigin();
 	iv_n -= pTMBb->tOrigin();
 
-	TqUchar* mapa = pTMBa->pBufferData();
-	TqUchar* mapb = pTMBb->pBufferData();
-	TqUchar* mapc = pTMBc->pBufferData();
-	TqUchar* mapd = pTMBd->pBufferData();
+	TqPuchar mapa = pTMBa->pBufferData();
+	TqPuchar mapb = pTMBb->pBufferData();
+	TqPuchar mapc = pTMBc->pBufferData();
+	TqPuchar mapd = pTMBd->pBufferData();
 
 	iu *= m_SamplesPerPixel;
 	iu_n *= m_SamplesPerPixel;
 	iv *= rowlen;
 	iv_n *= rowlen;
 
-	std::valarray<float> low_colour;
+	std::valarray<TqFloat> low_colour;
 	low_colour.resize( m_SamplesPerPixel );
 
 	TqInt c;
@@ -1099,17 +1101,17 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		iv -= pTMBa->tOrigin();
 		iv_n -= pTMBb->tOrigin();
 
-		TqUchar* mapa = pTMBa->pBufferData();
-		TqUchar* mapb = pTMBb->pBufferData();
-		TqUchar* mapc = pTMBc->pBufferData();
-		TqUchar* mapd = pTMBd->pBufferData();
+		TqPuchar mapa = pTMBa->pBufferData();
+		TqPuchar mapb = pTMBb->pBufferData();
+		TqPuchar mapc = pTMBc->pBufferData();
+		TqPuchar mapd = pTMBd->pBufferData();
 
 		iu *= m_SamplesPerPixel;
 		iu_n *= m_SamplesPerPixel;
 		iv *= rowlen;
 		iv_n *= rowlen;
 
-		std::valarray<float> high_colour;
+		std::valarray<TqFloat> high_colour;
 		high_colour.resize( m_SamplesPerPixel );
 
 		TqInt c;
@@ -1136,23 +1138,23 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 /** Retrieve a sample from the MIP MAP over the area specified by the four vertices
  */
 
-void CqTextureMap::SampleMIPMAP( float s1, float t1, float s2, float t2, float s3, float t3, float s4, float t4,
-                                 float sblur, float tblur,
-                                 std::valarray<float>& val )
+void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
+                                 TqFloat sblur, TqFloat tblur,
+                                 std::valarray<TqFloat>& val )
 {
 	// Work out the width and height
-	float ss1, tt1, ss2, tt2;
+	TqFloat ss1, tt1, ss2, tt2;
 	ss1 = MIN( MIN( MIN( s1, s2 ), s3 ), s4 );
 	tt1 = MIN( MIN( MIN( t1, t2 ), t3 ), t4 );
 	ss2 = MAX( MAX( MAX( s1, s2 ), s3 ), s4 );
 	tt2 = MAX( MAX( MAX( t1, t2 ), t3 ), t4 );
 
-	float swidth = ss2 - ss1;
-	float twidth = tt2 - tt1;
+	TqFloat swidth = ss2 - ss1;
+	TqFloat twidth = tt2 - tt1;
 	ss1 = ss1 + ( swidth * 0.5f );
 	tt1 = tt1 + ( twidth * 0.5f );
 
-	SampleMIPMAP( ss1, tt1, swidth, twidth, sblur, tblur, val );
+	SampleMap( ss1, tt1, swidth, twidth, sblur, tblur, val );
 }
 
 
@@ -1162,8 +1164,8 @@ void CqTextureMap::SampleMIPMAP( float s1, float t1, float s2, float t2, float s
  * Filtering is done using swidth, twidth and nsamples.
  */
 
-void CqEnvironmentMap::SampleMIPMAP( CqVector3D& R1, CqVector3D& swidth, CqVector3D& twidth, float sblur, float tblur,
-                                     std::valarray<float>& val )
+void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur,
+                                     std::valarray<TqFloat>& val )
 {
 	if ( m_pImage != 0 )
 	{
@@ -1174,7 +1176,7 @@ void CqEnvironmentMap::SampleMIPMAP( CqVector3D& R1, CqVector3D& swidth, CqVecto
 			R3 = R1 + twidth;
 			R4 = R1 + swidth + twidth;
 
-			SampleMIPMAP( R1, R2, R3, R4, sblur, tblur, val );
+			SampleMap( R1, R2, R3, R4, sblur, tblur, val );
 		}
 		else if ( Type() == MapType_LatLong )
 		{
@@ -1188,7 +1190,7 @@ void CqEnvironmentMap::SampleMIPMAP( CqVector3D& R1, CqVector3D& swidth, CqVecto
 			ss1 = ss1 + 0.5; /* remaps to 0 -> 1 */
 			tt1 = acos( -V.z() ) / RI_PI;
 
-			CqTextureMap::SampleMIPMAP( ss1, tt1, sswidth, stwidth, sblur, tblur, val );
+			CqTextureMap::SampleMap( ss1, tt1, sswidth, stwidth, sblur, tblur, val );
 		}
 	}
 }
@@ -1198,16 +1200,16 @@ void CqEnvironmentMap::SampleMIPMAP( CqVector3D& R1, CqVector3D& swidth, CqVecto
 /** Retrieve a sample from the environment map using R as the reflection vector.
  */
 
-void CqEnvironmentMap::SampleMIPMAP( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, float sblur, float tblur,
-                                     std::valarray<float>& val )
+void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, TqFloat sblur, TqFloat tblur,
+                                     std::valarray<TqFloat>& val )
 {
 	if ( m_pImage != 0 )
 	{
 		CqVector3D	last_R, R, pt;
 		TqFloat	texture_area, total_area;
-		int	i, j;
-		int	projection_bit;		// Stores all the faces the reflected beam projects onto.
-		int	edge, last_face, current_face, project_face;
+		TqInt	i, j;
+		TqInt	projection_bit;		// Stores all the faces the reflected beam projects onto.
+		TqInt	edge, last_face, current_face, project_face;
 
 		CqVector3D	vertex_list[ 4 ] =
 		    {
@@ -1255,7 +1257,7 @@ void CqEnvironmentMap::SampleMIPMAP( CqVector3D& R1, CqVector3D& R2, CqVector3D&
 			last_R = R;
 		}
 
-		std::valarray<float>	run_val;
+		std::valarray<TqFloat>	run_val;
 		run_val.resize( m_SamplesPerPixel );
 		run_val = 0.0f;
 		val = 0.0f;
@@ -1269,7 +1271,7 @@ void CqEnvironmentMap::SampleMIPMAP( CqVector3D& R1, CqVector3D& R2, CqVector3D&
 			{
 				// Get the projection in UVSpace on the project_face
 				project( project_face );
-				float s1, t1, s2, t2;
+				TqFloat s1, t1, s2, t2;
 				s1 = s2 = uv[ 0 ][ 0 ];
 				t1 = t2 = uv[ 0 ][ 1 ];
 				texture_area = 0.0;
@@ -1311,7 +1313,7 @@ void CqEnvironmentMap::SampleMIPMAP( CqVector3D& R1, CqVector3D& R2, CqVector3D&
 }
 
 
-static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, int* face )
+static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, TqInt* face )
 {
 	CqVector3D n = *normal;
 	TqFloat t;
@@ -1396,7 +1398,7 @@ static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, int* face
 	}
 }
 
-static void get_edge_intersection( CqVector3D* n1, CqVector3D* n2, int edge, CqVector3D* pt )
+static void get_edge_intersection( CqVector3D* n1, CqVector3D* n2, TqInt edge, CqVector3D* pt )
 {
 	TqFloat a, b, c;
 	TqFloat x0, y0, z0, f, g, h;
@@ -1435,9 +1437,9 @@ static void get_edge_intersection( CqVector3D* n1, CqVector3D* n2, int edge, CqV
 }
 
 
-static void project( int face )
+static void project( TqInt face )
 {
-	int i;
+	TqInt i;
 	switch ( face )
 	{
 			case pz:
@@ -1502,7 +1504,7 @@ static void project( int face )
 /** Sample the shadow map data to see if the point vecPoint is in shadow.
  */
 
-void CqShadowMap::SampleMap( const CqVector3D& vecPoint, const CqVector3D& swidth, const CqVector3D& twidth, float sblur, float tblur, float& val )
+void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val )
 {
 	if ( m_pImage != 0 )
 	{
@@ -1517,11 +1519,11 @@ void CqShadowMap::SampleMap( const CqVector3D& vecPoint, const CqVector3D& swidt
 }
 
 
-void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const CqVector3D& R3, const CqVector3D& R4, float sblur, float tblur, float& val )
+void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val )
 {
-	float depth;
-	float previousdepth;
-	float coverage;
+	TqFloat depth;
+	TqFloat previousdepth;
+	std::valarray<TqFloat> coverage;
 
 	// get coverage and average depth
 	SampleMap( R1, R2, R3, R4, sblur, tblur, coverage, depth );
@@ -1529,8 +1531,8 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 
 	if ( sblur != 0 || tblur != 0 )
 	{
-		int maxiterations = 5; // cap the no of times we go round in case we get stuck in a loop
-		int iterations = 0;
+		TqInt maxiterations = 5; // cap the no of times we go round in case we get stuck in a loop
+		TqInt iterations = 0;
 		while ( depth != 0.0 && iterations < maxiterations )
 		{
 			// resize the filter
@@ -1552,15 +1554,17 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 	else
 	{
 		// get coverage and average depth again
-		SampleMap( R1, R2, R3, R4, sblur, tblur, val, depth );
+		//SampleMap( R1, R2, R3, R4, sblur, tblur, val, depth );
+		val = coverage;
 	}
 }
 
 
-void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const CqVector3D& R3, const CqVector3D& R4, float sblur, float tblur, float& val, float& depth )
+void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const CqVector3D& R3, const CqVector3D& R4, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val, TqFloat& depth )
 {
 	// If no map defined, not in shadow.
-	val = 0.0f;
+	val.resize( 1 );
+	val[0] = 0.0f;
 	depth = 0.0f;
 
 	CqVector3D	vecR1l, vecR2l, vecR3l, vecR4l;
@@ -1595,8 +1599,8 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 	TqFloat z4 = vecR4l.z();
 	TqFloat z = ( z1 + z2 + z3 + z4 ) * 0.25;
 
-	float sbo2 = ( sblur * 0.5f ) * m_XRes;
-	float tbo2 = ( tblur * 0.5f ) * m_YRes;
+	TqFloat sbo2 = ( sblur * 0.5f ) * m_XRes;
+	TqFloat tbo2 = ( tblur * 0.5f ) * m_YRes;
 
 	// If point is behind light, call it not in shadow.
 	//if(z1<0.0)	return;
@@ -1684,7 +1688,7 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 					iu -= pTMBa->sOrigin();
 					iv -= pTMBa->tOrigin();
 					TqInt rowlen = pTMBa->Width();
-					float *depths = ( float * ) pTMBa->pBufferData();
+					TqFloat *depths = ( TqFloat * ) pTMBa->pBufferData();
 					if ( z > depths[ ( iv * rowlen ) + iu ] )
 					{
 						inshadow += 1;
@@ -1697,10 +1701,10 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 		s = s + ds;
 	}
 
-	val = ( static_cast<TqFloat>( inshadow ) / ( ns * nt ) );
+	val[0] = ( static_cast<TqFloat>( inshadow ) / ( ns * nt ) );
 
 	// get the average depth of occluded samples
-	float lightdistance = MAX( MAX( MAX( vecR1l.Magnitude(), vecR2l.Magnitude() ), vecR3l.Magnitude() ), vecR4l.Magnitude() );
+	TqFloat lightdistance = MAX( MAX( MAX( vecR1l.Magnitude(), vecR2l.Magnitude() ), vecR3l.Magnitude() ), vecR4l.Magnitude() );
 	depth = ( depth / inshadow ) / lightdistance;
 }
 
@@ -1719,7 +1723,7 @@ void CqShadowMap::AllocateMap( TqInt XRes, TqInt YRes )
 
 	m_XRes = XRes;
 	m_YRes = YRes;
-	m_apSegments.push_back( new	CqTextureMapBuffer( 0, 0, sizeof( float ) * m_XRes, m_YRes, 1 ) );
+	m_apSegments.push_back( new	CqTextureMapBuffer( 0, 0, sizeof( TqFloat ) * m_XRes, m_YRes, 1 ) );
 
 	TqInt i;
 	for ( i = 0; i < 256; i++ )
@@ -1743,22 +1747,22 @@ void CqShadowMap::SaveZFile()
 			ofile << ZFILE_HEADER;
 
 			// Save the xres and yres.
-			ofile.write( reinterpret_cast<char* >( &m_XRes ), sizeof( m_XRes ) );
-			ofile.write( reinterpret_cast<char* >( &m_YRes ), sizeof( m_XRes ) );
+			ofile.write( reinterpret_cast<TqPchar >( &m_XRes ), sizeof( m_XRes ) );
+			ofile.write( reinterpret_cast<TqPchar >( &m_YRes ), sizeof( m_XRes ) );
 
 			// Save the transformation matrices.
-			ofile.write( reinterpret_cast<char*>( m_matWorldToCamera[ 0 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<char*>( m_matWorldToCamera[ 1 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<char*>( m_matWorldToCamera[ 2 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<char*>( m_matWorldToCamera[ 3 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 0 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 1 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 2 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 3 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
 
-			ofile.write( reinterpret_cast<char*>( m_matWorldToScreen[ 0 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<char*>( m_matWorldToScreen[ 1 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<char*>( m_matWorldToScreen[ 2 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<char*>( m_matWorldToScreen[ 3 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 0 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 1 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 2 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 3 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
 
 			// Now output the depth values
-			ofile.write( reinterpret_cast<char*>( m_apSegments[ 0 ] ->pBufferData() ), sizeof( float ) * ( m_XRes * m_YRes ) );
+			ofile.write( reinterpret_cast<TqPchar>( m_apSegments[ 0 ] ->pBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
 			ofile.close();
 		}
 	}
@@ -1779,9 +1783,9 @@ void CqShadowMap::LoadZFile()
 		if ( file != NULL )
 		{
 			// Save a file type and version marker
-			char * origHeader = ZFILE_HEADER;
-			int headerLength = strlen( ZFILE_HEADER );
-			char* strHeader = new char[ headerLength ];
+			TqPchar origHeader = ZFILE_HEADER;
+			TqInt headerLength = strlen( ZFILE_HEADER );
+			TqPchar strHeader = new TqChar[ headerLength ];
 			file.read( strHeader, headerLength );
 			// Check validity of shadow map.
 			if ( strncmp( strHeader, origHeader, headerLength ) != 0 )
@@ -1793,23 +1797,23 @@ void CqShadowMap::LoadZFile()
 			}
 
 			// Save the xres and yres.
-			file.read( reinterpret_cast<char* >( &m_XRes ), sizeof( m_XRes ) );
-			file.read( reinterpret_cast<char* >( &m_YRes ), sizeof( m_YRes ) );
+			file.read( reinterpret_cast<TqPchar >( &m_XRes ), sizeof( m_XRes ) );
+			file.read( reinterpret_cast<TqPchar >( &m_YRes ), sizeof( m_YRes ) );
 
 			// Save the transformation matrices.
-			file.read( reinterpret_cast<char*>( m_matWorldToCamera[ 0 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			file.read( reinterpret_cast<char*>( m_matWorldToCamera[ 1 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			file.read( reinterpret_cast<char*>( m_matWorldToCamera[ 2 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			file.read( reinterpret_cast<char*>( m_matWorldToCamera[ 3 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 0 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 1 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 2 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 3 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
 
-			file.read( reinterpret_cast<char*>( m_matWorldToScreen[ 0 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			file.read( reinterpret_cast<char*>( m_matWorldToScreen[ 1 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			file.read( reinterpret_cast<char*>( m_matWorldToScreen[ 2 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			file.read( reinterpret_cast<char*>( m_matWorldToScreen[ 3 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 0 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 1 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 2 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 3 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
 
 			// Now output the depth values
 			AllocateMap( m_XRes, m_YRes );
-			file.read( reinterpret_cast<char*>( m_apSegments[ 0 ] ->pBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
+			file.read( reinterpret_cast<TqPchar>( m_apSegments[ 0 ] ->pBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
 
 			// Set the matrixes to general, not Identity as default.
 			m_matWorldToCamera.SetfIdentity( TqFalse );
@@ -1829,21 +1833,21 @@ void CqShadowMap::LoadZFile()
 /** Save the shadowmap data in system specifirc image format.
  */
 
-void CqShadowMap::SaveShadowMap( const char* strShadowName )
+void CqShadowMap::SaveShadowMap( const CqString& strShadowName )
 {
-	char version[ 80 ];
+	TqChar version[ 80 ];
 
 	// Save the shadowmap to a binary file.
-	if ( m_strName != "" )
+	if ( m_strName.compare( "" ) != 0 )
 	{
 		if ( m_apSegments.size() != 0 )
 		{
-			TIFF * pshadow = TIFFOpen( strShadowName, "w" );
+			TIFF * pshadow = TIFFOpen( strShadowName.c_str(), "w" );
 			TIFFCreateDirectory( pshadow );
 
 			// Write the transform matrices.
-			float	matWorldToCamera[ 16 ];
-			float	matWorldToScreen[ 16 ];
+			TqFloat	matWorldToCamera[ 16 ];
+			TqFloat	matWorldToScreen[ 16 ];
 			TqInt r, c;
 			for ( r = 0; r < 4; r++ )
 			{
@@ -1865,7 +1869,7 @@ void CqShadowMap::SaveShadowMap( const char* strShadowName )
 			TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
 
 			// Write the floating point image to the directory.
-			float *depths = ( float * ) m_apSegments[ 0 ] ->pBufferData();
+			TqFloat *depths = ( TqFloat * ) m_apSegments[ 0 ] ->pBufferData();
 			WriteTileImage( pshadow, depths, XRes(), YRes(), 32, 32, 1 );
 			TIFFClose( pshadow );
 		}
@@ -1880,10 +1884,10 @@ void CqShadowMap::SaveShadowMap( const char* strShadowName )
 void CqShadowMap::ReadMatrices()
 {
 	// Read the transform matrices.
-	float * matWorldToCamera;
-	float*	matWorldToScreen;
-	int reta = TIFFGetField( m_pImage, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, &matWorldToCamera );
-	int retb = TIFFGetField( m_pImage, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, &matWorldToScreen );
+	TqFloat * matWorldToCamera;
+	TqFloat*	matWorldToScreen;
+	TqInt reta = TIFFGetField( m_pImage, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, &matWorldToCamera );
+	TqInt retb = TIFFGetField( m_pImage, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, &matWorldToScreen );
 	if ( !reta || !retb )
 		SetInvalid();
 	else
@@ -1906,13 +1910,13 @@ void CqShadowMap::ReadMatrices()
 
 //----------------------------------------------------------------------
 /** Write an image to an open TIFF file in the current directory as tiled storage.
- * as float values
+ * as TqFloat values
  */
 
-void CqTextureMap::WriteTileImage( TIFF* ptex, float *raster, unsigned long width, unsigned long length, unsigned long twidth, unsigned long tlength, int samples )
+void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples )
 {
 	//TIFFCreateDirectory(ptex);
-	char version[ 80 ];
+	TqChar version[ 80 ];
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 	sprintf( version, "%s %s", STRNAME, VERSION_STR );
 #else
@@ -1929,28 +1933,28 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, float *raster, unsigned long widt
 	TIFFSetField( ptex, TIFFTAG_TILELENGTH, tlength );
 	TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
 
-	int tsize = twidth * tlength;
-	int tperrow = ( width + twidth - 1 ) / twidth;
-	float* ptile = static_cast<float*>( _TIFFmalloc( tsize * samples * sizeof( float ) ) );
+	TqInt tsize = twidth * tlength;
+	TqInt tperrow = ( width + twidth - 1 ) / twidth;
+	TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * samples * sizeof( TqFloat ) ) );
 
 	if ( ptile != NULL )
 	{
-		int ctiles = tperrow * ( ( length + tlength - 1 ) / tlength );
-		int itile;
+		TqInt ctiles = tperrow * ( ( length + tlength - 1 ) / tlength );
+		TqInt itile;
 		for ( itile = 0; itile < ctiles; itile++ )
 		{
-			int x = ( itile % tperrow ) * twidth;
-			int y = ( itile / tperrow ) * tlength;
-			float* ptdata = raster + ( ( y * width ) + x ) * samples;
+			TqInt x = ( itile % tperrow ) * twidth;
+			TqInt y = ( itile / tperrow ) * tlength;
+			TqFloat* ptdata = raster + ( ( y * width ) + x ) * samples;
 			// Clear the tile to black.
-			memset( ptile, 0, tsize * samples * sizeof( float ) );
-			for ( unsigned long i = 0; i < tlength; i++ )
+			memset( ptile, 0, tsize * samples * sizeof( TqFloat ) );
+			for ( TqUlong i = 0; i < tlength; i++ )
 			{
-				for ( unsigned long j = 0; j < twidth; j++ )
+				for ( TqUlong j = 0; j < twidth; j++ )
 				{
 					if ( ( x + j ) < width && ( y + i ) < length )
 					{
-						int ii;
+						TqInt ii;
 						for ( ii = 0; ii < samples; ii++ )
 							ptile[ ( i * twidth * samples ) + ( ( ( j * samples ) + ii ) ) ] = ptdata[ ( ( j * samples ) + ii ) ];
 					}
@@ -1965,13 +1969,13 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, float *raster, unsigned long widt
 }
 //----------------------------------------------------------------------
 /** Write an image to an open TIFF file in the current directory as straight storage.
- * as float values
+ * as TqFloat values
  */
 
 
-void CqTextureMap::WriteImage( TIFF* ptex, float *raster, unsigned long width, unsigned long length, int samples )
+void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples )
 {
-	char version[ 80 ];
+	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
@@ -1991,8 +1995,8 @@ void CqTextureMap::WriteImage( TIFF* ptex, float *raster, unsigned long width, u
 	TIFFSetField( ptex, TIFFTAG_ROWSPERSTRIP, 1 );
 	TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 
-	float *pdata = raster;
-	for ( unsigned long i = 0; i < length; i++ )
+	TqFloat *pdata = raster;
+	for ( TqUlong i = 0; i < length; i++ )
 	{
 		TIFFWriteScanline( ptex, pdata, i );
 		pdata += ( width * samples );
@@ -2004,9 +2008,9 @@ void CqTextureMap::WriteImage( TIFF* ptex, float *raster, unsigned long width, u
  * as unsigned char values
  */
 
-void CqTextureMap::WriteTileImage( TIFF* ptex, unsigned char *raster, unsigned long width, unsigned long length, unsigned long twidth, unsigned long tlength, int samples )
+void CqTextureMap::WriteTileImage( TIFF* ptex, unsigned char *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples )
 {
-	char version[ 80 ];
+	TqChar version[ 80 ];
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 	sprintf( version, "%s %s", STRNAME, VERSION_STR );
 #else
@@ -2025,28 +2029,28 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, unsigned char *raster, unsigned l
 	TIFFSetField( ptex, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS );
 	TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 
-	int tsize = twidth * tlength;
-	int tperrow = ( width + twidth - 1 ) / twidth;
-	unsigned char * ptile = static_cast<unsigned char*>( _TIFFmalloc( tsize * samples ) );
+	TqInt tsize = twidth * tlength;
+	TqInt tperrow = ( width + twidth - 1 ) / twidth;
+	TqPuchar ptile = static_cast<TqPuchar>( _TIFFmalloc( tsize * samples ) );
 
 	if ( ptile != NULL )
 	{
-		int ctiles = tperrow * ( ( length + tlength - 1 ) / tlength );
-		int itile;
+		TqInt ctiles = tperrow * ( ( length + tlength - 1 ) / tlength );
+		TqInt itile;
 		for ( itile = 0; itile < ctiles; itile++ )
 		{
-			int x = ( itile % tperrow ) * twidth;
-			int y = ( itile / tperrow ) * tlength;
-			unsigned char* ptdata = raster + ( ( y * width ) + x ) * samples;
+			TqInt x = ( itile % tperrow ) * twidth;
+			TqInt y = ( itile / tperrow ) * tlength;
+			TqPuchar ptdata = raster + ( ( y * width ) + x ) * samples;
 			// Clear the tile to black.
 			memset( ptile, 0, tsize * samples );
-			for ( unsigned long i = 0; i < tlength; i++ )
+			for ( TqUlong i = 0; i < tlength; i++ )
 			{
-				for ( unsigned long j = 0; j < twidth; j++ )
+				for ( TqUlong j = 0; j < twidth; j++ )
 				{
 					if ( ( x + j ) < width && ( y + i ) < length )
 					{
-						int ii;
+						TqInt ii;
 						for ( ii = 0; ii < samples; ii++ )
 							ptile[ ( i * twidth * samples ) + ( ( ( j * samples ) + ii ) ) ] = ptdata[ ( ( j * samples ) + ii ) ];
 					}
@@ -2064,9 +2068,9 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, unsigned char *raster, unsigned l
  * as unsigned char values
  */
 
-void CqTextureMap::WriteImage( TIFF* ptex, unsigned char *raster, unsigned long width, unsigned long length, int samples )
+void CqTextureMap::WriteImage( TIFF* ptex, unsigned char *raster, TqUlong width, TqUlong length, TqInt samples )
 {
-	char version[ 80 ];
+	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
@@ -2086,7 +2090,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, unsigned char *raster, unsigned long 
 	TIFFSetField( ptex, TIFFTAG_ROWSPERSTRIP, 1 );
 
 	unsigned char *pdata = raster;
-	for ( unsigned long i = 0; i < length; i++ )
+	for ( TqUlong i = 0; i < length; i++ )
 	{
 		TIFFWriteScanline( ptex, pdata, i );
 		pdata += ( width * samples );
