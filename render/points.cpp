@@ -66,11 +66,22 @@ CqPoints::CqPoints(TqInt n, TqFloat *origins , TqFloat *sizes, TqFloat constantw
 		angle = 0.0;
 		pSurface->SetDefaultPrimitiveVariables();
 		pSurface->SetSurfaceParameters( *this );
-		pSurface->P()->SetSize( NBR_SEGMENTS );
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>("Cs") );
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>("Os") );
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>("P",0) );
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
+	    pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
+	    pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
+		
+	
 		pSurface->Cs()->SetSize( NBR_SEGMENTS );
 		pSurface->Os()->SetSize( NBR_SEGMENTS );
+		pSurface->P()->SetSize( NBR_SEGMENTS );
 		pSurface->s()->SetSize( NBR_SEGMENTS );
 		pSurface->t()->SetSize( NBR_SEGMENTS );
+		pSurface->u()->SetSize( NBR_SEGMENTS );
+		pSurface->v()->SetSize( NBR_SEGMENTS );
 		
 		
 
