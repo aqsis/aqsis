@@ -2545,10 +2545,12 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 
         // Grab the appropriate channel.
         TqFloat fchan = FLOAT( channel );
-        if ( fchan + 2 >= val.size() )
-            SETCOLOR( Result, CqColor( fill, fill, fill ) );
-        else
-            SETCOLOR( Result, CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ) );
+		CqColor colResult;
+        colResult.SetfRed( (fchan >= val.size())? fill : val[ static_cast<unsigned int>( fchan ) ] );
+        colResult.SetfGreen( ((fchan + 1) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+1 ) ] );
+        colResult.SetfBlue( ((fchan + 2) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+2 ) ] );
+
+		SETCOLOR( Result, colResult );
         END_VARYING_SECTION
     }
     else
@@ -2623,10 +2625,12 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOA
 
         // Grab the appropriate channel.
         TqFloat fchan = FLOAT( channel );
-        if ( fchan + 2 >= val.size() )
-            SETCOLOR( Result, CqColor( fill, fill, fill ) );
-        else
-            SETCOLOR( Result, CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ) );
+		CqColor colResult;
+        colResult.SetfRed( (fchan >= val.size())? fill : val[ static_cast<unsigned int>( fchan ) ] );
+        colResult.SetfGreen( ((fchan + 1) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+1 ) ] );
+        colResult.SetfBlue( ((fchan + 2) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+2 ) ] );
+
+		SETCOLOR( Result, colResult );
         END_VARYING_SECTION
     }
     else
@@ -2681,10 +2685,12 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOA
 
         // Grab the appropriate channel.
         TqFloat fchan = FLOAT( channel );
-        if ( fchan + 2 >= val.size() )
-            SETCOLOR( Result, CqColor( fill, fill, fill ) );
-        else
-            SETCOLOR( Result, CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ) );
+		CqColor colResult;
+        colResult.SetfRed( (fchan >= val.size())? fill : val[ static_cast<unsigned int>( fchan ) ] );
+        colResult.SetfGreen( ((fchan + 1) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+1 ) ] );
+        colResult.SetfBlue( ((fchan + 2) >= val.size())? fill : val[ static_cast<unsigned int>( fchan+2 ) ] );
+
+		SETCOLOR( Result, colResult );
         END_VARYING_SECTION
     }
     else
