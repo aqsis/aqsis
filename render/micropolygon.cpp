@@ -44,7 +44,7 @@ CqMemoryPool<CqMicroPolygonStatic>	CqMicroPolygonStatic::m_thePool;
 
 CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(), m_fNormals(TqFalse), m_cReferences(0)
 {
-	QGetRenderContext()->Stats().cGridsAllocated()++;
+	QGetRenderContext()->Stats().IncGridsAllocated();
 }
 
 
@@ -55,7 +55,7 @@ CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(), m_fNormals(TqFalse),
 CqMicroPolyGrid::~CqMicroPolyGrid()	
 {
 	assert(m_cReferences==0);
-	QGetRenderContext()->Stats().cGridsDeallocated()++;
+	QGetRenderContext()->Stats().IncGridsDeallocated();
 }
 
 //---------------------------------------------------------------------
@@ -64,7 +64,7 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
 
 CqMicroPolyGrid::CqMicroPolyGrid(TqInt cu, TqInt cv, CqSurface* pSurface) : m_fNormals(TqFalse), m_cReferences(0)
 {
-	QGetRenderContext()->Stats().cGridsAllocated()++;
+	QGetRenderContext()->Stats().IncGridsAllocated();
 	// Initialise the shader execution environment
 	Initialise(cu,cv,pSurface);
 }
@@ -215,8 +215,10 @@ void CqMicroPolyGrid::Shade()
 
 	if(pshadDisplacement!=0)
 	{
+		QGetRenderContext()->Stats().StartDisplacementTimer();
 		pshadDisplacement->Initialise(uGridRes(), vGridRes(), *this);
 		pshadDisplacement->Evaluate(*this);
+		QGetRenderContext()->Stats().StopDisplacementTimer();
 	}
 
 	// Now try and cull any hidden MPs if Sides==1
@@ -238,14 +240,18 @@ void CqMicroPolyGrid::Shade()
 	}
 
 	// Now shade the grid.
+	QGetRenderContext()->Stats().StartSurfaceTimer();
 	pshadSurface->Initialise(uGridRes(), vGridRes(), *this);
 	pshadSurface->Evaluate(*this);
+	QGetRenderContext()->Stats().StopSurfaceTimer();
 
 	// Now perform atmosphere shading
 	if(pshadAtmosphere!=0)
 	{
+		QGetRenderContext()->Stats().StartAtmosphereTimer();
 		pshadAtmosphere->Initialise(uGridRes(), vGridRes(), *this);
 		pshadAtmosphere->Evaluate(*this);
+		QGetRenderContext()->Stats().StopAtmosphereTimer();
 	}
 
 	// Delete unneeded variables so that we don't use up unnecessary memory
@@ -474,7 +480,7 @@ void CqMotionMicroPolyGrid::Split(CqImageBuffer* pImage, TqInt iBucket, long xmi
 
 CqMicroPolygonBase::CqMicroPolygonBase() : m_pGrid(0), m_RefCount(0)
 { 
-	QGetRenderContext()->Stats().cMPGsAllocated()++; 
+	QGetRenderContext()->Stats().IncMPGsAllocated(); 
 }
 
 
@@ -484,7 +490,7 @@ CqMicroPolygonBase::CqMicroPolygonBase() : m_pGrid(0), m_RefCount(0)
 
 CqMicroPolygonBase::CqMicroPolygonBase(const CqMicroPolygonBase& From)
 {
-	QGetRenderContext()->Stats().cMPGsAllocated()++;
+	QGetRenderContext()->Stats().IncMPGsAllocated();
 	*this=From;
 }
 
@@ -496,7 +502,7 @@ CqMicroPolygonBase::CqMicroPolygonBase(const CqMicroPolygonBase& From)
 CqMicroPolygonBase::~CqMicroPolygonBase()	
 {
 	if(m_pGrid)	m_pGrid->Release(); 
-	QGetRenderContext()->Stats().cMPGsDeallocated()++;
+	QGetRenderContext()->Stats().IncMPGsDeallocated();
 }
 
 
@@ -665,7 +671,7 @@ TqBool CqMicroPolygonMotion::Sample(CqVector2D& vecSample, TqFloat time, TqFloat
 	CqMicroPolygonStaticBase MP=GetMotionObjectInterpolated(time);
 	if(MP.fContains(vecSample, D))
 	{
-		QGetRenderContext()->Stats().cSampleHits()++;
+//		QGetRenderContext()->Stats().IncSampleHits();  This shouldn't be here, should it? [MB]
 		return(TqTrue);
 	}
 	else
