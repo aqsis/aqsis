@@ -887,7 +887,7 @@ RtFloat	RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
    if (x!=0.0)
    {
       x *= RI_PI;
-      x = cos(0.5*x) * sin(x)/x;
+      x = cos(0.5*x/xwidth) * sin(x)/x;
    }
    else
    {
@@ -896,7 +896,7 @@ RtFloat	RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
    if (y!=0.0)
    {
       y *= RI_PI;
-      y = cos(0.5*y) * sin(y)/y;
+      y = cos(0.5*y/ywidth) * sin(y)/y;
    }
    else
    {
