@@ -480,10 +480,10 @@ CqMicroPolyGridBase* CqSurface::Dice()
     CqParameter* pParam;
     if( ( pParam = FindUserParam("st") ) != NULL )
     {
-        if ( !isDONE( lDone, EnvVars_s ) && USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) )
-            pParam ->DiceOne( m_uDiceSize, m_vDiceSize, pGrid->s(), this, 0 );
-        if ( !isDONE( lDone, EnvVars_t ) && USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) )
-            pParam ->DiceOne( m_uDiceSize, m_vDiceSize, pGrid->t(), this, 1 );
+        if ( !isDONE( lDone, EnvVars_s ) && USES( lUses, EnvVars_s ) && ( NULL != pGrid->pVar(EnvVars_s) ) )
+            pParam ->DiceOne( m_uDiceSize, m_vDiceSize, pGrid->pVar(EnvVars_s), this, 0 );
+        if ( !isDONE( lDone, EnvVars_t ) && USES( lUses, EnvVars_t ) && ( NULL != pGrid->pVar(EnvVars_t) ) )
+            pParam ->DiceOne( m_uDiceSize, m_vDiceSize, pGrid->pVar(EnvVars_t), this, 1 );
         DONE( lDone, EnvVars_s);
         DONE( lDone, EnvVars_t);
     }
@@ -514,20 +514,20 @@ CqMicroPolyGridBase* CqSurface::Dice()
     }
 
     // Special case handlers for primitive variables that have defaults.
-    if ( !isDONE( lDone, EnvVars_Cs ) && USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) )
+    if ( !isDONE( lDone, EnvVars_Cs ) && USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->pVar(EnvVars_Cs) ) )
     {
         if ( NULL != pAttributes() ->GetColorAttribute( "System", "Color" ) )
-            pGrid->Cs() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
+            pGrid->pVar(EnvVars_Cs) ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
         else
-            pGrid->Cs() ->SetColor( CqColor( 1, 1, 1 ) );
+            pGrid->pVar(EnvVars_Cs) ->SetColor( CqColor( 1, 1, 1 ) );
     }
 
-    if ( !isDONE( lDone, EnvVars_Os ) && USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) )
+    if ( !isDONE( lDone, EnvVars_Os ) && USES( lUses, EnvVars_Os ) && ( NULL != pGrid->pVar(EnvVars_Os) ) )
     {
         if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
-            pGrid->Os() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
+            pGrid->pVar(EnvVars_Os) ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
         else
-            pGrid->Os() ->SetColor( CqColor( 1, 1, 1 ) );
+            pGrid->pVar(EnvVars_Os) ->SetColor( CqColor( 1, 1, 1 ) );
     }
 
     // If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
@@ -536,7 +536,7 @@ CqMicroPolyGridBase* CqSurface::Dice()
 
     if ( !isDONE( lDone, EnvVars_Ng ) && CanGenerateNormals() && USES( lUses, EnvVars_Ng ) )
     {
-        GenerateGeometricNormals( m_uDiceSize, m_vDiceSize, pGrid->Ng() );
+        GenerateGeometricNormals( m_uDiceSize, m_vDiceSize, pGrid->pVar(EnvVars_Ng) );
         pGrid->SetbGeometricNormals( TqTrue );
     }
 

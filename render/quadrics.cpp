@@ -98,7 +98,7 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
     CqParameterTyped<TqFloat, TqFloat>* pst = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(FindUserParam( "st" ));
 
     TqFloat s0,s1,s2,s3;
-    if( USES( lUses, EnvVars_s ) && NULL != pGrid->s() && bHasVar(EnvVars_s) )
+    if( USES( lUses, EnvVars_s ) && NULL != pGrid->pVar(EnvVars_s) && bHasVar(EnvVars_s) )
     {
         if( pst )
         {
@@ -119,7 +119,7 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
     }
 
     TqFloat t0,t1,t2,t3;
-    if( USES( lUses, EnvVars_t ) && NULL != pGrid->t() && bHasVar(EnvVars_t) )
+    if( USES( lUses, EnvVars_t ) && NULL != pGrid->pVar(EnvVars_t) && bHasVar(EnvVars_t) )
     {
         if( pst )
         {
@@ -140,7 +140,7 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
     }
 
     TqFloat u0,u1,u2,u3;
-    if( USES( lUses, EnvVars_u ) && NULL != pGrid->u() && bHasVar(EnvVars_u) )
+    if( USES( lUses, EnvVars_u ) && NULL != pGrid->pVar(EnvVars_u) && bHasVar(EnvVars_u) )
     {
         u0 = pu->pValue( 0 )[0];
         u1 = pu->pValue( 1 )[0];
@@ -151,7 +151,7 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
     }
 
     TqFloat v0,v1,v2,v3;
-    if( USES( lUses, EnvVars_v ) && NULL != pGrid->v() && bHasVar(EnvVars_v) )
+    if( USES( lUses, EnvVars_v ) && NULL != pGrid->pVar(EnvVars_v) && bHasVar(EnvVars_v) )
     {
         v0 = pv->pValue( 0 )[0];
         v1 = pv->pValue( 1 )[0];
@@ -161,9 +161,9 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
         DONE( lDone, EnvVars_v );
     }
 
-    if( USES( lUses, EnvVars_P ) && NULL != pGrid->P() )
+    if( USES( lUses, EnvVars_P ) && NULL != pGrid->pVar(EnvVars_P) )
         DONE( lDone, EnvVars_P );
-    if( USES( lUses, EnvVars_Ng ) && NULL != pGrid->Ng() )
+    if( USES( lUses, EnvVars_Ng ) && NULL != pGrid->pVar(EnvVars_Ng) )
     {
         DONE( lDone, EnvVars_Ng );
         pGrid->SetbGeometricNormals( TqTrue );
@@ -178,40 +178,40 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
         {
             TqFloat uf = u * du;
             TqInt igrid = ( v * ( uDiceSize() + 1 ) ) + u;
-            if( USES( lUses, EnvVars_P ) && NULL != pGrid->P() )
+            if( USES( lUses, EnvVars_P ) && NULL != pGrid->pVar(EnvVars_P) )
             {
-                if( USES( lUses, EnvVars_Ng ) && NULL != pGrid->Ng() )
+                if( USES( lUses, EnvVars_Ng ) && NULL != pGrid->pVar(EnvVars_Ng) )
                 {
                     P = DicePoint( u, v, N );
-                    pGrid->P()->SetPoint( m_matTx * P, igrid );
-                    pGrid->Ng()->SetNormal( m_matITTx * N, igrid );
+                    pGrid->pVar(EnvVars_P)->SetPoint( m_matTx * P, igrid );
+                    pGrid->pVar(EnvVars_Ng)->SetNormal( m_matITTx * N, igrid );
 
                 }
                 else
                 {
                     P = DicePoint( u, v );
-                    pGrid->P()->SetPoint( m_matTx * P, igrid );
+                    pGrid->pVar(EnvVars_P)->SetPoint( m_matTx * P, igrid );
                 }
             }
-            if( USES( lUses, EnvVars_s ) && NULL != pGrid->s() && bHasVar(EnvVars_s) )
+            if( USES( lUses, EnvVars_s ) && NULL != pGrid->pVar(EnvVars_s) && bHasVar(EnvVars_s) )
             {
                 TqFloat _s = BilinearEvaluate( s0, s1, s2, s3, uf, vf );
-                pGrid->s()->SetFloat( _s, igrid );
+                pGrid->pVar(EnvVars_s)->SetFloat( _s, igrid );
             }
-            if( USES( lUses, EnvVars_t ) && NULL != pGrid->t() && bHasVar(EnvVars_t) )
+            if( USES( lUses, EnvVars_t ) && NULL != pGrid->pVar(EnvVars_t) && bHasVar(EnvVars_t) )
             {
                 TqFloat _t = BilinearEvaluate( t0, t1, t2, t3, uf, vf );
-                pGrid->t()->SetFloat( _t, igrid );
+                pGrid->pVar(EnvVars_t)->SetFloat( _t, igrid );
             }
-            if( USES( lUses, EnvVars_u ) && NULL != pGrid->u() && bHasVar(EnvVars_u) )
+            if( USES( lUses, EnvVars_u ) && NULL != pGrid->pVar(EnvVars_u) && bHasVar(EnvVars_u) )
             {
                 TqFloat _u = BilinearEvaluate( u0, u1, u2, u3, uf, vf );
-                pGrid->u()->SetFloat( _u, igrid );
+                pGrid->pVar(EnvVars_u)->SetFloat( _u, igrid );
             }
-            if( USES( lUses, EnvVars_v ) && NULL != pGrid->v() && bHasVar(EnvVars_v) )
+            if( USES( lUses, EnvVars_v ) && NULL != pGrid->pVar(EnvVars_v) && bHasVar(EnvVars_v) )
             {
                 TqFloat _v = BilinearEvaluate( v0, v1, v2, v3, uf, vf );
-                pGrid->v()->SetFloat( _v, igrid );
+                pGrid->pVar(EnvVars_v)->SetFloat( _v, igrid );
             }
         }
     }

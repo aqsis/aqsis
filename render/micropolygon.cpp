@@ -46,9 +46,7 @@ DEFINE_STATIC_MEMORYPOOL( CqMovingMicroPolygonKey, 512 );
 CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(),
         m_bShadingNormals( TqFalse ),
         m_bGeometricNormals( TqFalse ),
-        m_pSurface( NULL ),
-        m_fTriangular( TqFalse )
-
+        m_pSurface( NULL )
 {
     STATS_INC( GRD_allocated );
 }
@@ -84,7 +82,6 @@ CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) :
         m_bShadingNormals( TqFalse ),
         m_bGeometricNormals( TqFalse ),
         m_pSurface( NULL ),
-        m_fTriangular( TqFalse ),
         m_pShaderExecEnv( new CqShaderExecEnv )
 {
     STATS_INC( GRD_created );
@@ -147,7 +144,7 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
 
 void CqMicroPolyGrid::CalcNormals()
 {
-    if ( NULL == P() || NULL == N() ) return ;
+    if ( NULL == pVar(EnvVars_P) || NULL == pVar(EnvVars_N) ) return ;
 
     // Get the handedness of the coordinate system (at the time of creation) and
     // the coordinate system specified, to check for normal flipping.
@@ -158,8 +155,8 @@ void CqMicroPolyGrid::CalcNormals()
     CqVector3D	vecFailsafeN;
 
     const CqVector3D* pP;
-    P() ->GetPointPtr( pP );
-    IqShaderData* pNg = Ng();
+    pVar(EnvVars_P) ->GetPointPtr( pP );
+    IqShaderData* pNg = pVar(EnvVars_Ng);
 
     // Calculate each normal from the top left, top right and bottom left points.
     register TqInt ur = uGridRes();
@@ -258,13 +255,11 @@ void CqMicroPolyGrid::Shade()
 {
     register TqInt i;
 
-
     // Sanity checks
-    if ( NULL == P() || NULL == I() ) return ;
+    if ( NULL == pVar(EnvVars_P) || NULL == pVar(EnvVars_I) ) return ;
 
     static CqVector3D	vecE( 0, 0, 0 );
     static CqVector3D	Defvec( 0, 0, 0 );
-
 
     CqStats& theStats = QGetRenderContext() ->Stats();
 
@@ -279,25 +274,25 @@ void CqMicroPolyGrid::Shade()
 
 
     const CqVector3D* pP;
-    P() ->GetPointPtr( pP );
+    pVar(EnvVars_P) ->GetPointPtr( pP );
     const CqColor* pOs = NULL;
-    if ( USES( lUses, EnvVars_Os ) ) Os() ->GetColorPtr( pOs );
+    if ( USES( lUses, EnvVars_Os ) ) pVar(EnvVars_Os) ->GetColorPtr( pOs );
     const CqColor* pCs = NULL;
-    if ( USES( lUses, EnvVars_Cs ) ) Cs() ->GetColorPtr( pCs );
-    IqShaderData* pI = I();
+    if ( USES( lUses, EnvVars_Cs ) ) pVar(EnvVars_Cs) ->GetColorPtr( pCs );
+    IqShaderData* pI = pVar(EnvVars_I);
     const CqVector3D* pN = NULL;
-    if ( USES( lUses, EnvVars_N ) ) N() ->GetNormalPtr( pN );
+    if ( USES( lUses, EnvVars_N ) ) pVar(EnvVars_N) ->GetNormalPtr( pN );
 
     // Calculate geometric normals if not specified by the surface.
     if ( !bGeometricNormals() && USES( lUses, EnvVars_Ng ) )
         CalcNormals();
 
     // If shading normals are not explicitly specified, they default to the geometric normal.
-    if ( !bShadingNormals() && USES( lUses, EnvVars_N ) && NULL != Ng() && NULL != N() )
-        N() ->SetValueFromVariable( Ng() );
+    if ( !bShadingNormals() && USES( lUses, EnvVars_N ) && NULL != pVar(EnvVars_Ng) && NULL != pVar(EnvVars_N) )
+        pVar(EnvVars_N) ->SetValueFromVariable( pVar(EnvVars_Ng) );
 
     // Setup uniform variables.
-    if ( USES( lUses, EnvVars_E ) ) E() ->SetVector( vecE );
+    if ( USES( lUses, EnvVars_E ) ) pVar(EnvVars_E) ->SetVector( vecE );
     if ( USES( lUses, EnvVars_du ) )
     {
         for ( i = gsmin1; i >= 0; i-- )
@@ -308,15 +303,15 @@ void CqMicroPolyGrid::Shade()
 
             if ( GridX < uRes )
             {
-                u() ->GetValue( v1, i + 1 );
-                u() ->GetValue( v2, i );
-                du() ->SetFloat( v1 - v2, i );
+                pVar(EnvVars_u) ->GetValue( v1, i + 1 );
+                pVar(EnvVars_u) ->GetValue( v2, i );
+                pVar(EnvVars_du) ->SetFloat( v1 - v2, i );
             }
             else
             {
-                u() ->GetValue( v1, i );
-                u() ->GetValue( v2, i - 1 );
-                du() ->SetFloat( v1 - v2, i );
+                pVar(EnvVars_u) ->GetValue( v1, i );
+                pVar(EnvVars_u) ->GetValue( v2, i - 1 );
+                pVar(EnvVars_du) ->SetFloat( v1 - v2, i );
             }
         }
     }
@@ -331,27 +326,27 @@ void CqMicroPolyGrid::Shade()
 
             if ( GridY < vRes )
             {
-                v() ->GetValue( v1, i + uRes + 1 );
-                v() ->GetValue( v2, i );
-                dv() ->SetFloat( v1 - v2, i );
+                pVar(EnvVars_v) ->GetValue( v1, i + uRes + 1 );
+                pVar(EnvVars_v) ->GetValue( v2, i );
+                pVar(EnvVars_dv) ->SetFloat( v1 - v2, i );
             }
             else
             {
-                v() ->GetValue( v1, i );
-                v() ->GetValue( v2, i - ( uRes + 1 ) );
-                dv() ->SetFloat( v1 - v2, i );
+                pVar(EnvVars_v) ->GetValue( v1, i );
+                pVar(EnvVars_v) ->GetValue( v2, i - ( uRes + 1 ) );
+                pVar(EnvVars_dv) ->SetFloat( v1 - v2, i );
             }
         }
     }
 
-    if ( USES( lUses, EnvVars_Ci ) ) Ci() ->SetColor( gColBlack );
-    if ( USES( lUses, EnvVars_Oi ) ) Oi() ->SetColor( gColWhite );
+    if ( USES( lUses, EnvVars_Ci ) ) pVar(EnvVars_Ci) ->SetColor( gColBlack );
+    if ( USES( lUses, EnvVars_Oi ) ) pVar(EnvVars_Oi) ->SetColor( gColWhite );
 
     // Setup varying variables.
     TqBool bdpu, bdpv;
     bdpu = ( USES( lUses, EnvVars_dPdu ) );
     bdpv = ( USES( lUses, EnvVars_dPdv ) );
-    IqShaderData * pSDP = P();
+    IqShaderData * pSDP = pVar(EnvVars_P);
 
     for ( i = gsmin1; i >= 0; i-- )
     {
@@ -359,11 +354,11 @@ void CqMicroPolyGrid::Shade()
 
         if ( bdpu )
         {
-            dPdu() ->SetVector( SO_DuType<CqVector3D>( pSDP, i, m_pShaderExecEnv.get(), Defvec ), i );
+            pVar(EnvVars_dPdu) ->SetVector( SO_DuType<CqVector3D>( pSDP, i, m_pShaderExecEnv.get(), Defvec ), i );
         }
         if ( bdpv )
         {
-            dPdv() ->SetVector( SO_DvType<CqVector3D>( pSDP, i, m_pShaderExecEnv.get(), Defvec ), i );
+            pVar(EnvVars_dPdv) ->SetVector( SO_DvType<CqVector3D>( pSDP, i, m_pShaderExecEnv.get(), Defvec ), i );
         }
     }
     // Now try and cull any transparent MPs
@@ -599,7 +594,7 @@ void CqMicroPolyGrid::DeleteVariables( TqBool all )
 
 void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )
 {
-    if ( NULL == P() )
+    if ( NULL == pVar(EnvVars_P) )
         return ;
 
 	QGetRenderContext() ->Stats().MakeProject().Start();
@@ -608,7 +603,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 
     // Transform the whole grid to hybrid camera/raster space
     CqVector3D* pP;
-    P() ->GetPointPtr( pP );
+    pVar(EnvVars_P) ->GetPointPtr( pP );
 
     // Get an array of P's for all time positions.
     std::vector<std::vector<CqVector3D> > aaPtimes;
@@ -639,6 +634,23 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
             aaPtimes[ iTime ][ i ] = matCameraToRaster * Point;
             aaPtimes[ iTime ][ i ].z( zdepth );
         }
+		SqTriangleSplitLine sl;
+		CqVector3D v0, v1, v2;
+		v0 = aaPtimes[ iTime ][ 0 ];
+		v1 = aaPtimes[ iTime ][ uGridRes() ];
+		v2 = aaPtimes[ iTime ][ vGridRes() * ( uGridRes() + 1 ) ];
+		// Check for clockwise, swap if not.
+		if( ( ( v1.x() - v0.x() ) * ( v2.y() - v0.y() ) - ( v1.y() - v0.y() ) * ( v2.x() - v0.x() ) ) >= 0 )
+		{
+			sl.m_TriangleSplitPoint1 = v1;
+			sl.m_TriangleSplitPoint2 = v2;
+		}
+		else
+		{
+			sl.m_TriangleSplitPoint1 = v2;
+			sl.m_TriangleSplitPoint2 = v1;
+		}
+		m_TriangleSplitLine.AddTimeSlot(pSurface()->pTransform()->Time( iTime ), sl ); 
     }
 
     for ( i = gsmin1; i >= 0; i-- )
@@ -650,6 +662,24 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
         aaPtimes[ 0 ][ i ].z( zdepth );
         pP[ i ] = aaPtimes[ 0 ][ i ];
     }
+
+	SqTriangleSplitLine sl;
+	CqVector3D v0, v1, v2;
+	v0 = aaPtimes[ 0 ][ 0 ];
+	v1 = aaPtimes[ 0 ][ uGridRes() ];
+	v2 = aaPtimes[ 0 ][ vGridRes() * ( uGridRes() + 1 ) ];
+	// Check for clockwise, swap if not.
+	if( ( ( v1.x() - v0.x() ) * ( v2.y() - v0.y() ) - ( v1.y() - v0.y() ) * ( v2.x() - v0.x() ) ) >= 0 )
+	{
+		sl.m_TriangleSplitPoint1 = v1;
+		sl.m_TriangleSplitPoint2 = v2;
+	}
+	else
+	{
+		sl.m_TriangleSplitPoint1 = v2;
+		sl.m_TriangleSplitPoint2 = v1;
+	}
+	m_TriangleSplitLine.AddTimeSlot(pSurface()->pTransform()->Time( 0 ), sl ); 
 
     QGetRenderContext() ->Stats().MakeProject().Stop();
 
@@ -664,7 +694,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
     TqBool bOutside = strTrimSense == "outside";
 
     // Determine whether we need to bother with trimming or not.
-    TqBool bCanBeTrimmed = pSurface() ->bCanBeTrimmed() && NULL != u() && NULL != v();
+    TqBool bCanBeTrimmed = pSurface() ->bCanBeTrimmed() && NULL != pVar(EnvVars_u) && NULL != pVar(EnvVars_v);
 
     ADDREF( this );
 
@@ -688,17 +718,17 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
             if ( bCanBeTrimmed )
             {
                 TqFloat fu, fv;
-                u() ->GetFloat( fu, iIndex );
-                v() ->GetFloat( fv, iIndex );
+                pVar(EnvVars_u) ->GetFloat( fu, iIndex );
+                pVar(EnvVars_v) ->GetFloat( fv, iIndex );
                 TqBool fTrimA = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-                u() ->GetFloat( fu, iIndex + 1 );
-                v() ->GetFloat( fv, iIndex + 1 );
+                pVar(EnvVars_u) ->GetFloat( fu, iIndex + 1 );
+                pVar(EnvVars_v) ->GetFloat( fv, iIndex + 1 );
                 TqBool fTrimB = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-                u() ->GetFloat( fu, iIndex + cu + 2 );
-                v() ->GetFloat( fv, iIndex + cu + 2 );
+                pVar(EnvVars_u) ->GetFloat( fu, iIndex + cu + 2 );
+                pVar(EnvVars_v) ->GetFloat( fv, iIndex + cu + 2 );
                 TqBool fTrimC = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-                u() ->GetFloat( fu, iIndex + cu + 1 );
-                v() ->GetFloat( fv, iIndex + cu + 1 );
+                pVar(EnvVars_u) ->GetFloat( fu, iIndex + cu + 1 );
+                pVar(EnvVars_v) ->GetFloat( fv, iIndex + cu + 1 );
                 TqBool fTrimD = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
 
                 if ( bOutside )
@@ -761,6 +791,15 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 }
 
 
+void CqMicroPolyGridBase::TriangleSplitPoints(CqVector3D& v1, CqVector3D& v2, TqFloat Time)
+{
+	// Workout where in the keyframe sequence the requested point is.
+	SqTriangleSplitLine sl = m_TriangleSplitLine.GetMotionObjectInterpolated( Time );
+	v1 = sl.m_TriangleSplitPoint1;
+	v2 = sl.m_TriangleSplitPoint2;
+}
+
+
 CqMotionMicroPolyGrid::~CqMotionMicroPolyGrid()
 {
 	TqInt iTime;
@@ -779,7 +818,7 @@ CqMotionMicroPolyGrid::~CqMotionMicroPolyGrid()
 
 void CqMotionMicroPolyGrid::Shade()
 {
-    CqMicroPolyGrid * pGrid = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) );
+	CqMicroPolyGrid * pGrid = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) );
     pGrid->Shade();
 }
 
@@ -834,7 +873,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
         // Transform the whole grid to hybrid camera/raster space
         CqMicroPolyGrid* pg = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
         CqVector3D* pP;
-        pg->P() ->GetPointPtr( pP );
+        pg->pVar(EnvVars_P) ->GetPointPtr( pP );
 
         for ( i = gsmin1; i >= 0; i-- )
         {
@@ -846,6 +885,23 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
             aaPtimes[ iTime ][ i ].z( zdepth );
             pP[ i ] = aaPtimes[ iTime ][ i ];
         }
+		SqTriangleSplitLine sl;
+		CqVector3D v0, v1, v2;
+		v0 = aaPtimes[ iTime ][ 0 ];
+		v1 = aaPtimes[ iTime ][ pGridA->uGridRes() ];
+		v2 = aaPtimes[ iTime ][ pGridA->vGridRes() * ( pGridA->uGridRes() + 1 ) ];
+		// Check for clockwise, swap if not.
+		if( ( ( v1.x() - v0.x() ) * ( v2.y() - v0.y() ) - ( v1.y() - v0.y() ) * ( v2.x() - v0.x() ) ) >= 0 )
+		{
+			sl.m_TriangleSplitPoint1 = v1;
+			sl.m_TriangleSplitPoint2 = v2;
+		}
+		else
+		{
+			sl.m_TriangleSplitPoint1 = v2;
+			sl.m_TriangleSplitPoint2 = v1;
+		}
+		m_TriangleSplitLine.AddTimeSlot(Time( iTime ), sl ); 
     }
 
     // Get the required trim curve sense, if specified, defaults to "inside".
@@ -855,7 +911,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
     TqBool bOutside = strTrimSense == "outside";
 
     // Determine whether we need to bother with trimming or not.
-    TqBool bCanBeTrimmed = pSurface() ->bCanBeTrimmed() && NULL != pGridA->u() && NULL != pGridA->v();
+    TqBool bCanBeTrimmed = pSurface() ->bCanBeTrimmed() && NULL != pGridA->pVar(EnvVars_u) && NULL != pGridA->pVar(EnvVars_v);
 
     TqInt iv;
     for ( iv = 0; iv < cv; iv++ )
@@ -877,17 +933,17 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
             if ( bCanBeTrimmed )
             {
                 TqFloat fu, fv;
-                pGridA->u() ->GetFloat( fu, iIndex );
-                pGridA->v() ->GetFloat( fv, iIndex );
+                pGridA->pVar(EnvVars_u) ->GetFloat( fu, iIndex );
+                pGridA->pVar(EnvVars_v) ->GetFloat( fv, iIndex );
                 TqBool fTrimA = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-                pGridA->u() ->GetFloat( fu, iIndex + 1 );
-                pGridA->v() ->GetFloat( fv, iIndex + 1 );
+                pGridA->pVar(EnvVars_u) ->GetFloat( fu, iIndex + 1 );
+                pGridA->pVar(EnvVars_v) ->GetFloat( fv, iIndex + 1 );
                 TqBool fTrimB = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-                pGridA->u() ->GetFloat( fu, iIndex + cu + 2 );
-                pGridA->v() ->GetFloat( fv, iIndex + cu + 2 );
+                pGridA->pVar(EnvVars_u) ->GetFloat( fu, iIndex + cu + 2 );
+                pGridA->pVar(EnvVars_v) ->GetFloat( fv, iIndex + cu + 2 );
                 TqBool fTrimC = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-                pGridA->u() ->GetFloat( fu, iIndex + cu + 1 );
-                pGridA->v() ->GetFloat( fv, iIndex + cu + 1 );
+                pGridA->pVar(EnvVars_u) ->GetFloat( fu, iIndex + cu + 1 );
+                pGridA->pVar(EnvVars_v) ->GetFloat( fv, iIndex + cu + 1 );
                 TqBool fTrimD = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
 
                 if ( bOutside )
@@ -909,8 +965,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
             }
 
             CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion();
-            pNew->SetGrid( pGridA );
-            pNew->SetMotionGrid( this );
+            pNew->SetGrid( this );
             pNew->SetIndex( iIndex );
             for ( iTime = 0; iTime < cTimes(); iTime++ )
                 pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], Time( iTime ) );
@@ -981,7 +1036,7 @@ void CqMicroPolygon::Initialise()
     TqShort CodeD = 3;
 
     const CqVector3D* pP;
-    m_pGrid->P() ->GetPointPtr( pP );
+    m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
     if ( ( pP[ IndexA ] - pP[ IndexB ] ).Magnitude2() < 1e-8 )
     {
         // A--B is degenerate
@@ -1160,20 +1215,20 @@ TqBool CqMicroPolygon::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat 
 
             TqFloat u, v;
 
-            pGrid() ->u() ->GetFloat( u, m_Index );
-            pGrid() ->v() ->GetFloat( v, m_Index );
+            pGrid() ->pVar(EnvVars_u) ->GetFloat( u, m_Index );
+            pGrid() ->pVar(EnvVars_v) ->GetFloat( v, m_Index );
             CqVector2D uvA( u, v );
 
-            pGrid() ->u() ->GetFloat( u, m_Index + 1 );
-            pGrid() ->v() ->GetFloat( v, m_Index + 1 );
+            pGrid() ->pVar(EnvVars_u) ->GetFloat( u, m_Index + 1 );
+            pGrid() ->pVar(EnvVars_v) ->GetFloat( v, m_Index + 1 );
             CqVector2D uvB( u, v );
 
-            pGrid() ->u() ->GetFloat( u, m_Index + pGrid() ->uGridRes() + 1 );
-            pGrid() ->v() ->GetFloat( v, m_Index + pGrid() ->uGridRes() + 1 );
+            pGrid() ->pVar(EnvVars_u) ->GetFloat( u, m_Index + pGrid() ->uGridRes() + 1 );
+            pGrid() ->pVar(EnvVars_v) ->GetFloat( v, m_Index + pGrid() ->uGridRes() + 1 );
             CqVector2D uvC( u, v );
 
-            pGrid() ->u() ->GetFloat( u, m_Index + pGrid() ->uGridRes() + 2 );
-            pGrid() ->v() ->GetFloat( v, m_Index + pGrid() ->uGridRes() + 2 );
+            pGrid() ->pVar(EnvVars_u) ->GetFloat( u, m_Index + pGrid() ->uGridRes() + 2 );
+            pGrid() ->pVar(EnvVars_v) ->GetFloat( v, m_Index + pGrid() ->uGridRes() + 2 );
             CqVector2D uvD( u, v );
 
             CqVector2D vR = BilinearEvaluate( uvA, uvB, uvC, uvD, vecUV.x(), vecUV.y() );
@@ -1187,29 +1242,16 @@ TqBool CqMicroPolygon::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat 
 
         if ( pGrid() ->fTriangular() )
         {
-            CqVector3D vO;
-            pGrid() ->P() ->GetPoint( vO, 0 );
-            CqVector3D vA;
-            pGrid() ->P() ->GetPoint( vA, pGrid() ->uGridRes() );
-            CqVector3D vB;
-            pGrid() ->P() ->GetPoint( vB, pGrid() ->vGridRes() * ( pGrid() ->uGridRes() + 1 ) );
-
-            TqBool clockwise;
-            CqVector3D E1 = vA - vO;
-            CqVector3D E2 = vB - vO;
-            if ( ( E1.x() * E2.y() - E1.y() * E2.x() ) >= 0 ) clockwise = TqTrue;
-            else	clockwise = TqFalse;
-
-
+            CqVector3D vA, vB;
+			pGrid()->TriangleSplitPoints( vA, vB, time );
             TqFloat Ax = vA.x();
             TqFloat Ay = vA.y();
             TqFloat Bx = vB.x();
             TqFloat By = vB.y();
 
             TqFloat v = ( Ay - By ) * vecSample.x() + ( Bx - Ax ) * vecSample.y() + ( Ax * By - Bx * Ay );
-            if ( ( ( clockwise ) && ( v <= 0 ) ) || ( ( !clockwise ) && ( v >= 0 ) ) )
+            if ( v <= 0 )
                 return ( TqFalse );
-
         }
 
         return ( TqTrue );
@@ -1225,7 +1267,7 @@ TqBool CqMicroPolygon::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat 
 CqBound CqMicroPolygon::GetTotalBound( TqBool fForce )
 {
     CqVector3D * pP;
-    m_pGrid->P() ->GetPointPtr( pP );
+    m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
     if ( fForce )
     {
         // Calculate the boundary, and store the indexes in the cache.
@@ -1411,65 +1453,15 @@ TqBool CqMicroPolygonMotion::Sample( const CqVector2D& vecSample, TqFloat& D, Tq
 
         if ( pGrid() ->fTriangular() )
         {
-			TqInt iIndex = 0;
-			TqFloat Fraction = 0.0f;
-			TqBool Exact = TqTrue;
-
-			if ( time > m_Times.front() )
-			{
-				if ( time >= m_Times.back() )
-					iIndex = m_Times.size() - 1;
-				else
-				{
-					// Find the appropriate time span.
-					iIndex = 0;
-					while ( time >= m_Times[ iIndex + 1 ] )
-						iIndex += 1;
-					Fraction = ( time - m_Times[ iIndex ] ) / ( m_Times[ iIndex + 1 ] - m_Times[ iIndex ] );
-					Exact = ( m_Times[ iIndex ] == time );
-				}
-			}
-
-			CqMotionMicroPolyGrid* pG = pMotionGrid();
-			CqVector3D vO, vA, vB;
-			if ( Exact )
-			{
-				CqMicroPolyGrid * pGridA = static_cast<CqMicroPolyGrid*>( pG->GetMotionObject( iIndex ) );
-				pGridA->P()->GetPoint( vO, 0 );
-				pGridA->P()->GetPoint( vA, pGrid() ->uGridRes() );
-				pGridA->P()->GetPoint( vB, pGrid() ->vGridRes() * ( pGrid() ->uGridRes() + 1 ) );
-			}
-			else
-			{
-				TqFloat F1 = 1.0f - Fraction;
-				CqMicroPolyGrid * pGridA = static_cast<CqMicroPolyGrid*>( pG->GetMotionObject( iIndex ) );
-				CqMicroPolyGrid * pGridB = static_cast<CqMicroPolyGrid*>( pG->GetMotionObject( iIndex + 1) );
-				CqVector3D vO1, vA1, vB1;
-				CqVector3D vO2, vA2, vB2;
-				pGridA->P()->GetPoint( vO1, 0 );
-				pGridA->P()->GetPoint( vA1, pGrid() ->uGridRes() );
-				pGridA->P()->GetPoint( vB1, pGrid() ->vGridRes() * ( pGrid() ->uGridRes() + 1 ) );
-				pGridB->P()->GetPoint( vO2, 0 );
-				pGridB->P()->GetPoint( vA2, pGrid() ->uGridRes() );
-				pGridB->P()->GetPoint( vB2, pGrid() ->vGridRes() * ( pGrid() ->uGridRes() + 1 ) );
-				vO = ( F1 * vO1 ) + ( Fraction * vO2 );
-				vA = ( F1 * vA1 ) + ( Fraction * vA2 );
-				vB = ( F1 * vB1 ) + ( Fraction * vB2 );
-			}
-			TqBool clockwise;
-			CqVector3D E1 = vA - vO;
-			CqVector3D E2 = vB - vO;
-			if ( ( E1.x() * E2.y() - E1.y() * E2.x() ) >= 0 ) clockwise = TqTrue;
-			else	clockwise = TqFalse;
-
-
+			CqVector3D vA, vB;
+			pGrid()->TriangleSplitPoints( vA, vB, time );
 			TqFloat Ax = vA.x();
 			TqFloat Ay = vA.y();
 			TqFloat Bx = vB.x();
 			TqFloat By = vB.y();
 
 			TqFloat v = ( Ay - By ) * vecSample.x() + ( Bx - Ax ) * vecSample.y() + ( Ax * By - Bx * Ay );
-			if ( ( ( clockwise ) && ( v <= 0 ) ) || ( ( !clockwise ) && ( v >= 0 ) ) )
+			if( v <= 0 )
 				return ( TqFalse );
         }
         return ( TqTrue );

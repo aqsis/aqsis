@@ -1033,17 +1033,17 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
         if ( USES( lUses, EnvVars_Cs ) && !pTopology()->pPoints()->bHasVar(EnvVars_Cs) )
         {
             if ( NULL != pAttributes() ->GetColorAttribute( "System", "Color" ) )
-                pGrid->Cs() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
+                pGrid->pVar(EnvVars_Cs) ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
             else
-                pGrid->Cs() ->SetColor( CqColor( 1, 1, 1 ) );
+                pGrid->pVar(EnvVars_Cs) ->SetColor( CqColor( 1, 1, 1 ) );
         }
 
         if ( USES( lUses, EnvVars_Os ) && !pTopology()->pPoints()->bHasVar(EnvVars_Os) )
         {
             if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
-                pGrid->Os() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
+                pGrid->pVar(EnvVars_Os) ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
             else
-                pGrid->Os() ->SetColor( CqColor( 1, 1, 1 ) );
+                pGrid->pVar(EnvVars_Os) ->SetColor( CqColor( 1, 1, 1 ) );
         }
         apGrids.push_back( pGrid );
 
@@ -1058,7 +1058,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
                 {
                     TqFloat u = ( 1.0f / ( dicesize + 1 ) ) * iu;
                     TqInt igrid = ( iv * ( dicesize + 1 ) ) + iu;
-                    pGrid->u()->SetFloat( BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u, v ), igrid );
+                    pGrid->pVar(EnvVars_u)->SetFloat( BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u, v ), igrid );
                 }
             }
         }
@@ -1073,7 +1073,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
                 {
                     TqFloat u = ( 1.0f / ( dicesize + 1 ) ) * iu;
                     TqInt igrid = ( iv * ( dicesize + 1 ) ) + iu;
-                    pGrid->v()->SetFloat( BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u, v ), igrid );
+                    pGrid->pVar(EnvVars_v)->SetFloat( BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u, v ), igrid );
                 }
             }
         }
@@ -1081,12 +1081,12 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
         // Fill in s/t if required.
         if ( USES( lUses, EnvVars_s ) && !pTopology()->pPoints()->bHasVar(EnvVars_s) )
         {
-            pGrid->s()->SetValueFromVariable( pGrid->u() );
+            pGrid->pVar(EnvVars_s)->SetValueFromVariable( pGrid->pVar(EnvVars_u) );
         }
 
         if ( USES( lUses, EnvVars_t ) && !pTopology()->pPoints()->bHasVar(EnvVars_t) )
         {
-            pGrid->t()->SetValueFromVariable( pGrid->v() );
+            pGrid->pVar(EnvVars_t)->SetValueFromVariable( pGrid->pVar(EnvVars_v) );
         }
     }
 
@@ -1178,30 +1178,30 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoin
     TqInt lUses = Uses();
 
     if ( USES( lUses, EnvVars_P ) )
-        pGrid->P() ->SetPoint( pPoints->P()->pValue( iParam )[0], iData );
+        pGrid->pVar(EnvVars_P) ->SetPoint( pPoints->P()->pValue( iParam )[0], iData );
 
-    if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) )
+    if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->pVar(EnvVars_s) ) )
     {
         if( pPoints->bHasVar(EnvVars_s) )
-            pGrid->s() ->SetFloat( pPoints->s()->pValue( iParam )[0], iData );
+            pGrid->pVar(EnvVars_s) ->SetFloat( pPoints->s()->pValue( iParam )[0], iData );
     }
 
-    if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) )
+    if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->pVar(EnvVars_t) ) )
     {
         if( pPoints->bHasVar(EnvVars_t) )
-            pGrid->t() ->SetFloat( pPoints->t()->pValue( iParam )[0], iData );
+            pGrid->pVar(EnvVars_t) ->SetFloat( pPoints->t()->pValue( iParam )[0], iData );
     }
 
-    if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) && ( pPoints->bHasVar(EnvVars_Cs) ) )
+    if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->pVar(EnvVars_Cs) ) && ( pPoints->bHasVar(EnvVars_Cs) ) )
     {
         if( pPoints->Cs()->Class() == class_varying || pPoints->Cs()->Class() == class_vertex )
-            pGrid->Cs() ->SetColor( pPoints->Cs()->pValue(iParam)[0], iData );
+            pGrid->pVar(EnvVars_Cs) ->SetColor( pPoints->Cs()->pValue(iParam)[0], iData );
         else if( pPoints->Cs()->Class() == class_facevarying )
-            pGrid->Cs() ->SetColor( pPoints->Cs()->pValue(iFVParam)[0], iData );
+            pGrid->pVar(EnvVars_Cs) ->SetColor( pPoints->Cs()->pValue(iFVParam)[0], iData );
     }
 
-    if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) && ( pPoints->bHasVar(EnvVars_Os) ) )
-        pGrid->Os() ->SetColor( pPoints->Os()->pValue(iParam)[0], iData );
+    if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->pVar(EnvVars_Os) ) && ( pPoints->bHasVar(EnvVars_Os) ) )
+        pGrid->pVar(EnvVars_Os) ->SetColor( pPoints->Os()->pValue(iParam)[0], iData );
 
     // Now lets store the diced user specified primitive variables.
     std::vector<CqParameter*>::iterator iUP;

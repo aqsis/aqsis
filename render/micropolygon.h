@@ -58,7 +58,7 @@ class CqSurface;
 class CqMicroPolyGridBase : public CqRefCount
 {
 public:
-    CqMicroPolyGridBase() : m_fCulled( TqFalse )
+    CqMicroPolyGridBase() : m_fCulled( TqFalse ), m_fTriangular( TqFalse )
     {}
     virtual	~CqMicroPolyGridBase()
     {}
@@ -91,9 +91,57 @@ public:
     {
         return m_fCulled;
     }
+    /** Query whether this grid is being rendered as a triangle.
+     */
+    virtual TqBool fTriangular() const
+    {
+        return ( m_fTriangular );
+    }
+    /** Set this grid as being rendered as a triangle or not.
+     */
+    virtual void SetfTriangular( TqBool fTriangular )
+    {
+        m_fTriangular = fTriangular;
+    }
+    virtual	TqInt	uGridRes() const = 0;
+    virtual	TqInt	vGridRes() const = 0;
+    virtual	TqInt	GridSize() const = 0;
+    virtual IqShaderData* pVar(TqInt index) = 0;
+	/** Get the points of the triangle split line if this grid represents a triangle.
+	 */
+	virtual void	TriangleSplitPoints(CqVector3D& v1, CqVector3D& v2, TqFloat Time = 0);
+
+	struct SqTriangleSplitLine
+	{	
+		CqVector3D	m_TriangleSplitPoint1, m_TriangleSplitPoint2;
+	};
+	class CqTriangleSplitLine : public CqMotionSpec<SqTriangleSplitLine>
+	{
+		public:
+		CqTriangleSplitLine( const SqTriangleSplitLine& def = SqTriangleSplitLine() ) : CqMotionSpec<SqTriangleSplitLine>( def )
+		{
+		}
+
+		virtual	void	ClearMotionObject( SqTriangleSplitLine& A ) const
+		{}
+		virtual	SqTriangleSplitLine	ConcatMotionObjects( const SqTriangleSplitLine& A, const SqTriangleSplitLine& B ) const
+		{
+			return( A );
+		}
+		virtual	SqTriangleSplitLine	LinearInterpolateMotionObjects( TqFloat Fraction, const SqTriangleSplitLine& A, const SqTriangleSplitLine& B ) const
+		{
+			SqTriangleSplitLine sl;
+			sl.m_TriangleSplitPoint1 = ( ( 1.0f - Fraction ) * A.m_TriangleSplitPoint1 ) + ( Fraction * B.m_TriangleSplitPoint1 );
+			sl.m_TriangleSplitPoint2 = ( ( 1.0f - Fraction ) * A.m_TriangleSplitPoint2 ) + ( Fraction * B.m_TriangleSplitPoint2 );
+			return( sl );
+		}
+	};
+    virtual	IqShaderData* FindStandardVar( const char* pname ) = 0;
 
 public:
     TqBool m_fCulled; ///< Boolean indicating the entire grid is culled.
+	CqTriangleSplitLine	m_TriangleSplitLine;	///< Two endpoints of the line that is used to turn the quad into a triangle at sample time.
+    TqBool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
 };
 
 
@@ -139,18 +187,6 @@ public:
     TqBool bGeometricNormals() const
     {
         return ( m_bGeometricNormals );
-    }
-    /** Query whether this grid is being rendered as a triangle.
-     */
-    TqBool fTriangular() const
-    {
-        return ( m_fTriangular );
-    }
-    /** Set this grid as being rendered as a triangle or not.
-     */
-    void SetfTriangular( TqBool fTriangular )
-    {
-        m_fTriangular = fTriangular;
     }
 
     /** Get a reference to the bitvector representing the culled status of each u-poly in this grid.
@@ -209,106 +245,6 @@ public:
     {
         assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->matObjectToWorld() );
     }
-    virtual	IqShaderData* Cs()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->Cs() );
-    }
-    virtual	IqShaderData* Os()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->Os() );
-    }
-    virtual	IqShaderData* Ng()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ng() );
-    }
-    virtual	IqShaderData* du()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->du() );
-    }
-    virtual	IqShaderData* dv()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->dv() );
-    }
-    virtual	IqShaderData* L()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->L() );
-    }
-    virtual	IqShaderData* Cl()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->Cl() );
-    }
-    virtual IqShaderData* Ol()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ol() );
-    }
-    virtual IqShaderData* P()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->P() );
-    }
-    virtual IqShaderData* dPdu()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->dPdu() );
-    }
-    virtual IqShaderData* dPdv()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->dPdv() );
-    }
-    virtual IqShaderData* N()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->N() );
-    }
-    virtual IqShaderData* u()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->u() );
-    }
-    virtual IqShaderData* v()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->v() );
-    }
-    virtual IqShaderData* s()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->s() );
-    }
-    virtual IqShaderData* t()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->t() );
-    }
-    virtual IqShaderData* I()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->I() );
-    }
-    virtual IqShaderData* Ci()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ci() );
-    }
-    virtual IqShaderData* Oi()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->Oi() );
-    }
-    virtual IqShaderData* Ps()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ps() );
-    }
-    virtual IqShaderData* E()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->E() );
-    }
-    virtual IqShaderData* ncomps()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->ncomps() );
-    }
-    virtual IqShaderData* time()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->time() );
-    }
-    virtual IqShaderData* alpha()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->alpha() );
-    }
-    virtual IqShaderData* Ns()
-    {
-        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ns() );
-    }
     virtual IqShaderData* pVar(TqInt index)
     {
         assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->pVar(index) );
@@ -331,13 +267,11 @@ public:
         return( pVar );
     }
 
-
 private:
     TqBool	m_bShadingNormals;		///< Flag indicating shading normals have been filled in and don't need to be calculated during shading.
     TqBool	m_bGeometricNormals;	///< Flag indicating geometric normals have been filled in and don't need to be calculated during shading.
     CqSurface* m_pSurface;	///< Pointer to the attributes for this grid.
     boost::shared_ptr<CqCSGTreeNode> m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
-    TqBool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
     CqBitVector	m_CulledPolys;		///< Bitvector indicating whether the individual micro polygons are culled.
     std::vector<IqShaderData*>	m_apShaderOutputVariables;	///< Vector of pointers to shader output variables.
 protected:
@@ -368,6 +302,32 @@ public:
     {}
 
 
+    // Redirect acces via IqShaderExecEnv
+    virtual	TqInt	uGridRes() const
+    {
+        assert( GetMotionObject( Time( 0 ) ) ); 
+		return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->uGridRes() );
+    }
+    virtual	TqInt	vGridRes() const
+    {
+        assert( GetMotionObject( Time( 0 ) ) ); 
+		return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->vGridRes() );
+    }
+    virtual	TqInt	GridSize() const
+    {
+        assert( GetMotionObject( Time( 0 ) ) ); 
+		return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->GridSize() );
+    }
+    virtual IqShaderData* pVar(TqInt index)
+    {
+        assert( GetMotionObject( Time( 0 ) ) ); 
+        return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pVar(index) );
+    }
+    virtual	IqShaderData* FindStandardVar( const char* pname )
+    {
+        assert( GetMotionObject( Time( 0 ) ) ); 
+        return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->FindStandardVar(pname) );
+    }
     /** Get a pointer to the surface which this grid belongs.
      * Actually returns the surface pointer from the first timeslot.
      * \return Surface pointer, only valid during shading.
@@ -447,7 +407,7 @@ public:
     /** Set up the pointer to the grid this micropoly came from.
      * \param pGrid CqMicroPolyGrid pointer.
      */
-    void	SetGrid( CqMicroPolyGrid* pGrid )
+    void	SetGrid( CqMicroPolyGridBase* pGrid )
     {
         if ( m_pGrid ) RELEASEREF( m_pGrid );
         m_pGrid = pGrid;
@@ -456,7 +416,7 @@ public:
     /** Get the pointer to the grid this micropoly came from.
      * \return Pointer to the CqMicroPolyGrid.
      */
-    CqMicroPolyGrid* pGrid() const
+    virtual CqMicroPolyGridBase* pGrid() const
     {
         return ( m_pGrid );
     }
@@ -490,7 +450,7 @@ public:
     const	CqColor	colColor() const
     {
         CqColor colRes;
-        m_pGrid->Ci() ->GetColor( colRes, m_Index );
+        m_pGrid->pVar(EnvVars_Ci) ->GetColor( colRes, m_Index );
         return ( colRes );
     }
     /** Get the opacity of this micropoly.
@@ -499,7 +459,7 @@ public:
     const	CqColor	colOpacity() const
     {
         CqColor colRes;
-        m_pGrid->Oi() ->GetColor( colRes, m_Index );
+        m_pGrid->pVar(EnvVars_Oi) ->GetColor( colRes, m_Index );
         return ( colRes );
     }
 
@@ -576,25 +536,25 @@ public:
     virtual const CqVector3D& PointA() const
     {
         CqVector3D * pP;
-        m_pGrid->P() ->GetPointPtr( pP );
+        m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
         return ( pP[ GetCodedIndex( m_IndexCode, 0 ) ] );
     }
     virtual const CqVector3D& PointB() const
     {
         CqVector3D * pP;
-        m_pGrid->P() ->GetPointPtr( pP );
+        m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
         return ( pP[ GetCodedIndex( m_IndexCode, 1 ) ] );
     }
     virtual const CqVector3D& PointC() const
     {
         CqVector3D * pP;
-        m_pGrid->P() ->GetPointPtr( pP );
+        m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
         return ( pP[ GetCodedIndex( m_IndexCode, 2 ) ] );
     }
     virtual const CqVector3D& PointD() const
     {
         CqVector3D * pP;
-        m_pGrid->P() ->GetPointPtr( pP );
+        m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
         return ( pP[ GetCodedIndex( m_IndexCode, 3 ) ] );
     }
     virtual const TqBool IsDegenerate() const
@@ -619,7 +579,7 @@ protected:
     }
     TqLong	m_IndexCode;
     TqLong	m_BoundCode;
-    CqMicroPolyGrid*	m_pGrid;		///< Pointer to the donor grid.
+    CqMicroPolyGridBase*	m_pGrid;		///< Pointer to the donor grid.
     TqInt	m_Index;		///< Index within the donor grid.
 
     TqShort	m_Flags;		///< Bitvector of general flags, using EqMicroPolyFlags as bitmasks.
@@ -672,15 +632,13 @@ public:
 class CqMicroPolygonMotion : public CqMicroPolygon
 {
 public:
-    CqMicroPolygonMotion() : CqMicroPolygon(), m_BoundReady( TqFalse ), m_pMotionGrid(0)
+    CqMicroPolygonMotion() : CqMicroPolygon(), m_BoundReady( TqFalse )
     { }
     virtual	~CqMicroPolygonMotion()
     {
         std::vector<CqMovingMicroPolygonKey*>::iterator	ikey;
         for ( ikey = m_Keys.begin(); ikey != m_Keys.end(); ikey++ )
             delete( ( *ikey ) );
-		if( m_pMotionGrid )
-			RELEASEREF(m_pMotionGrid);
 	}
 
 public:
@@ -717,22 +675,6 @@ public:
     {
         m_fTrimmed = TqTrue;
     }
-    /** Set up the pointer to the grid this micropoly came from.
-     * \param pGrid CqMicroPolyGrid pointer.
-     */
-    void	SetMotionGrid( CqMotionMicroPolyGrid* pGrid )
-    {
-        if ( m_pMotionGrid ) RELEASEREF( m_pMotionGrid );
-        m_pMotionGrid = pGrid;
-        ADDREF( m_pMotionGrid );
-    }
-    /** Get the pointer to the grid this micropoly came from.
-     * \return Pointer to the CqMicroPolyGrid.
-     */
-    CqMotionMicroPolyGrid* pMotionGrid() const
-    {
-        return ( m_pMotionGrid );
-    }
 private:
     CqBound	m_Bound;					///< Stored bound.
     CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
@@ -740,7 +682,6 @@ private:
     std::vector<TqFloat> m_Times;
     std::vector<CqMovingMicroPolygonKey*>	m_Keys;
     TqBool	m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
-	CqMotionMicroPolyGrid* m_pMotionGrid;
 
     CqMicroPolygonMotion( const CqMicroPolygonMotion& From )
     {}

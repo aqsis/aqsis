@@ -701,6 +701,7 @@ public:
             CqMicroPolyGridBase* pGrid2 = GetMotionObject( Time( i ) ) ->Dice();
             pGrid->AddTimeSlot( Time( i ), pGrid2 );
 			ADDREF(pGrid2);
+			pGrid->SetfTriangular( pGrid2->fTriangular() );
         }
         return ( pGrid );
     }

@@ -329,7 +329,7 @@ public:
     virtual	CqBound			GetTotalBound( TqBool fForce = TqFalse )
     {
         CqVector3D Pmin, Pmax;
-        pGrid()->P()->GetPoint(Pmin, m_Index);
+        pGrid()->pVar(EnvVars_P)->GetPoint(Pmin, m_Index);
         Pmax = Pmin;
         Pmin.x( Pmin.x() - m_radius );
         Pmin.y( Pmin.y() - m_radius );
@@ -340,7 +340,7 @@ public:
     virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time )
     {
         CqVector3D P;
-        pGrid()->P()->GetPoint(P, m_Index);
+        pGrid()->pVar(EnvVars_P)->GetPoint(P, m_Index);
         if( (CqVector2D( P.x(), P.y() ) - vecSample).Magnitude() < m_radius )
         {
             D = P.z();

@@ -144,46 +144,46 @@ CqMicroPolyGridBase* CqPoints::Dice()
     TqInt lUses = Uses();
 
     // Dice the primitive variables.
-    if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) )
+    if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->pVar(EnvVars_Cs) ) )
     {
         if ( pPoints()->bHasVar(EnvVars_Cs) )
-            NaturalDice( pPoints()->Cs(), nVertices(), 1, pGrid->Cs() );
+            NaturalDice( pPoints()->Cs(), nVertices(), 1, pGrid->pVar(EnvVars_Cs) );
         else if ( NULL != pAttributes() ->GetColorAttribute( "System", "Color" ) )
-            pGrid->Cs() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
+            pGrid->pVar(EnvVars_Cs) ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
         else
-            pGrid->Cs() ->SetColor( CqColor( 1, 1, 1 ) );
+            pGrid->pVar(EnvVars_Cs) ->SetColor( CqColor( 1, 1, 1 ) );
     }
 
-    if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) )
+    if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->pVar(EnvVars_Os) ) )
     {
         if ( bHasVar(EnvVars_Os) )
-            NaturalDice( pPoints()->Os(), nVertices(), 1, pGrid->Os() );
+            NaturalDice( pPoints()->Os(), nVertices(), 1, pGrid->pVar(EnvVars_Os) );
         else if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
-            pGrid->Os() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
+            pGrid->pVar(EnvVars_Os) ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
         else
-            pGrid->Os() ->SetColor( CqColor( 1, 1, 1 ) );
+            pGrid->pVar(EnvVars_Os) ->SetColor( CqColor( 1, 1, 1 ) );
     }
 
-    if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && pPoints()->bHasVar(EnvVars_s) )
-        NaturalDice( pPoints()->s(), nVertices(), 1, pGrid->s() );
+    if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->pVar(EnvVars_s) ) && pPoints()->bHasVar(EnvVars_s) )
+        NaturalDice( pPoints()->s(), nVertices(), 1, pGrid->pVar(EnvVars_s) );
 
-    if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && pPoints()->bHasVar(EnvVars_t) )
-        NaturalDice( pPoints()->t(), nVertices(), 1, pGrid->t() );
+    if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->pVar(EnvVars_t) ) && pPoints()->bHasVar(EnvVars_t) )
+        NaturalDice( pPoints()->t(), nVertices(), 1, pGrid->pVar(EnvVars_t) );
 
-    if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && pPoints()->bHasVar(EnvVars_u) )
-        NaturalDice( pPoints()->u(), nVertices(), 1, pGrid->u() );
+    if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->pVar(EnvVars_u) ) && pPoints()->bHasVar(EnvVars_u) )
+        NaturalDice( pPoints()->u(), nVertices(), 1, pGrid->pVar(EnvVars_u) );
 
-    if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && pPoints()->bHasVar(EnvVars_v) )
-        NaturalDice( pPoints()->v(), nVertices(), 1, pGrid->v() );
+    if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->pVar(EnvVars_v) ) && pPoints()->bHasVar(EnvVars_v) )
+        NaturalDice( pPoints()->v(), nVertices(), 1, pGrid->pVar(EnvVars_v) );
 
 
-    if ( NULL != pGrid->P() )
-        NaturalDice( pPoints( 0 )->P(), nVertices(), 1, pGrid->P() );
+    if ( NULL != pGrid->pVar(EnvVars_P) )
+        NaturalDice( pPoints( 0 )->P(), nVertices(), 1, pGrid->pVar(EnvVars_P) );
 
     // If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
-    if ( USES( lUses, EnvVars_N ) && ( NULL != pGrid->N() ) && pPoints()->bHasVar(EnvVars_N) )
+    if ( USES( lUses, EnvVars_N ) && ( NULL != pGrid->pVar(EnvVars_N) ) && pPoints()->bHasVar(EnvVars_N) )
     {
-        NaturalDice( pPoints()->N(), nVertices(), 1, pGrid->N() );
+        NaturalDice( pPoints()->N(), nVertices(), 1, pGrid->pVar(EnvVars_N) );
         pGrid->SetbShadingNormals( TqTrue );
     }
 
@@ -197,7 +197,7 @@ CqMicroPolyGridBase* CqPoints::Dice()
 		    TqInt CSO = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 1 ];
             TqInt O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
             N = ( O == CSO ) ? N : -N;
-            pGrid->Ng()->SetNormal( N, u );
+            pGrid->pVar(EnvVars_Ng)->SetNormal( N, u );
         }
         pGrid->SetbGeometricNormals( TqTrue );
     }
@@ -448,7 +448,7 @@ void CqPoints::InitialiseMaxWidth()
 
 void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )
 {
-    if ( NULL == P() )
+    if ( NULL == pVar(EnvVars_P) )
         return ;
 
     TqInt cu = uGridRes();	// Only need cu, as we know cv is 1.
@@ -470,7 +470,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
     // Transform the whole grid to hybrid camera/raster space
 
     CqVector3D* pP;
-    P() ->GetPointPtr( pP );
+    pVar(EnvVars_P) ->GetPointPtr( pP );
 
     QGetRenderContext() ->Stats().MakeProject().Stop();
 
@@ -647,7 +647,7 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, l
     CqMicroPolyGrid * pGridA = static_cast<CqMicroPolyGridPoints*>( GetMotionObject( Time( 0 ) ) );
     TqInt iTime;
 
-    assert(NULL != pGridA->P() );
+    assert(NULL != pGridA->pVar(EnvVars_P) );
 
     ADDREF( pGridA );
 
@@ -690,7 +690,7 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, l
         CqMicroPolyGridPoints* pGridT = static_cast<CqMicroPolyGridPoints*>( GetMotionObject( Time( iTime ) ) );
 
         CqVector3D* pP;
-        pGridT->P() ->GetPointPtr( pP );
+        pGridT->pVar(EnvVars_P) ->GetPointPtr( pP );
 
         for ( i = gsmin1; i >= 0; i-- )
         {
