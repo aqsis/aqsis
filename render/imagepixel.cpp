@@ -423,7 +423,8 @@ void CqImagePixel::Combine()
         // Write the collapsed color values back into the top entry.
         if ( !samples->empty() )
         {
-            samples->begin() ->SetCs( samplecolor );
+            // Set the color and opacity.
+			samples->begin() ->SetCs( samplecolor );
             samples->begin() ->SetOs( sampleopacity );
 
             if ( depthfilter != 0)
@@ -464,7 +465,16 @@ void CqImagePixel::Combine()
     }
 
     if ( samplecount )
-        SetCoverage(coverage /= numsamples);
+	{
+		coverage /= numsamples;
+        SetCoverage(coverage);
+
+		// Calculate and set the alpha (pre-multiplied).
+		TqFloat a = ( Opacity()[0] + Opacity()[1] + Opacity()[2] ) / 3.0f;
+		SetAlpha(a * coverage);
+	}
+	else
+		SetAlpha(0.0f);
 }
 
 //----------------------------------------------------------------------

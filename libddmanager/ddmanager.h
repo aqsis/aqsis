@@ -82,14 +82,14 @@ private:
 		std::string m_mode;
 		TqInt		m_modeHash;
 		TqInt		m_modeID;
-		TqInt		m_dataOffset;
-		TqInt		m_dataSize;
 		std::string m_customParamsArgs;
-		CqSimplePlugin m_DspyDriverPlugin;
+		CqSimplePlugin m_DspyPlugin;
 		void*		m_DriverHandle;
-		PtDspyImageHandle m_ImageHandle;
-		PtFlagStuff	m_Flags;
-		std::vector<PtDspyDevFormat> m_Formats;
+		PtDspyImageHandle m_imageHandle;
+		PtFlagStuff	m_flags;
+		std::vector<PtDspyDevFormat> m_formats;
+		std::vector<TqInt>			m_dataOffsets;
+		TqInt		m_elementSize;
 		DspyImageOpenMethod			m_OpenMethod;
 		DspyImageQueryMethod		m_QueryMethod;
 		DspyImageDataMethod			m_DataMethod;
@@ -109,6 +109,12 @@ private:
 	static CqString m_strDataMethod;
 	static CqString m_strCloseMethod;
 	static CqString m_strDelayCloseMethod;
+
+	static char* m_RedName;
+	static char* m_GreenName;
+	static char* m_BlueName;
+	static char* m_AlphaName;
+	static char* m_ZName;
 };
 
 

@@ -29,7 +29,6 @@
 #include	"sstring.h"
 #include	"ddmanager.h"
 #include	"rifile.h"
-#include	"tiffio.h"
 #include	"imagebuffer.h"
 #include	"shaderexecenv.h"
 #include	"logging.h"
@@ -51,6 +50,12 @@ CqString CqDDManager::m_strDataMethod("DspyImageData");
 CqString CqDDManager::m_strCloseMethod("DspyImageClose");
 CqString CqDDManager::m_strDelayCloseMethod("DspyImageDelayClose");
 
+char* CqDDManager::m_RedName = "r";
+char* CqDDManager::m_GreenName = "g";
+char* CqDDManager::m_BlueName = "b";
+char* CqDDManager::m_AlphaName = "a";
+char* CqDDManager::m_ZName = "z";
+
 TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments )
 {
 	SqDisplayRequest req;
@@ -59,8 +64,6 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 	req.m_mode = mode;
 	req.m_modeHash = CqString::hash( mode );
 	req.m_modeID = modeID;
-	req.m_dataOffset = dataOffset;
-	req.m_dataSize = dataSize;
 	req.m_customParamsArgs = PrepareCustomParameters(mapOfArguments);
 
 	m_displayRequests.push_back(req);
@@ -96,69 +99,58 @@ TqInt CqDDManager::CloseDisplays()
 
 TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 {
-/*    std::vector<SqDDevice>::iterator i;
-    for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+    std::vector<SqDisplayRequest>::iterator i;
+    for ( i = m_displayRequests.begin(); i != m_displayRequests.end(); i++ )
     {
         TqInt	xmin = pBucket->XOrigin();
         TqInt	ymin = pBucket->YOrigin();
-        TqInt	xsize = pBucket->Width();
-        TqInt	ysize = pBucket->Height();
+        TqInt	xmaxplus1 = xmin + pBucket->Width();
+        TqInt	ymaxplus1 = ymin + pBucket->Height();
 
-        for ( std::vector<SqDDevice>::iterator i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+		char* data = reinterpret_cast<char*>(malloc(i->m_elementSize * pBucket->Width() * pBucket->Height()));
+
+        SqImageSample val( QGetRenderContext()->GetOutputDataTotalSize() );
+		char* pdata = data;
+        TqInt y;
+        for ( y = ymin; y < ymaxplus1; y++ )
         {
-            TqInt	samples = i->m_SamplesPerElement;
-            TqInt	linelen = i->m_XRes * samples;
-
-            RtInt mode = 0;
-            if ( strstr( i->m_strMode.c_str(), RI_RGB ) != NULL )
-                mode |= ModeRGB;
-            if ( strstr( i->m_strMode.c_str(), RI_A ) != NULL )
-                mode |= ModeA;
-            if ( strstr( i->m_strMode.c_str(), RI_Z ) != NULL )
-                mode |= ModeZ;
-
-            SqImageSample val( QGetRenderContext()->GetOutputDataTotalSize() );
-            TqInt y;
-            for ( y = 0; y < ysize; y++ )
+            TqInt x;
+            for ( x = xmin; x < xmaxplus1; x++ )
             {
-                TqInt sy = y + ymin;
-                TqInt x;
-                for ( x = 0; x < xsize; x++ )
-                {
-                    TqInt sx = x + xmin;
-                    TqInt so = ( sy * linelen ) + ( sx * samples );
-                    // If outputting a zfile, use the midpoint method.
-                    /// \todo Should really be generalising this section to use specif Filter/Expose/Quantize functions.
-                    if ( mode & ModeZ )
-                    {
-                        i->m_pData[ so ] = static_cast<unsigned char>( pBucket->Depth( sx, sy ) );
-                    }
-                    else
-                    {
-                        if ( samples >= 3 )
-                        {
-                            CqColor col = pBucket->Color( sx, sy );
-                            i->m_pData[ so + 0 ] = static_cast<unsigned char>( col.fRed() );
-                            i->m_pData[ so + 1 ] = static_cast<unsigned char>( col.fGreen() );
-                            i->m_pData[ so + 2 ] = static_cast<unsigned char>( col.fBlue() );
-                            if ( samples == 4 )
-                            {
-                                CqColor o = pBucket->Opacity( sx, sy );
-                                TqFloat a = ( o.fRed() + o.fGreen() + o.fBlue() ) / 3.0f;
-                                i->m_pData[ so + 3 ] = static_cast<unsigned char>( a * pBucket->Coverage( sx, sy ) );
-                            }
-                        }
-                        else if ( samples == 1 )
-                        {
-                            CqColor o = pBucket->Opacity( sx, sy );
-                            TqFloat a = ( o.fRed() + o.fGreen() + o.fBlue() ) / 3.0f;
-                            i->m_pData[ so + 0 ] = static_cast<unsigned char>( a * pBucket->Coverage( sx, sy ) );
-                        }
-                    }
-                }
+				TqInt index = 0;
+				std::vector<PtDspyDevFormat>::iterator iformat;
+				for(iformat = i->m_formats.begin(); iformat != i->m_formats.end(); iformat++)
+				{
+					const TqFloat* pSamples = pBucket->Data( x, y );
+					switch(iformat->type)
+					{
+						case PkDspyFloat32:
+							reinterpret_cast<float*>(pdata)[0] = pSamples[i->m_dataOffsets[index]];
+							pdata += sizeof(float);
+							break;
+						case PkDspyUnsigned32:
+						case PkDspySigned32:
+							reinterpret_cast<long*>(pdata)[0] = pSamples[i->m_dataOffsets[index]];
+							pdata += sizeof(long);
+							break;
+						case PkDspyUnsigned16:
+						case PkDspySigned16:
+							reinterpret_cast<short*>(pdata)[0] = pSamples[i->m_dataOffsets[index]];
+							pdata += sizeof(short);
+							break;
+						case PkDspyUnsigned8:
+						case PkDspySigned8:
+							reinterpret_cast<char*>(pdata)[0] = pSamples[i->m_dataOffsets[index]];
+							pdata += sizeof(char);
+							break;
+					}
+					index++;
+				}
             }
         }
-    }*/
+
+		free(data);
+    }
     return ( 0 );
 }
 
@@ -227,14 +219,14 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
     CqString strDriverPathAndFile = fileDriver.strRealName();
 
 	// Load the dynamic obejct and locate the relevant symbols.
-    req.m_DriverHandle = req.m_DspyDriverPlugin.SimpleDLOpen( &strDriverPathAndFile );
+    req.m_DriverHandle = req.m_DspyPlugin.SimpleDLOpen( &strDriverPathAndFile );
     if( req.m_DriverHandle != NULL )
     {
-        req.m_OpenMethod = (DspyImageOpenMethod)req.m_DspyDriverPlugin.SimpleDLSym( req.m_DriverHandle, &m_strOpenMethod );
-        req.m_QueryMethod = (DspyImageQueryMethod)req.m_DspyDriverPlugin.SimpleDLSym( req.m_DriverHandle, &m_strQueryMethod );
-        req.m_DataMethod = (DspyImageDataMethod)req.m_DspyDriverPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDataMethod );
-        req.m_CloseMethod = (DspyImageCloseMethod)req.m_DspyDriverPlugin.SimpleDLSym( req.m_DriverHandle, &m_strCloseMethod );
-        req.m_DelayCloseMethod = (DspyImageDelayCloseMethod)req.m_DspyDriverPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDelayCloseMethod );
+        req.m_OpenMethod = (DspyImageOpenMethod)req.m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strOpenMethod );
+        req.m_QueryMethod = (DspyImageQueryMethod)req.m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strQueryMethod );
+        req.m_DataMethod = (DspyImageDataMethod)req.m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDataMethod );
+        req.m_CloseMethod = (DspyImageCloseMethod)req.m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strCloseMethod );
+        req.m_DelayCloseMethod = (DspyImageDelayCloseMethod)req.m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDelayCloseMethod );
     }
 
     if( NULL != req.m_OpenMethod )
@@ -248,7 +240,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 		if( pQuant )	depthQuantOne = pQuant[0];
 
 		// Prepare the information and call the DspyImageOpen function in the display device.
-		if(req.m_mode.find("rgb") != req.m_mode.npos )
+		if(req.m_modeID & ( ModeRGB | ModeA | ModeZ) )
 		{
 			PtDspyDevFormat fmt;
 			if( colorQuantOne == 255 )
@@ -258,31 +250,78 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 			else if( colorQuantOne == 4294967295 )
 				fmt.type = PkDspyUnsigned32;
 			else fmt.type = PkDspyFloat32;
-			fmt.name = "r";
-			req.m_Formats.push_back(fmt);
-			fmt.name = "g";
-			req.m_Formats.push_back(fmt);
-			fmt.name = "b";
-			req.m_Formats.push_back(fmt);
-			if(req.m_mode.find("a") != req.m_mode.npos)
+			if(req.m_modeID & ModeA)
 			{
-				fmt.name = "a";
-				req.m_Formats.push_back(fmt);
+				fmt.name = m_AlphaName;
+				req.m_formats.push_back(fmt);
 			}
-			if(req.m_mode.find("z") != req.m_mode.npos)
+			if(req.m_modeID & ModeRGB)
 			{
-				fmt.name = "z";
+				fmt.name = m_RedName;
+				req.m_formats.push_back(fmt);
+				fmt.name = m_GreenName;
+				req.m_formats.push_back(fmt);
+				fmt.name = m_BlueName;
+				req.m_formats.push_back(fmt);
+			}
+			if(req.m_modeID & ModeZ)
+			{
+				fmt.name = m_ZName;
 				fmt.type = PkDspyFloat32;
-				req.m_Formats.push_back(fmt);
+				req.m_formats.push_back(fmt);
 			}
 		}
-        PtDspyError err = (*req.m_OpenMethod)(&req.m_ImageHandle, req.m_type.c_str(), req.m_name.c_str(), QGetRenderContext() ->pImage() ->iXRes(), QGetRenderContext() ->pImage() ->iYRes(), 0, NULL, req.m_Formats.size(), &req.m_Formats[0], &req.m_Flags);
+        
+		// Call the DspyImageOpen method on the display to initialise things.
+		PtDspyError err = (*req.m_OpenMethod)(&req.m_imageHandle, req.m_type.c_str(), req.m_name.c_str(), QGetRenderContext() ->pImage() ->iXRes(), QGetRenderContext() ->pImage() ->iYRes(), 0, NULL, req.m_formats.size(), &req.m_formats[0], &req.m_flags);
+
+		// Now scan the returned format list to make sure that we pass the data in the order the display wants it.
+		std::vector<PtDspyDevFormat>::iterator i;
+		for(i=req.m_formats.begin(); i!=req.m_formats.end(); i++)
+		{
+			if( i->name == m_RedName )
+				req.m_dataOffsets.push_back(Sample_Red);
+			else if( i->name == m_GreenName )
+				req.m_dataOffsets.push_back(Sample_Green);
+			else if( i->name == m_BlueName )
+				req.m_dataOffsets.push_back(Sample_Blue);
+			else if( i->name == m_AlphaName )
+				req.m_dataOffsets.push_back(Sample_Alpha);
+			else if( i->name == m_ZName )
+				req.m_dataOffsets.push_back(Sample_Depth);
+		}
+
+		// Determine how big each pixel is by summing the format type sizes.
+		req.m_elementSize = 0;
+		std::vector<PtDspyDevFormat>::iterator iformat;
+		for(iformat = req.m_formats.begin(); iformat != req.m_formats.end(); iformat++)
+		{
+			switch(iformat->type)
+			{
+				case PkDspyFloat32:
+					req.m_elementSize+=sizeof(float);
+					break;
+				case PkDspyUnsigned32:
+				case PkDspySigned32:
+					req.m_elementSize+=sizeof(long);
+					break;
+				case PkDspyUnsigned16:
+				case PkDspySigned16:
+					req.m_elementSize+=sizeof(short);
+					break;
+				case PkDspyUnsigned8:
+				case PkDspySigned8:
+					req.m_elementSize+=sizeof(char);
+					break;
+			}
+		}
+
 		if( NULL != req.m_QueryMethod )
 		{
 			PtDspySizeInfo size;
-			err = (*req.m_QueryMethod)(req.m_ImageHandle, PkSizeQuery, sizeof(size), &size);
+			err = (*req.m_QueryMethod)(req.m_imageHandle, PkSizeQuery, sizeof(size), &size);
 			PtDspyOverwriteInfo owinfo;
-			err = (*req.m_QueryMethod)(req.m_ImageHandle, PkOverwriteQuery, sizeof(owinfo), &owinfo);
+			err = (*req.m_QueryMethod)(req.m_imageHandle, PkOverwriteQuery, sizeof(owinfo), &owinfo);
 		}
     }
 

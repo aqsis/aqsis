@@ -73,41 +73,41 @@ enum EqDisplayTypes
 struct SqDisplayInstance
 {
 	SqDisplayInstance() :
-		m_ImageWidth(0),
-		m_ImageHeight(0),
-		m_PixelsProcessed(0),
-		m_Channels(0),
+		m_width(0),
+		m_height(0),
+		m_iFormatCount(0),
+		m_format(PkDspyUnsigned8),
 		m_QuantizeZeroVal(0.0f),
 		m_QuantizeOneVal(0.0f),
 		m_QuantizeMinVal(0.0f),
 		m_QuantizeMaxVal(0.0f),
 		m_QuantizeDitherVal(0.0f),
-		m_Compression(COMPRESSION_NONE), m_Quality(0),
+		m_compression(COMPRESSION_NONE), m_quality(0),
 		m_RenderWholeFrame(TqFalse),
-		m_ImageType(Type_File),
+		m_imageType(Type_File),
 		m_append(0),
-		m_Data(0),
+		m_data(0),
 		m_theWindow(0),
 		m_uiImageWidget(0),
 		m_uiImage(0)
 	{}
-	TqInt		m_ImageWidth;
-	TqInt		m_ImageHeight;
-	TqInt		m_PixelsProcessed;
-	TqInt		m_Channels;
+	TqInt		m_width;
+	TqInt		m_height;
+	TqInt		m_iFormatCount;
+	TqInt		m_format;
 	TqFloat		m_QuantizeZeroVal;
 	TqFloat		m_QuantizeOneVal;
 	TqFloat		m_QuantizeMinVal;
 	TqFloat		m_QuantizeMaxVal;
 	TqFloat		m_QuantizeDitherVal;
-	uint16		m_Compression, m_Quality;
+	uint16		m_compression, m_quality;
 	TqBool		m_RenderWholeFrame;
-	TqInt		m_ImageType;
+	TqInt		m_imageType;
 	TqInt		m_append;
 	TqFloat		m_matWorldToCamera[ 4 ][ 4 ];
 	TqFloat		m_matWorldToScreen[ 4 ][ 4 ];
 
-	void*		m_Data;
+	void*		m_data;
 
 	Fl_Window*	m_theWindow;
 	Fl_FrameBuffer_Widget* m_uiImageWidget;

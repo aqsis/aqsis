@@ -18,9 +18,6 @@ Package=<4>
     Project_Dep_Name libargparse
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name libdd
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name libri2rib
     End Project Dependency
     Begin Project Dependency
@@ -75,25 +72,7 @@ Package=<4>
     Project_Dep_Name texer
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name filebuffer
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name libaqsis
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libdd
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libddmsimple
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name shadowmap
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name framebuffer_glut
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name framebuffer_glut_z
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libcodegenvm
@@ -103,9 +82,6 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name teqser
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libddmsock
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libri2rib
@@ -142,9 +118,6 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name aqsl
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name dspylink
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name dsotest
@@ -324,81 +297,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "dspylink"=.\dspylink\dspylink.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name libdd
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name inline
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libaqsistypes
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "filebuffer"=.\filebuffer\filebuffer.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name libdd
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libaqsistypes
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "framebuffer_glut"=.\framebuffer_glut\framebuffer_glut.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name libdd
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libaqsistypes
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "framebuffer_glut_z"=.\framebuffer_glut_z\framebuffer_glut_z.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name libdd
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libaqsistypes
-    End Project Dependency
-}}}
-
-###############################################################################
-
 Project: "gif2tif"=.\plugins\gif2tif\gif2tif.dsp - Package Owner=<4>
 
 Package=<5>
@@ -510,58 +408,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libdd"=.\libdd\libdd.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "libddmanager"=.\libddmanager\libddmanager.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "libddmsimple"=.\libddmsimple\libddmsimple.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name inline
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "libddmsock"=.\libddmsock\libddmsock.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "libddmsock2"=.\libddmsock2\libddmsock2.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -735,27 +582,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "shadowmap"=.\shadowmap\shadowmap.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name libdd
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libaqsistypes
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name inline
-    End Project Dependency
-}}}
-
-###############################################################################
-
 Project: "slpp"=.\slpp\slpp.dsp - Package Owner=<4>
 
 Package=<5>
@@ -778,9 +604,6 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name libaqsis
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libddmsimple
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libargparse

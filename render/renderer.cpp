@@ -75,8 +75,8 @@ CqRenderer::CqRenderer() :
         m_pImageBuffer( 0 ),
         m_Mode( RenderMode_Image ),
         m_fSaveGPrims( TqFalse ),
-        m_OutputDataOffset(8),		// Cs, Os, z, coverage
-        m_OutputDataTotalSize(8),	// Cs, Os, z, coverage
+        m_OutputDataOffset(9),		// Cs, Os, z, coverage, a
+        m_OutputDataTotalSize(9),	// Cs, Os, z, coverage, a
         m_FrameNo( 0 ),
 		m_bObjectOpen(TqFalse),
         m_pErrorHandler( &RiErrorPrint ),
@@ -654,8 +654,8 @@ void CqRenderer::Initialise()
 
     // Clear the output data entries
     m_OutputDataEntries.clear();
-    m_OutputDataOffset = 8;		// Cs, Os, depth, coverage
-    m_OutputDataTotalSize = 8;	// Cs, Os, depth, coverage
+    m_OutputDataOffset = 9;		// Cs, Os, depth, coverage, a
+    m_OutputDataTotalSize = 9;	// Cs, Os, depth, coverage, a
 }
 
 

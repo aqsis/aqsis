@@ -64,53 +64,29 @@ using namespace Aqsis;
 
 #include "display.h"
 
+// From displayhelpers.c
+#ifdef __cplusplus
+extern "C" {
+#endif
+PtDspyError DspyReorderFormatting(int formatCount, PtDspyDevFormat *format, int outFormatCount, const PtDspyDevFormat *outFormat);
+#ifdef __cplusplus
+}
+#endif
+
 #define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
 #define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
 
 START_NAMESPACE( Aqsis )
 
 
-TqInt g_ImageWidth = 0;
-TqInt g_ImageHeight = 0;
-TqInt g_PixelsProcessed = 0;
-TqInt g_Channels = 0;
-TqInt g_offset = 0;
-TqInt g_ElementSize = 0;
-TqInt g_CWXmin, g_CWYmin;
-TqInt g_CWXmax, g_CWYmax;
-TqFloat g_QuantizeZeroVal = 0.0f;
-TqFloat g_QuantizeOneVal = 0.0f;
-TqFloat g_QuantizeMinVal = 0.0f;
-TqFloat g_QuantizeMaxVal = 0.0f;
-TqFloat g_QuantizeDitherVal = 0.0f;
-TqFloat g_appliedQuantizeOneVal = 0.0f;
-TqFloat g_appliedQuantizeMinVal = 0.0f;
-TqFloat g_appliedQuantizeMaxVal = 0.0f;
-TqFloat g_appliedQuantizeDitherVal = 0.0f;
-uint16	g_Compression = COMPRESSION_NONE, g_Quality = 0;
-TqInt	g_BucketsPerCol, g_BucketsPerRow;
-TqInt	g_BucketWidthMax, g_BucketHeightMax;
-TqBool	g_RenderWholeFrame = TqFalse;
-TqInt	g_ImageType;
-TqInt	g_append = 0;
-TqFloat	g_matWorldToCamera[ 4 ][ 4 ];
-TqFloat	g_matWorldToScreen[ 4 ][ 4 ];
 
-unsigned char* g_byteData;
-float*	g_floatData;
-
-Fl_Window *g_theWindow;
-Fl_FrameBuffer_Widget *g_uiImageWidget;
-Fl_RGB_Image* g_uiImage;
-
-
-void SaveAsShadowMap(const std::string& filename)
+void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image)
 {
     TqChar version[ 80 ];
     TqInt twidth = 32;
     TqInt tlength = 32;
 
-    const char* mode = (g_append)? "a" : "w";
+    const char* mode = (image->m_append)? "a" : "w";
 
     // Save the shadowmap to a binary file.
     if ( filename.compare( "" ) != 0 )
@@ -119,9 +95,6 @@ void SaveAsShadowMap(const std::string& filename)
 		if( pshadow != NULL )
 		{
 			// Set common tags
-			TqInt XRes = ( g_CWXmax - g_CWXmin );
-			TqInt YRes = ( g_CWYmax - g_CWYmin );
-
 			TIFFCreateDirectory( pshadow );
 
 	#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
@@ -130,8 +103,8 @@ void SaveAsShadowMap(const std::string& filename)
 			sprintf( version, "%s %s", STRNAME, VERSION );
 	#endif
 			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
-			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, g_matWorldToCamera );
-			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, g_matWorldToScreen );
+			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, image->m_matWorldToCamera );
+			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, image->m_matWorldToScreen );
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
 			TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
 
@@ -142,45 +115,45 @@ void SaveAsShadowMap(const std::string& filename)
 			sprintf( version, "%s %s", STRNAME, VERSION );
 		#endif
 			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
-			TIFFSetField( pshadow, TIFFTAG_IMAGEWIDTH, XRes );
-			TIFFSetField( pshadow, TIFFTAG_IMAGELENGTH, YRes );
+			TIFFSetField( pshadow, TIFFTAG_IMAGEWIDTH, image->m_width );
+			TIFFSetField( pshadow, TIFFTAG_IMAGELENGTH, image->m_height );
 			TIFFSetField( pshadow, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
 			TIFFSetField( pshadow, TIFFTAG_BITSPERSAMPLE, 32 );
-			TIFFSetField( pshadow, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
+			TIFFSetField( pshadow, TIFFTAG_SAMPLESPERPIXEL, image->m_iFormatCount );
 			TIFFSetField( pshadow, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
 			TIFFSetField( pshadow, TIFFTAG_TILEWIDTH, twidth );
 			TIFFSetField( pshadow, TIFFTAG_TILELENGTH, tlength );
 			TIFFSetField( pshadow, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
-			TIFFSetField( pshadow, TIFFTAG_COMPRESSION, g_Compression );
+			TIFFSetField( pshadow, TIFFTAG_COMPRESSION, image->m_compression );
 
 
 			TqInt tsize = twidth * tlength;
-			TqInt tperrow = ( XRes + twidth - 1 ) / twidth;
-			TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * g_Channels * sizeof( TqFloat ) ) );
+			TqInt tperrow = ( image->m_width + twidth - 1 ) / twidth;
+			TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * sizeof( TqFloat ) ) );
 
 			if ( ptile != NULL )
 			{
-				TqInt ctiles = tperrow * ( ( YRes + tlength - 1 ) / tlength );
+				TqInt ctiles = tperrow * ( ( image->m_width + tlength - 1 ) / tlength );
 				TqInt itile;
 				for ( itile = 0; itile < ctiles; itile++ )
 				{
 					TqInt x = ( itile % tperrow ) * twidth;
 					TqInt y = ( itile / tperrow ) * tlength;
-					TqFloat* ptdata = g_floatData + ( ( y * XRes ) + x ) * g_Channels;
+					TqFloat* ptdata = reinterpret_cast<TqFloat*>(image->m_data) + ( ( y * image->m_width ) + x ) * image->m_iFormatCount;
 					// Clear the tile to black.
-					memset( ptile, 0, tsize * g_Channels * sizeof( TqFloat ) );
+					memset( ptile, 0, tsize * sizeof( TqFloat ) );
 					for ( TqUlong i = 0; i < tlength; i++ )
 					{
 						for ( TqUlong j = 0; j < twidth; j++ )
 						{
-							if ( ( x + j ) < XRes && ( y + i ) < YRes )
+							if ( ( x + j ) < image->m_width && ( y + i ) < image->m_height )
 							{
 								TqInt ii;
-								for ( ii = 0; ii < g_Channels; ii++ )
-									ptile[ ( i * twidth * g_Channels ) + ( ( ( j * g_Channels ) + ii ) ) ] = ptdata[ ( ( j * g_Channels ) + ii ) ];
+								for ( ii = 0; ii < image->m_iFormatCount; ii++ )
+									ptile[ ( i * twidth * image->m_iFormatCount ) + ( ( ( j * image->m_iFormatCount ) + ii ) ) ] = ptdata[ ( ( j * image->m_iFormatCount ) + ii ) ];
 							}
 						}
-						ptdata += ( XRes * g_Channels );
+						ptdata += ( image->m_width * image->m_iFormatCount );
 					}
 					TIFFWriteTile( pshadow, ptile, x, y, 0, 0 );
 				}
@@ -194,22 +167,19 @@ void SaveAsShadowMap(const std::string& filename)
 }
 
 
-void WriteTIFF(const std::string& filename)
+void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 {
     uint16 photometric = PHOTOMETRIC_RGB;
     uint16 config = PLANARCONFIG_CONTIG;
 
     // Set common tags
-	TqInt XRes = ( g_CWXmax - g_CWXmin );
-	TqInt YRes = ( g_CWYmax - g_CWYmin );
-
     // If in "shadowmap" mode, write as a shadowmap.
-	if( g_ImageType == Type_Shadowmap )
+	if( image->m_imageType == Type_Shadowmap )
 	{
-		SaveAsShadowMap(filename);
+		SaveAsShadowMap(filename, image);
 		return;
 	}
-    else if( g_ImageType == Type_ZFile )
+    else if( image->m_imageType == Type_ZFile )
     {
         std::ofstream ofile( filename.c_str(), std::ios::out | std::ios::binary );
         if ( ofile.is_open() )
@@ -218,22 +188,22 @@ void WriteTIFF(const std::string& filename)
             ofile << ZFILE_HEADER;
 
             // Save the xres and yres.
-            ofile.write( reinterpret_cast<char* >( &XRes ), sizeof( XRes ) );
-            ofile.write( reinterpret_cast<char* >( &YRes ), sizeof( XRes ) );
+            ofile.write( reinterpret_cast<char* >( &image->m_width ), sizeof( image->m_width ) );
+            ofile.write( reinterpret_cast<char* >( &image->m_height ), sizeof( image->m_height ) );
 
             // Save the transformation matrices.
-            ofile.write( reinterpret_cast<char*>( g_matWorldToCamera[ 0 ] ), sizeof( g_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-            ofile.write( reinterpret_cast<char*>( g_matWorldToCamera[ 1 ] ), sizeof( g_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-            ofile.write( reinterpret_cast<char*>( g_matWorldToCamera[ 2 ] ), sizeof( g_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-            ofile.write( reinterpret_cast<char*>( g_matWorldToCamera[ 3 ] ), sizeof( g_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+            ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 0 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+            ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 1 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+            ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 2 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+            ofile.write( reinterpret_cast<char*>( image->m_matWorldToCamera[ 3 ] ), sizeof( image->m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
 
-            ofile.write( reinterpret_cast<char*>( g_matWorldToScreen[ 0 ] ), sizeof( g_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-            ofile.write( reinterpret_cast<char*>( g_matWorldToScreen[ 1 ] ), sizeof( g_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-            ofile.write( reinterpret_cast<char*>( g_matWorldToScreen[ 2 ] ), sizeof( g_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-            ofile.write( reinterpret_cast<char*>( g_matWorldToScreen[ 3 ] ), sizeof( g_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+            ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 0 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+            ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 1 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+            ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 2 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+            ofile.write( reinterpret_cast<char*>( image->m_matWorldToScreen[ 3 ] ), sizeof( image->m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
 
             // Now output the depth values
-            ofile.write( reinterpret_cast<char*>( g_floatData ), sizeof( TqFloat ) * ( XRes * YRes ) );
+            ofile.write( reinterpret_cast<char*>( image->m_data ), sizeof( TqFloat ) * ( image->m_width * image->m_height ) );
             ofile.close();
         }
 		return;
@@ -257,36 +227,36 @@ void WriteTIFF(const std::string& filename)
         bool use_logluv = false;
 
         TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( uint32 ) version );
-        TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) XRes );
-        TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) YRes );
+        TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) image->m_width );
+        TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) image->m_height );
         TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
-        TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
+        TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, image->m_iFormatCount );
 
         // Write out an 8 bits per pixel integer image.
-        if ( g_appliedQuantizeOneVal == 255 )
+        if ( image->m_format == PkDspyUnsigned8 )
         {
             TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
             TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
-            TIFFSetField( pOut, TIFFTAG_COMPRESSION, g_Compression );
-            if ( g_Compression == COMPRESSION_JPEG )
-                TIFFSetField( pOut, TIFFTAG_JPEGQUALITY, g_Quality );
+            TIFFSetField( pOut, TIFFTAG_COMPRESSION, image->m_compression );
+            if ( image->m_compression == COMPRESSION_JPEG )
+                TIFFSetField( pOut, TIFFTAG_JPEGQUALITY, image->m_quality );
             //if (description != "")
             //TIFFSetField(TIFFTAG_IMAGEDESCRIPTION, description);
             TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, photometric );
             TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
 
-            if ( g_Channels == 4 )
+            if ( image->m_iFormatCount == 4 )
                 TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
 
             // Set the position tages in case we aer dealing with a cropped image.
-            TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
-            TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
+            //TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
+            //TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
 
-            TqInt	linelen = g_ImageWidth * g_Channels;
+            TqInt	linelen = image->m_width * image->m_iFormatCount;
             TqInt row;
-            for ( row = 0; row < YRes; row++ )
+            for ( row = 0; row < image->m_height; row++ )
             {
-                if ( TIFFWriteScanline( pOut, g_byteData + ( row * linelen ), row, 0 ) < 0 )
+                if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<char*>(image->m_data) + ( row * linelen )), row, 0 ) < 0 )
                     break;
             }
             TIFFClose( pOut );
@@ -329,23 +299,23 @@ void WriteTIFF(const std::string& filename)
                 TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
                 TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
                 TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
-                TIFFSetField( pOut, TIFFTAG_COMPRESSION, g_Compression );
+                TIFFSetField( pOut, TIFFTAG_COMPRESSION, image->m_compression );
             }
 
-            TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
+            TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, image->m_iFormatCount );
 
-            if ( g_Channels == 4 )
+            if ( image->m_iFormatCount == 4 )
                 TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
             // Set the position tages in case we aer dealing with a cropped image.
-            TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
-            TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
+            //TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
+            //TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
             TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
 
-            TqInt	linelen = g_ImageWidth * g_Channels;
+            TqInt	linelen = image->m_width * image->m_iFormatCount;
             TqInt row = 0;
-            for ( row = 0; row < YRes; row++ )
+            for ( row = 0; row < image->m_height; row++ )
             {
-                if ( TIFFWriteScanline( pOut, g_floatData + ( row * linelen ), row, 0 ) < 0 )
+                if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<float*>(image->m_data) + ( row * linelen )), row, 0 ) < 0 )
                     break;
             }
             TIFFClose( pOut );
@@ -594,20 +564,20 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 	if(pImage)
 	{
 		// Store the instance information so that on re-entry we know which display is being referenced.
-		pImage->m_ImageHeight = height;
-		pImage->m_ImageWidth = width;
+		pImage->m_height = height;
+		pImage->m_width = width;
 		// Determine the display type from the list that we support.
 		if(strcmp(drivername, "file")==0 || strcmp(drivername, "tiff")==0)
-			pImage->m_ImageType = Type_File;
+			pImage->m_imageType = Type_File;
 		else if(strcmp(drivername, "framebuffer")==0)
-			pImage->m_ImageType = Type_Framebuffer;
+			pImage->m_imageType = Type_Framebuffer;
 		else if(strcmp(drivername, "zfile")==0)
-			pImage->m_ImageType = Type_ZFile;
+			pImage->m_imageType = Type_ZFile;
 		else if(strcmp(drivername, "zframebuffer")==0)
-			pImage->m_ImageType = Type_ZFramebuffer;
+			pImage->m_imageType = Type_ZFramebuffer;
 		else if(strcmp(drivername, "shadow")==0)
-			pImage->m_ImageType = Type_Shadowmap;
-		pImage->m_Channels = iFormatCount;
+			pImage->m_imageType = Type_Shadowmap;
+		pImage->m_iFormatCount = iFormatCount;
 
 		*image = pImage;
 
@@ -623,28 +593,28 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		else if(widestFormat == PkDspySigned32)	widestFormat = PkDspyUnsigned32;
 
 		// Create and initialise a byte array if rendering 8bit image, or we are in framebuffer mode
-		if(pImage->m_ImageType == Type_Framebuffer)
+		if(pImage->m_imageType == Type_Framebuffer)
 		{
-			pImage->m_Data = new unsigned char[ pImage->m_ImageWidth * pImage->m_ImageHeight * pImage->m_Channels ];
+			pImage->m_data = new unsigned char[ pImage->m_width * pImage->m_height * pImage->m_iFormatCount ];
 
 			// Initialise the display to a checkerboard to show alpha
-			for (TqInt i = 0; i < pImage->m_ImageHeight; i ++) 
+			for (TqInt i = 0; i < pImage->m_height; i ++) 
 			{
-				for (TqInt j = 0; j < pImage->m_ImageWidth; j++)
+				for (TqInt j = 0; j < pImage->m_width; j++)
 				{
 					int     t       = 0;
 					unsigned char d = 255;
 
-					if ( ( (pImage->m_ImageHeight - 1 - i) & 31 ) < 16 ) t ^= 1;
+					if ( ( (pImage->m_height - 1 - i) & 31 ) < 16 ) t ^= 1;
 					if ( ( j & 31 ) < 16 ) t ^= 1;
 
 					if ( t )
 					{
 						d      = 128;
 					}
-					reinterpret_cast<unsigned char*>(pImage->m_Data)[pImage->m_Channels * (i*pImage->m_ImageWidth + j) ] = d;
-					reinterpret_cast<unsigned char*>(pImage->m_Data)[pImage->m_Channels * (i*pImage->m_ImageWidth + j) + 1] = d;
-					reinterpret_cast<unsigned char*>(pImage->m_Data)[pImage->m_Channels * (i*pImage->m_ImageWidth + j) + 2] = d;
+					reinterpret_cast<unsigned char*>(pImage->m_data)[pImage->m_iFormatCount * (i*pImage->m_width + j) ] = d;
+					reinterpret_cast<unsigned char*>(pImage->m_data)[pImage->m_iFormatCount * (i*pImage->m_width + j) + 1] = d;
+					reinterpret_cast<unsigned char*>(pImage->m_data)[pImage->m_iFormatCount * (i*pImage->m_width + j) + 2] = d;
 				}
 			}
 		}
@@ -653,24 +623,50 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			// Determine the appropriate format to save into.
 			if(widestFormat == PkDspyUnsigned8)
 			{
-				pImage->m_Data = malloc( g_ImageWidth * g_ImageHeight * g_Channels * sizeof(unsigned char));
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(unsigned char));
 			}
 			else if(widestFormat == PkDspyUnsigned16)
 			{
-				pImage->m_Data = malloc( g_ImageWidth * g_ImageHeight * g_Channels * sizeof(unsigned short));
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(unsigned short));
 			}
 			else if(widestFormat == PkDspyUnsigned32)
 			{
-				pImage->m_Data = malloc( g_ImageWidth * g_ImageHeight * g_Channels * sizeof(unsigned long));
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(unsigned long));
 			}
 			else if(widestFormat == PkDspyFloat32)
 			{
-				pImage->m_Data = malloc( g_ImageWidth * g_ImageHeight * g_Channels * sizeof(float));
+				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(float));
 			}
 		}
+
+		PtDspyDevFormat outFormat[] = 
+		{
+			{"r", widestFormat},
+			{"g", widestFormat},
+			{"b", widestFormat},
+			{"a", widestFormat},
+		};
+		PtDspyError err;
+		if( ( err = DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat) ) != PkDspyErrorNone )
+			return(err);
 	}
 	else
 		return(PkDspyErrorNoMemory);
 
 	return(PkDspyErrorNone);	
 }
+
+
+PtDspyError DspyImageData(PtDspyImageHandle image,
+								   int xmin,
+								   int xmax,
+								   int ymin,
+								   int ymax,
+								   int entrysize,
+								   const unsigned char *data)
+{
+	
+
+	return(PkDspyErrorNone);	
+}
+

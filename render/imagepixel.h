@@ -68,9 +68,23 @@ START_NAMESPACE( Aqsis )
 
 class CqCSGTreeNode;
 
+enum EqSampleIndices
+{
+	Sample_Red = 0,
+	Sample_Green = 1,
+	Sample_Blue = 2,
+	Sample_ORed = 3,
+	Sample_OGreen = 4,
+	Sample_OBlue = 5,
+	Sample_Depth = 6,
+	Sample_Coverage = 7,
+	Sample_Alpha = 8,
+};
+
+
 struct SqImageSample
 {
-    SqImageSample( TqInt NumData = 8 )
+    SqImageSample( TqInt NumData = 9 )
     {
         m_Data.resize( NumData );
     }
@@ -81,51 +95,65 @@ struct SqImageSample
 
     CqColor Cs() const
     {
-        return( CqColor( m_Data[0], m_Data[1], m_Data[2] ) );
+        return( CqColor( m_Data[Sample_Red], m_Data[Sample_Green], m_Data[Sample_Blue] ) );
     }
 
     void SetCs( const CqColor& col )
     {
-        assert( m_Data.size() >= 3 );
-        m_Data[0] = col.fRed();
-        m_Data[1] = col.fGreen();
-        m_Data[2] = col.fBlue();
+        assert( m_Data.size() >= Sample_Blue+1 );
+        m_Data[Sample_Red] = col.fRed();
+        m_Data[Sample_Green] = col.fGreen();
+        m_Data[Sample_Blue] = col.fBlue();
     }
 
     CqColor Os() const
     {
-        return( CqColor( m_Data[3], m_Data[4], m_Data[5] ) );
+        return( CqColor( m_Data[Sample_ORed], m_Data[Sample_OGreen], m_Data[Sample_OBlue] ) );
     }
 
     void SetOs( const CqColor& col )
     {
-        assert( m_Data.size() >= 6 );
-        m_Data[3] = col.fRed();
-        m_Data[4] = col.fGreen();
-        m_Data[5] = col.fBlue();
+        assert( m_Data.size() >= Sample_OBlue+1);
+        m_Data[Sample_ORed] = col.fRed();
+        m_Data[Sample_OGreen] = col.fGreen();
+        m_Data[Sample_OBlue] = col.fBlue();
     }
 
     TqFloat Depth() const
     {
-        return( m_Data[6] );
+        assert( m_Data.size() >= Sample_Depth+1 );
+        return( m_Data[Sample_Depth] );
     }
 
     void SetDepth( TqFloat d )
     {
-        assert( m_Data.size() >= 7 );
-        m_Data[6] = d;
+        assert( m_Data.size() >= Sample_Depth+1 );
+        m_Data[Sample_Depth] = d;
     }
 
     TqFloat Coverage() const
     {
-        return( m_Data[7] );
+        assert( m_Data.size() >= Sample_Coverage+1 );
+        return( m_Data[Sample_Coverage] );
     }
 
     void SetCoverage( TqFloat d )
     {
-        assert( m_Data.size() >= 8 );
-        m_Data[7] = d;
+        assert( m_Data.size() >= Sample_Coverage+1 );
+        m_Data[Sample_Coverage] = d;
     }
+
+	TqFloat Alpha() const
+	{
+        assert( m_Data.size() >= Sample_Alpha+1 );
+		return(m_Data[Sample_Alpha]);
+	}
+
+	void SetAlpha(TqFloat a)
+	{
+        assert( m_Data.size() >= Sample_Alpha+1 );
+		m_Data[Sample_Alpha] = a;
+	}
 
     TqInt DataSize() const
     {
@@ -234,6 +262,18 @@ public:
     void	SetDepth( TqFloat d )
     {
         m_Data.SetDepth( d );
+    }
+    /** Get the premultiplied alpha of this pixel
+     * \return A float representing the premultiplied alpha value of this pixel.
+     * \attention Only call this after already calling FilterBucket().
+     */
+    TqFloat	Alpha()
+    {
+        return ( m_Data.Alpha() );
+    }
+    void	SetAlpha( TqFloat a )
+    {
+        m_Data.SetAlpha( a );
     }
     /** Get a pointer to the sample data
      * \return A constant pointer to the sample data.
