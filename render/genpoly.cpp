@@ -52,6 +52,7 @@ CqPolygonGeneral2D& CqPolygonGeneral2D::operator=( const CqPolygonGeneral2D& Fro
 
     m_Orientation = From.m_Orientation;
     m_Axis = From.m_Axis;
+	m_Reverse = From.m_Reverse;
 
     m_pVertices = From.m_pVertices;
 
@@ -77,6 +78,7 @@ void CqPolygonGeneral2D::SwapDirection()
         m_aiVertices[ which ] = tmp;
     }
     CalcOrientation();
+	m_Reverse = !m_Reverse;
 }
 
 
@@ -389,9 +391,18 @@ void CqPolygonGeneral2D::Triangulate( std::vector<TqInt>& aiList ) const
             return ;
         else
         {
-            aiList.push_back( m_aiVertices[ iList[ iPrev ] ] );
-            aiList.push_back( m_aiVertices[ iList[ iCurr ] ] );
-            aiList.push_back( m_aiVertices[ iList[ iNext ] ] );
+			if( m_Reverse )
+			{
+				aiList.push_back( m_aiVertices[ iList[ iNext ] ] );
+				aiList.push_back( m_aiVertices[ iList[ iCurr ] ] );
+				aiList.push_back( m_aiVertices[ iList[ iPrev ] ] );
+			}
+			else
+			{				
+				aiList.push_back( m_aiVertices[ iList[ iPrev ] ] );
+				aiList.push_back( m_aiVertices[ iList[ iCurr ] ] );
+				aiList.push_back( m_aiVertices[ iList[ iNext ] ] );
+			}
 
             cVertex -= 1;
             for ( iVertex = iCurr; iVertex < cVertex; iVertex++ )
@@ -401,9 +412,18 @@ void CqPolygonGeneral2D::Triangulate( std::vector<TqInt>& aiList ) const
     }
 	if( cVertex == 3 )
 	{
-		aiList.push_back( m_aiVertices[ iList[ 0 ] ] );
-		aiList.push_back( m_aiVertices[ iList[ 1 ] ] );
-		aiList.push_back( m_aiVertices[ iList[ 2 ] ] );
+		if( m_Reverse )
+		{
+			aiList.push_back( m_aiVertices[ iList[ 2 ] ] );
+			aiList.push_back( m_aiVertices[ iList[ 1 ] ] );
+			aiList.push_back( m_aiVertices[ iList[ 0 ] ] );
+		}
+		else
+		{
+			aiList.push_back( m_aiVertices[ iList[ 0 ] ] );
+			aiList.push_back( m_aiVertices[ iList[ 1 ] ] );
+			aiList.push_back( m_aiVertices[ iList[ 2 ] ] );
+		}
 	}
 }
 

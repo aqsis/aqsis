@@ -50,7 +50,8 @@ class CqPolygonGeneral2D
 {
 public:
     CqPolygonGeneral2D() :
-            m_Orientation( Orientation_Unknown )
+            m_Orientation( Orientation_Unknown ),
+			m_Reverse( TqFalse )
     {
         STATS_INC( GPR_poly );
     }
@@ -134,6 +135,7 @@ private:
     TqInt	m_Orientation;
     TqInt	m_Axis;
     boost::shared_ptr<CqSurface>	m_pVertices;
+	TqBool	m_Reverse;
 };
 
 
