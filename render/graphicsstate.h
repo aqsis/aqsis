@@ -37,12 +37,11 @@
 #include	"attributes.h"
 #include	"transform.h"
 //#include	"messages.h"
-#include	"list.h"
+#include	"lights.h"
 #include	"csgtree.h"
 
 START_NAMESPACE( Aqsis )
 
-class CqLightsource;
 class CqBasicSurface;
 class CqDeformingSurface;
 
@@ -230,7 +229,7 @@ public:
         return ( ptransCurrent() ->matObjectToWorld( time ) );
     }
 
-    virtual	void	AddContextLightSource( CqLightsource* pLS )
+    virtual	void	AddContextLightSource( const CqLightsourcePtr& pLS )
     {
         if ( pconParent() )
             pconParent() ->AddContextLightSource( pLS );
@@ -402,10 +401,10 @@ public:
         return ( pconParent() ->optCurrent() );
     }
 
-    virtual	void	AddContextLightSource( CqLightsource* pLS );
+    virtual	void	AddContextLightSource( const CqLightsourcePtr& pLS );
 
 private:
-    std::vector<CqLightsource*>	m_apWorldLights;
+    std::vector<CqLightsourcePtr>	m_apWorldLights;
 };
 
 

@@ -125,13 +125,13 @@ public:
     /** Add a lightsource to the current available list.
      * \param pL a pointer to the new lightsource.
      */
-    void	AddLightsource( CqLightsource* pL )
+    void	AddLightsource( const boost::shared_ptr<CqLightsource>& pL )
     {
         // Check if the ligthsource is already active
-        std::vector<CqLightsource*>::iterator end = m_apLightsources.end();
-        for ( std::vector<CqLightsource*>::iterator i = m_apLightsources.begin(); i != end; i++ )
+        std::vector<boost::shared_ptr<CqLightsource> >::iterator end = m_apLightsources.end();
+        for ( std::vector<boost::shared_ptr<CqLightsource> >::iterator i = m_apLightsources.begin(); i != end; i++ )
         {
-            if ( ( *i ) == pL )
+            if ( ( i->get() ) == pL.get() )
                 return ;
         }
         m_apLightsources.push_back( pL );
@@ -139,13 +139,13 @@ public:
     /** Remove a lightsource from the current available list.
      * \param pL a pointer to the lightsource to remove.
      */
-    void	RemoveLightsource( CqLightsource* pL )
+    void	RemoveLightsource( const boost::shared_ptr<CqLightsource>& pL )
     {
         // Check if the ligthsource is in the active list.
-        std::vector<CqLightsource*>::iterator end = m_apLightsources.end();
-        for ( std::vector<CqLightsource*>::iterator i = m_apLightsources.begin(); i != end; i++ )
+        std::vector<boost::shared_ptr<CqLightsource> >::iterator end = m_apLightsources.end();
+        for ( std::vector<boost::shared_ptr<CqLightsource> >::iterator i = m_apLightsources.begin(); i != end; i++ )
         {
-            if ( *i == pL )
+            if ( i->get() == pL.get() )
             {
                 m_apLightsources.erase( i );
                 return ;
@@ -155,7 +155,7 @@ public:
     /** Get a reference to the lightsource list.
      * \return a reference to the vector of lightsource pointers.
      */
-    virtual const	std::vector<CqLightsource*>&	apLights() const
+    virtual const	std::vector<boost::shared_ptr<CqLightsource> >&	apLights() const
     {
         return ( m_apLightsources );
     }
@@ -496,7 +496,7 @@ private:
     boost::shared_ptr<IqShader> m_pshadExteriorVolume;          ///< a pointer to the current exterior shader.
 
     CqTrimLoopArray m_TrimLoops;					///< the array of closed trimcurve loops.
-    std::vector<CqLightsource*> m_apLightsources;	///< a vector of currently available lightsources.
+    std::vector<boost::shared_ptr<CqLightsource> > m_apLightsources;	///< a vector of currently available lightsources.
 
     std::list<CqAttributes*>::iterator	m_StackIterator;	///< the index of this attribute state in the global stack, used for destroying when last reference is removed.
 }

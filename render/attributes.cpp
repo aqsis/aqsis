@@ -183,12 +183,7 @@ CqAttributes& CqAttributes::operator=( const CqAttributes& From )
     //	}
     m_aAttributes = From.m_aAttributes;
 
-    // Copy the lightsource list.
-    m_apLightsources.resize( 0 );
-    std::vector<CqLightsource*>::const_iterator il;
-    std::vector<CqLightsource*>::const_iterator end = From.m_apLightsources.end();
-    for ( il = From.m_apLightsources.begin(); il != end; il++ )
-        m_apLightsources.push_back( *il );
+    m_apLightsources = From.m_apLightsources;
 
     m_pshadDisplacement = From.m_pshadDisplacement;
     m_pshadAreaLightSource = From.m_pshadAreaLightSource;
@@ -495,7 +490,7 @@ const CqMatrix* CqAttributes::GetMatrixAttribute( const char* strName, const cha
 
 IqLightsource*	CqAttributes::pLight( TqInt index )
 {
-    return ( m_apLightsources[ index ] );
+    return ( m_apLightsources[ index ].get() );
 }
 
 //---------------------------------------------------------------------

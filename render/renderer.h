@@ -44,11 +44,13 @@
 #include	"iddmanager.h"
 #include	"irenderer.h"
 #include	"iraytrace.h"
+#include	"iraytrace.h"
 
 START_NAMESPACE( Aqsis )
 
 class CqImageBuffer;
 class CqObjectInstance;
+class CqModeBlock;
 
 struct SqCoordSys
 {

@@ -44,6 +44,7 @@
 #include	"csgtree.h"
 #include	"isurface.h"
 #include	"logging.h"
+#include	"stats.h"
 
 START_NAMESPACE( Aqsis )
 

@@ -34,6 +34,7 @@
 #include	<queue>
 #include	<deque>
 
+#include	"iddmanager.h"
 #include	"bitvector.h"
 #include	"micropolygon.h"
 #include	"renderer.h"

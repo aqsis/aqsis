@@ -421,14 +421,7 @@ RtVoid	RiBegin( RtToken name )
     QGetRenderContext() ->ptransSetTime( CqMatrix() );
     QGetRenderContext() ->SetCameraTransform( QGetRenderContext() ->ptransCurrent() );
     // Clear the lightsources stack.
-    CqLightsource* pL = Lightsource_stack.pFirst();
-    while ( pL )
-    {
-        // Unlink from the stack, and release the stacks reference to the light.
-        pL->UnLink();
-        RELEASEREF( pL );
-        pL = Lightsource_stack.pFirst();
-    }
+    Lightsource_stack.clear();
 
     // Clear any options.
     QGetRenderContext() ->optCurrent().ClearOptions();
@@ -495,14 +488,7 @@ RtVoid	RiEnd()
     CqTextureMap::FlushCache();
 
     // Clear the lightsources stack.
-    CqLightsource* pL = Lightsource_stack.pFirst();
-    while ( pL )
-    {
-        // Unlink from the stack, and release the stacks reference to the light.
-        pL->UnLink();
-        RELEASEREF( pL );
-        pL = Lightsource_stack.pFirst();
-    }
+    Lightsource_stack.clear();
 
     // Delete the renderer
     delete( QGetRenderContext() );
@@ -2035,7 +2021,8 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
     if ( !pShader ) return ( 0 );
 
     pShader->matCurrent() = QGetRenderContext() ->ptransCurrent()->matObjectToWorld(QGetRenderContext()->Time());
-    CqLightsource* pNew = new CqLightsource( pShader, RI_TRUE );
+    CqLightsourcePtr pNew( new CqLightsource( pShader, RI_TRUE ) );
+    Lightsource_stack.push_back(pNew);
 
     // Execute the intiialisation code here, as we now have our shader context complete.
     pShader->PrepareDefArgs();
@@ -2054,7 +2041,7 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 
         // Add it as a Context light as well in case we are in a context that manages it's own lights.
         QGetRenderContext() ->pconCurrent() ->AddContextLightSource( pNew );
-        return ( reinterpret_cast<RtLightHandle>( pNew ) );
+        return ( reinterpret_cast<RtLightHandle>( pNew.get() ) );
     }
     return ( 0 );
 }
@@ -2105,12 +2092,14 @@ RtVoid	RiIlluminate( RtLightHandle light, RtBoolean onoff )
 
 	Validate_RiIlluminate
 
+    CqLightsourcePtr pL( reinterpret_cast<CqLightsource*>( light )->shared_from_this() );
+
     // Check if we are turning the light on or off.
     if ( light == NULL ) return ;
     if ( onoff )
-        QGetRenderContext() ->pattrWriteCurrent() ->AddLightsource( reinterpret_cast<CqLightsource*>( light ) );
+        QGetRenderContext() ->pattrWriteCurrent() ->AddLightsource( pL );
     else
-        QGetRenderContext() ->pattrWriteCurrent() ->RemoveLightsource( reinterpret_cast<CqLightsource*>( light ) );
+        QGetRenderContext() ->pattrWriteCurrent() ->RemoveLightsource( pL );
     return ;
 }
 

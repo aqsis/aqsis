@@ -26,10 +26,11 @@
 #include	"aqsis.h"
 #include	"lights.h"
 #include	"file.h"
+#include	"renderer.h"
 
 START_NAMESPACE( Aqsis )
 
-CqList<CqLightsource>	Lightsource_stack;
+std::deque<CqLightsourcePtr>	Lightsource_stack;
 
 //---------------------------------------------------------------------
 /** Default constructor.
@@ -43,11 +44,6 @@ CqLightsource::CqLightsource( const boost::shared_ptr<IqShader>& pShader, TqBool
     // Set a reference with the current attributes.
     m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
     ADDREF( m_pAttributes );
-
-    // Link into the lightsource stack.
-    Lightsource_stack.LinkFirst( this );
-    // Add a reference from the stack.
-    ADDREF( this );
 }
 
 

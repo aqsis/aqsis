@@ -30,7 +30,6 @@
 #include	<vector>
 #include	<boost/utility.hpp>
 #include	<boost/shared_ptr.hpp>
-#include	<boost/enable_shared_from_this.hpp>
 
 #include	"aqsis.h"
 
@@ -58,7 +57,7 @@ typedef boost::shared_ptr<CqTransform> CqTransformPtr;
  * Container class for the transform definitions of the graphics state.
  */
 
-class CqTransform : public CqMotionSpec<SqTransformation>, public IqTransform, public boost::enable_shared_from_this<CqTransform>, private boost::noncopyable
+class CqTransform : public CqMotionSpec<SqTransformation>, public IqTransform, private boost::noncopyable
 {
 public:
     class Set {};

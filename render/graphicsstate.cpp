@@ -25,10 +25,10 @@
 
 #include	"aqsis.h"
 
-#include "graphicsstate.h"
 #include "lights.h"
 #include "csgtree.h"
 #include "renderer.h"
+#include "imagebuffer.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -120,11 +120,6 @@ CqWorldModeBlock::CqWorldModeBlock( const boost::shared_ptr<CqModeBlock>& pconPa
 
 CqWorldModeBlock::~CqWorldModeBlock()
 {
-    // Delete any context lights
-    std::vector<CqLightsource*>::iterator i;
-    for ( i = m_apWorldLights.begin(); i != m_apWorldLights.end(); i++ )
-        RELEASEREF( ( *i ) );
-
     RELEASEREF( m_pattrCurrent );
 }
 
@@ -133,11 +128,10 @@ CqWorldModeBlock::~CqWorldModeBlock()
 /** Hold a reference to the specified lightsource in this context.
  */
 
-void CqWorldModeBlock::AddContextLightSource( CqLightsource* pLS )
+void CqWorldModeBlock::AddContextLightSource( const CqLightsourcePtr& pLS )
 {
-    // Add the light to the context stack and reference it.
+    // Add the light to the context stack.
     m_apWorldLights.push_back( pLS );
-    ADDREF( pLS );
 }
 
 //---------------------------------------------------------------------

@@ -29,6 +29,9 @@
 #define LIGHTS_H_INCLUDED 1
 
 #include	<vector>
+#include	<deque>
+#include	<boost/shared_ptr.hpp>
+#include	<boost/enable_shared_from_this.hpp>
 
 #include	"aqsis.h"
 
@@ -38,18 +41,21 @@
 #include "matrix.h"
 #include "shaderexecenv.h"
 #include "vector4d.h"
-#include "imagebuffer.h"
 #include "version.h"
 #include "ilightsource.h"
+#include "attributes.h"
 
 START_NAMESPACE( Aqsis )
+
+class CqLightsource;
+typedef boost::shared_ptr<CqLightsource> CqLightsourcePtr;
 
 //----------------------------------------------------------------------
 /** \class CqLightsource
  * Abstract base class from which all lightsources are derived.
  */
 
-class CqLightsource : public CqListEntry<CqLightsource>, public IqLightsource, public CqRefCount
+class CqLightsource : public IqLightsource, public boost::enable_shared_from_this<CqLightsource>
 {
 public:
     CqLightsource( const boost::shared_ptr<IqShader>& pShader, TqBool fActive = TqTrue );
@@ -215,7 +221,7 @@ private:
 }
 ;
 
-extern CqList<CqLightsource>	Lightsource_stack;
+extern std::deque<CqLightsourcePtr>	Lightsource_stack;
 
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
