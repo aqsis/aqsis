@@ -156,6 +156,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %token	<ctype>	REQUEST_TOKEN_IMAGER
 %token	<ctype>	REQUEST_TOKEN_INTERIOR
 %token	<ctype>	REQUEST_TOKEN_LIGHTSOURCE
+%token	<ctype>	REQUEST_TOKEN_MAKEOCCLUSION
 %token	<ctype>	REQUEST_TOKEN_MAKEBUMP
 %token	<ctype>	REQUEST_TOKEN_MAKECUBEFACEENVIRONMENT
 %token	<ctype>	REQUEST_TOKEN_MAKELATLONGENVIRONMENT
@@ -262,6 +263,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %type	<ctype>	imager
 %type	<ctype>	interior
 %type	<ctype>	lightsource
+%type	<ctype>	makeocclusion
 %type	<ctype>	makebump
 %type	<ctype>	makecubefaceenvironment
 %type	<ctype>	makelatlongenvironment
@@ -1075,6 +1077,10 @@ complete_request
 			{
 				ParseCallbackInterface->RiMakeShadowV($2, $3, $4->Count(), $4->Tokens(), $4->Values());
 			}
+	|	makeocclusion string_array string opttvpairs
+			{
+				ParseCallbackInterface->RiMakeOcclusionV($2->Count(), (const char**)&(*$2)[0], $3, $4->Count(), $4->Tokens(), $4->Values());
+			}
 	|	errorhandler string
 			{
 /*
@@ -1205,6 +1211,7 @@ illuminate : REQUEST_TOKEN_ILLUMINATE	{ ExpectParams(); };
 imager : REQUEST_TOKEN_IMAGER	{ ExpectParams(); };
 interior : REQUEST_TOKEN_INTERIOR	{ ExpectParams(); };
 lightsource : REQUEST_TOKEN_LIGHTSOURCE	{ ExpectParams(); };
+makeocclusion : REQUEST_TOKEN_MAKEOCCLUSION	{ ExpectParams(); };
 makebump : REQUEST_TOKEN_MAKEBUMP	{ ExpectParams(); };
 makecubefaceenvironment : REQUEST_TOKEN_MAKECUBEFACEENVIRONMENT	{ ExpectParams(); };
 makelatlongenvironment : REQUEST_TOKEN_MAKELATLONGENVIRONMENT	{ ExpectParams(); };

@@ -233,6 +233,10 @@ RendermanInterface::RtVoid Engine::RiMakeShadowV( const char *picfile, const cha
 {
 	::RiMakeShadowV( picfile, shadowfile, count, tokens, values );
 }
+RendermanInterface::RtVoid Engine::RiMakeOcclusionV( RtInt npics, const char **picfile, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
+{
+	::RiMakeOcclusionV( npics, picfile, shadowfile, count, tokens, values );
+}
 RendermanInterface::RtVoid Engine::RiMakeTextureV( const char *imagefile, const char *texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
 {
 	::RiMakeTextureV( imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, count, tokens, values );

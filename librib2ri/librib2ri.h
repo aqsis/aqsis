@@ -69,6 +69,7 @@ class Engine :
 		virtual	RtVoid	RiMakeCubeFaceEnvironmentV( const char *px, const char *nx, const char *py, const char *ny, const char *pz, const char *nz, const char *reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] );
 		virtual	RtVoid	RiMakeLatLongEnvironmentV( const char *imagefile, const char *reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] );
 		virtual	RtVoid	RiMakeShadowV( const char *picfile, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] );
+		virtual	RtVoid	RiMakeOcclusionV( RtInt npics, const char **picfile, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] );
 		virtual	RtVoid	RiMakeTextureV( const char *imagefile, const char *texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] );
 		virtual	RtVoid	RiMatte( RtBoolean onoff );
 		virtual	RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] );

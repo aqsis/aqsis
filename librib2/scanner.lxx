@@ -206,6 +206,7 @@ MakeBump				{ return REQUEST_TOKEN_MAKEBUMP; }
 MakeLatLongEnvironment	{ return REQUEST_TOKEN_MAKELATLONGENVIRONMENT; }
 MakeCubeFaceEnvironment { return REQUEST_TOKEN_MAKECUBEFACEENVIRONMENT; }
 MakeShadow				{ return REQUEST_TOKEN_MAKESHADOW; }
+MakeOcclusion			{ return REQUEST_TOKEN_MAKEOCCLUSION; }
 ErrorHandler			{ return REQUEST_TOKEN_ERRORHANDLER; }
 SubdivisionMesh			{ return REQUEST_TOKEN_SUBDIVISIONMESH; }
 ReadArchive				{ return REQUEST_TOKEN_READARCHIVE; }

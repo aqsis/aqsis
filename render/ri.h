@@ -279,6 +279,8 @@ extern	"C"
 	RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char * py, const char * ny, const char * pz, const char * nz, const char * reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST );
 	RtVoid	RiMakeShadow( const char * picfile, const char * shadowfile, ... );
 	RtVoid	RiMakeShadowV( const char * picfile, const char * shadowfile, PARAMETERLIST );
+	RtVoid	RiMakeOcclusion( RtInt npics, const char **picfiles, const char *shadowfile, ... );
+	RtVoid	RiMakeOcclusionV( RtInt npics, const char **picfiles, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] );
 
 	RtVoid	RiErrorHandler( RtErrorFunc handler );
 	RtVoid	RiErrorIgnore( RtInt code, RtInt severity, const char * message );

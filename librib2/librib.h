@@ -94,6 +94,7 @@ class RendermanInterface
 		virtual	RtVoid	RiMakeLatLongEnvironmentV( const char *imagefile, const char *reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiMakeShadowV( const char *picfile, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiMakeTextureV( const char *imagefile, const char *texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
+		virtual	RtVoid	RiMakeOcclusionV( RtInt npics, const char **picfile, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiMatte( RtBoolean onoff ) = 0;
 		virtual	RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] ) = 0;
 		virtual	RtVoid	RiMotionEnd() = 0;

@@ -4329,6 +4329,49 @@ RtVoid	RiMakeShadowV( const char * picfile, const char * shadowfile, PARAMETERLI
 
 
 //----------------------------------------------------------------------
+// RiMakeOcclusion
+// Convert a series of depth maps to an occlusion map.
+//
+RtVoid	RiMakeOcclusion( RtInt npics, const char **picfiles, const char *shadowfile, ... )
+{
+	va_list	pArgs;
+	va_start( pArgs, shadowfile );
+
+	RtToken* pTokens;
+	RtPointer* pValues;
+	RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+
+	RiMakeOcclusionV( npics, picfiles, shadowfile, count, pTokens, pValues );
+}
+
+
+//----------------------------------------------------------------------
+// RiMakeOcclusionV
+// List based version of above.
+//
+RtVoid	RiMakeOcclusionV( RtInt npics, const char **picfiles, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
+{
+	QGetRenderContext() ->Stats().MakeShadowTimer().Start();
+	
+	RtInt index;
+	for( index = 0; index < npics; index++ )
+	{
+		CqShadowMap ZFile( picfiles[index] );
+		ZFile.LoadZFile();
+
+		TqInt comp, qual;
+		ProcessCompression( &comp, &qual, count, tokens, values );
+		ZFile.SetCompression( comp );
+		ZFile.SetQuality( qual );
+
+		ZFile.SaveShadowMap( shadowfile, TqTrue );
+	}
+	QGetRenderContext() ->Stats().MakeShadowTimer().Stop();
+	return ;
+}
+
+
+//----------------------------------------------------------------------
 // RiErrorHandler
 // Set the function used to report errors.
 //

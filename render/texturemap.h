@@ -657,7 +657,7 @@ class CqShadowMap : public CqTextureMap
 		TqFloat	Sample( const CqVector3D&	vecPoint );
 		void	SaveZFile();
 		void	LoadZFile();
-		void	SaveShadowMap( const CqString& strShadowName );
+		void	SaveShadowMap( const CqString& strShadowName, TqBool append = TqFalse );
 		void	ReadMatrices();
 
 		virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt directory = 0, TqBool fProt = TqFalse )
@@ -683,6 +683,7 @@ class CqShadowMap : public CqTextureMap
 
 		std::vector<CqMatrix>	m_WorldToCameraMatrices;		///< Matrix to convert points from world space to light space.
 		std::vector<CqMatrix>	m_WorldToScreenMatrices;		///< Matrix to convert points from world space to screen space.
+		TqInt	m_NumberOfMaps;
 }
 ;
 

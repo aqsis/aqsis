@@ -2116,6 +2116,7 @@ void CqShadowMap::LoadZFile()
 			// Save the transformation matrices.
 			m_WorldToScreenMatrices.resize(1);
 			m_WorldToCameraMatrices.resize(1);
+			m_NumberOfMaps = 0;
 			file.read( reinterpret_cast<TqPchar>( matWorldToCamera()[ 0 ] ), sizeof( matWorldToCamera()[ 0 ][ 0 ] ) * 4 );
 			file.read( reinterpret_cast<TqPchar>( matWorldToCamera()[ 1 ] ), sizeof( matWorldToCamera()[ 0 ][ 0 ] ) * 4 );
 			file.read( reinterpret_cast<TqPchar>( matWorldToCamera()[ 2 ] ), sizeof( matWorldToCamera()[ 0 ][ 0 ] ) * 4 );
@@ -2148,16 +2149,18 @@ void CqShadowMap::LoadZFile()
 /** Save the shadowmap data in system specifirc image format.
  */
 
-void CqShadowMap::SaveShadowMap( const CqString& strShadowName )
+void CqShadowMap::SaveShadowMap( const CqString& strShadowName, TqBool append )
 {
 	TqChar version[ 80 ];
+
+	const char* mode = (append)? "a" : "w";
 
 	// Save the shadowmap to a binary file.
 	if ( m_strName.compare( "" ) != 0 )
 	{
 		if ( m_apSegments.size() != 0 )
 		{
-			TIFF * pshadow = TIFFOpen( strShadowName.c_str(), "w" );
+			TIFF * pshadow = TIFFOpen( strShadowName.c_str(), mode );
 			TIFFCreateDirectory( pshadow );
 
 			// Write the transform matrices.
@@ -2202,28 +2205,39 @@ void CqShadowMap::ReadMatrices()
 	TqFloat*	WToC;
 	TqFloat*	WToS;
 	CqMatrix	matWToC, matWToS;
-	TqInt reta = TIFFGetField( m_pImage, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, &WToC );
-	TqInt retb = TIFFGetField( m_pImage, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, &WToS );
-	if ( !reta || !retb )
-		SetInvalid();
-	else
+	
+	// Set the number of shadow maps initially to 0.
+	m_NumberOfMaps = 0;
+	
+	while(1)
 	{
-		TqInt r, c;
-		for ( r = 0; r < 4; r++ )
+		TqInt reta = TIFFGetField( m_pImage, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, &WToC );
+		TqInt retb = TIFFGetField( m_pImage, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, &WToS );
+		if ( !reta || !retb )
+			SetInvalid();
+		else
 		{
-			for ( c = 0; c < 4; c++ )
+			TqInt r, c;
+			for ( r = 0; r < 4; r++ )
 			{
-				matWToC[ r ][ c ] = WToC[ ( r * 4 ) + c ];
-				matWToS[ r ][ c ] = WToS[ ( r * 4 ) + c ];
+				for ( c = 0; c < 4; c++ )
+				{
+					matWToC[ r ][ c ] = WToC[ ( r * 4 ) + c ];
+					matWToS[ r ][ c ] = WToS[ ( r * 4 ) + c ];
+				}
 			}
 		}
-	}
-	// Set the matrixes to general, not Identity as default.
-	matWToC.SetfIdentity( TqFalse );
-	matWToS.SetfIdentity( TqFalse );
+		// Set the matrixes to general, not Identity as default.
+		matWToC.SetfIdentity( TqFalse );
+		matWToS.SetfIdentity( TqFalse );
 
-	m_WorldToCameraMatrices.push_back( matWToC );
-	m_WorldToScreenMatrices.push_back( matWToS );
+		m_WorldToCameraMatrices.push_back( matWToC );
+		m_WorldToScreenMatrices.push_back( matWToS );
+		m_NumberOfMaps++;	// Increment the number of maps.
+
+		if( TIFFReadDirectory( m_pImage ) == 0 )
+			break;
+	}
 }
 
 
