@@ -27,7 +27,6 @@ extern "C" int isatty(int);
 #endif /* WIN32 */
 
 #include "bdec.h"
-#include "parameters.h"
 
 namespace librib
 {
@@ -47,214 +46,12 @@ static std::stack<CqRibBinaryDecoder*> StreamStack;
 static std::stack<YY_BUFFER_STATE> BufferStack;
 static std::stack<std::string> StreamNameStack;
 static std::stack<unsigned int> LineNumberStack;
-extern "C" {int riparsecode(char *keycode); }
 
 #define YY_DECL int yylex( YYSTYPE *lvalp )
 
 static int scannerinput(char* Buffer, int MaxSize);
 #undef YY_INPUT
 #define YY_INPUT(buffer, result, max_size) (result = scannerinput(buffer, max_size))
-
-static unsigned int hash(char *name)
-{
- 
-         unsigned int retval = 0;
-
-         if ( name )
-         {
-                 int length;
-                 int i;
-
-                 /* ints are assumed to be 32 bits */
-
-                 length = strlen( name ); /* < 2^18, or low */
-
-                 /* trivial rejection */
-                 if (length < 4) return 0;
-                 if (length > 25) return 0;
-                 for (i=length-1; i >0; i--) retval += name[i];
-                 retval += length;
-                 
-
-         }
-         return retval;
- 
-}
-
-/* hash key for the RI keyword */
-/* key, value                  */
-typedef struct {
-unsigned int hash;
-unsigned int value;
-} entries;
-
-static entries hardcode[] =
-{
-
-{ hash("version"),  REQUEST_TOKEN_VERSION}, 
-{ hash("Declare"),  REQUEST_TOKEN_DECLARE}, 
-{ hash("FrameBegin"),  REQUEST_TOKEN_FRAMEBEGIN}, 
-{ hash("FrameEnd"),  REQUEST_TOKEN_FRAMEEND}, 
-{ hash("WorldBegin"),  REQUEST_TOKEN_WORLDBEGIN}, 
-{ hash("WorldEnd"),  REQUEST_TOKEN_WORLDEND}, 
-{ hash("Format"),  REQUEST_TOKEN_FORMAT}, 
-{ hash("FrameAspectRatio"),  REQUEST_TOKEN_FRAMEASPECTRATIO}, 
-{ hash("ScreenWindow"),  REQUEST_TOKEN_SCREENWINDOW}, 
-{ hash("CropWindow"),  REQUEST_TOKEN_CROPWINDOW}, 
-{ hash("Projection"),  REQUEST_TOKEN_PROJECTION}, 
-{ hash("Clipping"),  REQUEST_TOKEN_CLIPPING}, 
-{ hash("DepthOfField"),  REQUEST_TOKEN_DEPTHOFFIELD}, 
-{ hash("Shutter"),  REQUEST_TOKEN_SHUTTER}, 
-{ hash("PixelVariance"),  REQUEST_TOKEN_PIXELVARIANCE}, 
-{ hash("PixelSamples"),  REQUEST_TOKEN_PIXELSAMPLES}, 
-{ hash("PixelFilter"),  REQUEST_TOKEN_PIXELFILTER}, 
-{ hash("Exposure"),  REQUEST_TOKEN_EXPOSURE}, 
-{ hash("Imager"),  REQUEST_TOKEN_IMAGER}, 
-{ hash("Quantize"),  REQUEST_TOKEN_QUANTIZE}, 
-{ hash("Display"),  REQUEST_TOKEN_DISPLAY}, 
-{ hash("GaussianFilter"),  REQUEST_TOKEN_GAUSSIANFILTER}, 
-{ hash("BoxFilter"),  REQUEST_TOKEN_BOXFILTER}, 
-{ hash("TriangleFilter"),  REQUEST_TOKEN_TRIANGLEFILTER}, 
-{ hash("CatmullRomFilter"),  REQUEST_TOKEN_CATMULLROMFILTER}, 
-{ hash("SincFilter"),  REQUEST_TOKEN_SINCFILTER}, 
-{ hash("DiskFilter"),  REQUEST_TOKEN_DISKFILTER}, 
-{ hash("BesselFilter"),  REQUEST_TOKEN_BESSELFILTER}, 
-{ hash("Hider"),  REQUEST_TOKEN_HIDER}, 
-{ hash("ColorSamples"),  REQUEST_TOKEN_COLORSAMPLES}, 
-{ hash("RelativeDetail"),  REQUEST_TOKEN_RELATIVEDETAIL}, 
-{ hash("Option"),  REQUEST_TOKEN_OPTION}, 
-{ hash("AttributeBegin"),  REQUEST_TOKEN_ATTRIBUTEBEGIN}, 
-{ hash("AttributeEnd"),  REQUEST_TOKEN_ATTRIBUTEEND}, 
-{ hash("Color"),  REQUEST_TOKEN_COLOR}, 
-{ hash("Opacity"),  REQUEST_TOKEN_OPACITY}, 
-{ hash("TextureCoordinates"),  REQUEST_TOKEN_TEXTURECOORDINATES}, 
-{ hash("LightSource"),  REQUEST_TOKEN_LIGHTSOURCE}, 
-{ hash("AreaLightSource"),  REQUEST_TOKEN_AREALIGHTSOURCE}, 
-{ hash("Illuminate"),  REQUEST_TOKEN_ILLUMINATE}, 
-{ hash("Surface"),  REQUEST_TOKEN_SURFACE}, 
-{ hash("Atmosphere"),  REQUEST_TOKEN_ATMOSPHERE}, 
-{ hash("Interior"),  REQUEST_TOKEN_INTERIOR}, 
-{ hash("Exterior"),  REQUEST_TOKEN_EXTERIOR}, 
-{ hash("ShadingRate"),  REQUEST_TOKEN_SHADINGRATE}, 
-{ hash("ShadingInterpolation"),  REQUEST_TOKEN_SHADINGINTERPOLATION}, 
-{ hash("Matte"),  REQUEST_TOKEN_MATTE}, 
-{ hash("Blobby"),  REQUEST_TOKEN_BLOBBY}, 
-{ hash("Bound"),  REQUEST_TOKEN_BOUND}, 
-{ hash("Detail"),  REQUEST_TOKEN_DETAIL}, 
-{ hash("DetailRange"),  REQUEST_TOKEN_DETAILRANGE}, 
-{ hash("GeometricApproximation"),  REQUEST_TOKEN_GEOMETRICAPPROXIMATION}, 
-{ hash("Orientation"),  REQUEST_TOKEN_ORIENTATION}, 
-{ hash("ReverseOrientation"),  REQUEST_TOKEN_REVERSEORIENTATION}, 
-{ hash("Sides"),  REQUEST_TOKEN_SIDES}, 
-{ hash("Identity"),  REQUEST_TOKEN_IDENTITY}, 
-{ hash("Transform"),  REQUEST_TOKEN_TRANSFORM}, 
-{ hash("ConcatTransform"),  REQUEST_TOKEN_CONCATTRANSFORM}, 
-{ hash("Perspective"),  REQUEST_TOKEN_PERSPECTIVE}, 
-{ hash("Translate"),  REQUEST_TOKEN_TRANSLATE}, 
-{ hash("Rotate"),  REQUEST_TOKEN_ROTATE}, 
-{ hash("Scale"),  REQUEST_TOKEN_SCALE}, 
-{ hash("Skew"),  REQUEST_TOKEN_SKEW}, 
-{ hash("Deformation"),  REQUEST_TOKEN_DEFORMATION}, 
-{ hash("Displacement"),  REQUEST_TOKEN_DISPLACEMENT}, 
-{ hash("CoordinateSystem"),  REQUEST_TOKEN_COORDINATESYSTEM}, 
-{ hash("CoordSysTransform"),  REQUEST_TOKEN_COORDSYSTRANSFORM}, 
-{ hash("TransformPoints"),  REQUEST_TOKEN_TRANSFORMPOINTS}, 
-{ hash("TransformBegin"),  REQUEST_TOKEN_TRANSFORMBEGIN}, 
-{ hash("TransformEnd"),  REQUEST_TOKEN_TRANSFORMEND}, 
-{ hash("Attribute"),  REQUEST_TOKEN_ATTRIBUTE}, 
-{ hash("Polygon"),  REQUEST_TOKEN_POLYGON}, 
-{ hash("GeneralPolygon"),  REQUEST_TOKEN_GENERALPOLYGON}, 
-{ hash("Curves"),  REQUEST_TOKEN_CURVES}, 
-{ hash("Points"),  REQUEST_TOKEN_POINTS}, 
-{ hash("PointsPolygons"),  REQUEST_TOKEN_POINTSPOLYGONS}, 
-{ hash("PointsGeneralPolygons"),  REQUEST_TOKEN_POINTSGENERALPOLYGONS}, 
-{ hash("Basis"),  REQUEST_TOKEN_BASIS}, 
-{ hash("Patch"),  REQUEST_TOKEN_PATCH}, 
-{ hash("PatchMesh"),  REQUEST_TOKEN_PATCHMESH}, 
-{ hash("NuPatch"),  REQUEST_TOKEN_NUPATCH}, 
-{ hash("TrimCurve"),  REQUEST_TOKEN_TRIMCURVE}, 
-{ hash("Sphere"),  REQUEST_TOKEN_SPHERE}, 
-{ hash("Cone"),  REQUEST_TOKEN_CONE}, 
-{ hash("Cylinder"),  REQUEST_TOKEN_CYLINDER}, 
-{ hash("Hyperboloid"),  REQUEST_TOKEN_HYPERBOLOID}, 
-{ hash("Paraboloid"),  REQUEST_TOKEN_PARABOLOID}, 
-{ hash("Disk"),  REQUEST_TOKEN_DISK}, 
-{ hash("Torus"),  REQUEST_TOKEN_TORUS}, 
-{ hash("Procedural"),  REQUEST_TOKEN_PROCEDURAL}, 
-{ hash("Geometry"),  REQUEST_TOKEN_GEOMETRY}, 
-{ hash("SolidBegin"),  REQUEST_TOKEN_SOLIDBEGIN}, 
-{ hash("SolidEnd"),  REQUEST_TOKEN_SOLIDEND}, 
-{ hash("ObjectBegin"),  REQUEST_TOKEN_OBJECTBEGIN}, 
-{ hash("ObjectEnd"),  REQUEST_TOKEN_OBJECTEND}, 
-{ hash("ObjectInstance"),  REQUEST_TOKEN_OBJECTINSTANCE}, 
-{ hash("MotionBegin"),  REQUEST_TOKEN_MOTIONBEGIN}, 
-{ hash("MotionEnd"),  REQUEST_TOKEN_MOTIONEND}, 
-{ hash("MakeTexture"),  REQUEST_TOKEN_MAKETEXTURE}, 
-{ hash("MakeBump"),  REQUEST_TOKEN_MAKEBUMP}, 
-{ hash("MakeLatLongEnvironment"),  REQUEST_TOKEN_MAKELATLONGENVIRONMENT}, 
-{ hash("MakeCubeFaceEnvironment"),  REQUEST_TOKEN_MAKECUBEFACEENVIRONMENT}, 
-{ hash("MakeShadow"),  REQUEST_TOKEN_MAKESHADOW}, 
-{ hash("MakeOcclusion"), REQUEST_TOKEN_MAKEOCCLUSION},
-{ hash("ErrorHandler"),  REQUEST_TOKEN_ERRORHANDLER}, 
-{ hash("SubdivisionMesh"),  REQUEST_TOKEN_SUBDIVISIONMESH}, 
-{ hash("ReadArchive"),  REQUEST_TOKEN_READARCHIVE},
-{ 0, 0}
-};
-
-extern "C" int cmp(const void *a, const void *b)
-{
-   return ((entries *) a)->hash - ((entries *) b)->hash;
-}
-
-
-extern "C" int riparsecode(char *name)
-{ 
-static entries last;
-static int len1; 
-static int len2;
-entries *result, tmp;
-int retval = UNKNOWN_TOKEN;
-     
-    /* the table was not quick sorted
-     * than do a quick sort and reset the last known 
-     * hash,value entry.
-     */
-    if (hardcode[0].hash  != 0)
-    {
-        len1 = sizeof(entries);
-        len2 = sizeof(hardcode)/len1;
-        qsort(hardcode, len2, len1, cmp);
-	last.value = last.hash = 0;
-        
-
-    }
-
-    tmp.hash = hash (name );
-
-    /* trivial rejection */
-    if (tmp.hash == 0) return retval;
-
-    /* the last occurrence the key was the same than return the last know value     
-     */
-    if (last.hash == tmp.hash) return last.value;
-
-    /*
-     * binary search using the current hash key
-     */
-    result = (entries *) bsearch(&tmp, hardcode, len2, len1, cmp);
-
-    /* found it than keept it for now as a reference for the next keyword
-     *
-     */
-    if (result != NULL) {
-        retval = result->value;
-	last.hash = tmp.hash;
-        last.value = result->value;
-    }
-
-
-    return retval; 
-} 
 
 //#define YY_SKIP_YYWRAP
 //static int yywrap();
@@ -310,13 +107,115 @@ array_end		\]
 <INITIAL>{array_start}	{ return INVALID_VALUE; }
 <INITIAL>{array_end}	{ return INVALID_VALUE; }
 							
-
-{letter}({letter})*	{ int retval; 
-                          retval = riparsecode(yytext); return retval;
-                        }
+version					{ return REQUEST_TOKEN_VERSION; }
+Declare					{ return REQUEST_TOKEN_DECLARE; }
+FrameBegin				{ return REQUEST_TOKEN_FRAMEBEGIN; }
+FrameEnd				{ return REQUEST_TOKEN_FRAMEEND; }
+WorldBegin				{ return REQUEST_TOKEN_WORLDBEGIN; }
+WorldEnd				{ return REQUEST_TOKEN_WORLDEND; }
+Format					{ return REQUEST_TOKEN_FORMAT; }
+FrameAspectRatio		{ return REQUEST_TOKEN_FRAMEASPECTRATIO; }
+ScreenWindow			{ return REQUEST_TOKEN_SCREENWINDOW; }
+CropWindow				{ return REQUEST_TOKEN_CROPWINDOW; }
+Projection				{ return REQUEST_TOKEN_PROJECTION; }
+Clipping				{ return REQUEST_TOKEN_CLIPPING; }
+DepthOfField			{ return REQUEST_TOKEN_DEPTHOFFIELD; }
+Shutter					{ return REQUEST_TOKEN_SHUTTER; }
+PixelVariance			{ return REQUEST_TOKEN_PIXELVARIANCE; }
+PixelSamples			{ return REQUEST_TOKEN_PIXELSAMPLES; }
+PixelFilter				{ return REQUEST_TOKEN_PIXELFILTER; }
+Exposure				{ return REQUEST_TOKEN_EXPOSURE; }
+Imager					{ return REQUEST_TOKEN_IMAGER; }
+Quantize				{ return REQUEST_TOKEN_QUANTIZE; }
+Display					{ return REQUEST_TOKEN_DISPLAY; }
+GaussianFilter			{ return REQUEST_TOKEN_GAUSSIANFILTER; }
+BoxFilter				{ return REQUEST_TOKEN_BOXFILTER; }
+TriangleFilter			{ return REQUEST_TOKEN_TRIANGLEFILTER; }
+CatmullRomFilter		{ return REQUEST_TOKEN_CATMULLROMFILTER; }
+SincFilter				{ return REQUEST_TOKEN_SINCFILTER; }
+DiskFilter				{ return REQUEST_TOKEN_DISKFILTER; }
+BesselFilter			{ return REQUEST_TOKEN_BESSELFILTER; }
+Hider					{ return REQUEST_TOKEN_HIDER; }
+ColorSamples			{ return REQUEST_TOKEN_COLORSAMPLES; }
+RelativeDetail			{ return REQUEST_TOKEN_RELATIVEDETAIL; }
+Option					{ return REQUEST_TOKEN_OPTION; }
+AttributeBegin			{ return REQUEST_TOKEN_ATTRIBUTEBEGIN; }
+AttributeEnd			{ return REQUEST_TOKEN_ATTRIBUTEEND; }
+Color					{ return REQUEST_TOKEN_COLOR; }
+Opacity					{ return REQUEST_TOKEN_OPACITY; }
+TextureCoordinates		{ return REQUEST_TOKEN_TEXTURECOORDINATES; }
+LightSource				{ return REQUEST_TOKEN_LIGHTSOURCE; }
+AreaLightSource			{ return REQUEST_TOKEN_AREALIGHTSOURCE; }
+Illuminate				{ return REQUEST_TOKEN_ILLUMINATE; }
+Surface					{ return REQUEST_TOKEN_SURFACE; }
+Atmosphere				{ return REQUEST_TOKEN_ATMOSPHERE; }
+Interior				{ return REQUEST_TOKEN_INTERIOR; }
+Exterior				{ return REQUEST_TOKEN_EXTERIOR; }
+ShadingRate				{ return REQUEST_TOKEN_SHADINGRATE; }
+ShadingInterpolation	{ return REQUEST_TOKEN_SHADINGINTERPOLATION; }
+Matte					{ return REQUEST_TOKEN_MATTE; }
+Blobby      			{ return REQUEST_TOKEN_BLOBBY; }
+Bound					{ return REQUEST_TOKEN_BOUND; }
+Detail					{ return REQUEST_TOKEN_DETAIL; }
+DetailRange				{ return REQUEST_TOKEN_DETAILRANGE; }
+GeometricApproximation	{ return REQUEST_TOKEN_GEOMETRICAPPROXIMATION; }
+Orientation				{ return REQUEST_TOKEN_ORIENTATION; }
+ReverseOrientation		{ return REQUEST_TOKEN_REVERSEORIENTATION; }
+Sides					{ return REQUEST_TOKEN_SIDES; }
+Identity				{ return REQUEST_TOKEN_IDENTITY; }
+Transform				{ return REQUEST_TOKEN_TRANSFORM; }
+ConcatTransform			{ return REQUEST_TOKEN_CONCATTRANSFORM; }
+Perspective				{ return REQUEST_TOKEN_PERSPECTIVE; }
+Translate				{ return REQUEST_TOKEN_TRANSLATE; }
+Rotate					{ return REQUEST_TOKEN_ROTATE; }
+Scale					{ return REQUEST_TOKEN_SCALE; }
+Skew					{ return REQUEST_TOKEN_SKEW; }
+Deformation				{ return REQUEST_TOKEN_DEFORMATION; }
+Displacement			{ return REQUEST_TOKEN_DISPLACEMENT; }
+CoordinateSystem		{ return REQUEST_TOKEN_COORDINATESYSTEM; }
+CoordSysTransform		{ return REQUEST_TOKEN_COORDSYSTRANSFORM; }
+TransformPoints			{ return REQUEST_TOKEN_TRANSFORMPOINTS; }
+TransformBegin			{ return REQUEST_TOKEN_TRANSFORMBEGIN; }
+TransformEnd			{ return REQUEST_TOKEN_TRANSFORMEND; }
+Attribute				{ return REQUEST_TOKEN_ATTRIBUTE; }
+Polygon					{ return REQUEST_TOKEN_POLYGON; }
+GeneralPolygon			{ return REQUEST_TOKEN_GENERALPOLYGON; }
+Curves      			{ return REQUEST_TOKEN_CURVES; }
+Points      			{ return REQUEST_TOKEN_POINTS; }
+PointsPolygons			{ return REQUEST_TOKEN_POINTSPOLYGONS; }
+PointsGeneralPolygons	{ return REQUEST_TOKEN_POINTSGENERALPOLYGONS; }
+Basis					{ return REQUEST_TOKEN_BASIS; }
+Patch					{ return REQUEST_TOKEN_PATCH; }
+PatchMesh				{ return REQUEST_TOKEN_PATCHMESH; }
+NuPatch					{ return REQUEST_TOKEN_NUPATCH; }
+TrimCurve				{ return REQUEST_TOKEN_TRIMCURVE; }
+Sphere					{ return REQUEST_TOKEN_SPHERE; }
+Cone					{ return REQUEST_TOKEN_CONE; }
+Cylinder				{ return REQUEST_TOKEN_CYLINDER; }
+Hyperboloid				{ return REQUEST_TOKEN_HYPERBOLOID; }
+Paraboloid				{ return REQUEST_TOKEN_PARABOLOID; }
+Disk					{ return REQUEST_TOKEN_DISK; }
+Torus					{ return REQUEST_TOKEN_TORUS; }
+Procedural				{ return REQUEST_TOKEN_PROCEDURAL; }
+Geometry				{ return REQUEST_TOKEN_GEOMETRY; }
+SolidBegin				{ return REQUEST_TOKEN_SOLIDBEGIN; }
+SolidEnd				{ return REQUEST_TOKEN_SOLIDEND; }
+ObjectBegin				{ return REQUEST_TOKEN_OBJECTBEGIN; }
+ObjectEnd				{ return REQUEST_TOKEN_OBJECTEND; }
+ObjectInstance			{ return REQUEST_TOKEN_OBJECTINSTANCE; }
+MotionBegin				{ return REQUEST_TOKEN_MOTIONBEGIN; }
+MotionEnd				{ return REQUEST_TOKEN_MOTIONEND; }
+MakeTexture				{ return REQUEST_TOKEN_MAKETEXTURE; }
+MakeBump				{ return REQUEST_TOKEN_MAKEBUMP; }
+MakeLatLongEnvironment	{ return REQUEST_TOKEN_MAKELATLONGENVIRONMENT; }
+MakeCubeFaceEnvironment { return REQUEST_TOKEN_MAKECUBEFACEENVIRONMENT; }
+MakeShadow				{ return REQUEST_TOKEN_MAKESHADOW; }
+MakeOcclusion			{ return REQUEST_TOKEN_MAKEOCCLUSION; }
+ErrorHandler			{ return REQUEST_TOKEN_ERRORHANDLER; }
+SubdivisionMesh			{ return REQUEST_TOKEN_SUBDIVISIONMESH; }
+ReadArchive				{ return REQUEST_TOKEN_READARCHIVE; }
 {letter}({letter}|{digit})*	{ return UNKNOWN_TOKEN; }
-
-.			{ return(yytext[0]); }
+.						{ return(yytext[0]); }
 
 <<EOF>>			{
 									yyterminate();
