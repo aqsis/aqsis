@@ -2,3 +2,5 @@ Makefile
 .#*
 *.#*
 *~
+librib2ri.plg
+

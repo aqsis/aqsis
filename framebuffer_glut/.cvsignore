@@ -2,4 +2,4 @@ Makefile
 aqsis_framebuffer_glut
 .#*
 *.#*
-*~
+framebuffer_glut.plg
