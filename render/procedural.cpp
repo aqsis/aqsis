@@ -64,10 +64,14 @@ TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
 	// Store current context, set current context to the stored one
 	CqModeBlock *pconSave = QGetRenderContext()->pconCurrent( m_pconStored );
 
+	CqBound bound = m_Bound;
+	bound.Transform(QGetRenderContext()->matSpaceToSpace("camera", "raster"));
+	float detail = ( bound.vecMax().x() - bound.vecMin().x() ) * ( bound.vecMax().y() - bound.vecMin().y() );
+	//std::cout << "detail: " << detail << std::endl;
+
 	// Call the procedural secific Split()
 	RiAttributeBegin();
 
-	int detail = 1;// Need to work out what this should be
 	m_pSubdivFunc(m_pData, detail);
 
 	RiAttributeEnd();
@@ -75,6 +79,16 @@ TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
 	// restore saved context
 	QGetRenderContext()->pconCurrent( pconSave );
 	return 0;
+}
+
+
+//---------------------------------------------------------------------
+/** Transform the quadric primitive by the specified matrix.
+ */
+
+ void    CqProcedural::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime )
+{
+	m_Bound.Transform( matTx );
 }
 
 
