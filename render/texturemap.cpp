@@ -336,6 +336,14 @@ void CqTextureMap::Open()
 		TIFFGetField( m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &pFormat );
 		TIFFGetField( m_pImage, TIFFTAG_PIXAR_WRAPMODES, &pModes );
 
+		// Resize the temporary storage values to the new depth.
+		m_tempval1.resize( m_SamplesPerPixel );
+		m_tempval2.resize( m_SamplesPerPixel );
+		m_tempval3.resize( m_SamplesPerPixel );
+		m_tempval4.resize( m_SamplesPerPixel );
+		m_low_color.resize( m_SamplesPerPixel );
+		m_high_color.resize( m_SamplesPerPixel );
+
 		if ( pModes )
 		{
 			sscanf( pModes, "%s %s %s %f %f", swrap, twrap, filterfunc, &swidth, &twidth );
@@ -867,18 +875,10 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 	TqFloat ss2 = s1 + swidth;
 	TqFloat tt2 = t1 + twidth;
 
-	std::valarray<TqFloat> val1;
-	std::valarray<TqFloat> val2;
-	std::valarray<TqFloat> val3;
-	std::valarray<TqFloat> val4;
-	val1.resize( m_SamplesPerPixel );
-	val2.resize( m_SamplesPerPixel );
-	val3.resize( m_SamplesPerPixel );
-	val4.resize( m_SamplesPerPixel );
-	val1 = 0.0f;
-	val2 = 0.0f;
-	val3 = 0.0f;
-	val4 = 0.0f;
+	m_tempval1 = 0.0f;
+	m_tempval2 = 0.0f;
+	m_tempval3 = 0.0f;
+	m_tempval4 = 0.0f;
 
 
 	if ( m_smode == WrapMode_Periodic )
@@ -930,29 +930,29 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 	// If it crosses only the s boundary, we need to get two samples.
 	else if ( ( ss1 > ss2 ) && ( tt1 < tt2 ) )
 	{
-		GetSample( 0, tt1, ss2, tt2, val1 );
-		GetSample( ss1, tt1, 1.0f, tt2, val2 );
-		val = ( val1 + val2 );
+		GetSample( 0, tt1, ss2, tt2, m_tempval1 );
+		GetSample( ss1, tt1, 1.0f, tt2, m_tempval2 );
+		val = ( m_tempval1 + m_tempval2 );
 		val *= 0.5f;
 
 	}
 	// If it crosses only the t boundary, we need to get two samples.
 	else if ( ( ss1 < ss2 ) && ( tt1 > tt2 ) )
 	{
-		GetSample( ss1, 0, ss2, tt2, val1 );
-		GetSample( ss1, tt1, ss2, 1.0f, val2 );
-		val = ( val1 + val2 );
+		GetSample( ss1, 0, ss2, tt2, m_tempval1 );
+		GetSample( ss1, tt1, ss2, 1.0f, m_tempval2 );
+		val = ( m_tempval1 + m_tempval2 );
 		val *= 0.5f;
 
 	}
 	// If it crosses the s and t boundary, we need to get four samples.
 	else
 	{
-		GetSample( 0, 0, ss2, tt2, val1 );
-		GetSample( ss1, 0, 1.0f, tt2, val2 );
-		GetSample( 0, tt1, ss2, 1.0f, val3 );
-		GetSample( ss1, tt1, 1.0f, 1.0f, val4 );
-		val = ( val1 + val2 + val3 + val4 );
+		GetSample( 0, 0, ss2, tt2, m_tempval1 );
+		GetSample( ss1, 0, 1.0f, tt2, m_tempval2 );
+		GetSample( 0, tt1, ss2, 1.0f, m_tempval3 );
+		GetSample( ss1, tt1, 1.0f, 1.0f, m_tempval4 );
+		val = ( m_tempval1 + m_tempval2 + m_tempval3 + m_tempval4 );
 		val *= 0.25f;
 	}
 
@@ -1028,9 +1028,6 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 	iv *= rowlen;
 	iv_n *= rowlen;
 
-	std::valarray<TqFloat> low_colour;
-	low_colour.resize( m_SamplesPerPixel );
-
 	TqInt c;
 	for ( c = 0; c < m_SamplesPerPixel; c++ )
 	{
@@ -1040,13 +1037,13 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		TqFloat Val11 = ( mapd[ iv_n + iu_n + c ] / 255.0 );
 		TqFloat bot = Val00 + ( ru * ( Val10 - Val00 ) );
 		TqFloat top = Val01 + ( ru * ( Val11 - Val01 ) );
-		low_colour[ c ] = bot + ( rv * ( top - bot ) );
+		m_low_color[ c ] = bot + ( rv * ( top - bot ) );
 	}
 
 
 	if ( singlelevel )
 	{
-		val = low_colour;
+		val = m_low_color;
 	}
 	else
 	{
@@ -1093,9 +1090,6 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		iv *= rowlen;
 		iv_n *= rowlen;
 
-		std::valarray<TqFloat> high_colour;
-		high_colour.resize( m_SamplesPerPixel );
-
 		TqInt c;
 		for ( c = 0; c < m_SamplesPerPixel; c++ )
 		{
@@ -1105,14 +1099,14 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 			TqFloat Val11 = ( mapd[ iv_n + iu_n + c ] / 255.0 );
 			TqFloat bot = Val00 + ( ru * ( Val10 - Val00 ) );
 			TqFloat top = Val01 + ( ru * ( Val11 - Val01 ) );
-			high_colour[ c ] = bot + ( rv * ( top - bot ) );
+			m_high_color[ c ] = bot + ( rv * ( top - bot ) );
 		}
 
-		// Linearly interpolate between low_colour and high_colour by dinterp.
+		// Linearly interpolate between low_color and high_color by dinterp.
 
 		TqFloat dinterp = ( MAX( umapsize, vmapsize ) * d ) - 1;
 		for ( c = 0; c < m_SamplesPerPixel; c++ )
-			val[ c ] = low_colour[ c ] + dinterp * ( high_colour[ c ] - low_colour[ c ] );
+			val[ c ] = m_low_color[ c ] + dinterp * ( m_high_color[ c ] - m_low_color[ c ] );
 	}
 }
 

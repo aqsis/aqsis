@@ -235,98 +235,98 @@ class _qShareC CqSurface : public CqBasicSurface
 
 		/** Get a reference the to P default parameter.
 		 */
-		CqParameterTypedVarying<CqVector4D, type_hpoint>& P()
+		CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>& P()
 		{
 			return ( m_P );
 		}
 		/** Get a reference the to N default parameter.
 		 */
-		CqParameterTypedVarying<CqVector3D, type_normal>& N()
+		CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>& N()
 		{
 			return ( m_N );
 		}
 		/** Get a reference the to Cq default parameter.
 		 */
-		CqParameterTypedVarying<CqColor, type_color>& Cs()
+		CqParameterTypedVarying<CqColor, type_color, CqColor>& Cs()
 		{
 			return ( m_Cs );
 		}
 		/** Get a reference the to Os default parameter.
 		 */
-		CqParameterTypedVarying<CqColor, type_color>& Os()
+		CqParameterTypedVarying<CqColor, type_color, CqColor>& Os()
 		{
 			return ( m_Os );
 		}
 		/** Get a reference the to s default parameter.
 		 */
-		CqParameterTypedVarying<TqFloat, type_float>& s()
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>& s()
 		{
 			return ( m_s );
 		}
 		/** Get a reference the to t default parameter.
 		 */
-		CqParameterTypedVarying<TqFloat, type_float>& t()
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>& t()
 		{
 			return ( m_t );
 		}
 		/** Get a reference the to u default parameter.
 		 */
-		CqParameterTypedVarying<TqFloat, type_float>& u()
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>& u()
 		{
 			return ( m_u );
 		}
 		/** Get a reference the to v default parameter.
 		 */
-		CqParameterTypedVarying<TqFloat, type_float>& v()
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>& v()
 		{
 			return ( m_v );
 		}
 
 		/** Get a reference the to P default parameter.
 		 */
-		const	CqParameterTypedVarying<CqVector4D, type_hpoint>& P() const
+		const	CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>& P() const
 		{
 			return ( m_P );
 		}
 		/** Get a reference the to N default parameter.
 		 */
-		const	CqParameterTypedVarying<CqVector3D, type_normal>& N() const
+		const	CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>& N() const
 		{
 			return ( m_N );
 		}
 		/** Get a reference the to Cq default parameter.
 		 */
-		const	CqParameterTypedVarying<CqColor, type_color>& Cs() const
+		const	CqParameterTypedVarying<CqColor, type_color, CqColor>& Cs() const
 		{
 			return ( m_Cs );
 		}
 		/** Get a reference the to Os default parameter.
 		 */
-		const	CqParameterTypedVarying<CqColor, type_color>& Os() const
+		const	CqParameterTypedVarying<CqColor, type_color, CqColor>& Os() const
 		{
 			return ( m_Os );
 		}
 		/** Get a reference the to s default parameter.
 		 */
-		const	CqParameterTypedVarying<TqFloat, type_float>& s() const
+		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>& s() const
 		{
 			return ( m_s );
 		}
 		/** Get a reference the to t default parameter.
 		 */
-		const	CqParameterTypedVarying<TqFloat, type_float>& t() const
+		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>& t() const
 		{
 			return ( m_t );
 		}
 		/** Get a reference the to u default parameter.
 		 */
-		const	CqParameterTypedVarying<TqFloat, type_float>& u() const
+		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>& u() const
 		{
 			return ( m_u );
 		}
 		/** Get a reference the to v default parameter.
 		 */
-		const	CqParameterTypedVarying<TqFloat, type_float>& v() const
+		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>& v() const
 		{
 			return ( m_v );
 		}
@@ -419,14 +419,14 @@ class _qShareC CqSurface : public CqBasicSurface
 
 	protected:
 		// Default primitive variables
-		CqParameterTypedVarying<CqVector4D, type_hpoint>	m_P;		///< Default parameter P.
-		CqParameterTypedVarying<CqVector3D, type_normal>	m_N;		///< Default parameter N.
-		CqParameterTypedVarying<CqColor, type_color>	m_Cs;		///< Default parameter Cq.
-		CqParameterTypedVarying<CqColor, type_color>	m_Os;		///< Default parameter Os.
-		CqParameterTypedVarying<TqFloat, type_float>	m_s;		///< Default parameter s.
-		CqParameterTypedVarying<TqFloat, type_float>	m_t;		///< Default parameter t.
-		CqParameterTypedVarying<TqFloat, type_float>	m_u;		///< Default parameter u.
-		CqParameterTypedVarying<TqFloat, type_float>	m_v;		///< Default parameter v.
+		CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>	m_P;		///< Default parameter P.
+		CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>	m_N;		///< Default parameter N.
+		CqParameterTypedVarying<CqColor, type_color, CqColor>	m_Cs;		///< Default parameter Cq.
+		CqParameterTypedVarying<CqColor, type_color, CqColor>	m_Os;		///< Default parameter Os.
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>	m_s;		///< Default parameter s.
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>	m_t;		///< Default parameter t.
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>	m_u;		///< Default parameter u.
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>	m_v;		///< Default parameter v.
 
 }
 ;

@@ -119,14 +119,14 @@ class CqParameter
  * Parameter templatised by its value type.
  */
 
-template <class T>
+template <class T, class SLT>
 class CqParameterTyped : public CqParameter
 {
 	public:
 		CqParameterTyped( const char* strName, TqInt Count = 1 ) :
 				CqParameter( strName, Count )
 		{}
-		CqParameterTyped( const CqParameterTyped<T>& From ) :
+		CqParameterTyped( const CqParameterTyped<T, SLT>& From ) :
 				CqParameter( From )
 		{}
 		virtual	~CqParameterTyped()
@@ -154,17 +154,17 @@ class CqParameterTyped : public CqParameter
  * Parameter with a varying type, templatised by value type and type id.
  */
 
-template <class T, EqVariableType I>
-class CqParameterTypedVarying : public CqParameterTyped<T>
+template <class T, EqVariableType I, class SLT>
+class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 {
 	public:
 		CqParameterTypedVarying( const char* strName, TqInt Count = 1 ) :
-				CqParameterTyped<T>( strName, Count )
+				CqParameterTyped<T, SLT>( strName, Count )
 		{
 			m_aValues.resize( 1 );
 		}
-		CqParameterTypedVarying( const CqParameterTypedVarying<T, I>& From ) :
-				CqParameterTyped<T>( From )
+		CqParameterTypedVarying( const CqParameterTypedVarying<T, I, SLT>& From ) :
+				CqParameterTyped<T, SLT>( From )
 		{
 			*this = From;
 		}
@@ -176,7 +176,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T>
 
 		virtual	CqParameter* Clone() const
 		{
-			return ( new CqParameterTypedVarying<T, I>( *this ) );
+			return ( new CqParameterTypedVarying<T, I, SLT>( *this ) );
 		}
 		virtual	EqVariableClass	Class() const
 		{
@@ -201,7 +201,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T>
 		virtual void	uSubdivide( CqParameter* pResult )
 		{
 			assert( pResult->Type() == Type() );
-			CqParameterTypedVarying<T, I>* pVS = static_cast<CqParameterTypedVarying<T, I>*>( pResult );
+			CqParameterTypedVarying<T, I, SLT>* pVS = static_cast<CqParameterTypedVarying<T, I, SLT>*>( pResult );
 			// Check if a valid 4 point quad, do nothing if not.
 			if ( m_aValues.size() == 4 && pVS->m_aValues.size() == 4 )
 			{
@@ -212,7 +212,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T>
 		virtual void	vSubdivide( CqParameter* pResult )
 		{
 			assert( pResult->Type() == Type() );
-			CqParameterTypedVarying<T, I>* pVS = static_cast<CqParameterTypedVarying<T, I>*>( pResult );
+			CqParameterTypedVarying<T, I, SLT>* pVS = static_cast<CqParameterTypedVarying<T, I, SLT>*>( pResult );
 			// Check if a valid 4 point quad, do nothing if not.
 			if ( m_aValues.size() == 4 && pVS->m_aValues.size() == 4 )
 			{
@@ -259,7 +259,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T>
 
 		/** Assignment operator
 		 */
-		CqParameterTypedVarying<T, I>& operator=( const CqParameterTypedVarying<T, I>& From )
+		CqParameterTypedVarying<T, I, SLT>& operator=( const CqParameterTypedVarying<T, I, SLT>& From )
 		{
 			m_aValues.resize( From.m_aValues.size() );
 			for ( TqUint j = 0; j < m_aValues.size(); j++ )
@@ -275,7 +275,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T>
 		 */
 		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
 		{
-			return ( new CqParameterTypedVarying<T, I>( strName, Count ) );
+			return ( new CqParameterTypedVarying<T, I, SLT>( strName, Count ) );
 		}
 
 	private:
@@ -289,15 +289,15 @@ class CqParameterTypedVarying : public CqParameterTyped<T>
  * Parameter with a uniform type, templatised by value type and type id.
  */
 
-template <class T, EqVariableType I>
-class CqParameterTypedUniform : public CqParameterTyped<T>
+template <class T, EqVariableType I, class SLT>
+class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 {
 	public:
 		CqParameterTypedUniform( const char* strName, TqInt Count = 1 ) :
-				CqParameterTyped<T>( strName, Count )
+				CqParameterTyped<T, SLT>( strName, Count )
 		{}
-		CqParameterTypedUniform( const CqParameterTypedUniform<T, I>& From ) :
-				CqParameterTyped<T>( From )
+		CqParameterTypedUniform( const CqParameterTypedUniform<T, I, SLT>& From ) :
+				CqParameterTyped<T, SLT>( From )
 		{
 			m_Value = From.m_Value;
 		}
@@ -306,7 +306,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T>
 
 		virtual	CqParameter* Clone() const
 		{
-			return ( new CqParameterTypedUniform<T, I>( *this ) );
+			return ( new CqParameterTypedUniform<T, I, SLT>( *this ) );
 		}
 		virtual	EqVariableClass	Class() const
 		{
@@ -363,7 +363,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T>
 
 		/** Assignment operator.
 		 */
-		CqParameterTypedUniform<T, I>& operator=( const CqParameterTypedUniform<T, I>& From )
+		CqParameterTypedUniform<T, I, SLT>& operator=( const CqParameterTypedUniform<T, I, SLT>& From )
 		{
 			m_Value = From.m_Value;
 			return ( *this );
@@ -375,7 +375,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T>
 		 */
 		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
 		{
-			return ( new CqParameterTypedUniform<T, I>( strName, Count ) );
+			return ( new CqParameterTypedUniform<T, I, SLT>( strName, Count ) );
 		}
 	private:
 		T	m_Value;	///< Single uniform value.
@@ -388,22 +388,22 @@ class CqParameterTypedUniform : public CqParameterTyped<T>
  * Parameter with a vertex type, templatised by value type and type id.
  */
 
-template <class T, EqVariableType I>
-class CqParameterTypedVertex : public CqParameterTypedVarying<T, I>
+template <class T, EqVariableType I, class SLT>
+class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 {
 	public:
 		CqParameterTypedVertex( const char* strName, TqInt Count ) :
-				CqParameterTypedVarying<T, I>( strName, Count )
+				CqParameterTypedVarying<T, I, SLT>( strName, Count )
 		{}
-		CqParameterTypedVertex( const CqParameterTypedVertex<T, I>& From ) :
-				CqParameterTypedVarying<T, I>( From )
+		CqParameterTypedVertex( const CqParameterTypedVertex<T, I, SLT>& From ) :
+				CqParameterTypedVarying<T, I, SLT>( From )
 		{}
 		virtual	~CqParameterTypedVertex()
 		{}
 
 		virtual	CqParameter* Clone() const
 		{
-			return ( new CqParameterTypedVertex<T, I>( *this ) );
+			return ( new CqParameterTypedVertex<T, I, SLT>( *this ) );
 		}
 		virtual	EqVariableClass	Class() const
 		{
@@ -416,7 +416,7 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I>
 		 */
 		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
 		{
-			return ( new CqParameterTypedVertex<T, I>( strName, Count ) );
+			return ( new CqParameterTypedVertex<T, I, SLT>( strName, Count ) );
 		}
 
 	private:
@@ -428,18 +428,18 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I>
  * Parameter with a varying array type, templatised by value type and type id.
  */
 
-template <class T, EqVariableType I>
-class CqParameterTypedVaryingArray : public CqParameterTyped<T>
+template <class T, EqVariableType I, class SLT>
+class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 {
 	public:
 		CqParameterTypedVaryingArray( const char* strName, TqInt Count = 1 ) :
-				CqParameterTyped<T>( strName, Count )
+				CqParameterTyped<T, SLT>( strName, Count )
 		{
 			m_aValues.resize( 1 );
 			m_aValues[ 0 ].resize( Count );
 		}
-		CqParameterTypedVaryingArray( const CqParameterTypedVaryingArray<T, I>& From ) :
-				CqParameterTyped<T>( From )
+		CqParameterTypedVaryingArray( const CqParameterTypedVaryingArray<T, I, SLT>& From ) :
+				CqParameterTyped<T, SLT>( From )
 		{
 			*this = From;
 		}
@@ -448,7 +448,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T>
 
 		virtual	CqParameter* Clone() const
 		{
-			return ( new CqParameterTypedVaryingArray<T, I>( *this ) );
+			return ( new CqParameterTypedVaryingArray<T, I, SLT>( *this ) );
 		}
 		virtual	EqVariableClass	Class() const
 		{
@@ -476,7 +476,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T>
 		virtual void	uSubdivide( CqParameter* pResult )
 		{
 			assert( pResult->Type() == Type() );
-			CqParameterTypedVaryingArray<T, I>* pVS = static_cast<CqParameterTypedVaryingArray<T, I>*>( pResult );
+			CqParameterTypedVaryingArray<T, I, SLT>* pVS = static_cast<CqParameterTypedVaryingArray<T, I, SLT>*>( pResult );
 			// Check if a valid 4 point quad, do nothing if not.
 			if ( m_aValues.size() == 4 && pVS->m_aValues.size() == 4 )
 			{
@@ -487,7 +487,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T>
 		virtual void	vSubdivide( CqParameter* pResult )
 		{
 			assert( pResult->Type() == Type() );
-			CqParameterTypedVaryingArray<T, I>* pVS = static_cast<CqParameterTypedVaryingArray<T, I>*>( pResult );
+			CqParameterTypedVaryingArray<T, I, SLT>* pVS = static_cast<CqParameterTypedVaryingArray<T, I, SLT>*>( pResult );
 			// Check if a valid 4 point quad, do nothing if not.
 			if ( m_aValues.size() == 4 && pVS->m_aValues.size() == 4 )
 			{
@@ -535,7 +535,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T>
 
 		/** Assignment operator.
 		 */
-		CqParameterTypedVaryingArray<T, I>& operator=( const CqParameterTypedVaryingArray<T, I>& From )
+		CqParameterTypedVaryingArray<T, I, SLT>& operator=( const CqParameterTypedVaryingArray<T, I, SLT>& From )
 		{
 			m_aValues.resize( From.m_aValues.size() );
 			TqUint j;
@@ -555,7 +555,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T>
 		 */
 		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
 		{
-			return ( new CqParameterTypedVaryingArray<T, I>( strName, Count ) );
+			return ( new CqParameterTypedVaryingArray<T, I, SLT>( strName, Count ) );
 		}
 
 	private:
@@ -569,17 +569,17 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T>
  * Parameter with a uniform array type, templatised by value type and type id.
  */
 
-template <class T, EqVariableType I>
-class CqParameterTypedUniformArray : public CqParameterTyped<T>
+template <class T, EqVariableType I, class SLT>
+class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 {
 	public:
 		CqParameterTypedUniformArray( const char* strName, TqInt Count = 1 ) :
-				CqParameterTyped<T>( strName, Count )
+				CqParameterTyped<T, SLT>( strName, Count )
 		{
 			m_aValues.resize( Count );
 		}
-		CqParameterTypedUniformArray( const CqParameterTypedUniformArray<T, I>& From ) :
-				CqParameterTyped<T>( From )
+		CqParameterTypedUniformArray( const CqParameterTypedUniformArray<T, I, SLT>& From ) :
+				CqParameterTyped<T, SLT>( From )
 		{
 			m_aValues.resize( From.m_Count );
 			TqInt i;
@@ -591,7 +591,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T>
 
 		virtual	CqParameter* Clone() const
 		{
-			return ( new CqParameterTypedUniformArray<T, I>( *this ) );
+			return ( new CqParameterTypedUniformArray<T, I, SLT>( *this ) );
 		}
 		virtual	EqVariableClass	Class() const
 		{
@@ -646,7 +646,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T>
 
 		/** Assignment operator.
 		 */
-		CqParameterTypedUniformArray<T, I>& operator=( const CqParameterTypedUniformArray<T, I>& From )
+		CqParameterTypedUniformArray<T, I, SLT>& operator=( const CqParameterTypedUniformArray<T, I, SLT>& From )
 		{
 			m_aValues.resize( From.m_aValues.size() );
 			TqInt i2 = 0;
@@ -661,7 +661,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T>
 		 */
 		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
 		{
-			return ( new CqParameterTypedUniformArray<T, I>( strName, Count ) );
+			return ( new CqParameterTypedUniformArray<T, I, SLT>( strName, Count ) );
 		}
 	private:
 		std::vector<T>	m_aValues;	///< Array of uniform values.
@@ -674,22 +674,22 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T>
  * Parameter with a vertex array type, templatised by value type and type id.
  */
 
-template <class T, EqVariableType I>
-class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I>
+template <class T, EqVariableType I, class SLT>
+class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SLT>
 {
 	public:
 		CqParameterTypedVertexArray( const char* strName, TqInt Count ) :
-				CqParameterTypedVaryingArray<T, I>( strName, Count )
+				CqParameterTypedVaryingArray<T, I, SLT>( strName, Count )
 		{}
-		CqParameterTypedVertexArray( const CqParameterTypedVertexArray<T, I>& From ) :
-				CqParameterTypedVaryingArray<T, I>( From )
+		CqParameterTypedVertexArray( const CqParameterTypedVertexArray<T, I, SLT>& From ) :
+				CqParameterTypedVaryingArray<T, I, SLT>( From )
 		{}
 		virtual	~CqParameterTypedVertexArray()
 		{}
 
 		virtual	CqParameter* Clone() const
 		{
-			return ( new CqParameterTypedVertexArray<T, I>( *this ) );
+			return ( new CqParameterTypedVertexArray<T, I, SLT>( *this ) );
 		}
 		virtual	EqVariableClass	Class() const
 		{
@@ -702,7 +702,7 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I>
 		 */
 		static	CqParameter*	Create( const char* strName, TqInt Count = 1 )
 		{
-			return ( new CqParameterTypedVertexArray<T, I>( strName, Count ) );
+			return ( new CqParameterTypedVertexArray<T, I, SLT>( strName, Count ) );
 		}
 
 	private:
@@ -716,14 +716,21 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I>
  * \param pResult Pointer to storage for the result.
  */
 
-template <class T, EqVariableType I>
-void CqParameterTypedVarying<T, I>::BilinearDice( TqInt u, TqInt v, IqShaderData* pResult )
+template <class T, EqVariableType I, class SLT>
+void CqParameterTypedVarying<T, I, SLT>::BilinearDice( TqInt u, TqInt v, IqShaderData* pResult )
 {
 	assert( pResult->Type() == Type() );
 	assert( pResult->Class() == class_varying );
 	
 	T res;
 	
+	// Not much point bilinear dicing into a uniform storage.
+	assert( pResult->Size() > 1 );
+
+	SLT* pResData;
+	pResult->GetValuePtr( pResData );
+	assert( NULL != pResData );
+
 	// Check if a valid 4 point quad, do nothing if not.
 	if ( m_aValues.size() == 4 )
 	{
@@ -731,7 +738,6 @@ void CqParameterTypedVarying<T, I>::BilinearDice( TqInt u, TqInt v, IqShaderData
 		// initialised to the correct size prior to calling.
 		TqFloat diu = 1.0 / u;
 		TqFloat div = 1.0 / v;
-		TqInt i = 0;
 		TqInt iv;
 		for ( iv = 0; iv <= v; iv++ )
 		{
@@ -743,8 +749,7 @@ void CqParameterTypedVarying<T, I>::BilinearDice( TqInt u, TqInt v, IqShaderData
 				                          pValue( 2 ) [ 0 ],
 				                          pValue( 3 ) [ 0 ],
 				                          iu * diu, iv * div );
-				pResult->SetValue( res, i );
-				i++;
+				(*pResData++) = res;
 			}
 		}
 	}
@@ -752,15 +757,12 @@ void CqParameterTypedVarying<T, I>::BilinearDice( TqInt u, TqInt v, IqShaderData
 	{
 		TqInt i = 0;
 		TqInt iv;
+		res = pValue( 0 ) [ 0 ];
 		for ( iv = 0; iv <= v; iv++ )
 		{
 			TqInt iu;
 			for ( iu = 0; iu <= u; iu++ )
-			{
-				res = pValue( 0 ) [ 0 ];
-				pResult->SetValue( res, i );
-				i++;
-			}
+				(*pResData++) = res;
 		}
 	}
 }
@@ -772,14 +774,20 @@ void CqParameterTypedVarying<T, I>::BilinearDice( TqInt u, TqInt v, IqShaderData
  * \param pResult Pointer to storage for the result.
  */
 
-template <class T, EqVariableType I>
-void CqParameterTypedVaryingArray<T, I>::BilinearDice( TqInt u, TqInt v, IqShaderData* pResult )
+template <class T, EqVariableType I, class SLT>
+void CqParameterTypedVaryingArray<T, I, SLT>::BilinearDice( TqInt u, TqInt v, IqShaderData* pResult )
 {
 	assert( pResult->Type() == Type() );
 	assert( pResult->Class() == class_varying );
 	
-	
 	T res;
+
+	// Not much point bilinear dicing into a uniform storage.
+	assert( pResult->Size() > 1 );
+
+	SLT* pResData;
+	pResult->GetValuePtr( pResData );
+	assert( NULL != pResData );
 
 	// Check if a valid 4 point quad, do nothing if not.
 	if ( m_aValues.size() == 4 )
@@ -788,7 +796,6 @@ void CqParameterTypedVaryingArray<T, I>::BilinearDice( TqInt u, TqInt v, IqShade
 		// initialised to the correct size prior to calling.
 		TqFloat diu = 1.0 / u;
 		TqFloat div = 1.0 / v;
-		TqInt i = 0;
 		TqInt iv;
 		for ( iv = 0; iv <= v; iv++ )
 		{
@@ -800,8 +807,7 @@ void CqParameterTypedVaryingArray<T, I>::BilinearDice( TqInt u, TqInt v, IqShade
 				                          pValue( 2 ) [ 0 ],
 				                          pValue( 3 ) [ 0 ],
 				                          iu * diu, iv * div );
-				pResult->SetValue( res, i );
-				i++;
+				(*pResData++) = res;
 			}
 		}
 	}
@@ -809,15 +815,12 @@ void CqParameterTypedVaryingArray<T, I>::BilinearDice( TqInt u, TqInt v, IqShade
 	{
 		TqInt i = 0;
 		TqInt iv;
+		res = pValue( 0 ) [ 0 ];
 		for ( iv = 0; iv <= v; iv++ )
 		{
 			TqInt iu;
 			for ( iu = 0; iu <= u; iu++ )
-			{
-				res = pValue( 0 ) [ 0 ];
-				pResult->SetValue( res, i );
-				i++;
-			}
+				(*pResData++) = res;
 		}
 	}
 }

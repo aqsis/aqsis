@@ -169,6 +169,7 @@ union UsProgramElement
 						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(a,pResult,this, cParams, aParams); \
+						delete[](aParams); \
 						Push(pResult);
 #define FUNC2PLUS(t,Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
@@ -182,6 +183,7 @@ union UsProgramElement
 						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(a,b,pResult,this, cParams, aParams); \
+						delete[](aParams); \
 						Push(pResult);
 #define FUNC3PLUS(t,Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
@@ -196,6 +198,7 @@ union UsProgramElement
 						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						Func(a,b,c,pResult,this, cParams, aParams); \
+						delete[](aParams); \
 						Push(pResult);
 
 
@@ -237,7 +240,8 @@ union UsProgramElement
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=POP; \
-						Func(a,this, cParams, aParams);
+						Func(a,this, cParams, aParams); \
+						delete[](aParams);
 
 #define	SPLINE(t,func)	POPV(count);	\
 						POPV(value); \
@@ -258,6 +262,7 @@ union UsProgramElement
 							apSplinePoints[iSP]=POP; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(value,pResult,this,cParams,apSplinePoints); \
+						delete[](apSplinePoints); \
 						Push(pResult);
 
 #define	SSPLINE(t,func)	POPV(count); \
@@ -280,6 +285,7 @@ union UsProgramElement
 							apSplinePoints[iSP]=POP; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(basis,value,pResult,this,cParams,apSplinePoints); \
+						delete[](apSplinePoints); \
 						Push(pResult);
 
 #define	TEXTURE(t,func)	POPV(count); /* additional parameter count */\
@@ -293,6 +299,7 @@ union UsProgramElement
 						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,pResult,this,cParams,aParams); \
+						delete[](aParams); \
 						Push(pResult);
 #define	TEXTURE1(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
@@ -306,6 +313,7 @@ union UsProgramElement
 						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,R,pResult,this, cParams, aParams); \
+						delete[](aParams); \
 						Push(pResult);
 #define	TEXTURE2(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
@@ -320,6 +328,7 @@ union UsProgramElement
 						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,s1,t1,pResult,this, cParams, aParams); \
+						delete[](aParams); \
 						Push(pResult);
 #define	TEXTURE4(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
@@ -336,6 +345,7 @@ union UsProgramElement
 						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,R1,R2,R3,R4,pResult,this,cParams,aParams); \
+						delete[](aParams); \
 						Push(pResult);
 #define	TEXTURE8(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
@@ -356,6 +366,7 @@ union UsProgramElement
 						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT(t,__fVarying?class_varying:class_uniform); \
 						func(name,channel,s1,t1,s2,t2,s3,t3,s4,t4,pResult,this,cParams,aParams); \
+						delete[](aParams); \
 						Push(pResult);
 
 #define	TRIPLE(T)		POPV(ValA); \

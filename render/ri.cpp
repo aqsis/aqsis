@@ -1123,10 +1123,10 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 					{
 						RtInt j;
 						for ( j = 0; j < pParam->Count(); j++ )
-							static_cast<CqParameterTypedUniformArray<RtFloat, type_float>*>( pParam ) ->pValue() [ j ] = pf[ j ];
+							static_cast<CqParameterTypedUniformArray<RtFloat, type_float, RtFloat>*>( pParam ) ->pValue() [ j ] = pf[ j ];
 					}
 					else
-						static_cast<CqParameterTypedUniform<RtFloat, type_float>*>( pParam ) ->pValue() [ 0 ] = pf[ 0 ];
+						static_cast<CqParameterTypedUniform<RtFloat, type_float, RtFloat>*>( pParam ) ->pValue() [ 0 ] = pf[ 0 ];
 				}
 				break;
 
@@ -1137,10 +1137,10 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 					{
 						RtInt j;
 						for ( j = 0; j < pParam->Count(); j++ )
-							static_cast<CqParameterTypedUniformArray<RtInt, type_integer>*>( pParam ) ->pValue() [ j ] = pi[ j ];
+							static_cast<CqParameterTypedUniformArray<RtInt, type_integer, RtFloat>*>( pParam ) ->pValue() [ j ] = pi[ j ];
 					}
 					else
-						static_cast<CqParameterTypedUniform<RtInt, type_integer>*>( pParam ) ->pValue() [ 0 ] = pi[ 0 ];
+						static_cast<CqParameterTypedUniform<RtInt, type_integer, RtFloat>*>( pParam ) ->pValue() [ 0 ] = pi[ 0 ];
 				}
 				break;
 
@@ -1156,7 +1156,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 							if ( strcmp( name, "searchpath" ) == 0 )
 							{
 								// Get the old value for use in escape replacement
-								CqString str_old = static_cast<CqParameterTypedUniform<CqString, type_string>*>( pParam ) ->pValue() [ 0 ];
+								CqString str_old = static_cast<CqParameterTypedUniform<CqString, type_string, CqString>*>( pParam ) ->pValue() [ 0 ];
 								// Build the string, checking for & character and replace with old string.
 								unsigned int strt = 0;
 								unsigned int len = 0;
@@ -1178,7 +1178,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 							else
 								str = CqString( ps[ j ] );
 
-							static_cast<CqParameterTypedUniformArray<CqString, type_string>*>( pParam ) ->pValue() [ j ] = str;
+							static_cast<CqParameterTypedUniformArray<CqString, type_string, CqString>*>( pParam ) ->pValue() [ j ] = str;
 						}
 					}
 					else
@@ -1187,7 +1187,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 						if ( strcmp( name, "searchpath" ) == 0 )
 						{
 							// Get the old value for use in escape replacement
-							CqString str_old = static_cast<CqParameterTypedUniform<CqString, type_string>*>( pParam ) ->pValue() [ 0 ];
+							CqString str_old = static_cast<CqParameterTypedUniform<CqString, type_string, CqString>*>( pParam ) ->pValue() [ 0 ];
 							// Build the string, checking for & character and replace with old string.
 							unsigned int strt = 0;
 							unsigned int len = 0;
@@ -1209,7 +1209,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 						else
 							str = CqString( ps[ 0 ] );
 
-						static_cast<CqParameterTyped<CqString>*>( pParam ) ->pValue() [ 0 ] = str;
+						static_cast<CqParameterTyped<CqString, CqString>*>( pParam ) ->pValue() [ 0 ] = str;
 					}
 				}
 				break;
@@ -2057,10 +2057,10 @@ RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 					{
 						RtInt j;
 						for ( j = 0; j < pParam->Count(); j++ )
-							static_cast<CqParameterTypedUniformArray<RtFloat, type_float>*>( pParam ) ->pValue() [ j ] = pf[ j ];
+							static_cast<CqParameterTypedUniformArray<RtFloat, type_float, RtFloat>*>( pParam ) ->pValue() [ j ] = pf[ j ];
 					}
 					else
-						static_cast<CqParameterTypedUniform<RtFloat, type_float>*>( pParam ) ->pValue() [ 0 ] = pf[ 0 ];
+						static_cast<CqParameterTypedUniform<RtFloat, type_float, RtFloat>*>( pParam ) ->pValue() [ 0 ] = pf[ 0 ];
 				}
 				break;
 
@@ -2071,10 +2071,10 @@ RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 					{
 						RtInt j;
 						for ( j = 0; j < pParam->Count(); j++ )
-							static_cast<CqParameterTypedUniformArray<RtInt, type_integer>*>( pParam ) ->pValue() [ j ] = pi[ j ];
+							static_cast<CqParameterTypedUniformArray<RtInt, type_integer, RtFloat>*>( pParam ) ->pValue() [ j ] = pi[ j ];
 					}
 					else
-						static_cast<CqParameterTypedUniform<RtInt, type_integer>*>( pParam ) ->pValue() [ 0 ] = pi[ 0 ];
+						static_cast<CqParameterTypedUniform<RtInt, type_integer, RtFloat>*>( pParam ) ->pValue() [ 0 ] = pi[ 0 ];
 				}
 				break;
 
@@ -2087,13 +2087,13 @@ RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 						for ( j = 0; j < pParam->Count(); j++ )
 						{
 							CqString str( ps[ j ] );
-							static_cast<CqParameterTypedUniform<CqString, type_string>*>( pParam ) ->pValue() [ j ] = str;
+							static_cast<CqParameterTypedUniform<CqString, type_string, RtFloat>*>( pParam ) ->pValue() [ j ] = str;
 						}
 					}
 					else
 					{
 						CqString str( ps[ 0 ] );
-						static_cast<CqParameterTypedUniform<CqString, type_string>*>( pParam ) ->pValue() [ 0 ] = str;
+						static_cast<CqParameterTypedUniform<CqString, type_string, RtFloat>*>( pParam ) ->pValue() [ 0 ] = str;
 					}
 				}
 				// TODO: Rest of parameter types.

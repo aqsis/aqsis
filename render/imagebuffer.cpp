@@ -1408,6 +1408,9 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 
 		register long iY = sY;
 
+		CqColor colMPGColor = pMPG->colColor();
+		CqColor colMPGOpacity = pMPG->colOpacity();
+
 		while ( iY < eY )
 		{
 			register long iX = sX;
@@ -1455,14 +1458,14 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 									// If it is exactly the same, chances are we've hit a MPG grid line.
 									if ( i < c && p[ i ].m_Depth == ImageVal.m_Depth )
 									{
-										p[ i ].m_colColor = ( p[ i ].m_colColor + pMPG->colColor() ) * 0.5f;
-										p[ i ].m_colOpacity = ( p[ i ].m_colOpacity + pMPG->colOpacity() ) * 0.5f;
+										p[ i ].m_colColor = ( p[ i ].m_colColor + colMPGColor ) * 0.5f;
+										p[ i ].m_colOpacity = ( p[ i ].m_colOpacity + colMPGOpacity ) * 0.5f;
 										continue;
 									}
 								}
 
 								// Update max depth values
-								if ( pMPG->colOpacity() == gColWhite )
+								if ( colMPGOpacity == gColWhite )
 								{
 									if ( c == 0 )
 									{
@@ -1483,13 +1486,14 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 									}
 								}
 
-								ImageVal.m_colColor = pMPG->colColor();
-								ImageVal.m_colOpacity = pMPG->colOpacity();
+								// Now that we have updated the samples, set the 
+								ImageVal.m_colColor = colMPGColor;
+								ImageVal.m_colOpacity = colMPGOpacity;
 								ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
 								if ( NULL != ImageVal.m_pCSGNode ) ImageVal.m_pCSGNode->AddRef();
 
 								// Truncate sample list if opaque.
-								if ( ( pMPG->colOpacity() == gColWhite ) && ( pMPG->pGrid() ->pCSGNode() == NULL ) )
+								if ( ( colMPGOpacity == gColWhite ) && ( pMPG->pGrid() ->pCSGNode() == NULL ) )
 								{
 									aValues.erase( aValues.begin() + i, aValues.end() );
 									aValues.push_back( ImageVal );

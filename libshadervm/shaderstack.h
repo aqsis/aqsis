@@ -43,66 +43,66 @@
 
 START_NAMESPACE( Aqsis )
 
-#define	OpLSS_FF(a,b,Res,State)		OpLSS(temp_float,temp_float,a,b,Res,State)
-#define	OpLSS_PP(a,b,Res,State)		OpLSS(temp_point,temp_point,a,b,Res,State)
-#define	OpLSS_CC(a,b,Res,State)		OpLSS(temp_color,temp_color,a,b,Res,State)
+#define	OpLSS_FF(a,b,Res,State)		OpLSS(temp_float,temp_float,temp_float,a,b,Res,State)
+#define	OpLSS_PP(a,b,Res,State)		OpLSS(temp_point,temp_point,temp_float,a,b,Res,State)
+#define	OpLSS_CC(a,b,Res,State)		OpLSS(temp_color,temp_color,temp_float,a,b,Res,State)
 
-#define	OpGRT_FF(a,b,Res,State)		OpGRT(temp_float,temp_float,a,b,Res,State)
-#define	OpGRT_PP(a,b,Res,State)		OpGRT(temp_point,temp_point,a,b,Res,State)
-#define	OpGRT_CC(a,b,Res,State)		OpGRT(temp_color,temp_color,a,b,Res,State)
+#define	OpGRT_FF(a,b,Res,State)		OpGRT(temp_float,temp_float,temp_float,a,b,Res,State)
+#define	OpGRT_PP(a,b,Res,State)		OpGRT(temp_point,temp_point,temp_float,a,b,Res,State)
+#define	OpGRT_CC(a,b,Res,State)		OpGRT(temp_color,temp_color,temp_float,a,b,Res,State)
 
-#define	OpLE_FF(a,b,Res,State)		OpLE(temp_float,temp_float,a,b,Res,State)
-#define	OpLE_PP(a,b,Res,State)		OpLE(temp_point,temp_point,a,b,Res,State)
-#define	OpLE_CC(a,b,Res,State)		OpLE(temp_color,temp_color,a,b,Res,State)
+#define	OpLE_FF(a,b,Res,State)		OpLE(temp_float,temp_float,temp_float,a,b,Res,State)
+#define	OpLE_PP(a,b,Res,State)		OpLE(temp_point,temp_point,temp_float,a,b,Res,State)
+#define	OpLE_CC(a,b,Res,State)		OpLE(temp_color,temp_color,temp_float,a,b,Res,State)
 
-#define	OpGE_FF(a,b,Res,State)		OpGE(temp_float,temp_float,a,b,Res,State)
-#define	OpGE_PP(a,b,Res,State)		OpGE(temp_point,temp_point,a,b,Res,State)
-#define	OpGE_CC(a,b,Res,State)		OpGE(temp_color,temp_color,a,b,Res,State)
+#define	OpGE_FF(a,b,Res,State)		OpGE(temp_float,temp_float,temp_float,a,b,Res,State)
+#define	OpGE_PP(a,b,Res,State)		OpGE(temp_point,temp_point,temp_float,a,b,Res,State)
+#define	OpGE_CC(a,b,Res,State)		OpGE(temp_color,temp_color,temp_float,a,b,Res,State)
 
-#define	OpEQ_FF(a,b,Res,State)		OpEQ(temp_float,temp_float,a,b,Res,State)
-#define	OpEQ_PP(a,b,Res,State)		OpEQ(temp_point,temp_point,a,b,Res,State)
-#define	OpEQ_CC(a,b,Res,State)		OpEQ(temp_color,temp_color,a,b,Res,State)
-#define	OpEQ_SS(a,b,Res,State)		OpEQ(temp_string,temp_string,a,b,Res,State)
+#define	OpEQ_FF(a,b,Res,State)		OpEQ(temp_float,temp_float,temp_float,a,b,Res,State)
+#define	OpEQ_PP(a,b,Res,State)		OpEQ(temp_point,temp_point,temp_float,a,b,Res,State)
+#define	OpEQ_CC(a,b,Res,State)		OpEQ(temp_color,temp_color,temp_float,a,b,Res,State)
+#define	OpEQ_SS(a,b,Res,State)		OpEQ(temp_string,temp_string,temp_float,a,b,Res,State)
 
-#define	OpNE_FF(a,b,Res,State)		OpNE(temp_float,temp_float,a,b,Res,State)
-#define	OpNE_PP(a,b,Res,State)		OpNE(temp_point,temp_point,a,b,Res,State)
-#define	OpNE_CC(a,b,Res,State)		OpNE(temp_color,temp_color,a,b,Res,State)
-#define	OpNE_SS(a,b,Res,State)		OpNE(temp_string,temp_string,a,b,Res,State)
+#define	OpNE_FF(a,b,Res,State)		OpNE(temp_float,temp_float,temp_float,a,b,Res,State)
+#define	OpNE_PP(a,b,Res,State)		OpNE(temp_point,temp_point,temp_float,a,b,Res,State)
+#define	OpNE_CC(a,b,Res,State)		OpNE(temp_color,temp_color,temp_float,a,b,Res,State)
+#define	OpNE_SS(a,b,Res,State)		OpNE(temp_string,temp_string,temp_float,a,b,Res,State)
 
-#define	OpMUL_FF(a,b,Res,State)		OpMUL(temp_float,temp_float,a,b,Res,State)
-#define	OpDIV_FF(a,b,Res,State)		OpDIV(temp_float,temp_float,a,b,Res,State)
-#define	OpADD_FF(a,b,Res,State)		OpADD(temp_float,temp_float,a,b,Res,State)
-#define	OpSUB_FF(a,b,Res,State)		OpSUB(temp_float,temp_float,a,b,Res,State)
+#define	OpMUL_FF(a,b,Res,State)		OpMUL(temp_float,temp_float,temp_float,a,b,Res,State)
+#define	OpDIV_FF(a,b,Res,State)		OpDIV(temp_float,temp_float,temp_float,a,b,Res,State)
+#define	OpADD_FF(a,b,Res,State)		OpADD(temp_float,temp_float,temp_float,a,b,Res,State)
+#define	OpSUB_FF(a,b,Res,State)		OpSUB(temp_float,temp_float,temp_float,a,b,Res,State)
 #define	OpNEG_F(a,Res,State)		OpNEG(temp_float,a,Res,State)
 
-#define	OpMUL_PP(a,b,Res,State)		OpMUL(temp_point,temp_point,a,b,Res,State)
-#define	OpDIV_PP(a,b,Res,State)		OpDIV(temp_point,temp_point,a,b,Res,State)
-#define	OpADD_PP(a,b,Res,State)		OpADD(temp_point,temp_point,a,b,Res,State)
-#define	OpSUB_PP(a,b,Res,State)		OpSUB(temp_point,temp_point,a,b,Res,State)
-#define	OpCRS_PP(a,b,Res,State)		OpCRS(temp_point,temp_point,a,b,Res,State)
-#define	OpDOT_PP(a,b,Res,State)		OpDOT(temp_point,temp_point,a,b,Res,State)
+#define	OpMUL_PP(a,b,Res,State)		OpMUL(temp_point,temp_point,temp_point,a,b,Res,State)
+#define	OpDIV_PP(a,b,Res,State)		OpDIV(temp_point,temp_point,temp_point,a,b,Res,State)
+#define	OpADD_PP(a,b,Res,State)		OpADD(temp_point,temp_point,temp_point,a,b,Res,State)
+#define	OpSUB_PP(a,b,Res,State)		OpSUB(temp_point,temp_point,temp_point,a,b,Res,State)
+#define	OpCRS_PP(a,b,Res,State)		OpCRS(temp_point,temp_point,temp_point,a,b,Res,State)
+#define	OpDOT_PP(a,b,Res,State)		OpDOT(temp_point,temp_point,temp_float,a,b,Res,State)
 #define	OpNEG_P(a,Res,State)		OpNEG(temp_point,a,Res,State)
 
-#define	OpMUL_CC(a,b,Res,State)		OpMUL(temp_color,temp_color,a,b,Res,State)
-#define	OpDIV_CC(a,b,Res,State)		OpDIV(temp_color,temp_color,a,b,Res,State)
-#define	OpADD_CC(a,b,Res,State)		OpADD(temp_color,temp_color,a,b,Res,State)
-#define	OpSUB_CC(a,b,Res,State)		OpSUB(temp_color,temp_color,a,b,Res,State)
-#define	OpCRS_CC(a,b,Res,State)		OpCRS(temp_color,temp_color,a,b,Res,State)
-#define	OpDOT_CC(a,b,Res,State)		OpDOT(temp_color,temp_color,a,b,Res,State)
+#define	OpMUL_CC(a,b,Res,State)		OpMUL(temp_color,temp_color,temp_color,a,b,Res,State)
+#define	OpDIV_CC(a,b,Res,State)		OpDIV(temp_color,temp_color,temp_color,a,b,Res,State)
+#define	OpADD_CC(a,b,Res,State)		OpADD(temp_color,temp_color,temp_color,a,b,Res,State)
+#define	OpSUB_CC(a,b,Res,State)		OpSUB(temp_color,temp_color,temp_color,a,b,Res,State)
+#define	OpCRS_CC(a,b,Res,State)		OpCRS(temp_color,temp_color,temp_color,a,b,Res,State)
+#define	OpDOT_CC(a,b,Res,State)		OpDOT(temp_color,temp_color,temp_color,a,b,Res,State)
 #define	OpNEG_C(a,Res,State)		OpNEG(temp_color,a,Res,State)
 
-#define	OpMUL_FP(a,b,Res,State)		OpMUL(temp_float,temp_point,a,b,Res,State)
-#define	OpDIV_FP(a,b,Res,State)		OpDIV(temp_float,temp_point,a,b,Res,State)
-#define	OpADD_FP(a,b,Res,State)		OpADD(temp_float,temp_point,a,b,Res,State)
-#define	OpSUB_FP(a,b,Res,State)		OpSUB(temp_float,temp_point,a,b,Res,State)
+#define	OpMUL_FP(a,b,Res,State)		OpMUL(temp_float,temp_point,temp_point,a,b,Res,State)
+#define	OpDIV_FP(a,b,Res,State)		OpDIV(temp_float,temp_point,temp_point,a,b,Res,State)
+#define	OpADD_FP(a,b,Res,State)		OpADD(temp_float,temp_point,temp_point,a,b,Res,State)
+#define	OpSUB_FP(a,b,Res,State)		OpSUB(temp_float,temp_point,temp_point,a,b,Res,State)
 
-#define	OpMUL_FC(a,b,Res,State)		OpMUL(temp_float,temp_color,a,b,Res,State)
-#define	OpDIV_FC(a,b,Res,State)		OpDIV(temp_float,temp_color,a,b,Res,State)
-#define	OpADD_FC(a,b,Res,State)		OpADD(temp_float,temp_color,a,b,Res,State)
-#define	OpSUB_FC(a,b,Res,State)		OpSUB(temp_float,temp_color,a,b,Res,State)
+#define	OpMUL_FC(a,b,Res,State)		OpMUL(temp_float,temp_color,temp_color,a,b,Res,State)
+#define	OpDIV_FC(a,b,Res,State)		OpDIV(temp_float,temp_color,temp_color,a,b,Res,State)
+#define	OpADD_FC(a,b,Res,State)		OpADD(temp_float,temp_color,temp_color,a,b,Res,State)
+#define	OpSUB_FC(a,b,Res,State)		OpSUB(temp_float,temp_color,temp_color,a,b,Res,State)
 
-#define	OpLAND_B(a,b,Res,State)		OpLAND(temp_float,temp_float,a,b,Res,State)
-#define	OpLOR_B(a,b,Res,State)		OpLOR(temp_float,temp_float,a,b,Res,State)
+#define	OpLAND_B(a,b,Res,State)		OpLAND(temp_float,temp_float,temp_float,a,b,Res,State)
+#define	OpLOR_B(a,b,Res,State)		OpLOR(temp_float,temp_float,temp_float,a,b,Res,State)
 
 #define	OpCAST_FC(a,Res,State)		OpCAST(temp_float,temp_color, a,Res,State)
 #define	OpCAST_FP(a,Res,State)		OpCAST(temp_float,temp_point, a,Res,State)
@@ -126,13 +126,14 @@ START_NAMESPACE( Aqsis )
 // Define macros for defining Opcodes efficiently
 
 #define OpABRS(OP, NAME) \
-		template <class A, class B>	\
-		inline void	Op##NAME( A& a, B&b, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBitVector& RunningState ) \
+		template <class A, class B, class R>	\
+		inline void	Op##NAME( A& a, B&b, R& r, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBitVector& RunningState ) \
 		{ \
 			A vA; \
 			B vB; \
 			A* pdA; \
 			B* pdB; \
+			R* pdR; \
 			TqInt i, ii; \
 			\
 			TqBool fAVar = pA->Size() > 1; \
@@ -143,13 +144,15 @@ START_NAMESPACE( Aqsis )
 				/* Both are varying, must go accross all processing each element. */ \
 				pA->GetValuePtr( pdA ); \
 				pB->GetValuePtr( pdB ); \
+				pRes->GetValuePtr( pdR ); \
 				ii = pA->Size(); \
 				for ( i = 0; i < ii; i++ ) \
 				{ \
 					if ( RunningState.Value( i ) ) \
-						pRes->SetValue( (*pdA) OP (*pdB), i ); \
+						(*pdR) = ( (*pdA) OP (*pdB) ); \
 					pdA++; \
 					pdB++; \
+					pdR++; \
 				} \
 			} \
 			else if( !fBVar && fAVar) \
@@ -158,11 +161,13 @@ START_NAMESPACE( Aqsis )
 				ii = pA->Size(); \
 				pA->GetValuePtr( pdA ); \
 				pB->GetValue( vB ); \
+				pRes->GetValuePtr( pdR ); \
 				for ( i = 0; i < ii; i++ ) \
 				{ \
 					if ( RunningState.Value( i ) ) \
-						pRes->SetValue( (*pdA) OP vB, i ); \
+						(*pdR) = ( (*pdA) OP vB ); \
 					pdA++; \
+					pdR++; \
 				} \
 			} \
 			else if( !fAVar && fBVar) \
@@ -171,11 +176,13 @@ START_NAMESPACE( Aqsis )
 				ii = pB->Size(); \
 				pB->GetValuePtr( pdB ); \
 				pA->GetValue( vA ); \
+				pRes->GetValuePtr( pdR ); \
 				for ( i = 0; i < ii; i++ ) \
 				{ \
 					if ( RunningState.Value( i ) ) \
-						pRes->SetValue( vA OP (*pdB), i ); \
+						(*pdR) = ( vA OP (*pdB) ); \
 					pdB++; \
+					pdR++; \
 				} \
 			} \
 			else \

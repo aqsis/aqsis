@@ -250,26 +250,26 @@ CqOptions& CqOptions::operator=( const CqOptions& From )
 
 
 
-#define	ADD_SYSTEM_PARAM(name, type, id, def) \
-	CqParameterTypedUniform<type,id>* p##name = new CqParameterTypedUniform<type,id>(#name); \
+#define	ADD_SYSTEM_PARAM(name, type, sltype, id, def) \
+	CqParameterTypedUniform<type,id,sltype>* p##name = new CqParameterTypedUniform<type,id,sltype>(#name); \
 	p##name->pValue()[0] = ( def ); \
 	pdefopts->AddParameter(p##name);
 
-#define	ADD_SYSTEM_PARAM2(name, type, id, def0, def1) \
-	CqParameterTypedUniformArray<type,id>* p##name = new CqParameterTypedUniformArray<type,id>(#name,2); \
+#define	ADD_SYSTEM_PARAM2(name, type, sltype, id, def0, def1) \
+	CqParameterTypedUniformArray<type,id,sltype>* p##name = new CqParameterTypedUniformArray<type,id,sltype>(#name,2); \
 	p##name->pValue()[0] = ( def0 ); \
 	p##name->pValue()[1] = ( def1 ); \
 	pdefopts->AddParameter(p##name);
 
-#define	ADD_SYSTEM_PARAM3(name, type, id, def0, def1, def2) \
-	CqParameterTypedUniformArray<type,id>* p##name = new CqParameterTypedUniformArray<type,id>(#name,3); \
+#define	ADD_SYSTEM_PARAM3(name, type, sltype, id, def0, def1, def2) \
+	CqParameterTypedUniformArray<type,id,sltype>* p##name = new CqParameterTypedUniformArray<type,id,sltype>(#name,3); \
 	p##name->pValue()[0] = ( def0 ); \
 	p##name->pValue()[1] = ( def1 ); \
 	p##name->pValue()[2] = ( def2 ); \
 	pdefopts->AddParameter(p##name);
 
-#define	ADD_SYSTEM_PARAM4(name, type, id, def0, def1, def2, def3) \
-	CqParameterTypedUniformArray<type,id>* p##name = new CqParameterTypedUniformArray<type,id>(#name,4); \
+#define	ADD_SYSTEM_PARAM4(name, type, sltype, id, def0, def1, def2, def3) \
+	CqParameterTypedUniformArray<type,id,sltype>* p##name = new CqParameterTypedUniformArray<type,id,sltype>(#name,4); \
 	p##name->pValue()[0] = ( def0 ); \
 	p##name->pValue()[1] = ( def1 ); \
 	p##name->pValue()[2] = ( def2 ); \
@@ -281,37 +281,37 @@ void CqOptions::InitialiseDefaultOptions()
 {
 	CqSystemOption*  pdefopts = new CqSystemOption("System");
 
-	ADD_SYSTEM_PARAM(PixelVariance, TqFloat, type_float, 1.0f );
-	ADD_SYSTEM_PARAM2(PixelSamples, TqInt, type_integer, 2, 2 );
-	ADD_SYSTEM_PARAM2(FilterWidth, TqFloat, type_float, 2.0f, 2.0f );
-	ADD_SYSTEM_PARAM2(Exposure, TqFloat, type_float, 1.0f, 1.0f );
-	ADD_SYSTEM_PARAM(ColorQuantizeOne, TqInt, type_integer, 255 );
-	ADD_SYSTEM_PARAM(ColorQuantizeMin, TqInt, type_integer, 0 );
-	ADD_SYSTEM_PARAM(ColorQuantizeMax, TqInt, type_integer, 255 );
-	ADD_SYSTEM_PARAM(ColorQuantizeDitherAmplitude, TqFloat, type_float, 0.5f );
-	ADD_SYSTEM_PARAM(DepthQuantizeOne, TqInt, type_integer, 0 );
-	ADD_SYSTEM_PARAM(DepthQuantizeMin, TqInt, type_integer, 0 );
-	ADD_SYSTEM_PARAM(DepthQuantizeMax, TqInt, type_integer, 255 );
-	ADD_SYSTEM_PARAM(DepthQuantizeDitherAmplitude, TqFloat, type_float, 0.0f );
-	ADD_SYSTEM_PARAM(Imager, CqString, type_string, "null" );
-	ADD_SYSTEM_PARAM(DisplayType, CqString, type_string, "file" );
-	ADD_SYSTEM_PARAM(DisplayName, CqString, type_string, "aqsis.tif" );
-	ADD_SYSTEM_PARAM(DisplayMode, TqInt, type_integer, ModeRGB );
+	ADD_SYSTEM_PARAM(PixelVariance, TqFloat, TqFloat, type_float, 1.0f );
+	ADD_SYSTEM_PARAM2(PixelSamples, TqInt, TqFloat, type_integer, 2, 2 );
+	ADD_SYSTEM_PARAM2(FilterWidth, TqFloat, TqFloat, type_float, 2.0f, 2.0f );
+	ADD_SYSTEM_PARAM2(Exposure, TqFloat, TqFloat, type_float, 1.0f, 1.0f );
+	ADD_SYSTEM_PARAM(ColorQuantizeOne, TqInt, TqFloat, type_integer, 255 );
+	ADD_SYSTEM_PARAM(ColorQuantizeMin, TqInt, TqFloat, type_integer, 0 );
+	ADD_SYSTEM_PARAM(ColorQuantizeMax, TqInt, TqFloat, type_integer, 255 );
+	ADD_SYSTEM_PARAM(ColorQuantizeDitherAmplitude, TqFloat, TqFloat, type_float, 0.5f );
+	ADD_SYSTEM_PARAM(DepthQuantizeOne, TqInt, TqFloat, type_integer, 0 );
+	ADD_SYSTEM_PARAM(DepthQuantizeMin, TqInt, TqFloat, type_integer, 0 );
+	ADD_SYSTEM_PARAM(DepthQuantizeMax, TqInt, TqFloat, type_integer, 255 );
+	ADD_SYSTEM_PARAM(DepthQuantizeDitherAmplitude, TqFloat, TqFloat, type_float, 0.0f );
+	ADD_SYSTEM_PARAM(Imager, CqString, CqString, type_string, "null" );
+	ADD_SYSTEM_PARAM(DisplayType, CqString, CqString, type_string, "file" );
+	ADD_SYSTEM_PARAM(DisplayName, CqString, CqString, type_string, "aqsis.tif" );
+	ADD_SYSTEM_PARAM(DisplayMode, TqInt, TqFloat, type_integer, ModeRGB );
 
-	ADD_SYSTEM_PARAM(Hider,CqString, type_string, "hidden" );
-	ADD_SYSTEM_PARAM(ColorSamples, TqInt, type_integer, 3 );
-	ADD_SYSTEM_PARAM(RelativeDetail, TqFloat, type_float, 1.0f );
+	ADD_SYSTEM_PARAM(Hider,CqString, CqString, type_string, "hidden" );
+	ADD_SYSTEM_PARAM(ColorSamples, TqInt, TqFloat, type_integer, 3 );
+	ADD_SYSTEM_PARAM(RelativeDetail, TqFloat, TqFloat, type_float, 1.0f );
 
-	ADD_SYSTEM_PARAM2(Resolution, TqInt, type_integer, 640, 480 );
-	ADD_SYSTEM_PARAM(PixelAspectRatio, TqFloat, type_float, 1.0f );
-	ADD_SYSTEM_PARAM4(CropWindow, TqFloat, type_float, 0.0f, 1.0f, 0.0f, 1.0f );
-	ADD_SYSTEM_PARAM(FrameAspectRatio, TqFloat, type_float, 4.0f / 3.0f );
-	ADD_SYSTEM_PARAM4(ScreenWindow, TqFloat, type_float, -( 4.0f / 3.0f ), ( 4.0f / 3.0f ), 1.0f, -1.0f );
-	ADD_SYSTEM_PARAM(Projection, TqInt, type_integer, ProjectionOrthographic );
-	ADD_SYSTEM_PARAM2(Clipping, TqFloat, type_float, FLT_EPSILON, FLT_MAX );
-	ADD_SYSTEM_PARAM3(DepthOfField, TqFloat, type_float, FLT_MAX, FLT_MAX, FLT_MAX );
-	ADD_SYSTEM_PARAM2(Shutter, TqFloat, type_float, 0.0f, 1.0f );
-	ADD_SYSTEM_PARAM(FOV, TqFloat, type_float, 90.0f );
+	ADD_SYSTEM_PARAM2(Resolution, TqInt, TqFloat, type_integer, 640, 480 );
+	ADD_SYSTEM_PARAM(PixelAspectRatio, TqFloat, TqFloat, type_float, 1.0f );
+	ADD_SYSTEM_PARAM4(CropWindow, TqFloat, TqFloat, type_float, 0.0f, 1.0f, 0.0f, 1.0f );
+	ADD_SYSTEM_PARAM(FrameAspectRatio, TqFloat, TqFloat, type_float, 4.0f / 3.0f );
+	ADD_SYSTEM_PARAM4(ScreenWindow, TqFloat, TqFloat, type_float, -( 4.0f / 3.0f ), ( 4.0f / 3.0f ), 1.0f, -1.0f );
+	ADD_SYSTEM_PARAM(Projection, TqInt, TqFloat, type_integer, ProjectionOrthographic );
+	ADD_SYSTEM_PARAM2(Clipping, TqFloat, TqFloat, type_float, FLT_EPSILON, FLT_MAX );
+	ADD_SYSTEM_PARAM3(DepthOfField, TqFloat, TqFloat, type_float, FLT_MAX, FLT_MAX, FLT_MAX );
+	ADD_SYSTEM_PARAM2(Shutter, TqFloat, TqFloat, type_float, 0.0f, 1.0f );
+	ADD_SYSTEM_PARAM(FOV, TqFloat, TqFloat, type_float, 90.0f );
 
 	pdefopts->AddRef();
 	AddOption(pdefopts);
@@ -369,7 +369,7 @@ TqFloat* CqOptions::GetFloatOptionWrite( const char* strName, const char* strPar
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
 	if ( pParam != 0 )
-		return ( static_cast<CqParameterTyped<TqFloat>*>( pParam ) ->pValue() );
+		return ( static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
 }
@@ -386,7 +386,7 @@ TqInt* CqOptions::GetIntegerOptionWrite( const char* strName, const char* strPar
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
 	if ( pParam != 0 )
-		return ( static_cast<CqParameterTyped<TqInt>*>( pParam ) ->pValue() );
+		return ( static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
 }
@@ -403,7 +403,7 @@ CqString* CqOptions::GetStringOptionWrite( const char* strName, const char* strP
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
 	if ( pParam != 0 )
-		return ( static_cast<CqParameterTyped<CqString>*>( pParam ) ->pValue() );
+		return ( static_cast<CqParameterTyped<CqString, CqString>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
 }
@@ -420,7 +420,7 @@ CqVector3D* CqOptions::GetPointOptionWrite( const char* strName, const char* str
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
 	if ( pParam != 0 )
-		return ( static_cast<CqParameterTyped<CqVector3D>*>( pParam ) ->pValue() );
+		return ( static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
 }
@@ -437,7 +437,7 @@ CqColor* CqOptions::GetColorOptionWrite( const char* strName, const char* strPar
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
 	if ( pParam != 0 )
-		return ( static_cast<CqParameterTyped<CqColor>*>( pParam ) ->pValue() );
+		return ( static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
 }
@@ -454,7 +454,7 @@ const TqFloat* CqOptions::GetFloatOption( const char* strName, const char* strPa
 {
 	const CqParameter * pParam = pParameter( strName, strParam );
 	if ( pParam != 0 )
-		return ( static_cast<const CqParameterTyped<TqFloat>*>( pParam ) ->pValue() );
+		return ( static_cast<const CqParameterTyped<TqFloat, TqFloat>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
 }
@@ -471,7 +471,7 @@ const TqInt* CqOptions::GetIntegerOption( const char* strName, const char* strPa
 {
 	const CqParameter * pParam = pParameter( strName, strParam );
 	if ( pParam != 0 )
-		return ( static_cast<const CqParameterTyped<TqInt>*>( pParam ) ->pValue() );
+		return ( static_cast<const CqParameterTyped<TqInt, TqFloat>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
 }
@@ -488,7 +488,7 @@ const CqString* CqOptions::GetStringOption( const char* strName, const char* str
 {
 	const CqParameter * pParam = pParameter( strName, strParam );
 	if ( pParam != 0 )
-		return ( static_cast<const CqParameterTyped<CqString>*>( pParam ) ->pValue() );
+		return ( static_cast<const CqParameterTyped<CqString, CqString>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
 }
@@ -505,7 +505,7 @@ const CqVector3D* CqOptions::GetPointOption( const char* strName, const char* st
 {
 	const CqParameter * pParam = pParameter( strName, strParam );
 	if ( pParam != 0 )
-		return ( static_cast<const CqParameterTyped<CqVector3D>*>( pParam ) ->pValue() );
+		return ( static_cast<const CqParameterTyped<CqVector3D, CqVector3D>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
 }
@@ -522,7 +522,7 @@ const CqColor* CqOptions::GetColorOption( const char* strName, const char* strPa
 {
 	const CqParameter * pParam = pParameter( strName, strParam );
 	if ( pParam != 0 )
-		return ( static_cast<const CqParameterTyped<CqColor>*>( pParam ) ->pValue() );
+		return ( static_cast<const CqParameterTyped<CqColor, CqColor>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
 }

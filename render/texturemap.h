@@ -234,7 +234,14 @@ class _qShareC CqTextureMap : public IqTextureMap
 				m_Compression(COMPRESSION_NONE), 
 				m_Quality(70)
 
-		{}
+		{
+			m_tempval1.resize(m_SamplesPerPixel);		
+			m_tempval2.resize(m_SamplesPerPixel);		
+			m_tempval3.resize(m_SamplesPerPixel);		
+			m_tempval4.resize(m_SamplesPerPixel);
+			m_low_color.resize(m_SamplesPerPixel);
+			m_high_color.resize(m_SamplesPerPixel);
+		}
 		_qShareM	virtual	~CqTextureMap();
 
 		/** Get/Set the mininum depth this texture (for any surfaces using it)
@@ -395,6 +402,14 @@ class _qShareC CqTextureMap : public IqTextureMap
 		RtFilterFunc m_FilterFunc;       ///< Catmull-Rom, sinc, disk, ... pixelfilter
 		TqFloat m_swidth, m_twidth;   ///< for the pixel's filter
 		std::vector<CqTextureMapBuffer*>	m_apSegments;	///< Array of cache segments related to this image.
+
+		// Temporary values used during sampling.
+		std::valarray<TqFloat>		m_tempval1;
+		std::valarray<TqFloat>		m_tempval2;
+		std::valarray<TqFloat>		m_tempval3;
+		std::valarray<TqFloat>		m_tempval4;
+		std::valarray<TqFloat>		m_low_color;
+		std::valarray<TqFloat>		m_high_color;
 }
 ;
 
