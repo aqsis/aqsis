@@ -664,7 +664,7 @@ RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat dither
 {
 	if ( strcmp( type, "rgba" ) == 0 )
 	{
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "ColorQuantizeNne")[0] =  one ;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "ColorQuantizeOne")[0] =  one ;
 		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "ColorQuantizeMin")[0] =  min ;
 		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "ColorQuantizeMax")[0] =  max ;
 		QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ColorQuantizeDitherAmplitude")[0] =  ditheramplitude ;
