@@ -95,14 +95,25 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pt = t();
 	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pu = this->u();
 	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pv = this->v();
+	CqParameterTypedVaryingArray<TqFloat, type_float, TqFloat>* pst = static_cast<CqParameterTypedVaryingArray<TqFloat, type_float, TqFloat>*>(FindUserParam( "st" ));
 
 	TqFloat s0,s1,s2,s3;
 	if( USES( lUses, EnvVars_s ) && NULL != pGrid->s() && bHass() )
 	{
-		s0 = ps->pValue( 0 )[0];
-		s1 = ps->pValue( 1 )[0];
-		s2 = ps->pValue( 2 )[0];
-		s3 = ps->pValue( 3 )[0];
+		if( pst )
+		{
+			s0 = pst->pValue( 0 )[0];
+			s1 = pst->pValue( 1 )[0];
+			s2 = pst->pValue( 2 )[0];
+			s3 = pst->pValue( 3 )[0];
+		}
+		else if( ps )
+		{
+			s0 = ps->pValue( 0 )[0];
+			s1 = ps->pValue( 1 )[0];
+			s2 = ps->pValue( 2 )[0];
+			s3 = ps->pValue( 3 )[0];
+		}
 
 		DONE( lDone, EnvVars_s );
 	}
@@ -110,10 +121,20 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
 	TqFloat t0,t1,t2,t3;
 	if( USES( lUses, EnvVars_t ) && NULL != pGrid->t() && bHast() )
 	{
-		t0 = pt->pValue( 0 )[0];
-		t1 = pt->pValue( 1 )[0];
-		t2 = pt->pValue( 2 )[0];
-		t3 = pt->pValue( 3 )[0];
+		if( pst )
+		{
+			t0 = pst->pValue( 0 )[1];
+			t1 = pst->pValue( 1 )[1];
+			t2 = pst->pValue( 2 )[1];
+			t3 = pst->pValue( 3 )[1];
+		}
+		else if( pt )
+		{
+			t0 = pt->pValue( 0 )[0];
+			t1 = pt->pValue( 1 )[0];
+			t2 = pt->pValue( 2 )[0];
+			t3 = pt->pValue( 3 )[0];
+		}
 
 		DONE( lDone, EnvVars_t );
 	}
