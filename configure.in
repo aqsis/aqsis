@@ -12,9 +12,6 @@ libddmsimple/Makefile \
 libddmsock/Makefile \
 libddmsock/posix/Makefile \
 libddmsock/posix/intel/Makefile \
-librib/Makefile \
-librib/tests/Makefile \
-file/Makefile \
 aqsis/Makefile \
 Makefile )
 
