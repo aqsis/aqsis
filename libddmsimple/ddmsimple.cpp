@@ -26,7 +26,8 @@
 
 #include	"aqsis.h"
 
-#include	"renderer.h"
+#include	"sstring.h"
+#include	"irenderer.h"
 #include	"ddmsimple.h"
 #include	"imagebuffer.h"
 #include	"file.h"
@@ -72,8 +73,9 @@ TqInt CqDDManagerSimple::OpenDisplays()
 	std::vector<SqDDevice>::iterator i;
 	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
 	{
-		i->m_XRes = QGetRenderContext() ->pImage() ->iXRes();
-		i->m_YRes = QGetRenderContext() ->pImage() ->iYRes();
+		i->m_XRes = QGetRenderContextI() ->GetIntegerOption("System", "Resolution")[0];
+		i->m_YRes = QGetRenderContextI() ->GetIntegerOption("System", "Resolution")[1];
+
 		RtInt mode = 0;
 		if ( strstr( i->m_strMode.c_str(), RI_RGB ) != NULL )
 			mode |= ModeRGB;

@@ -28,6 +28,9 @@
 #define DDMSIMPLE_H_INCLUDED 1
 
 #include	"aqsis.h"
+#include	"color.h"
+#include	"ri.h"
+#include	"iddmanager.h"
 
 START_NAMESPACE( Aqsis )
 

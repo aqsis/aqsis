@@ -87,5 +87,6 @@ plugins/tga2tif/Makefile \
 releasearchive/Makefile \
 libslxargs/Makefile \
 libshadervm/Makefile \
+libshaderexecenv/Makefile \
 Makefile )
 
