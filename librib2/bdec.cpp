@@ -167,7 +167,14 @@ CqRibBinaryDecoder::initZlib( int buffersize )
     zbuffersize = 2;
     for (len = 0; len < 2; len++)
     {
-        gc( c );
+        try
+		{
+			gc( c );
+		}
+		catch(std::string)
+		{
+			return;
+		}
         if (c != gz_magic[len])
         {
             if (len != 0) zavailable++, zcurrent--;
