@@ -2680,16 +2680,17 @@ STD_SOIMPL CqShaderExecEnv::SO_ambient( DEFPARAMIMPL )
 	static CqVMStackEntry Point;
 	static CqColor colTemp;
 
-	Result = CqColor( 0, 0, 0 );
-
 	// Use the lightsource stack on the current surface
 	if ( m_pSurface != 0 )
 	{
+		Point = P();
 		// If this is the first call to illuminance this time round, call all lights and setup the Cl and L caches.
 		if ( !m_IlluminanceCacheValid )
 		{
 			ValidateIlluminanceCache( Point, pShader );
 		}
+
+		Result = CqColor( 0, 0, 0 );
 
 		for ( TqUint light_index = 0; light_index < m_pSurface->pAttributes() ->apLights().size(); light_index++ )
 		{
@@ -2774,13 +2775,6 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 		}
 		while ( SO_advance_illuminance() );
 	}
-	else
-	{
-		__fVarying = TqTrue;
-		BEGIN_VARYING_SECTION
-		SETCOLOR( Result, CqColor( 0, 0, 0 ) );
-		END_VARYING_SECTION
-	}
 }
 
 
@@ -2842,13 +2836,6 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
 			// SO_advance_illuminance returns TRUE if there are any more non ambient lightsources.
 		}
 		while ( SO_advance_illuminance() );
-	}
-	else
-	{
-		__fVarying = TqTrue;
-		BEGIN_VARYING_SECTION
-		SETCOLOR( Result, CqColor( 0, 0, 0 ) );
-		END_VARYING_SECTION
 	}
 }
 
@@ -2924,13 +2911,6 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 			// SO_advance_illuminance returns TRUE if there are any more non ambient lightsources.
 		}
 		while ( SO_advance_illuminance() );
-	}
-	else
-	{
-		__fVarying = TqTrue;
-		BEGIN_VARYING_SECTION
-		SETCOLOR( Result, CqColor( 0, 0, 0 ) );
-		END_VARYING_SECTION
 	}
 }
 

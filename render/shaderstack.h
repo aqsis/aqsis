@@ -395,7 +395,7 @@ struct SqVMStackEntry
 	{
 		if( m_Type == StackEntryType_String && m_Value.m_str != NULL )
 			delete[]( m_Value.m_str );
-		m_Value.m_str = new char[strlen(s)]; 
+		m_Value.m_str = new char[strlen(s)+1]; 
 		strcpy(m_Value.m_str, s);
 		m_Type = StackEntryType_String; 
 		return ( *this );
@@ -406,7 +406,7 @@ struct SqVMStackEntry
 	{
 		if( m_Type == StackEntryType_String && m_Value.m_str != NULL )
 			delete[]( m_Value.m_str );
-		m_Value.m_str = new char[s.size()]; 
+		m_Value.m_str = new char[s.size()+1]; 
 		strcpy(m_Value.m_str, s.c_str());
 		m_Type = StackEntryType_String; 
 		return ( *this );
