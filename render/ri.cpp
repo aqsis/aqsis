@@ -4205,6 +4205,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		subd2.SubdivideFace(2);
 		subd2.SubdivideFace(3);
 		subd2.OutputMesh("test.raw");
+		subd2.OutputInfo("test2.sds");
 		TqInt cV = subd2.cVertices();
 	}
 	// Create a storage class for all the points.

@@ -29,6 +29,8 @@
 
 START_NAMESPACE( Aqsis )
 
+TqInt CqLath::m_nextID = 0;
+
 //------------------------------------------------------------------------------
 /**
  *	Constructor.
@@ -37,6 +39,7 @@ START_NAMESPACE( Aqsis )
 CqLath::CqLath() : m_pClockwiseVertex(NULL), m_pClockwiseFacet(NULL), m_VertexIndex(0),
 				   m_pParentFacet(NULL), m_pChildVertex(NULL), m_pMidVertex(NULL)
 {
+	m_ID = m_nextID++;
 }
 
 

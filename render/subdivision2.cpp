@@ -26,6 +26,7 @@
 #include	"subdivision2.h"
 
 #include	<fstream>
+#include	<vector>
 
 START_NAMESPACE( Aqsis )
 
@@ -286,6 +287,9 @@ void CqSubdivision2::Finalise()
 
 
 #define modulo(a, b) (a * b >= 0 ? a % b : (a % b) + b)
+struct SqFaceLathList {
+	CqLath* pA, *pB, *pC, *pD;
+};
 
 void CqSubdivision2::SubdivideFace(TqInt iF)
 {
@@ -310,6 +314,7 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 		{
 			// Create a new vertex for the next level
 			iVert = AddVertex(m_aVertices[aQfv[i]->VertexIndex()]);
+			m_aapVertices.resize(iVert+1);
 		}
 		else
 		{
@@ -332,6 +337,7 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 			CqVector3D vH = m_aVertices[aQfv[i]->VertexIndex()];
 			CqVector3D vT = m_aVertices[aQfv[i]->ec()->VertexIndex()];
 			iVert = AddVertex((vH+vT)/2);
+			m_aapVertices.resize(iVert+1);
 		}
 		else
 		{
@@ -345,11 +351,15 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 
 	// Create new vertex for the facepoint.
 	TqInt iVert = AddVertex(vF/n);
+	m_aapVertices.resize(iVert+1);
 
 	// Store the index, for later lath creation
 	aVertices[2*n] = iVert;
 
 	// Now create new laths for the new facets
+	std::vector<SqFaceLathList>	apFaceLaths;
+	apFaceLaths.resize(n);
+
 	for( i = 0; i < n; i++ )
 	{
 		// For each facet, create 4 laths and join them in the order of the facet
@@ -362,16 +372,27 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 		CqLath* pLathD = new CqLath();
 		m_apLaths.push_back(pLathD);
 		pLathA->SetVertexIndex(aVertices[i]);
-		pLathB->SetVertexIndex(aVertices[i+n]);
+		pLathB->SetVertexIndex(aVertices[(modulo((i+1),n))+n]);
 		pLathC->SetVertexIndex(aVertices[2*n]);
-		pLathD->SetVertexIndex(aVertices[(modulo((i-1),n))+n]);
+		pLathD->SetVertexIndex(aVertices[i+n]);
 		pLathA->SetpClockwiseFacet(pLathB);
 		pLathB->SetpClockwiseFacet(pLathC);
 		pLathC->SetpClockwiseFacet(pLathD);
 		pLathD->SetpClockwiseFacet(pLathA);
 
-		// Store the end and midpoint lath references for the current level, so that we can 
-		// use them when subdividing other facets that share them.
+		apFaceLaths[i].pA = pLathA;
+		apFaceLaths[i].pB = pLathB;
+		apFaceLaths[i].pC = pLathC;
+		apFaceLaths[i].pD = pLathD;
+
+		// Fill in the vertex references table for these vertices.
+		m_aapVertices[pLathA->VertexIndex()].push_back(pLathA);
+		m_aapVertices[pLathB->VertexIndex()].push_back(pLathB);
+		m_aapVertices[pLathC->VertexIndex()].push_back(pLathC);
+		m_aapVertices[pLathD->VertexIndex()].push_back(pLathD);
+
+		// Set the child vertex pointer for all laths which reference the A vertex of this facet
+		// so that we can use them when subdividing other faces.
 		CqLath* pNextV = aQfv[i];
 		do
 		{
@@ -379,12 +400,45 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 			pNextV = pNextV->pClockwiseVertex();
 		}while( pNextV != aQfv[i]);
 		
-		aQfv[i]->SetpMidVertex(pLathB);
+		// For this edge of the original face, set a ponter to the new midpoint lath, so that we can
+		// use it when subdividing neighbour facets, do the same for the lath representing the edge in the
+		// other direction if not a boundary.
+		aQfv[i]->SetpMidVertex(pLathD);
 		if( NULL != aQfv[i]->ec() )	
-			aQfv[i]->ec()->SetpMidVertex(pLathB);
+			aQfv[i]->ec()->SetpMidVertex(pLathD);
 
 		// Store a lath reference for the facet.
 		m_apFacets.push_back(pLathA);
+	}
+
+	// Now connect up the laths we have created.
+	// The clcckwise face connections will have already been made, we need to fixup and clockwise
+	// vertex connections we can.
+	for( i = 0; i < n; i++ )
+	{
+		// Connect midpoints clockwise vertex pointers.
+		apFaceLaths[((i+1)%n)].pD->SetpClockwiseVertex( apFaceLaths[i].pA );
+		// Connect all laths around the new face point.
+		apFaceLaths[i].pC->SetpClockwiseVertex( apFaceLaths[ ((i+1)%n) ].pC );
+		// Connect the new corner vertices, this is only possible if neighbouring facets have previously been
+		// subdivided.
+		std::vector<CqLath*>::iterator iVertLath;
+		for( iVertLath = m_aapVertices[apFaceLaths[i].pA->VertexIndex()].begin(); iVertLath != m_aapVertices[apFaceLaths[i].pA->VertexIndex()].end(); iVertLath++ )
+		{
+			if( (*iVertLath)->cf()->VertexIndex() == apFaceLaths[i].pD->VertexIndex() )
+				apFaceLaths[i].pA->SetpClockwiseVertex( (*iVertLath ) );
+			else if( (*iVertLath)->ccf()->VertexIndex() == apFaceLaths[i].pB->VertexIndex() )
+				(*iVertLath)->SetpClockwiseVertex( apFaceLaths[i].pA );
+		}
+		// Connect the new edge midpoint vertices to any neighbours, this is only possible if neighbouring facets have previously been
+		// subdivided.
+		for( iVertLath = m_aapVertices[apFaceLaths[i].pB->VertexIndex()].begin(); iVertLath != m_aapVertices[apFaceLaths[i].pB->VertexIndex()].end(); iVertLath++ )
+		{
+			if( (*iVertLath)->cf()->VertexIndex() == apFaceLaths[i].pA->VertexIndex() )
+				apFaceLaths[i].pB->SetpClockwiseVertex( (*iVertLath ) );
+			else if( (*iVertLath)->ccf()->VertexIndex() == apFaceLaths[i].pA->VertexIndex() )
+				(*iVertLath)->SetpClockwiseVertex( apFaceLaths[i].pB );
+		}
 	}
 }
 
@@ -422,8 +476,20 @@ void CqSubdivision2::OutputInfo(const char* fname)
 	{
 		CqLath* pL = apLaths()[i];
 		file << i << " - " << 
-			"0x" << pL << " - "	<<
-			pL->VertexIndex() << " - (cf) 0x" << pL->cf() << " - (cv) 0x" << pL->cv() << std::endl;
+			(char)(pL->ID()+'A') << " - "	<<
+			pL->VertexIndex() << " - (cf) ";
+		if( pL->cf() )
+			file << (char)(pL->cf()->ID()+'A');
+		else
+			file << "***";
+		file << " - (cv) ";
+		
+		if(pL->cv())
+			file << (char)(pL->cv()->ID()+'A');
+		else
+			file << "***";
+			
+		file << std::endl;
 	}
 
 	file.close();

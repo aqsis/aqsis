@@ -101,6 +101,8 @@ public:
 	void Qee(std::vector<CqLath*>&);
 	void Qff(std::vector<CqLath*>&);
 
+	TqInt	ID() const	{return(m_ID);}
+
 private:
 	///	Declared private to prevent copying.
 	CqLath(const CqLath &);
@@ -116,6 +118,10 @@ private:
 	CqLath*	m_pMidVertex;		///< Poniter to the point that represents the midpoint of this edge at the next level.
 
 	TqInt	m_VertexIndex;
+
+	// Debug only information.
+	static	TqInt	m_nextID;	///< Next ID for allocated LATH
+	TqInt	m_ID;				///< ID for current lath.
 };
 
 END_NAMESPACE( Aqsis )
