@@ -47,6 +47,11 @@ struct SqShadeOp {
 	char *m_shutdown;
 } ;
 
+typedef struct _STRING_DESC {
+	char *s;
+	int bufflen;
+} STRING_DESC;
+
 // Some of the DSO's out there seem to use this
 #define SHADEOP_SPEC struct SqShadeOp 
 
