@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=Aqsis
-AppVerName=Aqsis Renderer v0.6.4
+AppVerName=Aqsis Renderer v0.6.5
 AppPublisher=The Aqsis Team
 AppPublisherURL=http://www.aqsis.com
 AppSupportURL=http://www.aqsis.com
@@ -14,7 +14,7 @@ AllowNoIcons=true
 LicenseFile=C:\Projects\Aqsis\renderer\COPYING
 OutputBaseFilename=aqsis-setup
 Compression=zip/9
-AppVersion=0.6.4
+AppVersion=0.6.5
 
 [Tasks]
 Name: desktopicon; Description: Create a &desktop icon; GroupDescription: Additional icons:
@@ -35,6 +35,10 @@ Source: Library\Release\shadowmap.exe; DestDir: {app}\displays; CopyMode: normal
 Source: Library\Release\slpp.exe; DestDir: {app}; CopyMode: normal
 Source: Library\Release\teqser.exe; DestDir: {app}; CopyMode: normal
 Source: Library\Release\aqsl.exe; DestDir: {app}; CopyMode: normal
+Source: Library\Release\aqsltell.exe; DestDir: {app}; CopyMode: normal
+Source: \Apps\GnuWin32\bin\libtiff.dll; DestDir: {app}; CopyMode: normal
+Source: \Apps\GnuWin32\bin\zlib.dll; DestDir: {app}; CopyMode: normal
+Source: \WINDOWS.000\System32\glut32.dll; DestDir: {app}; CopyMode: normal
 Source: shaders\*.sl; DestDir: {app}\shaders
 Source: shaders\*.slx; DestDir: {app}\shaders
 Source: ribfiles\*.rib; DestDir: {app}\examples
