@@ -1021,8 +1021,8 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 			const CqString *poptDSOPath = QGetRenderContext()->optCurrent().GetStringOption( "searchpath","dsolibs" );
 			pShader->SetDSOPath( poptDSOPath );
 			pShader->SetLogger( &m_theLog );
-			pShader->LoadProgram( SLXFile );
 			pShader->SetstrName( strName );
+			pShader->LoadProgram( SLXFile );
 			RegisterShader( strName, type, pShader );
 			return ( pShader );
 		}
