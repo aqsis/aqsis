@@ -459,8 +459,8 @@ void CqBucket::FilterBucket(TqBool empty)
         pie += xlen;
     }
 
-    endy = YOrigin() + RealHeight();
-    endx = XOrigin() + RealWidth();
+    endy = YOrigin() + Height();
+    endx = XOrigin() + Width();
 
     if ( NULL != QGetRenderContext() ->optCurrent().pshadImager() && NULL != QGetRenderContext() ->optCurrent().pshadImager() ->pShader() )
     {

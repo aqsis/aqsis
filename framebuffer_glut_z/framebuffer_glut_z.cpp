@@ -40,7 +40,7 @@ using namespace Aqsis;
 
 #ifdef AQSIS_SYSTEM_WIN32
 
-	#include <winsock2.h>
+	#include <windows.h>
 
 #else // AQSIS_SYSTEM_WIN32
 
