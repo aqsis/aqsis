@@ -134,7 +134,8 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
 	if ( NULL != pshadAtmosphere ) pshadAtmosphere->Initialise( cu, cv, m_pShaderExecEnv );
 
 	// Initialise the local/public culled variable.
-
+	m_CulledPolys.SetSize( ( cu + 1 ) * ( cv + 1 ) );
+	m_CulledPolys.SetAll( TqFalse );
 }
 
 //---------------------------------------------------------------------
@@ -378,7 +379,10 @@ void CqMicroPolyGrid::Shade()
 		for ( i = gsmin1; i >= 0; i-- )
 		{
 			if ( pOs[ i ] != gColWhite )
+			{
 				cCulled ++;
+				m_CulledPolys.SetValue( i, TqTrue );
+			}
 			else
 				break;
 		}
@@ -403,7 +407,10 @@ void CqMicroPolyGrid::Shade()
 		for ( i = gsmin1; i >= 0; i-- )
 		{
 			if ( pOs[ i ] == gColBlack )
+			{
 				cCulled ++;
+				m_CulledPolys.SetValue( i, TqTrue );
+			}
 			else
 				break;
 		}
@@ -434,7 +441,10 @@ void CqMicroPolyGrid::Shade()
 		{
 			// Calulate the direction the MPG is facing.
 			if ( ( pN[ i ] * pP[ i ] ) >= 0 )
+			{
 				cCulled++;
+				m_CulledPolys.SetValue( i, TqTrue );
+			}
 		}
 		theStats.OcclusionCullTimer().Stop();
 
@@ -466,7 +476,10 @@ void CqMicroPolyGrid::Shade()
 		for ( i = gsmin1; i >= 0; i-- )
 		{
 			if ( pOs[ i ] == gColBlack )
+			{
 				cCulled ++;
+				m_CulledPolys.SetValue( i, TqTrue );
+			}
 			else
 				break;
 		}
@@ -641,6 +654,13 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 		{
 			TqInt iIndex = ( iv * ( cu + 1 ) ) + iu;
 
+			// If culled don't bother.
+			if ( m_CulledPolys.Value( iIndex ) )
+			{
+				theStats.IncCulledMPGs();
+				continue;
+			}
+
 			// If the MPG is trimmed then don't add it.
 			TqBool fTrimmed = TqFalse;
 			if ( bCanBeTrimmed )
@@ -812,17 +832,6 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 CqMicroPolygonBase::CqMicroPolygonBase() : m_pGrid( 0 ), m_RefCount( 0 ), m_bHit( TqFalse )
 {
 	QGetRenderContext() ->Stats().IncMPGsAllocated();
-}
-
-
-//---------------------------------------------------------------------
-/** Copy constructor
- */
-
-CqMicroPolygonBase::CqMicroPolygonBase( const CqMicroPolygonBase& From ) : m_bHit( TqFalse )
-{
-	QGetRenderContext() ->Stats().IncMPGsAllocated();
-	*this = From;
 }
 
 

@@ -100,7 +100,7 @@ class CqMicroPolyGridBase
 		}
 
 	public:
-		TqBool m_fCulled; ///< Shader variable indicating whether the individual micropolys are culled.
+		TqBool m_fCulled; ///< Boolean indicating the entire grid is culled.
 };
 
 
@@ -305,6 +305,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 		CqCSGTreeNode* m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
 		IqShaderExecEnv* m_pShaderExecEnv;	///< Pointer to the shader execution environment for this grid.
 		TqBool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
+		CqBitVector	m_CulledPolys;		///< Bitvector indicating whether the individual micro polygons are culled.
 	protected:
 
 }
@@ -382,7 +383,6 @@ class CqMicroPolygonBase
 {
 	public:
 		CqMicroPolygonBase();
-		CqMicroPolygonBase( const CqMicroPolygonBase& From );
 		virtual	~CqMicroPolygonBase();
 
 	public:
@@ -498,6 +498,9 @@ class CqMicroPolygonBase
 		TqInt	m_Index;		///< Index within the donor grid.
 		TqInt	m_RefCount;		///< Number of references to this micropoly.
 		TqBool	m_bHit;			///< Flag indicating the MPG has been sampled.
+
+	private:
+		CqMicroPolygonBase( const CqMicroPolygonBase& From )	{}
 }
 ;
 
@@ -591,13 +594,7 @@ class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonSta
 	public:
 		CqMicroPolygonStatic() : CqMicroPolygonBase(), CqMicroPolygonStaticBase(), m_fTrimmed( TqFalse )
 		{}
-		CqMicroPolygonStatic( const CqMicroPolygonStatic& From ) : CqMicroPolygonBase( From ), CqMicroPolygonStaticBase( From )
-		{
-			m_fTrimmed = From.m_fTrimmed;
-		}
-
-		virtual	~CqMicroPolygonStatic()
-		{}
+		virtual	~CqMicroPolygonStatic()	{}
 
 		// overrides from CqMicroPolygonBase
 
@@ -630,6 +627,8 @@ class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonSta
 	private:
 		CqBound	m_Bound;		///< Stored bound.
 		TqBool	m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
+
+		CqMicroPolygonStatic( const CqMicroPolygonStatic& From ) {}
 }
 ;
 
@@ -644,11 +643,6 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 	public:
 		CqMicroPolygonMotion() : CqMicroPolygonBase(), CqMotionSpec<CqMicroPolygonStaticBase>( CqMicroPolygonStaticBase() ), m_BoundReady( TqFalse )
 		{ }
-		CqMicroPolygonMotion( const CqMicroPolygonMotion& From ) : CqMicroPolygonBase( From ), CqMotionSpec<CqMicroPolygonStaticBase>( From ), m_BoundReady( TqFalse )
-		{
-			*this = From;
-		}
-		//	private:
 		virtual	~CqMicroPolygonMotion()
 		{}
 
@@ -717,6 +711,8 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 		CqBound	m_Bound;		///< Stored bound.
 		CqBoundList	m_BoundList;	///< List of bounds to get a tighter fit.
 		TqBool	m_BoundReady;	///< Flag indicating the boundary has been initialised.
+
+		CqMicroPolygonMotion( const CqMicroPolygonMotion& From ) : CqMotionSpec<CqMicroPolygonStaticBase>( From )	{}
 }
 ;
 
