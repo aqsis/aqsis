@@ -4197,7 +4197,10 @@ STD_SOIMPL CqShaderExecEnv::SO_filterstep( FLOATVAL edge, FLOATVAL s1, DEFPARAMV
 	TqFloat dsdu = SO_DuType<TqFloat>( s1, __iGrid, this, Deffloat );
 	TqFloat dsdv = SO_DvType<TqFloat>( s1, __iGrid, this, Deffloat );
 
-	TqFloat w = fabs( dsdu * fdu ) + fabs( dsdv * fdv );
+	TqFloat uwidth = fabs( dsdu * fdu ); 
+	TqFloat vwidth = fabs( dsdv * fdv );
+
+	TqFloat w = uwidth + vwidth;
 	w *= _pswidth;
 
 	SETFLOAT( Result, CLAMP( ( FLOAT( s1 ) + w / 2.0f - FLOAT( edge ) ) / w, 0, 1 ) );

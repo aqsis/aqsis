@@ -43,7 +43,18 @@ CqModeBlock::CqModeBlock( CqModeBlock* pconParent ) :
 		m_pattrCurrent( 0 ),
 		m_ptransCurrent( 0 ),
 		m_pconParent( pconParent )
-{}
+{
+	if( m_pconParent ) m_pconParent->AddRef();
+}
+
+//---------------------------------------------------------------------
+/** Default Destructor.
+ */
+
+CqModeBlock::~CqModeBlock()
+{
+	if( m_pconParent ) m_pconParent->Release();
+}
 
 
 //---------------------------------------------------------------------

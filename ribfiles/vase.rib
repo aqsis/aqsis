@@ -11,7 +11,7 @@ Option "searchpath" "texture" ["./:&"]
 FrameBegin 1
 
 Display "shad1.map" "zfile" "z"
-Display "+shad1.map" "zframebuffer" "z"
+#Display "+shad1.map" "zframebuffer" "z"
 
 Hider "hidden" "depthfilter" "midpoint"
 
@@ -148,7 +148,7 @@ FrameEnd
 FrameBegin 2
 
 Display "shad2.map" "zfile" "z"
-Display "+shad2.map" "framebuffer" "z"
+#Display "+shad2.map" "framebuffer" "z"
 
 Format 256 256 1
 PixelSamples 1 1
@@ -288,7 +288,7 @@ MakeShadow "shad2.map" "shad2.map"
 FrameBegin 3
 
 Display "vase.tif" "file" "rgba"
-Display "+vase.tif" "framebuffer" "rgba"
+#Display "+vase.tif" "framebuffer" "rgba"
 
 Format 256 192 1
 PixelSamples 2 2

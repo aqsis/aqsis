@@ -773,17 +773,29 @@ complete_request
 		        if($4->Count() != 6)
 		           yyerror("Expecting 6 Values");
 
-		char** pdata=new char*[$3->Count()];
+		// We jump through a few hoops here to meet the spec
+		// The arguments should be free()'able, so we must allocate them in one
+		// big lump
+		size_t size = 0;
 		int i;
 		for(i=0; i<$3->Count(); i++)
 		{
-			char* pval=new char[strlen((*$3)[i]) + 1];
-			strcpy(pval, (*$3)[i]);
-			pdata[i]=pval;
+			size += sizeof( char* ); //one pointer for this entry
+			size += strlen((*$3)[i]) + 1; //and space for the string
 		}
 
-                RendermanInterface::RtFunc pFunc = ParseCallbackInterface->GetProceduralFunction($2);
-				ParseCallbackInterface->RiProcedural(pdata, &(*$4)[0], (void (*)(void ) ) pFunc, NULL);
+		void* pdata = (void *) malloc( size );
+		char* stringstart = (char*) ((char**) pdata + $3->Count() ) ;
+		for(i=0; i<$3->Count(); i++)
+		{
+			((char**) pdata)[i] = stringstart;
+			strcpy(stringstart, (*$3)[i]);
+			stringstart += strlen( stringstart ) + 1;
+		}
+
+                RendermanInterface::RtFunc pFunc = ParseCallbackInterface->GetProceduralFunction( $2 );
+                RendermanInterface::RtFunc pFreeFunc = ParseCallbackInterface->GetProceduralFunction( "RiProcFree" );
+		ParseCallbackInterface->RiProcedural(pdata, &(*$4)[0], (void (*)(void ) ) pFunc, pFreeFunc);
                 DiscardStringValue($2);
                 DiscardArrayValue($3);
                 DiscardArrayValue($4); 

@@ -54,8 +54,7 @@ class CqModeBlock : public CqRefCount
 		 * \param pconParent a pointer to the previous context.
 		 */
 		CqModeBlock( CqModeBlock* pconParent = 0 );
-		virtual	~CqModeBlock()
-		{}
+		virtual	~CqModeBlock();
 
 		virtual	CqModeBlock*	BeginMainModeBlock();
 		virtual	CqModeBlock*	BeginFrameModeBlock();

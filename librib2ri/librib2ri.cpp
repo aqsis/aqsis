@@ -494,6 +494,8 @@ RendermanInterface::RtFunc Engine::GetProceduralFunction(RtToken type)
 		return( (void (*)(void ) )&::RiProcRunProgram );
 	else if( strcmp( type, "DynamicLoad") == 0 )
 		return( (void (*)(void ) )&::RiProcDynamicLoad );
+	else if( strcmp( type, "RiProcFree") == 0 )
+		return( (void (*)(void ) )&::RiProcFree );
 
 	return(NULL);
 }
