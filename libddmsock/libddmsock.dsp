@@ -97,7 +97,7 @@ SOURCE=.\ddmsock.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\displaydriver.h
+SOURCE=.\displaydriver.h
 # End Source File
 # End Group
 # End Target
