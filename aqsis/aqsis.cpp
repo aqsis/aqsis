@@ -42,9 +42,8 @@ bool g_nostandard = 0;
 bool g_help = 0;
 bool g_version = 0;
 bool g_verbose = 0;
-bool g_envverbose = 0;
+bool g_environment = 0;
 bool g_fb = 0;
-bool g_d = 0;
 bool g_progress = 0;
 TqInt verbose = 1;
 ArgParse::apstring g_config = "";
@@ -193,7 +192,7 @@ RtVoid PreRender( ... )
 RtVoid PreRender()
 #endif
 {
-	if ( g_fb || g_d )
+	if ( g_fb )
 	{
 		char * type = "framebuffer", *mode = "rgba";
 		RiDisplay( "aqsis", type, mode, NULL );
@@ -229,12 +228,13 @@ int main( int argc, const char** argv )
 	ap.argInt( "endofframe", "=integer\aequivalent to \"endofframe\" option", &g_endofframe );
 	ap.argFlag( "nostandard", "\adisables declaration of standard RenderMan parameter types", &g_nostandard );
 	ap.argFlag( "verbose", "\aoutpur more information during rendering", &g_verbose );
-	ap.argFlag( "envverbose", "\aoutput environment information", &g_envverbose );
+	ap.alias( "verbose", "v" );
+	ap.argFlag( "environment", "\aoutput environment information", &g_environment );
 	ap.argString( "type", "=string\aspecify a display device type to use", &g_type );
 	ap.argString( "addtype", "=string\aspecify a display device type to add", &g_addtype );
 	ap.argString( "mode", "=string\aspecify a display device mode to use", &g_mode );
 	ap.argFlag( "fb", "\aequivalent to --type=\"framebuffer\" --mode=\"rgba\"", &g_fb );
-	ap.argFlag( "d", "\aequivalent to -fb", &g_d );
+	ap.alias( "fb", "d" );
 	ap.argString( "config", "=string\aspecify a configuration file to load", &g_config );
 	ap.argString( "base", "=string\aspecify a default base path", &g_base_path );
 	ap.argString( "shaders", "=string\aspecify a default shaders searchpath", &g_shaders );
@@ -265,7 +265,7 @@ int main( int argc, const char** argv )
 
 	GetOptions();
 
-	if ( g_envverbose )
+	if ( g_environment )
 	{
 		std::cout << "config:   " << g_config.c_str() << std::endl;
 		std::cout << "base:     " << g_base_path.c_str() << std::endl;
@@ -458,7 +458,7 @@ void RenderFile( FILE* file, const char* name )
 			librib::Parse( cfgfile, "config", renderengine, std::cerr );
 			fclose( cfgfile );
 		}
-		else if ( g_envverbose )
+		else if ( g_environment )
 		{
 #ifdef  AQSIS_SYSTEM_WIN32
 			std::cout << "Warning: Config file not found in" << std::endl <<
