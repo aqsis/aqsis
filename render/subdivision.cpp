@@ -40,11 +40,11 @@ START_NAMESPACE(Aqsis)
 
 void CqWVert::RemoveEdge(CqWEdge* pE)
 {
-	for(TqUint i=0; i<m_apEdges.size(); i++)
+	for(std::vector<CqWEdge*>::iterator i=m_apEdges.begin(); i!=m_apEdges.end(); i++)
 	{
-		if(m_apEdges[i]==pE)	
+		if((*i)==pE)	
 		{
-			m_apEdges.erase(m_apEdges.begin()+i);
+			m_apEdges.erase(i);
 			return;
 		}
 	}
@@ -261,10 +261,10 @@ CqWVert* CqWSurf::FindVertex(const CqVector3D& V)
 	// If no vertices or no edges, cannot have been constructed yet.
 	if(m_apVerts.size()==0 || m_apEdges.size()==0)	return(NULL);
 
-	for(TqUint i=0; i<m_apVerts.size(); i++)
+	for(std::vector<CqWVert*>::iterator i=m_apVerts.begin(); i!=m_apVerts.end(); i++)
 	{
-		if(SubdP(m_apVerts[i]->iVertex())==V)
-			return(m_apVerts[i]);
+		if(SubdP((*i)->iVertex())==V)
+			return(*i);
 	}
 	return(NULL);
 }

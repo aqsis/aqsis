@@ -47,7 +47,7 @@
 
 START_NAMESPACE(Aqsis)
 
-#ifdef WIN32
+#ifdef AQSIS_SYSTEM_WIN32
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
 #else // WIN32
 #define ZFILE_HEADER "Aqsis ZFile" VERSION
@@ -287,8 +287,9 @@ class _qShareC CqTextureMap
 									/** Clear the cache of texture maps.
 									 */
 	_qShareM	static	void		FlushCache()			{
-																for(TqUint i=0; i<m_TextureMap_Cache.size(); i++)
-																	delete(m_TextureMap_Cache[i]);
+																std::vector<CqTextureMap*>::iterator i;
+																while((i=m_TextureMap_Cache.begin())!=m_TextureMap_Cache.end())
+																	delete(*i);
 
 																m_TextureMap_Cache.clear();
 															}

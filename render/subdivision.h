@@ -160,14 +160,14 @@ class CqWVert
 
 			// Q the average of the face points surrounding the vertex.
 			T Q=T(0.0f);
-			TqUint iE;
+			std::vector<CqWEdge*>::iterator iE;
 			CqWFace* pF;
 			TqInt cE=0;
 
-			for(iE=0; iE<m_apEdges.size(); iE++)
+			for(iE=m_apEdges.begin(); iE!=m_apEdges.end(); iE++)
 			{
-				if(m_apEdges[iE]->pvHead()==this)	pF=m_apEdges[iE]->pfLeft();
-				else								pF=m_apEdges[iE]->pfRight();
+				if((*iE)->pvHead()==this)	pF=(*iE)->pfLeft();
+				else						pF=(*iE)->pfRight();
 				if(pF)
 				{
 					Q+=(pSurf->*F)(pF->pvSubdivide()->iVertex());	
@@ -179,12 +179,12 @@ class CqWVert
 			// R average of the midpoints of the edges that share the old vertex.
 			T R=T(0.0f);
 			cE=0;
-			for(iE=0; iE<m_apEdges.size(); iE++)
+			for(iE=m_apEdges.begin(); iE!=m_apEdges.end(); iE++)
 			{
-				if(m_apEdges[iE]->IsValid())
+				if((*iE)->IsValid())
 				{
-					if(m_apEdges[iE]->pvHead()==this)	R+=(pSurf->*F)(m_apEdges[iE]->pvTail()->iVertex());
-					else								R+=(pSurf->*F)(m_apEdges[iE]->pvHead()->iVertex());
+					if((*iE)->pvHead()==this)	R+=(pSurf->*F)((*iE)->pvTail()->iVertex());
+					else						R+=(pSurf->*F)((*iE)->pvHead()->iVertex());
 					cE++;
 				}
 			}
@@ -203,17 +203,17 @@ class CqWVert
 		T GetCreaseScalar(T& t, T(CqWSurf::*F)(TqInt i), CqWSurf* pSurf)
 		{
 			T P=T(0.0f);
-			TqUint iE;
+			std::vector<CqWEdge*>::iterator iE;
 			TqFloat S=0.0;
 			TqInt cS=0;
 			
-			for(iE=0; iE<m_apEdges.size(); iE++)
+			for(iE=m_apEdges.begin(); iE!=m_apEdges.end(); iE++)
 			{
-				if(m_apEdges[iE]->Sharpness()>0 && m_apEdges[iE]->IsValid())
+				if((*iE)->Sharpness()>0 && (*iE)->IsValid())
 				{
-					if(m_apEdges[iE]->pvHead()==this)	P+=(pSurf->*F)(m_apEdges[iE]->pvTail()->iVertex());
-					else								P+=(pSurf->*F)(m_apEdges[iE]->pvHead()->iVertex());
-					S+=m_apEdges[iE]->Sharpness();
+					if((*iE)->pvHead()==this)	P+=(pSurf->*F)((*iE)->pvTail()->iVertex());
+					else						P+=(pSurf->*F)((*iE)->pvHead()->iVertex());
+					S+=(*iE)->Sharpness();
 					cS++;
 				}
 			}
@@ -239,11 +239,11 @@ class CqWVert
 		T GetBoundaryScalar(T& t, T(CqWSurf::*F)(TqInt i), CqWSurf* pSurf)
 		{
 			T P=T(0.0f);
-			TqUint iE;
-			for(iE=0; iE<m_apEdges.size(); iE++)
-				if(m_apEdges[iE]->IsBoundary())
-					if(m_apEdges[iE]->pvHead()==this)	P+=(pSurf->*F)(m_apEdges[iE]->pvTail()->iVertex());
-					else								P+=(pSurf->*F)(m_apEdges[iE]->pvHead()->iVertex());
+			std::vector<CqWEdge*>::iterator iE;
+			for(iE=m_apEdges.begin(); iE!=m_apEdges.end(); iE++)
+				if((*iE)->IsBoundary())
+					if((*iE)->pvHead()==this)	P+=(pSurf->*F)((*iE)->pvTail()->iVertex());
+					else						P+=(pSurf->*F)((*iE)->pvHead()->iVertex());
 			
 			P+=(pSurf->*F)(iVertex())*6.0f;
 			P/=8.0f;

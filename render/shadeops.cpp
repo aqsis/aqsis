@@ -2868,7 +2868,7 @@ STD_SOIMPL CqShaderExecEnv::SO_rendererinfo(STRINGVAL name, CqShaderVariable* pV
 	{
 		if((pV->Type()&Type_Mask)==Type_String)
 		{
-#ifdef WIN32
+#ifdef AQSIS_SYSTEM_WIN32
 			se=VERSION_STR;
 #else // WIN32
 			se = VERSION;

@@ -269,8 +269,8 @@ class CqShaderVariableArray: public CqShaderVariable
 	// Overridded from CqShaderVariable.
 	virtual	void	Initialise(const TqInt uGridRes, const TqInt vGridRes, TqInt& index)
 												{
-													for(TqUint i=0; i<m_aVariables.size(); i++)
-														m_aVariables[i]->Initialise(uGridRes,vGridRes,index);
+													for(std::vector<CqShaderVariable*>::iterator i=m_aVariables.begin(); i!=m_aVariables.end(); i++)
+														(*i)->Initialise(uGridRes,vGridRes,index);
 												}
 	virtual	void	SetValue(CqVMStackEntry& Val)
 												{

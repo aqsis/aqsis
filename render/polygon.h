@@ -211,7 +211,7 @@ class CqPolygonPoints : public CqSurface
 
 		// Overridden from CqSurface.
 		// NOTE: These should never be called.
-#ifdef WIN32
+#ifdef AQSIS_COMPILER_MSVC6
 		virtual	CqBound		Bound() const		{static CqBound bTemp; return(bTemp);}
 #else // WIN32
 		virtual	CqBound		Bound() const		{ return CqBound(); }

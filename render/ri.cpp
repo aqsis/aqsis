@@ -245,7 +245,7 @@ RtVoid	RiBegin(RtToken name)
 	// Clear any options.
 	QGetRenderContext()->optCurrent().ClearOptions();
 
-#ifdef WIN32
+#ifdef AQSIS_SYSTEM_WIN32
 	// Set the default search path for shaders to the shaders directory under the executable directory.
 	// Read config file name out of the ini file.
 	char strExe[255];
@@ -669,7 +669,7 @@ RtVoid	RiDisplayV(const char *name, RtToken type, RtToken mode, PARAMETERLIST)
 		eValue+=ModeZ;
 	QGetRenderContext()->optCurrent().SetiDisplayMode(eValue);
 
-#ifdef WIN32
+#ifdef AQSIS_SYSTEM_WIN32
 	QGetRenderContext()->LoadDisplayLibrary();
 #endif // WIN32
 

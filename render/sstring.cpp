@@ -24,7 +24,7 @@
 */
 
 #include	<stdarg.h>
-#include <strstream>
+#include	<strstream>
 
 #include	"aqsis.h"
 #include	"sstring.h"
@@ -219,11 +219,6 @@ CqString& CqString::Format(const TqChar* strFmt, ...)
 						strVal << val << std::ends;
 						*this+=strVal.str();
 						strVal.freeze(false);
-						
-/*						
-						TqChar strVal[34];
-						*this+=itoa(val,strVal,16);
-*/
 					}
 					break;
 

@@ -454,7 +454,7 @@ static CqString temp_string;
 static bool temp_bool;
 static CqMatrix temp_matrix;
 
-#ifndef WIN32
+#ifndef AQSIS_SYSTEM_WIN32
 // Eliminates "defined but not used" warnings in gcc 2.96
 static TqFloat& temp_float_reference = temp_float;
 static bool& temp_bool_reference = temp_bool;
@@ -477,11 +477,8 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 	virtual _qShareM 	~CqShaderVM()	
 								{
 									// Delete the local variables.
-									for(TqUint i=0; i<m_LocalVars.size(); i++)
-									{
-										if(m_LocalVars[i]!=NULL)	delete(m_LocalVars[i]);
-										m_LocalVars[i]=0;
-									}
+									for(std::vector<CqShaderVariable*>::iterator i=m_LocalVars.begin(); i!=m_LocalVars.end(); i++)
+										if((*i)!=NULL)	delete(*i);
 								}
 
 	_qShareM	void	LoadProgram(std::istream* pFile);

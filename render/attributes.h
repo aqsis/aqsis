@@ -176,9 +176,9 @@ class CqShadingAttributes
 			void		AddLightsource(CqLightsource* pL)
 												{
 													// Check if the ligthsource is already active
-													for(TqUint i=0; i<m_apLightsources.size(); i++)
+													for(std::vector<CqLightsource*>::iterator i=m_apLightsources.begin(); i!=m_apLightsources.end(); i++)
 													{
-														if(m_apLightsources[i]==pL)
+														if((*i)==pL)
 															return;
 													}
 													m_apLightsources.push_back(pL);
@@ -475,8 +475,8 @@ class _qShareC	CqAttributes : public CqShadingAttributes, public CqGeometricAttr
 						 */
 	const	CqSystemOption* pAttribute(const char* strName) const
 											{
-												for(TqUint i=0; i<m_aAttributes.size(); i++)
-													if(m_aAttributes[i]->strName().compare(strName)==0)	return(m_aAttributes[i]);
+												for(std::vector<CqSystemOption*>::const_iterator i=m_aAttributes.begin(); i!=m_aAttributes.end(); i++)
+													if((*i)->strName().compare(strName)==0)	return(*i);
 												return(0);
 											}
 						/** Get a pointer to a named user defined attribute suitable for writing.
@@ -487,18 +487,18 @@ class _qShareC	CqAttributes : public CqShadingAttributes, public CqGeometricAttr
 						 */
 			CqSystemOption* pAttributeWrite(const char* strName)
 											{
-												for(TqUint i=0; i<m_aAttributes.size(); i++)
+												for(std::vector<CqSystemOption*>::iterator i=m_aAttributes.begin(); i!=m_aAttributes.end(); i++)
 												{
-													if(m_aAttributes[i]->strName().compare(strName)==0)
+													if((*i)->strName().compare(strName)==0)
 													{
-														if(m_aAttributes[i]->Refcount()==1)
-															return(m_aAttributes[i]);
+														if((*i)->Refcount()==1)
+															return(*i);
 														else
 														{
-															m_aAttributes[i]->UnReference();
-															m_aAttributes[i]=new CqSystemOption(*(m_aAttributes[i]));
-															m_aAttributes[i]->Reference();
-															return(m_aAttributes[i]);
+															(*i)->UnReference();
+															(*i)=new CqSystemOption(*(*i));
+															(*i)->Reference();
+															return(*i);
 														}
 													}
 												}

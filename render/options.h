@@ -56,11 +56,8 @@ class CqSystemOption
 											{}
 						CqSystemOption(const CqSystemOption& From);
 						~CqSystemOption()	{
-												for(TqUint i=0; i<m_aParameters.size(); i++)
-												{
-													delete(m_aParameters[i]);
-													m_aParameters[i]=0;
-												}
+												for(std::vector<CqParameter*>::iterator i=m_aParameters.begin(); i!=m_aParameters.end(); i++)
+													delete((*i));
 											}
 
 						/** Get a refernece to the option name.
@@ -74,12 +71,12 @@ class CqSystemOption
 			void		AddParameter(const CqParameter* pParameter)
 											{
 												// Look to see if one already exists
-												for(TqUint i=0; i<m_aParameters.size(); i++)
+												for(std::vector<CqParameter*>::iterator i=m_aParameters.begin(); i!=m_aParameters.end(); i++)
 												{
-													if(m_aParameters[i]->strName().compare(pParameter->strName())==0)
+													if((*i)->strName().compare(pParameter->strName())==0)
 													{
-														delete(m_aParameters[i]);
-														m_aParameters[i]=const_cast<CqParameter*>(pParameter);
+														delete(*i);
+														(*i)=const_cast<CqParameter*>(pParameter);
 														return;
 													}
 												}
@@ -92,8 +89,8 @@ class CqSystemOption
 						 */
 	const	CqParameter* pParameter(const char* strName) const
 											{
-												for(TqUint i=0; i<m_aParameters.size(); i++)
-													if(m_aParameters[i]->strName().compare(strName)==0)	return(m_aParameters[i]);
+												for(std::vector<CqParameter*>::const_iterator i=m_aParameters.begin(); i!=m_aParameters.end(); i++)
+													if((*i)->strName().compare(strName)==0)	return(*i);
 												return(0);
 											}
 						/** Get a pointer to a named parameter.
@@ -102,8 +99,8 @@ class CqSystemOption
 						 */
 			CqParameter* pParameter(const char* strName)
 											{
-												for(TqUint i=0; i<m_aParameters.size(); i++)
-													if(m_aParameters[i]->strName().compare(strName)==0)	return(m_aParameters[i]);
+												for(std::vector<CqParameter*>::iterator i=m_aParameters.begin(); i!=m_aParameters.end(); i++)
+													if((*i)->strName().compare(strName)==0)	return(*i);
 												return(0);
 											}
 						/** Get the number of references to this option/attribute.
@@ -633,8 +630,8 @@ class CqOptions : public CqDisplay, public CqCamera
 						 */
 	const	CqSystemOption* pOption(const char* strName) const
 											{
-												for(TqUint i=0; i<m_aOptions.size(); i++)
-													if(m_aOptions[i]->strName().compare(strName)==0)	return(m_aOptions[i]);
+												for(std::vector<CqSystemOption*>::const_iterator i=m_aOptions.begin(); i!=m_aOptions.end(); i++)
+													if((*i)->strName().compare(strName)==0)	return(*i);
 												return(0);
 											}
 						/** Get a pointer to a named user option.
@@ -643,24 +640,24 @@ class CqOptions : public CqDisplay, public CqCamera
 						 */
 			CqSystemOption* pOptionWrite(const char* strName)
 											{
-												for(TqUint i=0; i<m_aOptions.size(); i++)
+												for(std::vector<CqSystemOption*>::iterator i=m_aOptions.begin(); i!=m_aOptions.end(); i++)
 												{
-													if(m_aOptions[i]->strName().compare(strName)==0)
+													if((*i)->strName().compare(strName)==0)
 													{
-														if(m_aOptions[i]->Refcount()==1)
-															return(m_aOptions[i]);
+														if((*i)->Refcount()==1)
+															return(*i);
 														else
 														{
-															m_aOptions[i]->UnReference();
-															m_aOptions[i]=new CqSystemOption(*(m_aOptions[i]));
-															m_aOptions[i]->Reference();
-															return(m_aOptions[i]);
+															(*i)->UnReference();
+															(*i)=new CqSystemOption(*(*i));
+															(*i)->Reference();
+															return(*i);
 														}
 													}
 												}
 												m_aOptions.push_back(new CqSystemOption(strName));
-												m_aOptions[m_aOptions.size()-1]->Reference();
-												return(m_aOptions[m_aOptions.size()-1]);
+												m_aOptions.back()->Reference();
+												return(m_aOptions.back());
 											}
 	const	CqParameter* pParameter(const char* strName, const char* strParam) const;
 			CqParameter* pParameterWrite(const char* strName, const char* strParam);

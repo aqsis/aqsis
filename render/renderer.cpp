@@ -811,7 +811,7 @@ CqMatrix	CqRenderer::matNSpaceToSpace(const char* strFrom, const char* strTo, co
 /** Main routine for the display driver to run on.
  */
 
-#ifdef WIN32
+#ifdef AQSIS_SYSTEM_WIN32
 
 DWORD WINAPI DisplayDriverThread(void* dummy)
 {

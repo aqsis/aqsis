@@ -23,19 +23,20 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-#ifdef WIN32
+#include	"aqsis.h"
+
+#ifdef AQSIS_SYSTEM_WIN32
 #include	<windows.h>
 #include	<io.h>
 #include	<fcntl.h>
 #endif // WIN32
 
-#include	"aqsis.h"
 #include	"sstring.h"
 #include	"render.h"
 
 using namespace Aqsis;
 
-#ifdef WIN32
+#ifdef AQSIS_SYSTEM_WIN32
 void InitialiseINIData();
 
 BOOL APIENTRY DllMain( HINSTANCE hModule, 

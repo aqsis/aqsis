@@ -549,11 +549,8 @@ class CqVMStackEntry
 							 */
 		void				OpMULV(CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState)
 													{
-#ifdef WIN32
-														static CqVector3D	temp_point;
-#else // WIN32
 														CqVector3D	temp_point;
-#endif // !WIN32
+
 														TqInt i=MAX(MAX(Size(),Comp.Size()),Res.Size())-1;
 														TqBool __fVarying=i>0;
 														for(; i>=0; i--)
@@ -843,13 +840,9 @@ class CqVMStackEntry
 							 */
 		void				OpCOMPM(CqVMStackEntry& r, CqVMStackEntry& c, CqVMStackEntry& Res, CqBitVector& RunningState)
 													{
-#ifdef WIN32
-														static CqMatrix m;
-														static TqFloat temp_float;
-#else // WIN32
 														CqMatrix m;
 														TqFloat temp_float;
-#endif // !WIN32
+
 														TqInt i=MAX(Size(),Res.Size())-1;
 														TqBool __fVarying=i>0;
 														for(; i>=0; i--)
@@ -865,13 +858,9 @@ class CqVMStackEntry
 							 */
 		void				OpSETCOMPM(CqVMStackEntry& r, CqVMStackEntry& c, CqVMStackEntry& v, CqBitVector& RunningState)
 													{
-#ifdef WIN32
-														static CqMatrix m;
-														static TqFloat temp_float;
-#else // WIN32
 														CqMatrix m;
 														TqFloat temp_float;
-#endif // !WIN32
+
 														TqInt i=MAX(Size(),v.Size())-1;
 														TqBool __fVarying=i>0;
 														for(; i>=0; i--)

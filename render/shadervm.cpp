@@ -851,17 +851,18 @@ void CqShaderVM::Initialise(const TqInt uGridRes, const TqInt vGridRes, CqShader
 CqShaderVM&	CqShaderVM::operator=(const CqShaderVM& From)
 {
 	// Copy the local variables...
-	TqUint i;
-	for(i=0; i<From.m_LocalVars.size(); i++)
-		m_LocalVars.push_back(From.m_LocalVars[i]->Clone());
+	std::vector<CqShaderVariable*>::const_iterator i;
+	for(i=From.m_LocalVars.begin(); i!=From.m_LocalVars.end(); i++)
+		m_LocalVars.push_back((*i)->Clone());
 
 	// Copy the intialisation program.
-	for(i=0; i<From.m_ProgramInit.size(); i++)
-		m_ProgramInit.push_back(From.m_ProgramInit[i]);
+	std::vector<UsProgramElement>::const_iterator p;
+	for(p=From.m_ProgramInit.begin(); p!=From.m_ProgramInit.end(); p++)
+		m_ProgramInit.push_back(*p);
 	
 	// Copy the main program.
-	for(i=0; i<From.m_Program.size(); i++)
-		m_Program.push_back(From.m_Program[i]);
+	for(p=From.m_Program.begin(); p!=From.m_Program.end(); p++)
+		m_Program.push_back(*p);
 	
 	return(*this);
 }

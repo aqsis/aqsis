@@ -61,11 +61,6 @@ class _qShareC CqRandom
 								{
 									double n=((double) RandomInt()) * ((double) Range) * INV_RANDMAX;
 									return (unsigned int) n;
-									
-/*									
-									__int64 n=static_cast<unsigned __int64>(RandomInt())*static_cast<__int64>(Range);
-									return(static_cast<unsigned int>(n>>32));
-*/
 								}
 
 								/** Get a random float (0.0 < value < 1.0).

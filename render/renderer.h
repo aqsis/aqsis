@@ -28,7 +28,7 @@
 //{
 #define RENDERER_H_INCLUDED 1
 
-#ifdef	WIN32
+#ifdef	AQSIS_SYSTEM_WIN32
 #include	<windows.h>
 #endif
 
@@ -168,7 +168,7 @@ class CqRenderer
 	// Function which can be overridden by the derived class.
 				virtual	void		Initialise();
 				virtual	void		RenderWorld();
-#ifdef WIN32
+#ifdef AQSIS_SYSTEM_WIN32
 				virtual	void		LoadDisplayLibrary();
 #endif // WIN32
 				virtual	void		Quit();
@@ -278,7 +278,7 @@ class CqRenderer
 			CqTransform		m_transDefault;					///< Default transformation.
 			CqImageBuffer*	m_pImageBuffer;					///< Pointer to the current image buffer.
 			
-#ifdef WIN32			
+#ifdef AQSIS_SYSTEM_WIN32			
 			HANDLE			m_hDisplayThread;				///< Handle to the display driver thread.
 #endif // WIN32
 

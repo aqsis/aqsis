@@ -107,21 +107,20 @@ void	CqTextureMapBuffer::FreeSegment(float* pBufferData, unsigned long width, un
 CqTextureMap::~CqTextureMap()
 {
 	// Search for it in the cache and remove the reference.
-	TqUint i;
-	for(i=0; i<m_TextureMap_Cache.size(); i++)
+	std::vector<CqTextureMap*>::iterator i;
+	for(i=m_TextureMap_Cache.begin(); i!=m_TextureMap_Cache.end(); i++)
 	{
-		if(m_TextureMap_Cache[i]==this)
+		if((*i)==this)
 		{
-			m_TextureMap_Cache.erase(m_TextureMap_Cache.begin()+i);
+			m_TextureMap_Cache.erase(i);
 			break;
 		}
 	}
 
 	// Delete any held cache buffer segments.
-	for(i=0; i<m_apSegments.size(); i++)
-	{
-		delete(m_apSegments[i]);
-	}
+	std::vector<CqTextureMapBuffer*>::iterator s;
+	for(s=m_apSegments.begin(); s!=m_apSegments.end(); s++)
+		delete(*s);
 }
 
 
@@ -190,12 +189,12 @@ void CqTextureMap::Close()
 CqTextureMap* CqTextureMap::GetTextureMap(const char* strName)
 {
 	// First search the texture map cache
-	for(TqUint i=0; i<m_TextureMap_Cache.size(); i++)
+	for(std::vector<CqTextureMap*>::iterator i=m_TextureMap_Cache.begin(); i!=m_TextureMap_Cache.end(); i++)
 	{
-		if(m_TextureMap_Cache[i]->m_strName==strName)
+		if((*i)->m_strName==strName)
 		{ 
-			if(m_TextureMap_Cache[i]->Type()==MapType_Texture)
-				return(m_TextureMap_Cache[i]);
+			if((*i)->Type()==MapType_Texture)
+				return(*i);
 			else
 				return(NULL);
 		}
@@ -224,12 +223,12 @@ CqTextureMap* CqTextureMap::GetTextureMap(const char* strName)
 CqTextureMap* CqTextureMap::GetEnvironmentMap(const char* strName)
 {
 	// First search the texture map cache
-	for(TqUint i=0; i<m_TextureMap_Cache.size(); i++)
+	for(std::vector<CqTextureMap*>::iterator i=m_TextureMap_Cache.begin(); i!=m_TextureMap_Cache.end(); i++)
 	{
-		if(m_TextureMap_Cache[i]->m_strName==strName)
+		if((*i)->m_strName==strName)
 		{
-			if(m_TextureMap_Cache[i]->Type()==MapType_Environment)
-				return(m_TextureMap_Cache[i]);
+			if((*i)->Type()==MapType_Environment)
+				return(*i);
 			else
 				return(NULL);
 		}
@@ -261,12 +260,12 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap(const char* strName)
 CqTextureMap* CqTextureMap::GetShadowMap(const char* strName)
 {
 	// First search the texture map cache
-	for(TqUint i=0; i<m_TextureMap_Cache.size(); i++)
+	for(std::vector<CqTextureMap*>::iterator i=m_TextureMap_Cache.begin(); i!=m_TextureMap_Cache.end(); i++)
 	{
-		if(m_TextureMap_Cache[i]->m_strName==strName)
+		if((*i)->m_strName==strName)
 		{
-			if(m_TextureMap_Cache[i]->Type()==MapType_Shadow)
-				return(m_TextureMap_Cache[i]);
+			if((*i)->Type()==MapType_Shadow)
+				return(*i);
 			else
 				return(NULL);
 		}
@@ -301,9 +300,8 @@ CqTextureMap* CqTextureMap::GetShadowMap(const char* strName)
 CqTextureMapBuffer* CqTextureMap::GetBuffer(unsigned long s, unsigned long t, int directory)
 {
 	// Search already cached segments first.
-	TqUint i;
-	for(i=0; i<m_apSegments.size(); i++)
-		if(m_apSegments[i]->IsValid(s,t,directory))	return(m_apSegments[i]);
+	for(std::vector<CqTextureMapBuffer*>::iterator i=m_apSegments.begin(); i!=m_apSegments.end(); i++)
+		if((*i)->IsValid(s,t,directory))	return(*i);
 
 	// If we got here, segment is not currently loaded, so load the correct segement and store it in the cache.
 	CqTextureMapBuffer* pTMB=0;
@@ -338,6 +336,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer(unsigned long s, unsigned long t, in
 			
 			int res=TIFFSetDirectory(m_pImage, directory);
 			float* pdata=pTMB->pBufferData();
+			TqUint i;
 			for(i=0; i<m_YRes; i++)
 			{
 				TIFFReadScanline(m_pImage,pdata,i);
