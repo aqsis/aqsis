@@ -1,3 +1,20 @@
+2004-02-17 12:25  pgregory
+
+	* Makefile.am: Update build so that it works in distcheck mode.
+
+2004-02-16 22:40  pgregory
+
+	* render/: imagebuffer.cpp, micropolygon.cpp: Fix a bug in the
+	  calculation of MP bound lists for moving MPs. The delta
+	  calculation was completely wrong resulting in bounds way beyond
+	  the limits of the motion, and hence incredible slowdown.  Move
+	  the time check to before the bound check when rendering MPs as
+	  this is a simpler test so should be used as an early out.
+
+2004-02-16 16:08  pgregory
+
+	* ChangeLog: Update changelog prior to release 0.9.1
+
 2004-02-14 23:24  pgregory
 
 	* filebuffer/filebuffer.cpp: Fix bug in saving of floating point
