@@ -40,8 +40,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define	_qShareName	BUILD_PPM2TIF
-#include	"share.h"
+#ifdef	WIN32
+#define	__export	__declspec(dllexport)
+#else	// WIN32
+#define	__export
+#endif	// WIN32
 
 
 static char tiffname[ 1024 ];
@@ -50,7 +53,7 @@ static char tiffname[ 1024 ];
  * It used the standard tiff tool name ppm2tiff.exe on PC
  * or ppm2tiff on unix
  */
-_qShareM char *ppm2tif( char *in )
+__export char *ppm2tif( char *in )
 {
 
 	int errcode;

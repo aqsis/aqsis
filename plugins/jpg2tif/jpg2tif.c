@@ -45,9 +45,11 @@
 
 #include "../common/pixelsave.h"
 
-#define	_qShareName	BUILD_JPG2TIF
-#include	"share.h"
-
+#ifdef	WIN32
+#define	__export	__declspec(dllexport)
+#else	// WIN32
+#define	__export
+#endif	// WIN32
 
 typedef struct tagMyErrorMgr
 {
@@ -80,7 +82,7 @@ static void run( JpegReader * jerr );
  * It used the standard tiff tool name jpg2tiff.exe on PC
  * or jpg2tiff on unix
  */
-_qShareM char *jpg2tif( char *in )
+__export char *jpg2tif( char *in )
 {
 	FILE * jpgfile;
 	char *result = NULL;

@@ -42,10 +42,11 @@
 
 #include "../common/pixelsave.h"
 
-
-#define	_qShareName	BUILD_GIF2TIF
-#include	"share.h"
-
+#ifdef	WIN32
+#define	__export	__declspec(dllexport)
+#else	// WIN32
+#define	__export
+#endif	// WIN32
 
 #define MAXCOLORMAPSIZE  256
 
@@ -113,7 +114,7 @@ static unsigned short swap2( unsigned short s );
  * It used the standard tiff tool name gif2tiff.exe on PC
  * or gif2tiff on unix
  */
-_qShareM char *gif2tif( char *in )
+__export char *gif2tif( char *in )
 {
 	FILE * giffile;
 	char *result = NULL;

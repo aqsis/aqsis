@@ -42,9 +42,11 @@
 
 #include "../common/pixelsave.h"
 
-#define	_qShareName	BUILD_PCX2TIF
-#include	"share.h"
-
+#ifdef	WIN32
+#define	__export	__declspec(dllexport)
+#else	// WIN32
+#define	__export
+#endif	// WIN32
 
 /* structure for PaintBrush file */
 
@@ -93,7 +95,7 @@ static char tiffname[ 1024 ];
  * It used the standard standard definition of pcx/paintbrush structure and
  * output RGB tif file for PC and Unix/
  */
-_qShareM char *pcx2tif( char *in )
+__export char *pcx2tif( char *in )
 {
 	FILE * pcxfile;
 	char *result = NULL;

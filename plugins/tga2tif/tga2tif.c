@@ -62,9 +62,11 @@
 
 #include "../common/pixelsave.h"
 
-#define	_qShareName	BUILD_TGA2TIF
-#include	"share.h"
-
+#ifdef	WIN32
+#define	__export	__declspec(dllexport)
+#else	// WIN32
+#define	__export
+#endif	// WIN32
 
 /* structure for Targa file */
 #define NO_ENCODING   0
@@ -108,7 +110,7 @@ static char tiffname[ 1024 ];
  * It used the standard standard definition of tga structure and
  * output RGB tif file for PC and Unix/
  */
-_qShareM char *tga2tif( char *in )
+__export char *tga2tif( char *in )
 {
 	FILE * tgafile;
 	char *result = NULL;

@@ -41,8 +41,11 @@
 
 #include "../common/pixelsave.h"
 
-#define	_qShareName	BUILD_BAKE2TIF
-#include	"share.h"
+#ifdef	WIN32
+#define	__export	__declspec(dllexport)
+#else	// WIN32
+#define	__export
+#endif	// WIN32
 
 static char *bake_open( FILE *bakefile, char *tiffname );
 
@@ -63,7 +66,7 @@ static char tiffname[ 1024 ];
 
 static int size = SIZE;
 
-_qShareM char *bake2tif( char *in )
+__export char *bake2tif( char *in )
 {
 	FILE * bakefile;
 	char *result = NULL;
