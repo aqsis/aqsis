@@ -137,13 +137,12 @@ class CqBucket : public IqBucket
 		 */
 		void	AddMPG( CqMicroPolygon* pmpgNew )
 		{
-//#ifdef _DEBUG
+#ifdef _DEBUG
 			std::vector<CqMicroPolygon*>::iterator end = m_ampgWaiting.end();
 			for (std::vector<CqMicroPolygon*>::iterator i = m_ampgWaiting.begin(); i != end; i++)
 				if ((*i) == pmpgNew) 
-//					assert( TqFalse );
-					std::cout << pmpgNew << "Added more than once!" << std::endl;
-//#endif
+					assert( TqFalse );
+#endif
 			m_ampgWaiting.push_back( pmpgNew );
 		}
 		/** Add a Micropoly grid to the list of deferred grids.
@@ -163,6 +162,19 @@ class CqBucket : public IqBucket
 		CqBasicSurface* pTopSurface()
 		{
 			return ( m_aGPrims.pFirst() );
+		}
+		/** Get a count of deferred GPrims.
+		 */
+		TqInt cGPrims()
+		{
+			TqInt count = 0;
+			CqBasicSurface* pSurf = pTopSurface();
+			while( pSurf )
+			{
+				count++;
+				pSurf=pSurf->pNext();
+			}
+			return ( count );
 		}
 		/** Get a reference to the vetor of deferred MPGs.
 		 */
