@@ -29,7 +29,9 @@
 #ifdef HAVE_CONFIG_H
 #include	"config.h"
 #else
+#ifdef	__GNUC__
 #warn	" If this is a POSIX system you should be sure to run configure"
+#endif
 #endif
 
 #include	<assert.h>
