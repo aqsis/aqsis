@@ -287,7 +287,7 @@ union UsProgramElement
 #define FUNC1PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						/* Read all the additional values. */ \
-						static TqInt i=0; \
+						static TqInt __iGrid=0; \
 						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
@@ -300,7 +300,7 @@ union UsProgramElement
 						POPV(a);		/* first value */ \
 						POPV(b);		/* second value */ \
 						/* Read all the additional values. */ \
-						static TqInt i=0; \
+						static TqInt __iGrid=0; \
 						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
@@ -314,7 +314,7 @@ union UsProgramElement
 						POPV(b);		/* second value */ \
 						POPV(c);		/* third value */ \
 						/* Read all the additional values. */ \
-						static TqInt i=0; \
+						static TqInt __iGrid=0; \
 						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
@@ -357,7 +357,7 @@ union UsProgramElement
 #define VOIDFUNC1PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						/* Read all the additional values. */ \
-						static TqInt i=0; \
+						static TqInt __iGrid=0; \
 						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
@@ -371,7 +371,7 @@ union UsProgramElement
 						POPV(valb);	\
 						POPV(valc);	\
 						POPV(vald);	\
-						TqInt i=0; \
+						TqInt __iGrid=0; \
 						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count))+4; \
 						CqVMStackEntry** apSplinePoints=new CqVMStackEntry*[cParams]; \
@@ -390,7 +390,7 @@ union UsProgramElement
 						POPV(valb);	\
 						POPV(valc);	\
 						POPV(vald);	\
-						TqInt i=0; \
+						TqInt __iGrid=0; \
 						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count))+4; \
 						CqVMStackEntry** apSplinePoints=new CqVMStackEntry*[cParams]; \
@@ -405,7 +405,7 @@ union UsProgramElement
 #define	TEXTURE(func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
-						TqInt i=0; \
+						TqInt __iGrid=0; \
 						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
@@ -418,7 +418,7 @@ union UsProgramElement
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
 						POPV(R); /* point */\
-						TqInt i=0; \
+						TqInt __iGrid=0; \
 						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
@@ -432,7 +432,7 @@ union UsProgramElement
 						POPV(channel); /* channel */\
 						POPV(s); /* s */\
 						POPV(t); /* t */\
-						TqInt i=0; \
+						TqInt __iGrid=0; \
 						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
@@ -448,7 +448,7 @@ union UsProgramElement
 						POPV(R2); /* R2 */\
 						POPV(R3); /* R3 */\
 						POPV(R4); /* R4 */\
-						TqInt i=0; \
+						TqInt __iGrid=0; \
 						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
@@ -468,7 +468,7 @@ union UsProgramElement
 						POPV(t3); /* t3 */\
 						POPV(s4); /* s4 */\
 						POPV(t4); /* t4 */\
-						TqInt i=0; \
+						TqInt __iGrid=0; \
 						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \

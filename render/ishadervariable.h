@@ -5,7 +5,7 @@
  *	@brief	Decares the interface to generic shader variables.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/04/12 17:00:36 $
+ *	Last change date:	$Date: 2002/04/15 22:02:00 $
  */
 //------------------------------------------------------------------------------
 
@@ -80,12 +80,12 @@ struct IqShaderVariable
 		 * \param vGridRes The size of the SIMD grid in v.
 		 * \param index A Reference to a SIMD index used to obtain the 'current', in terms of SIMD execution, value.
 		 */
-		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt& index ) = 0;
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes ) = 0;
 		/** Create a duplicate of this variable.
 		 * \return A IqShaderVariable pointer.
 		 */
 		virtual	IqShaderVariable* Clone() const = 0;
-		/** Set the 'current', in terms of SIMD execution, value.
+		/** Set the whole variable (uniform or varying) to the specified value.
 		 * \param Val The new value.
 		 */
 		virtual	void	SetValue( CqVMStackEntry& Val ) = 0;
@@ -99,6 +99,10 @@ struct IqShaderVariable
 		 * \param State The bit vector to control modification.
 		 */
 		virtual	void	SetValue( CqVMStackEntry& Val, CqBitVector& State ) = 0;
+		/** Copy the values from the passed variable into this, taking into account any class differences.
+		 * \param Val The variable to copy from.
+		 */
+		virtual	void	SetValue( IqShaderVariable* pVal ) = 0;
 		/** Get an indexed SIMD data value.
 		 * \param index Integer SIMD index.
 		 * \param Val A reference to a stackentry to store the value.

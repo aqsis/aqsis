@@ -93,23 +93,22 @@ CqMicroPolyGridBase* CqQuadric::Dice()
 	if ( USES( lUses, EnvVars_Cs ) ) Cs().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
 	if ( USES( lUses, EnvVars_Os ) ) Os().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
 
-	pGrid->Reset();
 	CqVector3D	P, N;
 	int v, u;
 	for ( v = 0; v <= m_vDiceSize; v++ )
 	{
 		for ( u = 0; u <= m_uDiceSize; u++ )
 		{
+			TqInt igrid = ( v * ( m_uDiceSize + 1 ) ) + u;
 			P = DicePoint( u, v, N );
-			pGrid->P()->SetValue( pGrid->GridI(), CqVMStackEntry( m_matTx * P ) );
+			pGrid->P()->SetValue( igrid, CqVMStackEntry( m_matTx * P ) );
 			if(CanGenerateNormals())
 			{
 				EqOrientation CSO = pAttributes() ->eCoordsysOrientation();
 				EqOrientation O = pAttributes() ->eOrientation();
 				N = ( CSO == O ) ? N : -N;
-				pGrid->Ng()->SetValue( pGrid->GridI(), CqVMStackEntry( m_matITTx * N ) );
+				pGrid->Ng()->SetValue( igrid, CqVMStackEntry( m_matITTx * N ) );
 			}
-			pGrid->Advance();
 		}
 	}
 

@@ -122,20 +122,23 @@ void CqMicroPolyGrid::CalcNormals()
 	CqVMStackEntry vecMP[ 4 ];
 	CqVector3D	vecN, vecTemp;
 	CqVector3D	vecLastN( 0, 0, 0 );
+
 	// Calculate each normal from the top left, top right and bottom left points.
-	Reset();
 	register TqInt ur = uGridRes();
 	register TqInt vr = vGridRes();
+	TqInt igrid = 0;
 	TqInt iv;
 	for ( iv = 0; iv < vr; iv++ )
 	{
 		TqInt iu;
 		for ( iu = 0; iu < ur; iu++ )
 		{
-			P()->GetValue( GridI(), vecMP[ 0 ]);
-			P()->GetValue( GridI() + 1, vecMP[ 1 ]);
-			P()->GetValue( GridI() + ur + 1, vecMP[ 2 ]);
-			P()->GetValue( GridI() + ur, vecMP[ 3 ]);
+//			TqInt igrid = ( iv * ur ) + iu;
+
+			P()->GetValue( igrid, vecMP[ 0 ]);
+			P()->GetValue( igrid + 1, vecMP[ 1 ]);
+			P()->GetValue( igrid + ur + 1, vecMP[ 2 ]);
+			P()->GetValue( igrid + ur, vecMP[ 3 ]);
 			int a, b, c;
 			a = 0;
 			b = a + 1;
@@ -169,14 +172,17 @@ void CqMicroPolyGrid::CalcNormals()
 				//assert(false);
 				vecN = vecLastN;
 			}
-			Ng()->SetValue( GridI(), CqVMStackEntry( vecN ) );
-			Advance();
-			if ( iv == vr - 1 ) Ng()->SetValue( ( iv + 1 ) * ( ur + 1 ) + iu, CqVMStackEntry( vecN ) );
+			Ng()->SetValue( igrid, CqVMStackEntry( vecN ) );
+			igrid++;
+			// If we are at the last row, last row normal to the same.
+			if ( iv == vr - 1 ) 
+				Ng()->SetValue( ( vr * ( ur + 1 ) ) + iu, CqVMStackEntry( vecN ) );
 		}
-		Ng()->SetValue( GridI(), CqVMStackEntry( vecN ) );
-		// Additional advance as we are processing MPs not coords and thus must skip the trailing coord.
-		Advance();
+		// Set the last one on the row to the same.
+		Ng()->SetValue( igrid, CqVMStackEntry( vecN ) );
+		igrid++;
 	}
+	// Set the very last corner value to the last normal calculated.
 	Ng()->SetValue( ( vr + 1 ) * ( ur + 1 ) - 1, CqVMStackEntry( vecN ) );
 }
 
@@ -247,29 +253,29 @@ void CqMicroPolyGrid::Shade()
 	if ( USES( lUses, EnvVars_Oi ) ) Oi()->SetValue( CqVMStackEntry( gColWhite ) );
 
 	// Setup varying variables.
-	Reset();
+	TqInt i = 0;
 	do
 	{
 		// Convert to 3D now, as all operations in SL are in 3D not 4D.
 		CqVMStackEntry SE;
 		CqVector3D vecTemp;
-		P()->GetValue( GridI(), SE );
+		P()->GetValue( i, SE );
 		SE.Value( vecTemp );
-		I()->SetValue( GridI(), CqVMStackEntry( vecTemp ) );
-		if ( USES( lUses, EnvVars_dPdu ) ) dPdu()->SetValue( GridI(), CqVMStackEntry( SO_DuType( vecTemp, P(), GridI(), *this ) ) );
-		if ( USES( lUses, EnvVars_dPdv ) ) dPdv()->SetValue( GridI(), CqVMStackEntry( SO_DvType( vecTemp, P(), GridI(), *this ) ) );
+		I()->SetValue( i, CqVMStackEntry( vecTemp ) );
+		if ( USES( lUses, EnvVars_dPdu ) ) dPdu()->SetValue( i, CqVMStackEntry( SO_DuType( vecTemp, P(), i, *this ) ) );
+		if ( USES( lUses, EnvVars_dPdv ) ) dPdv()->SetValue( i, CqVMStackEntry( SO_DvType( vecTemp, P(), i, *this ) ) );
 	}
-	while ( Advance() );
+	while ( ++i < GridSize() );
 
 	// Now try and cull any transparent MPs
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().iDisplayMode() & ModeZ )
 	{
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
-		Reset();
+		TqInt i = 0;
 		do
 		{
 			CqVMStackEntry SE;
-			Os()->GetValue( GridI(), SE );
+			Os()->GetValue( i, SE );
 			CqColor opacity;
 			SE.Value( opacity );
 
@@ -277,7 +283,7 @@ void CqMicroPolyGrid::Shade()
 				cCulled ++;
 			else break;
 		}
-		while ( Advance() );
+		while ( ++i < GridSize() );
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
 
 		if ( cCulled == gs )
@@ -294,11 +300,11 @@ void CqMicroPolyGrid::Shade()
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().iDisplayMode() & ModeRGB )
 	{
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
-		Reset();
+		TqInt i = 0;
 		do
 		{
 			CqVMStackEntry SE;
-			Os()->GetValue( GridI(), SE );
+			Os()->GetValue( i, SE );
 			CqColor opacity;
 			SE.Value( opacity );
 
@@ -306,7 +312,7 @@ void CqMicroPolyGrid::Shade()
 				cCulled ++;
 			else break;
 		}
-		while ( Advance() );
+		while ( ++i < GridSize() );
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
 
 		if ( cCulled == gs )
@@ -330,20 +336,20 @@ void CqMicroPolyGrid::Shade()
 	{
 		cCulled = 0;
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
-		Reset();
+		TqInt i = 0;
 		do
 		{
 			// Calulate the direction the MPG is facing.
 			CqVMStackEntry SEN, SEP;
 			CqVector3D vecN, vecP;
-			N()->GetValue( GridI(), SEN );
-			P()->GetValue( GridI(), SEP );
+			N()->GetValue( i, SEN );
+			P()->GetValue( i, SEP );
 			SEN.Value( vecN );
 			SEP.Value( vecP );
 			if ( ( vecN * vecP ) >= 0 )
 				cCulled++;
 		}
-		while ( Advance() );
+		while ( ++i < GridSize() );
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
 
 		// If the whole grid is culled don't bother going any further.
@@ -369,11 +375,11 @@ void CqMicroPolyGrid::Shade()
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().iDisplayMode() & ModeRGB )
 	{
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
-		Reset();
+		TqInt i = 0;
 		do
 		{
 			CqVMStackEntry SEOs;
-			Os()->GetValue(GridI(), SEOs );
+			Os()->GetValue(i, SEOs );
 			CqColor opacity;
 			SEOs.Value( opacity );
 
@@ -381,7 +387,7 @@ void CqMicroPolyGrid::Shade()
 				cCulled ++;
 			else break;
 		}
-		while ( Advance() );
+		while ( ++i < GridSize() );
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
 
 		if ( cCulled == gs )
@@ -436,19 +442,19 @@ void CqMicroPolyGrid::Project()
 {
 	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
 	// Transform the whole grid to hybrid camera/raster space
-	Reset();
+	TqInt i = 0;
 	do
 	{
 		CqVMStackEntry SEP;
-		P()->GetValue( GridI(), SEP );
+		P()->GetValue( i, SEP );
 		CqVector3D	vecP;
 		SEP.Value( vecP );
 		TqFloat zdepth = vecP.z();
 		vecP = matCameraToRaster * vecP;
 		vecP.z( zdepth );
-		P()->SetValue( GridI(), CqVMStackEntry( vecP ) );
+		P()->SetValue( i, CqVMStackEntry( vecP ) );
 	}
-	while ( Advance() );
+	while ( ++i < GridSize() );
 }
 
 
@@ -460,16 +466,16 @@ CqBound CqMicroPolyGrid::Bound()
 {
 	CqBound B( FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX );
 	// Get all point in the grid.
-	Reset();
+	TqInt i = 0;
 	do
 	{
 		CqVector3D vecTemp;
 		CqVMStackEntry SEP;
-		P()->GetValue( GridI(), SEP );
+		P()->GetValue( i, SEP );
 		SEP.Value( vecTemp );
 		B.Encapsulate( vecTemp );
 	}
-	while ( Advance() );
+	while ( ++i < GridSize() );
 	return ( B );
 }
 
@@ -497,20 +503,18 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 
 	AddRef();
 
-	Reset();
 	TqInt iv;
 	for ( iv = 0; iv < cv; iv++ )
 	{
 		TqInt iu;
 		for ( iu = 0; iu < cu; iu++ )
 		{
-			TqInt iIndex = GridI();
+			TqInt iIndex = ( iv * ( cu + 1 ) ) + iu;
 
 			// If culled, ignore it
 			if ( m_vfCulled )
 			{
 				QGetRenderContext() ->Stats().IncCulledMPGs( 1 );
-				Advance();
 				continue;
 			}
 
@@ -547,10 +551,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 
 				// If al points are trimmed discard the MPG
 				if ( fTrimA && fTrimB && fTrimC && fTrimD )
-				{
-					Advance();
 					continue;
-				}
 
 				// If any points are trimmed mark the MPG as needing to be trim checked.
 				//fTrimmed = fTrimA || fTrimB || fTrimC || fTrimD;
@@ -576,10 +577,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 			pNew->GetTotalBound( TqTrue );
 
 			pImage->AddMPG( pNew );
-			Advance();
 		}
-		// Additional advance to skip the last grid coordinate, as we are processing MPs not coords;
-		Advance();
 	}
 
 	Release();
@@ -652,7 +650,6 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 
 	pGridA->AddRef();
 
-	pGridA->Reset();
 	TqInt iv;
 	for ( iv = 0; iv < cv; iv++ )
 	{
@@ -663,12 +660,12 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 			if ( pGridA->m_vfCulled )
 			{
 				QGetRenderContext() ->Stats().IncCulledMPGs( 1 );
-				pGridA->Advance();
 				continue;
 			}
+
 			CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion();
 			pNew->SetGrid( pGridA );
-			TqInt iIndex = pGridA->GridI();
+			TqInt iIndex = ( iv * ( cu + 1 ) ) + iu;
 			pNew->SetIndex( iIndex );
 			for ( iTime = 0; iTime < cTimes(); iTime++ )
 			{
@@ -688,10 +685,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 			pNew->GetTotalBound( TqTrue );
 
 			pImage->AddMPG( pNew );
-			pGridA->Advance();
 		}
-		// Additional advance to skip the last grid coordinate, as we are processing MPs not coords;
-		pGridA->Advance();
 	}
 
 	pGridA->Release();

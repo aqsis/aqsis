@@ -159,9 +159,6 @@ void CqShaderExecEnv::ValidateIlluminanceCache( CqVMStackEntry& P, CqShader* pSh
 	// If this is the first call to illuminance this time round, call all lights and setup the Cl and L caches.
 	if ( !m_IlluminanceCacheValid )
 	{
-		// Fist cache the shaderexecenv state for later retrieval.
-		TqInt	cacheGridI = m_GridI;
-
 		TqUint li = 0;
 		while ( li < m_pSurface->pAttributes() ->apLights().size() )
 		{
@@ -174,222 +171,255 @@ void CqShaderExecEnv::ValidateIlluminanceCache( CqVMStackEntry& P, CqShader* pSh
 			li++;
 		}
 		m_IlluminanceCacheValid = TqTrue;;
-
-		// Restore the state prior to executing the lightsources.
-		m_GridI = cacheGridI;
 	}
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_radians( FLOATVAL degrees, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( degrees )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( degrees );
-	Result.SetValue( i, FLOAT( degrees ) / ( 180.0f / RI_PI ) );
-	END_FORR
+	SETFLOAT( Result, FLOAT( degrees ) / ( 180.0f / RI_PI ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_degrees( FLOATVAL radians, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( radians )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( radians );
-	Result.SetValue( i, ( FLOAT( radians ) / 180.0f ) * RI_PI );
-	END_FORR
+	SETFLOAT( Result, ( FLOAT( radians ) / 180.0f ) * RI_PI );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_sin( FLOATVAL a, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( a );
-	Result.SetValue( i, static_cast<TqFloat>( sin( FLOAT( a ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( sin( FLOAT( a ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_asin( FLOATVAL a, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( a );
-	Result.SetValue( i, static_cast<TqFloat>( asin( FLOAT( a ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( asin( FLOAT( a ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_cos( FLOATVAL a, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( a );
-	Result.SetValue( i, static_cast<TqFloat>( cos( FLOAT( a ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( cos( FLOAT( a ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_acos( FLOATVAL a, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( a );
-	Result.SetValue( i, static_cast<TqFloat>( acos( FLOAT( a ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( acos( FLOAT( a ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_tan( FLOATVAL a, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( a );
-	Result.SetValue( i, static_cast<TqFloat>( tan( FLOAT( a ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( tan( FLOAT( a ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_atan( FLOATVAL yoverx, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( yoverx )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( yoverx );
-	Result.SetValue( i, static_cast<TqFloat>( atan( FLOAT( yoverx ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( atan( FLOAT( yoverx ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_atan( FLOATVAL y, FLOATVAL x, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( x )
 	CHECKVARY( y )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( x );
 	GETFLOAT( y );
-	Result.SetValue( i, static_cast<TqFloat>( atan2( FLOAT( y ), FLOAT( x ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( atan2( FLOAT( y ), FLOAT( x ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_pow( FLOATVAL x, FLOATVAL y, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( x )
 	CHECKVARY( y )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( x );
 	GETFLOAT( y );
-	Result.SetValue( i, static_cast<TqFloat>( pow( FLOAT( x ), FLOAT( y ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( pow( FLOAT( x ), FLOAT( y ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_exp( FLOATVAL x, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( x )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( x );
-	Result.SetValue( i, static_cast<TqFloat>( exp( FLOAT( x ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( exp( FLOAT( x ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_sqrt( FLOATVAL x, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( x )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( x );
-	Result.SetValue( i, static_cast<TqFloat>( sqrt( FLOAT( x ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( sqrt( FLOAT( x ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_log( FLOATVAL x, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( x )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( x );
-	Result.SetValue( i, static_cast<TqFloat>( log( FLOAT( x ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( log( FLOAT( x ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_mod( FLOATVAL a, FLOATVAL b, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( b )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( a );
 	GETFLOAT( b );
 	TqInt n = static_cast<TqInt>( FLOAT( a ) / FLOAT( b ) );
 	TqFloat a2 = FLOAT( a ) - n * FLOAT( b );
 	if ( a2 < 0.0f )
 		a2 += FLOAT( b );
-	Result.SetValue( i, a2 );
-	END_FORR
+	SETFLOAT( Result, a2 );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // log(x,base)
 STD_SOIMPL	CqShaderExecEnv::SO_log( FLOATVAL x, FLOATVAL base, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( x )
 	CHECKVARY( base )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( x );
 	GETFLOAT( base );
-	Result.SetValue( i, static_cast<TqFloat>( log( FLOAT( x ) ) / log( FLOAT( base ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( log( FLOAT( x ) ) / log( FLOAT( base ) ) ) );
+	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_abs( FLOATVAL x, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( x )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( x );
-	Result.SetValue( i, static_cast<TqFloat>( fabs( FLOAT( x ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( fabs( FLOAT( x ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_sign( FLOATVAL x, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( x )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( x );
-	Result.SetValue( i, ( FLOAT( x ) < 0.0f ) ? -1.0f : 1.0f );
-	END_FORR
+	SETFLOAT( Result, ( FLOAT( x ) < 0.0f ) ? -1.0f : 1.0f );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_min( FLOATVAL a, FLOATVAL b, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( b )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( a );
 	GETFLOAT( b );
 	TqFloat fRes = MIN( FLOAT( a ), FLOAT( b ) );
@@ -399,17 +429,19 @@ STD_SOIMPL	CqShaderExecEnv::SO_min( FLOATVAL a, FLOATVAL b, DEFPARAMVARIMPL )
 		GETFLOAT( next );
 		fRes = MIN( fRes, FLOAT( next ) );
 	}
-	Result.SetValue( i, fRes );
-	END_FORR
+	SETFLOAT( Result, fRes );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_max( FLOATVAL a, FLOATVAL b, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( b )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( a );
 	GETFLOAT( b );
 	TqFloat fRes = MAX( FLOAT( a ), FLOAT( b ) );
@@ -419,17 +451,19 @@ STD_SOIMPL	CqShaderExecEnv::SO_max( FLOATVAL a, FLOATVAL b, DEFPARAMVARIMPL )
 		GETFLOAT( next );
 		fRes = MAX( fRes, FLOAT( next ) );
 	}
-	Result.SetValue( i, fRes );
-	END_FORR
+	SETFLOAT( Result, fRes );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_pmin( POINTVAL a, POINTVAL b, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( b )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETPOINT( a );
 	GETPOINT( b );
 	CqVector3D res = VMIN( POINT( a ), POINT( b ) );
@@ -439,17 +473,19 @@ STD_SOIMPL	CqShaderExecEnv::SO_pmin( POINTVAL a, POINTVAL b, DEFPARAMVARIMPL )
 		GETPOINT( next );
 		res = VMIN( res, POINT( next ) );
 	}
-	Result.SetValue( i, res );
-	END_FORR
+	SETPOINT( Result, res );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_pmax( POINTVAL a, POINTVAL b, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( b )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETPOINT( a );
 	GETPOINT( b );
 	CqVector3D res = VMAX( POINT( a ), POINT( b ) );
@@ -459,17 +495,19 @@ STD_SOIMPL	CqShaderExecEnv::SO_pmax( POINTVAL a, POINTVAL b, DEFPARAMVARIMPL )
 		GETPOINT( next );
 		res = VMAX( res, POINT( next ) );
 	}
-	Result.SetValue( i, res );
-	END_FORR
+	SETPOINT( Result, res );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_cmin( COLORVAL a, COLORVAL b, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( b )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETCOLOR( a );
 	GETCOLOR( b );
 	CqColor res = CMIN( COLOR( a ), COLOR( b ) );
@@ -479,17 +517,19 @@ STD_SOIMPL	CqShaderExecEnv::SO_cmin( COLORVAL a, COLORVAL b, DEFPARAMVARIMPL )
 		GETCOLOR( next );
 		res = CMIN( res, COLOR( next ) );
 	}
-	Result.SetValue( i, res );
-	END_FORR
+	SETCOLOR( Result, res );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_cmax( COLORVAL a, COLORVAL b, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( b )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETCOLOR( a );
 	GETCOLOR( b );
 	CqColor res = CMAX( COLOR( a ), COLOR( b ) );
@@ -499,100 +539,114 @@ STD_SOIMPL	CqShaderExecEnv::SO_cmax( COLORVAL a, COLORVAL b, DEFPARAMVARIMPL )
 		GETCOLOR( next );
 		res = CMAX( res, COLOR( next ) );
 	}
-	Result.SetValue( i, res );
-	END_FORR
+	SETCOLOR( Result, res );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_clamp( FLOATVAL a, FLOATVAL min, FLOATVAL max, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( min )
 	CHECKVARY( max )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( a );
 	GETFLOAT( min );
 	GETFLOAT( max );
-	Result.SetValue( i, CLAMP( FLOAT( a ), FLOAT( min ), FLOAT( max ) ) );
-	END_FORR
+	SETFLOAT( Result, CLAMP( FLOAT( a ), FLOAT( min ), FLOAT( max ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_pclamp( POINTVAL a, POINTVAL min, POINTVAL max, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( min )
 	CHECKVARY( max )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETPOINT( a );
 	GETPOINT( min );
 	GETPOINT( max );
-	Result.SetValue( i, VCLAMP( POINT( a ), POINT( min ), POINT( max ) ) );
-	END_FORR
+	SETPOINT( Result, VCLAMP( POINT( a ), POINT( min ), POINT( max ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_cclamp( COLORVAL a, COLORVAL min, COLORVAL max, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( a )
 	CHECKVARY( min )
 	CHECKVARY( max )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETCOLOR( a );
 	GETCOLOR( min );
 	GETCOLOR( max );
-	Result.SetValue( i, CCLAMP( COLOR( a ), COLOR( min ), COLOR( max ) ) );
-	END_FORR
+	SETCOLOR( Result, CCLAMP( COLOR( a ), COLOR( min ), COLOR( max ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_floor( FLOATVAL x, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( x )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( x );
-	Result.SetValue( i, static_cast<TqFloat>( FLOOR( FLOAT( x ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( FLOOR( FLOAT( x ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_ceil( FLOATVAL x, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( x )
 	CHECKVARY( Result )
-	FOR_EACHR
+	
+	BEGIN_VARYING_SECTION
 	GETFLOAT( x );
-	Result.SetValue( i, static_cast<TqFloat>( CEIL( FLOAT( x ) ) ) );
-	END_FORR
+	SETFLOAT( Result, static_cast<TqFloat>( CEIL( FLOAT( x ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_round( FLOATVAL x, DEFPARAMIMPL )
 {
+	INIT_SO
 	double v;
-	INIT_SOR
+
 	CHECKVARY( x )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( x );
-	Result.SetValue( i, ( modf( FLOAT( x ), &v ) > 0.5f ) ? static_cast<TqFloat>( v ) + 1.0f : static_cast<TqFloat>( v ) );
-	END_FORR
+	SETFLOAT( Result, ( modf( FLOAT( x ), &v ) > 0.5f ) ? static_cast<TqFloat>( v ) + 1.0f : static_cast<TqFloat>( v ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_step( FLOATVAL min, FLOATVAL value, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( min )
 	CHECKVARY( value )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( min );
 	GETFLOAT( value );
-	Result.SetValue( i, ( FLOAT( value ) < FLOAT( min ) ) ? 0.0f : 1.0f );
-	END_FORR
+	SETFLOAT( Result, ( FLOAT( value ) < FLOAT( min ) ) ? 0.0f : 1.0f );
+	END_VARYING_SECTION
 }
 
 
@@ -600,26 +654,27 @@ STD_SOIMPL	CqShaderExecEnv::SO_step( FLOATVAL min, FLOATVAL value, DEFPARAMIMPL 
 // smoothstep(min,max,value)
 STD_SOIMPL	CqShaderExecEnv::SO_smoothstep( FLOATVAL min, FLOATVAL max, FLOATVAL value, DEFPARAMIMPL )
 {
-	// TODO: Check this against Eberts code
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( value )
 	CHECKVARY( min )
 	CHECKVARY( max )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( min );
 	GETFLOAT( max );
 	GETFLOAT( value );
 	if ( FLOAT( value ) < FLOAT( min ) )
-		Result.SetValue( i, 0.0f );
+		SETFLOAT( Result, 0.0f );
 	else if ( FLOAT( value ) >= FLOAT( max ) )
-		Result.SetValue( i, 1.0f );
+		SETFLOAT( Result, 1.0f );
 	else
 	{
 		TqFloat v = ( FLOAT( value ) - FLOAT( min ) ) / ( FLOAT( max ) - FLOAT( min ) );
-		Result.SetValue( i, v * v * ( 3.0f - 2.0f * v ) );
+		SETFLOAT( Result, v * v * ( 3.0f - 2.0f * v ) );
 	}
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
@@ -627,27 +682,31 @@ STD_SOIMPL	CqShaderExecEnv::SO_smoothstep( FLOATVAL min, FLOATVAL max, FLOATVAL 
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_fspline( FLOATVAL value, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
+	CqSplineCubic spline( cParams );
+
 	CHECKVARY( value )
 	TqInt v;
-	for ( v = 0; v < cParams; v++ ) CHECKVARY( ( *apParams[ v ] ) )
-		CHECKVARY( Result )
+	for ( v = 0; v < cParams; v++ )
+	{
+		CHECKVARY( ( *apParams[ v ] ) )
+	}
+	CHECKVARY( Result )
 
-		CqSplineCubic spline( cParams );
-
-	FOR_EACHR
+	BEGIN_VARYING_SECTION
 	GETFLOAT( value );
 	if ( FLOAT( value ) >= 1.0f )
 	{
 		CqVMStackEntry& last = *apParams[ cParams - 2 ];
 		GETFLOAT( last );
-		Result.SetValue( i, FLOAT( last ) );
+		SETFLOAT( Result, FLOAT( last ) );
 	}
 	else if ( FLOAT( value ) <= 0.0f ) 
 	{
 		CqVMStackEntry& first = *apParams[ 1 ];
 		GETFLOAT( first );
-		Result.SetValue( i, FLOAT( first ) );
+		SETFLOAT( Result, FLOAT( first ) );
 	}
 	else
 	{
@@ -660,9 +719,9 @@ STD_SOIMPL	CqShaderExecEnv::SO_fspline( FLOATVAL value, DEFPARAMVARIMPL )
 		}
 
 		CqVector4D	res = spline.Evaluate( FLOAT( value ) );
-		Result.SetValue( i, res.x() );
+		SETFLOAT( Result, res.x() );
 	}
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
@@ -670,27 +729,31 @@ STD_SOIMPL	CqShaderExecEnv::SO_fspline( FLOATVAL value, DEFPARAMVARIMPL )
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_cspline( FLOATVAL value, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
+	CqSplineCubic spline( cParams );
+
 	CHECKVARY( value )
 	TqInt v;
-	for ( v = 0; v < cParams; v++ ) CHECKVARY( ( *apParams[ v ] ) )
-		CHECKVARY( Result )
+	for ( v = 0; v < cParams; v++ )
+	{
+		CHECKVARY( ( *apParams[ v ] ) )
+	}
+	CHECKVARY( Result )
 
-		CqSplineCubic spline( cParams );
-
-	FOR_EACHR
+	BEGIN_VARYING_SECTION
 	GETFLOAT( value );
 	if ( FLOAT( value ) >= 1.0f )
 	{
 		CqVMStackEntry& last = *apParams[ cParams - 2 ];
 		GETCOLOR( last );
-		Result.SetValue( i, COLOR( last ) );
+		SETCOLOR( Result, COLOR( last ) );
 	}
 	else if ( FLOAT( value ) <= 0.0f )
 	{
 		CqVMStackEntry& first = *apParams[ 1 ];
 		GETCOLOR( first );
-		Result.SetValue( i, COLOR( first ) );
+		SETCOLOR( Result, COLOR( first ) );
 	}
 	else
 	{
@@ -703,9 +766,9 @@ STD_SOIMPL	CqShaderExecEnv::SO_cspline( FLOATVAL value, DEFPARAMVARIMPL )
 		}
 
 		CqVector4D	res = spline.Evaluate( FLOAT( value ) );
-		Result.SetValue( i, CqColor( res.x(), res.y(), res.z() ) );
+		SETCOLOR( Result, CqColor( res.x(), res.y(), res.z() ) );
 	}
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
@@ -713,27 +776,31 @@ STD_SOIMPL	CqShaderExecEnv::SO_cspline( FLOATVAL value, DEFPARAMVARIMPL )
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_pspline( FLOATVAL value, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
+	CqSplineCubic spline( cParams );
+
 	CHECKVARY( value )
 	TqInt v;
-	for ( v = 0; v < cParams; v++ ) CHECKVARY( ( *apParams[ v ] ) )
-		CHECKVARY( Result )
+	for ( v = 0; v < cParams; v++ )
+	{
+		CHECKVARY( ( *apParams[ v ] ) )
+	}
+	CHECKVARY( Result )
 
-		CqSplineCubic spline( cParams );
-
-	FOR_EACHR
+	BEGIN_VARYING_SECTION
 	GETFLOAT( value );
 	if ( FLOAT( value ) >= 1.0f )
 	{
 		CqVMStackEntry& last = *apParams[ cParams - 2 ];
 		GETPOINT( last );
-		Result.SetValue( i, POINT( last ) );
+		SETPOINT( Result, POINT( last ) );
 	}
 	else if ( FLOAT( value ) <= 0.0f )
 	{
 		CqVMStackEntry& first = *apParams[ 1 ];
 		GETPOINT( first );
-		Result.SetValue( i, POINT( first ) );
+		SETPOINT( Result, POINT( first ) );
 	}
 	else
 	{
@@ -746,9 +813,9 @@ STD_SOIMPL	CqShaderExecEnv::SO_pspline( FLOATVAL value, DEFPARAMVARIMPL )
 		}
 
 		CqVector3D	res = spline.Evaluate( FLOAT( value ) );
-		Result.SetValue( i, res );
+		SETPOINT( Result, res );
 	}
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
@@ -756,7 +823,10 @@ STD_SOIMPL	CqShaderExecEnv::SO_pspline( FLOATVAL value, DEFPARAMVARIMPL )
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_sfspline( STRINGVAL basis, FLOATVAL value, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
+	CqSplineCubic spline( cParams );
+
 	CHECKVARY( value )
 	TqInt v;
 	for ( v = 0; v < cParams; v++ )
@@ -765,24 +835,24 @@ STD_SOIMPL	CqShaderExecEnv::SO_sfspline( STRINGVAL basis, FLOATVAL value, DEFPAR
 	}
 	CHECKVARY( Result )
 
-	TqInt i = 0;
-	CqSplineCubic spline( cParams );
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( basis );
 	spline.SetmatBasis( STRING( basis ) );
+	END_UNIFORM_SECTION
 
-	FOR_EACHR
+	BEGIN_VARYING_SECTION
 	GETFLOAT( value );
 	if ( FLOAT( value ) >= 1.0f )
 	{
 		CqVMStackEntry& last = *apParams[ cParams - 2 ];
 		GETFLOAT( last );
-		Result.SetValue( i, FLOAT( last ) );
+		SETFLOAT( Result, FLOAT( last ) );
 	}
 	else if ( FLOAT( value ) <= 0.0f )
 	{
 		CqVMStackEntry& first = *apParams[ 1 ];
 		GETFLOAT( first );
-		Result.SetValue( i, FLOAT( first ) );
+		SETFLOAT( Result, FLOAT( first ) );
 	}
 	else
 	{
@@ -795,9 +865,9 @@ STD_SOIMPL	CqShaderExecEnv::SO_sfspline( STRINGVAL basis, FLOATVAL value, DEFPAR
 		}
 
 		CqVector4D	res = spline.Evaluate( FLOAT( value ) );
-		Result.SetValue( i, res.x() );
+		SETFLOAT( Result, res.x() );
 	}
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
@@ -805,34 +875,36 @@ STD_SOIMPL	CqShaderExecEnv::SO_sfspline( STRINGVAL basis, FLOATVAL value, DEFPAR
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_scspline( STRINGVAL basis, FLOATVAL value, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
+	CqSplineCubic spline( cParams );
+
 	CHECKVARY( value )
 	TqInt v;
 	for ( v = 0; v < cParams; v++ )
 	{
 		CHECKVARY( ( *apParams[ v ] ) )
 	}
-	
 	CHECKVARY( Result )
-	CqSplineCubic spline( cParams );
 
-	TqInt i = 0;
+	BEGIN_UNIFORM_SECTION
 	GETFLOAT( basis );
 	spline.SetmatBasis( STRING( basis) );
+	END_UNIFORM_SECTION
 
-	FOR_EACHR
+	BEGIN_VARYING_SECTION
 	GETFLOAT( value );
 	if ( FLOAT( value ) >= 1.0f )
 	{
 		CqVMStackEntry& last = *apParams[ cParams - 2 ];
 		GETCOLOR( last );
-		Result.SetValue( i, COLOR( last ) );
+		SETCOLOR( Result, COLOR( last ) );
 	}
 	else if ( FLOAT( value ) <= 0.0f )
 	{
 		CqVMStackEntry& first = *apParams[ 1 ];
 		GETCOLOR( first );
-		Result.SetValue( i, COLOR( first ) );
+		SETCOLOR( Result, COLOR( first ) );
 	}
 	else
 	{
@@ -845,9 +917,9 @@ STD_SOIMPL	CqShaderExecEnv::SO_scspline( STRINGVAL basis, FLOATVAL value, DEFPAR
 		}
 
 		CqVector4D	res = spline.Evaluate( FLOAT( value ) );
-		Result.SetValue( i, CqColor( res.x(), res.y(), res.z() ) );
+		SETCOLOR( Result, CqColor( res.x(), res.y(), res.z() ) );
 	}
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
@@ -855,34 +927,36 @@ STD_SOIMPL	CqShaderExecEnv::SO_scspline( STRINGVAL basis, FLOATVAL value, DEFPAR
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_spspline( STRINGVAL basis, FLOATVAL value, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
+	CqSplineCubic spline( cParams );
+
 	CHECKVARY( value )
 	TqInt v;
 	for ( v = 0; v < cParams; v++ )
 	{
 		CHECKVARY( ( *apParams[ v ] ) )
 	}
-	
 	CHECKVARY( Result )
-	CqSplineCubic spline( cParams );
 
-	TqInt i = 0;
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( basis );
 	spline.SetmatBasis( STRING( basis ) );
+	END_UNIFORM_SECTION
 
-	FOR_EACHR
+	BEGIN_VARYING_SECTION
 	GETFLOAT( value );
 	if ( FLOAT( value ) >= 1.0f )
 	{
 		CqVMStackEntry& last = *apParams[ cParams - 2 ];
 		GETPOINT( last );
-		Result.SetValue( i, POINT( last ) );
+		SETPOINT( Result, POINT( last ) );
 	}
 	else if ( FLOAT( value ) <= 0.0f )
 	{
 		CqVMStackEntry& first = *apParams[ 1 ];
 		GETPOINT( first );
-		Result.SetValue( i, POINT( first ) );
+		SETPOINT( Result, POINT( first ) );
 	}
 	else
 	{
@@ -895,141 +969,163 @@ STD_SOIMPL	CqShaderExecEnv::SO_spspline( STRINGVAL basis, FLOATVAL value, DEFPAR
 		}
 
 		CqVector3D	res = spline.Evaluate( FLOAT( value ) );
-		Result.SetValue( i, res );
+		SETPOINT( Result, res );
 	}
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_fDu( FLOATVAL p, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
-	Result.SetValue( i, SO_DuType<TqFloat>( p, i, *this ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETFLOAT( Result, SO_DuType<TqFloat>( p, __iGrid, *this ) );
+	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_fDv( FLOATVAL p, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
-	Result.SetValue( i, SO_DvType<TqFloat>( p, i, *this ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETFLOAT( Result, SO_DvType<TqFloat>( p, __iGrid, *this ) );
+	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_fDeriv( FLOATVAL p, FLOATVAL den, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( den )
 	CHECKVARY( Result )
-	FOR_EACHR
-	Result.SetValue( i, SO_DerivType<TqFloat>( p, den, i, *this ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETFLOAT( Result, SO_DerivType<TqFloat>( p, den, __iGrid, *this ) );
+	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_cDu( COLORVAL p, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
-	Result.SetValue( i, SO_DuType<CqColor>( p, i, *this ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETCOLOR( Result, SO_DuType<CqColor>( p, __iGrid, *this ) );
+	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_cDv( COLORVAL p, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
-	Result.SetValue( i, SO_DvType<CqColor>( p, i, *this ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETCOLOR( Result, SO_DvType<CqColor>( p, __iGrid, *this ) );
+	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_cDeriv( COLORVAL p, FLOATVAL den, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( den )
 	CHECKVARY( Result )
-	FOR_EACHR
-	Result.SetValue( i, SO_DerivType<CqColor>( p, den, i, *this ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETCOLOR( Result, SO_DerivType<CqColor>( p, den, __iGrid, *this ) );
+	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_pDu( POINTVAL p, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
-	Result.SetValue( i, SO_DuType<CqVector3D>( p, i, *this ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETPOINT( Result, SO_DuType<CqVector3D>( p, __iGrid, *this ) );
+	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_pDv( POINTVAL p, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
-	Result.SetValue( i, SO_DvType<CqVector3D>( p, i, *this ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETPOINT( Result, SO_DvType<CqVector3D>( p, __iGrid, *this ) );
+	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_pDeriv( POINTVAL p, FLOATVAL den, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( den )
 	CHECKVARY( Result )
-	FOR_EACHR
-	Result.SetValue( i, SO_DerivType<CqVector3D>( p, den, i, *this ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETPOINT( Result, SO_DerivType<CqVector3D>( p, den, __iGrid, *this ) );
+	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_frandom( DEFPARAMIMPL )
 {
-	static CqRandom randomiser;
+	INIT_SO
 
-	INIT_SOR
 	CHECKVARY( Result )
-	FOR_EACHR
-	Result.SetValue( i, m_random.RandomFloat() );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETFLOAT( Result, m_random.RandomFloat() );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_crandom( DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( Result )
-	FOR_EACHR
-	Result.SetValue( i, CqColor( m_random.RandomFloat(), m_random.RandomFloat(), m_random.RandomFloat() ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETCOLOR( Result, CqColor( m_random.RandomFloat(), m_random.RandomFloat(), m_random.RandomFloat() ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_prandom( DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( Result )
-	FOR_EACHR
-	Result.SetValue( i, CqVector3D( m_random.RandomFloat(), m_random.RandomFloat(), m_random.RandomFloat() ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETCOLOR( Result, CqVector3D( m_random.RandomFloat(), m_random.RandomFloat(), m_random.RandomFloat() ) );
+	END_VARYING_SECTION
 }
 
 
@@ -1037,41 +1133,47 @@ STD_SOIMPL	CqShaderExecEnv::SO_prandom( DEFPARAMIMPL )
 // noise(v)
 STD_SOIMPL	CqShaderExecEnv::SO_fnoise1( FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( v );
-	Result.SetValue( i, ( m_noise.FGNoise1( FLOAT( v ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETFLOAT( Result, ( m_noise.FGNoise1( FLOAT( v ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // noise(u,v)
 STD_SOIMPL CqShaderExecEnv::SO_fnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( u )
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( u );
 	GETFLOAT( v );
-	Result.SetValue( i, ( m_noise.FGNoise2( FLOAT( u ), FLOAT( v ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETFLOAT( Result, ( m_noise.FGNoise2( FLOAT( u ), FLOAT( v ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // noise(p)
 STD_SOIMPL CqShaderExecEnv::SO_fnoise3( POINTVAL p, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
-	Result.SetValue( i, ( m_noise.FGNoise3( POINT( p ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETFLOAT( Result, ( m_noise.FGNoise3( POINT( p ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
@@ -1079,56 +1181,64 @@ STD_SOIMPL CqShaderExecEnv::SO_fnoise3( POINTVAL p, DEFPARAMIMPL )
 STD_SOIMPL CqShaderExecEnv::SO_fnoise4( POINTVAL p, FLOATVAL t, DEFPARAMIMPL )
 {
 	// TODO: Do proper 4D noise.
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( t )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETFLOAT( t );
-	Result.SetValue( i, ( m_noise.FGNoise3( POINT( p ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETFLOAT( Result, ( m_noise.FGNoise3( POINT( p ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // noise(v)
 STD_SOIMPL	CqShaderExecEnv::SO_cnoise1( FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( v );
-	Result.SetValue( i, ( m_noise.CGNoise1( FLOAT( v ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETCOLOR( Result, ( m_noise.CGNoise1( FLOAT( v ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // noise(u,v)
 STD_SOIMPL CqShaderExecEnv::SO_cnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( u )
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( u );
 	GETFLOAT( v );
-	Result.SetValue( i, ( m_noise.CGNoise2( FLOAT( u ), FLOAT( v ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETCOLOR( Result, ( m_noise.CGNoise2( FLOAT( u ), FLOAT( v ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // noise(p)
 STD_SOIMPL CqShaderExecEnv::SO_cnoise3( POINTVAL p, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
-	Result.SetValue( i, ( m_noise.CGNoise3( POINT( p ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETCOLOR( Result, ( m_noise.CGNoise3( POINT( p ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
@@ -1136,56 +1246,64 @@ STD_SOIMPL CqShaderExecEnv::SO_cnoise3( POINTVAL p, DEFPARAMIMPL )
 STD_SOIMPL CqShaderExecEnv::SO_cnoise4( POINTVAL p, FLOATVAL t, DEFPARAMIMPL )
 {
 	// TODO: Do proper 4D noise.
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( t )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETFLOAT( t );
-	Result.SetValue( i, ( m_noise.CGNoise3( POINT( p ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETCOLOR( Result, ( m_noise.CGNoise3( POINT( p ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // noise(v)
 STD_SOIMPL CqShaderExecEnv::SO_pnoise1( FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( v );
-	Result.SetValue( i, ( m_noise.PGNoise1( FLOAT( v ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETPOINT( Result, ( m_noise.PGNoise1( FLOAT( v ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // noise(u,v)
 STD_SOIMPL CqShaderExecEnv::SO_pnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( u )
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( u );
 	GETFLOAT( v );
-	Result.SetValue( i, ( m_noise.PGNoise2( FLOAT( u ), FLOAT( v ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETPOINT( Result, ( m_noise.PGNoise2( FLOAT( u ), FLOAT( v ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // noise(p)
 STD_SOIMPL CqShaderExecEnv::SO_pnoise3( POINTVAL p, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
-	Result.SetValue( i, ( m_noise.PGNoise3( POINT( p ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETPOINT( Result, ( m_noise.PGNoise3( POINT( p ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
@@ -1193,103 +1311,117 @@ STD_SOIMPL CqShaderExecEnv::SO_pnoise3( POINTVAL p, DEFPARAMIMPL )
 STD_SOIMPL CqShaderExecEnv::SO_pnoise4( POINTVAL p, FLOATVAL t, DEFPARAMIMPL )
 {
 	// TODO: Do proper 4D noise.
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( t )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETFLOAT( t );
-	Result.SetValue( i, ( m_noise.PGNoise3( POINT( p ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETPOINT( Result, ( m_noise.PGNoise3( POINT( p ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
-// setcomp(c,i,v)
+// setcomp(c,__iGrid,v)
 STD_SOIMPL	CqShaderExecEnv::SO_setcomp( COLORVAL p, FLOATVAL index, FLOATVAL v, DEFVOIDPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( v )
 	CHECKVARY( index )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETCOLOR( p );
 	GETFLOAT( index );
 	GETFLOAT( v );
 	COLOR( p )[ FLOAT( index ) ] = FLOAT( v );
-	p.SetValue( i, COLOR( p ) );
-	END_FORR
+	SETCOLOR( p, COLOR( p ) );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // setxcomp(p,v)
 STD_SOIMPL	CqShaderExecEnv::SO_setxcomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( v )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETFLOAT( v );
 	POINT( p ).x( FLOAT( v ) );
-	p.SetValue( i, POINT( p ) );
-	END_FORR
+	SETPOINT( p, POINT( p ) );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // setycomp(p,v)
 STD_SOIMPL	CqShaderExecEnv::SO_setycomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( v )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETFLOAT( v );
 	POINT( p ).y( FLOAT( v ) );
-	p.SetValue( i, POINT( p ) );
-	END_FORR
+	SETPOINT( p, POINT( p ) );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // setzcomp(p,v)
 STD_SOIMPL	CqShaderExecEnv::SO_setzcomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( v )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETFLOAT( v );
 	POINT( p ).z( FLOAT( v ) );
-	p.SetValue( i, POINT( p ) );
-	END_FORR
+	SETPOINT( p, POINT( p ) );
+	END_VARYING_SECTION
 }
 
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_length( VECTORVAL V, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( V )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETVECTOR( V );
-	Result.SetValue( i, VECTOR( V ).Magnitude() );
-	END_FORR
+	SETFLOAT( Result, VECTOR( V ).Magnitude() );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_distance( POINTVAL P1, POINTVAL P2, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( P1 )
 	CHECKVARY( P2 )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( P1 );
 	GETPOINT( P2 );
-	Result.SetValue( i, ( POINT( P1 ) - POINT( P2 ) ).Magnitude() );
-	END_FORR
+	SETFLOAT( Result, ( POINT( P1 ) - POINT( P2 ) ).Magnitude() );
+	END_VARYING_SECTION
 }
 
 
@@ -1297,37 +1429,39 @@ STD_SOIMPL	CqShaderExecEnv::SO_distance( POINTVAL P1, POINTVAL P2, DEFPARAMIMPL 
 // area(P)
 STD_SOIMPL CqShaderExecEnv::SO_area( POINTVAL p, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
+	CqVector3D	vecR;
+
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
-	CqVector3D	vecR;
+
+	BEGIN_VARYING_SECTION
 	if ( m_pSurface )
 	{
-		CqVMStackEntry SEdu, SEdv;
-		du()->GetValue( i, SEdu );
-		dv()->GetValue( i, SEdv );
-		GETFLOAT( SEdu );
-		GETFLOAT( SEdv );
-		vecR = ( SO_DuType<CqVector3D>( p, m_GridI, *this ) * FLOAT( SEdu ) ) % 
-			   ( SO_DvType<CqVector3D>( p, m_GridI, *this ) * FLOAT( SEdv ) );
-		Result.SetValue( i, vecR.Magnitude() );
+		GET_STDVAR_FLOAT( du );
+		GET_STDVAR_FLOAT( dv );
+		vecR = ( SO_DuType<CqVector3D>( p, __iGrid, *this ) * FLOAT( du ) ) % 
+			   ( SO_DvType<CqVector3D>( p, __iGrid, *this ) * FLOAT( dv ) );
+		SETFLOAT( Result, vecR.Magnitude() );
 	}
 
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_normalize( VECTORVAL V, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( V )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETVECTOR( V );
 	VECTOR( V ).Unit();
-	Result.SetValue( i, VECTOR( V ) );
-	END_FORR
+	SETVECTOR( Result, VECTOR( V ) );
+	END_VARYING_SECTION
 }
 
 
@@ -1335,16 +1469,18 @@ STD_SOIMPL	CqShaderExecEnv::SO_normalize( VECTORVAL V, DEFPARAMIMPL )
 // faceforward(N,I,[Nref])
 STD_SOIMPL CqShaderExecEnv::SO_faceforward( NORMALVAL N, VECTORVAL I, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( N )
 	CHECKVARY( I )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETNORMAL( N );
 	GETVECTOR( I );
 	TqFloat s = ( ( ( -VECTOR( I ) ) * NORMAL( N ) ) < 0.0f ) ? -1.0f : 1.0f;
-	Result.SetValue( i, NORMAL( N ) * s );
-	END_FORR
+	SETNORMAL( Result, NORMAL( N ) * s );
+	END_VARYING_SECTION
 }
 
 
@@ -1352,17 +1488,19 @@ STD_SOIMPL CqShaderExecEnv::SO_faceforward( NORMALVAL N, VECTORVAL I, DEFPARAMIM
 // reflect(I,N)
 STD_SOIMPL CqShaderExecEnv::SO_reflect( VECTORVAL I, NORMALVAL N, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( I )
 	CHECKVARY( N )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETVECTOR( I );
 	GETNORMAL( N );
 	TqFloat idn = 2.0f * ( VECTOR( I ) * NORMAL( N ) );
 	CqVector3D res = VECTOR( I ) - ( idn * NORMAL( N ) );
-	Result.SetValue( i, res );
-	END_FORR
+	SETVECTOR( Result, res );
+	END_VARYING_SECTION
 }
 
 
@@ -1370,20 +1508,22 @@ STD_SOIMPL CqShaderExecEnv::SO_reflect( VECTORVAL I, NORMALVAL N, DEFPARAMIMPL )
 // reftact(I,N,eta)
 STD_SOIMPL CqShaderExecEnv::SO_refract( VECTORVAL I, NORMALVAL N, FLOATVAL eta, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( I )
 	CHECKVARY( N )
 	CHECKVARY( eta )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETVECTOR( I );
 	GETNORMAL( N );
 	GETFLOAT( eta );
 	TqFloat IdotN = VECTOR( I ) * NORMAL( N );
 	TqFloat feta = FLOAT( eta );
 	TqFloat k = 1 - feta * feta * ( 1 - IdotN * IdotN );
-	Result.SetValue( i, ( k < 0.0f ) ? CqVector3D( 0, 0, 0 ) : CqVector3D( feta * VECTOR( I ) - ( feta * IdotN + sqrt( k ) ) * NORMAL( N ) ) );
-	END_FORR
+	SETVECTOR( Result, ( k < 0.0f ) ? CqVector3D( 0, 0, 0 ) : CqVector3D( feta * VECTOR( I ) - ( feta * IdotN + sqrt( k ) ) * NORMAL( N ) ) );
+	END_VARYING_SECTION
 }
 
 
@@ -1392,13 +1532,15 @@ STD_SOIMPL CqShaderExecEnv::SO_refract( VECTORVAL I, NORMALVAL N, FLOATVAL eta, 
 #define SQR(A)	((A)*(A))
 STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, FLOATVAL Kr, FLOATVAL Kt, DEFVOIDPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( I )
 	CHECKVARY( N )
 	CHECKVARY( eta )
 	CHECKVARY( Kr )
 	CHECKVARY( Kt )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETVECTOR( I );
 	GETNORMAL( N );
 	GETFLOAT( eta );
@@ -1414,16 +1556,17 @@ STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, 
 	TqFloat fpara2 = ( SQR( SQR( 1.0f / feta ) * cos_theta - sqrt( fu2 ) ) + SQR( -sqrt( fv2 ) ) ) /
 	                 ( SQR( SQR( 1.0f / feta ) * cos_theta + sqrt( fu2 ) ) + SQR( sqrt( fv2 ) ) );
 
-	Kr.SetValue( i, 0.5f * ( fperp2 + fpara2 ) );
-	Kt.SetValue( i, 1.0f - FLOAT( Kr ) );
-	END_FORR
+	SETFLOAT( Kr, 0.5f * ( fperp2 + fpara2 ) );
+	SETFLOAT( Kt, 1.0f - FLOAT( Kr ) );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // fresnel(I,N,eta,Kr,Kt,R,T)
 STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, FLOATVAL Kr, FLOATVAL Kt, VECTORVAL R, VECTORVAL T, DEFVOIDPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( I )
 	CHECKVARY( N )
 	CHECKVARY( eta )
@@ -1431,7 +1574,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, 
 	CHECKVARY( Kt )
 	CHECKVARY( R )
 	CHECKVARY( T )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETVECTOR( I );
 	GETNORMAL( N );
 	GETFLOAT( eta );
@@ -1448,9 +1592,10 @@ STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, 
 	TqFloat fperp2 = ( SQR( cos_theta - sqrt( fu2 ) ) + fv2 ) / ( SQR( cos_theta + sqrt( fu2 ) ) + fv2 );
 	TqFloat fpara2 = ( SQR( SQR( 1.0f / feta ) * cos_theta - sqrt( fu2 ) ) + SQR( -sqrt( fv2 ) ) ) /
 	                 ( SQR( SQR( 1.0f / feta ) * cos_theta + sqrt( fu2 ) ) + SQR( sqrt( fv2 ) ) );
-	Kr.SetValue( i, 0.5f * ( fperp2 + fpara2 ) );
-	Kt.SetValue( i, 1.0f - FLOAT( Kr ) );
-	END_FORR
+	SETFLOAT( Kr, 0.5f * ( fperp2 + fpara2 ) );
+	SETFLOAT( Kt, 1.0f - FLOAT( Kr ) );
+	END_VARYING_SECTION
+
 	SO_reflect( I, N, R );
 	SO_refract( I, N, eta, T );
 }
@@ -1460,19 +1605,23 @@ STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, 
 // transform(s,s,P)
 STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL fromspace, STRINGVAL tospace, POINTVAL p, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( pShader != 0 );
 
-	TqInt i = 0;
+	CHECKVARY( p )
+	CHECKVARY( Result )
+
+	BEGIN_UNIFORM_SECTION	
 	GETSTRING( fromspace );
 	GETSTRING( tospace );
 	const CqMatrix& mat = QGetRenderContext() ->matSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
-	INIT_SOR
-	CHECKVARY( p )
-	CHECKVARY( Result )
-	FOR_EACHR
+	END_UNIFORM_SECTION	
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
-	Result.SetValue( i, mat * POINT( p ) );
-	END_FORR
+	SETPOINT( Result, mat * POINT( p ) );
+	END_VARYING_SECTION
 }
 
 
@@ -1480,18 +1629,22 @@ STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL fromspace, STRINGVAL tospace
 // transform(s,P)
 STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL tospace, POINTVAL p, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( pShader != 0 );
 
-	TqInt i = 0;
-	GETSTRING( tospace );
-	const CqMatrix& mat = QGetRenderContext() ->matSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
-	INIT_SOR
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_UNIFORM_SECTION
+	GETSTRING( tospace );
+	const CqMatrix& mat = QGetRenderContext() ->matSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+	END_UNIFORM_SECTION
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
-	Result.SetValue( i, mat * POINT( p ) );
-	END_FORR
+	SETPOINT( Result, mat * POINT( p ) );
+	END_VARYING_SECTION
 }
 
 
@@ -1499,16 +1652,18 @@ STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL tospace, POINTVAL p, DEFPARA
 // transform(m,P)
 STD_SOIMPL CqShaderExecEnv::SO_transformm( MATRIXVAL tospace, POINTVAL p, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( pShader != 0 );
 
-	INIT_SOR
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETMATRIX( tospace );
 	GETPOINT( p );
-	Result.SetValue( i, MATRIX( tospace ) * POINT( p ) );
-	END_FORR
+	SETPOINT( Result, MATRIX( tospace ) * POINT( p ) );
+	END_VARYING_SECTION
 }
 
 
@@ -1516,20 +1671,23 @@ STD_SOIMPL CqShaderExecEnv::SO_transformm( MATRIXVAL tospace, POINTVAL p, DEFPAR
 // vtransform(s,s,P)
 STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL fromspace, STRINGVAL tospace, VECTORVAL p, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( pShader != 0 );
 
-	TqInt i = 0;
-	GETSTRING( fromspace );
-	GETSTRING( tospace );
-
-	const CqMatrix& mat = QGetRenderContext() ->matVSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
-	INIT_SOR
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_UNIFORM_SECTION
+	GETSTRING( fromspace );
+	GETSTRING( tospace );
+	const CqMatrix& mat = QGetRenderContext() ->matVSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+	END_UNIFORM_SECTION
+
+	BEGIN_VARYING_SECTION
 	GETVECTOR( p );
-	Result.SetValue( i, mat * VECTOR( p ) );
-	END_FORR
+	SETVECTOR( Result, mat * VECTOR( p ) );
+	END_VARYING_SECTION
 }
 
 
@@ -1537,19 +1695,22 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL fromspace, STRINGVAL tospac
 // vtransform(s,P)
 STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL tospace, VECTORVAL p, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( pShader != 0 );
 
-	TqInt i = 0;
-	GETSTRING( tospace );
-
-	const CqMatrix& mat = QGetRenderContext() ->matVSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
-	INIT_SOR
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_UNIFORM_SECTION
+	GETSTRING( tospace );
+	const CqMatrix& mat = QGetRenderContext() ->matVSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+	END_UNIFORM_SECTION
+
+	BEGIN_VARYING_SECTION
 	GETVECTOR( p );
-	Result.SetValue( i, mat * VECTOR( p ) );
-	END_FORR
+	SETVECTOR( Result, mat * VECTOR( p ) );
+	END_VARYING_SECTION
 }
 
 
@@ -1557,16 +1718,18 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL tospace, VECTORVAL p, DEFPA
 // vtransform(m,P)
 STD_SOIMPL CqShaderExecEnv::SO_vtransformm( MATRIXVAL tospace, VECTORVAL p, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( pShader != 0 );
 
-	INIT_SOR
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETMATRIX( tospace );
 	GETVECTOR( p );
-	Result.SetValue( i, MATRIX( tospace ) * VECTOR( p ) );
-	END_FORR
+	SETVECTOR( Result, MATRIX( tospace ) * VECTOR( p ) );
+	END_VARYING_SECTION
 }
 
 
@@ -1574,20 +1737,23 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransformm( MATRIXVAL tospace, VECTORVAL p, DEFP
 // ntransform(s,s,P)
 STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL fromspace, STRINGVAL tospace, NORMALVAL p, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( pShader != 0 );
 
-	TqInt i = 0;
-	GETSTRING( fromspace );
-	GETSTRING( tospace );
-
-	const CqMatrix& mat = QGetRenderContext() ->matNSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
-	INIT_SOR
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_UNIFORM_SECTION
+	GETSTRING( fromspace );
+	GETSTRING( tospace );
+	const CqMatrix& mat = QGetRenderContext() ->matNSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+	BEGIN_UNIFORM_SECTION
+
+	BEGIN_VARYING_SECTION
 	GETNORMAL( p );
-	Result.SetValue( i, mat * NORMAL( p ) );
-	END_FORR
+	SETNORMAL( Result, mat * NORMAL( p ) );
+	END_VARYING_SECTION
 }
 
 
@@ -1595,19 +1761,22 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL fromspace, STRINGVAL tospac
 // ntransform(s,P)
 STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL tospace, NORMALVAL p, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( pShader != 0 );
 
-	TqInt i = 0;
-	GETSTRING( tospace );
-
-	const CqMatrix& mat = QGetRenderContext() ->matNSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
-	INIT_SOR
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_UNIFORM_SECTION
+	GETSTRING( tospace );
+	const CqMatrix& mat = QGetRenderContext() ->matNSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+	BEGIN_UNIFORM_SECTION
+
+	BEGIN_VARYING_SECTION
 	GETNORMAL( p );
-	Result.SetValue( i, mat * NORMAL( p ) );
-	END_FORR
+	SETNORMAL( Result, mat * NORMAL( p ) );
+	END_VARYING_SECTION
 }
 
 
@@ -1615,16 +1784,18 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL tospace, NORMALVAL p, DEFPA
 // ntransform(m,P)
 STD_SOIMPL CqShaderExecEnv::SO_ntransformm( MATRIXVAL tospace, NORMALVAL p, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( pShader != 0 );
 
-	INIT_SOR
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETMATRIX( tospace );
 	GETNORMAL( p );
-	Result.SetValue( i, MATRIX( tospace ) * NORMAL( p ) );
-	END_FORR
+	SETNORMAL( Result, MATRIX( tospace ) * NORMAL( p ) );
+	END_VARYING_SECTION
 }
 
 
@@ -1632,16 +1803,18 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransformm( MATRIXVAL tospace, NORMALVAL p, DEFP
 // depth(P)
 STD_SOIMPL CqShaderExecEnv::SO_depth( POINTVAL p, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	TqFloat d = POINT( p ).z();
 	d = ( d - QGetRenderContext() ->optCurrent().fClippingPlaneNear() ) /
 	    ( QGetRenderContext() ->optCurrent().fClippingPlaneFar() - QGetRenderContext() ->optCurrent().fClippingPlaneNear() );
-	Result.SetValue( i, d );
-	END_FORR
+	SETNORMAL( Result, d );
+	END_VARYING_SECTION
 }
 
 
@@ -1649,103 +1822,110 @@ STD_SOIMPL CqShaderExecEnv::SO_depth( POINTVAL p, DEFPARAMIMPL )
 // calculatenormal(P)
 STD_SOIMPL CqShaderExecEnv::SO_calculatenormal( POINTVAL p, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	// Find out if the orientation is inverted.
 	EqOrientation O = pSurface() ->pAttributes() ->eOrientation();
 	float neg = 1;
 	if ( O != OrientationLH ) neg = -1;
 
-	INIT_SOR
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
-	CqVector3D	dPdu = SO_DuType<CqVector3D>( p, m_GridI, *this );
-	CqVector3D	dPdv = SO_DvType<CqVector3D>( p, m_GridI, *this );
+
+	BEGIN_VARYING_SECTION
+	CqVector3D	dPdu = SO_DuType<CqVector3D>( p, __iGrid, *this );
+	CqVector3D	dPdv = SO_DvType<CqVector3D>( p, __iGrid, *this );
 	CqVector3D	N = dPdu % dPdv;
 	N.Unit();
 	N *= neg;
-	Result.SetValue( i, N );
-	END_FORR
+	SETNORMAL( Result, N );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL CqShaderExecEnv::SO_cmix( COLORVAL color0, COLORVAL color1, FLOATVAL value, DEFPARAMIMPL )
 {
-	//assert(value>=0.0 && value<=1.0);
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( color0 )
 	CHECKVARY( color1 )
 	CHECKVARY( value )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETCOLOR( color0 );
 	GETCOLOR( color1 );
 	GETFLOAT( value );
 	CqColor c( ( 1.0f - FLOAT( value ) ) * COLOR( color0 ) + FLOAT( value ) * COLOR( color1 ) );
-	Result.SetValue( i, c );
-	END_FORR
+	SETCOLOR( Result, c );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_fmix( FLOATVAL f0, FLOATVAL f1, FLOATVAL value, DEFPARAMIMPL )
 {
-	//assert(value>=0.0 && value<=1.0);
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( f0 )
 	CHECKVARY( f1 )
 	CHECKVARY( value )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( f0 );
 	GETFLOAT( f1 );
 	GETFLOAT( value );
 	TqFloat f( ( 1.0f - FLOAT( value ) ) * FLOAT( f0 ) + FLOAT( value ) * FLOAT( f1 ) );
-	Result.SetValue( i, f );
-	END_FORR
+	SETFLOAT( Result, f );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_pmix( POINTVAL p0, POINTVAL p1, FLOATVAL value, DEFPARAMIMPL )
 {
-	//assert(value>=0.0 && value<=1.0);
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p0 )
 	CHECKVARY( p1 )
 	CHECKVARY( value )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p0 );
 	GETPOINT( p1 );
 	GETFLOAT( value );
 	CqVector3D p( ( 1.0f - FLOAT( value ) ) * POINT( p0 ) + FLOAT( value ) * POINT( p1 ) );
-	Result.SetValue( i, p );
-	END_FORR
+	SETPOINT( Result, p );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_vmix( VECTORVAL v0, VECTORVAL v1, FLOATVAL value, DEFPARAMIMPL )
 {
-	//assert(value>=0.0 && value<=1.0);
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( v0 )
 	CHECKVARY( v1 )
 	CHECKVARY( value )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETVECTOR( v0 );
 	GETVECTOR( v1 );
 	GETFLOAT( value );
 	CqVector3D v( ( 1.0f - FLOAT( value ) ) * VECTOR( v0 ) + FLOAT( value ) * VECTOR( v1 ) );
-	Result.SetValue( i, v );
-	END_FORR
+	SETVECTOR( Result, v );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_nmix( NORMALVAL n0, NORMALVAL n1, FLOATVAL value, DEFPARAMIMPL )
 {
-	//assert(value>=0.0 && value<=1.0);
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( n0 )
 	CHECKVARY( n1 )
 	CHECKVARY( value )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETNORMAL( n0 );
 	GETNORMAL( n1 );
 	GETFLOAT( value );
 	CqVector3D n( ( 1.0f - FLOAT( value ) ) * NORMAL( n0 ) + FLOAT( value ) * NORMAL( n1 ) );
-	Result.SetValue( i, n );
-	END_FORR
+	SETNORMAL( Result, n );
+	END_VARYING_SECTION
 }
 
 
@@ -1753,38 +1933,39 @@ STD_SOIMPL	CqShaderExecEnv::SO_nmix( NORMALVAL n0, NORMALVAL n1, FLOATVAL value,
 // texture(S)
 STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFPARAMVARIMPL )
 {
+	INIT_SO
+
 	GET_TEXTURE_PARAMS;
 
-	TqInt i = 0;
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
 	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+	END_UNIFORM_SECTION
 
-	INIT_SOR
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		CqVMStackEntry SEdu, SEdv;
-		du()->GetValue( 0, SEdu );
-		dv()->GetValue( 0, SEdv );
 		TqFloat fdu = 0.0f, fdv = 0.0f;
 		if( m_pSurface )	
 		{
-			SEdu.Value( fdu );
-			SEdv.Value( fdv );
+			GET_STDVAR_FLOAT( du );
+			GET_STDVAR_FLOAT( dv );
+			fdu = FLOAT( du );
+			fdv = FLOAT( dv );
 		}
-		FOR_EACHR
+		BEGIN_VARYING_SECTION
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
 		{
-			TqFloat dsdu = SO_DuType<TqFloat>( dsdu, s(), m_GridI, *this );
+			TqFloat dsdu = SO_DuType<TqFloat>( dsdu, s(), __iGrid, *this );
 			swidth = fabs( dsdu * fdu );
-			TqFloat dtdu = SO_DuType<TqFloat>( dsdu, t(), m_GridI, *this );
+			TqFloat dtdu = SO_DuType<TqFloat>( dsdu, t(), __iGrid, *this );
 			twidth = fabs( dtdu * fdu );
 
-			TqFloat dsdv = SO_DvType<TqFloat>( dsdu, s(), m_GridI, *this );
+			TqFloat dsdv = SO_DvType<TqFloat>( dsdu, s(), __iGrid, *this );
 			swidth += fabs( dsdv * fdv );
-			TqFloat dtdv = SO_DvType<TqFloat>( dsdu, t(), m_GridI, *this );
+			TqFloat dtdv = SO_DvType<TqFloat>( dsdu, t(), __iGrid, *this );
 			twidth += fabs( dtdv * fdv );
 		}
 		else
@@ -1799,62 +1980,64 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFP
 		// Sample the texture.
 		std::valarray<TqFloat> val;
 
-		CqVMStackEntry SEs, SEt;
-		s()->GetValue( i, SEs );
-		t()->GetValue( i, SEt );
-		GETFLOAT( SEs );
-		GETFLOAT( SEt );
-		pTMap->SampleMIPMAP( FLOAT( SEs ), FLOAT( SEt ), swidth, twidth, _psblur, _ptblur, val);
+		GET_STDVAR_FLOAT( s );
+		GET_STDVAR_FLOAT( t );
+		pTMap->SampleMIPMAP( FLOAT( s ), FLOAT( t ), swidth, twidth, _psblur, _ptblur, val);
 
 		// Grab the appropriate channel.
 		float fchan = FLOAT( channel );
 		if ( fchan >= val.size() )
-			Result.SetValue( i, _pfill );
+			SETFLOAT( Result, _pfill );
 		else
-			Result.SetValue( i, val[ static_cast<unsigned int>( fchan ) ] );
-		END_FORR
+			SETFLOAT( Result, val[ static_cast<unsigned int>( fchan ) ] );
+		END_VARYING_SECTION
 	}
 	else
-		Result = 0.0f;
+	{
+		BEGIN_VARYING_SECTION
+		SETFLOAT( Result, 0.0f );
+		END_VARYING_SECTION
+	}
 }
 
 //----------------------------------------------------------------------
 // texture(S,F,F)
 STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVARIMPL )
 {
+	INIT_SO
+
 	GET_TEXTURE_PARAMS;
 
-	TqInt i = 0;
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
 	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+	END_UNIFORM_SECTION
 
-	INIT_SOR
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		
-		CqVMStackEntry SEdu, SEdv;
-		du()->GetValue( 0, SEdu );
-		dv()->GetValue( 0, SEdv );
 		TqFloat fdu = 0.0f, fdv = 0.0f;
 		if( m_pSurface )	
 		{
-			SEdu.Value( fdu );
-			SEdv.Value( fdv );
+			GET_STDVAR_FLOAT( du );
+			GET_STDVAR_FLOAT( dv );
+			fdu = FLOAT( du );
+			fdv = FLOAT( dv );
 		}
-		FOR_EACHR
+		BEGIN_VARYING_SECTION
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
 		{
-			TqFloat dsdu = SO_DuType<TqFloat>( s, m_GridI, *this );
+			TqFloat dsdu = SO_DuType<TqFloat>( s, __iGrid, *this );
 			swidth = fabs( dsdu * fdu );
-			TqFloat dtdu = SO_DuType<TqFloat>( t, m_GridI, *this );
+			TqFloat dtdu = SO_DuType<TqFloat>( t, __iGrid, *this );
 			twidth = fabs( dtdu * fdu );
 
-			TqFloat dsdv = SO_DvType<TqFloat>( s, m_GridI, *this );
+			TqFloat dsdv = SO_DvType<TqFloat>( s, __iGrid, *this );
 			swidth += fabs( dsdv * fdv );
-			TqFloat dtdv = SO_DvType<TqFloat>( t, m_GridI, *this );
+			TqFloat dtdv = SO_DvType<TqFloat>( t, __iGrid, *this );
 			twidth += fabs( dtdv * fdv );
 		}
 		else
@@ -1876,30 +2059,37 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOA
 		// Grab the appropriate channel.
 		float fchan = FLOAT( channel );
 		if ( fchan >= val.size() )
-			Result.SetValue( i, _pfill );
+			SETFLOAT( Result, _pfill );
 		else
-			Result.SetValue( i, val[ static_cast<unsigned int>( fchan ) ] );
-		END_FORR
+			SETFLOAT( Result, val[ static_cast<unsigned int>( fchan ) ] );
+		END_VARYING_SECTION
 	}
 	else
-		Result = 0.0f;
+	{
+		BEGIN_VARYING_SECTION
+		SETFLOAT( Result, 0.0f );	// Default, completely lit
+		END_VARYING_SECTION
+	}
 }
 
 //----------------------------------------------------------------------
 // texture(S,F,F,F,F,F,F,F,F)
 STD_SOIMPL CqShaderExecEnv::SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVARIMPL )
 {
+	INIT_SO
+
 	GET_TEXTURE_PARAMS;
 
-	TqInt i = 0;
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
 	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
-	INIT_SOR
+	END_UNIFORM_SECTION
+
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		FOR_EACHR
+		BEGIN_VARYING_SECTION
 		// Sample the texture.
 		std::valarray<float> val;
 		GETFLOAT( s1 );
@@ -1915,51 +2105,56 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOA
 		// Grab the appropriate channel.
 		float fchan = FLOAT( channel );
 		if ( fchan >= val.size() )
-			Result.SetValue( i, _pfill );
+			SETFLOAT( Result, _pfill );
 		else
-			Result.SetValue( i, val[ static_cast<unsigned int>( fchan ) ] );
-		END_FORR
+			SETFLOAT( Result, val[ static_cast<unsigned int>( fchan ) ] );
+		END_VARYING_SECTION
 	}
 	else
-		Result = 0.0f;
+	{
+		BEGIN_VARYING_SECTION
+		SETFLOAT( Result, 0.0f );	// Default, completely lit
+		END_VARYING_SECTION
+	}
 }
 
 //----------------------------------------------------------------------
 // texture(S)
 STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFPARAMVARIMPL )
 {
+	INIT_SO
+
 	GET_TEXTURE_PARAMS;
 
-	TqInt i = 0;
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
 	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+	BEGIN_UNIFORM_SECTION
 
-	INIT_SOR
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		CqVMStackEntry SEdu, SEdv;
-		du()->GetValue( 0, SEdu );
-		dv()->GetValue( 0, SEdv );
 		TqFloat fdu = 0.0f, fdv = 0.0f;
 		if( m_pSurface )	
 		{
-			SEdu.Value( fdu );
-			SEdv.Value( fdv );
+			GET_STDVAR_FLOAT( du );
+			GET_STDVAR_FLOAT( dv );
+			fdu = FLOAT( du );
+			fdv = FLOAT( dv );
 		}
-		FOR_EACHR
+		BEGIN_VARYING_SECTION
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
 		{
-			TqFloat dsdu = SO_DuType<TqFloat>( dsdu, s(), m_GridI, *this );
+			TqFloat dsdu = SO_DuType<TqFloat>( dsdu, s(), __iGrid, *this );
 			swidth = fabs( dsdu * fdu );
-			TqFloat dsdv = SO_DvType<TqFloat>( dsdu, s(), m_GridI, *this );
+			TqFloat dsdv = SO_DvType<TqFloat>( dsdu, s(), __iGrid, *this );
 			swidth += fabs( dsdv * fdv );
 
-			TqFloat dtdu = SO_DuType<TqFloat>( dsdu, t(), m_GridI, *this );
+			TqFloat dtdu = SO_DuType<TqFloat>( dsdu, t(), __iGrid, *this );
 			twidth = fabs( dtdu * fdu );
-			TqFloat dtdv = SO_DvType<TqFloat>( dsdu, t(), m_GridI, *this );
+			TqFloat dtdv = SO_DvType<TqFloat>( dsdu, t(), __iGrid, *this );
 			twidth += fabs( dtdv * fdv );
 		}
 		else
@@ -1975,61 +2170,63 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 		std::valarray<TqFloat> val;
 
 
-		CqVMStackEntry SEs, SEt;
-		s()->GetValue( i, SEs );
-		t()->GetValue( i, SEt );
-		GETFLOAT( SEs );
-		GETFLOAT( SEt );
-		pTMap->SampleMIPMAP( FLOAT( SEs ), FLOAT( SEt ), swidth, twidth, _psblur, _ptblur, val);
+		GET_STDVAR_FLOAT( s );
+		GET_STDVAR_FLOAT( t );
+		pTMap->SampleMIPMAP( FLOAT( s ), FLOAT( t ), swidth, twidth, _psblur, _ptblur, val);
 
 		// Grab the appropriate channel.
 		float fchan = FLOAT( channel );
 		if ( fchan + 2 >= val.size() )
-			Result.SetValue( i, CqColor( _pfill, _pfill, _pfill ) );
+			SETCOLOR( Result, CqColor( _pfill, _pfill, _pfill ) );
 		else
-			Result.SetValue( i, CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ) );
-		END_FORR
+			SETCOLOR( Result, CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ) );
+		END_VARYING_SECTION
 	}
 	else
-		Result = CqColor( 0, 0, 0 );
+	{
+		BEGIN_VARYING_SECTION
+		SETCOLOR( Result, CqColor( 0, 0, 0 ) );	// Default, completely lit
+		END_VARYING_SECTION
+	}
 }
 
 //----------------------------------------------------------------------
 // texture(S,F,F)
 STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVARIMPL )
 {
+	INIT_SO
+
 	GET_TEXTURE_PARAMS;
 
-	TqInt i = 0;
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
 	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+	END_UNIFORM_SECTION
 
-	INIT_SOR
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		CqVMStackEntry SEdu, SEdv;
-		du()->GetValue( 0, SEdu );
-		dv()->GetValue( 0, SEdv );
 		TqFloat fdu = 0.0f, fdv = 0.0f;
 		if( m_pSurface )	
 		{
-			SEdu.Value( fdu );
-			SEdv.Value( fdv );
+			GET_STDVAR_FLOAT( du );
+			GET_STDVAR_FLOAT( dv );
+			fdu = FLOAT( du );
+			fdv = FLOAT( dv );
 		}
-		FOR_EACHR
+		BEGIN_VARYING_SECTION
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
 		{
-			TqFloat dsdu = SO_DuType<TqFloat>( s, m_GridI, *this );
+			TqFloat dsdu = SO_DuType<TqFloat>( s, __iGrid, *this );
 			swidth = fabs( dsdu * fdu );
-			TqFloat dsdv = SO_DvType<TqFloat>( s, m_GridI, *this );
+			TqFloat dsdv = SO_DvType<TqFloat>( s, __iGrid, *this );
 			swidth += fabs( dsdv * fdv );
 
-			TqFloat dtdu = SO_DuType<TqFloat>( t, m_GridI, *this );
+			TqFloat dtdu = SO_DuType<TqFloat>( t, __iGrid, *this );
 			twidth = fabs( dtdu * fdu );
-			TqFloat dtdv = SO_DvType<TqFloat>( t, m_GridI, *this );
+			TqFloat dtdv = SO_DvType<TqFloat>( t, __iGrid, *this );
 			twidth += fabs( dtdv * fdv );
 		}
 		else
@@ -2051,30 +2248,37 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOA
 		// Grab the appropriate channel.
 		float fchan = FLOAT( channel );
 		if ( fchan + 2 >= val.size() )
-			Result.SetValue( i, CqColor( _pfill, _pfill, _pfill ) );
+			SETCOLOR( Result, CqColor( _pfill, _pfill, _pfill ) );
 		else
-			Result.SetValue( i, CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ) );
-		END_FORR
+			SETCOLOR( Result, CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ) );
+		END_VARYING_SECTION
 	}
 	else
-		Result = CqColor( 0, 0, 0 );
+	{
+		BEGIN_VARYING_SECTION
+		SETCOLOR( Result, CqColor( 0, 0, 0 ) );	// Default, completely lit
+		END_VARYING_SECTION
+	}
 }
 
 //----------------------------------------------------------------------
 // texture(S,F,F,F,F,F,F,F,F)
 STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVARIMPL )
 {
+	INIT_SO
+
 	GET_TEXTURE_PARAMS;
 
-	TqInt i = 0;
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
 	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
-	INIT_SOR
+	END_UNIFORM_SECTION
+
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		FOR_EACHR
+		BEGIN_VARYING_SECTION
 		// Sample the texture.
 		std::valarray<float> val;
 		GETFLOAT( s1 );
@@ -2090,13 +2294,17 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOA
 		// Grab the appropriate channel.
 		float fchan = FLOAT( channel );
 		if ( fchan + 2 >= val.size() )
-			Result.SetValue( i, CqColor( _pfill, _pfill, _pfill ) );
+			SETCOLOR( Result, CqColor( _pfill, _pfill, _pfill ) );
 		else
-			Result.SetValue( i, CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ) );
-		END_FORR
+			SETCOLOR( Result, CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ) );
+		END_VARYING_SECTION
 	}
 	else
-		Result = CqColor( 0, 0, 0 );
+	{
+		BEGIN_VARYING_SECTION
+		SETCOLOR( Result, CqColor( 0, 0, 0 ) );	// Default, completely lit
+		END_VARYING_SECTION
+	}
 }
 
 
@@ -2104,43 +2312,43 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOA
 // environment(S,P)
 STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, VECTORVAL R, DEFPARAMVARIMPL )
 {
+	INIT_SO
+
 	GET_TEXTURE_PARAMS;
 
-	TqInt i = 0;
+	BEGIN_UNIFORM_SECTION
 	CqTextureMap* pTMap;
 	GETSTRING( name );
 	GETFLOAT( channel );
 	pTMap = CqTextureMap::GetEnvironmentMap( STRING( name ).c_str() );
-
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
 		pTMap = CqTextureMap::GetLatLongMap( STRING( name ).c_str() );
 	}
+	END_UNIFORM_SECTION
 
-	INIT_SOR
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		CqVMStackEntry SEdu, SEdv;
-		du()->GetValue( 0, SEdu );
-		dv()->GetValue( 0, SEdv );
 		TqFloat fdu = 0.0f, fdv = 0.0f;
 		if( m_pSurface )
 		{
-			SEdu.Value( fdu );
-			SEdv.Value( fdv );
+			GET_STDVAR_FLOAT( du );
+			GET_STDVAR_FLOAT( dv );
+			fdu = FLOAT( du );
+			fdv = FLOAT( dv );
 		}
-		FOR_EACHR
+		BEGIN_VARYING_SECTION
 		CqVector3D swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f )
 		{
-			CqVector3D dRdu = SO_DuType<CqVector3D>( R, m_GridI, *this );
+			CqVector3D dRdu = SO_DuType<CqVector3D>( R, __iGrid, *this );
 			swidth = dRdu * fdu;
 		}
 		if ( fdv != 0.0f )
 		{
-			CqVector3D dRdv = SO_DvType<CqVector3D>( R, m_GridI, *this );
+			CqVector3D dRdv = SO_DvType<CqVector3D>( R, __iGrid, *this );
 			twidth = dRdv * fdv;
 		}
 		else
@@ -2161,38 +2369,43 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, 
 		// Grab the appropriate channel.
 		float fchan = FLOAT( channel );
 		if ( fchan >= val.size() )
-			Result.SetValue( i, _pfill );
+			SETFLOAT( Result, _pfill );
 		else
-			Result.SetValue( i, val[ static_cast<unsigned int>( fchan ) ] );
-		END_FORR
+			SETFLOAT( Result, val[ static_cast<unsigned int>( fchan ) ] );
+		END_VARYING_SECTION
 	}
 	else
-		Result = 0.0f;
+	{
+		BEGIN_VARYING_SECTION
+		SETFLOAT( Result, 0.0f );	// Default, completely lit
+		END_VARYING_SECTION
+	}
 }
 
 //----------------------------------------------------------------------
 // environment(S,P,P,P,P)
 STD_SOIMPL CqShaderExecEnv::SO_fenvironment3( STRINGVAL name, FLOATVAL channel, VECTORVAL R1, VECTORVAL R2, VECTORVAL R3, VECTORVAL R4, DEFPARAMVARIMPL )
 {
+	INIT_SO
+
 	GET_TEXTURE_PARAMS;
 
-	TqInt i = 0;
+	BEGIN_UNIFORM_SECTION
 	CqTextureMap* pTMap;
 	GETSTRING( name );
 	GETFLOAT( channel );
 	pTMap = CqTextureMap::GetEnvironmentMap( STRING( name ).c_str() );
-
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
 		pTMap = CqTextureMap::GetLatLongMap( STRING( name ).c_str() );
 	}
+	END_UNIFORM_SECTION
 
-	INIT_SOR
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		FOR_EACHR
+		BEGIN_VARYING_SECTION
 		// Sample the texture.
 		std::valarray<float> val;
 		GETVECTOR( R1 );
@@ -2204,13 +2417,17 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment3( STRINGVAL name, FLOATVAL channel, 
 		// Grab the appropriate channel.
 		float fchan = FLOAT( channel );
 		if ( fchan >= val.size() )
-			Result.SetValue( i, _pfill );
+			SETFLOAT( Result, _pfill );
 		else
-			Result.SetValue( i, val[ static_cast<unsigned int>( fchan ) ] );
-		END_FORR
+			SETFLOAT( Result, val[ static_cast<unsigned int>( fchan ) ] );
+		END_VARYING_SECTION
 	}
 	else
-		Result = 0.0f;
+	{
+		BEGIN_VARYING_SECTION
+		SETFLOAT( Result, 0.0f );	// Default, completely lit
+		END_VARYING_SECTION
+	}
 }
 
 
@@ -2218,43 +2435,43 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment3( STRINGVAL name, FLOATVAL channel, 
 // environment(S,P)
 STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, VECTORVAL R, DEFPARAMVARIMPL )
 {
+	INIT_SO
+
 	GET_TEXTURE_PARAMS;
 
-	TqInt i = 0;
+	BEGIN_UNIFORM_SECTION
 	CqTextureMap* pTMap = NULL;
 	GETSTRING( name );
 	GETFLOAT( channel );
 	pTMap = CqTextureMap::GetEnvironmentMap( STRING( name ).c_str() );
-
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
 		pTMap = CqTextureMap::GetLatLongMap( STRING( name ).c_str() );
 	}
+	END_UNIFORM_SECTION
 
-	INIT_SOR
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		CqVMStackEntry SEdu, SEdv;
-		du()->GetValue( 0, SEdu );
-		dv()->GetValue( 0, SEdv );
 		TqFloat fdu = 0.0f, fdv = 0.0f;
 		if( m_pSurface )
 		{
-			SEdu.Value( fdu );
-			SEdv.Value( fdv );
+			GET_STDVAR_FLOAT( du );
+			GET_STDVAR_FLOAT( dv );
+			fdu = FLOAT( du );
+			fdv = FLOAT( dv );
 		}
-		FOR_EACHR
+		BEGIN_VARYING_SECTION
 		CqVector3D swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f )
 		{
-			CqVector3D dRdu = SO_DuType<CqVector3D>( R, m_GridI, *this );
+			CqVector3D dRdu = SO_DuType<CqVector3D>( R, __iGrid, *this );
 			swidth = dRdu * fdu;
 		}
 		if ( fdv != 0.0f )
 		{
-			CqVector3D dRdv = SO_DvType<CqVector3D>( R, m_GridI, *this );
+			CqVector3D dRdv = SO_DvType<CqVector3D>( R, __iGrid, *this );
 			twidth = dRdv * fdv;
 		}
 		else
@@ -2276,38 +2493,43 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, 
 		// Grab the appropriate channel.
 		float fchan = FLOAT( channel );
 		if ( fchan + 2 >= val.size() )
-			Result.SetValue( i, CqColor( _pfill, _pfill, _pfill ) );
+			SETCOLOR( Result, CqColor( _pfill, _pfill, _pfill ) );
 		else
-			Result.SetValue( i, CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ) );
-		END_FORR
+			SETCOLOR( Result, CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ) );
+		END_VARYING_SECTION
 	}
 	else
-		Result = CqColor( 1, 1, 0 );
+	{
+		BEGIN_VARYING_SECTION
+		SETCOLOR( Result, CqColor( 0.0f, 0.0f, 0.0f ) );	// Default, completely lit
+		END_VARYING_SECTION
+	}
 }
 
 //----------------------------------------------------------------------
 // environment(S,P,P,P,P)
 STD_SOIMPL CqShaderExecEnv::SO_cenvironment3( STRINGVAL name, FLOATVAL channel, VECTORVAL R1, VECTORVAL R2, VECTORVAL R3, VECTORVAL R4, DEFPARAMVARIMPL )
 {
+	INIT_SO
+
 	GET_TEXTURE_PARAMS;
 
-	TqInt i = 0;
+	BEGIN_UNIFORM_SECTION
 	CqTextureMap* pTMap;
 	GETSTRING( name );
 	GETFLOAT( channel );
 	pTMap = CqTextureMap::GetEnvironmentMap( STRING( name ).c_str() );
-
 	// Try with LatLong map file
 	if ( pTMap == 0 )
 	{
 		pTMap = CqTextureMap::GetLatLongMap( STRING( name ).c_str() );
 	}
+	BEGIN_UNIFORM_SECTION
 
-	INIT_SOR
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		FOR_EACHR
+		BEGIN_VARYING_SECTION
 		// Sample the texture.
 		// TODO: need to get and pass width,blur etc. values.
 		std::valarray<float> val;
@@ -2320,82 +2542,97 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment3( STRINGVAL name, FLOATVAL channel, 
 		// Grab the appropriate channel.
 		float fchan = FLOAT( channel );
 		if ( fchan + 2 >= val.size() )
-			Result.SetValue( i, CqColor( _pfill, _pfill, _pfill ) );
+			SETCOLOR( Result, CqColor( _pfill, _pfill, _pfill ) );
 		else
-			Result.SetValue( i, CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ) );
-		END_FORR
+			SETCOLOR( Result, CqColor( val[ static_cast<unsigned int>( fchan ) ], val[ static_cast<unsigned int>( fchan ) + 1 ], val[ static_cast<unsigned int>( fchan ) + 2 ] ) );
+		END_VARYING_SECTION
 	}
 	else
-		Result = CqColor( 0, 0, 0 );
+	{
+		BEGIN_VARYING_SECTION
+		SETCOLOR( Result, CqColor( 0.0f, 0.0f, 0.0f ) );	// Default, completely lit
+		END_VARYING_SECTION
+	}
 }
 
 //----------------------------------------------------------------------
 // bump(S)
 STD_SOIMPL CqShaderExecEnv::SO_bump1( STRINGVAL name, FLOATVAL channel, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	__fVarying = TqTrue;
-	FOR_EACHR
-	Result.SetValue( i, CqVector3D( 0, 0, 0 ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETPOINT( Result, CqVector3D( 0, 0, 0 ) );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // bump(S,F,F)
 STD_SOIMPL CqShaderExecEnv::SO_bump2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	__fVarying = TqTrue;
-	FOR_EACHR
-	Result.SetValue( i, CqVector3D( 0, 0, 0 ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETPOINT( Result, CqVector3D( 0, 0, 0 ) );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // bump(S,F,F,F,F,F,F,F,F)
 STD_SOIMPL CqShaderExecEnv::SO_bump3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	__fVarying = TqTrue;
-	FOR_EACHR
-	Result.SetValue( i, CqVector3D( 0, 0, 0 ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETPOINT( Result, CqVector3D( 0, 0, 0 ) );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // shadow(S,P)
 STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVAL P, DEFPARAMVARIMPL )
 {
-	static CqVMStackEntry den( 1.0f );
+	INIT_SO
 
+	static CqVMStackEntry den( 1.0f );
 	GET_TEXTURE_PARAMS;
 
-	TqInt i = 0;
-
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
 	CqShadowMap* pMap = static_cast<CqShadowMap*>( CqShadowMap::GetShadowMap( STRING( name ).c_str() ) );
-	INIT_SOR
+	END_UNIFORM_SECTION
+
 	__fVarying = TqTrue;
 	if ( pMap != 0 && pMap->IsValid() )
 	{
-		FOR_EACHR
+		BEGIN_VARYING_SECTION
 		CqVector3D swidth = 0.0f, twidth = 0.0f;
 
-		swidth = SO_DerivType<CqVector3D>( P, den, m_GridI, *this );
-		twidth = SO_DerivType<CqVector3D>( P, den, m_GridI, *this );
+		swidth = SO_DerivType<CqVector3D>( P, den, __iGrid, *this );
+		twidth = SO_DerivType<CqVector3D>( P, den, __iGrid, *this );
 
 		swidth *= _pswidth;
 		twidth *= _ptwidth;
 
-		float fv;
+		TqFloat fv;
 		GETPOINT( P );
 		pMap->SampleMap( POINT( P ), swidth, twidth, _psblur, _ptblur, fv );
-		Result.SetValue( i, fv );
-		END_FORR
+		SETFLOAT( Result, fv );
+		END_VARYING_SECTION
 	}
 	else
-		Result.SetValue( i, 0.0f );	// Default, completely lit
+	{
+		BEGIN_VARYING_SECTION
+		SETFLOAT( Result, 0.0f );	// Default, completely lit
+		END_VARYING_SECTION
+	}
 }
 
 //----------------------------------------------------------------------
@@ -2403,28 +2640,35 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 
 STD_SOIMPL CqShaderExecEnv::SO_shadow1( STRINGVAL name, FLOATVAL channel, POINTVAL P1, POINTVAL P2, POINTVAL P3, POINTVAL P4, DEFPARAMVARIMPL )
 {
+	INIT_SO
+
 	GET_TEXTURE_PARAMS;
 
-	TqInt i = 0;
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	GETFLOAT( channel );
 	CqShadowMap* pMap = static_cast<CqShadowMap*>( CqShadowMap::GetShadowMap( STRING( name ).c_str() ) );
-	INIT_SOR
+	END_UNIFORM_SECTION
+
 	__fVarying = TqTrue;
 	if ( pMap != 0 && pMap->IsValid() )
 	{
-		FOR_EACHR
-		float fv;
+		BEGIN_VARYING_SECTION
+		TqFloat fv;
 		GETPOINT( P1 );
 		GETPOINT( P2 );
 		GETPOINT( P3 );
 		GETPOINT( P4 );
 		pMap->SampleMap( POINT( P1 ), POINT( P2 ), POINT( P3 ), POINT( P4 ), _psblur, _ptblur, fv );
-		Result.SetValue( i, fv );
-		END_FORR
+		SETFLOAT( Result, fv );
+		END_VARYING_SECTION
 	}
 	else
-		Result.SetValue( i, 0.0f );	// Default, completely lit
+	{
+		BEGIN_VARYING_SECTION
+		SETFLOAT( Result, 0.0f );	// Default, completely lit
+		END_VARYING_SECTION
+	}
 }
 
 
@@ -2433,11 +2677,12 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow1( STRINGVAL name, FLOATVAL channel, POINTV
 
 STD_SOIMPL CqShaderExecEnv::SO_ambient( DEFPARAMIMPL )
 {
+	INIT_SO
+
 	static CqVMStackEntry Point;
 	static CqColor colTemp;
 
-	TqInt i = 0;
-	Result = CqColor( 0,0,0 );
+	Result = CqColor( 0, 0, 0 );
 
 	// Use the lightsource stack on the current surface
 	if ( m_pSurface != 0 )
@@ -2450,26 +2695,25 @@ STD_SOIMPL CqShaderExecEnv::SO_ambient( DEFPARAMIMPL )
 
 		for ( TqUint light_index = 0; light_index < m_pSurface->pAttributes() ->apLights().size(); light_index++ )
 		{
-			INIT_SOR
 			__fVarying = TqTrue;
 
 			CqLightsource* lp = m_pSurface->pAttributes() ->apLights() [ light_index ];
 			if ( lp->pShader() ->fAmbient() )
 			{
-				FOR_EACHR
+				BEGIN_VARYING_SECTION
 				// Get the color from the lightsource.
 				CqVMStackEntry SECl;
-				lp->Cl()->GetValue( i, SECl );
+				lp->Cl()->GetValue( __iGrid, SECl );
 				GETCOLOR( SECl );
 
 				/// Set the light color in this surface shader /note not sure this is necessary.
-				//Cl().SetValue( i, CqVMStackEntry( COLOR( SECl ) ) );
+				//Cl().SetValue( __iGrid, CqVMStackEntry( COLOR( SECl ) ) );
 
 				// Now Combine the color of all ambient lightsources.
 				GETCOLOR( Result );
-				Result.SetValue( i, COLOR( Result ) + COLOR( SECl ) );
+				SETCOLOR( Result, COLOR( Result ) + COLOR( SECl ) );
 
-				END_FORR
+				END_VARYING_SECTION
 			}
 		}
 	}
@@ -2480,6 +2724,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ambient( DEFPARAMIMPL )
 // diffuse(N)
 STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	static CqVMStackEntry Tempangle;
 	static CqVMStackEntry Tempnsamples;
 	static CqVMStackEntry Point;
@@ -2495,11 +2741,9 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 	Tempangle = RI_PIO2;
 	Tempnsamples = 0.0f;
 
-	// Setup the return value.
-	INIT_SOR
 	Result = CqColor( 0, 0, 0 );
-	__fVarying = TqTrue;
 
+	__fVarying = TqTrue;
 	// SO_init_illuminance returns TRUE if there are any non ambient ligthsources available.
 	if ( SO_init_illuminance() )
 	{
@@ -2511,12 +2755,12 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 			PushState();
 			GetCurrentState();
 			
-			FOR_EACHR
+			BEGIN_VARYING_SECTION
 			
 			// Get the light vector and color from the lightsource.
 			CqVMStackEntry SEL, SECl;
-			L()->GetValue( i, SEL );
-			Cl()->GetValue( i, SECl );
+			L()->GetValue( __iGrid, SEL );
+			Cl()->GetValue( __iGrid, SECl );
 			GETVECTOR( SEL );
 			GETCOLOR( SECl );
 			VECTOR( SEL ).Unit();
@@ -2524,9 +2768,9 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 			// Combine the light color into the result
 			GETCOLOR( Result );
 			GETNORMAL( N );
-			Result.SetValue( i, COLOR( Result ) + COLOR( SECl ) * ( NORMAL ( SEL ) * NORMAL( N ) ) );
+			SETCOLOR( Result, COLOR( Result ) + COLOR( SECl ) * ( NORMAL ( SEL ) * NORMAL( N ) ) );
 			
-			END_FORR
+			END_VARYING_SECTION
 			PopState();
 			// SO_advance_illuminance returns TRUE if there are any more non ambient lightsources.
 		}
@@ -2534,11 +2778,10 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 	}
 	else
 	{
-		INIT_SOR
 		__fVarying = TqTrue;
-		FOR_EACHR
-		Result.SetValue( i, CqColor( 0, 0, 0 ) );
-		END_FORR
+		BEGIN_VARYING_SECTION
+		SETCOLOR( Result, CqColor( 0, 0, 0 ) );
+		END_VARYING_SECTION
 	}
 }
 
@@ -2547,6 +2790,8 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 // specular(N,V,roughness)
 STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roughness, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	static CqVMStackEntry Tempangle;
 	static CqVMStackEntry Tempnsamples;
 	static CqVMStackEntry Point;
@@ -2558,12 +2803,9 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
 	{
 		ValidateIlluminanceCache( Point, pShader );
 	}
-
 	Tempangle = RI_PIO2;
 	Tempnsamples = 0.0f;
 
-	// Setup the return value.
-	INIT_SOR
 	Result = CqColor( 0, 0, 0 );
 	__fVarying = TqTrue;
 
@@ -2577,12 +2819,12 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
 
 			PushState();
 			GetCurrentState();
-			FOR_EACHR
+			BEGIN_VARYING_SECTION
 
 			// Get the ligth vector and color from the lightsource
 			CqVMStackEntry SEL, SECl;
-			L()->GetValue( i, SEL );
-			Cl()->GetValue( i, SECl );
+			L()->GetValue( __iGrid, SEL );
+			Cl()->GetValue( __iGrid, SECl );
 			GETVECTOR( SEL );
 			GETCOLOR( SECl );
 			VECTOR( SEL ).Unit();
@@ -2595,9 +2837,9 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
 			GETCOLOR( Result );
 			GETNORMAL( N );
 			GETFLOAT( roughness );
-			Result.SetValue( i, COLOR( Result ) + COLOR( SECl ) * pow( MAX( 0.0f, NORMAL( N ) * H ), 1.0f / ( FLOAT( roughness ) / 8.0f ) ) );
+			SETCOLOR( Result, COLOR( Result ) + COLOR( SECl ) * pow( MAX( 0.0f, NORMAL( N ) * H ), 1.0f / ( FLOAT( roughness ) / 8.0f ) ) );
 
-			END_FORR
+			END_VARYING_SECTION
 			PopState();
 			// SO_advance_illuminance returns TRUE if there are any more non ambient lightsources.
 		}
@@ -2605,11 +2847,10 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
 	}
 	else
 	{
-		INIT_SOR
 		__fVarying = TqTrue;
-		FOR_EACHR
-		Result.SetValue( i, CqColor( 0, 0, 0 ) );
-		END_FORR
+		BEGIN_VARYING_SECTION
+		SETCOLOR( Result, CqColor( 0, 0, 0 ) );
+		END_VARYING_SECTION
 	}
 }
 
@@ -2618,10 +2859,11 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
 // phong(N,V,size)
 STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	static CqVMStackEntry nV;
 	static CqVMStackEntry nN;
 	static CqVMStackEntry R;
-
 	static CqVMStackEntry Tempangle;
 	static CqVMStackEntry Tempnsamples;
 	static CqVMStackEntry Point;
@@ -2630,14 +2872,12 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 	SO_normalize( V, nV );
 	SO_normalize( N, nN );
 
-	INIT_SOR
 	__fVarying = TqTrue;
-	{
-		FOR_EACHR
-		GETVECTOR( nV );
-		nV.SetValue( i, -VECTOR( nV ) );
-		END_FORR
-	}
+	BEGIN_VARYING_SECTION
+	GETVECTOR( nV );
+	nV.SetValue( __iGrid, -VECTOR( nV ) );
+	END_VARYING_SECTION
+
 	SO_reflect( nV, nN, R );
 
 	Point = P();
@@ -2664,12 +2904,12 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 			PushState();
 			GetCurrentState();
 			
-			FOR_EACHR
+			BEGIN_VARYING_SECTION
 			
 			// Get the light vector and color from the loght source.
 			CqVMStackEntry SEL, SECl;
-			L()->GetValue( i, SEL );
-			Cl()->GetValue( i, SECl );
+			L()->GetValue( __iGrid, SEL );
+			Cl()->GetValue( __iGrid, SECl );
 			GETVECTOR( SEL );
 			GETCOLOR( SECl );
 			VECTOR( SEL ).Unit();	
@@ -2678,9 +2918,9 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 			GETCOLOR( Result );
 			GETVECTOR( R );
 			GETFLOAT( size );
-			Result.SetValue( i, COLOR( Result ) + COLOR( SECl ) * pow( MAX( 0.0f, VECTOR( R ) * VECTOR( SEL ) ), FLOAT( size ) ) );
+			SETCOLOR( Result, COLOR( Result ) + COLOR( SECl ) * pow( MAX( 0.0f, VECTOR( R ) * VECTOR( SEL ) ), FLOAT( size ) ) );
 
-			END_FORR
+			END_VARYING_SECTION
 
 			PopState();
 			// SO_advance_illuminance returns TRUE if there are any more non ambient lightsources.
@@ -2689,11 +2929,10 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 	}
 	else
 	{
-		INIT_SOR
 		__fVarying = TqTrue;
-		FOR_EACHR
-		Result.SetValue( i, CqColor( 0, 0, 0 ) );
-		END_FORR
+		BEGIN_VARYING_SECTION
+		SETCOLOR( Result, CqColor( 0, 0, 0 ) );
+		END_VARYING_SECTION
 	}
 }
 
@@ -2702,13 +2941,15 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 // trace(P,R)
 STD_SOIMPL CqShaderExecEnv::SO_trace( POINTVAL P, VECTORVAL R, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( P )
 	CHECKVARY( R )
 	CHECKVARY( Result )
-	FOR_EACHR
-	Result.SetValue( i, CqColor( 0, 0, 0 ) );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETCOLOR( Result, CqColor( 0, 0, 0 ) );
+	END_VARYING_SECTION
 }
 
 
@@ -2716,12 +2957,13 @@ STD_SOIMPL CqShaderExecEnv::SO_trace( POINTVAL P, VECTORVAL R, DEFPARAMIMPL )
 // illuminance(P,nsamples)
 STD_SOIMPL CqShaderExecEnv::SO_illuminance( POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, FLOATVAL nsamples, DEFVOIDPARAMIMPL )
 {
+	INIT_SO
+
 	// Fill in the lightsource information, and transfer the results to the shader variables,
 	if ( m_pSurface != 0 )
 	{
 		CqLightsource * lp = m_pSurface->pAttributes() ->apLights() [ m_li ];
 
-		INIT_SOR
 		CHECKVARY( P )
 		CHECKVARY( Axis )
 		CHECKVARY( Angle )
@@ -2730,18 +2972,18 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminance( POINTVAL P, VECTORVAL Axis, FLOATVAL
 		CqVector3D vecTemp;
 		CqColor colTemp;
 
-		FOR_EACHR
+		BEGIN_VARYING_SECTION
 		
 		// Get the light vector and color from the loghtsource.
 		CqVMStackEntry SEL, SECl;
-		lp->L()->GetValue( i, SEL );
-		lp->Cl()->GetValue( i, SECl );
+		lp->L()->GetValue( __iGrid, SEL );
+		lp->Cl()->GetValue( __iGrid, SECl );
 		GETVECTOR( SEL );
 		GETCOLOR( SECl );
 		
 		// Store them locally on the surface.
-		L()->SetValue( i, CqVMStackEntry( -( VECTOR( SEL ) ) ) );
-		Cl()->SetValue( i, CqVMStackEntry( COLOR( SECl ) ) );
+		L()->SetValue( __iGrid, CqVMStackEntry( -( VECTOR( SEL ) ) ) );
+		Cl()->SetValue( __iGrid, CqVMStackEntry( COLOR( SECl ) ) );
 		
 		// Check if its within the cone.
 		CqVector3D nL = -( VECTOR( SEL ) );	
@@ -2750,11 +2992,11 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminance( POINTVAL P, VECTORVAL Axis, FLOATVAL
 		GETFLOAT( Angle );
 		TqFloat cosangle = nL * VECTOR( Axis );
 		if ( acos( cosangle ) > FLOAT( Angle ) )
-			m_CurrentState.SetValue( i, TqFalse );
+			m_CurrentState.SetValue( __iGrid, TqFalse );
 		else
-			m_CurrentState.SetValue( i, TqTrue );
+			m_CurrentState.SetValue( __iGrid, TqTrue );
 		
-		END_FORR
+		END_VARYING_SECTION
 	}
 }
 
@@ -2775,23 +3017,25 @@ STD_SOIMPL	CqShaderExecEnv::SO_illuminance( POINTVAL P, FLOATVAL nsamples, DEFVO
 // illuminate(P)
 STD_SOIMPL CqShaderExecEnv::SO_illuminate( POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAMIMPL )
 {
+	INIT_SO
+
 	TqBool res = TqTrue;
 	if ( m_Illuminate > 0 ) res = TqFalse;
-	INIT_SOR
+
 	__fVarying = TqTrue;
-	FOR_EACHR
+	BEGIN_VARYING_SECTION
 	if ( res )
 	{
 		// Get the point being lit and set the ligth vector.
 		CqVMStackEntry SEPs;
-		Ps()->GetValue( i, SEPs );
+		Ps()->GetValue( __iGrid, SEPs );
 		GETPOINT( SEPs );
 		GETPOINT( P );
-		L()->SetValue( i, CqVMStackEntry( POINT( SEPs ) - POINT( P ) ) );
+		L()->SetValue( __iGrid, CqVMStackEntry( POINT( SEPs ) - POINT( P ) ) );
 		
 		// Check if its within the cone.
 		CqVMStackEntry SEL;
-		L()->GetValue( i, SEL );
+		L()->GetValue( __iGrid, SEL );
 		GETVECTOR( SEL );
 		
 		VECTOR( SEL ).Unit();
@@ -2802,13 +3046,14 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminate( POINTVAL P, VECTORVAL Axis, FLOATVAL 
 		if ( acos( cosangle ) > FLOAT( Angle ) )
 		{
 			// Make sure we set the light color to zero in the areas that won't be lit.
-			Cl()->SetValue( i, CqVMStackEntry( CqColor( 0, 0, 0 ) ) );
-			m_CurrentState.SetValue( i, TqFalse );
+			Cl()->SetValue( __iGrid, CqVMStackEntry( CqColor( 0, 0, 0 ) ) );
+			m_CurrentState.SetValue( __iGrid, TqFalse );
 		}
 		else
-			m_CurrentState.SetValue( i, TqTrue );
+			m_CurrentState.SetValue( __iGrid, TqTrue );
 	}
-	END_FORR
+	END_VARYING_SECTION
+
 	m_Illuminate++;
 }
 
@@ -2829,19 +3074,22 @@ STD_SOIMPL	CqShaderExecEnv::SO_illuminate( POINTVAL P, DEFVOIDPARAMIMPL )
 // solar()
 STD_SOIMPL CqShaderExecEnv::SO_solar( VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAMIMPL )
 {
+	// TODO: Check light cone, and exclude points outside.
+	INIT_SO
+
 	TqBool res = TqTrue;
 	if ( m_Illuminate > 0 ) res = TqFalse;
-	// TODO: Check light cone, and exclude points outside.
-	INIT_SOR
+
 	__fVarying = TqTrue;
-	FOR_EACHR
+	BEGIN_VARYING_SECTION
 	if ( res )
 	{
 		GETVECTOR( Axis );
-		L()->SetValue( i, CqVMStackEntry( VECTOR( Axis ) ) );
-		m_CurrentState.SetValue( i, TqTrue );
+		L()->SetValue( __iGrid, CqVMStackEntry( VECTOR( Axis ) ) );
+		m_CurrentState.SetValue( __iGrid, TqTrue );
 	}
-	END_FORR
+	END_VARYING_SECTION
+
 	m_Illuminate++;
 }
 
@@ -2863,15 +3111,20 @@ STD_SOIMPL	CqShaderExecEnv::SO_solar( DEFVOIDPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_printf( STRINGVAL str, DEFVOIDPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( str )
-	int ii;
-	for ( ii = 0; ii < cParams; ii++ ) CHECKVARY( *apParams[ ii ] );
-	FOR_EACHR
+	TqInt ii;
+	for ( ii = 0; ii < cParams; ii++ )
+	{
+		CHECKVARY( *apParams[ ii ] );
+	}
+
+	BEGIN_VARYING_SECTION
 	GETSTRING( str );
-	CqString strA = SO_sprintf( STRING( str ).c_str(), cParams, apParams, i );
+	CqString strA = SO_sprintf( STRING( str ).c_str(), cParams, apParams, __iGrid );
 	QGetRenderContext() ->PrintMessage( SqMessage( 0, 0, strA.c_str() ) );
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
@@ -2880,16 +3133,21 @@ STD_SOIMPL	CqShaderExecEnv::SO_printf( STRINGVAL str, DEFVOIDPARAMVARIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_format( STRINGVAL str, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( str )
 	int ii;
-	for ( ii = 0; ii < cParams; ii++ ) CHECKVARY( *apParams[ ii ] );
+	for ( ii = 0; ii < cParams; ii++ )
+	{
+		CHECKVARY( *apParams[ ii ] );
+	}
 	CHECKVARY( Result );
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETSTRING( str );
-	CqString strA = SO_sprintf( STRING( str ).c_str(), cParams, apParams, i );
-	Result.SetValue( i, strA );
-	END_FORR
+	CqString strA = SO_sprintf( STRING( str ).c_str(), cParams, apParams, __iGrid );
+	SETSTRING( Result, strA );
+	END_VARYING_SECTION
 }
 
 
@@ -2898,13 +3156,18 @@ STD_SOIMPL	CqShaderExecEnv::SO_format( STRINGVAL str, DEFPARAMVARIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_concat( STRINGVAL stra, STRINGVAL strb, DEFPARAMVARIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( stra )
 	CHECKVARY( strb )
 	int ii;
-	for ( ii = 0; ii < cParams; ii++ ) CHECKVARY( *apParams[ ii ] );
+	for ( ii = 0; ii < cParams; ii++ )
+	{
+		CHECKVARY( *apParams[ ii ] );
+	}
 	CHECKVARY( Result );
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETSTRING( stra );
 	CqString strRes = STRING( stra );
 	GETSTRING( strb );
@@ -2915,8 +3178,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_concat( STRINGVAL stra, STRINGVAL strb, DEFPARAMV
 		GETSTRING( next );
 		strRes += STRING( next );
 	}
-	Result.SetValue( i, strRes );
-	END_FORR
+	SETSTRING( Result, strRes );
+	END_VARYING_SECTION
 }
 
 
@@ -2924,144 +3187,170 @@ STD_SOIMPL	CqShaderExecEnv::SO_concat( STRINGVAL stra, STRINGVAL strb, DEFPARAMV
 // noise(v)
 STD_SOIMPL CqShaderExecEnv::SO_fcellnoise1( FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( v );
-	Result.SetValue( i, m_cellnoise.FCellNoise1( FLOAT( v ) ) );
-	END_FORR
+	SETFLOAT( Result, m_cellnoise.FCellNoise1( FLOAT( v ) ) );
+	END_VARYING_SECTION
 }
+
 STD_SOIMPL CqShaderExecEnv::SO_ccellnoise1( FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( v );
-	Result.SetValue( i, CqColor( m_cellnoise.PCellNoise1( FLOAT( v ) ) ) );
-	END_FORR
+	SETCOLOR( Result, CqColor( m_cellnoise.PCellNoise1( FLOAT( v ) ) ) );
+	END_VARYING_SECTION
 }
+
 STD_SOIMPL CqShaderExecEnv::SO_pcellnoise1( FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( v );
-	Result.SetValue( i, m_cellnoise.PCellNoise1( FLOAT( v ) ) );
-	END_FORR
+	SETPOINT( Result, m_cellnoise.PCellNoise1( FLOAT( v ) ) );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // noise(u,v)
 STD_SOIMPL CqShaderExecEnv::SO_fcellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( u )
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( u );
 	GETFLOAT( v );
-	Result.SetValue( i, m_cellnoise.FCellNoise2( FLOAT( u ), FLOAT( v ) ) );
-	END_FORR
+	SETFLOAT( Result, m_cellnoise.FCellNoise2( FLOAT( u ), FLOAT( v ) ) );
+	END_VARYING_SECTION
 }
 STD_SOIMPL CqShaderExecEnv::SO_ccellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( u )
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( u );
 	GETFLOAT( v );
-	Result.SetValue( i, CqColor( m_cellnoise.PCellNoise2( FLOAT( u ), FLOAT( v ) ) ) );
-	END_FORR
+	SETCOLOR( Result, CqColor( m_cellnoise.PCellNoise2( FLOAT( u ), FLOAT( v ) ) ) );
+	END_VARYING_SECTION
 }
 STD_SOIMPL CqShaderExecEnv::SO_pcellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( u )
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( u );
 	GETFLOAT( v );
-	Result.SetValue( i, m_cellnoise.PCellNoise2( FLOAT( u ), FLOAT( v ) ) );
-	END_FORR
+	SETPOINT( Result, m_cellnoise.PCellNoise2( FLOAT( u ), FLOAT( v ) ) );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // noise(p)
 STD_SOIMPL CqShaderExecEnv::SO_fcellnoise3( POINTVAL p, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
-	Result.SetValue( i, m_cellnoise.FCellNoise3( POINT( p ) ) );
-	END_FORR
+	SETFLOAT( Result, m_cellnoise.FCellNoise3( POINT( p ) ) );
+	END_VARYING_SECTION
 }
 STD_SOIMPL CqShaderExecEnv::SO_ccellnoise3( POINTVAL p, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
-	Result.SetValue( i, CqColor( m_cellnoise.PCellNoise3( POINT( p ) ) ) );
-	END_FORR
+	SETCOLOR( Result, CqColor( m_cellnoise.PCellNoise3( POINT( p ) ) ) );
+	END_VARYING_SECTION
 }
 STD_SOIMPL CqShaderExecEnv::SO_pcellnoise3( POINTVAL p, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
-	Result.SetValue( i, m_cellnoise.PCellNoise3( POINT( p ) ) );
-	END_FORR
+	SETPOINT( Result, m_cellnoise.PCellNoise3( POINT( p ) ) );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // noise(p,f)
 STD_SOIMPL CqShaderExecEnv::SO_fcellnoise4( POINTVAL p, FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETFLOAT( v );
-	Result.SetValue( i, m_cellnoise.FCellNoise4( POINT( p ), FLOAT( v ) ) );
-	END_FORR
+	SETFLOAT( Result, m_cellnoise.FCellNoise4( POINT( p ), FLOAT( v ) ) );
+	END_VARYING_SECTION
 }
 STD_SOIMPL CqShaderExecEnv::SO_ccellnoise4( POINTVAL p, FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETFLOAT( v );
-	Result.SetValue( i, CqColor( m_cellnoise.PCellNoise4( POINT( p ), FLOAT( v ) ) ) );
-	END_FORR
+	SETCOLOR( Result, CqColor( m_cellnoise.PCellNoise4( POINT( p ), FLOAT( v ) ) ) );
+	END_VARYING_SECTION
 }
 STD_SOIMPL CqShaderExecEnv::SO_pcellnoise4( POINTVAL p, FLOATVAL v, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( v )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETFLOAT( v );
-	Result.SetValue( i, m_cellnoise.PCellNoise4( POINT( p ), FLOAT( v ) ) );
-	END_FORR
+	SETPOINT( Result, m_cellnoise.PCellNoise4( POINT( p ), FLOAT( v ) ) );
+	END_VARYING_SECTION
 }
 
 
@@ -3072,11 +3361,17 @@ STD_SOIMPL CqShaderExecEnv::SO_pcellnoise4( POINTVAL p, FLOATVAL v, DEFPARAMIMPL
 
 STD_SOIMPL CqShaderExecEnv::SO_atmosphere( STRINGVAL name, IqShaderVariable* pV, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	CqShader * pAtmosphere = m_pSurface->pAttributes() ->pshadAtmosphere();
-	TqInt i = 0;
+
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
-	if ( pAtmosphere ) Result.SetValue( 0, pAtmosphere->GetValue( STRING( name ).c_str(), pV ) ? 1.0f : 0.0f );
-	else	Result.SetValue( 0, 0.0f );
+	if ( pAtmosphere ) 
+		Result.SetValue( 0, pAtmosphere->GetValue( STRING( name ).c_str(), pV ) ? 1.0f : 0.0f );
+	else
+		Result.SetValue( 0, 0.0f );
+	END_UNIFORM_SECTION
 }
 
 
@@ -3086,11 +3381,17 @@ STD_SOIMPL CqShaderExecEnv::SO_atmosphere( STRINGVAL name, IqShaderVariable* pV,
 
 STD_SOIMPL CqShaderExecEnv::SO_displacement( STRINGVAL name, IqShaderVariable* pV, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	CqShader * pDisplacement = m_pSurface->pAttributes() ->pshadDisplacement();
-	TqInt i = 0;
+
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
-	if ( pDisplacement ) Result.SetValue( 0, pDisplacement->GetValue( STRING( name ).c_str(), pV ) ? 1.0f : 0.0f );
-	else	Result.SetValue( 0, 0.0f );
+	if ( pDisplacement ) 
+		Result.SetValue( 0, pDisplacement->GetValue( STRING( name ).c_str(), pV ) ? 1.0f : 0.0f );
+	else
+		Result.SetValue( 0, 0.0f );
+	END_UNIFORM_SECTION
 }
 
 
@@ -3100,14 +3401,20 @@ STD_SOIMPL CqShaderExecEnv::SO_displacement( STRINGVAL name, IqShaderVariable* p
 
 STD_SOIMPL CqShaderExecEnv::SO_lightsource( STRINGVAL name, IqShaderVariable* pV, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	// This should only be called within an Illuminance construct, so m_li should be valid.
-	TqInt i = 0;
 	CqShader* pLightsource = 0;
+	
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	if ( m_li < static_cast<TqInt>( m_pSurface->pAttributes() ->apLights().size() ) )
 		pLightsource = m_pSurface->pAttributes() ->apLights() [ m_li ] ->pShader();
-	if ( pLightsource ) Result.SetValue( 0, pLightsource->GetValue( STRING( name ).c_str(), pV ) ? 1.0f : 0.0f );
-	else	Result.SetValue( 0, 0.0f );
+	if ( pLightsource )
+		Result.SetValue( 0, pLightsource->GetValue( STRING( name ).c_str(), pV ) ? 1.0f : 0.0f );
+	else
+		Result.SetValue( 0, 0.0f );
+	END_UNIFORM_SECTION
 }
 
 
@@ -3117,11 +3424,17 @@ STD_SOIMPL CqShaderExecEnv::SO_lightsource( STRINGVAL name, IqShaderVariable* pV
 
 STD_SOIMPL CqShaderExecEnv::SO_surface( STRINGVAL name, IqShaderVariable* pV, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	CqShader * pSurface = m_pSurface->pAttributes() ->pshadSurface();
-	TqInt i = 0;
+
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
-	if ( pSurface ) Result.SetValue( 0, pSurface->GetValue( STRING( name ).c_str(), pV ) ? 1.0f : 0.0f );
-	else	Result.SetValue( 0, 0.0f );
+	if ( pSurface )
+		Result.SetValue( 0, pSurface->GetValue( STRING( name ).c_str(), pV ) ? 1.0f : 0.0f );
+	else
+		Result.SetValue( 0, 0.0f );
+	END_UNIFORM_SECTION
 }
 
 
@@ -3131,8 +3444,10 @@ STD_SOIMPL CqShaderExecEnv::SO_surface( STRINGVAL name, IqShaderVariable* pV, DE
 
 STD_SOIMPL CqShaderExecEnv::SO_attribute( STRINGVAL name, IqShaderVariable* pV, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	//Find out if it is a specific attribute request
-	TqInt i = 0;
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	TqFloat Ret = 0.0f;
 
@@ -3226,8 +3541,8 @@ STD_SOIMPL CqShaderExecEnv::SO_attribute( STRINGVAL name, IqShaderVariable* pV, 
 			}
 		}
 	}
-
 	Result.SetValue( 0, Ret );
+	END_UNIFORM_SECTION
 }
 
 
@@ -3237,8 +3552,10 @@ STD_SOIMPL CqShaderExecEnv::SO_attribute( STRINGVAL name, IqShaderVariable* pV, 
 
 STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderVariable* pV, DEFPARAMIMPL )
 {
+	INIT_SO
+
+	BEGIN_UNIFORM_SECTION
 	//Find out if it is a specific option request
-	TqInt i = 0;
 	GETSTRING( name );
 	TqFloat Ret = 0.0f;
 	CqVMStackEntry se;
@@ -3397,8 +3714,8 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderVariable* pV, DEF
 			}
 		}
 	}
-
 	Result.SetValue( 0, Ret );
+	END_UNIFORM_SECTION
 }
 
 
@@ -3408,7 +3725,9 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderVariable* pV, DEF
 
 STD_SOIMPL CqShaderExecEnv::SO_rendererinfo( STRINGVAL name, IqShaderVariable* pV, DEFPARAMIMPL )
 {
-	TqInt i = 0;
+	INIT_SO
+
+	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
 	TqFloat Ret = 0.0f;
 	CqVMStackEntry se;
@@ -3454,8 +3773,8 @@ STD_SOIMPL CqShaderExecEnv::SO_rendererinfo( STRINGVAL name, IqShaderVariable* p
 			Ret = 1.0f;
 		}
 	}
-
 	Result.SetValue( 0, Ret );
+	END_UNIFORM_SECTION
 }
 
 
@@ -3464,8 +3783,11 @@ STD_SOIMPL CqShaderExecEnv::SO_rendererinfo( STRINGVAL name, IqShaderVariable* p
 
 STD_SOIMPL CqShaderExecEnv::SO_incident( STRINGVAL name, IqShaderVariable* pV, DEFPARAMIMPL )
 {
-	TqFloat Ret = 0.0f;
-	Result.SetValue( 0, Ret );
+	INIT_SO
+
+	BEGIN_UNIFORM_SECTION
+	Result.SetValue( 0, 0.0f );
+	END_UNIFORM_SECTION
 }
 
 
@@ -3474,8 +3796,11 @@ STD_SOIMPL CqShaderExecEnv::SO_incident( STRINGVAL name, IqShaderVariable* pV, D
 
 STD_SOIMPL CqShaderExecEnv::SO_opposite( STRINGVAL name, IqShaderVariable* pV, DEFPARAMIMPL )
 {
-	TqFloat Ret = 0.0f;
-	Result.SetValue( 0, Ret );
+	INIT_SO
+
+	BEGIN_UNIFORM_SECTION
+	Result.SetValue( 0, 0.0f );
+	END_UNIFORM_SECTION
 }
 
 
@@ -3483,14 +3808,17 @@ STD_SOIMPL CqShaderExecEnv::SO_opposite( STRINGVAL name, IqShaderVariable* pV, D
 // ctransform(s,s,c)
 STD_SOIMPL CqShaderExecEnv::SO_ctransform( STRINGVAL fromspace, STRINGVAL tospace, COLORVAL c, DEFPARAMIMPL )
 {
-	TqInt i = 0;
-	GETSTRING( fromspace );
-	GETSTRING( tospace );
-	
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( c )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_UNIFORM_SECTION
+	GETSTRING( fromspace );
+	GETSTRING( tospace );
+	END_UNIFORM_SECTION
+	
+	BEGIN_VARYING_SECTION
 	GETCOLOR( c );
 	CqColor res( COLOR( c ) );
 	if ( STRING( fromspace ).compare( "hsv" ) ) res = COLOR( c ).hsvtorgb();
@@ -3505,8 +3833,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ctransform( STRINGVAL fromspace, STRINGVAL tospac
 	else if ( STRING( tospace ).compare( "xyY" ) ) res = COLOR( c ).rgbtoxyY();
 	else if ( STRING( tospace ).compare( "YIQ" ) ) res = COLOR( c ).rgbtoYIQ();
 
-	Result.SetValue( i, res );
-	END_FORR
+	SETCOLOR( Result, res );
+	END_VARYING_SECTION
 }
 
 
@@ -3526,12 +3854,14 @@ STD_SOIMPL CqShaderExecEnv::SO_ctransform( STRINGVAL tospace, COLORVAL c, DEFPAR
 // ctransform(s,c)
 STD_SOIMPL CqShaderExecEnv::SO_ptlined( POINTVAL P0, POINTVAL P1, POINTVAL Q, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( P0 )
 	CHECKVARY( P1 )
 	CHECKVARY( Q )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( P0 );
 	GETPOINT( P1 );
 	GETPOINT( Q );
@@ -3555,29 +3885,32 @@ STD_SOIMPL CqShaderExecEnv::SO_ptlined( POINTVAL P0, POINTVAL P1, POINTVAL Q, DE
 			kDiff -= fT * vecDir;
 		}
 	}
-	Result.SetValue( i, kDiff.Magnitude() );
-	END_FORR
+	SETFLOAT( Result, kDiff.Magnitude() );
+	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_inversesqrt( FLOATVAL x, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( x )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( x );
-	Result.SetValue( i, 1.0f / static_cast<TqFloat>( sqrt( FLOAT( x ) ) ) );
-	END_FORR
+	SETFLOAT( Result, 1.0f / static_cast<TqFloat>( sqrt( FLOAT( x ) ) ) );
+	END_VARYING_SECTION
 }
 
 STD_SOIMPL	CqShaderExecEnv::SO_match( STRINGVAL a, STRINGVAL b, DEFPARAMIMPL )
 {
 	// TODO: Do this properly.
-	INIT_SOR
-	FOR_EACHR
-	Result.SetValue( i, 0.0f );
-	END_FORR
+	INIT_SO
+
+	BEGIN_VARYING_SECTION
+	SETFLOAT( Result, 0.0f );
+	END_VARYING_SECTION
 }
 
 
@@ -3585,219 +3918,243 @@ STD_SOIMPL	CqShaderExecEnv::SO_match( STRINGVAL a, STRINGVAL b, DEFPARAMIMPL )
 // pnoise(u,period)
 STD_SOIMPL CqShaderExecEnv::SO_fpnoise1( FLOATVAL v, FLOATVAL period, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( v )
 	CHECKVARY( period )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( v );
 	GETFLOAT( period );
-	Result.SetValue( i, ( m_noise.FGNoise1( fmod( FLOAT( v ), FLOAT( period ) ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETFLOAT( Result, ( m_noise.FGNoise1( fmod( FLOAT( v ), FLOAT( period ) ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // pnoise(u,v,uperiod,vperiod)
 STD_SOIMPL CqShaderExecEnv::SO_fpnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperiod, FLOATVAL vperiod, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( u )
 	CHECKVARY( uperiod )
 	CHECKVARY( v )
 	CHECKVARY( vperiod )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( u );
 	GETFLOAT( v );
 	GETFLOAT( uperiod );
 	GETFLOAT( vperiod );
-	Result.SetValue( i, ( m_noise.FGNoise2( fmod( FLOAT( u ), FLOAT( uperiod ) ),
+	SETFLOAT( Result, ( m_noise.FGNoise2( fmod( FLOAT( u ), FLOAT( uperiod ) ),
 	                                        fmod( FLOAT( v ), FLOAT( vperiod ) ) ) + 1 ) / 2.0f );
-	END_FORR
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // pnoise(p,pperiod)
 STD_SOIMPL CqShaderExecEnv::SO_fpnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( pperiod )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETPOINT( pperiod );
-	Result.SetValue( i, ( m_noise.FGNoise3( CqVector3D( fmod( POINT( p ).x(), POINT( pperiod ).x() ),
+	SETFLOAT( Result, ( m_noise.FGNoise3( CqVector3D( fmod( POINT( p ).x(), POINT( pperiod ).x() ),
 	                                        fmod( POINT( p ).y(), POINT( pperiod ).y() ),
 	                                        fmod( POINT( p ).z(), POINT( pperiod ).z() ) ) ) + 1 ) / 2.0f );
-	END_FORR
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // pnoise(p,t,pperiod,tperiod)
 STD_SOIMPL CqShaderExecEnv::SO_fpnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperiod, FLOATVAL tperiod, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( pperiod )
 	CHECKVARY( t )
 	CHECKVARY( tperiod )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETFLOAT( t );
 	GETPOINT( pperiod );
 	GETFLOAT( tperiod );
-	Result.SetValue( i, ( m_noise.FGNoise3( CqVector3D( fmod( POINT( p ).x(), POINT( pperiod ).x() ),
+	SETFLOAT( Result, ( m_noise.FGNoise3( CqVector3D( fmod( POINT( p ).x(), POINT( pperiod ).x() ),
 	                                        fmod( POINT( p ).y(), POINT( pperiod ).y() ),
 	                                        fmod( POINT( p ).z(), POINT( pperiod ).z() ) ) ) + 1 ) / 2.0f );
-	END_FORR
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // pnoise(u,period)
 STD_SOIMPL CqShaderExecEnv::SO_cpnoise1( FLOATVAL v, FLOATVAL period, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( v )
 	CHECKVARY( period )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( v );
 	GETFLOAT( period );
-	Result.SetValue( i, ( m_noise.CGNoise1( fmod( FLOAT( v ), FLOAT( period ) ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETCOLOR( Result, ( m_noise.CGNoise1( fmod( FLOAT( v ), FLOAT( period ) ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // pnoise(u,v,uperiod,vperiod)
 STD_SOIMPL CqShaderExecEnv::SO_cpnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperiod, FLOATVAL vperiod, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( u )
 	CHECKVARY( uperiod )
 	CHECKVARY( v )
 	CHECKVARY( vperiod )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( u );
 	GETFLOAT( v );
 	GETFLOAT( uperiod );
 	GETFLOAT( vperiod );
-	Result.SetValue( i, ( m_noise.CGNoise2( fmod( FLOAT( u ), FLOAT( uperiod ) ),
+	SETCOLOR( Result, ( m_noise.CGNoise2( fmod( FLOAT( u ), FLOAT( uperiod ) ),
 	                                        fmod( FLOAT( v ), FLOAT( vperiod ) ) ) + 1 ) / 2.0f );
-	END_FORR
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // pnoise(p,pperiod)
 STD_SOIMPL CqShaderExecEnv::SO_cpnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( pperiod )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETPOINT( pperiod );
-	Result.SetValue( i, ( m_noise.CGNoise3( CqVector3D( fmod( POINT( p ).x(), POINT( pperiod ).x() ),
+	SETCOLOR( Result, ( m_noise.CGNoise3( CqVector3D( fmod( POINT( p ).x(), POINT( pperiod ).x() ),
 	                                        fmod( POINT( p ).y(), POINT( pperiod ).y() ),
 	                                        fmod( POINT( p ).z(), POINT( pperiod ).z() ) ) ) + 1 ) / 2.0f );
-	END_FORR
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // pnoise(p,t,pperiod,tperiod)
 STD_SOIMPL CqShaderExecEnv::SO_cpnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperiod, FLOATVAL tperiod, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( pperiod )
 	CHECKVARY( t )
 	CHECKVARY( tperiod )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETFLOAT( t );
 	GETPOINT( pperiod );
 	GETFLOAT( tperiod );
-	Result.SetValue( i, ( m_noise.CGNoise3( CqVector3D( fmod( POINT( p ).x(), POINT( pperiod ).x() ),
+	SETCOLOR( Result, ( m_noise.CGNoise3( CqVector3D( fmod( POINT( p ).x(), POINT( pperiod ).x() ),
 	                                        fmod( POINT( p ).y(), POINT( pperiod ).y() ),
 	                                        fmod( POINT( p ).z(), POINT( pperiod ).z() ) ) ) + 1 ) / 2.0f );
-	END_FORR
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // pnoise(u,period)
 STD_SOIMPL CqShaderExecEnv::SO_ppnoise1( FLOATVAL v, FLOATVAL period, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( v )
 	CHECKVARY( period )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( v );
 	GETFLOAT( period );
-	Result.SetValue( i, ( m_noise.PGNoise1( fmod( FLOAT( v ), FLOAT( period ) ) ) + 1 ) / 2.0f );
-	END_FORR
+	SETPOINT( Result, ( m_noise.PGNoise1( fmod( FLOAT( v ), FLOAT( period ) ) ) + 1 ) / 2.0f );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // pnoise(u,v,uperiod,vperiod)
 STD_SOIMPL CqShaderExecEnv::SO_ppnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperiod, FLOATVAL vperiod, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( u )
 	CHECKVARY( uperiod )
 	CHECKVARY( v )
 	CHECKVARY( vperiod )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( u );
 	GETFLOAT( v );
 	GETFLOAT( uperiod );
 	GETFLOAT( vperiod );
-	Result.SetValue( i, ( m_noise.PGNoise2( fmod( FLOAT( u ), FLOAT( uperiod ) ),
+	SETPOINT( Result, ( m_noise.PGNoise2( fmod( FLOAT( u ), FLOAT( uperiod ) ),
 	                                        fmod( FLOAT( v ), FLOAT( vperiod ) ) ) + 1 ) / 2.0f );
-	END_FORR
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // pnoise(p,pperiod)
 STD_SOIMPL CqShaderExecEnv::SO_ppnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( pperiod )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETPOINT( pperiod );
-	Result.SetValue( i, ( m_noise.PGNoise3( CqVector3D( fmod( POINT( p ).x(), POINT( pperiod ).x() ),
+	SETPOINT( Result, ( m_noise.PGNoise3( CqVector3D( fmod( POINT( p ).x(), POINT( pperiod ).x() ),
 	                                        fmod( POINT( p ).y(), POINT( pperiod ).y() ),
 	                                        fmod( POINT( p ).z(), POINT( pperiod ).z() ) ) ) + 1 ) / 2.0f );
-	END_FORR
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // pnoise(p,t,pperiod,tperiod)
 STD_SOIMPL CqShaderExecEnv::SO_ppnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperiod, FLOATVAL tperiod, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( p )
 	CHECKVARY( pperiod )
 	CHECKVARY( t )
 	CHECKVARY( tperiod )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	GETFLOAT( t );
 	GETPOINT( pperiod );
 	GETFLOAT( tperiod );
-	Result.SetValue( i, ( m_noise.PGNoise3( CqVector3D( fmod( POINT( p ).x(), POINT( pperiod ).x() ),
+	SETPOINT( Result, ( m_noise.PGNoise3( CqVector3D( fmod( POINT( p ).x(), POINT( pperiod ).x() ),
 	                                        fmod( POINT( p ).y(), POINT( pperiod ).y() ),
 	                                        fmod( POINT( p ).z(), POINT( pperiod ).z() ) ) ) + 1 ) / 2.0f );
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
@@ -3805,13 +4162,15 @@ STD_SOIMPL CqShaderExecEnv::SO_ppnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperio
 // rotate(Q,angle,P0,P1)
 STD_SOIMPL CqShaderExecEnv::SO_rotate( VECTORVAL Q, FLOATVAL angle, POINTVAL P0, POINTVAL P1, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( Q )
 	CHECKVARY( angle )
 	CHECKVARY( P0 )
 	CHECKVARY( P1 )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( angle );
 	GETVECTOR( Q );
 	GETPOINT( P0 );
@@ -3821,39 +4180,41 @@ STD_SOIMPL CqShaderExecEnv::SO_rotate( VECTORVAL Q, FLOATVAL angle, POINTVAL P0,
 	CqVector3D	Res( VECTOR( Q ) );
 	Res = matR * Res;
 
-	Result.SetValue( i, Res );
-	END_FORR
+	SETPOINT( Result, Res );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // filterstep(edge,s1)
 STD_SOIMPL CqShaderExecEnv::SO_filterstep( FLOATVAL edge, FLOATVAL s1, DEFPARAMVARIMPL )
 {
+	INIT_SO
+
 	GET_FILTER_PARAMS;
 
-	INIT_SOR
 	CHECKVARY( edge )
 	CHECKVARY( s1 )
 	CHECKVARY( Result )
 
-	// We can get these here because the are uniform.
+	BEGIN_UNIFORM_SECTION
 	CqVMStackEntry SEdu, SEdv;
 	du()->GetValue( 0, SEdu );
 	dv()->GetValue( 0, SEdv );
+	END_UNIFORM_SECTION
 
-	FOR_EACHR
+	BEGIN_VARYING_SECTION
 	GETFLOAT( s1 );
 	GETFLOAT( edge );
-	TqFloat dsdu = SO_DuType<TqFloat>( s1, m_GridI, *this );
-	TqFloat dsdv = SO_DvType<TqFloat>( s1, m_GridI, *this );
+	TqFloat dsdu = SO_DuType<TqFloat>( s1, __iGrid, *this );
+	TqFloat dsdv = SO_DvType<TqFloat>( s1, __iGrid, *this );
 
 	GETFLOAT( SEdu );
 	GETFLOAT( SEdv );
 	TqFloat w = fabs( dsdu * FLOAT( SEdu ) * dsdv * FLOAT( SEdv ) );
 	w *= _pswidth;
 
-	Result.SetValue( i, CLAMP( ( FLOAT( s1 ) + w / 2.0f - FLOAT( edge ) ) / w, 0, 1 ) );
-	END_FORR
+	SETFLOAT( Result, CLAMP( ( FLOAT( s1 ) + w / 2.0f - FLOAT( edge ) ) / w, 0, 1 ) );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
@@ -3862,33 +4223,38 @@ STD_SOIMPL CqShaderExecEnv::SO_filterstep2( FLOATVAL edge, FLOATVAL s1, FLOATVAL
 {
 	GET_FILTER_PARAMS;
 
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( edge )
 	CHECKVARY( s1 )
 	CHECKVARY( s2 )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( edge );
 	GETFLOAT( s1 );
 	GETFLOAT( s2 );
 	TqFloat w = FLOAT( s2 ) - FLOAT( s1 );
 	w *= _pswidth;
-	Result.SetValue( i, CLAMP( ( FLOAT( s1 ) + w / 2.0f - FLOAT( edge ) ) / w, 0, 1 ) );
-	END_FORR
+	SETFLOAT( Result, CLAMP( ( FLOAT( s1 ) + w / 2.0f - FLOAT( edge ) ) / w, 0, 1 ) );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // specularbrdf(L,N,V,rough)
 STD_SOIMPL CqShaderExecEnv::SO_specularbrdf( VECTORVAL L, NORMALVAL N, VECTORVAL V, FLOATVAL rough, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
+	CqColor colTemp;
+
 	CHECKVARY( L )
 	CHECKVARY( N )
 	CHECKVARY( V )
 	CHECKVARY( rough )
 	CHECKVARY( Result )
-	CqColor colTemp;
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETVECTOR( L );
 	GETVECTOR( V );
 	VECTOR( L ).Unit();
@@ -3897,12 +4263,12 @@ STD_SOIMPL CqShaderExecEnv::SO_specularbrdf( VECTORVAL L, NORMALVAL N, VECTORVAL
 	H.Unit();
 	/// \note The (roughness/8) term emulates the BMRT behaviour for prmanspecular.
 	CqVMStackEntry SECl;
-	Cl()->GetValue( i, SECl );
+	Cl()->GetValue( __iGrid, SECl );
 	GETCOLOR( SECl );
 	GETNORMAL( N );
 	GETFLOAT( rough );
-	Result.SetValue( i, COLOR( SECl ) * pow( MAX( 0.0f, NORMAL( N ) * H ), 1.0f / ( FLOAT( rough ) / 8.0f ) ) );
-	END_FORR
+	SETCOLOR( Result, COLOR( SECl ) * pow( MAX( 0.0f, NORMAL( N ) * H ), 1.0f / ( FLOAT( rough ) / 8.0f ) ) );
+	END_VARYING_SECTION
 }
 
 
@@ -3910,13 +4276,15 @@ STD_SOIMPL CqShaderExecEnv::SO_specularbrdf( VECTORVAL L, NORMALVAL N, VECTORVAL
 // determinant(m)
 STD_SOIMPL CqShaderExecEnv::SO_determinant( MATRIXVAL M, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( M )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETMATRIX( M );
-	Result.SetValue( i, MATRIX( M ).Determinant() );
-	END_FORR
+	SETFLOAT( Result, MATRIX( M ).Determinant() );
+	END_VARYING_SECTION
 }
 
 
@@ -3924,50 +4292,56 @@ STD_SOIMPL CqShaderExecEnv::SO_determinant( MATRIXVAL M, DEFPARAMIMPL )
 // translate(m,v)
 STD_SOIMPL CqShaderExecEnv::SO_mtranslate( MATRIXVAL M, VECTORVAL V, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( M )
 	CHECKVARY( V )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETMATRIX( M );
 	GETVECTOR( V );
 	MATRIX( M ).Translate( VECTOR( V ) );
-	Result.SetValue( i, MATRIX( M ) );
-	END_FORR
+	SETMATRIX( Result, MATRIX( M ) );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // rotate(m,v)
 STD_SOIMPL CqShaderExecEnv::SO_mrotate( MATRIXVAL M, FLOATVAL angle, VECTORVAL axis, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( M )
 	CHECKVARY( angle )
 	CHECKVARY( axis )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETMATRIX( M );
 	GETFLOAT( angle );
 	GETVECTOR( axis );
 	MATRIX( M ).Rotate( FLOAT( angle ), VECTOR( axis ) );
-	Result.SetValue( i, MATRIX( M ) );
-	END_FORR
+	SETMATRIX( Result, MATRIX( M ) );
+	END_VARYING_SECTION
 }
 
 //----------------------------------------------------------------------
 // scale(m,p)
 STD_SOIMPL CqShaderExecEnv::SO_mscale( MATRIXVAL M, POINTVAL S, DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( M )
 	CHECKVARY( S )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETPOINT( S );
 	GETMATRIX( M );
 	MATRIX( M ).Scale( POINT( S ).x(), POINT( S ).y(), POINT( S ).z() );
-	Result.SetValue( i, MATRIX( M ) );
-	END_FORR
+	SETMATRIX( Result, MATRIX( M ) );
+	END_VARYING_SECTION
 }
 
 
@@ -3975,19 +4349,21 @@ STD_SOIMPL CqShaderExecEnv::SO_mscale( MATRIXVAL M, POINTVAL S, DEFPARAMIMPL )
 // setmcomp(p,v)
 STD_SOIMPL	CqShaderExecEnv::SO_setmcomp( MATRIXVAL M, FLOATVAL r, FLOATVAL c, FLOATVAL v, DEFVOIDPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( M )
 	CHECKVARY( r )
 	CHECKVARY( c )
 	CHECKVARY( v )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETMATRIX( M );
 	GETFLOAT( r );
 	GETFLOAT( c );
 	GETFLOAT( v );
 	MATRIX( M )[ static_cast<TqInt>( FLOAT( r ) ) ][ static_cast<TqInt>( FLOAT( c ) ) ] = FLOAT( v );
-	M.SetValue( i, MATRIX( M ) );
-	END_FORR
+	M.SetValue( __iGrid, MATRIX( M ) );
+	END_VARYING_SECTION
 }
 
 
@@ -3995,6 +4371,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_setmcomp( MATRIXVAL M, FLOATVAL r, FLOATVAL c, FL
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_fsplinea( FLOATVAL value, FLOATARRAYVAL a, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( a.fVariable() );
 	assert( a.pVariable() ->ArrayLength() > 0 );
 	assert( a.pVariable() ->Type() == type_float );
@@ -4003,30 +4381,30 @@ STD_SOIMPL	CqShaderExecEnv::SO_fsplinea( FLOATVAL value, FLOATARRAYVAL a, DEFPAR
 	TqInt	cParams = pArray->ArrayLength();
 	CqSplineCubic spline( cParams );
 
-	INIT_SOR
 	CHECKVARY( value )
 	CHECKVARY( a )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( value );
 
-	if ( FLOAT( value ) >= 1.0f ) pArray->ArrayEntry( cParams - 2 ) ->GetValue( i, Result );
-	else if ( FLOAT( value ) <= 0.0f ) pArray->ArrayEntry( 1 ) ->GetValue( i, Result );
+	if ( FLOAT( value ) >= 1.0f ) pArray->ArrayEntry( cParams - 2 ) ->GetValue( __iGrid, Result );
+	else if ( FLOAT( value ) <= 0.0f ) pArray->ArrayEntry( 1 ) ->GetValue( __iGrid, Result );
 	else
 	{
 		TqInt j;
 		for ( j = 0; j < cParams; j++ )
 		{
 			CqVMStackEntry next;
-			pArray->ArrayEntry( j ) ->GetValue( i, next );
+			pArray->ArrayEntry( j ) ->GetValue( __iGrid, next );
 			GETFLOAT( next );
 			spline[ j ] = CqVector4D( FLOAT( next ), 0.0f, 0.0f, 1.0f );
 		}
 
 		CqVector4D	res = spline.Evaluate( FLOAT( value ) );
-		Result.SetValue( i, res.x() );
+		SETFLOAT( Result, res.x() );
 	}
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
@@ -4034,6 +4412,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_fsplinea( FLOATVAL value, FLOATARRAYVAL a, DEFPAR
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_csplinea( FLOATVAL value, COLORARRAYVAL a, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( a.fVariable() );
 	assert( a.pVariable() ->ArrayLength() > 0 );
 	assert( a.pVariable() ->Type() == type_color );
@@ -4041,32 +4421,32 @@ STD_SOIMPL	CqShaderExecEnv::SO_csplinea( FLOATVAL value, COLORARRAYVAL a, DEFPAR
 	IqShaderVariable* pArray = a.pVariable();
 	TqInt	cParams = pArray->ArrayLength();
 	CqSplineCubic spline( cParams );
+	CqColor colTemp;
 
-	INIT_SOR
 	CHECKVARY( value )
 	CHECKVARY( a )
 	CHECKVARY( Result )
-	CqColor colTemp;
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( value );
 
-	if ( FLOAT( value ) >= 1.0f ) pArray->ArrayEntry( cParams - 2 ) ->GetValue( i, Result );
-	else if ( FLOAT( value ) <= 0.0f ) pArray->ArrayEntry( 1 ) ->GetValue( i, Result );
+	if ( FLOAT( value ) >= 1.0f ) pArray->ArrayEntry( cParams - 2 ) ->GetValue( __iGrid, Result );
+	else if ( FLOAT( value ) <= 0.0f ) pArray->ArrayEntry( 1 ) ->GetValue( __iGrid, Result );
 	else
 	{
 		TqInt j;
 		for ( j = 0; j < cParams; j++ )
 		{
 			CqVMStackEntry next;
-			pArray->ArrayEntry( j ) ->GetValue( i, next );
+			pArray->ArrayEntry( j ) ->GetValue( __iGrid, next );
 			GETCOLOR( next );
 			spline[ j ] = CqVector4D( COLOR( next ).fRed(), COLOR( next ).fGreen(), COLOR( next ).fBlue(), 1.0f );
 		}
 
 		CqVector4D	res = spline.Evaluate( FLOAT( value ) );
-		Result.SetValue( i, CqColor( res.x(), res.y(), res.z() ) );
+		SETCOLOR( Result, CqColor( res.x(), res.y(), res.z() ) );
 	}
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
@@ -4074,6 +4454,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_csplinea( FLOATVAL value, COLORARRAYVAL a, DEFPAR
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_psplinea( FLOATVAL value, POINTARRAYVAL a, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( a.fVariable() );
 	assert( a.pVariable() ->ArrayLength() > 0 );
 	assert( a.pVariable() ->Type() == type_point );
@@ -4081,32 +4463,32 @@ STD_SOIMPL	CqShaderExecEnv::SO_psplinea( FLOATVAL value, POINTARRAYVAL a, DEFPAR
 	IqShaderVariable* pArray = a.pVariable();
 	TqInt	cParams = pArray->ArrayLength();
 	CqSplineCubic spline( cParams );
+	CqVector3D vecTemp;
 
-	INIT_SOR
 	CHECKVARY( value )
 	CHECKVARY( a )
 	CHECKVARY( Result )
-	CqVector3D vecTemp;
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( value );
 
-	if ( FLOAT( value ) >= 1.0f ) pArray->ArrayEntry( cParams - 2 ) ->GetValue( i, Result );
-	else if ( FLOAT( value ) <= 0.0f ) pArray->ArrayEntry( 1 ) ->GetValue( i, Result );
+	if ( FLOAT( value ) >= 1.0f ) pArray->ArrayEntry( cParams - 2 ) ->GetValue( __iGrid, Result );
+	else if ( FLOAT( value ) <= 0.0f ) pArray->ArrayEntry( 1 ) ->GetValue( __iGrid, Result );
 	else
 	{
 		TqInt j;
 		for ( j = 0; j < cParams; j++ )
 		{
 			CqVMStackEntry next;
-			pArray->ArrayEntry( j ) ->GetValue( i, next );
+			pArray->ArrayEntry( j ) ->GetValue( __iGrid, next );
 			GETPOINT( next );
 			spline[ j ] = POINT( next );
 		}
 
-		CqVector4D	res = spline.Evaluate( FLOAT( value ) );
-		Result.SetValue( i, res );
+		CqVector3D	res = spline.Evaluate( FLOAT( value ) );
+		SETPOINT( Result, res );
 	}
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
@@ -4114,6 +4496,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_psplinea( FLOATVAL value, POINTARRAYVAL a, DEFPAR
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_sfsplinea( STRINGVAL basis, FLOATVAL value, FLOATARRAYVAL a, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( a.fVariable() );
 	assert( a.pVariable() ->ArrayLength() > 0 );
 	assert( a.pVariable() ->Type() == type_float );
@@ -4121,34 +4505,36 @@ STD_SOIMPL	CqShaderExecEnv::SO_sfsplinea( STRINGVAL basis, FLOATVAL value, FLOAT
 	IqShaderVariable* pArray = a.pVariable();
 	TqInt	cParams = pArray->ArrayLength();
 	CqSplineCubic spline( cParams );
-	TqInt i = 0;
-	GETSTRING( basis );
-	spline.SetmatBasis( STRING( basis ) );
 
-	INIT_SOR
 	CHECKVARY( value )
 	CHECKVARY( a )
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_UNIFORM_SECTION
+	GETSTRING( basis );
+	spline.SetmatBasis( STRING( basis ) );
+	END_UNIFORM_SECTION
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( value );
 	
-	if ( FLOAT( value ) >= 1.0f ) pArray->ArrayEntry( cParams - 2 ) ->GetValue( i, Result );
-	else if ( FLOAT( value ) <= 0.0f ) pArray->ArrayEntry( 1 ) ->GetValue( i, Result );
+	if ( FLOAT( value ) >= 1.0f ) pArray->ArrayEntry( cParams - 2 ) ->GetValue( __iGrid, Result );
+	else if ( FLOAT( value ) <= 0.0f ) pArray->ArrayEntry( 1 ) ->GetValue( __iGrid, Result );
 	else
 	{
 		TqInt j;
 		for ( j = 0; j < cParams; j++ )
 		{
 			CqVMStackEntry next;
-			pArray->ArrayEntry( j ) ->GetValue( i, next );
+			pArray->ArrayEntry( j ) ->GetValue( __iGrid, next );
 			GETFLOAT( next );
 			spline[ j ] = CqVector4D( FLOAT( next ), 0.0f, 0.0f, 1.0f );
 		}
 
 		CqVector4D	res = spline.Evaluate( FLOAT( value ) );
-		Result.SetValue( i, res.x() );
+		SETFLOAT( Result, res.x() );
 	}
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
@@ -4156,6 +4542,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_sfsplinea( STRINGVAL basis, FLOATVAL value, FLOAT
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_scsplinea( STRINGVAL basis, FLOATVAL value, COLORARRAYVAL a, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( a.fVariable() );
 	assert( a.pVariable() ->ArrayLength() > 0 );
 	assert( a.pVariable() ->Type() == type_color );
@@ -4163,35 +4551,37 @@ STD_SOIMPL	CqShaderExecEnv::SO_scsplinea( STRINGVAL basis, FLOATVAL value, COLOR
 	IqShaderVariable* pArray = a.pVariable();
 	TqInt	cParams = pArray->ArrayLength();
 	CqSplineCubic spline( cParams );
-	TqInt i = 0;
-	GETSTRING( basis );
-	spline.SetmatBasis( STRING( basis ) );
+	CqColor colTemp;
 
-	INIT_SOR
 	CHECKVARY( value )
 	CHECKVARY( a )
 	CHECKVARY( Result )
-	CqColor colTemp;
-	FOR_EACHR
+
+	BEGIN_UNIFORM_SECTION
+	GETSTRING( basis );
+	spline.SetmatBasis( STRING( basis ) );
+	END_UNIFORM_SECTION
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( value );
 
-	if ( FLOAT( value ) >= 1.0f ) pArray->ArrayEntry( cParams - 2 ) ->GetValue( i, Result );
-	else if ( FLOAT( value ) <= 0.0f ) pArray->ArrayEntry( 1 ) ->GetValue( i, Result );
+	if ( FLOAT( value ) >= 1.0f ) pArray->ArrayEntry( cParams - 2 ) ->GetValue( __iGrid, Result );
+	else if ( FLOAT( value ) <= 0.0f ) pArray->ArrayEntry( 1 ) ->GetValue( __iGrid, Result );
 	else
 	{
 		TqInt j;
 		for ( j = 0; j < cParams; j++ )
 		{
 			CqVMStackEntry next;
-			pArray->ArrayEntry( j ) ->GetValue( i, next );
+			pArray->ArrayEntry( j ) ->GetValue( __iGrid, next );
 			GETCOLOR( next );
 			spline[ j ] = CqVector4D( COLOR( next ).fRed(), COLOR( next ).fGreen(), COLOR( next ).fBlue(), 1.0f );
 		}
 
 		CqVector4D	res = spline.Evaluate( FLOAT( value ) );
-		Result.SetValue( i, CqColor( res.x(), res.y(), res.z() ) );
+		SETCOLOR( Result, CqColor( res.x(), res.y(), res.z() ) );
 	}
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
@@ -4199,6 +4589,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_scsplinea( STRINGVAL basis, FLOATVAL value, COLOR
 // spline(value, f1,f2,...,fn)
 STD_SOIMPL	CqShaderExecEnv::SO_spsplinea( STRINGVAL basis, FLOATVAL value, POINTARRAYVAL a, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	assert( a.fVariable() );
 	assert( a.pVariable() ->ArrayLength() > 0 );
 	assert( a.pVariable() ->Type() == type_point );
@@ -4206,35 +4598,37 @@ STD_SOIMPL	CqShaderExecEnv::SO_spsplinea( STRINGVAL basis, FLOATVAL value, POINT
 	IqShaderVariable* pArray = a.pVariable();
 	TqInt	cParams = pArray->ArrayLength();
 	CqSplineCubic spline( cParams );
-	TqInt i = 0;
-	GETSTRING( basis );
-	spline.SetmatBasis( STRING( basis ) );
+	CqVector3D vecTemp;
 
-	INIT_SOR
 	CHECKVARY( value )
 	CHECKVARY( a )
 	CHECKVARY( Result )
-	CqVector3D vecTemp;
-	FOR_EACHR
+
+	BEGIN_UNIFORM_SECTION
+	GETSTRING( basis );
+	spline.SetmatBasis( STRING( basis ) );
+	END_UNIFORM_SECTION
+
+	BEGIN_VARYING_SECTION
 	GETFLOAT( value );
 
-	if ( FLOAT( value ) >= 1.0f ) pArray->ArrayEntry( cParams - 2 ) ->GetValue( i, Result );
-	else if ( FLOAT( value ) <= 0.0f ) pArray->ArrayEntry( 1 ) ->GetValue( i, Result );
+	if ( FLOAT( value ) >= 1.0f ) pArray->ArrayEntry( cParams - 2 ) ->GetValue( __iGrid, Result );
+	else if ( FLOAT( value ) <= 0.0f ) pArray->ArrayEntry( 1 ) ->GetValue( __iGrid, Result );
 	else
 	{
 		TqInt j;
 		for ( j = 0; j < cParams; j++ )
 		{
 			CqVMStackEntry next;
-			pArray->ArrayEntry( j )->GetValue( i, next );
+			pArray->ArrayEntry( j )->GetValue( __iGrid, next );
 			GETPOINT( next );
 			spline[ j ] = POINT( next );
 		}
 
-		CqVector4D	res = spline.Evaluate( FLOAT( value ) );
-		Result.SetValue( i, res );
+		CqVector3D	res = spline.Evaluate( FLOAT( value ) );
+		SETPOINT( Result, res );
 	}
-	END_FORR
+	END_VARYING_SECTION
 }
 
 
@@ -4242,11 +4636,13 @@ STD_SOIMPL	CqShaderExecEnv::SO_spsplinea( STRINGVAL basis, FLOATVAL value, POINT
 // shadername()
 STD_SOIMPL	CqShaderExecEnv::SO_shadername( DEFPARAMIMPL )
 {
-	INIT_SOR
+	INIT_SO
+
 	CHECKVARY( Result )
-	FOR_EACHR
-	Result.SetValue( i, pShader->strName() );
-	END_FORR
+
+	BEGIN_VARYING_SECTION
+	SETSTRING( Result, pShader->strName() );
+	END_VARYING_SECTION
 }
 
 
@@ -4254,22 +4650,24 @@ STD_SOIMPL	CqShaderExecEnv::SO_shadername( DEFPARAMIMPL )
 // shadername(s)
 STD_SOIMPL	CqShaderExecEnv::SO_shadername2( STRINGVAL shader, DEFPARAMIMPL )
 {
+	INIT_SO
+
 	CqString strName( "" );
 	CqString strShader;
 	CqShader* pSurface = m_pSurface->pAttributes() ->pshadSurface();
 	CqShader* pDisplacement = m_pSurface->pAttributes() ->pshadDisplacement();
 	CqShader* pAtmosphere = m_pSurface->pAttributes() ->pshadAtmosphere();
 
-	INIT_SOR
 	CHECKVARY( Result )
-	FOR_EACHR
+
+	BEGIN_VARYING_SECTION
 	strName = "";
 	GETSTRING( shader );
 	if ( STRING( shader ).compare( "surface" ) == 0 && pSurface != 0 ) strName = pSurface->strName();
 	else if ( STRING( shader ).compare( "displacement" ) == 0 && pDisplacement != 0 ) strName = pDisplacement->strName();
 	else if ( STRING( shader ).compare( "atmosphere" ) == 0 && pAtmosphere != 0 ) strName = pAtmosphere->strName();
-	Result.SetValue( i, strName );
-	END_FORR
+	SETSTRING( Result, strName );
+	END_VARYING_SECTION
 }
 
 
@@ -4285,10 +4683,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_shadername2( STRINGVAL shader, DEFPARAMIMPL )
 
 STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, IqShaderVariable* pV, DEFPARAMIMPL )
 {
-
-	TqInt i = 0;
-	GETSTRING( name );
-	GETSTRING( dataname );
+	INIT_SO
 
 	TqFloat Ret = 0.0f;
 	CqVMStackEntry se;
@@ -4298,6 +4693,9 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 	CqEnvironmentMap *pEMap = NULL;
 	CqTextureMap *pTMap = NULL;
 
+	BEGIN_UNIFORM_SECTION
+	GETSTRING( name );
+	GETSTRING( dataname );
 
 	if ( !pMap && strstr( STRING( name ).c_str(), ".tif" ) )
 	{
@@ -4530,11 +4928,10 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 		}
 	}
 
-
 	delete pMap;
 
-	Result.SetValue( 0, Ret );
-	return ;
+	SETFLOAT( Result, Ret );
+	END_UNIFORM_SECTION
 }
 
 

@@ -76,7 +76,6 @@ class CqLightsource : public CqListEntry<CqLightsource>, public CqShaderExecEnv
 		 */
 		void	Evaluate( CqVMStackEntry& Ps )
 		{
-			Reset();
 			CqShaderExecEnv::Ps()->SetValue( Ps );
 			m_pShader->Evaluate( *this );
 		}

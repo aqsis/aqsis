@@ -90,10 +90,10 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 	// Initialise the geometric parameters in the shader exec env.
 
 	i = ( vGridRes + 1 ) * ( uGridRes + 1 );
-	P()->Initialise( uGridRes, vGridRes, i );
-	Ci()->Initialise( uGridRes, vGridRes, i );
-	Oi()->Initialise( uGridRes, vGridRes, i );
-	alpha()->Initialise( uGridRes, vGridRes, i );
+	P()->Initialise( uGridRes, vGridRes );
+	Ci()->Initialise( uGridRes, vGridRes );
+	Oi()->Initialise( uGridRes, vGridRes );
+	alpha()->Initialise( uGridRes, vGridRes );
 
 	//TODO dtime is not initialised yet
 	//dtime().Initialise(uGridRes, vGridRes, i);

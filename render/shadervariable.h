@@ -117,13 +117,12 @@ class CqShaderVariableArray: public CqShaderVariable
 		virtual	~CqShaderVariableArray()
 		{}
 
-		// Overridded from CqShaderVariable.
+		// Overridded from IqShaderVariable.
 
-
-		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt& index )
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
 		{
 			for ( std::vector<IqShaderVariable*>::iterator i = m_aVariables.begin(); i != m_aVariables.end(); i++ )
-				( *i ) ->Initialise( uGridRes, vGridRes, index );
+				( *i ) ->Initialise( uGridRes, vGridRes );
 		}
 		virtual	void	SetValue( CqVMStackEntry& Val )
 		{
@@ -136,6 +135,10 @@ class CqShaderVariableArray: public CqShaderVariable
 		virtual	void	SetValue( CqVMStackEntry& Val, CqBitVector& State )
 		{
 			m_aVariables[ 0 ] ->SetValue( Val, State );
+		}
+		virtual	void	SetValue( IqShaderVariable* pFrom )
+		{
+			m_aVariables[ 0 ] ->SetValue( pFrom );
 		}
 		virtual	void	GetValue( TqInt index, CqVMStackEntry& Val ) const
 		{
@@ -262,11 +265,11 @@ class CqShaderVariableUniform : public CqShaderVariableTyped<R>
 		virtual	~CqShaderVariableUniform()
 		{}
 
-		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt& index )
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
 		{}
 		virtual	void	SetValue( CqVMStackEntry& Val )
 		{
-			Val.Value( m_Value );
+			Val.Value( m_Value, 0 );
 		}
 		virtual	void	SetValue( TqInt index, CqVMStackEntry& Val )
 		{
@@ -275,6 +278,12 @@ class CqShaderVariableUniform : public CqShaderVariableTyped<R>
 		virtual	void	SetValue( CqVMStackEntry& Val, CqBitVector& State )
 		{
 			SetValue( Val );
+		}
+		virtual	void	SetValue( IqShaderVariable* pFrom )
+		{
+			CqVMStackEntry value;
+			pFrom->GetValue( 0, value );
+			value.Value( m_Value, 0 );
 		}
 		virtual	void	GetValue( TqInt index, CqVMStackEntry& Val ) const
 		{
@@ -359,18 +368,18 @@ class CqShaderVariableVarying : public CqShaderVariableTyped<R>
 		{
 			m_aValue.resize( val.m_aValue.size() );
 			m_aValue.assign( val.m_aValue.begin(), val.m_aValue.begin() );
-			m_pIndex = val.m_pIndex;
+//			m_pIndex = val.m_pIndex;
 			m_Size = val.m_Size;
 		}
 		virtual	~CqShaderVariableVarying()
 		{}
 
-		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, TqInt& index )
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
 		{
 			m_Size = ( uGridRes + 1 ) * ( vGridRes + 1 );
 			if ( m_aValue.size() < m_Size )
 				m_aValue.resize( m_Size );
-			m_pIndex = &index;
+//			m_pIndex = &index;
 		}
 
 		virtual	void	SetValue( CqVMStackEntry& Val )
@@ -379,17 +388,13 @@ class CqShaderVariableVarying : public CqShaderVariableTyped<R>
 			// the single value irrespective of the array index.
 			TqInt i;
 			for ( i = Size() - 1; i >= 0; i-- )
-			{
-				Val.Value( m_temp_R, i );
-				m_aValue[ i ] = m_temp_R;
-			}
+				Val.Value( m_aValue[ i ], i );
 		}
 		virtual	void	SetValue( TqInt index, CqVMStackEntry& Val )
 		{
 			// Note we can do this because uniform stack entries just return
 			// the single value irrespective of the array index.
-			Val.Value( m_temp_R, index );
-			m_aValue[ index ] = m_temp_R;
+			Val.Value( m_aValue[ index ], index );
 		}
 		virtual	void	SetValue( CqVMStackEntry& Val, CqBitVector& State )
 		{
@@ -399,10 +404,17 @@ class CqShaderVariableVarying : public CqShaderVariableTyped<R>
 			for ( i = Size() - 1; i >= 0; i-- )
 			{
 				if ( State.Value( i ) )
-				{
-					Val.Value( m_temp_R, i );
-					m_aValue[ i ] = m_temp_R;
-				}
+					Val.Value( m_aValue[ i ], i );
+			}
+		}
+		virtual	void	SetValue( IqShaderVariable* pVar )
+		{
+			TqInt i;
+			CqVMStackEntry SE;
+			for ( i = Size() - 1; i >= 0; i-- )
+			{
+				pVar->GetValue( i, SE );
+				SetValue( i, SE );
 			}
 		}
 		virtual	void	GetValue( TqInt index, CqVMStackEntry& Val ) const
@@ -430,10 +442,10 @@ class CqShaderVariableVarying : public CqShaderVariableTyped<R>
 //			for ( i = Size() - 1; i >= 0; i-- )
 //				m_aValue[ i ] = From[ i ];
 //		}
-		virtual	R	GetValue() const
-		{
-			return ( m_aValue[ *m_pIndex ] );
-		}
+//		virtual	R	GetValue() const
+//		{
+//			return ( m_aValue[ *m_pIndex ] );
+//		}
 		virtual	EqVariableClass	Class() const
 		{
 			return ( class_varying );
@@ -478,7 +490,7 @@ class CqShaderVariableVarying : public CqShaderVariableTyped<R>
 
 	private:
 		std::vector<R>	m_aValue;		///< Array of values of the appropriate type.
-		TqInt*	m_pIndex;		///< Pointer to the SIMD index.
+//		TqInt*	m_pIndex;		///< Pointer to the SIMD index.
 		TqUint	m_Size;			///< Integer size of the SIMD data.
 		R	m_temp_R;		///< Temp value to use in template functions, problem with VC++.
 }

@@ -988,7 +988,7 @@ void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, CqShade
 	// Initialise local variables.
 	TqInt i;
 	for ( i = m_LocalVars.size() - 1; i >= 0; i-- )
-		m_LocalVars[ i ] ->Initialise( uGridRes, vGridRes, Env.GridI() );
+		m_LocalVars[ i ] ->Initialise( uGridRes, vGridRes );
 
 	gVaryingResult.SetSize( ( uGridRes + 1 ) * ( vGridRes + 1 ) );
 
@@ -1291,8 +1291,9 @@ void CqShaderVM::SO_ipushv()
 	TqInt i;
 	for ( i = 0; i < ext; i++ )
 	{
-		GETFLOAT( A );
-		( *pVarArray ) [ static_cast<unsigned int>( FLOAT( A ) ) ] ->GetValue( i, Result );
+		TqFloat _A;
+		A.Value( _A );
+		( *pVarArray ) [ static_cast<unsigned int>( _A ) ] ->GetValue( i, Result );
 	}
 	Push( Result );
 }
@@ -1326,8 +1327,9 @@ void CqShaderVM::SO_ipop()
 	{
 		if ( m_pEnv->RunningState().Value( i ) )
 		{
-			GETFLOAT( A );
-			( *pVA ) [ static_cast<unsigned int>( FLOAT( A ) ) ] ->SetValue( i, Val );
+			TqFloat _A;
+			A.Value( _A );
+			( *pVA ) [ static_cast<unsigned int>( _A ) ] ->SetValue( i, Val );
 		}
 	}
 }
@@ -1343,11 +1345,13 @@ void CqShaderVM::SO_mergef()
 	TqInt i;
 	for ( i = 0; i < m_pEnv->GridSize(); i++ )
 	{
-		GETBOOLEAN( A );
-		GETFLOAT( T );
-		GETFLOAT( F );
-		if ( BOOLEAN( A ) ) Result.SetValue( i, FLOAT( T ) );
-		else	Result.SetValue( i, FLOAT( F ) );
+		TqBool _A;
+		TqFloat _T, _F;
+		A.Value( _A );
+		T.Value( _T );
+		F.Value( _F );
+		if ( _A ) Result.SetValue( i, _T );
+		else	Result.SetValue( i, _F );
 	}
 	Push( Result );
 }
@@ -1363,11 +1367,13 @@ void CqShaderVM::SO_merges()
 	TqInt i;
 	for ( i = 0; i < m_pEnv->GridSize(); i++ )
 	{
-		GETBOOLEAN( A );
-		GETSTRING( T );
-		GETSTRING( F );
-		if ( BOOLEAN( A ) ) Result.SetValue( i, STRING( T ) );
-		else	Result.SetValue( i, STRING( F ) );
+		TqBool _A;
+		CqString _T, _F;
+		A.Value( _A );
+		T.Value( _T );
+		F.Value( _F );
+		if ( _A ) Result.SetValue( i, _T );
+		else	Result.SetValue( i, _F );
 	}
 	Push( Result );
 }
@@ -1383,11 +1389,13 @@ void CqShaderVM::SO_mergep()
 	TqInt i;
 	for ( i = 0; i < m_pEnv->GridSize(); i++ )
 	{
-		GETBOOLEAN( A );
-		GETPOINT( T );
-		GETPOINT( F );
-		if ( BOOLEAN( A ) ) Result.SetValue( i, POINT( T ) );
-		else	Result.SetValue( i, POINT( F ) );
+		TqBool _A;
+		CqVector3D _T, _F;
+		A.Value( _A );
+		T.Value( _T );
+		F.Value( _F );
+		if ( _A ) Result.SetValue( i, _T );
+		else	Result.SetValue( i, _F );
 	}
 	Push( Result );
 }
@@ -1403,11 +1411,13 @@ void CqShaderVM::SO_mergec()
 	TqInt i;
 	for ( i = m_pEnv->GridSize() - 1; i >= 0; i-- )
 	{
-		GETBOOLEAN( A );
-		GETCOLOR( T );
-		GETCOLOR( F );
-		if ( BOOLEAN( A ) ) Result.SetValue( i, COLOR( T ) );
-		else	Result.SetValue( i, COLOR( F ) );
+		TqBool _A;
+		CqColor _T, _F;
+		A.Value( _A );
+		T.Value( _T );
+		F.Value( _F );
+		if ( _A ) Result.SetValue( i, _T );
+		else	Result.SetValue( i, _F );
 	}
 	Push( Result );
 }
@@ -1533,14 +1543,15 @@ void CqShaderVM::SO_S_GET()
 {
 	// Get the current state from the current stack entry
 	AUTOFUNC;
-	POPV( ValA );
+	POPV( A );
 	TqInt i;
 	for ( i = m_pEnv->GridSize() - 1; i >= 0; i-- )
 	{
 		if ( m_pEnv->RunningState().Value( i ) )
 		{
-			GETBOOLEAN( ValA );
-			m_pEnv->CurrentState().SetValue( i, BOOLEAN( ValA ) );
+			TqBool _A;
+			A.Value( _A );
+			m_pEnv->CurrentState().SetValue( i, _A );
 		}
 	}
 }
@@ -1596,8 +1607,9 @@ void CqShaderVM::SO_jnz()
 		TqInt i = m_pEnv->GridI();
 		if ( !__fVarying || m_pEnv->RunningState().Value( i ) )
 		{
-			GETBOOLEAN( f );
-			if ( !BOOLEAN( f ) ) return ;
+			TqBool _f;
+			f.Value( _f );
+			if ( !_f ) return ;
 		}
 	}
 	while ( m_pEnv->Advance() );
@@ -1616,8 +1628,9 @@ void CqShaderVM::SO_jz()
 		TqInt i = m_pEnv->GridI();
 		if ( !__fVarying || m_pEnv->RunningState().Value( i ) )
 		{
-			GETBOOLEAN( f );
-			if ( BOOLEAN( f ) ) return ;
+			TqBool _f;
+			f.Value( _f );
+			if ( _f ) return ;
 		}
 	}
 	while ( m_pEnv->Advance() );

@@ -134,214 +134,320 @@ enum EqStackEntryType
 
 struct SqVMStackEntry
 {
-	SqVMStackEntry( TqFloat f = 0 ) : m_float( f ), m_Type( StackEntryType_Float )
-	{}
-	SqVMStackEntry( const CqVector3D& v ) : m_Point( v ), m_Type( StackEntryType_Point )
-	{}
-	SqVMStackEntry( const CqColor& c ) : m_Color( c ), m_Type( StackEntryType_Color )
-	{}
-	SqVMStackEntry( const char* s ) : m_str( s ), m_Type( StackEntryType_String )
-	{}
-	SqVMStackEntry( const CqString& s ) : m_str( s ), m_Type( StackEntryType_String )
-	{}
-	SqVMStackEntry( const CqMatrix& m ) : m_Matrix( m ), m_Type( StackEntryType_Matrix )
-	{}
+	SqVMStackEntry( TqFloat f = 0 )
+	{
+		*this = f;
+	}
+	SqVMStackEntry( const CqVector3D& v )
+	{
+		*this = v;
+	}
+	SqVMStackEntry( const CqColor& c )
+	{
+		*this = c;
+	}
+	SqVMStackEntry( const char* s )
+	{
+		m_Value.m_str = NULL;
+		*this = s;
+	}
+	SqVMStackEntry( const CqString& s )
+	{
+		m_Value.m_str = NULL;
+		*this = s;
+	}
+	SqVMStackEntry( const CqMatrix& m )
+	{
+		*this = m;
+	}
+	~SqVMStackEntry()
+	{
+		if(	m_Type == StackEntryType_String )
+			delete[]( m_Value.m_str );
+	}
 
 	// Cast to the various types
 	/** Type checked cast to a float
 	 */
-	operator TqFloat&()
+	void GetValue( TqFloat& res)
 	{
 		if ( m_Type == StackEntryType_Int )
-		{
-			m_float = ( float ) m_int;
-
-		}
-
-		return ( m_float );
+			res = static_cast<TqFloat>( m_Value.m_int );
+		else
+			res = m_Value.m_float;
 	}
 	/** Type checked cast to an integer
 	 */
-	operator TqInt&()
+	void GetValue( TqInt& res )
 	{
 		if ( m_Type == StackEntryType_Float )
-		{
-			m_int = ( int ) m_float;
-
-		}
-		return ( m_int );
+			res = static_cast<TqInt>( m_Value.m_float );
+		else
+		res = m_Value.m_int;
 	}
 	/** Type checked cast to a boolean
 	 */
-	operator bool&()
+	void GetValue( bool& res)
 	{
-		assert( m_Type == StackEntryType_Bool );	return ( m_bool );
+		assert( m_Type == StackEntryType_Bool );
+		res = m_Value.m_bool;
 	}
 	/** Type checked cast to a 3D vector
 	 */
-
-	operator CqVector3D&()
+	void GetValue( CqVector3D& res )
 	{
-
-
 		if ( m_Type == StackEntryType_Float )
 		{
-			m_Point = CqVector3D( m_float, m_float, m_float );
-
+			res.x(m_Value.m_float);
+			res.y(m_Value.m_float);
+			res.z(m_Value.m_float);
 		}
-		if ( m_Type == StackEntryType_Int )
+		else if ( m_Type == StackEntryType_Int )
 		{
-			m_Point = CqVector3D( ( float ) m_int, ( float ) m_int, ( float ) m_int );
-
+			res.x(static_cast<TqFloat>( m_Value.m_int ));
+			res.y(static_cast<TqFloat>( m_Value.m_int ));
+			res.z(static_cast<TqFloat>( m_Value.m_int ));
 		}
-		if ( m_Type == StackEntryType_Bool )
+		else if ( m_Type == StackEntryType_Bool )
 		{
-			m_Point = CqVector3D( ( float ) m_bool, ( float ) m_bool, ( float ) m_bool );
-
+			res.x(static_cast<TqFloat>( m_Value.m_bool ));
+			res.y(static_cast<TqFloat>( m_Value.m_bool ));
+			res.z(static_cast<TqFloat>( m_Value.m_bool ));
 		}
-
-		return ( m_Point );
+		else if ( m_Type == StackEntryType_HPoint )
+		{
+			res.x(m_Value.m_hpoint[0]/m_Value.m_hpoint[3]);
+			res.y(m_Value.m_hpoint[1]/m_Value.m_hpoint[3]);
+			res.z(m_Value.m_hpoint[2]/m_Value.m_hpoint[3]);
+		}
+		else
+		{
+			res.x(m_Value.m_point[0]);
+			res.y(m_Value.m_point[1]);
+			res.z(m_Value.m_point[2]);
+		}
 	}
 
 	/** Type checked cast to a 4D vector.
 	 */
-	operator CqVector4D&()
+	void GetValue( CqVector4D& res )
 	{
-		assert( m_Type == StackEntryType_HPoint );	return ( m_HPoint );
+		if ( m_Type == StackEntryType_Float )
+		{
+			res.x(m_Value.m_float);
+			res.y(m_Value.m_float);
+			res.z(m_Value.m_float);
+			res.h(1.0f);
+		}
+		else if ( m_Type == StackEntryType_Int )
+		{
+			res.x(static_cast<TqFloat>( m_Value.m_int ));
+			res.y(static_cast<TqFloat>( m_Value.m_int ));
+			res.z(static_cast<TqFloat>( m_Value.m_int ));
+			res.h(1.0f);
+		}
+		else if ( m_Type == StackEntryType_Bool )
+		{
+			res.x(static_cast<TqFloat>( m_Value.m_bool ));
+			res.y(static_cast<TqFloat>( m_Value.m_bool ));
+			res.z(static_cast<TqFloat>( m_Value.m_bool ));
+			res.h(1.0f);
+		}
+		else if ( m_Type == StackEntryType_Point )
+		{
+			res.x(m_Value.m_point[0]);
+			res.y(m_Value.m_point[1]);
+			res.z(m_Value.m_point[2]);
+			res.h(1.0f);
+		}
+		else
+		{
+			res.x(m_Value.m_hpoint[0]);
+			res.y(m_Value.m_hpoint[1]);
+			res.z(m_Value.m_hpoint[2]);
+			res.h(m_Value.m_hpoint[3]);
+		}
 	}
 	/** Type checked cast to a color
 	 */
-	operator CqColor&()
+	void GetValue( CqColor& res )
 	{
-		assert( m_Type == StackEntryType_Color );	return ( m_Color );
+		if ( m_Type == StackEntryType_Float )
+		{
+			res.SetfRed(m_Value.m_float);
+			res.SetfGreen(m_Value.m_float);
+			res.SetfBlue(m_Value.m_float);
+		}
+		else if ( m_Type == StackEntryType_Int )
+		{
+			res.SetfRed(static_cast<TqFloat>( m_Value.m_int ));
+			res.SetfGreen(static_cast<TqFloat>( m_Value.m_int ));
+			res.SetfBlue(static_cast<TqFloat>( m_Value.m_int ));
+		}
+		else if ( m_Type == StackEntryType_Bool )
+		{
+			res.SetfRed(static_cast<TqFloat>( m_Value.m_bool ));
+			res.SetfGreen(static_cast<TqFloat>( m_Value.m_bool ));
+			res.SetfBlue(static_cast<TqFloat>( m_Value.m_bool ));
+		}
+		else if ( m_Type == StackEntryType_HPoint )
+		{
+			res.SetfRed(m_Value.m_hpoint[0]/m_Value.m_hpoint[3]);
+			res.SetfGreen(m_Value.m_hpoint[1]/m_Value.m_hpoint[3]);
+			res.SetfBlue(m_Value.m_hpoint[2]/m_Value.m_hpoint[3]);
+		}
+		else
+		{
+			res.SetfRed(m_Value.m_color[0]);
+			res.SetfGreen(m_Value.m_color[1]);
+			res.SetfBlue(m_Value.m_color[2]);
+		}
 	}
 	/** Type checked cast to a string
 	 */
-	operator CqString&()
+	void GetValue( CqString& res )
 	{
-		assert( m_Type == StackEntryType_String );	return ( m_str );
+		assert( m_Type == StackEntryType_String );
+		res = m_Value.m_str;
 	}
 	/** Type checked cast to a matrix
 	 */
-	operator CqMatrix&()
+	void GetValue( CqMatrix& res )
 	{
-		assert( m_Type == StackEntryType_Matrix );	return ( m_Matrix );
+		assert( m_Type == StackEntryType_Matrix );
+		res[0][0] = m_Value.m_matrix[0 ];
+		res[0][1] = m_Value.m_matrix[1 ];
+		res[0][2] = m_Value.m_matrix[2 ];
+		res[0][3] = m_Value.m_matrix[3 ];
+		res[1][0] = m_Value.m_matrix[4 ];
+		res[1][1] = m_Value.m_matrix[5 ];
+		res[1][2] = m_Value.m_matrix[6 ];
+		res[1][3] = m_Value.m_matrix[7 ];
+		res[2][0] = m_Value.m_matrix[8 ];
+		res[2][1] = m_Value.m_matrix[9 ];
+		res[2][2] = m_Value.m_matrix[10];
+		res[2][3] = m_Value.m_matrix[11];
+		res[3][0] = m_Value.m_matrix[12];
+		res[3][1] = m_Value.m_matrix[13];
+		res[3][2] = m_Value.m_matrix[14];
+		res[3][3] = m_Value.m_matrix[15];
 	}
 
 	/** Assignment from a float
 	 */
 	SqVMStackEntry& operator=( TqFloat f )
 	{
-		m_float = f; m_Type = StackEntryType_Float; return ( *this );
-	}
-	/** Assignment from a double
-	 */
-	SqVMStackEntry& operator=( double d )
-	{
-		m_float = d; m_Type = StackEntryType_Float; return ( *this );
+		m_Value.m_float = f; 
+		m_Type = StackEntryType_Float; 
+		return ( *this );
 	}
 	/** Assignment from an integer
 	 */
 	SqVMStackEntry& operator=( TqInt i )
 	{
-		m_int = i; m_Type = StackEntryType_Int; return ( *this );
+		m_Value.m_int = i; 
+		m_Type = StackEntryType_Int; 
+		return ( *this );
 	}
 	/** Assignment from a boolean
 	 */
 	SqVMStackEntry& operator=( bool b )
 	{
-		m_bool = b; m_Type = StackEntryType_Bool; return ( *this );
+		m_Value.m_bool = b; 
+		m_Type = StackEntryType_Bool; 
+		return ( *this );
 	}
 	/** Assignment from a 4D vector
 	 */
 	SqVMStackEntry& operator=( const CqVector4D& v )
 	{
-		m_HPoint = v; m_Type = StackEntryType_HPoint; return ( *this );
+		m_Value.m_hpoint[0] = v.x();
+		m_Value.m_hpoint[1] = v.y();
+		m_Value.m_hpoint[2] = v.z();
+		m_Value.m_hpoint[3] = v.h();
+		m_Type = StackEntryType_HPoint; 
+		return ( *this );
 	}
 	/** Assignment from a 3D vector
 	 */
 	SqVMStackEntry& operator=( const CqVector3D& v )
 	{
-		m_Point = v; m_Type = StackEntryType_Point; return ( *this );
+		m_Value.m_point[0] = v.x();
+		m_Value.m_point[1] = v.y();
+		m_Value.m_point[2] = v.z();
+		m_Type = StackEntryType_Point; 
+		return ( *this );
 	}
 	/** Assignment from a color
 	 */
 	SqVMStackEntry& operator=( const CqColor& c )
 	{
-		m_Color = c; m_Type = StackEntryType_Color; return ( *this );
+		m_Value.m_color[0] = c.fRed();
+		m_Value.m_color[1] = c.fGreen();
+		m_Value.m_color[2] = c.fBlue();
+		m_Type = StackEntryType_Color; 
+		return ( *this );
 	}
 	/** Assignment from a char pointer (string)
 	 */
 	SqVMStackEntry& operator=( const char* s )
 	{
-		m_str = s; m_Type = StackEntryType_String; return ( *this );
+		if( m_Type == StackEntryType_String && m_Value.m_str != NULL )
+			delete[]( m_Value.m_str );
+		m_Value.m_str = new char[strlen(s)]; 
+		strcpy(m_Value.m_str, s);
+		m_Type = StackEntryType_String; 
+		return ( *this );
 	}
 	/** Assignment from a string
 	 */
 	SqVMStackEntry& operator=( const CqString& s )
 	{
-		m_str = s; m_Type = StackEntryType_String; return ( *this );
+		if( m_Type == StackEntryType_String && m_Value.m_str != NULL )
+			delete[]( m_Value.m_str );
+		m_Value.m_str = new char[s.size()]; 
+		strcpy(m_Value.m_str, s.c_str());
+		m_Type = StackEntryType_String; 
+		return ( *this );
 	}
 	/** Assignment from a matrix
 	 */
 	SqVMStackEntry& operator=( const CqMatrix& m )
 	{
-		m_Matrix = m; m_Type = StackEntryType_Matrix; return ( *this );
-	}
-	/** Assignment from another stack entry
-	 */
-	SqVMStackEntry& operator=( const SqVMStackEntry& e )
-	{
-		m_Type = e.m_Type;
-		switch ( m_Type )
-		{
-				case StackEntryType_Float:
-				m_float = e.m_float;
-				break;
-				case StackEntryType_Int:
-				m_int = e.m_int;
-				break;
-				case StackEntryType_Bool:
-				m_bool = e.m_bool;
-				break;
-				case StackEntryType_Point:
-				m_Point = e.m_Point;
-				break;
-				case StackEntryType_HPoint:
-				m_HPoint = e.m_HPoint;
-				break;
-				case StackEntryType_Color:
-				m_Color = e.m_Color;
-				break;
-				case StackEntryType_String:
-				m_str = e.m_str;
-				break;
-				case StackEntryType_Matrix:
-				m_Matrix = e.m_Matrix;
-				break;
-		}
+		m_Value.m_matrix[0 ] = m[0][0];
+		m_Value.m_matrix[1 ] = m[0][1];
+		m_Value.m_matrix[2 ] = m[0][2];
+		m_Value.m_matrix[3 ] = m[1][3];
+		m_Value.m_matrix[4 ] = m[1][0];
+		m_Value.m_matrix[5 ] = m[1][1];
+		m_Value.m_matrix[6 ] = m[1][2];
+		m_Value.m_matrix[7 ] = m[2][3];
+		m_Value.m_matrix[8 ] = m[2][0];
+		m_Value.m_matrix[9 ] = m[2][1];
+		m_Value.m_matrix[10] = m[2][2];
+		m_Value.m_matrix[11] = m[3][3];
+		m_Value.m_matrix[12] = m[3][0];
+		m_Value.m_matrix[13] = m[3][1];
+		m_Value.m_matrix[14] = m[3][2];
+		m_Value.m_matrix[15] = m[3][3];
+		m_Type = StackEntryType_Matrix;
 		return ( *this );
 	}
 
-	TqFloat	m_float;		///< Float value
-	TqInt	m_int;			///< Integer value
-	bool	m_bool;			///< Boolean value
-	CqString	m_str;			///< String value
-	CqVector3D	m_Point;		///< 3D point value
-	CqVector4D	m_HPoint;		///< 4D homogenous point value
-	CqColor	m_Color;		///< Color value
-	CqMatrix	m_Matrix;		///< Matrix value
+	union
+	{
+		TqFloat	m_float;		///< Float value
+		TqInt	m_int;			///< Integer value
+		bool	m_bool;			///< Boolean value
+		char*	m_str;			///< String value
+		TqFloat	m_point[3];		///< 3D point value
+		TqFloat	m_hpoint[4];	///< 4D homogenous point value
+		TqFloat	m_color[3];		///< Color value
+		TqFloat	m_matrix[16];	///< Matrix value
+	}m_Value;
 	TqInt	m_Type;			///< Type identifier, from EqVariableType.
 }
 ;
-
-//class CqVMStackEntryAllocator : public std::allocator<SqVMStackEntry>
-//{
-//	public:
-//
-//		void construct(pointer _P, const SqVMStackEntry& _V)
-//					{new ((void _FARQ *)_P) SqVMStackEntry(); }
-//};
 
 
 class CqVMStackEntry
@@ -407,12 +513,14 @@ class CqVMStackEntry
 				// TODO: Should do some checking!!
 				CqVMStackEntry SE;
 				m_pVarRef->GetValue(Index, SE);
-				SE.Value(res);
+				SE.Value( res );
 			}
 			else
 			{
-				if ( Size() == 1 ) res = static_cast<T&>( m_Value );
-				else	res = static_cast<T&>( m_aValues[ Index ] );
+				if ( Size() == 1 ) 
+					m_Value.GetValue(res);
+				else	
+					m_aValues[ Index ].GetValue(res);
 			}
 		}
 		/** Set the value of the stack entry by index.

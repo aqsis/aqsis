@@ -81,26 +81,52 @@ enum EqEnvVars
 extern TqInt gDefUses;
 extern TqInt gDefLightUses;
 
-#define	INIT_SOR		TqBool __fVarying=TqFalse;
+#define	INIT_SO			TqBool __fVarying=TqFalse; /* A flag which will be set to indicate if the operation has any varying components. */ \
+						TqInt __iGrid; /* Integer index used to track progress through the varying data */
 #define	CHECKVARY(A)	__fVarying=(A).Size()>1||__fVarying;
-#define	FOR_EACHR		/*TqBool __f=__fVarying?RunningState().Count()<GridSize():TqFalse;*/ \
-						Reset(); \
+#define	FOR_EACH		__iGrid = 0; \
 						do \
 						{ \
-							TqInt i=GridI(); \
-							if(!__fVarying || RunningState().Value(i)) \
+							if(!__fVarying || RunningState().Value( __iGrid ) ) \
 							{
-#define	END_FORR			} \
-						}while(Advance() && __fVarying);
+#define	END_FOR				} \
+						}while( ( ++__iGrid < GridSize() ) && __fVarying);
 
-#define	GETFLOAT(Val)		TqFloat _##Val; (Val).Value(_##Val,i)
-#define	GETPOINT(Val)		CqVector3D _##Val; (Val).Value(_##Val,i)
-#define	GETVECTOR(Val)		CqVector3D _##Val; (Val).Value(_##Val,i)
-#define	GETNORMAL(Val)		CqVector3D _##Val; (Val).Value(_##Val,i)
-#define	GETCOLOR(Val)		CqColor _##Val; (Val).Value(_##Val,i)
-#define	GETSTRING(Val)		CqString _##Val; (Val).Value(_##Val,i)
-#define	GETBOOLEAN(Val)		TqBool _##Val; (Val).Value(_##Val,i)
-#define	GETMATRIX(Val)		CqMatrix _##Val; (Val).Value(_##Val,i)
+#define	BEGIN_UNIFORM_SECTION	__iGrid = 0;
+#define	END_UNIFORM_SECTION
+
+#define	BEGIN_VARYING_SECTION	FOR_EACH
+#define	END_VARYING_SECTION		END_FOR
+
+#define	GETFLOAT(Val)		TqFloat _##Val; (Val).Value(_##Val,__iGrid)
+#define	GETPOINT(Val)		CqVector3D _##Val; (Val).Value(_##Val,__iGrid)
+#define	GETVECTOR(Val)		CqVector3D _##Val; (Val).Value(_##Val,__iGrid)
+#define	GETNORMAL(Val)		CqVector3D _##Val; (Val).Value(_##Val,__iGrid)
+#define	GETCOLOR(Val)		CqColor _##Val; (Val).Value(_##Val,__iGrid)
+#define	GETSTRING(Val)		CqString _##Val; (Val).Value(_##Val,__iGrid)
+#define	GETBOOLEAN(Val)		TqBool _##Val; (Val).Value(_##Val,__iGrid)
+#define	GETMATRIX(Val)		CqMatrix _##Val; (Val).Value(_##Val,__iGrid)
+
+#define	_GET_STDVAR(Val)	CqVMStackEntry __##Val; \
+							Val##()->GetValue( __iGrid, __##Val); \
+							__##Val.Value(_##Val)
+#define	GET_STDVAR_FLOAT(Val) TqFloat _##Val; _GET_STDVAR(Val)
+#define	GET_STDVAR_POINT(Val) CqVector3D _##Val; _GET_STDVAR(Val)
+#define	GET_STDVAR_VECTOR(Val) CqVector3D _##Val; _GET_STDVAR(Val)
+#define	GET_STDVAR_NORMAL(Val) CqVector3D _##Val; _GET_STDVAR(Val)
+#define	GET_STDVAR_COLOR(Val) CqColor _##Val; _GET_STDVAR(Val)
+#define	GET_STDVAR_STRING(Val) CqString _##Val; _GET_STDVAR(Val)
+#define	GET_STDVAR_BOOLEAN(Val) TqBool _##Val; _GET_STDVAR(Val)
+#define	GET_STDVAR_MATRIX(Val) CqMatrix _##Val; _GET_STDVAR(Val)
+
+#define	SETFLOAT(Val, v)	(Val).SetValue(__iGrid, v)
+#define	SETPOINT(Val, v)	(Val).SetValue(__iGrid, v)
+#define	SETVECTOR(Val, v)	(Val).SetValue(__iGrid, v)
+#define	SETNORMAL(Val, v)	(Val).SetValue(__iGrid, v)
+#define	SETCOLOR(Val, v)	(Val).SetValue(__iGrid, v)
+#define	SETSTRING(Val, v)	(Val).SetValue(__iGrid, v)
+#define	SETBOOLEAN(Val, v)	(Val).SetValue(__iGrid, v)
+#define	SETMATRIX(Val, v)	(Val).SetValue(__iGrid, v)
 
 #define	FLOAT(Val)			_##Val
 #define	POINT(Val)			_##Val

@@ -104,7 +104,6 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Cq
 	m_uGridRes = uGridRes;
 	m_vGridRes = vGridRes;
 	m_GridSize = ( uGridRes + 1 ) * ( vGridRes + 1 );
-	m_GridI = 0;
 	m_LocalIndex = 0;
 
 	// Store a pointer to the surface definition.
@@ -173,7 +172,7 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Cq
 	for ( i = 0; i < EnvVars_Last; i++ )
 	{
 		if ( m_apVariables[ i ] && USES( Uses, i ) )
-			m_apVariables[ i ] ->Initialise( uGridRes, vGridRes, m_GridI );
+			m_apVariables[ i ] ->Initialise( uGridRes, vGridRes );
 	}
 }
 
