@@ -206,7 +206,6 @@ CqBucketDiskStore::SqBucketDiskStoreRecord* CqBucketDiskStore::RetrieveBucketInd
 	boost::mutex::scoped_lock lk(m_MemoryCacheMutex);
 	if( m_MemoryCache.find(index) != m_MemoryCache.end() )
 	{
-		//std::cerr << debug << "Bucket found in cache: " << index << std::endl;
 		// Lock the cache entry so that it doesn't get freed while it is in use.
 		m_MemoryCache[index].second++;
 		return( m_MemoryCache[index].first );
@@ -218,11 +217,7 @@ CqBucketDiskStore::SqBucketDiskStoreRecord* CqBucketDiskStore::RetrieveBucketInd
 		{
 			SqBucketDiskStoreRecord* record = RetrieveBucketOffset(m_IndexTable[index]);
 			if( record )
-			{
 				CacheBucket(record, index);
-
-				//std::cerr << debug << "Bucket memory cache size: " << m_MemoryCacheSize << std::endl;
-			}
 			return(record);
 		}
 		else
@@ -285,17 +280,19 @@ CqBucketDiskStore::SqBucketDiskStoreRecord* CqBucketDiskStore::RetrieveBucketOff
 */
 void CqBucketDiskStore::CloseDown()
 {
+	boost::mutex::scoped_lock lk(m_MemoryCacheMutex);
 	if( m_Temporary )
 	{
-		if(unlink(m_fileName.c_str()) < 0)
+		if(!m_fileName.empty() && unlink(m_fileName.c_str()) < 0)
 			std::cerr << error << "Could not delete temporary bucket store " << m_fileName.c_str() << std::endl;
+		m_fileName = "";
 	}
 	free(m_Header);
+	m_Header = 0;
 
 	m_IndexTable.clear();
 	
 	// Free any entries we have in the memory cache
-	boost::mutex::scoped_lock lk(m_MemoryCacheMutex);
 	std::map<TqInt, std::pair<SqBucketDiskStoreRecord*, TqInt> >::iterator i;
 	for( i = m_MemoryCache.begin(); i != m_MemoryCache.end(); i++ )
 		free(i->second.first);
@@ -321,7 +318,7 @@ void CqBucketDiskStore::CacheBucket(SqBucketDiskStoreRecord* record, TqInt index
 {
 	boost::mutex::scoped_lock lk(m_MemoryCacheMutex);
 	// Add the bucket to the most recently referenced list and add it to the memory cache.
-	if( ( m_MemoryCacheSize + record->m_BucketLength ) > 1024 * 50 )
+	if( ( m_MemoryCacheSize + record->m_BucketLength ) > 1024 * 200 )
 	{
 		// Free the least most recently used cache entry, that isn't locked.
 		std::deque<TqInt>::reverse_iterator i;
@@ -337,7 +334,7 @@ void CqBucketDiskStore::CacheBucket(SqBucketDiskStoreRecord* record, TqInt index
 					free(oldrec);
 				}
 				m_MemoryCache.erase(m_MemoryCache.find(*i));
-				m_MemoryCacheReferences.erase(i.base());
+				std::remove(m_MemoryCacheReferences.begin(), m_MemoryCacheReferences.end(), *i);
 			}
 		}
 	}

@@ -1024,7 +1024,8 @@ int main( int argc, char** argv )
 
 	if(SOCKET_ERROR == connect( g_Socket, PSOCKADDR(&saTemp), sizeof(saTemp)))
 	{
-		std::cerr << "Connecting to " << g_hostname.c_str() << ":" << port << " ... " << strerror(errno) << std::endl;
+		int error = WSAGetLastError();
+		std::cerr << "Connecting to " << g_hostname.c_str() << ":" << port << " ... " << error << std::endl;
 		CloseSocket(g_Socket);
 		return -1;
 	}
