@@ -11,6 +11,9 @@
 #include	"funcdef.h"
 #include	"vardef.h"
 
+#if defined (AQSIS_SYSTEM_WIN32)
+	#define tolower(x) _tolower(x)
+#endif
 
 START_NAMESPACE( Aqsis )
 
@@ -143,12 +146,7 @@ TqInt CqParseNode::TypeFromIdentifier( char Id )
     TqInt i;
     for ( i = 0; i < Type_Last; i++ )
     {
-        if ( gVariableTypeIdentifiers[ i ][ 0 ] == Id ||
-#if defined(AQSIS_SYSTEM_MACOSX) || defined (AQSIS_SYSTEM_BEOS)
-                gVariableTypeIdentifiers[ i ][ 0 ] == tolower( Id ) )
-#else
-                gVariableTypeIdentifiers[ i ][ 0 ] == _tolower( Id ) )
-#endif
+        if ( gVariableTypeIdentifiers[ i ][ 0 ] == Id || gVariableTypeIdentifiers[ i ][ 0 ] == tolower( Id ) )
             return ( i );
     }
     return ( Type_Nil );
