@@ -164,7 +164,7 @@ CqRibBinaryDecoder::initZlib( int buffersize )
 	// Start by only buffering 2 bytes 
 	zbuffersize = 2;
 	for (len = 0; len < 2; len++)
-       	{
+	{
 		gc( c );
 		if (c != gz_magic[len]) 
 		{
@@ -173,14 +173,6 @@ CqRibBinaryDecoder::initZlib( int buffersize )
 				zavailable++, zcurrent--;
 			is_gzip = 0;
 			zbuffersize = buffersize;
-
-			if (zin)
-				delete [] zin;
-			if (zout)
-				delete [] zout;
-
-			zin = zout = NULL;
-			fseek( file, 0, SEEK_SET);
 
 			return;
 		}
@@ -836,29 +828,24 @@ TqInt CqRibBinaryDecoder::read( TqPchar buffer, TqUint size )
 {
 	TqInt n;
 
-	if (is_gzip) {
-		try
-		{
-			while ( cv.size() < size )
-			{
-				getNext();
-				if( cv.back() == '\n' )
-				{
-					size = cv.size() + 1;
-					break;
-				};
-			}
-		}
-		catch ( std::string & s )
-		{
-			if ( s != "" ) std::cerr << s << std::endl;
-		}
-
-		n = writeToBuffer( buffer, size );
-
-	} else  
+	try
 	{
-		n = fread(buffer, 1,  size, file);
+		while ( cv.size() < size )
+		{
+			getNext();
+			if( cv.back() == '\n' )
+			{
+				size = cv.size() + 1;
+				break;
+			};
+		}
 	}
+	catch ( std::string & s )
+	{
+		if ( s != "" ) std::cerr << s << std::endl;
+	}
+
+	n = writeToBuffer( buffer, size );
+
 	return n;
 }
