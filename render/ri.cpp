@@ -686,6 +686,9 @@ RtVoid	RiWorldEnd()
         // ...and print the statistics.
         QGetRenderContext() ->Stats().PrintStats( verbosity );
     }
+
+	QGetRenderContext()->SetWorldBegin(TqFalse);
+
     return ;
 }
 
