@@ -17,6 +17,8 @@ void StandardDeclarations( RendermanInterface& CallbackInterface );
 bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream );
 /// Resets the state of the parser, clearing any symbol tables, etc.
 void ResetParser();
+/// Setup the defaut setting for the archive searchpath, automatically updated when an appropriate RiOption is seen.
+void UpdateArchivePath( std::string strPath );
 
 /// Provides an abstract base class for objects that implement the Renderman Interface
 class RendermanInterface

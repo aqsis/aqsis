@@ -107,6 +107,8 @@ void StandardDeclarations( RendermanInterface& CallbackInterface )
 	ParserDeclare( CallbackInterface, "sense", "uniform string" );
 	ParserDeclare( CallbackInterface, "compression", "uniform string" );
 	ParserDeclare( CallbackInterface, "quality", "uniform integer" );
+	ParserDeclare( CallbackInterface, "bias0", "uniform float" );
+	ParserDeclare( CallbackInterface, "bias1", "uniform float" );
 
 }
 
