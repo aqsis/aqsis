@@ -341,7 +341,7 @@ void CqMotionModeBlock::EndMotionModeBlock()
 	if( NULL != m_pDeformingSurface )
 	{
 		QGetRenderContext() ->pImage() ->PostSurface( m_pDeformingSurface );
-		QGetRenderContext() ->Stats().IncGPrims();
+		STATS_INC( GPR_created );
 		RELEASEREF( m_pDeformingSurface );
 	}
 }

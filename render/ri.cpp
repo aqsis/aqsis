@@ -2850,7 +2850,7 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 		else
 		{
 			QGetRenderContext() ->pImage() ->PostSurface( pSurface );
-			QGetRenderContext() ->Stats().IncGPrims();
+			STATS_INC( GPR_created );
 		}
 	
 		RELEASEREF( pPointsClass );
@@ -5083,7 +5083,7 @@ RtVoid	CreateGPrim( CqBasicSurface* pSurface )
 		ADDREF( pSurface );
 		pSurface->PrepareTrimCurve();
 		QGetRenderContext() ->pImage() ->PostSurface( pSurface );
-		QGetRenderContext() ->Stats().IncGPrims();
+		STATS_INC( GPR_created );
 		RELEASEREF( pSurface );
 	}
 

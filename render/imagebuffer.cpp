@@ -299,7 +299,7 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 	ADDREF( pSurface );
 
 	// Count the number of total gprims
-	QGetRenderContext() ->Stats().IncTotalGPrims();
+	STATS_INC( GPR_created_total );
 
 	// Bound the primitive in its current space (camera) space taking into account any motion specification.
 	CqBound Bound( pSurface->Bound() );
@@ -330,7 +330,7 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 	{
 		pSurface->UnLink();
 		RELEASEREF( pSurface );
-		QGetRenderContext() ->Stats().IncCulledGPrims();
+		STATS_INC( GPR_culled );
 		return ;
 	}
 
@@ -432,7 +432,7 @@ TqBool CqImageBuffer::OcclusionCullSurface( TqInt iBucket, CqBasicSurface* pSurf
 		// Bound covers no more buckets
 		pSurface->UnLink();
 		RELEASEREF( pSurface );
-		QGetRenderContext() ->Stats().IncCulledGPrims();
+		STATS_INC( GPR_culled );
 		return TqTrue;
 	}
 	else
@@ -1152,7 +1152,7 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 		{
 			std::vector<CqBasicSurface*> aSplits;
 			// Decrease the total gprim count since this gprim is replaced by other gprims
-			QGetRenderContext() ->Stats().DecTotalGPrims();
+			STATS_DEC( GPR_created_total );
 			// Split it
 			QGetRenderContext() ->Stats().SplitsTimer().Start();
 			TqInt cSplits = pSurface->Split( aSplits );

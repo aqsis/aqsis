@@ -54,7 +54,7 @@ CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(),
 		m_fTriangular( TqFalse )
 
 {
-	QGetRenderContext() ->Stats().IncGridsAllocated();
+	STATS_INC( GRD_allocated );
 }
 
 
@@ -66,7 +66,8 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
 {
 	assert( RefCount() <= 0 );
 
-	QGetRenderContext() ->Stats().IncGridsDeallocated();
+	STATS_INC( GRD_deallocated );
+	STATS_DEC( GRD_current );
 
 	// Release the reference to the attributes.
 	if ( m_pSurface != 0 ) RELEASEREF( m_pSurface );
@@ -104,6 +105,11 @@ CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) :
 
 {
 	STATS_INC( GRD_created );
+	STATS_INC( GRD_current );
+	STATS_INC( GRD_allocated );
+	TqInt cGRD = STATS_GETI( GRD_current );
+	TqInt cPeak = STATS_GETI( GRD_peak );
+	STATS_SETI( GRD_peak, cGRD > cPeak ? cGRD : cPeak );
 	// Initialise the shader execution environment
 
 	m_pShaderExecEnv = new CqShaderExecEnv;
@@ -1050,7 +1056,7 @@ CqMicroPolygon::~CqMicroPolygon()
 	STATS_INC( MPG_deallocated );
 	STATS_DEC( MPG_current );
 	if ( IsHit() )
-		QGetRenderContext() ->Stats().IncMissedMPGs();
+		STATS_INC( MPG_missed );
 }
 
 
@@ -1273,7 +1279,10 @@ TqBool CqMicroPolygon::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat 
 			CqVector2D vR = BilinearEvaluate( uvA, uvB, uvC, uvD, vecUV.x(), vecUV.y() );
 
 			if ( pGrid() ->pSurface() ->bCanBeTrimmed() && pGrid() ->pSurface() ->bIsPointTrimmed( vR ) && !bOutside )
+			{
+				STATS_INC( MPG_trimmed );
 				return ( TqFalse );
+			}
 		}
 
 		if ( pGrid() ->fTriangular() )

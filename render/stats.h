@@ -214,11 +214,43 @@ class CqStats
 		enum {	_First_float,
 				_Last_float } EqFloatIndex;
 		enum {	_First_int,
+
+				// GPrim stats
+
+					GPR_allocated,
+					GPR_created,
+					GPR_created_total,
+					GPR_current,
+					GPR_peak,
+					GPR_culled,
+
+				// Geometry stats
+
+					// Curve stats
+
+					GEO_crv_created,
+					GEO_crv_splits,
+					GEO_crv_crv,
+					GEO_crv_patch,
+					GEO_crv_crv_created,
+					GEO_crv_patch_created,
+
+					// Procedural
+
+					GEO_prc_created,
+					GEO_prc_split,
+					GEO_prc_created_dl, // Dynamic load
+					GEO_prc_created_dra,
+					GEO_prc_created_prp,
 			
 				// Grid stats
 
 					GRD_created,
 					GRD_culled,
+					GRD_current,
+					GRD_peak,
+					GRD_allocated,
+					GRD_deallocated,
 
 					//Unshaded grids
 						GRD_size_4,
@@ -248,6 +280,8 @@ class CqStats
 					MPG_current,
 					MPG_peak,
 					MPG_culled,
+					MPG_missed,
+					MPG_trimmed,
 
 					//Pushes
 					MPG_pushed_forward,
@@ -296,63 +330,6 @@ class CqStats
 		{
 			m_cParametersDeallocated++;
 			m_cParametersCurrent--;
-		}
-		/** Increase the micropolygrids allocated count by 1.
-		 */
-		void	IncGridsAllocated()
-		{
-			m_cGridsAllocated++;
-			m_cGridsCurrent++;
-			m_cGridsPeak = ( m_cGridsCurrent > m_cGridsPeak ) ? m_cGridsCurrent : m_cGridsPeak;
-		}
-		/** Increase the micropolygrids deallocated count by 1.
-		 */
-		void	IncGridsDeallocated()
-		{
-			m_cGridsDeallocated++;
-			m_cGridsCurrent--;
-		}
-		/** Increase the GPrim count by 1.
-		    These counter should only be increased when adding a toplevel gprim
-				(e.g. in the Ri...() calls).
-		 */
-		void	IncGPrims()
-		{
-			m_cGPrims++;
-		}
-		/** Increase the total GPrim count by 1.
-		    Here \em every gprim is counted (including those resulting from a split).
-		 */
-		void	IncTotalGPrims()
-		{
-			m_cTotalGPrims++;
-		}
-		/** Decrease the total GPrim count by 1.
-		    This method should be called when a gprim is split since the
-				gprim will be replaced by a number of smaller gprims and therefore 
-				shouldn't appear in the statistics.
-		 */
-		void	DecTotalGPrims()
-		{
-			m_cTotalGPrims--;
-		}
-		/** Increase the culled GPrim count by 1.
-		 */
-		void	IncCulledGPrims()
-		{
-			m_cCulledGPrims++;
-		}
-		/** Increase the culled micropoly grid count by 1.
-		 */
-		void	IncCulledGrids()
-		{
-			m_cCulledGrids++;
-		}
-		/** Increase the missed MPG count by 1.
-		 */
-		void	IncMissedMPGs()
-		{
-			m_cMissedMPGs++;
 		}
 
 		/** Increase the texture memory used.
@@ -489,32 +466,6 @@ class CqStats
 			return ( m_timeOthers );
 		};
 
-		TqInt GetCurrentMPGsAllocated() const
-		{
-			return ( m_cMPGsCurrent );
-		}
-		TqInt GetMPGsAllocated() const
-		{
-			return ( m_cMPGsAllocated );
-		}
-		TqInt GetMPGsDeallocated() const
-		{
-			return ( m_cMPGsDeallocated );
-		}
-
-		TqInt GetCurrentGridsAllocated() const
-		{
-			return ( m_cGridsCurrent );
-		}
-		TqInt GetGridsAllocated() const
-		{
-			return ( m_cGridsAllocated );
-		}
-		TqInt GetGridsDeallocated() const
-		{
-			return ( m_cGridsDeallocated );
-		}
-
 		TqInt GetCurrentParametersAllocated() const
 		{
 			return ( m_cParametersCurrent );
@@ -543,17 +494,7 @@ class CqStats
 		static TqFloat	 m_floatVars[ _Last_float ];		///< Float variables
 		static TqInt		m_intVars[ _Last_int ];			///< Int variables
 
-		TqInt	m_cMPGsAllocated;				///< Count of micropolygons allocated.
-		TqInt	m_cMPGsDeallocated;				///< Count of microplygons dallocated.
-		TqInt	m_cMPGsCurrent;					///< Current count of allocated MPGs.
-		TqInt	m_cMPGsPeak;					///< Peak count of allocated MPGs.
-		TqInt	m_cMPGsPushedForward;			///< Number of micropolygons pushed forward in the bucket list.
-		TqInt	m_cMPGsPushedDown;				///< Number of micropolygons pushed down in the bucket list.
-		TqInt	m_cMPGsPushedFarDown;			///< Number of micropolygons pushed down additional rows in the bucket list.
-		TqInt	m_cSamples;						///< Count of samples tested.
-		TqInt	m_cSampleBoundHits;				///< Count of sample boundary hits.
-		TqInt	m_cSampleHits;					///< Count of sample micropolygon hits.
-		TqInt	m_cVariablesAllocated;			///< Count of shader variables allocated.
+			TqInt	m_cVariablesAllocated;			///< Count of shader variables allocated.
 		TqInt	m_cVariablesDeallocated;		///< Count of shader variables deallocated.
 		TqInt	m_cVariablesCurrent;			///< Current count of variables allocated.
 		TqInt	m_cVariablesPeak;				///< Peak count of variables allocated.
@@ -561,17 +502,8 @@ class CqStats
 		TqInt	m_cParametersDeallocated;		///< Count of surface parameters deallocated.
 		TqInt	m_cParametersCurrent;			///< Current count of parameters allocated.
 		TqInt	m_cParametersPeak;				///< Peak count of parameters allocated.
-		TqInt	m_cGridsAllocated;				///< Count of micropolygrids allocated.
-		TqInt	m_cGridsDeallocated;			///< Count of micropolygrids deallocated.
-		TqInt	m_cGridsCurrent;				///< Current count of grids allocated.
-		TqInt	m_cGridsPeak;					///< Peak count of grids allocated.
-		TqInt	m_cGPrims;						///< Count of GPrims.
 
-		TqInt	m_cTotalGPrims;					///< Count of total GPrims (including gprims resulting from splits).
-		TqInt	m_cCulledGPrims;				///< Count of culled GPrims.
-		TqInt	m_cCulledGrids;					///< Count of culled micro poly grids.
-		TqInt	m_cCulledMPGs;					///< Count of culled micro polys.
-		TqInt	m_cMissedMPGs;				///< Count of missed MPGs.
+
 		TqInt m_cTextureMemory;     ///< Count of the memory used by texturemap.cpp
 		TqInt m_cTextureHits[ 2 ][ 5 ];     ///< Count of the hits encountered used by texturemap.cpp
 		TqInt m_cTextureMisses[ 5 ];     ///< Count of the hits encountered used by texturemap.cpp

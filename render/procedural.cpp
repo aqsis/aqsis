@@ -63,6 +63,7 @@ START_NAMESPACE( Aqsis )
  */
 CqProcedural::CqProcedural() : CqSurface()
 {
+	STATS_INC( GEO_prc_created );
 }
 
 /**
@@ -77,6 +78,8 @@ CqProcedural::CqProcedural(RtPointer data, CqBound &B, RtProcSubdivFunc subfunc,
 
 	m_pconStored = QGetRenderContext()->pconCurrent();
 	ADDREF( m_pconStored );
+
+	STATS_INC( GEO_prc_created );
 }
 
 
@@ -101,6 +104,9 @@ TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	// restore saved context
 	QGetRenderContext()->pconCurrent( pconSave );
+
+	STATS_INC( GEO_prc_split );
+
 	return 0;
 }
 
@@ -242,6 +248,8 @@ extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 	plugin->Free();
 
 	ActiveProcDLList.push_back( plugin ); 
+
+	STATS_INC( GEO_prc_created_dl );
 } 
 
 
@@ -252,6 +260,7 @@ extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 extern "C" RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
 {
 	RiReadArchive( (RtToken) ((char**) data)[0], NULL );
+	STATS_INC( GEO_prc_created_dra );
 }
 
 
@@ -376,6 +385,8 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 	delete( decoder );
 
+	STATS_INC( GEO_prc_created_prp );
+
 	return;
 }
 
@@ -484,6 +495,8 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 	librib::SetParserState( currstate );
 
 	delete( decoder );
+
+	STATS_INC( GEO_prc_created_prp );
 
 	return;
 }

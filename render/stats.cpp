@@ -72,13 +72,6 @@ void CqStats::Initialise()
  */
 void CqStats::InitialiseFrame()
 {
-	m_cMPGsAllocated = 0;
-	m_cMPGsDeallocated = 0;
-	m_cMPGsCurrent	= 0;
-	m_cMPGsPeak = 0;
-	m_cSamples = 0;
-	m_cSampleBoundHits = 0;
-	m_cSampleHits = 0;
 	m_cVariablesAllocated = 0;
 	m_cVariablesDeallocated = 0;
 	m_cVariablesCurrent = 0;
@@ -87,16 +80,6 @@ void CqStats::InitialiseFrame()
 	m_cParametersDeallocated = 0;
 	m_cParametersCurrent = 0;
 	m_cParametersPeak = 0;
-	m_cGridsAllocated = 0;
-	m_cGridsDeallocated = 0;
-	m_cGridsCurrent = 0;
-	m_cGridsPeak = 0;
-	m_cGPrims = 0;
-	m_cTotalGPrims = 0;
-	m_cCulledGPrims = 0;
-	m_cCulledGrids = 0;
-	m_cMissedMPGs = 0;
-	m_cCulledMPGs = 0;
 	m_cTextureMemory = 0;
 	memset( m_cTextureMisses, '\0', sizeof( m_cTextureMisses ) );
 	memset( m_cTextureHits, '\0', sizeof( m_cTextureHits ) );
@@ -286,8 +269,64 @@ void CqStats::PrintStats( TqInt level ) const
 	//! Most important informations
 	if ( level == 2 || level == 3 )
 	{
-		MSG << "GPrims: \t" << m_cGPrims << std::endl;
-		MSG << "Total GPrims:\t" << m_cTotalGPrims << " (" << m_cCulledGPrims << " culled)" << std::endl;
+
+		/*
+			-------------------------------------------------------------------
+			GPrim stats
+		*/
+
+		TqFloat _gpr_c_q = 100.0f * STATS_GETI( GPR_culled ) /STATS_GETI( GPR_created_total );
+		TqFloat _gpr_u_q = 100.0f * STATS_GETI( GPR_created_total ) /STATS_GETI( GPR_allocated );
+
+		MSG << "Input geometry:\n\t" << STATS_GETI( GPR_created ) << " primitives created\n" << std::endl;
+
+		MSG << "GPrims:\n\t" 
+			<< STATS_INT_GETI( GPR_allocated ) <<  " allocated\n\t"
+			<< STATS_GETI( GPR_created_total ) <<  " used (" << _gpr_u_q << "%), " << STATS_GETI( GPR_peak ) << " peak,\n\t"
+			<< STATS_GETI( GPR_culled ) << " culled (" << _gpr_c_q << "%)\n" << std::endl;
+		
+		/*
+			GPrim stats - End
+			-------------------------------------------------------------------
+		*/
+
+
+		
+		/*
+			-------------------------------------------------------------------
+			Geometry stats
+		*/
+
+		// Curves
+		TqFloat _geo_crv_s_q = 100.0f * STATS_GETI( GEO_crv_splits ) / STATS_GETI( GEO_crv_created );
+		TqFloat _geo_crv_s_c_q = 100.0f * STATS_GETI( GEO_crv_crv ) / STATS_GETI( GEO_crv_splits );
+		TqFloat _geo_crv_s_p_q = 100.0f * STATS_GETI( GEO_crv_patch ) / STATS_GETI( GEO_crv_splits );
+		
+		// Procedural
+		TqFloat _geo_prc_s_q = 100.0f * STATS_GETI( GEO_prc_split ) / STATS_GETI( GEO_prc_created );
+		
+		
+		MSG << "Geometry:\n\t"
+			// Curves
+			<< "Curves:\n"
+			<<					"\t\t" << STATS_INT_GETI( GEO_crv_created ) << " created\n\t"
+			<<					"\t" << STATS_INT_GETI( GEO_crv_splits ) << " split (" << _geo_crv_s_q << "%)\n\t\t\t"
+			<<							STATS_INT_GETI( GEO_crv_crv ) << " (" << _geo_crv_s_c_q << "%) into " << STATS_INT_GETI( GEO_crv_crv_created ) << " subcurves\n\t\t\t"
+			<<							STATS_INT_GETI( GEO_crv_patch ) << " (" << _geo_crv_s_p_q << "%) into " << STATS_INT_GETI( GEO_crv_patch_created ) << " patches\n\t"
+			<< "Procedurals:\n"
+			<<					"\t\t" << STATS_INT_GETI( GEO_prc_created ) << " created\n\t"
+			<<					"\t" << STATS_INT_GETI( GEO_prc_split ) << " split (" << _geo_crv_s_q << "%)\n\t\t"
+			<<							STATS_INT_GETI( GEO_prc_created_dl ) << " dynamic load,\n\t\t"
+			<<							STATS_INT_GETI( GEO_prc_created_dra ) << " dynamic read archive,\n\t\t"
+			<<							STATS_INT_GETI( GEO_prc_created_prp ) << " run program\n\t\t"
+			<< std::endl;
+		
+		/*
+			GPrim stats - End
+			-------------------------------------------------------------------
+		*/
+
+
 
 		/*
 			-------------------------------------------------------------------
@@ -338,48 +377,49 @@ void CqStats::PrintStats( TqInt level ) const
 		
 
 		MSG << "Grids:\n\t"
-			<< STATS_INT_GETI( GRD_created ) << " created, " << _grd_init << " initialized (" << _grd_init_quote << "%),\n\t" << _grd_shade << " shaded (" << _grd_shade_quote << "%), " << STATS_INT_GETI( GRD_culled ) << " culled\n\n"
+			<< STATS_INT_GETI( GRD_created ) << " created, " << STATS_INT_GETI( GRD_peak ) << " peak,\n\t"
+			<< _grd_init << " initialized (" << _grd_init_quote << "%),\n\t" << _grd_shade << " shaded (" << _grd_shade_quote << "%), " << STATS_INT_GETI( GRD_culled ) << " culled\n\n"
 			<< "\tGrid count/size (diced grids):\n"
 			<< "\t+------+------+------+------+------+------+------+------+\n"
 			<< "\t|<=  4 |<=  8 |<= 16 |<= 32 |<= 64 |<=128 |<=256 | >256 |\n"
 			<< "\t+------+------+------+------+------+------+------+------+\n\t|"
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_4 ) << "|" 
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_8 ) << "|"
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_16 ) << "|"
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_32 ) << "|"
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_64 ) << "|"
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_128 ) << "|"
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_256 ) << "|"
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_g256 ) << "|\n"
+			<< std::setw(6) << std::setprecision( 1 ) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_4 ) << "|" 
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_8 ) << "|"
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_16 ) << "|"
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_32 ) << "|"
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_64 ) << "|"
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_128 ) << "|"
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_256 ) << "|"
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_g256 ) << "|\n"
 			<< "\t|" << std::setw(5) << std::setiosflags( std::ios::right ) << _grd_4 << "%|" 
-			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_8 << "%|"
-			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_16 << "%|"
-			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_32 << "%|"
-			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_64 << "%|"
-			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_128 << "%|"
-			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_256 << "%|"
-			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_g256 << "%|\n"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_8 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_16 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_32 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_64 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_128 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_256 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_g256 << "%|\n"
 			<< "\t+------+------+------+------+------+------+------+------+\n\n"
 			<< "\tGrid count/size (shaded grids):\n"
 			<< "\t+------+------+------+------+------+------+------+------+\n"
 			<< "\t|<=  4 |<=  8 |<= 16 |<= 32 |<= 64 |<=128 |<=256 | >256 |\n"
 			<< "\t+------+------+------+------+------+------+------+------+\n\t|"
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_4 ) << "|" 
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_8 ) << "|"
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_16 ) << "|"
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_32 ) << "|"
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_64 ) << "|"
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_128 ) << "|"
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_256 ) << "|"
-			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_g256 ) << "|\n"
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_4 ) << "|" 
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_8 ) << "|"
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_16 ) << "|"
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_32 ) << "|"
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_64 ) << "|"
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_128 ) << "|"
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_256 ) << "|"
+			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_g256 ) << "|\n"
 			<< "\t|" << std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_4 << "%|" 
-			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_8 << "%|"
-			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_16 << "%|"
-			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_32 << "%|"
-			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_64 << "%|"
-			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_128 << "%|"
-			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_256 << "%|"
-			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_g256 << "%|\n"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_shd_8 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_shd_16 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_shd_32 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_shd_64 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_shd_128 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_shd_256 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_shd_g256 << "%|\n"
 			<< "\t+------+------+------+------+------+------+------+------+\n\n"
 			<< std::endl;
 
@@ -406,7 +446,7 @@ void CqStats::PrintStats( TqInt level ) const
 
 		MSG << "Micropolygons:\n\t"
 			<< STATS_INT_GETI( MPG_allocated ) << " created (" << STATS_INT_GETI( MPG_culled ) << " culled)\n"
-			<< "\tPeak: " << STATS_INT_GETI( MPG_peak ) << "\n\t"
+			<< "\t" <<STATS_INT_GETI( MPG_peak ) << " peak, " << STATS_INT_GETI( MPG_trimmed ) << " trimmed\n\t"
 			<< std::endl;
 		
 		/*

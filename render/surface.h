@@ -66,6 +66,8 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 			if ( m_pCSGNode )
 				RELEASEREF( m_pCSGNode );
 			m_pTransform = 0;
+
+			STATS_DEC( GPR_current );
 		}
 
 #ifdef _DEBUG
