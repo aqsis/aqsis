@@ -264,7 +264,9 @@ CqDDClient::CqDDClient( const TqChar* name, const TqChar* type, const TqChar* mo
 		m_strName( name ),
 		m_strType( type ),
 		m_strMode( mode )
-{}
+{
+		m_hMode = CqParameter::hash(mode);
+}
 
 CqDDClient::~CqDDClient()
 {}
@@ -511,25 +513,27 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 }
 
 
+
 TqBool CqDDManager::fDisplayNeeds(const TqChar* var)
 {
-	static std::string strRGB("rgb");
-	static std::string strRGBA("rgba");
-	static std::string strCi("Ci");
-	static std::string strOi("Oi");
+	static TqUlong rgb = CqParameter::hash("rgb");
+	static TqUlong rgba = CqParameter::hash("rgba");
+	static TqUlong Ci = CqParameter::hash("Ci");
+	static TqUlong Oi = CqParameter::hash("Oi");
+
+	TqUlong htoken = CqParameter::hash(var);
 
 	std::vector<CqDDClient>::iterator i;
 	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
 	{
-		// First check for "rgb"
-		if( ( strCi.compare( var ) == 0 ) && ( i->strMode().find( strRGB ) != i->strMode().npos ) )
-			return( TqTrue );
-		// and "rgba"
-		if( ( strOi.compare( var ) == 0 ) && ( i->strMode().find( strRGBA ) != i->strMode().npos ) )
-			return( TqTrue );
-
-		if( i->strMode().compare( var ) == 0 )
-			return( TqTrue );
+		TqBool usage = ((i->hMode() == rgba) || (i->hMode() == rgb));
+		if ((htoken == Ci) && usage )
+			return(TqTrue);
+		else if ((htoken == Oi) && usage )
+			return(TqTrue);
+		else if ((i->hMode() == htoken))
+			return(TqTrue);
+		
 	}
 	return ( TqFalse );
 }

@@ -85,6 +85,10 @@ class CqDDClient
 		{
 			return ( m_strName );
 		}
+		TqUlong&	hMode()
+		{
+			return ( m_hMode );
+		}
 		void	SetstrName( const TqChar* name )
 		{
 			m_strName = name;
@@ -111,6 +115,7 @@ class CqDDClient
 		CqString	m_strName;			///< Display name.
 		CqString	m_strType;			///< Display type.
 		CqString	m_strMode;			///< Display mode.
+		TqUlong         m_hMode;
 }
 ;
 
