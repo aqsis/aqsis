@@ -62,4 +62,6 @@
 
 #define S_ISDIR(a) (a & S_IFDIR)
 
+#define SHARED_LIBRARY_SUFFIX ".dll"
+
 #endif // AQSIS_COMPILER_H_INCLUDED

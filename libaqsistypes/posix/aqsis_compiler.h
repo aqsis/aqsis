@@ -54,4 +54,6 @@
 #define USING_NAMESPACE(x)  using namespace x;
 #endif
 
+#define SHARED_LIBRARY_SUFFIX ".so"
+
 #endif // AQSIS_COMPILER_H_INCLUDED

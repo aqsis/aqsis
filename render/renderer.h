@@ -38,7 +38,6 @@
 #include	"graphicsstate.h"
 #include	"stats.h"
 #include	"vector2d.h"
-#include	"semaphore.h"
 
 #include	"shaders.h"
 #include	"symbols.h"

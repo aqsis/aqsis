@@ -298,10 +298,6 @@ SOURCE=.\color.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\intel\criticalsection.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\exception.h
 # End Source File
 # Begin Source File
@@ -343,14 +339,6 @@ SOURCE=.\random.h
 # Begin Source File
 
 SOURCE=.\refcount.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\win32\intel\semaphore.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\win32\intel\share.h
 # End Source File
 # Begin Source File
 
