@@ -18,7 +18,7 @@
 void RenderFile(std::istream& file, const char* name);
 static void arg_filename(int argc, char**argv);
 
-bool g_nowait;
+bool g_pause;
 int g_cFiles=0;
 int g_Verbose=0;
 
@@ -27,7 +27,7 @@ int main(int argc, const char** argv)
 {
 	ArgParse ap;
 	ap.usageHeader(ArgParse::apstring("Usage: ") + argv[0] + " [options] files(s) to render");
-	ap.argFlag("nowait", "\adon't wait for a keypress", &g_nowait);
+	ap.argFlag("pause", "\await for a keypress on completion", &g_pause);
 	ap.argInt("endofframe", "=integer\aequivalent to \"endofframe\" option", &g_Verbose);
 	if (!ap.parse(argc-1, argv+1))
 	{
@@ -49,10 +49,10 @@ int main(int argc, const char** argv)
 	}
 
 	// Wait for a keypress
-	if(!g_nowait)
+	if(g_pause)
 	{
 		std::cout << "Press any key to continue..." << std::endl;
-		while(!kbhit());
+		while(!kbhit())	_sleep(1000);
 		getche();
 	}
 
