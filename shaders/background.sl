@@ -17,7 +17,6 @@
 
 imager background (color bgcolor = 1, background = 1)
 {
-    Ci += (1-alpha) * (bgcolor * background);
-    Oi = 1;
-    alpha = 1;
+	Ci += (1-Oi) * (bgcolor * background);
+	Oi = 1;
 }
