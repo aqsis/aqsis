@@ -227,9 +227,7 @@ const CqParameter* CqAttributes::pParameter( const char* strName, const char* st
 	const CqNamedParameterList * pList;
 	if ( ( pList = pAttribute( strName ) ) != 0 )
 	{
-		const CqParameter * pParam;
-		if ( ( pParam = pList->pParameter( strParam ) ) != 0 )
-			return ( pParam );
+		return (pList->pParameter( strParam ) );
 	}
 	return ( 0 );
 }
@@ -247,9 +245,7 @@ CqParameter* CqAttributes::pParameterWrite( const char* strName, const char* str
 	CqNamedParameterList * pList;
 	if ( ( pList = pAttributeWrite( strName ) ) != 0 )
 	{
-		CqParameter * pParam;
-		if ( ( pParam = pList->pParameter( strParam ) ) != 0 )
-			return ( pParam );
+		return (pList->pParameter( strParam ) );
 	}
 	return ( 0 );
 }

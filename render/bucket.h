@@ -190,6 +190,8 @@ class CqBucket : public IqBucket
 		static	std::vector<CqImagePixel>	m_aieImage;
 		static	std::vector<std::vector<CqVector2D> >	m_aSamplePositions;///< Vector of vectors of jittered sample positions precalculated.
 		static	std::vector<TqFloat>	m_aFilterValues;				///< Vector of filter weights precalculated.
+		static	std::vector<TqFloat>	m_aDatas;
+		static	std::vector<TqFloat>	m_aCoverages;
 
 		std::vector<CqMicroPolygon*> m_ampgWaiting;			///< Vector of vectors of waiting micropolygons in this bucket
 		std::vector<CqMicroPolyGridBase*> m_agridWaiting;		///< Vector of vectors of waiting micropolygrids in this bucket

@@ -60,6 +60,8 @@ TqInt	CqBucket::m_YPixelSamples;
 std::vector<CqImagePixel>	CqBucket::m_aieImage;
 std::vector<std::vector<CqVector2D> >	CqBucket::m_aSamplePositions;
 std::vector<TqFloat> CqBucket::m_aFilterValues;
+std::vector<TqFloat> CqBucket::m_aDatas;
+std::vector<TqFloat> CqBucket::m_aCoverages;
 
 
 //----------------------------------------------------------------------
@@ -351,8 +353,8 @@ void CqBucket::FilterBucket(TqBool empty)
 	CqImagePixel * pie;
 	
 	TqInt datasize = QGetRenderContext()->GetOutputDataTotalSize();
-	TqFloat* pDatas = new TqFloat[ datasize * XSize() * YSize() ];
-	TqFloat* pCoverages = new TqFloat[ XSize() * YSize() ];
+	m_aDatas.resize( datasize * XSize() * YSize() );
+	m_aCoverages.resize( XSize() * YSize() );
 
 	TqInt xmax = static_cast<TqInt>( CEIL( ( XFWidth() - 1 ) * 0.5f ) );
 	TqInt ymax = static_cast<TqInt>( CEIL( ( YFWidth() - 1 ) * 0.5f ) );
@@ -386,58 +388,58 @@ void CqBucket::FilterBucket(TqBool empty)
 
 			if(!empty)
 			{
-			TqInt fx, fy;
-			// Get the element at the upper left corner of the filter area.
-			ImageElement( x - xmax, y - ymax, pie );
-			for ( fy = -ymax; fy <= ymax; fy++ )
-			{
-				CqImagePixel* pie2 = pie;
-				for ( fx = -xmax; fx <= xmax; fx++ )
+				TqInt fx, fy;
+				// Get the element at the upper left corner of the filter area.
+				ImageElement( x - xmax, y - ymax, pie );
+				for ( fy = -ymax; fy <= ymax; fy++ )
 				{
-					TqInt index = ( ( ( fy + ymax ) * XFWidth() ) + ( fx + xmax ) ) * numperpixel;
-					// Now go over each subsample within the pixel
-					TqInt sx, sy;
-						TqInt sampleIndex = 0;
-					for ( sy = 0; sy < m_YPixelSamples; sy++ )
+					CqImagePixel* pie2 = pie;
+					for ( fx = -xmax; fx <= xmax; fx++ )
 					{
-						for ( sx = 0; sx < m_XPixelSamples; sx++ )
+						TqInt index = ( ( ( fy + ymax ) * XFWidth() ) + ( fx + xmax ) ) * numperpixel;
+						// Now go over each subsample within the pixel
+						TqInt sx, sy;
+						TqInt sampleIndex = 0;
+						for ( sy = 0; sy < m_YPixelSamples; sy++ )
 						{
-							TqInt sindex = index + ( ( ( sy * m_XPixelSamples ) + sx ) * numsubpixels );
+							for ( sx = 0; sx < m_XPixelSamples; sx++ )
+							{
+								TqInt sindex = index + ( ( ( sy * m_XPixelSamples ) + sx ) * numsubpixels );
 								const SqSampleData& sampleData = pie2->SampleData( sampleIndex );
 								CqVector2D vecS = sampleData.m_Position;
-							vecS -= CqVector2D( xcent, ycent );
-							if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
-							{
-									TqInt cindex = sindex + sampleData.m_SubCellIndex;
-								TqFloat g = m_aFilterValues[ cindex ];
-								gTot += g;
-								if ( pie2->Values( sx, sy ).size() > 0 )
+								vecS -= CqVector2D( xcent, ycent );
+								if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 								{
-									SqImageSample* pSample = &pie2->Values( sx, sy ) [ 0 ];
-									samples += pSample->m_Data * g;
-									SampleCount++;
+										TqInt cindex = sindex + sampleData.m_SubCellIndex;
+									TqFloat g = m_aFilterValues[ cindex ];
+									gTot += g;
+									if ( pie2->Values( sx, sy ).size() > 0 )
+									{
+										SqImageSample* pSample = &pie2->Values( sx, sy ) [ 0 ];
+										samples += pSample->m_Data * g;
+										SampleCount++;
+									}
 								}
+									sampleIndex++;
 							}
-								sampleIndex++;
 						}
+						pie2++;
 					}
-					pie2++;
+					pie += xlen;
 				}
-				pie += xlen;
-			}
 			}
 
 			// Set depth to infinity if no samples.
 			if ( SampleCount <= 0 )
 				samples[ 6 ] = FLT_MAX;
 
-                        for ( TqInt k = 0; k < datasize; k ++)
-				pDatas[ i*datasize + k ] = samples[k] / gTot;
+			for ( TqInt k = 0; k < datasize; k ++)
+				m_aDatas[ i*datasize + k ] = samples[k] / gTot;
 
 			if ( SampleCount >= numsubpixels)
-				pCoverages[ i ] = 1.0;
+				m_aCoverages[ i ] = 1.0;
 			else
-				pCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numsubpixels );
+				m_aCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numsubpixels );
 
 			i++;
 		}
@@ -454,8 +456,8 @@ void CqBucket::FilterBucket(TqBool empty)
 		for ( x = 0; x < endx; x++ )
 		{
 			for (TqInt k=0; k < datasize; k++)
-				pie2->GetPixelSample().m_Data[k] = pDatas[ i * datasize + k ];
-			pie2->SetCoverage( pCoverages[ i++ ] );
+				pie2->GetPixelSample().m_Data[k] = m_aDatas[ i * datasize + k ];
+			pie2->SetCoverage( m_aCoverages[ i++ ] );
 			pie2++;
 		}
 		pie += xlen;
@@ -497,10 +499,6 @@ void CqBucket::FilterBucket(TqBool empty)
 		}
 		QGetRenderContext() ->Stats().MakeFilterBucket().Start();
 	}
-
-	delete[] ( pDatas );
-	delete[] ( pCoverages );
-
 }
 
 

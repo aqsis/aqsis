@@ -766,8 +766,12 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 	m_vDiceSize = static_cast<TqInt>( vLen );
 
 	// Ensure power of 2 to avoid cracking
-	m_uDiceSize = CEIL_POW2( m_uDiceSize );
-	m_vDiceSize = CEIL_POW2( m_vDiceSize );
+	const TqInt *binary = pAttributes() ->GetIntegerAttribute( "dice", "binary" );
+	if ( binary && *binary)
+	{
+		m_uDiceSize = CEIL_POW2( m_uDiceSize );
+		m_vDiceSize = CEIL_POW2( m_vDiceSize );
+	}
 
 	if ( uLen < FLT_EPSILON || vLen < FLT_EPSILON )
 	{
