@@ -224,27 +224,23 @@ void CqImagePixel::Combine()
 	m_Depth = 0;
 	m_Coverage = 0;
 	
-	unsigned int samplecount = 0;
+	TqUint samplecount = 0;
 	for(std::vector<std::vector<SqImageSample> >::iterator samples = m_aValues.begin(); samples != m_aValues.end(); samples++)
+	{
+		CqColor samplecolor(0,0,0);
+		for(std::vector<SqImageSample>::reverse_iterator sample = samples->rbegin(); sample != samples->rend(); sample++)
 		{
-			for(std::vector<SqImageSample>::iterator sample = samples->begin(); sample != samples->end(); sample++)
-				{
-					m_colColor = (m_colColor * (white - sample->m_colOpacity)) + sample->m_colColor;
-					m_Depth += sample->m_Depth;
-					m_Coverage += 1;
-					
-					samplecount++;
-				}
+			samplecolor = (samplecolor * (white - sample->m_colOpacity)) + sample->m_colColor;
+			m_Coverage += 1;
+			samplecount++;
 		}
+
+		if(samples->size()>0)
+			samples->begin()->m_colColor=samplecolor;
+	}
 	
 	if(samplecount)
-		{
-			m_colColor.Clamp();
-			m_Depth /= samplecount;
-			m_Coverage /= samplecount;
-		}
-	else
-		m_Depth=FLT_MAX;
+		m_Coverage /= samplecount;
 }
 
 
@@ -559,6 +555,7 @@ void CqBucket::FilterBucket()
 	CqImagePixel* pie;
 
 	CqColor* pCols=new CqColor[XSize()*YSize()];
+	TqFloat* pDepths=new TqFloat[XSize()*YSize()];
 	TqInt xmax=static_cast<TqInt>(ceil((XFWidth()-1)*0.5f));
 	TqInt ymax=static_cast<TqInt>(ceil((YFWidth()-1)*0.5f));
 	TqFloat xfwo2=XFWidth()*0.5f;
@@ -577,7 +574,9 @@ void CqBucket::FilterBucket()
 		{
 			TqFloat xcent=x+0.5f;
 			CqColor c(0,0,0);
+			TqFloat d=0;
 			TqFloat gTot=0.0;
+			TqInt SampleCount=0;
 			
 			TqInt fx,fy;
 			// Get the element at the upper left corner of the filter area.
@@ -603,7 +602,11 @@ void CqBucket::FilterBucket()
 								TqFloat g=m_aFilterValues[cindex];
 								gTot+=g;
 								if(pie2->Values(sx,sy).size()>0)
+								{
 									c+=pie2->Values(sx,sy)[0].m_colColor*g;
+									d+=pie2->Values(sx,sy)[0].m_Depth;
+									SampleCount++;
+								}
 							}	
 						}
 					}
@@ -612,7 +615,9 @@ void CqBucket::FilterBucket()
 				pie+=xlen;
 				fy++;
 			}
-			pCols[i++]=c/gTot;
+			pCols[i  ]=c/gTot;
+			if(SampleCount>0)	pDepths[i++]=d/SampleCount;
+			else				pDepths[i++]=FLT_MAX;
 		}
 	}
 	
@@ -623,12 +628,14 @@ void CqBucket::FilterBucket()
 		CqImagePixel* pie2=pie;
 		for(x=0; x<XSize(); x++)
 		{
-			pie2->Color()=pCols[i++];
+			pie2->Color()=pCols[i];
+			pie2->SetDepth(pDepths[i++]);
 			pie2++;
 		}
 		pie+=xlen;
 	}
 	delete[](pCols);
+	delete[](pDepths);
 }
 
 
@@ -1332,7 +1339,7 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 										int j=0;
 										// Find first opaque sample
 										while(j<c && aValues[j].m_colOpacity != gColWhite) j++;
-										if(aValues[j].m_Depth == Bucket.MaxDepth() && aValues[j].m_colOpacity == gColWhite)
+										if(j<c && aValues[j].m_Depth == Bucket.MaxDepth() && aValues[j].m_colOpacity == gColWhite)
 										{
 											if(aValues[j].m_Depth > ImageVal.m_Depth)
 											{
@@ -1459,8 +1466,8 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 	
 	// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
 	if(m_fQuit)	return;
-	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
-		CqBucket::CombineElements();
+
+	CqBucket::CombineElements();
 
 	Bucket.FilterBucket();
 	Bucket.ExposeBucket();
