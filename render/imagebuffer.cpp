@@ -886,8 +886,8 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 				// Now compute the % of samples that hit...
 				TqInt scount = iXSamples * iYSamples;
 				TqFloat max_hits = scount * shd_rate;
-
-				STATS_INC( MPG_sample_coverage0_125 + TqInt( -0.1 + 8 * ( sample_hits / max_hits ) ) );
+				TqInt hit_rate = ( sample_hits / max_hits ) / 0.125;
+				STATS_INC( MPG_sample_coverage0_125 + CLAMP( hit_rate - 1 , 0, 7 ) );
 			}
 			iY++;
 		}

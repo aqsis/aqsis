@@ -158,64 +158,7 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
 
 	TqInt size = ( cu + 1 ) * ( cv + 1 );
 
-	if( size > 256 )
-	{
-		STATS_INC( GRD_size_g256 );
-		return;
-	}
-	else
-	{
-		if( size > 128 )
-		{
-			STATS_INC( GRD_size_256 );
-			return;
-		}
-		else
-		{
-			if( size > 64 )
-			{
-				STATS_INC( GRD_size_128 );
-				return;
-			}
-			else
-			{
-				if( size > 32 )
-				{
-					STATS_INC( GRD_size_64 );
-					return;
-				}
-				else
-				{
-					if( size > 16 )
-					{
-						STATS_INC( GRD_size_32 );
-						return;
-					}
-					else
-					{
-						if( size > 8 )
-						{
-							STATS_INC( GRD_size_16 );
-							return;
-						}
-						else
-						{
-							if( size > 4 )
-							{
-								STATS_INC( GRD_size_8 );
-							}
-							else
-							{
-								STATS_INC( GRD_size_4 );
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-
+	STATS_INC( GRD_size_4 + CLAMP( CqStats::log2( size ) - 2, 0, 7 ) );
 }
 
 //---------------------------------------------------------------------
@@ -571,62 +514,7 @@ void CqMicroPolyGrid::Shade()
 
 	TqInt	size = GridSize();
 
-	if( size > 256 )
-	{
-		STATS_INC( GRD_shd_size_g256 );
-		return;
-	}
-	else
-	{
-		if( size > 128 )
-		{
-			STATS_INC( GRD_shd_size_256 );
-			return;
-		}
-		else
-		{
-			if( size > 64 )
-			{
-				STATS_INC( GRD_shd_size_128 );
-				return;
-			}
-			else
-			{
-				if( size > 32 )
-				{
-					STATS_INC( GRD_shd_size_64 );
-					return;
-				}
-				else
-				{
-					if( size > 16 )
-					{
-						STATS_INC( GRD_shd_size_32 );
-						return;
-					}
-					else
-					{
-						if( size > 8 )
-						{
-							STATS_INC( GRD_shd_size_16 );
-							return;
-						}
-						else
-						{
-							if( size > 4 )
-							{
-								STATS_INC( GRD_shd_size_8 );
-							}
-							else
-							{
-								STATS_INC( GRD_shd_size_4 );
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+	STATS_INC( GRD_shd_size_4 + CLAMP( CqStats::log2( size ) - 2, 0, 7 ) );
 }
 
 //---------------------------------------------------------------------

@@ -221,6 +221,31 @@ class CqStats
 			return m_floatVars[ index ];
 		}
 
+		/**
+			\param	value	This has to be a 32-bit integer!
+		 */
+		static unsigned int log2( int value /* Must be 32-bit integer!! */ )
+		{
+			// As described in http://graphics.stanford.edu/~seander/bithacks.html#IntegerLog
+			// This method should take roughly O(lg(N)) operations for a N-bit integer
+			
+			const unsigned int b[] = {0x2, 0xC, 0xF0, 0xFF00, 0xFFFF0000};
+			const unsigned int S[] = {1, 2, 4, 8, 16};
+			int i;
+
+			register unsigned int c = 0; // result of log2(v) will go here
+			for (i = 4; i >= 0; i--) // unroll for speed...
+			{
+			  if (value & b[i])
+			  {
+				value >>= S[i];
+				c |= S[i];
+			  } 
+			}
+
+			return c;
+		}
+
 		enum {	_First_float,
 				_Last_float } EqFloatIndex;
 		enum {	_First_int,
