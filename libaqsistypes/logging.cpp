@@ -266,10 +266,33 @@ fold_duplicates_buf::fold_duplicates_buf(std::ostream& Stream) :
 fold_duplicates_buf::~fold_duplicates_buf()
 {
 	// Flush any leftover output ...
+	print_duplicates();
+
 	if(m_buffer.size())
 		m_streambuf->sputn(m_buffer.c_str(), m_buffer.size());
 
 	m_stream.rdbuf(m_streambuf);
+}
+
+bool fold_duplicates_buf::print_duplicates()
+{
+	if(m_duplicate_count)
+		{
+			std::ostringstream buffer;
+			buffer << "Last message repeated " << m_duplicate_count << " time";
+			if(m_duplicate_count > 1)
+				buffer << "s";
+			buffer << "\n";
+
+			const std::string message(buffer.str());
+
+			if(m_streambuf->sputn(message.c_str(), message.size()) != message.size())
+				return false;
+
+			m_duplicate_count = 0;
+		}
+
+	return true;
 }
 
 int fold_duplicates_buf::overflow(int c)
@@ -287,21 +310,8 @@ int fold_duplicates_buf::overflow(int c)
 				}
 			else
 				{
-					if(m_duplicate_count)
-						{
-							std::ostringstream buffer;
-							buffer << "Last message repeated " << m_duplicate_count << " time";
-							if(m_duplicate_count > 1)
-								buffer << "s";
-							buffer << "\n";
-
-							const std::string message(buffer.str());
-
-							if(m_streambuf->sputn(message.c_str(), message.size()) != message.size())
-								return EOF;
-
-							m_duplicate_count = 0;
-						}
+					if(!print_duplicates())
+						return EOF;
 
 					if(m_streambuf->sputn(m_buffer.c_str(), m_buffer.size()) != m_buffer.size())
 						return EOF;

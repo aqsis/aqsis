@@ -84,6 +84,8 @@ protected:
 	int sync();
 
 private:
+	bool print_duplicates();
+
 	std::ostream& m_stream;
 	std::streambuf* const m_streambuf;
 	std::string m_buffer;
