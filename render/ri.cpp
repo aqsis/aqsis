@@ -4054,12 +4054,12 @@ RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char 
 		// Now copy the images to the big map.
 		CqTextureMap* Images[ 6 ] =
 		    {
-		        {&tpz},
-		        {&tpx},
-		        {&tpy},
-		        {&tnx},
-		        {&tny},
-		        {&tnz}
+		        &tpz,
+		        &tpx,
+		        &tpy,
+		        &tnx,
+		        &tny,
+		        &tnz
 		    };
 
 		// Create a new image.
