@@ -137,7 +137,7 @@ int main( int argc, const char** argv )
 						if ( symPtr->svd_arraylen != 0 )
 							arrayLen = symPtr->svd_arraylen;
 
-						std::cout << "\t\"" << symPtr->svd_name << "\" \"" <<
+						std::cout << "    \"" << symPtr->svd_name << "\" \"parameter " <<
 						SLX_DetailtoStr( symPtr->svd_detail ) << " " <<
 						SLX_TypetoStr( symPtr->svd_type );
 
@@ -219,7 +219,7 @@ int main( int argc, const char** argv )
 					{
 						printf( "ERROR - null pointer to value" );
 					}
-					std::cout << std::endl;
+					//std::cout << std::endl;
 				}
 
 				SLX_EndShader();

@@ -39,7 +39,7 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\Release"
+# PROP Output_Dir "..\dso"
 # PROP Intermediate_Dir "..\Object\Release\plugins\dsotest"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DSOTEST_EXPORTS" /YX /FD /c
@@ -64,7 +64,7 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\Library\Debug"
+# PROP Output_Dir "..\dso\Debug"
 # PROP Intermediate_Dir "..\Object\Debug\plugins\dsotest"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
@@ -90,7 +90,7 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\Release"
+# PROP Output_Dir "..\dso\Profile"
 # PROP Intermediate_Dir "..\Object\Profile\plugins\dsotest"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\render" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DSOTEST_EXPORTS" /YX /FD /c

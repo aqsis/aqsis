@@ -3464,27 +3464,31 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminance( STRINGVAL Category, POINTVAL P, VECT
 				catname = cat;
 			}
 			
-			lp->pShader()->FindArgument("__category")->GetString( lightcategories );
-
-			exec = TqFalse;
-			// While no matching category has been found...
-			TqInt tokenpos = 0, tokenend;
-			while( 1 )
+			IqShaderData* pcats = lp->pShader()->FindArgument("__category");
+			if( pcats )
 			{
-				tokenend = lightcategories.find(',', tokenpos);
-				CqString token = lightcategories.substr( tokenpos, tokenend );
-				if( catname.compare( token ) == 0 )
+				pcats->GetString( lightcategories );
+
+				exec = TqFalse;
+				// While no matching category has been found...
+				TqInt tokenpos = 0, tokenend;
+				while( 1 )
 				{
-					if( !exclude )
+					tokenend = lightcategories.find(',', tokenpos);
+					CqString token = lightcategories.substr( tokenpos, tokenend );
+					if( catname.compare( token ) == 0 )
 					{
-						exec = TqTrue;
-						break;
+						if( !exclude )
+						{
+							exec = TqTrue;
+							break;
+						}
 					}
+					if( tokenend == std::string::npos )
+						break;
+					else
+						tokenpos = tokenend+1;
 				}
-				if( tokenend == std::string::npos )
-					break;
-				else
-					tokenpos = tokenend+1;
 			}
 		}
 

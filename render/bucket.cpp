@@ -128,6 +128,10 @@ void CqBucket::InitialiseFilterValues()
 	RtFilterFunc pFilter;
 	pFilter = QGetRenderContext() ->optCurrent().funcFilter();
 
+	// Sanity check
+	if( NULL == pFilter )
+		pFilter = RiBoxFilter;
+
 	TqFloat xmax = m_XMax;
 	TqFloat ymax = m_YMax;
 	TqFloat xfwo2 = m_XFWidth * 0.5f;

@@ -90,12 +90,13 @@ int main( int argc, const char** argv )
 	bool error = false; ///! Couldn't compile shader
 
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options]" );
+	ap.argString( "o", " %s \aspecify output filename", &g_stroutname );
+	ap.argStrings( "i", "%s \aSet path for #include files.", &g_includes );
+	ap.argStrings( "I", "%s \aSet path for #include files.", &g_includes );
+	ap.argStrings( "D", "Sym[=value] \adefine symbol <string> to have value <value> (default 1).", &g_defines );
+	ap.argStrings( "U", "Sym \aUndefine an initial symbol.", &g_undefines );
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
 	ap.argFlag( "version", "\aprint version information and exit", &g_version );
-	ap.argString( "o", " string \aspecify output filename", &g_stroutname );
-	ap.argStrings( "d", " string[=value] \adefine symbol <string> to have value <value> (default 1).", &g_defines );
-	ap.argStrings( "i", " string \aSet path for #include files.", &g_includes );
-	ap.argStrings( "u", " string \aUndefine an initial symbol.", &g_undefines );
 
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
 	{

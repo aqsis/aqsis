@@ -275,13 +275,23 @@ bool ArgParse::parse(int argc, const char** argv)
 	apstring option_name(rest, l);
 	OptionHandler* oh = d->findOption(option_name, &no);
 	if (oh == NULL) {
-	    if (d->allowUnrecognizedOptions) {
-		d->leftovers.push_back(argv[i]);
-		continue;
-	    } else {
-		d->errmsg = apstring(argv[i]) + ": unrecognized option";
-		break;
-	    }
+		// See if there is an option which matches the first character and takes and
+		// argument, if so, match it as an option/argument pair.
+		apstring onechar(rest, 1);
+		bool no;
+		oh = d->findOption(onechar, &no);
+		if( oh != NULL && oh->takesarg()) {
+			// Setup the lenght to point to the remainder.
+			l = 0;
+		} else {
+			if (d->allowUnrecognizedOptions) {
+			d->leftovers.push_back(argv[i]);
+			continue;
+			} else {
+			d->errmsg = apstring(argv[i]) + ": unrecognized option";
+			break;
+			}
+		}
 	}
 	if (oh->takesarg()) {
 	    if (rest[l] != '\0') {

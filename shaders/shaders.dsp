@@ -37,7 +37,7 @@ MTL=midl.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\Release"
+# PROP Output_Dir ""
 # PROP Intermediate_Dir ""
 # PROP Target_Dir ""
 
@@ -50,7 +50,7 @@ MTL=midl.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\Library\Debug"
+# PROP Output_Dir ""
 # PROP Intermediate_Dir ""
 # PROP Target_Dir ""
 
@@ -63,8 +63,8 @@ MTL=midl.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\Profile"
-# PROP Intermediate_Dir "..\Object\Profile\shaders"
+# PROP Output_Dir ""
+# PROP Intermediate_Dir ""
 # PROP Target_Dir ""
 
 !ENDIF 
@@ -85,7 +85,7 @@ SOURCE=.\ambientlight.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\ambientlight.sl
 InputName=ambientlight
 
@@ -99,7 +99,7 @@ InputName=ambientlight
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\ambientlight.sl
 InputName=ambientlight
 
@@ -113,7 +113,7 @@ InputName=ambientlight
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\ambientlight.sl
 InputName=ambientlight
 
@@ -134,7 +134,7 @@ SOURCE=.\background.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\background.sl
 InputName=background
 
@@ -148,7 +148,7 @@ InputName=background
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\background.sl
 InputName=background
 
@@ -162,7 +162,7 @@ InputName=background
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\background.sl
 InputName=background
 
@@ -183,7 +183,7 @@ SOURCE=.\cellnoisetest.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\cellnoisetest.sl
 InputName=cellnoisetest
 
@@ -197,7 +197,7 @@ InputName=cellnoisetest
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\cellnoisetest.sl
 InputName=cellnoisetest
 
@@ -211,7 +211,7 @@ InputName=cellnoisetest
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\cellnoisetest.sl
 InputName=cellnoisetest
 
@@ -232,7 +232,7 @@ SOURCE=.\constant.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\constant.sl
 InputName=constant
 
@@ -246,7 +246,7 @@ InputName=constant
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\constant.sl
 InputName=constant
 
@@ -260,7 +260,7 @@ InputName=constant
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\constant.sl
 InputName=constant
 
@@ -281,7 +281,7 @@ SOURCE=.\dented.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\dented.sl
 InputName=dented
 
@@ -295,7 +295,7 @@ InputName=dented
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\dented.sl
 InputName=dented
 
@@ -309,7 +309,7 @@ InputName=dented
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\dented.sl
 InputName=dented
 
@@ -330,7 +330,7 @@ SOURCE=.\depthcue.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\depthcue.sl
 InputName=depthcue
 
@@ -344,7 +344,7 @@ InputName=depthcue
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\depthcue.sl
 InputName=depthcue
 
@@ -358,7 +358,7 @@ InputName=depthcue
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\depthcue.sl
 InputName=depthcue
 
@@ -379,7 +379,7 @@ SOURCE=.\distantlight.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\distantlight.sl
 InputName=distantlight
 
@@ -393,7 +393,7 @@ InputName=distantlight
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\distantlight.sl
 InputName=distantlight
 
@@ -407,7 +407,7 @@ InputName=distantlight
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\distantlight.sl
 InputName=distantlight
 
@@ -428,7 +428,7 @@ SOURCE=.\fog.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\fog.sl
 InputName=fog
 
@@ -442,7 +442,7 @@ InputName=fog
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\fog.sl
 InputName=fog
 
@@ -456,7 +456,7 @@ InputName=fog
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\fog.sl
 InputName=fog
 
@@ -477,7 +477,7 @@ SOURCE=.\matte.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\matte.sl
 InputName=matte
 
@@ -491,7 +491,7 @@ InputName=matte
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\matte.sl
 InputName=matte
 
@@ -505,7 +505,7 @@ InputName=matte
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\matte.sl
 InputName=matte
 
@@ -526,7 +526,7 @@ SOURCE=.\metal.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\metal.sl
 InputName=metal
 
@@ -540,7 +540,7 @@ InputName=metal
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\metal.sl
 InputName=metal
 
@@ -554,7 +554,7 @@ InputName=metal
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\metal.sl
 InputName=metal
 
@@ -575,7 +575,7 @@ SOURCE=.\paintedplastic.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\paintedplastic.sl
 InputName=paintedplastic
 
@@ -589,7 +589,7 @@ InputName=paintedplastic
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\paintedplastic.sl
 InputName=paintedplastic
 
@@ -603,7 +603,7 @@ InputName=paintedplastic
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\paintedplastic.sl
 InputName=paintedplastic
 
@@ -624,7 +624,7 @@ SOURCE=.\plastic.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\plastic.sl
 InputName=plastic
 
@@ -638,7 +638,7 @@ InputName=plastic
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\plastic.sl
 InputName=plastic
 
@@ -652,7 +652,7 @@ InputName=plastic
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\plastic.sl
 InputName=plastic
 
@@ -673,7 +673,7 @@ SOURCE=.\pointlight.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\pointlight.sl
 InputName=pointlight
 
@@ -687,7 +687,7 @@ InputName=pointlight
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\pointlight.sl
 InputName=pointlight
 
@@ -701,7 +701,7 @@ InputName=pointlight
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\pointlight.sl
 InputName=pointlight
 
@@ -722,7 +722,7 @@ SOURCE=.\randgrid.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\randgrid.sl
 InputName=randgrid
 
@@ -736,7 +736,7 @@ InputName=randgrid
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\randgrid.sl
 InputName=randgrid
 
@@ -750,7 +750,7 @@ InputName=randgrid
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\randgrid.sl
 InputName=randgrid
 
@@ -771,7 +771,7 @@ SOURCE=.\shadowspot.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\shadowspot.sl
 InputName=shadowspot
 
@@ -785,7 +785,7 @@ InputName=shadowspot
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\shadowspot.sl
 InputName=shadowspot
 
@@ -799,7 +799,7 @@ InputName=shadowspot
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\shadowspot.sl
 InputName=shadowspot
 
@@ -820,7 +820,7 @@ SOURCE=.\shinymetal.sl
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\shinymetal.sl
 InputName=shinymetal
 
@@ -834,7 +834,7 @@ InputName=shinymetal
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\shinymetal.sl
 InputName=shinymetal
 
@@ -848,7 +848,7 @@ InputName=shinymetal
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\shinymetal.sl
 InputName=shinymetal
 
@@ -870,7 +870,7 @@ SOURCE=.\spotlight.sl
 # PROP Intermediate_Dir "..\Content"
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Release
+OutDir=.
 InputPath=.\spotlight.sl
 InputName=spotlight
 
@@ -885,7 +885,7 @@ InputName=spotlight
 # PROP Intermediate_Dir "..\Content"
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Debug
+OutDir=.
 InputPath=.\spotlight.sl
 InputName=spotlight
 
@@ -901,7 +901,7 @@ InputName=spotlight
 # PROP Intermediate_Dir "..\Content"
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\Library\Profile
+OutDir=.
 InputPath=.\spotlight.sl
 InputName=spotlight
 

@@ -38,7 +38,7 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\Release"
+# PROP Output_Dir "..\lib"
 # PROP Intermediate_Dir "..\Object\Release\libcodegenvm"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
@@ -61,7 +61,7 @@ LIB32=link.exe -lib
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\Library\Debug"
+# PROP Output_Dir "..\lib\Debug"
 # PROP Intermediate_Dir "..\Object\Debug\libcodegenvm"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /GZ /c
@@ -84,7 +84,7 @@ LIB32=link.exe -lib
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\Profile"
+# PROP Output_Dir "..\lib\Profile"
 # PROP Intermediate_Dir "..\Object\Profile\libcodegenvm"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libslparse" /I "..\render" /D "NDEBUG" /D "_WINDOWS" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBCODEGENVM /D BUILD_LIBCODEGENVM=1 /FR /YX /FD /c

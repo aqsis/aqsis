@@ -37,8 +37,8 @@ MTL=midl.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\Release"
-# PROP Intermediate_Dir "Release"
+# PROP Output_Dir ""
+# PROP Intermediate_Dir ""
 # PROP Target_Dir ""
 
 !ELSEIF  "$(CFG)" == "doxygen - Win32 Debug"
@@ -50,8 +50,8 @@ MTL=midl.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\Library\Debug"
-# PROP Intermediate_Dir "Debug"
+# PROP Output_Dir ""
+# PROP Intermediate_Dir ""
 # PROP Target_Dir ""
 
 !ELSEIF  "$(CFG)" == "doxygen - Win32 Profile"
@@ -63,8 +63,8 @@ MTL=midl.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\Profile"
-# PROP Intermediate_Dir "..\Object\Profile\doxygen"
+# PROP Output_Dir ""
+# PROP Intermediate_Dir ""
 # PROP Target_Dir ""
 
 !ENDIF 

@@ -38,7 +38,7 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\Release"
+# PROP Output_Dir "..\bin"
 # PROP Intermediate_Dir "..\Object\Release\teqser"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
@@ -51,7 +51,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 libargparse.lib /nologo /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /libpath:"..\Library\Release"
+# ADD LINK32 libargparse.lib /nologo /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /libpath:"..\lib" /libpath:"..\bin"
 
 !ELSEIF  "$(CFG)" == "teqser - Win32 Debug"
 
@@ -62,7 +62,7 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\Library\Debug"
+# PROP Output_Dir "..\bin\Debug"
 # PROP Intermediate_Dir "..\Object\Debug\teqser"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
@@ -75,7 +75,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 libargparse.lib /nologo /subsystem:console /debug /machine:I386 /nodefaultlib:"libcd.lib" /pdbtype:sept /libpath:"..\Library\Debug"
+# ADD LINK32 libargparse.lib /nologo /subsystem:console /debug /machine:I386 /nodefaultlib:"libcd.lib" /pdbtype:sept /libpath:"..\lib\Debug" /libpath:"..\bin\Debug"
 
 !ELSEIF  "$(CFG)" == "teqser - Win32 Profile"
 
@@ -87,7 +87,7 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\Profile"
+# PROP Output_Dir "..\bin\Profile"
 # PROP Intermediate_Dir "..\Object\Profile\teqser"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
@@ -100,7 +100,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 libargparse.lib log4cpp.lib libz.lib librib2.lib librib2ri.lib libshadervm.lib libshaderexecenv.lib libddmsimple.lib libtiff.lib libaqsistypes.lib libaqsis.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /libpath:"..\Library\Release"
-# ADD LINK32 libargparse.lib /nologo /subsystem:console /profile /debug /machine:I386 /nodefaultlib:"libc.lib" /libpath:"..\Library\Profile"
+# ADD LINK32 libargparse.lib /nologo /subsystem:console /profile /debug /machine:I386 /nodefaultlib:"libc.lib" /libpath:"..\lib\Profile" /libpath:"..\bin\Profile"
 
 !ENDIF 
 
