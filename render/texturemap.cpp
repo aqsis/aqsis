@@ -293,7 +293,7 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 		TqInt ret = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
 		if( ret )
 		{
-			QGetRenderContext()->Logger()->error("Cannot MIPMAP a tiled image (%s)", m_strName.c_str() );
+		   QGetRenderContext()->Logger()->error("Cannot MIPMAP a tiled image (%s)", m_strName.c_str() );
 			return( TqFalse );
 		}
 		// Read the whole image into a buffer.
@@ -887,11 +887,22 @@ void CqTextureMap::Open()
 		m_low_color.resize( m_SamplesPerPixel );
 		m_high_color.resize( m_SamplesPerPixel );
 
+		/* Aqsis supports a slighty different scheme for MipMap tiff file;
+		 * its filtering is kept as a string in 
+		 * Texture Wrap Modes: "periodic periodic box 1.000000 1.000000"
+		 * where AIR, 3Delight, BMRT, RDC use very basic texture wrap mode description eg.
+		 * Texture Wrap Modes: "black,black"
+		 * therefore I initialized the value for filtering to be black, black, box, 1.0, 1.0
+		 * 
+		 */
 		if ( pModes )
 		{
+			swidth = twidth = 1.0f;
+
 			sscanf( pModes, "%s %s %s %f %f", swrap, twrap, filterfunc, &swidth, &twidth );
 
 			/// smode
+			m_smode = WrapMode_Black;
 			if ( strcmp( swrap, RI_PERIODIC ) == 0 )
 			{
 				m_smode = WrapMode_Periodic;
@@ -906,6 +917,7 @@ void CqTextureMap::Open()
 			}
 
 			/// t mode
+			m_tmode = WrapMode_Black;
 			if ( strcmp( twrap, RI_PERIODIC ) == 0 )
 			{
 				m_tmode = WrapMode_Periodic;
@@ -919,6 +931,7 @@ void CqTextureMap::Open()
 				m_tmode = WrapMode_Clamp;
 			}
 			/// Pixel's Filter
+			m_FilterFunc = RiBoxFilter;
 			if ( strcmp( filterfunc, "gaussian" ) == 0 )
 			{
 				m_FilterFunc = RiGaussianFilter;
@@ -952,11 +965,32 @@ void CqTextureMap::Open()
 			m_swidth = swidth;
 			m_twidth = twidth;
 		}
+		uint32 tsx;
+
+		/* First tests; is it stored using tiles ? */
+		TqInt bMipMap = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
+		bMipMap &= TIFFGetField( m_pImage, TIFFTAG_TILELENGTH, &tsx );
+		
+		/* Second test; is it containing enough directories for us */
+		TqInt min = MIN(m_XRes, m_YRes );
+		TqInt directory = (TqInt)  log((double) min)/log((double) 2.0);
+		bMipMap &= TIFFSetDirectory(m_pImage, directory - 1);
 
 
-		if ( pFormat && strcmp( pFormat, MIPMAP_HEADER ) == 0 ||
-		        ( pFormat && strcmp( pFormat, CUBEENVMAP_HEADER ) == 0 ) ||
-		        ( pFormat && strcmp( pFormat, LATLONG_HEADER ) == 0 ) )
+		TIFFSetDirectory(m_pImage, 0 );
+
+
+		/* Support for 3delight, AIR, BMRT, RDC, PIXIE MipMap files.
+		 * Aqsis is not bound to have exact multiples of 2 on height, lenght.
+		 * The Format of 3Delight, AIR, BMRT and RDC is more "Plain Texture"/MipMap.
+		 * What is preventing us to load their files was the format description file as 
+		 * MipMap differ from our format description not the way they store their information.
+		 * A better way is to ask the direct question if if the image is stored as MipMap via
+		 * TIFFTAG_TILEWIDTH, TIFFTAG_TILELENGTH and checking if the texture contains enough 
+		 * directory/pages.
+		 */
+		
+		if ( bMipMap )
 		{
 			m_Format = TexFormat_MIPMAP;
 			m_IsValid = TqTrue;
