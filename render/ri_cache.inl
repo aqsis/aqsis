@@ -1892,8 +1892,8 @@ public:
 		int vertex_size = 1;
 		int facevarying_size = 1;
 		uniform_size=(1+nu-uorder+1)*(1+nv-vorder+1);
-		uniform_size=(1+nu-uorder+1)*(1+nv-vorder+1);
-		uniform_size=nu*nv;
+		varying_size=(1+nu-uorder+1)*(1+nv-vorder+1);
+		vertex_size=nu*nv;
 		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
 	virtual ~RiNuPatchCache()

@@ -631,8 +631,8 @@
 				<Argument name="plist" type="PARAMETERLIST"/>
 			</Arguments>
 			<UniformSize>		uniform_size=(1+nu-uorder+1)*(1+nv-vorder+1);&#xa;</UniformSize>
-			<VaryingSize>		uniform_size=(1+nu-uorder+1)*(1+nv-vorder+1);&#xa;</VaryingSize>
-			<VertexSize>		uniform_size=nu*nv;&#xa;</VertexSize>
+			<VaryingSize>		varying_size=(1+nu-uorder+1)*(1+nv-vorder+1);&#xa;</VaryingSize>
+			<VertexSize>		vertex_size=nu*nv;&#xa;</VertexSize>
 		</Procedure>
 		<Procedure name="RiTrimCurve" return="RtVoid">
 			<Arguments>
