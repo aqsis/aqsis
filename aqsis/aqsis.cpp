@@ -216,11 +216,19 @@ void RenderFile(std::istream& file, const char* name)
 			librib::Parse(cfgfile,"config",renderengine,std::cerr);
 		else
 		{
+                      #ifdef  AQSIS_SYSTEM_WIN32
 			std::cout << "Warning: Config file not found in" << std::endl <<
 						 "%AQSIS_CONFIG%" << std::endl <<
 						 "%AQSIS_BASE_PATH%/.aqsisrc" << std::endl << 
 						 "%HOME%/.aqsisrc" << std::endl <<
 						 "/etc/.aqsisrc" << std::endl;
+                      #else
+                      std::cout << "Warning: Config file not found in" << std::endl <<
+                                              "$AQSIS_CONFIG" << std::endl <<
+                                              "$AQSIS_BASE_PATH/.aqsisrc" << std::endl <<
+                                              "$HOME/.aqsisrc" << std::endl <<
+                                              "/etc/.aqsisrc" << std::endl;
+                      #endif
 		}
 	}
 	librib::Parse(file,name,renderengine,std::cerr);
