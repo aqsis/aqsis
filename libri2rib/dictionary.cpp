@@ -125,6 +125,8 @@ CqDictionary::CqDictionary()
     addToken( "quality", UNIFORM, INTEGER );
     addToken( "bias0", UNIFORM, FLOAT );
     addToken( "bias1", UNIFORM, FLOAT );
+	addToken( "jitter", UNIFORM, INTEGER );
+	addToken( "depthfilter", UNIFORM, STRING );
 }
 
 
