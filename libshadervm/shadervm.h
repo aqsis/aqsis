@@ -110,7 +110,7 @@ union UsProgramElement
 #define	POP				Pop(__fVarying)
 //#define	RESULT			CqVMStackEntry& Result=__fVarying?gVaryingResult:gUniformResult;
 #define	RESULT(t,c)		IqShaderData* pResult=GetNextTemp(t,c); \
-						pResult->Initialise(m_uGridRes, m_vGridRes)
+						pResult->SetSize(( m_uGridRes + 1 ) * ( m_vGridRes + 1 ))
 
 #define	VARFUNC			TqBool __fVarying=TqTrue;
 #define	AUTOFUNC		TqBool __fVarying=TqFalse;

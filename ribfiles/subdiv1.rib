@@ -16,7 +16,7 @@ ConcatTransform [1.0 0.0 0.0 0  0.0 0.373805 -0.927507 0  0.0 0.927507 0.373805 
 WorldBegin
 
 # Default-Surface
-Surface "showuser"
+Surface "showN"
 
 # Object "Punktlicht01"
 TransformBegin

@@ -1,5 +1,6 @@
 version 3.03
 Option "searchpath" "shader" ["../shaders:&"]
+Option "searchpath" "texture" ["../images:&"]
 Display "patch.tif" "framebuffer" "rgba"
 #Display "+patch.tif" "file" "rgba"
 Format 400 300 1

@@ -135,6 +135,11 @@ class CqShaderVariableArray: public CqShaderVariable
 				( *i ) ->Initialise( uGridRes, vGridRes );
 		}
 
+		virtual	void	SetSize( const TqInt size )
+		{
+			for ( std::vector<IqShaderData*>::iterator i = m_aVariables.begin(); i != m_aVariables.end(); i++ )
+				( *i ) ->SetSize( size );
+		}
 
 
 		virtual	void		GetFloat(TqFloat& res, TqInt index=0) const		{assert(TqFalse); m_aVariables[0]->GetFloat(res, index); }
@@ -261,6 +266,8 @@ class CqShaderVariableUniform : public CqShaderVariable
 		{}
 
 		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
+		{}
+		virtual	void	SetSize( const TqInt size )
 		{}
 
 
@@ -489,6 +496,11 @@ class CqShaderVariableVarying : public CqShaderVariable
 			if( m_aValue.size() > 0 )	Def = m_aValue[0];
 			m_aValue.resize( ( uGridRes + 1 ) * ( vGridRes + 1 ) );
 			SetValue( Def );
+		}
+
+		virtual	void	SetSize( const TqInt size )
+		{
+			m_aValue.resize( size );
 		}
 
 		virtual	void		GetFloat(TqFloat &res, TqInt index=0) const		{assert(TqFalse); }

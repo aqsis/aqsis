@@ -1846,8 +1846,22 @@ CqMicroPolyGridBase* CqMotionWSurf::Dice()
 		CqPolygonPoints* pPoints = GetMotionObject( Time( i ) );
 		CqMicroPolyGrid* pGrid2 = new CqMicroPolyGrid( cuv, cuv, pPoints );
 
-		if ( uses_Cs && !has_Cs ) pPoints->Cs()->Dice( cuv, cuv, pGrid2->Cs(), this );
-		if ( uses_Os && !has_Os ) pPoints->Os()->Dice( cuv, cuv, pGrid2->Os(), this );
+		// If the color and opacity are not defined, use the system values.
+		if ( USES( lUses, EnvVars_Cs ) && !bHasCs() ) 
+		{
+			if( NULL != pAttributes()->GetColorAttribute("System", "Color") )
+				pGrid2->Cs()->SetColor( pAttributes()->GetColorAttribute("System", "Color")[0]);
+			else
+				pGrid2->Cs()->SetColor( CqColor( 1,1,1 ) );
+		}
+
+		if ( USES( lUses, EnvVars_Os ) && !bHasOs() ) 
+		{
+			if( NULL != pAttributes()->GetColorAttribute("System", "Opacity") )
+				pGrid2->Os()->SetColor( pAttributes()->GetColorAttribute("System", "Opacity")[0]);
+			else
+				pGrid2->Os()->SetColor( CqColor( 1,1,1 ) );
+		}
 
 		TqInt iFace = 0;
 		StoreDice( m_DiceCount, iFace, pPoints, 0, 0, cuv + 1, pGrid2, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
@@ -1914,7 +1928,7 @@ void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool u
 	{
 		CqPolygonPoints* pPoints = GetMotionObject( Time( iTime ) );
 		CqPolygonPoints* pNewPoints = new CqPolygonPoints(*pPoints);
-		pPoints->ClonePrimitiveVariables(*pPoints);
+		pNewPoints->ClonePrimitiveVariables(*pPoints);
 
 		// Smooth vertex points
 		TqInt iE, bE, sE, i;
@@ -1977,8 +1991,9 @@ void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool u
 		}
 
 		// Copy the modified points back to the surface.
-//		m_pPoints = pNewPoints;
-//		pPoints->Release();
+		AddTimeSlot( Time( iTime ), pNewPoints );
+		pNewPoints->AddRef();
+		pPoints->Release();
 	}
 }
 
@@ -1991,18 +2006,6 @@ CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec
 {
 	m_fSubdivided = TqTrue;
 
-	// Allocate a new points class for points storage.
-	TqInt i;
-	for ( i = 0; i < pSurf->cTimes(); i++ )
-	{
-		CqPolygonPoints* pPointsClass = new CqPolygonPoints( pSurf->cVerts(), 1 );
-		pPointsClass->SetSurfaceParameters( *pSurf->GetMotionObject( Time( i ) ) );
-		pPointsClass->AddRef();
-		AddTimeSlot( pSurf->Time( i ), pPointsClass );
-
-		CqPolygonPoints* pSurfPoints = pSurf->GetMotionObject( pSurf->Time( i ) );
-	}
-
 	TqInt lUses = pSurf->Uses();
 	TqBool uses_s = USES( lUses, EnvVars_s );
 	TqBool uses_t = USES( lUses, EnvVars_t );
@@ -2013,6 +2016,27 @@ CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec
 	TqBool has_t = pSurf->bHast();
 	TqBool has_Cs = pSurf->bHasCs();
 	TqBool has_Os = pSurf->bHasOs();
+
+	// Allocate a new points class for points storage.
+	TqInt i;
+	for ( i = 0; i < pSurf->cTimes(); i++ )
+	{
+		CqPolygonPoints* pPointsClass = new CqPolygonPoints( pSurf->cVerts(), 1 );
+		pPointsClass->SetSurfaceParameters( *pSurf->GetMotionObject( Time( i ) ) );
+		pPointsClass->AddRef();
+		AddTimeSlot( pSurf->Time( i ), pPointsClass );
+
+		CqPolygonPoints* pSurfPoints = pSurf->GetMotionObject( pSurf->Time( i ) );
+		pPointsClass->ClonePrimitiveVariables( *pSurfPoints );
+
+//		pPointsClass->AddPrimitiveVariable(new CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>("P") );
+
+//		if( has_s && uses_s )	pPointsClass->AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
+//		if( has_t && uses_t )	pPointsClass->AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
+//		if( has_Cs && uses_Cs )	pPointsClass->AddPrimitiveVariable(new CqParameterTypedVarying<CqColor, type_color, CqColor>("Cs") );
+//		if( has_Os && uses_Os )	pPointsClass->AddPrimitiveVariable(new CqParameterTypedVarying<CqColor, type_color, CqColor>("Os") );
+	}
+
 
 	// Copy the donor face and all of its neghbours into our local face storage.
 	CqWFace* pF = pSurf->pFace( iFace );

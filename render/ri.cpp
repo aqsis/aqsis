@@ -2535,7 +2535,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 		else
 		{
 			std::vector<CqPolygonPoints*>	apPoints;
-			RtInt i;
+			TqInt i;
 			apPoints.push_back( pPointsClass );
 			for ( i = 1; i < QGetRenderContext() ->ptransCurrent() ->cTimes(); i++ )
 			{
@@ -4080,6 +4080,8 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			{
 				RtFloat time = QGetRenderContext() ->ptransCurrent() ->Time( i );
 				CqPolygonPoints* pPointsClass2 = new CqPolygonPoints( *pPointsClass );
+				// Clone the primitive variables.
+				pPointsClass2->ClonePrimitiveVariables( *pPointsClass );
 
 				// Transform the points into camera space for processing,
 				pPointsClass2->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ) ),
@@ -4150,10 +4152,10 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		}
 
 		// Set up points references according to motion details.
-		pPointsClass->AddRef();
 		if ( QGetRenderContext() ->ptransCurrent() ->cTimes() > 1 )
 		{
 			pMotionSubdivision->AddTimeSlot( QGetRenderContext() ->ptransCurrent() ->Time( 0 ), pPointsClass );
+			pPointsClass->AddRef();
 
 			for ( i = 1; i < QGetRenderContext() ->ptransCurrent() ->cTimes(); i++ )
 			{
@@ -4166,9 +4168,11 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		}
 		else
 		{
+			pPointsClass->AddRef();
 			QGetRenderContext() ->pImage() ->PostSurface( pSubdivision );
 			QGetRenderContext() ->Stats().IncGPrims();
 		}
+		pPointsClass->Release();
 	}
 
 	// Process tags.

@@ -5,7 +5,7 @@
  *	@brief	Decares the interface to generic shader variables.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/08/12 14:27:09 $
+ *	Last change date:	$Date: 2002/09/12 16:51:32 $
  */
 //------------------------------------------------------------------------------
 
@@ -236,6 +236,10 @@ struct IqShaderData
 		 * \return Integer SIMD data size.
 		 */
 		virtual TqUint	Size() const = 0;
+		/** Set the SIMD size of this variable.
+		 * \param size Integer SIMD data size.
+		 */
+		virtual void	SetSize(const TqInt size) = 0;
 		/** Get the length of the variable array.
 		 * \return Integer array length.
 		 */
