@@ -1093,7 +1093,10 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 			CqVector3D vA = (*pTopology()->pPoints()->P())[ aiVertices[i] ];
 			( *pSurface->P() ) [i] = vA;
 		}
-		pSurface->ConvertToBezierBasis();
+
+		CqMatrix matuBasis( RiBSplineBasis );
+		CqMatrix matvBasis( RiBSplineBasis );
+		pSurface->ConvertToBezierBasis( matuBasis, matvBasis );
 
 		aSplits.push_back(pSurface);
 	}

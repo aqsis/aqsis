@@ -392,7 +392,7 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 /** Convert from the current basis into Bezier for processing.
  */
 
-void CqSurfacePatchBicubic::ConvertToBezierBasis()
+void CqSurfacePatchBicubic::ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix& matvBasis )
 {
 	static CqMatrix matMim1;
 	TqInt i, j;
@@ -406,8 +406,8 @@ void CqSurfacePatchBicubic::ConvertToBezierBasis()
 		matMim1 = matMim1.Inverse();
 	}
 
-	CqMatrix matuMj = matuBasis();
-	CqMatrix matvMj = matvBasis();
+	CqMatrix matuMj = matuBasis;
+	CqMatrix matvMj = matvBasis;
 
 	CqMatrix matuConv = matuMj * matMim1;
 	CqMatrix matvConv = matvMj * matMim1;

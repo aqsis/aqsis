@@ -146,18 +146,6 @@ class CqSurfacePatchBicubic : public CqSurface
 		{
 			return ( ( *P() ) [ ( iRow * 4 ) + iCol ] );
 		}
-		/** Get a reference to the basis matrix for the u direction.
-		 */
-		const	CqMatrix&	matuBasis()
-		{
-			return ( pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 0 ] );
-		}
-		/** Get a reference to the basis matrix for the v direction.
-		 */
-		const	CqMatrix&	matvBasis()
-		{
-			return ( pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 1 ] );
-		}
 		CqSurfacePatchBicubic& operator=( const CqSurfacePatchBicubic& From );
 
 		virtual	CqBound	Bound() const;
@@ -185,7 +173,7 @@ class CqSurfacePatchBicubic : public CqSurface
 		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 		virtual void NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u );
 
-		void	ConvertToBezierBasis();
+		void	ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix& matvBasis );
 
 	protected:
 };
@@ -284,19 +272,6 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 
 		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue )
 		{}
-
-		/** Get a reference to the basis matrix for the u direction.
-		 */
-		const	CqMatrix&	matuBasis()
-		{
-			return ( pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 0 ] );
-		}
-		/** Get a reference to the basis matrix for the v direction.
-		 */
-		const	CqMatrix&	matvBasis()
-		{
-			return ( pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 1 ] );
-		}
 
 		virtual	CqBound	Bound() const;
 		virtual	CqMicroPolyGridBase* Dice()

@@ -2937,7 +2937,9 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 		// Fill in primitive variables specified.
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 		{
-			pSurface->ConvertToBezierBasis();
+			CqMatrix matuBasis = pSurface->pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 0 ];
+			CqMatrix matvBasis = pSurface->pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 1 ];
+			pSurface->ConvertToBezierBasis( matuBasis, matvBasis );
 			CreateGPrim( pSurface );
 		}
 		else
@@ -3002,7 +3004,9 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 			std::vector<CqBasicSurface*>::iterator iSS;
 			for ( iSS = aSplits.begin(); iSS != aSplits.end(); iSS++ )
 			{
-				static_cast<CqSurfacePatchBicubic*>( *iSS ) ->ConvertToBezierBasis();
+				CqMatrix matuBasis = pSurface->pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 0 ];
+				CqMatrix matvBasis = pSurface->pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 1 ];
+				static_cast<CqSurfacePatchBicubic*>( *iSS ) ->ConvertToBezierBasis( matuBasis, matvBasis );
 				CreateGPrim( static_cast<CqSurfacePatchBicubic*>( *iSS ) );
 			}
 		}
