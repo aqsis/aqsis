@@ -94,6 +94,9 @@ RtVoid RiProcRunProgram ( RtPointer data, RtFloat detail )
 RtVoid RiProcDynamicLoad ( RtPointer data, RtFloat detail )
 {}
 
+extern "C" RtVoid RiProcFree ( RtPointer data )
+{}
+
 
 
 
