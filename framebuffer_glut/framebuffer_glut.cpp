@@ -62,7 +62,6 @@ using namespace Aqsis;
 typedef int SOCKET;
 #endif // !AQSIS_SYSTEM_WIN32
 
-static bool g_RenderComplete = false;
 static std::string	g_Filename("output.tif");
 static TqInt g_ImageWidth = 0;
 static TqInt g_ImageHeight = 0;
@@ -73,6 +72,7 @@ static GLubyte* g_Image = 0;
 void display(void)
 {
 	glDisable(GL_SCISSOR_TEST);
+	glClear(GL_COLOR_BUFFER_BIT);
 	glRasterPos2i(0, 0);
 	glDrawPixels(g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image);
 	glFlush();
@@ -88,24 +88,10 @@ void reshape(int w, int h)
 	glLoadIdentity();
 }
 
-void visibility(int state)
-{
-	if( state == GLUT_NOT_VISIBLE )
-		return;
-
-	glDisable(GL_SCISSOR_TEST);
-	glRasterPos2i(0, 0);
-	glDrawPixels(g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image);
-	glFlush();
-}
-
 void idle(void)
 {
 	if(!DDProcessMessageAsync(0, 1000))
-		{
-			g_RenderComplete = true;
-			glutIdleFunc(0);
-		}
+		glutIdleFunc(0);
 }
 
 void keyboard(unsigned char key, int x, int y)
@@ -146,7 +132,6 @@ int main(int argc, char** argv)
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboard);
 	glutIdleFunc(idle);
-	glutVisibilityFunc(visibility);
 
 	// Setup GL context.
 	glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -235,11 +220,13 @@ TqInt Data(SOCKET s, SqDDMessageBase* pMsgB)
 					bucket += message->m_ElementSize;
 				}
 		}
-		
-	TqInt BucketX = message->m_XMin;
-	TqInt BucketY = g_ImageHeight - message->m_YMin - 1;
-	TqInt BucketW = message->m_XMaxPlus1-message->m_XMin;
-	TqInt BucketH = message->m_YMaxPlus1-message->m_YMin;
+
+//std::cerr << message->m_XMin << ", " << message->m_YMin << " - " << message->m_XMaxPlus1 << ", " << message->m_YMaxPlus1 << std::endl;
+
+	const TqInt BucketX = message->m_XMin;
+	const TqInt BucketY = g_ImageHeight - (message->m_YMaxPlus1);
+	const TqInt BucketW = message->m_XMaxPlus1 - message->m_XMin;
+	const TqInt BucketH = message->m_YMaxPlus1 - message->m_YMin;
 
 	glEnable(GL_SCISSOR_TEST);
 	glScissor(BucketX, BucketY, BucketW, BucketH);
@@ -252,7 +239,6 @@ TqInt Data(SOCKET s, SqDDMessageBase* pMsgB)
 
 TqInt Close(SOCKET s, SqDDMessageBase* pMsgB)
 {
-	g_RenderComplete = true;
 	glutPostRedisplay();
 	return(1);	
 }
