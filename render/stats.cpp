@@ -105,10 +105,6 @@ void CqStats::Initialise()
  */
 void CqStats::InitialiseFrame()
 {
-	m_cParametersAllocated = 0;
-	m_cParametersDeallocated = 0;
-	m_cParametersCurrent = 0;
-	m_cParametersPeak = 0;
 	m_cTextureMemory = 0;
 	memset( m_cTextureMisses, '\0', sizeof( m_cTextureMisses ) );
 	memset( m_cTextureHits, '\0', sizeof( m_cTextureHits ) );
@@ -251,48 +247,7 @@ void CqStats::PrintStats( TqInt level ) const
 
 		MSG << std::endl;
 
-		MSG << "Textures            : " << m_cTextureMemory << " bytes used." << std::endl;
-		MSG << "Textures hits       : " << std::endl;
-		for ( TqInt i = 0; i < 5; i++ )
-		{
-			/* Only if we missed something */
-			if ( m_cTextureHits[ 0 ][ i ] )
-			{
-				switch ( i )
-				{
-						case 0: MSG << "\t\t\tMipMap   P(";
-						break;
-						case 1: MSG << "\t\t\tCube Env.P(";
-						break;
-						case 2: MSG << "\t\t\tLatLong  P(";
-						break;
-						case 3: MSG << "\t\t\tShadow   P(";
-						break;
-						case 4: MSG << "\t\t\tTiles    P(";
-						break;
-				}
-				MSG << 100.0f * ( ( float ) m_cTextureHits[ 0 ][ i ] / ( float ) ( m_cTextureHits[ 0 ][ i ] + m_cTextureMisses[ i ] ) ) << "%)" << " of " << m_cTextureMisses[ i ] << " tries" << std::endl;
-			}
-			if ( m_cTextureHits[ 1 ][ i ] )
-			{
-				switch ( i )
-				{
-						case 0: MSG << "\t\t\tMipMap   S(";
-						break;
-						case 1: MSG << "\t\t\tCube Env.S(";
-						break;
-						case 2: MSG << "\t\t\tLatLong  S(";
-						break;
-						case 3: MSG << "\t\t\tShadow   S(";
-						break;
-						case 4: MSG << "\t\t\tTiles    S(";
-						break;
-				}
-				MSG << 100.0f * ( ( float ) m_cTextureHits[ 1 ][ i ] / ( float ) ( m_cTextureHits[ 1 ][ i ] + m_cTextureMisses[ i ] ) ) << "%)" << std::endl;
-			}
 
-		}
-		MSG << std::endl;
 
 	}
 	//! Most important informations
@@ -781,49 +736,53 @@ void CqStats::PrintStats( TqInt level ) const
 
 		MSG << "Parameters:\n\t" << STATS_INT_GETI( PRM_created ) << " created, " << STATS_INT_GETI( PRM_peak ) << " peak\n" << std::endl;
 
-	}/*
-	if ( level == 4 )
+	}
+
+	if ( level == 3 )
 	{
-		MSG << "GPrims: \t" << m_cGPrims << std::endl;
-		MSG << "Total GPrims:\t" << m_cTotalGPrims << " (" << m_cCulledGPrims << " culled)" << std::endl;
+		MSG << "Textures            : " << m_cTextureMemory << " bytes used." << std::endl;
+		MSG << "Textures hits       : " << std::endl;
+		for ( TqInt i = 0; i < 5; i++ )
+		{
+			/* Only if we missed something */
+			if ( m_cTextureHits[ 0 ][ i ] )
+			{
+				switch ( i )
+				{
+						case 0: MSG << "\t\t\tMipMap   P(";
+						break;
+						case 1: MSG << "\t\t\tCube Env.P(";
+						break;
+						case 2: MSG << "\t\t\tLatLong  P(";
+						break;
+						case 3: MSG << "\t\t\tShadow   P(";
+						break;
+						case 4: MSG << "\t\t\tTiles    P(";
+						break;
+				}
+				MSG << 100.0f * ( ( float ) m_cTextureHits[ 0 ][ i ] / ( float ) ( m_cTextureHits[ 0 ][ i ] + m_cTextureMisses[ i ] ) ) << "%)" << " of " << m_cTextureMisses[ i ] << " tries" << std::endl;
+			}
+			if ( m_cTextureHits[ 1 ][ i ] )
+			{
+				switch ( i )
+				{
+						case 0: MSG << "\t\t\tMipMap   S(";
+						break;
+						case 1: MSG << "\t\t\tCube Env.S(";
+						break;
+						case 2: MSG << "\t\t\tLatLong  S(";
+						break;
+						case 3: MSG << "\t\t\tShadow   S(";
+						break;
+						case 4: MSG << "\t\t\tTiles    S(";
+						break;
+				}
+				MSG << 100.0f * ( ( float ) m_cTextureHits[ 1 ][ i ] / ( float ) ( m_cTextureHits[ 1 ][ i ] + m_cTextureMisses[ i ] ) ) << "%)" << std::endl;
+			}
 
-		MSG << "Grids:    \t" << m_cGridsAllocated << " created / ";
-		MSG << m_cGridsAllocated - m_cGridsDeallocated << " remaining  / ";
-		MSG << m_cGridsPeak << " peak  (";
-		MSG << m_cCulledGrids << " culled)" << std::endl;
-
-		MSG << "Micropolygons: \t" << m_cMPGsAllocated << " created / ";
-		MSG << m_cMPGsAllocated - m_cMPGsDeallocated << " remaining / ";
-		MSG << m_cMPGsPeak << " peak (+ ";
-		MSG << m_cCulledMPGs << " culled)";
-		if ( m_cMissedMPGs > 0 )
-			MSG << " (** " << m_cMissedMPGs << " missed **)" << std::endl;
-		else
-			MSG << std::endl;
-		MSG << "               \t" << m_cMPGsPushedForward << " pushed forward, " << m_cMPGsPushedDown << " pushed down, " << m_cMPGsPushedFarDown << " pushed far down" << std::endl;
-
-		MSG << "Sampling: \t" << m_cSamples << " samples" << std::endl;
-		MSG << "          \t" << m_cSampleBoundHits << " bound hits (";
-		MSG << ( 100.0f / m_cSamples ) * m_cSampleBoundHits << "% of samples)" << std::endl;
-		MSG << "          \t" << m_cSampleHits << " hits (";
-		MSG << ( 100.0f / m_cSamples ) * m_cSampleHits << "% of samples)" << std::endl;
-
-		MSG << "Attributes: \t";
-		MSG << ( TqInt ) Attribute_stack.size() << " created" << std::endl;
-
-		MSG << "Transforms: \t";
-		MSG << QGetRenderContext() ->TransformStack().size() << " created" << std::endl;
-
-		MSG << "Variables: \t";
-		MSG << m_cVariablesAllocated << " created / ";
-		MSG << m_cVariablesAllocated - m_cVariablesDeallocated << " remaining / ";
-		MSG << m_cVariablesPeak << " peak" << std::endl;
-
-		MSG << "Parameters: \t" << m_cParametersAllocated << " created / ";
-		MSG << m_cParametersAllocated - m_cParametersDeallocated << " remaining (5 expected) / ";
-		MSG << m_cParametersPeak << " peak" << std::endl;
-	}*/
-
+		}
+		MSG << std::endl;
+	}
 
 	MSG << std::ends;
 

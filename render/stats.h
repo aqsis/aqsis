@@ -683,19 +683,6 @@ class CqStats
 			return ( m_timeOthers );
 		};
 
-		TqInt GetCurrentParametersAllocated() const
-		{
-			return ( m_cParametersCurrent );
-		}
-		TqInt GetParametersAllocated() const
-		{
-			return ( m_cParametersAllocated );
-		}
-		TqInt GetParametersDeallocated() const
-		{
-			return ( m_cParametersDeallocated );
-		}
-
 		//@}
 
 		void PrintStats( TqInt level ) const;
@@ -710,12 +697,6 @@ class CqStats
 
 		static TqFloat	 m_floatVars[ _Last_float ];		///< Float variables
 		static TqInt		m_intVars[ _Last_int ];			///< Int variables
-
-		TqInt	m_cParametersAllocated;			///< Count of surface parameters allocated.
-		TqInt	m_cParametersDeallocated;		///< Count of surface parameters deallocated.
-		TqInt	m_cParametersCurrent;			///< Current count of parameters allocated.
-		TqInt	m_cParametersPeak;				///< Peak count of parameters allocated.
-
 
 		TqInt m_cTextureMemory;     ///< Count of the memory used by texturemap.cpp
 		TqInt m_cTextureHits[ 2 ][ 5 ];     ///< Count of the hits encountered used by texturemap.cpp
