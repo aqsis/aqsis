@@ -471,6 +471,10 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		std::vector<CqParameter*>::iterator iUP;
 		for( iUP = Surface().aUserParams().begin(); iUP != Surface().aUserParams().end(); iUP++ )
 		{
+			TqInt iUPA = PolyIndex(indexA);
+			TqInt iUPB = PolyIndex(indexB);
+			TqInt iUPC = PolyIndex(indexC);
+			TqInt iUPD = PolyIndex(indexD);
 			CqParameter* pNewUP = (*iUP)->Clone();
 			pNewUP->Clear();
 			pNewUP->SetSize(4);
@@ -480,10 +484,10 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 				{
 					CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(*iUP);
 					CqParameterTyped<TqFloat, TqFloat>* pTNewUP = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pNewUP);
-					pTNewUP->pValue(0)[0] = pTParam->pValue(indexA)[0];
-					pTNewUP->pValue(1)[0] = pTParam->pValue(indexB)[0];
-					pTNewUP->pValue(2)[0] = pTParam->pValue(indexD)[0];
-					pTNewUP->pValue(3)[0] = pTParam->pValue(indexC)[0];
+					pTNewUP->pValue(0)[0] = pTParam->pValue(iUPA)[0];
+					pTNewUP->pValue(1)[0] = pTParam->pValue(iUPB)[0];
+					pTNewUP->pValue(2)[0] = pTParam->pValue(iUPD)[0];
+					pTNewUP->pValue(3)[0] = pTParam->pValue(iUPC)[0];
 				}
 				break;
 
@@ -491,10 +495,10 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 				{
 					CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>(*iUP);
 					CqParameterTyped<TqInt, TqFloat>* pTNewUP = static_cast<CqParameterTyped<TqInt, TqFloat>*>(pNewUP);
-					pTNewUP->pValue(0)[0] = pTParam->pValue(indexA)[0];
-					pTNewUP->pValue(1)[0] = pTParam->pValue(indexB)[0];
-					pTNewUP->pValue(2)[0] = pTParam->pValue(indexD)[0];
-					pTNewUP->pValue(3)[0] = pTParam->pValue(indexC)[0];
+					pTNewUP->pValue(0)[0] = pTParam->pValue(iUPA)[0];
+					pTNewUP->pValue(1)[0] = pTParam->pValue(iUPB)[0];
+					pTNewUP->pValue(2)[0] = pTParam->pValue(iUPD)[0];
+					pTNewUP->pValue(3)[0] = pTParam->pValue(iUPC)[0];
 				}
 				break;
 
@@ -504,10 +508,10 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 				{
 					CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(*iUP);
 					CqParameterTyped<CqVector3D, CqVector3D>* pTNewUP = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(pNewUP);
-					pTNewUP->pValue(0)[0] = pTParam->pValue(indexA)[0];
-					pTNewUP->pValue(1)[0] = pTParam->pValue(indexB)[0];
-					pTNewUP->pValue(2)[0] = pTParam->pValue(indexD)[0];
-					pTNewUP->pValue(3)[0] = pTParam->pValue(indexC)[0];
+					pTNewUP->pValue(0)[0] = pTParam->pValue(iUPA)[0];
+					pTNewUP->pValue(1)[0] = pTParam->pValue(iUPB)[0];
+					pTNewUP->pValue(2)[0] = pTParam->pValue(iUPD)[0];
+					pTNewUP->pValue(3)[0] = pTParam->pValue(iUPC)[0];
 				}
 				break;
 
@@ -515,10 +519,10 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 				{
 					CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(*iUP);
 					CqParameterTyped<CqVector4D, CqVector3D>* pTNewUP = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pNewUP);
-					pTNewUP->pValue(0)[0] = pTParam->pValue(indexA)[0];
-					pTNewUP->pValue(1)[0] = pTParam->pValue(indexB)[0];
-					pTNewUP->pValue(2)[0] = pTParam->pValue(indexD)[0];
-					pTNewUP->pValue(3)[0] = pTParam->pValue(indexC)[0];
+					pTNewUP->pValue(0)[0] = pTParam->pValue(iUPA)[0];
+					pTNewUP->pValue(1)[0] = pTParam->pValue(iUPB)[0];
+					pTNewUP->pValue(2)[0] = pTParam->pValue(iUPD)[0];
+					pTNewUP->pValue(3)[0] = pTParam->pValue(iUPC)[0];
 				}
 				break;
 
@@ -526,10 +530,10 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 				{
 					CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>(*iUP);
 					CqParameterTyped<CqColor, CqColor>* pTNewUP = static_cast<CqParameterTyped<CqColor, CqColor>*>(pNewUP);
-					pTNewUP->pValue(0)[0] = pTParam->pValue(indexA)[0];
-					pTNewUP->pValue(1)[0] = pTParam->pValue(indexB)[0];
-					pTNewUP->pValue(2)[0] = pTParam->pValue(indexD)[0];
-					pTNewUP->pValue(3)[0] = pTParam->pValue(indexC)[0];
+					pTNewUP->pValue(0)[0] = pTParam->pValue(iUPA)[0];
+					pTNewUP->pValue(1)[0] = pTParam->pValue(iUPB)[0];
+					pTNewUP->pValue(2)[0] = pTParam->pValue(iUPD)[0];
+					pTNewUP->pValue(3)[0] = pTParam->pValue(iUPC)[0];
 				}
 				break;
 
@@ -537,10 +541,10 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 				{
 					CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>(*iUP);
 					CqParameterTyped<CqString, CqString>* pTNewUP = static_cast<CqParameterTyped<CqString, CqString>*>(pNewUP);
-					pTNewUP->pValue(0)[0] = pTParam->pValue(indexA)[0];
-					pTNewUP->pValue(1)[0] = pTParam->pValue(indexB)[0];
-					pTNewUP->pValue(2)[0] = pTParam->pValue(indexD)[0];
-					pTNewUP->pValue(3)[0] = pTParam->pValue(indexC)[0];
+					pTNewUP->pValue(0)[0] = pTParam->pValue(iUPA)[0];
+					pTNewUP->pValue(1)[0] = pTParam->pValue(iUPB)[0];
+					pTNewUP->pValue(2)[0] = pTParam->pValue(iUPD)[0];
+					pTNewUP->pValue(3)[0] = pTParam->pValue(iUPC)[0];
 				}
 				break;
 
@@ -548,10 +552,10 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 				{
 					CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(*iUP);
 					CqParameterTyped<CqMatrix, CqMatrix>* pTNewUP = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(pNewUP);
-					pTNewUP->pValue(0)[0] = pTParam->pValue(indexA)[0];
-					pTNewUP->pValue(1)[0] = pTParam->pValue(indexB)[0];
-					pTNewUP->pValue(2)[0] = pTParam->pValue(indexD)[0];
-					pTNewUP->pValue(3)[0] = pTParam->pValue(indexC)[0];
+					pTNewUP->pValue(0)[0] = pTParam->pValue(iUPA)[0];
+					pTNewUP->pValue(1)[0] = pTParam->pValue(iUPB)[0];
+					pTNewUP->pValue(2)[0] = pTParam->pValue(iUPD)[0];
+					pTNewUP->pValue(3)[0] = pTParam->pValue(iUPC)[0];
 				}
 				break;
 			}

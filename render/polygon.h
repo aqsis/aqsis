@@ -91,6 +91,10 @@ class CqPolygonBase
 		 * \param i Integer index in of the vertex in question.
 		 */
 		virtual	const	TqFloat& Polyv( TqInt i ) const = 0;
+		/** Get the real index into the points list translated from the polygon vertex index.
+		 * \param i Integer index in of the vertex in question.
+		 */
+		virtual	const	TqInt PolyIndex( TqInt i ) const = 0;
 
 		/** Get the number of vertices in this polygon.
 		 */
@@ -228,6 +232,10 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		virtual	const	TqFloat& Polyv( TqInt i ) const
 		{
 			return ( v() [ i ] );
+		}
+		virtual	const	TqInt PolyIndex( TqInt i ) const
+		{
+			return( i );
 		}
 
 		virtual	const	TqBool	bHasN() const
@@ -473,6 +481,10 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		{
 			return ( m_pPoints->v() [ m_aIndices[ i ] ] );
 		}
+		virtual	const	TqInt PolyIndex( TqInt i ) const
+		{
+			return( (i<m_aIndices.size())?m_aIndices[ i ]:m_aIndices.back() );
+		}
 
 		virtual	TqInt	NumVertices() const
 		{
@@ -639,6 +651,10 @@ class CqMotionSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		virtual	const TqFloat& Polyv( TqInt i ) const
 		{
 			return ( GetMotionObject( Time( m_CurrTimeIndex ) ) ->v() [ m_aIndices[ i ] ] );
+		}
+		virtual	const	TqInt PolyIndex( TqInt i ) const
+		{
+			return( (i<m_aIndices.size())?m_aIndices[ i ]:m_aIndices.back() );
 		}
 
 		virtual	TqInt	NumVertices() const
