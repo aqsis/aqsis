@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=Aqsis
-AppVerName=Aqsis Renderer v0.6.5
+AppVerName=Aqsis Renderer v0.6.6
 AppPublisher=The Aqsis Team
 AppPublisherURL=http://www.aqsis.com
 AppSupportURL=http://www.aqsis.com
@@ -11,51 +11,73 @@ AppUpdatesURL=http://www.aqsis.com
 DefaultDirName={pf}\Aqsis
 DefaultGroupName=Aqsis
 AllowNoIcons=true
-LicenseFile=C:\Projects\Aqsis\renderer\COPYING
+LicenseFile=COPYING
 OutputBaseFilename=aqsis-setup
-Compression=zip/9
-AppVersion=0.6.5
+Compression=bzip/9
+AppVersion=0.6.6
+
+[Types]
+Name: "full"; Description: "Full installation"
+Name: "compact"; Description: "Compact installation"
+Name: "custom"; Description: "Custom installation"; Flags: iscustom
+
+[Components]
+Name: "main"; Description: "Main Files"; Types: full compact
+Name: "bonus"; Description: "Shaders and .rib examples"; Types: full
+; Name: "GUI"; Description: "AqsisGUI"; Types: full compact
+Name: "ref"; Description: "Tests and reference images"; Types: full
 
 [Tasks]
-Name: desktopicon; Description: Create a &desktop icon; GroupDescription: Additional icons:
+; Name: desktopicon; Description: Create a &desktop icon; GroupDescription: Additional icons:; Components: GUI
+Name: registry; Description: Setup Aqsis specific &environment variables; GroupDescription: Environment Variables:; MinVersion: 0,4.0.1381
 
 [Files]
-Source: Library\Release\aqsis.exe; DestDir: {app}; CopyMode: normal
-Source: Library\Release\tga2tif.dll; DestDir: {app}\procedures; CopyMode: normal
-Source: Library\Release\aqslcomp.exe; DestDir: {app}; CopyMode: normal
-Source: Library\Release\ddmsock.ini; DestDir: {app}\displays; CopyMode: normal
-Source: Library\Release\filebuffer.exe; DestDir: {app}\displays; CopyMode: normal
-Source: Library\Release\framebuffer_glut.exe; DestDir: {app}\displays; CopyMode: normal
-Source: Library\Release\framebuffer_glut_z.exe; DestDir: {app}\displays; CopyMode: normal
-Source: Library\Release\gif2tif.dll; DestDir: {app}\procedures; CopyMode: normal
-Source: Library\Release\jpg2tif.dll; DestDir: {app}\procedures; CopyMode: normal
-Source: Library\Release\pcx2tif.dll; DestDir: {app}\procedures; CopyMode: normal
-Source: Library\Release\ppm2tif.dll; DestDir: {app}\procedures; CopyMode: normal
-Source: Library\Release\shadowmap.exe; DestDir: {app}\displays; CopyMode: normal
-Source: Library\Release\slpp.exe; DestDir: {app}; CopyMode: normal
-Source: Library\Release\teqser.exe; DestDir: {app}; CopyMode: normal
-Source: Library\Release\aqsl.exe; DestDir: {app}; CopyMode: normal
-Source: Library\Release\aqsltell.exe; DestDir: {app}; CopyMode: normal
-Source: \Apps\GnuWin32\bin\libtiff.dll; DestDir: {app}; CopyMode: normal
-Source: \Apps\GnuWin32\bin\zlib.dll; DestDir: {app}; CopyMode: normal
-Source: \Apps\GnuWin32\bin\libjpeg.dll; DestDir: {app}; CopyMode: normal
-Source: \WINDOWS.000\System32\glut32.dll; DestDir: {app}; CopyMode: normal
-Source: shaders\*.sl; DestDir: {app}\shaders
-Source: shaders\*.slx; DestDir: {app}\shaders
-Source: ribfiles\*.rib; DestDir: {app}\examples
-Source: NEWS; DestDir: {app}
-Source: BUILD; DestDir: {app}
-Source: ChangeLog; DestDir: {app}
-Source: COPYING; DestDir: {app}
-Source: INSTALL; DestDir: {app}
-Source: AUTHORS; DestDir: {app}
-Source: README; DestDir: {app}
-Source: Library\Release\aqsltell.exe; DestDir: {app}
+Source: Library\Release\aqsis.exe; DestDir: {app}; CopyMode: normal ; Components: main
+Source: Library\Release\tga2tif.dll; DestDir: {app}\procedures; CopyMode: normal ; Components: main
+Source: Library\Release\aqslcomp.exe; DestDir: {app}; CopyMode: normal ; Components: main
+Source: Library\Release\ddmsock.ini; DestDir: {app}\displays; CopyMode: normal ; Components: main
+Source: Library\Release\filebuffer.exe; DestDir: {app}\displays; CopyMode: normal ; Components: main
+Source: Library\Release\framebuffer_glut.exe; DestDir: {app}\displays; CopyMode: normal ; Components: main
+Source: Library\Release\framebuffer_glut_z.exe; DestDir: {app}\displays; CopyMode: normal ; Components: main
+Source: Library\Release\gif2tif.dll; DestDir: {app}\procedures; CopyMode: normal ; Components: main
+Source: Library\Release\jpg2tif.dll; DestDir: {app}\procedures; CopyMode: normal ; Components: main
+Source: Library\Release\pcx2tif.dll; DestDir: {app}\procedures; CopyMode: normal ; Components: main
+Source: Library\Release\ppm2tif.dll; DestDir: {app}\procedures; CopyMode: normal ; Components: main
+Source: Library\Release\shadowmap.exe; DestDir: {app}\displays; CopyMode: normal ; Components: main
+Source: Library\Release\slpp.exe; DestDir: {app}; CopyMode: normal ; Components: main
+Source: Library\Release\teqser.exe; DestDir: {app}; CopyMode: normal ; Components: main
+Source: Library\Release\aqsl.exe; DestDir: {app}; CopyMode: normal ; Components: main
+Source: Library\Release\aqsltell.exe; DestDir: {app}; CopyMode: normal ; Components: main
+Source: thirdparty\libtiff.dll; DestDir: {app}; CopyMode: normal ; Components: main
+Source: thirdparty\zlib.dll; DestDir: {app}; CopyMode: normal ; Components: main
+Source: thirdparty\libjpeg.dll; DestDir: {app}; CopyMode: normal ; Components: main
+Source: thirdparty\glut32.dll; DestDir: {app}; CopyMode: normal ; Components: main
+Source: shaders\*.sl; DestDir: {app}\shaders ; Components: bonus
+Source: shaders\*.slx; DestDir: {app}\shaders ;  Components: main
+Source: ribfiles\*.rib; DestDir: {app}\examples ; Components: bonus
+Source: images\*.tif; DestDir: {app}\textures ;  Components: bonus
+Source: NEWS; DestDir: {app} ; Components: main
+Source: BUILD; DestDir: {app} ; Components: main
+Source: ChangeLog; DestDir: {app} ; Components: main
+Source: COPYING; DestDir: {app} ; Components: main
+Source: INSTALL; DestDir: {app} ; Components: main
+Source: AUTHORS; DestDir: {app} ; Components: main
+Source: README; DestDir: {app} ; Components: main
+Source: Library\Release\aqsltell.exe; DestDir: {app}    ; Components: main
+Source: ..\Testing\RegressionTests\reference\*.tif; DestDir: {app}\tests\reference; Components: ref
+Source: ..\Testing\RegressionTests\*.rib; DestDir: {app}\tests; Components: ref
+Source: ..\Testing\RegressionTests\simple_archive; DestDir: {app}\tests; Components: ref
+Source: ..\Testing\RegressionTests\*.pl; DestDir: {app}\tests; Components: ref
+; AqsisGUI related files.
+; Source: ..\GUI\Windows\VB\bin\AqsisGUI.exe; DestDir: {app}  ; Components: GUI
+
 
 [Icons]
-Name: {group}\Aqsis; Filename: {app}\aqsis.exe
+Name: {group}\Aqsis; Filename: {app}\aqsis.exe;
+;Name: {group}\AqsisGUI; Filename: {app}\AqsisGUI.exe;
 Name: {group}\Uninstall Aqsis; Filename: {uninstallexe}
-Name: {userdesktop}\Aqsis; Filename: {app}\aqsis.exe; Tasks: desktopicon
+;Name: {userdesktop}\AqsisGUI; Filename: {app}\AqsisGUI.EXE; Tasks: desktopicon;
+
 
 [_ISTool]
 EnableISX=false
@@ -65,8 +87,15 @@ Name: {app}\shaders
 Name: {app}\examples
 Name: {app}\displays
 Name: {app}\procedures
+Name: {app}\textures
+Name: {app}\tests
+Name: {app}\tests\reference
+
+[Messages]
+BeveledLabel=Aqsis Setup
 
 [Registry]
 Root: HKCU; Subkey: Environment; ValueType: string; ValueName: AQSIS_BASE_PATH; ValueData: {app}; MinVersion: 0,4.0.1381
 Root: HKCU; Subkey: Environment; ValueType: string; ValueName: AQSIS_DISPLAYS_PATH; ValueData: {app}\displays; MinVersion: 0,4.0.1381
 Root: HKCU; Subkey: Environment; ValueType: string; ValueName: AQSIS_SHADERS_PATH; ValueData: {app}\shaders; MinVersion: 0,4.0.1381
+Root: HKCU; Subkey: Environment; ValueType: string; ValueName: AQSIS_TEXTURES_PATH; ValueData: {app}\textures; MinVersion: 0,4.0.1381
