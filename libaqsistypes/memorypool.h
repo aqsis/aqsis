@@ -159,7 +159,7 @@ class CqPoolable
 /** Define the static memory pool for a poolable class.
  */
 
-#define	DEFINE_STATIC_MEMORYPOOL(A)	CqMemoryPool<A>	A::m_thePool
+#define	DEFINE_STATIC_MEMORYPOOL(A)	CqMemoryPool<A>	CqPoolable<A>::m_thePool
 
 
 //-----------------------------------------------------------------------
