@@ -222,7 +222,7 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
  */
 
 void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D& twidth,
-                                  std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index, TqFloat* average_depth )
+                                  std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth )
 {
 	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
@@ -236,7 +236,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D
 			R3 = R1 + twidth;
 			R4 = R1 + swidth + twidth;
 
-			SampleMap( R1, R2, R3, R4, val, paramMap );
+			SampleMap( R1, R2, R3, R4, val );
 		}
 		else if ( Type() == MapType_LatLong )
 		{
@@ -250,7 +250,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D
 			ss1 = ss1 + 0.5; /* remaps to 0 -> 1 */
 			tt1 = acos( -V.z() ) / RI_PI;
 
-			CqTextureMap::SampleMap( ss1, tt1, sswidth, stwidth, val, paramMap );
+			CqTextureMap::SampleMap( ss1, tt1, sswidth, stwidth, val );
 		}
 	}
 }
@@ -261,7 +261,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D
  */
 
 void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-                                  std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index, TqFloat* average_depth )
+                                  std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth )
 {
 	if ( m_pImage != 0 )
 	{

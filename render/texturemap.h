@@ -472,14 +472,16 @@ class CqTextureMap : public IqTextureMap
 			return( pRes );
 		}
 
-		virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
+		virtual void	PrepareSampleOptions(std::map<std::string, IqShaderData*>& paramMap );
+
+		virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val );
 		virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
-		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
+		                                 std::valarray<TqFloat>& val );
 		virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
-		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0, TqFloat* average_depth = NULL )
+		                                 std::valarray<TqFloat>& val, TqInt index = 0, TqFloat* average_depth = NULL )
 		{}
 		virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0, TqFloat* average_depth = NULL )
+		                                 std::valarray<TqFloat>& val, TqInt index = 0, TqFloat* average_depth = NULL )
 		{}
 
 		virtual	void	GetSample( TqFloat ss1, TqFloat tt1, TqFloat ss2, TqFloat tt2, std::valarray<TqFloat>& val );
@@ -545,6 +547,12 @@ class CqTextureMap : public IqTextureMap
 
 		CqMatrix	m_matWorldToScreen;		///< Matrix to convert points from world space to screen space.
 
+		TqFloat		m_sblur;
+		TqFloat		m_tblur;
+		TqFloat		m_pswidth;
+		TqFloat		m_ptwidth;
+		TqFloat		m_samples;
+
 		// Temporary values used during sampling.
 		std::valarray<TqFloat>	m_tempval1;
 		std::valarray<TqFloat>	m_tempval2;
@@ -577,9 +585,9 @@ class CqEnvironmentMap : public CqTextureMap
 		}
 
 		virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
-		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0, TqFloat* average_depth = NULL );
+		                                 std::valarray<TqFloat>& val, TqInt index = 0, TqFloat* average_depth = NULL );
 		virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0, TqFloat* average_depth = NULL );
+		                                 std::valarray<TqFloat>& val, TqInt index = 0, TqFloat* average_depth = NULL );
 
 		virtual CqMatrix& GetMatrix( TqInt which, TqInt index = 0 )
 		{
@@ -669,8 +677,10 @@ class CqShadowMap : public CqTextureMap
 			return( pRes );
 		}
 
-		virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0, TqFloat* average_depth = NULL );
-		virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0, TqFloat* average_depth = NULL );
+		virtual void	PrepareSampleOptions(std::map<std::string, IqShaderData*>& paramMap );
+
+		virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, TqInt index = 0, TqFloat* average_depth = NULL );
+		virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, TqInt index = 0, TqFloat* average_depth = NULL );
 		virtual CqMatrix& GetMatrix( TqInt which, TqInt index = 0 )
 		{
 			if ( which == 0 ) return matWorldToCamera(index);
@@ -683,6 +693,10 @@ class CqShadowMap : public CqTextureMap
 	private:
 		static	TqInt	m_rand_index;			///< Static random number table index.
 		static	TqFloat	m_aRand_no[ 256 ];		///< Random no. table used for jittering the shadow sampling.
+
+		TqFloat	m_bias;
+		TqFloat m_bias0;
+		TqFloat m_bias1;
 
 		std::vector<CqMatrix>	m_WorldToCameraMatrices;		///< Matrix to convert points from world space to light space.
 		std::vector<CqMatrix>	m_WorldToScreenMatrices;		///< Matrix to convert points from world space to screen space.

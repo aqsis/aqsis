@@ -2031,10 +2031,12 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFP
 	}
 	END_UNIFORM_SECTION
 
+
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
+		pTMap->PrepareSampleOptions( paramMap );
 
 		BEGIN_VARYING_SECTION
 		TqFloat swidth = 0.0f, twidth = 0.0f;
@@ -2060,7 +2062,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFP
 		TqFloat fs, ft;
 		s() ->GetFloat( fs, __iGrid );
 		t() ->GetFloat( ft, __iGrid );
-		pTMap->SampleMap( fs, ft, swidth, twidth, val, paramMap );
+		pTMap->SampleMap( fs, ft, swidth, twidth, val );
 
 		// Grab the appropriate channel.
 		TqFloat fchan = FLOAT( channel );
@@ -2106,10 +2108,12 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOA
 	}
 	END_UNIFORM_SECTION
 
+
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
+		pTMap->PrepareSampleOptions( paramMap );
 
 		BEGIN_VARYING_SECTION
 		TqFloat swidth = 0.0f, twidth = 0.0f;
@@ -2134,7 +2138,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOA
 		// Sample the texture.
 		GETFLOAT( s );
 		GETFLOAT( t );
-		pTMap->SampleMap( FLOAT( s ), FLOAT( t ), swidth, twidth, val, paramMap );
+		pTMap->SampleMap( FLOAT( s ), FLOAT( t ), swidth, twidth, val );
 
 		// Grab the appropriate channel.
 		TqFloat fchan = FLOAT( channel );
@@ -2173,10 +2177,12 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOA
 	IqTextureMap* pTMap = QGetRenderContextI() ->GetTextureMap( STRING( name ) );
 	END_UNIFORM_SECTION
 
+
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
+		pTMap->PrepareSampleOptions( paramMap );
 
 		BEGIN_VARYING_SECTION
 
@@ -2189,7 +2195,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOA
 		GETFLOAT( t3 );
 		GETFLOAT( s4 );
 		GETFLOAT( t4 );
-		pTMap->SampleMap( FLOAT( s1 ), FLOAT( t1 ), FLOAT( s2 ), FLOAT( t2 ), FLOAT( s3 ), FLOAT( t3 ), FLOAT( s4 ), FLOAT( t4 ), val, paramMap );
+		pTMap->SampleMap( FLOAT( s1 ), FLOAT( t1 ), FLOAT( s2 ), FLOAT( t2 ), FLOAT( s3 ), FLOAT( t3 ), FLOAT( s4 ), FLOAT( t4 ), val );
 
 		// Grab the appropriate channel.
 		TqFloat fchan = FLOAT( channel );
@@ -2235,10 +2241,12 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 	}
 	END_UNIFORM_SECTION
 
+
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
+		pTMap->PrepareSampleOptions( paramMap );
 
 		BEGIN_VARYING_SECTION
 		TqFloat swidth = 0.0f, twidth = 0.0f;
@@ -2264,7 +2272,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 		TqFloat fs, ft;
 		s() ->GetFloat( fs, __iGrid );
 		t() ->GetFloat( ft, __iGrid );
-		pTMap->SampleMap( fs, ft, swidth, twidth, val, paramMap );
+		pTMap->SampleMap( fs, ft, swidth, twidth, val );
 
 		// Grab the appropriate channel.
 		TqFloat fchan = FLOAT( channel );
@@ -2310,10 +2318,12 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOA
 	}
 	END_UNIFORM_SECTION
 
+
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
+		pTMap->PrepareSampleOptions( paramMap );
 
 		BEGIN_VARYING_SECTION
 		TqFloat swidth = 0.0f, twidth = 0.0f;
@@ -2338,7 +2348,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOA
 		// Sample the texture.
 		GETFLOAT( s );
 		GETFLOAT( t );
-		pTMap->SampleMap( FLOAT( s ), FLOAT( t ), swidth, twidth, val, paramMap );
+		pTMap->SampleMap( FLOAT( s ), FLOAT( t ), swidth, twidth, val );
 
 		// Grab the appropriate channel.
 		TqFloat fchan = FLOAT( channel );
@@ -2377,10 +2387,12 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOA
 	IqTextureMap* pTMap = QGetRenderContextI() ->GetTextureMap( STRING( name ) );
 	END_UNIFORM_SECTION
 
+
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
+		pTMap->PrepareSampleOptions( paramMap );
 
 		BEGIN_VARYING_SECTION
 		// Sample the texture.
@@ -2392,7 +2404,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOA
 		GETFLOAT( t3 );
 		GETFLOAT( s4 );
 		GETFLOAT( t4 );
-		pTMap->SampleMap( FLOAT( s1 ), FLOAT( t1 ), FLOAT( s2 ), FLOAT( t2 ), FLOAT( s3 ), FLOAT( t3 ), FLOAT( s4 ), FLOAT( t4 ), val, paramMap );
+		pTMap->SampleMap( FLOAT( s1 ), FLOAT( t1 ), FLOAT( s2 ), FLOAT( t2 ), FLOAT( s3 ), FLOAT( t3 ), FLOAT( s4 ), FLOAT( t4 ), val );
 
 		// Grab the appropriate channel.
 		TqFloat fchan = FLOAT( channel );
@@ -2448,6 +2460,7 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, 
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
+		pTMap->PrepareSampleOptions( paramMap );
 		std::valarray<TqFloat> val;
 
 		BEGIN_VARYING_SECTION
@@ -2470,7 +2483,7 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, 
 
 		// Sample the texture.
 		GETVECTOR( R );
-		pTMap->SampleMap( VECTOR( R ), swidth, twidth, val, paramMap );
+		pTMap->SampleMap( VECTOR( R ), swidth, twidth, val );
 
 		// Grab the appropriate channel.
 		TqFloat fchan = FLOAT( channel );
@@ -2518,6 +2531,7 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment3( STRINGVAL name, FLOATVAL channel, 
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
+		pTMap->PrepareSampleOptions( paramMap );
 
 		BEGIN_VARYING_SECTION
 		// Sample the texture.
@@ -2525,7 +2539,7 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment3( STRINGVAL name, FLOATVAL channel, 
 		GETVECTOR( R2 );
 		GETVECTOR( R3 );
 		GETVECTOR( R4 );
-		pTMap->SampleMap( VECTOR( R1 ), VECTOR( R2 ), VECTOR( R3 ), VECTOR( R4 ), val, paramMap );
+		pTMap->SampleMap( VECTOR( R1 ), VECTOR( R2 ), VECTOR( R3 ), VECTOR( R4 ), val );
 
 		// Grab the appropriate channel.
 		TqFloat fchan = FLOAT( channel );
@@ -2581,6 +2595,7 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, 
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
+		pTMap->PrepareSampleOptions( paramMap );
 
 		BEGIN_VARYING_SECTION
 		CqVector3D swidth = 0.0f, twidth = 0.0f;
@@ -2602,7 +2617,7 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, 
 
 		// Sample the texture.
 		GETVECTOR( R );
-		pTMap->SampleMap( VECTOR( R ), swidth, twidth, val, paramMap );
+		pTMap->SampleMap( VECTOR( R ), swidth, twidth, val );
 
 
 		// Grab the appropriate channel.
@@ -2651,6 +2666,7 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment3( STRINGVAL name, FLOATVAL channel, 
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
 		std::valarray<TqFloat> val;
+		pTMap->PrepareSampleOptions( paramMap );
 
 		BEGIN_VARYING_SECTION
 		// Sample the texture.
@@ -2658,7 +2674,7 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment3( STRINGVAL name, FLOATVAL channel, 
 		GETVECTOR( R2 );
 		GETVECTOR( R3 );
 		GETVECTOR( R4 );
-		pTMap->SampleMap( VECTOR( R1 ), VECTOR( R2 ), VECTOR( R3 ), VECTOR( R4 ), val, paramMap );
+		pTMap->SampleMap( VECTOR( R1 ), VECTOR( R2 ), VECTOR( R3 ), VECTOR( R4 ), val );
 
 		// Grab the appropriate channel.
 		TqFloat fchan = FLOAT( channel );
@@ -2736,6 +2752,7 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 	if ( pMap != 0 && pMap->IsValid() )
 	{
 		std::valarray<TqFloat> fv;
+		pMap->PrepareSampleOptions( paramMap );
 
 		BEGIN_VARYING_SECTION
 		CqVector3D swidth = 0.0f, twidth = 0.0f;
@@ -2744,7 +2761,7 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 		twidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
 
 		GETPOINT( P );
-		pMap->SampleMap( POINT( P ), swidth, twidth, fv, paramMap, 0 );
+		pMap->SampleMap( POINT( P ), swidth, twidth, fv, 0 );
 		SETFLOAT( Result, fv[ 0 ] );
 		END_VARYING_SECTION
 	}
@@ -2778,13 +2795,14 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow1( STRINGVAL name, FLOATVAL channel, POINTV
 	if ( pMap != 0 && pMap->IsValid() )
 	{
 		std::valarray<TqFloat> fv;
+		pMap->PrepareSampleOptions( paramMap );
 
 		BEGIN_VARYING_SECTION
 		GETPOINT( P1 );
 		GETPOINT( P2 );
 		GETPOINT( P3 );
 		GETPOINT( P4 );
-		pMap->SampleMap( POINT( P1 ), POINT( P2 ), POINT( P3 ), POINT( P4 ), fv, paramMap, 0 );
+		pMap->SampleMap( POINT( P1 ), POINT( P2 ), POINT( P3 ), POINT( P4 ), fv, 0 );
 		SETFLOAT( Result, fv[ 0 ] );
 		END_VARYING_SECTION
 	}
@@ -5630,6 +5648,8 @@ STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, P
 	if ( pMap != 0 && pMap->IsValid() )
 	{
 		std::valarray<TqFloat> fv;
+		pMap->PrepareSampleOptions( paramMap );
+	
 		// Generate normal conversion matrices to save time.
 		TqInt i;
 		std::vector<CqMatrix> matITTx;
@@ -5666,7 +5686,7 @@ STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, P
 				continue;
 
 			fv = 0.0f;
-			pMap->SampleMap( POINT( P ), swidth, twidth, fv, paramMap, i );
+			pMap->SampleMap( POINT( P ), swidth, twidth, fv, i );
 			occlsum += cosangle * fv[0];
 			dotsum += cosangle;
 		}

@@ -250,36 +250,49 @@ void CqShadowMap::ReadMatrices()
 	}
 }
 
+
+void CqShadowMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& paramMap )
+{
+	CqTextureMap::PrepareSampleOptions( paramMap );
+	
+	// Extend the shadow() call to accept bias, if set, override global bias
+	m_bias = 0.0f;
+	m_bias0 = 0.0f;
+	m_bias1 = 0.0f;
+
+	if ( ( paramMap.size() != 0 ) && ( paramMap.find( "bias" ) != paramMap.end() ) )
+	{
+		paramMap[ "bias" ] ->GetFloat( m_bias );
+	}
+	else
+	{
+		// Add in the bias at this point in camera coordinates.
+		const TqFloat* poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias0" );
+		if ( poptBias != 0 )
+			m_bias0 = poptBias[ 0 ];
+
+		poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias1" );
+		if ( poptBias != 0 )
+			m_bias1 = poptBias[ 0 ];
+
+		// Get bias, if set override bias0 and bias1
+		poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias" );
+		if ( poptBias != 0 )
+			m_bias = poptBias[ 0 ];
+	}
+}
+
+
 //---------------------------------------------------------------------
 /** Sample the shadow map data to see if the point vecPoint is in shadow.
  */
 
-void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index, TqFloat* average_depth )
+void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth )
 {
 	if ( m_pImage != 0 )
 	{
-		TqFloat pswidth = 1.0f;
-		TqFloat ptwidth = 1.0f;
-
-		// Get parameters out of the map.
-		if ( paramMap.size() != 0 )
-		{
-			if ( paramMap.find( "width" ) != paramMap.end() )
-			{
-				paramMap[ "width" ] ->GetFloat( pswidth );
-				ptwidth = pswidth;
-			}
-			else
-			{
-				if ( paramMap.find( "swidth" ) != paramMap.end() )
-					paramMap[ "swidth" ] ->GetFloat( pswidth );
-				if ( paramMap.find( "twidth" ) != paramMap.end() )
-					paramMap[ "twidth" ] ->GetFloat( ptwidth );
-			}
-		}
-
-		swidth *= pswidth;
-		twidth *= ptwidth;
+		swidth *= m_pswidth;
+		twidth *= m_ptwidth;
 
 		CqVector3D	R1, R2, R3, R4;
 		R1 = vecPoint - ( swidth / 2.0f ) - ( twidth / 2.0f );
@@ -287,7 +300,7 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 		R3 = vecPoint - ( swidth / 2.0f ) + ( twidth / 2.0f );
 		R4 = vecPoint + ( swidth / 2.0f ) + ( twidth / 2.0f );
 
-		SampleMap( R1, R2, R3, R4, val, paramMap, index, average_depth );
+		SampleMap( R1, R2, R3, R4, val, index, average_depth );
 	}
 	else
 	{
@@ -301,33 +314,10 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 /** Sample the shadow map data using R1, R2, R3, R4
  */
 
-void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index, TqFloat* average_depth )
+void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth )
 {
 	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
-
-	TqFloat sblur = 0.0f;
-	TqFloat tblur = 0.0f;
-	TqFloat samples = 0.0f;
-
-	// Get parameters out of the map.
-	if ( paramMap.size() != 0 )
-	{
-		if ( paramMap.find( "blur" ) != paramMap.end() )
-		{
-			paramMap[ "blur" ] ->GetFloat( sblur );
-			tblur = sblur;
-		}
-		else
-		{
-			if ( paramMap.find( "sblur" ) != paramMap.end() )
-				paramMap[ "sblur" ] ->GetFloat( sblur );
-			if ( paramMap.find( "tblur" ) != paramMap.end() )
-				paramMap[ "tblur" ] ->GetFloat( tblur );
-		}
-		if ( paramMap.find( "samples" ) != paramMap.end() )
-			paramMap[ "samples" ] ->GetFloat( samples );
-	}
 
 	// If no map defined, not in shadow.
 	val.resize( 1 );
@@ -336,51 +326,24 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	CqVector3D	vecR1l, vecR2l, vecR3l, vecR4l;
 	CqVector3D	vecR1m, vecR2m, vecR3m, vecR4m;
 
-
-	// Extend the shadow() call to accept bias, if set, override global bias
-	TqFloat bias = 0.0f;
-	TqFloat bias0 = 0.0f;
-	TqFloat bias1 = 0.0f;
-
-	if ( ( paramMap.size() != 0 ) && ( paramMap.find( "bias" ) != paramMap.end() ) )
-	{
-		paramMap[ "bias" ] ->GetFloat( bias );
-	}
-	else
-	{
-		// Add in the bias at this point in camera coordinates.
-		const TqFloat* poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias0" );
-		if ( poptBias != 0 )
-			bias0 = poptBias[ 0 ];
-
-		poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias1" );
-		if ( poptBias != 0 )
-			bias1 = poptBias[ 0 ];
-
-		// Get bias, if set override bias0 and bias1
-		poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias" );
-		if ( poptBias != 0 )
-			bias = poptBias[ 0 ];
-	}
-
 	static CqRandom random( 42 );
 
 	// If bias not set ( i.e. 0 ), try to use bias0 and bias1
-	if ( !( bias > 0 ) )
+	if ( !( m_bias > 0 ) )
 	{
-		if ( bias1 >= bias0 )
+		if ( m_bias1 >= m_bias0 )
 		{
-			bias = random.RandomFloat( bias1 - bias0 ) + bias0;
-			if ( bias > bias1 ) bias = bias1;
+			m_bias = random.RandomFloat( m_bias1 - m_bias0 ) + m_bias0;
+			if ( m_bias > m_bias1 ) m_bias = m_bias1;
 		}
 		else
 		{
-			bias = random.RandomFloat( bias0 - bias1 ) + bias1;
-			if ( bias > bias0 ) bias = bias0;
+			m_bias = random.RandomFloat( m_bias0 - m_bias1 ) + m_bias1;
+			if ( m_bias > m_bias0 ) m_bias = m_bias0;
 		}
 	}
 
-	CqVector3D vecBias( 0, 0, bias );
+	CqVector3D vecBias( 0, 0, m_bias );
 	// Generate a matrix to transform points from camera space into the space of the light source used in the
 	// definition of the shadow map.
 	CqMatrix matCameraToLight = matWorldToCamera( index ) * QGetRenderContextI() ->matSpaceToSpace( "camera", "world" );
@@ -403,8 +366,8 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	TqFloat z4 = vecR4l.z();
 	TqFloat z = ( z1 + z2 + z3 + z4 ) * 0.25;
 
-	TqFloat sbo2 = ( sblur * 0.5f ) * m_XRes;
-	TqFloat tbo2 = ( tblur * 0.5f ) * m_YRes;
+	TqFloat sbo2 = ( m_sblur * 0.5f ) * m_XRes;
+	TqFloat tbo2 = ( m_tblur * 0.5f ) * m_YRes;
 
 	// If point is behind light, call it not in shadow.
 	//if(z1<0.0)	return;
@@ -445,9 +408,9 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 	// Calculate no. of samples.
 	TqInt nt, ns;
-	if ( samples > 0 )
+	if ( m_samples > 0 )
 	{
-		nt = ns = static_cast<TqInt>( CEIL( sqrt( samples ) ) );
+		nt = ns = static_cast<TqInt>( CEIL( sqrt( m_samples ) ) );
 	}
 	else
 	{

@@ -1033,58 +1033,66 @@ void CqTextureMap::Open()
 
 }
 
-void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
+
+void CqTextureMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& paramMap )
 {
-	// Check the memory and make sure we don't abuse it
-	CriticalMeasure();
-
-	if ( !IsValid() ) return ;
-
-	TqFloat sblur = 0.0f;
-	TqFloat tblur = 0.0f;
-	TqFloat pswidth = 1.0f;
-	TqFloat ptwidth = 1.0f;
+	m_sblur = 0.0f;
+	m_tblur = 0.0f;
+	m_pswidth = 1.0f;
+	m_ptwidth = 1.0f;
+	m_samples = 0.0f;
 
 	// Get parameters out of the map.
 	if ( paramMap.size() != 0 )
 	{
 		if ( paramMap.find( "width" ) != paramMap.end() )
 		{
-			paramMap[ "width" ] ->GetFloat( pswidth );
-			ptwidth = pswidth;
+			paramMap[ "width" ] ->GetFloat( m_pswidth );
+			m_ptwidth = m_pswidth;
 		}
 		else
 		{
 			if ( paramMap.find( "swidth" ) != paramMap.end() )
-				paramMap[ "swidth" ] ->GetFloat( pswidth );
+				paramMap[ "swidth" ] ->GetFloat( m_pswidth );
 			if ( paramMap.find( "twidth" ) != paramMap.end() )
-				paramMap[ "twidth" ] ->GetFloat( ptwidth );
+				paramMap[ "twidth" ] ->GetFloat( m_ptwidth );
 		}
 		if ( paramMap.find( "blur" ) != paramMap.end() )
 		{
-			paramMap[ "blur" ] ->GetFloat( sblur );
-			tblur = sblur;
+			paramMap[ "blur" ] ->GetFloat( m_sblur );
+			m_tblur = m_sblur;
 		}
 		else
 		{
 			if ( paramMap.find( "sblur" ) != paramMap.end() )
-				paramMap[ "sblur" ] ->GetFloat( sblur );
+				paramMap[ "sblur" ] ->GetFloat( m_sblur );
 			if ( paramMap.find( "tblur" ) != paramMap.end() )
-				paramMap[ "tblur" ] ->GetFloat( tblur );
+				paramMap[ "tblur" ] ->GetFloat( m_tblur );
 		}
+		if ( paramMap.find( "samples" ) != paramMap.end() )
+			paramMap[ "samples" ] ->GetFloat( m_samples );
 	}
+}
 
-	swidth *= pswidth;
-	twidth *= ptwidth;
+
+void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val )
+{
+	// Check the memory and make sure we don't abuse it
+	CriticalMeasure();
+
+	if ( !IsValid() ) return ;
+
+	swidth *= m_pswidth;
+	twidth *= m_ptwidth;
 
 	// T(s2,t2)-T(s2,t1)-T(s1,t2)+T(s1,t1)
 	val.resize( m_SamplesPerPixel );
 	val = 0.0f;
 
-	TqFloat ss1 = s1 - swidth - ( sblur * 0.5f );
-	TqFloat tt1 = t1 - twidth - ( tblur * 0.5f );
-	TqFloat ss2 = s1 + swidth + ( sblur * 0.5f );
-	TqFloat tt2 = t1 + twidth + ( tblur * 0.5f );
+	TqFloat ss1 = s1 - swidth - ( m_sblur * 0.5f );
+	TqFloat tt1 = t1 - twidth - ( m_tblur * 0.5f );
+	TqFloat ss2 = s1 + swidth + ( m_sblur * 0.5f );
+	TqFloat tt2 = t1 + twidth + ( m_tblur * 0.5f );
 
 	m_tempval1 = 0.0f;
 	m_tempval2 = 0.0f;
@@ -1180,7 +1188,7 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
  */
 
 void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
-                              std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
+                              std::valarray<TqFloat>& val )
 {
 	// Work out the width and height
 	TqFloat ss1, tt1, ss2, tt2;
@@ -1194,7 +1202,7 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, Tq
 	ss1 = ss1 + ( swidth * 0.5f );
 	tt1 = tt1 + ( twidth * 0.5f );
 
-	SampleMap( ss1, tt1, swidth, twidth, val, paramMap );
+	SampleMap( ss1, tt1, swidth, twidth, val );
 }
 
 

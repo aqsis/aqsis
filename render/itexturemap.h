@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/07/06 09:06:00 $
+ *	Last change date:	$Date: 2003/07/21 16:53:27 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -110,13 +110,15 @@ struct IqTextureMap
 	 */
 	virtual bool	IsValid() const = 0;
 
-	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap ) = 0;
+	virtual void	PrepareSampleOptions(std::map<std::string, IqShaderData*>& paramMap ) = 0;
+
+	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val) = 0;
 	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
-	                           std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap ) = 0;
+	                           std::valarray<TqFloat>& val ) = 0;
 	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
-	                        std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0, TqFloat* average_depth = NULL ) = 0;
+	                        std::valarray<TqFloat>& val, TqInt index = 0, TqFloat* average_depth = NULL ) = 0;
 	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-	                        std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0, TqFloat* average_depth = NULL ) = 0;
+	                        std::valarray<TqFloat>& val, TqInt index = 0, TqFloat* average_depth = NULL ) = 0;
 	virtual CqMatrix& GetMatrix( TqInt which, TqInt index = 0 ) = 0;
 
 	virtual	TqInt	NumPages() const = 0;
