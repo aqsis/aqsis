@@ -79,7 +79,7 @@ std::list<CqString*> CqFile::Glob ( const CqString& strFileGlob )
 CqString CqFile::GetSystemSetting( const CqString& strAsset )
 {
 	char * env;
-	char* base_path;
+	char* base_path = ".";
 	CqString result( "" );
 
 	if ( ( env = getenv( "AQSIS_BASE_PATH" ) ) != NULL )
