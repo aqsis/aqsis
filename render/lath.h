@@ -109,6 +109,39 @@ public:
 	TqInt cQfv() const;
 	TqInt cQvv() const;
 
+	TqBool isBoundaryFacet()
+	{
+		// Check if any of the vertices are boundary, if so then this facet must be.
+		std::vector<CqLath*> aQfv;
+		Qfv(aQfv);
+		std::vector<CqLath*>::iterator iVert;
+		for( iVert = aQfv.begin(); iVert != aQfv.end(); iVert++ )
+			if( (*iVert)->isBoundaryVertex() )
+				return( TqTrue );
+		return( TqFalse );
+	}
+
+	TqBool isBoundaryEdge()
+	{
+		// If this edge has no companion it must be boundary.
+		if( NULL == ec() )
+			return( TqTrue );
+		return( TqFalse );
+	}
+
+	TqBool isBoundaryVertex()
+	{
+		// Check if the ccv loop is closed, if not must be boundary.
+		CqLath* pNext = ccv();
+		while( pNext != this )
+		{
+			if( NULL == pNext )
+				return( TqTrue );
+			pNext = pNext->ccv();
+		}
+		return( TqFalse );
+	}
+
 private:
 	///	Declared private to prevent copying.
 	CqLath(const CqLath &);

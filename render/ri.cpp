@@ -4162,12 +4162,18 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 				pSubd2->AddRef();
 				for ( face = 0; face < nfaces; face++ )
 				{
-					// Add a patch surface to the bucket queue
-					CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( pSubd2, pSubd2->pFacet( face ) );
-					CreateGPrim( pNew );
+					// Don't add faces which are on the boundary, unless "interpolateboundary" is specified.
+					if( !pSubd2->pFacet( face )->isBoundaryFacet() )
+					{
+						// Add a patch surface to the bucket queue
+						CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( pSubd2, pSubd2->pFacet( face ) );
+						CreateGPrim( pNew );
+					}
 				}
 				pSubd2->Release();
 				pPointsClass->Release();
+
+				pSubd2->OutputMesh("green.obj");
 			}
 			else
 			{

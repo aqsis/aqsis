@@ -91,7 +91,7 @@ public:
 					if(pParam->Class() == class_vertex)
 					{
 						// Determine if we have a boundary vertex.
-						if( ( NULL != pVertex->cv() ) && ( NULL != pVertex->ccv() ) )
+						//if( ( NULL != pVertex->cv() ) && ( NULL != pVertex->ccv() ) )
 						{
 							// Smooth
 							// Vertex point is...
@@ -146,7 +146,7 @@ public:
 							
 							pParam->pValue( iIndex )[0] = Q+R+S;
 						}
-						else
+						/*else
 						{
 							// The vertex is on a boundary.
 							std::vector<CqLath*> apQve;
@@ -164,8 +164,6 @@ public:
 								std::vector<CqLath*> aQve;
 								pVertex->Qve( aQve );
 
-								TypeA A = pParam->pValue( pVertex->VertexIndex() )[0];
-								TypeA B = TypeA(0.0f);
 								TqInt cBoundaryEdges = 0;
 								std::vector<CqLath*>::iterator iE;
 								for( iE = aQve.begin(); iE != aQve.end(); iE++ )
@@ -173,19 +171,20 @@ public:
 									// Only consider the boundary edges.
 									if( NULL == (*iE)->ec() )
 									{
-										B = pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
-										R += (A+B)/2.0f;
+										if( (*iE)->VertexIndex() == pVertex->VertexIndex() )
+											R += pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
+										else
+											R += pParam->pValue( (*iE)->VertexIndex() )[0];
 										cBoundaryEdges++;
 									}
 								}
 								assert( cBoundaryEdges == 2 );
-								R *= 0.5f;
 								
 								// Get the current vertex;
 								S = pParam->pValue( pVertex->VertexIndex() )[0];
-								pParam->pValue( iIndex )[0] = ( R+S ) * 0.5f;;
+								pParam->pValue( iIndex )[0] = ( R + ( S * 6.0f ) ) / 8.0f;;
 							}
-						}
+						}*/
 					}
 					else
 #endif
@@ -202,30 +201,39 @@ public:
 					TypeA C = TypeA(0.0f);
 
 #if 1
-					if(pParam->Class() == class_vertex && ( NULL != pEdge->ec() ) )
+					if(pParam->Class() == class_vertex)
 					{
-						// Edge point is the average of the centrepoint of the original edge and the
-						// average of the two new face points of the adjacent faces.
-						std::vector<CqLath*> aQef;
-						pEdge->Qef( aQef );
-						std::vector<CqLath*>::iterator iF;
-						for( iF = aQef.begin(); iF != aQef.end(); iF++ )
+						//if( NULL != pEdge->ec() )
 						{
-							std::vector<CqLath*> aQfv;
-							(*iF)->Qfv(aQfv);
-							std::vector<CqLath*>::iterator iV;
-							TypeA Val = TypeA(0.0f);
-							for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
-								Val += pParam->pValue( (*iV)->VertexIndex() )[0];
-							Val/=static_cast<TqFloat>( aQfv.size() );
-							C += Val;
-						}
-						C /= static_cast<TqFloat>(aQef.size());
+							// Edge point is the average of the centrepoint of the original edge and the
+							// average of the two new face points of the adjacent faces.
+							std::vector<CqLath*> aQef;
+							pEdge->Qef( aQef );
+							std::vector<CqLath*>::iterator iF;
+							for( iF = aQef.begin(); iF != aQef.end(); iF++ )
+							{
+								std::vector<CqLath*> aQfv;
+								(*iF)->Qfv(aQfv);
+								std::vector<CqLath*>::iterator iV;
+								TypeA Val = TypeA(0.0f);
+								for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
+									Val += pParam->pValue( (*iV)->VertexIndex() )[0];
+								Val/=static_cast<TqFloat>( aQfv.size() );
+								C += Val;
+							}
+							C /= static_cast<TqFloat>(aQef.size());
 
-						A = pParam->pValue( pEdge->VertexIndex() )[0];
-						B = pParam->pValue( pEdge->ccf()->VertexIndex() )[0];
-						A = (A+B)/2.0f;
-						A = (A+C)/2.0f;
+							A = pParam->pValue( pEdge->VertexIndex() )[0];
+							B = pParam->pValue( pEdge->ccf()->VertexIndex() )[0];
+							A = (A+B)/2.0f;
+							A = (A+C)/2.0f;
+						}
+						/*else
+						{
+							A = pParam->pValue( pEdge->VertexIndex() )[0];
+							B = pParam->pValue( pEdge->ccf()->VertexIndex() )[0];
+							A = (A+B)/2.0f;
+						}*/
 					}
 					else
 #endif
