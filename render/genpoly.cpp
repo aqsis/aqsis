@@ -235,9 +235,11 @@ void CqPolygonGeneral2D::Combine(CqPolygonGeneral2D& polyFrom)
 	TqFloat	CurrDist;
 	TqFloat	MinDist=FLT_MAX;
 
-	for(TqInt i=0; i<cVertices(); i++)
+	TqInt i;
+	for(i=0; i<cVertices(); i++)
 	{
-		for(TqInt j=0; j<polyFrom.cVertices(); j++)
+		TqInt j;
+		for(j=0; j<polyFrom.cVertices(); j++)
 		{
 			CqVector2D	vecTemp((*this)[i]-polyFrom[j]);
 			CurrDist=static_cast<TqFloat>(sqrt(vecTemp*vecTemp));
