@@ -481,47 +481,48 @@ class _qShareC CqSurface : public CqBasicSurface
 		virtual void AddPrimitiveVariable( CqParameter* pParam )
 		{
 			m_aUserParams.push_back( pParam );
-			if ( pParam->strName() == "P" )
+			
+			if ( pParam->hash() == CqParameter::hash("P") )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_P ] );
 				m_aiStdPrimitiveVars[ EnvVars_P ] = m_aUserParams.size() - 1;
 			}
-			else if ( pParam->strName() == "N" )
+			else if ( pParam->hash() == CqParameter::hash("N") )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_N ] );
 				m_aiStdPrimitiveVars[ EnvVars_N ] = m_aUserParams.size() - 1;
 			}
-			else if ( pParam->strName() == "Cs" )
+			else if ( pParam->hash() == CqParameter::hash("Cs") )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_Cs ] );
 				m_aiStdPrimitiveVars[ EnvVars_Cs ] = m_aUserParams.size() - 1;
 			}
-			else if ( pParam->strName() == "Os" )
+			else if ( pParam->hash() == CqParameter::hash("Os") )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_Os ] );
 				m_aiStdPrimitiveVars[ EnvVars_Os ] = m_aUserParams.size() - 1;
 			}
-			else if ( pParam->strName() == "s" )
+			else if ( pParam->hash() == CqParameter::hash("s") )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_s ] );
 				m_aiStdPrimitiveVars[ EnvVars_s ] = m_aUserParams.size() - 1;
 			}
-			else if ( pParam->strName() == "t" )
+			else if ( pParam->hash() == CqParameter::hash("t") )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_t ] );
 				m_aiStdPrimitiveVars[ EnvVars_t ] = m_aUserParams.size() - 1;
 			}
-			else if ( pParam->strName() == "u" )
+			else if ( pParam->hash() == CqParameter::hash("u") )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_u ] );
 				m_aiStdPrimitiveVars[ EnvVars_u ] = m_aUserParams.size() - 1;
 			}
-			else if ( pParam->strName() == "v" )
+			else if ( pParam->hash() == CqParameter::hash("v") )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_v ] );
 				m_aiStdPrimitiveVars[ EnvVars_v ] = m_aUserParams.size() - 1;
 			}
-			else if ( pParam->strName() == "N" )
+			else if ( pParam->hash() == CqParameter::hash("N") )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_N ] );
 				m_aiStdPrimitiveVars[ EnvVars_N ] = m_aUserParams.size() - 1;

@@ -759,11 +759,16 @@ void CqSurfacePatchBilinear::AddPrimitiveVariable( CqParameter* pParam )
 	// add the primitive variable using the superclass method
 	CqSurface::AddPrimitiveVariable( pParam );
 
+	TqLong hash = CqParameter::hash("__internal_u");
+
 	// trap the indexes of "width" and "constantwidth" parameters
-	if ( pParam->strName() == "__internal_u" )
+	if ( pParam->hash() == hash )
 		m_iInternalu = m_aUserParams.size() - 1;
-	else if ( pParam->strName() == "__internal_v" )
-		m_iInternalv = m_aUserParams.size() - 1;
+	else {
+		hash = CqParameter::hash("__internal_v");
+		if ( pParam->hash() == hash )
+			m_iInternalv = m_aUserParams.size() - 1;
+	}
 }
 
 
