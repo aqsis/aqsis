@@ -1137,8 +1137,6 @@ inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2
 
 void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
 {
-    int counter = 0;
-    int MaxEyeSplits = 10;
     TqBool bIsEmpty = IsCurrentBucketEmpty();
 
     // Render any waiting micro polygon grids.
@@ -1173,34 +1171,13 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
                 QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
                 if ( fCull )
                 {
-                    if ( pSurface == Bucket.pTopSurface() )
-                        counter ++;
-                    else
-                        counter = 0;
+					Bucket.popSurface();
                     pSurface = Bucket.pTopSurface();
-                    if ( counter > MaxEyeSplits )
-                    {
-                        /* the same primitive was processed by the occlusion a MaxEyeSplits times !!
-                         * A bug occurred with the renderer probably.
-                         * We need a way out of this forloop. So I pop the primitive
-                         * and try with the next one
-                         * 
-                         */ 
-                        //CqAttributeError( ErrorID_OcclusionMaxEyeSplits, Severity_Normal, "Geometry gets culled too many times", pSurface->pAttributes(), TqTrue );
-                        CqString objname( "unnamed" );
-                        const CqString* pattrName = pSurface ->pAttributes() ->GetStringAttribute( "identifier", "name" );
-                        if ( pattrName != 0 ) objname = pattrName[ 0 ];
-                        std::cerr << warning << "Primitive \"" << objname.c_str() << "\" gets culled too many times" << std::endl;
-
-                        counter = 0;
-			Bucket.popSurface();
-                        pSurface = Bucket.pTopSurface();
-                    }
                     continue;
                 }
             }
 
-	    Bucket.popSurface();
+		    Bucket.popSurface();	
             CqMicroPolyGridBase* pGrid;
             QGetRenderContext() ->Stats().DicingTimer().Start();
             pGrid = pSurface->Dice();
