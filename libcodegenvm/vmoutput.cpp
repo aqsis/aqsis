@@ -26,6 +26,8 @@
 #include	<strstream>
 #include	<fstream>
 
+#include "aqsis.h"
+
 #ifdef AQSIS_SYSTEM_WIN32
 #include	"version.h"
 #endif // AQSIS_SYSTEM_WIN32
