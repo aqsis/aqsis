@@ -1353,6 +1353,15 @@ void CqImageBuffer::RenderImage()
         // TODO: fix non jittered bucket initialisation.
         // Warning Jitter must be True is all cases; the InitialiseBucket when it is not in jittering mode
         // doesn't initialise correctly so later we have problem in the FilterBucket()
+        TqBool fImager = TqFalse;
+        const CqString* systemOptions;
+        if( ( systemOptions = QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) ) != 0 )
+    	if( systemOptions[ 0 ].compare("null") != 0 )
+		fImager = TqTrue;
+
+        if (fImager)
+            bIsEmpty = TqFalse;
+
         CqBucket::InitialiseBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), true, bIsEmpty );
         CqBucket::InitialiseFilterValues();
 
@@ -1389,11 +1398,11 @@ void CqImageBuffer::RenderImage()
 
 
 
+        TqInt iBucket = ( CurrentBucketRow() * cXBuckets() ) + CurrentBucketCol();
         if ( pProgressHandler )
         {
             // Inform the status class how far we have got, and update UI.
             float Complete = ( float ) ( cXBuckets() * cYBuckets() );
-            TqInt iBucket = ( CurrentBucketRow() * cXBuckets() ) + CurrentBucketCol();
             Complete /= iBucket;
             Complete = 100.0f / Complete;
             QGetRenderContext() ->Stats().SetComplete( Complete );
@@ -1408,8 +1417,8 @@ void CqImageBuffer::RenderImage()
             return ;
         }
 #ifdef WIN32
-        //		if ( !( iBucket % bucketmodulo ) )
-        //			SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );
+        if ( !( iBucket % bucketmodulo ) )
+             SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );
 #endif
 #if defined(REQUIRED)
         TqInt iB2, NumGrids = 0, NumPolys = 0;
