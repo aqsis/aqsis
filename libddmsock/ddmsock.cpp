@@ -524,13 +524,8 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 	//    trapping.
 	if ( strDriverFile.empty() )
 	{
-#ifdef AQSIS_SYSTEM_WIN32
-		strDriverFile = "framebuffer.exe";
-#else // AQSIS_SYSTEM_WIN32
-		strDriverFile = "framebuffer";
-#endif // !AQSIS_SYSTEM_WIN32
-
-		CqBasicError( ErrorID_DisplayDriver, Severity_Normal, ( "Could not find ddmsock.ini file.  Defaulting to \"" + strDriverFile + "\" display driver." ).c_str() );
+		//CqBasicError( ErrorID_DisplayDriver, Severity_Normal, "Invalid display type. \"" + dd.strType + "\"" );
+		throw( CqString("Invalid display type \"") + dd.strType() + CqString("\"") );
 	}
 
 	CqRiFile fileDriver( strDriverFile.c_str(), "display" );
@@ -677,6 +672,10 @@ void CqDDManager::InitialiseDisplayNameMap()
 			}
 		}
 		g_fDisplayMapInitialised = true;
+	}
+	else
+	{
+		CqBasicError( ErrorID_DisplayDriver, Severity_Normal, "Could not find ddmsock.ini file." );
 	}
 }
 

@@ -410,6 +410,7 @@ RtVoid	RiWorldBegin()
 
 RtVoid	RiWorldEnd()
 {
+	TqBool fFailed = TqFalse;
 	// Call any specified pre render function.
 	if ( QGetRenderContext() ->optCurrent().pPreRenderFunction() != NULL )
 		( *QGetRenderContext() ->optCurrent().pPreRenderFunction() ) ();
@@ -418,7 +419,15 @@ RtVoid	RiWorldEnd()
 	QGetRenderContext() ->Stats().MakeParse().Stop();
 
 	// Render the world
-	QGetRenderContext() ->RenderWorld();
+	try
+	{
+		QGetRenderContext() ->RenderWorld();
+	}
+	catch(CqString strError)
+	{
+		std::cout << strError.c_str() << std::endl;
+		fFailed = TqTrue;
+	}
 
 	// Delete the world context
 	QGetRenderContext() ->EndWorldModeBlock();
@@ -426,14 +435,17 @@ RtVoid	RiWorldEnd()
 	// Stop the frame timer
 	QGetRenderContext() ->Stats().StopFrameTimer();
 
-	// Get the verbosity level from the options...
-	TqInt verbosity = 0;
-	const TqInt* poptEndofframe = QGetRenderContext() ->optCurrent().GetIntegerOption( "statistics", "endofframe" );
-	if ( poptEndofframe != 0 )
-		verbosity = poptEndofframe[ 0 ];
+	if(!fFailed)
+	{
+		// Get the verbosity level from the options...
+		TqInt verbosity = 0;
+		const TqInt* poptEndofframe = QGetRenderContext() ->optCurrent().GetIntegerOption( "statistics", "endofframe" );
+		if ( poptEndofframe != 0 )
+			verbosity = poptEndofframe[ 0 ];
 
-	// ...and print the statistics.
-	QGetRenderContext() ->Stats().PrintStats( verbosity );
+		// ...and print the statistics.
+		QGetRenderContext() ->Stats().PrintStats( verbosity );
+	}
 	return ;
 }
 

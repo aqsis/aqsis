@@ -538,18 +538,6 @@ void CqRenderer::RenderWorld()
 
 	pImage() ->RenderImage();
 
-	// Calculate the time taken.
-	//	m_timeTaken=time(0)-m_timeTaken;
-
-	/* moved the following code into RiWorldEnd()
-		TqInt verbosity=0;
-		const TqInt* poptEndofframe=optCurrent().GetIntegerOption("statistics","endofframe");
-		if(poptEndofframe!=0)
-			verbosity=poptEndofframe[0];
-	 
-		Stats().PrintStats(verbosity);
-		*/
-
 	m_pDDManager->CloseDisplays();
 }
 
