@@ -402,7 +402,7 @@ void CqImagePixel::Combine()
         }
 
         // Write the collapsed color values back into the top entry.
-        if ( samples->size() > 0 )
+        if ( !samples->empty() )
         {
             samples->begin() ->SetCs( samplecolor );
             samples->begin() ->SetOs( sampleopacity );
