@@ -8,7 +8,7 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-//
+//  
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -33,69 +33,62 @@
 #include <zlib.h>
 #include "aqsis.h"
 
-namespace librib
-{
+namespace librib {
 
+#ifdef _DEBUG
+#define gzFile FILE *
+#endif
 class CqRibBinaryDecoder
 {
-	private:
-		gzFile gzf;
-		std::vector<TqChar> cv;
+private:
+    gzFile gzf;
+    std::vector<TqChar> cv;
 
-		std::string ritab[ 256 ];
-		std::vector<std::string> stringtab;
+    std::string ritab[256];
+    std::vector<std::string> stringtab;
 
-		// Convert To Signed Integer
-		TqInt ctsi( TqChar );
-		TqInt ctsi( TqChar, TqChar );
-		TqInt ctsi( TqChar, TqChar, TqChar );
-		TqInt ctsi( TqChar, TqChar, TqChar, TqChar );
+    // Convert To Signed Integer
+    TqInt ctsi(TqChar);
+    TqInt ctsi(TqChar,TqChar);
+    TqInt ctsi(TqChar,TqChar,TqChar);
+    TqInt ctsi(TqChar,TqChar,TqChar,TqChar);
 
-		// Convert To unsigned Integer
-		TqUint ctui( TqChar );
-		TqUint ctui( TqChar, TqChar );
-		TqUint ctui( TqChar, TqChar, TqChar );
-		TqUint ctui( TqChar, TqChar, TqChar, TqChar );
+    // Convert To unsigned Integer
+    TqUint ctui(TqChar);
+    TqUint ctui(TqChar,TqChar);
+    TqUint ctui(TqChar,TqChar,TqChar);
+    TqUint ctui(TqChar,TqChar,TqChar,TqChar);
 
-		// Get Char
-		void gc( TqChar & );
+    // Get Char
+    void gc(TqChar &);
 
-		// Send N Characters
-		void snc( TqUint, std::strstream & );
+    // Send N Characters 
+    void snc(TqUint, std::strstream &);
 
-		void sendFloat( std::strstream & );
-		void sendDouble( std::strstream & );
+    void sendFloat(std::strstream &);
+    void sendDouble(std::strstream &);
 
-		void readString( TqChar, std::strstream & );
+    void readString(TqChar, std::strstream &);
 
-		// Decode Next Char
-		void getNext();
-		TqInt writeToBuffer( TqPchar buffer, TqUint size );
+    // Decode Next Char
+    void getNext();
+    TqInt writeToBuffer(TqPchar buffer, TqUint size);
 
-		TqBool eof_flag;
-		TqBool fail_flag;
+    TqBool eof_flag;
+    TqBool fail_flag;
 
-		CqRibBinaryDecoder( CqRibBinaryDecoder const & )
-		{}
-		CqRibBinaryDecoder const &operator=( CqRibBinaryDecoder const & )
-		{
-			return * this;
-		}
+    CqRibBinaryDecoder(CqRibBinaryDecoder const &) {}
+    CqRibBinaryDecoder const &operator=(CqRibBinaryDecoder const &)
+    {return *this;}
 
-	public:
-		CqRibBinaryDecoder( std::string );
-		CqRibBinaryDecoder( FILE * );
-		~CqRibBinaryDecoder();
+public:
+    CqRibBinaryDecoder(std::string);
+    CqRibBinaryDecoder(FILE *);
+    ~CqRibBinaryDecoder();
 
-		TqInt read( TqPchar buffer, TqUint size );
-		TqBool eof()
-		{
-			return eof_flag;
-		};
-		TqBool fail()
-		{
-			return fail_flag;
-		};
+    TqInt read(TqPchar buffer, TqUint size);
+    TqBool eof() { return eof_flag; };
+    TqBool fail() { return fail_flag; };
 };
 
 } // namespace librib
