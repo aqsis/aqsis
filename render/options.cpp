@@ -110,11 +110,11 @@ void CqCamera::InitialiseCamera()
 
 			matCameraToScreen.Identity();
 			matCameraToScreen.SetfIdentity(TqFalse);
-			matCameraToScreen.SetElement(0,0,2/(r-l));
+			matCameraToScreen.SetElement(0,0,2.0f/(r-l));
 			matCameraToScreen.SetElement(3,0,(r+l)/(r-l));
-			matCameraToScreen.SetElement(1,1,2/(t-b));
+			matCameraToScreen.SetElement(1,1,2.0f/(t-b));
 			matCameraToScreen.SetElement(3,1,(t+b)/(t-b));
-			matCameraToScreen.SetElement(2,2,-2/(f-n));
+			matCameraToScreen.SetElement(2,2,-2.0f/(f-n));
 			matCameraToScreen.SetElement(3,2,(f+n)/(f-n));
 			matCameraToScreen.SetElement(2,3,0);
 			matCameraToScreen.SetElement(3,3,1);
@@ -148,7 +148,7 @@ void CqCamera::InitialiseCamera()
 			// Define a matrix to convert from right top left handed coordinate systems.
 			CqMatrix Trl(1,1,-1);
 
-			TqFloat fov=m_fClippingPlaneNear*(tan(RAD(m_fFOV/2)));
+			TqFloat fov=m_fClippingPlaneNear*(tan(RAD(m_fFOV/2.0f)));
 			TqFloat l=m_fScreenWindowLeft*fov;
 			TqFloat r=m_fScreenWindowRight*fov;
 			TqFloat t=m_fScreenWindowTop*fov;
@@ -158,12 +158,12 @@ void CqCamera::InitialiseCamera()
 
 			matCameraToScreen.Identity();
 			matCameraToScreen.SetfIdentity(TqFalse);
-			matCameraToScreen.SetElement(0,0,(2*n)/(r-l));
+			matCameraToScreen.SetElement(0,0,(2.0f*n)/(r-l));
 			matCameraToScreen.SetElement(2,0,(r+l)/(r-l));
-			matCameraToScreen.SetElement(1,1,(2*n)/(t-b));
+			matCameraToScreen.SetElement(1,1,(2.0f*n)/(t-b));
 			matCameraToScreen.SetElement(2,1,(t+b)/(t-b));
 			matCameraToScreen.SetElement(2,2,(f+n)/(f-n));
-			matCameraToScreen.SetElement(3,2,(-2*f*n)/(f-n));
+			matCameraToScreen.SetElement(3,2,(-2.0f*f*n)/(f-n));
 			matCameraToScreen.SetElement(2,3,-1);
 			matCameraToScreen.SetElement(3,3,0);
 
