@@ -115,19 +115,25 @@ void idle(void)
 			if(g_Data[i] == FLT_MAX)
 				continue;
 				
-			#ifdef	AQSIS_SYSTEM_WIN32
+#ifdef	AQSIS_SYSTEM_WIN32
 			mindepth = min(mindepth, g_Data[i]);
 			maxdepth = max(maxdepth, g_Data[i]);
-			#else // AQSIS_SYSTEM_WIN32
+#else // AQSIS_SYSTEM_WIN32
 			mindepth = std::min(mindepth, g_Data[i]);
 			maxdepth = std::max(maxdepth, g_Data[i]);
-			#endif // AQSIS_SYSTEM_WIN32
+#endif // AQSIS_SYSTEM_WIN32
 			totaldepth += g_Data[i];
 			samples++;
 		}
 		
 	const TqFloat dynamicrange = maxdepth - mindepth;
 		
+#ifdef AQSIS_SYSTEM_WIN32
+	Sleep(200);
+#else
+	sleep(2);
+#endif
+
 	std::cout << std::endl;
 	std::cout << "Total Samples: " << totalsamples << std::endl;
 	std::cout << "Depth Samples: " << samples << std::endl;
