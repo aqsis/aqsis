@@ -128,6 +128,55 @@ InputName=ambientlight
 # End Source File
 # Begin Source File
 
+SOURCE=.\background.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+OutDir=.\..\Library\Release
+InputPath=.\background.sl
+InputName=background
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	$(OutDir)\aqsl $(InputPath) 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+OutDir=.\..\Library\Debug
+InputPath=.\background.sl
+InputName=background
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	$(OutDir)\aqsl $(InputPath) 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Profile"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+OutDir=.\..\Library\Profile
+InputPath=.\background.sl
+InputName=background
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	$(OutDir)\aqsl $(InputPath) 
+	
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\cellnoisetest.sl
 
 !IF  "$(CFG)" == "Shaders - Win32 Release"
