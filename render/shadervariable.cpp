@@ -59,15 +59,6 @@ char* gVariableStorageNames[]=
 };
 TqInt gcVariableStorageNames=sizeof(gVariableStorageNames)/sizeof(gVariableStorageNames[0]);
 
-char* gVariableUsageNames[]=
-{
-	"function",
-	"param",
-	"variable",
-	"invalid",
-};
-TqInt gcVariableUsageNames=sizeof(gVariableUsageNames)/sizeof(gVariableUsageNames[0]);
-
 CqShaderVariable::CqShaderVariable() 	
 {
 	QGetRenderContext()->Stats().IncVariablesAllocated();

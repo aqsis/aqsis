@@ -165,8 +165,6 @@ enum EqVariableType
 
 _qShareM	extern char*	gVariableStorageNames[];
 _qShareM	extern TqInt	gcVariableStorageNames;
-_qShareM	extern char*	gVariableUsageNames[];
-_qShareM	extern TqInt	gcVariableUsageNames;
 _qShareM	extern char*	gVariableTypeNames[];
 _qShareM	extern TqInt	gcVariableTypeNames;
 
