@@ -4805,18 +4805,17 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 
 	}
 
-/*	if ( STRING( dataname ).compare( "viewingmatrix" ) == 0 )
+	if ( STRING( dataname ).compare( "viewingmatrix" ) == 0 )
 	{
-		if ( pV->Type() == type_float && 
-			 pV->ArrayLength() > 0 )
+		if ( ( (pV->Type() == type_float) && (pV->ArrayLength() == 16 ) ) ||
+			 (pV->Type() == type_matrix) )
 		{
 			if ( pSMap ) // && pSMap->Type() == MapType_Shadow)
 			{
 
+				CqMatrix m = pSMap->GetMatrix(0);  /* WorldToCamera */
 				if ( pV->ArrayLength() == 16 )
 				{
-
-					CqMatrix m = pSMap->matWorldToCamera();
 
 					pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 0 ] ) );
 					pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 1 ] ) );
@@ -4835,8 +4834,12 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 					pV->ArrayEntry( 14 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 2 ] ) );
 					pV->ArrayEntry( 15 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 3 ] ) );
 
-					Ret = 1.0f;
+				} else
+				{
+					pV->SetMatrix(m,0);
 				}
+				Ret = 1.0f;
+
 			}
 
 		}
@@ -4844,17 +4847,16 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 
 	if ( STRING( dataname ).compare( "projectionmatrix" ) == 0 )
 	{
-		if ( pV->Type() == type_float && 
-			 pV->ArrayLength() > 0 )
+		if ( ( (pV->Type() == type_float) && (pV->ArrayLength() == 16 ) ) ||
+			 (pV->Type() == type_matrix) )
 		{
 			if ( pSMap )  // && pSMap->Type() == MapType_Shadow)
 			{
 
+				CqMatrix m = pSMap->GetMatrix(1); /* WorldToScreen */
+
 				if ( pV->ArrayLength() == 16 )
 				{
-
-					CqMatrix m = pSMap->matWorldToScreen();
-
 					pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 0 ] ) );
 					pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 1 ] ) );
 					pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( m[ 0 ][ 2 ] ) );
@@ -4872,13 +4874,17 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 					pV->ArrayEntry( 14 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 2 ] ) );
 					pV->ArrayEntry( 15 ) ->SetFloat( static_cast<TqFloat>( m[ 3 ][ 3 ] ) );
 
+					
+				} else
+				{
+					pV->SetMatrix(m,0);
 
-					Ret = 1.0f;
 				}
+				Ret = 1.0f;
 			}
 
 		}
-	}*/
+	}
 
 	delete pMap;
 
