@@ -946,7 +946,7 @@ void CqTextureMap::GetSample(TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std
 	TqInt idu = FLOOR(d*m_XRes);
 	TqInt idv = FLOOR(d*m_YRes);
 	TqInt id = 0;
-	TqBool singlelevel = ((idu==0)||(idu==m_XRes)||(idv==0)||(idv==m_YRes));
+	TqBool singlelevel = ((idu==0)||(idu>=(m_XRes/2))||(idv==0)||(idv>=(m_YRes/2)));
 	TqInt umapsize,vmapsize;
 	for(umapsize = m_XRes, vmapsize = m_YRes; idu > 1 && idv > 1; idu >>= 1, umapsize >>= 1, idv >>= 1, vmapsize >>= 1, id++);
 	
