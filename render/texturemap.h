@@ -53,6 +53,7 @@ START_NAMESPACE(Aqsis)
 #define ZFILE_HEADER "Aqsis ZFile" VERSION
 #endif // !AQSIS_SYSTEM_WIN32
 
+#define	LATLONG_HEADER	"Aqsis LatLong MIP MAP"
 #define	CUBEENVMAP_HEADER	"Aqsis CubeFace Environment"
 #define	SHADOWMAP_HEADER	"Shadow"
 #define	MIPMAP_HEADER		"Aqsis MIP MAP"
@@ -71,6 +72,7 @@ enum	EqMapType
 	MapType_Environment,	///< Cube face environment map.
 	MapType_Bump,			///< Bump map (not used).
 	MapType_Shadow,			///< Shadow map.
+	MapType_LatLong
 };
 
 
@@ -270,7 +272,7 @@ class _qShareC CqTextureMap
 
 									/** Use the plugin to convert to a tif file any texture file provided
 									**/
-	_qShareM	virtual TqInt 		Convert	(CqString &strName);
+	_qShareM    virtual TqInt Convert	(CqString &strName);
 
 	_qShareM	virtual	void		Open();
 									/** Close this image file.
@@ -308,6 +310,7 @@ class _qShareC CqTextureMap
 	_qShareM	static	CqTextureMap* GetTextureMap(const char* strName);
 	_qShareM	static	CqTextureMap* GetEnvironmentMap(const char* strName);
 	_qShareM	static	CqTextureMap* GetShadowMap(const char* strName);
+	_qShareM	static	CqTextureMap* GetLatLongMap(const char* strName);
 
 	_qShareM    TqUlong				ImageFilterVal(uint32* p, TqInt x, TqInt y, TqInt directory);
 
@@ -377,6 +380,25 @@ class _qShareC CqEnvironmentMap : public CqTextureMap
 	private:
 						void		Getst(CqVector3D& R, unsigned long fullwidth, unsigned long fulllength, float& s, float& t);
 };
+
+//----------------------------------------------------------------------
+/** \class CqLatLongMap
+ * Environment map, derives from texture map and handles converting reflection
+ * vector to s,t coordinates.
+ */
+
+class _qShareC CqLatLongMap : public CqEnvironmentMap
+{
+	public:
+	_qShareM 		CqLatLongMap(const char* strName)	:
+									CqEnvironmentMap(strName)
+									{}
+	_qShareM	virtual	~CqLatLongMap()	{}
+	
+	_qShareM	virtual	EqMapType	Type() const			{return(IsValid()?MapType_LatLong:MapType_Invalid);}
+
+
+	};
 
 
 //----------------------------------------------------------------------

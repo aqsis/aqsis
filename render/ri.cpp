@@ -3153,7 +3153,14 @@ RtVoid	RiMakeBumpV(const char *imagefile, const char *bumpfile, RtToken swrap, R
 //
 RtVoid	RiMakeLatLongEnvironment(const char *imagefile, const char *reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ...)
 {
-	CqBasicError(0,Severity_Normal,"RiMakeLatLongEnvironment not supported");
+	va_list	pArgs;
+	va_start(pArgs, twidth);
+
+	RtToken* pTokens;
+	RtPointer* pValues;
+	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
+
+	RiMakeLatLongEnvironmentV(imagefile, reflfile, filterfunc, swidth, twidth, count, pTokens, pValues);
 	return;
 }
 
@@ -3162,9 +3169,68 @@ RtVoid	RiMakeLatLongEnvironment(const char *imagefile, const char *reflfile, RtF
 // RiMakeLatLongEnvironmentV
 // List based version of above.
 //
-RtVoid	RiMakeLatLongEnvironmentV(const char *imagefile, const char *reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST)
+RtVoid	RiMakeLatLongEnvironmentV(const char *pic, const char *tex, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST)
 {
-	CqBasicError(0,Severity_Normal,"RiMakeLatLongEnvironment not supported");
+	char modes[1024];
+	char *swrap = "periodic";
+	char *twrap = "clamp";
+
+	assert(pic!=0 && tex!=0 && swrap!=0 && twrap!=0 && filterfunc!=0);
+
+	QGetRenderContext()->Stats().MakeTextureTimer().Start();
+	
+	sprintf(modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth);
+	if (filterfunc == RiGaussianFilter)
+		sprintf(modes, "%s %s %s %f %f", swrap, twrap, "gaussian", swidth, twidth);
+    if (filterfunc == RiBoxFilter)
+		sprintf(modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth);
+    if (filterfunc == RiTriangleFilter)
+		sprintf(modes, "%s %s %s %f %f", swrap, twrap, "triangle", swidth, twidth);
+    if (filterfunc == RiCatmullRomFilter)
+		sprintf(modes, "%s %s %s %f %f", swrap, twrap, "catmull-rom", swidth, twidth);
+    if (filterfunc == RiSincFilter)
+		sprintf(modes, "%s %s %s %f %f", swrap, twrap, "sinc", swidth, twidth);
+    if (filterfunc == RiDiskFilter)
+		sprintf(modes, "%s %s %s %f %f", swrap, twrap, "disk", swidth, twidth);
+    if (filterfunc == RiBesselFilter)
+		sprintf(modes, "%s %s %s %f %f", swrap, twrap, "bessel", swidth, twidth);
+	
+
+	// Now load the original image.
+	CqTextureMap Source(pic);
+	Source.Open();
+	
+	if(Source.IsValid() && Source.Format()==TexFormat_Plain)
+	{
+		// Hopefully CqTextureMap will take care of closing the tiff file after
+		// it has SAT mapped it so we can overwrite if needs be.
+		// Create a new image.
+		Source.Interpreted(modes);
+		Source.CreateMIPMAP();
+		TIFF* ptex=TIFFOpen(tex,"w");
+
+		TIFFCreateDirectory(ptex);
+		TIFFSetField(ptex,TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+		TIFFSetField(ptex,TIFFTAG_PIXAR_TEXTUREFORMAT, LATLONG_HEADER);
+		TIFFSetField(ptex,TIFFTAG_PIXAR_WRAPMODES,modes);
+		TIFFSetField(ptex,TIFFTAG_SAMPLESPERPIXEL, Source.SamplesPerPixel());
+		TIFFSetField(ptex,TIFFTAG_BITSPERSAMPLE, 8);
+		TIFFSetField(ptex,TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS ); /* COMPRESSION_DEFLATE */
+		int log2 = MIN(Source.XRes(), Source.YRes());
+		log2 = (int)(log(log2)/log(2.0));
+
+
+		for(int i=0; i < log2; i ++) {
+			// Write the floating point image to the directory.
+			CqTextureMapBuffer* pBuffer=Source.GetBuffer(0,0, i);
+			if (!pBuffer) break;
+			Source.WriteTileImage(ptex,pBuffer->pBufferData(),Source.XRes()/(1<<i),Source.YRes()/(1<<i),64,64,Source.SamplesPerPixel());
+		}
+		TIFFClose(ptex);
+	}
+
+	Source.Close();
+	QGetRenderContext()->Stats().MakeTextureTimer().Stop();
 	return;
 }
 

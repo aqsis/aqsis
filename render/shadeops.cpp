@@ -1789,7 +1789,15 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2(STRINGVAL name, FLOATVAL channel, V
 	GET_TEXTURE_PARAMS;
 
 	TqInt i=0;
-	CqTextureMap* pTMap=CqTextureMap::GetEnvironmentMap(STRING(name).c_str());
+	CqTextureMap* pTMap;
+	pTMap=CqTextureMap::GetEnvironmentMap(STRING(name).c_str());
+
+	// Try with LatLong map file 
+	if (pTMap == 0)
+	{
+		pTMap =CqTextureMap::GetLatLongMap(STRING(name).c_str());
+	}
+
 	CqVector3D f;
 	INIT_SOR
 	__fVarying=TqTrue;
@@ -1837,7 +1845,15 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment3(STRINGVAL name, FLOATVAL channel, V
 	GET_TEXTURE_PARAMS;
 
 	TqInt i=0;
-	CqTextureMap* pTMap=CqTextureMap::GetEnvironmentMap(STRING(name).c_str());
+	CqTextureMap* pTMap;
+	pTMap=CqTextureMap::GetEnvironmentMap(STRING(name).c_str());
+	
+	// Try with LatLong map file 
+	if (pTMap == 0)
+	{
+		pTMap =CqTextureMap::GetLatLongMap(STRING(name).c_str());
+	}
+
 	CqVector3D f;
 	INIT_SOR
 	__fVarying=TqTrue;
@@ -1868,7 +1884,15 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2(STRINGVAL name, FLOATVAL channel, V
 	GET_TEXTURE_PARAMS;
 
 	TqInt i=0;
-	CqTextureMap* pTMap=CqTextureMap::GetEnvironmentMap(STRING(name).c_str());
+	CqTextureMap* pTMap = NULL;
+	pTMap =CqTextureMap::GetEnvironmentMap(STRING(name).c_str());
+
+	// Try with LatLong map file 
+	if (pTMap == 0)
+	{
+		pTMap =CqTextureMap::GetLatLongMap(STRING(name).c_str());
+	}
+
 	CqVector3D f;
 	INIT_SOR
 	__fVarying=TqTrue;
@@ -1895,8 +1919,9 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2(STRINGVAL name, FLOATVAL channel, V
 
 			// Sample the texture.
 			std::valarray<float> val;
+			
 			pTMap->SampleMIPMAP(R.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val);
-            
+			
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1917,7 +1942,15 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment3(STRINGVAL name, FLOATVAL channel, V
 	GET_TEXTURE_PARAMS;
 
 	TqInt i=0;
-	CqTextureMap* pTMap=CqTextureMap::GetEnvironmentMap(STRING(name).c_str());
+	CqTextureMap* pTMap;
+	pTMap=CqTextureMap::GetEnvironmentMap(STRING(name).c_str());
+
+	// Try with LatLong map file 
+	if (pTMap == 0)
+	{
+		pTMap =CqTextureMap::GetLatLongMap(STRING(name).c_str());
+	}
+
 	CqVector3D f;
 	INIT_SOR
 	__fVarying=TqTrue;
@@ -3678,6 +3711,13 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo(STRINGVAL name, STRINGVAL dataname, C
 		if (pTMap->Type() == MapType_Shadow) 
 		{
 			se="shadow";
+			Ret=1.0f;
+		}
+		if (pTMap->Type() == MapType_LatLong) 
+		{
+			// both latlong/cube respond the same way according to BMRT 
+			// It makes sense since both use environment() shader fct.
+			se="environment";
 			Ret=1.0f;
 		}
 	}
