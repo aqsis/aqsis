@@ -8,12 +8,12 @@ CFG=Shaders - Win32 Debug
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
-!MESSAGE NMAKE /f "Shaders.mak".
+!MESSAGE NMAKE /f "shaders.mak".
 !MESSAGE 
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "Shaders.mak" CFG="Shaders - Win32 Debug"
+!MESSAGE NMAKE /f "shaders.mak" CFG="Shaders - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
@@ -64,6 +64,18 @@ MTL=midl.exe
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\borg_metal.sl
+# End Source File
+# Begin Source File
+
+SOURCE=.\brickbump.sl
+# End Source File
+# Begin Source File
+
+SOURCE=.\cellnoisetest.sl
+# End Source File
+# Begin Source File
+
 SOURCE=.\constant.sl
 
 !IF  "$(CFG)" == "Shaders - Win32 Release"
@@ -94,6 +106,10 @@ InputName=constant
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\dented.sl
 # End Source File
 # Begin Source File
 
@@ -160,6 +176,10 @@ InputName=distantlight
 
 !ENDIF 
 
+# End Source File
+# Begin Source File
+
+SOURCE=.\dpbluemarble.sl
 # End Source File
 # Begin Source File
 
@@ -361,6 +381,26 @@ InputName=pointlight
 # End Source File
 # Begin Source File
 
+SOURCE=.\randgrid.sl
+# End Source File
+# Begin Source File
+
+SOURCE=.\shadowspot.sl
+# End Source File
+# Begin Source File
+
+SOURCE=.\shinymetal.sl
+# End Source File
+# Begin Source File
+
+SOURCE=.\show_st.sl
+# End Source File
+# Begin Source File
+
+SOURCE=.\spacetest.sl
+# End Source File
+# Begin Source File
+
 SOURCE=.\spotlight.sl
 
 !IF  "$(CFG)" == "Shaders - Win32 Release"
@@ -394,207 +434,13 @@ InputName=spotlight
 !ENDIF 
 
 # End Source File
-# End Group
-# Begin Group "Additional"
-
-# PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\Additional\Borg_metal.sl
-
-!IF  "$(CFG)" == "Shaders - Win32 Release"
-
-# Begin Custom Build - Compiling Shader $(InputPath)
-InputDir=.\Additional
-InputPath=.\Additional\Borg_metal.sl
-InputName=Borg_metal
-
-"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd $(InputDir) 
-	slcomp $(InputName).sl 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
-
-# Begin Custom Build - Compiling Shader $(InputPath)
-InputDir=.\Additional
-InputPath=.\Additional\Borg_metal.sl
-InputName=Borg_metal
-
-"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd $(InputDir) 
-	slcomp $(InputName).sl 
-	
-# End Custom Build
-
-!ENDIF 
-
+SOURCE=.\uvtest.sl
 # End Source File
 # Begin Source File
 
-SOURCE=.\debug.sl
-
-!IF  "$(CFG)" == "Shaders - Win32 Release"
-
-# Begin Custom Build - Compiling Shader $(InputPath)
-InputDir=.
-InputPath=.\debug.sl
-InputName=debug
-
-"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd $(InputDir) 
-	slcomp $(InputName).sl 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
-
-# Begin Custom Build - Compiling Shader $(InputPath)
-InputDir=.
-InputPath=.\debug.sl
-InputName=debug
-
-"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd $(InputDir) 
-	slcomp $(InputName).sl 
-	
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Additional\dented.sl
-
-!IF  "$(CFG)" == "Shaders - Win32 Release"
-
-# Begin Custom Build - Compiling Shader $(InputPath)
-InputDir=.\Additional
-InputPath=.\Additional\dented.sl
-InputName=dented
-
-"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd $(InputDir) 
-	slcomp $(InputName).sl 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
-
-# Begin Custom Build - Compiling Shader $(InputPath)
-InputDir=.\Additional
-InputPath=.\Additional\dented.sl
-InputName=dented
-
-"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd $(InputDir) 
-	slcomp $(InputName).sl 
-	
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Additional\DPBlueMarble.sl
-
-!IF  "$(CFG)" == "Shaders - Win32 Release"
-
-# Begin Custom Build - Compiling Shader $(InputPath)
-InputDir=.\Additional
-InputPath=.\Additional\DPBlueMarble.sl
-InputName=DPBlueMarble
-
-"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd $(InputDir) 
-	slcomp $(InputName).sl 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
-
-# Begin Custom Build - Compiling Shader $(InputPath)
-InputDir=.\Additional
-InputPath=.\Additional\DPBlueMarble.sl
-InputName=DPBlueMarble
-
-"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd $(InputDir) 
-	slcomp $(InputName).sl 
-	
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Additional\randgrid.sl
-
-!IF  "$(CFG)" == "Shaders - Win32 Release"
-
-# Begin Custom Build - Compiling Shader $(InputPath)
-InputDir=.\Additional
-InputPath=.\Additional\randgrid.sl
-InputName=randgrid
-
-"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd $(InputDir) 
-	slcomp $(InputName).sl 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
-
-# Begin Custom Build - Compiling Shader $(InputPath)
-InputDir=.\Additional
-InputPath=.\Additional\randgrid.sl
-InputName=randgrid
-
-"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd $(InputDir) 
-	slcomp $(InputName).sl 
-	
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\Additional\shadowspot.sl
-
-!IF  "$(CFG)" == "Shaders - Win32 Release"
-
-# Begin Custom Build - Compiling Shader $(InputPath)
-InputDir=.\Additional
-InputPath=.\Additional\shadowspot.sl
-InputName=shadowspot
-
-"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd $(InputDir) 
-	slcomp $(InputName).sl 
-	
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
-
-# Begin Custom Build - Compiling Shader $(InputPath)
-InputDir=.\Additional
-InputPath=.\Additional\shadowspot.sl
-InputName=shadowspot
-
-"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	cd $(InputDir) 
-	slcomp $(InputName).sl 
-	
-# End Custom Build
-
-!ENDIF 
-
+SOURCE=.\wavy.sl
 # End Source File
 # End Group
 # End Target
