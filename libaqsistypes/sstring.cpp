@@ -282,8 +282,13 @@ CqString& CqString::operator+=(TqInt i)
 
 CqString& CqString::operator+=(TqFloat f)
 {
-	TqInt dec,sign;
-	return(*this+=fcvt(f,5,&dec,&sign));
+	char buf[5];
+	#ifdef	AQSIS_COMPILER_MSVC6
+	_snprintf(buf,5,"%f",f);
+	#else
+	snprintf(buf,5,"%f",f);
+	#endif
+	return (*this+=buf);
 }
 
 
