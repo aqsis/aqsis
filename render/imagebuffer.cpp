@@ -623,6 +623,8 @@ void CqBucket::FilterBucket()
 	TqInt i = 0;
 	TqFloat total = numsubpixels;
 
+	TqBool fImager = (QGetRenderContext()->optCurrent().GetStringOption("System", "Imager")[0] != "null");
+
 	for ( y = YOrigin(); y < YOrigin() + YSize(); y++ )
 	{
 		TqFloat ycent = y + 0.5f;
@@ -689,7 +691,7 @@ void CqBucket::FilterBucket()
 																&pCols[i], &pOpacs[i], 
 																&pDepths[i], &pCoverages[i]);
 
-				if (QGetRenderContext()->optCurrent().GetStringOption("System", "Imager")[0] != "null")
+				if (fImager)
 				{
 					imager = QGetRenderContext()->optCurrent().GetColorImager( x , y ); 
 					// Normal case will be to poke the alpha from the image shader and 
@@ -987,6 +989,8 @@ void	CqImageBuffer::SetImage()
 	m_PixelYSamples = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "PixelSamples")[1];
 	m_FilterXWidth = static_cast<TqInt>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "FilterWidth")[0] );
 	m_FilterYWidth = static_cast<TqInt>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "FilterWidth")[1] );
+	m_ClippingNear = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[0] );
+	m_ClippingFar = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[1] );
 	m_DisplayMode = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "DisplayMode")[0];
 
 	m_aBuckets.resize( m_cXBuckets * m_cYBuckets );
@@ -1338,6 +1342,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 	static	SqImageSample	ImageVal;
 
 	CqBucket& Bucket = m_aBuckets[ iBucket ];
+	CqStats& theStats = QGetRenderContext() ->Stats();
 
 	for ( TqInt bound_num = 0; bound_num < pMPG->cSubBounds(); bound_num++ )
 	{
@@ -1357,7 +1362,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 			if ( bound_num == pMPG->cSubBounds() - 1 )
 			{
 				// last bound so we can delete the mpg
-				QGetRenderContext() ->Stats().IncCulledMPGs();
+				theStats.IncCulledMPGs();
 				return ;
 			}
 			else
@@ -1365,13 +1370,13 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 		}
 
 		// If the micropolygon is outside the hither-yon range, cull it.
-		if ( Bound.vecMin().z() > QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[1] ||
-		        Bound.vecMax().z() < QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[0] )
+		if ( Bound.vecMin().z() > ClippingFar() ||
+		     Bound.vecMax().z() < ClippingNear() )
 		{
 			if ( bound_num == pMPG->cSubBounds() - 1 )
 			{
 				// last bound so we can delete the mpg
-				QGetRenderContext() ->Stats().IncCulledMPGs();
+				theStats.IncCulledMPGs();
 				return ;
 			}
 			else
@@ -1393,8 +1398,8 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 
 		CqImagePixel* pie;
 
-		TqInt iXSamples = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "PixelSamples")[0];
-		TqInt iYSamples = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "PixelSamples")[1];
+		TqInt iXSamples = PixelXSamples();
+		TqInt iYSamples = PixelYSamples();
 
 		TqInt im = ( bminx < sX ) ? 0 : FLOOR( ( bminx - sX ) * iXSamples );
 		TqInt in = ( bminy < sY ) ? 0 : FLOOR( ( bminy - sY ) * iYSamples );
@@ -1426,18 +1431,18 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 					for ( m = start_m; m < end_m && !brkHoriz; m++ )
 					{
 						CqVector2D vecP( pie->SamplePoint( m, n ) );
-						QGetRenderContext() ->Stats().IncSamples();
+						theStats.IncSamples();
 
 						TqFloat t = pie->SampleTime( m, n );
 						// First, check if the subsample point lies within the micropoly bound
 						if ( t >= time0 && t <= time1 && Bound.Contains2D( vecP ) )
 						{
-							QGetRenderContext() ->Stats().IncSampleBoundHits();
+							theStats.IncSampleBoundHits();
 
 							// Now check if the subsample hits the micropoly
 							if ( pMPG->Sample( vecP, t, ImageVal.m_Depth ) )
 							{
-								QGetRenderContext() ->Stats().IncSampleHits();
+								theStats.IncSampleHits();
 								pMPG->BeenHit();
 								// Sort the color/opacity into the visible point list
 								std::vector<SqImageSample>& aValues = pie->Values( m, n );

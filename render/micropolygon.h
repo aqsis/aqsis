@@ -444,7 +444,7 @@ class CqMicroPolygonStaticBase
  * Class which stores a single static micropolygon.
  */
 
-class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonStaticBase, public CqPoolable<CqMicroPolygonStatic>
+class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonStaticBase, public CqPoolable<CqMicroPolygonStatic, 500>
 {
 	public:
 		CqMicroPolygonStatic() : CqMicroPolygonBase(), CqMicroPolygonStaticBase(), m_fTrimmed( TqFalse )

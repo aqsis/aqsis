@@ -504,6 +504,20 @@ class _qShareC	CqImageBuffer
 		{
 			return ( m_FilterYWidth );
 		}
+		/** Get the near clipping distance.
+		 * \return Float distance from the camera that objects must be to be visible.
+		 */
+		_qShareM	TqFloat	ClippingNear() const
+		{
+			return ( m_ClippingNear );
+		}
+		/** Get the far clipping distance.
+		 * \return Float distance from the camera that objects will be clipped from view.
+		 */
+		_qShareM	TqFloat	ClippingFar() const
+		{
+			return ( m_ClippingFar );
+		}
 		/** Get the display.
 		 * \return Integer display mode as a member of enum Mode.
 		 */
@@ -575,6 +589,8 @@ class _qShareC	CqImageBuffer
 		TqInt	m_CropWindowYMin;	///< Integer minimum vertical pixel to render.
 		TqInt	m_CropWindowXMax;	///< Integer maximum horizontal pixel to render.
 		TqInt	m_CropWindowYMax;	///< Integer maximum vertical pixel to render.
+		TqFloat	m_ClippingNear;		///< Near clipping distance.
+		TqFloat	m_ClippingFar;		///< Far clipping distance.
 		TqInt	m_DisplayMode;		///< Integer display mode, a member of the enum Mode.
 
 		std::vector<CqBucket>	m_aBuckets;

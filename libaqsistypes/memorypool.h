@@ -131,7 +131,7 @@ class CqMemoryPool
  * Tamplate class to add the ability for a derived class to use a memory pool.
  */
 
-template <class T>
+template <class T, long S = MEMORYPOOL_DEFAULTBLOCKSIZE>
 class CqPoolable
 {
 	public:
@@ -156,7 +156,7 @@ class CqPoolable
 
 		T*	m_pNext;	///< Pointer to the next object.
 
-		static	CqMemoryPool<T>	m_thePool;	///< Static pool to allocated micropolys from.
+		static	CqMemoryPool<T, S>	m_thePool;	///< Static pool to allocated micropolys from.
 }
 ;
 
@@ -165,7 +165,7 @@ class CqPoolable
 /** Define the static memory pool for a poolable class.
  */
 
-#define	DEFINE_STATIC_MEMORYPOOL(A)	CqMemoryPool<A>	CqPoolable<A>::m_thePool
+#define	DEFINE_STATIC_MEMORYPOOL(A, S)	CqMemoryPool<A, S>	CqPoolable<A, S>::m_thePool
 
 
 //-----------------------------------------------------------------------

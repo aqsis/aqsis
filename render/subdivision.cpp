@@ -34,9 +34,9 @@
 
 START_NAMESPACE( Aqsis )
 
-DEFINE_STATIC_MEMORYPOOL( CqWEdge );
-DEFINE_STATIC_MEMORYPOOL( CqWFace );
-DEFINE_STATIC_MEMORYPOOL( CqWVert );
+DEFINE_STATIC_MEMORYPOOL( CqWEdge, 512 );
+DEFINE_STATIC_MEMORYPOOL( CqWFace, 512 );
+DEFINE_STATIC_MEMORYPOOL( CqWVert, 512 );
 
 //---------------------------------------------------------------------
 /** Remove an edge reference from the array.
