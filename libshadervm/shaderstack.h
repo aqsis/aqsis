@@ -42,9 +42,6 @@
 #include	"bitvector.h"
 #include	"shadervariable.h"
 
-#define	 _qShareName	BUILD_LIBSHADERVM
-#include "share.h"
-
 START_NAMESPACE( Aqsis )
 
 #define	OpLSS_FF(a,b,Res,State)		OpLSS(temp_float,temp_float,temp_float,a,b,Res,State)
@@ -203,10 +200,10 @@ START_NAMESPACE( Aqsis )
  * Class handling the shader execution stack.
  */
 
-class _qShareC CqShaderStack
+class CqShaderStack
 {
 	public:
-		_qShareM CqShaderStack() : m_iTop( 0 )
+		CqShaderStack() : m_iTop( 0 )
 		{
 			TqInt n = MAX(m_maxsamples, m_samples);
 			m_Stack.resize( n );
@@ -233,7 +230,7 @@ class _qShareC CqShaderStack
 			for ( i = 0; i < type_last; i++ )
 				m_iVPoolTops[ i ] = 0;
 		}
-		virtual _qShareM ~CqShaderStack()
+		virtual ~CqShaderStack()
 		{
 		
 			m_Stack.clear();

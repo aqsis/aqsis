@@ -48,18 +48,15 @@
 #include	"iattributes.h"
 #include	"itransform.h"
 
-#define	 _qShareName	BUILD_LIBSHADEREXECENV
-#include "share.h"
-
 START_NAMESPACE( Aqsis )
 
 
-_qShareM	extern char*	gVariableClassNames[];
-_qShareM	extern TqInt	gcVariableClassNames;
-_qShareM	extern char*	gVariableTypeNames[];
-_qShareM	extern TqInt	gcVariableTypeNames;
-_qShareM	extern char*	gVariableNames[];	///< Vector of variable names.
-_qShareM	extern TqUlong	gVariableTokens[];	///< Vector of hash key from above names.
+extern char*	gVariableClassNames[];
+extern TqInt	gcVariableClassNames;
+extern char*	gVariableTypeNames[];
+extern TqInt	gcVariableTypeNames;
+extern char*	gVariableNames[];	///< Vector of variable names.
+extern TqUlong	gVariableTokens[];	///< Vector of hash key from above names.
 
 
 extern TqInt gDefUses;

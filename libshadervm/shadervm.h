@@ -46,9 +46,6 @@
 #include	"shadervariable.h"
 #include 	"dsoshadeops.h"
 
-#define		_qShareName	BUILD_LIBSHADERVM
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 
@@ -388,16 +385,16 @@ static CqMatrix temp_matrix;
  * Main class handling the execution of a program in shader language bytecodes.
  */
 
-class _qShareC CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
+class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 {
 	public:
-		_qShareM CqShaderVM() : CqShaderStack(), m_logger( NULL ), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue ) 
+		CqShaderVM() : CqShaderStack(), m_logger( NULL ), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue ) 
 		{}
-		_qShareM	CqShaderVM( const CqShaderVM& From ) : m_logger( NULL ), m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
+		CqShaderVM( const CqShaderVM& From ) : m_logger( NULL ), m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
 		{
 			*this = From;
 		}
-		virtual _qShareM ~CqShaderVM()
+		virtual ~CqShaderVM()
 		{
 			// Delete the local variables.
 			for ( std::vector<IqShaderData*>::iterator i = m_LocalVars.begin(); i != m_LocalVars.end(); i++ )
@@ -426,12 +423,12 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader, public CqDSOR
 		{
 			Execute( pEnv );
 		}
-		virtual	_qShareM	void	PrepareDefArgs()
+		virtual	void	PrepareDefArgs()
 		{
 			ExecuteInit();
 		}
 		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShaderExecEnv* pEnv );
-		virtual	_qShareM TqBool	fAmbient() const
+		virtual	TqBool	fAmbient() const
 		{
 			return ( m_fAmbient );
 		}
