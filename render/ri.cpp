@@ -4081,9 +4081,9 @@ RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
     CqLogRangeCheckCallback rc;
 
     rc.set( "sphere zmin" );
-    CheckMinMax( zmin, -radius, radius, &rc );
+    CheckMinMax( zmin, MIN(-radius, radius), MAX(-radius,radius), &rc );
     rc.set( "sphere zmax" );
-    CheckMinMax( zmax, -radius, radius, &rc );
+    CheckMinMax( zmax, MIN(-radius, radius), MAX(-radius,radius), &rc );
 
     // Create a sphere
     boost::shared_ptr<CqSphere> pSurface( new CqSphere( radius, zmin, zmax, 0, thetamax ) );

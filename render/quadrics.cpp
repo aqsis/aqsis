@@ -369,11 +369,10 @@ CqSphere::CqSphere( TqFloat radius, TqFloat zmin, TqFloat zmax, TqFloat thetamin
         m_ThetaMin( thetamin ),
         m_ThetaMax( thetamax )
 {
-    // Sanity check the values.
-    if( m_ZMin < -m_Radius )	m_ZMin = -m_Radius;
-    if( m_ZMin >  m_Radius )	m_ZMin =  m_Radius;
-    if( m_ZMax < -m_Radius )	m_ZMax = -m_Radius;
-    if( m_ZMax >  m_Radius )	m_ZMax =  m_Radius;
+    // Sanity check the values, while ensuring we keep the same signs.
+	TqFloat frad = fabs(m_Radius);
+    if( fabs(m_ZMin) > frad )	m_ZMin = frad*(m_ZMin<0)?-1:1;
+    if( fabs(m_ZMax) > frad )	m_ZMax = frad*(m_ZMax<0)?-1:1;
 }
 
 
@@ -399,8 +398,8 @@ CqSphere&	CqSphere::operator=( const CqSphere& From )
 
 CqBound	CqSphere::Bound() const
 {
-    TqFloat phimin = ( m_ZMin > -m_Radius ) ? asin( m_ZMin / m_Radius ) : -( RI_PIO2 );
-    TqFloat phimax = ( m_ZMax < m_Radius ) ? asin( m_ZMax / m_Radius ) : ( RI_PIO2 );
+    TqFloat phimin = asin( m_ZMin / m_Radius );
+    TqFloat phimax = asin( m_ZMax / m_Radius );
 
     std::vector<CqVector3D> curve;
     CqVector3D vA( 0, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 );
@@ -456,8 +455,8 @@ TqInt CqSphere::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& a
 
 CqVector3D CqSphere::DicePoint( TqInt u, TqInt v )
 {
-    TqFloat phimin = ( m_ZMin > -m_Radius ) ? asin( m_ZMin / m_Radius ) : RAD( -90.0 );
-    TqFloat phimax = ( m_ZMax < m_Radius ) ? asin( m_ZMax / m_Radius ) : RAD( 90.0 );
+    TqFloat phimin = asin( m_ZMin / m_Radius );
+    TqFloat phimax = asin( m_ZMax / m_Radius );
     TqFloat phi = phimin + ( ( TqFloat ) v * ( phimax - phimin ) ) / m_vDiceSize;
 
     TqFloat cosphi = cos( phi );
