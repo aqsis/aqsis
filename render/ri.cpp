@@ -1106,7 +1106,7 @@ RtVoid	RiHiderV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, CqLog::RI_COLOR_SAMPLES_INVALID ) );
+	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_COLOR_SAMPLES_INVALID );
 	return ;
 }
 
@@ -1119,10 +1119,7 @@ RtVoid	RiRelativeDetail( RtFloat relativedetail )
 {
 	if ( relativedetail < 0.0f )
 	{
-		CqBasicError(
-		    ErrorID_InvalidData, Severity_Normal,
-		    QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 2 )
-		);
+		QGetRenderContext() ->Logger()->error( CqLog::RI_ERROR_TABLE, CqLog::RI_RELATIVE_DETAIL_INVALID );
 	}
 	else
 	{
@@ -1181,7 +1178,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 			else
 			{
 				if ( Decl.m_strName == "" )
-					CqBasicError( ErrorID_UnknownSymbol, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 3 ) );
+					QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_UNKNOWN_SYMBOL );
 				else
 					CqBasicError( ErrorID_InvalidType, Severity_Normal, "Options can only be uniform" );
 				return ;
@@ -1455,7 +1452,8 @@ RtLightHandle	RiAreaLightSource( const char *name, ... )
 //
 RtLightHandle	RiAreaLightSourceV( const char *name, PARAMETERLIST )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 4 ) );
+	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_AREA_LIGHT_UNSUPPORTED );
+	
 	return ( RiLightSourceV( name, count, tokens, values ) );
 }
 
