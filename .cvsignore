@@ -1,7 +1,14 @@
 libtool
 configure
 Makefile
+
+
+*.zip
+
 *.proj
 .#*
 *.ncb
 *.opt
+*~
+
+*.positions

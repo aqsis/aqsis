@@ -4,3 +4,5 @@ parser.cpp.h
 scanner.cpp
 .#*
 *.plg
+*.#*
+*~

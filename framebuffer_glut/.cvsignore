@@ -1,3 +1,5 @@
 Makefile
 aqsis_framebuffer_glut
 .#*
+*.#*
+*~
