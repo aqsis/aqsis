@@ -105,7 +105,17 @@ public:
         // find the length of the CqLinearCurveSegment line in raster space
         if( m_splitDecision == Split_Undecided )
         {
-            const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace(
+			// AGG - 31/07/04
+			// well, if we follow the above statagy we end up splitting into
+			// far too many grids (with roughly 1 mpg per grid). so after
+			// profiling a few scenes, the fastest method seems to be just
+			// to convert to a patch immediatly.
+			// we really need a native dice for curves but until that time
+			// i reckon this is best.
+			m_splitDecision = Split_Patch;
+
+
+       /*     const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace(
                                            "camera", "raster",
 											CqMatrix(), CqMatrix(),
 											QGetRenderContextI()->Time()
@@ -143,6 +153,7 @@ public:
                 // split into smaller curves
                 m_splitDecision = Split_Curve;
             }
+	*/
         }
 
         return TqFalse;

@@ -404,8 +404,8 @@ TqBool	CqSurfacePatchBicubic::Diceable()
     if( NULL != poptGridSize )
         gs = poptGridSize[0];
 
-    if ( m_uDiceSize > gs) return TqFalse;
-    if ( m_vDiceSize > gs) return TqFalse;
+	if( m_uDiceSize * m_vDiceSize > gs * gs )
+		return TqFalse;
 
     return ( TqTrue );
 }
@@ -751,8 +751,8 @@ TqBool	CqSurfacePatchBilinear::Diceable()
     if( NULL != poptGridSize )
         gs = poptGridSize[0];
 
-    if ( m_uDiceSize > gs) return TqFalse;
-    if ( m_vDiceSize > gs) return TqFalse;
+	if( m_uDiceSize * m_vDiceSize > gs * gs )
+		return TqFalse;
 
     return ( TqTrue );
 }
