@@ -832,19 +832,25 @@ void CqTextureMap::Open()
     CqString strRealName( fileImage.strRealName() );
     fileImage.Close();
 
-    // Now try to converted first to tif file
-    wasconverted = Convert( strRealName );
-    if ( wasconverted )
-    {
-        CqString * strnew = new CqString( strRealName );
-        m_ConvertString_Cache.push_back( strnew );
-    }
-
-    // Now open it as a tiff file.
+	// First try to open it as a tiff image.
     m_pImage = TIFFOpen( strRealName.c_str(), "r" );
-    std::cerr << info << "TextureMap: \"" << strRealName.c_str() << "\" is open" << std::endl;
+
+	if( !m_pImage )
+	{
+		// Now try to converted first to tif file
+		wasconverted = Convert( strRealName );
+		if ( wasconverted )
+		{
+			CqString * strnew = new CqString( strRealName );
+			m_ConvertString_Cache.push_back( strnew );
+			// Now open it as a tiff file.
+			m_pImage = TIFFOpen( strRealName.c_str(), "r" );
+		}
+	}
+
     if ( m_pImage )
     {
+	    std::cerr << info << "TextureMap: \"" << strRealName.c_str() << "\" is open" << std::endl;
         TqPchar pFormat = 0;
         TqPchar pModes = 0;
 
