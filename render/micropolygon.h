@@ -810,7 +810,7 @@ public:
 				m_Point2 = ( F1 * pMP1->m_Point2 ) + ( Fraction * pMP2->m_Point2 );
 				m_Point3 = ( F1 * pMP1->m_Point3 ) + ( Fraction * pMP2->m_Point3 );
 			}
-			m_IsDegenerate = pMPG->IsDegenerate();
+			m_IsDegenerate = m_Point2 == m_Point3;
 		}
 		else
 		{
