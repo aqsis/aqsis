@@ -409,7 +409,7 @@ void CqMicroPolyGrid::Shade()
         }
     }
 
-    if ( pshadDisplacement != 0 )
+    if ( pshadDisplacement )
     {
         theStats.DisplacementTimer().Start();
         pshadDisplacement->Evaluate( m_pShaderExecEnv );
@@ -444,7 +444,7 @@ void CqMicroPolyGrid::Shade()
 
     // Now shade the grid.
     theStats.SurfaceTimer().Start();
-    if ( NULL != pshadSurface )
+    if ( pshadSurface )
     {
 		//boost::shared_ptr<CqSurface> surf(pSurface());
 		m_pShaderExecEnv->SetCurrentSurface(pSurface());
@@ -479,7 +479,7 @@ void CqMicroPolyGrid::Shade()
         }
     }
     // Now perform atmosphere shading
-    if ( pshadAtmosphere != 0 )
+    if ( pshadAtmosphere )
     {
         theStats.AtmosphereTimer().Start();
         pshadAtmosphere->Evaluate( m_pShaderExecEnv );

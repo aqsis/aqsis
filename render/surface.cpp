@@ -164,7 +164,7 @@ TqInt CqBasicSurface::Uses() const
     boost::shared_ptr<IqShader> pshadDisplacement = pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time());
     boost::shared_ptr<IqShader> pshadAtmosphere = pAttributes() ->pshadAtmosphere(QGetRenderContextI()->Time());
 
-    if ( NULL == pshadSurface && NULL == pshadDisplacement && NULL == pshadAtmosphere )
+    if ( pshadSurface && pshadDisplacement && pshadAtmosphere )
         return ( 0 );
 
     if ( pshadSurface ) Uses |= pshadSurface->Uses();

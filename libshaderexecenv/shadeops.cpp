@@ -3989,7 +3989,7 @@ STD_SOIMPL CqShaderExecEnv::SO_surface( STRINGVAL name, IqShaderData* pV, DEFPAR
 
     if ( GetCurrentSurface() &&
 		 NULL != GetCurrentSurface()->pAttributes() && 
-		 NULL != GetCurrentSurface()->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) )
+		 GetCurrentSurface()->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) )
         pSurface = GetCurrentSurface()->pAttributes() ->pshadSurface(QGetRenderContextI()->Time());
 
     BEGIN_UNIFORM_SECTION
@@ -5271,9 +5271,9 @@ STD_SOIMPL	CqShaderExecEnv::SO_shadername2( STRINGVAL shader, DEFPARAMIMPL )
     BEGIN_VARYING_SECTION
     strName = "";
     GETSTRING( shader );
-    if ( STRING( shader ).compare( "surface" ) == 0 && pSurface != 0 ) strName = pSurface->strName();
-    else if ( STRING( shader ).compare( "displacement" ) == 0 && pDisplacement != 0 ) strName = pDisplacement->strName();
-    else if ( STRING( shader ).compare( "atmosphere" ) == 0 && pAtmosphere != 0 ) strName = pAtmosphere->strName();
+    if ( STRING( shader ).compare( "surface" ) == 0 && pSurface ) strName = pSurface->strName();
+    else if ( STRING( shader ).compare( "displacement" ) == 0 && pDisplacement ) strName = pDisplacement->strName();
+    else if ( STRING( shader ).compare( "atmosphere" ) == 0 && pAtmosphere ) strName = pAtmosphere->strName();
     SETSTRING( Result, strName );
     END_VARYING_SECTION
 }

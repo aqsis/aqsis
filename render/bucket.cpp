@@ -467,7 +467,7 @@ void CqBucket::FilterBucket(TqBool empty)
     endy = YOrigin() + Height();
     endx = XOrigin() + Width();
 
-    if ( NULL != QGetRenderContext() ->optCurrent().pshadImager() && NULL != QGetRenderContext() ->optCurrent().pshadImager() ->pShader() )
+    if ( NULL != QGetRenderContext() ->optCurrent().pshadImager() && QGetRenderContext() ->optCurrent().pshadImager() ->pShader() )
     {
         QGetRenderContext() ->Stats().MakeFilterBucket().Stop();
         // Init & Execute the imager shader
