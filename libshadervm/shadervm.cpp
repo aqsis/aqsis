@@ -455,13 +455,6 @@ static TqUlong uhash = 0;
 static TqUlong ushash = 0;
 static TqUlong ehash = 0;
 static TqUlong ohash = 0;
-/*
- * Private hash key for the data types supported by the shaders
- */
-static TqUlong *itypes = NULL;
-
-
-
 
 //---------------------------------------------------------------------
 /**
@@ -804,6 +797,10 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
     ADDREF( StdEnv );
     TqInt	array_count = 0;
     TqUlong  htoken, i;
+	/*
+	 * Private hash key for the data types supported by the shaders
+	 */
+	std::vector<TqUlong> itypes;
 
     // Initialise the private hash keys.
     if (!dhash)
@@ -827,12 +824,8 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
     if (!ohash)
         ohash = CqParameter::hash("output");
 
-    if (!itypes)
-    {
-        itypes = (TqUlong *) malloc(gcVariableTypeNames * sizeof(TqUlong));
-        for(i = 0; i<gcVariableTypeNames; i++)
-            itypes[i] = CqParameter::hash(gVariableTypeNames[i]);
-    }
+	for(i = 0; i<gcVariableTypeNames; i++)
+		itypes.push_back(CqParameter::hash(gVariableTypeNames[i]));
 
 
     TqBool fShaderSpec = TqFalse;

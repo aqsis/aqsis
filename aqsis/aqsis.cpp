@@ -44,8 +44,9 @@ extern "C" void report_refcounts();
 #include <stdio.h>
 
 
-void RenderFile( FILE* file, const char* name );
+void RenderFile( FILE* file, std::string& name );
 void GetOptions();
+void ReleaseOptions();
 
 bool g_pause;
 // Set verbose stats if in debug mode
@@ -357,7 +358,8 @@ int main( int argc, const char** argv )
 
     if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
     {
-        RenderFile( stdin, "stdin" );
+        std::string name("stdin");
+		RenderFile( stdin, name );
     }
     else
     {
@@ -366,7 +368,8 @@ int main( int argc, const char** argv )
             FILE *file = fopen( e->c_str(), "rb" );
             if ( file != NULL )
             {
-                RenderFile( file, e->c_str() );
+                std::string name(*e);
+				RenderFile( file, name );
                 fclose( file );
             }
             else
@@ -375,6 +378,8 @@ int main( int argc, const char** argv )
             }
         }
     }
+
+	ReleaseOptions();
 
 	}
 #if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
@@ -448,7 +453,21 @@ void GetOptions()
         g_procedurals = Aqsis::CqFile::GetSystemSetting( "procedurals" );
 }
 
-void RenderFile( FILE* file, const char* name )
+
+void ReleaseOptions()
+{
+	g_base_path = "";
+	g_config = "";
+	g_shaders = "";
+	g_archives = "";
+	g_textures = "";
+	g_displays = "";
+	g_dso_libs = "";
+	g_procedurals = "";
+}
+
+
+void RenderFile( FILE* file, std::string&  name )
 {
     librib::RendermanInterface * renderengine = librib2ri::CreateRIBEngine();
 

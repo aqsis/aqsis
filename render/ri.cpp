@@ -238,12 +238,8 @@ RtInt	RiLastError = 0;
 // Helper function to build a parameter list to pass on to the V style functions.
 // returns a parameter count.
 
-RtInt BuildParameterList( va_list pArgs, RtToken*& pTokens, RtPointer*& pValues )
+RtInt BuildParameterList( va_list pArgs, std::vector<RtToken>& aTokens, std::vector<RtPointer>& aValues )
 {
-    // TODO: Check this is thread safe.
-    static std::vector<RtToken>	aTokens;
-    static std::vector<RtPointer>	aValues;
-
     RtInt count = 0;
     RtToken pToken = va_arg( pArgs, RtToken );
     RtPointer pValue;
@@ -257,9 +253,6 @@ RtInt BuildParameterList( va_list pArgs, RtToken*& pTokens, RtPointer*& pValues 
         pToken = va_arg( pArgs, RtToken );
         count++;
     }
-
-    pTokens = &aTokens[ 0 ];
-    pValues = &aValues[ 0 ];
     return ( count );
 }
 
@@ -696,11 +689,11 @@ RtVoid	RiProjection( const char *name, ... )
     va_list	pArgs;
     va_start( pArgs, name );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiProjectionV( name, count, pTokens, pValues );
+    RiProjectionV( name, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -951,11 +944,11 @@ RtVoid	RiImager( const char *name, ... )
     va_list	pArgs;
     va_start( pArgs, name );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiImagerV( name, count, pTokens, pValues );
+    RiImagerV( name, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -1033,11 +1026,11 @@ RtVoid	RiDisplay( const char *name, RtToken type, RtToken mode, ... )
     va_list	pArgs;
     va_start( pArgs, mode );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiDisplayV( name, type, mode, count, pTokens, pValues );
+    RiDisplayV( name, type, mode, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -1371,11 +1364,11 @@ RtVoid	RiHider( const char *name, ... )
     va_list	pArgs;
     va_start( pArgs, name );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiHiderV( name, count, pTokens, pValues );
+    RiHiderV( name, count, &aTokens[0], &aValues[0] );
 
 }
 
@@ -1452,11 +1445,11 @@ RtVoid	RiOption( const char *name, ... )
     va_list	pArgs;
     va_start( pArgs, name );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiOptionV( name, count, pTokens, pValues );
+    RiOptionV( name, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -1704,11 +1697,11 @@ RtLightHandle	RiLightSource( const char *name, ... )
     va_list	pArgs;
     va_start( pArgs, name );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    return ( RiLightSourceV( name, count, pTokens, pValues ) );
+    return ( RiLightSourceV( name, count, &aTokens[0], &aValues[0] ) );
 }
 
 
@@ -1761,11 +1754,11 @@ RtLightHandle	RiAreaLightSource( const char *name, ... )
     va_list	pArgs;
     va_start( pArgs, name );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    return ( RiAreaLightSourceV( name, count, pTokens, pValues ) );
+    return ( RiAreaLightSourceV( name, count, &aTokens[0], &aValues[0] ) );
 }
 
 
@@ -1806,11 +1799,11 @@ RtVoid	RiSurface( const char *name, ... )
     va_list	pArgs;
     va_start( pArgs, name );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiSurfaceV( name, count, pTokens, pValues );
+    RiSurfaceV( name, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -1852,11 +1845,11 @@ RtVoid	RiAtmosphere( const char *name, ... )
     va_list	pArgs;
     va_start( pArgs, name );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiAtmosphereV( name, count, pTokens, pValues );
+    RiAtmosphereV( name, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -2343,11 +2336,11 @@ RtVoid	RiDisplacement( const char *name, ... )
     va_list	pArgs;
     va_start( pArgs, name );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiDisplacementV( name, count, pTokens, pValues );
+    RiDisplacementV( name, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -2454,11 +2447,11 @@ RtVoid	RiAttribute( const char *name, ... )
     va_list	pArgs;
     va_start( pArgs, name );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiAttributeV( name, count, pTokens, pValues );
+    RiAttributeV( name, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -2583,11 +2576,11 @@ RtVoid	RiPolygon( RtInt nvertices, ... )
     va_list	pArgs;
     va_start( pArgs, nvertices );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiPolygonV( nvertices, count, pTokens, pValues );
+    RiPolygonV( nvertices, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -2636,11 +2629,11 @@ RtVoid	RiGeneralPolygon( RtInt nloops, RtInt nverts[], ... )
     va_list	pArgs;
     va_start( pArgs, nverts );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiGeneralPolygonV( nloops, nverts, count, pTokens, pValues );
+    RiGeneralPolygonV( nloops, nverts, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -2765,11 +2758,11 @@ RtVoid RiBlobby( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloa
     va_list	pArgs;
     va_start( pArgs, strings );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiBlobbyV( nleaf, ncodes, codes, nfloats, floats, nstrings, strings, count, pTokens, pValues );
+    RiBlobbyV( nleaf, ncodes, codes, nfloats, floats, nstrings, strings, count, &aTokens[0], &aValues[0] );
 
     return ;
 }
@@ -2799,11 +2792,11 @@ RtVoid	RiPoints( RtInt nvertices, ... )
     va_list	pArgs;
     va_start( pArgs, nvertices );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiPointsV( nvertices, count, pTokens, pValues );
+    RiPointsV( nvertices, count, &aTokens[0], &aValues[0] );
 
     return ;
 }
@@ -2902,11 +2895,11 @@ RtVoid RiCurves( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, .
     va_list	pArgs;
     va_start( pArgs, wrap );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiCurvesV( type, ncurves, nvertices, wrap, count, pTokens, pValues );
+    RiCurvesV( type, ncurves, nvertices, wrap, count, &aTokens[0], &aValues[0] );
 
     return ;
 }
@@ -2993,11 +2986,11 @@ RtVoid	RiPointsPolygons( RtInt npolys, RtInt nverts[], RtInt verts[], ... )
     va_list	pArgs;
     va_start( pArgs, verts );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiPointsPolygonsV( npolys, nverts, verts, count, pTokens, pValues );
+    RiPointsPolygonsV( npolys, nverts, verts, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -3056,11 +3049,11 @@ RtVoid	RiPointsGeneralPolygons( RtInt npolys, RtInt nloops[], RtInt nverts[], Rt
     va_list	pArgs;
     va_start( pArgs, verts );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiPointsGeneralPolygonsV( npolys, nloops, nverts, verts, count, pTokens, pValues );
+    RiPointsGeneralPolygonsV( npolys, nloops, nverts, verts, count, &aTokens[0], &aValues[0] );
 
     return ;
 }
@@ -3338,11 +3331,11 @@ RtVoid	RiPatch( RtToken type, ... )
     va_list	pArgs;
     va_start( pArgs, type );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiPatchV( type, count, pTokens, pValues );
+    RiPatchV( type, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -3413,11 +3406,11 @@ RtVoid	RiPatchMesh( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
     va_list	pArgs;
     va_start( pArgs, vwrap );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiPatchMeshV( type, nu, uwrap, nv, vwrap, count, pTokens, pValues );
+    RiPatchMeshV( type, nu, uwrap, nv, vwrap, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -3508,11 +3501,11 @@ RtVoid	RiNuPatch( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat
     va_list	pArgs;
     va_start( pArgs, vmax );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiNuPatchV( nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, count, pTokens, pValues );
+    RiNuPatchV( nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -3617,11 +3610,11 @@ RtVoid	RiSphere( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, .
     va_list	pArgs;
     va_start( pArgs, thetamax );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiSphereV( radius, zmin, zmax, thetamax, count, pTokens, pValues );
+    RiSphereV( radius, zmin, zmax, thetamax, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -3665,11 +3658,11 @@ RtVoid	RiCone( RtFloat height, RtFloat radius, RtFloat thetamax, ... )
     va_list	pArgs;
     va_start( pArgs, thetamax );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiConeV( height, radius, thetamax, count, pTokens, pValues );
+    RiConeV( height, radius, thetamax, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -3710,11 +3703,11 @@ RtVoid	RiCylinder( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
     va_list	pArgs;
     va_start( pArgs, thetamax );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiCylinderV( radius, zmin, zmax, thetamax, count, pTokens, pValues );
+    RiCylinderV( radius, zmin, zmax, thetamax, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -3751,11 +3744,11 @@ RtVoid	RiHyperboloid( RtPoint point1, RtPoint point2, RtFloat thetamax, ... )
     va_list	pArgs;
     va_start( pArgs, thetamax );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiHyperboloidV( point1, point2, thetamax, count, pTokens, pValues );
+    RiHyperboloidV( point1, point2, thetamax, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -3794,11 +3787,11 @@ RtVoid	RiParaboloid( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
     va_list	pArgs;
     va_start( pArgs, thetamax );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiParaboloidV( rmax, zmin, zmax, thetamax, count, pTokens, pValues );
+    RiParaboloidV( rmax, zmin, zmax, thetamax, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -3835,11 +3828,11 @@ RtVoid	RiDisk( RtFloat height, RtFloat radius, RtFloat thetamax, ... )
     va_list	pArgs;
     va_start( pArgs, thetamax );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiDiskV( height, radius, thetamax, count, pTokens, pValues );
+    RiDiskV( height, radius, thetamax, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -3876,11 +3869,11 @@ RtVoid	RiTorus( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phim
     va_list	pArgs;
     va_start( pArgs, thetamax );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiTorusV( majorrad, minorrad, phimin, phimax, thetamax, count, pTokens, pValues );
+    RiTorusV( majorrad, minorrad, phimin, phimax, thetamax, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -3945,11 +3938,11 @@ RtVoid	RiGeometry( RtToken type, ... )
     va_list	pArgs;
     va_start( pArgs, type );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiGeometryV( type, count, pTokens, pValues );
+    RiGeometryV( type, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -4132,11 +4125,11 @@ RtVoid RiMakeTexture ( const char * pic, const char * tex, RtToken swrap, RtToke
     va_list	pArgs;
     va_start( pArgs, twidth );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiMakeTextureV( pic, tex, swrap, twrap, filterfunc, swidth, twidth, count, pTokens, pValues );
+    RiMakeTextureV( pic, tex, swrap, twrap, filterfunc, swidth, twidth, count, &aTokens[0], &aValues[0] );
 
 }
 
@@ -4260,11 +4253,11 @@ RtVoid	RiMakeLatLongEnvironment( const char * imagefile, const char * reflfile, 
     va_list	pArgs;
     va_start( pArgs, twidth );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiMakeLatLongEnvironmentV( imagefile, reflfile, filterfunc, swidth, twidth, count, pTokens, pValues );
+    RiMakeLatLongEnvironmentV( imagefile, reflfile, filterfunc, swidth, twidth, count, &aTokens[0], &aValues[0] );
     return ;
 }
 
@@ -4353,11 +4346,11 @@ RtVoid	RiMakeCubeFaceEnvironment( const char * px, const char * nx, const char *
     va_list	pArgs;
     va_start( pArgs, twidth );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiMakeCubeFaceEnvironmentV( px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, count, pTokens, pValues );
+    RiMakeCubeFaceEnvironmentV( px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -4476,11 +4469,11 @@ RtVoid	RiMakeShadow( const char * picfile, const char * shadowfile, ... )
     va_list	pArgs;
     va_start( pArgs, shadowfile );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiMakeShadowV( picfile, shadowfile, count, pTokens, pValues );
+    RiMakeShadowV( picfile, shadowfile, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -4514,11 +4507,11 @@ RtVoid	RiMakeOcclusion( RtInt npics, const char **picfiles, const char *shadowfi
     va_list	pArgs;
     va_start( pArgs, shadowfile );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiMakeOcclusionV( npics, picfiles, shadowfile, count, pTokens, pValues );
+    RiMakeOcclusionV( npics, picfiles, shadowfile, count, &aTokens[0], &aValues[0] );
 }
 
 
@@ -4600,11 +4593,11 @@ RtVoid	RiSubdivisionMesh( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
     va_list	pArgs;
     va_start( pArgs, floatargs );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiSubdivisionMeshV( scheme, nfaces, nvertices, vertices, ntags, tags, nargs, intargs, floatargs, count, pTokens, pValues );
+    RiSubdivisionMeshV( scheme, nfaces, nvertices, vertices, ntags, tags, nargs, intargs, floatargs, count, &aTokens[0], &aValues[0] );
 }
 
 //----------------------------------------------------------------------
@@ -4755,11 +4748,11 @@ RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
     va_list	pArgs;
     va_start( pArgs, callback );
 
-    RtToken* pTokens;
-    RtPointer* pValues;
-    RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+    std::vector<RtToken> aTokens;
+    std::vector<RtPointer> aValues;
+    RtInt count = BuildParameterList( pArgs, aTokens, aValues );
 
-    RiReadArchiveV( name, callback, count, pTokens, pValues );
+    RiReadArchiveV( name, callback, count, &aTokens[0], &aValues[0] );
 }
 
 
