@@ -45,6 +45,7 @@ CqImagersource::CqImagersource( IqShader* pShader, TqBool fActive ) :
 	ADDREF( m_pAttributes );
 
 	m_pShaderExecEnv = new CqShaderExecEnv;
+	ADDREF( m_pShaderExecEnv );
 
 }
 
@@ -60,8 +61,10 @@ CqImagersource::~CqImagersource()
 	m_pAttributes = 0;
 
 	/// \note This should delete through the interface that created it.
-	if ( NULL != m_pShaderExecEnv )
-		delete( m_pShaderExecEnv );
+	if ( NULL != m_pShaderExecEnv ) {
+		RELEASEREF( m_pShaderExecEnv );
+		m_pShaderExecEnv = NULL;
+	}
 }
 
 //---------------------------------------------------------------------
