@@ -700,7 +700,6 @@ void CqBucket::FilterBucket()
 					pie2++;
 				}
 				pie += xlen;
-				fy++;
 			}
 			pCols[ i ] = c / gTot;
 			pOpacs[ i ] = o / gTot;
