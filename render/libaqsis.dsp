@@ -81,6 +81,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 libz.lib libtiff.lib ws2_32.lib /nologo /dll /pdb:"..\bin/libaqsis_d.pdb" /map /debug /machine:I386 /out:"..\bin/aqsis_d.dll" /pdbtype:sept /libpath:"..\lib" /libpath:"..\bin" /libpath:"..\..\win32libs\lib"
+# SUBTRACT LINK32 /pdb:none
 
 !ELSEIF  "$(CFG)" == "libaqsis - Win32 Profile"
 
@@ -107,7 +108,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 libaqsistypes.lib libshaderexecenv.lib libshadervm.lib libddmsock.lib libz.lib libtiff.lib ws2_32.lib librib2.lib librib2ri.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /libpath:"..\Library\Release"
-# ADD LINK32 libz.lib libtiff.lib ws2_32.lib /nologo /dll /profile /debug /machine:I386 /out:"..\bin\Profile/aqsis.dll" /libpath:"..\lib\Profile" /libpath:"..\bin\Profile" /libpath:"..\..\win32libs\lib"
+# ADD LINK32 libz.lib libtiff.lib ws2_32.lib /nologo /dll /profile /debug /machine:I386 /libpath:"..\lib\Profile" /libpath:"..\bin\Profile" /libpath:"..\..\win32libs\lib"
 
 !ENDIF 
 
