@@ -77,7 +77,7 @@ public:
 	TqBool		Finalise();
 	void		SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFaces);
 	TqBool		CanUsePatch( CqLath* pFace );
-	TqBool		SetInterpolateBoundary( TqBool state = TqTrue )
+	void		SetInterpolateBoundary( TqBool state = TqTrue )
 				{
 					m_bInterpolateBoundary = state;
 				}
@@ -93,6 +93,30 @@ public:
 				{
 					return( m_mapHoles.find( iFaceIndex ) != m_mapHoles.end() );
 				}
+	void		AddSharpEdge( CqLath* pLath, TqFloat Sharpness )
+				{
+					m_mapSharpEdges[pLath] = Sharpness;
+				}
+	TqFloat		EdgeSharpness( CqLath* pLath )
+				{
+					if( m_mapSharpEdges.find( pLath ) != m_mapSharpEdges.end() )
+						return( m_mapSharpEdges[ pLath ] );
+					return( 0.0f );
+				}
+	void		AddSharpCorner( CqLath* pLath, TqFloat Sharpness )
+				{
+					std::vector<CqLath*> aQve;
+					pLath->Qve( aQve );
+					std::vector<CqLath*>::iterator iVE;
+					for( iVE = aQve.begin(); iVE != aQve.end(); iVE++ )
+						m_mapSharpCorners[(*iVE)] = Sharpness;
+				}
+	TqFloat		CornerSharpness( CqLath* pLath )
+				{
+					if( m_mapSharpCorners.find( pLath ) != m_mapSharpCorners.end() )
+						return( m_mapSharpCorners[ pLath ] );
+					return( 0.0f );
+				}
 
 	TqInt		AddVertex(CqLath* pVertex);
 	template<class TypeA, class TypeB>
@@ -106,64 +130,11 @@ public:
 					if(pParam->Class() == class_vertex)
 					{
 						// Determine if we have a boundary vertex.
-						if( ( NULL != pVertex->cv() ) && ( NULL != pVertex->ccv() ) )
-						{
-							// Smooth
-							// Vertex point is...
-							//    Q     2R     S(n-3)
-							//   --- + ---- + --------
-							//    n      n        n
-							// 
-							// Q = Average of face points surrounding old vertex
-							// R = average of midpoints of edges surrounding old vertex
-							// S = old vertex
-							// n = number of edges sharing the old vertex.
-
-							std::vector<CqLath*> aQve;
-							pVertex->Qve( aQve );
-							n = aQve.size();
-
-							// Get the face points of the surrounding faces
-							std::vector<CqLath*> aQvf;
-							pVertex->Qvf( aQvf );
-							std::vector<CqLath*>::iterator iF;
-							for( iF = aQvf.begin(); iF != aQvf.end(); iF++ )
-							{
-								std::vector<CqLath*> aQfv;
-								(*iF)->Qfv(aQfv);
-								std::vector<CqLath*>::iterator iV;
-								TypeA Val = TypeA(0.0f);
-								for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
-									Val += pParam->pValue( (*iV)->VertexIndex() )[0];
-								Val /= static_cast<TqFloat>( aQfv.size() );
-								Q += Val;
-							}
-							Q /= aQvf.size();
-							Q /= n;
-							
-							// Get the midpoints of the surrounding edges
-							TypeA A = pParam->pValue( pVertex->VertexIndex() )[0];
-							TypeA B = TypeA(0.0f);
-							std::vector<CqLath*>::iterator iE;
-							for( iE = aQve.begin(); iE != aQve.end(); iE++ )
-							{
-								B = pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
-								R += (A+B)/2.0f;
-							}
-							R *= 2.0f;
-							R /= n;
-							R /= n;
-
-							// Get the current vertex;
-							S = pParam->pValue( pVertex->VertexIndex() )[0];
-							S *= static_cast<TqFloat>(n-3);
-							S /= n;
-							
-							pParam->pValue( iIndex )[0] = Q+R+S;
-						}
-						else
+						if( pVertex->isBoundaryVertex() )
 						{
 							// The vertex is on a boundary.
+							/// \note If "interpolateboundary" is not specified, we will never see this as
+							/// the boundary facets aren't rendered. So we don't need to check for "interpolateboundary" here.
 							std::vector<CqLath*> apQve;
 							pVertex->Qve(apQve);							
 							// Is the valence == 2 ?
@@ -197,7 +168,104 @@ public:
 								
 								// Get the current vertex;
 								S = pParam->pValue( pVertex->VertexIndex() )[0];
-								pParam->pValue( iIndex )[0] = ( R + ( S * 6.0f ) ) / 8.0f;;
+								pParam->pValue( iIndex )[0] = ( R + ( S * 6.0f ) ) / 8.0f;
+							}
+						}
+						else
+						{
+							// Check if a sharp corner vertex.
+							if( CornerSharpness( pVertex ) > 0.0f )
+							{
+								pParam->pValue( iIndex )[0] = pParam->pValue( pVertex->VertexIndex() )[0];
+							}
+							else
+							{
+								// Check if crease vertex.
+								std::vector<CqLath*> aQve;
+								pVertex->Qve( aQve );
+
+								TqInt se = 0;
+								std::vector<CqLath*>::iterator iEdge;
+								for( iEdge = aQve.begin(); iEdge != aQve.end(); iEdge++ )
+									if( EdgeSharpness( (*iEdge) ) > 0.0f )	se++;
+
+								if( se <= 1 )
+								{
+									// Smooth
+									// Vertex point is...
+									//    Q     2R     S(n-3)
+									//   --- + ---- + --------
+									//    n      n        n
+									// 
+									// Q = Average of face points surrounding old vertex
+									// R = average of midpoints of edges surrounding old vertex
+									// S = old vertex
+									// n = number of edges sharing the old vertex.
+
+									n = aQve.size();
+
+									// Get the face points of the surrounding faces
+									std::vector<CqLath*> aQvf;
+									pVertex->Qvf( aQvf );
+									std::vector<CqLath*>::iterator iF;
+									for( iF = aQvf.begin(); iF != aQvf.end(); iF++ )
+									{
+										std::vector<CqLath*> aQfv;
+										(*iF)->Qfv(aQfv);
+										std::vector<CqLath*>::iterator iV;
+										TypeA Val = TypeA(0.0f);
+										for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
+											Val += pParam->pValue( (*iV)->VertexIndex() )[0];
+										Val /= static_cast<TqFloat>( aQfv.size() );
+										Q += Val;
+									}
+									Q /= aQvf.size();
+									Q /= n;
+									
+									// Get the midpoints of the surrounding edges
+									TypeA A = pParam->pValue( pVertex->VertexIndex() )[0];
+									TypeA B = TypeA(0.0f);
+									std::vector<CqLath*>::iterator iE;
+									for( iE = aQve.begin(); iE != aQve.end(); iE++ )
+									{
+										B = pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
+										R += (A+B)/2.0f;
+									}
+									R *= 2.0f;
+									R /= n;
+									R /= n;
+
+									// Get the current vertex;
+									S = pParam->pValue( pVertex->VertexIndex() )[0];
+									S *= static_cast<TqFloat>(n-3);
+									S /= n;
+									
+									pParam->pValue( iIndex )[0] = Q+R+S;
+								}
+								else
+								{
+									if( se == 2 )
+									{
+										// Crease 
+										// Get the midpoints of the surrounding edges
+										TypeA A = pParam->pValue( pVertex->VertexIndex() )[0];
+										TypeA B = TypeA(0.0f);
+										std::vector<CqLath*>::iterator iE;
+										for( iE = aQve.begin(); iE != aQve.end(); iE++ )
+										{
+											if( EdgeSharpness( (*iE) ) > 0.0f )
+												R += pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
+										}
+										// Get the current vertex;
+										S = pParam->pValue( pVertex->VertexIndex() )[0];
+										pParam->pValue( iIndex )[0] = ( R + ( S * 6.0f ) ) / 8.0f;
+									}
+									else
+									{
+										// Corner
+										pParam->pValue( iIndex )[0] = pParam->pValue( pVertex->VertexIndex() )[0];
+									}
+								}
 							}
 						}
 					}
@@ -216,7 +284,7 @@ public:
 
 					if(pParam->Class() == class_vertex)
 					{
-						if( NULL != pEdge->ec() )
+						if( NULL != pEdge->ec() && ( EdgeSharpness( pEdge ) == 0.0f ) )
 						{
 							// Edge point is the average of the centrepoint of the original edge and the
 							// average of the two new face points of the adjacent faces.
@@ -303,6 +371,10 @@ private:
 	std::map<TqInt, TqBool>				m_mapHoles;
 	/// Flag indicating whether this surface interpolates it's boundaries or not.
 	TqBool								m_bInterpolateBoundary;
+	/// Map of sharp edges.
+	std::map<CqLath*, TqFloat>			m_mapSharpEdges;
+	/// Map of sharp corners.
+	std::map<CqLath*, TqFloat>			m_mapSharpCorners;
 
 
 	/// Flag indicating whether the topology structures have been finalised.

@@ -4176,9 +4176,37 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 							if ( intargs[ iEdge + intargIndex ] < pSubd2->cVertices() &&
 								 intargs[ iEdge + intargIndex + 1 ] < pSubd2->cVertices() )
 							{
-								// Store the crease sharpness somehow.
+								// Store the crease sharpness.
+								CqLath* pEdge = pSubd2->pVertex( intargs[ iEdge + intargIndex ] );
+								std::vector<CqLath*> aQve;
+								pEdge->Qve( aQve );
+								std::vector<CqLath*>::iterator iOpp;
+								for( iOpp = aQve.begin(); iOpp != aQve.end(); iOpp++ )
+								{
+									if( ( NULL != (*iOpp)->ec() ) && (*iOpp)->ec()->VertexIndex() == intargs[ iEdge + intargIndex + 1 ] )
+									{
+										pSubd2->AddSharpEdge( (*iOpp), RI_INFINITY );
+										pSubd2->AddSharpEdge( (*iOpp)->ec(), RI_INFINITY );
+										break;
+									}
+								}
 							}
 							iEdge++;
+						}
+					}
+					else if ( strcmp( tags [ i ], "corner" ) == 0 )
+					{
+						TqFloat cornerSharpness = floatargs[ floatargIndex ];
+						TqInt iVertex = 0;
+						while ( iVertex < nargs[ argcIndex ] )
+						{
+							if ( intargs[ iVertex + intargIndex ] < pSubd2->cVertices() )
+							{
+								// Store the corner sharpness.
+								CqLath* pVertex = pSubd2->pVertex( intargs[ iVertex + intargIndex ] );
+								pSubd2->AddSharpCorner( pVertex, RI_INFINITY );
+							}
+							iVertex++;
 						}
 					}
 					else if ( strcmp( tags [ i ], "hole" ) == 0 )

@@ -666,6 +666,14 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 		// use it when subdividing neighbour facets.
 		aQfv[i]->SetpMidVertex(pLathD);
 
+		// Transfer sharpness information
+		if( EdgeSharpness( aQfv[ i ] ) > 0.0f )
+			AddSharpEdge( pLathA, EdgeSharpness( aQfv[ i ] ) );
+		if( EdgeSharpness( aQfv[ modulo( (i+1),n ) ] ) > 0.0f )
+			AddSharpEdge( pLathB, EdgeSharpness( aQfv[ modulo( (i+1),n ) ] ) );
+		if( CornerSharpness( aQfv[ i ] ) > 0.0f )
+			AddSharpCorner( pLathA, CornerSharpness( aQfv[ i ] ) );
+
 		// Store a lath reference for the facet.
 		apSubFaces.push_back( pLathA );
 		m_apFacets.push_back( pLathA );
@@ -1404,6 +1412,11 @@ TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
 		if( (*iFV)->cQvv() != 4 )
 			return( TqFalse );
 
+		// Check if all vertices smooth.
+		if( EdgeSharpness((*iFV)) != 0.0f || 
+		    CornerSharpness((*iFV)) != 0.0f )
+			return( TqFalse );
+
 		// Check if no internal boundaries.
 		CqLath* pEnd = (*iFV)->cv();
 		while( (*iFV) != pEnd )
@@ -1414,6 +1427,7 @@ TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
 		}
 	}
 
+	// Check local neighbourhood of patch is 9 quads.
 	pFace->Qff(aQff);
 	if( aQff.size() != 9 )
 		return( TqFalse );
@@ -1423,6 +1437,17 @@ TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
 	{
 		if( (*iFF)->cQfv() != 4 )
 			return( TqFalse );
+
+		std::vector<CqLath*> aQfv;
+		(*iFF)->Qfv(aQfv);
+		std::vector<CqLath*>::iterator iFV;
+		for( iFV = aQfv.begin(); iFV!=aQfv.end(); iFV++ )
+		{
+			// Check if all vertices smooth.
+			if( EdgeSharpness((*iFV)) != 0.0f ||
+			    CornerSharpness((*iFV)) != 0.0f )
+				return( TqFalse );
+		}
 	}
 
 	return( TqTrue );
