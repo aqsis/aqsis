@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\Object\Release\libaqsis"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /Zm200 /c
+# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /Zm200 /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\Object\Debug\libaqsis"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /GZ /Zm200 /c
+# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /GZ /Zm200 /c
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
 # ADD RSC /l 0x809 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -90,10 +90,6 @@ SOURCE=.\attributes.cpp
 # Begin Source File
 
 SOURCE=.\bound.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\cellnoise.cpp
 # End Source File
 # Begin Source File
 
@@ -126,10 +122,6 @@ SOURCE=.\messages.cpp
 # Begin Source File
 
 SOURCE=.\micropolygon.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\noise.cpp
 # End Source File
 # Begin Source File
 
@@ -169,14 +161,6 @@ SOURCE=.\ri.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\shadeops.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\shaderexecenv.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\shaders.cpp
 # End Source File
 # Begin Source File
@@ -205,10 +189,6 @@ SOURCE=.\teapot.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\texturemap.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\transform.cpp
 # End Source File
 # Begin Source File
@@ -230,10 +210,6 @@ SOURCE=.\bilinear.h
 # Begin Source File
 
 SOURCE=.\bound.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\cellnoise.h
 # End Source File
 # Begin Source File
 
@@ -289,10 +265,6 @@ SOURCE=.\motion.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\noise.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\nurbs.h
 # End Source File
 # Begin Source File
@@ -333,10 +305,6 @@ SOURCE=.\rifile.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\shaderexecenv.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\shaders.h
 # End Source File
 # Begin Source File
@@ -366,10 +334,6 @@ SOURCE=.\symbols.h
 # Begin Source File
 
 SOURCE=.\teapot.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\texturemap.h
 # End Source File
 # Begin Source File
 

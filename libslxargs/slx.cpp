@@ -406,8 +406,8 @@ static RtInt GetCurrentShaderInfo(char * name, char * filePath)
     // establish a rendering context -
     // (This step should not be necessary after the Aqsis shaderVM is
     //  moved to a separate libray.)
-    librib2ri::Engine renderengine;	
-    RiBegin("CRIBBER");
+//    librib2ri::Engine renderengine;	
+//    RiBegin("CRIBBER");
     
     CqString strFilename(filePath);
     CqRiFile SLXFile(strFilename.c_str(),"");
@@ -467,7 +467,7 @@ static RtInt GetCurrentShaderInfo(char * name, char * filePath)
     {
         result = RIE_NOFILE;
     }
-    RiEnd();
+//    RiEnd();
     return result;
 }
 

@@ -89,6 +89,10 @@ SOURCE=.\bitvector.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\cellnoise.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\color.cpp
 # End Source File
 # Begin Source File
@@ -102,6 +106,10 @@ SOURCE=.\file.cpp
 # Begin Source File
 
 SOURCE=.\matrix.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\noise.cpp
 # End Source File
 # Begin Source File
 
@@ -141,6 +149,10 @@ SOURCE=.\bitvector.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cellnoise.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\color.h
 # End Source File
 # Begin Source File
@@ -166,6 +178,10 @@ SOURCE=.\matrix.h
 # Begin Source File
 
 SOURCE=.\memorypool.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\noise.h
 # End Source File
 # Begin Source File
 

@@ -197,6 +197,18 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name libshaderexecenv
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libshadervm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libslxargs
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libaqsistypes
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -388,6 +400,18 @@ Package=<4>
 ###############################################################################
 
 Project: "librib2stream"=.\librib2stream\librib2stream.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libshaderexecenv"=.\libshaderexecenv\libshaderexecenv.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
