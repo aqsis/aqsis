@@ -1764,6 +1764,11 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 		R4 = vecPoint + ( swidth / 2.0f ) + ( twidth / 2.0f );
 
 		SampleMap( R1, R2, R3, R4, sblur, tblur, val );
+	} else 
+	{
+		// If no map defined, not in shadow.
+		val.resize( 1 );
+		val[ 0 ] = 0.0f;
 	}
 }
 
