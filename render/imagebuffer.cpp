@@ -38,6 +38,7 @@
 #include	"shadervm.h"
 #include	"micropolygon.h"
 #include	"imagebuffer.h"
+#include	"imagers.h"
 
 #include	<map>
 
@@ -680,22 +681,27 @@ void CqBucket::FilterBucket()
 	            pCoverages[i] = 1.0;
 			else
 				pCoverages[i] = (TqFloat) SampleCount/ (TqFloat)( m_YPixelSamples * m_XPixelSamples);
-			// Init & Execute the imager shader
-			QGetRenderContext()->optCurrent().InitialiseColorImager(1, 1, 
-															x, y, 
-															&pCols[i], &pOpacs[i], 
-															&pDepths[i], &pCoverages[i]);
 
-			if (QGetRenderContext()->optCurrent().strImager() != "null") {
-				imager = QGetRenderContext()->optCurrent().GetColorImager( x , y ); 
-				// Normal case will be to poke the alpha from the image shader and 
-				// multiply imager color with it... but after investigation alpha is always 
-				// == 1 after a call to imager shader in 3delight and BMRT.
-				// Therefore I did not ask for alpha value and set directly the pCols[i]
-				// with imager value. see imagers.cpp 
-				pCols[i] = imager;
-				imager =  QGetRenderContext()->optCurrent().GetOpacityImager( x , y);
-				pOpacs[i] = imager;
+			if( NULL != QGetRenderContext()->optCurrent().pshadImager() && NULL != QGetRenderContext()->optCurrent().pshadImager()->pShader())
+			{
+				// Init & Execute the imager shader
+				QGetRenderContext()->optCurrent().InitialiseColorImager(1, 1, 
+																x, y, 
+																&pCols[i], &pOpacs[i], 
+																&pDepths[i], &pCoverages[i]);
+
+				if (QGetRenderContext()->optCurrent().strImager() != "null")
+				{
+					imager = QGetRenderContext()->optCurrent().GetColorImager( x , y ); 
+					// Normal case will be to poke the alpha from the image shader and 
+					// multiply imager color with it... but after investigation alpha is always 
+					// == 1 after a call to imager shader in 3delight and BMRT.
+					// Therefore I did not ask for alpha value and set directly the pCols[i]
+					// with imager value. see imagers.cpp 
+					pCols[i] = imager;
+					imager =  QGetRenderContext()->optCurrent().GetOpacityImager( x , y);
+					pOpacs[i] = imager;
+				}
 			}
 
 			if ( SampleCount > 0 )

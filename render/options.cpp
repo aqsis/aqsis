@@ -34,7 +34,6 @@
 
 START_NAMESPACE( Aqsis )
 
-static CqImagersource* pshadImager = NULL;
 
 //---------------------------------------------------------------------
 /** Copy constructor.
@@ -497,9 +496,9 @@ void CqDisplay::InitialiseColorImager(TqInt gx, TqInt gy,
 {
 	// Each time with finished up a bucket; we will execute the imager shader
 	// on the gridsize about the same size as the bucket
-	if (pshadImager != NULL) 
+	if (m_pshadImager != NULL) 
 	{
-		pshadImager->Initialise(gx, gy, x, y, color, opacity, depth, coverage);
+		m_pshadImager->Initialise(gx, gy, x, y, color, opacity, depth, coverage);
 	}
 }
 
@@ -512,12 +511,12 @@ void CqDisplay::InitialiseColorImager(TqInt gx, TqInt gy,
  */
 CqColor CqDisplay::GetColorImager(TqFloat x, TqFloat y)
 {
-	CqColor result = QGetRenderContext()->optCurrent().GetBkColorImager();
+	CqColor result(0,0,0);
 
-	if (pshadImager != NULL)
+	if (m_pshadImager != NULL)
 	{
 		// get the color from the current imager than
-		result = pshadImager->Color(x,y);	
+		result = m_pshadImager->Color(x,y);	
 	}
 
 	return result;
@@ -534,10 +533,10 @@ TqFloat CqDisplay::GetAlphaImager(TqFloat x, TqFloat y)
 {
 	TqFloat result = 1.0;
 
-	if (pshadImager != NULL)
+	if (m_pshadImager != NULL)
 	{
 		// get the color from the current imager than
-		result = pshadImager->Alpha(x,y);	
+		result = m_pshadImager->Alpha(x,y);	
 	}
 
 	return result;
@@ -556,10 +555,10 @@ CqColor CqDisplay::GetOpacityImager(TqFloat x, TqFloat y)
 {
 	CqColor result = gColWhite;
 
-	if (pshadImager != NULL)
+	if (m_pshadImager != NULL)
 	{
 		// get the opacity from the current imager than
-		result = pshadImager->Opacity(x,y);	
+		result = m_pshadImager->Opacity(x,y);	
 	}
 
 
@@ -582,25 +581,25 @@ void CqDisplay::LoadImager(const char* strName)
 
 	if(pShader==0)	return;
 
-	pshadImager=new CqImagersource(pShader,RI_TRUE);
-	pshadImager->pShader()->PrepareDefArgs();
+	m_pshadImager=new CqImagersource(pShader,RI_TRUE);
+	m_pshadImager->pShader()->PrepareDefArgs();
 	
 }
 
 void   CqDisplay::DeleteImager()
 {
 
-	if (pshadImager != NULL)
+	if (m_pshadImager != NULL)
 	{
-		delete pshadImager; 
-		pshadImager = NULL;
+		delete m_pshadImager; 
+		m_pshadImager = NULL;
 	}
 }
 void CqDisplay::SetValueImager(char *token, char *value)
 {
-	if (pshadImager != NULL) {
+	if (m_pshadImager != NULL) {
 		
-		pshadImager->pShader()->SetValue(token,value);
+		m_pshadImager->pShader()->SetValue(token,value);
 	}
 
 }

@@ -46,6 +46,7 @@
 START_NAMESPACE( Aqsis )
 
 
+class CqImagersource;
 
 //----------------------------------------------------------------------
 /** \class CqSystemOption
@@ -144,6 +145,7 @@ class CqDisplay
 				m_fExposureGain( 1.0 ),
 				m_fExposureGamma( 1.0 ),
 				m_strImager( "null" ),
+				m_pshadImager( NULL),
 				m_iColorQuantizeOne( 255 ),
 				m_iColorQuantizeMin( 0 ),
 				m_iColorQuantizeMax( 255 ),
@@ -154,12 +156,13 @@ class CqDisplay
 				m_fDepthQuantizeDitherAmplitude( 0 ),
 				m_strDisplayType( "file" ),
 				m_strDisplayName( "aqsis.tif" ),
-				m_cBackground( 0.0, 0.0, 0.0 ),
 				m_iDisplayMode( ModeRGB )
 		{}
 
 		virtual	~CqDisplay()
-		{ }
+		{ 
+			DeleteImager();
+		}
 
 		/** Get the pixel variance as a float.
 		 */
@@ -270,6 +273,12 @@ class CqDisplay
 		const CqString&	strImager() const
 		{
 			return ( m_strImager );
+		}
+		/** Get a pointer to the imager shader.
+		 */
+		const CqImagersource*	pshadImager() const
+		{
+			return ( m_pshadImager );
 		}
 		/** Set the name of the Imager shader.
 		 * \param strValue Character pointer to name of Imager shader.
@@ -426,17 +435,6 @@ class CqDisplay
 		{
 			m_iDisplayMode = iValue;
 		}
-		/** Set/Get the background color.
-		* 
-		*/
-		void SetBkColorImager( CqColor background )
-		{
-			m_cBackground = background;
-		}
-		CqColor GetBkColorImager()
-		{
-			return m_cBackground;
-		}
 		void InitialiseColorImager( TqInt bx, TqInt by,
 		                            TqFloat x, TqFloat y,
 		                            CqColor *color, CqColor *opacity,
@@ -455,6 +453,7 @@ class CqDisplay
 		TqFloat	m_fExposureGain, 					///< Exposure gain value.
 		m_fExposureGamma;					///< Exposure gamma value.
 		CqString	m_strImager;						///< Name of the Imager shader.
+		CqImagersource* m_pshadImager;		///< Pointer to the imager shader.
 		TqInt	m_iColorQuantizeOne, 				///< Color quantisation one value.
 		m_iColorQuantizeMin, 				///< Color quantisation min value.
 		m_iColorQuantizeMax;				///< Color quantisation max value.
@@ -466,8 +465,6 @@ class CqDisplay
 		CqString	m_strDisplayType;					///< Name of the display type to use.
 		CqString	m_strDisplayName;					///< Name of the display.
 		TqInt	m_iDisplayMode;						///< Display mode, from EqDisplayMode.
-		CqColor m_cBackground;                      ///< Background color for imager "background"
-
 }
 ;
 

@@ -66,6 +66,13 @@ class CqImagersource : public CqListEntry<CqImagersource>, public CqShaderExecEn
 			return ( m_pShader );
 		}
 
+		/** Get a pointer to the associated Imagersource shader.
+		 * \return a pointer to a CqShader derived class.
+		 */
+		const CqShader*	pShader() const
+		{
+			return ( m_pShader );
+		}
 
 		/** Initialise the shader execution environment & execute the
 		 *  shader code.

@@ -103,27 +103,27 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 	time().SetValue( TqFloat( shuttertime ) );
 
 
+	m_pShader->Initialise( uGridRes, vGridRes, *this );
+	for ( j = 0; j < vGridRes; j++ )
+		for ( i = 0; i < uGridRes; i++ )
+		{
+
+			P() [ j * ( uGridRes + 1 ) + i ] = CqVector3D( x + i, y + j, 0.0 );
+			Ci() [ j * ( uGridRes + 1 ) + i ] = color[ j * ( uGridRes ) + i ];
+			Oi() [ j * ( uGridRes + 1 ) + i ] = opacity[ j * ( uGridRes ) + i ];
+
+		}
 	// Execute the Shader VM
 	if ( m_pShader )
 	{
-		m_pShader->Initialise( uGridRes, vGridRes, *this );
-		for ( j = 0; j < vGridRes; j++ )
-			for ( i = 0; i < uGridRes; i++ )
-			{
-
-				P() [ j * ( uGridRes + 1 ) + i ] = CqVector3D( x + i, y + j, 0.0 );
-				Ci() [ j * ( uGridRes + 1 ) + i ] = color[ j * ( uGridRes ) + i ];
-				Oi() [ j * ( uGridRes + 1 ) + i ] = opacity[ j * ( uGridRes ) + i ];
-
-			}
 		m_pShader->Evaluate( *this );
+		alpha().SetValue( 1.0 ); /* by default 3delight/bmrt set it to 1.0 */
 	}
 
 	m_uYOrigin = static_cast<TqInt>(y);
 	m_uXOrigin = static_cast<TqInt>(x);
 	m_uGridRes = uGridRes;
 	m_vGridRes = vGridRes;
-	alpha().SetValue( 1.0 ); /* by default 3delight/bmrt set it to 1.0 */
 
 	QGetRenderContext() ->Stats().ImagerTimer().Stop();
 }
