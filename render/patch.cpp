@@ -1065,6 +1065,14 @@ CqSurfacePatchMeshBicubic& CqSurfacePatchMeshBicubic::operator=(const CqSurfaceP
 {
 	// Perform per surface copy function
 	CqSurface::operator=(From);
+
+	m_uPatches=From.m_uPatches;
+	m_vPatches=From.m_vPatches;
+	m_nu=From.m_nu;	
+	m_nv=From.m_nv;	
+	m_uPeriodic=From.m_uPeriodic;
+	m_vPeriodic=From.m_vPeriodic;
+
 	return(*this);
 }
 
@@ -1288,6 +1296,14 @@ CqSurfacePatchMeshBilinear& CqSurfacePatchMeshBilinear::operator=(const CqSurfac
 {
 	// Perform per surface copy function
 	CqSurface::operator=(From);
+
+	m_uPatches=From.m_uPatches;
+	m_vPatches=From.m_vPatches;
+	m_nu=From.m_nu;	
+	m_nv=From.m_nv;	
+	m_uPeriodic=From.m_uPeriodic;
+	m_vPeriodic=From.m_vPeriodic;
+
 	return(*this);
 }
 
