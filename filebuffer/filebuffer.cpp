@@ -25,6 +25,7 @@
 
 #include	<iostream>
 #include	<stdlib.h>
+#include	<memory>
 
 #include	"aqsis.h"
 #include	"logging.h"

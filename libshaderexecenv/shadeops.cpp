@@ -3180,6 +3180,7 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
                 if( NULL != __nondiffuse )
                 {
                     __nondiffuse->GetFloat( __nondiffuse_val, 0 );
+					pShader->DeleteTemporaryStorage( __nondiffuse );
                     if( __nondiffuse_val != 0.0f )
                         continue;
                 }
@@ -3260,6 +3261,7 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
                 if( NULL != __nonspecular )
                 {
                     __nonspecular->GetFloat( __nonspecular_val, 0 );
+					pShader->DeleteTemporaryStorage( __nonspecular );
                     if( __nonspecular_val != 0.0f )
                         continue;
                 }

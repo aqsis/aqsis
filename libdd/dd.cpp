@@ -230,7 +230,7 @@ TqInt DDInitialise( const TqChar* phostname, TqInt port )
 
 	if(SOCKET_ERROR == connect( g_Socket, PSOCKADDR(&saTemp), sizeof(saTemp)))
 		{
-			std::cerr << error << "Connecting to " << hostName << ":" << port << " ... " << strerror(errno) << std::endl;
+			std::cerr << error << "Connecting to " << hostName.c_str() << ":" << port << " ... " << strerror(errno) << std::endl;
 			CloseSocket(g_Socket);
 			return -1;
 		}

@@ -181,6 +181,7 @@ extern	"C"
 
 #define	PARAMETERLIST	RtInt count, RtToken tokens[], RtPointer values[]
 
+// ++CACHE++
     _qShare	RtToken	RiDeclare( const char * name, const char * declaration );
 
     _qShare	RtVoid	RiBegin( RtToken name );
@@ -366,6 +367,7 @@ extern	"C"
     _qShare	RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail );
     _qShare	RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail );
     _qShare	RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail );
+// --CACHE--
 
 
     // Specific to Aqsis
