@@ -434,10 +434,10 @@ void CqStats::PrintInfo() const
 
 	QGetRenderContext() ->Logger()->info( "Image settings:" );
 	QGetRenderContext() ->Logger()->info( "	Resolution: %d %d", resX, resY );
-	QGetRenderContext() ->Logger()->info( "	PixelAspectRatio: %d", pratio );
+	QGetRenderContext() ->Logger()->info( "	PixelAspectRatio: %f", pratio );
 	QGetRenderContext() ->Logger()->info( "	Exposure:" );
-	QGetRenderContext() ->Logger()->info( "		Gain: %d", gain );
-	QGetRenderContext() ->Logger()->info( "		Gamma: %d", gamma );
+	QGetRenderContext() ->Logger()->info( "		Gain: %f", gain );
+	QGetRenderContext() ->Logger()->info( "		Gamma: %f", gamma );
 	QGetRenderContext() ->Logger()->info( "Shading:" );
 	QGetRenderContext() ->Logger()->info( "	Bucket size: [ %d %d ]", bX, bY );
 	QGetRenderContext() ->Logger()->info( "	Gridsize: %d", gs );
