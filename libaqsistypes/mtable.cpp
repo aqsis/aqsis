@@ -48,9 +48,9 @@ CqMessageTable::CqMessageTable()
 	// RI Error
 	m_Ri.insert(i_s::value_type( 0, "RiError: Unknown error" ));
 	m_Ri.insert(i_s::value_type( 1, "RiColorSamples not supported, defaults to 3" ));
-	m_Ri.insert(i_s::value_type( 2, "RiRelativeDetail (invalid scaling factor)" ));
-	m_Ri.insert(i_s::value_type( 3, "Unknown Symbol" ));
-	m_Ri.insert(i_s::value_type( 4, "RiAreaLightSource not supported, creating a point lightsource" ));
+	m_Ri.insert(i_s::value_type( CqLog::RI_RELATIVE_DETAIL_INVALID, "RiRelativeDetail (invalid scaling factor)" ));
+	m_Ri.insert(i_s::value_type( CqLog::RI_UNKNOWN_SYMBOL, "Unknown Symbol" ));
+	m_Ri.insert(i_s::value_type( CqLog::RI_AREA_LIGHT_UNSUPPORTED, "RiAreaLightSource not supported, creating a point lightsource" ));
 	m_Ri.insert(i_s::value_type( 5, "RiInterior shaders not supported" ));
 	m_Ri.insert(i_s::value_type( 6, "RiExterior shaders not supported" ));
 	m_Ri.insert(i_s::value_type( 7, "RiDetailRange (invalid levels of detail)" ));

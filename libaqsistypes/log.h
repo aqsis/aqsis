@@ -73,40 +73,48 @@ class CqLog	: public IqLog
 		CqMessageTable* getMessageTable();
 
 		void log( char* priority, const char* stringFormat, ... );
+		void log( const char *priority, const CqString &stringFormat, ... );
 		
 		/** Log an error message
 		 */
 		void error( int table, int error_id );
 		void error( const char* stringFormat, ... );
+		void error( const CqString &stringFormat, ... );
 
 		/** Log an warning
 		 */
 		void warn( int table, int error_id );
 		void warn( const char* stringFormat, ... );
+		void warn( const CqString &stringFormat, ... );
 
 		/** Log an critical error message
 		 */
 		void critical( int table, int error_id );
 		void critical( const char* stringFormat, ... );
+		void critical( const CqString &stringFormat, ... );
 
 		/** Log an notice message
 		 */
 		void notice( int table, int error_id );
 		void notice( const char* stringFormat, ... );
+		void notice( const CqString &stringFormat, ... );
 		
 		/** Log an info message
 		 */
 		void info( int table, int error_id );
 		void info( const char* stringFormat, ... );
+		void info( const CqString &stringFormat, ... );
 		
 		/** Log an fatal error
 		 */
 		void fatal( int table, int error_id );
 		void fatal( const char* stringFormat, ... );
+		void fatal( const CqString &stringFormat, ... );
 		
 		/** Log an debug message
 		 */
 		void debug( const char* stringFormat, ... );
+		void debug( const CqString &stringFormat, ... );
 
 		const char* getError( int table, int error_id );
 
