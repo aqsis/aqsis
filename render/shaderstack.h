@@ -931,97 +931,92 @@ class _qShareC CqShaderStack
 									m_Stack.clear();
 								}	
 
+						/** Get a reference to the next item on the stack to be pushed.
+						 */
+				CqVMStackEntry& GetPush()
+								{
+									if(m_iTop>=m_Stack.size())
+										m_Stack.resize(m_Stack.size()+1);
+
+									return(m_Stack[m_iTop++]);
+								}
+
 						/** Push a new stack entry onto the stack.
 						 */
 				void	Push(const CqVMStackEntry& E)
 								{
-									if(m_iTop>=m_Stack.size())
-									{
-										m_Stack.push_back(E);
-										m_iTop++;
-									}
-									else
-										m_Stack[m_iTop++]=E;
+									GetPush()=E;
 								}
 						/** Push a new float onto the stack.
 						 */
 				void	Push(const TqFloat f)
 								{
-									CqVMStackEntry s;
+									CqVMStackEntry& s=GetPush();
 									s.SetSize(1);
 									s=f;
-									Push(s);
 								}
 						/** Push a new boolean onto the stack.
 						 */
 				void	Push(const TqBool b)
 								{
-									CqVMStackEntry s;
+									CqVMStackEntry& s=GetPush();
 									s.SetSize(1);
 									s=b;
-									Push(s);
 								}
 						/** Push a new 3D vector onto the stack.
 						 */
 				void	Push(const CqVector3D& v)
 								{
-									CqVMStackEntry s;
+									CqVMStackEntry& s=GetPush();
 									s.SetSize(1);
 									s=v;
-									Push(s);
 								}
 						/** Push a new color onto the stack, passed as 3 floats.
 						 */
 				void	Push(const TqFloat r, TqFloat g, TqFloat b)
 								{
-									CqVMStackEntry s;
+									CqVMStackEntry& s=GetPush();
 									s.SetSize(1);
 									s=CqColor(r,g,b);
-									Push(s);
 								}
 						/** Push a new color onto the stack.
 						 */
 				void	Push(const CqColor& c)
 								{
-									CqVMStackEntry s;
+									CqVMStackEntry& s=GetPush();
 									s.SetSize(1);
 									s=c;
-									Push(s);
 								}
 						/** Push a new string onto the stack.
 						 */
 				void	Push(const CqString& str)
 								{
-									CqVMStackEntry s;
+									CqVMStackEntry& s=GetPush();
 									s.SetSize(1);
 									s=str;
-									Push(s);
 								}
 						/** Push a new string, passed as a character onto the stack.
 						 */
 				void	Push(const char* ps)
 								{
-									CqVMStackEntry s;
+									CqVMStackEntry& s=GetPush();
 									s.SetSize(1);
 									s=ps;
-									Push(s);
 								}
 						/** Push a new matrix onto the stack.
 						 */
 				void	Push(const CqMatrix& mat)
 								{
-									CqVMStackEntry s;
+									CqVMStackEntry& s=GetPush();
 									s.SetSize(1);
 									s=mat;
-									Push(s);
 								}
 						/** Push a new shader variable reference onto the stack.
 						 */
 				void	Push(CqShaderVariable* pv)
 								{
-									CqVMStackEntry s;
+									CqVMStackEntry& s=GetPush();
 									s=pv;
-									Push(s);
 								}
 						/** Pop the top stack entry.
 						 * \param f Boolean value to update if this is varying. If not varying, leaves f unaltered.
@@ -1037,14 +1032,14 @@ class _qShareC CqShaderStack
 						/** Duplicate the top stack entry.
 						 */
 				void	Dup()	{
-									CqVMStackEntry& s=m_Stack[m_iTop];
-									Push(s);
+									TqInt iTop=m_iTop;
+									GetPush()=m_Stack[iTop];
 								}
 						/** Drop the top stack entry.
 						 */
 				void	Drop()	{
-                                                            if(m_iTop)
-									m_iTop--;
+									if(m_iTop)
+										m_iTop--;
 								}
 	protected:
 			std::vector<CqVMStackEntry>		m_Stack;		///< Array of stacke entries.
