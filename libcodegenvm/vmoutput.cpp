@@ -520,16 +520,19 @@ void CqCodeGenOutput::Visit( IqParseNodeIlluminanceConstruct& IC )
 	IqParseNode* pInitArg = pArg->pChild();
 	while ( pInitArg->pNextSibling() != 0 ) pInitArg = pInitArg->pNextSibling();
 	pInitArg = pInitArg->pPrevSibling();
-	pInitArg->Accept( *this );
 	// If it has an axisangle, then the previous one is the axis, so pass that in as the surface normal.
 	if ( IC.fHasAxisAngle() )
 	{
-		pInitArg = pInitArg->pPrevSibling();
+		assert( pInitArg->pPrevSibling() );
+		pInitArg->pPrevSibling()->Accept( *this );
 		pInitArg->Accept( *this );
 		m_slxFile << "\tinit_illuminance2" << std::endl;
 	}
 	else
+	{
+		pInitArg->Accept( *this );
 		m_slxFile << "\tinit_illuminance" << std::endl;
+	}
 
 	m_slxFile << "\tjz " << iLabelB << std::endl;	// Jump if no lightsources.
 	m_slxFile << ":" << iLabelA << std::endl;		// loop back label
