@@ -29,7 +29,7 @@ CqVarDef	gStandardVars[] = {
                                CqVarDef( Type_VaryingPoint, "Ng", 0,	SU|LS|VO|DI|IM ),
                                CqVarDef( Type_UniformFloat, "du", 0,	SU|LS|VO|DI|IM ),
                                CqVarDef( Type_UniformFloat, "dv", 0,	SU|LS|VO|DI|IM ),
-                               CqVarDef( Type_VaryingPoint, "L", 0,		SU|LS|VO|DI|IM ),
+                               CqVarDef( Type_VaryingPoint, "L", 0,		SU|   VO|DI|IM ),
                                CqVarDef( Type_VaryingColor, "Cl",0,		SU|   VO|DI|IM ),
                                CqVarDef( Type_VaryingColor, "Ol",0,		SU|   VO|DI|IM ),
                                CqVarDef( Type_VaryingPoint, "P",0,		   LS|VO|   IM ),
