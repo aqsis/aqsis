@@ -29,7 +29,6 @@
 
 #include	"aqsis.h"
 
-#include	"ri.h"
 #include	"vector3d.h"
 
 START_NAMESPACE( Aqsis )

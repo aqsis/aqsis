@@ -31,8 +31,6 @@
 #include	"aqsis.h"
 #include	"noise.h"
 
-#include	"ri.h"
-
 
 START_NAMESPACE( Aqsis )
 
