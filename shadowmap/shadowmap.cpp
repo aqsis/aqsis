@@ -82,6 +82,7 @@ int main( int argc, char* argv[] )
 
 TqInt	XRes, YRes;
 TqInt	g_Channels;
+TqInt	g_append = 0;
 TqFloat* pData;
 TIFF*	pOut;
 TqInt	CWXMin, CWYMin;
@@ -210,10 +211,12 @@ void SaveAsShadowMap()
 	TqInt twidth = 32;
 	TqInt tlength = 32;
 
+	const char* mode = (g_append)? "a" : "w";
+
 	// Save the shadowmap to a binary file.
 	if ( strFilename.compare( "" ) != 0 )
 	{
-		TIFF * pshadow = TIFFOpen( strFilename.c_str(), "w" );
+		TIFF * pshadow = TIFFOpen( strFilename.c_str(), mode );
 		TIFFCreateDirectory( pshadow );
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
@@ -316,6 +319,17 @@ TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
 			{
 				SqDDMessageNP* pMsg = static_cast<SqDDMessageNP*>( pMsgB );
 				memcpy( matWorldToScreen, pMsg->m_Matrix, sizeof( matWorldToScreen ) );
+			}
+			break;
+
+			case MessageID_UserParam:
+			{
+				SqDDMessageUserParam * pMsg = static_cast<SqDDMessageUserParam*>( pMsgB );
+				// Check if we understand the parameter.
+				if( strncmp( pMsg->m_NameAndData, "append", pMsg->m_NameLength ) == 0 )
+				{
+					g_append = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+				}
 			}
 			break;
 	}
