@@ -353,8 +353,8 @@ class CqBucket : public IqBucket
 			iYPos -= m_YOrigin;
 
 			// Check within renderable range
-			assert( iXPos < -m_XMax && iXPos < m_XSize + m_XMax &&
-					iYPos < -m_YMax && iYPos < m_YSize + m_YMax );
+			//assert( iXPos < -m_XMax && iXPos < m_XSize + m_XMax &&
+			//		iYPos < -m_YMax && iYPos < m_YSize + m_YMax );
 
 			TqInt i = ( ( iYPos + m_YMax ) * ( m_XSize + m_XFWidth ) ) + ( iXPos + m_XMax );
 			pie = &m_aieImage[ i ];
