@@ -39,7 +39,7 @@ TqFloat CqBasicSurface::m_fGridSize = sqrt(256.0);
  */
 
 CqBasicSurface::CqBasicSurface() : CqListEntry<CqBasicSurface>(), m_fDiceable( TqTrue ), m_fDiscard( TqFalse ), m_EyeSplitCount( 0 ),
-        m_pAttributes( 0 ), m_pTransform( 0 ), m_SplitDir( SplitDir_U ), m_pCSGNode( NULL )
+        m_pAttributes( 0 ), m_pTransform( 0 ), m_SplitDir( SplitDir_U )
 {
     // Set a refernce with the current attributes.
     m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
@@ -57,7 +57,6 @@ CqBasicSurface::CqBasicSurface() : CqListEntry<CqBasicSurface>(), m_fDiceable( T
         if ( pSolid->pCSGNode() ->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive )
         {
             m_pCSGNode = pSolid->pCSGNode();
-            ADDREF( m_pCSGNode );
         }
         else
         {
@@ -127,7 +126,6 @@ void CqBasicSurface::SetSurfaceParameters( const CqBasicSurface& From )
     // If we already have attributes, unreference them now as we don't need them anymore.
     if ( m_pAttributes ) RELEASEREF( m_pAttributes );
     if ( m_pTransform ) RELEASEREF( m_pTransform );
-    if ( m_pCSGNode ) RELEASEREF( m_pCSGNode );
 
     // Now store and reference our new attributes.
     m_pAttributes = From.m_pAttributes;
@@ -137,7 +135,6 @@ void CqBasicSurface::SetSurfaceParameters( const CqBasicSurface& From )
     ADDREF( m_pTransform );
 
     m_pCSGNode = From.m_pCSGNode;
-    if ( m_pCSGNode ) ADDREF( m_pCSGNode );
 }
 
 

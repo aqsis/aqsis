@@ -47,7 +47,6 @@ CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(),
         m_bShadingNormals( TqFalse ),
         m_bGeometricNormals( TqFalse ),
         m_pSurface( NULL ),
-        m_pCSGNode( NULL ),
         m_fTriangular( TqFalse )
 
 {
@@ -69,10 +68,6 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
     // Release the reference to the attributes.
     if ( m_pSurface != 0 ) RELEASEREF( m_pSurface );
     m_pSurface = 0;
-
-    // Release the reference to the CSG node.
-    if ( m_pCSGNode != 0 ) RELEASEREF( m_pCSGNode );
-    m_pCSGNode = 0;
 
     // Delete any cloned shader output variables.
     std::vector<IqShaderData*>::iterator outputVar;
@@ -122,7 +117,6 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
         ADDREF( m_pSurface );
 
         m_pCSGNode = pSurface->pCSGNode();
-        if ( m_pCSGNode ) ADDREF( m_pCSGNode );
     }
     lUses |= QGetRenderContext()->pDDmanager()->Uses();
 
@@ -433,7 +427,7 @@ void CqMicroPolyGrid::Shade()
     }
 
     // Now try and cull any hidden MPs if Sides==1
-    if ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 && m_pCSGNode == NULL )
+    if ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 && m_pCSGNode )
     {
         cCulled = 0;
         theStats.OcclusionCullTimer().Start();

@@ -30,9 +30,11 @@
 #include	"aqsis.h"
 
 #include	<vector>
+#include	<list>
 
-#include	"refcount.h"
-#include	"list.h"
+#include	<boost/shared_ptr.hpp>
+#include	<boost/weak_ptr.hpp>
+#include	<boost/enable_shared_from_this.hpp>
 #include	"sstring.h"
 
 
@@ -46,12 +48,12 @@ struct SqImageSample;
  *	Base CSG node class.
  *	Handles all linkage and basic processing, derived classes provide operation specific details.
  */
-class CqCSGTreeNode : public CqRefCount, public CqListEntry<CqCSGTreeNode>
+class CqCSGTreeNode : public boost::enable_shared_from_this<CqCSGTreeNode>
 {
 public:
     /** Default constructor.
      */
-    CqCSGTreeNode() : m_pParent( NULL )
+    CqCSGTreeNode()
     {}
     virtual	~CqCSGTreeNode();
 
@@ -71,26 +73,22 @@ public:
 
     /** Get a reference to the list of children of this node.
      */
-    virtual CqList<CqCSGTreeNode>& lChildren()
+    virtual std::list<boost::weak_ptr<CqCSGTreeNode> >& lChildren()
     {
         return ( m_lChildren );
     }
     /** Add a child to this node.
      *  Takes care of unreferencing the parent if not already done.
      */
-    virtual	void	AddChild( CqCSGTreeNode* pChild )
+    virtual	void	AddChild( const boost::shared_ptr<CqCSGTreeNode>& pChild )
     {
-        pChild->UnLink();
-        lChildren().LinkLast( pChild );
-        ADDREF(pChild);
-        if ( pChild->m_pParent ) RELEASEREF( pChild->m_pParent );
-        pChild->m_pParent = this;
-        ADDREF( this );
+        lChildren().push_back( pChild );
+        pChild->m_pParent = shared_from_this();
     }
     virtual	TqInt	isChild( const CqCSGTreeNode* pNode );
     /** Get the pointer to the parent CSG node for this node.
      */
-    virtual	CqCSGTreeNode*	pParent() const
+    virtual	boost::shared_ptr<CqCSGTreeNode>	pParent() const
     {
         return ( m_pParent );
     }
@@ -109,14 +107,14 @@ public:
 
     void	ProcessTree( std::vector<SqImageSample>& samples );
 
-    static CqCSGTreeNode* CreateNode( CqString& type );
+    static boost::shared_ptr<CqCSGTreeNode> CreateNode( CqString& type );
     static TqBool IsRequired();
     static void SetRequired(TqBool value);
 
 
 private:
-    CqCSGTreeNode*	m_pParent;		///< Pointer to the parent CSG node.
-    CqList<CqCSGTreeNode>	m_lChildren;	///< List of children nodes.
+    boost::shared_ptr<CqCSGTreeNode>	m_pParent;		///< Pointer to the parent CSG node.
+    std::list<boost::weak_ptr<CqCSGTreeNode> >	m_lChildren;	///< List of children nodes.
     static TqBool m_bCSGRequired;    ///< Tell imagebuffer the processing for CSG is not required
 }
 ;
@@ -141,11 +139,11 @@ public:
     virtual ~CqCSGNodePrimitive()
     {}
 
-    virtual CqList<CqCSGTreeNode>& lChildren()
+    virtual std::list<boost::weak_ptr<CqCSGTreeNode> >& lChildren()
     {
         assert( TqFalse ); return ( m_lDefPrimChildren );
     }
-    virtual	void	AddChild( CqCSGTreeNode* pChild )
+    virtual	void	AddChild( const boost::shared_ptr<CqCSGTreeNode>& pChild )
     {
         assert( TqFalse );
     }
@@ -161,7 +159,7 @@ public:
     }
 
 private:
-    static	CqList<CqCSGTreeNode>	m_lDefPrimChildren;		///< Static empty child list, as primitives cannot have children nodes.
+    static	std::list<boost::weak_ptr<CqCSGTreeNode> >	m_lDefPrimChildren;		///< Static empty child list, as primitives cannot have children nodes.
 }
 ;
 

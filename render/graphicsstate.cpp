@@ -33,8 +33,6 @@
 START_NAMESPACE( Aqsis )
 
 
-CqList<CqCSGTreeNode>	CqModeBlock::m_lCSGTrees;
-
 
 //---------------------------------------------------------------------
 /** Default constructor.
@@ -221,7 +219,6 @@ CqSolidModeBlock::CqSolidModeBlock( CqString& type, const boost::shared_ptr<CqMo
 
     // Create a new CSG tree node of the appropriate type.
     m_pCSGNode = CqCSGTreeNode::CreateNode( type );
-    ADDREF( m_pCSGNode );
 
     if ( pconParent && pconParent->isSolid() )
     {
@@ -234,13 +231,10 @@ CqSolidModeBlock::CqSolidModeBlock( CqString& type, const boost::shared_ptr<CqMo
             if ( pattrName != 0 ) objname = pattrName[ 0 ];
             std::cerr << warning << "Cannot add solid block under 'Primitive' \"" << objname.c_str() << "\" solid block" << std::endl;
 
-            m_lCSGTrees.LinkLast( m_pCSGNode );
         }
         else
             pParentSolid->pCSGNode() ->AddChild( m_pCSGNode );
     }
-    else
-        m_lCSGTrees.LinkLast( m_pCSGNode );
 }
 
 
@@ -252,7 +246,6 @@ CqSolidModeBlock::~CqSolidModeBlock()
 {
     RELEASEREF( m_pattrCurrent );
     RELEASEREF( m_ptransCurrent );
-    //	if(m_pCSGNode)	m_pCSGNode->Release();
 }
 
 

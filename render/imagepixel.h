@@ -129,7 +129,7 @@ struct SqImageSample
     TqInt m_flags;
     std::valarray<TqFloat>	m_Data;
     TqFloat	m_Coverage;
-    CqCSGTreeNode*	m_pCSGNode;	///< Pointer to the CSG node this sample is part of, NULL if not part of a solid.
+    boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;	///< Pointer to the CSG node this sample is part of, NULL if not part of a solid.
 }
 ;
 

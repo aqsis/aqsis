@@ -251,17 +251,15 @@ public:
     /** Get a pointer to the CSG tree node related to this context.
      * \return an options reference.
      */
-    virtual	CqCSGTreeNode*	pCSGNode()
+    virtual	boost::shared_ptr<CqCSGTreeNode>	pCSGNode()
     {
-        return ( ( pconParent() ) ? pconParent() ->pCSGNode() : NULL );
+        return ( ( pconParent() ) ? pconParent() ->pCSGNode() : boost::shared_ptr<CqCSGTreeNode>() );
     }
 
     /** Log invalid context nesting
      */
     virtual void logInvalidNesting() const;
 
-public:
-    static	CqList<CqCSGTreeNode>	m_lCSGTrees;
 public:
     CqAttributes* m_pattrCurrent;		///< The current attributes.
     CqTransform* m_ptransCurrent;		///< The current transformation.
@@ -573,13 +571,13 @@ public:
     {
         return ( TqTrue );
     }
-    virtual	CqCSGTreeNode*	pCSGNode()
+    virtual	boost::shared_ptr<CqCSGTreeNode>	pCSGNode()
     {
         return ( m_pCSGNode );
     }
 
 private:
-    CqCSGTreeNode*	m_pCSGNode;			///< Pointer to the node in the CSG tree for this level in the solid definition.
+    boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;			///< Pointer to the node in the CSG tree for this level in the solid definition.
 	CqString		m_strType;
 }
 ;

@@ -86,7 +86,7 @@ public:
 
     virtual	const IqAttributes* pAttributes() const = 0;
 
-    virtual	CqCSGTreeNode* pCSGNode() const = 0;
+    virtual	boost::shared_ptr<CqCSGTreeNode> pCSGNode() const = 0;
     TqBool vfCulled()
     {
         return m_fCulled;
@@ -187,7 +187,7 @@ public:
         assert( m_pShaderExecEnv );
         return ( m_pShaderExecEnv->pAttributes() );
     }
-    virtual	CqCSGTreeNode* pCSGNode() const
+    virtual	boost::shared_ptr<CqCSGTreeNode> pCSGNode() const
     {
         return ( m_pCSGNode );
     }
@@ -336,7 +336,7 @@ private:
     TqBool	m_bShadingNormals;		///< Flag indicating shading normals have been filled in and don't need to be calculated during shading.
     TqBool	m_bGeometricNormals;	///< Flag indicating geometric normals have been filled in and don't need to be calculated during shading.
     CqSurface* m_pSurface;	///< Pointer to the attributes for this grid.
-    CqCSGTreeNode* m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
+    boost::shared_ptr<CqCSGTreeNode> m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
     TqBool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
     CqBitVector	m_CulledPolys;		///< Bitvector indicating whether the individual micro polygons are culled.
     std::vector<IqShaderData*>	m_apShaderOutputVariables;	///< Vector of pointers to shader output variables.
@@ -382,7 +382,7 @@ public:
         return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pAttributes() );
     }
 
-    virtual CqCSGTreeNode* pCSGNode() const
+    virtual boost::shared_ptr<CqCSGTreeNode> pCSGNode() const
     {
         return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pCSGNode() );
     }

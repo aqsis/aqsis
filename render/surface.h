@@ -64,8 +64,6 @@ public:
         m_pAttributes = 0;
         if ( m_pTransform )
             RELEASEREF( m_pTransform );
-        if ( m_pCSGNode )
-            RELEASEREF( m_pCSGNode );
         m_pTransform = 0;
 
         STATS_DEC( GPR_current );
@@ -254,7 +252,7 @@ CqString className() const { return CqString("CqBasicSurface"); }
 
     CqBasicSurface&	operator=( const CqBasicSurface& From );
 
-    CqCSGTreeNode* pCSGNode()
+    boost::shared_ptr<CqCSGTreeNode>& pCSGNode()
     {
         return ( m_pCSGNode );
     }
@@ -271,7 +269,7 @@ protected:
     EqSplitDir	m_SplitDir;			///< The direction to split this GPrim to achieve best results.
     TqBool	m_CachedBound;		///< Whether or not the bound has been cached
     CqBound	m_Bound;			///< The cached object bound
-    CqCSGTreeNode*	m_pCSGNode;		///< Pointer to the 'primitive' CSG node this surface belongs to, NULL if not part of a solid.
+    boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;		///< Pointer to the 'primitive' CSG node this surface belongs to, NULL if not part of a solid.
     static TqFloat     m_fGridSize;   ///< standard sqrt(gridsize);
 }
 ;

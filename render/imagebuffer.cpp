@@ -1099,7 +1099,6 @@ inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2
 
 
     ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
-    if ( NULL != ImageVal.m_pCSGNode ) ADDREF( ImageVal.m_pCSGNode );
 
     ImageVal.m_flags = 0;
     if ( Occludes )
