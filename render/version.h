@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-//? Is .h included already?
+//? Is .h included already? 
 #ifndef VERSION_H_INCLUDED
 #define VERSION_H_INCLUDED 1
 
@@ -33,7 +33,7 @@
 
 #define	VERMAJOR	0
 #define	VERMINOR	7
-#define	BUILD		0
+#define	BUILD		1
 
 #define	STRX(x)	#x
 #define	STR(x)	STRX(x)
