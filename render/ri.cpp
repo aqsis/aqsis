@@ -3627,6 +3627,7 @@ RtVoid	CreateGPrim(T* pSurface)
 							QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
 							QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
 
+		pSurface->PrepareTrimCurve();
 		QGetRenderContext()->pImage()->PostSurface(pSurface);
 		QGetRenderContext()->Stats().IncGPrims();
 	}
@@ -3652,6 +3653,7 @@ RtVoid	CreateGPrim(T* pSurface)
 		pSurface->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
 							QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
 							QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
+		pSurface->PrepareTrimCurve();
 		QGetRenderContext()->pImage()->PostSurface(pMotionSurface);
 		QGetRenderContext()->Stats().IncGPrims();
 	}

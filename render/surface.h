@@ -270,10 +270,17 @@ class _qShareC CqSurface : public CqBasicSurface
 						/** Determine whether this surface can be trimmed
 						 */
 	virtual const	TqBool	bCanBeTrimmed() const						{return(TqFalse);}
-	
 						/** Determine if the specified point is trimmed.
 						 */
 	virtual	const	TqBool	bIsPointTrimmed(const CqVector2D& p) const	{return(TqFalse);}
+						/** Determine the level at which to split a trim curve according
+						 * to its screen size after application to the surface paramters of this
+						 * surface.
+						 */
+	virtual			TqInt	TrimDecimation(const CqTrimCurve& Curve)	{return(0);}
+						/** Prepare the trim curve once the surface has been completed.
+						 */
+	virtual			void	PrepareTrimCurve()							{}
 
 	protected:
 			// Default primitive variables

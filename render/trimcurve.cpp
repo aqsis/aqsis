@@ -5,12 +5,13 @@
  *	@brief	Implementation of trimcurce functionality.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2001/11/13 23:32:54 $
+ *	Last change date:	$Date: 2001/11/15 08:58:45 $
  */
 //------------------------------------------------------------------------------
 
 
 #include	"trimcurve.h"
+#include	"surface.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -106,15 +107,15 @@ CqVector2D	CqTrimCurve::Evaluate(TqFloat u)
 
 
 
-void CqTrimLoop::Prepare()
+void CqTrimLoop::Prepare(CqSurface* pSurface)
 {
-	TqInt cPoints=200;
-
 	std::vector<CqTrimCurve>::iterator iCurve;
 	TqInt iPoint;
 
 	for(iCurve=m_aCurves.begin(); iCurve!=m_aCurves.end(); iCurve++)
 	{
+		TqInt cPoints=pSurface->TrimDecimation(*iCurve);
+
 		iCurve->Clamp();
 
 		TqFloat range=iCurve->aKnots()[iCurve->cKnots()-1]-iCurve->aKnots()[0];
@@ -150,11 +151,11 @@ const TqBool	CqTrimLoop::TrimPoint(const CqVector2D& v) const
 
 
 
-void CqTrimLoopArray::Prepare()
+void CqTrimLoopArray::Prepare(CqSurface* pSurface)
 {
 	std::vector<CqTrimLoop>::iterator iLoop;
 	for(iLoop=m_aLoops.begin(); iLoop!=m_aLoops.end(); iLoop++)
-		iLoop->Prepare();
+		iLoop->Prepare(pSurface);
 }
 
 

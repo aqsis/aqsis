@@ -5,7 +5,7 @@
  *	@brief	NURB based trim cureve class.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2001/11/13 23:32:54 $
+ *	Last change date:	$Date: 2001/11/15 08:58:45 $
  */
 //------------------------------------------------------------------------------
 
@@ -19,6 +19,8 @@
 #include	"vector3d.h"
 
 START_NAMESPACE(Aqsis)
+
+class CqSurface;
 
 //----------------------------------------------------------------------
 /** \class CqTrimCurve
@@ -98,7 +100,7 @@ class CqTrimLoop
 				
 				std::vector<CqTrimCurve>& aCurves()	{return(m_aCurves);}
 
-				void		Prepare();
+				void		Prepare(CqSurface* pSurface);
 		const	TqBool		TrimPoint(const CqVector2D& v) const;
 
 	private:
@@ -115,7 +117,7 @@ class CqTrimLoopArray
 
 				std::vector<CqTrimLoop>& aLoops()	{return(m_aLoops);}
 
-				void		Prepare();
+				void		Prepare(CqSurface* pSurface);
 		const	TqBool		TrimPoint(const CqVector2D& v) const;
 				void		Clear()
 								{	

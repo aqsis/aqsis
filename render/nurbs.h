@@ -175,6 +175,8 @@ class CqSurfaceNURBS : public CqSurface
 
 				virtual const TqBool bCanBeTrimmed() const	{return(TqTrue);}
 				virtual const TqBool bIsPointTrimmed(const CqVector2D& p) const	{return(m_TrimLoops.TrimPoint(p));}
+				virtual		  TqInt	 TrimDecimation(const CqTrimCurve& Curve);
+				virtual		  void	 PrepareTrimCurve()		{m_TrimLoops.Prepare(this);}
 
 				
 	protected:

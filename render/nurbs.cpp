@@ -45,7 +45,6 @@ START_NAMESPACE(Aqsis)
 CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface()
 {
 	TrimLoops()=pAttributes()->TrimLoops();
-	TrimLoops().Prepare();
 }
 
 //---------------------------------------------------------------------
@@ -1437,6 +1436,52 @@ void	CqSurfaceNURBS::Transform(const CqMatrix& matTx, const CqMatrix& matITTx, c
 		P()[i]=matTx*P()[i];
 }
 
+
+//---------------------------------------------------------------------
+/** Determine the segment count for the specified trim curve to make each segment the appropriate size
+ *  for the current shading rate.
+ */
+
+TqInt	 CqSurfaceNURBS::TrimDecimation(const CqTrimCurve& Curve)
+{
+	TqFloat Len=0;
+	TqFloat MaxLen=0;
+	TqInt cSegments=0;
+	CqMatrix matCtoR=QGetRenderContext()->matSpaceToSpace("camera","raster",CqMatrix(),pTransform()->matObjectToWorld());
+
+	TqUint iTrimCurvePoint;
+	for(iTrimCurvePoint=0; iTrimCurvePoint<Curve.cVerts()-1; iTrimCurvePoint++)
+	{
+		// Get the u,v of the current point.
+		TqFloat u,v;
+		CqVector3D vecCP;
+		vecCP=Curve.CP(iTrimCurvePoint);
+		u=vecCP.x();
+		v=vecCP.y();
+
+		// Get the u,v of the next point.
+		TqFloat u2,v2;
+		vecCP=Curve.CP(iTrimCurvePoint+1);
+		u2=vecCP.x();
+		v2=vecCP.y();
+
+		CqVector3D vecP=Evaluate(u,v);
+		vecP=matCtoR*vecP;
+		CqVector3D vecP2=Evaluate(u2,v2);
+		vecP2=matCtoR*vecP2;
+
+		Len=(vecP2-vecP).Magnitude();
+		if(Len>MaxLen)	MaxLen=Len;
+		cSegments++;
+	}
+	TqFloat ShadingRate=pAttributes()->fEffectiveShadingRate();
+	ShadingRate=static_cast<TqFloat>(sqrt(ShadingRate));
+	MaxLen/=ShadingRate;
+
+	TqInt SplitCount=static_cast<TqUint>(MAX(MaxLen,1));
+
+	return(SplitCount*cSegments);
+}
 
 
 
