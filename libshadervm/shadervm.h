@@ -389,6 +389,28 @@ union UsProgramElement
 						RELEASE(name); \
 						RELEASE(channel); \
 						RELEASE(R); 
+#define	TEXTURE3(t,func)	POPV(count); /* additional parameter count */\
+						POPV(name); /* texture name */\
+						POPV(channel); /* channel */\
+						POPV(P); /* point */\
+						POPV(N); /* normal */\
+						POPV(samples); /* samples */\
+						TqFloat fc; \
+						count->GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
+						TqInt iP=0; \
+						while(iP!=cParams)	aParams[iP++]=POP.m_Data; \
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						func(name,channel,P,N,samples,pResult,this, cParams, aParams); \
+						delete[](aParams); \
+						Push(pResult); \
+						RELEASE(count); \
+						RELEASE(name); \
+						RELEASE(channel); \
+						RELEASE(P); \
+						RELEASE(N); \
+						RELEASE(samples); 
 #define	TEXTURE2(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
@@ -988,7 +1010,7 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		void	SO_bake_3v();
 		void	SO_bake_3n();
 		void	SO_external();
-
+		void	SO_occlusion();
 
 		static	SqOpCodeTrans	m_TransTable[];		///< Static opcode translation table.
 		static	TqInt	m_cTransSize;		///< Size of translation table.

@@ -416,7 +416,7 @@ class CqTextureMap : public IqTextureMap
 			m_Quality = Quality;
 		}
 
-		CqMatrix& GetMatrix( TqInt which )
+		virtual CqMatrix& GetMatrix( TqInt which, TqInt index = 0 )
 		{
 			return ( m_matWorldToScreen );
 		}
@@ -483,6 +483,8 @@ class CqTextureMap : public IqTextureMap
 		{}
 
 		virtual	void	GetSample( TqFloat ss1, TqFloat tt1, TqFloat ss2, TqFloat tt2, std::valarray<TqFloat>& val );
+
+		virtual	TqInt	NumPages() const	{ return(1); }
 
 		static	CqTextureMap* GetTextureMap( const CqString& strName );
 		static	CqTextureMap* GetEnvironmentMap( const CqString& strName );
@@ -579,7 +581,7 @@ class CqEnvironmentMap : public CqTextureMap
 		virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
 		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
 
-		CqMatrix& CqEnvironmentMap::GetMatrix( TqInt which )
+		virtual CqMatrix& GetMatrix( TqInt which, TqInt index = 0 )
 		{
 
 			return ( m_matWorldToScreen );
@@ -669,12 +671,13 @@ class CqShadowMap : public CqTextureMap
 
 		virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0 );
 		virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0 );
-		CqMatrix& CqShadowMap::GetMatrix( TqInt which, TqInt index = 0 )
+		virtual CqMatrix& GetMatrix( TqInt which, TqInt index = 0 )
 		{
 			if ( which == 0 ) return matWorldToCamera(index);
 			else if ( which == 1 ) return matWorldToScreen(index);
 			return ( matWorldToCamera(index) );
 		}
+		virtual	TqInt	NumPages() const	{ return(m_NumberOfMaps); }
 
 
 	private:

@@ -97,7 +97,7 @@ static void yyerror(const CqString Message);
 %token <m_tok>	IF ELSE WHILE FOR CONTINUE BREAK RETURN
 %token <m_tok>	ILLUMINATE ILLUMINANCE SOLAR
 
-%token <m_tok>	TEXTUREMAP ENVIRONMENT BUMP SHADOW
+%token <m_tok>	TEXTUREMAP ENVIRONMENT BUMP SHADOW OCCLUSION
 
 %token <m_tok>	SETXCOMP SETYCOMP SETZCOMP SETCOMP
 
@@ -1588,7 +1588,7 @@ unresolvedcall
 proc_arguments
 	:	expression			{
 								// Create a list header, and add the first entry.
-								$$=new CqParseNode();
+									$$=new CqParseNode();
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								$$->AddLastChild($1);
 							}
@@ -1664,6 +1664,12 @@ texture_type
 	|	SHADOW				{
 								std::vector<SqFuncRef> func;
 								CqFuncDef::FindFunction("shadow", func);
+								$$=new CqParseNodeFunctionCall(func);
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+							}
+	|	OCCLUSION			{
+								std::vector<SqFuncRef> func;
+								CqFuncDef::FindFunction("occlusion", func);
 								$$=new CqParseNodeFunctionCall(func);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}

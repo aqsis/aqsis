@@ -1234,6 +1234,13 @@ void CqShaderVM::SO_external()
 	Push(pResult);
 }
 
+void CqShaderVM::SO_occlusion()
+{
+	VARFUNC;
+	TEXTURE3( type_float, m_pEnv->SO_occlusion );
+}
+
+
 #ifdef AQSIS_SYSTEM_MACOSX
 #pragma CC_OPT_RESTORE
 #endif

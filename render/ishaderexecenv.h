@@ -454,6 +454,7 @@ struct IqShaderExecEnv
 	virtual STD_SO	SO_bake_3n( STRINGVAL shader, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVAR) = 0;
 	virtual STD_SO	SO_bake_3v( STRINGVAL shader, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVAR) = 0;
 	virtual STD_SO	SO_external(DSOMethod method, void *initData, DEFPARAMVAR) = 0;
+	virtual	STD_SO	SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVAR ) = 0; 
 };
 
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to u.

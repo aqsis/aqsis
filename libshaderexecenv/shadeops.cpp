@@ -2881,7 +2881,10 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 			GETNORMAL( N );
 			CqColor colCl;
 			Cl() ->GetColor( colCl, __iGrid );
+			//std::cout << COLOR( Result ) << std::endl;
+			//std::cout << colCl * ( Ln * NORMAL( N ) ) << std::endl;
 			SETCOLOR( Result, COLOR( Result ) + colCl * ( Ln * NORMAL( N ) ) );
+			//std::cout << COLOR( Result ) << std::endl << std::endl;
 
 			END_VARYING_SECTION
 			PopState();
@@ -5608,7 +5611,7 @@ STD_SOIMPL CqShaderExecEnv::SO_external( DSOMethod method, void *initData, DEFPA
 
 //----------------------------------------------------------------------
 // occlusion(occlmap,P,N,samples)
-STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVARIMPL )
+STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVARIMPL )
 {
 	INIT_SO
 
@@ -5630,14 +5633,24 @@ STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, POINTVAL P, NORMALV
 		std::valarray<TqFloat> fv;
 
 		BEGIN_VARYING_SECTION
+		// Storage for the final combined occlusion value.
+		TqFloat finalocclusion = 0.0f;
+
 		CqVector3D swidth = 0.0f, twidth = 0.0f;
 
 		swidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
 		twidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
 
 		GETPOINT( P );
-		pMap->SampleMap( POINT( P ), swidth, twidth, fv, paramMap );
-		SETFLOAT( Result, fv[ 0 ] );
+		TqInt i;
+		for( i = 0; i < pMap->NumPages(); i++ )
+		{
+			fv = 0.0f;
+			pMap->SampleMap( POINT( P ), swidth, twidth, fv, paramMap, i );
+			finalocclusion += fv[0];
+		}
+		finalocclusion /= static_cast<TqFloat>(pMap->NumPages());
+		SETFLOAT( Result, finalocclusion);
 		END_VARYING_SECTION
 	}
 	else

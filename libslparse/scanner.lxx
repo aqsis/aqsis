@@ -107,6 +107,7 @@ static TqInt check_type();
 "environment"	{ return(ENVIRONMENT);}
 "bump"			{ return(BUMP);}
 "shadow"		{ return(SHADOW);}
+"occlusion"		{ return(OCCLUSION);}
 "textureinfo"	{ return(TEXTUREINFO);}
 
 {hashline}.*{LF}	{

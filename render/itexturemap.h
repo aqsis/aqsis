@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/07/03 00:21:35 $
+ *	Last change date:	$Date: 2003/07/03 23:30:04 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -117,8 +117,9 @@ struct IqTextureMap
 	                        std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0 ) = 0;
 	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
 	                        std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0 ) = 0;
-	virtual CqMatrix& GetMatrix( TqInt which ) = 0;
+	virtual CqMatrix& GetMatrix( TqInt which, TqInt index = 0 ) = 0;
 
+	virtual	TqInt	NumPages() const = 0;
 };
 
 
