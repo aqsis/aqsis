@@ -506,6 +506,17 @@ RtVoid	RiWorldBegin()
     for ( i = 0; i < QGetRenderContext() ->ptransWriteCurrent() ->cTimes(); i++ )
         QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->ptransWriteCurrent() ->Time( i ), CqMatrix() );
 
+    if ( QGetRenderContext() ->matSpaceToSpace( "world", "camera" ).Determinant() < 0 )
+    {
+        QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 1 ] = OrientationRH;
+        QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationRH;
+    }
+    else
+    {
+        QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 1 ] = OrientationLH;
+        QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationLH;
+    }
+
     QGetRenderContext() ->optCurrent().InitialiseCamera();
     QGetRenderContext() ->pImage() ->SetImage();
 
