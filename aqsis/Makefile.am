@@ -17,6 +17,8 @@ check-local:
 	echo "zfile	@top_builddir@shadowmap/shadowmap@EXEEXT@" >> ./ddmsock.ini
 	echo "shadow	@top_builddir@shadowmap/shadowmap@EXEEXT@" >> ./ddmsock.ini
 	for file in $(top_srcdir)/ribfiles/*.rib; do echo "Rendering $$file ..."; AQSIS_CONFIG_PATH="./" $(top_builddir)/aqsis/aqsis -shaders=$(top_builddir)/shaders $$file; done
+
+clean-local:
 	rm -f ddmsock.ini
 	rm -f *.map
 	rm -f *.tif
