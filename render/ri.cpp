@@ -3648,6 +3648,13 @@ RtVoid	RiSphere( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, .
 //
 RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
+	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+
+	rc.set( "sphere zmin", "WARN" );
+	CheckMinMax( zmin, -radius, radius, &rc );
+	rc.set( "sphere zmax", "WARN" );
+	CheckMinMax( zmax, -radius, radius, &rc );
+
 	// Create a sphere
 	CqSphere * pSurface = new CqSphere( radius, zmin, zmax, 0, thetamax );
 	ADDREF( pSurface );

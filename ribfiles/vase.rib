@@ -314,8 +314,7 @@ LightSource "shadowspot" 5 "intensity" [10 ] "lightcolor" [0.8 1 1] "from" [-4 6
 AttributeBegin
 Color [0.5490 0.6745 0.4667]
 Declare "texturescale" "uniform float"
-Surface "matte" "Ka" [0.4 ] "Kd" [1.0 ] "Ks" [1] "texturescale" [7]
-#Surface "constant"
+Surface "matte" "Ka" [0.4 ] "Kd" [1.0 ]
 TransformBegin
 Translate -0.4 0 0
 Basis "bezier" 3 "bezier" 3

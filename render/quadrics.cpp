@@ -346,7 +346,13 @@ CqSphere::CqSphere( TqFloat radius, TqFloat zmin, TqFloat zmax, TqFloat thetamin
 		m_ZMax( zmax ),
 		m_ThetaMin( thetamin ),
 		m_ThetaMax( thetamax )
-{}
+{
+	// Sanity check the values.
+	if( m_ZMin < -m_Radius )	m_ZMin = -m_Radius;
+	if( m_ZMin >  m_Radius )	m_ZMin =  m_Radius;
+	if( m_ZMax < -m_Radius )	m_ZMax = -m_Radius;
+	if( m_ZMax >  m_Radius )	m_ZMax =  m_Radius;
+}
 
 
 //---------------------------------------------------------------------
