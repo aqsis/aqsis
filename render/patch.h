@@ -33,6 +33,7 @@
 #include	"surface.h"
 #include	"vector4d.h"
 #include	"bilinear.h"
+#include	"forwarddiff.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -52,7 +53,37 @@ class CqSurfacePatchBicubic : public CqSurface
 		CqSurfacePatchBicubic( const CqSurfacePatchBicubic& From );
 		virtual	~CqSurfacePatchBicubic();
 
-		virtual	CqVector4D	Evaluate( TqFloat s, TqFloat t ) const;
+		template<class T, class SLT>
+		void	TypedNaturalInterpolate( TqFloat uSize, TqFloat vSize, CqParameterTyped<T,SLT>* pParam, IqShaderData* pData )
+		{
+			CqForwardDiffBezier<T> vFD0( 1.0f / vSize );
+			CqForwardDiffBezier<T> vFD1( 1.0f / vSize );
+			CqForwardDiffBezier<T> vFD2( 1.0f / vSize );
+			CqForwardDiffBezier<T> vFD3( 1.0f / vSize );
+			CqForwardDiffBezier<T> uFD0( 1.0f / uSize );
+
+			vFD0.CalcForwardDiff( pParam->pValue()[0], pParam->pValue()[4], pParam->pValue()[8], pParam->pValue()[12] );
+			vFD1.CalcForwardDiff( pParam->pValue()[1], pParam->pValue()[5], pParam->pValue()[9], pParam->pValue()[13] );
+			vFD2.CalcForwardDiff( pParam->pValue()[2], pParam->pValue()[6], pParam->pValue()[10], pParam->pValue()[14] );
+			vFD3.CalcForwardDiff( pParam->pValue()[3], pParam->pValue()[7], pParam->pValue()[11], pParam->pValue()[15] );
+
+			TqInt iv, iu;
+			for ( iv = 0; iv <= vSize; iv++ )
+			{
+				T vA = vFD0.GetValue();
+				T vB = vFD1.GetValue();
+				T vC = vFD2.GetValue();
+				T vD = vFD3.GetValue();
+				uFD0.CalcForwardDiff( vA, vB, vC, vD );
+
+				for ( iu = 0; iu <= uSize; iu++ )
+				{
+					T vec = uFD0.GetValue();
+					TqInt igrid = ( iv * ( uSize + 1 ) ) + iu;
+					pData->SetValue( static_cast<SLT>(vec), igrid );
+				}
+			}
+		}
 
 		/** Get a reference to the indexed control point.
 		 * \param iRow Integer row index.
@@ -115,29 +146,6 @@ class CqSurfacePatchBicubic : public CqSurface
 		virtual void NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
 
 	protected:
-
-		virtual	void	GetGeometryMatrices( TqFloat& s, TqFloat &t, CqMatrix& Gx, CqMatrix& Gy, CqMatrix& Gz ) const;
-		CqVector4D	EvaluateMatrix( TqFloat s, TqFloat t, CqMatrix& Gx, CqMatrix& Gy, CqMatrix& Gz ) const;
-		void	InitFD( TqInt cu, TqInt cv,
-		             CqMatrix&	matDDx,
-		             CqMatrix&	matDDy,
-		             CqMatrix&	matDDz,
-		             CqVector4D&	DDxA,
-		             CqVector4D&	DDyA,
-		             CqVector4D&	DDzA );
-		CqVector4D	EvaluateFD( CqMatrix&	matDDx,
-		                       CqMatrix&	matDDy,
-		                       CqMatrix&	matDDz,
-		                       CqVector4D&	DDxA,
-		                       CqVector4D&	DDyA,
-		                       CqVector4D&	DDzA );
-		void	AdvanceFD( CqMatrix&	matDDx,
-		                CqMatrix&	matDDy,
-		                CqMatrix&	matDDz,
-		                CqVector4D&	DDxA,
-		                CqVector4D&	DDyA,
-		                CqVector4D&	DDzA );
-
 };
 
 

@@ -1,0 +1,69 @@
+version 3.03
+Option "searchpath" "shader" ["../shaders:&"]
+Display "patch.tif" "framebuffer" "rgba"
+#Display "+patch.tif" "file" "rgba"
+Format 200 150 1
+ShadingRate 2
+
+Projection "perspective" "fov" 45
+Translate 0 0 5
+
+Option "limits" "eyesplits" 3
+Sides 2
+PixelSamples 1 1
+PixelFilter "box" 1 1
+
+WorldBegin
+      
+	LightSource "pointlight" 0 "intensity" [100] "from" [0 0 -10]
+
+	Color [1 1 1]
+
+	AttributeBegin
+		Surface "showuser"
+		Patch "bicubic" "P" [
+							-1 -1 -1
+							-0.5 -1 -1
+							0.5 -1 -1
+							1 -1 -1
+
+							-1 -0.5 -1
+							-0.5 -0.5 -1
+							0.5 -0.5 -1
+							1 -0.5 -1
+
+							-1 0.5 -1
+							-0.5 0.5 -1
+							0.5 0.5 -1
+							1 0.5 -1
+
+							-1 1 -1
+							-0.5 1 -1
+							0.5 1 -1
+							1 1 -1
+						]
+			"vertex color myvcolor" [
+							1 1 1
+							1 1 0
+							1 0 1
+							0 1 1
+
+							0 0 0
+							1 0 1
+							1 0 0
+							0 1 0
+							
+							0 0 1
+							0 1 1
+							1 0 1
+							0 0 1
+
+							1 1 1
+							0 1 0
+							1 0 1
+							1 1 0
+						]
+	AttributeEnd
+
+WorldEnd
+
