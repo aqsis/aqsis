@@ -887,7 +887,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 				TqInt scount = iXSamples * iYSamples;
 				TqFloat max_hits = scount * shd_rate;
 
-				STATS_INC( MPG_sample_coverage0_125 + TqInt( 8 * ( sample_hits / max_hits ) ) );
+				STATS_INC( MPG_sample_coverage0_125 + TqInt( -0.1 + 8 * ( sample_hits / max_hits ) ) );
 			}
 			iY++;
 		}
