@@ -1,17 +1,21 @@
 Aqsis Rendering System INSTALL - Posix systems
 -----------------------------------------------
 
-* Generated files (e.g. configure, Makefile.in) are not stored in CVS; if you are building from a CVS tree, you need to generate these files from the top-level directory:
+* Generated files (e.g. configure, Makefile.in) are not stored in CVS; if you
+are building from a CVS tree, you need to generate these files from the 
+top-level directory:
 
 	./bootstrap
 
-* Now (regardless of where how you obtained the source), you need to configure it for your system.  Note that
-currently shared libraries are turned-off by default, and the default install prefix is "/usr/local/aqsis".
-You can obtain a listing of available configuration options by doing:
+* Now (regardless of where how you obtained the source), you need to configure
+it for your system.  Note that currently shared libraries are turned-off by 
+default, and the default install prefix is "/usr/local/aqsis". You can obtain a
+listing of available configuration options by doing:
 
 	./configure --help
 
-* Once you've decided which (if any) configuration options you want to override, you can run the configure script:
+* Once you've decided which (if any) configuration options you want to override,
+you can run the configure script:
 
 	./configure <options>
 
@@ -19,41 +23,80 @@ You can obtain a listing of available configuration options by doing:
 
 	make
 
-* Now, run the built-in tests, which will render a sample image of a vase and teapot (ribfiles/vase.rib):
+* Now, run the built-in tests, which will render a sample image of a vase and
+teapot (ribfiles/vase.rib):
 
 	make check
 
-* You're now ready to install the Aqsis binaries for general use on your host.  You will have to have root access:
+* You're now ready to install the Aqsis binaries for general use on your host.
+You will have to have root access:
+
 	su -c "make install"
 
-* If you want to make a copy of the Aqsis source available for others, you can roll your own distribution tarball:
+* If you want to make a copy of the Aqsis source available for others, you can
+roll your own distribution tarball:
 
 	make distcheck
 
-* Contact the Aqsis mailing list, <aqsis-development@lists.sourceforge.net> with any questions.
+* Contact the Aqsis mailing list, <aqsis-development@lists.sourceforge.net> 
+with any questions.
+
+
+
+
 
 Aqsis Rendering System INSTALL - Windows binary installation
 ------------------------------------------------------------
 
-To install the binary installation on a Windows machine, simply unarchive the .zip file to a suitable location (c:\Program Files\Aqsis for instance). You may need to set an environment variable to enable the programs to locate support files, two examples are shown below for the most common Windows versions, if these do not apply check with your Windows documentation to find out how to set environment variables.
+Simply download and run the executable installer.
 
-Windows 95/98/me
 
-Using notepad edit the autoexec.bat file in the c:\ directory. Add the following line substituting the location you unzipped to in the path.
 
-set AQSIS_BASE_PATH=<unzip-directory>
 
-for instance if you unarchived to the location suggested
 
-set AQSIS_BASE_PATH="C:\Program Files\Aqsis"
+Aqsis Rendering System INSTALL - Compiling under Windows (From CVS)
+-------------------------------------------------------------------
 
-note that if you have a space in the location you will need to enclose it in double quotes.
+Requirements:
+	
+	CVS Projects:
+		renderer
+		win32libs
 
-Windows NT/2000
+	Tools:
 
-Go to the settings/control panel and select 'system'. From the dialogue select the advanced pane and click on 'Environment Variables...', choose the 'New...' button and set the 'Variable name.' to AQSIS_BASE_PATH, and the value to the location of the unzipped distribution as above.
+		MSVC++ 6.0
+		bison		1.35-4 (http://sourceforge.net/projects/gnuwin32/)
+					Included in the win32libs project
+		flex		2.5.4a (http://sourceforge.net/projects/gnuwin32/)
+					Included in the win32libs project
 
-You may need to restart for the changes to take effect, then you should be able to run Aqsis from the command line.
+
+	Libraries:
+
+		libtiff		3.5.7 (http://sourceforge.net/projects/gnuwin32/)
+					Included in the win32libs project
+		libjpeg		6b (http://sourceforge.net/projects/gnuwin32/)
+					Included in the win32libs project
+		zlib		1.1.4 (http://sourceforge.net/projects/gnuwin32/)
+					Included in the win32libs project
+		log4cpp		0.3.4b (http://sourceforge.net/projects/log4cpp/)
+					Download the archive and install to a suitable location.
+					Load the <install>\log4cpp-0.3.4b\msvc6\msvc6.dsw 
+						workspace.
+					Build log4cpp debug and release.
+					Add <install>\include to your include paths under 
+						tools/options.
+					Add <install>\include to your include paths under 
+						tools/options.
+					Add <install>\log4cpp-0.3.4b\msvc6\log4cpp\release to your 
+						library paths under tools/options.
+					Add <install>\log4cpp-0.3.4b\msvc6\log4cpp\debug to your 
+						library paths under tools/options.
+
+	Load the Renderer.dsw workspace from the Aqsis/Renderer directory, select 
+	the "All - Release" project and build all.
+
 
 
 Happy Rendering!
