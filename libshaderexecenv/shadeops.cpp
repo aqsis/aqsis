@@ -29,6 +29,7 @@
 #include	<map>
 #include	<vector>
 #include	<string>
+#include	<stdio.h>
 
 #include	"shaderexecenv.h"
 #include	"spline.h"

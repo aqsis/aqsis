@@ -26,10 +26,12 @@
 #ifndef RI2RIB_OUTSTREAM_H
 #define RI2RIB_OUTSTREAM_H 1
 
+#include "aqsis.h"
+
 #include <fstream>
 #include <string>
 #include <zlib.h>
-#include "aqsis.h"
+#include <stdio.h>
 
 
 START_NAMESPACE( libri2rib )
