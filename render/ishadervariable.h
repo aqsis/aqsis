@@ -5,7 +5,7 @@
  *	@brief	Decares the interface to generic shader variables.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/04/11 21:56:53 $
+ *	Last change date:	$Date: 2002/04/12 17:00:36 $
  */
 //------------------------------------------------------------------------------
 
@@ -120,6 +120,10 @@ struct IqShaderVariable
 		 * \return Integer array length.
 		 */
 		virtual TqInt	ArrayLength() const=0;
+		/** Get the i'th entry of the variable array.
+		 * \return Pointer to an object implementing IqShaderVariable.
+		 */
+		virtual IqShaderVariable*	ArrayEntry(TqInt i) const=0;
 }
 ;
 

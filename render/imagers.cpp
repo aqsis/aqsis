@@ -90,17 +90,17 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 	// Initialise the geometric parameters in the shader exec env.
 
 	i = ( vGridRes + 1 ) * ( uGridRes + 1 );
-	P().Initialise( uGridRes, vGridRes, i );
-	Ci().Initialise( uGridRes, vGridRes, i );
-	Oi().Initialise( uGridRes, vGridRes, i );
-	alpha().Initialise( uGridRes, vGridRes, i );
+	P()->Initialise( uGridRes, vGridRes, i );
+	Ci()->Initialise( uGridRes, vGridRes, i );
+	Oi()->Initialise( uGridRes, vGridRes, i );
+	alpha()->Initialise( uGridRes, vGridRes, i );
 
 	//TODO dtime is not initialised yet
 	//dtime().Initialise(uGridRes, vGridRes, i);
 
-	alpha().SetValue( CqVMStackEntry( coverage[ 0 ] ) );
-	ncomps().SetValue( CqVMStackEntry( components ) );
-	time().SetValue( CqVMStackEntry( shuttertime ) );
+	alpha()->SetValue( CqVMStackEntry( coverage[ 0 ] ) );
+	ncomps()->SetValue( CqVMStackEntry( components ) );
+	time()->SetValue( CqVMStackEntry( shuttertime ) );
 
 
 	m_pShader->Initialise( uGridRes, vGridRes, *this );
@@ -108,16 +108,16 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 		for ( i = 0; i < uGridRes; i++ )
 		{
 
-			P().SetValue( j * ( uGridRes + 1 ) + i, CqVMStackEntry(CqVector3D( x + i, y + j, 0.0 )));
-			Ci().SetValue( j * ( uGridRes + 1 ) + i, CqVMStackEntry(color[ j * ( uGridRes ) + i ]));
-			Oi().SetValue( j * ( uGridRes + 1 ) + i, CqVMStackEntry(opacity[ j * ( uGridRes ) + i ]));
+			P()->SetValue( j * ( uGridRes + 1 ) + i, CqVMStackEntry(CqVector3D( x + i, y + j, 0.0 )));
+			Ci()->SetValue( j * ( uGridRes + 1 ) + i, CqVMStackEntry(color[ j * ( uGridRes ) + i ]));
+			Oi()->SetValue( j * ( uGridRes + 1 ) + i, CqVMStackEntry(opacity[ j * ( uGridRes ) + i ]));
 
 		}
 	// Execute the Shader VM
 	if ( m_pShader )
 	{
 		m_pShader->Evaluate( *this );
-		alpha().SetValue( CqVMStackEntry( 1.0f ) ); /* by default 3delight/bmrt set it to 1.0 */
+		alpha()->SetValue( CqVMStackEntry( 1.0f ) ); /* by default 3delight/bmrt set it to 1.0 */
 	}
 
 	m_uYOrigin = static_cast<TqInt>(y);
@@ -140,9 +140,9 @@ CqColor CqImagersource::Color( TqFloat x, TqFloat y )
 	TqInt index = static_cast<TqInt>(( y - m_uYOrigin ) * ( m_uGridRes + 1 ) + x - m_uXOrigin);
 
 	CqVMStackEntry SE;
-	if ( Ci().Size() >= index )
+	if ( Ci()->Size() >= index )
 	{
-		Ci().GetValue ( index, SE );
+		Ci()->GetValue ( index, SE );
 		SE.Value( result );
 	}
 
@@ -161,9 +161,9 @@ CqColor CqImagersource::Opacity( TqFloat x, TqFloat y )
 	TqInt index = static_cast<TqInt>(( y - m_uYOrigin ) * ( m_uGridRes + 1 ) + x - m_uXOrigin);
 
 	CqVMStackEntry SE;
-	if ( Oi().Size() >= index )
+	if ( Oi()->Size() >= index )
 	{
-		Oi().GetValue ( index, SE );
+		Oi()->GetValue ( index, SE );
 		SE.Value( result );
 	}
 
@@ -181,7 +181,7 @@ TqFloat CqImagersource::Alpha( TqFloat x, TqFloat y )
 	TqFloat result;
 
 	CqVMStackEntry SE;
-	alpha().GetValue ( 0, SE );
+	alpha()->GetValue ( 0, SE );
 	SE.Value( result );
 
 	return result;

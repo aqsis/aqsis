@@ -273,6 +273,10 @@ SOURCE=.\imagers.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ishadervariable.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\lights.h
 # End Source File
 # Begin Source File

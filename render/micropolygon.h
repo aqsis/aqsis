@@ -311,7 +311,7 @@ class CqMicroPolygonBase
 		{
 			CqColor colRes;
 			CqVMStackEntry SE;
-			m_pGrid->Ci().GetValue(m_Index, SE);
+			m_pGrid->Ci()->GetValue(m_Index, SE);
 			SE.Value( colRes );
 			return ( colRes );
 		}
@@ -322,7 +322,7 @@ class CqMicroPolygonBase
 		{
 			CqColor colRes;
 			CqVMStackEntry SE;
-			m_pGrid->Oi().GetValue(m_Index, SE);
+			m_pGrid->Oi()->GetValue(m_Index, SE);
 			SE.Value(colRes);
 			return ( colRes );
 		}

@@ -39,11 +39,9 @@ CqLightsource::CqLightsource( CqShader* pShader, TqBool fActive ) :
 		m_pShader( pShader ),
 		m_pAttributes( 0 )
 {
-	// Set a refernce with the current attributes.
+	// Set a reference with the current attributes.
 	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
 	m_pAttributes->AddRef();
-	//	m_matLightToWorld=QGetRenderContext()->matCurrent();
-	//	m_matWorldToLight=QGetRenderContext()->matCurrent().Inverse();
 
 	// Link into the lightsource stack.
 	Lightsource_stack.LinkFirst( this );
@@ -80,18 +78,18 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
 	if ( m_pShader ) Uses |= m_pShader->Uses();
 	CqShaderExecEnv::Initialise( uGridRes, vGridRes, 0, Uses );
 
-	L().Initialise( uGridRes, vGridRes, GridI() );
-	Cl().Initialise( uGridRes, vGridRes, GridI() );
+	L()->Initialise( uGridRes, vGridRes, GridI() );
+	Cl()->Initialise( uGridRes, vGridRes, GridI() );
 
 	// Initialise the geometric parameters in the shader exec env.
-	P().SetValue( CqVMStackEntry( QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->matCurrent() ) * CqVector3D( 0.0f, 0.0f, 0.0f ) ) );
-	if ( USES( Uses, EnvVars_u ) ) u().SetValue( CqVMStackEntry( 0.0f ) );
-	if ( USES( Uses, EnvVars_v ) ) v().SetValue( CqVMStackEntry( 0.0f ) );
-	if ( USES( Uses, EnvVars_du ) ) du().SetValue( CqVMStackEntry( 0.0f ) );
-	if ( USES( Uses, EnvVars_du ) ) dv().SetValue( CqVMStackEntry( 0.0f ) );
-	if ( USES( Uses, EnvVars_s ) ) s().SetValue( CqVMStackEntry( 0.0f ) );
-	if ( USES( Uses, EnvVars_t ) ) t().SetValue( CqVMStackEntry( 0.0f ) );
-	if ( USES( Uses, EnvVars_N ) ) N().SetValue( CqVMStackEntry( CqVector3D( 0.0f, 0.0f, 0.0f ) ) );
+	P()->SetValue( CqVMStackEntry( QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->matCurrent() ) * CqVector3D( 0.0f, 0.0f, 0.0f ) ) );
+	if ( USES( Uses, EnvVars_u ) ) u()->SetValue( CqVMStackEntry( 0.0f ) );
+	if ( USES( Uses, EnvVars_v ) ) v()->SetValue( CqVMStackEntry( 0.0f ) );
+	if ( USES( Uses, EnvVars_du ) ) du()->SetValue( CqVMStackEntry( 0.0f ) );
+	if ( USES( Uses, EnvVars_du ) ) dv()->SetValue( CqVMStackEntry( 0.0f ) );
+	if ( USES( Uses, EnvVars_s ) ) s()->SetValue( CqVMStackEntry( 0.0f ) );
+	if ( USES( Uses, EnvVars_t ) ) t()->SetValue( CqVMStackEntry( 0.0f ) );
+	if ( USES( Uses, EnvVars_N ) ) N()->SetValue( CqVMStackEntry( CqVector3D( 0.0f, 0.0f, 0.0f ) ) );
 }
 
 
@@ -169,11 +167,29 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
 // These are the built in shaders, they will be registered as "builtin_<name>"
 // these should be used where speed is an issue.
 
+CqShaderLightsourceAmbient::CqShaderLightsourceAmbient() : m_intensity(NULL), m_lightcolor(NULL)
+{
+	m_intensity = CqShaderVM::CreateVariable(type_float, class_uniform, "intensity" );
+	m_lightcolor = CqShaderVM::CreateVariable(type_color, class_uniform, "lightcolor" );
+
+	// Set up the default values for the parameters.
+	m_intensity->SetValue( CqVMStackEntry( 1.0f ) );
+	m_lightcolor->SetValue( CqVMStackEntry( CqColor(1,1,1) ) );
+}
+
+
+CqShaderLightsourceAmbient::~CqShaderLightsourceAmbient()
+{
+	delete(m_intensity);
+	delete(m_lightcolor);
+}
+
+
 void CqShaderLightsourceAmbient::SetValue( const char* name, TqPchar val )
 {
-	if ( strcmp( name, "intensity" ) == 0 ) intensity.SetValue( CqVMStackEntry( *reinterpret_cast<TqFloat*>( val ) ) );
+	if ( strcmp( name, "intensity" ) == 0 ) m_intensity->SetValue( CqVMStackEntry( *reinterpret_cast<TqFloat*>( val ) ) );
 	else
-		if ( strcmp( name, "lightcolor" ) == 0 ) lightcolor.SetValue( CqVMStackEntry( CqColor ( reinterpret_cast<TqFloat*>( val ) ) ) );
+		if ( strcmp( name, "lightcolor" ) == 0 ) m_lightcolor->SetValue( CqVMStackEntry( CqColor ( reinterpret_cast<TqFloat*>( val ) ) ) );
 }
 
 
@@ -182,11 +198,20 @@ void CqShaderLightsourceAmbient::Evaluate( CqShaderExecEnv& Env )
 	TqFloat fTemp;
 	CqColor cTemp;
 	CqVMStackEntry SE1, SE2;
-	lightcolor.GetValue( 0, SE1 );
-	intensity.GetValue( 0, SE2 );
+	
+	if(m_lightcolor)
+		m_lightcolor->GetValue( 0, SE1 );
+	else
+		SE1.SetValue( 0, CqColor(1,1,1) );
+
+	if(m_intensity)
+		m_intensity->GetValue( 0, SE2 );
+	else
+		SE2.SetValue(0, 1.0f );
+
 	SE1.Value( cTemp );
 	SE2.Value( fTemp );
-	Env.Cl().SetValue( CqVMStackEntry( cTemp * fTemp ) );
+	Env.Cl()->SetValue( CqVMStackEntry( cTemp * fTemp ) );
 }
 
 

@@ -58,13 +58,13 @@ void CqShaderSurfaceConstant::Evaluate( CqShaderExecEnv& Env )
 	do
 	{
 		CqVMStackEntry SEOs, SECs;
-		Env.Os().GetValue( Env.GridI(), SEOs );
-		Env.Cs().GetValue( Env.GridI(), SECs );
+		Env.Os()->GetValue( Env.GridI(), SEOs );
+		Env.Cs()->GetValue( Env.GridI(), SECs );
 		TqInt i = 0;
 		GETCOLOR(SECs);
 		GETCOLOR(SEOs);
-		Env.Ci().SetValue( Env.GridI(), CqVMStackEntry( COLOR( SEOs ) * COLOR( SECs ) ) );
-		Env.Oi().SetValue( Env.GridI(), CqVMStackEntry( COLOR( SEOs ) ) );
+		Env.Ci()->SetValue( Env.GridI(), CqVMStackEntry( COLOR( SEOs ) * COLOR( SECs ) ) );
+		Env.Oi()->SetValue( Env.GridI(), CqVMStackEntry( COLOR( SEOs ) ) );
 	}
 	while ( Env.Advance() );
 }

@@ -334,7 +334,6 @@ class CqParameterTypedUniform : public CqParameterTyped<T>
 			// Just promote the uniform value to varying by duplication.
 			assert( pResult->Type() == Type() );
 			assert( pResult->Class() == class_varying );
-			//CqShaderVariableVarying<I, T>* pVR = static_cast<CqShaderVariableVarying<I, T>*>( pResult );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqInt i;
@@ -620,7 +619,6 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T>
 			// Just promote the uniform value to varying by duplication.
 			assert( pResult->Type() == Type() );
 			assert( pResult->Class() == class_varying );
-			//CqShaderVariableVarying<I, T>* pVR = static_cast<CqShaderVariableVarying<I, T>*>( pResult );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqInt i;
@@ -724,7 +722,6 @@ void CqParameterTypedVarying<T, I>::BilinearDice( TqInt u, TqInt v, IqShaderVari
 {
 	assert( pResult->Type() == Type() );
 	assert( pResult->Class() == class_varying );
-//	CqShaderVariableVarying<I, T>* pVR = static_cast<CqShaderVariableVarying<I, T>*>( pResult );
 	// Check if a valid 4 point quad, do nothing if not.
 	CqVMStackEntry SE;
 	if ( m_aValues.size() == 4 )
@@ -780,7 +777,6 @@ void CqParameterTypedVaryingArray<T, I>::BilinearDice( TqInt u, TqInt v, IqShade
 {
 	assert( pResult->Type() == Type() );
 	assert( pResult->Class() == class_varying );
-//	CqShaderVariableVarying<I, T>* pVR = static_cast<CqShaderVariableVarying<I, T>*>( pResult );
 	CqVMStackEntry SE;
 	// Check if a valid 4 point quad, do nothing if not.
 	if ( m_aValues.size() == 4 )

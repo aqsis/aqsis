@@ -86,12 +86,12 @@ CqMicroPolyGridBase* CqQuadric::Dice()
 	TqInt lUses = Uses();
 
 	// Dice the primitive variables.
-	if ( USES( lUses, EnvVars_u ) ) u().BilinearDice( m_uDiceSize, m_vDiceSize, &pGrid->u() );
-	if ( USES( lUses, EnvVars_v ) ) v().BilinearDice( m_uDiceSize, m_vDiceSize, &pGrid->v() );
-	if ( USES( lUses, EnvVars_s ) ) s().BilinearDice( m_uDiceSize, m_vDiceSize, &pGrid->s() );
-	if ( USES( lUses, EnvVars_t ) ) t().BilinearDice( m_uDiceSize, m_vDiceSize, &pGrid->t() );
-	if ( USES( lUses, EnvVars_Cs ) ) Cs().BilinearDice( m_uDiceSize, m_vDiceSize, &pGrid->Cs() );
-	if ( USES( lUses, EnvVars_Os ) ) Os().BilinearDice( m_uDiceSize, m_vDiceSize, &pGrid->Os() );
+	if ( USES( lUses, EnvVars_u ) ) u().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->u() );
+	if ( USES( lUses, EnvVars_v ) ) v().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->v() );
+	if ( USES( lUses, EnvVars_s ) ) s().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->s() );
+	if ( USES( lUses, EnvVars_t ) ) t().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
+	if ( USES( lUses, EnvVars_Cs ) ) Cs().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
+	if ( USES( lUses, EnvVars_Os ) ) Os().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
 
 	pGrid->Reset();
 	CqVector3D	P, N;
@@ -101,13 +101,13 @@ CqMicroPolyGridBase* CqQuadric::Dice()
 		for ( u = 0; u <= m_uDiceSize; u++ )
 		{
 			P = DicePoint( u, v, N );
-			pGrid->P().SetValue( pGrid->GridI(), CqVMStackEntry( m_matTx * P ) );
+			pGrid->P()->SetValue( pGrid->GridI(), CqVMStackEntry( m_matTx * P ) );
 			if(CanGenerateNormals())
 			{
 				EqOrientation CSO = pAttributes() ->eCoordsysOrientation();
 				EqOrientation O = pAttributes() ->eOrientation();
 				N = ( CSO == O ) ? N : -N;
-				pGrid->Ng().SetValue( pGrid->GridI(), CqVMStackEntry( m_matITTx * N ) );
+				pGrid->Ng()->SetValue( pGrid->GridI(), CqVMStackEntry( m_matITTx * N ) );
 			}
 			pGrid->Advance();
 		}

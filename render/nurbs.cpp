@@ -1281,12 +1281,12 @@ CqMicroPolyGridBase* CqSurfaceNURBS::Dice()
 	TqInt lUses = Uses();
 
 	// Dice the primitive variables.
-	if ( USES( lUses, EnvVars_u ) ) u().BilinearDice( m_uDiceSize, m_vDiceSize, &pGrid->u() );
-	if ( USES( lUses, EnvVars_v ) ) v().BilinearDice( m_uDiceSize, m_vDiceSize, &pGrid->v() );
-	if ( USES( lUses, EnvVars_s ) ) s().BilinearDice( m_uDiceSize, m_vDiceSize, &pGrid->s() );
-	if ( USES( lUses, EnvVars_t ) ) t().BilinearDice( m_uDiceSize, m_vDiceSize, &pGrid->t() );
-	if ( USES( lUses, EnvVars_Cs ) ) Cs().BilinearDice( m_uDiceSize, m_vDiceSize, &pGrid->Cs() );
-	if ( USES( lUses, EnvVars_Os ) ) Os().BilinearDice( m_uDiceSize, m_vDiceSize, &pGrid->Os() );
+	if ( USES( lUses, EnvVars_u ) ) u().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->u() );
+	if ( USES( lUses, EnvVars_v ) ) v().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->v() );
+	if ( USES( lUses, EnvVars_s ) ) s().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->s() );
+	if ( USES( lUses, EnvVars_t ) ) t().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
+	if ( USES( lUses, EnvVars_Cs ) ) Cs().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
+	if ( USES( lUses, EnvVars_Os ) ) Os().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
 
 	pGrid->Reset();
 	TqInt iv;
@@ -1302,7 +1302,7 @@ CqMicroPolyGridBase* CqSurfaceNURBS::Dice()
 			             * ( m_auKnots[ m_cuVerts ] - m_auKnots[ m_uOrder - 1 ] )
 			             + m_auKnots[ m_uOrder - 1 ];
 
-			pGrid->P().SetValue( pGrid->GridI(), CqVMStackEntry( Evaluate( su, sv ) ) );
+			pGrid->P()->SetValue( pGrid->GridI(), CqVMStackEntry( Evaluate( su, sv ) ) );
 			pGrid->Advance();
 		}
 	}

@@ -132,10 +132,10 @@ void CqMicroPolyGrid::CalcNormals()
 		TqInt iu;
 		for ( iu = 0; iu < ur; iu++ )
 		{
-			P().GetValue( GridI(), vecMP[ 0 ]);
-			P().GetValue( GridI() + 1, vecMP[ 1 ]);
-			P().GetValue( GridI() + ur + 1, vecMP[ 2 ]);
-			P().GetValue( GridI() + ur, vecMP[ 3 ]);
+			P()->GetValue( GridI(), vecMP[ 0 ]);
+			P()->GetValue( GridI() + 1, vecMP[ 1 ]);
+			P()->GetValue( GridI() + ur + 1, vecMP[ 2 ]);
+			P()->GetValue( GridI() + ur, vecMP[ 3 ]);
 			int a, b, c;
 			a = 0;
 			b = a + 1;
@@ -169,15 +169,15 @@ void CqMicroPolyGrid::CalcNormals()
 				//assert(false);
 				vecN = vecLastN;
 			}
-			Ng().SetValue( GridI(), CqVMStackEntry( vecN ) );
+			Ng()->SetValue( GridI(), CqVMStackEntry( vecN ) );
 			Advance();
-			if ( iv == vr - 1 ) Ng().SetValue( ( iv + 1 ) * ( ur + 1 ) + iu, CqVMStackEntry( vecN ) );
+			if ( iv == vr - 1 ) Ng()->SetValue( ( iv + 1 ) * ( ur + 1 ) + iu, CqVMStackEntry( vecN ) );
 		}
-		Ng().SetValue( GridI(), CqVMStackEntry( vecN ) );
+		Ng()->SetValue( GridI(), CqVMStackEntry( vecN ) );
 		// Additional advance as we are processing MPs not coords and thus must skip the trailing coord.
 		Advance();
 	}
-	Ng().SetValue( ( vr + 1 ) * ( ur + 1 ) - 1, CqVMStackEntry( vecN ) );
+	Ng()->SetValue( ( vr + 1 ) * ( ur + 1 ) - 1, CqVMStackEntry( vecN ) );
 }
 
 
@@ -207,44 +207,44 @@ void CqMicroPolyGrid::Shade()
 		TqInt i;
 		for( i = 0; i < GridSize(); i++ )
 		{
-			Ng().GetValue( i, SE );
-			N().SetValue( i, SE );	
+			Ng()->GetValue( i, SE );
+			N()->SetValue( i, SE );	
 		}
 	}
 
 	// Setup uniform variables.
-	if ( USES( lUses, EnvVars_E ) ) E().SetValue( CqVMStackEntry( vecE ) );
+	if ( USES( lUses, EnvVars_E ) ) E()->SetValue( CqVMStackEntry( vecE ) );
 	if ( USES( lUses, EnvVars_du ) )
 	{
 		CqVMStackEntry SE1, SE2, SE3, SE4;
 		TqFloat u1, u2, u3; 
-		u().GetValue( 0, SE1 );
-		u().GetValue( uGridRes(), SE2 );
-		u().GetValue( vGridRes() * ( uGridRes() + 1 ), SE3 );
+		u()->GetValue( 0, SE1 );
+		u()->GetValue( uGridRes(), SE2 );
+		u()->GetValue( vGridRes() * ( uGridRes() + 1 ), SE3 );
 		SE1.Value( u1 );
 		SE2.Value( u2 );
 		SE3.Value( u3 );
 		TqFloat adu = ( ( u2 - u1 ) / uGridRes() );
 		TqFloat bdu = ( ( u3 - u1 ) / vGridRes() );
-		du().SetValue( CqVMStackEntry( adu + bdu ) );
+		du()->SetValue( CqVMStackEntry( adu + bdu ) );
 	}
 	if ( USES( lUses, EnvVars_dv ) )
 	{
 		CqVMStackEntry SE1, SE2, SE3, SE4;
 		TqFloat v1, v2, v3; 
-		v().GetValue( 0, SE1 );
-		v().GetValue( uGridRes(), SE2 );
-		v().GetValue( vGridRes() * ( uGridRes() + 1 ), SE3 );
+		v()->GetValue( 0, SE1 );
+		v()->GetValue( uGridRes(), SE2 );
+		v()->GetValue( vGridRes() * ( uGridRes() + 1 ), SE3 );
 		SE1.Value( v1 );
 		SE2.Value( v2 );
 		SE3.Value( v3 );
 		TqFloat adv = ( ( v2 - v1 ) / uGridRes() );
 		TqFloat bdv = ( ( v3 - v1 ) / vGridRes() );
-		dv().SetValue( CqVMStackEntry( adv + bdv ) );
+		dv()->SetValue( CqVMStackEntry( adv + bdv ) );
 	}
 
-	if ( USES( lUses, EnvVars_Ci ) ) Ci().SetValue( CqVMStackEntry( gColBlack ) );
-	if ( USES( lUses, EnvVars_Oi ) ) Oi().SetValue( CqVMStackEntry( gColWhite ) );
+	if ( USES( lUses, EnvVars_Ci ) ) Ci()->SetValue( CqVMStackEntry( gColBlack ) );
+	if ( USES( lUses, EnvVars_Oi ) ) Oi()->SetValue( CqVMStackEntry( gColWhite ) );
 
 	// Setup varying variables.
 	Reset();
@@ -253,11 +253,11 @@ void CqMicroPolyGrid::Shade()
 		// Convert to 3D now, as all operations in SL are in 3D not 4D.
 		CqVMStackEntry SE;
 		CqVector3D vecTemp;
-		P().GetValue( GridI(), SE );
+		P()->GetValue( GridI(), SE );
 		SE.Value( vecTemp );
-		I().SetValue( GridI(), CqVMStackEntry( vecTemp ) );
-		if ( USES( lUses, EnvVars_dPdu ) ) dPdu().SetValue( GridI(), CqVMStackEntry( SO_DuType( vecTemp, &P(), GridI(), *this ) ) );
-		if ( USES( lUses, EnvVars_dPdv ) ) dPdv().SetValue( GridI(), CqVMStackEntry( SO_DvType( vecTemp, &P(), GridI(), *this ) ) );
+		I()->SetValue( GridI(), CqVMStackEntry( vecTemp ) );
+		if ( USES( lUses, EnvVars_dPdu ) ) dPdu()->SetValue( GridI(), CqVMStackEntry( SO_DuType( vecTemp, P(), GridI(), *this ) ) );
+		if ( USES( lUses, EnvVars_dPdv ) ) dPdv()->SetValue( GridI(), CqVMStackEntry( SO_DvType( vecTemp, P(), GridI(), *this ) ) );
 	}
 	while ( Advance() );
 
@@ -269,7 +269,7 @@ void CqMicroPolyGrid::Shade()
 		do
 		{
 			CqVMStackEntry SE;
-			Os().GetValue( GridI(), SE );
+			Os()->GetValue( GridI(), SE );
 			CqColor opacity;
 			SE.Value( opacity );
 
@@ -298,7 +298,7 @@ void CqMicroPolyGrid::Shade()
 		do
 		{
 			CqVMStackEntry SE;
-			Os().GetValue( GridI(), SE );
+			Os()->GetValue( GridI(), SE );
 			CqColor opacity;
 			SE.Value( opacity );
 
@@ -336,8 +336,8 @@ void CqMicroPolyGrid::Shade()
 			// Calulate the direction the MPG is facing.
 			CqVMStackEntry SEN, SEP;
 			CqVector3D vecN, vecP;
-			N().GetValue( GridI(), SEN );
-			P().GetValue( GridI(), SEP );
+			N()->GetValue( GridI(), SEN );
+			P()->GetValue( GridI(), SEP );
 			SEN.Value( vecN );
 			SEP.Value( vecP );
 			if ( ( vecN * vecP ) >= 0 )
@@ -373,7 +373,7 @@ void CqMicroPolyGrid::Shade()
 		do
 		{
 			CqVMStackEntry SEOs;
-			Os().GetValue(GridI(), SEOs );
+			Os()->GetValue(GridI(), SEOs );
 			CqColor opacity;
 			SEOs.Value( opacity );
 
@@ -440,13 +440,13 @@ void CqMicroPolyGrid::Project()
 	do
 	{
 		CqVMStackEntry SEP;
-		P().GetValue( GridI(), SEP );
+		P()->GetValue( GridI(), SEP );
 		CqVector3D	vecP;
 		SEP.Value( vecP );
 		TqFloat zdepth = vecP.z();
 		vecP = matCameraToRaster * vecP;
 		vecP.z( zdepth );
-		P().SetValue( GridI(), CqVMStackEntry( vecP ) );
+		P()->SetValue( GridI(), CqVMStackEntry( vecP ) );
 	}
 	while ( Advance() );
 }
@@ -465,7 +465,7 @@ CqBound CqMicroPolyGrid::Bound()
 	{
 		CqVector3D vecTemp;
 		CqVMStackEntry SEP;
-		P().GetValue( GridI(), SEP );
+		P()->GetValue( GridI(), SEP );
 		SEP.Value( vecTemp );
 		B.Encapsulate( vecTemp );
 	}
@@ -520,16 +520,20 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 			{
 				CqVMStackEntry SEu, SEv;
 				TqFloat fu, fv;
-				u().GetValue( iIndex, SEu ); v().GetValue( iIndex, SEv );
+				u()->GetValue( iIndex, SEu ); 
+				v()->GetValue( iIndex, SEv );
 				SEu.Value( fu );	SEv.Value( fv );
 				TqBool fTrimA = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-				u().GetValue( iIndex + 1, SEu ); v().GetValue( iIndex + 1, SEv );
+				u()->GetValue( iIndex + 1, SEu ); 
+				v()->GetValue( iIndex + 1, SEv );
 				SEu.Value( fu );	SEv.Value( fv );
 				TqBool fTrimB = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-				u().GetValue( iIndex + cu + 2, SEu ); v().GetValue( iIndex +cu + 2, SEv );
+				u()->GetValue( iIndex + cu + 2, SEu ); 
+				v()->GetValue( iIndex +cu + 2, SEv );
 				SEu.Value( fu );	SEv.Value( fv );
 				TqBool fTrimC = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-				u().GetValue( iIndex + cu + 1, SEu ); v().GetValue( iIndex +cu + 1, SEv );
+				u()->GetValue( iIndex + cu + 1, SEu ); 
+				v()->GetValue( iIndex +cu + 1, SEv );
 				SEu.Value( fu );	SEv.Value( fv );
 				TqBool fTrimD = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
 
@@ -559,10 +563,10 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 			pNew->SetIndex( iIndex );
 			if ( fTrimmed ) pNew->MarkTrimmed();
 			CqVMStackEntry SEP1, SEP2, SEP3, SEP4;
-			P().GetValue( iIndex, SEP1 );
-			P().GetValue( iIndex + 1, SEP2 );
-			P().GetValue( iIndex + cu + 2, SEP3 );
-			P().GetValue( iIndex + cu + 1, SEP4 );
+			P()->GetValue( iIndex, SEP1 );
+			P()->GetValue( iIndex + 1, SEP2 );
+			P()->GetValue( iIndex + cu + 2, SEP3 );
+			P()->GetValue( iIndex + cu + 1, SEP4 );
 			CqVector3D vec1, vec2, vec3, vec4;
 			SEP1.Value( vec1 );
 			SEP2.Value( vec2 );
@@ -670,10 +674,10 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 			{
 				CqMicroPolyGrid* pGridT = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
 				CqVMStackEntry SEP1, SEP2, SEP3, SEP4;
-				pGridA->P().GetValue( iIndex, SEP1 );
-				pGridA->P().GetValue( iIndex + 1, SEP2 );
-				pGridA->P().GetValue( iIndex + cu + 2, SEP3 );
-				pGridA->P().GetValue( iIndex + cu + 1, SEP4 );
+				pGridA->P()->GetValue( iIndex, SEP1 );
+				pGridA->P()->GetValue( iIndex + 1, SEP2 );
+				pGridA->P()->GetValue( iIndex + cu + 2, SEP3 );
+				pGridA->P()->GetValue( iIndex + cu + 1, SEP4 );
 				CqVector3D vec1, vec2, vec3, vec4;
 				SEP1.Value( vec1 );
 				SEP2.Value( vec2 );
@@ -919,10 +923,14 @@ TqBool CqMicroPolygonStatic::Sample( CqVector2D& vecSample, TqFloat time, TqFloa
 			CqVector2D vecUV = ReverseBilinear( vecSample );
 
 			CqVMStackEntry SEu1, SEv1, SEu2, SEv2, SEu3, SEv3, SEu4, SEv4;
-			pGrid() ->u().GetValue( m_Index, SEu1 ); pGrid() ->v().GetValue( m_Index, SEv1 );
-			pGrid() ->u().GetValue( m_Index + 1, SEu2 ); pGrid() ->v().GetValue( m_Index + 1, SEv2 );
-			pGrid() ->u().GetValue( m_Index + pGrid() ->uGridRes() + 1, SEu3 ); pGrid() ->v().GetValue( m_Index + pGrid() ->uGridRes() + 1, SEv3 );
-			pGrid() ->u().GetValue( m_Index + pGrid() ->uGridRes() + 2, SEu4 ); pGrid() ->v().GetValue( m_Index + pGrid() ->uGridRes() + 2, SEv4 );
+			pGrid() ->u()->GetValue( m_Index, SEu1 );
+			pGrid() ->v()->GetValue( m_Index, SEv1 );
+			pGrid() ->u()->GetValue( m_Index + 1, SEu2 ); 
+			pGrid() ->v()->GetValue( m_Index + 1, SEv2 );
+			pGrid() ->u()->GetValue( m_Index + pGrid() ->uGridRes() + 1, SEu3 );	
+			pGrid() ->v()->GetValue( m_Index + pGrid() ->uGridRes() + 1, SEv3 );
+			pGrid() ->u()->GetValue( m_Index + pGrid() ->uGridRes() + 2, SEu4 );	
+			pGrid() ->v()->GetValue( m_Index + pGrid() ->uGridRes() + 2, SEv4 );
 			TqFloat u, v;
 			SEu1.Value( u );	SEv1.Value( v );
 			CqVector2D uvA( u, v );

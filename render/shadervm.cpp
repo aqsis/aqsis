@@ -431,61 +431,184 @@ CqVMStackEntry	gVaryingResult( 2 );
 static	TqFloat	temp_float;
 static	TqBool	temp_bool;
 
-CqShaderVariableArray* CreateNewArray( EqVariableType VarType, EqVariableClass VarClass, char* name, TqInt Count )
+
+IqShaderVariable* CqShaderVM::CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name)
+{
+	// Create a VM specific shader variable, which implements the IqShaderVariable interface,
+	// based on the type and class specified.
+	switch(Type)
+	{
+		case type_float:
+		{
+			switch(Class)
+			{
+				case class_varying:
+					return(new CqShaderVariableVarying<type_float, TqFloat>( name.c_str() ) );
+				case class_uniform:
+					return(new CqShaderVariableUniform<type_float, TqFloat>( name.c_str() ) );
+			}
+			assert(TqFalse);	// If we get here, something is wrong with the request.
+			return(NULL);
+		}
+
+		case type_integer:
+		{
+			switch(Class)
+			{
+				case class_varying:
+					return(new CqShaderVariableVarying<type_integer, TqInt>( name.c_str() ) );
+				case class_uniform:
+					return(new CqShaderVariableUniform<type_integer, TqInt>( name.c_str() ) );
+			}
+			assert(TqFalse);	// If we get here, something is wrong with the request.
+			return(NULL);
+		}
+
+		case type_point:
+		{
+			switch(Class)
+			{
+				case class_varying:
+					return(new CqShaderVariableVarying<type_point, CqVector3D>( name.c_str() ) );
+				case class_uniform:
+					return(new CqShaderVariableUniform<type_point, CqVector3D>( name.c_str() ) );
+			}
+			assert(TqFalse);	// If we get here, something is wrong with the request.
+			return(NULL);
+		}
+
+		case type_normal:
+		{
+			switch(Class)
+			{
+				case class_varying:
+					return(new CqShaderVariableVarying<type_normal, CqVector3D>( name.c_str() ) );
+				case class_uniform:
+					return(new CqShaderVariableUniform<type_normal, CqVector3D>( name.c_str() ) );
+			}
+			assert(TqFalse);	// If we get here, something is wrong with the request.
+			return(NULL);
+		}
+
+		case type_vector:
+		{
+			switch(Class)
+			{
+				case class_varying:
+					return(new CqShaderVariableVarying<type_vector, CqVector3D>( name.c_str() ) );
+				case class_uniform:
+					return(new CqShaderVariableUniform<type_vector, CqVector3D>( name.c_str() ) );
+			}
+			assert(TqFalse);	// If we get here, something is wrong with the request.
+			return(NULL);
+		}
+		
+		case type_string:
+		{
+			switch(Class)
+			{
+				case class_varying:
+					return(new CqShaderVariableVarying<type_string, CqString>( name.c_str() ) );
+				case class_uniform:
+					return(new CqShaderVariableUniform<type_string, CqString>( name.c_str() ) );
+			}
+			assert(TqFalse);	// If we get here, something is wrong with the request.
+			return(NULL);
+		}
+
+		case type_color:
+		{
+			switch(Class)
+			{
+				case class_varying:
+					return(new CqShaderVariableVarying<type_color, CqColor>( name.c_str() ) );
+				case class_uniform:
+					return(new CqShaderVariableUniform<type_color, CqColor>( name.c_str() ) );
+			}
+			assert(TqFalse);	// If we get here, something is wrong with the request.
+			return(NULL);
+		}
+
+		case type_triple:
+		case type_hpoint:
+		case type_void:
+			assert(TqFalse);	// We don't support triples in the engine as variables.
+			return(NULL);
+
+		case type_matrix:
+		{
+			switch(Class)
+			{
+				case class_varying:
+					return(new CqShaderVariableVarying<type_matrix, CqMatrix>( name.c_str() ) );
+				case class_uniform:
+					return(new CqShaderVariableUniform<type_matrix, CqMatrix>( name.c_str() ) );
+			}
+			assert(TqFalse);	// If we get here, something is wrong with the request.
+			return(NULL);
+		}
+	}
+	assert(TqFalse);	// If we get here, something is wrong with the request.
+	return(NULL);
+}
+
+
+
+IqShaderVariable* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariableClass VarClass, const CqString& name, TqInt Count )
 {
 	IqShaderVariable * pVar = 0;
 	switch ( VarType )
 	{
 			case type_float:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVarying<type_float, TqFloat>( name );
+				pVar = new CqShaderVariableVarying<type_float, TqFloat>( name.c_str() );
 			else
-				pVar = new CqShaderVariableUniform<type_float, TqFloat>( name );
+				pVar = new CqShaderVariableUniform<type_float, TqFloat>( name.c_str() );
 			break;
 
 			case type_point:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVarying<type_point, CqVector3D>( name );
+				pVar = new CqShaderVariableVarying<type_point, CqVector3D>( name.c_str() );
 			else
-				pVar = new CqShaderVariableUniform<type_point, CqVector3D>( name );
+				pVar = new CqShaderVariableUniform<type_point, CqVector3D>( name.c_str() );
 			break;
 
 			case type_normal:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVarying<type_normal, CqVector3D>( name );
+				pVar = new CqShaderVariableVarying<type_normal, CqVector3D>( name.c_str() );
 			else
-				pVar = new CqShaderVariableUniform<type_normal, CqVector3D>( name );
+				pVar = new CqShaderVariableUniform<type_normal, CqVector3D>( name.c_str() );
 			break;
 
 			case type_vector:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVarying<type_vector, CqVector3D>( name );
+				pVar = new CqShaderVariableVarying<type_vector, CqVector3D>( name.c_str() );
 			else
-				pVar = new CqShaderVariableUniform<type_vector, CqVector3D>( name );
+				pVar = new CqShaderVariableUniform<type_vector, CqVector3D>( name.c_str() );
 			break;
 
 			case type_color:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVarying<type_color, CqColor>( name );
+				pVar = new CqShaderVariableVarying<type_color, CqColor>( name.c_str() );
 			else
-				pVar = new CqShaderVariableUniform<type_color, CqColor>( name );
+				pVar = new CqShaderVariableUniform<type_color, CqColor>( name.c_str() );
 			break;
 
 			case type_string:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVarying<type_string, CqString>( name );
+				pVar = new CqShaderVariableVarying<type_string, CqString>( name.c_str() );
 			else
-				pVar = new CqShaderVariableUniform<type_string, CqString>( name );
+				pVar = new CqShaderVariableUniform<type_string, CqString>( name.c_str() );
 			break;
 
 			case type_matrix:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVarying<type_matrix, CqMatrix>( name );
+				pVar = new CqShaderVariableVarying<type_matrix, CqMatrix>( name.c_str() );
 			else
-				pVar = new CqShaderVariableUniform<type_matrix, CqMatrix>( name );
+				pVar = new CqShaderVariableUniform<type_matrix, CqMatrix>( name.c_str() );
 			break;
 	}
-	CqShaderVariableArray* pArray = new CqShaderVariableArray( name, Count );
+	CqShaderVariableArray* pArray = new CqShaderVariableArray( name.c_str(), Count );
 	pArray->aVariables() [ 0 ] = pVar;
 	TqInt i;
 	for ( i = 1; i < Count; i++ )
@@ -674,7 +797,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 					{
 							case type_float:
 							if ( bVarArray )
-								AddLocalVariable( CreateNewArray( VarType, VarClass, token, array_count ) );
+								AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count ) );
 							else if ( VarClass == class_varying )
 								AddLocalVariable( new CqShaderVariableVarying<type_float, TqFloat>( token ) );
 							else
@@ -683,7 +806,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 
 							case type_point:
 							if ( bVarArray )
-								AddLocalVariable( CreateNewArray( VarType, VarClass, token, array_count ) );
+								AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count ) );
 							else if ( VarClass == class_varying )
 								AddLocalVariable( new CqShaderVariableVarying<type_point, CqVector3D>( token ) );
 							else
@@ -692,7 +815,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 
 							case type_normal:
 							if ( bVarArray )
-								AddLocalVariable( CreateNewArray( VarType, VarClass, token, array_count ) );
+								AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count ) );
 							else if ( VarClass == class_varying )
 								AddLocalVariable( new CqShaderVariableVarying<type_normal, CqVector3D>( token ) );
 							else
@@ -701,7 +824,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 
 							case type_vector:
 							if ( bVarArray )
-								AddLocalVariable( CreateNewArray( VarType, VarClass, token, array_count ) );
+								AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count ) );
 							else if ( VarClass == class_varying )
 								AddLocalVariable( new CqShaderVariableVarying<type_vector, CqVector3D>( token ) );
 							else
@@ -710,7 +833,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 
 							case type_color:
 							if ( bVarArray )
-								AddLocalVariable( CreateNewArray( VarType, VarClass, token, array_count ) );
+								AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count ) );
 							else if ( VarClass == class_varying )
 								AddLocalVariable( new CqShaderVariableVarying<type_color, CqColor>( token ) );
 							else
@@ -719,7 +842,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 
 							case type_string:
 							if ( bVarArray )
-								AddLocalVariable( CreateNewArray( VarType, VarClass, token, array_count ) );
+								AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count ) );
 							else if ( VarClass == class_varying )
 								AddLocalVariable( new CqShaderVariableVarying<type_string, CqString>( token ) );
 							else
@@ -728,7 +851,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 
 							case type_matrix:
 							if ( bVarArray )
-								AddLocalVariable( CreateNewArray( VarType, VarClass, token, array_count ) );
+								AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count ) );
 							else if ( VarClass == class_varying )
 								AddLocalVariable( new CqShaderVariableVarying<type_matrix, CqMatrix>( token ) );
 							else

@@ -545,6 +545,14 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 		 */
 		CqShaderVM&	operator=( const CqShaderVM& From );
 
+
+		/** Static variable creation function.
+		 */
+		static IqShaderVariable* CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name);
+		/** Static variable array creation function.
+		 */
+		static IqShaderVariable* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count);
+
 	private:
         EqShaderType 		m_Type;							///< Shader type for libslxargs
 		TqUint m_LocalIndex;                   ///<  Local Index to speed up

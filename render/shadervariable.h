@@ -74,12 +74,13 @@ class CqShaderVariable : public IqShaderVariable
 			return ( m_strName );
 		}
 
-		/** Get the length of the variable array.
-		 * \return Integer array length.
-		 */
-		TqInt	ArrayLength() const
+		virtual TqInt	ArrayLength() const
 		{
 			return ( 0 );
+		}
+		virtual IqShaderVariable*	ArrayEntry(TqInt i) const
+		{
+			return(NULL);
 		}
 
 	protected:
@@ -114,7 +115,7 @@ class CqShaderVariableArray: public CqShaderVariable
 				m_aVariables[ i ] = From.m_aVariables[ i ] ->Clone();
 		}
 		virtual	~CqShaderVariableArray()
-	{}
+		{}
 
 		// Overridded from CqShaderVariable.
 
@@ -153,6 +154,14 @@ class CqShaderVariableArray: public CqShaderVariable
 		{
 			return ( m_aVariables[ 0 ] ->Size() );
 		}
+		virtual	TqInt	ArrayLength() const
+		{
+			return ( m_aVariables.size() );
+		}
+		virtual IqShaderVariable*	ArrayEntry(TqInt i) const
+		{
+			return((*this)[i]);
+		}
 
 		/** Get a reference to the variable array.
 		 */
@@ -160,19 +169,18 @@ class CqShaderVariableArray: public CqShaderVariable
 		{
 			return ( m_aVariables );
 		}
+		/** Get a const reference to the variable array.
+		 */
+		const std::vector<IqShaderVariable*>& aVariables() const
+		{
+			return ( m_aVariables );
+		}
 		/** Array index access to the values in the array.
 		 * \param index Integer index intot he array.
 		 */
-		IqShaderVariable* operator[] ( TqUint index )
+		IqShaderVariable* operator[] ( TqUint index ) const
 		{
 			return( m_aVariables[ index ] );
-		}
-		/** Get the length of the variable array.
-		 * \return Integer array length.
-		 */
-		TqInt	ArrayLength() const
-		{
-			return ( m_aVariables.size() );
 		}
 
 	private:

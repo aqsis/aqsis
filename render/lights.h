@@ -77,7 +77,7 @@ class CqLightsource : public CqListEntry<CqLightsource>, public CqShaderExecEnv
 		void	Evaluate( CqVMStackEntry& Ps )
 		{
 			Reset();
-			CqShaderExecEnv::Ps().SetValue( Ps );
+			CqShaderExecEnv::Ps()->SetValue( Ps );
 			m_pShader->Evaluate( *this );
 		}
 		/** Get a pointer to the attributes associated with this lightsource.
@@ -111,12 +111,8 @@ extern CqList<CqLightsource>	Lightsource_stack;
 class CqShaderLightsourceAmbient : public CqShader
 {
 	public:
-		CqShaderLightsourceAmbient() :
-				intensity( "intensity", 1.0 ),
-				lightcolor( "lightcolor", CqColor( 1, 1, 1 ) )
-		{}
-		virtual	~CqShaderLightsourceAmbient()
-		{}
+		CqShaderLightsourceAmbient();
+		virtual	~CqShaderLightsourceAmbient();
 
 		virtual	void	Evaluate( CqShaderExecEnv& Env );
 		virtual	void	SetValue( const char* name, TqPchar val );
@@ -131,8 +127,8 @@ class CqShaderLightsourceAmbient : public CqShader
 		}
 
 	private:
-		CqShaderVariableUniform<type_float, TqFloat>	intensity;
-		CqShaderVariableUniform<type_color, CqColor>	lightcolor;
+		IqShaderVariable*	m_intensity;
+		IqShaderVariable*	m_lightcolor;
 };
 
 
