@@ -970,6 +970,20 @@ statement
 								pNew->AddLastChild($3);
 								$$=pNew;
 							}
+	|	IF expression statement			{
+								CqParseNode* relation=new CqParseNodeRelOp(Op_NE);
+								relation->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								relation->AddFirstChild($2);
+								CqParseNode* pcomp=new CqParseNodeFloatConst(0);
+								relation->AddLastChild(pcomp);
+
+								CqParseNode* pNew=new CqParseNodeConditional();
+								pNew->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								pNew->AddLastChild(relation);
+								pNew->AddLastChild($3);
+								$$=pNew;
+
+							}
 	|	IF relation statement ELSE statement
 							{
 								CqParseNode* pNew=new CqParseNodeConditional();
@@ -979,16 +993,42 @@ statement
 								pNew->AddLastChild($5);
 								$$=pNew;
 							}
+	|	IF expression statement ELSE statement	{
+								CqParseNode* relation=new CqParseNodeRelOp(Op_NE);
+								relation->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								relation->AddFirstChild($2);
+								CqParseNode* pcomp=new CqParseNodeFloatConst(0);
+								relation->AddLastChild(pcomp);
+								CqParseNode* pNew=new CqParseNodeConditional();
+								
+								pNew->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								pNew->AddLastChild(relation);
+								pNew->AddLastChild($3);
+								pNew->AddLastChild($5);
+								$$=pNew;
+							}
 	;
 
 
 
 loop_control
-	:	WHILE relation statement
-							{
+	:	WHILE relation statement		 {
 								$$=new CqParseNodeWhileConstruct();
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								$$->AddLastChild($2);
+								$$->AddLastChild($3);
+							}
+	|	WHILE expression statement		 {
+								CqParseNode* relation=new CqParseNodeRelOp(Op_NE);
+								relation->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								relation->AddFirstChild($2);
+								CqParseNode* pcomp=new CqParseNodeFloatConst(0);
+								relation->AddLastChild(pcomp);
+								CqParseNode* pNew=new CqParseNodeConditional();
+
+								$$=new CqParseNodeWhileConstruct();
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								$$->AddLastChild(relation);
 								$$->AddLastChild($3);
 							}
 	|	FOR '(' expression ';' relation ';' expression ')' statement
@@ -1000,6 +1040,28 @@ loop_control
 								pW->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								$$->AddLastChild(pW);
 								pW->AddLastChild($5);
+								pW->AddLastChild($9);
+								pW->AddLastChild($7);
+								// Make sure that any assigns in the two expressions don't dup
+								$3->NoDup();
+								$7->NoDup();
+							}
+	|	FOR '(' expression ';' expression ';' expression ')' statement
+							{
+								CqParseNode* relation=new CqParseNodeRelOp(Op_NE);
+								relation->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								relation->AddFirstChild($5);
+								CqParseNode* pcomp=new CqParseNodeFloatConst(0);
+								relation->AddLastChild(pcomp);
+
+								CqParseNode* pNew=new CqParseNodeConditional();
+								$$=new CqParseNode();
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								$$->AddLastChild($3);
+								CqParseNode* pW=new CqParseNodeWhileConstruct();
+								pW->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								$$->AddLastChild(pW);
+								pW->AddLastChild(relation);
 								pW->AddLastChild($9);
 								pW->AddLastChild($7);
 								// Make sure that any assigns in the two expressions don't dup
@@ -1213,20 +1275,12 @@ expression
 	|	cast_expr
 	|	relation '?' expression ':' expression
 							{
-//								if($3->ResType() == $5->ResType())
-//								{
-									CqParseNode* pNew=new CqParseNodeQCond();
-									pNew->SetPos(ParseLineNumber,ParseStreamName.c_str());
-									pNew->AddLastChild($1);
-									pNew->AddLastChild($3);
-									pNew->AddLastChild($5);
-									$$=pNew;
-//								}
-//								else
-//								{
-//									yyerror("expressions don't match");
-//									$$=new CqParseNode();
-//								}
+								CqParseNode* pNew=new CqParseNodeQCond();
+								pNew->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								pNew->AddLastChild($1);
+								pNew->AddLastChild($3);
+								pNew->AddLastChild($5);
+								$$=pNew;
 							}
 	;
 
@@ -1372,13 +1426,6 @@ relation
 								$$=new CqParseNodeUnaryOp(Op_LogicalNot);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								$$->AddLastChild($2);
-							}
-	|	expression				{
-								$$=new CqParseNodeRelOp(Op_NE);
-								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
-								$$->AddFirstChild($1);
-								CqParseNode* pcomp=new CqParseNodeFloatConst(0);
-								$$->AddLastChild(pcomp);
 							}
 	;
 
