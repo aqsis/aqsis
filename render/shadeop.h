@@ -67,7 +67,7 @@ typedef struct _STRING_DESC {
 // Utility macro for declaring a shadeop shutdown function
 #define SHADEOP_SHUTDOWN(shutdownfunc) EXTERN_C void EXPORT shutdownfunc (void *initdata)
 // alternative name for the above seen in bbox.c in the RMR
-#define SHADEOP_CLEANUP SHADOP_SHUTDOWN
+#define SHADEOP_CLEANUP(shutdownfunc) EXTERN_C void EXPORT shutdownfunc (void *initdata)
 
 // We declare these here for access from shaderexecenv
 typedef void (*DSOMethod)(void*,int,void**);
