@@ -73,17 +73,18 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsg );
  */
 TqInt Abandon( SOCKET s, SqDDMessageBase* pMsg );
 
-TqInt	XRes, YRes;
-TqInt	SamplesPerElement, BitsPerSample;
-TIFF*	pOut;
-TqInt	g_CWXmin, g_CWYmin;
-TqInt	g_CWXmax, g_CWYmax;
-uint16	compression = COMPRESSION_NONE, quality = 0;
-TqFloat	quantize_zeroval = 0.0f;
-TqFloat	quantize_oneval  = 0.0f;
-TqFloat	quantize_minval  = 0.0f;
-TqFloat	quantize_maxval  = 0.0f;
-TqFloat dither_val       = 0.0f;
+static	TqInt	XRes, YRes;
+static	TqInt	g_Channels;
+static	TqInt	g_Format;
+static	TIFF*	pOut;
+static	TqInt	g_CWXmin, g_CWYmin;
+static	TqInt	g_CWXmax, g_CWYmax;
+static	uint16	compression = COMPRESSION_NONE, quality = 0;
+static	TqFloat	quantize_zeroval = 0.0f;
+static	TqFloat	quantize_oneval  = 0.0f;
+static	TqFloat	quantize_minval  = 0.0f;
+static	TqFloat	quantize_maxval  = 0.0f;
+static	TqFloat dither_val       = 0.0f;
 
 CqString g_strOpenMethod("DspyImageOpen");
 CqString g_strQueryMethod("DspyImageQuery");
@@ -138,6 +139,9 @@ TqInt Query( SOCKET s, SqDDMessageBase* pMsgB )
 	{
 		case MessageID_FormatQuery:
 		{
+			SqDDMessageFormatQuery* pMsg = static_cast<SqDDMessageFormatQuery*>(pMsgB);
+			g_Format = pMsg->m_Formats[0];
+			frmt.m_DataFormat = g_Format;
 			if ( DDSendMsg( s, &frmt ) <= 0 )
 				return ( -1 );
 		}
@@ -152,8 +156,7 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 
 	XRes = ( pMsg->m_CropWindowXMax - pMsg->m_CropWindowXMin );
 	YRes = ( pMsg->m_CropWindowYMax - pMsg->m_CropWindowYMin );
-	SamplesPerElement = pMsg->m_SamplesPerElement;
-	BitsPerSample = pMsg->m_BitsPerSample;
+	g_Channels = pMsg->m_Channels;
 
 	g_CWXmin = pMsg->m_CropWindowXMin;
 	g_CWYmin = pMsg->m_CropWindowYMin;
@@ -174,7 +177,7 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 	{
 		// \todo: need to pass the proper mode string.
 		TqInt formatindex = 0;
-		if( SamplesPerElement >=4 )
+		if( g_Channels >=4 )
 		{
 			g_Formats[formatindex  ].name = "a";
 			g_Formats[formatindex++].type = PkDspyUnsigned8;
@@ -209,7 +212,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 	TqInt xsize = xmaxp1 - xmin;
 	TqInt ysize = ymaxp1 - ymin;
 
-	TqInt	linelen = xsize * SamplesPerElement;
+	TqInt	linelen = xsize * g_Channels;
 	char* pBucket = reinterpret_cast<char*>( &pMsg->m_Data );
 
 
@@ -222,9 +225,9 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 	float*	pFloatData = NULL;
 
 	if ( g_Formats[0].type == PkDspyUnsigned8 )
-		pByteData = new unsigned char[ xsize * ysize * SamplesPerElement ];
+		pByteData = new unsigned char[ xsize * ysize * g_Channels ];
 	else if( g_Formats[0].type == PkDspyFloat32 )
-		pFloatData = new float[ xsize * ysize * SamplesPerElement ];
+		pFloatData = new float[ xsize * ysize * g_Channels ];
 	else
 		return(-1);
 	
@@ -234,14 +237,14 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 		TqInt x;
 		for ( x = xmin; x < xmaxp1; x++ )
 		{
-			TqInt so = ( ( y - ymin ) * linelen ) + ( ( x - xmin ) * SamplesPerElement );
+			TqInt so = ( ( y - ymin ) * linelen ) + ( ( x - xmin ) * g_Channels );
 
 			TqFloat rvalue = reinterpret_cast<TqFloat*>( pBucket ) [ 0 ];
 			TqFloat gvalue = reinterpret_cast<TqFloat*>( pBucket ) [ 1 ];
 			TqFloat bvalue = reinterpret_cast<TqFloat*>( pBucket ) [ 2 ];
 
 			TqFloat avalue = 0.0f;
-			if( SamplesPerElement >= 4 )
+			if( g_Channels >= 4 )
 				avalue = reinterpret_cast<TqFloat*>( pBucket ) [ 3 ];
 
 			if( !( quantize_zeroval == 0.0f &&
@@ -255,7 +258,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 				gvalue = CLAMP(gvalue, quantize_minval, quantize_maxval) ;
 				bvalue = ROUND(quantize_zeroval + bvalue * (quantize_oneval - quantize_zeroval) + dither_val );
 				bvalue = CLAMP(bvalue, quantize_minval, quantize_maxval) ;
-				if( SamplesPerElement >= 4 )
+				if( g_Channels >= 4 )
 				{
 					avalue = ROUND(quantize_zeroval + avalue * (quantize_oneval - quantize_zeroval) + dither_val );
 					avalue = CLAMP(avalue, quantize_minval, quantize_maxval) ;
@@ -264,12 +267,12 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 
 			if ( g_Formats[0].type == PkDspyUnsigned8  )
 			{
-				if( BitsPerSample == 8 )
+				if( g_Format == DataFormat_Unsigned8 )
 				{
 					pByteData[ so + 1 ] = static_cast<char>( rvalue );
 					pByteData[ so + 2 ] = static_cast<char>( gvalue );
 					pByteData[ so + 3 ] = static_cast<char>( bvalue );
-					if( SamplesPerElement >= 4 )
+					if( g_Channels >= 4 )
 						pByteData[ so + 0 ] = static_cast<char>( avalue );
 				}
 				else
@@ -277,7 +280,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 					pByteData[ so + 1 ] = static_cast<char>( rvalue * 255.0f );
 					pByteData[ so + 2 ] = static_cast<char>( gvalue * 255.0f );
 					pByteData[ so + 3 ] = static_cast<char>( bvalue * 255.0f );
-					if( SamplesPerElement >= 4 )
+					if( g_Channels >= 4 )
 						pByteData[ so + 0 ] = static_cast<char>( avalue * 255.0f );
 				}
 			}
@@ -286,7 +289,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 				pFloatData[ so + 1 ] = rvalue;
 				pFloatData[ so + 2 ] = gvalue;
 				pFloatData[ so + 3 ] = bvalue;
-				if( SamplesPerElement >= 4 )
+				if( g_Channels >= 4 )
 					pFloatData[ so + 0 ] = avalue;
 			}
 			pBucket += pMsg->m_ElementSize;
@@ -299,9 +302,9 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 	{
 		PtDspyError err;
 		if( g_Formats[0].type == PkDspyUnsigned8 )
-			err = (*g_DataMethod)(g_ImageHandle, xmin, xmaxp1, ymin, ymaxp1, sizeof(char) * SamplesPerElement, (unsigned char*)pByteData);
+			err = (*g_DataMethod)(g_ImageHandle, xmin, xmaxp1, ymin, ymaxp1, sizeof(char) * g_Channels, (unsigned char*)pByteData);
 		else
-			err = (*g_DataMethod)(g_ImageHandle, xmin, xmaxp1, ymin, ymaxp1, sizeof(float) * SamplesPerElement, (unsigned char*)pFloatData);
+			err = (*g_DataMethod)(g_ImageHandle, xmin, xmaxp1, ymin, ymaxp1, sizeof(float) * g_Channels, (unsigned char*)pFloatData);
 	}
 
 	delete[] ( pByteData );

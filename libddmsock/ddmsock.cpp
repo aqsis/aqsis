@@ -380,9 +380,19 @@ TqInt CqDDManager::Shutdown()
 TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments )
 {
 	CqDDClient New( name, type, mode, modeID, dataOffset, dataSize );
+	TqInt error = 0;
 	m_aDisplayRequests.push_back( New );
-	LoadDisplayLibrary( m_aDisplayRequests.back(), mapOfArguments );
-	return ( 0 );
+	try
+	{
+		LoadDisplayLibrary( m_aDisplayRequests.back(), mapOfArguments );
+	}
+	catch( CqString str )
+	{
+		CqBasicError( ErrorID_DisplayDriver, Severity_Normal, str.c_str() );
+		error = 1;
+		m_aDisplayRequests.erase( &m_aDisplayRequests.back() );
+	}
+	return ( error );
 }
 
 TqInt CqDDManager::ClearDisplays()
@@ -424,11 +434,11 @@ TqInt CqDDManager::OpenDisplays()
 		TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
 		TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
 		TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
-		TqInt BitsPerSample = ( one == 0 && min == 0 && max == 0 ) ? 32 : 8;
+		TqBool FloatOutput = ( one == 0 && min == 0 && max == 0 );
 		SqDDMessageOpen msgopen( QGetRenderContext() ->pImage() ->iXRes(),
 		                         QGetRenderContext() ->pImage() ->iYRes(),
 		                         SamplesPerElement,
-		                         BitsPerSample,  	// Bits per sample.
+		                         //BitsPerSample,  	// Bits per sample.
 		                         QGetRenderContext() ->pImage() ->CropWindowXMin(),
 		                         QGetRenderContext() ->pImage() ->CropWindowXMax(),
 		                         QGetRenderContext() ->pImage() ->CropWindowYMin(),
@@ -436,13 +446,23 @@ TqInt CqDDManager::OpenDisplays()
 		dd.SendMsg( &msgopen );
 
 		// Issue a format request so that we know what data to send to the client.
-		SqDDMessageBase msg;
+		TqInt formats[2];
+		if( FloatOutput )
+		{
+			formats[0] = DataFormat_Float32;
+			formats[1] = DataFormat_Unsigned8;
+		}
+		else
+		{
+			formats[0] = DataFormat_Unsigned8;
+			formats[1] = DataFormat_Float32;
+		}
+		SqDDMessageFormatQuery* msg = SqDDMessageFormatQuery::Construct( 2, formats );
 		SqDDMessageFormatResponse frmt;
 
-		msg.m_MessageID = MessageID_FormatQuery;
-		msg.m_MessageLength = sizeof( SqDDMessageBase );
-		dd.SendMsg( &msg );
+		dd.SendMsg( msg );
 		dd.Receive( &frmt, sizeof( frmt ) );
+		msg->Destroy();
 
 		// Confirm the message returned is as expected.
 		if ( frmt.m_MessageID != MessageID_FormatResponse ||
@@ -628,8 +648,8 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd, std::map<std::string, void
 
 	if ( !fileDriver.IsValid() )
 	{
-		CqBasicError( 0, 0, ( "Error loading display driver [ " + strDriverFile + " ]" ).c_str() );
-		return ;  /* and how is the error reported to the caller? */
+		//CqBasicError( 0, 0, ( "Error loading display driver [ " + strDriverFile + " ]" ).c_str() );
+		throw( CqString( "Error loading display driver [ " ) + strDriverFile + CqString( " ]" ) );
 	}
 
 	CqString strDriverPathAndFile = fileDriver.strRealName();
@@ -677,8 +697,8 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd, std::map<std::string, void
 	}
 	if ( ProcHandle < 0 )
 	{
-		CqBasicError( 0, 0, "Error spawning display driver process" );
-		return ; /* should that be a throw? */
+		//CqBasicError( 0, 0, "Error spawning display driver process" );
+		throw( CqString( "Error spawning display driver process" ) );
 	}
 
 #else // AQSIS_SYSTEM_WIN32
@@ -698,8 +718,8 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd, std::map<std::string, void
 	}
 	else if ( -1 == forkresult )
 	{
-		CqBasicError( 0, 0, "Error forking display driver process" );
-		return ; /* should that be a throw? */
+		//CqBasicError( 0, 0, "Error forking display driver process" );
+		throw( CqString( "Error forking display driver process" ) );
 	}
 #endif // !AQSIS_SYSTEM_WIN32
 

@@ -91,7 +91,9 @@ int main( int argc, char* argv[] )
 
 
 TqInt	XRes, YRes;
-TqInt	SamplesPerElement, BitsPerSample;
+TqInt	g_Channels;
+TqInt	g_Format;
+// BitsPerSample;
 unsigned char* pByteData;
 float*	pFloatData;
 TIFF*	pOut;
@@ -113,8 +115,18 @@ TqInt Query( SOCKET s, SqDDMessageBase* pMsgB )
 	{
 			case MessageID_FormatQuery:
 			{
+				SqDDMessageFormatQuery* pMsg = static_cast<SqDDMessageFormatQuery*>(pMsgB);
+				g_Format = pMsg->m_Formats[0];
+				frmt.m_DataFormat = g_Format;
 				if ( DDSendMsg( s, &frmt ) <= 0 )
 					return ( -1 );
+				// Create a buffer big enough to hold a row of buckets.
+				pByteData = NULL;
+				pFloatData = NULL;
+				if ( g_Format == DataFormat_Unsigned8 )
+					pByteData = new unsigned char[ XRes * YRes * g_Channels ];
+				else
+					pFloatData = new float[ XRes * YRes * g_Channels ];
 			}
 			break;
 	}
@@ -127,21 +139,14 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 
 	XRes = ( pMsg->m_CropWindowXMax - pMsg->m_CropWindowXMin );
 	YRes = ( pMsg->m_CropWindowYMax - pMsg->m_CropWindowYMin );
-	SamplesPerElement = pMsg->m_SamplesPerElement;
-	BitsPerSample = pMsg->m_BitsPerSample;
+	g_Channels = pMsg->m_Channels;
+//	BitsPerSample = pMsg->m_BitsPerSample;
 
 	g_CWXmin = pMsg->m_CropWindowXMin;
 	g_CWYmin = pMsg->m_CropWindowYMin;
 	g_CWXmax = pMsg->m_CropWindowXMax;
 	g_CWYmax = pMsg->m_CropWindowYMax;
 
-	// Create a buffer big enough to hold a row of buckets.
-	pByteData = NULL;
-	pFloatData = NULL;
-	if ( BitsPerSample == 8 )
-		pByteData = new unsigned char[ XRes * YRes * SamplesPerElement ];
-	else
-		pFloatData = new float[ XRes * YRes * SamplesPerElement ];
 	return ( 0 );
 }
 
@@ -150,7 +155,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 {
 	SqDDMessageData * pMsg = static_cast<SqDDMessageData*>( pMsgB );
 
-	TqInt	linelen = XRes * SamplesPerElement;
+	TqInt	linelen = XRes * g_Channels;
 	char* pBucket = reinterpret_cast<char*>( &pMsg->m_Data );
 
 	SqDDMessageData * const message = static_cast<SqDDMessageData*>( pMsgB );
@@ -168,10 +173,10 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 		{
 			if ( x >= 0 && y >= 0 && x < XRes && y < YRes )
 			{
-				TqInt so = ( y * linelen ) + ( x * SamplesPerElement );
+				TqInt so = ( y * linelen ) + ( x * g_Channels );
 
 				TqInt i = 0;
-				while ( i < SamplesPerElement )
+				while ( i < g_Channels )
 				{
 					TqFloat value = reinterpret_cast<TqFloat*>( pBucket ) [ i ];
 
@@ -184,10 +189,14 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 						value = CLAMP(value, quantize_minval, quantize_maxval) ;
 					}
 
-					if ( BitsPerSample == 8 )
-						pByteData[ so++ ] = static_cast<char>( value );
-					else
-						pFloatData[ so++ ] = value;
+					if( NULL != pByteData )
+					{
+						if ( g_Format == DataFormat_Unsigned8 )
+							pByteData[ so ] = static_cast<char>( value );
+						else
+							pFloatData[ so ] = value;
+					}
+					so++;
 					i++;
 				}
 			}
@@ -226,10 +235,10 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 		TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) XRes );
 		TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) YRes );
 		TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
-		TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, SamplesPerElement );
+		TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
 
 		// Write out an 8 bits per pixel integer image.
-		if ( BitsPerSample == 8 )
+		if ( g_Format == DataFormat_Unsigned8 )
 		{
 			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
 			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
@@ -241,14 +250,14 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 			TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, photometric );
 			TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
 
-			if ( SamplesPerElement == 4 )
+			if ( g_Channels == 4 )
 				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
 
 			// Set the position tages in case we aer dealing with a cropped image.
 			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
 			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
 
-			TqInt	linelen = XRes * SamplesPerElement;
+			TqInt	linelen = XRes * g_Channels;
 			TqInt row;
 			for ( row = 0; row < YRes; row++ )
 			{
@@ -298,16 +307,16 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 				TIFFSetField( pOut, TIFFTAG_COMPRESSION, compression );
 			}
 
-			TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, SamplesPerElement );
+			TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
 
-			if ( SamplesPerElement == 4 )
+			if ( g_Channels == 4 )
 				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
 			// Set the position tages in case we aer dealing with a cropped image.
 			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
 			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
 			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
 
-			TqInt	linelen = XRes * SamplesPerElement;
+			TqInt	linelen = XRes * g_Channels;
 			TqInt row = 0;
 			for ( row = 0; row < YRes; row++ )
 			{

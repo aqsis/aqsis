@@ -71,7 +71,8 @@ typedef int SOCKET;
 static std::string	g_Filename( "output.tif" );
 static TqInt g_ImageWidth = 0;
 static TqInt g_ImageHeight = 0;
-static TqInt g_SamplesPerElement = 0, g_BitsPerSample = 0;
+static TqInt g_Channels = 0;
+static TqInt g_Format = 0;
 static int g_Window = 0;
 static GLubyte* g_Image = 0;
 static TqInt g_CWXmin, g_CWYmin;
@@ -183,6 +184,9 @@ TqInt Query( SOCKET s, SqDDMessageBase* pMsgB )
 	{
 			case MessageID_FormatQuery:
 			{
+				SqDDMessageFormatQuery* pMsg = static_cast<SqDDMessageFormatQuery*>(pMsgB);
+				g_Format = pMsg->m_Formats[0];
+				frmt.m_DataFormat = g_Format;
 				if ( DDSendMsg( s, &frmt ) <= 0 )
 					return ( -1 );
 			}
@@ -198,8 +202,7 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 
 	g_ImageWidth = ( message->m_CropWindowXMax - message->m_CropWindowXMin );
 	g_ImageHeight = ( message->m_CropWindowYMax - message->m_CropWindowYMin );
-	g_SamplesPerElement = message->m_SamplesPerElement;
-	g_BitsPerSample = message->m_BitsPerSample;
+	g_Channels = message->m_Channels;
 
 	g_CWXmin = message->m_CropWindowXMin;
 	g_CWYmin = message->m_CropWindowYMin;
@@ -261,7 +264,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 
 				TqFloat value0, value1, value2;
 				TqFloat alpha = 255.0f;
-				if ( g_SamplesPerElement >= 3 )
+				if ( g_Channels >= 3 )
 				{
 					value0 = reinterpret_cast<TqFloat*>( bucket ) [ 0 ];
 					value1 = reinterpret_cast<TqFloat*>( bucket ) [ 1 ];
@@ -274,7 +277,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 					value2 = reinterpret_cast<TqFloat*>( bucket ) [ 0 ];
 				}
 
-				if (g_SamplesPerElement > 3 ) 
+				if ( g_Channels > 3 ) 
 					alpha = (reinterpret_cast<TqFloat*>( bucket ) [ 3 ]);
 
 				if( !( quantize_zeroval == 0.0f &&
@@ -291,7 +294,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 					alpha  = ROUND(quantize_zeroval + alpha * (quantize_oneval - quantize_zeroval) + dither_val );
 					alpha  = CLAMP(alpha, quantize_minval, quantize_maxval) ;
 				}
-				else if ( g_BitsPerSample != 8 )
+				else if ( g_Format != DataFormat_Unsigned8 )
 				{
 					// If we are displaying an FP image we will need to quantize ourselves.
 					value0 *= 255;

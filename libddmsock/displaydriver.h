@@ -89,6 +89,38 @@ struct SqDDMessageBase
 
 
 //---------------------------------------------------------------------
+/** \struct SqDDMessageFormatQuery
+ * Format query message, asks the device what format (from a selection) it wants.
+ */
+
+struct SqDDMessageFormatQuery : public SqDDMessageBase
+{
+	// Specific message data
+	TqInt	m_FormatCount;
+	TqInt	m_Formats[ 1 ];
+
+	static SqDDMessageFormatQuery*	Construct( TqInt formatcount, TqInt* formats );
+	void	Destroy()
+	{
+		free( this );
+	}
+};
+
+
+inline SqDDMessageFormatQuery* SqDDMessageFormatQuery::Construct( TqInt formatcount, TqInt* formats )
+{
+	TqInt len = sizeof(TqInt) * formatcount;
+	SqDDMessageFormatQuery * pMessage = reinterpret_cast<SqDDMessageFormatQuery*>( malloc( sizeof( SqDDMessageFormatQuery ) - sizeof( TqInt ) + len ) );
+	pMessage->m_MessageID = MessageID_FormatQuery;
+	pMessage->m_FormatCount = formatcount;
+	pMessage->m_MessageLength = sizeof( SqDDMessageFormatQuery ) - sizeof( TqInt ) + len;
+	memcpy( &pMessage->m_Formats, formats, len );
+
+	return ( pMessage );
+}
+
+
+//---------------------------------------------------------------------
 /** \struct SqDDMessageFormatResponse
  * Message containing data format request, sent by client in response to a FormatQuery message.
  */
@@ -115,12 +147,11 @@ struct SqDDMessageOpen : public SqDDMessageBase
 {
 	SqDDMessageOpen()
 	{}
-	SqDDMessageOpen( TqInt xres, TqInt yres, TqInt samples, TqInt bits, TqInt cwxmin, TqInt cwxmax, TqInt cwymin, TqInt cwymax ) :
+	SqDDMessageOpen( TqInt xres, TqInt yres, TqInt channels, TqInt cwxmin, TqInt cwxmax, TqInt cwymin, TqInt cwymax ) :
 			SqDDMessageBase( MessageID_Open, sizeof( SqDDMessageOpen ) ),
 			m_XRes( xres ),
 			m_YRes( yres ),
-			m_SamplesPerElement( samples ),
-			m_BitsPerSample( bits ),
+			m_Channels( channels ),
 			m_CropWindowXMin( cwxmin ),
 			m_CropWindowXMax( cwxmax ),
 			m_CropWindowYMin( cwymin ),
@@ -128,8 +159,8 @@ struct SqDDMessageOpen : public SqDDMessageBase
 	{}
 	TqInt	m_XRes;
 	TqInt	m_YRes;
-	TqInt	m_SamplesPerElement;
-	TqInt	m_BitsPerSample;
+	TqInt	m_Channels;
+	TqInt	m_NotUsed;
 	TqInt	m_CropWindowXMin;
 	TqInt	m_CropWindowXMax;
 	TqInt	m_CropWindowYMin;

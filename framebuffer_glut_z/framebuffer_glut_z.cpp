@@ -75,7 +75,7 @@ typedef int SOCKET;
 static std::string	g_Filename( "output.tif" );
 static TqInt g_ImageWidth = 0;
 static TqInt g_ImageHeight = 0;
-static TqInt g_SamplesPerElement = 0;
+static TqInt g_Channels = 0;
 static int g_Window = 0;
 static GLubyte* g_Image = 0;
 static TqFloat* g_Data = 0;
@@ -272,14 +272,14 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 
 	g_ImageWidth = ( message->m_CropWindowXMax - message->m_CropWindowXMin );
 	g_ImageHeight = ( message->m_CropWindowYMax - message->m_CropWindowYMin );
-	g_SamplesPerElement = message->m_SamplesPerElement;
+	g_Channels = message->m_Channels;
 
 	g_CWXmin = message->m_CropWindowXMin;
 	g_CWYmin = message->m_CropWindowYMin;
 	g_CWXmax = message->m_CropWindowXMax;
 	g_CWYmax = message->m_CropWindowYMax;
 
-	if ( g_SamplesPerElement > 1 )
+	if ( g_Channels > 1 )
 		return -1;
 
 	g_Image = new GLubyte[ g_ImageWidth * g_ImageHeight * 3 ];

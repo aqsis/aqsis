@@ -81,7 +81,7 @@ int main( int argc, char* argv[] )
 
 
 TqInt	XRes, YRes;
-TqInt	SamplesPerElement;
+TqInt	g_Channels;
 TqFloat* pData;
 TIFF*	pOut;
 TqInt	CWXMin, CWYMin;
@@ -112,9 +112,9 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 	YRes = ( pMsg->m_CropWindowYMax - pMsg->m_CropWindowYMin );
 	CWXMin = pMsg->m_CropWindowXMin;
 	CWYMin = pMsg->m_CropWindowYMin;
-	SamplesPerElement = pMsg->m_SamplesPerElement;
+	g_Channels = pMsg->m_Channels;
 
-	if ( SamplesPerElement > 1 ) return ( -1 );
+	if ( g_Channels > 1 ) return ( -1 );
 
 	// Create a buffer big enough to hold a row of buckets.
 	pData = new TqFloat[ XRes * YRes ];
@@ -126,7 +126,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 {
 	SqDDMessageData * pMsg = static_cast<SqDDMessageData*>( pMsgB );
 
-	TqInt	linelen = XRes * SamplesPerElement;
+	TqInt	linelen = XRes * g_Channels;
 	char* pBucket = reinterpret_cast<char*>( &pMsg->m_Data );
 
 	TqInt y;
@@ -137,10 +137,10 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 		{
 			if ( x >= 0 && y >= 0 && x < XRes && y < YRes )
 			{
-				TqInt so = ( y * linelen ) + ( x * SamplesPerElement );
+				TqInt so = ( y * linelen ) + ( x * g_Channels );
 
 				TqInt i = 0;
-				while ( i < SamplesPerElement )
+				while ( i < g_Channels )
 				{
 					pData[ so++ ] = reinterpret_cast<TqFloat*>( pBucket ) [ i ];
 					i++;
@@ -240,7 +240,7 @@ void SaveAsShadowMap()
 		TIFFSetField( pshadow, TIFFTAG_IMAGELENGTH, YRes );
 		TIFFSetField( pshadow, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
 		TIFFSetField( pshadow, TIFFTAG_BITSPERSAMPLE, 32 );
-		TIFFSetField( pshadow, TIFFTAG_SAMPLESPERPIXEL, SamplesPerElement );
+		TIFFSetField( pshadow, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
 		TIFFSetField( pshadow, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
 		TIFFSetField( pshadow, TIFFTAG_TILEWIDTH, twidth );
 		TIFFSetField( pshadow, TIFFTAG_TILELENGTH, tlength );
@@ -250,7 +250,7 @@ void SaveAsShadowMap()
 
 		TqInt tsize = twidth * tlength;
 		TqInt tperrow = ( XRes + twidth - 1 ) / twidth;
-		TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * SamplesPerElement * sizeof( TqFloat ) ) );
+		TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * g_Channels * sizeof( TqFloat ) ) );
 
 		if ( ptile != NULL )
 		{
@@ -260,9 +260,9 @@ void SaveAsShadowMap()
 			{
 				TqInt x = ( itile % tperrow ) * twidth;
 				TqInt y = ( itile / tperrow ) * tlength;
-				TqFloat* ptdata = pData + ( ( y * XRes ) + x ) * SamplesPerElement;
+				TqFloat* ptdata = pData + ( ( y * XRes ) + x ) * g_Channels;
 				// Clear the tile to black.
-				memset( ptile, 0, tsize * SamplesPerElement * sizeof( TqFloat ) );
+				memset( ptile, 0, tsize * g_Channels * sizeof( TqFloat ) );
 				for ( TqUlong i = 0; i < tlength; i++ )
 				{
 					for ( TqUlong j = 0; j < twidth; j++ )
@@ -270,11 +270,11 @@ void SaveAsShadowMap()
 						if ( ( x + j ) < XRes && ( y + i ) < YRes )
 						{
 							TqInt ii;
-							for ( ii = 0; ii < SamplesPerElement; ii++ )
-								ptile[ ( i * twidth * SamplesPerElement ) + ( ( ( j * SamplesPerElement ) + ii ) ) ] = ptdata[ ( ( j * SamplesPerElement ) + ii ) ];
+							for ( ii = 0; ii < g_Channels; ii++ )
+								ptile[ ( i * twidth * g_Channels ) + ( ( ( j * g_Channels ) + ii ) ) ] = ptdata[ ( ( j * g_Channels ) + ii ) ];
 						}
 					}
-					ptdata += ( XRes * SamplesPerElement );
+					ptdata += ( XRes * g_Channels );
 				}
 				TIFFWriteTile( pshadow, ptile, x, y, 0, 0 );
 			}
