@@ -908,8 +908,9 @@ void CqBucket::ExposeBucket()
 void CqBucket::QuantizeBucket()
 {
 	// Initiliaze the random with a value based on the X,Y coordinate
-	CqVector2D area(XOrigin(), YOrigin()); 
-	CqRandom random( area.Magnitude() );
+//	CqVector2D area(XOrigin(), YOrigin()); 
+//	CqRandom random( area.Magnitude() );
+	static CqRandom random( 61 );
 	TqFloat endx, endy;
 	TqInt   nextx;
 	endy = YSize();
