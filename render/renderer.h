@@ -231,7 +231,6 @@ class CqRenderer
 																	m_aCoordSystems[CoordSystem_Camera] .m_matToWorld=
 																	m_aCoordSystems[CoordSystem_Current].m_matToWorld=mat.Inverse();
 																}
-
 							/** Get the current transformation stack.
 							 * \return A reference to a vector of CqTransform class pointers.
 							 */
@@ -266,9 +265,6 @@ class CqRenderer
 			TqBool			m_fSaveGPrims;
 			std::vector<CqTransform*>	m_TransformStack;	///< The global transformation stack.
 			std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
-
-	protected:
-//			time_t			m_timeTaken;					///< The stored time taken to complete the last full render.
 
 	public:
 			std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.
