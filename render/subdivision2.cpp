@@ -877,7 +877,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 	assert( NULL != pFace() );
 
 	TqInt dicesize = MAX(m_uDiceSize, m_vDiceSize);
-	TqInt sdcount = ( dicesize == 16 ) ? 4 : ( dicesize == 8 ) ? 3 : ( dicesize == 4 ) ? 2 : ( dicesize == 2 ) ? 1 : 1;
+	TqInt sdcount = ( dicesize == 16 ) ? 4 : ( dicesize == 8 ) ? 3 : ( dicesize == 4 ) ? 2 : ( dicesize == 2 ) ? 1 : 0;
 	dicesize = 1 << sdcount;
 	TqInt lUses = Uses();
 
