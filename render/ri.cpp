@@ -674,6 +674,8 @@ RtVoid	RiFrameBegin( RtInt number )
     QGetRenderContext() ->SetCurrentFrame( number );
     CqCSGTreeNode::SetRequired( TqFalse );
 
+    QGetRenderContext() ->Stats().InitialiseFrame();
+
 
     worldrand.Reseed('a'+'q'+'s'+'i'+'s');
 
@@ -5130,9 +5132,9 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
         // Now copy the images to the big map.
         CqTextureMap* Images[ 6 ] =
             {
-                &tpz,
                 &tpx,
                 &tpy,
+                &tpz,
                 &tnx,
                 &tny,
                 &tnz

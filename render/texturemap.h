@@ -51,8 +51,8 @@ struct IqShader;
 struct IqShaderData;
 
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
-#define	LATLONG_HEADER	"Aqsis LatLong MIP MAP"
-#define	CUBEENVMAP_HEADER	"Aqsis CubeFace Environment"
+#define	LATLONG_HEADER		"LatLong Environment"
+#define	CUBEENVMAP_HEADER	"CubeFace Environment"
 #define	SHADOWMAP_HEADER	"Shadow"
 #define	MIPMAP_HEADER		"Aqsis MIP MAP"
 

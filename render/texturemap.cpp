@@ -55,6 +55,10 @@ START_NAMESPACE( Aqsis )
 
 #undef  ALLOCSEGMENTSTATUS
 
+#define ONETHIRD (1.0f/3.0f)
+#define TWOTHIRD (2.0f/3.0f)
+#define ONEHALF  (1.0f/2.0f)
+
 
 //
 // #define WITHFILTER 1 if you want filtering even when you are doing with area sampling;
@@ -62,10 +66,34 @@ START_NAMESPACE( Aqsis )
 //
 #define WITHFILTER       1
 
+// Local Constants
+typedef enum {
+    PX,
+    NX,
+    PY,
+    NY,
+    PZ,
+    NZ,
+} ESide;
+
+typedef enum {
+    XYZ,
+    XZY,
+    YXZ,
+    YZX,
+    ZXY,
+    ZYX
+} EOrder;
+
 //
 // Local Variables
 //
 static TqBool m_critical = TqFalse;
+
+static TqFloat sides[6][2]    =  {
+     {0.0f,0.0f}, {0.0f, ONEHALF}, {ONETHIRD, 0.0f}, {ONETHIRD,ONEHALF}, 
+     {TWOTHIRD, 0.0f}, {TWOTHIRD, ONEHALF}
+};
 
 //---------------------------------------------------------------------
 /** Static array of cached texture maps.
@@ -696,28 +724,15 @@ TqBool CqTextureMap::BiLinear(TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsi
 	TqUint iu = FLOOR( u * umapsize1);
 	TqDouble ru = (u * umapsize1) - iu;
 	TqUint iu_n = FLOOR( (u * umapsize1) + 1.0);
-	if (iu > umapsize1)
-	{
-		iu = umapsize1;
-	}
-	if (iu_n > umapsize1)
-	{
-		iu_n = umapsize1;
-	}
-
 
 	TqUint iv = FLOOR( v * vmapsize1 );
 	TqDouble rv = (v * vmapsize1) - iv;
 	TqUint iv_n = FLOOR( (v * vmapsize1) + 1.0);
 
-	if (iv > vmapsize1)
-	{
-		iv = vmapsize1;
-	}
-	if (iv_n > vmapsize1)
-	{
-		iv_n = vmapsize1;
-	}
+	iu = CLAMP(iu, 0,umapsize1);
+	iu_n = CLAMP(iu_n, 0,umapsize1);
+	iv = CLAMP(iv, 0,vmapsize1);
+	iv_n = CLAMP(iv_n, 0,vmapsize1);
 
 	// Read in the relevant texture tiles.
 	register TqInt c;
@@ -1304,6 +1319,8 @@ void CqTextureMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& p
 
 	if (Type() != MapType_Shadow)
 		m_samples = 8.0f;
+	if (Type() != MapType_Environment)
+		m_samples = 8.0f;
 
 	// Get parameters out of the map.
 	if ( paramMap.size() != 0 )
@@ -1788,6 +1805,187 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, T
 		}
 		TIFFWriteDirectory( ptex );
 	}
+}
+
+
+//----------------------------------------------------------------------
+/** Retrieve a sample from the environment map using R as the reflection vector.
+ */
+
+#define COMP_X 0
+#define COMP_Y 1
+#define COMP_Z 2
+
+void CqEnvironmentMap::SampleMap( CqVector3D& R1, 
+		CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
+		std::valarray<TqFloat>& val, TqInt index, 
+		TqFloat* average_depth, TqFloat* shadow_depth )
+{
+	CqVector3D D;
+	TqFloat x,y;
+	TqFloat contrib, mul, t, u, v;
+	TqInt i;
+	EOrder order;
+	TqFloat side[2];
+	register TqInt c;
+
+	QGetRenderContext() ->Stats().TextureMapTimer().Start();
+
+	// Textures are filtered with either bilinear or trilinear mip-mapping.
+	// Trilinear gives higher image quality but takes more time.  To disable trilinear
+	// mip-mapping for the entire scene:
+	//        Option "texture" "float lerp" 0.0 or
+	// provide to texture() call in the shader.
+	if (m_lerp == -1.0)
+	{
+		const TqInt* pLerp = QGetRenderContext() ->optCurrent().GetIntegerOption( "texture", "lerp" );
+
+		m_lerp = 0.0f;
+		if (pLerp && (*pLerp > 0.0f))
+			m_lerp = 1.0f;
+	}
+	TqBool bLerp = (m_lerp == 1.0); 
+
+	if ( m_pImage != 0 )
+	{
+		val.resize( m_SamplesPerPixel );
+		val = 0.0f;
+		m_accum_color = 0.0f;
+		contrib = 0.0f;
+
+		if ((R1 * R1) == 0) return;
+
+		for (i=0; i < m_samples; i++)
+		{
+			CalculateNoise(x, y, i);
+
+			D = LERP(y, LERP(x, R1, R2), LERP(x, R3, R4));
+
+			mul = (*m_FilterFunc)(x-0.5, y-0.5, 1.0, 1.0);
+			if (mul < m_pixelvariance)
+				continue;
+			contrib += mul;
+
+			// Find the side of the cube that we're looking at
+			if (fabs(D[COMP_Y]) > fabs(D[COMP_X]))
+			{
+				if (fabs(D[COMP_Z]) > fabs(D[COMP_Y]))
+				{
+					order   =   ZYX;
+				}
+				else
+				{
+					if (fabs(D[COMP_Z]) > fabs(D[COMP_X]))
+						order   =   YZX;
+					else
+						order   =   YXZ;
+				}
+			}
+			else if (fabs(D[COMP_Z]) > fabs(D[COMP_Y]))
+			{
+				if (fabs(D[COMP_Z]) > fabs(D[COMP_X]))
+					order   =   ZXY;
+				else
+					order   =   XZY;
+			}
+			else
+			{
+				order =   XYZ;
+			}
+
+			switch(order)
+			{
+					case XYZ:
+					case XZY:
+					if (D[COMP_X] > 0)
+					{
+						memcpy(side,   &sides[PX][0], sizeof(TqFloat) * 2);
+						t =   1 / D[COMP_X];
+						u =   (-D[COMP_Z]*t+1)*(float) 0.5;
+						v =   (-D[COMP_Y]*t+1)*(float) 0.5;
+					}
+					else
+					{
+						memcpy(side,   &sides[NX][0], sizeof(TqFloat) * 2);
+						t =   -1 / D[COMP_X];
+						u =   (D[COMP_Z]*t+1)*(float) 0.5;
+						v =   (-D[COMP_Y]*t+1)*(float) 0.5;
+					}
+					break;
+					case YXZ:
+					case YZX:
+					if (D[COMP_Y] > 0)
+					{
+						memcpy(side, &sides[PY][0], sizeof(TqFloat) * 2);
+						t =   1 / D[COMP_Y];
+						u =   (D[COMP_X]*t+1)*(float) 0.5;
+						v =   (D[COMP_Z]*t+1)*(float) 0.5;
+					}
+					else
+					{
+						memcpy(side,   &sides[NY][0], sizeof(TqFloat) * 2);
+						t =   -1 / D[COMP_Y];
+						u =   (D[COMP_X]*t+1)*(float) 0.5;
+						v =   (-D[COMP_Z]*t+1)*(float) 0.5;
+					}
+					break;
+					case ZXY:
+					case ZYX:
+					if (D[COMP_Z] > 0)
+					{
+						memcpy(side,   &sides[PZ][0], sizeof(TqFloat) * 2);
+						t =   1 / D[COMP_Z];
+						u =   (D[COMP_X]*t+1)*(float) 0.5;
+						v =   (-D[COMP_Y]*t+1)*(float) 0.5;
+					}
+					else
+					{
+						memcpy(side,   &sides[NZ][0], sizeof(TqFloat) * 2);
+						t =   -1 / D[COMP_Z];
+						u =   (-D[COMP_X]*t+1)*(float) 0.5;
+						v =   (-D[COMP_Y]*t+1)*(float) 0.5;
+					}
+					break;
+			}
+
+                        /* At this point: u,v are between 0..1.0 
+			 * They must be remapped to their correct 
+      			 * position 
+			 */
+			u = side[0] + MIN(u*ONETHIRD, ONETHIRD);
+			v = side[1] + MIN(v*ONEHALF, ONEHALF);
+			u = MAX(0.0, u);
+			v = MAX(0.0, v);
+                     
+			CalculateLevel(u, v);
+			BiLinear(u, v, m_umapsize, m_vmapsize, m_level, m_pixel_variance);
+			if (bLerp)
+				BiLinear(u, v, m_umapsize/2, m_vmapsize/2, m_level+1, m_pixel_sublevel);
+
+
+			if (bLerp)
+			{
+				for (c = 0; c < m_SamplesPerPixel; c++)
+				{
+					m_accum_color[c] += mul * LERP(m_interp, m_pixel_variance[c], m_pixel_sublevel[c]);
+
+				}
+			}
+			else
+			{
+				for (c = 0; c < m_SamplesPerPixel; c++)
+				{
+					m_accum_color[c] += mul * m_pixel_variance[c];
+				}
+			}
+		}
+
+		for (c = 0; c < m_SamplesPerPixel; c++)
+			val[c] = m_accum_color[c] / contrib;
+
+	}
+	QGetRenderContext() ->Stats().TextureMapTimer().Stop();
+
 }
 
 END_NAMESPACE( Aqsis )
