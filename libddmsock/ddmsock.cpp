@@ -637,8 +637,9 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 	// Start the driver in the child process
 	if ( 0 == forkresult )
 	{
-//		execlp( strDriverPathAndFile.c_str(), strDriverFile.c_str(), NULL );
-		execvp( strDriverPathAndFile.c_str(), (char * const * ) args[2] );
+		//execlp( strDriverPathAndFile.c_str(), strDriverFile.c_str(), NULL );
+		args[1] = strDriverPathAndFile.c_str() ;
+		execvp( strDriverPathAndFile.c_str(), (char * const * ) (args + 1) );
 		/* error checking? */
 		return;
 	}
