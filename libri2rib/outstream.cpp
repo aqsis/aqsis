@@ -26,7 +26,7 @@
 #include "errno.h"
 #include "string.h"
 #include "error.h"
-
+#include <unistd.h>
 
 USING_NAMESPACE( libri2rib );
 
@@ -82,7 +82,7 @@ void CqStreamGzip::openFile( const char *name )
 
 void CqStreamGzip::openFile( int fdesc )
 {
-	gzf = gzdopen( fdesc, "wb" );
+	gzf = gzdopen( dup(fdesc), "wb" );
 	if ( gzf == NULL )
 	{
 		char c[ 100 ];
@@ -141,7 +141,7 @@ void CqStreamFDesc::openFile( const char *name )
 
 void CqStreamFDesc::openFile ( int fdesc )
 {
-	fstr = fdopen ( fdesc, "wb" );
+	fstr = fdopen ( dup(fdesc), "wb" );
 	if ( fstr == NULL )
 	{
 		char c[ 100 ];

@@ -79,6 +79,7 @@ CqOutput::CqOutput( SqOptions::EqFileOpenType fot, const char *name, int fdesc,
 
 CqOutput::~CqOutput()
 {
+	out->closeFile();
 	delete out;
 }
 
