@@ -1941,19 +1941,19 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFP
 	GETSTRING( name );
 	GETFLOAT( channel );
 	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+	TqFloat fdu = 0.0f, fdv = 0.0f;
+	if( m_pSurface )	
+	{
+		GET_STDVAR_FLOAT( du );
+		GET_STDVAR_FLOAT( dv );
+		fdu = FLOAT( du );
+		fdv = FLOAT( dv );
+	}
 	END_UNIFORM_SECTION
 
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		TqFloat fdu = 0.0f, fdv = 0.0f;
-		if( m_pSurface )	
-		{
-			GET_STDVAR_FLOAT( du );
-			GET_STDVAR_FLOAT( dv );
-			fdu = FLOAT( du );
-			fdv = FLOAT( dv );
-		}
 		BEGIN_VARYING_SECTION
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
@@ -2012,20 +2012,19 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOA
 	GETSTRING( name );
 	GETFLOAT( channel );
 	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+	TqFloat fdu = 0.0f, fdv = 0.0f;
+	if( m_pSurface )	
+	{
+		GET_STDVAR_FLOAT( du );
+		GET_STDVAR_FLOAT( dv );
+		fdu = FLOAT( du );
+		fdv = FLOAT( dv );
+	}
 	END_UNIFORM_SECTION
 
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		
-		TqFloat fdu = 0.0f, fdv = 0.0f;
-		if( m_pSurface )	
-		{
-			GET_STDVAR_FLOAT( du );
-			GET_STDVAR_FLOAT( dv );
-			fdu = FLOAT( du );
-			fdv = FLOAT( dv );
-		}
 		BEGIN_VARYING_SECTION
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
@@ -2130,19 +2129,19 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 	GETSTRING( name );
 	GETFLOAT( channel );
 	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
-	BEGIN_UNIFORM_SECTION
+	TqFloat fdu = 0.0f, fdv = 0.0f;
+	if( m_pSurface )	
+	{
+		GET_STDVAR_FLOAT( du );
+		GET_STDVAR_FLOAT( dv );
+		fdu = FLOAT( du );
+		fdv = FLOAT( dv );
+	}
+	END_UNIFORM_SECTION
 
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		TqFloat fdu = 0.0f, fdv = 0.0f;
-		if( m_pSurface )	
-		{
-			GET_STDVAR_FLOAT( du );
-			GET_STDVAR_FLOAT( dv );
-			fdu = FLOAT( du );
-			fdv = FLOAT( dv );
-		}
 		BEGIN_VARYING_SECTION
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
@@ -2169,7 +2168,6 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 		// Sample the texture.
 		std::valarray<TqFloat> val;
 
-
 		GET_STDVAR_FLOAT( s );
 		GET_STDVAR_FLOAT( t );
 		pTMap->SampleMIPMAP( FLOAT( s ), FLOAT( t ), swidth, twidth, _psblur, _ptblur, val);
@@ -2185,7 +2183,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 	else
 	{
 		BEGIN_VARYING_SECTION
-		SETCOLOR( Result, CqColor( 0, 0, 0 ) );	// Default, completely lit
+		SETCOLOR( Result, CqColor( 0, 0, 0 ) );	// Default, no color
 		END_VARYING_SECTION
 	}
 }
@@ -2202,19 +2200,19 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOA
 	GETSTRING( name );
 	GETFLOAT( channel );
 	CqTextureMap* pTMap = CqTextureMap::GetTextureMap( STRING( name ).c_str() );
+	TqFloat fdu = 0.0f, fdv = 0.0f;
+	if( m_pSurface )	
+	{
+		GET_STDVAR_FLOAT( du );
+		GET_STDVAR_FLOAT( dv );
+		fdu = FLOAT( du );
+		fdv = FLOAT( dv );
+	}
 	END_UNIFORM_SECTION
 
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		TqFloat fdu = 0.0f, fdv = 0.0f;
-		if( m_pSurface )	
-		{
-			GET_STDVAR_FLOAT( du );
-			GET_STDVAR_FLOAT( dv );
-			fdu = FLOAT( du );
-			fdv = FLOAT( dv );
-		}
 		BEGIN_VARYING_SECTION
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
@@ -2326,19 +2324,19 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, 
 	{
 		pTMap = CqTextureMap::GetLatLongMap( STRING( name ).c_str() );
 	}
+	TqFloat fdu = 0.0f, fdv = 0.0f;
+	if( m_pSurface )
+	{
+		GET_STDVAR_FLOAT( du );
+		GET_STDVAR_FLOAT( dv );
+		fdu = FLOAT( du );
+		fdv = FLOAT( dv );
+	}
 	END_UNIFORM_SECTION
 
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		TqFloat fdu = 0.0f, fdv = 0.0f;
-		if( m_pSurface )
-		{
-			GET_STDVAR_FLOAT( du );
-			GET_STDVAR_FLOAT( dv );
-			fdu = FLOAT( du );
-			fdv = FLOAT( dv );
-		}
 		BEGIN_VARYING_SECTION
 		CqVector3D swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f )
@@ -2449,19 +2447,19 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, 
 	{
 		pTMap = CqTextureMap::GetLatLongMap( STRING( name ).c_str() );
 	}
+	TqFloat fdu = 0.0f, fdv = 0.0f;
+	if( m_pSurface )
+	{
+		GET_STDVAR_FLOAT( du );
+		GET_STDVAR_FLOAT( dv );
+		fdu = FLOAT( du );
+		fdv = FLOAT( dv );
+	}
 	END_UNIFORM_SECTION
 
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		TqFloat fdu = 0.0f, fdv = 0.0f;
-		if( m_pSurface )
-		{
-			GET_STDVAR_FLOAT( du );
-			GET_STDVAR_FLOAT( dv );
-			fdu = FLOAT( du );
-			fdv = FLOAT( dv );
-		}
 		BEGIN_VARYING_SECTION
 		CqVector3D swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f )

@@ -1292,7 +1292,7 @@ void CqShaderVM::SO_ipushv()
 	for ( i = 0; i < ext; i++ )
 	{
 		TqFloat _A;
-		A.Value( _A );
+		A.Value( _A, i );
 		( *pVarArray ) [ static_cast<unsigned int>( _A ) ] ->GetValue( i, Result );
 	}
 	Push( Result );
@@ -1328,7 +1328,7 @@ void CqShaderVM::SO_ipop()
 		if ( m_pEnv->RunningState().Value( i ) )
 		{
 			TqFloat _A;
-			A.Value( _A );
+			A.Value( _A, i );
 			( *pVA ) [ static_cast<unsigned int>( _A ) ] ->SetValue( i, Val );
 		}
 	}
@@ -1347,9 +1347,9 @@ void CqShaderVM::SO_mergef()
 	{
 		TqBool _A;
 		TqFloat _T, _F;
-		A.Value( _A );
-		T.Value( _T );
-		F.Value( _F );
+		A.Value( _A, i );
+		T.Value( _T, i );
+		F.Value( _F, i );
 		if ( _A ) Result.SetValue( i, _T );
 		else	Result.SetValue( i, _F );
 	}
@@ -1369,9 +1369,9 @@ void CqShaderVM::SO_merges()
 	{
 		TqBool _A;
 		CqString _T, _F;
-		A.Value( _A );
-		T.Value( _T );
-		F.Value( _F );
+		A.Value( _A, i );
+		T.Value( _T, i );
+		F.Value( _F, i );
 		if ( _A ) Result.SetValue( i, _T );
 		else	Result.SetValue( i, _F );
 	}
@@ -1391,9 +1391,9 @@ void CqShaderVM::SO_mergep()
 	{
 		TqBool _A;
 		CqVector3D _T, _F;
-		A.Value( _A );
-		T.Value( _T );
-		F.Value( _F );
+		A.Value( _A, i );
+		T.Value( _T, i );
+		F.Value( _F, i );
 		if ( _A ) Result.SetValue( i, _T );
 		else	Result.SetValue( i, _F );
 	}
@@ -1413,9 +1413,9 @@ void CqShaderVM::SO_mergec()
 	{
 		TqBool _A;
 		CqColor _T, _F;
-		A.Value( _A );
-		T.Value( _T );
-		F.Value( _F );
+		A.Value( _A, i );
+		T.Value( _T, i );
+		F.Value( _F, i );
 		if ( _A ) Result.SetValue( i, _T );
 		else	Result.SetValue( i, _F );
 	}
@@ -1550,7 +1550,7 @@ void CqShaderVM::SO_S_GET()
 		if ( m_pEnv->RunningState().Value( i ) )
 		{
 			TqBool _A;
-			A.Value( _A );
+			A.Value( _A, i );
 			m_pEnv->CurrentState().SetValue( i, _A );
 		}
 	}
@@ -1608,7 +1608,7 @@ void CqShaderVM::SO_jnz()
 		if ( !__fVarying || m_pEnv->RunningState().Value( i ) )
 		{
 			TqBool _f;
-			f.Value( _f );
+			f.Value( _f, i );
 			if ( !_f ) return ;
 		}
 	}
@@ -1629,7 +1629,7 @@ void CqShaderVM::SO_jz()
 		if ( !__fVarying || m_pEnv->RunningState().Value( i ) )
 		{
 			TqBool _f;
-			f.Value( _f );
+			f.Value( _f, i );
 			if ( _f ) return ;
 		}
 	}
