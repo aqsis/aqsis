@@ -20,14 +20,14 @@ EXTRA_DIST = Doxyfile Renderer.dsw bootstrap doxygen.dsp
 test:
 	cd aqsl/tests; $(MAKE) $(AM_MAKEFLAGS) test
 
-all-local: render/ri.inl render/ri_cache.inl render/ri_validate.inl
+all-local: $(top_srcdir)/render/ri.inl $(top_srcdir)/render/ri_cache.inl $(top_srcdir)/render/ri_validate.inl
 
-render/ri.inl: render/apiheader.xsl render/api.xml
-	xsltproc -o render/ri.inl render/apiheader.xsl render/api.xml
+$(top_srcdir)/render/ri.inl: $(top_srcdir)/render/apiheader.xsl $(top_srcdir)/render/api.xml
+	xsltproc -o $(top_srcdir)/render/ri.inl $(top_srcdir)/render/apiheader.xsl $(top_srcdir)/render/api.xml
 	
-render/ri_cache.inl: render/apicache.xsl render/api.xml
-	xsltproc -o render/ri_cache.inl render/apicache.xsl render/api.xml
+$(top_srcdir)/render/ri_cache.inl: $(top_srcdir)/render/apicache.xsl $(top_srcdir)/render/api.xml
+	xsltproc -o $(top_srcdir)/render/ri_cache.inl $(top_srcdir)/render/apicache.xsl $(top_srcdir)/render/api.xml
 
-render/ri_validate.inl: render/apivalidate.xsl render/api.xml
-	xsltproc -o render/ri_validate.inl render/apivalidate.xsl render/api.xml
+$(top_srcdir)/render/ri_validate.inl: $(top_srcdir)/render/apivalidate.xsl $(top_srcdir)/render/api.xml
+	xsltproc -o $(top_srcdir)/render/ri_validate.inl $(top_srcdir)/render/apivalidate.xsl $(top_srcdir)/render/api.xml
 
