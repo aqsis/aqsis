@@ -125,8 +125,10 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 			TqInt off = j * ( uGridRes + 1 ) + i;
 			P() ->SetPoint( CqVector3D( x + i, y + j, 0.0 ), off );
 			Ci() ->SetColor( pBucket->Color( x + i, y + j ), off );
-			Oi() ->SetColor( pBucket->Opacity( x + i, y + j ), off );
-			alpha() ->SetFloat( pBucket->Coverage( x + i, y + j ), off );
+			CqColor opa = pBucket->Opacity( x + i, y + j );
+			Oi() ->SetColor( opa, off );
+			TqFloat avopa = ( opa.fRed() + opa.fGreen() + opa.fBlue() ) /3.0f;
+			alpha() ->SetFloat( pBucket->Coverage( x + i, y + j ) * avopa, off );
 		}
 	}
 	// Execute the Shader VM
