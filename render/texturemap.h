@@ -476,10 +476,10 @@ class CqTextureMap : public IqTextureMap
 		virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
 		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
 		virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
-		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0 )
+		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0, TqFloat* average_depth = NULL )
 		{}
 		virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0 )
+		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0, TqFloat* average_depth = NULL )
 		{}
 
 		virtual	void	GetSample( TqFloat ss1, TqFloat tt1, TqFloat ss2, TqFloat tt2, std::valarray<TqFloat>& val );
@@ -577,9 +577,9 @@ class CqEnvironmentMap : public CqTextureMap
 		}
 
 		virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
-		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
+		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0, TqFloat* average_depth = NULL );
 		virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
+		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0, TqFloat* average_depth = NULL );
 
 		virtual CqMatrix& GetMatrix( TqInt which, TqInt index = 0 )
 		{
@@ -669,8 +669,8 @@ class CqShadowMap : public CqTextureMap
 			return( pRes );
 		}
 
-		virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0 );
-		virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0 );
+		virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0, TqFloat* average_depth = NULL );
+		virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0, TqFloat* average_depth = NULL );
 		virtual CqMatrix& GetMatrix( TqInt which, TqInt index = 0 )
 		{
 			if ( which == 0 ) return matWorldToCamera(index);

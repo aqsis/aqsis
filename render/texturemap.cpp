@@ -104,7 +104,6 @@ static TqInt free_cnt = 0;
 
 TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt samples, TqBool fProt )
 {
-	TqChar warnings[ 400 ];
 	static TqInt limit = -1;
 	static TqInt report = 1;
 	static TqInt megs = 10; /* a number to hint it is abusing enough memory */
@@ -148,8 +147,6 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 #ifdef _DEBUG
 	if ( ( more > MEG1 ) && ( ( more / ( 1024 * 1024 ) ) > megs ) )
 	{
-		//sprintf( warnings, "Texturememory is more than %d Megs", megs );
-		//RiErrorPrint( 0, 1, warnings );
 		QGetRenderContextI() ->Logger() ->debug( "Texturememory is more than %d megs", megs );
 		megs += 10;
 	}
@@ -1181,9 +1178,6 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 void CqTextureMap::CriticalMeasure()
 {
 	const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
-#ifdef _DEBUG
-	TqChar warnings[ 400 ];
-#endif
 	TqInt current, limit, now;
 	std::vector<CqTextureMap*>::iterator i;
 	std::vector<CqTextureMapBuffer*>::iterator j;
@@ -1232,11 +1226,8 @@ void CqTextureMap::CriticalMeasure()
 
 #ifdef _DEBUG
 
-	//sprintf( warnings, "I was forced to zap the tile segment buffers for %dK",
-	//         ( now - current ) / 1024 );
 	if ( now - current )
 	{
-		//	RiErrorPrint( 0, 1, warnings );
 		///! \todo Review this debug message
 		QGetRenderContextI() ->Logger() ->debug( "I was forced to zap the tile segment buffers for %dK", ( now - current ) / 1024 );
 	}
@@ -1445,7 +1436,7 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, Tq
  */
 
 void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D& twidth,
-                                  std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
+                                  std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index, TqFloat* average_depth )
 {
 	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
@@ -1484,7 +1475,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D
  */
 
 void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-                                  std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
+                                  std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index, TqFloat* average_depth )
 {
 	if ( m_pImage != 0 )
 	{
@@ -1788,7 +1779,7 @@ static void project( TqInt face )
 /** Sample the shadow map data to see if the point vecPoint is in shadow.
  */
 
-void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index )
+void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index, TqFloat* average_depth )
 {
 	if ( m_pImage != 0 )
 	{
@@ -1821,7 +1812,7 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 		R3 = vecPoint - ( swidth / 2.0f ) + ( twidth / 2.0f );
 		R4 = vecPoint + ( swidth / 2.0f ) + ( twidth / 2.0f );
 
-		SampleMap( R1, R2, R3, R4, val, paramMap, index );
+		SampleMap( R1, R2, R3, R4, val, paramMap, index, average_depth );
 	}
 	else
 	{
@@ -1832,7 +1823,7 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 }
 
 
-void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index )
+void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index, TqFloat* average_depth )
 {
 	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
@@ -2006,6 +1997,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 	// Test the samples.
 	TqInt inshadow = 0;
+	TqFloat avz = 0.0f;
 
 	TqFloat s = lu;
 	TqInt i;
@@ -2029,8 +2021,10 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 				{
 					iu -= pTMBa->sOrigin();
 					iv -= pTMBa->tOrigin();
-					if ( z > pTMBa->GetValue( iu, iv, 0 ) )
+					TqFloat mapz = pTMBa->GetValue( iu, iv, 0 );
+					if ( z > mapz )
 						inshadow += 1;
+					avz += mapz;
 				}
 			}
 			t = t + dt;
@@ -2038,6 +2032,9 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 		s = s + ds;
 	}
 
+	avz /= ( ns * nt );
+	if( NULL != average_depth )
+		*average_depth = avz;
 	val[ 0 ] = ( static_cast<TqFloat>( inshadow ) / ( ns * nt ) );
 }
 
