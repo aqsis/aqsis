@@ -309,8 +309,43 @@ class CqStats
 
 				// Shading stats
 
-					// Per-shadeop stats
+					// Variables
+					SHD_var_created_total,
 					
+					SHD_var_array,
+					SHD_var_array_current,
+					SHD_var_array_peak,
+					SHD_var_array_init,
+
+						// Uniform
+						SHD_var_uniform,
+						SHD_var_uniform_current,
+						SHD_var_uniform_peak,
+						SHD_var_uniform_init,
+
+						SHD_var_uniform_float,
+						SHD_var_uniform_string,
+						SHD_var_uniform_point,
+						SHD_var_uniform_vector,
+						SHD_var_uniform_normal,
+						SHD_var_uniform_color,
+						SHD_var_uniform_matrix,
+
+						// Varying
+						SHD_var_varying,
+						SHD_var_varying_current,
+						SHD_var_varying_peak,
+						SHD_Var_varying_init,
+
+						SHD_var_varying_float,
+						SHD_var_varying_string,
+						SHD_var_varying_point,
+						SHD_var_varying_vector,
+						SHD_var_varying_normal,
+						SHD_var_varying_color,
+						SHD_var_varying_matrix,
+
+					// Per-shadeop stats
 					SHD_so_abs,
 					SHD_so_acos,
 					SHD_so_ambient,

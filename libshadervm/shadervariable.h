@@ -133,6 +133,11 @@ class CqShaderVariableArray: public CqShaderVariable
 		{
 			assert( Count > 0 );
 			m_aVariables.resize( Count );
+			STATS_INC( SHD_var_array );
+			STATS_INC( SHD_var_array_current );
+			TqInt cvArr = STATS_GETI( SHD_var_array_current );
+			TqInt cPeak = STATS_GETI( SHD_var_array_peak );
+			STATS_SETI( SHD_var_array_peak, cvArr > cPeak ? cvArr : cPeak );
 		}
 		/** Copy constructor.
 		 */
@@ -141,9 +146,16 @@ class CqShaderVariableArray: public CqShaderVariable
 			m_aVariables.resize( From.m_aVariables.size() );
 			for ( TqUint i = 0; i < From.m_aVariables.size(); i++ )
 				m_aVariables[ i ] = From.m_aVariables[ i ] ->Clone();
+			STATS_INC( SHD_var_array );
+			STATS_INC( SHD_var_array_current );
+			TqInt cvArr = STATS_GETI( SHD_var_array_current );
+			TqInt cPeak = STATS_GETI( SHD_var_array_peak );
+			STATS_SETI( SHD_var_array_peak, cvArr > cPeak ? cvArr : cPeak );
 		}
 		virtual	~CqShaderVariableArray()
-	{}
+		{
+			STATS_DEC( SHD_var_array_current );
+		}
 
 		// Overridden from IqShaderData.
 
@@ -152,6 +164,7 @@ class CqShaderVariableArray: public CqShaderVariable
 		{
 			for ( std::vector<IqShaderData*>::iterator i = m_aVariables.begin(); i != m_aVariables.end(); i++ )
 				( *i ) ->Initialise( uGridRes, vGridRes );
+			STATS_INC( SHD_var_array_init );
 		}
 
 		virtual	void	SetSize( const TqInt size )
@@ -386,21 +399,50 @@ class CqShaderVariableUniform : public CqShaderVariable
 {
 	public:
 		CqShaderVariableUniform() : CqShaderVariable()
-		{}
+		{
+			STATS_INC( SHD_var_uniform );
+			STATS_INC( SHD_var_uniform_current );
+			TqInt cvUni = STATS_GETI( SHD_var_uniform_current );
+			TqInt cPeak = STATS_GETI( SHD_var_uniform_peak );
+			STATS_SETI( SHD_var_uniform_peak, cvUni > cPeak ? cvUni : cPeak );
+		}
 		CqShaderVariableUniform( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariable( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_uniform );
+			STATS_INC( SHD_var_uniform_current );
+			TqInt cvUni = STATS_GETI( SHD_var_uniform_current );
+			TqInt cPeak = STATS_GETI( SHD_var_uniform_peak );
+			STATS_SETI( SHD_var_uniform_peak, cvUni > cPeak ? cvUni : cPeak );
+		}
 		CqShaderVariableUniform( const char* strName, const R& val ) : CqShaderVariable( strName ),
 				m_Value( val )
-		{}
+		{
+			STATS_INC( SHD_var_uniform );
+			STATS_INC( SHD_var_uniform_current );
+			TqInt cvUni = STATS_GETI( SHD_var_uniform_current );
+			TqInt cPeak = STATS_GETI( SHD_var_uniform_peak );
+			STATS_SETI( SHD_var_uniform_peak, cvUni > cPeak ? cvUni : cPeak );
+		
+		}
 		CqShaderVariableUniform( const CqShaderVariableUniform<T, R>& val ) :
 				CqShaderVariable( val ),
 				m_Value( val.m_Value )
-		{}
+		{
+			STATS_INC( SHD_var_uniform );
+			STATS_INC( SHD_var_uniform_current );
+			TqInt cvUni = STATS_GETI( SHD_var_uniform_current );
+			TqInt cPeak = STATS_GETI( SHD_var_uniform_peak );
+			STATS_SETI( SHD_var_uniform_peak, cvUni > cPeak ? cvUni : cPeak );
+		}
 		virtual	~CqShaderVariableUniform()
-		{}
+		{
+			STATS_DEC( SHD_var_uniform_current );
+		}
 
 		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
-		{}
+		{
+			STATS_INC( SHD_var_uniform_init );
+		}
 		virtual	void	SetSize( const TqInt size )
 		{}
 
@@ -595,9 +637,13 @@ class CqShaderVariableUniformFloat : public CqShaderVariableUniform<type_float, 
 {
 	public:
 		CqShaderVariableUniformFloat( ) : CqShaderVariableUniform<type_float, TqFloat>()
-		{}
+		{
+			STATS_INC( SHD_var_uniform_float );
+		}
 		CqShaderVariableUniformFloat( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_float, TqFloat>( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_uniform_float );
+		}
 		virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
 		{
 			res = m_Value;
@@ -642,9 +688,13 @@ class CqShaderVariableUniformString : public CqShaderVariableUniform<type_string
 {
 	public:
 		CqShaderVariableUniformString( ) : CqShaderVariableUniform<type_string, CqString>()
-		{}
+		{
+			STATS_INC( SHD_var_uniform_string );
+		}
 		CqShaderVariableUniformString( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_string, CqString>( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_uniform_string );
+		}
 		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
 		{
 			res = m_Value;
@@ -681,9 +731,13 @@ class CqShaderVariableUniformPoint : public CqShaderVariableUniform<type_point, 
 {
 	public:
 		CqShaderVariableUniformPoint() : CqShaderVariableUniform<type_point, CqVector3D>()
-		{}
+		{
+			STATS_INC( SHD_var_uniform_point );
+		}
 		CqShaderVariableUniformPoint( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_point, CqVector3D>( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_uniform_point );
+		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 		{
 			res = m_Value;
@@ -748,9 +802,13 @@ class CqShaderVariableUniformVector : public CqShaderVariableUniform<type_vector
 {
 	public:
 		CqShaderVariableUniformVector() : CqShaderVariableUniform<type_vector, CqVector3D>()
-		{}
+		{
+			STATS_INC( SHD_var_uniform_vector );
+		}
 		CqShaderVariableUniformVector( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_vector, CqVector3D>( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_uniform_vector );
+		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 		{
 			res = m_Value;
@@ -815,9 +873,13 @@ class CqShaderVariableUniformNormal : public CqShaderVariableUniform<type_normal
 {
 	public:
 		CqShaderVariableUniformNormal() : CqShaderVariableUniform<type_normal, CqVector3D>()
-		{}
+		{
+			STATS_INC( SHD_var_uniform_normal );
+		}
 		CqShaderVariableUniformNormal( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_normal, CqVector3D>( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_uniform_normal );
+		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 		{
 			res = m_Value;
@@ -882,9 +944,13 @@ class CqShaderVariableUniformColor : public CqShaderVariableUniform<type_color, 
 {
 	public:
 		CqShaderVariableUniformColor() : CqShaderVariableUniform<type_color, CqColor>()
-		{}
+		{
+			STATS_INC( SHD_var_uniform_color );
+		}
 		CqShaderVariableUniformColor( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_color, CqColor>( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_uniform_color );
+		}
 		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
 		{
 			res = m_Value;
@@ -921,9 +987,13 @@ class CqShaderVariableUniformMatrix : public CqShaderVariableUniform<type_matrix
 {
 	public:
 		CqShaderVariableUniformMatrix() : CqShaderVariableUniform<type_matrix, CqMatrix>()
-		{}
+		{
+			STATS_INC( SHD_var_uniform_matrix );
+		}
 		CqShaderVariableUniformMatrix( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableUniform<type_matrix, CqMatrix>( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_uniform_matrix );
+		}
 		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
 		{
 			res = m_Value;
@@ -965,24 +1035,50 @@ class CqShaderVariableVarying : public CqShaderVariable
 		CqShaderVariableVarying( ) : CqShaderVariable( )
 		{
 			m_aValue.resize( 1 );
+			
+			STATS_INC( SHD_var_varying );
+			STATS_INC( SHD_var_varying_current );
+			TqInt cvVar = STATS_GETI( SHD_var_varying_current );
+			TqInt cPeak = STATS_GETI( SHD_var_varying_peak );
+			STATS_SETI( SHD_var_varying_peak, cvVar > cPeak ? cvVar : cPeak );
 		}
 
 		CqShaderVariableVarying( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariable( strName, fParameter )
 		{
 			m_aValue.resize( 1 );
+			
+			STATS_INC( SHD_var_varying );
+			STATS_INC( SHD_var_varying_current );
+			TqInt cvVar = STATS_GETI( SHD_var_varying_current );
+			TqInt cPeak = STATS_GETI( SHD_var_varying_peak );
+			STATS_SETI( SHD_var_varying_peak, cvVar > cPeak ? cvVar : cPeak );
 		}
 		CqShaderVariableVarying( const char* strName, const R& val ) : CqShaderVariable( strName )
 		{
 			m_aValue.resize( 1 );
 			m_aValue[ 0 ] = val;
+			
+			STATS_INC( SHD_var_varying );
+			STATS_INC( SHD_var_varying_current );
+			TqInt cvVar = STATS_GETI( SHD_var_varying_current );
+			TqInt cPeak = STATS_GETI( SHD_var_varying_peak );
+			STATS_SETI( SHD_var_varying_peak, cvVar > cPeak ? cvVar : cPeak );
 		}
 		CqShaderVariableVarying( const CqShaderVariableVarying<T, R>& val ) : CqShaderVariable( val )
 		{
 			m_aValue.resize( val.m_aValue.size() );
 			m_aValue.assign( val.m_aValue.begin(), val.m_aValue.begin() );
+			
+			STATS_INC( SHD_var_varying );
+			STATS_INC( SHD_var_varying_current );
+			TqInt cvVar = STATS_GETI( SHD_var_varying_current );
+			TqInt cPeak = STATS_GETI( SHD_var_varying_peak );
+			STATS_SETI( SHD_var_varying_peak, cvVar > cPeak ? cvVar : cPeak );
 		}
 		virtual	~CqShaderVariableVarying()
-		{}
+		{
+			STATS_DEC( SHD_var_varying_current );
+		}
 
 		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
 		{
@@ -990,6 +1086,8 @@ class CqShaderVariableVarying : public CqShaderVariable
 			if ( m_aValue.size() > 0 ) Def = m_aValue[ 0 ];
 			m_aValue.resize( ( uGridRes + 1 ) * ( vGridRes + 1 ) );
 			SetValue( Def );
+
+			STATS_INC( SHD_Var_varying_init );
 		}
 
 		virtual	void	SetSize( const TqInt size )
@@ -1173,9 +1271,13 @@ class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, 
 {
 	public:
 		CqShaderVariableVaryingFloat( ) : CqShaderVariableVarying<type_float, TqFloat>( )
-		{}
+		{
+			STATS_INC( SHD_var_varying_float );
+		}
 		CqShaderVariableVaryingFloat( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_float, TqFloat>( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_varying_float );
+		}
 		virtual	void	GetFloat( TqFloat& res, TqInt index = 0 ) const
 		{
 			res = m_aValue[ index ];
@@ -1254,9 +1356,13 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 {
 	public:
 		CqShaderVariableVaryingString( ) : CqShaderVariableVarying<type_string, CqString>( )
-		{}
+		{
+			STATS_INC( SHD_var_varying_string );
+		}
 		CqShaderVariableVaryingString( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_string, CqString>( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_varying_string );
+		}
 		virtual	void	GetString( CqString& res, TqInt index = 0 ) const
 		{
 			res = m_aValue[ index ];
@@ -1325,9 +1431,13 @@ class CqShaderVariableVaryingPoint : public CqShaderVariableVarying<type_point, 
 {
 	public:
 		CqShaderVariableVaryingPoint( ) : CqShaderVariableVarying<type_point, CqVector3D>( )
-		{}
+		{
+			STATS_INC( SHD_var_varying_point );
+		}
 		CqShaderVariableVaryingPoint( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_point, CqVector3D>( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_varying_point );
+		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 		{
 			res = m_aValue[ index ];
@@ -1436,9 +1546,13 @@ class CqShaderVariableVaryingVector : public CqShaderVariableVarying<type_vector
 {
 	public:
 		CqShaderVariableVaryingVector( ) : CqShaderVariableVarying<type_vector, CqVector3D>( )
-		{}
+		{
+			STATS_INC( SHD_var_varying_vector );
+		}
 		CqShaderVariableVaryingVector( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_vector, CqVector3D>( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_varying_vector );
+		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 		{
 			res = m_aValue[ index ];
@@ -1547,9 +1661,13 @@ class CqShaderVariableVaryingNormal : public CqShaderVariableVarying<type_normal
 {
 	public:
 		CqShaderVariableVaryingNormal( ) : CqShaderVariableVarying<type_normal, CqVector3D>( )
-		{}
+		{
+			STATS_INC( SHD_var_varying_normal );
+		}
 		CqShaderVariableVaryingNormal( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_normal, CqVector3D>( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_varying_normal );
+		}
 		virtual	void	GetPoint( CqVector3D& res, TqInt index = 0 ) const
 		{
 			res = m_aValue[ index ];
@@ -1658,9 +1776,13 @@ class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, 
 {
 	public:
 		CqShaderVariableVaryingColor( ) : CqShaderVariableVarying<type_color, CqColor>( )
-		{}
+		{
+			STATS_INC( SHD_var_varying_color );
+		}
 		CqShaderVariableVaryingColor( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_color, CqColor>( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_varying_color );
+		}
 		virtual	void	GetColor( CqColor& res, TqInt index = 0 ) const
 		{
 			res = m_aValue[ index ];
@@ -1729,9 +1851,13 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 {
 	public:
 		CqShaderVariableVaryingMatrix( ) : CqShaderVariableVarying<type_matrix, CqMatrix>( )
-		{}
+		{
+			STATS_INC( SHD_var_varying_matrix );
+		}
 		CqShaderVariableVaryingMatrix( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariableVarying<type_matrix, CqMatrix>( strName, fParameter )
-		{}
+		{
+			STATS_INC( SHD_var_varying_matrix );
+		}
 		virtual	void	GetMatrix( CqMatrix& res, TqInt index = 0 ) const
 		{
 			res = m_aValue[ index ];

@@ -308,10 +308,10 @@ void CqStats::PrintStats( TqInt level ) const
 			GPrim stats
 		*/
 
-		TqFloat _gpr_c_q = 100.0f * STATS_GETI( GPR_culled ) /STATS_GETI( GPR_created_total );
-		TqFloat _gpr_u_q = 100.0f * STATS_GETI( GPR_created_total ) /STATS_GETI( GPR_allocated );
+		TqFloat _gpr_c_q = 100.0f * STATS_INT_GETI( GPR_culled ) / STATS_INT_GETI( GPR_created_total );
+		TqFloat _gpr_u_q = 100.0f * STATS_INT_GETI( GPR_created_total ) / STATS_INT_GETI( GPR_allocated );
 
-		MSG << "Input geometry:\n\t" << STATS_GETI( GPR_created ) << " primitives created\n\n"
+		MSG << "Input geometry:\n\t" << STATS_INT_GETI( GPR_created ) << " primitives created\n\n"
 			<< "\t"	<<	STATS_INT_GETI( GPR_subdiv ) << " subdivision primitives\n\t"
 			<<			STATS_INT_GETI( GPR_nurbs )	 << " NURBS primitives\n\t"
 			<<			STATS_INT_GETI( GPR_poly )	 << " polygons\n\t"
@@ -323,8 +323,8 @@ void CqStats::PrintStats( TqInt level ) const
 
 		MSG << "GPrims:\n\t" 
 			<< STATS_INT_GETI( GPR_allocated ) <<  " allocated\n\t"
-			<< STATS_GETI( GPR_created_total ) <<  " used (" << _gpr_u_q << "%), " << STATS_GETI( GPR_peak ) << " peak,\n\t"
-			<< STATS_GETI( GPR_culled ) << " culled (" << _gpr_c_q << "%)\n" << std::endl;
+			<< STATS_INT_GETI( GPR_created_total ) <<  " used (" << _gpr_u_q << "%), " << STATS_INT_GETI( GPR_peak ) << " peak,\n\t"
+			<< STATS_INT_GETI( GPR_culled ) << " culled (" << _gpr_c_q << "%)\n" << std::endl;
 		
 		/*
 			GPrim stats - End
@@ -339,12 +339,12 @@ void CqStats::PrintStats( TqInt level ) const
 		*/
 
 		// Curves
-		TqFloat _geo_crv_s_q = 100.0f * STATS_GETI( GEO_crv_splits ) / STATS_GETI( GPR_crv );
-		TqFloat _geo_crv_s_c_q = 100.0f * STATS_GETI( GEO_crv_crv ) / STATS_GETI( GEO_crv_splits );
-		TqFloat _geo_crv_s_p_q = 100.0f * STATS_GETI( GEO_crv_patch ) / STATS_GETI( GEO_crv_splits );
+		TqFloat _geo_crv_s_q = 100.0f * STATS_INT_GETI( GEO_crv_splits ) / STATS_INT_GETI( GPR_crv );
+		TqFloat _geo_crv_s_c_q = 100.0f * STATS_INT_GETI( GEO_crv_crv ) / STATS_INT_GETI( GEO_crv_splits );
+		TqFloat _geo_crv_s_p_q = 100.0f * STATS_INT_GETI( GEO_crv_patch ) / STATS_INT_GETI( GEO_crv_splits );
 		
 		// Procedural
-		TqFloat _geo_prc_s_q = 100.0f * STATS_GETI( GEO_prc_split ) / STATS_GETI( GEO_prc_created );
+		TqFloat _geo_prc_s_q = 100.0f * STATS_INT_GETI( GEO_prc_split ) / STATS_INT_GETI( GEO_prc_created );
 		
 		
 		MSG << "Geometry:\n\t"
@@ -538,7 +538,42 @@ void CqStats::PrintStats( TqInt level ) const
 			-------------------------------------------------------------------
 		*/
 
-			MSG <<	"Shading:\n\tShadeop calls:\n\t\t"
+			TqFloat _shd_var_a = 100.0f * STATS_INT_GETI( SHD_var_array ) / STATS_INT_GETI( SHD_var_created_total );
+			TqFloat _shd_var_u = 100.0f * STATS_INT_GETI( SHD_var_uniform ) / STATS_INT_GETI( SHD_var_created_total );
+			TqFloat _shd_var_v = 100.0f * STATS_INT_GETI( SHD_var_varying ) / STATS_INT_GETI( SHD_var_created_total );
+		
+			
+		
+
+			MSG << 	"Shading:\n\t"
+				<<					"Variables:\n\t\t"
+				<<							STATS_INT_GETI( SHD_var_created_total )  << " created\n\n\t\t"
+				<<					"Arrays:\n\t\t"
+				<<					"\t" << STATS_INT_GETI( SHD_var_array ) << " created (" << _shd_var_a << "%), " << STATS_INT_GETI( SHD_var_array_peak ) << " peak\n\t\t"
+				<<					"\t" << STATS_INT_GETI( SHD_var_array_init ) << " initialized\n\n\t\t"
+				<<					"Uniform:\n\t\t"
+				<<					"\t" << STATS_INT_GETI( SHD_var_uniform ) << " created (" << _shd_var_u << "%), " << STATS_INT_GETI( SHD_var_uniform_peak ) << " peak\n\t\t"
+				<<					"\t" << STATS_INT_GETI( SHD_var_uniform_init ) << " inits\n\n\t\t"
+				<<					"\t\t" << STATS_INT_GETI( SHD_var_uniform_float ) << " float\n\t\t"
+				<<					"\t\t" << STATS_INT_GETI( SHD_var_uniform_string ) << " string\n\t\t"
+				<<					"\t\t" << STATS_INT_GETI( SHD_var_uniform_point ) << " point\n\t\t"
+				<<					"\t\t" << STATS_INT_GETI( SHD_var_uniform_vector ) << " vector\n\t\t"
+				<<					"\t\t" << STATS_INT_GETI( SHD_var_uniform_normal ) << " normal\n\t\t"
+				<<					"\t\t" << STATS_INT_GETI( SHD_var_uniform_color ) << " color\n\t\t"
+				<<					"\t\t" << STATS_INT_GETI( SHD_var_uniform_matrix ) << " matrix\n\n\t\t"
+				<<					"Varying:\n\t\t"
+				<<					"\t" << STATS_INT_GETI( SHD_var_varying ) << " created (" << _shd_var_v << "%), " << STATS_INT_GETI( SHD_var_varying_peak ) << " peak\n\t\t"
+				<<					"\t" << STATS_INT_GETI( SHD_Var_varying_init ) << " inits\n\n\t\t"
+				<<					"\t\t" << STATS_INT_GETI( SHD_var_varying_float ) << " float\n\t\t"
+				<<					"\t\t" << STATS_INT_GETI( SHD_var_varying_string ) << " string\n\t\t"
+				<<					"\t\t" << STATS_INT_GETI( SHD_var_varying_point ) << " point\n\t\t"
+				<<					"\t\t" << STATS_INT_GETI( SHD_var_varying_vector ) << " vector\n\t\t"
+				<<					"\t\t" << STATS_INT_GETI( SHD_var_varying_normal ) << " normal\n\t\t"
+				<<					"\t\t" << STATS_INT_GETI( SHD_var_varying_color ) << " color\n\t\t"
+				<<					"\t\t" << STATS_INT_GETI( SHD_var_varying_matrix ) << " matrix\n\n\t"
+
+
+				<<	"Shadeop calls:\n\t\t"
 					<< STATS_INT_GETI( SHD_so_abs ) << "\tabs\n\t\t"
 					<< STATS_INT_GETI( SHD_so_acos ) << "\tacos\n\t\t"
 					<< STATS_INT_GETI( SHD_so_ambient ) << "\tambient\n\t\t"
