@@ -124,54 +124,66 @@ int main( int argc, const char** argv )
 					symPtr = SLX_GetArgById(i);
 					if (symPtr != NULL)
 					{
+						TqInt arrayLen = 1;
+						if( symPtr->svd_arraylen != 0 )
+							arrayLen = symPtr->svd_arraylen;
+
 						std::cout << "\t\"" << symPtr->svd_name << "\" \"" << 
-							SLX_DetailtoStr(symPtr->svd_detail) <<
-							SLX_TypetoStr(symPtr->svd_type) << 
-							"\"" << std::endl;
+							SLX_DetailtoStr(symPtr->svd_detail) << " " << 
+							SLX_TypetoStr(symPtr->svd_type);
+							
+						if( symPtr->svd_arraylen != 0 )
+							std::cout << "[" << arrayLen << "]";
+
+						std::cout << "\"" << std::endl;
         				
-						std::cout << "\t\tDefault value: ";
-						
-						if (symPtr->svd_spacename != NULL)
+						TqInt arrayIndex;
+						for( arrayIndex = 0; arrayIndex < arrayLen; arrayIndex++ )
 						{
-							if ((symPtr->svd_type == SLX_TYPE_POINT) || 
-									(symPtr->svd_type == SLX_TYPE_COLOR))
-								std::cout << "\"" << symPtr->svd_spacename << "\" ";
-						}
-                
-						if (symPtr->svd_default.stringval != NULL)
-						{
-							switch (symPtr->svd_type)
+							std::cout << "\t\tDefault value: ";
+							
+							if (symPtr->svd_spacename != NULL)
 							{
-								case SLX_TYPE_UNKNOWN:
-									std::cout << "unknown" << std::endl;
-									break;
-								case SLX_TYPE_POINT:
-									std::cout << "[" << symPtr->svd_default.pointval->xval << ", " <<
-														symPtr->svd_default.pointval->xval << ", " <<
-														symPtr->svd_default.pointval->xval <<
-												"]" << std::endl;
-									break;
-								case SLX_TYPE_COLOR:
-									std::cout << "[" << symPtr->svd_default.pointval->xval << ", " <<
-														symPtr->svd_default.pointval->xval << ", " <<
-														symPtr->svd_default.pointval->xval <<
-												"]" << std::endl;
-									break;
-								case SLX_TYPE_SCALAR:
-									std::cout << *(symPtr->svd_default.scalarval) << std::endl;
-									break;
-								case SLX_TYPE_STRING:
-									std::cout << "\"" << symPtr->svd_default.stringval << "\"" << std::endl;
-									break;
-								default:
-									std::cout << "unknown" << std::endl;
-									break;
+								if ((symPtr->svd_type == SLX_TYPE_POINT) || 
+										(symPtr->svd_type == SLX_TYPE_COLOR))
+									std::cout << "\"" << symPtr->svd_spacename << "\" ";
+							}
+                
+							if (symPtr->svd_default.stringval != NULL)
+							{
+								switch (symPtr->svd_type)
+								{
+									case SLX_TYPE_UNKNOWN:
+										std::cout << "unknown" << std::endl;
+										break;
+									case SLX_TYPE_POINT:
+										std::cout << "[" << symPtr->svd_default.pointval[arrayIndex].xval << ", " <<
+															symPtr->svd_default.pointval[arrayIndex].xval << ", " <<
+															symPtr->svd_default.pointval[arrayIndex].xval <<
+													"]" << std::endl;
+										break;
+									case SLX_TYPE_COLOR:
+										std::cout << "[" << symPtr->svd_default.pointval[arrayIndex].xval << ", " <<
+															symPtr->svd_default.pointval[arrayIndex].xval << ", " <<
+															symPtr->svd_default.pointval[arrayIndex].xval <<
+													"]" << std::endl;
+										break;
+									case SLX_TYPE_SCALAR:
+										std::cout << symPtr->svd_default.scalarval[arrayIndex] << std::endl;
+										break;
+									case SLX_TYPE_STRING:
+										std::cout << "\"" << symPtr->svd_default.stringval[arrayIndex] << "\"" << std::endl;
+										break;
+									default:
+										std::cout << "unknown" << std::endl;
+										break;
+								}
 							}
 						}
-						else
-						{
-							printf("ERROR - null pointer to value");
-						}
+					}
+					else
+					{
+						printf("ERROR - null pointer to value");
 					}
 				}
         

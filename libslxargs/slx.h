@@ -81,7 +81,7 @@ typedef struct SLXvissymdef {
         SLX_POINT	*pointval;
         SLX_SCALAR	*scalarval;
         SLX_SCALAR	*matrixval;
-        char		*stringval;
+        char		**stringval;
     } svd_default;
 } SLX_VISSYMDEF;
 

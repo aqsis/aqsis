@@ -570,7 +570,7 @@ IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariabl
 				pVar = new CqShaderVariableUniformMatrix( name.c_str(), fParameter );
 			break;
 	}
-	CqShaderVariableArray* pArray = new CqShaderVariableArray( name.c_str(), Count );
+	CqShaderVariableArray* pArray = new CqShaderVariableArray( name.c_str(), Count, fParameter );
 	pArray->aVariables() [ 0 ] = pVar;
 	TqInt i;
 	for ( i = 1; i < Count; i++ )

@@ -109,7 +109,7 @@ class CqShaderVariableArray: public CqShaderVariable
 		 * \param name Character pointer to the name to use.
 		 * \param Count, the size of the array.
 		 */
-		CqShaderVariableArray( const char* name, TqInt Count ) : CqShaderVariable( name )
+		CqShaderVariableArray( const char* name, TqInt Count, TqBool fParameter = TqFalse ) : CqShaderVariable( name, fParameter )
 		{
 			assert( Count > 0 );
 			m_aVariables.resize( Count );

@@ -24,14 +24,10 @@
 */
 
 /* TO DO:
- *  1 - Currently, this routine returns all uniform variables, including local variables.  When a 'param' flag is available from ShaderVM, modify this routine to return shader arguments only.
- *  2 - Set svd_arraylen in SLX_VISSYMDEF records.  Currently hard coded to 0.
- *  3 - Set svd_spacename for type SLX_TYPE_POINT in SLX_VISSYMDEF records.  Currently hard coded to RI_SHADER.
+ *  1 - Set svd_spacename for type SLX_TYPE_POINT in SLX_VISSYMDEF records.  Currently hard coded to RI_SHADER.
  *      Valid values should include RI_CURRENT, RI_SHADER, RI_EYE or RI_NDC.
- *  3 - Set svd_spacename for type SLX_TYPE_COLOR in SLX_VISSYMDEF records.  Currently hard codes to RI_RGB.
+ *  2 - Set svd_spacename for type SLX_TYPE_COLOR in SLX_VISSYMDEF records.  Currently hard codes to RI_RGB.
  *      Valid values should include RI_RGB, RI_RGBA, RI_RGBZ, RI_RGBAZ, RI_A, RI_Z or RI_AZ.
- *  5 - Implement SLX_GetArrayArgElement().
- *  6 - Implement libshadervm and use it instead of libaqsis.  Eliminate other unnecessary libs.
  */
 
 #include <stdio.h>
@@ -176,7 +172,7 @@ SLX_VISSYMDEF * GetShaderArgRecByName(SLX_VISSYMDEF * theShaderArgArray,
  */
 static void FreeArgRecStorage(SLX_VISSYMDEF * theShaderArgArray, int theShaderNArgs)
 {
-    int argIdx;
+    int argIdx, stringIdx, stringCount;
     for (argIdx = 0; argIdx < currentShaderNArgs; argIdx++)
     {
         SLX_VISSYMDEF * theShaderArgRec;
@@ -196,6 +192,16 @@ static void FreeArgRecStorage(SLX_VISSYMDEF * theShaderArgArray, int theShaderNA
         
         if (theShaderArgRec->svd_default.stringval != NULL)
         {
+			// Delete each string first.
+			if( theShaderArgRec->svd_type == SLX_TYPE_STRING )
+			{
+				stringCount = 1;
+				if( theShaderArgRec->svd_arraylen != 0 )
+					stringCount = theShaderArgRec->svd_arraylen;
+				for( stringIdx = 0; stringIdx < stringCount; stringIdx++ )
+					free( theShaderArgRec->svd_default.stringval[stringIdx] );
+			}
+
             free(theShaderArgRec->svd_default.stringval);
             theShaderArgRec->svd_default.stringval = NULL;
         }
@@ -207,7 +213,7 @@ static void FreeArgRecStorage(SLX_VISSYMDEF * theShaderArgArray, int theShaderNA
  * Store info in the shader arg record specified by index
 */
 static RtInt StoreShaderArgDef(SLX_VISSYMDEF * theArgsArray, int argsArrayIdx, 
-        char * varName, SLX_TYPE varType, char * spacename, char * defaultVal)
+        char * varName, SLX_TYPE varType, char * spacename, char * defaultVal, int arrayLen)
 {
     SLX_VISSYMDEF * theShaderArgRec;
     RtInt result;
@@ -225,8 +231,10 @@ static RtInt StoreShaderArgDef(SLX_VISSYMDEF * theArgsArray, int argsArrayIdx,
     theShaderArgRec->svd_detail = SLX_DETAIL_UNIFORM;
     
     theShaderArgRec->svd_spacename = spacename;
+
+    theShaderArgRec->svd_arraylen = arrayLen;
     
-    theShaderArgRec->svd_default.stringval = defaultVal;
+    theShaderArgRec->svd_default.stringval = (char**)defaultVal;
     
     return result;
 }
@@ -282,9 +290,12 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
     char *			varNameCStr;
     char *			theVarNameStr;
     int 			nameLength;
-    char *			defaultVal;
+    char *			defaultVal = NULL;
+    char *			defaultValString = NULL;
     int 			defaultValLength;
     char * 			spacename;
+	int				arrayLen = 0;
+	int				arrayIndex;
 
     shaderVar = pShader->GetShaderVarAt(i);
     if ( shaderVar != NULL && shaderVar->fParameter() ) 
@@ -307,15 +318,30 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     TqFloat			aTqFloat;
                     RtFloat			aRtFloat;
                     slxType = SLX_TYPE_SCALAR;
-					shaderVar->GetFloat( aTqFloat );
-                    aRtFloat = aTqFloat;
-                    defaultValLength = sizeof(RtFloat);
-                    defaultVal = (char *)malloc(defaultValLength);
-                    memcpy(defaultVal, &aRtFloat, defaultValLength);
+					if( shaderVar->ArrayLength() == 0 )
+					{
+						shaderVar->GetFloat( aTqFloat );
+						aRtFloat = aTqFloat;
+						defaultValLength = sizeof(RtFloat);
+						defaultVal = (char *)malloc(defaultValLength);
+						memcpy(defaultVal, &aRtFloat, defaultValLength);
+					}
+					else
+					{
+						arrayLen = shaderVar->ArrayLength();
+						defaultValLength = sizeof(RtFloat) * arrayLen;
+						defaultVal = (char *)malloc(defaultValLength);
+						for( arrayIndex = 0; arrayIndex < arrayLen; arrayIndex++ )
+						{
+							shaderVar->ArrayEntry(arrayIndex)->GetFloat( aTqFloat );
+							aRtFloat = aTqFloat;
+							memcpy(defaultVal + ( arrayIndex* sizeof(RtFloat) ), &aRtFloat, sizeof(RtFloat));
+						}
+					}
                     spacename = (char *)malloc(1);
                     *spacename = 0x0;	// NULL string
                     StoreShaderArgDef(theArgsArray, *theNArgs, theVarNameStr, slxType, 
-                            spacename, defaultVal);
+                            spacename, defaultVal, arrayLen);
                     (*theNArgs)++;
                 }
                 break;
@@ -324,15 +350,35 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     CqString		aCqString;
                     char *			aCString;
                     slxType = SLX_TYPE_STRING;
-					shaderVar->GetString( aCqString );
-                    aCString = (char *)aCqString.c_str();
-                    defaultValLength = strlen(aCString) + 1;
-                    defaultVal = (char *)malloc(defaultValLength);
-                    strcpy(defaultVal, aCString);
+					if( shaderVar->ArrayLength() == 0 )
+					{
+						shaderVar->GetString( aCqString );
+						aCString = (char *)aCqString.c_str();
+						defaultValLength = strlen(aCString) + 1;
+						defaultValString = (char *)malloc(defaultValLength);
+						strcpy(defaultVal, aCString);
+						defaultVal = (char *)malloc(sizeof(char *));
+						memcpy(defaultVal, &defaultValString, sizeof(char *) );
+					}
+					else
+					{
+						arrayLen = shaderVar->ArrayLength();
+						defaultValLength = sizeof(char *) * arrayLen;
+						defaultVal = (char *)malloc(defaultValLength);
+						for( arrayIndex = 0; arrayIndex < arrayLen; arrayIndex++ )
+						{
+							shaderVar->ArrayEntry(arrayIndex)->GetString( aCqString );
+							aCString = (char *)aCqString.c_str();
+							defaultValLength = strlen(aCString) + 1;
+							defaultValString = (char *)malloc(defaultValLength);
+							strcpy(defaultValString, aCString);
+							memcpy(defaultVal + (arrayIndex* sizeof(char *)), &defaultValString, sizeof(char *) );
+						}
+					}
                     spacename = (char *)malloc(1);
                     *spacename = 0x0;	// NULL string
                     StoreShaderArgDef(theArgsArray, *theNArgs, theVarNameStr, slxType, 
-                            spacename, defaultVal);
+                            spacename, defaultVal, arrayLen);
                     (*theNArgs)++;
                 }
                 break;
@@ -341,13 +387,30 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     CqVector3D		aCqVector3D;
                     RtPoint			aRtPoint;
                     slxType = SLX_TYPE_POINT;
-					shaderVar->GetPoint( aCqVector3D );
-                    aRtPoint[0] = aCqVector3D[0];
-                    aRtPoint[1] = aCqVector3D[1];
-                    aRtPoint[2] = aCqVector3D[2];
-                    defaultValLength = sizeof(RtPoint);
-                    defaultVal = (char *)malloc(defaultValLength);
-                    memcpy(defaultVal, &aRtPoint, defaultValLength);
+					if( shaderVar->ArrayLength() == 0 )
+					{
+						shaderVar->GetPoint( aCqVector3D );
+						aRtPoint[0] = aCqVector3D[0];
+						aRtPoint[1] = aCqVector3D[1];
+						aRtPoint[2] = aCqVector3D[2];
+						defaultValLength = sizeof(RtPoint);
+						defaultVal = (char *)malloc(defaultValLength);
+						memcpy(defaultVal, &aRtPoint, defaultValLength);
+					}
+					else
+					{
+						arrayLen = shaderVar->ArrayLength();
+						defaultValLength = sizeof(RtPoint) * arrayLen;
+						defaultVal = (char *)malloc(defaultValLength);
+						for( arrayIndex = 0; arrayIndex < arrayLen; arrayIndex++ )
+						{
+							shaderVar->ArrayEntry(arrayIndex)->GetPoint( aCqVector3D );
+							aRtPoint[0] = aCqVector3D[0];
+							aRtPoint[1] = aCqVector3D[1];
+							aRtPoint[2] = aCqVector3D[2];
+							memcpy(defaultVal + (arrayIndex* sizeof(RtPoint)), &aRtPoint, sizeof(RtPoint));
+						}
+					}
                     
                     // shader evaluation space - RI_CURRENT, RI_SHADER, RI_EYE or RI_NDC
                     // just go with RI_SHADER for now
@@ -355,7 +418,7 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     strcpy(spacename, "shader");
                     
                     StoreShaderArgDef(theArgsArray, *theNArgs, theVarNameStr, slxType, 
-                            spacename, defaultVal);
+                            spacename, defaultVal, arrayLen);
                     (*theNArgs)++;
                 }
                 break;
@@ -364,13 +427,30 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     CqColor			aCqColor;
                     RtColor			aRtColor;
                     slxType = SLX_TYPE_COLOR;
-					shaderVar->GetColor( aCqColor );
-                    aRtColor[0] = aCqColor.fRed();
-                    aRtColor[1] = aCqColor.fGreen();
-                    aRtColor[2] = aCqColor.fBlue();
-                    defaultValLength = sizeof(RtColor);
-                    defaultVal = (char *)malloc(defaultValLength);
-                    memcpy(defaultVal, &aRtColor, defaultValLength);
+					if( shaderVar->ArrayLength() == 0 )
+					{
+						shaderVar->GetColor( aCqColor );
+						aRtColor[0] = aCqColor.fRed();
+						aRtColor[1] = aCqColor.fGreen();
+						aRtColor[2] = aCqColor.fBlue();
+						defaultValLength = sizeof(RtColor);
+						defaultVal = (char *)malloc(defaultValLength);
+						memcpy(defaultVal, &aRtColor, defaultValLength);
+					}
+					else
+					{
+						arrayLen = shaderVar->ArrayLength();
+						defaultValLength = sizeof(RtColor) * arrayLen;
+						defaultVal = (char *)malloc(defaultValLength);
+						for( arrayIndex = 0; arrayIndex < arrayLen; arrayIndex++ )
+						{
+							shaderVar->ArrayEntry(arrayIndex)->GetColor( aCqColor );
+							aRtColor[0] = aCqColor[0];
+							aRtColor[1] = aCqColor[1];
+							aRtColor[2] = aCqColor[2];
+							memcpy(defaultVal + (arrayIndex* sizeof(RtColor)), &aRtColor, sizeof(RtColor));
+						}
+					}
                     
                     // shader evaluation space - RI_RGB, RI_RGBA, RI_RGBZ, RI_RGBAZ, RI_A, RI_Z or RI_AZ
                     // just go with RI_RGB for now
@@ -378,7 +458,7 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     strcpy(spacename, "rgb");
                     
                     StoreShaderArgDef(theArgsArray, *theNArgs, theVarNameStr, slxType, 
-                            spacename, defaultVal);
+                            spacename, defaultVal, arrayLen);
                     (*theNArgs)++;
                 }
                 break;
