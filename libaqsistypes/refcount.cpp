@@ -255,21 +255,6 @@ CqRefCount::CqRefCount( const CqRefCount& From )
 
 CqRefCount::~CqRefCount()
 {
-
-	// Delete any reference counting records that are stored.
-	RecordIterator end = m_records.end();
-	for (RecordIterator i = m_records.begin(); i != end; i++)
-	{
-		// This deletes an object of type RefCountRecord*
-		delete ( *i );
-	}
-	m_records.clear();
-
-	// Remove the reference count object from the global list
-	//  so that it is no longer included in the un-released
-	//  list.
-	RefCountTracker::removeRefCountObj( this );
-	
 }
 
 TqInt CqRefCount::RefCount() const
@@ -303,6 +288,24 @@ void CqRefCount::Release(const TqChar* file, TqInt line)
 	//  references to it.
 	if (m_cReferences <= 0)
 	{
+
+		// Delete the reference counting records that are stored.
+		RecordIterator end = m_records.end();
+		for (RecordIterator i = m_records.begin(); i != end; i++)
+		{
+			// This deletes an object of type RefCountRecord*
+			assert( (*i) != NULL );
+			delete ( *i );
+			(*i) = NULL;
+		}
+		m_records.clear();
+
+		// Remove the reference count object from the global list
+		//  so that it is no longer included in the un-released
+		//  list.
+		RefCountTracker::removeRefCountObj( this );
+
+		
 		// free the memory
 		delete( this );
 	}
@@ -317,8 +320,8 @@ void CqRefCount::dump() const
 	std::cout << "Reference history for un-freed CqRefCount class of type: ";
 	std::cout << className() << "\n";
 	
-        RecordIterator end = m_records.end();
-        for (RecordIterator i = m_records.begin(); i != end; i++)
+        ConstRecordIterator end = m_records.end();
+        for (ConstRecordIterator i = m_records.begin(); i != end; i++)
 	{
 		(*i)->dump();
 		std::cout << "\n";
