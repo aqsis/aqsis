@@ -263,6 +263,14 @@ struct IqShaderExecEnv
 	virtual	TqBool	SO_init_illuminance() = 0;
 	virtual	TqBool	SO_advance_illuminance() = 0;
 
+#ifndef _DEBUG
+	virtual void AddRef() = 0;
+	virtual void Release() = 0;
+#else
+	virtual void AddRef(const TqChar* file, TqInt line) = 0;
+	virtual void Release(const TqChar* file, TqInt line) = 0;
+#endif
+
 	// ShadeOps
 	virtual STD_SO	SO_radians( FLOATVAL degrees, DEFPARAM ) = 0;
 	virtual STD_SO	SO_degrees( FLOATVAL radians, DEFPARAM ) = 0;
