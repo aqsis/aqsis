@@ -755,7 +755,6 @@ void CqBucket::QuantizeBucket()
 	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
 	{
 		double ditheramplitude=QGetRenderContext()->optCurrent().fColorQuantizeDitherAmplitude();
-		if(ditheramplitude==0)	return;
 		TqInt one=QGetRenderContext()->optCurrent().iColorQuantizeOne();
 		TqInt min=QGetRenderContext()->optCurrent().iColorQuantizeMin();
 		TqInt max=QGetRenderContext()->optCurrent().iColorQuantizeMax();
