@@ -1108,11 +1108,11 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 			if ( strcmp( strName, "null" ) != 0 )
 			{
 				CqString strError( "Shader \"" );
-				strError += strName;
+				strError += strName ? strName : "";
 				strError += "\" not found";
 				//strError.Format("Shader \"%s\" not found",strName.String());
 				//CqBasicError( ErrorID_FileNotFound, Severity_Normal, strError.c_str() );
-				QGetRenderContext() ->Logger() ->error( "Shader \"%s\" not found" );
+				QGetRenderContext() ->Logger() ->error( strError );
 			}
 			if( type == Type_Surface )
 			{
