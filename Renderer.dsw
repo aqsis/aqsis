@@ -54,9 +54,6 @@ Package=<4>
     Project_Dep_Name framebuffer_glut_z
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name aqslcomp
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name libcodegenvm
     End Project Dependency
     Begin Project Dependency
@@ -101,9 +98,6 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name bake2tif
     End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name aqsl
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -118,12 +112,6 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name slpp
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name aqslcomp
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name aqsl
     End Project Dependency
 }}}
 
@@ -155,36 +143,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name aqslcomp
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name slpp
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "aqslcomp"=.\aqsl\aqslcomp.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name libslparse
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libcodegenvm
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libargparse
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libaqsistypes
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -250,12 +208,6 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name aqsis
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name aqsl
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name aqslcomp
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libshaderexecenv

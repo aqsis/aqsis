@@ -1896,6 +1896,7 @@ void SLCreateLogger()
 void SLDeleteLogger()
 {
 	DeleteLogger( g_ptheLog );
+	g_ptheLog = NULL;
 }
 
 } // End Namespace
