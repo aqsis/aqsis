@@ -9,7 +9,8 @@ light shadowspot(
     string shadowname = "";
     float samples = 16;
     float width = 1;
-	float blur = 0;)
+	float blur = 0;
+	float falloff = 2)
 {
     float atten, cosangle;
     uniform point A = (to - from) / length(to - from);
@@ -18,7 +19,13 @@ light shadowspot(
 
     illuminate (from, A, coneangle) {
         cosangle = (L . A) / length(L);
-        atten = pow(cosangle, beamdistribution) / (L . L);
+        if( falloff == 2 )
+			atten = pow(cosangle, beamdistribution) / (L . L);
+		else if( falloff == 1 )
+			atten = pow(cosangle, beamdistribution) / (length(L)/2);
+		else
+			atten = pow(cosangle, beamdistribution);
+			
         atten *= smoothstep(cosoutside, cosinside, cosangle);
         Cl = atten * intensity * lightcolor;
         if (shadowname != "")
