@@ -45,6 +45,7 @@ bool g_verbose = 0;
 bool g_fb = 0;
 bool g_d = 0;
 bool g_progress = 0;
+TqInt verbose = 1;
 ArgParse::apstring g_config = "";
 ArgParse::apstring g_shaders = "";
 ArgParse::apstring g_archives = "";
@@ -427,6 +428,12 @@ void RenderFile( FILE* file, const char* name )
 		librib::StandardDeclarations( renderengine );
 
 	RiOption( "statistics", "endofframe", &g_endofframe, RI_NULL );
+
+	if ( g_verbose )
+	{
+		RiOption( "statistics", "verbose", &verbose, RI_NULL );
+	}
+
 	const char* popt[ 1 ];
 	popt[ 0 ] = g_shaders.c_str();
 	RiOption( "searchpath", "shader", &popt, RI_NULL );
