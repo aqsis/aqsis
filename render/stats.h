@@ -247,6 +247,13 @@ class CqStats
 		}
 
 		enum {	_First_float,
+			
+				// MPG stats
+					// Size
+					MPG_average_area,
+					MPG_min_area,
+					MPG_max_area,
+
 				_Last_float } EqFloatIndex;
 		enum {	_First_int,
 
@@ -341,11 +348,6 @@ class CqStats
 					MPG_pushed_forward,
 					MPG_pushed_down,
 					MPG_pushed_far_down,
-
-					// Size
-					MPG_average_area,
-					MPG_min_area,
-					MPG_max_area,
 
 				// Shading stats
 
