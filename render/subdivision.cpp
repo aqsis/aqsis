@@ -1374,7 +1374,7 @@ void CqWReference::SetpeHeadHeadRight( CqWEdge* pe )
 
 CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
 {
-	m_fSubdivided = true;
+	m_fSubdivided = TqTrue;
 
 	InterpolateBoundary( pSurf->bInterpolateBoundary() );
 
@@ -1556,6 +1556,8 @@ CqBound CqWSurf::Bound() const
 
 TqBool CqWSurf::Diceable()
 {
+	if( !m_fSubdivided )	return( TqFalse );
+	
 	// Fail if not a quad patch
 	TqInt iF;
 	for ( iF = 0; iF < cFaces(); iF++ )
@@ -1938,7 +1940,7 @@ void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool u
 
 CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec<CqPolygonPoints*>( 0 )
 {
-	m_fSubdivided = true;
+	m_fSubdivided = TqTrue;
 
 	// Allocate a new points class for points storage.
 	TqInt i;
