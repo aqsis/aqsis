@@ -104,8 +104,8 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
 
     // now shuffle the pixels around and add in the pixel offset to the position.
     static CqRandom random(  53 );
-    TqInt shuffleX = random.RandomInt( m_RealWidth );
-    TqInt shuffleY = random.RandomInt( m_RealHeight );
+    TqInt shuffleX = random.RandomInt( m_RealWidth-1 );
+    TqInt shuffleY = random.RandomInt( m_RealHeight-1 );
     TqInt which = 0;
     TqInt sourceIndex = shuffleY * m_RealWidth + shuffleX;
     TqInt numPixels = m_RealWidth*m_RealHeight;

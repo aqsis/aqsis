@@ -120,7 +120,7 @@ public:
     unsigned int RandomInt( unsigned int Range )
     {
         double n = RandomFloat( Range );
-        return ( unsigned int ) n;
+        return ( unsigned int ) ROUND(n);
     }
 
     /** Get a random float (0.0 <= value < 1.0).
