@@ -253,7 +253,7 @@ TqInt	CqBucket::m_YFWidth;
 TqInt	CqBucket::m_XOrigin;
 TqInt	CqBucket::m_YOrigin;
 std::vector<CqImageElement>	CqBucket::m_aieImage;
-std::vector<std::vector<TqFloat> > CqBucket::m_aaFilterValues;
+std::vector<TqFloat> CqBucket::m_aFilterValues;
 
 //----------------------------------------------------------------------
 /** Get a reference to pixel data.
@@ -328,39 +328,37 @@ void CqBucket::InitialiseBucket(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt
 }
 
 
+//----------------------------------------------------------------------
+/** Initialise the static filter values.
+ */
+
 void CqBucket::InitialiseFilterValues()
 {
 	// Allocate and fill in the filter values array for each pixel.
 	RtFilterFunc pFilter;
 	pFilter=QGetRenderContext()->optCurrent().funcFilter();
-	m_aaFilterValues.resize(m_XSize*m_YSize);
 	TqInt NumFilterValues=((m_YFWidth+1)*(m_XFWidth+1));//*(m_PixelXSamples*m_PixelYSamples);
-	TqInt y;
-	for(y=0; y<m_YSize; y++)
+	m_aFilterValues.resize(NumFilterValues);
+	TqFloat* pFilterValues=&m_aFilterValues[0];
+	TqInt fy=-m_YFWidth*0.5f;
+	while(fy<=m_YFWidth*0.5f)
 	{
-		TqInt x;
-		for(x=0; x<m_XSize; x++)
+		TqInt fx=-m_XFWidth*0.5f;
+		while(fx<=m_YFWidth*0.5f)
 		{
-			// Allocate enough entries
-			m_aaFilterValues[(y*m_XSize)+x].resize(NumFilterValues);
-			TqFloat* pFilterValues=&m_aaFilterValues[(y*m_XSize)+x][0];
-			TqInt fy=-m_YFWidth/2;
-			while(fy<=m_YFWidth/2)
-			{
-				TqInt fx=-m_XFWidth/2;
-				while(fx<=m_YFWidth/2)
-				{
-					TqFloat g=(*pFilter)(fx, fy, m_XFWidth, m_YFWidth);
-					*pFilterValues++=g;
+			TqFloat g=(*pFilter)(fx, fy, m_XFWidth, m_YFWidth);
+			*pFilterValues++=g;
 
-					fx++;
-				}
-				fy++;
-			}
+			fx++;
 		}
+		fy++;
 	}
 }
 
+
+//----------------------------------------------------------------------
+/** Combine the subsamples into single pixel samples and coverage information.
+ */
 
 void CqBucket::CombineElements()
 {
@@ -369,90 +367,156 @@ void CqBucket::CombineElements()
 }
 
 
-TqBool CqBucket::FilteredElement(TqInt iXPos, TqInt iYPos, SqImageValue& Val)
+//----------------------------------------------------------------------
+/** Get the sample color for the specified screen position.
+ * If position is outside bucket, returns black.
+ * \param iXPos Screen position of sample.
+ * \param iYPos Screen position of sample.
+ */
+
+CqColor CqBucket::Color(TqInt iXPos, TqInt iYPos)
 {
 	CqImageElement* pie;
+	if(ImageElement(iXPos,iYPos,pie))
+		return(pie->Color());
+	else
+		return(CqColor(0.0f,0.0f,0.0f));
+}
 
-	TqInt X=iXPos-XOrigin();
-	TqInt Y=iYPos-YOrigin();
 
-	if(!ImageElement(iXPos-(XFWidth()*0.5f),iYPos-(YFWidth()*0.5f),pie))
-		return(TqFalse);
+//----------------------------------------------------------------------
+/** Get the sample coverage for the specified screen position.
+ * If position is outside bucket, returns 0.
+ * \param iXPos Screen position of sample.
+ * \param iYPos Screen position of sample.
+ */
 
-	TqInt xsize=QGetRenderContext()->pImage()->XBucketSize();
-	TqInt ysize=QGetRenderContext()->pImage()->YBucketSize();
-	TqFloat* pFilterValues=&m_aaFilterValues[((Y%ysize)*xsize)+(X%xsize)][0];
+TqFloat CqBucket::Coverage(TqInt iXPos, TqInt iYPos)
+{
+	CqImageElement* pie;
+	if(ImageElement(iXPos,iYPos,pie))
+		return(pie->Coverage());
+	else
+		return(0.0f);
+}
 
-	CqColor c(0,0,0);
-	TqFloat d=0.0f;
-	TqFloat gTot=0.0;
-	TqFloat xmax=XFWidth()*0.5f;
-	TqFloat ymax=YFWidth()*0.5f;
-	TqInt fy=static_cast<TqInt>(-ymax);
-	while(fy<=ymax)
+
+//----------------------------------------------------------------------
+/** Get the sample depth for the specified screen position.
+ * If position is outside bucket, returns FLT_MAX.
+ * \param iXPos Screen position of sample.
+ * \param iYPos Screen position of sample.
+ */
+
+TqFloat CqBucket::Depth(TqInt iXPos, TqInt iYPos)
+{
+	CqImageElement* pie;
+	if(ImageElement(iXPos,iYPos,pie))
+		return(pie->Depth());
+	else
+		return(FLT_MAX);
+}
+
+
+//----------------------------------------------------------------------
+/** Filter the samples in this bucket according to type and filter widths.
+ */
+
+void CqBucket::FilterBucket()
+{
+	CqImageElement* pie=&m_aieImage[0];;
+
+	CqColor* pCols=new CqColor[XSize()*YSize()];
+	TqFloat xmax=XFWidth();
+	TqFloat ymax=YFWidth();
+	TqInt	xlen=XSize()+XFWidth();
+
+	TqInt x,y;
+	TqInt i=0;
+	for(y=0; y<YSize(); y++)
 	{
-		TqInt fx=static_cast<TqInt>(-xmax);
-		CqImageElement* pie2=pie;
-		while(fx<=xmax)
+		for(x=0; x<XSize(); x++)
 		{
-			TqFloat g=*pFilterValues++;
-			c+=pie2->Color()*g;
-			d+=pie2->Depth()*g;
-
-			gTot+=g;
-
-			pie2++;
-			fx++;
+			CqColor c(0,0,0);
+			TqFloat gTot=0.0;
+			TqInt fy=0;
+			TqFloat* pFilterValues=&m_aFilterValues[0];
+			while(fy<=ymax)
+			{
+				TqInt fx=0;
+				while(fx<=xmax)
+				{
+					TqInt ieoff=(fy*xlen)+fx;
+					TqFloat g=*pFilterValues++;
+					c+=pie[ieoff].Color()*g;
+					gTot+=g;
+					fx++;
+				}
+				fy++;
+			}
+			pie++;
+			pCols[i++]=c/gTot;
 		}
-		pie+=(xsize+XFWidth());
-		fy++;
+		pie+=XFWidth();
 	}
-
-	Val.m_colColor=c/gTot;
-	Val.m_colOpacity=(CqColor(1,1,1)); // TODO: Work out the A value properly.
-	Val.m_Depth=d/gTot;
-
-	return(TqTrue);
+	
+	i=0;
+	pie=&m_aieImage[((YFWidth()*0.5f)*xlen)+(XFWidth()*0.5f)];
+	for(y=0; y<YSize(); y++)
+	{
+		for(x=0; x<XSize(); x++)
+		{
+			pie->Color()=pCols[i++];
+			pie++;
+		}
+		pie+=XFWidth();
+	}
+	delete[](pCols);
 }
 
 
-TqBool CqBucket::Element(TqInt iXPos, TqInt iYPos, SqImageValue& Val)
-{
-	CqImageElement* pie;
+//----------------------------------------------------------------------
+/** Expose the samples in this bucket according to specified gain and gamma settings.
+ */
 
-	if(!ImageElement(iXPos, iYPos, pie))
-		return(TqFalse);
-
-	Val.m_colColor=pie->Color();
-	Val.m_colOpacity=(CqColor(1,1,1)); // TODO: Work out the A value properly.
-	Val.m_Depth=pie->Depth();
-
-	return(TqTrue);
-}
-
-
-void CqBucket::ExposeElement(SqImageValue& Val)
+void CqBucket::ExposeBucket()
 {
 	if(QGetRenderContext()->optCurrent().fExposureGain()==1.0 &&
 	   QGetRenderContext()->optCurrent().fExposureGamma()==1.0)
 		return;
 	else
 	{
-		// color=(color*gain)^1/gamma
-		if(QGetRenderContext()->optCurrent().fExposureGain()!=1.0)
-			Val.m_colColor*=QGetRenderContext()->optCurrent().fExposureGain();
-
-		if(QGetRenderContext()->optCurrent().fExposureGamma()!=1.0)
+		TqInt	xlen=XSize()+XFWidth();
+		CqImageElement* pie=&m_aieImage[((YFWidth()*0.5f)*xlen)+(XFWidth()*0.5f)];
+		TqInt x,y;
+		for(y=0; y<YSize(); y++)
 		{
-			TqFloat oneovergamma=1.0f/QGetRenderContext()->optCurrent().fExposureGamma();
-			Val.m_colColor.SetfRed  (pow(Val.m_colColor.fRed  (),oneovergamma));
-			Val.m_colColor.SetfGreen(pow(Val.m_colColor.fGreen(),oneovergamma));
-			Val.m_colColor.SetfBlue (pow(Val.m_colColor.fBlue (),oneovergamma));
+			for(x=0; x<XSize(); x++)
+			{
+				// color=(color*gain)^1/gamma
+				if(QGetRenderContext()->optCurrent().fExposureGain()!=1.0)
+					pie->Color()*=QGetRenderContext()->optCurrent().fExposureGain();
+
+				if(QGetRenderContext()->optCurrent().fExposureGamma()!=1.0)
+				{
+					TqFloat oneovergamma=1.0f/QGetRenderContext()->optCurrent().fExposureGamma();
+					pie->Color().SetfRed  (pow(pie->Color().fRed  (),oneovergamma));
+					pie->Color().SetfGreen(pow(pie->Color().fGreen(),oneovergamma));
+					pie->Color().SetfBlue (pow(pie->Color().fBlue (),oneovergamma));
+				}
+				pie++;
+			}
+			pie+=XFWidth();
 		}
 	}
 }
 
-void CqBucket::QuantizeElement(SqImageValue& Val)
+
+//----------------------------------------------------------------------
+/** Quantize the samples in this bucket according to type.
+ */
+
+void CqBucket::QuantizeBucket()
 {
 	static CqRandom random;
 
@@ -464,20 +528,32 @@ void CqBucket::QuantizeElement(SqImageValue& Val)
 		TqInt min=QGetRenderContext()->optCurrent().iColorQuantizeMin();
 		TqInt max=QGetRenderContext()->optCurrent().iColorQuantizeMax();
 
-		double r,g,b,a;
-		double s=random.RandomFloat();
-		if(modf(one*Val.m_colColor.fRed  ()+ditheramplitude*s,&r)>0.5)	r+=1;
-		if(modf(one*Val.m_colColor.fGreen()+ditheramplitude*s,&g)>0.5)	g+=1;
-		if(modf(one*Val.m_colColor.fBlue ()+ditheramplitude*s,&b)>0.5)	b+=1;
-		if(modf(one*Val.m_Coverage		   +ditheramplitude*s,&a)>0.5)	a+=1;
-		r=CLAMP(r,min,max);
-		g=CLAMP(g,min,max);
-		b=CLAMP(b,min,max);
-		a=CLAMP(a,min,max);
-		Val.m_colColor.SetfRed  (r);
-		Val.m_colColor.SetfGreen(g);
-		Val.m_colColor.SetfBlue (b);
-		Val.m_Coverage=a;
+		TqInt	xlen=XSize()+XFWidth();
+		CqImageElement* pie=&m_aieImage[((YFWidth()*0.5f)*xlen)+(XFWidth()*0.5f)];
+		TqInt x,y;
+		for(y=0; y<YSize(); y++)
+		{
+			for(x=0; x<XSize(); x++)
+			{
+				double r,g,b,a;
+				double s=random.RandomFloat();
+				if(modf(one*pie->Color().fRed  ()+ditheramplitude*s,&r)>0.5)	r+=1;
+				if(modf(one*pie->Color().fGreen()+ditheramplitude*s,&g)>0.5)	g+=1;
+				if(modf(one*pie->Color().fBlue ()+ditheramplitude*s,&b)>0.5)	b+=1;
+				if(modf(one*pie->Coverage()		 +ditheramplitude*s,&a)>0.5)	a+=1;
+				r=CLAMP(r,min,max);
+				g=CLAMP(g,min,max);
+				b=CLAMP(b,min,max);
+				a=CLAMP(a,min,max);
+				pie->Color().SetfRed  (r);
+				pie->Color().SetfGreen(g);
+				pie->Color().SetfBlue (b);
+				pie->SetCoverage(a);
+				
+				pie++;
+			}
+			pie+=XFWidth();
+		}
 	}
 	else
 	{
@@ -487,10 +563,21 @@ void CqBucket::QuantizeElement(SqImageValue& Val)
 		TqInt min=QGetRenderContext()->optCurrent().iDepthQuantizeMin();
 		TqInt max=QGetRenderContext()->optCurrent().iDepthQuantizeMax();
 
-		double d;
-		if(modf(one*Val.m_Depth+ditheramplitude*random.RandomFloat(),&d)>0.5)	d+=1;
-		d=CLAMP(d,min,max);
-		Val.m_Depth=d;
+		TqInt	xlen=XSize()+XFWidth();
+		CqImageElement* pie=&m_aieImage[((YFWidth()*0.5f)*xlen)+(XFWidth()*0.5f)];
+		TqInt x,y;
+		for(y=0; y<YSize(); y++)
+		{
+			for(x=0; x<XSize(); x++)
+			{
+				double d;
+				if(modf(one*pie->Depth()+ditheramplitude*random.RandomFloat(),&d)>0.5)	d+=1;
+				d=CLAMP(d,min,max);
+				pie->SetDepth(d);
+				pie++;
+			}
+			pie+=XFWidth();
+		}
 	}
 }
 
@@ -994,6 +1081,10 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
 		CqBucket::CombineElements();
 
+	Bucket.FilterBucket();
+	Bucket.ExposeBucket();
+	Bucket.QuantizeBucket();
+	
 	BucketComplete(iBucket);
 	QGetRenderContext()->pDDmanager()->DisplayBucket(&m_aBuckets[iBucket]);
 }

@@ -258,7 +258,7 @@ TqInt CqDDManager::DisplayBucket(IqBucket* pBucket)
 		TqInt		elementsize=samples*sizeof(TqFloat);
 		TqInt		datalen=xsize*ysize*elementsize;
 
-		TqFloat*	pData=new TqFloat[xsize*ysize*samples];
+		TqFloat*	pData=new TqFloat[xsize*ysize*samples];f
 
 		TqInt		linelen=xsize*samples;
 
@@ -274,26 +274,23 @@ TqInt CqDDManager::DisplayBucket(IqBucket* pBucket)
 				TqInt so=(y*linelen)+(x*samples);
 				// If outputting a zfile, use the midpoint method.
 				/// \todo Should really be generalising this section to use specif Filter/Expose/Quantize functions.
-				SqImageValue val;
-				pBucket->FilteredElement(sx,sy,val);
-				pBucket->ExposeElement(val);
-				pBucket->QuantizeElement(val);
 				if(mode&ModeZ)
 				{
-					pData[so]=val.m_Depth;
+					pData[so]=pBucket->Depth(sx,sy);
 				}
 				else
 				{
 					if(samples>=3)
 					{
-						pData[so+0]=val.m_colColor.fRed();
-						pData[so+1]=val.m_colColor.fGreen();
-						pData[so+2]=val.m_colColor.fBlue();
+						CqColor col=pBucket->Color(sx,sy);
+						pData[so+0]=col.fRed();
+						pData[so+1]=col.fGreen();
+						pData[so+2]=col.fBlue();
 						if(samples==4)
-							pData[so+3]=val.m_Coverage;
+							pData[so+3]=pBucket->Coverage(sx,sy);
 					}
 					else if(samples==1)
-						pData[so+0]=val.m_Coverage;
+						pData[so+0]=pBucket->Coverage(sx,sy);
 				}
 			}
 		}

@@ -95,6 +95,7 @@ class _qShareC	CqImageElement
 								 * \return Float fraction of the pixel covered.
 								 */
 	_qShareM	TqFloat			Coverage()			{return(m_Coverage);}
+	_qShareM	void			SetCoverage(TqFloat c)		{m_Coverage=c;}
 								/** Get the averaged color of this pixel
 								 * \return A color representing the averaged color at this pixel.
 								 * \attention Only call this after already calling Combine().
@@ -105,6 +106,7 @@ class _qShareC	CqImageElement
 								 * \attention Only call this after already calling Combine().
 								 */
 	_qShareM	TqFloat			Depth()		{return(m_Depth);}
+	_qShareM	void			SetDepth(TqFloat d)		{m_Depth=d;}
 								/** Clear all sample information from this pixel.
 								 */
 	_qShareM	void			Clear();
@@ -188,30 +190,46 @@ class CqBucket : public IqBucket
 		virtual	TqInt	XFWidth() const	{return(m_XFWidth);}
 		virtual	TqInt	YFWidth() const	{return(m_YFWidth);}
 
-		virtual	TqBool	FilteredElement(TqInt iXPos, TqInt iYPos, SqImageValue& Val);
-		virtual	TqBool	Element(TqInt iXPos, TqInt iYPos, SqImageValue& Val);
-		virtual	void	ExposeElement(SqImageValue& Val);
-		virtual	void	QuantizeElement(SqImageValue& Val);
+		virtual	CqColor Color(TqInt iXPos, TqInt iYPos);
+		virtual	TqFloat Coverage(TqInt iXPos, TqInt iYPos);
+		virtual	TqFloat Depth(TqInt iXPos, TqInt iYPos);
+
 
 		static	void	InitialiseBucket(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqInt xfwidth, TqInt yfwidth, TqInt xsamples, TqInt ysamples, TqBool fJitter=TqTrue);
 		static	void	InitialiseFilterValues();
 		static	void	Clear();
 		static	TqBool	ImageElement(TqInt iXPos, TqInt iYPos, CqImageElement*& pie);
 		static	void	CombineElements();
+				void	FilterBucket();
+				void	ExposeBucket();
+				void	QuantizeBucket();
+
+				/** Add a GPRim to the list of deferred GPrims.
+				 */
 				void	AddGPrim(CqBasicSurface* pGPrim)
 								{
 									m_aGPrims.LinkFirst(pGPrim);
 								}
+				/** Add an MPG to the list of deferred MPGs.
+				 */
 				void	AddMPG(CqMicroPolygonBase* pmpgNew)
 								{
 									m_ampgWaiting.push_back(pmpgNew);
 								}
+				/** Add a Micropoly grid to the list of deferred grids.
+				 */
 				void	AddGrid(CqMicroPolyGridBase* pgridNew)
 								{
 									m_agridWaiting.push_back(pgridNew);
 								}
+				/** Get a pointer to the top GPrim in the list of deferred GPrims.
+				 */
 				CqBasicSurface* pTopSurface()				{return(m_aGPrims.pFirst());}
+				/** Get a reference to the vetor of deferred MPGs.
+				 */
 				std::vector<CqMicroPolygonBase*>& aMPGs()	{return(m_ampgWaiting);}
+				/** Get a reference to the vetor of deferred grids.
+				 */
 				std::vector<CqMicroPolyGridBase*>& aGrids()	{return(m_agridWaiting);}
 
 	private:
@@ -222,7 +240,7 @@ class CqBucket : public IqBucket
 	static	TqInt	m_XOrigin;
 	static	TqInt	m_YOrigin;
 	static	std::vector<CqImageElement>	m_aieImage;
-	static	std::vector<std::vector<TqFloat> >	m_aaFilterValues;	///< Vector of vector of filter weights precalculated fro each jittered sample point in each pixel.
+	static	std::vector<TqFloat>	m_aFilterValues;				///< Vector of filter weights precalculated.
 
 			std::vector<CqMicroPolygonBase*> m_ampgWaiting;			///< Vector of vectors of waiting micropolygons in this bucket
 			std::vector<CqMicroPolyGridBase*> m_agridWaiting;		///< Vector of vectors of waiting micropolygrids in this bucket

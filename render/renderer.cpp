@@ -42,7 +42,9 @@
 #include	"transform.h"
 #include	"file.h"
 
+#ifdef	AQSIS_SYSTEM_WIN32
 #include	"ddmsock.h"
+#endif //	AQSIS_SYSTEM_WIN32
 
 START_NAMESPACE(Aqsis)
 
