@@ -159,7 +159,6 @@ class _qShareC	CqImagePixel
 														return(m_aTimes[n*m_XSamples+m]);
 													}
 
-
 //	_qShareM	CqImagePixel&	operator=(const CqImagePixel& ieFrom);
 
 	private:
@@ -210,6 +209,10 @@ class CqBucket : public IqBucket
 		virtual	TqFloat Coverage(TqInt iXPos, TqInt iYPos);
 		virtual	TqFloat Depth(TqInt iXPos, TqInt iYPos);
 
+				TqFloat MaxDepth() {return m_MaxDepth;}
+				TqInt	MaxDepthCount() {return m_MaxDepthCount;}
+				void 	DecMaxDepthCount() {m_MaxDepthCount--;}
+				void 	UpdateMaxDepth();
 
 		static	void	InitialiseBucket(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqInt xfwidth, TqInt yfwidth, TqInt xsamples, TqInt ysamples, TqBool fJitter=TqTrue);
 		static	void	InitialiseFilterValues();
@@ -222,10 +225,8 @@ class CqBucket : public IqBucket
 
 				/** Add a GPRim to the list of deferred GPrims.
 				 */
-				void	AddGPrim(CqBasicSurface* pGPrim)
-								{
-									m_aGPrims.LinkFirst(pGPrim);
-								}
+				void	AddGPrim(CqBasicSurface* pGPrim);
+
 				/** Add an MPG to the list of deferred MPGs.
 				 */
 				void	AddMPG(CqMicroPolygonBase* pmpgNew)
@@ -257,6 +258,8 @@ class CqBucket : public IqBucket
 	static	TqInt	m_YPixelSamples;
 	static	TqInt	m_XOrigin;
 	static	TqInt	m_YOrigin;
+	static	TqFloat m_MaxDepth;										///< Current biggest Z-value in this bucket. Used for occlusion culling.
+	static  TqInt	m_MaxDepthCount;								///< Count of how many samples are currently at MaxDepth.
 	static	std::vector<CqImagePixel>	m_aieImage;
 	static	std::vector<TqFloat>	m_aFilterValues;				///< Vector of filter weights precalculated.
 
@@ -383,6 +386,7 @@ class _qShareC	CqImageBuffer
 
 	_qShareM			void	PostSurface(CqBasicSurface* pSurface);
 	_qShareM			TqBool	CullSurface(CqBound& Bound, CqBasicSurface* pSurface);
+	_qShareM			TqBool	OcclusionCullSurface(TqInt iBucket, CqBasicSurface* pSurface);
 	_qShareM			void	AddMPG(CqMicroPolygonBase* pmpgNew);
 	_qShareM			void	RenderMPGs(TqInt iBucket, long xmin, long xmax, long ymin, long ymax);
 	_qShareM			void	RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax);

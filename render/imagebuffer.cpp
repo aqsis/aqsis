@@ -21,6 +21,7 @@
 /** \file
 		\brief Implements the CqImageBuffer class responsible for rendering the primitives and storing the results.
 		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Andy Gill (buzz@ucky.com)
 */
 
 #include	<strstream>
@@ -257,6 +258,8 @@ TqInt	CqBucket::m_XOrigin;
 TqInt	CqBucket::m_YOrigin;
 TqInt	CqBucket::m_XPixelSamples;
 TqInt	CqBucket::m_YPixelSamples;
+TqFloat CqBucket::m_MaxDepth;
+TqInt	CqBucket::m_MaxDepthCount;
 std::vector<CqImagePixel>	CqBucket::m_aieImage;
 std::vector<TqFloat> CqBucket::m_aFilterValues;
 
@@ -319,6 +322,11 @@ void CqBucket::InitialiseBucket(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt
 	m_YFWidth=yfwidth;
 	m_XPixelSamples=xsamples;
 	m_YPixelSamples=ysamples;
+
+	// Reset max depth value to infinity
+	m_MaxDepth = FLT_MAX;
+	m_MaxDepthCount = (m_YSize+m_YFWidth)*(m_XSize+m_XFWidth)*xsamples*ysamples;
+	
 	// Allocate the image element storage for a single bucket
 	m_aieImage.resize((xsize+xfwidth)*(ysize+yfwidth));
 
@@ -467,6 +475,78 @@ TqFloat CqBucket::Depth(TqInt iXPos, TqInt iYPos)
 		return(FLT_MAX);
 }
 
+
+//----------------------------------------------------------------------
+/** Calculates the current biggest Z-Value and updates MaxDepth and  
+ * MaxDepthCount accordingly.
+ */
+
+void CqBucket::UpdateMaxDepth()
+{
+	TqFloat currentMax = -FLT_MAX;
+	TqInt	count;
+
+	// Go through each pixel in the bucket
+	TqInt i,j;
+	for(i=0; i<(m_YSize+m_YFWidth); i++)
+	{
+		for(j=0; j<(m_XSize+m_XFWidth); j++)
+		{
+			CqImagePixel* pie = &m_aieImage[(i*(m_XSize+m_XFWidth))+j];
+			// Now go through each subpixel sample
+			TqInt sx, sy;
+			for(sy=0; sy<m_YPixelSamples; sy++)
+			{
+				for(sx=0; sx<m_XPixelSamples; sx++)
+				{
+					std::vector<SqImageSample>& aValues = pie->Values(sx,sy);
+					TqInt c = aValues.size();
+					if(c > 0)
+					{
+						int sc=0;
+						// find first opaque sample
+						while(sc<c && aValues[sc].m_colOpacity != gColWhite) sc++;
+						if( aValues[sc].m_colOpacity == gColWhite )
+						{
+							if( aValues[sc].m_Depth > currentMax )
+							{
+								currentMax = aValues[sc].m_Depth;
+								count = 1;
+							}
+							else if( aValues[sc].m_Depth == currentMax )
+							{
+								count++;
+							}
+						}
+						else
+						{
+							if( currentMax == FLT_MAX )
+								count++;
+							else
+							{
+								currentMax = FLT_MAX;
+								count = 1;
+							}
+						}
+					}
+					else
+					{
+						if( currentMax == FLT_MAX )
+							count++;
+						else
+						{
+							currentMax = FLT_MAX;
+							count = 1;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	m_MaxDepth = currentMax;
+	m_MaxDepthCount = count;
+}
 
 //----------------------------------------------------------------------
 /** Filter the samples in this bucket according to type and filter widths.
@@ -659,6 +739,27 @@ void CqBucket::QuantizeBucket()
 	}
 }
 
+//----------------------------------------------------------------------
+/** Place GPrim into bucket in order of depth
+ * \param The Gprim to be added.
+ */
+void CqBucket::AddGPrim(CqBasicSurface* pGPrim)
+{
+	CqBasicSurface* surf = m_aGPrims.pFirst();
+	while( surf != 0 )
+	{
+		if( surf->GetCachedRasterBound().vecMin().z() > pGPrim->GetCachedRasterBound().vecMin().z() )
+		{
+			pGPrim->LinkBefore( surf );
+			return;
+		}
+		
+		surf = surf->pNext();
+	}
+	m_aGPrims.LinkLast(pGPrim);
+}
+
+
 
 //----------------------------------------------------------------------
 /** Destructor
@@ -845,6 +946,9 @@ TqBool CqImageBuffer::CullSurface(CqBound& Bound, CqBasicSurface* pSurface)
 		return(TqFalse);
 	}
 
+	TqFloat minz = Bound.vecMin().z();
+	TqFloat maxz = Bound.vecMax().z();
+
 	// Convert the bounds to raster space.
 	Bound.Transform(QGetRenderContext()->matSpaceToSpace("camera","raster"));
 	Bound.vecMin().x(Bound.vecMin().x()-m_FilterXWidth/2);
@@ -859,6 +963,12 @@ TqBool CqImageBuffer::CullSurface(CqBound& Bound, CqBasicSurface* pSurface)
 	   Bound.vecMax().y()<CropWindowYMin()-m_FilterYWidth/2)
 		return(TqTrue);
 
+	// Restore Z-Values to camera space.
+	Bound.vecMin().z(minz);
+	Bound.vecMax().z(maxz);
+
+	// Cache the Bound.
+	pSurface->CacheRasterBound(Bound);
 	return(TqFalse);
 }
 
@@ -913,7 +1023,65 @@ void CqImageBuffer::PostSurface(CqBasicSurface* pSurface)
 		if(YMinb<0)	YMinb=0;
 		iBucket=(YMinb*m_cXBuckets)+XMinb;
 	}
+	
 	m_aBuckets[iBucket].AddGPrim(pSurface);
+
+}
+
+
+//----------------------------------------------------------------------
+/** Test if this surface can be occlusion culled. If it can then
+ * transfer surface to the next bucket it covers, or delete it if it
+ * covers no more.
+ * \param iBucket Integer index of bucket being processed.
+ * \param pSurface A pointer to a CqBasicSurface derived class.
+ * \return Boolean indicating that the GPrim has been culled.
+*/
+
+TqBool CqImageBuffer::OcclusionCullSurface(TqInt iBucket, CqBasicSurface* pSurface)
+{
+	CqBound RasterBound(pSurface->GetCachedRasterBound());
+
+	// Update bucket max depth values
+	CqBucket currentBucket=m_aBuckets[iBucket];
+	if(currentBucket.MaxDepthCount() <= 0)
+		currentBucket.UpdateMaxDepth();
+
+	if( RasterBound.vecMin().z() > currentBucket.MaxDepth() )
+	{
+		// pSurface is behind everying in this bucket but it may be 
+		// visible in other buckets it overlaps.
+		// bucket to the right
+		TqInt nextBucket = iBucket+1;
+		CqVector2D pos = Position(nextBucket);
+		if( RasterBound.vecMax().x() > pos.x() )
+		{
+			pSurface->UnLink();
+			m_aBuckets[nextBucket].AddGPrim(pSurface);
+			return TqTrue;
+		}
+		
+		// bucket below
+		nextBucket = iBucket+m_cXBuckets;
+		pos = Position(nextBucket);
+		// find bucket containing left side of bound
+		pos.x( RasterBound.vecMin().x() );
+		nextBucket = Bucket( pos.x(), pos.y() );
+		
+		if( RasterBound.vecMax().y() > pos.y() )
+		{		
+			pSurface->UnLink();
+			m_aBuckets[nextBucket].AddGPrim(pSurface);
+			return TqTrue;
+		}
+		
+		// Bound covers no more buckets
+		delete(pSurface);
+		QGetRenderContext()->Stats().IncCulledGPrims();
+		return TqTrue;
+	}
+	else
+		return TqFalse;
 }
 
 
@@ -1124,9 +1292,40 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 									continue;
 								}
 							}
+							
+							// Update max depth values
+							if(pMPG->colOpacity() == gColWhite)
+							{
+								if(c==0)
+								{
+									Bucket.DecMaxDepthCount();
+								}
+								else 
+								{
+									int j=0;
+									// Find first opaque sample
+									while(j<c && aValues[j].m_colOpacity != gColWhite) j++;
+									if(aValues[j].m_Depth == Bucket.MaxDepth() && aValues[j].m_colOpacity == gColWhite)
+									{
+										if(aValues[j].m_Depth > ImageVal.m_Depth)
+										{
+											Bucket.DecMaxDepthCount();
+										}
+									}
+								}
+							}
+								
 							ImageVal.m_colColor=pMPG->colColor();
 							ImageVal.m_colOpacity=pMPG->colOpacity();
-							aValues.insert(aValues.begin()+i,ImageVal);
+							
+							// Truncate sample list if opaque.
+							if( pMPG->colOpacity() == gColWhite )
+							{
+								aValues.erase(aValues.begin()+i, aValues.end());
+								aValues.push_back(ImageVal);
+							}
+							else
+								aValues.insert(aValues.begin()+i,ImageVal);
 						}
 					}
 					else
@@ -1190,9 +1389,16 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 	{
 		if(m_fQuit)	return;
 
-    // Dice & shade the surface if it's small enough...
+		// Dice & shade the surface if it's small enough...
 		if(pSurface->Diceable())
 		{
+			//Cull surface if it's hidden
+			if(OcclusionCullSurface(iBucket, pSurface))
+			{
+				pSurface=Bucket.pTopSurface();
+				continue;
+			}
+
 			CqMicroPolyGridBase* pGrid;
 			if((pGrid=pSurface->Dice())!=0)
 			{
@@ -1205,7 +1411,7 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 			}
 		}
 		// The surface is not small enough, so split it...
-   	else if(!pSurface->fDiscard())
+		else if(!pSurface->fDiscard())
 		{
 			std::vector<CqBasicSurface*> aSplits;
 			// Decrease the total gprim count since this gprim is replaced by other gprims
