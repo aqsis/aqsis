@@ -513,31 +513,39 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 	std::vector<std::vector<CqVector3D> > aaPtimes;
 	aaPtimes.resize( pSurface()->pTransform()->cTimes() );
 
-	TqInt iTime, tTime = MIN(pSurface()->pTransform()->cTimes(),1);
+	TqInt iTime, tTime = pSurface()->pTransform()->cTimes();
 	CqMatrix matObjectToCameraT;
-	for( iTime = 0; iTime < tTime; iTime++ )
+	register TqInt i;
+	TqInt gsmin1;
+	gsmin1 = GridSize() - 1;
+
+	for( iTime = 1; iTime < tTime; iTime++ )
 	{
-		TqInt gsmin1;
-		gsmin1 = GridSize() - 1;
+		matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
 		aaPtimes[ iTime ].resize( gsmin1 + 1 );
 
-		if( iTime > 0 )
-			matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
-
-		register TqInt i;
 		for ( i = gsmin1; i >= 0; i-- )
 		{
 			CqVector3D Point( pP[ i ] );
 
 			// Only do the complex transform if motion blurred.
-			if( iTime > 0 )
-				Point = matObjectToCameraT * matCameraToObject0 * Point;
+			Point = matObjectToCameraT * matCameraToObject0 * Point;
 
 			// Make sure to retain camera space 'z' coordinate.
 			TqFloat zdepth = Point.z();
 			aaPtimes[ iTime ][ i ] = matCameraToRaster * Point;
 			aaPtimes[ iTime ][ i ].z( zdepth );
 		}
+	}
+
+	for ( i = gsmin1; i >= 0; i-- )
+	{
+		aaPtimes[ 0 ].resize( gsmin1 + 1 );
+		// Make sure to retain camera space 'z' coordinate.
+		TqFloat zdepth = pP[ i ].z();
+		aaPtimes[ 0 ][ i ] = matCameraToRaster * pP[ i ];
+		aaPtimes[ 0 ][ i ].z( zdepth );
+		pP[ i ] = aaPtimes[ 0 ][ i ];
 	}
 
 	QGetRenderContext() ->Stats().MakeProject().Stop();
@@ -603,13 +611,26 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 					fTrimmed = TqTrue;
 			}
 
-			CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion();
-			pNew->SetGrid( this );
-			pNew->SetIndex( iIndex );
-			for ( iTime = 0; iTime < tTime; iTime++ )
-				pNew->Initialise( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], iTime );
-			pNew->GetTotalBound( TqTrue );
-			pImage->AddMPG( pNew );
+			if( tTime > 1 )
+			{
+				CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion();
+				pNew->SetGrid( this );
+				pNew->SetIndex( iIndex );
+				for ( iTime = 0; iTime < tTime; iTime++ )
+					pNew->Initialise( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], pSurface()->pTransform()->Time( iTime ) );
+				pNew->GetTotalBound( TqTrue );
+				pImage->AddMPG( pNew );
+			}
+			else
+			{
+				CqMicroPolygonStatic *pNew = new CqMicroPolygonStatic();
+				pNew->SetGrid( this );
+				pNew->SetIndex( iIndex );
+				if( fTrimmed )	pNew->MarkTrimmed();
+				pNew->Initialise( aaPtimes[ 0 ][ iIndex ], aaPtimes[ 0 ][ iIndex + 1 ], aaPtimes[ 0 ][ iIndex + cu + 2 ], aaPtimes[ 0 ][ iIndex + cu + 1 ] );
+				pNew->GetTotalBound( TqTrue );
+				pImage->AddMPG( pNew );
+			}
 		}
 	}
 

@@ -2657,104 +2657,41 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 	// Process any specified primitive variables
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
-		if ( QGetRenderContext() ->ptransCurrent() ->cTimes() <= 1 )
+		// Transform the points into "current" space,
+		pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
+			                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
+			                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
+
+		// For each polygon specified create a primitive.
+		RtInt	iP = 0;
+		for ( poly = 0; poly < npolys; poly++ )
 		{
-			// Transform the points into "current" space,
-			pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
-			                         QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
-			                         QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
+			// Create a surface polygon
+			CqSurfacePointsPolygon*	pSurface = new CqSurfacePointsPolygon( pPointsClass, poly );
+			pSurface->AddRef();
+			RtBoolean fValid = RI_TRUE;
 
-			// For each polygon specified create a primitive.
-			RtInt	iP = 0;
-			for ( poly = 0; poly < npolys; poly++ )
+			pSurface->aIndices().resize( nverts[ poly ] );
+			RtInt i;
+			for ( i = 0; i < nverts[ poly ]; i++ )          	// Fill in the points
 			{
-				// Create a surface polygon
-				CqSurfacePointsPolygon*	pSurface = new CqSurfacePointsPolygon( pPointsClass, poly );
-				pSurface->AddRef();
-				RtBoolean fValid = RI_TRUE;
-
-				pSurface->aIndices().resize( nverts[ poly ] );
-				RtInt i;
-				for ( i = 0; i < nverts[ poly ]; i++ )          	// Fill in the points
+				if ( verts[ iP ] >= cVerts )
 				{
-					if ( verts[ iP ] >= cVerts )
-					{
-						fValid = RI_FALSE;
-						CqAttributeError( 1, Severity_Normal, "Invalid PointsPolygon index", pSurface->pAttributes() );
-						break;
-					}
-					pSurface->aIndices() [ i ] = verts[ iP ];
-					iP++;
+					fValid = RI_FALSE;
+					CqAttributeError( 1, Severity_Normal, "Invalid PointsPolygon index", pSurface->pAttributes() );
+					break;
 				}
-				if ( fValid )
-					QGetRenderContext() ->pImage() ->PostSurface( pSurface );
+				pSurface->aIndices() [ i ] = verts[ iP ];
+				iP++;
 			}
-			QGetRenderContext() ->Stats().IncGPrims();
+			if ( fValid )
+				QGetRenderContext() ->pImage() ->PostSurface( pSurface );
 		}
-		else
-		{
-			std::vector<CqPolygonPoints*>	apPoints;
-			TqInt i;
-			apPoints.push_back( pPointsClass );
-			for ( i = 1; i < QGetRenderContext() ->ptransCurrent() ->cTimes(); i++ )
-			{
-				RtFloat time = QGetRenderContext() ->ptransCurrent() ->Time( i );
-				CqPolygonPoints* pPointsClass2 = new CqPolygonPoints( *pPointsClass );
-				// Clone the primitive variables.
-				pPointsClass2->ClonePrimitiveVariables( *pPointsClass );
-
-				// Transform the points into camera space for processing,
-				pPointsClass2->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ),
-				                          QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ),
-				                          QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ), time );
-				apPoints.push_back( pPointsClass2 );
-			}
-			pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
-			                         QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
-			                         QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
-
-
-			// For each polygon specified create a primitive.
-			RtInt	iP = 0;
-			for ( poly = 0; poly < npolys; poly++ )
-			{
-				// Create a surface polygon
-				CqMotionSurfacePointsPolygon*	pSurface = new CqMotionSurfacePointsPolygon( pPointsClass );
-				RtBoolean fValid = RI_TRUE;
-
-				pSurface->aIndices().resize( nverts[ poly ] );
-				RtInt i;
-				for ( i = 0; i < nverts[ poly ]; i++ )          	// Fill in the points
-				{
-					if ( verts[ iP ] >= cVerts )
-					{
-						fValid = RI_FALSE;
-						CqAttributeError( 1, Severity_Normal, "Invalid PointsPolygon index", pSurface->pAttributes() );
-						break;
-					}
-					pSurface->aIndices() [ i ] = verts[ iP ];
-					iP++;
-				}
-				if ( fValid )
-				{
-					pSurface->AddTimeSlot( QGetRenderContext() ->ptransCurrent() ->Time( 0 ), pPointsClass );
-					pPointsClass->AddRef();
-
-					for ( i = 1; i < QGetRenderContext() ->ptransCurrent() ->cTimes(); i++ )
-					{
-						RtFloat time = QGetRenderContext() ->ptransCurrent() ->Time( i );
-						pSurface->AddTimeSlot( time, apPoints[ i ] );
-						apPoints[ i ] ->AddRef();
-					}
-					QGetRenderContext() ->pImage() ->PostSurface( pSurface );
-				}
-			}
-			QGetRenderContext() ->Stats().IncGPrims();
-		}
+		QGetRenderContext() ->Stats().IncGPrims();
 		pPointsClass->Release();
 	}
 	else
-		delete( pPointsClass );
+		pPointsClass->Release();
 
 	return ;
 }
