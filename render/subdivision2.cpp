@@ -331,7 +331,6 @@ void CqSubdivision2::AddEdgeVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIn
                 }
                 break;
             }
-
         }
     }
 }
@@ -618,7 +617,10 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
         pFace->pParentFacet()->Qff( aQff );
         std::vector<CqLath*>::iterator iF;
         for( iF = aQff.begin(); iF != aQff.end(); iF++ )
-            SubdivideFace(*iF, apSubFaces2);
+		{
+		    if( NULL != (*iF)->pFaceVertex() )
+			    SubdivideFace(*iF, apSubFaces2);
+		}
     }
 
     std::vector<CqLath*> aQfv;
@@ -931,7 +933,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
     assert( NULL != pFace() );
 
     TqInt dicesize = MAX(m_uDiceSize, m_vDiceSize);
-    
+
 	TqInt sdcount = aDiceSizes[ dicesize ];
     dicesize = 1 << sdcount;
     TqInt lUses = Uses();
@@ -948,6 +950,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
         TqInt isd;
         std::vector<CqLath*> apSubFace1, apSubFace2;
         apSubFace1.push_back(pFace());
+
         for( isd = 0; isd < sdcount; isd++ )
         {
             apSubFace2.clear();
@@ -1086,6 +1089,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
             pGrid->t()->SetValueFromVariable( pGrid->v() );
         }
     }
+
     if( apGrids.size() == 1 )
         return( apGrids[ 0 ] );
     else

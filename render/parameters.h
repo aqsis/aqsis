@@ -735,8 +735,7 @@ public:
     CqParameterTypedVaryingArray( const char* strName, TqInt Count = 1 ) :
             CqParameterTyped<T, SLT>( strName, Count )
     {
-        m_aValues.resize( 1 );
-        m_aValues[ 0 ].resize( Count );
+        m_aValues.resize( 1, std::vector<T>(Count) );
     }
     CqParameterTypedVaryingArray( const CqParameterTypedVaryingArray<T, I, SLT>& From ) :
             CqParameterTyped<T, SLT>( From )
@@ -764,10 +763,7 @@ public:
     }
     virtual	void	SetSize( TqInt size )
     {
-        m_aValues.resize( size );
-        TqUint j;
-        for ( j = 0; j < (TqUint) size; j++ )
-            m_aValues[ j ].resize( m_Count );
+        m_aValues.resize( size, std::vector<T>(m_Count) );
     }
     virtual	TqUint	Size() const
     {
@@ -860,11 +856,11 @@ public:
      */
     CqParameterTypedVaryingArray<T, I, SLT>& operator=( const CqParameterTypedVaryingArray<T, I, SLT>& From )
     {
-        m_aValues.resize( From.m_aValues.size() );
+        m_aValues.resize( From.m_aValues.size(), std::vector<T>(From.Count()) );
+		m_Count = From.m_Count;
         TqUint j;
         for ( j = 0; j < m_aValues.size(); j++ )
         {
-            m_aValues[ j ].resize( m_Count );
             TqUint i;
             for ( i = 0; i < (TqUint) m_Count; i++ )
                 m_aValues[ j ][ i ] = From.m_aValues[ j ][ i ];
