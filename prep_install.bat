@@ -17,6 +17,7 @@ copy ..\library\release\aqsl.exe .
 copy ..\library\release\aqslcomp.exe .
 copy ..\library\release\slpp.exe .
 copy ..\library\release\teqser.exe .
+copy ..\library\release\aqsltell.exe .
 
 cd displays
 
