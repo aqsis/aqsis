@@ -1138,7 +1138,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_normalize(VECTORVAL V, DEFPARAMIMPL)
 
 //----------------------------------------------------------------------
 // faceforward(N,I,[Nref])
-STD_SOIMPL CqShaderExecEnv::SO_faceforward(NORMALVAL N, VECTORVAL I /* [Nref] */, DEFPARAMIMPL)
+STD_SOIMPL CqShaderExecEnv::SO_faceforward(NORMALVAL N, VECTORVAL I, DEFPARAMIMPL)
 {
 	INIT_SOR
 	CHECKVARY(N)
@@ -1147,9 +1147,10 @@ STD_SOIMPL CqShaderExecEnv::SO_faceforward(NORMALVAL N, VECTORVAL I /* [Nref] */
 	FOR_EACHR
 		CqVector3D vN=NORMAL(N);
 		CqVector3D vI=VECTOR(I);
-		//CqVector3D vNg=Ng();
+                CqVector3D vNg=Ng();
 		TqFloat s=(((-vI)*vN)<0.0f)?-1.0f:1.0f;
-		Result.SetValue(i,vN*s);
+		   Result.SetValue(i,vN*s);
+		
 	END_FORR
 }
 
