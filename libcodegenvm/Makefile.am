@@ -1,5 +1,7 @@
 noinst_LTLIBRARIES =  libcodegenvm.la
 
+EXTRA_DIST = libcodegenvm.dsp
+
 libcodegenvm_la_SOURCES = vmoutput.cpp vmoutput.h 
 
 CXXFLAGS = -g -Wall

@@ -1,5 +1,7 @@
 noinst_LTLIBRARIES =  librib2stream.la
 
+EXTRA_DIST = librib2stream.dsp
+
 librib2stream_la_SOURCES = librib2stream.cpp librib2stream.h
 
 CXXFLAGS = -g -Wall

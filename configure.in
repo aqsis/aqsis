@@ -9,9 +9,13 @@ AC_PROG_YACC
 AC_OUTPUT( \
 libaqsistypes/Makefile \
 libaqsistypes/posix/Makefile \
+libaqsistypes/win32/Makefile \
+libaqsistypes/win32/intel/Makefile \
 libddmsimple/Makefile \
 libddmsock/Makefile \
 libddmsock/posix/Makefile \
+libddmsock/win32/Makefile \
+libddmsock/win32/intel/Makefile \
 render/Makefile \
 librib2/Makefile \
 librib2/tests/Makefile \
@@ -22,5 +26,8 @@ libcodegenvm/Makefile \
 aqsl/Makefile \
 aqsl/tests/Makefile \
 aqsis/Makefile \
+libdd/Makefile \
+filebuffer/Makefile \
+shadowmap/Makefile \
 Makefile )
 

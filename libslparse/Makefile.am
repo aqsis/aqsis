@@ -12,7 +12,7 @@ parser.cpp parser.cpp.h : $(srcdir)/parser.y
 scanner.cpp : $(srcdir)/scanner.l parser.cpp.h 
 	flex -oscanner.cpp $(srcdir)/scanner.l
 
-EXTRA_DIST = parser.y scanner.l
+EXTRA_DIST = parser.y scanner.l libslparse.dsp
 
 CXXFLAGS = -g -Wall
 INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix 
