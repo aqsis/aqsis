@@ -785,7 +785,7 @@ class CqVMStackEntry
 														TqBool __fVarying=i>0;
 														for(; i>=0; i--)
 															if(!__fVarying || RunningState.Value(i))
-																Res.SetValue(i,Value(z,i)[index.Value(temp_float,i)]);
+																Res.SetValue(i,Value(z,i)[static_cast<int>(index.Value(temp_float,i))]);
 													}
 							/** Templatised component set operator.
 							 * \param z The type to cast this to.

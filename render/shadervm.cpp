@@ -718,8 +718,8 @@ void CqShaderVM::LoadProgram(std::istream* pFile)
 						TqFloat f;
 						(*pFile) >> f;
 						if(aLabels.size()<(f+1))
-							aLabels.resize(f+1);
-						aLabels[f]=pProgramArea->size();
+							aLabels.resize(static_cast<TqInt>(f)+1);
+						aLabels[static_cast<TqInt>(f)]=pProgramArea->size();
 						AddCommand(&CqShaderVM::SO_nop,pProgramArea);
 						break;
 					}
@@ -804,7 +804,7 @@ void CqShaderVM::LoadProgram(std::istream* pFile)
 		   E.m_Command==&CqShaderVM::SO_S_JNZ)
 		{
 			SqLabel lab;
-			lab.m_Offset=aLabels[m_Program[i].m_FloatVal];
+			lab.m_Offset=aLabels[static_cast<unsigned int>(m_Program[i].m_FloatVal)];
 			lab.m_pAddress=&m_Program[lab.m_Offset];
 			m_Program[i].m_Label=lab;
 			i++;
@@ -1115,7 +1115,7 @@ void CqShaderVM::SO_ipushv()
 	TqInt ext=m_pEnv->GridSize();
 	TqInt i;
 	for(i=0; i<ext; i++)
-		(*pVarArray)[FLOAT(A)]->GetValue(i,Result);
+		(*pVarArray)[static_cast<unsigned int>(FLOAT(A))]->GetValue(i,Result);
 	Push(Result);
 }
 
@@ -1147,7 +1147,7 @@ void CqShaderVM::SO_ipop()
 	for(i=0; i<ext; i++)
 	{
 		if(m_pEnv->RunningState().Value(i))
-			(*pVA)[FLOAT(A)]->SetValue(i,Val);
+			(*pVA)[static_cast<unsigned int>(FLOAT(A))]->SetValue(i,Val);
 	}
 }
 

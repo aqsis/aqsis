@@ -51,20 +51,20 @@ START_NAMESPACE(Aqsis)
 /** Structure representing the information at a sample point in the image.
  */
 
-struct SqImageValue
+struct SqImageSample
 {
-				SqImageValue()	{}
+				SqImageSample()	{}
 				/** Data constructor
 				 * \param col The color at this sample point.
 				 * \param opac The opacity at this sample point.
 				 * \param depth the depth of the sample point.
 				 */
-				SqImageValue(CqColor& col,
+				SqImageSample(CqColor& col,
 							 CqColor& opac=gColWhite,
 							 TqFloat depth=FLT_MAX) : 
 								m_colColor(col), m_colOpacity(opac), m_Depth(depth) {}
 
-	CqColor	m_colColor;		///< The color at this sampel point.
+	CqColor	m_colColor;		///< The color at this sample point.
 	CqColor	m_colOpacity;		///< The opacity value of this sample point.
 	TqFloat		m_Depth;			///< The depth of the sample point.
 	TqFloat		m_Coverage;
@@ -74,12 +74,12 @@ struct SqImageValue
 /** Storage class for all data relating to a single pixel in the image.
  */
 
-class _qShareC	CqImageElement
+class _qShareC	CqImagePixel
 {
 	public:
-	_qShareM					CqImageElement();
-	_qShareM					CqImageElement(const CqImageElement& ieFrom);
-	_qShareM	virtual			~CqImageElement();
+	_qShareM					CqImagePixel();
+	_qShareM					CqImagePixel(const CqImagePixel& ieFrom);
+	_qShareM	virtual			~CqImagePixel();
 
 								/** Get the number of horizontal samples in this pixel
 								 * \return The number of samples as an integer.
@@ -113,9 +113,9 @@ class _qShareC	CqImageElement
 								/** Get a reference to the array of values for the specified sample.
 								 * \param m The horizontal index of the required sample point.
 								 * \param n The vertical index of the required sample point.
-								 * \return A Reference to a vector of SqImageValue data.
+								 * \return A Reference to a vector of SqImageSample data.
 								 */
-	_qShareM	std::vector<SqImageValue>&	Values(TqInt m, TqInt n)	
+	_qShareM	std::vector<SqImageSample>&	Values(TqInt m, TqInt n)	
 											{
 												assert(m<m_XSamples);
 												assert(n<m_XSamples);
@@ -160,12 +160,12 @@ class _qShareC	CqImageElement
 													}
 
 
-//	_qShareM	CqImageElement&	operator=(const CqImageElement& ieFrom);
+//	_qShareM	CqImagePixel&	operator=(const CqImagePixel& ieFrom);
 
 	private:
 			TqInt				m_XSamples;						///< The number of samples in the horizontal direction.
 			TqInt				m_YSamples;						///< The number of samples in the vertical direction.
-			std::vector<std::vector<SqImageValue> > m_aValues;	///< Vector of vectors of sample point data.
+			std::vector<std::vector<SqImageSample> > m_aValues;	///< Vector of vectors of sample point data.
 			std::vector<CqVector2D>	 m_avecSamples;				///< Vector of sample positions.
 			std::vector<TqInt>	 m_aSubCellIndex;				///< Vector of subcell indices.
 			std::vector<TqFloat> m_aTimes;						///< A vector of float sample times for the sample points.
@@ -214,7 +214,7 @@ class CqBucket : public IqBucket
 		static	void	InitialiseBucket(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqInt xfwidth, TqInt yfwidth, TqInt xsamples, TqInt ysamples, TqBool fJitter=TqTrue);
 		static	void	InitialiseFilterValues();
 		static	void	Clear();
-		static	TqBool	ImageElement(TqInt iXPos, TqInt iYPos, CqImageElement*& pie);
+		static	TqBool	ImageElement(TqInt iXPos, TqInt iYPos, CqImagePixel*& pie);
 		static	void	CombineElements();
 				void	FilterBucket();
 				void	ExposeBucket();
@@ -257,7 +257,7 @@ class CqBucket : public IqBucket
 	static	TqInt	m_YPixelSamples;
 	static	TqInt	m_XOrigin;
 	static	TqInt	m_YOrigin;
-	static	std::vector<CqImageElement>	m_aieImage;
+	static	std::vector<CqImagePixel>	m_aieImage;
 	static	std::vector<TqFloat>	m_aFilterValues;				///< Vector of filter weights precalculated.
 
 			std::vector<CqMicroPolygonBase*> m_ampgWaiting;			///< Vector of vectors of waiting micropolygons in this bucket

@@ -1537,7 +1537,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1(STRINGVAL name, FLOATVAL channel, DEFPA
 			if(fchan>=val.size())
 				Result.SetValue(i,_pfill);
 			else
-				Result.SetValue(i,val[fchan]);
+				Result.SetValue(i,val[static_cast<unsigned int>(fchan)]);
 		END_FORR
 	}
 	else
@@ -1586,7 +1586,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2(STRINGVAL name, FLOATVAL channel, FLOAT
 			if(fchan>=val.size())
 				Result.SetValue(i,_pfill);
 			else
-				Result.SetValue(i,val[fchan]);
+				Result.SetValue(i,val[static_cast<unsigned int>(fchan)]);
 		END_FORR
 	}
 	else
@@ -1616,7 +1616,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3(STRINGVAL name, FLOATVAL channel, FLOAT
 			if(fchan>=val.size())
 				Result.SetValue(i,_pfill);
 			else
-				Result.SetValue(i,val[fchan]);
+				Result.SetValue(i,val[static_cast<unsigned int>(fchan)]);
 		END_FORR
 	}
 	else
@@ -1664,7 +1664,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1(STRINGVAL name, FLOATVAL channel, DEFPA
 			if(fchan+2>=val.size())
 				Result.SetValue(i,CqColor(_pfill,_pfill,_pfill));
 			else
-				Result.SetValue(i,CqColor(val[fchan],val[fchan+1],val[fchan+2]));
+				Result.SetValue(i,CqColor(val[static_cast<unsigned int>(fchan)],val[static_cast<unsigned int>(fchan)+1],val[static_cast<unsigned int>(fchan)+2]));
 		END_FORR
 	}
 	else
@@ -1713,7 +1713,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2(STRINGVAL name, FLOATVAL channel, FLOAT
 			if(fchan+2>=val.size())
 				Result.SetValue(i,CqColor(_pfill,_pfill,_pfill));
 			else
-				Result.SetValue(i,CqColor(val[fchan],val[fchan+1],val[fchan+2]));
+				Result.SetValue(i,CqColor(val[static_cast<unsigned int>(fchan)],val[static_cast<unsigned int>(fchan)+1],val[static_cast<unsigned int>(fchan)+2]));
 		END_FORR
 	}
 	else
@@ -1743,7 +1743,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3(STRINGVAL name, FLOATVAL channel, FLOAT
 			if(fchan+2>=val.size())
 				Result.SetValue(i,CqColor(_pfill,_pfill,_pfill));
 			else
-				Result.SetValue(i,CqColor(val[fchan],val[fchan+1],val[fchan+2]));
+				Result.SetValue(i,CqColor(val[static_cast<unsigned int>(fchan)],val[static_cast<unsigned int>(fchan)+1],val[static_cast<unsigned int>(fchan)+2]));
 		END_FORR
 	}
 	else
@@ -1791,7 +1791,7 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2(STRINGVAL name, FLOATVAL channel, V
 			if(fchan>=val.size())
 				Result.SetValue(i,_pfill);
 			else
-				Result.SetValue(i,val[fchan]);
+				Result.SetValue(i,val[static_cast<unsigned int>(fchan)]);
 		END_FORR
 	}
 	else
@@ -1821,7 +1821,7 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment3(STRINGVAL name, FLOATVAL channel, V
 			if(fchan>=val.size())
 				Result.SetValue(i,_pfill);
 			else
-				Result.SetValue(i,val[fchan]);
+				Result.SetValue(i,val[static_cast<unsigned int>(fchan)]);
 		END_FORR
 	}
 	else
@@ -1869,7 +1869,7 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2(STRINGVAL name, FLOATVAL channel, V
 			if(fchan+2>=val.size())
 				Result.SetValue(i,CqColor(_pfill,_pfill,_pfill));
 			else
-				Result.SetValue(i,CqColor(val[fchan],val[fchan+1],val[fchan+2]));
+				Result.SetValue(i,CqColor(val[static_cast<unsigned int>(fchan)],val[static_cast<unsigned int>(fchan)+1],val[static_cast<unsigned int>(fchan)+2]));
 		END_FORR
 	}
 	else
@@ -1900,7 +1900,7 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment3(STRINGVAL name, FLOATVAL channel, V
 			if(fchan+2>=val.size())
 				Result.SetValue(i,CqColor(_pfill,_pfill,_pfill));
 			else
-				Result.SetValue(i,CqColor(val[fchan],val[fchan+1],val[fchan+2]));
+				Result.SetValue(i,CqColor(val[static_cast<unsigned int>(fchan)],val[static_cast<unsigned int>(fchan)+1],val[static_cast<unsigned int>(fchan)+2]));
 		END_FORR
 	}
 	else
@@ -2566,7 +2566,7 @@ STD_SOIMPL CqShaderExecEnv::SO_attribute(STRINGVAL name, CqShaderVariable* pV, D
 	{
 		if((pV->Type()&Type_Mask)==Type_Float)
 		{
-			CqVMStackEntry SE(m_pSurface->pAttributes()->fEffectiveShadingRate());
+			CqVMStackEntry SE(static_cast<TqInt>(m_pSurface->pAttributes()->fEffectiveShadingRate()));
 			pV->SetValue(SE);
 			Ret=1.0f;
 		}

@@ -32,7 +32,7 @@
 
 START_NAMESPACE(Aqsis)
 
-struct SqImageValue;
+struct SqImageSample;
 
 struct IqBucket
 {

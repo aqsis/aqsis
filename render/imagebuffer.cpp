@@ -45,7 +45,7 @@ START_NAMESPACE(Aqsis)
 /** Constructor
  */
 
-CqImageElement::CqImageElement() : 
+CqImagePixel::CqImagePixel() : 
 				m_XSamples(0),
 				m_YSamples(0),
 //				m_aValues(0), 
@@ -59,7 +59,7 @@ CqImageElement::CqImageElement() :
 /** Destructor
  */
 
-CqImageElement::~CqImageElement()
+CqImagePixel::~CqImagePixel()
 {
 }
 
@@ -68,7 +68,7 @@ CqImageElement::~CqImageElement()
 /** Copy constructor
  */
 
-CqImageElement::CqImageElement(const CqImageElement& ieFrom) : m_aValues(0), m_avecSamples(0)
+CqImagePixel::CqImagePixel(const CqImagePixel& ieFrom) : m_aValues(0), m_avecSamples(0)
 {
 	*this=ieFrom;
 }
@@ -80,7 +80,7 @@ CqImageElement::CqImageElement(const CqImageElement& ieFrom) : m_aValues(0), m_a
  * \param YSamples Integer samples count in Y.
  */
 
-void CqImageElement::AllocateSamples(TqInt XSamples, TqInt YSamples)
+void CqImagePixel::AllocateSamples(TqInt XSamples, TqInt YSamples)
 {
 	m_XSamples=XSamples;
 	m_YSamples=YSamples;
@@ -101,7 +101,7 @@ void CqImageElement::AllocateSamples(TqInt XSamples, TqInt YSamples)
  * \param fJitter Flag indicating whether to apply jittering to the sample points or not.
  */
 
-void CqImageElement::InitialiseSamples(CqVector2D& vecPixel, TqBool fJitter)
+void CqImagePixel::InitialiseSamples(CqVector2D& vecPixel, TqBool fJitter)
 {
 	TqFloat subcell_width=1.0f/(m_XSamples*m_YSamples);
 	CqRandom random;
@@ -203,7 +203,7 @@ void CqImageElement::InitialiseSamples(CqVector2D& vecPixel, TqBool fJitter)
 /** Clear the relevant data from the image element preparing it for the next usage.
  */
 
-void CqImageElement::Clear()
+void CqImagePixel::Clear()
 {
 	TqInt i;
 	for(i=(m_XSamples*m_YSamples)-1; i>=0; i--)	
@@ -215,32 +215,33 @@ void CqImageElement::Clear()
 /** Get the color at the specified sample point by blending the colors that appear at that point.
  */
 
-void CqImageElement::Combine()
+void CqImagePixel::Combine()
 {
-	static CqColor	opaque(1,1,1);
-	static CqColor	colWhite(1,1,1);
-	CqColor col_total(0,0,0);
+	static CqColor white(1, 1, 1);
 
-	TqInt n;
-	for(n=0; n<m_YSamples; n++)
-	{
-		TqInt m;
-		for(m=0; m<m_XSamples; m++)
+	m_colColor = CqColor(0, 0, 0);
+	m_Depth = 0;
+	m_Coverage = 0;
+	
+	unsigned int samplecount = 0;
+	for(std::vector<std::vector<SqImageSample> >::iterator samples = m_aValues.begin(); samples != m_aValues.end(); samples++)
 		{
-			std::vector<SqImageValue>& vals=m_aValues[n*m_XSamples+m];
-			CqColor	col(0,0,0);
-
-			if(vals.size()>0)
-			{
-				TqInt i=vals.size();
-				// Now mix the colors using the transparency as a filter.
-				while(i-->0)
-					col=(vals[i].m_colColor)+(col*(colWhite-vals[i].m_colOpacity));
-				col.Clamp();
-				vals[0].m_colColor=col;
-			}
+			for(std::vector<SqImageSample>::iterator sample = samples->begin(); sample != samples->end(); sample++)
+				{
+					m_colColor = (m_colColor * (white - sample->m_colOpacity)) + sample->m_colColor;
+					m_Depth += sample->m_Depth;
+					m_Coverage += 1;
+					
+					samplecount++;
+				}
 		}
-	}
+	
+	if(samplecount)
+		{
+			m_colColor.Clamp();
+			m_Depth /= samplecount;
+			m_Coverage /= samplecount;
+		}
 }
 
 
@@ -256,7 +257,7 @@ TqInt	CqBucket::m_XOrigin;
 TqInt	CqBucket::m_YOrigin;
 TqInt	CqBucket::m_XPixelSamples;
 TqInt	CqBucket::m_YPixelSamples;
-std::vector<CqImageElement>	CqBucket::m_aieImage;
+std::vector<CqImagePixel>	CqBucket::m_aieImage;
 std::vector<TqFloat> CqBucket::m_aFilterValues;
 
 //----------------------------------------------------------------------
@@ -264,11 +265,11 @@ std::vector<TqFloat> CqBucket::m_aFilterValues;
  * \param iXPos Integer pixel coordinate.
  * \param iYPos Integer pixel coordinate.
  * \param iBucket Integer bucket index.
- * \param pie Pointer to CqImageElement to fill in.
+ * \param pie Pointer to CqImagePixel to fill in.
  * \return Boolean indicating success, could fail if the specified pixel is not within the specified bucket.
  */
 
-TqBool CqBucket::ImageElement(TqInt iXPos, TqInt iYPos, CqImageElement*& pie)
+TqBool CqBucket::ImageElement(TqInt iXPos, TqInt iYPos, CqImagePixel*& pie)
 {
 	iXPos-=m_XOrigin;
 	iYPos-=m_YOrigin;
@@ -285,7 +286,10 @@ TqBool CqBucket::ImageElement(TqInt iXPos, TqInt iYPos, CqImageElement*& pie)
 		return(TqTrue);
 	}
 	else
+	{
+std::cerr << "CqBucket::ImageElement() outside bucket boundary!" << std::endl;
 		return(TqFalse);
+	}
 }
 
 
@@ -296,7 +300,7 @@ TqBool CqBucket::ImageElement(TqInt iXPos, TqInt iYPos, CqImageElement*& pie)
 void CqBucket::Clear()
 {
 	// Call the clear function on each element in the bucket.
-	for(std::vector<CqImageElement>::iterator iElement=m_aieImage.begin(); iElement!=m_aieImage.end(); iElement++)
+	for(std::vector<CqImagePixel>::iterator iElement=m_aieImage.begin(); iElement!=m_aieImage.end(); iElement++)
 		iElement->Clear();
 }
 
@@ -408,7 +412,7 @@ void CqBucket::InitialiseFilterValues()
 
 void CqBucket::CombineElements()
 {
-	for(std::vector<CqImageElement>::iterator i=m_aieImage.begin(); i!=m_aieImage.end(); i++)
+	for(std::vector<CqImagePixel>::iterator i=m_aieImage.begin(); i!=m_aieImage.end(); i++)
 		i->Combine();
 }
 
@@ -422,7 +426,7 @@ void CqBucket::CombineElements()
 
 CqColor CqBucket::Color(TqInt iXPos, TqInt iYPos)
 {
-	CqImageElement* pie;
+	CqImagePixel* pie;
 	if(ImageElement(iXPos,iYPos,pie))
 		return(pie->Color());
 	else
@@ -439,7 +443,7 @@ CqColor CqBucket::Color(TqInt iXPos, TqInt iYPos)
 
 TqFloat CqBucket::Coverage(TqInt iXPos, TqInt iYPos)
 {
-	CqImageElement* pie;
+	CqImagePixel* pie;
 	if(ImageElement(iXPos,iYPos,pie))
 		return(pie->Coverage());
 	else
@@ -456,7 +460,7 @@ TqFloat CqBucket::Coverage(TqInt iXPos, TqInt iYPos)
 
 TqFloat CqBucket::Depth(TqInt iXPos, TqInt iYPos)
 {
-	CqImageElement* pie;
+	CqImagePixel* pie;
 	if(ImageElement(iXPos,iYPos,pie))
 		return(pie->Depth());
 	else
@@ -470,7 +474,7 @@ TqFloat CqBucket::Depth(TqInt iXPos, TqInt iYPos)
 
 void CqBucket::FilterBucket()
 {
-	CqImageElement* pie;
+	CqImagePixel* pie;
 
 	CqColor* pCols=new CqColor[XSize()*YSize()];
 	TqInt xmax=static_cast<TqInt>(ceil((XFWidth()-1)*0.5f));
@@ -498,7 +502,7 @@ void CqBucket::FilterBucket()
 			ImageElement(x-xmax, y-ymax, pie);
 			for(fy=-ymax; fy<=ymax; fy++)
 			{
-				CqImageElement* pie2=pie;
+				CqImagePixel* pie2=pie;
 				for(fx=-xmax; fx<=xmax; fx++)
 				{
 					TqInt index=(((fy+ymax)*XFWidth())+(fx+xmax))*numperpixel;
@@ -534,7 +538,7 @@ void CqBucket::FilterBucket()
 	ImageElement(XOrigin(),YOrigin(),pie);
 	for(y=0; y<YSize(); y++)
 	{
-		CqImageElement* pie2=pie;
+		CqImagePixel* pie2=pie;
 		for(x=0; x<XSize(); x++)
 		{
 			pie2->Color()=pCols[i++];
@@ -557,12 +561,12 @@ void CqBucket::ExposeBucket()
 		return;
 	else
 	{
-		CqImageElement* pie;
+		CqImagePixel* pie;
 		ImageElement(XOrigin(), YOrigin(), pie);
 		TqInt x,y;
 		for(y=0; y<YSize(); y++)
 		{
-			CqImageElement* pie2=pie;
+			CqImagePixel* pie2=pie;
 			for(x=0; x<XSize(); x++)
 			{
 				// color=(color*gain)^1/gamma
@@ -600,12 +604,12 @@ void CqBucket::QuantizeBucket()
 		TqInt min=QGetRenderContext()->optCurrent().iColorQuantizeMin();
 		TqInt max=QGetRenderContext()->optCurrent().iColorQuantizeMax();
 
-		CqImageElement* pie;
+		CqImagePixel* pie;
 		ImageElement(XOrigin(),YOrigin(),pie);
 		TqInt x,y;
 		for(y=0; y<YSize(); y++)
 		{
-			CqImageElement* pie2=pie;
+			CqImagePixel* pie2=pie;
 			for(x=0; x<XSize(); x++)
 			{
 				double r,g,b,a;
@@ -636,12 +640,12 @@ void CqBucket::QuantizeBucket()
 		TqInt min=QGetRenderContext()->optCurrent().iDepthQuantizeMin();
 		TqInt max=QGetRenderContext()->optCurrent().iDepthQuantizeMax();
 
-		CqImageElement* pie;
+		CqImagePixel* pie;
 		ImageElement(XOrigin(), YOrigin(), pie);
 		TqInt x,y;
 		for(y=0; y<YSize(); y++)
 		{
-			CqImageElement* pie2=pie;
+			CqImagePixel* pie2=pie;
 			for(x=0; x<XSize(); x++)
 			{
 				double d;
@@ -1013,12 +1017,12 @@ void CqImageBuffer::RenderMPGs(TqInt iBucket, long xmin, long xmax, long ymin, l
  * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
 
-   \see CqBucket, CqImageElement
+   \see CqBucket, CqImagePixel
  */
 
 inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax)
 {
-	static	SqImageValue	ImageVal;
+	static	SqImageSample	ImageVal;
 
 	CqBucket& Bucket=m_aBuckets[iBucket];
 
@@ -1052,7 +1056,7 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 	if(eX>=xmax)	eX=xmax-1;
 	if(eY>=ymax)	eY=ymax-1;
 
-	CqImageElement* pie;
+	CqImagePixel* pie;
 
 	long initY=static_cast<long>(floor(Bound.vecMin().y()));
 	if(initY<ymin)	initY=ymin;
@@ -1105,12 +1109,12 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 						{									
 							QGetRenderContext()->Stats().IncSampleHits();
 							// Sort the color/opacity into the visible point list
-							std::vector<SqImageValue>& aValues=pie->Values(m,n);
+							std::vector<SqImageSample>& aValues=pie->Values(m,n);
 							int i=0;
 							int c=aValues.size();
 							if(c>0 && aValues[0].m_Depth<ImageVal.m_Depth)
 							{
-								SqImageValue* p=&aValues[0];
+								SqImageSample* p=&aValues[0];
 								while(i<c && p[i].m_Depth<ImageVal.m_Depth)	i++;
 								// If it is exactly the same, chances are we've hit a MPG grid line.
 								if(i<c && p[i].m_Depth==ImageVal.m_Depth)
@@ -1253,7 +1257,7 @@ void CqImageBuffer::RenderImage()
 		CqBucket::Clear();
 		CqVector2D bPos=Position(iBucket);
 		CqVector2D bSize=Size(iBucket);
-		CqBucket::InitialiseBucket(bPos.x(), bPos.y(), bSize.x(), bSize.y(), m_FilterXWidth, m_FilterYWidth, m_PixelXSamples, m_PixelYSamples);
+		CqBucket::InitialiseBucket(static_cast<TqInt>(bPos.x()), static_cast<TqInt>(bPos.y()), static_cast<TqInt>(bSize.x()), static_cast<TqInt>(bSize.y()), m_FilterXWidth, m_FilterYWidth, m_PixelXSamples, m_PixelYSamples);
 
 		// Set up some bounds for the bucket.
 		CqVector2D vecMin=bPos;
