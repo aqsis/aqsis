@@ -53,7 +53,7 @@ TqFloat CqCellNoise::FCellNoise2(TqFloat u, TqFloat v)
 	if(u<0.0)	u-=1;
 	TqInt i=m_PermuteTable[((unsigned int)(u))&0x7ff];
 
-	if(v<0.0)	v-=1;
+	if(v<0.0) v-=1;
 	i=m_PermuteTable[i+(unsigned int)(v)&0x7ff];
 
 	return(m_RandomTable[i]);
