@@ -128,7 +128,7 @@ public:
     void	FilterBucket(TqBool empty);
     void	ExposeBucket();
     void	QuantizeBucket();
-    static	void	EmptyBucket();
+    static	void	ShutdownBucket();
 
     /** Add a GPRim to the list of deferred GPrims.
      */

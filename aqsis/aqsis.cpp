@@ -276,6 +276,7 @@ RtVoid PreRender()
 
 int main( int argc, const char** argv )
 {
+	{
 
     ArgParse ap;
     ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] files(s) to render" );
@@ -375,6 +376,7 @@ int main( int argc, const char** argv )
         }
     }
 
+	}
 #if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
     _CrtDumpMemoryLeaks();
 #endif
@@ -511,6 +513,9 @@ void RenderFile( FILE* file, const char* name )
     librib::Parse( file, name, *renderengine, std::cerr, NULL );
 
     RiEnd();
+
+    if ( !g_nostandard )
+        librib::CleanupDeclarations( *renderengine );
 
     librib2ri::DestroyRIBEngine( renderengine );
 }

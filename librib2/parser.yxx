@@ -1869,6 +1869,11 @@ void ParserDeclare(librib::RendermanInterface& CallbackInterface, const std::str
 	CallbackInterface.RiDeclare(Name.c_str(), Type.c_str());
 }
 
+void ClearDeclarations()
+{
+	TypeMap.clear();
+}
+
 }; // namespace librib
 
 

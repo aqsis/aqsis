@@ -148,6 +148,7 @@ CqRenderer::~CqRenderer()
 
     // Close down the Display device manager.
     m_pDDManager->Shutdown();
+	delete(m_pDDManager);
 
     // Delete the default options
     if ( m_pOptDefault )

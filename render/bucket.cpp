@@ -721,10 +721,16 @@ void CqBucket::AddGPrim( CqBasicSurface* pGPrim )
 //----------------------------------------------------------------------
 /** Clear any data on the bucket
  */
-void CqBucket::EmptyBucket()
+void CqBucket::ShutdownBucket()
 {
     m_aieImage.clear();
     m_aFilterValues.clear();
+	m_aCoverages.clear();
+	m_aDatas.clear();
+	std::vector<std::vector<CqVector2D> >::iterator i;
+	for( i=m_aSamplePositions.begin(); i!=m_aSamplePositions.end(); i++ )
+		(*i).clear();
+	m_aSamplePositions.clear();
 }
 
 //---------------------------------------------------------------------

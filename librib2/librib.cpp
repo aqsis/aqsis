@@ -51,6 +51,7 @@ namespace librib
 {
 
 extern void ParserDeclare( RendermanInterface& CallbackInterface, const std::string Name, const std::string Type );
+extern void	ClearDeclarations();
 
 FILE *ParseInputFile = stdin;
 CqRibBinaryDecoder *BinaryDecoder = 0;
@@ -153,6 +154,12 @@ void StandardDeclarations( RendermanInterface& CallbackInterface )
         ParserDeclare( CallbackInterface, name, type );
         i++;
     };
+}
+
+
+void CleanupDeclarations( RendermanInterface& CallbackInterface )
+{
+	ClearDeclarations();
 }
 
 

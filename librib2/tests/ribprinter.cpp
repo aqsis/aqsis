@@ -50,6 +50,7 @@ int main( int argc, char* argv[] )
             return 3;
         }
         fclose( file );
+        librib::CleanupDeclarations( stream );
     }
 
     return 0;

@@ -3,6 +3,7 @@ DESCRIPTION	"Main Aqsis rendering library"
 EXPORTS
 	Parse
 	StandardDeclarations
+	CleanupDeclarations
 	CreateRIBEngine
 	DestroyRIBEngine
 

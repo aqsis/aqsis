@@ -161,6 +161,8 @@ extern "C" {
 
     void StandardDeclarations( RendermanInterface& CallbackInterface );
 
+    void CleanupDeclarations( RendermanInterface& CallbackInterface );
+
     /// Parses an input stream, using the supplied callback object and sending error data to the supplied output stream
     bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream, RtArchiveCallback callback);
     /// Parse the stream held in decoder, does not close the stream
