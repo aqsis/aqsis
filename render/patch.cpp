@@ -751,7 +751,8 @@ TqBool	CqSurfacePatchBilinear::Diceable()
     if( NULL != poptGridSize )
         gs = poptGridSize[0];
 
-	if( m_uDiceSize * m_vDiceSize > gs * gs )
+	TqFloat gs2 = gs*gs;
+	if( m_uDiceSize > gs2 || m_vDiceSize > gs2 || (m_uDiceSize * m_vDiceSize) > gs2 )
 		return TqFalse;
 
     return ( TqTrue );
