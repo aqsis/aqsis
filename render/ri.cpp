@@ -4971,7 +4971,9 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 					break;
 
 					case class_facevarying:
-					cValues = pSurface->cFaceVarying();
+					//cValues = pSurface->cFaceVarying();
+					QGetRenderContext() ->Logger()->error( "Aqsis does not support 'facevarying' primitive variables" );
+					return( TqFalse );
 					break;
 
 					default:  // left blank to avoid compiler warnings about unhandled types
