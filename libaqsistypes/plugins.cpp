@@ -185,7 +185,7 @@ CqPluginBase::DLError(void)
 #endif
 
 #else
-	errorlog = "Aqsis was built without plugin support\m";
+	errorlog = "Aqsis was built without plugin support\n";
 #endif
 	return errorlog;
 }
