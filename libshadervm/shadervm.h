@@ -42,6 +42,7 @@
 #include	"ishader.h"
 #include	"shaderexecenv.h"
 #include	"shaderstack.h"
+#include	"shadervariable.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -431,8 +432,8 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		{
 			return ( m_Uses );
 		}
-		virtual IqShaderData* CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name);
-		virtual IqShaderData* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count);
+		virtual IqShaderData* CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fArgument = TqFalse);
+		virtual IqShaderData* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fParameter = TqFalse );
 		virtual IqShaderData* CreateTemporaryStorage();
 		virtual void DeleteTemporaryStorage( IqShaderData* pData );
 

@@ -627,6 +627,7 @@ class CqVMStackEntry : public IqShaderData
 
 
 		virtual	const CqString&	strName()			{ return(m_strName); }
+		virtual	TqBool	fParameter() const			{ return(TqFalse); }
 
 		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
 		{

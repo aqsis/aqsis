@@ -143,11 +143,11 @@ class CqShader : public IqShader
 		{
 			return ( m_Uses );
 		}
-		virtual IqShaderData* CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name)
+		virtual IqShaderData* CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fArgument = TqFalse)
 		{
 			return( NULL );
 		}
-		virtual IqShaderData* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count)
+		virtual IqShaderData* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fArgument = TqFalse)
 		{
 			return( NULL );
 		}

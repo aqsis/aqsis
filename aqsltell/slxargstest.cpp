@@ -24,52 +24,27 @@
 */
 
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#include <iostream>
+#include <iomanip>
+#include <fstream>
+#include <string>
+#include <vector>
 
-//#define testaqsis
-//#define testbmrt
+#include "aqsis.h"
 
-#define shaderName "spotlight"
-
-/* 
- *	To test with Aqsis -
- *		Link with  libslxargs, libaqsis, libddmsimple, libaqsistypes, 
- *				librib2ri, libtiff, libstdc++
- */
-#define shaderPath "../shaders/"
-#include "slx.h"
-
-/*
- *	To compile with BMRT2.6 for Linux -
- *		g++ -Dtestbmrt -L../lib/ -rdynamic -o testslxargs testslxargs.cpp \
- *				-lribout -lstdc++ -ldl -lm -lc
- */
-#ifdef testbmrt
-#define shaderPath "/home/dsward/BMRT2.6/shaders/"
-#include "../include/slc.h"
-#define SLX_TYPE SLC_TYPE
-#define SLX_TYPE_UNKNOWN SLC_TYPE_UNKNOWN
-#define SLX_TYPE_POINT SLC_TYPE_POINT
-#define SLX_TYPE_COLOR SLC_TYPE_COLOR
-#define SLX_TYPE_SCALAR SLC_TYPE_SCALAR
-#define SLX_TYPE_STRING SLC_TYPE_STRING
-#define SLX_VISSYMDEF SLC_VISSYMDEF
-#define SLX_SetPath SLC_SetPath
-#define SLX_GetPath SLC_GetPath
-#define SLX_SetShader SLC_SetShader
-#define SLX_GetName SLC_GetName
-#define SLX_GetType SLC_GetType
-#define SLX_GetNArgs SLC_GetNArgs
-#define SLX_GetArgById SLC_GetArgById
-#define SLX_GetArgByName SLC_GetArgByName
-#define SLX_EndShader SLC_EndShader
-#define SLX_TypetoStr SLC_TypetoStr
-#define SLX_StortoStr SLC_StortoStr
-#define SLX_DetailtoStr SLC_DetailtoStr
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+#include "version.h"
 #endif
 
+#include <stdio.h>
+#include "slx.h"
+#include <argparse.h>
+
+
+/*
+ * Define a dummy render context function, needed by the shader VM, if any initialisation code need the
+ * render core, it will fail.
+ */
 namespace Aqsis
 {
 	struct IqRenderer;
@@ -79,140 +54,132 @@ namespace Aqsis
 	}
 }
 
+bool g_pause;
+bool g_help;
+bool g_version;
+
+
+void version( std::ostream& Stream )
+{
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+//	Stream << "aqsis version " << VERSION_STR << std::endl;
+#else
+	Stream << "aqsis version " << VERSION << std::endl;
+#endif
+}
+
 /*
  *
  */
-int main(int argc, char *argv[])
+int main( int argc, const char** argv )
 {    
-	printf("slxtestargs\n");
-    SLX_SetPath(shaderPath);
-    if (SLX_SetShader(shaderName) == 0)
-    {
-        // SLX_SetShader successful
-        char * slxPath;
-        char * slxName;
-        SLX_TYPE slxType;
-        int	nArgs;
-        int i;
-        SLX_VISSYMDEF * symPtr;
-        char * slxTypeStr;
-        char * slxStorStr;
-        char * slxDetailStr;
+	ArgParse ap;
+	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " <shadername>" );
+	ap.argFlag( "help", "\aprint this help and exit", &g_help );
+	ap.argFlag( "version", "\aprint version information and exit", &g_version );
+	ap.argFlag( "pause", "\await for a keypress on completion", &g_pause );
 
-        printf("shaderPath: ");
-        printf(shaderPath);
-        printf("\n");
-        printf("shaderName: ");
-        printf(shaderName);
-        printf("\n");
- 
-        slxPath = SLX_GetPath();
-        printf("GetPath result: %s\n", slxPath);
-        
-        slxName = SLX_GetName();
-        printf("GetName result: %s\n", slxName);
-        
-        slxType = SLX_GetType();
-        printf("GetType result: %s\n", SLX_TypetoStr(slxType));
+	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
+	{
+		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
+		exit( 1 );
+	}
 
-        nArgs = SLX_GetNArgs();
-        printf("GetNArgs result: %d\n\n", nArgs);
-        
-        for (i=0; i<nArgs; i++)
-        {
-            symPtr = SLX_GetArgById(i);
-            if (symPtr != NULL)
-            {
-        		printf("Indexed shader argument #%d results from GetArgById:\n", i);
-                
-                if (symPtr->svd_name != NULL)
-                {
-                    printf("   Name: %s\n", symPtr->svd_name);
-                }
-                else
-                {
-                    printf("   Name: ERROR - svd_name is NULL\n");
-                }
-        		
-                slxTypeStr = SLX_TypetoStr(symPtr->svd_type);
-        		printf("   Type: %s\n", slxTypeStr);
-        		
-                slxStorStr = SLX_StortoStr(symPtr->svd_storage);
-        		printf("   Storage: %s\n", slxStorStr);
-                
-                slxDetailStr = SLX_DetailtoStr(symPtr->svd_detail);
-        		printf("   Detail: %s\n", slxDetailStr);
+	if ( g_help )
+	{
+		std::cout << ap.usagemsg();
+		exit( 0 );
+	}
 
-                if (symPtr->svd_spacename != NULL)
-                {
-                    if ((symPtr->svd_type == SLX_TYPE_POINT) || 
-                            (symPtr->svd_type == SLX_TYPE_COLOR))
-                    {
-                        printf("   Spacename: %s\n", symPtr->svd_spacename);
-                    }
-                }
-                else
-                {
-                    printf("   Spacename: ERROR - svd_spacename is NULL\n");
-                }
-                
-                printf("   Array length: %d\n", symPtr->svd_arraylen);
-                
-                if (symPtr->svd_default.stringval != NULL)
-                {
-                    switch (symPtr->svd_type)
-                    {
-                        case SLX_TYPE_UNKNOWN:
-                            printf("   Data: unknown");
-                            break;
-                        case SLX_TYPE_POINT:
-                            printf("   Data: x=%f\n", symPtr->svd_default.pointval->xval);
-                            printf("   Data: y=%f\n", symPtr->svd_default.pointval->yval);
-                            printf("   Data: z=%f\n", symPtr->svd_default.pointval->zval);
-                            break;
-                        case SLX_TYPE_COLOR:
-                            printf("   Data: r=%f\n", symPtr->svd_default.pointval->xval);
-                            printf("   Data: g=%f\n", symPtr->svd_default.pointval->yval);
-                            printf("   Data: b=%f\n", symPtr->svd_default.pointval->zval);
-                            break;
-                        case SLX_TYPE_SCALAR:
-                            printf("   Data: val=%f\n", *(symPtr->svd_default.scalarval));
-                            break;
-                        case SLX_TYPE_STRING:
-                            printf("   Data: val=%s\n", symPtr->svd_default.stringval);
-                            break;
-                        default:
-                            printf("   Data: unknown");
-                            break;
-                    }
-                }
-                else
-                {
-                    printf("   Data: ERROR - null pointer to value");
-                }
-        		
-        		printf("\n");
-            }
-        }
-        
-        symPtr = SLX_GetArgByName ("intensity");
-        
-        // SLX_GetArrayArgElement - Not implemented yet
-        // symPtr - SLX_GetArrayArgElement(SLX_VISSYMDEF *array, int index);
+	if ( g_version )
+	{
+		version( std::cout );
+		exit( 0 );
+	}
 
-        SLX_EndShader();
-    }
-    else
-    {
-        printf("Shader not found: \n");
-        printf("shaderPath: ");
-        printf(shaderPath);
-        printf("\n");
-        printf("shaderName: ");
-        printf(shaderName);
-        printf("\n");
-    }
-    
-    exit(0);
+	// Any leftovers are presumed to be shader names.
+	if ( ap.leftovers().size() == 0 )   // If no files specified, take input from stdin.
+	{
+		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
+		exit( 1 );
+	}
+	else
+	{
+		for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
+		{
+		    SLX_SetPath("./");
+
+			if (SLX_SetShader((char*)e->c_str()) == 0)
+			{
+				// SLX_SetShader successful
+				int	nArgs;
+				int i;
+				SLX_VISSYMDEF * symPtr;
+
+				std::cout << SLX_TypetoStr(SLX_GetType()) << " \"" << SLX_GetPath() << SLX_GetName() << "\"" << std::endl;
+				nArgs = SLX_GetNArgs();
+        
+				for (i=0; i<nArgs; i++)
+				{
+					symPtr = SLX_GetArgById(i);
+					if (symPtr != NULL)
+					{
+						std::cout << "\t\"" << symPtr->svd_name << "\" \"" << 
+							SLX_DetailtoStr(symPtr->svd_detail) <<
+							SLX_TypetoStr(symPtr->svd_type) << 
+							"\"" << std::endl;
+        				
+						std::cout << "\t\tDefault value: ";
+						
+						if (symPtr->svd_spacename != NULL)
+						{
+							if ((symPtr->svd_type == SLX_TYPE_POINT) || 
+									(symPtr->svd_type == SLX_TYPE_COLOR))
+								std::cout << "\"" << symPtr->svd_spacename << "\" ";
+						}
+                
+						if (symPtr->svd_default.stringval != NULL)
+						{
+							switch (symPtr->svd_type)
+							{
+								case SLX_TYPE_UNKNOWN:
+									std::cout << "unknown" << std::endl;
+									break;
+								case SLX_TYPE_POINT:
+									std::cout << "[" << symPtr->svd_default.pointval->xval << ", " <<
+														symPtr->svd_default.pointval->xval << ", " <<
+														symPtr->svd_default.pointval->xval <<
+												"]" << std::endl;
+									break;
+								case SLX_TYPE_COLOR:
+									std::cout << "[" << symPtr->svd_default.pointval->xval << ", " <<
+														symPtr->svd_default.pointval->xval << ", " <<
+														symPtr->svd_default.pointval->xval <<
+												"]" << std::endl;
+									break;
+								case SLX_TYPE_SCALAR:
+									std::cout << *(symPtr->svd_default.scalarval) << std::endl;
+									break;
+								case SLX_TYPE_STRING:
+									std::cout << "\"" << symPtr->svd_default.stringval << "\"" << std::endl;
+									break;
+								default:
+									std::cout << "unknown" << std::endl;
+									break;
+							}
+						}
+						else
+						{
+							printf("ERROR - null pointer to value");
+						}
+					}
+				}
+        
+				SLX_EndShader();
+			}
+		}
+	}
+
+    return(0);
 }
 

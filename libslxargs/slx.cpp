@@ -287,7 +287,7 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
     char * 			spacename;
 
     shaderVar = pShader->GetShaderVarAt(i);
-    if (shaderVar != NULL) 
+    if ( shaderVar != NULL && shaderVar->fParameter() ) 
     {
         theType = shaderVar->Type();
         theClass = shaderVar->Class();

@@ -5,7 +5,7 @@
  *	@brief	Decares the interface to generic shader variables.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/05/02 23:33:08 $
+ *	Last change date:	$Date: 2002/05/09 07:14:09 $
  */
 //------------------------------------------------------------------------------
 
@@ -152,6 +152,10 @@ struct IqShaderData
 		 * \return Read only reference to a CqString class.
 		 */
 		virtual	const CqString&	strName()=0;
+		/** Determine whether this data storage represents a shader argument.
+		 * \return Read only reference to a CqString class.
+		 */
+		virtual	TqBool	fParameter() const =0;
 
 		/** Pure virtual, prepare the variable for the SIMD size.
 		 * \param uGridRes The size of the SIMD grid in u.

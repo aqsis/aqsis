@@ -53,7 +53,7 @@ class CqShaderVariable : public IqShaderData
 {
 	public:
 		CqShaderVariable();
-		CqShaderVariable( const char* strName );
+		CqShaderVariable( const char* strName, TqBool fParameter = TqFalse );
 		virtual	~CqShaderVariable();
 
 		virtual void GetBool( TqBool& res, TqInt index = 0 ) const	{ assert(TqFalse); }
@@ -63,9 +63,23 @@ class CqShaderVariable : public IqShaderData
 		/** Get the name of this variable.
 		 * \return Read only reference to a CqString class.
 		 */
-		const CqString&	strName()
+		virtual const CqString&	strName()
 		{
 			return ( m_strName );
+		}
+
+		/** Determine if this variable is storage for a shader argument.
+		 */
+		virtual TqBool fParameter() const
+		{
+			return( m_fParameter );
+		}
+
+		/** Indicate whether or not this variable is a shader argument.
+		 */
+		void SetfParameter( TqBool fParameter = TqTrue )
+		{
+			m_fParameter = fParameter;
 		}
 
 		virtual TqInt	ArrayLength() const
@@ -79,6 +93,7 @@ class CqShaderVariable : public IqShaderData
 
 	protected:
 		CqString	m_strName;		///< Name of this variable.
+		TqBool		m_fParameter;	///< Flag indicating this variable is a shader argument.
 };
 
 
@@ -213,7 +228,7 @@ template <const EqVariableType T, class R>
 class CqShaderVariableUniform : public CqShaderVariable
 {
 	public:
-		CqShaderVariableUniform( const char* strName ) : CqShaderVariable( strName )
+		CqShaderVariableUniform( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariable( strName, fParameter )
 		{}
 		CqShaderVariableUniform( const char* strName, const R& val ) : CqShaderVariable( strName ),
 				m_Value( val )
@@ -282,7 +297,7 @@ class CqShaderVariableUniform : public CqShaderVariable
 class CqShaderVariableUniformFloat : public CqShaderVariableUniform<type_float, TqFloat>
 {
 	public:
-		CqShaderVariableUniformFloat( const char* strName )	: CqShaderVariableUniform<type_float, TqFloat>( strName )	
+		CqShaderVariableUniformFloat( const char* strName, TqBool fParameter = TqFalse )	: CqShaderVariableUniform<type_float, TqFloat>( strName, fParameter )	
 																	{}
 		virtual	void		GetFloat(TqFloat& res, TqInt index=0) const	{ res = m_Value; }
 		virtual	void		SetFloat(const TqFloat& f)					{ m_Value = f; }
@@ -293,7 +308,7 @@ class CqShaderVariableUniformFloat : public CqShaderVariableUniform<type_float, 
 class CqShaderVariableUniformString : public CqShaderVariableUniform<type_string, CqString>
 {
 	public:
-		CqShaderVariableUniformString( const char* strName )	: CqShaderVariableUniform<type_string, CqString>( strName )	
+		CqShaderVariableUniformString( const char* strName, TqBool fParameter = TqFalse )	: CqShaderVariableUniform<type_string, CqString>( strName, fParameter )	
 																	{}
 		virtual	void		GetString(CqString& res, TqInt index=0) const	{ res = m_Value; }
 		virtual	void		SetString(const CqString& s)					{ m_Value = s; }
@@ -304,7 +319,7 @@ class CqShaderVariableUniformString : public CqShaderVariableUniform<type_string
 class CqShaderVariableUniformPoint : public CqShaderVariableUniform<type_point, CqVector3D>
 {
 	public:
-		CqShaderVariableUniformPoint( const char* strName )	: CqShaderVariableUniform<type_point, CqVector3D>( strName )	
+		CqShaderVariableUniformPoint( const char* strName, TqBool fParameter = TqFalse )	: CqShaderVariableUniform<type_point, CqVector3D>( strName, fParameter )	
 																	{}
 		virtual	void		GetPoint(CqVector3D& res, TqInt index=0) const	{ res = m_Value; }
 		virtual	void		SetPoint(const CqVector3D& p)					{ m_Value = p; }
@@ -319,7 +334,7 @@ class CqShaderVariableUniformPoint : public CqShaderVariableUniform<type_point, 
 class CqShaderVariableUniformVector : public CqShaderVariableUniform<type_vector, CqVector3D>
 {
 	public:
-		CqShaderVariableUniformVector( const char* strName )	: CqShaderVariableUniform<type_vector, CqVector3D>( strName )	
+		CqShaderVariableUniformVector( const char* strName, TqBool fParameter = TqFalse )	: CqShaderVariableUniform<type_vector, CqVector3D>( strName, fParameter )	
 																	{}
 		virtual	void		GetPoint(CqVector3D& res, TqInt index=0) const	{ res = m_Value; }
 		virtual	void		SetPoint(const CqVector3D& p)					{ m_Value = p; }
@@ -334,7 +349,7 @@ class CqShaderVariableUniformVector : public CqShaderVariableUniform<type_vector
 class CqShaderVariableUniformNormal : public CqShaderVariableUniform<type_normal, CqVector3D>
 {
 	public:
-		CqShaderVariableUniformNormal( const char* strName )	: CqShaderVariableUniform<type_normal, CqVector3D>( strName )	
+		CqShaderVariableUniformNormal( const char* strName, TqBool fParameter = TqFalse )	: CqShaderVariableUniform<type_normal, CqVector3D>( strName, fParameter )	
 																	{}
 		virtual	void		GetPoint(CqVector3D& res, TqInt index=0) const	{ res = m_Value; }
 		virtual	void		SetPoint(const CqVector3D& p)					{ m_Value = p; }
@@ -349,7 +364,7 @@ class CqShaderVariableUniformNormal : public CqShaderVariableUniform<type_normal
 class CqShaderVariableUniformColor : public CqShaderVariableUniform<type_color, CqColor>
 {
 	public:
-		CqShaderVariableUniformColor( const char* strName )	: CqShaderVariableUniform<type_color, CqColor>( strName )	
+		CqShaderVariableUniformColor( const char* strName, TqBool fParameter = TqFalse )	: CqShaderVariableUniform<type_color, CqColor>( strName, fParameter )	
 																	{}
 		virtual	void		GetColor(CqColor& res, TqInt index=0) const		{ res = m_Value; }
 		virtual	void		SetColor(const CqColor& c)						{ m_Value = c; }
@@ -360,7 +375,7 @@ class CqShaderVariableUniformColor : public CqShaderVariableUniform<type_color, 
 class CqShaderVariableUniformMatrix : public CqShaderVariableUniform<type_matrix, CqMatrix>
 {
 	public:
-		CqShaderVariableUniformMatrix( const char* strName )	: CqShaderVariableUniform<type_matrix, CqMatrix>( strName )	
+		CqShaderVariableUniformMatrix( const char* strName, TqBool fParameter = TqFalse )	: CqShaderVariableUniform<type_matrix, CqMatrix>( strName, fParameter )	
 																	{}
 		virtual	void		GetMatrix(CqMatrix& res, TqInt index=0) const	{ res = m_Value; }
 		virtual	void		SetMatrix(const CqMatrix& m)					{ m_Value = m; }
@@ -378,7 +393,7 @@ template <const EqVariableType T, class R>
 class CqShaderVariableVarying : public CqShaderVariable
 {
 	public:
-		CqShaderVariableVarying( const char* strName ) : CqShaderVariable( strName )
+		CqShaderVariableVarying( const char* strName, TqBool fParameter = TqFalse ) : CqShaderVariable( strName, fParameter )
 		{
 			m_aValue.resize( 1 );
 		}
@@ -453,7 +468,7 @@ class CqShaderVariableVarying : public CqShaderVariable
 class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, TqFloat>
 {
 	public:
-		CqShaderVariableVaryingFloat( const char* strName )	: CqShaderVariableVarying<type_float, TqFloat>( strName )	
+		CqShaderVariableVaryingFloat( const char* strName, TqBool fParameter = TqFalse )	: CqShaderVariableVarying<type_float, TqFloat>( strName, fParameter )	
 																	{}
 		virtual	void		GetFloat(TqFloat& res, TqInt index=0) const	{ res = m_aValue[index]; }
 		virtual	void		SetFloat(const TqFloat& f, TqInt index)		{ m_aValue[index] = f; }
@@ -479,7 +494,7 @@ class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, 
 class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string, CqString>
 {
 	public:
-		CqShaderVariableVaryingString( const char* strName )	: CqShaderVariableVarying<type_string, CqString>( strName )	
+		CqShaderVariableVaryingString( const char* strName, TqBool fParameter = TqFalse )	: CqShaderVariableVarying<type_string, CqString>( strName, fParameter )	
 																	{}
 		virtual	void		GetString(CqString& res, TqInt index=0) const	{ res = m_aValue[index]; }
 		virtual	void		SetString(const CqString& s, TqInt index)		{ m_aValue[index] = s; }
@@ -505,7 +520,7 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 class CqShaderVariableVaryingPoint : public CqShaderVariableVarying<type_point, CqVector3D>
 {
 	public:
-		CqShaderVariableVaryingPoint( const char* strName )	: CqShaderVariableVarying<type_point, CqVector3D>( strName )	
+		CqShaderVariableVaryingPoint( const char* strName, TqBool fParameter = TqFalse )	: CqShaderVariableVarying<type_point, CqVector3D>( strName, fParameter )	
 																	{}
 		virtual	void		GetPoint(CqVector3D& res, TqInt index=0) const	{ res = m_aValue[index]; }
 		virtual	void		SetPoint(const CqVector3D& p, TqInt index)		{ m_aValue[index] = p; }
@@ -537,7 +552,7 @@ class CqShaderVariableVaryingPoint : public CqShaderVariableVarying<type_point, 
 class CqShaderVariableVaryingVector : public CqShaderVariableVarying<type_vector, CqVector3D>
 {
 	public:
-		CqShaderVariableVaryingVector( const char* strName )	: CqShaderVariableVarying<type_vector, CqVector3D>( strName )	
+		CqShaderVariableVaryingVector( const char* strName, TqBool fParameter = TqFalse )	: CqShaderVariableVarying<type_vector, CqVector3D>( strName, fParameter )	
 																	{}
 		virtual	void		GetPoint(CqVector3D& res, TqInt index=0) const	{ res = m_aValue[index]; }
 		virtual	void		SetPoint(const CqVector3D& p, TqInt index)		{ m_aValue[index] = p; }
@@ -569,7 +584,7 @@ class CqShaderVariableVaryingVector : public CqShaderVariableVarying<type_vector
 class CqShaderVariableVaryingNormal : public CqShaderVariableVarying<type_normal, CqVector3D>
 {
 	public:
-		CqShaderVariableVaryingNormal( const char* strName )	: CqShaderVariableVarying<type_normal, CqVector3D>( strName )	
+		CqShaderVariableVaryingNormal( const char* strName, TqBool fParameter = TqFalse )	: CqShaderVariableVarying<type_normal, CqVector3D>( strName, fParameter )	
 																	{}
 		virtual	void		GetPoint(CqVector3D& res, TqInt index=0) const	{ res = m_aValue[index]; }
 		virtual	void		SetPoint(const CqVector3D& p, TqInt index)		{ m_aValue[index] = p; }
@@ -601,7 +616,7 @@ class CqShaderVariableVaryingNormal : public CqShaderVariableVarying<type_normal
 class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, CqColor>
 {
 	public:
-		CqShaderVariableVaryingColor( const char* strName )	: CqShaderVariableVarying<type_color, CqColor>( strName )	
+		CqShaderVariableVaryingColor( const char* strName, TqBool fParameter = TqFalse )	: CqShaderVariableVarying<type_color, CqColor>( strName, fParameter )	
 																	{}
 		virtual	void		GetColor(CqColor& res, TqInt index=0) const	{ res = m_aValue[index]; }
 		virtual	void		SetColor(const CqColor& c, TqInt index)		{ m_aValue[index] = c; }
@@ -627,7 +642,7 @@ class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, 
 class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix, CqMatrix>
 {
 	public:
-		CqShaderVariableVaryingMatrix( const char* strName )	: CqShaderVariableVarying<type_matrix, CqMatrix>( strName )	
+		CqShaderVariableVaryingMatrix( const char* strName, TqBool fParameter = TqFalse )	: CqShaderVariableVarying<type_matrix, CqMatrix>( strName, fParameter )	
 																	{}
 		virtual	void		GetMatrix(CqMatrix& res, TqInt index=0) const	{ res = m_aValue[index]; }
 		virtual	void		SetMatrix(const CqMatrix& m, TqInt index)		{ m_aValue[index] = m; }
