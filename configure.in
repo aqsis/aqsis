@@ -1,0 +1,8 @@
+AC_INIT()
+AM_INIT_AUTOMAKE(aqsis,0.4.4003)
+
+AC_PROG_CXX
+AM_PROG_LIBTOOL
+
+AC_OUTPUT(render/Makefile render/posix/Makefile render/posix/intel/Makefile librib/Makefile file/Makefile aqsis/Makefile Makefile)
+

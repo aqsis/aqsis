@@ -1,0 +1,273 @@
+2001-04-27 14:33  pgregory
+
+	* render/makefile.mingw, cribber/makefile.mingw: Initial check in.
+
+2001-04-27 14:08  pgregory
+
+	* BUILD, Doxyfile, License.txt, Readme.txt, Renderer.dsw,
+	aqsis.ini, prep_install.bat, ribber.cfg: Initial check in.
+
+2001-04-27 13:39  pgregory
+
+	* content/Test/: std_st_test.rib, test.bat, test.rib, testincl.rib,
+	tmap_test.rib, transmb_test.rib, uvtest.sl, uv_test.rib: Initial
+	revision
+
+2001-04-27 13:39  pgregory
+
+	* content/Test/: std_st_test.rib, test.bat, test.rib, testincl.rib,
+	tmap_test.rib, transmb_test.rib, uvtest.sl, uv_test.rib: Initial
+	check in.
+
+2001-04-27 13:36  pgregory
+
+	* content/Test/: nz.tif, orient_test.rib, patterns.h,
+	periodic_test.rib, persptest.rib, poly_test.rib, px.tif, py.tif,
+	pz.tif, quads_test.rib, shadtest.rib, show_st.sl, space_test.rib,
+	spacetest.sl: Initial revision
+
+2001-04-27 13:36  pgregory
+
+	* content/Test/: nz.tif, orient_test.rib, patterns.h,
+	periodic_test.rib, persptest.rib, poly_test.rib, px.tif, py.tif,
+	pz.tif, quads_test.rib, shadtest.rib, show_st.sl, space_test.rib,
+	spacetest.sl: Initial check in.
+
+2001-04-27 13:33  pgregory
+
+	* content/Test/: Image1.tif, mod_st2_test.rib, mod_st_test.rib,
+	noises.h, noshadows.rib, nx.tif, ny.tif: Initial revision
+
+2001-04-27 13:33  pgregory
+
+	* content/Test/: Image1.tif, mod_st2_test.rib, mod_st_test.rib,
+	noises.h, noshadows.rib, nx.tif, ny.tif: Initial check in.
+
+2001-04-27 13:27  pgregory
+
+	* content/: Content.dsp, vase.rib, vase_shad1.rib, vase_shad2.rib,
+	Test/autoshadows.rib, Test/autoshadtest.rib, Test/brickbump.sl,
+	Test/DPProctext.h, Test/bucket_test.rib,
+	Test/colpervertex_test.rib, Test/coordsys_test.rib,
+	Test/disp_test.rib, Test/env_test.rib, Test/eyeplanetest.rib:
+	Initial revision
+
+2001-04-27 13:27  pgregory
+
+	* content/: Content.dsp, vase.rib, vase_shad1.rib, vase_shad2.rib,
+	Test/autoshadows.rib, Test/autoshadtest.rib, Test/brickbump.sl,
+	Test/DPProctext.h, Test/bucket_test.rib,
+	Test/colpervertex_test.rib, Test/coordsys_test.rib,
+	Test/disp_test.rib, Test/env_test.rib, Test/eyeplanetest.rib:
+	Initial check in.
+
+2001-04-27 13:23  pgregory
+
+	* texer/: texer.cpp, texer.dsp: Initial revision
+
+2001-04-27 13:23  pgregory
+
+	* texer/: texer.cpp, texer.dsp: Initial check in.
+
+2001-04-27 13:17  pgregory
+
+	* slcomp/parser.y, slcomp/scanner.l, slcomp/slcomp.cpp,
+	slcomp/slcomp.dsp, slcomp/Test.sl, slcomp/typecheck.cpp,
+	slcomp/vardef.cpp, slcomp/vardef.h, slpp/MAKEFILE, slpp/PP.DOC,
+	slpp/PP.H, slpp/PP1.C, slpp/PP2.C, slpp/PP3.C, slpp/PP4.C,
+	slpp/PP5.C, slpp/PP6.C, slpp/PP7.C, slpp/PP8.C, slpp/PPEXT.H,
+	slpp/slpp.dsp: Initial revision
+
+2001-04-27 13:17  pgregory
+
+	* slcomp/parser.y, slcomp/scanner.l, slcomp/slcomp.cpp,
+	slcomp/slcomp.dsp, slcomp/Test.sl, slcomp/typecheck.cpp,
+	slcomp/vardef.cpp, slcomp/vardef.h, slpp/MAKEFILE, slpp/PP.DOC,
+	slpp/PP.H, slpp/PP1.C, slpp/PP2.C, slpp/PP3.C, slpp/PP4.C,
+	slpp/PP5.C, slpp/PP6.C, slpp/PP7.C, slpp/PP8.C, slpp/PPEXT.H,
+	slpp/slpp.dsp: Initial check in.
+
+2001-04-27 13:14  pgregory
+
+	* shaders/constant.sl, shaders/debug.sl, shaders/depthcue.sl,
+	shaders/distantlight.sl, shaders/fog.sl, shaders/matte.sl,
+	shaders/metal.sl, shaders/paintedplastic.sl, shaders/plastic.sl,
+	shaders/pointlight.sl, shaders/shaders.dsp, shaders/spotlight.sl,
+	shaders/additional/borg_metal.sl, shaders/additional/DPProctext.h,
+	shaders/additional/dented.sl, shaders/additional/dpbluemarble.sl,
+	shaders/additional/noises.h, shaders/additional/patterns.h,
+	shaders/additional/randgrid.sl, shaders/additional/shadowspot.sl,
+	shaders/additional/shinymetal.sl, shadowmap/shadowmap.cpp,
+	shadowmap/shadowmap.dsp, shadowmap/shadowmap.h, slcomp/bison.cc,
+	slcomp/bison.h, slcomp/error.h, slcomp/flexskel.cc,
+	slcomp/flexskel.h, slcomp/funcdef.cpp, slcomp/funcdef.h,
+	slcomp/optimise.cpp, slcomp/parsenode.cpp, slcomp/parsenode.h:
+	Initial revision
+
+2001-04-27 13:14  pgregory
+
+	* shaders/constant.sl, shaders/debug.sl, shaders/depthcue.sl,
+	shaders/distantlight.sl, shaders/fog.sl, shaders/matte.sl,
+	shaders/metal.sl, shaders/paintedplastic.sl, shaders/plastic.sl,
+	shaders/pointlight.sl, shaders/shaders.dsp, shaders/spotlight.sl,
+	shaders/additional/borg_metal.sl, shaders/additional/DPProctext.h,
+	shaders/additional/dented.sl, shaders/additional/dpbluemarble.sl,
+	shaders/additional/noises.h, shaders/additional/patterns.h,
+	shaders/additional/randgrid.sl, shaders/additional/shadowspot.sl,
+	shaders/additional/shinymetal.sl, shadowmap/shadowmap.cpp,
+	shadowmap/shadowmap.dsp, shadowmap/shadowmap.h, slcomp/bison.cc,
+	slcomp/bison.h, slcomp/error.h, slcomp/flexskel.cc,
+	slcomp/flexskel.h, slcomp/funcdef.cpp, slcomp/funcdef.h,
+	slcomp/optimise.cpp, slcomp/parsenode.cpp, slcomp/parsenode.h:
+	Initial check in.
+
+2001-04-27 13:00  pgregory
+
+	* render/: subdivision.cpp, subdivision.h, surface.cpp, surface.h,
+	symbols.cpp, symbols.h, texturemap.cpp, texturemap.h,
+	transform.cpp, transform.h, vector2d.cpp, vector2d.h, vector3d.cpp,
+	vector3d.h, vector4d.cpp, vector4d.h, version.h,
+	win32_mingw/intel/aqsis_compiler.h,
+	win32_mingw/intel/criticalsection.cpp,
+	win32_mingw/intel/criticalsection.h,
+	win32_mingw/intel/perftimer.cpp, win32_mingw/intel/perftimer.h,
+	win32_mingw/intel/semaphore.cpp, win32_mingw/intel/semaphore.h,
+	win32_mingw/intel/share.h, win32_mingw/intel/specific.h: Initial
+	revision
+
+2001-04-27 13:00  pgregory
+
+	* render/: subdivision.cpp, subdivision.h, surface.cpp, surface.h,
+	symbols.cpp, symbols.h, texturemap.cpp, texturemap.h,
+	transform.cpp, transform.h, vector2d.cpp, vector2d.h, vector3d.cpp,
+	vector3d.h, vector4d.cpp, vector4d.h, version.h,
+	win32_mingw/intel/aqsis_compiler.h,
+	win32_mingw/intel/criticalsection.cpp,
+	win32_mingw/intel/criticalsection.h,
+	win32_mingw/intel/perftimer.cpp, win32_mingw/intel/perftimer.h,
+	win32_mingw/intel/semaphore.cpp, win32_mingw/intel/semaphore.h,
+	win32_mingw/intel/share.h, win32_mingw/intel/specific.h: Initial
+	check in.
+
+2001-04-27 12:57  pgregory
+
+	* render/: ri.cpp, ri.h, ribber.cfg, scene.cpp, scene.h,
+	shadeops.cpp, shaderexecenv.cpp, shaderexecenv.h, shaders.cpp,
+	shaders.h, shaderstack.cpp, shaderstack.h, shadervariable.cpp,
+	shadervariable.h, shadervm.cpp, shadervm.h, spline.cpp, spline.h,
+	sstring.cpp, sstring.h, stats.cpp, stats.h: Initial revision
+
+2001-04-27 12:57  pgregory
+
+	* render/: ri.cpp, ri.h, ribber.cfg, scene.cpp, scene.h,
+	shadeops.cpp, shaderexecenv.cpp, shaderexecenv.h, shaders.cpp,
+	shaders.h, shaderstack.cpp, shaderstack.h, shadervariable.cpp,
+	shadervariable.h, shadervm.cpp, shadervm.h, spline.cpp, spline.h,
+	sstring.cpp, sstring.h, stats.cpp, stats.h: Initial check in.
+
+2001-04-27 12:54  pgregory
+
+	* render/: matrix.h, memorypool.h, messages.cpp, messages.h,
+	micropolygon.cpp, micropolygon.h, motion.h, noise.cpp, noise.h,
+	nommgr.h, nurbs.cpp, nurbs.h, options.cpp, options.h, parameters.h,
+	patch.cpp, patch.h, polygon.cpp, polygon.h, quadrics.cpp,
+	quadrics.h, random.h, render.cpp, Render.dsp, render.h,
+	renderer.cpp, renderer.h: Initial revision
+
+2001-04-27 12:54  pgregory
+
+	* render/: matrix.h, memorypool.h, messages.cpp, messages.h,
+	micropolygon.cpp, micropolygon.h, motion.h, noise.cpp, noise.h,
+	nommgr.h, nurbs.cpp, nurbs.h, options.cpp, options.h, parameters.h,
+	patch.cpp, patch.h, polygon.cpp, polygon.h, quadrics.cpp,
+	quadrics.h, random.h, render.cpp, Render.dsp, render.h,
+	renderer.cpp, renderer.h: Initial check in.
+
+2001-04-27 12:51  pgregory
+
+	* render/: aqsis.h, aqsis_types.h, attributes.cpp, attributes.h,
+	bilinear.h, bison.cc, bison.h, bitvector.cpp, bitvector.h,
+	bound.cpp, bound.h, cellnoise.cpp, cellnoise.h, color.cpp, color.h,
+	context.cpp, context.h, Doxyfile, exception.h, file.cpp, file.h,
+	flexskel.cc, flexskel.h, globals.h, imagebuffer.cpp, imagebuffer.h,
+	irenderer.h, lights.cpp, lights.h, list.h, matrix.cpp: Initial
+	revision
+
+2001-04-27 12:51  pgregory
+
+	* render/: aqsis.h, aqsis_types.h, attributes.cpp, attributes.h,
+	bilinear.h, bison.cc, bison.h, bitvector.cpp, bitvector.h,
+	bound.cpp, bound.h, cellnoise.cpp, cellnoise.h, color.cpp, color.h,
+	context.cpp, context.h, Doxyfile, exception.h, file.cpp, file.h,
+	flexskel.cc, flexskel.h, globals.h, imagebuffer.cpp, imagebuffer.h,
+	irenderer.h, lights.cpp, lights.h, list.h, matrix.cpp: Initial
+	check in.
+
+2001-04-27 12:41  pgregory
+
+	* framebuffer/framebuffer.cpp, framebuffer/framebuffer.dsp,
+	framebuffer/framebuffer.h, framebuffer/framebuffer.rc,
+	framebuffer/ico00001.ico, framebuffer/icon1.ico,
+	framebuffer/readme.txt, framebuffer/resource.h, librib/bison.cc,
+	librib/bison.h, librib/flexskel.cc, librib/flexskel.h,
+	librib/iribcompiler.h, librib/librib.dsp, librib/parser.y,
+	librib/ribcompiler.cpp, librib/ribcompiler.h, librib/scanner.l:
+	Initial revision
+
+2001-04-27 12:41  pgregory
+
+	* framebuffer/framebuffer.cpp, framebuffer/framebuffer.dsp,
+	framebuffer/framebuffer.h, framebuffer/framebuffer.rc,
+	framebuffer/ico00001.ico, framebuffer/icon1.ico,
+	framebuffer/readme.txt, framebuffer/resource.h, librib/bison.cc,
+	librib/bison.h, librib/flexskel.cc, librib/flexskel.h,
+	librib/iribcompiler.h, librib/librib.dsp, librib/parser.y,
+	librib/ribcompiler.cpp, librib/ribcompiler.h, librib/scanner.l:
+	Initial check in.
+
+2001-04-27 12:37  pgregory
+
+	* render/win32/intel/aqsis_compiler.h,
+	render/win32/intel/criticalsection.cpp,
+	render/win32/intel/criticalsection.h,
+	render/win32/intel/semaphore.cpp, render/win32/intel/semaphore.h,
+	render/win32/intel/share.h, render/win32/intel/specific.h,
+	all/All.dsp, cribber/cribber.cpp, cribber/cribber.dsp,
+	file/file.cpp, file/file.dsp, file/file.h: Initial revision
+
+2001-04-27 12:37  pgregory
+
+	* render/win32/intel/aqsis_compiler.h,
+	render/win32/intel/criticalsection.cpp,
+	render/win32/intel/criticalsection.h,
+	render/win32/intel/semaphore.cpp, render/win32/intel/semaphore.h,
+	render/win32/intel/share.h, render/win32/intel/specific.h,
+	all/All.dsp, cribber/cribber.cpp, cribber/cribber.dsp,
+	file/file.cpp, file/file.dsp, file/file.h: Initial check in.
+
+2001-04-17 07:45  pgregory
+
+	* Readme.txt: Removed
+
+2001-04-17 07:42  pgregory
+
+	* Readme.txt: Still testing.
+
+2001-04-17 07:17  pgregory
+
+	* Readme.txt: Removed.
+
+2001-04-17 07:15  pgregory
+
+	* Readme.txt: Simple change.
+
+2001-04-17 07:05  pgregory
+
+	* Readme.txt: Test, trying to get used to CVS/SSH stuff.
+
+2001-04-17 06:49  pgregory
+
+	* CVSROOT/: checkoutlist, commitinfo, config, cvswrappers,
+	editinfo, loginfo, modules, notify, rcsinfo, taginfo, verifymsg:
+	initial checkin
+

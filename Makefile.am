@@ -1,0 +1,2 @@
+SUBDIRS = render file aqsis 
+
