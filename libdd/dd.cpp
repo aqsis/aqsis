@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <unistd.h>
+#include <errno.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/time.h>

@@ -783,7 +783,7 @@ inline void	OpSETCOMP( A& z, IqShaderData* pRes, IqShaderData* index, IqShaderDa
     A vA;
     TqFloat val, fi;
 
-    TqInt i = MAX( MAX( Size(), pA->Size() ), index->Size() ) - 1;
+    TqInt i = MAX( MAX( pRes->Size(), pA->Size() ), index->Size() ) - 1;
     TqBool __fVarying = i > 0;
     for ( ; i >= 0; i-- )
     {

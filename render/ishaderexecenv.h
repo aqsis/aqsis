@@ -29,6 +29,7 @@
 #include	"aqsis.h"
 #include	<boost/shared_ptr.hpp>
 
+#include	"ishaderdata.h"
 #include	"vector3d.h"
 #include	"matrix.h"
 #include	"sstring.h"
@@ -41,7 +42,6 @@ struct IqSurface;
 struct IqAttributes;
 struct IqTransform;
 struct IqShader;
-struct IqShaderData;
 
 /** \enum EqEnvVars
  * Identifiers for the standard environment variables.

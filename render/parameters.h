@@ -31,13 +31,12 @@
 
 #include	"aqsis.h"
 
+#include	"isurface.h"
 #include	"ishaderdata.h"
 #include	"bilinear.h"
 #include	<boost/shared_ptr.hpp>
 
 START_NAMESPACE( Aqsis )
-
-struct IqSurface;
 
 
 //----------------------------------------------------------------------
@@ -735,7 +734,7 @@ public:
     }
     virtual	void	SetSize( TqInt size )
     {
-        m_aValues.resize( size, std::vector<T>(m_Count) );
+        m_aValues.resize( size, std::vector< T >(this->m_Count) );
     }
     virtual	TqUint	Size() const
     {
@@ -760,7 +759,7 @@ public:
             if ( u )
             {
                 TqInt index;
-                for( index = Count()-1; index >= 0; index-- )
+                for( index = this->Count()-1; index >= 0; index-- )
                 {
                     pTResult2->pValue( 1 ) [ index ] = pValue( 1 ) [ index ];
                     pTResult2->pValue( 3 ) [ index ] = pValue( 3 ) [ index ];
@@ -771,7 +770,7 @@ public:
             else
             {
                 TqInt index;
-                for( index = Count()-1; index >= 0; index-- )
+                for( index = this->Count()-1; index >= 0; index-- )
                 {
                     pTResult2->pValue( 2 ) [ index ] = pValue( 2 ) [ index ];
                     pTResult2->pValue( 3 ) [ index ] = pValue( 3 ) [ index ];
@@ -820,7 +819,7 @@ public:
         TqInt index;
         T* pTargetValues = pValue( idxTarget );
         T* pSourceValues = pFromTyped->pValue( idxSource );
-        for( index = 0; index < Count(); index++ )
+        for( index = 0; index < this->Count(); index++ )
             pTargetValues[ index ] = pSourceValues[ index ];
     }
 
@@ -829,12 +828,12 @@ public:
     CqParameterTypedVaryingArray<T, I, SLT>& operator=( const CqParameterTypedVaryingArray<T, I, SLT>& From )
     {
         m_aValues.resize( From.m_aValues.size(), std::vector<T>(From.Count()) );
-		m_Count = From.m_Count;
+		this->m_Count = From.m_Count;
         TqUint j;
         for ( j = 0; j < m_aValues.size(); j++ )
         {
             TqUint i;
-            for ( i = 0; i < (TqUint) m_Count; i++ )
+            for ( i = 0; i < (TqUint) this->m_Count; i++ )
                 m_aValues[ j ][ i ] = From.m_aValues[ j ][ i ];
         }
         return ( *this );

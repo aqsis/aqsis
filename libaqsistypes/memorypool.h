@@ -195,8 +195,11 @@ public:
 /** Define the static memory pool for a poolable class.
  */
 
-#define	DEFINE_STATIC_MEMORYPOOL(A, S)	CqMemoryPool<A, S>	CqPoolable<A, S>::m_thePool
-
+// the first line is the _explicit instantiation_ of m_thePool
+// the second line is the _definition_ of m_thePool
+#define	DEFINE_STATIC_MEMORYPOOL(A, S) \
+	template CqMemoryPool<A, S> CqPoolable<A, S>::m_thePool; \
+	template<> CqMemoryPool<A, S> CqPoolable<A, S>::m_thePool
 
 //-----------------------------------------------------------------------
 
