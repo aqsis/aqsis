@@ -487,7 +487,6 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 		RELEASEREF( pmpgNew );
 		return ;
 	} 
-
 	assert( !Bucket(iXBa, iYBa).IsProcessed() );
 	Bucket(iXBa, iYBa).AddMPG( pmpgNew );
 	ADDREF( pmpgNew );
@@ -560,15 +559,6 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 	if ( Row == ( m_cYBuckets - 1 ) )
 		return ( TqFalse );
 
-	// Passing in -1 as the column means to get the minimum bucket on the row that the MPG touches.
-	CqBound	B( pmpg->GetTotalBound( ) );
-
-	if( Col == -1 )
-	{
-		Col = static_cast<TqInt>(B.vecMin().x()) / XBucketSize();
-		Col = CLAMP( Col, 0, cXBuckets() );
-	}
-
 	TqInt NextBucketDown = Row + 1;
 
 	// If the next bucket down has already been processed, 
@@ -588,6 +578,8 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 	CqVector2D FilterWidth( m_FilterXWidth * 0.5f, m_FilterYWidth * 0.5f );
 	BucketMin -= FilterWidth;
 	BucketMax += FilterWidth;
+
+	CqBound	B( pmpg->GetTotalBound( ) );
 
 	const CqVector3D& vMin = B.vecMin();
 	const CqVector3D& vMax = B.vecMax();
@@ -642,7 +634,7 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 			for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
 			{
 				RenderMicroPoly( *impg, xmin, xmax, ymin, ymax );
-				if ( PushMPGDown( ( *impg ), -1, CurrentBucketRow() ) )
+				if ( PushMPGDown( ( *impg ), CurrentBucketCol(), CurrentBucketRow() ) )
 					STATS_INC( MPG_pushed_down );
 				if ( PushMPGForward( ( *impg ), CurrentBucketCol(), CurrentBucketRow() ) )
 					STATS_INC( MPG_pushed_forward );
@@ -660,7 +652,7 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 	for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
 	{
 		RenderMicroPoly( *impg, xmin, xmax, ymin, ymax );
-		if ( PushMPGDown( ( *impg ), -1, CurrentBucketRow() ) ) 
+		if ( PushMPGDown( ( *impg ), CurrentBucketCol(), CurrentBucketRow() ) ) 
 			STATS_INC( MPG_pushed_down );
 		if ( PushMPGForward( ( *impg ), CurrentBucketCol(), CurrentBucketRow() ) ) 
 			STATS_INC( MPG_pushed_forward );
