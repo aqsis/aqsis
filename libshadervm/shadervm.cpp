@@ -663,7 +663,7 @@ IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariabl
 
 IqShaderData* CqShaderVM::CreateTemporaryStorage( EqVariableType type, EqVariableClass _class )
 {
-    static CqString strName( "__temporary__" );
+    CqString strName( "__temporary__" );
     return ( CreateVariable( type, _class, strName ) );
 }
 

@@ -91,6 +91,8 @@ struct IqBucket
 
 struct IqDDManager
 {
+	virtual ~IqDDManager()
+	{}
     /** Initialise the device manager.
      */
     virtual	TqInt	Initialise() = 0;

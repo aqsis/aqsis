@@ -277,6 +277,12 @@ RtVoid PreRender()
 
 int main( int argc, const char** argv )
 {
+#if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
+	std::ostringstream __buffer;
+    __buffer << 0;
+	_CrtMemState __initialState;
+	_CrtMemCheckpoint(&__initialState);
+#endif
 	{
 
     ArgParse ap;
@@ -383,7 +389,8 @@ int main( int argc, const char** argv )
 
 	}
 #if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
-    _CrtDumpMemoryLeaks();
+    //_CrtDumpMemoryLeaks();
+	_CrtMemDumpAllObjectsSince(&__initialState);
 #endif
 
 #if defined(AQSIS_SYSTEM_WIN32)

@@ -174,6 +174,12 @@ CqRenderer::~CqRenderer()
         m_pTransCamera = NULL;
     }
 
+	// Make sure the attribute stack is cleaned up.
+	std::vector<CqAttributes*>::iterator i;
+	for( i=Attribute_stack.begin(); i!=Attribute_stack.end(); i++ )
+		delete( (*i) );
+	Attribute_stack.clear();
+
 #ifdef _DEBUG
     // Print information about any un-released CqRefCount objects
     //report_refcounts();
