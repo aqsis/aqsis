@@ -342,6 +342,11 @@ class CqRenderer : public IqRenderer
 			return m_depthOfFieldData;
 		}
 
+		const CqMatrix& GetDepthOfFieldTMatrix() const
+		{
+			return m_depthOfFieldTMatrix;
+		}
+
 		void	RegisterShader( const char* strName, EqShaderType type, IqShader* pShader );
 		CqShaderRegister* FindShader( const char* strName, EqShaderType type );
 
@@ -372,6 +377,7 @@ class CqRenderer : public IqRenderer
 		std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
 
 		TqFloat m_depthOfFieldData[4];	///< DoF data
+		CqMatrix m_depthOfFieldTMatrix;
 
 		void WhichMatWorldTo(CqMatrix &a, TqUlong thash);
 		void WhichMatToWorld(CqMatrix &b, TqUlong thash);

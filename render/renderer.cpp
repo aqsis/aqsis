@@ -98,6 +98,9 @@ CqRenderer::CqRenderer() :
 	m_depthOfFieldData[1] = 0.0f;
 	m_depthOfFieldData[2] = 0.0f;
 
+	// Create a transform matrix
+	m_depthOfFieldTMatrix = matVSpaceToSpace( "__camera__", "raster" );
+
 	// Get the hash keys for object, shader, camera keywords.
 	if ( ohash == 0 ) ohash = CqParameter::hash( "object" );
 	if ( shash == 0 ) shash = CqParameter::hash( "shader" );
