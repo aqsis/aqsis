@@ -151,6 +151,16 @@ CqString CqFile::GetSystemSetting(const CqString& strAsset)
 			result.append( "/displays" );
 		}
 	}
+	else if( strAsset.compare( "procedurals" ) == 0 )
+	{
+		if ( ( env = getenv( "AQSIS_PROCEDURALS" ) ) != 0 )
+			result = env;
+		else
+		{
+			result = CqString( ".:" ) + base_path;
+			result.append( "/procedurals" );
+		}
+	}
 	else if( strAsset.compare( "dsolibs" ) == 0 )
 	{
 		if ( ( env = getenv( "AQSIS_DSO_LIBS" ) ) != 0 )

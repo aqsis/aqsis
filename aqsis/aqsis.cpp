@@ -64,6 +64,7 @@ ArgParse::apstring g_textures = "";
 ArgParse::apstring g_displays = "";
 ArgParse::apstring g_base_path = "";
 ArgParse::apstring g_dso_libs = "";
+ArgParse::apstring g_procedurals = "";
 ArgParse::apstring g_type = "";
 ArgParse::apstring g_addtype = "";
 ArgParse::apstring g_mode = "rgba";
@@ -280,6 +281,7 @@ int main( int argc, const char** argv )
 	ap.argString( "textures", "=string\aspecify a default textures searchpath", &g_textures );
 	ap.argString( "displays", "=string\aspecify a default displays searchpath", &g_displays );
 	ap.argString( "dsolibs", "=string\aspecify default DSO libraries", &g_dso_libs );
+	ap.argString( "procedurals", "=string\aspecify default searchpath for procedurals", &g_procedurals );
 	ap.allowUnrecognizedOptions();
 
 	//_crtBreakAlloc = 1305;
@@ -314,6 +316,7 @@ int main( int argc, const char** argv )
 		std::cout << "textures: " << g_textures.c_str() << std::endl;
 		std::cout << "displays: " << g_displays.c_str() << std::endl;
 		std::cout << "dsolibs: " << g_dso_libs.c_str() << std::endl;
+		std::cout << "procedurals: " << g_procedurals.c_str() << std::endl;
 	}
 
 	if ( ap.leftovers().size() == 0 )    // If no files specified, take input from stdin.
@@ -397,6 +400,10 @@ void GetOptions()
 	// if --displays is not specified, try and get a default dso libraries.
 	if ( g_dso_libs.compare( "" ) == 0 )
 		g_dso_libs = Aqsis::CqFile::GetSystemSetting("dsolibs");
+
+	// if --displays is not specified, try and get a default procedurals searchpath.
+	if ( g_procedurals.compare( "" ) == 0 )
+		g_procedurals = Aqsis::CqFile::GetSystemSetting("procedurals");
 }
 
 void RenderFile( FILE* file, const char* name )
@@ -424,6 +431,8 @@ void RenderFile( FILE* file, const char* name )
 	RiOption( "searchpath", "display", &popt, RI_NULL );
 	popt[ 0 ] = g_dso_libs.c_str();
 	RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
+	popt[ 0 ] = g_procedurals.c_str();
+	RiOption( "searchpath", "procedural", &popt, RI_NULL );
 
 	RiProgressHandler( &PrintProgress );
 	RiPreRenderFunction( &PreRender );

@@ -67,6 +67,7 @@
 #include	"sstring.h"
 #include	"mtable.h"
 #include	"ilog.h"
+#include	"share.h"
 
 using namespace Aqsis;
 
@@ -4144,56 +4145,114 @@ RtVoid	RiProcFree( RtPointer data )
 }
 
 
+class CqRiProceduralPlugin : CqPluginBase 
+{
+	private:
+	void *( *m_ppvfcts ) ( char * );
+	void ( *m_pvfctpvf ) ( void *, float );
+	void ( *m_pvfctpv ) ( void * );
+	void *m_ppriv;
+	void *m_handle;
+	bool m_bIsValid;
+	CqString m_Error;
+
+	public:
+	CqRiProceduralPlugin( CqString& strDSOName )
+	{
+		CqString strConver("ConvertParameters");
+		CqString strSubdivide("Subdivide");
+		CqString strFree("Free");
+
+        	CqRiFile        fileDSO( strDSOName.c_str(), "procedure" );
+		m_bIsValid = false ;
+
+	        if ( !fileDSO.IsValid() )
+		{
+			m_Error = CqString( "Cannot find Procedural DSO for " )
+			 + strDSOName 
+			 + CqString (" in current searchpath");
+
+			return;
+		}
+
+		CqString strRealName( fileDSO.strRealName() );
+		fileDSO.Close();
+		void *handle = DLOpen( &strRealName );
+	
+		if ( ( m_ppvfcts = ( void * ( * ) ( char * ) ) DLSym(handle, &strConver) ) == NULL )
+		{
+			m_Error = DLError();
+			return;
+		}
+
+		if ( ( m_pvfctpvf = ( void ( * ) ( void *, float ) ) DLSym(handle, &strSubdivide) ) == NULL )
+		{
+			m_Error = DLError();
+			return;
+		}
+
+		if ( ( m_pvfctpv = ( void ( * ) ( void * ) ) DLSym(handle, &strFree) ) == NULL )
+		{
+			m_Error = DLError();
+			return;
+		}
+
+		m_bIsValid = true ;
+	};
+	
+	void ConvertParameters(char* opdata)
+	{
+		if( m_bIsValid )
+			m_ppriv = ( *m_ppvfcts ) ( opdata );
+	};
+
+	void Subdivide( float detail )
+	{
+		if( m_bIsValid )
+			( *m_pvfctpvf ) ( m_ppriv, detail );
+	};
+
+	void Free()
+	{
+		if( m_bIsValid )
+			( *m_pvfctpv ) ( m_ppriv );
+	};
+
+	bool IsValid(void)
+	{
+		return m_bIsValid;
+	};
+
+	const CqString Error()
+	{
+		return m_Error;
+	};
+};
+
+// We don't want to DLClose until we are finished rendering, since any RiProcedurals
+// created from within the dynamic module may re-use the Subdivide and Free pointers so
+// they must remain linked in.
+std::list<CqRiProceduralPlugin*> ActiveProcDLList;
 //----------------------------------------------------------------------
 // RiProcDynamicLoad() subdivide function
 //
 RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 {
-/*
-	// TODO: We need a custom class for handling RiProcDunamicLoad
-	CqPluginBase *plugin = new CqPluginBase;
-	void *( *pvfcts ) ( char * );
-	void ( *vfctpvf ) ( void *, float );
-	void ( *vfctpv ) ( void * );
-	void *priv;
-	char dsoname[ 1024 ];
-	char opdata[ 4096 ];
+	CqString dsoname = CqString( (( char** ) data)[0] ) + CqString(SHARED_LIBRARY_SUFFIX);
+	CqRiProceduralPlugin *plugin = new CqRiProceduralPlugin( dsoname );
+	
+	if( !plugin->IsValid() )
+	{
+		QGetRenderContext() ->Logger()->error( CqString("Problem loading Procedural DSO:") );
+		QGetRenderContext() ->Logger()->error( CqString(plugin->Error()) );
+		return;
+	}
 
-	// take the first filename is saved to be the name of the .dll/.so
-	// the reset is passed as such to ConvertParameters function later on
-	strcpy( dsoname, (( char** ) data)[0] );
-	strcpy( opdata, (( char** ) data)[1] );
+	plugin->ConvertParameters( (( char** ) data)[1] );
+	plugin->Subdivide( detail );
+	plugin->Free();
 
-	// As the first parameters is empty I relied on the fullpath name for the .dll/.so
-	// or hopefully relies on the fact the dll/.so is local to this .rib file
-	// later it should use the "searchpath" "procedure" standard options
-	pConvertParameters = new CqConverter( "", dsoname, "ConvertParameters" );
-	pSubdivide = new CqConverter( "", dsoname, "Free" );
-	pFree = new CqConverter( "", dsoname, "Subdivide" );
-
-	if ( ( pvfcts = ( void * ( * ) ( char * ) ) pConvertParameters->Function() ) == NULL )
-		QGetRenderContext() ->Logger()->error( pConvertParameters->ErrorLog() );
-	else
-		priv = ( *pvfcts ) ( opdata );
-
-	if ( ( vfctpvf = ( void ( * ) ( void *, float ) ) pSubdivide->Function() ) == NULL )
-		QGetRenderContext() ->Logger()->error( pSubdivide->ErrorLog() );
-	else
-		( *vfctpvf ) ( priv, 1.0 );
-
-	if ( ( vfctpv = ( void ( * ) ( void * ) ) pFree->Function() ) == NULL )
-		QGetRenderContext() ->Logger()->error( pFree->ErrorLog() );
-	else
-		( *vfctpv ) ( priv );
-
-
-	// Unload all function/all dlls
-	if ( pConvertParameters ) pConvertParameters->Close();
-	if ( pSubdivide ) pSubdivide->Close();
-	if ( pFree ) pFree->Close();
-
-	delete plugin;
- */
+	ActiveProcDLList.push_back( plugin ); 
 } 
 
 
