@@ -140,15 +140,18 @@ public:
      */
     TqFloat	Magnitude() const
     {
-        return ( sqrt( ( m_x * m_x ) + ( m_y * m_y ) + ( m_z * m_z ) ) );
+		TqFloat mag2 = Magnitude2();
+        return ( mag2<=0.0f? 0.0f : sqrt( mag2 ) );
     }
     void	Unit()
     {
         TqFloat Mag = Magnitude();
-
-        m_x /= Mag;
-        m_y /= Mag;
-        m_z /= Mag;
+		if( Mag > 0.0f )
+		{
+			m_x /= Mag;
+			m_y /= Mag;
+			m_z /= Mag;
+		}
     }
 
     CqVector3D& operator= ( const CqVector4D &From );

@@ -217,7 +217,7 @@ CqTransformModeBlock::~CqTransformModeBlock()
 /** Default constructor.
  */
 
-CqSolidModeBlock::CqSolidModeBlock( CqString& type, CqModeBlock* pconParent ) : CqModeBlock( pconParent, Solid )
+CqSolidModeBlock::CqSolidModeBlock( CqString& type, CqModeBlock* pconParent ) : CqModeBlock( pconParent, Solid ), m_strType( type )
 {
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );

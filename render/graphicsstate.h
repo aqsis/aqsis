@@ -573,6 +573,7 @@ public:
 
 private:
     CqCSGTreeNode*	m_pCSGNode;			///< Pointer to the node in the CSG tree for this level in the solid definition.
+	CqString		m_strType;
 }
 ;
 

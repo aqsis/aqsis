@@ -90,6 +90,12 @@ TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
     // Store current context, set current context to the stored one
     CqModeBlock *pconSave = QGetRenderContext()->pconCurrent( m_pconStored );
 
+	m_pconStored->m_pattrCurrent = m_pAttributes;
+	ADDREF(m_pAttributes);
+
+	m_pconStored->m_ptransCurrent = m_pTransform;
+	ADDREF(m_pTransform);
+
     CqBound bound = m_Bound;
     bound.Transform(QGetRenderContext()->matSpaceToSpace("camera", "raster"));
     float detail = ( bound.vecMax().x() - bound.vecMin().x() ) * ( bound.vecMax().y() - bound.vecMin().y() );
