@@ -37,8 +37,7 @@ START_NAMESPACE( Aqsis )
  *	Constructor.
  */
 
-CqSubdivision2::CqSubdivision2( CqPolygonPoints* pPoints ) : m_fFinalised(TqFalse), m_bInterpolateBoundary( TqFalse ),
-	CqMotionSpec<CqPolygonPoints*>(pPoints)
+CqSubdivision2::CqSubdivision2( CqPolygonPoints* pPoints ) :  CqMotionSpec<CqPolygonPoints*>(pPoints), m_bInterpolateBoundary( TqFalse ), m_fFinalised(TqFalse)
 {
 	if( pPoints )
 	{
@@ -731,7 +730,7 @@ void CqSubdivision2::OutputMesh(const char* fname, std::vector<CqLath*>* paFaces
 	std::ofstream file(fname);
 	std::vector<CqLath*> aQfv;
 
-	TqUint i;
+	TqInt i;
 	for( i = 0; i < cVertices(); i++ )
 	{
 		CqVector3D vec = pPoints()->P()->pValue()[ pVertex( i )->VertexIndex() ];

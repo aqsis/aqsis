@@ -302,14 +302,14 @@ class CqPolygonPoints : public CqSurface
 	public:
 		CqPolygonPoints( TqInt cVertices, TqInt cFaces ) :
 				m_cVertices( cVertices ),
-				m_cFaces( cFaces ),
-				m_Transformed( TqFalse )
+				m_Transformed( TqFalse ),
+				m_cFaces( cFaces )
 		{}
 		CqPolygonPoints( const CqPolygonPoints& From ) :
 				CqSurface( From ),
 				m_cVertices( From.m_cVertices ),
-				m_cFaces( From.m_cFaces ),
-				m_Transformed( From.m_Transformed )
+				m_Transformed( From.m_Transformed ),
+				m_cFaces( From.m_cFaces )
 		{}
 		virtual	~CqPolygonPoints()
 		{

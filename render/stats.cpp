@@ -394,13 +394,13 @@ std::ostream& CqStats::TimeToString( std::ostream& os, TqFloat ticks, TqFloat to
 
 void CqStats::PrintInfo() const
 {
-	int psX, psY; //< Pixel Samples
-	int resX, resY;	//< Image resolution
-	int fX, fY;	//< Filter width
-	float gain, gamma; //< Exposure, gain
-	float pratio; //< PixelAspectRatio
-	int bX = 16, bY = 16; //< Bucket Size
-	int gs; //< Grid Size
+	TqInt psX, psY; //< Pixel Samples
+	TqInt resX, resY;	//< Image resolution
+	TqInt fX, fY;	//< Filter width
+	TqFloat gain, gamma; //< Exposure, gain
+	TqFloat pratio; //< PixelAspectRatio
+	TqInt bX = 16, bY = 16; //< Bucket Size
+	TqInt gs; //< Grid Size
 
 	psX = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
 	psY = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
@@ -408,8 +408,8 @@ void CqStats::PrintInfo() const
 	resX = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 0 ];
 	resY = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 1 ];
 	
-	fX = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 0 ];
-	fY = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 1 ];
+	fX = (TqInt) QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 0 ];
+	fY = (TqInt) QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 1 ];
 
 	gain = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Exposure" ) [ 0 ];
 	gamma = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Exposure" ) [ 1 ];

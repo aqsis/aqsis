@@ -93,8 +93,9 @@ class CqPoints : public CqSurface, public CqMotionSpec<CqPolygonPoints*>
 	public:
 
 		CqPoints( TqInt nVertices, CqPolygonPoints* pPoints = NULL );
-		CqPoints( const CqPoints& From ) : m_KDTree( &m_KDTreeData ),
-					CqMotionSpec<CqPolygonPoints*>(From.pPoints())
+		CqPoints( const CqPoints& From ) : CqMotionSpec<CqPolygonPoints*>(From.pPoints()), 
+                                            m_KDTree( &m_KDTreeData )
+                                        
 		{
 			*this = From;
 		}

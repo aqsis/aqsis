@@ -69,10 +69,10 @@ bool CqPointsKDTreeData::CqPointsKDTreeDataComparator::operator()(TqInt a, TqInt
 /** Constructor.
  */
 
-CqPoints::CqPoints( TqInt nvertices, CqPolygonPoints* pPoints ) : m_nVertices(nvertices), 
+CqPoints::CqPoints( TqInt nvertices, CqPolygonPoints* pPoints ) : CqMotionSpec<CqPolygonPoints*>(pPoints),
+							m_nVertices(nvertices), 
 																  m_KDTree(&m_KDTreeData),
-																  m_MaxWidth(0),
-																  CqMotionSpec<CqPolygonPoints*>(pPoints)
+																  m_MaxWidth(0)
 {
 	//assert( NULL != pPoints );
 	assert( nvertices > 0 );
@@ -189,7 +189,7 @@ CqMicroPolyGridBase* CqPoints::Dice()
 	{
 		CqVector3D	N(0,0,1);
 		//N = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pGrid->matObjectToWorld() ) * N;
-		TqInt u;
+		TqUint u;
 		for ( u = 0; u <= nVertices(); u++ )
 		{
 			TqInt O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
@@ -282,7 +282,7 @@ void CqPoints::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDic
 
 TqBool	CqPoints::Diceable()
 {
-	TqInt gridsize = 256;
+	TqUint gridsize = 256;
 
 	const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
 
@@ -295,10 +295,9 @@ TqBool	CqPoints::Diceable()
 		m_XBucketSize = poptBucketSize[ 0 ];
 		m_YBucketSize = poptBucketSize[ 1 ];
 	}
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
 
 	if ( poptGridSize )
-		gridsize = poptGridSize[ 0 ];
+		gridsize = (TqUint) poptGridSize[ 0 ];
 
 	if( nVertices() > gridsize )
 		return ( TqFalse );
@@ -315,7 +314,7 @@ CqBound	CqPoints::Bound() const
 {
 	CqBound	B;
 
-	TqInt i;
+	TqUint i;
 	
 	TqInt t;
 	for ( t = 0; t < cTimes(); t++ )
@@ -398,7 +397,7 @@ TqInt CqPoints::CopySplit( std::vector<CqBasicSurface*>& aSplits, CqPoints* pFro
 void CqPoints::InitialiseKDTree()
 {
 	m_KDTree.aLeaves().reserve( nVertices() );
-	TqInt i;
+	TqUint i;
 	for( i = 0; i < nVertices(); i++ )
 		m_KDTree.aLeaves().push_back( i );
 }
@@ -412,8 +411,6 @@ void CqPoints::InitialiseMaxWidth()
 	const CqParameterTypedConstant<TqFloat, type_float, TqFloat>* pConstantWidthParam = constantwidth( );
 
 	TqInt iu;
-	TqInt tTime = pTransform()->cTimes();
-
 	TqInt gsmin1;
 	gsmin1 = cu - 1;
 

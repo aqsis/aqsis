@@ -357,7 +357,10 @@ TqBool CqSurfacePolygon::CheckDegenerate() const
 	for ( i = 1; i < n; i++ )
 	{
 		if ( ( PolyP( i ) - PolyP( i - 1 ) ).Magnitude() > FLT_EPSILON )
+		{
 			fDegen = TqFalse;
+			break;
+		}
 	}
 	return ( fDegen );
 }
@@ -448,10 +451,10 @@ TqInt CqSurfacePointsPolygons::Split( std::vector<CqBasicSurface*>& aSplits )
 		RtBoolean fValid = RI_TRUE;
 
 		pSurface->aIndices().resize( m_PointCounts[ poly ] );
-		RtInt i;
-		for ( i = 0; i < m_PointCounts[ poly ]; i++ )          	// Fill in the points
+		TqUint i;
+		for ( i = 0; i < (TqUint)m_PointCounts[ poly ]; i++ )          	// Fill in the points
 		{
-			if ( m_PointIndices[ iP ] >= m_pPoints->P()->Size() )
+			if ( (TqUint) m_PointIndices[ iP ] >= m_pPoints->P()->Size() )
 			{
 				fValid = RI_FALSE;
 				CqAttributeError( 1, Severity_Normal, "Invalid PointsPolygon index", pSurface->pAttributes() );

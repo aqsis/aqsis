@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright ) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.com
 //
@@ -152,7 +152,7 @@ CqColor CqImagersource::Color( TqFloat x, TqFloat y )
 
 	TqInt index = static_cast<TqInt>( ( y - m_uYOrigin ) * ( m_uGridRes + 1 ) + x - m_uXOrigin );
 
-	if ( Ci() ->Size() >= index )
+	if ( (TqInt)Ci() ->Size() >= index )
 		Ci() ->GetColor( result, index );
 
 	return result;
@@ -169,7 +169,7 @@ CqColor CqImagersource::Opacity( TqFloat x, TqFloat y )
 
 	TqInt index = static_cast<TqInt>( ( y - m_uYOrigin ) * ( m_uGridRes + 1 ) + x - m_uXOrigin );
 
-	if ( Oi() ->Size() >= index )
+	if ((TqInt) Oi() ->Size() >= index )
 		Oi() ->GetColor( result, index );
 
 	return result;
