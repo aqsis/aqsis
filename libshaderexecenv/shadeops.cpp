@@ -164,12 +164,13 @@ TqBool CqShaderExecEnv::SO_advance_illuminance()
 }
 
 
-void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShader* pShader )
+void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* pN, IqShader* pShader )
 {
 	// If this is the first call to illuminance this time round, call all lights and setup the Cl and L caches.
 	if ( !m_IlluminanceCacheValid )
 	{
-		IqShaderData* Ns = N();
+		IqShaderData* Ns = (pN != NULL )? pN : N();
+		IqShaderData* Ps = (pP != NULL )? pP : P();
 		TqUint li = 0;
 		while ( li < m_pAttributes ->cLights() )
 		{
@@ -178,10 +179,7 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShader* pSha
 			lp->Initialise( uGridRes(), vGridRes() );
 			m_Illuminate = 0;
 			// Evaluate the lightsource
-			if ( pP != NULL )
-				lp->Evaluate( pP, Ns );
-			else
-				lp->Evaluate( P(), Ns );
+			lp->Evaluate( Ps, Ns );
 			li++;
 		}
 		m_IlluminanceCacheValid = TqTrue;;
@@ -2812,7 +2810,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ambient( DEFPARAMIMPL )
 		// If this is the first call to illuminance this time round, call all lights and setup the Cl and L caches.
 		if ( !m_IlluminanceCacheValid )
 		{
-			ValidateIlluminanceCache( NULL, pShader );
+			ValidateIlluminanceCache( NULL, NULL, pShader );
 		}
 
 		Result->SetColor( gColBlack );
@@ -2848,7 +2846,7 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 	// If the illuminance cache is already OK, then we don't need to bother filling in the illuminance parameters.
 	if ( !m_IlluminanceCacheValid )
 	{
-		ValidateIlluminanceCache( NULL, pShader );
+		ValidateIlluminanceCache( NULL, N, pShader );
 	}
 
 	IqShaderData* pDefAngle = pShader->CreateTemporaryStorage( type_float, class_uniform );
@@ -2906,7 +2904,7 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
 	// If the illuminance cache is already OK, then we don't need to bother filling in the illuminance parameters.
 	if ( !m_IlluminanceCacheValid )
 	{
-		ValidateIlluminanceCache( NULL, pShader );
+		ValidateIlluminanceCache( NULL, N, pShader );
 	}
 
 	IqShaderData* pDefAngle = pShader->CreateTemporaryStorage( type_float, class_uniform );
@@ -2990,7 +2988,7 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 	// If the illuminance cache is already OK, then we don't need to bother filling in the illuminance parameters.
 	if ( !m_IlluminanceCacheValid )
 	{
-		ValidateIlluminanceCache( NULL, pShader );
+		ValidateIlluminanceCache( NULL, N, pShader );
 	}
 
 	IqShaderData* pDefAngle = pShader->CreateTemporaryStorage( type_float, class_uniform );
@@ -5661,8 +5659,8 @@ STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, P
 		for( i = 0; i < pMap->NumPages(); i++ )
 		{
 			// Check if the lightsource is behind the sample.
-			TqFloat s = ( ( CqVector3D( 0,0,-1 ) * NORMAL(N) ) < 0.0f ) ? -1.0f : 1.0f;
-			CqVector3D Nl = matITTx[i] * ( NORMAL( N ) * s );
+			//TqFloat s = ( ( CqVector3D( 0,0,-1 ) * NORMAL(N) ) < 0.0f ) ? -1.0f : 1.0f;
+			CqVector3D Nl = matITTx[i] * ( NORMAL( N ) /* * s */ );
 			TqFloat cosangle = Nl * CqVector3D(0,0,-1);
 			if( cosangle < 0.0f )
 				continue;

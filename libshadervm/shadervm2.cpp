@@ -729,7 +729,20 @@ void CqShaderVM::SO_init_illuminance()
 	VARFUNC;
 	POPV( A );
 	m_pEnv->InvalidateIlluminanceCache();
-	m_pEnv->ValidateIlluminanceCache( A, this );
+	m_pEnv->ValidateIlluminanceCache( A, NULL, this );
+	RESULT(type_float, class_varying);
+	pResult->SetFloat( m_pEnv->SO_init_illuminance() );
+	Push( pResult );
+	RELEASE( A );
+}
+
+void CqShaderVM::SO_init_illuminance2()
+{
+	VARFUNC;
+	POPV( A );
+	POPV( B );
+	m_pEnv->InvalidateIlluminanceCache();
+	m_pEnv->ValidateIlluminanceCache( A, B, this );
 	RESULT(type_float, class_varying);
 	pResult->SetFloat( m_pEnv->SO_init_illuminance() );
 	Push( pResult );

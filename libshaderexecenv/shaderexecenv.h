@@ -157,7 +157,7 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		{
 			return ( m_pTransform );
 		}
-		virtual	void	ValidateIlluminanceCache( IqShaderData* pP, IqShader* pShader );
+		virtual	void	ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* pN, IqShader* pShader );
 		virtual	void	InvalidateIlluminanceCache()
 		{
 			m_IlluminanceCacheValid = TqFalse;

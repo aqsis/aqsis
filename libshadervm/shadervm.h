@@ -940,6 +940,7 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		void	SO_illuminate();
 		void	SO_illuminate2();
 		void	SO_init_illuminance();
+		void	SO_init_illuminance2();
 		void	SO_advance_illuminance();
 		void	SO_illuminance();
 		void	SO_illuminance2();

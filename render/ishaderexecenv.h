@@ -145,7 +145,7 @@ struct IqShaderExecEnv
 	virtual	const IqTransform*	pTransform() const = 0;
 	/** Update all cached lighting results.
 	 */
-	virtual	void	ValidateIlluminanceCache( IqShaderData* pP, IqShader* pShader ) = 0;
+	virtual	void	ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* pN, IqShader* pShader ) = 0;
 	/** Reset the illuminance cache.
 	 */
 	virtual	void	InvalidateIlluminanceCache() = 0;
