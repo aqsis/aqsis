@@ -217,7 +217,8 @@ void CqMicroPolyGrid::CalcNormals()
 
 void CqMicroPolyGrid::Shade()
 {
-	TqInt i;
+	register TqInt i;
+	
 
 	// Sanity checks
 	if ( NULL == P() || NULL == I() ) return ;
@@ -233,6 +234,7 @@ void CqMicroPolyGrid::Shade()
 
 	TqInt lUses = pSurface() ->Uses();
 	TqInt gs = GridSize();
+	TqInt gsmin1 = gs - 1;
 	long cCulled = 0;
 
 
@@ -279,28 +281,29 @@ void CqMicroPolyGrid::Shade()
 	if ( USES( lUses, EnvVars_Oi ) ) Oi() ->SetColor( gColWhite );
 
 	// Setup varying variables.
-	for ( i = GridSize() - 1; i >= 0; i-- )
+    TqBool bdpu, bdpv;
+	bdpu = ( USES( lUses, EnvVars_dPdu ) );
+	bdpv = ( USES( lUses, EnvVars_dPdv ) );
+	IqShaderData * pSDP = P();
+
+	for ( i = gsmin1; i >= 0; i-- ) 
+    {
 		pI->SetVector( pP[ i ], i );
 
-
-	if ( USES( lUses, EnvVars_dPdu ) )
-	{
-		IqShaderData * pSDP = P();
-		for ( i = GridSize() - 1; i >= 0; i-- )
-			dPdu() ->SetVector( SO_DuType<CqVector3D>( pSDP, i, m_pShaderExecEnv, Defvec ), i );
-	}
-	if ( USES( lUses, EnvVars_dPdv ) )
-	{
-		IqShaderData * pSDP = P();
-		for ( i = GridSize() - 1; i >= 0; i-- )
-			dPdv() ->SetVector( SO_DvType<CqVector3D>( pSDP, i, m_pShaderExecEnv, Defvec ), i );
-	}
-
+	    if ( bdpu)
+	    {
+		    dPdu() ->SetVector( SO_DuType<CqVector3D>( pSDP, i, m_pShaderExecEnv, Defvec ), i );
+	    }
+	    if ( bdpv)
+	    {
+		    dPdv() ->SetVector( SO_DvType<CqVector3D>( pSDP, i, m_pShaderExecEnv, Defvec ), i );
+	    }
+    }
 	// Now try and cull any transparent MPs
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ )
 	{
 		theStats.OcclusionCullTimer().Start();
-		for ( i = GridSize() - 1; i >= 0; i-- )
+		for ( i = gsmin1; i >= 0; i-- )
 		{
 			if ( pOs[ i ] != gColWhite )
 				cCulled ++;
@@ -319,12 +322,13 @@ void CqMicroPolyGrid::Shade()
 
 	}
 
+
 	// Now try and cull any true transparent MPs
 	cCulled = 0;
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 	{
 		theStats.OcclusionCullTimer().Start();
-		for ( i = GridSize() - 1; i >= 0; i-- )
+		for ( i = gsmin1; i >= 0; i-- )
 		{
 			if ( pOs[ i ] == gColBlack )
 				cCulled ++;
@@ -354,7 +358,7 @@ void CqMicroPolyGrid::Shade()
 	{
 		cCulled = 0;
 		theStats.OcclusionCullTimer().Start();
-		for ( i = GridSize() - 1; i >= 0; i-- )
+		for ( i = gsmin1; i >= 0; i-- )
 		{
 			// Calulate the direction the MPG is facing.
 			if ( ( pN[ i ] * pP[ i ] ) >= 0 )
@@ -387,7 +391,7 @@ void CqMicroPolyGrid::Shade()
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 	{
 		theStats.OcclusionCullTimer().Start();
-		for ( i = GridSize() - 1; i >= 0; i-- )
+		for ( i = gsmin1; i >= 0; i-- )
 		{
 			if ( pOs[ i ] == gColBlack )
 				cCulled ++;
@@ -478,8 +482,10 @@ void CqMicroPolyGrid::Project()
 	CqVector3D* pP;
 	P() ->GetPointPtr( pP );
 
-	TqInt i;
-	for ( i = GridSize() - 1; i >= 0; i-- )
+	register TqInt i;
+	TqInt gsmin1;
+	gsmin1 = GridSize() - 1;
+	for ( i = gsmin1; i >= 0; i-- )
 	{
 		TqFloat zdepth = pP[ i ].z();
 		pP[ i ] = matCameraToRaster * pP[ i ];
@@ -501,8 +507,9 @@ CqBound CqMicroPolyGrid::Bound()
 	P() ->GetPointPtr( pP );
 
 	// Get all point in the grid.
-	TqInt i;
-	for ( i = GridSize() - 1; i >= 0; i-- )
+	register TqInt i;
+	TqInt gsmin1 = GridSize() - 1;
+	for ( i = gsmin1; i >= 0; i-- )
 		B.Encapsulate( pP[ i ] );
 	return ( B );
 }
