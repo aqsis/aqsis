@@ -563,7 +563,21 @@ CqVector3D CqCone::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqCone::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	return ( DicePoint( u, v ) );
+	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+
+	TqFloat z = m_ZMin + ( ( TqFloat ) v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
+	TqFloat r = m_Radius * ( 1.0 - z / m_Height );
+
+	TqFloat cos_theta = cos( theta );
+	TqFloat sin_theta = sin( theta );
+	
+	TqFloat coneLength = sqrt( m_Height * m_Height + m_Radius * m_Radius );
+	TqFloat xN = m_Height / coneLength;
+	Normal.x( xN * cos_theta );
+	Normal.y( xN * sin_theta );
+	Normal.z( m_Radius / coneLength );
+	
+	return ( CqVector3D( r * cos_theta, r * sin_theta, z ) );
 }
 
 
