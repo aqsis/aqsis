@@ -140,10 +140,15 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 
     std::string strProgress;
 
+    static int last_percent = 0;  // So we can skip instead of printing the same twice
     if ( g_Progress )  // Override the outputformat
     {
         strProgress = "R90000%p%%";
         percent = static_cast<int>( percent );
+        if ( last_percent == percent )
+          return;
+        else
+          last_percent = percent;
     }
     else			// Use the default style
     {
