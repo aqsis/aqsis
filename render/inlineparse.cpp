@@ -167,7 +167,17 @@ void CqInlineParse::parse ( std::string &str )
 		j++;
 	}
 	number_of_words = j;
-	check_syntax ();
+	try
+	{
+		check_syntax ();
+	}
+	catch(XqException e )
+	{	
+		std::string strError( e.strReason() );
+		strError += " : ";
+		strError += str;
+		throw( XqException( strError.c_str() ) );
+	}
 }
 
 TqBool CqInlineParse::is_class ( const std::string &str )
@@ -175,7 +185,8 @@ TqBool CqInlineParse::is_class ( const std::string &str )
 	if ( ( str == "constant" ) ||
 	        ( str == "uniform" ) ||
 	        ( str == "varying" ) ||
-	        ( str == "vertex" ) )
+	        ( str == "vertex" ) ||
+			( str == "facevarying" ) )
 		return TqTrue;
 	return TqFalse;
 }
