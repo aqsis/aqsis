@@ -296,12 +296,25 @@ TqInt	CqParseNodeUnresolvedCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool C
 
 	// If we have no type set yet we take the first type given as an option
 	if(m_aFuncDef.Type() == Type_Nil || !CheckOnly) 
-		m_aFuncDef = CqFuncDef( pTypes[0],
+	{
+		// Is Void acceptable, if so we prefer it.
+		int i;
+		for( i=0; i < Count; i++)
+		{
+			if( pTypes[i] == Type_Void) 
+				NewType = Type_Void;
+		};
+		// Otherwise we fall back to the first option given
+		if( NewType == Type_Nil )
+			NewType = pTypes[0];
+
+		m_aFuncDef = CqFuncDef( NewType,
 					m_aFuncDef.strName(),
 					"unresolved",
 					m_aFuncDef.strParams(),
 					m_aFuncDef.pDefNode(),
 					m_aFuncDef.pArgs());
+	};
 
 	return m_aFuncDef.Type();
 }
