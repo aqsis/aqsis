@@ -1,4 +1,5 @@
 SUBDIRS = . tests
+AM_YFLAGS=-d
 
 EXTRA_DIST = librib2.dsp parser.cxx parser.h scanner.cxx
 
