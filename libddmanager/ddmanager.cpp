@@ -778,7 +778,7 @@ void CqDDManager::PrepareSystemParameters( SqDisplayRequest& req )
 
 	// "Nl"
     CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), CqMatrix(), QGetRenderContextI()->Time() );
-	ConstructMatrixParameter("Nl", &matWorldToScreen, 1, parameter);
+	ConstructMatrixParameter("Nl", &matWorldToCamera, 1, parameter);
 	req.m_customParams.push_back(parameter);
 
 	// "near"

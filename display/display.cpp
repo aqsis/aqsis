@@ -65,6 +65,7 @@ extern "C" {
 PtDspyError DspyReorderFormatting(int formatCount, PtDspyDevFormat *format, int outFormatCount, const PtDspyDevFormat *outFormat);
 PtDspyError DspyFindStringInParamList(const char *string, char **result, int n, const UserParameter *p);
 PtDspyError DspyFindIntInParamList(const char *string, int *result, int n, const UserParameter *p);
+PtDspyError DspyFindMatrixInParamList(const char *string, float *result, int n, const UserParameter *p);
 #ifdef __cplusplus
 }
 #endif
@@ -455,6 +456,9 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		int quality;
 		if( DspyFindIntInParamList("quality", &quality, paramCount, parameters ) == PkDspyErrorNone )
 			pImage->m_quality = quality;
+		// Extract the transformation matrices if they are there.
+		DspyFindMatrixInParamList( "NP", reinterpret_cast<float*>(pImage->m_matWorldToScreen), paramCount, parameters );
+		DspyFindMatrixInParamList( "Nl", reinterpret_cast<float*>(pImage->m_matWorldToCamera), paramCount, parameters );
 	}
 	else
 		return(PkDspyErrorNoMemory);
