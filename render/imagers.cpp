@@ -103,7 +103,7 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 	time()->SetFloat( shuttertime );
 
 
-	m_pShader->Initialise( uGridRes, vGridRes, *this );
+	m_pShader->Initialise( uGridRes, vGridRes, this );
 	for ( j = 0; j < vGridRes; j++ )
 		for ( i = 0; i < uGridRes; i++ )
 		{
@@ -116,7 +116,7 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 	// Execute the Shader VM
 	if ( m_pShader )
 	{
-		m_pShader->Evaluate( *this );
+		m_pShader->Evaluate( this );
 		alpha()->SetFloat( 1.0f ); /* by default 3delight/bmrt set it to 1.0 */
 	}
 

@@ -956,9 +956,9 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 /**	Ready the shader for execution.
  */
 
-void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, CqShaderExecEnv& Env )
+void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShaderExecEnv* pEnv )
 {
-	m_pEnv = &Env;
+	m_pEnv = pEnv;
 	// Initialise local variables.
 	TqInt i;
 	for ( i = m_LocalVars.size() - 1; i >= 0; i-- )
@@ -1003,15 +1003,15 @@ CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 /**	Execute a series of shader language bytecodes.
  */
 
-void CqShaderVM::Execute( CqShaderExecEnv& Env )
+void CqShaderVM::Execute( IqShaderExecEnv* pEnv )
 {
 	// Check if there is anything to execute.
 	if ( m_Program.size() <= 0 )
 		return ;
 
-	m_pEnv = &Env;
+	m_pEnv = pEnv;
 
-	Env.InvalidateIlluminanceCache();
+	pEnv->InvalidateIlluminanceCache();
 
 	// Execute the main program.
 	m_PC = &m_Program[ 0 ];
@@ -1043,7 +1043,7 @@ void CqShaderVM::ExecuteInit()
 	// Fake an environment
 	CqShaderExecEnv	Env;
 	Env.Initialise( 1, 1, 0, m_Uses );
-	Initialise( 1, 1, Env );
+	Initialise( 1, 1, &Env );
 
 	// Execute the init program.
 	m_PC = &m_ProgramInit[ 0 ];
@@ -1588,18 +1588,17 @@ void CqShaderVM::SO_jnz()
 	SqLabel lab = ReadNext().m_Label;
 	AUTOFUNC;
 	CqVMStackEntry f = POP;
-	m_pEnv->Reset();
+	TqInt __iGrid = 0;
 	do
 	{
-		TqInt i = m_pEnv->GridI();
-		if ( !__fVarying || m_pEnv->RunningState().Value( i ) )
+		if ( !__fVarying || m_pEnv->RunningState().Value( __iGrid ) )
 		{
 			TqBool _f;
-			f.GetBool( _f, i );
+			f.GetBool( _f, __iGrid );
 			if ( !_f ) return ;
 		}
 	}
-	while ( m_pEnv->Advance() );
+	while ( ++__iGrid < m_pEnv->GridSize() );
 	m_PO = lab.m_Offset;
 	m_PC = lab.m_pAddress;
 }
@@ -1609,18 +1608,17 @@ void CqShaderVM::SO_jz()
 	SqLabel lab = ReadNext().m_Label;
 	AUTOFUNC;
 	CqVMStackEntry f = POP;
-	m_pEnv->Reset();
+	TqInt __iGrid = 0;
 	do
 	{
-		TqInt i = m_pEnv->GridI();
-		if ( !__fVarying || m_pEnv->RunningState().Value( i ) )
+		if ( !__fVarying || m_pEnv->RunningState().Value( __iGrid ) )
 		{
 			TqBool _f;
-			f.GetBool( _f, i );
+			f.GetBool( _f, __iGrid );
 			if ( _f ) return ;
 		}
 	}
-	while ( m_pEnv->Advance() );
+	while ( ++__iGrid < m_pEnv->GridSize() );
 	m_PO = lab.m_Offset;
 	m_PC = lab.m_pAddress;
 }

@@ -240,8 +240,8 @@ void CqMicroPolyGrid::Shade()
 		CqVector3D vecTemp;
 		P()->GetPoint( vecTemp, i );
 		I()->SetVector( vecTemp, i );
-		if ( USES( lUses, EnvVars_dPdu ) ) dPdu()->SetVector( SO_DuType<CqVector3D>( P(), i, *this ), i );
-		if ( USES( lUses, EnvVars_dPdv ) ) dPdv()->SetVector( SO_DvType<CqVector3D>( P(), i, *this ), i );
+		if ( USES( lUses, EnvVars_dPdu ) ) dPdu()->SetVector( SO_DuType<CqVector3D>( P(), i, this ), i );
+		if ( USES( lUses, EnvVars_dPdv ) ) dPdv()->SetVector( SO_DvType<CqVector3D>( P(), i, this ), i );
 	}
 	while ( ++i < GridSize() );
 
@@ -298,8 +298,8 @@ void CqMicroPolyGrid::Shade()
 	if ( pshadDisplacement != 0 )
 	{
 		QGetRenderContext() ->Stats().DisplacementTimer().Start();
-		pshadDisplacement->Initialise( uGridRes(), vGridRes(), *this );
-		pshadDisplacement->Evaluate( *this );
+		pshadDisplacement->Initialise( uGridRes(), vGridRes(), this );
+		pshadDisplacement->Evaluate( this );
 		QGetRenderContext() ->Stats().DisplacementTimer().Stop();
 	}
 
@@ -333,8 +333,8 @@ void CqMicroPolyGrid::Shade()
 
 	// Now shade the grid.
 	QGetRenderContext() ->Stats().SurfaceTimer().Start();
-	pshadSurface->Initialise( uGridRes(), vGridRes(), *this );
-	pshadSurface->Evaluate( *this );
+	pshadSurface->Initialise( uGridRes(), vGridRes(), this );
+	pshadSurface->Evaluate( this );
 	QGetRenderContext() ->Stats().SurfaceTimer().Stop();
 
 	// Now try and cull any true transparent MPs (assigned by the shader code
@@ -367,8 +367,8 @@ void CqMicroPolyGrid::Shade()
 	if ( pshadAtmosphere != 0 )
 	{
 		QGetRenderContext() ->Stats().AtmosphereTimer().Start();
-		pshadAtmosphere->Initialise( uGridRes(), vGridRes(), *this );
-		pshadAtmosphere->Evaluate( *this );
+		pshadAtmosphere->Initialise( uGridRes(), vGridRes(), this );
+		pshadAtmosphere->Evaluate( this );
 		QGetRenderContext() ->Stats().AtmosphereTimer().Stop();
 	}
 

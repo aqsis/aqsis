@@ -52,8 +52,6 @@ _qShareM	extern TqInt	gcVariableTypeNames;
 _qShare	std::ostream &operator<<( std::ostream &Stream, EqVariableType t );
 
 
-class CqShaderExecEnv;
-
 
 //----------------------------------------------------------------------
 /** \class CqShaderVariable

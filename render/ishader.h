@@ -5,7 +5,7 @@
  *	@brief	Declare the interface which all shaders must implement.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/04/24 00:25:37 $
+ *	Last change date:	$Date: 2002/04/24 16:08:57 $
  */
 //------------------------------------------------------------------------------
 
@@ -18,6 +18,7 @@
 
 START_NAMESPACE( Aqsis )
 
+struct IqShaderExecEnv;
 
 //----------------------------------------------------------------------
 /** \class CqShader
@@ -50,16 +51,16 @@ struct IqShader
 		/** Evaluate the shader code.
 		 * \param Env The shader execution environment to evaluate within.
 		 */
-		virtual	void	Evaluate( CqShaderExecEnv& Env ) = 0;
+		virtual	void	Evaluate( IqShaderExecEnv* pEnv ) = 0;
 		/** Initialise the state of any arguments with default values.
 		 */
 		virtual	void	PrepareDefArgs() = 0;
 		/** Prepare the shader for evaluation.
 		 * \param uGridRes The resolution of the grid being shaded in u.
 		 * \param vGridRes The resolution of the grid being shaded in v
-		 * \param Env Pointer to the CqShaderExecEnv to evaluate within.
+		 * \param Env Pointer to the IqShaderExecEnv to evaluate within.
 		 */
-		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, CqShaderExecEnv& Env ) = 0;
+		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShaderExecEnv* pEnv ) = 0;
 		/** Determine whether this shader is an aambient ligthsource shader.
 		 * i.e. A lightsource shader with no Illuminate or Solar constructs.
 		 */

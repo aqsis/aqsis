@@ -77,7 +77,7 @@ class CqLightsource : public CqListEntry<CqLightsource>, public CqShaderExecEnv
 		void	Evaluate( IqShaderData* pPs )
 		{
 			CqShaderExecEnv::Ps()->SetValueFromVariable( pPs );
-			m_pShader->Evaluate( *this );
+			m_pShader->Evaluate( this );
 		}
 		/** Get a pointer to the attributes associated with this lightsource.
 		 * \return a CqAttributes pointer.
@@ -113,7 +113,7 @@ class CqShaderLightsourceAmbient : public CqShader
 		CqShaderLightsourceAmbient();
 		virtual	~CqShaderLightsourceAmbient();
 
-		virtual	void	Evaluate( CqShaderExecEnv& Env );
+		virtual	void	Evaluate( IqShaderExecEnv* pEnv );
 		virtual	void	SetValue( const char* name, TqPchar val );
 		virtual IqShader* Clone() const
 		{

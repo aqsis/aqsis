@@ -40,43 +40,11 @@
 #include	"vector4d.h"
 #include	"ishaderdata.h"
 #include	"ishader.h"
+#include	"ishaderexecenv.h"
 #include	"matrix.h"
 
 START_NAMESPACE( Aqsis )
 
-/** \enum EqEnvVars
- * Identifiers for the standard environment variables.
- */
-
-enum EqEnvVars
-{
-    EnvVars_Cs,  		///< Surface color.
-    EnvVars_Os,  		///< Surface opacity.
-    EnvVars_Ng,  		///< Geometric normal.
-    EnvVars_du,  		///< First derivative in u.
-    EnvVars_dv,  		///< First derivative in v.
-    EnvVars_L,  		///< Incoming light direction.
-    EnvVars_Cl,  		///< Light color.
-    EnvVars_Ol,  		///< Light opacity.
-    EnvVars_P,  		///< Point being shaded.
-    EnvVars_dPdu,  	///< Change in P with respect to change in u.
-    EnvVars_dPdv,  	///< Change in P with respect to change in v.
-    EnvVars_N,  		///< Surface normal.
-    EnvVars_u,  		///< Surface u coordinate.
-    EnvVars_v,  		///< Surface v coordinate.
-    EnvVars_s,  		///< Texture s coordinate.
-    EnvVars_t,  		///< Texture t coordinate.
-    EnvVars_I,  		///< Incident ray direction.
-    EnvVars_Ci,  		///< Incident color.
-    EnvVars_Oi,  		///< Incident opacity.
-    EnvVars_Ps,  		///< Point being lit.
-    EnvVars_E,  		///< Viewpoint position.
-    EnvVars_ncomps,  	///< Number of color components.
-    EnvVars_time,  	///< Frame time.
-    EnvVars_alpha,  	///< Fractional pixel coverage.
-
-    EnvVars_Last
-};
 
 extern TqInt gDefUses;
 extern TqInt gDefLightUses;
@@ -125,48 +93,15 @@ extern TqInt gDefLightUses;
 #define	BOOLEAN(Val)		_##Val
 #define	MATRIX(Val)			_##Val
 
-
-#define	DEFPARAM		IqShaderData* Result, IqShader* pShader=0
-#define	DEFVOIDPARAM	IqShader* pShader=0
-#define	DEFPARAMVAR		DEFPARAM, int cParams=0, IqShaderData** apParams=0
-#define	DEFVOIDPARAMVAR	DEFVOIDPARAM, int cParams=0, IqShaderData** apParams=0
-
 #define	DEFPARAMIMPL		IqShaderData* Result, IqShader* pShader
 #define	DEFVOIDPARAMIMPL	IqShader* pShader
 #define DEFPARAMVARIMPL		DEFPARAMIMPL, int cParams, IqShaderData** apParams
 #define	DEFVOIDPARAMVARIMPL	DEFVOIDPARAMIMPL, int cParams, IqShaderData** apParams
 
-#define	STD_SO		void
-#define	STD_SOIMPL	void
-
 #define	GET_FILTER_PARAMS	float _pswidth=1.0f,_ptwidth=1.0f; \
 							GetFilterParams(cParams, apParams, _pswidth,_ptwidth);
 #define	GET_TEXTURE_PARAMS	float _pswidth=1.0f,_ptwidth=1.0f,_psblur=0.0f,_ptblur=0.0f, _pfill=0.0f; \
 							GetTexParams(cParams, apParams, _pswidth,_ptwidth,_psblur,_ptblur,_pfill);
-
-#define	FLOATVAL	IqShaderData*
-#define	POINTVAL	IqShaderData*
-#define	VECTORVAL	IqShaderData*
-#define	NORMALVAL	IqShaderData*
-#define	COLORVAL	IqShaderData*
-#define	STRINGVAL	IqShaderData*
-#define	MATRIXVAL	IqShaderData*
-
-#define	FLOATPTR	IqShaderData**
-#define	POINTPTR	IqShaderData**
-#define	VECTORPTR	IqShaderData**
-#define	NORMALPTR	IqShaderData**
-#define	COLORPTR	IqShaderData**
-#define	STRINGPTR	IqShaderData**
-#define	MATRIXPTR	IqShaderData**
-
-#define	FLOATARRAYVAL	IqShaderData*
-#define	POINTARRAYVAL	IqShaderData*
-#define	VECTORARRAYVAL	IqShaderData*
-#define	NORMALARRAYVAL	IqShaderData*
-#define	COLORARRAYVAL	IqShaderData*
-#define	STRINGARRAYVAL	IqShaderData*
-#define	MATRIXARRAYVAL	IqShaderData*
 
 class CqLightsource;
 class CqSurface;
@@ -176,114 +111,67 @@ class CqSurface;
  * Standard shader execution environment. Contains standard variables, and provides SIMD functionality.
  */
 
-class CqShaderExecEnv
+class CqShaderExecEnv : public IqShaderExecEnv
 {
 	public:
 		CqShaderExecEnv();
 		virtual	~CqShaderExecEnv();
 
-		/** Reset the internal SIMD counter.
-		 */
-		void	Reset()
-		{
-			m_GridI = 0;
-		}
-		/** Advance the internal SIMD counter.
-		 * \return Boolean indicating SIMD completion.
-		 */
-		TqBool	Advance()
-		{
-			m_GridI++; return ( m_GridI < m_GridSize );
-		}
-		void	Initialise( const TqInt uGridRes, const TqInt vGridRes, CqSurface* pSurface, TqInt Uses );
-		/** Get internal SIMD index.
-		 */
-		TqInt&	GridI()
-		{
-			return ( m_GridI );
-		}
-		/** Get grid size in u
-		 */
-		TqInt	uGridRes()
+		// Overidden from IqShaderExecEnv, see ishaderexecenv.h for descriptions.
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, CqSurface* pSurface, TqInt Uses );
+		virtual	TqInt	uGridRes() const
 		{
 			return ( m_uGridRes );
 		}
-		/** Get grid size in v
-		 */
-		TqInt	vGridRes()
+		virtual	TqInt	vGridRes() const
 		{
 			return ( m_vGridRes );
 		}
-		/** Get total grid size.
-		 */
-		TqInt	GridSize()
+		virtual	TqInt	GridSize() const
 		{
 			return ( m_GridSize );
 		}
-		/** Get a pointer to the associated surface.
-		 */
+		virtual	const CqMatrix&	matObjectToWorld() const;
 		CqSurface*	pSurface() const
 		{
 			return ( m_pSurface );
 		}
-		const CqMatrix&	matObjectToWorld() const;
-
-		void	ValidateIlluminanceCache( IqShaderData* pP, IqShader* pShader );
-		/** Reset the illuminance cache.
-		 */
-		void	InvalidateIlluminanceCache()
+		virtual	void	ValidateIlluminanceCache( IqShaderData* pP, IqShader* pShader );
+		virtual	void	InvalidateIlluminanceCache()
 		{
 			m_IlluminanceCacheValid = TqFalse;
 		}
-		/** Get the current execution state. Bits in the vector indicate which SIMD indexes have passed the current condition.
-		 */
-		CqBitVector& CurrentState()
+		virtual	CqBitVector& CurrentState()
 		{
 			return ( m_CurrentState );
 		}
-		/** Get the running execution state. Bits in the vector indicate which SIMD indexes are valid.
-		 */
-		CqBitVector& RunningState()
+		virtual	CqBitVector& RunningState()
 		{
 			return ( m_RunningState );
 		}
-		/** Transfer the current state into the running state.
-		 */
-		void	GetCurrentState()
+		virtual	void	GetCurrentState()
 		{
 			m_RunningState = m_CurrentState;
 		}
-		/** Clear the current state ready for a new condition.
-		 */
-		void	ClearCurrentState()
+		virtual	void	ClearCurrentState()
 		{
 			m_CurrentState.SetAll( TqFalse );
 		}
-		/** Push the running state onto the stack.
-		 */
-		void	PushState()
+		virtual	void	PushState()
 		{
 			m_stkState.push( m_RunningState );
 		}
-		/** Pop the running state from the stack.
-		 */
-		void	PopState()
+		virtual	void	PopState()
 		{
 			m_RunningState = m_stkState.top(); m_stkState.pop();
 		}
-		/** Invert the bits in the running state, to perform the opposite to the condition, i.e. else.
-		 */
-		void	InvertRunningState()
+		virtual	void	InvertRunningState()
 		{
 			m_RunningState.Complement();
 			if ( !m_stkState.empty() )
 				m_RunningState.Intersect( m_stkState.top() );
 		}
-		/** Find a named standard variable in the list.
-		 * \param pname Character pointer to the name.
-		 * \return IqShaderData pointer or 0.
-		 */
-		IqShaderData* FindStandardVar( char* pname )
+		virtual IqShaderData* FindStandardVar( char* pname )
 		{
 			TqInt i;
 			for ( i = 0; i < EnvVars_Last; i++ )
@@ -293,11 +181,7 @@ class CqShaderExecEnv
 			}
 			return ( 0 );
 		}
-		/** Find a named standard variable in the list.
-		 * \param pname Character pointer to the name.
-		 * \return Integer index in the list or -1.
-		 */
-		TqInt	FindStandardVarIndex( char* pname )
+		virtual	TqInt	FindStandardVarIndex( char* pname )
 		{
 			TqInt i;
 			for ( i = 0; i < EnvVars_Last; i++ )
@@ -307,165 +191,108 @@ class CqShaderExecEnv
 			}
 			return ( -1 );
 		}
-
-		/** Get a standard variable pointer given an index.
-		 * \param Index The integer index returned from FindStandardVarIndex.
-		 * \return IqShaderData pointer.
-		 */
-		IqShaderData*	pVar( TqInt Index )
+		virtual IqShaderData*	pVar( TqInt Index )
 		{
 			return ( m_apVariables[ Index ] );
 		}
-		/** Delete an indexed variable from the list.
-		 * \param Index The integer index returned from FindStandardVarIndex.
-		 */
-		void	DeleteVariable( TqInt Index )
+		virtual	void	DeleteVariable( TqInt Index )
 		{
 			delete( m_apVariables[ Index ] );
 			m_apVariables[ Index ] = 0;
 		}
-
-		/** Get a reference to the Cq standard variable.
-		 */
-		IqShaderData* Cs()
+		virtual IqShaderData* Cs()
 		{
 			return ( m_apVariables[ EnvVars_Cs ] );
 		}
-		/** Get a reference to the Os standard variable.
-		 */
-		IqShaderData* 	Os()
+		virtual IqShaderData* 	Os()
 		{
 			return ( m_apVariables[ EnvVars_Os ] );
 		}
-		/** Get a reference to the Ng standard variable.
-		 */
-		IqShaderData* Ng()
+		virtual IqShaderData* Ng()
 		{
 			return ( m_apVariables[ EnvVars_Ng ] );
 		}
-		/** Get a reference to the du standard variable.
-		 */
-		IqShaderData* du()
+		virtual IqShaderData* du()
 		{
 			return ( m_apVariables[ EnvVars_du ] );
 		}
-		/** Get a reference to the dv standard variable.
-		 */
-		IqShaderData* dv()
+		virtual IqShaderData* dv()
 		{
 			return ( m_apVariables[ EnvVars_dv ] );
 		}
-		/** Get a reference to the L standard variable.
-		 */
-		IqShaderData* L()
+		virtual IqShaderData* L()
 		{
 			return ( m_apVariables[ EnvVars_L ] );
 		}
-		/** Get a reference to the Cl standard variable.
-		 */
-		IqShaderData* Cl()
+		virtual IqShaderData* Cl()
 		{
 			return ( m_apVariables[ EnvVars_Cl ] );
 		}
-		/** Get a reference to the Ol standard variable.
-		 */
-		IqShaderData* Ol()
+		virtual IqShaderData* Ol()
 		{
 			return ( m_apVariables[ EnvVars_Ol ] );
 		}
-		/** Get a reference to the P standard variable.
-		 */
-		IqShaderData* P()
+		virtual IqShaderData* P()
 		{
 			return ( m_apVariables[ EnvVars_P ] );
 		}
-		/** Get a reference to the dPdu standard variable.
-		 */
-		IqShaderData* dPdu()
+		virtual IqShaderData* dPdu()
 		{
 			return ( m_apVariables[ EnvVars_dPdu ] );
 		}
-		/** Get a reference to the dPdv standard variable.
-		 */
-		IqShaderData* dPdv()
+		virtual IqShaderData* dPdv()
 		{
 			return ( m_apVariables[ EnvVars_dPdv ] );
 		}
-		/** Get a reference to the N standard variable.
-		 */
-		IqShaderData* N()
+		virtual IqShaderData* N()
 		{
 			return ( m_apVariables[ EnvVars_N ] );
 		}
-		/** Get a reference to the u standard variable.
-		 */
-		IqShaderData* u()
+		virtual IqShaderData* u()
 		{
 			return ( m_apVariables[ EnvVars_u ] );
 		}
-		/** Get a reference to the v standard variable.
-		 */
-		IqShaderData* v()
+		virtual IqShaderData* v()
 		{
 			return ( m_apVariables[ EnvVars_v ] );
 		}
-		/** Get a reference to the s standard variable.
-		 */
-		IqShaderData* s()
+		virtual IqShaderData* s()
 		{
 			return ( m_apVariables[ EnvVars_s ] );
 		}
-		/** Get a reference to the t standard variable.
-		 */
-		IqShaderData* t()
+		virtual IqShaderData* t()
 		{
 			return ( m_apVariables[ EnvVars_t ] );
 		}
-		/** Get a reference to the I standard variable.
-		 */
-		IqShaderData* I()
+		virtual IqShaderData* I()
 		{
 			return ( m_apVariables[ EnvVars_I ] );
 		}
-		/** Get a reference to the Ci standard variable.
-		 */
-		IqShaderData* Ci()
+		virtual IqShaderData* Ci()
 		{
 			return ( m_apVariables[ EnvVars_Ci ] );
 		}
-		/** Get a reference to the Oi standard variable.
-		 */
-		IqShaderData* Oi()
+		virtual IqShaderData* Oi()
 		{
 			return ( m_apVariables[ EnvVars_Oi ] );
 		}
-		/** Get a reference to the Ps standard variable.
-		 */
-		IqShaderData* Ps()
+		virtual IqShaderData* Ps()
 		{
 			return ( m_apVariables[ EnvVars_Ps ] );
 		}
-		/** Get a reference to the E standard variable.
-		 */
-		IqShaderData* E()
+		virtual IqShaderData* E()
 		{
 			return ( m_apVariables[ EnvVars_E ] );
 		}
-		/** Get a reference to the ncomps standard variable.
-		 */
-		IqShaderData* ncomps()
+		virtual IqShaderData* ncomps()
 		{
 			return ( m_apVariables[ EnvVars_ncomps ] );
 		}
-		/** Get a reference to the time standard variable.
-		 */
-		IqShaderData* time()
+		virtual IqShaderData* time()
 		{
 			return ( m_apVariables[ EnvVars_time ] );
 		}
-		/** Get a reference to the alpha standard variable.
-		 */
-		IqShaderData* alpha()
+		virtual IqShaderData* alpha()
 		{
 			return ( m_apVariables[ EnvVars_alpha ] );
 		}
@@ -543,199 +370,199 @@ class CqShaderExecEnv
 	public:
 		TqInt	m_vfCulled;	///< Shader variable indicating whether the individual micropolys are culled.
 
-		TqBool	SO_init_illuminance();
-		TqBool	SO_advance_illuminance();
+		virtual	TqBool	SO_init_illuminance();
+		virtual	TqBool	SO_advance_illuminance();
 
 		// ShadeOps
-		STD_SO	SO_radians( FLOATVAL degrees, DEFPARAM );
-		STD_SO	SO_degrees( FLOATVAL radians, DEFPARAM );
-		STD_SO	SO_sin( FLOATVAL a, DEFPARAM );
-		STD_SO	SO_asin( FLOATVAL a, DEFPARAM );
-		STD_SO	SO_cos( FLOATVAL a, DEFPARAM );
-		STD_SO	SO_acos( FLOATVAL a, DEFPARAM );
-		STD_SO	SO_tan( FLOATVAL a, DEFPARAM );
-		STD_SO	SO_atan( FLOATVAL yoverx, DEFPARAM );
-		STD_SO	SO_atan( FLOATVAL y, FLOATVAL x, DEFPARAM );
-		STD_SO	SO_pow( FLOATVAL x, FLOATVAL y, DEFPARAM );
-		STD_SO	SO_exp( FLOATVAL x, DEFPARAM );
-		STD_SO	SO_sqrt( FLOATVAL x, DEFPARAM );
-		STD_SO	SO_log( FLOATVAL x, DEFPARAM );
-		STD_SO	SO_log( FLOATVAL x, FLOATVAL base, DEFPARAM );
-		STD_SO	SO_mod( FLOATVAL a, FLOATVAL b, DEFPARAM );
-		STD_SO	SO_abs( FLOATVAL x, DEFPARAM );
-		STD_SO	SO_sign( FLOATVAL x, DEFPARAM );
-		STD_SO	SO_min( FLOATVAL a, FLOATVAL b, DEFPARAMVAR );
-		STD_SO	SO_max( FLOATVAL a, FLOATVAL b, DEFPARAMVAR );
-		STD_SO	SO_pmin( POINTVAL a, POINTVAL b, DEFPARAMVAR );
-		STD_SO	SO_pmax( POINTVAL a, POINTVAL b, DEFPARAMVAR );
-		STD_SO	SO_cmin( COLORVAL a, COLORVAL b, DEFPARAMVAR );
-		STD_SO	SO_cmax( COLORVAL a, COLORVAL b, DEFPARAMVAR );
-		STD_SO	SO_clamp( FLOATVAL a, FLOATVAL min, FLOATVAL max, DEFPARAM );
-		STD_SO	SO_pclamp( POINTVAL a, POINTVAL min, POINTVAL max, DEFPARAM );
-		STD_SO	SO_cclamp( COLORVAL a, COLORVAL min, COLORVAL max, DEFPARAM );
-		STD_SO	SO_floor( FLOATVAL x, DEFPARAM );
-		STD_SO	SO_ceil( FLOATVAL x, DEFPARAM );
-		STD_SO	SO_round( FLOATVAL x, DEFPARAM );
-		STD_SO	SO_step( FLOATVAL min, FLOATVAL value, DEFPARAM );
-		STD_SO	SO_smoothstep( FLOATVAL min, FLOATVAL max, FLOATVAL value, DEFPARAM );
-		STD_SO	SO_fspline( FLOATVAL value, DEFPARAMVAR );
-		STD_SO	SO_cspline( FLOATVAL value, DEFPARAMVAR );
-		STD_SO	SO_pspline( FLOATVAL value, DEFPARAMVAR );
-		STD_SO	SO_sfspline( STRINGVAL basis, FLOATVAL value, DEFPARAMVAR );
-		STD_SO	SO_scspline( STRINGVAL basis, FLOATVAL value, DEFPARAMVAR );
-		STD_SO	SO_spspline( STRINGVAL basis, FLOATVAL value, DEFPARAMVAR );
-		STD_SO	SO_fDu( FLOATVAL p, DEFPARAM );
-		STD_SO	SO_fDv( FLOATVAL p, DEFPARAM );
-		STD_SO	SO_fDeriv( FLOATVAL p, FLOATVAL den, DEFPARAM );
-		STD_SO	SO_cDu( COLORVAL p, DEFPARAM );
-		STD_SO	SO_cDv( COLORVAL p, DEFPARAM );
-		STD_SO	SO_cDeriv( COLORVAL p, FLOATVAL den, DEFPARAM );
-		STD_SO	SO_pDu( POINTVAL p, DEFPARAM );
-		STD_SO	SO_pDv( POINTVAL p, DEFPARAM );
-		STD_SO	SO_pDeriv( POINTVAL p, FLOATVAL den, DEFPARAM );
-		STD_SO	SO_frandom( DEFPARAM );
-		STD_SO	SO_crandom( DEFPARAM );
-		STD_SO	SO_prandom( DEFPARAM );
-		STD_SO	SO_fnoise1( FLOATVAL v, DEFPARAM );
-		STD_SO	SO_fnoise2( FLOATVAL u, FLOATVAL v, DEFPARAM );
-		STD_SO	SO_fnoise3( POINTVAL p, DEFPARAM );
-		STD_SO	SO_fnoise4( POINTVAL p, FLOATVAL t, DEFPARAM );
-		STD_SO	SO_cnoise1( FLOATVAL v, DEFPARAM );
-		STD_SO	SO_cnoise2( FLOATVAL u, FLOATVAL v, DEFPARAM );
-		STD_SO	SO_cnoise3( POINTVAL p, DEFPARAM );
-		STD_SO	SO_cnoise4( POINTVAL p, FLOATVAL t, DEFPARAM );
-		STD_SO	SO_pnoise1( FLOATVAL v, DEFPARAM );
-		STD_SO	SO_pnoise2( FLOATVAL u, FLOATVAL v, DEFPARAM );
-		STD_SO	SO_pnoise3( POINTVAL p, DEFPARAM );
-		STD_SO	SO_pnoise4( POINTVAL p, FLOATVAL t, DEFPARAM );
-		STD_SO	SO_setcomp( COLORVAL p, FLOATVAL i, FLOATVAL v, DEFVOIDPARAM );
-		STD_SO	SO_setxcomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAM );
-		STD_SO	SO_setycomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAM );
-		STD_SO	SO_setzcomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAM );
-		STD_SO	SO_length( VECTORVAL V, DEFPARAM );
-		STD_SO	SO_distance( POINTVAL P1, POINTVAL P2, DEFPARAM );
-		STD_SO	SO_area( POINTVAL p, DEFPARAM );
-		STD_SO	SO_normalize( VECTORVAL V, DEFPARAM );
-		STD_SO	SO_faceforward( NORMALVAL N, VECTORVAL I /* [Nref] */, DEFPARAM );
-		STD_SO	SO_reflect( VECTORVAL I, NORMALVAL N, DEFPARAM );
-		STD_SO	SO_refract( VECTORVAL I, NORMALVAL N, FLOATVAL eta, DEFPARAM );
-		STD_SO	SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, FLOATVAL Kr, FLOATVAL Kt, DEFVOIDPARAM );
-		STD_SO	SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, FLOATVAL Kr, FLOATVAL Kt, VECTORVAL R, VECTORVAL T, DEFVOIDPARAM );
-		STD_SO	SO_transform( STRINGVAL fromspace, STRINGVAL tospace, POINTVAL p, DEFPARAM );
-		STD_SO	SO_transform( STRINGVAL tospace, POINTVAL p, DEFPARAM );
-		STD_SO	SO_transformm( MATRIXVAL tospace, POINTVAL p, DEFPARAM );
-		STD_SO	SO_vtransform( STRINGVAL fromspace, STRINGVAL tospace, VECTORVAL p, DEFPARAM );
-		STD_SO	SO_vtransform( STRINGVAL tospace, VECTORVAL p, DEFPARAM );
-		STD_SO	SO_vtransformm( MATRIXVAL tospace, VECTORVAL p, DEFPARAM );
-		STD_SO	SO_ntransform( STRINGVAL fromspace, STRINGVAL tospace, NORMALVAL p, DEFPARAM );
-		STD_SO	SO_ntransform( STRINGVAL tospace, NORMALVAL p, DEFPARAM );
-		STD_SO	SO_ntransformm( MATRIXVAL tospace, NORMALVAL p, DEFPARAM );
-		STD_SO	SO_depth( POINTVAL p, DEFPARAM );
-		STD_SO	SO_calculatenormal( POINTVAL p, DEFPARAM );
-		STD_SO	SO_cmix( COLORVAL color0, COLORVAL color1, FLOATVAL value, DEFPARAM );
-		STD_SO	SO_fmix( FLOATVAL f0, FLOATVAL f1, FLOATVAL value, DEFPARAM );
-		STD_SO	SO_pmix( POINTVAL p0, POINTVAL p1, FLOATVAL value, DEFPARAM );
-		STD_SO	SO_vmix( VECTORVAL v0, VECTORVAL v1, FLOATVAL value, DEFPARAM );
-		STD_SO	SO_nmix( NORMALVAL n0, NORMALVAL n1, FLOATVAL value, DEFPARAM );
-		STD_SO	SO_ambient( DEFPARAM );
-		STD_SO	SO_diffuse( NORMALVAL N, DEFPARAM );
-		STD_SO	SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roughness, DEFPARAM );
-		STD_SO	SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, DEFPARAM );
-		STD_SO	SO_trace( POINTVAL P, VECTORVAL R, DEFPARAM );
-		STD_SO	SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFPARAMVAR );
-		STD_SO	SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVAR );
-		STD_SO	SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVAR );
-		STD_SO	SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFPARAMVAR );
-		STD_SO	SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVAR );
-		STD_SO	SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVAR );
-		STD_SO	SO_fenvironment2( STRINGVAL name, FLOATVAL channel, VECTORVAL R, DEFPARAMVAR );
-		STD_SO	SO_fenvironment3( STRINGVAL name, FLOATVAL channel, VECTORVAL R1, VECTORVAL R2, VECTORVAL R3, VECTORVAL R4, DEFPARAMVAR );
-		STD_SO	SO_cenvironment2( STRINGVAL name, FLOATVAL channel, VECTORVAL R, DEFPARAMVAR );
-		STD_SO	SO_cenvironment3( STRINGVAL name, FLOATVAL channel, VECTORVAL R1, VECTORVAL R2, VECTORVAL R3, VECTORVAL R4, DEFPARAMVAR );
-		STD_SO	SO_bump1( STRINGVAL name, FLOATVAL channel, DEFPARAMVAR );
-		STD_SO	SO_bump2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVAR );
-		STD_SO	SO_bump3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVAR );
-		STD_SO	SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVAL P, DEFPARAMVAR );
-		STD_SO	SO_shadow1( STRINGVAL name, FLOATVAL channel, POINTVAL P1, POINTVAL P2, POINTVAL P3, POINTVAL P4, DEFPARAMVAR );
-		STD_SO	SO_illuminance( POINTVAL P, FLOATVAL nsamples, DEFVOIDPARAM );
-		STD_SO	SO_illuminance( POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, FLOATVAL nsamples, DEFVOIDPARAM );
-		STD_SO	SO_illuminate( POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAM );
-		STD_SO	SO_illuminate( POINTVAL P, DEFVOIDPARAM );
-		STD_SO	SO_solar( VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAM );
-		STD_SO	SO_solar( DEFVOIDPARAM );
-		STD_SO	SO_printf( STRINGVAL str, DEFVOIDPARAMVAR );
-		STD_SO	SO_format( STRINGVAL str, DEFPARAMVAR );
-		STD_SO	SO_concat( STRINGVAL stra, STRINGVAL strb, DEFPARAMVAR );
-		STD_SO	SO_atmosphere( STRINGVAL name, IqShaderData* pV, DEFPARAM );
-		STD_SO	SO_displacement( STRINGVAL name, IqShaderData* pV, DEFPARAM );
-		STD_SO	SO_lightsource( STRINGVAL name, IqShaderData* pV, DEFPARAM );
-		STD_SO	SO_surface( STRINGVAL name, IqShaderData* pV, DEFPARAM );
-		STD_SO	SO_attribute( STRINGVAL name, IqShaderData* pV, DEFPARAM );
-		STD_SO	SO_option( STRINGVAL name, IqShaderData* pV, DEFPARAM );
-		STD_SO	SO_rendererinfo( STRINGVAL name, IqShaderData* pV, DEFPARAM );
-		STD_SO	SO_incident( STRINGVAL name, IqShaderData* pV, DEFPARAM );
-		STD_SO	SO_opposite( STRINGVAL name, IqShaderData* pV, DEFPARAM );
-		STD_SO	SO_fcellnoise1( FLOATVAL v, DEFPARAM );
-		STD_SO	SO_fcellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAM );
-		STD_SO	SO_fcellnoise3( POINTVAL p, DEFPARAM );
-		STD_SO	SO_fcellnoise4( POINTVAL p, FLOATVAL v, DEFPARAM );
-		STD_SO	SO_ccellnoise1( FLOATVAL v, DEFPARAM );
-		STD_SO	SO_ccellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAM );
-		STD_SO	SO_ccellnoise3( POINTVAL p, DEFPARAM );
-		STD_SO	SO_ccellnoise4( POINTVAL p, FLOATVAL v, DEFPARAM );
-		STD_SO	SO_pcellnoise1( FLOATVAL v, DEFPARAM );
-		STD_SO	SO_pcellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAM );
-		STD_SO	SO_pcellnoise3( POINTVAL p, DEFPARAM );
-		STD_SO	SO_pcellnoise4( POINTVAL p, FLOATVAL v, DEFPARAM );
-		STD_SO	SO_fpnoise1( FLOATVAL v, FLOATVAL period, DEFPARAM );
-		STD_SO	SO_fpnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperiod, FLOATVAL vperiod, DEFPARAM );
-		STD_SO	SO_fpnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAM );
-		STD_SO	SO_fpnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperiod, FLOATVAL tperiod, DEFPARAM );
-		STD_SO	SO_cpnoise1( FLOATVAL v, FLOATVAL period, DEFPARAM );
-		STD_SO	SO_cpnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperiod, FLOATVAL vperiod, DEFPARAM );
-		STD_SO	SO_cpnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAM );
-		STD_SO	SO_cpnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperiod, FLOATVAL tperiod, DEFPARAM );
-		STD_SO	SO_ppnoise1( FLOATVAL v, FLOATVAL period, DEFPARAM );
-		STD_SO	SO_ppnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperiod, FLOATVAL vperiod, DEFPARAM );
-		STD_SO	SO_ppnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAM );
-		STD_SO	SO_ppnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperiod, FLOATVAL tperiod, DEFPARAM );
-		STD_SO	SO_ctransform( STRINGVAL fromspace, STRINGVAL tospace, COLORVAL c, DEFPARAM );
-		STD_SO	SO_ctransform( STRINGVAL tospace, COLORVAL c, DEFPARAM );
-		STD_SO	SO_ptlined( POINTVAL P0, POINTVAL P1, POINTVAL Q, DEFPARAM );
-		STD_SO	SO_inversesqrt( FLOATVAL x, DEFPARAM );
-		STD_SO	SO_match( STRINGVAL a, STRINGVAL b, DEFPARAM );
-		STD_SO	SO_rotate( VECTORVAL Q, FLOATVAL angle, POINTVAL P0, POINTVAL P1, DEFPARAM );
-		STD_SO	SO_filterstep( FLOATVAL edge, FLOATVAL s1, DEFPARAMVAR );
-		STD_SO	SO_filterstep2( FLOATVAL edge, FLOATVAL s1, FLOATVAL s2, DEFPARAMVAR );
-		STD_SO	SO_specularbrdf( VECTORVAL L, NORMALVAL N, VECTORVAL V, FLOATVAL rough, DEFPARAM );
-		STD_SO	SO_setmcomp( MATRIXVAL M, FLOATVAL row, FLOATVAL column, FLOATVAL val, DEFVOIDPARAM );
-		STD_SO	SO_determinant( MATRIXVAL M, DEFPARAM );
-		STD_SO	SO_mtranslate( MATRIXVAL M, VECTORVAL V, DEFPARAM );
-		STD_SO	SO_mrotate( MATRIXVAL M, FLOATVAL angle, VECTORVAL axis, DEFPARAM );
-		STD_SO	SO_mscale( MATRIXVAL M, POINTVAL s, DEFPARAM );
-		STD_SO	SO_fsplinea( FLOATVAL value, FLOATARRAYVAL a, DEFPARAM );
-		STD_SO	SO_csplinea( FLOATVAL value, COLORARRAYVAL a, DEFPARAM );
-		STD_SO	SO_psplinea( FLOATVAL value, POINTARRAYVAL a, DEFPARAM );
-		STD_SO	SO_sfsplinea( STRINGVAL basis, FLOATVAL value, FLOATARRAYVAL a, DEFPARAM );
-		STD_SO	SO_scsplinea( STRINGVAL basis, FLOATVAL value, COLORARRAYVAL a, DEFPARAM );
-		STD_SO	SO_spsplinea( STRINGVAL basis, FLOATVAL value, POINTARRAYVAL a, DEFPARAM );
-		STD_SO	SO_shadername( DEFPARAM );
-		STD_SO	SO_shadername2( STRINGVAL shader, DEFPARAM );
-		STD_SO	SO_textureinfo( STRINGVAL shader, STRINGVAL dataname, IqShaderData* pV, DEFPARAM );
+		virtual STD_SO	SO_radians( FLOATVAL degrees, DEFPARAM );
+		virtual STD_SO	SO_degrees( FLOATVAL radians, DEFPARAM );
+		virtual STD_SO	SO_sin( FLOATVAL a, DEFPARAM );
+		virtual STD_SO	SO_asin( FLOATVAL a, DEFPARAM );
+		virtual STD_SO	SO_cos( FLOATVAL a, DEFPARAM );
+		virtual STD_SO	SO_acos( FLOATVAL a, DEFPARAM );
+		virtual STD_SO	SO_tan( FLOATVAL a, DEFPARAM );
+		virtual STD_SO	SO_atan( FLOATVAL yoverx, DEFPARAM );
+		virtual STD_SO	SO_atan( FLOATVAL y, FLOATVAL x, DEFPARAM );
+		virtual STD_SO	SO_pow( FLOATVAL x, FLOATVAL y, DEFPARAM );
+		virtual STD_SO	SO_exp( FLOATVAL x, DEFPARAM );
+		virtual STD_SO	SO_sqrt( FLOATVAL x, DEFPARAM );
+		virtual STD_SO	SO_log( FLOATVAL x, DEFPARAM );
+		virtual STD_SO	SO_log( FLOATVAL x, FLOATVAL base, DEFPARAM );
+		virtual STD_SO	SO_mod( FLOATVAL a, FLOATVAL b, DEFPARAM );
+		virtual STD_SO	SO_abs( FLOATVAL x, DEFPARAM );
+		virtual STD_SO	SO_sign( FLOATVAL x, DEFPARAM );
+		virtual STD_SO	SO_min( FLOATVAL a, FLOATVAL b, DEFPARAMVAR );
+		virtual STD_SO	SO_max( FLOATVAL a, FLOATVAL b, DEFPARAMVAR );
+		virtual STD_SO	SO_pmin( POINTVAL a, POINTVAL b, DEFPARAMVAR );
+		virtual STD_SO	SO_pmax( POINTVAL a, POINTVAL b, DEFPARAMVAR );
+		virtual STD_SO	SO_cmin( COLORVAL a, COLORVAL b, DEFPARAMVAR );
+		virtual STD_SO	SO_cmax( COLORVAL a, COLORVAL b, DEFPARAMVAR );
+		virtual STD_SO	SO_clamp( FLOATVAL a, FLOATVAL min, FLOATVAL max, DEFPARAM );
+		virtual STD_SO	SO_pclamp( POINTVAL a, POINTVAL min, POINTVAL max, DEFPARAM );
+		virtual STD_SO	SO_cclamp( COLORVAL a, COLORVAL min, COLORVAL max, DEFPARAM );
+		virtual STD_SO	SO_floor( FLOATVAL x, DEFPARAM );
+		virtual STD_SO	SO_ceil( FLOATVAL x, DEFPARAM );
+		virtual STD_SO	SO_round( FLOATVAL x, DEFPARAM );
+		virtual STD_SO	SO_step( FLOATVAL min, FLOATVAL value, DEFPARAM );
+		virtual STD_SO	SO_smoothstep( FLOATVAL min, FLOATVAL max, FLOATVAL value, DEFPARAM );
+		virtual STD_SO	SO_fspline( FLOATVAL value, DEFPARAMVAR );
+		virtual STD_SO	SO_cspline( FLOATVAL value, DEFPARAMVAR );
+		virtual STD_SO	SO_pspline( FLOATVAL value, DEFPARAMVAR );
+		virtual STD_SO	SO_sfspline( STRINGVAL basis, FLOATVAL value, DEFPARAMVAR );
+		virtual STD_SO	SO_scspline( STRINGVAL basis, FLOATVAL value, DEFPARAMVAR );
+		virtual STD_SO	SO_spspline( STRINGVAL basis, FLOATVAL value, DEFPARAMVAR );
+		virtual STD_SO	SO_fDu( FLOATVAL p, DEFPARAM );
+		virtual STD_SO	SO_fDv( FLOATVAL p, DEFPARAM );
+		virtual STD_SO	SO_fDeriv( FLOATVAL p, FLOATVAL den, DEFPARAM );
+		virtual STD_SO	SO_cDu( COLORVAL p, DEFPARAM );
+		virtual STD_SO	SO_cDv( COLORVAL p, DEFPARAM );
+		virtual STD_SO	SO_cDeriv( COLORVAL p, FLOATVAL den, DEFPARAM );
+		virtual STD_SO	SO_pDu( POINTVAL p, DEFPARAM );
+		virtual STD_SO	SO_pDv( POINTVAL p, DEFPARAM );
+		virtual STD_SO	SO_pDeriv( POINTVAL p, FLOATVAL den, DEFPARAM );
+		virtual STD_SO	SO_frandom( DEFPARAM );
+		virtual STD_SO	SO_crandom( DEFPARAM );
+		virtual STD_SO	SO_prandom( DEFPARAM );
+		virtual STD_SO	SO_fnoise1( FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_fnoise2( FLOATVAL u, FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_fnoise3( POINTVAL p, DEFPARAM );
+		virtual STD_SO	SO_fnoise4( POINTVAL p, FLOATVAL t, DEFPARAM );
+		virtual STD_SO	SO_cnoise1( FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_cnoise2( FLOATVAL u, FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_cnoise3( POINTVAL p, DEFPARAM );
+		virtual STD_SO	SO_cnoise4( POINTVAL p, FLOATVAL t, DEFPARAM );
+		virtual STD_SO	SO_pnoise1( FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_pnoise2( FLOATVAL u, FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_pnoise3( POINTVAL p, DEFPARAM );
+		virtual STD_SO	SO_pnoise4( POINTVAL p, FLOATVAL t, DEFPARAM );
+		virtual STD_SO	SO_setcomp( COLORVAL p, FLOATVAL i, FLOATVAL v, DEFVOIDPARAM );
+		virtual STD_SO	SO_setxcomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAM );
+		virtual STD_SO	SO_setycomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAM );
+		virtual STD_SO	SO_setzcomp( POINTVAL p, FLOATVAL v, DEFVOIDPARAM );
+		virtual STD_SO	SO_length( VECTORVAL V, DEFPARAM );
+		virtual STD_SO	SO_distance( POINTVAL P1, POINTVAL P2, DEFPARAM );
+		virtual STD_SO	SO_area( POINTVAL p, DEFPARAM );
+		virtual STD_SO	SO_normalize( VECTORVAL V, DEFPARAM );
+		virtual STD_SO	SO_faceforward( NORMALVAL N, VECTORVAL I /* [Nref] */, DEFPARAM );
+		virtual STD_SO	SO_reflect( VECTORVAL I, NORMALVAL N, DEFPARAM );
+		virtual STD_SO	SO_refract( VECTORVAL I, NORMALVAL N, FLOATVAL eta, DEFPARAM );
+		virtual STD_SO	SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, FLOATVAL Kr, FLOATVAL Kt, DEFVOIDPARAM );
+		virtual STD_SO	SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, FLOATVAL Kr, FLOATVAL Kt, VECTORVAL R, VECTORVAL T, DEFVOIDPARAM );
+		virtual STD_SO	SO_transform( STRINGVAL fromspace, STRINGVAL tospace, POINTVAL p, DEFPARAM );
+		virtual STD_SO	SO_transform( STRINGVAL tospace, POINTVAL p, DEFPARAM );
+		virtual STD_SO	SO_transformm( MATRIXVAL tospace, POINTVAL p, DEFPARAM );
+		virtual STD_SO	SO_vtransform( STRINGVAL fromspace, STRINGVAL tospace, VECTORVAL p, DEFPARAM );
+		virtual STD_SO	SO_vtransform( STRINGVAL tospace, VECTORVAL p, DEFPARAM );
+		virtual STD_SO	SO_vtransformm( MATRIXVAL tospace, VECTORVAL p, DEFPARAM );
+		virtual STD_SO	SO_ntransform( STRINGVAL fromspace, STRINGVAL tospace, NORMALVAL p, DEFPARAM );
+		virtual STD_SO	SO_ntransform( STRINGVAL tospace, NORMALVAL p, DEFPARAM );
+		virtual STD_SO	SO_ntransformm( MATRIXVAL tospace, NORMALVAL p, DEFPARAM );
+		virtual STD_SO	SO_depth( POINTVAL p, DEFPARAM );
+		virtual STD_SO	SO_calculatenormal( POINTVAL p, DEFPARAM );
+		virtual STD_SO	SO_cmix( COLORVAL color0, COLORVAL color1, FLOATVAL value, DEFPARAM );
+		virtual STD_SO	SO_fmix( FLOATVAL f0, FLOATVAL f1, FLOATVAL value, DEFPARAM );
+		virtual STD_SO	SO_pmix( POINTVAL p0, POINTVAL p1, FLOATVAL value, DEFPARAM );
+		virtual STD_SO	SO_vmix( VECTORVAL v0, VECTORVAL v1, FLOATVAL value, DEFPARAM );
+		virtual STD_SO	SO_nmix( NORMALVAL n0, NORMALVAL n1, FLOATVAL value, DEFPARAM );
+		virtual STD_SO	SO_ambient( DEFPARAM );
+		virtual STD_SO	SO_diffuse( NORMALVAL N, DEFPARAM );
+		virtual STD_SO	SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roughness, DEFPARAM );
+		virtual STD_SO	SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, DEFPARAM );
+		virtual STD_SO	SO_trace( POINTVAL P, VECTORVAL R, DEFPARAM );
+		virtual STD_SO	SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFPARAMVAR );
+		virtual STD_SO	SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVAR );
+		virtual STD_SO	SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVAR );
+		virtual STD_SO	SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFPARAMVAR );
+		virtual STD_SO	SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVAR );
+		virtual STD_SO	SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVAR );
+		virtual STD_SO	SO_fenvironment2( STRINGVAL name, FLOATVAL channel, VECTORVAL R, DEFPARAMVAR );
+		virtual STD_SO	SO_fenvironment3( STRINGVAL name, FLOATVAL channel, VECTORVAL R1, VECTORVAL R2, VECTORVAL R3, VECTORVAL R4, DEFPARAMVAR );
+		virtual STD_SO	SO_cenvironment2( STRINGVAL name, FLOATVAL channel, VECTORVAL R, DEFPARAMVAR );
+		virtual STD_SO	SO_cenvironment3( STRINGVAL name, FLOATVAL channel, VECTORVAL R1, VECTORVAL R2, VECTORVAL R3, VECTORVAL R4, DEFPARAMVAR );
+		virtual STD_SO	SO_bump1( STRINGVAL name, FLOATVAL channel, DEFPARAMVAR );
+		virtual STD_SO	SO_bump2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVAR );
+		virtual STD_SO	SO_bump3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVAR );
+		virtual STD_SO	SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVAL P, DEFPARAMVAR );
+		virtual STD_SO	SO_shadow1( STRINGVAL name, FLOATVAL channel, POINTVAL P1, POINTVAL P2, POINTVAL P3, POINTVAL P4, DEFPARAMVAR );
+		virtual STD_SO	SO_illuminance( POINTVAL P, FLOATVAL nsamples, DEFVOIDPARAM );
+		virtual STD_SO	SO_illuminance( POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, FLOATVAL nsamples, DEFVOIDPARAM );
+		virtual STD_SO	SO_illuminate( POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAM );
+		virtual STD_SO	SO_illuminate( POINTVAL P, DEFVOIDPARAM );
+		virtual STD_SO	SO_solar( VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAM );
+		virtual STD_SO	SO_solar( DEFVOIDPARAM );
+		virtual STD_SO	SO_printf( STRINGVAL str, DEFVOIDPARAMVAR );
+		virtual STD_SO	SO_format( STRINGVAL str, DEFPARAMVAR );
+		virtual STD_SO	SO_concat( STRINGVAL stra, STRINGVAL strb, DEFPARAMVAR );
+		virtual STD_SO	SO_atmosphere( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		virtual STD_SO	SO_displacement( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		virtual STD_SO	SO_lightsource( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		virtual STD_SO	SO_surface( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		virtual STD_SO	SO_attribute( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		virtual STD_SO	SO_option( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		virtual STD_SO	SO_rendererinfo( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		virtual STD_SO	SO_incident( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		virtual STD_SO	SO_opposite( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		virtual STD_SO	SO_fcellnoise1( FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_fcellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_fcellnoise3( POINTVAL p, DEFPARAM );
+		virtual STD_SO	SO_fcellnoise4( POINTVAL p, FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_ccellnoise1( FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_ccellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_ccellnoise3( POINTVAL p, DEFPARAM );
+		virtual STD_SO	SO_ccellnoise4( POINTVAL p, FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_pcellnoise1( FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_pcellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_pcellnoise3( POINTVAL p, DEFPARAM );
+		virtual STD_SO	SO_pcellnoise4( POINTVAL p, FLOATVAL v, DEFPARAM );
+		virtual STD_SO	SO_fpnoise1( FLOATVAL v, FLOATVAL period, DEFPARAM );
+		virtual STD_SO	SO_fpnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperiod, FLOATVAL vperiod, DEFPARAM );
+		virtual STD_SO	SO_fpnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAM );
+		virtual STD_SO	SO_fpnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperiod, FLOATVAL tperiod, DEFPARAM );
+		virtual STD_SO	SO_cpnoise1( FLOATVAL v, FLOATVAL period, DEFPARAM );
+		virtual STD_SO	SO_cpnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperiod, FLOATVAL vperiod, DEFPARAM );
+		virtual STD_SO	SO_cpnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAM );
+		virtual STD_SO	SO_cpnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperiod, FLOATVAL tperiod, DEFPARAM );
+		virtual STD_SO	SO_ppnoise1( FLOATVAL v, FLOATVAL period, DEFPARAM );
+		virtual STD_SO	SO_ppnoise2( FLOATVAL u, FLOATVAL v, FLOATVAL uperiod, FLOATVAL vperiod, DEFPARAM );
+		virtual STD_SO	SO_ppnoise3( POINTVAL p, POINTVAL pperiod, DEFPARAM );
+		virtual STD_SO	SO_ppnoise4( POINTVAL p, FLOATVAL t, POINTVAL pperiod, FLOATVAL tperiod, DEFPARAM );
+		virtual STD_SO	SO_ctransform( STRINGVAL fromspace, STRINGVAL tospace, COLORVAL c, DEFPARAM );
+		virtual STD_SO	SO_ctransform( STRINGVAL tospace, COLORVAL c, DEFPARAM );
+		virtual STD_SO	SO_ptlined( POINTVAL P0, POINTVAL P1, POINTVAL Q, DEFPARAM );
+		virtual STD_SO	SO_inversesqrt( FLOATVAL x, DEFPARAM );
+		virtual STD_SO	SO_match( STRINGVAL a, STRINGVAL b, DEFPARAM );
+		virtual STD_SO	SO_rotate( VECTORVAL Q, FLOATVAL angle, POINTVAL P0, POINTVAL P1, DEFPARAM );
+		virtual STD_SO	SO_filterstep( FLOATVAL edge, FLOATVAL s1, DEFPARAMVAR );
+		virtual STD_SO	SO_filterstep2( FLOATVAL edge, FLOATVAL s1, FLOATVAL s2, DEFPARAMVAR );
+		virtual STD_SO	SO_specularbrdf( VECTORVAL L, NORMALVAL N, VECTORVAL V, FLOATVAL rough, DEFPARAM );
+		virtual STD_SO	SO_setmcomp( MATRIXVAL M, FLOATVAL row, FLOATVAL column, FLOATVAL val, DEFVOIDPARAM );
+		virtual STD_SO	SO_determinant( MATRIXVAL M, DEFPARAM );
+		virtual STD_SO	SO_mtranslate( MATRIXVAL M, VECTORVAL V, DEFPARAM );
+		virtual STD_SO	SO_mrotate( MATRIXVAL M, FLOATVAL angle, VECTORVAL axis, DEFPARAM );
+		virtual STD_SO	SO_mscale( MATRIXVAL M, POINTVAL s, DEFPARAM );
+		virtual STD_SO	SO_fsplinea( FLOATVAL value, FLOATARRAYVAL a, DEFPARAM );
+		virtual STD_SO	SO_csplinea( FLOATVAL value, COLORARRAYVAL a, DEFPARAM );
+		virtual STD_SO	SO_psplinea( FLOATVAL value, POINTARRAYVAL a, DEFPARAM );
+		virtual STD_SO	SO_sfsplinea( STRINGVAL basis, FLOATVAL value, FLOATARRAYVAL a, DEFPARAM );
+		virtual STD_SO	SO_scsplinea( STRINGVAL basis, FLOATVAL value, COLORARRAYVAL a, DEFPARAM );
+		virtual STD_SO	SO_spsplinea( STRINGVAL basis, FLOATVAL value, POINTARRAYVAL a, DEFPARAM );
+		virtual STD_SO	SO_shadername( DEFPARAM );
+		virtual STD_SO	SO_shadername2( STRINGVAL shader, DEFPARAM );
+		virtual STD_SO	SO_textureinfo( STRINGVAL shader, STRINGVAL dataname, IqShaderData* pV, DEFPARAM );
 };
 
 
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to u.
  */
 template <class R>
-R SO_DuType( IqShaderData* Var, TqInt i, CqShaderExecEnv& s )
+R SO_DuType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps )
 {
 	R Ret;
-	TqInt uRes = s.uGridRes();
+	TqInt uRes = ps->uGridRes();
 	TqInt GridX = i % ( uRes + 1 );
 	
 	TqFloat fdu;
-	s.du()->GetFloat( fdu );
+	ps->du()->GetFloat( fdu );
 	
 	R v1,v2;
 	if ( GridX < uRes )
@@ -757,15 +584,15 @@ R SO_DuType( IqShaderData* Var, TqInt i, CqShaderExecEnv& s )
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to v.
  */
 template <class R>
-R SO_DvType( IqShaderData* Var, TqInt i, CqShaderExecEnv& s )
+R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps )
 {
 	R Ret;
-	TqInt uRes = s.uGridRes();
-	TqInt vRes = s.vGridRes();
+	TqInt uRes = ps->uGridRes();
+	TqInt vRes = ps->vGridRes();
 	TqInt GridY = ( i / ( uRes + 1 ) );
 
 	TqFloat fdv;
-	s.dv()->GetFloat( fdv );
+	ps->dv()->GetFloat( fdv );
 
 	R v1,v2;
 	if ( GridY < vRes )
@@ -787,13 +614,13 @@ R SO_DvType( IqShaderData* Var, TqInt i, CqShaderExecEnv& s )
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to a second stack entry.
  */
 template <class R>
-R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, CqShaderExecEnv& s )
+R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* ps )
 {
 	assert( NULL != Var );
 	
 	R Retu, Retv;
-	TqInt uRes = s.uGridRes();
-	TqInt vRes = s.vGridRes();
+	TqInt uRes = ps->uGridRes();
+	TqInt vRes = ps->vGridRes();
 	TqInt GridX = i % ( uRes + 1 );
 	TqInt GridY = ( i / ( uRes + 1 ) );
 

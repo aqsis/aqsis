@@ -72,7 +72,7 @@ CqLightsource::~CqLightsource()
 void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
 {
 	if ( m_pShader )
-		m_pShader->Initialise( uGridRes, vGridRes, *this );
+		m_pShader->Initialise( uGridRes, vGridRes, this );
 
 	TqInt Uses = gDefLightUses;
 	if ( m_pShader ) Uses |= m_pShader->Uses();
@@ -195,7 +195,7 @@ void CqShaderLightsourceAmbient::SetValue( const char* name, TqPchar val )
 }
 
 
-void CqShaderLightsourceAmbient::Evaluate( CqShaderExecEnv& Env )
+void CqShaderLightsourceAmbient::Evaluate( IqShaderExecEnv* pEnv )
 {
 	TqFloat fTemp = 1.0f;
 	CqColor cTemp = CqColor(1,1,1);
@@ -206,7 +206,7 @@ void CqShaderLightsourceAmbient::Evaluate( CqShaderExecEnv& Env )
 	if(m_intensity)
 		m_intensity->GetFloat( fTemp, 0 );
 
-	Env.Cl()->SetColor( cTemp * fTemp );
+	pEnv->Cl()->SetColor( cTemp * fTemp );
 }
 
 

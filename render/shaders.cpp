@@ -51,7 +51,7 @@ void CqShaderSurfaceConstant::SetValue( const char* name, TqPchar val )
 /** Evaluate the shader function based on the values in the variables.
  */
 
-void CqShaderSurfaceConstant::Evaluate( CqShaderExecEnv& Env )
+void CqShaderSurfaceConstant::Evaluate( IqShaderExecEnv* pEnv )
 {
 	CqColor colTemp;
 	
@@ -59,12 +59,12 @@ void CqShaderSurfaceConstant::Evaluate( CqShaderExecEnv& Env )
 	do
 	{
 		CqColor colOs, colCs;
-		Env.Os()->GetColor( colOs, i );
-		Env.Cs()->GetColor( colCs, i );
-		Env.Ci()->SetColor( colOs * colCs, i );
-		Env.Oi()->SetColor( colOs, i );
+		pEnv->Os()->GetColor( colOs, i );
+		pEnv->Cs()->GetColor( colCs, i );
+		pEnv->Ci()->SetColor( colOs * colCs, i );
+		pEnv->Oi()->SetColor( colOs, i );
 	}
-	while ( ++i < Env.GridSize() );
+	while ( ++i < pEnv->GridSize() );
 }
 
 

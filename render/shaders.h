@@ -119,11 +119,11 @@ class CqShader : public IqShader
 		{
 			return ( TqFalse );
 		}
-		virtual	void	Evaluate( CqShaderExecEnv& Env )
+		virtual	void	Evaluate( IqShaderExecEnv* pEnv )
 		{}
 		virtual	void	PrepareDefArgs()
 		{}
-		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, CqShaderExecEnv& Env )
+		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShaderExecEnv* pEnv )
 		{}
 		virtual	TqBool	fAmbient() const
 		{
@@ -170,7 +170,7 @@ class CqShaderSurfaceConstant : public CqShader
 		virtual	~CqShaderSurfaceConstant()
 		{}
 
-		virtual	void	Evaluate( CqShaderExecEnv& Env );
+		virtual	void	Evaluate( IqShaderExecEnv* pEnv );
 		virtual	void	SetValue( const char* name, TqPchar val );
 		virtual IqShader* Clone() const
 		{

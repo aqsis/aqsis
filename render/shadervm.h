@@ -420,15 +420,15 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		}
 		virtual	void	SetValue( const char* name, TqPchar val );
 		virtual	TqBool	GetValue( const char* name, IqShaderData* res );
-		virtual	void	Evaluate( CqShaderExecEnv& Env )
+		virtual	void	Evaluate( IqShaderExecEnv* pEnv )
 		{
-			Execute( Env );
+			Execute( pEnv );
 		}
 		virtual	_qShareM	void	PrepareDefArgs()
 		{
 			ExecuteInit();
 		}
-		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, CqShaderExecEnv& Env );
+		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShaderExecEnv* pEnv );
 		virtual	_qShareM TqBool	fAmbient() const
 		{
 			return ( TqFalse );
@@ -451,7 +451,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 
 
 		void	LoadProgram( std::istream* pFile );
-		void	Execute( CqShaderExecEnv& Env );
+		void	Execute( IqShaderExecEnv* pEnv );
 		void	ExecuteInit();
 
 
@@ -485,7 +485,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 
         EqShaderType 		m_Type;							///< Shader type for libslxargs
 		TqUint				m_LocalIndex;                   ///<  Local Index to speed up
-		CqShaderExecEnv*	m_pEnv;							///< Pointer to the current excution environment.
+		IqShaderExecEnv*	m_pEnv;							///< Pointer to the current excution environment.
 		std::vector<IqShaderData*>		m_LocalVars;		///< Array of local variables.
 		std::vector<UsProgramElement>	m_ProgramInit;		///< Bytecodes of the intialisation program.
 		std::vector<UsProgramElement>	m_Program;			///< Bytecodes of the main program.

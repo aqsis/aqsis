@@ -5,7 +5,7 @@
  *	@brief	Decares the interface to generic shader variables.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/04/23 20:55:33 $
+ *	Last change date:	$Date: 2002/04/24 16:08:57 $
  */
 //------------------------------------------------------------------------------
 
@@ -22,7 +22,6 @@
 
 START_NAMESPACE( Aqsis )
 
-class CqShaderExecEnv;
 
 //----------------------------------------------------------------------
 /** \enum EqVariableType

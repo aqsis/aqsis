@@ -281,6 +281,10 @@ SOURCE=.\ishaderdata.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ishaderexecenv.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\lights.h
 # End Source File
 # Begin Source File
