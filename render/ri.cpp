@@ -2924,7 +2924,6 @@ RtVoid	RiGeometryV(RtToken type, PARAMETERLIST)
 //
 RtVoid	RiSolidBegin(RtToken type)
 {
-	CqBasicError(0,Severity_Normal,"RiSolidBegin, CSG not supported");
 	QGetRenderContext()->CreateSolidContext(CqString(type));
 
 	return;
@@ -3104,6 +3103,9 @@ RtVoid	RiMakeTextureV(const char *pic, const char *tex, RtToken swrap, RtToken t
 		TIFFSetField(ptex,TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 		TIFFSetField(ptex,TIFFTAG_PIXAR_TEXTUREFORMAT, SATMAP_HEADER);
 		TIFFSetField(ptex,TIFFTAG_PIXAR_WRAPMODES,modes);
+		TIFFSetField(ptex,TIFFTAG_SAMPLESPERPIXEL, Source.SamplesPerPixel());
+		TIFFSetField(ptex,TIFFTAG_BITSPERSAMPLE, 8);
+		TIFFSetField(ptex,TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS ); /* COMPRESSION_DEFLATE */
 		int log2 = MIN(Source.XRes(), Source.YRes());
 		log2 = (int)(log(log2)/log(2.0));
 
@@ -3112,7 +3114,7 @@ RtVoid	RiMakeTextureV(const char *pic, const char *tex, RtToken swrap, RtToken t
 			// Write the floating point image to the directory.
 			CqTextureMapBuffer* pBuffer=Source.GetBuffer(0,0, i);
 			if (!pBuffer) break;
-			WriteTileImage(ptex,pBuffer->pBufferData(),Source.XRes()/(1<<i),Source.YRes()/(1<<i),64,64,Source.SamplesPerPixel());
+			Source.WriteTileImage(ptex,pBuffer->pBufferData(),Source.XRes()/(1<<i),Source.YRes()/(1<<i),64,64,Source.SamplesPerPixel());
 		}
 		TIFFClose(ptex);
 	}
@@ -3248,7 +3250,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV(const char *px, const char *nx, const char *py
 			TIFFCreateDirectory(ptex);
 			TIFFSetField(ptex,TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 			TIFFSetField(ptex,TIFFTAG_PIXAR_TEXTUREFORMAT, CUBEENVMAP_HEADER);
-			WriteTileImage(ptex,pBuffer->pBufferData(),Images[ii]->XRes(),Images[ii]->YRes(),64,64,Images[ii]->SamplesPerPixel());
+			tpx.WriteTileImage(ptex,pBuffer->pBufferData(),Images[ii]->XRes(),Images[ii]->YRes(),64,64,Images[ii]->SamplesPerPixel());
 		}
 		TIFFClose(ptex);
 	}

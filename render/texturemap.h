@@ -57,8 +57,6 @@ START_NAMESPACE(Aqsis)
 #define	SHADOWMAP_HEADER	"Shadow"
 #define	SATMAP_HEADER		"Aqsis SAT Map"
 
-void WriteImage(TIFF* ptex, float *raster, unsigned long width, unsigned long length, int samples);
-void WriteTileImage(TIFF* ptex, float *raster, unsigned long width, unsigned long length, unsigned long twidth, unsigned long tlength, int samples);
 
 //----------------------------------------------------------------------
 /** \enum EqMapType
@@ -114,6 +112,7 @@ class _qShareC CqTextureMapBuffer
 								m_Samples(0),
 								m_Directory(0)
 								{}
+	
 					/** Constructor taking buffer information.
 					 * \param xorigin Integer origin within the texture map.
 					 * \param yorigin Integer origin within the texture map.
@@ -131,7 +130,7 @@ class _qShareC CqTextureMapBuffer
 								m_Samples(samples),
 								m_Directory(directory)
 					{
-						m_pBufferData=AllocSegment(width,height,samples);
+						m_pBufferData=AllocSegmentB(width,height,samples);
 					}
 	_qShareM		~CqTextureMapBuffer()
 					{
@@ -155,13 +154,13 @@ class _qShareC CqTextureMapBuffer
 						m_Height=height; 
 						m_Samples=samples;
 						m_Directory=directory;
-						m_pBufferData=AllocSegment(width,height,samples);
+						m_pBufferData=AllocSegmentB(width,height,samples);
 					}
 					/** Release this reference to the cache.
 					 */
 	_qShareM		void	Release()
 					{
-						if(m_pBufferData!=0)	FreeSegment(m_pBufferData,m_Width,m_Height,m_Samples);
+						if(m_pBufferData!=0)	FreeSegment((void*)m_pBufferData,m_Width,m_Height,m_Samples);
 						m_pBufferData=0;
 					}
 
@@ -180,7 +179,7 @@ class _qShareC CqTextureMapBuffer
 
 					/** Get a pointer to the data for this buffer segment.
 					 */
-	_qShareM		float*	pBufferData()			{return(m_pBufferData);}
+	_qShareM		unsigned char*	pBufferData()			{return(m_pBufferData);}
 					/** Get the origin of this buffer segment.
 					 */
 	_qShareM		unsigned long sOrigin() const	{return(m_sOrigin);}
@@ -197,13 +196,15 @@ class _qShareC CqTextureMapBuffer
 					 */
 	_qShareM		int			  Directory() const	{return(m_Directory);}
 
+    _qShareM        float*         AllocSegment(unsigned long width, unsigned long height, int samples);
+    _qShareM        unsigned char* AllocSegmentB(unsigned long width, unsigned long height, int samples);
+    _qShareM        void	FreeSegment(void* pBufferData, unsigned long width, unsigned long height, int samples);	
 
 	
-	_qShareM	static 	float* AllocSegment(unsigned long width, unsigned long height, int samples);
-	_qShareM	static 	void	FreeSegment(float* pBufferData, unsigned long width, unsigned long height, int samples);
+	
 
 	private:
-			float*			m_pBufferData;	///< Pointer to the image data.
+			unsigned char*	m_pBufferData;	///< Pointer to the image data.
 			unsigned long	m_sOrigin;		///< Horizontal segment origin.
 			unsigned long	m_tOrigin;		///< Vertical segment origin.
 			unsigned long	m_Width;		///< Width of segment.
@@ -306,10 +307,17 @@ class _qShareC CqTextureMap
 																	delete(*i);
 
 																m_TextureMap_Cache.clear();
+																
 															}
+	_qShareM    static void WriteImage(TIFF* ptex, float *raster, unsigned long width, unsigned long length, int samples);
+    _qShareM    static void WriteTileImage(TIFF* ptex, float *raster, unsigned long width, unsigned long length, unsigned long twidth, unsigned long tlength, int samples);
+    _qShareM    static void WriteImage(TIFF* ptex, unsigned char *raster, unsigned long width, unsigned long length, int samples);
+    _qShareM    static void WriteTileImage(TIFF* ptex, unsigned char *raster, unsigned long width, unsigned long length, unsigned long twidth, unsigned long tlength, int samples);
+
 
 	protected:
 static	std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loaded textures.
+
 
 				TqUint	m_XRes;					///< Horizontal resolution.
 				TqUint	m_YRes;					///< Vertical resolution.
