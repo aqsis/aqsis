@@ -245,6 +245,7 @@ void CqLath::Qve(std::vector<CqLath*>& Result)
 		// case as a terminator.
 		while(NULL != pNext)
 		{
+			assert( pNext != this );
 			Result.push_back(pNext);
 			pLast = pNext;
 			pNext = pNext->ccv();

@@ -83,6 +83,7 @@ public:
 					TypeA R = TypeA(0.0f);
 					TqInt n;
 					
+#if 1
 					if(pParam->Class() == class_vertex)
 					{
 						// Determine if we have a boundary vertex.
@@ -183,6 +184,7 @@ public:
 						}
 					}
 					else
+#endif
 					{
 						pParam->pValue( iIndex )[0] = pParam->pValue( pVertex->VertexIndex() )[0];
 					}
@@ -195,6 +197,7 @@ public:
 					TypeA B = TypeA(0.0f);
 					TypeA C = TypeA(0.0f);
 
+#if 1
 					if(pParam->Class() == class_vertex && ( NULL != pEdge->ec() ) )
 					{
 						// Edge point is the average of the centrepoint of the original edge and the
@@ -221,6 +224,7 @@ public:
 						A = (A+C)/2.0f;
 					}
 					else
+#endif
 					{
 						A = pParam->pValue( pEdge->VertexIndex() )[0];
 						B = pParam->pValue( pEdge->ccf()->VertexIndex() )[0];

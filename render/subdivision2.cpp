@@ -558,12 +558,12 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 	{
 		TqInt iVert;
 		// Create new vertices for the edge mid points.
-		if( NULL == aQfv[i]->pMidVertex() )
+		if( NULL != aQfv[i]->ec() && NULL != aQfv[i]->ec()->pMidVertex() )
+			// There is already a next level vertex for this, so just setup a lath to it.
+			iVert = aQfv[i]->ec()->pMidVertex()->VertexIndex();
+		else
 			// Create new vertex for the edge midpoint.
 			iVert = AddEdgeVertex(aQfv[i]);
-		else
-			// There is already a next level vertex for this, so just setup a lath to it.
-			iVert = aQfv[i]->pMidVertex()->VertexIndex();
 
 		// Store the index, for later lath creation
 		aVertices[i+n] = iVert;
@@ -642,8 +642,9 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 			pNextV = aQfv[i]->ccv();
 			// We know we are going to hit a boundary in this direction as well so we can just look for that
 			// case as a terminator.
-			while(NULL != pNextV)
+			while( pNextV )
 			{
+				assert( pNextV != aQfv[i] );
 				pNextV->SetpChildVertex(pLathA);
 				pNextV = pNextV->ccv();
 			}
@@ -672,6 +673,7 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 		apFaceLaths[((i+1)%n)].pD->SetpClockwiseVertex( apFaceLaths[i].pB );
 		// Connect all laths around the new face point.
 		apFaceLaths[i].pC->SetpClockwiseVertex( apFaceLaths[ ((i+1)%n) ].pC );
+
 		// Connect the new corner vertices, this is only possible if neighbouring facets have previously been
 		// subdivided.
 		std::vector<CqLath*>::iterator iVertLath;
@@ -679,11 +681,16 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 		{
 			if( (*iVertLath)->cf()->VertexIndex() == apFaceLaths[i].pD->VertexIndex() )
 				apFaceLaths[i].pA->SetpClockwiseVertex( (*iVertLath ) );
-			else if( (*iVertLath)->ccf()->VertexIndex() == apFaceLaths[i].pB->VertexIndex() )
+			if( (*iVertLath)->ccf()->VertexIndex() == apFaceLaths[i].pB->VertexIndex() )
 				(*iVertLath)->SetpClockwiseVertex( apFaceLaths[i].pA );
 		}
+	}
+
+	for( i = 0; i < n; i++ )
+	{
 		// Connect the new edge midpoint vertices to any neighbours, this is only possible if neighbouring facets have previously been
 		// subdivided.
+		std::vector<CqLath*>::iterator iVertLath;
 		for( iVertLath = m_aapVertices[apFaceLaths[i].pB->VertexIndex()].begin(); iVertLath != m_aapVertices[apFaceLaths[i].pB->VertexIndex()].end(); iVertLath++ )
 		{
 			if( (*iVertLath)->cf()->VertexIndex() == apFaceLaths[i].pA->VertexIndex() )
@@ -732,10 +739,8 @@ void CqSubdivision2::OutputMesh(const char* fname, std::vector<CqLath*>* paFaces
 			(*paFaces)[i]->Qfv(aQfv);
 			TqInt j;
 			file << "f ";
-			//for( j = 0; j < aQfv.size(); j++ )
-				file << aQfv[0]->VertexIndex()+1 << " ";
-				file << aQfv[0]->cf()->VertexIndex()+1 << " ";
-				file << aQfv[0]->ccf()->VertexIndex()+1 << " ";
+			for( j = 0; j < aQfv.size(); j++ )
+				file << aQfv[j]->VertexIndex()+1 << " ";
 			file << std::endl;
 		}
 	}
@@ -1038,25 +1043,18 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 	// If the patch is a quad with each corner having valence 4, and no special features, 
 	// we can just create a B-Spline patch.
 	TqBool fCanUsePatch = TqFalse;
-	std::vector<CqLath*> aQfv, aQvv;
-	pFace()->Qfv(aQfv);
-	if( aQfv.size() == 4 )
+	std::vector<CqLath*> aQff, aQfv;
+	pFace()->Qff(aQff);
+	if( aQff.size() == 9 )
 	{
-		aQfv[0]->Qvv( aQvv );
-		if( aQvv.size() == 4 )
+		std::vector<CqLath*>::iterator iFF;
+		for( iFF = aQff.begin(); iFF!=aQff.end(); iFF++ )
 		{
-			aQfv[1]->Qvv( aQvv );
-			if( aQvv.size() == 4 )
-			{
-				aQfv[2]->Qvv( aQvv );
-				if( aQvv.size() == 4 )
-				{
-					aQfv[3]->Qvv( aQvv );
-					if( aQvv.size() == 4 )
-						fCanUsePatch = TqTrue;
-				}
-			}
+			(*iFF)->Qfv( aQfv );
+			if( aQfv.size() != 4 )
+				break;
 		}
+		fCanUsePatch = TqTrue;
 	}
 	
 	if( fCanUsePatch )
