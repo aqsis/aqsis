@@ -2924,7 +2924,8 @@ RtVoid	RiGeometryV(RtToken type, PARAMETERLIST)
 //
 RtVoid	RiSolidBegin(RtToken type)
 {
-	QGetRenderContext()->CreateSolidContext(CqString(type));
+	CqString strType(type);
+	QGetRenderContext()->CreateSolidContext(strType);
 
 	return;
 }
