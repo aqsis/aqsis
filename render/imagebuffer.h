@@ -219,7 +219,7 @@ class _qShareC	CqImagePixel
 		_qShareM	CqVector2D&	SamplePoint( TqInt m, TqInt n )
 		{
 			assert( m < m_XSamples );
-			assert( n < m_XSamples );
+			assert( n < m_YSamples );
 			return ( m_avecSamples[ n * m_XSamples + m ] );
 		}
 		/** Get the filter weight index of the appropriate subcell.
@@ -232,7 +232,7 @@ class _qShareC	CqImagePixel
 		_qShareM	TqInt	SubCellIndex( TqInt m, TqInt n )
 		{
 			assert( m < m_XSamples );
-			assert( n < m_XSamples );
+			assert( n < m_YSamples );
 			return ( m_aSubCellIndex[ n * m_XSamples + m ] );
 		}
 		/** Get the frame time associated with the specified sample.
@@ -243,7 +243,7 @@ class _qShareC	CqImagePixel
 		_qShareM	TqFloat	SampleTime( TqInt m, TqInt n )
 		{
 			assert( m < m_XSamples );
-			assert( n < m_XSamples );
+			assert( n < m_YSamples );
 			return ( m_aTimes[ n * m_XSamples + m ] );
 		}
 		/** Get the detail level associated with the specified sample.
@@ -254,7 +254,7 @@ class _qShareC	CqImagePixel
 		_qShareM	TqFloat	SampleLevelOfDetail( TqInt m, TqInt n )
 		{
 			assert( m < m_XSamples );
-			assert( n < m_XSamples );
+			assert( n < m_YSamples );
 			return ( m_aDetailLevels[ n * m_XSamples + m ] );
 		}
 
