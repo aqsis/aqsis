@@ -29,6 +29,7 @@
 #include "output.h"
 #include "error.h"
 #include "inlineparse.h"
+#include "context.h"
 
 USING_NAMESPACE( libri2rib );
 
@@ -189,7 +190,9 @@ RtToken CqOutput::RiDeclare( const char *name, const char *declaration )
 
 RtVoid CqOutput::RiBegin( RtToken name )
 {
-	( *out ).openFile( name );
+	// If NULL, try to adopt the PIPE setup using the RiOption("rib", "pipe") option.
+	if( NULL != name )
+		( *out ).openFile( name );
 
 	printHeader();
 }

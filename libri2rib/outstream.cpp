@@ -101,3 +101,43 @@ void CqStreamGzip::closeFile()
 		gzclose( gzf );
 }
 
+
+CqStream & CqStreamFDesc::operator<< ( int i )
+{
+	fprintf( fd, "%i", i );
+	return *this;
+}
+
+CqStream & CqStreamFDesc::operator<< ( float f )
+{
+	fprintf( fd, "%f", f );
+	return *this;
+}
+
+CqStream & CqStreamFDesc::operator<< ( std::string s )
+{
+	fputs( s.c_str(), fd );
+	return *this;
+}
+
+CqStream & CqStreamFDesc::operator<< ( char c )
+{
+	fputc( c, fd );
+	return *this;
+}
+
+void CqStreamFDesc::openFile( const char *name )
+{
+	throw CqError( RIE_NOFILE, RIE_ERROR, "Trying to open file ", name, " using PIPE mode.", TqFalse );
+}
+
+void CqStreamFDesc::closeFile()
+{
+	if ( fd )
+		fclose( fd );
+}
+
+void CqStreamFDesc::setFile(FILE* desc)
+{
+	fd = desc;
+}

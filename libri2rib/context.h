@@ -73,6 +73,8 @@ class CqContext
 		void removeCurrent();
 
 		void parseOption( const char *name, RtInt n, RtToken tokens[], RtPointer params[] );
+
+		static CqStreamFDesc* m_PipeHandle;
 };
 
 END_NAMESPACE( libri2rib )

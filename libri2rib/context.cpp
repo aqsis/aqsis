@@ -30,6 +30,9 @@
 USING_NAMESPACE( libri2rib )
 
 
+CqStreamFDesc* CqContext::m_PipeHandle = 0;
+
+
 CqContext::CqContext() :
 		m_OutputType( SqOptions::OutputType_Ascii ),
 		m_Compression( SqOptions::Compression_None ),
@@ -44,14 +47,19 @@ void CqContext::addContext()
 {
 	SqPair pair;
 
-	switch ( m_Compression )
+	if( NULL != m_PipeHandle )
+		pair.stream = m_PipeHandle;
+	else
 	{
-			case SqOptions::Compression_None:
-			pair.stream = new CqStreamStd ();
-			break;
-			case SqOptions::Compression_Gzip:
-			pair.stream = new CqStreamGzip ();
-			break;
+		switch ( m_Compression )
+		{
+				case SqOptions::Compression_None:
+				pair.stream = new CqStreamStd ();
+				break;
+				case SqOptions::Compression_Gzip:
+				pair.stream = new CqStreamGzip ();
+				break;
+		}
 	}
 
 	switch ( m_OutputType )
@@ -167,6 +175,14 @@ void CqContext::parseOutputType( RtInt n, RtToken tokens[], RtPointer params[] )
 					               "\"", TqFalse );
 				}
 
+			}
+			else if ( strcmp( tokens[ i ], "Pipe" ) == 0 )
+			{
+				FILE* fp;
+				int fd = ((int*)params[ i ])[0];
+				fp = fdopen(fd, "wb");
+				m_PipeHandle = new CqStreamFDesc();
+				m_PipeHandle->setFile( fp );
 			}
 			else
 			{

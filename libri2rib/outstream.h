@@ -103,5 +103,28 @@ class CqStreamGzip : public CqStream
 		void closeFile();
 };
 
+
+class CqStreamFDesc : public CqStream
+{
+	private:
+		FILE* fd;
+	public:
+		CqStream & operator<<( int i );
+		CqStream & operator<<( float f );
+		CqStream & operator<<( std::string s );
+		CqStream & operator<<( char c );
+
+		CqStreamFDesc()
+		{}
+		~CqStreamFDesc()
+		{}
+
+		void openFile( const char * );
+		void closeFile();
+
+		void setFile( FILE* fd );
+};
+
+
 END_NAMESPACE( libri2rib )
 #endif
