@@ -35,6 +35,7 @@
 //#include	"messages.h"
 #include	"imagebuffer.h"
 #include	<iostream>
+#include	<iomanip>
 
 START_NAMESPACE( Aqsis )
 
@@ -288,20 +289,107 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "GPrims: \t" << m_cGPrims << std::endl;
 		MSG << "Total GPrims:\t" << m_cTotalGPrims << " (" << m_cCulledGPrims << " culled)" << std::endl;
 
-		MSG << "Grids:    \t" << m_cGridsAllocated << " created" << std::endl;
+		/*
+			-------------------------------------------------------------------
+			Grid stats
+		*/
+
+		TqInt _grd_init =
+					STATS_INT_GETI( GRD_size_4 ) +
+					STATS_INT_GETI( GRD_size_8 ) +
+					STATS_INT_GETI( GRD_size_16 ) +
+					STATS_INT_GETI( GRD_size_32 ) +
+					STATS_INT_GETI( GRD_size_64 ) +
+					STATS_INT_GETI( GRD_size_128 ) +
+					STATS_INT_GETI( GRD_size_256 ) +
+					STATS_INT_GETI( GRD_size_g256 );
+
+		TqInt _grd_shade =
+					STATS_INT_GETI( GRD_shd_size_4 ) +
+					STATS_INT_GETI( GRD_shd_size_8 ) +
+					STATS_INT_GETI( GRD_shd_size_16 ) +
+					STATS_INT_GETI( GRD_shd_size_32 ) +
+					STATS_INT_GETI( GRD_shd_size_64 ) +
+					STATS_INT_GETI( GRD_shd_size_128 ) +
+					STATS_INT_GETI( GRD_shd_size_256 ) +
+					STATS_INT_GETI( GRD_shd_size_g256 );
+		
+		TqFloat	_grd_init_quote	=	100.0f *  _grd_init / STATS_INT_GETI( GRD_created );
+		TqFloat	_grd_shade_quote=	100.0f *  _grd_shade / STATS_INT_GETI( GRD_created );
+
+		TqFloat	_grd_4		=	100.0f * STATS_INT_GETI( GRD_size_4 ) / _grd_init;
+		TqFloat	_grd_8		=	100.0f * STATS_INT_GETI( GRD_size_8 ) / _grd_init;
+		TqFloat	_grd_16		=	100.0f * STATS_INT_GETI( GRD_size_16 ) / _grd_init;
+		TqFloat	_grd_32		=	100.0f * STATS_INT_GETI( GRD_size_32 ) / _grd_init;
+		TqFloat	_grd_64		=	100.0f * STATS_INT_GETI( GRD_size_64 ) / _grd_init;
+		TqFloat	_grd_128	=	100.0f * STATS_INT_GETI( GRD_size_128 ) / _grd_init;
+		TqFloat	_grd_256	=	100.0f * STATS_INT_GETI( GRD_size_256 ) / _grd_init;
+		TqFloat	_grd_g256	=	100.0f * STATS_INT_GETI( GRD_size_g256 ) / _grd_init;
+
+		TqFloat	_grd_shd_4		=	100.0f * STATS_INT_GETI( GRD_shd_size_4 ) / _grd_shade;
+		TqFloat	_grd_shd_8		=	100.0f * STATS_INT_GETI( GRD_shd_size_8 ) / _grd_shade;
+		TqFloat	_grd_shd_16		=	100.0f * STATS_INT_GETI( GRD_shd_size_16 ) / _grd_shade;
+		TqFloat	_grd_shd_32		=	100.0f * STATS_INT_GETI( GRD_shd_size_32 ) / _grd_shade;
+		TqFloat	_grd_shd_64		=	100.0f * STATS_INT_GETI( GRD_shd_size_64 ) / _grd_shade;
+		TqFloat	_grd_shd_128	=	100.0f * STATS_INT_GETI( GRD_shd_size_128 ) / _grd_shade;
+		TqFloat	_grd_shd_256	=	100.0f * STATS_INT_GETI( GRD_shd_size_256 ) / _grd_shade;
+		TqFloat	_grd_shd_g256	=	100.0f * STATS_INT_GETI( GRD_shd_size_g256 ) / _grd_shade;
+		
+		
+
+		MSG << "Grids:\n\t"
+			<< STATS_INT_GETI( GRD_created ) << " created, " << _grd_init << " initialized (" << _grd_init_quote << "%),\n\t" << _grd_shade << " shaded (" << _grd_shade_quote << "%), " << STATS_INT_GETI( GRD_culled ) << " culled\n\n"
+			<< "\tGrid count/size (diced grids):\n"
+			<< "\t+------+------+------+------+------+------+------+------+\n"
+			<< "\t|<=  4 |<=  8 |<= 16 |<= 32 |<= 64 |<=128 |<=256 | >256 |\n"
+			<< "\t+------+------+------+------+------+------+------+------+\n\t|"
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_4 ) << "|" 
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_8 ) << "|"
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_16 ) << "|"
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_32 ) << "|"
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_64 ) << "|"
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_128 ) << "|"
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_256 ) << "|"
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_g256 ) << "|\n"
+			<< "\t|" << std::setw(5) << std::setiosflags( std::ios::right ) << _grd_4 << "%|" 
+			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_8 << "%|"
+			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_16 << "%|"
+			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_32 << "%|"
+			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_64 << "%|"
+			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_128 << "%|"
+			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_256 << "%|"
+			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_g256 << "%|\n"
+			<< "\t+------+------+------+------+------+------+------+------+\n\n"
+			<< "\tGrid count/size (shaded grids):\n"
+			<< "\t+------+------+------+------+------+------+------+------+\n"
+			<< "\t|<=  4 |<=  8 |<= 16 |<= 32 |<= 64 |<=128 |<=256 | >256 |\n"
+			<< "\t+------+------+------+------+------+------+------+------+\n\t|"
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_4 ) << "|" 
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_8 ) << "|"
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_16 ) << "|"
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_32 ) << "|"
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_64 ) << "|"
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_128 ) << "|"
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_256 ) << "|"
+			<< std::setw(6) << std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_g256 ) << "|\n"
+			<< "\t|" << std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_4 << "%|" 
+			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_8 << "%|"
+			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_16 << "%|"
+			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_32 << "%|"
+			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_64 << "%|"
+			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_128 << "%|"
+			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_256 << "%|"
+			<< std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_g256 << "%|\n"
+			<< "\t+------+------+------+------+------+------+------+------+\n\n"
+			<< std::endl;
+
+		/*
+			Grid stats - End
+			-------------------------------------------------------------------
+		*/
 
 		/* MPGS */
-		/*   Micropolygons:
-				3237314 created
-				1299501 current (406094 KB), 1644602 peak (513938 KB)
-				1644720 allocated (513975 KB), 345219 free
-				91.8 KB overhead (0+0+0+11748 blocks)
-				2729915 aov store current (447876 KB), 3421917 peak (561408 KB)
-				Hit rate: 7.23% (233951 of 3237314) (2511975 not sampled)
-				Pushes: 497130 forward (15.36%), 1167240 down (36.06%)
-						7669 far down (0.24%) (current 2246 KB, peak 2246 KB)
-				Hittest success rate: 9.51% (1917871 of 20169901 samples)
-		*/
+
 
 		/*
 			-------------------------------------------------------------------
@@ -319,7 +407,6 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "Micropolygons:\n\t"
 			<< STATS_INT_GETI( MPG_allocated ) << " created (" << STATS_INT_GETI( MPG_culled ) << " culled)\n"
 			<< "\tPeak: " << STATS_INT_GETI( MPG_peak ) << "\n\t"
-			<< STATS_INT_GETI( MPG_allocated ) - STATS_INT_GETI( MPG_deallocated ) << " remaining\n"		
 			<< std::endl;
 		
 		/*
@@ -327,7 +414,7 @@ void CqStats::PrintStats( TqInt level ) const
 		*/
 		MSG << "\tPushes:\t" << _mpg_pushes_all << " MPGs pushed ("		<< _mpg_p_a			<< "%)\n\t\t" 
 							 << STATS_INT_GETI( MPG_pushed_forward )	<< " forward ("		<< _mpg_p_f	 << "%), "
-							 << STATS_INT_GETI( MPG_pushed_down )		<< " down, ("		<< _mpg_p_d	 << "%),\n\t\t"
+							 << STATS_INT_GETI( MPG_pushed_down )		<< " down ("		<< _mpg_p_d	 << "%),\n\t\t"
 							 << STATS_INT_GETI( MPG_pushed_far_down )	<< " far down ("	<< _mpg_p_fd << "%)\n"
 							 << std::endl;
 
@@ -345,6 +432,7 @@ void CqStats::PrintStats( TqInt level ) const
 
 		TqFloat _spl_b_h = 100.0f * STATS_INT_GETI( SPL_bound_hits ) / STATS_INT_GETI( SPL_count );
 		TqFloat _spl_h = 100.0f * STATS_INT_GETI( SPL_hits ) / STATS_INT_GETI( SPL_count );
+		TqFloat _spl_m = 100.0f - _spl_b_h - _spl_h;
 
 		TqInt _spl_px = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
 		TqInt _spl_py = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
@@ -353,7 +441,8 @@ void CqStats::PrintStats( TqInt level ) const
 							<< "\tSamples per Pixel: " << _spl_px * _spl_py << " (" << _spl_px << " " << _spl_py << ")\n\t"
 							<< STATS_INT_GETI( SPL_count ) << " samples" << std::endl;
 		MSG					<< "\tHits: " << STATS_INT_GETI( SPL_hits ) << " (" << _spl_h << "%), "
-							<< STATS_INT_GETI( SPL_bound_hits ) << " (" << _spl_b_h << "%)\n"
+							<< "bound hits: " << STATS_INT_GETI( SPL_bound_hits ) << " (" << _spl_b_h << "%),\n\tmisses: "
+							<< STATS_INT_GETI( SPL_count ) - STATS_INT_GETI( SPL_hits ) - STATS_INT_GETI( SPL_bound_hits ) << " (" << _spl_m << "%)\n"
 							<< std::endl;
 		
 		/*

@@ -214,7 +214,32 @@ class CqStats
 		enum {	_First_float,
 				_Last_float } EqFloatIndex;
 		enum {	_First_int,
-				
+			
+				// Grid stats
+
+					GRD_created,
+					GRD_culled,
+
+					//Unshaded grids
+						GRD_size_4,
+						GRD_size_8,
+						GRD_size_16,
+						GRD_size_32,
+						GRD_size_64,
+						GRD_size_128,
+						GRD_size_256,
+						GRD_size_g256,
+
+					//Shaded grids
+						GRD_shd_size_4,
+						GRD_shd_size_8,
+						GRD_shd_size_16,
+						GRD_shd_size_32,
+						GRD_shd_size_64,
+						GRD_shd_size_128,
+						GRD_shd_size_256,
+						GRD_shd_size_g256,
+
 				// MPG stats
 
 					//(De)Allocs

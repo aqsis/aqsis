@@ -103,7 +103,7 @@ CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) :
 		m_fTriangular( TqFalse )
 
 {
-	QGetRenderContext() ->Stats().IncGridsAllocated();
+	STATS_INC( GRD_created );
 	// Initialise the shader execution environment
 
 	m_pShaderExecEnv = new CqShaderExecEnv;
@@ -149,6 +149,67 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
 	// Initialise the local/public culled variable.
 	m_CulledPolys.SetSize( ( cu + 1 ) * ( cv + 1 ) );
 	m_CulledPolys.SetAll( TqFalse );
+
+	TqInt size = ( cu + 1 ) * ( cv + 1 );
+
+	if( size > 256 )
+	{
+		STATS_INC( GRD_size_g256 );
+		return;
+	}
+	else
+	{
+		if( size > 128 )
+		{
+			STATS_INC( GRD_size_256 );
+			return;
+		}
+		else
+		{
+			if( size > 64 )
+			{
+				STATS_INC( GRD_size_128 );
+				return;
+			}
+			else
+			{
+				if( size > 32 )
+				{
+					STATS_INC( GRD_size_64 );
+					return;
+				}
+				else
+				{
+					if( size > 16 )
+					{
+						STATS_INC( GRD_size_32 );
+						return;
+					}
+					else
+					{
+						if( size > 8 )
+						{
+							STATS_INC( GRD_size_16 );
+							return;
+						}
+						else
+						{
+							if( size > 4 )
+							{
+								STATS_INC( GRD_size_8 );
+							}
+							else
+							{
+								STATS_INC( GRD_size_4 );
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+
 }
 
 //---------------------------------------------------------------------
@@ -390,7 +451,7 @@ void CqMicroPolyGrid::Shade()
 		if ( cCulled == gs )
 		{
 			m_fCulled = TqTrue;
-			theStats.IncCulledGrids();
+			STATS_INC( GRD_culled );
 			DeleteVariables( TqTrue );
 			return ;
 		}
@@ -418,7 +479,7 @@ void CqMicroPolyGrid::Shade()
 		if ( cCulled == gs )
 		{
 			m_fCulled = TqTrue;
-			theStats.IncCulledGrids();
+			STATS_INC( GRD_culled );
 			DeleteVariables( TqTrue );
 			return ;
 		}
@@ -451,7 +512,7 @@ void CqMicroPolyGrid::Shade()
 		if ( cCulled == gs )
 		{
 			m_fCulled = TqTrue;
-			theStats.IncCulledGrids();
+			STATS_INC( GRD_culled );
 			DeleteVariables( TqTrue );
 			return ;
 		}
@@ -487,7 +548,7 @@ void CqMicroPolyGrid::Shade()
 		if ( cCulled == gs )
 		{
 			m_fCulled = TqTrue;
-			theStats.IncCulledGrids();
+			STATS_INC( GRD_culled );
 			DeleteVariables( TqTrue );
 			return ;
 		}
@@ -501,6 +562,65 @@ void CqMicroPolyGrid::Shade()
 	}
 
 	DeleteVariables( TqFalse );
+
+	TqInt	size = GridSize();
+
+	if( size > 256 )
+	{
+		STATS_INC( GRD_shd_size_g256 );
+		return;
+	}
+	else
+	{
+		if( size > 128 )
+		{
+			STATS_INC( GRD_shd_size_256 );
+			return;
+		}
+		else
+		{
+			if( size > 64 )
+			{
+				STATS_INC( GRD_shd_size_128 );
+				return;
+			}
+			else
+			{
+				if( size > 32 )
+				{
+					STATS_INC( GRD_shd_size_64 );
+					return;
+				}
+				else
+				{
+					if( size > 16 )
+					{
+						STATS_INC( GRD_shd_size_32 );
+						return;
+					}
+					else
+					{
+						if( size > 8 )
+						{
+							STATS_INC( GRD_shd_size_16 );
+							return;
+						}
+						else
+						{
+							if( size > 4 )
+							{
+								STATS_INC( GRD_shd_size_8 );
+							}
+							else
+							{
+								STATS_INC( GRD_shd_size_4 );
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 //---------------------------------------------------------------------
