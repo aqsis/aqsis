@@ -45,6 +45,7 @@
 #include	"trimcurve.h"
 #include	"genpoly.h"
 #include	"points.h"
+#include        "curves.h"
 #include	"rifile.h"
 #include	"librib2ri.h"
 #include        "plugins.h"
@@ -2420,28 +2421,76 @@ RtVoid RiCurves(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, ..
  **/
 RtVoid RiCurvesV(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, PARAMETERLIST)
 {
-
-	CqBasicError( 0, Severity_Normal, "RiCurvesV not supported" );
-
-	if ( strcmp( type, RI_BICUBIC ) == 0 ) {
-
-    } else if ( strcmp( type, RI_LINEAR ) == 0 ) {
-
-    } else {
-		CqBasicError( 0, Severity_Normal, "RiCurvesV (unknown type)" );
-    }
-
-	if ( strcmp( wrap, RI_PERIODIC ) == 0 ) {
-
-    } else if ( strcmp( wrap, RI_NONPERIODIC ) == 0 ) {
-
-    } else {
-		CqBasicError( 0, Severity_Normal, "RiCurvesV (unknown wrap mode)" );
-    }
-    if (ncurves <= 0)  {
-		CqBasicError( 0, Severity_Normal, "RiCurvesV (ncurves <= 0)" );
-    }
-	return;
+        // find out whether the curve is periodic or non-periodic
+        TqBool periodic;
+        if (strcmp(wrap, RI_PERIODIC) == 0) 
+        {
+                periodic = TqTrue;
+        } 
+        else if (strcmp(wrap, RI_NONPERIODIC) == 0) 
+        {
+                periodic = TqFalse;
+        } 
+        else 
+        {
+                // the wrap mode was neither "periodic" nor "nonperiodic"
+                CqBasicError(
+                        0, Severity_Normal, 
+                        "RiCurvesV (unknown wrap mode: must be \"periodic\" or \"nonperiodic\")"
+                );
+        }
+        
+        // handle creation of linear and cubic curve groups separately
+        if (strcmp(type, RI_BICUBIC) == 0) 
+        {
+                CqBasicError(
+                        0, Severity_Normal,
+                        "RiCurvesV: Cubic curves are not supported."
+                );
+                
+                // create a new group of linear curves
+                CqCubicCurvesGroup* pSurface =
+                        new CqCubicCurvesGroup(ncurves, nvertices, periodic);
+                pSurface->AddRef();
+                // set the default primitive variables
+                pSurface->SetDefaultPrimitiveVariables();
+                // read in the parameter list
+                if (ProcessPrimitiveVariables(pSurface, count, tokens, values))
+                {
+                        CreateGPrim(pSurface);
+                }
+                else
+                {
+                        pSurface->Release();
+                }
+        } 
+        else if (strcmp(type, RI_LINEAR) == 0) 
+        {
+                // create a new group of cubic curves
+                CqLinearCurvesGroup* pSurface =
+                        new CqLinearCurvesGroup(ncurves, nvertices, periodic);
+                
+                pSurface->AddRef();
+                // set the default primitive variables
+                pSurface->SetDefaultPrimitiveVariables();
+                // read in the parameter list
+                if (ProcessPrimitiveVariables(pSurface, count, tokens, values))
+                {
+                        CreateGPrim(pSurface);
+                }
+                else
+                {
+                        pSurface->Release();
+                }
+        } 
+        else 
+        {
+                // the type of curve was neither "linear" nor "cubic"
+                CqBasicError(
+                        0, Severity_Normal, 
+                        "RiCurvesV (unknown type: must be \"linear\" or \"cubic\")"
+                );
+        }
 }
 
 

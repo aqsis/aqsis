@@ -23,7 +23,6 @@
                 handling RenderMan Curves primitives.
         \author Jonathan Merritt (j.merritt@pgrad.unimelb.edu.au)
 */
-#if 0
 
 #include <stdio.h>
 #include <string.h>
@@ -130,7 +129,7 @@ CqBound CqCurve::Bound() const {
                 //  necessary
                 if (i < nWidthParams)
                 {
-                        TqFloat camSpaceWidth = GetWidthInSpace("camera", i);
+                        TqFloat camSpaceWidth = (*width())[i];
                         if (camSpaceWidth > maxCameraSpaceWidth)
                         {
                                 maxCameraSpaceWidth = camSpaceWidth;
@@ -210,89 +209,6 @@ TqFloat CqCurve::GetGridLength() const {
 
 
 /**
- * Returns the width of the curve at a specified index.  The index is an index
- * into the "width" parameter, if present.  If the "width" parameter was not
- * specified then the "constantwidth" parameter is used.  If "constantwidth"
- * was not specified either then the default width of 1.0 is used.  The width 
- * is returned as an object space dimension.
- *
- * @param index         Index at which to return the width.
- *
- * @return Width of the curve in object space.
- */
-TqFloat CqCurve::GetWidth(TqInt index) const {
-        
-        // first try returning the width
-        const CqParameterTypedVarying<TqFloat, type_float, TqFloat>* widthP =
-                width();
-        if (widthP != NULL) 
-        {
-                return (*widthP)[index];
-        }
-        
-        // next, try constantwidth
-        const CqParameterTypedConstant<TqFloat, type_float, TqFloat>* cwidthP =
-                constantwidth();
-        if (cwidthP != NULL)
-        {
-                printf ("Returning constantwidth of %f\n", *(*cwidthP).pValue());
-                return *(*cwidthP).pValue();
-        }
-        
-        // finally, just return the default
-        return static_cast<TqFloat>(1.0);
-        
-}
-
-
-
-/**
- * Returns the width of the curve in a certain space (NB: cannot be shader
- * space yet, since I don't look up shader shace!).
- *
- * See CqCurve::GetWidth().
- *
- * @param toSpace       Space in which to return the width (cannot be shader
- *                              space!).
- * @param index         Index at which to return the width.
- *
- * @return Width of the curve in toSpace space.
- */
-TqFloat CqCurve::GetWidthInSpace(
-        const char *toSpace, TqInt index
-) const {
-        
-        // fetch the current width in object space
-        TqFloat objSpaceWidth = GetWidth(index);
-        
-        // fetch the object->world transform for this CqCurve, and
-        //  then arrange to translate it to the position of the point in
-        //  question
-        CqMatrix objToWorld = pTransform()->matObjectToWorld();
-        objToWorld.Translate((*P())[index]);
-        
-        // To convert the widths to world space, what we do is create a
-        //  vector in object space that represents the width of the
-        //  curve, and transform this vector into the required space,
-        //  using the modified object to world transform
-        CqVector4D wv0 = CqVector4D(0,0,0,1);
-        CqVector4D wv1 = CqVector4D(objSpaceWidth,0,0,1);
-        CqMatrix objToCamera = QGetRenderContext()->matSpaceToSpace(
-                "object", toSpace, CqMatrix(), objToWorld
-        );
-        wv0 = objToCamera * wv0;
-        wv1 = objToCamera * wv1;
-        printf("wv0 = [ %f %f %f ]\n", wv0.x(), wv0.y(), wv0.z());
-        printf("wv1 = [ %f %f %f ]\n", wv1.x(), wv1.y(), wv1.z());
-        CqVector2D lengthVector = CqVector3D(wv0 - wv1);
-
-        return lengthVector.Magnitude();
-        
-}
-
-
-
-/**
  * Populates the "width" parameter if it is not already present (ie supplied
  * by the user).  The "width" is populated either by the value of
  * "constantwidth" or by the default object-space width 1.0.
@@ -303,7 +219,8 @@ void CqCurve::PopulateWidth() {
         if (width() != NULL)
                 return;
         
-        // otherwise, find the value to fill the width array with
+        // otherwise, find the value to fill the width array with; default
+        //  value is 1.0
         TqFloat widthvalue = 1.0;
         if (constantwidth() != NULL)
         {
@@ -368,13 +285,16 @@ void CqCurve::SetDefaultPrimitiveVariables(TqBool bUseDef_st)
 	}
         */
 
+        /*
 	if ( USES( bUses, EnvVars_v ) )
 	{
 		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
 		v()->SetSize( 2 );
 		v()->pValue() [ 0 ] = 0.0;
-                v()->pValue() [ 1 ] = 1.0;
+          
+                  v()->pValue() [ 1 ] = 1.0;
 	}
+        */
 }
 
 
@@ -566,29 +486,32 @@ TqInt CqLinearCurveSegment::Split(std::vector<CqBasicSurface*>& aSplits) {
         hull[1] = matCtoR * (*P())[1];
         CqVector2D lengthVector = hull[1] - hull[0];
         TqFloat lengthraster = lengthVector.Magnitude();
-        TqFloat width0 = GetWidthInSpace("raster", 0);
-        TqFloat width1 = GetWidthInSpace("raster", 1);
+
+        CqVector3D pp0 = hull[0] - matCtoR * ( (*P())[0] + CqVector4D((*width())[0],0,0,1) );
+        CqVector3D pp1 = hull[1] - matCtoR * ( (*P())[1] + CqVector4D((*width())[1],0,0,1) );
+        TqFloat width0 = pp0.Magnitude();
+        TqFloat width1 = pp1.Magnitude();
         TqFloat maxwidthraster = (width0 > width1) ? width0 : width1;
         
         // find the approximate "length" of a diced patch in raster space
         TqFloat gridlength = GetGridLength();
         
-        printf("(*P())[0]      = [ %f %f %f ]\n", (*P())[0].x(), (*P())[0].y(), (*P())[0].z());
-        printf("(*P())[1]      = [ %f %f %f ]\n", (*P())[1].x(), (*P())[1].y(), (*P())[1].z());
-        printf("(*v())[0]      = %f\n", (*v())[0]);
-        printf("(*v())[1]      = %f\n", (*v())[1]);
-        printf("maxwidthraster = %f\n", maxwidthraster);
-        printf("lengthraster   = %f\n", lengthraster);
-        printf("gridlength     = %f\n", gridlength);
+        //printf("(*P())[0]      = [ %f %f %f ]\n", (*P())[0].x(), (*P())[0].y(), (*P())[0].z());
+        //printf("(*P())[1]      = [ %f %f %f ]\n", (*P())[1].x(), (*P())[1].y(), (*P())[1].z());
+        //printf("(*v())[0]      = %f\n", (*v())[0]);
+        //printf("(*v())[1]      = %f\n", (*v())[1]);
+        //printf("maxwidthraster = %f\n", maxwidthraster);
+        //printf("lengthraster   = %f\n", lengthraster);
+        //printf("gridlength     = %f\n", gridlength);
         
         // decide whether to split into a more curve segments or a patch
         if (
-                (maxwidthraster > (0.75 * lengthraster)) ||
+                (maxwidthraster > (0.5 * lengthraster)) ||
                 (gridlength >= lengthraster) ||
                 (!m_fDiceable)
         ) 
         {
-                printf("Splitting into a patch.\n");
+                //printf("Splitting into a patch.\n");
                 
                 // split into a patch
                 return SplitToPatch(aSplits);
@@ -596,7 +519,7 @@ TqInt CqLinearCurveSegment::Split(std::vector<CqBasicSurface*>& aSplits) {
         else
         {
                 
-                printf("Splitting into two curves.\n");
+                //printf("Splitting into two curves.\n");
                 
                 // split into more curves
                 //  This bit right here looks a lot like CqSurface::Split().
@@ -713,12 +636,14 @@ TqInt CqLinearCurveSegment::SplitToPatch(
         CqVector3D direction = (*P())[1] - (*P())[0];
         CqVector3D normal0, normal1;
         TqBool userN = GetNormal(0, normal0);  GetNormal(1, normal1);
+        normal0.Unit();
+        normal1.Unit();
         CqVector3D widthOffset0 = normal0 % direction;
         CqVector3D widthOffset1 = normal1 % direction;
         widthOffset0 *= 
-                GetWidthInSpace("camera", 0) / widthOffset0.Magnitude() / 2.0;
+                (*width())[0] / widthOffset0.Magnitude() / 2.0;
         widthOffset1 *=
-                GetWidthInSpace("camera", 1) / widthOffset1.Magnitude() / 2.0;
+                (*width())[1] / widthOffset1.Magnitude() / 2.0;
                 
         // next, we create the bilinear patch
         CqSurfacePatchBilinear *pPatch = new CqSurfacePatchBilinear();
@@ -738,8 +663,37 @@ TqInt CqLinearCurveSegment::SplitToPatch(
         (*pPatch->P())[2] = static_cast<CqVector3D>((*P())[1]) + widthOffset1;
         (*pPatch->P())[3] = static_cast<CqVector3D>((*P())[1]) - widthOffset1;
 
+        // set the normals on the patch
+        pPatch->AddPrimitiveVariable(
+                new CqParameterTypedVertex<
+                        CqVector3D, type_normal, CqVector3D
+                >("N",0)
+        );
+        pPatch->N()->SetSize(4);
+        (*pPatch->N())[0] = (*pPatch->N())[1] = normal0;
+        (*pPatch->N())[2] = (*pPatch->N())[3] = normal1;
+
+	TqInt bUses = Uses();
+
         // set u, v coordinates of the patch
-        
+        if ( USES( bUses, EnvVars_u ) || USES( bUses, EnvVars_v ) )
+        {
+                (*pPatch->u())[0] = (*pPatch->u())[2] = 0.0;
+                (*pPatch->u())[1] = (*pPatch->u())[3] = 1.0;
+                (*pPatch->v())[0] = (*pPatch->v())[1] = (*v())[0];
+                (*pPatch->v())[2] = (*pPatch->v())[3] = (*v())[1];
+        }
+
+        // helllllp!!! What DO I DO WITH s,t!!!???
+        if ( USES( bUses, EnvVars_s ) || USES( bUses, EnvVars_t ) )
+        {
+                for (TqInt i=0; i < 4; i++)
+                {
+                        (*pPatch->s())[i] = (*pPatch->u())[i];
+                        (*pPatch->t())[i] = (*pPatch->v())[i];
+                }
+        }
+
         // add the patch to the split surfaces vector
         aSplits.push_back(pPatch);
         
@@ -831,10 +785,13 @@ CqCurvesGroup& CqCurvesGroup::operator=(const CqCurvesGroup& from) {
  * @param periodic      true if the curves in the group are periodic.
  */
 CqLinearCurvesGroup::CqLinearCurvesGroup(
-        RtInt ncurves, RtInt nvertices[], TqBool periodic
-) : CqCurvesGroup(), m_ncurves(ncurves), m_periodic(periodic) {
+        TqInt ncurves, TqInt nvertices[], TqBool periodic
+) : CqCurvesGroup() {
         
-        assert(nvertices != NULL);     
+        assert(nvertices != NULL);
+        
+        m_ncurves = ncurves;
+        m_periodic = periodic;
         
         // it makes no sense to have a periodic curve group with a segment
         //  that has only two vertices - check for this just in case
@@ -856,8 +813,12 @@ CqLinearCurvesGroup::CqLinearCurvesGroup(
         }
         
         // copy the array of numbers of vertices
-        m_nvertices = new RtInt[m_ncurves];
-        memcpy(m_nvertices, nvertices, sizeof(RtInt)*m_ncurves);
+        m_nvertices.clear();
+        m_nvertices.reserve(m_ncurves);
+        for (TqInt i=0; i < m_ncurves; i++)
+        {
+                m_nvertices.push_back(nvertices[i]);
+        }
         
 }
 
@@ -867,7 +828,7 @@ CqLinearCurvesGroup::CqLinearCurvesGroup(
  * CqLinearCurvesGroup copy constructor.
  */
 CqLinearCurvesGroup::CqLinearCurvesGroup(const CqLinearCurvesGroup &from)
-: CqCurve() {
+: CqCurvesGroup() {
         (*this) = from;
 }
 
@@ -876,36 +837,7 @@ CqLinearCurvesGroup::CqLinearCurvesGroup(const CqLinearCurvesGroup &from)
  * CqLinearCurvesGroup destructor.
  */
 CqLinearCurvesGroup::~CqLinearCurvesGroup() { 
-        delete m_nvertices;
-}
-
-
-
-/**
- * Returns the number of parameters of varying storage class that this curve
- * group has.
- *
- * @return      Number of varying parameters.
- */
-TqUint CqLinearCurvesGroup::cVarying() const {
-        
-        // this formula for cVarying is a slight modification of the one found
-        //  in section 5.5 of RiSpec ver. 3.2
-        TqUint nsegments = 0;
-        for (TqInt i=0; i < m_ncurves; i++) 
-        {
-                nsegments += m_nvertices[i];
-        }
-        if (m_periodic)
-        {
-                nsegments -= m_ncurves;
-                return nsegments;
-        }
-        else
-        {
-                return nsegments-1;
-        }
-        
+        m_nvertices.clear();
 }
 
 
@@ -926,7 +858,7 @@ CqLinearCurvesGroup& CqLinearCurvesGroup::operator=(
         // copy members
         m_ncurves = from.m_ncurves;
         m_periodic = from.m_periodic;
-        memcpy(m_nvertices, from.m_nvertices, sizeof(TqInt)*m_ncurves);
+        m_nvertices = from.m_nvertices;
 }
 
 
@@ -945,15 +877,38 @@ TqInt CqLinearCurvesGroup::Split(std::vector<CqBasicSurface*>& aSplits) {
         
         TqInt nSplits = 0;      // number of splits we've done
         
+	TqInt bUses = Uses();
+        
         // create each linear curve, filling in its variables as we go
         TqInt vertexI = 0;      // keeps track of the current vertex index
         TqInt uniformI = 0;     // keeps track of the uniform param index
         // we process all the curves in the group...
         for (TqInt curveI = 0; curveI < m_ncurves; curveI++)
         {
-                // for each curve, we then process all its segments
-                for (TqInt segI = 0; segI < m_nvertices[curveI]-1; segI++)
+                TqInt lastSegment;
+                if (m_periodic)
                 {
+                        lastSegment = m_nvertices[curveI];
+                }
+                else
+                {
+                        lastSegment = m_nvertices[curveI]-1;
+                }
+                TqInt firstVertex = vertexI;
+                
+                // for each curve, we then process all its segments
+                for (TqInt segI = 0; segI < lastSegment; segI++)
+                {
+                        
+                        TqInt nextVertex;
+                        if (segI == (m_nvertices[curveI]-1))
+                        {
+                                nextVertex = firstVertex;
+                        }
+                        else
+                        {
+                                nextVertex = vertexI+1;
+                        }
                         
                         // create the new CqLinearCurveSegment for the current
                         //  curve segment
@@ -961,6 +916,25 @@ TqInt CqLinearCurvesGroup::Split(std::vector<CqBasicSurface*>& aSplits) {
                                 new CqLinearCurveSegment();
                         pSeg->AddRef();
                         pSeg->SetSurfaceParameters(*this);
+
+                        // set the value of "v"
+                        if ( USES( bUses, EnvVars_v ) )
+                        {
+                                TqFloat vv = (TqFloat)segI / 
+                                        (TqFloat)lastSegment;
+                                TqFloat vvnext = 
+                                        (TqFloat)(segI+1) / 
+                                        (TqFloat)lastSegment;
+                                CqParameterTypedVarying<
+                                        TqFloat, type_float, TqFloat
+                                >* pVP = new CqParameterTypedVarying<
+                                        TqFloat, type_float, TqFloat
+                                >("v", 1);
+                                pVP->SetSize(pSeg->cVarying());
+                                (*pVP)[0] = vv;
+                                (*pVP)[1] = vvnext;
+                                pSeg->AddPrimitiveVariable(pVP);
+                        }
                         
                         // process user parameters
 			std::vector<CqParameter*>::iterator iUP;
@@ -989,7 +963,7 @@ TqInt CqLinearCurvesGroup::Split(std::vector<CqBasicSurface*>& aSplits) {
                                         pNewUP->SetSize(pSeg->cVarying());
                                         
                                         pNewUP->SetValue((*iUP), 0, vertexI);
-                                        pNewUP->SetValue((*iUP), 1, vertexI+1);
+                                        pNewUP->SetValue((*iUP), 1, nextVertex);
                                         pSeg->AddPrimitiveVariable(pNewUP);
                                         
                                 }
@@ -1021,20 +995,69 @@ TqInt CqLinearCurvesGroup::Split(std::vector<CqBasicSurface*>& aSplits) {
                                 } // if
                                 
                         } // for each parameter
-                        
+
                         ++vertexI;
-                        ++uniformI;
                         aSplits.push_back(pSeg);
                         ++nSplits;
                         
                 } // for each curve segment
                 
                 ++vertexI;
+                ++uniformI;
                 
         } // for each curve
         
         return nSplits;
         
+}
+
+
+
+/** 
+ * Transforms this GPrim using the specified matrices.
+ *
+ * @param matTx         Reference to the transformation matrix.
+ * @param matITTx       Reference to the inverse transpose of the 
+ *                        transformation matrix, used to transform normals.
+ * @param matRTx        Reference to the rotation only transformation matrix, 
+ *                        used to transform vectors.
+ */
+void CqLinearCurvesGroup::Transform(
+        const CqMatrix& matTx, 
+        const CqMatrix& matITTx, 
+        const CqMatrix& matRTx 
+) {
+        // First, we want to transform the width array.  For each curve in the
+        //  group, there are as many width parameters as there are vertices,
+        //  so each vertex matches exactly with a width; no stuffing around is
+        //  required.
+        PopulateWidth();
+        assert(cVarying() == cVertex());
+        for (TqInt i=0; i < cVarying(); i++)
+        {
+                // first, create a horizontal vector in the new space which is
+                //  the length of the current width in current space
+                CqVector3D horiz(1,0,0);
+                horiz = matITTx * horiz;
+                horiz *= (*width())[i] / horiz.Magnitude();
+                
+                // now, create two points; one at the vertex in current space
+                //  and one which is offset horizontally in the new space by
+                //  the width in the current space.  transform both points
+                //  into the new space
+                CqVector3D pt = (*P())[i];
+                CqVector3D pt_delta = pt + horiz;
+                pt  = matTx * pt;
+                pt_delta = matTx * pt_delta;
+                
+                // finally, find the difference between the two points in
+                //  current space - this is the transformed width
+                CqVector3D widthVector = pt_delta - pt;
+                (*width())[i] = widthVector.Magnitude();
+        }
+        
+        // finally, we want to call the base class transform
+        CqCurve::Transform(matTx, matITTx, matRTx);
 }
 
 
@@ -1047,8 +1070,11 @@ TqInt CqLinearCurvesGroup::Split(std::vector<CqBasicSurface*>& aSplits) {
  * @param periodic      true if curves in the group are periodic.
  */
 CqCubicCurvesGroup::CqCubicCurvesGroup(
-        RtInt ncurves, RtInt nvertices[], TqBool periodic
-) : CqCurvesGroup(), m_ncurves(ncurves), m_periodic(periodic) {
+        TqInt ncurves, TqInt nvertices[], TqBool periodic
+) : CqCurvesGroup() {
+        
+        m_ncurves = ncurves;
+        m_periodic = periodic;
         
         // add up the total number of vertices
         m_nTotalVerts = 0;
@@ -1056,11 +1082,14 @@ CqCubicCurvesGroup::CqCubicCurvesGroup(
         {
                 m_nTotalVerts += nvertices[i];
         }
-        
+
         // copy the array of numbers of vertices
-        assert(nvertices != NULL);
-        m_nvertices = new RtInt[m_ncurves];
-        memcpy(m_nvertices, nvertices, sizeof(RtInt)*m_ncurves);
+        m_nvertices.clear();
+        m_nvertices.reserve(m_ncurves);
+        for (TqInt i=0; i < m_ncurves; i++)
+        {
+                m_nvertices.push_back(nvertices[i]);
+        }
         
 }
 
@@ -1070,7 +1099,7 @@ CqCubicCurvesGroup::CqCubicCurvesGroup(
  * CqCubicCurvesGroup copy constructor.
  */
 CqCubicCurvesGroup::CqCubicCurvesGroup(const CqCubicCurvesGroup &from) :
-CqCurve() {
+CqCurvesGroup() {
         (*this) = from;
 }
 
@@ -1080,7 +1109,7 @@ CqCurve() {
  * CqCubicCurvesGroup destructor.
  */
 CqCubicCurvesGroup::~CqCubicCurvesGroup() { 
-        delete m_nvertices;
+        m_nvertices.clear();
 }
 
 
@@ -1139,11 +1168,9 @@ CqCubicCurvesGroup& CqCubicCurvesGroup::operator=(
         // copy members
         m_ncurves = from.m_ncurves;
         m_periodic = from.m_periodic;
-        memcpy(m_nvertices, from.m_nvertices, sizeof(TqInt)*m_ncurves);
+        m_nvertices = from.m_nvertices;
 }
 
 
 
 END_NAMESPACE(Aqsis)
-
-#endif
