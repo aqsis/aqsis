@@ -188,7 +188,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
         // If there are no smooth normals specified, then fill in the facet normal at each vertex.
         if ( !bHasVar(EnvVars_N) && USES( iUses, EnvVars_N ) )
         {
-            CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* pNewUP = new CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>( "N", 0 );
+            CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* pNewUP = new CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>( "N", 1 );
             pNewUP->SetSize( pNew->cVarying() );
 
             pNewUP->pValue() [ 0 ] = vecN;
