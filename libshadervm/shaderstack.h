@@ -400,7 +400,7 @@ class _qShareC CqShaderStack
 		 */
 		void	Dup()
 		{
-			TqInt iTop = m_iTop;
+			TqInt iTop = m_iTop-1;
 
 			IqShaderData* s = GetNextTemp( m_Stack[ iTop ] ->Type(), m_Stack[ iTop ] ->Class() );
 			s->SetValueFromVariable( m_Stack[ iTop ] );
