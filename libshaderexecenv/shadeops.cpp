@@ -2111,11 +2111,12 @@ STD_SOIMPL CqShaderExecEnv::SO_calculatenormal( POINTVAL p, DEFPARAMIMPL )
     INIT_SO
 
     // Find out if the orientation is inverted.
+    TqBool CSO = pTransform()->GetHandedness();
     TqBool O = TqFalse;
-	if( m_pAttributes )
-		O = m_pTransform->GetHandedness();
+	if( pAttributes() )
+	    TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
     TqFloat neg = 1;
-    if ( !O ) neg = -1;
+	if ( O != CSO ) neg = -1;
 
     CHECKVARY( p )
     CHECKVARY( Result )

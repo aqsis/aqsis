@@ -122,7 +122,9 @@ CqTransform& CqTransform::operator=( const CqTransform& From )
 
 void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 {
-	TqBool flip = ( matTrans.Determinant() < 0 );
+	TqFloat det = matTrans.Determinant();
+	TqBool flip = ( !matTrans.fIdentity() && det < 0 );
+
 	SqTransformation ct;
 	ct.m_matTransform = matTrans;
 
@@ -151,8 +153,11 @@ void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 
 void CqTransform::SetTransform( TqFloat time, const CqMatrix& matTrans )
 {
-	TqBool flip = ( matTrans.Determinant() < 0 );
-	TqBool camhand = ( QGetRenderContext()->matSpaceToSpace("world", "camera").Determinant() < 0 );
+	TqFloat det = matTrans.Determinant();
+	TqBool flip = ( !matTrans.fIdentity() && det < 0 );
+	CqMatrix matCtoW = QGetRenderContext()->matSpaceToSpace("world", "camera");
+	TqFloat camdet = matCtoW.Determinant();
+	TqBool camhand = ( !matCtoW.fIdentity() && camdet < 0 );
 
     if ( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
 	{
@@ -200,7 +205,8 @@ void CqTransform::SetTransform( TqFloat time, const CqMatrix& matTrans )
 
 void CqTransform::ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 {
-	TqBool flip = ( matTrans.Determinant() < 0 );
+	TqFloat det = matTrans.Determinant();
+	TqBool flip = ( !matTrans.fIdentity() && det < 0 );
 
 	SqTransformation ct;
 	ct.m_matTransform = matTrans;
