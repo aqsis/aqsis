@@ -1548,8 +1548,8 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
     pNew2->TrimLoops() = TrimLoops();
     pNew1->m_fDiceable = TqTrue;
     pNew2->m_fDiceable = TqTrue;
-    pNew1->m_SplitDir = m_SplitDir;
-    pNew2->m_SplitDir = m_SplitDir;
+    pNew1->m_SplitDir = ( m_SplitDir == SplitDir_U )? SplitDir_V : SplitDir_U;
+    pNew2->m_SplitDir = ( m_SplitDir == SplitDir_U )? SplitDir_V : SplitDir_U;
     pNew1->m_EyeSplitCount = m_EyeSplitCount;
     pNew2->m_EyeSplitCount = m_EyeSplitCount;
     //ADDREF( pNew1 );
