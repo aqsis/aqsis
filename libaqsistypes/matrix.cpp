@@ -137,15 +137,19 @@ CqMatrix::CqMatrix( const TqFloat angle,
     else
     {
         CqVector3D right = d1 % d2;
-
         right.Unit();
+
+        // d1ortho will be perpendicular to <d2> and <right> and can be
+        // used to construct a rotation matrix
+        CqVector3D d1ortho = d2 % right;
+
 
         // 1) Rotate to a space where the skew operation is in a major plane.
         // 2) Bend the y axis towards the z axis causing a skew.
         // 3) Rotate back.
-        CqMatrix Rot( right[ 0 ], d1[ 0 ], d2[ 0 ], 0,
-                      right[ 1 ], d1[ 1 ], d2[ 1 ], 0,
-                      right[ 2 ], d1[ 2 ], d2[ 2 ], 0,
+        CqMatrix Rot( right[ 0 ], d1ortho[ 0 ], d2[ 0 ], 0,
+                      right[ 1 ], d1ortho[ 1 ], d2[ 1 ], 0,
+                      right[ 2 ], d1ortho[ 2 ], d2[ 2 ], 0,
                       0, 0, 0, 1 );
         TqFloat par = d1d2dot;               // Amount of d1 parallel to d2
         TqFloat perp = static_cast<TqFloat>(sqrt( 1 - par * par ));   // Amount perpendicular
@@ -154,7 +158,7 @@ CqMatrix::CqMatrix( const TqFloat angle,
                       0, 1, s, 0,
                       0, 0, 1, 0,
                       0, 0, 0, 1 );
-        // Note the Inverse of a rotation matrix is it's Transpose.
+        // Note the Inverse of a rotation matrix is its Transpose.
         *this = Rot.Transpose() * Skw * Rot;
     }
 }
