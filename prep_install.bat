@@ -15,12 +15,12 @@ copy ..\library\release\aqsl.exe .
 copy ..\library\release\aqslcomp.exe .
 copy ..\library\release\slpp.exe .
 copy ..\library\release\texer.exe .
+copy ..\library\release\ddmsock.ini .
 
 copy \Libraries\tiff-v3.5.5\libtiff\libtiff.dll .
 copy \Libraries\zlib-1.1.3\zlib.dll .
 
 copy ..\ribber.cfg .
-copy ..\aqsis.ini .
 
 cd shaders
 copy ..\..\shaders\*.sl .
