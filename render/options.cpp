@@ -577,7 +577,7 @@ void CqDisplay::LoadImager(const char* strName)
 	TqFloat dummy = 0.0;
 	
 
-	CqShader* pShader=static_cast<CqShader*>(QGetRenderContext()->CreateShader(strName, Type_Imager));
+	IqShader* pShader=static_cast<IqShader*>(QGetRenderContext()->CreateShader(strName, Type_Imager));
 
 	if(pShader==0)	return;
 

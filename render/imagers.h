@@ -55,21 +55,21 @@ START_NAMESPACE( Aqsis )
 class CqImagersource : public CqListEntry<CqImagersource>, public CqShaderExecEnv
 {
 	public:
-		CqImagersource( CqShader* pShader, TqBool fActive = TqTrue );
+		CqImagersource( IqShader* pShader, TqBool fActive = TqTrue );
 		virtual	~CqImagersource();
 
 		/** Get a pointer to the associated Imagersource shader.
 		 * \return a pointer to a CqShader derived class.
 		 */
-		CqShader*	pShader()
+		IqShader*	pShader()
 		{
 			return ( m_pShader );
 		}
 
 		/** Get a pointer to the associated Imagersource shader.
-		 * \return a pointer to a CqShader derived class.
+		 * \return a pointer to a IqShader derived class.
 		 */
-		const CqShader*	pShader() const
+		const IqShader*	pShader() const
 		{
 			return ( m_pShader );
 		}
@@ -92,7 +92,7 @@ class CqImagersource : public CqListEntry<CqImagersource>, public CqShaderExecEn
 		TqFloat Alpha( TqFloat x, TqFloat y );
 
 	private:
-		CqShader*	m_pShader;				///< Pointer to the associated shader.
+		IqShader*	m_pShader;				///< Pointer to the associated shader.
 		CqAttributes*	m_pAttributes;			///< Pointer to the associated attributes.
 
 		TqInt m_vGridRes;						///< Size of the bucket X

@@ -145,9 +145,9 @@ CqString CqBasicSurface::strName() const
 TqInt CqBasicSurface::Uses() const
 {
 	TqInt Uses = gDefUses;
-	CqShader* pshadSurface = pAttributes() ->pshadSurface();
-	CqShader* pshadDisplacement = pAttributes() ->pshadDisplacement();
-	CqShader* pshadAtmosphere = pAttributes() ->pshadAtmosphere();
+	IqShader* pshadSurface = pAttributes() ->pshadSurface();
+	IqShader* pshadDisplacement = pAttributes() ->pshadDisplacement();
+	IqShader* pshadAtmosphere = pAttributes() ->pshadAtmosphere();
 
 	if ( pshadSurface ) Uses |= pshadSurface->Uses();
 	if ( pshadDisplacement ) Uses |= pshadDisplacement->Uses();

@@ -35,7 +35,7 @@ START_NAMESPACE( Aqsis )
 /** Default constructor.
  */
 
-CqImagersource::CqImagersource( CqShader* pShader, TqBool fActive ) :
+CqImagersource::CqImagersource( IqShader* pShader, TqBool fActive ) :
 		m_pShader( pShader ),
 		m_pAttributes( 0 )
 {

@@ -154,7 +154,7 @@ TqBool CqShaderExecEnv::SO_advance_illuminance()
 }
 
 
-void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, CqShader* pShader )
+void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShader* pShader )
 {
 	// If this is the first call to illuminance this time round, call all lights and setup the Cl and L caches.
 	if ( !m_IlluminanceCacheValid )
@@ -3277,7 +3277,7 @@ STD_SOIMPL CqShaderExecEnv::SO_atmosphere( STRINGVAL name, IqShaderData* pV, DEF
 {
 	INIT_SO
 
-	CqShader * pAtmosphere = m_pSurface->pAttributes() ->pshadAtmosphere();
+	IqShader * pAtmosphere = m_pSurface->pAttributes() ->pshadAtmosphere();
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -3297,7 +3297,7 @@ STD_SOIMPL CqShaderExecEnv::SO_displacement( STRINGVAL name, IqShaderData* pV, D
 {
 	INIT_SO
 
-	CqShader * pDisplacement = m_pSurface->pAttributes() ->pshadDisplacement();
+	IqShader * pDisplacement = m_pSurface->pAttributes() ->pshadDisplacement();
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -3318,7 +3318,7 @@ STD_SOIMPL CqShaderExecEnv::SO_lightsource( STRINGVAL name, IqShaderData* pV, DE
 	INIT_SO
 
 	// This should only be called within an Illuminance construct, so m_li should be valid.
-	CqShader* pLightsource = 0;
+	IqShader* pLightsource = 0;
 	
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -3340,7 +3340,7 @@ STD_SOIMPL CqShaderExecEnv::SO_surface( STRINGVAL name, IqShaderData* pV, DEFPAR
 {
 	INIT_SO
 
-	CqShader * pSurface = m_pSurface->pAttributes() ->pshadSurface();
+	IqShader * pSurface = m_pSurface->pAttributes() ->pshadSurface();
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -4582,9 +4582,9 @@ STD_SOIMPL	CqShaderExecEnv::SO_shadername2( STRINGVAL shader, DEFPARAMIMPL )
 
 	CqString strName( "" );
 	CqString strShader;
-	CqShader* pSurface = m_pSurface->pAttributes() ->pshadSurface();
-	CqShader* pDisplacement = m_pSurface->pAttributes() ->pshadDisplacement();
-	CqShader* pAtmosphere = m_pSurface->pAttributes() ->pshadAtmosphere();
+	IqShader* pSurface = m_pSurface->pAttributes() ->pshadSurface();
+	IqShader* pDisplacement = m_pSurface->pAttributes() ->pshadDisplacement();
+	IqShader* pAtmosphere = m_pSurface->pAttributes() ->pshadAtmosphere();
 
 	CHECKVARY( Result )
 

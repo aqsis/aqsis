@@ -1290,7 +1290,7 @@ RtLightHandle	RiLightSource( const char *name, ... )
 RtLightHandle	RiLightSourceV( const char *name, PARAMETERLIST )
 {
 	// Find the lightsource shader.
-	CqShader * pShader = static_cast<CqShader*>( QGetRenderContext() ->CreateShader( name, Type_Lightsource ) );
+	IqShader * pShader = static_cast<CqShader*>( QGetRenderContext() ->CreateShader( name, Type_Lightsource ) );
 
 	// TODO: Report error.
 	if ( pShader == 0 ) return ( 0 );
@@ -1391,7 +1391,7 @@ RtVoid	RiSurface( const char *name, ... )
 RtVoid	RiSurfaceV( const char *name, PARAMETERLIST )
 {
 	// Find the shader.
-	CqShader * pshadSurface = QGetRenderContext() ->CreateShader( name, Type_Surface );
+	IqShader * pshadSurface = QGetRenderContext() ->CreateShader( name, Type_Surface );
 
 	if ( pshadSurface != 0 )
 	{
@@ -1437,7 +1437,7 @@ RtVoid	RiAtmosphere( const char *name, ... )
 RtVoid	RiAtmosphereV( const char *name, PARAMETERLIST )
 {
 	// Find the shader.
-	CqShader * pshadAtmosphere = QGetRenderContext() ->CreateShader( name, Type_Volume );
+	IqShader * pshadAtmosphere = QGetRenderContext() ->CreateShader( name, Type_Volume );
 
 	if ( pshadAtmosphere != 0 )
 	{
@@ -1867,7 +1867,7 @@ RtVoid	RiDisplacement( const char *name, ... )
 RtVoid	RiDisplacementV( const char *name, PARAMETERLIST )
 {
 	// Find the shader.
-	CqShader * pshadDisplacement = QGetRenderContext() ->CreateShader( name, Type_Displacement );
+	IqShader * pshadDisplacement = QGetRenderContext() ->CreateShader( name, Type_Displacement );
 
 	if ( pshadDisplacement != 0 )
 	{

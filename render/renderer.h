@@ -215,7 +215,7 @@ class CqRenderer
 		/** Get the list of currently registered shaders.
 		 * \return A reference to a list of CqShaderRegister classes.
 		 */
-		virtual	CqShader* CreateShader( const char* strName, EqShaderType type );
+		virtual	IqShader* CreateShader( const char* strName, EqShaderType type );
 
 		/** Flush any registered shaders.
 		 */
@@ -282,7 +282,7 @@ class CqRenderer
 		//						void		PrintStats(TqInt level);
 
 	private:
-		void	RegisterShader( const char* strName, EqShaderType type, CqShader* pShader );
+		void	RegisterShader( const char* strName, EqShaderType type, IqShader* pShader );
 		CqShaderRegister* FindShader( const char* strName, EqShaderType type );
 
 

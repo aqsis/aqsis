@@ -55,13 +55,13 @@ START_NAMESPACE( Aqsis )
 class CqLightsource : public CqListEntry<CqLightsource>, public CqShaderExecEnv
 {
 	public:
-		CqLightsource( CqShader* pShader, TqBool fActive = TqTrue );
+		CqLightsource( IqShader* pShader, TqBool fActive = TqTrue );
 		virtual	~CqLightsource();
 
 		/** Get a pointer to the associated lightsource shader.
-		 * \return a pointer to a CqShader derived class.
+		 * \return a pointer to a IqShader derived class.
 		 */
-		CqShader*	pShader()
+		IqShader*	pShader()
 		{
 			return ( m_pShader );
 		}
@@ -87,7 +87,7 @@ class CqLightsource : public CqListEntry<CqLightsource>, public CqShaderExecEnv
 			return ( m_pAttributes );
 		}
 	private:
-		CqShader*	m_pShader;				///< Pointer to the associated shader.
+		IqShader*		m_pShader;				///< Pointer to the associated shader.
 		CqAttributes*	m_pAttributes;			///< Pointer to the associated attributes.
 		//			CqMatrix		m_matLightToWorld;		///< Light to world transformation matrix.
 		//			CqMatrix		m_matWorldToLight;		///< World to light transformation matrix.
@@ -115,7 +115,7 @@ class CqShaderLightsourceAmbient : public CqShader
 
 		virtual	void	Evaluate( CqShaderExecEnv& Env );
 		virtual	void	SetValue( const char* name, TqPchar val );
-		virtual CqShader* Clone() const
+		virtual IqShader* Clone() const
 		{
 			return ( new CqShaderLightsourceAmbient );
 		}

@@ -273,6 +273,10 @@ SOURCE=.\imagers.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ishader.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ishaderdata.h
 # End Source File
 # Begin Source File

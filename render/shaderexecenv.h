@@ -39,6 +39,7 @@
 #include	"vector3d.h"
 #include	"vector4d.h"
 #include	"ishaderdata.h"
+#include	"ishader.h"
 #include	"matrix.h"
 
 START_NAMESPACE( Aqsis )
@@ -125,13 +126,13 @@ extern TqInt gDefLightUses;
 #define	MATRIX(Val)			_##Val
 
 
-#define	DEFPARAM		IqShaderData* Result, CqShader* pShader=0
-#define	DEFVOIDPARAM	CqShader* pShader=0
+#define	DEFPARAM		IqShaderData* Result, IqShader* pShader=0
+#define	DEFVOIDPARAM	IqShader* pShader=0
 #define	DEFPARAMVAR		DEFPARAM, int cParams=0, IqShaderData** apParams=0
 #define	DEFVOIDPARAMVAR	DEFVOIDPARAM, int cParams=0, IqShaderData** apParams=0
 
-#define	DEFPARAMIMPL		IqShaderData* Result, CqShader* pShader
-#define	DEFVOIDPARAMIMPL	CqShader* pShader
+#define	DEFPARAMIMPL		IqShaderData* Result, IqShader* pShader
+#define	DEFVOIDPARAMIMPL	IqShader* pShader
 #define DEFPARAMVARIMPL		DEFPARAMIMPL, int cParams, IqShaderData** apParams
 #define	DEFVOIDPARAMVARIMPL	DEFVOIDPARAMIMPL, int cParams, IqShaderData** apParams
 
@@ -168,7 +169,6 @@ extern TqInt gDefLightUses;
 #define	MATRIXARRAYVAL	IqShaderData*
 
 class CqLightsource;
-class CqShader;
 class CqSurface;
 
 //----------------------------------------------------------------------
@@ -228,7 +228,7 @@ class CqShaderExecEnv
 		}
 		const CqMatrix&	matObjectToWorld() const;
 
-		void	ValidateIlluminanceCache( IqShaderData* pP, CqShader* pShader );
+		void	ValidateIlluminanceCache( IqShaderData* pP, IqShader* pShader );
 		/** Reset the illuminance cache.
 		 */
 		void	InvalidateIlluminanceCache()

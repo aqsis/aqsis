@@ -53,7 +53,6 @@ enum EqOrientation
 };
 
 class CqLightsource;
-class CqShader;
 
 //-----------------------------------------------------------------------
 /**
@@ -146,7 +145,7 @@ class CqShadingAttributes
 		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
 		 * \return a pointer to the surface shader.
 		 */
-		CqShader*	pshadSurface( TqFloat time = 0.0f ) const
+		IqShader*	pshadSurface( TqFloat time = 0.0f ) const
 		{
 			return ( m_pshadSurface );
 		}
@@ -154,7 +153,7 @@ class CqShadingAttributes
 		 * \param pshadSurface a pointer to a shader to use as the surface shader.
 		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
 		 */
-		void	SetpshadSurface( CqShader* pshadSurface, TqFloat time = 0.0f )
+		void	SetpshadSurface( IqShader* pshadSurface, TqFloat time = 0.0f )
 		{
 			m_pshadSurface = pshadSurface;
 		}
@@ -162,7 +161,7 @@ class CqShadingAttributes
 		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
 		 * \return a pointer to the atmosphere shader.
 		 */
-		CqShader*	pshadAtmosphere( TqFloat time = 0.0f ) const
+		IqShader*	pshadAtmosphere( TqFloat time = 0.0f ) const
 		{
 			return ( m_pshadAtmosphere );
 		}
@@ -170,7 +169,7 @@ class CqShadingAttributes
 		 * \param pshadAtmosphere a pointer to a shader to use as the atmosphere shader.
 		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
 		 */
-		void	SetpshadAtmosphere( CqShader* pshadAtmosphere, TqFloat time = 0.0f )
+		void	SetpshadAtmosphere( IqShader* pshadAtmosphere, TqFloat time = 0.0f )
 		{
 			m_pshadAtmosphere = pshadAtmosphere;
 		}
@@ -250,11 +249,11 @@ class CqShadingAttributes
 		CqColor	m_colOpacity;						///< the current opacity attribute.
 		CqVector2D	m_aTextureCoordinates[ 4 ];			///< an array of 2D vectors representing the coordinate space.
 		std::vector<CqLightsource*> m_apLightsources;	///< a vector of currently available lightsources.
-		CqShader*	m_pshadAreaLightSource;				///< a pointer to the current area ligthsource shader.
-		CqShader*	m_pshadSurface;						///< a pointer to the current surface shader.
-		CqShader*	m_pshadAtmosphere;					///< a pointer to the current atmosphere shader.
-		CqShader*	m_pshadInteriorVolume;				///< a pointer to the current interior shader.
-		CqShader*	m_pshadExteriorVolume;				///< a pointer to the current exterior shader.
+		IqShader*	m_pshadAreaLightSource;				///< a pointer to the current area ligthsource shader.
+		IqShader*	m_pshadSurface;						///< a pointer to the current surface shader.
+		IqShader*	m_pshadAtmosphere;					///< a pointer to the current atmosphere shader.
+		IqShader*	m_pshadInteriorVolume;				///< a pointer to the current interior shader.
+		IqShader*	m_pshadExteriorVolume;				///< a pointer to the current exterior shader.
 		TqFloat	m_fEffectiveShadingRate;			///< the current effective shading rate.
 		ShadingInterpolation m_eShadingInterpolation;	///< the current shading interpolation mode.
 		TqBool	m_bMatteSurfaceFlag;				///< the current state of the matte flag.
@@ -499,7 +498,7 @@ class CqGeometricAttributes
 		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
 		 * \return a pointer to the displacement shader.
 		 */
-		CqShader*	pshadDisplacement( TqFloat time = 0.0f ) const
+		IqShader*	pshadDisplacement( TqFloat time = 0.0f ) const
 		{
 			return ( m_pshadDisplacement );
 		}
@@ -507,7 +506,7 @@ class CqGeometricAttributes
 		 * \param pshadAtmosphere a pointer to a shader to use as the displacement shader.
 		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
 		 */
-		void	SetpshadDisplacement( CqShader* pshadDisplacement, TqFloat time = 0.0f )
+		void	SetpshadDisplacement( IqShader* pshadDisplacement, TqFloat time = 0.0f )
 		{
 			m_pshadDisplacement = pshadDisplacement;
 		}
@@ -541,7 +540,7 @@ class CqGeometricAttributes
 		EqOrientation m_eOrientation;					///< the orientation associated primitives are described in.
 		EqOrientation	m_eCoordsysOrientation;			///< the orientation of the current coordinate system.
 		TqInt	m_iNumberOfSides;					///< the number of visible sides associated primitives have.
-		CqShader*	m_pshadDisplacement;				///< a pointer to the current displacement shader.
+		IqShader*	m_pshadDisplacement;				///< a pointer to the current displacement shader.
 		CqTrimLoopArray m_TrimLoops;					///< the array of closed trimcurve loops.
 }
 ;

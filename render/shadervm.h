@@ -31,7 +31,6 @@
 
 #include	"aqsis.h"
 
-#include	"ri.h"
 #include	"bitvector.h"
 #include	"vector3d.h"
 #include	"color.h"
@@ -40,6 +39,7 @@
 #include	"matrix.h"
 #include	"noise.h"
 #include	"ishaderdata.h"
+#include	"ishader.h"
 #include	"shaderexecenv.h"
 #include	"shaderstack.h"
 
@@ -89,118 +89,9 @@ extern	CqVMStackEntry	gVaryingResult; ///< Global stackentry for storing the res
 
 #define	USES(a,b)	((a)&(0x00000001<<(b))?TqTrue:TqFalse)
 
-class CqShaderRegister;
-
-//----------------------------------------------------------------------
-/** \class CqShader
- * Abstract base class from which all shaders must be defined.
- */
-
-class _qShareC CqShader
-{
-	public:
-		_qShareM CqShader() : m_Uses( 0xFFFFFFFF )
-		{}
-		virtual	_qShareM ~CqShader()
-		{}
-
-		/** Get the shader matrix, the transformation at the time this shader was instantiated.
-		 */
-		_qShareM CqMatrix&	matCurrent()
-		{
-			return ( m_matCurrent );
-		}
-		/** Set the naem of the shader.
-		 */
-		_qShareM	void	SetstrName( const char* strName )
-		{
-			m_strName = strName;
-		}
-		/** Get the name of this shader.
-		 */
-		_qShareM	const CqString& strName() const
-		{
-			return ( m_strName );
-		}
-
-		/** Set a named shader paramter to the specified value.
-		 * \param name Character pointer to parameter name.
-		 * \param val Character pointer to the vale storage, will be cast to a pointer of the appropriate type.
-		 */
-		virtual	_qShareM void	SetValue( const char* name, TqPchar val )
-		{}
-		/** Get the value of a named shader paramter.
-		 * \param name The name of the shader paramter.
-		 * \param res IqShaderData pointer to store the result in, will be typechecked for suitability.
-		 * \return Boolean indicating the parameter existed and res was of an appropriate type.
-		 */
-		virtual	_qShareM TqBool	GetValue( const char* name, IqShaderData* res )
-		{
-			return ( TqFalse );
-		}
-		/** Evaluate the shader code.
-		 * \param Env The shader execution environment to evaluate within.
-		 */
-		virtual	_qShareM void	Evaluate( CqShaderExecEnv& Env )
-		{}
-		/** Initialise the state of any arguments with default values.
-		 */
-		virtual	_qShareM	void	PrepareDefArgs()
-		{}
-		/** Prepare the shader for evaluation.
-		 * \param uGridRes The resolution of the grid being shaded in u.
-		 * \param vGridRes The resolution of the grid being shaded in v
-		 * \param Env Pointer to the CqShaderExecEnv to evaluate within.
-		 */
-		virtual _qShareM void	Initialise( const TqInt uGridRes, const TqInt vGridRes, CqShaderExecEnv& Env )
-		{}
-		/** Determine whether this shader is an aambient ligthsource shader.
-		 * i.e. A lightsource shader with no Illuminate or Solar constructs.
-		 */
-		virtual	_qShareM TqBool	fAmbient() const
-		{
-			return ( TqFalse );
-		}
-		/** Duplicate this shader.
-		 * \return A pointer to a new shader.
-		 */
-		virtual _qShareM CqShader*	Clone() const
-		{
-			return ( new CqShader );
-		}
-		/** Determine whether this shader uses the specified system variable.
-		 * \param Var ID of the variable from EqEnvVars.
-		 */
-		TqBool	Uses( EqEnvVars Var ) const
-		{
-			return ( USES( m_Uses, Var ) );
-		}
-		/** Determine whether this shader uses the specified system variable.
-		 * \param Var ID of the variable from EqEnvVars.
-		 */
-		TqBool	Uses( TqInt Var ) const
-		{
-			assert( Var >= 0 && Var < EnvVars_Last );
-			return ( Uses( static_cast<EqEnvVars>( Var ) ) );
-		}
-		/** Get a bit vector representing the system variables needed by this shader.
-		 */
-		TqInt	Uses() const
-		{
-			return ( m_Uses );
-		}
-
-	protected:
-		TqInt	m_Uses;			///< Bit vector representing the system variables used by this shader.
-	private:
-		CqMatrix	m_matCurrent;	///< Transformation matrix to world coordinates in effect at the time this shader was instantiated.
-		CqString	m_strName;		///< The name of this shader.
-}
-;
-
-
 class CqShaderVM;
 union UsProgramElement;
+
 
 /** \struct SqLabel
  * Storege for label during slx file reading.
@@ -497,12 +388,12 @@ static CqMatrix temp_matrix;
  * Main class handling the execution of a program in shader language bytecodes.
  */
 
-class _qShareC CqShaderVM : public CqShaderStack, public CqShader
+class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 {
 	public:
-		_qShareM CqShaderVM() : CqShaderStack(), m_LocalIndex( 0 ), m_PC( 0 )
+		_qShareM CqShaderVM() : CqShaderStack(), m_LocalIndex( 0 ), m_PC( 0 ), m_Uses( 0xFFFFFFFF )
 		{}
-		_qShareM	CqShaderVM( const CqShaderVM& From ) : CqShader(), m_PC( 0 ), m_LocalIndex( 0 )
+		_qShareM	CqShaderVM( const CqShaderVM& From ) : m_PC( 0 ), m_LocalIndex( 0 )
 		{
 			*this = From;
 		}
@@ -513,33 +404,61 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 				if ( ( *i ) != NULL ) delete( *i );
 		}
 
-		_qShareM	void	LoadProgram( std::istream* pFile );
-		_qShareM void	Execute( CqShaderExecEnv& Env );
-		_qShareM	void	ExecuteInit();
 
+		// Overidden from IqShader
+		virtual	CqMatrix&	matCurrent()
+		{
+			return ( m_matCurrent );
+		}
+		virtual	void	SetstrName( const char* strName )
+		{
+			m_strName = strName;
+		}
+		virtual	const CqString& strName() const
+		{
+			return ( m_strName );
+		}
 		virtual	void	SetValue( const char* name, TqPchar val );
 		virtual	TqBool	GetValue( const char* name, IqShaderData* res );
-
-        _qShareM int				GetShaderVarCount();				// for libslxargs
-        _qShareM IqShaderData * GetShaderVarAt(int varIndex);  		// for libslxargs     
-        _qShareM EqShaderType		Type()			{return(m_Type);}	// for libslxargs
-        
 		virtual	void	Evaluate( CqShaderExecEnv& Env )
 		{
 			Execute( Env );
 		}
-		;
 		virtual	_qShareM	void	PrepareDefArgs()
 		{
 			ExecuteInit();
 		}
 		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, CqShaderExecEnv& Env );
-		virtual	CqShader*	Clone() const
+		virtual	_qShareM TqBool	fAmbient() const
+		{
+			return ( TqFalse );
+		}
+		virtual	IqShader*	Clone() const
 		{
 			CqShaderVM * pShader = new CqShaderVM( *this );
 			pShader->ExecuteInit();
 			return ( pShader );
 		}
+		virtual TqBool	Uses( TqInt Var ) const
+		{
+			assert( Var >= 0 && Var < EnvVars_Last );
+			return ( Uses( static_cast<EqEnvVars>( Var ) ) );
+		}
+		virtual TqInt	Uses() const
+		{
+			return ( m_Uses );
+		}
+
+
+		void	LoadProgram( std::istream* pFile );
+		void	Execute( CqShaderExecEnv& Env );
+		void	ExecuteInit();
+
+
+        TqInt			GetShaderVarCount();				// for libslxargs
+        IqShaderData*	GetShaderVarAt(int varIndex);  		// for libslxargs     
+        EqShaderType	Type()			{return(m_Type);}	// for libslxargs
+        
 
 		/** Assignment operator.
 		 */
@@ -560,10 +479,14 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 		static void DeleteTemporaryStorage( IqShaderData* pData );
 
 	private:
+		TqInt		m_Uses;			///< Bit vector representing the system variables used by this shader.
+		CqMatrix	m_matCurrent;	///< Transformation matrix to world coordinates in effect at the time this shader was instantiated.
+		CqString	m_strName;		///< The name of this shader.
+
         EqShaderType 		m_Type;							///< Shader type for libslxargs
-		TqUint m_LocalIndex;                   ///<  Local Index to speed up
+		TqUint				m_LocalIndex;                   ///<  Local Index to speed up
 		CqShaderExecEnv*	m_pEnv;							///< Pointer to the current excution environment.
-		std::vector<IqShaderData*>	m_LocalVars;		///< Array of local variables.
+		std::vector<IqShaderData*>		m_LocalVars;		///< Array of local variables.
 		std::vector<UsProgramElement>	m_ProgramInit;		///< Bytecodes of the intialisation program.
 		std::vector<UsProgramElement>	m_Program;			///< Bytecodes of the main program.
 		UsProgramElement*	m_PC;							///< Current program pointer.

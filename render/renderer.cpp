@@ -806,7 +806,7 @@ void CqRenderer::AddParameterDecl( const char* strName, const char* strType )
 /** Register a shader of the specified type with the specified name.
  */
 
-void CqRenderer::RegisterShader( const char* strName, EqShaderType type, CqShader* pShader )
+void CqRenderer::RegisterShader( const char* strName, EqShaderType type, IqShader* pShader )
 {
 	assert( pShader );
 	m_Shaders.LinkLast( new CqShaderRegister( strName, type, pShader ) );
@@ -837,12 +837,12 @@ CqShaderRegister* CqRenderer::FindShader( const char* strName, EqShaderType type
  * If not found, try and load one.
  */
 
-CqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
+IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 {
 	CqShaderRegister * pReg = FindShader( strName, type );
 	if ( pReg != 0 )
 	{
-		CqShader * pShader = pReg->Create();
+		IqShader * pShader = pReg->Create();
 		RegisterShader( strName, type, pShader );
 		return ( pShader );
 	}

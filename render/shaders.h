@@ -47,7 +47,7 @@ START_NAMESPACE( Aqsis )
 class CqShaderRegister : public CqListEntry<CqShaderRegister>
 {
 	public:
-		CqShaderRegister( const char* strName, EqShaderType type, CqShader* pShader ) :
+		CqShaderRegister( const char* strName, EqShaderType type, IqShader* pShader ) :
 				m_strName( strName ),
 				m_Type( type ),
 				m_pShader( pShader )
@@ -74,7 +74,7 @@ class CqShaderRegister : public CqListEntry<CqShaderRegister>
 		/** Create an instance of this shader.
 		 * \return A pointer to the new instance of the shader.
 		 */
-		CqShader*	Create()
+		IqShader*	Create()
 		{
 			return ( m_pShader->Clone() );
 		}
@@ -82,9 +82,74 @@ class CqShaderRegister : public CqListEntry<CqShaderRegister>
 	private:
 		CqString	m_strName;		///< The registered name of the shader.
 		EqShaderType m_Type;		///< The type of the shader from EqShaderType.
-		CqShader*	m_pShader;		///< Pointer to the shader class.
+		IqShader*	m_pShader;		///< Pointer to the shader class.
 }
 ;
+
+
+//----------------------------------------------------------------------
+/** \class CqShader
+ * Abstract base class from which all shaders must be defined.
+ */
+
+class CqShader : public IqShader
+{
+	public:
+		CqShader() : m_Uses( 0xFFFFFFFF )
+		{}
+		virtual	~CqShader()
+		{}
+
+		// Overidden from IqShader
+		virtual CqMatrix&	matCurrent()
+		{
+			return ( m_matCurrent );
+		}
+		virtual void	SetstrName( const char* strName )
+		{
+			m_strName = strName;
+		}
+		virtual const CqString& strName() const
+		{
+			return ( m_strName );
+		}
+		virtual	void	SetValue( const char* name, TqPchar val )
+		{}
+		virtual	TqBool	GetValue( const char* name, IqShaderData* res )
+		{
+			return ( TqFalse );
+		}
+		virtual	void	Evaluate( CqShaderExecEnv& Env )
+		{}
+		virtual	void	PrepareDefArgs()
+		{}
+		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, CqShaderExecEnv& Env )
+		{}
+		virtual	TqBool	fAmbient() const
+		{
+			return ( TqFalse );
+		}
+		virtual IqShader*	Clone() const
+		{
+			return ( new CqShader );
+		}
+		virtual TqBool	Uses( TqInt Var ) const
+		{
+			assert( Var >= 0 && Var < EnvVars_Last );
+			return ( Uses( static_cast<EqEnvVars>( Var ) ) );
+		}
+		virtual TqInt	Uses() const
+		{
+			return ( m_Uses );
+		}
+
+	protected:
+		TqInt		m_Uses;			///< Bit vector representing the system variables used by this shader.
+	private:
+		CqMatrix	m_matCurrent;	///< Transformation matrix to world coordinates in effect at the time this shader was instantiated.
+		CqString	m_strName;		///< The name of this shader.
+};
+
 
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
@@ -107,7 +172,7 @@ class CqShaderSurfaceConstant : public CqShader
 
 		virtual	void	Evaluate( CqShaderExecEnv& Env );
 		virtual	void	SetValue( const char* name, TqPchar val );
-		virtual CqShader* Clone() const
+		virtual IqShader* Clone() const
 		{
 			return ( new CqShaderSurfaceConstant );
 		}

@@ -35,7 +35,7 @@ CqList<CqLightsource>	Lightsource_stack;
 /** Default constructor.
  */
 
-CqLightsource::CqLightsource( CqShader* pShader, TqBool fActive ) :
+CqLightsource::CqLightsource( IqShader* pShader, TqBool fActive ) :
 		m_pShader( pShader ),
 		m_pAttributes( 0 )
 {
@@ -167,7 +167,7 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
 // These are the built in shaders, they will be registered as "builtin_<name>"
 // these should be used where speed is an issue.
 
-CqShaderLightsourceAmbient::CqShaderLightsourceAmbient() : m_intensity(NULL), m_lightcolor(NULL)
+CqShaderLightsourceAmbient::CqShaderLightsourceAmbient() : CqShader(), m_intensity(NULL), m_lightcolor(NULL)
 {
 	m_intensity = CqShaderVM::CreateVariable(type_float, class_uniform, "intensity" );
 	m_lightcolor = CqShaderVM::CreateVariable(type_color, class_uniform, "lightcolor" );

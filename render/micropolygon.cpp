@@ -189,9 +189,9 @@ void CqMicroPolyGrid::Shade()
 {
 	static CqVector3D	vecE( 0, 0, 0 );
 
-	CqShader* pshadSurface = pSurface() ->pAttributes() ->pshadSurface();
-	CqShader* pshadDisplacement = pSurface() ->pAttributes() ->pshadDisplacement();
-	CqShader* pshadAtmosphere = pSurface() ->pAttributes() ->pshadAtmosphere();
+	IqShader* pshadSurface = pSurface() ->pAttributes() ->pshadSurface();
+	IqShader* pshadDisplacement = pSurface() ->pAttributes() ->pshadDisplacement();
+	IqShader* pshadAtmosphere = pSurface() ->pAttributes() ->pshadAtmosphere();
 
 	TqInt lUses = pSurface() ->Uses();
 	TqInt gs = GridSize();

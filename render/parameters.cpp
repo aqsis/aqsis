@@ -30,8 +30,35 @@
 #include	"matrix.h"
 #include	"sstring.h"
 #include	"color.h"
+#include	"renderer.h"
 
 START_NAMESPACE( Aqsis )
+
+
+/** Default constructor
+ * \param strName Character pointer to parameter name.
+ * \param Count Integer value count, for arrays.
+ */
+CqParameter::CqParameter( const char* strName, TqInt Count ) :
+		m_strName( strName ),
+		m_Count( Count )
+{
+	QGetRenderContext() ->Stats().IncParametersAllocated();
+}
+
+/** Copy constructor
+ */
+CqParameter::CqParameter( const CqParameter& From ) :
+		m_strName( From.m_strName ),
+		m_Count( From.m_Count )
+{
+	QGetRenderContext() ->Stats().IncParametersAllocated();
+}
+
+CqParameter::~CqParameter()
+{
+	QGetRenderContext() ->Stats().IncParametersDeallocated();
+}
 
 
 CqParameter* ( *gVariableCreateFuncsUniform[] ) ( const char* strName, TqInt Count ) =

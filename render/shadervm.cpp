@@ -33,7 +33,8 @@
 #include	"renderer.h"
 #include	"version.h"
 #include	"sstring.h"
-#include	"imagebuffer.h"
+//#include	"imagebuffer.h"
+
 #include	"shadervariable.h"
 
 START_NAMESPACE( Aqsis )
@@ -48,32 +49,6 @@ char* gShaderTypeNames[] =
         "imager",
     };
 TqInt gcShaderTypeNames = sizeof( gShaderTypeNames ) / sizeof( gShaderTypeNames[ 0 ] );
-
-/** Default constructor
- * \param strName Character pointer to parameter name.
- * \param Count Integer value count, for arrays.
- */
-CqParameter::CqParameter( const char* strName, TqInt Count ) :
-		m_strName( strName ),
-		m_Count( Count )
-{
-	QGetRenderContext() ->Stats().IncParametersAllocated();
-}
-
-/** Copy constructor
- */
-CqParameter::CqParameter( const CqParameter& From ) :
-		m_strName( From.m_strName ),
-		m_Count( From.m_Count )
-{
-	QGetRenderContext() ->Stats().IncParametersAllocated();
-}
-
-CqParameter::~CqParameter()
-{
-	QGetRenderContext() ->Stats().IncParametersDeallocated();
-}
-
 
 
 SqOpCodeTrans CqShaderVM::m_TransTable[] =
@@ -779,7 +754,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						while ( i < strlen( token ) && token[ i ] != '[' ) i++;
 						if ( i == strlen( token ) )
 						{
-							CqBasicError( 0, Severity_Fatal, "Invalid variable specification in slx file" );
+							//CqBasicError( 0, Severity_Fatal, "Invalid variable specification in slx file" );
 							return ;
 						}
 						token[ strlen( token ) - 1 ] = '\0';
@@ -933,7 +908,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 					{
 						CqString strErr( "Invalid opcode found : " );
 						strErr += token;
-						CqBasicError( 0, Severity_Fatal, strErr.c_str() );
+						//CqBasicError( 0, Severity_Fatal, strErr.c_str() );
 						return ;
 					}
 					break;
@@ -983,7 +958,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 
 void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, CqShaderExecEnv& Env )
 {
-	CqShader::Initialise( uGridRes, vGridRes, Env );
 	m_pEnv = &Env;
 	// Initialise local variables.
 	TqInt i;
@@ -1003,6 +977,10 @@ void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, CqShade
 
 CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 {
+	m_Uses = From.m_Uses;
+	m_matCurrent = From.m_matCurrent;
+	m_strName = From.m_strName;
+
 	// Copy the local variables...
 	std::vector<IqShaderData*>::const_iterator i;
 	for ( i = From.m_LocalVars.begin(); i != From.m_LocalVars.end(); i++ )
