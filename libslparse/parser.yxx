@@ -1828,6 +1828,57 @@ comm_function
 									$$=new CqParseNode();
 								}
 							}
+	|	comm_type '(' expression ',' ARRAY_SYMBOL ')'
+							{
+								CqVarDef* pVD=0;
+								TqBool fError=TqFalse;
+								
+								if(($3->ResType()&Type_Mask)!=Type_String)	fError=TqTrue;
+
+								// Get the variable, error if not a variable.
+								if($5.eType&1)	pVD=CqVarDef::GetVariablePtr($5.VarRef);
+								
+								if(pVD!=0 && !fError)
+								{
+									$$=new CqParseNodeCommFunction($1, $5.VarRef);
+									$$->AddLastChild($3);
+								}
+								else
+								{
+									yyerror("invalid variable reference");
+									$$=new CqParseNode();
+								}
+							}
+    | comm_type '(' expression ',' expression ',' ARRAY_SYMBOL ')'
+
+                            {
+								CqVarDef* pVD=0;
+								TqBool fError=TqFalse;
+								
+                                if(($3->ResType()&Type_Mask)!=Type_String)	fError=TqTrue;
+
+							    if(($5->ResType()&Type_Mask)!=Type_String)	fError=TqTrue;
+
+								// Get the variable, error if not a variable.
+								if($7.eType&1)	pVD=CqVarDef::GetVariablePtr($7.VarRef);
+								
+								if(pVD!=0 && !fError)
+								{
+                                    
+	                                CqParseNode* pArgs=$3;
+                                    CqParseNodeStringConst* pString = (CqParseNodeStringConst *) pArgs;
+                                    CqString strArg("");
+                                    strArg += pString->strValue();
+								        
+									$$=new CqParseNodeCommFunction($1, strArg, $7.VarRef);
+								    $$->AddLastChild($5);
+								}
+								else
+								{
+									yyerror("invalid variable reference");
+									$$=new CqParseNode();
+								}
+							}
 	;
 
 
