@@ -11,6 +11,7 @@ Rotate -40 1 0 0
 Translate 0 -4 5
 
 Option "limits" "eyesplits" 3
+Option "searchpath" "texture" ["../images:&"]
 Sides 2
 
 WorldBegin
