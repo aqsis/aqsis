@@ -453,6 +453,10 @@ SOURCE=.\ri.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\ri_cache.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\rifile.h
 # End Source File
 # Begin Source File

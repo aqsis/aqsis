@@ -1,7 +1,7 @@
 class RiDeclareCache : public RiCacheBase
 {
 public:
-	RiDeclareCache(RtString name, RtString declaration)
+	RiDeclareCache(RtString name, RtString declaration) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
@@ -28,7 +28,7 @@ private:
 class RiFrameBeginCache : public RiCacheBase
 {
 public:
-	RiFrameBeginCache(RtInt number)
+	RiFrameBeginCache(RtInt number) : RiCacheBase()
 	{
 		m_number = number;
 	}
@@ -47,7 +47,7 @@ private:
 class RiFrameEndCache : public RiCacheBase
 {
 public:
-	RiFrameEndCache()
+	RiFrameEndCache() : RiCacheBase()
 	{
 	}
 	virtual ~RiFrameEndCache()
@@ -64,7 +64,7 @@ private:
 class RiWorldBeginCache : public RiCacheBase
 {
 public:
-	RiWorldBeginCache()
+	RiWorldBeginCache() : RiCacheBase()
 	{
 	}
 	virtual ~RiWorldBeginCache()
@@ -81,7 +81,7 @@ private:
 class RiWorldEndCache : public RiCacheBase
 {
 public:
-	RiWorldEndCache()
+	RiWorldEndCache() : RiCacheBase()
 	{
 	}
 	virtual ~RiWorldEndCache()
@@ -98,7 +98,7 @@ private:
 class RiFormatCache : public RiCacheBase
 {
 public:
-	RiFormatCache(RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio)
+	RiFormatCache(RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio) : RiCacheBase()
 	{
 		m_xresolution = xresolution;
 		m_yresolution = yresolution;
@@ -121,7 +121,7 @@ private:
 class RiFrameAspectRatioCache : public RiCacheBase
 {
 public:
-	RiFrameAspectRatioCache(RtFloat frameratio)
+	RiFrameAspectRatioCache(RtFloat frameratio) : RiCacheBase()
 	{
 		m_frameratio = frameratio;
 	}
@@ -140,7 +140,7 @@ private:
 class RiScreenWindowCache : public RiCacheBase
 {
 public:
-	RiScreenWindowCache(RtFloat left, RtFloat right, RtFloat bottom, RtFloat top)
+	RiScreenWindowCache(RtFloat left, RtFloat right, RtFloat bottom, RtFloat top) : RiCacheBase()
 	{
 		m_left = left;
 		m_right = right;
@@ -165,7 +165,7 @@ private:
 class RiCropWindowCache : public RiCacheBase
 {
 public:
-	RiCropWindowCache(RtFloat left, RtFloat right, RtFloat top, RtFloat bottom)
+	RiCropWindowCache(RtFloat left, RtFloat right, RtFloat top, RtFloat bottom) : RiCacheBase()
 	{
 		m_left = left;
 		m_right = right;
@@ -187,37 +187,41 @@ private:
 	RtFloat m_bottom;
 };
 
-class RiProjectionVCache : public RiCacheBase
+class RiProjectionCache : public RiCacheBase
 {
 public:
-	RiProjectionVCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+	RiProjectionCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
 		strcpy(m_name, name);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiProjectionVCache()
+	virtual ~RiProjectionCache()
 	{
 		delete[](m_name);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiProjectionV(m_name, m_count, m_tokens, m_values);
+		RiProjection(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
 class RiClippingCache : public RiCacheBase
 {
 public:
-	RiClippingCache(RtFloat cnear, RtFloat cfar)
+	RiClippingCache(RtFloat cnear, RtFloat cfar) : RiCacheBase()
 	{
 		m_cnear = cnear;
 		m_cfar = cfar;
@@ -238,7 +242,7 @@ private:
 class RiDepthOfFieldCache : public RiCacheBase
 {
 public:
-	RiDepthOfFieldCache(RtFloat fstop, RtFloat focallength, RtFloat focaldistance)
+	RiDepthOfFieldCache(RtFloat fstop, RtFloat focallength, RtFloat focaldistance) : RiCacheBase()
 	{
 		m_fstop = fstop;
 		m_focallength = focallength;
@@ -261,7 +265,7 @@ private:
 class RiShutterCache : public RiCacheBase
 {
 public:
-	RiShutterCache(RtFloat opentime, RtFloat closetime)
+	RiShutterCache(RtFloat opentime, RtFloat closetime) : RiCacheBase()
 	{
 		m_opentime = opentime;
 		m_closetime = closetime;
@@ -282,7 +286,7 @@ private:
 class RiPixelVarianceCache : public RiCacheBase
 {
 public:
-	RiPixelVarianceCache(RtFloat variance)
+	RiPixelVarianceCache(RtFloat variance) : RiCacheBase()
 	{
 		m_variance = variance;
 	}
@@ -301,7 +305,7 @@ private:
 class RiPixelSamplesCache : public RiCacheBase
 {
 public:
-	RiPixelSamplesCache(RtFloat xsamples, RtFloat ysamples)
+	RiPixelSamplesCache(RtFloat xsamples, RtFloat ysamples) : RiCacheBase()
 	{
 		m_xsamples = xsamples;
 		m_ysamples = ysamples;
@@ -322,7 +326,7 @@ private:
 class RiPixelFilterCache : public RiCacheBase
 {
 public:
-	RiPixelFilterCache(RtFilterFunc function, RtFloat xwidth, RtFloat ywidth)
+	RiPixelFilterCache(RtFilterFunc function, RtFloat xwidth, RtFloat ywidth) : RiCacheBase()
 	{
 		m_function = function;
 		m_xwidth = xwidth;
@@ -345,7 +349,7 @@ private:
 class RiExposureCache : public RiCacheBase
 {
 public:
-	RiExposureCache(RtFloat gain, RtFloat gamma)
+	RiExposureCache(RtFloat gain, RtFloat gamma) : RiCacheBase()
 	{
 		m_gain = gain;
 		m_gamma = gamma;
@@ -363,37 +367,41 @@ private:
 	RtFloat m_gamma;
 };
 
-class RiImagerVCache : public RiCacheBase
+class RiImagerCache : public RiCacheBase
 {
 public:
-	RiImagerVCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+	RiImagerCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
 		strcpy(m_name, name);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiImagerVCache()
+	virtual ~RiImagerCache()
 	{
 		delete[](m_name);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiImagerV(m_name, m_count, m_tokens, m_values);
+		RiImager(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
 class RiQuantizeCache : public RiCacheBase
 {
 public:
-	RiQuantizeCache(RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude)
+	RiQuantizeCache(RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude) : RiCacheBase()
 	{
 		int __type_length = strlen(type);
 		m_type = new char[ __type_length + 1 ];
@@ -420,10 +428,10 @@ private:
 	RtFloat m_ditheramplitude;
 };
 
-class RiDisplayVCache : public RiCacheBase
+class RiDisplayCache : public RiCacheBase
 {
 public:
-	RiDisplayVCache(RtToken name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[])
+	RiDisplayCache(RtToken name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
@@ -435,59 +443,67 @@ public:
 		m_mode = new char[ __mode_length + 1 ];
 		strcpy(m_mode, mode);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiDisplayVCache()
+	virtual ~RiDisplayCache()
 	{
 		delete[](m_name);
 		delete[](m_type);
 		delete[](m_mode);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiDisplayV(m_name, m_type, m_mode, m_count, m_tokens, m_values);
+		RiDisplay(m_name, m_type, m_mode, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
 	RtToken m_type;
 	RtToken m_mode;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiHiderVCache : public RiCacheBase
+class RiHiderCache : public RiCacheBase
 {
 public:
-	RiHiderVCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+	RiHiderCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
 		strcpy(m_name, name);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiHiderVCache()
+	virtual ~RiHiderCache()
 	{
 		delete[](m_name);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiHiderV(m_name, m_count, m_tokens, m_values);
+		RiHider(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
 class RiColorSamplesCache : public RiCacheBase
 {
 public:
-	RiColorSamplesCache(RtInt N, RtFloat nRGB[], RtFloat RGBn[])
+	RiColorSamplesCache(RtInt N, RtFloat nRGB[], RtFloat RGBn[]) : RiCacheBase()
 	{
 		m_N = N;
 		int __nRGB_length = N;
@@ -524,7 +540,7 @@ private:
 class RiRelativeDetailCache : public RiCacheBase
 {
 public:
-	RiRelativeDetailCache(RtFloat relativedetail)
+	RiRelativeDetailCache(RtFloat relativedetail) : RiCacheBase()
 	{
 		m_relativedetail = relativedetail;
 	}
@@ -540,37 +556,41 @@ private:
 	RtFloat m_relativedetail;
 };
 
-class RiOptionVCache : public RiCacheBase
+class RiOptionCache : public RiCacheBase
 {
 public:
-	RiOptionVCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+	RiOptionCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
 		strcpy(m_name, name);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiOptionVCache()
+	virtual ~RiOptionCache()
 	{
 		delete[](m_name);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiOptionV(m_name, m_count, m_tokens, m_values);
+		RiOption(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
 class RiAttributeBeginCache : public RiCacheBase
 {
 public:
-	RiAttributeBeginCache()
+	RiAttributeBeginCache() : RiCacheBase()
 	{
 	}
 	virtual ~RiAttributeBeginCache()
@@ -587,7 +607,7 @@ private:
 class RiAttributeEndCache : public RiCacheBase
 {
 public:
-	RiAttributeEndCache()
+	RiAttributeEndCache() : RiCacheBase()
 	{
 	}
 	virtual ~RiAttributeEndCache()
@@ -604,7 +624,7 @@ private:
 class RiColorCache : public RiCacheBase
 {
 public:
-	RiColorCache(RtColor Cq)
+	RiColorCache(RtColor Cq) : RiCacheBase()
 	{
 		m_Cq[0] = Cq[0];
 		m_Cq[1] = Cq[1];
@@ -625,7 +645,7 @@ private:
 class RiOpacityCache : public RiCacheBase
 {
 public:
-	RiOpacityCache(RtColor Os)
+	RiOpacityCache(RtColor Os) : RiCacheBase()
 	{
 		m_Os[0] = Os[0];
 		m_Os[1] = Os[1];
@@ -646,7 +666,7 @@ private:
 class RiTextureCoordinatesCache : public RiCacheBase
 {
 public:
-	RiTextureCoordinatesCache(RtFloat s1, RtFloat t1, RtFloat s2, RtFloat t2, RtFloat s3, RtFloat t3, RtFloat s4, RtFloat t4)
+	RiTextureCoordinatesCache(RtFloat s1, RtFloat t1, RtFloat s2, RtFloat t2, RtFloat s3, RtFloat t3, RtFloat s4, RtFloat t4) : RiCacheBase()
 	{
 		m_s1 = s1;
 		m_t1 = t1;
@@ -676,64 +696,72 @@ private:
 	RtFloat m_t4;
 };
 
-class RiLightSourceVCache : public RiCacheBase
+class RiLightSourceCache : public RiCacheBase
 {
 public:
-	RiLightSourceVCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+	RiLightSourceCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
 		strcpy(m_name, name);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiLightSourceVCache()
+	virtual ~RiLightSourceCache()
 	{
 		delete[](m_name);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiLightSourceV(m_name, m_count, m_tokens, m_values);
+		RiLightSource(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiAreaLightSourceVCache : public RiCacheBase
+class RiAreaLightSourceCache : public RiCacheBase
 {
 public:
-	RiAreaLightSourceVCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+	RiAreaLightSourceCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
 		strcpy(m_name, name);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiAreaLightSourceVCache()
+	virtual ~RiAreaLightSourceCache()
 	{
 		delete[](m_name);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiAreaLightSourceV(m_name, m_count, m_tokens, m_values);
+		RiAreaLightSource(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
 class RiIlluminateCache : public RiCacheBase
 {
 public:
-	RiIlluminateCache(RtLightHandle light, RtBoolean onoff)
+	RiIlluminateCache(RtLightHandle light, RtBoolean onoff) : RiCacheBase()
 	{
 		m_light = light;
 		m_onoff = onoff;
@@ -751,118 +779,134 @@ private:
 	RtBoolean m_onoff;
 };
 
-class RiSurfaceVCache : public RiCacheBase
+class RiSurfaceCache : public RiCacheBase
 {
 public:
-	RiSurfaceVCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+	RiSurfaceCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
 		strcpy(m_name, name);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiSurfaceVCache()
+	virtual ~RiSurfaceCache()
 	{
 		delete[](m_name);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiSurfaceV(m_name, m_count, m_tokens, m_values);
+		RiSurface(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiAtmosphereVCache : public RiCacheBase
+class RiAtmosphereCache : public RiCacheBase
 {
 public:
-	RiAtmosphereVCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+	RiAtmosphereCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
 		strcpy(m_name, name);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiAtmosphereVCache()
+	virtual ~RiAtmosphereCache()
 	{
 		delete[](m_name);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiAtmosphereV(m_name, m_count, m_tokens, m_values);
+		RiAtmosphere(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiInteriorVCache : public RiCacheBase
+class RiInteriorCache : public RiCacheBase
 {
 public:
-	RiInteriorVCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+	RiInteriorCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
 		strcpy(m_name, name);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiInteriorVCache()
+	virtual ~RiInteriorCache()
 	{
 		delete[](m_name);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiInteriorV(m_name, m_count, m_tokens, m_values);
+		RiInterior(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiExteriorVCache : public RiCacheBase
+class RiExteriorCache : public RiCacheBase
 {
 public:
-	RiExteriorVCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+	RiExteriorCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
 		strcpy(m_name, name);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiExteriorVCache()
+	virtual ~RiExteriorCache()
 	{
 		delete[](m_name);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiExteriorV(m_name, m_count, m_tokens, m_values);
+		RiExterior(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
 class RiShadingRateCache : public RiCacheBase
 {
 public:
-	RiShadingRateCache(RtFloat size)
+	RiShadingRateCache(RtFloat size) : RiCacheBase()
 	{
 		m_size = size;
 	}
@@ -881,7 +925,7 @@ private:
 class RiShadingInterpolationCache : public RiCacheBase
 {
 public:
-	RiShadingInterpolationCache(RtToken type)
+	RiShadingInterpolationCache(RtToken type) : RiCacheBase()
 	{
 		int __type_length = strlen(type);
 		m_type = new char[ __type_length + 1 ];
@@ -903,7 +947,7 @@ private:
 class RiMatteCache : public RiCacheBase
 {
 public:
-	RiMatteCache(RtBoolean onoff)
+	RiMatteCache(RtBoolean onoff) : RiCacheBase()
 	{
 		m_onoff = onoff;
 	}
@@ -922,7 +966,7 @@ private:
 class RiBoundCache : public RiCacheBase
 {
 public:
-	RiBoundCache(RtBound bound)
+	RiBoundCache(RtBound bound) : RiCacheBase()
 	{
 		m_bound[0] = bound[0];
 		m_bound[1] = bound[1];
@@ -946,7 +990,7 @@ private:
 class RiDetailCache : public RiCacheBase
 {
 public:
-	RiDetailCache(RtBound bound)
+	RiDetailCache(RtBound bound) : RiCacheBase()
 	{
 		m_bound[0] = bound[0];
 		m_bound[1] = bound[1];
@@ -970,7 +1014,7 @@ private:
 class RiDetailRangeCache : public RiCacheBase
 {
 public:
-	RiDetailRangeCache(RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh)
+	RiDetailRangeCache(RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh) : RiCacheBase()
 	{
 		m_offlow = offlow;
 		m_onlow = onlow;
@@ -995,7 +1039,7 @@ private:
 class RiGeometricApproximationCache : public RiCacheBase
 {
 public:
-	RiGeometricApproximationCache(RtToken type, RtFloat value)
+	RiGeometricApproximationCache(RtToken type, RtFloat value) : RiCacheBase()
 	{
 		int __type_length = strlen(type);
 		m_type = new char[ __type_length + 1 ];
@@ -1019,7 +1063,7 @@ private:
 class RiOrientationCache : public RiCacheBase
 {
 public:
-	RiOrientationCache(RtToken orientation)
+	RiOrientationCache(RtToken orientation) : RiCacheBase()
 	{
 		int __orientation_length = strlen(orientation);
 		m_orientation = new char[ __orientation_length + 1 ];
@@ -1041,7 +1085,7 @@ private:
 class RiReverseOrientationCache : public RiCacheBase
 {
 public:
-	RiReverseOrientationCache()
+	RiReverseOrientationCache() : RiCacheBase()
 	{
 	}
 	virtual ~RiReverseOrientationCache()
@@ -1058,7 +1102,7 @@ private:
 class RiSidesCache : public RiCacheBase
 {
 public:
-	RiSidesCache(RtInt nsides)
+	RiSidesCache(RtInt nsides) : RiCacheBase()
 	{
 		m_nsides = nsides;
 	}
@@ -1077,7 +1121,7 @@ private:
 class RiIdentityCache : public RiCacheBase
 {
 public:
-	RiIdentityCache()
+	RiIdentityCache() : RiCacheBase()
 	{
 	}
 	virtual ~RiIdentityCache()
@@ -1094,7 +1138,7 @@ private:
 class RiTransformCache : public RiCacheBase
 {
 public:
-	RiTransformCache(RtMatrix transform)
+	RiTransformCache(RtMatrix transform) : RiCacheBase()
 	{
 		int __transform_i, __transform_j;
 		for(__transform_j = 0; __transform_j<4; __transform_j++)
@@ -1116,7 +1160,7 @@ private:
 class RiConcatTransformCache : public RiCacheBase
 {
 public:
-	RiConcatTransformCache(RtMatrix transform)
+	RiConcatTransformCache(RtMatrix transform) : RiCacheBase()
 	{
 		int __transform_i, __transform_j;
 		for(__transform_j = 0; __transform_j<4; __transform_j++)
@@ -1138,7 +1182,7 @@ private:
 class RiPerspectiveCache : public RiCacheBase
 {
 public:
-	RiPerspectiveCache(RtFloat fov)
+	RiPerspectiveCache(RtFloat fov) : RiCacheBase()
 	{
 		m_fov = fov;
 	}
@@ -1157,7 +1201,7 @@ private:
 class RiTranslateCache : public RiCacheBase
 {
 public:
-	RiTranslateCache(RtFloat dx, RtFloat dy, RtFloat dz)
+	RiTranslateCache(RtFloat dx, RtFloat dy, RtFloat dz) : RiCacheBase()
 	{
 		m_dx = dx;
 		m_dy = dy;
@@ -1180,7 +1224,7 @@ private:
 class RiRotateCache : public RiCacheBase
 {
 public:
-	RiRotateCache(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
+	RiRotateCache(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz) : RiCacheBase()
 	{
 		m_angle = angle;
 		m_dx = dx;
@@ -1205,7 +1249,7 @@ private:
 class RiScaleCache : public RiCacheBase
 {
 public:
-	RiScaleCache(RtFloat sx, RtFloat sy, RtFloat sz)
+	RiScaleCache(RtFloat sx, RtFloat sy, RtFloat sz) : RiCacheBase()
 	{
 		m_sx = sx;
 		m_sy = sy;
@@ -1228,7 +1272,7 @@ private:
 class RiSkewCache : public RiCacheBase
 {
 public:
-	RiSkewCache(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1, RtFloat dx2, RtFloat dy2, RtFloat dz2)
+	RiSkewCache(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1, RtFloat dx2, RtFloat dy2, RtFloat dz2) : RiCacheBase()
 	{
 		m_angle = angle;
 		m_dx1 = dx1;
@@ -1256,64 +1300,72 @@ private:
 	RtFloat m_dz2;
 };
 
-class RiDeformationVCache : public RiCacheBase
+class RiDeformationCache : public RiCacheBase
 {
 public:
-	RiDeformationVCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+	RiDeformationCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
 		strcpy(m_name, name);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiDeformationVCache()
+	virtual ~RiDeformationCache()
 	{
 		delete[](m_name);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiDeformationV(m_name, m_count, m_tokens, m_values);
+		RiDeformation(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiDisplacementVCache : public RiCacheBase
+class RiDisplacementCache : public RiCacheBase
 {
 public:
-	RiDisplacementVCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+	RiDisplacementCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
 		strcpy(m_name, name);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiDisplacementVCache()
+	virtual ~RiDisplacementCache()
 	{
 		delete[](m_name);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiDisplacementV(m_name, m_count, m_tokens, m_values);
+		RiDisplacement(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
 class RiCoordinateSystemCache : public RiCacheBase
 {
 public:
-	RiCoordinateSystemCache(RtToken space)
+	RiCoordinateSystemCache(RtToken space) : RiCacheBase()
 	{
 		int __space_length = strlen(space);
 		m_space = new char[ __space_length + 1 ];
@@ -1335,7 +1387,7 @@ private:
 class RiTransformPointsCache : public RiCacheBase
 {
 public:
-	RiTransformPointsCache(RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[])
+	RiTransformPointsCache(RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[]) : RiCacheBase()
 	{
 		int __fromspace_length = strlen(fromspace);
 		m_fromspace = new char[ __fromspace_length + 1 ];
@@ -1375,7 +1427,7 @@ private:
 class RiTransformBeginCache : public RiCacheBase
 {
 public:
-	RiTransformBeginCache()
+	RiTransformBeginCache() : RiCacheBase()
 	{
 	}
 	virtual ~RiTransformBeginCache()
@@ -1392,7 +1444,7 @@ private:
 class RiTransformEndCache : public RiCacheBase
 {
 public:
-	RiTransformEndCache()
+	RiTransformEndCache() : RiCacheBase()
 	{
 	}
 	virtual ~RiTransformEndCache()
@@ -1406,61 +1458,72 @@ public:
 private:
 };
 
-class RiAttributeVCache : public RiCacheBase
+class RiAttributeCache : public RiCacheBase
 {
 public:
-	RiAttributeVCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[])
+	RiAttributeCache(RtToken name, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
 		strcpy(m_name, name);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiAttributeVCache()
+	virtual ~RiAttributeCache()
 	{
 		delete[](m_name);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiAttributeV(m_name, m_count, m_tokens, m_values);
+		RiAttribute(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiPolygonVCache : public RiCacheBase
+class RiPolygonCache : public RiCacheBase
 {
 public:
-	RiPolygonVCache(RtInt nvertices, RtInt count, RtToken tokens[], RtPointer values[])
+	RiPolygonCache(RtInt nvertices, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_nvertices = nvertices;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		varying_size = nvertices;
+		vertex_size = nvertices;
+		facevarying_size = nvertices;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiPolygonVCache()
+	virtual ~RiPolygonCache()
 	{
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiPolygonV(m_nvertices, m_count, m_tokens, m_values);
+		RiPolygon(m_nvertices, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtInt m_nvertices;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiGeneralPolygonVCache : public RiCacheBase
+class RiGeneralPolygonCache : public RiCacheBase
 {
 public:
-	RiGeneralPolygonVCache(RtInt nloops, RtInt nverts[], RtInt count, RtToken tokens[], RtPointer values[])
+	RiGeneralPolygonCache(RtInt nloops, RtInt nverts[], RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_nloops = nloops;
 		int __nverts_length = nloops;
@@ -1471,29 +1534,41 @@ public:
 			m_nverts[__nverts_index] = nverts[__nverts_index];
 		}
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		varying_size = 0;
+		{
+			int __i;
+			for(__i=0;__i<nloops;__i++)
+				varying_size+=nverts[__i];
+		}
+		vertex_size = varying_size;
+		facevarying_size = varying_size;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiGeneralPolygonVCache()
+	virtual ~RiGeneralPolygonCache()
 	{
 		delete[](m_nverts);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiGeneralPolygonV(m_nloops, m_nverts, m_count, m_tokens, m_values);
+		RiGeneralPolygon(m_nloops, m_nverts, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtInt m_nloops;
 	RtInt* m_nverts;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiPointsPolygonsVCache : public RiCacheBase
+class RiPointsPolygonsCache : public RiCacheBase
 {
 public:
-	RiPointsPolygonsVCache(RtInt npolys, RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[])
+	RiPointsPolygonsCache(RtInt npolys, RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_npolys = npolys;
 		int __nverts_length = npolys;
@@ -1516,31 +1591,50 @@ public:
 			m_verts[__verts_index] = verts[__verts_index];
 		}
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		varying_size=0;
+		{
+			int __i;
+			for(__i=0; __i<__verts_length; __i++)
+				if(verts[__i]>varying_size)
+					varying_size=verts[__i];
+		}
+		varying_size+=1;
+		vertex_size=varying_size;
+		facevarying_size=0;
+		{
+			int __i;
+			for(__i=0; __i<npolys; __i++)
+				facevarying_size+=nverts[__i];
+		}
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiPointsPolygonsVCache()
+	virtual ~RiPointsPolygonsCache()
 	{
 		delete[](m_nverts);
 		delete[](m_verts);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiPointsPolygonsV(m_npolys, m_nverts, m_verts, m_count, m_tokens, m_values);
+		RiPointsPolygons(m_npolys, m_nverts, m_verts, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtInt m_npolys;
 	RtInt* m_nverts;
 	RtInt* m_verts;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiPointsGeneralPolygonsVCache : public RiCacheBase
+class RiPointsGeneralPolygonsCache : public RiCacheBase
 {
 public:
-	RiPointsGeneralPolygonsVCache(RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[])
+	RiPointsGeneralPolygonsCache(RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_npolys = npolys;
 		int __nloops_length = npolys;
@@ -1575,17 +1669,38 @@ public:
 			m_verts[__verts_index] = verts[__verts_index];
 		}
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		varying_size=0;
+		{
+			int __i;
+			for(__i=0; __i<__verts_length; __i++)
+				if(verts[__i]>varying_size)
+					varying_size=verts[__i];
+		}
+		varying_size+=1;
+		vertex_size=varying_size;
+		facevarying_size=0;
+		{
+			int __i;
+			for(__i=0; __i<npolys; __i++)
+				facevarying_size+=nverts[__i];
+		}
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiPointsGeneralPolygonsVCache()
+	virtual ~RiPointsGeneralPolygonsCache()
 	{
 		delete[](m_nloops);
 		delete[](m_nverts);
 		delete[](m_verts);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiPointsGeneralPolygonsV(m_npolys, m_nloops, m_nverts, m_verts, m_count, m_tokens, m_values);
+		RiPointsGeneralPolygons(m_npolys, m_nloops, m_nverts, m_verts, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1593,15 +1708,13 @@ private:
 	RtInt* m_nloops;
 	RtInt* m_nverts;
 	RtInt* m_verts;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
 class RiBasisCache : public RiCacheBase
 {
 public:
-	RiBasisCache(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep)
+	RiBasisCache(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep) : RiCacheBase()
 	{
 		int __ubasis_i, __ubasis_j;
 		for(__ubasis_j = 0; __ubasis_j<4; __ubasis_j++)
@@ -1629,37 +1742,46 @@ private:
 	RtInt m_vstep;
 };
 
-class RiPatchVCache : public RiCacheBase
+class RiPatchCache : public RiCacheBase
 {
 public:
-	RiPatchVCache(RtToken type, RtInt count, RtToken tokens[], RtPointer values[])
+	RiPatchCache(RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __type_length = strlen(type);
 		m_type = new char[ __type_length + 1 ];
 		strcpy(m_type, type);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		varying_size = 4;
+		vertex_size = 4;
+		if(strcmp(type, "bicubic")==0)
+			vertex_size=16;
+		facevarying_size = varying_size;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiPatchVCache()
+	virtual ~RiPatchCache()
 	{
 		delete[](m_type);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiPatchV(m_type, m_count, m_tokens, m_values);
+		RiPatch(m_type, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_type;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiPatchMeshVCache : public RiCacheBase
+class RiPatchMeshCache : public RiCacheBase
 {
 public:
-	RiPatchMeshVCache(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, RtInt count, RtToken tokens[], RtPointer values[])
+	RiPatchMeshCache(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __type_length = strlen(type);
 		m_type = new char[ __type_length + 1 ];
@@ -1673,17 +1795,58 @@ public:
 		m_vwrap = new char[ __vwrap_length + 1 ];
 		strcpy(m_vwrap, vwrap);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+
+		if(strcmp(type, "bilinear")==0)
+		{
+			if(strcmp(uwrap, "periodic")==0)
+				uniform_size = nu;
+			else
+				uniform_size = nu-1;
+			if(strcmp(vwrap, "periodic")==0)
+				uniform_size *= nv;
+			else
+				uniform_size *= nv-1;
+		}
+		else
+		{
+			int ustep = QGetRenderContext() ->pattrCurrent()->GetIntegerAttribute( "System", "BasisStep" ) [ 0 ];
+			int vstep = QGetRenderContext() ->pattrCurrent()->GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
+			if(strcmp(uwrap, "periodic")==0)
+				uniform_size = nu/ustep;
+			else
+				uniform_size = (nu-4)/ustep;
+			if(strcmp(vwrap, "periodic")==0)
+				uniform_size *= nv/vstep;
+			else
+				uniform_size *= (nv-4)/vstep;
+		}
+
+		if(strcmp(type, "bilinear")==0)
+			varying_size = nu*nv;
+		else
+		{
+			int ustep = QGetRenderContext() ->pattrCurrent()->GetIntegerAttribute( "System", "BasisStep" ) [ 0 ];
+			int vstep = QGetRenderContext() ->pattrCurrent()->GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
+			varying_size = (nu/ustep)*(nv/vstep);
+		}
+		vertex_size=nu*nv;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiPatchMeshVCache()
+	virtual ~RiPatchMeshCache()
 	{
 		delete[](m_type);
 		delete[](m_uwrap);
 		delete[](m_vwrap);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiPatchMeshV(m_type, m_nu, m_uwrap, m_nv, m_vwrap, m_count, m_tokens, m_values);
+		RiPatchMesh(m_type, m_nu, m_uwrap, m_nv, m_vwrap, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1692,15 +1855,13 @@ private:
 	RtToken m_uwrap;
 	RtInt m_nv;
 	RtToken m_vwrap;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiNuPatchVCache : public RiCacheBase
+class RiNuPatchCache : public RiCacheBase
 {
 public:
-	RiNuPatchVCache(RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax, RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, RtInt count, RtToken tokens[], RtPointer values[])
+	RiNuPatchCache(RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax, RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_nu = nu;
 		m_uorder = uorder;
@@ -1725,16 +1886,25 @@ public:
 		m_vmin = vmin;
 		m_vmax = vmax;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		uniform_size=(1+nu-uorder+1)*(1+nv-vorder+1);
+		uniform_size=(1+nu-uorder+1)*(1+nv-vorder+1);
+		uniform_size=nu*nv;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiNuPatchVCache()
+	virtual ~RiNuPatchCache()
 	{
 		delete[](m_uknot);
 		delete[](m_vknot);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiNuPatchV(m_nu, m_uorder, m_uknot, m_umin, m_umax, m_nv, m_vorder, m_vknot, m_vmin, m_vmax, m_count, m_tokens, m_values);
+		RiNuPatch(m_nu, m_uorder, m_uknot, m_umin, m_umax, m_nv, m_vorder, m_vknot, m_vmin, m_vmax, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1748,15 +1918,13 @@ private:
 	RtFloat* m_vknot;
 	RtFloat m_vmin;
 	RtFloat m_vmax;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
 class RiTrimCurveCache : public RiCacheBase
 {
 public:
-	RiTrimCurveCache(RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[])
+	RiTrimCurveCache(RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[]) : RiCacheBase()
 	{
 		m_nloops = nloops;
 		int __ncurves_length = nloops;
@@ -1868,24 +2036,33 @@ private:
 	RtFloat* m_w;
 };
 
-class RiSphereVCache : public RiCacheBase
+class RiSphereCache : public RiCacheBase
 {
 public:
-	RiSphereVCache(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[])
+	RiSphereCache(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_radius = radius;
 		m_zmin = zmin;
 		m_zmax = zmax;
 		m_thetamax = thetamax;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		varying_size = 4;
+		vertex_size = 4;
+		facevarying_size = 4;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiSphereVCache()
+	virtual ~RiSphereCache()
 	{
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiSphereV(m_radius, m_zmin, m_zmax, m_thetamax, m_count, m_tokens, m_values);
+		RiSphere(m_radius, m_zmin, m_zmax, m_thetamax, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1893,57 +2070,71 @@ private:
 	RtFloat m_zmin;
 	RtFloat m_zmax;
 	RtFloat m_thetamax;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiConeVCache : public RiCacheBase
+class RiConeCache : public RiCacheBase
 {
 public:
-	RiConeVCache(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[])
+	RiConeCache(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_height = height;
 		m_radius = radius;
 		m_thetamax = thetamax;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		varying_size = 4;
+		vertex_size = 4;
+		facevarying_size = 4;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiConeVCache()
+	virtual ~RiConeCache()
 	{
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiConeV(m_height, m_radius, m_thetamax, m_count, m_tokens, m_values);
+		RiCone(m_height, m_radius, m_thetamax, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtFloat m_height;
 	RtFloat m_radius;
 	RtFloat m_thetamax;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiCylinderVCache : public RiCacheBase
+class RiCylinderCache : public RiCacheBase
 {
 public:
-	RiCylinderVCache(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[])
+	RiCylinderCache(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_radius = radius;
 		m_zmin = zmin;
 		m_zmax = zmax;
 		m_thetamax = thetamax;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		varying_size = 4;
+		vertex_size = 4;
+		facevarying_size = 4;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiCylinderVCache()
+	virtual ~RiCylinderCache()
 	{
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiCylinderV(m_radius, m_zmin, m_zmax, m_thetamax, m_count, m_tokens, m_values);
+		RiCylinder(m_radius, m_zmin, m_zmax, m_thetamax, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1951,15 +2142,13 @@ private:
 	RtFloat m_zmin;
 	RtFloat m_zmax;
 	RtFloat m_thetamax;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiHyperboloidVCache : public RiCacheBase
+class RiHyperboloidCache : public RiCacheBase
 {
 public:
-	RiHyperboloidVCache(RtPoint point1, RtPoint point2, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[])
+	RiHyperboloidCache(RtPoint point1, RtPoint point2, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_point1[0] = point1[0];
 		m_point1[1] = point1[1];
@@ -1969,43 +2158,59 @@ public:
 		m_point2[2] = point2[2];
 		m_thetamax = thetamax;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		varying_size = 4;
+		vertex_size = 4;
+		facevarying_size = 4;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiHyperboloidVCache()
+	virtual ~RiHyperboloidCache()
 	{
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiHyperboloidV(m_point1, m_point2, m_thetamax, m_count, m_tokens, m_values);
+		RiHyperboloid(m_point1, m_point2, m_thetamax, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtPoint m_point1;
 	RtPoint m_point2;
 	RtFloat m_thetamax;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiParaboloidVCache : public RiCacheBase
+class RiParaboloidCache : public RiCacheBase
 {
 public:
-	RiParaboloidVCache(RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[])
+	RiParaboloidCache(RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_rmax = rmax;
 		m_zmin = zmin;
 		m_zmax = zmax;
 		m_thetamax = thetamax;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		varying_size = 4;
+		vertex_size = 4;
+		facevarying_size = 4;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiParaboloidVCache()
+	virtual ~RiParaboloidCache()
 	{
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiParaboloidV(m_rmax, m_zmin, m_zmax, m_thetamax, m_count, m_tokens, m_values);
+		RiParaboloid(m_rmax, m_zmin, m_zmax, m_thetamax, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2013,43 +2218,48 @@ private:
 	RtFloat m_zmin;
 	RtFloat m_zmax;
 	RtFloat m_thetamax;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiDiskVCache : public RiCacheBase
+class RiDiskCache : public RiCacheBase
 {
 public:
-	RiDiskVCache(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[])
+	RiDiskCache(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_height = height;
 		m_radius = radius;
 		m_thetamax = thetamax;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		varying_size = 4;
+		vertex_size = 4;
+		facevarying_size = 4;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiDiskVCache()
+	virtual ~RiDiskCache()
 	{
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiDiskV(m_height, m_radius, m_thetamax, m_count, m_tokens, m_values);
+		RiDisk(m_height, m_radius, m_thetamax, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtFloat m_height;
 	RtFloat m_radius;
 	RtFloat m_thetamax;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiTorusVCache : public RiCacheBase
+class RiTorusCache : public RiCacheBase
 {
 public:
-	RiTorusVCache(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[])
+	RiTorusCache(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_majorrad = majorrad;
 		m_minorrad = minorrad;
@@ -2057,14 +2267,23 @@ public:
 		m_phimax = phimax;
 		m_thetamax = thetamax;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		varying_size = 4;
+		vertex_size = 4;
+		facevarying_size = 4;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiTorusVCache()
+	virtual ~RiTorusCache()
 	{
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiTorusV(m_majorrad, m_minorrad, m_phimin, m_phimax, m_thetamax, m_count, m_tokens, m_values);
+		RiTorus(m_majorrad, m_minorrad, m_phimin, m_phimax, m_thetamax, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2073,15 +2292,13 @@ private:
 	RtFloat m_phimin;
 	RtFloat m_phimax;
 	RtFloat m_thetamax;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
 class RiProceduralCache : public RiCacheBase
 {
 public:
-	RiProceduralCache(RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc)
+	RiProceduralCache(RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc) : RiCacheBase()
 	{
 		m_data = data;
 		m_bound[0] = bound[0];
@@ -2108,37 +2325,41 @@ private:
 	RtProcFreeFunc m_freeproc;
 };
 
-class RiGeometryVCache : public RiCacheBase
+class RiGeometryCache : public RiCacheBase
 {
 public:
-	RiGeometryVCache(RtToken type, RtInt count, RtToken tokens[], RtPointer values[])
+	RiGeometryCache(RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __type_length = strlen(type);
 		m_type = new char[ __type_length + 1 ];
 		strcpy(m_type, type);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiGeometryVCache()
+	virtual ~RiGeometryCache()
 	{
 		delete[](m_type);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiGeometryV(m_type, m_count, m_tokens, m_values);
+		RiGeometry(m_type, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_type;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
 class RiSolidBeginCache : public RiCacheBase
 {
 public:
-	RiSolidBeginCache(RtToken type)
+	RiSolidBeginCache(RtToken type) : RiCacheBase()
 	{
 		int __type_length = strlen(type);
 		m_type = new char[ __type_length + 1 ];
@@ -2160,7 +2381,7 @@ private:
 class RiSolidEndCache : public RiCacheBase
 {
 public:
-	RiSolidEndCache()
+	RiSolidEndCache() : RiCacheBase()
 	{
 	}
 	virtual ~RiSolidEndCache()
@@ -2177,7 +2398,7 @@ private:
 class RiObjectBeginCache : public RiCacheBase
 {
 public:
-	RiObjectBeginCache()
+	RiObjectBeginCache() : RiCacheBase()
 	{
 	}
 	virtual ~RiObjectBeginCache()
@@ -2194,7 +2415,7 @@ private:
 class RiObjectEndCache : public RiCacheBase
 {
 public:
-	RiObjectEndCache()
+	RiObjectEndCache() : RiCacheBase()
 	{
 	}
 	virtual ~RiObjectEndCache()
@@ -2211,7 +2432,7 @@ private:
 class RiObjectInstanceCache : public RiCacheBase
 {
 public:
-	RiObjectInstanceCache(RtObjectHandle handle)
+	RiObjectInstanceCache(RtObjectHandle handle) : RiCacheBase()
 	{
 		m_handle = handle;
 	}
@@ -2230,7 +2451,7 @@ private:
 class RiMotionBeginVCache : public RiCacheBase
 {
 public:
-	RiMotionBeginVCache(RtInt N, RtFloat times[])
+	RiMotionBeginVCache(RtInt N, RtFloat times[]) : RiCacheBase()
 	{
 		m_N = N;
 		int __times_length = N;
@@ -2258,7 +2479,7 @@ private:
 class RiMotionEndCache : public RiCacheBase
 {
 public:
-	RiMotionEndCache()
+	RiMotionEndCache() : RiCacheBase()
 	{
 	}
 	virtual ~RiMotionEndCache()
@@ -2272,10 +2493,10 @@ public:
 private:
 };
 
-class RiMakeTextureVCache : public RiCacheBase
+class RiMakeTextureCache : public RiCacheBase
 {
 public:
-	RiMakeTextureVCache(RtString imagefile, RtString texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[])
+	RiMakeTextureCache(RtString imagefile, RtString texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __imagefile_length = strlen(imagefile);
 		m_imagefile = new char[ __imagefile_length + 1 ];
@@ -2293,18 +2514,24 @@ public:
 		m_swidth = swidth;
 		m_twidth = twidth;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiMakeTextureVCache()
+	virtual ~RiMakeTextureCache()
 	{
 		delete[](m_imagefile);
 		delete[](m_texturefile);
 		delete[](m_swrap);
 		delete[](m_twrap);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiMakeTextureV(m_imagefile, m_texturefile, m_swrap, m_twrap, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
+		RiMakeTexture(m_imagefile, m_texturefile, m_swrap, m_twrap, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2315,15 +2542,13 @@ private:
 	RtFilterFunc m_filterfunc;
 	RtFloat m_swidth;
 	RtFloat m_twidth;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiMakeBumpVCache : public RiCacheBase
+class RiMakeBumpCache : public RiCacheBase
 {
 public:
-	RiMakeBumpVCache(RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[])
+	RiMakeBumpCache(RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __imagefile_length = strlen(imagefile);
 		m_imagefile = new char[ __imagefile_length + 1 ];
@@ -2341,18 +2566,24 @@ public:
 		m_swidth = swidth;
 		m_twidth = twidth;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiMakeBumpVCache()
+	virtual ~RiMakeBumpCache()
 	{
 		delete[](m_imagefile);
 		delete[](m_bumpfile);
 		delete[](m_swrap);
 		delete[](m_twrap);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiMakeBumpV(m_imagefile, m_bumpfile, m_swrap, m_twrap, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
+		RiMakeBump(m_imagefile, m_bumpfile, m_swrap, m_twrap, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2363,15 +2594,13 @@ private:
 	RtFilterFunc m_filterfunc;
 	RtFloat m_swidth;
 	RtFloat m_twidth;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiMakeLatLongEnvironmentVCache : public RiCacheBase
+class RiMakeLatLongEnvironmentCache : public RiCacheBase
 {
 public:
-	RiMakeLatLongEnvironmentVCache(RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[])
+	RiMakeLatLongEnvironmentCache(RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __imagefile_length = strlen(imagefile);
 		m_imagefile = new char[ __imagefile_length + 1 ];
@@ -2383,16 +2612,22 @@ public:
 		m_swidth = swidth;
 		m_twidth = twidth;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiMakeLatLongEnvironmentVCache()
+	virtual ~RiMakeLatLongEnvironmentCache()
 	{
 		delete[](m_imagefile);
 		delete[](m_reflfile);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiMakeLatLongEnvironmentV(m_imagefile, m_reflfile, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
+		RiMakeLatLongEnvironment(m_imagefile, m_reflfile, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2401,15 +2636,13 @@ private:
 	RtFilterFunc m_filterfunc;
 	RtFloat m_swidth;
 	RtFloat m_twidth;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiMakeCubeFaceEnvironmentVCache : public RiCacheBase
+class RiMakeCubeFaceEnvironmentCache : public RiCacheBase
 {
 public:
-	RiMakeCubeFaceEnvironmentVCache(RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[])
+	RiMakeCubeFaceEnvironmentCache(RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __px_length = strlen(px);
 		m_px = new char[ __px_length + 1 ];
@@ -2437,8 +2670,14 @@ public:
 		m_swidth = swidth;
 		m_twidth = twidth;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiMakeCubeFaceEnvironmentVCache()
+	virtual ~RiMakeCubeFaceEnvironmentCache()
 	{
 		delete[](m_px);
 		delete[](m_nx);
@@ -2447,11 +2686,11 @@ public:
 		delete[](m_pz);
 		delete[](m_nz);
 		delete[](m_reflfile);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiMakeCubeFaceEnvironmentV(m_px, m_nx, m_py, m_ny, m_pz, m_nz, m_reflfile, m_fov, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
+		RiMakeCubeFaceEnvironment(m_px, m_nx, m_py, m_ny, m_pz, m_nz, m_reflfile, m_fov, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2466,15 +2705,13 @@ private:
 	RtFilterFunc m_filterfunc;
 	RtFloat m_swidth;
 	RtFloat m_twidth;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiMakeShadowVCache : public RiCacheBase
+class RiMakeShadowCache : public RiCacheBase
 {
 public:
-	RiMakeShadowVCache(RtString picfile, RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[])
+	RiMakeShadowCache(RtString picfile, RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __picfile_length = strlen(picfile);
 		m_picfile = new char[ __picfile_length + 1 ];
@@ -2483,30 +2720,34 @@ public:
 		m_shadowfile = new char[ __shadowfile_length + 1 ];
 		strcpy(m_shadowfile, shadowfile);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiMakeShadowVCache()
+	virtual ~RiMakeShadowCache()
 	{
 		delete[](m_picfile);
 		delete[](m_shadowfile);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiMakeShadowV(m_picfile, m_shadowfile, m_count, m_tokens, m_values);
+		RiMakeShadow(m_picfile, m_shadowfile, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtString m_picfile;
 	RtString m_shadowfile;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiMakeOcclusionVCache : public RiCacheBase
+class RiMakeOcclusionCache : public RiCacheBase
 {
 public:
-	RiMakeOcclusionVCache(RtInt npics, RtString picfiles[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[])
+	RiMakeOcclusionCache(RtInt npics, RtString picfiles[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_npics = npics;
 		int __picfiles_length = npics;
@@ -2522,8 +2763,14 @@ public:
 		m_shadowfile = new char[ __shadowfile_length + 1 ];
 		strcpy(m_shadowfile, shadowfile);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiMakeOcclusionVCache()
+	virtual ~RiMakeOcclusionCache()
 	{
 		int __picfiles_length = 1;
 		int __picfiles_index;
@@ -2533,26 +2780,24 @@ public:
 		}
 		delete[](m_picfiles);
 		delete[](m_shadowfile);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiMakeOcclusionV(m_npics, m_picfiles, m_shadowfile, m_count, m_tokens, m_values);
+		RiMakeOcclusion(m_npics, m_picfiles, m_shadowfile, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtInt m_npics;
 	RtString* m_picfiles;
 	RtString m_shadowfile;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
 class RiErrorHandlerCache : public RiCacheBase
 {
 public:
-	RiErrorHandlerCache(RtErrorFunc handler)
+	RiErrorHandlerCache(RtErrorFunc handler) : RiCacheBase()
 	{
 		m_handler = handler;
 	}
@@ -2571,7 +2816,7 @@ private:
 class RiGetContextCache : public RiCacheBase
 {
 public:
-	RiGetContextCache()
+	RiGetContextCache() : RiCacheBase()
 	{
 	}
 	virtual ~RiGetContextCache()
@@ -2588,7 +2833,7 @@ private:
 class RiContextCache : public RiCacheBase
 {
 public:
-	RiContextCache(RtContextHandle handle)
+	RiContextCache(RtContextHandle handle) : RiCacheBase()
 	{
 		m_handle = handle;
 	}
@@ -2607,7 +2852,7 @@ private:
 class RiClippingPlaneCache : public RiCacheBase
 {
 public:
-	RiClippingPlaneCache(RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny, RtFloat nz)
+	RiClippingPlaneCache(RtFloat x, RtFloat y, RtFloat z, RtFloat nx, RtFloat ny, RtFloat nz) : RiCacheBase()
 	{
 		m_x = x;
 		m_y = y;
@@ -2636,7 +2881,7 @@ private:
 class RiCoordSysTransformCache : public RiCacheBase
 {
 public:
-	RiCoordSysTransformCache(RtToken space)
+	RiCoordSysTransformCache(RtToken space) : RiCacheBase()
 	{
 		int __space_length = strlen(space);
 		m_space = new char[ __space_length + 1 ];
@@ -2655,10 +2900,10 @@ private:
 	RtToken m_space;
 };
 
-class RiBlobbyVCache : public RiCacheBase
+class RiBlobbyCache : public RiCacheBase
 {
 public:
-	RiBlobbyVCache(RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], RtInt count, RtToken tokens[], RtPointer values[])
+	RiBlobbyCache(RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_nleaf = nleaf;
 		m_ncode = ncode;
@@ -2688,8 +2933,14 @@ public:
 			strcpy(m_str[__str_index], str[__str_index]);
 		}
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiBlobbyVCache()
+	virtual ~RiBlobbyCache()
 	{
 		delete[](m_code);
 		delete[](m_flt);
@@ -2700,11 +2951,11 @@ public:
 			delete[](m_str[__str_index]);
 		}
 		delete[](m_str);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiBlobbyV(m_nleaf, m_ncode, m_code, m_nflt, m_flt, m_nstr, m_str, m_count, m_tokens, m_values);
+		RiBlobby(m_nleaf, m_ncode, m_code, m_nflt, m_flt, m_nstr, m_str, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2715,39 +2966,44 @@ private:
 	RtFloat* m_flt;
 	RtInt m_nstr;
 	RtToken* m_str;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiPointsVCache : public RiCacheBase
+class RiPointsCache : public RiCacheBase
 {
 public:
-	RiPointsVCache(RtInt npoints, RtInt count, RtToken tokens[], RtPointer values[])
+	RiPointsCache(RtInt npoints, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		m_npoints = npoints;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		varying_size = npoints;
+		vertex_size = npoints;
+		facevarying_size = npoints;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiPointsVCache()
+	virtual ~RiPointsCache()
 	{
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiPointsV(m_npoints, m_count, m_tokens, m_values);
+		RiPoints(m_npoints, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtInt m_npoints;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiCurvesVCache : public RiCacheBase
+class RiCurvesCache : public RiCacheBase
 {
 public:
-	RiCurvesVCache(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, RtInt count, RtToken tokens[], RtPointer values[])
+	RiCurvesCache(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __type_length = strlen(type);
 		m_type = new char[ __type_length + 1 ];
@@ -2764,17 +3020,53 @@ public:
 		m_wrap = new char[ __wrap_length + 1 ];
 		strcpy(m_wrap, wrap);
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		uniform_size = ncurves;
+		varying_size = 0;
+		{
+			int __i;
+			for(__i=0; __i<__nvertices_length; __i++)
+			{
+				if(strcmp(type, "cubic")==0)
+				{
+					int step = QGetRenderContext() ->pattrCurrent()->GetIntegerAttribute( "System", "BasisStep" ) [ 0 ];
+					if(strcmp(wrap, "periodic")==0)
+						varying_size+=nvertices[__i]/step;
+					else
+						varying_size+=((nvertices[__i]-4)/step)+1;
+				}
+				else
+				{
+					if(strcmp(wrap, "periodic")==0)
+						varying_size+=nvertices[__i];
+					else
+						varying_size+=nvertices[__i]-1;
+				}
+				varying_size+=1;
+			}
+		}
+		vertex_size = 0;
+		{
+			int __i;
+			for(__i=0; __i<ncurves; __i++)
+				vertex_size+=nvertices[__i];
+		}
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiCurvesVCache()
+	virtual ~RiCurvesCache()
 	{
 		delete[](m_type);
 		delete[](m_nvertices);
 		delete[](m_wrap);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiCurvesV(m_type, m_ncurves, m_nvertices, m_wrap, m_count, m_tokens, m_values);
+		RiCurves(m_type, m_ncurves, m_nvertices, m_wrap, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2782,15 +3074,13 @@ private:
 	RtInt m_ncurves;
 	RtInt* m_nvertices;
 	RtToken m_wrap;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiSubdivisionMeshVCache : public RiCacheBase
+class RiSubdivisionMeshCache : public RiCacheBase
 {
 public:
-	RiSubdivisionMeshVCache(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], RtInt count, RtToken tokens[], RtPointer values[])
+	RiSubdivisionMeshCache(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __scheme_length = strlen(scheme);
 		m_scheme = new char[ __scheme_length + 1 ];
@@ -2856,8 +3146,29 @@ public:
 			m_floatargs[__floatargs_index] = floatargs[__floatargs_index];
 		}
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		varying_size=0;
+		{
+			int __i;
+			for(__i=0; __i<__vertices_length; __i++)
+				if(vertices[__i]>varying_size)
+					varying_size=vertices[__i];
+		}
+		varying_size+=1;
+		vertex_size=varying_size;
+		facevarying_size=0;
+		{
+			int __i;
+			for(__i=0; __i<nfaces; __i++)
+				facevarying_size+=nvertices[__i];
+		}
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiSubdivisionMeshVCache()
+	virtual ~RiSubdivisionMeshCache()
 	{
 		delete[](m_scheme);
 		delete[](m_nvertices);
@@ -2872,11 +3183,11 @@ public:
 		delete[](m_nargs);
 		delete[](m_intargs);
 		delete[](m_floatargs);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiSubdivisionMeshV(m_scheme, m_nfaces, m_nvertices, m_vertices, m_ntags, m_tags, m_nargs, m_intargs, m_floatargs, m_count, m_tokens, m_values);
+		RiSubdivisionMesh(m_scheme, m_nfaces, m_nvertices, m_vertices, m_ntags, m_tags, m_nargs, m_intargs, m_floatargs, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2889,37 +3200,39 @@ private:
 	RtInt* m_nargs;
 	RtInt* m_intargs;
 	RtFloat* m_floatargs;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 
-class RiReadArchiveVCache : public RiCacheBase
+class RiReadArchiveCache : public RiCacheBase
 {
 public:
-	RiReadArchiveVCache(RtToken name, RtArchiveCallback callback, RtInt count, RtToken tokens[], RtPointer values[])
+	RiReadArchiveCache(RtToken name, RtArchiveCallback callback, RtInt count, RtToken tokens[], RtPointer values[]) : RiCacheBase()
 	{
 		int __name_length = strlen(name);
 		m_name = new char[ __name_length + 1 ];
 		strcpy(m_name, name);
 		m_callback = callback;
 		// Copy the plist here.
+		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);
 	}
-	virtual ~RiReadArchiveVCache()
+	virtual ~RiReadArchiveCache()
 	{
 		delete[](m_name);
-		// Delete the plist here.
+		// plist gets destroyed by the base class.
 	}
 	virtual void ReCall()
 	{
-		RiReadArchiveV(m_name, m_callback, m_count, m_tokens, m_values);
+		RiReadArchive(m_name, m_callback, m_count, m_tokens, m_values);
 	}
 
 private:
 	RtToken m_name;
 	RtArchiveCallback m_callback;
-	RtInt m_count;
-	RtToken* m_tokens;
-	RtPointer* m_values;
+	// plist information is stored in the base class.
 };
 

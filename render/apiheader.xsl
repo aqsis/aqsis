@@ -23,9 +23,21 @@
 
 	<!--	Procedure	-->
 	<xsl:template match="Procedure">
-		<xsl:value-of select="concat('&#x9;_qShare ', @return, ' ', @name, '( ')"/>
-		<xsl:apply-templates select="Arguments/Argument"/>
-		<xsl:value-of select="string(' );&#xa;')"/>
+		<xsl:choose>
+			<xsl:when test="Arguments/Argument[last()]/@type = 'PARAMETERLIST'">
+				<xsl:value-of select="concat('&#x9;_qShare ', @return, ' ', @name, '( ')"/>
+				<xsl:apply-templates select="Arguments/Argument[position()&lt;last()]"/>
+				<xsl:value-of select="string(', ... );&#xa;')"/>
+				<xsl:value-of select="concat('&#x9;_qShare ', @return, ' ', @name, 'V( ')"/>
+				<xsl:apply-templates select="Arguments/Argument"/>
+				<xsl:value-of select="string(' );&#xa;')"/>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="concat('&#x9;_qShare ', @return, ' ', @name, '( ')"/>
+				<xsl:apply-templates select="Arguments/Argument"/>
+				<xsl:value-of select="string(' );&#xa;')"/>
+			</xsl:otherwise>
+		</xsl:choose>
 	</xsl:template>
 
 

@@ -21,14 +21,8 @@
 			<xsl:value-of select="concat('class ', @name, 'Cache : public RiCacheBase&#xa;')"/>
 			<xsl:text>{&#xa;</xsl:text>
 			<xsl:text>public:&#xa;</xsl:text>
-			<xsl:value-of select="concat('&#x9;', @name, 'Cache(')"/>
-			<xsl:apply-templates select="Arguments/Argument" mode="constructor_sig"/>
-			<xsl:text>)&#xa;&#x9;{&#xa;</xsl:text>
-			<xsl:apply-templates select="Arguments/Argument" mode="constructor_copy"/>
-			<xsl:text>&#x9;}&#xa;</xsl:text>
-			<xsl:value-of select="concat('&#x9;virtual ~', @name, 'Cache()&#xa;&#x9;{&#xa;')"/>
-			<xsl:apply-templates select="Arguments/Argument" mode="destructor"/>
-			<xsl:text>&#x9;}&#xa;</xsl:text>
+			<xsl:call-template name="Constructor"/>
+			<xsl:call-template name="Destructor"/>
 			<xsl:value-of select="concat('&#x9;virtual void ReCall()&#xa;&#x9;{&#xa;&#x9;&#x9;', @name, '(')"/>
 			<xsl:apply-templates select="Arguments/Argument" mode="recall_args"/>
 			<xsl:text>);&#xa;</xsl:text>
@@ -40,6 +34,19 @@
 		</xsl:if>
 	</xsl:template>
 
+	<xsl:template name="Constructor">
+		<xsl:value-of select="concat('&#x9;', @name, 'Cache(')"/>
+		<xsl:apply-templates select="Arguments/Argument" mode="constructor_sig"/>
+		<xsl:text>) : RiCacheBase()&#xa;&#x9;{&#xa;</xsl:text>
+		<xsl:apply-templates select="Arguments/Argument" mode="constructor_copy"/>
+		<xsl:text>&#x9;}&#xa;</xsl:text>
+	</xsl:template>
+
+	<xsl:template name="Destructor">
+		<xsl:value-of select="concat('&#x9;virtual ~', @name, 'Cache()&#xa;&#x9;{&#xa;')"/>
+		<xsl:apply-templates select="Arguments/Argument" mode="destructor"/>
+		<xsl:text>&#x9;}&#xa;</xsl:text>
+	</xsl:template>
 
 	<!--	Argument to the cache constructor	-->
 	<xsl:template match="Argument" mode="constructor_sig">
@@ -64,6 +71,28 @@
 		<xsl:choose>
 			<xsl:when test="@type = 'PARAMETERLIST'">
 				<xsl:text>&#x9;&#x9;// Copy the plist here.&#xa;</xsl:text>
+				<xsl:text>		int constant_size = 1;
+		int uniform_size = 1;
+		int varying_size = 1;
+		int vertex_size = 1;
+		int facevarying_size = 1;
+</xsl:text>
+				<xsl:if test="../../ConstantSize">
+					<xsl:value-of select="../../ConstantSize"/>
+				</xsl:if>
+				<xsl:if test="../../UniformSize">
+					<xsl:value-of select="../../UniformSize"/>
+				</xsl:if>
+				<xsl:if test="../../VaryingSize">
+					<xsl:value-of select="../../VaryingSize"/>
+				</xsl:if>
+				<xsl:if test="../../VertexSize">
+					<xsl:value-of select="../../VertexSize"/>
+				</xsl:if>
+				<xsl:if test="../../FaceVaryingSize">
+					<xsl:value-of select="../../FaceVaryingSize"/>
+				</xsl:if>
+				<xsl:text>		CachePlist(count, tokens, values, constant_size, uniform_size, varying_size, vertex_size, facevarying_size);&#xa;</xsl:text>
 			</xsl:when>
 			<xsl:when test="contains( @type, 'Array')">
 				<xsl:choose>
@@ -135,7 +164,7 @@
 		<xsl:text>&#x9;</xsl:text>
 		<xsl:choose>
 			<xsl:when test="@type = 'PARAMETERLIST'">
-				<xsl:text>RtInt m_count;&#xa;&#x9;RtToken* m_tokens;&#xa;&#x9;RtPointer* m_values;</xsl:text>
+				<xsl:text>// plist information is stored in the base class.</xsl:text>
 			</xsl:when>
 			<xsl:when test="contains( @type, 'Array')">
 				<xsl:value-of select="concat(substring-before(@type, 'Array'), '* m_', @name, ';')"/>
@@ -166,7 +195,7 @@
 	<xsl:template match="Argument" mode="destructor">
 		<xsl:choose>
 			<xsl:when test="@type = 'PARAMETERLIST'">
-				<xsl:text>&#x9;&#x9;// Delete the plist here.&#xa;</xsl:text>
+				<xsl:text>&#x9;&#x9;// plist gets destroyed by the base class.&#xa;</xsl:text>
 			</xsl:when>
 			<xsl:when test="contains( @type, 'Array')">
 				<xsl:choose>
