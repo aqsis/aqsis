@@ -129,6 +129,10 @@ SOURCE=.\bound.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\bucket.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\converter.cpp
 # End Source File
 # Begin Source File
@@ -150,6 +154,10 @@ SOURCE=.\graphicsstate.cpp
 # Begin Source File
 
 SOURCE=.\imagebuffer.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\imagepixel.cpp
 # End Source File
 # Begin Source File
 
@@ -269,6 +277,10 @@ SOURCE=.\bound.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\bucket.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\converter.h
 # End Source File
 # Begin Source File
@@ -310,6 +322,10 @@ SOURCE=.\ilightsource.h
 # Begin Source File
 
 SOURCE=.\ImageBuffer.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\imagepixel.h
 # End Source File
 # Begin Source File
 
