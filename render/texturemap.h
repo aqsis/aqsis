@@ -302,15 +302,15 @@ class CqShadowMapBuffer : public CqTextureMapBuffer
 
 		virtual TqFloat	GetValue(TqInt x, TqInt y, TqInt sample)
 		{
-			TqInt iv = y * ( m_Width * ElemSize() );
-			TqInt iu = x * ElemSize();
-			return ( (reinterpret_cast<TqFloat*>(&m_pBufferData[ iv + iu ]))[sample] );
+			TqInt iv = y * ( m_Width * m_Samples );
+			TqInt iu = x * m_Samples;
+			return ( reinterpret_cast<TqFloat*>(m_pBufferData)[ iv + iu + sample] );
 		}
 		virtual void	SetValue(TqInt x, TqInt y, TqInt sample, TqFloat value)
 		{
-			TqInt iv = y * ( m_Width * ElemSize() );
-			TqInt iu = x * ElemSize();
-			(reinterpret_cast<TqFloat*>(&m_pBufferData[ iv + iu ]))[sample] = value;
+			TqInt iv = y * ( m_Width * m_Samples );
+			TqInt iu = x * m_Samples;
+			reinterpret_cast<TqFloat*>(m_pBufferData)[ iv + iu + sample] = value;
 		}
 		virtual TqInt	ElemSize()
 		{

@@ -309,10 +309,18 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 		twidth *= m_ptwidth;
 
 		CqVector3D	R1, R2, R3, R4;
-		R1 = vecPoint - ( swidth / 2.0f ) - ( twidth / 2.0f );
-		R2 = vecPoint + ( swidth / 2.0f ) - ( twidth / 2.0f );
-		R3 = vecPoint - ( swidth / 2.0f ) + ( twidth / 2.0f );
-		R4 = vecPoint + ( swidth / 2.0f ) + ( twidth / 2.0f );
+		R1 = vecPoint;
+		R1 -= ( swidth / 2.0f );
+		R1 -= ( twidth / 2.0f );
+		R2 = vecPoint;
+		R2 += ( swidth / 2.0f );
+		R2 -= ( twidth / 2.0f );
+		R3 = vecPoint;
+		R3 -= ( swidth / 2.0f );
+		R3 += ( twidth / 2.0f );
+		R4 = vecPoint;
+		R4 += ( swidth / 2.0f );
+		R4 += ( twidth / 2.0f );
 
 		SampleMap( R1, R2, R3, R4, val, index, average_depth );
 	}
@@ -331,13 +339,13 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth )
 {
 	// Check the memory and make sure we don't abuse it
-	//CriticalMeasure();
+	CriticalMeasure();
 
 	// If no map defined, not in shadow.
 	val.resize( 1 );
 	val[ 0 ] = 0.0f;
 
-	CqVector3D	vecR1l, vecR2l, vecR3l, vecR4l;
+	CqVector3D	vecR1l;
 	CqVector3D	vecR1m, vecR2m, vecR3m, vecR4m;
 
 	static CqRandom random( 42 );
@@ -364,21 +372,17 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	// Generate a matrix to transform points from camera space into the space of the shadow map.
 	CqMatrix& matCameraToMap = matWorldToScreen( index );
 
-	vecR1l = matCameraToLight * ( R1 - vecBias );
-	vecR2l = matCameraToLight * ( R2 - vecBias );
-	vecR3l = matCameraToLight * ( R3 - vecBias );
-	vecR4l = matCameraToLight * ( R4 - vecBias );
+	R1 -= vecBias;
+	R2 -= vecBias;
+	R3 -= vecBias;
+	R4 -= vecBias;
+	vecR1l = matCameraToLight * ( ( R1 + R2 + R3 + R4 ) * 0.25f );
+	TqFloat z = vecR1l.z();
 
-	vecR1m = matCameraToMap * ( R1 - vecBias );
-	vecR2m = matCameraToMap * ( R2 - vecBias );
-	vecR3m = matCameraToMap * ( R3 - vecBias );
-	vecR4m = matCameraToMap * ( R4 - vecBias );
-
-	TqFloat z1 = vecR1l.z();
-	TqFloat z2 = vecR2l.z();
-	TqFloat z3 = vecR3l.z();
-	TqFloat z4 = vecR4l.z();
-	TqFloat z = ( z1 + z2 + z3 + z4 ) * 0.25;
+	vecR1m = matCameraToMap * R1;
+	vecR2m = matCameraToMap * R2;
+	vecR3m = matCameraToMap * R3;
+	vecR4m = matCameraToMap * R4;
 
 	TqFloat sbo2 = ( m_sblur * 0.5f ) * m_XRes;
 	TqFloat tbo2 = ( m_tblur * 0.5f ) * m_YRes;
@@ -386,8 +390,8 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	// If point is behind light, call it not in shadow.
 	//if(z1<0.0)	return;
 
-	TqFloat xro2 = m_XRes * 0.5;
-	TqFloat yro2 = m_YRes * 0.5;
+	TqFloat xro2 = m_XRes * 0.5f;
+	TqFloat yro2 = m_YRes * 0.5f;
 
 	TqFloat s1 = vecR1m.x() * xro2 + xro2;
 	TqFloat t1 = m_YRes - ( vecR1m.y() * yro2 + yro2 );
@@ -414,8 +418,13 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	hu += static_cast<TqInt>( sbo2 );
 	hv += static_cast<TqInt>( tbo2 );
 
-	if ( lu > m_XRes || hu < 0 || lv > m_YRes || hv < 0 )
+	if ( lu >= m_XRes || hu < 0 || lv >= m_YRes || hv < 0 )
 		return ;
+
+	lu = MAX(0,lu);
+	lv = MAX(0,lv);
+	hu = MIN(m_XRes - 1,hu);
+	hv = MIN(m_YRes - 1,hv);
 
 	TqFloat sres = hu - lu;
 	TqFloat tres = hv - lv;
@@ -445,8 +454,8 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	}
 
 	// Setup jitter variables
-	TqFloat ds =        /*2.0f**/sres / ns;
-	TqFloat dt =        /*2.0f**/tres / nt;
+	TqFloat ds = sres / ns;
+	TqFloat dt = tres / nt;
 	TqFloat js = ds * 0.5f;
 	TqFloat jt = dt * 0.5f;
 
@@ -456,6 +465,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 	TqFloat s = lu;
 	TqInt i;
+	CqTextureMapBuffer * pTMBa = NULL;
 	for ( i = 0; i < ns; i++ )
 	{
 		TqFloat t = lv;
@@ -468,29 +478,27 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 			m_rand_index = ( m_rand_index + 1 ) & 255;
 			TqUint iv = static_cast<TqUint>( t + m_aRand_no[ m_rand_index ] * jt );
 
-			// Clip to bounding box.
-			if ( iu >= 0 && iu < m_XRes &&
-			        iv >= 0 && iv < m_YRes )
+			if( ( pTMBa == NULL )  || !pTMBa->IsValid( iu, iv, index ) )
+				pTMBa = GetBuffer( iu, iv, index );
+			if ( pTMBa != 0 && pTMBa->pVoidBufferData() != 0 )
 			{
-				CqTextureMapBuffer * pTMBa = GetBuffer( iu, iv, index );
-				if ( pTMBa != 0 && pTMBa->pVoidBufferData() != 0 )
-				{
-					iu -= pTMBa->sOrigin();
-					iv -= pTMBa->tOrigin();
-					TqFloat mapz = pTMBa->GetValue( iu, iv, 0 );
-					if ( z > mapz )
-						inshadow += 1;
-					avz += mapz;
-				}
+				iu -= pTMBa->sOrigin();
+				iv -= pTMBa->tOrigin();
+				TqFloat mapz = pTMBa->GetValue( iu, iv, 0 );
+				if ( z > mapz )
+					inshadow += 1;
+				avz += mapz;
 			}
-			t = t + dt;
+			t += dt;
 		}
-		s = s + ds;
+		s += ds;
 	}
 
-	avz /= ( ns * nt );
 	if( NULL != average_depth )
+	{
+		avz /= ( ns * nt );
 		*average_depth = avz;
+	}
 	val[ 0 ] = ( static_cast<TqFloat>( inshadow ) / ( ns * nt ) );
 }
 

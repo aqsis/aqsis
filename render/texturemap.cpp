@@ -402,8 +402,11 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 {
 	QGetRenderContext() ->Stats().IncTextureMisses( 4 );
 
-	if ( m_apSegments.front() ->IsValid( s, t, directory ) )
+	if ( m_apSegments.size() > 0 && m_apSegments.front() ->IsValid( s, t, directory ) )
+	{
+		QGetRenderContext() ->Stats().IncTextureHits( 1, 4 );
 		return( m_apSegments.front() );
+	}
 
 	// Search already cached segments first.
 	for ( std::list<CqTextureMapBuffer*>::iterator i = m_apSegments.begin(); i != m_apSegments.end(); i++ )
