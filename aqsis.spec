@@ -12,6 +12,7 @@ BuildRoot: %{_tmppath}/%{name}-root
 Requires: /sbin/ldconfig
 AutoReqProv: no
 
+
 %description
 A RenderMan(tm)-compatible renderer
 
@@ -20,7 +21,10 @@ A RenderMan(tm)-compatible renderer
 
 %build
 #./bootstrap
+export CFLAGS="-O2" 
+export CXXFLAGS="-O29" 
 %configure
+
 make
 #make check
 
@@ -58,10 +62,13 @@ rm -fr %{buildroot}
 
 %changelog
 
+* Sun Mar 21 2004 cgtobix <cgtobix@users.sourceforge.net>
+- Now building without debug information
+* Thu Mar 18 2004 cgtobix <cgtobix@users.sourceforge.net>
+- Make it working for RedHat9/Fedora
 * Wed Oct 23 2002 Damien Miller <djm@mindrot.org>
 - Make an RPM
-* Thu Mar 18 2004 cgtobix
-- RPM from aqsis cvs 0.9.1
+
 
 
 
