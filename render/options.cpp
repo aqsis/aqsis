@@ -213,6 +213,9 @@ CqOptions& CqOptions::operator=( const CqOptions& From )
     m_bScreenWindowCalled = From.m_bScreenWindowCalled;
     m_bFormatCalled = From.m_bFormatCalled;
 
+    m_funcFilter = From.m_funcFilter;
+    m_pshadImager = From.m_pshadImager;
+
     DeleteImager();
 
     // Copy the system options.

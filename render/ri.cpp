@@ -1404,17 +1404,23 @@ RtFloat	RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth
      * otherwise  f(d)=0
      *
      */
-    RtFloat d, d2;
+/*    RtFloat d, d2;
 
-    d2 = x * x + y * y; /* d*d */
-    d = sqrt( d2 ); /* distance from origin */
+    d2 = x * x + y * y; // d*d 
+    d = sqrt( d2 ); // distance from origin 
 
     if ( d < 1 )
         return ( 1.5 * d * d2 - 2.5 * d2 + 1.0 );
     else if ( d < 2 )
         return ( -d * d2 * 0.5 + 2.5 * d2 - 4.0 * d + 2.0 );
     else
-        return 0.0;
+        return 0.0;*/
+
+   /* RI SPec 3.2 */
+   RtFloat r2 = (x*x+y*y);
+   RtFloat r = sqrt(r2);
+   return (r>=2.0)?0.0:
+				   (r<1.0)?(3.0*r*r2-5.0*r2+2.0):(-r*r2+5.0*r2-8.0*r+4.0);
 }
 
 
