@@ -2447,57 +2447,23 @@ RtVoid	RiPoints( RtInt nvertices, ... )
 RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 {
 
-	TqInt n = nvertices;
+	// Create a storage class for all the points.
+	CqPolygonPoints* pPointsClass = new CqPolygonPoints( nvertices, 1 );
 
-	RtFloat*	pOrigins = 0;
-	RtFloat*	pSizes = 0;
-	RtFloat constantwidth = 1.0f;
+	// Create a new points storage class
+	CqPoints* pSurface = new CqPoints( nvertices, pPointsClass );
 
-
-	RtToken	token;
-	RtPointer	value;
-
-	RtInt i;
-
-	for ( i = 0; i < count; i++ )
+	pSurface->AddRef();
+	// read in the parameter list
+	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
-		token = tokens[ i ];
-		value = values[ i ];
-
-
-		if ( strcmp( token, "width" ) == 0 )
-		{
-			pSizes = ( RtFloat* ) value;
-		}
-
-		else if ( strcmp( token, RI_P ) == 0 )
-		{
-
-			pOrigins = ( RtFloat* ) value;
-		}
-		else if ( strstr( token, "constantwidth" ) )
-		{
-			constantwidth = *( RtFloat* ) value;
-		}
+		// Initialise the KDTree for the points to contain all.
+		pSurface->InitialiseKDTree();
+		CreateGPrim( pSurface );
 	}
-
-
-	if ( ( n != 0 ) && ( pOrigins ) )
+	else
 	{
-		CqPoints * pSurface = new CqPoints( n, pOrigins , pSizes, constantwidth );
-
-		if ( pSurface )
-		{
-			pSurface->AddRef();
-
-			std::vector<CqSurfacePolygon*>::iterator iE;
-
-			for ( iE = pSurface->m_pPolygons.begin(); iE != pSurface->m_pPolygons.end(); iE++ )
-			{
-				CreateGPrim( ( CqSurfacePolygon* ) ( *iE ) );
-			}
-			pSurface->Release();
-		}
+		pSurface->Release();
 	}
 
 	return ;

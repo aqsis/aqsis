@@ -309,6 +309,10 @@ SOURCE=.\itransform.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\kdtree.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\lath.h
 # End Source File
 # Begin Source File
