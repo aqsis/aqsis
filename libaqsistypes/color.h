@@ -35,6 +35,8 @@
 #define		_qShareName	CORE
 #include	"share.h"
 
+#include <iostream>
+
 START_NAMESPACE(Aqsis)
 
 
@@ -357,6 +359,16 @@ class _qShareC	CqColor
 								 * \return new color representing negation. 
 								 */
 	_qShareM	friend CqColor	operator-(const CqColor& a)					{return(CqColor(-a.m_fRed,-a.m_fGreen,-a.m_fBlue));} // Negation
+								/** Component wide stream output operator.
+								 *\param Stream output stream.
+								 *\param a color to serialize.
+								 *\return input stream.
+								 */
+	_qShareM	friend std::ostream& operator<<(std::ostream& Stream, const CqColor& a)
+	{
+		Stream << a.m_fRed << " " << a.m_fGreen << " " << a.m_fBlue;
+		return Stream;
+	}
 
 	private:
 				TqFloat			m_fRed,				///< the red component 0.0-1.0
