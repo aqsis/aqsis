@@ -92,6 +92,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name tga2tif
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libslxargs
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -382,6 +385,18 @@ Package=<4>
 ###############################################################################
 
 Project: "libslparse"=.\libslparse\libslparse.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libslxargs"=.\libslxargs\libslxargs.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
