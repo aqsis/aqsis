@@ -285,10 +285,30 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
     if( req.m_DriverHandle != NULL )
     {
         req.m_OpenMethod = (DspyImageOpenMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strOpenMethod );
+       if (!req.m_OpenMethod) {
+          m_strOpenMethod = "_" + m_strOpenMethod;
+          req.m_OpenMethod = (DspyImageOpenMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strOpenMethod );
+       }
+       req.m_QueryMethod = (DspyImageQueryMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strQueryMethod );
+       if (!req.m_QueryMethod) {
+          m_strQueryMethod = "_" + m_strQueryMethod;
         req.m_QueryMethod = (DspyImageQueryMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strQueryMethod );
+       }
+       req.m_DataMethod = (DspyImageDataMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDataMethod );
+       if (!req.m_DataMethod) {
+          m_strDataMethod = "_" + m_strDataMethod;
         req.m_DataMethod = (DspyImageDataMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDataMethod );
+       }
+       req.m_CloseMethod = (DspyImageCloseMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strCloseMethod );
+       if (!req.m_OpenMethod) {
+          m_strCloseMethod = "_" + m_strCloseMethod;
         req.m_CloseMethod = (DspyImageCloseMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strCloseMethod );
+       }
+       req.m_DelayCloseMethod = (DspyImageDelayCloseMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDelayCloseMethod );
+       if (!req.m_DelayCloseMethod) {
+          m_strDelayCloseMethod = "_" + m_strDelayCloseMethod;
         req.m_DelayCloseMethod = (DspyImageDelayCloseMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDelayCloseMethod );
+	}
 	}
 
     if( NULL != req.m_OpenMethod )
@@ -469,6 +489,8 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 			err = (*req.m_QueryMethod)(req.m_imageHandle, PkOverwriteQuery, sizeof(owinfo), &owinfo);
 		}
     }
+
+	std::cerr << debug << "Load Display: " << strDriverPathAndFile.c_str() << std::endl;
 }
 
 void CqDDManager::CloseDisplayLibrary( SqDisplayRequest& req )

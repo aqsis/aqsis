@@ -307,7 +307,7 @@ private:
 
         const boost::shared_ptr<CqNamedParameterList>	Find( const TqChar* pname ) const
         {
-            TqUlong hash = CqParameter::hash(pname);
+            TqUlong hash = CqString::hash(pname);
             TqInt i = _hash( hash);
 
             if ( m_aLists[ i ].empty() )
@@ -338,8 +338,8 @@ private:
 
 	boost::shared_ptr<CqNamedParameterList>	Find( const TqChar* pname )
         {
-            TqUlong hash = CqParameter::hash(pname);
-            TqInt i = _hash( hash);
+            TqUlong hash = CqString::hash(pname);
+            TqUlong i = _hash( hash);
 
             if ( m_aLists[ i ].empty() )
 	    {
@@ -369,15 +369,15 @@ private:
 
         void Add( const boost::shared_ptr<CqNamedParameterList>& pOption )
         {
-            TqUlong hash = CqParameter::hash(pOption->strName().c_str());
-            TqInt i = _hash( hash);
+            TqUlong hash = CqString::hash(pOption->strName().c_str());
+            TqUlong i = _hash( hash);
             m_aLists[ i ].push_back( pOption );
         }
 
         void Remove( const boost::shared_ptr<CqNamedParameterList>& pOption )
         {
-            TqUlong hash = CqParameter::hash(pOption->strName().c_str());
-            TqInt i = _hash( hash);
+            TqUlong hash = CqString::hash(pOption->strName().c_str());
+            TqUlong i = _hash( hash);
 
             std::list<boost::shared_ptr<CqNamedParameterList> >::iterator iEntry = m_aLists[ i ].begin();
             while ( iEntry != m_aLists[ i ].end() )
@@ -404,16 +404,16 @@ private:
         }
 
     private:
-        TqInt _hash( TqUlong h ) const
+        TqUlong _hash( TqUlong h ) const
         {
             return (h % tableSize);
         }
-        TqInt _hash( const TqChar* string ) const
+        TqUlong _hash( const TqChar* string ) const
         {
             assert ( string != 0 && string[ 0 ] != 0 );
 
-            TqUlong h = CqParameter::hash( string );
-            return ( (TqUlong) h % tableSize ); // remainder
+            TqUlong h = CqString::hash( string );
+            return (  h % tableSize ); // remainder
         }
 
         std::vector<std::list<boost::shared_ptr<CqNamedParameterList> > >	m_aLists;
@@ -422,7 +422,7 @@ private:
     class CqHashTable
     {
     private:
-        static const TqInt tableSize;
+        static const TqUlong tableSize;
 
         typedef	std::map<std::string, boost::shared_ptr<CqNamedParameterList>, std::less<std::string> > plist_type;
         typedef	plist_type::value_type	value_type;

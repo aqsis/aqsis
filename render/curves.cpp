@@ -37,6 +37,12 @@
 START_NAMESPACE( Aqsis )
 
 
+static TqUlong hwidth = CqString::hash("width");
+static TqUlong hcwidth = CqString::hash("constantwidth");
+static TqUlong hp = CqString::hash("P");
+static TqUlong hu = CqString::hash("u");
+static TqUlong hn = CqString::hash("N");
+static TqUlong hv = CqString::hash("v");
 
 /**
  * CqCurve constructor.
@@ -71,7 +77,6 @@ CqCurve::~CqCurve()
 { }
 
 
-
 /**
  * Adds a primitive variable to the list of user parameters.  This method
  * caches the indexes of the "width" and "constantwidth" parameters within
@@ -86,12 +91,12 @@ void CqCurve::AddPrimitiveVariable( CqParameter* pParam )
     CqSurface::AddPrimitiveVariable( pParam );
 
     // trap the indexes of "width" and "constantwidth" parameters
-    if ( pParam->strName() == "width" )
+    if ( pParam->hash() == hwidth )
     {
         assert( m_widthParamIndex == -1 );
         m_widthParamIndex = m_aUserParams.size() - 1;
     }
-    else if ( pParam->strName() == "constantwidth" )
+    else if ( pParam->hash() == hcwidth )
     {
         assert( m_constantwidthParamIndex == -1 );
         m_constantwidthParamIndex = m_aUserParams.size() - 1;
@@ -599,10 +604,10 @@ TqInt CqLinearCurveSegment::SplitToPatch(
     for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
     {
         if (
-            ( ( *iUP ) ->strName() != "P" ) &&
-            ( ( *iUP ) ->strName() != "N" ) &&
-            ( ( *iUP ) ->strName() != "u" ) &&
-            ( ( *iUP ) ->strName() != "v" )
+            ( ( *iUP ) ->hash() != hp ) &&
+            ( ( *iUP ) ->hash() != hn ) &&
+            ( ( *iUP ) ->hash() != hu ) &&
+            ( ( *iUP ) ->hash() != hv )
         )
         {
 
@@ -1143,10 +1148,10 @@ TqInt CqCubicCurveSegment::SplitToPatch(
     for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
     {
         if (
-            ( ( *iUP ) ->strName() != "P" ) &&
-            ( ( *iUP ) ->strName() != "N" ) &&
-            ( ( *iUP ) ->strName() != "u" ) &&
-            ( ( *iUP ) ->strName() != "v" )
+            ( ( *iUP ) ->hash() != hp ) &&
+            ( ( *iUP ) ->hash() != hn ) &&
+            ( ( *iUP ) ->hash() != hu ) &&
+            ( ( *iUP ) ->hash() != hv )
         )
         {
 

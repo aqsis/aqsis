@@ -258,6 +258,8 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D
 void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
                                   std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth, TqFloat* shadow_depth )
 {
+    QGetRenderContext() ->Stats().TextureMapTimer().Stop(); 
+
     if ( m_pImage != 0 )
     {
 
@@ -365,6 +367,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3
         // Normalize the weightings
         val /= total_area;
     }
+    QGetRenderContext() ->Stats().TextureMapTimer().Start(); 
 
 }
 

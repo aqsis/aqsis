@@ -120,23 +120,10 @@ public:
     {
         return ( m_strName );
     }
-    const TqLong hash() const
+    const TqUlong hash() const
     {
         return m_hash;
     }
-    static TqLong	hash( const char *strName )
-    {
-        TqInt retval = 0;
-	const char *p = strName;
-	retval = *p;
-
-	    if (retval) {
-	        for (p += 1; *p != '\0'; p++) {
-	            retval = (retval << 5) - retval + *p;
-	        }
-            }
-	return (TqLong) retval;
-            }
 
     /** Get the array size.
      */
@@ -148,7 +135,7 @@ public:
 protected:
     CqString	m_strName;		///< String name of the parameter.
     TqInt	m_Count;		///< Array size of value.
-    TqLong m_hash;
+    TqUlong m_hash;
 
 }
 ;
@@ -1378,7 +1365,7 @@ class CqNamedParameterList
 public:
     CqNamedParameterList( const char* strName ) : m_strName( strName )
     {
-        m_hash = CqParameter::hash( strName );
+        m_hash = CqString::hash( strName );
 
     }
     CqNamedParameterList( const CqNamedParameterList& From );
@@ -1423,8 +1410,7 @@ CqString className() const { return CqString("CqNamedParameterList"); }
      */
     const	CqParameter* pParameter( const char* strName ) const
     {
-        TqLong hash;
-        hash = CqParameter::hash( strName );
+        TqUlong hash = CqString::hash( strName );
         for ( std::vector<CqParameter*>::const_iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
             if ( ( *i ) ->hash() == hash ) return ( *i );
         return ( 0 );
@@ -1435,20 +1421,19 @@ CqString className() const { return CqString("CqNamedParameterList"); }
      */
     CqParameter* pParameter( const char* strName )
     {
-        TqLong hash;
-        hash = CqParameter::hash( strName );
+        TqUlong hash = CqString::hash( strName );
         for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
             if ( ( *i ) ->hash() == hash ) return ( *i );
         return ( 0 );
     }
-    TqLong hash()
+    TqUlong hash()
     {
         return m_hash;
     }
 private:
     CqString	m_strName;			///< The name of this parameter list.
     std::vector<CqParameter*>	m_aParameters;		///< A vector of name/value parameters.
-    TqLong m_hash;
+    TqUlong m_hash;
 }
 ;
 

@@ -59,10 +59,10 @@ void TIFF_ErrorHandler(const char*, const char*, va_list);
 void TIFF_WarnHandler(const char*, const char*, va_list);
 
 
-static TqUlong ohash = 0; //< == "object"
-static TqUlong shash = 0; //< == "shader"
-static TqUlong chash = 0; //< == "camera"
-static TqUlong cuhash = 0; //< == "current"
+static TqUlong ohash = CqString::hash( "object" ); //< == "object"
+static TqUlong shash = CqString::hash( "shader" ); //< == "shader"
+static TqUlong chash = CqString::hash( "camera" ); //< == "camera"
+static TqUlong cuhash = CqString::hash( "current" ); //< == "current"
 
 static CqMatrix oldkey[2];  //< to eliminate Inverse(), Transpose() matrix ops.
 static CqMatrix oldresult[2];
@@ -106,12 +106,12 @@ CqRenderer::CqRenderer() :
     m_aCoordSystems[ CoordSystem_NDC ].m_strName = "NDC";
     m_aCoordSystems[ CoordSystem_Raster ].m_strName = "raster";
 
-    m_aCoordSystems[ CoordSystem_Camera ].m_hash = CqParameter::hash( "__camera__" );
-    m_aCoordSystems[ CoordSystem_Current ].m_hash = CqParameter::hash( "__current__" );
-    m_aCoordSystems[ CoordSystem_World ].m_hash = CqParameter::hash( "world" );
-    m_aCoordSystems[ CoordSystem_Screen ].m_hash = CqParameter::hash( "screen" );
-    m_aCoordSystems[ CoordSystem_NDC ].m_hash = CqParameter::hash( "NDC" );
-    m_aCoordSystems[ CoordSystem_Raster ].m_hash = CqParameter::hash( "raster" );
+    m_aCoordSystems[ CoordSystem_Camera ].m_hash = CqString::hash( "__camera__" );
+    m_aCoordSystems[ CoordSystem_Current ].m_hash = CqString::hash( "__current__" );
+    m_aCoordSystems[ CoordSystem_World ].m_hash = CqString::hash( "world" );
+    m_aCoordSystems[ CoordSystem_Screen ].m_hash = CqString::hash( "screen" );
+    m_aCoordSystems[ CoordSystem_NDC ].m_hash = CqString::hash( "NDC" );
+    m_aCoordSystems[ CoordSystem_Raster ].m_hash = CqString::hash( "raster" );
 
     m_pDDManager = CreateDisplayDriverManager();
     m_pDDManager->Initialise();
@@ -123,10 +123,6 @@ CqRenderer::CqRenderer() :
     m_UsingDepthOfField = false;
 
     // Get the hash keys for object, shader, camera keywords.
-    if ( ohash == 0 ) ohash = CqParameter::hash( "object" );
-    if ( shash == 0 ) shash = CqParameter::hash( "shader" );
-    if ( chash == 0 ) chash = CqParameter::hash( "camera" );
-    if ( cuhash == 0 ) cuhash = CqParameter::hash( "current" );
 
     // Set the TIFF Error/Warn handler
     TIFFSetErrorHandler( &TIFF_ErrorHandler );
@@ -172,7 +168,6 @@ CqRenderer::~CqRenderer()
 		delete m_pRaytracer;
 		m_pRaytracer = 0;	// MGC: or better NULL?
 	}
-
 	// Clear up the MicroPolygon memory pool.
 	CqMicroPolygon::Flush();
 	CqMovingMicroPolygonKeyPoints::Flush();
@@ -694,8 +689,8 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 
 
     // Get the hash keys for From,To spaces
-    fhash = CqParameter::hash( strFrom );
-    thash = CqParameter::hash( strTo );
+    fhash = CqString::hash( strFrom );
+    thash = CqString::hash( strTo );
 
     // Get the two component matrices.
     // First check for special cases.
@@ -738,8 +733,8 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
     TqUlong fhash, thash;
 
     // Get the hash keys for From,To spaces
-    fhash = CqParameter::hash( strFrom );
-    thash = CqParameter::hash( strTo );
+    fhash = CqString::hash( strFrom );
+    thash = CqString::hash( strTo );
 
     // Get the two component matrices.
     // First check for special cases.
@@ -793,8 +788,8 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
     TqUlong fhash, thash;
 
     // Get the hash keys for From,To spaces
-    fhash = CqParameter::hash( strFrom );
-    thash = CqParameter::hash( strTo );
+    fhash = CqString::hash( strFrom );
+    thash = CqString::hash( strTo );
 
     // Get the two component matrices.
     // First check for special cases.
@@ -897,7 +892,7 @@ CqColor*	CqRenderer::GetColorOptionWrite( const char* strName, const char* strPa
 TqBool	CqRenderer::SetCoordSystem( const char* strName, const CqMatrix& matToWorld )
 {
     // Search for the same named system in the current list.
-    TqUlong hash = CqParameter::hash( strName );
+    TqUlong hash = CqString::hash( strName );
     for ( TqUint i = 0; i < m_aCoordSystems.size(); i++ )
     {
         if ( m_aCoordSystems[ i ].m_hash == hash )
@@ -995,10 +990,10 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
     // Search the local parameter declaration list.
     std::vector<SqParameterDeclaration>::const_iterator is;
     std::vector<SqParameterDeclaration>::const_iterator end = m_Symbols.end();
-    TqLong hash = CqParameter::hash( strDecl );
+    TqUlong hash = CqString::hash( strDecl );
     for ( is = m_Symbols.begin(); is != end ; is++ )
     {
-        TqLong hash2 = CqParameter::hash( is->m_strName.c_str() );
+        TqUlong hash2 = CqString::hash( is->m_strName.c_str() );
         if ( hash == hash2 )
             return ( *is );
     }

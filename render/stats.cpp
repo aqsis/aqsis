@@ -136,6 +136,7 @@ void CqStats::InitialiseFrame()
  */
 void CqStats::StartFrameTimer()
 {
+    m_timeTotalFrame.Reset();
     if( !m_timeTotalFrame.isStarted() )
         m_timeTotalFrame.Start();
 }

@@ -58,7 +58,7 @@ struct SqCoordSys
             m_matWorldTo( matWorldTo ),
             m_matToWorld( matToWorld ),
             m_strName( strName )
-    { m_hash = CqParameter::hash((char *) strName);}
+    { m_hash = CqString::hash((char *) strName);}
     SqCoordSys()
     {}
 

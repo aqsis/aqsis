@@ -304,14 +304,14 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"fresnel", 0, &CqShaderVM::SO_fresnel, 0, {0}},
         {"fresnel2", 0, &CqShaderVM::SO_fresnel2, 0, {0}},
         {"transform2", 0, &CqShaderVM::SO_transform2, 0, {0}},
-        {"transform", 0, &CqShaderVM::SO_transform, 0, {0}},
         {"transformm", 0, &CqShaderVM::SO_transformm, 0, {0}},
+        {"transform", 0, &CqShaderVM::SO_transform, 0, {0}},
         {"vtransform2", 0, &CqShaderVM::SO_vtransform2, 0, {0}},
-        {"vtransform", 0, &CqShaderVM::SO_vtransform, 0, {0}},
         {"vtransformm", 0, &CqShaderVM::SO_vtransformm, 0, {0}},
+        {"vtransform", 0, &CqShaderVM::SO_vtransform, 0, {0}},
         {"ntransform2", 0, &CqShaderVM::SO_ntransform2, 0, {0}},
-        {"ntransform", 0, &CqShaderVM::SO_ntransform, 0, {0}},
         {"ntransformm", 0, &CqShaderVM::SO_ntransformm, 0, {0}},
+        {"ntransform", 0, &CqShaderVM::SO_ntransform, 0, {0}},
         {"depth", 0, &CqShaderVM::SO_depth, 0, {0}},
         {"calculatenormal", 0, &CqShaderVM::SO_calculatenormal, 0, {0}},
         {"cmix", 0, &CqShaderVM::SO_cmix, 0, {0}},
@@ -340,17 +340,17 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"bump1", 0, &CqShaderVM::SO_bump1, 0, {0}},
         {"bump2", 0, &CqShaderVM::SO_bump2, 0, {0}},
         {"bump3", 0, &CqShaderVM::SO_bump3, 0, {0}},
-        {"shadow", 0, &CqShaderVM::SO_shadow, 0, {0}},
         {"shadow2", 0, &CqShaderVM::SO_shadow1, 0, {0}},
-        {"illuminate", 0, &CqShaderVM::SO_illuminate, 0, {0}},
+        {"shadow", 0, &CqShaderVM::SO_shadow, 0, {0}},
         {"illuminate2", 0, &CqShaderVM::SO_illuminate2, 0, {0}},
-        {"illuminance", 0, &CqShaderVM::SO_illuminance, 0, {0}},
+        {"illuminate", 0, &CqShaderVM::SO_illuminate, 0, {0}},
         {"illuminance2", 0, &CqShaderVM::SO_illuminance2, 0, {0}},
-        {"init_illuminance", 0, &CqShaderVM::SO_init_illuminance, 0, {0}},
+        {"illuminance", 0, &CqShaderVM::SO_illuminance, 0, {0}},
         {"init_illuminance2", 0, &CqShaderVM::SO_init_illuminance2, 0, {0}},
+        {"init_illuminance", 0, &CqShaderVM::SO_init_illuminance, 0, {0}},
         {"advance_illuminance", 0, &CqShaderVM::SO_advance_illuminance, 0, {0}},
-        {"solar", 0, &CqShaderVM::SO_solar, 0, {0}},
         {"solar2", 0, &CqShaderVM::SO_solar2, 0, {0}},
+        {"solar", 0, &CqShaderVM::SO_solar, 0, {0}},
         {"printf", 0, &CqShaderVM::SO_printf, 0, {0}},
 
         {"fcellnoise1", 0, &CqShaderVM::SO_fcellnoise1, 0, {0}},
@@ -419,8 +419,8 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"spsplinea", 0, &CqShaderVM::SO_spsplinea, 0, {0}},
         {"svsplinea", 0, &CqShaderVM::SO_spsplinea, 0, {0}},
 
-        {"shadername", 0, &CqShaderVM::SO_shadername, 0, {0}},
         {"shadername2", 0, &CqShaderVM::SO_shadername2, 0, {0}},
+        {"shadername", 0, &CqShaderVM::SO_shadername, 0, {0}},
         {"bake_f", 0, &CqShaderVM::SO_bake_f, 0, {0}},
         {"bake_3c", 0, &CqShaderVM::SO_bake_3c, 0, {0}},
         {"bake_3n", 0, &CqShaderVM::SO_bake_3n, 0, {0}},
@@ -441,16 +441,17 @@ TqInt CqShaderVM::m_cTransSize = sizeof( m_TransTable ) / sizeof( m_TransTable[ 
  * Private hash keys for "Data", "Init", "Code", "segment", "param", 
  *          "varying", "uniform", "USES"
  */
-static TqUlong dhash = 0;
-static TqUlong ihash = 0;
-static TqUlong chash = 0;
-static TqUlong shash = 0;
-static TqUlong phash = 0;
-static TqUlong vhash = 0;
-static TqUlong uhash = 0;
-static TqUlong ushash = 0;
-static TqUlong ehash = 0;
-static TqUlong ohash = 0;
+static TqUlong dhash = CqString::hash("Data");;
+static TqUlong ihash = CqString::hash("Init");
+static TqUlong chash = CqString::hash("Code");
+static TqUlong shash = CqString::hash("segment");
+static TqUlong phash = CqString::hash("param");
+static TqUlong vhash = CqString::hash("varying");
+static TqUlong uhash = CqString::hash("uniform");
+static TqUlong ushash = CqString::hash("USES");
+static TqUlong ehash = CqString::hash("external");
+static TqUlong ohash = CqString::hash("output");
+
 
 //---------------------------------------------------------------------
 /**
@@ -793,29 +794,10 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	std::vector<TqUlong> itypes;
 
     // Initialise the private hash keys.
-    if (!dhash)
-        dhash = CqParameter::hash("Data");
-    if (!ihash)
-        ihash = CqParameter::hash("Init");
-    if (!chash)
-        chash = CqParameter::hash("Code");
-    if (!phash)
-        phash = CqParameter::hash("param");
-    if (!vhash)
-        vhash = CqParameter::hash("varying");
-    if (!uhash)
-        uhash = CqParameter::hash("uniform");
-    if (!shash)
-        shash = CqParameter::hash("segment");
-    if (!ushash)
-        ushash = CqParameter::hash("USES");
-    if (!ehash)
-        ehash = CqParameter::hash("external");
-    if (!ohash)
-        ohash = CqParameter::hash("output");
+    
 
 	for(i = 0; i<gcVariableTypeNames; i++)
-		itypes.push_back(CqParameter::hash(gVariableTypeNames[i]));
+		itypes.push_back(CqString::hash(gVariableTypeNames[i]));
 
 
     TqBool fShaderSpec = TqFalse;
@@ -823,24 +805,44 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
     {
         GetToken( token, 255, pFile );
 
-        htoken = CqParameter::hash(token);
+        htoken = CqString::hash(token);
 
         // Check for type and version information.
         if ( !fShaderSpec )
         {
             TqInt i;
-            for ( i = 0; i < gcShaderTypeNames; i++ )
+            static TqInt tmp = 0;
+            i = tmp;
+            for ( ; i < gcShaderTypeNames; i++ )
             {
                 if (!gShaderTypeNames[i].hash)
                 {
-                    gShaderTypeNames[i].hash = CqParameter::hash(gShaderTypeNames[i].name);
+                    gShaderTypeNames[i].hash = CqString::hash(gShaderTypeNames[i].name);
                 }
                 if ( gShaderTypeNames[i].hash == htoken )
                 {
                     m_Type = gShaderTypeNames[i].type;
                     fShaderSpec = TqTrue;
+                    tmp = i;
                     break;
                 }
+            }
+            if (fShaderSpec == TqFalse)
+            {
+               for (i=0 ; i < tmp; i++ )
+            {
+                if (!gShaderTypeNames[i].hash)
+                {
+                       gShaderTypeNames[i].hash = CqString::hash(gShaderTypeNames[i].name);
+                }
+                if ( gShaderTypeNames[i].hash == htoken )
+                {
+                    m_Type = gShaderTypeNames[i].type;
+                    fShaderSpec = TqTrue;
+                       tmp = i;
+                    break;
+                }
+            }
             }
             if ( fShaderSpec ) continue;
         }
@@ -871,7 +873,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
         if ( shash == htoken ) // == "segment"
         {
             GetToken( token, 255, pFile );
-            htoken = CqParameter::hash(token);
+            htoken = CqString::hash(token);
 
             if ( dhash == htoken ) // == "Data"
                 Segment = Seg_Data;
@@ -921,7 +923,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
                             }
                     }
                     GetToken( token, 255, pFile );
-                    htoken = CqParameter::hash(token);
+                    htoken = CqString::hash(token);
                 }
                 // Check for array type variable.
                 if ( token[ strlen( token ) - 1 ] == ']' )
@@ -971,7 +973,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
                 {
                     if ( !m_TransTable[ i ].m_hash )
                     {
-                        m_TransTable[ i ].m_hash = CqParameter::hash(m_TransTable[ i ].m_strName);
+                        m_TransTable[ i ].m_hash = CqString::hash(m_TransTable[ i ].m_strName);
                     }
 
                     if ( ehash == htoken )

@@ -68,9 +68,9 @@ public:
     }
 
 
-    static TqLong	hash( const char *strName )
+    inline static TqUlong	hash( const char *strName )
     {
-        TqInt retval = 0;
+        TqUlong retval = 0;
 		const char *p = strName;
 		retval = *p;
 
@@ -81,7 +81,7 @@ public:
 				retval = (retval << 5) - retval + *p;
 			}
 		}
-		return (TqLong) retval;
+	return retval;
 	}
 
     // Format a string printf style.

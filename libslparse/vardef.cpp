@@ -118,9 +118,11 @@ TqBool CqVarDef::FindVariable( const char* strName, SqVarRef& Ref )
 {
     // Search the local definitions next.
     TqUint i;
+	 TqUlong hash = CqString::hash(strName);
+
     for ( i = 0; i < gLocalVars.size(); i++ )
     {
-        if ( gLocalVars[ i ].m_strName == strName )
+		if ( CqString::hash(gLocalVars[ i ].m_strName.c_str()) == hash )
         {
             Ref.m_Type = VarTypeLocal;
             Ref.m_Index = i;
@@ -131,7 +133,7 @@ TqBool CqVarDef::FindVariable( const char* strName, SqVarRef& Ref )
     // Search the standard definitions first.
     for ( i = 0; i < gcStandardVars; i++ )
     {
-        if ( gStandardVars[ i ].m_strName == strName )
+        if ( CqString::hash(gStandardVars[ i ].m_strName.c_str()) == hash )
         {
             Ref.m_Type = VarTypeStandard;
             Ref.m_Index = i;
@@ -152,9 +154,11 @@ TqBool CqVarDef::FindStandardVariable( const char* strName, SqVarRef& Ref )
 {
     // Search the standard definitions only.
     TqInt i;
+	TqUlong hash = CqString::hash(strName);
+
 	for ( i = 0; i < gcStandardVars; i++ )
     {
-        if ( gStandardVars[ i ].m_strName == strName )
+        if ( CqString::hash(gStandardVars[ i ].m_strName.c_str()) == hash )
         {
             Ref.m_Type = VarTypeStandard;
             Ref.m_Index = i;

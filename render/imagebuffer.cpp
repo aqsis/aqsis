@@ -815,7 +815,6 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 		TqFloat mpgbmaxx;
 		TqFloat mpgbminy;
 		TqFloat mpgbmaxy;
-		TqFloat mpgbminz;
 		TqInt bound_maxDof;
 		if(UsingDof)
 		{

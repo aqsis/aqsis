@@ -31,8 +31,7 @@
 #include	"matrix.h"
 #include	"sstring.h"
 #include	"color.h"
-#include	"stats.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -57,7 +56,7 @@ CqParameter::CqParameter( const char* strName, TqInt Count ) :
     TqInt cPeak = STATS_GETI( PRM_peak );
 
     STATS_SETI( PRM_peak, cPRM > cPeak ? cPRM : cPeak );
-    m_hash = hash(strName);
+    m_hash = CqString::hash(strName);
 }
 
 /** Copy constructor

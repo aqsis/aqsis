@@ -152,7 +152,7 @@ CqMatrix::CqMatrix( const TqFloat angle,
                       right[ 2 ], d1ortho[ 2 ], d2[ 2 ], 0,
                       0, 0, 0, 1 );
         TqFloat par = d1d2dot;               // Amount of d1 parallel to d2
-        TqFloat perp = static_cast<TqFloat>(sqrt( 1 - par * par ));   // Amount perpendicular
+        TqFloat perp = static_cast<TqFloat>(sqrt( 1.0 - par * par ));   // Amount perpendicular
         TqFloat s = static_cast<TqFloat>(tan( angle + acos( perp ) ) * perp - par);
         CqMatrix Skw( 1, 0, 0, 0,
                       0, 1, s, 0,

@@ -27,25 +27,25 @@
 
 USING_NAMESPACE( Aqsis );
 
-static TqUlong huniform = CqParameter::hash( "uniform" );
-static TqUlong hconstant = CqParameter::hash( "constant" );
-static TqUlong hvarying = CqParameter::hash( "varying" );
-static TqUlong hvertex = CqParameter::hash( "vertex" );
-static TqUlong hfacevarying = CqParameter::hash( "facevarying" );
+static TqUlong huniform = CqString::hash( "uniform" );
+static TqUlong hconstant = CqString::hash( "constant" );
+static TqUlong hvarying = CqString::hash( "varying" );
+static TqUlong hvertex = CqString::hash( "vertex" );
+static TqUlong hfacevarying = CqString::hash( "facevarying" );
 
-static TqUlong hfloat = CqParameter::hash( "float" );
-static TqUlong hpoint = CqParameter::hash( "point" );
-static TqUlong hhpoint = CqParameter::hash( "hpoint" );
-static TqUlong hvector = CqParameter::hash( "vector" );
-static TqUlong hnormal = CqParameter::hash( "normal" );
-static TqUlong hcolor = CqParameter::hash( "color" );
-static TqUlong hstring = CqParameter::hash( "string" );
-static TqUlong hmatrix = CqParameter::hash( "matrix" );
-static TqUlong hinteger = CqParameter::hash( "integer" );
-static TqUlong hint = CqParameter::hash( "int" );
+static TqUlong hfloat = CqString::hash( "float" );
+static TqUlong hpoint = CqString::hash( "point" );
+static TqUlong hhpoint = CqString::hash( "hpoint" );
+static TqUlong hvector = CqString::hash( "vector" );
+static TqUlong hnormal = CqString::hash( "normal" );
+static TqUlong hcolor = CqString::hash( "color" );
+static TqUlong hstring = CqString::hash( "string" );
+static TqUlong hmatrix = CqString::hash( "matrix" );
+static TqUlong hinteger = CqString::hash( "integer" );
+static TqUlong hint = CqString::hash( "int" );
 
-static TqUlong hleft = CqParameter::hash( "[" );
-static TqUlong hright = CqParameter::hash( "]" );
+static TqUlong hleft = CqString::hash( "[" );
+static TqUlong hright = CqString::hash( "]" );
 
 void CqInlineParse::check_syntax ()
 {
@@ -203,7 +203,7 @@ void CqInlineParse::parse ( std::string &str )
 
 TqBool CqInlineParse::is_class ( const std::string &str )
 {
-    TqUlong param = CqParameter::hash( str.c_str() );
+    TqUlong param = CqString::hash( str.c_str() );
 
         if ( ( param == hconstant ) ||
              ( param == huniform ) ||
@@ -216,7 +216,7 @@ TqBool CqInlineParse::is_class ( const std::string &str )
 
 TqBool CqInlineParse::is_type ( const std::string &str )
 {
-    TqUlong param = CqParameter::hash( str.c_str() );
+    TqUlong param = CqString::hash( str.c_str() );
 
         if ( ( param == hfloat ) ||
              ( param == hpoint ) ||
@@ -242,7 +242,7 @@ TqBool CqInlineParse::is_int ( const std::string &str )
 
 EqVariableClass CqInlineParse::get_class ( const std::string &str )
 {
-         TqUlong param = CqParameter::hash( str.c_str() );
+         TqUlong param = CqString::hash( str.c_str() );
 
         if ( param == hconstant ) return class_constant;
         if ( param == huniform ) return class_uniform;
@@ -254,7 +254,7 @@ EqVariableClass CqInlineParse::get_class ( const std::string &str )
 
 EqVariableType CqInlineParse::get_type ( const std::string &str )
 {
-        TqUlong param = CqParameter::hash( str.c_str() );
+        TqUlong param = CqString::hash( str.c_str() );
 
         if ( param == hfloat ) return type_float;
         if ( param == hpoint ) return type_point;

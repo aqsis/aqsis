@@ -264,6 +264,8 @@ void CqMicroPolyGrid::Shade()
 
     TqInt lUses = pSurface() ->Uses();
     TqInt gs = GridSize();
+    TqInt uRes = uGridRes();
+    TqInt vRes = vGridRes();
     TqInt gsmin1 = gs - 1;
     long cCulled = 0;
 
@@ -288,12 +290,19 @@ void CqMicroPolyGrid::Shade()
 
     // Setup uniform variables.
     if ( USES( lUses, EnvVars_E ) ) pVar(EnvVars_E) ->SetVector( vecE );
+
+    // Setup varying variables.
+    TqBool bdpu, bdpv;
+    bdpu = ( USES( lUses, EnvVars_dPdu ) );
+    bdpv = ( USES( lUses, EnvVars_dPdv ) );
+    IqShaderData * pSDP = pVar(EnvVars_P);
+    TqInt proj = QGetRenderContext()->GetIntegerOption( "System", "Projection" ) [ 0 ];
+
+    for ( i = gsmin1; i >= 0; i-- )
+    {
     if ( USES( lUses, EnvVars_du ) )
     {
-        for ( i = gsmin1; i >= 0; i-- )
-        {
             TqFloat v1, v2;
-            TqInt uRes = uGridRes();
             TqInt GridX = i % ( uRes + 1 );
 
             if ( GridX < uRes )
@@ -309,14 +318,9 @@ void CqMicroPolyGrid::Shade()
                 pVar(EnvVars_du) ->SetFloat( v1 - v2, i );
             }
         }
-    }
     if ( USES( lUses, EnvVars_dv ) )
     {
-        for ( i = gsmin1; i >= 0; i-- )
-        {
             TqFloat v1, v2;
-            TqInt uRes = uGridRes();
-            TqInt vRes = vGridRes();
             TqInt GridY = ( i / ( uRes + 1 ) );
 
             if ( GridY < vRes )
@@ -332,20 +336,6 @@ void CqMicroPolyGrid::Shade()
                 pVar(EnvVars_dv) ->SetFloat( v1 - v2, i );
             }
         }
-    }
-
-    if ( USES( lUses, EnvVars_Ci ) ) pVar(EnvVars_Ci) ->SetColor( gColBlack );
-    if ( USES( lUses, EnvVars_Oi ) ) pVar(EnvVars_Oi) ->SetColor( gColWhite );
-
-    // Setup varying variables.
-    TqBool bdpu, bdpv;
-    bdpu = ( USES( lUses, EnvVars_dPdu ) );
-    bdpv = ( USES( lUses, EnvVars_dPdv ) );
-    IqShaderData * pSDP = pVar(EnvVars_P);
-
-    for ( i = gsmin1; i >= 0; i-- )
-    {
-		TqInt proj = QGetRenderContext()->GetIntegerOption( "System", "Projection" ) [ 0 ];
 		switch ( proj )
 		{
 		    case	ProjectionOrthographic:
@@ -367,7 +357,12 @@ void CqMicroPolyGrid::Shade()
             pVar(EnvVars_dPdv) ->SetVector( SO_DvType<CqVector3D>( pSDP, i, m_pShaderExecEnv.get(), Defvec ), i );
         }
     }
+    
+    if ( USES( lUses, EnvVars_Ci ) ) pVar(EnvVars_Ci) ->SetColor( gColBlack );
+    if ( USES( lUses, EnvVars_Oi ) ) pVar(EnvVars_Oi) ->SetColor( gColWhite );
+
     // Now try and cull any transparent MPs
+    cCulled = 0;
     if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ )
     {
         theStats.OcclusionCullTimer().Start();
@@ -428,9 +423,9 @@ void CqMicroPolyGrid::Shade()
     }
 
     // Now try and cull any hidden MPs if Sides==1
+    cCulled = 0;
     if ( ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 ) && !m_pCSGNode )
     {
-        cCulled = 0;
         theStats.OcclusionCullTimer().Start();
         for ( i = gsmin1; i >= 0; i-- )
         {

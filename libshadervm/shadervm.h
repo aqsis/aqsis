@@ -44,6 +44,7 @@
 #include	"shaderexecenv.h"
 #include	"shaderstack.h"
 #include	"shadervariable.h"
+#include "parameters.h"
 #include 	"dsoshadeops.h"
 
 START_NAMESPACE( Aqsis )
@@ -654,12 +655,13 @@ private:
     TqInt	FindLocalVarIndex( const char* strName )
     {
         TqUint tmp = m_LocalIndex;
+        TqUlong hash = CqString::hash(strName);
 
         for ( ; m_LocalIndex < m_LocalVars.size(); m_LocalIndex++ )
-            if ( m_LocalVars[ m_LocalIndex ] ->strName().compare( strName ) == 0 ) return ( m_LocalIndex );
+            if ( CqString::hash(m_LocalVars[ m_LocalIndex ] ->strName().c_str()) == hash ) return ( m_LocalIndex );
 
         for ( m_LocalIndex = 0; m_LocalIndex < tmp; m_LocalIndex++ )
-            if ( m_LocalVars[ m_LocalIndex ] ->strName().compare( strName ) == 0 ) return ( m_LocalIndex );
+            if ( CqString::hash(m_LocalVars[ m_LocalIndex ] ->strName().c_str()) == hash ) return ( m_LocalIndex );
         return ( -1 );
     }
     void	GetToken( char* token, TqInt l, std::istream* pFile );

@@ -279,7 +279,7 @@ void CqShadowMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& pa
     m_bias0 = 0.0f;
     m_bias1 = 0.0f;
 
-    if ( ( paramMap.size() != 0 ) && ( paramMap.find( "bias" ) != paramMap.end() ) )
+    if ( ( !paramMap.empty() ) && ( paramMap.find( "bias" ) != paramMap.end() ) )
     {
         paramMap[ "bias" ] ->GetFloat( m_bias );
     }
@@ -345,6 +345,8 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 {
     // Check the memory and make sure we don't abuse it
     CriticalMeasure();
+
+    QGetRenderContext() ->Stats().TextureMapTimer().Start(); 
 
     // If no map defined, not in shadow.
     val.resize( 1 );
@@ -520,6 +522,8 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
     }
 
     val[ 0 ] = ( static_cast<TqFloat>( inshadow ) / ( ns * nt ) );
+
+    QGetRenderContext() ->Stats().TextureMapTimer().Stop(); 
 }
 
 
@@ -536,7 +540,7 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName, TqBool append )
     // Save the shadowmap to a binary file.
     if ( m_strName.compare( "" ) != 0 )
     {
-        if ( m_apSegments.size() != 0 )
+        if ( ! m_apSegments.empty() )
         {
             TIFF * pshadow = TIFFOpen( strShadowName.c_str(), mode );
             TIFFCreateDirectory( pshadow );

@@ -49,13 +49,15 @@ class CqShaderKey
 {
         public:
                 CqShaderKey( const char* strName, EqShaderType type ) :
-                        m_name( strName ),
                         m_type( type )
-                {}
+                {
+                        m_name = CqString::hash( strName );
+                }
                 CqShaderKey( const CqShaderKey &other ) :
                         m_name( other.m_name ),
                         m_type( other.m_type )
-                {}
+                {
+                }
                 virtual ~CqShaderKey()
                 {}
                 CqShaderKey &operator=( const CqShaderKey &other )
@@ -81,7 +83,7 @@ class CqShaderKey
                                 return m_type < other.m_type;
                 }
         private:
-                CqString        m_name; ///< Name of the shader.
+                TqUlong        m_name; ///< Name of the shader.
                 EqShaderType    m_type; ///< Type of the shader.
 };
 

@@ -225,18 +225,22 @@ enum RIL_POINTS
     RIL_t = RIL_s,
     RIL_st,
 };
-static TqUlong RIH_S = CqParameter::hash( RI_S );
-static TqUlong RIH_T = CqParameter::hash( RI_T );
-static TqUlong RIH_ST = CqParameter::hash( RI_ST );
-static TqUlong RIH_CS = CqParameter::hash( RI_CS );
-static TqUlong RIH_OS = CqParameter::hash( RI_OS );
-static TqUlong RIH_P = CqParameter::hash( RI_P );
-static TqUlong RIH_PZ = CqParameter::hash( RI_PZ );
-static TqUlong RIH_PW = CqParameter::hash( RI_PW );
-static TqUlong RIH_N = CqParameter::hash( RI_N );
-static TqUlong RIH_NP = CqParameter::hash( RI_NP );
-static TqUlong RIH_DEPTHFILTER = CqParameter::hash( "depthfilter" );
-static TqUlong RIH_JITTER = CqParameter::hash( "jitter" );
+static TqUlong RIH_S = CqString::hash( RI_S );
+static TqUlong RIH_T = CqString::hash( RI_T );
+static TqUlong RIH_ST = CqString::hash( RI_ST );
+static TqUlong RIH_CS = CqString::hash( RI_CS );
+static TqUlong RIH_OS = CqString::hash( RI_OS );
+static TqUlong RIH_P = CqString::hash( RI_P );
+static TqUlong RIH_PZ = CqString::hash( RI_PZ );
+static TqUlong RIH_PW = CqString::hash( RI_PW );
+static TqUlong RIH_N = CqString::hash( RI_N );
+static TqUlong RIH_NP = CqString::hash( RI_NP );
+static TqUlong RIH_DEPTHFILTER = CqString::hash( "depthfilter" );
+static TqUlong RIH_JITTER = CqString::hash( "jitter" );
+static TqUlong RIH_RENDER = CqString::hash( "render" );
+static TqUlong RIH_INDIRECT = CqString::hash( "indirect" );
+static TqUlong RIH_LIGHT = CqString::hash( "light" );
+static TqUlong RIH_VISIBILITY = CqString::hash( "visibility" );
 
 RtInt	RiLastError = 0;
 
@@ -712,7 +716,6 @@ RtVoid	RiFrameAspectRatio( RtFloat frameratio )
     if( !valid )
     {
         std::cerr << error << "RiFrameAspectRatio: Invalid RiFrameAspectRatio, aborting" << std::endl;
-        throw( "INVALID_VALUE" );
         return;
     }
 
@@ -790,7 +793,6 @@ RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
     if( !valid )
     {
         std::cerr << error << "Invalid RiCropWindow, aborting" << std::endl;
-        throw( "INVALID_VALUE" );
         return;
     }
 
@@ -1551,7 +1553,7 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
             std::cerr << error << e.strReason().c_str() << std::endl;
             continue;
         }
-		TqUlong hash = CqParameter::hash(Decl.m_strName.c_str());
+		TqUlong hash = CqString::hash(Decl.m_strName.c_str());
 		if ( hash == RIH_DEPTHFILTER )
             RiOption( "Hider", "depthfilter", ( RtToken ) values[ i ], NULL );
 		else if ( hash == RIH_JITTER )
@@ -2818,6 +2820,13 @@ RtVoid	RiAttribute( RtToken name, ... )
     va_list	pArgs;
     va_start( pArgs, name );
 
+    TqUlong hash = CqString::hash(name);
+      
+    if (hash == RIH_RENDER) return;
+    if (hash == RIH_INDIRECT) return;
+    if (hash == RIH_LIGHT) return;
+    if (hash == RIH_VISIBILITY) return;
+
     std::vector<RtToken> aTokens;
     std::vector<RtPointer> aValues;
     RtInt count = BuildParameterList( pArgs, aTokens, aValues );
@@ -2835,6 +2844,13 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 	Cache_RiAttribute
 
 	Validate_RiAttribute
+
+    TqUlong hash = CqString::hash(name);
+      
+    if (hash == RIH_RENDER) return;
+    if (hash == RIH_INDIRECT) return;
+    if (hash == RIH_LIGHT) return;
+    if (hash == RIH_VISIBILITY) return;
 
     // Find the parameter on the current options.
     CqNamedParameterList * pAttr = QGetRenderContext() ->pattrWriteCurrent() ->pAttributeWrite( name ).get();
@@ -5347,7 +5363,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
     {
         RtToken	token = tokens[ i ];
         RtPointer	value = values[ i ];
-		TqUlong hash = CqParameter::hash(token);
+	     TqUlong hash = CqString::hash(token);
 
         SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( token );
 
@@ -5377,7 +5393,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
     {
         pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
         pSurface->P() ->SetSize( pSurface->cVertex() );
-        TqInt i;
+        TqUint i;
         switch ( fP )
         {
         case RIL_P:
