@@ -2,8 +2,8 @@
 
 Name: aqsis
 
-Version: 0.9.2_%{rel}
-#Version: 0.9.2
+Version: 0.9.3_%{rel}
+#Version: 0.9.3
 
 Release: %{distro}
 Summary: RenderMan(tm)-compatible renderer
@@ -35,16 +35,15 @@ make
 rm -fr %{buildroot}
 
 %makeinstall
-#mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/aqsis
-cat << EOF > $RPM_BUILD_ROOT/%{_sysconfdir}/displays.ini
-
-file	%{_libdir}/aqsis/libdisplay.so
-framebuffer	%{_libdir}/aqsis/libdisplay.so
-zfile	%{_libdir}/aqsis/libdisplay.so
-zframebuffer	%{_libdir}/aqsis/libdisplay.so
-shadow	%{_libdir}/aqsis/libdisplay.so
-tiff	%{_libdir}/aqsis/libdisplay.so
-EOF
+#cat << EOF > $RPM_BUILD_ROOT/%{_sysconfdir}/displays.ini
+#cat << EOF > $RPM_BUILD_ROOT/%{_libdir}/displays.ini
+#file	%{_libdir}/aqsis/libdisplay.so
+#framebuffer	%{_libdir}/aqsis/libdisplay.so
+#zfile	%{_libdir}/aqsis/libdisplay.so
+#zframebuffer	%{_libdir}/aqsis/libdisplay.so
+#shadow	%{_libdir}/aqsis/libdisplay.so
+#tiff	%{_libdir}/aqsis/libdisplay.so
+#EOF
 
 %post -p /sbin/ldconfig
 
@@ -61,8 +60,9 @@ rm -fr %{buildroot}
 %dir %{_datadir}/aqsis/shaders
 %{_datadir}/aqsis/shaders/*
 %{_includedir}/*
-%dir %{_sysconfdir}/
-%{_sysconfdir}/*
+%{_mandir}/man1/*
+#%dir %{_sysconfdir}/
+#%{_sysconfdir}/*
 
 %changelog
 

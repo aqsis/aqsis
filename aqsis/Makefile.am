@@ -1,7 +1,7 @@
 EXTRA_DIST = aqsis.dsp aqsis.vcproj
 
 AM_CXXFLAGS=@AQSIS_CXXFLAGS@
-AM_CPPFLAGS=@AQSIS_CPPFLAGS@ -DDEFAULT_RC_PATH=\"$(sysconfdir)/aqsisrc\" -DDEFAULT_SHADER_PATH=\".:$(pkgdatadir)/shaders\" -DDEFAULT_ARCHIVE_PATH=\".:$(pkgdatadir)/archives\" -DDEFAULT_TEXTURE_PATH=\".:$(pkgdatadir)/textures\" -DDEFAULT_DISPLAY_PATH=\"$(pkglibdir)\" -DDEFAULT_DSO_PATH=\"$(pkglibdir)\" -DDEFAULT_PROCEDURAL_PATH=\"$(pkglibdir)\"
+AM_CPPFLAGS=@AQSIS_CPPFLAGS@ -DDEFAULT_RC_PATH=\"$(sysconfdir)/aqsisrc\" -DDEFAULT_SHADER_PATH=\".:$(pkgdatadir)/shaders\" -DDEFAULT_ARCHIVE_PATH=\".:$(pkgdatadir)/archives\" -DDEFAULT_TEXTURE_PATH=\".:$(pkgdatadir)/textures\" -DDEFAULT_DISPLAY_PATH=\"$(pkglibdir)\" -DDEFAULT_DSO_PATH=\"$(pkglibdir)\" -DDEFAULT_PROCEDURAL_PATH=\"$(pkglibdir)\" -DDEFAULT_PLUGIN_PATH=\"$(pkglibdir)\"
 AM_CFLAGS=@AQSIS_CFLAGS@
 
 INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I$(top_srcdir)/render -I$(top_srcdir)/librib2 -I$(top_srcdir)/librib2ri -I$(top_srcdir)/libargparse

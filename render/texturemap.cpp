@@ -195,7 +195,7 @@ TqInt CqTextureMap::Convert( CqString &strName )
     const CqString extension = strName.substr(strName.rfind(".")).substr(1);
 
 #if defined(AQSIS_SYSTEM_POSIX)
-    const CqString plugin_path = DEFAULT_PLUGIN_PATH "/lib" + extension + "2tif.so";
+    CqString plugin_path = DEFAULT_PLUGIN_PATH "/lib" + extension + "2tif.so";
     // Check for lib<ext>2tif.so; it it is existing than let the converter to 
     // be called.
     // I assume on MacOSX and Linux the file we are looking will be something:
