@@ -14,6 +14,13 @@
 #include	"argparse.h"
 #include	"ri.h"
 
+#define __MESSAGE_TABLE
+#include "mtable.h"
+#undef __MESSAGE_TABLE
+
+CqMessageTable mTable; // Create the message table
+
+
 bool	g_version = 0;
 bool	g_help = 0;
 
