@@ -4224,13 +4224,11 @@ void CqShaderExecEnv::SO_shadow( IqShaderData* name, IqShaderData* channel, IqSh
 		CqBitVector& RS = RunningState();
 		do
 		{
+			
 			if(!__fVarying || RS.Value( __iGrid ) )
 			{
-				CqVector3D swidth = 0.0f, twidth = 0.0f, nullv = 0.0f;
-
-				swidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
-				twidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
-
+				CqVector3D swidth = 0.0f, twidth = 0.0f;
+				
 				CqVector3D _aq_P;
 				(P)->GetPoint(_aq_P,__iGrid);
 
@@ -8129,8 +8127,6 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 
 				CqVector3D swidth = 0.0f, twidth = 0.0f;
 
-				swidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
-				twidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
 
 				CqVector3D _aq_P;
 				(P)->GetPoint(_aq_P,__iGrid);
@@ -8145,8 +8141,7 @@ void CqShaderExecEnv::SO_occlusion( IqShaderData* occlmap, IqShaderData* channel
 					if( cosangle < 0.0f )
 						continue;
 
-					fv = 0.0f;
-					pMap->SampleMap( _aq_P, swidth, twidth, fv, i );
+				        pMap->SampleMap( _aq_P, swidth, twidth, fv, i );
 					occlsum += cosangle * fv[0];
 					dotsum += cosangle;
 				}
