@@ -574,6 +574,46 @@ void CqSurface::vSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 	}
 }
 
+
+//---------------------------------------------------------------------
+/** Transform the surface by the specified matrix.
+ */
+
+void	CqSurface::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
+{
+	// Tansform the control hull by the specified matrix.
+	std::vector<CqParameter*>::iterator iUP;
+	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	{
+		TqInt i;
+
+		if( (*iUP)->Type() == type_point )
+		{
+			CqParameterTyped<CqVector3D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP));
+			for( i = 0; i < (*iUP)->Size(); i++ )
+				pTPV->pValue()[ i ] = matTx * pTPV->pValue()[ i ];
+		}
+		else if( (*iUP)->Type() == type_normal )
+		{
+			CqParameterTyped<CqVector3D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP));
+			for( i = 0; i < (*iUP)->Size(); i++ )
+				pTPV->pValue()[ i ] = matITTx * pTPV->pValue()[ i ];
+		}
+		if( (*iUP)->Type() == type_vector )
+		{
+			CqParameterTyped<CqVector3D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP));
+			for( i = 0; i < (*iUP)->Size(); i++ )
+				pTPV->pValue()[ i ] = matRTx * pTPV->pValue()[ i ];
+		}
+		if( (*iUP)->Type() == type_hpoint )
+		{
+			CqParameterTyped<CqVector4D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP));
+			for( i = 0; i < (*iUP)->Size(); i++ )
+				pTPV->pValue()[ i ] = matTx * pTPV->pValue()[ i ];
+		}
+	}
+}
+
 //---------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )

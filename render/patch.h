@@ -163,7 +163,6 @@ class CqSurfacePatchBicubic : public CqSurface
 		virtual	CqBound	Bound() const;
 		virtual TqBool	Diceable();
 
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
 		virtual	TqUint	cUniform() const
 		{
 			return ( 1 );
@@ -208,7 +207,6 @@ class _qShareC CqSurfacePatchBilinear : public CqSurface
 		virtual	CqBound	Bound() const;
 		virtual TqBool	Diceable();
 
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
 		virtual	TqUint	cUniform() const
 		{
 			return ( 1 );
@@ -286,7 +284,6 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 			return ( TqFalse );
 		}
 
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
 		virtual	TqUint	cUniform() const
 		{
 			return ( m_uPatches * m_vPatches );
@@ -353,7 +350,6 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 			return ( TqFalse );
 		}
 
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
 		virtual	TqUint	cUniform() const
 		{
 			return ( m_uPatches * m_vPatches );

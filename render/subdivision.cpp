@@ -1076,19 +1076,6 @@ TqInt CqWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 	return ( cE );
 }
 
-//---------------------------------------------------------------------
-/** Transform the control hull by the specified matrix.
- */
-
-void CqWSurf::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
-{
-	// Tansform the control hull by the specified matrix.
-	if( NULL == m_pPoints->P() )	return;
-	TqUint i;
-	for ( i = 0; i < m_pPoints->P()->Size(); i++ )
-		(*m_pPoints->P()) [ i ] = matTx * (*m_pPoints->P()) [ i ];
-}
-
 
 //---------------------------------------------------------------------
 /** Create a new C4D polygonobject from this winged edge surface.

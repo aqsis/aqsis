@@ -496,29 +496,6 @@ CqSurfacePolygon& CqSurfacePolygon::operator=( const CqSurfacePolygon& From )
 
 
 //---------------------------------------------------------------------
-/** Transform the polygon by the specified matrix.
- */
-
-void	CqSurfacePolygon::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
-{
-	TqInt i;
-	// Tansform the points by the specified matrix.
-	if( NULL != P() )
-	{
-		for ( i = P()->Size() - 1; i >= 0; i-- )
-			(*P()) [ i ] = matTx * (*P()) [ i ];
-	}
-
-	// Tansform the normals by the specified matrix.
-	if( NULL != N() )
-	{
-		for ( i = N()->Size() - 1; i >= 0; i-- )
-			(*N()) [ i ] = matITTx * (*N()) [ i ];
-	}
-}
-
-
-//---------------------------------------------------------------------
 /** Transfer x,y points to s,t and u,v if required.
  */
 
@@ -606,20 +583,7 @@ void	CqPolygonPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx,
 {
 	if ( m_Transformed ) return ;
 
-	// Tansform the points by the specified matrix.
-	TqInt i;
-	if( NULL != P() )
-	{
-		for ( i = P()->Size() - 1; i >= 0; i-- )
-			(*P()) [ i ] = matTx * (*P()) [ i ];
-	}
-
-	// Tansform the normals by the specified matrix.
-	if( NULL != N() )
-	{
-		for ( i = N()->Size() - 1; i >= 0; i-- )
-			(*N()) [ i ] = matITTx * (*N()) [ i ];
-	}
+	CqSurface::Transform( matTx, matITTx, matRTx );
 
 	m_Transformed = TqTrue;
 }

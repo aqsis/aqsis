@@ -456,6 +456,10 @@ class _qShareC CqSurface : public CqBasicSurface
 			return(m_aUserParams);
 		}
 
+		/* From IqSurface.
+		 */
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
+
 		/** Add a primitive variable to the array.
 		 */
 		void AddPrimitiveVariable( CqParameter* pParam )

@@ -402,20 +402,6 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 
 
 //---------------------------------------------------------------------
-/** Transform the patch by the specified matrix.
- */
-
-void	CqSurfacePatchBicubic::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
-{
-	// Tansform the control hull by the specified matrix.
-	if( NULL == P() )	return;
-	TqInt i;
-	for ( i = 0; i < 16; i++ )
-		(*P()) [ i ] = matTx * (*P()) [ i ];
-}
-
-
-//---------------------------------------------------------------------
 /** Constructor.
  */
 
@@ -610,23 +596,6 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 
 
 //---------------------------------------------------------------------
-/** Transform the patch by the specified matrix.
- */
-
-void	CqSurfacePatchBilinear::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
-{
-	// Tansform the control hull by the specified matrix.
-	if( NULL == P() ) return;
-	TqInt i;
-	for ( i = 0; i < 4; i++ )
-	{
-		(*P()) [ i ] = matTx * (*P()) [ i ];
-		if ( NULL != N() && N()->Size() == 4 ) (*N()) [ i ] = matITTx * (*N()) [ i ];
-	}
-}
-
-
-//---------------------------------------------------------------------
 /** Copy constructor.
  */
 
@@ -691,20 +660,6 @@ CqBound CqSurfacePatchMeshBicubic::Bound() const
 	B.vecMin() = vecA;
 	B.vecMax() = vecB;
 	return ( B );
-}
-
-
-//---------------------------------------------------------------------
-/** Transform the patch by the specified matrix.
- */
-
-void CqSurfacePatchMeshBicubic::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
-{
-	// Tansform the control hull by the specified matrix.
-	if( NULL == P() )	return;
-	TqUint i;
-	for ( i = 0; i < P()->Size(); i++ )
-		(*P()) [ i ] = matTx * (*P()) [ i ];
 }
 
 
@@ -929,20 +884,6 @@ CqBound CqSurfacePatchMeshBilinear::Bound() const
 	B.vecMin() = vecA;
 	B.vecMax() = vecB;
 	return ( B );
-}
-
-
-//---------------------------------------------------------------------
-/** Transform the patch by the specified matrix.
- */
-
-void CqSurfacePatchMeshBilinear::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
-{
-	// Tansform the control hull by the specified matrix.
-	if( NULL == P() )	return;
-	TqUint i;
-	for ( i = 0; i < P()->Size(); i++ )
-		(*P()) [ i ] = matTx * (*P()) [ i ];
 }
 
 

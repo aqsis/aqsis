@@ -982,7 +982,10 @@ class CqWSurf : public CqSubdivider, public CqBasicSurface
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual TqBool	Diceable();
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
+		{
+			m_pPoints->Transform( matTx, matITTx, matRTx );
+		}
 		virtual	TqUint	cUniform() const
 		{
 			return ( m_cExpectedFaces );

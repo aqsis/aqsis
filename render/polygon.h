@@ -178,7 +178,6 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 			return ( CqPolygonBase::Diceable() );
 		}
 
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
 		virtual	TqUint	cUniform() const
 		{
 			return ( 1 );
@@ -345,8 +344,8 @@ class CqPolygonPoints : public CqSurface
 		{
 			return ( TqFalse );
 		}
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
 
-		virtual	void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
 		virtual	TqUint	cUniform() const
 		{
 			return ( m_cFaces );

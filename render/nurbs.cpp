@@ -1459,20 +1459,6 @@ TqBool	CqSurfaceNURBS::Diceable()
 
 
 //---------------------------------------------------------------------
-/** Transform the patch by the specified matrix.
- */
-
-void	CqSurfaceNURBS::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
-{
-	// Tansform the control hull by the specified matrix.
-	if( NULL == P() )	return;
-	TqUint i;
-	for ( i = 0; i < P()->Size(); i++ )
-		(*P()) [ i ] = matTx * (*P()) [ i ];
-}
-
-
-//---------------------------------------------------------------------
 /** Determine the segment count for the specified trim curve to make each segment the appropriate size
  *  for the current shading rate.
  */

@@ -300,7 +300,6 @@ class CqSurfaceNURBS : public CqSurface
 
 		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
 
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
 		/** Get the number of uniform variables for a NURBS surface.
 		 */
 		virtual	TqUint cUniform() const
