@@ -994,7 +994,8 @@ RtVoid CqOutput::RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt n
         if ( psize < verts[ i ] )
             psize = verts[ i ];
     }
-    printPL( n, tokens, parms, psize + 1, psize + 1, npolys );
+	RtInt facevarying = nv;
+    printPL( n, tokens, parms, psize + 1, psize + 1, npolys, facevarying );
 }
 
 RtVoid CqOutput::RiPatchV( RtToken type, RtInt n, RtToken tokens[], RtPointer parms[] )

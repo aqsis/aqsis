@@ -194,6 +194,8 @@ TqUint CqDictionary::allocSize ( TqTokenId id, TqUint vertex, TqUint varying, Tq
         break;
     case CONSTANT:
         break;
+	case FACEVARYING: size *= facevarying;
+		break;
     }
     size *= ( first->quantity );
     return size;

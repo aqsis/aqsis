@@ -85,7 +85,7 @@ private:
     void pop();
 
     void printPL ( RtInt n, RtToken tokens[], RtPointer parms[],
-                   RtInt vertex = 1, RtInt varying = 1, RtInt uniform = 1 );
+                   RtInt vertex = 1, RtInt varying = 1, RtInt uniform = 1, RtInt facevarying = 1 );
     std::string getFilterFuncName ( RtFilterFunc, const char * ) const;
 
     CqOutput( CqOutput const & )

@@ -72,7 +72,7 @@ public:
 
     TqTokenId addToken ( std::string n, EqTokenClass tc, EqTokenType tt, TqUint qnt = 1, TqBool inln = false );
     TqTokenId getTokenId ( std::string n );
-    TqUint allocSize ( TqTokenId id, TqUint vertex, TqUint varying, TqUint uniform );
+    TqUint allocSize ( TqTokenId id, TqUint vertex, TqUint varying, TqUint uniform, TqUint facevarying = 0 );
     EqTokenType getType ( TqTokenId id );
 
 #ifdef DEBUG
