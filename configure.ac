@@ -92,6 +92,12 @@ AC_CHECK_LIB(socket, socket, NET_LIBS="-lsocket $NET_LIBS",)
 AC_CHECK_LIB(nsl, gethostbyname, NET_LIBS="-lnsl $NET_LIBS",)
 AC_SUBST(NET_LIBS)
 
+dnl pthread library
+dnl This macro sets:
+dnl    PTHREAD_LIBS
+dnl    PTHREAD_CFLAGS
+ACX_PTHREAD(LIBS="$PTHREAD_LIBS $LIBS",)
+
 dnl TIFF library
 saveCFLAGS=$CFLAGS
 saveLIBS=$LIBS
@@ -131,8 +137,8 @@ AC_SUBST(AQSIS_CPPFLAGS)
 AC_SUBST(AQSIS_CXXFLAGS)
 AC_SUBST(AQSIS_CFLAGS)
 AQSIS_CPPFLAGS="-DBASE_PATH=\\\"\"\${pkgdatadir}\\\"\" -DCONFIG_PATH=\\\"\"$sysconfdir\\\"\""
-AQSIS_CXXFLAGS="$DEBUG_FLAGS $OPT_FLAGS"
-AQSIS_CFLAGS="$DEBUG_FLAGS $OPT_FLAGS"
+AQSIS_CXXFLAGS="$DEBUG_FLAGS $OPT_FLAGS $PTHREAD_CFLAGS"
+AQSIS_CFLAGS="$DEBUG_FLAGS $OPT_FLAGS $PTHREAD_CFLAGS"
 
 AC_OUTPUT( \
 all/Makefile \
@@ -268,7 +274,7 @@ boost/libs/mpl/preprocessed/src/Makefile \
 boost/libs/mpl/preprocessed/vector/Makefile \
 boost/libs/regex/Makefile \
 boost/libs/regex/src/Makefile \
-boost/libs/thread/Makfile \
+boost/libs/thread/Makefile \
 boost/libs/thread/src/Makefile \
 boost/libs/thread/src/mac/Makefile \
 boost/libs/thread/src/mac/msl_replacements/Makefile \

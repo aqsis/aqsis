@@ -1,3 +1,4 @@
+SUBDIRS = .
 
 noinst_HEADERS = \
 addressof.hpp \
