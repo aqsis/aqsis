@@ -161,7 +161,8 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 	else
 	{
     	// Initiliaze the random with a value based on the X,Y coordinate
-		CqRandom random(  vecPixel.Magnitude()  );
+//		CqRandom random(  vecPixel.Magnitude()  );
+		static CqRandom random(  53 );
 
 		// Initialize points to the "canonical" multi-jittered pattern.
 
@@ -907,7 +908,7 @@ void CqBucket::ExposeBucket()
 void CqBucket::QuantizeBucket()
 {
 	// Initiliaze the random with a value based on the X,Y coordinate
-        CqVector2D area(XOrigin(), YOrigin()); 
+	CqVector2D area(XOrigin(), YOrigin()); 
 	CqRandom random( area.Magnitude() );
 	TqFloat endx, endy;
 	TqInt   nextx;
