@@ -232,8 +232,11 @@ void GetOptions()
 		if ( ( env = getenv( "AQSIS_CONFIG" ) ) != NULL )
 			g_config = env;
 		else
+		{
 			g_config = g_base_path;
-		g_config.append( "/.aqsisrc" );
+			g_config.append( "/.aqsisrc" );
+		}
+
 		std::ifstream cfgfile( g_config.c_str() );
 		if ( !cfgfile.is_open() )
 			if ( ( env = getenv( "HOME" ) ) != NULL )
