@@ -5178,12 +5178,11 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 		case type_triple:
 		case type_vector:
 		case type_normal: 
-			#ifdef	AQSIS_COMPILER_MSVC6
 			dso_argv[0]=(void*) new TqFloat[3]; break;
-			#else
-			dso_argv[0]=(void*) new (TqFloat)[3]; break;
-			#endif
 		case type_string:
+			dso_argv[0]=(void*) new STRING_DESC;
+		        ((STRING_DESC*) dso_argv[0])->s = NULL;	
+		        ((STRING_DESC*) dso_argv[0])->bufflen = 0;	
 			break;
 		case type_matrix:
 		case type_sixteentuple:
@@ -5208,6 +5207,9 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 			case type_color:
 				dso_argv[p] = (void*) new TqFloat[3]; break;
 			case type_string:
+				dso_argv[p]=(void*) new STRING_DESC;
+		        	((STRING_DESC*) dso_argv[p])->s = NULL;	
+		        	((STRING_DESC*) dso_argv[p])->bufflen = 0;	
 				break;
 			case type_matrix:
 			case type_sixteentuple:
@@ -5259,8 +5261,14 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 				((float*) dso_argv[p])[1] = c[1];
 				((float*) dso_argv[p])[2] = c[2];
 				}; break;
-			case type_string:
-				break;
+			case type_string:{
+				CqString s;
+				apParams[p-1]->GetString(s,__iGrid);
+				char *ps = new char[s.size()+1];
+				strncpy (ps, s.c_str(), s.size() + 1);
+				((STRING_DESC*) dso_argv[p])->s = ps;
+				((STRING_DESC*) dso_argv[p])->bufflen = s.size() + 1;
+				}; break;
 			case type_matrix:
 			case type_sixteentuple:
 				break;
@@ -5311,8 +5319,10 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 				c[2] = ((float*) dso_argv[0])[2];
 				Result->SetColor(c,__iGrid);
 			}; break;
-		case type_string: // Need to look into these
-			break;
+		case type_string:{ 
+				CqString s(((STRING_DESC*)dso_argv[p])->s);
+				apParams[p-1]->SetString(s,__iGrid);
+			}; break;
 		case type_matrix:
 		case type_sixteentuple:
 			break;
@@ -5360,8 +5370,10 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 				c[2] = ((float*) dso_argv[p])[2];
 				apParams[p-1]->SetColor(c,__iGrid);
 				};break;
-			case type_string: // Need to look into these
-				break;
+			case type_string:{
+				CqString s(((STRING_DESC*)dso_argv[p])->s);
+				apParams[p-1]->SetString(s,__iGrid);
+				}; break;
 			case type_matrix:
 			case type_sixteentuple:
 				break;
@@ -5375,52 +5387,52 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 
 	END_VARYING_SECTION
 
-//	// Free up the storage allocated for the return type
-//	switch(Result->Type()){
-//
-//		case type_float: 
-//		 	delete (float*) dso_argv[0]; break;
-//		case type_point:
-//		case type_triple: // This seems reasonable
-//		case type_vector:
-//		case type_normal:
-//		case type_color:
-//			delete[] (float*) dso_argv[0];
-//		case type_string: // Need to look into these
-//			break;
-//		case type_matrix:
-//		case type_sixteentuple:
-//			break;
-//		case type_hpoint:
-//		case type_bool:
-//		default:
-//			// Unhandled TYpe
-//			break;
-//	};
-//
-//	// Free up the storage allocated for the args
-//	for(int p=1;p<=cParams;p++){
-//		switch(apParams[p-1]->Type()){
-//			case type_float:
-//				delete (float*) dso_argv[p]; break;
-//			case type_point:
-//			case type_triple:
-//			case type_vector:
-//			case type_normal:
-//			case type_color:
-//				delete[] (float*) dso_argv[p]; break;
-//			case type_string: // Need to look into these
-//				break;
-//			case type_matrix:
-//			case type_sixteentuple:
-//				break;
-//			case type_hpoint:
-//			case type_bool:
-//			default: 
-//				// Unhandled TYpe
-//				break;
-//		};
-//	};
+	// Free up the storage allocated for the return type
+	switch(Result->Type()){
+
+		case type_float: 
+		 	delete (float*) dso_argv[0]; break;
+		case type_point:
+		case type_triple: // This seems reasonable
+		case type_vector:
+		case type_normal:
+		case type_color:
+			delete[] (float*) dso_argv[0];
+		case type_string: // Need to look into these
+			break;
+		case type_matrix:
+		case type_sixteentuple:
+			break;
+		case type_hpoint:
+		case type_bool:
+		default:
+			// Unhandled TYpe
+			break;
+	};
+
+	// Free up the storage allocated for the args
+	for(int p=1;p<=cParams;p++){
+		switch(apParams[p-1]->Type()){
+			case type_float:
+				delete (float*) dso_argv[p]; break;
+			case type_point:
+			case type_triple:
+			case type_vector:
+			case type_normal:
+			case type_color:
+				delete[] (float*) dso_argv[p]; break;
+			case type_string:
+				delete (STRING_DESC*) dso_argv[p]; break;
+			case type_matrix:
+			case type_sixteentuple:
+				break;
+			case type_hpoint:
+			case type_bool:
+			default: 
+				// Unhandled TYpe
+				break;
+		};
+	};
 
 	delete dso_argv;
 }
