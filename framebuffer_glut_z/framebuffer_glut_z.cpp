@@ -101,8 +101,8 @@ void GetImageOffset(GLint& X, GLint& Y)
     double viewport[4];
     glGetDoublev(GL_VIEWPORT, viewport);
 
-    X = static_cast<GLint>(std::max(0.0, (viewport[2] - g_ImageWidth) / 2));
-    Y = static_cast<GLint>(std::max(0.0, (viewport[3] - g_ImageHeight) / 2));
+    X = static_cast<GLint>(MAX(0.0, (viewport[2] - g_ImageWidth) / 2));
+    Y = static_cast<GLint>(MAX(0.0, (viewport[3] - g_ImageHeight) / 2));
 }
 
 void Display( )
@@ -413,7 +413,7 @@ TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
             SqDDMessageUserParam * pMsg = static_cast<SqDDMessageUserParam*>( pMsgB );
             if( strncmp( pMsg->m_NameAndData, "doublebuffer", pMsg->m_NameLength ) == 0 )
             {
-                g_DoubleBuffer = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+                g_DoubleBuffer = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] ) != 0;
             }
         }
         break;

@@ -30,9 +30,7 @@
 #include	"aqsis.h"
 
 #include	<stdlib.h>
-#ifndef AQSIS_SYSTEM_WIN32
-#include <string.h>
-#endif // !AQSIS_SYSTEM_WIN32
+#include	<string.h>
 
 START_NAMESPACE( Aqsis )
 

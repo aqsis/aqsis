@@ -41,13 +41,12 @@ using namespace Aqsis;
 
 #ifdef AQSIS_SYSTEM_WIN32
 
-	#include <winsock2.h>
 	#include <locale>
 	#include <direct.h>
+	#include <algorithm>
 
 	#define getcwd _getcwd
 	#define PATH_SEPARATOR "\\"
-
 #else // !AQSIS_SYSTEM_WIN32
 
 	#include <stdio.h>
@@ -173,8 +172,8 @@ void TextPrompt(const std::string& Prompt, const std::string& DefaultValue, Text
 
 void CancelTextPrompt()
 {
-    g_TextPrompt.clear();
-    g_TextInput.clear();
+    g_TextPrompt.erase();
+    g_TextInput.erase();
     g_TextOKCallback = 0;
 
     glutPostRedisplay();
@@ -191,8 +190,8 @@ void GetImageOffset(GLint& X, GLint& Y)
     double viewport[4];
     glGetDoublev(GL_VIEWPORT, viewport);
 
-    X = static_cast<GLint>(std::max(0.0, (viewport[2] - g_ImageWidth) / 2));
-    Y = static_cast<GLint>(std::max(0.0, (viewport[3] - g_ImageHeight) / 2));
+    X = static_cast<GLint>(MAX(0.0, (viewport[2] - g_ImageWidth) / 2));
+    Y = static_cast<GLint>(MAX(0.0, (viewport[3] - g_ImageHeight) / 2));
 }
 
 void Display()
@@ -271,7 +270,8 @@ void OnKeyboard( unsigned char key, int x, int y )
         case 8: // Backspace
             if(g_TextInput.size())
 	    {
-                g_TextInput.erase(--g_TextInput.end());
+				std::string::iterator i = g_TextInput.end();
+				g_TextInput.erase(--i);
                 glutPostRedisplay();
 	    }
             break;
@@ -581,7 +581,7 @@ TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
             }
             else if( strncmp( pMsg->m_NameAndData, "doublebuffer", pMsg->m_NameLength ) == 0 )
             {
-                g_DoubleBuffer = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+                g_DoubleBuffer = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] ) != 0;
             }
         }
         break;
