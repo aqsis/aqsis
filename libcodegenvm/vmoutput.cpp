@@ -181,6 +181,8 @@ void CqCodeGenOutput::Visit( IqParseNodeFunctionCall& FC)
 		// Output arguments and pop the parameters off the stack.
 		if ( pArguments != 0 && pFunc->pArgs() != 0 && pFunc->pDef() != 0 )
 		{
+			CreateTempMap( pFunc->pArgs()->pChild(), pArguments, m_StackVarMap, m_saTransTable, TempVars() );
+
 			IqParseNode * pParam = pFunc->pArgs() ->pChild();
 			IqParseNode* pArg = pArguments;
 			while ( pParam != 0 )
@@ -201,12 +203,11 @@ void CqCodeGenOutput::Visit( IqParseNodeFunctionCall& FC)
 		// Output the function body.
 		if( NULL != pFunc->pDef() )
 		{
-			CreateTempMap( pFunc->pArgs()->pChild(), pArguments, m_StackVarMap, m_saTransTable, TempVars() );
 			CreateTranslationTable( pFunc->pArgs()->pChild(), pArguments, m_saTransTable );
 			pFunc->pDef()->Accept( *this );
 			m_saTransTable.erase( m_saTransTable.end() - 1 );
-			m_StackVarMap.pop_back( );
 		}
+		m_StackVarMap.pop_back( );
 	}
 }
 
