@@ -849,48 +849,35 @@ RtFloat	RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
 	// tburge 5-28-01
 
 	/* Modified version of the RI Spec 3.2 sinc filter to be 
-	 *   radially symmetric and also windowed with a positive
-	 *   lobe of a cosine which is half of a cosine period.  
+	 *   windowed with a positive lobe of a cosine which is half
+	 *   of a cosine period.  
 	 */
 
-   double d,w,xx,yy;
-
-   xx = x*x;
-   yy = y*y;
-
-   xwidth *= 0.5;
-   ywidth *= 0.5;
-
-   /* Get a window width that can handle odd eliptical shapes
-	* resulting from xwidth and ywidth not being equal.  
-	* The w is a parabola from 0 to 1.  Taking the square root
-	* later turns it into a nice 0 to 1 parameter for cosine.
-	* No reason to do the sqrt() call now.  
-    */
-   w = (xx)/(xwidth*xwidth)+(yy)/(ywidth*ywidth);
-   if ( w<1.0 )
-   {   
-      d = sqrt(xx+yy);
-      if (d!=0.0)
-      {
-         /* Half cosine window. */
-         w = cos(0.5*RI_PI*sqrt(w));
-		 /* The 0.5 above stretches the positive lobe of the 
-		  * cosine across the windowed space and the sqrt() 
-		  * makes w linear.  The PI scales everything so that 
-		  * cosine is at a zero for integer values of w.  
-		  */
-         return w * sin(RI_PI*d)/(RI_PI*d);
-      }
-      else
-      {
-         return 1.0;
-      }
+   /* Uses a -PI to PI cosine window. */
+   if (x!=0.0)
+   {
+      x *= RI_PI;
+      x = cos(0.5*x) * sin(x)/x;
    }
    else
    {
-      return 0.0;
+      x = 1.0;
    }
+   if (y!=0.0)
+   {
+      y *= RI_PI;
+      y = cos(0.5*y) * sin(y)/y;
+   }
+   else
+   {
+      y = 1.0;
+   }
+
+   /* This is a square separable filter and is the 2D Fourier
+    * transform of a rectangular box outlining a lowpass bandwidth
+	* filter in the frequency domain.
+	*/
+   return x*y;
 }
 
 
@@ -900,9 +887,22 @@ RtFloat	RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
 //
 RtFloat	RiDiskFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
 {
-	/* Add code later. */
-	CqBasicError(0,Severity_Normal,"RiDiskFilter not supported, defaults to 1.0");
-	return 1.0;
+   double d,xx,yy;
+
+   xx = x*x;
+   yy = y*y;
+   xwidth *= 0.5;
+   ywidth *= 0.5;
+
+   d = (xx)/(xwidth*xwidth)+(yy)/(ywidth*ywidth);
+   if ( d<1.0 )
+   {   
+      return 1.0;
+   }
+   else
+   {
+      return 0.0;
+   }   
 }
 
 
@@ -912,9 +912,34 @@ RtFloat	RiDiskFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
 //
 RtFloat	RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
 {
-	/* Add code later. */
-	CqBasicError(0,Severity_Normal,"RiBesselFilter not supported, defaults to 1.0");
-	return 1.0;
+
+   double d,w,xx,yy;
+
+   xx = x*x;
+   yy = y*y;
+
+   xwidth *= 0.5;
+   ywidth *= 0.5;
+
+   w = (xx)/(xwidth*xwidth)+(yy)/(ywidth*ywidth);
+   if ( w<1.0 )
+   {   
+      d = sqrt(xx+yy);
+      if (d!=0.0)
+      {
+         /* Half cosine window. */
+         w = cos(0.5*RI_PI*sqrt(w));
+         return w * 2*j1(RI_PI*d)/d;
+      }
+      else
+      {
+         return RI_PI;
+      }
+   }
+   else
+   {
+      return 0.0;
+   }
 }
 
 
