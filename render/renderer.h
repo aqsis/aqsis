@@ -342,10 +342,12 @@ public:
     {
         TqInt	m_Offset;
         TqInt	m_NumSamples;
+		TqInt	m_Type;
     };
     TqInt	RegisterOutputData( const char* name );
     TqInt	OutputDataIndex( const char* name );
     TqInt	OutputDataSamples( const char* name );
+	TqInt	OutputDataType(const char* name );
     std::map<std::string, SqOutputDataEntry>& GetMapOfOutputDataEntries()
     {
         return( m_OutputDataEntries );

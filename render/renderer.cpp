@@ -1395,6 +1395,7 @@ TqInt CqRenderer::RegisterOutputData( const char* name )
 
         DataEntry.m_Offset = m_OutputDataOffset;
         DataEntry.m_NumSamples = NumSamples;
+		DataEntry.m_Type = Decl.m_Type;
         m_OutputDataOffset += NumSamples;
         m_OutputDataTotalSize += NumSamples;
 
@@ -1445,6 +1446,28 @@ TqInt CqRenderer::OutputDataSamples( const char* name )
         std::map<std::string, SqOutputDataEntry>::iterator entry = m_OutputDataEntries.find( Decl.m_strName );
         if( entry != m_OutputDataEntries.end() )
             return( entry->second.m_NumSamples );
+    }
+    return( 0 );
+}
+
+
+TqInt CqRenderer::OutputDataType( const char* name )
+{
+    SqParameterDeclaration Decl;
+    try
+    {
+        Decl = FindParameterDecl( name );
+    }
+    catch( XqException e )
+    {
+        std::cerr << error << e.strReason().c_str() << std::endl;
+        return(-1);
+    }
+    if( Decl.m_Type != type_invalid )
+    {
+        std::map<std::string, SqOutputDataEntry>::iterator entry = m_OutputDataEntries.find( Decl.m_strName );
+        if( entry != m_OutputDataEntries.end() )
+            return( entry->second.m_Type );
     }
     return( 0 );
 }

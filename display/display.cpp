@@ -649,6 +649,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		pImage->m_lineLength = pImage->m_entrySize * pImage->m_width;
 		pImage->m_format = widestFormat;
 
+		// If we are recieving "rgba" data, ensure that it is in the correct order.
 		PtDspyDevFormat outFormat[] = 
 		{
 			{"r", widestFormat},
@@ -656,13 +657,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			{"b", widestFormat},
 			{"a", widestFormat},
 		};
-		PtDspyError err;
-		if( ( err = DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat) ) != PkDspyErrorNone )
-		{
-			*image = 0;
-			delete(pImage);
-			return(err);
-		}
+		DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat);
 	}
 	else
 		return(PkDspyErrorNoMemory);
@@ -685,7 +680,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	const unsigned char* pdatarow = data;
 	TqInt bucketlinelen = entrysize * (xmaxplus1 - xmin);
 
-	if( data && xmin >= 0 && ymin >= 0 && xmaxplus1 <= pImage->m_width && ymaxplus1 <= pImage->m_height )
+	if( pImage && data && xmin >= 0 && ymin >= 0 && xmaxplus1 <= pImage->m_width && ymaxplus1 <= pImage->m_height )
 	{
 		TqInt y;
 		for ( y = ymin; y < ymaxplus1; y++ )

@@ -82,6 +82,8 @@ private:
 		std::string m_mode;
 		TqInt		m_modeHash;
 		TqInt		m_modeID;
+		TqInt		m_AOVOffset;
+		TqInt		m_AOVSize;
 		std::string m_customParamsArgs;
 		CqSimplePlugin m_DspyPlugin;
 		void*		m_DriverHandle;
@@ -89,6 +91,7 @@ private:
 		PtFlagStuff	m_flags;
 		std::vector<PtDspyDevFormat> m_formats;
 		std::vector<TqInt>			m_dataOffsets;
+		std::vector<std::string>	m_AOVnames;
 		TqInt		m_elementSize;
 		DspyImageOpenMethod			m_OpenMethod;
 		DspyImageQueryMethod		m_QueryMethod;

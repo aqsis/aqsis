@@ -62,6 +62,8 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 	req.m_name = name;
 	req.m_type = type;
 	req.m_mode = mode;
+	req.m_AOVOffset = dataOffset;
+	req.m_AOVSize = dataSize;
 	req.m_modeHash = CqString::hash( mode );
 	req.m_modeID = modeID;
 	req.m_customParamsArgs = PrepareCustomParameters(mapOfArguments);
@@ -276,6 +278,47 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 				req.m_formats.push_back(fmt);
 			}
 		}
+		// Otherwise we are dealing with AOV and should therefore fill in the formats according to it's type.
+		else
+		{
+			// Determine the type of the AOV data being displayed.
+			TqInt type;
+			type = QGetRenderContext()->OutputDataType(req.m_mode.c_str());
+			// Generate a suitable name for the channels.
+			std::string baseName = req.m_mode;
+			std::string componentNames = "";
+			switch(type)
+			{
+				case type_point:
+				case type_normal:
+				case type_vector:
+				case type_hpoint:
+					componentNames = "xyz";
+					break;
+				case type_color:
+					componentNames = "rgb";
+					break;
+			}
+			// Now create the channels formats.
+			PtDspyDevFormat fmt;
+			TqInt i;
+			for( i = 0; i < req.m_AOVSize; i++ )
+			{
+				std::string name(baseName);
+				name.append(".");
+				name.append(ToString(i));
+				if(componentNames.size()>i)
+				{
+					name.append(".");
+					name.append(componentNames.substr(i, 1));
+				}
+				req.m_AOVnames.push_back(name);
+				fmt.name = const_cast<char*>(req.m_AOVnames.back().c_str());
+				fmt.type = PkDspyFloat32;
+
+				req.m_formats.push_back(fmt);
+			}		
+		}
         
 		// Call the DspyImageOpen method on the display to initialise things.
 		PtDspyError err = (*req.m_OpenMethod)(&req.m_imageHandle, req.m_type.c_str(), req.m_name.c_str(), QGetRenderContext() ->pImage() ->iXRes(), QGetRenderContext() ->pImage() ->iYRes(), 0, NULL, req.m_formats.size(), &req.m_formats[0], &req.m_flags);
@@ -284,16 +327,39 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 		std::vector<PtDspyDevFormat>::iterator i;
 		for(i=req.m_formats.begin(); i!=req.m_formats.end(); i++)
 		{
-			if( i->name == m_RedName )
-				req.m_dataOffsets.push_back(Sample_Red);
-			else if( i->name == m_GreenName )
-				req.m_dataOffsets.push_back(Sample_Green);
-			else if( i->name == m_BlueName )
-				req.m_dataOffsets.push_back(Sample_Blue);
-			else if( i->name == m_AlphaName )
-				req.m_dataOffsets.push_back(Sample_Alpha);
-			else if( i->name == m_ZName )
-				req.m_dataOffsets.push_back(Sample_Depth);
+			if(req.m_modeID & ( ModeRGB | ModeA | ModeZ) )
+			{
+				if( i->name == m_RedName )
+					req.m_dataOffsets.push_back(Sample_Red);
+				else if( i->name == m_GreenName )
+					req.m_dataOffsets.push_back(Sample_Green);
+				else if( i->name == m_BlueName )
+					req.m_dataOffsets.push_back(Sample_Blue);
+				else if( i->name == m_AlphaName )
+					req.m_dataOffsets.push_back(Sample_Alpha);
+				else if( i->name == m_ZName )
+					req.m_dataOffsets.push_back(Sample_Depth);
+			}
+			else
+			{
+				// Scan through the generated names to find the ones specified, and use the index
+				// of the found name as an offset into the data from the dataOffset passed in originally.
+				TqInt iname;
+				for(iname = 0; iname < req.m_AOVnames.size(); iname++)
+				{
+					if(i->name == req.m_AOVnames[iname].c_str())
+					{
+						req.m_dataOffsets.push_back(req.m_AOVOffset + iname );
+						break;
+					}
+				}
+				// If we got here, and didn't find it, add 0 as the offset, and issue an error.
+				if( iname == req.m_AOVnames.size() )
+				{
+					std::cerr << error << "Couldn't find format entry returned from display : " << i->name << std::endl;
+					req.m_dataOffsets.push_back(req.m_AOVOffset);
+				}
+			}
 		}
 
 		// Determine how big each pixel is by summing the format type sizes.

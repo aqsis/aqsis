@@ -96,6 +96,7 @@ extern "C" const char* StandardParameters[][2] =
             {"Pz", "vertex point" },
             {"Pw", "vertex hpoint" },
             {"N", "varying normal" },
+            {"Ng", "varying normal" },
             {"Np", "uniform normal" },
             {"Cs", "varying color" },
             {"Os", "varying color" },

@@ -5,7 +5,7 @@
  *	@brief	Declare the common interface structure for a Renderer core class.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2004/06/19 22:43:28 $
+ *	Last change date:	$Date: 2004/07/09 11:27:39 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___irenderer_Loaded___
@@ -69,6 +69,7 @@ struct IqRenderer
     virtual TqInt	RegisterOutputData( const char* name ) = 0;
     virtual TqInt	OutputDataIndex( const char* name ) = 0;
     virtual TqInt	OutputDataSamples( const char* name ) = 0;
+	virtual TqInt	OutputDataType( const char* name ) = 0;
 
     virtual	void	SetCurrentFrame( TqInt FrameNo ) = 0;
     virtual	TqInt	CurrentFrame() const = 0;
