@@ -330,7 +330,11 @@ SOURCE=..\Object\Release\libslparse\parser.cpp
 
 !ELSEIF  "$(CFG)" == "libslparse - Win32 Profile"
 
+# PROP Exclude_From_Build 1
+
 !ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
+# PROP Exclude_From_Build 1
 
 !ENDIF 
 
@@ -347,7 +351,11 @@ SOURCE=..\Object\Release\libslparse\parser.hpp
 
 !ELSEIF  "$(CFG)" == "libslparse - Win32 Profile"
 
+# PROP Exclude_From_Build 1
+
 !ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
+# PROP Exclude_From_Build 1
 
 !ENDIF 
 
@@ -364,7 +372,11 @@ SOURCE=..\Object\Release\libslparse\scanner.cpp
 
 !ELSEIF  "$(CFG)" == "libslparse - Win32 Profile"
 
+# PROP Exclude_From_Build 1
+
 !ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
+# PROP Exclude_From_Build 1
 
 !ENDIF 
 
@@ -438,6 +450,140 @@ SOURCE=..\Object\Debug\libslparse\scanner.cpp
 
 # PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
+# End Group
+# Begin Group "Profile"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\Object\Profile\libslparse\parser.cpp
+
+!IF  "$(CFG)" == "libslparse - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 Profile"
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\Object\Profile\libslparse\parser.hpp
+
+!IF  "$(CFG)" == "libslparse - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 Profile"
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\Object\Profile\libslparse\scanner.cpp
+
+!IF  "$(CFG)" == "libslparse - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 Profile"
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
+# End Group
+# Begin Group "MPatrol"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\Object\MPatrol\libslparse\parser.cpp
+
+!IF  "$(CFG)" == "libslparse - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 Profile"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\Object\MPatrol\libslparse\parser.hpp
+
+!IF  "$(CFG)" == "libslparse - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 Profile"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=..\Object\MPatrol\libslparse\scanner.cpp
+
+!IF  "$(CFG)" == "libslparse - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 Profile"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
 
 !ENDIF 
 

@@ -130,7 +130,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 libargparse.lib /nologo /subsystem:console /profile /debug /machine:I386 /libpath:"..\Library\Profile"
 # SUBTRACT BASE LINK32 /nodefaultlib
-# ADD LINK32 libargparse.lib /nologo /subsystem:console /profile /debug /machine:I386 /libpath:"..\Library\Profile"
+# ADD LINK32 libargparse.lib /nologo /subsystem:console /profile /debug /machine:I386 /libpath:"..\Library\MPatrol"
 # SUBTRACT LINK32 /nodefaultlib
 
 !ENDIF 

@@ -135,7 +135,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 libz.lib libtiff.lib ws2_32.lib log4cpp.lib libaqsistypes.lib librib2.lib librib2ri.lib /nologo /dll /profile /debug /machine:I386 /libpath:"..\Library\Profile"
-# ADD LINK32 libz.lib libtiff.lib ws2_32.lib log4cpp.lib libaqsistypes.lib librib2.lib librib2ri.lib /nologo /dll /profile /debug /machine:I386 /libpath:"..\Library\Profile"
+# ADD LINK32 libz.lib libtiff.lib ws2_32.lib log4cpp.lib libaqsistypes.lib librib2.lib librib2ri.lib /nologo /dll /profile /debug /machine:I386 /libpath:"..\Library\MPatrol"
 
 !ENDIF 
 
