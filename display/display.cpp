@@ -551,13 +551,13 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 					if( alpha > 0 )
 					{
 						TqInt so = ( y * pImage->m_lineLength ) + ( x * pImage->m_entrySize );
-						unsigned char r = _pdatarow[0];
-						unsigned char g = _pdatarow[1];
-						unsigned char b = _pdatarow[2];
+						int r = _pdatarow[0];
+						int g = _pdatarow[1];
+						int b = _pdatarow[2];
 						// C’ = INT_PRELERP( A’, B’, b, t )
-						unsigned char R = static_cast<int>(INT_PRELERP( reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 0 ], r, alpha, t ));
-						unsigned char G = static_cast<int>(INT_PRELERP( reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 1 ], g, alpha, t ));
-						unsigned char B = static_cast<int>(INT_PRELERP( reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 2 ], b, alpha, t ));
+						int R = static_cast<int>(INT_PRELERP( static_cast<int>(reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 0 ]), r, alpha, t ));
+						int G = static_cast<int>(INT_PRELERP( static_cast<int>(reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 1 ]), g, alpha, t ));
+						int B = static_cast<int>(INT_PRELERP( static_cast<int>(reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 2 ]), b, alpha, t ));
 						reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 0 ] = CLAMP( R, 0, 255 );
 						reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 1 ] = CLAMP( G, 0, 255 );
 						reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 2 ] = CLAMP( B, 0, 255 );
