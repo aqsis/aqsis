@@ -26,15 +26,16 @@
 #include	<math.h>
 
 #include	"aqsis.h"
-#include	"lights.h"
 #include	"shaderexecenv.h"
 #include	"texturemap.h"
 #include	"spline.h"
-#include	"surface.h"
 #include	"shadervm.h"
+#include	"irenderer.h"
 
 
 START_NAMESPACE( Aqsis )
+
+IqRenderer* QGetRenderContextI();
 
 static	TqFloat	temp_float;
 
@@ -1620,7 +1621,7 @@ STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL fromspace, STRINGVAL tospace
 	BEGIN_UNIFORM_SECTION	
 	GETSTRING( fromspace );
 	GETSTRING( tospace );
-	const CqMatrix& mat = QGetRenderContext() ->matSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+	const CqMatrix& mat = QGetRenderContextI() ->matSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
 	END_UNIFORM_SECTION	
 
 	BEGIN_VARYING_SECTION
@@ -1643,7 +1644,7 @@ STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL tospace, POINTVAL p, DEFPARA
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( tospace );
-	const CqMatrix& mat = QGetRenderContext() ->matSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+	const CqMatrix& mat = QGetRenderContextI() ->matSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
 	END_UNIFORM_SECTION
 
 	BEGIN_VARYING_SECTION
@@ -1686,7 +1687,7 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL fromspace, STRINGVAL tospac
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( fromspace );
 	GETSTRING( tospace );
-	const CqMatrix& mat = QGetRenderContext() ->matVSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+	const CqMatrix& mat = QGetRenderContextI() ->matVSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
 	END_UNIFORM_SECTION
 
 	BEGIN_VARYING_SECTION
@@ -1709,7 +1710,7 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL tospace, VECTORVAL p, DEFPA
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( tospace );
-	const CqMatrix& mat = QGetRenderContext() ->matVSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+	const CqMatrix& mat = QGetRenderContextI() ->matVSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
 	END_UNIFORM_SECTION
 
 	BEGIN_VARYING_SECTION
@@ -1752,7 +1753,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL fromspace, STRINGVAL tospac
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( fromspace );
 	GETSTRING( tospace );
-	const CqMatrix& mat = QGetRenderContext() ->matNSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+	const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
 	BEGIN_UNIFORM_SECTION
 
 	BEGIN_VARYING_SECTION
@@ -1775,7 +1776,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL tospace, NORMALVAL p, DEFPA
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( tospace );
-	const CqMatrix& mat = QGetRenderContext() ->matNSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+	const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
 	BEGIN_UNIFORM_SECTION
 
 	BEGIN_VARYING_SECTION
@@ -1816,8 +1817,8 @@ STD_SOIMPL CqShaderExecEnv::SO_depth( POINTVAL p, DEFPARAMIMPL )
 	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	TqFloat d = POINT( p ).z();
-	d = ( d - QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[0] ) /
-	    ( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[1] - QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[0] );
+	d = ( d - QGetRenderContextI() ->GetFloatOption("System", "Clipping")[0] ) /
+	    ( QGetRenderContextI() ->GetFloatOption("System", "Clipping")[1] - QGetRenderContextI() ->GetFloatOption("System", "Clipping")[0] );
 	SETNORMAL( Result, d );
 	END_VARYING_SECTION
 }
@@ -3038,7 +3039,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_printf( STRINGVAL str, DEFVOIDPARAMVARIMPL )
 	BEGIN_VARYING_SECTION
 	GETSTRING( str );
 	CqString strA = SO_sprintf( STRING( str ).c_str(), cParams, apParams, __iGrid );
-	QGetRenderContext() ->PrintMessage( SqMessage( 0, 0, strA.c_str() ) );
+	QGetRenderContextI() ->PrintString( strA.c_str() );
 	END_VARYING_SECTION
 }
 
@@ -3486,9 +3487,9 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 		{
 			if ( pV->ArrayLength() >= 3 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetIntegerOption("System", "Resolution")[0] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetIntegerOption("System", "Resolution")[1] ) );
-				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "PixelAspectRatio")[0] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetIntegerOption("System", "Resolution")[0] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetIntegerOption("System", "Resolution")[1] ) );
+				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "PixelAspectRatio")[0] ) );
 				Ret = 1.0f;
 			}
 		}
@@ -3500,10 +3501,10 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 		{
 			if ( pV->ArrayLength() >= 4 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[0] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[1] ) );
-				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[2] ) );
-				pV->ArrayEntry( 3 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[3] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "CropWindow")[0] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "CropWindow")[1] ) );
+				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "CropWindow")[2] ) );
+				pV->ArrayEntry( 3 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "CropWindow")[3] ) );
 				Ret = 1.0f;
 			}
 		}
@@ -3512,7 +3513,7 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 	{
 		if ( pV->Type() == type_float )
 		{
-			pV->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "FrameAspectRatio")[0] ) );
+			pV->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "FrameAspectRatio")[0] ) );
 			Ret = 1.0f;
 		}
 	}
@@ -3523,9 +3524,9 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 		{
 			if ( pV->ArrayLength() >= 3 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "DepthOfField")[0] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "DepthOfField")[1] ) );
-				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "DepthOfField")[2] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "DepthOfField")[0] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "DepthOfField")[1] ) );
+				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "DepthOfField")[2] ) );
 				Ret = 1.0f;
 			}
 		}
@@ -3537,8 +3538,8 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 		{
 			if ( pV->ArrayLength() >= 2 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Shutter")[0] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Shutter")[1] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "Shutter")[0] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "Shutter")[1] ) );
 				Ret = 1.0f;
 			}
 		}
@@ -3550,13 +3551,13 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 		{
 			if ( pV->ArrayLength() >= 2 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[0] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[1] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "Clipping")[0] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "Clipping")[1] ) );
 				Ret = 1.0f;
 			}
 		}
 	}
-	else
+/*	else
 	{
 		int iColon = STRING( name ).find_first_of( ':' );
 		if ( iColon >= 0 )
@@ -3626,7 +3627,7 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 				}
 			}
 		}
-	}
+	}*/
 	Result->SetValue( Ret, 0 );
 	END_UNIFORM_SECTION
 }

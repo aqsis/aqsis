@@ -44,6 +44,7 @@
 #include	"renderer.h"
 #include	"symbols.h"
 #include	"iddmanager.h"
+#include	"irenderer.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -97,8 +98,9 @@ enum EqRenderMode
 
 class CqRenderer;
 _qShareM extern CqRenderer* pCurrRenderer;
+_qShareM extern CqOptions	goptDefault;					///< Default options.
 
-class CqRenderer
+class CqRenderer : public IqRenderer
 {
 	public:
 		CqRenderer();
@@ -122,7 +124,7 @@ class CqRenderer
 		virtual	void	DeleteObjectContext();
 		virtual	void	DeleteMotionContext();
 
-		virtual	CqOptions&	optCurrent();
+		virtual	CqOptions&	optCurrent() const;
 		virtual	const CqAttributes*	pattrCurrent();
 		virtual	CqAttributes*	pattrWriteCurrent();
 		virtual	const CqTransform*	ptransCurrent();
@@ -158,10 +160,28 @@ class CqRenderer
 		{
 			m_pImageBuffer = pImage;
 		}
+
 		// Handle various coordinate system transformation requirements.
 		virtual	CqMatrix	matSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix() );
 		virtual	CqMatrix	matVSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix() );
 		virtual	CqMatrix	matNSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix() );
+
+		virtual	const	TqFloat*	GetFloatOption( const char* strName, const char* strParam ) const;
+		virtual	const	TqInt*	GetIntegerOption( const char* strName, const char* strParam ) const;
+		virtual	const	CqString* GetStringOption( const char* strName, const char* strParam ) const;
+		virtual	const	CqVector3D*	GetPointOption( const char* strName, const char* strParam ) const;
+		virtual	const	CqColor*	GetColorOption( const char* strName, const char* strParam ) const;
+
+		virtual	TqFloat*	GetFloatOptionWrite( const char* strName, const char* strParam );
+		virtual	TqInt*	GetIntegerOptionWrite( const char* strName, const char* strParam );
+		virtual	CqString* GetStringOptionWrite( const char* strName, const char* strParam );
+		virtual	CqVector3D*	GetPointOptionWrite( const char* strName, const char* strParam );
+		virtual	CqColor*	GetColorOptionWrite( const char* strName, const char* strParam );
+
+		virtual	void	PrintString( const char* str )
+		{
+			PrintMessage( SqMessage( 0,0, str ) );
+		}
 
 		/** Get a read only reference to the current transformation matrix.
 		 * \return A constant reference to a CqMatrix.
@@ -288,7 +308,6 @@ class CqRenderer
 
 		CqContext*	m_pconCurrent;					///< Pointer to the current context.
 		CqStats	m_Stats;						///< Global statistics.
-		CqOptions	m_optDefault;					///< Default options.
 		CqAttributes	m_attrDefault;					///< Default attributes.
 		CqTransform	m_transDefault;					///< Default transformation.
 		CqImageBuffer*	m_pImageBuffer;					///< Pointer to the current image buffer.
@@ -312,6 +331,8 @@ inline CqRenderer* QGetRenderContext()
 	return ( pCurrRenderer );
 }
 
+
+_qShareM	IqRenderer* QGetRenderContextI();
 _qShareM	void	QSetRenderContext( CqRenderer* pRenderer );
 
 

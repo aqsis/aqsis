@@ -31,10 +31,14 @@
 #include	"texturemap.h"
 #include	"rifile.h"
 #include	"exception.h"
+#include	"irenderer.h"
+
 #include	"renderer.h"
 
 
 START_NAMESPACE( Aqsis )
+
+IqRenderer* QGetRenderContextI();
 
 
 static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, int* face );
@@ -99,7 +103,7 @@ unsigned char* CqTextureMapBuffer::AllocSegment( unsigned long width, unsigned l
 #endif
 	if ( limit == -1 )
 	{
-		const TqInt * poptMem = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "texturememory" );
+		const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
 		limit = 0;
 		if ( poptMem )
 			limit = poptMem[ 0 ] * 1024;
@@ -1564,16 +1568,16 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 
 	// Add in the bias at this point in camera coordinates.
 	TqFloat bias = 0.225f;
-	const TqFloat* poptBias = QGetRenderContext() ->optCurrent().GetFloatOption( "shadow", "bias" );
+	const TqFloat* poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias" );
 	if ( poptBias != 0 )
 		bias = poptBias[ 0 ];
 
 	CqVector3D vecBias( 0, 0, bias );
 	// Generate a matrix to transform points from camera space into the space of the light source used in the
 	// definition of the shadow map.
-	CqMatrix matCameraToLight = m_matWorldToCamera * QGetRenderContext() ->matSpaceToSpace( "camera", "world" );
+	CqMatrix matCameraToLight = m_matWorldToCamera * QGetRenderContextI() ->matSpaceToSpace( "camera", "world" );
 	// Generate a matrix to transform points from camera space into the space of the shadow map.
-	CqMatrix matCameraToMap = m_matWorldToScreen * QGetRenderContext() ->matSpaceToSpace( "camera", "world" );
+	CqMatrix matCameraToMap = m_matWorldToScreen * QGetRenderContextI() ->matSpaceToSpace( "camera", "world" );
 
 	vecR1l = matCameraToLight * ( R1 - vecBias );
 	vecR2l = matCameraToLight * ( R2 - vecBias );

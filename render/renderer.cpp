@@ -45,6 +45,9 @@ extern IqDDManager* CreateDisplayDriverManager();
 
 CqRenderer* pCurrRenderer = 0;
 
+
+CqOptions	goptDefault;					///< Default options.
+
 //---------------------------------------------------------------------
 /** Default constructor for the main renderer class. Initialises current state.
  */
@@ -427,12 +430,12 @@ void CqRenderer::AdvanceTime()
 /** Return a reference to the current options.
  */
 
-CqOptions& CqRenderer::optCurrent()
+CqOptions& CqRenderer::optCurrent() const
 {
 	if ( m_pconCurrent != 0 )
 		return ( m_pconCurrent->optCurrent() );
 	else
-		return ( m_optDefault );
+		return ( goptDefault );
 }
 
 
@@ -639,6 +642,58 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
 	matResult.Transpose();
 
 	return ( matResult );
+}
+
+
+const	TqFloat*	CqRenderer::GetFloatOption( const char* strName, const char* strParam ) const
+{
+	return(optCurrent().GetFloatOption( strName, strParam ) );
+}
+
+const	TqInt*		CqRenderer::GetIntegerOption( const char* strName, const char* strParam ) const
+{
+	return(optCurrent().GetIntegerOption( strName, strParam ) );
+}
+
+const	CqString*	CqRenderer::GetStringOption( const char* strName, const char* strParam ) const
+{
+	return(optCurrent().GetStringOption( strName, strParam ) );
+}
+
+const	CqVector3D*	CqRenderer::GetPointOption( const char* strName, const char* strParam ) const
+{
+	return(optCurrent().GetPointOption( strName, strParam ) );
+}
+
+const	CqColor*	CqRenderer::GetColorOption( const char* strName, const char* strParam ) const
+{
+	return(optCurrent().GetColorOption( strName, strParam ) );
+}
+
+
+TqFloat*			CqRenderer::GetFloatOptionWrite( const char* strName, const char* strParam )
+{
+	return(optCurrent().GetFloatOptionWrite( strName, strParam ) );
+}
+
+TqInt*				CqRenderer::GetIntegerOptionWrite( const char* strName, const char* strParam )
+{
+	return(optCurrent().GetIntegerOptionWrite( strName, strParam ) );
+}
+
+CqString*			CqRenderer::GetStringOptionWrite( const char* strName, const char* strParam )
+{
+	return(optCurrent().GetStringOptionWrite( strName, strParam ) );
+}
+
+CqVector3D*			CqRenderer::GetPointOptionWrite( const char* strName, const char* strParam )
+{
+	return(optCurrent().GetPointOptionWrite( strName, strParam ) );
+}
+
+CqColor*			CqRenderer::GetColorOptionWrite( const char* strName, const char* strParam )
+{
+	return(optCurrent().GetColorOptionWrite( strName, strParam ) );
 }
 
 
@@ -888,6 +943,11 @@ void CqRenderer::ClearDisplayRequests()
 void QSetRenderContext( CqRenderer* pRend )
 {
 	pCurrRenderer = pRend;
+}
+
+IqRenderer* QGetRenderContextI()
+{
+	return ( pCurrRenderer );
 }
 
 //---------------------------------------------------------------------
