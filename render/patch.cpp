@@ -463,7 +463,7 @@ void CqSurfacePatchBicubic::ConvertToBezierBasis()
 /** Constructor.
  */
 
-CqSurfacePatchBilinear::CqSurfacePatchBilinear() : CqSurface()
+CqSurfacePatchBilinear::CqSurfacePatchBilinear() : CqSurface(), m_fHasPhantomFourthVertex(TqFalse), m_iInternalu(-1), m_iInternalv(-1)
 {}
 
 
@@ -493,6 +493,10 @@ CqSurfacePatchBilinear::~CqSurfacePatchBilinear()
 CqSurfacePatchBilinear& CqSurfacePatchBilinear::operator=( const CqSurfacePatchBilinear& From )
 {
 	CqSurface::operator=( From );
+
+	m_fHasPhantomFourthVertex = From.m_fHasPhantomFourthVertex;
+	m_iInternalu = From.m_iInternalu;
+	m_iInternalv = From.m_iInternalv;
 
 	return ( *this );
 }
@@ -543,7 +547,7 @@ CqBound CqSurfacePatchBilinear::Bound() const
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
 	CqVector3D	vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
 	TqInt i;
-	for ( i = 0; i < 4; i++ )
+	for ( i = 0; i < (m_fHasPhantomFourthVertex?3:4); i++ )
 	{
 		CqVector3D	vecV = ( *P() ) [ i ];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
@@ -650,6 +654,116 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 		return ( TqFalse );
 
 	return ( TqTrue );
+}
+
+
+
+//---------------------------------------------------------------------
+/** Perform post split operations.
+ */
+
+void CqSurfacePatchBilinear::PostSubdivide(std::vector<CqBasicSurface*>& aSplits)
+{
+	if(aSplits.size() == 4)
+	{
+		delete(aSplits.back());
+		aSplits.pop_back();
+	}
+}
+
+
+TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
+{
+	aSplits.push_back( new CqSurfacePatchBilinear );
+	aSplits.push_back( new CqSurfacePatchBilinear );
+	
+	if(m_fHasPhantomFourthVertex)
+	{
+		aSplits.push_back( new CqSurfacePatchBilinear );
+		aSplits.push_back( new CqSurfacePatchBilinear );
+	}
+
+	TqInt i;
+	for(i=0; i<(m_fHasPhantomFourthVertex?4:2); i++)
+	{
+		aSplits[ i ] ->SetSurfaceParameters( *this );
+		aSplits[ i ] ->SetSplitDir( ( SplitDir() == SplitDir_U ) ? SplitDir_V : SplitDir_U );
+		aSplits[ i ] ->SetEyeSplitCount( EyeSplitCount() );
+		aSplits[ i ] ->m_fDiceable = TqTrue;
+		aSplits[ i ] ->AddRef();
+	}
+
+	// Iterate through any use parameters subdividing and storing the second value in the target surface.
+	std::vector<CqParameter*>::iterator iUP;
+	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	{
+		CqParameter* pNewA = ( *iUP ) ->Clone();
+		CqParameter* pNewB = ( *iUP ) ->Clone();
+		( *iUP ) ->Subdivide( pNewA, pNewB, SplitDir() == SplitDir_U, this );
+
+		if(m_fHasPhantomFourthVertex)
+		{
+			CqParameter* pNewC = pNewA ->Clone();
+			CqParameter* pNewD = pNewA ->Clone();
+			CqParameter* pNewE = pNewB ->Clone();
+			CqParameter* pNewF = pNewB ->Clone();
+			pNewA ->Subdivide( pNewC, pNewD, SplitDir() == SplitDir_V, this );
+			pNewB ->Subdivide( pNewE, pNewF, SplitDir() == SplitDir_V, this );
+
+			static_cast<CqSurface*>( aSplits[ 0 ] ) ->AddPrimitiveVariable( pNewC );
+			static_cast<CqSurface*>( aSplits[ 1 ] ) ->AddPrimitiveVariable( pNewD );
+			static_cast<CqSurface*>( aSplits[ 2 ] ) ->AddPrimitiveVariable( pNewE );
+			static_cast<CqSurface*>( aSplits[ 3 ] ) ->AddPrimitiveVariable( pNewF );
+
+			delete(pNewA);
+			delete(pNewB);
+		}
+		else
+		{
+			static_cast<CqSurface*>( aSplits[ 0 ] ) ->AddPrimitiveVariable( pNewA );
+			static_cast<CqSurface*>( aSplits[ 1 ] ) ->AddPrimitiveVariable( pNewB );
+		}
+	}
+	
+	if(m_fHasPhantomFourthVertex)
+	{
+		delete(aSplits.back());
+		aSplits.pop_back();
+
+		static_cast<CqSurfacePatchBilinear*>( aSplits[ 0 ] ) ->m_fHasPhantomFourthVertex = TqFalse;
+		static_cast<CqSurfacePatchBilinear*>( aSplits[ 1 ] ) ->m_fHasPhantomFourthVertex = TqTrue;
+		static_cast<CqSurfacePatchBilinear*>( aSplits[ 2 ] ) ->m_fHasPhantomFourthVertex = TqTrue;
+
+		return ( 3 );
+	}
+	else
+	{
+		static_cast<CqSurfacePatchBilinear*>( aSplits[ 0 ] ) ->m_fHasPhantomFourthVertex = TqFalse;
+		static_cast<CqSurfacePatchBilinear*>( aSplits[ 1 ] ) ->m_fHasPhantomFourthVertex = TqFalse;
+
+		return ( 2 );
+	}
+}
+
+
+//---------------------------------------------------------------------
+/**
+ * Adds a primitive variable to the list of user parameters.  This method
+ * caches the indexes of the "__internal_u" and "__internal_v" parameters within
+ * the array of user parameters for later access.
+ *
+ * @param pParam        Pointer to the parameter to add.
+ */
+void CqSurfacePatchBilinear::AddPrimitiveVariable( CqParameter* pParam )
+{
+	// add the primitive variable using the superclass method
+	CqSurface::AddPrimitiveVariable( pParam );
+
+	// trap the indexes of "width" and "constantwidth" parameters
+	if ( pParam->strName() == "__internal_u" )
+		m_iInternalu = m_aUserParams.size() - 1;
+	else if ( pParam->strName() == "__internal_v" )
+		m_iInternalv = m_aUserParams.size() - 1;
 }
 
 

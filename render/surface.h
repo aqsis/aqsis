@@ -103,7 +103,7 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		{}
 		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
 		{}
-		virtual void	PostDice()
+		virtual void	PostDice(CqMicroPolyGrid * pGrid)
 		{}
 
 		virtual TqInt	PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
@@ -112,7 +112,7 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		}
 		virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u )
 		{}
-		virtual void	PostSubdivide()
+		virtual void	PostSubdivide(std::vector<CqBasicSurface*>& aSplits)
 		{}
 
 		/** Get the surface paramter values for the given vertex index. Used when constructing a surface
@@ -559,7 +559,7 @@ class _qShareC CqSurface : public CqBasicSurface
 		virtual void	PreDice( TqInt uDiceSize, TqInt vDiceSize )
 		{}
 		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
-		virtual void	PostDice()
+		virtual void	PostDice(CqMicroPolyGrid * pGrid)
 		{}
 
 		virtual TqInt	PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
@@ -567,7 +567,7 @@ class _qShareC CqSurface : public CqBasicSurface
 			return ( 0 );
 		}
 		virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u );
-		virtual void	PostSubdivide()
+		virtual void	PostSubdivide(std::vector<CqBasicSurface*>& aSplits)
 		{}
 
 		/** Virtual function to indicate whether a particular surface is able

@@ -333,6 +333,12 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 			pNew->AddPrimitiveVariable( pNewUP );
 		}
 
+		if(indexC == indexD)
+		{
+			*pNew->P()->pValue(3) = (pNew->P()->pValue(1)[0] - pNew->P()->pValue(0)[0]) + pNew->P()->pValue(2)[0];
+			pNew->SetfHasPhantomFourthVertex(TqTrue);
+		}
+
 		// If there are no smooth normals specified, then fill in the facet normal at each vertex.
 		if ( !bHasN() && USES( iUses, EnvVars_N ) )
 		{
@@ -353,10 +359,10 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 			CqVector3D PA, PB, PC, PD;
 			CqMatrix matID;
 			const CqMatrix& matCurrentToWorld = QGetRenderContext() ->matSpaceToSpace( "current", "object", matID, Surface().pTransform() ->matObjectToWorld() );
-			PA = matCurrentToWorld * PolyP( indexA );
-			PB = matCurrentToWorld * PolyP( indexB );
-			PC = matCurrentToWorld * PolyP( indexC );
-			PD = matCurrentToWorld * PolyP( indexD );
+			PA = matCurrentToWorld * pNew->P()->pValue()[0];
+			PB = matCurrentToWorld * pNew->P()->pValue()[1];
+			PC = matCurrentToWorld * pNew->P()->pValue()[3];
+			PD = matCurrentToWorld * pNew->P()->pValue()[2];
 
 			if ( USES( iUses, EnvVars_s ) && !bHass() )
 			{
@@ -409,6 +415,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 
 				pNew->AddPrimitiveVariable( pNewUP );
 			}
+
 		}
 
 		aSplits.push_back( pNew );

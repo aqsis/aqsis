@@ -143,6 +143,18 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 		{
 			return ( m_bGeometricNormals );
 		}
+		/** Query whether this grid is being rendered as a triangle.
+		 */
+		TqBool fTriangular() const
+		{
+			return( m_fTriangular );
+		}
+		/** Set this grid as being rendered as a triangle or not.
+		 */
+		void SetfTriangular( TqBool fTriangular )
+		{
+			m_fTriangular = fTriangular;
+		}
 
 		void	Initialise( TqInt cu, TqInt cv, CqSurface* pSurface );
 
@@ -292,6 +304,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 		CqSurface* m_pSurface;	///< Pointer to the attributes for this grid.
 		CqCSGTreeNode* m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
 		IqShaderExecEnv* m_pShaderExecEnv;	///< Pointer to the shader execution environment for this grid.
+		TqBool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
 	protected:
 
 }

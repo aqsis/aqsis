@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/10/31 11:51:12 $
+ *	Last change date:	$Date: 2002/11/07 19:18:31 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___isurface_Loaded___
@@ -25,6 +25,7 @@ struct IqTransform;
 class CqParameter;
 struct IqShaderData;
 class CqBasicSurface;
+class CqMicroPolyGrid;
 
 
 //----------------------------------------------------------------------
@@ -77,7 +78,7 @@ struct IqSurface
 	virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData ) = 0;
 	/** Perform any post cleanup after dicing.
 	 */
-	virtual void	PostDice() = 0;
+	virtual void	PostDice(CqMicroPolyGrid * pGrid) = 0;
 
 	/** Perform any precalculation required before subdividing.
 	 *  \param u Flag indicating if we are subdividing in u, if false we are doing v.
@@ -92,7 +93,7 @@ struct IqSurface
 	virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u ) = 0;
 	/** Perform any post cleanup after dicing.
 	 */
-	virtual void	PostSubdivide() = 0;
+	virtual void	PostSubdivide( std::vector<CqBasicSurface*>& aSplits ) = 0;
 };
 
 

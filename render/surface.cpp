@@ -480,7 +480,7 @@ CqMicroPolyGridBase* CqSurface::Dice()
 			pGrid->pAttributes() ->pshadAtmosphere() ->SetArgument( ( *iUP ), this );
 	}
 
-	PostDice( );
+	PostDice( pGrid );
 
 	return ( pGrid );
 }
@@ -531,9 +531,9 @@ TqInt CqSurface::Split( std::vector<CqBasicSurface*>& aSplits )
 		aSplits.insert( aSplits.end(), aSplits1.begin(), aSplits1.end() );
 	}
 
-	PostSubdivide();
+	PostSubdivide(aSplits);
 
-	return ( cSplits );
+	return ( aSplits.size() );
 }
 
 

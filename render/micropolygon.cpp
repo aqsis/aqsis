@@ -48,7 +48,8 @@ CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(),
 		m_bGeometricNormals( TqFalse ),
 		m_pSurface( NULL ),
 		m_pCSGNode( NULL ),
-		m_pShaderExecEnv( NULL )
+		m_pShaderExecEnv( NULL ),
+		m_fTriangular(TqFalse)
 
 {
 	QGetRenderContext() ->Stats().IncGridsAllocated();
@@ -85,7 +86,8 @@ CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) :
 		m_bShadingNormals( TqFalse ),
 		m_bGeometricNormals( TqFalse ),
 		m_pSurface( NULL ),
-		m_pShaderExecEnv( NULL )
+		m_pShaderExecEnv( NULL ),
+		m_fTriangular(TqFalse)
 
 {
 	QGetRenderContext() ->Stats().IncGridsAllocated();
@@ -605,11 +607,6 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 			pNew->SetGrid( this );
 			pNew->SetIndex( iIndex );
 			if ( fTrimmed ) pNew->MarkTrimmed();
-			//			CqVector3D vec1, vec2, vec3, vec4;
-			//			pP->GetPoint( vec1, iIndex );
-			//			pP->GetPoint( vec2, iIndex + 1 );
-			//			pP->GetPoint( vec3, iIndex + cu + 2 );
-			//			pP->GetPoint( vec4, iIndex + cu + 1 );
 			pNew->Initialise( pP[ iIndex ], pP[ iIndex + 1 ], pP[ iIndex + cu + 2 ], pP[ iIndex + cu + 1 ] );
 			pNew->GetTotalBound( TqTrue );
 
@@ -982,6 +979,34 @@ TqBool CqMicroPolygonStatic::Sample( CqVector2D& vecSample, TqFloat time, TqFloa
 			if ( pGrid() ->pSurface() ->bCanBeTrimmed() && pGrid() ->pSurface() ->bIsPointTrimmed( vR ) && !bOutside )
 				return ( TqFalse );
 		}
+
+		if( pGrid()->fTriangular() )
+		{
+			CqVector3D vO;
+			pGrid()->P()->GetPoint(vO, 0);
+			CqVector3D vA;
+			pGrid()->P()->GetPoint(vA, pGrid()->uGridRes());
+			CqVector3D vB;
+			pGrid()->P()->GetPoint(vB, pGrid()->vGridRes() * ( pGrid()->uGridRes() + 1 ));
+
+			TqBool clockwise;
+			CqVector3D E1 = vA - vO; 
+			CqVector3D E2 = vB - vO;
+			if ((E1.x() * E2.y() - E1.y() * E2.x()) >= 0)	clockwise = TqTrue; 
+			else											clockwise = TqFalse;
+
+
+			TqFloat Ax = vA.x();
+			TqFloat Ay = vA.y();
+			TqFloat Bx = vB.x();
+			TqFloat By = vB.y();
+
+			TqFloat v = (Ay-By)*vecSample.x()+(Bx-Ax)*vecSample.y()+(Ax*By-Bx*Ay);
+			if( ( ( clockwise ) && ( v <= 0 ) ) || ( ( !clockwise ) && ( v >= 0 ) ) )
+				return(TqFalse);
+
+		}
+
 		return ( TqTrue );
 	}
 	else
