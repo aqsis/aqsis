@@ -158,6 +158,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name librib_shared
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libargparse
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -197,6 +200,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libcodegenvm
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libargparse
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -220,6 +226,9 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libaqsistypes
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libargparse
     End Project Dependency
 }}}
 
@@ -391,6 +400,18 @@ Package=<4>
 ###############################################################################
 
 Project: "libaqsistypes"=.\libaqsistypes\libaqsistypes.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libargparse"=.\libargparse\libargparse.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -628,6 +649,9 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libddmsimple
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libargparse
     End Project Dependency
 }}}
 
