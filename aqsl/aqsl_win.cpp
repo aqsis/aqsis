@@ -69,15 +69,21 @@ void compile_file( const char* sl_file )
 int main( int argc, char** argv )
 {
 	int i;
+	char* pargs = new char[255];
+	pargs[0] = '\0';
 	for ( i = 1; i < argc; i++ )
 	{
 		if ( strstr( argv[ i ], "-help" ) )
 		{
-			printf( "Usage: %s -D anyconstant yourshader.sl\n", argv[ 0 ] );
+			printf( "Usage: %s [options] yourshader.sl\n", argv[ 0 ] );
+			printf( "all options will be passed directly to slpp\n" );
 			exit( 2 );
 		}
-		compile_file( argv[ i ] );
+		strcat( pargs, argv[ i] );
+		strcat( pargs, " " );
 	}
+	compile_file( pargs );
 
+	delete[](pargs);
 	return ( 0 );
 }
