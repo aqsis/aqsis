@@ -266,15 +266,15 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
     CqString strDriverPathAndFile = fileDriver.strRealName();
 
 	// Load the dynamic obejct and locate the relevant symbols.
-    req.m_DriverHandle = req.m_DspyPlugin.SimpleDLOpen( &strDriverPathAndFile );
+    req.m_DriverHandle = m_DspyPlugin.SimpleDLOpen( &strDriverPathAndFile );
     if( req.m_DriverHandle != NULL )
     {
-        req.m_OpenMethod = (DspyImageOpenMethod)req.m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strOpenMethod );
-        req.m_QueryMethod = (DspyImageQueryMethod)req.m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strQueryMethod );
-        req.m_DataMethod = (DspyImageDataMethod)req.m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDataMethod );
-        req.m_CloseMethod = (DspyImageCloseMethod)req.m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strCloseMethod );
-        req.m_DelayCloseMethod = (DspyImageDelayCloseMethod)req.m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDelayCloseMethod );
-    }
+        req.m_OpenMethod = (DspyImageOpenMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strOpenMethod );
+        req.m_QueryMethod = (DspyImageQueryMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strQueryMethod );
+        req.m_DataMethod = (DspyImageDataMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDataMethod );
+        req.m_CloseMethod = (DspyImageCloseMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strCloseMethod );
+        req.m_DelayCloseMethod = (DspyImageDelayCloseMethod)m_DspyPlugin.SimpleDLSym( req.m_DriverHandle, &m_strDelayCloseMethod );
+	}
 
     if( NULL != req.m_OpenMethod )
     {
@@ -466,6 +466,12 @@ void CqDDManager::CloseDisplayLibrary( SqDisplayRequest& req )
 		(*req.m_DelayCloseMethod)(req.m_imageHandle);
 	else if( NULL != req.m_CloseMethod )
 		(*req.m_CloseMethod)(req.m_imageHandle);
+
+	/// \note We don't close the driver shared libraries here because doing so caused 
+	/// some problems with Win2K and FLTK. It seems that detatching from the drive DLL 
+	/// causes some important data to be altered and when a new window is opened it crashes.
+	/// The cleanup of the drivers is left to when the CqDDManager instance closes down, and the
+	/// CqSimplePlugin class gets destroyed, which will be at the end of the render, which is fine.
 }
 
 void CqDDManager::InitialiseDisplayNameMap()

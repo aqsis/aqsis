@@ -404,6 +404,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
 			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, pImage->m_iFormatCount, reinterpret_cast<unsigned char*>(pImage->m_data));
 			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
+			pImage->m_theWindow->label(pImage->m_filename);
 			pImage->m_theWindow->end();
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
@@ -438,11 +439,12 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		// If in "zframebuffer" mode, we need another buffer for the displayed depth data.
 		if(pImage->m_imageType == Type_ZFramebuffer)
 		{
-			pImage->m_zfbdata = reinterpret_cast<unsigned char*>(malloc( pImage->m_width * pImage->m_height * 3 * sizeof(float)));
+			pImage->m_zfbdata = reinterpret_cast<unsigned char*>(malloc( pImage->m_width * pImage->m_height * 3 * sizeof(unsigned char)));
 
 			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
 			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, 3, reinterpret_cast<unsigned char*>(pImage->m_zfbdata));
 			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
+			pImage->m_theWindow->label(pImage->m_filename);
 			pImage->m_theWindow->end();
 			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();

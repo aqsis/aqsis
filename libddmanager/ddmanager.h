@@ -85,7 +85,6 @@ private:
 		TqInt		m_AOVOffset;
 		TqInt		m_AOVSize;
 		std::vector<UserParameter> m_customParams;
-		CqSimplePlugin m_DspyPlugin;
 		void*		m_DriverHandle;
 		PtDspyImageHandle m_imageHandle;
 		PtFlagStuff	m_flags;
@@ -119,6 +118,7 @@ private:
 	static CqString m_strDataMethod;
 	static CqString m_strCloseMethod;
 	static CqString m_strDelayCloseMethod;
+	CqSimplePlugin m_DspyPlugin;
 
 	static char* m_RedName;
 	static char* m_GreenName;
