@@ -36,8 +36,6 @@ START_NAMESPACE( Aqsis )
 
 
 #define	ESTIMATEGRIDSIZE    8
-#define MINSHADINGRATE		0.4
-
 
 //----------------------------------------------------------------------
 /** \class CqQuadric
@@ -77,7 +75,9 @@ class CqQuadric : public CqSurface
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual TqBool	Diceable();
 
-		void	EqtimateGridSize();
+		void	EstimateGridSize();
+		void	Circle( const CqVector3D& O, const CqVector3D& X, const CqVector3D& Y, TqFloat r, TqFloat as, TqFloat ae, std::vector<CqVector3D>& points ) const;
+		CqBound	RevolveForBound( const std::vector<CqVector3D>& profile, const CqVector3D& S, const CqVector3D& Tvec, TqFloat theta ) const;
 
 		/** Pure virtual, get a surface point.
 		 * \param u Surface u coordinate.
@@ -332,7 +332,6 @@ class CqDisk : public CqQuadric
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
 		CqDisk&	operator=( const CqDisk& From );
-		TqBool	Diceable();         ////< Disk are diceable in 1 or 2 steps max
 
 	private:
 		TqFloat	m_Height;			///< Position on z axis.
