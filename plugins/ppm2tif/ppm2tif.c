@@ -26,7 +26,7 @@
 
 // The conversion process assumes a minimal conversion
 // the function to do convertion must be name 
-// as the name of the dll or .dso on Unix 
+// as the name of the dll or .so on Unix 
 // The conversion must create a valid .tif file and return
 // the filename of the new file created.
 // Eg. this function ppm2tif() created a .tif file at the same place
@@ -40,8 +40,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define	_qShareName ppm2tif
-#include "share.h"
+#define	_qShareName	ppm2tif
+#include	"share.h"
+
 
 static char tiffname[1024];
 
@@ -66,19 +67,20 @@ char *result =NULL;
 	if (!result) return result;
 
 #ifdef AQSIS_SYSTEM_WIN32
-
     sprintf(cmd, "ppm2tiff.exe %s %s", in, tiffname);
 #else
 	sprintf(cmd, "ppm2tiff %s %s", in, tiffname);
 #endif
-   errcode = system(cmd);
 
-   if (errcode == 0) 
-   {
+	errcode = system(cmd);
+
+	if (errcode == 0) 
+	{
 		/* SUCCESS */
 		result = tiffname;
-   } 
-   return result;
+	} 
+
+	return result;
 }
 
 
@@ -88,7 +90,7 @@ int main(int argc, char *argv[])
 char *result;
 
    if (argc != 2) {
-      fprintf(stderr, "Usage %s: %s some.gif", argv[0], argv[1]);
+      fprintf(stderr, "Usage %s: %s some.ppm", argv[0], argv[1]);
       exit(2);
    }
    result = ppm2tif(argv[1]);

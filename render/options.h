@@ -321,7 +321,7 @@ class CqDisplay
 
 	private:
 			TqFloat		m_fPixelVariance;					///< Pixel variance (not used).
-			TqFloat		m_PixelXSamples,					///< Pixel samples in x.
+			TqInt		m_PixelXSamples,					///< Pixel samples in x.
 						m_PixelYSamples;					///< Pixel samples in y.
 			RtFilterFunc m_funcFilter;						///< Pointer to the pixel filter function.
 			TqFloat		m_fFilterXWidth,					///< Pixel filter width in x.
