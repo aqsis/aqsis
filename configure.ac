@@ -130,6 +130,7 @@ AQSIS_CFLAGS="$DEBUG_FLAGS $OPT_FLAGS"
 
 AC_OUTPUT( \
 all/Makefile \
+all/AdditionalDeveloperLibs/Makefile \
 aqsis/Makefile \
 aqsl/Makefile \
 aqsl/tests/Makefile \
