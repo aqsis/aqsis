@@ -40,6 +40,20 @@ namespace log4cpp {
     std::string AqLayout::format(const LoggingEvent& event) {
         std::ostringstream message;
 
+        message << event.message << std::endl;
+
+        return message.str();
+    }
+
+	AqFileLayout::AqFileLayout() {
+    }
+    
+    AqFileLayout::~AqFileLayout() {
+    }
+
+    std::string AqFileLayout::format(const LoggingEvent& event) {
+        std::ostringstream message;
+
         const std::string& priorityName = Priority::getPriorityName(event.priority);
         message << priorityName << " " 
                 << event.categoryName << " " << event.ndc << ": " 
@@ -66,8 +80,6 @@ CqLog::CqLog( char* name, bool noConsoleOutput )
 	{
 		createCOUTLog();
 	}
-
-	m_FirstRun = true;
 }
 
 // Close down the log and shutdown all categories
@@ -79,13 +91,6 @@ CqLog::~CqLog()
 // Log a message, if possible, don't use this
 void CqLog::log( const char* priority, const char* stringFormat, ...)
 {
-
-	if ( m_FirstRun )
-	{
-		std::cout << "using log4cpp " << LOG4CPP_VERSION << " ( licensed under the LGPL )" << std::endl;
-
-		m_FirstRun = false;
-	}
 
 	va_list va;
 	va_start(va, stringFormat);
@@ -112,13 +117,6 @@ void CqLog::log( const char* priority, const char* stringFormat, ...)
 void CqLog::log(const char *priority, const CqString &stringFormat)
 {
 
-	if ( m_FirstRun )
-	{
-		std::cout << "using log4cpp " << LOG4CPP_VERSION << " ( licensed under the LGPL )" << std::endl;
-
-		m_FirstRun = false;
-	}
-
 	log4cpp::Priority::Value pVal;
 	
 	// Report an error if unknown priority used
@@ -137,26 +135,12 @@ void CqLog::log(const char *priority, const CqString &stringFormat)
 // Internal log function for error(), debug() etc. calls, just like log4cpp does it
 void CqLog::log2( log4cpp::Priority::Value priority, const char* stringFormat, va_list va )
 {
-	if ( m_FirstRun )
-	{
-		std::cout << "using log4cpp " << LOG4CPP_VERSION << " ( licensed under the LGPL )" << std::endl;
-
-		m_FirstRun = false;
-	}
-
 	m_pRoot->logva(priority, stringFormat, va);
 }
 
 // Internal log without ...
 void CqLog::log2( log4cpp::Priority::Value priority, const char* string )
 {
-	if ( m_FirstRun )
-	{
-		std::cout << "using log4cpp " << LOG4CPP_VERSION << " ( licensed under the LGPL )" << std::endl;
-
-		m_FirstRun = false;
-	}
-
 	m_pRoot->log(priority, string);
 }
 
@@ -166,7 +150,7 @@ void CqLog::createFileLog( std::string filename , std::string name )
 	m_pFileAppender = 
         new log4cpp::FileAppender( name, filename );
 
-	m_pFileLayout = new log4cpp::AqLayout();
+	m_pFileLayout = new log4cpp::AqFileLayout();
 	
 	
 	m_pFileAppender->setLayout( m_pFileLayout );

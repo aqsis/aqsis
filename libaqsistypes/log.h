@@ -59,6 +59,17 @@ namespace log4cpp
 
 
 	};
+
+	class AqFileLayout : public Layout  
+	{
+	public:
+		AqFileLayout();
+		virtual ~AqFileLayout();
+
+		virtual std::string format(const LoggingEvent& event);
+
+
+	};
 }
 
 START_NAMESPACE( Aqsis )
@@ -122,31 +133,30 @@ class _qShareC CqLog	: public IqLog
 		_qShareM const char* getError( int table, int error_id );
 
 		enum {	BASIC_ERROR_TABLE = 0,
-				RI_ERROR_TABLE,
-				SHADER_ERROR_TABLE } m_ErrorTables;
+				RI_ERROR_TABLE } m_ErrorTables;
 
 		enum {	UNKNOW_ERROR = 0,
 				RI_COLOR_SAMPLES_INVALID,
 				RI_RELATIVE_DETAIL_INVALID,
 				RI_UNKNOWN_SYMBOL,
 				RI_AREA_LIGHT_UNSUPPORTED,
-				RI_INTERIOR_UNSUPPORTED,
+				RI_INTERIOR_UNSUPPORTED,							// 5
 				RI_EXTERIOR_UNSUPPORTED,
 				RI_DETAIL_RANGE_INVALID,
 				RI_GEOMETRIC_APPROX_UNSUPPORTED,
 				RI_PERSPECTIVE_BAD_FOV,
-				RI_DEFORMATION_UNSUPPORTED,
-				RI_TRANSFORM_POINTS_UNSUPPORTED,
+				RI_DEFORMATION_UNSUPPORTED,							//10
+				RI_TRANSFORM_POINTS_UNSUPPORTED,					
 				RI_BLOBBY_V_UNSUPPORTED,
 				RI_CURVES_V_UNKNOWN_WRAP_MODE,
 				RI_CURVES_V_UNKNOWN_TYPE,
-				RI_PROC_DELAYED_READ_ARCHIVE_UNSUPPORTED,
-				RI_PROC_RUN_PROGRAM_UNSUPPORTED,
+				RI_PROC_DELAYED_READ_ARCHIVE_UNSUPPORTED,			//15
+				RI_PROC_RUN_PROGRAM_UNSUPPORTED,					
 				RI_PROC_DYNAMIC_LOAD_UNSUPPORTED,
 				RI_PROCEDURAL_UNKNOWN_SUBDIV,
 				RI_GEOMETRY_V_UNKNOWN,
-				RI_OBJECT_BEGIN_UNSUPPORTED,
-				RI_OBJECT_END_UNSUPPORTED,
+				RI_OBJECT_BEGIN_UNSUPPORTED,						//20
+				RI_OBJECT_END_UNSUPPORTED,						
 				RI_MAKE_BUMP_UNSUPPORTED } m_RiErrorTable;
 
 				
@@ -161,12 +171,10 @@ class _qShareC CqLog	: public IqLog
 		log4cpp::Appender* m_pAppender;
 		log4cpp::Appender* m_pFileAppender;
 		log4cpp::AqLayout* m_pLayout;
-		log4cpp::AqLayout* m_pFileLayout;
+		log4cpp::AqFileLayout* m_pFileLayout;
 		log4cpp::Category* m_pRoot;
 
 		CqMessageTable* m_pTable;
-
-		bool m_FirstRun;
 };
 
 END_NAMESPACE( Aqsis )

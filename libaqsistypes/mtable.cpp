@@ -47,31 +47,29 @@ CqMessageTable::CqMessageTable()
 
 	// RI Error
 	m_Ri[0] = "RiError: Unknown error";
-	m_Ri[1] = "RiColorSamples not supported, defaults to 3";
+	m_Ri[CqLog::RI_COLOR_SAMPLES_INVALID] = "RiColorSamples not supported, defaults to 3";
 	m_Ri[CqLog::RI_RELATIVE_DETAIL_INVALID] = "RiRelativeDetail (invalid scaling factor)";
 	m_Ri[CqLog::RI_UNKNOWN_SYMBOL] = "Unknown Symbol";
 	m_Ri[CqLog::RI_AREA_LIGHT_UNSUPPORTED] = "RiAreaLightSource not supported, creating a point lightsource";
-	m_Ri[5] = "RiInterior shaders not supported";
-	m_Ri[6] = "RiExterior shaders not supported";
-	m_Ri[7] = "RiDetailRange (invalid levels of detail)";
-	m_Ri[8] = "RiGeometricApproximation not supported";
-	m_Ri[9] = "RiPerspective given bad fov value.";
-	m_Ri[10] = "RiDeformation shaders not supported";
-	m_Ri[11] = "RiTransformPoints not supported";
-	m_Ri[12] = "RiBlobbyV not supported";
-	m_Ri[13] = "RiCurvesV (unknown wrap mode: must be \"periodic\" or \"nonperiodic\")";
-	m_Ri[14] = "RiCurvesV (unknown type: must be \"linear\" or \"cubic\")";
-	m_Ri[15] = "RiProcDelayedReadArchive not supported";
-	m_Ri[16] = "RiProcRunProgram not supported";
-	m_Ri[17] = "RiProcDynamicLoad not supported";
-	m_Ri[18] = "RiProcedural Unknown SubdivFunc type";
-	m_Ri[19] = "RiGeometryV, unknown geometry";
-	m_Ri[20] = "RiObjectBegin, instances not supported";
-	m_Ri[21] = "RiObjectInstance, instances not supported";
-	m_Ri[22] = "RiMakeBump not supported";
+	m_Ri[CqLog::RI_INTERIOR_UNSUPPORTED] = "RiInterior shaders not supported";
+	m_Ri[CqLog::RI_EXTERIOR_UNSUPPORTED] = "RiExterior shaders not supported";
+	m_Ri[CqLog::RI_DETAIL_RANGE_INVALID] = "RiDetailRange (invalid levels of detail)";
+	m_Ri[CqLog::RI_GEOMETRIC_APPROX_UNSUPPORTED] = "RiGeometricApproximation not supported";
+	m_Ri[CqLog::RI_PERSPECTIVE_BAD_FOV] = "RiPerspective given bad fov value.";
+	m_Ri[CqLog::RI_DEFORMATION_UNSUPPORTED] = "RiDeformation shaders not supported";
+	m_Ri[CqLog::RI_TRANSFORM_POINTS_UNSUPPORTED] = "RiTransformPoints not supported";
+	m_Ri[CqLog::RI_BLOBBY_V_UNSUPPORTED] = "RiBlobbyV not supported";
+	m_Ri[CqLog::RI_CURVES_V_UNKNOWN_WRAP_MODE] = "RiCurvesV (unknown wrap mode: must be \"periodic\" or \"nonperiodic\")";
+	m_Ri[CqLog::RI_CURVES_V_UNKNOWN_TYPE] = "RiCurvesV (unknown type: must be \"linear\" or \"cubic\")";
+	m_Ri[CqLog::RI_PROC_DELAYED_READ_ARCHIVE_UNSUPPORTED] = "RiProcDelayedReadArchive not supported";
+	m_Ri[CqLog::RI_PROC_RUN_PROGRAM_UNSUPPORTED] = "RiProcRunProgram not supported";
+	m_Ri[CqLog::RI_PROC_DYNAMIC_LOAD_UNSUPPORTED] = "RiProcDynamicLoad not supported";
+	m_Ri[CqLog::RI_PROCEDURAL_UNKNOWN_SUBDIV] = "RiProcedural Unknown SubdivFunc type";
+	m_Ri[CqLog::RI_GEOMETRY_V_UNKNOWN] = "RiGeometryV, unknown geometry";
+	m_Ri[CqLog::RI_OBJECT_BEGIN_UNSUPPORTED] = "RiObjectBegin, instances not supported";
+	m_Ri[CqLog::RI_OBJECT_END_UNSUPPORTED] = "RiObjectInstance, instances not supported";
+	m_Ri[CqLog::RI_MAKE_BUMP_UNSUPPORTED] = "RiMakeBump not supported";
 
-	// Shader error
-	m_Sh[0] = "ShaderError: Unknown error";
 }
 
 
@@ -79,7 +77,6 @@ CqMessageTable::~CqMessageTable()
 {
 	m_Be.clear();
 	m_Ri.clear();
-	m_Sh.clear();
 }
 
 //------------------------------------------------------------------------------
@@ -118,13 +115,6 @@ const char* CqMessageTable::getError( int table, int error_id )
 			break;
 		}
 
-		case CqLog::SHADER_ERROR_TABLE:
-		{	
-			m_pTable = &m_Sh;
-			m_pIt = &m_Sh_i;
-			break;
-		}
-		
 		default:
 			return "Table not found";
 	}
@@ -167,11 +157,6 @@ void CqMessageTable::insert( int table, i_s::value_type data)
 			break;
 		}
 
-		case CqLog::SHADER_ERROR_TABLE:
-		{	
-			m_Sh.insert( data );
-			break;
-		}
 	}
 }
   

@@ -26,7 +26,6 @@
 /*
 	*	RI_ERROR			0		RiError: Unknown error
 	*	BASIC_ERROR			0		BasicError: Unkown error
-	*	SHADER_ERROR		0		ShaderError: Unknown error
 */
 
 
@@ -87,10 +86,6 @@ class _qShareC CqMessageTable
 
 		i_s m_Ri;
 		i_s::iterator m_Ri_i;
-
-		i_s m_Sh;
-		i_s::iterator m_Sh_i;
-
 };
 
 END_NAMESPACE( Aqsis )
