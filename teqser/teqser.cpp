@@ -22,7 +22,9 @@ TqBool	g_shadow = TqFalse;
 
 ArgParse::apstring	g_swrap = "black";
 ArgParse::apstring	g_twrap = "black";
+ArgParse::apstring	g_wrap = "";
 ArgParse::apstring g_filter = "box";
+ArgParse::apstring g_resize = "up";
 ArgParse::apfloat g_swidth = 1.0;
 ArgParse::apfloat g_twidth = 1.0;
 ArgParse::apfloat g_fov = 90.0;
@@ -49,20 +51,25 @@ int main( int argc, const char** argv )
 
     ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] outfile" );
     ap.argFlag( "help", "\aprint this help and exit", &g_help );
-    ap.argFlag( "version", "print version information and exit", &g_version );
-    ap.argString( "compression", "=string [none|lzw|packbits|deflate]", &g_compress );
+    ap.argFlag( "version", "\aprint version information and exit", &g_version );
+    ap.argString( "compression", "=string\a[none|lzw|packbits|deflate]", &g_compress );
     ap.argFlag( "envcube", " px nx py ny pz nz\aproduce a cubeface environment map from 6 images.", &g_envcube );
-    ap.argFlag( "envlatl", " produce a latlong environment map from an image file.", &g_envlatl );
-    ap.argFlag( "shadow", " produce a shadow map from a z file.", &g_shadow );
-    ap.argString( "swrap", "=string s wrap [black|periodic|clamp]", &g_swrap );
-    ap.argString( "twrap", "=string t wrap [black|periodic|clamp]", &g_twrap );
-    ap.argString( "filter", "=string [box|bessel|catmull-rom|disk|gaussian|sinc|triangle]", &g_filter );
-    ap.argFloat( "fov(envcube)", "=float [>=0.0f]", &g_fov );
-    ap.argFloat( "swidth", "=float s width [>0.0f]", &g_swidth );
-    ap.argFloat( "twidth", "=float t width [>0.0f]", &g_twidth );
-    ap.argFloat( "width", "=float width [>0,0f] set both swidth and twidth", &g_width );
-    ap.argFloat( "quality", "=float [>=1.0f && <= 100.0f]", &g_quality );
-    ap.argFloat( "bake", "=float [>=2.0f && <= 2048.0f]", &g_bake );
+    ap.argFlag( "envlatl", "\aproduce a latlong environment map from an image file.", &g_envlatl );
+    ap.argFlag( "shadow", "\aproduce a shadow map from a z file.", &g_shadow );
+    ap.argString( "swrap", "=string\as wrap [black|periodic|clamp]", &g_swrap );
+    ap.argString( "smode", "=string\a(equivalent to swrap for BMRT compatibility)", &g_swrap );
+    ap.argString( "twrap", "=string\at wrap [black|periodic|clamp]", &g_twrap );
+    ap.argString( "tmode", "=string\a(equivalent to twrap for BMRT compatibility)", &g_swrap );
+    ap.argString( "wrap", "=string\awrap s&t [black|periodic|clamp]", &g_wrap );
+    ap.argString( "mode", "=string\as (equivalent to wrap for BMRT compatibility)", &g_swrap );
+    ap.argString( "filter", "=string\a[box|bessel|catmull-rom|disk|gaussian|sinc|triangle]", &g_filter );
+    ap.argFloat( "fov(envcube)", "=float\a[>=0.0f]", &g_fov );
+    ap.argFloat( "swidth", "=float\as width [>0.0f]", &g_swidth );
+    ap.argFloat( "twidth", "=float\at width [>0.0f]", &g_twidth );
+    ap.argFloat( "width", "=float\awidth [>0,0f] set both swidth and twidth", &g_width );
+    ap.argFloat( "quality", "=float\a[>=1.0f && <= 100.0f]", &g_quality );
+    ap.argFloat( "bake", "=float\a[>=2.0f && <= 2048.0f]", &g_bake );
+    ap.argString( "resize", "=string\a[up|down|round|up-|down-|round-]\n\aNot used, for BMRT compatibility only!", &g_resize );
 
 
     if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
@@ -132,7 +139,20 @@ int main( int argc, const char** argv )
         std::cerr << "Unknown t wrap mode: " << g_twrap << ". black will be used instead." << std::endl;
         g_twrap = "black";
     }
-    /* Need to set both st width ? */
+    if ( !( ( g_wrap == "" ) || ( g_wrap == "black" ) || ( g_wrap == "periodic" ) || ( g_wrap == "clamp" ) ) )
+    {
+        std::cerr << "Unknown wrap mode: " << g_wrap << ". black will be used instead." << std::endl;
+        g_wrap = "black";
+    }
+    
+	/* If wrap is specified, it overrides both s and t */
+	if( g_wrap != "" )
+	{
+		g_twrap = g_wrap;
+		g_swrap = g_wrap;
+	}
+	
+	/* Need to set both st width ? */
     if ( g_width > 0.0 )
     {
         g_twidth = g_swidth = g_width;
