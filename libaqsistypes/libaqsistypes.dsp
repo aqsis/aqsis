@@ -121,6 +121,10 @@ SOURCE=.\noise.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\plugins.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\win32\intel\semaphore.cpp
 # End Source File
 # Begin Source File
@@ -202,6 +206,10 @@ SOURCE=.\mtable.h
 # Begin Source File
 
 SOURCE=.\noise.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\plugins.h
 # End Source File
 # Begin Source File
 
