@@ -2922,6 +2922,7 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 {
 	// Create a NURBS patch
 	CqSurfaceNURBS * pSurface = new CqSurfaceNURBS();
+	pSurface->SetfPatchMesh();
 	pSurface->AddRef();
 	pSurface->Init( uorder, vorder, nu, nv );
 
@@ -2943,17 +2944,6 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 	{
 		// Clamp the surface to ensure non-periodic.
 		pSurface->Clamp();
-
-		std::vector<CqSurfaceNURBS*> S;
-		pSurface->Decompose(S);
-		TqInt i;
-		for( i = 0; i < S.size(); i++ )
-		{
-			std::strstream strName;
-			strName << "decomp" << i << ".out" << std::ends;
-//			S[ i ]->Output(strName.str());
-			strName.freeze(false);
-		}
 		CreateGPrim( pSurface );
 	}
 	else

@@ -24,6 +24,7 @@
 */
 
 #include	<math.h>
+#include	<strstream>
 
 #include	<stdio.h>
 
@@ -43,7 +44,7 @@ START_NAMESPACE( Aqsis )
 /** Constructor.
  */
 
-CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface(), m_cuVerts(0), m_cvVerts(0), m_uOrder(0), m_vOrder(0), m_umin(0.0f), m_umax(1.0f), m_vmin(0.0f), m_vmax(1.0f)
+CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface(), m_cuVerts(0), m_cvVerts(0), m_uOrder(0), m_vOrder(0), m_umin(0.0f), m_umax(1.0f), m_vmin(0.0f), m_vmax(1.0f), m_fPatchMesh( TqFalse )
 {
 	TrimLoops() = static_cast<const CqAttributes*>(pAttributes()) ->TrimLoops();
 }
@@ -74,6 +75,8 @@ void CqSurfaceNURBS::operator=( const CqSurfaceNURBS& From )
 	m_umax = From.m_umax;
 	m_vmin = From.m_vmin;
 	m_vmax = From.m_vmax;
+
+	m_fPatchMesh = From.m_fPatchMesh;
 
 	// Copy the knot vectors.
 	TqInt i;
@@ -1597,10 +1600,11 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 {
 	TqInt cSplits = 0;
 
-	if( cuSegments() > 1 || cvSegments() > 1 )
+	if( fPatchMesh() )
 	{
 		std::vector<CqSurfaceNURBS*> S;
-		Decompose(S);
+
+		SubdivideSegments( S );
 		TqInt i;
 		for( i = 0; i < S.size(); i++ )
 		{
@@ -1860,8 +1864,8 @@ void CqSurfaceNURBS::OutputMesh()
 
 
 	std::vector<CqSurfaceNURBS*>	S(1);
-//	S[ 0 ] = this;
-	Decompose(S);
+	S[ 0 ] = this;
+//	Decompose(S);
 
 	// Save the grid as a .raw file.
 	FILE* fp = fopen( "NURBS.RAW", "w" );
@@ -1942,7 +1946,7 @@ void CqSurfaceNURBS::Output( const char* name )
 	fputs( "]", fp );
 	fprintf( fp, "%f %f ", 0.0f, 1.0f );
 
-	fputs( "\"P\" [", fp );
+	fputs( "\"Pw\" [", fp );
 	for ( i = 0; i < P().Size(); i++ )
 		fprintf( fp, "%f %f %f %f ", P() [ i ].x(), P() [ i ].y(), P() [ i ].z(), P() [ i ].h() );
 	fputs( "]\n", fp );
@@ -1992,7 +1996,348 @@ void CqSurfaceNURBS::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 			vval += vinc;
 		}
 	}
+
+	const TqFloat* pTC = pAttributes() ->GetFloatAttribute("System", "TextureCoordinates");
+	CqVector2D st1( pTC[0], pTC[1]);
+	CqVector2D st2( pTC[2], pTC[3]);
+	CqVector2D st3( pTC[4], pTC[5]);
+	CqVector2D st4( pTC[6], pTC[7]);
+
+	if( USES( bUses, EnvVars_s ) && !bHass() && bUseDef_st)
+	{
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
+		s()->SetSize( cVarying() );
+
+		TqInt c,r;
+		TqInt i = 0;
+		for( c = 0; c < cvSegments(); c++ )
+		{
+			TqFloat v = ( 1.0f / cvSegments()+1 ) * c;
+			for( r = 0; r < cuSegments()+1; r++ )
+			{
+				TqFloat u = ( 1.0f / cuSegments() ) * r;
+				s()->pValue() [ i++ ] = BilinearEvaluate(st1.x(), st2.x(), st3.x(), st4.x(), u,v );
+			}
+		}
+	}
+
+	if( USES( bUses, EnvVars_t ) && !bHast() && bUseDef_st )
+	{
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
+		t()->SetSize( cVarying() );
+
+		TqInt c,r;
+		TqInt i = 0;
+		for( c = 0; c < cvSegments(); c++ )
+		{
+			TqFloat v = ( 1.0f / cvSegments() ) * c;
+			for( r = 0; r < cuSegments()+1; r++ )
+			{
+				TqFloat u = ( 1.0f / cuSegments()+1 ) * r;
+				t()->pValue() [ i++ ] = BilinearEvaluate(st1.y(), st2.y(), st3.y(), st4.y(), u,v );
+			}
+		}
+	}
+
 }
+
+
+/** Split the NURBS surface into B-Spline (sub) surfaces
+ */
+
+void CqSurfaceNURBS::SubdivideSegments(std::vector<CqSurfaceNURBS*>& S)
+{
+	TqInt uSplits = cuSegments();
+	TqInt vSplits = cvSegments();
+
+	// Resize the array to hold the aplit surfaces.
+	S.resize( uSplits * vSplits );
+	
+	TqInt iu, iv;
+
+	// An array to hold the split points in u and v, fill in the first one for us.
+	std::vector<TqInt> uSplitPoint(uSplits+1), vSplitPoint(vSplits+1);
+	uSplitPoint[0] = vSplitPoint[0] = 0;
+
+	// Refine the knot vectors as appropriate to generate the required split points in u
+	for ( iu = 1; iu < uSplits; iu++ )
+	{
+		TqFloat su = ( static_cast<TqFloat>( iu ) / static_cast<TqFloat>( uSplits ) )
+					 * ( m_auKnots[ m_cuVerts ] - m_auKnots[ m_uOrder - 1 ] )
+					 + m_auKnots[ m_uOrder - 1 ];
+
+		TqUint extra = 0L;
+		TqUint last = m_cuVerts + m_uOrder - 1;
+		TqFloat midVal = su;
+		TqUint middex = FindSpanU( midVal );
+		
+		// Search forward and backward to see if multiple knot is already there
+		TqUint i = 0;
+		TqUint same = 0L;
+		if ( auKnots()[ middex ] == midVal )
+		{
+			i = middex + 1L;
+			same = 1L;
+			while ( ( i < last ) && ( auKnots()[ i ] == midVal ) )
+			{
+				i++;
+				same++;
+			}
+
+			i = middex - 1L;
+			while ( ( i > 0L ) && ( auKnots()[ i ] == midVal ) )
+			{
+				i--;
+				middex--;	// middex is start of multiple knot
+				same++;
+			}
+		}
+
+		if ( i <= 0L )         	    // No knot in middle, must create it
+		{
+			middex = 0;
+			while ( auKnots()[ middex + 1L ] < midVal )
+				middex++;
+			same = 0L;
+		}
+
+		extra = m_uOrder - same;
+		std::vector<TqFloat> anewKnots( extra );
+
+		if ( same < m_uOrder )         	    // Must add knots
+		{
+			for ( i = 0; i < extra; i++ )
+				anewKnots[ i ] = midVal;
+		}
+
+		uSplitPoint[ iu ] = ( extra < m_uOrder ) ? middex - 1L : middex;
+		RefineKnotU( anewKnots );
+	}
+
+	// Refine the knot vectors as appropriate to generate the required split points in v
+	for ( iv = 1; iv < vSplits; iv++ )
+	{
+		TqFloat sv = ( static_cast<TqFloat>( iv ) / static_cast<TqFloat>( vSplits ) )
+					 * ( m_avKnots[ m_cvVerts ] - m_avKnots[ m_vOrder - 1 ] )
+					 + m_avKnots[ m_vOrder - 1 ];
+
+		TqUint extra = 0L;
+		TqUint last = m_cvVerts + m_vOrder - 1;
+		TqFloat midVal = sv;
+		TqUint middex = FindSpanV( midVal );
+		// Search forward and backward to see if multiple knot is already there
+		TqUint i = 0;
+		TqUint same = 0L;
+		if ( avKnots()[ middex ] == midVal )
+		{
+			i = middex + 1L;
+			same = 1L;
+			while ( ( i < last ) && ( avKnots()[ i ] == midVal ) )
+			{
+				i++;
+				same++;
+			}
+
+			i = middex - 1L;
+			while ( ( i > 0L ) && ( avKnots()[ i ] == midVal ) )
+			{
+				i--;
+				middex--;	// middex is start of multiple knot
+				same++;
+			}
+		}
+
+		if ( i <= 0L )         	    // No knot in middle, must create it
+		{
+			middex = 0;
+			while ( avKnots()[ middex + 1L ] < midVal )
+				middex++;
+			same = 0L;
+		}
+
+		extra = m_vOrder - same;
+		std::vector<TqFloat> anewKnots( extra );
+
+		if ( same < m_vOrder )         	    // Must add knots
+		{
+			for ( i = 0; i < extra; i++ )
+				anewKnots[ i ] = midVal;
+		}
+
+		vSplitPoint[ iv ] = ( extra < m_vOrder ) ? middex - 1L : middex;
+		RefineKnotV( anewKnots );
+	}
+
+	// Fill in the end points for the last split.
+	uSplitPoint[uSplits] = m_cuVerts-1;
+	vSplitPoint[vSplits] = m_cvVerts-1;
+
+	// Now go over the surface, generating the new patches at the split points in the arrays.
+	TqInt uPatch, vPatch;
+	// Initialise the offset for the first segment.
+	TqInt vOffset = 0;
+	for( vPatch = 0; vPatch < vSplits; vPatch++ )
+	{
+		// Initialise the offset for the first segment.
+		TqInt uOffset = 0;
+		// Get the end of the next segment in v.
+		TqInt vEnd = vSplitPoint[ vPatch+1 ];
+		
+		// Loop across u rows, filling points and knot vectors.
+		for( uPatch = 0; uPatch < uSplits; uPatch++ )
+		{
+			TqInt uEnd = uSplitPoint[ uPatch+1 ];
+
+			// The index of the patch we are working on.
+			TqInt iS = ( vPatch * uSplits ) + uPatch;
+			S[iS] = new CqSurfaceNURBS(*this);
+			S[iS]->SetfPatchMesh( TqFalse );
+			// Initialise it to the same orders as us, with the calculated control point densities.
+			S[iS]->Init( m_uOrder, m_vOrder, (uEnd+1)-uOffset, (vEnd+1)-vOffset );
+
+			// Copy the control points out of the our storage.
+			TqInt iPu, iPv;
+			for( iPv = 0; iPv <= vEnd; iPv++ )
+			{
+				TqInt iPIndex = ( ( vOffset + iPv ) * m_cuVerts ) + uOffset;
+				for( iPu = 0; iPu <= uEnd; iPu++ )
+				{
+					TqInt iSP = ( iPv * S[iS]->cuVerts() ) + iPu; 
+					S[iS]->P()[ iSP ] = P()[ iPIndex++ ];
+				}
+			}
+			
+			// Copy the knot vectors 
+			TqInt iuK, ivK;
+			for( iuK = 0; iuK < S[iS]->uOrder() + S[iS]->cuVerts(); iuK++ )
+				S[iS]->auKnots()[iuK] = auKnots()[ uOffset + iuK ];
+			for( ivK = 0; ivK < S[iS]->vOrder() + S[iS]->cvVerts(); ivK++ )
+				S[iS]->avKnots()[ivK] = avKnots()[ vOffset + ivK ];
+
+			// Set the offset to just after the end of this segment.
+			uOffset = uEnd + 1;
+		}
+		// Set the offset to just after the end of this segment.
+		vOffset = vEnd + 1;
+	}
+
+	// Now setup any user variables on the segments.
+	TqInt irow, icol;
+	TqInt nuSegs = uSplits;
+	TqInt nvSegs = vSplits;
+	for( icol = 0; icol < nvSegs; icol++ )
+	{
+		for( irow = 0; irow < nuSegs; irow++ )
+		{
+			TqInt iPatch = ( icol * nvSegs ) + irow;
+			TqInt iA = ( icol * ( nuSegs + 1 ) ) + irow;
+			TqInt iB = ( icol * ( nuSegs + 1 ) ) + irow + 1;
+			TqInt iC = ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow;
+			TqInt iD = ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1;
+
+			std::vector<CqParameter*>::iterator iUP;
+			for( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
+			{
+				switch( (*iUP)->Type() )
+				{
+					case type_integer:
+					{
+						CqParameterTyped<TqInt, TqFloat>* pUPV = static_cast<CqParameterTyped<TqInt, TqFloat>*>( (*iUP) );
+						CqParameterTyped<TqInt, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqInt, TqFloat>*>( (*iUP)->Clone() );
+						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
+						pNUPV->SetSize(4);
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
+					}
+					break;
+
+					case type_float:
+					{
+						CqParameterTyped<TqFloat, TqFloat>* pUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( (*iUP) );
+						CqParameterTyped<TqFloat, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( (*iUP)->Clone() );
+						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
+						pNUPV->SetSize(4);
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
+					}
+					break;
+
+					case type_color:
+					{
+						CqParameterTyped<CqColor, CqColor>* pUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( (*iUP) );
+						CqParameterTyped<CqColor, CqColor>* pNUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( (*iUP)->Clone() );
+						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
+						pNUPV->SetSize(4);
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
+					}
+					break;
+
+					case type_point:
+					case type_normal:
+					case type_vector:
+					{
+						CqParameterTyped<CqVector3D, CqVector3D>* pUPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( (*iUP) );
+						CqParameterTyped<CqVector3D, CqVector3D>* pNUPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( (*iUP)->Clone() );
+						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
+						pNUPV->SetSize(4);
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
+					}
+					break;
+
+					case type_hpoint:
+					{
+						CqParameterTyped<CqVector4D, CqVector3D>* pUPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( (*iUP) );
+						CqParameterTyped<CqVector4D, CqVector3D>* pNUPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( (*iUP)->Clone() );
+						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
+						pNUPV->SetSize(4);
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
+					}
+					break;
+
+					case type_string:
+					{
+						CqParameterTyped<CqString, CqString>* pUPV = static_cast<CqParameterTyped<CqString, CqString>*>( (*iUP) );
+						CqParameterTyped<CqString, CqString>* pNUPV = static_cast<CqParameterTyped<CqString, CqString>*>( (*iUP)->Clone() );
+						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
+						pNUPV->SetSize(4);
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
+					}
+					break;
+
+					case type_matrix:
+					{
+						CqParameterTyped<CqMatrix, CqMatrix>* pUPV = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( (*iUP) );
+						CqParameterTyped<CqMatrix, CqMatrix>* pNUPV = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( (*iUP)->Clone() );
+						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
+						pNUPV->SetSize(4);
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
+					}
+					break;
+				}
+			}
+		}
+	}
+}
+
 
 
 //-------------------------------------------------------

@@ -175,6 +175,19 @@ class CqSurfaceNURBS : public CqSurface
 		{
 			return(1 + m_cvVerts - m_vOrder );
 		}
+		/** Determine whether this surface is a mesh, and needs to be split into segments before continuing.
+		 */
+		TqBool fPatchMesh() const
+		{
+			return( m_fPatchMesh );
+		}
+		/** Mark this mesh as being part of a mesh or not.
+		 */
+		void SetfPatchMesh( TqBool fPatchMesh = TqTrue)
+		{
+			m_fPatchMesh = fPatchMesh;
+		}
+
 
 		void	operator=( const CqSurfaceNURBS& From );
 		TqInt	operator==( const CqSurfaceNURBS& from );
@@ -222,6 +235,7 @@ class CqSurfaceNURBS : public CqSurface
 		CqVector4D	Evaluate( TqFloat u, TqFloat v );
 		CqVector4D	EvaluateNormal( TqFloat u, TqFloat v );
 		void	SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqBool dirflag );
+		void	SubdivideSegments(std::vector<CqSurfaceNURBS*>& Array);
 		void	Decompose( std::vector<CqSurfaceNURBS*>& Array );
 		void	RefineKnotU( const std::vector<TqFloat>& X );
 		void	RefineKnotV( const std::vector<TqFloat>& X );
@@ -331,6 +345,7 @@ class CqSurfaceNURBS : public CqSurface
 		TqFloat	m_vmin;		///< Minimum value of v over surface.
 		TqFloat m_vmax;		///< Maximum value of v over surface.
 		CqTrimLoopArray	m_TrimLoops;	///< Local trim curves, prepared for this surface.
+		TqBool	m_fPatchMesh;	///< Flag indicating this is an unsubdivided mesh.
 }
 ;
 
