@@ -27,9 +27,8 @@ rm -fr $RPM_BUILD_ROOT
 export LD_LIBRARY_PATH=$RPM_BUILD_ROOT/usr/lib 
 %makeinstall
 mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/aqsis
-install -m 0644 ribber.cfg $RPM_BUILD_ROOT/%{_sysconfdir}/aqsis
-
 cat << EOF > $RPM_BUILD_ROOT/%{_sysconfdir}/aqsis/ddmsock.ini
+
 file                    /usr/bin/filebuffer
 framebuffer             /usr/bin/aqsis_framebuffer_glut
 zfile                   /usr/bin/shadowmap
