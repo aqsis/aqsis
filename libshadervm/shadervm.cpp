@@ -1335,120 +1335,130 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 		}
 
 		// Ensure that the type passed matches what the variable expects.
-		//assert( m_LocalVars[ i ] ->Type() == type );
-		while ( count-- > 0 )
+		if( m_LocalVars[ i ] ->Type() == type )
 		{
-			IqShaderData* pVMVal = CreateTemporaryStorage(type, class_uniform);
-			switch ( m_LocalVars[ i ] ->Type() )
+			while ( count-- > 0 )
 			{
-					case	type_float:
-					{
-						pVMVal->SetFloat(reinterpret_cast<TqFloat*>( pval ) [ index++ ] );
-					}
-					break;
+				IqShaderData* pVMVal = CreateTemporaryStorage(type, class_uniform);
+				switch ( m_LocalVars[ i ] ->Type() )
+				{
+						case	type_float:
+						{
+							pVMVal->SetFloat(reinterpret_cast<TqFloat*>( pval ) [ index++ ] );
+						}
+						break;
 
-					case	type_point:
-					{
-						TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-						pVMVal->SetPoint( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
-						index += 3;
-					}
-					break;
+						case	type_point:
+						{
+							TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+							pVMVal->SetPoint( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
+							index += 3;
+						}
+						break;
 
-					case	type_normal:
-					{
-						TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-						pVMVal->SetNormal( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
-						index += 3;
-					}
-					break;
+						case	type_normal:
+						{
+							TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+							pVMVal->SetNormal( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
+							index += 3;
+						}
+						break;
 
-					case	type_vector:
-					{
-						TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-						pVMVal->SetVector( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
-						index += 3;
-					}
-					break;
+						case	type_vector:
+						{
+							TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+							pVMVal->SetVector( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
+							index += 3;
+						}
+						break;
 
-					case	type_color:
-					{
-						TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-						pVMVal->SetColor( CqColor( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
-						index += 3;
-					}
-					break;
+						case	type_color:
+						{
+							TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+							pVMVal->SetColor( CqColor( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
+							index += 3;
+						}
+						break;
 
-					case	type_matrix:
-					{
-						TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-						pVMVal->SetMatrix( CqMatrix( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ], pvecval[ index + 3 ],
-						                             pvecval[ index + 4 ], pvecval[ index + 5 ], pvecval[ index + 6 ], pvecval[ index + 7 ],
-						                             pvecval[ index + 8 ], pvecval[ index + 9 ], pvecval[ index + 10 ], pvecval[ index + 11 ],
-						                             pvecval[ index + 12 ], pvecval[ index + 13 ], pvecval[ index + 14 ], pvecval[ index + 15 ] ) );
-						index += 16;
-					}
-					break;
+						case	type_matrix:
+						{
+							TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+							pVMVal->SetMatrix( CqMatrix( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ], pvecval[ index + 3 ],
+														 pvecval[ index + 4 ], pvecval[ index + 5 ], pvecval[ index + 6 ], pvecval[ index + 7 ],
+														 pvecval[ index + 8 ], pvecval[ index + 9 ], pvecval[ index + 10 ], pvecval[ index + 11 ],
+														 pvecval[ index + 12 ], pvecval[ index + 13 ], pvecval[ index + 14 ], pvecval[ index + 15 ] ) );
+							index += 16;
+						}
+						break;
 
-					case	type_string:
-					{
-						pVMVal->SetString( reinterpret_cast<char**>( pval ) [ index++ ] );
-					}
-					break;
+						case	type_string:
+						{
+							pVMVal->SetString( reinterpret_cast<char**>( pval ) [ index++ ] );
+						}
+						break;
 
-					default: // Clear up warnings
-					break;
+						default: // Clear up warnings
+						break;
+				}
+
+				CqMatrix matObjectToWorld = matCurrent();
+				if( NULL != m_pEnv )
+					matObjectToWorld = m_pEnv->pTransform()->matObjectToWorld();
+
+				// If it is a color or a point, ensure it is the correct 'space'
+				if ( m_LocalVars[ i ] ->Type() == type_point || m_LocalVars[ i ] ->Type() == type_hpoint )
+				{
+					CqString _strSpace( "shader" );
+					if ( strSpace.compare( "" ) != 0 )
+						_strSpace = strSpace;
+					CqVector3D p;
+					pVMVal->GetPoint( p, 0 );
+					pVMVal->SetPoint( QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
+				}
+				else if ( m_LocalVars[ i ] ->Type() == type_normal )
+				{
+					CqString _strSpace( "shader" );
+					if ( strSpace.compare( "" ) != 0 )
+						_strSpace = strSpace;
+					CqVector3D p;
+					pVMVal->GetNormal( p, 0 );
+					pVMVal->SetNormal( QGetRenderContextI() ->matNSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
+				}
+				else if ( m_LocalVars[ i ] ->Type() == type_vector )
+				{
+					CqString _strSpace( "shader" );
+					if ( strSpace.compare( "" ) != 0 )
+						_strSpace = strSpace;
+					CqVector3D p;
+					pVMVal->GetVector( p, 0 );
+					pVMVal->SetVector( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
+				}
+				else if ( m_LocalVars[ i ] ->Type() == type_matrix )
+				{
+					CqString _strSpace( "shader" );
+					if ( strSpace.compare( "" ) != 0 )
+						_strSpace = strSpace;
+					CqMatrix m;
+					pVMVal->GetMatrix( m, 0 );
+					pVMVal->SetMatrix( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * m );
+				}
+
+				if ( pArray )
+					pArray->ArrayEntry( arrayindex++ ) ->SetValueFromVariable( pVMVal );
+				else
+					m_LocalVars[ i ] ->SetValueFromVariable( pVMVal );
+
+				DeleteTemporaryStorage(pVMVal);
 			}
-
-			CqMatrix matObjectToWorld = matCurrent();
-			if( NULL != m_pEnv )
-				matObjectToWorld = m_pEnv->pTransform()->matObjectToWorld();
-
-			// If it is a color or a point, ensure it is the correct 'space'
-			if ( m_LocalVars[ i ] ->Type() == type_point || m_LocalVars[ i ] ->Type() == type_hpoint )
-			{
-				CqString _strSpace( "shader" );
-				if ( strSpace.compare( "" ) != 0 )
-					_strSpace = strSpace;
-				CqVector3D p;
-				pVMVal->GetPoint( p, 0 );
-				pVMVal->SetPoint( QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
-			}
-			else if ( m_LocalVars[ i ] ->Type() == type_normal )
-			{
-				CqString _strSpace( "shader" );
-				if ( strSpace.compare( "" ) != 0 )
-					_strSpace = strSpace;
-				CqVector3D p;
-				pVMVal->GetNormal( p, 0 );
-				pVMVal->SetNormal( QGetRenderContextI() ->matNSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
-			}
-			else if ( m_LocalVars[ i ] ->Type() == type_vector )
-			{
-				CqString _strSpace( "shader" );
-				if ( strSpace.compare( "" ) != 0 )
-					_strSpace = strSpace;
-				CqVector3D p;
-				pVMVal->GetVector( p, 0 );
-				pVMVal->SetVector( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
-			}
-			else if ( m_LocalVars[ i ] ->Type() == type_matrix )
-			{
-				CqString _strSpace( "shader" );
-				if ( strSpace.compare( "" ) != 0 )
-					_strSpace = strSpace;
-				CqMatrix m;
-				pVMVal->GetMatrix( m, 0 );
-				pVMVal->SetMatrix( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * m );
-			}
-
-			if ( pArray )
-				pArray->ArrayEntry( arrayindex++ ) ->SetValueFromVariable( pVMVal );
-			else
-				m_LocalVars[ i ] ->SetValueFromVariable( pVMVal );
-
-			DeleteTemporaryStorage(pVMVal);
 		}
+		else
+		{
+			QGetRenderContextI() ->Logger() ->warn( "Type mismatch in shader \"%s\"", m_strName.c_str() );
+		}
+	}
+	else
+	{
+		QGetRenderContextI() ->Logger()->warn( "Unknown parameter \"%s\" in shader \"%s\"", strName.c_str(), m_strName.c_str() );
 	}
 }
 
