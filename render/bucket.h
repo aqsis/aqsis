@@ -50,7 +50,7 @@ START_NAMESPACE( Aqsis )
 class CqBucket : public IqBucket
 {
 	public:
-		CqBucket()
+		CqBucket() : m_bProcessed( TqFalse )
 		{}
 		CqBucket( const CqBucket& From )
 		{
@@ -63,6 +63,7 @@ class CqBucket : public IqBucket
 		{
 			m_ampgWaiting = From.m_ampgWaiting;
 			m_agridWaiting = From.m_agridWaiting;
+			m_bProcessed = From.m_bProcessed;
 
 			return ( *this );
 		}
@@ -188,6 +189,19 @@ class CqBucket : public IqBucket
 		{
 			return ( m_agridWaiting );
 		}
+		/** Get the flag that indicates if the bucket has been processed yet.
+		 */
+		TqBool IsProcessed() const
+		{
+			return( m_bProcessed );
+		}
+
+		/** Mark this bucket as processed
+		 */
+		void SetProcessed( TqBool bProc =  TqTrue)
+		{
+			m_bProcessed = bProc;
+		}
 
 	private:
 		static	TqInt	m_XSize;
@@ -209,6 +223,7 @@ class CqBucket : public IqBucket
 		std::vector<CqMicroPolygon*> m_ampgWaiting;			///< Vector of vectors of waiting micropolygons in this bucket
 		std::vector<CqMicroPolyGridBase*> m_agridWaiting;		///< Vector of vectors of waiting micropolygrids in this bucket
 		CqList<CqBasicSurface>	m_aGPrims;						///< Vector of lists of split surfaces for this bucket.
+		TqBool	m_bProcessed;	///< Flag indicating if this bucket has been processed yet.
 }
 ;
 

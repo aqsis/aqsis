@@ -604,14 +604,13 @@ void CqMicroPolyGrid::DeleteVariables( TqBool all )
 //---------------------------------------------------------------------
 /** Split the shaded grid into microploygons, and insert them into the relevant buckets in the image buffer.
  * \param pImage Pointer to image being rendered into.
- * \param iBucket Integer index of bucket being processed.
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax )
+void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )
 {
 	if ( NULL == P() )
 		return ;
@@ -800,14 +799,13 @@ void CqMotionMicroPolyGrid::TransferOutputVariables()
 //---------------------------------------------------------------------
 /** Split the micropolygrid into individual MPGs,
  * \param pImage Pointer to image being rendered into.
- * \param iBucket Integer index of bucket being processed.
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax )
+void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )
 {
 	// Get the main object, the one that was shaded.
 	CqMicroPolyGrid * pGridA = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) );

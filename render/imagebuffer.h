@@ -81,7 +81,6 @@ class CqImageBuffer
 				m_cYBuckets( 0 ),
 				m_XBucketSize( 0 ),
 				m_YBucketSize( 0 ),
-				m_iCurrentBucket( 0 ),
 				m_PixelXSamples( 0 ),
 				m_PixelYSamples( 0 ),
 				m_FilterXWidth( 0 ),
@@ -90,14 +89,16 @@ class CqImageBuffer
 				m_CropWindowYMin( 0 ),
 				m_CropWindowXMax( 0 ),
 				m_CropWindowYMax( 0 ),
-				m_DisplayMode( ModeRGB )
+				m_DisplayMode( ModeRGB ),
+				m_CurrentBucketX( 0 ),
+				m_CurrentBucketY( 0 )
 		{}
 		virtual	~CqImageBuffer();
 
-		TqInt	Bucket( TqInt X, TqInt Y, TqInt& Xb, TqInt& Yb ) const;
-		TqInt	Bucket( TqInt X, TqInt Y ) const;
-		CqVector2D	Position( TqInt iBucket ) const;
-		CqVector2D	Size( TqInt iBucket ) const;
+		CqVector2D	BucketPosition() const;
+		CqVector2D	BucketPosition(TqInt x, TqInt y) const;
+		CqVector2D	BucketSize() const;
+		CqVector2D	BucketSize( TqInt x, TqInt y) const;
 
 		/** Get the horizontal resolution of this image.
 		 * \return Integer horizontal resolution.
@@ -218,19 +219,45 @@ class CqImageBuffer
 		{
 			return ( m_DisplayMode );
 		}
-		/** Get the index of the bucket currently being processed.
+		/** Get the column index of the bucket currently being processed.
 		 * \return Integer bucket index.
 		 */
-		TqInt	iCurrentBucket() const
+		TqInt	CurrentBucketX() const
 		{
-			return ( m_iCurrentBucket );
+			return ( m_CurrentBucketX );
 		}
-		/** Set the current bucket index.
-		 * \param iBucket Integer index of the bucket being processed.
+		/** Get the row index of the bucket currently being processed.
+		 * \return Integer bucket index.
 		 */
-		void	SetiCurrentBucket( TqInt iBucket )
+		TqInt	CurrentBucketY() const
 		{
-			m_iCurrentBucket = iBucket;
+			return ( m_CurrentBucketY );
+		}
+		/** Move to the next bucket to process.
+		 */
+		bool NextBucket()
+		{
+			m_CurrentBucketX++;
+			if( m_CurrentBucketX >= m_cXBuckets )
+			{
+				m_CurrentBucketX = 0;
+				m_CurrentBucketY++;
+				if( m_CurrentBucketY >= m_cYBuckets )
+					return( TqFalse );
+			}
+			return( TqTrue );
+		}
+		/** Get a pointer to the current bucket
+		 */
+		CqBucket& CurrentBucket()
+		{
+			return( m_Buckets[CurrentBucketY()][CurrentBucketX()] );
+		}
+		/** Get a pointer to the bucket at position x,y in the grid.
+		 */
+		CqBucket& Bucket( TqInt x, TqInt y)
+		{
+			return( m_Buckets[y][x] );
 		}
 
 		void	DeleteImage();
@@ -238,13 +265,13 @@ class CqImageBuffer
 
 		void	PostSurface( CqBasicSurface* pSurface );
 		TqBool	CullSurface( CqBound& Bound, CqBasicSurface* pSurface );
-		TqBool	OcclusionCullSurface( TqInt iBucket, CqBasicSurface* pSurface );
+		TqBool	OcclusionCullSurface( CqBasicSurface* pSurface );
 		void	AddMPG( CqMicroPolygon* pmpgNew );
 		TqBool	PushMPGForward( CqMicroPolygon* pmpg );
-		TqBool	PushMPGDown( CqMicroPolygon*, TqInt );
-		void	RenderMPGs( TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
-		void	RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
-		void	RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
+		TqBool	PushMPGDown( CqMicroPolygon*, TqInt, TqInt );
+		void	RenderMPGs( long xmin, long xmax, long ymin, long ymax );
+		void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
+		void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax );
 		void	RenderImage();
 		void	StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt m, TqInt n, TqFloat D );
 		/** Get completion status of this rendered image.
@@ -260,12 +287,12 @@ class CqImageBuffer
 		virtual	void	Release();
 
 		// Callbacks to overridden image buffer class to allow display/processing etc.
-		virtual	void	BucketComplete( TqInt iBucket )
+		virtual	void	BucketComplete()
 		{
 		}
 		virtual	void	ImageComplete()
 		{}
-		virtual	TqBool	IsEmpty( TqInt iBucket );
+		virtual	TqBool	IsCurrentBucketEmpty();
 
 	private:
 		TqBool	m_fQuit;			///< Set by system if a quit has been requested.
@@ -277,7 +304,6 @@ class CqImageBuffer
 		TqInt	m_cYBuckets;		///< Integer vertical bucket count.
 		TqInt	m_XBucketSize;		///< Integer horizontal bucket size.
 		TqInt	m_YBucketSize;		///< Integer vertical bucket size.
-		TqInt	m_iCurrentBucket;	///< Index of the bucket currently being processed.
 		TqInt	m_PixelXSamples;	///< Integer horizontal sample per pixel count.
 		TqInt	m_PixelYSamples;	///< Integer vertical sample per pixel count.
 		TqInt	m_FilterXWidth;		///< Integer horizontal pixel filter width in pixels.
@@ -290,7 +316,9 @@ class CqImageBuffer
 		TqFloat	m_ClippingFar;		///< Far clipping distance.
 		TqInt	m_DisplayMode;		///< Integer display mode, a member of the enum Mode.
 
-		std::vector<CqBucket>	m_aBuckets;
+		std::vector<std::vector<CqBucket> >	m_Buckets; ///< Array of bucket storage classes (row/col)
+		TqInt	m_CurrentBucketX;	///< Column index of the bucket currently being processed.
+		TqInt	m_CurrentBucketY;	///< Row index of the bucket currently being processed.
 
 		// This struct is used to hold info about a mpg that is used when rendering the mpg.
 		// It caches the info for use by multiple samples.

@@ -54,48 +54,26 @@ CqImageBuffer::~CqImageBuffer()
 
 
 //----------------------------------------------------------------------
-/** Get the bucket index for the specified image coordinates.
- * \param X Integer pixel coordinate in X.
- * \param Y Integer pixel coordinate in Y.
- * \param Xb Storage for integer bucket index in X.
- * \param Yb Storage for integer bucket index in Y.
- * \return Integer bucket index.
- */
-
-TqInt CqImageBuffer::Bucket( TqInt X, TqInt Y, TqInt& Xb, TqInt& Yb ) const
-{
-	Xb = static_cast<TqInt>( ( X / m_XBucketSize ) );
-	Yb = static_cast<TqInt>( ( Y / m_YBucketSize ) );
-
-	return ( ( Yb * m_cXBuckets ) + Xb );
-}
-
-
-//----------------------------------------------------------------------
-/** Get the bucket index for the specified image coordinates.
- * \param X Integer pixel coordinate in X.
- * \param Y Integer pixel coordinate in Y.
- * \return Integer bucket index.
- */
-
-TqInt CqImageBuffer::Bucket( TqInt X, TqInt Y ) const
-{
-	static TqInt Xb, Yb;
-	return ( Bucket( X, Y, Xb, Yb ) );
-}
-
-
-//----------------------------------------------------------------------
-/** Get the screen position for the specified bucket index.
- * \param iBucket Integer bucket index (0-based).
+/** Get the screen position for the current bucket.
  * \return Bucket position as 2d vector (xpos, ypos).
  */
 
-CqVector2D	CqImageBuffer::Position( TqInt iBucket ) const
+CqVector2D	CqImageBuffer::BucketPosition( ) const
+{
+	return( BucketPosition( CurrentBucketX(), CurrentBucketY() ) );
+}
+
+
+//----------------------------------------------------------------------
+/** Get the screen position for the bucket at x,y.
+ * \return Bucket position as 2d vector (xpos, ypos).
+ */
+
+CqVector2D	CqImageBuffer::BucketPosition( TqInt x, TqInt y ) const
 {
 	CqVector2D	vecA;
-	vecA.y( iBucket / m_cXBuckets );
-	vecA.x( iBucket % m_cXBuckets );
+	vecA.x( x );
+	vecA.y( y );
 	vecA.x( vecA.x() * XBucketSize() );
 	vecA.y( vecA.y() * YBucketSize() );
 
@@ -103,19 +81,34 @@ CqVector2D	CqImageBuffer::Position( TqInt iBucket ) const
 }
 
 //----------------------------------------------------------------------
-/** Get the bucket size for the specified index.
+/** Get the bucket size for the current bucket.
  
     Usually the return value is just (XBucketSize, YBucketSize) except
     for the buckets on the right and bottom side of the image where the
     size can be smaller. The crop window is not taken into account.
  
- * \param iBucket Integer bucket index.
  * \return Bucket size as 2d vector (xsize, ysize).
  */
 
-CqVector2D CqImageBuffer::Size( TqInt iBucket ) const
+CqVector2D CqImageBuffer::BucketSize( ) const
 {
-	CqVector2D	vecA = Position( iBucket );
+	return( BucketSize( CurrentBucketX(), CurrentBucketY() ) );
+}
+
+
+//----------------------------------------------------------------------
+/** Get the bucket size for the bucket at x,y.
+ 
+    Usually the return value is just (XBucketSize, YBucketSize) except
+    for the buckets on the right and bottom side of the image where the
+    size can be smaller. The crop window is not taken into account.
+ 
+ * \return Bucket size as 2d vector (xsize, ysize).
+ */
+
+CqVector2D CqImageBuffer::BucketSize(TqInt x, TqInt y) const
+{
+	CqVector2D	vecA = BucketPosition(x,y);
 	vecA.x( m_iXRes - vecA.x() );
 	if ( vecA.x() > m_XBucketSize ) vecA.x( m_XBucketSize );
 	vecA.y( m_iYRes - vecA.y() );
@@ -164,9 +157,17 @@ void	CqImageBuffer::SetImage()
 	m_ClippingFar = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 1 ] );
 	m_DisplayMode = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ];
 
-	m_aBuckets.resize( m_cXBuckets * m_cYBuckets );
+	m_Buckets.resize( m_cYBuckets );
+	std::vector<std::vector<CqBucket> >::iterator i;
+	for( i = m_Buckets.begin(); i!=m_Buckets.end(); i++)
+	{
+		i->resize( m_cXBuckets );
+		std::vector<CqBucket>::iterator b;
+		for( b = i->begin(); b!=i->end(); b++)
+			b->SetProcessed( TqFalse );
+	}
 
-	m_iCurrentBucket = 0;
+	m_CurrentBucketX = m_CurrentBucketY = 0;
 }
 
 
@@ -332,30 +333,26 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 	// If the primitive has been marked as undiceable by the eyeplane check, then we cannot get a valid
 	// bucket index from it as the projection of the bound would cross the camera plane and therefore give a false
 	// result, so just put it back in the current bucket for further splitting.
-	TqInt iBucket = iCurrentBucket();
-	TqInt nBucket = iBucket;
+	TqInt XMinb = CurrentBucketX(), YMinb = CurrentBucketY();
 	if ( !pSurface->IsUndiceable() )
 	{
 		// Find out which bucket(s) the surface belongs to.
-		TqInt XMinb, YMinb;
 		if ( Bound.vecMin().x() < 0 ) Bound.vecMin().x( 0.0f );
 		if ( Bound.vecMin().y() < 0 ) Bound.vecMin().y( 0.0f );
-		nBucket = Bucket( static_cast<TqInt>( Bound.vecMin().x() ), static_cast<TqInt>( Bound.vecMin().y() ), XMinb, YMinb );
+		
+		XMinb = static_cast<TqInt>( Bound.vecMin().x() ) / XBucketSize();
+		YMinb = static_cast<TqInt>( Bound.vecMin().y() ) / YBucketSize();
 
-		if ( XMinb >= m_cXBuckets || YMinb >= m_cYBuckets ) return ;
+		if ( XMinb >= cXBuckets() || YMinb >= cYBuckets() ) 
+			return;
 
-		if ( XMinb < 0 || YMinb < 0 )
-		{
-			if ( XMinb < 0 ) XMinb = 0;
-			if ( YMinb < 0 ) YMinb = 0;
-			nBucket = ( YMinb * m_cXBuckets ) + XMinb;
-		}
-		if ( nBucket < iCurrentBucket() )
-			nBucket = iCurrentBucket();
+		XMinb = CLAMP( XMinb, 0, cXBuckets() );
+		YMinb = CLAMP( YMinb, 0, cYBuckets() );
+
+		// Sanity check we are not putting into a bucket that has already been processed.
+		assert( !Bucket(XMinb, YMinb).IsProcessed() );
 	}
-
-	assert( nBucket >= iCurrentBucket() );
-	m_aBuckets[ nBucket ].AddGPrim( pSurface );
+	Bucket(XMinb, YMinb).AddGPrim( pSurface );
 
 	// Release the reference acquired for the surface for this method.
 	RELEASEREF( pSurface );
@@ -368,12 +365,11 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 /** Test if this surface can be occlusion culled. If it can then
  * transfer surface to the next bucket it covers, or delete it if it
  * covers no more.
- * \param iBucket Integer index of bucket being processed.
  * \param pSurface A pointer to a CqBasicSurface derived class.
  * \return Boolean indicating that the GPrim has been culled.
 */
 
-TqBool CqImageBuffer::OcclusionCullSurface( TqInt iBucket, CqBasicSurface* pSurface )
+TqBool CqImageBuffer::OcclusionCullSurface( CqBasicSurface* pSurface )
 {
 	CqBound RasterBound( pSurface->GetCachedRasterBound() );
 
@@ -387,10 +383,9 @@ TqBool CqImageBuffer::OcclusionCullSurface( TqInt iBucket, CqBasicSurface* pSurf
 		// pSurface is behind everying in this bucket but it may be
 		// visible in other buckets it overlaps.
 		// bucket to the right
-		TqInt nextBucket = iBucket + 1;
-		CqVector2D pos = Position( nextBucket );
-		if ( ( nextBucket != iBucket ) && 
-			 ( nextBucket < nBuckets ) &&
+		TqInt nextBucket = CurrentBucketX() + 1;
+		CqVector2D pos = BucketPosition( nextBucket, CurrentBucketY() );
+		if ( ( nextBucket < cXBuckets() ) &&
 		     ( RasterBound.vecMax().x() >= pos.x() ) )
 		{
 			// Here, pSurface is unlinked from the list in the
@@ -403,25 +398,25 @@ TqBool CqImageBuffer::OcclusionCullSurface( TqInt iBucket, CqBasicSurface* pSurf
 			//  has been added to stop the surface from being
 			//  deleted. - Jonathan Merritt.
 			pSurface->UnLink();
-			m_aBuckets[ nextBucket ].AddGPrim( pSurface );
+			Bucket( nextBucket, CurrentBucketY() ).AddGPrim( pSurface );
 			RELEASEREF( pSurface );
 			return TqTrue;
 		}
 
-		// bucket below
-		nextBucket = iBucket + m_cXBuckets;
-		pos = Position( nextBucket );
+		// next row
+		nextBucket = CurrentBucketY() + 1;
 		// find bucket containing left side of bound
-		pos.x( RasterBound.vecMin().x() );
-		nextBucket = Bucket( static_cast<TqInt>( pos.x() ), static_cast<TqInt>( pos.y() ) );
+		TqInt nextBucketX = static_cast<TqInt>( RasterBound.vecMin().x() ) / XBucketSize();
+		nextBucketX = MAX( nextBucketX, 0 );
+		pos = BucketPosition( nextBucketX, nextBucket );
 
-		if ( ( nextBucket != iBucket ) &&
-			 ( nextBucket < nBuckets ) &&
-		     ( RasterBound.vecMax().y() >= pos.y() ) )
+		if ( ( nextBucketX < cXBuckets() ) &&
+			 ( nextBucket  < cYBuckets() ) &&
+			 ( RasterBound.vecMax().y() >= pos.y() ) )
 		{
 			// See above for comments... - Jonathan Merritt.
 			pSurface->UnLink();
-			m_aBuckets[ nextBucket ].AddGPrim( pSurface );
+			Bucket( nextBucketX, nextBucket ).AddGPrim( pSurface );
 			RELEASEREF( pSurface );
 			return TqTrue;
 		}
@@ -449,7 +444,7 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 	ADDREF( pmpgNew );
 
 	if ( B.vecMax().x() < m_CropWindowXMin - m_FilterXWidth / 2 || B.vecMax().y() < m_CropWindowYMin - m_FilterYWidth / 2 ||
-	        B.vecMin().x() > m_CropWindowXMax + m_FilterXWidth / 2 || B.vecMin().y() > m_CropWindowYMax + m_FilterYWidth / 2 )
+	     B.vecMin().x() > m_CropWindowXMax + m_FilterXWidth / 2 || B.vecMin().y() > m_CropWindowYMax + m_FilterYWidth / 2 )
 	{
 		RELEASEREF( pmpgNew );
 		return ;
@@ -469,7 +464,7 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 	TqInt iYBb = static_cast<TqInt>( B.vecMax().y() / ( m_YBucketSize ) );
 
 	if ( ( iXBb < 0 ) || ( iYBb < 0 ) ||
-	        ( iXBa >= m_cXBuckets ) || ( iYBa >= m_cYBuckets ) )
+	     ( iXBa >= m_cXBuckets ) || ( iYBa >= m_cYBuckets ) )
 	{
 		RELEASEREF( pmpgNew );
 		return ;
@@ -477,34 +472,31 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 
 	if ( iXBa < 0 ) iXBa = 0;
 	if ( iYBa < 0 ) iYBa = 0;
-	iBkt = ( iYBa * m_cXBuckets ) + iXBa;
 
-	// If the bucket is less than the current, see if it fits in the current bucket, this
-	// should allow for trimmed u-polys that lie on a bucket boundary, as is the case with
-	// bilinear patches with 3 points.
-
-	if ( iBkt < iCurrentBucket() )
+	// If the ideal bucket has already been processed we need to work out why we have got into this
+	// situation.
+	if ( Bucket(iXBa,iYBa).IsProcessed() )
 	{
-		CqVector2D BucketMin = Position( iCurrentBucket() );
-		CqVector2D BucketMax = BucketMin + Size( iCurrentBucket() );
-		if ((( B.vecMax().x() >= BucketMin.x() ) &&
-			 ( B.vecMax().y() >= BucketMin.y() )) ||
-			 ( B.vecMax().y() >= BucketMax.y() ) )
-
+		// It is possible that the grid this MP belongs to was occlusion culled from
+		// the ideal bucket and pushed forward, so check if the MP should be pushed down into the
+		// next row of buckets.
+		CqVector2D BucketMin = BucketPosition(iXBa, CurrentBucketY());
+		CqVector2D BucketMax = BucketMin + BucketSize(iXBa, CurrentBucketY());
+		if ( B.vecMax().y() >= BucketMax.y() )
 		{
 			// Make sure it is pushed down from the appropriate column but this row, just in case the
 			// bound extends into previous rows as well.
-			TqInt BucketRow = iCurrentBucket() / m_cXBuckets;
-			TqInt BucketCol = iBkt % m_cXBuckets;
-			TqInt NextBucketDown = ( BucketRow * m_cXBuckets ) + BucketCol;
-
-			if ( PushMPGDown( pmpgNew, NextBucketDown ) ) STATS_INC( MPG_pushed_down );
-			if (B.vecMax().x() < BucketMin.x()) 
+			if ( PushMPGDown( pmpgNew, iXBa, CurrentBucketY() ) ) 
+				STATS_INC( MPG_pushed_down );
+		
+			// If the x doesn't extend into this bucket, release it.
+			if (B.vecMax().x() < BucketPosition().x()) 
 			{
 				RELEASEREF( pmpgNew );
 				return ;
 			}
-			iBkt = iCurrentBucket();
+			iXBa = CurrentBucketX();
+			iYBa = CurrentBucketY();
 			pmpgNew->MarkPushedForward();
 		}
 		// This can be hit if the grid was occluded in the previous bucket, then diced in this one. 
@@ -515,14 +507,33 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 			RELEASEREF( pmpgNew );
 			return ;
 		}
+		else
+		{
+			// If the bucket is less than the current, see if it fits in the current bucket, this
+			// should allow for trimmed u-polys that lie on a bucket boundary, as is the case with
+			// bilinear patches with 3 points.
+			CqVector2D BucketMin = BucketPosition(CurrentBucketX(), CurrentBucketY());
+			CqVector2D BucketMax = BucketMin + BucketSize(CurrentBucketX(), CurrentBucketY());
+			if ((( B.vecMax().x() >= BucketMin.x() ) &&
+				 ( B.vecMax().y() >= BucketMin.y() )) ||
+				 ( B.vecMax().y() >= BucketMax.y() ) )
+
+			{
+				iXBa = CurrentBucketX();
+				iYBa = CurrentBucketY();
+			}
+			else
+			{
+				RELEASEREF( pmpgNew );
+				return ;
+			}
+		}
 	} 
 
-	assert( iBkt >= iCurrentBucket() );
-	if ( ( iBkt >= iCurrentBucket() ) && ( iBkt < ( m_cXBuckets * m_cYBuckets ) ) )
-	{
-		m_aBuckets[ iBkt ].AddMPG( pmpgNew );
-		ADDREF( pmpgNew );
-	}
+	assert( !Bucket(iXBa, iYBa).IsProcessed() );
+	Bucket(iXBa, iYBa).AddMPG( pmpgNew );
+	ADDREF( pmpgNew );
+
 	RELEASEREF( pmpgNew );
 }
 
@@ -539,19 +550,18 @@ TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg )
 	// then the mpg would be pushed down again when the next row is hit.
 	pmpg->MarkPushedForward();
 
-	TqInt CurrBucketIndex = iCurrentBucket();
+	TqInt BucketRow = CurrentBucketY();
+	TqInt BucketCol = CurrentBucketX();
 
 	// Check if there is anywhere to push forward to.
-	TqInt BucketCol = CurrBucketIndex % m_cXBuckets;
-	if ( BucketCol == ( m_cXBuckets - 1 ) )
+	if ( CurrentBucketX() == ( cXBuckets() - 1 ) )
 		return ( TqFalse );
 
-	TqInt BucketRow = CurrBucketIndex / m_cXBuckets;
-	TqInt NextBucketForward = ( BucketRow * m_cXBuckets ) + BucketCol + 1;
+	TqInt NextBucketForward = CurrentBucketX() + 1;
 
 	// Find out if any of the subbounds touch this bucket.
-	CqVector2D BucketMin = Position( NextBucketForward );
-	CqVector2D BucketMax = BucketMin + Size( NextBucketForward );
+	CqVector2D BucketMin = BucketPosition( NextBucketForward, CurrentBucketY() );
+	CqVector2D BucketMax = BucketMin + BucketSize( NextBucketForward, CurrentBucketY() );
 	CqVector2D FilterWidth( m_FilterXWidth * 0.5f, m_FilterYWidth * 0.5f );
 	BucketMin -= FilterWidth;
 	BucketMax += FilterWidth;
@@ -561,16 +571,16 @@ TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg )
 	const CqVector3D& vMin = B.vecMin();
 	const CqVector3D& vMax = B.vecMax();
 	if ( ( vMin.x() > BucketMax.x() ) ||
-	        ( vMin.y() > BucketMax.y() ) ||
-	        ( vMax.x() < BucketMin.x() ) ||
-	        ( vMax.y() < BucketMin.y() ) )
+	     ( vMin.y() > BucketMax.y() ) ||
+	     ( vMax.x() < BucketMin.x() ) ||
+	     ( vMax.y() < BucketMin.y() ) )
 	{
 		return ( TqFalse );
 	}
 	else
 	{
 		ADDREF( pmpg );
-		m_aBuckets[ NextBucketForward ].AddMPG( pmpg );
+		Bucket( NextBucketForward, CurrentBucketY() ).AddMPG( pmpg );
 		return ( TqTrue );
 	}
 	return ( TqFalse );
@@ -583,21 +593,19 @@ TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg )
  * \param CurrBucketIndex Index of the bucket from which we are pushing down.
  */
 
-TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt CurrBucketIndex )
+TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 {
 	if ( pmpg->IsPushedForward() ) return ( TqFalse );
 
 	// Check if there is anywhere to push down to.
-	TqInt BucketRow = CurrBucketIndex / m_cXBuckets;
-	if ( BucketRow == ( m_cYBuckets - 1 ) )
+	if ( Row == ( m_cYBuckets - 1 ) )
 		return ( TqFalse );
 
-	TqInt BucketCol = CurrBucketIndex % m_cXBuckets;
-	TqInt NextBucketDown = ( ( BucketRow + 1 ) * m_cXBuckets ) + BucketCol;
+	TqInt NextBucketDown = Row + 1;
 
 	// Find out if any of the subbounds touch this bucket.
-	CqVector2D BucketMin = Position( NextBucketDown );
-	CqVector2D BucketMax = BucketMin + Size( NextBucketDown );
+	CqVector2D BucketMin = BucketPosition( Col, NextBucketDown );
+	CqVector2D BucketMax = BucketMin + BucketSize( Col, NextBucketDown );
 	CqVector2D FilterWidth( m_FilterXWidth * 0.5f, m_FilterYWidth * 0.5f );
 	BucketMin -= FilterWidth;
 	BucketMax += FilterWidth;
@@ -607,18 +615,18 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt CurrBucketIndex )
 	const CqVector3D& vMin = B.vecMin();
 	const CqVector3D& vMax = B.vecMax();
 	if ( ( vMin.x() > BucketMax.x() ) ||
-	        ( vMin.y() > BucketMax.y() ) ||
-	        ( vMax.x() < BucketMin.x() ) ||
-	        ( vMax.y() < BucketMin.y() ) )
+	     ( vMin.y() > BucketMax.y() ) ||
+	     ( vMax.x() < BucketMin.x() ) ||
+	     ( vMax.y() < BucketMin.y() ) )
 	{
 		return ( TqFalse );
 	}
 	else
 	{
 		ADDREF( pmpg );
-		m_aBuckets[ NextBucketDown ].AddMPG( pmpg );
+		Bucket(Col, NextBucketDown ).AddMPG( pmpg );
 		// See if it needs to be pushed further down (extreme Motion Blur)
-		if ( PushMPGDown( pmpg, NextBucketDown ) )
+		if ( PushMPGDown( pmpg, Col, NextBucketDown ) )
 			STATS_INC( MPG_pushed_far_down );
 		return ( TqTrue );
 	}
@@ -635,52 +643,53 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt CurrBucketIndex )
     bucket. Then RenderMicroPoly() is called for each micro polygon in
     the current bucket.
  
- * \param iBucket Integer index of bucket being processed.
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqImageBuffer::RenderMPGs( TqInt iBucket, long xmin, long xmax, long ymin, long ymax )
+void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 {
 	// First of all split any grids in this bucket waiting to be processed.
-	if ( !m_aBuckets[ iBucket ].aGrids().empty() )
+	if ( !CurrentBucket().aGrids().empty() )
 	{
-		std::vector<CqMicroPolyGridBase*>::iterator lastgrid = m_aBuckets[ iBucket ].aGrids().end();
+		std::vector<CqMicroPolyGridBase*>::iterator lastgrid = CurrentBucket().aGrids().end();
 
-		for ( std::vector<CqMicroPolyGridBase*>::iterator igrid = m_aBuckets[ iBucket ].aGrids().begin(); igrid != lastgrid; igrid++ )
+		for ( std::vector<CqMicroPolyGridBase*>::iterator igrid = CurrentBucket().aGrids().begin(); igrid != lastgrid; igrid++ )
 		{
-			( *igrid ) ->Split( this, iBucket, xmin, xmax, ymin, ymax );
+			( *igrid ) ->Split( this, xmin, xmax, ymin, ymax );
 
 			// Render any waiting MPGs
-			std::vector<CqMicroPolygon*>::iterator lastmpg = m_aBuckets[ iBucket ].aMPGs().end();
-			for ( std::vector<CqMicroPolygon*>::iterator impg = m_aBuckets[ iBucket ].aMPGs().begin(); impg != lastmpg; impg++ )
+			std::vector<CqMicroPolygon*>::iterator lastmpg = CurrentBucket().aMPGs().end();
+			for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
 			{
-				RenderMicroPoly( *impg, iBucket, xmin, xmax, ymin, ymax );
-				if ( PushMPGDown( ( *impg ), iBucket ) )
+				RenderMicroPoly( *impg, xmin, xmax, ymin, ymax );
+				if ( PushMPGDown( ( *impg ), CurrentBucketX(), CurrentBucketY() ) )
 					STATS_INC( MPG_pushed_down );
 				if ( PushMPGForward( ( *impg ) ) )
 					STATS_INC( MPG_pushed_forward );
 				RELEASEREF( ( *impg ) );
 			}
-			m_aBuckets[ iBucket ].aMPGs().clear();
+			CurrentBucket().aMPGs().clear();
 		}
 	}
-	m_aBuckets[ iBucket ].aGrids().clear();
+	CurrentBucket().aGrids().clear();
 
-	if ( m_aBuckets[ iBucket ].aMPGs().empty() ) return ;
+	if ( CurrentBucket().aMPGs().empty() ) return ;
 
 	// Render any waiting MPGs
-	std::vector<CqMicroPolygon*>::iterator lastmpg = m_aBuckets[ iBucket ].aMPGs().end();
-	for ( std::vector<CqMicroPolygon*>::iterator impg = m_aBuckets[ iBucket ].aMPGs().begin(); impg != lastmpg; impg++ )
+	std::vector<CqMicroPolygon*>::iterator lastmpg = CurrentBucket().aMPGs().end();
+	for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
 	{
-		RenderMicroPoly( *impg, iBucket, xmin, xmax, ymin, ymax );
-		if ( PushMPGDown( ( *impg ), iBucket ) ) STATS_INC( MPG_pushed_down );
-		if ( PushMPGForward( ( *impg ) ) ) STATS_INC( MPG_pushed_forward );
+		RenderMicroPoly( *impg, xmin, xmax, ymin, ymax );
+		if ( PushMPGDown( ( *impg ), CurrentBucketX(), CurrentBucketY() ) ) 
+			STATS_INC( MPG_pushed_down );
+		if ( PushMPGForward( ( *impg ) ) ) 
+			STATS_INC( MPG_pushed_forward );
 		RELEASEREF( ( *impg ) );
 	}
-	m_aBuckets[ iBucket ].aMPGs().clear();
+	CurrentBucket().aMPGs().clear();
 }
 
 
@@ -688,7 +697,6 @@ void CqImageBuffer::RenderMPGs( TqInt iBucket, long xmin, long xmax, long ymin, 
 /** Render a particular micropolygon.
  
  * \param pMPG Pointer to the micropolygon to process.
- * \param iBucket Integer index of bucket being processed.
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
@@ -697,9 +705,9 @@ void CqImageBuffer::RenderMPGs( TqInt iBucket, long xmin, long xmax, long ymin, 
    \see CqBucket, CqImagePixel
  */
 
-inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax )
+inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax )
 {
-	CqBucket & Bucket = m_aBuckets[ iBucket ];
+	CqBucket & Bucket = CurrentBucket();
 	CqStats& theStats = QGetRenderContext() ->Stats();
 
 	const TqFloat* LodBounds = pMPG->pGrid() ->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
@@ -1153,28 +1161,27 @@ inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2
     is called which can be used to display the bucket inside a window or
     save it to disk.
  
- * \param iBucket Integer index of bucket being processed (0-based).
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ymin, long ymax )
+void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
 {
 	int counter = 0;
 	int MaxEyeSplits = 10;
-	TqBool bIsEmpty = IsEmpty( iBucket );
+	TqBool bIsEmpty = IsCurrentBucketEmpty();
 	const TqInt* poptEyeSplits = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "eyesplits" );
 	if ( poptEyeSplits != 0 )
 		MaxEyeSplits = poptEyeSplits[ 0 ];
 
 	// Render any waiting micro polygon grids.
 	QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
-	RenderMPGs( iBucket, xmin, xmax, ymin, ymax );
+	RenderMPGs( xmin, xmax, ymin, ymax );
 	QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
 
-	CqBucket& Bucket = m_aBuckets[ iBucket ];
+	CqBucket& Bucket = CurrentBucket();
 
 	// Render any waiting subsurfaces.
 	CqBasicSurface* pSurface = Bucket.pTopSurface();
@@ -1197,7 +1204,7 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 				QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
 				TqBool fCull = TqFalse;
 				if ( !bIsEmpty && pSurface->fCachedBound() )
-					fCull = OcclusionCullSurface( iBucket, pSurface );
+					fCull = OcclusionCullSurface( pSurface );
 				QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
 				if ( fCull )
 				{
@@ -1245,7 +1252,7 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 					Bucket.AddGrid( pGrid );
 					// Render any waiting micro polygon grids.
 					QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
-					RenderMPGs( iBucket, xmin, xmax, ymin, ymax );
+					RenderMPGs( xmin, xmax, ymin, ymax );
 					QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
 				}
 				RELEASEREF( pGrid );
@@ -1278,7 +1285,7 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 		pSurface = Bucket.pTopSurface();
 		// Render any waiting micro polygon grids.
 		QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
-		RenderMPGs( iBucket, xmin, xmax, ymin, ymax );
+		RenderMPGs( xmin, xmax, ymin, ymax );
 		QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
 
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
@@ -1314,9 +1321,9 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 
 	QGetRenderContext() ->Stats().MakeFilterBucket().Stop();
 
-	BucketComplete( iBucket );
+	BucketComplete();
 	QGetRenderContext() ->Stats().MakeDisplayBucket().Start();
-	QGetRenderContext() ->pDDmanager() ->DisplayBucket( &m_aBuckets[ iBucket ] );
+	QGetRenderContext() ->pDDmanager() ->DisplayBucket( &CurrentBucket() );
 	QGetRenderContext() ->Stats().MakeDisplayBucket().Stop();
 }
 
@@ -1328,11 +1335,11 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
      It is empty only when this bucket doesn't contain any surface, 
 	 micropolygon or grids.
  */
-TqBool CqImageBuffer::IsEmpty( TqInt which )
+TqBool CqImageBuffer::IsCurrentBucketEmpty()
 {
 	TqBool retval = TqFalse;
 
-	CqBucket& Bucket = m_aBuckets[ which ];
+	CqBucket& Bucket = CurrentBucket();
 
 	if ( ( !Bucket.pTopSurface() ) &&
 	        Bucket.aGrids().empty() &&
@@ -1376,20 +1383,16 @@ void CqImageBuffer::RenderImage()
 	// Setup the hierarchy of boxes for occlusion culling
 	CqOcclusionBox::CreateHierarchy( m_XBucketSize, m_YBucketSize, m_FilterXWidth, m_FilterYWidth );
 
-	TqInt iBucket;
-	TqInt nBuckets = m_cXBuckets * m_cYBuckets;
 	RtProgressFunc pProgressHandler = NULL;
 	pProgressHandler = QGetRenderContext() ->optCurrent().pProgressHandler();
 
-
-	for ( iBucket = 0; iBucket < nBuckets; iBucket++ )
+	do
 	{
-		TqBool bIsEmpty = IsEmpty( iBucket );
+		TqBool bIsEmpty = IsCurrentBucketEmpty();
 		QGetRenderContext() ->Stats().Others().Start();
-		SetiCurrentBucket( iBucket );
 		// Prepare the bucket.
-		CqVector2D bPos = Position( iBucket );
-		CqVector2D bSize = Size( iBucket );
+		CqVector2D bPos = BucketPosition();
+		CqVector2D bSize = BucketSize();
 		// TODO: fix non jittered bucket initialisation.
 		// Warning Jitter must be True is all cases; the InitialiseBucket when it is not in jittering mode
 		// doesn't initialise correctly so later we have problem in the FilterBucket()
@@ -1417,7 +1420,7 @@ void CqImageBuffer::RenderImage()
 		if ( !bIsEmpty )
 		{
 			QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
-			CqOcclusionBox::SetupHierarchy( &m_aBuckets[ iBucket ], xmin, ymin, xmax, ymax );
+			CqOcclusionBox::SetupHierarchy( &CurrentBucket(), xmin, ymin, xmax, ymax );
 			QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
 		}
 
@@ -1426,7 +1429,8 @@ void CqImageBuffer::RenderImage()
 		if ( pProgressHandler )
 		{
 			// Inform the status class how far we have got, and update UI.
-			float Complete = ( float ) nBuckets;
+			float Complete = ( float ) ( cXBuckets() * cYBuckets() );
+			TqInt iBucket = ( CurrentBucketY() * cXBuckets() ) + CurrentBucketX();
 			Complete /= iBucket;
 			Complete = 100.0f / Complete;
 			QGetRenderContext() ->Stats().SetComplete( Complete );
@@ -1434,15 +1438,15 @@ void CqImageBuffer::RenderImage()
 		}
 
 
-		RenderSurfaces( iBucket, xmin, xmax, ymin, ymax );
+		RenderSurfaces( xmin, xmax, ymin, ymax );
 		if ( m_fQuit )
 		{
 			m_fDone = TqTrue;
 			return ;
 		}
 #ifdef WIN32
-		if ( !( iBucket % bucketmodulo ) )
-			SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );
+//		if ( !( iBucket % bucketmodulo ) )
+//			SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );
 #endif
 #if defined(REQUIRED)
 		TqInt iB2, NumGrids = 0, NumPolys = 0;
@@ -1452,7 +1456,8 @@ void CqImageBuffer::RenderImage()
 			NumPolys += m_aBuckets[ iB2 ].aMPGs().size();
 		}
 #endif
-	}
+		CurrentBucket().SetProcessed();
+	} while( NextBucket() );
 
 	ImageComplete();
 
