@@ -51,12 +51,12 @@ CqFile::CqFile(const char* strFilename, const char* strSearchPathName) : m_pStre
  * \param strSearchPathName Character pointer to name of RI "searchpath" option to use as the searchpath.
  */
 
-void CqFile::Open(const char* strFilename, const char* strSearchPathName)
+void CqFile::Open(const char* strFilename, const char* strSearchPathName, std::ios::open_mode mode)
 {
 	// Search in the current directory first.
 	m_strRealName=strFilename;
 	m_bInternal=TqTrue;
-	std::ifstream* pFStream=new std::ifstream(strFilename/*, std::ios::binary*/);
+	std::ifstream* pFStream=new std::ifstream(strFilename, mode);
 	if(!pFStream->is_open())
 	{
 		// If a searchpath option name was specified, use it.
