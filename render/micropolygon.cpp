@@ -400,7 +400,7 @@ void CqMicroPolyGrid::Split(CqImageBuffer* pImage, TqInt iBucket, long xmin, lon
 			pNew->SetIndex(iIndex);
 			if(fTrimmed)	pNew->MarkTrimmed();
 			pNew->Initialise(P()[iIndex], P()[iIndex+1], P()[iIndex+cu+2], P()[iIndex+cu+1]);
-			pNew->Bound(TqTrue);
+			pNew->GetTotalBound(TqTrue);
 			pImage->AddMPG(pNew);
 			Advance();
 		}
@@ -504,7 +504,7 @@ void CqMotionMicroPolyGrid::Split(CqImageBuffer* pImage, TqInt iBucket, long xmi
 				CqVector3D& vD=pGridT->P()[iIndex+cu+1];
 				pNew->Initialise(vA, vB, vC, vD,Time(iTime));
 			}
-			pNew->Bound(TqTrue);
+			pNew->GetTotalBound(TqTrue);
 			pImage->AddMPG(pNew);
 			pGridA->Advance();
 		}
@@ -683,7 +683,7 @@ CqVector2D CqMicroPolygonStaticBase::ReverseBilinear(CqVector2D& v)
 /** Calculate the 2D boundary of this micropolygon,
  */
 
-CqBound CqMicroPolygonStaticBase::Bound() const
+CqBound CqMicroPolygonStaticBase::GetTotalBound() const
 {
 	CqBound Bound;
 	// Calculate the boundary, and store the indexes in the cache.
@@ -741,24 +741,11 @@ TqBool CqMicroPolygonStatic::Sample(CqVector2D& vecSample, TqFloat time, TqFloat
 /** Calculate the 2D boundary of this micropolygon,
  */
 
-CqBound& CqMicroPolygonStatic::Bound(TqBool fForce)
+CqBound& CqMicroPolygonStatic::GetTotalBound(TqBool fForce)
 {
 	if(fForce)
-		m_Bound=CqMicroPolygonStaticBase::Bound();
+		m_Bound=CqMicroPolygonStaticBase::GetTotalBound();
 	return(m_Bound);
-}
-
-//---------------------------------------------------------------------
-/** Calculate the 2D boundary of this micropolygon, returned in a list
- */
-CqBoundList& CqMicroPolygonStatic::BoundList()
-{
-	m_BoundList.Clear();
-	
-	CqBound* bound = new CqBound( m_Bound );
-	m_BoundList.Add(bound, 0.0);
-	
-	return m_BoundList;
 }
 
 
@@ -767,15 +754,15 @@ CqBoundList& CqMicroPolygonStatic::BoundList()
  * \param fForce Boolean flag to force the recalculation of the cached bound.
  */
 
-CqBound& CqMicroPolygonMotion::Bound(TqBool fForce)
+CqBound& CqMicroPolygonMotion::GetTotalBound(TqBool fForce)
 {
 	if(fForce)
 	{
 		// Calculate the boundary from the various motion positions.
-		m_Bound=GetMotionObject(Time(0)).Bound();
+		m_Bound=GetMotionObject(Time(0)).GetTotalBound();
 		TqInt i;
 		for(i=1; i<cTimes(); i++)
-			m_Bound=m_Bound.Combine(GetMotionObject(Time(i)).Bound());
+			m_Bound=m_Bound.Combine(GetMotionObject(Time(i)).GetTotalBound());
 		
 	}
 	return(m_Bound);
@@ -784,15 +771,15 @@ CqBound& CqMicroPolygonMotion::Bound(TqBool fForce)
 //---------------------------------------------------------------------
 /** Calculate a list of 2D bounds for this micropolygon,
  */
-CqBoundList& CqMicroPolygonMotion::BoundList()
+void CqMicroPolygonMotion::BuildBoundList()
 {
 	m_BoundList.Clear();
 	
-	CqBound start = GetMotionObject(Time(0)).Bound();
+	CqBound start = GetMotionObject(Time(0)).GetTotalBound();
 	TqFloat startTime = Time(0);
 	for( TqInt i=1; i<cTimes(); i++ )
 	{
-		CqBound end = GetMotionObject(Time(i)).Bound();
+		CqBound end = GetMotionObject(Time(i)).GetTotalBound();
 		CqBound mid0(start);
 		CqBound mid1;
 		TqFloat endTime = Time(i);
@@ -818,8 +805,6 @@ CqBoundList& CqMicroPolygonMotion::BoundList()
 		start = end;
 		startTime = endTime;
 	}
-	
-	return m_BoundList;
 }
 	
 
@@ -859,7 +844,7 @@ void CqMicroPolygonMotion::Initialise(const CqVector3D& vA, const CqVector3D& vB
 	CqMicroPolygonStaticBase MP(vA,vB,vC,vD);
 	AddTimeSlot(time,MP);
 	if(Time(0)==time)
-		m_Bound=MP.Bound();
+		m_Bound=MP.GetTotalBound();
 	else
 		ExpandBound(MP);
 }
@@ -870,7 +855,7 @@ void CqMicroPolygonMotion::Initialise(const CqVector3D& vA, const CqVector3D& vB
 
 void CqMicroPolygonMotion::ExpandBound(const CqMicroPolygonStaticBase& MP)
 {
-	m_Bound.Combine(MP.Bound());
+	m_Bound.Combine(MP.GetTotalBound());
 }
 
 

@@ -1126,7 +1126,7 @@ TqBool CqImageBuffer::OcclusionCullSurface(TqInt iBucket, CqBasicSurface* pSurfa
 void CqImageBuffer::AddMPG(CqMicroPolygonBase* pmpgNew)
 {
 	// Find out which bucket(s) the mpg belongs to.
-	CqBound	B(pmpgNew->Bound());
+	CqBound	B(pmpgNew->GetTotalBound());
 	pmpgNew->AddRef();
 
 	if(B.vecMax().x()<m_CropWindowXMin-m_FilterXWidth/2 || B.vecMax().y()<m_CropWindowYMin-m_FilterYWidth/2 ||
@@ -1233,15 +1233,14 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 
 	CqBucket& Bucket=m_aBuckets[iBucket];
 
-	// Bound the microplygon in hybrid camera/raster space
-	CqBoundList& BoundList=pMPG->BoundList();
 	
-	for( TqInt bound_num = 0; bound_num<BoundList.Size(); bound_num++)
+	for( TqInt bound_num = 0; bound_num<pMPG->cSubBounds(); bound_num++)
 	{
-		//CqBound Bound(pMPG->Bound());
-		CqBound Bound = *(BoundList.GetBound(bound_num));
-		TqFloat time0 = BoundList.GetTime(bound_num);
-		TqFloat time1 = (bound_num==BoundList.Size()-1) ? 1.0 : BoundList.GetTime(bound_num+1);
+		TqFloat time0;
+		CqBound& Bound = pMPG->SubBound(bound_num, time0);
+		TqFloat time1=1.0f;
+		if(bound_num!=pMPG->cSubBounds()-1)
+			pMPG->SubBound(bound_num+1, time1);
 	
 		TqFloat bminx=Bound.vecMin().x();
 		TqFloat bmaxx=Bound.vecMax().x();
@@ -1250,7 +1249,7 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 
 		if(bmaxx<xmin || bmaxy<ymin || bminx>xmax || bminy>ymax)
 		{
-			if(bound_num == BoundList.Size() - 1)
+			if(bound_num == pMPG->cSubBounds() - 1)
 			{
 				// last bound so we can delete the mpg
 				QGetRenderContext()->Stats().IncCulledMPGs();
@@ -1264,7 +1263,7 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 		if(Bound.vecMin().z()>QGetRenderContext()->optCurrent().fClippingPlaneFar() ||
 		   Bound.vecMax().z()<QGetRenderContext()->optCurrent().fClippingPlaneNear())
 		{
-			if(bound_num == BoundList.Size() - 1)
+			if(bound_num == pMPG->cSubBounds() - 1)
 			{
 				// last bound so we can delete the mpg
 				QGetRenderContext()->Stats().IncCulledMPGs();

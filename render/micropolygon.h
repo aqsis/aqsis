@@ -253,16 +253,14 @@ class CqMicroPolygonBase
 					 * \param fForce Flag indicating do not get the stored bound, but recalculate it.
 					 * \return CqBound representing the conservative bound.
 					 */
-	virtual	CqBound&	Bound(TqBool fForce=TqFalse)=0;
+	virtual	CqBound&	GetTotalBound(TqBool fForce=TqFalse)=0;
 					/** Pure virtual, get the bound of the micropoly.
 					 * \return CqBound representing the conservative bound.
 					 */
-	virtual const CqBound&	Bound() const=0;
-					/** Pure virtual, get a list of bounds that together cover the micropoly.
-					 *  Useful for motion grids to get a tighter bound than a single rectangle.
-					 * \return CqBoundList a list of bounds.
-					 */
-	virtual CqBoundList& BoundList()=0;
+	virtual const CqBound&	GetTotalBound() const=0;
+	virtual	TqInt		cSubBounds()=0;
+	virtual	CqBound&	SubBound(TqInt iIndex, TqFloat& time)=0;
+
 					/** Pure virtual, check if the sample point is within the micropoly.
 					 * \param vecSample 2D sample point.
 					 * \param time The frame time at which to check.
@@ -310,7 +308,7 @@ class CqMicroPolygonStaticBase
 												m_D=From.m_D;
 												return(*this);
 											}		
-			CqBound	Bound() const;
+			CqBound	GetTotalBound() const;
 			void	Initialise(const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD);
 			TqBool	fContains(const CqVector2D& vecP, TqFloat& Depth);
 			CqMicroPolygonStaticBase&	LinearInterpolate(TqFloat Fraction, const CqMicroPolygonStaticBase& MPA, const CqMicroPolygonStaticBase& MPB);
@@ -356,20 +354,24 @@ class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonSta
 	virtual			~CqMicroPolygonStatic()	{}
 
 	// overrides from CqMicroPolygonBase
-	virtual	CqBound&	Bound(TqBool fForce=TqFalse);
+	virtual	CqBound&	GetTotalBound(TqBool fForce=TqFalse);
 					/** Pure virtual, get the bound of the micropoly.
 					 * \return CqBound representing the conservative bound.
 					 */
-	virtual const CqBound&	Bound() const	{return(m_Bound);}
+	virtual const CqBound&	GetTotalBound() const	{return(m_Bound);}
+	virtual	TqInt		cSubBounds()			{return(1);}
+	virtual	CqBound&	SubBound(TqInt iIndex, TqFloat& time) 
+											{
+												time=0.0f;
+												return(m_Bound);
+											}
+
+	virtual	TqBool	Sample(CqVector2D& vecSample, TqFloat time, TqFloat& D);
 
 	virtual void		MarkTrimmed()		{m_fTrimmed = TqTrue;}
-
-	virtual CqBoundList& BoundList();
-	virtual	TqBool	Sample(CqVector2D& vecSample, TqFloat time, TqFloat& D);
 	
 	private:
 			CqBound		m_Bound;		///< Stored bound.
-			CqBoundList	m_BoundList;	///< Bound as a (single element) list
 			TqBool		m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
 	
 	static	CqMemoryPool<CqMicroPolygonStatic>	m_thePool;	///< Static pool to allocated micropolys from.
@@ -404,12 +406,24 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 			void		Initialise(const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD, TqFloat time);
 
 	// Overrides from CqMicroPolygonBase
-	virtual	CqBound&	Bound(TqBool fForce=TqFalse);
+	virtual	CqBound&	GetTotalBound(TqBool fForce=TqFalse);
 					/** Pure virtual, get the bound of the micropoly.
 					 * \return CqBound representing the conservative bound.
 					 */
-	virtual const CqBound&	Bound() const	{return(m_Bound);}
-	virtual CqBoundList& BoundList();
+	virtual const CqBound&	GetTotalBound() const	
+											{return(m_Bound);}
+	virtual	TqInt		cSubBounds()		{
+												BuildBoundList();
+												return(m_BoundList.Size());
+											}
+	virtual	CqBound&	SubBound(TqInt iIndex, TqFloat& time) 
+											{
+												assert(iIndex<m_BoundList.Size());
+												time=m_BoundList.GetTime(iIndex);
+												return(*m_BoundList.GetBound(iIndex));
+											}
+	virtual void		BuildBoundList();
+
 	virtual	TqBool	Sample(CqVector2D& vecSample, TqFloat time, TqFloat& D);
 
 	// Overrides from CqMotionSpec
