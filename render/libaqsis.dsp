@@ -138,6 +138,10 @@ SOURCE=.\imagebuffer.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\imagers.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\lights.cpp
 # End Source File
 # Begin Source File
@@ -287,6 +291,10 @@ SOURCE=.\iddmanager.h
 # Begin Source File
 
 SOURCE=.\ImageBuffer.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\imagers.h
 # End Source File
 # Begin Source File
 
