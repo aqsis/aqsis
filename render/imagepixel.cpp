@@ -303,13 +303,20 @@ void CqImagePixel::Combine()
 
 	if ( NULL != pstrDepthFilter )
 	{
-		if ( !pstrDepthFilter[ 0 ].compare( "midpoint" ) )
+		if( !pstrDepthFilter[ 0 ].compare( "min" ) )
+			depthfilter = 0;
+		else if ( !pstrDepthFilter[ 0 ].compare( "midpoint" ) )
 			depthfilter = 1;
 		else if ( !pstrDepthFilter[ 0 ].compare( "max" ) )
 			depthfilter = 2;
 		else if ( !pstrDepthFilter[ 0 ].compare( "average" ) )
 			depthfilter = 3;
+		else
+			QGetRenderContext() ->Logger() ->warn( "Invalid depthfilter \"%s\", depthfilter set to \"min\"", pstrDepthFilter[ 0 ].c_str() );
 	}
+	else
+		QGetRenderContext() ->Logger() ->warn( "No depthfilter, depthfilter set to \"min\"", pstrDepthFilter[ 0 ].c_str() );
+
 	
 
 	TqUint samplecount = 0;

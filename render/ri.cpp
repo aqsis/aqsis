@@ -576,7 +576,7 @@ RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 	
 	if( !valid )
 	{
-		QGetRenderContext() ->Logger()->error( "Invalid RiFrameAspectRatio, aborting" );
+		QGetRenderContext() ->Logger()->error( "RiFrameAspectRatio: Invalid RiFrameAspectRatio, aborting" );
 		throw( "INVALID_VALUE" );
 		return;
 	}
@@ -689,7 +689,7 @@ RtVoid	RiProjectionV( const char *name, PARAMETERLIST )
 		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "Projection" ) [ 0 ] = ProjectionOrthographic ;
 	else if( name != RI_NULL )
 	{
-		QGetRenderContext() ->Logger() ->error( "RiProjection: Invalid projection: %s", name );
+		QGetRenderContext() ->Logger() ->error( "RiProjection: Invalid projection: \"%s\"", name );
 		return ;
 	}
 
@@ -733,7 +733,7 @@ RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 
 	if( !valid )
 	{
-		QGetRenderContext() ->Logger()->error( "Invalid RiClipping, clipping planes set to RI_EPSILON, RI_INFINITY" );
+		QGetRenderContext() ->Logger()->error( "RiClipping: Invalid RiClipping, clipping planes set to RI_EPSILON, RI_INFINITY" );
 		cnear	= RI_EPSILON;
 		cfar	= RI_INFINITY;
 	}
@@ -775,7 +775,7 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 
 	if( !valid )
 	{
-		QGetRenderContext() ->Logger()->warn( "Invalid DepthOfField, DepthOfField ignored" );
+		QGetRenderContext() ->Logger()->warn( "RiDepthOfField: Invalid DepthOfField, DepthOfField ignored" );
 		return;
 	}
 
@@ -842,7 +842,7 @@ RtVoid	RiPixelVariance( RtFloat variance )
 
 	if( !valid )
 	{
-		QGetRenderContext() ->Logger()->warn( "Invalid PixelVariance, PixelVariance set to 0" );
+		QGetRenderContext() ->Logger()->warn( "RiPixelVariance: Invalid PixelVariance, PixelVariance set to 0" );
 		variance = 0;
 	}
 
@@ -876,7 +876,7 @@ RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 
 	if( !valid )
 	{
-		QGetRenderContext() ->Logger()->warn( "Invalid PixelSamples, PixelSamples set to 1, 1" );
+		QGetRenderContext() ->Logger()->warn( "RiPixelSamples: Invalid PixelSamples, PixelSamples set to 1, 1" );
 		xsamples = 1;
 		ysamples = 1;
 	}
@@ -3261,10 +3261,10 @@ RtVoid	RiPatchMesh( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, PARAMETERLIST )
 {
 	if( strcmp( uwrap, RI_BICUBIC ) && strcmp( uwrap, RI_BILINEAR ) )
-		QGetRenderContext() ->Logger() ->error( "RiPatchMesh: Invalid u-wrap type: %s", type );
+		QGetRenderContext() ->Logger() ->error( "RiPatchMesh: Invalid u-wrap type: \"%s\"", type );
 
 	if( strcmp( vwrap, RI_BICUBIC ) && strcmp( vwrap, RI_BILINEAR ) )
-		QGetRenderContext() ->Logger() ->error( "RiPatchMesh: Invalid v-wrap type: %s", type );
+		QGetRenderContext() ->Logger() ->error( "RiPatchMesh: Invalid v-wrap type: \"%s\"", type );
 	
 	if ( strcmp( type, RI_BICUBIC ) == 0 )
 	{
@@ -3323,7 +3323,7 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 	}
 	else
 	{
-		QGetRenderContext() ->Logger() ->error( "RiPatchMesh: Invalid patch type: %s", type );
+		QGetRenderContext() ->Logger() ->error( "RiPatchMesh: Invalid patch type: \"%s\"", type );
 	}
 
 	return ;
@@ -4519,7 +4519,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		}
 		else
 		{
-			QGetRenderContext() ->Logger() ->error( "RiSubdivisionMesh: Invalid scheme: %s", scheme );
+			QGetRenderContext() ->Logger() ->error( "RiSubdivisionMesh: Invalid scheme: \"%s\"", scheme );
 		}
 	}
 

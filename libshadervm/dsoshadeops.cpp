@@ -233,7 +233,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 	// ERROR if we cant find this types name;
 	if (m_itTypeNameMap == m_TypeNameMap.end())
 	{
-	  	pLogger->warn( "Discarding DSO Table entry due to unsupported return type: %s\n" , strRetType.c_str() );
+	  	pLogger->warn( "Discarding DSO Table entry due to unsupported return type: \"%s\"" , strRetType.c_str() );
 		return NULL;
 	}
 	EqVariableType rettype = (*m_itTypeNameMap).second;
@@ -247,7 +247,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 	DSOMethod method = (DSOMethod) DLSym (handle,&s);
 	if(method == NULL) 
 	{
-	  	pLogger->warn( "Discarding DSO Table entry due to unknown symbol for method: %s\n" , strMethodName.c_str());
+	  	pLogger->warn( "Discarding DSO Table entry due to unknown symbol for method: \"%s\"" , strMethodName.c_str());
 	 	return NULL;
 	};
 	
@@ -268,7 +268,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 		// ERROR if we cant find this arguments type name;
 		if (m_itTypeNameMap == m_TypeNameMap.end())
 		{
-	  		pLogger->warn( "Discarding DSO Table entry due to unsupported argument type: %s\n", strArgType.c_str());
+	  		pLogger->warn( "Discarding DSO Table entry due to unsupported argument type: \"%s\"", strArgType.c_str());
 			return NULL;
 		}; 
 		arglist.push_back((*m_itTypeNameMap).second);
@@ -283,7 +283,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 		initfunc = (DSOInit) DLSym(handle,&strInit);
 		if (initfunc == NULL)
 		{
-	  		pLogger->warn( "Discarding DSO Table entry due to unknown symbol for init: %s\n" , strInit.c_str()); 
+	  		pLogger->warn( "Discarding DSO Table entry due to unknown symbol for init: \"%s\"" , strInit.c_str()); 
 			return NULL; // ERROR ;
 		};
 	} 
@@ -296,7 +296,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 		shutdownfunc = (DSOShutdown) DLSym(handle,&strShutdown);
 		if (shutdownfunc == NULL)
 		{
- 			pLogger->warn( "Discarding DSO Table entry due to unknown symbol for shutdown: %s\n" , strShutdown.c_str()); 
+ 			pLogger->warn( "Discarding DSO Table entry due to unknown symbol for shutdown: \"%s\"" , strShutdown.c_str()); 
 			return NULL; // ERROR ;
 		};
 	};

@@ -98,7 +98,7 @@ void CqShaderVM::SO_ipushv()
 	{
 		// Report error.
 		//CqBasicError( 0, Severity_Fatal, "Attempt to index a non array variable" );
-		//logger->fatal( "Attempt to index a non array variable" );
+		Logger()->fatal( "Attempt to index a non array variable" );
 		return ;
 	}
 	RESULT(pVar->Type(), pVar->Class());
@@ -141,7 +141,7 @@ void CqShaderVM::SO_ipop()
 	{
 		// Report error.
 		//CqBasicError( 0, Severity_Fatal, "Attempt to index a non array variable" );
-		//logger->fatal( "Attempt to index a non array variable" );
+		Logger()->fatal( "Attempt to index a non array variable" );
 		return ;
 	}
 	POPV( A );

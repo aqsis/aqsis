@@ -581,6 +581,12 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 			m_logger = logger;
 		};
 
+		// Get the log, this should have been set by CqRenderer::CreateShader
+		IqLog* Logger()
+		{
+			return m_logger;
+		}
+
 	private:
 		IqLog	*m_logger;
 		TqInt	m_Uses;			///< Bit vector representing the system variables used by this shader.
