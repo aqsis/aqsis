@@ -100,7 +100,7 @@ extern "C" const char* StandardParameters[][2] =
 	{"Os", "varying color" },
 	{"s", "varying float" },
 	{"t", "varying float" },
-	{"st", "varying float" },
+	{"st", "varying float[2]" },
 	{"gridsize", "uniform integer" },
 	{"texturememory", "uniform integer" },
 	{"bucketsize", "uniform integer[2]" },

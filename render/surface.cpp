@@ -703,11 +703,11 @@ void	CqSurface::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const
 
 /** Find out if a named user parameter exists on this surface.
  */
-CqParameter* CqSurface::FindUserParam( const char* name )
+CqParameter* CqSurface::FindUserParam( const char* name ) const
 {
 	CqString strName( name );
-	std::vector<CqParameter*>::iterator iUP;
-	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+	std::vector<CqParameter*>::const_iterator iUP;
+	std::vector<CqParameter*>::const_iterator end = m_aUserParams.end();
 	for ( iUP = m_aUserParams.begin(); iUP != end ; iUP++ )
 	{
 		if( ( *iUP )->strName() == strName )

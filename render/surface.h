@@ -472,13 +472,17 @@ class CqSurface : public CqBasicSurface
 		 */
 		virtual const	TqBool	bHass() const
 		{
-			return ( m_aiStdPrimitiveVars[ EnvVars_s ] >= 0 );
+			return ( m_aiStdPrimitiveVars[ EnvVars_s ] >= 0 ||
+					 FindUserParam("s") ||
+					 FindUserParam("st"));
 		}
 		/** Determine whether this surface has per vertex t coordinates.
 		 */
 		virtual const	TqBool	bHast() const
 		{
-			return ( m_aiStdPrimitiveVars[ EnvVars_t ] >= 0 );
+			return ( m_aiStdPrimitiveVars[ EnvVars_t ] >= 0 ||
+					 FindUserParam("t") ||
+					 FindUserParam("st"));
 		}
 		/** Determine whether this surface has per vertex u coordinates.
 		 */
@@ -507,7 +511,7 @@ class CqSurface : public CqBasicSurface
 			return ( m_aUserParams );
 		}
 
-		virtual CqParameter* FindUserParam( const char* strName );
+		virtual CqParameter* FindUserParam( const char* strName ) const;
 
 		/* From IqSurface.
 		 */

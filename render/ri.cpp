@@ -4850,63 +4850,29 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 	 for ( i = 0; i < count; i++ )
 	 {
 		 RtToken	token = tokens[ i ];
-		 TqUlong htoken = CqParameter::hash( tokens[ i ] );
 		 RtPointer	value = values[ i ];
 
-		 if ( htoken == RIH_S )
-		 {
-			 fT = RIL_s;
-			 pTextures_s = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_T )
-		 {
-			 fT = RIL_t;
-			 pTextures_t = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_ST )
-		 {
-			 fT = RIL_st;
-			 pTextures_st = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_CS )
-		 {
-			 fCs = RI_TRUE;
-			 pCs = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_OS )
-		 {
-			 fOs = RI_TRUE;
-			 pOs = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_P )
-		 {
-			 fP = RIL_P;
-			 pPoints = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_PZ )
-		 {
-			 fP = RIL_Pz;
-			 pPoints = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_PW )
-		 {
-			 fP = RIL_Pw;
-			 pPoints = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_N )
-		 {
-			 fN = RIL_N;
-			 pNormals = ( RtFloat* ) value;
-		 }
-		 else if ( htoken == RIH_NP )
-		 {
-			 fN = RIL_Np;
-			 pNormals = ( RtFloat* ) value;
-		 }
-		 else
-		 {
-			 aUserParams.push_back( i );
-		 }
+		 SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( token );
+
+		if ( Decl.m_strName.compare( RI_P ) == 0 && Decl.m_Class == class_vertex )
+		{
+			fP = RIL_P;
+			pPoints = ( RtFloat* ) value;
+		}
+		else if ( Decl.m_strName.compare( RI_PZ ) == 0 && Decl.m_Class == class_vertex )
+		{
+			fP = RIL_Pz;
+			pPoints = ( RtFloat* ) value;
+		}
+		else if ( Decl.m_strName.compare( RI_PW ) == 0 && Decl.m_Class == class_vertex )
+		{
+			fP = RIL_Pw;
+			pPoints = ( RtFloat* ) value;
+		}
+		else
+		{
+			aUserParams.push_back( i );
+		}
 	 }
 
 	 // Fill in the position variable according to type.
@@ -5162,10 +5128,11 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 					}
 			}
 			pSurface->AddPrimitiveVariable( pNewParam );
+			CqParameter* pP = pSurface->P();
 		}
 	}
 
-	return ( fP != RIL_NONE );
+	return ( pSurface->P() != NULL );
 }
 
 
