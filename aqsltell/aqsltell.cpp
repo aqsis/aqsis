@@ -102,10 +102,16 @@ int main( int argc, const char** argv )
 		for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
 		{
 			char shaderpath[ 1024 ];
-			strcpy( shaderpath, ".:" );
+			strcpy( shaderpath, "" );
 
 			char *ev;
 
+			ev = getenv( "AQSIS_SHADERS_PATH" );
+			if ( ev && *ev )
+			{
+				strcat( shaderpath, ev );
+				strcat( shaderpath, ":" );
+			}
 			ev = getenv( "AQSIS_BASE_PATH" );
 			if ( ev && *ev )
 			{
@@ -122,15 +128,13 @@ int main( int argc, const char** argv )
 				int i;
 				SLX_VISSYMDEF * symPtr;
 
-#ifdef	WIN32
-				// If SLX_GetPath returns "", then the shader specified is absolute, so don't add a path.
-				// This is only under windows, to avoid problems with drivespecs. i.e. h:\plastic.slx shouldn't
-				// be printed as ./h:\plastic.slx
-				if( strlen( SLX_GetPath() ) == 0 )
-					std::cout << SLX_TypetoStr( SLX_GetType() ) << " \"" << SLX_GetName() << "\"" << std::endl;
-				else
-#endif
-					std::cout << SLX_TypetoStr( SLX_GetType() ) << " \"" << SLX_GetPath() << "/" << SLX_GetName() << "\"" << std::endl;
+				char* currpath = SLX_GetPath();
+				std::cout << SLX_TypetoStr( SLX_GetType() ) << " \"" << currpath;
+				if( strlen(currpath) > 0 && 
+						(currpath[ strlen( currpath ) - 1 ] != '/') &&
+						(currpath[ strlen( currpath ) - 1 ] != '\\') ) 
+					std::cout << "/";
+				std::cout << SLX_GetName() << "\"" << std::endl;
 				nArgs = SLX_GetNArgs();
 
 				for ( i = 0; i < nArgs; i++ )

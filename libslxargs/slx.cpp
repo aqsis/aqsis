@@ -693,15 +693,17 @@ static bool LoadShaderInfo ( char *name )
 	doLoop = true;
 
 	pathListCount = GetSearchPathListCount();
-	if ( pathListCount > 0 )
-	{
-		if ( GetSearchPathEntryAtIndex( pathListIdx ) == false )
-			doLoop = false;
-	}
-	else
-	{
-		doLoop = false;
-	}
+//	if ( pathListCount > 0 )
+//	{
+//		if ( GetSearchPathEntryAtIndex( pathListIdx ) == false )
+//			doLoop = false;
+//	}
+//	else
+//	{
+//		doLoop = false;
+//	}
+	currentShaderSearchPath = (char*)malloc(strlen(""));
+	strcpy(currentShaderSearchPath, "");
 	while ( doLoop == true )
 	{
 		// Build a full file path description
@@ -713,27 +715,17 @@ static bool LoadShaderInfo ( char *name )
 		if ( strstr( name + strlen( name ) - strlen(RI_SHADER_EXTENSION), RI_SHADER_EXTENSION ) == NULL )
 			strcat( shaderFileName, RI_SHADER_EXTENSION );
 		
-		// If on Windows, and it is an absolute path, then don't prepend the current dir.
-#ifdef	WIN32
-		if( shaderFileName[ 1 ] != ':' && shaderFileName[ 0 ] != '\\' && shaderFileName[ 0 ] != '/' )
-		{
-#endif
-			stringLength = strlen( currentShaderSearchPath ) + strlen( shaderFileName ) + 2;
-			currentShaderFilePath = ( char * ) malloc( stringLength );
-			strcpy( currentShaderFilePath, currentShaderSearchPath );
+		stringLength = strlen( currentShaderSearchPath ) + strlen( shaderFileName ) + 2;
+		currentShaderFilePath = ( char * ) malloc( stringLength );
+		strcpy( currentShaderFilePath, currentShaderSearchPath );
+		if( strlen(currentShaderSearchPath) > 0 && 
+				(currentShaderSearchPath[ strlen( currentShaderSearchPath ) - 1 ] != '/') &&
+				(currentShaderSearchPath[ strlen( currentShaderSearchPath ) - 1 ] != '\\') ) 
 			strcat( currentShaderFilePath, "/" );
-			strcat( currentShaderFilePath, shaderFileName );
-#ifdef	WIN32
-		}
-		else
-		{
-			stringLength = strlen( shaderFileName ) + 1;
-			currentShaderFilePath = ( char * ) malloc( stringLength );
-			strcpy( currentShaderFilePath, shaderFileName );
-		}
-#endif
+		strcat( currentShaderFilePath, shaderFileName );
 
 		// attempt to open the shader file
+		//std::cout << "Trying: " << currentShaderFilePath << std::endl;
 		shaderInputFile = OpenCurrentShader();
 		if ( shaderInputFile != NULL )
 		{
@@ -747,9 +739,9 @@ static bool LoadShaderInfo ( char *name )
 
 		if ( result == false )
 		{
-			pathListIdx++;
 			if ( GetSearchPathEntryAtIndex( pathListIdx ) == false )
 				doLoop = false;
+			pathListIdx++;
 		}
 	}
 
@@ -800,11 +792,6 @@ char *SLX_GetPath ( void )
 	{
 		SlxLastError = RIE_NOFILE;
 	}
-#ifdef	WIN32
-	// Return empty if shader specified is absolute under Windows.
-	if( currentShader[ 1 ] == ':' || currentShader[ 0 ] == '\\' || currentShader[ 0 ] == '/' )
-		return( "" );
-#endif
 	return currentShaderSearchPath;
 }
 
