@@ -44,7 +44,6 @@ RSC=rc.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD CPP /nologo /MD /W2 /GX /O2 /Op /Oy- /Ob2 /I "..\Object\Release\Render" /I "..\tiff-v3.5.2\libtiff" /I "..\Render" /I "..\Render\win32\intel" /I ".\win32\intel" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D _qBUILDING=CORE /D CORE=1 /FR /FD /c
-# SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -664,18 +663,6 @@ SOURCE=.\vector4d.h
 
 SOURCE=.\version.h
 # End Source File
-# End Group
-# Begin Group "Generated Files"
-
-# PROP Default_Filter ""
-# Begin Group "Release"
-
-# PROP Default_Filter ""
-# End Group
-# Begin Group "Debug"
-
-# PROP Default_Filter ""
-# End Group
 # End Group
 # Begin Source File
 
