@@ -1,12 +1,12 @@
 Aqsis Rendering System README
 
-* The Aqsis Rendering System consists of a set of libraries and applications for creating high-quality computer imagery using the Pixar Renderman Interface.
+* The Aqsis Rendering System consists of a set of libraries and applications for creating high-quality computer imagery using the Pixar RenderMan Interface.
 
 * Aqsis is licensed under the GNU GPL.  See the COPYING file for details.
 
 * Aqsis was originally written by Paul Gregory for use under Win32.  See the AUTHORS file for subsequent contributors.
 
-* As of this writing (June 2001) the Aqsis Posix build is partially complete: the render engine (libaqsis) functions normally, and the RIB-parsing libraries (librib2, librib2stream, and librib2ri) can be used to parse most RIB files.  The simple (libddmsimple) display-driver manager functions normally (sending all rendered output to a TIFF file).  The shader parser front-end (libslparse) and a back-end capable of producing bytecode (libcodegenvm) are linked together in an executable (aqsl) that reliably compiles the current set of shaders.  An executable (aqsis) demonstrates how the render engine and RIB-parsing libraries can be integrated together to create a simple rendering application.  Additional work is required to implement the socket display driver manager (libddmsock), create a visible display driver for X, handle procedural geometry, shared libraries, and (if possible) merge the Posix and Win32 executable codebases.
+* As of this writing (September 2001) the Aqsis Posix build is mostly complete: the render engine (libaqsis) functions normally, and the RIB-parsing libraries (librib2, librib2stream, and librib2ri) can be used to parse most RIB files.  The simple (libddmsimple) display-driver manager functions normally (sending all rendered output to a TIFF file, regardless of the display type requested).  The socket (libddmsock) functions normally; a TIFF file output display driver (filebuffer) and GLUT-based visual display driver (framebuffer_glut) function well.  The shader parser front-end (libslparse) and a back-end capable of producing bytecode (libcodegenvm) are linked together in an executable (aqsl) that reliably compiles the current set of shaders.  An executable (aqsis) demonstrates how the render engine and RIB-parsing libraries can be integrated together to create a rendering application.  Additional work is required to handle procedural geometry and bring the Posix and Win32 codebases closer together (where possible).
 
 * The Aqsis Posix build uses GNU autotools to provide a standard build environment.  The Posix build has been tested under GNU/Linux running on Intel hardware, and the Cygwin environment, running under Win32 with Intel hardware.  See the INSTALL file for instructions on building Aqsis.
 
