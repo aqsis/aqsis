@@ -1152,7 +1152,7 @@ CqBound CqSurfaceNURBS::Bound() const
 /** Dice the patch into a mesh of micropolygons.
  */
 
-void CqSurfaceNURBS::NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
+void CqSurfaceNURBS::NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
 {
 	CqVector4D vec1;
 	TqInt iv;
@@ -1231,7 +1231,7 @@ void CqSurfaceNURBS::NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize
 /** Generate the vertex normals if not specified.
  */
 
-void CqSurfaceNURBS::DicePointsAndNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pP, IqShaderData* pNormals )
+void CqSurfaceNURBS::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
 {
 	// Get the handedness of the coordinate system (at the time of creation) and
 	// the coordinate system specified, to check for normal flipping.
@@ -1256,7 +1256,8 @@ void CqSurfaceNURBS::DicePointsAndNormals( TqInt uDiceSize, TqInt vDiceSize, IqS
 			N = EvaluateWithNormal( su, sv, P );
 			N = ( O == OrientationLH )? N : -N;
 			pNormals->SetNormal( N, igrid );
-			pP->SetPoint( P, igrid );
+			/// \todo This would be more efficient if we can store the P here as well, instead of calculating it twice.
+			//pP->SetPoint( P, igrid );
 		}
 	}
 }
@@ -1290,15 +1291,25 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 	}
 
 	// Split the surface in u or v
-	CqSurfaceNURBS * pNew1;
-	CqSurfaceNURBS * pNew2;
+	CqSurfaceNURBS * pNew1 = new CqSurfaceNURBS();
+	CqSurfaceNURBS * pNew2 = new CqSurfaceNURBS();
 
 	// If this primitive is being split because it spans the e and hither planes, then
 	// we should split in both directions to ensure we overcome the crossing.
-	if ( m_SplitDir == SplitDir_U || !m_fDiceable )
-		uSubdivide( pNew1, pNew2 );
-	else
-		vSubdivide( pNew1, pNew2 );
+	SplitNURBS( *pNew1, *pNew2, m_SplitDir == SplitDir_U || !m_fDiceable );
+
+	std::vector<CqParameter*>::iterator iUP;
+	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	{
+		if( (*iUP)->Class() != class_vertex )
+		{
+			CqParameter* pNewA = (*iUP)->Clone();
+			CqParameter* pNewB = (*iUP)->Clone();
+			(*iUP)->Subdivide( pNewA, pNewB, SplitDir() == SplitDir_U, this );
+			pNew1->AddPrimitiveVariable( pNewA );
+			pNew2->AddPrimitiveVariable( pNewB );
+		}
+	}
 
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
@@ -1315,62 +1326,25 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 	pNew1->SetfPatchMesh( TqFalse );
 	pNew2->SetfPatchMesh( TqFalse );
 
+	aSplits.push_back( pNew1 );
+	aSplits.push_back( pNew2 );
+
+	cSplits = 2;
+
 	if ( !m_fDiceable )
 	{
-		CqSurfaceNURBS * pNew3;
-		CqSurfaceNURBS * pNew4;
+		std::vector<CqBasicSurface*> aSplits0;
+		std::vector<CqBasicSurface*> aSplits1;
 
-		if ( m_SplitDir == SplitDir_U )
-			pNew1->vSubdivide( pNew3, pNew4 );
-		else
-			pNew1->uSubdivide( pNew3, pNew4 );
+		cSplits = aSplits[0]->Split( aSplits0 );
+		cSplits += aSplits[1]->Split( aSplits1 );
+		// Release the old ones.
+		aSplits[0]->Release();
+		aSplits[1]->Release();
 
-		pNew3->SetSurfaceParameters( *this );
-		pNew4->SetSurfaceParameters( *this );
-		pNew3->m_fDiceable = TqTrue;
-		pNew4->m_fDiceable = TqTrue;
-		pNew3->m_EyeSplitCount = m_EyeSplitCount;
-		pNew4->m_EyeSplitCount = m_EyeSplitCount;
-		pNew3->AddRef();
-		pNew4->AddRef();
-		pNew3->SetfPatchMesh( TqFalse );
-		pNew4->SetfPatchMesh( TqFalse );
-
-		aSplits.push_back( pNew3 );
-		aSplits.push_back( pNew4 );
-
-		cSplits += 2;
-
-		if ( m_SplitDir == SplitDir_U )
-			pNew2->vSubdivide( pNew3, pNew4 );
-		else
-			pNew2->uSubdivide( pNew3, pNew4 );
-
-		pNew3->SetSurfaceParameters( *this );
-		pNew4->SetSurfaceParameters( *this );
-		pNew3->m_fDiceable = TqTrue;
-		pNew4->m_fDiceable = TqTrue;
-		pNew3->m_EyeSplitCount = m_EyeSplitCount;
-		pNew4->m_EyeSplitCount = m_EyeSplitCount;
-		pNew3->AddRef();
-		pNew4->AddRef();
-		pNew3->SetfPatchMesh( TqFalse );
-		pNew4->SetfPatchMesh( TqFalse );
-
-		aSplits.push_back( pNew3 );
-		aSplits.push_back( pNew4 );
-
-		cSplits += 2;
-
-		pNew1->Release();
-		pNew2->Release();
-	}
-	else
-	{
-		aSplits.push_back( pNew1 );
-		aSplits.push_back( pNew2 );
-
-		cSplits += 2;
+		aSplits.clear();
+		aSplits.swap( aSplits0 );
+		aSplits.insert( aSplits.end(), aSplits1.begin(), aSplits1.end() );
 	}
 
 	return ( cSplits );
@@ -1481,88 +1455,6 @@ TqBool	CqSurfaceNURBS::Diceable()
 	}
 	else
 		return ( TqTrue );
-}
-
-
-//---------------------------------------------------------------------
-/** Dice the patch into a mesh of micropolygons.
- */
-
-CqMicroPolyGridBase* CqSurfaceNURBS::Dice()
-{
-	// Create a new CqMicorPolyGrid for this patch
-	CqMicroPolyGrid * pGrid = new CqMicroPolyGrid( m_uDiceSize, m_vDiceSize, this );
-
-	TqInt lUses = Uses();
-
-	// Dice the primitive variables.
-	if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) ) 
-	{
-		if( bHasCs() )
-			Cs()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
-		else if( NULL != pAttributes()->GetColorAttribute("System", "Color") )
-			pGrid->Cs()->SetColor( pAttributes()->GetColorAttribute("System", "Color")[0]);
-		else
-			pGrid->Cs()->SetColor( CqColor( 1,1,1 ) );
-	}
-
-	if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) ) 
-	{
-		if( bHasOs() )
-			Os()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
-		else if( NULL != pAttributes()->GetColorAttribute("System", "Opacity") )
-			pGrid->Os()->SetColor( pAttributes()->GetColorAttribute("System", "Opacity")[0]);
-		else
-			pGrid->Os()->SetColor( CqColor( 1,1,1 ) );
-	}
-
-	if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && bHass() ) 
-		s()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->s() );
-
-	if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && bHast() ) 
-		t()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
-
-	if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && bHasu() ) 
-		u()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->u() );
-
-	if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && bHasv() ) 
-		v()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->v() );
-	
-
-	if( NULL != pGrid->P() )
-	{
-		if( USES( lUses, EnvVars_N ) && ( NULL != pGrid->Ng() ) && !bHasN() )
-		{
-			DicePointsAndNormals( m_uDiceSize, m_vDiceSize, pGrid->P(), pGrid->Ng() );
-			pGrid->SetbGeometricNormals( TqTrue );
-		}
-		else
-			NaturalInterpolate( P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
-	}
-
-	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
-	if ( USES( lUses, EnvVars_N ) && ( NULL != pGrid->N() ) && bHasN() )
-	{
-		N()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->N() );
-		pGrid->SetbShadingNormals( TqTrue );
-	}
-
-	// Now we need to dice the user specified parameters as appropriate.
-	std::vector<CqParameter*>::iterator iUP;
-	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
-	{
-		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
-		if( NULL != pGrid->pAttributes()->pshadSurface() )
-			pGrid->pAttributes()->pshadSurface()->SetArgument( (*iUP), this );
-
-		if( NULL != pGrid->pAttributes()->pshadDisplacement() )
-			pGrid->pAttributes()->pshadDisplacement()->SetArgument( (*iUP), this );
-
-		if( NULL != pGrid->pAttributes()->pshadAtmosphere() )
-			pGrid->pAttributes()->pshadAtmosphere()->SetArgument( (*iUP), this );
-	}
-
-	return ( pGrid );
 }
 
 

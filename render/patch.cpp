@@ -80,411 +80,77 @@ CqSurfacePatchBicubic& CqSurfacePatchBicubic::operator=( const CqSurfacePatchBic
 }
 
 
-//---------------------------------------------------------------------
-/** Subdivide a bicubic patch in the u direction, return the left side.
- */
 
-void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfacePatchBicubic* pNew2 )
+void CqSurfacePatchBicubic::NaturalSubdivide(CqParameter* pParam,CqParameter* pParam1, CqParameter* pParam2, TqBool u)
 {
-	TqUint iv;
-	// Subdivide the 'vertex' class primitive variables.
-	std::vector<CqParameter*>::iterator iUP;
-	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	switch( pParam->Type() )
 	{
-		if( (*iUP)->Class() == class_vertex )
+		case type_float:
 		{
-			switch( (*iUP)->Type() )
-			{
-				case type_float:
-				{
-					CqParameterTyped<TqFloat, TqFloat>* pTParam =  static_cast<CqParameterTyped<TqFloat, TqFloat>*>(*iUP);
-					CqParameterTyped<TqFloat, TqFloat>* pTParam1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					CqParameterTyped<TqFloat, TqFloat>* pTParam2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					pTParam1->SetSize( pNew1->cVertex() );
-					pTParam2->SetSize( pNew2->cVertex() );
-					for( iv = 0; iv < 4; iv++ )
-					{
-						TqUint ivo = ( iv * 4 );
-						pTParam1->pValue()[ ivo + 0 ] = pTParam->pValue()[ ivo + 0 ];
-						pTParam1->pValue()[ ivo + 1 ] = ( pTParam->pValue()[ ivo + 0 ] + pTParam->pValue()[ ivo + 1 ] ) / 2.0f;
-						pTParam1->pValue()[ ivo + 2 ] = pTParam1->pValue()[ ivo + 1 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f;
+			CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
+			CqParameterTyped<TqFloat, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam1 );
+			CqParameterTyped<TqFloat, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam2 );
+			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+			break;
+		}
 
-						pTParam2->pValue()[ ivo + 3 ] = pTParam->pValue()[ ivo + 3 ];
-						pTParam2->pValue()[ ivo + 2 ] = ( pTParam->pValue()[ ivo + 2 ] + pTParam->pValue()[ ivo + 3 ] ) / 2.0f;
-						pTParam2->pValue()[ ivo + 1 ] = pTParam2->pValue()[ ivo + 2 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f;
+		case type_integer:
+		{
+			CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
+			CqParameterTyped<TqInt, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam1 );
+			CqParameterTyped<TqInt, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam2 );
+			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+			break;
+		}
 
-						pTParam1->pValue()[ ivo + 3 ] = ( pTParam1->pValue()[ ivo + 2] + pTParam2->pValue()[ ivo + 1 ] ) / 2.0f;
-						pTParam2->pValue()[ ivo + 0 ] = pTParam1->pValue()[ ivo + 3 ];
-					}
-					pNew1->AddPrimitiveVariable( pTParam1 );
-					pNew2->AddPrimitiveVariable( pTParam2 );
-					break;
-				}
+		case type_point:
+		case type_vector:
+		case type_normal:
+		{
+			CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
+			CqParameterTyped<CqVector3D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam1 );
+			CqParameterTyped<CqVector3D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam2 );
+			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+			break;
+		}
 
-				case type_integer:
-				{
-					CqParameterTyped<TqInt, TqFloat>* pTParam =  static_cast<CqParameterTyped<TqInt, TqFloat>*>(*iUP);
-					CqParameterTyped<TqInt, TqFloat>* pTParam1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					CqParameterTyped<TqInt, TqFloat>* pTParam2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					pTParam1->SetSize( pNew1->cVertex() );
-					pTParam2->SetSize( pNew2->cVertex() );
-					for( iv = 0; iv < 4; iv++ )
-					{
-						TqUint ivo = ( iv * 4 );
-						pTParam1->pValue()[ ivo + 0 ] = pTParam->pValue()[ ivo + 0 ];
-						pTParam1->pValue()[ ivo + 1 ] = ( pTParam->pValue()[ ivo + 0 ] + pTParam->pValue()[ ivo + 1 ] ) / 2.0f;
-						pTParam1->pValue()[ ivo + 2 ] = pTParam1->pValue()[ ivo + 1 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f;
-
-						pTParam2->pValue()[ ivo + 3 ] = pTParam->pValue()[ ivo + 3 ];
-						pTParam2->pValue()[ ivo + 2 ] = ( pTParam->pValue()[ ivo + 2 ] + pTParam->pValue()[ ivo + 3 ] ) / 2.0f;
-						pTParam2->pValue()[ ivo + 1 ] = pTParam2->pValue()[ ivo + 2 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f;
-
-						pTParam1->pValue()[ ivo + 3 ] = ( pTParam1->pValue()[ ivo + 2] + pTParam2->pValue()[ ivo + 1 ] ) / 2.0f;
-						pTParam2->pValue()[ ivo + 0 ] = pTParam1->pValue()[ ivo + 3 ];
-					}
-					pNew1->AddPrimitiveVariable( pTParam1 );
-					pNew2->AddPrimitiveVariable( pTParam2 );
-					break;
-				}
-
-				case type_point:
-				case type_vector:
-				case type_normal:
-				{
-					CqParameterTyped<CqVector3D, CqVector3D>* pTParam =  static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(*iUP);
-					CqParameterTyped<CqVector3D, CqVector3D>* pTParam1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					CqParameterTyped<CqVector3D, CqVector3D>* pTParam2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					pTParam1->SetSize( pNew1->cVertex() );
-					pTParam2->SetSize( pNew2->cVertex() );
-					for( iv = 0; iv < 4; iv++ )
-					{
-						TqUint ivo = ( iv * 4 );
-						pTParam1->pValue()[ ivo + 0 ] = pTParam->pValue()[ ivo + 0 ];
-						pTParam1->pValue()[ ivo + 1 ] = ( pTParam->pValue()[ ivo + 0 ] + pTParam->pValue()[ ivo + 1 ] ) / 2.0f;
-						pTParam1->pValue()[ ivo + 2 ] = pTParam1->pValue()[ ivo + 1 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f;
-
-						pTParam2->pValue()[ ivo + 3 ] = pTParam->pValue()[ ivo + 3 ];
-						pTParam2->pValue()[ ivo + 2 ] = ( pTParam->pValue()[ ivo + 2 ] + pTParam->pValue()[ ivo + 3 ] ) / 2.0f;
-						pTParam2->pValue()[ ivo + 1 ] = pTParam2->pValue()[ ivo + 2 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f;
-
-						pTParam1->pValue()[ ivo + 3 ] = ( pTParam1->pValue()[ ivo + 2] + pTParam2->pValue()[ ivo + 1 ] ) / 2.0f;
-						pTParam2->pValue()[ ivo + 0 ] = pTParam1->pValue()[ ivo + 3 ];
-					}
-					pNew1->AddPrimitiveVariable( pTParam1 );
-					pNew2->AddPrimitiveVariable( pTParam2 );
-					break;
-				}
-
-				case type_hpoint:
-				{
-					CqParameterTyped<CqVector4D, CqVector3D>* pTParam =  static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(*iUP);
-					CqParameterTyped<CqVector4D, CqVector3D>* pTParam1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					CqParameterTyped<CqVector4D, CqVector3D>* pTParam2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					pTParam1->SetSize( pNew1->cVertex() );
-					pTParam2->SetSize( pNew2->cVertex() );
-					for( iv = 0; iv < 4; iv++ )
-					{
-						TqUint ivo = ( iv * 4 );
-						pTParam1->pValue()[ ivo + 0 ] = static_cast<CqVector3D>( pTParam->pValue()[ ivo + 0 ] );
-						pTParam1->pValue()[ ivo + 1 ] = static_cast<CqVector3D>( ( pTParam->pValue()[ ivo + 0 ] + pTParam->pValue()[ ivo + 1 ] ) / 2.0f );
-						pTParam1->pValue()[ ivo + 2 ] = static_cast<CqVector3D>( pTParam1->pValue()[ ivo + 1 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f );
-
-						pTParam2->pValue()[ ivo + 3 ] = static_cast<CqVector3D>( pTParam->pValue()[ ivo + 3 ] );
-						pTParam2->pValue()[ ivo + 2 ] = static_cast<CqVector3D>( ( pTParam->pValue()[ ivo + 2 ] + pTParam->pValue()[ ivo + 3 ] ) / 2.0f );
-						pTParam2->pValue()[ ivo + 1 ] = static_cast<CqVector3D>( pTParam2->pValue()[ ivo + 2 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f );
-
-						pTParam1->pValue()[ ivo + 3 ] = static_cast<CqVector3D>( ( pTParam1->pValue()[ ivo + 2] + pTParam2->pValue()[ ivo + 1 ] ) / 2.0f );
-						pTParam2->pValue()[ ivo + 0 ] = static_cast<CqVector3D>( pTParam1->pValue()[ ivo + 3 ] );
-					}
-					pNew1->AddPrimitiveVariable( pTParam1 );
-					pNew2->AddPrimitiveVariable( pTParam2 );
-					break;
-				}
+		case type_hpoint:
+		{
+			CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
+			CqParameterTyped<CqVector4D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam1 );
+			CqParameterTyped<CqVector4D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam2 );
+			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+			break;
+		}
 
 
-				case type_color:
-				{
-					CqParameterTyped<CqColor, CqColor>* pTParam =  static_cast<CqParameterTyped<CqColor, CqColor>*>(*iUP);
-					CqParameterTyped<CqColor, CqColor>* pTParam1 = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					CqParameterTyped<CqColor, CqColor>* pTParam2 = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					pTParam1->SetSize( pNew1->cVertex() );
-					pTParam2->SetSize( pNew2->cVertex() );
-					for( iv = 0; iv < 4; iv++ )
-					{
-						TqUint ivo = ( iv * 4 );
-						pTParam1->pValue()[ ivo + 0 ] = pTParam->pValue()[ ivo + 0 ];
-						pTParam1->pValue()[ ivo + 1 ] = ( pTParam->pValue()[ ivo + 0 ] + pTParam->pValue()[ ivo + 1 ] ) / 2.0f;
-						pTParam1->pValue()[ ivo + 2 ] = pTParam1->pValue()[ ivo + 1 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f;
+		case type_color:
+		{
+			CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
+			CqParameterTyped<CqColor, CqColor>* pTResult1 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam1 );
+			CqParameterTyped<CqColor, CqColor>* pTResult2 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam2 );
+			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+			break;
+		}
 
-						pTParam2->pValue()[ ivo + 3 ] = pTParam->pValue()[ ivo + 3 ];
-						pTParam2->pValue()[ ivo + 2 ] = ( pTParam->pValue()[ ivo + 2 ] + pTParam->pValue()[ ivo + 3 ] ) / 2.0f;
-						pTParam2->pValue()[ ivo + 1 ] = pTParam2->pValue()[ ivo + 2 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f;
+		case type_string:
+		{
+			CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
+			CqParameterTyped<CqString, CqString>* pTResult1 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam1 );
+			CqParameterTyped<CqString, CqString>* pTResult2 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam2 );
+			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+			break;
+		}
 
-						pTParam1->pValue()[ ivo + 3 ] = ( pTParam1->pValue()[ ivo + 2] + pTParam2->pValue()[ ivo + 1 ] ) / 2.0f;
-						pTParam2->pValue()[ ivo + 0 ] = pTParam1->pValue()[ ivo + 3 ];
-					}
-					pNew1->AddPrimitiveVariable( pTParam1 );
-					pNew2->AddPrimitiveVariable( pTParam2 );
-					break;
-				}
-
-				case type_string:
-				{
-					CqParameterTyped<CqString, CqString>* pTParam =  static_cast<CqParameterTyped<CqString, CqString>*>(*iUP);
-					CqParameterTyped<CqString, CqString>* pTParam1 = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					CqParameterTyped<CqString, CqString>* pTParam2 = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					pTParam1->SetSize( pNew1->cVertex() );
-					pTParam2->SetSize( pNew2->cVertex() );
-					for( iv = 0; iv < 4; iv++ )
-					{
-						TqUint ivo = ( iv * 4 );
-						pTParam1->pValue()[ ivo + 0 ] = pTParam->pValue()[ ivo + 0 ];
-						pTParam1->pValue()[ ivo + 1 ] = ( pTParam->pValue()[ ivo + 0 ] + pTParam->pValue()[ ivo + 1 ] ) / 2.0f;
-						pTParam1->pValue()[ ivo + 2 ] = pTParam1->pValue()[ ivo + 1 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f;
-
-						pTParam2->pValue()[ ivo + 3 ] = pTParam->pValue()[ ivo + 3 ];
-						pTParam2->pValue()[ ivo + 2 ] = ( pTParam->pValue()[ ivo + 2 ] + pTParam->pValue()[ ivo + 3 ] ) / 2.0f;
-						pTParam2->pValue()[ ivo + 1 ] = pTParam2->pValue()[ ivo + 2 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f;
-
-						pTParam1->pValue()[ ivo + 3 ] = ( pTParam1->pValue()[ ivo + 2] + pTParam2->pValue()[ ivo + 1 ] ) / 2.0f;
-						pTParam2->pValue()[ ivo + 0 ] = pTParam1->pValue()[ ivo + 3 ];
-					}
-					pNew1->AddPrimitiveVariable( pTParam1 );
-					pNew2->AddPrimitiveVariable( pTParam2 );
-					break;
-				}
-
-				case type_matrix:
-				{
-//					CqParameterTyped<CqMatrix, CqMatrix>* pTParam =  static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(*iUP);
-//					CqParameterTyped<CqMatrix, CqMatrix>* pTParam1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-//					CqParameterTyped<CqMatrix, CqMatrix>* pTParam2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-//					pTParam1->SetSize( pNew1->cVertex() );
-//					pTParam2->SetSize( pNew2->cVertex() );
-//					for( iv = 0; iv < 4; iv++ )
-//					{
-//						TqUint ivo = ( iv * 4 );
-//						pTParam1->pValue()[ ivo + 0 ] = pTParam->pValue()[ ivo + 0 ];
-//						pTParam1->pValue()[ ivo + 1 ] = ( pTParam->pValue()[ ivo + 0 ] + pTParam->pValue()[ ivo + 1 ] ) / 2.0f;
-//						pTParam1->pValue()[ ivo + 2 ] = pTParam1->pValue()[ ivo + 1 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f;
-//
-//						pTParam2->pValue()[ ivo + 3 ] = pTParam->pValue()[ ivo + 3 ];
-//						pTParam2->pValue()[ ivo + 2 ] = ( pTParam->pValue()[ ivo + 2 ] + pTParam->pValue()[ ivo + 3 ] ) / 2.0f;
-//						pTParam2->pValue()[ ivo + 1 ] = pTParam2->pValue()[ ivo + 2 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f;
-//
-//						pTParam1->pValue()[ ivo + 3 ] = ( pTParam1->pValue()[ ivo + 2] + pTParam2->pValue()[ ivo + 1 ] ) / 2.0f;
-//						pTParam2->pValue()[ ivo + 0 ] = pTParam1->pValue()[ ivo + 3 ];
-//					}
-//					pNew1->AddPrimitiveVariable( pTParam1 );
-//					pNew2->AddPrimitiveVariable( pTParam2 );
-					break;
-				}
-			}
+		case type_matrix:
+		{
+//			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
+//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam1 );
+//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam2 );
+//			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+//			break;
 		}
 	}
-
-	// Now subdivide the 'varying' class variables.
-	uSubdivideUserParameters( pNew1, pNew2 );
-}
-
-
-//---------------------------------------------------------------------
-/** Subdivide a bicubic patch in the v direction, return the top side.
- */
-
-void CqSurfacePatchBicubic::vSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfacePatchBicubic* pNew2 )
-{
-	TqUint iu;
-	// Subdivide the 'vertex' class primitive variables.
-	std::vector<CqParameter*>::iterator iUP;
-	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
-	{
-		if( (*iUP)->Class() == class_vertex )
-		{
-			switch( (*iUP)->Type() )
-			{
-				case type_float:
-				{
-					CqParameterTyped<TqFloat, TqFloat>* pTParam =  static_cast<CqParameterTyped<TqFloat, TqFloat>*>(*iUP);
-					CqParameterTyped<TqFloat, TqFloat>* pTParam1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					CqParameterTyped<TqFloat, TqFloat>* pTParam2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					pTParam1->SetSize( pNew1->cVertex() );
-					pTParam2->SetSize( pNew2->cVertex() );
-					for( iu = 0; iu < 4; iu++ )
-					{
-						pTParam1->pValue()[  0 + iu ] = pTParam->pValue()[ 0 + iu ];
-						pTParam1->pValue()[  4 + iu ] = ( pTParam->pValue()[ 0 + iu ] + pTParam->pValue()[ 4 + iu ] ) / 2.0f;
-						pTParam1->pValue()[  8 + iu ] = pTParam1->pValue()[ 4 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f;
-
-						pTParam2->pValue()[ 12 + iu ] = pTParam->pValue()[ 12 + iu ];
-						pTParam2->pValue()[  8 + iu ] = ( pTParam->pValue()[ 8 + iu ] + pTParam->pValue()[ 12 + iu ] ) / 2.0f;
-						pTParam2->pValue()[  4 + iu ] = pTParam2->pValue()[ 8 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f;
-
-						pTParam1->pValue()[ 12 + iu ] = ( pTParam1->pValue()[ 8 + iu ] + pTParam2->pValue()[ 4 + iu ] ) / 2.0f;
-						pTParam2->pValue()[  0 + iu ] = pTParam1->pValue()[ 12 + iu ];
-					}
-					pNew1->AddPrimitiveVariable( pTParam1 );
-					pNew2->AddPrimitiveVariable( pTParam2 );
-					break;
-				}
-
-				case type_integer:
-				{
-					CqParameterTyped<TqInt, TqFloat>* pTParam =  static_cast<CqParameterTyped<TqInt, TqFloat>*>(*iUP);
-					CqParameterTyped<TqInt, TqFloat>* pTParam1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					CqParameterTyped<TqInt, TqFloat>* pTParam2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					pTParam1->SetSize( pNew1->cVertex() );
-					pTParam2->SetSize( pNew2->cVertex() );
-					for( iu = 0; iu < 4; iu++ )
-					{
-						pTParam1->pValue()[  0 + iu ] = pTParam->pValue()[ 0 + iu ];
-						pTParam1->pValue()[  4 + iu ] = ( pTParam->pValue()[ 0 + iu ] + pTParam->pValue()[ 4 + iu ] ) / 2.0f;
-						pTParam1->pValue()[  8 + iu ] = pTParam1->pValue()[ 4 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f;
-
-						pTParam2->pValue()[ 12 + iu ] = pTParam->pValue()[ 12 + iu ];
-						pTParam2->pValue()[  8 + iu ] = ( pTParam->pValue()[ 8 + iu ] + pTParam->pValue()[ 12 + iu ] ) / 2.0f;
-						pTParam2->pValue()[  4 + iu ] = pTParam2->pValue()[ 8 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f;
-
-						pTParam1->pValue()[ 12 + iu ] = ( pTParam1->pValue()[ 8 + iu ] + pTParam2->pValue()[ 4 + iu ] ) / 2.0f;
-						pTParam2->pValue()[  0 + iu ] = pTParam1->pValue()[ 12 + iu ];
-					}
-					pNew1->AddPrimitiveVariable( pTParam1 );
-					pNew2->AddPrimitiveVariable( pTParam2 );
-					break;
-				}
-
-				case type_point:
-				case type_normal:
-				case type_vector:
-				{
-					CqParameterTyped<CqVector3D, CqVector3D>* pTParam =  static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(*iUP);
-					CqParameterTyped<CqVector3D, CqVector3D>* pTParam1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					CqParameterTyped<CqVector3D, CqVector3D>* pTParam2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					pTParam1->SetSize( pNew1->cVertex() );
-					pTParam2->SetSize( pNew2->cVertex() );
-					for( iu = 0; iu < 4; iu++ )
-					{
-						pTParam1->pValue()[  0 + iu ] = pTParam->pValue()[ 0 + iu ];
-						pTParam1->pValue()[  4 + iu ] = ( pTParam->pValue()[ 0 + iu ] + pTParam->pValue()[ 4 + iu ] ) / 2.0f;
-						pTParam1->pValue()[  8 + iu ] = pTParam1->pValue()[ 4 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f;
-
-						pTParam2->pValue()[ 12 + iu ] = pTParam->pValue()[ 12 + iu ];
-						pTParam2->pValue()[  8 + iu ] = ( pTParam->pValue()[ 8 + iu ] + pTParam->pValue()[ 12 + iu ] ) / 2.0f;
-						pTParam2->pValue()[  4 + iu ] = pTParam2->pValue()[ 8 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f;
-
-						pTParam1->pValue()[ 12 + iu ] = ( pTParam1->pValue()[ 8 + iu ] + pTParam2->pValue()[ 4 + iu ] ) / 2.0f;
-						pTParam2->pValue()[  0 + iu ] = pTParam1->pValue()[ 12 + iu ];
-					}
-					pNew1->AddPrimitiveVariable( pTParam1 );
-					pNew2->AddPrimitiveVariable( pTParam2 );
-					break;
-				}
-
-				case type_hpoint:
-				{
-					CqParameterTyped<CqVector4D, CqVector3D>* pTParam =  static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(*iUP);
-					CqParameterTyped<CqVector4D, CqVector3D>* pTParam1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					CqParameterTyped<CqVector4D, CqVector3D>* pTParam2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					pTParam1->SetSize( pNew1->cVertex() );
-					pTParam2->SetSize( pNew2->cVertex() );
-					for( iu = 0; iu < 4; iu++ )
-					{
-						pTParam1->pValue()[  0 + iu ] = static_cast<CqVector3D>( pTParam->pValue()[ 0 + iu ] );
-						pTParam1->pValue()[  4 + iu ] = static_cast<CqVector3D>( ( pTParam->pValue()[ 0 + iu ] + pTParam->pValue()[ 4 + iu ] ) / 2.0f );
-						pTParam1->pValue()[  8 + iu ] = static_cast<CqVector3D>( pTParam1->pValue()[ 4 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f );
-
-						pTParam2->pValue()[ 12 + iu ] = static_cast<CqVector3D>( pTParam->pValue()[ 12 + iu ] );
-						pTParam2->pValue()[  8 + iu ] = static_cast<CqVector3D>( ( pTParam->pValue()[ 8 + iu ] + pTParam->pValue()[ 12 + iu ] ) / 2.0f );
-						pTParam2->pValue()[  4 + iu ] = static_cast<CqVector3D>( pTParam2->pValue()[ 8 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f );
-
-						pTParam1->pValue()[ 12 + iu ] = static_cast<CqVector3D>( ( pTParam1->pValue()[ 8 + iu ] + pTParam2->pValue()[ 4 + iu ] ) / 2.0f );
-						pTParam2->pValue()[  0 + iu ] = static_cast<CqVector3D>( pTParam1->pValue()[ 12 + iu ] );
-					}
-					pNew1->AddPrimitiveVariable( pTParam1 );
-					pNew2->AddPrimitiveVariable( pTParam2 );
-					break;
-				}
-
-				case type_color:
-				{
-					CqParameterTyped<CqColor, CqColor>* pTParam =  static_cast<CqParameterTyped<CqColor, CqColor>*>(*iUP);
-					CqParameterTyped<CqColor, CqColor>* pTParam1 = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					CqParameterTyped<CqColor, CqColor>* pTParam2 = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					pTParam1->SetSize( pNew1->cVertex() );
-					pTParam2->SetSize( pNew2->cVertex() );
-					for( iu = 0; iu < 4; iu++ )
-					{
-						pTParam1->pValue()[  0 + iu ] = pTParam->pValue()[ 0 + iu ];
-						pTParam1->pValue()[  4 + iu ] = ( pTParam->pValue()[ 0 + iu ] + pTParam->pValue()[ 4 + iu ] ) / 2.0f;
-						pTParam1->pValue()[  8 + iu ] = pTParam1->pValue()[ 4 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f;
-
-						pTParam2->pValue()[ 12 + iu ] = pTParam->pValue()[ 12 + iu ];
-						pTParam2->pValue()[  8 + iu ] = ( pTParam->pValue()[ 8 + iu ] + pTParam->pValue()[ 12 + iu ] ) / 2.0f;
-						pTParam2->pValue()[  4 + iu ] = pTParam2->pValue()[ 8 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f;
-
-						pTParam1->pValue()[ 12 + iu ] = ( pTParam1->pValue()[ 8 + iu ] + pTParam2->pValue()[ 4 + iu ] ) / 2.0f;
-						pTParam2->pValue()[  0 + iu ] = pTParam1->pValue()[ 12 + iu ];
-					}
-					pNew1->AddPrimitiveVariable( pTParam1 );
-					pNew2->AddPrimitiveVariable( pTParam2 );
-					break;
-				}
-
-				case type_string:
-				{
-					CqParameterTyped<CqString, CqString>* pTParam =  static_cast<CqParameterTyped<CqString, CqString>*>(*iUP);
-					CqParameterTyped<CqString, CqString>* pTParam1 = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					CqParameterTyped<CqString, CqString>* pTParam2 = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-					pTParam1->SetSize( pNew1->cVertex() );
-					pTParam2->SetSize( pNew2->cVertex() );
-					for( iu = 0; iu < 4; iu++ )
-					{
-						pTParam1->pValue()[  0 + iu ] = pTParam->pValue()[ 0 + iu ];
-						pTParam1->pValue()[  4 + iu ] = ( pTParam->pValue()[ 0 + iu ] + pTParam->pValue()[ 4 + iu ] ) / 2.0f;
-						pTParam1->pValue()[  8 + iu ] = pTParam1->pValue()[ 4 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f;
-
-						pTParam2->pValue()[ 12 + iu ] = pTParam->pValue()[ 12 + iu ];
-						pTParam2->pValue()[  8 + iu ] = ( pTParam->pValue()[ 8 + iu ] + pTParam->pValue()[ 12 + iu ] ) / 2.0f;
-						pTParam2->pValue()[  4 + iu ] = pTParam2->pValue()[ 8 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f;
-
-						pTParam1->pValue()[ 12 + iu ] = ( pTParam1->pValue()[ 8 + iu ] + pTParam2->pValue()[ 4 + iu ] ) / 2.0f;
-						pTParam2->pValue()[  0 + iu ] = pTParam1->pValue()[ 12 + iu ];
-					}
-					pNew1->AddPrimitiveVariable( pTParam1 );
-					pNew2->AddPrimitiveVariable( pTParam2 );
-					break;
-				}
-
-//				case type_matrix:
-//				{
-//					CqParameterTyped<CqMatrix, CqMatrix>* pTParam =  static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(*iUP);
-//					CqParameterTyped<CqMatrix, CqMatrix>* pTParam1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-//					CqParameterTyped<CqMatrix, CqMatrix>* pTParam2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() ));
-//					pTParam1->SetSize( pNew1->cVertex() );
-//					pTParam2->SetSize( pNew2->cVertex() );
-//					for( iu = 0; iu < 4; iu++ )
-//					{
-//						pTParam1->pValue()[  0 + iu ] = pTParam->pValue()[ 0 + iu ];
-//						pTParam1->pValue()[  4 + iu ] = ( pTParam->pValue()[ 0 + iu ] + pTParam->pValue()[ 4 + iu ] ) / 2.0f;
-//						pTParam1->pValue()[  8 + iu ] = pTParam1->pValue()[ 4 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f;
-//
-//						pTParam2->pValue()[ 12 + iu ] = pTParam->pValue()[ 12 + iu ];
-//						pTParam2->pValue()[  8 + iu ] = ( pTParam->pValue()[ 8 + iu ] + pTParam->pValue()[ 12 + iu ] ) / 2.0f;
-//						pTParam2->pValue()[  4 + iu ] = pTParam2->pValue()[ 8 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f;
-//
-//						pTParam1->pValue()[ 12 + iu ] = ( pTParam1->pValue()[ 8 + iu ] + pTParam2->pValue()[ 4 + iu ] ) / 2.0f;
-//						pTParam2->pValue()[  0 + iu ] = pTParam1->pValue()[ 12 + iu ];
-//					}
-//					pNew1->AddPrimitiveVariable( pTParam1 );
-//					pNew2->AddPrimitiveVariable( pTParam2 );
-//					break;
-//				}
-			}
-		}
-	}
-
-	// Subdivide the 'varying' class variables.
-	vSubdivideUserParameters( pNew1, pNew2 );
 }
 
 
@@ -520,21 +186,21 @@ CqBound CqSurfacePatchBicubic::Bound() const
  */
 
 
-void CqSurfacePatchBicubic::NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
+void CqSurfacePatchBicubic::NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
 {
 	switch( pParameter->Type() )
 	{
 		case type_float:
 		{
 			CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pParameter);
-			TypedNaturalInterpolate( uDiceSize, vDiceSize, pTParam, pData );
+			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
 			break;
 		}
 
 		case type_integer:
 		{
 			CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>(pParameter);
-			TypedNaturalInterpolate( uDiceSize, vDiceSize, pTParam, pData );
+			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
 			break;
 		}
 
@@ -543,35 +209,35 @@ void CqSurfacePatchBicubic::NaturalInterpolate(CqParameter* pParameter, TqInt uD
 		case type_normal:
 		{
 			CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(pParameter);
-			TypedNaturalInterpolate( uDiceSize, vDiceSize, pTParam, pData );
+			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
 			break;
 		}
 
 		case type_hpoint:
 		{
 			CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pParameter);
-			TypedNaturalInterpolate( uDiceSize, vDiceSize, pTParam, pData );
+			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
 			break;
 		}
 
 		case type_color:
 		{
 			CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>(pParameter);
-			TypedNaturalInterpolate( uDiceSize, vDiceSize, pTParam, pData );
+			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
 			break;
 		}
 
 		case type_string:
 		{
 			CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>(pParameter);
-			TypedNaturalInterpolate( uDiceSize, vDiceSize, pTParam, pData );
+			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
 			break;
 		}
 
 		case type_matrix:
 		{
 			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(pParameter);
-			TypedNaturalInterpolate( uDiceSize, vDiceSize, pTParam, pData );
+			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
 			break;
 		}
 	}
@@ -581,45 +247,13 @@ void CqSurfacePatchBicubic::NaturalInterpolate(CqParameter* pParameter, TqInt uD
 /** Split the patch into smaller patches.
  */
 
-TqInt CqSurfacePatchBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqSurfacePatchBicubic::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 {
-	TqInt cSplits = 0;
+	// Create two new surface of the appropriate type
+	aSplits.push_back( new CqSurfacePatchBicubic );
+	aSplits.push_back( new CqSurfacePatchBicubic );
 
-	// Split the surface in u or v
-	CqSurfacePatchBicubic * pNew1 = new CqSurfacePatchBicubic;
-	CqSurfacePatchBicubic * pNew2 = new CqSurfacePatchBicubic;
-
-	// If this primitive is being split because it spans the e and hither planes, then
-	// we should split in both directions to ensure we overcome the crossing.
-	if ( m_SplitDir == SplitDir_U )
-		uSubdivide(pNew1, pNew2);
-	else
-		vSubdivide(pNew1, pNew2);
-
-	pNew1->SetSurfaceParameters( *this );
-	pNew2->SetSurfaceParameters( *this );
-	pNew1->m_fDiceable = TqTrue;
-	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew1->AddRef();
-	pNew2->AddRef();
-
-	if ( !m_fDiceable)
-	{
-		cSplits += pNew1->Split( aSplits );
-		cSplits += pNew2->Split( aSplits );
-		pNew1->Release();
-		pNew2->Release();
-	}
-	else
-	{
-		aSplits.push_back( pNew1 );
-		aSplits.push_back( pNew2 );
-
-		cSplits += 2;
-	}
-	return ( cSplits );
+	return ( 2 );
 }
 
 //---------------------------------------------------------------------
@@ -854,56 +488,6 @@ void CqSurfacePatchBilinear::GenerateGeometricNormals( TqInt uDiceSize, TqInt vD
 
 
 //---------------------------------------------------------------------
-/** Subdivide a bicubic patch in the u direction, return the left side.
- */
-
-void CqSurfacePatchBilinear::uSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfacePatchBilinear* pNew2 )
-{
-	// Subdivide the 'vertex' class variables.
-	std::vector<CqParameter*>::iterator iUP;
-	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
-	{
-		if( (*iUP)->Class() == class_vertex )
-		{
-			CqParameter* pParam1 = (*iUP)->Clone();
-			CqParameter* pParam2 = (*iUP)->Clone();
-			pParam1->uSubdivide( pParam2 );
-			pNew1->AddPrimitiveVariable( pParam1 );
-			pNew2->AddPrimitiveVariable( pParam2 );
-		}
-	}
-
-	// Subdivide the 'varying' class variables.
-	uSubdivideUserParameters( pNew1, pNew2 );
-}
-
-
-//---------------------------------------------------------------------
-/** Subdivide a bicubic patch in the v direction, return the top side.
- */
-
-void CqSurfacePatchBilinear::vSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfacePatchBilinear* pNew2 )
-{
-	// Subdivide the 'vertex' class variables.
-	std::vector<CqParameter*>::iterator iUP;
-	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
-	{
-		if( (*iUP)->Class() == class_vertex )
-		{
-			CqParameter* pParam1 = (*iUP)->Clone();
-			CqParameter* pParam2 = (*iUP)->Clone();
-			pParam1->vSubdivide( pParam2 );
-			pNew1->AddPrimitiveVariable( pParam1 );
-			pNew2->AddPrimitiveVariable( pParam2 );
-		}
-	}
-
-	// Subdivide the 'varying' class variables.
-	vSubdivideUserParameters( pNew1, pNew2 );
-}
-
-
-//---------------------------------------------------------------------
 /** Return the boundary extents in camera space of the surface patch
  */
 
@@ -932,60 +516,17 @@ CqBound CqSurfacePatchBilinear::Bound() const
 }
 
 
-//---------------------------------------------------------------------
-/** Dice the patch into a mesh of micropolygons.
- */
-
-void CqSurfacePatchBilinear::NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
-{
-	pParameter->BilinearDice(uDiceSize, vDiceSize, pData);
-}
-
 
 //---------------------------------------------------------------------
 /** Split the patch into smaller patches.
  */
 
-TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqSurfacePatchBilinear::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 {
-	TqInt cSplits = 0;
+	aSplits.push_back( new CqSurfacePatchBilinear );
+	aSplits.push_back( new CqSurfacePatchBilinear );
 
-	// Split the surface in u or v
-	CqSurfacePatchBilinear* pNew1 = new CqSurfacePatchBilinear;
-	CqSurfacePatchBilinear* pNew2 = new CqSurfacePatchBilinear;
-
-	if ( m_SplitDir == SplitDir_U )
-		uSubdivide(pNew1, pNew2);
-	else
-		vSubdivide(pNew1, pNew2);
-
-	pNew1->SetSurfaceParameters( *this );
-	pNew2->SetSurfaceParameters( *this );
-	pNew1->m_fDiceable = TqTrue;
-	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount;
-	pNew1->AddRef();
-	pNew2->AddRef();
-
-	if( !m_fDiceable )
-	{
-		cSplits += pNew1->Split( aSplits );
-		cSplits += pNew2->Split( aSplits );
-		pNew1->Release();
-		pNew2->Release();
-	}
-	else
-	{
-		aSplits.push_back( pNew1 );
-		aSplits.push_back( pNew2 );
-
-		cSplits += 2;
-	}
-
-	return ( cSplits );
+	return ( 2 );
 }
 
 

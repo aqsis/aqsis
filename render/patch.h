@@ -54,7 +54,7 @@ class CqSurfacePatchBicubic : public CqSurface
 		virtual	~CqSurfacePatchBicubic();
 
 		template<class T, class SLT>
-		void	TypedNaturalInterpolate( TqFloat uSize, TqFloat vSize, CqParameterTyped<T,SLT>* pParam, IqShaderData* pData )
+		void	TypedNaturalDice( TqFloat uSize, TqFloat vSize, CqParameterTyped<T,SLT>* pParam, IqShaderData* pData )
 		{
 			CqForwardDiffBezier<T> vFD0( 1.0f / vSize );
 			CqForwardDiffBezier<T> vFD1( 1.0f / vSize );
@@ -81,6 +81,49 @@ class CqSurfacePatchBicubic : public CqSurface
 					T vec = uFD0.GetValue();
 					TqInt igrid = ( iv * ( uSize + 1 ) ) + iu;
 					pData->SetValue( static_cast<SLT>(vec), igrid );
+				}
+			}
+		}
+
+		template<class T, class SLT>
+		void	TypedNaturalSubdivide( CqParameterTyped<T,SLT>* pParam, CqParameterTyped<T,SLT>* pResult1, CqParameterTyped<T,SLT>* pResult2, TqBool u )
+		{
+			TqInt iu, iv;
+
+			CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
+			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
+			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
+			if( u )
+			{
+				for( iv = 0; iv < 4; iv++ )
+				{
+					TqUint ivo = ( iv * 4 );
+					pTResult1->pValue()[ ivo + 0 ] = pTParam->pValue()[ ivo + 0 ];
+					pTResult1->pValue()[ ivo + 1 ] = ( pTParam->pValue()[ ivo + 0 ] + pTParam->pValue()[ ivo + 1 ] ) / 2.0f;
+					pTResult1->pValue()[ ivo + 2 ] = pTResult1->pValue()[ ivo + 1 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f;
+
+					pTResult2->pValue()[ ivo + 3 ] = pTParam->pValue()[ ivo + 3 ];
+					pTResult2->pValue()[ ivo + 2 ] = ( pTParam->pValue()[ ivo + 2 ] + pTParam->pValue()[ ivo + 3 ] ) / 2.0f;
+					pTResult2->pValue()[ ivo + 1 ] = pTResult2->pValue()[ ivo + 2 ] / 2.0f + ( pTParam->pValue()[ ivo + 1 ] + pTParam->pValue()[ ivo + 2 ] ) / 4.0f;
+
+					pTResult1->pValue()[ ivo + 3 ] = ( pTResult1->pValue()[ ivo + 2] + pTResult2->pValue()[ ivo + 1 ] ) / 2.0f;
+					pTResult2->pValue()[ ivo + 0 ] = pTResult1->pValue()[ ivo + 3 ];
+				}
+			}
+			else
+			{
+				for( iu = 0; iu < 4; iu++ )
+				{
+					pTResult1->pValue()[  0 + iu ] = pTParam->pValue()[ 0 + iu ];
+					pTResult1->pValue()[  4 + iu ] = ( pTParam->pValue()[ 0 + iu ] + pTParam->pValue()[ 4 + iu ] ) / 2.0f;
+					pTResult1->pValue()[  8 + iu ] = pTResult1->pValue()[ 4 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f;
+
+					pTResult2->pValue()[ 12 + iu ] = pTParam->pValue()[ 12 + iu ];
+					pTResult2->pValue()[  8 + iu ] = ( pTParam->pValue()[ 8 + iu ] + pTParam->pValue()[ 12 + iu ] ) / 2.0f;
+					pTResult2->pValue()[  4 + iu ] = pTResult2->pValue()[ 8 + iu ] / 2.0f + ( pTParam->pValue()[ 4 + iu ] + pTParam->pValue()[ 8 + iu ] ) / 4.0f;
+
+					pTResult1->pValue()[ 12 + iu ] = ( pTResult1->pValue()[ 8 + iu ] + pTResult2->pValue()[ 4 + iu ] ) / 2.0f;
+					pTResult2->pValue()[  0 + iu ] = pTResult1->pValue()[ 12 + iu ];
 				}
 			}
 		}
@@ -117,11 +160,7 @@ class CqSurfacePatchBicubic : public CqSurface
 		}
 		CqSurfacePatchBicubic& operator=( const CqSurfacePatchBicubic& From );
 
-		void uSubdivide(CqSurfacePatchBicubic* pNew1, CqSurfacePatchBicubic* pNew2);
-		void vSubdivide(CqSurfacePatchBicubic* pNew1, CqSurfacePatchBicubic* pNew2);
-
 		virtual	CqBound	Bound() const;
-		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual TqBool	Diceable();
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
@@ -143,7 +182,9 @@ class CqSurfacePatchBicubic : public CqSurface
 			return ( 1 );
 		}
 
-		virtual void NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
+		virtual void NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
+		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
+		virtual void NaturalSubdivide(CqParameter* pParam,CqParameter* pParam1, CqParameter* pParam2, TqBool u);
 
 	protected:
 };
@@ -164,11 +205,7 @@ class _qShareC CqSurfacePatchBilinear : public CqSurface
 		CqSurfacePatchBilinear& operator=( const CqSurfacePatchBilinear& From );
 
 		void	GenNormals();
-		void	uSubdivide(CqSurfacePatchBilinear* pNew1, CqSurfacePatchBilinear* pNew2);
-		void	vSubdivide(CqSurfacePatchBilinear* pNew1, CqSurfacePatchBilinear* pNew2);
-
 		virtual	CqBound	Bound() const;
-		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual TqBool	Diceable();
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
@@ -190,9 +227,9 @@ class _qShareC CqSurfacePatchBilinear : public CqSurface
 			return ( 1 );
 		}
 
-		virtual void NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
-		virtual TqBool		CanGenerateNormals() const	{ return( TqTrue ); }
-		virtual	void		GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
+		virtual	TqInt	PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
+		virtual TqBool	CanGenerateNormals() const	{ return( TqTrue ); }
+		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 	protected:
 };

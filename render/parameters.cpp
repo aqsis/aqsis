@@ -24,6 +24,7 @@
 */
 
 #include	"aqsis.h"
+#include	"isurface.h"
 #include	"parameters.h"
 #include	"vector3d.h"
 #include	"vector4d.h"

@@ -79,19 +79,25 @@ void	CqQuadric::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const
 /** Dice the quadric into a grid of MPGs for rendering.
  */
 
-void CqQuadric::NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
+void CqQuadric::NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
 {
-	CqVector3D	P;
-	int v, u;
-	for ( v = 0; v <= vDiceSize; v++ )
+	// Special case for "P", else normal bilinear dice for all others.
+	if( pData->strName().compare("P") == 0)
 	{
-		for ( u = 0; u <= uDiceSize; u++ )
+		CqVector3D	P;
+		int v, u;
+		for ( v = 0; v <= vDiceSize; v++ )
 		{
-			TqInt igrid = ( v * ( uDiceSize + 1 ) ) + u;
-			P = DicePoint( u, v );
-			pData->SetPoint( m_matTx * P, igrid );
+			for ( u = 0; u <= uDiceSize; u++ )
+			{
+				TqInt igrid = ( v * ( uDiceSize + 1 ) ) + u;
+				P = DicePoint( u, v );
+				pData->SetPoint( m_matTx * P, igrid );
+			}
 		}
 	}
+	else
+		CqSurface::NaturalDice( pParameter, uDiceSize, vDiceSize, pData );
 }
 
 //---------------------------------------------------------------------
@@ -269,7 +275,7 @@ CqBound	CqSphere::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqSphere::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqSphere::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 {
 	TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
@@ -277,51 +283,21 @@ TqInt CqSphere::Split( std::vector<CqBasicSurface*>& aSplits )
 	CqSphere* pNew1 = new CqSphere( *this );
 	CqSphere* pNew2 = new CqSphere( *this );
 
-	pNew1->AddRef();
-	pNew2->AddRef();
-	if ( m_SplitDir == SplitDir_U )
+	if ( u )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
-
-		// Subdivide the parameter values
-		uSubdivideUserParameters( pNew1, pNew2 );
 	}
 	else
 	{
 		pNew1->m_ZMax = zcent;
 		pNew2->m_ZMin = zcent;
-
-		// Subdivide the parameter values
-		vSubdivideUserParameters( pNew1, pNew2 );
 	}
+
+	aSplits.push_back(pNew1);
+	aSplits.push_back(pNew2);
 	
-	pNew1->m_fDiceable = TqTrue;
-	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount;
-
-	TqInt cSplits = 0;
-
-	if( !m_fDiceable )
-	{
-		cSplits += pNew1->Split(aSplits);
-		cSplits += pNew2->Split(aSplits);
-
-		pNew1->Release();
-		pNew2->Release();
-	}
-	else
-	{
-		aSplits.push_back( pNew1 );
-		aSplits.push_back( pNew2 );
-
-		cSplits = 2;
-	}
-
-	return ( cSplits );
+	return ( 2 );
 }
 
 
@@ -417,7 +393,7 @@ CqBound	CqCone::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqCone::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqCone::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 {
 	TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
@@ -425,50 +401,22 @@ TqInt CqCone::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	CqCone* pNew1 = new CqCone( *this );
 	CqCone* pNew2 = new CqCone( *this );
-	pNew1->AddRef();
-	pNew2->AddRef();
-	if ( m_SplitDir == SplitDir_U )
+
+	if ( u )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
-
-		// Subdivide the parameter values
-		uSubdivideUserParameters( pNew1, pNew2 );
 	}
 	else
 	{
 		pNew1->m_ZMax = zcent;
 		pNew2->m_ZMin = zcent;
-
-		// Subdivide the parameter values
-		vSubdivideUserParameters( pNew1, pNew2 );
-	}
-	pNew1->m_fDiceable = TqTrue;
-	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount;
-
-	TqInt cSplits = 0;
-
-	if( !m_fDiceable )
-	{
-		cSplits += pNew1->Split(aSplits);
-		cSplits += pNew2->Split(aSplits);
-
-		pNew1->Release();
-		pNew2->Release();
-	}
-	else
-	{
-		aSplits.push_back( pNew1 );
-		aSplits.push_back( pNew2 );
-
-		cSplits = 2;
 	}
 
-	return ( cSplits );
+	aSplits.push_back(pNew1);
+	aSplits.push_back(pNew2);
+
+	return ( 2 );
 }
 
 
@@ -557,58 +505,29 @@ CqBound	CqCylinder::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqCylinder::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqCylinder::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 {
 	TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
-	//TqFloat rcent=m_RMax*sqrt(zcent/m_ZMax);
 
 	CqCylinder* pNew1 = new CqCylinder( *this );
 	CqCylinder* pNew2 = new CqCylinder( *this );
-	pNew1->AddRef();
-	pNew2->AddRef();
-	if ( m_SplitDir == SplitDir_U )
+
+	if ( u )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
-
-		// Subdivide the parameter values
-		uSubdivideUserParameters( pNew1, pNew2 );
 	}
 	else
 	{
 		pNew1->m_ZMax = zcent;
 		pNew2->m_ZMin = zcent;
-
-		// Subdivide the parameter values
-		vSubdivideUserParameters( pNew1, pNew2 );
-	}
-	pNew1->m_fDiceable = TqTrue;
-	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount;
-
-	TqInt cSplits = 0;
-
-	if( !m_fDiceable )
-	{
-		cSplits += pNew1->Split(aSplits);
-		cSplits += pNew2->Split(aSplits);
-
-		pNew1->Release();
-		pNew2->Release();
-	}
-	else
-	{
-		aSplits.push_back( pNew1 );
-		aSplits.push_back( pNew2 );
-
-		cSplits = 2;
 	}
 
-	return ( cSplits );
+	aSplits.push_back(pNew1);
+	aSplits.push_back(pNew2);
+
+	return ( 2 );
 }
 
 
@@ -710,57 +629,29 @@ CqBound	CqHyperboloid::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqHyperboloid::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqHyperboloid::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 {
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 	CqVector3D midpoint = ( m_Point1 + m_Point2 ) / 2.0;
 
 	CqHyperboloid* pNew1 = new CqHyperboloid( *this );
 	CqHyperboloid* pNew2 = new CqHyperboloid( *this );
-	pNew1->AddRef();
-	pNew2->AddRef();
-	if ( m_SplitDir == SplitDir_U )
+
+	if ( u)
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
-
-		// Subdivide the parameter values
-		uSubdivideUserParameters( pNew1, pNew2 );
 	}
 	else
 	{
 		pNew1->m_Point2 = midpoint;
 		pNew2->m_Point1 = midpoint;
-
-		// Subdivide the parameter values
-		vSubdivideUserParameters( pNew1, pNew2 );
-	}
-	pNew1->m_fDiceable = TqTrue;
-	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount;
-
-	TqInt cSplits = 0;
-
-	if( !m_fDiceable )
-	{
-		cSplits += pNew1->Split(aSplits);
-		cSplits += pNew2->Split(aSplits);
-
-		pNew1->Release();
-		pNew2->Release();
-	}
-	else
-	{
-		aSplits.push_back( pNew1 );
-		aSplits.push_back( pNew2 );
-
-		cSplits = 2;
 	}
 
-	return ( cSplits );
+	aSplits.push_back(pNew1);
+	aSplits.push_back(pNew2);
+
+	return ( 2 );
 }
 
 
@@ -863,7 +754,7 @@ CqBound	CqParaboloid::Bound() const
 /** Split this GPrim into smaller quadrics.
  */
 
-TqInt CqParaboloid::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqParaboloid::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 {
 	TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
@@ -871,51 +762,23 @@ TqInt CqParaboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	CqParaboloid* pNew1 = new CqParaboloid( *this );
 	CqParaboloid* pNew2 = new CqParaboloid( *this );
-	pNew1->AddRef();
-	pNew2->AddRef();
-	if ( m_SplitDir == SplitDir_U )
+
+	if ( u )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
-
-		// Subdivide the parameter values
-		uSubdivideUserParameters( pNew1, pNew2 );
 	}
 	else
 	{
 		pNew1->m_ZMax = zcent;
 		pNew1->m_RMax = rcent;
 		pNew2->m_ZMin = zcent;
-
-		// Subdivide the parameter values
-		vSubdivideUserParameters( pNew1, pNew2 );
-	}
-	pNew1->m_fDiceable = TqTrue;
-	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount;
-
-	TqInt cSplits = 0;
-
-	if( !m_fDiceable )
-	{
-		cSplits += pNew1->Split(aSplits);
-		cSplits += pNew2->Split(aSplits);
-
-		pNew1->Release();
-		pNew2->Release();
-	}
-	else
-	{
-		aSplits.push_back( pNew1 );
-		aSplits.push_back( pNew2 );
-
-		cSplits = 2;
 	}
 
-	return ( cSplits );
+	aSplits.push_back(pNew1);
+	aSplits.push_back(pNew2);
+
+	return ( 2 );
 }
 
 
@@ -1004,57 +867,29 @@ CqBound	CqTorus::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqTorus::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqTorus::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 {
 	TqFloat zcent = ( m_PhiMax + m_PhiMin ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 
 	CqTorus* pNew1 = new CqTorus( *this );
 	CqTorus* pNew2 = new CqTorus( *this );
-	pNew1->AddRef();
-	pNew2->AddRef();
-	if ( m_SplitDir == SplitDir_U )
+
+	if ( u )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
-
-		// Subdivide the parameter values
-		uSubdivideUserParameters( pNew1, pNew2 );
 	}
 	else
 	{
 		pNew1->m_PhiMax = zcent;
 		pNew2->m_PhiMin = zcent;
-
-		// Subdivide the parameter values
-		vSubdivideUserParameters( pNew1, pNew2 );
-	}
-	pNew1->m_fDiceable = TqTrue;
-	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount;
-
-	TqInt cSplits = 0;
-
-	if( !m_fDiceable )
-	{
-		cSplits += pNew1->Split(aSplits);
-		cSplits += pNew2->Split(aSplits);
-
-		pNew1->Release();
-		pNew2->Release();
-	}
-	else
-	{
-		aSplits.push_back( pNew1 );
-		aSplits.push_back( pNew2 );
-
-		cSplits = 2;
 	}
 
-	return ( cSplits );
+	aSplits.push_back(pNew1);
+	aSplits.push_back(pNew2);
+
+	return ( 2 );
 }
 
 
@@ -1143,57 +978,29 @@ CqBound	CqDisk::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqDisk::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqDisk::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 {
 	TqFloat zcent = ( m_MajorRadius + m_MinorRadius ) * 0.5;
 	TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 
 	CqDisk* pNew1 = new CqDisk( *this );
 	CqDisk* pNew2 = new CqDisk( *this );
-	pNew1->AddRef();
-	pNew2->AddRef();
-	if ( m_SplitDir == SplitDir_U )
+
+	if ( u )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
-
-		// Subdivide the parameter values
-		uSubdivideUserParameters( pNew1, pNew2 );
 	}
 	else
 	{
 		pNew1->m_MinorRadius = zcent;
 		pNew2->m_MajorRadius = zcent;
-
-		// Subdivide the parameter values
-		vSubdivideUserParameters( pNew1, pNew2 );
-	}
-	pNew1->m_fDiceable = TqTrue;
-	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount;
-
-	TqInt cSplits = 0;
-
-	if( !m_fDiceable )
-	{
-		cSplits += pNew1->Split(aSplits);
-		cSplits += pNew2->Split(aSplits);
-
-		pNew1->Release();
-		pNew2->Release();
-	}
-	else
-	{
-		aSplits.push_back( pNew1 );
-		aSplits.push_back( pNew2 );
-
-		cSplits = 2;
 	}
 
-	return ( cSplits );
+	aSplits.push_back(pNew1);
+	aSplits.push_back(pNew2);
+
+	return ( 2 );
 }
 
 

@@ -71,6 +71,12 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 			m_pTransform = 0;
 		}
 
+		enum EqSplitDir
+		{
+		    SplitDir_U,
+		    SplitDir_V,
+		};
+
 		/** Get the gemoetric bound of this GPrim.
 		 */
 		virtual	CqBound	Bound() const = 0;
@@ -93,10 +99,13 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		virtual CqString	strName() const;
 		virtual	TqInt	Uses() const;
 
-		/** Interpolate the specified value using the natural interpolation method for the surface.
-		 *  Fills in the given shader data with the resulting data.
-		 */
-		virtual void NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData) {}
+		virtual void	PreDice(TqInt uDiceSize, TqInt vDiceSize)	{}
+		virtual void	NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData) {}
+		virtual void	PostDice() {}
+
+		virtual TqInt	PreSubdivide(std::vector<CqBasicSurface*>& aSplits, TqBool u) { return( 0 ); }
+		virtual void	NaturalSubdivide(CqParameter* pParam,CqParameter* pParam1, CqParameter* pParam2, TqBool u) {}
+		virtual void	PostSubdivide() {}
 
 		/** Get a pointer to the attributes state associated with this GPrim.
 		 * \return A pointer to a CqAttributes class.
@@ -143,6 +152,24 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		TqInt	EyeSplitCount() const
 		{
 			return ( m_EyeSplitCount );
+		}
+		/** Set the number of times this GPrim has been split because if crossing the epsilon and eye planes.
+		 */
+		void	SetEyeSplitCount(TqInt EyeSplitCount)
+		{
+			m_EyeSplitCount = EyeSplitCount;
+		}
+		/** Get the precalculated split direction.
+		 */
+		TqInt	SplitDir() const
+		{
+			return ( m_SplitDir );
+		}
+		/** Set the precalculated split direction.
+		 */
+		void	SetSplitDir( EqSplitDir SplitDir )
+		{
+			m_SplitDir = SplitDir;
 		}
 		/** Copy the information about splitting and dicing from the specified GPrim.
 		 * \param From A CqBasicSurface reference to copy the information from.
@@ -194,11 +221,6 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 
 		TqInt	m_uDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.
 		TqInt	m_vDiceSize;		///< Calculated dice size to achieve an appropriate shading rate.
-		enum EqSplitDir
-		{
-		    SplitDir_U,
-		    SplitDir_V,
-	};
 		EqSplitDir	m_SplitDir;			///< The direction to split this GPrim to achieve best results.
 		TqBool	m_CachedBound;		///< Whether or not the bound has been cached
 		CqBound	m_Bound;			///< The cached object bound
@@ -514,10 +536,13 @@ class _qShareC CqSurface : public CqBasicSurface
 		void	uSubdivideUserParameters( CqSurface* pA, CqSurface* pB );
 		void	vSubdivideUserParameters( CqSurface* pA, CqSurface* pB );
 
-		/** Interpolate the specified value using the natural interpolation method for the surface.
-		 *  Fills in the given shader data with the resulting data.
-		 */
-		virtual void NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData) {}
+		virtual void	PreDice(TqInt uDiceSize, TqInt vDiceSize)	{}
+		virtual void	NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
+		virtual void	PostDice() {}
+
+		virtual TqInt	PreSubdivide(std::vector<CqBasicSurface*>& aSplits, TqBool u) { return( 0 ); }
+		virtual void	NaturalSubdivide(CqParameter* pParam,CqParameter* pParam1, CqParameter* pParam2, TqBool u);
+		virtual void	PostSubdivide() {}
 
 		/** Virtual function to indicate whether a particular surface is able
 		 *  to generate geometric normals itself.
@@ -530,10 +555,52 @@ class _qShareC CqSurface : public CqBasicSurface
 
 		// Derived from CqBasicSurface
 		virtual	CqMicroPolyGridBase* Dice();
+		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 
 	protected:
 		std::vector<CqParameter*>	m_aUserParams;						///< Storage for user defined paramter variables.
 		TqInt			m_aiStdPrimitiveVars[EnvVars_Last];		///< Quick lookup index into the primitive variables table for standard variables.
+
+		template<class T, class SLT>
+		void	TypedNaturalDice( TqFloat uSize, TqFloat vSize, CqParameterTyped<T,SLT>* pParam, IqShaderData* pData )
+		{
+			TqInt iv, iu;
+			for ( iv = 0; iv <= vSize; iv++ )
+			{
+				TqFloat v = (1.0f / vSize) * iv;
+				for ( iu = 0; iu <= uSize; iu++ )
+				{
+					TqFloat u = (1.0f / uSize) * iu;
+					T vec = BilinearEvaluate( pParam->pValue()[0],pParam->pValue()[1],pParam->pValue()[2],pParam->pValue()[3],u,v);
+					TqInt igrid = ( iv * ( uSize + 1 ) ) + iu;
+					pData->SetValue( static_cast<SLT>(vec), igrid );
+				}
+			}
+		}
+
+		template<class T, class SLT>
+		void	TypedNaturalSubdivide( CqParameterTyped<T,SLT>* pParam, CqParameterTyped<T,SLT>* pResult1, CqParameterTyped<T,SLT>* pResult2, TqBool u )
+		{
+			CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
+			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
+			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
+
+			if( u )
+			{
+				pTResult2->pValue( 1 ) [ 0 ] = pTParam->pValue( 1 ) [ 0 ];
+				pTResult2->pValue( 3 ) [ 0 ] = pTParam->pValue( 3 ) [ 0 ];
+				pTResult1->pValue( 1 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 0 ) [ 0 ] + pTParam->pValue( 1 ) [ 0 ] ) * 0.5 );
+				pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 2 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 2 ) [ 0 ] + pTParam->pValue( 3 ) [ 0 ] ) * 0.5 );
+			}
+			else
+			{
+				pTResult2->pValue( 2 ) [ 0 ] = pTParam->pValue( 2 ) [ 0 ];
+				pTResult2->pValue( 3 ) [ 0 ] = pTParam->pValue( 3 ) [ 0 ];
+				pTResult1->pValue( 2 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 0 ) [ 0 ] + pTParam->pValue( 2 ) [ 0 ] ) * 0.5 );
+				pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 1 ) [ 0 ] = static_cast<T>( ( pTParam->pValue( 1 ) [ 0 ] + pTParam->pValue( 3 ) [ 0 ] ) * 0.5 );
+			}
+		}
+
 }
 ;
 

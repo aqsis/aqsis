@@ -1159,10 +1159,7 @@ void CqShaderVM::SetArgument( CqParameter* pParam, IqSurface* pSurface )
 	{
 		/// \todo: Find out how to handle arrays.
 		IqShaderData* pVar = m_LocalVars[ i ];
-		if(pParam->Class() == class_varying )
-			pParam->BilinearDice(m_uGridRes,m_vGridRes,pVar);
-		else if(pParam->Class() == class_vertex )
-			pSurface->NaturalInterpolate( pParam, m_uGridRes,m_vGridRes,pVar );
+		pParam->Dice(m_uGridRes,m_vGridRes,pVar,pSurface);
 	}
 }
 

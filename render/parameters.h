@@ -36,6 +36,8 @@
 
 START_NAMESPACE( Aqsis )
 
+struct IqSurface;
+
 
 //----------------------------------------------------------------------
 /** \class CqParameter
@@ -84,19 +86,15 @@ class CqParameter
 		/** Subdivide the value in the u direction, place one half in this and the other in the specified parameter.
 		 * \param pResult Pointer to storage for the result.
 		 */
-		virtual void	uSubdivide( CqParameter* pResult )
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{}
-		/** Subdivide the value in the v direction, place one half in this and the other in the specified parameter.
-		 * \param pResult Pointer to storage for the result.
-		 */
-		virtual void	vSubdivide( CqParameter* pResult )
-		{}
-		/** Pure virtual, dice the value into a grid using linear interpolation.
+		/** Pure virtual, dice the value into a grid using appropriate interpolation for the class.
 		 * \param u Integer dice count for the u direction.
 		 * \param v Integer dice count for the v direction.
 		 * \param pResult Pointer to storage for the result.
+		 * \param pSurface Pointer to the surface we are processing used for vertex class variables to perform natural interpolation.
 		 */
-		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderData* pResult ) = 0;
+		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 ) = 0;
 
 		/** Pure virtual, set an indexed value from another parameter (must be the same type).
 		 * \param pFrom Pointer to parameter to get values from.
@@ -221,33 +219,35 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		{
 			m_aValues.clear();
 		}
-		virtual void	uSubdivide( CqParameter* pResult )
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
-			assert( pResult->Type() == Type() );
-			CqParameterTypedVarying<T, I, SLT>* pVS = static_cast<CqParameterTypedVarying<T, I, SLT>*>( pResult );
+			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
+					pResult1->Class() == Class() && pResult1->Class() == Class());
+
+			CqParameterTypedVarying<T, I, SLT>* pTResult1 = static_cast<CqParameterTypedVarying<T, I, SLT>*>( pResult1 );
+			CqParameterTypedVarying<T, I, SLT>* pTResult2 = static_cast<CqParameterTypedVarying<T, I, SLT>*>( pResult2 );
+			pTResult1->SetSize( 4 );
+			pTResult2->SetSize( 4 );
 			// Check if a valid 4 point quad, do nothing if not.
-			if ( m_aValues.size() == 4 && pVS->m_aValues.size() == 4 )
+			if ( m_aValues.size() == 4 )
 			{
-				pVS->pValue( 1 ) [ 0 ] = pValue( 1 ) [ 0 ];
-				pVS->pValue( 3 ) [ 0 ] = pValue( 3 ) [ 0 ];
-				pValue( 1 ) [ 0 ] = pVS->pValue( 0 ) [ 0 ] = static_cast<T>( ( pValue( 0 ) [ 0 ] + pValue( 1 ) [ 0 ] ) * 0.5 );
-				pValue( 3 ) [ 0 ] = pVS->pValue( 2 ) [ 0 ] = static_cast<T>( ( pValue( 2 ) [ 0 ] + pValue( 3 ) [ 0 ] ) * 0.5 );
+				if( u )
+				{
+					pTResult2->pValue( 1 ) [ 0 ] = pValue( 1 ) [ 0 ];
+					pTResult2->pValue( 3 ) [ 0 ] = pValue( 3 ) [ 0 ];
+					pTResult1->pValue( 1 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pValue( 0 ) [ 0 ] + pValue( 1 ) [ 0 ] ) * 0.5 );
+					pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 2 ) [ 0 ] = static_cast<T>( ( pValue( 2 ) [ 0 ] + pValue( 3 ) [ 0 ] ) * 0.5 );
+				}
+				else
+				{
+					pTResult2->pValue( 2 ) [ 0 ] = pValue( 2 ) [ 0 ];
+					pTResult2->pValue( 3 ) [ 0 ] = pValue( 3 ) [ 0 ];
+					pTResult1->pValue( 2 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pValue( 0 ) [ 0 ] + pValue( 2 ) [ 0 ] ) * 0.5 );
+					pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 1 ) [ 0 ] = static_cast<T>( ( pValue( 1 ) [ 0 ] + pValue( 3 ) [ 0 ] ) * 0.5 );
+				}
 			}
 		}
-		virtual void	vSubdivide( CqParameter* pResult )
-		{
-			assert( pResult->Type() == Type() );
-			CqParameterTypedVarying<T, I, SLT>* pVS = static_cast<CqParameterTypedVarying<T, I, SLT>*>( pResult );
-			// Check if a valid 4 point quad, do nothing if not.
-			if ( m_aValues.size() == 4 && pVS->m_aValues.size() == 4 )
-			{
-				pVS->pValue( 2 ) [ 0 ] = pValue( 2 ) [ 0 ];
-				pVS->pValue( 3 ) [ 0 ] = pValue( 3 ) [ 0 ];
-				pValue( 2 ) [ 0 ] = pVS->pValue( 0 ) [ 0 ] = static_cast<T>( ( pValue( 0 ) [ 0 ] + pValue( 2 ) [ 0 ] ) * 0.5 );
-				pValue( 3 ) [ 0 ] = pVS->pValue( 1 ) [ 0 ] = static_cast<T>( ( pValue( 1 ) [ 0 ] + pValue( 3 ) [ 0 ] ) * 0.5 );
-			}
-		}
-		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderData* pResult );
+		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 );
 
 		// Overridden from CqParameterTyped<T>
 
@@ -362,24 +362,27 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 			m_aValues.clear();
 		}
 
-		virtual void	uSubdivide( CqParameter* pResult )
-		{}
-		virtual void	vSubdivide( CqParameter* pResult )
-		{}
-		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderData* pResult )
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
+		{
+			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
+					pResult1->Class() == Class() && pResult1->Class() == Class());
+
+			CqParameterTypedUniform<T,I,SLT>* pTResult1 = static_cast<CqParameterTypedUniform<T,I,SLT>*>( pResult1 );
+			CqParameterTypedUniform<T,I,SLT>* pTResult2 = static_cast<CqParameterTypedUniform<T,I,SLT>*>( pResult2 );
+			(*pTResult1) = (*pTResult2) = (*this);
+		}
+		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the uniform value to varying by duplication.
 			assert( pResult->Type() == Type() );
-			assert( pResult->Class() == class_varying );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			// Also note that the only time a Uniform value is diced is when it is on a single element, i.e. the patchmesh
 			// has been split into isngle patches, or the polymesh has been split into polys.
 			TqInt i;
-			for ( i = 0; i < u*v; i++ )
+			for ( i = 0; i < (MAX(u*v,pResult->Size())); i++ )
 				pResult->SetValue( m_aValues[0], i );
 		}
-
 
 		// Overridden from CqParameterTyped<T>
 		virtual	const	T*	pValue() const
@@ -471,19 +474,23 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 		virtual	void	Clear()
 		{}
 
-		virtual void	uSubdivide( CqParameter* pResult )
-		{}
-		virtual void	vSubdivide( CqParameter* pResult )
-		{}
-		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderData* pResult )
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
+		{
+			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
+					pResult1->Class() == Class() && pResult1->Class() == Class());
+
+			CqParameterTypedConstant<T,I,SLT>* pTResult1 = static_cast<CqParameterTypedConstant<T,I,SLT>*>( pResult1 );
+			CqParameterTypedConstant<T,I,SLT>* pTResult2 = static_cast<CqParameterTypedConstant<T,I,SLT>*>( pResult2 );
+			(*pTResult1) = (*pTResult2) = (*this);
+		}
+		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the constant value to varying by duplication.
 			assert( pResult->Type() == Type() );
-			assert( pResult->Class() == class_varying );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqInt i;
-			for ( i = 0; i < u*v; i++ )
+			for ( i = 0; i < (MAX(u*v,pResult->Size())); i++ )
 				pResult->SetValue( m_Value, i );
 		}
 
@@ -558,6 +565,22 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 		virtual	EqVariableClass	Class() const
 		{
 			return ( class_vertex );
+		}
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
+		{
+			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
+					pResult1->Class() == Class() && pResult1->Class() == Class());
+
+			pSurface->NaturalSubdivide( this, pResult1, pResult2, u );
+		}
+		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
+		{
+			// Just promote the constant value to varying by duplication.
+			assert( pResult->Type() == Type() );
+			assert( NULL != pSurface );
+			// Note it is assumed that the variable has been
+			// initialised to the correct size prior to calling.
+			pSurface->NaturalDice( this, u, v, pResult );
 		}
 
 		/** Static constructor, to allow type free parameter construction.
@@ -671,29 +694,35 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		{
 			m_aValues.clear();
 		}
-		virtual void	uSubdivide( CqParameter* pResult )
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
-			assert( pResult->Type() == Type() );
-			CqParameterTypedVaryingArray<T, I, SLT>* pVS = static_cast<CqParameterTypedVaryingArray<T, I, SLT>*>( pResult );
+			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
+					pResult1->Class() == Class() && pResult1->Class() == Class());
+
+			CqParameterTypedVaryingArray<T, I, SLT>* pTResult1 = static_cast<CqParameterTypedVaryingArray<T, I, SLT>*>( pResult1 );
+			CqParameterTypedVaryingArray<T, I, SLT>* pTResult2 = static_cast<CqParameterTypedVaryingArray<T, I, SLT>*>( pResult2 );
+			pTResult1->SetSize( 4 );
+			pTResult2->SetSize( 4 );
 			// Check if a valid 4 point quad, do nothing if not.
-			if ( m_aValues.size() == 4 && pVS->m_aValues.size() == 4 )
+			if ( m_aValues.size() == 4 )
 			{
-				pValue( 1 ) [ 0 ] = pVS->pValue( 0 ) [ 0 ] = static_cast<T>( ( pValue( 0 ) [ 0 ] + pValue( 1 ) [ 0 ] ) * 0.5 );
-				pValue( 3 ) [ 0 ] = pVS->pValue( 2 ) [ 0 ] = static_cast<T>( ( pValue( 2 ) [ 0 ] + pValue( 3 ) [ 0 ] ) * 0.5 );
+				if( u )
+				{
+					pTResult2->pValue( 1 ) [ 0 ] = pValue( 1 ) [ 0 ];
+					pTResult2->pValue( 3 ) [ 0 ] = pValue( 3 ) [ 0 ];
+					pTResult1->pValue( 1 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pValue( 0 ) [ 0 ] + pValue( 1 ) [ 0 ] ) * 0.5 );
+					pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 2 ) [ 0 ] = static_cast<T>( ( pValue( 2 ) [ 0 ] + pValue( 3 ) [ 0 ] ) * 0.5 );
+				}
+				else
+				{
+					pTResult2->pValue( 2 ) [ 0 ] = pValue( 2 ) [ 0 ];
+					pTResult2->pValue( 3 ) [ 0 ] = pValue( 3 ) [ 0 ];
+					pTResult1->pValue( 2 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pValue( 0 ) [ 0 ] + pValue( 2 ) [ 0 ] ) * 0.5 );
+					pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 1 ) [ 0 ] = static_cast<T>( ( pValue( 1 ) [ 0 ] + pValue( 3 ) [ 0 ] ) * 0.5 );
+				}
 			}
 		}
-		virtual void	vSubdivide( CqParameter* pResult )
-		{
-			assert( pResult->Type() == Type() );
-			CqParameterTypedVaryingArray<T, I, SLT>* pVS = static_cast<CqParameterTypedVaryingArray<T, I, SLT>*>( pResult );
-			// Check if a valid 4 point quad, do nothing if not.
-			if ( m_aValues.size() == 4 && pVS->m_aValues.size() == 4 )
-			{
-				pValue( 2 ) [ 0 ] = pVS->pValue( 0 ) [ 0 ] = static_cast<T>( ( pValue( 0 ) [ 0 ] + pValue( 2 ) [ 0 ] ) * 0.5 );
-				pValue( 3 ) [ 0 ] = pVS->pValue( 1 ) [ 0 ] = static_cast<T>( ( pValue( 1 ) [ 0 ] + pValue( 3 ) [ 0 ] ) * 0.5 );
-			}
-		}
-		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderData* pResult );
+		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 );
 
 		// Overridden from CqParameterTyped<T>
 		virtual	const	T*	pValue() const
@@ -812,19 +841,16 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 		virtual	void	Clear()
 		{}
 
-		virtual void	uSubdivide( CqParameter* pResult )
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{}
-		virtual void	vSubdivide( CqParameter* pResult )
-		{}
-		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderData* pResult )
+		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the uniform value to varying by duplication.
 			assert( pResult->Type() == Type() );
-			assert( pResult->Class() == class_varying );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqInt i;
-			for ( i = 0; i < u*v; i++ )
+			for ( i = 0; i < (MAX(u*v,pResult->Size())); i++ )
 				pResult->SetValue( pValue( 0 ) [ 0 ], i );
 		}
 
@@ -920,19 +946,16 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 		virtual	void	Clear()
 		{}
 
-		virtual void	uSubdivide( CqParameter* pResult )
+		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{}
-		virtual void	vSubdivide( CqParameter* pResult )
-		{}
-		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderData* pResult )
+		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
 			// Just promote the constant value to varying by duplication.
 			assert( pResult->Type() == Type() );
-			assert( pResult->Class() == class_varying );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqInt i;
-			for ( i = 0; i < u*v; i++ )
+			for ( i = 0; i < (MAX(u*v,pResult->Size())); i++ )
 				pResult->SetValue( pValue( 0 ) [ 0 ], i );
 		}
 
@@ -1009,6 +1032,15 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SL
 		{
 			return ( class_vertex );
 		}
+		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
+		{
+			// Just promote the uniform value to varying by duplication.
+			assert( pResult->Type() == Type() );
+			assert( NULL != pSurface );
+			// Note it is assumed that the variable has been
+			// initialised to the correct size prior to calling.
+			pSurface->NaturalDice( this, u,v, pResult );
+		}
 
 		/** Static constructor, to allow type free parameter construction.
 		 * \param strName Character pointer to new parameter name.
@@ -1075,15 +1107,10 @@ class CqParameterTypedFaceVaryingArray : public CqParameterTypedVaryingArray<T, 
  */
 
 template <class T, EqVariableType I, class SLT>
-void CqParameterTypedVarying<T, I, SLT>::BilinearDice( TqInt u, TqInt v, IqShaderData* pResult )
+void CqParameterTypedVarying<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface )
 {
-	assert( pResult->Class() == class_varying );
-	
 	T res;
 	
-	// Not much point bilinear dicing into a uniform storage.
-	assert( pResult->Size() > 1 );
-
 	SLT* pResData;
 	pResult->GetValuePtr( pResData );
 	assert( NULL != pResData );
@@ -1132,15 +1159,12 @@ void CqParameterTypedVarying<T, I, SLT>::BilinearDice( TqInt u, TqInt v, IqShade
  */
 
 template <class T, EqVariableType I, class SLT>
-void CqParameterTypedVaryingArray<T, I, SLT>::BilinearDice( TqInt u, TqInt v, IqShaderData* pResult )
+void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface )
 {
 	assert( pResult->Type() == Type() );
 	assert( pResult->Class() == class_varying );
 	
 	T res;
-
-	// Not much point bilinear dicing into a uniform storage.
-	assert( pResult->Size() > 1 );
 
 	SLT* pResData;
 	pResult->GetValuePtr( pResData );

@@ -96,7 +96,7 @@ class CqQuadric : public CqSurface
 		CqQuadric&	operator=( const CqQuadric& From );
 
 		// Derived from CqSurface
-		virtual void		NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
+		virtual void		NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
 		virtual	void		GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 	protected:
@@ -125,11 +125,12 @@ class CqSphere : public CqQuadric
 		{}
 
 		virtual	CqBound	Bound() const;
-		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 		virtual TqBool		CanGenerateNormals() const	{ return( TqTrue ); }
+
+		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 
 		CqSphere&	operator=( const CqSphere& From );
 
@@ -160,10 +161,11 @@ class CqCone : public CqQuadric
 		{}
 
 		virtual	CqBound	Bound() const;
-		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+
+		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 
 		CqCone&	operator=( const CqCone& From );
 
@@ -195,10 +197,11 @@ class CqCylinder : public CqQuadric
 		{}
 
 		virtual	CqBound	Bound() const;
-		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+
+		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 
 		CqCylinder&	operator=( const CqCylinder& From );
 
@@ -230,10 +233,11 @@ class CqHyperboloid : public CqQuadric
 		{}
 
 		virtual	CqBound	Bound() const;
-		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+
+		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 
 		CqHyperboloid&	operator=( const CqHyperboloid& From );
 
@@ -263,10 +267,11 @@ class CqParaboloid : public CqQuadric
 		{}
 
 		virtual	CqBound	Bound() const;
-		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+
+		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 
 		CqParaboloid&	operator=( const CqParaboloid& From );
 
@@ -297,10 +302,11 @@ class CqTorus : public CqQuadric
 		{}
 
 		virtual	CqBound	Bound() const;
-		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+
+		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 
 		CqTorus&	operator=( const CqTorus& From );
 
@@ -332,11 +338,12 @@ class CqDisk : public CqQuadric
 		{}
 
 		virtual	CqBound	Bound() const;
-		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 		virtual TqBool		CanGenerateNormals() const	{ return( TqTrue ); }
+
+		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 
 		CqDisk&	operator=( const CqDisk& From );
 

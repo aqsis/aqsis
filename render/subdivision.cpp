@@ -1859,8 +1859,8 @@ CqMicroPolyGridBase* CqMotionWSurf::Dice()
 		CqPolygonPoints* pPoints = GetMotionObject( Time( i ) );
 		CqMicroPolyGrid* pGrid2 = new CqMicroPolyGrid( cuv, cuv, pPoints );
 
-		if ( uses_Cs && !has_Cs ) pPoints->Cs()->BilinearDice( cuv, cuv, pGrid2->Cs() );
-		if ( uses_Os && !has_Os ) pPoints->Os()->BilinearDice( cuv, cuv, pGrid2->Os() );
+		if ( uses_Cs && !has_Cs ) pPoints->Cs()->Dice( cuv, cuv, pGrid2->Cs(), this );
+		if ( uses_Os && !has_Os ) pPoints->Os()->Dice( cuv, cuv, pGrid2->Os(), this );
 
 		TqInt iFace = 0;
 		StoreDice( m_DiceCount, iFace, pPoints, 0, 0, cuv + 1, pGrid2, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );

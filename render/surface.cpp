@@ -270,12 +270,146 @@ void CqSurface::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 }
 
 
+void CqSurface::NaturalSubdivide(CqParameter* pParam,CqParameter* pParam1, CqParameter* pParam2, TqBool u)
+{
+	switch( pParam->Type() )
+	{
+		case type_float:
+		{
+			CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
+			CqParameterTyped<TqFloat, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam1 );
+			CqParameterTyped<TqFloat, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam2 );
+			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+			break;
+		}
+
+		case type_integer:
+		{
+			CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
+			CqParameterTyped<TqInt, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam1 );
+			CqParameterTyped<TqInt, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam2 );
+			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+			break;
+		}
+
+		case type_point:
+		case type_vector:
+		case type_normal:
+		{
+			CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
+			CqParameterTyped<CqVector3D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam1 );
+			CqParameterTyped<CqVector3D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam2 );
+			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+			break;
+		}
+
+		case type_hpoint:
+		{
+			CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
+			CqParameterTyped<CqVector4D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam1 );
+			CqParameterTyped<CqVector4D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam2 );
+			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+			break;
+		}
+
+
+		case type_color:
+		{
+			CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
+			CqParameterTyped<CqColor, CqColor>* pTResult1 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam1 );
+			CqParameterTyped<CqColor, CqColor>* pTResult2 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam2 );
+			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+			break;
+		}
+
+		case type_string:
+		{
+			CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
+			CqParameterTyped<CqString, CqString>* pTResult1 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam1 );
+			CqParameterTyped<CqString, CqString>* pTResult2 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam2 );
+			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+			break;
+		}
+
+		case type_matrix:
+		{
+			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
+			CqParameterTyped<CqMatrix, CqMatrix>* pTResult1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam1 );
+			CqParameterTyped<CqMatrix, CqMatrix>* pTResult2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam2 );
+			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+			break;
+		}
+	}
+}
+
+
+void CqSurface::NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
+{
+	switch( pParameter->Type() )
+	{
+		case type_float:
+		{
+			CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pParameter);
+			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+			break;
+		}
+
+		case type_integer:
+		{
+			CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>(pParameter);
+			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+			break;
+		}
+
+		case type_point:
+		case type_vector:
+		case type_normal:
+		{
+			CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(pParameter);
+			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+			break;
+		}
+
+		case type_hpoint:
+		{
+			CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pParameter);
+			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+			break;
+		}
+
+		case type_color:
+		{
+			CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>(pParameter);
+			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+			break;
+		}
+
+		case type_string:
+		{
+			CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>(pParameter);
+			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+			break;
+		}
+
+		case type_matrix:
+		{
+			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(pParameter);
+			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+			break;
+		}
+	}
+}
+
+
+
 //---------------------------------------------------------------------
 /** Dice the patch into a mesh of micropolygons.
  */
 
 CqMicroPolyGridBase* CqSurface::Dice()
 {
+	PreDice( m_uDiceSize, m_vDiceSize );
+
 	// Create a new CqMicorPolyGrid for this patch
 	CqMicroPolyGrid * pGrid = new CqMicroPolyGrid( m_uDiceSize, m_vDiceSize, this );
 
@@ -285,7 +419,7 @@ CqMicroPolyGridBase* CqSurface::Dice()
 	if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) ) 
 	{
 		if( bHasCs() )
-			Cs()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
+			Cs()->Dice( m_uDiceSize, m_vDiceSize, pGrid->Cs(), this );
 		else if( NULL != pAttributes()->GetColorAttribute("System", "Color") )
 			pGrid->Cs()->SetColor( pAttributes()->GetColorAttribute("System", "Color")[0]);
 		else
@@ -295,7 +429,7 @@ CqMicroPolyGridBase* CqSurface::Dice()
 	if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) ) 
 	{
 		if( bHasOs() )
-			Os()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
+			Os()->Dice( m_uDiceSize, m_vDiceSize, pGrid->Os(), this );
 		else if( NULL != pAttributes()->GetColorAttribute("System", "Opacity") )
 			pGrid->Os()->SetColor( pAttributes()->GetColorAttribute("System", "Opacity")[0]);
 		else
@@ -303,25 +437,25 @@ CqMicroPolyGridBase* CqSurface::Dice()
 	}
 
 	if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && bHass() ) 
-		s()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->s() );
+		s()->Dice( m_uDiceSize, m_vDiceSize, pGrid->s(), this );
 
 	if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && bHast() ) 
-		t()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
+		t()->Dice( m_uDiceSize, m_vDiceSize, pGrid->t(), this );
 
 	if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && bHasu() ) 
-		u()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->u() );
+		u()->Dice( m_uDiceSize, m_vDiceSize, pGrid->u(), this );
 
 	if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && bHasv() ) 
-		v()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->v() );
+		v()->Dice( m_uDiceSize, m_vDiceSize, pGrid->v(), this );
 	
 
 	if( NULL != pGrid->P() )
-		NaturalInterpolate( P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
+		NaturalDice( P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
 
 	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
 	if ( USES( lUses, EnvVars_N ) && ( NULL != pGrid->N() ) && bHasN() )
 	{
-		N()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->N() );
+		N()->Dice( m_uDiceSize, m_vDiceSize, pGrid->N(), this );
 		pGrid->SetbShadingNormals( TqTrue );
 	}
 
@@ -346,9 +480,61 @@ CqMicroPolyGridBase* CqSurface::Dice()
 			pGrid->pAttributes()->pshadAtmosphere()->SetArgument( (*iUP), this );
 	}
 
+	PostDice( );
+
 	return ( pGrid );
 }
 
+
+TqInt CqSurface::Split( std::vector<CqBasicSurface*>& aSplits )
+{
+	TqInt cSplits = PreSubdivide( aSplits, m_SplitDir == SplitDir_U );
+
+	assert( aSplits.size() == 2 );
+
+	aSplits[0]->SetSurfaceParameters( *this );
+	aSplits[0]->SetSplitDir((SplitDir() == SplitDir_U)? SplitDir_V:SplitDir_U );
+	aSplits[0]->SetEyeSplitCount( EyeSplitCount() );
+	aSplits[0]->m_fDiceable = TqTrue;
+	aSplits[0]->AddRef();
+
+	aSplits[1]->SetSurfaceParameters( *this );
+	aSplits[1]->SetSplitDir( (SplitDir() == SplitDir_U)? SplitDir_V:SplitDir_U );
+	aSplits[1]->SetEyeSplitCount( EyeSplitCount() );
+	aSplits[1]->m_fDiceable = TqTrue;
+	aSplits[1]->AddRef();
+	
+	// Iterate through any use parameters subdividing and storing the second value in the target surface.
+	std::vector<CqParameter*>::iterator iUP;
+	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	{
+		CqParameter* pNewA = (*iUP)->Clone();
+		CqParameter* pNewB = (*iUP)->Clone();
+		(*iUP)->Subdivide( pNewA, pNewB, SplitDir() == SplitDir_U, this );
+		static_cast<CqSurface*>(aSplits[0])->AddPrimitiveVariable( pNewA );
+		static_cast<CqSurface*>(aSplits[1])->AddPrimitiveVariable( pNewB );
+	}
+
+	if ( !m_fDiceable)
+	{
+		std::vector<CqBasicSurface*> aSplits0;
+		std::vector<CqBasicSurface*> aSplits1;
+
+		cSplits = aSplits[0]->Split( aSplits0 );
+		cSplits += aSplits[1]->Split( aSplits1 );
+		// Release the old ones.
+		aSplits[0]->Release();
+		aSplits[1]->Release();
+
+		aSplits.clear();
+		aSplits.swap( aSplits0 );
+		aSplits.insert( aSplits.end(), aSplits1.begin(), aSplits1.end() );
+	}
+
+	PostSubdivide();
+
+	return( cSplits );
+}
 
 
 //---------------------------------------------------------------------
@@ -361,16 +547,11 @@ void CqSurface::uSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
-		// We can only do this common linear subdivide if it is varying, vertex must be handled by the surface,
-		// as it needs to be done using surface specific natural interpolation.
-		if( (*iUP)->Class() == class_varying )
-		{
-			CqParameter* pNewA = (*iUP)->Clone();
-			CqParameter* pNewB = (*iUP)->Clone();
-			pNewA->uSubdivide( pNewB );
-			pA->AddPrimitiveVariable( pNewA );
-			pB->AddPrimitiveVariable( pNewB );
-		}
+		CqParameter* pNewA = (*iUP)->Clone();
+		CqParameter* pNewB = (*iUP)->Clone();
+		(*iUP)->Subdivide( pNewA, pNewB, TqTrue, this );
+		pA->AddPrimitiveVariable( pNewA );
+		pB->AddPrimitiveVariable( pNewB );
 	}
 }
 
@@ -385,16 +566,11 @@ void CqSurface::vSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
-		// We can only do this common linear subdivide if it is varying, vertex must be handled by the surface,
-		// as it needs to be done using surface specific natural interpolation.
-		if( (*iUP)->Class() == class_varying )
-		{
-			CqParameter* pNewA = (*iUP)->Clone();
-			CqParameter* pNewB = (*iUP)->Clone();
-			pNewA->vSubdivide( pNewB );
-			pA->AddPrimitiveVariable( pNewA );
-			pB->AddPrimitiveVariable( pNewB );
-		}
+		CqParameter* pNewA = (*iUP)->Clone();
+		CqParameter* pNewB = (*iUP)->Clone();
+		(*iUP)->Subdivide( pNewA, pNewB, TqFalse, this );
+		pA->AddPrimitiveVariable( pNewA );
+		pB->AddPrimitiveVariable( pNewB );
 	}
 }
 

@@ -290,13 +290,13 @@ class CqSurfaceNURBS : public CqSurface
 		// Function from CqSurface
 		virtual void uSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB );
 		virtual void vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB );
-		virtual void NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
-		virtual	void DicePointsAndNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pP, IqShaderData* pNormals );
+		virtual void NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
+		virtual TqBool		CanGenerateNormals() const	{ return( TqTrue ); }
+		virtual	void		GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 		virtual	CqBound	Bound() const;
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual TqBool	Diceable();
-		virtual CqMicroPolyGridBase* Dice();
 
 		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
 
