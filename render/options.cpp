@@ -145,9 +145,6 @@ void CqCamera::InitialiseCamera()
 
 		case	ProjectionPerspective:
 		{
-			// Define a matrix to convert from right top left handed coordinate systems.
-			CqMatrix Trl(1,1,-1);
-
 			TqFloat fov=m_fClippingPlaneNear*(tan(RAD(m_fFOV/2.0f)));
 			TqFloat l=m_fScreenWindowLeft*fov;
 			TqFloat r=m_fScreenWindowRight*fov;
@@ -162,29 +159,29 @@ void CqCamera::InitialiseCamera()
 			matCameraToScreen.SetElement(2,0,(r+l)/(r-l));
 			matCameraToScreen.SetElement(1,1,(2.0f*n)/(t-b));
 			matCameraToScreen.SetElement(2,1,(t+b)/(t-b));
-			matCameraToScreen.SetElement(2,2,(f+n)/(f-n));
-			matCameraToScreen.SetElement(3,2,(-2.0f*f*n)/(f-n));
-			matCameraToScreen.SetElement(2,3,-1);
+			TqFloat a=f/(f-n);
+//			matCameraToScreen.SetElement(2,2,-((f+n)/(f-n)));
+			matCameraToScreen.SetElement(2,2,a);
+//			matCameraToScreen.SetElement(3,2,-((2.0f*f*n)/(f-n)));
+			matCameraToScreen.SetElement(3,2,-n*a);
+			matCameraToScreen.SetElement(2,3,1);
 			matCameraToScreen.SetElement(3,3,0);
 
-			// Combine with the right to left matrix.
-			matCameraToScreen*=Trl;
-
 			// Set up the screen to frame matrix
-			TqFloat	FrameX=(m_fFrameAspectRatio>=1.0)?m_iXResolution:
+			TqFloat	FrameX=(m_fFrameAspectRatio>=1.0f)?m_iXResolution:
 													  (m_iYResolution*m_fFrameAspectRatio)/m_fPixelAspectRatio;
-			TqFloat	FrameY=(m_fFrameAspectRatio<1.0)? m_iYResolution:
+			TqFloat	FrameY=(m_fFrameAspectRatio<1.0f)? m_iYResolution:
 													  (m_iXResolution*m_fPixelAspectRatio)/m_fFrameAspectRatio;
 			matScreenToNDC.Identity();
 			matNDCToRaster.Identity();
 			// Translate from -1,-1-->1,1 to 0,0-->2,2
 			CqMatrix	T;
-			T.Translate(1,1,0);
+			T.Translate(1.0f,1.0f,0.0f);
 			// Scale by 0.5 (0,0 --> 1,1) NDC
-			CqMatrix	S(0.5,0.5,0);
-			CqMatrix	S2(FrameX, FrameY, 0);
+			CqMatrix	S(0.5f,0.5f,1.0f);
+			CqMatrix	S2(FrameX, FrameY, 1.0f);
 			// Invert y to fit top down format
-			CqMatrix	S3(1,-1,1);
+			CqMatrix	S3(1.0f,-1.0f,1.0f);
 			matScreenToNDC=S*T*S3; // S*T*S2
 			matNDCToRaster=S2;
 
@@ -195,6 +192,14 @@ void CqCamera::InitialiseCamera()
 	QGetRenderContext()->SetmatScreen(matCameraToScreen*matWorldToCamera);
 	QGetRenderContext()->SetmatNDC(matScreenToNDC*matCameraToScreen*matWorldToCamera);
 	QGetRenderContext()->SetmatRaster(matNDCToRaster*matScreenToNDC*matCameraToScreen*matWorldToCamera);
+
+	CqMatrix matWorldToScreen=matCameraToScreen*matWorldToCamera;
+
+	CqVector3D	vecf(0,0,7);
+	CqVector3D	vecn(0,0,-2);
+
+	vecf=vecf*matWorldToScreen;
+	vecn=vecn*matWorldToScreen;
 
 	// Set some additional information about the clip range.
 	m_fClippingRange=fClippingPlaneFar()-fClippingPlaneNear();
