@@ -93,14 +93,24 @@ extern TqInt gDefLightUses;
 #define	END_FORR			} \
 						}while(Advance() && __fVarying);
 
-#define	FLOAT(Val)		(Val).Value(temp_float,i)
-#define	POINT(Val)		(Val).Value(temp_point,i)
-#define	VECTOR(Val)		(Val).Value(temp_point,i)
-#define	NORMAL(Val)		(Val).Value(temp_point,i)
-#define	COLOR(Val)		(Val).Value(temp_color,i)
-#define	STRING(Val)		(Val).Value(temp_string,i)
-#define	BOOLEAN(Val)	(Val).Value(temp_bool,i)
-#define	MATRIX(Val)		(Val).Value(temp_matrix,i)
+#define	GETFLOAT(Val)		TqFloat _##Val; (Val).Value(_##Val,i)
+#define	GETPOINT(Val)		CqVector3D _##Val; (Val).Value(_##Val,i)
+#define	GETVECTOR(Val)		CqVector3D _##Val; (Val).Value(_##Val,i)
+#define	GETNORMAL(Val)		CqVector3D _##Val; (Val).Value(_##Val,i)
+#define	GETCOLOR(Val)		CqColor _##Val; (Val).Value(_##Val,i)
+#define	GETSTRING(Val)		CqString _##Val; (Val).Value(_##Val,i)
+#define	GETBOOLEAN(Val)		TqBool _##Val; (Val).Value(_##Val,i)
+#define	GETMATRIX(Val)		CqMatrix _##Val; (Val).Value(_##Val,i)
+
+#define	FLOAT(Val)			_##Val
+#define	POINT(Val)			_##Val
+#define	VECTOR(Val)			_##Val
+#define	NORMAL(Val)			_##Val
+#define	COLOR(Val)			_##Val
+#define	STRING(Val)			_##Val
+#define	BOOLEAN(Val)		_##Val
+#define	MATRIX(Val)			_##Val
+
 
 #define	DEFPARAM		CqVMStackEntry& Result, CqShader* pShader=0
 #define	DEFVOIDPARAM	CqShader* pShader=0
@@ -258,9 +268,9 @@ class CqShaderExecEnv
 		}
 		/** Find a named standard variable in the list.
 		 * \param pname Character pointer to the name.
-		 * \return CqShaderVariable pointer or 0.
+		 * \return IqShaderVariable pointer or 0.
 		 */
-		CqShaderVariable* FindStandardVar( char* pname )
+		IqShaderVariable* FindStandardVar( char* pname )
 		{
 			TqInt i;
 			for ( i = 0; i < EnvVars_Last; i++ )
@@ -287,9 +297,9 @@ class CqShaderExecEnv
 
 		/** Get a standard variable pointer given an index.
 		 * \param Index The integer index returned from FindStandardVarIndex.
-		 * \return CqShaderVariable pointer.
+		 * \return IqShaderVariable pointer.
 		 */
-		CqShaderVariable*	pVar( TqInt Index )
+		IqShaderVariable*	pVar( TqInt Index )
 		{
 			return ( m_apVariables[ Index ] );
 		}
@@ -304,147 +314,147 @@ class CqShaderExecEnv
 
 		/** Get a reference to the Cq standard variable.
 		 */
-		CqShaderVariableVarying<Type_Color, CqColor>&	Cs()
+		CqShaderVariableVarying<type_color, CqColor>&	Cs()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Color, CqColor>*>( m_apVariables[ EnvVars_Cs ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_color, CqColor>*>( m_apVariables[ EnvVars_Cs ] ) );
 		}
 		/** Get a reference to the Os standard variable.
 		 */
-		CqShaderVariableVarying<Type_Color, CqColor>&	Os()
+		CqShaderVariableVarying<type_color, CqColor>&	Os()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Color, CqColor>*>( m_apVariables[ EnvVars_Os ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_color, CqColor>*>( m_apVariables[ EnvVars_Os ] ) );
 		}
 		/** Get a reference to the Ng standard variable.
 		 */
-		CqShaderVariableVarying<Type_Normal, CqVector3D>&	Ng()
+		CqShaderVariableVarying<type_normal, CqVector3D>&	Ng()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Normal, CqVector3D>*>( m_apVariables[ EnvVars_Ng ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_normal, CqVector3D>*>( m_apVariables[ EnvVars_Ng ] ) );
 		}
 		/** Get a reference to the du standard variable.
 		 */
-		CqShaderVariableUniform<Type_Float, TqFloat>&	du()
+		CqShaderVariableUniform<type_float, TqFloat>&	du()
 		{
-			return ( *static_cast<CqShaderVariableUniform<Type_Float, TqFloat>*>( m_apVariables[ EnvVars_du ] ) );
+			return ( *static_cast<CqShaderVariableUniform<type_float, TqFloat>*>( m_apVariables[ EnvVars_du ] ) );
 		}
 		/** Get a reference to the dv standard variable.
 		 */
-		CqShaderVariableUniform<Type_Float, TqFloat>&	dv()
+		CqShaderVariableUniform<type_float, TqFloat>&	dv()
 		{
-			return ( *static_cast<CqShaderVariableUniform<Type_Float, TqFloat>*>( m_apVariables[ EnvVars_dv ] ) );
+			return ( *static_cast<CqShaderVariableUniform<type_float, TqFloat>*>( m_apVariables[ EnvVars_dv ] ) );
 		}
 		/** Get a reference to the L standard variable.
 		 */
-		CqShaderVariableVarying<Type_Vector, CqVector3D>&	L()
+		CqShaderVariableVarying<type_vector, CqVector3D>&	L()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Vector, CqVector3D>*>( m_apVariables[ EnvVars_L ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_vector, CqVector3D>*>( m_apVariables[ EnvVars_L ] ) );
 		}
 		/** Get a reference to the Cl standard variable.
 		 */
-		CqShaderVariableVarying<Type_Color, CqColor>&	Cl()
+		CqShaderVariableVarying<type_color, CqColor>&	Cl()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Color, CqColor>*>( m_apVariables[ EnvVars_Cl ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_color, CqColor>*>( m_apVariables[ EnvVars_Cl ] ) );
 		}
 		/** Get a reference to the Ol standard variable.
 		 */
-		CqShaderVariableVarying<Type_Color, CqColor>&	Ol()
+		CqShaderVariableVarying<type_color, CqColor>&	Ol()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Color, CqColor>*>( m_apVariables[ EnvVars_Ol ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_color, CqColor>*>( m_apVariables[ EnvVars_Ol ] ) );
 		}
 		/** Get a reference to the P standard variable.
 		 */
-		CqShaderVariableVarying<Type_Point, CqVector3D>&	P()
+		CqShaderVariableVarying<type_point, CqVector3D>&	P()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Point, CqVector3D>*>( m_apVariables[ EnvVars_P ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_point, CqVector3D>*>( m_apVariables[ EnvVars_P ] ) );
 		}
 		/** Get a reference to the dPdu standard variable.
 		 */
-		CqShaderVariableVarying<Type_Point, CqVector3D>&	dPdu()
+		CqShaderVariableVarying<type_point, CqVector3D>&	dPdu()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Point, CqVector3D>*>( m_apVariables[ EnvVars_dPdu ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_point, CqVector3D>*>( m_apVariables[ EnvVars_dPdu ] ) );
 		}
 		/** Get a reference to the dPdv standard variable.
 		 */
-		CqShaderVariableVarying<Type_Point, CqVector3D>&	dPdv()
+		CqShaderVariableVarying<type_point, CqVector3D>&	dPdv()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Point, CqVector3D>*>( m_apVariables[ EnvVars_dPdv ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_point, CqVector3D>*>( m_apVariables[ EnvVars_dPdv ] ) );
 		}
 		/** Get a reference to the N standard variable.
 		 */
-		CqShaderVariableVarying<Type_Normal, CqVector3D>&	N()
+		CqShaderVariableVarying<type_normal, CqVector3D>&	N()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Normal, CqVector3D>*>( m_apVariables[ EnvVars_N ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_normal, CqVector3D>*>( m_apVariables[ EnvVars_N ] ) );
 		}
 		/** Get a reference to the u standard variable.
 		 */
-		CqShaderVariableVarying<Type_Float, TqFloat>&	u()
+		CqShaderVariableVarying<type_float, TqFloat>&	u()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Float, TqFloat>*>( m_apVariables[ EnvVars_u ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_float, TqFloat>*>( m_apVariables[ EnvVars_u ] ) );
 		}
 		/** Get a reference to the v standard variable.
 		 */
-		CqShaderVariableVarying<Type_Float, TqFloat>&	v()
+		CqShaderVariableVarying<type_float, TqFloat>&	v()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Float, TqFloat>*>( m_apVariables[ EnvVars_v ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_float, TqFloat>*>( m_apVariables[ EnvVars_v ] ) );
 		}
 		/** Get a reference to the s standard variable.
 		 */
-		CqShaderVariableVarying<Type_Float, TqFloat>&	s()
+		CqShaderVariableVarying<type_float, TqFloat>&	s()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Float, TqFloat>*>( m_apVariables[ EnvVars_s ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_float, TqFloat>*>( m_apVariables[ EnvVars_s ] ) );
 		}
 		/** Get a reference to the t standard variable.
 		 */
-		CqShaderVariableVarying<Type_Float, TqFloat>&	t()
+		CqShaderVariableVarying<type_float, TqFloat>&	t()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Float, TqFloat>*>( m_apVariables[ EnvVars_t ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_float, TqFloat>*>( m_apVariables[ EnvVars_t ] ) );
 		}
 		/** Get a reference to the I standard variable.
 		 */
-		CqShaderVariableVarying<Type_Vector, CqVector3D>&	I()
+		CqShaderVariableVarying<type_vector, CqVector3D>&	I()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Vector, CqVector3D>*>( m_apVariables[ EnvVars_I ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_vector, CqVector3D>*>( m_apVariables[ EnvVars_I ] ) );
 		}
 		/** Get a reference to the Ci standard variable.
 		 */
-		CqShaderVariableVarying<Type_Color, CqColor>&	Ci()
+		CqShaderVariableVarying<type_color, CqColor>&	Ci()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Color, CqColor>*>( m_apVariables[ EnvVars_Ci ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_color, CqColor>*>( m_apVariables[ EnvVars_Ci ] ) );
 		}
 		/** Get a reference to the Oi standard variable.
 		 */
-		CqShaderVariableVarying<Type_Color, CqColor>&	Oi()
+		CqShaderVariableVarying<type_color, CqColor>&	Oi()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Color, CqColor>*>( m_apVariables[ EnvVars_Oi ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_color, CqColor>*>( m_apVariables[ EnvVars_Oi ] ) );
 		}
 		/** Get a reference to the Ps standard variable.
 		 */
-		CqShaderVariableVarying<Type_Point, CqVector3D>&	Ps()
+		CqShaderVariableVarying<type_point, CqVector3D>&	Ps()
 		{
-			return ( *static_cast<CqShaderVariableVarying<Type_Point, CqVector3D>*>( m_apVariables[ EnvVars_Ps ] ) );
+			return ( *static_cast<CqShaderVariableVarying<type_point, CqVector3D>*>( m_apVariables[ EnvVars_Ps ] ) );
 		}
 		/** Get a reference to the E standard variable.
 		 */
-		CqShaderVariableUniform<Type_Point, CqVector3D>&	E()
+		CqShaderVariableUniform<type_point, CqVector3D>&	E()
 		{
-			return ( *static_cast<CqShaderVariableUniform<Type_Point, CqVector3D>*>( m_apVariables[ EnvVars_E ] ) );
+			return ( *static_cast<CqShaderVariableUniform<type_point, CqVector3D>*>( m_apVariables[ EnvVars_E ] ) );
 		}
 		/** Get a reference to the ncomps standard variable.
 		 */
-		CqShaderVariableUniform<Type_Float, TqFloat>&	ncomps()
+		CqShaderVariableUniform<type_float, TqFloat>&	ncomps()
 		{
-			return ( *static_cast<CqShaderVariableUniform<Type_Float, TqFloat>*>( m_apVariables[ EnvVars_ncomps ] ) );
+			return ( *static_cast<CqShaderVariableUniform<type_float, TqFloat>*>( m_apVariables[ EnvVars_ncomps ] ) );
 		}
 		/** Get a reference to the time standard variable.
 		 */
-		CqShaderVariableUniform<Type_Float, TqFloat>&	time()
+		CqShaderVariableUniform<type_float, TqFloat>&	time()
 		{
-			return ( *static_cast<CqShaderVariableUniform<Type_Float, TqFloat>*>( m_apVariables[ EnvVars_time ] ) );
+			return ( *static_cast<CqShaderVariableUniform<type_float, TqFloat>*>( m_apVariables[ EnvVars_time ] ) );
 		}
 		/** Get a reference to the alpha standard variable.
 		 */
-		CqShaderVariableUniform<Type_Float, TqFloat>&	alpha()
+		CqShaderVariableUniform<type_float, TqFloat>&	alpha()
 		{
-			return ( *static_cast<CqShaderVariableUniform<Type_Float, TqFloat>*>( m_apVariables[ EnvVars_alpha ] ) );
+			return ( *static_cast<CqShaderVariableUniform<type_float, TqFloat>*>( m_apVariables[ EnvVars_alpha ] ) );
 		}
 
 	private:
@@ -452,16 +462,18 @@ class CqShaderExecEnv
 		 */
 		void	GetFilterParams( int cParams, CqVMStackEntry** apParams, float& _pswidth, float& _ptwidth )
 		{
-			CqString temp_string;
-			float temp_float;
+			CqString strParam;
+			TqFloat f;
 
 			int i = 0;
 			while ( cParams > 0 )
 			{
-				CqString & strParam = apParams[ i ] ->Value( temp_string, 0 );
-				if ( strParam.compare( "width" ) == 0 ) _pswidth = _ptwidth = apParams[ i + 1 ] ->Value( temp_float, 0 );
-				else if ( strParam.compare( "swidth" ) == 0 ) _pswidth = apParams[ i + 1 ] ->Value( temp_float, 0 );
-				else if ( strParam.compare( "twidth" ) == 0 ) _ptwidth = apParams[ i + 1 ] ->Value( temp_float, 0 );
+				apParams[ i ] ->Value( strParam, 0 );
+				apParams[ i + 1 ] ->Value( f, 0 );
+
+				if ( strParam.compare( "width" ) == 0 ) _pswidth = _ptwidth = f;
+				else if ( strParam.compare( "swidth" ) == 0 ) _pswidth = f;
+				else if ( strParam.compare( "twidth" ) == 0 ) _ptwidth = f;
 				i += 2;
 				cParams -= 2;
 			}
@@ -470,26 +482,27 @@ class CqShaderExecEnv
 		 */
 		void	GetTexParams( int cParams, CqVMStackEntry** apParams, float& _pswidth, float& _ptwidth, float& _psblur, float& _ptblur, float& _pfill )
 		{
-			CqString temp_string;
-			float temp_float;
+			CqString strParam;
+			TqFloat f;
 
 			int i = 0;
 			while ( cParams > 0 )
 			{
-				CqString & strParam = apParams[ i ] ->Value( temp_string, 0 );
-				if ( strParam.compare( "width" ) == 0 ) _pswidth = _ptwidth = apParams[ i + 1 ] ->Value( temp_float, 0 );
-				else if ( strParam.compare( "swidth" ) == 0 ) _pswidth = apParams[ i + 1 ] ->Value( temp_float, 0 );
-				else if ( strParam.compare( "twidth" ) == 0 ) _ptwidth = apParams[ i + 1 ] ->Value( temp_float, 0 );
-				else if ( strParam.compare( "blur" ) == 0 ) _psblur = _ptblur = apParams[ i + 1 ] ->Value( temp_float, 0 );
-				else if ( strParam.compare( "sblur" ) == 0 ) _psblur = apParams[ i + 1 ] ->Value( temp_float, 0 );
-				else if ( strParam.compare( "tblur" ) == 0 ) _ptblur = apParams[ i + 1 ] ->Value( temp_float, 0 );
-				else if ( strParam.compare( "fill" ) == 0 ) _pfill = apParams[ i + 1 ] ->Value( temp_float, 0 );
+				apParams[ i ] ->Value( strParam, 0 );
+				apParams[ i + 1 ] ->Value( f, 0 );
+				if ( strParam.compare( "width" ) == 0 ) _pswidth = _ptwidth = f;
+				else if ( strParam.compare( "swidth" ) == 0 ) _pswidth = f;
+				else if ( strParam.compare( "twidth" ) == 0 ) _ptwidth = f;
+				else if ( strParam.compare( "blur" ) == 0 ) _psblur = _ptblur = f;
+				else if ( strParam.compare( "sblur" ) == 0 ) _psblur = f;
+				else if ( strParam.compare( "tblur" ) == 0 ) _ptblur = f;
+				else if ( strParam.compare( "fill" ) == 0 ) _pfill = f;
 				i += 2;
 				cParams -= 2;
 			}
 		}
 
-		std::vector<CqShaderVariable*>	m_apVariables;	///< Vector of pointers to shader variables.
+		std::vector<IqShaderVariable*>	m_apVariables;	///< Vector of pointers to shader variables.
 		struct SqVarName
 		{
 			char*	m_strName;
@@ -640,15 +653,15 @@ class CqShaderExecEnv
 		STD_SO	SO_printf( STRINGVAL str, DEFVOIDPARAMVAR );
 		STD_SO	SO_format( STRINGVAL str, DEFPARAMVAR );
 		STD_SO	SO_concat( STRINGVAL stra, STRINGVAL strb, DEFPARAMVAR );
-		STD_SO	SO_atmosphere( STRINGVAL name, CqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_displacement( STRINGVAL name, CqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_lightsource( STRINGVAL name, CqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_surface( STRINGVAL name, CqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_attribute( STRINGVAL name, CqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_option( STRINGVAL name, CqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_rendererinfo( STRINGVAL name, CqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_incident( STRINGVAL name, CqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_opposite( STRINGVAL name, CqShaderVariable* pV, DEFPARAM );
+		STD_SO	SO_atmosphere( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
+		STD_SO	SO_displacement( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
+		STD_SO	SO_lightsource( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
+		STD_SO	SO_surface( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
+		STD_SO	SO_attribute( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
+		STD_SO	SO_option( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
+		STD_SO	SO_rendererinfo( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
+		STD_SO	SO_incident( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
+		STD_SO	SO_opposite( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
 		STD_SO	SO_fcellnoise1( FLOATVAL v, DEFPARAM );
 		STD_SO	SO_fcellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAM );
 		STD_SO	SO_fcellnoise3( POINTVAL p, DEFPARAM );
@@ -695,21 +708,43 @@ class CqShaderExecEnv
 		STD_SO	SO_spsplinea( STRINGVAL basis, FLOATVAL value, POINTARRAYVAL a, DEFPARAM );
 		STD_SO	SO_shadername( DEFPARAM );
 		STD_SO	SO_shadername2( STRINGVAL shader, DEFPARAM );
-		STD_SO	SO_textureinfo( STRINGVAL shader, STRINGVAL dataname, CqShaderVariable* pV, DEFPARAM );
+		STD_SO	SO_textureinfo( STRINGVAL shader, STRINGVAL dataname, IqShaderVariable* pV, DEFPARAM );
 };
 
 /** Templatised derivative function. Calculates the derivative of the provided shader variable with respect to u.
  */
 template <class R>
-R SO_DuType( CqShaderVariableTyped<R>& Var, TqInt i, CqShaderExecEnv& s )
+R SO_DuType( R& temp, IqShaderVariable* pVar, TqInt i, CqShaderExecEnv& s )
 {
 	R Ret;
 	TqInt uRes = s.uGridRes();
 	TqInt GridX = i % ( uRes + 1 );
 	if ( GridX < uRes )
-		Ret = ( static_cast<R>( Var[ i + 1 ] ) - static_cast<R>( Var[ i ] ) ) / s.du() [ i ];
+	{
+		CqVMStackEntry SE1, SE2, SEu;
+		pVar->GetValue( i + 1, SE1 );
+		pVar->GetValue( i, SE2 );
+		s.du().GetValue( i, SEu );
+		R v1, v2;
+		TqFloat u;
+		SE1.Value( v1 );
+		SE2.Value( v2 );
+		SEu.Value( u );
+		Ret = ( v1 - v2 ) / u;
+	}
 	else
-		Ret = ( static_cast<R>( Var[ i ] ) - static_cast<R>( Var[ i - 1 ] ) ) / s.du() [ i ];
+	{
+		CqVMStackEntry SE1, SE2, SEu;
+		pVar->GetValue( i, SE1 );
+		pVar->GetValue( i - 1, SE2 );
+		s.du().GetValue( i, SEu );
+		R v1, v2;
+		TqFloat u;
+		SE1.Value( v1 );
+		SE2.Value( v2 );
+		SEu.Value( u );
+		Ret = ( v1 - v2 ) / u;
+	}
 	return ( Ret );
 }
 
@@ -717,16 +752,38 @@ R SO_DuType( CqShaderVariableTyped<R>& Var, TqInt i, CqShaderExecEnv& s )
 /** Templatised derivative function. Calculates the derivative of the provided shader variable with respect to v.
  */
 template <class R>
-R SO_DvType( CqShaderVariableTyped<R>& Var, TqInt i, CqShaderExecEnv& s )
+R SO_DvType( R& temp, IqShaderVariable* pVar, TqInt i, CqShaderExecEnv& s )
 {
 	R Ret;
 	TqInt uRes = s.uGridRes();
 	TqInt vRes = s.vGridRes();
 	TqInt GridY = ( i / ( uRes + 1 ) );
 	if ( GridY < vRes )
-		Ret = ( static_cast<R>( Var[ i + uRes + 1 ] ) - static_cast<R>( Var[ i ] ) ) / s.dv() [ i ];
+	{
+		CqVMStackEntry SE1, SE2, SEv;
+		pVar->GetValue( i + uRes + 1, SE1 );
+		pVar->GetValue( i, SE2 );
+		s.dv().GetValue( i, SEv );
+		R v1, v2;
+		TqFloat v;
+		SE1.Value( v1 );
+		SE2.Value( v2 );
+		SEv.Value( v );
+		Ret = ( v1 - v2 ) / v;
+	}
 	else
-		Ret = ( static_cast<R>( Var[ i ] ) - static_cast<R>( Var[ i - ( uRes + 1 ) ] ) ) / s.dv() [ i ];
+	{
+		CqVMStackEntry SE1, SE2, SEv;
+		pVar->GetValue( i, SE1 );
+		pVar->GetValue( i - ( uRes + 1 ), SE2 );
+		s.dv().GetValue( i, SEv );
+		R v1, v2;
+		TqFloat v;
+		SE1.Value( v1 );
+		SE2.Value( v2 );
+		SEv.Value( v );
+		Ret = ( v1 - v2 ) / v;
+	}
 	return ( Ret );
 }
 
@@ -734,7 +791,7 @@ R SO_DvType( CqShaderVariableTyped<R>& Var, TqInt i, CqShaderExecEnv& s )
 /** Templatised derivative function. Calculates the derivative of the provided shader variable with respect to a second variable.
  */
 template <class R>
-R SO_DerivType( CqShaderVariableTyped<R>& Var, CqShaderVariableTyped<TqFloat>& den, TqInt i, CqShaderExecEnv& s )
+R SO_DerivType( R& temp, IqShaderVariable* pVar, IqShaderVariable* pDen, TqInt i, CqShaderExecEnv& s )
 {
 	R Retu, Retv;
 	TqInt uRes = s.uGridRes();
@@ -742,17 +799,41 @@ R SO_DerivType( CqShaderVariableTyped<R>& Var, CqShaderVariableTyped<TqFloat>& d
 	TqInt GridX = i % ( uRes + 1 );
 	TqInt GridY = ( i / ( uRes + 1 ) );
 
+	
+	CqVMStackEntry SEden;
+	pDen->GetValue( i, SEden );
+
 	// Calculate deriviative in u
 	if ( GridX < uRes )
-		Retu = ( static_cast<R>( Var[ i + 1 ] ) - static_cast<R>( Var[ i ] ) ) / static_cast<TqFloat>( den[ i ] );
+	{
+		CqVMStackEntry SE1, SE2;
+		pVar->GetValue( i + 1, SE1 );
+		pVar->GetValue( i, SE2 );
+		Retu = ( SE1.Value( Retu ) - SE2.Value( Retu ) ) / SEden.Value( 0.0f );
+	}
 	else
-		Retu = ( static_cast<R>( Var[ i ] ) - static_cast<R>( Var[ i - 1 ] ) ) / static_cast<TqFloat>( den[ i ] );
+	{
+		CqVMStackEntry SE1, SE2;
+		pVar->GetValue( i, SE1 );
+		pVar->GetValue( i - 1, SE2 );
+		Retu = ( SE1.Value( Retu ) - SE2.Value( Retu ) ) / SEden.Value( 0.0f );
+	}
 
 	// Calculate deriviative in v
 	if ( GridY < vRes )
-		Retv = ( static_cast<R>( Var[ i + uRes + 1 ] ) - static_cast<R>( Var[ i ] ) ) / static_cast<TqFloat>( den[ i ] );
+	{
+		CqVMStackEntry SE1, SE2;
+		pVar->GetValue( i + uRes + 1, SE1 );
+		pVar->GetValue( i, SE2 );
+		Retv = ( SE1.Value( Retv ) - SE2.Value( Retv ) ) / SEden.Value( 0.0f );
+	}
 	else
-		Retv = ( static_cast<R>( Var[ i ] ) - static_cast<R>( Var[ i - ( uRes + 1 ) ] ) ) / static_cast<TqFloat>( den[ i ] );
+	{
+		CqVMStackEntry SE1, SE2;
+		pVar->GetValue( i, SE1 );
+		pVar->GetValue( i - ( uRes + 1 ), SE2 );
+		Retv = ( SE1.Value( Retv ) - SE2.Value( Retv ) ) / SEden.Value( 0.0f );
+	}
 
 	return ( Retu + Retv );
 }
@@ -766,10 +847,26 @@ R SO_DuType( CqVMStackEntry& Var, TqInt i, CqShaderExecEnv& s )
 	R Ret;
 	TqInt uRes = s.uGridRes();
 	TqInt GridX = i % ( uRes + 1 );
+	
+	CqVMStackEntry SEu;
+	s.du().GetValue( i, SEu );
+	
+	R v1,v2;
+	TqFloat u;
 	if ( GridX < uRes )
-		Ret = ( Var.Value( Ret, i + 1 ) - Var.Value( Ret, i ) ) / s.du() [ i ];
+	{
+		Var.Value( v1, i + 1 );
+		Var.Value( v2, i );
+		SEu.Value( u );
+		Ret = ( v1 - v2 ) / u;
+	}
 	else
-		Ret = ( Var.Value( Ret, i ) - Var.Value( Ret, i - 1 ) ) / s.du() [ i ];
+	{
+		Var.Value( v1, i );
+		Var.Value( v2, i - 1 );
+		SEu.Value( u );
+		Ret = ( v1 - v2 ) / u;
+	}
 	return ( Ret );
 }
 
@@ -783,10 +880,26 @@ R SO_DvType( CqVMStackEntry& Var, TqInt i, CqShaderExecEnv& s )
 	TqInt uRes = s.uGridRes();
 	TqInt vRes = s.vGridRes();
 	TqInt GridY = ( i / ( uRes + 1 ) );
+
+	CqVMStackEntry SEv;
+	s.dv().GetValue( i, SEv );
+
+	R v1,v2;
+	TqFloat v;
 	if ( GridY < vRes )
-		Ret = ( Var.Value( Ret, i + uRes + 1 ) - Var.Value( Ret, i ) ) / s.dv() [ i ];
+	{
+		Var.Value( v1, i + uRes + 1 );
+		Var.Value( v2, i );
+		SEv.Value( v );
+		Ret = ( v1 - v2 ) / v;
+	}
 	else
-		Ret = ( Var.Value( Ret, i ) - Var.Value( Ret, i - ( uRes + 1 ) ) ) / s.dv() [ i ];
+	{
+		Var.Value( v1, i );
+		Var.Value( v2, i - ( uRes + 1 ) );
+		SEv.Value( v );
+		Ret = ( v1 - v2 ) / v;
+	}
 	return ( Ret );
 }
 
@@ -796,24 +909,46 @@ R SO_DvType( CqVMStackEntry& Var, TqInt i, CqShaderExecEnv& s )
 template <class R>
 R SO_DerivType( CqVMStackEntry& Var, CqVMStackEntry& den, TqInt i, CqShaderExecEnv& s )
 {
-	TqFloat f;
 	R Retu, Retv;
 	TqInt uRes = s.uGridRes();
 	TqInt vRes = s.vGridRes();
 	TqInt GridX = i % ( uRes + 1 );
 	TqInt GridY = ( i / ( uRes + 1 ) );
 
+	R v1, v2;
+	TqFloat u,v;
+
 	// Calculate deriviative in u
 	if ( GridX < uRes )
-		Retu = ( Var.Value( Retu, i + 1 ) - Var.Value( Retu, i ) ) / den.Value( f, i );
+	{
+		Var.Value( v1, i + 1);
+		Var.Value( v2, i );
+		den.Value( u, i );
+		Retu = ( v1 - v2 ) / u;
+	}
 	else
-		Retu = ( Var.Value( Retu, i ) - Var.Value( Retu, i - 1 ) ) / den.Value( f, i );
+	{
+		Var.Value( v1, i );
+		Var.Value( v2, i - 1 );
+		den.Value( u, i );
+		Retu = ( v1 - v2 ) / u;
+	}
 
 	// Calculate deriviative in v
 	if ( GridY < vRes )
-		Retv = ( Var.Value( Retu, i + uRes + 1 ) - Var.Value( Retu, i ) ) / den.Value( f, i );
+	{
+		Var.Value( v1, i + uRes + 1 );
+		Var.Value( v2, i );
+		den.Value( v, i );
+		Retv = ( v1 - v2 ) / v;
+	}
 	else
-		Retv = ( Var.Value( Retu, i ) - Var.Value( Retu, i - ( uRes + 1 ) ) ) / den.Value( f, i );
+	{
+		Var.Value( v1, i );
+		Var.Value( v2, i - ( uRes - 1 ) );
+		den.Value( v, i );
+		Retv = ( v1 - v2 ) / v;
+	}
 
 	return ( Retu + Retv );
 }

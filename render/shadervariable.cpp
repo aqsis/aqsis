@@ -47,16 +47,18 @@ char* gVariableTypeNames[] =
         "vector",
         "void",
         "matrix",
-        "hextuple",
+        "sixteentuple",
     };
 TqInt gcVariableTypeNames = sizeof( gVariableTypeNames ) / sizeof( gVariableTypeNames[ 0 ] );
 
 char* gVariableStorageNames[] =
     {
         "invalid",
-        "vertex",
-        "varying",
+		"constant",
         "uniform",
+        "varying",
+        "vertex",
+		"facevarying",
     };
 TqInt gcVariableStorageNames = sizeof( gVariableStorageNames ) / sizeof( gVariableStorageNames[ 0 ] );
 
@@ -87,7 +89,7 @@ CqShaderVariable::~CqShaderVariable()
 
 std::ostream &operator<<( std::ostream &Stream, EqVariableType t )
 {
-	Stream << gVariableTypeNames[ t & Type_Mask ];
+	Stream << gVariableTypeNames[ t ];
 	return ( Stream );
 }
 
@@ -96,7 +98,7 @@ std::ostream &operator<<( std::ostream &Stream, EqVariableType t )
 /** Clone function for variable array.
  */
 
-CqShaderVariable* CqShaderVariableArray::Clone() const
+IqShaderVariable* CqShaderVariableArray::Clone() const
 {
 	CqShaderVariableArray * pNew = new CqShaderVariableArray( *this );
 	return ( pNew );

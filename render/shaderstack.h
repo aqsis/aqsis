@@ -348,9 +348,44 @@ class CqVMStackEntry
 {
 	public:
 		CqVMStackEntry( TqInt size = 1 );
-		CqVMStackEntry( CqShaderVariable* pv )
+		CqVMStackEntry( IqShaderVariable* pv )
 		{
 			m_pVarRef = pv;
+		}
+		CqVMStackEntry( TqFloat f )
+		{
+			m_Size = 1;
+			*this = f;
+		}
+		CqVMStackEntry( TqBool b )
+		{
+			m_Size = 1;
+			*this = b;
+		}
+		CqVMStackEntry( const CqVector3D& vec )
+		{
+			m_Size = 1;
+			*this = vec;
+		}
+		CqVMStackEntry( const char* pstr )
+		{
+			m_Size = 1;
+			*this = pstr;
+		}
+		CqVMStackEntry( const CqString& str )
+		{
+			m_Size = 1;
+			*this = str;
+		}
+		CqVMStackEntry( const CqMatrix& mat )
+		{
+			m_Size = 1;
+			*this = mat;
+		}
+		CqVMStackEntry( const CqColor& col )
+		{
+			m_Size = 1;
+			*this = col;
 		}
 		~CqVMStackEntry()
 		{}
@@ -365,18 +400,19 @@ class CqVMStackEntry
 		 * \return A reference to the value.
 		 */
 		template <class T>
-		T&	Value( T& temp, TqInt Index = 0 )
+		void Value( T& res, TqInt Index = 0 )
 		{
 			if ( m_pVarRef != 0 )
 			{
 				// TODO: Should do some checking!!
-				CqShaderVariableTyped<T>* pVar = static_cast<CqShaderVariableTyped<T>*>( m_pVarRef );
-				return ( ( *pVar ) [ Index ] );
+				CqVMStackEntry SE;
+				m_pVarRef->GetValue(Index, SE);
+				SE.Value(res);
 			}
 			else
 			{
-				if ( Size() == 1 ) return ( static_cast<T&>( m_Value ) );
-				else	return ( static_cast<T&>( m_aValues[ Index ] ) );
+				if ( Size() == 1 ) res = static_cast<T&>( m_Value );
+				else	res = static_cast<T&>( m_aValues[ Index ] );
 			}
 		}
 		/** Set the value of the stack entry by index.
@@ -389,8 +425,9 @@ class CqVMStackEntry
 			if ( m_pVarRef != 0 )
 			{
 				// TODO: Should do some checking!!
-				CqShaderVariableTyped<T>* pVar = static_cast<CqShaderVariableTyped<T>*>( m_pVarRef );
-				( *pVar ) [ Index ] = val;
+				CqVMStackEntry SE;
+				SE = val;
+				m_pVarRef->SetValue( Index, SE );
 			}
 			else
 			{
@@ -423,9 +460,9 @@ class CqVMStackEntry
 		}
 		/** Get a pointer to the referenced shader variable.
 		 * Only valid if fVariable returns TqTrue.
-		 * \return A pointer to a CqShaderVariable.
+		 * \return A pointer to a IqShaderVariable.
 		 */
-		CqShaderVariable*	pVariable() const
+		IqShaderVariable*	pVariable() const
 		{
 			return ( m_pVarRef );
 		}
@@ -467,6 +504,18 @@ class CqVMStackEntry
 			if ( Size() == 1 ) m_Value = f;
 			else
 				for ( i = Size() - 1; i >= 0; i-- ) m_aValues[ i ] = f;
+			return ( *this );
+		}
+		/** Assignment from an int.
+		 * Takes care of casting to varying by duplication if neccessary.
+		 */
+		CqVMStackEntry&	operator=( TqInt v )
+		{
+			m_pVarRef = 0;
+			TqInt i;
+			if ( Size() == 1 ) m_Value = v;
+			else
+				for ( i = Size() - 1; i >= 0; i-- ) m_aValues[ i ] = v;
 			return ( *this );
 		}
 		/** Assignment from a boolean.
@@ -541,7 +590,7 @@ class CqVMStackEntry
 				for ( i = Size() - 1; i >= 0; i-- ) m_aValues[ i ] = m;
 			return ( *this );
 		}
-		CqVMStackEntry&	operator=( CqShaderVariable* pv );
+		CqVMStackEntry&	operator=( IqShaderVariable* pv );
 
 		/** Templatised less than operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -554,11 +603,18 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpLSS( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			B vB;
+
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( a, i ) < Comp.Value( b, i ) );
+				{
+					Value( vA, i );
+					Comp.Value( vB, i );
+					Res.SetValue( i, vA < vB );
+				}
 		}
 		/** Templatised greater than operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -571,11 +627,18 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpGRT( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			B vB;
+
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( a, i ) > Comp.Value( b, i ) );
+				{
+					Value( vA, i );
+					Comp.Value( vB, i );
+					Res.SetValue( i, vA > vB );
+				}
 		}
 		/** Templatised less than or equal to operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -588,11 +651,18 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpLE( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			B vB;
+
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( a, i ) <= Comp.Value( b, i ) );
+				{
+					Value( vA, i );
+					Comp.Value( vB, i );
+					Res.SetValue( i, vA <= vB );
+				}
 		}
 		/** Templatised greater than or equal to operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -605,11 +675,18 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpGE( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			B vB;
+
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( a, i ) >= Comp.Value( b, i ) );
+				{
+					Value( vA, i );
+					Comp.Value( vB, i );
+					Res.SetValue( i, vA >= vB );
+				}
 		}
 		/** Templatised equality operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -622,11 +699,18 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpEQ( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			B vB;
+			
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( a, i ) == Comp.Value( b, i ) );
+				{
+					Value( vA, i );
+					Comp.Value( vB, i );
+					Res.SetValue( i, vA == vB );
+				}
 		}
 		/** Templatised inequality operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -639,11 +723,18 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpNE( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			B vB;
+
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( a, i ) != Comp.Value( b, i ) );
+				{
+					Value( vA, i );
+					Comp.Value( vB, i );
+					Res.SetValue( i, vA != vB );
+				}
 		}
 		/** Templatised multiplication operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -656,11 +747,18 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpMUL( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			B vB;
+
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( a, i ) * Comp.Value( b, i ) );
+				{
+					Value( vA, i );
+					Comp.Value( vB, i );
+					Res.SetValue( i, vA * vB );
+				}
 		}
 		/** Special case vector multiplication operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -670,15 +768,19 @@ class CqVMStackEntry
 		 */
 		void	OpMULV( CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
-			CqVector3D	temp_point;
+			CqVector3D	vecA, vecB;
 
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, CqVector3D( Value( temp_point, i ).x() * Comp.Value( temp_point, i ).x(),
-					                             Value( temp_point, i ).y() * Comp.Value( temp_point, i ).y(),
-					                             Value( temp_point, i ).z() * Comp.Value( temp_point, i ).z() ) );
+				{
+					Value( vecA, i);
+					Comp.Value( vecB, i);
+					Res.SetValue( i, CqVector3D( vecA.x() * vecB.x(),
+					                             vecA.y() * vecB.y(),
+					                             vecA.z() * vecB.z() ) );
+				}
 		}
 		/** Templatised division operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -691,11 +793,18 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpDIV( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			B vB;
+			
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( a, i ) / Comp.Value( b, i ) );
+				{
+					Value( vA, i );
+					Comp.Value( vB, i );
+					Res.SetValue( i, vA / vB );
+				}
 		}
 		/** Templatised addition operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -708,11 +817,18 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpADD( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			B vB;
+			
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( a, i ) + Comp.Value( b, i ) );
+				{
+					Value( vA, i );
+					Comp.Value( vB, i );
+					Res.SetValue( i, vA + vB );
+				}
 		}
 		/** Templatised subtraction operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -725,11 +841,18 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpSUB( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			B vB;
+
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( a, i ) - Comp.Value( b, i ) );
+				{
+					Value( vA, i );
+					Comp.Value( vB, i );
+					Res.SetValue( i, vA - vB );
+				}
 		}
 		/** Templatised dot operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -743,11 +866,18 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpDOT( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			B vB;
+
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( a, i ) * Comp.Value( b, i ) );
+				{
+					Value( vA, i );
+					Comp.Value( vB, i );
+					Res.SetValue( i, vA * vB );
+				}
 		}
 		/** Templatised cross product operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -761,11 +891,18 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpCRS( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			B vB;
+			
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( a, i ) % Comp.Value( b, i ) );
+				{
+					Value( vA, i );
+					Comp.Value( vB, i );
+					Res.SetValue( i, vA % vB );
+				}
 		}
 		/** Templatised logical AND operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -778,11 +915,18 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpLAND( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			B vB;
+
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( a, i ) && Comp.Value( b, i ) );
+				{
+					Value( vA, i );
+					Comp.Value( vB, i );
+					Res.SetValue( i, vA && vB );
+				}
 		}
 		/** Templatised logical OR operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -795,11 +939,18 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpLOR( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			B vB;
+
 			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( a, i ) || Comp.Value( b, i ) );
+				{
+					Value( vA, i );
+					Comp.Value( vB, i );
+					Res.SetValue( i, vA || vB );
+				}
 		}
 		/** Templatised negation operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -812,11 +963,16 @@ class CqVMStackEntry
 		template <class A>
 		void	OpNEG( A& a, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+
 			TqInt i = MAX( Size(), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, -Value( a, i ) );
+				{
+					Value( vA, i );
+					Res.SetValue( i, -vA );
+				}
 		}
 		/** Templatised cast operator, cast the current stack entry to the spcified type.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -829,11 +985,16 @@ class CqVMStackEntry
 		template <class A, class B>
 		void	OpCAST( A& a, B& b, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+
 			TqInt i = MAX( Size(), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, static_cast<B>( Value( a, i ) ) );
+				{
+					Value( vA, i );
+					Res.SetValue( i, static_cast<B>( vA ) );
+				}
 		}
 		/** Templatised cast three operands to a single triple type (vector/normal/color etc.) and store the result in this stack entry
 		 * \param z The type to combine the float values into.
@@ -843,13 +1004,20 @@ class CqVMStackEntry
 		 * \param RunningState The current SIMD state.
 		 */
 		template <class A>
-		void	OpTRIPLE( A& z, CqVMStackEntry& a, CqVMStackEntry& b, CqVMStackEntry& c, CqBitVector& RunningState )
+		void	OpTRIPLE( A&, CqVMStackEntry& a, CqVMStackEntry& b, CqVMStackEntry& c, CqBitVector& RunningState )
 		{
+			TqFloat x,y,z;
+
 			TqInt i = MAX( MAX( a.Size(), b.Size() ), c.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					SetValue( i, A( a.Value( temp_float, i ), b.Value( temp_float, i ), c.Value( temp_float, i ) ) );
+				{
+					a.Value( x, i );
+					b.Value( y, i );
+					c.Value( z, i );
+					SetValue( i, A( x, y, z ) );
+				}
 		}
 		/** Templatised cast sixteen operands to a single matrix type and store the result in this stack entry
 		 * The parameters a-p are the float values to combine.
@@ -862,16 +1030,25 @@ class CqVMStackEntry
 		                 CqVMStackEntry& i, CqVMStackEntry& j, CqVMStackEntry& k, CqVMStackEntry& l,
 		                 CqVMStackEntry& m, CqVMStackEntry& n, CqVMStackEntry& o, CqVMStackEntry& p, CqBitVector& RunningState )
 		{
+			TqFloat a1,a2,a3,a4;
+			TqFloat b1,b2,b3,b4;
+			TqFloat c1,c2,c3,c4;
+			TqFloat d1,d2,d3,d4;
+			
 			TqInt ii = MAX( MAX( a.Size(), b.Size() ), c.Size() ) - 1;
 			TqBool __fVarying = ii > 0;
 			for ( ; ii >= 0; ii-- )
 			{
 				if ( !__fVarying || RunningState.Value( ii ) )
 				{
-					A tt( a.Value( temp_float, ii ), b.Value( temp_float, ii ), c.Value( temp_float, ii ), d.Value( temp_float, ii ),
-					      e.Value( temp_float, ii ), f.Value( temp_float, ii ), g.Value( temp_float, ii ), h.Value( temp_float, ii ),
-					      i.Value( temp_float, ii ), j.Value( temp_float, ii ), k.Value( temp_float, ii ), l.Value( temp_float, ii ),
-					      m.Value( temp_float, ii ), n.Value( temp_float, ii ), o.Value( temp_float, ii ), p.Value( temp_float, ii ) );
+					a.Value( a1, ii );	b.Value( a2, ii );	c.Value( a3, ii );	d.Value( a4, ii );
+					e.Value( b1, ii );	f.Value( b2, ii );	g.Value( b3, ii );	h.Value( b4, ii );
+					i.Value( c1, ii );	j.Value( c2, ii );	k.Value( c3, ii );	l.Value( c4, ii );
+					m.Value( d1, ii );	n.Value( d2, ii );	o.Value( d3, ii );	p.Value( d4, ii );
+					A tt( a1, a2, a3, a4,
+					      b1, b2, b3, b4,
+					      c1, c2, c3, c4,
+					      d1, d2, d3, d4);
 					SetValue( ii, tt );
 				}
 			}
@@ -886,11 +1063,16 @@ class CqVMStackEntry
 		template <class A>
 		void	OpCOMP( A& z, int index, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			
 			TqInt i = MAX( Size(), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( z, i ) [ index ] );
+				{
+					Value( vA, i );
+					Res.SetValue( i, vA [ index ] );
+				}
 		}
 		/** Templatised component access operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -902,11 +1084,18 @@ class CqVMStackEntry
 		template <class A>
 		void	OpCOMP( A& z, CqVMStackEntry& index, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
+			A vA;
+			TqFloat fi;
+
 			TqInt i = MAX( MAX( Size(), Res.Size() ), index.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( z, i ) [ static_cast<int>( index.Value( temp_float, i ) ) ] );
+				{
+					Value( vA, i );
+					index.Value( fi, i );
+					Res.SetValue( i, vA [ static_cast<TqInt>( fi ) ] );
+				}
 		}
 		/** Templatised component set operator.
 		 * \param z The type to cast this to.
@@ -917,16 +1106,19 @@ class CqVMStackEntry
 		template <class A>
 		void	OpSETCOMP( A& z, int index, CqVMStackEntry& a, CqBitVector& RunningState )
 		{
-			A temp;
+			A vA;
+			TqFloat val;
+
 			TqInt i = MAX( Size(), a.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 			{
 				if ( !__fVarying || RunningState.Value( i ) )
 				{
-					temp = Value( z, i );
-					temp[ index ] = a.Value( temp_float, i );
-					SetValue( i, temp );
+					Value( vA, i );
+					a.Value( val, i );
+					vA [ index ] = val;
+					SetValue( i, vA );
 				}
 			}
 		}
@@ -939,16 +1131,20 @@ class CqVMStackEntry
 		template <class A>
 		void	OpSETCOMP( A& z, CqVMStackEntry& index, CqVMStackEntry& a, CqBitVector& RunningState )
 		{
-			A temp;
+			A vA;
+			TqFloat val, fi;
+
 			TqInt i = MAX( MAX( Size(), a.Size() ), index.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 			{
 				if ( !__fVarying || RunningState.Value( i ) )
 				{
-					temp = Value( z, i );
-					temp[ index.Value( temp_float, i ) ] = a.Value( temp_float, i );
-					SetValue( i, temp );
+					Value( vA, i );
+					a.Value( val, i );
+					index.Value( fi, i );
+					vA [ static_cast<TqInt>( fi ) ] = val;
+					SetValue( i, vA );
 				}
 			}
 		}
@@ -962,13 +1158,18 @@ class CqVMStackEntry
 		void	OpCOMPM( CqVMStackEntry& r, CqVMStackEntry& c, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
 			CqMatrix m;
-			TqFloat temp_float;
+			TqFloat fr, fc;
 
 			TqInt i = MAX( Size(), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
-					Res.SetValue( i, Value( m, i ) [ static_cast<TqInt>( c.Value( temp_float, i ) ) ][ static_cast<TqInt>( c.Value( temp_float, i ) ) ] );
+				{
+					Value( m, i );
+					r.Value( fr, i );
+					c.Value( fc, i );
+					Res.SetValue( i, m [ static_cast<TqInt>( fr ) ][ static_cast<TqInt>( fc ) ] );
+				}
 		}
 
 		/** Special case matrix component access.
@@ -980,7 +1181,7 @@ class CqVMStackEntry
 		void	OpSETCOMPM( CqVMStackEntry& r, CqVMStackEntry& c, CqVMStackEntry& v, CqBitVector& RunningState )
 		{
 			CqMatrix m;
-			TqFloat temp_float;
+			TqFloat fr, fc, val;
 
 			TqInt i = MAX( Size(), v.Size() ) - 1;
 			TqBool __fVarying = i > 0;
@@ -988,8 +1189,11 @@ class CqVMStackEntry
 			{
 				if ( !__fVarying || RunningState.Value( i ) )
 				{
-					m = Value( m, i );
-					m[ static_cast<TqInt>( r.Value( temp_float, i ) ) ][ static_cast<TqInt>( c.Value( temp_float, i ) ) ] = v.Value( temp_float, i );
+					Value( m, i );
+					r.Value( fr, i );
+					c.Value( fc, i );
+					v.Value( val, i );
+					m[ static_cast<TqInt>( fr ) ][ static_cast<TqInt>( fc ) ] = val;
 					SetValue( i, m );
 				}
 			}
@@ -998,7 +1202,7 @@ class CqVMStackEntry
 	private:
 		std::vector < SqVMStackEntry /*,CqVMStackEntryAllocator*/ > m_aValues;	///< Array of SqVMStackEntry storage stuctures.
 		SqVMStackEntry	m_Value;		///< Single value in the case of a uniforn stack entry.
-		CqShaderVariable*	m_pVarRef;		///< Pointer to a referenced variable if a variable stack entry.
+		IqShaderVariable*	m_pVarRef;		///< Pointer to a referenced variable if a variable stack entry.
 		TqUint	m_Size;			///< Size of the SIMD data.
 }
 ;
@@ -1104,7 +1308,7 @@ class _qShareC CqShaderStack
 		}
 		/** Push a new shader variable reference onto the stack.
 		 */
-		void	Push( CqShaderVariable* pv )
+		void	Push( IqShaderVariable* pv )
 		{
 			CqVMStackEntry & s = GetPush();
 			s = pv;

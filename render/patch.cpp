@@ -494,7 +494,7 @@ CqMicroPolyGridBase* CqSurfacePatchBicubic::Dice()
 	{
 		for ( iu = 0; iu <= m_uDiceSize; iu++ )
 		{
-			pGrid->P() = EvaluateFD( matDDx, matDDy, matDDz, DDxA, DDyA, DDzA );
+			pGrid->P().SetValue( pGrid->GridI(), CqVMStackEntry( EvaluateFD( matDDx, matDDy, matDDz, DDxA, DDyA, DDzA ) ) );
 			pGrid->Advance();
 		}
 		AdvanceFD( matDDx, matDDy, matDDz, DDxA, DDyA, DDzA );
@@ -927,8 +927,8 @@ CqMicroPolyGridBase* CqSurfacePatchBilinear::Dice()
 	{
 		for ( iu = 0; iu <= m_uDiceSize; iu++ )
 		{
-			if ( bNormals ) pGrid->N() = EvaluateNormal( iu * diu, iv * div );
-			pGrid->P() = BilinearEvaluate<CqVector4D>( P() [ 0 ], P() [ 1 ], P() [ 2 ], P() [ 3 ], iu * diu, iv * div );
+			if ( bNormals ) pGrid->N().SetValue( pGrid->GridI(), CqVMStackEntry( EvaluateNormal( iu * diu, iv * div ) ) );
+			pGrid->P().SetValue( pGrid->GridI(), CqVMStackEntry( BilinearEvaluate<CqVector4D>( P() [ 0 ], P() [ 1 ], P() [ 2 ], P() [ 3 ], iu * diu, iv * div ) ) );
 			pGrid->Advance();
 		}
 	}

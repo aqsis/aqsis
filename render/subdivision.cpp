@@ -698,38 +698,38 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		TqInt ivC = rE.peNext().pvHead() ->iVertex();
 		TqInt ivD = rE.peNext().pvHead() ->iVertex();
 
-		pGrid->P() [ ( ( vOff ) * cuv ) + uOff ] = SubdP( pPoints, ivA );
-		pGrid->P() [ ( ( vOff ) * cuv ) + uOff + 1 ] = SubdP( pPoints, ivB );
-		pGrid->P() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = SubdP( pPoints, ivC );
-		pGrid->P() [ ( ( vOff + 1 ) * cuv ) + uOff ] = SubdP( pPoints, ivD );
+		pGrid->P().SetValue( ( ( vOff ) * cuv ) + uOff, CqVMStackEntry( SubdP( pPoints, ivA ) ) );
+		pGrid->P().SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( SubdP( pPoints, ivB ) ) );
+		pGrid->P().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdP( pPoints, ivC ) ) );
+		pGrid->P().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdP( pPoints, ivD ) ) );
 
 		if ( uses_s && has_s )
 		{
-			pGrid->s() [ ( ( vOff ) * cuv ) + uOff ] = Subds( pPoints, ivA );
-			pGrid->s() [ ( ( vOff ) * cuv ) + uOff + 1 ] = Subds( pPoints, ivB );
-			pGrid->s() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = Subds( pPoints, ivC );
-			pGrid->s() [ ( ( vOff + 1 ) * cuv ) + uOff ] = Subds( pPoints, ivD );
+			pGrid->s().SetValue( ( ( vOff ) * cuv ) + uOff, CqVMStackEntry( Subds( pPoints, ivA ) ) );
+			pGrid->s().SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( Subds( pPoints, ivB ) ) );
+			pGrid->s().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( Subds( pPoints, ivC ) ) );
+			pGrid->s().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( Subds( pPoints, ivD ) ) );
 		}
 		if ( uses_t && has_t )
 		{
-			pGrid->t() [ ( ( vOff ) * cuv ) + uOff ] = Subdt( pPoints, ivA );
-			pGrid->t() [ ( ( vOff ) * cuv ) + uOff + 1 ] = Subdt( pPoints, ivB );
-			pGrid->t() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = Subdt( pPoints, ivC );
-			pGrid->t() [ ( ( vOff + 1 ) * cuv ) + uOff ] = Subdt( pPoints, ivD );
+			pGrid->t().SetValue( ( ( vOff ) * cuv ) + uOff, CqVMStackEntry( Subdt( pPoints, ivA ) ) );
+			pGrid->t().SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( Subdt( pPoints, ivB ) ) );
+			pGrid->t().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( Subdt( pPoints, ivC ) ) );
+			pGrid->t().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( Subdt( pPoints, ivD ) ) );
 		}
 		if ( uses_Cs && has_Cs )
 		{
-			pGrid->Cs() [ ( ( vOff ) * cuv ) + uOff ] = SubdCs( pPoints, ivA );
-			pGrid->Cs() [ ( ( vOff ) * cuv ) + uOff + 1 ] = SubdCs( pPoints, ivB );
-			pGrid->Cs() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = SubdCs( pPoints, ivC );
-			pGrid->Cs() [ ( ( vOff + 1 ) * cuv ) + uOff ] = SubdCs( pPoints, ivD );
+			pGrid->Cs().SetValue( ( ( vOff ) * cuv ) + uOff, CqVMStackEntry( SubdCs( pPoints, ivA ) ) );
+			pGrid->Cs().SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( SubdCs( pPoints, ivB ) ) );
+			pGrid->Cs().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdCs( pPoints, ivC ) ) );
+			pGrid->Cs().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdCs( pPoints, ivD ) ) );
 		}
 		if ( uses_Os && has_Os )
 		{
-			pGrid->Os() [ ( ( vOff ) * cuv ) + uOff ] = SubdOs( pPoints, ivA );
-			pGrid->Os() [ ( ( vOff ) * cuv ) + uOff + 1 ] = SubdOs( pPoints, ivB );
-			pGrid->Os() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = SubdOs( pPoints, ivC );
-			pGrid->Os() [ ( ( vOff + 1 ) * cuv ) + uOff ] = SubdOs( pPoints, ivD );
+			pGrid->Os().SetValue( ( ( vOff ) * cuv ) + uOff, CqVMStackEntry( SubdOs( pPoints, ivA ) ) );
+			pGrid->Os().SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( SubdOs( pPoints, ivB ) ) );
+			pGrid->Os().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdOs( pPoints, ivC ) ) );
+			pGrid->Os().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdOs( pPoints, ivD ) ) );
 		}
 	}
 
@@ -743,28 +743,28 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		TqInt ivB = rE.pvHead() ->iVertex();
 		TqInt ivC = rE.peNext().pvHead() ->iVertex();
 
-		pGrid->P() [ ( ( vOff ) * cuv ) + uOff + 1 ] = SubdP( pPoints, ivB );
-		pGrid->P() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = SubdP( pPoints, ivC );
+		pGrid->P().SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( SubdP( pPoints, ivB ) ) );
+		pGrid->P().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdP( pPoints, ivC ) ) );
 
 		if ( uses_s && has_s )
 		{
-			pGrid->s() [ ( ( vOff ) * cuv ) + uOff + 1 ] = Subds( pPoints, ivB );
-			pGrid->s() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = Subds( pPoints, ivC );
+			pGrid->s().SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( Subds( pPoints, ivB ) ) );
+			pGrid->s().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( Subds( pPoints, ivC ) ) );
 		}
 		if ( uses_t && has_t )
 		{
-			pGrid->t() [ ( ( vOff ) * cuv ) + uOff + 1 ] = Subdt( pPoints, ivB );
-			pGrid->t() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = Subdt( pPoints, ivC );
+			pGrid->t().SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( Subdt( pPoints, ivB ) ) );
+			pGrid->t().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( Subdt( pPoints, ivC ) ) );
 		}
 		if ( uses_Cs && has_Cs )
 		{
-			pGrid->Cs() [ ( ( vOff ) * cuv ) + uOff + 1 ] = SubdCs( pPoints, ivB );
-			pGrid->Cs() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = SubdCs( pPoints, ivC );
+			pGrid->Cs().SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( SubdCs( pPoints, ivB ) ) );
+			pGrid->Cs().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdCs( pPoints, ivC ) ) );
 		}
 		if ( uses_Os && has_Os )
 		{
-			pGrid->Os() [ ( ( vOff ) * cuv ) + uOff + 1 ] = SubdOs( pPoints, ivB );
-			pGrid->Os() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = SubdOs( pPoints, ivC );
+			pGrid->Os().SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( SubdOs( pPoints, ivB ) ) );
+			pGrid->Os().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdOs( pPoints, ivC ) ) );
 		}
 	}
 
@@ -778,28 +778,28 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		TqInt ivC = rE.pvHead() ->iVertex();
 		TqInt ivD = rE.peNext().pvHead() ->iVertex();
 
-		pGrid->P() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = SubdP( pPoints, ivC );
-		pGrid->P() [ ( ( vOff + 1 ) * cuv ) + uOff ] = SubdP( pPoints, ivD );
+		pGrid->P().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdP( pPoints, ivC ) ) );
+		pGrid->P().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdP( pPoints, ivD ) ) );
 
 		if ( uses_s && has_s )
 		{
-			pGrid->s() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = Subds( pPoints, ivC );
-			pGrid->s() [ ( ( vOff + 1 ) * cuv ) + uOff ] = Subds( pPoints, ivD );
+			pGrid->s().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( Subds( pPoints, ivC ) ) );
+			pGrid->s().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( Subds( pPoints, ivD ) ) );
 		}
 		if ( uses_t && has_t )
 		{
-			pGrid->t() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = Subdt( pPoints, ivC );
-			pGrid->t() [ ( ( vOff + 1 ) * cuv ) + uOff ] = Subdt( pPoints, ivD );
+			pGrid->t().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( Subdt( pPoints, ivC ) ) );
+			pGrid->t().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( Subdt( pPoints, ivD ) ) );
 		}
 		if ( uses_Cs && has_Cs )
 		{
-			pGrid->Cs() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = SubdCs( pPoints, ivC );
-			pGrid->Cs() [ ( ( vOff + 1 ) * cuv ) + uOff ] = SubdCs( pPoints, ivD );
+			pGrid->Cs().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdCs( pPoints, ivC ) ) );
+			pGrid->Cs().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdCs( pPoints, ivD ) ) );
 		}
 		if ( uses_Os && has_Os )
 		{
-			pGrid->Os() [ ( ( vOff + 1 ) * cuv ) + uOff + 1 ] = SubdOs( pPoints, ivC );
-			pGrid->Os() [ ( ( vOff + 1 ) * cuv ) + uOff ] = SubdOs( pPoints, ivD );
+			pGrid->Os().SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdOs( pPoints, ivC ) ) );
+			pGrid->Os().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdOs( pPoints, ivD ) ) );
 		}
 	}
 
@@ -812,11 +812,11 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		rE.Reset( pF->pEdge( 3 ), pF );
 		TqInt ivD = rE.pvHead() ->iVertex();
 
-		pGrid->P() [ ( ( vOff + 1 ) * cuv ) + uOff ] = SubdP( pPoints, ivD );
-		if ( uses_s && has_s ) pGrid->s() [ ( ( vOff + 1 ) * cuv ) + uOff ] = Subds( pPoints, ivD );
-		if ( uses_t && has_t ) pGrid->t() [ ( ( vOff + 1 ) * cuv ) + uOff ] = Subdt( pPoints, ivD );
-		if ( uses_Cs && has_Cs ) pGrid->Cs() [ ( ( vOff + 1 ) * cuv ) + uOff ] = SubdCs( pPoints, ivD );
-		if ( uses_Os && has_Os ) pGrid->Os() [ ( ( vOff + 1 ) * cuv ) + uOff ] = SubdOs( pPoints, ivD );
+		pGrid->P().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdP( pPoints, ivD ) ) );
+		if ( uses_s && has_s ) pGrid->s().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( Subds( pPoints, ivD ) ) );
+		if ( uses_t && has_t ) pGrid->t().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( Subdt( pPoints, ivD ) ) );
+		if ( uses_Cs && has_Cs ) pGrid->Cs().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdCs( pPoints, ivD ) ) );
+		if ( uses_Os && has_Os ) pGrid->Os().SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdOs( pPoints, ivD ) ) );
 	}
 
 	vOff -= 1 << ( Level - 1 );

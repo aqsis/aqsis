@@ -76,7 +76,7 @@ struct SqOpCodeTrans
 	char*	m_strName;					///< Name of the opcode.
 	void( CqShaderVM::*m_pCommand ) ();	///< Member pointer to the function.
 	TqInt	m_cParams;					///< Number of expected parameters.
-	EqVariableType m_aParamTypes[ 10 ];	///< Array of parameter types (up to ten, can be extended if required).
+	TqInt   m_aParamTypes[ 10 ];	///< Array of parameter types (up to ten, can be extended if required).
 }
 ;
 
@@ -131,10 +131,10 @@ class _qShareC CqShader
 		{}
 		/** Get the value of a named shader paramter.
 		 * \param name The name of the shader paramter.
-		 * \param res CqShaderVariable pointer to store the result in, will be typechecked for suitability.
+		 * \param res IqShaderVariable pointer to store the result in, will be typechecked for suitability.
 		 * \return Boolean indicating the parameter existed and res was of an appropriate type.
 		 */
-		virtual	_qShareM TqBool	GetValue( const char* name, CqShaderVariable* res )
+		virtual	_qShareM TqBool	GetValue( const char* name, IqShaderVariable* res )
 		{
 			return ( TqFalse );
 		}
@@ -288,6 +288,7 @@ union UsProgramElement
 						POPV(a);		/* first value */ \
 						/* Read all the additional values. */ \
 						static TqInt i=0; \
+						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
 						TqInt iP=0; \
@@ -300,6 +301,7 @@ union UsProgramElement
 						POPV(b);		/* second value */ \
 						/* Read all the additional values. */ \
 						static TqInt i=0; \
+						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
 						TqInt iP=0; \
@@ -313,6 +315,7 @@ union UsProgramElement
 						POPV(c);		/* third value */ \
 						/* Read all the additional values. */ \
 						static TqInt i=0; \
+						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
 						TqInt iP=0; \
@@ -355,6 +358,7 @@ union UsProgramElement
 						POPV(a);		/* first value */ \
 						/* Read all the additional values. */ \
 						static TqInt i=0; \
+						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
 						TqInt iP=0; \
@@ -368,6 +372,7 @@ union UsProgramElement
 						POPV(valc);	\
 						POPV(vald);	\
 						TqInt i=0; \
+						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count))+4; \
 						CqVMStackEntry** apSplinePoints=new CqVMStackEntry*[cParams]; \
 						apSplinePoints[0]=&vala; apSplinePoints[1]=&valb; apSplinePoints[2]=&valc; apSplinePoints[3]=&vald; \
@@ -386,6 +391,7 @@ union UsProgramElement
 						POPV(valc);	\
 						POPV(vald);	\
 						TqInt i=0; \
+						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count))+4; \
 						CqVMStackEntry** apSplinePoints=new CqVMStackEntry*[cParams]; \
 						apSplinePoints[0]=&vala; apSplinePoints[1]=&valb; apSplinePoints[2]=&valc; apSplinePoints[3]=&vald; \
@@ -400,6 +406,7 @@ union UsProgramElement
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
 						TqInt i=0; \
+						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
 						TqInt iP=0; \
@@ -412,6 +419,7 @@ union UsProgramElement
 						POPV(channel); /* channel */\
 						POPV(R); /* point */\
 						TqInt i=0; \
+						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
 						TqInt iP=0; \
@@ -425,6 +433,7 @@ union UsProgramElement
 						POPV(s); /* s */\
 						POPV(t); /* t */\
 						TqInt i=0; \
+						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
 						TqInt iP=0; \
@@ -440,6 +449,7 @@ union UsProgramElement
 						POPV(R3); /* R3 */\
 						POPV(R4); /* R4 */\
 						TqInt i=0; \
+						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
 						TqInt iP=0; \
@@ -459,6 +469,7 @@ union UsProgramElement
 						POPV(s4); /* s4 */\
 						POPV(t4); /* t4 */\
 						TqInt i=0; \
+						GETFLOAT(count); \
 						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
 						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
 						TqInt iP=0; \
@@ -498,7 +509,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 		virtual _qShareM ~CqShaderVM()
 		{
 			// Delete the local variables.
-			for ( std::vector<CqShaderVariable*>::iterator i = m_LocalVars.begin(); i != m_LocalVars.end(); i++ )
+			for ( std::vector<IqShaderVariable*>::iterator i = m_LocalVars.begin(); i != m_LocalVars.end(); i++ )
 				if ( ( *i ) != NULL ) delete( *i );
 		}
 
@@ -507,10 +518,10 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 		_qShareM	void	ExecuteInit();
 
 		virtual	void	SetValue( const char* name, TqPchar val );
-		virtual	TqBool	GetValue( const char* name, CqShaderVariable* res );
+		virtual	TqBool	GetValue( const char* name, IqShaderVariable* res );
 
         _qShareM int				GetShaderVarCount();				// for libslxargs
-        _qShareM CqShaderVariable * GetShaderVarAt(int varIndex);  		// for libslxargs     
+        _qShareM IqShaderVariable * GetShaderVarAt(int varIndex);  		// for libslxargs     
         _qShareM EqShaderType		Type()			{return(m_Type);}	// for libslxargs
         
 		virtual	void	Evaluate( CqShaderExecEnv& Env )
@@ -538,7 +549,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
         EqShaderType 		m_Type;							///< Shader type for libslxargs
 		TqUint m_LocalIndex;                   ///<  Local Index to speed up
 		CqShaderExecEnv*	m_pEnv;							///< Pointer to the current excution environment.
-		std::vector<CqShaderVariable*>	m_LocalVars;		///< Array of local variables.
+		std::vector<IqShaderVariable*>	m_LocalVars;		///< Array of local variables.
 		std::vector<UsProgramElement>	m_ProgramInit;		///< Bytecodes of the intialisation program.
 		std::vector<UsProgramElement>	m_Program;			///< Bytecodes of the main program.
 		UsProgramElement*	m_PC;							///< Current program pointer.
@@ -560,9 +571,9 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 		}
 		/** Get a shader variable by index.
 		 * \param Index Integer index, top bit indicates system variable.
-		 * \return Pointer to a CqShaderVariable derived class.
+		 * \return Pointer to a IqShaderVariable derived class.
 		 */
-		CqShaderVariable*	GetVar( TqInt Index )
+		IqShaderVariable*	GetVar( TqInt Index )
 		{
 			if ( Index & 0x8000 )
 				return ( m_pEnv->pVar( Index & 0x7FFF ) );
@@ -570,9 +581,9 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 				return ( m_LocalVars[ Index ] );
 		}
 		/** Add a variable to the list of local ones.
-		 * \param pVar Pointer to a CqShaderVariable derived class.
+		 * \param pVar Pointer to a IqShaderVariable derived class.
 		 */
-		void	AddLocalVariable( CqShaderVariable* pVar )
+		void	AddLocalVariable( IqShaderVariable* pVar )
 		{
 			m_LocalVars.push_back( pVar );
 		}

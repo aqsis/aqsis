@@ -131,8 +131,8 @@ class CqShaderLightsourceAmbient : public CqShader
 		}
 
 	private:
-		CqShaderVariableUniform<Type_Float, TqFloat>	intensity;
-		CqShaderVariableUniform<Type_Color, CqColor>	lightcolor;
+		CqShaderVariableUniform<type_float, TqFloat>	intensity;
+		CqShaderVariableUniform<type_color, CqColor>	lightcolor;
 };
 
 

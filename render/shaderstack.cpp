@@ -40,7 +40,7 @@ CqVMStackEntry::CqVMStackEntry( TqInt size )
 }
 
 
-CqVMStackEntry&	CqVMStackEntry::operator=( CqShaderVariable* pv )
+CqVMStackEntry&	CqVMStackEntry::operator=( IqShaderVariable* pv )
 {
 	//pv->GetValue(*this);
 	m_pVarRef = pv;

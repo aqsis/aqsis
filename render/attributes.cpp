@@ -224,7 +224,7 @@ TqFloat* CqAttributes::GetFloatAttributeWrite( const char* strName, const char* 
 {
 	CqParameter * pParam = pParameterWrite( strName, strParam );
 	if ( pParam != 0 )
-		return ( static_cast<CqParameterTypedUniform<TqFloat, Type_Float>*>( pParam ) ->pValue() );
+		return ( static_cast<CqParameterTyped<TqFloat>*>( pParam ) ->pValue() );
 	else
 		return ( 0 );
 }

@@ -57,9 +57,17 @@ typedef	bool	TqBool;
 #define	CLAMP(a,min,max)	((a)<(min)?(min):((a)>(max)?(max):(a)))
 #define	MIN(a,b)			(((a)<(b))?(a):(b))
 #define	MAX(a,b)			(((a)<(b))?(b):(a))
+
+#define	CMIN(a,b)			( CqColor( MIN((a).fRed(), (b).fRed()), MIN((a).fGreen(), (b).fGreen()), MIN((a).fBlue(), (b).fBlue()) ) )
+#define	CMAX(a,b)			( CqColor( MAX((a).fRed(), (b).fRed()), MAX((a).fGreen(), (b).fGreen()), MAX((a).fBlue(), (b).fBlue()) ) )
+#define	CCLAMP(a,min,max)	( CqColor( CLAMP((a).fRed(), (min).fRed(), (max).fRed()), CLAMP((a).fGreen(), (min).fGreen(), (max).fGreen()), CLAMP((a).fBlue(), (min).fBlue(), (max).fBlue()) ) )
+
+#define	VMIN(a,b)			( CqVector3D( MIN((a).x(), (b).x()), MIN((a).y(), (b).y()), MIN((a).z(), (b).z()) ) )
+#define	VMAX(a,b)			( CqVector3D( MAX((a).x(), (b).x()), MAX((a).y(), (b).y()), MAX((a).z(), (b).z()) ) )
+#define	VCLAMP(a,min,max)	( CqVector3D( CLAMP( (a).x(), (min).x(), (max).x() ), CLAMP( (a).y(), (min).y(), (max).y() ), CLAMP( (a).z(), (min).z(), (max).z() ) ) )
+
 #define RAD(a)				((a)/(180.0f/RI_PI))
 #define DEG(a)				(((a)/180.0f)*RI_PI)
-
 
 inline TqUint LOWEST_BIT( TqUint x )
 {

@@ -276,6 +276,7 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
 {
     CqShaderVariable * shaderVar;
     EqVariableType	theType;
+	EqVariableClass theClass;
     SLX_TYPE		slxType;
     CqString		varNameCqStr;
     char *			varNameCStr;
@@ -289,6 +290,7 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
     if (shaderVar != NULL) 
     {
         theType = shaderVar->Type();
+        theClass = shaderVar->Class();
         
         varNameCqStr = shaderVar->strName();
         varNameCStr = (char *)varNameCqStr.c_str();
@@ -300,12 +302,12 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
         
         switch (theType)
         {
-            case Type_UniformFloatVariable:
+            case type_float:
                 {
                     TqFloat			aTqFloat;
                     RtFloat			aRtFloat;
                     slxType = SLX_TYPE_SCALAR;
-                    aTqFloat = static_cast<TqFloat>((*static_cast<CqShaderVariableUniform<Type_Float,TqFloat>*>(shaderVar)));
+                    aTqFloat = static_cast<TqFloat>((*static_cast<CqShaderVariableUniform<type_float,TqFloat>*>(shaderVar)));
                     aRtFloat = aTqFloat;
                     defaultValLength = sizeof(RtFloat);
                     defaultVal = (char *)malloc(defaultValLength);
@@ -317,12 +319,12 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     (*theNArgs)++;
                 }
                 break;
-            case Type_UniformStringVariable:
+            case type_string:
                 {
                     CqString		aCqString;
                     char *			aCString;
                     slxType = SLX_TYPE_STRING;
-                    aCqString = (*static_cast<CqShaderVariableUniform<Type_String,CqString>*>(shaderVar));
+                    aCqString = (*static_cast<CqShaderVariableUniform<type_string,CqString>*>(shaderVar));
                     aCString = (char *)aCqString.c_str();
                     defaultValLength = strlen(aCString) + 1;
                     defaultVal = (char *)malloc(defaultValLength);
@@ -334,12 +336,12 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     (*theNArgs)++;
                 }
                 break;
-            case Type_UniformPointVariable:
+            case type_point:
                 {
                     CqVector3D		aCqVector3D;
                     RtPoint			aRtPoint;
                     slxType = SLX_TYPE_POINT;
-                    aCqVector3D = (*static_cast<CqShaderVariableUniform<Type_Point,CqVector3D>*>(shaderVar));
+                    aCqVector3D = (*static_cast<CqShaderVariableUniform<type_point,CqVector3D>*>(shaderVar));
                     aRtPoint[0] = aCqVector3D[0];
                     aRtPoint[1] = aCqVector3D[1];
                     aRtPoint[2] = aCqVector3D[2];
@@ -357,12 +359,12 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     (*theNArgs)++;
                 }
                 break;
-            case Type_UniformColorVariable:
+            case type_color:
                 {
                     CqColor			aCqColor;
                     RtColor			aRtColor;
                     slxType = SLX_TYPE_COLOR;
-                    aCqColor = (*static_cast<CqShaderVariableUniform<Type_Color,CqColor>*>(shaderVar));
+                    aCqColor = (*static_cast<CqShaderVariableUniform<type_color,CqColor>*>(shaderVar));
                     aRtColor[0] = aCqColor.fRed();
                     aRtColor[1] = aCqColor.fGreen();
                     aRtColor[2] = aCqColor.fBlue();

@@ -98,9 +98,9 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 	//TODO dtime is not initialised yet
 	//dtime().Initialise(uGridRes, vGridRes, i);
 
-	alpha().SetValue( TqFloat( coverage[ 0 ] ) );
-	ncomps().SetValue( TqFloat( components ) );
-	time().SetValue( TqFloat( shuttertime ) );
+	alpha().SetValue( CqVMStackEntry( coverage[ 0 ] ) );
+	ncomps().SetValue( CqVMStackEntry( components ) );
+	time().SetValue( CqVMStackEntry( shuttertime ) );
 
 
 	m_pShader->Initialise( uGridRes, vGridRes, *this );
@@ -108,16 +108,16 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 		for ( i = 0; i < uGridRes; i++ )
 		{
 
-			P() [ j * ( uGridRes + 1 ) + i ] = CqVector3D( x + i, y + j, 0.0 );
-			Ci() [ j * ( uGridRes + 1 ) + i ] = color[ j * ( uGridRes ) + i ];
-			Oi() [ j * ( uGridRes + 1 ) + i ] = opacity[ j * ( uGridRes ) + i ];
+			P().SetValue( j * ( uGridRes + 1 ) + i, CqVMStackEntry(CqVector3D( x + i, y + j, 0.0 )));
+			Ci().SetValue( j * ( uGridRes + 1 ) + i, CqVMStackEntry(color[ j * ( uGridRes ) + i ]));
+			Oi().SetValue( j * ( uGridRes + 1 ) + i, CqVMStackEntry(opacity[ j * ( uGridRes ) + i ]));
 
 		}
 	// Execute the Shader VM
 	if ( m_pShader )
 	{
 		m_pShader->Evaluate( *this );
-		alpha().SetValue( 1.0 ); /* by default 3delight/bmrt set it to 1.0 */
+		alpha().SetValue( CqVMStackEntry( 1.0f ) ); /* by default 3delight/bmrt set it to 1.0 */
 	}
 
 	m_uYOrigin = static_cast<TqInt>(y);
@@ -139,8 +139,12 @@ CqColor CqImagersource::Color( TqFloat x, TqFloat y )
 
 	TqInt index = static_cast<TqInt>(( y - m_uYOrigin ) * ( m_uGridRes + 1 ) + x - m_uXOrigin);
 
+	CqVMStackEntry SE;
 	if ( Ci().Size() >= index )
-		result = Ci() [ index ];
+	{
+		Ci().GetValue ( index, SE );
+		SE.Value( result );
+	}
 
 	return result;
 }
@@ -156,8 +160,13 @@ CqColor CqImagersource::Opacity( TqFloat x, TqFloat y )
 
 	TqInt index = static_cast<TqInt>(( y - m_uYOrigin ) * ( m_uGridRes + 1 ) + x - m_uXOrigin);
 
+	CqVMStackEntry SE;
 	if ( Oi().Size() >= index )
-		result = Oi() [ index ];
+	{
+		Oi().GetValue ( index, SE );
+		SE.Value( result );
+	}
+
 	return result;
 }
 
@@ -169,7 +178,11 @@ CqColor CqImagersource::Opacity( TqFloat x, TqFloat y )
  */
 TqFloat CqImagersource::Alpha( TqFloat x, TqFloat y )
 {
-	TqFloat result = alpha();
+	TqFloat result;
+
+	CqVMStackEntry SE;
+	alpha().GetValue ( 0, SE );
+	SE.Value( result );
 
 	return result;
 }

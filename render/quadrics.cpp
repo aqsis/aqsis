@@ -101,13 +101,13 @@ CqMicroPolyGridBase* CqQuadric::Dice()
 		for ( u = 0; u <= m_uDiceSize; u++ )
 		{
 			P = DicePoint( u, v, N );
-			pGrid->P() = m_matTx * P;
+			pGrid->P().SetValue( pGrid->GridI(), CqVMStackEntry( m_matTx * P ) );
 			if(CanGenerateNormals())
 			{
 				EqOrientation CSO = pAttributes() ->eCoordsysOrientation();
 				EqOrientation O = pAttributes() ->eOrientation();
 				N = ( CSO == O ) ? N : -N;
-				pGrid->Ng() = m_matITTx * N;
+				pGrid->Ng().SetValue( pGrid->GridI(), CqVMStackEntry( m_matITTx * N ) );
 			}
 			pGrid->Advance();
 		}

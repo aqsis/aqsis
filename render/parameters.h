@@ -53,6 +53,10 @@ class CqParameter
 		 * \return A pointer to a new parameter with the same name and value.
 		 */
 		virtual	CqParameter* Clone() const = 0;
+		/** Pure virtual, get value class.
+		 * \return Class as an EqVariableClass.
+		 */
+		virtual	EqVariableClass	Class() const = 0;
 		/** Pure virtual, get value type.
 		 * \return Type as an EqVariableType.
 		 */
@@ -88,7 +92,7 @@ class CqParameter
 		 * \param v Integer dice count for the v direction.
 		 * \param pResult Pointer to storage for the result.
 		 */
-		virtual	void	BilinearDice( TqInt u, TqInt v, CqShaderVariable* pResult ) = 0;
+		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderVariable* pResult ) = 0;
 
 		/** Get a reference to the parameter name.
 		 */
@@ -174,9 +178,13 @@ class CqParameterTypedVarying : public CqParameterTyped<T>
 		{
 			return ( new CqParameterTypedVarying<T, I>( *this ) );
 		}
+		virtual	EqVariableClass	Class() const
+		{
+			return ( class_varying );
+		}
 		virtual	EqVariableType	Type() const
 		{
-			return ( ( EqVariableType ) ( I | Type_Varying ) );
+			return ( I );
 		}
 		virtual	void	SetSize( TqInt size )
 		{
@@ -212,7 +220,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T>
 				pValue( 3 ) [ 0 ] = pVS->pValue( 1 ) [ 0 ] = static_cast<T>( ( pValue( 1 ) [ 0 ] + pValue( 3 ) [ 0 ] ) * 0.5 );
 			}
 		}
-		virtual	void	BilinearDice( TqInt u, TqInt v, CqShaderVariable* pResult );
+		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderVariable* pResult );
 
 		// Overridden from CqParameterTyped<T>
 
@@ -300,9 +308,13 @@ class CqParameterTypedUniform : public CqParameterTyped<T>
 		{
 			return ( new CqParameterTypedUniform<T, I>( *this ) );
 		}
+		virtual	EqVariableClass	Class() const
+		{
+			return ( class_uniform );
+		}
 		virtual	EqVariableType	Type() const
 		{
-			return ( ( EqVariableType ) ( I | Type_Uniform ) );
+			return ( I );
 		}
 		virtual	void	SetSize( TqInt size )
 		{}
@@ -317,17 +329,17 @@ class CqParameterTypedUniform : public CqParameterTyped<T>
 		{}
 		virtual void	vSubdivide( CqParameter* pResult )
 		{}
-		virtual	void	BilinearDice( TqInt u, TqInt v, CqShaderVariable* pResult )
+		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderVariable* pResult )
 		{
 			// Just promote the uniform value to varying by duplication.
-			assert( ( pResult->Type() & Type_Mask ) == ( Type() & Type_Mask ) );
-			assert( ( pResult->Type() & Storage_Mask ) == Type_Varying );
-			CqShaderVariableVarying<I, T>* pVR = static_cast<CqShaderVariableVarying<I, T>*>( pResult );
+			assert( pResult->Type() == Type() );
+			assert( pResult->Class() == class_varying );
+			//CqShaderVariableVarying<I, T>* pVR = static_cast<CqShaderVariableVarying<I, T>*>( pResult );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqInt i;
 			for ( i = 0; i < u*v; i++ )
-				( *pVR ) [ i ] = m_Value;
+				pResult->SetValue( i, CqVMStackEntry( m_Value ) );
 		}
 
 
@@ -394,9 +406,9 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I>
 		{
 			return ( new CqParameterTypedVertex<T, I>( *this ) );
 		}
-		virtual	EqVariableType	Type() const
+		virtual	EqVariableClass	Class() const
 		{
-			return ( ( EqVariableType ) ( I | Type_Vertex ) );
+			return ( class_vertex );
 		}
 
 		/** Static constructor, to allow type free parameter construction.
@@ -439,9 +451,13 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T>
 		{
 			return ( new CqParameterTypedVaryingArray<T, I>( *this ) );
 		}
+		virtual	EqVariableClass	Class() const
+		{
+			return ( class_varying );
+		}
 		virtual	EqVariableType	Type() const
 		{
-			return ( ( EqVariableType ) ( I | Type_Varying ) );
+			return ( I );
 		}
 		virtual	void	SetSize( TqInt size )
 		{
@@ -480,7 +496,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T>
 				pValue( 3 ) [ 0 ] = pVS->pValue( 1 ) [ 0 ] = static_cast<T>( ( pValue( 1 ) [ 0 ] + pValue( 3 ) [ 0 ] ) * 0.5 );
 			}
 		}
-		virtual	void	BilinearDice( TqInt u, TqInt v, CqShaderVariable* pResult );
+		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderVariable* pResult );
 
 		// Overridden from CqParameterTyped<T>
 		virtual	const	T*	pValue() const
@@ -578,9 +594,13 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T>
 		{
 			return ( new CqParameterTypedUniformArray<T, I>( *this ) );
 		}
+		virtual	EqVariableClass	Class() const
+		{
+			return ( class_uniform );
+		}
 		virtual	EqVariableType	Type() const
 		{
-			return ( ( EqVariableType ) ( I | Type_Uniform ) );
+			return ( I );
 		}
 		virtual	void	SetSize( TqInt size )
 		{}
@@ -595,17 +615,17 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T>
 		{}
 		virtual void	vSubdivide( CqParameter* pResult )
 		{}
-		virtual	void	BilinearDice( TqInt u, TqInt v, CqShaderVariable* pResult )
+		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderVariable* pResult )
 		{
 			// Just promote the uniform value to varying by duplication.
-			assert( ( pResult->Type() & Type_Mask ) == ( Type() & Type_Mask ) );
-			assert( ( pResult->Type() & Storage_Mask ) == Type_Varying );
-			CqShaderVariableVarying<I, T>* pVR = static_cast<CqShaderVariableVarying<I, T>*>( pResult );
+			assert( pResult->Type() == Type() );
+			assert( pResult->Class() == class_varying );
+			//CqShaderVariableVarying<I, T>* pVR = static_cast<CqShaderVariableVarying<I, T>*>( pResult );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqInt i;
 			for ( i = 0; i < u*v; i++ )
-				( *pVR ) [ i ] = pValue( 0 ) [ 0 ];
+				pResult->SetValue( i, CqVMStackEntry( pValue( 0 ) [ 0 ] ) );
 		}
 
 		// Overridden from CqParameterTyped<T>
@@ -673,9 +693,9 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I>
 		{
 			return ( new CqParameterTypedVertexArray<T, I>( *this ) );
 		}
-		virtual	EqVariableType	Type() const
+		virtual	EqVariableClass	Class() const
 		{
-			return ( ( EqVariableType ) ( I | Type_Vertex ) );
+			return ( class_vertex );
 		}
 
 		/** Static constructor, to allow type free parameter construction.
@@ -692,7 +712,7 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I>
 
 
 
-/** \fn void CqParameterTypedVarying<T,I>::BilinearDice(TqInt u, TqInt v, CqShaderVariable* pResult)
+/** \fn void CqParameterTypedVarying<T,I>::BilinearDice
  * Dice the value into a grid using bilinear interpolation.
  * \param u Integer dice count for the u direction.
  * \param v Integer dice count for the v direction.
@@ -700,12 +720,13 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I>
  */
 
 template <class T, EqVariableType I>
-void CqParameterTypedVarying<T, I>::BilinearDice( TqInt u, TqInt v, CqShaderVariable* pResult )
+void CqParameterTypedVarying<T, I>::BilinearDice( TqInt u, TqInt v, IqShaderVariable* pResult )
 {
-	assert( ( pResult->Type() & Type_Mask ) == ( Type() & Type_Mask ) );
-	assert( ( pResult->Type() & Storage_Mask ) == Type_Varying );
-	CqShaderVariableVarying<I, T>* pVR = static_cast<CqShaderVariableVarying<I, T>*>( pResult );
+	assert( pResult->Type() == Type() );
+	assert( pResult->Class() == class_varying );
+//	CqShaderVariableVarying<I, T>* pVR = static_cast<CqShaderVariableVarying<I, T>*>( pResult );
 	// Check if a valid 4 point quad, do nothing if not.
+	CqVMStackEntry SE;
 	if ( m_aValues.size() == 4 )
 	{
 		// Note it is assumed that the variable has been
@@ -719,11 +740,12 @@ void CqParameterTypedVarying<T, I>::BilinearDice( TqInt u, TqInt v, CqShaderVari
 			TqInt iu;
 			for ( iu = 0; iu <= u; iu++ )
 			{
-				( *pVR ) [ i ] = BilinearEvaluate<T>( pValue( 0 ) [ 0 ],
-				                                      pValue( 1 ) [ 0 ],
-				                                      pValue( 2 ) [ 0 ],
-				                                      pValue( 3 ) [ 0 ],
-				                                      iu * diu, iv * div );
+				SE = BilinearEvaluate<T>( pValue( 0 ) [ 0 ],
+				                          pValue( 1 ) [ 0 ],
+				                          pValue( 2 ) [ 0 ],
+				                          pValue( 3 ) [ 0 ],
+				                          iu * diu, iv * div );
+				pResult->SetValue( i, SE );
 				i++;
 			}
 		}
@@ -737,7 +759,8 @@ void CqParameterTypedVarying<T, I>::BilinearDice( TqInt u, TqInt v, CqShaderVari
 			TqInt iu;
 			for ( iu = 0; iu <= u; iu++ )
 			{
-				( *pVR ) [ i ] = pValue( 0 ) [ 0 ];
+				SE = pValue( 0 ) [ 0 ];
+				pResult->SetValue( i, SE );
 				i++;
 			}
 		}
@@ -745,7 +768,7 @@ void CqParameterTypedVarying<T, I>::BilinearDice( TqInt u, TqInt v, CqShaderVari
 }
 
 
-/** \fn void CqParameterTypedVaryingArray<T,I>::BilinearDice(TqInt u, TqInt v, CqShaderVariable* pResult)
+/** \fn void CqParameterTypedVaryingArray<T,I>::BilinearDice
  * Dice the value into a grid using bilinear interpolation.
  * \param u Integer dice count for the u direction.
  * \param v Integer dice count for the v direction.
@@ -753,11 +776,12 @@ void CqParameterTypedVarying<T, I>::BilinearDice( TqInt u, TqInt v, CqShaderVari
  */
 
 template <class T, EqVariableType I>
-void CqParameterTypedVaryingArray<T, I>::BilinearDice( TqInt u, TqInt v, CqShaderVariable* pResult )
+void CqParameterTypedVaryingArray<T, I>::BilinearDice( TqInt u, TqInt v, IqShaderVariable* pResult )
 {
-	assert( ( pResult->Type() & Type_Mask ) == ( Type() & Type_Mask ) );
-	assert( ( pResult->Type() & Storage_Mask ) == Type_Varying );
-	CqShaderVariableVarying<I, T>* pVR = static_cast<CqShaderVariableVarying<I, T>*>( pResult );
+	assert( pResult->Type() == Type() );
+	assert( pResult->Class() == class_varying );
+//	CqShaderVariableVarying<I, T>* pVR = static_cast<CqShaderVariableVarying<I, T>*>( pResult );
+	CqVMStackEntry SE;
 	// Check if a valid 4 point quad, do nothing if not.
 	if ( m_aValues.size() == 4 )
 	{
@@ -772,11 +796,12 @@ void CqParameterTypedVaryingArray<T, I>::BilinearDice( TqInt u, TqInt v, CqShade
 			TqInt iu;
 			for ( iu = 0; iu <= u; iu++ )
 			{
-				( *pVR ) [ i ] = BilinearEvaluate<T>( pValue( 0 ) [ 0 ],
-				                                      pValue( 1 ) [ 0 ],
-				                                      pValue( 2 ) [ 0 ],
-				                                      pValue( 3 ) [ 0 ],
-				                                      iu * diu, iv * div );
+				SE = BilinearEvaluate<T>( pValue( 0 ) [ 0 ],
+				                          pValue( 1 ) [ 0 ],
+				                          pValue( 2 ) [ 0 ],
+				                          pValue( 3 ) [ 0 ],
+				                          iu * diu, iv * div );
+				pResult->SetValue( i, SE );
 				i++;
 			}
 		}
@@ -790,7 +815,8 @@ void CqParameterTypedVaryingArray<T, I>::BilinearDice( TqInt u, TqInt v, CqShade
 			TqInt iu;
 			for ( iu = 0; iu <= u; iu++ )
 			{
-				( *pVR ) [ i ] = pValue( 0 ) [ 0 ];
+				SE= pValue( 0 ) [ 0 ];
+				pResult->SetValue( i, SE );
 				i++;
 			}
 		}

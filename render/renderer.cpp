@@ -683,7 +683,9 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 {
 	TqInt Count = 1;
 	CqString strName( "" );
-	EqVariableType ILType = Type_Nil;
+	EqVariableType ILType = type_invalid;
+	EqVariableClass ILClass = class_invalid;
+	TqBool bArray = TqFalse;
 
 	// First check if the declaration has embedded type information.
 	CqString strLocalDecl( strDecl );
@@ -692,7 +694,7 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 	{
 		if ( strLocalDecl.find( gVariableStorageNames[ i ] ) != CqString::npos )
 		{
-			ILType = ( EqVariableType ) ( ILType | ( 0x01 << ( Storage_Shift + i ) ) & Storage_Mask );
+			ILClass = static_cast< EqVariableClass > ( i );
 			break;
 		}
 	}
@@ -701,7 +703,7 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 	{
 		if ( strLocalDecl.find( gVariableTypeNames[ i ] ) != CqString::npos )
 		{
-			ILType = ( EqVariableType ) ( ILType | ( i & Type_Mask ) );
+			ILType = static_cast< EqVariableType > ( i );
 			break;
 		}
 	}
@@ -713,7 +715,7 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 		if ( ( e = strLocalDecl.find( ']' ) ) != CqString::npos && e > s )
 		{
 			Count = static_cast<TqInt>( atoi( strLocalDecl.substr( s + 1, e - ( s + 1 ) ).c_str() ) );
-			ILType = ( EqVariableType ) ( ILType | Type_Array );
+			bArray = TqTrue ;
 		}
 	}
 
@@ -722,45 +724,46 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 	if ( s != CqString::npos ) strName = strLocalDecl.substr( s + 1 );
 	else	strName = strLocalDecl;
 
-	if ( ( ILType & Type_Mask ) != Type_Nil )
+	if ( ILType != type_invalid )
 	{
-		// Default to uniform if no storage specified
-		if ( ( ILType & Storage_Mask ) == Type_Nil )
-			ILType = ( EqVariableType ) ( ILType | Type_Uniform );
+		// Default to uniform if no class specified
+		if ( ILClass == class_invalid )
+			ILClass = class_uniform ;
 
 		SqParameterDeclaration Decl;
 		Decl.m_strName = strName;
 		Decl.m_Count = Count;
 		Decl.m_Type = ILType;
+		Decl.m_Class = ILClass;
 		Decl.m_strSpace = "";
 
 		// Get the creation function.
-		switch ( ILType & Storage_Mask )
+		switch ( ILClass )
 		{
-				case Type_Uniform:
+				case class_uniform:
 				{
-					if ( ILType & Type_Array )
-						Decl.m_pCreate = gVariableCreateFuncsUniformArray[ ILType & Type_Mask ];
+					if ( bArray )
+						Decl.m_pCreate = gVariableCreateFuncsUniformArray[ ILType ];
 					else
-						Decl.m_pCreate = gVariableCreateFuncsUniform[ ILType & Type_Mask ];
+						Decl.m_pCreate = gVariableCreateFuncsUniform[ ILType ];
 				}
 				break;
 
-				case Type_Varying:
+				case class_varying:
 				{
-					if ( ILType & Type_Array )
-						Decl.m_pCreate = gVariableCreateFuncsVaryingArray[ ILType & Type_Mask ];
+					if ( bArray )
+						Decl.m_pCreate = gVariableCreateFuncsVaryingArray[ ILType ];
 					else
-						Decl.m_pCreate = gVariableCreateFuncsVarying[ ILType & Type_Mask ];
+						Decl.m_pCreate = gVariableCreateFuncsVarying[ ILType ];
 				}
 				break;
 
-				case Type_Vertex:
+				case class_vertex:
 				{
-					if ( ILType & Type_Array )
-						Decl.m_pCreate = gVariableCreateFuncsVertexArray[ ILType & Type_Mask ];
+					if ( bArray )
+						Decl.m_pCreate = gVariableCreateFuncsVertexArray[ ILType ];
 					else
-						Decl.m_pCreate = gVariableCreateFuncsVertex[ ILType & Type_Mask ];
+						Decl.m_pCreate = gVariableCreateFuncsVertex[ ILType ];
 				}
 				break;
 		}
@@ -775,7 +778,7 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 		if ( strName == is->m_strName )
 			return ( *is );
 	}
-	return ( SqParameterDeclaration( "", Type_Nil, 0, 0, "" ) );
+	return ( SqParameterDeclaration( "", type_invalid, class_invalid, 0, 0, "" ) );
 }
 
 

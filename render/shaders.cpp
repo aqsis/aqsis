@@ -53,11 +53,18 @@ void CqShaderSurfaceConstant::SetValue( const char* name, TqPchar val )
 
 void CqShaderSurfaceConstant::Evaluate( CqShaderExecEnv& Env )
 {
+	CqColor colTemp;
 	Env.Reset();
 	do
 	{
-		Env.Ci() = Env.Os() * Env.Cs();
-		Env.Oi() = Env.Os();
+		CqVMStackEntry SEOs, SECs;
+		Env.Os().GetValue( Env.GridI(), SEOs );
+		Env.Cs().GetValue( Env.GridI(), SECs );
+		TqInt i = 0;
+		GETCOLOR(SECs);
+		GETCOLOR(SEOs);
+		Env.Ci().SetValue( Env.GridI(), CqVMStackEntry( COLOR( SEOs ) * COLOR( SECs ) ) );
+		Env.Oi().SetValue( Env.GridI(), CqVMStackEntry( COLOR( SEOs ) ) );
 	}
 	while ( Env.Advance() );
 }

@@ -119,7 +119,8 @@ void CqMicroPolyGrid::CalcNormals()
 	EqOrientation O = pSurface() ->pAttributes() ->eOrientation();
 	float neg = 1;
 	if ( O != OrientationLH ) neg = -1;
-	CqVector3D* vecMP[ 4 ], vecN;
+	CqVMStackEntry vecMP[ 4 ];
+	CqVector3D	vecN, vecTemp;
 	CqVector3D	vecLastN( 0, 0, 0 );
 	// Calculate each normal from the top left, top right and bottom left points.
 	Reset();
@@ -131,23 +132,26 @@ void CqMicroPolyGrid::CalcNormals()
 		TqInt iu;
 		for ( iu = 0; iu < ur; iu++ )
 		{
-			CqVector3D* pvec = &P() [ iv * ( ur + 1 ) + iu ];
-			vecMP[ 0 ] = &pvec[ 0 ];
-			vecMP[ 1 ] = &pvec[ 1 ];
-			vecMP[ 2 ] = &pvec[ ur + 1 ];
-			vecMP[ 3 ] = &pvec[ ur ];
+			P().GetValue( GridI(), vecMP[ 0 ]);
+			P().GetValue( GridI() + 1, vecMP[ 1 ]);
+			P().GetValue( GridI() + ur + 1, vecMP[ 2 ]);
+			P().GetValue( GridI() + ur, vecMP[ 3 ]);
 			int a, b, c;
 			a = 0;
 			b = a + 1;
-			while ( ( ( *vecMP[ a ] - *vecMP[ b ] ).Magnitude() < FLT_EPSILON ) && b < 3 ) b++;
+			CqVector3D vecA, vecB, vecC;
+			vecMP[ a ].Value( vecA );
+			vecMP[ b ].Value( vecB );
+			while ( ( ( vecA - vecB ).Magnitude() < FLT_EPSILON ) && b < 3 ) b++;
 			if ( b < 3 )
 			{
 				c = b + 1;
-				while ( ( ( *vecMP[ c ] - *vecMP[ b ] ).Magnitude() < FLT_EPSILON || ( *vecMP[ c ] - *vecMP[ a ] ).Magnitude() < FLT_EPSILON ) && c < 3 )
+				vecMP[ c ].Value( vecC );
+				while ( ( ( vecC - vecB ).Magnitude() < FLT_EPSILON || ( vecC - vecA ).Magnitude() < FLT_EPSILON ) && c < 3 )
 					c++;
 				if ( c <= 3 )
 				{
-					vecN = ( *vecMP[ b ] - *vecMP[ a ] ) % ( *vecMP[ c ] - *vecMP[ a ] );	// Cross product is normal.*/
+					vecN = ( vecB - vecA ) % ( vecC - vecA );	// Cross product is normal.*/
 					vecN.Unit();
 					// Flip the normal if the 'current orientation' differs from the 'coordinate system orientation'
 					// see RiSpec 'Orientation and Sides'
@@ -165,15 +169,15 @@ void CqMicroPolyGrid::CalcNormals()
 				//assert(false);
 				vecN = vecLastN;
 			}
-			Ng() = vecN;
+			Ng().SetValue( GridI(), CqVMStackEntry( vecN ) );
 			Advance();
-			if ( iv == vr - 1 ) Ng() [ ( iv + 1 ) * ( ur + 1 ) + iu ] = vecN;
+			if ( iv == vr - 1 ) Ng().SetValue( ( iv + 1 ) * ( ur + 1 ) + iu, CqVMStackEntry( vecN ) );
 		}
-		Ng() = vecN;
+		Ng().SetValue( GridI(), CqVMStackEntry( vecN ) );
 		// Additional advance as we are processing MPs not coords and thus must skip the trailing coord.
 		Advance();
 	}
-	Ng() [ ( vr + 1 ) * ( ur + 1 ) - 1 ] = vecN;
+	Ng().SetValue( ( vr + 1 ) * ( ur + 1 ) - 1, CqVMStackEntry( vecN ) );
 }
 
 
@@ -197,34 +201,63 @@ void CqMicroPolyGrid::Shade()
 	// Calculate geometric normals if not specified by the surface.
 	if ( !bGeometricNormals() )	CalcNormals();
 	// If shading normals are not explicitly specified, they default to the geometric normal.
-	if ( !bShadingNormals() ) N().SetValue( Ng() );	
+	if ( !bShadingNormals() ) 
+	{
+		CqVMStackEntry SE;
+		TqInt i;
+		for( i = 0; i < GridSize(); i++ )
+		{
+			Ng().GetValue( i, SE );
+			N().SetValue( i, SE );	
+		}
+	}
 
 	// Setup uniform variables.
-	if ( USES( lUses, EnvVars_E ) ) E() = vecE;
+	if ( USES( lUses, EnvVars_E ) ) E().SetValue( CqVMStackEntry( vecE ) );
 	if ( USES( lUses, EnvVars_du ) )
 	{
-		float adu = ( ( u() [ uGridRes() ] - u() [ 0 ] ) / uGridRes() );
-		float bdu = ( ( u() [ vGridRes() * ( uGridRes() + 1 ) ] - u() [ 0 ] ) / vGridRes() );
-		du() = adu + bdu;
+		CqVMStackEntry SE1, SE2, SE3, SE4;
+		TqFloat u1, u2, u3; 
+		u().GetValue( 0, SE1 );
+		u().GetValue( uGridRes(), SE2 );
+		u().GetValue( vGridRes() * ( uGridRes() + 1 ), SE3 );
+		SE1.Value( u1 );
+		SE2.Value( u2 );
+		SE3.Value( u3 );
+		TqFloat adu = ( ( u2 - u1 ) / uGridRes() );
+		TqFloat bdu = ( ( u3 - u1 ) / vGridRes() );
+		du().SetValue( CqVMStackEntry( adu + bdu ) );
 	}
 	if ( USES( lUses, EnvVars_dv ) )
 	{
-		float adv = ( ( v() [ uGridRes() ] - v() [ 0 ] ) / uGridRes() );
-		float bdv = ( ( v() [ vGridRes() * ( uGridRes() + 1 ) ] - v() [ 0 ] ) / vGridRes() );
-		dv() = adv + bdv;
+		CqVMStackEntry SE1, SE2, SE3, SE4;
+		TqFloat v1, v2, v3; 
+		v().GetValue( 0, SE1 );
+		v().GetValue( uGridRes(), SE2 );
+		v().GetValue( vGridRes() * ( uGridRes() + 1 ), SE3 );
+		SE1.Value( v1 );
+		SE2.Value( v2 );
+		SE3.Value( v3 );
+		TqFloat adv = ( ( v2 - v1 ) / uGridRes() );
+		TqFloat bdv = ( ( v3 - v1 ) / vGridRes() );
+		dv().SetValue( CqVMStackEntry( adv + bdv ) );
 	}
 
-	if ( USES( lUses, EnvVars_Ci ) ) Ci().SetValue( gColBlack );
-	if ( USES( lUses, EnvVars_Oi ) ) Oi().SetValue( gColWhite );
+	if ( USES( lUses, EnvVars_Ci ) ) Ci().SetValue( CqVMStackEntry( gColBlack ) );
+	if ( USES( lUses, EnvVars_Oi ) ) Oi().SetValue( CqVMStackEntry( gColWhite ) );
 
 	// Setup varying variables.
 	Reset();
 	do
 	{
 		// Convert to 3D now, as all operations in SL are in 3D not 4D.
-		I() = static_cast<CqVector3D>( P() );
-		if ( USES( lUses, EnvVars_dPdu ) ) dPdu() = SO_DuType( P(), GridI(), *this );
-		if ( USES( lUses, EnvVars_dPdv ) ) dPdv() = SO_DvType( P(), GridI(), *this );
+		CqVMStackEntry SE;
+		CqVector3D vecTemp;
+		P().GetValue( GridI(), SE );
+		SE.Value( vecTemp );
+		I().SetValue( GridI(), CqVMStackEntry( vecTemp ) );
+		if ( USES( lUses, EnvVars_dPdu ) ) dPdu().SetValue( GridI(), CqVMStackEntry( SO_DuType( vecTemp, &P(), GridI(), *this ) ) );
+		if ( USES( lUses, EnvVars_dPdv ) ) dPdv().SetValue( GridI(), CqVMStackEntry( SO_DvType( vecTemp, &P(), GridI(), *this ) ) );
 	}
 	while ( Advance() );
 
@@ -235,7 +268,10 @@ void CqMicroPolyGrid::Shade()
 		Reset();
 		do
 		{
-			CqColor opacity = Os();
+			CqVMStackEntry SE;
+			Os().GetValue( GridI(), SE );
+			CqColor opacity;
+			SE.Value( opacity );
 
 			if ( ( opacity != gColWhite ) )
 				cCulled ++;
@@ -261,7 +297,10 @@ void CqMicroPolyGrid::Shade()
 		Reset();
 		do
 		{
-			CqColor opacity = Os();
+			CqVMStackEntry SE;
+			Os().GetValue( GridI(), SE );
+			CqColor opacity;
+			SE.Value( opacity );
 
 			if ( ( opacity == gColBlack ) )
 				cCulled ++;
@@ -295,7 +334,13 @@ void CqMicroPolyGrid::Shade()
 		do
 		{
 			// Calulate the direction the MPG is facing.
-			if ( ( N() * P() ) >= 0 )
+			CqVMStackEntry SEN, SEP;
+			CqVector3D vecN, vecP;
+			N().GetValue( GridI(), SEN );
+			P().GetValue( GridI(), SEP );
+			SEN.Value( vecN );
+			SEP.Value( vecP );
+			if ( ( vecN * vecP ) >= 0 )
 				cCulled++;
 		}
 		while ( Advance() );
@@ -318,6 +363,8 @@ void CqMicroPolyGrid::Shade()
 	QGetRenderContext() ->Stats().SurfaceTimer().Stop();
 
 	// Now try and cull any true transparent MPs (assigned by the shader code
+	static CqRandom rand;
+
 	cCulled = 0;
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().iDisplayMode() & ModeRGB )
 	{
@@ -325,7 +372,10 @@ void CqMicroPolyGrid::Shade()
 		Reset();
 		do
 		{
-			CqColor opacity = Os();
+			CqVMStackEntry SEOs;
+			Os().GetValue(GridI(), SEOs );
+			CqColor opacity;
+			SEOs.Value( opacity );
 
 			if ( ( opacity == gColBlack ) )
 				cCulled ++;
@@ -389,10 +439,14 @@ void CqMicroPolyGrid::Project()
 	Reset();
 	do
 	{
-		CqVector3D&	vecP = P();
+		CqVMStackEntry SEP;
+		P().GetValue( GridI(), SEP );
+		CqVector3D	vecP;
+		SEP.Value( vecP );
 		TqFloat zdepth = vecP.z();
 		vecP = matCameraToRaster * vecP;
 		vecP.z( zdepth );
+		P().SetValue( GridI(), CqVMStackEntry( vecP ) );
 	}
 	while ( Advance() );
 }
@@ -409,8 +463,11 @@ CqBound CqMicroPolyGrid::Bound()
 	Reset();
 	do
 	{
-		CqVector3D&	vecP = P();
-		B.Encapsulate( vecP );
+		CqVector3D vecTemp;
+		CqVMStackEntry SEP;
+		P().GetValue( GridI(), SEP );
+		SEP.Value( vecTemp );
+		B.Encapsulate( vecTemp );
 	}
 	while ( Advance() );
 	return ( B );
@@ -461,14 +518,20 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 			TqBool fTrimmed = TqFalse;
 			if ( pSurface() ->bCanBeTrimmed() )
 			{
-				CqVector2D vecT( u() [ iIndex ], v() [ iIndex ] );
-				TqBool fTrimA = pSurface() ->bIsPointTrimmed( vecT );
-				vecT = CqVector2D( u() [ iIndex + 1 ], v() [ iIndex + 1 ] );
-				TqBool fTrimB = pSurface() ->bIsPointTrimmed( vecT );
-				vecT = CqVector2D( u() [ iIndex + cu + 2 ], v() [ iIndex + cu + 2 ] );
-				TqBool fTrimC = pSurface() ->bIsPointTrimmed( vecT );
-				vecT = CqVector2D( u() [ iIndex + cu + 1 ], v() [ iIndex + cu + 1 ] );
-				TqBool fTrimD = pSurface() ->bIsPointTrimmed( vecT );
+				CqVMStackEntry SEu, SEv;
+				TqFloat fu, fv;
+				u().GetValue( iIndex, SEu ); v().GetValue( iIndex, SEv );
+				SEu.Value( fu );	SEv.Value( fv );
+				TqBool fTrimA = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
+				u().GetValue( iIndex + 1, SEu ); v().GetValue( iIndex + 1, SEv );
+				SEu.Value( fu );	SEv.Value( fv );
+				TqBool fTrimB = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
+				u().GetValue( iIndex + cu + 2, SEu ); v().GetValue( iIndex +cu + 2, SEv );
+				SEu.Value( fu );	SEv.Value( fv );
+				TqBool fTrimC = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
+				u().GetValue( iIndex + cu + 1, SEu ); v().GetValue( iIndex +cu + 1, SEv );
+				SEu.Value( fu );	SEv.Value( fv );
+				TqBool fTrimD = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
 
 				if ( bOutside )
 				{
@@ -495,7 +558,17 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 			pNew->SetGrid( this );
 			pNew->SetIndex( iIndex );
 			if ( fTrimmed ) pNew->MarkTrimmed();
-			pNew->Initialise( P() [ iIndex ], P() [ iIndex + 1 ], P() [ iIndex + cu + 2 ], P() [ iIndex + cu + 1 ] );
+			CqVMStackEntry SEP1, SEP2, SEP3, SEP4;
+			P().GetValue( iIndex, SEP1 );
+			P().GetValue( iIndex + 1, SEP2 );
+			P().GetValue( iIndex + cu + 2, SEP3 );
+			P().GetValue( iIndex + cu + 1, SEP4 );
+			CqVector3D vec1, vec2, vec3, vec4;
+			SEP1.Value( vec1 );
+			SEP2.Value( vec2 );
+			SEP3.Value( vec3 );
+			SEP4.Value( vec4 );
+			pNew->Initialise( vec1, vec2, vec3, vec4 );
 			pNew->GetTotalBound( TqTrue );
 
 			pImage->AddMPG( pNew );
@@ -596,11 +669,17 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 			for ( iTime = 0; iTime < cTimes(); iTime++ )
 			{
 				CqMicroPolyGrid* pGridT = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
-				CqVector3D& vA = pGridT->P() [ iIndex ];
-				CqVector3D& vB = pGridT->P() [ iIndex + 1 ];
-				CqVector3D& vC = pGridT->P() [ iIndex + cu + 2 ];
-				CqVector3D& vD = pGridT->P() [ iIndex + cu + 1 ];
-				pNew->Initialise( vA, vB, vC, vD, Time( iTime ) );
+				CqVMStackEntry SEP1, SEP2, SEP3, SEP4;
+				pGridA->P().GetValue( iIndex, SEP1 );
+				pGridA->P().GetValue( iIndex + 1, SEP2 );
+				pGridA->P().GetValue( iIndex + cu + 2, SEP3 );
+				pGridA->P().GetValue( iIndex + cu + 1, SEP4 );
+				CqVector3D vec1, vec2, vec3, vec4;
+				SEP1.Value( vec1 );
+				SEP2.Value( vec2 );
+				SEP3.Value( vec3 );
+				SEP4.Value( vec4 );
+				pNew->Initialise( vec1, vec2, vec3, vec4, Time( iTime ) );
 			}
 			pNew->GetTotalBound( TqTrue );
 
@@ -839,10 +918,20 @@ TqBool CqMicroPolygonStatic::Sample( CqVector2D& vecSample, TqFloat time, TqFloa
 
 			CqVector2D vecUV = ReverseBilinear( vecSample );
 
-			CqVector2D uvA( pGrid() ->u() [ m_Index ], pGrid() ->v() [ m_Index ] );
-			CqVector2D uvB( pGrid() ->u() [ m_Index + 1 ], pGrid() ->v() [ m_Index + 1 ] );
-			CqVector2D uvC( pGrid() ->u() [ m_Index + pGrid() ->uGridRes() + 1 ], pGrid() ->v() [ m_Index + pGrid() ->uGridRes() + 1 ] );
-			CqVector2D uvD( pGrid() ->u() [ m_Index + pGrid() ->uGridRes() + 2 ], pGrid() ->v() [ m_Index + pGrid() ->uGridRes() + 2 ] );
+			CqVMStackEntry SEu1, SEv1, SEu2, SEv2, SEu3, SEv3, SEu4, SEv4;
+			pGrid() ->u().GetValue( m_Index, SEu1 ); pGrid() ->v().GetValue( m_Index, SEv1 );
+			pGrid() ->u().GetValue( m_Index + 1, SEu2 ); pGrid() ->v().GetValue( m_Index + 1, SEv2 );
+			pGrid() ->u().GetValue( m_Index + pGrid() ->uGridRes() + 1, SEu3 ); pGrid() ->v().GetValue( m_Index + pGrid() ->uGridRes() + 1, SEv3 );
+			pGrid() ->u().GetValue( m_Index + pGrid() ->uGridRes() + 2, SEu4 ); pGrid() ->v().GetValue( m_Index + pGrid() ->uGridRes() + 2, SEv4 );
+			TqFloat u, v;
+			SEu1.Value( u );	SEv1.Value( v );
+			CqVector2D uvA( u, v );
+			SEu2.Value( u );	SEv2.Value( v );
+			CqVector2D uvB( u, v );
+			SEu3.Value( u );	SEv3.Value( v );
+			CqVector2D uvC( u, v );
+			SEu4.Value( u );	SEv4.Value( v );
+			CqVector2D uvD( u, v );
 
 			CqVector2D vR = BilinearEvaluate( uvA, uvB, uvC, uvD, vecUV.x(), vecUV.y() );
 

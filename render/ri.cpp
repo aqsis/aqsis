@@ -1066,11 +1066,13 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 		// Search for the parameter in the declarations.
 		// Note Options can only be uniform.
 		SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( token );
-		RtInt Type = Decl.m_Type;
+		TqInt Type = Decl.m_Type;
+		TqInt Class = Decl.m_Class;
+		TqBool bArray = Decl.m_Count>1;
 		CqParameter* pParam = pOpt->pParameter( token );
 		if ( pParam == 0 )
 		{
-			if ( Decl.m_strName != "" && ( Decl.m_Type & Storage_Mask ) == Type_Uniform )
+			if ( Decl.m_strName != "" && ( Decl.m_Class ) == class_uniform )
 			{
 				pParam = Decl.m_pCreate( token, Decl.m_Count );
 				pOpt->AddParameter( pParam );
@@ -1085,42 +1087,46 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 			}
 		}
 		else
-			Type = pParam->Type();
-
-		switch ( Type & Type_Mask )
 		{
-				case Type_Float:
+			Type = pParam->Type();
+			Class = pParam->Class();
+			bArray = pParam->Count()>0;
+		}
+
+		switch ( Type )
+		{
+				case type_float:
 				{
 					RtFloat * pf = reinterpret_cast<RtFloat*>( value );
-					if ( Type & Type_Array )
+					if ( bArray )
 					{
 						RtInt j;
 						for ( j = 0; j < pParam->Count(); j++ )
-							static_cast<CqParameterTypedUniformArray<RtFloat, Type_Float>*>( pParam ) ->pValue() [ j ] = pf[ j ];
+							static_cast<CqParameterTypedUniformArray<RtFloat, type_float>*>( pParam ) ->pValue() [ j ] = pf[ j ];
 					}
 					else
-						static_cast<CqParameterTypedUniform<RtFloat, Type_Float>*>( pParam ) ->pValue() [ 0 ] = pf[ 0 ];
+						static_cast<CqParameterTypedUniform<RtFloat, type_float>*>( pParam ) ->pValue() [ 0 ] = pf[ 0 ];
 				}
 				break;
 
-				case Type_Integer:
+				case type_integer:
 				{
 					RtInt* pi = reinterpret_cast<RtInt*>( value );
-					if ( Type & Type_Array )
+					if ( bArray )
 					{
 						RtInt j;
 						for ( j = 0; j < pParam->Count(); j++ )
-							static_cast<CqParameterTypedUniformArray<RtInt, Type_Integer>*>( pParam ) ->pValue() [ j ] = pi[ j ];
+							static_cast<CqParameterTypedUniformArray<RtInt, type_integer>*>( pParam ) ->pValue() [ j ] = pi[ j ];
 					}
 					else
-						static_cast<CqParameterTypedUniform<RtInt, Type_Integer>*>( pParam ) ->pValue() [ 0 ] = pi[ 0 ];
+						static_cast<CqParameterTypedUniform<RtInt, type_integer>*>( pParam ) ->pValue() [ 0 ] = pi[ 0 ];
 				}
 				break;
 
-				case Type_String:
+				case type_string:
 				{
 					char** ps = reinterpret_cast<char**>( value );
-					if ( Type & Type_Array )
+					if ( bArray )
 					{
 						RtInt j;
 						for ( j = 0; j < pParam->Count(); j++ )
@@ -1129,7 +1135,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 							if ( strcmp( name, "searchpath" ) == 0 )
 							{
 								// Get the old value for use in escape replacement
-								CqString str_old = static_cast<CqParameterTypedUniform<CqString, Type_UniformString>*>( pParam ) ->pValue() [ 0 ];
+								CqString str_old = static_cast<CqParameterTypedUniform<CqString, type_string>*>( pParam ) ->pValue() [ 0 ];
 								// Build the string, checking for & character and replace with old string.
 								unsigned int strt = 0;
 								unsigned int len = 0;
@@ -1151,7 +1157,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 							else
 								str = CqString( ps[ j ] );
 
-							static_cast<CqParameterTypedUniformArray<CqString, Type_String>*>( pParam ) ->pValue() [ j ] = str;
+							static_cast<CqParameterTypedUniformArray<CqString, type_string>*>( pParam ) ->pValue() [ j ] = str;
 						}
 					}
 					else
@@ -1160,7 +1166,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 						if ( strcmp( name, "searchpath" ) == 0 )
 						{
 							// Get the old value for use in escape replacement
-							CqString str_old = static_cast<CqParameterTypedUniform<CqString, Type_UniformString>*>( pParam ) ->pValue() [ 0 ];
+							CqString str_old = static_cast<CqParameterTypedUniform<CqString, type_string>*>( pParam ) ->pValue() [ 0 ];
 							// Build the string, checking for & character and replace with old string.
 							unsigned int strt = 0;
 							unsigned int len = 0;
@@ -1182,7 +1188,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 						else
 							str = CqString( ps[ 0 ] );
 
-						static_cast<CqParameterTypedUniform<CqString, Type_String>*>( pParam ) ->pValue() [ 0 ] = str;
+						static_cast<CqParameterTyped<CqString>*>( pParam ) ->pValue() [ 0 ] = str;
 					}
 				}
 				break;
@@ -1980,17 +1986,21 @@ RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 		RtToken	token = tokens[ i ];
 		RtPointer	value = values[ i ];
 
-		RtInt Type;
+		TqInt Type;
+		TqInt Class;
+		TqBool bArray;
 		CqParameter* pParam = pAttr->pParameter( token );
 		if ( pParam == 0 )
 		{
 			// Search for the parameter in the declarations.
 			// Note attributes can only be uniform.
 			SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( token );
-			if ( Decl.m_strName != "" && ( Decl.m_Type & Storage_Mask ) == Type_Uniform )
+			if ( Decl.m_strName != "" && Decl.m_Class == class_uniform )
 			{
 				pParam = Decl.m_pCreate( Decl.m_strName.c_str(), Decl.m_Count );
 				Type = Decl.m_Type;
+				Class = Decl.m_Class;
+				bArray = Decl.m_Count>0;
 				pAttr->AddParameter( pParam );
 			}
 			else
@@ -2003,54 +2013,58 @@ RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 			}
 		}
 		else
-			Type = pParam->Type();
-
-		switch ( Type & Type_Mask )
 		{
-				case Type_Float:
+			Type = pParam->Type();
+			Class = pParam->Class();
+			bArray = pParam->Count()>0;
+		}
+
+		switch ( Type )
+		{
+				case type_float:
 				{
 					RtFloat * pf = reinterpret_cast<RtFloat*>( value );
-					if ( Type & Type_Array )
+					if ( bArray )
 					{
 						RtInt j;
 						for ( j = 0; j < pParam->Count(); j++ )
-							static_cast<CqParameterTypedUniformArray<RtFloat, Type_Float>*>( pParam ) ->pValue() [ j ] = pf[ j ];
+							static_cast<CqParameterTypedUniformArray<RtFloat, type_float>*>( pParam ) ->pValue() [ j ] = pf[ j ];
 					}
 					else
-						static_cast<CqParameterTypedUniform<RtFloat, Type_Float>*>( pParam ) ->pValue() [ 0 ] = pf[ 0 ];
+						static_cast<CqParameterTypedUniform<RtFloat, type_float>*>( pParam ) ->pValue() [ 0 ] = pf[ 0 ];
 				}
 				break;
 
-				case Type_Integer:
+				case type_integer:
 				{
 					RtInt* pi = reinterpret_cast<RtInt*>( value );
-					if ( Type & Type_Array )
+					if ( bArray )
 					{
 						RtInt j;
 						for ( j = 0; j < pParam->Count(); j++ )
-							static_cast<CqParameterTypedUniformArray<RtInt, Type_Integer>*>( pParam ) ->pValue() [ j ] = pi[ j ];
+							static_cast<CqParameterTypedUniformArray<RtInt, type_integer>*>( pParam ) ->pValue() [ j ] = pi[ j ];
 					}
 					else
-						static_cast<CqParameterTypedUniform<RtInt, Type_Integer>*>( pParam ) ->pValue() [ 0 ] = pi[ 0 ];
+						static_cast<CqParameterTypedUniform<RtInt, type_integer>*>( pParam ) ->pValue() [ 0 ] = pi[ 0 ];
 				}
 				break;
 
-				case Type_String:
+				case type_string:
 				{
 					char** ps = reinterpret_cast<char**>( value );
-					if ( Type & Type_Array )
+					if ( bArray )
 					{
 						RtInt j;
 						for ( j = 0; j < pParam->Count(); j++ )
 						{
 							CqString str( ps[ j ] );
-							static_cast<CqParameterTypedUniform<CqString, Type_String>*>( pParam ) ->pValue() [ j ] = str;
+							static_cast<CqParameterTypedUniform<CqString, type_string>*>( pParam ) ->pValue() [ j ] = str;
 						}
 					}
 					else
 					{
 						CqString str( ps[ 0 ] );
-						static_cast<CqParameterTypedUniform<CqString, Type_String>*>( pParam ) ->pValue() [ 0 ] = str;
+						static_cast<CqParameterTypedUniform<CqString, type_string>*>( pParam ) ->pValue() [ 0 ] = str;
 					}
 				}
 				// TODO: Rest of parameter types.

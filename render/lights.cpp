@@ -84,14 +84,14 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
 	Cl().Initialise( uGridRes, vGridRes, GridI() );
 
 	// Initialise the geometric parameters in the shader exec env.
-	P().SetValue( QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->matCurrent() ) * CqVector3D( 0.0f, 0.0f, 0.0f ) );
-	if ( USES( Uses, EnvVars_u ) ) u().SetValue( 0.0f );
-	if ( USES( Uses, EnvVars_v ) ) v().SetValue( 0.0f );
-	if ( USES( Uses, EnvVars_du ) ) du().SetValue( 0.0f );
-	if ( USES( Uses, EnvVars_du ) ) dv().SetValue( 0.0f );
-	if ( USES( Uses, EnvVars_s ) ) s().SetValue( 0.0f );
-	if ( USES( Uses, EnvVars_t ) ) t().SetValue( 0.0f );
-	if ( USES( Uses, EnvVars_N ) ) N().SetValue( CqVector3D( 0.0f, 0.0f, 0.0f ) );
+	P().SetValue( CqVMStackEntry( QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->matCurrent() ) * CqVector3D( 0.0f, 0.0f, 0.0f ) ) );
+	if ( USES( Uses, EnvVars_u ) ) u().SetValue( CqVMStackEntry( 0.0f ) );
+	if ( USES( Uses, EnvVars_v ) ) v().SetValue( CqVMStackEntry( 0.0f ) );
+	if ( USES( Uses, EnvVars_du ) ) du().SetValue( CqVMStackEntry( 0.0f ) );
+	if ( USES( Uses, EnvVars_du ) ) dv().SetValue( CqVMStackEntry( 0.0f ) );
+	if ( USES( Uses, EnvVars_s ) ) s().SetValue( CqVMStackEntry( 0.0f ) );
+	if ( USES( Uses, EnvVars_t ) ) t().SetValue( CqVMStackEntry( 0.0f ) );
+	if ( USES( Uses, EnvVars_N ) ) N().SetValue( CqVMStackEntry( CqVector3D( 0.0f, 0.0f, 0.0f ) ) );
 }
 
 
@@ -171,15 +171,22 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
 
 void CqShaderLightsourceAmbient::SetValue( const char* name, TqPchar val )
 {
-	if ( strcmp( name, "intensity" ) == 0 ) intensity = *reinterpret_cast<TqFloat*>( val );
+	if ( strcmp( name, "intensity" ) == 0 ) intensity.SetValue( CqVMStackEntry( *reinterpret_cast<TqFloat*>( val ) ) );
 	else
-		if ( strcmp( name, "lightcolor" ) == 0 ) lightcolor = reinterpret_cast<TqFloat*>( val );
+		if ( strcmp( name, "lightcolor" ) == 0 ) lightcolor.SetValue( CqVMStackEntry( CqColor ( reinterpret_cast<TqFloat*>( val ) ) ) );
 }
 
 
 void CqShaderLightsourceAmbient::Evaluate( CqShaderExecEnv& Env )
 {
-	Env.Cl().SetValue( lightcolor * intensity );
+	TqFloat fTemp;
+	CqColor cTemp;
+	CqVMStackEntry SE1, SE2;
+	lightcolor.GetValue( 0, SE1 );
+	intensity.GetValue( 0, SE2 );
+	SE1.Value( cTemp );
+	SE2.Value( fTemp );
+	Env.Cl().SetValue( CqVMStackEntry( cTemp * fTemp ) );
 }
 
 

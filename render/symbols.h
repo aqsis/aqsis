@@ -45,15 +45,17 @@ struct SqParameterDeclaration
 {
 	SqParameterDeclaration() :
 			m_strName( "" ),
-			m_Type( Type_Nil ),
+			m_Type( type_invalid ),
+			m_Class( class_invalid ),
 			m_Count( 0 ),
 			m_pCreate( 0 ),
 			m_strSpace( "" )
 	{}
-	SqParameterDeclaration( const char* strName, EqVariableType Type, TqInt Count,
+	SqParameterDeclaration( const char* strName, EqVariableType Type, EqVariableClass Class, TqInt Count,
 	                        CqParameter* ( *pCreate ) ( const char* strName, TqInt Count ), const char* strSpace ) :
 			m_strName( strName ),
 			m_Type( Type ),
+			m_Class( Class ),
 			m_Count( Count ),
 			m_pCreate( pCreate ),
 			m_strSpace( strSpace )
@@ -61,7 +63,8 @@ struct SqParameterDeclaration
 
 
 	CqString	m_strName;										///< Name of the parameter.
-	EqVariableType	m_Type;											///< Type.
+	EqVariableType	m_Type;										///< Type.
+	EqVariableClass	m_Class;									///< Class.
 	TqInt	m_Count;										///< Array length if an array.
 	CqParameter* ( *m_pCreate ) ( const char* strName, TqInt Count );		///< Constructor function.
 	CqString	m_strSpace;										///< Specification coordinate system name.

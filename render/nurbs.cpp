@@ -1302,7 +1302,7 @@ CqMicroPolyGridBase* CqSurfaceNURBS::Dice()
 			             * ( m_auKnots[ m_cuVerts ] - m_auKnots[ m_uOrder - 1 ] )
 			             + m_auKnots[ m_uOrder - 1 ];
 
-			pGrid->P() = Evaluate( su, sv );
+			pGrid->P().SetValue( pGrid->GridI(), CqVMStackEntry( Evaluate( su, sv ) ) );
 			pGrid->Advance();
 		}
 	}

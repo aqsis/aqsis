@@ -307,16 +307,24 @@ class CqMicroPolygonBase
 		/** Get the color of this micropoly.
 		 * \return CqColor reference.
 		 */
-		const	CqColor&	colColor() const
+		const	CqColor	colColor() const
 		{
-			return ( m_pGrid->Ci() [ m_Index ] );
+			CqColor colRes;
+			CqVMStackEntry SE;
+			m_pGrid->Ci().GetValue(m_Index, SE);
+			SE.Value( colRes );
+			return ( colRes );
 		}
 		/** Get the opacity of this micropoly.
 		 * \return CqColor reference.
 		 */
-		const	CqColor&	colOpacity() const
+		const	CqColor	colOpacity() const
 		{
-			return ( m_pGrid->Oi() [ m_Index ] );
+			CqColor colRes;
+			CqVMStackEntry SE;
+			m_pGrid->Oi().GetValue(m_Index, SE);
+			SE.Value(colRes);
+			return ( colRes );
 		}
 
 		/** Assigment operator, copies contents of donor micropoly while safely deleting old contents.
