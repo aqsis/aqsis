@@ -3,11 +3,11 @@ EXTRA_DIST = displays.ini
 ## Note: the displays.ini in CVS is a hard-coded version for Win32
 ## On Posix systems we generate displays.ini at install-time
 
-CONFIG_FILE = $(sysconfdir)/displays.ini
+CONFIG_FILE = $(DESTDIR)$(sysconfdir)/displays.ini
 DISPLAY_LIB = $(pkglibdir)/libdisplay.so
 
 install-exec-local:
-	mkdir -p @sysconfdir@
+	mkdir -p $(DESTDIR)@sysconfdir@
 	rm -f $(CONFIG_FILE)
 	echo "file	$(DISPLAY_LIB)" >> $(CONFIG_FILE)
 	echo "tiff	$(DISPLAY_LIB)" >> $(CONFIG_FILE)
