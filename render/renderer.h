@@ -342,11 +342,6 @@ class CqRenderer : public IqRenderer
 			return m_depthOfFieldData;
 		}
 
-		const CqMatrix& GetDepthOfFieldTMatrix() const
-		{
-			return m_depthOfFieldTMatrix;
-		}
-
 		void SetDepthOfFieldScale( TqFloat x, TqFloat y )
 		{
 			m_depthOfFieldScale[0] = x;
@@ -404,7 +399,6 @@ class CqRenderer : public IqRenderer
 		std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
 
 		TqFloat m_depthOfFieldData[4];	///< DoF data
-		CqMatrix m_depthOfFieldTMatrix;
 		TqFloat m_depthOfFieldScale[2];
 
 		void WhichMatWorldTo(CqMatrix &a, TqUlong thash);

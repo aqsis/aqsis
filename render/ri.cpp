@@ -64,7 +64,7 @@
 #include	"ri.h"
 
 #include	"sstring.h"
-#include	"mtable.h"
+//#include	"mtable.h"
 #include	"ilog.h"
 #include	"share.h"
 
@@ -619,6 +619,23 @@ RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 //
 RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance )
 {
+	if( fstop < 0 )
+	{
+		QGetRenderContext() ->Logger()->error( "Negative fstop: %f, DepthOfField ignored", fstop ) );
+		return;
+	}
+	
+	if( focallenght < 0 )
+	{
+		QGetRenderContext() ->Logger()->error( "Negative focallenght: %f, DepthOfField ignored", focallenght ) );
+		return;
+	}
+	
+	if( focaldistance < 0 )
+	{
+		QGetRenderContext() ->Logger()->error( "Negative focaldistance: %f, DepthOfField ignored", focaldistance ) );
+		return;
+	}
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "DepthOfField" ) [ 0 ] = fstop ;
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "DepthOfField" ) [ 1 ] = focallength ;
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "DepthOfField" ) [ 2 ] = focaldistance ;
