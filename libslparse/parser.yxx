@@ -1078,14 +1078,16 @@ cast_expr
 								  ((Type==Type_Point) ||
 								   (Type==Type_Normal) ||
 								   (Type==Type_Vector) ||
-								   (Type==Type_Matrix) ))
+								   (Type==Type_Matrix) ||
+								   (Type==Type_Color) ))
 								{
 									// Create a transform function.
 									std::vector<SqFuncRef> funcTrans;
 									CqString strTrans("transform");;
 									if(Type==Type_Normal)	strTrans="ntransform";
-									if(Type==Type_Vector)	strTrans="vtransform";
-									if(Type==Type_Matrix)	strTrans="mtransform";
+									else if(Type==Type_Vector)	strTrans="vtransform";
+									else if(Type==Type_Matrix)	strTrans="mtransform";
+									else if(Type==Type_Color)	strTrans="ctransform";
 									if(FindFunction(strTrans.c_str(), funcTrans))
 									{
 										$$=new CqParseNodeFunctionCall(funcTrans);
@@ -1093,7 +1095,9 @@ cast_expr
 									
 										// And create a holder for the arguments.
 										CqParseNode* pFromSpace=new CqParseNodeStringConst((*$1.Space).c_str());
-										CqParseNode* pToSpace=new CqParseNodeStringConst("current");
+										CqParseNode* pToSpace;
+										if(Type != Type_Color)	pToSpace = new CqParseNodeStringConst("current");
+										else					pToSpace = new CqParseNodeStringConst("rgb");
 										$$->AddLastChild(pFromSpace);
 										$$->AddLastChild(pToSpace);
 										$$->AddLastChild(pCast);
