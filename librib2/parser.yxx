@@ -82,6 +82,9 @@ static void DiscardArrayValue(Array* const Value);
 static void DeclareLightHandle(const RendermanInterface::RtInt ID, const RendermanInterface::RtLightHandle Handle);
 static RendermanInterface::RtLightHandle LookupLightHandle(const RendermanInterface::RtInt ID);
 
+static void DeclareLightHandleString(const RendermanInterface::RtString ID, const RendermanInterface::RtLightHandle Handle);
+static RendermanInterface::RtLightHandle LookupLightHandleString(const RendermanInterface::RtString ID);
+
 static ParameterType DeclareParameterType(const std::string& Name, const std::string& Type);
 static ParameterType LookupParameterType(const std::string& Name);
 
@@ -524,10 +527,24 @@ complete_request
 				DiscardStringValue($2);
 				DiscardTokenValuePairs($4);
 			}
+	|	lightsource string string opttvpairs
+			{
+				DeclareLightHandleString($3, ParseCallbackInterface->RiLightSourceV($2, $4->Count(), $4->Tokens(), $4->Values()));
+				DiscardStringValue($2);
+				DiscardStringValue($3);
+				DiscardTokenValuePairs($4);
+			}
 	|	arealightsource string integer opttvpairs
 			{
 				DeclareLightHandle($3, ParseCallbackInterface->RiAreaLightSourceV($2, $4->Count(), $4->Tokens(), $4->Values()));
 				DiscardStringValue($2);
+				DiscardTokenValuePairs($4);
+			}
+	|	arealightsource string string opttvpairs
+			{
+				DeclareLightHandleString($3, ParseCallbackInterface->RiAreaLightSourceV($2, $4->Count(), $4->Tokens(), $4->Values()));
+				DiscardStringValue($2);
+				DiscardStringValue($3);
 				DiscardTokenValuePairs($4);
 			}
 	|	illuminate integer integer
@@ -537,6 +554,15 @@ complete_request
 					ParseCallbackInterface->RiIlluminate(handle, $3 != 0);
 				else
 					yyerror("Undeclared Light");
+			}
+	|	illuminate string integer
+			{
+				RendermanInterface::RtLightHandle handle = LookupLightHandleString($2);
+				if(handle)
+					ParseCallbackInterface->RiIlluminate(handle, $3 != 0);
+				else
+					yyerror("Undeclared Light");
+				DiscardStringValue($2);
 			}
 	|	surface string opttvpairs
 			{
@@ -1742,6 +1768,10 @@ typedef std::map<RendermanInterface::RtInt, RendermanInterface::RtLightHandle> L
 typedef LightHandleMap::iterator LightHandleIterator;
 static LightHandleMap LightMap;
 
+typedef std::map<std::string, RendermanInterface::RtLightHandle> LightStringHandleMap;
+typedef LightStringHandleMap::iterator LightStringHandleIterator;
+static LightStringHandleMap LightMapString;
+
 static void DeclareLightHandle(const RendermanInterface::RtInt ID, const RendermanInterface::RtLightHandle Handle)
 {
 	if(0 == Handle)
@@ -1750,12 +1780,6 @@ static void DeclareLightHandle(const RendermanInterface::RtInt ID, const Renderm
 			return;
 		}
 
-//	if(LightMap.find(ID) != LightMap.end())
-//		{
-//			yyerror("Duplicate Light ID Will Be Ignored");
-//			return ;
-//		}
-		
 	LightMap[ID] = Handle;
 }
 
@@ -1768,6 +1792,29 @@ static RendermanInterface::RtLightHandle LookupLightHandle(const RendermanInterf
 		}
 		
 	return LightMap[ID];
+}
+
+
+static void DeclareLightHandleString(const RendermanInterface::RtString ID, const RendermanInterface::RtLightHandle Handle)
+{
+	if(0 == Handle)
+		{
+			yyerror("NULL Light Handle");
+			return;
+		}
+
+	LightMapString[ID] = Handle;
+}
+
+static RendermanInterface::RtLightHandle LookupLightHandleString(const RendermanInterface::RtString ID)
+{
+	if(LightMapString.find(ID) == LightMapString.end())
+		{
+			yyerror("Undeclared Light name");
+			return 0;
+		}
+		
+	return LightMapString[ID];
 }
 
 typedef std::map<std::string, ParameterType> ParameterTypeMap;
