@@ -1,5 +1,5 @@
 SUBDIRS = macosx .
-EXTRA_DIST = libaqsis.dsp
+EXTRA_DIST = libaqsis.dsp libaqsis.def
 
 lib_LTLIBRARIES = libaqsis.la
 
