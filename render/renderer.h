@@ -180,7 +180,7 @@ class CqRenderer
 																if(msg.Code()>0)
 																	std::cout << msg.Code() << " : " << 
 																				 msg.Severity() << " : ";
-																std::cout << msg.strMessage().data() << std::endl; 
+																std::cout << msg.strMessage().c_str() << std::endl; 
 															}
 	// Contect change callbacks
 				virtual	SqParameterDeclaration FindParameterDecl(const char* strDecl);

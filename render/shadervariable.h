@@ -254,7 +254,7 @@ class CqShaderVariableArray: public CqShaderVariable
 												}
 					/** Copy constructor.
 					 */
-					CqShaderVariableArray(const CqShaderVariableArray& From) : CqShaderVariable(From.m_strName.data())
+					CqShaderVariableArray(const CqShaderVariableArray& From) : CqShaderVariable(From.m_strName.c_str())
 												{
 													m_aVariables.resize(From.m_aVariables.size());
 													for(TqUint i=0; i<From.m_aVariables.size(); i++)
