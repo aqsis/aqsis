@@ -229,6 +229,10 @@ SOURCE=.\csgtree.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\forwarddiff.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\genpoly.h
 # End Source File
 # Begin Source File
