@@ -1,0 +1,81 @@
+#	Real syntax MAKEFILE for PP
+#
+#	Using Borland C++ V2.0 or Microsoft 'C' V6.00A and Logical Systems
+#	'MAKE'.  DON'T TRY THIS	WITH THE STOCK MICROSOFT V6.00 RELEASE, GET THE
+#	"MAINTENANCE" UPDATE FROM MICROSOFT!
+#
+#	Written		07/10/87 by Kirk Bailey
+#	Modified	5/3/91 by Kirk Bailey
+#
+#	"make"		Compile and link the preprocessor
+#
+
+# MACRO DEFINITIONS:
+
+.SUFFIXES:
+
+.SUFFIXES: .c
+
+# ----------------------------------------------------------------------------
+# Configure compiler vendor by deleting the "rem" from the desired vendor.
+# Current choices: Microsoft C6.00A (MS), Borland C++ V2.0 (BORLAND)
+#	
+MS	=
+BORLAND	= rem
+
+# ----------------------------------------------------------------------------
+# Configure whether to include compiler debug support by removing the "rem"
+# from the desired selection: Include debug info (DBUG) or Production (PROD)
+#
+DBUG	= rem
+PROD	=
+
+# ----------------------------------------------------------------------------
+# This defines a list of all local header source files
+#
+HFILES	= pp.h ppext.h
+
+# ----------------------------------------------------------------------------
+# All the object files
+#
+OFILES	= pp1.obj pp2.obj pp3.obj pp4.obj pp5.obj pp6.obj pp7.obj pp8.obj
+
+# ----------------------------------------------------------------------------
+# This rule says a .OBJ file should be created by using the C compiler on a .C
+# file.
+#
+.c.obj	:
+	$(BORLAND) $(DBUG) bcc -c -v -mc -w -w-pro -g1 -N $*.c
+	$(BORLAND) $(PROD) bcc -c -O -G -mc -w -w-pro -g1 $*.c
+	$(MS) $(DBUG) cl /c /Zi /Od /AC /W1 /WX $*.c
+	$(MS) $(PROD) cl /c /Ox /AC /W1 /WX /DMSC_OPT $*.c
+
+# ----------------------------------------------------------------------------
+# Link rule
+#
+pp.exe	: $(OFILES)
+	$(BORLAND) $(DBUG) tlink /v /c /x /Td c0c.obj $(OFILES),$*.exe,,cc.lib
+	$(BORLAND) $(PROD) tlink /c /x /Td c0c.obj $(OFILES),$*.exe,,cc.lib
+	$(MS) $(DBUG) link /CO /F /NOI /STACK:32768 $(OFILES),$*.exe;
+	$(MS) $(PROD) link /E /F /NOI /PACKC /STACK:32768 $(OFILES),$*.exe;
+
+# ----------------------------------------------------------------------------
+# Source file dependencies for object files.
+# 
+pp1.obj	: $(HFILES)
+
+pp2.obj	: $(HFILES)
+
+pp3.obj	: $(HFILES)
+
+pp4.obj	: $(HFILES)
+
+pp5.obj	: $(HFILES)
+
+pp6.obj	: $(HFILES)
+
+pp7.obj	: $(HFILES)
+
+pp8.obj	: $(HFILES)
+
+# End of PP makefile
