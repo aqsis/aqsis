@@ -23,14 +23,40 @@
 		\author Timothy M. Shead (tshead@k-3d.com)
 */
 
+#include <iostream>
+#include <string>
+
 #include "aqsis.h"
+
+#ifdef AQSIS_SYSTEM_WIN32
+
+#include	<winsock2.h>
+
+#else // AQSIS_SYSTEM_WIN32
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+typedef int SOCKET;
+typedef sockaddr_in SOCKADDR_IN;
+typedef sockaddr* PSOCKADDR;
+
+static const int INVALID_SOCKET = -1;
+static const int SOCKET_ERROR = -1;
+
+#endif // !AQSIS_SYSTEM_WIN32
+
 #include "displaydriver.h"
 #include "dd.h"
 
 using namespace Aqsis;
 
 #include <GL/glut.h>
-#include <string>
 
 #ifndef AQSIS_SYSTEM_WIN32
 typedef int SOCKET;
