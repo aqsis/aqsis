@@ -31,8 +31,13 @@
 #ifdef AQSIS_SYSTEM_WIN32
 
 #include	<winsock2.h>
+#include <locale>
+#include <direct.h>
 
-#else // AQSIS_SYSTEM_WIN32
+#define getcwd _getcwd
+#define PATH_SEPARATOR "\\"
+
+#else // !AQSIS_SYSTEM_WIN32
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,6 +53,8 @@ typedef sockaddr* PSOCKADDR;
 
 static const int INVALID_SOCKET = -1;
 static const int SOCKET_ERROR = -1;
+
+#define PATH_SEPARATOR "/"
 
 #endif // !AQSIS_SYSTEM_WIN32
 
@@ -85,55 +92,117 @@ static TqFloat	quantize_minval  = 0.0f;
 static TqFloat	quantize_maxval  = 0.0f;
 static TqFloat dither_val       = 0.0f;
 
-   
-bool write_tiff(const std::string& filename, const std::string& description)
-{
- 	TIFF* const file = TIFFOpen(filename.c_str(), "w");
- 	if(!file)
- 		return false;
- 
- 	TIFFSetField(file, TIFFTAG_IMAGEWIDTH, g_ImageWidth);
- 	TIFFSetField(file, TIFFTAG_IMAGELENGTH, g_ImageHeight);
- 	TIFFSetField(file, TIFFTAG_BITSPERSAMPLE, 8);
- 	TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
- 	TIFFSetField(file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
- 	TIFFSetField(file, TIFFTAG_SAMPLESPERPIXEL, 3);
- 	TIFFSetField(file, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
- 	TIFFSetField(file, TIFFTAG_ROWSPERSTRIP, 1);
- 	TIFFSetField(file, TIFFTAG_IMAGEDESCRIPTION, description.c_str());
- 
- 	GLubyte* p = g_Image;
- 	for(int i = g_ImageHeight - 1; i >= 0; i--)
- 		{
- 			if(TIFFWriteScanline(file, p, i, 0) < 0)
- 				{
- 					TIFFClose(file);
- 					return false;
- 				}
- 			p += g_ImageWidth * sizeof(GLubyte) * 3;
- 		}
- 		
- 	TIFFClose(file);
- 	return true;
- }
- 
- void menu(int value)
- {
- 	switch (value)
- 		{
- 			case 1:
- 				write_tiff(g_Filename, "Aqsis rendered image");
- 				break;
- 		}
- }
+typedef void (text_callback)(const std::string&);
+static std::string g_text_prompt;
+static std::string g_text_input;
+static text_callback* g_text_ok_callback = 0;
 
-void display( void )
+const std::string get_current_working_directory()
+{
+	std::string result(1024, '\0');
+	getcwd(const_cast<char*>(result.c_str()), result.size());
+	result.resize(strlen(result.c_str()));
+
+	return result;
+}
+
+const std::string append_path(const std::string& LHS, const std::string& RHS)
+{
+	return LHS + PATH_SEPARATOR + RHS;
+}
+
+void write_tiff(const std::string& filename)
+{
+	TIFF* const file = TIFFOpen(filename.c_str(), "w");
+	if(!file)
+		{
+			std::cerr << "Error opening [" << filename << "] for TIFF output" << std::endl;
+			return;
+		}
+
+	TIFFSetField(file, TIFFTAG_IMAGEWIDTH, g_ImageWidth);
+	TIFFSetField(file, TIFFTAG_IMAGELENGTH, g_ImageHeight);
+	TIFFSetField(file, TIFFTAG_BITSPERSAMPLE, 8);
+	TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+	TIFFSetField(file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+	TIFFSetField(file, TIFFTAG_SAMPLESPERPIXEL, 3);
+	TIFFSetField(file, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+	TIFFSetField(file, TIFFTAG_ROWSPERSTRIP, 1);
+	TIFFSetField(file, TIFFTAG_IMAGEDESCRIPTION, "Image rendered with Aqsis, http://www.aqsis.com");
+
+	GLubyte* p = g_Image;
+	for(int i = g_ImageHeight - 1; i >= 0; i--)
+		{
+			if(TIFFWriteScanline(file, p, i, 0) < 0)
+				{
+					TIFFClose(file);
+					std::cerr << "Error writing data to [" << filename << "] for TIFF output" << std::endl;
+					return;
+				}
+			p += g_ImageWidth * sizeof(GLubyte) * 3;
+		}
+		
+	TIFFClose(file);
+}
+
+void text_prompt(const std::string& Prompt, const std::string& DefaultValue, text_callback* Callback)
+{
+	g_text_prompt = Prompt;
+	g_text_input = DefaultValue;
+	g_text_ok_callback = Callback;
+
+	glutPostRedisplay();
+}
+
+void menu(int value)
+{
+	switch (value)
+		{
+			case 1:
+				text_prompt("Save TIFF: ", append_path(get_current_working_directory(), g_Filename), &write_tiff);
+				break;
+		}
+}
+
+void draw_text(const std::string& Text)
+{
+	for(std::string::const_iterator c = Text.begin(); c != Text.end(); ++c)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *c);
+}
+
+void display()
+{
+	glDisable(GL_BLEND);
+	glRasterPos2i( 0, 0 );
+	glDrawPixels( g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image );
+
+	// Prompt the user for input ...
+	if(g_text_prompt.size())
+		{
+			double viewport[4];
+			glGetDoublev(GL_VIEWPORT, viewport);
+
+			glEnable(GL_BLEND);
+			glColor4d(0, 0, 0.5, 0.5);
+			glRectd(viewport[0], viewport[3] / 2 + 20, viewport[2], viewport[3] / 2 - 10);
+		
+			glColor4d(1, 1, 1, 1);
+			glRasterPos2d(viewport[0] + 10, viewport[3] / 2);
+			draw_text(g_text_prompt);
+			draw_text(g_text_input);
+			draw_text("_");
+		}
+
+	// We're done ...
+	glFlush();
+}
+
+void full_display()
 {
 	glDisable( GL_SCISSOR_TEST );
 	glClear( GL_COLOR_BUFFER_BIT );
-	glRasterPos2i( 0, 0 );
-	glDrawPixels( g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image );
-	glFlush();
+
+	display();
 }
 
 void reshape( int w, int h )
@@ -154,15 +223,57 @@ void idle( void )
 
 void keyboard( unsigned char key, int x, int y )
 {
+	// If the text prompt is active, it consumes all input ...
+	if(g_text_prompt.size())
+		{
+			switch(key)
+				{
+					case 8: // Backspace
+						if(g_text_input.size())
+						{
+							std::string::iterator i = g_text_input.end();
+							g_text_input.erase(--i);
+						}
+						glutPostRedisplay();
+						break;
+					case 3: // CTRL-C
+					case 27: // ESC
+						g_text_prompt = "";
+						g_text_input = "";
+						g_text_ok_callback = 0;
+						glutPostRedisplay();
+						break;
+
+					case 13: // ENTER
+						g_text_ok_callback(g_text_input);
+						g_text_prompt= "";
+						g_text_input = "";
+						g_text_ok_callback = 0;
+						glutPostRedisplay();
+					default:
+						if(isprint(key))
+							{
+								g_text_input += key;
+								glutPostRedisplay();
+							}
+						break;
+				}
+			return;
+		}
+
+	// No text prompt ...
 	switch ( key )
-	{
-			case 27:
+		{
+			case 'w':
+				text_prompt("Save TIFF: ", append_path(get_current_working_directory(), g_Filename), &write_tiff);
+				break;
+			case 27: // ESC
 			case 'q':
-			exit( 0 );
-			break;
+				exit( 0 );
+				break;
 			default:
-			break;
-	}
+				break;
+		}
 }
 
 int main( int argc, char** argv )
@@ -194,7 +305,7 @@ int main( int argc, char** argv )
 	}
 
 	// Start the glut message loop ...
-	glutDisplayFunc( display );
+	glutDisplayFunc( full_display );
 	glutReshapeFunc( reshape );
 	glutKeyboardFunc( keyboard );
 	glutIdleFunc( idle );
@@ -204,8 +315,8 @@ int main( int argc, char** argv )
 
 	// Setup GL context.
 	glClearColor( 0.0, 0.0, 0.0, 0.0 );
-	glDisable( GL_SCISSOR_TEST );
 	glDisable( GL_DEPTH_TEST );
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glShadeModel( GL_FLAT );
 	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
 	glClear( GL_COLOR_BUFFER_BIT );
@@ -375,9 +486,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 
 	glEnable( GL_SCISSOR_TEST );
 	glScissor( BucketX, BucketY, BucketW, BucketH );
-	glRasterPos2i( 0, 0 );
-	glDrawPixels( g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image );
-	glFlush();
+	display();
 
 	return ( 0 );
 }
