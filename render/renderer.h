@@ -310,6 +310,38 @@ class CqRenderer : public IqRenderer
 			return ( m_TransformStack );
 		}
 
+		/** Set the lens data associated with depth of field effects.
+		 * \param fstop The f-stop of the lens.
+		 * \param focalLength The size of the lens.
+		 * \param focalDistance The distance at which everything is in focus.
+		 */
+		void	SetDepthOfFieldData( TqFloat fstop, TqFloat focalLength, TqFloat focalDistance )
+		{
+			m_depthOfFieldData[0] = fstop;
+			m_depthOfFieldData[1] = focalLength;
+			m_depthOfFieldData[2] = focalDistance;
+			if (fstop < FLT_MAX)
+			{
+			    m_depthOfFieldData[3] = 0.5 * (focalLength / fstop) * (focalDistance * focalLength) / (focalDistance - focalLength);
+			}
+		}
+
+		/** Find out if we are using depth of field or not.
+		 * \return TqTrue if depth of field is turned on.
+		 */
+		TqBool	UsingDepthOfField( ) const
+		{
+			return m_depthOfFieldData[0] < FLT_MAX;
+		}
+
+		/** Get the lens data associated with depth of field effects.
+		 * \return The lens data.
+		 */
+		const TqFloat*	GetDepthOfFieldData( ) const
+		{
+			return m_depthOfFieldData;
+		}
+
 		void	RegisterShader( const char* strName, EqShaderType type, IqShader* pShader );
 		CqShaderRegister* FindShader( const char* strName, EqShaderType type );
 
@@ -338,6 +370,8 @@ class CqRenderer : public IqRenderer
 		std::vector<CqTransform*>	m_TransformStack;	///< The global transformation stack.
 		CqTransform	m_transCamera;					///< The camera transform.
 		std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
+
+		TqFloat m_depthOfFieldData[4];	///< DoF data
 
 		void WhichMatWorldTo(CqMatrix &a, TqUlong thash);
 		void WhichMatToWorld(CqMatrix &b, TqUlong thash);

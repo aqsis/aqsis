@@ -93,6 +93,11 @@ CqRenderer::CqRenderer() :
 	m_pDDManager = CreateDisplayDriverManager();
 	m_pDDManager->Initialise();
 
+	// Set up DoF stuff for pinhole lens ( i.e. no DoF )
+	m_depthOfFieldData[0] = FLT_MAX;
+	m_depthOfFieldData[1] = 0.0f;
+	m_depthOfFieldData[2] = 0.0f;
+
 	// Get the hash keys for object, shader, camera keywords.
 	if ( ohash == 0 ) ohash = CqParameter::hash( "object" );
 	if ( shash == 0 ) shash = CqParameter::hash( "shader" );

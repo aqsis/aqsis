@@ -624,7 +624,7 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "DepthOfField" ) [ 1 ] = focallength ;
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "DepthOfField" ) [ 2 ] = focaldistance ;
 
-	return ;
+	QGetRenderContext() ->SetDepthOfFieldData( fstop, focallength, focaldistance );
 }
 
 
