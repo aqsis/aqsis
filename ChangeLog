@@ -1,3 +1,407 @@
+2002-04-03 16:20  pgregory
+
+	* Makefile.am, configure.in: Updated version number ready for
+	release.
+
+2002-04-03 16:19  pgregory
+
+	* prep_install.bat: Remove libslxargs from the binary release,
+	currently relies on too many other libraries.
+
+2002-04-03 15:08  pgregory
+
+	* aqsis.iss, prep_install.bat, libslparse/libslparse.dsp,
+	render/version.h: Update versioning info ready for a release.
+
+2002-04-03 15:07  pgregory
+
+	* libslparse/parser.y: Fix to work with latest Bison on Cygwin.
+
+2002-04-03 00:23  pgregory
+
+	* render/quadrics.cpp: Fix potential overflow in grid estimation
+	routine, spotted by Michel Joron.
+
+2002-03-31 22:15  pgregory
+
+	* render/quadrics.cpp: Small changes when tracking down quadrics
+	bug, NYI.
+
+2002-03-31 22:01  pgregory
+
+	* render/trimcurve.cpp: Fix bug in trim curve evaluation code. Was
+	using an unsigned integer as an index, then checking for >=0 as a
+	terminator.
+
+2002-03-27 22:47  pgregory
+
+	* ribfiles/: quads_test.rib, std_st_test.rib, uv_test.rib: Small
+	changes to make tests more appropriate for regression testing,
+	switch to using Sides 1 to test for Normal calculatioin problems.
+
+2002-03-27 22:46  pgregory
+
+	* render/quadrics.cpp: Fix normal calculation to only do matrix
+	multiply if the surface really can generate it's own normals.  Take
+	into account Orientation when calculating normals.
+
+2002-03-26 22:54  pgregory
+
+	* render/quadrics.cpp: Force circle function to use 4 arcs to avoid
+	innacuracies in the bound calculation. Should look into further to
+	find out if a more optimal solution exists.
+
+2002-03-22 22:55  pgregory
+
+	* aqsis/aqsis.cpp: Output time spent rendering along with progress.
+	Courtesy of Michel Joron.
+
+2002-03-21 10:58  pgregory
+
+	* render/: patch.cpp, polygon.cpp: Enable surfaces to generate Ng
+	if they are able. Handle degenerate MPGs gracefully. Output missed
+	MPG statistics, may help in choosing optimum
+	ShadingRate/PixelSamples settings.
+
+2002-03-21 10:41  pgregory
+
+	* render/: imagebuffer.cpp, micropolygon.cpp, micropolygon.h,
+	quadrics.cpp, stats.cpp, stats.h: Enable surfaces to generate Ng if
+	they are able. Handle degenerate MPGs gracefully. Output missed MPG
+	statistics, may help in choosing optimum ShadingRate/PixelSamples
+	settings.
+
+2002-03-19 17:54  pgregory
+
+	* render/: quadrics.cpp, quadrics.h: Allow quadrics to specify
+	their own normals.
+
+2002-03-19 17:51  pgregory
+
+	* librib2/: librib2.dsp, parser.y: Small fixes to allow parser to
+	work with latest bison.
+
+2002-03-19 15:23  pgregory
+
+	* render/: quadrics.cpp, quadrics.h: Use proper quadrics with an
+	approximating bound method based on NURBS hulls.
+
+2002-03-18 12:19  pgregory
+
+	* render/: context.cpp, surface.cpp: Couple of small fixes to work
+	under Posix.
+
+2002-03-18 08:37  pgregory
+
+	* render/: context.cpp, surface.cpp: Issue warnings on bad Solid
+	construction.
+
+2002-03-16 00:02  pgregory
+
+	* render/: imagebuffer.cpp, imagers.cpp, imagers.h, options.cpp,
+	options.h: Minor tidying up of the Imager shader support, and fix
+	the bug where a 'not found' imager shader resulted in a blank
+	image.
+
+2002-03-15 20:48  pgregory
+
+	* render/: csgtree.cpp, csgtree.h: Fix bug spotted by Michel, where
+	a single level CSG mode "primitive" would lock up.
+
+2002-03-15 20:46  pgregory
+
+	* render/patch.cpp: Michel Jorons fix for bug #529857, where patch
+	mesh wasn't getting Cs properly.
+
+2002-03-15 17:16  pgregory
+
+	* render/: imagers.cpp, options.h, quadrics.cpp, ri.cpp: Fix as
+	many as possible of the remaining warnings under Posix. Last left
+	is a missing CR warning on the generated scanner file.
+
+2002-03-14 22:59  pgregory
+
+	* aqsis.iss: Initial setup for a Windows Inno Setup based
+	installer.
+
+2002-03-14 21:59  pgregory
+
+	* License.txt: Removed, duplicated in COPYING
+
+2002-03-10 12:17  pgregory
+
+	* Renderer.dsw, libslxargs/libslxargs.dsp: Incorporate libslxargs
+	into Win32 build.
+
+2002-03-09 10:10  pgregory
+
+	* libslxargs/slx.cpp: Small change to get it compiling under Win32
+
+2002-03-08 11:47  pgregory
+
+	* Makefile.am, configure.in, libslxargs/Makefile.am: Add support
+	for libslxargs to general Posix build process
+
+2002-03-08 07:23  dsward2
+
+	* libslxargs/slx.cpp: Bug fixes
+
+2002-03-07 14:58  dsward2
+
+	* libslxargs/slx.cpp: Implement SLX_GetArgByName, numerous
+	revisions and comments added.
+
+2002-03-07 13:08  pgregory
+
+	* libcodegenvm/vmoutput.cpp, render/shadeops.cpp: Fix long time
+	annoying bug in shader VM. Multiple light sources would cause odd
+	artifacts, due to illuminance construct in VM bailing out
+	completely if one lightsource didn't contribute, thus subsequent
+	lightsources were missed.
+
+2002-03-07 13:04  pgregory
+
+	* AUTHORS: Added Doug Ward as Mac originator and general coder.
+
+2002-03-06 15:26  pgregory
+
+	* Makefile.am, configure.in, plugins/common/Makefile.am: Implement
+	--enable-plugins support in configure script
+
+2002-03-06 08:01  dsward2
+
+	* render/: shadervm.cpp, shadervm.h: Added accessor methods for
+	shader type and indexed shader variables to support libslxargs
+
+2002-03-06 07:37  dsward2
+
+	* libslxargs/: slx.cpp, slx.h: Initial check in
+
+2002-03-05 21:48  pgregory
+
+	* librib2ri/librib2ri.cpp, render/ri.cpp,
+	ribfiles/genpoly_test.rib: Implement RiPointsGeneralPolygons and
+	add a test file for both RiGeneralPolygon and
+	RiPointsGeneralPolygons.
+
+2002-03-04 08:53  pgregory
+
+	* render/Makefile.am: Added Imager supprot to Posix build
+
+2002-03-03 22:13  pgregory
+
+	* render/libaqsis.dsp: Added imager shader support, thanks to
+	Michel Joron.
+
+2002-03-03 22:12  pgregory
+
+	* render/: imagebuffer.cpp, imagers.cpp, imagers.h, options.cpp,
+	options.h, quadrics.cpp, quadrics.h, ri.cpp, shadeops.cpp,
+	stats.cpp, stats.h: Added imager shader support, thanks to Michel
+	Joron.	Beginings of proper quadric support thanks to Michel Joron.
+
+2002-03-01 18:02  pgregory
+
+	* .astylerc: "Artisitic Style" (SourceForge) options file for Aqsis
+	coding guidelines.
+
+2002-03-01 18:00  pgregory
+
+	* aqsis/aqsis.cpp, libaqsistypes/aqsis.h,
+	libaqsistypes/aqsis_types.h, libaqsistypes/bitvector.cpp,
+	libaqsistypes/bitvector.h, libaqsistypes/color.cpp,
+	libaqsistypes/color.h, libaqsistypes/exception.h,
+	libaqsistypes/file.cpp, libaqsistypes/file.h, libaqsistypes/list.h,
+	libaqsistypes/matrix.cpp, libaqsistypes/matrix.h,
+	libaqsistypes/memorypool.h, libaqsistypes/random.h,
+	libaqsistypes/refcount.h, libaqsistypes/sstring.cpp,
+	libaqsistypes/sstring.h, libaqsistypes/vector2d.cpp,
+	libaqsistypes/vector2d.h, libaqsistypes/vector3d.cpp,
+	libaqsistypes/vector3d.h, libaqsistypes/vector4d.cpp,
+	libaqsistypes/vector4d.h, libaqsistypes/posix/aqsis_compiler.h,
+	libaqsistypes/posix/criticalsection.h,
+	libaqsistypes/posix/semaphore.cpp, aqsl/aqsl_win.cpp,
+	aqsl/aqslcomp.cpp, aqsltell/aqsltell.c,
+	libaqsistypes/posix/semaphore.h, libaqsistypes/posix/share.h,
+	libaqsistypes/win32/intel/aqsis_compiler.h,
+	libaqsistypes/win32/intel/criticalsection.cpp,
+	libaqsistypes/win32/intel/criticalsection.h,
+	libaqsistypes/win32/intel/semaphore.cpp,
+	libaqsistypes/win32/intel/semaphore.h,
+	libaqsistypes/win32/intel/share.h, libri2rib/ascii.cpp,
+	libri2rib/ascii.h, libri2rib/context.cpp, libri2rib/context.h,
+	libri2rib/dictionary.cpp, libri2rib/dictionary.h,
+	libri2rib/error.cpp, libri2rib/error.h, libri2rib/inlineparse.cpp,
+	libri2rib/inlineparse.h, libri2rib/plstore.cpp,
+	libri2rib/plstore.h, libri2rib/ri.cpp, libri2rib/ri2rib_test.c,
+	libri2rib/tokens.cpp, render/attributes.cpp, render/attributes.h,
+	render/bilinear.h, render/bound.cpp, render/bound.h,
+	render/cellnoise.cpp, render/cellnoise.h, render/context.cpp,
+	render/context.h, render/csgtree.cpp, render/csgtree.h,
+	render/genpoly.cpp, render/genpoly.h, render/iddmanager.h,
+	render/imagebuffer.cpp, render/imagebuffer.h, render/lights.cpp,
+	render/lights.h, render/messages.cpp, render/messages.h,
+	render/micropolygon.cpp, render/micropolygon.h, render/motion.h,
+	render/noise.cpp, render/noise.h, render/nurbs.cpp, render/nurbs.h,
+	render/options.cpp, render/options.h, render/parameters.cpp,
+	render/parameters.h, render/patch.cpp, render/patch.h,
+	render/polygon.cpp, render/polygon.h, render/quadrics.cpp,
+	render/quadrics.h, render/render.cpp, render/render.h,
+	render/renderer.cpp, render/renderer.h, render/ri.cpp, render/ri.h,
+	render/rifile.h, render/shadeops.cpp, render/shaderexecenv.cpp,
+	render/shaderexecenv.h, render/shaders.cpp, render/shaders.h,
+	render/shaderstack.cpp, render/shaderstack.h,
+	render/shadervariable.cpp, render/shadervariable.h,
+	render/shadervm.cpp, render/shadervm.h, render/spline.cpp,
+	render/spline.h, render/stats.cpp, render/stats.h,
+	render/subdivision.cpp, render/subdivision.h, render/surface.cpp,
+	render/surface.h, render/symbols.cpp, render/symbols.h,
+	render/teapot.cpp, render/teapot.h, render/texturemap.cpp,
+	render/texturemap.h, render/transform.cpp, render/transform.h,
+	render/trimcurve.cpp, render/trimcurve.h, render/version.h,
+	libdd/dd.cpp, libdd/dd.h, libddmsimple/ddmsimple.cpp,
+	libddmsimple/ddmsimple.h, libddmsock/ddmsock.cpp, librib2/bdec.cpp,
+	librib2/bdec.h, librib2/librib.cpp, librib2/librib.h,
+	librib2/libribtypes.h, librib2/parser.y, librib2/scanner.l,
+	filebuffer/filebuffer.cpp, framebuffer_glut/framebuffer_glut.cpp,
+	framebuffer_glut_z/framebuffer_glut_z.cpp, libddmsock/ddmsock.h,
+	libddmsock/displaydriver.h, libslparse/funcdef.cpp,
+	libslparse/funcdef.h, libslparse/ifuncdef.h,
+	libslparse/iparsenode.h, libslparse/ivardef.h,
+	libslparse/libslparse.cpp, libslparse/libslparse.h,
+	libslparse/optimise.cpp, libslparse/parsenode.cpp,
+	libslparse/parsenode.h, libslparse/typecheck.cpp,
+	libslparse/vardef.cpp, libslparse/vardef.h,
+	librib2ri/librib2ri.cpp, librib2ri/librib2ri.h,
+	librib2stream/librib2stream.cpp, librib2stream/librib2stream.h,
+	plugins/gif2tif/gif2tif.c, plugins/jpg2tif/jpg2save.c,
+	plugins/jpg2tif/jpg2tif.c, plugins/pcx2tif/pcx2tif.c,
+	shaders/noises.h, shaders/patterns.h, plugins/common/pixelsave.c,
+	plugins/common/pixelsave.h, plugins/ppm2tif/ppm2tif.c,
+	libcodegenvm/vmoutput.cpp, librib2/tests/ribprinter.cpp,
+	librib2/tests/ribscanner.cpp, plugins/tga2tif/tga2tif.c,
+	render/macosx/std/std_valarray.h,
+	render/macosx/std/valarray_array.h,
+	render/macosx/std/valarray_meta.h, shadowmap/shadowmap.cpp,
+	teqser/teqser.cpp, libcodegenvm/vmoutput.h: Apply "Aqrtisitic
+	Style" to ensure consistent coding style throughout codebase.  Fix
+	Windows warnings.  Fix most (if not all) remaining Posix (gcc
+	-Wall) warnings.
+
+2002-03-01 09:54  dsward2
+
+	* libddmsock/ddmsock.cpp: For Mac OS X, use AQSIS_BASE_PATH
+	environment variable to describe paths to ddmsock.ini and display
+	devices (e.g. filebuffer, framebuffer)
+
+2002-03-01 09:51  dsward2
+
+	* aqsl/aqsl_win.cpp: For Mac OS X, use AQSIS_BASE_PATH environment
+	variable to describe path to slpp and aqslcomp.
+
+2002-03-01 09:49  dsward2
+
+	* libdd/dd.cpp: In ddInitialise for Mac OS X, use gethostent()
+	instead of gethostbyname() to get localhost info for the socket. 
+	Mac OS X checks DNS before /etc/hosts, causing 30 second timeout
+	each time a display device is opened if DNS not available. 
+	Potential problem - gethostent() foolishly assumes localhost is the
+	first valid entry in /etc/hosts.   Revert to gethostbyname() if
+	Apple ever fixes the problem.
+
+2002-03-01 08:31  pgregory
+
+	* libslparse/Makefile.am: Disable optimisation
+
+2002-02-28 17:12  pgregory
+
+	* aqsis/Makefile.am, aqsl/Makefile.am, aqsltell/Makefile.am,
+	filebuffer/Makefile.am, framebuffer_glut/Makefile.am,
+	framebuffer_glut_z/Makefile.am, libaqsistypes/Makefile.am,
+	libaqsistypes/posix/Makefile.am, libcodegenvm/Makefile.am,
+	libdd/Makefile.am, libddmsimple/Makefile.am,
+	libddmsock/Makefile.am, librib2/Makefile.am,
+	librib2/tests/Makefile.am, librib2ri/Makefile.am,
+	librib2stream/Makefile.am, libslparse/Makefile.am,
+	plugins/common/Makefile.am, plugins/gif2tif/Makefile.am,
+	plugins/jpg2tif/Makefile.am, plugins/pcx2tif/Makefile.am,
+	plugins/ppm2tif/Makefile.am, plugins/tga2tif/Makefile.am,
+	render/Makefile.am, render/shaderstack.h, shadowmap/Makefile.am,
+	teqser/Makefile.am: Fixes to allow use of GCC optimisations.
+
+2002-02-27 18:12  pgregory
+
+	* libaqsistypes/posix/Makefile.am: Make platform library static so
+	that it can be linked with
+
+2002-02-27 01:07  pgregory
+
+	* aqsis/aqsis.cpp: Fix after BeOS changes, PreRender needs to be
+	different for BeOS and everything else.
+
+2002-02-27 00:40  pgregory
+
+	* Makefile.am, aqsis/aqsis.cpp, libaqsistypes/Makefile.am,
+	libaqsistypes/posix/Makefile.am,
+	libaqsistypes/posix/aqsis_compiler.h, libcodegenvm/Makefile.am,
+	libdd/Makefile.am, libddmsimple/Makefile.am,
+	libddmsock/Makefile.am, libri2rib/Makefile.am, librib2/Makefile.am,
+	librib2ri/Makefile.am, librib2stream/Makefile.am,
+	libslparse/Makefile.am, libslparse/parsenode.cpp,
+	plugins/common/Makefile.am, plugins/gif2tif/Makefile.am,
+	plugins/jpg2tif/Makefile.am, plugins/pcx2tif/Makefile.am,
+	plugins/ppm2tif/Makefile.am, plugins/tga2tif/Makefile.am,
+	render/Makefile.am, render/texturemap.cpp: Changes to enable
+	building under BeOS
+
+2002-02-26 08:42  dsward2
+
+	* MacAqsis-test.sh: Moved to MacAqsis directory
+
+2002-02-26 08:39  dsward2
+
+	* aqsisrc-macosx: Moved to MacAqsis subdirectory
+
+2002-02-26 08:38  dsward2
+
+	* ddmsock-macosx.ini, MacAqsis_README.html: Moved to MacAqsis
+	directory
+
+2002-02-25 16:07  pgregory
+
+	* render/libaqsis.dsp: Added first General Poly support files.
+
+2002-02-25 15:59  pgregory
+
+	* librib2/: librib.cpp, libribtypes.h: Remove unnecessary warnings
+	about invalid pairs.  Added shadinggroup typdeclaration.
+
+2002-02-25 15:56  pgregory
+
+	* render/: Makefile.am, genpoly.cpp: General poly support in Posix
+
+2002-02-25 14:13  pgregory
+
+	* render/: genpoly.cpp, genpoly.h, ri.cpp: Initial General Polygon
+	support code.
+
+2002-02-21 07:28  dsward2
+
+	* MacAqsis_README.html: Update build instructions to show sit-bin
+	compression for Project Builder file
+
+2002-02-21 06:37  dsward2
+
+	* aqsl/aqsl_win.cpp: Add Mac OS X support
+
+2002-02-19 20:43  pgregory
+
+	* ChangeLog: [no log message]
+
+2002-02-19 20:41  pgregory
+
+	* configure.in: Update version number
+
 2002-02-19 20:32  pgregory
 
 	* prep_install.bat: Put display devices in the displays
