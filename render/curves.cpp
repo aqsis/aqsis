@@ -1094,33 +1094,29 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 	normal2.Unit();
 	normal3.Unit();
 
-	CqVector3D widthOffset0 = normal0 % direction0;
-	CqVector3D widthOffset1 = normal1 % direction1;
-	CqVector3D widthOffset2 = normal2 % direction2;
-	CqVector3D widthOffset3 = normal3 % direction3;
+	CqVector3D widthOffset02 = normal0 % direction0;
+	CqVector3D widthOffset12 = normal1 % direction1;
+	CqVector3D widthOffset22 = normal2 % direction2;
+	CqVector3D widthOffset32 = normal3 % direction3;
 
 	TqFloat width0 = ( *width() ) [ 0 ];
 	TqFloat width3 = ( *width() ) [ 1 ];
 	TqFloat width1 = ( ( width3 - width0 ) / 3.0f ) + width0;
 	TqFloat width2 = ( ( ( width3 - width0 ) / 3.0f ) * 2.0f ) + width0;
 
-	CqVector3D widthOffset02 = widthOffset0 *
-	    width0 / widthOffset0.Magnitude() / 4.0;
-	CqVector3D widthOffset12 = widthOffset1 *
-	    width1 / widthOffset1.Magnitude() / 4.0;
-	CqVector3D widthOffset22 = widthOffset2 *
-	    width2 / widthOffset0.Magnitude() / 4.0;
-	CqVector3D widthOffset32 = widthOffset3 *
-	    width3 / widthOffset1.Magnitude() / 4.0;
+	widthOffset02 *=
+	    width0 / widthOffset02.Magnitude() / 6.0;
+	widthOffset12 *=
+	    width1 / widthOffset12.Magnitude() / 6.0;
+	widthOffset22 *=
+	    width2 / widthOffset22.Magnitude() / 6.0;
+	widthOffset32 *=
+	    width3 / widthOffset32.Magnitude() / 6.0;
 
-	widthOffset0 *=
-	    width0 / widthOffset0.Magnitude() / 2.0;
-	widthOffset1 *=
-	    width1 / widthOffset1.Magnitude() / 2.0;
-	widthOffset2 *=
-	    width2 / widthOffset2.Magnitude() / 2.0;
-	widthOffset3 *=
-	    width3 / widthOffset3.Magnitude() / 2.0;
+	CqVector3D widthOffset0 = widthOffset02 * 3;
+	CqVector3D widthOffset1 = widthOffset12 * 3;
+	CqVector3D widthOffset2 = widthOffset22 * 3;
+	CqVector3D widthOffset3 = widthOffset32 * 3;
 
 	// next, we create the bilinear patch
 	CqSurfacePatchBicubic *pPatch = new CqSurfacePatchBicubic();
