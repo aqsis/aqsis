@@ -64,6 +64,39 @@ MTL=midl.exe
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\ambientlight.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\ambientlight.sl
+InputName=ambientlight
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\ambientlight.sl
+InputName=ambientlight
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\borg_metal.sl
 
 !IF  "$(CFG)" == "Shaders - Win32 Release"
