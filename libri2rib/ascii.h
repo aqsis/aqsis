@@ -169,9 +169,6 @@ public:
     RtVoid  RiCoordinateSystem(RtToken space);
     RtVoid  RiCoordSysTransform(RtToken space);
 
-    RtPoint *RiTransformPoints(RtToken fromspace, RtToken tospace, RtInt n,
-			       RtPoint points[]);
-
     RtVoid  RiAttributeV(const char *name, RtInt n, RtToken tokens[], RtPointer parms[]);
 
     /* PRIMITIVES */

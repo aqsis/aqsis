@@ -658,12 +658,6 @@ RtVoid  CqASCII::RiCoordSysTransform(RtToken space)
     printToken(space);
     out << endl;
 }
-RtPoint *CqASCII::RiTransformPoints(RtToken fromspace, RtToken tospace, RtInt n,
-				    RtPoint points[])
-{
-    throw CqError(RIE_UNIMPLEMENT,RIE_WARNING,"RiTransformPoints is a C api only call", TqFalse);
-    return (RtPoint *) 0;
-}
 RtVoid CqASCII::RiAttributeV(const char *name, RtInt n, RtToken tokens[], RtPointer parms[])
 {
     out <<"Attribute ";
