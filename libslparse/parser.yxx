@@ -92,7 +92,7 @@ static void yyerror(const CqString Message);
 %token <m_tok>	TYPE_UNIFORM TYPE_VARYING
 %token <m_tok>	SHADER_TYPE_SURFACE SHADER_TYPE_VOLUME SHADER_TYPE_IMAGER SHADER_TYPE_TRANSFORMATION SHADER_TYPE_DISPLACEMENT SHADER_TYPE_LIGHT SHADER_TYPE_ATMOSPHERE 
 %token <m_tok>	ATTRIBUTE OPTION RENDERERINFO INCIDENT OPPOSITE LIGHTSOURCE
-%token <m_tok>	EXTERN TEXTUREINFO
+%token <m_tok>	EXTERN TEXTUREINFO OUTPUT
 
 %token <m_tok>	IF ELSE WHILE FOR CONTINUE BREAK RETURN
 %token <m_tok>	ILLUMINATE ILLUMINANCE SOLAR
@@ -126,6 +126,7 @@ static void yyerror(const CqString Message);
 %type  <m_ShaderType>	shader_type
 %type  <m_pParseNode>	formals
 %type  <m_pParseNode>	variable_definitions
+%type  <m_pParseNode>	formal_variable_definitions
 %type  <m_TypeAndSpace>	typespec
 %type  <m_pParseNode>	def_expressions
 %type  <m_pParseNode>	def_expression
@@ -354,7 +355,7 @@ shader_type
 	;
 
 formals
-	:	variable_definitions
+	:	formal_variable_definitions
 							{
 								// Create a list header, and add the first entry to it.
 								$$=new CqParseNode();
@@ -367,7 +368,7 @@ formals
 									pVarNode=pVarNext;
 								}
 							}
-	|	formals ';' variable_definitions
+	|	formals ';' formal_variable_definitions
 							{
 								// Add this one to the list.
 								CqParseNodeVariable* pVarNode=static_cast<CqParseNodeVariable*>($3->pFirstChild());
@@ -380,6 +381,153 @@ formals
 							}
 	|	formals ';'
 	;
+
+formal_variable_definitions
+	:	typespec def_expressions
+							{
+								$$=new CqParseNode();
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								CqParseNodeDeclaration* pDecl=static_cast<CqParseNodeDeclaration*>($2->pFirstChild());
+								while(pDecl)
+								{
+									TqInt Type=($1.Type);
+									
+									SqVarRef var;
+									TqBool fv=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), var);
+									if(fv)
+									{
+										CqVarDef* pVar=CqVarDef::GetVariablePtr(var);
+										// Check if the declaration marked it as an arry
+										if(pVar->Type()&Type_Array)
+											Type=(TqInt)(Type|Type_Array);
+
+										pVar->SetType(Type);
+										// Create a variable node, in the case of local variable definition, these nodes will be removed, 
+										// and only the intitialisers kept.
+										// In the case of function parameters, the variables will be needed for type string construction.
+										CqParseNode* pVarNode=new CqParseNodeVariable(var);
+										pVarNode->SetPos(ParseLineNumber,ParseStreamName.c_str());
+										$$->AddLastChild(pVarNode);
+
+										// Copy any initialisers
+										if(pDecl->pFirstChild())
+										{
+											if(Type&Type_Array)
+											{
+												CqParseNode* pArrayInit=new CqParseNode();
+
+												CqParseNode* pInitList=pDecl->pFirstChild();
+												CqParseNode* pInit=pInitList->pFirstChild();
+												TqInt i=0;
+												while(pInit!=0)
+												{
+													CqParseNode* pInit2=pInit->pNext();
+													CqParseNodeAssignArray* pInitFunc=new CqParseNodeAssignArray(var);
+													pInitFunc->NoDup();
+													CqParseNodeFloatConst* pIndex=new CqParseNodeFloatConst(i);
+
+													pInitFunc->AddLastChild(pInit);
+													pInitFunc->AddLastChild(pIndex);
+													pArrayInit->AddLastChild(pInitFunc);
+
+													i++;
+													pInit=pInit2;
+												}
+												pVarNode->AddLastChild(pArrayInit);
+											}
+											else
+											{
+												// Create an assign operator to initialise the variable.
+												CqParseNode* pV=new CqParseNodeAssign(var);
+												pV->SetPos(ParseLineNumber,ParseStreamName.c_str());
+												pV->NoDup();
+												pV->AddLastChild(pDecl->pFirstChild());
+
+												pVarNode->AddLastChild(pV);
+												pDecl->ClearChild();
+											}
+										}
+									}
+
+									CqParseNode* pTemp=pDecl;
+									pDecl=static_cast<CqParseNodeDeclaration*>(pDecl->pNext());
+									delete(pTemp);
+								}
+							}
+	|	OUTPUT typespec def_expressions
+							{
+								$$=new CqParseNode();
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								CqParseNodeDeclaration* pDecl=static_cast<CqParseNodeDeclaration*>($3->pFirstChild());
+								while(pDecl)
+								{
+									TqInt Type=($2.Type);
+									
+									SqVarRef var;
+									TqBool fv=CqVarDef::FindVariable((strNameSpace()+pDecl->strName()).c_str(), var);
+									if(fv)
+									{
+										CqVarDef* pVar=CqVarDef::GetVariablePtr(var);
+										// Check if the declaration marked it as an arry
+										if(pVar->Type()&Type_Array)
+											Type=(TqInt)(Type|Type_Array);
+
+										pVar->SetType(Type);
+										// Create a variable node, in the case of local variable definition, these nodes will be removed, 
+										// and only the intitialisers kept.
+										// In the case of function parameters, the variables will be needed for type string construction.
+										CqParseNodeVariable* pVarNode=new CqParseNodeVariable(var);
+										pVarNode->SetOutput();
+										pVarNode->SetPos(ParseLineNumber,ParseStreamName.c_str());
+										$$->AddLastChild(pVarNode);
+
+										// Copy any initialisers
+										if(pDecl->pFirstChild())
+										{
+											if(Type&Type_Array)
+											{
+												CqParseNode* pArrayInit=new CqParseNode();
+
+												CqParseNode* pInitList=pDecl->pFirstChild();
+												CqParseNode* pInit=pInitList->pFirstChild();
+												TqInt i=0;
+												while(pInit!=0)
+												{
+													CqParseNode* pInit2=pInit->pNext();
+													CqParseNodeAssignArray* pInitFunc=new CqParseNodeAssignArray(var);
+													pInitFunc->NoDup();
+													CqParseNodeFloatConst* pIndex=new CqParseNodeFloatConst(i);
+
+													pInitFunc->AddLastChild(pInit);
+													pInitFunc->AddLastChild(pIndex);
+													pArrayInit->AddLastChild(pInitFunc);
+
+													i++;
+													pInit=pInit2;
+												}
+												pVarNode->AddLastChild(pArrayInit);
+											}
+											else
+											{
+												// Create an assign operator to initialise the variable.
+												CqParseNode* pV=new CqParseNodeAssign(var);
+												pV->SetPos(ParseLineNumber,ParseStreamName.c_str());
+												pV->NoDup();
+												pV->AddLastChild(pDecl->pFirstChild());
+
+												pVarNode->AddLastChild(pV);
+												pDecl->ClearChild();
+											}
+										}
+									}
+
+									CqParseNode* pTemp=pDecl;
+									pDecl=static_cast<CqParseNodeDeclaration*>(pDecl->pNext());
+									delete(pTemp);
+								}
+							}
+	;
+
 
 variable_definitions
 	:	typespec def_expressions

@@ -309,7 +309,7 @@ class CqShaderVariableArray: public CqShaderVariable
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			m_aVariables[ 0 ] ->SetValueFromVariable( pVal );
 		}
@@ -317,7 +317,7 @@ class CqShaderVariableArray: public CqShaderVariable
 		 * \param pVal The stack entry to assign.
 		 * \param index Integer SIMD index.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal, TqInt index )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 		{
 			m_aVariables[ 0 ] ->SetValueFromVariable( pVal, index );
 		}
@@ -555,14 +555,14 @@ class CqShaderVariableUniform : public CqShaderVariable
 		 * \param pVal The stack entry to assign.
 		 * \param index Integer SIMD index.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal, TqInt index )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 		{
 			SetValueFromVariable( pVal );
 		}
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			assert( TqFalse );
 		}
@@ -625,13 +625,16 @@ class CqShaderVariableUniformFloat : public CqShaderVariableUniform<type_float, 
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			pVal->GetFloat( m_Value );
 		}
 		virtual	IqShaderData* Clone() const
 		{
-			return ( new CqShaderVariableUniformFloat( *this ) );
+			CqShaderVariableUniformFloat* newVar = new CqShaderVariableUniformFloat( *this );
+			newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
+			return ( newVar );
 		}
 };
 
@@ -661,13 +664,16 @@ class CqShaderVariableUniformString : public CqShaderVariableUniform<type_string
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			pVal->GetString( m_Value );
 		}
 		virtual	IqShaderData* Clone() const
 		{
-			return ( new CqShaderVariableUniformString( *this ) );
+			CqShaderVariableUniformString* newVar = new CqShaderVariableUniformString( *this );
+			newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
+			return ( newVar );
 		}
 };
 
@@ -725,13 +731,16 @@ class CqShaderVariableUniformPoint : public CqShaderVariableUniform<type_point, 
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			pVal->GetPoint( m_Value );
 		}
 		virtual	IqShaderData* Clone() const
 		{
-			return ( new CqShaderVariableUniformPoint( *this ) );
+			CqShaderVariableUniformPoint* newVar = new CqShaderVariableUniformPoint( *this );
+			newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
+			return ( newVar );
 		}
 };
 
@@ -789,13 +798,16 @@ class CqShaderVariableUniformVector : public CqShaderVariableUniform<type_vector
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			pVal->GetVector( m_Value );
 		}
 		virtual	IqShaderData* Clone() const
 		{
-			return ( new CqShaderVariableUniformVector( *this ) );
+			CqShaderVariableUniformVector* newVar = new CqShaderVariableUniformVector( *this );
+			newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
+			return ( newVar );
 		}
 };
 
@@ -853,13 +865,16 @@ class CqShaderVariableUniformNormal : public CqShaderVariableUniform<type_normal
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			pVal->GetNormal( m_Value );
 		}
 		virtual	IqShaderData* Clone() const
 		{
-			return ( new CqShaderVariableUniformNormal( *this ) );
+			CqShaderVariableUniformNormal* newVar = new CqShaderVariableUniformNormal( *this );
+			newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
+			return ( newVar );
 		}
 };
 
@@ -885,7 +900,7 @@ class CqShaderVariableUniformColor : public CqShaderVariableUniform<type_color, 
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			pVal->GetColor( m_Value );
 		}
@@ -895,7 +910,10 @@ class CqShaderVariableUniformColor : public CqShaderVariableUniform<type_color, 
 		}
 		virtual	IqShaderData* Clone() const
 		{
-			return ( new CqShaderVariableUniformColor( *this ) );
+			CqShaderVariableUniformColor* newVar = new CqShaderVariableUniformColor( *this );
+			newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
+			return ( newVar );
 		}
 };
 
@@ -921,13 +939,16 @@ class CqShaderVariableUniformMatrix : public CqShaderVariableUniform<type_matrix
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			pVal->GetMatrix( m_Value );
 		}
 		virtual	IqShaderData* Clone() const
 		{
-			return ( new CqShaderVariableUniformMatrix( *this ) );
+			CqShaderVariableUniformMatrix* newVar = new CqShaderVariableUniformMatrix( *this );
+			newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
+			return ( newVar );
 		}
 };
 
@@ -1180,7 +1201,7 @@ class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, 
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			TqInt i;
 			if ( pVal->Size() > 1 )
@@ -1216,13 +1237,16 @@ class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, 
 		 * \param pVal The stack entry to assign.
 		 * \param index Integer SIMD index.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal, TqInt index )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 		{
 			pVal->GetFloat( m_aValue[ index ], index );
 		}
 		virtual	IqShaderData* Clone() const
 		{
-			return ( new CqShaderVariableVaryingFloat( *this ) );
+			CqShaderVariableVaryingFloat* newVar = new CqShaderVariableVaryingFloat( *this );
+			newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
+			return ( newVar );
 		}
 };
 
@@ -1258,7 +1282,7 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			TqInt i;
 			if ( pVal->Size() > 1 )
@@ -1284,13 +1308,16 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 		 * \param pVal The stack entry to assign.
 		 * \param index Integer SIMD index.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal, TqInt index )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 		{
 			pVal->GetString( m_aValue[ index ], index );
 		}
 		virtual	IqShaderData* Clone() const
 		{
-			return ( new CqShaderVariableVaryingString( *this ) );
+			CqShaderVariableVaryingString* newVar = new CqShaderVariableVaryingString( *this );
+			newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
+			return ( newVar );
 		}
 };
 
@@ -1370,7 +1397,7 @@ class CqShaderVariableVaryingPoint : public CqShaderVariableVarying<type_point, 
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			TqInt i;
 			if ( pVal->Size() > 1 )
@@ -1392,13 +1419,16 @@ class CqShaderVariableVaryingPoint : public CqShaderVariableVarying<type_point, 
 		 * \param pVal The stack entry to assign.
 		 * \param index Integer SIMD index.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal, TqInt index )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 		{
 			pVal->GetPoint( m_aValue[ index ], index );
 		}
 		virtual	IqShaderData* Clone() const
 		{
-			return ( new CqShaderVariableVaryingPoint( *this ) );
+			CqShaderVariableVaryingPoint* newVar = new CqShaderVariableVaryingPoint( *this );
+			newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
+			return ( newVar );
 		}
 };
 
@@ -1478,7 +1508,7 @@ class CqShaderVariableVaryingVector : public CqShaderVariableVarying<type_vector
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			TqInt i;
 			if ( pVal->Size() > 1 )
@@ -1500,13 +1530,16 @@ class CqShaderVariableVaryingVector : public CqShaderVariableVarying<type_vector
 		 * \param pVal The stack entry to assign.
 		 * \param index Integer SIMD index.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal, TqInt index )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 		{
 			pVal->GetVector( m_aValue[ index ], index );
 		}
 		virtual	IqShaderData* Clone() const
 		{
-			return ( new CqShaderVariableVaryingVector( *this ) );
+			CqShaderVariableVaryingVector* newVar = new CqShaderVariableVaryingVector( *this );
+			newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
+			return ( newVar );
 		}
 };
 
@@ -1586,7 +1619,7 @@ class CqShaderVariableVaryingNormal : public CqShaderVariableVarying<type_normal
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			TqInt i;
 			if ( pVal->Size() > 1 )
@@ -1608,13 +1641,16 @@ class CqShaderVariableVaryingNormal : public CqShaderVariableVarying<type_normal
 		 * \param pVal The stack entry to assign.
 		 * \param index Integer SIMD index.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal, TqInt index )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 		{
 			pVal->GetNormal( m_aValue[ index ], index );
 		}
 		virtual	IqShaderData* Clone() const
 		{
-			return ( new CqShaderVariableVaryingNormal( *this ) );
+			CqShaderVariableVaryingNormal* newVar = new CqShaderVariableVaryingNormal( *this );
+			newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
+			return ( newVar );
 		}
 };
 
@@ -1650,7 +1686,7 @@ class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, 
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			TqInt i;
 			if ( pVal->Size() > 1 )
@@ -1676,13 +1712,16 @@ class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, 
 		 * \param pVal The stack entry to assign.
 		 * \param index Integer SIMD index.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal, TqInt index )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 		{
 			pVal->GetColor( m_aValue[ index ], index );
 		}
 		virtual	IqShaderData* Clone() const
 		{
-			return ( new CqShaderVariableVaryingColor( *this ) );
+			CqShaderVariableVaryingColor* newVar = new CqShaderVariableVaryingColor( *this );
+			newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
+			return ( newVar );
 		}
 };
 
@@ -1718,7 +1757,7 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 		/** Copy the values from the passed variable into this, taking into account any class differences.
 		 * \param pVal The variable to copy from.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
 			TqInt i;
 			if ( pVal->Size() > 1 )
@@ -1740,13 +1779,16 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 		 * \param pVal The stack entry to assign.
 		 * \param index Integer SIMD index.
 		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal, TqInt index )
+		virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
 		{
 			pVal->GetMatrix( m_aValue[ index ], index );
 		}
 		virtual	IqShaderData* Clone() const
 		{
-			return ( new CqShaderVariableVaryingMatrix( *this ) );
+			CqShaderVariableVaryingMatrix* newVar = new CqShaderVariableVaryingMatrix( *this );
+			newVar->SetSize( Size() );
+			newVar->SetValueFromVariable( this );
+			return ( newVar );
 		}
 };
 

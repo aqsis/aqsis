@@ -1066,6 +1066,7 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 			{
 				// Only shade in all cases since the Displacement could be called in the shadow map creation too.
 				pGrid->Shade();
+				pGrid->TransferOutputVariables();
 
 				if ( pGrid->vfCulled() == TqFalse )
 				{

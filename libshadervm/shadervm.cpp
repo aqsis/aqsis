@@ -451,6 +451,7 @@ static TqLong vhash = 0;
 static TqLong uhash = 0;
 static TqLong ushash = 0;
 static TqLong ehash = 0;
+static TqLong ohash = 0;
 /*
  * Private hash key for the data types supported by the shaders
  */
@@ -464,7 +465,7 @@ static TqLong *itypes = NULL;
  *  Function to create a local variable for a specific shader
  */
 
-IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fParameter )
+IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fParameter, TqBool fOutput )
 {
 	// Create a VM specific shader variable, which implements the IqShaderData interface,
 	// based on the type and class specified.
@@ -594,7 +595,7 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
  *  Function to create a local variable array for a specific shader
  */
 
-IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariableClass VarClass, const CqString& name, TqInt Count, TqBool fParameter )
+IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariableClass VarClass, const CqString& name, TqInt Count, TqBool fParameter, TqBool fOutput )
 {
 	IqShaderData * pVar = 0;
 	switch ( VarType )
@@ -828,6 +829,8 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 		ushash = CqParameter::hash("USES");
 	if (!ehash)
 		ehash = CqParameter::hash("external");
+	if (!ohash)
+		ohash = CqParameter::hash("output");
 
 	if (!itypes)
 	{
@@ -913,6 +916,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 			EqVariableClass VarClass = class_varying;
 			TqBool			fVarArray = TqFalse;
 			TqBool			fParameter = TqFalse;
+			TqBool			fOutput = TqFalse;
 			switch ( Segment )
 			{
 					case Seg_Data:
@@ -920,7 +924,9 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 					VarClass = class_invalid;
 					while ( VarType == type_invalid )
 					{
-						if ( phash == htoken) // == "param"
+						if ( ohash == htoken) // == "output"
+							fOutput = TqTrue;
+						else if ( phash == htoken) // == "param"
 							fParameter = TqTrue;
 						else if ( vhash == htoken) // == "varying"
 							VarClass = class_varying;
@@ -961,9 +967,9 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 						continue;
 
 					if ( fVarArray )
-						AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count, fParameter ) );
+						AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count, fParameter, fOutput ) );
 					else
-						AddLocalVariable( CreateVariable( VarType, VarClass, token, fParameter ) );
+						AddLocalVariable( CreateVariable( VarType, VarClass, token, fParameter, fOutput ) );
 					break;
 
 					case Seg_Init:

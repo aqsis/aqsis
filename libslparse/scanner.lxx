@@ -85,7 +85,7 @@ static TqInt check_type();
 "while"			{ return(WHILE); }
 "uniform"		{ return(TYPE_UNIFORM); }
 "varying"		{ return(TYPE_VARYING); }
-"output"		{}
+"output"		{ return(OUTPUT); }
 "extern"		{ return(EXTERN); }
 "atmosphere"	{ return(SHADER_TYPE_ATMOSPHERE); }
 "surface"		{ return(SHADER_TYPE_SURFACE); }

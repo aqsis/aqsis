@@ -75,6 +75,7 @@ class CqMicroPolyGridBase
 		/** Pure virtual, shade the grid.
 		 */
 		virtual	void	Shade() = 0;
+		virtual	void	TransferOutputVariables() = 0;
 		/*
 		 * Delete all the variables per grid 
 		 */
@@ -169,6 +170,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 		// Overrides from CqMicroPolyGridBase
 		virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
 		virtual	void	Shade();
+		virtual	void	TransferOutputVariables();
 
 		/** Get a pointer to the surface which this grid belongs.
 		 * \return Surface pointer, only valid during shading.
@@ -302,9 +304,22 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 		}
 		virtual	IqShaderData* FindStandardVar( const char* pname )
 		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->FindStandardVar( pname ) );
+			IqShaderData* pVar = NULL;
+			if( ( pVar = m_pShaderExecEnv->FindStandardVar( pname ) ) == NULL )
+			{
+				std::vector<IqShaderData*>::iterator outputVar;
+				for( outputVar = m_apShaderOutputVariables.begin(); outputVar != m_apShaderOutputVariables.end(); outputVar++ )
+				{
+					if( (*outputVar)->strName() == pname )	
+					{
+						pVar = (*outputVar);
+						break;
+					}
+				}
+			}
+			return( pVar );
 		}
-
+		
 
 	private:
 		TqBool	m_bShadingNormals;		///< Flag indicating shading normals have been filled in and don't need to be calculated during shading.
@@ -314,6 +329,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 		IqShaderExecEnv* m_pShaderExecEnv;	///< Pointer to the shader execution environment for this grid.
 		TqBool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
 		CqBitVector	m_CulledPolys;		///< Bitvector indicating whether the individual micro polygons are culled.
+		std::vector<IqShaderData*>	m_apShaderOutputVariables;	///< Vector of pointers to shader output variables.
 	protected:
 
 }
@@ -338,6 +354,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 
 		virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
 		virtual	void	Shade();
+		virtual	void	TransferOutputVariables();
 		void DeleteVariables( TqBool all )
 		{}
 

@@ -564,13 +564,6 @@ void CqRenderer::RenderWorld()
 	if ( pImage() == 0 )
 		SetImage( new CqImageBuffer );
 
-	// \debug:
-	std::map<std::string, SqOutputDataEntry>::iterator entry;
-	for( entry = m_OutputDataEntries.begin(); entry != m_OutputDataEntries.end(); entry++ )
-	{
-		std::cout << entry->first.c_str() << " - " << entry->second.m_Offset << "," << entry->second.m_NumSamples << std::endl;
-	}
-
 	m_pDDManager->OpenDisplays();
 
 	pImage() ->RenderImage();

@@ -487,6 +487,11 @@ class CqParseNodeVariable : public CqParseNode, public IqParseNodeVariable
 			IqVarDef * pVarDef = CqVarDef::GetVariablePtr( m_VarRef );
 			if ( pVarDef != 0 ) pVarDef->SetParam();
 		}
+		void	SetOutput()
+		{
+			IqVarDef * pVarDef = CqVarDef::GetVariablePtr( m_VarRef );
+			if ( pVarDef != 0 ) pVarDef->SetOutput();
+		}
 		void	SetDefaultStorage( TqInt Storage )
 		{
 			// If a storage method has not been specified, default to the specified type.
@@ -1678,12 +1683,14 @@ class CqParseNodeDeclaration : public CqParseNode
 		CqParseNodeDeclaration( const CqParseNodeDeclaration& from ) :
 				CqParseNode( from ),
 				m_strName( from.m_strName ),
-				m_Type( from.m_Type )
+				m_Type( from.m_Type ),
+				m_Output( from.m_Output )
 		{}
 		CqParseNodeDeclaration( const char* strName = "", TqInt Type = Type_Nil ) :
 				CqParseNode(),
 				m_strName( strName ),
-				m_Type( Type )
+				m_Type( Type ),
+				m_Output( TqFalse )
 		{
 			m_fVarying = ( m_Type & Type_Varying ) != 0;
 		}
@@ -1701,6 +1708,14 @@ class CqParseNodeDeclaration : public CqParseNode
 		{
 			m_Type = Type;
 		}
+		TqBool	Output() const
+		{
+			return ( m_Output );
+		}
+		void	SetOutput( TqBool Output )
+		{
+			m_Output = Output;
+		}
 		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(*this); }
 
 
@@ -1715,6 +1730,7 @@ class CqParseNodeDeclaration : public CqParseNode
 	protected:
 		CqString	m_strName;
 		TqInt	m_Type;
+		TqBool	m_Output;
 };
 
 

@@ -55,7 +55,7 @@ enum EqVariableType
     Type_Varying = 0x4000,
     Type_Vertex = 0x2000,
 
-    Type_Drop = 0x0800,
+    Type_Output = 0x0800,
     Type_Variable = 0x0400,
     Type_Param = 0x0200,
     Type_Array = 0x0100,
@@ -234,6 +234,7 @@ struct IqVarDef
 	virtual	TqBool	fExtern() const = 0;
 	virtual	SqVarRef	vrExtern() const = 0;
 	virtual	void	SetParam( TqBool fParam = TqTrue ) = 0;
+	virtual	void	SetOutput( TqBool fOutput = TqTrue ) = 0;
 	virtual	void	SetDefaultStorage( TqInt Storage ) = 0;
 
 	static	IqVarDef*	GetVariablePtr( const SqVarRef& Ref );

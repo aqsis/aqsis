@@ -87,6 +87,10 @@ class CqVarDef : public IqVarDef
 		{
 			m_Type = ( m_Type & ~Type_Param ) | ( fParam ? Type_Param : 0 );
 		}
+		virtual	void	SetOutput( TqBool fOutput = TqTrue )
+		{
+			m_Type = ( m_Type & ~Type_Output ) | ( fOutput ? Type_Output : 0 );
+		}
 		virtual	void	SetDefaultStorage( TqInt Storage )
 		{
 			// If no storage has been explicitly specified, default to the

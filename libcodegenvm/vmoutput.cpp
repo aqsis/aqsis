@@ -812,6 +812,7 @@ CqString CqCodeGenOutput::StorageSpec( TqInt Type )
 {
 	CqString strSpec( "" );
 
+	if ( Type & Type_Output ) strSpec += "output ";
 	if ( Type & Type_Param ) strSpec += "param ";
 	if ( Type & Type_Uniform ) strSpec += "uniform ";
 	if ( Type & Type_Varying ) strSpec += "varying ";

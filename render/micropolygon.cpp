@@ -80,6 +80,12 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
 	/// \note This should delete throught the interface that created it.
 	if ( m_pShaderExecEnv != 0 ) delete( m_pShaderExecEnv );
 	m_pShaderExecEnv = 0;
+
+	// Delete any cloned shader output variables.
+	std::vector<IqShaderData*>::iterator outputVar;
+	for( outputVar = m_apShaderOutputVariables.begin(); outputVar != m_apShaderOutputVariables.end(); outputVar++ )
+		if( (*outputVar) )	delete( (*outputVar) );
+	m_apShaderOutputVariables.clear();
 }
 
 //---------------------------------------------------------------------
@@ -494,6 +500,28 @@ void CqMicroPolyGrid::Shade()
 }
 
 //---------------------------------------------------------------------
+/** Transfer any shader variables marked as "otuput" as they may be needed by the display devices.
+ */
+
+void CqMicroPolyGrid::TransferOutputVariables()
+{
+	IqShader* pShader = this->pAttributes()->pshadSurface();
+	
+	// Only bother transferring ones that have been used in a RiDisplay request.
+	std::map<std::string, CqRenderer::SqOutputDataEntry>& outputVars = QGetRenderContext()->GetMapOfOutputDataEntries();
+	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator outputVar;
+	for( outputVar = outputVars.begin(); outputVar != outputVars.end(); outputVar++ )
+	{	
+		IqShaderData* outputData = pShader->FindArgument( outputVar->first );
+		if( NULL != outputData )
+		{
+			IqShaderData* newOutputData = outputData->Clone();
+			m_apShaderOutputVariables.push_back( newOutputData );
+		}
+	}
+}
+
+//---------------------------------------------------------------------
 /**
  * Delete unneeded variables so that we don't use up unnecessary memory
  */
@@ -725,6 +753,16 @@ void CqMotionMicroPolyGrid::Shade()
 	pGrid->Shade();
 }
 
+
+//---------------------------------------------------------------------
+/** Transfer shader output variables for the primary grid.
+ */
+
+void CqMotionMicroPolyGrid::TransferOutputVariables()
+{
+	CqMicroPolyGrid * pGrid = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) );
+	pGrid->TransferOutputVariables();
+}
 
 
 //---------------------------------------------------------------------

@@ -549,8 +549,8 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		{
 			return ( m_Uses );
 		}
-		virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fArgument = TqFalse );
-		virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fParameter = TqFalse );
+		virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fArgument = TqFalse, TqBool fOutput = TqFalse  );
+		virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fParameter = TqFalse, TqBool fOutput = TqFalse  );
 		virtual	IqShaderData* CreateTemporaryStorage( EqVariableType type, EqVariableClass _class );
 		virtual void DeleteTemporaryStorage( IqShaderData* pData );
 		virtual void DefaultSurface();
