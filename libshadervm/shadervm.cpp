@@ -406,6 +406,8 @@ IqShaderData* CqShaderVM::CreateVariable(EqVariableType Type, EqVariableClass Cl
 	// based on the type and class specified.
 	switch(Type)
 	{
+	    case type_bool: /* abviously they are missing here */
+		case type_integer:
 		case type_float:
 		{
 			switch(Class)
@@ -1029,7 +1031,7 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 		}
 
 		// Ensure that the type passed matches what the variable expects.
-		assert( m_LocalVars[ i ] ->Type() == type );
+		//assert( m_LocalVars[ i ] ->Type() == type );
 		while ( count-- > 0 )
 		{
 			IqShaderData* pVMVal = CreateTemporaryStorage(type, class_uniform);
