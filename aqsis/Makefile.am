@@ -10,6 +10,7 @@ test-clean:
 	rm -f *.tif
 	rm -f *.z
 	rm -f *.slx
+	rm -f *.map
 
 test-shaders:
 	PATH=$$PATH:$(top_builddir)/aqsl; for file in $$(find $(top_srcdir) -name "*.sl" | sort); do $(top_builddir)/aqsl/aqsl $$file; done	

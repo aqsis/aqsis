@@ -18,6 +18,7 @@ filebuffer/Makefile \
 framebuffer/Makefile \
 framebuffer/win32/Makefile \
 framebuffer/win32/intel/Makefile \
+framebuffer_glut/Makefile \
 images/Makefile \
 libaqsistypes/Makefile \
 libaqsistypes/posix/Makefile \
@@ -27,9 +28,6 @@ libcodegenvm/Makefile \
 libdd/Makefile \
 libddmsimple/Makefile \
 libddmsock/Makefile \
-libddmsock/win32/Makefile \
-libddmsock/win32/intel/Makefile \
-libddmsock/posix/Makefile \
 librib2/Makefile \
 librib2/tests/Makefile \
 librib2ri/Makefile \

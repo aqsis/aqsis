@@ -463,8 +463,13 @@ void CqDDManager::LoadDisplayLibrary(CqDDClient& dd)
     //    trapping.  
     if (strDriverFile.empty())
     {
-        CqBasicError(ErrorID_DisplayDriver,Severity_Normal, "Add/copy ddmsock.ini file into path.  Defaulting to \"framebuffer.exe\".");
-        strDriverFile = "framebuffer.exe";
+#ifdef AQSIS_SYSTEM_WIN32
+	strDriverFile = "framebuffer.exe";
+#else // AQSIS_SYSTEM_WIN32
+	strDriverFile = "framebuffer";
+#endif // !AQSIS_SYSTEM_WIN32
+	
+        CqBasicError(ErrorID_DisplayDriver,Severity_Normal, ("Could not find ddmsock.ini file.  Defaulting to \"" + strDriverFile + "\" display driver.").c_str());
     }
 
 	CqRiFile fileDriver(strDriverFile.c_str(), "display");
@@ -530,7 +535,7 @@ void CqDDManager::LoadDisplayLibrary(CqDDClient& dd)
 	}
 	else
 	{
-		CqBasicError(0,0,"Error loading display driver");
+		CqBasicError(0,0, ("Error loading display driver [ " + strDriverFile + " ]").c_str());
 	}
 }
 
