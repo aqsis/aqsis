@@ -103,7 +103,7 @@ class CqNoise
 	static	CqColor		CGNoise1(TqFloat x)							{return(CGNoise3(x,0,0));}
 	static	CqColor		CGNoise2(TqFloat x, TqFloat y)				{return(CGNoise3(x,y,0));}
 	static	CqColor		CGNoise3(const CqVector3D& v)				{return(CGNoise3(v.x(),v.y(),v.z()));}
-	static	CqColor		CGNoise3(TqFloat x, TqFloat y, TqFloat z)	{return(CqColor(CGNoise3(x,y,z)));}
+	static	CqColor		CGNoise3(TqFloat x, TqFloat y, TqFloat z)	{return(CqColor(PGNoise3(x,y,z)));}
 
 	static	void		init(TqInt seed);
 	static	float		glattice(TqInt ix, TqInt iy, TqInt iz, TqFloat fx, TqFloat fy, TqFloat fz);
