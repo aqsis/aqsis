@@ -105,6 +105,8 @@ private:
 		std::string m_name;
 		std::string m_type;
 		std::string m_mode;
+		TqInt		m_modeHash;
+		TqInt		m_modeID;
 		TqInt		m_dataOffset;
 		TqInt		m_dataSize;
 	};

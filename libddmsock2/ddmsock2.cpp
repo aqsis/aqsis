@@ -124,6 +124,8 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 	req.m_name = name;
 	req.m_type = type;
 	req.m_mode = mode;
+	req.m_modeHash = CqParameter::hash( mode );
+	req.m_modeID = modeID;
 	req.m_dataOffset = dataOffset;
 	req.m_dataSize = dataSize;
 
@@ -193,41 +195,43 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 
 TqBool CqDDManager::fDisplayNeeds( const TqChar* var )
 {
-/*    static TqUlong rgb = CqParameter::hash( "rgb" );
+    static TqUlong rgb = CqParameter::hash( "rgb" );
     static TqUlong rgba = CqParameter::hash( "rgba" );
     static TqUlong Ci = CqParameter::hash( "Ci" );
     static TqUlong Oi = CqParameter::hash( "Oi" );
 
     TqUlong htoken = CqParameter::hash( var );
 
-    std::vector<CqDDClient>::iterator i;
-    for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+	// Scan all registered displays to see if any of them need the variable specified.
+	std::vector<SqDisplayRequest>::iterator i;
+	for(i = m_displayRequests.begin(); i!=m_displayRequests.end(); i++)
     {
-        TqBool usage = ( ( i->hMode() == rgba ) || ( i->hMode() == rgb ) );
+        TqBool usage = ( ( i->m_modeHash == rgba ) || ( i->m_modeHash == rgb ) );
         if ( ( htoken == Ci ) && usage )
             return ( TqTrue );
         else if ( ( htoken == Oi ) && usage )
             return ( TqTrue );
-        else if ( ( i->hMode() == htoken ) )
+        else if ( ( i->m_modeHash == htoken ) )
             return ( TqTrue );
-    }*/
-    return ( TqFalse );
+    }
+    return ( TqTrue );
 }
 
 
 TqInt CqDDManager::Uses()
 {
     TqInt Uses = 0;
-/*    std::vector<CqDDClient>::iterator i;
-    for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+	// Scan all registered displays to combine the required variables.
+	std::vector<SqDisplayRequest>::iterator i;
+	for(i = m_displayRequests.begin(); i!=m_displayRequests.end(); i++)
     {
         TqInt ivar;
         for( ivar = 0; ivar < EnvVars_Last; ivar++ )
         {
-            if( i->hMode() == gVariableTokens[ ivar ] )
+            if( i->m_modeHash == gVariableTokens[ ivar ] )
                 Uses |= 1 << ivar;
         }
-    }*/
+    }
     return ( Uses );
 }
 

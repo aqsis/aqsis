@@ -519,7 +519,7 @@ int main( int argc, char** argv )
 
     /// Port is defined as the value passed into the -port= command line argument.
 	/// if that is empty, then the value stored in the environment variable AQSIS_DD_PORT,
-	/// if that is not available, then the fallback is 27742 ('A', 'Q', 'S', 'I' 'S', '2' on phone keypad)
+	/// if that is not available, then the fallback is 2774 ('A', 'Q', 'S', 'I' 'S' on phone keypad)
 	int port = 277472;
 	if(g_port.empty())
 	{
@@ -535,7 +535,10 @@ int main( int argc, char** argv )
 	// Open a socket.
 	g_Socket = socket( AF_INET, SOCK_STREAM, 0 );
 	if ( g_Socket == INVALID_SOCKET )
+	{
+		std::cerr << "Aqsis display: Error creating socket" << std::endl;
 		return -1;
+	}
 
     /// Host name is the value passed into the -host= command line argument,
 	/// or the local host.
