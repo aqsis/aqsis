@@ -67,5 +67,6 @@ plugins/Makefile \
 plugins/gif2tif/Makefile \
 plugins/jpg2tif/Makefile \
 plugins/ppm2tif/Makefile \
+plugins/pcx2tif/Makefile \
 Makefile )
 
