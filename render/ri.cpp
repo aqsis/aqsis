@@ -2980,7 +2980,17 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
     // Calcualte how many points there are.
     TqInt cVerts = 0;
     for ( iloop = 0; iloop < nloops; iloop++ )
+	{
         cVerts += nverts[ iloop ];
+		// Check for degenerate loops.
+		if( nverts[ iloop ] < 3 )
+		{
+            CqString objname( "unnamed" );
+            const CqString* pattrName = QGetRenderContext()->pattrCurrent()->GetStringAttribute( "identifier", "name" );
+            if ( pattrName != 0 ) objname = pattrName[ 0 ];
+            std::cerr << warning << "Degenerate loop in GeneralPolygon object \"" << objname.c_str() << "\"" << std::endl;
+		}
+	}
 
     // Create a storage class for all the points.
     CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, 1, cVerts );

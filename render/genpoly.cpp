@@ -399,9 +399,12 @@ void CqPolygonGeneral2D::Triangulate( std::vector<TqInt>& aiList ) const
             iList.resize( cVertex );
         }
     }
-    aiList.push_back( m_aiVertices[ iList[ 0 ] ] );
-    aiList.push_back( m_aiVertices[ iList[ 1 ] ] );
-    aiList.push_back( m_aiVertices[ iList[ 2 ] ] );
+	if( cVertex == 3 )
+	{
+		aiList.push_back( m_aiVertices[ iList[ 0 ] ] );
+		aiList.push_back( m_aiVertices[ iList[ 1 ] ] );
+		aiList.push_back( m_aiVertices[ iList[ 2 ] ] );
+	}
 }
 
 
