@@ -7,7 +7,7 @@ CONFIG_FILE = $(DESTDIR)$(sysconfdir)/displays.ini
 DISPLAY_LIB = $(pkglibdir)/libdisplay.so
 
 install-exec-local:
-	mkdir -p $(DESTDIR)@sysconfdir@
+	mkdir -p $(DESTDIR)$(sysconfdir)
 	rm -f $(CONFIG_FILE)
 	echo "file	$(DISPLAY_LIB)" >> $(CONFIG_FILE)
 	echo "tiff	$(DISPLAY_LIB)" >> $(CONFIG_FILE)
