@@ -63,6 +63,20 @@
 #include        "unistd.h"
 #endif /* AQSIS_SYSTEM_WIN32 */
 
+// These are needed to allow calculation of the default paths
+#ifdef AQSIS_SYSTEM_WIN32
+  #include <windows.h>
+  #ifdef _DEBUG
+    #include <crtdbg.h>
+    extern "C" __declspec(dllimport) void report_refcounts();
+  #endif // _DEBUG
+#endif // !AQSIS_SYSTEM_WIN32
+
+#if defined(AQSIS_SYSTEM_MACOSX)
+#include "Carbon/Carbon.h"
+#endif
+
+
 #include	"ri.h"
 
 #include	"sstring.h"
@@ -410,6 +424,163 @@ RtToken	RiDeclare( RtString name, RtString declaration )
     return ( 0 );
 }
 
+
+//----------------------------------------------------------------------
+// SetDefaultRiOptions
+// Set some Default Options.
+//
+void SetDefaultRiOptions( void )
+{
+    std::string g_shader_path;
+    std::string g_archive_path;
+    std::string g_texture_path;
+    std::string g_display_path;
+    std::string g_dso_path;
+    std::string g_procedural_path;
+    std::string g_plugin_path;
+
+#ifdef AQSIS_SYSTEM_WIN32
+    char acPath[256];
+    char rootPath[256];
+    if( GetModuleFileName( NULL, acPath, 256 ) != 0)
+    {
+        // guaranteed file name of at least one character after path
+        *( strrchr( acPath, '\\' ) + 1 ) = '\0';
+        std::string      stracPath(acPath);
+        stracPath.append("..\\");
+        _fullpath(rootPath,&stracPath[0],256);
+    }
+    g_shader_path = rootPath;
+    g_archive_path = rootPath;
+    g_texture_path = rootPath;
+    g_display_path = rootPath;
+    g_dso_path = rootPath;
+    g_procedural_path = rootPath;
+    g_plugin_path = rootPath;
+
+    g_shader_path.append( "shaders" );
+    g_archive_path.append( "archives" );
+    g_texture_path.append( "textures" );
+    g_display_path.append( "bin" );
+    g_dso_path.append( "dsos" );
+    g_procedural_path.append( "procedures" );
+    g_plugin_path.append( "plugins" );
+#elif AQSIS_SYSTEM_MACOSX
+    CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
+    const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+
+    g_shader_path = pathPtr;
+    g_archive_path = pathPtr;
+    g_texture_path = pathPtr;
+    g_display_path = pathPtr;
+    g_dso_path = pathPtr;
+    g_procedural_path = pathPtr;
+    g_plugin_path = pathPtr;
+
+    g_shader_path.append( "/shaders" );
+    g_archive_path.append( "/archives" );
+    g_texture_path.append( "/textures" );
+    g_dso_path.append( "/dsos" );
+    g_procedural_path.append( "/procedures" );
+    g_plugin_path.append( "/plugins" );
+#else
+    g_shader_path = DEFAULT_SHADER_PATH;
+    g_archive_path = DEFAULT_ARCHIVE_PATH;
+    g_texture_path = DEFAULT_TEXTURE_PATH;
+    g_display_path = DEFAULT_DISPLAY_PATH;
+    g_dso_path = DEFAULT_DSO_PATH;
+    g_procedural_path = DEFAULT_PROCEDURAL_PATH;
+    g_plugin_path = DEFAULT_PLUGIN_PATH;
+#endif
+
+    // Apply environment-variable overrides to default paths ...
+    const char* popt[ 1 ];
+    const CqString *pOption;
+
+    pOption = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "shader" );
+    if (!pOption){
+        // If the calling application has not already set a shader path then we provide one here.
+        if(getenv("AQSIS_SHADER_PATH")){
+            popt[0] = getenv("AQSIS_SHADER_PATH");
+        }else{
+            popt[0] = g_shader_path.c_str();
+        };
+        RiOption( "searchpath", "shader", &popt, RI_NULL );
+    } ;
+
+    pOption = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "archive" );
+    if (!pOption){
+        // If the calling application has not already set a shader path then we provide one here.
+        if(getenv("AQSIS_ARCHIVE_PATH")){
+            popt[0] = getenv("AQSIS_ARCHIVE_PATH");
+        }else{
+            popt[0] = g_archive_path.c_str();
+        };
+        RiOption( "searchpath", "archive", &popt, RI_NULL );
+    } ;
+
+    pOption = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "texture" );
+    if (!pOption){
+        // If the calling application has not already set a shader path then we provide one here.
+        if(getenv("AQSIS_TEXTURE_PATH")){
+            popt[0] = getenv("AQSIS_TEXTURE_PATH");
+        }else{
+            popt[0] = g_texture_path.c_str();
+        };
+        RiOption( "searchpath", "texture", &popt, RI_NULL );
+    } ;
+
+    pOption = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "display" );
+    if (!pOption){
+        // If the calling application has not already set a shader path then we provide one here.
+        if(getenv("AQSIS_DISPLAY_PATH")){
+            popt[0] = getenv("AQSIS_DISPLAY_PATH");
+        }else{
+            popt[0] = g_display_path.c_str();
+        };
+        RiOption( "searchpath", "display", &popt, RI_NULL );
+    } ;
+
+    pOption = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "dsolibs" );
+    if (!pOption){
+        // If the calling application has not already set a shader path then we provide one here.
+        if(getenv("AQSIS_DSO_PATH")){
+            popt[0] = getenv("AQSIS_DSO_PATH");
+        }else{
+            popt[0] = g_dso_path.c_str();
+        };
+        RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
+    } ;
+
+
+    pOption = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "procedural" );
+    if (!pOption){
+        // If the calling application has not already set a shader path then we provide one here.
+        if(getenv("AQSIS_PROCEDURAL_PATH")){
+            popt[0] = getenv("AQSIS_PROCEDURAL_PATH");
+        }else{
+            popt[0] = g_procedural_path.c_str();
+        };
+        RiOption( "searchpath", "procedural", &popt, RI_NULL );
+    } ;
+
+    pOption = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "plugin" );
+    if (!pOption){
+        // If the calling application has not already set a shader path then we provide one here.
+        if(getenv("AQSIS_PLUGIN_PATH")){
+            popt[0] = getenv("AQSIS_PLUGIN_PATH");
+        }else{
+            popt[0] = g_plugin_path.c_str();
+        };
+        RiOption( "searchpath", "plugin", &popt, RI_NULL );
+    } ;
+
+    // Setup a default Displac
+    RiDisplay( "ri.pic", "file", "rgba", NULL );
+
+}
+
 //----------------------------------------------------------------------
 // RiBegin
 // Begin a Renderman render phase.
@@ -443,8 +614,7 @@ RtVoid	RiBegin( RtToken name )
         param++;
     };
 
-    // Setup a default Display
-    RiDisplay( "ri.pic", "file", "rgba", NULL );
+    SetDefaultRiOptions();
 
     // Setup a default surface shader
     boost::shared_ptr<IqShader> pDefaultSurfaceShader = 
