@@ -529,30 +529,6 @@ TqInt CqSurfacePatchBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	cSplits += 2;
 
-
-	if ( !m_fDiceable)
-	{
-		CqSurfacePatchBicubic * pNew3, * pNew4;
-
-		pNew3 = pNew1->vSubdivide();
-		pNew4 = pNew2->vSubdivide();
-
-		pNew3->SetSurfaceParameters( *this );
-		pNew4->SetSurfaceParameters( *this );
-		pNew3->m_fDiceable = TqTrue;
-		pNew4->m_fDiceable = TqTrue;
-		pNew3->m_EyeSplitCount = m_EyeSplitCount;
-		pNew4->m_EyeSplitCount = m_EyeSplitCount;
-		pNew3->AddRef();
-		pNew4->AddRef();
-
-		aSplits.push_back( pNew3 );
-		aSplits.push_back( pNew4 );
-
-		cSplits += 2;
-	}
-	
-
 	return ( cSplits );
 }
 
@@ -565,7 +541,10 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
 	if ( !m_fDiceable )
+	{
+		m_SplitDir = (m_SplitDir==SplitDir_U)?SplitDir_V:SplitDir_U;
 		return ( TqFalse );
+	}
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
 	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
@@ -971,28 +950,6 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	cSplits += 2;
 
-	if( !m_fDiceable )
-	{
-		CqSurfacePatchBilinear * pNew3, * pNew4;
-		
-		pNew3 = pNew1->vSubdivide();
-		pNew4 = pNew2->vSubdivide();
-
-		pNew3->SetSurfaceParameters( *this );
-		pNew4->SetSurfaceParameters( *this );
-		pNew3->m_fDiceable = TqTrue;
-		pNew4->m_fDiceable = TqTrue;
-		pNew3->m_EyeSplitCount = m_EyeSplitCount;
-		pNew4->m_EyeSplitCount = m_EyeSplitCount;
-		pNew3->AddRef();
-		pNew4->AddRef();
-
-		aSplits.push_back( pNew3 );
-		aSplits.push_back( pNew4 );
-
-		cSplits += 2;
-	}
-
 	return ( cSplits );
 }
 
@@ -1006,7 +963,10 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
 	if ( !m_fDiceable )
+	{
+		m_SplitDir = (m_SplitDir==SplitDir_U)?SplitDir_V:SplitDir_U;
 		return ( TqFalse );
+	}
 
 	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
 	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );

@@ -123,6 +123,14 @@ TqBool	CqQuadric::Diceable()
 {
 	TqInt gridsize;
 
+	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
+	// then we can return immediately.
+	if ( !m_fDiceable )
+	{
+		m_SplitDir = (m_SplitDir==SplitDir_U)?SplitDir_V:SplitDir_U;
+		return ( TqFalse );
+	}
+
 	const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
 	TqInt m_XBucketSize = 16;
 	TqInt m_YBucketSize = 16;
@@ -140,6 +148,8 @@ TqBool	CqQuadric::Diceable()
 		gridsize = static_cast<TqInt>(m_XBucketSize * m_XBucketSize / ShadingRate);
 
 	EstimateGridSize();
+
+	m_SplitDir = ( m_uDiceSize > m_vDiceSize )? SplitDir_U : SplitDir_V;
 
 	// if the gridsize is not set the computation of gridsize assuming
 	// a minimum of 0.4 shadingrate
@@ -271,7 +281,7 @@ TqInt CqSphere::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	pNew1->AddRef();
 	pNew2->AddRef();
-	if ( m_uDiceSize >= m_vDiceSize )
+	if ( m_SplitDir == SplitDir_U )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
@@ -417,7 +427,7 @@ TqInt CqCone::Split( std::vector<CqBasicSurface*>& aSplits )
 	CqCone* pNew2 = new CqCone( *this );
 	pNew1->AddRef();
 	pNew2->AddRef();
-	if ( m_uDiceSize > m_vDiceSize )
+	if ( m_SplitDir == SplitDir_U )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
@@ -556,7 +566,7 @@ TqInt CqCylinder::Split( std::vector<CqBasicSurface*>& aSplits )
 	CqCylinder* pNew2 = new CqCylinder( *this );
 	pNew1->AddRef();
 	pNew2->AddRef();
-	if ( m_uDiceSize > m_vDiceSize )
+	if ( m_SplitDir == SplitDir_U )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
@@ -695,7 +705,7 @@ TqInt CqHyperboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 	CqHyperboloid* pNew2 = new CqHyperboloid( *this );
 	pNew1->AddRef();
 	pNew2->AddRef();
-	if ( m_uDiceSize > m_vDiceSize )
+	if ( m_SplitDir == SplitDir_U )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
@@ -848,7 +858,7 @@ TqInt CqParaboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 	CqParaboloid* pNew2 = new CqParaboloid( *this );
 	pNew1->AddRef();
 	pNew2->AddRef();
-	if ( m_uDiceSize > m_vDiceSize )
+	if ( m_SplitDir == SplitDir_U )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
@@ -987,7 +997,7 @@ TqInt CqTorus::Split( std::vector<CqBasicSurface*>& aSplits )
 	CqTorus* pNew2 = new CqTorus( *this );
 	pNew1->AddRef();
 	pNew2->AddRef();
-	if ( m_uDiceSize >= m_vDiceSize )
+	if ( m_SplitDir == SplitDir_U )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
@@ -1125,7 +1135,7 @@ TqInt CqDisk::Split( std::vector<CqBasicSurface*>& aSplits )
 	CqDisk* pNew2 = new CqDisk( *this );
 	pNew1->AddRef();
 	pNew2->AddRef();
-	if ( m_uDiceSize >= m_vDiceSize )
+	if ( m_SplitDir == SplitDir_U )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;

@@ -1577,13 +1577,10 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 
 		// If the epsilon check has deemed this surface to be undiceable, don't bother asking.
 		TqBool fDiceable = TqFalse;
-		if( !pSurface->IsUndiceable() )
-		{
-			// Dice & shade the surface if it's small enough...
-			QGetRenderContext() ->Stats().DiceableTimer().Start();
-			fDiceable = pSurface->Diceable();
-			QGetRenderContext() ->Stats().DiceableTimer().Stop();
-		}
+		// Dice & shade the surface if it's small enough...
+		QGetRenderContext() ->Stats().DiceableTimer().Start();
+		fDiceable = pSurface->Diceable();
+		QGetRenderContext() ->Stats().DiceableTimer().Stop();
 
 		if ( fDiceable )
 		{
