@@ -95,30 +95,30 @@ char*	gVariableNames[ EnvVars_Last ] =
     };
 TqUlong	gVariableTokens[ EnvVars_Last ] =
     {
-        CqParameter::hash(gVariableNames[0]),
-        CqParameter::hash(gVariableNames[1]),
-        CqParameter::hash(gVariableNames[2]),
-        CqParameter::hash(gVariableNames[3]),
-        CqParameter::hash(gVariableNames[4]),
-        CqParameter::hash(gVariableNames[5]),
-        CqParameter::hash(gVariableNames[6]),
-        CqParameter::hash(gVariableNames[7]),
-        CqParameter::hash(gVariableNames[8]),
-        CqParameter::hash(gVariableNames[9]),
-        CqParameter::hash(gVariableNames[10]),
-        CqParameter::hash(gVariableNames[11]),
-        CqParameter::hash(gVariableNames[12]),
-        CqParameter::hash(gVariableNames[13]),
-        CqParameter::hash(gVariableNames[14]),
-        CqParameter::hash(gVariableNames[15]),
-        CqParameter::hash(gVariableNames[16]),
-        CqParameter::hash(gVariableNames[17]),
-        CqParameter::hash(gVariableNames[18]),
-        CqParameter::hash(gVariableNames[19]),
-        CqParameter::hash(gVariableNames[20]),
-        CqParameter::hash(gVariableNames[21]),
-        CqParameter::hash(gVariableNames[22]),
-        CqParameter::hash(gVariableNames[23]),
+        CqParameter::hash( gVariableNames[ 0 ] ),
+        CqParameter::hash( gVariableNames[ 1 ] ),
+        CqParameter::hash( gVariableNames[ 2 ] ),
+        CqParameter::hash( gVariableNames[ 3 ] ),
+        CqParameter::hash( gVariableNames[ 4 ] ),
+        CqParameter::hash( gVariableNames[ 5 ] ),
+        CqParameter::hash( gVariableNames[ 6 ] ),
+        CqParameter::hash( gVariableNames[ 7 ] ),
+        CqParameter::hash( gVariableNames[ 8 ] ),
+        CqParameter::hash( gVariableNames[ 9 ] ),
+        CqParameter::hash( gVariableNames[ 10 ] ),
+        CqParameter::hash( gVariableNames[ 11 ] ),
+        CqParameter::hash( gVariableNames[ 12 ] ),
+        CqParameter::hash( gVariableNames[ 13 ] ),
+        CqParameter::hash( gVariableNames[ 14 ] ),
+        CqParameter::hash( gVariableNames[ 15 ] ),
+        CqParameter::hash( gVariableNames[ 16 ] ),
+        CqParameter::hash( gVariableNames[ 17 ] ),
+        CqParameter::hash( gVariableNames[ 18 ] ),
+        CqParameter::hash( gVariableNames[ 19 ] ),
+        CqParameter::hash( gVariableNames[ 20 ] ),
+        CqParameter::hash( gVariableNames[ 21 ] ),
+        CqParameter::hash( gVariableNames[ 22 ] ),
+        CqParameter::hash( gVariableNames[ 23 ] ),
     };
 
 
@@ -251,17 +251,17 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Iq
 IqShaderData* CqShaderExecEnv::FindStandardVar( char* pname )
 {
 	TqInt tmp = m_LocalIndex;
-	TqUlong htoken = CqParameter::hash(pname);
+	TqUlong htoken = CqParameter::hash( pname );
 
 	for ( ; m_LocalIndex < EnvVars_Last; m_LocalIndex++ )
 	{
-		if ( gVariableTokens[ m_LocalIndex ] == htoken)
+		if ( gVariableTokens[ m_LocalIndex ] == htoken )
 			return ( m_apVariables[ m_LocalIndex ] );
 	}
 
 	for ( m_LocalIndex = 0; m_LocalIndex < tmp; m_LocalIndex++ )
 	{
-		if (  gVariableTokens[ m_LocalIndex ] == htoken)
+		if ( gVariableTokens[ m_LocalIndex ] == htoken )
 			return ( m_apVariables[ m_LocalIndex ] );
 	}
 	return ( 0 );
@@ -269,16 +269,16 @@ IqShaderData* CqShaderExecEnv::FindStandardVar( char* pname )
 TqInt	CqShaderExecEnv::FindStandardVarIndex( char* pname )
 {
 	TqInt tmp = m_LocalIndex;
-	TqUlong htoken = CqParameter::hash(pname);
+	TqUlong htoken = CqParameter::hash( pname );
 	for ( ; m_LocalIndex < EnvVars_Last; m_LocalIndex++ )
 	{
-		if ( gVariableTokens[ m_LocalIndex ] == htoken)
+		if ( gVariableTokens[ m_LocalIndex ] == htoken )
 			return ( m_LocalIndex );
 	}
 
 	for ( m_LocalIndex = 0; m_LocalIndex < tmp; m_LocalIndex++ )
 	{
-		if ( gVariableTokens[ m_LocalIndex ] == htoken)
+		if ( gVariableTokens[ m_LocalIndex ] == htoken )
 			return ( m_LocalIndex );
 	}
 	return ( -1 );

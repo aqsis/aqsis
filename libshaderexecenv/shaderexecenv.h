@@ -1,4 +1,4 @@
-// Aqsis 
+// Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.com
@@ -189,9 +189,9 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 				m_RunningState.Intersect( m_stkState.top() );
 		}
 		virtual IqShaderData* FindStandardVar( char* pname );
-		
+
 		virtual	TqInt	FindStandardVarIndex( char* pname );
-		
+
 		virtual IqShaderData*	pVar( TqInt Index )
 		{
 			return ( m_apVariables[ Index ] );
@@ -324,11 +324,11 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		void	GetTexParams( int cParams, IqShaderData** apParams, std::map<std::string, IqShaderData*>& map )
 		{
 			CqString strParam;
-			TqInt i=0;
+			TqInt i = 0;
 			while ( cParams > 0 )
 			{
 				apParams[ i ] ->GetString( strParam, 0 );
-				map[strParam] = apParams[ i + 1 ];
+				map[ strParam ] = apParams[ i + 1 ];
 				i += 2;
 				cParams -= 2;
 			}
@@ -545,7 +545,7 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		virtual STD_SO	SO_bake_3p( STRINGVAL name, FLOATVAL s, FLOATVAL t, POINTVAL f, DEFVOIDPARAMVAR );
 		virtual STD_SO	SO_bake_3v( STRINGVAL name, FLOATVAL s, FLOATVAL t, VECTORVAL f, DEFVOIDPARAMVAR );
 		virtual STD_SO	SO_bake_3n( STRINGVAL name, FLOATVAL s, FLOATVAL t, NORMALVAL f, DEFVOIDPARAMVAR );
-		virtual STD_SO	SO_external(DSOMethod method,void* initData, DEFPARAMVAR );
+		virtual STD_SO	SO_external( DSOMethod method, void* initData, DEFPARAMVAR );
 };
 
 

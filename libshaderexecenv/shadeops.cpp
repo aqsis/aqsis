@@ -60,7 +60,7 @@ static	CqString	SO_sprintf( const char* str, int cParams, IqShaderData** apParam
 	{
 		switch ( strTrans[ i ] )
 		{
-				case '%':  	// Insert variable.
+				case '%':   	// Insert variable.
 				{
 					i++;
 					switch ( strTrans[ i ] )
@@ -320,7 +320,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_pow( FLOATVAL x, FLOATVAL y, DEFPARAMIMPL )
 	GETFLOAT( y );
 	TqFloat yy = FLOAT( y );
 	TqFloat xx = FLOAT( x );
-	if( xx < 0.0f )	yy = FLOOR( yy );
+	if ( xx < 0.0f ) yy = FLOOR( yy );
 	SETFLOAT( Result, static_cast<TqFloat>( pow( xx, yy ) ) );
 	END_VARYING_SECTION
 }
@@ -1503,7 +1503,7 @@ STD_SOIMPL CqShaderExecEnv::SO_faceforward( NORMALVAL N, VECTORVAL I, DEFPARAMIM
 	GETNORMAL( N );
 	GETVECTOR( I );
 	CqVector3D Nref;
-	Ng()->GetNormal( Nref, __iGrid  );
+	Ng() ->GetNormal( Nref, __iGrid );
 	TqFloat s = ( ( ( -VECTOR( I ) ) * Nref ) < 0.0f ) ? -1.0f : 1.0f;
 	SETNORMAL( Result, NORMAL( N ) * s );
 	END_VARYING_SECTION
@@ -1598,8 +1598,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, 
 	TqFloat fuvB = fabs( fuvA );
 	TqFloat fu2 = ( fuvA + fuvB ) / 2;
 	TqFloat fv2 = ( -fuvA + fuvB ) / 2;
-	TqFloat fv2sqrt = ( fv2 == 0.0f )? 0.0f : sqrt( fabs( fv2 ) );
-	TqFloat fu2sqrt = ( fu2 == 0.0f )? 0.0f : sqrt( fabs( fu2 ) );
+	TqFloat fv2sqrt = ( fv2 == 0.0f ) ? 0.0f : sqrt( fabs( fv2 ) );
+	TqFloat fu2sqrt = ( fu2 == 0.0f ) ? 0.0f : sqrt( fabs( fu2 ) );
 	TqFloat fperp2 = ( SQR( cos_theta - fu2sqrt ) + fv2 ) / ( SQR( cos_theta + fu2sqrt ) + fv2 );
 	TqFloat feta = FLOAT( eta );
 	TqFloat fpara2 = ( SQR( SQR( 1.0f / feta ) * cos_theta - fu2sqrt ) + SQR( -fv2sqrt ) ) /
@@ -1638,8 +1638,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, 
 	TqFloat fu2 = ( fuvA + fuvB ) / 2;
 	TqFloat fv2 = ( -fuvA + fuvB ) / 2;
 	TqFloat feta = FLOAT( eta );
-	TqFloat fv2sqrt = ( fv2 == 0.0f )? 0.0f : sqrt( fabs( fv2 ) );
-	TqFloat fu2sqrt = ( fu2 == 0.0f )? 0.0f : sqrt( fabs( fu2 ) );
+	TqFloat fv2sqrt = ( fv2 == 0.0f ) ? 0.0f : sqrt( fabs( fv2 ) );
+	TqFloat fu2sqrt = ( fu2 == 0.0f ) ? 0.0f : sqrt( fabs( fu2 ) );
 	TqFloat fperp2 = ( SQR( cos_theta - fu2sqrt ) + fv2 ) / ( SQR( cos_theta + fu2sqrt ) + fv2 );
 	TqFloat fpara2 = ( SQR( SQR( 1.0f / feta ) * cos_theta - fu2sqrt ) + SQR( -fv2sqrt ) ) /
 	                 ( SQR( SQR( 1.0f / feta ) * cos_theta + fu2sqrt ) + SQR( fv2sqrt ) );
@@ -2015,8 +2015,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFP
 	GET_TEXTURE_PARAMS;
 
 	TqFloat fill = 0.0f;
-	if( paramMap.find("fill") != paramMap.end() )
-		paramMap["fill"]->GetFloat( fill );
+	if ( paramMap.find( "fill" ) != paramMap.end() )
+		paramMap[ "fill" ] ->GetFloat( fill );
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -2090,8 +2090,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOA
 	GET_TEXTURE_PARAMS;
 
 	TqFloat fill = 0.0f;
-	if( paramMap.find("fill") != paramMap.end() )
-		paramMap["fill"]->GetFloat( fill );
+	if ( paramMap.find( "fill" ) != paramMap.end() )
+		paramMap[ "fill" ] ->GetFloat( fill );
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -2163,8 +2163,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOA
 	GET_TEXTURE_PARAMS;
 
 	TqFloat fill = 0.0f;
-	if( paramMap.find("fill") != paramMap.end() )
-		paramMap["fill"]->GetFloat( fill );
+	if ( paramMap.find( "fill" ) != paramMap.end() )
+		paramMap[ "fill" ] ->GetFloat( fill );
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -2219,8 +2219,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 	GET_TEXTURE_PARAMS;
 
 	TqFloat fill = 0.0f;
-	if( paramMap.find("fill") != paramMap.end() )
-		paramMap["fill"]->GetFloat( fill );
+	if ( paramMap.find( "fill" ) != paramMap.end() )
+		paramMap[ "fill" ] ->GetFloat( fill );
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -2294,8 +2294,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOA
 	GET_TEXTURE_PARAMS;
 
 	TqFloat fill = 0.0f;
-	if( paramMap.find("fill") != paramMap.end() )
-		paramMap["fill"]->GetFloat( fill );
+	if ( paramMap.find( "fill" ) != paramMap.end() )
+		paramMap[ "fill" ] ->GetFloat( fill );
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -2367,8 +2367,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOA
 	GET_TEXTURE_PARAMS;
 
 	TqFloat fill = 0.0f;
-	if( paramMap.find("fill") != paramMap.end() )
-		paramMap["fill"]->GetFloat( fill );
+	if ( paramMap.find( "fill" ) != paramMap.end() )
+		paramMap[ "fill" ] ->GetFloat( fill );
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -2423,8 +2423,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, 
 	GET_TEXTURE_PARAMS;
 
 	TqFloat fill = 0.0f;
-	if( paramMap.find("fill") != paramMap.end() )
-		paramMap["fill"]->GetFloat( fill );
+	if ( paramMap.find( "fill" ) != paramMap.end() )
+		paramMap[ "fill" ] ->GetFloat( fill );
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -2499,8 +2499,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment3( STRINGVAL name, FLOATVAL channel, 
 	GET_TEXTURE_PARAMS;
 
 	TqFloat fill = 0.0f;
-	if( paramMap.find("fill") != paramMap.end() )
-		paramMap["fill"]->GetFloat( fill );
+	if ( paramMap.find( "fill" ) != paramMap.end() )
+		paramMap[ "fill" ] ->GetFloat( fill );
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -2556,8 +2556,8 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, 
 	GET_TEXTURE_PARAMS;
 
 	TqFloat fill = 0.0f;
-	if( paramMap.find("fill") != paramMap.end() )
-		paramMap["fill"]->GetFloat( fill );
+	if ( paramMap.find( "fill" ) != paramMap.end() )
+		paramMap[ "fill" ] ->GetFloat( fill );
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -2632,8 +2632,8 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment3( STRINGVAL name, FLOATVAL channel, 
 	GET_TEXTURE_PARAMS;
 
 	TqFloat fill = 0.0f;
-	if( paramMap.find("fill") != paramMap.end() )
-		paramMap["fill"]->GetFloat( fill );
+	if ( paramMap.find( "fill" ) != paramMap.end() )
+		paramMap[ "fill" ] ->GetFloat( fill );
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -2825,7 +2825,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ambient( DEFPARAMIMPL )
 				// Now Combine the color of all ambient lightsources.
 				GETCOLOR( Result );
 				CqColor colCl;
-				if(NULL != lp->Cl())
+				if ( NULL != lp->Cl() )
 					lp->Cl() ->GetColor( colCl, __iGrid );
 				SETCOLOR( Result, COLOR( Result ) + colCl );
 
@@ -3447,7 +3447,7 @@ STD_SOIMPL CqShaderExecEnv::SO_atmosphere( STRINGVAL name, IqShaderData* pV, DEF
 
 	IqShader * pAtmosphere = NULL;
 
-	if( NULL != m_pAttributes && NULL != m_pAttributes ->pshadAtmosphere() )
+	if ( NULL != m_pAttributes && NULL != m_pAttributes ->pshadAtmosphere() )
 		pAtmosphere = m_pAttributes ->pshadAtmosphere();
 
 	BEGIN_UNIFORM_SECTION
@@ -3470,7 +3470,7 @@ STD_SOIMPL CqShaderExecEnv::SO_displacement( STRINGVAL name, IqShaderData* pV, D
 
 	IqShader * pDisplacement = NULL;
 
-	if( NULL != m_pAttributes && NULL != m_pAttributes ->pshadDisplacement() )
+	if ( NULL != m_pAttributes && NULL != m_pAttributes ->pshadDisplacement() )
 		pDisplacement = m_pAttributes ->pshadDisplacement();
 
 	BEGIN_UNIFORM_SECTION
@@ -3516,7 +3516,7 @@ STD_SOIMPL CqShaderExecEnv::SO_surface( STRINGVAL name, IqShaderData* pV, DEFPAR
 
 	IqShader * pSurface = NULL;
 
-	if( NULL != m_pAttributes && NULL != m_pAttributes ->pshadSurface() )
+	if ( NULL != m_pAttributes && NULL != m_pAttributes ->pshadSurface() )
 		pSurface = m_pAttributes ->pshadSurface();
 
 	BEGIN_UNIFORM_SECTION
@@ -3693,9 +3693,10 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 				Ret = 1.0f;
 			}
 		}
-	} else
-        {
-                CqString strName = STRING( name ).c_str();
+	}
+	else
+	{
+		CqString strName = STRING( name ).c_str();
 		int iColon = strName.find_first_of( ':' );
 		if ( iColon >= 0 )
 		{
@@ -3704,18 +3705,18 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 			//const CqParameter* pParam = m_pAttributes ->pParameter( strName.c_str(), strParam.c_str() );
 
 			Ret = 1.0f;
-			
+
 			if ( NULL != QGetRenderContextI() ->GetStringOption( strName.c_str(), strParam.c_str() ) )
 				pV->SetString( QGetRenderContextI() ->GetStringOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
-                        else if ( NULL != QGetRenderContextI() ->GetIntegerOption( strName.c_str(), strParam.c_str() ) )
+			else if ( NULL != QGetRenderContextI() ->GetIntegerOption( strName.c_str(), strParam.c_str() ) )
 				pV->SetFloat( QGetRenderContextI() ->GetIntegerOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
-			
+
 			else if ( NULL != QGetRenderContextI() ->GetPointOption( strName.c_str(), strParam.c_str() ) )
 				pV->SetPoint( QGetRenderContextI() ->GetPointOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
-			
+
 			else if ( NULL != QGetRenderContextI() ->GetColorOption( strName.c_str(), strParam.c_str() ) )
 				pV->SetColor( QGetRenderContextI() ->GetColorOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
-                        else if ( NULL != QGetRenderContextI() ->GetFloatOption( strName.c_str(), strParam.c_str() ) )
+			else if ( NULL != QGetRenderContextI() ->GetFloatOption( strName.c_str(), strParam.c_str() ) )
 				pV->SetFloat( QGetRenderContextI() ->GetFloatOption( strName.c_str(), strParam.c_str() ) [ 0 ] );
 			/* did not deal with Vector, Normal and Matrix yet */
 			else
@@ -3909,19 +3910,20 @@ STD_SOIMPL	CqShaderExecEnv::SO_match( STRINGVAL a, STRINGVAL b, DEFPARAMIMPL )
 	INIT_SO
 
 	BEGIN_UNIFORM_SECTION
-        float r = 0.0f;
+	float r = 0.0f;
 	GETSTRING( a );
 	GETSTRING( b );
-        if (STRING( a ).size() == 0) r = 0.0f;
-        else if (STRING( b ).size() == 0) r = 0.0f;
-        else {
-            // MJO> Only check the occurrence of string b in string a 
-            // It doesn't support the regular expression yet
-            r = (float) (strstr(STRING( b ).c_str(), STRING( a ).c_str()) != 0);
-       }
-        
-	SETFLOAT( Result,  r);
-        END_UNIFORM_SECTION
+	if ( STRING( a ).size() == 0 ) r = 0.0f;
+	else if ( STRING( b ).size() == 0 ) r = 0.0f;
+	else
+	{
+		// MJO> Only check the occurrence of string b in string a
+		// It doesn't support the regular expression yet
+		r = ( float ) ( strstr( STRING( b ).c_str(), STRING( a ).c_str() ) != 0 );
+	}
+
+	SETFLOAT( Result, r );
+	END_UNIFORM_SECTION
 }
 
 
@@ -4220,7 +4222,7 @@ STD_SOIMPL CqShaderExecEnv::SO_filterstep( FLOATVAL edge, FLOATVAL s1, DEFPARAMV
 	TqFloat dsdu = SO_DuType<TqFloat>( s1, __iGrid, this, Deffloat );
 	TqFloat dsdv = SO_DvType<TqFloat>( s1, __iGrid, this, Deffloat );
 
-	TqFloat uwidth = fabs( dsdu * fdu ); 
+	TqFloat uwidth = fabs( dsdu * fdu );
 	TqFloat vwidth = fabs( dsdv * fdv );
 
 	TqFloat w = uwidth + vwidth;
@@ -4228,13 +4230,13 @@ STD_SOIMPL CqShaderExecEnv::SO_filterstep( FLOATVAL edge, FLOATVAL s1, DEFPARAMV
 
 	SETFLOAT( Result, CLAMP( ( FLOAT( s1 ) + w / 2.0f - FLOAT( edge ) ) / w, 0, 1 ) );
 
-//	TqFloat res  = RiCatmullRomFilter( FLOAT( s1 ) - FLOAT( edge ), 0, w, 0);
-//	SETFLOAT( Result, res );
+	//	TqFloat res  = RiCatmullRomFilter( FLOAT( s1 ) - FLOAT( edge ), 0, w, 0);
+	//	SETFLOAT( Result, res );
 
-//	std::cout << res << std::endl;
-//	TqFloat res = 1.0f - CLAMP( ( FLOAT( s1 ) + w / 2.0f - FLOAT( edge ) ) / w, 0, 1 );
-//	if( res > 0.0f )
-//		std::cout << "Aqsis angle/dangle: " << FLOAT(s1) << ", edge: " << FLOAT(edge) << ", dsdu: " << dsdu << ", dsdv: " << dsdv << ", w: " << w << ", res: " << res << std::endl;
+	//	std::cout << res << std::endl;
+	//	TqFloat res = 1.0f - CLAMP( ( FLOAT( s1 ) + w / 2.0f - FLOAT( edge ) ) / w, 0, 1 );
+	//	if( res > 0.0f )
+	//		std::cout << "Aqsis angle/dangle: " << FLOAT(s1) << ", edge: " << FLOAT(edge) << ", dsdu: " << dsdu << ", dsdv: " << dsdv << ", w: " << w << ", res: " << res << std::endl;
 	END_VARYING_SECTION
 }
 
@@ -4862,7 +4864,7 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 		if ( ( ( pV->Type() == type_float ) && ( pV->ArrayLength() == 16 ) ) ||
 		        ( pV->Type() == type_matrix ) )
 		{
-			if ( pSMap )  // && pSMap->Type() == MapType_Shadow)
+			if ( pSMap )   // && pSMap->Type() == MapType_Shadow)
 			{
 
 				CqMatrix m = pSMap->GetMatrix( 0 );  /* WorldToCamera */
@@ -4903,7 +4905,7 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 		if ( ( ( pV->Type() == type_float ) && ( pV->ArrayLength() == 16 ) ) ||
 		        ( pV->Type() == type_matrix ) )
 		{
-			if ( pSMap )   // && pSMap->Type() == MapType_Shadow)
+			if ( pSMap )    // && pSMap->Type() == MapType_Shadow)
 			{
 
 				CqMatrix m = pSMap->GetMatrix( 1 ); /* WorldToScreen */
@@ -4951,63 +4953,72 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 const int batchsize = 8; // elements to buffer before writing
 // Make sure we're thread-safe on those file writes
 
-class BakingChannel {
-// A "BakingChannel" is the buffer for a single baking output file.
-// We buffer up samples until "batchsize" has been accepted, then
-// write them all at once. This keeps us from constantly accessing
-// the disk. Note that we are careful to use a mutex to keep
-// simultaneous multithreaded writes from clobbering each other.
-public:
-// Constructors
-BakingChannel (void) : filename(NULL), data(NULL), buffered(0) { }
-BakingChannel (const char *_filename, int _elsize) {
-    init (_filename, _elsize);
-} 
-// Initialize - allocate memory, etc.
-void init (const char *_filename, int _elsize) {
-    elsize = _elsize+2;
-    buffered = 0;
-    data = new float [elsize*batchsize];
-    filename = strdup (_filename);
-}
-// Destructor: write buffered output, close file, deallocate
-~BakingChannel () {
-    writedata();
-    free (filename);
-    delete [] data; 
-}
-// Add one more data item
-void moredata (float s, float t, float *newdata) { 
-    if (buffered >= batchsize)
-        writedata();
-    float *f = data + elsize*buffered;
-    f[0] = s;
-    f[1] = t; 
-    for (int j = 2; j < elsize; ++j)
-        f[j] = newdata[j-2];
-    ++buffered;
-}
-private:
-int elsize; // element size (e.g., 3 for colors)
-int buffered; // how many elements are currently buffered
-float *data; // pointer to the allocated buffer (new'ed)
-char *filename; // pointer to filename (strdup'ed)
-// Write any buffered data to the file
-void writedata (void) {
+class BakingChannel
+{
+		// A "BakingChannel" is the buffer for a single baking output file.
+		// We buffer up samples until "batchsize" has been accepted, then
+		// write them all at once. This keeps us from constantly accessing
+		// the disk. Note that we are careful to use a mutex to keep
+		// simultaneous multithreaded writes from clobbering each other.
+	public:
+		// Constructors
+		BakingChannel ( void ) : filename( NULL ), data( NULL ), buffered( 0 )
+		{ }
+		BakingChannel ( const char *_filename, int _elsize )
+		{
+			init ( _filename, _elsize );
+		}
+		// Initialize - allocate memory, etc.
+		void init ( const char *_filename, int _elsize )
+		{
+			elsize = _elsize + 2;
+			buffered = 0;
+			data = new float [ elsize * batchsize ];
+			filename = strdup ( _filename );
+		}
+		// Destructor: write buffered output, close file, deallocate
+		~BakingChannel ()
+		{
+			writedata();
+			free ( filename );
+			delete [] data;
+		}
+		// Add one more data item
+		void moredata ( float s, float t, float *newdata )
+		{
+			if ( buffered >= batchsize )
+				writedata();
+			float *f = data + elsize * buffered;
+			f[ 0 ] = s;
+			f[ 1 ] = t;
+			for ( int j = 2; j < elsize; ++j )
+				f[ j ] = newdata[ j - 2 ];
+			++buffered;
+		}
+	private:
+		int elsize; // element size (e.g., 3 for colors)
+		int buffered; // how many elements are currently buffered
+		float *data; // pointer to the allocated buffer (new'ed)
+		char *filename; // pointer to filename (strdup'ed)
+		// Write any buffered data to the file
+		void writedata ( void )
+		{
 
-    if (buffered > 0 && filename != NULL) {
-        FILE *file = fopen (filename, "a");
-        float *f = data;
-        for (int i = 0; i < buffered; ++i, f += elsize) {
-            for (int j = 0; j < elsize; ++j) 
-                fprintf (file, "%g ", f[j]);
-            fprintf (file, "\n");
-        }
-        fclose (file);
-    }
-    
-    buffered = 0;
-}
+			if ( buffered > 0 && filename != NULL )
+			{
+				FILE * file = fopen ( filename, "a" );
+				float *f = data;
+				for ( int i = 0; i < buffered; ++i, f += elsize )
+				{
+					for ( int j = 0; j < elsize; ++j )
+						fprintf ( file, "%g ", f[ j ] );
+					fprintf ( file, "\n" );
+				}
+				fclose ( file );
+			}
+
+			buffered = 0;
+		}
 };
 
 typedef std::map<std::string, BakingChannel> BakingData;
@@ -5015,46 +5026,49 @@ typedef std::map<std::string, BakingChannel> BakingData;
 
 extern "C" BakingData *bake_init()
 {
-BakingData *bd = new BakingData;
+	BakingData * bd = new BakingData;
 
-    return bd;
+	return bd;
 }
-extern "C" void bake_done(BakingData *bd)
+extern "C" void bake_done( BakingData *bd )
 {
-    delete bd; // Will destroy bd, and in turn all its BakingChannel's
+	delete bd; // Will destroy bd, and in turn all its BakingChannel's
 }
 // Workhorse routine -- look up the channel name, add a new BakingChannel
 // if it doesn't exist, add one point's data to the channel.
-extern "C" void bake (BakingData *bd, const std::string &name,
-float s, float t, int elsize, float *data)
+extern "C" void bake ( BakingData *bd, const std::string &name,
+	                       float s, float t, int elsize, float *data )
 {
-BakingData::iterator found = bd->find (name);
+	BakingData::iterator found = bd->find ( name );
 
-    if (found == bd->end()) {
-        // This named map doesn't yet exist
-        (*bd)[name] = BakingChannel();
-        found = bd->find (name);
-        BakingChannel &bc = (found->second);
-        bc.init (name.c_str(), elsize);
-        bc.moredata (s, t, data);
-    } else {
-        BakingChannel &bc = (found->second);
-        bc.moredata (s, t, data);
-    }
+	if ( found == bd->end() )
+	{
+		// This named map doesn't yet exist
+		( *bd ) [ name ] = BakingChannel();
+		found = bd->find ( name );
+		BakingChannel &bc = ( found->second );
+		bc.init ( name.c_str(), elsize );
+		bc.moredata ( s, t, data );
+	}
+	else
+	{
+		BakingChannel &bc = ( found->second );
+		bc.moredata ( s, t, data );
+	}
 }
 
-extern "C" int bake_f(BakingData *bd, char *name, float s, float t, float f)
+extern "C" int bake_f( BakingData *bd, char *name, float s, float t, float f )
 {
-float *bakedata = (float *) &f;
+	float * bakedata = ( float * ) & f;
 
-    bake (bd, name, s, t, 1, bakedata);
-    return 0;
+	bake ( bd, name, s, t, 1, bakedata );
+	return 0;
 }
 // for baking a triple -- just call bake with appropriate args
-extern "C" int bake_3(BakingData *bd, char *name, float s, float t, float *bakedata)
+extern "C" int bake_3( BakingData *bd, char *name, float s, float t, float *bakedata )
 {
-    bake (bd, name, s, t, 3, bakedata);
-    return 0;
+	bake ( bd, name, s, t, 3, bakedata );
+	return 0;
 }
 
 
@@ -5062,21 +5076,21 @@ extern "C" int bake_3(BakingData *bd, char *name, float s, float t, float *baked
 STD_SOIMPL CqShaderExecEnv::SO_bake_f( STRINGVAL name, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVARIMPL )
 {
 	INIT_SO
-	
+
 	CHECKVARY( f );
 	CHECKVARY( s );
 	CHECKVARY( t );
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
-	BakingData *bd = bake_init( /*STRING( name).c_str() */ );
+	BakingData *bd = bake_init(  /*STRING( name).c_str() */ );
 	END_UNIFORM_SECTION
 
 	BEGIN_VARYING_SECTION
-		GETFLOAT( s );
-		GETFLOAT( t );
-		GETFLOAT( f );
-		bake_f( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), FLOAT( f ) );
+	GETFLOAT( s );
+	GETFLOAT( t );
+	GETFLOAT( f );
+	bake_f( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), FLOAT( f ) );
 	END_VARYING_SECTION
 
 	BEGIN_UNIFORM_SECTION
@@ -5091,19 +5105,19 @@ STD_SOIMPL CqShaderExecEnv::SO_bake_3c( STRINGVAL name, FLOATVAL s, FLOATVAL t, 
 	CHECKVARY( f );
 	CHECKVARY( s );
 	CHECKVARY( t );
-	
+
 	BEGIN_UNIFORM_SECTION
 	TqFloat rgb[ 3 ];
 
 	GETSTRING( name );
-	BakingData *bd = bake_init( /*(char *) STRING( name ).c_str()*/ );
+	BakingData *bd = bake_init(  /*(char *) STRING( name ).c_str()*/ );
 	END_UNIFORM_SECTION
 	BEGIN_VARYING_SECTION
-		GETFLOAT( s );
-		GETFLOAT( t );
-		GETCOLOR( f );
-		COLOR( f ).GetColorRGB( &rgb[ 0 ], &rgb[ 1 ], &rgb[ 2 ] );
-		bake_3( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), rgb );
+	GETFLOAT( s );
+	GETFLOAT( t );
+	GETCOLOR( f );
+	COLOR( f ).GetColorRGB( &rgb[ 0 ], &rgb[ 1 ], &rgb[ 2 ] );
+	bake_3( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), rgb );
 	END_VARYING_SECTION
 	BEGIN_UNIFORM_SECTION
 	bake_done( bd );
@@ -5120,18 +5134,18 @@ STD_SOIMPL CqShaderExecEnv::SO_bake_3n( STRINGVAL name, FLOATVAL s, FLOATVAL t, 
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
-	BakingData *bd = bake_init( /*(char *) STRING( name ).c_str() */ );
+	BakingData *bd = bake_init(  /*(char *) STRING( name ).c_str() */ );
 	END_UNIFORM_SECTION
 
 	BEGIN_VARYING_SECTION
-		GETFLOAT( s );
-		GETFLOAT( t );
-		GETNORMAL( f );
-		TqFloat rgb[ 3 ];
-		rgb[ 0 ] = VECTOR( f ) [ 0 ];
-		rgb[ 1 ] = VECTOR( f ) [ 1 ];
-		rgb[ 2 ] = VECTOR( f ) [ 2 ];
-		bake_3( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), rgb );
+	GETFLOAT( s );
+	GETFLOAT( t );
+	GETNORMAL( f );
+	TqFloat rgb[ 3 ];
+	rgb[ 0 ] = VECTOR( f ) [ 0 ];
+	rgb[ 1 ] = VECTOR( f ) [ 1 ];
+	rgb[ 2 ] = VECTOR( f ) [ 2 ];
+	bake_3( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), rgb );
 	END_VARYING_SECTION
 
 	BEGIN_UNIFORM_SECTION
@@ -5149,18 +5163,18 @@ STD_SOIMPL CqShaderExecEnv::SO_bake_3p( STRINGVAL name, FLOATVAL s, FLOATVAL t, 
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
-	BakingData *bd = bake_init( /*(char *) STRING( name ).c_str()  */ );
+	BakingData *bd = bake_init(  /*(char *) STRING( name ).c_str()  */ );
 	END_UNIFORM_SECTION
 
 	BEGIN_VARYING_SECTION
-		GETFLOAT( s );
-		GETFLOAT( t );
-		GETPOINT( f );
-		TqFloat rgb[ 3 ];
-		rgb[ 0 ] = VECTOR( f ) [ 0 ];
-		rgb[ 1 ] = VECTOR( f ) [ 1 ];
-		rgb[ 2 ] = VECTOR( f ) [ 2 ];
-		bake_3( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), rgb );
+	GETFLOAT( s );
+	GETFLOAT( t );
+	GETPOINT( f );
+	TqFloat rgb[ 3 ];
+	rgb[ 0 ] = VECTOR( f ) [ 0 ];
+	rgb[ 1 ] = VECTOR( f ) [ 1 ];
+	rgb[ 2 ] = VECTOR( f ) [ 2 ];
+	bake_3( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), rgb );
 	END_VARYING_SECTION
 
 	BEGIN_UNIFORM_SECTION
@@ -5177,18 +5191,18 @@ STD_SOIMPL CqShaderExecEnv::SO_bake_3v( STRINGVAL name, FLOATVAL s, FLOATVAL t, 
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
-	BakingData *bd = bake_init( /*(char *) STRING( name ).c_str()  */ );
+	BakingData *bd = bake_init(  /*(char *) STRING( name ).c_str()  */ );
 	END_UNIFORM_SECTION
 
 	BEGIN_VARYING_SECTION
-		GETFLOAT( s );
-		GETFLOAT( t );
-		GETVECTOR( f );
-		TqFloat rgb[ 3 ];
-		rgb[ 0 ] = VECTOR( f ) [ 0 ];
-		rgb[ 1 ] = VECTOR( f ) [ 1 ];
-		rgb[ 2 ] = VECTOR( f ) [ 2 ];
-		bake_3( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), rgb );
+	GETFLOAT( s );
+	GETFLOAT( t );
+	GETVECTOR( f );
+	TqFloat rgb[ 3 ];
+	rgb[ 0 ] = VECTOR( f ) [ 0 ];
+	rgb[ 1 ] = VECTOR( f ) [ 1 ];
+	rgb[ 2 ] = VECTOR( f ) [ 2 ];
+	bake_3( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), rgb );
 	END_VARYING_SECTION
 
 	BEGIN_UNIFORM_SECTION
@@ -5198,68 +5212,72 @@ STD_SOIMPL CqShaderExecEnv::SO_bake_3v( STRINGVAL name, FLOATVAL s, FLOATVAL t, 
 
 
 // We manually decalr th
-STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPARAMVARIMPL)
+STD_SOIMPL CqShaderExecEnv::SO_external( DSOMethod method, void *initData, DEFPARAMVARIMPL )
 {
 	INIT_SO
 
-	CHECKVARY(Result);
+	CHECKVARY( Result );
 	int p;
-	for (p=0;p<cParams;p++){
-		CHECKVARY(apParams[p]);
+	for ( p = 0;p < cParams;p++ )
+	{
+		CHECKVARY( apParams[ p ] );
 	};
 
 	int dso_argc = cParams + 1; // dso_argv[0] is used for the return value
-	void **dso_argv = new void*[dso_argc] ;
+	void **dso_argv = new void * [ dso_argc ] ;
 
 	// create storage for the returned value
-	switch(Result->Type()){
+	switch ( Result->Type() )
+	{
 
-		case type_float: 
-		 	dso_argv[0]=(void*) new TqFloat; break;
-		case type_point:
-		case type_color:
-		case type_triple:
-		case type_vector:
-		case type_normal: 
-		case type_hpoint:
-			dso_argv[0]=(void*) new TqFloat[3]; break;
-		case type_string:
-			dso_argv[0]=(void*) new STRING_DESC;
-		        ((STRING_DESC*) dso_argv[0])->s = NULL;	
-		        ((STRING_DESC*) dso_argv[0])->bufflen = 0;	
+			case type_float:
+			dso_argv[ 0 ] = ( void* ) new TqFloat; break;
+			case type_point:
+			case type_color:
+			case type_triple:
+			case type_vector:
+			case type_normal:
+			case type_hpoint:
+			dso_argv[ 0 ] = ( void* ) new TqFloat[ 3 ]; break;
+			case type_string:
+			dso_argv[ 0 ] = ( void* ) new STRING_DESC;
+			( ( STRING_DESC* ) dso_argv[ 0 ] ) ->s = NULL;
+			( ( STRING_DESC* ) dso_argv[ 0 ] ) ->bufflen = 0;
 			break;
-		case type_matrix:
-		case type_sixteentuple:
-			dso_argv[0]=(void*) new TqFloat[16];
+			case type_matrix:
+			case type_sixteentuple:
+			dso_argv[ 0 ] = ( void* ) new TqFloat[ 16 ];
 			break;
-		default:
+			default:
 			// Unhandled TYpe
 			break;
 	};
 
 	// Allocate space for the arguments
-	for(p=1;p<=cParams;p++){
+	for ( p = 1;p <= cParams;p++ )
+	{
 
-		switch(apParams[p-1]->Type()){
-			case type_float:
-				dso_argv[p] = (void*) new TqFloat; break;
-			case type_hpoint:
-			case type_point:
-			case type_triple: // This seems reasonable
-			case type_vector:
-			case type_normal:
-			case type_color:
-				dso_argv[p] = (void*) new TqFloat[3]; break;
-			case type_string:
-				dso_argv[p]=(void*) new STRING_DESC;
-		        	((STRING_DESC*) dso_argv[p])->s = NULL;	
-		        	((STRING_DESC*) dso_argv[p])->bufflen = 0;	
+		switch ( apParams[ p - 1 ] ->Type() )
+		{
+				case type_float:
+				dso_argv[ p ] = ( void* ) new TqFloat; break;
+				case type_hpoint:
+				case type_point:
+				case type_triple:  // This seems reasonable
+				case type_vector:
+				case type_normal:
+				case type_color:
+				dso_argv[ p ] = ( void* ) new TqFloat[ 3 ]; break;
+				case type_string:
+				dso_argv[ p ] = ( void* ) new STRING_DESC;
+				( ( STRING_DESC* ) dso_argv[ p ] ) ->s = NULL;
+				( ( STRING_DESC* ) dso_argv[ p ] ) ->bufflen = 0;
 				break;
-			case type_matrix:
-			case type_sixteentuple:
-				dso_argv[0]=(void*) new TqFloat[16];
+				case type_matrix:
+				case type_sixteentuple:
+				dso_argv[ 0 ] = ( void* ) new TqFloat[ 16 ];
 				break;
-			default: 
+				default:
 				// Unhandled TYpe
 				break;
 		};
@@ -5269,168 +5287,213 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 	BEGIN_VARYING_SECTION
 
 	// Convert the arguments to the required format for the DSO
-	for(p=1;p<=cParams;p++){
+	for ( p = 1;p <= cParams;p++ )
+	{
 
-		switch(apParams[p-1]->Type()){
-			case type_float:
-				apParams[p-1]->GetFloat(*((float*)dso_argv[p]),__iGrid);
+		switch ( apParams[ p - 1 ] ->Type() )
+		{
+				case type_float:
+				apParams[ p - 1 ] ->GetFloat( *( ( float* ) dso_argv[ p ] ), __iGrid );
 				break;
-			case type_hpoint:
-			case type_point:{
-				CqVector3D v;
-				apParams[p-1]->GetPoint(v,__iGrid);
-				((float*) dso_argv[p])[0] = v[0];
-				((float*) dso_argv[p])[1] = v[1];
-				((float*) dso_argv[p])[2] = v[2];
-				}; break;
-			case type_triple: // This seems reasonable
-			case type_vector:{
-				CqVector3D v;
-				apParams[p-1]->GetVector(v,__iGrid);
-				((float*) dso_argv[p])[0] = v[0];
-				((float*) dso_argv[p])[1] = v[1];
-				((float*) dso_argv[p])[2] = v[2];
-				}; break;
-			case type_normal:{
-				CqVector3D v;
-				apParams[p-1]->GetNormal(v,__iGrid);
-				((float*) dso_argv[p])[0] = v[0];
-				((float*) dso_argv[p])[1] = v[1];
-				((float*) dso_argv[p])[2] = v[2];
-				}; break;
-			case type_color:{
-				CqColor c;
-				apParams[p-1]->GetColor(c,__iGrid);
-				((float*) dso_argv[p])[0] = c[0];
-				((float*) dso_argv[p])[1] = c[1];
-				((float*) dso_argv[p])[2] = c[2];
-				}; break;
-			case type_string:{
-				CqString s;
-				apParams[p-1]->GetString(s,__iGrid);
-				char *ps = new char[s.size()+1];
-				strncpy (ps, s.c_str(), s.size() + 1);
-				((STRING_DESC*) dso_argv[p])->s = ps;
-				((STRING_DESC*) dso_argv[p])->bufflen = s.size() + 1;
-				}; break;
-			case type_matrix:
-			case type_sixteentuple:{
-				CqMatrix m;
-				int r,c;
-				apParams[p-1]->GetMatrix(m,__iGrid);
-				for(r=0; r<4; r++)
-					for(c=0; c<4; c++)
-						((TqFloat*) dso_argv[p])[(r*4)+c] = m[r][c];
-			        }; break;
-			default: 
+				case type_hpoint:
+				case type_point:
+				{
+					CqVector3D v;
+					apParams[ p - 1 ] ->GetPoint( v, __iGrid );
+					( ( float* ) dso_argv[ p ] ) [ 0 ] = v[ 0 ];
+					( ( float* ) dso_argv[ p ] ) [ 1 ] = v[ 1 ];
+					( ( float* ) dso_argv[ p ] ) [ 2 ] = v[ 2 ];
+				}
+				; break;
+				case type_triple:  // This seems reasonable
+				case type_vector:
+				{
+					CqVector3D v;
+					apParams[ p - 1 ] ->GetVector( v, __iGrid );
+					( ( float* ) dso_argv[ p ] ) [ 0 ] = v[ 0 ];
+					( ( float* ) dso_argv[ p ] ) [ 1 ] = v[ 1 ];
+					( ( float* ) dso_argv[ p ] ) [ 2 ] = v[ 2 ];
+				}
+				; break;
+				case type_normal:
+				{
+					CqVector3D v;
+					apParams[ p - 1 ] ->GetNormal( v, __iGrid );
+					( ( float* ) dso_argv[ p ] ) [ 0 ] = v[ 0 ];
+					( ( float* ) dso_argv[ p ] ) [ 1 ] = v[ 1 ];
+					( ( float* ) dso_argv[ p ] ) [ 2 ] = v[ 2 ];
+				}
+				; break;
+				case type_color:
+				{
+					CqColor c;
+					apParams[ p - 1 ] ->GetColor( c, __iGrid );
+					( ( float* ) dso_argv[ p ] ) [ 0 ] = c[ 0 ];
+					( ( float* ) dso_argv[ p ] ) [ 1 ] = c[ 1 ];
+					( ( float* ) dso_argv[ p ] ) [ 2 ] = c[ 2 ];
+				}
+				; break;
+				case type_string:
+				{
+					CqString s;
+					apParams[ p - 1 ] ->GetString( s, __iGrid );
+					char *ps = new char[ s.size() + 1 ];
+					strncpy ( ps, s.c_str(), s.size() + 1 );
+					( ( STRING_DESC* ) dso_argv[ p ] ) ->s = ps;
+					( ( STRING_DESC* ) dso_argv[ p ] ) ->bufflen = s.size() + 1;
+				}
+				; break;
+				case type_matrix:
+				case type_sixteentuple:
+				{
+					CqMatrix m;
+					int r, c;
+					apParams[ p - 1 ] ->GetMatrix( m, __iGrid );
+					for ( r = 0; r < 4; r++ )
+						for ( c = 0; c < 4; c++ )
+							( ( TqFloat* ) dso_argv[ p ] ) [ ( r * 4 ) + c ] = m[ r ][ c ];
+				}
+				; break;
+				default:
 				// Unhandled TYpe
 				break;
 		};
 	};
 
 	// Atlast, we call the shadeop method, looks rather dull after all this effort.
-	method(initData, dso_argc, dso_argv);
+	method( initData, dso_argc, dso_argv );
 
 	// Pass the returned value back to aqsis
-	switch(Result->Type()){
+	switch ( Result->Type() )
+	{
 
-		case type_float:{
-				TqFloat val= *((float*) (dso_argv[0]));
- 				Result->SetFloat(val,__iGrid);
-			}; break;
-		case type_hpoint:
-		case type_point:{
+			case type_float:
+			{
+				TqFloat val = *( ( float* ) ( dso_argv[ 0 ] ) );
+				Result->SetFloat( val, __iGrid );
+			}
+			; break;
+			case type_hpoint:
+			case type_point:
+			{
 				CqVector3D v;
-				v[0] = ((float*) dso_argv[0])[0];
-				v[1] = ((float*) dso_argv[0])[1];
-				v[2] = ((float*) dso_argv[0])[2];
-				Result->SetPoint(v,__iGrid);
-			}; break;
-		case type_triple: // This seems reasonable
-		case type_vector:{
+				v[ 0 ] = ( ( float* ) dso_argv[ 0 ] ) [ 0 ];
+				v[ 1 ] = ( ( float* ) dso_argv[ 0 ] ) [ 1 ];
+				v[ 2 ] = ( ( float* ) dso_argv[ 0 ] ) [ 2 ];
+				Result->SetPoint( v, __iGrid );
+			}
+			; break;
+			case type_triple:  // This seems reasonable
+			case type_vector:
+			{
 				CqVector3D v;
-				v[0] = ((float*) dso_argv[0])[0];
-				v[1] = ((float*) dso_argv[0])[1];
-				v[2] = ((float*) dso_argv[0])[2];
-				Result->SetVector(v,__iGrid);
-			}; break;
-		case type_normal:{
+				v[ 0 ] = ( ( float* ) dso_argv[ 0 ] ) [ 0 ];
+				v[ 1 ] = ( ( float* ) dso_argv[ 0 ] ) [ 1 ];
+				v[ 2 ] = ( ( float* ) dso_argv[ 0 ] ) [ 2 ];
+				Result->SetVector( v, __iGrid );
+			}
+			; break;
+			case type_normal:
+			{
 				CqVector3D v;
-				v[0] = ((float*) dso_argv[0])[0];
-				v[1] = ((float*) dso_argv[0])[1];
-				v[2] = ((float*) dso_argv[0])[2];
-				Result->SetNormal(v,__iGrid);
-			}; break;
-		case type_color:{
+				v[ 0 ] = ( ( float* ) dso_argv[ 0 ] ) [ 0 ];
+				v[ 1 ] = ( ( float* ) dso_argv[ 0 ] ) [ 1 ];
+				v[ 2 ] = ( ( float* ) dso_argv[ 0 ] ) [ 2 ];
+				Result->SetNormal( v, __iGrid );
+			}
+			; break;
+			case type_color:
+			{
 				CqColor c;
-				c[0] = ((float*) dso_argv[0])[0];
-				c[1] = ((float*) dso_argv[0])[1];
-				c[2] = ((float*) dso_argv[0])[2];
-				Result->SetColor(c,__iGrid);
-			}; break;
-		case type_string:{ 
-				CqString s(((STRING_DESC*)dso_argv[0])->s);
-				Result->SetString(s,__iGrid);
-			}; break;
-		case type_matrix:
-		case type_sixteentuple:{
-				CqMatrix m((float*) dso_argv[0]);
-				Result->SetMatrix(m,__iGrid);
-		        }; break;
-		default:
+				c[ 0 ] = ( ( float* ) dso_argv[ 0 ] ) [ 0 ];
+				c[ 1 ] = ( ( float* ) dso_argv[ 0 ] ) [ 1 ];
+				c[ 2 ] = ( ( float* ) dso_argv[ 0 ] ) [ 2 ];
+				Result->SetColor( c, __iGrid );
+			}
+			; break;
+			case type_string:
+			{
+				CqString s( ( ( STRING_DESC* ) dso_argv[ 0 ] ) ->s );
+				Result->SetString( s, __iGrid );
+			}
+			; break;
+			case type_matrix:
+			case type_sixteentuple:
+			{
+				CqMatrix m( ( float* ) dso_argv[ 0 ] );
+				Result->SetMatrix( m, __iGrid );
+			}
+			; break;
+			default:
 			// Unhandled TYpe
-				 std::cout << "Unsupported type" << std::endl;
+			std::cout << "Unsupported type" << std::endl;
 			break;
 	};
 
 
 	// Set the values that were altered by the Shadeop
-	for(p=1;p<=cParams;p++){
-		switch(apParams[p-1]->Type()){
-			case type_float:{
-				TqFloat val = *((float*)dso_argv[p]) ;
-				apParams[p-1]->SetFloat(val,__iGrid);
-				};break;
-			case type_hpoint:
-			case type_point:{
-				CqVector3D v;
-				v[0] = ((float*) dso_argv[p])[0];
-				v[1] = ((float*) dso_argv[p])[1];
-				v[2] = ((float*) dso_argv[p])[2];
-				apParams[p-1]->SetPoint(v,__iGrid);
-				};break;
-			case type_triple: // This seems reasonable
-			case type_vector:{
-				CqVector3D v;
-				v[0] = ((float*) dso_argv[p])[0];
-				v[1] = ((float*) dso_argv[p])[1];
-				v[2] = ((float*) dso_argv[p])[2];
-				apParams[p-1]->SetVector(v,__iGrid);
-				};break;
-			case type_normal:{
-				CqVector3D v;
-				v[0] = ((float*) dso_argv[p])[0];
-				v[1] = ((float*) dso_argv[p])[1];
-				v[2] = ((float*) dso_argv[p])[2];
-				apParams[p-1]->SetNormal(v,__iGrid);
-				};break;
-			case type_color:{
-				CqColor c;
-				c[0] = ((float*) dso_argv[p])[0];
-				c[1] = ((float*) dso_argv[p])[1];
-				c[2] = ((float*) dso_argv[p])[2];
-				apParams[p-1]->SetColor(c,__iGrid);
-				};break;
-			case type_string:{
-				CqString s(((STRING_DESC*)dso_argv[p])->s);
-				apParams[p-1]->SetString(s,__iGrid);
-				}; break;
-			case type_matrix:
-			case type_sixteentuple:{
-				CqMatrix m((float*) dso_argv[p]);
-				apParams[p-1]->SetMatrix(m,__iGrid);
-		        	}; break;
-			default: 
+	for ( p = 1;p <= cParams;p++ )
+	{
+		switch ( apParams[ p - 1 ] ->Type() )
+		{
+				case type_float:
+				{
+					TqFloat val = *( ( float* ) dso_argv[ p ] ) ;
+					apParams[ p - 1 ] ->SetFloat( val, __iGrid );
+				}
+				;break;
+				case type_hpoint:
+				case type_point:
+				{
+					CqVector3D v;
+					v[ 0 ] = ( ( float* ) dso_argv[ p ] ) [ 0 ];
+					v[ 1 ] = ( ( float* ) dso_argv[ p ] ) [ 1 ];
+					v[ 2 ] = ( ( float* ) dso_argv[ p ] ) [ 2 ];
+					apParams[ p - 1 ] ->SetPoint( v, __iGrid );
+				}
+				;break;
+				case type_triple:  // This seems reasonable
+				case type_vector:
+				{
+					CqVector3D v;
+					v[ 0 ] = ( ( float* ) dso_argv[ p ] ) [ 0 ];
+					v[ 1 ] = ( ( float* ) dso_argv[ p ] ) [ 1 ];
+					v[ 2 ] = ( ( float* ) dso_argv[ p ] ) [ 2 ];
+					apParams[ p - 1 ] ->SetVector( v, __iGrid );
+				}
+				;break;
+				case type_normal:
+				{
+					CqVector3D v;
+					v[ 0 ] = ( ( float* ) dso_argv[ p ] ) [ 0 ];
+					v[ 1 ] = ( ( float* ) dso_argv[ p ] ) [ 1 ];
+					v[ 2 ] = ( ( float* ) dso_argv[ p ] ) [ 2 ];
+					apParams[ p - 1 ] ->SetNormal( v, __iGrid );
+				}
+				;break;
+				case type_color:
+				{
+					CqColor c;
+					c[ 0 ] = ( ( float* ) dso_argv[ p ] ) [ 0 ];
+					c[ 1 ] = ( ( float* ) dso_argv[ p ] ) [ 1 ];
+					c[ 2 ] = ( ( float* ) dso_argv[ p ] ) [ 2 ];
+					apParams[ p - 1 ] ->SetColor( c, __iGrid );
+				}
+				;break;
+				case type_string:
+				{
+					CqString s( ( ( STRING_DESC* ) dso_argv[ p ] ) ->s );
+					apParams[ p - 1 ] ->SetString( s, __iGrid );
+				}
+				; break;
+				case type_matrix:
+				case type_sixteentuple:
+				{
+					CqMatrix m( ( float* ) dso_argv[ p ] );
+					apParams[ p - 1 ] ->SetMatrix( m, __iGrid );
+				}
+				; break;
+				default:
 				// Unhandled TYpe
 				break;
 		};
@@ -5439,45 +5502,48 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 	END_VARYING_SECTION
 
 	// Free up the storage allocated for the return type
-	switch(Result->Type()){
+	switch ( Result->Type() )
+	{
 
-		case type_float: 
-		 	delete (float*) dso_argv[0]; break;
-		case type_point:
-		case type_triple: // This seems reasonable
-		case type_vector:
-		case type_normal:
-		case type_color:
-		case type_hpoint:
-			delete[] (float*) dso_argv[0]; break;
-		case type_string: // Need to look into these
-			delete (STRING_DESC*) dso_argv[0]; break;
-		case type_matrix:
-		case type_sixteentuple:
-			delete[] (float*) dso_argv[0]; break;
-		default:
+			case type_float:
+			delete ( float* ) dso_argv[ 0 ]; break;
+			case type_point:
+			case type_triple:  // This seems reasonable
+			case type_vector:
+			case type_normal:
+			case type_color:
+			case type_hpoint:
+			delete[] ( float* ) dso_argv[ 0 ]; break;
+			case type_string:  // Need to look into these
+			delete ( STRING_DESC* ) dso_argv[ 0 ]; break;
+			case type_matrix:
+			case type_sixteentuple:
+			delete[] ( float* ) dso_argv[ 0 ]; break;
+			default:
 			// Unhandled TYpe
 			break;
 	};
 
 	// Free up the storage allocated for the args
-	for(p=1;p<=cParams;p++){
-		switch(apParams[p-1]->Type()){
-			case type_float:
-				delete (float*) dso_argv[p]; break;
-			case type_point:
-			case type_triple:
-			case type_vector:
-			case type_normal:
-			case type_color:
-			case type_hpoint:
-				delete[] (float*) dso_argv[p]; break;
-			case type_string:
-				delete (STRING_DESC*) dso_argv[p]; break;
-			case type_matrix:
-			case type_sixteentuple:
-				delete[] (float*) dso_argv[p]; break;
-			default: 
+	for ( p = 1;p <= cParams;p++ )
+	{
+		switch ( apParams[ p - 1 ] ->Type() )
+		{
+				case type_float:
+				delete ( float* ) dso_argv[ p ]; break;
+				case type_point:
+				case type_triple:
+				case type_vector:
+				case type_normal:
+				case type_color:
+				case type_hpoint:
+				delete[] ( float* ) dso_argv[ p ]; break;
+				case type_string:
+				delete ( STRING_DESC* ) dso_argv[ p ]; break;
+				case type_matrix:
+				case type_sixteentuple:
+				delete[] ( float* ) dso_argv[ p ]; break;
+				default:
 				// Unhandled TYpe
 				break;
 		};
