@@ -1,4 +1,5 @@
-%{!?rel:    %define rel    %(date +%Y%m%d%H%M)}
+#%{!?rel:    %define rel    %(date +%Y%m%d%H%M)}
+%{!?rel:    %define rel    %(date +%Y%m%d)}
 
 Name: aqsis
 
