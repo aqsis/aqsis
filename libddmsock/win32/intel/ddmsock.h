@@ -148,6 +148,7 @@ class CqDDManager : public IqDDManager
 	virtual	TqInt	DisplayBucket(IqBucket* pBucket);
 
 			void	LoadDisplayLibrary(CqDDClient& dd);
+			void	InitialiseDisplayNameMap();
 
 	private:
 		CqDDServer	m_DDServer;

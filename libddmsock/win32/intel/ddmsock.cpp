@@ -27,6 +27,8 @@
 #include	"aqsis.h"
 
 #include	<strstream>
+#include	<fstream>
+#include	<map>
 
 #include	<process.h>
 
@@ -252,13 +254,15 @@ void CqDDClient::Receive(void* buffer, TqInt len)
 }
 
 
+std::map<std::string, std::string>	g_mapDisplayNames;
+TqBool								g_fDisplayMapInitialised=false;
 
 TqInt CqDDManager::Initialise()
 {
-	if(m_DDServer.Prepare(AQSIS_DD_PORT))
-		return(0);
-	else
+	if(!m_DDServer.Prepare(AQSIS_DD_PORT))
 		return(-1);
+	else
+		return(0);
 }
 
 TqInt CqDDManager::Shutdown()
@@ -374,9 +378,11 @@ TqInt CqDDManager::DisplayBucket(IqBucket* pBucket)
 
 void CqDDManager::LoadDisplayLibrary(CqDDClient& dd)
 {
+	if(!g_fDisplayMapInitialised)
+		InitialiseDisplayNameMap();
+
 	// Load the requested display library according to the specified mode in the RiDisplay command.
-	CqString strDriverFile=dd.strType();
-	strDriverFile+=".exe";
+	CqString strDriverFile=g_mapDisplayNames[dd.strType()];
 
 	CqRiFile fileDriver(strDriverFile.c_str(), "display");
 	if(fileDriver.IsValid())
@@ -429,5 +435,37 @@ void CqDDManager::LoadDisplayLibrary(CqDDClient& dd)
 		CqBasicError(0,0,"Error loading display driver");
 }
 
+
+void CqDDManager::InitialiseDisplayNameMap()
+{
+	// Read in the configuration file.
+	// Find the config file in the same place as the display drivers.
+	CqString strConfigFile="ddmsock.ini";
+
+	CqRiFile fileINI(strConfigFile.c_str(), "display");
+	if(fileINI.IsValid())
+	{
+		// On each line, read the first string, then the second and store them in the map.
+		std::string strLine;
+		std::istream& strmINI=static_cast<std::istream&>(fileINI);
+		
+		while(std::getline(strmINI,strLine))
+		{
+			std::string strName,strDriverName;
+			TqInt iStartN=strLine.find_first_not_of('\t');
+			TqInt iEndN=strLine.find_first_of('\t',iStartN);
+			TqInt iStartD=strLine.find_first_not_of('\t',iEndN);
+			TqInt iEndD=strLine.find_first_of('\t',iStartD);
+			if(iStartN!=std::string::npos && iEndN!=std::string::npos &&
+			   iStartD!=std::string::npos)
+			{
+				strName=strLine.substr(iStartN,iEndN);
+				strDriverName=strLine.substr(iStartD,iEndD);
+				g_mapDisplayNames[strName]=strDriverName;
+			}
+		}
+		g_fDisplayMapInitialised=true;
+	}
+}
 
 END_NAMESPACE(Aqsis)
