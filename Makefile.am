@@ -14,33 +14,12 @@ endif
 
 SUBDIRS = $(MAINDIRS) $(GLUTDIRS) $(PLUGINSDIRS)
 
-EXTRA_DIST = Doxyfile Renderer.dsw bootstrap ddmsock.ini doxygen.dsp
+EXTRA_DIST = Doxyfile Renderer.dsw bootstrap doxygen.dsp
 
 .PHONY: test
 test:
 	cd aqsl/tests; $(MAKE) $(AM_MAKEFLAGS) test
 	cd librib2/tests; $(MAKE) $(AM_MAKEFLAGS) test
 	cd aqsis; $(MAKE) $(AM_MAKEFLAGS) test
-
-devicepath = $(sysconfdir)
-devicedriver = $(devicepath)/ddmsock.ini
-devicelocal = $(top_builddir)/libddmsock/ddmsock.ini
-
-all-local:
-	cat /dev/null > $(devicelocal)
-	echo "file	@bindir@/filebuffer@EXEEXT@" >> $(devicelocal)
-	echo "tiff	@bindir@/filebuffer@EXEEXT@" >> $(devicelocal)
-	echo "framebuffer	@bindir@/aqsis_framebuffer_glut@EXEEXT@" >> $(devicelocal)	
-	echo "zframebuffer	@bindir@/aqsis_framebuffer_glut_z@EXEEXT@" >> $(devicelocal)
-	echo "zfile	@bindir@/shadowmap@EXEEXT@" >> $(devicelocal)
-	echo "shadow	@bindir@/shadowmap@EXEEXT@" >> $(devicelocal)
-
-install-data-local:
-	mkdir -p $(devicepath)
-	cp $(devicelocal) $(devicedriver)
-
-uninstall-local:
-	rm $(devicedriver)
-	rm $(devicelocal)
 
 

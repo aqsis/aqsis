@@ -712,6 +712,7 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd, std::map<std::string, void
 	// Set the AQSIS_DD_PORT environment variable
 	snprintf( envBuffer, 32, "%d", m_DDServer.getPort() );
 	setenv( "AQSIS_DD_PORT", envBuffer, 1 );
+	signal( SIGCHLD, sig_chld );
 	// Spawn the driver
 	const int forkresult = fork();
 	// Start the driver in the child process
