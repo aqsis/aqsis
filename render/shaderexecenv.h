@@ -335,8 +335,13 @@ class CqShaderExecEnv
 						 */
 			void	GetFilterParams(int cParams, CqVMStackEntry** apParams, float& _pswidth, float& _ptwidth)
 					{
+#ifdef WIN32
 						static CqString temp_string;
 						static float temp_float;
+#else // WIN32
+						CqString temp_string;
+						float temp_float;
+#endif // !WIN32
 
 						int i=0;
 						while(cParams>0)
@@ -353,8 +358,13 @@ class CqShaderExecEnv
 						 */
 			void	GetTexParams(int cParams, CqVMStackEntry** apParams, float& _pswidth, float& _ptwidth, float& _psblur, float& _ptblur, float& _pfill)
 					{
+#ifdef WIN32
 						static CqString temp_string;
 						static float temp_float;
+#else // WIN32
+						CqString temp_string;
+						float temp_float;
+#endif // !WIN32
 
 						int i=0;
 						while(cParams>0)

@@ -59,9 +59,10 @@ class CqImageBuffer;
 struct SqCoordSys
 {
 	SqCoordSys(const char* strName, const CqMatrix& matToWorld, const CqMatrix& matWorldTo) :
-					m_strName(strName),
+					m_matWorldTo(matWorldTo),
 					m_matToWorld(matToWorld),
-					m_matWorldTo(matWorldTo)	{}
+					m_strName(strName)
+					{}
 	SqCoordSys()	{}
 
 	CqMatrix	m_matWorldTo;
@@ -167,7 +168,9 @@ class CqRenderer
 	// Function which can be overridden by the derived class.
 				virtual	void		Initialise();
 				virtual	void		RenderWorld();
+#ifdef WIN32
 				virtual	void		LoadDisplayLibrary();
+#endif // WIN32
 				virtual	void		Quit();
 				virtual	void		UpdateStatus()		{}
 						/** Get the global statistics class.
@@ -274,7 +277,11 @@ class CqRenderer
 			CqAttributes	m_attrDefault;					///< Default attributes.
 			CqTransform		m_transDefault;					///< Default transformation.
 			CqImageBuffer*	m_pImageBuffer;					///< Pointer to the current image buffer.
+			
+#ifdef WIN32			
 			HANDLE			m_hDisplayThread;				///< Handle to the display driver thread.
+#endif // WIN32
+
 			EqRenderMode	m_Mode;							
 			CqScene			m_Scene;						///< The global scene storage.
 			CqList<CqShaderRegister> m_Shaders;				///< List of registered shaders.

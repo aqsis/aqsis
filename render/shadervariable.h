@@ -261,8 +261,7 @@ class CqShaderVariableArray: public CqShaderVariable
 					CqShaderVariableArray(const CqShaderVariableArray& From) : CqShaderVariable(From.m_strName.data())
 												{
 													m_aVariables.resize(From.m_aVariables.size());
-													TqInt i;
-													for(i=0; i<From.m_aVariables.size(); i++)
+													for(TqUint i=0; i<From.m_aVariables.size(); i++)
 														m_aVariables[i]=From.m_aVariables[i]->Clone();
 												}
 	virtual			~CqShaderVariableArray()	{}
@@ -270,8 +269,7 @@ class CqShaderVariableArray: public CqShaderVariable
 	// Overridded from CqShaderVariable.
 	virtual	void	Initialise(const TqInt uGridRes, const TqInt vGridRes, TqInt& index)
 												{
-													TqInt i;
-													for(i=0; i<m_aVariables.size(); i++)
+													for(TqUint i=0; i<m_aVariables.size(); i++)
 														m_aVariables[i]->Initialise(uGridRes,vGridRes,index);
 												}
 	virtual	void	SetValue(CqVMStackEntry& Val)

@@ -41,7 +41,7 @@ template<class T>
 class CqListEntry 
 {
 	public:
-					CqListEntry() :	m_pNext(0), m_pPrevious(0), m_Invalid(TqFalse)	{}
+					CqListEntry() :	m_pPrevious(0), m_pNext(0), m_Invalid(TqFalse)	{}
 	virtual			~CqListEntry()		{ UnLink(); }
 
 					/** Get a pointer to the next element in the list.

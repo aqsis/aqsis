@@ -46,7 +46,10 @@ CqRenderer* pCurrRenderer=0;
 /** Default constructor for the main renderer class. Initialises current state.
  */
 
-CqRenderer::CqRenderer() : m_Mode(RenderMode_Image), m_pImageBuffer(0), m_fSaveGPrims(TqFalse)
+CqRenderer::CqRenderer() :
+	m_pImageBuffer(0),
+	m_Mode(RenderMode_Image),
+	m_fSaveGPrims(TqFalse)
 {
 	m_pconCurrent=0;
 	//m_pImageBuffer=new	CqImageBuffer();
@@ -552,6 +555,8 @@ void CqRenderer::RenderWorld()
 	pImage()->InitialiseSurfaces(Scene());
 	pImage()->RenderImage();
 
+//	m_Status.SetState(State_Complete);
+
 	// Calculate the time taken.
 	m_timeTaken=time(0)-m_timeTaken;
 
@@ -806,6 +811,8 @@ CqMatrix	CqRenderer::matNSpaceToSpace(const char* strFrom, const char* strTo, co
 /** Main routine for the display driver to run on.
  */
 
+#ifdef WIN32
+
 DWORD WINAPI DisplayDriverThread(void* dummy)
 {
 	// Release any current display driver.
@@ -885,6 +892,7 @@ void CqRenderer::LoadDisplayLibrary()
 	m_semDisplayDriverReady.Wait();
 }
 
+#endif // WIN32
 
 //----------------------------------------------------------------------
 /** Store the named coordinate system in the array of named coordinate systems, overwrite any existing
@@ -894,8 +902,7 @@ void CqRenderer::LoadDisplayLibrary()
 TqBool	CqRenderer::SetCoordSystem(const char* strName, const CqMatrix& matToWorld)
 {
 	// Search for the same named system in the current list.
-	TqInt i;
-	for(i=0; i<m_aCoordSystems.size(); i++)
+	for(TqUint i=0; i<m_aCoordSystems.size(); i++)
 	{
 		if(m_aCoordSystems[i].m_strName==strName)
 		{

@@ -150,7 +150,7 @@ void CqShaderExecEnv::ValidateIlluminanceCache(CqVMStackEntry& P, CqShader* pSha
 		// Fist cache the shaderexecenv state for later retrieval.
 		TqInt	cacheGridI=m_GridI;
 
-		TqInt li=0;
+		TqUint li=0;
 		while(li<m_pSurface->pAttributes()->apLights().size())
 		{
 			CqLightsource* lp=m_pSurface->pAttributes()->apLights()[li];
@@ -2003,7 +2003,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ambient(DEFPARAMIMPL)
 		// If this is the first call to illuminance this time round, call all lights and setup the Cl and L caches.
 		ValidateIlluminanceCache(Point,pShader);
 
-		for(TqInt light_index=0; light_index<m_pSurface->pAttributes()->apLights().size(); light_index++)
+		for(TqUint light_index=0; light_index<m_pSurface->pAttributes()->apLights().size(); light_index++)
 		{
 			CqLightsource* lp=m_pSurface->pAttributes()->apLights()[light_index];
 			INIT_SOR
@@ -2868,7 +2868,11 @@ STD_SOIMPL CqShaderExecEnv::SO_rendererinfo(STRINGVAL name, CqShaderVariable* pV
 	{
 		if((pV->Type()&Type_Mask)==Type_String)
 		{
+#ifdef WIN32
 			se=VERSION_STR;
+#else // WIN32
+			se = VERSION;
+#endif // !WIN32
 			pV->SetValue(se);
 			Ret=1.0f;
 		}

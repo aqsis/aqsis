@@ -47,7 +47,12 @@
 
 START_NAMESPACE(Aqsis)
 
+#ifdef WIN32
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
+#else // WIN32
+#define ZFILE_HEADER "Aqsis ZFile" VERSION
+#endif // !WIN32
+
 #define	CUBEENVMAP_HEADER	"Aqsis CubeFace Environment"
 #define	SHADOWMAP_HEADER	"Aqsis Shadow Map"
 #define	SATMAP_HEADER		"Aqsis SAT Map"
@@ -100,7 +105,15 @@ enum EqTexFormat
 class _qShareC CqTextureMapBuffer
 {
 	public:
-	_qShareM		CqTextureMapBuffer() : m_sOrigin(0), m_tOrigin(0), m_Width(0), m_Height(0), m_Samples(0), m_pBufferData(0), m_Directory(0)	{}
+	_qShareM		CqTextureMapBuffer() :
+								m_pBufferData(0),
+								m_sOrigin(0),
+								m_tOrigin(0),
+								m_Width(0),
+								m_Height(0),
+								m_Samples(0),
+								m_Directory(0)
+								{}
 					/** Constructor taking buffer information.
 					 * \param xorigin Integer origin within the texture map.
 					 * \param yorigin Integer origin within the texture map.
@@ -110,7 +123,13 @@ class _qShareC CqTextureMapBuffer
 					 * \param directory The directory within the TIFF image map, used for multi image formats, i.e. cubeface environment map.
 					 */
 	_qShareM		CqTextureMapBuffer(unsigned long xorigin, unsigned long yorigin, unsigned long width, unsigned long height, int samples, int directory=0) : 
-						m_sOrigin(xorigin), m_tOrigin(yorigin), m_Width(width), m_Height(height), m_Samples(samples), m_pBufferData(0), m_Directory(directory)
+								m_pBufferData(0),
+								m_sOrigin(xorigin),
+								m_tOrigin(yorigin),
+								m_Width(width),
+								m_Height(height),
+								m_Samples(samples),
+								m_Directory(directory)
 					{
 						m_pBufferData=AllocSegment(width,height,samples);
 					}
@@ -199,13 +218,13 @@ class _qShareC CqTextureMap
 {
 	public:
 	_qShareM 		CqTextureMap(const char* strName)	:
-									m_strName(strName),
-									m_pImage(0),
 									m_XRes(0),
 									m_YRes(0),
 									m_PlanarConfig(PLANARCONFIG_CONTIG),
 									m_SamplesPerPixel(3),
 									m_Format(TexFormat_Plain),
+									m_strName(strName),
+									m_pImage(0),
 									m_IsValid(TqTrue)
 									{}
 	_qShareM	virtual	~CqTextureMap();
@@ -268,8 +287,7 @@ class _qShareC CqTextureMap
 									/** Clear the cache of texture maps.
 									 */
 	_qShareM	static	void		FlushCache()			{
-																int i;
-																for(i=0; i<m_TextureMap_Cache.size(); i++)
+																for(TqUint i=0; i<m_TextureMap_Cache.size(); i++)
 																	delete(m_TextureMap_Cache[i]);
 
 																m_TextureMap_Cache.clear();
@@ -329,8 +347,8 @@ class _qShareC CqShadowMap : public CqTextureMap, public CqImageBuffer
 {
 	public:
 	_qShareM 		CqShadowMap(const char* strName)	:
-									CqImageBuffer(),
-									CqTextureMap(strName)
+									CqTextureMap(strName),
+									CqImageBuffer()
 									{}
 	_qShareM	virtual	~CqShadowMap()	{}
 	

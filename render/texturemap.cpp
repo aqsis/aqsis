@@ -107,7 +107,7 @@ void	CqTextureMapBuffer::FreeSegment(float* pBufferData, unsigned long width, un
 CqTextureMap::~CqTextureMap()
 {
 	// Search for it in the cache and remove the reference.
-	int i;
+	TqUint i;
 	for(i=0; i<m_TextureMap_Cache.size(); i++)
 	{
 		if(m_TextureMap_Cache[i]==this)
@@ -190,8 +190,7 @@ void CqTextureMap::Close()
 CqTextureMap* CqTextureMap::GetTextureMap(const char* strName)
 {
 	// First search the texture map cache
-	int i;
-	for(i=0; i<m_TextureMap_Cache.size(); i++)
+	for(TqUint i=0; i<m_TextureMap_Cache.size(); i++)
 	{
 		if(m_TextureMap_Cache[i]->m_strName==strName)
 		{ 
@@ -225,8 +224,7 @@ CqTextureMap* CqTextureMap::GetTextureMap(const char* strName)
 CqTextureMap* CqTextureMap::GetEnvironmentMap(const char* strName)
 {
 	// First search the texture map cache
-	int i;
-	for(i=0; i<m_TextureMap_Cache.size(); i++)
+	for(TqUint i=0; i<m_TextureMap_Cache.size(); i++)
 	{
 		if(m_TextureMap_Cache[i]->m_strName==strName)
 		{
@@ -263,8 +261,7 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap(const char* strName)
 CqTextureMap* CqTextureMap::GetShadowMap(const char* strName)
 {
 	// First search the texture map cache
-	int i;
-	for(i=0; i<m_TextureMap_Cache.size(); i++)
+	for(TqUint i=0; i<m_TextureMap_Cache.size(); i++)
 	{
 		if(m_TextureMap_Cache[i]->m_strName==strName)
 		{
@@ -304,7 +301,7 @@ CqTextureMap* CqTextureMap::GetShadowMap(const char* strName)
 CqTextureMapBuffer* CqTextureMap::GetBuffer(unsigned long s, unsigned long t, int directory)
 {
 	// Search already cached segments first.
-	int i;
+	TqUint i;
 	for(i=0; i<m_apSegments.size(); i++)
 		if(m_apSegments[i]->IsValid(s,t,directory))	return(m_apSegments[i]);
 
@@ -341,7 +338,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer(unsigned long s, unsigned long t, in
 			
 			int res=TIFFSetDirectory(m_pImage, directory);
 			float* pdata=pTMB->pBufferData();
-			for(unsigned long i=0; i<m_YRes; i++)
+			for(i=0; i<m_YRes; i++)
 			{
 				TIFFReadScanline(m_pImage,pdata,i);
 				pdata+=m_XRes*m_SamplesPerPixel;

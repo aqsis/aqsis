@@ -266,3 +266,5 @@ void CqSurface::SetDefaultPrimitiveVariables(TqBool bUseDef_st)
 //---------------------------------------------------------------------
 
 END_NAMESPACE(Aqsis)
+
+

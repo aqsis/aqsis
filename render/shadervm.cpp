@@ -851,7 +851,7 @@ void CqShaderVM::Initialise(const TqInt uGridRes, const TqInt vGridRes, CqShader
 CqShaderVM&	CqShaderVM::operator=(const CqShaderVM& From)
 {
 	// Copy the local variables...
-	TqInt i;
+	TqUint i;
 	for(i=0; i<From.m_LocalVars.size(); i++)
 		m_LocalVars.push_back(From.m_LocalVars[i]->Clone());
 

@@ -67,3 +67,5 @@ void CqShaderSurfaceConstant::Evaluate(CqShaderExecEnv& Env)
 //---------------------------------------------------------------------
 
 END_NAMESPACE(Aqsis)
+
+

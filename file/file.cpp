@@ -11,6 +11,8 @@
 #include	"renderer.h"
 #include	"sstring.h"
 
+#ifdef WIN32
+
 HINSTANCE	hInst;
 
 BOOL APIENTRY DllMain( HINSTANCE hModule, 
@@ -31,24 +33,25 @@ BOOL APIENTRY DllMain( HINSTANCE hModule,
 	return TRUE;
 }
 
+#endif // WIN32
 
 extern "C"
 _qShareM Aqsis::CqImageBuffer* CreateImage(const char* strName)
 {
-	return(new Aqsis::CqFile(strName));
+	return(new Aqsis::CqFileBuffer(strName));
 }
 
 START_NAMESPACE(Aqsis)
 
 ///---------------------------------------------------------------------
-/// CqFile::CqFile
+/// CqFileBuffer::CqFileBuffer
 ///
 /// Constructor
 
-CqFile::CqFile(const char* strName) :
+CqFileBuffer::CqFileBuffer(const char* strName) :
 										CqImageBuffer(),
-										m_strName(strName),
 										m_pData(0),
+										m_strName(strName),
 										m_XImageRes(0),
 										m_YImageRes(0)
 {
@@ -56,11 +59,11 @@ CqFile::CqFile(const char* strName) :
 
 
 ///---------------------------------------------------------------------
-/// CqFile::~CqFile
+/// CqFileBuffer::~CqFileBuffer
 ///
 /// Destructor
 
-CqFile::~CqFile()
+CqFileBuffer::~CqFileBuffer()
 {
 	// Delate the image buffer
 	delete[](m_pData);
@@ -68,11 +71,11 @@ CqFile::~CqFile()
 
 
 ///---------------------------------------------------------------------
-/// CqFile::SetImage
+/// CqFileBuffer::SetImage
 ///
 /// Set the reolution of the image buffer.
 
-void CqFile::SetImage()
+void CqFileBuffer::SetImage()
 {
 	// Call through to the standard image buffer function.
 	CqImageBuffer::SetImage();
@@ -122,31 +125,31 @@ void CqFile::SetImage()
 
 
 ///---------------------------------------------------------------------
-/// CqFile::GridRendered
+/// CqFileBuffer::GridRendered
 ///
 /// Grid rendered callback
 
-void CqFile::GridRendered()
+void CqFileBuffer::GridRendered()
 {
 }
 
 
 ///---------------------------------------------------------------------
-/// CqFile::SurfaceRendered
+/// CqFileBuffer::SurfaceRendered
 ///
 /// Surface rendered callback
 
-void CqFile::SurfaceRendered()
+void CqFileBuffer::SurfaceRendered()
 {
 }
 
 
 ///---------------------------------------------------------------------
-/// CqFile::BucketComplete
+/// CqFileBuffer::BucketComplete
 ///
 /// Bucket is complete so display the image.
 
-void CqFile::BucketComplete(TqInt iBucket)
+void CqFileBuffer::BucketComplete(TqInt iBucket)
 {
 	if(m_pOut == NULL)
 		return;
@@ -220,11 +223,11 @@ void CqFile::BucketComplete(TqInt iBucket)
 
 
 ///---------------------------------------------------------------------
-/// CqFile::ImageComplete
+/// CqFileBuffer::ImageComplete
 ///
 /// Rendering is finished so display the image.
 
-void CqFile::ImageComplete()
+void CqFileBuffer::ImageComplete()
 {
 	if(m_pOut)
 		(void) TIFFClose(m_pOut);

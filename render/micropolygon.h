@@ -413,4 +413,5 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 END_NAMESPACE(Aqsis)
 
 #endif	// !MICROPOLYGON_H_INCLUDED
- 
+
+

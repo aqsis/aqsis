@@ -31,7 +31,7 @@
 
 #include	"random.h"
 #include	"ri.h"
-#include	"vector3D.h"
+#include	"vector3d.h"
 #include	"color.h"
 
 START_NAMESPACE(Aqsis)

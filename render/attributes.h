@@ -176,8 +176,7 @@ class CqShadingAttributes
 			void		AddLightsource(CqLightsource* pL)
 												{
 													// Check if the ligthsource is already active
-													TqInt i;
-													for(i=0; i<m_apLightsources.size(); i++)
+													for(TqUint i=0; i<m_apLightsources.size(); i++)
 													{
 														if(m_apLightsources[i]==pL)
 															return;
@@ -476,8 +475,7 @@ class _qShareC	CqAttributes : public CqShadingAttributes, public CqGeometricAttr
 						 */
 	const	CqSystemOption* pAttribute(const char* strName) const
 											{
-												TqInt i;
-												for(i=0; i<m_aAttributes.size(); i++)
+												for(TqUint i=0; i<m_aAttributes.size(); i++)
 													if(m_aAttributes[i]->strName().compare(strName)==0)	return(m_aAttributes[i]);
 												return(0);
 											}
@@ -489,8 +487,7 @@ class _qShareC	CqAttributes : public CqShadingAttributes, public CqGeometricAttr
 						 */
 			CqSystemOption* pAttributeWrite(const char* strName)
 											{
-												TqInt i;
-												for(i=0; i<m_aAttributes.size(); i++)
+												for(TqUint i=0; i<m_aAttributes.size(); i++)
 												{
 													if(m_aAttributes[i]->strName().compare(strName)==0)
 													{

@@ -49,8 +49,7 @@ CqReportedErrors::~CqReportedErrors()
 {
 	// We know that items are only ever added to our list via SetReported, 
 	// so need to be deleted here.
-	TqInt i;
-	for(i=0; i<m_aReportedErrors.size(); i++)
+	for(TqUint i=0; i<m_aReportedErrors.size(); i++)
 		if(m_aReportedErrors[i]!=0)
 			delete(m_aReportedErrors[i]);
 }
@@ -74,8 +73,7 @@ void CqReportedErrors::SetReported(CqBasicError* pError)
 
 TqBool CqReportedErrors::CheckReport(CqBasicError* pError)
 {
-	TqInt i;
-	for(i=0; i<m_aReportedErrors.size(); i++)
+	for(TqUint i=0; i<m_aReportedErrors.size(); i++)
 		if(m_aReportedErrors[i]->CheckReport(pError))
 			return(false);
 	return(true);
@@ -88,8 +86,7 @@ TqBool CqReportedErrors::CheckReport(CqBasicError* pError)
 
 void CqReportedErrors::ClearReported()
 {
-	TqInt i;
-	for(i=0; i<m_aReportedErrors.size(); i++)
+	for(TqUint i=0; i<m_aReportedErrors.size(); i++)
 		delete(m_aReportedErrors[i]);
 	m_aReportedErrors.clear();
 }

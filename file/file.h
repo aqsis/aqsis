@@ -12,7 +12,7 @@
 
 #include	"aqsis.h"
 
-#include	"ImageBuffer.h"
+#include	"imagebuffer.h"
 #include	"tiffio.h"
 
 #define		_qShareName	FILEBUFFER
@@ -23,11 +23,11 @@ START_NAMESPACE(Aqsis)
 ///----------------------------------------------------------------------
 /// CqDisplayImageBuffer
 
-class  _qShareC CqFile : public CqImageBuffer
+class  _qShareC CqFileBuffer : public CqImageBuffer
 {
 	public:
-								CqFile(const char* strName);
-				virtual			~CqFile();
+								CqFileBuffer(const char* strName);
+				virtual			~CqFileBuffer();
 
 				virtual	void	SetImage();
 				virtual	void	GridRendered();

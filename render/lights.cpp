@@ -189,3 +189,5 @@ void CqShaderLightsourceAmbient::Evaluate(CqShaderExecEnv& Env)
 //---------------------------------------------------------------------
 
 END_NAMESPACE(Aqsis)
+
+

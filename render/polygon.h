@@ -211,7 +211,12 @@ class CqPolygonPoints : public CqSurface
 
 		// Overridden from CqSurface.
 		// NOTE: These should never be called.
+#ifdef WIN32
 		virtual	CqBound		Bound() const		{static CqBound bTemp; return(bTemp);}
+#else // WIN32
+		virtual	CqBound		Bound() const		{ return CqBound(); }
+#endif // !WIN32
+
 		virtual	CqMicroPolyGridBase* Dice()			{return(0);}
 		virtual	TqInt		Split(std::vector<CqBasicSurface*>& aSplits)
 												{return(0);}

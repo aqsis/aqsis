@@ -454,6 +454,12 @@ static CqString temp_string;
 static bool temp_bool;
 static CqMatrix temp_matrix;
 
+#ifndef WIN32
+// Eliminates "defined but not used" warnings in gcc 2.96
+static TqFloat& temp_float_reference = temp_float;
+static bool& temp_bool_reference = temp_bool;
+#endif // !WIN32
+
 //----------------------------------------------------------------------
 /** \class CqShaderVM
  * Main class handling the execution of a program in shader language bytecodes.
@@ -471,8 +477,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 	virtual _qShareM 	~CqShaderVM()	
 								{
 									// Delete the local variables.
-									TqInt i;
-									for(i=0; i<m_LocalVars.size(); i++)
+									for(TqUint i=0; i<m_LocalVars.size(); i++)
 									{
 										if(m_LocalVars[i]!=NULL)	delete(m_LocalVars[i]);
 										m_LocalVars[i]=0;
@@ -537,8 +542,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 									 */
 				TqInt				FindLocalVarIndex(const char* strName)
 												{
-													TqInt i;
-													for(i=0; i<m_LocalVars.size(); i++)
+													for(TqUint i=0; i<m_LocalVars.size(); i++)
 														if(m_LocalVars[i]->strName().compare(strName)==0)	return(i);
 													return(-1);
 												}

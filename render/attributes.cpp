@@ -42,14 +42,14 @@ static CqShaderSurfaceConstant	StandardSurface;
 CqShadingAttributes::CqShadingAttributes() :	
 					m_colColor(1.0,1.0,1.0),
 					m_colOpacity(1.0,1.0,1.0),
-					m_fEffectiveShadingRate(0.25),
-					m_eShadingInterpolation(ShadingConstant),
 					m_pshadAreaLightSource(0),
 					m_pshadSurface(0),
 					m_pshadAtmosphere(0),
 					m_pshadInteriorVolume(0),
 					m_pshadExteriorVolume(0),
-					m_bMatteSurfaceFlag(TqFalse)	
+					m_fEffectiveShadingRate(0.25),
+					m_eShadingInterpolation(ShadingConstant),
+					m_bMatteSurfaceFlag(TqFalse)
 {
 	// Setup default surface attributes.
 	m_aTextureCoordinates[0]=CqVector2D(0,0);
@@ -353,4 +353,5 @@ const CqColor* CqAttributes::GetColorAttribute(const char* strName, const char* 
 //---------------------------------------------------------------------
 
 END_NAMESPACE(Aqsis)
- 
+
+

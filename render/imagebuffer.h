@@ -168,8 +168,8 @@ class _qShareC	CqImageBuffer
 {
 	public:
 	_qShareM					CqImageBuffer()	:
-												m_fDone(TqTrue),
 												m_fQuit(TqFalse),
+												m_fDone(TqTrue),
 												m_iXRes(0),
 												m_iYRes(0),
 												m_cXBuckets(0),
@@ -180,15 +180,15 @@ class _qShareC	CqImageBuffer
 												m_PixelYSamples(0),
 												m_FilterXWidth(0),
 												m_FilterYWidth(0),
-												m_aSurfaces(0),
-												m_aScene(0),
-												m_pieImage(0),
-												m_CurrBucket(0),
 												m_CropWindowXMin(0),
 												m_CropWindowYMin(0),
 												m_CropWindowXMax(0),
 												m_CropWindowYMax(0),
-												m_DisplayMode(ModeRGB)
+												m_DisplayMode(ModeRGB),
+												m_CurrBucket(0),
+												m_pieImage(0),
+												m_aScene(0),
+												m_aSurfaces(0)
 												{}
 	_qShareM	virtual			~CqImageBuffer();
 

@@ -160,7 +160,7 @@ class CqWVert
 
 			// Q the average of the face points surrounding the vertex.
 			T Q=T(0.0f);
-			TqInt iE;
+			TqUint iE;
 			CqWFace* pF;
 			TqInt cE=0;
 
@@ -203,7 +203,7 @@ class CqWVert
 		T GetCreaseScalar(T& t, T(CqWSurf::*F)(TqInt i), CqWSurf* pSurf)
 		{
 			T P=T(0.0f);
-			TqInt iE;
+			TqUint iE;
 			TqFloat S=0.0;
 			TqInt cS=0;
 			
@@ -223,7 +223,8 @@ class CqWVert
 			S/=(TqFloat)cS;
 			if(cS==2 && S>0.0f && S<1.0f)
 			{
-				T P2=GetSmoothedScalar(P2,F,pSurf);
+				T P2;
+				P2 = GetSmoothedScalar(P2,F,pSurf);
 				P=(P2*(1.0f-S))+(P*S);	// Linear blend for variable crease.
 			}
 			return(P);
@@ -238,7 +239,7 @@ class CqWVert
 		T GetBoundaryScalar(T& t, T(CqWSurf::*F)(TqInt i), CqWSurf* pSurf)
 		{
 			T P=T(0.0f);
-			TqInt iE;
+			TqUint iE;
 			for(iE=0; iE<m_apEdges.size(); iE++)
 				if(m_apEdges[iE]->IsBoundary())
 					if(m_apEdges[iE]->pvHead()==this)	P+=(pSurf->*F)(m_apEdges[iE]->pvTail()->iVertex());
@@ -298,12 +299,11 @@ class CqWFace
 		template<class T>
 		T			CreateSubdivideScalar(T& t, T(CqWSurf::*F)(TqInt i), CqWSurf* pSurf)
 					{
-						TqInt j;
 						T P=T(0.0f);
 						
 						CqWReference grE(m_apEdges[0],this);
 
-						for(j=0; j<m_apEdges.size(); j++)
+						for(TqUint j=0; j<m_apEdges.size(); j++)
 						{
 							P+=(pSurf->*F)(grE.pvHead()->iVertex());
 							grE.peNext();
@@ -327,21 +327,23 @@ class CqWFace
 class CqWEdge
 {
 	public:
-					CqWEdge() : m_Sharpness(0), m_cFaces(0), m_pvSubdivide(0),
+					CqWEdge() :
 								m_pvHead(0), m_pvTail(0),	
 								m_peHeadRight(0), m_peHeadLeft(0),
 								m_peTailRight(0), m_peTailLeft(0),
 								m_pfLeft(0), m_pfRight(0),
 								m_peHeadHalf(0),
-								m_peTailHalf(0)
+								m_peTailHalf(0),
+								 m_pvSubdivide(0), m_Sharpness(0), m_cFaces(0)
 								{}
-					CqWEdge(CqWVert* pH, CqWVert* pT) : m_pvHead(pH), m_pvTail(pT),
-								m_Sharpness(0), m_cFaces(0), m_pvSubdivide(0),
+					CqWEdge(CqWVert* pH, CqWVert* pT) :
+								m_pvHead(pH), m_pvTail(pT),
 								m_peHeadRight(0), m_peHeadLeft(0),
 								m_peTailRight(0), m_peTailLeft(0),
 								m_pfLeft(0), m_pfRight(0),
 								m_peHeadHalf(0),
-								m_peTailHalf(0)
+								m_peTailHalf(0),
+								m_pvSubdivide(0), m_Sharpness(0), m_cFaces(0)
 								{}
 
 					/** Get a pointer to the head vertex of the edge.

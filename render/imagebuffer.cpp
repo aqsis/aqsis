@@ -535,8 +535,8 @@ TqBool CqImageBuffer::Pixel(TqInt iXPos, TqInt iYPos, TqInt iBucket, CqImageElem
 	iXPos-=(iXBucket*m_XBucketSize);
 	iYPos-=(iYBucket*m_YBucketSize);
 
-	int fyo2=m_FilterYWidth*0.5f;
-	int fxo2=m_FilterXWidth*0.5f;
+	int fyo2=static_cast<int>(m_FilterYWidth*0.5f);
+	int fxo2=static_cast<int>(m_FilterXWidth*0.5f);
 	
 	// Check within renderable range
 	if(iXPos>=-fxo2 && iXPos<=m_XBucketSize+fxo2 &&
@@ -578,10 +578,10 @@ void CqImageBuffer::FilterPixel(TqInt X, TqInt Y, TqInt iBucket, SqImageValue& V
 	TqFloat gTot=0.0;
 	TqFloat xmax=m_FilterXWidth*0.5f;
 	TqFloat ymax=m_FilterYWidth*0.5f;
-	TqInt fy=-ymax;
+	TqInt fy=static_cast<TqInt>(-ymax);
 	while(fy<=ymax)
 	{
-		TqInt fx=-xmax;
+		TqInt fx=static_cast<TqInt>(-xmax);
 		CqImageElement* pie2=pie;
 		while(fx<=xmax)
 		{
@@ -1002,13 +1002,13 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 	long initX=static_cast<long>(floor(Bound.vecMin().x()));
 	if(initX<xmin)	initX=xmin;
 
-	TqInt iXSamples=QGetRenderContext()->optCurrent().fPixelXSamples();
-	TqInt iYSamples=QGetRenderContext()->optCurrent().fPixelYSamples();
+	TqInt iXSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelXSamples());
+	TqInt iYSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelYSamples());
 	
-	TqInt im=(bminx<initX)?0:floor((bminx-initX)*iXSamples);
-	TqInt in=(bminy<initY)?0:floor((bminy-initY)*iYSamples);
-	TqInt em=(bmaxx>eX)?iXSamples:ceil((bmaxx-eX)*iXSamples);
-	TqInt en=(bmaxy>eY)?iYSamples:ceil((bmaxy-eY)*iYSamples);
+	TqInt im=static_cast<TqInt>((bminx<initX)?0:floor((bminx-initX)*iXSamples));
+	TqInt in=static_cast<TqInt>((bminy<initY)?0:floor((bminy-initY)*iYSamples));
+	TqInt em=static_cast<TqInt>((bmaxx>eX)?iXSamples:ceil((bmaxx-eX)*iXSamples));
+	TqInt en=static_cast<TqInt>((bmaxy>eY)?iYSamples:ceil((bmaxy-eY)*iYSamples));
 
 	register long iY=initY;
 
@@ -1214,10 +1214,10 @@ void CqImageBuffer::RenderImage()
 		vecMin-=CqVector2D(m_FilterXWidth/2,m_FilterYWidth/2);
 		vecMax+=CqVector2D(m_FilterXWidth/2,m_FilterYWidth/2);
 
-		long xmin=vecMin.x();
-		long ymin=vecMin.y();
-		long xmax=vecMax.x();
-		long ymax=vecMax.y();
+		long xmin=static_cast<long>(vecMin.x());
+		long ymin=static_cast<long>(vecMin.y());
+		long xmax=static_cast<long>(vecMax.x());
+		long ymax=static_cast<long>(vecMax.y());
 
 		if(xmin<CropWindowXMin()-m_FilterXWidth/2)	xmin=CropWindowXMin()-m_FilterXWidth/2;
 		if(ymin<CropWindowYMin()-m_FilterYWidth/2)	ymin=CropWindowYMin()-m_FilterYWidth/2;
@@ -1236,6 +1236,7 @@ void CqImageBuffer::RenderImage()
 		{
 			m_fDone=TqTrue;
 			QGetRenderContext()->SignalDisplayDriverFinished(-1);
+
 			return;
 		}
 
@@ -1243,6 +1244,7 @@ void CqImageBuffer::RenderImage()
 		InitialiseSamples(iBucket+1);
 		ClearBucket();
 	}
+
 	ImageComplete();
 	QGetRenderContext()->SignalDisplayDriverFinished(0);
 	m_fDone=TqTrue;
@@ -1285,3 +1287,5 @@ void CqImageBuffer::InitialiseSurfaces(CqScene& Scene)
 //---------------------------------------------------------------------
  
 END_NAMESPACE(Aqsis)
+
+

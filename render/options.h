@@ -56,8 +56,7 @@ class CqSystemOption
 											{}
 						CqSystemOption(const CqSystemOption& From);
 						~CqSystemOption()	{
-												TqInt i;
-												for(i=0; i<m_aParameters.size(); i++)
+												for(TqUint i=0; i<m_aParameters.size(); i++)
 												{
 													delete(m_aParameters[i]);
 													m_aParameters[i]=0;
@@ -75,8 +74,7 @@ class CqSystemOption
 			void		AddParameter(const CqParameter* pParameter)
 											{
 												// Look to see if one already exists
-												int i;
-												for(i=0; i<m_aParameters.size(); i++)
+												for(TqUint i=0; i<m_aParameters.size(); i++)
 												{
 													if(m_aParameters[i]->strName().compare(pParameter->strName())==0)
 													{
@@ -94,8 +92,7 @@ class CqSystemOption
 						 */
 	const	CqParameter* pParameter(const char* strName) const
 											{
-												TqInt i;
-												for(i=0; i<m_aParameters.size(); i++)
+												for(TqUint i=0; i<m_aParameters.size(); i++)
 													if(m_aParameters[i]->strName().compare(strName)==0)	return(m_aParameters[i]);
 												return(0);
 											}
@@ -105,8 +102,7 @@ class CqSystemOption
 						 */
 			CqParameter* pParameter(const char* strName)
 											{
-												TqInt i;
-												for(i=0; i<m_aParameters.size(); i++)
+												for(TqUint i=0; i<m_aParameters.size(); i++)
 													if(m_aParameters[i]->strName().compare(strName)==0)	return(m_aParameters[i]);
 												return(0);
 											}
@@ -637,8 +633,7 @@ class CqOptions : public CqDisplay, public CqCamera
 						 */
 	const	CqSystemOption* pOption(const char* strName) const
 											{
-												TqInt i;
-												for(i=0; i<m_aOptions.size(); i++)
+												for(TqUint i=0; i<m_aOptions.size(); i++)
 													if(m_aOptions[i]->strName().compare(strName)==0)	return(m_aOptions[i]);
 												return(0);
 											}
@@ -648,8 +643,7 @@ class CqOptions : public CqDisplay, public CqCamera
 						 */
 			CqSystemOption* pOptionWrite(const char* strName)
 											{
-												TqInt i;
-												for(i=0; i<m_aOptions.size(); i++)
+												for(TqUint i=0; i<m_aOptions.size(); i++)
 												{
 													if(m_aOptions[i]->strName().compare(strName)==0)
 													{

@@ -43,6 +43,8 @@ START_NAMESPACE(Aqsis)
  * A random number generator class.
  */
 
+static const double INV_RANDMAX = 1.0 / 4294967296.0;
+
 class _qShareC CqRandom
 {
 	public:
@@ -57,8 +59,13 @@ class _qShareC CqRandom
 								 */
 		_qShareM	unsigned int RandomInt(unsigned int Range)
 								{
+									double n=((double) RandomInt()) * ((double) Range) * INV_RANDMAX;
+									return (unsigned int) n;
+									
+/*									
 									__int64 n=static_cast<unsigned __int64>(RandomInt())*static_cast<__int64>(Range);
 									return(static_cast<unsigned int>(n>>32));
+*/
 								}
 
 								/** Get a random float (0.0 < value < 1.0).

@@ -40,9 +40,7 @@ START_NAMESPACE(Aqsis)
 
 void CqWVert::RemoveEdge(CqWEdge* pE)
 {
-	TqInt i;
-
-	for(i=0; i<m_apEdges.size(); i++)
+	for(TqUint i=0; i<m_apEdges.size(); i++)
 	{
 		if(m_apEdges[i]==pE)	
 		{
@@ -260,12 +258,10 @@ CqWEdge* CqWSurf::FindEdge(CqWEdge* pE)
 
 CqWVert* CqWSurf::FindVertex(const CqVector3D& V)
 {
-	TqInt i;
-
 	// If no vertices or no edges, cannot have been constructed yet.
 	if(m_apVerts.size()==0 || m_apEdges.size()==0)	return(NULL);
 
-	for(i=0; i<m_apVerts.size(); i++)
+	for(TqUint i=0; i<m_apVerts.size(); i++)
 	{
 		if(SubdP(m_apVerts[i]->iVertex())==V)
 			return(m_apVerts[i]);
@@ -385,7 +381,7 @@ CqWFace* CqWSurf::AddFace(CqWEdge** pE, TqInt cE)
 CqWSurf::~CqWSurf()
 {
 	// Delete all edges, vertices and faces.
-	int i;
+	TqUint i;
 	for(i=0; i<m_apVerts.size(); i++)
 		delete(m_apVerts[i]);
 
@@ -1318,7 +1314,7 @@ static unsigned upto2 (unsigned x)
     // if x is already a power of 2, great!  Return it.
     if ((x & (x - 1)) == 0)
 	return x;
-    return 1 << (int)(_logb ((double)x) + 1);
+    return 1 << (int)(logb ((double)x) + 1);
 }
 
 //---------------------------------------------------------------------

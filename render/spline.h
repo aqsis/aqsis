@@ -75,7 +75,10 @@ class _qShareC CqSplineCubic
 														{
 															RtBasis b;
 															if(BasisFromName(b,name))
-																SetmatBasis(CqMatrix(b));
+																{
+																	CqMatrix m(b);
+																	SetmatBasis(m);
+																}
 														}
 						/** Set the cubic spline basis matrix.
 						 * \param name Basis name.
@@ -84,7 +87,10 @@ class _qShareC CqSplineCubic
 														{
 															RtBasis b;
 															if(BasisFromName(b,name.c_str()))
-																SetmatBasis(CqMatrix(b));
+																{
+																	CqMatrix m(b);
+																	SetmatBasis(m);
+																}
 														}
 						/** Get the control point step size for the evaluation window.
 						 * \return Integer step size.

@@ -145,26 +145,26 @@ RtToken	RI_PRINT				="print";
 RtToken	RI_ABORT				="abort";
 RtToken	RI_HANDLER				="handler";
 
-RtBasis	RiBezierBasis			={-1, 3,-3, 1,
-								   3,-6, 3, 0,
-								  -3, 3, 0, 0,
-								   1, 0, 0, 0};
-RtBasis	RiBSplineBasis			={-1, 3,-3, 1,
-								   3,-6, 3, 0,
-								  -3, 0, 3, 0,
-								   1, 4, 1, 0};
-RtBasis	RiCatmullRomBasis		={-1, 3,-3, 1,
-								   2,-5, 4, -1,
-								  -1, 0, 1, 0,
-								   0, 2, 0, 0};
-RtBasis	RiHermiteBasis			={ 2, 1,-2, 1,
-			 					  -3,-2, 3,-1,
-								   0, 1, 0, 0,
-								   1, 0, 0, 0};
-RtBasis	RiPowerBasis			={ 1, 0, 0, 0,
-								   0, 1, 0, 0,
-								   0, 0, 1, 0,
-								   0, 0, 0, 1};
+RtBasis	RiBezierBasis			={{-1, 3,-3, 1},
+								   {3,-6, 3, 0},
+								  {-3, 3, 0, 0},
+								   {1, 0, 0, 0}};
+RtBasis	RiBSplineBasis			={{-1, 3,-3, 1},
+								   {3,-6, 3, 0},
+								  {-3, 0, 3, 0},
+								   {1, 4, 1, 0}};
+RtBasis	RiCatmullRomBasis		={{-1, 3,-3, 1},
+								   {2,-5, 4, -1},
+								  {-1, 0, 1, 0},
+								   {0, 2, 0, 0}};
+RtBasis	RiHermiteBasis			={{ 2, 1,-2, 1},
+			 					  {-3,-2, 3,-1},
+								   {0, 1, 0, 0},
+								   {1, 0, 0, 0}};
+RtBasis	RiPowerBasis			={{ 1, 0, 0, 0},
+								   {0, 1, 0, 0},
+								   {0, 0, 1, 0},
+								   {0, 0, 0, 1}};
 
 enum RIL_POINTS
 {
@@ -245,6 +245,7 @@ RtVoid	RiBegin(RtToken name)
 	// Clear any options.
 	QGetRenderContext()->optCurrent().ClearOptions();
 
+#ifdef WIN32
 	// Set the default search path for shaders to the shaders directory under the executable directory.
 	// Read config file name out of the ini file.
 	char strExe[255];
@@ -258,6 +259,7 @@ RtVoid	RiBegin(RtToken name)
 	char* strShaderOpt="shader";
 	char* pValue=strShaderPath;
 	RiOption("searchpath", (RtPointer)strShaderOpt, (RtPointer)&pValue, NULL);
+#endif // WIN32
 
 	return(0);
 }
@@ -666,7 +668,10 @@ RtVoid	RiDisplayV(const char *name, RtToken type, RtToken mode, PARAMETERLIST)
 	if(strstr(mode, RI_Z)!=NULL)
 		eValue+=ModeZ;
 	QGetRenderContext()->optCurrent().SetiDisplayMode(eValue);
+
+#ifdef WIN32
 	QGetRenderContext()->LoadDisplayLibrary();
+#endif // WIN32
 
 	return(0);
 }
@@ -2625,7 +2630,7 @@ RtVoid	RiMotionBegin(RtInt N, ...)
 	RtFloat* times=new RtFloat[N];
 	RtInt i;
 	for(i=0; i<N; i++)
-		times[i]=va_arg(pArgs, RtFloat);
+		times[i]=va_arg(pArgs, double);
 
 	RiMotionBeginV(N,times);
 	

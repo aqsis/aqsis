@@ -24,6 +24,7 @@
 */
 
 #include	<stdarg.h>
+#include <strstream>
 
 #include	"aqsis.h"
 #include	"sstring.h"
@@ -199,7 +200,7 @@ CqString& CqString::Format(const TqChar* strFmt, ...)
 				switch(strFmt[i])
 				{
 					case 'f':
-						*this+=va_arg(marker,TqFloat);
+						*this+=static_cast<TqFloat>(va_arg(marker,double));
 					break;
 
 					case 'd':
@@ -213,8 +214,16 @@ CqString& CqString::Format(const TqChar* strFmt, ...)
 					case 'x':
 					{ 
 						TqInt val=va_arg(marker,TqInt);
+
+						std::strstream strVal;
+						strVal << val << std::ends;
+						*this+=strVal.str();
+						strVal.freeze(false);
+						
+/*						
 						TqChar strVal[34];
 						*this+=itoa(val,strVal,16);
+*/
 					}
 					break;
 
@@ -257,8 +266,12 @@ CqString& CqString::operator+=(TqChar c)
 
 CqString& CqString::operator+=(TqInt i)
 {
-	TqChar val[34];
-	return(*this+=itoa(i,val,10));
+	std::strstream val;
+	val << i << std::ends;
+	*this += val.str();
+	val.freeze(false);
+	
+	return *this;
 }
 
 CqString& CqString::operator+=(TqFloat f)

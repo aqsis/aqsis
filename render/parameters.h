@@ -211,8 +211,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T>
 		CqParameterTypedVarying<T,I>& operator=(const CqParameterTypedVarying<T,I>& From)
 											{
 												m_aValues.resize(From.m_aValues.size());
-												TqInt j;
-												for(j=0; j<m_aValues.size(); j++)
+												for(TqUint j=0; j<m_aValues.size(); j++)
 												{
 													m_aValues[j]=From.m_aValues[j];
 												}
