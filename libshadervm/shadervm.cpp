@@ -1421,7 +1421,7 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
                 }
 
                 CqMatrix matObjectToWorld = matCurrent();
-                if( NULL != m_pEnv )
+                if( m_pEnv )
                     matObjectToWorld = m_pEnv->pTransform()->matObjectToWorld();
 
                 // If it is a color or a point, ensure it is the correct 'space'

@@ -195,7 +195,6 @@ EXPORTS
 	?DefaultSurface@CqShaderVM@Aqsis@@UAEXXZ
 	?DeleteTemporaryStorage@CqShaderVM@Aqsis@@UAEXPAUIqShaderData@2@@Z
 	?CreateTemporaryStorage@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@@Z
-	?Initialise@CqShaderVM@Aqsis@@UAEXHHPAUIqShaderExecEnv@2@@Z
 	?GetValue@CqShaderVM@Aqsis@@UAE_NPBDPAUIqShaderData@2@@Z
 	?FindArgument@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@ABVCqString@2@@Z
 	?SetArgument@CqShaderVM@Aqsis@@UAEXABVCqString@2@W4EqVariableType@2@0PAX@Z
@@ -206,7 +205,6 @@ EXPORTS
 	?m_samples@CqShaderStack@Aqsis@@1HA
 	?m_maxsamples@CqShaderStack@Aqsis@@1HA
 	?Statistics@CqShaderStack@Aqsis@@SAXXZ
-	?Execute@CqShaderVM@Aqsis@@QAEXPAUIqShaderExecEnv@2@@Z
 	??4CqShaderVM@Aqsis@@QAEAAV01@ABV01@@Z
 	?GetShaderVarAt@CqShaderVM@Aqsis@@QAEPAUIqShaderData@2@H@Z
 	?CreateVariable@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@ABVCqString@2@_N3@Z
