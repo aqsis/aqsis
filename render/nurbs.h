@@ -263,7 +263,6 @@ class CqSurfaceNURBS : public CqSurface
 		CqVector4D	EvaluateNormal( TqFloat u, TqFloat v );
 		void	SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqBool dirflag );
 		void	SubdivideSegments(std::vector<CqSurfaceNURBS*>& Array);
-		void	Decompose( std::vector<CqSurfaceNURBS*>& Array );
 		void	RefineKnotU( const std::vector<TqFloat>& X );
 		void	RefineKnotV( const std::vector<TqFloat>& X );
 		TqUint	InsertKnotU( TqFloat u, TqInt r );
@@ -276,18 +275,6 @@ class CqSurfaceNURBS : public CqSurface
 		{
 			ClampU(); ClampV();
 		}
-
-
-		// Surface construction functions.
-		void	SurfaceOfRevolution( const CqSurfaceNURBS& profile, const CqVector3D& S, const CqVector3D& Tvec, TqFloat theta );
-
-		// Curve functions.
-		void	Circle( const CqVector3D& O, const CqVector3D& X, const CqVector3D& Y, TqFloat r, TqFloat as, TqFloat ae );
-		void	LineSegment( const CqVector3D& P1, CqVector3D& P2 );
-
-		// Utility functions.
-		TqBool	IntersectLine( CqVector3D& P1, CqVector3D& T1, CqVector3D& P2, CqVector3D& T2, CqVector3D& P );
-		void	ProjectToLine( const CqVector3D& S, const CqVector3D& Trj, const CqVector3D& pnt, CqVector3D& p );
 
 		void	OutputMesh();
 		void	Output( const char* name );
