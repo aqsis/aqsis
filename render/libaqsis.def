@@ -270,12 +270,6 @@ EXPORTS
 	StandardDeclarations
 	CreateRIBEngine
 	DestroyRIBEngine
-	??0CqBitVector@Aqsis@@QAE@ABV01@@Z
-	??0CqBitVector@Aqsis@@QAE@H@Z
-	??0CqCellNoise@Aqsis@@QAE@XZ
-	??0CqColor@Aqsis@@QAE@ABVCqVector3D@1@@Z
-	??0CqColor@Aqsis@@QAE@MMM@Z
-	??0CqColor@Aqsis@@QAE@QBM@Z
 	??0CqColor@Aqsis@@QAE@XZ
 	??0CqFile@Aqsis@@QAE@PBD0@Z
 	??0CqFile@Aqsis@@QAE@XZ
@@ -290,21 +284,13 @@ EXPORTS
 	??0CqMatrix@Aqsis@@QAE@QAY03M@Z
 	??0CqMatrix@Aqsis@@QAE@XZ
 	??0CqMessageTable@Aqsis@@QAE@XZ
-	??0CqNoise@Aqsis@@QAE@XZ
-	??0CqRandom@Aqsis@@QAE@I@Z
-	??0CqRandom@Aqsis@@QAE@XZ
 	??0CqSplineCubic@Aqsis@@QAE@H@Z
 	??0CqString@Aqsis@@QAE@ABV01@@Z
-	??0CqString@Aqsis@@QAE@ABV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
-	??0CqString@Aqsis@@QAE@H@Z
-	??0CqString@Aqsis@@QAE@M@Z
 	??0CqString@Aqsis@@QAE@PBD@Z
 	??0CqString@Aqsis@@QAE@XZ
 	??0CqVector2D@Aqsis@@QAE@ABVCqVector3D@1@@Z
-	??0CqVector2D@Aqsis@@QAE@MM@Z
 	??0CqVector2D@Aqsis@@QAE@XZ
 	??0CqVector3D@Aqsis@@QAE@ABVCqColor@1@@Z
-	??0CqVector3D@Aqsis@@QAE@ABVCqVector2D@1@@Z
 	??0CqVector3D@Aqsis@@QAE@ABVCqVector4D@1@@Z
 	??0CqVector3D@Aqsis@@QAE@M@Z
 	??0CqVector3D@Aqsis@@QAE@MMM@Z
@@ -313,19 +299,16 @@ EXPORTS
 	??0CqVector4D@Aqsis@@QAE@MMMM@Z
 	??0CqVector4D@Aqsis@@QAE@XZ
 	??1CqBitVector@Aqsis@@QAE@XZ
-	??1CqCellNoise@Aqsis@@QAE@XZ
 	??1CqColor@Aqsis@@QAE@XZ
 	??1CqFile@Aqsis@@UAE@XZ
 	??1CqLog@Aqsis@@UAE@XZ
 	??1CqMatrix@Aqsis@@QAE@XZ
 	??1CqMessageTable@Aqsis@@UAE@XZ
-	??1CqNoise@Aqsis@@QAE@XZ
 	??1CqPluginBase@Aqsis@@QAE@XZ
 	??1CqSplineCubic@Aqsis@@UAE@XZ
 	??1CqVector2D@Aqsis@@QAE@XZ
 	??1CqVector3D@Aqsis@@QAE@XZ
 	??1CqVector4D@Aqsis@@QAE@XZ
-	??4CqBitVector@Aqsis@@QAEAAV01@ABV01@@Z
 	??4CqColor@Aqsis@@QAEAAV01@ABVCqVector3D@1@@Z
 	??4CqMatrix@Aqsis@@QAEAAV01@ABV01@@Z
 	??4CqMatrix@Aqsis@@QAEAAV01@QAM@Z
@@ -341,19 +324,9 @@ EXPORTS
 	??6Aqsis@@YAAAV?$basic_ostream@DU?$char_traits@D@std@@@std@@AAV12@AAVCqVector4D@0@@Z
 	??6Aqsis@@YAAAV?$basic_ostream@DU?$char_traits@D@std@@@std@@AAV12@ABVCqString@0@@Z
 	??8CqColor@Aqsis@@QBE_NABV01@@Z
-	??8CqVector2D@Aqsis@@QBE_NABV01@@Z
-	??8CqVector3D@Aqsis@@QBE_NABV01@@Z
 	??8CqVector4D@Aqsis@@QBE_NABV01@@Z
-	??9CqColor@Aqsis@@QBE_NABV01@@Z
-	??9CqVector3D@Aqsis@@QBE_NABV01@@Z
 	??9CqVector4D@Aqsis@@QBE_NABV01@@Z
-	??ACqColor@Aqsis@@QAEAAMH@Z
-	??ACqMatrix@Aqsis@@QAEPAMH@Z
-	??ACqSplineCubic@Aqsis@@QAEAAVCqVector4D@1@H@Z
-	??ACqVector3D@Aqsis@@QAEAAMH@Z
 	??ACqVector4D@Aqsis@@QAEAAMH@Z
-	??BCqFile@Aqsis@@QAEAAV?$basic_istream@DU?$char_traits@D@std@@@std@@XZ
-	??BCqFile@Aqsis@@QAEPAV?$basic_istream@DU?$char_traits@D@std@@@std@@XZ
 	??D@YA?AVCqColor@Aqsis@@ABV01@0@Z
 	??D@YA?AVCqColor@Aqsis@@ABV01@M@Z
 	??D@YA?AVCqColor@Aqsis@@MABV01@@Z
@@ -362,8 +335,6 @@ EXPORTS
 	??D@YA?AVCqVector3D@Aqsis@@MABV01@@Z
 	??D@YA?AVCqVector4D@Aqsis@@ABV01@M@Z
 	??D@YA?AVCqVector4D@Aqsis@@MABV01@@Z
-	??D@YAMABVCqVector2D@Aqsis@@0@Z
-	??D@YAMABVCqVector3D@Aqsis@@0@Z
 	??DAqsis@@YA?AVCqMatrix@0@MABV10@@Z
 	??DAqsis@@YA?AVCqString@0@ABV10@0@Z
 	??DAqsis@@YA?AVCqString@0@ABV10@M@Z
@@ -409,27 +380,14 @@ EXPORTS
 	??KAqsis@@YA?AVCqString@0@ABV10@0@Z
 	??LAqsis@@YA?AVCqVector3D@0@ABV10@0@Z
 	??LAqsis@@YA?AVCqVector4D@0@ABV10@0@Z
-	??MCqColor@Aqsis@@QBE_NABV01@@Z
-	??MCqVector3D@Aqsis@@QBE_NABV01@@Z
 	??MCqVector4D@Aqsis@@QBE_NABV01@@Z
-	??NCqColor@Aqsis@@QBE_NABV01@@Z
-	??NCqVector3D@Aqsis@@QBE_NABV01@@Z
 	??NCqVector4D@Aqsis@@QBE_NABV01@@Z
-	??OCqColor@Aqsis@@QBE_NABV01@@Z
-	??OCqVector3D@Aqsis@@QBE_NABV01@@Z
 	??OCqVector4D@Aqsis@@QBE_NABV01@@Z
-	??PCqColor@Aqsis@@QBE_NABV01@@Z
-	??PCqVector3D@Aqsis@@QBE_NABV01@@Z
 	??PCqVector4D@Aqsis@@QBE_NABV01@@Z
-	??XCqColor@Aqsis@@QAEAAV01@ABV01@@Z
-	??XCqColor@Aqsis@@QAEAAV01@M@Z
 	??XCqMatrix@Aqsis@@QAEAAV01@ABV01@@Z
 	??XCqMatrix@Aqsis@@QAEAAV01@M@Z
-	??XCqVector2D@Aqsis@@QAEAAV01@M@Z
-	??XCqVector3D@Aqsis@@QAEAAV01@M@Z
 	??XCqVector4D@Aqsis@@QAEAAV01@M@Z
 	??YCqColor@Aqsis@@QAEAAV01@ABV01@@Z
-	??YCqColor@Aqsis@@QAEAAV01@M@Z
 	??YCqMatrix@Aqsis@@QAEAAV01@ABV01@@Z
 	??YCqMatrix@Aqsis@@QAEAAV01@ABVCqVector4D@1@@Z
 	??YCqString@Aqsis@@QAEAAV01@ABV01@@Z
@@ -437,21 +395,12 @@ EXPORTS
 	??YCqString@Aqsis@@QAEAAV01@H@Z
 	??YCqString@Aqsis@@QAEAAV01@M@Z
 	??YCqString@Aqsis@@QAEAAV01@PBD@Z
-	??YCqVector2D@Aqsis@@QAEAAV01@ABV01@@Z
 	??YCqVector3D@Aqsis@@QAEAAV01@ABV01@@Z
-	??YCqVector3D@Aqsis@@QAEAAV01@M@Z
 	??YCqVector4D@Aqsis@@QAEAAV01@ABV01@@Z
-	??ZCqColor@Aqsis@@QAEAAV01@ABV01@@Z
 	??ZCqMatrix@Aqsis@@QAEAAV01@ABV01@@Z
 	??ZCqMatrix@Aqsis@@QAEAAV01@ABVCqVector4D@1@@Z
-	??ZCqVector2D@Aqsis@@QAEAAV01@ABV01@@Z
-	??ZCqVector3D@Aqsis@@QAEAAV01@ABV01@@Z
-	??ZCqVector3D@Aqsis@@QAEAAV01@M@Z
 	??ZCqVector4D@Aqsis@@QAEAAV01@ABV01@@Z
-	??_0CqColor@Aqsis@@QAEAAV01@ABV01@@Z
 	??_0CqColor@Aqsis@@QAEAAV01@M@Z
-	??_0CqVector2D@Aqsis@@QAEAAV01@M@Z
-	??_0CqVector3D@Aqsis@@QAEAAV01@ABV01@@Z
 	??_0CqVector3D@Aqsis@@QAEAAV01@M@Z
 	??_0CqVector4D@Aqsis@@QAEAAV01@M@Z
 	??_1CqVector3D@Aqsis@@QAEAAV01@ABV01@@Z
@@ -468,8 +417,6 @@ EXPORTS
 	?CGNoise3@CqNoise@Aqsis@@SA?AVCqColor@2@ABVCqVector3D@2@@Z
 	?CGNoise3@CqNoise@Aqsis@@SA?AVCqColor@2@MMM@Z
 	?Canonize@CqBitVector@Aqsis@@QAEXXZ
-	?Close@CqFile@Aqsis@@QAEXXZ
-	?Complement@CqBitVector@Aqsis@@QAEXXZ
 	?Count@CqBitVector@Aqsis@@QAEHXZ
 	?DLClose@CqPluginBase@Aqsis@@IAEXPAX@Z
 	?DLError@CqPluginBase@Aqsis@@QAE?BVCqString@2@XZ
@@ -477,7 +424,6 @@ EXPORTS
 	?DLSym@CqPluginBase@Aqsis@@IAEPAXPAXPAVCqString@2@@Z
 	?Determinant@CqMatrix@Aqsis@@QBEMXZ
 	?Difference@CqBitVector@Aqsis@@QAEAAV12@AAV12@@Z
-	?Element@CqMatrix@Aqsis@@QBEMHH@Z
 	?Evaluate@CqSplineCubic@Aqsis@@UBE?AVCqVector4D@2@M@Z
 	?EvaluateFD@CqSplineCubic@Aqsis@@UAE?AVCqVector4D@2@XZ
 	?ExpandEscapes@CqString@Aqsis@@QBE?AV12@XZ
@@ -487,27 +433,19 @@ EXPORTS
 	?FCellNoise4@CqCellNoise@Aqsis@@QAEMABVCqVector3D@2@M@Z
 	?FGNoise1@CqNoise@Aqsis@@SAMM@Z
 	?FGNoise2@CqNoise@Aqsis@@SAMMM@Z
-	?FGNoise3@CqNoise@Aqsis@@SAMABVCqVector3D@2@@Z
 	?FGNoise3@CqNoise@Aqsis@@SAMMMM@Z
 	?Format@CqString@Aqsis@@QAAAAV12@PBDZZ
-	?GetColorRGB@CqColor@Aqsis@@QAEXPAM00@Z
 	?GetSystemSetting@CqFile@Aqsis@@SA?AVCqString@2@ABV32@@Z
 	?Glob@CqFile@Aqsis@@SA?AV?$list@PAVCqString@Aqsis@@V?$allocator@PAVCqString@Aqsis@@@std@@@std@@ABVCqString@2@@Z
-	?Homogenize@CqVector4D@Aqsis@@QAEXXZ
 	?Identity@CqMatrix@Aqsis@@QAEXXZ
 	?InitFD@CqSplineCubic@Aqsis@@UAEXH@Z
 	?Intersect@CqBitVector@Aqsis@@QAEAAV12@AAV12@@Z
 	?Inverse@CqMatrix@Aqsis@@QBE?AV12@XZ
-	?IsValid@CqFile@Aqsis@@QBE_NXZ
-	?Magnitude2@CqVector2D@Aqsis@@QBEMXZ
-	?Magnitude2@CqVector3D@Aqsis@@QBEMXZ
 	?Magnitude2@CqVector4D@Aqsis@@QBEMXZ
-	?Magnitude@CqVector2D@Aqsis@@QBEMXZ
 	?Magnitude@CqVector3D@Aqsis@@QBEMXZ
 	?Magnitude@CqVector4D@Aqsis@@QBEMXZ
 	?NextState@CqRandom@Aqsis@@IAEXXZ
 	?Normalise@CqMatrix@Aqsis@@QAEXXZ
-	?NumberOfInts@CqBitVector@Aqsis@@SAHH@Z
 	?Open@CqFile@Aqsis@@QAEXPBD0H@Z
 	?PCellNoise1@CqCellNoise@Aqsis@@QAE?AVCqVector3D@2@M@Z
 	?PCellNoise2@CqCellNoise@Aqsis@@QAE?AVCqVector3D@2@MM@Z
@@ -519,29 +457,14 @@ EXPORTS
 	?PGNoise3@CqNoise@Aqsis@@SA?AVCqVector3D@2@MMM@Z
 	?PreMultiply@CqMatrix@Aqsis@@QAEAAV12@ABV12@@Z
 	?PreMultiply@CqMatrix@Aqsis@@QBE?AVCqVector4D@2@ABV32@@Z
-	?RandomFloat@CqRandom@Aqsis@@QAEMM@Z
-	?RandomFloat@CqRandom@Aqsis@@QAEMXZ
-	?RandomInt@CqRandom@Aqsis@@QAEII@Z
 	?RandomInt@CqRandom@Aqsis@@QAEIXZ
 	?Reseed@CqRandom@Aqsis@@QAEXI@Z
 	?Rotate@CqMatrix@Aqsis@@QAEXMVCqVector3D@2@@Z
 	?Scale@CqMatrix@Aqsis@@QAEXM@Z
 	?Scale@CqMatrix@Aqsis@@QAEXMMM@Z
-	?SetAll@CqBitVector@Aqsis@@QAEX_N@Z
-	?SetColorRGB@CqColor@Aqsis@@QAEXMMM@Z
-	?SetElement@CqMatrix@Aqsis@@QAEXHHM@Z
-	?SetSize@CqBitVector@Aqsis@@QAEXH@Z
-	?SetValue@CqBitVector@Aqsis@@QAEXH_N@Z
-	?SetfBlue@CqColor@Aqsis@@QAEXM@Z
-	?SetfGreen@CqColor@Aqsis@@QAEXM@Z
-	?SetfIdentity@CqMatrix@Aqsis@@QAEX_N@Z
-	?SetfRed@CqColor@Aqsis@@QAEXM@Z
-	?SetmatBasis@CqSplineCubic@Aqsis@@QAEXAAVCqMatrix@2@@Z
-	?SetmatBasis@CqSplineCubic@Aqsis@@QAEXABVCqString@2@@Z
 	?ShearX@CqMatrix@Aqsis@@QAEXMM@Z
 	?ShearY@CqMatrix@Aqsis@@QAEXMM@Z
 	?ShearZ@CqMatrix@Aqsis@@QAEXMM@Z
-	?Size@CqBitVector@Aqsis@@QBEHXZ
 	?Skew@CqMatrix@Aqsis@@QAEXMMMMMMM@Z
 	?Translate@CqMatrix@Aqsis@@QAEXABVCqVector3D@2@@Z
 	?Translate@CqMatrix@Aqsis@@QAEXMMM@Z
@@ -549,9 +472,6 @@ EXPORTS
 	?Transpose@CqMatrix@Aqsis@@QBE?AV12@XZ
 	?Union@CqBitVector@Aqsis@@QAEAAV12@AAV12@@Z
 	?Unit@CqVector2D@Aqsis@@QAEXXZ
-	?Unit@CqVector3D@Aqsis@@QAEXXZ
-	?Unit@CqVector4D@Aqsis@@QAEXXZ
-	?Value@CqBitVector@Aqsis@@QAE_NH@Z
 	?XYZtorgb@CqColor@Aqsis@@QBE?AV12@XZ
 	?YIQtorgb@CqColor@Aqsis@@QBE?AV12@XZ
 	?cSections@CqSplineCubic@Aqsis@@UBEHXZ
@@ -561,10 +481,6 @@ EXPORTS
 	?error@CqLog@Aqsis@@UAAXPBDZZ
 	?error@CqLog@Aqsis@@UAEXABVCqString@2@@Z
 	?error@CqLog@Aqsis@@UAEXHH@Z
-	?fBlue@CqColor@Aqsis@@QBEMXZ
-	?fGreen@CqColor@Aqsis@@QBEMXZ
-	?fIdentity@CqMatrix@Aqsis@@QBE_NXZ
-	?fRed@CqColor@Aqsis@@QBEMXZ
 	?gBSplineBasis@Aqsis@@3PAY03MA
 	?gBezierBasis@Aqsis@@3PAY03MA
 	?gCatmullRomBasis@Aqsis@@3PAY03MA
@@ -578,8 +494,6 @@ EXPORTS
 	?getError@CqLog@Aqsis@@UAEPBDHH@Z
 	?getError@CqMessageTable@Aqsis@@UAEPBDHH@Z
 	?getMessageTable@CqLog@Aqsis@@UAEPAUIqMessageTable@2@XZ
-	?h@CqVector4D@Aqsis@@QAEXM@Z
-	?h@CqVector4D@Aqsis@@QBEMXZ
 	?hsltorgb@CqColor@Aqsis@@QBE?AV12@XZ
 	?hsvtorgb@CqColor@Aqsis@@QBE?AV12@XZ
 	?info@CqLog@Aqsis@@UAAXPBDZZ
@@ -592,7 +506,6 @@ EXPORTS
 	?notice@CqLog@Aqsis@@UAAXPBDZZ
 	?notice@CqLog@Aqsis@@UAEXABVCqString@2@@Z
 	?notice@CqLog@Aqsis@@UAEXHH@Z
-	?pElements@CqMatrix@Aqsis@@QAEPAMXZ
 	?removeFileLog@CqLog@Aqsis@@UAEXV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
 	?rgbtoXYZ@CqColor@Aqsis@@QBE?AV12@XZ
 	?rgbtoYIQ@CqColor@Aqsis@@QBE?AV12@XZ
@@ -600,24 +513,7 @@ EXPORTS
 	?rgbtohsv@CqColor@Aqsis@@QBE?AV12@XZ
 	?rgbtoxyY@CqColor@Aqsis@@QBE?AV12@XZ
 	?setMessageTable@CqLog@Aqsis@@UAEXPAUIqMessageTable@2@@Z
-	?strRealName@CqFile@Aqsis@@QBEABVCqString@2@XZ
 	?warn@CqLog@Aqsis@@UAAXPBDZZ
 	?warn@CqLog@Aqsis@@UAEXABVCqString@2@@Z
 	?warn@CqLog@Aqsis@@UAEXHH@Z
-	?x@CqVector2D@Aqsis@@QAEXM@Z
-	?x@CqVector2D@Aqsis@@QBEMXZ
-	?x@CqVector3D@Aqsis@@QAEXM@Z
-	?x@CqVector3D@Aqsis@@QBEMXZ
-	?x@CqVector4D@Aqsis@@QAEXM@Z
-	?x@CqVector4D@Aqsis@@QBEMXZ
 	?xyYtorgb@CqColor@Aqsis@@QBE?AV12@XZ
-	?y@CqVector2D@Aqsis@@QAEXM@Z
-	?y@CqVector2D@Aqsis@@QBEMXZ
-	?y@CqVector3D@Aqsis@@QAEXM@Z
-	?y@CqVector3D@Aqsis@@QBEMXZ
-	?y@CqVector4D@Aqsis@@QAEXM@Z
-	?y@CqVector4D@Aqsis@@QBEMXZ
-	?z@CqVector3D@Aqsis@@QAEXM@Z
-	?z@CqVector3D@Aqsis@@QBEMXZ
-	?z@CqVector4D@Aqsis@@QAEXM@Z
-	?z@CqVector4D@Aqsis@@QBEMXZ

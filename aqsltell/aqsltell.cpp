@@ -23,6 +23,11 @@
 		\author Douglas Ward (dsward@vidi.com)
 */
 
+#include "aqsis.h"
+
+#ifdef	AQSIS_COMPILER_MSVC6
+#pragma warning(disable : 4786 )
+#endif //AQSIS_COMPILER_MSVC6
 
 #include <iostream>
 #include <iomanip>
