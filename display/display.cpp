@@ -513,7 +513,8 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	TqInt __ymin = MAX((ymin-pImage->m_origin[1]), 0);
 	TqInt __xmaxplus1 = MIN((xmaxplus1-pImage->m_origin[0]), pImage->m_width);
 	TqInt __ymaxplus1 = MIN((ymaxplus1-pImage->m_origin[1]), pImage->m_height);
-	TqInt bucketlinelen = entrysize * (__xmaxplus1 - __xmin);
+	TqInt bucketlinelen = entrysize * (xmaxplus1 - xmin);
+	TqInt copylinelen = entrysize * (__xmaxplus1 - __xmin);
 
 	// Calculate where in the bucket we are starting from if the window is cropped.
 	TqInt row = MAX(pImage->m_origin[1] - ymin, 0);
@@ -531,7 +532,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 			{
 				// Copy a whole row at a time, as we know it is being sent in the proper format and order.
 				TqInt so = ( y * pImage->m_lineLength ) + ( __xmin * pImage->m_entrySize );
-				memcpy(reinterpret_cast<char*>(pImage->m_data)+so, reinterpret_cast<const void*>(pdatarow), bucketlinelen);
+				memcpy(reinterpret_cast<char*>(pImage->m_data)+so, reinterpret_cast<const void*>(pdatarow), copylinelen);
 				pdatarow += bucketlinelen;
 			}
 		}
@@ -543,15 +544,16 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 			for ( y = __ymin; y < __ymaxplus1; y++ )
 			{
 				TqInt x;
+				const unsigned char* _pdatarow = pdatarow;
 				for ( x = __xmin; x < __xmaxplus1; x++ )
 				{
-					unsigned char alpha = pdatarow[3];
+					unsigned char alpha = _pdatarow[3];
 					if( alpha > 0 )
 					{
 						TqInt so = ( y * pImage->m_lineLength ) + ( x * pImage->m_entrySize );
-						unsigned char r = pdatarow[0];
-						unsigned char g = pdatarow[1];
-						unsigned char b = pdatarow[2];
+						unsigned char r = _pdatarow[0];
+						unsigned char g = _pdatarow[1];
+						unsigned char b = _pdatarow[2];
 						// C’ = INT_PRELERP( A’, B’, b, t )
 						unsigned char R = static_cast<int>(INT_PRELERP( reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 0 ], r, alpha, t ));
 						unsigned char G = static_cast<int>(INT_PRELERP( reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 1 ], g, alpha, t ));
@@ -560,8 +562,9 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 						reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 1 ] = CLAMP( G, 0, 255 );
 						reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 2 ] = CLAMP( B, 0, 255 );
 					}
-					pdatarow += entrysize;
+					_pdatarow += entrysize;
 				}
+				pdatarow += bucketlinelen;
 			}
 		}
 
@@ -574,15 +577,17 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 			for ( y = __ymin; y < __ymaxplus1; y++ )
 			{
 				TqInt x;
+				const unsigned char* _pdatarow = pdatarow;
 				for ( x = xmin; x < xmaxplus1; x++ )
 				{
-					TqFloat value = reinterpret_cast<const RtFloat*>(pdatarow)[0];
+					TqFloat value = reinterpret_cast<const RtFloat*>(_pdatarow)[0];
 					TqInt so = ( y * pImage->m_width * 3 * sizeof(unsigned char) ) + ( x * 3 * sizeof(unsigned char) );
 					pImage->m_zfbdata[ so + 0 ] = 
 					pImage->m_zfbdata[ so + 1 ] = 
 					pImage->m_zfbdata[ so + 2 ] = value < FLT_MAX ? 255 : 0;
-					pdatarow += entrysize;
+					_pdatarow += entrysize;
 				}
+				pdatarow += bucketlinelen;
 			}
 		}
 	}	
