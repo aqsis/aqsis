@@ -1795,7 +1795,96 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
                 }
             }
             break;
-            // TODO: Rest of parameter types.
+
+        case type_color:
+            {
+                RtFloat * pc = reinterpret_cast<RtFloat*>( value );
+                if ( bArray )
+                {
+                    RtInt j;
+                    for ( j = 0; j < pParam->Count(); j+=3 )
+                        static_cast<CqParameterTypedUniformArray<CqColor, type_color, CqColor>*>( pParam ) ->pValue() [ j ] = CqColor(pc[ j ], pc[ j+1 ], pc[ j+2 ]);
+                }
+                else
+                    static_cast<CqParameterTypedUniform<CqColor, type_color, CqColor>*>( pParam ) ->pValue() [ 0 ] = CqColor(pc[ 0 ], pc[ 1 ], pc[ 2 ]);
+            }
+            break;
+
+        case type_point:
+            {
+                RtFloat * pv = reinterpret_cast<RtFloat*>( value );
+                if ( bArray )
+                {
+                    RtInt j;
+                    for ( j = 0; j < pParam->Count(); j+=3 )
+                        static_cast<CqParameterTypedUniformArray<CqVector3D, type_point, CqVector3D>*>( pParam ) ->pValue() [ j ] = CqVector3D(pv[ j ], pv[ j+1 ], pv[ j+2 ]);
+                }
+                else
+                    static_cast<CqParameterTypedUniform<CqVector3D, type_point, CqVector3D>*>( pParam ) ->pValue() [ 0 ] = CqVector3D(pv[ 0 ], pv[ 1 ], pv[ 2 ]);
+            }
+            break;
+
+        case type_normal:
+            {
+                RtFloat * pv = reinterpret_cast<RtFloat*>( value );
+                if ( bArray )
+                {
+                    RtInt j;
+                    for ( j = 0; j < pParam->Count(); j+=3 )
+                        static_cast<CqParameterTypedUniformArray<CqVector3D, type_normal, CqVector3D>*>( pParam ) ->pValue() [ j ] = CqVector3D(pv[ j ], pv[ j+1 ], pv[ j+2 ]);
+                }
+                else
+                    static_cast<CqParameterTypedUniform<CqVector3D, type_normal, CqVector3D>*>( pParam ) ->pValue() [ 0 ] = CqVector3D(pv[ 0 ], pv[ 1 ], pv[ 2 ]);
+            }
+            break;
+
+        case type_vector:
+            {
+                RtFloat * pv = reinterpret_cast<RtFloat*>( value );
+                if ( bArray )
+                {
+                    RtInt j;
+                    for ( j = 0; j < pParam->Count(); j+=3 )
+                        static_cast<CqParameterTypedUniformArray<CqVector3D, type_vector, CqVector3D>*>( pParam ) ->pValue() [ j ] = CqVector3D(pv[ j ], pv[ j+1 ], pv[ j+2 ]);
+                }
+                else
+                    static_cast<CqParameterTypedUniform<CqVector3D, type_vector, CqVector3D>*>( pParam ) ->pValue() [ 0 ] = CqVector3D(pv[ 0 ], pv[ 1 ], pv[ 2 ]);
+            }
+            break;
+
+        case type_hpoint:
+            {
+                RtFloat * pv = reinterpret_cast<RtFloat*>( value );
+                if ( bArray )
+                {
+                    RtInt j;
+                    for ( j = 0; j < pParam->Count(); j+=4 )
+                        static_cast<CqParameterTypedUniformArray<CqVector4D, type_hpoint, CqVector3D>*>( pParam ) ->pValue() [ j ] = CqVector4D(pv[ j ], pv[ j+1 ], pv[ j+2 ], pv[ j+3 ]);
+                }
+                else
+                    static_cast<CqParameterTypedUniform<CqVector4D, type_hpoint, CqVector3D>*>( pParam ) ->pValue() [ 0 ] = CqVector4D(pv[ 0 ], pv[ 1 ], pv[ 2 ], pv[ 3 ]);
+            }
+            break;
+
+        case type_matrix:
+            {
+                RtFloat * pm = reinterpret_cast<RtFloat*>( value );
+                if ( bArray )
+                {
+                    RtInt j;
+                    for ( j = 0; j < pParam->Count(); j+=16 )
+                        static_cast<CqParameterTypedUniformArray<CqMatrix, type_matrix, CqMatrix>*>( pParam ) ->pValue() [ j ] = CqMatrix(pm[ j    ], pm[ j+1  ], pm[ j+2  ], pm[ j+3  ],
+																																		  pm[ j+4  ], pm[ j+5  ], pm[ j+6  ], pm[ j+7  ],
+																																		  pm[ j+8  ], pm[ j+9  ], pm[ j+10 ], pm[ j+11 ],
+																																		  pm[ j+12 ], pm[ j+13 ], pm[ j+14 ], pm[ j+15 ]);
+                }
+                else
+                    static_cast<CqParameterTypedUniform<CqMatrix, type_matrix, CqMatrix>*>( pParam ) ->pValue() [ 0 ] = CqMatrix(pm[ 0  ], pm[ 1  ], pm[ 2  ], pm[ 3  ],
+																																	 pm[ 4  ], pm[ 5  ], pm[ 6  ], pm[ 7  ],
+																																	 pm[ 8  ], pm[ 9  ], pm[ 10 ], pm[ 11 ],
+																																	 pm[ 12 ], pm[ 13 ], pm[ 14 ], pm[ 15 ]);
+            }
+            break;
         }
     }
     return ;

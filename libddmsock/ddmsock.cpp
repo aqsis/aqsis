@@ -586,6 +586,7 @@ TqBool CqDDManager::fDisplayNeeds( const TqChar* var )
 {
     static TqUlong rgb = CqParameter::hash( "rgb" );
     static TqUlong rgba = CqParameter::hash( "rgba" );
+    static TqUlong z = CqParameter::hash( "z" );
     static TqUlong Ci = CqParameter::hash( "Ci" );
     static TqUlong Oi = CqParameter::hash( "Oi" );
 
@@ -600,6 +601,8 @@ TqBool CqDDManager::fDisplayNeeds( const TqChar* var )
         else if ( ( htoken == Oi ) && usage )
             return ( TqTrue );
         else if ( ( i->hMode() == htoken ) )
+            return ( TqTrue );
+        if ( ( htoken == Oi ) && ( i->hMode() == z ) )
             return ( TqTrue );
     }
     return ( TqFalse );

@@ -317,6 +317,10 @@ void CqImagePixel::Combine()
     TqInt depthfilter = 0;
 
     const CqString* pstrDepthFilter = QGetRenderContext() ->optCurrent().GetStringOption( "Hider", "depthfilter" );
+    const CqColor* pzThreshold = QGetRenderContext() ->optCurrent().GetColorOption( "limits", "zthreshold" );
+	CqColor zThreshold(1.0f, 1.0f, 1.0f);	// Default threshold of 1,1,1 means that any objects that are partially transparent won't appear in shadow maps.
+	if(NULL != pzThreshold)
+		zThreshold = pzThreshold[0];
 
     if ( NULL != pstrDepthFilter )
     {
@@ -362,6 +366,8 @@ void CqImagePixel::Combine()
         CqColor samplecolor = gColBlack;
         CqColor sampleopacity = gColBlack;
         TqBool samplehit = TqFalse;
+		TqFloat opaqueDepths[2] = { FLT_MAX, FLT_MAX };
+		TqFloat maxOpaqueDepth = FLT_MAX;
 
         for ( std::vector<SqImageSample>::reverse_iterator sample = samples->rbegin(); sample != samples->rend(); sample++ )
         {
@@ -392,6 +398,19 @@ void CqImagePixel::Combine()
                 samplecolor = ( samplecolor * ( gColWhite - sample->Os() ) ) + sample->Cs();
                 sampleopacity = ( ( gColWhite - sampleopacity ) * sample->Os() ) + sampleopacity;
             }
+
+			// Now determine if the sample opacity meets the limit for depth mapping.
+			// If so, store the depth in the appropriate nearest opaque sample slot.
+			// The test is, if any channel of the opacity color is greater or equal to the threshold.
+			if(sample->Os().fRed() >= zThreshold.fRed() || sample->Os().fGreen() >= zThreshold.fGreen() || sample->Os().fBlue() >= zThreshold.fBlue())
+			{
+				// Make sure we store the nearest and second nearest depth values.
+				opaqueDepths[1] = opaqueDepths[0];
+				opaqueDepths[0] = sample->Depth();
+				// Store the max opaque depth too, if not already stored.
+				if(!(maxOpaqueDepth < FLT_MAX))
+					maxOpaqueDepth = sample->Depth();
+			}
             samplehit = TqTrue;
         }
 
@@ -411,28 +430,36 @@ void CqImagePixel::Combine()
             {
                 if ( depthfilter == 1 )
                 {
+					//std::cerr << debug << "OpaqueDepths: " << opaqueDepths[0] << " - " << opaqueDepths[1] << std::endl;
                     // Use midpoint for depth
                     if ( samples->size() > 1 )
-                        ( *samples ) [ 0 ].SetDepth( ( ( *samples ) [ 0 ].Depth() + ( *samples ) [ 1 ].Depth() ) * 0.5f );
+                        ( *samples ) [ 0 ].SetDepth( ( opaqueDepths[0] + opaqueDepths[1] ) * 0.5f );
                     else
                         ( *samples ) [ 0 ].SetDepth( FLT_MAX );
                 }
                 else if ( depthfilter == 2)
                 {
-                    ( *samples ) [ 0 ].SetDepth( samples->back().Depth() );
+                    ( *samples ) [ 0 ].SetDepth( maxOpaqueDepth );
                 }
                 else if ( depthfilter == 3 )
                 {
                     std::vector<SqImageSample>::iterator sample;
                     TqFloat totDepth = 0.0f;
+					TqInt totCount = 0;
                     for ( sample = samples->begin(); sample != samples->end(); sample++ )
-                        totDepth += sample->Depth();
-                    totDepth /= samples->size();
+						if(sample->Os().fRed() >= zThreshold.fRed() || sample->Os().fGreen() >= zThreshold.fGreen() || sample->Os().fBlue() >= zThreshold.fBlue())
+						{
+	                        totDepth += sample->Depth();
+							totCount++;
+						}
+                    totDepth /= totCount;
 
                     ( *samples ) [ 0 ].SetDepth( totDepth );
                 }
                 // Default to "min"
             }
+			else
+				( *samples ) [ 0 ].SetDepth( opaqueDepths[0] );
         }
     }
 
