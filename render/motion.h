@@ -266,7 +266,7 @@ public:
 	void	Reset()
 	{
 		m_aTimes.clear();
-		std::vector<T>::iterator i;
+		typename std::vector<T>::iterator i;
 		for(i=m_aObjects.begin(); i!=m_aObjects.end(); i++)
 			ClearMotionObject(*i);
 		m_aObjects.clear();
