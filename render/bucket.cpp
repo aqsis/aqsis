@@ -374,16 +374,16 @@ void CqBucket::FilterBucket()
 					{
 						for ( sx = 0; sx < m_XPixelSamples; sx++ )
 						{
-							if ( pie2->Values( sx, sy ).size() > 0 )
+							TqInt sindex = index + ( ( ( sy * m_XPixelSamples ) + sx ) * numsubpixels );
+							CqVector2D vecS = pie2->SamplePoint( sx, sy );
+							vecS -= CqVector2D( xcent, ycent );
+							if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 							{
-								TqInt sindex = index + ( ( ( sy * m_XPixelSamples ) + sx ) * numsubpixels );
-								CqVector2D vecS = pie2->SamplePoint( sx, sy );
-								vecS -= CqVector2D( xcent, ycent );
-								if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
+								TqInt cindex = sindex + pie2->SubCellIndex( sx, sy );
+								TqFloat g = m_aFilterValues[ cindex ];
+								gTot += g;
+								if ( pie2->Values( sx, sy ).size() > 0 )
 								{
-									TqInt cindex = sindex + pie2->SubCellIndex( sx, sy );
-									TqFloat g = m_aFilterValues[ cindex ];
-									gTot += g;
 									SqImageSample* pSample = &pie2->Values( sx, sy ) [ 0 ];
 									samples += pSample->m_Data * g;
 									SampleCount++;
