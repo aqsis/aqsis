@@ -147,9 +147,15 @@ class CqDDServer
 		{
 			return ( m_Socket );
 		}
-
+		/** Get the current port.
+		 */
+		int getPort() const
+		{
+			return ( m_Port );
+		}
 	private:
 		SOCKET	m_Socket;			///< Socket ID of the server.
+		int m_Port;				///< Port number used by this server.
 }
 ;
 

@@ -24,6 +24,7 @@
 */
 
 #include	<iostream>
+#include	<stdlib.h>
 
 #include	"aqsis.h"
 
@@ -70,7 +71,15 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsg );
 /// Main loop,, just cycle handling any recieved messages.
 int main( int argc, char* argv[] )
 {
-	if ( DDInitialise( NULL, -1 ) == 0 )
+        int port = -1;
+	char *portStr = getenv("AQSIS_DD_PORT");
+
+	if (portStr != NULL)
+	{
+		port = atoi(portStr);
+	}
+	
+	if ( DDInitialise( NULL, port ) == 0 )
 	{
 		DDProcessMessages();
 	}

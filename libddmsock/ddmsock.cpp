@@ -170,17 +170,27 @@ TqBool CqDDServer::Bind( TqInt port )
 	saTemp.sin_port = htons( port );
 	saTemp.sin_addr.s_addr = INADDR_ANY;
 
-	if ( bind( m_Socket, ( PSOCKADDR ) & saTemp, sizeof( saTemp ) ) == SOCKET_ERROR )
+	while ( bind( m_Socket, ( PSOCKADDR ) & saTemp, sizeof( saTemp ) ) == SOCKET_ERROR )
 	{
 #ifdef AQSIS_SYSTEM_WIN32
 		TqInt iE = WSAGetLastError();
+		if (errno == WSAEADDRINUSE)
+#else // AQSIS_SYSTEM_WIN32
+		if (errno == EADDRINUSE)
 #endif // AQSIS_SYSTEM_WIN32
-
-		CqBasicError( 0, 0, "Error binding to DD socket" );
-		Close();
-
-		return ( TqFalse );
+		{
+			port++;
+			saTemp.sin_port = htons( port );
+			continue;
+		}
+		else
+		{
+			CqBasicError( 0, 0, "Error binding to DD socket" );
+			Close();
+			return ( TqFalse );
+		}
 	}
+	m_Port = port;
 	return ( TqTrue );
 }
 
@@ -509,13 +519,18 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 	CqRiFile fileDriver( strDriverFile.c_str(), "display" );
 	if ( fileDriver.IsValid() )
 	{
+		char envBuffer[32];
 #ifdef AQSIS_SYSTEM_WIN32
+		_snprintf(envBuffer, 32, "%d", m_DDServer.getPort());
+		SetEnvironmentVariable("AQSIS_DD_PORT", envBuffer);
 		const TqInt ProcHandle = _spawnl( _P_NOWAITO, fileDriver.strRealName().c_str(), strDriverFile.c_str() , NULL );
 		if ( ProcHandle < 0 )
 		{
 			CqBasicError( 0, 0, "Error spawning display driver process" );
 		}
 #else // AQSIS_SYSTEM_WIN32
+		snprintf(envBuffer, 32, "%d", m_DDServer.getPort());
+		setenv("AQSIS_DD_PORT", envBuffer, 1);
 		const int forkresult = fork();
 		if ( 0 == forkresult )
 		{

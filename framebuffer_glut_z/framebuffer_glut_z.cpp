@@ -195,7 +195,15 @@ void keyboard( unsigned char key, int x, int y )
 
 int main( int argc, char** argv )
 {
-	if ( -1 == DDInitialise( NULL, -1 ) )
+        int port = -1;
+	char *portStr = getenv("AQSIS_DD_PORT");
+	
+	if (portStr != NULL)
+	{
+		port = atoi(portStr);
+	}
+
+	if ( -1 == DDInitialise( NULL, port ) )
 	{
 		std::cerr << "Unable to open socket" << std::endl;
 		return 1;
