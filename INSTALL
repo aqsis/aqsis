@@ -19,19 +19,12 @@ You can obtain a listing of available configuration options by doing:
 
 	make
 
-* Now, run the standard built-in tests:
+* Now, run the built-in tests, which will render a sample image of a vase and teapot (ribfiles/vase.rib):
 
 	make check
 
-* Then, run the high-level rendering tests, which will compile a selection of shaders and render several test images
-(to view the images, you will have to manually cd into the "aqsis" subdirectory and view all of the ".tif" images
-there.  "xview *.tif" is a safe bet, if you don't already have a preferred bitmap viewer):
-
-	make test
-
 * You're now ready to install the Aqsis binaries for general use on your host.  You will have to have root access:
-	su
-	make install
+	su -c "make install"
 
 * If you want to make a copy of the Aqsis source available for others, you can roll your own distribution tarball:
 
