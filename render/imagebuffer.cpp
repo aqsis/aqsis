@@ -998,6 +998,7 @@ void	CqImageBuffer::SetImage()
 
 	CqBucket::InitialiseBucket( 0, 0, m_XBucketSize, m_YBucketSize, m_FilterXWidth, m_FilterYWidth, m_PixelXSamples, m_PixelXSamples, fJitter );
 	CqBucket::InitialiseFilterValues();
+	m_iCurrentBucket = 0;
 }
 
 

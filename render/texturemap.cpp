@@ -1502,6 +1502,8 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	TqFloat depth;
 	TqFloat previousdepth;
 	std::valarray<TqFloat> coverage;
+	coverage.resize(m_SamplesPerPixel);
+	val.resize(m_SamplesPerPixel);
 
 	// get coverage and average depth
 	SampleMap( R1, R2, R3, R4, sblur, tblur, coverage, depth );
