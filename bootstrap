@@ -3,7 +3,7 @@
 cat ./m4/*.m4 > acinclude.m4
 aclocal 
 autoheader
-libtoolize --automake --copy 
+libtoolize --automake --copy --force
 automake --add-missing --copy --gnu
 autoconf
 
