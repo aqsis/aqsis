@@ -388,7 +388,8 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 	}
 	catch( CqString str )
 	{
-		CqBasicError( ErrorID_DisplayDriver, Severity_Normal, str.c_str() );
+		//CqBasicError( ErrorID_DisplayDriver, Severity_Normal, str.c_str() );
+		QGetRenderContext() ->Logger() ->error( str );
 		error = 1;
 		m_aDisplayRequests.erase( &m_aDisplayRequests.back() );
 	}
@@ -812,7 +813,8 @@ void CqDDManager::InitialiseDisplayNameMap()
 	}
 	else
 	{
-		CqBasicError( ErrorID_DisplayDriver, Severity_Normal, "Could not find ddmsock.ini file." );
+		//CqBasicError( ErrorID_DisplayDriver, Severity_Normal, "Could not find ddmsock.ini file." );
+		QGetRenderContext() ->Logger() ->error( "Could not find ddmsock.ini file" );
 	}
 }
 
