@@ -340,17 +340,15 @@ void CqTextureMap::Open()
 		TIFFGetField( m_pImage, TIFFTAG_IMAGEWIDTH, &m_XRes );
 		TIFFGetField( m_pImage, TIFFTAG_IMAGELENGTH, &m_YRes );
 
-#ifdef AQSIS_SYSTEM_MACOSX
 		uint16 planarconfig;
 		TIFFGetField( m_pImage, TIFFTAG_PLANARCONFIG, &planarconfig );
 		m_PlanarConfig = planarconfig;
 		uint16 samplesperpixel;
 		TIFFGetField( m_pImage, TIFFTAG_SAMPLESPERPIXEL, &samplesperpixel );
 		m_SamplesPerPixel = samplesperpixel;
-#else
-		TIFFGetField( m_pImage, TIFFTAG_PLANARCONFIG, &m_PlanarConfig );
-		TIFFGetField( m_pImage, TIFFTAG_SAMPLESPERPIXEL, &m_SamplesPerPixel );
-#endif
+		uint16 sampleformat;
+		TIFFGetField( m_pImage, TIFFTAG_SAMPLEFORMAT, &sampleformat );
+		m_SampleFormat = sampleformat;
 
 		TIFFGetField( m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &pFormat );
 		TIFFGetField( m_pImage, TIFFTAG_PIXAR_WRAPMODES, &pModes );
@@ -782,7 +780,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 			// Work out the coordinates of this tile.
 			TqUlong ox = ( s / tsx ) * tsx;
 			TqUlong oy = ( t / tsy ) * tsy;
-			pTMB = CreateBuffer( ox, oy, tsx, tsy, m_SamplesPerPixel, directory );
+			pTMB = CreateBuffer( ox, oy, tsx, tsy, directory );
 
 			TIFFSetDirectory( m_pImage, directory );
 
@@ -792,7 +790,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 		}
 		else
 		{
-			pTMB = CreateBuffer( 0, 0, m_XRes, m_YRes, m_SamplesPerPixel, directory );
+			pTMB = CreateBuffer( 0, 0, m_XRes, m_YRes, directory );
 
 			TIFFSetDirectory( m_pImage, directory );
 			void* pdata = pTMB->pVoidBufferData();
@@ -925,7 +923,7 @@ void CqTextureMap::CreateMIPMAP()
 
 		do
 		{
-			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, m_xres, m_yres, m_SamplesPerPixel, directory );
+			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, m_xres, m_yres, directory );
 
 			if ( pTMB->pVoidBufferData() != NULL )
 			{
@@ -1222,9 +1220,6 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		return ;
 	}
 
-	// all the tile are using the same size therefore the number is ok
-	long rowlen = pTMBa->Width() * m_SamplesPerPixel;
-
 	// Store the sample positions forl later use if need be.
 	TqUint iu_c = iu;
 	TqUint iv_c = iv;
@@ -1297,9 +1292,6 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 			RiErrorPrint( 0, 1, warnings );
 			return ;
 		}
-
-		// all the tile are using the same size therefore the number is ok
-		long rowlen = pTMBa->Width() * m_SamplesPerPixel;
 
 		// Bilinear intepolate the values at the corners of the sample.
 		iu -= pTMBa->sOrigin();
@@ -2170,6 +2162,30 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUl
 		case BufferType_Float:
 		{
 			WriteTileImage( ptex, static_cast<TqFloat*>(pBuffer->pVoidBufferData()), pBuffer->Width(), pBuffer->Height(), twidth, theight, pBuffer->Samples(), compression, quality );
+			break;
+		}
+	}
+}
+
+
+//----------------------------------------------------------------------
+/** Write an image to an open TIFF file in the current directory as tiled storage.
+ * determine the size and type from the buffer.
+ */
+
+void CqTextureMap::WriteImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqInt compression, TqInt quality )
+{
+	switch( pBuffer->BufferType() )
+	{
+		case BufferType_RGBA:
+		{
+			WriteImage( ptex, static_cast<TqPuchar>(pBuffer->pVoidBufferData()), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), compression, quality );
+			break;
+		}
+
+		case BufferType_Float:
+		{
+			WriteImage( ptex, static_cast<TqFloat*>(pBuffer->pVoidBufferData()), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), compression, quality );
 			break;
 		}
 	}

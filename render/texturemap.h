@@ -234,6 +234,44 @@ class _qShareC CqTextureMapBuffer
 
 
 //----------------------------------------------------------------------
+/** \class CqFloatTextureMapBuffer
+ * Class referencing a buffer in the image map cache in floating point format. 
+ */
+
+class _qShareC CqFloatTextureMapBuffer : public CqTextureMapBuffer
+{
+	public:
+		_qShareM	CqFloatTextureMapBuffer() : CqTextureMapBuffer()
+		{}
+		_qShareM virtual	~CqFloatTextureMapBuffer()
+		{}
+
+		_qShareM virtual TqFloat	GetValue(TqInt x, TqInt y, TqInt sample)
+		{
+			TqInt iv = y * ( m_Width * ElemSize() );
+			TqInt iu = x * ElemSize();
+			return ( (reinterpret_cast<TqFloat*>(&m_pBufferData[ iv + iu ]))[sample] );
+		}
+		_qShareM virtual void	SetValue(TqInt x, TqInt y, TqInt sample, TqFloat value)
+		{
+			TqInt iv = y * ( m_Width * ElemSize() );
+			TqInt iu = x * ElemSize();
+			(reinterpret_cast<TqFloat*>(&m_pBufferData[ iv + iu ]))[sample] = value;
+		}
+		_qShareM	virtual TqInt	ElemSize()
+		{
+			return( m_Samples * sizeof(TqFloat) );
+		}
+		/** Get the type of the data in the buffer
+		 */
+		_qShareM	virtual EqBufferType	BufferType()
+		{
+			return( BufferType_Float );
+		}
+}
+;
+
+//----------------------------------------------------------------------
 /** \class CqTextureMapBuffer
  * Class referencing a buffer in the image map cache. 
  */
@@ -250,13 +288,13 @@ class _qShareC CqShadowMapBuffer : public CqTextureMapBuffer
 		{
 			TqInt iv = y * ( m_Width * ElemSize() );
 			TqInt iu = x * ElemSize();
-			return ( *(reinterpret_cast<TqFloat*>(&m_pBufferData[ iv + iu + sample ])) );
+			return ( (reinterpret_cast<TqFloat*>(&m_pBufferData[ iv + iu ]))[sample] );
 		}
 		_qShareM virtual void	SetValue(TqInt x, TqInt y, TqInt sample, TqFloat value)
 		{
 			TqInt iv = y * ( m_Width * ElemSize() );
 			TqInt iu = x * ElemSize();
-			*(reinterpret_cast<TqFloat*>(&m_pBufferData[ iv + iu + sample ])) = value;
+			(reinterpret_cast<TqFloat*>(&m_pBufferData[ iv + iu ]))[sample] = value;
 		}
 		_qShareM	virtual TqInt	ElemSize()
 		{
@@ -406,10 +444,21 @@ class _qShareC CqTextureMap : public IqTextureMap
 		 */
 		_qShareM	virtual	CqTextureMapBuffer*	GetBuffer( TqUlong s, TqUlong t, TqInt directory = 0 );
 		void	CreateMIPMAP();
-		_qShareM	virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt samples, TqInt directory = 0 )
+		_qShareM	virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt directory = 0 )
 		{
-			CqTextureMapBuffer* pRes = new CqTextureMapBuffer();
-			pRes->Init( xorigin, yorigin, width, height, samples, directory );
+			CqTextureMapBuffer* pRes;
+			switch( m_SampleFormat )
+			{
+				case SAMPLEFORMAT_IEEEFP:
+					pRes = new CqFloatTextureMapBuffer();
+					break;
+				
+				case SAMPLEFORMAT_UINT:
+				default:
+					pRes = new CqTextureMapBuffer();
+					break;
+			}
+			pRes->Init( xorigin, yorigin, width, height, m_SamplesPerPixel, directory );
 			return( pRes );
 		}
 
@@ -448,6 +497,7 @@ class _qShareC CqTextureMap : public IqTextureMap
 		_qShareM void CriticalMeasure();
 
 		_qShareM static void WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUlong twidth, TqUlong theight, TqInt compression, TqInt quality );
+		_qShareM static void WriteImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqInt compression, TqInt quality );
 		_qShareM static void WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );
 		_qShareM static void WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality );
 		_qShareM static void WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );
@@ -467,6 +517,7 @@ class _qShareC CqTextureMap : public IqTextureMap
 		TqUint	m_YRes;					///< Vertical resolution.
 		TqInt	m_PlanarConfig;			///< TIFF planar configuration type.
 		TqInt	m_SamplesPerPixel;		///< Number of samples per pixel.
+		TqInt	m_SampleFormat;			///< Format of the sample elements, i.e. RGBA, or IEEE
 
 		EqTexFormat	m_Format;			///< Image storage format type.
 
@@ -596,10 +647,10 @@ class _qShareC CqShadowMap : public CqTextureMap
 		_qShareM	void	SaveShadowMap( const CqString& strShadowName );
 		_qShareM	void	ReadMatrices();
 
-		_qShareM	virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt samples, TqInt directory = 0 )
+		_qShareM	virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt directory = 0 )
 		{
 			CqTextureMapBuffer* pRes = new CqShadowMapBuffer();
-			pRes->Init( xorigin, yorigin, width, height, samples, directory );
+			pRes->Init( xorigin, yorigin, width, height, m_SamplesPerPixel, directory );
 			return( pRes );
 		}
 
