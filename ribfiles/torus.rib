@@ -17,7 +17,7 @@ FrameBegin 0
 
 Display "torus.tif" "file" "rgba"
 
-#Display "+torus.tif" "framebuffer" "rgba"
+Display "+torus.tif" "framebuffer" "rgba"
 
 
 
