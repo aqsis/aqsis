@@ -1369,9 +1369,10 @@ RtVoid	RiHiderV( const char *name, PARAMETERLIST )
 	TqInt i;
 	for ( i = 0; i < count; i++ )
 	{
-		if ( !strcmp( tokens[ i ], "depthfilter" ) )
+		SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( tokens[ i ] );
+		if ( Decl.m_strName.compare( "depthfilter" ) == 0 )
 			RiOption( "Hider", "depthfilter", ( RtToken ) values[ i ], NULL );
-		else if ( !strcmp( tokens[ i ], "jitter" ) )
+		else if ( Decl.m_strName.compare( "jitter" ) == 0 )
 			RiOption( "Hider", "jitter", ( RtFloat* ) values[ i ], NULL );
 	}
 
