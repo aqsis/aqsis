@@ -924,9 +924,11 @@
 			</Arguments>
 		</Procedure>
 		<Procedure name="RiGetContext" return="RtContextHandle">
+			<NoCache/>
 			<Arguments/>
 		</Procedure>
 		<Procedure name="RiContext" return="RtVoid">
+			<NoCache/>
 			<Arguments>
 				<Argument name="handle" type="RtContextHandle"/>
 			</Arguments>

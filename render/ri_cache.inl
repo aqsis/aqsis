@@ -2813,42 +2813,6 @@ private:
 	RtErrorFunc m_handler;
 };
 
-class RiGetContextCache : public RiCacheBase
-{
-public:
-	RiGetContextCache() : RiCacheBase()
-	{
-	}
-	virtual ~RiGetContextCache()
-	{
-	}
-	virtual void ReCall()
-	{
-		RiGetContext();
-	}
-
-private:
-};
-
-class RiContextCache : public RiCacheBase
-{
-public:
-	RiContextCache(RtContextHandle handle) : RiCacheBase()
-	{
-		m_handle = handle;
-	}
-	virtual ~RiContextCache()
-	{
-	}
-	virtual void ReCall()
-	{
-		RiContext(m_handle);
-	}
-
-private:
-	RtContextHandle m_handle;
-};
-
 class RiClippingPlaneCache : public RiCacheBase
 {
 public:
@@ -3236,3 +3200,704 @@ private:
 	// plist information is stored in the base class.
 };
 
+#define Cache_RiDeclare\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiDeclareCache(name, declaration) ); \
+		return(0);	\
+	}
+	#define Cache_RiFrameBegin\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiFrameBeginCache(number) ); \
+		return;	\
+	}
+	#define Cache_RiFrameEnd\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiFrameEndCache() ); \
+		return;	\
+	}
+	#define Cache_RiWorldBegin\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiWorldBeginCache() ); \
+		return;	\
+	}
+	#define Cache_RiWorldEnd\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiWorldEndCache() ); \
+		return;	\
+	}
+	#define Cache_RiFormat\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiFormatCache(xresolution, yresolution, pixelaspectratio) ); \
+		return;	\
+	}
+	#define Cache_RiFrameAspectRatio\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiFrameAspectRatioCache(frameratio) ); \
+		return;	\
+	}
+	#define Cache_RiScreenWindow\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiScreenWindowCache(left, right, bottom, top) ); \
+		return;	\
+	}
+	#define Cache_RiCropWindow\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiCropWindowCache(left, right, top, bottom) ); \
+		return;	\
+	}
+	#define Cache_RiProjection\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiProjectionCache(name, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiClipping\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiClippingCache(cnear, cfar) ); \
+		return;	\
+	}
+	#define Cache_RiDepthOfField\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiDepthOfFieldCache(fstop, focallength, focaldistance) ); \
+		return;	\
+	}
+	#define Cache_RiShutter\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiShutterCache(opentime, closetime) ); \
+		return;	\
+	}
+	#define Cache_RiPixelVariance\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiPixelVarianceCache(variance) ); \
+		return;	\
+	}
+	#define Cache_RiPixelSamples\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiPixelSamplesCache(xsamples, ysamples) ); \
+		return;	\
+	}
+	#define Cache_RiPixelFilter\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiPixelFilterCache(function, xwidth, ywidth) ); \
+		return;	\
+	}
+	#define Cache_RiExposure\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiExposureCache(gain, gamma) ); \
+		return;	\
+	}
+	#define Cache_RiImager\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiImagerCache(name, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiQuantize\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiQuantizeCache(type, one, min, max, ditheramplitude) ); \
+		return;	\
+	}
+	#define Cache_RiDisplay\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiDisplayCache(name, type, mode, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiHider\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiHiderCache(name, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiColorSamples\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiColorSamplesCache(N, nRGB, RGBn) ); \
+		return;	\
+	}
+	#define Cache_RiRelativeDetail\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiRelativeDetailCache(relativedetail) ); \
+		return;	\
+	}
+	#define Cache_RiOption\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiOptionCache(name, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiAttributeBegin\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiAttributeBeginCache() ); \
+		return;	\
+	}
+	#define Cache_RiAttributeEnd\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiAttributeEndCache() ); \
+		return;	\
+	}
+	#define Cache_RiColor\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiColorCache(Cq) ); \
+		return;	\
+	}
+	#define Cache_RiOpacity\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiOpacityCache(Os) ); \
+		return;	\
+	}
+	#define Cache_RiTextureCoordinates\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiTextureCoordinatesCache(s1, t1, s2, t2, s3, t3, s4, t4) ); \
+		return;	\
+	}
+	#define Cache_RiLightSource\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiLightSourceCache(name, count, tokens, values) ); \
+		return(0);	\
+	}
+	#define Cache_RiAreaLightSource\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiAreaLightSourceCache(name, count, tokens, values) ); \
+		return(0);	\
+	}
+	#define Cache_RiIlluminate\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiIlluminateCache(light, onoff) ); \
+		return;	\
+	}
+	#define Cache_RiSurface\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiSurfaceCache(name, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiAtmosphere\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiAtmosphereCache(name, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiInterior\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiInteriorCache(name, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiExterior\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiExteriorCache(name, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiShadingRate\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiShadingRateCache(size) ); \
+		return;	\
+	}
+	#define Cache_RiShadingInterpolation\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiShadingInterpolationCache(type) ); \
+		return;	\
+	}
+	#define Cache_RiMatte\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiMatteCache(onoff) ); \
+		return;	\
+	}
+	#define Cache_RiBound\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiBoundCache(bound) ); \
+		return;	\
+	}
+	#define Cache_RiDetail\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiDetailCache(bound) ); \
+		return;	\
+	}
+	#define Cache_RiDetailRange\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiDetailRangeCache(offlow, onlow, onhigh, offhigh) ); \
+		return;	\
+	}
+	#define Cache_RiGeometricApproximation\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiGeometricApproximationCache(type, value) ); \
+		return;	\
+	}
+	#define Cache_RiOrientation\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiOrientationCache(orientation) ); \
+		return;	\
+	}
+	#define Cache_RiReverseOrientation\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiReverseOrientationCache() ); \
+		return;	\
+	}
+	#define Cache_RiSides\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiSidesCache(nsides) ); \
+		return;	\
+	}
+	#define Cache_RiIdentity\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiIdentityCache() ); \
+		return;	\
+	}
+	#define Cache_RiTransform\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiTransformCache(transform) ); \
+		return;	\
+	}
+	#define Cache_RiConcatTransform\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiConcatTransformCache(transform) ); \
+		return;	\
+	}
+	#define Cache_RiPerspective\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiPerspectiveCache(fov) ); \
+		return;	\
+	}
+	#define Cache_RiTranslate\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiTranslateCache(dx, dy, dz) ); \
+		return;	\
+	}
+	#define Cache_RiRotate\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiRotateCache(angle, dx, dy, dz) ); \
+		return;	\
+	}
+	#define Cache_RiScale\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiScaleCache(sx, sy, sz) ); \
+		return;	\
+	}
+	#define Cache_RiSkew\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiSkewCache(angle, dx1, dy1, dz1, dx2, dy2, dz2) ); \
+		return;	\
+	}
+	#define Cache_RiDeformation\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiDeformationCache(name, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiDisplacement\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiDisplacementCache(name, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiCoordinateSystem\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiCoordinateSystemCache(space) ); \
+		return;	\
+	}
+	#define Cache_RiTransformPoints\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiTransformPointsCache(fromspace, tospace, npoints, points) ); \
+		return(0);	\
+	}
+	#define Cache_RiTransformBegin\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiTransformBeginCache() ); \
+		return;	\
+	}
+	#define Cache_RiTransformEnd\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiTransformEndCache() ); \
+		return;	\
+	}
+	#define Cache_RiAttribute\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiAttributeCache(name, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiPolygon\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiPolygonCache(nvertices, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiGeneralPolygon\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiGeneralPolygonCache(nloops, nverts, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiPointsPolygons\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiPointsPolygonsCache(npolys, nverts, verts, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiPointsGeneralPolygons\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiPointsGeneralPolygonsCache(npolys, nloops, nverts, verts, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiBasis\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiBasisCache(ubasis, ustep, vbasis, vstep) ); \
+		return;	\
+	}
+	#define Cache_RiPatch\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiPatchCache(type, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiPatchMesh\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiPatchMeshCache(type, nu, uwrap, nv, vwrap, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiNuPatch\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiNuPatchCache(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiTrimCurve\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiTrimCurveCache(nloops, ncurves, order, knot, min, max, n, u, v, w) ); \
+		return;	\
+	}
+	#define Cache_RiSphere\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiSphereCache(radius, zmin, zmax, thetamax, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiCone\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiConeCache(height, radius, thetamax, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiCylinder\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiCylinderCache(radius, zmin, zmax, thetamax, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiHyperboloid\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiHyperboloidCache(point1, point2, thetamax, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiParaboloid\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiParaboloidCache(rmax, zmin, zmax, thetamax, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiDisk\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiDiskCache(height, radius, thetamax, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiTorus\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiTorusCache(majorrad, minorrad, phimin, phimax, thetamax, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiProcedural\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiProceduralCache(data, bound, refineproc, freeproc) ); \
+		return;	\
+	}
+	#define Cache_RiGeometry\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiGeometryCache(type, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiSolidBegin\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiSolidBeginCache(type) ); \
+		return;	\
+	}
+	#define Cache_RiSolidEnd\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiSolidEndCache() ); \
+		return;	\
+	}
+	#define Cache_RiObjectBegin\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiObjectBeginCache() ); \
+		return(0);	\
+	}
+	#define Cache_RiObjectEnd\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiObjectEndCache() ); \
+		return;	\
+	}
+	#define Cache_RiObjectInstance\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiObjectInstanceCache(handle) ); \
+		return;	\
+	}
+	#define Cache_RiMotionBeginV\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiMotionBeginVCache(N, times) ); \
+		return;	\
+	}
+	#define Cache_RiMotionEnd\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiMotionEndCache() ); \
+		return;	\
+	}
+	#define Cache_RiMakeTexture\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiMakeTextureCache(imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiMakeBump\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiMakeBumpCache(imagefile, bumpfile, swrap, twrap, filterfunc, swidth, twidth, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiMakeLatLongEnvironment\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiMakeLatLongEnvironmentCache(imagefile, reflfile, filterfunc, swidth, twidth, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiMakeCubeFaceEnvironment\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiMakeCubeFaceEnvironmentCache(px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiMakeShadow\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiMakeShadowCache(picfile, shadowfile, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiMakeOcclusion\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiMakeOcclusionCache(npics, picfiles, shadowfile, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiErrorHandler\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiErrorHandlerCache(handler) ); \
+		return;	\
+	}
+	#define Cache_RiClippingPlane\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiClippingPlaneCache(x, y, z, nx, ny, nz) ); \
+		return;	\
+	}
+	#define Cache_RiCoordSysTransform\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiCoordSysTransformCache(space) ); \
+		return;	\
+	}
+	#define Cache_RiBlobby\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiBlobbyCache(nleaf, ncode, code, nflt, flt, nstr, str, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiPoints\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiPointsCache(npoints, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiCurves\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiCurvesCache(type, ncurves, nvertices, wrap, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiSubdivisionMesh\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiSubdivisionMeshCache(scheme, nfaces, nvertices, vertices, ntags, tags, nargs, intargs, floatargs, count, tokens, values) ); \
+		return;	\
+	}
+	#define Cache_RiReadArchive\
+	if( QGetRenderContext()->pCurrentObject()) \
+	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					new RiReadArchiveCache(name, callback, count, tokens, values) ); \
+		return;	\
+	}
+	

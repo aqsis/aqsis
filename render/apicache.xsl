@@ -12,6 +12,7 @@
 	<xsl:template match="RiAPI">
 		<!--	Procedures	-->
 		<xsl:apply-templates select="Procedures/Procedure"/>
+		<xsl:apply-templates select="Procedures/Procedure" mode="macro"/>
 	</xsl:template>
 
 
@@ -31,6 +32,26 @@
 			<xsl:text>private:&#xa;</xsl:text>
 			<xsl:apply-templates name="Argument" mode="member_vars" select="Arguments/Argument"/>
 			<xsl:text>};&#xa;&#xa;</xsl:text>
+		</xsl:if>
+	</xsl:template>
+
+	<xsl:template match="Procedure" mode="macro">
+		<xsl:if test="not(./NoCache)">
+			<xsl:value-of select="concat('#define Cache_', @name, '\&#xa;')"/>
+			<xsl:value-of select="string('&#x9;if( QGetRenderContext()->pCurrentObject()) \&#xa;')"/>
+			<xsl:text>	{ \
+			QGetRenderContext()->pCurrentObject()->AddCacheCommand( \
+					</xsl:text>
+			<xsl:value-of select="concat('new ', @name, 'Cache(')"/>
+			<xsl:apply-templates select="Arguments/Argument" mode="macro_call"/>
+			<xsl:value-of select="string(') ); \&#xa;')"/>
+			<xsl:text>		return</xsl:text>
+			<xsl:if test="@return != 'RtVoid'">
+				<xsl:text>(0)</xsl:text>
+			</xsl:if>
+			<xsl:text>;	\
+	}
+	</xsl:text>
 		</xsl:if>
 	</xsl:template>
 
@@ -218,6 +239,22 @@
 				</xsl:choose>
 			</xsl:otherwise>
 		</xsl:choose>
+	</xsl:template>
+
+
+			<!--	Arguments to macro construct method	-->
+	<xsl:template match="Argument" mode="macro_call">
+		<xsl:choose>
+			<xsl:when test="@type = 'PARAMETERLIST'">
+				<xsl:text>count, tokens, values</xsl:text>
+			</xsl:when>
+			<xsl:otherwise>
+				<xsl:value-of select="@name"/>
+			</xsl:otherwise>
+		</xsl:choose>
+		<xsl:if test="last() != position()">
+		   <xsl:text>, </xsl:text>
+		</xsl:if>
 	</xsl:template>
 
 </xsl:stylesheet>
