@@ -35,6 +35,8 @@
 START_NAMESPACE(Aqsis)
 
 DEFINE_STATIC_MEMORYPOOL(CqWEdge);
+DEFINE_STATIC_MEMORYPOOL(CqWFace);
+DEFINE_STATIC_MEMORYPOOL(CqWVert);
 
 //---------------------------------------------------------------------
 /** Remove an edge reference from the array.
@@ -560,7 +562,7 @@ void CqSubdivider::DiceSubdivide()
 		// Build all internal edges, external subdivided edges are built by WEdge structures themselves.
 		CqWReference grE(pFace(i)->pEdge(0), pFace(i));
 		CqWReference grE2;
-		aEdges.resize(pFace(i)->cEdges());
+		aEdges.reserve(pFace(i)->cEdges());
 		for(j=0; j<pFace(i)->cEdges(); j++)
 		{
 			aEdges[j]=new CqWEdge;

@@ -117,7 +117,7 @@ class CqWReference
  * Winged-Edge vertex structure.
  */
 
-class CqWVert
+class CqWVert : public CqPoolable<CqWVert>
 {
 	public:
 					CqWVert(TqInt iV) : m_iVertex(iV)	{}
@@ -267,7 +267,7 @@ class CqWEdge;
  * Winged-Edge face structure.
  */
 
-class CqWFace
+class CqWFace : public CqPoolable<CqWFace>
 {
 	public:
 					CqWFace() : m_pvSubdivide(0)	{}
