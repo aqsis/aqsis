@@ -640,8 +640,7 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 	if ( 0 == forkresult )
 	{
 		//execlp( strDriverPathAndFile.c_str(), strDriverFile.c_str(), NULL );
-		args[1] = strDriverPathAndFile.c_str() ;
-		execvp( strDriverPathAndFile.c_str(), (char * const * ) (args + 1) );
+		execvp( strDriverPathAndFile.c_str(), (char * const * ) (args + 2) );
 		/* error checking? */
 		return;
 	}
