@@ -1776,31 +1776,50 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	CqVector3D	vecR1l, vecR2l, vecR3l, vecR4l;
 	CqVector3D	vecR1m, vecR2m, vecR3m, vecR4m;
 
-	// Add in the bias at this point in camera coordinates.
+
+	// Extend the shadow() call to accept bias, if set, override global bias
+	TqFloat bias = 0.0f;
 	TqFloat bias0 = 0.0f;
-	const TqFloat* poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias0" );
-	if ( poptBias != 0 )
-		bias0 = poptBias[ 0 ];
-
 	TqFloat bias1 = 0.0f;
-	poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias1" );
-	if ( poptBias != 0 )
-		bias1 = poptBias[ 0 ];
-
-	static CqRandom random( 42 );
-	TqFloat bias;
-
-
-	if ( bias1 >= bias0 )
+				
+	if ( paramMap.find("bias") != paramMap.end() )
 	{
-		bias = random.RandomFloat( bias1 - bias0 ) + bias0;
-		if ( bias > bias1 ) bias = bias1;
+		paramMap["bias"]->GetFloat( bias );
 	}
 	else
 	{
-		bias = random.RandomFloat( bias0 - bias1 ) + bias1;
-		if ( bias > bias0 ) bias = bias0;
+		// Add in the bias at this point in camera coordinates.
+		const TqFloat* poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias0" );
+		if ( poptBias != 0 )
+			bias0 = poptBias[ 0 ];
+
+		poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias1" );
+		if ( poptBias != 0 )
+			bias1 = poptBias[ 0 ];
+
+		// Get bias, if set override bias0 and bias1
+		poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias" );
+		if ( poptBias != 0 )
+			bias = poptBias[ 0 ];
 	}
+
+	static CqRandom random( 42 );
+
+	// If bias not set ( i.e. 0 ), try to use bias0 and bias1
+	if ( !( bias > 0 ) )
+	{
+		if ( bias1 >= bias0 )
+		{
+			bias = random.RandomFloat( bias1 - bias0 ) + bias0;
+			if ( bias > bias1 ) bias = bias1;
+		}
+		else
+		{
+			bias = random.RandomFloat( bias0 - bias1 ) + bias1;
+			if ( bias > bias0 ) bias = bias0;
+		}
+	}
+
 	CqVector3D vecBias( 0, 0, bias );
 	// Generate a matrix to transform points from camera space into the space of the light source used in the
 	// definition of the shadow map.
