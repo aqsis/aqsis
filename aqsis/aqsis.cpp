@@ -77,6 +77,7 @@
 
 #endif
 
+// Storage for the actual resource paths that we will use at runtime
 std::string g_rc_path;
 std::string g_shader_path;
 std::string g_archive_path;
@@ -84,17 +85,6 @@ std::string g_texture_path;
 std::string g_display_path;
 std::string g_dso_path;
 std::string g_procedural_path;
-
-// Set default resource paths ...
-#ifdef	AQSIS_SYSTEM_POSIX
-g_rc_path = DEFAULT_RC_PATH;
-g_shader_path = DEFAULT_SHADER_PATH;
-g_archive_path = DEFAULT_ARCHIVE_PATH;
-g_texture_path = DEFAULT_TEXTURE_PATH;
-g_display_path = DEFAULT_DISPLAY_PATH;
-g_dso_path = DEFAULT_DSO_PATH;
-g_procedural_path = DEFAULT_PROCEDURAL_PATH;
-#endif
 
 // Forward declarations
 void RenderFile( FILE* file, std::string& name );
@@ -315,6 +305,7 @@ RtVoid PreWorld()
 
 int main( int argc, const char** argv )
 {
+// Set default resource paths ...
 #ifdef AQSIS_SYSTEM_WIN32
 	char acPath[256];
 	char rootPath[256];
@@ -340,6 +331,14 @@ int main( int argc, const char** argv )
 	g_display_path.append( "bin" );
 	g_dso_path.append( "dsos" );
 	g_procedural_path.append( "procedures" );
+#else
+	g_rc_path = DEFAULT_RC_PATH;
+	g_shader_path = DEFAULT_SHADER_PATH;
+	g_archive_path = DEFAULT_ARCHIVE_PATH;
+	g_texture_path = DEFAULT_TEXTURE_PATH;
+	g_display_path = DEFAULT_DISPLAY_PATH;
+	g_dso_path = DEFAULT_DSO_PATH;
+	g_procedural_path = DEFAULT_PROCEDURAL_PATH;
 #endif
 
     StartMemoryDebugging();

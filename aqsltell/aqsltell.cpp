@@ -55,11 +55,6 @@ extern IqRenderer* QGetRenderContextI();
 }
 
 std::string g_shader_path;
-#ifdef	AQSIS_SYSTEM_POSIX
-g_shader_path = DEFAULT_SHADER_PATH;
-#endif
-
-bool g_cl_pause = 0;
 bool g_cl_help = 0;
 bool g_cl_version = 0;
 ArgParse::apstring g_cl_shader_path = "";
@@ -80,6 +75,8 @@ int main( int argc, const char** argv )
 	}
 	g_shader_path = rootPath;
 	g_shader_path.append( "shaders" );
+#else
+	g_shader_path = DEFAULT_SHADER_PATH;
 #endif
 
     Aqsis::QGetRenderContextI();
@@ -87,7 +84,6 @@ int main( int argc, const char** argv )
     ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " <shadername>" );
     ap.argFlag( "help", "\aprint this help and exit", &g_cl_help );
     ap.argFlag( "version", "\aprint version information and exit", &g_cl_version );
-    ap.argFlag( "pause", "\await for a keypress on completion", &g_cl_pause );
     ap.argString( "shaders", "=string\aoverride the default shader searchpath", &g_cl_shader_path );
 
     if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
