@@ -1,8 +1,8 @@
 version 3.03
 Display "uv_test.tif" "file" "rgba"
-Format 200 150 1
+Format 640 480 1
 ShadingRate 2
-PixelSamples 8 8
+PixelSamples 2 2
 PixelFilter "gaussian" 3 3
 
 Projection "perspective" "fov" 45
