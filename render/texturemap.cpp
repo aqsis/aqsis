@@ -195,7 +195,7 @@ CqTextureMap::~CqTextureMap()
 /** Support for plugins mainly converter from any bitmap format to .tif file.
  */
 
-int CqTextureMap::Convert(CqString &strName )
+TqInt CqTextureMap::Convert(CqString &strName )
 {
 	int result = 0;
 	int lenght = 0;
@@ -253,11 +253,11 @@ int CqTextureMap::Convert(CqString &strName )
 	 sprintf(dynamiclibrary, "%s/procedures/%s.so", aqsis_home, dynamicfunction);
 
 	 /* so was never loaded before */
-	 if (!handle)
+/*	 if (!handle)
 		handle = dlopen(dynamiclibrary, RTLD_LAZY);
 	 if (handle) {
 		function_pt = (char * (*) (char *)) dlsym(handle, dynamicfunction);
-	 }
+	 }*/
 
 #endif
 
@@ -273,7 +273,7 @@ int CqTextureMap::Convert(CqString &strName )
 #ifdef AQSIS_SYSTEM_WIN32
 		FreeLibrary((HINSTANCE)handle);
 #else
-		dlclose(handle);
+//		dlclose(handle);
 #endif
 
 	 }

@@ -270,7 +270,7 @@ class _qShareC CqTextureMap
 
 									/** Use the plugin to convert to a tif file any texture file provided
 									**/
-	_qShareM    virtual Convert	(CqString &strName);
+	_qShareM	virtual TqInt 		Convert	(CqString &strName);
 
 	_qShareM	virtual	void		Open();
 									/** Close this image file.
