@@ -50,18 +50,27 @@ public:
         {
             m_vecMin.x( pBounds[ 0 ] );	m_vecMin.y( pBounds[ 2 ] );	m_vecMin.z( pBounds[ 4 ] );
             m_vecMax.x( pBounds[ 1 ] );	m_vecMax.y( pBounds[ 3 ] );	m_vecMax.z( pBounds[ 5 ] );
+
+			m_vecCross = m_vecMax - m_vecMin;
         }
     }
+
     CqBound( TqFloat XMin = FLT_MAX, TqFloat YMin = FLT_MAX, TqFloat ZMin = FLT_MAX, TqFloat XMax = -FLT_MAX, TqFloat YMax = -FLT_MAX, TqFloat ZMax = -FLT_MAX )
     {
         m_vecMin.x( XMin );	m_vecMin.y( YMin );	m_vecMin.z( ZMin );
         m_vecMax.x( XMax );	m_vecMax.y( YMax );	m_vecMax.z( ZMax );
+
+		m_vecCross = m_vecMax - m_vecMin;
     }
+
     CqBound( const CqVector3D& vecMin, const CqVector3D& vecMax )
     {
         m_vecMin = vecMin;
         m_vecMax = vecMax;
+
+		m_vecCross = m_vecMax - m_vecMin;
     }
+
     CqBound( const CqBound& From );
     ~CqBound()
     {}
@@ -70,18 +79,42 @@ public:
     {
         return ( m_vecMin );
     }
+
     CqVector3D&	vecMin()
     {
         return ( m_vecMin );
     }
+
     const	CqVector3D&	vecMax() const
     {
         return ( m_vecMax );
     }
+
     CqVector3D&	vecMax()
     {
         return ( m_vecMax );
     }
+
+	const	CqVector3D& vecCross() const
+	{
+		return	( m_vecCross );
+	}
+
+	CqVector3D&	vecCross()
+	{
+		return	( m_vecCross );
+	}
+
+	TqFloat	Volume() const
+	{
+		return sqrt( Volume2() );
+	}
+
+	TqFloat Volume2() const
+	{
+		return m_vecCross.Magnitude2();
+	}
+
     CqBound&	operator=( const CqBound& From );
 
     void		Transform( const CqMatrix&	matTransform );
@@ -113,6 +146,7 @@ public:
 private:
     CqVector3D	m_vecMin;
     CqVector3D	m_vecMax;
+	CqVector3D	m_vecCross;	//!	Vector crossing the bound
 };
 
 //----------------------------------------------------------------------

@@ -86,6 +86,8 @@ void CqBound::Transform( const CqMatrix& matTransform )
         if ( avecCuboid[ i ].y() > m_vecMax.y() ) m_vecMax.y( avecCuboid[ i ].y() );
         if ( avecCuboid[ i ].z() > m_vecMax.z() ) m_vecMax.z( avecCuboid[ i ].z() );
     }
+
+	m_vecCross = m_vecMax - m_vecMin;
 }
 
 
@@ -107,6 +109,8 @@ CqBound CqBound::Combine( const CqBound& bound )
     Result.m_vecMin.y( MIN( m_vecMin.y(), bound.m_vecMin.y() ) );
     Result.m_vecMin.z( MIN( m_vecMin.z(), bound.m_vecMin.z() ) );
 
+	Result.m_vecCross = Result.m_vecMax - Result.m_vecMin;
+
     return ( Result );
 }
 
@@ -125,6 +129,8 @@ CqBound& CqBound::Encapsulate( const CqBound& bound )
     m_vecMin.x( MIN( m_vecMin.x(), bound.m_vecMin.x() ) );
     m_vecMin.y( MIN( m_vecMin.y(), bound.m_vecMin.y() ) );
     m_vecMin.z( MIN( m_vecMin.z(), bound.m_vecMin.z() ) );
+
+	m_vecCross = m_vecMax - m_vecMin;
 
     return( *this );
 }
@@ -145,6 +151,8 @@ CqBound& CqBound::Encapsulate( const CqVector3D& v )
     m_vecMin.y( MIN( m_vecMin.y(), v.y() ) );
     m_vecMin.z( MIN( m_vecMin.z(), v.z() ) );
 
+    m_vecCross = m_vecMax - m_vecMin;
+
     return( *this );
 }
 
@@ -162,6 +170,8 @@ CqBound& CqBound::Encapsulate( const CqVector2D& v )
     m_vecMin.x( MIN( m_vecMin.x(), v.x() ) );
     m_vecMin.y( MIN( m_vecMin.y(), v.y() ) );
 
+    m_vecCross = m_vecMax - m_vecMin;
+
     return( *this );
 }
 
@@ -176,7 +186,9 @@ std::ostream &operator<<( std::ostream &Stream, const CqBound &Bound )
 {
     CqVector3D min = Bound.vecMin();
     CqVector3D max = Bound.vecMax();
-	Stream << min << "-->" << max << std::ends;
+	CqVector3D cross = Bound.vecCross();
+
+	Stream << min << "-->" << max << "  |  Cross: " << cross << std::ends;
     return ( Stream );
 }
 
