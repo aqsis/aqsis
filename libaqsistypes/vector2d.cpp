@@ -87,7 +87,7 @@ CqVector2D &CqVector2D::operator=( const CqVector4D &From )
  * \return The new state of Stream.
  */
 
-std::ostream &operator<<( std::ostream &Stream, CqVector2D &Vector )
+std::ostream &operator<<( std::ostream &Stream, const CqVector2D &Vector )
 {
     Stream << Vector.m_x << "," << Vector.m_y;
     return ( Stream );

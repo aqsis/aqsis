@@ -122,7 +122,7 @@ CqVector3D &CqVector3D::operator=( const CqColor &From )
  * \return The new state of Stream.
  */
 
-std::ostream &operator<<( std::ostream &Stream, CqVector3D &Vector )
+std::ostream &operator<<( std::ostream &Stream, const CqVector3D &Vector )
 {
     Stream << Vector.m_x << "," << Vector.m_y << "," << Vector.m_z;
     return ( Stream );

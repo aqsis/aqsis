@@ -48,9 +48,6 @@ EXPORTS
 	??4CqVector3D@Aqsis@@QAEAAV01@ABVCqColor@1@@Z
 	??4CqVector3D@Aqsis@@QAEAAV01@ABVCqVector4D@1@@Z
 	??4CqVector4D@Aqsis@@QAEAAV01@ABVCqVector3D@1@@Z
-	??6Aqsis@@YAAAV?$basic_ostream@DU?$char_traits@D@std@@@std@@AAV12@AAVCqVector2D@0@@Z
-	??6Aqsis@@YAAAV?$basic_ostream@DU?$char_traits@D@std@@@std@@AAV12@AAVCqVector3D@0@@Z
-	??6Aqsis@@YAAAV?$basic_ostream@DU?$char_traits@D@std@@@std@@AAV12@AAVCqVector4D@0@@Z
 	??6Aqsis@@YAAAV?$basic_ostream@DU?$char_traits@D@std@@@std@@AAV12@ABVCqString@0@@Z
 	??8CqColor@Aqsis@@QBE_NABV01@@Z
 	??8CqVector4D@Aqsis@@QBE_NABV01@@Z

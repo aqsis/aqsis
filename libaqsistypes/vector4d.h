@@ -203,7 +203,7 @@ public:
 
     friend TqFloat	operator*( const CqVector4D& a, const CqVector4D& b );
     friend CqVector4D	operator%( const CqVector4D& a, const CqVector4D& b );	// X product
-    friend std::ostream &operator<<( std::ostream &Stream, CqVector4D &Vector );
+    friend std::ostream &operator<<( std::ostream &Stream, const CqVector4D &Vector );
 
 protected:
     TqFloat	m_x;	///< X component.

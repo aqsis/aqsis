@@ -271,7 +271,7 @@ TqBool CqVector4D::operator<( const CqVector4D &Cmp ) const
  * \return The new state of Stream.
  */
 
-std::ostream &operator<<( std::ostream &Stream, CqVector4D &Vector )
+std::ostream &operator<<( std::ostream &Stream, const CqVector4D &Vector )
 {
     Stream << Vector.m_x << "," << Vector.m_y << "," << Vector.m_z << "," << Vector.m_h;
     return ( Stream );

@@ -298,7 +298,7 @@ public:
         return ( a.m_x * b.m_x + a.m_y * b.m_y + a.m_z * b.m_z );
     } // Dot product
     friend CqVector3D	operator%( const CqVector3D& a, const CqVector3D& b );	// X product
-    friend std::ostream &operator<<( std::ostream &Stream, CqVector3D &Vector );
+    friend std::ostream &operator<<( std::ostream &Stream, const CqVector3D &Vector );
 
 protected:
     TqFloat	m_x;	///< X component.

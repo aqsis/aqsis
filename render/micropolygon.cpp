@@ -1368,6 +1368,7 @@ void CqMicroPolygonMotion::BuildBoundList()
     for ( TqInt i = 1; i < cTimes; i++ )
     {
         CqBound end = m_Keys[ i ] ->GetTotalBound();
+
         CqBound mid0( start );
         CqBound mid1;
         TqFloat endTime = m_Times[ i ];
@@ -1696,6 +1697,20 @@ CqBound CqMovingMicroPolygonKey::GetTotalBound() const
     Bound.vecMax().x( MAX( m_Point0.x(), MAX( m_Point1.x(), MAX( m_Point2.x(), m_Point3.x() ) ) ) );
     Bound.vecMax().y( MAX( m_Point0.y(), MAX( m_Point1.y(), MAX( m_Point2.y(), m_Point3.y() ) ) ) );
     Bound.vecMax().z( MAX( m_Point0.z(), MAX( m_Point1.z(), MAX( m_Point2.z(), m_Point3.z() ) ) ) );
+
+	// Adjust for DOF
+	if ( QGetRenderContext() ->UsingDepthOfField() )
+	{
+		const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMin().z() );
+		const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMax().z() );
+		TqFloat cocX = MAX( minZCoc.x(), maxZCoc.x() );
+		TqFloat cocY = MAX( minZCoc.y(), maxZCoc.y() );
+
+		Bound.vecMin().x( Bound.vecMin().x() - cocX );
+		Bound.vecMin().y( Bound.vecMin().y() - cocY );
+		Bound.vecMax().x( Bound.vecMax().x() + cocX );
+		Bound.vecMax().y( Bound.vecMax().y() + cocY );
+	}
 
     return ( Bound );
 }

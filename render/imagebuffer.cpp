@@ -1166,8 +1166,8 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
             {
                 QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
                 TqBool fCull = TqFalse;
-                if ( !bIsEmpty && pSurface->fCachedBound() )
-                    fCull = OcclusionCullSurface( pSurface );
+//                if ( !bIsEmpty && pSurface->fCachedBound() )
+  //                  fCull = OcclusionCullSurface( pSurface );
                 QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
                 if ( fCull )
                 {

@@ -249,7 +249,7 @@ public:
     {
         return ( a.m_x * b.m_x + a.m_y * b.m_y );
     } // Dot product
-    friend std::ostream &operator<<( std::ostream &Stream, CqVector2D &Vector );
+    friend std::ostream &operator<<( std::ostream &Stream, const CqVector2D &Vector );
 
 protected:
     TqFloat	m_x;		///< X component.
