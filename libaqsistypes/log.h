@@ -144,7 +144,7 @@ class CqLog	: public IqLog
 		void createFileLog( std::string filename, std::string name );
 		void createCOUTLog( std::string name = "AqsisConsoleLog" );
 
-		void log2( log4cpp::Priority::Value priority, const char* stringFormat, ... );
+		void log2( log4cpp::Priority::Value priority, const char* stringFormat, va_list va );
 
 		log4cpp::Appender* m_pAppender;
 		log4cpp::Appender* m_pFileAppender;

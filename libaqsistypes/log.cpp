@@ -109,7 +109,7 @@ void CqLog::log(char* priority, const char* stringFormat, ...)
 }
 
 // Internal log function for error(), debug() etc. calls, just like log4cpp does it
-void CqLog::log2( log4cpp::Priority::Value priority, const char* stringFormat, ... )
+void CqLog::log2( log4cpp::Priority::Value priority, const char* stringFormat, va_list va )
 {
 	if ( m_FirstRun )
 	{
@@ -118,12 +118,7 @@ void CqLog::log2( log4cpp::Priority::Value priority, const char* stringFormat, .
 		m_FirstRun = false;
 	}
 
-	va_list va;
-	va_start(va, stringFormat);
-
 	m_pRoot->logva(priority, stringFormat, va);
-
-	va_end(va);
 }
 
 // Create a file log, i.e. pipe the output to a file
