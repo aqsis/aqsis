@@ -1145,13 +1145,6 @@ void CqRenderer::ClearDisplayDrivers()
 }
 
 
-
-CqRenderer* QGetRenderContext()
-{
-	return(pCurrRenderer);
-}
-
-
 void QSetRenderContext(CqRenderer* pRend)
 {
 	pCurrRenderer=pRend;

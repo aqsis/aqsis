@@ -103,7 +103,7 @@ enum EqRenderMode
  */
 
 class CqRenderer;
-extern CqRenderer* pCurrRenderer;
+_qShareM extern CqRenderer* pCurrRenderer;
 
 class CqRenderer
 {
@@ -297,7 +297,11 @@ class CqRenderer
 };
 
 
-_qShareM	CqRenderer* QGetRenderContext();
+inline CqRenderer* QGetRenderContext()
+{
+	return(pCurrRenderer);
+}
+
 _qShareM	void		QSetRenderContext(CqRenderer* pRenderer);
 
 
