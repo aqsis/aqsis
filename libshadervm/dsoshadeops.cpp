@@ -146,8 +146,6 @@ CqDSORepository::getShadeOpMethods(CqString* pShadeOpName)
     std::list<CqString*>::iterator itPathEntry;
     SqShadeOp *pTableSymbol = NULL;
 
-	std::cerr << critical << "Hello!!!" << std::endl;
-
     for ( itPathEntry = m_pDSOPathList.begin() ; itPathEntry != m_pDSOPathList.end() ; itPathEntry++ )
     {
         void *handle = DLOpen( (*itPathEntry) );

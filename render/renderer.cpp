@@ -1129,6 +1129,10 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
                 CqShaderVM* pShader = static_cast<CqShaderVM*>( pRet.get() );
                 const CqString* poptDSOPath = QGetRenderContext()->
                     optCurrent().GetStringOption( "searchpath", "dsolibs" );
+
+                std::cerr << info << "DSO lib path set to \"" << poptDSOPath->c_str() 
+                          << "\"" << std::endl;
+
                 pShader->SetDSOPath( poptDSOPath );
 
                 CqString strRealName( SLXFile.strRealName() );
