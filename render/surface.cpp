@@ -286,7 +286,7 @@ CqMicroPolyGridBase* CqSurface::Dice()
 	TqInt lUses = Uses();
 
 	// Dice the primitive variables.
-	if ( USES( lUses, EnvVars_Cs ) ) 
+	if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) ) 
 	{
 		if( bHasCs() )
 			Cs()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
@@ -296,7 +296,7 @@ CqMicroPolyGridBase* CqSurface::Dice()
 			pGrid->Cs()->SetColor( CqColor( 1,1,1 ) );
 	}
 
-	if ( USES( lUses, EnvVars_Os ) ) 
+	if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) ) 
 	{
 		if( bHasOs() )
 			Os()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
@@ -306,41 +306,27 @@ CqMicroPolyGridBase* CqSurface::Dice()
 			pGrid->Os()->SetColor( CqColor( 1,1,1 ) );
 	}
 
-	if ( USES( lUses, EnvVars_s ) ) 
-	{
-		if( bHass() )
-			s()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->s() );
-	}
+	if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && bHass() ) 
+		s()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->s() );
 
-	if ( USES( lUses, EnvVars_t ) ) 
-	{
-		if( bHast() )
-			t()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
-	}
+	if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && bHast() ) 
+		t()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
 
-	if ( USES( lUses, EnvVars_u ) ) 
-	{
-		if( bHasu() )
-			u()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->u() );
-	}
+	if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && bHasu() ) 
+		u()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->u() );
 
-	if ( USES( lUses, EnvVars_v ) ) 
-	{
-		if( bHasv() )
-			v()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->v() );
-	}
+	if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && bHasv() ) 
+		v()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->v() );
 	
 
-	NaturalInterpolate( &P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
+	if( NULL != pGrid->P() )
+		NaturalInterpolate( &P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
 
 	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
-	if ( USES( lUses, EnvVars_N ) )
+	if ( USES( lUses, EnvVars_N ) && ( NULL != pGrid->N() ) && bHasN() )
 	{
-		if( bHasN() )
-		{
-			N().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->N() );
-			pGrid->SetbShadingNormals( TqTrue );
-		}
+		N().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->N() );
+		pGrid->SetbShadingNormals( TqTrue );
 	}
 
 	if( CanGenerateNormals() && USES( lUses, EnvVars_N ) )
