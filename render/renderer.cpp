@@ -53,6 +53,11 @@ static CqShaderRegister * pOShaderRegister = NULL;
 
 CqRenderer* pCurrRenderer = 0;
 
+// Forward declaration
+//-------------------------------- Tiff error handlers
+	void TIFF_ErrorHandler(const char*, const char*, va_list);
+	void TIFF_WarnHandler(const char*, const char*, va_list);
+
 
 static TqUlong ohash = 0; //< == "object"
 static TqUlong shash = 0; //< == "shader"
@@ -1297,7 +1302,7 @@ TqInt CqRenderer::OutputDataSamples( const char* name )
 
 void TIFF_ErrorHandler(const char* mdl, const char* fmt, va_list va)
 {
-	char err_string[256];
+	char err_string[384];
 	vsprintf( err_string, fmt, va ); 
 	QGetRenderContextI() ->Logger() ->error( "%s in file: \"%s\"", err_string, mdl );
 }

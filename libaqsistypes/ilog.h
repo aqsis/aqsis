@@ -5,7 +5,7 @@
  *	@brief	Declare the interface structure for the log class.
  *
  *	Last change by:		$Author: mw_matti $
- *	Last change date:	$Date: 2003/08/05 12:32:13 $
+ *	Last change date:	$Date: 2003/08/05 14:17:19 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___ilog_Loaded___
@@ -99,12 +99,6 @@ public:
 //-------------------------------- Utility functions prototypes
 IqLog* CreateLogger( void );
 void DeleteLogger( IqLog* );
-
-//-----------------------------------------------------------------------
-
-//-------------------------------- Tiff error handlers
-	void TIFF_ErrorHandler(const char*, const char*, va_list);
-	void TIFF_WarnHandler(const char*, const char*, va_list);
 
 //-----------------------------------------------------------------------
 
