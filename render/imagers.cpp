@@ -76,12 +76,19 @@ CqImagersource::~CqImagersource()
  * \param depth Initial value depth (not required).
  * \param coverage Initial value "alpha"
  */
-void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
-                                 TqFloat x, TqFloat y,
-                                 CqColor *color, CqColor *opacity,
-                                 TqFloat *depth, TqFloat *coverage )
+void CqImagersource::Initialise( IqBucket* pBucket )
 {
 	QGetRenderContext() ->Stats().ImagerTimer().Start();
+
+	TqInt uGridRes = pBucket->XSize();
+	TqInt vGridRes = pBucket->YSize();
+	TqInt x = pBucket->XOrigin();
+	TqInt y = pBucket->YOrigin();
+
+	m_uYOrigin = static_cast<TqInt>( y );
+	m_uXOrigin = static_cast<TqInt>( x );
+	m_uGridRes = uGridRes;
+	m_vGridRes = vGridRes;
 
 	TqInt mode = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ];
 	TqFloat components;
@@ -98,7 +105,6 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 
 	// Initialise the geometric parameters in the shader exec env.
 
-	i = ( vGridRes + 1 ) * ( uGridRes + 1 );
 	P() ->Initialise( uGridRes, vGridRes );
 	Ci() ->Initialise( uGridRes, vGridRes );
 	Oi() ->Initialise( uGridRes, vGridRes );
@@ -107,32 +113,28 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 	//TODO dtime is not initialised yet
 	//dtime().Initialise(uGridRes, vGridRes, i);
 
-	alpha() ->SetFloat( coverage[ 0 ] );
 	ncomps() ->SetFloat( components );
 	time() ->SetFloat( shuttertime );
 
 
 	m_pShader->Initialise( uGridRes, vGridRes, m_pShaderExecEnv );
 	for ( j = 0; j < vGridRes; j++ )
+	{
 		for ( i = 0; i < uGridRes; i++ )
 		{
-
-			P() ->SetPoint( CqVector3D( x + i, y + j, 0.0 ), j * ( uGridRes + 1 ) + i );
-			Ci() ->SetColor( color[ j * ( uGridRes ) + i ], j * ( uGridRes + 1 ) + i );
-			Oi() ->SetColor( opacity[ j * ( uGridRes ) + i ], j * ( uGridRes + 1 ) + i );
-
+			TqInt off = j * ( uGridRes + 1 ) + i;
+			P() ->SetPoint( CqVector3D( x + i, y + j, 0.0 ), off );
+			Ci() ->SetColor( pBucket->Color( x + i, y + j ), off );
+			Oi() ->SetColor( pBucket->Opacity( x + i, y + j ), off );
+			alpha() ->SetFloat( pBucket->Coverage( x + i, y + j ), off );
 		}
+	}
 	// Execute the Shader VM
 	if ( m_pShader )
 	{
 		m_pShader->Evaluate( m_pShaderExecEnv );
 		alpha() ->SetFloat( 1.0f ); /* by default 3delight/bmrt set it to 1.0 */
 	}
-
-	m_uYOrigin = static_cast<TqInt>( y );
-	m_uXOrigin = static_cast<TqInt>( x );
-	m_uGridRes = uGridRes;
-	m_vGridRes = vGridRes;
 
 	QGetRenderContext() ->Stats().ImagerTimer().Stop();
 }

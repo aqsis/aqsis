@@ -548,16 +548,13 @@ const CqColor* CqOptions::GetColorOption( const char* strName, const char* strPa
  * \param depth Initial value depth (not required).
  * \param coverage Initial value "alpha"
  */
-void CqOptions::InitialiseColorImager( TqInt gx, TqInt gy,
-                                       TqFloat x, TqFloat y,
-                                       CqColor *color, CqColor *opacity,
-                                       TqFloat *depth, TqFloat *coverage )
+void CqOptions::InitialiseColorImager( IqBucket* pBucket )
 {
 	// Each time with finished up a bucket; we will execute the imager shader
 	// on the gridsize about the same size as the bucket
 	if ( m_pshadImager != NULL )
 	{
-		m_pshadImager->Initialise( gx, gy, x, y, color, opacity, depth, coverage );
+		m_pshadImager->Initialise( pBucket );
 	}
 }
 

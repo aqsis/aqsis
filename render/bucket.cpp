@@ -327,10 +327,7 @@ void CqBucket::FilterBucket()
 {
 	CqImagePixel * pie;
 	
-
-	CqColor* pCols = new CqColor[ XSize() * YSize() ];
-	CqColor* pOpacs = new CqColor[ XSize() * YSize() ];
-	TqFloat* pDepths = new TqFloat[ XSize() * YSize() ];
+	std::valarray<TqFloat>* pDatas = new std::valarray<TqFloat>[ XSize() * YSize() ];
 	TqFloat* pCoverages = new TqFloat[ XSize() * YSize() ];
 
 	TqInt xmax = static_cast<TqInt>( CEIL( ( XFWidth() - 1 ) * 0.5f ) );
@@ -351,8 +348,8 @@ void CqBucket::FilterBucket()
 
 	TqBool fImager = ( QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) [ 0 ] != "null" );
 
-	TqFloat endy = YOrigin() + YSize();
-	TqFloat endx = XOrigin() + XSize();
+	TqInt endy = YOrigin() + YSize();
+	TqInt endx = XOrigin() + XSize();
 
 	for ( y = YOrigin(); y < endy ; y++ )
 	{
@@ -360,9 +357,6 @@ void CqBucket::FilterBucket()
 		for ( x = XOrigin(); x < endx ; x++ )
 		{
 			TqFloat xcent = x + 0.5f;
-			CqColor c = gColBlack;
-			CqColor o = gColBlack;
-			TqFloat d = 0;
 			TqFloat gTot = 0.0;
 			SampleCount = 0;
 			std::valarray<TqFloat> samples( 0.0f, QGetRenderContext()->GetOutputDataTotalSize() );
@@ -393,57 +387,28 @@ void CqBucket::FilterBucket()
 								if ( pie2->Values( sx, sy ).size() > 0 )
 								{
 									SqImageSample* pSample = &pie2->Values( sx, sy ) [ 0 ];
-									c += pSample->Cs() * g;
-									o += pSample->Os() * g;
-									d += pSample->Depth();
 									samples += pSample->m_Data * g;
 									SampleCount++;
 								}
 							}
 						}
 					}
-					pie2->GetPixelSample().m_Data = samples / gTot;
 					pie2++;
 				}
 				pie += xlen;
 			}
-			pCols[ i ] = c / gTot;
-			pOpacs[ i ] = o / gTot;
+			// Set depth to infinity if no samples.
+			if ( SampleCount <= 0 )
+				samples[ 6 ] = FLT_MAX;
+
+			pDatas[ i ] = samples / gTot;
 
 			if ( SampleCount > numsubpixels)
 				pCoverages[ i ] = 1.0;
 			else
 				pCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numsubpixels );
 
-			if ( NULL != QGetRenderContext() ->optCurrent().pshadImager() && NULL != QGetRenderContext() ->optCurrent().pshadImager() ->pShader() )
-			{
-				QGetRenderContext() ->Stats().MakeFilterBucket().Stop();
-				// Init & Execute the imager shader
-			
-				QGetRenderContext() ->optCurrent().InitialiseColorImager( 1, 1,
-				        x, y,
-				        &pCols[ i ], &pOpacs[ i ],
-				        &pDepths[ i ], &pCoverages[ i ] );
-				
-				if ( fImager )
-				{
-					imager = QGetRenderContext() ->optCurrent().GetColorImager( x , y );
-					// Normal case will be to poke the alpha from the image shader and
-					// multiply imager color with it... but after investigation alpha is always
-					// == 1 after a call to imager shader in 3delight and BMRT.
-					// Therefore I did not ask for alpha value and set directly the pCols[i]
-					// with imager value. see imagers.cpp
-					pCols[ i ] = imager;
-					imager = QGetRenderContext() ->optCurrent().GetOpacityImager( x , y );
-					pOpacs[ i ] = imager;
-				}
-				QGetRenderContext() ->Stats().MakeFilterBucket().Start();
-			}
-			
-			if ( SampleCount > 0 )
-				pDepths[ i++ ] = d / SampleCount;
-			else
-				pDepths[ i++ ] = FLT_MAX;
+			i++;
 		}
 	}
 
@@ -457,16 +422,51 @@ void CqBucket::FilterBucket()
 		CqImagePixel* pie2 = pie;
 		for ( x = 0; x < endx; x++ )
 		{
-			pie2->SetColor( pCols[ i ] );
-			pie2->SetOpacity( pOpacs[ i ] );
-			pie2->SetDepth( pDepths[ i++ ] );
+			pie2->GetPixelSample().m_Data = pDatas[ i ];
+			pie2->SetCoverage( pCoverages[ i++ ] );
 			pie2++;
 		}
 		pie += xlen;
 	}
-	delete[] ( pCols );
-	delete[] ( pOpacs );
-	delete[] ( pDepths );
+
+	endy = YOrigin() + YSize();
+	endx = XOrigin() + XSize();
+
+	if ( NULL != QGetRenderContext() ->optCurrent().pshadImager() && NULL != QGetRenderContext() ->optCurrent().pshadImager() ->pShader() )
+	{
+		QGetRenderContext() ->Stats().MakeFilterBucket().Stop();
+		// Init & Execute the imager shader
+	
+		QGetRenderContext() ->optCurrent().InitialiseColorImager( this );
+		
+		if ( fImager )
+		{
+			i = 0;
+			ImageElement( XOrigin(), YOrigin(), pie );
+			for ( y = YOrigin(); y < endy ; y++ )
+			{
+				CqImagePixel* pie2 = pie;
+				for ( x = XOrigin(); x < endx ; x++ )
+				{
+					imager = QGetRenderContext() ->optCurrent().GetColorImager( x , y );
+					// Normal case will be to poke the alpha from the image shader and
+					// multiply imager color with it... but after investigation alpha is always
+					// == 1 after a call to imager shader in 3delight and BMRT.
+					// Therefore I did not ask for alpha value and set directly the pCols[i]
+					// with imager value. see imagers.cpp
+					pie2->SetColor( imager );
+					imager = QGetRenderContext() ->optCurrent().GetOpacityImager( x , y );
+					pie2->SetOpacity( imager );
+					pie2++;
+					i++;
+				}
+				pie += xlen;
+			}
+		}
+		QGetRenderContext() ->Stats().MakeFilterBucket().Start();
+	}
+
+	delete[] ( pDatas );
 	delete[] ( pCoverages );
 }
 

@@ -43,6 +43,7 @@ START_NAMESPACE( Aqsis )
 
 
 class CqImagersource;
+struct IqBucket;
 
 //----------------------------------------------------------------------
 /** \enum EqDisplayMode
@@ -279,10 +280,7 @@ class CqOptions
 			return ( m_pshadImager );
 		}
 
-		void	InitialiseColorImager( TqInt gx, TqInt gy,
-		                            TqFloat x, TqFloat y,
-		                            CqColor *color, CqColor *opacity,
-		                            TqFloat *depth, TqFloat *coverage );
+		void	InitialiseColorImager( IqBucket* pBucket );
 		CqColor GetColorImager( TqFloat x, TqFloat y );
 		CqColor GetOpacityImager( TqFloat x, TqFloat y );
 		TqFloat GetAlphaImager( TqFloat x, TqFloat y );

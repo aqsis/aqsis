@@ -70,10 +70,7 @@ class CqImagersource : public CqListEntry<CqImagersource>
 			return ( m_pShader );
 		}
 
-		void	Initialise( TqInt uGridRes, TqInt vGridRes,
-		                 TqFloat x, TqFloat y,
-		                 CqColor *color, CqColor *opacity,
-		                 TqFloat *depth, TqFloat *coverage );
+		void	Initialise( IqBucket* pBucket );
 
 
 		// Forwarding functions for IqShaderExecEnv
