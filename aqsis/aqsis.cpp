@@ -441,8 +441,12 @@ int main( int argc, const char** argv )
 
         if ( g_cl_version )
         {
-            std::cout << "aqsis version " << VERSION_STR << std::endl;
-            std::cout << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
+            std::cout << "aqsis version " << VERSION_STR
+#ifdef _DEBUG
+		      << " (debug build)"
+#endif
+		      << "\n"
+                      << "compiled " << __DATE__ << " " << __TIME__ << "\n";
             exit( 0 );
         }
 
