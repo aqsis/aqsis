@@ -70,6 +70,15 @@
 #define SLX_DetailtoStr SLC_DetailtoStr
 #endif
 
+namespace Aqsis
+{
+	struct IqRenderer;
+	IqRenderer* QGetRenderContextI()
+	{
+		return(NULL);
+	}
+}
+
 /*
  *
  */

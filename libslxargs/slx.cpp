@@ -533,7 +533,7 @@ static int GetSearchPathEntryAtIndex(int pathIdx)
         currentShaderSearchPath = NULL;
     }
     
-    currentShaderSearchPath = (char *)malloc(strlen(shaderSearchPathList));
+    currentShaderSearchPath = (char *)malloc(strlen(shaderSearchPathList) + 1 );
     currentChar = shaderSearchPathList;
     copyOutChar = currentShaderSearchPath;
     *copyOutChar = 0x0;

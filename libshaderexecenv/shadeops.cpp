@@ -1617,6 +1617,9 @@ STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL fromspace, STRINGVAL tospace
 {
 	INIT_SO
 
+	if( NULL == QGetRenderContextI() )
+		return;
+
 	assert( pShader != 0 );
 
 	CHECKVARY( p )
@@ -1640,6 +1643,9 @@ STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL fromspace, STRINGVAL tospace
 STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL tospace, POINTVAL p, DEFPARAMIMPL )
 {
 	INIT_SO
+
+	if( NULL == QGetRenderContextI() )
+		return;
 
 	assert( pShader != 0 );
 
@@ -1683,6 +1689,9 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL fromspace, STRINGVAL tospac
 {
 	INIT_SO
 
+	if( NULL == QGetRenderContextI() )
+		return;
+
 	assert( pShader != 0 );
 
 	CHECKVARY( p )
@@ -1706,6 +1715,9 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL fromspace, STRINGVAL tospac
 STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL tospace, VECTORVAL p, DEFPARAMIMPL )
 {
 	INIT_SO
+
+	if( NULL == QGetRenderContextI() )
+		return;
 
 	assert( pShader != 0 );
 
@@ -1749,6 +1761,9 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL fromspace, STRINGVAL tospac
 {
 	INIT_SO
 
+	if( NULL == QGetRenderContextI() )
+		return;
+
 	assert( pShader != 0 );
 
 	CHECKVARY( p )
@@ -1772,6 +1787,9 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL fromspace, STRINGVAL tospac
 STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL tospace, NORMALVAL p, DEFPARAMIMPL )
 {
 	INIT_SO
+
+	if( NULL == QGetRenderContextI() )
+		return;
 
 	assert( pShader != 0 );
 
@@ -1814,6 +1832,9 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransformm( MATRIXVAL tospace, NORMALVAL p, DEFP
 STD_SOIMPL CqShaderExecEnv::SO_depth( POINTVAL p, DEFPARAMIMPL )
 {
 	INIT_SO
+
+	if( NULL == QGetRenderContextI() )
+		return;
 
 	CHECKVARY( p )
 	CHECKVARY( Result )
@@ -1945,6 +1966,9 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFP
 {
 	INIT_SO
 
+	if( NULL == QGetRenderContextI() )
+		return;
+
 	GET_TEXTURE_PARAMS;
 
 	BEGIN_UNIFORM_SECTION
@@ -2015,6 +2039,9 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOA
 {
 	INIT_SO
 
+	if( NULL == QGetRenderContextI() )
+		return;
+
 	GET_TEXTURE_PARAMS;
 
 	BEGIN_UNIFORM_SECTION
@@ -2084,6 +2111,9 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOA
 {
 	INIT_SO
 
+	if( NULL == QGetRenderContextI() )
+		return;
+
 	GET_TEXTURE_PARAMS;
 
 	BEGIN_UNIFORM_SECTION
@@ -2129,6 +2159,9 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOA
 STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFPARAMVARIMPL )
 {
 	INIT_SO
+
+	if( NULL == QGetRenderContextI() )
+		return;
 
 	GET_TEXTURE_PARAMS;
 
@@ -2200,6 +2233,9 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOA
 {
 	INIT_SO
 
+	if( NULL == QGetRenderContextI() )
+		return;
+
 	GET_TEXTURE_PARAMS;
 
 	BEGIN_UNIFORM_SECTION
@@ -2269,6 +2305,9 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOA
 {
 	INIT_SO
 
+	if( NULL == QGetRenderContextI() )
+		return;
+
 	GET_TEXTURE_PARAMS;
 
 	BEGIN_UNIFORM_SECTION
@@ -2315,6 +2354,9 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOA
 STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, VECTORVAL R, DEFPARAMVARIMPL )
 {
 	INIT_SO
+
+	if( NULL == QGetRenderContextI() )
+		return;
 
 	GET_TEXTURE_PARAMS;
 
@@ -2388,6 +2430,9 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment3( STRINGVAL name, FLOATVAL channel, 
 {
 	INIT_SO
 
+	if( NULL == QGetRenderContextI() )
+		return;
+
 	GET_TEXTURE_PARAMS;
 
 	BEGIN_UNIFORM_SECTION
@@ -2435,6 +2480,9 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment3( STRINGVAL name, FLOATVAL channel, 
 STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, VECTORVAL R, DEFPARAMVARIMPL )
 {
 	INIT_SO
+
+	if( NULL == QGetRenderContextI() )
+		return;
 
 	GET_TEXTURE_PARAMS;
 
@@ -2507,6 +2555,9 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, 
 STD_SOIMPL CqShaderExecEnv::SO_cenvironment3( STRINGVAL name, FLOATVAL channel, VECTORVAL R1, VECTORVAL R2, VECTORVAL R3, VECTORVAL R4, DEFPARAMVARIMPL )
 {
 	INIT_SO
+
+	if( NULL == QGetRenderContextI() )
+		return;
 
 	GET_TEXTURE_PARAMS;
 
@@ -2595,6 +2646,9 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 {
 	INIT_SO
 
+	if( NULL == QGetRenderContextI() )
+		return;
+
 	GET_TEXTURE_PARAMS;
 
 	BEGIN_UNIFORM_SECTION
@@ -2635,6 +2689,9 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 STD_SOIMPL CqShaderExecEnv::SO_shadow1( STRINGVAL name, FLOATVAL channel, POINTVAL P1, POINTVAL P2, POINTVAL P3, POINTVAL P4, DEFPARAMVARIMPL )
 {
 	INIT_SO
+
+	if( NULL == QGetRenderContextI() )
+		return;
 
 	GET_TEXTURE_PARAMS;
 
@@ -3029,6 +3086,9 @@ STD_SOIMPL	CqShaderExecEnv::SO_solar( DEFVOIDPARAMIMPL )
 STD_SOIMPL	CqShaderExecEnv::SO_printf( STRINGVAL str, DEFVOIDPARAMVARIMPL )
 {
 	INIT_SO
+
+	if( NULL == QGetRenderContextI() )
+		return;
 
 	CHECKVARY( str )
 	TqInt ii;
@@ -3434,6 +3494,9 @@ STD_SOIMPL CqShaderExecEnv::SO_attribute( STRINGVAL name, IqShaderData* pV, DEFP
 STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARAMIMPL )
 {
 	INIT_SO
+
+	if( NULL == QGetRenderContextI() )
+		return;
 
 	BEGIN_UNIFORM_SECTION
 	//Find out if it is a specific option request
@@ -4574,6 +4637,9 @@ STD_SOIMPL	CqShaderExecEnv::SO_shadername2( STRINGVAL shader, DEFPARAMIMPL )
 STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, IqShaderData* pV, DEFPARAMIMPL )
 {
 	INIT_SO
+
+	if( NULL == QGetRenderContextI() )
+		return;
 
 	TqFloat Ret = 0.0f;
 	IqTextureMap* pMap = NULL;
