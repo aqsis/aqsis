@@ -402,6 +402,64 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 
 
 //---------------------------------------------------------------------
+/** Convert from the current basis into Bezier for processing.
+ */
+
+void CqSurfacePatchBicubic::ConvertToBezierBasis()
+{
+	static CqMatrix matMim1;
+	TqInt i, j;
+	
+	if(matMim1.fIdentity())
+	{
+		for ( i = 0; i < 4; i++ )
+			for ( j = 0; j < 4; j++ )
+				matMim1[ i ][ j ] = RiBezierBasis[ i ][ j ];
+		matMim1.SetfIdentity( TqFalse );
+		matMim1 = matMim1.Inverse();
+	}
+
+	CqMatrix matuMj = matuBasis();
+	CqMatrix matvMj = matvBasis();
+
+	CqMatrix matuConv = matuMj * matMim1;
+	CqMatrix matvConv = matvMj * matMim1;
+
+	CqMatrix matCPx, matCPy, matCPz, matCPh;
+	for ( i = 0; i < 4; i++ )
+	{
+		for ( j = 0; j < 4; j++ )
+		{
+			matCPx[ i ][ j ] = CP(i,j).x();
+			matCPy[ i ][ j ] = CP(i,j).y();
+			matCPz[ i ][ j ] = CP(i,j).z();
+			matCPh[ i ][ j ] = CP(i,j).h();
+		}
+	}
+	matCPx.SetfIdentity( TqFalse );
+	matCPy.SetfIdentity( TqFalse );
+	matCPz.SetfIdentity( TqFalse );
+	matCPh.SetfIdentity( TqFalse );
+
+	matCPx = matuConv.Transpose() * matCPx * matvConv;
+	matCPy = matuConv.Transpose() * matCPy * matvConv;
+	matCPz = matuConv.Transpose() * matCPz * matvConv;
+	matCPh = matuConv.Transpose() * matCPh * matvConv;
+
+	for ( i = 0; i < 4; i++ )
+	{
+		for ( j = 0; j < 4; j++ )
+		{
+			CP(i,j).x(matCPx[ i ][ j ]);
+			CP(i,j).y(matCPy[ i ][ j ]);
+			CP(i,j).z(matCPz[ i ][ j ]);
+			CP(i,j).h(matCPh[ i ][ j ]);
+		}
+	}
+}
+
+
+//---------------------------------------------------------------------
 /** Constructor.
  */
 

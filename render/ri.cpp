@@ -2920,7 +2920,7 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 		// Fill in primitive variables specified.
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 		{
-			//pSurface->ConvertToBezierBasis();
+			pSurface->ConvertToBezierBasis();
 			CreateGPrim( pSurface );
 		}
 		else

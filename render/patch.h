@@ -185,6 +185,8 @@ class CqSurfacePatchBicubic : public CqSurface
 		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 		virtual void NaturalSubdivide(CqParameter* pParam,CqParameter* pParam1, CqParameter* pParam2, TqBool u);
 
+		void	ConvertToBezierBasis();
+
 	protected:
 };
 
