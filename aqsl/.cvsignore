@@ -1,4 +1,5 @@
 Makefile
+aqsl
 aqslcomp
 *.slx
 .#*

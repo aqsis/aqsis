@@ -1,6 +1,9 @@
 Makefile
+parser.cxx
+parser.h
 parser.cpp
 parser.cpp.h
+scanner.cxx
 scanner.cpp
 .#*
 *.plg

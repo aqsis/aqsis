@@ -1,4 +1,7 @@
 Makefile
+parser.cxx
+parser.h
+scanner.cxx
 parser.cpp
 parser.cpp.h
 scanner.cpp

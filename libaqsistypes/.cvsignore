@@ -1,6 +1,5 @@
 Makefile
-.#*
-*.#*
-*~
-libaqsistypes.plg
-
+config.h
+config.h.in
+stamp-h
+stamp-h.in
