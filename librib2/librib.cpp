@@ -93,6 +93,7 @@ void StandardDeclarations( RendermanInterface& CallbackInterface )
 	ParserDeclare( CallbackInterface, "display", "uniform string" );
 	ParserDeclare( CallbackInterface, "auto_shadows", "uniform string" );
 	ParserDeclare( CallbackInterface, "endofframe", "uniform integer" );
+	ParserDeclare( CallbackInterface, "verbose", "uniform integer" );
 	ParserDeclare( CallbackInterface, "sphere", "uniform float" );
 	ParserDeclare( CallbackInterface, "coordinatesystem", "uniform string" );
 	ParserDeclare( CallbackInterface, "shadows", "uniform string" );
