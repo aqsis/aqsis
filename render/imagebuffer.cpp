@@ -240,7 +240,11 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqBas
     TqFloat minz = Bound.vecMin().z();
     TqFloat maxz = Bound.vecMax().z();
 
-    // Take into account depth-of-field (in camera space)
+
+    // Convert the bounds to raster space.
+    Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), CqMatrix(), QGetRenderContext()->Time() ) );
+
+    // Take into account depth-of-field
     if ( QGetRenderContext() ->UsingDepthOfField() )
     {
         const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( minz );
@@ -253,8 +257,7 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqBas
         Bound.vecMax().y( Bound.vecMax().y() + cocY );
     }
 
-    // Convert the bounds to raster space.
-    Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), CqMatrix(), QGetRenderContext()->Time() ) );
+    // And expand to account for filter size.
     Bound.vecMin().x( Bound.vecMin().x() - m_FilterXWidth / 2.0f );
     Bound.vecMin().y( Bound.vecMin().y() - m_FilterYWidth / 2.0f );
     Bound.vecMax().x( Bound.vecMax().x() + m_FilterXWidth / 2.0f );
@@ -820,8 +823,8 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 		{
 			const CqVector2D& minZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMin().z() );
 			const CqVector2D& maxZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMax().z() );
-			maxCocX = MIN( minZCoc.x(), maxZCoc.x() );
-			maxCocY = MIN( minZCoc.y(), maxZCoc.y() );
+			maxCocX = MAX( minZCoc.x(), maxZCoc.x() );
+			maxCocY = MAX( minZCoc.y(), maxZCoc.y() );
 
 			mpgbminx = Bound.vecMin().x() + maxCocX;
 			mpgbmaxx = Bound.vecMax().x() - maxCocX;
