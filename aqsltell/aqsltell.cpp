@@ -154,7 +154,10 @@ int main( int argc, const char** argv )
 							if ( symPtr->svd_spacename != NULL )
 							{
 								if ( ( symPtr->svd_type == SLX_TYPE_POINT ) ||
-								        ( symPtr->svd_type == SLX_TYPE_COLOR ) )
+									 ( symPtr->svd_type == SLX_TYPE_NORMAL ) ||
+									 ( symPtr->svd_type == SLX_TYPE_VECTOR ) ||
+									 ( symPtr->svd_type == SLX_TYPE_MATRIX ) ||
+								     ( symPtr->svd_type == SLX_TYPE_COLOR ) )
 									std::cout << "\"" << symPtr->svd_spacename << "\" ";
 							}
 
@@ -166,14 +169,16 @@ int main( int argc, const char** argv )
 										std::cout << "unknown" << std::endl;
 										break;
 										case SLX_TYPE_POINT:
-										std::cout << "[" << symPtr->svd_default.pointval[ arrayIndex ].xval << ", " <<
-										symPtr->svd_default.pointval[ arrayIndex ].yval << ", " <<
+										case SLX_TYPE_NORMAL:
+										case SLX_TYPE_VECTOR:
+										std::cout << "[" << symPtr->svd_default.pointval[ arrayIndex ].xval << " " <<
+										symPtr->svd_default.pointval[ arrayIndex ].yval << " " <<
 										symPtr->svd_default.pointval[ arrayIndex ].zval <<
 										"]" << std::endl;
 										break;
 										case SLX_TYPE_COLOR:
-										std::cout << "[" << symPtr->svd_default.pointval[ arrayIndex ].xval << ", " <<
-										symPtr->svd_default.pointval[ arrayIndex ].yval << ", " <<
+										std::cout << "[" << symPtr->svd_default.pointval[ arrayIndex ].xval << " " <<
+										symPtr->svd_default.pointval[ arrayIndex ].yval << " " <<
 										symPtr->svd_default.pointval[ arrayIndex ].zval <<
 										"]" << std::endl;
 										break;
@@ -182,6 +187,26 @@ int main( int argc, const char** argv )
 										break;
 										case SLX_TYPE_STRING:
 										std::cout << "\"" << symPtr->svd_default.stringval[ arrayIndex ] << "\"" << std::endl;
+										break;
+										case SLX_TYPE_MATRIX:
+										std::cout << "[" << 
+										symPtr->svd_default.matrixval[ arrayIndex ].val[0][0] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[0][1] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[0][2] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[0][2] << std::endl << "\t\t\t" <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[1][0] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[1][1] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[1][2] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[1][2] << std::endl << "\t\t\t" <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[2][0] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[2][1] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[2][2] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[2][3] << std::endl << "\t\t\t" <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[3][0] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[3][1] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[3][2] << " " <<
+										symPtr->svd_default.matrixval[ arrayIndex ].val[3][3] << 
+										"]" << std::endl;
 										break;
 										default:
 										std::cout << "unknown" << std::endl;

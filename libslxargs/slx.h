@@ -71,6 +71,12 @@ extern "C"
 	}
 	SLX_POINT;
 
+	typedef struct
+	{
+		float	val[4][4];
+	}
+	SLX_MATRIX;
+
 	typedef float SLX_SCALAR;
 
 	typedef struct SLXvissymdef
@@ -84,7 +90,7 @@ extern "C"
 		union {
 			SLX_POINT	*pointval;
 			SLX_SCALAR	*scalarval;
-			SLX_SCALAR	*matrixval;
+			SLX_MATRIX	*matrixval;
 			char	**stringval;
 		} svd_default;
 	}

@@ -67,9 +67,12 @@ static SLX_VISSYMDEF * currentShaderArgsArray = NULL;
 
 static const char * SLX_TYPE_UNKNOWN_STR = "unknown";
 static const char * SLX_TYPE_POINT_STR = "point";
+static const char * SLX_TYPE_NORMAL_STR = "normal";
+static const char * SLX_TYPE_VECTOR_STR = "vector";
 static const char * SLX_TYPE_COLOR_STR = "color";
 static const char * SLX_TYPE_SCALAR_STR = "float";
 static const char * SLX_TYPE_STRING_STR = "string";
+static const char * SLX_TYPE_MATRIX_STR = "matrix";
 static const char * SLX_TYPE_SURFACE_STR = "surface";
 static const char * SLX_TYPE_LIGHT_STR = "light";
 static const char * SLX_TYPE_DISPLACEMENT_STR = "displacement";
@@ -434,9 +437,89 @@ static void AddShaderVar( CqShaderVM * pShader, int i,
 					}
 
 					// shader evaluation space - RI_CURRENT, RI_SHADER, RI_EYE or RI_NDC
-					// just go with RI_SHADER for now
-					spacename = ( char * ) malloc( sizeof( "shader" ) + 1 );
-					strcpy( spacename, "shader" );
+					// just go with RI_CURRENT for now
+					spacename = ( char * ) malloc( sizeof( "current" ) + 1 );
+					strcpy( spacename, "current" );
+
+					StoreShaderArgDef( theArgsArray, *theNArgs, theVarNameStr, slxType,
+					                   spacename, defaultVal, arrayLen );
+					( *theNArgs ) ++;
+				}
+				break;
+				case type_normal:
+				{
+					CqVector3D	aCqVector3D;
+					RtPoint	aRtPoint;
+					slxType = SLX_TYPE_NORMAL;
+					if ( shaderVar->ArrayLength() == 0 )
+					{
+						shaderVar->GetNormal( aCqVector3D );
+						aRtPoint[ 0 ] = aCqVector3D[ 0 ];
+						aRtPoint[ 1 ] = aCqVector3D[ 1 ];
+						aRtPoint[ 2 ] = aCqVector3D[ 2 ];
+						defaultValLength = sizeof( RtPoint );
+						defaultVal = ( char * ) malloc( defaultValLength );
+						memcpy( defaultVal, &aRtPoint, defaultValLength );
+					}
+					else
+					{
+						arrayLen = shaderVar->ArrayLength();
+						defaultValLength = sizeof( RtPoint ) * arrayLen;
+						defaultVal = ( char * ) malloc( defaultValLength );
+						for ( arrayIndex = 0; arrayIndex < arrayLen; arrayIndex++ )
+						{
+							shaderVar->ArrayEntry( arrayIndex ) ->GetNormal( aCqVector3D );
+							aRtPoint[ 0 ] = aCqVector3D[ 0 ];
+							aRtPoint[ 1 ] = aCqVector3D[ 1 ];
+							aRtPoint[ 2 ] = aCqVector3D[ 2 ];
+							memcpy( defaultVal + ( arrayIndex * sizeof( RtPoint ) ), &aRtPoint, sizeof( RtPoint ) );
+						}
+					}
+
+					// shader evaluation space - RI_CURRENT, RI_SHADER, RI_EYE or RI_NDC
+					// just go with RI_CURRENT for now
+					spacename = ( char * ) malloc( sizeof( "current" ) + 1 );
+					strcpy( spacename, "current" );
+
+					StoreShaderArgDef( theArgsArray, *theNArgs, theVarNameStr, slxType,
+					                   spacename, defaultVal, arrayLen );
+					( *theNArgs ) ++;
+				}
+				break;
+				case type_vector:
+				{
+					CqVector3D	aCqVector3D;
+					RtPoint	aRtPoint;
+					slxType = SLX_TYPE_VECTOR;
+					if ( shaderVar->ArrayLength() == 0 )
+					{
+						shaderVar->GetPoint( aCqVector3D );
+						aRtPoint[ 0 ] = aCqVector3D[ 0 ];
+						aRtPoint[ 1 ] = aCqVector3D[ 1 ];
+						aRtPoint[ 2 ] = aCqVector3D[ 2 ];
+						defaultValLength = sizeof( RtPoint );
+						defaultVal = ( char * ) malloc( defaultValLength );
+						memcpy( defaultVal, &aRtPoint, defaultValLength );
+					}
+					else
+					{
+						arrayLen = shaderVar->ArrayLength();
+						defaultValLength = sizeof( RtPoint ) * arrayLen;
+						defaultVal = ( char * ) malloc( defaultValLength );
+						for ( arrayIndex = 0; arrayIndex < arrayLen; arrayIndex++ )
+						{
+							shaderVar->ArrayEntry( arrayIndex ) ->GetPoint( aCqVector3D );
+							aRtPoint[ 0 ] = aCqVector3D[ 0 ];
+							aRtPoint[ 1 ] = aCqVector3D[ 1 ];
+							aRtPoint[ 2 ] = aCqVector3D[ 2 ];
+							memcpy( defaultVal + ( arrayIndex * sizeof( RtPoint ) ), &aRtPoint, sizeof( RtPoint ) );
+						}
+					}
+
+					// shader evaluation space - RI_CURRENT, RI_SHADER, RI_EYE or RI_NDC
+					// just go with RI_CURRENT for now
+					spacename = ( char * ) malloc( sizeof( "current" ) + 1 );
+					strcpy( spacename, "current" );
 
 					StoreShaderArgDef( theArgsArray, *theNArgs, theVarNameStr, slxType,
 					                   spacename, defaultVal, arrayLen );
@@ -477,6 +560,72 @@ static void AddShaderVar( CqShaderVM * pShader, int i,
 					// just go with RI_RGB for now
 					spacename = ( char * ) malloc( sizeof( "rgb" ) + 1 );
 					strcpy( spacename, "rgb" );
+
+					StoreShaderArgDef( theArgsArray, *theNArgs, theVarNameStr, slxType,
+					                   spacename, defaultVal, arrayLen );
+					( *theNArgs ) ++;
+				}
+				break;
+				case type_matrix:
+				{
+					CqMatrix	aCqMatrix;
+					RtMatrix	aRtMatrix;
+					slxType = SLX_TYPE_MATRIX;
+					if ( shaderVar->ArrayLength() == 0 )
+					{
+						shaderVar->GetMatrix( aCqMatrix );
+						aRtMatrix[ 0 ][ 0 ] = aCqMatrix[ 0 ][ 0 ];
+						aRtMatrix[ 0 ][ 1 ] = aCqMatrix[ 0 ][ 1 ];
+						aRtMatrix[ 0 ][ 2 ] = aCqMatrix[ 0 ][ 2 ];
+						aRtMatrix[ 0 ][ 3 ] = aCqMatrix[ 0 ][ 3 ];
+						aRtMatrix[ 1 ][ 0 ] = aCqMatrix[ 1 ][ 0 ];
+						aRtMatrix[ 1 ][ 1 ] = aCqMatrix[ 1 ][ 1 ];
+						aRtMatrix[ 1 ][ 2 ] = aCqMatrix[ 1 ][ 2 ];
+						aRtMatrix[ 1 ][ 3 ] = aCqMatrix[ 1 ][ 3 ];
+						aRtMatrix[ 2 ][ 0 ] = aCqMatrix[ 2 ][ 0 ];
+						aRtMatrix[ 2 ][ 1 ] = aCqMatrix[ 2 ][ 1 ];
+						aRtMatrix[ 2 ][ 2 ] = aCqMatrix[ 2 ][ 2 ];
+						aRtMatrix[ 2 ][ 3 ] = aCqMatrix[ 2 ][ 3 ];
+						aRtMatrix[ 3 ][ 0 ] = aCqMatrix[ 3 ][ 0 ];
+						aRtMatrix[ 3 ][ 1 ] = aCqMatrix[ 3 ][ 1 ];
+						aRtMatrix[ 3 ][ 2 ] = aCqMatrix[ 3 ][ 2 ];
+						aRtMatrix[ 3 ][ 3 ] = aCqMatrix[ 3 ][ 3 ];
+						defaultValLength = sizeof( RtMatrix );
+						defaultVal = ( char * ) malloc( defaultValLength );
+						memcpy( defaultVal, &aRtMatrix, defaultValLength );
+					}
+					else
+					{
+						arrayLen = shaderVar->ArrayLength();
+						defaultValLength = sizeof( RtMatrix ) * arrayLen;
+						defaultVal = ( char * ) malloc( defaultValLength );
+						for ( arrayIndex = 0; arrayIndex < arrayLen; arrayIndex++ )
+						{
+							shaderVar->ArrayEntry( arrayIndex ) ->GetMatrix( aCqMatrix );
+							aRtMatrix[ 0 ][ 0 ] = aCqMatrix[ 0 ][ 0 ];
+							aRtMatrix[ 0 ][ 1 ] = aCqMatrix[ 0 ][ 1 ];
+							aRtMatrix[ 0 ][ 2 ] = aCqMatrix[ 0 ][ 2 ];
+							aRtMatrix[ 0 ][ 3 ] = aCqMatrix[ 0 ][ 3 ];
+							aRtMatrix[ 1 ][ 0 ] = aCqMatrix[ 1 ][ 0 ];
+							aRtMatrix[ 1 ][ 1 ] = aCqMatrix[ 1 ][ 1 ];
+							aRtMatrix[ 1 ][ 2 ] = aCqMatrix[ 1 ][ 2 ];
+							aRtMatrix[ 1 ][ 3 ] = aCqMatrix[ 1 ][ 3 ];
+							aRtMatrix[ 2 ][ 0 ] = aCqMatrix[ 2 ][ 0 ];
+							aRtMatrix[ 2 ][ 1 ] = aCqMatrix[ 2 ][ 1 ];
+							aRtMatrix[ 2 ][ 2 ] = aCqMatrix[ 2 ][ 2 ];
+							aRtMatrix[ 2 ][ 3 ] = aCqMatrix[ 2 ][ 3 ];
+							aRtMatrix[ 3 ][ 0 ] = aCqMatrix[ 3 ][ 0 ];
+							aRtMatrix[ 3 ][ 1 ] = aCqMatrix[ 3 ][ 1 ];
+							aRtMatrix[ 3 ][ 2 ] = aCqMatrix[ 3 ][ 2 ];
+							aRtMatrix[ 3 ][ 3 ] = aCqMatrix[ 3 ][ 3 ];
+							memcpy( defaultVal + ( arrayIndex * sizeof( RtMatrix ) ), &aRtMatrix, sizeof( RtMatrix ) );
+						}
+					}
+
+					// shader evaluation space - RI_CURRENT, RI_SHADER, RI_EYE or RI_NDC
+					// just go with RI_CURRENT for now
+					spacename = ( char * ) malloc( sizeof( "current" ) + 1 );
+					strcpy( spacename, "current" );
 
 					StoreShaderArgDef( theArgsArray, *theNArgs, theVarNameStr, slxType,
 					                   spacename, defaultVal, arrayLen );
@@ -1049,6 +1198,12 @@ char *SLX_TypetoStr ( SLX_TYPE type )
 			break;
 			case SLX_TYPE_POINT:
 			slxTypeStr = ( char * ) SLX_TYPE_POINT_STR;
+			break;
+			case SLX_TYPE_NORMAL:
+			slxTypeStr = ( char * ) SLX_TYPE_NORMAL_STR;
+			break;
+			case SLX_TYPE_VECTOR:
+			slxTypeStr = ( char * ) SLX_TYPE_VECTOR_STR;
 			break;
 			case SLX_TYPE_COLOR:
 			slxTypeStr = ( char * ) SLX_TYPE_COLOR_STR;
