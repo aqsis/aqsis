@@ -1,11 +1,10 @@
-SUBDIRS = posix
-
 lib_LTLIBRARIES = libaqsis.la
 
-libaqsis_la_SOURCES = attributes.cpp bitvector.cpp bound.cpp cellnoise.cpp color.cpp context.cpp file.cpp imagebuffer.cpp lights.cpp matrix.cpp messages.cpp micropolygon.cpp noise.cpp nurbs.cpp options.cpp parameters.cpp patch.cpp polygon.cpp quadrics.cpp render.cpp renderer.cpp ri.cpp shadeops.cpp shaderexecenv.cpp shaders.cpp shaderstack.cpp shadervariable.cpp shadervm.cpp spline.cpp sstring.cpp stats.cpp subdivision.cpp surface.cpp symbols.cpp texturemap.cpp transform.cpp vector2d.cpp vector3d.cpp vector4d.cpp
-libaqsis_la_INCLUDES = aqsis.h aqsis_types.h attributes.h bilinear.h bison.h bitvector.h bound.h cellnoise.h color.h context.h exception.h file.h flexskel.h globals.h imagebuffer.h irenderer.h lights.h list.h matrix.h memorypool.h messages.h micropolygon.h motion.h noise.h nommgr.h nurbs.h options.h parameters.h patch.h polygon.h quadrics.h random.h render.h renderer.h ri.h scene.h shaderexecenv.h shaders.h shaderstack.h shadervariable.h shadervm.h spline.h sstring.h stats.h subdivision.h surface.h symbols.h texturemap.h transform.h vector2d.h vector3d.h vector4d.h version.h
-libaqsis_la_LIBADD = posix/intel/libplatform.la
+libaqsis_la_SOURCES = attributes.cpp attributes.h bilinear.h bound.cpp bound.h cellnoise.cpp cellnoise.h context.cpp context.h iddmanager.h imagebuffer.cpp imagebuffer.h lights.cpp lights.h messages.cpp messages.h micropolygon.cpp micropolygon.h motion.h noise.cpp noise.h nurbs.cpp nurbs.h options.cpp options.h parameters.cpp parameters.h patch.cpp patch.h polygon.cpp polygon.h quadrics.cpp quadrics.h render.cpp render.h renderer.cpp renderer.h ri.cpp ri.h rifile.h shadeops.cpp shaderexecenv.cpp shaderexecenv.h shaders.cpp shaders.h shaderstack.cpp shaderstack.h shadervariable.cpp shadervariable.h shadervm.cpp shadervm.h spline.cpp spline.h stats.cpp stats.h subdivision.cpp subdivision.h surface.cpp surface.h symbols.cpp symbols.h texturemap.cpp texturemap.h transform.cpp transform.h version.h
+
+pkginclude_HEADERS = ri.h
 
 CXXFLAGS = -g -Wall
-INCLUDES = -I$(srcdir)/posix/intel -I$(top_srcdir)/libddmsimple -I$(top_srcdir)/libddmsock/posix/intel
+INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix
+
 

@@ -1,3 +1,450 @@
+2001-05-14 14:18  pgregory
+
+	* Renderer.dsw: Update dependencies for libddmsimple.
+
+2001-05-14 14:17  pgregory
+
+	* render/renderer.cpp: Make display device manager creation common
+	to Win32 and Posix.
+
+2001-05-14 12:51  tshead
+
+	* aqsis/aqsis.cpp: * Posix code cleanup
+
+2001-05-14 12:26  tshead
+
+	* Makefile.am, configure.in, aqsis/Makefile.am, aqsis/aqsis.cpp,
+	libddmsimple/.cvsignore, libddmsimple/Makefile.am,
+	libddmsimple/ddmsimple.cpp, libddmsimple/ddmsimple.h,
+	libddmsock/.cvsignore, libddmsock/Makefile.am,
+	libddmsock/displaydriver.h, libddmsock/posix/.cvsignore,
+	libddmsock/posix/Makefile.am, libddmsock/posix/intel/.cvsignore,
+	libddmsock/posix/intel/Makefile.am,
+	libddmsock/posix/intel/ddmsock.cpp,
+	libddmsock/posix/intel/ddmsock.h, render/Makefile.am,
+	render/iddmanager.h, render/renderer.cpp: * Posix build update *
+	Modified libaqsis to instantiate ddmanager objects using Class
+	Factory design pattern
+
+2001-05-13 13:00  pgregory
+
+	* libddmsimple/: ddmsimple.cpp, ddmsimple.h, libddmsimple.dsp:
+	Initial revision
+
+2001-05-13 13:00  pgregory
+
+	* libddmsimple/: ddmsimple.cpp, ddmsimple.h, libddmsimple.dsp: no
+	message
+
+2001-05-13 06:58  pgregory
+
+	* Renderer.dsw, framebuffer/win32/intel/framebuffer.cpp,
+	libddmsock/win32/intel/ddmsock.cpp, render/Render.dsp,
+	render/imagebuffer.cpp, render/renderer.cpp: Fix problem with
+	filtering of odd filter widths.
+
+2001-05-11 17:02  pgregory
+
+	* BUILD: Removed libarg details
+
+2001-05-11 15:49  pgregory
+
+	* AUTHORS: Updated authors list.
+
+2001-05-11 15:27  pgregory
+
+	* Renderer.dsw, filebuffer/filebuffer.dsp,
+	framebuffer/win32/intel/framebuffer.dsp, libdd/libdd.dsp,
+	libddmsock/win32/intel/ddmsock.cpp,
+	libddmsock/win32/intel/libddmsock.dsp, shadowmap/shadowmap.dsp:
+	Further changes to get new dd stuff compiling.
+
+2001-05-11 09:38  pgregory
+
+	* libddmsock/win32/intel/ddmsock.cpp, render/iddmanager.h,
+	render/imagebuffer.cpp, render/imagebuffer.h, render/renderer.cpp:
+	Move filtering/exposing/quatizing of buckets back up the pipeline,
+	and make the happen before the buckets are passed to the display
+	device manager.
+
+2001-05-11 02:01  pgregory
+
+	* render/Render.dsp: Updated properly to use the new ddmanager.
+
+2001-05-11 00:56  pgregory
+
+	* render/displaydriver.h: Removed, moved into libddmsock
+
+2001-05-10 17:00  pgregory
+
+	* cribber/cribber.dsp: Next step in display device change, devices
+	are now controlled by a manager which is exposed via an interface
+	for flexibility.
+
+2001-05-10 16:58  pgregory
+
+	* libddmsock/: displaydriver.h, win32/intel/ddmsock.cpp,
+	win32/intel/ddmsock.h, win32/intel/libddmsock.dsp: Initial revision
+
+2001-05-10 16:58  pgregory
+
+	* libddmsock/: displaydriver.h, win32/intel/ddmsock.cpp,
+	win32/intel/ddmsock.h, win32/intel/libddmsock.dsp: no message
+
+2001-05-10 16:55  pgregory
+
+	* render/renderer.cpp, Renderer.dsw, file/file.cpp,
+	render/Render.dsp, render/imagebuffer.cpp, render/imagebuffer.h,
+	render/renderer.h, render/ri.cpp: Next step in display device
+	change, devices are now controlled by a manager which is exposed
+	via an interface for flexibility.
+
+2001-05-10 16:45  pgregory
+
+	* render/win32/intel/: ddserver.cpp, ddserver.h: Removed, now in
+	libddmsock
+
+2001-05-10 16:44  pgregory
+
+	* render/iddmanager.h: no message
+
+2001-05-10 12:05  tshead
+
+	* aqsis/Makefile.am, file/Makefile.am, render/Makefile.am,
+	render/renderer.cpp, render/shadervm.h,
+	render/posix/intel/Makefile.am: * Applied patches from Patrick
+	Mauritz enabling Automake Makefiles to perform builds outside of
+	the source directories * Posix code cleanup
+
+2001-05-09 15:00  pgregory
+
+	* Renderer.dsw, render/imagebuffer.cpp, render/imagebuffer.h,
+	render/list.h, render/ri.cpp, render/texturemap.cpp,
+	render/texturemap.h: Wrap the bucket functionality into a class.
+
+2001-05-09 10:32  pgregory
+
+	* libdd/dd.cpp: Fix bug reporting error in ReceiveMsg
+
+2001-05-09 10:31  pgregory
+
+	* texer/: texer.cpp, texer.dsp: Change to use the libargparse
+	library.
+
+2001-05-08 18:00  pgregory
+
+	* render/: renderer.cpp, ri.cpp, stats.h: Change to more compact
+	statistics output suggested by Mathias Baas.  Fix GPrim counting.
+
+2001-05-08 14:44  pgregory
+
+	* framebuffer/win32/intel/framebuffer.dsp, render/Render.dsp,
+	render/imagebuffer.cpp, render/imagebuffer.h,
+	render/micropolygon.cpp, render/micropolygon.h, render/nurbs.cpp,
+	render/patch.cpp, render/polygon.cpp, render/quadrics.cpp,
+	render/render.cpp, render/renderer.cpp, render/renderer.h,
+	render/ri.cpp, render/scene.cpp, render/scene.h,
+	render/subdivision.cpp, shadowmap/shadowmap.dsp: Removed scene
+	storage, now GPrims are piped directly to the image buffer, and can
+	be culled immediately if necessary.  Moved the shading of grids
+	into the image buffer and out of the dice routines.  Got rid of the
+	need to bound grids, they are placed in the same bucket as the
+	GPrim they come from.
+
+2001-05-08 11:42  pgregory
+
+	* cribber/cribber.dsp: Change to using the new libargparse
+
+2001-05-08 10:05  pgregory
+
+	* render/: vector2d.cpp, vector2d.h, vector3d.cpp, vector3d.h,
+	vector4d.cpp, vector4d.h: Make Unit functions inline.
+
+2001-05-08 10:04  pgregory
+
+	* slcomp/slcomp.cpp: Added default header, and reordered includes
+	to get rid of warnings.
+
+2001-05-08 10:04  pgregory
+
+	* render/ri.cpp: Fix bugs in RiBasis functionality found by Gang
+	Chen.
+
+2001-05-08 10:03  pgregory
+
+	* render/: renderer.cpp, renderer.h: Make QGetRenderContext inline.
+
+2001-05-08 10:01  pgregory
+
+	* render/patch.cpp: Fix bugs found by Gang Chen regarding the new
+	patchmesh class.
+
+2001-05-08 10:01  pgregory
+
+	* framebuffer/win32/intel/: framebuffer.cpp, framebuffer.dsp:
+	Remove precompiled header support.
+
+2001-05-08 10:01  pgregory
+
+	* cribber/: cribber.cpp, cribber.dsp: Use the new libargparse from
+	Patrick.
+
+2001-05-08 10:00  pgregory
+
+	* render/Render.dsp: Remove generated files branch.
+
+2001-05-07 16:49  pgregory
+
+	* ribber.cfg: Add ':&' to end of all searchpaths.  Add "display"
+	searchpath.
+
+2001-05-07 16:48  pgregory
+
+	* render/shadeops.cpp: Make shadow functions return 0 as a float on
+	error.
+
+2001-05-07 16:45  pgregory
+
+	* Renderer.dsw: Add new projects relating to sockets based display
+	driver interface.
+
+2001-05-07 16:44  pgregory
+
+	* render/: file.cpp, file.h: Allow specification of open mode
+	during construction.
+
+2001-05-07 16:43  pgregory
+
+	* aqsis.ini, render/displaydriver.h, render/imagebuffer.cpp,
+	render/imagebuffer.h, render/renderer.cpp, render/renderer.h,
+	render/ri.cpp, render/texturemap.cpp,
+	render/win32/intel/ddserver.cpp, render/win32/intel/ddserver.h,
+	shadowmap/shadowmap.cpp, shadowmap/shadowmap.dsp: Implement first
+	attempt at new sockets based display driver interface.
+
+2001-05-07 16:41  pgregory
+
+	* shadowmap/shadowmap.h: Removed
+
+2001-05-07 16:40  pgregory
+
+	* framebuffer/: framebuffer.cpp, framebuffer.dsp, framebuffer.h,
+	framebuffer.rc, ico00001.ico, icon1.ico, readme.txt, resource.h:
+	Removed, new framebuffer in win32/intel specific directory.
+
+2001-05-07 16:39  pgregory
+
+	* libdd/: dd.cpp, dd.h, libdd.dsp: Initial revision
+
+2001-05-07 16:39  pgregory
+
+	* libdd/: dd.cpp, dd.h, libdd.dsp: no message
+
+2001-05-07 16:31  pgregory
+
+	* filebuffer/filebuffer.cpp, filebuffer/filebuffer.dsp,
+	framebuffer/win32/intel/framebuffer.cpp,
+	framebuffer/win32/intel/framebuffer.dsp,
+	framebuffer/win32/intel/framebuffer.rc,
+	framebuffer/win32/intel/ico00001.ico,
+	framebuffer/win32/intel/icon1.ico,
+	framebuffer/win32/intel/resource.h: Initial revision
+
+2001-05-07 16:31  pgregory
+
+	* filebuffer/filebuffer.cpp, filebuffer/filebuffer.dsp,
+	framebuffer/win32/intel/framebuffer.cpp,
+	framebuffer/win32/intel/framebuffer.dsp,
+	framebuffer/win32/intel/framebuffer.rc,
+	framebuffer/win32/intel/ico00001.ico,
+	framebuffer/win32/intel/icon1.ico,
+	framebuffer/win32/intel/resource.h: no message
+
+2001-05-03 09:57  pgregory
+
+	* render/: renderer.h, renderer.cpp, Render.dsp, render.cpp,
+	displaydriver.h, win32/intel/ddserver.cpp, win32/intel/ddserver.h:
+	Implement first attempt at new display driver method.
+
+2001-05-03 09:50  pgregory
+
+	* render/texturemap.cpp: Restore the TIFF stuff for texture maps
+	and environment maps.
+
+2001-05-02 15:31  pgregory
+
+	* BUILD: Missed a TIFF export.
+
+2001-05-02 15:18  pgregory
+
+	* BUILD: Expand on the build process for libraries.
+
+2001-05-02 11:35  tshead
+
+	* file/file.cpp, render/polygon.h, render/render.cpp,
+	render/renderer.cpp, render/renderer.h, render/ri.cpp,
+	render/shadeops.cpp, render/shadervm.h, render/texturemap.h,
+	render/posix/intel/aqsis_compiler.h, slcomp/slcomp.cpp,
+	texer/texer.cpp: * Updated conditional processing code to use
+	AQSIS_SYSTEM_WIN32 instead of WIN32 * Defined AQSIS_SYSTEM_POSIX
+	and AQSIS_COMPILER_GCC in the Posix build
+
+2001-05-02 09:39  pgregory
+
+	* render/makefile.mingw: Bring up to date with latest win32 build.
+
+2001-05-02 06:34  pgregory
+
+	* render/: attributes.h, messages.cpp, options.h, polygon.h,
+	random.h, render.cpp, renderer.cpp, renderer.h, ri.cpp,
+	shadeops.cpp, shaderexecenv.h, shaderstack.h, shadervariable.h,
+	shadervm.cpp, shadervm.h, sstring.cpp, subdivision.cpp,
+	subdivision.h, texturemap.cpp, texturemap.h: Use vector iterators
+	where appropriate.  Change WIN32 #ifdefs to AQSIS_SYSTEM_WIN32. 
+	Adopt appropriate changes from Linux port into Win32 version.
+
+2001-05-02 03:31  pgregory
+
+	* render/: aqsis_types.h, subdivision.cpp: Remove dependency on
+	logb, caused portability issues.  Add fast pow2 code to standard
+	header.
+
+2001-05-01 17:49  tshead
+
+	* .cvsignore, AUTHORS, ChangeLog, Makefile.am, NEWS, README,
+	aclocal.m4, bootstrap, configure.in, aqsis/.cvsignore,
+	aqsis/Makefile.am, aqsis/aqsis.cpp, file/.cvsignore,
+	file/Makefile.am, librib/.cvsignore, librib/Makefile.am,
+	render/.cvsignore, render/Makefile.am, render/posix/.cvsignore,
+	render/posix/Makefile.am, render/posix/intel/.cvsignore,
+	render/posix/intel/Makefile.am,
+	render/posix/intel/aqsis_compiler.h,
+	render/posix/intel/criticalsection.h,
+	render/posix/intel/semaphore.cpp, render/posix/intel/semaphore.h,
+	render/posix/intel/share.h, render/posix/intel/specific.h: *
+	Initial GNU/Linux build
+
+2001-05-01 17:32  tshead
+
+	* file/file.cpp, file/file.h, render/attributes.cpp,
+	render/attributes.h, render/imagebuffer.cpp, render/imagebuffer.h,
+	render/lights.cpp, render/list.h, render/messages.cpp,
+	render/micropolygon.h, render/noise.h, render/options.h,
+	render/parameters.h, render/polygon.h, render/random.h,
+	render/render.cpp, render/renderer.cpp, render/renderer.h,
+	render/ri.cpp, render/shadeops.cpp, render/shaderexecenv.h,
+	render/shaders.cpp, render/shaderstack.h, render/shadervariable.h,
+	render/shadervm.cpp, render/shadervm.h, render/spline.h,
+	render/sstring.cpp, render/subdivision.cpp, render/subdivision.h,
+	render/surface.cpp, render/texturemap.cpp, render/texturemap.h: *
+	Initial GNU/Linux build
+
+2001-05-01 16:02  pgregory
+
+	* content/Test/transmb_test.rib: Reenable motion blur testing.
+
+2001-05-01 16:01  pgregory
+
+	* render/renderer.cpp: Remove some crud.
+
+2001-05-01 10:08  pgregory
+
+	* render/ri.cpp: Implement motion blurred points polygons.
+
+2001-05-01 10:08  pgregory
+
+	* render/micropolygon.cpp: Remove asserts in normal calculation
+	code, should look into why they were asserting.
+
+2001-05-01 10:08  pgregory
+
+	* render/: polygon.cpp, polygon.h: Add motion blurred points
+	polygons.
+
+2001-05-01 10:07  pgregory
+
+	* render/quadrics.cpp: Fix typo in the sphere dicing code.
+
+2001-05-01 10:06  pgregory
+
+	* render/quadrics.h: Remove duplicated m_?DiceSize member
+	variables, they are on CqBasicSurface where they are needed.
+
+2001-05-01 10:06  pgregory
+
+	* render/surface.cpp: Fix the copy constructor to actually do a
+	copy.
+
+2001-05-01 04:33  pgregory
+
+	* render/patch.cpp: Fix bug in assignment operator, motion blur now
+	works with patchmeshes.
+
+2001-04-30 16:36  pgregory
+
+	* render/: Render.dsp, imagebuffer.cpp, micropolygon.cpp,
+	parameters.cpp, parameters.h, patch.cpp, patch.h, polygon.cpp,
+	polygon.h, renderer.cpp, ri.cpp, shadervm.cpp, surface.cpp,
+	surface.h: Fixed bug in array declarations.  Fixed couple of
+	problems with motion blur.  Moved patch mesh into an object, out of
+	ri.cpp.
+
+2001-04-30 15:58  pgregory
+
+	* render/parameters.cpp: no message
+
+2001-04-29 16:43  pgregory
+
+	* cribber/cribber.cpp, cribber/cribber.dsp, file/file.cpp,
+	file/file.dsp, file/file.h, framebuffer/framebuffer.cpp,
+	framebuffer/framebuffer.dsp, framebuffer/framebuffer.h,
+	librib/iribcompiler.h, librib/librib.dsp, librib/parser.y,
+	librib/ribcompiler.cpp, librib/ribcompiler.h, librib/scanner.l,
+	render/Render.dsp, render/attributes.cpp, render/attributes.h,
+	render/bilinear.h, render/bitvector.h, render/bound.h,
+	render/cellnoise.h, render/color.h, render/context.h,
+	render/exception.h, render/file.cpp, render/file.h,
+	render/globals.h, render/imagebuffer.cpp, render/imagebuffer.h,
+	render/irenderer.h, render/lights.cpp, render/lights.h,
+	render/list.h, render/matrix.h, render/memorypool.h,
+	render/messages.cpp, render/messages.h, render/micropolygon.cpp,
+	render/micropolygon.h, render/motion.h, render/noise.h,
+	render/nommgr.h, render/nurbs.cpp, render/nurbs.h,
+	render/options.cpp, render/parameters.h, render/patch.cpp,
+	render/patch.h, render/polygon.cpp, render/polygon.h,
+	render/quadrics.cpp, render/quadrics.h, render/random.h,
+	render/render.h, render/renderer.cpp, render/renderer.h,
+	render/ri.cpp, render/ri.h, render/scene.h, render/shadeops.cpp,
+	render/shaderexecenv.h, render/shaders.cpp, render/shaders.h,
+	render/shaderstack.h, render/shadervariable.cpp,
+	render/shadervariable.h, render/shadervm.cpp, render/shadervm.h,
+	render/spline.h, render/sstring.h, render/stats.h,
+	render/subdivision.cpp, render/surface.cpp, render/surface.h,
+	render/symbols.h, render/texturemap.cpp, render/texturemap.h,
+	render/transform.cpp, render/transform.h, render/vector2d.h,
+	render/vector3d.h, render/vector4d.h,
+	render/win32/intel/aqsis_compiler.h,
+	render/win32/intel/criticalsection.cpp,
+	render/win32/intel/specific.h,
+	render/win32_mingw/intel/aqsis_compiler.h,
+	render/win32_mingw/intel/criticalsection.cpp,
+	render/win32_mingw/intel/specific.h, shadowmap/shadowmap.dsp,
+	shadowmap/shadowmap.h, slcomp/funcdef.h, slcomp/parsenode.h,
+	slcomp/slcomp.dsp, slcomp/vardef.h, slpp/slpp.dsp, texer/texer.dsp:
+	Removed "specific.h" functionality now in "aqsis_compiler.h". 
+	Removed the external reliance on CqRenderer and therefore the need
+	for IqRenderer. RiBegin now creates a render context.  Added two
+	global functions QSetRenderContext to set the current render
+	context, and QGetRenderContext, which is just pCurrentRenderer
+	under a more appropriate name.	Moved shader creation functionality
+	onto the renderer.
+
+2001-04-28 15:16  pgregory
+
+	* render/: win32/intel/aqsis_compiler.h,
+	win32_mingw/intel/aqsis_compiler.h: Added system and compiler
+	defines
+
 2001-04-27 14:33  pgregory
 
 	* render/makefile.mingw, cribber/makefile.mingw: Initial check in.

@@ -505,9 +505,9 @@ void CqRenderer::RenderWorld()
 	m_timeTaken=time(0);
 
 	// Print to the defined output what we are rendering.
-	CqString strMsg("Rendering - ");
-	strMsg+=optCurrent().strDisplayName();
-	CqBasicError(0,Severity_Normal,strMsg.c_str());
+//	CqString strMsg("Rendering - ");
+//	strMsg+=optCurrent().strDisplayName();
+//	CqBasicError(0,Severity_Normal,strMsg.c_str());
 
 	m_pDDManager->OpenDisplays();
 

@@ -1,8 +1,8 @@
-lib_LTLIBRARIES = libddmsimple.la
+noinst_LTLIBRARIES = libddmsimple.la
 
-libddmsimple_la_SOURCES = ddmsimple.cpp 
-libaqsis_la_INCLUDES = ddmsimple.h
+libddmsimple_la_SOURCES = ddmsimple.cpp ddmsimple.h 
 
 CXXFLAGS = -g -Wall
-INCLUDES = -I$(top_srcdir)/render -I$(top_srcdir)/render/posix/intel 
+INCLUDES = -I$(top_srcdir)/render -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix
+ 
 

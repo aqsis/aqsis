@@ -293,4 +293,5 @@ CqColor CqColor::YIQtorgb() const
 //---------------------------------------------------------------------
 
 END_NAMESPACE(Aqsis)
+
  

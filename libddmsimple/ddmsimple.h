@@ -66,7 +66,7 @@ class CqDDManagerSimple : public IqDDManager
 {
 	public:
 				CqDDManagerSimple()	{}
-				~CqDDManagerSimple()	{}
+				virtual ~CqDDManagerSimple()	{}
 
 	// Overridden from IqDDManager
 	virtual	TqInt	Initialise();

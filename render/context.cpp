@@ -33,7 +33,10 @@ START_NAMESPACE(Aqsis)
 /** Default constructor.
  */
 
-CqContext::CqContext(CqContext* pconParent) : m_pconParent(pconParent), m_pattrCurrent(0), m_ptransCurrent(0)
+CqContext::CqContext(CqContext* pconParent) :
+	m_pattrCurrent(0),
+	m_ptransCurrent(0),
+	m_pconParent(pconParent)
 {
 }
 

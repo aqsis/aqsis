@@ -3,15 +3,24 @@ AM_INIT_AUTOMAKE(aqsis,0.4.4003)
 
 AC_PROG_CXX
 AM_PROG_LIBTOOL
+AM_PROG_LEX
+AC_PROG_YACC
 
 AC_OUTPUT( \
-render/Makefile \
-render/posix/Makefile \
-render/posix/intel/Makefile \
+libaqsistypes/Makefile \
+libaqsistypes/posix/Makefile \
 libddmsimple/Makefile \
 libddmsock/Makefile \
 libddmsock/posix/Makefile \
-libddmsock/posix/intel/Makefile \
+render/Makefile \
+librib2/Makefile \
+librib2/tests/Makefile \
+librib2/tests/test_001 \
+librib2/tests/test_002 \
+librib2/tests/test_003 \
+librib2/tests/test_004 \
+librib2stream/Makefile \
+librib2ri/Makefile \
 aqsis/Makefile \
 Makefile )
 

@@ -180,21 +180,21 @@ TqInt CqDDManagerSimple::DisplayBucket(IqBucket* pBucket)
 					/// \todo Should really be generalising this section to use specif Filter/Expose/Quantize functions.
 					if(mode&ModeZ)
 					{
-						i->m_pData[so]=pBucket->Depth(sx,sy);
+						i->m_pData[so]=static_cast<unsigned char>(pBucket->Depth(sx,sy));
 					}
 					else
 					{
 						if(samples>=3)
 						{
 							CqColor col=pBucket->Color(sx,sy);
-							i->m_pData[so+0]=col.fRed();
-							i->m_pData[so+1]=col.fGreen();
-							i->m_pData[so+2]=col.fBlue();
+							i->m_pData[so+0]=static_cast<unsigned char>(col.fRed());
+							i->m_pData[so+1]=static_cast<unsigned char>(col.fGreen());
+							i->m_pData[so+2]=static_cast<unsigned char>(col.fBlue());
 							if(samples==4)
-								i->m_pData[so+3]=pBucket->Coverage(sx,sy);
+								i->m_pData[so+3]=static_cast<unsigned char>(pBucket->Coverage(sx,sy));
 						}
 						else if(samples==1)
-							i->m_pData[so+0]=pBucket->Coverage(sx,sy);
+							i->m_pData[so+0]=static_cast<unsigned char>(pBucket->Coverage(sx,sy));
 					}
 				}
 			}

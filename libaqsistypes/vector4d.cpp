@@ -267,4 +267,5 @@ TqBool CqVector4D::operator<(const CqVector4D &Cmp) const
 //---------------------------------------------------------------------
 
 END_NAMESPACE(Aqsis)
+
  

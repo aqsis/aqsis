@@ -105,7 +105,7 @@ TqFloat CqNoise::FGNoise2(TqFloat x, TqFloat y)
 {
 	TqInt bx0, bx1, by0, by1, b00, b10, b01, b11;
 	TqFloat rx0, rx1, ry0, ry1, *q, sx, sy, a, b, t, u, v, vec[2];
-	register i, j;
+	register int i, j;
 
 	vec[0]=x;
 	vec[1]=y;
@@ -146,7 +146,7 @@ TqFloat CqNoise::FGNoise3(TqFloat x, TqFloat y, TqFloat z)
 {
 	TqInt bx0, bx1, by0, by1, bz0, bz1, b00, b10, b01, b11;
 	TqFloat rx0, rx1, ry0, ry1, rz0, rz1, *q, sy, sz, a, b, c, d, t, u, v, vec[3];
-	register i, j;
+	register int i, j;
 
 	vec[0]=x;
 	vec[1]=y;

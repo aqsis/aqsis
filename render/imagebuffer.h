@@ -186,7 +186,7 @@ class CqBucket : public IqBucket
 								{
 									*this=From;
 								}
-					~CqBucket()	{}
+					virtual ~CqBucket()	{}
 
 					CqBucket& operator=(const CqBucket& From)
 								{

@@ -198,11 +198,13 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 class CqPolygonPoints : public CqSurface
 {
 	public:
-				CqPolygonPoints(TqInt cVertices)	:	m_cReferences(0),	
-														m_cVertices(cVertices),
-														m_Transformed(TqFalse)
+				CqPolygonPoints(TqInt cVertices) :
+					m_cVertices(cVertices),
+					m_cReferences(0),	
+					m_Transformed(TqFalse)
 															{}
-				CqPolygonPoints(const CqPolygonPoints& From) : CqSurface(From),
+				CqPolygonPoints(const CqPolygonPoints& From) :
+																CqSurface(From),
 																m_cVertices(From.m_cVertices),
 																m_cReferences(0),
 																m_Transformed(From.m_Transformed)
