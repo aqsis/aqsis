@@ -4168,48 +4168,6 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		}
 	}
 
-	// Create experimental version
-	if(strcmp(scheme, "experimental")==0)
-	{
-		CqSubdivision2 subd2;
-		subd2.Prepare(cVerts);
-
-		TqInt i;
-		for ( i = 0; i < count; i++ )
-		{
-			RtToken	token = tokens[ i ];
-			RtPointer	value = values[ i ];
-			if ( strcmp( token, RI_P ) == 0 )
-			{
-				RtFloat* pPoints = ( RtFloat* ) value;
-				TqInt iVert;
-				for( iVert = 0; iVert < cVerts; iVert++ )
-				{
-					CqVector3D vA(pPoints[iVert*3], pPoints[iVert*3+1], pPoints[iVert*3+2]);
-					subd2.SetVertex(iVert,vA);
-				}
-				break;
-			}
-		}
-
-		RtInt	iP = 0;
-		for ( face = 0; face < nfaces; face++ )
-		{
-			subd2.AddFacet(nvertices[ face ], &vertices[ iP ]);
-			iP+=nvertices[ face ];
-		}
-		subd2.Finalise();
-		subd2.SubdivideFace(0);
-//		subd2.SubdivideFace(1);
-//		subd2.SubdivideFace(2);
-//		subd2.SubdivideFace(3);
-		TqInt tot2 = subd2.cFacets();
-		for(i = 4; i < tot2; i++)
-			subd2.SubdivideFace(i);
-		subd2.OutputMesh("test.raw");
-		subd2.OutputInfo("test2.sds");
-		TqInt cV = subd2.cVertices();
-	}
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, nfaces );
 	pPointsClass->AddRef();
@@ -4233,6 +4191,31 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			// Create the subdivision structure class.
 			pSubdivider = pSubdivision = new CqWSurf( cVerts, nfaces, pPointsClass );
 			pAttr = pSubdivision->pAttributes();
+
+			// Create experimental version
+			if(strcmp(scheme, "experimental")==0)
+			{
+				CqSubdivision2 subd2(pPointsClass);
+				subd2.Prepare(cVerts);
+
+				RtInt	iP = 0;
+				for ( face = 0; face < nfaces; face++ )
+				{
+					subd2.AddFacet(nvertices[ face ], &vertices[ iP ]);
+					iP+=nvertices[ face ];
+				}
+				subd2.Finalise();
+				subd2.SubdivideFace(0);
+				subd2.SubdivideFace(1);
+				subd2.SubdivideFace(2);
+				subd2.SubdivideFace(3);
+				TqInt tot2 = subd2.cFacets();
+				TqInt i;
+				for(i = 4; i < tot2; i++)
+					subd2.SubdivideFace(i);
+				subd2.OutputMesh("test.obj");
+				subd2.OutputInfo("test2.sds");
+			}
 		}
 		else
 		{

@@ -35,8 +35,12 @@ START_NAMESPACE( Aqsis )
  *	Constructor.
  */
 
-CqSubdivision2::CqSubdivision2() : m_fFinalised(TqFalse)
+CqSubdivision2::CqSubdivision2( CqPolygonPoints* pPoints ) : m_fFinalised(TqFalse)
 {
+	assert(NULL != pPoints);
+	// Store the reference to our points.
+	m_pPoints = pPoints;
+	m_pPoints->AddRef();
 }
 
 
@@ -47,9 +51,13 @@ CqSubdivision2::CqSubdivision2() : m_fFinalised(TqFalse)
 
 CqSubdivision2::~CqSubdivision2()
 {
+	assert(NULL != m_pPoints);
 	// Delete the array of laths generated during the facet adding phase.
 	for(std::vector<CqLath*>::const_iterator iLath=apLaths().begin(); iLath!=apLaths().end(); iLath++)
 		if(*iLath)	delete(*iLath);
+
+	// Release the reference to our points.
+	m_pPoints->Release();
 }
 
 
@@ -82,7 +90,7 @@ CqLath* CqSubdivision2::pFacet(TqInt iIndex)
  */
 CqLath* CqSubdivision2::pVertex(TqInt iIndex)
 {
-	assert(iIndex < m_aapVertices.size() && 1 >= m_aapVertices[iIndex].size());
+	assert(iIndex < m_aapVertices.size() && m_aapVertices[iIndex].size() >= 1);
 	return(m_aapVertices[iIndex][0]);
 }
 
@@ -99,25 +107,8 @@ void CqSubdivision2::Prepare(TqInt cVerts)
 {
 	// Initialise the array of vertex indexes to the appropriate size.
 	m_aapVertices.resize(cVerts);
-	m_aVertices.resize(cVerts);
 
 	m_fFinalised=TqFalse;
-}
-
-
-//------------------------------------------------------------------------------
-/**
- *	Set the contents of a specified vertex index.
- *	Used after calling Prepare to setup the initial state of the vertex
- *	positions. Asserts if the index is out of range.
- *
- *	@param	iIndex	Index of the vertex to set.
- *	@param	vecVert	Position to set the vertex to.
- */
-void CqSubdivision2::SetVertex(TqInt iIndex, CqVector3D vecVert)
-{
-	assert(iIndex < m_aVertices.size());
-	m_aVertices[iIndex] = vecVert;
 }
 
 
@@ -127,14 +118,238 @@ void CqSubdivision2::SetVertex(TqInt iIndex, CqVector3D vecVert)
  *	Appends a new vertex to the end of the list, updating the referencing
  *	table as well.
  *
- *	@param	vecVert	Position to apply to the new vertex.
+ *	@return			The index of the new point.
+ */
+TqInt CqSubdivision2::AddVertex(CqLath* pVertex)
+{
+	TqInt iIndex;
+
+	std::vector<CqParameter*>::iterator iUP;
+	for ( iUP = pPoints()->aUserParams().begin(); iUP != pPoints()->aUserParams().end(); iUP++ )
+	{
+		iIndex = ( *iUP )->Size();
+		( *iUP )->SetSize( iIndex+1 );
+
+		switch ( ( *iUP )->Type() )
+		{
+				case type_float:
+				{
+					CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
+					CreateVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_integer:
+				{
+					CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
+					CreateVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_point:
+				case type_normal:
+				case type_vector:
+				{
+					CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
+					CreateVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_color:
+				{
+					CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
+					CreateVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_hpoint:
+				{
+					CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
+					CreateVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_string:
+				{
+					CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
+					CreateVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_matrix:
+				{
+					CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
+					CreateVertex( pParam, pVertex, iIndex );
+				}
+				break;
+		}
+
+	}
+
+	// Resize the vertex lath 
+	m_aapVertices.resize(iIndex+1);
+
+	return(iIndex);
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Add a completely new vertex to the list.
+ *	Appends a new vertex to the end of the list, updating the referencing
+ *	table as well.
  *
  *	@return			The index of the new point.
  */
-TqInt CqSubdivision2::AddVertex(CqVector3D vecVert)
+TqInt CqSubdivision2::AddEdgeVertex(CqLath* pVertex)
 {
-	TqInt iIndex = m_aVertices.size();
-	m_aVertices.push_back(vecVert);
+	TqInt iIndex;
+
+	std::vector<CqParameter*>::iterator iUP;
+	for ( iUP = pPoints()->aUserParams().begin(); iUP != pPoints()->aUserParams().end(); iUP++ )
+	{
+		iIndex = ( *iUP )->Size();
+		( *iUP )->SetSize( iIndex+1 );
+
+		switch ( ( *iUP )->Type() )
+		{
+				case type_float:
+				{
+					CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
+					CreateEdgeVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_integer:
+				{
+					CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
+					CreateEdgeVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_point:
+				case type_normal:
+				case type_vector:
+				{
+					CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
+					CreateEdgeVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_color:
+				{
+					CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
+					CreateEdgeVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_hpoint:
+				{
+					CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
+					CreateEdgeVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_string:
+				{
+					CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
+					CreateEdgeVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_matrix:
+				{
+					//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
+					//CreateEdgeVertex( pParam, pVertex, iIndex );
+				}
+				break;
+		}
+
+	}
+
+	// Resize the vertex lath 
+	m_aapVertices.resize(iIndex+1);
+
+	return(iIndex);
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Add a completely new vertex to the list.
+ *	Appends a new vertex to the end of the list, updating the referencing
+ *	table as well.
+ *
+ *	@return			The index of the new point.
+ */
+TqInt CqSubdivision2::AddFaceVertex(CqLath* pVertex)
+{
+	TqInt iIndex;
+
+	std::vector<CqParameter*>::iterator iUP;
+	for ( iUP = pPoints()->aUserParams().begin(); iUP != pPoints()->aUserParams().end(); iUP++ )
+	{
+		iIndex = ( *iUP )->Size();
+		( *iUP )->SetSize( iIndex+1 );
+
+		switch ( ( *iUP )->Type() )
+		{
+				case type_float:
+				{
+					CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
+					CreateFaceVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_integer:
+				{
+					CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
+					CreateFaceVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_point:
+				case type_normal:
+				case type_vector:
+				{
+					CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
+					CreateFaceVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_color:
+				{
+					CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
+					CreateFaceVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_hpoint:
+				{
+					CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
+					CreateFaceVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_string:
+				{
+					//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
+					//CreateFaceVertex( pParam, pVertex, iIndex );
+				}
+				break;
+
+				case type_matrix:
+				{
+					//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
+					//CreateFaceVertex( pParam, pVertex, iIndex );
+				}
+				break;
+		}
+
+	}
+
+	// Resize the vertex lath 
+	m_aapVertices.resize(iIndex+1);
 
 	return(iIndex);
 }
@@ -305,7 +520,6 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 
 	// First of all setup the points.
 	TqInt i;
-	CqVector3D vF(0,0,0);
 	for(i = 0; i < n; i++)
 	{
 		TqInt iVert;
@@ -313,8 +527,7 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 		if( NULL == aQfv[i]->pChildVertex() )
 		{
 			// Create a new vertex for the next level
-			iVert = AddVertex(m_aVertices[aQfv[i]->VertexIndex()]);
-			m_aapVertices.resize(iVert+1);
+			iVert = AddVertex(aQfv[i]);
 		}
 		else
 		{
@@ -324,7 +537,6 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 
 		// Store the index, for later lath creation
 		aVertices[i] = iVert;
-		vF += m_aVertices[aQfv[i]->VertexIndex()];
 	}
 
 	for(i = 0; i < n; i++)
@@ -334,10 +546,7 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 		if( NULL == aQfv[i]->pMidVertex() )
 		{
 			// Create new vertex for the edge midpoint.
-			CqVector3D vH = m_aVertices[aQfv[i]->VertexIndex()];
-			CqVector3D vT = m_aVertices[aQfv[i]->ccf()->VertexIndex()];
-			iVert = AddVertex((vH+vT)/2);
-			m_aapVertices.resize(iVert+1);
+			iVert = AddEdgeVertex(aQfv[i]);
 		}
 		else
 		{
@@ -350,8 +559,7 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 	}
 
 	// Create new vertex for the facepoint.
-	TqInt iVert = AddVertex(vF/n);
-	m_aapVertices.resize(iVert+1);
+	TqInt iVert = AddFaceVertex(pFacet(iF));
 
 	// Store the index, for later lath creation
 	aVertices[2*n] = iVert;
@@ -451,19 +659,21 @@ void CqSubdivision2::OutputMesh(const char* fname)
 	std::ofstream file(fname);
 	std::vector<CqLath*> aQfv;
 
-	for(TqInt i = 0; i < cFacets(); i++)
+	TqInt i;
+	for( i = 0; i < cVertices(); i++ )
+	{
+		CqVector3D vec = pPoints()->P()->pValue()[ pVertex( i )->VertexIndex() ];
+		file << "v " << vec.x() << " " << vec.y() << " " << vec.z() << std::endl;
+	}
+	
+	for(i = 0; i < cFacets(); i++)
 	{
 		pFacet(i)->Qfv(aQfv);
-		CqVector3D vA = m_aVertices[aQfv[0]->VertexIndex()];
-		TqInt j=1;
-		while( j < aQfv.size()-1 )
-		{
-			CqVector3D vB = m_aVertices[aQfv[j++]->VertexIndex()];
-			CqVector3D vC = m_aVertices[aQfv[j]->VertexIndex()];
-			file << vA.x() << " " << vA.y() << " " << vA.z() << " " << 
-					vB.x() << " " << vB.y() << " " << vB.z() << " " << 
-					vC.x() << " " << vC.y() << " " << vC.z() << " " << std::endl;
-		}
+		TqInt j;
+		file << "f ";
+		for( j = 0; j < aQfv.size(); j++ )
+			file << aQfv[j]->VertexIndex()+1 << " ";
+		file << std::endl;
 	}
 
 	file.close();
