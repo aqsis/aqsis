@@ -3,9 +3,6 @@
 #include "librib2ri.h"
 #include "aqsis.h"
 
-//
-#include	"messages.h"
-//
 
 #ifdef	AQSIS_SYSTEM_WIN32
 #include "version.h"
@@ -140,7 +137,7 @@ void GetOptions()
 			}
 			else
 			{
-				Aqsis::CqBasicError(0,0,"Warning:  Should have AQSIS_BASE_PATH, AQSIS_CONFIG or HOME set.");
+				std::cout << "Warning:  Should have AQSIS_BASE_PATH, AQSIS_CONFIG or HOME set." << std::endl;
 			}
 	}
 
@@ -220,8 +217,8 @@ void RenderFile(std::istream& file, const char* name)
 			librib::Parse(cfgfile,"config",renderengine,std::cerr);
 		else
 		{
-			Aqsis::CqBasicError(0,0,"Warning: Config file not found." );
-			Aqsis::CqBasicError(0,0,"Warning: Looking for (%AQSIS_BASE_PATH%:%AQSIS_CONFIG%:%HOME%:%AQSIS_BASE_PATH%/etc/aqsisrc) for .aqsis file.");
+			std::cout << "Warning: Config file not found." << std::endl;
+			std::cout << "Warning: Looking for (%AQSIS_BASE_PATH%:%AQSIS_CONFIG%:%HOME%:%AQSIS_BASE_PATH%/etc/aqsisrc) for .aqsis file." << std::endl;
 		}
 	}
 	librib::Parse(file,name,renderengine,std::cerr);
