@@ -65,6 +65,7 @@ extern "C" {
 PtDspyError DspyReorderFormatting(int formatCount, PtDspyDevFormat *format, int outFormatCount, const PtDspyDevFormat *outFormat);
 PtDspyError DspyFindStringInParamList(const char *string, char **result, int n, const UserParameter *p);
 PtDspyError DspyFindIntInParamList(const char *string, int *result, int n, const UserParameter *p);
+PtDspyError DspyFindFloatInParamList(const char *string, float *result, int n, const UserParameter *p);
 PtDspyError DspyFindMatrixInParamList(const char *string, float *result, int n, const UserParameter *p);
 PtDspyError DspyFindIntsInParamList(const char *string, int *resultCount, int *result, int n, const UserParameter *p);
 #ifdef __cplusplus
@@ -490,6 +491,11 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		TqInt count = 2;
 		DspyFindIntsInParamList("origin", &count, pImage->m_origin, paramCount, parameters);
 		DspyFindIntsInParamList("OriginalSize", &count, pImage->m_OriginalSize, paramCount, parameters);
+
+		// Determine if we are creating a combined shadow map for ambient occlusion.
+		float append;
+		if( DspyFindFloatInParamList("append", &append, paramCount, parameters ) == PkDspyErrorNone )
+			pImage->m_append = (append != 0.0f)? 1:0;
 	}
 	else
 		return(PkDspyErrorNoMemory);
