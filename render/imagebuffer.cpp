@@ -25,7 +25,9 @@
 */
 
 #include	<strstream>
-
+#ifdef WIN32
+#include    <windows.h>
+#endif
 #include	<math.h>
 
 #include	"aqsis.h"
@@ -1498,9 +1500,8 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 			QGetRenderContext()->Stats().DicingTimer().Stop();
 			if(NULL != pGrid)
 			{
-				// Only shade if the ImageBuffer mode is at least RGB
-				if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
-					pGrid->Shade();
+				// Only shade in all cases since the Displacement could be called in the shadow map creation too.
+				pGrid->Shade();
 
 				pGrid->Project();
 				Bucket.AddGrid(pGrid);
@@ -1601,6 +1602,10 @@ void CqImageBuffer::RenderImage()
 			m_fDone=TqTrue;
 			return;
 		}
+#ifdef WIN32
+        if (!(iBucket%m_cXBuckets))
+           SetProcessWorkingSetSize(GetCurrentProcess(), 0xffffffff, 0xffffffff);
+#endif
 	}
 
 	ImageComplete();
