@@ -79,7 +79,7 @@ class CqStreamGzip : public CqStream
 class CqStreamFDesc : public CqStream
 {
 	private:
-		std::ofstream* ofstr;
+		FILE* fstr;
 		void error();
 	public:
 		CqStream & operator<<( int i );
@@ -88,14 +88,9 @@ class CqStreamFDesc : public CqStream
 		CqStream & operator<<( char c );
 
 		CqStreamFDesc()
-		{
-			ofstr = new std::ofstream;
-		}
+		{}
 		~CqStreamFDesc()
-		{
-			delete ofstr;
-			ofstr = 0;
-		}
+		{}
 
 		void openFile( const char * );
 		void openFile( int );
