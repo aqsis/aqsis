@@ -1195,152 +1195,173 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 	CqBucket& Bucket=m_aBuckets[iBucket];
 
 	// Bound the microplygon in hybrid camera/raster space
-	CqBound Bound(pMPG->Bound());
-
-	TqFloat bminx=Bound.vecMin().x();
-	TqFloat bmaxx=Bound.vecMax().x();
-	TqFloat bminy=Bound.vecMin().y();
-	TqFloat bmaxy=Bound.vecMax().y();
-
-	if(bmaxx<xmin || bmaxy<ymin || bminx>xmax || bminy>ymax)
-	{
-	  QGetRenderContext()->Stats().IncCulledMPGs();
-		return;
-	}
-
-	// If the micropolygon is outside the hither-yon range, cull it.
-	if(Bound.vecMin().z()>QGetRenderContext()->optCurrent().fClippingPlaneFar() ||
-	   Bound.vecMax().z()<QGetRenderContext()->optCurrent().fClippingPlaneNear())
-	{
-	  QGetRenderContext()->Stats().IncCulledMPGs();
-		return;
-	}
-
-	// Now go across all pixels touched by the micropolygon bound.
-	// The first pixel position is at (initX, initY), the last one
-	// at (eX, eY).
-	long eX=static_cast<TqInt>(ceil(bmaxx));
-	long eY=static_cast<TqInt>(ceil(bmaxy));
-	if(eX>=xmax)	eX=xmax-1;
-	if(eY>=ymax)	eY=ymax-1;
-
-	CqImagePixel* pie;
-
-	long initY=static_cast<long>(floor(Bound.vecMin().y()));
-	if(initY<ymin)	initY=ymin;
-
-	long initX=static_cast<long>(floor(Bound.vecMin().x()));
-	if(initX<xmin)	initX=xmin;
-
-	TqInt iXSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelXSamples());
-	TqInt iYSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelYSamples());
+	CqBoundList* BoundList=pMPG->BoundList();
 	
-	TqInt im=static_cast<TqInt>((bminx<initX)?0:floor((bminx-initX)*iXSamples));
-	TqInt in=static_cast<TqInt>((bminy<initY)?0:floor((bminy-initY)*iYSamples));
-	TqInt em=static_cast<TqInt>((bmaxx>eX)?iXSamples:ceil((bmaxx-eX)*iXSamples));
-	TqInt en=static_cast<TqInt>((bmaxy>eY)?iYSamples:ceil((bmaxy-eY)*iYSamples));
-
-	register long iY=initY;
-
-	while(iY<=eY)
+	for( TqInt bound_num = 0; bound_num<BoundList->Size(); bound_num++)
 	{
-		register long iX=initX;
+		//CqBound Bound(pMPG->Bound());
+		CqBound Bound = *(BoundList->GetBound(bound_num));
+		TqFloat time0 = BoundList->GetTime(bound_num);
+		TqFloat time1 = (bound_num==BoundList->Size()-1) ? 1.0 : BoundList->GetTime(bound_num+1);
+	
+		TqFloat bminx=Bound.vecMin().x();
+		TqFloat bmaxx=Bound.vecMax().x();
+		TqFloat bminy=Bound.vecMin().y();
+		TqFloat bmaxy=Bound.vecMax().y();
 
-		Bucket.ImageElement(iX,iY,pie);
-
-		while(iX<=eX)
+		if(bmaxx<xmin || bmaxy<ymin || bminx>xmax || bminy>ymax)
 		{
-			// Now sample the micropolygon at several subsample positions
-			// within the pixel. The subsample indices range from (start_m, n)
-			// to (end_m-1, end_n-1).
-		  	register int m,n;
-			n=(iY==initY)?in:0;
-			int end_n=(iY==eY)?en:iYSamples;
-			int start_m=(iX==initX)?im:0;
-			int end_m=(iX==eX)?em:iXSamples;
-			TqBool brkVert=TqFalse;
-			for(; n<end_n && !brkVert; n++)
+			if(bound_num == BoundList->Size() - 1)
 			{
-				TqBool brkHoriz=TqFalse;
-				for(m=start_m; m<end_m && !brkHoriz; m++)
-				{
-					CqVector2D vecP(pie->SamplePoint(m,n));
-					QGetRenderContext()->Stats().IncSamples();
-					// First, check if the subsample point lies within the micropoly bound
-					if(Bound.Contains2D(vecP))
-					{
-						QGetRenderContext()->Stats().IncSampleBoundHits();
+				// last bound so we can delete the mpg
+				QGetRenderContext()->Stats().IncCulledMPGs();
+				return;
+			}
+			else
+				continue;
+		}
 
+		// If the micropolygon is outside the hither-yon range, cull it.
+		if(Bound.vecMin().z()>QGetRenderContext()->optCurrent().fClippingPlaneFar() ||
+		   Bound.vecMax().z()<QGetRenderContext()->optCurrent().fClippingPlaneNear())
+		{
+			if(bound_num == BoundList->Size() - 1)
+			{
+				// last bound so we can delete the mpg
+				QGetRenderContext()->Stats().IncCulledMPGs();
+				return;
+			}
+			else
+				continue;
+		}
+
+		// Now go across all pixels touched by the micropolygon bound.
+		// The first pixel position is at (initX, initY), the last one
+		// at (eX, eY).
+		long eX=static_cast<TqInt>(ceil(bmaxx));
+		long eY=static_cast<TqInt>(ceil(bmaxy));
+		if(eX>=xmax)	eX=xmax-1;
+		if(eY>=ymax)	eY=ymax-1;
+
+		CqImagePixel* pie;
+	
+		long initY=static_cast<long>(floor(Bound.vecMin().y()));
+		if(initY<ymin)	initY=ymin;
+	
+		long initX=static_cast<long>(floor(Bound.vecMin().x()));
+		if(initX<xmin)	initX=xmin;
+
+		TqInt iXSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelXSamples());
+		TqInt iYSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelYSamples());
+	
+		TqInt im=static_cast<TqInt>((bminx<initX)?0:floor((bminx-initX)*iXSamples));
+		TqInt in=static_cast<TqInt>((bminy<initY)?0:floor((bminy-initY)*iYSamples));
+		TqInt em=static_cast<TqInt>((bmaxx>eX)?iXSamples:ceil((bmaxx-eX)*iXSamples));
+		TqInt en=static_cast<TqInt>((bmaxy>eY)?iYSamples:ceil((bmaxy-eY)*iYSamples));
+
+		register long iY=initY;
+	
+		while(iY<=eY)
+		{
+			register long iX=initX;
+
+			Bucket.ImageElement(iX,iY,pie);
+	
+			while(iX<=eX)
+			{
+				// Now sample the micropolygon at several subsample positions
+				// within the pixel. The subsample indices range from (start_m, n)
+				// to (end_m-1, end_n-1).
+			  	register int m,n;
+				n=(iY==initY)?in:0;
+				int end_n=(iY==eY)?en:iYSamples;
+				int start_m=(iX==initX)?im:0;
+				int end_m=(iX==eX)?em:iXSamples;
+				TqBool brkVert=TqFalse;
+				for(; n<end_n && !brkVert; n++)
+				{
+					TqBool brkHoriz=TqFalse;
+					for(m=start_m; m<end_m && !brkHoriz; m++)
+					{
+						CqVector2D vecP(pie->SamplePoint(m,n));
+						QGetRenderContext()->Stats().IncSamples();
+	
 						TqFloat t=pie->SampleTime(m,n);
-						// Now check if the subsample hits the micropoly
-						if(pMPG->Sample(vecP,t,ImageVal.m_Depth))
-						{									
-							QGetRenderContext()->Stats().IncSampleHits();
-							// Sort the color/opacity into the visible point list
-							std::vector<SqImageSample>& aValues=pie->Values(m,n);
-							int i=0;
-							int c=aValues.size();
-							if(c>0 && aValues[0].m_Depth<ImageVal.m_Depth)
-							{
-								SqImageSample* p=&aValues[0];
-								while(i<c && p[i].m_Depth<ImageVal.m_Depth)	i++;
-								// If it is exactly the same, chances are we've hit a MPG grid line.
-								if(i<c && p[i].m_Depth==ImageVal.m_Depth)
+						// First, check if the subsample point lies within the micropoly bound
+						if(t>=time0 && t<=time1 && Bound.Contains2D(vecP))
+						{
+							QGetRenderContext()->Stats().IncSampleBoundHits();
+	
+							// Now check if the subsample hits the micropoly
+							if(pMPG->Sample(vecP,t,ImageVal.m_Depth))
+							{									
+								QGetRenderContext()->Stats().IncSampleHits();
+								// Sort the color/opacity into the visible point list
+								std::vector<SqImageSample>& aValues=pie->Values(m,n);
+								int i=0;
+								int c=aValues.size();
+								if(c>0 && aValues[0].m_Depth<ImageVal.m_Depth)
 								{
-									p[i].m_colColor=(p[i].m_colColor+pMPG->colColor())*0.5f;
-									p[i].m_colOpacity=(p[i].m_colOpacity+pMPG->colOpacity())*0.5f;
-									continue;
-								}
-							}
-							
-							// Update max depth values
-							if(pMPG->colOpacity() == gColWhite)
-							{
-								if(c==0)
-								{
-									Bucket.DecMaxDepthCount();
-								}
-								else 
-								{
-									int j=0;
-									// Find first opaque sample
-									while(j<c && aValues[j].m_colOpacity != gColWhite) j++;
-									if(aValues[j].m_Depth == Bucket.MaxDepth() && aValues[j].m_colOpacity == gColWhite)
+									SqImageSample* p=&aValues[0];
+									while(i<c && p[i].m_Depth<ImageVal.m_Depth)	i++;
+									// If it is exactly the same, chances are we've hit a MPG grid line.
+									if(i<c && p[i].m_Depth==ImageVal.m_Depth)
 									{
-										if(aValues[j].m_Depth > ImageVal.m_Depth)
+										p[i].m_colColor=(p[i].m_colColor+pMPG->colColor())*0.5f;
+										p[i].m_colOpacity=(p[i].m_colOpacity+pMPG->colOpacity())*0.5f;
+										continue;
+									}
+								}
+								
+								// Update max depth values
+								if(pMPG->colOpacity() == gColWhite)
+								{
+									if(c==0)
+									{
+										Bucket.DecMaxDepthCount();
+									}
+									else 
+									{
+										int j=0;
+										// Find first opaque sample
+										while(j<c && aValues[j].m_colOpacity != gColWhite) j++;
+										if(aValues[j].m_Depth == Bucket.MaxDepth() && aValues[j].m_colOpacity == gColWhite)
 										{
-											Bucket.DecMaxDepthCount();
+											if(aValues[j].m_Depth > ImageVal.m_Depth)
+											{
+												Bucket.DecMaxDepthCount();
+											}
 										}
 									}
 								}
-							}
+									
+								ImageVal.m_colColor=pMPG->colColor();
+								ImageVal.m_colOpacity=pMPG->colOpacity();
 								
-							ImageVal.m_colColor=pMPG->colColor();
-							ImageVal.m_colOpacity=pMPG->colOpacity();
-							
-							// Truncate sample list if opaque.
-							if( pMPG->colOpacity() == gColWhite )
-							{
-								aValues.erase(aValues.begin()+i, aValues.end());
-								aValues.push_back(ImageVal);
+								// Truncate sample list if opaque.
+								if( pMPG->colOpacity() == gColWhite )
+								{
+									aValues.erase(aValues.begin()+i, aValues.end());
+									aValues.push_back(ImageVal);
+								}
+								else
+									aValues.insert(aValues.begin()+i,ImageVal);
 							}
-							else
-								aValues.insert(aValues.begin()+i,ImageVal);
+						}
+						else
+						{
+							if(vecP.x()>Bound.vecMax().x())
+								brkHoriz=TqTrue;
+							if(vecP.y()>Bound.vecMax().y())
+								brkVert=TqTrue;
 						}
 					}
-					else
-					{
-						if(vecP.x()>Bound.vecMax().x())
-							brkHoriz=TqTrue;
-						if(vecP.y()>Bound.vecMax().y())
-							brkVert=TqTrue;
-					}
 				}
+				iX++;
+				pie++;
 			}
-			iX++;
-			pie++;
+			iY++;
 		}
-		iY++;
 	}
 }
 

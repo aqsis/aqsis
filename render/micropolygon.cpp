@@ -21,6 +21,7 @@
 /** \file
 		\brief Implements the classes for handling micropolygrids and micropolygons.
 		\author Paul C. Gregory (pgregory@aqsis.com)
+        \author Andy Gill (buzz@ucky.com)
 */
 
 #include	"aqsis.h"
@@ -645,6 +646,18 @@ CqBound& CqMicroPolygonStatic::Bound(TqBool fForce)
 	return(m_Bound);
 }
 
+//---------------------------------------------------------------------
+/** Calculate the 2D boundary of this micropolygon, returned in a list
+ */
+CqBoundList* CqMicroPolygonStatic::BoundList()
+{
+	m_Bound=CqMicroPolygonStaticBase::Bound();
+	CqBoundList* boundlist = new CqBoundList;
+	boundlist->Add(&m_Bound, 0.0);
+	
+	return boundlist;
+}
+
 
 //---------------------------------------------------------------------
 /** Calculate the 2D boundary of this micropolygon,
@@ -664,6 +677,48 @@ CqBound& CqMicroPolygonMotion::Bound(TqBool fForce)
 	}
 	return(m_Bound);
 }
+
+//---------------------------------------------------------------------
+/** Calculate a list of 2D bounds for this micropolygon,
+ */
+CqBoundList* CqMicroPolygonMotion::BoundList()
+{
+	CqBoundList* boundlist = new CqBoundList;
+		
+	CqBound start = GetMotionObject(Time(0)).Bound();
+	TqFloat startTime = Time(0);
+	for( TqInt i=1; i<cTimes(); i++ )
+	{
+		CqBound end = GetMotionObject(Time(i)).Bound();
+		CqBound mid0(start);
+		CqBound mid1;
+		TqFloat endTime = Time(i);
+		TqFloat time = startTime;
+
+		TqInt d;
+		// arbitary number of divisions, should be related to screen size of blur
+		TqInt divisions=10;
+		for(d=1; d<=divisions; d++)
+		{
+			TqFloat delta = (float)d/(float)divisions;
+			CqVector3D min = delta*(end.vecMin() - start.vecMin()) + start.vecMin();
+			CqVector3D max = delta*(end.vecMax() - start.vecMax()) + start.vecMax();
+			mid1 = CqBound(min, max);
+
+			CqBound* combinedBound = new CqBound;
+			*combinedBound = mid0.Combine(mid1);
+			boundlist->Add(combinedBound, time);
+
+			time = delta*(endTime - startTime) + startTime;
+			mid0 = mid1;
+		}
+		start = end;
+		startTime = endTime;
+	}
+	
+	return boundlist;
+}
+	
 
 //---------------------------------------------------------------------
 /** Sample the specified point against the MPG at the specified time.

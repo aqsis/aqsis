@@ -251,6 +251,11 @@ class CqMicroPolygonBase
 					 * \return CqBound representing the conservative bound.
 					 */
 	virtual const CqBound&	Bound() const=0;
+					/** Pure virtual, get a list of bounds that together cover the micropoly.
+					 *  Useful for motion grids to get a tighter bound than a single rectangle.
+					 * \return CqBoundList a list of bounds.
+					 */
+	virtual CqBoundList* BoundList()=0;
 					/** Pure virtual, check if the sample point is within the micropoly.
 					 * \param vecSample 2D sample point.
 					 * \param time The frame time at which to check.
@@ -346,6 +351,7 @@ class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonSta
 					 * \return CqBound representing the conservative bound.
 					 */
 	virtual const CqBound&	Bound() const	{return(m_Bound);}
+	virtual CqBoundList* BoundList();
 	virtual	TqBool	Sample(CqVector2D& vecSample, TqFloat time, TqFloat& D);
 	
 	private:
@@ -388,6 +394,7 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 					 * \return CqBound representing the conservative bound.
 					 */
 	virtual const CqBound&	Bound() const	{return(m_Bound);}
+	virtual CqBoundList* BoundList();
 	virtual	TqBool	Sample(CqVector2D& vecSample, TqFloat time, TqFloat& D);
 
 	// Overrides from CqMotionSpec

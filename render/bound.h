@@ -35,6 +35,8 @@
 #define		_qShareName	CORE
 #include	"share.h"
 
+#include <vector>
+
 START_NAMESPACE(Aqsis)
 
 //----------------------------------------------------------------------
@@ -99,6 +101,39 @@ class CqBound
 			CqVector3D	m_vecMax;
 };
 
+//----------------------------------------------------------------------
+/** \class CqBoundList
+ * Class specifying a list of CqBounds.
+ */
+class CqBoundList
+{
+public:
+			CqBoundList(){}
+			~CqBoundList()
+						{
+							for(std::vector<CqBound*>::iterator i=m_Bounds.begin(); i!=m_Bounds.end(); i++)
+								delete (*i);
+						} 
+			
+	/** Add a bound to the current list
+	 *\param bound The CqBound to add
+	 *\param time The shutter time that this bound becomes valid at. The bound
+	 * is valid until the time of the next bound or until 1.0 if there are no more bounds.
+	 */
+	void	Add(CqBound* bound, TqFloat time) 
+						{
+							m_Bounds.push_back(bound);
+							m_Times.push_back(time);
+						}
+	TqInt 	Size()	{return m_Bounds.size();}
+	
+	CqBound* GetBound(TqInt i) {return  m_Bounds[i];}
+	TqFloat  GetTime(TqInt i) {return m_Times[i];}
+	
+private:
+	std::vector<CqBound*> m_Bounds;
+	std::vector<TqFloat> m_Times;
+};
 
 //-----------------------------------------------------------------------
 
