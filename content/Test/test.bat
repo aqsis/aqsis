@@ -1,4 +1,3 @@
-@ECHO OFF
 cribber bucket_test.rib
 cribber coordsys_test.rib
 cribber disp_test.rib
