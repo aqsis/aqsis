@@ -58,35 +58,40 @@ static	CqString	SO_sprintf(const char* str, int cParams, CqVMStackEntry** apPara
 					case 'f':
 					{
 						TqFloat f=apParams[ivar++]->Value(f,varyingindex);
-						strRes+=f;
+						CqString strVal;
+						strVal.Format("%f",f);
+						strRes+=strVal;
 					}
 					break;
 
 					case 'p':
 					{
 						CqVector3D vec=apParams[ivar++]->Value(vec,varyingindex);
-						strRes+=vec.x();	strRes+=",";
-						strRes+=vec.y();	strRes+=",";
-						strRes+=vec.z();
+						CqString strVal;
+						strVal.Format("%f,%f,%f",vec.x(),vec.y(),vec.z());
+						strRes+=strVal;
 					}
 					break;
 
 					case 'c':
 					{
 						CqColor col=apParams[ivar++]->Value(col,varyingindex);
-						strRes+=col.fRed();		strRes+=",";
-						strRes+=col.fGreen();	strRes+=",";
-						strRes+=col.fBlue();
+						CqString strVal;
+						strVal.Format("%f,%f,%f",col.fRed(),col.fGreen(),col.fBlue());
+						strRes+=strVal;
 					}
 					break;
 
 					case 'm':
 					{
 						CqMatrix mat=apParams[ivar++]->Value(mat,varyingindex);
-						strRes+=mat.Element(0,0);	strRes+=","; strRes+=mat.Element(0,1);	strRes+=","; strRes+=mat.Element(0,2);	strRes+=","; strRes+=mat.Element(0,3);	strRes+=",";
-						strRes+=mat.Element(1,0);	strRes+=","; strRes+=mat.Element(1,1);	strRes+=","; strRes+=mat.Element(1,2);	strRes+=","; strRes+=mat.Element(1,3);	strRes+=",";
-						strRes+=mat.Element(2,0);	strRes+=","; strRes+=mat.Element(2,1);	strRes+=","; strRes+=mat.Element(2,2);	strRes+=","; strRes+=mat.Element(2,3);	strRes+=",";
-						strRes+=mat.Element(3,0);	strRes+=","; strRes+=mat.Element(3,1);	strRes+=","; strRes+=mat.Element(3,2);	strRes+=","; strRes+=mat.Element(3,3);	strRes+=",";
+						CqString strVal;
+						strVal.Format("%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f\n%f,%f,%f,%f",
+						mat.Element(0,0),mat.Element(0,1),mat.Element(0,2),mat.Element(0,3),
+						mat.Element(1,0),mat.Element(1,1),mat.Element(1,2),mat.Element(1,3),
+						mat.Element(2,0),mat.Element(2,1),mat.Element(2,2),mat.Element(2,3),
+						mat.Element(3,0),mat.Element(3,1),mat.Element(3,2),mat.Element(3,3));
+						strRes+=strVal;
 					}
 					break;
 

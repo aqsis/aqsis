@@ -200,14 +200,25 @@ CqString& CqString::Format(const TqChar* strFmt, ...)
 				switch(strFmt[i])
 				{
 					case 'f':
-						*this+=static_cast<TqFloat>(va_arg(marker,double));
+					{
+						TqFloat val=static_cast<TqFloat>(va_arg(marker,double));
+
+						std::strstream strVal;
+						strVal << val << std::ends;
+						*this+=strVal.str();
+						strVal.freeze(false);
+					}
 					break;
 
 					case 'd':
 					case 'i':
 					{
 						TqInt val=va_arg(marker,TqInt);
-						*this+=val;
+
+						std::strstream strVal;
+						strVal << val << std::ends;
+						*this+=strVal.str();
+						strVal.freeze(false);
 					}
 					break;
 
