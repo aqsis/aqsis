@@ -103,6 +103,7 @@ void StandardDeclarations(RendermanInterface& CallbackInterface)
 	ParserDeclare(CallbackInterface, "shadowmapname", "uniform string");
 	ParserDeclare(CallbackInterface, "shadow_shadingrate", "uniform float");
 	ParserDeclare(CallbackInterface, "name", "uniform string");
+	ParserDeclare(CallbackInterface, "shadinggroup", "uniform string");
 	ParserDeclare(CallbackInterface, "sense", "uniform string");
 }
 

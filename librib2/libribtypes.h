@@ -242,10 +242,7 @@ public:
 	void AddPair(TokenValuePair* const Pair)
 	{
 		if(0 == Pair)
-			{
-				std::cerr << "librib > TokenValuePairs::AddPair(): NULL pair will not be added" << std::endl;
-				return;
-			}
+			return;
 		
 		m_Counts.push_back(Pair->Count());
 		m_Tokens.push_back(Pair->Token());
