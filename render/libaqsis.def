@@ -45,7 +45,6 @@ EXPORTS
 	??1CqVector2D@Aqsis@@QAE@XZ
 	??1CqVector3D@Aqsis@@QAE@XZ
 	??1CqVector4D@Aqsis@@QAE@XZ
-	??4CqColor@Aqsis@@QAEAAV01@ABVCqVector3D@1@@Z
 	??4CqMatrix@Aqsis@@QAEAAV01@ABV01@@Z
 	??4CqMatrix@Aqsis@@QAEAAV01@QAM@Z
 	??4CqMatrix@Aqsis@@QAEAAV01@QAY03M@Z
