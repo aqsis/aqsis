@@ -247,7 +247,7 @@ class CqSurfacePatchBilinear : public CqSurface
 		}
 		virtual TqBool	CanGenerateNormals() const
 		{
-			return ( TqTrue );
+			return ( TqFalse );
 		}
 		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
