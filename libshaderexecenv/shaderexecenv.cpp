@@ -237,7 +237,7 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Iq
 		if ( USES( Uses, EnvVars_time ) && m_apVariables[ EnvVars_time ] == 0 )
 			m_apVariables[ EnvVars_time ] = pShader->CreateVariable( type_float, class_uniform, gVariableNames[ EnvVars_time ] );
 		if ( USES( Uses, EnvVars_alpha ) && m_apVariables[ EnvVars_alpha ] == 0 )
-			m_apVariables[ EnvVars_alpha ] = pShader->CreateVariable( type_float, class_uniform, gVariableNames[ EnvVars_alpha ] );
+			m_apVariables[ EnvVars_alpha ] = pShader->CreateVariable( type_float, class_varying, gVariableNames[ EnvVars_alpha ] );
 	}
 
 	TqInt i;

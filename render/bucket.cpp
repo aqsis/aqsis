@@ -403,7 +403,7 @@ void CqBucket::FilterBucket()
 
 			pDatas[ i ] = samples / gTot;
 
-			if ( SampleCount > numsubpixels)
+			if ( SampleCount >= numsubpixels)
 				pCoverages[ i ] = 1.0;
 			else
 				pCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numsubpixels );
