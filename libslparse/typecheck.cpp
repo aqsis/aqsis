@@ -56,7 +56,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 			TqInt cArgs = aFuncs[ i ] ->cTypeSpecLength();
 			if ( ( cArgs > 0 ) &&
 			        ( ( !aFuncs[ i ] ->fVarying() && cArgs != cSpecifiedArgs ) ||
-			          ( aFuncs[ i ] ->fVarying() && cSpecifiedArgs < cArgs - 1 ) ) )
+			          ( aFuncs[ i ] ->fVarying() && cSpecifiedArgs < cArgs ) ) )
 			{
 				m_aFuncRef.erase( m_aFuncRef.begin() + i );
 				aFuncs.erase( aFuncs.begin() + i );
