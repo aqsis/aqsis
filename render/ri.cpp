@@ -598,8 +598,14 @@ RtVoid	RiExposure(RtFloat gain, RtFloat gamma)
 //
 RtVoid	RiImager(const char *name, ...)
 {
-	CqBasicError(0,Severity_Normal,"RiImager shaders not supported");
-	return(0);
+	va_list	pArgs;
+	va_start(pArgs, name);
+
+	RtToken* pTokens;
+	RtPointer* pValues;
+	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
+
+	return(RiImagerV(name, count, pTokens, pValues));
 }
 
 
@@ -609,7 +615,22 @@ RtVoid	RiImager(const char *name, ...)
 //
 RtVoid	RiImagerV(const char *name, PARAMETERLIST)
 {
-	CqBasicError(0,Severity_Normal,"RiImager shaders not supported");
+	RtInt i;
+	
+	if (strlen(name)) {
+		QGetRenderContext()->optCurrent().SetstrImager(name);
+   		for(i=0; i<count; i++)
+		{
+			RtToken		token=tokens[i];
+			RtPointer	value=values[i];
+
+			if (strstr(name, "background") && (strstr(token, "background") || strstr(token, "bgcolor"))  ){
+				/* Save the background color */
+				RtFloat*	pBackground=(RtFloat*)value;
+				QGetRenderContext()->optCurrent().SetBkColorImager(CqColor(pBackground));
+			}
+		}
+	}	
 	return(0);
 }
 
@@ -952,20 +973,30 @@ RtFloat	RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
 // RiHider
 // Specify a hidden surface calculation mode.
 //
-RtVoid	RiHider(RtToken type, ...)
+RtVoid	RiHider(const char *name, ...)
 {
-	CqBasicError(0,Severity_Normal,"RiHider not supported, defaults to hidden");
-	return(0);
-}
+	va_list	pArgs;
+	va_start(pArgs, name);
 
+	RtToken* pTokens;
+	RtPointer* pValues;
+	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
+
+	return(RiHiderV(name, count, pTokens, pValues));
+
+}
 
 //----------------------------------------------------------------------
 // RiHiderV
 // List based version of above.
 //
-RtVoid	RiHiderV(RtToken type, PARAMETERLIST)
+RtVoid	RiHiderV(const char *name, PARAMETERLIST)
 {
-	CqBasicError(0,Severity_Normal,"RiHider not supported, defaults to hidden");
+        if ( !strcmp(name, "hider") || !strcmp(name, "painter") ) 
+        {
+	    QGetRenderContext()->optCurrent().SetstrHider(name);
+        }
+
 	return(0);
 }
 
@@ -2116,7 +2147,7 @@ RtVoid	RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERL
 
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass=new CqPolygonPoints(cVerts);
-	
+	pPointsClass->Reference();
 	// Process any specified primitive variables
 	pPointsClass->SetDefaultPrimitiveVariables(RI_FALSE); 
 	if(ProcessPrimitiveVariables(pPointsClass,count,tokens,values))
@@ -2215,6 +2246,7 @@ RtVoid	RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERL
 			}
 			QGetRenderContext()->Stats().IncGPrims();
 		}
+                pPointsClass->UnReference();
 	}
 	else
 		delete(pPointsClass);
@@ -2740,11 +2772,39 @@ RtVoid	RiGeometry(RtToken type, ...)
 //
 RtVoid	RiGeometryV(RtToken type, PARAMETERLIST)
 {
-	CqTeapot* pTeapot=new CqTeapot(false);
-	pTeapot->SetDefaultPrimitiveVariables();
-	ProcessPrimitiveVariables(pTeapot,count,tokens,values);
+	if (strcmp(type, "teapot") == 0) {
 
-	CreateGPrim(pTeapot);
+		// Create a standard teapot
+		CqTeapot* pSurface=new CqTeapot(true); // add a bottom if true/false otherwise
+
+		pSurface->SetDefaultPrimitiveVariables();
+		pSurface->SetSurfaceParameters(*pSurface);
+		ProcessPrimitiveVariables(pSurface,count,tokens,values);
+		
+		// I don't use the original teapot primitives as defined by T. Burge
+		// but an array of Patch Bicubic (stolen from example from Pixar) and
+		// those (6 meshes) are registered as standards GPrims right here.
+		// Basically I kept the bound, transform and split, dice and diceable methods
+		// in teapot.cpp but I suspect they are never called since the work of 
+		// dicing will rely on the registered Gprimitives (see below in the for loop).
+		// I suspect the 6/7 meshes are equivalent in size/definition as the T. Burge 
+		// definition. The 7th is the bottom part of the teapot (see teapot.cpp).
+	
+		for(int i=0; i<pSurface->cNbrPatchMeshBicubic; i++) {
+			CqSurface *pMesh = pSurface->pPatchMeshBicubic[i];
+			
+			CreateGPrim(	(CqSurfacePatchMeshBicubic* )pMesh);
+		}
+	} else if (strcmp(type, "sphere") == 0){
+		// Create a sphere
+		CqSphere* pSurface=new CqSphere(1,-1,1,0,360.0);
+		pSurface->SetDefaultPrimitiveVariables();
+		ProcessPrimitiveVariables(pSurface,count,tokens,values);
+		CreateGPrim(pSurface);
+
+	} else {
+		CqBasicError(0,Severity_Normal,"RiGeometryV, unknown geometry");
+	}
 
 	return(0);
 }
@@ -2902,6 +2962,7 @@ RtVoid	RiMakeTextureV(const char *pic, const char *tex, RtToken swrap, RtToken t
 		// Hopefully CqTextureMap will take care of closing the tiff file after
 		// it has SAT mapped it so we can overwrite if needs be.
 		// Create a new image.
+	    Source.CreateSATMap();
 		TIFF* ptex=TIFFOpen(tex,"w");
 
 		TIFFCreateDirectory(ptex);

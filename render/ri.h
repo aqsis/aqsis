@@ -149,8 +149,8 @@ _qShare	RtFloat			RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywi
 _qShare	RtFloat			RiDiskFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
 _qShare	RtFloat			RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
 
-_qShare	RtVoid			RiHider(RtToken type, ...);
-_qShare	RtVoid			RiHiderV(RtToken type, PARAMETERLIST);
+_qShare	RtVoid			RiHider(const char *name, ...);
+_qShare	RtVoid			RiHiderV(const char *name, PARAMETERLIST);
 _qShare	RtVoid			RiColorSamples(RtInt N, RtFloat *nRGB, RtFloat *RGBn);
 _qShare	RtVoid			RiRelativeDetail(RtFloat relativedetail);
 _qShare	RtVoid			RiOption(const char *name, ...);
