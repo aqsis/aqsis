@@ -34,58 +34,13 @@
 
 #include	"parsenode.h"
 #include	"ri.h"
-#include	"Parser.h"
-#include	"scanner.h"
 #include	"shadervariable.h"
 #include	"version.h"
+#include	"vmoutput.h"
+#include	"sstring.h"
+#include	"libslparse.h"
 
-class SLCompiler : public SLParser
-{
-	public:
-			SLCompiler(std::istream& file, char* pName) :	
-									m_Scanner(&file),
-									m_strName(pName),
-									m_Line(1)
-				{
-					m_Scanner.m_Parser=this;
-				};
-
-	virtual int yylex();
-	virtual void yyerror(char *m);
-	virtual	void yydebugout(char *m);
-	
-	virtual	const char* FileName() const		{return(m_strName.c_str());}
-	virtual	void SetFileName(const char* strName)	{m_strName=strName;}
-	virtual void SetLineNo(TqInt i)				{m_Line=i;}
-	virtual TqInt LineNo() const				{return(m_Line);}
-			
-	private:
-			SLScanner	m_Scanner;
-			CqString	m_strName;
-			TqInt		m_Line;
-};
-
-int SLCompiler::yylex()
-{
-	yylloc.first_line=m_Line;
-	int token=m_Scanner.yylex(&yylval,&yylloc);
-	yylloc.last_line=m_Line;
-	yylloc.text=(char *)m_Scanner.yytext;
-	return(token);
-}
-
-void SLCompiler::yyerror(char *m)
-{
-	char String[100];
-	// C:\Projects\Renderer\slcomp\slcomp.cpp(37) : error C2065: 'tchar' : undeclared identifier
-	sprintf(String,"%s(%d) : error C0001: '%s' : %s\n",m_strName.c_str(),yylloc. first_line, yylloc.text, m);
-	std::cout << String << std::flush;	
-}
-
-void SLCompiler::yydebugout(char *m)
-{
-	printf(m);	
-}
+using namespace Aqsis;
 
 
 int main(int argc, char* argv[])
@@ -137,36 +92,22 @@ int main(int argc, char* argv[])
 		return(ExitCode);
 	}
 
-#ifdef	_DEBUG
-	FILE *stream = freopen( "slparse.out", "w", stderr );
-#endif
-
 	std::ifstream ifile(iName, std::ios_base::in);
-	SLCompiler theCompiler(ifile,iName);
-#ifdef _DEBUG
-	theCompiler.yydebug=1;
-#endif
-	int result=theCompiler.yyparse();
 
-	if(result==0)
+	TqBool result=Parse(ifile,iName,std::cerr);
+
+	if(result)
 	{
-		char oName[256];
-		strcpy(oName,theCompiler.Shader().strName());
-		strcat(oName,RI_SHADER_EXTENSION);
-		std::ofstream ofile(oName);
+//		char oName[256];
+//		strcpy(oName,static_cast<CqParseNodeShader*>(theCompiler.pParseTree())->strName());
+//		strcat(oName,RI_SHADER_EXTENSION);
+		CqString oName(iName);
+		oName.substr(0,oName.find_last_of('.'));
+		oName.append(RI_SHADER_EXTENSION);
+		std::ofstream ofile(oName.c_str());
 
-#ifdef _DEBUG
-		std::ofstream dofile("tree.out");
-		theCompiler.pParseTree()->OutTree(dofile);				
-#endif
-		theCompiler.TypeCheck();
- 		theCompiler.Optimise();
-		theCompiler.Output(ofile);
+		OutputTree(GetParseTree(),ofile);
 	}
-
-#ifdef	_DEBUG	
-	fclose(stream);
-#endif
 
 	// Delete the temporary preprocessed source file
 	ifile.close();

@@ -168,5 +168,25 @@ Test(
 	matrix m4=MatrixFunc(af);
 
 	attribute("name",f1);
-	f1=(f1==0)?p2:f1;
+//	f1=(f1==0)?p2:f1;
+
+	illuminate(P)
+	{
+		printf("%p",P);
+	}
+
+	illuminate(P,vector(1,0,0),0.707)
+	{
+		printf("%p",P);
+	}
+
+	illuminance(P)
+	{
+		printf("%p",P);
+	}
+
+	illuminance(P,vector(0,1,0),0.707)
+	{
+		printf("%p",P);
+	}
 }
