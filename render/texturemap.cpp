@@ -1016,10 +1016,10 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 
 	val.resize( m_SamplesPerPixel );
 
-	TqFloat ss1 = s1 - swidth;
-	TqFloat tt1 = t1 - twidth;
-	TqFloat ss2 = s1 + swidth;
-	TqFloat tt2 = t1 + twidth;
+	TqFloat ss1 = s1 - swidth - (sblur*0.5f);
+	TqFloat tt1 = t1 - twidth - (tblur*0.5f);
+	TqFloat ss2 = s1 + swidth + (sblur*0.5f);
+	TqFloat tt2 = t1 + twidth + (tblur*0.5f);
 
 	m_tempval1 = 0.0f;
 	m_tempval2 = 0.0f;
