@@ -2323,7 +2323,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_illuminate(POINTVAL P, DEFVOIDPARAMIMPL)
 	static CqVMStackEntry Angle;
 
 	Axis=CqVector3D(0,0,0);
-	Angle=(TqFloat)-1.0f;
+	Angle=(TqFloat)RI_PI;
 
 	SO_illuminate(P, Axis, Angle, pShader);
 }
