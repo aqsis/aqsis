@@ -291,7 +291,7 @@ TqFloat CqBucket::MaxDepth( TqInt iXPos, TqInt iYPos )
 void CqBucket::FilterBucket()
 {
 	CqImagePixel * pie;
-
+	
 
 	CqColor* pCols = new CqColor[ XSize() * YSize() ];
 	CqColor* pOpacs = new CqColor[ XSize() * YSize() ];
@@ -378,6 +378,7 @@ void CqBucket::FilterBucket()
 
 			if ( NULL != QGetRenderContext() ->optCurrent().pshadImager() && NULL != QGetRenderContext() ->optCurrent().pshadImager() ->pShader() )
 			{
+				QGetRenderContext() ->Stats().MakeFilterBucket().Stop();
 				// Init & Execute the imager shader
 			
 				QGetRenderContext() ->optCurrent().InitialiseColorImager( 1, 1,
@@ -397,8 +398,9 @@ void CqBucket::FilterBucket()
 					imager = QGetRenderContext() ->optCurrent().GetOpacityImager( x , y );
 					pOpacs[ i ] = imager;
 				}
+				QGetRenderContext() ->Stats().MakeFilterBucket().Start();
 			}
-
+			
 			if ( SampleCount > 0 )
 				pDepths[ i++ ] = d / SampleCount;
 			else

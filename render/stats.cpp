@@ -215,13 +215,13 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "SampleTexture       : "; 
 		TimeToString( MSG, m_timeTM.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
 		MSG << "Combine             : "; 
-		TimeToString( MSG, m_timeDB.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		TimeToString( MSG, m_timeCombine.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
 		MSG << "Project             : "; 
 		TimeToString( MSG, m_timeProject.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
 		MSG << "FilterBucket        : "; 
-		TimeToString( MSG, m_timeCombine.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
-		MSG << "DisplayBucket       : "; 
 		TimeToString( MSG, m_timeFB.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "DisplayBucket       : "; 
+		TimeToString( MSG, m_timeDB.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
 		MSG << "MakeTexture         : "; 
 		TimeToString( MSG, m_timeMakeTexture.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
 		MSG << "MakeShadow          : "; 
