@@ -539,17 +539,14 @@ CqMicroPolyGridBase* CqSurface::Dice()
 	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
 	for ( iUP = m_aUserParams.begin(); iUP != end ; iUP++ )
 	{
-		if( ( *iUP )->Class() == class_varying || ( *iUP )->Class() == class_vertex )
-		{
-			if ( NULL != pGrid->pAttributes() ->pshadSurface() )
-				pGrid->pAttributes() ->pshadSurface() ->SetArgument( ( *iUP ), this );
+		if ( NULL != pGrid->pAttributes() ->pshadSurface() )
+			pGrid->pAttributes() ->pshadSurface() ->SetArgument( ( *iUP ), this );
 
-			if ( NULL != pGrid->pAttributes() ->pshadDisplacement() )
-				pGrid->pAttributes() ->pshadDisplacement() ->SetArgument( ( *iUP ), this );
+		if ( NULL != pGrid->pAttributes() ->pshadDisplacement() )
+			pGrid->pAttributes() ->pshadDisplacement() ->SetArgument( ( *iUP ), this );
 
-			if ( NULL != pGrid->pAttributes() ->pshadAtmosphere() )
-				pGrid->pAttributes() ->pshadAtmosphere() ->SetArgument( ( *iUP ), this );
-		}
+		if ( NULL != pGrid->pAttributes() ->pshadAtmosphere() )
+			pGrid->pAttributes() ->pshadAtmosphere() ->SetArgument( ( *iUP ), this );
 	}
 
 	PostDice( pGrid );
