@@ -4635,8 +4635,6 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
         TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
         TIFFSetField( ptex, TIFFTAG_PIXAR_TEXTUREFORMAT, MIPMAP_HEADER );
         TIFFSetField( ptex, TIFFTAG_PIXAR_WRAPMODES, modes );
-        TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, Source.SamplesPerPixel() );
-        TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
         TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
         int log2 = MIN( Source.XRes(), Source.YRes() );
         log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );

@@ -71,6 +71,7 @@ enum EqBufferType
 {
     BufferType_RGBA = 0,
     BufferType_Float,
+	BufferType_Int16,
 };
 
 
@@ -287,6 +288,45 @@ public:
 }
 ;
 
+
+//----------------------------------------------------------------------
+/** \class CqFloatTextureMapBuffer
+ * Class referencing a buffer in the image map cache in floating point format. 
+ */
+
+class Cq16bitTextureMapBuffer : public CqTextureMapBuffer
+{
+public:
+    Cq16bitTextureMapBuffer() : CqTextureMapBuffer()
+    {}
+    virtual	~Cq16bitTextureMapBuffer()
+    {}
+
+    virtual TqFloat	GetValue(TqInt x, TqInt y, TqInt sample)
+    {
+        TqInt iv = y * ( m_Width * ElemSize() );
+        TqInt iu = x * ElemSize();
+        return ( (reinterpret_cast<TqUshort*>(&m_pBufferData[ iv + iu ]))[sample] / 65536.0f );
+    }
+    virtual void	SetValue(TqInt x, TqInt y, TqInt sample, TqFloat value)
+    {
+        TqInt iv = y * ( m_Width * ElemSize() );
+        TqInt iu = x * ElemSize();
+        (reinterpret_cast<TqUshort*>(&m_pBufferData[ iv + iu ]))[sample] = static_cast<TqUshort>( value * 65536.0f );
+    }
+    virtual TqInt	ElemSize()
+    {
+        return( m_Samples * sizeof(TqUshort) );
+    }
+    /** Get the type of the data in the buffer
+     */
+    virtual EqBufferType	BufferType()
+    {
+        return( BufferType_Int16 );
+    }
+}
+;
+
 //----------------------------------------------------------------------
 /** \class CqShadowMapBuffer
  * Class referencing a depth buffer in the image map cache. 
@@ -466,7 +506,18 @@ public:
 
         case SAMPLEFORMAT_UINT:
         default:
-            pRes = new CqTextureMapBuffer();
+			{
+				switch( m_BitsPerSample )
+				{
+					case 16:
+						pRes = new Cq16bitTextureMapBuffer();
+						break;
+					case 8:
+					default:
+						pRes = new CqTextureMapBuffer();
+						break;
+				}
+			}
             break;
         }
         pRes->Init( xorigin, yorigin, width, height, m_SamplesPerPixel, directory, fProt );
@@ -513,10 +564,13 @@ public:
 
     static void WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUlong twidth, TqUlong theight, TqInt compression, TqInt quality );
     static void WriteImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqInt compression, TqInt quality );
+
     static void WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );
     static void WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality );
     static void WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );
     static void WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality );
+    static void WriteImage( TIFF* ptex, TqUshort* raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );
+    static void WriteTileImage( TIFF* ptex, TqUshort* raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality );
 
 TIFF*	pImage()			{ return( m_pImage ); }
     const TIFF*	pImage() const	{ return( m_pImage ); }
@@ -534,6 +588,7 @@ protected:
     TqInt	m_PlanarConfig;			///< TIFF planar configuration type.
     TqInt	m_SamplesPerPixel;		///< Number of samples per pixel.
     TqInt	m_SampleFormat;			///< Format of the sample elements, i.e. RGBA, or IEEE
+	TqInt	m_BitsPerSample;		///< Number of bits per sample element, 8 or 16.
 
     EqTexFormat	m_Format;			///< Image storage format type.
 

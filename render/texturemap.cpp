@@ -887,8 +887,12 @@ void CqTextureMap::Open()
         TIFFGetField( m_pImage, TIFFTAG_SAMPLESPERPIXEL, &samplesperpixel );
         m_SamplesPerPixel = samplesperpixel;
         uint16 sampleformat;
-        TIFFGetField( m_pImage, TIFFTAG_SAMPLEFORMAT, &sampleformat );
+        TIFFGetFieldDefaulted( m_pImage, TIFFTAG_SAMPLEFORMAT, &sampleformat );
         m_SampleFormat = sampleformat;
+
+        uint16 bitspersample;
+        TIFFGetFieldDefaulted( m_pImage, TIFFTAG_BITSPERSAMPLE, &bitspersample );
+        m_BitsPerSample = bitspersample;
 
         TIFFGetField( m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &pFormat );
         TIFFGetField( m_pImage, TIFFTAG_PIXAR_WRAPMODES, &pModes );
@@ -1199,6 +1203,43 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlo
 
 
 //----------------------------------------------------------------------
+/** Write an image to an open TIFF file in the current directory as straight storage.
+ * as 16 bit int values
+ */
+
+void CqTextureMap::WriteImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
+{
+    TqChar version[ 80 ];
+    TIFFCreateDirectory( ptex );
+
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+    sprintf( version, "%s %s", STRNAME, VERSION_STR );
+#else
+    sprintf( version, "%s %s", STRNAME, VERSION );
+#endif
+    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
+    TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
+    TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
+    TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
+    TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 16 );
+    TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
+    TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
+    TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
+    TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression ); /* COMPRESSION_DEFLATE */
+    TIFFSetField( ptex, TIFFTAG_ROWSPERSTRIP, 1 );
+    TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
+
+    TqUshort *pdata = raster;
+    for ( TqUlong i = 0; i < length; i++ )
+    {
+        TIFFWriteScanline( ptex, pdata, i );
+        pdata += ( width * samples );
+    }
+    TIFFWriteDirectory( ptex );
+}
+
+
+//----------------------------------------------------------------------
 /** Write an image to an open TIFF file in the current directory as tiled storage.
  * determine the size and type from the buffer.
  */
@@ -1216,6 +1257,12 @@ void CqTextureMap::WriteImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqInt co
     case BufferType_Float:
         {
             WriteImage( ptex, static_cast<TqFloat*>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), compression, quality );
+            break;
+        }
+
+    case BufferType_Int16:
+        {
+            WriteImage( ptex, static_cast<TqUshort*>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), compression, quality );
             break;
         }
     }
@@ -1239,6 +1286,12 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUl
     case BufferType_Float:
         {
             WriteTileImage( ptex, static_cast<TqFloat*>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), twidth, theight, pBuffer->Samples(), compression, quality );
+            break;
+        }
+
+    case BufferType_Int16:
+        {
+            WriteTileImage( ptex, static_cast<TqUshort*>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), twidth, theight, pBuffer->Samples(), compression, quality );
             break;
         }
     }
@@ -1306,6 +1359,70 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
 
     }
 }
+
+
+//----------------------------------------------------------------------
+/** Write an image to an open TIFF file in the current directory as tiled storage.
+ * as 16 bit int values
+ */
+
+void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
+{
+    //TIFFCreateDirectory(ptex);
+    TqChar version[ 80 ];
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+    sprintf( version, "%s %s", STRNAME, VERSION_STR );
+#else
+    sprintf( version, "%s %s", STRNAME, VERSION );
+#endif
+    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
+    TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
+    TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
+    TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
+    TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 16 );
+    TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
+    TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
+    TIFFSetField( ptex, TIFFTAG_TILEWIDTH, twidth );
+    TIFFSetField( ptex, TIFFTAG_TILELENGTH, tlength );
+    TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
+    TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression );
+
+
+    TqInt tsize = twidth * tlength;
+    TqInt tperrow = ( width + twidth - 1 ) / twidth;
+    TqUshort* ptile = static_cast<TqUshort*>( _TIFFmalloc( tsize * samples * sizeof( TqUshort ) ) );
+
+    if ( ptile != NULL )
+    {
+        TqInt ctiles = tperrow * ( ( length + tlength - 1 ) / tlength );
+        TqInt itile;
+        for ( itile = 0; itile < ctiles; itile++ )
+        {
+            TqInt x = ( itile % tperrow ) * twidth;
+            TqInt y = ( itile / tperrow ) * tlength;
+            TqUshort* ptdata = raster + ( ( y * width ) + x ) * samples;
+            // Clear the tile to black.
+            memset( ptile, 0, tsize * samples * sizeof( TqUshort ) );
+            for ( TqUlong i = 0; i < tlength; i++ )
+            {
+                for ( TqUlong j = 0; j < twidth; j++ )
+                {
+                    if ( ( x + j ) < width && ( y + i ) < length )
+                    {
+                        TqInt ii;
+                        for ( ii = 0; ii < samples; ii++ )
+                            ptile[ ( i * twidth * samples ) + ( ( ( j * samples ) + ii ) ) ] = ptdata[ ( ( j * samples ) + ii ) ];
+                    }
+                }
+                ptdata += ( width * samples );
+            }
+            TIFFWriteTile( ptex, ptile, x, y, 0, 0 );
+        }
+        TIFFWriteDirectory( ptex );
+
+    }
+}
+
 
 //----------------------------------------------------------------------
 /** Write an image to an open TIFF file in the current directory as tiled storage.
