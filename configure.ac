@@ -325,6 +325,8 @@ plugins/jpg2tif/Makefile \
 plugins/pcx2tif/Makefile \
 plugins/ppm2tif/Makefile \
 plugins/tga2tif/Makefile \
+plugins/bmp2tif/Makefile \
+plugins/exr2tif/Makefile \
 render/Makefile \
 ribfiles/Makefile \
 shaders/Makefile \
