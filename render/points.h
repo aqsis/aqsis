@@ -293,7 +293,12 @@ public:
     CqMicroPolyGridPoints( TqInt cu, TqInt cv, CqSurface* pSurface ) : CqMicroPolyGrid( cu, cv, pSurface )	{}
     virtual	~CqMicroPolyGridPoints()	{}
 
-    virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
+    virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
+
+    virtual	TqInt	GridSize() const
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->uGridRes() );
+    }
 };
 
 class CqMotionMicroPolyGridPoints : public CqMotionMicroPolyGrid

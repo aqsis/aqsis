@@ -445,7 +445,7 @@ void CqPoints::InitialiseMaxWidth()
     }
 }
 
-void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax )
+void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )
 {
     if ( NULL == P() )
         return ;

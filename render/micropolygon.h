@@ -337,11 +337,11 @@ private:
     TqBool	m_bGeometricNormals;	///< Flag indicating geometric normals have been filled in and don't need to be calculated during shading.
     CqSurface* m_pSurface;	///< Pointer to the attributes for this grid.
     CqCSGTreeNode* m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
-    IqShaderExecEnv* m_pShaderExecEnv;	///< Pointer to the shader execution environment for this grid.
     TqBool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
     CqBitVector	m_CulledPolys;		///< Bitvector indicating whether the individual micro polygons are culled.
     std::vector<IqShaderData*>	m_apShaderOutputVariables;	///< Vector of pointers to shader output variables.
 protected:
+    IqShaderExecEnv* m_pShaderExecEnv;	///< Pointer to the shader execution environment for this grid.
 
 }
 ;
