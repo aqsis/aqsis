@@ -1,5 +1,5 @@
 if GLUT
-SUBDIRS = all images libaqsistypes libcodegenvm libdd libddmsimple libddmsock filebuffer framebuffer_glut framebuffer_glut_z librib2 librib2ri librib2stream libslparse render ribfiles shadowmap slpp teqser aqsl shaders aqsis libri2rib aqsltell plugins
+SUBDIRS = all images libaqsistypes libcodegenvm libdd libddmsimple libddmsock filebuffer framebuffer_glut framebuffer_glut_z librib2 librib2ri librib2stream libslparse render ribfiles shadowmap slpp teqser aqsl shaders aqsis libri2rib aqsltell plugins releasearchive
 else
 SUBDIRS = all images libaqsistypes libcodegenvm libdd libddmsimple libddmsock filebuffer librib2 librib2ri librib2stream libslparse render ribfiles shadowmap slpp teqser aqsl shaders aqsis libri2rib aqsltell plugins
 endif

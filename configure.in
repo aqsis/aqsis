@@ -1,5 +1,5 @@
 AC_INIT()
-AM_INIT_AUTOMAKE(aqsis,0.6.0000)
+AM_INIT_AUTOMAKE(aqsis,0.6.0001)
 AC_PREFIX_DEFAULT(/usr/local/aqsis)
 
 AC_DEFINE(STRNAME,"Aqsis")
@@ -72,5 +72,6 @@ plugins/jpg2tif/Makefile \
 plugins/ppm2tif/Makefile \
 plugins/pcx2tif/Makefile \
 plugins/tga2tif/Makefile \
+releasearchive/Makefile \
 Makefile )
 

@@ -1,4 +1,4 @@
-EXTRA_DIST = DPProctext.h ambientlight.sl borg_metal.sl bumpy.sl constant.sl debug.sl dented.sl depthcue.sl distantlight.sl dpbluemarble.sl fog.sl matte.sl metal.sl noises.h paintedplastic.sl patterns.h plastic.sl pointlight.sl randgrid.sl shaders.dsp shadowspot.sl shinymetal.sl spotlight.sl wavy.sl
+EXTRA_DIST = DPProctext.h ambientlight.sl borg_metal.sl bumpy.sl constant.sl debug.sl dented.sl depthcue.sl distantlight.sl dpbluemarble.sl fog.sl matte.sl metal.sl noises.h paintedplastic.sl patterns.h plastic.sl pointlight.sl randgrid.sl shaders.dsp shadowspot.sl shinymetal.sl spotlight.sl wavy.sl uvtest.sl spacetest.sl show_st.sl cellnoisetest.sl brickbump.sl
 
 shaderdir = $(prefix)/shaders
 

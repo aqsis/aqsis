@@ -3,7 +3,7 @@ SUBDIRS = . tests
 bin_PROGRAMS = aqslcomp
 bin_SCRIPTS = aqsl
 
-EXTRA_DIST = aqsl aqsl_win.cpp aqsl.dsp macaqsl
+EXTRA_DIST = aqsl aqsl_win.cpp aqsl.dsp aqslcomp.dsp macaqsl
 
 aqslcomp_SOURCES = aqslcomp.cpp
 aqslcomp_LDADD = $(top_builddir)/libslparse/libslparse.la $(top_builddir)/libcodegenvm/libcodegenvm.la $(top_builddir)/libaqsistypes/libaqsistypes.la
