@@ -173,7 +173,7 @@ public:
     {
         TqInt iv = y * ( m_Width * ElemSize() );
         TqInt iu = x * ElemSize();
-        return ( m_pBufferData[ iv + iu + sample ] / 256.0f );
+        return ( m_pBufferData[ iv + iu + sample ] / 255.0f );
     }
     /** Set the float value at the specified pixel/element (0.0 --> 1.0)
      */
@@ -181,7 +181,7 @@ public:
     {
         TqInt iv = y * ( m_Width * ElemSize() );
         TqInt iu = x * ElemSize();
-        m_pBufferData[ iv + iu + sample ] = static_cast<TqUchar>( value * 256.0f );
+        m_pBufferData[ iv + iu + sample ] = static_cast<TqUchar>( value * 255.0f );
     }
     /** Get the origin of this buffer segment.
      */
@@ -306,13 +306,13 @@ public:
     {
         TqInt iv = y * ( m_Width * ElemSize() );
         TqInt iu = x * ElemSize();
-        return ( (reinterpret_cast<TqUshort*>(&m_pBufferData[ iv + iu ]))[sample] / 65536.0f );
+        return ( (reinterpret_cast<TqUshort*>(&m_pBufferData[ iv + iu ]))[sample] / 65535.0f );
     }
     virtual void	SetValue(TqInt x, TqInt y, TqInt sample, TqFloat value)
     {
         TqInt iv = y * ( m_Width * ElemSize() );
         TqInt iu = x * ElemSize();
-        (reinterpret_cast<TqUshort*>(&m_pBufferData[ iv + iu ]))[sample] = static_cast<TqUshort>( value * 65536.0f );
+        (reinterpret_cast<TqUshort*>(&m_pBufferData[ iv + iu ]))[sample] = static_cast<TqUshort>( value * 65535.0f );
     }
     virtual TqInt	ElemSize()
     {

@@ -490,6 +490,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 
 void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<TqFloat>& val )
 {
+    QGetRenderContext() ->Stats().TextureMapTimer().Start(); 
     // u/v is average of sample positions.
     TqFloat u = ( ( u2 - u1 ) * 0.5f ) + u1;
     TqFloat v = ( ( v2 - v1 ) * 0.5f ) + v1;
@@ -649,6 +650,7 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 
     }
 
+    QGetRenderContext() ->Stats().TextureMapTimer().Stop(); 
 }
 
 //----------------------------------------------------------------------
@@ -872,6 +874,7 @@ void CqTextureMap::Open()
 
     // Now open it as a tiff file.
     m_pImage = TIFFOpen( strRealName.c_str(), "r" );
+    std::cerr << info << "TextureMap: \"" << strRealName.c_str() << "\" is open" << std::endl;
     if ( m_pImage )
     {
         TqPchar pFormat = 0;
