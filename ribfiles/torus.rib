@@ -6,6 +6,8 @@ PixelSamples 2 2
 
 ShadingRate 1.0
 
+Quantize "rgba" 255 0 255 0.5
+
 Option "statistics" "endofframe" [1]
 
 Option "searchpath" "shader" ["../shaders:&"]
