@@ -8,3 +8,7 @@ install-data-local:
 	$(INSTALL_DATA) $(srcdir)/*.sl $(shaderdir)
 	PATH=$$PATH:$(bindir); cd $(shaderdir); for file in $$(find . -name "*.sl"); do $(bindir)/aqsl $$file; done
 
+uninstall-local:
+	rm -f $(shaderdir)/*.h
+	rm -f $(shaderdir)/*.sl
+	rm -f $(shaderdir)/*.slx

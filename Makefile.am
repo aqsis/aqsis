@@ -24,7 +24,7 @@ test:
 
 devicepath = $(sysconfdir)
 devicedriver = $(devicepath)/ddmsock.ini
-devicelocal = $(srcdir)/libddmsock/ddmsock.ini
+devicelocal = $(top_builddir)/libddmsock/ddmsock.ini
 
 all-local:
 	cat /dev/null > $(devicelocal)
@@ -41,5 +41,6 @@ install-data-local:
 
 uninstall-local:
 	rm $(devicedriver)
+	rm $(devicelocal)
 
 
