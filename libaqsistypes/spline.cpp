@@ -28,26 +28,26 @@
 
 START_NAMESPACE( Aqsis )
 
-__Basis	gBezierBasis	= {{ -1, 3, -3, 1},
-                        {3, -6, 3, 0},
-                        { -3, 3, 0, 0},
-                        {1, 0, 0, 0}};
-__Basis	gBSplineBasis	= {{ -1, 3, -3, 1},
-                         {3, -6, 3, 0},
-                         { -3, 0, 3, 0},
-                         {1, 4, 1, 0}};
-__Basis	gCatmullRomBasis	= {{ -1, 3, -3, 1},
-                            {2, -5, 4, -1},
-                            { -1, 0, 1, 0},
-                            {0, 2, 0, 0}};
-__Basis	gHermiteBasis	= {{ 2, 1, -2, 1},
-                         { -3, -2, 3, -1},
-                         {0, 1, 0, 0},
-                         {1, 0, 0, 0}};
-__Basis	gPowerBasis	= {{ 1, 0, 0, 0},
-                       {0, 1, 0, 0},
-                       {0, 0, 1, 0},
-                       {0, 0, 0, 1}};
+__Basis	gBezierBasis	= {{ -1.0f,       3.0f,      -3.0f,       1.0f},
+                         {  3.0f,      -6.0f,       3.0f,       0.0f},
+                         { -3.0f,       3.0f,       0.0f,       0.0f},
+                         {  1.0f,       0.0f,       0.0f,       0.0f}};
+__Basis	gBSplineBasis	= {{ -1.0f/6.0f,  0.5f,      -0.5f,       1.0f/6.0f},
+                          {  0.5f,      -1.0f,       0.5f,       0.0f},
+                          { -0.5f,       0.0f,	      0.5f,       0.0f},
+                          {  1.0f/6.0f,  2.0f/3.0f,  1.0f/6.0f,  0.0f}};
+__Basis	gCatmullRomBasis	= {{ -0.5f,       1.5f,      -1.5f,       0.5f},
+                           {  1.0f,      -2.5f,       2.0f,      -0.5f},
+                           { -0.5f,       0.0f,       0.5f,       0.0f},
+                           {  0.0f,       1.0f,       0.0f,       0.0f}};
+__Basis	gHermiteBasis	= {{  2.0f,       1.0f,      -2.0f,       1.0f},
+                          { -3.0f,      -2.0f,       3.0f,      -1.0f},
+                          {  0.0f,       1.0f,       0.0f,       0.0f},
+                          {  1.0f,       0.0f,       0.0f,       0.0f}};
+__Basis	gPowerBasis	= {{  1.0f,       0.0f,       0.0f,       0.0f},
+                        {  0.0f,       1.0f,       0.0f,       0.0f},
+                        {  0.0f,       0.0f,       1.0f,       0.0f},
+                        {  0.0f,       0.0f,       0.0f,       1.0f}};
 
 
 //---------------------------------------------------------------------
@@ -188,7 +188,7 @@ CqVector4D CqSplineCubic::EvaluateFD()
 
 TqInt CqSplineCubic::cSections() const
 {
-    return ( ( m_cu -4 ) / m_Step + 1 );
+    return ( ( ( m_cu -4 ) / m_Step ) + 1 );
 }
 
 END_NAMESPACE( Aqsis )

@@ -764,6 +764,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_fspline( FLOATVAL value, DEFPARAMVARIMPL )
     INIT_SO
 
     CqSplineCubic spline( cParams );
+	spline.SetBasis("catmull-rom");
 
     CHECKVARY( value )
     TqInt v;
@@ -922,7 +923,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_sfspline( STRINGVAL basis, FLOATVAL value, DEFPAR
 
     BEGIN_UNIFORM_SECTION
     GETSTRING( basis );
-    spline.SetmatBasis( STRING( basis ) );
+    spline.SetBasis( STRING( basis ) );
     END_UNIFORM_SECTION
 
     BEGIN_VARYING_SECTION
@@ -976,7 +977,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_scspline( STRINGVAL basis, FLOATVAL value, DEFPAR
 
     BEGIN_UNIFORM_SECTION
     GETFLOAT( basis );
-    spline.SetmatBasis( STRING( basis ) );
+    spline.SetBasis( STRING( basis ) );
     END_UNIFORM_SECTION
 
     BEGIN_VARYING_SECTION
@@ -1030,7 +1031,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_spspline( STRINGVAL basis, FLOATVAL value, DEFPAR
 
     BEGIN_UNIFORM_SECTION
     GETSTRING( basis );
-    spline.SetmatBasis( STRING( basis ) );
+    spline.SetBasis( STRING( basis ) );
     END_UNIFORM_SECTION
 
     BEGIN_VARYING_SECTION
@@ -5080,7 +5081,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_sfsplinea( STRINGVAL basis, FLOATVAL value, FLOAT
 
     BEGIN_UNIFORM_SECTION
     GETSTRING( basis );
-    spline.SetmatBasis( STRING( basis ) );
+    spline.SetBasis( STRING( basis ) );
     END_UNIFORM_SECTION
 
     BEGIN_VARYING_SECTION
@@ -5134,7 +5135,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_scsplinea( STRINGVAL basis, FLOATVAL value, COLOR
 
     BEGIN_UNIFORM_SECTION
     GETSTRING( basis );
-    spline.SetmatBasis( STRING( basis ) );
+    spline.SetBasis( STRING( basis ) );
     END_UNIFORM_SECTION
 
     BEGIN_VARYING_SECTION
@@ -5188,7 +5189,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_spsplinea( STRINGVAL basis, FLOATVAL value, POINT
 
     BEGIN_UNIFORM_SECTION
     GETSTRING( basis );
-    spline.SetmatBasis( STRING( basis ) );
+    spline.SetBasis( STRING( basis ) );
     END_UNIFORM_SECTION
 
     BEGIN_VARYING_SECTION
