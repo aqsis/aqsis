@@ -25,6 +25,10 @@
 
 #include "log.h"
 
+/* This is a basic layout that is used to display the whole messages.
+	The format is:
+		PRIORITY: message
+*/
 namespace log4cpp {
 
     AqLayout::AqLayout() {
@@ -47,6 +51,8 @@ namespace log4cpp {
 
 START_NAMESPACE( Aqsis )
 
+// Constructor
+// Creates a log
 CqLog::CqLog( char* name, bool noConsoleOutput )
 {
 	log4cpp::Category& root = log4cpp::Category::getRoot();
@@ -64,17 +70,19 @@ CqLog::CqLog( char* name, bool noConsoleOutput )
 	m_FirstRun = true;
 }
 
+// Close down the log and shutdown all categories
 CqLog::~CqLog()
 {
 	log4cpp::Category::shutdown();
 }
 
+// Log a message, if possible, don't use this
 void CqLog::log(char* priority, const char* stringFormat, ...)
 {
 
 	if ( m_FirstRun )
 	{
-		std::cout << "using log4cpp 0.3.4b ( licensed under the LGPL )" << std::endl;
+		std::cout << "using log4cpp " << LOG4CPP_VERSION << " ( licensed under the LGPL )" << std::endl;
 
 		m_FirstRun = false;
 	}
@@ -100,11 +108,12 @@ void CqLog::log(char* priority, const char* stringFormat, ...)
 	va_end(va);
 }
 
+// Internal log function for error(), debug() etc. calls, just like log4cpp does it
 void CqLog::log2( log4cpp::Priority::Value priority, const char* stringFormat, ... )
 {
 	if ( m_FirstRun )
 	{
-		std::cout << "using log4cpp 0.3.4b ( licensed under the LGPL )" << std::endl;
+		std::cout << "using log4cpp " << LOG4CPP_VERSION << " ( licensed under the LGPL )" << std::endl;
 
 		m_FirstRun = false;
 	}
@@ -117,6 +126,7 @@ void CqLog::log2( log4cpp::Priority::Value priority, const char* stringFormat, .
 	va_end(va);
 }
 
+// Create a file log, i.e. pipe the output to a file
 void CqLog::createFileLog( std::string filename , std::string name )
 {
 	m_pFileAppender = 
@@ -131,6 +141,7 @@ void CqLog::createFileLog( std::string filename , std::string name )
 	
 }
 
+// Create a std::cout log, i.e. write to console
 void CqLog::createCOUTLog( std::string name )
 {
 	m_pAppender = 
@@ -143,11 +154,13 @@ void CqLog::createCOUTLog( std::string name )
 	m_pRoot->addAppender( m_pAppender );
 }
 
+// Set a message table as the current message table
 void CqLog::setMessageTable( CqMessageTable* pTable )
 {
 	m_pTable = pTable;
 }
 
+// Creeate another file log
 void CqLog::addFileLog( std::string filename, std::string name )
 {
 	// Pass through to createFileLog
@@ -155,17 +168,20 @@ void CqLog::addFileLog( std::string filename, std::string name )
 	createFileLog( filename, name );
 }
 
+// Get an error message, usually called getError( CqLog::*_ERROR_TABLE, CqLog::ERROR_MESSAGE_ID )
 const char* CqLog::getError( int table, int error_id )
 {
 	// Call the MessageTable
 	return m_pTable->getError( table, error_id );
 }
 
+// Get a pointer to the current message table
 CqMessageTable* CqLog::getMessageTable()
 {
 	return m_pTable;
 }
 
+// Remove a file log, i.e. close the file
 void CqLog::removeFileLog( std::string name )
 {
 	m_pRoot->removeAppender( m_pRoot->getAppender( name ) );
