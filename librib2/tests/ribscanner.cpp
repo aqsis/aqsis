@@ -1,7 +1,9 @@
 #include "librib.h"
 #include "bdec.h"
+#include "libribtypes.h"
+#include "parser.h"
 
-extern int yylex();
+extern int yylex(YYSTYPE*);
 namespace librib
 {
 extern CqRibBinaryDecoder* BinaryDecoder;
@@ -30,8 +32,9 @@ RtBasis	RiPowerBasis	= {{ 1, 0, 0, 0},
 
 int main( int argc, char* argv[] )
 {
+	YYSTYPE data;
 	librib::BinaryDecoder = new librib::CqRibBinaryDecoder( stdin );
-	while ( yylex() )
+	while ( yylex(&data) )
 	{}
 
 	delete( librib::BinaryDecoder );
