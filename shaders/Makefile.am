@@ -1,18 +1,18 @@
-SHADER_INCLUDES = $(wildcard $(srcdir)/*.h)
-SHADERS = $(wildcard $(srcdir)/*.sl)
-COMPILED_SHADERS = $(addprefix $(top_builddir)/shaders/,$(notdir $(SHADERS:.sl=.slx)))
+shader_include_files = $(wildcard $(srcdir)/*.h)
+shader_source_files = $(wildcard $(srcdir)/*.sl)
+shader_binary_files = $(addprefix $(top_builddir)/shaders/,$(notdir $(shader_source_files:.sl=.slx)))
 
 .sl.slx:
 	$(top_builddir)/aqsl/aqsl $< -o $@
 
 shadersdir = $(pkgdatadir)/shaders
 
-shaders_DATA = $(SHADER_INCLUDES) $(SHADERS) $(COMPILED_SHADERS)
+shaders_DATA = $(shader_include_files) $(shader_source_files) $(shader_binary_files)
+
+all-local: $(shader_binary_files)
 
 clean-local:
 	rm -f *.slx
 
-all-local: $(COMPILED_SHADERS)
-
-EXTRA_DIST = $(SHADER_INCLUDES) $(SHADERS)
+EXTRA_DIST = $(shader_include_files) $(shader_source_files)
 

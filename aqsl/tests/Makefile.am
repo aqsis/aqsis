@@ -9,3 +9,6 @@ check-local:
 	rm -f *.slx
 	for file in $$(find $(top_srcdir) -name "*.sl" | sort); do $(aqsl) $$file; done
 
+clean-local:
+	rm -f *.slx
+
