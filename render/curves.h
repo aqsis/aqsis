@@ -26,7 +26,6 @@
 
 #ifndef CURVES_H_INCLUDED
 #define CURVES_H_INCLUDED
-START_NAMESPACE(Aqsis)
 
 #include        "aqsis.h"
 #include        "matrix.h"
@@ -36,10 +35,11 @@ START_NAMESPACE(Aqsis)
 #define         _qShareName	CORE
 #include        "share.h"
 
+START_NAMESPACE(Aqsis)
 
 
 /**
- * \class CqCurvesBase
+ * \class CqCurve
  * 
  * Abstract base class for all curve objects.  This class provides facilities
  * for accessing information common to all curves, such as width information.
@@ -168,8 +168,8 @@ public:
                 CqParameter* pParam1, CqParameter* pParam2, 
                 TqBool u
         );
-        TqInt PreSubdivide(std::vector<CqBasicSurface*>& aSplits, TqBool u);
         virtual TqInt Split(std::vector<CqBasicSurface*>& aSplits);
+        TqInt SplitToCurves(std::vector<CqBasicSurface*>& aSplits);
         TqInt SplitToPatch(std::vector<CqBasicSurface*>& aSplits);
         //---------------------------------------------- Inlined Public Methods
 public:
@@ -192,8 +192,6 @@ public:
         ) {     
                 // we can only split curves along v, so enforce this
                 assert(u == false);
-                
-                //printf("Subdivision of type name: %s\n", pParam->strName().c_str());
                 
 		CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
 		CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
@@ -222,6 +220,14 @@ public:
         CqCubicCurveSegment& operator=(const CqCubicCurveSegment& from);
         //---------------------------------------------- Inlined Public Methods
 public:
+        /** Returns the number of facevarying class parameters. */
+	virtual	TqUint	cFaceVarying() const { return 0; }
+        /** Returns the number of uniform class parameters. */
+        virtual	TqUint cUniform() const { return 1; }
+        /** Returns the number of varying class parameters. */
+        virtual	TqUint cVarying() const { return 2; }
+        /** Returns the number of vertex class parameters. */
+	virtual	TqUint	cVertex() const { return 4; }
         /** Returns a string name of the class. */
         virtual CqString strName() const { return "CqCubicCurveSegment"; }
 };
@@ -276,7 +282,7 @@ public:
         /** Returns the number of facevarying class parameters. */
 	virtual	TqUint cFaceVarying() const { return 0; }
         /** Returns the number of uniform class parameters. */
-        virtual	TqUint cUniform() const { return 1; }
+        virtual	TqUint cUniform() const { return m_ncurves; }
         /** Returns the number of varying class parameters. */
         virtual TqUint cVarying() const { return m_nTotalVerts; }
         /** Returns the number of vertex class parameters. */
@@ -303,14 +309,20 @@ public:
         virtual ~CqCubicCurvesGroup();
         virtual	TqUint cVarying() const;
         CqCubicCurvesGroup& operator=(const CqCubicCurvesGroup& from);
+        virtual TqInt Split(std::vector<CqBasicSurface*>& aSplits);
+        virtual void Transform(
+                const CqMatrix& matTx, 
+                const CqMatrix& matITTx, 
+                const CqMatrix& matRTx 
+        );
         //---------------------------------------------- Inlined Public Methods
 public:
         /** Returns the number of facevarying class parameters. */
-	virtual	TqUint	cFaceVarying() const { return 0; }
+	virtual	TqUint cFaceVarying() const { return 0; }
         /** Returns the number of uniform class parameters. */
-        virtual	TqUint cUniform() const { return 1; }
+        virtual	TqUint cUniform() const { return m_ncurves; }
         /** Returns the number of vertex class parameters. */
-	virtual	TqUint	cVertex() const { return m_nTotalVerts; };
+	virtual	TqUint cVertex() const { return m_nTotalVerts; };
         /** Returns a string name of the class. */
         virtual CqString strName() const { return "CqCubicCurvesGroup"; }
 };

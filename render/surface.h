@@ -462,7 +462,7 @@ class _qShareC CqSurface : public CqBasicSurface
 
 		/** Add a primitive variable to the array.
 		 */
-		void AddPrimitiveVariable( CqParameter* pParam )
+		virtual void AddPrimitiveVariable( CqParameter* pParam )
 		{
 			m_aUserParams.push_back( pParam );
 			if( pParam->strName() == "P" )

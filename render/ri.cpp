@@ -2441,14 +2441,9 @@ RtVoid RiCurvesV(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, P
         }
         
         // handle creation of linear and cubic curve groups separately
-        if (strcmp(type, RI_BICUBIC) == 0) 
+        if (strcmp(type, RI_CUBIC) == 0) 
         {
-                CqBasicError(
-                        0, Severity_Normal,
-                        "RiCurvesV: Cubic curves are not supported."
-                );
-                
-                // create a new group of linear curves
+                // create a new group of cubic curves
                 CqCubicCurvesGroup* pSurface =
                         new CqCubicCurvesGroup(ncurves, nvertices, periodic);
                 pSurface->AddRef();
@@ -2466,7 +2461,7 @@ RtVoid RiCurvesV(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, P
         } 
         else if (strcmp(type, RI_LINEAR) == 0) 
         {
-                // create a new group of cubic curves
+                // create a new group of linear curves
                 CqLinearCurvesGroup* pSurface =
                         new CqLinearCurvesGroup(ncurves, nvertices, periodic);
                 
