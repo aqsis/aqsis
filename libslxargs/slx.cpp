@@ -867,7 +867,8 @@ static bool LoadShaderInfo ( char *name )
         strcpy( shaderFileName, name );
 
         // Check if RI_SHADER_EXTENSION is at the very end of the name
-        if ( strstr( name + strlen( name ) - strlen(RI_SHADER_EXTENSION), RI_SHADER_EXTENSION ) == NULL )
+        if ( strlen(name) < strlen(RI_SHADER_EXTENSION) &&
+			 strstr( name + strlen( name ) - strlen(RI_SHADER_EXTENSION), RI_SHADER_EXTENSION ) == NULL )
             strcat( shaderFileName, RI_SHADER_EXTENSION );
 
         stringLength = strlen( currentShaderSearchPath ) + strlen( shaderFileName ) + 2;
@@ -991,7 +992,8 @@ int SLX_SetShader ( char *name )
         stringLength = strlen( name ) + 1;
 
         // Append RI_SHADER_EXTENSION if not given already
-        if ( strstr( name + strlen( name ) - strlen(RI_SHADER_EXTENSION), RI_SHADER_EXTENSION ) == NULL )
+        if ( strlen(name) < strlen(RI_SHADER_EXTENSION) &&
+			 strstr( name + strlen( name ) - strlen(RI_SHADER_EXTENSION), RI_SHADER_EXTENSION ) == NULL )
         {
             // Create new string with .slx
             stringLength = strlen( name ) + strlen( RI_SHADER_EXTENSION ) + 1;
