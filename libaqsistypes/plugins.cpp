@@ -148,11 +148,11 @@ CqPluginBase::DLClose(void *handle)
 
 CqPluginBase::~CqPluginBase()
 {
-	std::list<void*>::iterator i_handle;
-
-	if (!m_activeHandles.empty())
-		for (i_handle=m_activeHandles.begin() ; i_handle != m_activeHandles.end() ; i_handle++)
-			DLClose(*i_handle);
+	while ( !m_activeHandles.empty() )
+	{
+		if( m_activeHandles.front() != NULL )
+			DLClose( m_activeHandles.front() );
+	};
 };
 
 
