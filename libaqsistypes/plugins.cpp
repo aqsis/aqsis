@@ -68,7 +68,10 @@ CqPluginBase::DLOpen( CqString *library )
 #ifdef AQSIS_SYSTEM_WIN32
     handle = ( void* ) LoadLibrary( library->c_str() );
 #else
-    handle = ( void * ) dlopen( library->c_str(), RTLD_NOW | RTLD_GLOBAL );
+    CqString tstring = *library;
+    CqString::size_type pos = tstring.find ("/");
+    if (pos == CqString::npos) tstring = CqString("./") + *library;
+    handle = ( void * ) dlopen( tstring.c_str(), RTLD_NOW | RTLD_GLOBAL );
 #endif
 #endif
     if ( handle ) m_activeHandles.push_back( handle );
@@ -151,7 +154,7 @@ CqPluginBase::DLError( void )
     LocalFree( lpMsgBuf );
 #elif not defined AQSIS_SYSTEM_MACOSX
     char* error = dlerror();
-    if( dlerror )
+    if( error )
 	    errorlog = error;
 #endif
 
