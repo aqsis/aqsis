@@ -32,8 +32,8 @@
 #define	STRNAME		"Aqsis"
 
 #define	VERMAJOR	0
-#define	VERMINOR	6
-#define	BUILD		6
+#define	VERMINOR	7
+#define	BUILD		0
 
 #define	STRX(x)	#x
 #define	STR(x)	STRX(x)
