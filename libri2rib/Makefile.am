@@ -6,5 +6,4 @@ libri2rib_la_SOURCES = ascii.cpp ascii.h context.cpp context.h dictionary.cpp di
 
 bin_PROGRAMS = ri2ribtest
 ri2ribtest_SOURCES = ri2rib_test.c
-ri2ribtest_LDADD = $(top_builddir)/libri2rib/libri2rib.la
-ri2ribtest_LDFLAGS = -lstdc++
+ri2ribtest_LDADD = $(top_builddir)/libri2rib/libri2rib.la -lstdc++
