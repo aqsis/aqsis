@@ -191,13 +191,18 @@ void CqCSGTreeNode::ProcessSampleList(std::vector<SqImageSample>& samples)
 		if(bNewI == bCurrentI)
 			i = samples.erase(i);
 		else
-		// Otherwise promote it to this node
+		// Otherwise promote it to this node unless we are a the top.
 		{
 			bCurrentI = bNewI;
 			CqCSGTreeNode* poldnode = i->m_pCSGNode;
-			i->m_pCSGNode = this;
+			if(NULL != this->pParent())
+			{
+				i->m_pCSGNode = this;
+				AddRef();
+			}
+			else
+				i->m_pCSGNode = NULL;
 			poldnode->Release();
-			AddRef();
 			i++;
 		}
 	}

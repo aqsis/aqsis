@@ -229,13 +229,20 @@ void CqImagePixel::Combine()
 	for(std::vector<std::vector<SqImageSample> >::iterator samples = m_aValues.begin(); samples != m_aValues.end(); samples++)
 	{
 		// Find out if any of the samples are in a CSG tree.
-		for(std::vector<SqImageSample>::iterator isample = samples->begin(); isample != samples->end(); isample++)
+		while(1)
 		{
-			if(NULL != isample->m_pCSGNode)
+			TqBool bProcessed = TqFalse;
+			for(std::vector<SqImageSample>::iterator isample = samples->begin(); isample != samples->end(); isample++)
 			{
-				isample->m_pCSGNode->ProcessTree(*samples);
-				break;
+				if(NULL != isample->m_pCSGNode)
+				{
+					isample->m_pCSGNode->ProcessTree(*samples);
+					bProcessed = TqTrue;
+					break;
+				}
 			}
+			if(!bProcessed)
+				break;
 		}
 		
 		CqColor samplecolor = gColBlack;
