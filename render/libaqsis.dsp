@@ -141,6 +141,10 @@ SOURCE=.\patch.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\plugins.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\points.cpp
 # End Source File
 # Begin Source File
@@ -306,6 +310,10 @@ SOURCE=.\parameters.h
 # Begin Source File
 
 SOURCE=.\patch.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\plugins.h
 # End Source File
 # Begin Source File
 
