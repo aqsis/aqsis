@@ -6,23 +6,27 @@ if not exist ..\binary-archive\examples mkdir ..\binary-archive\examples
 if not exist ..\binary-archive\lib mkdir ..\binary-archive\lib
 if not exist ..\binary-archive\include mkdir ..\binary-archive\include
 if not exist ..\binary-archive\procedures mkdir ..\binary-archive\procedures
+if not exist ..\binary-archive\displays mkdir ..\binary-archive\displays
 
 erase /f /s /q ..\binary-archive\*.*
 
 cd ..\binary-archive
 
 copy ..\library\release\aqsis.exe .
-copy ..\library\release\filebuffer.exe .
-copy ..\library\release\framebuffer_glut.exe .
-copy ..\library\release\framebuffer_glut_z.exe .
-copy ..\library\release\shadowmap.exe .
 copy ..\library\release\aqsl.exe .
 copy ..\library\release\aqslcomp.exe .
 copy ..\library\release\slpp.exe .
 copy ..\library\release\teqser.exe .
 copy ..\ddmsock.ini .
 
-cd procedures
+cd displays
+
+copy ..\..\library\release\filebuffer.exe .
+copy ..\..\library\release\framebuffer_glut.exe .
+copy ..\..\library\release\framebuffer_glut_z.exe .
+copy ..\..\library\release\shadowmap.exe .
+
+cd ..\procedures
 
 copy ..\..\library\release\gif2tif.dll .
 copy ..\..\library\release\jpg2tif.dll .
