@@ -17,7 +17,6 @@ copy ..\library\release\aqsl.exe .
 copy ..\library\release\aqslcomp.exe .
 copy ..\library\release\slpp.exe .
 copy ..\library\release\teqser.exe .
-copy ..\ddmsock.ini .
 
 cd displays
 
@@ -25,6 +24,7 @@ copy ..\..\library\release\filebuffer.exe .
 copy ..\..\library\release\framebuffer_glut.exe .
 copy ..\..\library\release\framebuffer_glut_z.exe .
 copy ..\..\library\release\shadowmap.exe .
+copy ..\..\ddmsock.ini .
 
 cd ..\procedures
 
@@ -49,17 +49,19 @@ copy ..\..\README .
 copy ..\..\NEWS .
 copy ..\..\BUILD .
 copy ..\..\AUTHORS .
-copy ..\..\License.txt .
+copy ..\..\COPYING .
 
 cd ..\examples
 copy ..\..\ribfiles\*.rib .
 
 cd ..\lib
 copy ..\..\library\release\libri2rib.lib .
+copy ..\..\library\release\libslxargs.lib .
 
 cd ..\include
 copy ..\..\render\ri.h .
 copy ..\..\libaqsistypes\win32\intel\share.h .
+copy ..\..\libslxargs\slx.h .
 
 cd ..\..\
 erase /f /q Aqsis_Win32.zip

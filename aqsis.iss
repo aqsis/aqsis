@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=Aqsis
-AppVerName=Aqsis Renderer v0.6.1000
+AppVerName=Aqsis Renderer v0.6.3
 AppPublisher=The Aqsis Team
 AppPublisherURL=http://www.aqsis.com
 AppSupportURL=http://www.aqsis.com
@@ -14,7 +14,7 @@ AllowNoIcons=true
 LicenseFile=C:\Projects\Aqsis\renderer\COPYING
 OutputBaseFilename=aqsis-setup
 Compression=zip/9
-AppVersion=0.6.1000
+AppVersion=0.6.3
 
 [Tasks]
 Name: desktopicon; Description: Create a &desktop icon; GroupDescription: Additional icons:
