@@ -3,6 +3,10 @@
 #include "librib2ri.h"
 #include "aqsis.h"
 
+//
+#include	"messages.h"
+//
+
 #ifdef	AQSIS_SYSTEM_WIN32
 #include "version.h"
 #endif
@@ -13,6 +17,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+
 
 void RenderFile(std::istream& file, const char* name);
 void GetOptions();
@@ -133,6 +138,10 @@ void GetOptions()
 					g_config.append("/etc/aqsisrc");
 				}
 			}
+			else
+			{
+				Aqsis::CqBasicError(0,0,"Warning:  Should have AQSIS_BASE_PATH, AQSIS_CONFIG or HOME set.");
+			}
 	}
 
 		// if --shaders is not specified, try and get a default shaders searchpath.
@@ -209,6 +218,11 @@ void RenderFile(std::istream& file, const char* name)
 		std::ifstream cfgfile(g_config.c_str());
 		if(cfgfile.is_open())
 			librib::Parse(cfgfile,"config",renderengine,std::cerr);
+		else
+		{
+			Aqsis::CqBasicError(0,0,"Warning: Config file not found." );
+			Aqsis::CqBasicError(0,0,"Warning: Looking for (%AQSIS_BASE_PATH%:%AQSIS_CONFIG%:%HOME%:%AQSIS_BASE_PATH%/etc/aqsisrc) for .aqsis file.");
+		}
 	}
 	librib::Parse(file,name,renderengine,std::cerr);
 
