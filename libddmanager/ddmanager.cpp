@@ -128,6 +128,9 @@ TqInt CqDDManager::CloseDisplays()
 
 TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 {
+	if( (pBucket->Width() == 0) || (pBucket->Height() == 0) )
+		return(0);
+
     TqInt	xmin = pBucket->XOrigin();
     TqInt	ymin = pBucket->YOrigin();
     TqInt	xmaxplus1 = xmin + pBucket->Width();
