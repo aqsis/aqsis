@@ -731,11 +731,42 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
  **/
 void CqTextureMap::Interpreted( TqPchar mode )
 {
-	TqChar filter[ 80 ];
-	TqChar smode[ 80 ];
-	TqChar tmode[ 80 ];
+	const char* filter = "", *smode = "", *tmode = "";
+	const char* sep = ", \t";
 
-	sscanf( mode, "%s %s %s %f %f", smode, tmode, filter, &m_swidth, &m_twidth );
+	// Take a copy of the string before processing it.
+	char* string = new char[strlen(mode)+1];
+	strcpy( string, mode );
+
+	const char* token;
+	token = strtok( string, sep );
+	if( NULL != token )
+	{
+		smode = token;
+		token = strtok( NULL, sep );
+		if( NULL != token )
+		{
+			tmode = token;
+			token = strtok( NULL, sep );
+			if( NULL != token )
+			{
+				filter = token;
+				token = strtok( NULL, sep );
+				if( NULL != token )
+				{
+					m_swidth = atof( token );
+					token = strtok( NULL, sep );
+					if( NULL != token )
+					{
+						m_twidth = atof( token );
+						token = strtok( NULL, sep );
+					}
+				}
+			}
+		}
+	}
+
+	//sscanf( mode, "%s %s %s %f %f", smode, tmode, filter, &m_swidth, &m_twidth );
 
 	m_FilterFunc = RiBoxFilter;
 	if ( strcmp( filter, "gaussian" ) == 0 ) m_FilterFunc = RiGaussianFilter;
@@ -761,6 +792,7 @@ void CqTextureMap::Interpreted( TqPchar mode )
 	else if ( strcmp( tmode, RI_BLACK ) == 0 )
 		m_tmode = WrapMode_Black;
 
+	delete[](string);
 }
 
 //----------------------------------------------------------------------
@@ -897,73 +929,7 @@ void CqTextureMap::Open()
 		 */
 		if ( pModes )
 		{
-			swidth = twidth = 1.0f;
-
-			sscanf( pModes, "%s %s %s %f %f", swrap, twrap, filterfunc, &swidth, &twidth );
-
-			/// smode
-			m_smode = WrapMode_Black;
-			if ( strcmp( swrap, RI_PERIODIC ) == 0 )
-			{
-				m_smode = WrapMode_Periodic;
-			}
-			else if ( strcmp( swrap, RI_BLACK ) == 0 )
-			{
-				m_smode = WrapMode_Black;
-			}
-			else if ( strcmp( swrap, RI_CLAMP ) == 0 )
-			{
-				m_smode = WrapMode_Clamp;
-			}
-
-			/// t mode
-			m_tmode = WrapMode_Black;
-			if ( strcmp( twrap, RI_PERIODIC ) == 0 )
-			{
-				m_tmode = WrapMode_Periodic;
-			}
-			else if ( strcmp( twrap, RI_BLACK ) == 0 )
-			{
-				m_tmode = WrapMode_Black;
-			}
-			else if ( strcmp( twrap, RI_CLAMP ) == 0 )
-			{
-				m_tmode = WrapMode_Clamp;
-			}
-			/// Pixel's Filter
-			m_FilterFunc = RiBoxFilter;
-			if ( strcmp( filterfunc, "gaussian" ) == 0 )
-			{
-				m_FilterFunc = RiGaussianFilter;
-			}
-			else if ( strcmp( filterfunc, "box" ) == 0 )
-			{
-				m_FilterFunc = RiBoxFilter;
-			}
-			else if ( strcmp( filterfunc, "triangle" ) == 0 )
-			{
-				m_FilterFunc = RiTriangleFilter;
-			}
-			else if ( strcmp( filterfunc, "catmull-rom" ) == 0 )
-			{
-				m_FilterFunc = RiCatmullRomFilter;
-			}
-			else if ( strcmp( filterfunc, "sinc" ) == 0 )
-			{
-				m_FilterFunc = RiSincFilter;
-			}
-			else if ( strcmp( filterfunc, "disk" ) == 0 )
-			{
-				m_FilterFunc = RiDiskFilter;
-			}
-			else if ( strcmp( filterfunc, "bessel" ) == 0 )
-			{
-				m_FilterFunc = RiBesselFilter;
-			}
-
-			/// Pixel's Filter x,y
-			m_swidth = swidth;
-			m_twidth = twidth;
+			Interpreted( pModes );
 		}
 		uint32 tsx;
 
