@@ -3784,17 +3784,17 @@ STD_SOIMPL CqShaderExecEnv::SO_ctransform( STRINGVAL fromspace, STRINGVAL tospac
 	BEGIN_VARYING_SECTION
 	GETCOLOR( c );
 	CqColor res( COLOR( c ) );
-	if ( strfromspace.compare( "hsv" ) ) res = COLOR( c ).hsvtorgb();
-	else if ( strfromspace.compare( "hsl" ) ) res = COLOR( c ).hsltorgb();
-	else if ( strfromspace.compare( "XYZ" ) ) res = COLOR( c ).XYZtorgb();
-	else if ( strfromspace.compare( "xyY" ) ) res = COLOR( c ).xyYtorgb();
-	else if ( strfromspace.compare( "YIQ" ) ) res = COLOR( c ).YIQtorgb();
+	if ( strfromspace.compare( "hsv" ) == 0 ) res = COLOR( c ).hsvtorgb();
+	else if ( strfromspace.compare( "hsl" ) == 0 ) res = COLOR( c ).hsltorgb();
+	else if ( strfromspace.compare( "XYZ" ) == 0 ) res = COLOR( c ).XYZtorgb();
+	else if ( strfromspace.compare( "xyY" ) == 0 ) res = COLOR( c ).xyYtorgb();
+	else if ( strfromspace.compare( "YIQ" ) == 0 ) res = COLOR( c ).YIQtorgb();
 
-	if ( STRING( tospace ).compare( "hsv" ) ) res = COLOR( c ).rgbtohsv();
-	else if ( STRING( tospace ).compare( "hsl" ) ) res = COLOR( c ).rgbtohsl();
-	else if ( STRING( tospace ).compare( "XYZ" ) ) res = COLOR( c ).rgbtoXYZ();
-	else if ( STRING( tospace ).compare( "xyY" ) ) res = COLOR( c ).rgbtoxyY();
-	else if ( STRING( tospace ).compare( "YIQ" ) ) res = COLOR( c ).rgbtoYIQ();
+	if ( STRING( tospace ).compare( "hsv" ) == 0 ) res = COLOR( c ).rgbtohsv();
+	else if ( STRING( tospace ).compare( "hsl" ) == 0 ) res = COLOR( c ).rgbtohsl();
+	else if ( STRING( tospace ).compare( "XYZ" ) == 0 ) res = COLOR( c ).rgbtoXYZ();
+	else if ( STRING( tospace ).compare( "xyY" ) == 0 ) res = COLOR( c ).rgbtoxyY();
+	else if ( STRING( tospace ).compare( "YIQ" ) == 0 ) res = COLOR( c ).rgbtoYIQ();
 
 	SETCOLOR( Result, res );
 	END_VARYING_SECTION
