@@ -1,2 +1,7 @@
 aqsis
 Makefile
+
+*.slx
+*.tif
+*.map
+
