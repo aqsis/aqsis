@@ -503,7 +503,7 @@ class CqVMStackEntry : public IqShaderData
 			m_Size = 1;
 			*this = col;
 		}
-		~CqVMStackEntry()
+	virtual	~CqVMStackEntry()
 		{}
 
 		// Value access functions overridden from IqShaderData

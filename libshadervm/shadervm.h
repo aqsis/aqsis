@@ -374,9 +374,9 @@ static CqMatrix temp_matrix;
 class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 {
 	public:
-		_qShareM CqShaderVM() : CqShaderStack(), m_LocalIndex( 0 ), m_PC( 0 ), m_Uses( 0xFFFFFFFF )
+		_qShareM CqShaderVM() : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ) 
 		{}
-		_qShareM	CqShaderVM( const CqShaderVM& From ) : m_PC( 0 ), m_LocalIndex( 0 )
+		_qShareM	CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_PC( 0 ) 
 		{
 			*this = From;
 		}
