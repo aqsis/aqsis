@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 	}
 	strcpy(iName,argv[i]);
 
-	std::cout << "Compiling : " << iName;
+	std::cout << "Compiling " << iName << "..." << std::endl;
 
 	// Call slpp to preprocess the source file.
 	PROCESS_INFORMATION ProcInf;
@@ -96,15 +96,7 @@ int main(int argc, char* argv[])
 	TqBool result=Parse(ifile,iName,std::cerr);
 
 	if(result)
-	{
-		CqString oName(iName);
-		oName=oName.substr(0,oName.find_last_of('.'));
-		oName.append(RI_SHADER_EXTENSION);
-		std::ofstream ofile(oName.c_str());
-		std::cout << " --> " << oName.c_str() << std::endl;
-
-		OutputTree(GetParseTree(),ofile);
-	}
+		OutputTree(GetParseTree());
 
 	// Delete the temporary preprocessed source file
 	ifile.close();

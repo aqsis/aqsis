@@ -37,6 +37,9 @@
 
 START_NAMESPACE(Aqsis)
 
+
+#define	VM_SHADER_EXTENSION	".slx"
+
 ///----------------------------------------------------------------------
 /// SqVarRefTranslator
 /// Structure storing a variable reference translation.
@@ -47,7 +50,7 @@ struct SqVarRefTranslator
 	SqVarRef	m_To;
 };
 
-void OutputTree(const IqParseNode* pNode, std::ostream& Out);
+void OutputTree(const IqParseNode* pNode);
 void OutputTreeNode(const IqParseNode* pNode, std::ostream& out);
 IqVarDef* pTranslatedVariable(SqVarRef& Ref);
 void PushTransTable(std::vector<SqVarRefTranslator>* paTransTable);

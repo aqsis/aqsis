@@ -24,6 +24,7 @@
 */
 
 #include	<strstream>
+#include	<fstream>
 
 #include	"version.h"
 #include	"vmoutput.h"
@@ -64,12 +65,12 @@ static TqInt gInternalFunctionUsage=0;
 std::vector<std::vector<SqVarRefTranslator>*>	saTransTable;
 
 
-void OutputTree(const IqParseNode* pNode, std::ostream& Out)
+void OutputTree(const IqParseNode* pNode)
 {
 	TqInt i=0;
 
 	if(pNode)
-		OutputTreeNode(pNode,Out);
+		OutputTreeNode(pNode, std::cout);
 }
 
 TqInt	gcLabels=0;
@@ -205,12 +206,18 @@ void OutputTreeNode(const IqParseNode* pNode, std::ostream& out)
 
 	if(pNode->GetInterface(IqParseNodeShader::m_ID, (void**)&pS))
 	{
-		out << pS->strShaderType() << std::endl;
+		// Create a new file for this shader
+		CqString slxName(pS->strName());
+		slxName.append(VM_SHADER_EXTENSION);
+		std::ofstream slxFile(slxName.c_str());
+		std::cout << "... " << slxName.c_str() << std::endl;
+
+		slxFile << pS->strShaderType() << std::endl;
 
 		// Output version information.
-		out << "AQSIS_V " << VERSION_STR << std::endl;
+		slxFile << "AQSIS_V " << VERSION_STR << std::endl;
 
-		out << std::endl << std::endl << "segment Data" << std::endl;
+		slxFile << std::endl << std::endl << "segment Data" << std::endl;
 
 		// Do a first pass output to find out which variables are used.
 		if(pNode)
@@ -227,27 +234,28 @@ void OutputTreeNode(const IqParseNode* pNode, std::ostream& out)
 			if(gStandardVars[i].UseCount()>0)
 				Use|=(0x00000001<<i);
 		}
-		out << std::endl << "USES " << Use << std::endl << std::endl;
+		slxFile << std::endl << "USES " << Use << std::endl << std::endl;
 		
 		// Output any declared variables.
 		for(i=0; i<gLocalVars.size(); i++)
-			OutputLocalVariable(&gLocalVars[i],out);
+			OutputLocalVariable(&gLocalVars[i],slxFile);
 
-		out << std::endl << std::endl << "segment Init" << std::endl;
+		slxFile << std::endl << std::endl << "segment Init" << std::endl;
 		for(i=0; i<gLocalVars.size(); i++)
 		{
 			IqVarDef* pVar=&gLocalVars[i];
 			if(pVar->Type()&Type_Param && pVar->pInitialiser()!=0)
-				OutputTreeNode(pVar->pInitialiser(),out);
+				OutputTreeNode(pVar->pInitialiser(),slxFile);
 		}
 
-		out << std::endl << std::endl << "segment Code" << std::endl;
+		slxFile << std::endl << std::endl << "segment Code" << std::endl;
 		IqParseNode* pNext=pNode->pChild();
 		while(pNext)
 		{
-			OutputTreeNode(pNext,out);
+			OutputTreeNode(pNext,slxFile);
 			pNext=pNext->pNextSibling();
 		}
+		slxFile.close();
 	}
 	else if(pNode->GetInterface(ParseNode_FunctionCall,(void**)&pFC))
 	{
