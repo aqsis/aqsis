@@ -31,9 +31,6 @@
 
 #include	"aqsis.h"
 
-#define		_qShareName	BUILD_LIBAQSISTYPES
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 //-----------------------------------------------------------------------
@@ -45,64 +42,64 @@ class CqVector3D;
  * Define class structure for 4D homogeneous vector.
  */
 
-class _qShareC CqVector4D
+class CqVector4D
 {
 	public:
-		_qShareM	CqVector4D() : m_x( 0.0f ), m_y( 0.0f ), m_z( 0.0f ), m_h( 1.0f )
+		CqVector4D() : m_x( 0.0f ), m_y( 0.0f ), m_z( 0.0f ), m_h( 1.0f )
 		{}
-		_qShareM	CqVector4D( TqFloat x, TqFloat y, TqFloat z, TqFloat h = 1.0f ) : m_x( x ), m_y( y ), m_z( z ), m_h( h )
+		CqVector4D( TqFloat x, TqFloat y, TqFloat z, TqFloat h = 1.0f ) : m_x( x ), m_y( y ), m_z( z ), m_h( h )
 		{}
-		_qShareM	CqVector4D( const CqVector3D &From );
-		_qShareM	CqVector4D( const TqFloat Array[ 4 ] ) : m_x( Array[ 0 ] ), m_y( Array[ 1 ] ), m_z( Array[ 2 ] ), m_h( Array[ 3 ] )
+		CqVector4D( const CqVector3D &From );
+		CqVector4D( const TqFloat Array[ 4 ] ) : m_x( Array[ 0 ] ), m_y( Array[ 1 ] ), m_z( Array[ 2 ] ), m_h( Array[ 3 ] )
 		{}
-		_qShareM	~CqVector4D()
+		~CqVector4D()
 		{}
 
 		/** Get the x component.
 		 */
-		_qShareM	TqFloat	x() const
+		TqFloat	x() const
 		{
 			return ( m_x );
 		}
 		/** Set the x component.
 		 */
-		_qShareM	void	x( TqFloat x )
+		void	x( TqFloat x )
 		{
 			m_x = x;
 		}
 		/** Get the y component.
 		 */
-		_qShareM	TqFloat	y() const
+		TqFloat	y() const
 		{
 			return ( m_y );
 		}
 		/** Set the y component.
 		 */
-		_qShareM	void	y( TqFloat y )
+		void	y( TqFloat y )
 		{
 			m_y = y;
 		}
 		/** Get the z component.
 		 */
-		_qShareM	TqFloat	z() const
+		TqFloat	z() const
 		{
 			return ( m_z );
 		}
 		/** Set the z component.
 		 */
-		_qShareM	void	z( TqFloat z )
+		void	z( TqFloat z )
 		{
 			m_z = z;
 		}
 		/** Get the h component.
 		 */
-		_qShareM	TqFloat	h() const
+		TqFloat	h() const
 		{
 			return ( m_h );
 		}
 		/** Set the h component.
 		 */
-		_qShareM	void	h( TqFloat h )
+		void	h( TqFloat h )
 		{
 			m_h = h;
 		}
@@ -111,7 +108,7 @@ class _qShareC CqVector4D
 		 * \param i Integer component index, 0-3.
 		 * \return Appropriate component, or h if index is invalid.
 		 */
-		_qShareM	TqFloat&	operator[] ( TqInt i )
+		TqFloat&	operator[] ( TqInt i )
 		{
 			switch ( i )
 			{
@@ -127,7 +124,7 @@ class _qShareC CqVector4D
 		 * \param i Integer component index, 0-3.
 		 * \return Appropriate component, or h if index is invalid.
 		 */
-		_qShareM	const TqFloat&	operator[] ( TqInt i ) const
+		const TqFloat&	operator[] ( TqInt i ) const
 		{
 			switch ( i )
 			{
@@ -141,16 +138,16 @@ class _qShareC CqVector4D
 
 		/** Get the length squared.
 		 */
-		_qShareM	TqFloat	Magnitude2() const;
+		TqFloat	Magnitude2() const;
 		/** Get the length.
 		 */
-		_qShareM	TqFloat	Magnitude() const;
+		TqFloat	Magnitude() const;
 
-		_qShareM	void	Unit()
+		void	Unit()
 		{
 			m_h = ( Magnitude() );
 		}
-		_qShareM	void	Homogenize()
+		void	Homogenize()
 		{
 			if ( m_h != 1.0 )
 			{
@@ -161,52 +158,52 @@ class _qShareC CqVector4D
 			}
 		}
 
-		_qShareM	CqVector4D& operator= ( const CqVector3D &From );
-		_qShareM	CqVector4D& operator+=( const CqVector4D &From );
-		_qShareM	CqVector4D& operator-=( const CqVector4D &From );
-		_qShareM	CqVector4D& operator%=( const CqVector4D &From );
-		_qShareM	CqVector4D& operator*=( const TqFloat Scale );
-		_qShareM	CqVector4D& operator/=( const TqFloat Scale );
-		_qShareM	TqBool	operator==( const CqVector4D &Cmp ) const;
-		_qShareM	TqBool	operator!=( const CqVector4D &Cmp ) const;
-		_qShareM	TqBool	operator>=( const CqVector4D &Cmp ) const;
-		_qShareM	TqBool	operator<=( const CqVector4D &Cmp ) const;
-		_qShareM	TqBool	operator>( const CqVector4D &Cmp ) const;
-		_qShareM	TqBool	operator<( const CqVector4D &Cmp ) const;
+		CqVector4D& operator= ( const CqVector3D &From );
+		CqVector4D& operator+=( const CqVector4D &From );
+		CqVector4D& operator-=( const CqVector4D &From );
+		CqVector4D& operator%=( const CqVector4D &From );
+		CqVector4D& operator*=( const TqFloat Scale );
+		CqVector4D& operator/=( const TqFloat Scale );
+		TqBool	operator==( const CqVector4D &Cmp ) const;
+		TqBool	operator!=( const CqVector4D &Cmp ) const;
+		TqBool	operator>=( const CqVector4D &Cmp ) const;
+		TqBool	operator<=( const CqVector4D &Cmp ) const;
+		TqBool	operator>( const CqVector4D &Cmp ) const;
+		TqBool	operator<( const CqVector4D &Cmp ) const;
 
-		_qShareM	friend CqVector4D	operator*( const TqFloat f, const CqVector4D& v )
+		friend CqVector4D	operator*( const TqFloat f, const CqVector4D& v )
 		{
 			CqVector4D r( v ); return ( r *= f );
 		}
-		_qShareM	friend CqVector4D	operator*( const CqVector4D& v, const TqFloat f )
+		friend CqVector4D	operator*( const CqVector4D& v, const TqFloat f )
 		{
 			CqVector4D r( v ); return ( r *= f );
 		}
-		_qShareM	friend CqVector4D	operator/( const TqFloat f, const CqVector4D& v )
+		friend CqVector4D	operator/( const TqFloat f, const CqVector4D& v )
 		{
 			CqVector4D r( v ); return ( r /= f );
 		}
-		_qShareM	friend CqVector4D	operator/( const CqVector4D& v, const TqFloat f )
+		friend CqVector4D	operator/( const CqVector4D& v, const TqFloat f )
 		{
 			CqVector4D r( v ); return ( r /= f );
 		}
 
-		_qShareM	friend CqVector4D	operator+( const CqVector4D& a, const CqVector4D& b )
+		friend CqVector4D	operator+( const CqVector4D& a, const CqVector4D& b )
 		{
 			CqVector4D r( a ); return ( r += b );
 		}
-		_qShareM	friend CqVector4D	operator-( const CqVector4D& a, const CqVector4D& b )
+		friend CqVector4D	operator-( const CqVector4D& a, const CqVector4D& b )
 		{
 			CqVector4D r( a ); return ( r -= b );
 		}
-		_qShareM	friend CqVector4D	operator-( const CqVector4D& v )
+		friend CqVector4D	operator-( const CqVector4D& v )
 		{
 			return ( CqVector4D( -v.m_x, -v.m_y, -v.m_z, v.m_h ) );
 		} // Negation
 
-		_qShareM	friend TqFloat	operator*( const CqVector4D& a, const CqVector4D& b );
-		_qShareM	friend CqVector4D	operator%( const CqVector4D& a, const CqVector4D& b );	// X product
-		_qShare		friend std::ostream &operator<<( std::ostream &Stream, CqVector4D &Vector );
+		friend TqFloat	operator*( const CqVector4D& a, const CqVector4D& b );
+		friend CqVector4D	operator%( const CqVector4D& a, const CqVector4D& b );	// X product
+		friend std::ostream &operator<<( std::ostream &Stream, CqVector4D &Vector );
 
 	protected:
 		TqFloat	m_x;	///< X component.

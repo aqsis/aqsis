@@ -32,9 +32,6 @@
 #include	"sstring.h"
 #include	<list>
 
-#define		_qShareName	BUILD_LIBAQSISTYPES
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
@@ -50,19 +47,19 @@ START_NAMESPACE( Aqsis )
  *  
  */
 
-class _qShareC CqPluginBase
+class CqPluginBase
 {
   	public:
-	  	_qShareM	~CqPluginBase();
-		_qShareM	const CqString DLError();
+	  	~CqPluginBase();
+		const CqString DLError();
 
 	private:
 	  	
 
 	protected:
-		_qShareM	void *DLOpen(CqString *library);
-		_qShareM	void DLClose(void*);
-		_qShareM	void *DLSym(void*, CqString*);
+		void *DLOpen(CqString *library);
+		void DLClose(void*);
+		void *DLSym(void*, CqString*);
 
 		// we record all the DLOpen'ed handles to close them properly on destruction.
 		std::list<void*> m_activeHandles;

@@ -34,9 +34,6 @@
 
 #include	"sstring.h"
 
-#define		_qShareName	BUILD_LIBAQSISTYPES
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
  // This should'nt really be in here, but for now it will do
@@ -51,59 +48,59 @@ START_NAMESPACE( Aqsis )
  * Standard handling of all file types utilising the searchpath options.
  */
 
-class _qShareC CqFile
+class CqFile
 {
 	public:
 		/** Default constructor
 		 */
-		_qShareM	CqFile() : m_pStream( 0 ), m_bInternal( TqFalse )
+		CqFile() : m_pStream( 0 ), m_bInternal( TqFalse )
 		{}
 		/** Constructor taking an open stream pointer and a name.
 		 * \param Stream a pointer to an already opened input stream to attach this object to.
 		 * \param strRealName the name of the file associated with this stream.
 		 */
-		_qShareM	CqFile( std::istream* Stream, const char* strRealName ) :
+		CqFile( std::istream* Stream, const char* strRealName ) :
 				m_pStream( Stream ), m_strRealName( strRealName ), m_bInternal( TqFalse )
 		{}
-		_qShareM	CqFile( const char* strFilename, const char* strSearchPathOption = "" );
+		CqFile( const char* strFilename, const char* strSearchPathOption = "" );
 		/** Dectructor. Takes care of closing the stream if the constructor opened it.
 		 */
-		_qShareM	virtual	~CqFile()
+		virtual	~CqFile()
 		{
 			if ( m_pStream != NULL && m_bInternal ) delete( m_pStream );
 		}
 
-		_qShareM	void	Open( const char* strFilename, const char* strSearchPathOption = "", std::ios::openmode mode = std::ios::in );
+		void	Open( const char* strFilename, const char* strSearchPathOption = "", std::ios::openmode mode = std::ios::in );
 		/** Close any opened stream associated with this object.
 		 */
-		_qShareM	void	Close()
+		void	Close()
 		{
 			if ( m_pStream != NULL ) delete( m_pStream ); m_pStream = NULL;
 		}
 		/** Find out if the stream associated with this object is valid.
 		 * \return boolean indicating validity.
 		 */
-		_qShareM	TqBool	IsValid() const
+		TqBool	IsValid() const
 		{
 			return ( m_pStream != NULL );
 		}
 		/** Get the name asociated with this file object.
 		 * \return a read only reference to the string object.
 		 */
-		_qShareM	const CqString&	strRealName() const
+		const CqString&	strRealName() const
 		{
 			return ( m_strRealName );
 		}
 
 		/** Cast to a stream reference.
 		 */
-		_qShareM	operator std::istream&()
+		operator std::istream&()
 		{
 			return ( *m_pStream );
 		}
 		/** Cast to a stream pointer.
 		 */
-		_qShareM	operator std::istream*()
+		operator std::istream*()
 		{
 			return ( m_pStream );
 		}
@@ -111,14 +108,14 @@ class _qShareC CqFile
 		/** Get the current position within the stream if appropriate.
 		 * \return long integer indicating the offest from the start.
 		 */
-		_qShareM	TqLong	Position()
+		TqLong	Position()
 		{
 			return ( m_pStream->tellg() );
 		}
 		/** Get the length of the stream if a file.
 		 * \return the lenght as a long integer.
 		 */
-		_qShareM	TqLong	Length()
+		TqLong	Length()
 		{
 			/// \todo Should check if it is a file here.
 			long pos = Position();
@@ -128,8 +125,8 @@ class _qShareC CqFile
 			return ( len );
 		}
 
-		_qShareM static std::list<CqString*> Glob(const CqString& strFileGlob);
-		_qShareM static CqString GetSystemSetting(const CqString& strAsset);
+		static std::list<CqString*> Glob(const CqString& strFileGlob);
+		static CqString GetSystemSetting(const CqString& strAsset);
 
 	private:
 		std::istream*	m_pStream;		///< a poimter to the stream associated with this file object.

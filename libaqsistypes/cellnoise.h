@@ -31,10 +31,6 @@
 
 #include	"vector3d.h"
 
-
-#define		_qShareName	BUILD_LIBAQSISTYPES
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
@@ -42,24 +38,24 @@ START_NAMESPACE( Aqsis )
  * Class encapsulating the functionality of the shader cell noise functions.
  */
 
-class _qShareC CqCellNoise
+class CqCellNoise
 {
 	public:
 		// Default constructor.
-		_qShareM CqCellNoise()
+		CqCellNoise()
 		{}
-		_qShareM ~CqCellNoise()
+		~CqCellNoise()
 		{}
 
-		_qShareM TqFloat	FCellNoise1( TqFloat u );
-		_qShareM TqFloat	FCellNoise2( TqFloat u, TqFloat v );
-		_qShareM TqFloat	FCellNoise3( const CqVector3D& P );
-		_qShareM TqFloat	FCellNoise4( const CqVector3D& P, TqFloat v );
+		TqFloat	FCellNoise1( TqFloat u );
+		TqFloat	FCellNoise2( TqFloat u, TqFloat v );
+		TqFloat	FCellNoise3( const CqVector3D& P );
+		TqFloat	FCellNoise4( const CqVector3D& P, TqFloat v );
 
-		_qShareM CqVector3D	PCellNoise1( TqFloat u );
-		_qShareM CqVector3D	PCellNoise2( TqFloat u, TqFloat v );
-		_qShareM CqVector3D	PCellNoise3( const CqVector3D& P );
-		_qShareM CqVector3D	PCellNoise4( const CqVector3D& P, TqFloat v );
+		CqVector3D	PCellNoise1( TqFloat u );
+		CqVector3D	PCellNoise2( TqFloat u, TqFloat v );
+		CqVector3D	PCellNoise3( const CqVector3D& P );
+		CqVector3D	PCellNoise4( const CqVector3D& P, TqFloat v );
 
 	private:
 		static TqInt	m_PermuteTable[ 2*2048 ];		///< static permutation table.

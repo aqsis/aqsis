@@ -32,9 +32,6 @@
 
 #include "aqsis.h"
 
-#define	 _qShareName	BUILD_LIBAQSISTYPES
-#include "share.h"
-
 
 START_NAMESPACE( Aqsis )
 
@@ -45,58 +42,58 @@ typedef std::string CqStringBase;
  * An extended string class, derived from std::string
  */
 
-class _qShareC CqString : public CqStringBase
+class CqString : public CqStringBase
 {
 	public:
-		_qShareM	CqString() : CqStringBase()
+		CqString() : CqStringBase()
 		{}
-		_qShareM	CqString( const CqString& str ) : CqStringBase( str )
+		CqString( const CqString& str ) : CqStringBase( str )
 		{}
-		_qShareM	CqString( const CqStringBase& str ) : CqStringBase( str )
+		CqString( const CqStringBase& str ) : CqStringBase( str )
 		{}
-		_qShareM	CqString( const TqChar* s ) : CqStringBase( s )
+		CqString( const TqChar* s ) : CqStringBase( s )
 		{}
 		/** Construct from an integer,
 		 */
-		_qShareM	CqString( TqInt i )
+		CqString( TqInt i )
 		{
 			*this += i;
 		}
 		/** Construct from a float,
 		 */
-		_qShareM	CqString( TqFloat f )
+		CqString( TqFloat f )
 		{
 			*this += f;
 		}
 
 		// Format a string printf style.
-		_qShareM	CqString&	Format( const TqChar* Format, ... );
-		_qShareM	CqString	ExpandEscapes() const;
-		_qShareM	CqString	TranslateEscapes() const;
+		CqString&	Format( const TqChar* Format, ... );
+		CqString	ExpandEscapes() const;
+		CqString	TranslateEscapes() const;
 
 		// Concatenation functions not provided by std::string
-		_qShareM	CqString&	operator+=( const CqString& str );
-		_qShareM	CqString&	operator+=( const TqChar* str );
-		_qShareM	CqString&	operator+=( TqChar c );
-		_qShareM	CqString&	operator+=( TqInt i );
-		_qShareM	CqString&	operator+=( TqFloat f );
+		CqString&	operator+=( const CqString& str );
+		CqString&	operator+=( const TqChar* str );
+		CqString&	operator+=( TqChar c );
+		CqString&	operator+=( TqInt i );
+		CqString&	operator+=( TqFloat f );
 };
 
 
 // Some useful functions
-_qShare	std::ostream& operator<<( std::ostream & stmOutput, const CqString& strString );
-_qShare	CqString operator+( const CqString& strAdd1, const CqString& strAdd2 );
-_qShare	CqString operator+( const TqChar* strAdd1, const CqString& strAdd2 );
-_qShare	CqString operator+( const CqString& strAdd1, const TqChar* strAdd2 );
-_qShare	CqString operator+( const CqString& strAdd1, TqChar ch );
-_qShare	CqString operator+( TqChar ch, const CqString& strAdd2 );
+std::ostream& operator<<( std::ostream & stmOutput, const CqString& strString );
+CqString operator+( const CqString& strAdd1, const CqString& strAdd2 );
+CqString operator+( const TqChar* strAdd1, const CqString& strAdd2 );
+CqString operator+( const CqString& strAdd1, const TqChar* strAdd2 );
+CqString operator+( const CqString& strAdd1, TqChar ch );
+CqString operator+( TqChar ch, const CqString& strAdd2 );
 
 // These must be defined so that std::string can be used as a type in the ShaderVM and
 // in the parameter dicing code.
-_qShare	CqString operator/( const CqString& strAdd1, const CqString& strAdd2 );
-_qShare	CqString operator*( const CqString& strAdd1, const CqString& strAdd2 );
-_qShare	CqString operator*( const CqString& strAdd1, TqFloat f );
-_qShare	CqString operator-( const CqString& strAdd1, const CqString& strAdd2 );
+CqString operator/( const CqString& strAdd1, const CqString& strAdd2 );
+CqString operator*( const CqString& strAdd1, const CqString& strAdd2 );
+CqString operator*( const CqString& strAdd1, TqFloat f );
+CqString operator-( const CqString& strAdd1, const CqString& strAdd2 );
 
 
 //-----------------------------------------------------------------------

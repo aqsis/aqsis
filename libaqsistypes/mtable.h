@@ -39,8 +39,6 @@
 #include <string>
 #include "aqsis.h"
 
-#define	 _qShareName	BUILD_LIBAQSISTYPES
-#include "share.h"
 #include "imtable.h"
 
 
@@ -48,21 +46,21 @@ START_NAMESPACE( Aqsis )
 
 typedef std::map< int, std::string > i_s;
 
-class _qShareC CqMessageTable	: public IqMessageTable
+class CqMessageTable	: public IqMessageTable
 {
 	public:
-		_qShareM CqMessageTable();
-		_qShareM ~CqMessageTable();
+		CqMessageTable();
+		~CqMessageTable();
 
-		_qShareM const char* getError( const int table, const int error_id );
-		_qShareM void insert( int table, i_s::value_type data );
+		const char* getError( const int table, const int error_id );
+		void insert( int table, i_s::value_type data );
 		
-		_qShareM int getErrorCount()
+		int getErrorCount()
 		{
 			return m_errorCount;
 		}
 
-		_qShareM int getCacheHits()
+		int getCacheHits()
 		{
 			return m_cacheHits;
 		}

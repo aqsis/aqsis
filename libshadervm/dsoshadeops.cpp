@@ -28,6 +28,7 @@
 #include	"dsoshadeops.h"
 #include	"file.h"
 
+#include	"share.h"
 
 START_NAMESPACE( Aqsis )
 

@@ -33,10 +33,6 @@
 #include	"vector3d.h"
 #include	"color.h"
 
-#define		_qShareName	BUILD_LIBAQSISTYPES
-#include	"share.h"
-
-
 START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
@@ -63,25 +59,25 @@ START_NAMESPACE( Aqsis )
 
 #define NOISE_N 0x1000
 
-class _qShareC CqNoise
+class CqNoise
 {
 	public:
-		_qShareM CqNoise()
+		CqNoise()
 		{
 			init( 665 );
 		}
-		_qShareM ~CqNoise()
+		~CqNoise()
 		{}
 
-		_qShareM static	TqFloat	FGNoise1( TqFloat x );
-		_qShareM static	TqFloat	FGNoise2( TqFloat x, TqFloat y );
-		_qShareM static	TqFloat	FGNoise3( const CqVector3D& v )
+		static	TqFloat	FGNoise1( TqFloat x );
+		static	TqFloat	FGNoise2( TqFloat x, TqFloat y );
+		static	TqFloat	FGNoise3( const CqVector3D& v )
 		{
 			return ( FGNoise3( v.x(), v.y(), v.z() ) );
 		}
-		_qShareM static	TqFloat	FGNoise3( TqFloat x, TqFloat y, TqFloat z );
+		static	TqFloat	FGNoise3( TqFloat x, TqFloat y, TqFloat z );
 
-		_qShareM static	CqVector3D	PGNoise1( TqFloat x )
+		static	CqVector3D	PGNoise1( TqFloat x )
 		{
 			CqVector3D res(
 			    FGNoise1( x + P1x ),
@@ -89,7 +85,7 @@ class _qShareC CqNoise
 			    FGNoise1( x + P3x ) );
 			return ( res );
 		}
-		_qShareM static	CqVector3D	PGNoise2( TqFloat x, TqFloat y )
+		static	CqVector3D	PGNoise2( TqFloat x, TqFloat y )
 		{
 			CqVector3D res(
 			    FGNoise2( x + P1x, y + P1y ),
@@ -97,11 +93,11 @@ class _qShareC CqNoise
 			    FGNoise2( x + P3x, y + P3y ) );
 			return ( res );
 		}
-		_qShareM static	CqVector3D	PGNoise3( const CqVector3D& v )
+		static	CqVector3D	PGNoise3( const CqVector3D& v )
 		{
 			return ( PGNoise3( v.x(), v.y(), v.z() ) );
 		}
-		_qShareM static	CqVector3D	PGNoise3( TqFloat x, TqFloat y, TqFloat z )
+		static	CqVector3D	PGNoise3( TqFloat x, TqFloat y, TqFloat z )
 		{
 			CqVector3D res(
 			    FGNoise3( x + P1x, y + P1y, z + P1z ),
@@ -110,25 +106,25 @@ class _qShareC CqNoise
 			return ( res );
 		}
 
-		_qShareM static	CqColor	CGNoise1( TqFloat x )
+		static	CqColor	CGNoise1( TqFloat x )
 		{
 			return ( CGNoise3( x, 0, 0 ) );
 		}
-		_qShareM static	CqColor	CGNoise2( TqFloat x, TqFloat y )
+		static	CqColor	CGNoise2( TqFloat x, TqFloat y )
 		{
 			return ( CGNoise3( x, y, 0 ) );
 		}
-		_qShareM static	CqColor	CGNoise3( const CqVector3D& v )
+		static	CqColor	CGNoise3( const CqVector3D& v )
 		{
 			return ( CGNoise3( v.x(), v.y(), v.z() ) );
 		}
-		_qShareM static	CqColor	CGNoise3( TqFloat x, TqFloat y, TqFloat z )
+		static	CqColor	CGNoise3( TqFloat x, TqFloat y, TqFloat z )
 		{
 			return ( CqColor( PGNoise3( x, y, z ) ) );
 		}
 
-		_qShareM static	void	init( TqInt seed );
-		_qShareM static	float	glattice( TqInt ix, TqInt iy, TqInt iz, TqFloat fx, TqFloat fy, TqFloat fz );
+		static	void	init( TqInt seed );
+		static	float	glattice( TqInt ix, TqInt iy, TqInt iz, TqFloat fx, TqFloat fy, TqFloat fz );
 
 	private:
 

@@ -33,9 +33,6 @@
 
 #include	"aqsis.h"
 
-#define		_qShareName	BUILD_LIBAQSISTYPES
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 //-----------------------------------------------------------------------
@@ -48,40 +45,40 @@ class CqVector4D;
  * Define class structure for 2D vector.
  */
 
-class _qShareC CqVector2D
+class CqVector2D
 {
 	public:
-		_qShareM	CqVector2D()
+		CqVector2D()
 		{}
-		_qShareM	CqVector2D( TqFloat x, TqFloat y ) : m_x( x ), m_y( y )
+		CqVector2D( TqFloat x, TqFloat y ) : m_x( x ), m_y( y )
 		{}
-		_qShareM	CqVector2D( const CqVector3D &From );
-		_qShareM	~CqVector2D()
+		CqVector2D( const CqVector3D &From );
+		~CqVector2D()
 		{}
 
 		/** Get the x component.
 		 */
-		_qShareM	TqFloat	x() const
+		TqFloat	x() const
 		{
 			return ( m_x );
 		}
 		/** Set the x component.
 		 * \param x Float new value.
 		 */
-		_qShareM	void	x( TqFloat x )
+		void	x( TqFloat x )
 		{
 			m_x = x;
 		}
 		/** Get the y component.
 		 */
-		_qShareM	TqFloat	y() const
+		TqFloat	y() const
 		{
 			return ( m_y );
 		}
 		/** Set the y component.
 		 * \param y Float new value.
 		 */
-		_qShareM	void	y( TqFloat y )
+		void	y( TqFloat y )
 		{
 			m_y = y;
 		}
@@ -90,7 +87,7 @@ class _qShareC CqVector2D
 		 * \param i Integer component index, 0 or 1.
 		 * \return Appropriate component or y if invalid index.
 		 */
-		_qShareM	TqFloat&	operator[] ( TqInt i )
+		TqFloat&	operator[] ( TqInt i )
 		{
 			switch ( i )
 			{
@@ -104,7 +101,7 @@ class _qShareC CqVector2D
 		 * \param i Integer component index, 0 or 1.
 		 * \return Appropriate component or y if invalid index.
 		 */
-		_qShareM	const TqFloat&	operator[] ( TqInt i ) const
+		const TqFloat&	operator[] ( TqInt i ) const
 		{
 			switch ( i )
 			{
@@ -116,17 +113,17 @@ class _qShareC CqVector2D
 
 		/** Get the length squared.
 		 */
-		_qShareM	TqFloat	Magnitude2() const
+		TqFloat	Magnitude2() const
 		{
 			return ( ( m_x * m_x ) + ( m_y * m_y ) );
 		}
 		/** Get the length.
 		 */
-		_qShareM	TqFloat	Magnitude() const
+		TqFloat	Magnitude() const
 		{
 			return ( sqrt( ( m_x * m_x ) + ( m_y * m_y ) ) );
 		}
-		_qShareM	void	Unit()
+		void	Unit()
 		{
 			TqFloat Mag = Magnitude();
 
@@ -134,124 +131,124 @@ class _qShareC CqVector2D
 			m_y /= Mag;
 		}
 
-		_qShareM	CqVector2D& operator= ( const CqVector3D &From );
-		_qShareM	CqVector2D& operator= ( const CqVector4D &From );
+		CqVector2D& operator= ( const CqVector3D &From );
+		CqVector2D& operator= ( const CqVector4D &From );
 		/** Addition assignment operator.
 		 */
-		_qShareM	CqVector2D& operator+=( const CqVector2D &From )
+		CqVector2D& operator+=( const CqVector2D &From )
 		{
 			m_x += From.m_x; m_y += From.m_y;	return ( *this );
 		}
 		/** Componentwise addition assignment operator.
 		 */
-		_qShareM	CqVector2D& operator+=( const TqFloat &f )
+		CqVector2D& operator+=( const TqFloat &f )
 		{
 			m_x += f; m_y += f;	return ( *this );
 		}
 		/** Subtraction assignment operator.
 		 */
-		_qShareM	CqVector2D& operator-=( const CqVector2D &From )
+		CqVector2D& operator-=( const CqVector2D &From )
 		{
 			m_x -= From.m_x; m_y -= From.m_y;	return ( *this );
 		}
 		/** Componentwise subtraction assignment operator.
 		 */
-		_qShareM	CqVector2D& operator-=( const TqFloat &f )
+		CqVector2D& operator-=( const TqFloat &f )
 		{
 			m_x -= f; m_y -= f;	return ( *this );
 		}
 		/** Coponent wise scale operator.
 		 */
-		_qShareM	CqVector2D& operator*=( const TqFloat Scale )
+		CqVector2D& operator*=( const TqFloat Scale )
 		{
 			m_x *= Scale;	m_y *= Scale;	return ( *this );
 		}
 		/** Scale operator.
 		 */
-		_qShareM	CqVector2D& operator*=( const CqVector2D &Scale )
+		CqVector2D& operator*=( const CqVector2D &Scale )
 		{
 			m_x *= Scale.m_x;m_y *= Scale.m_y;	return ( *this );
 		}
 		/** Inverse scale operator.
 		 */
-		_qShareM	CqVector2D& operator/=( const CqVector2D &Scale )
+		CqVector2D& operator/=( const CqVector2D &Scale )
 		{
 			m_x /= Scale.m_x;m_y /= Scale.m_y;	return ( *this );
 		}
 		/** Component wise inverse scale operator.
 		 */
-		_qShareM	CqVector2D& operator/=( const TqFloat Scale )
+		CqVector2D& operator/=( const TqFloat Scale )
 		{
 			m_x /= Scale;	m_y /= Scale;	return ( *this );
 		}
 		/** Equality operator.
 		 */
-		_qShareM	TqBool	operator==( const CqVector2D &Cmp ) const
+		TqBool	operator==( const CqVector2D &Cmp ) const
 		{
 			return ( ( m_x == Cmp.m_x ) && ( m_y == Cmp.m_y ) );
 		}
 		/** Inequality operator.
 		 */
-		_qShareM	TqBool	operator!=( const CqVector2D &Cmp ) const
+		TqBool	operator!=( const CqVector2D &Cmp ) const
 		{
 			return ( ( m_x != Cmp.m_x ) || ( m_y != Cmp.m_y ) );
 		}
 
-		_qShareM	friend CqVector2D	operator+( const TqFloat f, const CqVector2D& v )
+		friend CqVector2D	operator+( const TqFloat f, const CqVector2D& v )
 		{
 			return CqVector2D( f + v.x(), f + v.y() );
 		}
-		_qShareM	friend CqVector2D	operator+( const CqVector2D& v, const TqFloat f )
+		friend CqVector2D	operator+( const CqVector2D& v, const TqFloat f )
 		{
 			CqVector2D r( v ); return ( r += f );
 		}
-		_qShareM	friend CqVector2D	operator-( const TqFloat f, const CqVector2D& v )
+		friend CqVector2D	operator-( const TqFloat f, const CqVector2D& v )
 		{
 			return CqVector2D( f -v.x(), f - v.y() );
 		}
-		_qShareM	friend CqVector2D	operator-( const CqVector2D& v, const TqFloat f )
+		friend CqVector2D	operator-( const CqVector2D& v, const TqFloat f )
 		{
 			CqVector2D r( v ); return ( r -= f );
 		}
-		_qShareM	friend CqVector2D	operator*( const TqFloat f, const CqVector2D& v )
+		friend CqVector2D	operator*( const TqFloat f, const CqVector2D& v )
 		{
 			return CqVector2D( f * v.x(), f * v.y() );
 		}
-		_qShareM	friend CqVector2D	operator*( const CqVector2D& v, const TqFloat f )
+		friend CqVector2D	operator*( const CqVector2D& v, const TqFloat f )
 		{
 			CqVector2D r( v ); return ( r *= f );
 		}
-		_qShareM	friend CqVector2D	operator/( const TqFloat f, const CqVector2D& v )
+		friend CqVector2D	operator/( const TqFloat f, const CqVector2D& v )
 		{
 			return CqVector2D( f / v.x(), f / v.y() );
 		}
-		_qShareM	friend CqVector2D	operator/( const CqVector2D& v, const TqFloat f )
+		friend CqVector2D	operator/( const CqVector2D& v, const TqFloat f )
 		{
 			CqVector2D r( v ); return ( r /= f );
 		}
 
-		_qShareM	friend CqVector2D	operator+( const CqVector2D& a, const CqVector2D& b )
+		friend CqVector2D	operator+( const CqVector2D& a, const CqVector2D& b )
 		{
 			CqVector2D r( a ); return ( r += b );
 		}
-		_qShareM	friend CqVector2D	operator-( const CqVector2D& a, const CqVector2D& b )
+		friend CqVector2D	operator-( const CqVector2D& a, const CqVector2D& b )
 		{
 			CqVector2D r( a ); return ( r -= b );
 		}
-		_qShareM	friend CqVector2D	operator/( const CqVector2D& a, const CqVector2D& b )
+		friend CqVector2D	operator/( const CqVector2D& a, const CqVector2D& b )
 		{
 			CqVector2D r( a ); return ( r /= b );
 		}
-		_qShareM	friend CqVector2D	operator-( const CqVector2D& v )
+		friend CqVector2D	operator-( const CqVector2D& v )
 		{
 			return ( CqVector2D( -v.m_x, -v.m_y ) );
 		} // Negation
 
-		_qShareM	friend TqFloat	operator*( const CqVector2D& a, const CqVector2D& b )
+		friend TqFloat	operator*( const CqVector2D& a, const CqVector2D& b )
 		{
 			return ( a.m_x * b.m_x + a.m_y * b.m_y );
 		} // Dot product
-		_qShare		friend std::ostream &operator<<( std::ostream &Stream, CqVector2D &Vector );
+		friend std::ostream &operator<<( std::ostream &Stream, CqVector2D &Vector );
 
 	protected:
 		TqFloat	m_x;		///< X component.

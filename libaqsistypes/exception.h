@@ -32,31 +32,28 @@
 
 #include	"sstring.h"
 
-#define		_qShareName	BUILD_LIBAQSISTYPES
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 //-----------------------------------------------------------------------
 /** General message based exception.  specific exceptions are derived from this.
  */
 
-class _qShareC XqException
+class XqException
 {
 	public:
 		/** Default constructor.
 		 * \param pcharReason Pointer to a string associated with the error which caused the exception.
 		 */
-		_qShareM	XqException( const char* pcharReason = 0 ) :
+		XqException( const char* pcharReason = 0 ) :
 				m_strReason( pcharReason )
 		{}
-		_qShareM	virtual	~XqException()
+		virtual	~XqException()
 		{}
 
 		/** Get a reference to the error message.
 		 * \return a constant string reference.
 		 */
-		_qShareM	const CqString&	strReason()
+		const CqString&	strReason()
 		{
 			return ( m_strReason );
 		}

@@ -80,8 +80,6 @@
 
 #include	"aqsis.h"
 
-#define		_qShareName	BUILD_LIBAQSISTYPES
-#include	"share.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -90,21 +88,21 @@ START_NAMESPACE( Aqsis )
  * A random number generator class.
  */
 
-class _qShareC CqRandom
+class CqRandom
 {
 	public:
-		_qShareM	CqRandom()
+		CqRandom()
 		{
 			Reseed( rand() );
 		}
-		_qShareM	CqRandom( unsigned int Seed )
+		CqRandom( unsigned int Seed )
 		{
 			Reseed( Seed );
 		}
 
 		/** Get a random integer in the range (0 <= value < 2^32).
 		 */
-		_qShareM	unsigned int RandomInt()
+		unsigned int RandomInt()
 		{
 			if ( --m_left == 0 ) NextState();
 
@@ -119,7 +117,7 @@ class _qShareC CqRandom
 		/** Get a random integer in the specified range (0 <= value < Range).
 		 * \param Range Integer max value.
 		 */
-		_qShareM	unsigned int RandomInt( unsigned int Range )
+		unsigned int RandomInt( unsigned int Range )
 		{
 			double n = RandomFloat( Range );
 			return ( unsigned int ) n;
@@ -127,7 +125,7 @@ class _qShareC CqRandom
 
 		/** Get a random float (0.0 <= value < 1.0).
 		 */
-		_qShareM	TqFloat	RandomFloat()
+		TqFloat	RandomFloat()
 		{
 			return static_cast<TqFloat>( ( double ) RandomInt() * ( 1.0 / 4294967296.0 ) );
 		}
@@ -135,14 +133,14 @@ class _qShareC CqRandom
 		/** Get a random float in the specified range (0 <= value < Range).
 		 * \param Range The max value for the range.
 		 */
-		_qShareM	TqFloat	RandomFloat( TqFloat Range )
+		TqFloat	RandomFloat( TqFloat Range )
 		{
 			return ( RandomFloat() * Range );
 		}
 
 		/** Apply a new seed value to the random number generator.
 		 */
-		_qShareM	void	Reseed( unsigned int Seed )
+		void	Reseed( unsigned int Seed )
 		{
 			m_state[ 0 ] = Seed & 0xffffffffUL;
 			for ( int j = 1; j < N; j++ )
@@ -170,7 +168,7 @@ class _qShareC CqRandom
 #define MT_LMASK	0x7fffffffUL
 #define MT_TWIST(u,v)	((((u) & MT_UMASK | (v) & MT_LMASK) >> 1) ^ ((v)&1UL ? MT_MATRIX_A : 0UL))
 
-		_qShareM	void	NextState()
+		void	NextState()
 		{
 			m_left = N;
 			m_next = m_state;

@@ -34,9 +34,6 @@
 #include	"vector3d.h"
 #include	"vector4d.h"
 
-#define		_qShareName	BUILD_LIBAQSISTYPES
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
@@ -45,22 +42,22 @@ START_NAMESPACE( Aqsis )
  * Access to matrix elements is always row,column from 0.
  */
 
-class _qShareC CqMatrix
+class CqMatrix
 {
 	public:
-		_qShareM	CqMatrix() : m_fIdentity( TqTrue )
+		CqMatrix() : m_fIdentity( TqTrue )
 		{}
-		_qShareM	CqMatrix( const TqFloat xs, const TqFloat ys, const TqFloat zs ); // Scaled ID
-		_qShareM	CqMatrix( const CqVector3D& Trans ); // Translated
-		_qShareM	CqMatrix( const TqFloat Angle, const CqVector3D Axis ); // Rotation2
-		_qShareM	CqMatrix( const TqFloat angle,
+		CqMatrix( const TqFloat xs, const TqFloat ys, const TqFloat zs ); // Scaled ID
+		CqMatrix( const CqVector3D& Trans ); // Translated
+		CqMatrix( const TqFloat Angle, const CqVector3D Axis ); // Rotation2
+		CqMatrix( const TqFloat angle,
 		                   const TqFloat dx1, const TqFloat dy1, const TqFloat dz1,
 		                   const TqFloat dx2, const TqFloat dy2, const TqFloat dz2 ); // Skew
-		_qShareM	CqMatrix( const CqMatrix &From );
+		CqMatrix( const CqMatrix &From );
 		/** Individual element constructor.
 		 * Takes 16 floats for the elements of the matrix.
 		 */
-		_qShareM	CqMatrix( const TqFloat r1c1, const TqFloat r1c2, const TqFloat r1c3, const TqFloat r1c4,
+		CqMatrix( const TqFloat r1c1, const TqFloat r1c2, const TqFloat r1c3, const TqFloat r1c4,
 		                   const TqFloat r2c1, const TqFloat r2c2, const TqFloat r2c3, const TqFloat r2c4,
 		                   const TqFloat r3c1, const TqFloat r3c2, const TqFloat r3c3, const TqFloat r3c4,
 		                   const TqFloat r4c1, const TqFloat r4c2, const TqFloat r4c3, const TqFloat r4c4 )
@@ -71,42 +68,42 @@ class _qShareC CqMatrix
 			m_aaElement[ 3 ][ 0 ] = r4c1; m_aaElement[ 3 ][ 1 ] = r4c2; m_aaElement[ 3 ][ 2 ] = r4c3; m_aaElement[ 3 ][ 3 ] = r4c4;
 			m_fIdentity = TqFalse;
 		}
-		_qShareM	CqMatrix( TqFloat From[ 4 ][ 4 ] );
-		_qShareM	CqMatrix( TqFloat From[ 16 ] );
-		_qShareM	~CqMatrix()
+		CqMatrix( TqFloat From[ 4 ][ 4 ] );
+		CqMatrix( TqFloat From[ 16 ] );
+		~CqMatrix()
 		{}
 
-		_qShareM	void	Identity();		// Make identity
+		void	Identity();		// Make identity
 		/** Mark this matrix as identity or not.
 		 * \param f Bool indicating whether or not this matrix should be considered identity irespective of its contents.
 		 */
-		_qShareM	void	SetfIdentity( TqBool f )
+		void	SetfIdentity( TqBool f )
 		{
 			m_fIdentity = f;
 		}
-		_qShareM	TqBool	fIdentity() const
+		TqBool	fIdentity() const
 		{
 			return ( m_fIdentity );
 		}
-		_qShareM	void	Scale( const TqFloat S );
-		_qShareM	void	Scale( const TqFloat xs, const TqFloat ys, const TqFloat zs );
-		_qShareM	void	Rotate( const TqFloat Angle, const CqVector3D Axis );
-		_qShareM	void	Translate( const CqVector3D& Trans );
-		_qShareM	void	Translate( const TqFloat xt, const TqFloat yt, const TqFloat zt );
-		_qShareM	void	ShearX( const TqFloat yh, const TqFloat zh );
-		_qShareM	void	ShearY( const TqFloat xh, const TqFloat zh );
-		_qShareM	void	ShearZ( const TqFloat xh, const TqFloat yh );
-		_qShareM	void	Skew( const TqFloat angle,
+		void	Scale( const TqFloat S );
+		void	Scale( const TqFloat xs, const TqFloat ys, const TqFloat zs );
+		void	Rotate( const TqFloat Angle, const CqVector3D Axis );
+		void	Translate( const CqVector3D& Trans );
+		void	Translate( const TqFloat xt, const TqFloat yt, const TqFloat zt );
+		void	ShearX( const TqFloat yh, const TqFloat zh );
+		void	ShearY( const TqFloat xh, const TqFloat zh );
+		void	ShearZ( const TqFloat xh, const TqFloat yh );
+		void	Skew( const TqFloat angle,
 		                    const TqFloat dx1, const TqFloat dy1, const TqFloat dz1,
 		                    const TqFloat dx2, const TqFloat dy2, const TqFloat dz2 );
-		_qShareM	void	Normalise();
+		void	Normalise();
 
 		/** Get the element at the specified row and column index.
 		 * \param iRow The row index.
 		 * \param iColumn The column index.
 		 * \return Float value.
 		 */
-		_qShareM	TqFloat	Element( TqInt iRow, TqInt iColumn ) const
+		TqFloat	Element( TqInt iRow, TqInt iColumn ) const
 		{
 			return ( m_aaElement[ iRow ][ iColumn ] );
 		}
@@ -115,7 +112,7 @@ class _qShareC CqMatrix
 		 * \param iColumn The column index.
 		 * \param fValue the value to insert.
 		 */
-		_qShareM	void	SetElement( TqInt iRow, TqInt iColumn, TqFloat fValue )
+		void	SetElement( TqInt iRow, TqInt iColumn, TqFloat fValue )
 		{
 			m_aaElement[ iRow ][ iColumn ] = fValue;
 		}
@@ -123,7 +120,7 @@ class _qShareC CqMatrix
 		 * \param iRow The row index.
 		 * \return Pointer to array of 4 float values.
 		 */
-		_qShareM	TqFloat*	operator[] ( TqInt iRow )
+		TqFloat*	operator[] ( TqInt iRow )
 		{
 			return( &m_aaElement[ iRow ][ 0 ] );
 		}
@@ -131,54 +128,54 @@ class _qShareC CqMatrix
 		 * \param iRow The row index.
 		 * \return Pointer to array of 4 float values.
 		 */
-		_qShareM	const TqFloat*	operator[] ( TqInt iRow ) const
+		const TqFloat*	operator[] ( TqInt iRow ) const
 		{
 			return( &m_aaElement[ iRow ][ 0 ] );
 		}
 		/** Get a pointer to matrix data.
 		 * \return Pointer to array of 16 float values.
 		 */
-		_qShareM	TqFloat*	pElements()
+		TqFloat*	pElements()
 		{
 			return ( &m_aaElement[ 0 ][ 0 ] );
 		}
 		/** Get a read only pointer to matrix data.
 		 * \return Pointer to array of 16 float values.
 		 */
-		_qShareM	const TqFloat* pElements() const
+		const TqFloat* pElements() const
 		{
 			return ( &m_aaElement[ 0 ][ 0 ] );
 		}
 
 		// Binary operators
-		_qShareM	CqMatrix	operator*( const CqMatrix &From ) const;
-		_qShareM	CqMatrix	operator*( const TqFloat S ) const;
-		_qShareM	CqVector4D	operator*( const CqVector4D &Vector ) const;
-		_qShareM	CqVector3D	operator*( const CqVector3D &Vector ) const;
-		_qShareM	CqMatrix	operator+( const CqVector4D &Vector ) const;
-		_qShareM	CqMatrix	operator-( const CqVector4D &Vector ) const;
-		_qShareM	CqMatrix	operator+( const CqMatrix &From ) const;
-		_qShareM	CqMatrix	operator-( const CqMatrix &From ) const;
+		CqMatrix	operator*( const CqMatrix &From ) const;
+		CqMatrix	operator*( const TqFloat S ) const;
+		CqVector4D	operator*( const CqVector4D &Vector ) const;
+		CqVector3D	operator*( const CqVector3D &Vector ) const;
+		CqMatrix	operator+( const CqVector4D &Vector ) const;
+		CqMatrix	operator-( const CqVector4D &Vector ) const;
+		CqMatrix	operator+( const CqMatrix &From ) const;
+		CqMatrix	operator-( const CqMatrix &From ) const;
 
-		_qShareM	CqMatrix	Inverse() const;
-		_qShareM	CqMatrix	Transpose() const;
+		CqMatrix	Inverse() const;
+		CqMatrix	Transpose() const;
 
-		_qShareM	CqMatrix&	operator=( const CqMatrix &From );
-		_qShareM	CqMatrix&	operator=( TqFloat From[ 4 ][ 4 ] );
-		_qShareM	CqMatrix&	operator=( TqFloat From[ 16 ] );
-		_qShareM	CqMatrix&	operator+=( const CqMatrix &From );
-		_qShareM	CqMatrix&	operator-=( const CqMatrix &From );
-		_qShareM	CqMatrix&	operator+=( const CqVector4D &Vector );
-		_qShareM	CqMatrix&	operator-=( const CqVector4D &Vector );
-		_qShareM	CqMatrix&	operator*=( const CqMatrix &From );
-		_qShareM	CqMatrix&	PreMultiply( const CqMatrix &From );
-		_qShareM	CqVector4D	PreMultiply( const CqVector4D &Vector ) const;
-		_qShareM	CqMatrix&	operator*=( const TqFloat S );
+		CqMatrix&	operator=( const CqMatrix &From );
+		CqMatrix&	operator=( TqFloat From[ 4 ][ 4 ] );
+		CqMatrix&	operator=( TqFloat From[ 16 ] );
+		CqMatrix&	operator+=( const CqMatrix &From );
+		CqMatrix&	operator-=( const CqMatrix &From );
+		CqMatrix&	operator+=( const CqVector4D &Vector );
+		CqMatrix&	operator-=( const CqVector4D &Vector );
+		CqMatrix&	operator*=( const CqMatrix &From );
+		CqMatrix&	PreMultiply( const CqMatrix &From );
+		CqVector4D	PreMultiply( const CqVector4D &Vector ) const;
+		CqMatrix&	operator*=( const TqFloat S );
 
-		friend _qShareM std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
-		friend _qShareM CqMatrix	operator*( TqFloat S, const CqMatrix& a );
+		friend std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
+		friend CqMatrix	operator*( TqFloat S, const CqMatrix& a );
 
-		_qShareM	TqFloat	Determinant() const;
+		TqFloat	Determinant() const;
 
 	protected:
 		TqFloat	m_aaElement[ 4 ][ 4 ];		///< The 4x4 array of float values.
@@ -186,11 +183,11 @@ class _qShareC CqMatrix
 }
 ;
 
-_qShare	std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
+std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
 
 //-----------------------------------------------------------------------
 
-_qShare	CqVector4D operator*( const CqVector4D &Vector, const CqMatrix& Matrix );
+CqVector4D operator*( const CqVector4D &Vector, const CqMatrix& Matrix );
 
 END_NAMESPACE( Aqsis )
 

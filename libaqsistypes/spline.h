@@ -35,19 +35,16 @@
 #include	"vector4d.h"
 #include	"sstring.h"
 
-#define		_qShareName	BUILD_LIBAQSISTYPES
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 
 typedef	TqFloat	__Basis[ 4 ][ 4 ];
 
-extern _qShareM __Basis	gBezierBasis;
-extern _qShareM __Basis	gBSplineBasis;
-extern _qShareM __Basis	gCatmullRomBasis;
-extern _qShareM __Basis	gHermiteBasis;
-extern _qShareM __Basis	gPowerBasis;
+extern __Basis	gBezierBasis;
+extern __Basis	gBSplineBasis;
+extern __Basis	gCatmullRomBasis;
+extern __Basis	gHermiteBasis;
+extern __Basis	gPowerBasis;
 
 
 //----------------------------------------------------------------------
@@ -55,41 +52,41 @@ extern _qShareM __Basis	gPowerBasis;
  * Cubic spline curve
  */
 
-class _qShareC CqSplineCubic
+class CqSplineCubic
 {
 	public:
-		_qShareM	CqSplineCubic( TqInt cu = 4 );
-		_qShareM	virtual	~CqSplineCubic()
+		CqSplineCubic( TqInt cu = 4 );
+		virtual	~CqSplineCubic()
 		{}
 
-		_qShareM	virtual	CqVector4D	Evaluate( TqFloat t ) const;
-		_qShareM	virtual	void	InitFD( TqInt n );
-		_qShareM	virtual	CqVector4D	EvaluateFD();
-		_qShareM	virtual	TqInt	cSections() const;
+		virtual	CqVector4D	Evaluate( TqFloat t ) const;
+		virtual	void	InitFD( TqInt n );
+		virtual	CqVector4D	EvaluateFD();
+		virtual	TqInt	cSections() const;
 
 		/** Get a reference to the array of control points.
 		 */
-		_qShareM	std::vector<CqVector4D>& aControlPoints()
+		std::vector<CqVector4D>& aControlPoints()
 		{
 			return ( m_aControlPoints );
 		}
 		/** Get a reference to the cubic spline basis matrix.
 		 */
-		_qShareM	CqMatrix&	matBasis()
+		CqMatrix&	matBasis()
 		{
 			return ( m_matBasis );
 		}
 		/** Set the cubic spline basis matrix.
 		 * \param mat Basis matrix.
 		 */
-		_qShareM	void	SetmatBasis( CqMatrix& mat )
+		void	SetmatBasis( CqMatrix& mat )
 		{
 			m_matBasis = mat;
 		}
 		/** Set the cubic spline basis matrix.
 		 * \param name Basis name.
 		 */
-		_qShareM	void	SetmatBasis( const CqString& strName )
+		void	SetmatBasis( const CqString& strName )
 		{
 			__Basis * pVals = 0;
 			if ( strName.compare( "bezier" ) == 0 )
@@ -118,14 +115,14 @@ class _qShareC CqSplineCubic
 		/** Get the control point step size for the evaluation window.
 		 * \return Integer step size.
 		 */
-		_qShareM	TqInt	Step() const
+		TqInt	Step() const
 		{
 			return ( m_Step );
 		}
 		/** Set the control point step size for the evaluation window.
 		 * \param Step Integer step size.
 		 */
-		_qShareM	void	SetStep( const TqInt Step )
+		void	SetStep( const TqInt Step )
 		{
 			m_Step = Step;
 		}
@@ -133,14 +130,14 @@ class _qShareC CqSplineCubic
 		/** Indexed access to the control points.
 		 * \param i Integer index.
 		 */
-		_qShareM	CqVector4D&	operator[] ( TqInt i )
+		CqVector4D&	operator[] ( TqInt i )
 		{
 			assert( i<m_cu ); return ( m_aControlPoints[ i ] );
 		}
 		/** Indexed access to the control points.
 		 * \param i Integer index.
 		 */
-		_qShareM	const CqVector4D&	operator[] ( TqInt i ) const
+		const CqVector4D&	operator[] ( TqInt i ) const
 		{
 			assert( i<m_cu ); return ( m_aControlPoints[ i ] );
 		}

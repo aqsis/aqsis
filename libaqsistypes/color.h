@@ -32,9 +32,6 @@
 
 #include	"vector3d.h"
 
-#define		_qShareName	BUILD_LIBAQSISTYPES
-#include	"share.h"
-
 #include <iostream>
 
 START_NAMESPACE( Aqsis )
@@ -45,18 +42,18 @@ START_NAMESPACE( Aqsis )
  * Class to store and manipulate three component color information.
  */
 
-class _qShareC	CqColor
+class CqColor
 {
 	public:
 		/// Default constructor.
-		_qShareM	CqColor() : m_fRed( 0.0f ), m_fGreen( 0.0f ), m_fBlue( 0.0f )
+		CqColor() : m_fRed( 0.0f ), m_fGreen( 0.0f ), m_fBlue( 0.0f )
 		{}
 		/** Component constructor
 		 * \param fRed red component 0.0-1.0
 		 * \param fGreen green component 0.0-1.0
 		 * \param fBlue blue component 0.0-1.0
 		 */
-		_qShareM	CqColor( TqFloat fRed, TqFloat fGreen, TqFloat fBlue ) :
+		CqColor( TqFloat fRed, TqFloat fGreen, TqFloat fBlue ) :
 				m_fRed( fRed ),
 				m_fGreen( fGreen ),
 				m_fBlue( fBlue )
@@ -64,60 +61,60 @@ class _qShareC	CqColor
 		/** 3D vector constructor.
 		 * \param From the vector to copy the component values from.
 		 */
-		_qShareM	CqColor( const CqVector3D& From )
+		CqColor( const CqVector3D& From )
 		{
 			*this = From;
 		}
 		/** Array component constructor.
 		 * \param From array of floats to use as the components.
 		 */
-		_qShareM	CqColor( const TqFloat From[ 3 ] ) :
+		CqColor( const TqFloat From[ 3 ] ) :
 				m_fRed( From[ 0 ] ),
 				m_fGreen( From[ 1 ] ),
 				m_fBlue( From[ 2 ] )
 		{}
-		_qShareM	~CqColor()
+		~CqColor()
 		{}
 
 		/** Get the red component.
 		 * \return float red component 0.0-1.0.
 		 */
-		_qShareM	TqFloat	fRed() const
+		TqFloat	fRed() const
 		{
 			return ( m_fRed );
 		}
 		/** Set the red component.
 		 * \param fValue the new value for the red component 0.0-1.0.
 		 */
-		_qShareM	void	SetfRed( const TqFloat fValue )
+		void	SetfRed( const TqFloat fValue )
 		{
 			m_fRed = fValue;
 		}
 		/** Get the freen component.
 		 * \return float green component 0.0-1.0.
 		 */
-		_qShareM	TqFloat	fGreen() const
+		TqFloat	fGreen() const
 		{
 			return ( m_fGreen );
 		}
 		/** Set the green component.
 		 * \param fValue the new value for the green component 0.0-1.0.
 		 */
-		_qShareM	void	SetfGreen( const TqFloat fValue )
+		void	SetfGreen( const TqFloat fValue )
 		{
 			m_fGreen = fValue;
 		}
 		/** Get the blue component.
 		 * \return float blue component 0.0-1.0.
 		 */
-		_qShareM	TqFloat	fBlue() const
+		TqFloat	fBlue() const
 		{
 			return ( m_fBlue );
 		}
 		/** Set the blue component.
 		 * \param fValue the new value for the blue component 0.0-1.0.
 		 */
-		_qShareM	void	SetfBlue( const TqFloat fValue )
+		void	SetfBlue( const TqFloat fValue )
 		{
 			m_fBlue = fValue;
 		}
@@ -126,7 +123,7 @@ class _qShareC	CqColor
 		 * \param pfGreen pointer to the area to store the green component.
 		 * \param pfBlue pointer to the area to store the blue component.
 		 */
-		_qShareM	void	GetColorRGB( TqFloat* pfRed, TqFloat* pfGreen, TqFloat* pfBlue )
+		void	GetColorRGB( TqFloat* pfRed, TqFloat* pfGreen, TqFloat* pfBlue )
 		{
 			*pfRed = m_fRed;
 			*pfGreen = m_fGreen;
@@ -137,26 +134,26 @@ class _qShareC	CqColor
 		 * \param fGreen the new value for the green component 0.0-1.0.
 		 * \param fBlue the new value for the blue component 0.0-1.0.
 		 */
-		_qShareM	void	SetColorRGB( TqFloat fRed, TqFloat fGreen, TqFloat fBlue )
+		void	SetColorRGB( TqFloat fRed, TqFloat fGreen, TqFloat fBlue )
 		{
 			m_fRed = fRed;
 			m_fGreen = fGreen;
 			m_fBlue = fBlue;
 		}
 
-		_qShareM	CqColor	rgbtohsv() const;
-		_qShareM	CqColor	rgbtohsl() const;
-		_qShareM	CqColor	rgbtoXYZ() const;
-		_qShareM	CqColor	rgbtoxyY() const;
-		_qShareM	CqColor	rgbtoYIQ() const;
-		_qShareM	CqColor	hsvtorgb() const;
-		_qShareM	CqColor	hsltorgb() const;
-		_qShareM	CqColor	XYZtorgb() const;
-		_qShareM	CqColor	xyYtorgb() const;
-		_qShareM	CqColor	YIQtorgb() const;
+		CqColor	rgbtohsv() const;
+		CqColor	rgbtohsl() const;
+		CqColor	rgbtoXYZ() const;
+		CqColor	rgbtoxyY() const;
+		CqColor	rgbtoYIQ() const;
+		CqColor	hsvtorgb() const;
+		CqColor	hsltorgb() const;
+		CqColor	XYZtorgb() const;
+		CqColor	xyYtorgb() const;
+		CqColor	YIQtorgb() const;
 
 		/// Clamp the components to the range 0.0-1.0.
-		_qShareM	void	Clamp()
+		void	Clamp()
 		{
 			if ( m_fRed > 1.0 ) m_fRed = 1.0;
 			if ( m_fGreen > 1.0 ) m_fGreen = 1.0;
@@ -171,7 +168,7 @@ class _qShareC	CqColor
 		 * \param i integer component index, 0-2.
 		 * \return a reference to the float value of the appropriate component, returns blue if index is invalid.
 		 */
-		_qShareM	TqFloat&	operator[] ( TqInt i )
+		TqFloat&	operator[] ( TqInt i )
 		{
 			if ( i==0 ) return ( m_fRed );
 			else if ( i == 1 ) return ( m_fGreen );
@@ -181,7 +178,7 @@ class _qShareC	CqColor
 		 * \param i integer component index, 0-2.
 		 * \return a constant reference the float value of the appropriate component, returns blue if index is invalid.
 		 */
-		_qShareM	const TqFloat&	operator[] ( TqInt i ) const
+		const TqFloat&	operator[] ( TqInt i ) const
 		{
 			if ( i==0 ) return ( m_fRed );
 			else if ( i == 1 ) return ( m_fGreen );
@@ -191,7 +188,7 @@ class _qShareC	CqColor
 		 * \param From the vector to get the color cmoponents from.
 		 * \return a reference to this color.
 		 */
-		_qShareM	CqColor&	operator=( const CqVector3D& From )
+		CqColor&	operator=( const CqVector3D& From )
 		{
 			m_fRed = From.x();
 			m_fGreen = From.y();
@@ -203,7 +200,7 @@ class _qShareC	CqColor
 		 * \param colFrom the color to add to this.
 		 * \return a reference to this color.
 		 */
-		_qShareM	CqColor&	operator+=( const CqColor &colFrom )
+		CqColor&	operator+=( const CqColor &colFrom )
 		{
 			m_fRed += colFrom.m_fRed;	m_fGreen += colFrom.m_fGreen;	m_fBlue += colFrom.m_fBlue;
 			return ( *this );
@@ -212,7 +209,7 @@ class _qShareC	CqColor
 		 * \param colFrom the color to subtract from this.
 		 * \return a reference to this color.
 		 */
-		_qShareM	CqColor&	operator-=( const CqColor &colFrom )
+		CqColor&	operator-=( const CqColor &colFrom )
 		{
 			m_fRed -= colFrom.m_fRed;	m_fGreen -= colFrom.m_fGreen;	m_fBlue -= colFrom.m_fBlue;
 			return ( *this );
@@ -221,7 +218,7 @@ class _qShareC	CqColor
 		 * \param colFrom the color to multiply this with.
 		 * \return a reference to this color.
 		 */
-		_qShareM	CqColor&	operator*=( const CqColor& colFrom )
+		CqColor&	operator*=( const CqColor& colFrom )
 		{
 			m_fRed *= colFrom.m_fRed;	m_fGreen *= colFrom.m_fGreen;	m_fBlue *= colFrom.m_fBlue;
 			return ( *this );
@@ -230,7 +227,7 @@ class _qShareC	CqColor
 		 * \param fScale the float to multiply each component with.
 		 * \return a reference to this color.
 		 */
-		_qShareM	CqColor&	operator*=( TqFloat fScale )
+		CqColor&	operator*=( TqFloat fScale )
 		{
 			m_fRed *= fScale;	m_fGreen *= fScale;	m_fBlue *= fScale;
 			return ( *this );
@@ -239,7 +236,7 @@ class _qShareC	CqColor
 		 * \param fScale the float to divide each component by.
 		 * \return a reference to this color.
 		 */
-		_qShareM	CqColor&	operator/=( const TqFloat fScale )
+		CqColor&	operator/=( const TqFloat fScale )
 		{
 			m_fRed /= fScale;	m_fGreen /= fScale;	m_fBlue /= fScale;
 			return ( *this );
@@ -248,7 +245,7 @@ class _qShareC	CqColor
 		 * \param colFrom the color to divide this by.
 		 * \return a reference to this color.
 		 */
-		_qShareM	CqColor&	operator/=( const CqColor& colFrom )
+		CqColor&	operator/=( const CqColor& colFrom )
 		{
 			m_fRed /= colFrom.m_fRed;	m_fGreen /= colFrom.m_fGreen;	m_fBlue /= colFrom.m_fBlue;
 			return ( *this );
@@ -257,7 +254,7 @@ class _qShareC	CqColor
 		 * \param Add the float to add to each component.
 		 * \return a reference to this color.
 		 */
-		_qShareM	CqColor&	operator+=( const TqFloat Add )
+		CqColor&	operator+=( const TqFloat Add )
 		{
 			m_fRed += Add;	m_fGreen += Add;	m_fBlue += Add;
 			return ( *this );
@@ -266,7 +263,7 @@ class _qShareC	CqColor
 		 * \param Sub the float to subtract from each component.
 		 * \return a reference to this color.
 		 */
-		_qShareM	CqColor&	operator-=( const TqFloat Sub )
+		CqColor&	operator-=( const TqFloat Sub )
 		{
 			m_fRed -= Sub;	m_fGreen -= Sub;	m_fBlue -= Sub;
 			return ( *this );
@@ -275,7 +272,7 @@ class _qShareC	CqColor
 		 * \param colCmp the color to compare this with.
 		 * \return boolean indicating equality.
 		 */
-		_qShareM	TqBool	operator==( const CqColor &colCmp ) const
+		TqBool	operator==( const CqColor &colCmp ) const
 		{
 			return ( ( m_fRed == colCmp.m_fRed ) && ( m_fGreen == colCmp.m_fGreen ) && ( m_fBlue == colCmp.m_fBlue ) );
 		}
@@ -283,7 +280,7 @@ class _qShareC	CqColor
 		 * \param colCmp the color to compare this with.
 		 * \return boolean indicating inequality.
 		 */
-		_qShareM	TqBool	operator!=( const CqColor &colCmp ) const
+		TqBool	operator!=( const CqColor &colCmp ) const
 		{
 			return ( !( *this == colCmp ) );
 		}
@@ -291,7 +288,7 @@ class _qShareC	CqColor
 		 * \param colCmp the color to compare this with.
 		 * \return boolean indicating each component is greater than or equal to its counterpart in the argument.
 		 */
-		_qShareM	TqBool	operator>=( const CqColor &colCmp ) const
+		TqBool	operator>=( const CqColor &colCmp ) const
 		{
 			return ( ( m_fRed >= colCmp.m_fRed ) && ( m_fGreen >= colCmp.m_fGreen ) && ( m_fBlue >= colCmp.m_fBlue ) );
 		}
@@ -299,7 +296,7 @@ class _qShareC	CqColor
 		 * \param colCmp the color to compare this with.
 		 * \return boolean indicating each component is less than or equal to its counterpart in the argument.
 		 */
-		_qShareM	TqBool	operator<=( const CqColor &colCmp ) const
+		TqBool	operator<=( const CqColor &colCmp ) const
 		{
 			return ( ( m_fRed <= colCmp.m_fRed ) && ( m_fGreen <= colCmp.m_fGreen ) && ( m_fBlue <= colCmp.m_fBlue ) );
 		}
@@ -307,7 +304,7 @@ class _qShareC	CqColor
 		 * \param colCmp the color to compare this with.
 		 * \return boolean indicating each component is greater than its counterpart in the argument.
 		 */
-		_qShareM	TqBool	operator>( const CqColor &colCmp ) const
+		TqBool	operator>( const CqColor &colCmp ) const
 		{
 			return ( ( m_fRed > colCmp.m_fRed ) && ( m_fGreen > colCmp.m_fGreen ) && ( m_fBlue > colCmp.m_fBlue ) );
 		}
@@ -315,7 +312,7 @@ class _qShareC	CqColor
 		 * \param colCmp the color to compare this with.
 		 * \return boolean indicating each component is less than its counterpart in the argument.
 		 */
-		_qShareM	TqBool	operator<( const CqColor &colCmp ) const
+		TqBool	operator<( const CqColor &colCmp ) const
 		{
 			return ( ( m_fRed < colCmp.m_fRed ) && ( m_fGreen < colCmp.m_fGreen ) && ( m_fBlue < colCmp.m_fBlue ) );
 		}
@@ -325,7 +322,7 @@ class _qShareC	CqColor
 		 * \param c color to add to.
 		 * \return new color representing addition. 
 		 */
-		_qShareM	friend CqColor	operator+( const TqFloat f, const CqColor& c )
+		friend CqColor	operator+( const TqFloat f, const CqColor& c )
 		{
 			CqColor r( c ); return ( r += f );
 		}
@@ -334,7 +331,7 @@ class _qShareC	CqColor
 		 * \param f float to add to each component.
 		 * \return new color representing addition. 
 		 */
-		_qShareM	friend CqColor	operator+( const CqColor& c, const TqFloat f )
+		friend CqColor	operator+( const CqColor& c, const TqFloat f )
 		{
 			CqColor r( c ); return ( r += f );
 		}
@@ -343,7 +340,7 @@ class _qShareC	CqColor
 		 * \param c color to subtract from.
 		 * \return new color representing subtraction. 
 		 */
-		_qShareM	friend CqColor	operator-( const TqFloat f, const CqColor& c )
+		friend CqColor	operator-( const TqFloat f, const CqColor& c )
 		{
 			CqColor r( f, f, f ); return ( r -= c );
 		}
@@ -352,7 +349,7 @@ class _qShareC	CqColor
 		 * \param f float to subtract from each component.
 		 * \return new color representing subtraction. 
 		 */
-		_qShareM	friend CqColor	operator-( const CqColor& c, const TqFloat f )
+		friend CqColor	operator-( const CqColor& c, const TqFloat f )
 		{
 			CqColor r( c ); return ( r -= f );
 		}
@@ -361,7 +358,7 @@ class _qShareC	CqColor
 		 * \param c color to multiply with.
 		 * \return new color representing multiplication. 
 		 */
-		_qShareM	friend CqColor	operator*( const TqFloat f, const CqColor& c )
+		friend CqColor	operator*( const TqFloat f, const CqColor& c )
 		{
 			CqColor r( f, f, f ); return ( r *= c );
 		}
@@ -370,7 +367,7 @@ class _qShareC	CqColor
 		 * \param f float to multiply each component with.
 		 * \return new color representing multiplication. 
 		 */
-		_qShareM	friend CqColor	operator*( const CqColor& c, const TqFloat f )
+		friend CqColor	operator*( const CqColor& c, const TqFloat f )
 		{
 			CqColor r( c ); return ( r *= f );
 		}
@@ -379,7 +376,7 @@ class _qShareC	CqColor
 		 * \param c color to divide.
 		 * \return new color representing division. 
 		 */
-		_qShareM	friend CqColor	operator/( const TqFloat f, const CqColor& c )
+		friend CqColor	operator/( const TqFloat f, const CqColor& c )
 		{
 			CqColor r( f, f, f ); return ( r /= c );
 		}
@@ -388,7 +385,7 @@ class _qShareC	CqColor
 		 * \param f float to divide each component by.
 		 * \return new color representing division. 
 		 */
-		_qShareM	friend CqColor	operator/( const CqColor& c, const TqFloat f )
+		friend CqColor	operator/( const CqColor& c, const TqFloat f )
 		{
 			CqColor r( c ); return ( r /= f );
 		}
@@ -398,7 +395,7 @@ class _qShareC	CqColor
 		 * \param b color to add.
 		 * \return new color representing addition. 
 		 */
-		_qShareM	friend CqColor	operator+( const CqColor& a, const CqColor& b )
+		friend CqColor	operator+( const CqColor& a, const CqColor& b )
 		{
 			CqColor r( a ); return ( r += b );
 		}
@@ -407,7 +404,7 @@ class _qShareC	CqColor
 		 * \param b color to subtract.
 		 * \return new color representing subtraction. 
 		 */
-		_qShareM	friend CqColor	operator-( const CqColor& a, const CqColor& b )
+		friend CqColor	operator-( const CqColor& a, const CqColor& b )
 		{
 			CqColor r( a ); return ( r -= b );
 		}
@@ -416,7 +413,7 @@ class _qShareC	CqColor
 		 * \param b color to multiply by.
 		 * \return new color representing multiplication. 
 		 */
-		_qShareM	friend CqColor	operator*( const CqColor& a, const CqColor& b )
+		friend CqColor	operator*( const CqColor& a, const CqColor& b )
 		{
 			CqColor r( a ); return ( r *= b );
 		}
@@ -425,7 +422,7 @@ class _qShareC	CqColor
 		 * \param b color to divide by.
 		 * \return new color representing division. 
 		 */
-		_qShareM	friend CqColor	operator/( const CqColor& a, const CqColor& b )
+		friend CqColor	operator/( const CqColor& a, const CqColor& b )
 		{
 			CqColor r( a ); return ( r /= b );
 		}
@@ -433,7 +430,7 @@ class _qShareC	CqColor
 		 * \param a color to negate.
 		 * \return new color representing negation. 
 		 */
-		_qShareM	friend CqColor	operator-( const CqColor& a )
+		friend CqColor	operator-( const CqColor& a )
 		{
 			return ( CqColor( -a.m_fRed, -a.m_fGreen, -a.m_fBlue ) );
 		} // Negation
@@ -442,7 +439,7 @@ class _qShareC	CqColor
 		 *\param a color to serialize.
 		 *\return input stream.
 		 */
-		_qShareM	friend std::ostream& operator<<( std::ostream& Stream, const CqColor& a )
+		friend std::ostream& operator<<( std::ostream& Stream, const CqColor& a )
 		{
 			Stream << a.m_fRed << " " << a.m_fGreen << " " << a.m_fBlue;
 			return Stream;
@@ -457,15 +454,15 @@ class _qShareC	CqColor
 
 
 /// Static white color
-_qShareM extern CqColor	gColWhite;
+extern CqColor	gColWhite;
 /// Static black color
-_qShareM extern CqColor	gColBlack;
+extern CqColor	gColBlack;
 /// Static red color
-_qShareM extern CqColor	gColRed;
+extern CqColor	gColRed;
 /// Static green color
-_qShareM extern CqColor	gColGreen;
+extern CqColor	gColGreen;
 /// Static blue color
-_qShareM extern CqColor	gColBlue;
+extern CqColor	gColBlue;
 
 //-----------------------------------------------------------------------
 
