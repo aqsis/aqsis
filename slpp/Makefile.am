@@ -1,1 +1,7 @@
-EXTRA_DIST = PP.DOC PP.H PP1.C PP2.C PP3.C PP4.C PP5.C PP6.C PP7.C PP8.C PPEXT.H slpp.dsp
+bin_PROGRAMS = slpp 
+
+slpp_SOURCES = pp.doc pp.h pp1.c pp2.c pp3.c pp4.c pp5.c pp6.c pp7.c pp8.c ppext.h
+
+.PHONY: slpp
+
+EXTRA_DIST = slpp.dsp
