@@ -21,7 +21,6 @@
 /** \file
 		\brief Implements the CqImageBuffer class responsible for rendering the primitives and storing the results.
 		\author Paul C. Gregory (pgregory@aqsis.com)
-		\author Andy Gill (billybobjimboy@users.sf.net)
 */
 
 #include	"aqsis.h"
@@ -38,7 +37,6 @@
 #include	"micropolygon.h"
 #include	"imagebuffer.h"
 #include	"occlusion.h"
-#include	"focus.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -251,14 +249,14 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 	// Take into account depth-of-field (in camera space)
 	if ( QGetRenderContext() ->UsingDepthOfField() )
 	{
-		const TqFloat * dofdata = QGetRenderContext() ->GetDepthOfFieldData();
-		TqFloat C = MAX( CircleOfConfusion( dofdata, minz ), CircleOfConfusion( dofdata, maxz ) );
-		TqFloat sx = QGetRenderContext() ->GetDepthOfFieldScaleX();
-		TqFloat sy = QGetRenderContext() ->GetDepthOfFieldScaleY();
-		Bound.vecMin().x( Bound.vecMin().x() - C * sx );
-		Bound.vecMin().y( Bound.vecMin().y() - C * sy );
-		Bound.vecMax().x( Bound.vecMax().x() + C * sx );
-		Bound.vecMax().y( Bound.vecMax().y() + C * sy );
+		const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( minz );
+		const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( maxz );
+		TqFloat cocX = MAX( minZCoc.x(), maxZCoc.x() );
+		TqFloat cocY = MAX( minZCoc.y(), maxZCoc.y() );
+		Bound.vecMin().x( Bound.vecMin().x() - cocX );
+		Bound.vecMin().y( Bound.vecMin().y() - cocY );
+		Bound.vecMax().x( Bound.vecMax().x() + cocX );
+		Bound.vecMax().y( Bound.vecMax().y() + cocY );
 	}
 
 	// Convert the bounds to raster space.
@@ -711,19 +709,36 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 	TqBool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
 
 	TqBool UsingDepthOfField = QGetRenderContext() ->UsingDepthOfField();
-	const TqFloat* dofdata = 0;
-	TqFloat sx = QGetRenderContext() ->GetDepthOfFieldScaleX();
-	TqFloat sy = QGetRenderContext() ->GetDepthOfFieldScaleY();
-
-	if ( UsingDepthOfField )
-	{
-		dofdata = QGetRenderContext() ->GetDepthOfFieldData();
-	}
 
 	TqInt bound_max = pMPG->cSubBounds();
 	TqInt bound_max_1 = bound_max - 1;
 	TqInt sample_hits = 0;
 	TqInt shd_rate = pMPG->pGrid() ->pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
+
+	// fill in sample info for this mpg so we don't have to keep fetching it for each sample.
+	m_CurrentMpgSampleInfo.m_IsMatte = pMPG->pGrid() ->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1;
+	// Must check if colour is needed, as if not, the variable will have been deleted from the grid.
+	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
+	{
+		m_CurrentMpgSampleInfo.m_Colour = pMPG->colColor();
+	}
+	else
+	{
+		m_CurrentMpgSampleInfo.m_Colour = gColWhite;
+	}
+
+	// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
+	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
+	{
+		m_CurrentMpgSampleInfo.m_Opacity = pMPG->colOpacity();
+		m_CurrentMpgSampleInfo.m_Occludes = pMPG->colOpacity() >= gColWhite;
+	}
+	else
+	{
+		m_CurrentMpgSampleInfo.m_Opacity = gColWhite;
+		m_CurrentMpgSampleInfo.m_Occludes = TqTrue;
+	}
+
 	for ( TqInt bound_num = 0; bound_num < bound_max ; bound_num++ )
 	{
 		TqFloat time0;
@@ -737,14 +752,32 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 		TqFloat bminy = Bound.vecMin().y();
 		TqFloat bmaxy = Bound.vecMax().y();
 
+		// these values are the bound of the mpg not including dof extension.
+		// the values above (bminx etc) *do* include dof.
+		// if dof is turned off the values will be the same.
+		TqFloat mpgbminx;
+		TqFloat mpgbmaxx;
+		TqFloat mpgbminy;
+		TqFloat mpgbmaxy;
 		if ( UsingDepthOfField )
 		{
-			TqFloat C = MAX( CircleOfConfusion( dofdata, Bound.vecMin().z() ), CircleOfConfusion( dofdata, Bound.vecMax().z() ) );
+			const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMin().z() );
+			const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( Bound.vecMax().z() );
+			TqFloat cocX = MAX( minZCoc.x(), maxZCoc.x() );
+			TqFloat cocY = MAX( minZCoc.y(), maxZCoc.y() );
 
-			bminx -= C * sx;
-			bminy -= C * sy;
-			bmaxx += C * sx;
-			bmaxy += C * sy;
+			// reduce the mpg bound so it doesn't include the coc.
+			mpgbminx = bminx + cocX;
+			mpgbmaxx = bmaxx - cocX;
+			mpgbminy = bminy + cocY;
+			mpgbmaxy = bmaxy - cocY;
+		}
+		else
+		{
+			mpgbminx = bminx;
+			mpgbmaxx = bmaxx;
+			mpgbminy = bminy;
+			mpgbmaxy = bmaxy;
 		}
 
 		if ( bmaxx < xmin || bmaxy < ymin || bminx > xmax || bminy > ymax )
@@ -778,13 +811,24 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 		// at (eX, eY).
 		TqInt eX = CEIL( bmaxx );
 		TqInt eY = CEIL( bmaxy );
-		if ( eX >= xmax ) eX = xmax;
-		if ( eY >= ymax ) eY = ymax;
+		if ( eX > xmax ) eX = xmax;
+		if ( eY > ymax ) eY = ymax;
 
 		TqInt sX = FLOOR( bminx );
 		TqInt sY = FLOOR( bminy );
 		if ( sY < ymin ) sY = ymin;
 		if ( sX < xmin ) sX = xmin;
+
+		// these values give the pixel bound of the mpg *not* including dof.
+		TqInt mpg_eX = CEIL( mpgbmaxx );
+		TqInt mpg_eY = CEIL( mpgbmaxy );
+		if ( mpg_eX > xmax ) mpg_eX = xmax;
+		if ( mpg_eY > ymax ) mpg_eY = ymax;
+
+		TqInt mpg_sX = FLOOR( mpgbminx );
+		TqInt mpg_sY = FLOOR( mpgbminy );
+		if ( mpg_sY < ymin ) mpg_sY = ymin;
+		if ( mpg_sX < xmin ) mpg_sX = xmin;
 
 		CqImagePixel* pie, *pie2;
 
@@ -798,23 +842,28 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 
 		register long iY = sY;
 
-		TqFloat dc = 0.0f;
-		if ( UsingDepthOfField )
+		CqVector2D coc;
+		if( UsingDepthOfField )
 		{
 			TqFloat ad; // Average depth
 
 			ad = pMPG->PointA().z() + pMPG->PointB().z() + pMPG->PointC().z() + pMPG->PointD().z();
 			ad /= 4;
-			dc = CircleOfConfusion( dofdata, ad );
-			/*
-			CqVector4D dct( dc, dc, 0.0 );
-			*/
-			/*
-			dc = dct.Magnitude();*/
+			coc = QGetRenderContext()->GetCircleOfConfusion( ad );
 		}
 
 		TqInt nextx = Bucket.XSize() + Bucket.XFWidth();
 		Bucket.ImageElement( sX, sY, pie );
+
+		// quadX and quadY hold which quadrant we are currently sampling in
+		// reletive to the mpg. they are used for dof sampling optimisations.
+		// a value of -1 means we are in a pixel wholly left (or above for quadY) of the mpg.
+		// a value of +1 means we are wholly to the right of the mpg.
+		// a value of 0 means the current pixel intersects the mpg bound.
+		// if we are wholly left of the mpg, and the dof sample offset has a -ve x value
+		// then we needn't bother checking any further. ditto for y.
+		TqInt quadX;
+		TqInt quadY;
 
 		while ( iY < eY )
 		{
@@ -823,8 +872,22 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 			pie2 = pie;
 			pie += nextx;
 
+			if(iY < mpg_sY)
+				quadY = -1;
+			else if(iY > mpg_eY)
+				quadY = 1;
+			else
+				quadY = 0;
+
 			while ( iX < eX )
 			{
+				if(iX < mpg_sX)
+					quadX = -1;
+				else if(iX > mpg_eX)
+					quadX = 1;
+				else
+					quadX = 0;
+
 				// Now sample the micropolygon at several subsample positions
 				// within the pixel. The subsample indices range from (start_m, n)
 				// to (end_m-1, end_n-1).
@@ -833,50 +896,82 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 				int end_n = ( iY == ( eY - 1 ) ) ? en : iYSamples;
 				int start_m = ( iX == sX ) ? im : 0;
 				int end_m = ( iX == ( eX - 1 ) ) ? em : iXSamples;
-				TqBool brkVert = TqFalse;
-				for ( ; n < end_n && !brkVert; n++ )
+				int index_start = n*iXSamples + start_m;
+				for ( ; n < end_n; n++ )
 				{
-					TqBool brkHoriz = TqFalse;
-					for ( m = start_m; m < end_m && !brkHoriz; m++ )
+					int index = index_start;
+					for ( m = start_m; m < end_m; m++ )
 					{
-						const CqVector2D& vecP = pie2->SamplePoint( m, n );
+						const SqSampleData& sampleData = pie2->SampleData( index );
+						const CqVector2D& vecP = sampleData.m_Position;
+						index++;
 
-						CqVector2D samplelens;
+						TqFloat vecX;
+						TqFloat vecY;
 						if ( UsingDepthOfField )
 						{
-							samplelens = pie2->SampleLens( m, n );
-							//std::cout << samplelens.x() << " " << samplelens.y() << std::endl;
-							samplelens.x( samplelens.x() * QGetRenderContext() ->GetDepthOfFieldScaleX() );
-							samplelens.y( samplelens.y() * QGetRenderContext() ->GetDepthOfFieldScaleX() );
-							//std::cout << samplelens.x() << " " << samplelens.y() << std::endl;
-
+							// check if the offset is pointing away from the mpg.
+							if(	(sampleData.m_DofOffsetXQuad == quadX) ||
+								(sampleData.m_DofOffsetYQuad == quadY) )
+							{
+								continue;
 						}
-						STATS_INC( SPL_count );
-
-						TqFloat t = pie2->SampleTime( m, n );
-						// First, check if the subsample point lies within the micropoly bound
-						if ( t >= time0 && t <= time1 && Bound.Contains2D( vecP ) )
+							else
 						{
 							STATS_INC( SPL_bound_hits );
+								// check if the displaced sample will fall outside the mpg
+								// if outside in x dimension, don't bother transforming y
+								vecX = vecP.x() + coc.x()*sampleData.m_DofOffset.x();
+								if(mpgbminx > vecX || mpgbmaxx < vecX)
+								{
+									continue;
+								}
+								else
+								{
+									vecY = vecP.y() + coc.y()*sampleData.m_DofOffset.y();
+									if(mpgbminy > vecY || mpgbmaxy < vecY)
+										continue;
+								}
+							}
+						}
 
 							// Check to see if the sample is within the sample's level of detail
-							if ( UsingLevelOfDetail )
+						if ( UsingLevelOfDetail)
 							{
-								TqFloat LevelOfDetail = pie2->SampleLevelOfDetail( m, n );
+							TqFloat LevelOfDetail = sampleData.m_DetailLevel;
 								if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
 								{
 									continue;
 								}
 							}
 
+						TqFloat t;
+						t = sampleData.m_Time;
+						if( t < time0 || t > time1)
+							continue;
+
+						if ( !UsingDepthOfField ) // already checked this if we're using dof.
+						{
+							if(!Bound.Contains2D( vecP ))
+								continue;
+						}
+
+						STATS_INC( SPL_bound_hits );
+
+
 							// Now check if the subsample hits the micropoly
 							TqBool SampleHit;
 							TqFloat D;
 
-							if ( UsingDepthOfField )
-								SampleHit = pMPG->Sample( vecP + dc * samplelens, D, t );
+						if( UsingDepthOfField )
+						{
+							CqVector2D vecPDof(vecX, vecY);
+							SampleHit = pMPG->Sample( vecPDof, D, t );
+						}
 							else
+						{
 								SampleHit = pMPG->Sample( vecP, D, t );
+						}
 
 							if ( SampleHit )
 							{
@@ -888,17 +983,14 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 								StoreSample( pMPG, pie2, m, n, D );
 							}
 						}
-						else
-						{
-							if ( vecP.y() > bmaxy )
-								brkVert = TqTrue;
-							if ( vecP.x() > bmaxx )
-								brkHoriz = TqTrue;
-						}
-					}
+					index_start += iXSamples;
 				}
 				iX++;
 				pie2++;
+
+				// increment the total sample count stats.
+				// note this is approximate as we might not have sampled a whole pixel.
+				STATS_SETI( SPL_count, STATS_GETI(SPL_count) + (iXSamples*iYSamples));
 
 				// Now compute the % of samples that hit...
 				TqInt scount = iXSamples * iYSamples;
@@ -915,29 +1007,19 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 
 inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt m, TqInt n, TqFloat D )
 {
-	SqImageSample	ImageVal( QGetRenderContext() ->GetOutputDataTotalSize() );
+	static SqImageSample ImageVal( QGetRenderContext() ->GetOutputDataTotalSize() );
 	ImageVal.SetDepth( D );
 
-	std::valarray<TqFloat>	val( 0.0f, QGetRenderContext() ->GetOutputDataTotalSize() );
-
-	TqBool Occludes = TqTrue;
-	val[ 0 ] = val[ 1 ] = val[ 2 ] = val[ 3 ] = val[ 4 ] = val[ 5 ] = 1.0f;
+	std::valarray<TqFloat>& val = ImageVal.m_Data;
+	val[ 0 ] = m_CurrentMpgSampleInfo.m_Colour.fRed();
+	val[ 1 ] = m_CurrentMpgSampleInfo.m_Colour.fGreen();
+	val[ 2 ] = m_CurrentMpgSampleInfo.m_Colour.fBlue();
+	val[ 3 ] = m_CurrentMpgSampleInfo.m_Opacity.fRed();
+	val[ 4 ] = m_CurrentMpgSampleInfo.m_Opacity.fGreen();
+	val[ 5 ] = m_CurrentMpgSampleInfo.m_Opacity.fBlue();
 	val[ 6 ] = D;
-	// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
-	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
-	{
-		val[ 0 ] = pMPG->colColor().fRed();
-		val[ 1 ] = pMPG->colColor().fGreen();
-		val[ 2 ] = pMPG->colColor().fBlue();
-	}
-	// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
-	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
-	{
-		val[ 3 ] = pMPG->colOpacity().fRed();
-		val[ 4 ] = pMPG->colOpacity().fGreen();
-		val[ 5 ] = pMPG->colOpacity().fBlue();
-		Occludes = pMPG->colOpacity() >= gColWhite;
-	}
+
+	TqBool Occludes = m_CurrentMpgSampleInfo.m_Occludes;
 
 	// Now store any other data types that have been registered.
 	std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext() ->GetMapOfOutputDataEntries();
@@ -1033,8 +1115,6 @@ inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2
 	}
 
 
-	// Store the sample information.
-	ImageVal.m_Data = val;
 	ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
 	if ( NULL != ImageVal.m_pCSGNode ) ADDREF( ImageVal.m_pCSGNode );
 
@@ -1043,7 +1123,7 @@ inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2
 	{
 		ImageVal.m_flags |= SqImageSample::Flag_Occludes;
 	}
-	if ( pMPG->pGrid() ->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1 )
+	if( m_CurrentMpgSampleInfo.m_IsMatte )
 	{
 		ImageVal.m_flags |= SqImageSample::Flag_Matte;
 	}
@@ -1214,14 +1294,20 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 	// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
 	if ( m_fQuit ) return ;
 
-	QGetRenderContext() ->Stats().MakeCombine().Start();
-	CqBucket::CombineElements();
-	QGetRenderContext() ->Stats().MakeCombine().Stop();
+	if(!bIsEmpty)
+	{
+		QGetRenderContext() ->Stats().MakeCombine().Start();
+		CqBucket::CombineElements();
+		QGetRenderContext() ->Stats().MakeCombine().Stop();
+	}
 
 	QGetRenderContext() ->Stats().MakeFilterBucket().Start();
 
-	Bucket.FilterBucket();
-	Bucket.ExposeBucket();
+	Bucket.FilterBucket(bIsEmpty);
+	if(!bIsEmpty)
+	{
+		Bucket.ExposeBucket();
+	}
 	Bucket.QuantizeBucket();
 
 	QGetRenderContext() ->Stats().MakeFilterBucket().Stop();
@@ -1303,10 +1389,10 @@ void CqImageBuffer::RenderImage()
 		// Prepare the bucket.
 		CqVector2D bPos = Position( iBucket );
 		CqVector2D bSize = Size( iBucket );
+		// TODO: fix non jittered bucket initialisation.
 		// Warning Jitter must be True is all cases; the InitialiseBucket when it is not in jittering mode
 		// doesn't initialise correctly so later we have problem in the FilterBucket()
-		// It is crucial !IsEmpty set the jitter here when something is present in this bucket.
-		CqBucket::InitialiseBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), m_FilterXWidth, m_FilterYWidth, m_PixelXSamples, m_PixelYSamples, !bIsEmpty );
+		CqBucket::InitialiseBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), m_FilterXWidth, m_FilterYWidth, m_PixelXSamples, m_PixelYSamples, true );
 		CqBucket::InitialiseFilterValues();
 
 		// Set up some bounds for the bucket.
@@ -1327,11 +1413,12 @@ void CqImageBuffer::RenderImage()
 
 		QGetRenderContext() ->Stats().Others().Stop();
 
-		QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
 		if ( !bIsEmpty )
+		{
+			QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
 			CqOcclusionBox::SetupHierarchy( &m_aBuckets[ iBucket ], xmin, ymin, xmax, ymax );
-
-		QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
+			QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
+		}
 
 
 
@@ -1364,8 +1451,6 @@ void CqImageBuffer::RenderImage()
 			NumPolys += m_aBuckets[ iB2 ].aMPGs().size();
 		}
 #endif
-
-		m_aBuckets[ iBucket ].EmptyBucket();
 	}
 
 	ImageComplete();

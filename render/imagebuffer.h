@@ -291,6 +291,17 @@ class CqImageBuffer
 		TqInt	m_DisplayMode;		///< Integer display mode, a member of the enum Mode.
 
 		std::vector<CqBucket>	m_aBuckets;
+
+		// This struct is used to hold info about a mpg that is used when rendering the mpg.
+		// It caches the info for use by multiple samples.
+		struct SqMpgSampleInfo
+		{
+			TqBool m_IsMatte;
+			TqBool m_Occludes;
+			CqColor m_Colour;
+			CqColor m_Opacity;
+		};
+		SqMpgSampleInfo m_CurrentMpgSampleInfo;
 };
 
 

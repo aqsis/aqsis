@@ -21,7 +21,6 @@
 /** \file
 		\brief Implements the CqBucket class responsible for bookkeeping the primitives and storing the results.
 		\author Paul C. Gregory (pgregory@aqsis.com)
-		\author Andy Gill (billybobjimboy@users.sf.net)
 */
 
 #include	"aqsis.h"
@@ -59,6 +58,7 @@ TqInt	CqBucket::m_YOrigin;
 TqInt	CqBucket::m_XPixelSamples;
 TqInt	CqBucket::m_YPixelSamples;
 std::vector<CqImagePixel>	CqBucket::m_aieImage;
+std::vector<std::vector<CqVector2D> >	CqBucket::m_aSamplePositions;
 std::vector<TqFloat> CqBucket::m_aFilterValues;
 
 
@@ -84,26 +84,46 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
 	ywidth1 = m_YSize + m_YFWidth;
 	xwidth1 = m_XSize + m_XFWidth;
 
-	// Allocate the image element storage for a single bucket if it different 
-	// but from bucket to bucket it will be the same size all the times.
-	if (m_aieImage.size() != ((TqUint)xwidth1 * (TqUint)ywidth1) )
+	// Allocate the image element storage if this is the first bucket
+	if(m_aieImage.empty())
+	{
 		m_aieImage.resize( xwidth1 * ywidth1);
+		m_aSamplePositions.resize( xwidth1 * ywidth1 );
 
 	// Initialise the samples for this bucket.
-	TqInt i;
+		TqInt which = 0;
+		for ( TqInt i = 0; i < ywidth1; i++ )
+		{
+			for ( TqInt j = 0; j < xwidth1; j++ )
+			{
+				m_aieImage[which].Clear();
+				m_aieImage[which].AllocateSamples( xsamples, ysamples );
+				m_aieImage[which].InitialiseSamples( m_aSamplePositions[which], fJitter );
 
-	for ( i = 0; i < ywidth1; i++ )
+				which++;
+			}
+		}
+	}
+
+	// now shuffle the pixels around and add in the pixel offset to the position.
+	static CqRandom random(  53 );
+	TqInt shuffleX = random.RandomInt( xwidth1 );
+	TqInt shuffleY = random.RandomInt( ywidth1 );
+	TqInt which = 0;
+	TqInt sourceIndex = shuffleY*xwidth1 + shuffleX;
+	TqInt numPixels = xwidth1*ywidth1;
+	for ( TqInt i = 0; i < ywidth1; i++ )
 	{
-		TqInt j;
-		for ( j = 0; j < xwidth1; j++ )
+		for ( TqInt j = 0; j < xwidth1; j++ )
 		{
 			CqVector2D bPos2( m_XOrigin, m_YOrigin );
 			bPos2 += CqVector2D( ( j - m_XFWidth / 2 ), ( i - m_YFWidth / 2 ) );
-			TqInt which = ( i * ( xwidth1 ) ) + j ;
 
 		    m_aieImage[which].Clear();
-			m_aieImage[which].AllocateSamples( xsamples, ysamples );
-			m_aieImage[which].InitialiseSamples( bPos2, fJitter );
+			m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[sourceIndex] );
+
+			which++;
+			sourceIndex = (sourceIndex+1) % (numPixels);
 		}
 	}
 }
@@ -115,16 +135,17 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
 
 void CqBucket::InitialiseFilterValues()
 {
+	if( !m_aFilterValues.empty() )
+		return;
+
 	// Allocate and fill in the filter values array for each pixel.
 	TqInt numsubpixels = ( m_XPixelSamples * m_YPixelSamples );
 	TqInt numperpixel = numsubpixels * numsubpixels;
 
 	TqUint numvalues = static_cast<TqUint>( ( ( m_XFWidth + 1 ) * ( m_YFWidth + 1 ) ) * ( numperpixel ) );
 
-	if (m_aFilterValues.size() != numvalues)
-	{
 		m_aFilterValues.resize( numvalues );
-	} else return;
+
 	RtFilterFunc pFilter;
 	pFilter = QGetRenderContext() ->optCurrent().funcFilter();
 
@@ -325,7 +346,7 @@ TqInt CqBucket::DataSize( TqInt iXPos, TqInt iYPos )
 /** Filter the samples in this bucket according to type and filter widths.
  */
 
-void CqBucket::FilterBucket()
+void CqBucket::FilterBucket(TqBool empty)
 {
 	CqImagePixel * pie;
 	
@@ -363,6 +384,8 @@ void CqBucket::FilterBucket()
 			SampleCount = 0;
 			std::valarray<TqFloat> samples( 0.0f, datasize);
 
+			if(!empty)
+			{
 			TqInt fx, fy;
 			// Get the element at the upper left corner of the filter area.
 			ImageElement( x - xmax, y - ymax, pie );
@@ -374,16 +397,18 @@ void CqBucket::FilterBucket()
 					TqInt index = ( ( ( fy + ymax ) * XFWidth() ) + ( fx + xmax ) ) * numperpixel;
 					// Now go over each subsample within the pixel
 					TqInt sx, sy;
+						TqInt sampleIndex = 0;
 					for ( sy = 0; sy < m_YPixelSamples; sy++ )
 					{
 						for ( sx = 0; sx < m_XPixelSamples; sx++ )
 						{
 							TqInt sindex = index + ( ( ( sy * m_XPixelSamples ) + sx ) * numsubpixels );
-							CqVector2D vecS = pie2->SamplePoint( sx, sy );
+								const SqSampleData& sampleData = pie2->SampleData( sampleIndex );
+								CqVector2D vecS = sampleData.m_Position;
 							vecS -= CqVector2D( xcent, ycent );
 							if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
 							{
-								TqInt cindex = sindex + pie2->SubCellIndex( sx, sy );
+									TqInt cindex = sindex + sampleData.m_SubCellIndex;
 								TqFloat g = m_aFilterValues[ cindex ];
 								gTot += g;
 								if ( pie2->Values( sx, sy ).size() > 0 )
@@ -393,12 +418,15 @@ void CqBucket::FilterBucket()
 									SampleCount++;
 								}
 							}
+								sampleIndex++;
 						}
 					}
 					pie2++;
 				}
 				pie += xlen;
 			}
+			}
+
 			// Set depth to infinity if no samples.
 			if ( SampleCount <= 0 )
 				samples[ 6 ] = FLT_MAX;
@@ -697,8 +725,8 @@ void CqBucket::AddGPrim( CqBasicSurface* pGPrim )
  */
 void CqBucket::EmptyBucket()
 {
-	//m_aieImage.clear();
-	//m_aFilterValues.clear();
+	m_aieImage.clear();
+	m_aFilterValues.clear();
 }
 
 //---------------------------------------------------------------------

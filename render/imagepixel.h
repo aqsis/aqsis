@@ -133,6 +133,19 @@ struct SqImageSample
 }
 ;
 
+/** Structure to hold the info about a sample point.
+ */
+struct SqSampleData
+{
+		CqVector2D	m_Position;				///< Sample position.
+		CqVector2D	m_DofOffset;			///< Dof lens offset.
+		TqInt		m_DofOffsetXQuad;		///< Cached info to hold which quadrant the Dof lens offset falls in.
+		TqInt		m_DofOffsetYQuad;
+		TqInt		m_SubCellIndex;		///< Subcell index.
+		TqFloat		m_Time;				///< Float sample time.
+		TqFloat		m_DetailLevel;		///< Float level-of-detail sample.
+};
+
 //-----------------------------------------------------------------------
 /** Storage class for all data relating to a single pixel in the image.
  */
@@ -159,7 +172,8 @@ class CqImagePixel
 			return ( m_YSamples );
 		}
 		void	AllocateSamples( TqInt XSamples, TqInt YSamples );
-		void	InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter = TqTrue );
+		void	InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBool fJitter = TqTrue );
+		void	OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples);
 	
 		/** Get the approximate coverage of this pixel.
 		 * \return Float fraction of the pixel covered.
@@ -288,72 +302,22 @@ class CqImagePixel
 			return ( m_aValues[ n * m_XSamples + m ] );
 		}
 		void	Combine();
-		/** Get the 2D sample position of the specified sample index.
-		 * \param m The horizontal index of the required sample point.
-		 * \param n The vertical index of the required sample point.
-		 * \return A 2d vector representing the sample position. 
-		 *  The position is in pixels and fractions thereof indexed from 0,0 at the top left of the image.
-		 */
-		CqVector2D&	SamplePoint( TqInt m, TqInt n )
-		{
-			assert( m < m_XSamples );
-			assert( n < m_YSamples );
-			return ( m_avecSamples[ n * m_XSamples + m ] );
-		}
 
-		/**	\TODO: Implent the DoF version...
+		/** Get the sample data for the specified sample index.
+		 * \param The index of the required sample point.
+		 * \return A reference to the sample data.
 		 */
-		CqVector2D&	SampleLens( TqInt m, TqInt n )
+		const SqSampleData& SampleData( TqInt index )
 		{
-			assert( m < m_XSamples );
-			assert( n < m_YSamples );
-			return ( m_aDoFSamples[ n * m_XSamples + m ] );
-		}
-		/** Get the filter weight index of the appropriate subcell.
-		 * Subcell dimensions are inverted subpixel dimensions, producing a square subcell matrix.
-		 * \param m The horizontal index of the required sample point.
-		 * \param n The vertical index of the required sample point.
-		 * \return The integer index of the subcell.
-		 *  The position is in pixels and fractions thereof indexed from 0,0 at the top left of the image.
-		 */
-		TqInt	SubCellIndex( TqInt m, TqInt n )
-		{
-			assert( m < m_XSamples );
-			assert( n < m_YSamples );
-			return ( m_aSubCellIndex[ n * m_XSamples + m ] );
-		}
-		/** Get the frame time associated with the specified sample.
-		 * \param m The horizontal index of the required sample point.
-		 * \param n The vertical index of the required sample point.
-		 * \return A float time between the shutter open and close times.
-		 */
-		TqFloat	SampleTime( TqInt m, TqInt n )
-		{
-			assert( m < m_XSamples );
-			assert( n < m_YSamples );
-			return ( m_aTimes[ n * m_XSamples + m ] );
-		}
-		/** Get the detail level associated with the specified sample.
-		 * \param m The horizontal index of the required sample point.
-		 * \param n The vertical index of the required sample point.
-		 * \return A float detail level.
-		 */
-		TqFloat	SampleLevelOfDetail( TqInt m, TqInt n )
-		{
-			assert( m < m_XSamples );
-			assert( n < m_YSamples );
-			return ( m_aDetailLevels[ n * m_XSamples + m ] );
+			assert( index < m_XSamples*m_YSamples );
+			return ( m_Samples[index] );
 		}
 
 	private:
 		TqInt	m_XSamples;						///< The number of samples in the horizontal direction.
 		TqInt	m_YSamples;						///< The number of samples in the vertical direction.
 		std::vector<std::vector<SqImageSample> > m_aValues;	///< Vector of vectors of sample point data.
-		std::vector<CqVector2D>	m_avecSamples;				///< Vector of sample positions.
-		std::vector<CqVector2D> m_aDoFSamples;				///< Vector of dof lens positions
-		std::vector<TqInt>	m_aSubCellIndex;				///< Vector of subcell indices.
-		std::vector<TqFloat> m_aTimes;						///< A vector of float sample times for the sample points.
-		std::vector<TqFloat> m_aDetailLevels;					///< A vector of float level-of-detail samples for the sample points.
+		std::vector<SqSampleData> m_Samples;	///< A Vector of samples. Holds position, time, dof offset etc for each sample.
 		SqImageSample	m_Data;
 		TqFloat	m_Coverage;						///< The approximate coverage, just the ratio of sample hits to misses.
 		TqFloat m_MaxDepth;						///< The maximum depth of any sample in this pixel. used for occlusion culling

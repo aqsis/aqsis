@@ -21,7 +21,6 @@
 /** \file
 		\brief Implements the classes for handling micropolygrids and micropolygons.
 		\author Paul C. Gregory (pgregory@aqsis.com)
-        \author Andy Gill (buzz@ucky.com)
 */
 
 #include	"aqsis.h"
@@ -33,7 +32,6 @@
 #include	"lights.h"
 #include	"shaders.h"
 #include	"trimcurve.h"
-#include	"focus.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -1283,18 +1281,15 @@ CqBound CqMicroPolygon::GetTotalBound( TqBool fForce )
 	// Adjust for DOF
 	if ( QGetRenderContext() ->UsingDepthOfField() )
 	{
-		const TqFloat * dofdata = QGetRenderContext() ->GetDepthOfFieldData();
+		const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( B.vecMin().z() );
+		const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( B.vecMax().z() );
+		TqFloat cocX = MAX( minZCoc.x(), maxZCoc.x() );
+		TqFloat cocY = MAX( minZCoc.y(), maxZCoc.y() );
 
-		TqFloat C = MAX( CircleOfConfusion( dofdata, B.vecMin().z() ), CircleOfConfusion( dofdata, B.vecMax().z() ) );
-
-		TqFloat sx = QGetRenderContext() ->GetDepthOfFieldScaleX();
-		TqFloat sy = QGetRenderContext() ->GetDepthOfFieldScaleY();
-		
-
-		B.vecMin().x( B.vecMin().x() - C * sx );
-		B.vecMin().y( B.vecMin().y() - C * sy );
-		B.vecMax().x( B.vecMax().x() + C * sx );
-		B.vecMax().y( B.vecMax().y() + C * sy );
+		B.vecMin().x( B.vecMin().x() - cocX );
+		B.vecMin().y( B.vecMin().y() - cocY );
+		B.vecMax().x( B.vecMax().x() + cocX );
+		B.vecMax().y( B.vecMax().y() + cocY );
 	}
 
 	return ( B );

@@ -306,12 +306,12 @@ class CqRenderer : public IqRenderer
 		 */
 		void	SetDepthOfFieldData( TqFloat fstop, TqFloat focalLength, TqFloat focalDistance )
 		{
-			m_depthOfFieldData[0] = fstop;
-			m_depthOfFieldData[1] = focalLength;
-			m_depthOfFieldData[2] = focalDistance;
+			m_UsingDepthOfField = (fstop < FLT_MAX);
 			if (fstop < FLT_MAX)
 			{
-			    m_depthOfFieldData[3] = 0.5 * (focalLength / fstop) * (focalDistance * focalLength) / (focalDistance - focalLength);
+				TqFloat lensDiameter = focalLength / fstop;
+				m_DofMultiplier = 0.5 * lensDiameter * focalDistance / (focalDistance + lensDiameter);
+				m_OneOverFocalDistance = 1.0 / focalDistance;
 			}
 		}
 
@@ -320,31 +320,28 @@ class CqRenderer : public IqRenderer
 		 */
 		TqBool	UsingDepthOfField( ) const
 		{
-			return m_depthOfFieldData[0] < FLT_MAX;
+			return m_UsingDepthOfField;
 		}
 
-		/** Get the lens data associated with depth of field effects.
-		 * \return The lens data.
+		/** Set the scale for dof to transform the coc from camera to raster space
+		 * \param x the scale in x
+		 * \param y the scale in y
 		 */
-		const TqFloat*	GetDepthOfFieldData( ) const
-		{
-			return m_depthOfFieldData;
-		}
-
 		void SetDepthOfFieldScale( TqFloat x, TqFloat y )
 		{
-			m_depthOfFieldScale[0] = x;
-			m_depthOfFieldScale[1] = y;
+			m_DepthOfFieldScale.x( x );
+			m_DepthOfFieldScale.y( y );
 		}
 
-		TqFloat GetDepthOfFieldScaleX() const
+		/** Get the circle of confusion at the specified depth
+		 * \param depth The depth in camera space
+		 * \return A 2d vector with the radius of the coc in raster space along x and y.
+		 */
+		const CqVector2D GetCircleOfConfusion( TqFloat depth )
 		{
-			return m_depthOfFieldScale[0];
-		}
-
-		TqFloat GetDepthOfFieldScaleY() const
-		{
-			return m_depthOfFieldScale[1];
+			assert(m_UsingDepthOfField);
+			TqFloat c = m_DofMultiplier * fabs(1.0f / depth - m_OneOverFocalDistance);
+			return CqVector2D(m_DepthOfFieldScale * c);
 		}
 
 		void	RegisterShader( const char* strName, EqShaderType type, IqShader* pShader );
@@ -396,8 +393,10 @@ class CqRenderer : public IqRenderer
 		CqTransform*	m_pTransCamera;					///< The camera transform.
 		std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
 
-		TqFloat m_depthOfFieldData[4];	///< DoF data
-		TqFloat m_depthOfFieldScale[2];
+		TqFloat			m_DofMultiplier;
+		TqFloat			m_OneOverFocalDistance;
+		TqBool			m_UsingDepthOfField;
+		CqVector2D		m_DepthOfFieldScale;
 
 		void WhichMatWorldTo(CqMatrix &a, TqUlong thash);
 		void WhichMatToWorld(CqMatrix &b, TqUlong thash);

@@ -124,7 +124,7 @@ class CqBucket : public IqBucket
 			pie = &m_aieImage[ i ];
 		}
 		static	void	CombineElements();
-		void	FilterBucket();
+		void	FilterBucket(TqBool empty);
 		void	ExposeBucket();
 		void	QuantizeBucket();
 		static	void	EmptyBucket();
@@ -188,6 +188,7 @@ class CqBucket : public IqBucket
 		static	TqInt	m_XOrigin;
 		static	TqInt	m_YOrigin;
 		static	std::vector<CqImagePixel>	m_aieImage;
+		static	std::vector<std::vector<CqVector2D> >	m_aSamplePositions;///< Vector of vectors of jittered sample positions precalculated.
 		static	std::vector<TqFloat>	m_aFilterValues;				///< Vector of filter weights precalculated.
 
 		std::vector<CqMicroPolygon*> m_ampgWaiting;			///< Vector of vectors of waiting micropolygons in this bucket
