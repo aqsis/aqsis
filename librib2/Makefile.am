@@ -4,7 +4,8 @@ EXTRA_DIST = parser.y scanner.l librib2.dsp
 
 lib_LTLIBRARIES =  librib2.la
 
-librib2_la_SOURCES = librib.cpp librib.h libribtypes.h parser.cpp parser.cpp.h scanner.cpp
+librib2_la_SOURCES = bdec.cpp bdec.h librib.cpp librib.h libribtypes.h parser.cpp parser.cpp.h scanner.cpp
+librib2_la_LDFLAGS = -lz
 
 include_HEADERS = librib.h
 
@@ -20,5 +21,5 @@ else
 CXXFLAGS =
 endif
 
-INCLUDES = -I$(top_srcdir)/render -I$(top_srcdir)/render/posix/intel
+INCLUDES = -I$(top_srcdir)/render -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix
 

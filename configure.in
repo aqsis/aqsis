@@ -20,6 +20,9 @@ AM_PROG_LIBTOOL
 AM_PROG_LEX
 AC_PROG_YACC
 
+dnl Needed by librib2/bdec.cpp. Define WORDS_BIGENDIAN.
+AC_C_BIGENDIAN
+
 AC_OUTPUT( \
 all/Makefile \
 aqsis/Makefile \

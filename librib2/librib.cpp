@@ -2,6 +2,8 @@
 
 #include <iostream>
 #include <cassert>
+#include <stdio.h>
+#include "bdec.h"
 
 extern int yyparse();
 
@@ -10,7 +12,8 @@ namespace librib
 
 extern void ParserDeclare(RendermanInterface& CallbackInterface, const std::string Name, const std::string Type);
 
-std::istream* ParseInputStream = &std::cin;
+FILE *ParseInputFile = stdin;
+CqRibBinaryDecoder *BinaryDecoder=0;
 std::string ParseStreamName = "stdin";
 RendermanInterface* ParseCallbackInterface = 0;
 std::ostream* ParseErrorStream = &std::cerr;
@@ -70,23 +73,25 @@ void StandardDeclarations(RendermanInterface& CallbackInterface)
 	ParserDeclare(CallbackInterface, "name", "uniform string");
 }
 
-bool Parse(std::istream& InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream)
+bool Parse(FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream)
 {
-	ParseInputStream = &InputStream;
+	ParseInputFile = InputStream;
 	ParseStreamName = StreamName;
 	ParseCallbackInterface = &CallbackInterface;
 	ParseErrorStream = &ErrorStream;
 	ParseLineNumber = 1;
 	ParseSucceeded = true;
-	
+
+	BinaryDecoder= new CqRibBinaryDecoder(InputStream);
 	yyparse();
+	delete BinaryDecoder;
 	
 	return ParseSucceeded;
 }
 
 void ResetParser()
 {
-	ParseInputStream = &std::cin;
+	ParseInputFile = stdin;
 	ParseStreamName = "stdin";
 	ParseCallbackInterface = 0;
 	ParseErrorStream = &std::cerr;
@@ -95,4 +100,3 @@ void ResetParser()
 }
 
 }; // namespace librib
-

@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <stdio.h>
 
 namespace librib
 {
@@ -13,7 +14,7 @@ class RendermanInterface;
 /// Initializes the parser and callback object with a set of standard declarations
 void StandardDeclarations(RendermanInterface& CallbackInterface);
 /// Parses an input stream, using the supplied callback object and sending error data to the supplied output stream
-bool Parse(std::istream& InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream);
+bool Parse(FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream);
 /// Resets the state of the parser, clearing any symbol tables, etc.
 void ResetParser();
 

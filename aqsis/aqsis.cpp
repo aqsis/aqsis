@@ -16,8 +16,9 @@
 #include <string>
 #include <vector>
 
+#include <stdio.h>
 
-void RenderFile(std::istream& file, const char* name);
+void RenderFile(FILE* file, const char* name);
 void GetOptions();
 
 bool g_pause;
@@ -135,14 +136,15 @@ int main(int argc, const char** argv)
 
 	if(ap.leftovers().size()==0) // If no files specified, take input from stdin.
 	{
-		RenderFile(std::cin, "stdin");
+		RenderFile(stdin, "stdin");
 	}
 	else
 	{
 		for (ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++)
 		{
-			std::ifstream file(e->c_str());
+			FILE *file=fopen(e->c_str(),"rb");
 			RenderFile(file, e->c_str());
+			fclose(file);
 		}
 	}
 
@@ -234,7 +236,7 @@ void GetOptions()
 	}
 }
 
-void RenderFile(std::istream& file, const char* name)
+void RenderFile(FILE* file, const char* name)
 {
 	librib2ri::Engine renderengine;
 
@@ -259,9 +261,12 @@ void RenderFile(std::istream& file, const char* name)
 
 	if(g_config.compare(""))
 	{
-		std::ifstream cfgfile(g_config.c_str());
-		if(cfgfile.is_open())
+		FILE *cfgfile=fopen(g_config.c_str(),"rb");
+		if(cfgfile!=NULL)
+		{
 			librib::Parse(cfgfile,"config",renderengine,std::cerr);
+			fclose(cfgfile);
+		}
 		else if(g_verbose)
 		{
 #ifdef  AQSIS_SYSTEM_WIN32
@@ -283,13 +288,3 @@ void RenderFile(std::istream& file, const char* name)
 
 	RiEnd();
 }
-
-
-
-
-
-
-
-
-
-
