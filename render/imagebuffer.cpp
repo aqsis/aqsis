@@ -21,7 +21,7 @@
 /** \file
 		\brief Implements the CqImageBuffer class responsible for rendering the primitives and storing the results.
 		\author Paul C. Gregory (pgregory@aqsis.com)
-		\author Andy Gill (buzz@ucky.com)
+		\author Andy Gill (billybobjimboy@users.sf.net)
 */
 
 #include	<strstream>
@@ -38,6 +38,7 @@
 #include	"micropolygon.h"
 #include	"imagebuffer.h"
 #include	"imagers.h"
+#include	"occlusion.h"
 
 #include	<map>
 
@@ -53,7 +54,11 @@ CqImagePixel::CqImagePixel() :
 		m_YSamples( 0 ),
 		//				m_aValues(0),
 		//				m_avecSamples(0),
-		m_colColor( 0, 0, 0 )
+		m_colColor( 0, 0, 0 ),
+		m_MaxDepth(FLT_MAX),
+		m_MinDepth(FLT_MAX),
+		m_OcclusionBoxId(-1),
+		m_NeedsZUpdate(false)
 {}
 
 
@@ -299,6 +304,54 @@ void CqImagePixel::Combine()
 		m_Coverage /= numsamples;
 }
 
+//----------------------------------------------------------------------
+/** ReCalculate the min and max z values for this pixel
+ */
+
+void CqImagePixel::UpdateZValues()
+{
+	float currentMax = 0.0f;
+	float currentMin = FLT_MAX;
+	TqInt sx, sy;
+	for ( sy = 0; sy < m_YSamples; sy++ )
+	{
+		for ( sx = 0; sx < m_XSamples; sx++ )
+		{
+			std::vector<SqImageSample>& aValues = m_aValues[ sy * m_XSamples + sx ];
+
+			if ( aValues.size() > 0 )
+			{
+				std::vector<SqImageSample>::iterator sc = aValues.begin();
+				// find first opaque sample
+				while ( sc != aValues.end() && ( ( sc->m_colOpacity != gColWhite ) || ( sc->m_pCSGNode != NULL ) ) )
+					sc++;
+				if ( sc != aValues.end() )
+				{
+					if ( sc->m_Depth > currentMax )
+					{
+						currentMax = sc->m_Depth;
+					}
+					if ( sc->m_Depth < currentMin )
+					{
+						currentMin = sc->m_Depth;
+					}
+				}
+				else
+				{
+					currentMax = FLT_MAX;
+				}
+			}
+			else
+			{
+				currentMax = FLT_MAX;
+			}
+		}
+	}
+
+	m_MaxDepth = currentMax;
+	m_MinDepth = currentMin;
+}
+
 
 //----------------------------------------------------------------------
 /** Static data on CqBucket
@@ -314,8 +367,8 @@ TqInt	CqBucket::m_XOrigin;
 TqInt	CqBucket::m_YOrigin;
 TqInt	CqBucket::m_XPixelSamples;
 TqInt	CqBucket::m_YPixelSamples;
-TqFloat CqBucket::m_MaxDepth;
-TqInt	CqBucket::m_MaxDepthCount;
+//TqFloat CqBucket::m_MaxDepth;
+//TqInt	CqBucket::m_MaxDepthCount;
 std::vector<CqImagePixel>	CqBucket::m_aieImage;
 std::vector<TqFloat> CqBucket::m_aFilterValues;
 
@@ -379,10 +432,6 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
 	m_YMax = static_cast<TqInt>( CEIL( ( xfwidth - 1 ) * 0.5f ) );
 	m_XPixelSamples = xsamples;
 	m_YPixelSamples = ysamples;
-
-	// Reset max depth value to infinity
-	m_MaxDepth = FLT_MAX;
-	m_MaxDepthCount = ( m_YSize + m_YFWidth ) * ( m_XSize + m_XFWidth ) * xsamples * ysamples;
 
 	// Allocate the image element storage for a single bucket
 	m_aieImage.resize( ( xsize + xfwidth ) * ( ysize + yfwidth ) );
@@ -550,75 +599,21 @@ TqFloat CqBucket::Depth( TqInt iXPos, TqInt iYPos )
 
 
 //----------------------------------------------------------------------
-/** Calculates the current biggest Z-Value and updates MaxDepth and
- * MaxDepthCount accordingly.
+/** Get the maximum sample depth for the specified screen position.
+ * If position is outside bucket, returns FLT_MAX.
+ * \param iXPos Screen position of sample.
+ * \param iYPos Screen position of sample.
  */
 
-void CqBucket::UpdateMaxDepth()
+TqFloat CqBucket::MaxDepth( TqInt iXPos, TqInt iYPos )
 {
-	TqFloat currentMax = -FLT_MAX;
-	TqInt	count = 0;
-
-	// Go through each pixel in the bucket
-	TqInt i, j;
-	for ( i = 0; i < ( m_YSize + m_YFWidth ); i++ )
-	{
-		for ( j = 0; j < ( m_XSize + m_XFWidth ); j++ )
-		{
-			CqImagePixel* pie = &m_aieImage[ ( i * ( m_XSize + m_XFWidth ) ) + j ];
-			// Now go through each subpixel sample
-			TqInt sx, sy;
-			for ( sy = 0; sy < m_YPixelSamples; sy++ )
-			{
-				for ( sx = 0; sx < m_XPixelSamples; sx++ )
-				{
-					std::vector<SqImageSample>& aValues = pie->Values( sx, sy );
-
-					if ( aValues.size() > 0 )
-					{
-						std::vector<SqImageSample>::iterator sc = aValues.begin();
-						// find first opaque sample
-						while ( sc != aValues.end() && ( ( sc->m_colOpacity != gColWhite ) || ( sc->m_pCSGNode != NULL ) ) )
-							sc++;
-						if ( sc != aValues.end() )
-						{
-							if ( sc->m_Depth > currentMax )
-							{
-								currentMax = sc->m_Depth;
-								count = 1;
-							}
-							else if ( sc->m_Depth == currentMax )
-								count++;
-						}
+	CqImagePixel * pie;
+	if ( ImageElement( iXPos, iYPos, pie ) )
+		return ( pie->MaxDepth() );
 						else
-						{
-							if ( currentMax == FLT_MAX )
-								count++;
-							else
-							{
-								currentMax = FLT_MAX;
-								count = 1;
-							}
-						}
-					}
-					else
-					{
-						if ( currentMax == FLT_MAX )
-							count++;
-						else
-						{
-							currentMax = FLT_MAX;
-							count = 1;
-						}
-					}
-				}
-			}
-		}
+		return ( FLT_MAX );
 	}
 
-	m_MaxDepth = currentMax;
-	m_MaxDepthCount = count;
-}
 
 //----------------------------------------------------------------------
 /** Filter the samples in this bucket according to type and filter widths.
@@ -1211,15 +1206,10 @@ TqBool CqImageBuffer::OcclusionCullSurface( TqInt iBucket, CqBasicSurface* pSurf
 {
 	CqBound RasterBound( pSurface->GetCachedRasterBound() );
 
-	// Update bucket max depth values
-	CqBucket currentBucket = m_aBuckets[ iBucket ];
-	if ( currentBucket.MaxDepthCount() <= 0 )
-		currentBucket.UpdateMaxDepth();
-
 	if ( pSurface->pCSGNode() != NULL )
 		return ( TqFalse );
 
-	if ( RasterBound.vecMin().z() > currentBucket.MaxDepth() )
+	if(CqOcclusionBox::CanCull(&RasterBound))
 	{
 		// pSurface is behind everying in this bucket but it may be
 		// visible in other buckets it overlaps.
@@ -1502,25 +1492,11 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 								{
 									if ( colMPGOpacity == gColWhite )
 									{
-										if ( c == 0 )
-										{
-											Bucket.DecMaxDepthCount();
-										}
-										else
-										{
-											int j = 0;
-											// Find first opaque sample
-											while ( j < c && aValues[ j ].m_colOpacity != gColWhite ) j++;
-											if ( j < c && aValues[ j ].m_Depth == Bucket.MaxDepth() && aValues[ j ].m_colOpacity == gColWhite )
-											{
-												if ( aValues[ j ].m_Depth > ImageVal.m_Depth )
-												{
-													Bucket.DecMaxDepthCount();
-												}
-											}
-										}
+										CqOcclusionBox::MarkForUpdate(pie->OcclusionBoxId());
+										pie->MarkForZUpdate();
 									}
 								}
+							
 
 								// Now that we have updated the samples, set the 
 								ImageVal.m_colColor = colMPGColor;
@@ -1676,6 +1652,9 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 		QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
 		RenderMPGs( iBucket, xmin, xmax, ymin, ymax );
 		QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
+		
+		// Update our occlusion hierarchy after each grid that gets drawn.
+		CqOcclusionBox::Update();
 	}
 
 	// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
@@ -1713,6 +1692,9 @@ void CqImageBuffer::RenderImage()
 	// Render the surface at the front of the list.
 	m_fDone = TqFalse;
 
+	// Setup the hierarchy of boxes for occlusion culling
+	CqOcclusionBox::CreateHierarchy(m_XBucketSize, m_YBucketSize, m_FilterXWidth, m_FilterYWidth);
+	
 	TqInt iBucket;
 	for ( iBucket = 0; iBucket < m_cXBuckets*m_cYBuckets; iBucket++ )
 	{
@@ -1738,6 +1720,8 @@ void CqImageBuffer::RenderImage()
 		if ( ymin < CropWindowYMin() - m_FilterYWidth / 2 ) ymin = CropWindowYMin() - m_FilterYWidth / 2;
 		if ( xmax > CropWindowXMax() + m_FilterXWidth / 2 ) xmax = CropWindowXMax() + m_FilterXWidth / 2;
 		if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 ) ymax = CropWindowYMax() + m_FilterYWidth / 2;
+
+		CqOcclusionBox::SetupHierarchy(&m_aBuckets[ iBucket ], xmin, ymin, xmax, ymax);
 
 		// Inform the status class how far we have got, and update UI.
 		float Complete = ( m_cXBuckets * m_cYBuckets );
@@ -1765,6 +1749,8 @@ void CqImageBuffer::RenderImage()
 	}
 
 	ImageComplete();
+	
+	CqOcclusionBox::DeleteHierarchy();
 	// Pass >100 through to progress to allow it to indicate completion.
 	RtProgressFunc pProgressHandler;
 	if ( ( pProgressHandler = QGetRenderContext() ->optCurrent().pProgressHandler() ) != 0 )

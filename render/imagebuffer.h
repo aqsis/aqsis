@@ -142,6 +142,53 @@ class _qShareC	CqImagePixel
 		{
 			m_Depth = d;
 		}
+		/** Get the maximum depth of this pixel
+		 * \return A float representing the maximum depth at this pixel.
+		 */
+		_qShareM	TqFloat	MaxDepth()
+		{
+			return ( m_MaxDepth );
+		}
+		_qShareM	void	SetMaxDepth( TqFloat d )
+		{
+			m_MaxDepth = d;
+		}
+		/** Get the minimum depth of this pixel
+		 * \return A float representing the minimum depth at this pixel.
+		 */
+		_qShareM	TqFloat	MinDepth()
+		{
+			return ( m_MinDepth );
+		}
+		_qShareM	void	SetMinDepth( TqFloat d )
+		{
+			m_MinDepth = d;
+		}
+		/** Get the id of the occlusion box that covers this pixel
+		 * \return The covering occlusion box's id.
+		 */
+		_qShareM	TqInt	OcclusionBoxId()
+		{
+			return ( m_OcclusionBoxId );
+		}
+		_qShareM	void	SetOcclusionBoxId( TqInt id )
+		{
+			m_OcclusionBoxId = id;
+		}
+		/** Mark this pixel as needing its min and max Z  values recalculating
+		*/
+		_qShareM	void	MarkForZUpdate()
+		{
+			m_NeedsZUpdate = true;
+		}
+		_qShareM	bool	NeedsZUpdating()
+		{
+			return m_NeedsZUpdate;
+		}
+		/** Scan through all the samples to find the min and max z values
+		*/
+		_qShareM	void	UpdateZValues();
+		
 		/** Clear all sample information from this pixel.
 		 */
 		_qShareM	void	Clear();
@@ -207,6 +254,10 @@ class _qShareC	CqImagePixel
 		CqColor	m_colColor;						///< The averaged color of this pixel.
 		CqColor	m_colOpacity;					///< The averaged opacity of this pixel.
 		TqFloat	m_Depth;						///< The averaged depth of this pixel.
+		TqFloat m_MaxDepth;						///< The maximum depth of any sample in this pixel. used for occlusion culling
+		TqFloat m_MinDepth;						///< The minimum depth of any sample in this pixel. used for occlusion culling
+		TqInt m_OcclusionBoxId;					///< The CqOcclusionBox that covers this pixel
+		TqBool m_NeedsZUpdate;					///< Whether or not the min/max depth values are up to date.
 }
 ;
 
@@ -272,20 +323,7 @@ class CqBucket : public IqBucket
 		virtual	CqColor Opacity( TqInt iXPos, TqInt iYPos );
 		virtual	TqFloat Coverage( TqInt iXPos, TqInt iYPos );
 		virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos );
-
-		TqFloat MaxDepth()
-		{
-			return m_MaxDepth;
-		}
-		TqInt	MaxDepthCount()
-		{
-			return m_MaxDepthCount;
-		}
-		void DecMaxDepthCount()
-		{
-			m_MaxDepthCount--;
-		}
-		void UpdateMaxDepth();
+		virtual	TqFloat MaxDepth( TqInt iXPos, TqInt iYPos );
 
 		static	void	InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqInt xfwidth, TqInt yfwidth, TqInt xsamples, TqInt ysamples, TqBool fJitter = TqTrue );
 		static	void	InitialiseFilterValues();
@@ -342,8 +380,6 @@ class CqBucket : public IqBucket
 		static	TqInt	m_YPixelSamples;
 		static	TqInt	m_XOrigin;
 		static	TqInt	m_YOrigin;
-		static	TqFloat m_MaxDepth;										///< Current biggest Z-value in this bucket. Used for occlusion culling.
-		static TqInt	m_MaxDepthCount;								///< Count of how many samples are currently at MaxDepth.
 		static	std::vector<CqImagePixel>	m_aieImage;
 		static	std::vector<TqFloat>	m_aFilterValues;				///< Vector of filter weights precalculated.
 
