@@ -41,35 +41,6 @@ START_NAMESPACE( Aqsis )
 // these should be used where speed is an issue.
 
 //---------------------------------------------------------------------
-/** Set the instance variables on this shader.
- */
-
-void CqShaderSurfaceConstant::SetValue( const char* name, TqPchar val )
-{}
-
-//---------------------------------------------------------------------
-/** Evaluate the shader function based on the values in the variables.
- */
-
-void CqShaderSurfaceConstant::Evaluate( IqShaderExecEnv* pEnv )
-{
-	CqColor colTemp;
-	
-	TqInt i = 0;
-	do
-	{
-		CqColor colOs, colCs;
-		pEnv->Os()->GetColor( colOs, i );
-		pEnv->Cs()->GetColor( colCs, i );
-		pEnv->Ci()->SetColor( colOs * colCs, i );
-		pEnv->Oi()->SetColor( colOs, i );
-	}
-	while ( ++i < pEnv->GridSize() );
-}
-
-
-
-//---------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )
 

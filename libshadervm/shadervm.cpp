@@ -1042,7 +1042,7 @@ void CqShaderVM::ExecuteInit()
 
 	// Fake an environment
 	CqShaderExecEnv	Env;
-	Env.Initialise( 1, 1, 0, m_Uses );
+	Env.Initialise( 1, 1, 0, this, m_Uses );
 	Initialise( 1, 1, &Env );
 
 	// Execute the init program.

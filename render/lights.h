@@ -101,36 +101,6 @@ extern CqList<CqLightsource>	Lightsource_stack;
 // These are the built in shaders, they will be registered as "builtin_<name>"
 // these should be used where speed is an issue.
 
-//----------------------------------------------------------------------
-/** \class CqShaderLightsourceAmbient
- * Ambient lightsource shader
- */
-
-class CqShaderLightsourceAmbient : public CqShader
-{
-	public:
-		CqShaderLightsourceAmbient();
-		virtual	~CqShaderLightsourceAmbient();
-
-		virtual	void	Evaluate( IqShaderExecEnv* pEnv );
-		virtual	void	SetValue( const char* name, TqPchar val );
-		virtual IqShader* Clone() const
-		{
-			return ( new CqShaderLightsourceAmbient );
-		}
-
-		virtual	TqBool	fAmbient() const
-		{
-			return ( TqTrue );
-		}
-
-	private:
-		IqShaderData*	m_intensity;
-		IqShaderData*	m_lightcolor;
-};
-
-
-
 //-----------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )

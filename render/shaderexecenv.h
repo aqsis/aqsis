@@ -118,7 +118,7 @@ class CqShaderExecEnv : public IqShaderExecEnv
 		virtual	~CqShaderExecEnv();
 
 		// Overidden from IqShaderExecEnv, see ishaderexecenv.h for descriptions.
-		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, CqSurface* pSurface, TqInt Uses );
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, CqSurface* pSurface, IqShader* pShader, TqInt Uses );
 		virtual	TqInt	uGridRes() const
 		{
 			return ( m_uGridRes );

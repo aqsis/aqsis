@@ -116,7 +116,7 @@ struct IqShaderExecEnv
 {
 		virtual	~IqShaderExecEnv()	{}
 
-		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, CqSurface* pSurface, TqInt Uses ) = 0;
+		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes, CqSurface* pSurface, IqShader* pShader, TqInt Uses ) = 0;
 		/** Get grid size in u
 		 */
 		virtual	TqInt	uGridRes() const = 0;

@@ -431,6 +431,10 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		{
 			return ( m_Uses );
 		}
+		virtual IqShaderData* CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name);
+		virtual IqShaderData* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count);
+		virtual IqShaderData* CreateTemporaryStorage();
+		virtual void DeleteTemporaryStorage( IqShaderData* pData );
 
 
 		void	LoadProgram( std::istream* pFile );
@@ -446,20 +450,6 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		/** Assignment operator.
 		 */
 		CqShaderVM&	operator=( const CqShaderVM& From );
-
-
-		/** Static variable creation function.
-		 */
-		static IqShaderData* CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name);
-		/** Static variable array creation function.
-		 */
-		static IqShaderData* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count);
-		/** Static function to create some temporary storage which complies to the IqShaderData interface.
-		 */
-		static IqShaderData* CreateTemporaryStorage();
-		/** Static function to destroy temporary storage created with CreateTemporaryStorage.
-		 */
-		static void DeleteTemporaryStorage( IqShaderData* pData );
 
 	private:
 		TqInt		m_Uses;			///< Bit vector representing the system variables used by this shader.

@@ -85,7 +85,7 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 	components = mode & ModeZ ? 1 : components;
 
 	TqInt Uses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi | ( 1 << EnvVars_ncomps ) | ( 1 << EnvVars_time ) | ( 1 << EnvVars_alpha ) );
-	CqShaderExecEnv::Initialise( uGridRes, vGridRes, 0, Uses );
+	CqShaderExecEnv::Initialise( uGridRes, vGridRes, 0, m_pShader, Uses );
 
 	// Initialise the geometric parameters in the shader exec env.
 

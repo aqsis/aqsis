@@ -552,15 +552,6 @@ void CqRenderer::Initialise()
 	ClearSymbolTable();
 	FlushShaders();
 
-	// Register built in shaders.
-	RegisterShader( "builtin_constant", Type_Surface, new CqShaderSurfaceConstant() );
-
-	// Register standard lightsource shaders.
-	RegisterShader( "ambientlight", Type_Lightsource, new CqShaderLightsourceAmbient() );
-
-	CqShaderRegister* pFirst = m_Shaders.pFirst();
-	pFirst->Create();
-
 	// Initialise the matrices for this camera according to the
 	// status of the camera attributes.
 	optCurrent().InitialiseCamera();

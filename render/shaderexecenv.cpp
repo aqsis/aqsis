@@ -100,7 +100,7 @@ CqShaderExecEnv::~CqShaderExecEnv()
 /** Initialise variables to correct size for current grid.
  */
 
-void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, CqSurface* pSurface, TqInt Uses )
+void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, CqSurface* pSurface, IqShader* pShader, TqInt Uses )
 {
 	m_uGridRes = uGridRes;
 	m_vGridRes = vGridRes;
@@ -120,54 +120,57 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Cq
 	m_RunningState.SetSize( ( uGridRes + 1 ) * ( vGridRes + 1 ) );
 	m_RunningState.SetAll( TqTrue );
 
-	if ( USES( Uses, EnvVars_Cs ) && m_apVariables[ EnvVars_Cs ] == 0 ) 
-		m_apVariables[ EnvVars_Cs ] = CqShaderVM::CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Cs ] );
-	if ( USES( Uses, EnvVars_Os ) && m_apVariables[ EnvVars_Os ] == 0 ) 
-		m_apVariables[ EnvVars_Os ] = CqShaderVM::CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Os ] );
-	if ( USES( Uses, EnvVars_Ng ) && m_apVariables[ EnvVars_Ng ] == 0 ) 
-		m_apVariables[ EnvVars_Ng ] = CqShaderVM::CreateVariable( type_normal, class_varying, m_apVariableNames[ EnvVars_Ng ] );
-	if ( USES( Uses, EnvVars_du ) && m_apVariables[ EnvVars_du ] == 0 ) 
-		m_apVariables[ EnvVars_du ] = CqShaderVM::CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_du ] );
-	if ( USES( Uses, EnvVars_dv ) && m_apVariables[ EnvVars_dv ] == 0 ) 
-		m_apVariables[ EnvVars_dv ] = CqShaderVM::CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_dv ] );
-	if ( USES( Uses, EnvVars_L ) && m_apVariables[ EnvVars_L ] == 0 ) 
-		m_apVariables[ EnvVars_L ] = CqShaderVM::CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_L ] );
-	if ( USES( Uses, EnvVars_Cl ) && m_apVariables[ EnvVars_Cl ] == 0 ) 
-		m_apVariables[ EnvVars_Cl ] = CqShaderVM::CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Cl ] );
-	if ( USES( Uses, EnvVars_Ol ) && m_apVariables[ EnvVars_Ol ] == 0 ) 
-		m_apVariables[ EnvVars_Ol ] = CqShaderVM::CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Ol ] );
-	if ( USES( Uses, EnvVars_P ) && m_apVariables[ EnvVars_P ] == 0 ) 
-		m_apVariables[ EnvVars_P ] = CqShaderVM::CreateVariable( type_point, class_varying, m_apVariableNames[ EnvVars_P ] );
-	if ( USES( Uses, EnvVars_dPdu ) && m_apVariables[ EnvVars_dPdu ] == 0 ) 
-		m_apVariables[ EnvVars_dPdu ] = CqShaderVM::CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_dPdu ] );
-	if ( USES( Uses, EnvVars_dPdv ) && m_apVariables[ EnvVars_dPdv ] == 0 ) 
-		m_apVariables[ EnvVars_dPdv ] = CqShaderVM::CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_dPdv ] );
-	if ( USES( Uses, EnvVars_N ) && m_apVariables[ EnvVars_N ] == 0 ) 
-		m_apVariables[ EnvVars_N ] = CqShaderVM::CreateVariable( type_normal, class_varying, m_apVariableNames[ EnvVars_N ] );
-	if ( USES( Uses, EnvVars_u ) && m_apVariables[ EnvVars_u ] == 0 ) 
-		m_apVariables[ EnvVars_u ] = CqShaderVM::CreateVariable( type_float, class_varying, m_apVariableNames[ EnvVars_u ] );
-	if ( USES( Uses, EnvVars_v ) && m_apVariables[ EnvVars_v ] == 0 ) 
-		m_apVariables[ EnvVars_v ] = CqShaderVM::CreateVariable( type_float, class_varying, m_apVariableNames[ EnvVars_v ] );
-	if ( USES( Uses, EnvVars_s ) && m_apVariables[ EnvVars_s ] == 0 ) 
-		m_apVariables[ EnvVars_s ] = CqShaderVM::CreateVariable( type_float, class_varying, m_apVariableNames[ EnvVars_s ] );
-	if ( USES( Uses, EnvVars_t ) && m_apVariables[ EnvVars_t ] == 0 ) 
-		m_apVariables[ EnvVars_t ] = CqShaderVM::CreateVariable( type_float, class_varying, m_apVariableNames[ EnvVars_t ] );
-	if ( USES( Uses, EnvVars_I ) && m_apVariables[ EnvVars_I ] == 0 ) 
-		m_apVariables[ EnvVars_I ] = CqShaderVM::CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_I ] );
-	if ( USES( Uses, EnvVars_Ci ) && m_apVariables[ EnvVars_Ci ] == 0 ) 
-		m_apVariables[ EnvVars_Ci ] = CqShaderVM::CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Ci ] );
-	if ( USES( Uses, EnvVars_Oi ) && m_apVariables[ EnvVars_Oi ] == 0 ) 
-		m_apVariables[ EnvVars_Oi ] = CqShaderVM::CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Oi ] );
-	if ( USES( Uses, EnvVars_Ps ) && m_apVariables[ EnvVars_Ps ] == 0 ) 
-		m_apVariables[ EnvVars_Ps ] = CqShaderVM::CreateVariable( type_point, class_varying, m_apVariableNames[ EnvVars_Ps ] );
-	if ( USES( Uses, EnvVars_E ) && m_apVariables[ EnvVars_E ] == 0 ) 
-		m_apVariables[ EnvVars_E ] = CqShaderVM::CreateVariable( type_point, class_uniform, m_apVariableNames[ EnvVars_E ] );
-	if ( USES( Uses, EnvVars_ncomps ) && m_apVariables[ EnvVars_ncomps ] == 0 ) 
-		m_apVariables[ EnvVars_ncomps ] = CqShaderVM::CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_ncomps ] );
-	if ( USES( Uses, EnvVars_time ) && m_apVariables[ EnvVars_time ] == 0 ) 
-		m_apVariables[ EnvVars_time ] = CqShaderVM::CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_time ] );
-	if ( USES( Uses, EnvVars_alpha ) && m_apVariables[ EnvVars_alpha ] == 0 ) 
-		m_apVariables[ EnvVars_alpha ] = CqShaderVM::CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_alpha ] );
+	if( NULL != pShader )
+	{
+		if ( USES( Uses, EnvVars_Cs ) && m_apVariables[ EnvVars_Cs ] == 0 ) 
+			m_apVariables[ EnvVars_Cs ] = pShader->CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Cs ] );
+		if ( USES( Uses, EnvVars_Os ) && m_apVariables[ EnvVars_Os ] == 0 ) 
+			m_apVariables[ EnvVars_Os ] = pShader->CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Os ] );
+		if ( USES( Uses, EnvVars_Ng ) && m_apVariables[ EnvVars_Ng ] == 0 ) 
+			m_apVariables[ EnvVars_Ng ] = pShader->CreateVariable( type_normal, class_varying, m_apVariableNames[ EnvVars_Ng ] );
+		if ( USES( Uses, EnvVars_du ) && m_apVariables[ EnvVars_du ] == 0 ) 
+			m_apVariables[ EnvVars_du ] = pShader->CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_du ] );
+		if ( USES( Uses, EnvVars_dv ) && m_apVariables[ EnvVars_dv ] == 0 ) 
+			m_apVariables[ EnvVars_dv ] = pShader->CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_dv ] );
+		if ( USES( Uses, EnvVars_L ) && m_apVariables[ EnvVars_L ] == 0 ) 
+			m_apVariables[ EnvVars_L ] = pShader->CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_L ] );
+		if ( USES( Uses, EnvVars_Cl ) && m_apVariables[ EnvVars_Cl ] == 0 ) 
+			m_apVariables[ EnvVars_Cl ] = pShader->CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Cl ] );
+		if ( USES( Uses, EnvVars_Ol ) && m_apVariables[ EnvVars_Ol ] == 0 ) 
+			m_apVariables[ EnvVars_Ol ] = pShader->CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Ol ] );
+		if ( USES( Uses, EnvVars_P ) && m_apVariables[ EnvVars_P ] == 0 ) 
+			m_apVariables[ EnvVars_P ] = pShader->CreateVariable( type_point, class_varying, m_apVariableNames[ EnvVars_P ] );
+		if ( USES( Uses, EnvVars_dPdu ) && m_apVariables[ EnvVars_dPdu ] == 0 ) 
+			m_apVariables[ EnvVars_dPdu ] = pShader->CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_dPdu ] );
+		if ( USES( Uses, EnvVars_dPdv ) && m_apVariables[ EnvVars_dPdv ] == 0 ) 
+			m_apVariables[ EnvVars_dPdv ] = pShader->CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_dPdv ] );
+		if ( USES( Uses, EnvVars_N ) && m_apVariables[ EnvVars_N ] == 0 ) 
+			m_apVariables[ EnvVars_N ] = pShader->CreateVariable( type_normal, class_varying, m_apVariableNames[ EnvVars_N ] );
+		if ( USES( Uses, EnvVars_u ) && m_apVariables[ EnvVars_u ] == 0 ) 
+			m_apVariables[ EnvVars_u ] = pShader->CreateVariable( type_float, class_varying, m_apVariableNames[ EnvVars_u ] );
+		if ( USES( Uses, EnvVars_v ) && m_apVariables[ EnvVars_v ] == 0 ) 
+			m_apVariables[ EnvVars_v ] = pShader->CreateVariable( type_float, class_varying, m_apVariableNames[ EnvVars_v ] );
+		if ( USES( Uses, EnvVars_s ) && m_apVariables[ EnvVars_s ] == 0 ) 
+			m_apVariables[ EnvVars_s ] = pShader->CreateVariable( type_float, class_varying, m_apVariableNames[ EnvVars_s ] );
+		if ( USES( Uses, EnvVars_t ) && m_apVariables[ EnvVars_t ] == 0 ) 
+			m_apVariables[ EnvVars_t ] = pShader->CreateVariable( type_float, class_varying, m_apVariableNames[ EnvVars_t ] );
+		if ( USES( Uses, EnvVars_I ) && m_apVariables[ EnvVars_I ] == 0 ) 
+			m_apVariables[ EnvVars_I ] = pShader->CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_I ] );
+		if ( USES( Uses, EnvVars_Ci ) && m_apVariables[ EnvVars_Ci ] == 0 ) 
+			m_apVariables[ EnvVars_Ci ] = pShader->CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Ci ] );
+		if ( USES( Uses, EnvVars_Oi ) && m_apVariables[ EnvVars_Oi ] == 0 ) 
+			m_apVariables[ EnvVars_Oi ] = pShader->CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Oi ] );
+		if ( USES( Uses, EnvVars_Ps ) && m_apVariables[ EnvVars_Ps ] == 0 ) 
+			m_apVariables[ EnvVars_Ps ] = pShader->CreateVariable( type_point, class_varying, m_apVariableNames[ EnvVars_Ps ] );
+		if ( USES( Uses, EnvVars_E ) && m_apVariables[ EnvVars_E ] == 0 ) 
+			m_apVariables[ EnvVars_E ] = pShader->CreateVariable( type_point, class_uniform, m_apVariableNames[ EnvVars_E ] );
+		if ( USES( Uses, EnvVars_ncomps ) && m_apVariables[ EnvVars_ncomps ] == 0 ) 
+			m_apVariables[ EnvVars_ncomps ] = pShader->CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_ncomps ] );
+		if ( USES( Uses, EnvVars_time ) && m_apVariables[ EnvVars_time ] == 0 ) 
+			m_apVariables[ EnvVars_time ] = pShader->CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_time ] );
+		if ( USES( Uses, EnvVars_alpha ) && m_apVariables[ EnvVars_alpha ] == 0 ) 
+			m_apVariables[ EnvVars_alpha ] = pShader->CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_alpha ] );
+	}
 
 	TqInt i;
 	for ( i = 0; i < EnvVars_Last; i++ )

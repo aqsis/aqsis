@@ -2811,9 +2811,9 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 {
 	INIT_SO
 
-	IqShaderData* pnV = CqShaderVM::CreateTemporaryStorage();
-	IqShaderData* pnN = CqShaderVM::CreateTemporaryStorage();
-	IqShaderData* pR = CqShaderVM::CreateTemporaryStorage();
+	IqShaderData* pnV = pSurface()->pAttributes()->pshadSurface()->CreateTemporaryStorage();
+	IqShaderData* pnN = pSurface()->pAttributes()->pshadSurface()->CreateTemporaryStorage();
+	IqShaderData* pR = pSurface()->pAttributes()->pshadSurface()->CreateTemporaryStorage();
 
 	SO_normalize( V, pnV );
 	SO_normalize( N, pnN );

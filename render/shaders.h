@@ -143,6 +143,21 @@ class CqShader : public IqShader
 		{
 			return ( m_Uses );
 		}
+		virtual IqShaderData* CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name)
+		{
+			return( NULL );
+		}
+		virtual IqShaderData* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count)
+		{
+			return( NULL );
+		}
+		virtual IqShaderData* CreateTemporaryStorage()
+		{
+			return( NULL );
+		}
+		virtual void DeleteTemporaryStorage( IqShaderData* pData )
+		{
+		}
 
 	protected:
 		TqInt		m_Uses;			///< Bit vector representing the system variables used by this shader.
@@ -157,30 +172,6 @@ class CqShader : public IqShader
 //---------------------------------------------------------------------
 // These are the built in shaders, they will be registered as "builtin_<name>"
 // these should be used where speed is an issue.
-
-//----------------------------------------------------------------------
-/** \class CqShaderSurfaceConstant
- * Built in constant surface shader.
- */
-
-class CqShaderSurfaceConstant : public CqShader
-{
-	public:
-		CqShaderSurfaceConstant()
-		{}
-		virtual	~CqShaderSurfaceConstant()
-		{}
-
-		virtual	void	Evaluate( IqShaderExecEnv* pEnv );
-		virtual	void	SetValue( const char* name, TqPchar val );
-		virtual IqShader* Clone() const
-		{
-			return ( new CqShaderSurfaceConstant );
-		}
-
-	private:
-};
-
 
 
 //-----------------------------------------------------------------------

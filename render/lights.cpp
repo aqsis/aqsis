@@ -76,8 +76,11 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
 		m_pShader->Initialise( uGridRes, vGridRes, this );
 
 	TqInt Uses = gDefLightUses;
-	if ( m_pShader ) Uses |= m_pShader->Uses();
-	CqShaderExecEnv::Initialise( uGridRes, vGridRes, 0, Uses );
+	if ( m_pShader )
+	{
+		Uses |= m_pShader->Uses();
+		CqShaderExecEnv::Initialise( uGridRes, vGridRes, 0, m_pShader, Uses );
+	}
 
 	L()->Initialise( uGridRes, vGridRes );
 	Cl()->Initialise( uGridRes, vGridRes );
@@ -167,50 +170,6 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
 //---------------------------------------------------------------------
 // These are the built in shaders, they will be registered as "builtin_<name>"
 // these should be used where speed is an issue.
-
-CqShaderLightsourceAmbient::CqShaderLightsourceAmbient() : CqShader(), m_intensity(NULL), m_lightcolor(NULL)
-{
-	m_intensity = CqShaderVM::CreateVariable(type_float, class_uniform, "intensity" );
-	m_lightcolor = CqShaderVM::CreateVariable(type_color, class_uniform, "lightcolor" );
-
-	// Set up the default values for the parameters.
-	m_intensity->SetFloat( 1.0f );
-	m_lightcolor->SetColor( CqColor(1,1,1) );
-}
-
-
-CqShaderLightsourceAmbient::~CqShaderLightsourceAmbient()
-{
-	delete(m_intensity);
-	delete(m_lightcolor);
-}
-
-
-void CqShaderLightsourceAmbient::SetValue( const char* name, TqPchar val )
-{
-	if ( strcmp( name, "intensity" ) == 0 ) 
-		m_intensity->SetFloat( *reinterpret_cast<TqFloat*>( val ) );
-	else
-		if ( strcmp( name, "lightcolor" ) == 0 ) 
-			m_lightcolor->SetColor( CqColor ( reinterpret_cast<TqFloat*>( val ) ) );
-}
-
-
-void CqShaderLightsourceAmbient::Evaluate( IqShaderExecEnv* pEnv )
-{
-	TqFloat fTemp = 1.0f;
-	CqColor cTemp = CqColor(1,1,1);
-	
-	if(m_lightcolor)
-		m_lightcolor->GetColor( cTemp, 0 );
-
-	if(m_intensity)
-		m_intensity->GetFloat( fTemp, 0 );
-
-	pEnv->Cl()->SetColor( cTemp * fTemp );
-}
-
-
 
 //---------------------------------------------------------------------
 

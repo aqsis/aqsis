@@ -100,7 +100,7 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
 		if ( m_pCSGNode ) m_pCSGNode->AddRef();
 	}
 
-	CqShaderExecEnv::Initialise( cu, cv, pSurface, lUses );
+	CqShaderExecEnv::Initialise( cu, cv, pSurface, pSurface->pAttributes()->pshadSurface(), lUses );
 
 	// Initialise the local/public culled variable.
 	m_vfCulled = TqFalse;

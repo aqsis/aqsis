@@ -35,7 +35,6 @@ START_NAMESPACE( Aqsis )
 
 
 std::vector<CqAttributes*>	Attribute_stack;
-static CqShaderSurfaceConstant	StandardSurface;
 
 //---------------------------------------------------------------------
 /** Constructor.
@@ -58,9 +57,6 @@ CqShadingAttributes::CqShadingAttributes() :
 	m_aTextureCoordinates[ 1 ] = CqVector2D( 1, 0 );
 	m_aTextureCoordinates[ 2 ] = CqVector2D( 0, 1 );
 	m_aTextureCoordinates[ 3 ] = CqVector2D( 1, 1 );
-
-	// Use a default surface shader in case one isn't specified.
-	SetpshadSurface( &StandardSurface );
 }
 
 
