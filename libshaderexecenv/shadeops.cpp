@@ -4287,6 +4287,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_setmcomp( MATRIXVAL M, FLOATVAL r, FLOATVAL c, FL
 	GETFLOAT( c );
 	GETFLOAT( v );
 	MATRIX( M )[ static_cast<TqInt>( FLOAT( r ) ) ][ static_cast<TqInt>( FLOAT( c ) ) ] = FLOAT( v );
+	MATRIX( M ).SetfIdentity(TqFalse);
 	M->SetValue( MATRIX( M ), __iGrid );
 	END_VARYING_SECTION
 }
