@@ -502,7 +502,7 @@ void CqRenderer::RenderWorld()
 		SetImage(new CqImageBuffer);
 	
 	// Store the time at start.
-	m_timeTaken=time(0);
+//	m_timeTaken=time(0);
 
 	// Print to the defined output what we are rendering.
 //	CqString strMsg("Rendering - ");
@@ -514,78 +514,21 @@ void CqRenderer::RenderWorld()
 	pImage()->RenderImage();
 
 	// Calculate the time taken.
-	m_timeTaken=time(0)-m_timeTaken;
+//	m_timeTaken=time(0)-m_timeTaken;
 
+/* moved the following code into RiWorldEnd()
 	TqInt verbosity=0;
 	const TqInt* poptEndofframe=optCurrent().GetIntegerOption("statistics","endofframe");
 	if(poptEndofframe!=0)
 		verbosity=poptEndofframe[0];
 
-	PrintStats(verbosity);
+	Stats().PrintStats(verbosity);
+	*/
 
 	m_pDDManager->CloseDisplays();
 }
 
 
-//----------------------------------------------------------------------
-/** Output rendering stats if required.
- */
-
-void CqRenderer::PrintStats(TqInt level)
-{
-	if(level>0)
-	{
-		std::strstream MSG;
-
-		TqFloat h=m_timeTaken/(60*60);
-		TqFloat m=(m_timeTaken/60)-(h*60);
-		TqFloat s=(m_timeTaken)-(h*60*60)-(m*60);
-		MSG << "Total render time: ";
-		if(h>0.0)
-			MSG << static_cast<TqInt>(h) << "hrs ";
-		if(m>0.0)
-			MSG << static_cast<TqInt>(m) << "mins ";
-		if(s>0.0)
-			MSG << static_cast<TqInt>(s) << "secs ";
-		MSG << std::endl << std::endl;
-
-		MSG << "Grids:    \t";
-		MSG << Stats().cGridsAllocated() << " created / ";
-		MSG << Stats().cGridsAllocated()-Stats().cGridsDeallocated() << " remaining" << std::endl;
-
-		MSG << "Micropolygons: \t";
-		MSG << Stats().cMPGsAllocated() << " created / ";
-		MSG << Stats().cMPGsAllocated()-Stats().cMPGsDeallocated() << " remaining" << std::endl;
-
-		MSG << "Sampling: \t";
-		MSG << Stats().cSamples() << " samples" << std::endl;
-		MSG << "          \t" << Stats().cSampleBoundHits() << " bound hits (";
-		MSG << (100.0f/Stats().cSamples())*Stats().cSampleBoundHits() << "% of samples)" << std::endl;
-		MSG << "          \t" << Stats().cSampleHits() << " hits (";
-		MSG << (100.0f/Stats().cSamples())*Stats().cSampleHits() << "% of samples)" << std::endl;
-
-		MSG << "GPrims: \t";
-		MSG << Stats().cGPrims() << std::endl;
-
-		MSG << "Attributes: \t";
-		MSG << (TqInt)Attribute_stack.size() << " created" << std::endl;
-
-		MSG << "Transforms: \t";
-		MSG << (TqInt)TransformStack().size() << " created" << std::endl;
-
-		MSG << "Variables: \t";
-		MSG << Stats().cVariablesAllocated() << " created / ";
-		MSG << Stats().cVariablesAllocated()-Stats().cVariablesDeallocated() << " remaining" << std::endl;
-
-		MSG << "Parameters: \t";
-		MSG << Stats().cParametersAllocated() << " created / ";
-		MSG << Stats().cParametersAllocated()-Stats().cParametersDeallocated() << " remaining" << std::endl;
-		MSG << std::ends;
-
-		CqString strMSG(MSG.str());
-		CqBasicError(0,Severity_Normal,strMSG.c_str());
-	}
-}
 
 //----------------------------------------------------------------------
 /** Quit rendering at the next opportunity.

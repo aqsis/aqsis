@@ -27,6 +27,8 @@
 #ifndef STATS_H_INCLUDED
 #define STATS_H_INCLUDED 1
 
+#include  <time.h>
+#include  <iostream>
 #include	"ri.h"
 
 #include	"aqsis.h"
@@ -49,28 +51,26 @@ enum EqState
 
 //----------------------------------------------------------------------
 /** \class CqStats
- * Class containing statistics information.
+   Class containing statistics information.
+ 
+   Before a rendering session the method Initialise() has to be called
+	 (it is also called by the constructor). Before each individual frame 
+	 the variables have to be reset by calling InitialiseFrame().
+	 After that the counters can be increased by calling the appropriate
+	 IncXyz()-Method. To measure various times there are several pairs
+	 of StartXyzTimer() and StopXyZTimer() methods.
+	 The statistics for each frame can be printed with PrintStats().
  */
 
 class CqStats
 {
 	public:
-					CqStats()	: m_State(State_Parsing),
-								  m_Complete(0.0f),
-								  m_cMPGsAllocated(0),
-								  m_cMPGsDeallocated(0),
-								  m_cSamples(0),
-									m_cSampleBoundHits(0),
-								  m_cSampleHits(0),
-								  m_cVariablesAllocated(0),
-								  m_cVariablesDeallocated(0),
-								  m_cParametersAllocated(0),
-								  m_cParametersDeallocated(0),
-								  m_cGridsAllocated(0),
-								  m_cGridsDeallocated(0),
-									m_cGPrims(0)
-								{}
-					~CqStats()	{}
+					CqStats()	{ Initialise(); }
+
+					~CqStats()	{ }
+
+			void Initialise();
+			void InitialiseFrame();
 
 					/** Get the process identifier.
 					 */
@@ -88,48 +88,102 @@ class CqStats
 			void	SetComplete(TqFloat complete)
 										{m_Complete=complete;}
 
-					/** Get a reference to the micropolygons allocated count.
+      /// \name Increasing counters
+			//@{
+
+					/** Increase the micropolygons allocated count by 1.
 					 */
-			TqInt&	cMPGsAllocated()	{return(m_cMPGsAllocated);}
-					/** Get a reference to the micropolygons deallocated count.
+			void	IncMPGsAllocated()	{ m_cMPGsAllocated++; }
+					/** Increase the micropolygons deallocated count by 1.
 					 */
-			TqInt&	cMPGsDeallocated()	{return(m_cMPGsDeallocated);}
-					/** Get a reference to the samples count.
+			void	IncMPGsDeallocated()	{ m_cMPGsDeallocated++; }
+					/** Increase the sample count by 1.
 					 */
-			TqInt&	cSamples()			{return(m_cSamples);}
-					/** Get a reference to the sample bound hit count.
+			void	IncSamples()			{ m_cSamples++; }
+					/** Increase the sample bound hit count by 1.
 					 */
-			TqInt&	cSampleBoundHits()	{return(m_cSampleBoundHits);}
-					/** Get a reference to the sample hit count.
+			void	IncSampleBoundHits()	{ m_cSampleBoundHits++; }
+					/** Increase the sample hit count by 1.
 					 */
-			TqInt&	cSampleHits()		{return(m_cSampleHits);}
-					/** Get a reference to the shader variables allocated count.
+			void	IncSampleHits()		{ m_cSampleHits++; }
+					/** Increase the shader variables allocated count by 1.
 					 */
-			TqInt&	cVariablesAllocated()	{return(m_cVariablesAllocated);}
-					/** Get a reference to the shader variables deallocated count.
+			void	IncVariablesAllocated()	{ m_cVariablesAllocated++; }
+					/** Increase the shader variables deallocated count by 1.
 					 */
-			TqInt&	cVariablesDeallocated()	{return(m_cVariablesDeallocated);}
-					/** Get a reference to the surface parameters allocated count.
+			void	IncVariablesDeallocated()	{ m_cVariablesDeallocated++; }
+					/** Increase the surface parameters allocated count by 1.
 					 */
-			TqInt&	cParametersAllocated()	{return(m_cParametersAllocated);}
-					/** Get a reference to the surface parameters deallocated count.
+			void	IncParametersAllocated()	{ m_cParametersAllocated++;}
+					/** Increase the surface parameters deallocated count by 1.
 					 */
-			TqInt&	cParametersDeallocated(){return(m_cParametersDeallocated);}
-					/** Get a reference to the micropolygrids allocated count.
+			void	IncParametersDeallocated(){ m_cParametersDeallocated++; }
+					/** Increase the micropolygrids allocated count by 1.
 					 */
-			TqInt&	cGridsAllocated()	{return(m_cGridsAllocated);}
-					/** Get a reference to the micropolygrids deallocated count.
+			void	IncGridsAllocated()	{ m_cGridsAllocated++; }
+					/** Increase the micropolygrids deallocated count by 1.
 					 */
-			TqInt&	cGridsDeallocated()	{return(m_cGridsDeallocated);}
-					/** Get a reference to the GPrims count.
+			void	IncGridsDeallocated()	{ m_cGridsDeallocated++; }
+					/** Increase the GPrim count by 1.
 					 */
-			TqInt&	cGPrims()			{return(m_cGPrims);}
+			void	IncGPrims()			{ m_cGPrims++; }
+
+			//@}
+
+
+      /// \name Timer methods
+      //@{
+      void    StartFrameTimer();
+			void    StopFrameTimer();
+
+          /** Start the surface timer.
+					    \see StopSurfaceTimer()
+		    	 */
+      void    StartSurfaceTimer() { m_dummytime = clock(); };
+
+          /** Stop the surface timer.
+					    The difference between the starting time and the current time is
+							added to the total surface shading time.
+					    \see StartSurfaceTimer()
+		    	 */
+			void    StopSurfaceTimer()  { m_timeSurface += clock()-m_dummytime; }
+
+          /** Start the displacement timer.
+					    \see StopDisplacementTimer()
+		    	 */
+      void    StartDisplacementTimer() { m_dummytime = clock(); };
+
+          /** Stop the displacement timer.
+					    The difference between the starting time and the current time is
+							added to the total displacement shading time.
+					    \see StartDisplacementTimer()
+		    	 */
+			void    StopDisplacementTimer()  { m_timeDisplacement += clock()-m_dummytime; }
+
+          /** Start the atmosphere timer.
+					    \see StopAtmosphereTimer()
+		    	 */
+      void    StartAtmosphereTimer() { m_dummytime = clock(); };
+
+          /** Stop the atmosphere timer.
+					    The difference between the starting time and the current time is
+							added to the total atmosphere shading time.
+					    \see StartAtmosphereTimer()
+		    	 */
+			void    StopAtmosphereTimer()  { m_timeAtmosphere += clock()-m_dummytime; }
+			//@}
+
+
+			void    PrintStats(TqInt level) const;
+
+  private:
+	    std::ostream& TimeToString(std::ostream& os, TqFloat t) const;
 
 	private:
 			EqState	m_State;						///< Current process identifier.
 			TqFloat	m_Complete;						///< Current percentage comlpete.
 			
-			TqInt	m_cMPGsAllocated;				///< Count of microplygons allocated.
+			TqInt	m_cMPGsAllocated;				///< Count of micropolygons allocated.
 			TqInt	m_cMPGsDeallocated;				///< Count of microplygons dallocated.
 			TqInt	m_cSamples;						///< Count of samples tested.
 			TqInt	m_cSampleBoundHits;				///< Count of sample boundary hits.
@@ -139,9 +193,17 @@ class CqStats
 			TqInt	m_cParametersAllocated;			///< Count of surface parameters allocated.
 			TqInt	m_cParametersDeallocated;		///< Count of surface parameters deallocated.
 			TqInt	m_cGridsAllocated;				///< Count of micropolygrids allocated.
-			TqInt	m_cGridsDeallocated;			///< Count of micropolygrids allocated.
+			TqInt	m_cGridsDeallocated;			///< Count of micropolygrids deallocated.
 
 			TqInt	m_cGPrims;						///< Count of GPrims.
+
+			time_t	m_timeTotal;				 ///< Total time spent on the entire animation.
+			time_t  m_timeTotalFrame;    ///< Time spent on processing one individual frame.
+			TqBool  m_frameTimerRunning; ///< True, if the frame timer was started and not yet stopped.
+			clock_t m_timeSurface;       ///< Time spent on surface shading.
+			clock_t m_timeDisplacement;  ///< Time spent on displacement shading.
+			clock_t m_timeAtmosphere;    ///< Time spent on volume shading (atmosphere).
+      clock_t m_dummytime;         ///< Variable that keeps starting times for surface, displacement and atmosphere timers.
 };
 
 

@@ -240,12 +240,12 @@ class CqRenderer
 						/** Set the locally stored render time.
 						 * \param time System time value representing the seconds taken to render.
 						 */
-						void	SettimeTaken(time_t time)	{m_timeTaken=time;}
+//						void	SettimeTaken(time_t time)	{m_timeTaken=time;}
 						/** Get the time taken to complete the last render in seconds.
 						 */
-						time_t	timeTaken() const			{return(m_timeTaken);}
+//						time_t	timeTaken() const			{return(m_timeTaken);}
 
-						void		PrintStats(TqInt level);
+//						void		PrintStats(TqInt level);
 
 	private:
 			void			RegisterShader(const char* strName, EqShaderType type, CqShader* pShader);
@@ -268,7 +268,7 @@ class CqRenderer
 			std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
 
 	protected:
-			time_t			m_timeTaken;					///< The stored time taken to complete the last full render.
+//			time_t			m_timeTaken;					///< The stored time taken to complete the last full render.
 
 	public:
 			std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.
