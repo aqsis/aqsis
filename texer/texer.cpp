@@ -10,66 +10,51 @@
 
 #include	"aqsis.h"
 #include	"version.h"
-#include	"arg.h"
+#include	"argparse.h"
 
-int g_cFiles=0;
-char* g_aFiles[7];
-
-TqInt	envcube;
-TqChar*	swrap="black";
-TqChar*	twrap="black";
+bool				g_envcube;
+ArgParse::apstring	g_swrap="black";
+ArgParse::apstring	g_twrap="black";
 
 static void arg_filename(int argc, char**argv);
 
-int main(int argc, char* argv[])
+int main(int argc, const char** argv)
 {
-	printf("texer version %s - Copyright 2000 Paul C. Gregory\n", VERSION_STR);
-	printf("All Rights Reserved\n\n");
+	std::cout << "texer version " << VERSION_STR << " - Copyright 2000 Paul C. Gregory" << std::endl;
+	std::cout << "All Rights Reserved" << std::endl;
 
-    if (arg_parse(argc, argv,
-		"", "Usage: %s [options] infile[s] outfile", argv[0],
-		"-envcube", ARG_FLAG(&envcube), "px nx py ny pz nz out\n\t\t\tprocess input images as a cubic environment map.",
-		"-swrap %S", &swrap, "s mode [black|periodic|clamp]",
-		"-twrap %S", &twrap, "t mode [black|periodic|clamp]",
-		"", ARG_SUBR(arg_filename), "",
-		0) >= 0)
+	ArgParse ap;
+	ap.usageHeader(ArgParse::apstring("Usage: ") + argv[0] + " [options] outfile");
+	ap.argFlag("envcube", " px nx py ny pz nz\aproduce a cubeface environment map from 6 images.", &g_envcube);
+	ap.argString("swrap", "=string\as mode [black|periodic|clamp]", &g_swrap);
+	ap.argString("twrap", "=string\at mode [black|periodic|clamp]", &g_twrap);
+	if (!ap.parse(argc-1, argv+1) || ap.leftovers().size()<=1)
 	{
-		if(envcube)
+		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
+		exit(1);
+	}
+
+	if(g_envcube)
+	{
+		if(ap.leftovers().size()!=7)	
 		{
-			if(g_cFiles!=7)	
-			{
-				printf("Need 6 images for cubic environment map\n");
-				return(-1);
-			}
-			printf("CubeFace Environment %s,%s,%s,%s,%s,%s-->%s\n",g_aFiles[0], g_aFiles[1],
-																   g_aFiles[2], g_aFiles[3],
-																   g_aFiles[4], g_aFiles[5],
-																   g_aFiles[6]);
-			RiMakeCubeFaceEnvironment(g_aFiles[0],g_aFiles[1],g_aFiles[2],g_aFiles[3],g_aFiles[4],g_aFiles[5],g_aFiles[6],
-									  0,RiBoxFilter,0,0);
+			std::cerr << "Need 6 images for cubic environment map" << std::endl;
+			return(-1);
 		}
-		else
-		{
-			if(g_cFiles<2)
-			{
-				printf("Must specify input and output names\n");
-				return(-1);
-			}
-			printf("Texture %s-->%s, smode \"%s\", tmode \"%s\"\n",g_aFiles[0], g_aFiles[1], swrap, twrap);
-			RiMakeTexture(g_aFiles[0],g_aFiles[1],swrap,twrap,RiBoxFilter,0,0);
-		}
+		std::cout << "CubeFace Environment " << ap.leftovers()[0] << "," <<
+												ap.leftovers()[1] << "," <<
+												ap.leftovers()[2] << "," <<
+												ap.leftovers()[3] << "," <<
+												ap.leftovers()[4] << "," << 
+												ap.leftovers()[5] << "-->" <<
+												ap.leftovers()[6] << std::endl;
+		RiMakeCubeFaceEnvironment(ap.leftovers()[0].c_str(),ap.leftovers()[1].c_str(),ap.leftovers()[2].c_str(),ap.leftovers()[3].c_str(),ap.leftovers()[4].c_str(),ap.leftovers()[5].c_str(),ap.leftovers()[6].c_str(),0,RiBoxFilter,0,0);
+	}
+	else
+	{
+		std::cout << "Texture " << ap.leftovers()[0] << "-->" << ap.leftovers()[1] << 
+					 " smode \"" << g_swrap.c_str() << "\" tmode \"" << g_twrap.c_str() << "\"" << std::endl;
+		RiMakeTexture((char*)ap.leftovers()[0].c_str(),(char*)ap.leftovers()[1].c_str(),(char*)g_swrap.c_str(),(char*)g_twrap.c_str(),RiBoxFilter,0,0);
 	}
 	return(0);
-}
-
-
-static void arg_filename(int argc, char**argv)
-{
-    int i;
-
-	for(i=0; i<argc; i++)
-	{
-		if(g_cFiles<7)	g_aFiles[g_cFiles]=argv[i];
-		g_cFiles++;
-	}
 }
