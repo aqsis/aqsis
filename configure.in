@@ -46,7 +46,7 @@ HAVE_LIBTIFF
 dnl Needed by librib2/bdec.cpp. Define WORDS_BIGENDIAN.
 AC_C_BIGENDIAN
 
-AM_CPPFLAGS="$CPPFLAGS -DBASE_PATH=\\\"\"$datadir\\\"\" -DCONFIG_PATH=\\\"\"$sysconfdir\\\"\""
+CPPFLAGS="$CPPFLAGS -DBASE_PATH=\\\"\"$datadir\\\"\" -DCONFIG_PATH=\\\"\"$sysconfdir\\\"\""
 
 AC_OUTPUT( \
 all/Makefile \
