@@ -85,5 +85,6 @@ plugins/ppm2tif/Makefile \
 plugins/pcx2tif/Makefile \
 plugins/tga2tif/Makefile \
 releasearchive/Makefile \
+libslxargs/Makefile \
 Makefile )
 
