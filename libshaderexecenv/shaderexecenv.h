@@ -156,6 +156,14 @@ public:
     {
         return ( m_pTransform );
     }
+	virtual void SetCurrentSurface(IqSurface* pEnv)
+	{
+		m_pCurrentSurface = pEnv;
+	}
+	virtual const IqSurface* GetCurrentSurface() const
+	{
+		return(m_pCurrentSurface);
+	}
     virtual	void	ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* pN, IqShader* pShader );
     virtual	void	InvalidateIlluminanceCache()
     {
@@ -365,6 +373,7 @@ private:
     CqBitVector	m_RunningState;			///< SIMD running execution state bit vector.
     std::stack<CqBitVector>	m_stkState;				///< Stack of execution state bit vectors.
     TqInt	m_LocalIndex;			///< Local cached variable index to speed repeated access to the same local variable.
+	IqSurface*	m_pCurrentSurface;	///< Pointer to the surface being shaded.
 
 public:
 

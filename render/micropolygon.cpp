@@ -446,6 +446,8 @@ void CqMicroPolyGrid::Shade()
     theStats.SurfaceTimer().Start();
     if ( NULL != pshadSurface )
     {
+		//boost::shared_ptr<CqSurface> surf(pSurface());
+		m_pShaderExecEnv->SetCurrentSurface(pSurface());
         pshadSurface->Evaluate( m_pShaderExecEnv );
     }
     theStats.SurfaceTimer().Stop();

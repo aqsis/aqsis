@@ -1,4 +1,4 @@
-SUBDIRS = . bind config detail filesystem mpl multi_array pending pool preprocessor random regex spirit tuple type_traits utility
+SUBDIRS = . bind config detail filesystem mpl multi_array pending pool preprocessor random regex spirit tuple type_traits utility function thread
 
 noinst_HEADERS = \
 any.hpp \
@@ -18,6 +18,7 @@ cstdint.hpp \
 cstdlib.hpp \
 current_function.hpp \
 enable_shared_from_this.hpp \
+function.hpp \
 functional.hpp \
 generator_iterator.hpp \
 get_pointer.hpp \
@@ -52,6 +53,7 @@ shared_ptr.hpp \
 signal.hpp \
 spirit.hpp \
 static_assert.hpp \
+thread.hpp \
 throw_exception.hpp \
 token_functions.hpp \
 token_iterator.hpp \
@@ -82,6 +84,7 @@ cstdint.hpp \
 cstdlib.hpp \
 current_function.hpp \
 enable_shared_from_this.hpp \
+function.hpp \
 functional.hpp \
 generator_iterator.hpp \
 get_pointer.hpp \
@@ -115,6 +118,7 @@ shared_ptr.hpp \
 signal.hpp \
 spirit.hpp \
 static_assert.hpp \
+thread.hpp \
 throw_exception.hpp \
 token_functions.hpp \
 token_iterator.hpp \

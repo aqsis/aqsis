@@ -75,10 +75,11 @@ public:
     /** Evaluate the shader.
      * \param pPs the point being lit.
      */
-    virtual void	Evaluate( IqShaderData* pPs, IqShaderData* pNs )
+    virtual void	Evaluate( IqShaderData* pPs, IqShaderData* pNs, IqSurface* pSurface )
     {
         Ps() ->SetValueFromVariable( pPs );
         Ns() ->SetValueFromVariable( pNs );
+		m_pShaderExecEnv->SetCurrentSurface(pSurface);
         m_pShader->Evaluate( m_pShaderExecEnv );
     }
     /** Get a pointer to the attributes associated with this lightsource.

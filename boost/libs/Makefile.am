@@ -1,2 +1,2 @@
-SUBDIRS = . filesystem mpl regex
+SUBDIRS = . filesystem mpl regex thread
 

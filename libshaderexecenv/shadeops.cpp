@@ -179,7 +179,7 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* 
             lp->Initialise( uGridRes(), vGridRes() );
             m_Illuminate = 0;
             // Evaluate the lightsource
-            lp->Evaluate( Ps, Ns );
+            lp->Evaluate( Ps, Ns, m_pCurrentSurface );
             li++;
         }
         m_IlluminanceCacheValid = TqTrue;;
@@ -3981,8 +3981,10 @@ STD_SOIMPL CqShaderExecEnv::SO_surface( STRINGVAL name, IqShaderData* pV, DEFPAR
 
     IqShader * pSurface = NULL;
 
-    if ( NULL != m_pAttributes && NULL != m_pAttributes ->pshadSurface(QGetRenderContextI()->Time()) )
-        pSurface = m_pAttributes ->pshadSurface(QGetRenderContextI()->Time());
+    if ( GetCurrentSurface() &&
+		 NULL != GetCurrentSurface()->pAttributes() && 
+		 NULL != GetCurrentSurface()->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) )
+        pSurface = GetCurrentSurface()->pAttributes() ->pshadSurface(QGetRenderContextI()->Time());
 
     BEGIN_UNIFORM_SECTION
     GETSTRING( name );

@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/12/28 18:26:20 $
+ *	Last change date:	$Date: 2004/06/07 23:00:47 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ struct IqLightsource
     /** Evaluate the shader.
      * \param pPs the point being lit.
      */
-    virtual	void	Evaluate( IqShaderData* pPs, IqShaderData* pNs ) = 0;
+    virtual	void	Evaluate( IqShaderData* pPs, IqShaderData* pNs, IqSurface* pSurface ) = 0;
     /** Get a pointer to the attributes associated with this lightsource.
      * \return a CqAttributes pointer.
      */

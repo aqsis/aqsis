@@ -4,8 +4,8 @@
  *	@author	Authors name
  *	@brief	Brief description of the file contents
  *
- *	Last change by:		$Author: pseudonym $
- *	Last change date:	$Date: 2004/03/19 06:11:16 $
+ *	Last change by:		$Author: pgregory $
+ *	Last change date:	$Date: 2004/06/07 23:00:48 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___isurface_Loaded___
@@ -35,7 +35,7 @@ class CqMicroPolyGrid;
  * Abstract base surface class, which provides interfaces to geometry.  
  */
 
-struct IqSurface
+struct IqSurface 
 {
     virtual	~IqSurface()
     {}

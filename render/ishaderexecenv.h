@@ -144,6 +144,13 @@ struct IqShaderExecEnv
     /** Get a pointer to the associated transform.
      */
     virtual	const IqTransform*	pTransform() const = 0;
+	/** Set the pointer to the currently being lit surface
+	 */
+	virtual void SetCurrentSurface(IqSurface* pEnv) = 0;
+
+	/** Get the pointer to the currently being lit surface
+	 */
+	virtual const IqSurface* GetCurrentSurface() const = 0;
     /** Update all cached lighting results.
      */
     virtual	void	ValidateIlluminanceCache( IqShaderData* pP, IqShaderData* pN, IqShader* pShader ) = 0;

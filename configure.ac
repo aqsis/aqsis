@@ -254,6 +254,10 @@ boost/boost/tuple/detail/Makefile \
 boost/boost/type_traits/Makefile \
 boost/boost/type_traits/detail/Makefile \
 boost/boost/utility/Makefile \
+boost/boost/function/Makefile \
+boost/boost/function/detail/Makefile \
+boost/boost/thread/Makefile \
+boost/boost/thread/detail/Makefile \
 boost/libs/Makefile \
 boost/libs/filesystem/Makefile \
 boost/libs/filesystem/src/Makefile \
@@ -264,6 +268,10 @@ boost/libs/mpl/preprocessed/src/Makefile \
 boost/libs/mpl/preprocessed/vector/Makefile \
 boost/libs/regex/Makefile \
 boost/libs/regex/src/Makefile \
+boost/libs/thread/Makfile \
+boost/libs/thread/src/Makefile \
+boost/libs/thread/src/mac/Makefile \
+boost/libs/thread/src/mac/msl_replacements/Makefile \
 filebuffer/Makefile \
 framebuffer_glut/Makefile \
 framebuffer_glut_z/Makefile \
