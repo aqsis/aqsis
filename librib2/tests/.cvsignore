@@ -10,6 +10,7 @@ test_003
 test_004
 
 *.tif
+*.map
 *.z
 *.slx
 

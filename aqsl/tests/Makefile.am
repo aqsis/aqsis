@@ -6,8 +6,7 @@ test-clean:
 aqsl=$(top_builddir)/aqsl/aqsl
 
 test: test-clean 
-	for file in *.sl; do $(aqsl) $$file; done
-	for file in $$(find $(top_srcdir)/shaders -name "*.sl"); do $(aqsl) $$file; done
+	PATH=$$PATH:$(top_builddir)/aqsl; for file in $$(find $(top_srcdir) -name "*.sl"); do $(aqsl) $$file; done
 
 .PHONY: test-clean test
 

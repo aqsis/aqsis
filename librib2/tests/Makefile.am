@@ -13,7 +13,7 @@ ribrenderer_LDADD = $(top_builddir)/librib2/librib2.la $(top_builddir)/librib2ri
 CXXFLAGS = -g -Wall
 INCLUDES = -I$(top_srcdir)/librib2 -I$(top_srcdir)/librib2stream -I$(top_srcdir)/librib2ri -I$(top_srcdir)/render -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix
 
-EXTRA_DIST = test_001.in test_002.in test_003.in test_004.in cone.rib cylinder.rib nurbs.rib simple.rib sphere.rib teapot.rib torus.rib 
+EXTRA_DIST = cone.rib cylinder.rib nurbs.rib simple.rib sphere.rib teapot.rib torus.rib 
 
 test-clean:
 	rm -f *.tif
@@ -21,18 +21,12 @@ test-clean:
 	rm -f *.slx
 
 test-shaders:
-	for file in $$(find $(top_srcdir)/shaders -name "*.sl"); do $(top_builddir)/aqsl/aqsl $$file; done	
+	PATH=$$PATH:$(top_builddir)/aqsl; for file in $$(find $(top_srcdir) -name "*.sl"); do $(top_builddir)/aqsl/aqsl $$file; done	
 
-test-scripts:
-	chmod a+x test_001
-	chmod a+x test_002
-	chmod a+x test_003
-	chmod a+x test_004	
+test: check test-clean test-shaders
+	for file in $(srcdir)/*.rib; do echo "Scanning $$file ..."; $(top_builddir)/librib2/tests/ribscanner < $$file; done
+	for file in $(srcdir)/*.rib; do echo "Parsing $$file ..."; $(top_builddir)/librib2/tests/ribprinter $(top_srcdir)/ribber.cfg $$file; done
+	for file in $(srcdir)/*.rib; do echo "Rendering $$file ..."; $(top_builddir)/librib2/tests/ribrenderer $(top_srcdir)/ribber.cfg $$file; done
+	for file in $$(find $(top_srcdir)/content -name "*.rib"); do echo "Rendering $$file ..."; $(top_builddir)/librib2/tests/ribrenderer $(top_srcdir)/ribber.cfg $$file; done;
 
-test: check test-clean test-shaders test-scripts
-	$(SHELL) test_001
-	$(SHELL) test_002
-	$(SHELL) test_003
-	$(SHELL) test_004
-
-.PHONY: test-clean test-shaders test-scripts test
+.PHONY: test-clean test-shaders test

@@ -15,10 +15,6 @@ libddmsock/posix/Makefile \
 render/Makefile \
 librib2/Makefile \
 librib2/tests/Makefile \
-librib2/tests/test_001 \
-librib2/tests/test_002 \
-librib2/tests/test_003 \
-librib2/tests/test_004 \
 librib2stream/Makefile \
 librib2ri/Makefile \
 libslparse/Makefile \
