@@ -25,8 +25,8 @@ A RenderMan(tm)-compatible renderer
 %setup -q
 
 %build
-export CFLAGS="-O2" 
-export CXXFLAGS="-O29" 
+#export CFLAGS="-O2" 
+#export CXXFLAGS="-O29" 
 ./configure --bindir=%{_bindir} --mandir=%{_mandir} --libdir=%{_libdir} --datadir=%{_datadir} --includedir=%{_includedir} --sysconfdir=%{_sysconfdir}
 
 make
