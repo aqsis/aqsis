@@ -1051,7 +1051,17 @@ CqVector3D CqTorus::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqTorus::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	return ( DicePoint( u, v ) );
+	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat phi = RAD( m_PhiMin + ( ( TqFloat ) v * ( m_PhiMax - m_PhiMin ) ) / m_vDiceSize );
+	
+	TqFloat r = m_MinorRadius * cos( phi );
+	TqFloat z = m_MinorRadius * sin( phi );
+
+	Normal.x( cos( phi ) * cos( theta ) );
+	Normal.y( cos( phi ) * sin( theta ) );
+	Normal.z( sin( phi ) );
+
+	return ( CqVector3D( ( m_MajorRadius + r ) * cos( theta ), ( m_MajorRadius + r ) * sin( theta ), z ) );
 }
 
 
