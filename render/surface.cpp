@@ -176,7 +176,7 @@ CqBound	CqBasicSurface::AdjustBoundForTransformationMotion( const CqBound& B ) c
 {
 	CqBound Bm( B );
 
-	if( pTransform()->cTimes() > 0 )
+	if( pTransform()->cTimes() > 1 )
 	{
 		CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pTransform()->matObjectToWorld( pTransform()->Time( 0 ) ) );
 		CqBound B0( B );
