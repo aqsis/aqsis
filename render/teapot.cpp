@@ -626,7 +626,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
 CqTeapot&	CqTeapot::operator=( const CqTeapot& From )
 {
-	CqTeapot::operator=( From );
+	CqSurface::operator=( From );
 	m_CrowBase = From.m_CrowBase;
 	m_matTx = From.m_matTx;
 	m_matITTx = From.m_matITTx;
