@@ -994,7 +994,7 @@ CqMatrix CqMatrix::Inverse() const
 		TqInt i1;
 
 		// Loop over cols of a from left to right, eliminating above and below diag
-		for ( j = 0; j < 4; j++ )   	// Find largest pivot in column j among rows j..3
+		for ( j = 0; j < 4; j++ )    	// Find largest pivot in column j among rows j..3
 		{
 			i1 = j;
 			for ( i = j + 1; i < 4; i++ )

@@ -397,7 +397,7 @@ CqString operator*( const CqString& strAdd1, TqFloat f )
 std::ostream& operator<<( std::ostream & stmOutput, const CqString& strString )
 {
 	stmOutput << strString.c_str();
-	return( stmOutput);
+	return ( stmOutput );
 }
 
 

@@ -51,16 +51,16 @@ class CqMatrix
 		CqMatrix( const CqVector3D& Trans ); // Translated
 		CqMatrix( const TqFloat Angle, const CqVector3D Axis ); // Rotation2
 		CqMatrix( const TqFloat angle,
-		                   const TqFloat dx1, const TqFloat dy1, const TqFloat dz1,
-		                   const TqFloat dx2, const TqFloat dy2, const TqFloat dz2 ); // Skew
+		          const TqFloat dx1, const TqFloat dy1, const TqFloat dz1,
+		          const TqFloat dx2, const TqFloat dy2, const TqFloat dz2 ); // Skew
 		CqMatrix( const CqMatrix &From );
 		/** Individual element constructor.
 		 * Takes 16 floats for the elements of the matrix.
 		 */
 		CqMatrix( const TqFloat r1c1, const TqFloat r1c2, const TqFloat r1c3, const TqFloat r1c4,
-		                   const TqFloat r2c1, const TqFloat r2c2, const TqFloat r2c3, const TqFloat r2c4,
-		                   const TqFloat r3c1, const TqFloat r3c2, const TqFloat r3c3, const TqFloat r3c4,
-		                   const TqFloat r4c1, const TqFloat r4c2, const TqFloat r4c3, const TqFloat r4c4 )
+		          const TqFloat r2c1, const TqFloat r2c2, const TqFloat r2c3, const TqFloat r2c4,
+		          const TqFloat r3c1, const TqFloat r3c2, const TqFloat r3c3, const TqFloat r3c4,
+		          const TqFloat r4c1, const TqFloat r4c2, const TqFloat r4c3, const TqFloat r4c4 )
 		{
 			m_aaElement[ 0 ][ 0 ] = r1c1; m_aaElement[ 0 ][ 1 ] = r1c2; m_aaElement[ 0 ][ 2 ] = r1c3; m_aaElement[ 0 ][ 3 ] = r1c4;
 			m_aaElement[ 1 ][ 0 ] = r2c1; m_aaElement[ 1 ][ 1 ] = r2c2; m_aaElement[ 1 ][ 2 ] = r2c3; m_aaElement[ 1 ][ 3 ] = r2c4;
@@ -94,8 +94,8 @@ class CqMatrix
 		void	ShearY( const TqFloat xh, const TqFloat zh );
 		void	ShearZ( const TqFloat xh, const TqFloat yh );
 		void	Skew( const TqFloat angle,
-		                    const TqFloat dx1, const TqFloat dy1, const TqFloat dz1,
-		                    const TqFloat dx2, const TqFloat dy2, const TqFloat dz2 );
+		           const TqFloat dx1, const TqFloat dy1, const TqFloat dz1,
+		           const TqFloat dx2, const TqFloat dy2, const TqFloat dz2 );
 		void	Normalise();
 
 		/** Get the element at the specified row and column index.

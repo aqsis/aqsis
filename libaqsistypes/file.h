@@ -36,7 +36,7 @@
 
 START_NAMESPACE( Aqsis )
 
- // This should'nt really be in here, but for now it will do
+// This should'nt really be in here, but for now it will do
 #ifdef AQSIS_SYSTEM_WIN32
 #define DIRSEP "\\"
 #else
@@ -125,8 +125,8 @@ class CqFile
 			return ( len );
 		}
 
-		static std::list<CqString*> Glob(const CqString& strFileGlob);
-		static CqString GetSystemSetting(const CqString& strAsset);
+		static std::list<CqString*> Glob( const CqString& strFileGlob );
+		static CqString GetSystemSetting( const CqString& strAsset );
 
 	private:
 		std::istream*	m_pStream;		///< a poimter to the stream associated with this file object.

@@ -49,17 +49,17 @@ START_NAMESPACE( Aqsis )
 
 class CqPluginBase
 {
-  	public:
-	  	~CqPluginBase();
+	public:
+		~CqPluginBase();
 		const CqString DLError();
 
 	private:
-	  	
+
 
 	protected:
-		void *DLOpen(CqString *library);
-		void DLClose(void*);
-		void *DLSym(void*, CqString*);
+		void *DLOpen( CqString *library );
+		void DLClose( void* );
+		void *DLSym( void*, CqString* );
 
 		// we record all the DLOpen'ed handles to close them properly on destruction.
 		std::list<void*> m_activeHandles;

@@ -40,21 +40,22 @@ START_NAMESPACE( Aqsis )
 /** Given a string representing a filename with wildcards, return a list
  * of filenames that match that string.
 */
-std::list<CqString*> CqFile::Glob (const CqString& strFileGlob)
+std::list<CqString*> CqFile::Glob ( const CqString& strFileGlob )
 {
-	glob_t  globbuf;
+	glob_t globbuf;
 	const char *pt = strFileGlob.c_str();
 
-	globbuf.gl_offs =       0;
-	glob(pt,GLOB_DOOFFS,NULL,&globbuf);
+	globbuf.gl_offs = 0;
+	glob( pt, GLOB_DOOFFS, NULL, &globbuf );
 
 	std::list<CqString*> result;
 	int i;
-	for (i=0;i<globbuf.gl_pathc;i++) {
-		result.push_front( new CqString( globbuf.gl_pathv[i] ) );
+	for ( i = 0;i < globbuf.gl_pathc;i++ )
+	{
+		result.push_front( new CqString( globbuf.gl_pathv[ i ] ) );
 	}
 
-	globfree(&globbuf);
+	globfree( &globbuf );
 	return result;
 }
 
@@ -69,26 +70,28 @@ std::list<CqString*> CqFile::Glob (const CqString& strFileGlob)
  *  \return A string containing the ":" separated list of searchpaths.
  */
 
-CqString CqFile::GetSystemSetting(const CqString& strAsset)
+CqString CqFile::GetSystemSetting( const CqString& strAsset )
 {
-	char* env;
+	char * env;
 	char* base_path;
-	CqString result("");
-	
+	CqString result( "" );
+
 	if ( ( env = getenv( "AQSIS_BASE_PATH" ) ) != NULL )
 	{
 		base_path = env;
-	} else {
-	  	// use the default from the build system
-	  	base_path = BASE_PATH;
+	}
+	else
+	{
+		// use the default from the build system
+		base_path = BASE_PATH;
 	};
 
 
-	if( strAsset.compare( "base" ) == 0 )
+	if ( strAsset.compare( "base" ) == 0 )
 	{
 		result = base_path;
 	}
-	else if( strAsset.compare( "config" ) == 0 )
+	else if ( strAsset.compare( "config" ) == 0 )
 	{
 		if ( ( env = getenv( "AQSIS_CONFIG" ) ) != NULL )
 			result = env;
@@ -111,7 +114,7 @@ CqString CqFile::GetSystemSetting(const CqString& strAsset)
 				}
 			}
 	}
-	else if( strAsset.compare( "shaders" ) == 0 )
+	else if ( strAsset.compare( "shaders" ) == 0 )
 	{
 		if ( ( env = getenv( "AQSIS_SHADERS_PATH" ) ) != 0 )
 			result = env;
@@ -121,7 +124,7 @@ CqString CqFile::GetSystemSetting(const CqString& strAsset)
 			result.append( "/shaders" );
 		}
 	}
-	else if( strAsset.compare( "archives" ) == 0 )
+	else if ( strAsset.compare( "archives" ) == 0 )
 	{
 		if ( ( env = getenv( "AQSIS_ARCHIVES_PATH" ) ) != 0 )
 			result = env;
@@ -131,7 +134,7 @@ CqString CqFile::GetSystemSetting(const CqString& strAsset)
 			result.append( "/archives" );
 		}
 	}
-	else if( strAsset.compare( "textures" ) == 0 )
+	else if ( strAsset.compare( "textures" ) == 0 )
 	{
 		if ( ( env = getenv( "AQSIS_TEXTURES_PATH" ) ) != 0 )
 			result = env;
@@ -141,7 +144,7 @@ CqString CqFile::GetSystemSetting(const CqString& strAsset)
 			result.append( "/textures" );
 		}
 	}
-	else if( strAsset.compare( "displays" ) == 0 )
+	else if ( strAsset.compare( "displays" ) == 0 )
 	{
 		if ( ( env = getenv( "AQSIS_DISPLAYS_PATH" ) ) != 0 )
 			result = env;
@@ -151,7 +154,7 @@ CqString CqFile::GetSystemSetting(const CqString& strAsset)
 			result.append( "/displays" );
 		}
 	}
-	else if( strAsset.compare( "procedurals" ) == 0 )
+	else if ( strAsset.compare( "procedurals" ) == 0 )
 	{
 		if ( ( env = getenv( "AQSIS_PROCEDURALS" ) ) != 0 )
 			result = env;
@@ -161,7 +164,7 @@ CqString CqFile::GetSystemSetting(const CqString& strAsset)
 			result.append( "/procedurals" );
 		}
 	}
-	else if( strAsset.compare( "dsolibs" ) == 0 )
+	else if ( strAsset.compare( "dsolibs" ) == 0 )
 	{
 		if ( ( env = getenv( "AQSIS_DSO_LIBS" ) ) != 0 )
 			result = env;
@@ -172,7 +175,7 @@ CqString CqFile::GetSystemSetting(const CqString& strAsset)
 		}
 	}
 
-	return( result );
+	return ( result );
 }
 
 END_NAMESPACE( Aqsis )

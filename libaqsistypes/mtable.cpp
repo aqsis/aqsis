@@ -43,38 +43,38 @@ CqMessageTable::CqMessageTable()
 	m_errorCount = 0;
 
 	// Basic errors
-	m_Be[0] = "BasicError: Unknown error";
+	m_Be[ 0 ] = "BasicError: Unknown error";
 
 	// RI Error
-	m_Ri[0] = "RiError: Unknown error";
-	m_Ri[RI_COLOR_SAMPLES_INVALID]					= "RiColorSamples not supported, defaults to 3";
-	m_Ri[RI_RELATIVE_DETAIL_INVALID]				= "RiRelativeDetail (invalid scaling factor)";
-	m_Ri[RI_UNKNOWN_SYMBOL]							= "Unknown Symbol";
-	m_Ri[RI_AREA_LIGHT_UNSUPPORTED]					= "RiAreaLightSource not supported, creating a point lightsource";
-	m_Ri[RI_INTERIOR_UNSUPPORTED]					= "RiInterior shaders not supported";
-	m_Ri[RI_EXTERIOR_UNSUPPORTED]					= "RiExterior shaders not supported";
-	m_Ri[RI_DETAIL_RANGE_INVALID]					= "RiDetailRange (invalid levels of detail)";
-	m_Ri[RI_GEOMETRIC_APPROX_UNSUPPORTED]			= "RiGeometricApproximation not supported";
-	m_Ri[RI_PERSPECTIVE_BAD_FOV]					= "RiPerspective given bad fov value.";
-	m_Ri[RI_DEFORMATION_UNSUPPORTED]				= "RiDeformation shaders not supported";
-	m_Ri[RI_TRANSFORM_POINTS_UNSUPPORTED]			= "RiTransformPoints not supported";
-	m_Ri[RI_BLOBBY_V_UNSUPPORTED]					= "RiBlobbyV not supported";
-	m_Ri[RI_CURVES_V_UNKNOWN_WRAP_MODE]				= "RiCurvesV (unknown wrap mode: must be \"periodic\" or \"nonperiodic\")";
-	m_Ri[RI_CURVES_V_UNKNOWN_TYPE]					= "RiCurvesV (unknown type: must be \"linear\" or \"cubic\")";
-	m_Ri[RI_PROC_DELAYED_READ_ARCHIVE_UNSUPPORTED]	= "RiProcDelayedReadArchive not supported";
-	m_Ri[RI_PROC_RUN_PROGRAM_UNSUPPORTED]			= "RiProcRunProgram not supported";
-	m_Ri[RI_PROC_DYNAMIC_LOAD_UNSUPPORTED]			= "RiProcDynamicLoad not supported";
-	m_Ri[RI_PROCEDURAL_UNKNOWN_SUBDIV]				= "RiProcedural Unknown SubdivFunc type";
-	m_Ri[RI_GEOMETRY_V_UNKNOWN]						= "RiGeometryV, unknown geometry";
-	m_Ri[RI_OBJECT_BEGIN_UNSUPPORTED]				= "RiObjectBegin, instances not supported";
-	m_Ri[RI_OBJECT_END_UNSUPPORTED]					= "RiObjectInstance, instances not supported";
-	m_Ri[RI_MAKE_BUMP_UNSUPPORTED]					= "RiMakeBump not supported";
-	m_Ri[RI_ONLY_UNIFORM_OPTIONS]					= "Options can only be uniform";
-	m_Ri[RI_ONLY_UNIFORM_ATTRIBUTES]				= "Attributes can only be uniform";
-	m_Ri[RI_INVALID_SHADING_INTERPOLATION]			= "Invald shading interpolation";
-	m_Ri[RI_DEGENRATE_POLYGON]						= "Degenerate polygon found";
-	m_Ri[RI_MAKE_CUBE_ENV_WRONG_SIZE]				= "RiMakeCubeFaceEnvironment : Images not the same size";
-	m_Ri[RI_SDS_NONMANIFOLD]						= "Subdivision Mesh contains non-manifold data";
+	m_Ri[ 0 ] = "RiError: Unknown error";
+	m_Ri[ RI_COLOR_SAMPLES_INVALID ] = "RiColorSamples not supported, defaults to 3";
+	m_Ri[ RI_RELATIVE_DETAIL_INVALID ] = "RiRelativeDetail (invalid scaling factor)";
+	m_Ri[ RI_UNKNOWN_SYMBOL ] = "Unknown Symbol";
+	m_Ri[ RI_AREA_LIGHT_UNSUPPORTED ] = "RiAreaLightSource not supported, creating a point lightsource";
+	m_Ri[ RI_INTERIOR_UNSUPPORTED ] = "RiInterior shaders not supported";
+	m_Ri[ RI_EXTERIOR_UNSUPPORTED ] = "RiExterior shaders not supported";
+	m_Ri[ RI_DETAIL_RANGE_INVALID ] = "RiDetailRange (invalid levels of detail)";
+	m_Ri[ RI_GEOMETRIC_APPROX_UNSUPPORTED ] = "RiGeometricApproximation not supported";
+	m_Ri[ RI_PERSPECTIVE_BAD_FOV ] = "RiPerspective given bad fov value.";
+	m_Ri[ RI_DEFORMATION_UNSUPPORTED ] = "RiDeformation shaders not supported";
+	m_Ri[ RI_TRANSFORM_POINTS_UNSUPPORTED ] = "RiTransformPoints not supported";
+	m_Ri[ RI_BLOBBY_V_UNSUPPORTED ] = "RiBlobbyV not supported";
+	m_Ri[ RI_CURVES_V_UNKNOWN_WRAP_MODE ] = "RiCurvesV (unknown wrap mode: must be \"periodic\" or \"nonperiodic\")";
+	m_Ri[ RI_CURVES_V_UNKNOWN_TYPE ] = "RiCurvesV (unknown type: must be \"linear\" or \"cubic\")";
+	m_Ri[ RI_PROC_DELAYED_READ_ARCHIVE_UNSUPPORTED ] = "RiProcDelayedReadArchive not supported";
+	m_Ri[ RI_PROC_RUN_PROGRAM_UNSUPPORTED ] = "RiProcRunProgram not supported";
+	m_Ri[ RI_PROC_DYNAMIC_LOAD_UNSUPPORTED ] = "RiProcDynamicLoad not supported";
+	m_Ri[ RI_PROCEDURAL_UNKNOWN_SUBDIV ] = "RiProcedural Unknown SubdivFunc type";
+	m_Ri[ RI_GEOMETRY_V_UNKNOWN ] = "RiGeometryV, unknown geometry";
+	m_Ri[ RI_OBJECT_BEGIN_UNSUPPORTED ] = "RiObjectBegin, instances not supported";
+	m_Ri[ RI_OBJECT_END_UNSUPPORTED ] = "RiObjectInstance, instances not supported";
+	m_Ri[ RI_MAKE_BUMP_UNSUPPORTED ] = "RiMakeBump not supported";
+	m_Ri[ RI_ONLY_UNIFORM_OPTIONS ] = "Options can only be uniform";
+	m_Ri[ RI_ONLY_UNIFORM_ATTRIBUTES ] = "Attributes can only be uniform";
+	m_Ri[ RI_INVALID_SHADING_INTERPOLATION ] = "Invald shading interpolation";
+	m_Ri[ RI_DEGENRATE_POLYGON ] = "Degenerate polygon found";
+	m_Ri[ RI_MAKE_CUBE_ENV_WRONG_SIZE ] = "RiMakeCubeFaceEnvironment : Images not the same size";
+	m_Ri[ RI_SDS_NONMANIFOLD ] = "Subdivision Mesh contains non-manifold data";
 }
 
 
@@ -105,31 +105,31 @@ const char* CqMessageTable::getError( const int table, const int error_id )
 
 	switch ( table )
 	{
-		case BASIC_ERROR_TABLE:
-		{
-			m_pTable = &m_Be;
-			m_pIt = &m_Be_i;
-			break;
-		}
-		
-		case RI_ERROR_TABLE:
-		{	
-			m_pTable = &m_Ri;
-			m_pIt = &m_Ri_i;
-			break;
-		}
+			case BASIC_ERROR_TABLE:
+			{
+				m_pTable = &m_Be;
+				m_pIt = &m_Be_i;
+				break;
+			}
 
-		default:
+			case RI_ERROR_TABLE:
+			{
+				m_pTable = &m_Ri;
+				m_pIt = &m_Ri_i;
+				break;
+			}
+
+			default:
 			return "Table not found";
 	}
 
 	*m_pIt = m_pTable->find( error_id );
 	if ( *m_pIt != m_pTable->end() )
-	{	
+	{
 		// Cache the result
 		m_cError = error_id;
 		m_cTable = table;
-		m_cErrorText = (*m_pIt)->second;
+		m_cErrorText = ( *m_pIt ) ->second;
 
 		return m_cErrorText.c_str();
 	}
@@ -145,23 +145,23 @@ const char* CqMessageTable::getError( const int table, const int error_id )
  *	@param	data	The message as a i_s::value_type
  *
  */
-void CqMessageTable::insert( int table, i_s::value_type data)
+void CqMessageTable::insert( int table, i_s::value_type data )
 {
 	switch ( table )
 	{
-		case BASIC_ERROR_TABLE:
-		{
-			m_Be.insert( data );
-			break;
-		}
+			case BASIC_ERROR_TABLE:
+			{
+				m_Be.insert( data );
+				break;
+			}
 
-		case RI_ERROR_TABLE:
-		{	
-			m_Ri.insert( data );
-			break;
-		}
+			case RI_ERROR_TABLE:
+			{
+				m_Ri.insert( data );
+				break;
+			}
 
 	}
 }
-  
+
 END_NAMESPACE( Aqsis )

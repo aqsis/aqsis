@@ -70,32 +70,32 @@ START_NAMESPACE( Aqsis )
  * and POSIX etc.
  */
 void *
-CqPluginBase::DLOpen(CqString *library)
+CqPluginBase::DLOpen( CqString *library )
 {
-  	void *handle = NULL;
+	void * handle = NULL;
 
 #ifdef	PLUGINS
-#ifdef AQSIS_SYSTEM_WIN32 
+#ifdef AQSIS_SYSTEM_WIN32
 	handle = ( void* ) LoadLibrary( library->c_str() );
-#elif defined (AQSIS_SYSTEM_MACOSX) 
+#elif defined (AQSIS_SYSTEM_MACOSX)
 #  ifndef MACOSX_NO_LIBDL
 	handle = ( void * ) dlopen( library->c_str(), RTLD_NOW | RTLD_GLOBAL );
 #  endif
 #elif defined (AQSIS_SYSTEM_BEOS)
-		// We probably need an interface for CFPlugins here
-		// But for now, we will not implement plugins
-#else  
+	// We probably need an interface for CFPlugins here
+	// But for now, we will not implement plugins
+#else
 	handle = ( void * ) dlopen( library->c_str(), RTLD_LAZY );
 #endif
 #endif
-	if (handle) m_activeHandles.push_back(handle);
+	if ( handle ) m_activeHandles.push_back( handle );
 	return handle;
 }
 
 void *
-CqPluginBase::DLSym(void *handle, CqString *symbol )
+CqPluginBase::DLSym( void *handle, CqString *symbol )
 {
-	void *location = NULL;
+	void * location = NULL;
 
 #ifdef	PLUGINS
 	if ( handle )
@@ -103,9 +103,9 @@ CqPluginBase::DLSym(void *handle, CqString *symbol )
 
 #if   defined (AQSIS_SYSTEM_WIN32) //Win32 LoadProc support
 		location = ( void * ) GetProcAddress( ( HINSTANCE ) handle, symbol->c_str() );
-#elif defined (AQSIS_SYSTEM_MACOSX) 
+#elif defined (AQSIS_SYSTEM_MACOSX)
 #  ifndef MACOSX_NO_LIBDL
-		location = ( void * ) dlsym( handle, (CqString("_") + *symbol).c_str() );
+		location = ( void * ) dlsym( handle, ( CqString( "_" ) + *symbol ).c_str() );
 #  endif
 #elif defined (AQSIS_SYSTEM_BEOS)
 		// We probably need an interface for CFPlugins here
@@ -114,6 +114,7 @@ CqPluginBase::DLSym(void *handle, CqString *symbol )
 		//this is the same as MacOS-X but we might aswell keep the same seperation for the moment
 		location = ( void * ) dlsym( handle, symbol->c_str() );
 #endif
+
 	};
 
 #endif
@@ -121,7 +122,7 @@ CqPluginBase::DLSym(void *handle, CqString *symbol )
 }
 
 void
-CqPluginBase::DLClose(void *handle)
+CqPluginBase::DLClose( void *handle )
 {
 #ifdef	PLUGINS
 	if ( handle )
@@ -129,7 +130,7 @@ CqPluginBase::DLClose(void *handle)
 
 #if   defined (AQSIS_SYSTEM_WIN32) //Win32 LoadProc support
 		FreeLibrary( ( HINSTANCE ) handle );
-#elif defined (AQSIS_SYSTEM_MACOSX) 
+#elif defined (AQSIS_SYSTEM_MACOSX)
 #  ifndef MACOSX_NO_LIBDL
 		dlclose( handle );
 #  endif
@@ -140,8 +141,9 @@ CqPluginBase::DLClose(void *handle)
 		//this is the same as MacOS-X but we might aswell keep the same seperation for the moment
 		dlclose( handle );
 #endif
+
 	};
-	m_activeHandles.remove(handle);
+	m_activeHandles.remove( handle );
 #endif
 }
 
@@ -149,39 +151,39 @@ CqPluginBase::~CqPluginBase()
 {
 	while ( !m_activeHandles.empty() )
 	{
-		if( m_activeHandles.front() != NULL )
+		if ( m_activeHandles.front() != NULL )
 			DLClose( m_activeHandles.front() );
 	};
 };
 
 
 const CqString
-CqPluginBase::DLError(void)
+CqPluginBase::DLError( void )
 {
 	CqString errorlog;
 #ifdef	PLUGINS
 #ifdef AQSIS_SYSTEM_WIN32
 	LPVOID lpMsgBuf;
 	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER |
-		FORMAT_MESSAGE_FROM_SYSTEM |
-		FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL,
-		GetLastError(),
-		MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),  // Default language
-		( LPTSTR ) & lpMsgBuf,
-		0,
-		NULL
+	    FORMAT_MESSAGE_ALLOCATE_BUFFER |
+	    FORMAT_MESSAGE_FROM_SYSTEM |
+	    FORMAT_MESSAGE_IGNORE_INSERTS,
+	    NULL,
+	    GetLastError(),
+	    MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),   // Default language
+	    ( LPTSTR ) & lpMsgBuf,
+	    0,
+	    NULL
 	);
 	// Process any inserts in lpMsgBuf.
 	// ...
 	// Display the string.
-	errorlog = (CqString) ( LPCTSTR ) lpMsgBuf ;
+	errorlog = ( CqString ) ( LPCTSTR ) lpMsgBuf ;
 
 	// Free the buffer.
- 	LocalFree( lpMsgBuf );
+	LocalFree( lpMsgBuf );
 #else
-        errorlog = dlerror() ;
+	errorlog = dlerror() ;
 #endif
 
 #else

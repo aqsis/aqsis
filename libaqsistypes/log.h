@@ -48,27 +48,27 @@
 namespace log4cpp
 {
 
-	class AqLayout : public Layout  
-	{
+class AqLayout : public Layout
+{
 	public:
 		AqLayout();
 		virtual ~AqLayout();
 
-		virtual std::string format(const LoggingEvent& event);
+		virtual std::string format( const LoggingEvent& event );
 
 
-	};
+};
 
-	class AqFileLayout : public Layout  
-	{
+class AqFileLayout : public Layout
+{
 	public:
 		AqFileLayout();
 		virtual ~AqFileLayout();
 
-		virtual std::string format(const LoggingEvent& event);
+		virtual std::string format( const LoggingEvent& event );
 
 
-	};
+};
 }
 
 START_NAMESPACE( Aqsis )
@@ -81,13 +81,13 @@ class CqLog	: public IqLog
 
 		void addFileLog( std::string filename = "render.log", std::string name = "AqsisFileLog" );
 		void removeFileLog( std::string name );
-		
+
 		void setMessageTable( IqMessageTable* pTable );
 		IqMessageTable* getMessageTable();
 
 		void log( const char* priority, const char* stringFormat, ... );
 		void log( const char* priority, const CqString &stringFormat );
-		
+
 		/** Log an error message
 		 */
 		void error( int table, int error_id );
@@ -111,19 +111,19 @@ class CqLog	: public IqLog
 		void notice( int table, int error_id );
 		void notice( const char* stringFormat, ... );
 		void notice( const CqString &string );
-		
+
 		/** Log an info message
 		 */
 		void info( int table, int error_id );
 		void info( const char* stringFormat, ... );
 		void info( const CqString &string );
-		
+
 		/** Log an fatal error
 		 */
 		void fatal( int table, int error_id );
 		void fatal( const char* stringFormat, ... );
 		void fatal( const CqString &string );
-		
+
 		/** Log an debug message
 		 */
 		void debug( const char* stringFormat, ... );
@@ -132,7 +132,7 @@ class CqLog	: public IqLog
 		const char* getError( int table, int error_id );
 
 	private:
-		
+
 		void createFileLog( std::string filename, std::string name );
 		void createCOUTLog( std::string name = "AqsisConsoleLog" );
 

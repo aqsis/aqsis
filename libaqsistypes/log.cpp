@@ -29,38 +29,41 @@
 	The format is:
 		PRIORITY: message
 */
-namespace log4cpp {
+namespace log4cpp
+{
 
-    AqLayout::AqLayout() {
-    }
-    
-    AqLayout::~AqLayout() {
-    }
+AqLayout::AqLayout()
+{}
 
-    std::string AqLayout::format(const LoggingEvent& event) {
-        std::ostringstream message;
+AqLayout::~AqLayout()
+{}
 
-        message << event.message << std::endl;
+std::string AqLayout::format( const LoggingEvent& event )
+{
+	std::ostringstream message;
 
-        return message.str();
-    }
+	message << event.message << std::endl;
 
-	AqFileLayout::AqFileLayout() {
-    }
-    
-    AqFileLayout::~AqFileLayout() {
-    }
+	return message.str();
+}
 
-    std::string AqFileLayout::format(const LoggingEvent& event) {
-        std::ostringstream message;
+AqFileLayout::AqFileLayout()
+{}
 
-        const std::string& priorityName = Priority::getPriorityName(event.priority);
-        message << priorityName << " " 
-                << event.categoryName << " " << event.ndc << ": " 
-                << event.message << std::endl;
+AqFileLayout::~AqFileLayout()
+{}
 
-        return message.str();
-    }
+std::string AqFileLayout::format( const LoggingEvent& event )
+{
+	std::ostringstream message;
+
+	const std::string& priorityName = Priority::getPriorityName( event.priority );
+	message << priorityName << " "
+	<< event.categoryName << " " << event.ndc << ": "
+	<< event.message << std::endl;
+
+	return message.str();
+}
 }
 
 START_NAMESPACE( Aqsis )
@@ -69,13 +72,13 @@ START_NAMESPACE( Aqsis )
 // Creates a log
 CqLog::CqLog( char* name, bool noConsoleOutput )
 {
-	log4cpp::Category& root = log4cpp::Category::getRoot();
-	
+	log4cpp::Category & root = log4cpp::Category::getRoot();
+
 	m_pRoot = &root;
 
 	m_pRoot->removeAllAppenders();
 
-	
+
 	if ( !noConsoleOutput )
 	{
 		createCOUTLog();
@@ -89,14 +92,14 @@ CqLog::~CqLog()
 }
 
 // Log a message, if possible, don't use this
-void CqLog::log( const char* priority, const char* stringFormat, ...)
+void CqLog::log( const char* priority, const char* stringFormat, ... )
 {
 
 	va_list va;
-	va_start(va, stringFormat);
+	va_start( va, stringFormat );
 
 	log4cpp::Priority::Value pVal;
-	
+
 	// Report an error if unknown priority used
 	try
 	{
@@ -107,18 +110,18 @@ void CqLog::log( const char* priority, const char* stringFormat, ...)
 		log( "ERROR", e.what() );
 	}
 
-	m_pRoot->logva(pVal, stringFormat, va);
+	m_pRoot->logva( pVal, stringFormat, va );
 
 
-	va_end(va);
+	va_end( va );
 }
 
 // Log a message with CqString, if possible, don't use this
-void CqLog::log(const char *priority, const CqString &stringFormat)
+void CqLog::log( const char *priority, const CqString &stringFormat )
 {
 
 	log4cpp::Priority::Value pVal;
-	
+
 	// Report an error if unknown priority used
 	try
 	{
@@ -129,46 +132,46 @@ void CqLog::log(const char *priority, const CqString &stringFormat)
 		log( "ERROR", e.what() );
 	}
 
-	m_pRoot->log(pVal, stringFormat.c_str());
+	m_pRoot->log( pVal, stringFormat.c_str() );
 }
 
 // Internal log function for error(), debug() etc. calls, just like log4cpp does it
 void CqLog::log2( log4cpp::Priority::Value priority, const char* stringFormat, va_list va )
 {
-	m_pRoot->logva(priority, stringFormat, va);
+	m_pRoot->logva( priority, stringFormat, va );
 }
 
 // Internal log without ...
 void CqLog::log2( log4cpp::Priority::Value priority, const char* string )
 {
-	m_pRoot->log(priority, string);
+	m_pRoot->log( priority, string );
 }
 
 // Create a file log, i.e. pipe the output to a file
 void CqLog::createFileLog( std::string filename , std::string name )
 {
-	m_pFileAppender = 
-        new log4cpp::FileAppender( name, filename );
+	m_pFileAppender =
+	    new log4cpp::FileAppender( name, filename );
 
 	m_pFileLayout = new log4cpp::AqFileLayout();
-	
-	
+
+
 	m_pFileAppender->setLayout( m_pFileLayout );
 
 	m_pRoot->addAppender( m_pFileAppender );
-	
+
 }
 
 // Create a std::cout log, i.e. write to console
 void CqLog::createCOUTLog( std::string name )
 {
-	m_pAppender = 
-        new log4cpp::OstreamAppender(name, &std::cout);
+	m_pAppender =
+	    new log4cpp::OstreamAppender( name, &std::cout );
 
 	m_pLayout = new log4cpp::AqLayout();
 
 	m_pAppender->setLayout( m_pLayout );
-	
+
 	m_pRoot->addAppender( m_pAppender );
 }
 
@@ -182,7 +185,7 @@ void CqLog::setMessageTable( IqMessageTable* pTable )
 void CqLog::addFileLog( std::string filename, std::string name )
 {
 	// Pass through to createFileLog
-	
+
 	createFileLog( filename, name );
 }
 
@@ -215,14 +218,14 @@ void CqLog::error( int table, int error_id )
 void CqLog::error( const char* stringFormat, ... )
 {
 	va_list va;
-	va_start(va,stringFormat);
-	log2(log4cpp::Priority::ERROR, stringFormat, va);
-	va_end(va);
+	va_start( va, stringFormat );
+	log2( log4cpp::Priority::ERROR, stringFormat, va );
+	va_end( va );
 }
 
 void CqLog::error( const CqString &string )
 {
-	log2(log4cpp::Priority::ERROR, string.c_str());
+	log2( log4cpp::Priority::ERROR, string.c_str() );
 }
 
 // -------------------------- Warning
@@ -234,14 +237,14 @@ void CqLog::warn( int table, int error_id )
 void CqLog::warn( const char* stringFormat, ... )
 {
 	va_list va;
-	va_start(va,stringFormat);
-	log2(log4cpp::Priority::WARN, stringFormat, va);
-	va_end(va);
+	va_start( va, stringFormat );
+	log2( log4cpp::Priority::WARN, stringFormat, va );
+	va_end( va );
 }
 
 void CqLog::warn( const CqString &string )
 {
-	log2(log4cpp::Priority::WARN, string.c_str());
+	log2( log4cpp::Priority::WARN, string.c_str() );
 }
 
 // --------------------------- Critical
@@ -253,14 +256,14 @@ void CqLog::critical( int table, int error_id )
 void CqLog::critical( const char* stringFormat, ... )
 {
 	va_list va;
-	va_start(va,stringFormat);
-	log2(log4cpp::Priority::CRIT, stringFormat, va);
-	va_end(va);
+	va_start( va, stringFormat );
+	log2( log4cpp::Priority::CRIT, stringFormat, va );
+	va_end( va );
 }
 
 void CqLog::critical( const CqString &string )
 {
-	log2(log4cpp::Priority::CRIT, string.c_str());
+	log2( log4cpp::Priority::CRIT, string.c_str() );
 }
 
 // ---------------------------- Notice
@@ -272,14 +275,14 @@ void CqLog::notice( int table, int error_id )
 void CqLog::notice( const char* stringFormat, ... )
 {
 	va_list va;
-	va_start(va,stringFormat);
-	log2(log4cpp::Priority::NOTICE, stringFormat, va);
-	va_end(va);
+	va_start( va, stringFormat );
+	log2( log4cpp::Priority::NOTICE, stringFormat, va );
+	va_end( va );
 }
 
 void CqLog::notice( const CqString &string )
 {
-	log2(log4cpp::Priority::NOTICE, string.c_str());
+	log2( log4cpp::Priority::NOTICE, string.c_str() );
 }
 
 // ---------------------------- Info
@@ -291,14 +294,14 @@ void CqLog::info( int table, int error_id )
 void CqLog::info( const char* stringFormat, ... )
 {
 	va_list va;
-	va_start(va,stringFormat);
-	log2(log4cpp::Priority::INFO, stringFormat, va);
-	va_end(va);
+	va_start( va, stringFormat );
+	log2( log4cpp::Priority::INFO, stringFormat, va );
+	va_end( va );
 }
 
 void CqLog::info( const CqString &string )
 {
-	log2(log4cpp::Priority::INFO, string.c_str());
+	log2( log4cpp::Priority::INFO, string.c_str() );
 }
 
 // ----------------------------- Fatal
@@ -310,37 +313,37 @@ void CqLog::fatal( int table, int error_id )
 void CqLog::fatal( const char* stringFormat, ... )
 {
 	va_list va;
-	va_start(va,stringFormat);
-	log2(log4cpp::Priority::FATAL, stringFormat, va);
-	va_end(va);
+	va_start( va, stringFormat );
+	log2( log4cpp::Priority::FATAL, stringFormat, va );
+	va_end( va );
 }
 
 void CqLog::fatal( const CqString &string )
 {
-	log2(log4cpp::Priority::FATAL, string.c_str());
+	log2( log4cpp::Priority::FATAL, string.c_str() );
 }
 
 // ------------------------------ Debug
 void CqLog::debug( const char* stringFormat, ... )
 {
 	va_list va;
-	va_start(va,stringFormat);
-	log2(log4cpp::Priority::DEBUG, stringFormat, va);
-	va_end(va);
+	va_start( va, stringFormat );
+	log2( log4cpp::Priority::DEBUG, stringFormat, va );
+	va_end( va );
 }
 
 void CqLog::debug( const CqString &string )
 {
-	log2(log4cpp::Priority::DEBUG, string.c_str());
+	log2( log4cpp::Priority::DEBUG, string.c_str() );
 }
 
 //-------------------------------- Utility functions
 IqLog* CreateLogger()
 {
-	return( new CqLog );
+	return ( new CqLog );
 }
 
-void DeleteLogger(IqLog *log)
+void DeleteLogger( IqLog *log )
 {
 	delete( log );
 }

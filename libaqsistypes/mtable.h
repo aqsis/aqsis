@@ -54,7 +54,7 @@ class CqMessageTable	: public IqMessageTable
 
 		const char* getError( const int table, const int error_id );
 		void insert( int table, i_s::value_type data );
-		
+
 		int getErrorCount()
 		{
 			return m_errorCount;
@@ -65,40 +65,40 @@ class CqMessageTable	: public IqMessageTable
 			return m_cacheHits;
 		}
 
-		
+
 		enum {	BASIC_ERROR_TABLE = 0,
-				RI_ERROR_TABLE } EqErrorTables;
+		       RI_ERROR_TABLE } EqErrorTables;
 
 		enum {	UNKNOW_ERROR = 0,
-				RI_COLOR_SAMPLES_INVALID,
-				RI_RELATIVE_DETAIL_INVALID,
-				RI_UNKNOWN_SYMBOL,
-				RI_AREA_LIGHT_UNSUPPORTED,
-				RI_INTERIOR_UNSUPPORTED,							// 5
-				RI_EXTERIOR_UNSUPPORTED,
-				RI_DETAIL_RANGE_INVALID,
-				RI_GEOMETRIC_APPROX_UNSUPPORTED,
-				RI_PERSPECTIVE_BAD_FOV,
-				RI_DEFORMATION_UNSUPPORTED,							//10
-				RI_TRANSFORM_POINTS_UNSUPPORTED,					
-				RI_BLOBBY_V_UNSUPPORTED,
-				RI_CURVES_V_UNKNOWN_WRAP_MODE,
-				RI_CURVES_V_UNKNOWN_TYPE,
-				RI_PROC_DELAYED_READ_ARCHIVE_UNSUPPORTED,			//15
-				RI_PROC_RUN_PROGRAM_UNSUPPORTED,					
-				RI_PROC_DYNAMIC_LOAD_UNSUPPORTED,
-				RI_PROCEDURAL_UNKNOWN_SUBDIV,
-				RI_GEOMETRY_V_UNKNOWN,
-				RI_OBJECT_BEGIN_UNSUPPORTED,						//20
-				RI_OBJECT_END_UNSUPPORTED,						
-				RI_MAKE_BUMP_UNSUPPORTED,
-				RI_ONLY_UNIFORM_OPTIONS,
-				RI_ONLY_UNIFORM_ATTRIBUTES,
-				RI_INVALID_SHADING_INTERPOLATION,
-				RI_DEGENRATE_POLYGON,								//25
-				RI_MAKE_CUBE_ENV_WRONG_SIZE,
-				RI_SDS_NONMANIFOLD	} EqErrorMessages;	
-		
+		       RI_COLOR_SAMPLES_INVALID,
+		       RI_RELATIVE_DETAIL_INVALID,
+		       RI_UNKNOWN_SYMBOL,
+		       RI_AREA_LIGHT_UNSUPPORTED,
+		       RI_INTERIOR_UNSUPPORTED, 							// 5
+		       RI_EXTERIOR_UNSUPPORTED,
+		       RI_DETAIL_RANGE_INVALID,
+		       RI_GEOMETRIC_APPROX_UNSUPPORTED,
+		       RI_PERSPECTIVE_BAD_FOV,
+		       RI_DEFORMATION_UNSUPPORTED, 							//10
+		       RI_TRANSFORM_POINTS_UNSUPPORTED,
+		       RI_BLOBBY_V_UNSUPPORTED,
+		       RI_CURVES_V_UNKNOWN_WRAP_MODE,
+		       RI_CURVES_V_UNKNOWN_TYPE,
+		       RI_PROC_DELAYED_READ_ARCHIVE_UNSUPPORTED, 			//15
+		       RI_PROC_RUN_PROGRAM_UNSUPPORTED,
+		       RI_PROC_DYNAMIC_LOAD_UNSUPPORTED,
+		       RI_PROCEDURAL_UNKNOWN_SUBDIV,
+		       RI_GEOMETRY_V_UNKNOWN,
+		       RI_OBJECT_BEGIN_UNSUPPORTED, 						//20
+		       RI_OBJECT_END_UNSUPPORTED,
+		       RI_MAKE_BUMP_UNSUPPORTED,
+		       RI_ONLY_UNIFORM_OPTIONS,
+		       RI_ONLY_UNIFORM_ATTRIBUTES,
+		       RI_INVALID_SHADING_INTERPOLATION,
+		       RI_DEGENRATE_POLYGON, 								//25
+		       RI_MAKE_CUBE_ENV_WRONG_SIZE,
+		       RI_SDS_NONMANIFOLD	} EqErrorMessages;
+
 	private:
 		// Stats
 		int m_errorCount;
@@ -112,7 +112,7 @@ class CqMessageTable	: public IqMessageTable
 		// Pointers
 		i_s* m_pTable;
 		i_s::iterator* m_pIt;
-		
+
 		// Tables
 		i_s m_Be;
 		i_s::iterator m_Be_i;
