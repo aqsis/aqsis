@@ -165,7 +165,14 @@ CqVector4D &CqVector4D::operator=( const CqVector3D &From )
 
 CqVector4D &CqVector4D::operator*=( const TqFloat Scale )
 {
-    m_h /= Scale;
+	if(Scale != 0.0)
+	{
+	    m_h /= Scale;
+	}
+	else
+	{
+		m_x = m_y = m_z = 0.0;
+	}
 
     return ( *this );
 }
