@@ -59,7 +59,7 @@ void CqCodeGenVM::OutputTree( IqParseNode* pNode, std::string strOutName )
 
 void CreateTranslationTable( IqParseNode* pParam, IqParseNode* pArg, std::vector<std::vector<SqVarRefTranslator> >& Stack )
 {
-	assert( NULL != pParam && NULL != pArg );
+//	assert( NULL != pParam && NULL != pArg );
 
 	std::vector<SqVarRefTranslator> aTransTable;
 

@@ -100,26 +100,39 @@ void CqCodeGenDataGather::Visit( IqParseNodeFunctionCall& FC )
 	}
 	else
 	{
-		IqParseNode * pParam = pFunc->pArgs() ->pChild();
-		IqParseNode* pArg = pArguments;
-
-		CreateTempMap( pParam, pArg, m_StackVarMap, m_saTransTable, TempVars() );
-
-		while ( pParam != 0 )
+		if( NULL != pFunc->pArgs() )
 		{
-			if ( !pArg->IsVariableRef() )
-				pArg->Accept( *this );
+			IqParseNode * pParam = pFunc->pArgs() ->pChild();
+			IqParseNode* pArg = pArguments;
 
-			pParam = pParam->pNextSibling();
-			pArg = pArg->pNextSibling();
+			CreateTempMap( pParam, pArg, m_StackVarMap, m_saTransTable, TempVars() );
+
+			while ( pParam != 0 )
+			{
+				if ( !pArg->IsVariableRef() )
+					pArg->Accept( *this );
+
+				pParam = pParam->pNextSibling();
+				pArg = pArg->pNextSibling();
+			}
+
+			IqParseNode* pDef = pFunc->pDef();
+			if ( NULL != pDef )
+			{
+				CreateTranslationTable( pFunc->pArgs() ->pChild(), pArguments, m_saTransTable );
+				pDef->Accept( *this );
+				m_saTransTable.erase( m_saTransTable.end() - 1 );
+			}
 		}
-
-		IqParseNode* pDef = pFunc->pDef();
-		if ( NULL != pDef )
+		else
 		{
-			CreateTranslationTable( pFunc->pArgs() ->pChild(), pArguments, m_saTransTable );
-			pDef->Accept( *this );
-			m_saTransTable.erase( m_saTransTable.end() - 1 );
+			IqParseNode* pDef = pFunc->pDef();
+			if ( NULL != pDef )
+			{
+				CreateTranslationTable( NULL, NULL, m_saTransTable );
+				pDef->Accept( *this );
+				m_saTransTable.erase( m_saTransTable.end() - 1 );
+			}
 		}
 		m_StackVarMap.pop_back( );
 	}

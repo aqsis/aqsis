@@ -202,11 +202,23 @@ void CqCodeGenOutput::Visit( IqParseNodeFunctionCall& FC )
 			}
 		}
 		// Output the function body.
-		if ( NULL != pFunc->pDef() )
+		if( NULL != pFunc->pArgs() )
 		{
-			CreateTranslationTable( pFunc->pArgs() ->pChild(), pArguments, m_saTransTable );
-			pFunc->pDef() ->Accept( *this );
-			m_saTransTable.erase( m_saTransTable.end() - 1 );
+			if ( NULL != pFunc->pDef() )
+			{
+				CreateTranslationTable( pFunc->pArgs() ->pChild(), pArguments, m_saTransTable );
+				pFunc->pDef() ->Accept( *this );
+				m_saTransTable.erase( m_saTransTable.end() - 1 );
+			}
+		}
+		else
+		{
+			if ( NULL != pFunc->pDef() )
+			{
+				CreateTranslationTable( NULL, NULL, m_saTransTable );
+				pFunc->pDef() ->Accept( *this );
+				m_saTransTable.erase( m_saTransTable.end() - 1 );
+			}
 		}
 		m_StackVarMap.pop_back( );
 	}

@@ -12,6 +12,13 @@ void VoidFunc(float param)
 	NestFunc(param);
 }
 
+float Procedure()
+{
+	float f = 1;
+	return f;
+}
+
+
 float TestFunc(float param, param2; point PP;)
 {
 	float test=1;
@@ -60,6 +67,7 @@ TestSurface(
 	// Test function calls.
 	f2=cos(Kd);
 	f2=clamp(f2,Ka,Kd);
+	f2=Procedure();
 
 	f2=min(f2,f3,f1);
 	point p2=min(p,p,p);
