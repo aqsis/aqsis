@@ -186,6 +186,10 @@ class CqImagersource : public CqListEntry<CqImagersource>
 		{
 			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->alpha() );
 		}
+		virtual IqShaderData* Ns()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ns() );
+		}
 
 
 	public:

@@ -178,9 +178,9 @@ void CqShaderExecEnv::ValidateIlluminanceCache( IqShaderData* pP, IqShader* pSha
 			m_Illuminate = 0;
 			// Evaluate the lightsource
 			if ( pP != NULL )
-				lp->Evaluate( pP );
+				lp->Evaluate( pP, N() );
 			else
-				lp->Evaluate( P() );
+				lp->Evaluate( P(), N() );
 			li++;
 		}
 		m_IlluminanceCacheValid = TqTrue;;

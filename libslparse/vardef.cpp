@@ -48,6 +48,8 @@ CqVarDef	gStandardVars[] = {
                                CqVarDef( Type_UniformFloat, "ncomps",0,	SU|LS|VO|DI|IM ),
                                CqVarDef( Type_UniformFloat, "time",0,	SU|LS|VO|DI|IM ),
                                CqVarDef( Type_UniformFloat, "alpha",0,	SU|LS|VO|DI    ),
+
+                               CqVarDef( Type_VaryingPoint, "Ns",0,		SU|LS|VO|DI|IM ),
                            };
 TqInt	gcStandardVars = sizeof( gStandardVars ) / sizeof( gStandardVars[ 0 ] );
 

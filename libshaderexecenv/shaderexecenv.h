@@ -301,6 +301,10 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		{
 			return ( m_apVariables[ EnvVars_alpha ] );
 		}
+		virtual IqShaderData* Ns()
+		{
+			return ( m_apVariables[ EnvVars_Ns ] );
+		}
 
 	private:
 		/** Internal function to extract additional named filter parameters from an array of stack entries.

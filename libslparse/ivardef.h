@@ -191,6 +191,8 @@ enum EqEnvVars
     EnvVars_time,   	///< Frame time.
     EnvVars_alpha,   	///< Fractional pixel coverage.
 
+    EnvVars_Ns,   		///< Normal at point being lit.
+
     EnvVars_Last
 };
 

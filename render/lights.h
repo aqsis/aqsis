@@ -75,9 +75,10 @@ class CqLightsource : public CqListEntry<CqLightsource>, public IqLightsource, p
 		/** Evaluate the shader.
 		 * \param pPs the point being lit.
 		 */
-		virtual void	Evaluate( IqShaderData* pPs )
+		virtual void	Evaluate( IqShaderData* pPs, IqShaderData* pNs )
 		{
 			Ps() ->SetValueFromVariable( pPs );
+			Ns() ->SetValueFromVariable( pNs );
 			m_pShader->Evaluate( m_pShaderExecEnv );
 		}
 		/** Get a pointer to the attributes associated with this lightsource.
@@ -200,6 +201,10 @@ class CqLightsource : public CqListEntry<CqLightsource>, public IqLightsource, p
 		virtual IqShaderData* alpha()
 		{
 			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->alpha() );
+		}
+		virtual IqShaderData* Ns()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ns() );
 		}
 
 	private:

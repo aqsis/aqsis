@@ -91,7 +91,8 @@ char*	gVariableNames[ EnvVars_Last ] =
         "E",
         "ncomps",
         "time",
-        "alpha"
+        "alpha",
+        "Ns",
     };
 TqUlong	gVariableTokens[ EnvVars_Last ] =
     {
@@ -119,12 +120,13 @@ TqUlong	gVariableTokens[ EnvVars_Last ] =
         CqParameter::hash( gVariableNames[ 21 ] ),
         CqParameter::hash( gVariableNames[ 22 ] ),
         CqParameter::hash( gVariableNames[ 23 ] ),
+        CqParameter::hash( gVariableNames[ 24 ] ),
     };
 
 
 // TODO: See if we can reduce these default requires further!
 TqInt	gDefUses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_I ) | ( 1 << EnvVars_N ) | ( 1 << EnvVars_Ng ) | ( 1 << EnvVars_L ) | ( 1 << EnvVars_Cl ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi ) | ( 1 << EnvVars_u ) | ( 1 << EnvVars_v );
-TqInt	gDefLightUses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_L ) | ( 1 << EnvVars_Ps );
+TqInt	gDefLightUses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_L ) | ( 1 << EnvVars_Ps ) | ( 1 << EnvVars_Ns );
 
 //----------------------------------------------------------------------
 /** Constructor.
@@ -238,6 +240,8 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Iq
 			m_apVariables[ EnvVars_time ] = pShader->CreateVariable( type_float, class_uniform, gVariableNames[ EnvVars_time ] );
 		if ( USES( Uses, EnvVars_alpha ) && m_apVariables[ EnvVars_alpha ] == 0 )
 			m_apVariables[ EnvVars_alpha ] = pShader->CreateVariable( type_float, class_varying, gVariableNames[ EnvVars_alpha ] );
+		if ( USES( Uses, EnvVars_Ns ) && m_apVariables[ EnvVars_Ns ] == 0 )
+			m_apVariables[ EnvVars_Ns ] = pShader->CreateVariable( type_normal, class_varying, gVariableNames[ EnvVars_Ns ] );
 	}
 
 	TqInt i;

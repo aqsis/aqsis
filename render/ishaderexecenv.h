@@ -73,6 +73,8 @@ enum EqEnvVars
     EnvVars_time,   	///< Frame time.
     EnvVars_alpha,   	///< Fractional pixel coverage.
 
+    EnvVars_Ns,   		///< Normal at point being lit.
+
     EnvVars_Last
 };
 
@@ -259,6 +261,9 @@ struct IqShaderExecEnv
 	/** Get a reference to the alpha standard variable.
 	 */
 	virtual IqShaderData* alpha() = 0;
+	/** Get a reference to the Ns standard variable.
+	 */
+	virtual IqShaderData* Ns() = 0;
 
 	virtual	TqBool	SO_init_illuminance() = 0;
 	virtual	TqBool	SO_advance_illuminance() = 0;

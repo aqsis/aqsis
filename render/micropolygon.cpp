@@ -582,6 +582,9 @@ void CqMicroPolyGrid::DeleteVariables( TqBool all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ci );
 	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Oi );
+
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ns" ) || all )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_Ns );
 }
 
 
