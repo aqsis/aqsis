@@ -1,0 +1,2 @@
+SUBDIRS = list src vector .
+

@@ -1,0 +1,2 @@
+SUBDIRS = . filesystem mpl regex
+
