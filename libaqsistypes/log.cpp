@@ -22,9 +22,8 @@
 		\brief Implements the CqLog class and a AqLayout helper class
 		\author Matthäus G. Chajdas (Matthaeus@darkside-conflict.net)
 */
-#define __LOG_CPP_IMPLENT
+
 #include "log.h"
-#undef __LOG_CPP_IMPLENT
 
 namespace log4cpp {
 
@@ -45,6 +44,8 @@ namespace log4cpp {
         return message.str();
     }
 }
+
+START_NAMESPACE( Aqsis )
 
 CqLog::CqLog( char* name, bool noConsoleOutput )
 {
@@ -158,6 +159,4 @@ void CqLog::removeFileLog( std::string name )
 	m_pRoot->removeAppender( m_pRoot->getAppender( name ) );
 }
 
-
-	
-   
+END_NAMESPACE( Aqsis )

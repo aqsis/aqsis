@@ -1,9 +1,32 @@
-// CqLog.h: Schnittstelle für die Klasse CqLog.
+// Aqsis
+// Copyright © 1997 - 2001, Paul C. Gregory
 //
-//////////////////////////////////////////////////////////////////////
+// Contact: pgregory@aqsis.com
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-#ifndef __log_inc_
-#define __log_inc_
+
+/** \file	log.h
+		\brief The Log class
+		\author Matthäus G. Chajdas (Matthaeus@darkside-conflict.net)
+*/
+
+
+//? Is .h included already?
+#ifndef LOG_H_INCLUDED
+#define LOG_H_INCLUDED 1
 
 #include <stdio.h>
 #include <log4cpp/Portability.hh>
@@ -17,6 +40,8 @@
 #include <log4cpp/Priority.hh>
 
 #include "mtable.h"
+#include "ilog.h"
+#include "aqsis.h"
 
 namespace log4cpp
 {
@@ -33,7 +58,9 @@ namespace log4cpp
 	};
 }
 
-class CqLog  
+START_NAMESPACE( Aqsis )
+
+class CqLog	: public IqLog
 {
 	public:
 		CqLog( char* name = "AqsisLog", bool noConsoleOutput = false );
@@ -67,5 +94,6 @@ class CqLog
 		bool m_FirstRun;
 };
 
+END_NAMESPACE( Aqsis )
 
 #endif
