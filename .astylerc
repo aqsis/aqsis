@@ -4,5 +4,3 @@ indent-switches
 indent-cases
 indent=tab=4
 brackets=break
-pad=paren
-one-line=keep-statements

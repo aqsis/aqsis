@@ -599,6 +599,9 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
     if ( NULL == pVar(EnvVars_P) )
         return ;
 
+    TqInt cu = uGridRes();
+    TqInt cv = vGridRes();
+
 	QGetRenderContext() ->Stats().MakeProject().Start();
     CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), CqMatrix(), QGetRenderContext()->Time() );
     CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pSurface() ->pTransform() ->matObjectToWorld( pSurface() ->pTransform() ->Time( 0 ) ), QGetRenderContext()->Time() );
@@ -639,8 +642,8 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 		SqTriangleSplitLine sl;
 		CqVector3D v0, v1, v2;
 		v0 = aaPtimes[ iTime ][ 0 ];
-		v1 = aaPtimes[ iTime ][ uGridRes() ];
-		v2 = aaPtimes[ iTime ][ vGridRes() * ( uGridRes() + 1 ) ];
+		v1 = aaPtimes[ iTime ][ cu ];
+		v2 = aaPtimes[ iTime ][ cv * ( cu + 1 ) ];
 		// Check for clockwise, swap if not.
 		if( ( ( v1.x() - v0.x() ) * ( v2.y() - v0.y() ) - ( v1.y() - v0.y() ) * ( v2.x() - v0.x() ) ) >= 0 )
 		{
@@ -668,8 +671,8 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	SqTriangleSplitLine sl;
 	CqVector3D v0, v1, v2;
 	v0 = aaPtimes[ 0 ][ 0 ];
-	v1 = aaPtimes[ 0 ][ uGridRes() ];
-	v2 = aaPtimes[ 0 ][ vGridRes() * ( uGridRes() + 1 ) ];
+	v1 = aaPtimes[ 0 ][ cu ];
+	v2 = aaPtimes[ 0 ][ cv * ( cu + 1 ) ];
 	// Check for clockwise, swap if not.
 	if( ( ( v1.x() - v0.x() ) * ( v2.y() - v0.y() ) - ( v1.y() - v0.y() ) * ( v2.x() - v0.x() ) ) >= 0 )
 	{
@@ -684,10 +687,6 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	m_TriangleSplitLine.AddTimeSlot(pSurface()->pTransform()->Time( 0 ), sl ); 
 
     QGetRenderContext() ->Stats().MakeProject().Stop();
-
-
-    TqInt cu = uGridRes();
-    TqInt cv = vGridRes();
 
     // Get the required trim curve sense, if specified, defaults to "inside".
     const CqString* pattrTrimSense = pAttributes() ->GetStringAttribute( "trimcurve", "sense" );
@@ -907,8 +906,8 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 		SqTriangleSplitLine sl;
 		CqVector3D v0, v1, v2;
 		v0 = aaPtimes[ iTime ][ 0 ];
-		v1 = aaPtimes[ iTime ][ pGridA->uGridRes() ];
-		v2 = aaPtimes[ iTime ][ pGridA->vGridRes() * ( pGridA->uGridRes() + 1 ) ];
+		v1 = aaPtimes[ iTime ][ cu ];
+		v2 = aaPtimes[ iTime ][ cv * ( cu + 1 ) ];
 		// Check for clockwise, swap if not.
 		if( ( ( v1.x() - v0.x() ) * ( v2.y() - v0.y() ) - ( v1.y() - v0.y() ) * ( v2.x() - v0.x() ) ) >= 0 )
 		{
@@ -1447,8 +1446,9 @@ void CqMicroPolygon::CalculateTotalBound()
 
 	// Calculate the boundary, and store the indexes in the cache.
 	const CqVector3D& B = pP[ m_Index + 1 ];
-	const CqVector3D& C = pP[ m_Index + m_pGrid->uGridRes() + 2 ];
-	const CqVector3D& D = pP[ m_Index + m_pGrid->uGridRes() + 1 ];
+	TqInt cu = m_pGrid->uGridRes();
+	const CqVector3D& C = pP[ m_Index + cu + 2 ];
+	const CqVector3D& D = pP[ m_Index + cu + 1 ];
 
 	TqShort BCMinX = 0;
 	TqShort BCMaxX = 0;

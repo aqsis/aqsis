@@ -1386,7 +1386,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlo
     TIFFCreateDirectory( ptex );
 
     sprintf( version, "%s %s", STRNAME, VERSION_STR );
-    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
+    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
     TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
     TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
     TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
@@ -1417,7 +1417,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlo
     TIFFCreateDirectory( ptex );
 
     sprintf( version, "%s %s", STRNAME, VERSION_STR );
-    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
+    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
     TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
     TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
     TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
@@ -1450,7 +1450,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqUshort *raster, TqUlong width, TqUl
     TIFFCreateDirectory( ptex );
 
     sprintf( version, "%s %s", STRNAME, VERSION_STR );
-    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
+    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
     TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
     TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
     TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
@@ -1541,7 +1541,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
     //TIFFCreateDirectory(ptex);
     TqChar version[ 80 ];
     sprintf( version, "%s %s", STRNAME, VERSION_STR );
-    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
+    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
     TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
     TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
     TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
@@ -1600,7 +1600,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqUshort *raster, TqUlong width, 
     //TIFFCreateDirectory(ptex);
     TqChar version[ 80 ];
     sprintf( version, "%s %s", STRNAME, VERSION_STR );
-    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
+    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
     TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
     TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
     TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
@@ -1658,7 +1658,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, T
 {
     TqChar version[ 80 ];
     sprintf( version, "%s %s", STRNAME, VERSION_STR );
-    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
+    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
     TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
     TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
     TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );

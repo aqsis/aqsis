@@ -1544,6 +1544,8 @@ void CqImageBuffer::RenderImage()
     #endif
 	/////////////////////////////////////////////
 
+	STATS_SETF( MPG_min_area, FLT_MAX );
+	STATS_SETF( MPG_max_area, FLT_MIN );
 
     if ( bucketmodulo == -1 )
     {

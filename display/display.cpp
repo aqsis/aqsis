@@ -101,7 +101,7 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image)
 	#else
 			sprintf( version, "%s %s", STRNAME, VERSION );
 	#endif
-			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
+			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( char* ) version );
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, image->m_matWorldToCamera );
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, image->m_matWorldToScreen );
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
@@ -113,7 +113,7 @@ void SaveAsShadowMap(const std::string& filename, SqDisplayInstance* image)
 		#else
 			sprintf( version, "%s %s", STRNAME, VERSION );
 		#endif
-			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
+			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( char* ) version );
 			TIFFSetField( pshadow, TIFFTAG_IMAGEWIDTH, image->m_width );
 			TIFFSetField( pshadow, TIFFTAG_IMAGELENGTH, image->m_height );
 			TIFFSetField( pshadow, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
@@ -225,7 +225,7 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
 
         bool use_logluv = false;
 
-        TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( uint32 ) version );
+        TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( char* ) version );
         TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) image->m_width );
         TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) image->m_height );
         TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );

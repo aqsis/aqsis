@@ -37,7 +37,7 @@ void save_tiff( char *filename,
 	/* Write the some form of version */
 	sprintf( version, "%s conversion for AQSIS", conversion );
 
-	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
+	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( char* ) version );
 	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
 	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
 	TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );

@@ -544,7 +544,7 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName, TqBool append )
                 }
             }
             sprintf( version, "%s %s", STRNAME, VERSION_STR );
-            TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
+            TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( char* ) version );
             TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, matWToC );
             TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, matWToS );
             TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
