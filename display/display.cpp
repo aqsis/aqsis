@@ -27,6 +27,8 @@
 
 #ifdef AQSIS_SYSTEM_WIN32
 	#include <winsock2.h>
+    	#define SHUT_RDWR SD_BOTH
+	typedef linger LINGER;
 #endif
 
 #include <logging.h>
@@ -147,12 +149,12 @@ hostent* GetHostByName(const std::string& HostName)
 static void CloseSocket( SOCKET& Socket )
 {
     int x = 1;
-    LINGER ling;
+    linger ling;
     ling.l_onoff = 1;
     ling.l_linger = 10;
     setsockopt( Socket, SOL_SOCKET, SO_LINGER, reinterpret_cast<const char*>( &ling ), sizeof( ling ) );
-    shutdown( Socket, SD_BOTH );
-    closesocket( Socket );
+    shutdown( Socket, SHUT_RDWR );
+    close( Socket );
 
     Socket = INVALID_SOCKET;
 }

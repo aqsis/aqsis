@@ -42,12 +42,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 
-static const int INVALID_SOCKET = -1;
-static const int SD_BOTH = 2;
 static const int SOCKET_ERROR = -1;
-
-typedef sockaddr_in SOCKADDR_IN;
-typedef sockaddr* PSOCKADDR;
 
 #endif // !_WIN32
 

@@ -38,6 +38,11 @@
 #include	"ddmsock2.h"
 #include	"imagebuffer.h"
 
+#ifdef AQSIS_SYSTEM_WIN32
+
+	#define unlink _unlink
+
+#endif // AQSIS_SYSTEM_WIN32
 
 START_NAMESPACE( Aqsis )
 
@@ -45,7 +50,7 @@ CqBucketDiskStore::~CqBucketDiskStore()
 {
 	if( m_Temporary )
 	{
-		if(_unlink(m_fileName.c_str()) < 0)
+		if(unlink(m_fileName.c_str()) < 0)
 			std::cerr << error << "Could not delete temporary bucket store " << m_fileName.c_str() << std::endl;
 	}
 	free(m_Header);
@@ -76,7 +81,7 @@ void CqBucketDiskStore::PrepareFile(std::string& name, IqRenderer* renderer, TqB
 		std::vector<TqInt> counts;
 		TqInt datasize = renderer->GetOutputDataInfo(desc,counts);
 		TqInt len = sizeof(SqBucketDiskStoreHeader) + (counts.size()-1)*sizeof(TqInt) + desc.length();
-		m_Header = reinterpret_cast<SqBucketDiskStoreHeader*>(calloc(len, sizeof(byte)));
+		m_Header = reinterpret_cast<SqBucketDiskStoreHeader*>(calloc(len, 1));
 		m_Header->m_DataValueCount = counts.size();
 		m_Header->m_DataValueDescLen = desc.length();
 		m_Header->m_DataValueSize = datasize;
@@ -133,7 +138,7 @@ TqLong CqBucketDiskStore::StoreBucket(IqBucket* bucket, SqBucketDiskStoreRecord*
 		SqBucketDiskStoreRecord* record;
 		TqInt datalen = ( bucket->Width() * bucket->Height() * m_Header->m_DataValueSize * sizeof(float) );
 		TqInt totallen = sizeof(SqBucketDiskStoreRecord) + datalen - sizeof(float);
-		record = reinterpret_cast<SqBucketDiskStoreRecord*>(calloc(totallen, sizeof(byte)));
+		record = reinterpret_cast<SqBucketDiskStoreRecord*>(calloc(totallen, 1));
 		TqInt x, y;
 		TqFloat* recordaddress = &record->m_Data[0];
 		for(y = 0; y < bucket->Height(); y++)
@@ -248,7 +253,7 @@ CqBucketDiskStore::SqBucketDiskStoreRecord* CqBucketDiskStore::RetrieveBucketOff
 		file.read(reinterpret_cast<char*>(&len), sizeof(TqLong));
 
 		// Allocate enough space for the whole bucket data.
-		SqBucketDiskStoreRecord* record = reinterpret_cast<SqBucketDiskStoreRecord*>(calloc(len, sizeof(byte)));
+		SqBucketDiskStoreRecord* record = reinterpret_cast<SqBucketDiskStoreRecord*>(calloc(len, 1));
 		if(!record)
 			throw("ERROR: Out of memory reading bucket from disk store!");
 		record->m_BucketLength = len;

@@ -81,6 +81,7 @@ if test x$plugins = xtrue ; then
 else
   PLUGIN_FLAGS=""
 fi
+
 AM_CONDITIONAL(PLUGINS, test x$plugins = xtrue)
 AC_SUBST(PLUGIN_FLAGS)
 
@@ -114,6 +115,8 @@ dnl This macro sets:
 dnl    PTHREAD_LIBS
 dnl    PTHREAD_CFLAGS
 ACX_PTHREAD(LIBS="$PTHREAD_LIBS $LIBS",)
+
+AQSIS_WITH_FLTK
 
 dnl TIFF library
 saveCFLAGS=$CFLAGS
@@ -295,6 +298,7 @@ boost/libs/thread/Makefile \
 boost/libs/thread/src/Makefile \
 boost/libs/thread/src/mac/Makefile \
 boost/libs/thread/src/mac/msl_replacements/Makefile \
+display/Makefile \
 filebuffer/Makefile \
 framebuffer_glut/Makefile \
 framebuffer_glut_z/Makefile \
@@ -305,8 +309,10 @@ libaqsistypes/win32/Makefile \
 libaqsistypes/win32/intel/Makefile \
 libcodegenvm/Makefile \
 libdd/Makefile \
+libdd2/Makefile \
 libddmsimple/Makefile \
 libddmsock/Makefile \
+libddmsock2/Makefile \
 libraytrace/Makefile \
 libri2rib/Makefile \
 librib2/Makefile \

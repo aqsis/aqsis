@@ -251,7 +251,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
     if ( strDriverFile.empty() )
     {
         //CqBasicError( ErrorID_DisplayDriver, Severity_Normal, "Invalid display type. \"" + dd.strType + "\"" );
-        throw( CqString( "Invalid display type \"" ) + CqString(req.m_type) + CqString( "\"" ) );
+        throw( CqString( "Invalid display type \"" ) + CqString( req.m_type ) + CqString( "\"" ) );
     }
 
     // Try to open the file to see if it's really there
@@ -285,9 +285,17 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
         args.push_back(argstrings.back().c_str());
     }
 	// Send the name argument.
+<<<<<<< ddmsock2.cpp
+	argstrings.push_back(CqString("-name=") + CqString( req.m_name ));
+=======
 	argstrings.push_back(CqString("-name=")+CqString(req.m_name));
+>>>>>>> 1.5
 	args.push_back(argstrings.back().c_str());
+<<<<<<< ddmsock2.cpp
+	argstrings.push_back(CqString("-type=") + CqString( req.m_type ));
+=======
 	argstrings.push_back(CqString("-type=")+CqString(req.m_type));
+>>>>>>> 1.5
 	args.push_back(argstrings.back().c_str());
     args.push_back(NULL);
 
