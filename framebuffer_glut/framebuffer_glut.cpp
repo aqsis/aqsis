@@ -72,15 +72,10 @@ static GLubyte* g_Image = 0;
 
 void display(void)
 {
-	glClearColor (0.0, 0.0, 0.0, 0.0);
-	glShadeModel(GL_FLAT);
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glDisable(GL_SCISSOR_TEST);
 	glRasterPos2i(0, 0);
 	glDrawPixels(g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image);
 	glFlush();
-
-	glutSwapBuffers();
 }
 
 void reshape(int w, int h)
@@ -91,6 +86,17 @@ void reshape(int w, int h)
 	gluOrtho2D(0.0, (GLdouble) w, 0.0, (GLdouble) h);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+}
+
+void visibility(int state)
+{
+	if( state == GLUT_NOT_VISIBLE )
+		return;
+
+	glDisable(GL_SCISSOR_TEST);
+	glRasterPos2i(0, 0);
+	glDrawPixels(g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image);
+	glFlush();
 }
 
 void idle(void)
@@ -107,6 +113,7 @@ void keyboard(unsigned char key, int x, int y)
 	switch(key)
 		{
 			case 27:
+			case 'q':
 				exit(0);
 				break;
 			default:
@@ -139,6 +146,17 @@ int main(int argc, char** argv)
 	glutReshapeFunc(reshape);
 	glutKeyboardFunc(keyboard);
 	glutIdleFunc(idle);
+	glutVisibilityFunc(visibility);
+
+	// Setup GL context.
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glDisable(GL_SCISSOR_TEST);
+	glDisable(GL_DEPTH_TEST);
+	glShadeModel(GL_FLAT);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	// Start up.
 	glutMainLoop();
 
 	// Lose our image buffer ...
@@ -178,8 +196,8 @@ TqInt Open(SOCKET s, SqDDMessageBase* pMsgB)
 	g_Image = new GLubyte[g_ImageWidth * g_ImageHeight * 3];
 	memset(g_Image, 128, g_ImageWidth* g_ImageHeight * 3);
 
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-//	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
+//	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
 	glutInitWindowSize(g_ImageWidth, g_ImageHeight);
 	g_Window = glutCreateWindow(g_Filename.c_str());
 	
@@ -218,7 +236,16 @@ TqInt Data(SOCKET s, SqDDMessageBase* pMsgB)
 				}
 		}
 		
-	glutPostRedisplay();
+	TqInt BucketX = message->m_XMin;
+	TqInt BucketY = g_ImageHeight - message->m_YMin - 1;
+	TqInt BucketW = message->m_XMaxPlus1-message->m_XMin;
+	TqInt BucketH = message->m_YMaxPlus1-message->m_YMin;
+
+	glEnable(GL_SCISSOR_TEST);
+	glScissor(BucketX, BucketY, BucketW, BucketH);
+	glRasterPos2i(0, 0);
+	glDrawPixels(g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image);
+	glFlush();
 
 	return(0);
 }
@@ -226,6 +253,7 @@ TqInt Data(SOCKET s, SqDDMessageBase* pMsgB)
 TqInt Close(SOCKET s, SqDDMessageBase* pMsgB)
 {
 	g_RenderComplete = true;
+	glutPostRedisplay();
 	return(1);	
 }
 
@@ -242,5 +270,6 @@ TqInt HandleMessage(SOCKET s, SqDDMessageBase* pMsgB)
 		}
 	return(0);
 }
+
 
 
