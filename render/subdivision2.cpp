@@ -1074,6 +1074,12 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoin
 			pGrid->v() ->SetFloat( ( *pPoints->P() ) [ iParam ].y(), iData );
 	}
 
+	if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) && ( pPoints->bHasCs() ) )
+		pGrid->Cs() ->SetColor( ( *pPoints->Cs() ) [ iParam ], iData );
+
+	if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) && ( pPoints->bHasOs() ) )
+		pGrid->Os() ->SetColor( ( *pPoints->Os() ) [ iParam ], iData );
+
 	// Now lets store the diced user specified primitive variables.
 	std::vector<CqParameter*>::iterator iUP;
 	for ( iUP = pPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++ )
