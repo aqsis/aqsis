@@ -165,6 +165,22 @@ CqBound& CqBound::Encapsulate( const CqVector2D& v )
     return( *this );
 }
 
+//----------------------------------------------------------------------
+/** Outputs a bound to an output stream.
+ * \param Stream Stream to output the matrix to.
+ * \param Bound The bound to output.
+ * \return The new state of Stream.
+ */
+
+std::ostream &operator<<( std::ostream &Stream, const CqBound &Bound )
+{
+    CqVector3D min = Bound.vecMin();
+    CqVector3D max = Bound.vecMax();
+	Stream << min << "-->" << max << std::ends;
+    return ( Stream );
+}
+
+
 //---------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )

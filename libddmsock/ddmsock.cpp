@@ -28,6 +28,7 @@
 
 #include	<fstream>
 #include	<map>
+#include	"signal.h"
 
 #ifdef AQSIS_SYSTEM_WIN32
 

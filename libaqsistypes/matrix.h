@@ -184,7 +184,7 @@ public:
     CqVector4D	PreMultiply( const CqVector4D &Vector ) const;
     CqMatrix&	operator*=( const TqFloat S );
 
-    friend std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
+    friend std::ostream &operator<<( std::ostream &Stream, const CqMatrix &Matrix );
     friend CqMatrix	operator*( TqFloat S, const CqMatrix& a );
 
     TqFloat	Determinant() const;

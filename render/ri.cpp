@@ -3034,7 +3034,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
         CqSurfacePointsPolygons* pPsPs = new CqSurfacePointsPolygons(pPointsClass, npolys, nverts, verts );
         ADDREF( pPsPs );
         TqFloat time = QGetRenderContext()->Time();
-        // Transform the points into camera space for processing,
+       // Transform the points into camera space for processing,
         pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time) ),
                                  QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time) ),
                                  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time) ) );
@@ -3924,7 +3924,12 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 
     CqProcedural *pProc = new CqProcedural(data, B, refineproc, freeproc );
     ADDREF( pProc );
+	TqFloat time = QGetRenderContext()->Time();
+    pProc->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pProc->pTransform() ->matObjectToWorld(time) ),
+                      QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pProc->pTransform() ->matObjectToWorld(time) ),
+                      QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pProc->pTransform() ->matObjectToWorld(time) ) );
     CreateGPrim( pProc );
+	RELEASEREF( pProc );
 
     return ;
 }

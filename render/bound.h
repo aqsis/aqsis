@@ -48,8 +48,8 @@ public:
     {
         if ( pBounds )
         {
-            m_vecMin.x( pBounds[ 0 ] );	m_vecMin.y( pBounds[ 1 ] );	m_vecMin.z( pBounds[ 2 ] );
-            m_vecMax.x( pBounds[ 3 ] );	m_vecMax.y( pBounds[ 4 ] );	m_vecMax.z( pBounds[ 5 ] );
+            m_vecMin.x( pBounds[ 0 ] );	m_vecMin.y( pBounds[ 2 ] );	m_vecMin.z( pBounds[ 4 ] );
+            m_vecMax.x( pBounds[ 1 ] );	m_vecMax.y( pBounds[ 3 ] );	m_vecMax.z( pBounds[ 5 ] );
         }
     }
     CqBound( TqFloat XMin = FLT_MAX, TqFloat YMin = FLT_MAX, TqFloat ZMin = FLT_MAX, TqFloat XMax = -FLT_MAX, TqFloat YMax = -FLT_MAX, TqFloat ZMax = -FLT_MAX )
@@ -107,6 +107,8 @@ public:
         else
             return ( TqTrue );
     }
+
+    friend std::ostream &operator<<( std::ostream &Stream, const CqBound &Bound );
 
 private:
     CqVector3D	m_vecMin;

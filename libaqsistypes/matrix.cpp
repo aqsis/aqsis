@@ -1185,7 +1185,7 @@ TqFloat CqMatrix::Determinant() const
  * \return The new state of Stream.
  */
 
-std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix )
+std::ostream &operator<<( std::ostream &Stream, const CqMatrix &Matrix )
 {
     if ( !Matrix.fIdentity() )
     {
