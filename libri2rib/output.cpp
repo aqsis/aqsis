@@ -1528,8 +1528,8 @@ RtVoid CqOutput::RiArchiveRecord( RtToken type, std::string txt )
 		throw CqError( RIE_BADTOKEN, RIE_ERROR,
 		               "Unknown ArchiveRecord type: ", type, "", TqTrue );
 	}
-	print( ( tmp + txt ).c_str() );
-	EOL;
+	// EOL must be forced for binary
+	print( ( tmp + txt + "\n" ).c_str() );
 }
 
 RtVoid CqOutput::RiReadArchiveV( RtToken name, RtArchiveCallback callback,

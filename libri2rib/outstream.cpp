@@ -105,7 +105,9 @@ void CqStreamGzip::flushFile()
 	//  At the end of a procedural RunProgram the
 	// gzip internal state must be reset.
 	if ( gzf )
+	{
 		gzflush( gzf, Z_FINISH ); 
+	}
 }
 
 
