@@ -1,8 +1,0 @@
-#!/bin/sh
-
-PATH=$PATH:.
-
-for file in $*; do
-    cc -E -P -DPI=3.141592654 -DAQSIS -traditional -x c $file | aqslcomp
-done
-
