@@ -120,23 +120,23 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
 	// now shuffle the pixels around and add in the pixel offset to the position.
 //	std::random_shuffle(m_aImageIndex.begin(), m_aImageIndex.end());
 
-    TqInt which = 0;
-    TqInt numPixels = m_RealWidth*m_RealHeight;
-    for ( TqInt i = 0; i < m_RealHeight; i++ )
-    {
-        for ( TqInt j = 0; j < m_RealWidth; j++ )
-        {
-            CqVector2D bPos2( m_XOrigin, m_YOrigin );
-            bPos2 += CqVector2D( ( j - m_DiscreteShiftX ), ( i - m_DiscreteShiftY ) );
+	TqInt which = 0;
+	TqInt numPixels = m_RealWidth*m_RealHeight;
+	for ( TqInt i = 0; i < m_RealHeight; i++ )
+	{
+		for ( TqInt j = 0; j < m_RealWidth; j++ )
+		{
+			CqVector2D bPos2( m_XOrigin, m_YOrigin );
+			bPos2 += CqVector2D( ( j - m_DiscreteShiftX ), ( i - m_DiscreteShiftY ) );
 
 			if(!empty)
-		    	m_aieImage[which].Clear();
+				m_aieImage[which].Clear();
 
-            m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[which] );
+			m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[which] );
 
-            which++;
-        }
-    }
+			which++;
+		}
+	}
 }
 
 
@@ -451,75 +451,248 @@ void CqBucket::FilterBucket(TqBool empty)
     TqInt endy = YOrigin() + Height();
     TqInt endx = XOrigin() + Width();
 
-    for ( y = YOrigin(); y < endy ; y++ )
-    {
-        TqFloat ycent = y + 0.5f;
-        for ( x = XOrigin(); x < endx ; x++ )
-        {
-            TqFloat xcent = x + 0.5f;
-            TqFloat gTot = 0.0;
-            SampleCount = 0;
-            std::valarray<TqFloat> samples( 0.0f, datasize);
-
-            if(!empty)
-            {
-                TqInt fx, fy;
-                // Get the element at the upper left corner of the filter area.
-                ImageElement( x - xmax, y - ymax, pie );
-                for ( fy = -ymax; fy <= ymax; fy++ )
-                {
-                    CqImagePixel* pie2 = pie;
-                    for ( fx = -xmax; fx <= xmax; fx++ )
-                    {
-                        TqInt index = ( ( ( fy + ymax ) * CEIL(FilterXWidth()) ) + ( fx + xmax ) ) * numperpixel;
-                        // Now go over each subsample within the pixel
-                        TqInt sx, sy;
-                        TqInt sampleIndex = 0;
-                        for ( sy = 0; sy < PixelYSamples(); sy++ )
-                        {
-                            for ( sx = 0; sx < PixelXSamples(); sx++ )
-                            {
-                                TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
-                                const SqSampleData& sampleData = pie2->SampleData( sampleIndex );
-                                CqVector2D vecS = sampleData.m_Position;
-                                vecS -= CqVector2D( xcent, ycent );
-                                if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
-                                {
-                                    TqInt cindex = sindex + sampleData.m_SubCellIndex;
-                                    TqFloat g = m_aFilterValues[ cindex ];
-                                    gTot += g;
-                                    if ( pie2->Values( sampleIndex ).size() > 0 )
-                                    {
-                                        SqImageSample* pSample = &pie2->Values( sampleIndex ) [ 0 ];
-                                        samples += pSample->m_Data * g;
-                                        SampleCount++;
-                                    }
-                                }
-                                sampleIndex++;
-                            }
-                        }
-                        pie2++;
-                    }
-                    pie += xlen;
-                }
-            }
+	bool useSeperable = true;
 
 
-            for ( TqInt k = 0; k < datasize; k ++)
-                m_aDatas[ i*datasize + k ] = samples[k] / gTot;
+	if(!empty)
+	{
+		// non-seperable is faster for very small filter widths.
+		if(FilterXWidth() <= 1.0 || FilterYWidth() <= 1.0)
+			useSeperable = false;
 
-            // Set depth to infinity if no samples.
-            if ( SampleCount <= 0 )
-                m_aDatas[ i*datasize+6 ] = FLT_MAX;
+		if(useSeperable)
+		{
+			// seperable filter. filtering by fx,fy is equivalent to filtering
+			// by fx,1 followed by 1,fy.
 
-            if ( SampleCount >= numsubpixels)
-                m_aCoverages[ i ] = 1.0;
-            else
-                m_aCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numsubpixels );
+			TqInt size = Width() * RealHeight() * PixelYSamples();
+			std::valarray<TqFloat> intermediateSamples( 0.0f, size * datasize);
+			std::valarray<TqInt> sampleCounts(0, size);
+			for ( y = YOrigin() - ymax; y < endy + ymax ; y++ )
+			{
+				TqFloat ycent = y + 0.5f;
+				TqInt pixelRow = (y-(YOrigin()-ymax)) * PixelYSamples();
+				for ( x = XOrigin(); x < endx ; x++ )
+				{
+					TqFloat xcent = x + 0.5f;
 
-            i++;
-        }
-    }
+					// Get the element at the left side of the filter area.
+					ImageElement( x - xmax, y, pie );
+
+					TqInt pixelIndex = pixelRow*Width() + x-XOrigin();
+
+					// filter just in x first
+					for ( TqInt sy = 0; sy < PixelYSamples(); sy++ )
+					{
+						TqFloat gTot = 0.0;
+						SampleCount = 0;
+						std::valarray<TqFloat> samples( 0.0f, datasize);
+
+						CqImagePixel* pie2 = pie;
+						for ( TqInt fx = -xmax; fx <= xmax; fx++ )
+						{
+							TqInt index = ( ( ymax * CEIL(FilterXWidth()) ) + ( fx + xmax ) ) * numperpixel;
+							// Now go over each subsample within the pixel
+							TqInt sampleIndex = sy * PixelXSamples();
+							TqInt sindex = index + ( sy * PixelXSamples() * numsubpixels );
+
+							for ( TqInt sx = 0; sx < PixelXSamples(); sx++ )
+							{
+								const SqSampleData& sampleData = pie2->SampleData( sampleIndex );
+								CqVector2D vecS = sampleData.m_Position;
+								vecS -= CqVector2D( xcent, ycent );
+								if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
+								{
+									TqInt cindex = sindex + sampleData.m_SubCellIndex;
+									TqFloat g = m_aFilterValues[ cindex ];
+									gTot += g;
+									if ( !pie2->Values( sampleIndex ).empty() )
+									{
+										SqImageSample* pSample = &pie2->Values( sampleIndex ) [ 0 ];
+										for ( TqInt k = 0; k < datasize; ++k )
+											samples[k] += pSample->m_Data[k] * g;
+										sampleCounts[pixelIndex]++;
+									}
+								}
+								sampleIndex++;
+								sindex += numsubpixels;
+							}
+							pie2++;
+						}
+
+						// store the intermediate result
+						for ( TqInt k = 0; k < datasize; k ++)
+							intermediateSamples[pixelIndex*datasize + k] = samples[k] / gTot;
+
+						pixelIndex += Width();
+					}
+				}
+			}
+
+			// now filter in y.
+			for ( y = YOrigin(); y < endy ; y++ )
+			{
+				TqFloat ycent = y + 0.5f;
+				for ( x = XOrigin(); x < endx ; x++ )
+				{
+					TqFloat xcent = x + 0.5f;
+					TqFloat gTot = 0.0;
+					SampleCount = 0;
+					std::valarray<TqFloat> samples( 0.0f, datasize);
+
+					TqInt fy;
+					// Get the element at the top of the filter area.
+					ImageElement( x, y - ymax, pie );
+					for ( fy = -ymax; fy <= ymax; fy++ )
+					{
+						CqImagePixel* pie2 = pie;
+
+						TqInt index = ( ( ( fy + ymax ) * CEIL(FilterXWidth()) ) + xmax ) * numperpixel;
+						// Now go over each y subsample within the pixel
+						TqInt sx = PixelXSamples() / 2; // use the samples in the centre of the pixel.
+						TqInt sy = 0;
+						TqInt sampleIndex = sx;
+						TqInt pixelRow = (y + fy - (YOrigin()-ymax)) * PixelYSamples();
+						TqInt pixelIndex = pixelRow*Width() + x-XOrigin();
+
+						for ( sy = 0; sy < PixelYSamples(); sy++ )
+						{
+							TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
+							const SqSampleData& sampleData = pie2->SampleData( sampleIndex );
+							CqVector2D vecS = sampleData.m_Position;
+							vecS -= CqVector2D( xcent, ycent );
+							if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
+							{
+								TqInt cindex = sindex + sampleData.m_SubCellIndex;
+								TqFloat g = m_aFilterValues[ cindex ];
+								gTot += g;
+								if(sampleCounts[pixelIndex] > 0)
+								{
+									SampleCount += sampleCounts[pixelIndex];
+									for ( TqInt k = 0; k < datasize; k++)
+										samples[k] += intermediateSamples[pixelIndex * datasize + k] * g;
+								}
+							}
+							sampleIndex += PixelXSamples();
+							pixelIndex += Width();
+						}
+
+						pie += xlen;
+					}
+
+					// Set depth to infinity if no samples.
+					if ( SampleCount == 0 )
+					{
+						memset(&m_aDatas[i*datasize], 0, datasize * sizeof(float));
+						m_aDatas[ i*datasize+6 ] = FLT_MAX;
+						m_aCoverages[i] = 0.0;
+					}
+					else
+					{
+						float oneOverGTot = 1.0 / gTot;
+						for ( TqInt k = 0; k < datasize; k ++)
+							m_aDatas[ i*datasize + k ] = samples[k] * oneOverGTot;
+
+						if ( SampleCount >= numsubpixels)
+							m_aCoverages[ i ] = 1.0;
+						else
+							m_aCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numsubpixels );
+					}
+
+					i++;
+				}
+			}
+		}
+		else
+		{
+			// non-seperable filter
+			for ( y = YOrigin(); y < endy ; y++ )
+			{
+				TqFloat ycent = y + 0.5f;
+				for ( x = XOrigin(); x < endx ; x++ )
+				{
+					TqFloat xcent = x + 0.5f;
+					TqFloat gTot = 0.0;
+					SampleCount = 0;
+					std::valarray<TqFloat> samples( 0.0f, datasize);
+
+					TqInt fx, fy;
+					// Get the element at the upper left corner of the filter area.
+					ImageElement( x - xmax, y - ymax, pie );
+					for ( fy = -ymax; fy <= ymax; fy++ )
+					{
+						CqImagePixel* pie2 = pie;
+						for ( fx = -xmax; fx <= xmax; fx++ )
+						{
+							TqInt index = ( ( ( fy + ymax ) * CEIL(FilterXWidth()) ) + ( fx + xmax ) ) * numperpixel;
+							// Now go over each subsample within the pixel
+							TqInt sx, sy;
+							TqInt sampleIndex = 0;
+							for ( sy = 0; sy < PixelYSamples(); sy++ )
+							{
+								for ( sx = 0; sx < PixelXSamples(); sx++ )
+								{
+									TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
+									const SqSampleData& sampleData = pie2->SampleData( sampleIndex );
+									CqVector2D vecS = sampleData.m_Position;
+									vecS -= CqVector2D( xcent, ycent );
+									if ( vecS.x() >= -xfwo2 && vecS.y() >= -yfwo2 && vecS.x() <= xfwo2 && vecS.y() <= yfwo2 )
+									{
+										TqInt cindex = sindex + sampleData.m_SubCellIndex;
+										TqFloat g = m_aFilterValues[ cindex ];
+										gTot += g;
+										if ( pie2->Values( sampleIndex ).size() > 0 )
+										{
+											SqImageSample* pSample = &pie2->Values( sampleIndex ) [ 0 ];
+											for ( TqInt k = 0; k < datasize; ++k )
+												samples[k] += pSample->m_Data[k] * g;
+											SampleCount++;
+										}
+									}
+									sampleIndex++;
+								}
+							}
+							pie2++;
+						}
+						pie += xlen;
+					}
+
+
+					// Set depth to infinity if no samples.
+					if ( SampleCount == 0 )
+					{
+						memset(&m_aDatas[i*datasize], 0, datasize * sizeof(float));
+						m_aDatas[ i*datasize+6 ] = FLT_MAX;
+						m_aCoverages[i] = 0.0;
+					}
+					else
+					{
+						float oneOverGTot = 1.0 / gTot;
+						for ( TqInt k = 0; k < datasize; k ++)
+							m_aDatas[ i*datasize + k ] = samples[k] * oneOverGTot;
+
+						if ( SampleCount >= numsubpixels)
+							m_aCoverages[ i ] = 1.0;
+						else
+							m_aCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) (numsubpixels );
+					}
+
+					i++;
+				}
+			}
+		}
+	}
+	else
+	{
+		// empty bucket.
+		TqInt size = Width()*Height();
+		memset(&m_aDatas[0], 0, size * datasize * sizeof(float));
+		memset(&m_aCoverages[0], 0, size * sizeof(float));
+		for(i = 0; i<size; ++i)
+		{
+			m_aDatas[ i*datasize+6 ] = FLT_MAX;
+		}
+	}
 
     i = 0;
     ImageElement( XOrigin(), YOrigin(), pie );
