@@ -285,14 +285,21 @@ TqInt	CqParseNodeUnresolvedCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool C
     TqInt NewType = Type_Nil;
 
     // TypeCheck the args, we don't know what types will be needed
-    // later, so there is little else we can do.
+    // later, so there is little else we can do. While doing so, rebuild the params string for the
+	// external declaration in the .slx
+	CqString strArgTypes("");
     CqParseNode *pArg = m_pChild;
     while (pArg != NULL)
     {
         CqParseNode *pNext = pArg->pNext();
         pArg->TypeCheck( pAllTypes(), Type_Last - 1 );
+		strArgTypes+=CqParseNode::TypeIdentifier(pArg->ResType());
         pArg = pNext;
     };
+
+	// Store the newly decided parameter list string. This now reflects the actual parameter types 
+	// passed in.
+	m_aFuncDef.SetstrParams(strArgTypes);
 
     // If we have no type set yet we take the first type given as an option
     if(m_aFuncDef.Type() == Type_Nil || !CheckOnly)

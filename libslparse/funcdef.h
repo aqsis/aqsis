@@ -121,6 +121,10 @@ public:
     {
         return ( m_aTypeSpec.size() );
     }
+	void SetstrParams(const CqString& strParams)
+	{
+        m_strParamTypes = strParams;
+	}
 
     static	TqBool	FindFunction( const char* strName, std::vector<SqFuncRef>& Refs );
     static	CqFuncDef*	GetFunctionPtr( const SqFuncRef& Ref );
