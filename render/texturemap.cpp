@@ -809,13 +809,13 @@ void CqTextureMap::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, 
     if ( directory )
     {
         TqInt i, j;
+        TqFloat yfilt = -(directory - 0.5f);
         for ( j = 0; j < ydelta; j++ )
         {
+	        TqFloat xfilt = -(directory - 0.5f);
             for ( i = 0; i < xdelta; i++ )
             {
                 /* find the filter value */
-                TqFloat xfilt = i - directory;
-                TqFloat yfilt = j - directory;
                 mul = ( *pFilter ) ( xfilt, yfilt, xdelta, ydelta );
 
                 /* find the value in the original image */
@@ -828,7 +828,10 @@ void CqTextureMap::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, 
 
                 /* accumulate the ponderation factor */
                 div += mul;
+
+				xfilt += 1.0f;
             }
+			yfilt += 1.0f;
         }
 
         /* use the accumulated ponderation factor */
