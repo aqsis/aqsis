@@ -279,64 +279,76 @@ void CqPolygonBase::CreatePhantomData( CqParameter* pParam )
 {
 	assert( pParam->Class() == class_varying || pParam->Class() == class_vertex || pParam->Class() == class_facevarying );
 
+	TqInt iArrayCount = 1;
+	TqInt iArray;
+	if( pParam->Count() > 0)
+		iArrayCount = pParam->Count();
+	
 	switch ( pParam->Type() )
 	{
-			case type_point:
-			case type_vector:
-			case type_normal:
-			{
-				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
-				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
-				break;
-			}
+		case type_point:
+		case type_vector:
+		case type_normal:
+		{
+			CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
+			for( iArray = 0; iArray < iArrayCount; iArray++ )
+				pTParam->pValue( 3 ) [ iArray ] = ( pTParam->pValue( 1 ) [ iArray ] - pTParam->pValue( 0 ) [ iArray ] ) + pTParam->pValue( 2 ) [ iArray ];
+			break;
+		}
 
-			case type_hpoint:
-			{
-				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
-				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
-				break;
-			}
+		case type_hpoint:
+		{
+			CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
+			for( iArray = 0; iArray < iArrayCount; iArray++ )
+				pTParam->pValue( 3 ) [ iArray ] = ( pTParam->pValue( 1 ) [ iArray ] - pTParam->pValue( 0 ) [ iArray ] ) + pTParam->pValue( 2 ) [ iArray ];
+			break;
+		}
 
-			case type_float:
-			{
-				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
-				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
-				break;
-			}
+		case type_float:
+		{
+			CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
+			for( iArray = 0; iArray < iArrayCount; iArray++ )
+				pTParam->pValue( 3 ) [ iArray ] = ( pTParam->pValue( 1 ) [ iArray ] - pTParam->pValue( 0 ) [ iArray ] ) + pTParam->pValue( 2 ) [ iArray ];
+			break;
+		}
 
-			case type_integer:
-			{
-				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
-				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
-				break;
-			}
+		case type_integer:
+		{
+			CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
+			for( iArray = 0; iArray < iArrayCount; iArray++ )
+				pTParam->pValue( 3 ) [ iArray ] = ( pTParam->pValue( 1 ) [ iArray ] - pTParam->pValue( 0 ) [ iArray ] ) + pTParam->pValue( 2 ) [ iArray ];
+			break;
+		}
 
-			case type_color:
-			{
-				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
-				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
-				break;
-			}
+		case type_color:
+		{
+			CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
+			for( iArray = 0; iArray < iArrayCount; iArray++ )
+				pTParam->pValue( 3 ) [ iArray ] = ( pTParam->pValue( 1 ) [ iArray ] - pTParam->pValue( 0 ) [ iArray ] ) + pTParam->pValue( 2 ) [ iArray ];
+			break;
+		}
 
-			case type_matrix:
-			{
-				CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
-				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
-				break;
-			}
+		case type_matrix:
+		{
+			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
+			for( iArray = 0; iArray < iArrayCount; iArray++ )
+				pTParam->pValue( 3 ) [ iArray ] = ( pTParam->pValue( 1 ) [ iArray ] - pTParam->pValue( 0 ) [ iArray ] ) + pTParam->pValue( 2 ) [ iArray ];
+			break;
+		}
 
-			case type_string:
-			{
-				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
-				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
-				break;
-			}
+		case type_string:
+		{
+			CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
+			for( iArray = 0; iArray < iArrayCount; iArray++ )
+				pTParam->pValue( 3 ) [ iArray ] = ( pTParam->pValue( 1 ) [ iArray ] - pTParam->pValue( 0 ) [ iArray ] ) + pTParam->pValue( 2 ) [ iArray ];
+			break;
+		}
 
-			default:
-			{
-				// left blank to avoid compiler warnings about unhandled types
-				break;
-			}
+		default:
+		{
+			// left blank to avoid compiler warnings about unhandled types
+			break;
+		}
 	}
 }
 
