@@ -11,6 +11,6 @@ libslxargs_la_LDFLAGS = -rpath $(libdir)
 
 pkginclude_HEADERS = slx.h
 
-INCLUDES = -I$(top_srcdir)/render -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix  -I$(top_srcdir)/librib2ri -I$(top_srcdir)/librib2 -I$(top_srcdir)/libshadervm -I$(top_srcdir)/libshaderexecenv
+INCLUDES = -I$(top_srcdir)/boost -I$(top_srcdir)/render -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix  -I$(top_srcdir)/librib2ri -I$(top_srcdir)/librib2 -I$(top_srcdir)/libshadervm -I$(top_srcdir)/libshaderexecenv
  
 

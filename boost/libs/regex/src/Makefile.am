@@ -16,6 +16,8 @@ w32_regex_traits.cpp \
 wide_posix_api.cpp \
 winstances.cpp
 
+INCLUDES=-I$(top_srcdir)/boost
+
 AM_CXXFLAGS = @AQSIS_CXXFLAGS@
 AM_CPPFLAGS = @AQSIS_CPPFLAGS@
 
