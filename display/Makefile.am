@@ -1,4 +1,4 @@
-EXTRA_DIST = display.dsp displays.ini
+EXTRA_DIST = display.dsp displays.ini display.vcproj
 
 AM_CXXFLAGS=@AQSIS_CXXFLAGS@
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@

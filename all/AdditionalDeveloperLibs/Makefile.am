@@ -1,4 +1,4 @@
-EXTRA_DIST = AdditionalDeveloperLibs.dsp
+EXTRA_DIST = AdditionalDeveloperLibs.dsp AdditionalDeveloperLibs.vcproj
 AM_CXXFLAGS=@AQSIS_CXXFLAGS@
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@
 AM_CFLAGS=@AQSIS_CFLAGS@

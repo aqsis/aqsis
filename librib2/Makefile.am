@@ -6,7 +6,7 @@ AM_CFLAGS=@AQSIS_CFLAGS@
 
 AM_YFLAGS=-d
 
-EXTRA_DIST = librib2.dsp parser.cxx parser.h scanner.cxx
+EXTRA_DIST = librib2.dsp parser.cxx parser.h scanner.cxx librib2.vcproj
 
 lib_LTLIBRARIES =  librib2.la
 

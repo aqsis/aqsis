@@ -1,4 +1,4 @@
-EXTRA_DIST = libddmanager.dsp
+EXTRA_DIST = libddmanager.dsp libddmanager.vcproj
 
 AM_CXXFLAGS=@AQSIS_CXXFLAGS@
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@

@@ -1,4 +1,4 @@
-EXTRA_DIST = libslxargs.dsp
+EXTRA_DIST = libslxargs.dsp libslxargs.vcproj
 AM_CXXFLAGS=@AQSIS_CXXFLAGS@
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@
 AM_CFLAGS=@AQSIS_CFLAGS@

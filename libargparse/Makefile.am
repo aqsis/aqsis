@@ -1,6 +1,6 @@
 AM_YFLAGS=-d
 
-EXTRA_DIST = libargparse.dsp
+EXTRA_DIST = libargparse.dsp libargparse.vcproj
 
 lib_LTLIBRARIES = libargparse.la
 

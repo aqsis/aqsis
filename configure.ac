@@ -333,5 +333,6 @@ shaders/Makefile \
 slpp/Makefile \
 teqser/Makefile \
 thirdparty/Makefile \
+renderer.xcode/Makefile \
 Makefile )
 

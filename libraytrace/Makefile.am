@@ -1,4 +1,4 @@
-EXTRA_DIST = libraytrace.dsp
+EXTRA_DIST = libraytrace.dsp libraytrace.vcproj
 
 AM_CXXFLAGS=@AQSIS_CXXFLAGS@
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@

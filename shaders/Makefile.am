@@ -90,7 +90,7 @@ shader_binaries = \
 
 shaders_DATA = $(shader_headers) $(shader_sources) $(shader_binaries)
 
-EXTRA_DIST = $(shader_headers) $(shader_sources)
+EXTRA_DIST = $(shader_headers) $(shader_sources) shaders.dsp shaders.vcproj
 
 .sl.slx:
 	$(top_builddir)/aqsl/aqsl $< -o $@

@@ -1,4 +1,4 @@
-EXTRA_DIST = libcodegenvm.dsp
+EXTRA_DIST = libcodegenvm.dsp libcodegenvm.vcproj
 AM_CXXFLAGS=@AQSIS_CXXFLAGS@
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@
 AM_CFLAGS=@AQSIS_CFLAGS@

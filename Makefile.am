@@ -1,4 +1,4 @@
-MAINDIRS = bin boost thirdparty all images libargparse libaqsistypes libcodegenvm librib2 librib2ri librib2stream libslparse libshadervm libshaderexecenv libraytrace ribfiles slpp aqsl shaders libri2rib libslxargs aqsltell dsotest display libddmanager render aqsis teqser man
+MAINDIRS = bin boost thirdparty all images libargparse libaqsistypes libcodegenvm librib2 librib2ri librib2stream libslparse libshadervm libshaderexecenv libraytrace ribfiles slpp aqsl shaders libri2rib libslxargs aqsltell dsotest display libddmanager render aqsis teqser man renderer.xcode
 
 if PLUGINS
 PLUGINSDIRS = plugins
@@ -8,7 +8,7 @@ endif
 
 SUBDIRS = . $(MAINDIRS) $(PLUGINSDIRS)
 
-EXTRA_DIST = Doxyfile Renderer.dsw bootstrap doxygen.dsp
+EXTRA_DIST = Doxyfile Renderer.dsw bootstrap doxygen.dsp Renderer.sln
 
 .PHONY: test
 test:

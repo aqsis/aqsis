@@ -6,7 +6,7 @@ AM_CFLAGS=@AQSIS_CFLAGS@
 
 bin_PROGRAMS = aqsl
 
-EXTRA_DIST = aqsl.dsp 
+EXTRA_DIST = aqsl.dsp aqsl.vcproj
 
 aqsl_SOURCES = aqslcomp.cpp
 aqsl_LDADD = $(top_builddir)/libslparse/libslparse.la $(top_builddir)/libcodegenvm/libcodegenvm.la $(top_builddir)/libaqsistypes/libaqsistypes.la $(top_builddir)/libargparse/libargparse.la $(top_builddir)/slpp/libslpp.la

@@ -10,5 +10,5 @@ aqsltell_LDADD = $(top_builddir)/libslxargs/libslxargs.la $(top_builddir)/libsha
 
 INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I$(top_srcdir)/libshadervm -I$(top_srcdir)/libshaderexecenv -I$(top_srcdir)/libslxargs -I$(top_srcdir)/libargparse -I$(top_srcdir)/render
 
-EXTRA_DIST = aqsltell.dsp
+EXTRA_DIST = aqsltell.dsp aqsltell.vcproj
 

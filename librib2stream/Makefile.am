@@ -1,4 +1,4 @@
-EXTRA_DIST = librib2stream.dsp
+EXTRA_DIST = librib2stream.dsp librib2stream.vcproj
 AM_CXXFLAGS=@AQSIS_CXXFLAGS@
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@
 AM_CFLAGS=@AQSIS_CFLAGS@

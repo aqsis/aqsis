@@ -1,5 +1,5 @@
 SUBDIRS = posix win32 .
-EXTRA_DIST = libaqsistypes.dsp
+EXTRA_DIST = libaqsistypes.dsp libaqsistypes.vcproj
 
 AM_CXXFLAGS=@AQSIS_CXXFLAGS@
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@

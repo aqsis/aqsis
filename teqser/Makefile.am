@@ -1,4 +1,4 @@
-EXTRA_DIST = teqser.dsp
+EXTRA_DIST = teqser.dsp teqser.vcproj
 
 AM_CXXFLAGS=@AQSIS_CXXFLAGS@
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@

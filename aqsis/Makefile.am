@@ -1,4 +1,4 @@
-EXTRA_DIST = aqsis.dsp 
+EXTRA_DIST = aqsis.dsp aqsis.vcproj
 
 AM_CXXFLAGS=@AQSIS_CXXFLAGS@
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@ -DDEFAULT_RC_PATH=\"$(sysconfdir)/aqsisrc\" -DDEFAULT_SHADER_PATH=\".:$(pkgdatadir)/shaders\" -DDEFAULT_ARCHIVE_PATH=\".:$(pkgdatadir)/archives\" -DDEFAULT_TEXTURE_PATH=\".:$(pkgdatadir)/textures\" -DDEFAULT_DISPLAY_PATH=\"$(pkglibdir)\" -DDEFAULT_DSO_PATH=\"$(pkglibdir)\" -DDEFAULT_PROCEDURAL_PATH=\"$(pkglibdir)\"

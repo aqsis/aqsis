@@ -1,4 +1,4 @@
-EXTRA_DIST = scanner.cxx parser.cxx parser.h libslparse.dsp
+EXTRA_DIST = scanner.cxx parser.cxx parser.h libslparse.dsp libslparse.vcproj
 #Must disable optimisation here, because it takes far too much memory.
 CXXFLAGS=
 AM_CXXFLAGS=-O0

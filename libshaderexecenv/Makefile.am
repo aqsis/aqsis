@@ -1,4 +1,4 @@
-EXTRA_DIST = libshaderexecenv.dsp 
+EXTRA_DIST = libshaderexecenv.dsp libshaderexecenv.vcproj
 AM_CXXFLAGS=@AQSIS_CXXFLAGS@
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@
 AM_CFLAGS=@AQSIS_CFLAGS@
