@@ -199,7 +199,8 @@ CqAttributes& CqAttributes::operator=( const CqAttributes& From )
 	// Copy the lightsource list.
 	m_apLightsources.resize( 0 );
 	std::vector<CqLightsource*>::const_iterator il;
-	for ( il = From.m_apLightsources.begin(); il != From.m_apLightsources.end(); il++ )
+	std::vector<CqLightsource*>::const_iterator end = From.m_apLightsources.end();
+	for ( il = From.m_apLightsources.begin(); il != end; il++ )
 		m_apLightsources.push_back( *il );
 
 	m_pshadDisplacement = From.m_pshadDisplacement;
@@ -222,7 +223,7 @@ CqAttributes& CqAttributes::operator=( const CqAttributes& From )
 
 const CqParameter* CqAttributes::pParameter( const char* strName, const char* strParam ) const
 {
-	const CqNamedParameterList* pList;
+	const CqNamedParameterList * pList;
 	if ( ( pList = pAttribute( strName ) ) != 0 )
 	{
 		const CqParameter * pParam;
@@ -242,7 +243,7 @@ const CqParameter* CqAttributes::pParameter( const char* strName, const char* st
 
 CqParameter* CqAttributes::pParameterWrite( const char* strName, const char* strParam )
 {
-	CqNamedParameterList* pList;
+	CqNamedParameterList * pList;
 	if ( ( pList = pAttributeWrite( strName ) ) != 0 )
 	{
 		CqParameter * pParam;

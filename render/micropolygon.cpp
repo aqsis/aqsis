@@ -49,7 +49,7 @@ CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(),
 		m_pSurface( NULL ),
 		m_pCSGNode( NULL ),
 		m_pShaderExecEnv( NULL ),
-		m_fTriangular(TqFalse)
+		m_fTriangular( TqFalse )
 
 {
 	QGetRenderContext() ->Stats().IncGridsAllocated();
@@ -87,7 +87,7 @@ CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) :
 		m_bGeometricNormals( TqFalse ),
 		m_pSurface( NULL ),
 		m_pShaderExecEnv( NULL ),
-		m_fTriangular(TqFalse)
+		m_fTriangular( TqFalse )
 
 {
 	QGetRenderContext() ->Stats().IncGridsAllocated();
@@ -220,7 +220,7 @@ void CqMicroPolyGrid::CalcNormals()
 void CqMicroPolyGrid::Shade()
 {
 	register TqInt i;
-	
+
 
 	// Sanity checks
 	if ( NULL == P() || NULL == I() ) return ;
@@ -251,7 +251,9 @@ void CqMicroPolyGrid::Shade()
 	if ( USES( lUses, EnvVars_N ) ) N() ->GetNormalPtr( pN );
 
 	// Calculate geometric normals if not specified by the surface.
-	if ( !bGeometricNormals() ) CalcNormals();
+	if ( !bGeometricNormals() && USES( lUses, EnvVars_Ng ) )
+		CalcNormals();
+
 	// If shading normals are not explicitly specified, they default to the geometric normal.
 	if ( !bShadingNormals() && USES( lUses, EnvVars_N ) && NULL != Ng() && NULL != N() )
 		N() ->SetValueFromVariable( Ng() );
@@ -283,24 +285,24 @@ void CqMicroPolyGrid::Shade()
 	if ( USES( lUses, EnvVars_Oi ) ) Oi() ->SetColor( gColWhite );
 
 	// Setup varying variables.
-    TqBool bdpu, bdpv;
+	TqBool bdpu, bdpv;
 	bdpu = ( USES( lUses, EnvVars_dPdu ) );
 	bdpv = ( USES( lUses, EnvVars_dPdv ) );
 	IqShaderData * pSDP = P();
 
-	for ( i = gsmin1; i >= 0; i-- ) 
-    {
+	for ( i = gsmin1; i >= 0; i-- )
+	{
 		pI->SetVector( pP[ i ], i );
 
-	    if ( bdpu)
-	    {
-		    dPdu() ->SetVector( SO_DuType<CqVector3D>( pSDP, i, m_pShaderExecEnv, Defvec ), i );
-	    }
-	    if ( bdpv)
-	    {
-		    dPdv() ->SetVector( SO_DvType<CqVector3D>( pSDP, i, m_pShaderExecEnv, Defvec ), i );
-	    }
-    }
+		if ( bdpu )
+		{
+			dPdu() ->SetVector( SO_DuType<CqVector3D>( pSDP, i, m_pShaderExecEnv, Defvec ), i );
+		}
+		if ( bdpv )
+		{
+			dPdv() ->SetVector( SO_DvType<CqVector3D>( pSDP, i, m_pShaderExecEnv, Defvec ), i );
+		}
+	}
 	// Now try and cull any transparent MPs
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ )
 	{
@@ -980,20 +982,20 @@ TqBool CqMicroPolygonStatic::Sample( CqVector2D& vecSample, TqFloat time, TqFloa
 				return ( TqFalse );
 		}
 
-		if( pGrid()->fTriangular() )
+		if ( pGrid() ->fTriangular() )
 		{
 			CqVector3D vO;
-			pGrid()->P()->GetPoint(vO, 0);
+			pGrid() ->P() ->GetPoint( vO, 0 );
 			CqVector3D vA;
-			pGrid()->P()->GetPoint(vA, pGrid()->uGridRes());
+			pGrid() ->P() ->GetPoint( vA, pGrid() ->uGridRes() );
 			CqVector3D vB;
-			pGrid()->P()->GetPoint(vB, pGrid()->vGridRes() * ( pGrid()->uGridRes() + 1 ));
+			pGrid() ->P() ->GetPoint( vB, pGrid() ->vGridRes() * ( pGrid() ->uGridRes() + 1 ) );
 
 			TqBool clockwise;
-			CqVector3D E1 = vA - vO; 
+			CqVector3D E1 = vA - vO;
 			CqVector3D E2 = vB - vO;
-			if ((E1.x() * E2.y() - E1.y() * E2.x()) >= 0)	clockwise = TqTrue; 
-			else											clockwise = TqFalse;
+			if ( ( E1.x() * E2.y() - E1.y() * E2.x() ) >= 0 ) clockwise = TqTrue;
+			else	clockwise = TqFalse;
 
 
 			TqFloat Ax = vA.x();
@@ -1001,9 +1003,9 @@ TqBool CqMicroPolygonStatic::Sample( CqVector2D& vecSample, TqFloat time, TqFloa
 			TqFloat Bx = vB.x();
 			TqFloat By = vB.y();
 
-			TqFloat v = (Ay-By)*vecSample.x()+(Bx-Ax)*vecSample.y()+(Ax*By-Bx*Ay);
-			if( ( ( clockwise ) && ( v <= 0 ) ) || ( ( !clockwise ) && ( v >= 0 ) ) )
-				return(TqFalse);
+			TqFloat v = ( Ay - By ) * vecSample.x() + ( Bx - Ax ) * vecSample.y() + ( Ax * By - Bx * Ay );
+			if ( ( ( clockwise ) && ( v <= 0 ) ) || ( ( !clockwise ) && ( v >= 0 ) ) )
+				return ( TqFalse );
 
 		}
 

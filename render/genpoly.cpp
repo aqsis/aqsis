@@ -46,7 +46,7 @@ CqPolygonGeneral2D& CqPolygonGeneral2D::operator=( const CqPolygonGeneral2D& Fro
 {
 	// Copy the vertices
 	TqInt iVertex = From.cVertices();
-	m_aiVertices.resize( From.cVertices() );
+	m_aiVertices.resize( iVertex );
 	while ( iVertex-- > 0 )
 		m_aiVertices[ iVertex ] = From.m_aiVertices[ iVertex ];
 
@@ -67,11 +67,19 @@ CqPolygonGeneral2D& CqPolygonGeneral2D::operator=( const CqPolygonGeneral2D& Fro
 
 void CqPolygonGeneral2D::SwapDirection()
 {
-	for ( TqInt iVertex = 0; iVertex < cVertices() / 2; iVertex++ )
+	TqInt vertices2 = cVertices() / 2;
+	TqInt vertices1 = cVertices() - 1;
+	for ( TqInt iVertex = 0; iVertex < vertices2; iVertex++ )
 	{
-		TqInt	itemp = m_aiVertices[ iVertex ];
-		m_aiVertices[ iVertex ] = m_aiVertices[ cVertices() - 1 - iVertex ];
-		m_aiVertices[ cVertices() - 1 - iVertex ] = itemp;
+		/* Mathematically equivalent */
+		TqInt which = vertices1 - iVertex;
+		TqInt tmp = m_aiVertices[ iVertex ];
+
+		m_aiVertices[ iVertex ] = m_aiVertices[ which ];
+		m_aiVertices[ which ] = tmp;
+
+
+
 	}
 	CalcOrientation();
 }
@@ -85,10 +93,13 @@ TqInt CqPolygonGeneral2D::CalcOrientation()
 {
 	// Calculate the area of this polygon, and
 	// if it is negative the polygon is clockwise.
-	TqFloat	Area = ( *this ) [ cVertices() - 1 ].x() * ( *this ) [ 0 ].y() -
-	               ( *this ) [ 0 ].x() * ( *this ) [ cVertices() - 1 ].y();
+	TqInt vertices1 = cVertices() - 1;
 
-	for ( TqInt iVertex = 0; iVertex < cVertices() - 1; iVertex++ )
+	TqFloat	Area = ( *this ) [ vertices1 ].x() * ( *this ) [ 0 ].y() -
+	               ( *this ) [ 0 ].x() * ( *this ) [ vertices1 ].y();
+
+
+	for ( TqInt iVertex = 0; iVertex < vertices1; iVertex++ )
 		Area += ( *this ) [ iVertex ].x() * ( *this ) [ iVertex + 1 ].y() -
 		        ( *this ) [ iVertex + 1 ].x() * ( *this ) [ iVertex ].y();
 
@@ -146,7 +157,8 @@ TqInt CqPolygonGeneral2D::CalcDeterminant( TqInt i1, TqInt i2, TqInt i3 ) const
 TqBool CqPolygonGeneral2D::NoneInside( TqInt i1, TqInt i2, TqInt i3, std::vector<TqInt>& iList ) const
 {
 	TqUint iVertex;
-	for ( iVertex = 0; iVertex < iList.size(); iVertex++ )
+	TqUint size = iList.size();
+	for ( iVertex = 0; iVertex < size; iVertex++ )
 	{
 		TqInt iN = iList[ iVertex ];
 
@@ -193,7 +205,8 @@ TqBool CqPolygonGeneral2D::Contains( CqPolygonGeneral2D& polyCheck )
 {
 	assert( polyCheck.cVertices() > 0 && cVertices() > 0 );
 
-	for ( TqInt iVertex = 0; iVertex < polyCheck.cVertices(); iVertex++ )
+	TqInt vertices = polyCheck.cVertices();
+	for ( TqInt iVertex = 0; iVertex < vertices; iVertex++ )
 	{
 		TqInt	c = 0;
 		TqFloat	x = polyCheck[ iVertex ].x();
@@ -201,7 +214,7 @@ TqBool CqPolygonGeneral2D::Contains( CqPolygonGeneral2D& polyCheck )
 
 		// Check if this vertex is inside this polygon.
 		TqInt	i, j;
-		for ( i = 0, j = cVertices() - 1; i < cVertices(); j = i++ )
+		for ( i = 0, j = vertices - 1; i < vertices; j = i++ )
 		{
 			// Check if this edge spans the vertex in y
 			if ( ( ( ( ( *this ) [ i ].y() <= y ) && ( y < ( *this ) [ j ].y() ) ) ||
@@ -236,10 +249,13 @@ void CqPolygonGeneral2D::Combine( CqPolygonGeneral2D& polyFrom )
 	TqFloat	MinDist = FLT_MAX;
 
 	TqInt i;
-	for ( i = 0; i < cVertices(); i++ )
+	TqInt vertices = cVertices();
+	TqInt polyvertices = polyFrom.cVertices();
+	for ( i = 0; i < vertices; i++ )
 	{
 		TqInt j;
-		for ( j = 0; j < polyFrom.cVertices(); j++ )
+
+		for ( j = 0; j < polyvertices; j++ )
 		{
 			CqVector2D	vecTemp( ( *this ) [ i ] - polyFrom[ j ] );
 			CurrDist = static_cast<TqFloat>( sqrt( vecTemp * vecTemp ) );
@@ -295,7 +311,7 @@ void CqPolygonGeneral2D::Combine( CqPolygonGeneral2D& polyFrom )
 	std::vector<TqInt>	avecNew;
 
 	// First copy the vertices from this one, from the min point up to the end...
-	for ( i = iMinThis; i < cVertices(); i++ )
+	for ( i = iMinThis; i < vertices; i++ )
 		avecNew.push_back( m_aiVertices[ i ] );
 
 	// ...then copy the vertices from this one, from 0 up to (and including) the min point...
@@ -303,7 +319,7 @@ void CqPolygonGeneral2D::Combine( CqPolygonGeneral2D& polyFrom )
 		avecNew.push_back( m_aiVertices[ i ] );
 
 	// ...then copy the vertices from that one, from the min point up to the end...
-	for ( i = iMinThat; i < polyFrom.cVertices(); i++ )
+	for ( i = iMinThat; i < polyvertices; i++ )
 		avecNew.push_back( polyFrom.m_aiVertices[ i ] );
 
 	// ...then copy the vertices from that one, from 0 up to (and including) the min point...
@@ -311,9 +327,10 @@ void CqPolygonGeneral2D::Combine( CqPolygonGeneral2D& polyFrom )
 		avecNew.push_back( polyFrom.m_aiVertices[ i ] );
 
 	// Now copy the new list of vertices to this new polygon.
-	m_aiVertices.resize( avecNew.size() );
+	TqInt size = avecNew.size();
+	m_aiVertices.resize( size );
 	TqUint ivert;
-	for ( ivert = 0; ivert < avecNew.size(); ivert++ )
+	for ( ivert = 0; ivert < size; ivert++ )
 		m_aiVertices[ ivert ] = avecNew[ ivert ];
 }
 
@@ -329,12 +346,13 @@ void CqPolygonGeneral2D::Triangulate( std::vector<TqInt>& aiList ) const
 	// polygon is self intersecting.
 
 	std::vector<TqInt>	iList;
-	iList.resize( m_aiVertices.size() );
-	TqInt iVertex = m_aiVertices.size();
+	TqInt size = m_aiVertices.size() ;
+	iList.resize( size );
+	TqInt iVertex = size;
 	while ( iVertex-- > 0 )
 		iList[ iVertex ] = iVertex;
 
-	TqInt cVertex = m_aiVertices.size();
+	TqInt cVertex = size;
 	while ( cVertex > 3 )
 	{
 		TqBool	fDone = TqFalse;

@@ -430,7 +430,8 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 
 	// Now process all the 'vertex' class variables.
 	std::vector<CqParameter*>::iterator iUP;
-	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+	for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
 	{
 		if ( ( *iUP ) ->Class() == class_vertex )
 		{
@@ -561,7 +562,8 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 	if ( v < m_avKnots[ vDegree() ] || v > m_avKnots[ m_cvVerts ] )
 		return ( 0 );
 
-	for ( i = 0; i < static_cast<TqInt>( m_avKnots.size() ); i++ )
+	TqInt size = static_cast<TqInt>( m_avKnots.size() );
+	for ( i = 0; i < size; i++ )
 	{
 		if ( m_avKnots[ i ] > v )
 		{
@@ -600,12 +602,14 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 		m_avKnots[ i ] = avHold[ i ];
 	for ( i = 1;i <= r;i++ )
 		m_avKnots[ k + i ] = v;
-	for ( i = k + 1;i < static_cast<TqInt>( m_avKnots.size() ); i++ )
+	size = static_cast<TqInt>( m_avKnots.size() );
+	for ( i = k + 1;i < size; i++ )
 		m_avKnots[ i + r ] = avHold[ i ];
 
 	// Now process all the 'vertex' class variables.
 	std::vector<CqParameter*>::iterator iUP;
-	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+	for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
 	{
 		if ( ( *iUP ) ->Class() == class_vertex )
 		{
@@ -769,7 +773,8 @@ void CqSurfaceNURBS::RefineKnotU( const std::vector<TqFloat>& X )
 
 	// Now process all the 'vertex' class variables.
 	std::vector<CqParameter*>::iterator iUP;
-	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+	for ( iUP = m_aUserParams.begin(); iUP != end ; iUP++ )
 	{
 		if ( ( *iUP ) ->Class() == class_vertex )
 		{
@@ -936,7 +941,8 @@ void CqSurfaceNURBS::RefineKnotV( const std::vector<TqFloat>& X )
 
 	// Now process all the 'vertex' class variables.
 	std::vector<CqParameter*>::iterator iUP;
-	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+	for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
 	{
 		if ( ( *iUP ) ->Class() == class_vertex )
 		{
@@ -1081,7 +1087,8 @@ void CqSurfaceNURBS::ClampU()
 
 		// Now process all the 'vertex' class variables.
 		std::vector<CqParameter*>::iterator iUP;
-		for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+		std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+		for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
 		{
 			if ( ( *iUP ) ->Class() == class_vertex )
 			{
@@ -1129,7 +1136,8 @@ void CqSurfaceNURBS::ClampV()
 
 		// Now process all the 'vertex' class variables.
 		std::vector<CqParameter*>::iterator iUP;
-		for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+		std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+		for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
 		{
 			if ( ( *iUP ) ->Class() == class_vertex )
 			{
@@ -1191,7 +1199,7 @@ void CqSurfaceNURBS::SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqB
 		}
 	}
 
-	if ( i <= 0L )          	    // No knot in middle, must create it
+	if ( i <= 0L )           	    // No knot in middle, must create it
 	{
 		midVal = ( aKnots[ 0L ] + aKnots[ last ] ) / 2.0;
 		middex = 0;
@@ -1203,7 +1211,7 @@ void CqSurfaceNURBS::SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqB
 	extra = Order - same;
 	std::vector<TqFloat> anewKnots( extra );
 
-	if ( same < Order )          	    // Must add knots
+	if ( same < Order )           	    // Must add knots
 	{
 		for ( i = 0; i < extra; i++ )
 			anewKnots[ i ] = midVal;
@@ -1970,7 +1978,7 @@ void CqSurfaceNURBS::SubdivideSegments( std::vector<CqSurfaceNURBS*>& S )
 			}
 		}
 
-		if ( i <= 0L )          	    // No knot in middle, must create it
+		if ( i <= 0L )           	    // No knot in middle, must create it
 		{
 			middex = 0;
 			while ( auKnots() [ middex + 1L ] < midVal )
@@ -1981,7 +1989,7 @@ void CqSurfaceNURBS::SubdivideSegments( std::vector<CqSurfaceNURBS*>& S )
 		extra = m_uOrder - same;
 		std::vector<TqFloat> anewKnots( extra );
 
-		if ( same < m_uOrder )          	    // Must add knots
+		if ( same < m_uOrder )           	    // Must add knots
 		{
 			for ( i = 0; i < extra; i++ )
 				anewKnots[ i ] = midVal;
@@ -2024,7 +2032,7 @@ void CqSurfaceNURBS::SubdivideSegments( std::vector<CqSurfaceNURBS*>& S )
 			}
 		}
 
-		if ( i <= 0L )          	    // No knot in middle, must create it
+		if ( i <= 0L )           	    // No knot in middle, must create it
 		{
 			middex = 0;
 			while ( avKnots() [ middex + 1L ] < midVal )
@@ -2035,7 +2043,7 @@ void CqSurfaceNURBS::SubdivideSegments( std::vector<CqSurfaceNURBS*>& S )
 		extra = m_vOrder - same;
 		std::vector<TqFloat> anewKnots( extra );
 
-		if ( same < m_vOrder )          	    // Must add knots
+		if ( same < m_vOrder )           	    // Must add knots
 		{
 			for ( i = 0; i < extra; i++ )
 				anewKnots[ i ] = midVal;

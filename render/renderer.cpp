@@ -37,7 +37,6 @@
 #include	"transform.h"
 #include	"rifile.h"
 #include	"texturemap.h"
-
 #include	"shadervm.h"
 
 START_NAMESPACE( Aqsis )
@@ -719,9 +718,11 @@ CqColor*	CqRenderer::GetColorOptionWrite( const char* strName, const char* strPa
 TqBool	CqRenderer::SetCoordSystem( const char* strName, const CqMatrix& matToWorld )
 {
 	// Search for the same named system in the current list.
+	TqLong hash = CqParameter::hash( strName );
 	for ( TqUint i = 0; i < m_aCoordSystems.size(); i++ )
 	{
-		if ( m_aCoordSystems[ i ].m_strName == strName )
+		TqLong hash2 = CqParameter::hash( m_aCoordSystems[ i ].m_strName.c_str() );
+		if ( hash2 == hash )
 		{
 			m_aCoordSystems[ i ].m_matToWorld = matToWorld;
 			m_aCoordSystems[ i ].m_matWorldTo = matToWorld.Inverse();
@@ -854,9 +855,12 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 	strName = strDecl;
 	// Search the local parameter declaration list.
 	std::vector<SqParameterDeclaration>::const_iterator is;
-	for ( is = m_Symbols.begin(); is != m_Symbols.end(); is++ )
+	std::vector<SqParameterDeclaration>::const_iterator end = m_Symbols.end();
+	TqLong hash = CqParameter::hash( strDecl );
+	for ( is = m_Symbols.begin(); is != end ; is++ )
 	{
-		if ( strName == is->m_strName )
+		TqLong hash2 = CqParameter::hash( is->m_strName.c_str() );
+		if ( hash == hash2 )
 			return ( *is );
 	}
 	return ( SqParameterDeclaration( "", type_invalid, class_invalid, 0, 0, "" ) );

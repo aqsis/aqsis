@@ -463,7 +463,7 @@ void CqSurfacePatchBicubic::ConvertToBezierBasis()
 /** Constructor.
  */
 
-CqSurfacePatchBilinear::CqSurfacePatchBilinear() : CqSurface(), m_fHasPhantomFourthVertex(TqFalse), m_iInternalu(-1), m_iInternalv(-1)
+CqSurfacePatchBilinear::CqSurfacePatchBilinear() : CqSurface(), m_fHasPhantomFourthVertex( TqFalse ), m_iInternalu( -1 ), m_iInternalv( -1 )
 {}
 
 
@@ -547,7 +547,7 @@ CqBound CqSurfacePatchBilinear::Bound() const
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
 	CqVector3D	vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
 	TqInt i;
-	for ( i = 0; i < (m_fHasPhantomFourthVertex?3:4); i++ )
+	for ( i = 0; i < ( m_fHasPhantomFourthVertex ? 3 : 4 ); i++ )
 	{
 		CqVector3D	vecV = ( *P() ) [ i ];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
@@ -662,18 +662,19 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 {
 	aSplits.push_back( new CqSurfacePatchBilinear );
 	aSplits.push_back( new CqSurfacePatchBilinear );
-	
-	if(m_fHasPhantomFourthVertex)
+
+	if ( m_fHasPhantomFourthVertex )
 	{
 		aSplits.push_back( new CqSurfacePatchBilinear );
 		aSplits.push_back( new CqSurfacePatchBilinear );
 	}
-
+	TqBool direction = SplitDir() == SplitDir_U;
+	TqBool opposite = !direction;
 	TqInt i;
-	for(i=0; i<(m_fHasPhantomFourthVertex?4:2); i++)
+	for ( i = 0; i < ( m_fHasPhantomFourthVertex ? 4 : 2 ); i++ )
 	{
 		aSplits[ i ] ->SetSurfaceParameters( *this );
-		aSplits[ i ] ->SetSplitDir( ( SplitDir() == SplitDir_U ) ? SplitDir_V : SplitDir_U );
+		aSplits[ i ] ->SetSplitDir( direction ? SplitDir_V : SplitDir_U );
 		aSplits[ i ] ->SetEyeSplitCount( EyeSplitCount() );
 		aSplits[ i ] ->m_fDiceable = TqTrue;
 		aSplits[ i ] ->AddRef();
@@ -681,28 +682,30 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	// Iterate through any use parameters subdividing and storing the second value in the target surface.
 	std::vector<CqParameter*>::iterator iUP;
-	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+
+	for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
 	{
 		CqParameter* pNewA = ( *iUP ) ->Clone();
 		CqParameter* pNewB = ( *iUP ) ->Clone();
-		( *iUP ) ->Subdivide( pNewA, pNewB, SplitDir() == SplitDir_U, this );
+		( *iUP ) ->Subdivide( pNewA, pNewB, direction, this );
 
-		if(m_fHasPhantomFourthVertex)
+		if ( m_fHasPhantomFourthVertex )
 		{
-			CqParameter* pNewC = pNewA ->Clone();
+			CqParameter * pNewC = pNewA ->Clone();
 			CqParameter* pNewD = pNewA ->Clone();
 			CqParameter* pNewE = pNewB ->Clone();
 			CqParameter* pNewF = pNewB ->Clone();
-			pNewA ->Subdivide( pNewC, pNewD, SplitDir() == SplitDir_V, this );
-			pNewB ->Subdivide( pNewE, pNewF, SplitDir() == SplitDir_V, this );
+			pNewA ->Subdivide( pNewC, pNewD, opposite, this );
+			pNewB ->Subdivide( pNewE, pNewF, opposite, this );
 
 			static_cast<CqSurface*>( aSplits[ 0 ] ) ->AddPrimitiveVariable( pNewC );
 			static_cast<CqSurface*>( aSplits[ 1 ] ) ->AddPrimitiveVariable( pNewD );
 			static_cast<CqSurface*>( aSplits[ 2 ] ) ->AddPrimitiveVariable( pNewE );
 			static_cast<CqSurface*>( aSplits[ 3 ] ) ->AddPrimitiveVariable( pNewF );
 
-			delete(pNewA);
-			delete(pNewB);
+			delete( pNewA );
+			delete( pNewB );
 		}
 		else
 		{
@@ -710,10 +713,10 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 			static_cast<CqSurface*>( aSplits[ 1 ] ) ->AddPrimitiveVariable( pNewB );
 		}
 	}
-	
-	if(m_fHasPhantomFourthVertex)
+
+	if ( m_fHasPhantomFourthVertex )
 	{
-		delete(aSplits.back());
+		delete( aSplits.back() );
 		aSplits.pop_back();
 
 		static_cast<CqSurfacePatchBilinear*>( aSplits[ 0 ] ) ->m_fHasPhantomFourthVertex = TqFalse;
@@ -855,7 +858,8 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 			TqFloat u1 = ( 1.0f / m_uPatches ) * ( j + 1 );
 
 			std::vector<CqParameter*>::iterator iUP;
-			for ( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
+			std::vector<CqParameter*>::iterator end = aUserParams().end();
+			for ( iUP = aUserParams().begin(); iUP != end; iUP++ )
 			{
 				if ( ( *iUP ) ->Class() == class_varying )
 				{
@@ -1067,7 +1071,8 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 
 			// Copy any primitive variables.
 			std::vector<CqParameter*>::iterator iUP;
-			for ( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
+			std::vector<CqParameter*>::iterator end = aUserParams().end();
+			for ( iUP = aUserParams().begin(); iUP != end; iUP++ )
 			{
 				if ( ( *iUP ) ->Class() == class_varying )
 				{

@@ -52,9 +52,9 @@ class CqImagersource;
  */
 enum EqDisplayMode
 {
-    ModeNone = 0x0000,  	///< Invalid.
-    ModeRGB = 0x0001,  		///< Red Green and Blue channels.
-    ModeA = 0x0002,  		///< Alpha channel.
+    ModeNone = 0x0000,   	///< Invalid.
+    ModeRGB = 0x0001,   		///< Red Green and Blue channels.
+    ModeA = 0x0002,   		///< Alpha channel.
     ModeZ = 0x0004		///< Depth channel.
 };
 
@@ -65,7 +65,7 @@ enum EqDisplayMode
  */
 enum EqProjection
 {
-    ProjectionOrthographic,  		///< Orthographic projection.
+    ProjectionOrthographic,   		///< Orthographic projection.
     ProjectionPerspective		///< Perspective projection.
 };
 
@@ -107,8 +107,9 @@ class CqOptions
 		 */
 		const	CqNamedParameterList* pOption( const char* strName ) const
 		{
-			TqLong hash = CqParameter::hash(strName);
-			for ( std::vector<CqNamedParameterList*>::const_iterator i = m_aOptions.begin(); i != m_aOptions.end(); i++ )
+			TqLong hash = CqParameter::hash( strName );
+			std::vector<CqNamedParameterList*>::const_iterator end = m_aOptions.end();
+			for ( std::vector<CqNamedParameterList*>::const_iterator i = m_aOptions.begin(); i != end; i++ )
 				if ( ( *i ) ->hash() == hash ) return ( *i );
 			return ( 0 );
 		}
@@ -118,11 +119,11 @@ class CqOptions
 		 */
 		CqNamedParameterList* pOptionWrite( const char* strName )
 		{
-			TqLong hash = CqParameter::hash(strName);
-
-			for ( std::vector<CqNamedParameterList*>::iterator i = m_aOptions.begin(); i != m_aOptions.end(); i++ )
+			TqLong hash = CqParameter::hash( strName );
+			std::vector<CqNamedParameterList*>::iterator end = m_aOptions.end();
+			for ( std::vector<CqNamedParameterList*>::iterator i = m_aOptions.begin(); i != end; i++ )
 			{
-				if ( ( *i ) ->hash()  == hash )
+				if ( ( *i ) ->hash() == hash )
 				{
 					if ( ( *i ) ->RefCount() == 1 )
 						return ( *i );
@@ -299,8 +300,8 @@ class CqOptions
 		RtFilterFunc m_funcFilter;						///< Pointer to the pixel filter function.
 		CqImagersource* m_pshadImager;		///< Pointer to the imager shader.
 
-		TqBool	m_bFrameAspectRatioCalled,  		///< Indicate RiFrameAspectRatio has been called. Calculation of the screen geometry is reliant on which of these have been called.
-		m_bScreenWindowCalled,  			///< Indicate RiScreenWindow has been called. Calculation of the screen geometry is reliant on which of these have been called.
+		TqBool	m_bFrameAspectRatioCalled,   		///< Indicate RiFrameAspectRatio has been called. Calculation of the screen geometry is reliant on which of these have been called.
+		m_bScreenWindowCalled,   			///< Indicate RiScreenWindow has been called. Calculation of the screen geometry is reliant on which of these have been called.
 		m_bFormatCalled;				///< Indicate RiFormat has been called. Calculation of the screen geometry is reliant on which of these have been called.
 }
 ;

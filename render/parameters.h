@@ -110,49 +110,51 @@ class CqParameter
 		{
 			return ( m_strName );
 		}
-		const   TqLong hash() const
+		const TqLong hash() const
 		{
 			return m_hash;
 		}
-		static  TqLong	hash(const char *strName) 
+		static TqLong	hash( const char *strName )
 		{
 			TqInt retval = 0;
-                        
-			if (strName) 
+
+			if ( strName )
 			{
-				TqInt length = strlen(strName); /* < 2^18, or carry can overflow */
+				TqInt length = strlen( strName ); /* < 2^18, or carry can overflow */
 				/* ints are assumed to be 32 bits */
 				TqUshort *sbuf;
 				TqUint hi, lo, hicarry, locarry;
 				TqInt len, remain, i;
 
-				
-				sbuf = (TqUshort *) strName;
-				len = 2*(length / 4);   /* make sure it's even */
+
+				sbuf = ( TqUshort * ) strName;
+				len = 2 * ( length / 4 );   /* make sure it's even */
 				remain = length % 4;    /* add odd bytes below */
 
-				hi = (retval >> 16);
-				lo = (retval << 16) >> 16;
-				for (i=0; i < len; i+=2) {
-				    hi += sbuf[i];
-				    lo += sbuf[i+1];
+				hi = ( retval >> 16 );
+				lo = ( retval << 16 ) >> 16;
+				for ( i = 0; i < len; i += 2 )
+				{
+					hi += sbuf[ i ];
+					lo += sbuf[ i + 1 ];
 				}
-				if (remain >= 1) hi += strName[2*len] * 0x100;
-				if (remain >= 2) hi += strName[2*len+1];
-				if (remain == 3) lo += strName[2*len+2] * 0x100;
+				if ( remain >= 1 ) hi += strName[ 2 * len ] * 0x100;
+				if ( remain >= 2 ) hi += strName[ 2 * len + 1 ];
+				if ( remain == 3 ) lo += strName[ 2 * len + 2 ] * 0x100;
 
 				hicarry = hi >> 16;     /* fold carry bits in */
 				locarry = lo >> 16;
-				while (hicarry || locarry) {
-				    hi = (hi & 0xFFFF) + locarry;
-				    lo = (lo & 0xFFFF) + hicarry;
-				    hicarry = hi >> 16;
-				    locarry = lo >> 16;
+				while ( hicarry || locarry )
+				{
+					hi = ( hi & 0xFFFF ) + locarry;
+					lo = ( lo & 0xFFFF ) + hicarry;
+					hicarry = hi >> 16;
+					locarry = lo >> 16;
 				}
-				retval = (hi << 16) + lo;
-				
+				retval = ( hi << 16 ) + lo;
+
 			}
-			return (TqLong) retval;
+			return ( TqLong ) retval;
 		}
 		/** Get the array size.
 		 */
@@ -163,9 +165,9 @@ class CqParameter
 
 	protected:
 		CqString	m_strName;		///< String name of the parameter.
-		TqInt		m_Count;		///< Array size of value.
-		TqLong      m_hash;
-		
+		TqInt	m_Count;		///< Array size of value.
+		TqLong m_hash;
+
 }
 ;
 
@@ -336,8 +338,12 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		 */
 		CqParameterTypedVarying<T, I, SLT>& operator=( const CqParameterTypedVarying<T, I, SLT>& From )
 		{
-			m_aValues.resize( From.m_aValues.size() );
-			for ( TqUint j = 0; j < m_aValues.size(); j++ )
+
+			TqInt size = From.m_aValues.size();
+
+			m_aValues.resize( size );
+
+			for ( TqUint j = 0; j < size; j++ )
 			{
 				m_aValues[ j ] = From.m_aValues[ j ];
 			}
@@ -428,7 +434,8 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 			// Also note that the only time a Uniform value is diced is when it is on a single element, i.e. the patchmesh
 			// has been split into isngle patches, or the polymesh has been split into polys.
 			TqInt i;
-			for ( i = 0; i < ( MAX( u * v, pResult->Size() ) ); i++ )
+			TqInt max = MAX( u * v, pResult->Size() );
+			for ( i = 0; i < max; i++ )
 				pResult->SetValue( m_aValues[ 0 ], i );
 		}
 
@@ -898,7 +905,8 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqInt i;
-			for ( i = 0; i < ( MAX( u * v, pResult->Size() ) ); i++ )
+			TqInt max = ( MAX( u * v, pResult->Size() ) );
+			for ( i = 0; i < max; i++ )
 				pResult->SetValue( pValue( 0 ) [ 0 ], i );
 		}
 
@@ -1003,7 +1011,8 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqInt i;
-			for ( i = 0; i < ( MAX( u * v, pResult->Size() ) ); i++ )
+			TqInt max = ( MAX( u * v, pResult->Size() ) );
+			for ( i = 0; i < max; i++ )
 				pResult->SetValue( pValue( 0 ) [ 0 ], i );
 		}
 
@@ -1265,8 +1274,8 @@ class CqNamedParameterList : public CqRefCount
 	public:
 		CqNamedParameterList( const char* strName ) : m_strName( strName )
 		{
-			m_hash = CqParameter::hash(strName);
-			
+			m_hash = CqParameter::hash( strName );
+
 		}
 		CqNamedParameterList( const CqNamedParameterList& From );
 		~CqNamedParameterList()
@@ -1307,7 +1316,7 @@ class CqNamedParameterList : public CqRefCount
 		const	CqParameter* pParameter( const char* strName ) const
 		{
 			TqLong hash;
-			hash = CqParameter::hash(strName);
+			hash = CqParameter::hash( strName );
 			for ( std::vector<CqParameter*>::const_iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
 				if ( ( *i ) ->hash() == hash ) return ( *i );
 			return ( 0 );
@@ -1319,7 +1328,7 @@ class CqNamedParameterList : public CqRefCount
 		CqParameter* pParameter( const char* strName )
 		{
 			TqLong hash;
-			hash = CqParameter::hash(strName);
+			hash = CqParameter::hash( strName );
 			for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
 				if ( ( *i ) ->hash() == hash ) return ( *i );
 			return ( 0 );
@@ -1331,7 +1340,7 @@ class CqNamedParameterList : public CqRefCount
 	private:
 		CqString	m_strName;			///< The name of this parameter list.
 		std::vector<CqParameter*>	m_aParameters;		///< A vector of name/value parameters.
-        TqLong  m_hash;
+		TqLong m_hash;
 }
 ;
 

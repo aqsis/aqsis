@@ -39,7 +39,7 @@ CqBound CqPolygonBase::Bound() const
 {
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
 	CqVector3D	vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
-	TqInt i,n;
+	TqInt i, n;
 	n = NumVertices();
 	for ( i = 0; i < n; i++ )
 	{
@@ -270,8 +270,8 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		// Find two suitable vectors, and produce a geometric normal to use.
 		TqInt i = 1;
 		CqVector3D	vecN0, vecN1;
-		
-		while ( i < n)
+
+		while ( i < n )
 		{
 			vecN0 = static_cast<CqVector3D>( PolyP( i ) ) - vecA;
 			if ( vecN0.Magnitude() > FLT_EPSILON )
@@ -314,7 +314,8 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 
 		// Copy any user specified primitive variables.
 		std::vector<CqParameter*>::iterator iUP;
-		for ( iUP = Surface().aUserParams().begin(); iUP != Surface().aUserParams().end(); iUP++ )
+		std::vector<CqParameter*>::iterator end = Surface().aUserParams().end();
+		for ( iUP = Surface().aUserParams().begin(); iUP != end; iUP++ )
 		{
 			CqParameter* pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 
@@ -325,7 +326,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 				pNewUP->SetValue( ( *iUP ), 1, iUPB );
 				pNewUP->SetValue( ( *iUP ), 2, iUPD );
 				pNewUP->SetValue( ( *iUP ), 3, iUPC );
-				if(indexC == indexD)
+				if ( indexC == indexD )
 					CreatePhantomData( pNewUP );
 			}
 			else if ( pNewUP->Class() == class_uniform )
@@ -343,7 +344,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		}
 
 		// If this is a triangle, then mark the patch as a special case. See function header comment for more details.
-		if(indexC == indexD)	pNew->SetfHasPhantomFourthVertex(TqTrue);
+		if ( indexC == indexD ) pNew->SetfHasPhantomFourthVertex( TqTrue );
 
 		// If there are no smooth normals specified, then fill in the facet normal at each vertex.
 		if ( !bHasN() && USES( iUses, EnvVars_N ) )
@@ -365,10 +366,10 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 			CqVector3D PA, PB, PC, PD;
 			CqMatrix matID;
 			const CqMatrix& matCurrentToWorld = QGetRenderContext() ->matSpaceToSpace( "current", "object", matID, Surface().pTransform() ->matObjectToWorld() );
-			PA = matCurrentToWorld * pNew->P()->pValue()[0];
-			PB = matCurrentToWorld * pNew->P()->pValue()[1];
-			PC = matCurrentToWorld * pNew->P()->pValue()[3];
-			PD = matCurrentToWorld * pNew->P()->pValue()[2];
+			PA = matCurrentToWorld * pNew->P() ->pValue() [ 0 ];
+			PB = matCurrentToWorld * pNew->P() ->pValue() [ 1 ];
+			PC = matCurrentToWorld * pNew->P() ->pValue() [ 3 ];
+			PD = matCurrentToWorld * pNew->P() ->pValue() [ 2 ];
 
 			if ( USES( iUses, EnvVars_s ) && !bHass() )
 			{
@@ -438,62 +439,62 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 /** Generate phanton data to 'stretch' the triangle patch into a parallelogram.
  */
 
-void CqPolygonBase::CreatePhantomData(CqParameter* pParam)
+void CqPolygonBase::CreatePhantomData( CqParameter* pParam )
 {
-	assert(pParam->Class() == class_varying || pParam->Class() == class_vertex);
-	
-	switch(pParam->Type())
+	assert( pParam->Class() == class_varying || pParam->Class() == class_vertex );
+
+	switch ( pParam->Type() )
 	{
-		case type_point:
-		case type_vector:
-		case type_normal:
-		{
-			CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(pParam);
-			pTParam->pValue(3)[0] = ( pTParam->pValue(1)[0] - pTParam->pValue(0)[0] ) + pTParam->pValue(2)[0];
-			break;
-		}
+			case type_point:
+			case type_vector:
+			case type_normal:
+			{
+				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
+				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
+				break;
+			}
 
-		case type_hpoint:
-		{
-			CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pParam);
-			pTParam->pValue(3)[0] = ( pTParam->pValue(1)[0] - pTParam->pValue(0)[0] ) + pTParam->pValue(2)[0];
-			break;
-		}
+			case type_hpoint:
+			{
+				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
+				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
+				break;
+			}
 
-		case type_float:
-		{
-			CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pParam);
-			pTParam->pValue(3)[0] = ( pTParam->pValue(1)[0] - pTParam->pValue(0)[0] ) + pTParam->pValue(2)[0];
-			break;
-		}
+			case type_float:
+			{
+				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
+				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
+				break;
+			}
 
-		case type_integer:
-		{
-			CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>(pParam);
-			pTParam->pValue(3)[0] = ( pTParam->pValue(1)[0] - pTParam->pValue(0)[0] ) + pTParam->pValue(2)[0];
-			break;
-		}
+			case type_integer:
+			{
+				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
+				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
+				break;
+			}
 
-		case type_color:
-		{
-			CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>(pParam);
-			pTParam->pValue(3)[0] = ( pTParam->pValue(1)[0] - pTParam->pValue(0)[0] ) + pTParam->pValue(2)[0];
-			break;
-		}
+			case type_color:
+			{
+				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
+				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
+				break;
+			}
 
-		case type_matrix:
-		{
-			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(pParam);
-			pTParam->pValue(3)[0] = ( pTParam->pValue(1)[0] - pTParam->pValue(0)[0] ) + pTParam->pValue(2)[0];
-			break;
-		}
+			case type_matrix:
+			{
+				CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
+				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
+				break;
+			}
 
-		case type_string:
-		{
-			CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>(pParam);
-			pTParam->pValue(3)[0] = ( pTParam->pValue(1)[0] - pTParam->pValue(0)[0] ) + pTParam->pValue(2)[0];
-			break;
-		}
+			case type_string:
+			{
+				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
+				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
+				break;
+			}
 	}
 }
 
@@ -532,7 +533,7 @@ TqBool CqSurfacePolygon::CheckDegenerate() const
 {
 	// Check if all points are within a minute distance of each other.
 	TqBool	fDegen = TqTrue;
-	TqInt i,n;
+	TqInt i, n;
 	n = NumVertices();
 	for ( i = 1; i < n; i++ )
 	{

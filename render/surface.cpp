@@ -212,7 +212,8 @@ void CqSurface::ClonePrimitiveVariables( const CqSurface& From )
 	// Clone any primitive variables.
 	m_aUserParams.clear();
 	std::vector<CqParameter*>::const_iterator iUP;
-	for ( iUP = From.m_aUserParams.begin(); iUP != From.m_aUserParams.end(); iUP++ )
+	std::vector<CqParameter*>::const_iterator end = From.m_aUserParams.end() ;
+	for ( iUP = From.m_aUserParams.begin(); iUP != end; iUP++ )
 		AddPrimitiveVariable( ( *iUP ) ->Clone() );
 
 	// Copy the standard primitive variables index table.
@@ -467,7 +468,8 @@ CqMicroPolyGridBase* CqSurface::Dice()
 
 	// Now we need to dice the user specified parameters as appropriate.
 	std::vector<CqParameter*>::iterator iUP;
-	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+	for ( iUP = m_aUserParams.begin(); iUP != end ; iUP++ )
 	{
 		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
 		if ( NULL != pGrid->pAttributes() ->pshadSurface() )
@@ -506,11 +508,14 @@ TqInt CqSurface::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	// Iterate through any use parameters subdividing and storing the second value in the target surface.
 	std::vector<CqParameter*>::iterator iUP;
-	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+	TqBool direction = SplitDir() == SplitDir_U;
+
+	for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
 	{
 		CqParameter* pNewA = ( *iUP ) ->Clone();
 		CqParameter* pNewB = ( *iUP ) ->Clone();
-		( *iUP ) ->Subdivide( pNewA, pNewB, SplitDir() == SplitDir_U, this );
+		( *iUP ) ->Subdivide( pNewA, pNewB, direction , this );
 		static_cast<CqSurface*>( aSplits[ 0 ] ) ->AddPrimitiveVariable( pNewA );
 		static_cast<CqSurface*>( aSplits[ 1 ] ) ->AddPrimitiveVariable( pNewB );
 	}
@@ -531,7 +536,7 @@ TqInt CqSurface::Split( std::vector<CqBasicSurface*>& aSplits )
 		aSplits.insert( aSplits.end(), aSplits1.begin(), aSplits1.end() );
 	}
 
-	PostSubdivide(aSplits);
+	PostSubdivide( aSplits );
 
 	return ( aSplits.size() );
 }
@@ -545,7 +550,8 @@ void CqSurface::uSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 {
 	// Iterate through any use parameters subdividing and storing the second value in the target surface.
 	std::vector<CqParameter*>::iterator iUP;
-	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+	for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
 	{
 		CqParameter* pNewA = ( *iUP ) ->Clone();
 		CqParameter* pNewB = ( *iUP ) ->Clone();
@@ -564,7 +570,8 @@ void CqSurface::vSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 {
 	// Iterate through any use parameters subdividing and storing the second value in the target surface.
 	std::vector<CqParameter*>::iterator iUP;
-	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+	for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
 	{
 		CqParameter* pNewA = ( *iUP ) ->Clone();
 		CqParameter* pNewB = ( *iUP ) ->Clone();
@@ -583,32 +590,37 @@ void	CqSurface::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const
 {
 	// Tansform the control hull by the specified matrix.
 	std::vector<CqParameter*>::iterator iUP;
-	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+	for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
 	{
 		TqInt i;
 
 		if ( ( *iUP ) ->Type() == type_point )
 		{
 			CqParameterTyped<CqVector3D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-			for ( i = 0; i < ( *iUP ) ->Size(); i++ )
+			TqInt size = ( *iUP ) ->Size();
+			for ( i = 0; i < size; i++ )
 				pTPV->pValue() [ i ] = matTx * pTPV->pValue() [ i ];
 		}
 		else if ( ( *iUP ) ->Type() == type_normal )
 		{
 			CqParameterTyped<CqVector3D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-			for ( i = 0; i < ( *iUP ) ->Size(); i++ )
+			TqInt size = ( *iUP ) ->Size();
+			for ( i = 0; i < size; i++ )
 				pTPV->pValue() [ i ] = matITTx * pTPV->pValue() [ i ];
 		}
 		if ( ( *iUP ) ->Type() == type_vector )
 		{
 			CqParameterTyped<CqVector3D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-			for ( i = 0; i < ( *iUP ) ->Size(); i++ )
+			TqInt size = ( *iUP ) ->Size();
+			for ( i = 0; i < size; i++ )
 				pTPV->pValue() [ i ] = matRTx * pTPV->pValue() [ i ];
 		}
 		if ( ( *iUP ) ->Type() == type_hpoint )
 		{
 			CqParameterTyped<CqVector4D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
-			for ( i = 0; i < ( *iUP ) ->Size(); i++ )
+			TqInt size = ( *iUP ) ->Size();
+			for ( i = 0; i < size; i++ )
 				pTPV->pValue() [ i ] = matTx * pTPV->pValue() [ i ];
 		}
 	}

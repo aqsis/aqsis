@@ -106,7 +106,7 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		 */
 		CqNamedParameterList* pAttributeWrite( const char* strName )
 		{
-			CqNamedParameterList* pAttr = m_aAttributes.Find( strName );
+			CqNamedParameterList * pAttr = m_aAttributes.Find( strName );
 			if ( NULL != pAttr )
 			{
 				if ( pAttr->RefCount() == 1 )
@@ -131,7 +131,8 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		void	AddLightsource( CqLightsource* pL )
 		{
 			// Check if the ligthsource is already active
-			for ( std::vector<CqLightsource*>::iterator i = m_apLightsources.begin(); i != m_apLightsources.end(); i++ )
+			std::vector<CqLightsource*>::iterator end = m_apLightsources.end();
+			for ( std::vector<CqLightsource*>::iterator i = m_apLightsources.begin(); i != end; i++ )
 			{
 				if ( ( *i ) == pL )
 					return ;
@@ -144,7 +145,8 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		void	RemoveLightsource( CqLightsource* pL )
 		{
 			// Check if the ligthsource is in the active list.
-			for ( std::vector<CqLightsource*>::iterator i = m_apLightsources.begin(); i != m_apLightsources.end(); i++ )
+			std::vector<CqLightsource*>::iterator end = m_apLightsources.end();
+			for ( std::vector<CqLightsource*>::iterator i = m_apLightsources.begin(); i != end; i++ )
 			{
 				if ( *i == pL )
 				{
@@ -316,7 +318,7 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 
 					if ( m_aLists[ i ].empty() )
 						return ( 0 );
-					
+
 
 					std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
 					if ( iEntry == m_aLists[ i ].end() )
@@ -324,7 +326,7 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 					else
 					{
 						TqLong hash;
-						hash = CqParameter::hash(pname);
+						hash = CqParameter::hash( pname );
 						while ( iEntry != m_aLists[ i ].end() )
 						{
 							if ( ( *iEntry ) ->hash() == hash )
@@ -342,7 +344,7 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 
 					if ( m_aLists[ i ].empty() )
 						return ( 0 );
-				
+
 
 					std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
 					if ( iEntry == m_aLists[ i ].end() )
@@ -351,7 +353,7 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 					{
 						TqLong hash;
 
-						hash = CqParameter::hash(pname);
+						hash = CqParameter::hash( pname );
 						while ( iEntry != m_aLists[ i ].end() )
 						{
 							if ( ( *iEntry ) ->hash() == hash )
