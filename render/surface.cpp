@@ -169,6 +169,7 @@ CqSurface::CqSurface(const CqSurface& From) : CqBasicSurface(From),
 											m_u("u"),
 											m_v("v")
 {
+	*this=From;
 }
 
 
