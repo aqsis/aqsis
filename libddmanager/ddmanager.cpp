@@ -128,14 +128,21 @@ TqInt CqDDManager::CloseDisplays()
 
 TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 {
+    TqInt	xmin = pBucket->XOrigin();
+    TqInt	ymin = pBucket->YOrigin();
+    TqInt	xmaxplus1 = xmin + pBucket->Width();
+    TqInt	ymaxplus1 = ymin + pBucket->Height();
+
+	// If completely outside the crop rectangle, don't bother sending.
+	if( xmaxplus1 <= QGetRenderContext()->pImage()->CropWindowXMin() ||
+		ymaxplus1 <= QGetRenderContext()->pImage()->CropWindowYMin() ||
+		xmin > QGetRenderContext()->pImage()->CropWindowXMax() ||
+		ymin > QGetRenderContext()->pImage()->CropWindowYMax() )
+		return(0);
+
     std::vector<SqDisplayRequest>::iterator i;
     for ( i = m_displayRequests.begin(); i != m_displayRequests.end(); i++ )
     {
-        TqInt	xmin = pBucket->XOrigin();
-        TqInt	ymin = pBucket->YOrigin();
-        TqInt	xmaxplus1 = xmin + pBucket->Width();
-        TqInt	ymaxplus1 = ymin + pBucket->Height();
-
 		// Allocate enough space to put the whole bucket data into.
 		unsigned char* data = reinterpret_cast<unsigned char*>(malloc(i->m_elementSize * pBucket->Width() * pBucket->Height()));
 
@@ -163,7 +170,6 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 						value = ROUND(i->m_QuantizeZeroVal + value * (i->m_QuantizeOneVal - i->m_QuantizeZeroVal) + i->m_QuantizeDitherVal );
 						value = CLAMP(value, i->m_QuantizeMinVal, i->m_QuantizeMaxVal) ;
 					}
-
 					switch(iformat->type)
 					{
 						case PkDspyFloat32:
@@ -817,7 +823,7 @@ void CqDDManager::PrepareSystemParameters( SqDisplayRequest& req )
 	// "origin"
     TqInt origin[2];
     origin[0] = static_cast<TqInt>( CLAMP( CEIL( OriginalSize[0] * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, OriginalSize[0] ) );
-    origin[1] = static_cast<TqInt>( CLAMP( CEIL( OriginalSize[0] * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, OriginalSize[1] ) );
+    origin[1] = static_cast<TqInt>( CLAMP( CEIL( OriginalSize[1] * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, OriginalSize[1] ) );
 	ConstructIntsParameter("origin", origin, 2, parameter);
 	req.m_customParams.push_back(parameter);
 

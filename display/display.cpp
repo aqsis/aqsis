@@ -66,6 +66,7 @@ PtDspyError DspyReorderFormatting(int formatCount, PtDspyDevFormat *format, int 
 PtDspyError DspyFindStringInParamList(const char *string, char **result, int n, const UserParameter *p);
 PtDspyError DspyFindIntInParamList(const char *string, int *result, int n, const UserParameter *p);
 PtDspyError DspyFindMatrixInParamList(const char *string, float *result, int n, const UserParameter *p);
+PtDspyError DspyFindIntsInParamList(const char *string, int *resultCount, int *result, int n, const UserParameter *p);
 #ifdef __cplusplus
 }
 #endif
@@ -246,8 +247,8 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
                 TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
 
             // Set the position tages in case we aer dealing with a cropped image.
-            //TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
-            //TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
+            TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
+            TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
 
             TqInt row;
             for ( row = 0; row < image->m_height; row++ )
@@ -303,8 +304,8 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
             if ( image->m_iFormatCount == 4 )
                 TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
             // Set the position tages in case we aer dealing with a cropped image.
-            //TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
-            //TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
+            TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) image->m_origin[0] );
+            TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) image->m_origin[1] );
             TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
 
             TqInt	linelen = image->m_width * image->m_iFormatCount;
@@ -481,6 +482,14 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		// Extract the transformation matrices if they are there.
 		DspyFindMatrixInParamList( "NP", reinterpret_cast<float*>(pImage->m_matWorldToScreen), paramCount, parameters );
 		DspyFindMatrixInParamList( "Nl", reinterpret_cast<float*>(pImage->m_matWorldToCamera), paramCount, parameters );
+
+		// Extract any clipping information.
+		pImage->m_origin[0] = pImage->m_origin[1] = 0;
+		pImage->m_OriginalSize[0] = pImage->m_width;
+		pImage->m_OriginalSize[1] = pImage->m_height;
+		TqInt count = 2;
+		DspyFindIntsInParamList("origin", &count, pImage->m_origin, paramCount, parameters);
+		DspyFindIntsInParamList("OriginalSize", &count, pImage->m_OriginalSize, paramCount, parameters);
 	}
 	else
 		return(PkDspyErrorNoMemory);
@@ -500,19 +509,28 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	SqDisplayInstance* pImage;
 	pImage = reinterpret_cast<SqDisplayInstance*>(image);
 
-	const unsigned char* pdatarow = data;
-	TqInt bucketlinelen = entrysize * (xmaxplus1 - xmin);
+	TqInt __xmin = MAX((xmin-pImage->m_origin[0]), 0);
+	TqInt __ymin = MAX((ymin-pImage->m_origin[1]), 0);
+	TqInt __xmaxplus1 = MIN((xmaxplus1-pImage->m_origin[0]), pImage->m_width);
+	TqInt __ymaxplus1 = MIN((ymaxplus1-pImage->m_origin[1]), pImage->m_height);
+	TqInt bucketlinelen = entrysize * (__xmaxplus1 - __xmin);
 
-	if( pImage && data && xmin >= 0 && ymin >= 0 && xmaxplus1 <= pImage->m_width && ymaxplus1 <= pImage->m_height )
+	// Calculate where in the bucket we are starting from if the window is cropped.
+	TqInt row = MAX(pImage->m_origin[1] - ymin, 0);
+	TqInt col = MAX(pImage->m_origin[0] - xmin, 0);
+	const unsigned char* pdatarow = data;
+	pdatarow += (row * bucketlinelen) + (col * entrysize);
+
+	if( pImage && data && __xmin >= 0 && __ymin >= 0 && __xmaxplus1 <= pImage->m_width && __ymaxplus1 <= pImage->m_height )
 	{
 		// If rendering to a file, or an "rgb" framebuffer, we can just copy the data.
 		if( pImage->m_imageType != Type_Framebuffer || pImage->m_iFormatCount <= 3 )
 		{
 			TqInt y;
-			for ( y = ymin; y < ymaxplus1; y++ )
+			for ( y = __ymin; y < __ymaxplus1; y++ )
 			{
 				// Copy a whole row at a time, as we know it is being sent in the proper format and order.
-				TqInt so = ( y * pImage->m_lineLength ) + ( xmin * pImage->m_entrySize );
+				TqInt so = ( y * pImage->m_lineLength ) + ( __xmin * pImage->m_entrySize );
 				memcpy(reinterpret_cast<char*>(pImage->m_data)+so, reinterpret_cast<const void*>(pdatarow), bucketlinelen);
 				pdatarow += bucketlinelen;
 			}
@@ -522,10 +540,10 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		{
 			TqInt t;	// Not used, just a temporary needed for the INT_PRELERP macro.
 			TqInt y;
-			for ( y = ymin; y < ymaxplus1; y++ )
+			for ( y = __ymin; y < __ymaxplus1; y++ )
 			{
 				TqInt x;
-				for ( x = xmin; x < xmaxplus1; x++ )
+				for ( x = __xmin; x < __xmaxplus1; x++ )
 				{
 					unsigned char alpha = pdatarow[3];
 					if( alpha > 0 )
@@ -551,8 +569,9 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		if(pImage->m_imageType == Type_ZFramebuffer)
 		{
 			const unsigned char* pdatarow = data;
+			pdatarow += (row * bucketlinelen) + (col * entrysize);
 			TqInt y;
-			for ( y = ymin; y < ymaxplus1; y++ )
+			for ( y = __ymin; y < __ymaxplus1; y++ )
 			{
 				TqInt x;
 				for ( x = xmin; x < xmaxplus1; x++ )
@@ -570,7 +589,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 
 	if(pImage->m_imageType == Type_Framebuffer || pImage->m_imageType == Type_ZFramebuffer)
 	{
-		pImage->m_uiImageWidget->damage(1, xmin, ymin, xmaxplus1-xmin, ymaxplus1-ymin);
+		pImage->m_uiImageWidget->damage(1, __xmin, __ymin, __xmaxplus1-__xmin, __ymaxplus1-__ymin);
 		Fl::check();
 	}
 	return(PkDspyErrorNone);	

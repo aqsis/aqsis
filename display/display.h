@@ -92,6 +92,8 @@ struct SqDisplayInstance
 	char*		m_filename;
 	TqInt		m_width;
 	TqInt		m_height;
+	TqInt		m_OriginalSize[2];
+	TqInt		m_origin[2];
 	TqInt		m_iFormatCount;
 	TqInt		m_format;
 	TqInt		m_entrySize;
