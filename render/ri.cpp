@@ -685,8 +685,13 @@ RtVoid	RiProjectionV( const char *name, PARAMETERLIST )
 {
 	if ( strcmp( name, RI_PERSPECTIVE ) == 0 )
 		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "Projection" ) [ 0 ] = ProjectionPerspective ;
-	else
+	else if	( strcmp( name, RI_ORTHOGRAPHIC ) == 0 )
 		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "Projection" ) [ 0 ] = ProjectionOrthographic ;
+	else if( name != RI_NULL )
+	{
+		QGetRenderContext() ->Logger() ->error( "RiProjection: Invalid projection: %s", name );
+		return ;
+	}
 
 	RtInt i;
 	for ( i = 0; i < count; i++ )
@@ -3222,6 +3227,11 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 		}
 		RELEASEREF( pSurface );
 	}
+	else
+	{
+		QGetRenderContext() ->Logger() ->error( "RiPatch: Invalid patch type: %s", type );
+	}
+
 	return ;
 }
 
@@ -3250,6 +3260,12 @@ RtVoid	RiPatchMesh( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 
 RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, PARAMETERLIST )
 {
+	if( strcmp( uwrap, RI_BICUBIC ) && strcmp( uwrap, RI_BILINEAR ) )
+		QGetRenderContext() ->Logger() ->error( "RiPatchMesh: Invalid u-wrap type: %s", type );
+
+	if( strcmp( vwrap, RI_BICUBIC ) && strcmp( vwrap, RI_BILINEAR ) )
+		QGetRenderContext() ->Logger() ->error( "RiPatchMesh: Invalid v-wrap type: %s", type );
+	
 	if ( strcmp( type, RI_BICUBIC ) == 0 )
 	{
 		// Create a surface patch
@@ -3305,6 +3321,11 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 		}
 		RELEASEREF( pSurface );
 	}
+	else
+	{
+		QGetRenderContext() ->Logger() ->error( "RiPatchMesh: Invalid patch type: %s", type );
+	}
+
 	return ;
 }
 
@@ -4495,6 +4516,10 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 				RELEASEREF( pPointsClass );
 				RELEASEREF( pSubd2 );
 			}
+		}
+		else
+		{
+			QGetRenderContext() ->Logger() ->error( "RiSubdivisionMesh: Invalid scheme: %s", scheme );
 		}
 	}
 

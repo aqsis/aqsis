@@ -1017,7 +1017,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								if( candidates == NULL )
 								{
 									RELEASEREF( StdEnv );
-									logger->fatal("%s: No DSO found for external shadeop: %s\n", strName().c_str(), strFunc.c_str());
+									logger->critical("%s: No DSO found for external shadeop: %s\n", strName().c_str(), strFunc.c_str());
 									return ;
 								}
 								m_ActiveDSOMap[strFunc]=candidates;
@@ -1034,7 +1034,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							{
 								//error, we dont know this return type
 								RELEASEREF( StdEnv );
-								logger->fatal("%s: Invalid return type in call to external shadeop: %s: %s\n", strName().c_str(), strFunc.c_str(), strRetType.c_str());
+								logger->critical("%s: Invalid return type in call to external shadeop: %s: %s\n", strName().c_str(), strFunc.c_str(), strRetType.c_str());
 								return;
 							};
 
@@ -1050,7 +1050,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								{
 									// Error, unknown arg type
 									RELEASEREF( StdEnv );
-									logger->fatal("%s: Invalid argument type in call to external shadeop: %s: %c\n", strName().c_str(), strFunc.c_str(), strArgTypes[x]);
+									logger->critical("%s: Invalid argument type in call to external shadeop: %s: %c\n", strName().c_str(), strFunc.c_str(), strArgTypes[x]);
 									return;
 								};
 
@@ -1068,7 +1068,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							};
 							if(candidate == candidates->end())
 							{ 
-								logger->fatal("%s: No candidate found for call to external shadeop: %s", strName().c_str(), strFunc.c_str());
+								logger->critical("%s: No candidate found for call to external shadeop: %s", strName().c_str(), strFunc.c_str());
 								logger->info("%s: Perhaps you need some casts?\n", strName().c_str());
 								logger->info("%s: The following candidates are in you current DSO path:\n", strName().c_str());
 								candidate = candidates->begin();
