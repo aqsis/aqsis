@@ -1159,30 +1159,6 @@ CqBasicSurface* CqWSurf::ExtractFace( TqInt index)
 	{
 		CqWSurf* pNew = new CqWSurf(this, index);
 
-		TqInt MyUses = Uses();
-
-		// If the shaders need u/v or s/t and they are not specified, then we need to put them in as defaults.
-		if( USES( MyUses, EnvVars_u ) && !bHasu() )
-		{
-			pNew->pPoints()->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
-			pNew->pPoints()->u()->SetSize(4);
-			pNew->pPoints()->u()->pValue( 0 )[0] = 0.0f;
-			pNew->pPoints()->u()->pValue( 1 )[0] = 1.0f;
-			pNew->pPoints()->u()->pValue( 2 )[0] = 0.0f;
-			pNew->pPoints()->u()->pValue( 3 )[0] = 1.0f;
-		}
-
-		// If the shaders need u/v or s/t and they are not specified, then we need to put them in as defaults.
-		if( USES( MyUses, EnvVars_v ) && !bHasv() )
-		{
-			pNew->pPoints()->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
-			pNew->pPoints()->v()->SetSize(4);
-			pNew->pPoints()->v()->pValue( 0 )[0] = 0.0f;
-			pNew->pPoints()->v()->pValue( 1 )[0] = 0.0f;
-			pNew->pPoints()->v()->pValue( 2 )[0] = 1.0f;
-			pNew->pPoints()->v()->pValue( 3 )[0] = 1.0f;
-		}
-
 		return( pNew );
 	}
 }
@@ -1878,36 +1854,6 @@ CqBasicSurface* CqMotionWSurf::ExtractFace( TqInt index)
 //	else
 	{
 		CqMotionWSurf* pNew = new CqMotionWSurf(this, index);
-
-		TqInt MyUses = Uses();
-
-		TqInt i;
-		for( i = 0; i < pNew->cTimes(); i++ )
-		{
-			CqPolygonPoints* pPoints = pNew->GetMotionObject( pNew->Time( i ) );
-
-			// If the shaders need u/v or s/t and they are not specified, then we need to put them in as defaults.
-			if( USES( MyUses, EnvVars_u ) && !bHasu() )
-			{
-				pPoints->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
-				pPoints->u()->SetSize(4);
-				pPoints->u()->pValue( 0 )[0] = 0.0f;
-				pPoints->u()->pValue( 1 )[0] = 1.0f;
-				pPoints->u()->pValue( 2 )[0] = 0.0f;
-				pPoints->u()->pValue( 3 )[0] = 1.0f;
-			}
-
-			// If the shaders need u/v or s/t and they are not specified, then we need to put them in as defaults.
-			if( USES( MyUses, EnvVars_v ) && !bHasv() )
-			{
-				pPoints->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
-				pPoints->v()->SetSize(4);
-				pPoints->v()->pValue( 0 )[0] = 0.0f;
-				pPoints->v()->pValue( 1 )[0] = 0.0f;
-				pPoints->v()->pValue( 2 )[0] = 1.0f;
-				pPoints->v()->pValue( 3 )[0] = 1.0f;
-			}
-		}
 
 		return( pNew );
 	}
