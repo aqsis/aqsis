@@ -7,7 +7,7 @@ libaqsistypes_la_SOURCES = aqsis.h aqsis_types.h bitvector.cpp bitvector.h color
 
 libaqsistypes_la_LIBADD = $(top_builddir)/libaqsistypes/posix/libplatform.la
 
-include_HEADERS = aqsis.h aqsis_types.h bitvector.h color.h exception.h file.h list.h matrix.h memorypool.h random.h sstring.h vector2d.h vector3d.h vector4d.h
+include_HEADERS = aqsis.h aqsis_types.h bitvector.h color.h exception.h file.h list.h matrix.h memorypool.h random.h sstring.h vector2d.h vector3d.h vector4d.h refcount.h
 
 if DEBUG
 CXXFLAGS = -g -Wall
