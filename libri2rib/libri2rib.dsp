@@ -296,10 +296,6 @@ SOURCE=.\outstream.h
 
 SOURCE=.\plstore.h
 # End Source File
-# Begin Source File
-
-SOURCE=.\ri.h
-# End Source File
 # End Group
 # End Target
 # End Project

@@ -122,7 +122,7 @@ RtVoid RiContext ( RtContextHandle ch )
     }
 }
 
-RtToken RiDeclare ( const char *name, const char *declaration )
+RtToken RiDeclare ( RtToken name, RtToken declaration )
 {
     try
     {
@@ -257,7 +257,7 @@ RtVoid RiCropWindow ( RtFloat xmin, RtFloat xmax, RtFloat ymin, RtFloat ymax )
     }
 }
 
-RtVoid RiProjection ( const char *name, ... )
+RtVoid RiProjection ( RtToken name, ... )
 {
     try
     {
@@ -274,7 +274,7 @@ RtVoid RiProjection ( const char *name, ... )
     }
 }
 
-RtVoid RiProjectionV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] )
+RtVoid RiProjectionV ( RtToken name, RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
     {
@@ -383,7 +383,7 @@ RtVoid RiExposure ( RtFloat gain, RtFloat gamma )
     }
 }
 
-RtVoid RiImager ( const char *name, ... )
+RtVoid RiImager ( RtToken name, ... )
 {
     try
     {
@@ -400,7 +400,7 @@ RtVoid RiImager ( const char *name, ... )
     }
 }
 
-RtVoid RiImagerV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] )
+RtVoid RiImagerV ( RtToken name, RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
     {
@@ -424,7 +424,7 @@ RtVoid RiQuantize ( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ampl 
     }
 }
 
-RtVoid RiDisplay ( const char *name, RtToken type, RtToken mode, ... )
+RtVoid RiDisplay ( RtToken name, RtToken type, RtToken mode, ... )
 {
     try
     {
@@ -441,7 +441,7 @@ RtVoid RiDisplay ( const char *name, RtToken type, RtToken mode, ... )
     }
 }
 
-RtVoid RiDisplayV ( const char *name, RtToken type, RtToken mode,
+RtVoid RiDisplayV ( RtToken name, RtToken type, RtToken mode,
                     RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
@@ -454,7 +454,7 @@ RtVoid RiDisplayV ( const char *name, RtToken type, RtToken mode,
     }
 }
 
-RtVoid RiHider ( const char *type, ... )
+RtVoid RiHider ( RtToken type, ... )
 {
     try
     {
@@ -471,7 +471,7 @@ RtVoid RiHider ( const char *type, ... )
     }
 }
 
-RtVoid RiHiderV ( const char *type, RtInt n, RtToken tokens[], RtPointer parms[] )
+RtVoid RiHiderV ( RtToken type, RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
     {
@@ -507,7 +507,7 @@ RtVoid RiRelativeDetail ( RtFloat relativedetail )
     }
 }
 
-RtVoid RiOption ( const char *name, ... )
+RtVoid RiOption ( RtToken name, ... )
 {
     try
     {
@@ -524,7 +524,7 @@ RtVoid RiOption ( const char *name, ... )
     }
 }
 
-RtVoid RiOptionV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] )
+RtVoid RiOptionV ( RtToken name, RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
     {
@@ -604,7 +604,7 @@ RtVoid RiTextureCoordinates( RtFloat s1, RtFloat t1, RtFloat s2, RtFloat t2,
     }
 }
 
-RtLightHandle RiLightSource ( const char *name, ... )
+RtLightHandle RiLightSource ( RtToken name, ... )
 {
     try
     {
@@ -622,7 +622,7 @@ RtLightHandle RiLightSource ( const char *name, ... )
     }
 }
 
-RtLightHandle RiLightSourceV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] )
+RtLightHandle RiLightSourceV ( RtToken name, RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
     {
@@ -635,7 +635,7 @@ RtLightHandle RiLightSourceV ( const char *name, RtInt n, RtToken tokens[], RtPo
     }
 }
 
-RtLightHandle RiAreaLightSource ( const char *name, ... )
+RtLightHandle RiAreaLightSource ( RtToken name, ... )
 {
     try
     {
@@ -653,7 +653,7 @@ RtLightHandle RiAreaLightSource ( const char *name, ... )
     }
 }
 
-RtLightHandle RiAreaLightSourceV ( const char *name,
+RtLightHandle RiAreaLightSourceV ( RtToken name,
                                    RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
@@ -679,7 +679,7 @@ RtVoid RiIlluminate ( RtLightHandle light, RtBoolean onoff )
     }
 }
 
-RtVoid RiSurface ( const char *name, ... )
+RtVoid RiSurface ( RtToken name, ... )
 {
     try
     {
@@ -696,7 +696,7 @@ RtVoid RiSurface ( const char *name, ... )
     }
 }
 
-RtVoid RiSurfaceV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] )
+RtVoid RiSurfaceV ( RtToken name, RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
     {
@@ -708,7 +708,7 @@ RtVoid RiSurfaceV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms
     }
 }
 
-RtVoid RiAtmosphere ( const char *name, ... )
+RtVoid RiAtmosphere ( RtToken name, ... )
 {
     try
     {
@@ -725,7 +725,7 @@ RtVoid RiAtmosphere ( const char *name, ... )
     }
 }
 
-RtVoid RiAtmosphereV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] )
+RtVoid RiAtmosphereV ( RtToken name, RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
     {
@@ -737,7 +737,7 @@ RtVoid RiAtmosphereV ( const char *name, RtInt n, RtToken tokens[], RtPointer pa
     }
 }
 
-RtVoid RiInterior ( const char *name, ... )
+RtVoid RiInterior ( RtToken name, ... )
 {
     try
     {
@@ -754,7 +754,7 @@ RtVoid RiInterior ( const char *name, ... )
     }
 }
 
-RtVoid RiInteriorV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] )
+RtVoid RiInteriorV ( RtToken name, RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
     {
@@ -766,7 +766,7 @@ RtVoid RiInteriorV ( const char *name, RtInt n, RtToken tokens[], RtPointer parm
     }
 }
 
-RtVoid RiExterior ( const char *name, ... )
+RtVoid RiExterior ( RtToken name, ... )
 {
     try
     {
@@ -783,7 +783,7 @@ RtVoid RiExterior ( const char *name, ... )
     }
 }
 
-RtVoid RiExteriorV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] )
+RtVoid RiExteriorV ( RtToken name, RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
     {
@@ -1012,7 +1012,7 @@ RtVoid RiSkew ( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
     }
 }
 
-RtVoid RiDeformation ( const char *name, ... )
+RtVoid RiDeformation ( RtToken name, ... )
 {
     try
     {
@@ -1029,7 +1029,7 @@ RtVoid RiDeformation ( const char *name, ... )
     }
 }
 
-RtVoid RiDeformationV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] )
+RtVoid RiDeformationV ( RtToken name, RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
     {
@@ -1041,7 +1041,7 @@ RtVoid RiDeformationV ( const char *name, RtInt n, RtToken tokens[], RtPointer p
     }
 }
 
-RtVoid RiDisplacement ( const char *name, ... )
+RtVoid RiDisplacement ( RtToken name, ... )
 {
     try
     {
@@ -1058,7 +1058,7 @@ RtVoid RiDisplacement ( const char *name, ... )
     }
 }
 
-RtVoid RiDisplacementV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] )
+RtVoid RiDisplacementV ( RtToken name, RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
     {
@@ -1128,7 +1128,7 @@ RtVoid RiTransformEnd ( void )
     }
 }
 
-RtVoid RiAttribute ( const char *name, ... )
+RtVoid RiAttribute ( RtToken name, ... )
 {
     try
     {
@@ -1145,7 +1145,7 @@ RtVoid RiAttribute ( const char *name, ... )
     }
 }
 
-RtVoid RiAttributeV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] )
+RtVoid RiAttributeV ( RtToken name, RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
     {
@@ -1900,7 +1900,7 @@ RtVoid RiMotionEnd ( void )
     }
 }
 
-RtVoid RiMakeTexture ( const char *pic, const char *tex, RtToken swrap, RtToken twrap,
+RtVoid RiMakeTexture ( RtToken pic, RtToken tex, RtToken swrap, RtToken twrap,
                        RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
     try
@@ -1919,7 +1919,7 @@ RtVoid RiMakeTexture ( const char *pic, const char *tex, RtToken swrap, RtToken 
     }
 }
 
-RtVoid RiMakeTextureV ( const char *pic, const char *tex, RtToken swrap, RtToken twrap,
+RtVoid RiMakeTextureV ( RtToken pic, RtToken tex, RtToken swrap, RtToken twrap,
                         RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth,
                         RtInt n, RtToken tokens[], RtPointer parms[] )
 {
@@ -1935,7 +1935,7 @@ RtVoid RiMakeTextureV ( const char *pic, const char *tex, RtToken swrap, RtToken
     }
 }
 
-RtVoid RiMakeBump ( const char *pic, const char *tex, RtToken swrap, RtToken twrap,
+RtVoid RiMakeBump ( RtToken pic, RtToken tex, RtToken swrap, RtToken twrap,
                     RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
     try
@@ -1954,7 +1954,7 @@ RtVoid RiMakeBump ( const char *pic, const char *tex, RtToken swrap, RtToken twr
     }
 }
 
-RtVoid RiMakeBumpV ( const char *pic, const char *tex, RtToken swrap, RtToken twrap,
+RtVoid RiMakeBumpV ( RtToken pic, RtToken tex, RtToken swrap, RtToken twrap,
                      RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth,
                      RtInt n, RtToken tokens[], RtPointer parms[] )
 {
@@ -1970,7 +1970,7 @@ RtVoid RiMakeBumpV ( const char *pic, const char *tex, RtToken swrap, RtToken tw
     }
 }
 
-RtVoid RiMakeLatLongEnvironment ( const char *pic, const char *tex,
+RtVoid RiMakeLatLongEnvironment ( RtToken pic, RtToken tex,
                                   RtFilterFunc filterfunc,
                                   RtFloat swidth, RtFloat twidth, ... )
 {
@@ -1990,7 +1990,7 @@ RtVoid RiMakeLatLongEnvironment ( const char *pic, const char *tex,
     }
 }
 
-RtVoid RiMakeLatLongEnvironmentV ( const char *pic, const char *tex,
+RtVoid RiMakeLatLongEnvironmentV ( RtToken pic, RtToken tex,
                                    RtFilterFunc filterfunc,
                                    RtFloat swidth, RtFloat twidth,
                                    RtInt n, RtToken tokens[], RtPointer parms[] )
@@ -2007,8 +2007,8 @@ RtVoid RiMakeLatLongEnvironmentV ( const char *pic, const char *tex,
     }
 }
 
-RtVoid RiMakeCubeFaceEnvironment ( const char *px, const char *nx, const char *py, const char *ny,
-                                   const char *pz, const char *nz, const char *tex, RtFloat fov,
+RtVoid RiMakeCubeFaceEnvironment ( RtToken px, RtToken nx, RtToken py, RtToken ny,
+                                   RtToken pz, RtToken nz, RtToken tex, RtFloat fov,
                                    RtFilterFunc filterfunc,
                                    RtFloat swidth, RtFloat ywidth, ... )
 {
@@ -2029,8 +2029,8 @@ RtVoid RiMakeCubeFaceEnvironment ( const char *px, const char *nx, const char *p
     }
 }
 
-RtVoid RiMakeCubeFaceEnvironmentV ( const char *px, const char *nx, const char *py, const char *ny,
-                                    const char *pz, const char *nz, const char *tex, RtFloat fov,
+RtVoid RiMakeCubeFaceEnvironmentV ( RtToken px, RtToken nx, RtToken py, RtToken ny,
+                                    RtToken pz, RtToken nz, RtToken tex, RtFloat fov,
                                     RtFilterFunc filterfunc, RtFloat swidth, RtFloat ywidth,
                                     RtInt n, RtToken tokens[], RtPointer parms[] )
 {
@@ -2046,7 +2046,7 @@ RtVoid RiMakeCubeFaceEnvironmentV ( const char *px, const char *nx, const char *
     }
 }
 
-RtVoid RiMakeShadow ( const char *pic, const char *tex, ... )
+RtVoid RiMakeShadow ( RtToken pic, RtToken tex, ... )
 {
 
     try
@@ -2064,7 +2064,7 @@ RtVoid RiMakeShadow ( const char *pic, const char *tex, ... )
     }
 }
 
-RtVoid RiMakeShadowV ( const char *pic, const char *tex,
+RtVoid RiMakeShadowV ( RtToken pic, RtToken tex,
                        RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     try
