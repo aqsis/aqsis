@@ -1,13 +1,35 @@
 #include <stdio.h>
 #include "ri.h"
 
-// Options strings
+
+/*-------------------*/
+/* Available options:*/
+/* ------------------*/
+
+/*-----------------------------------------------------------------------------------------------*/
+/* Name:                Token:          Parameter:                     Default value:            */
+/*-----------------------------------------------------------------------------------------------*/
+/* RI2RIB_Output                                                                                 */
+/*                      Type            "Ascii" | "Binary"             "Ascii"                   */
+/*                      Compression      "None" | "Gzip"               "None"                    */
+/*                      FileOpenType     "Name" | "FileDescriptor"     "Name"                    */
+/*                      PipeHandle           integer                        1  (Standard output) */
+/*                                                                                               */
+/* RI2RIB_Indentation                                                                            */
+/*                      Type            "None" | "Space" | "Tab"       "None"                    */
+/*                      Size                 integer                        0                    */
+/*-----------------------------------------------------------------------------------------------*/
+
+
+/* Options strings */
 char *ri2rib_ascii = "Ascii";
 char *ri2rib_binary = "Binary";
 char *ri2rib_space = "Space";
 char *ri2rib_tab = "Tab";
 char *ri2rib_none = "None";
 char *ri2rib_gzip = "Gzip";
+
+char *ri2rib_file_descriptor = "FileDescriptor";
 
 RtFloat newFilter ( RtFloat a, RtFloat b, RtFloat c, RtFloat d )
 {
@@ -303,18 +325,49 @@ void torus_test()
 	           ( RtToken ) "Compression", ( RtPointer ) & ri2rib_none, RI_NULL );
 }
 
+void file_descriptor_test()
+{
+	int out = 1;
+	int err = 2;
+
+	RiBegin( RI_NULL );
+	RiArchiveRecord( RI_COMMENT, "RiBegin(RI_NULL); test\n" );
+	RiEnd();
+
+	RiOption( "RI2RIB_Output",
+	          ( RtToken ) "FileOpenType", ( RtPointer ) & ri2rib_file_descriptor, RI_NULL );
+	RiOption( "RI2RIB_Output",
+	          ( RtToken ) "PipeHandle", ( RtPointer ) & out, RI_NULL );
+	RiBegin( RI_NULL );
+	RiArchiveRecord( RI_COMMENT, "File descriptor = 1 test\n" );
+	RiEnd();
+
+
+	RiOption( "RI2RIB_Output",
+	          ( RtToken ) "FileOpenType", ( RtPointer ) & ri2rib_file_descriptor, RI_NULL );
+	RiOption( "RI2RIB_Output",
+	          ( RtToken ) "PipeHandle", ( RtPointer ) & err, RI_NULL );
+	RiBegin( RI_NULL );
+	RiArchiveRecord( RI_COMMENT, "try \"ri2ribtest 2>ri2rib_err.txt\" to see if it works !" );
+	RiArchiveRecord( RI_COMMENT, "File descriptor = 2 test\n" );
+	RiEnd();
+}
+
+
 int main()
 {
-	printf( "Context switching test\n" );
+	printf( "Context switching test:\n" );
 	context_switching_test();
-	printf( "\nBasic test\n" );
+	printf( "\nBasic test:\n" );
 	basic_test();
-	printf( "\nIndent test\n" );
+	printf( "\nIndent test:\n" );
 	indent_test();
-	printf( "\nColorSamples test\n" );
+	printf( "\nColorSamples test:\n" );
 	colorsamples_test();
-	printf( "\nBinary output test\n" );
+	printf( "\nBinary output test:\n" );
 	torus_test();
+	printf ( "\nFile descriptor output test:\n" );
+	file_descriptor_test();
 	return 0;
 }
 

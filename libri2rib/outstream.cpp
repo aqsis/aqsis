@@ -30,21 +30,6 @@
 
 USING_NAMESPACE( libri2rib );
 
-void CqStreamStd::openFile( const char * name )
-{
-	out.open( name, std::ios::out );
-	if ( !out )
-	{
-		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file ", name, "", TqFalse );
-	}
-}
-
-void CqStreamStd::closeFile()
-{
-	out.close();
-}
-
-
 
 void CqStreamGzip::error()
 {
@@ -95,6 +80,17 @@ void CqStreamGzip::openFile( const char *name )
 	gzsetparams( gzf, Z_DEFAULT_COMPRESSION, Z_DEFAULT_STRATEGY );
 }
 
+void CqStreamGzip::openFile( int fdesc )
+{
+	gzf = gzdopen( fdesc, "wb" );
+	if ( gzf == NULL )
+	{
+		char c[ 100 ];
+		sprintf( c, "%u", fdesc );
+		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file with descriptor=", c, "", TqFalse );
+	}
+}
+
 void CqStreamGzip::closeFile()
 {
 	if ( gzf )
@@ -102,42 +98,60 @@ void CqStreamGzip::closeFile()
 }
 
 
+
+
+
+void CqStreamFDesc::error()
+{
+	throw CqError ( RIE_SYSTEM, RIE_ERROR, strerror( errno ), TqFalse );
+}
+
 CqStream & CqStreamFDesc::operator<< ( int i )
 {
-	fprintf( fd, "%i", i );
+	if ( fprintf( fstr, "%i", i ) < 0 ) error();
 	return *this;
 }
 
 CqStream & CqStreamFDesc::operator<< ( float f )
 {
-	fprintf( fd, "%f", f );
+	if ( fprintf( fstr, "%f", f ) < 0 ) error();
 	return *this;
 }
 
 CqStream & CqStreamFDesc::operator<< ( std::string s )
 {
-	fputs( s.c_str(), fd );
+	if ( fputs( s.c_str(), fstr ) == EOF ) error();
 	return *this;
 }
 
 CqStream & CqStreamFDesc::operator<< ( char c )
 {
-	fputc( c, fd );
+	if ( fputc( c, fstr ) == EOF ) error();
 	return *this;
 }
 
 void CqStreamFDesc::openFile( const char *name )
 {
-	throw CqError( RIE_NOFILE, RIE_ERROR, "Trying to open file ", name, " using PIPE mode.", TqFalse );
+	fstr = fopen( name, "wb" );
+	if ( fstr == NULL )
+	{
+		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file ", name, "", TqFalse );
+	}
+}
+
+void CqStreamFDesc::openFile ( int fdesc )
+{
+	fstr = fdopen ( fdesc, "wb" );
+	if ( fstr == NULL )
+	{
+		char c[ 100 ];
+		sprintf( c, "%u", fdesc );
+		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file with descriptor=", c, "", TqFalse );
+	}
 }
 
 void CqStreamFDesc::closeFile()
 {
-	if ( fd )
-		fclose( fd );
-}
-
-void CqStreamFDesc::setFile(FILE* desc)
-{
-	fd = desc;
+	if ( fstr )
+		fclose( fstr );
 }

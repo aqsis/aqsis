@@ -139,7 +139,7 @@ RtVoid RiBegin ( RtToken name )
 {
 	try
 	{
-		context.addContext();
+		context.addContext( name );
 		context.current().RiBegin( name );
 	}
 	catch ( CqError & r )

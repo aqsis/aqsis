@@ -37,21 +37,12 @@ START_NAMESPACE( libri2rib )
 
 class CqContext
 {
-	private:
-		struct SqPair
-		{
-			CqOutput *output;
-			CqStream *stream;
-
-			SqPair() : output( ( CqOutput * ) RI_NULL ), stream( ( CqStream * ) RI_NULL )
-			{}
-			~SqPair()
-			{}
-		}
-		;
-
-		std::list<SqPair> m_lContextHandle;
+		std::list<CqOutput *> m_lContextHandle;
 		CqOutput *m_Active;
+
+		SqOptions::EqFileOpenType m_FileOpenType;
+		TqBool m_PipeHandleSet;
+		int m_PipeHandle;
 
 		SqOptions::EqOutputType m_OutputType;
 		SqOptions::EqCompression m_Compression;
@@ -66,15 +57,13 @@ class CqContext
 		~CqContext()
 		{}
 
-		void addContext();
+		void addContext( RtToken name );
 		RtContextHandle getContext();
 		CqOutput & current();
 		void switchTo ( RtContextHandle );
 		void removeCurrent();
 
 		void parseOption( const char *name, RtInt n, RtToken tokens[], RtPointer params[] );
-
-		static CqStreamFDesc* m_PipeHandle;
 };
 
 END_NAMESPACE( libri2rib )

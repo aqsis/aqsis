@@ -60,7 +60,9 @@ class CqBinary : public CqOutput
 		void print ( const char *c );
 
 	public:
-		CqBinary( CqStream *o, SqOptions::EqIndentation i, TqInt isize );
+		CqBinary( SqOptions::EqFileOpenType, const char *, int fdesc,
+		          SqOptions::EqCompression,
+		          SqOptions::EqIndentation, TqInt isize );
 		~CqBinary()
 		{}
 }

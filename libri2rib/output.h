@@ -88,6 +88,13 @@ class CqOutput
 		               RtInt vertex = 1, RtInt varying = 1, RtInt uniform = 1 );
 		std::string getFilterFuncName ( RtFilterFunc, const char * ) const;
 
+		CqOutput( CqOutput const & )
+		{}
+		CqOutput const &operator=( CqOutput const & )
+		{
+			return * this;
+		}
+
 	protected:
 		SqOptions::EqIndentation m_Indentation;
 		TqInt m_IndentSize;
@@ -122,9 +129,10 @@ class CqOutput
 		{}
 
 	public:
-		CqOutput( CqStream *o, SqOptions::EqIndentation, TqInt isize );
-		virtual ~CqOutput()
-		{}
+		CqOutput( SqOptions::EqFileOpenType, const char *, int fdesc,
+		          SqOptions::EqCompression,
+		          SqOptions::EqIndentation, TqInt isize );
+		virtual ~CqOutput();
 
 		RtToken RiDeclare( const char *name, const char *declaration );
 

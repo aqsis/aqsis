@@ -48,39 +48,8 @@ class CqStream
 		{}
 
 		virtual void openFile( const char * ) = 0;
+		virtual void openFile ( int file_descriptor ) = 0;
 		virtual void closeFile() = 0;
-};
-
-
-class CqStreamStd : public CqStream
-{
-	private:
-		std::ofstream out;
-	public:
-		CqStream & operator<<( int i )
-		{
-			out << i; return *this;
-		}
-		CqStream & operator<<( float f )
-		{
-			out << f; return *this;
-		}
-		CqStream & operator<<( std::string s )
-		{
-			out << s; return *this;
-		}
-		CqStream & operator<<( char c )
-		{
-			out << c; return *this;
-		}
-
-		CqStreamStd()
-		{}
-		~CqStreamStd()
-		{}
-
-		void openFile( const char * );
-		void closeFile();
 };
 
 class CqStreamGzip : public CqStream
@@ -100,6 +69,7 @@ class CqStreamGzip : public CqStream
 		{}
 
 		void openFile( const char * );
+		void openFile( int );
 		void closeFile();
 };
 
@@ -107,7 +77,8 @@ class CqStreamGzip : public CqStream
 class CqStreamFDesc : public CqStream
 {
 	private:
-		FILE* fd;
+		FILE* fstr;
+		void error();
 	public:
 		CqStream & operator<<( int i );
 		CqStream & operator<<( float f );
@@ -120,9 +91,8 @@ class CqStreamFDesc : public CqStream
 		{}
 
 		void openFile( const char * );
+		void openFile( int );
 		void closeFile();
-
-		void setFile( FILE* fd );
 };
 
 

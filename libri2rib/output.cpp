@@ -42,18 +42,46 @@ USING_NAMESPACE( libri2rib );
 
 
 
-CqOutput::CqOutput( CqStream *o, SqOptions::EqIndentation i, TqInt isize ) :
+CqOutput::CqOutput( SqOptions::EqFileOpenType fot, const char *name, int fdesc,
+                    SqOptions::EqCompression comp,
+                    SqOptions::EqIndentation i, TqInt isize )
+		:
 		m_ColorNComps( 3 ),
 		m_ObjectHandle( 0 ),
 		m_LightHandle( 0 ),
 		m_Indentation( i ),
 		m_IndentSize( isize ),
-		m_IndentLevel( 0 ),
-		out( o )
+		m_IndentLevel( 0 )
 {
+	switch ( comp )
+	{
+			case SqOptions::Compression_None:
+			out = new CqStreamFDesc();
+			break;
+			case SqOptions::Compression_Gzip:
+			out = new CqStreamGzip();
+			break;
+	}
+
+	switch ( fot )
+	{
+			case SqOptions::FileOpenType_ByName:
+			out->openFile( name );
+			break;
+			case SqOptions::FileOpenType_ByFileDescriptor:
+			out->openFile( fdesc );
+			break;
+	}
+
 	SqSteps a = {RI_BEZIERSTEP, RI_BEZIERSTEP};
 	m_Steps.push( a );
 }
+
+CqOutput::~CqOutput()
+{
+	delete out;
+}
+
 
 
 
@@ -190,17 +218,11 @@ RtToken CqOutput::RiDeclare( const char *name, const char *declaration )
 
 RtVoid CqOutput::RiBegin( RtToken name )
 {
-	// If NULL, try to adopt the PIPE setup using the RiOption("rib", "pipe") option.
-	if( NULL != name )
-		( *out ).openFile( name );
-
 	printHeader();
 }
 
 RtVoid CqOutput::RiEnd( RtVoid )
-{
-	( *out ).closeFile();
-}
+{}
 
 RtVoid CqOutput::RiFrameBegin( RtInt frame )
 {

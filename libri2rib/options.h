@@ -30,6 +30,7 @@ START_NAMESPACE( libri2rib )
 
 struct SqOptions
 {
+	enum EqFileOpenType { FileOpenType_ByName, FileOpenType_ByFileDescriptor };
 	enum EqOutputType { OutputType_Ascii, OutputType_Binary };
 	enum EqCompression { Compression_None, Compression_Gzip };
 	enum EqIndentation { Indentation_None, Indentation_Space, Indentation_Tab };

@@ -114,8 +114,10 @@ void CqBinary::encodeString( const char *s )
 		OUT << str[ i ];
 }
 
-CqBinary::CqBinary( CqStream *o, SqOptions::EqIndentation i, TqInt isize )
-		: CqOutput( o, i, isize )
+CqBinary::CqBinary( SqOptions::EqFileOpenType fot, const char *name, int fdesc,
+                    SqOptions::EqCompression comp,
+                    SqOptions::EqIndentation i, TqInt isize )
+		: CqOutput( fot, name, fdesc, comp, i, isize )
 {
 	for ( TqInt ii = 0; ii < LAST_Function; ii++ )
 		m_aRequest[ ii ] = TqFalse;

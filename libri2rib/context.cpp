@@ -30,49 +30,43 @@
 USING_NAMESPACE( libri2rib )
 
 
-CqStreamFDesc* CqContext::m_PipeHandle = 0;
-
-
 CqContext::CqContext() :
+		m_FileOpenType ( SqOptions::FileOpenType_ByName ),
+		m_PipeHandleSet ( TqFalse ),
+		m_PipeHandle ( 1 ),
 		m_OutputType( SqOptions::OutputType_Ascii ),
 		m_Compression( SqOptions::Compression_None ),
 		m_Indentation( SqOptions::Indentation_None ),
 		m_IndentSize( 0 )
 {
 	m_Active = ( CqOutput * ) RI_NULL;
-	m_lContextHandle.push_back( SqPair() );
+	m_lContextHandle.push_back( m_Active );
 }
 
-void CqContext::addContext()
+void CqContext::addContext( RtToken name )
 {
-	SqPair pair;
-
-	if( NULL != m_PipeHandle )
-		pair.stream = m_PipeHandle;
-	else
+	if ( name == NULL )
 	{
-		switch ( m_Compression )
-		{
-				case SqOptions::Compression_None:
-				pair.stream = new CqStreamStd ();
-				break;
-				case SqOptions::Compression_Gzip:
-				pair.stream = new CqStreamGzip ();
-				break;
-		}
+		m_FileOpenType = SqOptions::FileOpenType_ByFileDescriptor;
+		if ( m_PipeHandleSet == TqFalse )
+			m_PipeHandle = 1;
 	}
 
 	switch ( m_OutputType )
 	{
 			case SqOptions::OutputType_Ascii:
-			m_Active = pair.output = new CqASCII ( pair.stream , m_Indentation, m_IndentSize );
+			m_Active = new CqASCII ( m_FileOpenType , name, m_PipeHandle,
+			                         m_Compression,
+			                         m_Indentation, m_IndentSize );
 			break;
 			case SqOptions::OutputType_Binary:
-			m_Active = pair.output = new CqBinary ( pair.stream , m_Indentation, m_IndentSize );
+			m_Active = new CqBinary ( m_FileOpenType , name, m_PipeHandle,
+			                          m_Compression,
+			                          m_Indentation, m_IndentSize );
 			break;
 	}
 
-	m_lContextHandle.push_back( pair );
+	m_lContextHandle.push_back( m_Active );
 }
 
 RtContextHandle CqContext::getContext()
@@ -91,11 +85,11 @@ CqOutput & CqContext::current()
 
 void CqContext::switchTo( RtContextHandle ch )
 {
-	std::list<SqPair>::iterator first = m_lContextHandle.begin();
+	std::list<CqOutput *>::iterator first = m_lContextHandle.begin();
 	CqOutput *r = ( CqOutput * ) ch;
 	for ( ;first != m_lContextHandle.end();first++ )
 	{
-		if ( ( *first ).output == r )
+		if ( ( *first ) == r )
 		{
 			m_Active = r;
 			return ;
@@ -106,14 +100,13 @@ void CqContext::switchTo( RtContextHandle ch )
 
 void CqContext::removeCurrent()
 {
-	std::list<SqPair>::iterator first = m_lContextHandle.begin();
+	std::list<CqOutput *>::iterator first = m_lContextHandle.begin();
 
 	for ( ;first != m_lContextHandle.end();first++ )
 	{
-		if ( ( *first ).output == m_Active )
+		if ( ( *first ) == m_Active )
 		{
-			delete ( *first ).output;
-			delete ( *first ).stream;
+			delete ( *first );
 			m_lContextHandle.erase( first );
 			m_Active = ( CqOutput * ) RI_NULL;
 			return ;
@@ -125,17 +118,19 @@ void CqContext::removeCurrent()
 // Available options:
 // ------------------
 
-//-------------------------------------------------------------------------------
-// Name:                Token:          Parameter:                 Default value:
-//-------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------
+// Name:                Token:          Parameter:                     Default value:
+//----------------------------------------------------------------------------------------------
 // RI2RIB_Output
-//                      Type            "Ascii" | "Binary"           "Ascii"
-//                      Compression      "None" | "Gzip"             "None"
+//                      Type            "Ascii" | "Binary"             "Ascii"
+//                      Compression      "None" | "Gzip"               "None"
+//                      FileOpenType     "Name" | "FileDescriptor"     "Name"
+//                      PipeHandle           integer                        1  (Standard output)
 //
 // RI2RIB_Indentation
-//                      Type            "None" | "Space" | "Tab"     "None"
-//                      Size             integer                       0
-//-------------------------------------------------------------------------------
+//                      Type            "None" | "Space" | "Tab"       "None"
+//                      Size                 integer                        0
+//----------------------------------------------------------------------------------------------
 
 
 
@@ -176,13 +171,24 @@ void CqContext::parseOutputType( RtInt n, RtToken tokens[], RtPointer params[] )
 				}
 
 			}
-			else if ( strcmp( tokens[ i ], "Pipe" ) == 0 )
+			else if ( strcmp ( tokens[ i ], "FileOpenType" ) == 0 )
 			{
-				FILE* fp;
-				int fd = ((int*)params[ i ])[0];
-				fp = fdopen(fd, "wb");
-				m_PipeHandle = new CqStreamFDesc();
-				m_PipeHandle->setFile( fp );
+				if ( strcmp ( ( ( char ** ) params[ i ] ) [ 0 ], "Name" ) == 0 )
+					m_FileOpenType = SqOptions::FileOpenType_ByName;
+				else if ( strcmp ( ( ( char ** ) params[ i ] ) [ 0 ] , "FileDescriptor" ) == 0 )
+					m_FileOpenType = SqOptions::FileOpenType_ByFileDescriptor;
+				else
+				{
+					throw CqError ( RIE_CONSISTENCY, RIE_WARNING,
+					                "RiOption: Unrecognised FileOpenType parameter \"",
+					                ( ( char ** ) params[ i ] ) [ 0 ],
+					                "\"", TqFalse );
+				}
+			}
+			else if ( strcmp ( tokens[ i ], "PipeHandle" ) == 0 )
+			{
+				m_PipeHandleSet = TqTrue;
+				m_PipeHandle = ( ( int * ) params[ i ] ) [ 0 ];
 			}
 			else
 			{
