@@ -860,15 +860,21 @@ RtFloat	RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
 
 	if ( (xx)/(xwidth*xwidth)+(yy)/(ywidth*ywidth)<1.0 )
 	{   
-		/* Raised cosine window (von Hann Window) described in 
-		 *   R. W. Hamming "Digital Filters" 3rd Ed. p.117. 
-		 */
-		x = (1+cos(RI_PI*x/xwidth))/2;
-		y = (1+cos(RI_PI*y/ywidth))/2;
-		w = x*y;
-
 		d = sqrt(xx+yy);
-		return w * sin(RI_PI*d)/(RI_PI*d);
+		if (d!=0.0)
+		{
+			/* Raised cosine window (von Hann Window) described in 
+			 *   R. W. Hamming "Digital Filters" 3rd Ed. p.117. 
+			 */
+			x = (1+cos(RI_PI*x/xwidth))/2;
+			y = (1+cos(RI_PI*y/ywidth))/2;
+			w = x*y;
+			return w * sin(RI_PI*d)/(RI_PI*d);
+		}
+		else
+		{
+			return 1.0;
+		}
 	}
 	else
 	{
