@@ -515,15 +515,15 @@ TqInt	CqParseNodeOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
 
 TqInt	CqParseNodeRelOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
 {
-    // Type check the operands first.
-    CqParseNode * pExpr1 = m_pChild;
-    CqParseNode* pExpr2 = pExpr1->pNext();
-    pExpr1->TypeCheck( pAllTypes(), Type_Last - 1, CheckOnly );
-    pExpr2->TypeCheck( pAllTypes(), Type_Last - 1, CheckOnly );
+    TqInt RelType;
+    RelType = CqParseNodeOp::TypeCheck( pTypes, Count, CheckOnly );  
+
+    if( RelType == Type_Nil)
+    	return( RelType );
 
     // See if float is a requested type.
     TqInt NewType;
-    if ( ( NewType = FindCast( Type_Float, pTypes, Count ) ) != Type_Nil )
+    if ( ( NewType = FindCast( Type_Float, &RelType, 1 ) ) != Type_Nil )
     {
         if ( NewType == Type_Float ) return ( Type_Float );
         else
@@ -540,7 +540,7 @@ TqInt	CqParseNodeRelOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly 
         strErr += " : ";
         strErr += LineNo();
         strErr += " : ";
-        strErr += "Relative operators only return float.";
+        strErr += "Relational can operators only return float.";
         throw( strErr );
         return ( Type_Nil );
     }

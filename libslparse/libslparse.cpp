@@ -26,6 +26,8 @@
 #include "libslparse.h"
 #include "parsenode.h"
 
+#include "logging.h"
+
 extern int yyparse();
 #ifdef	YYDEBUG
 extern int yydebug;
@@ -65,9 +67,9 @@ TqBool Parse( std::istream& InputStream, const CqString StreamName, std::ostream
         yyparse();
         TypeCheck();
     }
-    catch(CqString error)
+    catch(CqString strError)
     {
-        ( *ParseErrorStream ) << error << error.c_str() << std::endl;
+        ( *ParseErrorStream ) << error << strError.c_str() << std::endl;
         ( *ParseErrorStream ) << error << "Shader not compiled" << std::endl;
         ParseSucceeded = false;
         return( false );

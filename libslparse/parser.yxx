@@ -1,6 +1,6 @@
 /* -------------- declaration section -------------- */
 
-%expect 23
+%expect 24
 
 %{
 #ifdef	WIN32
@@ -1372,6 +1372,13 @@ relation
 								$$=new CqParseNodeUnaryOp(Op_LogicalNot);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								$$->AddLastChild($2);
+							}
+	|	expression				{
+								$$=new CqParseNodeRelOp(Op_NE);
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								$$->AddFirstChild($1);
+								CqParseNode* pcomp=new CqParseNodeFloatConst(0);
+								$$->AddLastChild(pcomp);
 							}
 	;
 
