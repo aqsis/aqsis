@@ -131,8 +131,7 @@ void GetOptions()
 				std::ifstream cfgfile(g_config.c_str());
 				if(!cfgfile.is_open())
 				{
-					g_config=g_base_path;
-					g_config.append("/etc/aqsisrc");
+					g_config="/etc/.aqsisrc";
 				}
 			}
 			else
@@ -217,8 +216,12 @@ void RenderFile(std::istream& file, const char* name)
 			librib::Parse(cfgfile,"config",renderengine,std::cerr);
 		else
 		{
-			std::cout << "Warning: Config file not found." << std::endl;
-			std::cout << "Warning: Looking for (%AQSIS_BASE_PATH%:%AQSIS_CONFIG%:%HOME%:%AQSIS_BASE_PATH%/etc/aqsisrc) for .aqsis file." << std::endl;
+			std::cout << "Warning: Config file not found in" << std::endl <<
+						 "%AQSIS_BASE_PATH%/.aqsisrc" << std::endl << 
+						 "%AQSIS_CONFIG%" << std::endl <<
+						 "%HOME%/.aqsisrc" << std::endl <<
+						 "%AQSIS_BASE_PATH%/.aqsisrc" << std::endl << 
+						 "/etc/.aqsisrc" << std::endl;
 		}
 	}
 	librib::Parse(file,name,renderengine,std::cerr);
