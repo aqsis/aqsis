@@ -1,3 +1,220 @@
+2001-05-21 16:28  tshead
+
+	* ChangeLog, Makefile.am, aclocal.m4, configure.in,
+	aqsis/Makefile.am, aqsis/aqsis.cpp, file/Makefile.am,
+	libaqsistypes/.cvsignore, libaqsistypes/Makefile.am,
+	libaqsistypes/color.cpp, libaqsistypes/vector4d.cpp,
+	libaqsistypes/posix/.cvsignore, libaqsistypes/posix/Makefile.am,
+	libaqsistypes/posix/aqsis_compiler.h,
+	libaqsistypes/posix/criticalsection.h,
+	libaqsistypes/posix/semaphore.cpp, libaqsistypes/posix/semaphore.h,
+	libaqsistypes/posix/share.h, libddmsimple/Makefile.am,
+	libddmsimple/ddmsimple.cpp, libddmsimple/ddmsimple.h,
+	libddmsock/Makefile.am, libddmsock/posix/Makefile.am,
+	libddmsock/posix/ddmsock.cpp, libddmsock/posix/ddmsock.h,
+	render/Makefile.am, render/context.cpp, render/imagebuffer.h,
+	render/noise.cpp, render/polygon.h, render/renderer.cpp: * Updated
+	libaqsistypes for the Posix build * Got rid of the posix/intel
+	directories, since the GNU autotools are designed for testing
+	specific capabilities instead of platforms * Got rid of some more
+	warnings in libaqsis - plenty more where they came from, though!
+
+2001-05-21 16:25  tshead
+
+	* librib2/.cvsignore, librib2/Makefile.am, librib2/librib.cpp,
+	librib2/librib.h, librib2/libribtypes.h, librib2/parser.y,
+	librib2/scanner.l, librib2/tests/.cvsignore,
+	librib2/tests/Makefile.am, librib2/tests/Makefile.in,
+	librib2/tests/cone.rib, librib2/tests/cylinder.rib,
+	librib2/tests/nurbs.rib, librib2/tests/ribprinter.cpp,
+	librib2/tests/ribrenderer.cpp, librib2/tests/ribscanner.cpp,
+	librib2/tests/simple.rib, librib2/tests/simple_archive,
+	librib2/tests/sphere.rib, librib2/tests/teapot.rib,
+	librib2/tests/test_001.in, librib2/tests/test_002.in,
+	librib2/tests/test_003.in, librib2/tests/test_004.in,
+	librib2/tests/torus.rib, librib2ri/.cvsignore,
+	librib2ri/Makefile.am, librib2ri/librib2ri.cpp,
+	librib2ri/librib2ri.h, librib2stream/.cvsignore,
+	librib2stream/Makefile.am, librib2stream/librib2stream.cpp,
+	librib2stream/librib2stream.h: * Ported librib to use "standard"
+	GNU flex & bison, and separated the parser (librib2) from the
+	callback objects called by the parser (librib2stream, librib2ri)
+
+2001-05-21 16:06  tshead
+
+	* AUTHORS, INSTALL, README: * Updated project info / Posix build
+	directions
+
+2001-05-21 14:13  tburge
+
+	* render/ri.cpp, render/ri.h, librib/parser.y: Added commented out
+	RiGeometry.  If no one minds would like to add teapot so that PRMan
+	test RIBs will work.
+
+2001-05-21 09:58  tburge
+
+	* content/Test/test.bat: Removed -nowait from test.bat since
+	cribber now uses -pause.
+
+2001-05-21 04:30  pgregory
+
+	* render/: imagebuffer.cpp, imagebuffer.h: Updated filtering code
+	to filter at the subppixel level.
+
+2001-05-20 14:36  tburge
+
+	* content/Test/persptrans.rib: Add perspective transformation test.
+
+2001-05-20 14:23  tburge
+
+	* render/ri.cpp: Added RiPerspective support which matches PRMan
+	3.9 in testing.  Does not match BMRT's rgl or rendrib.
+
+2001-05-20 12:13  mbaas
+
+	* render/: imagebuffer.cpp, imagebuffer.h: Extended the
+	documentation. The code remained unchanged.
+
+2001-05-19 12:49  tburge
+
+	* libaqsistypes/matrix.cpp, libaqsistypes/matrix.h, render/ri.cpp:
+	Added Skew support.
+
+2001-05-18 12:58  pgregory
+
+	* file/: .cvsignore, Makefile.am, file.cpp, file.dsp, file.h:
+	Removed, deprecated.
+
+2001-05-18 12:48  pgregory
+
+	* render/: makefile.mingw, win32_mingw/intel/aqsis_compiler.h,
+	win32_mingw/intel/criticalsection.cpp,
+	win32_mingw/intel/criticalsection.h,
+	win32_mingw/intel/perftimer.cpp, win32_mingw/intel/perftimer.h,
+	win32_mingw/intel/semaphore.cpp, win32_mingw/intel/semaphore.h,
+	win32_mingw/intel/share.h: Removed MinGW support.
+
+2001-05-18 12:47  pgregory
+
+	* render/rifile.h: New CqFile derived class to handle Ri option
+	searchpaths.
+
+2001-05-18 12:39  pgregory
+
+	* libaqsistypes/win32/intel/: aqsis_compiler.h,
+	criticalsection.cpp, criticalsection.h, semaphore.cpp, semaphore.h,
+	share.h: Move non-rendering functionality out to libaqsistypes.
+
+2001-05-18 12:35  pgregory
+
+	* libaqsistypes/: aqsis.h, aqsis_types.h, bitvector.cpp,
+	bitvector.h, color.cpp, color.h, exception.h, file.cpp, file.h,
+	libaqsistypes.dsp, list.h, matrix.cpp, matrix.h, memorypool.h,
+	random.h, sstring.cpp, sstring.h, vector2d.cpp, vector2d.h,
+	vector3d.cpp, vector3d.h, vector4d.cpp, vector4d.h: Move
+	non-rendering functionality out to libaqsistypes.
+
+2001-05-18 12:30  pgregory
+
+	* Renderer.dsw, cribber/cribber.dsp, filebuffer/filebuffer.dsp,
+	framebuffer/win32/intel/framebuffer.dsp, libdd/libdd.dsp,
+	libddmsimple/libddmsimple.dsp,
+	libddmsock/win32/intel/libddmsock.dsp, librib/librib.dsp,
+	render/libaqsis.dsp, shadowmap/shadowmap.dsp, slcomp/slcomp.dsp,
+	texer/texer.dsp, render/aqsis.h, render/aqsis_types.h,
+	render/bitvector.cpp, render/bitvector.h, render/color.cpp,
+	render/color.h, render/exception.h, render/file.cpp, render/file.h,
+	render/list.h, render/matrix.cpp, render/matrix.h,
+	render/memorypool.h, render/random.h, render/sstring.cpp,
+	render/sstring.h, render/vector2d.cpp, render/vector2d.h,
+	render/vector3d.cpp, render/vector3d.h, render/vector4d.cpp,
+	render/vector4d.h, render/win32/intel/aqsis_compiler.h,
+	render/win32/intel/criticalsection.cpp,
+	render/win32/intel/criticalsection.h,
+	render/win32/intel/semaphore.cpp, render/win32/intel/semaphore.h,
+	render/win32/intel/share.h: Move non-rendering functionality out to
+	libaqsistypes.
+
+2001-05-18 11:33  pgregory
+
+	* libddmsock/win32/intel/ddmsock.cpp, render/renderer.cpp,
+	render/texturemap.cpp, texer/texer.cpp: Chnage to CqFile, the main
+	CqFile now takes an optional searchpath string as a ';' separated
+	list of pathspecs. CqRiFile derives from CqFile and provides the
+	ability to fetch the searchpath from the Ri options.
+
+2001-05-17 16:22  pgregory
+
+	* cribber/cribber.cpp: Change the -nowait option to -pause and make
+	cribber exit immediately by default.
+
+2001-05-17 10:08  pgregory
+
+	* render/: noise.cpp, noise.h: Change to use pure Perlin noise.
+
+2001-05-17 04:49  pgregory
+
+	* libddmsock/win32/intel/ddmsock.cpp: Improve error handling, won't
+	try to send data to an invalid socket.
+
+2001-05-17 03:50  pgregory
+
+	* slcomp/slcomp.dsp, Renderer.dsw,
+	framebuffer/win32/intel/framebuffer.dsp: Update dependencies and
+	link options.
+
+2001-05-16 15:45  pgregory
+
+	* render/: shadeops.cpp, sstring.cpp: Fix sl printf function.
+
+2001-05-16 15:44  pgregory
+
+	* render/ri.cpp: Fix type in RI_CS definition.
+
+2001-05-16 14:15  tshead
+
+	* Makefile.am, configure.in, render/Makefile.am: * Modified
+	autotools configuration to skip the "file" and "librib" projects,
+	since "file" is obsolete, and "librib" soon will be (and segfaults,
+	anyway) * Incorporated another patch from Patrick Mauritz
+	<oxygene2k1@crosswinds.net> for building outside the source tree
+
+2001-05-15 15:32  pgregory
+
+	* render/libaqsis.dsp: Dependency update.
+
+2001-05-15 15:13  pgregory
+
+	* Renderer.dsw, prep_install.bat, cribber/cribber.dsp,
+	libddmsimple/libddmsimple.dsp, libddmsock/win32/intel/ddmsock.h,
+	render/render.cpp, render/renderer.cpp, render/shadervariable.cpp,
+	render/shadervariable.h, render/win32/intel/share.h,
+	slcomp/funcdef.cpp, slcomp/funcdef.h, slcomp/parsenode.cpp,
+	slcomp/parsenode.h, slcomp/slcomp.dsp, slcomp/vardef.h,
+	texer/texer.dsp, render/libaqsis.dsp: Changed the build to make the
+	main renderer library a static library 'libaqsis'.
+
+2001-05-15 15:10  pgregory
+
+	* render/: bison.cc, bison.h, flexskel.cc, flexskel.h: Removed from
+	the render directory.
+
+2001-05-15 12:12  pgregory
+
+	* ribber.cfg, render/renderer.cpp, render/ri.cpp: Remove Ri
+	declares from CqRenderer, now in ribber.cfg Remove setting of
+	default shader/display searchpath, must be in ribber.cfg now.
+
+2001-05-15 09:04  pgregory
+
+	* libddmsock/win32/intel/ddmsock.cpp, render/Render.dsp: Fix so
+	that windows build uses the sockets device manager.
+
+2001-05-15 08:25  mbaas
+
+	* render/stats.h: Fixed initialisation of bound hits and gprim
+	count.
+
 2001-05-14 14:18  pgregory
 
 	* Renderer.dsw: Update dependencies for libddmsimple.
