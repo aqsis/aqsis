@@ -32,6 +32,7 @@
 #include	"aqsis.h"
 #include	"ifuncdef.h"
 #include	"ivardef.h"
+#include	"sstring.h"
 
 START_NAMESPACE(Aqsis)
 
