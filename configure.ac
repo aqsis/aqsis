@@ -162,6 +162,7 @@ aqsis/Makefile \
 aqsl/Makefile \
 aqsl/tests/Makefile \
 aqsltell/Makefile \
+bin/Makefile \
 boost/Makefile \
 boost/boost/Makefile \
 boost/boost/bind/Makefile \

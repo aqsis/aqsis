@@ -1,8 +1,4 @@
 Makefile
-*.tif
 .#*
 *.#*
 *~
-*.map
-*.z
-*.raw

@@ -671,7 +671,7 @@ RtVoid	RiWorldEnd()
     }
     catch ( CqString strError )
     {
-        std::cout << strError.c_str() << std::endl;
+        std::cerr << error << strError.c_str() << std::endl;
         fFailed = TqTrue;
     }
 

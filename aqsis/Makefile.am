@@ -12,15 +12,15 @@ aqsis_LDADD = $(top_builddir)/render/libaqsis.la $(top_builddir)/libraytrace/lib
 
 CONFIG_FILE = ./displays.ini
 DISPLAY_LIB = @top_builddir@display/.libs/libdisplay.so
-check-local:
-	cat /dev/null > $(CONFIG_FILE)
+
+check-local: clean-local
 	echo "file	$(DISPLAY_LIB)" >> $(CONFIG_FILE)
 	echo "tiff	$(DISPLAY_LIB)" >> $(CONFIG_FILE)
 	echo "framebuffer	$(DISPLAY_LIB)" >> $(CONFIG_FILE)
 	echo "zframebuffer	$(DISPLAY_LIB)" >> $(CONFIG_FILE)
 	echo "zfile	$(DISPLAY_LIB)" >> $(CONFIG_FILE)
 	echo "shadow	$(DISPLAY_LIB)" >> $(CONFIG_FILE)
-	for file in $(top_srcdir)/ribfiles/*.rib; do echo "Rendering $$file ..."; AQSIS_CONFIG_PATH="." $(top_builddir)/aqsis/aqsis -v3 -shaders=$(top_builddir)/shaders $$file; done
+	for file in $(top_srcdir)/ribfiles/*.rib; do echo "Rendering $$file ..."; AQSIS_CONFIG_PATH="." $(top_builddir)/aqsis/aqsis -shaders=$(top_builddir)/shaders $$file; done
 
 clean-local:
 	rm -f $(CONFIG_FILE)

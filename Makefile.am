@@ -1,4 +1,4 @@
-MAINDIRS = boost thirdparty all images libargparse libaqsistypes libcodegenvm librib2 librib2ri librib2stream libslparse libshadervm libshaderexecenv libraytrace ribfiles slpp aqsl shaders libri2rib libslxargs aqsltell dsotest display libddmanager render aqsis teqser
+MAINDIRS = bin boost thirdparty all images libargparse libaqsistypes libcodegenvm librib2 librib2ri librib2stream libslparse libshadervm libshaderexecenv libraytrace ribfiles slpp aqsl shaders libri2rib libslxargs aqsltell dsotest display libddmanager render aqsis teqser
 
 if PLUGINS
 PLUGINSDIRS = plugins
