@@ -24,6 +24,8 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include	<windows.h>
+
 #include	<math.h>
 
 #include	"aqsis.h"
@@ -35,6 +37,28 @@
 #include	"ri.h"
 
 START_NAMESPACE( Aqsis )
+
+
+#ifdef	_DEBUG
+
+inline long CountMemUsage()
+{
+	MEMORY_BASIC_INFORMATION mbi;
+	DWORD      dwMemUsed = 0;
+	PVOID      pvAddress = 0;
+
+	memset(&mbi, 0, sizeof(MEMORY_BASIC_INFORMATION));
+	while(VirtualQuery(pvAddress, &mbi, sizeof(MEMORY_BASIC_INFORMATION)) == sizeof(MEMORY_BASIC_INFORMATION))
+	{
+		if(mbi.State == MEM_COMMIT && mbi.Type == MEM_PRIVATE)
+			dwMemUsed += mbi.RegionSize;
+		pvAddress = ((BYTE*)mbi.BaseAddress) + mbi.RegionSize;
+	} 
+	return dwMemUsed;
+}
+
+#endif // _DEBUG
+
 
 static TqBool IntersectLine( CqVector3D& P1, CqVector3D& T1, CqVector3D& P2, CqVector3D& T2, CqVector3D& P );
 static void ProjectToLine( const CqVector3D& S, const CqVector3D& Trj, const CqVector3D& pnt, CqVector3D& p );
@@ -295,8 +319,6 @@ TqInt CqSphere::Split( std::vector<CqBasicSurface*>& aSplits )
 		vSubdivideUserParameters( pNew1, pNew2 );
 	}
 	
-	pNew1->SetSurfaceParameters( *this );
-	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
 	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
@@ -310,6 +332,9 @@ TqInt CqSphere::Split( std::vector<CqBasicSurface*>& aSplits )
 	{
 		cSplits += pNew1->Split(aSplits);
 		cSplits += pNew2->Split(aSplits);
+
+		pNew1->Release();
+		pNew2->Release();
 	}
 	else
 	{
@@ -398,7 +423,7 @@ CqCone&	CqCone::operator=( const CqCone& From )
 CqBound	CqCone::Bound() const
 {
 	std::vector<CqVector3D> curve;
-	CqVector3D vA( m_Radius, 0, 0 ), vB( 0, 0, m_Height ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
+	CqVector3D vA( m_Radius, 0, m_ZMin ), vB( 0, 0, m_ZMax ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
 	curve.push_back( vA );
 	curve.push_back( vB );
 	CqMatrix matRot( RAD ( m_ThetaMin ), vD );
@@ -441,8 +466,6 @@ TqInt CqCone::Split( std::vector<CqBasicSurface*>& aSplits )
 		// Subdivide the parameter values
 		vSubdivideUserParameters( pNew1, pNew2 );
 	}
-	pNew1->SetSurfaceParameters( *this );
-	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
 	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
@@ -456,6 +479,9 @@ TqInt CqCone::Split( std::vector<CqBasicSurface*>& aSplits )
 	{
 		cSplits += pNew1->Split(aSplits);
 		cSplits += pNew2->Split(aSplits);
+
+		pNew1->Release();
+		pNew2->Release();
 	}
 	else
 	{
@@ -580,8 +606,6 @@ TqInt CqCylinder::Split( std::vector<CqBasicSurface*>& aSplits )
 		// Subdivide the parameter values
 		vSubdivideUserParameters( pNew1, pNew2 );
 	}
-	pNew1->SetSurfaceParameters( *this );
-	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
 	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
@@ -595,6 +619,9 @@ TqInt CqCylinder::Split( std::vector<CqBasicSurface*>& aSplits )
 	{
 		cSplits += pNew1->Split(aSplits);
 		cSplits += pNew2->Split(aSplits);
+
+		pNew1->Release();
+		pNew2->Release();
 	}
 	else
 	{
@@ -731,8 +758,6 @@ TqInt CqHyperboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 		// Subdivide the parameter values
 		vSubdivideUserParameters( pNew1, pNew2 );
 	}
-	pNew1->SetSurfaceParameters( *this );
-	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
 	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
@@ -746,6 +771,9 @@ TqInt CqHyperboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 	{
 		cSplits += pNew1->Split(aSplits);
 		cSplits += pNew2->Split(aSplits);
+
+		pNew1->Release();
+		pNew2->Release();
 	}
 	else
 	{
@@ -885,8 +913,6 @@ TqInt CqParaboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 		// Subdivide the parameter values
 		vSubdivideUserParameters( pNew1, pNew2 );
 	}
-	pNew1->SetSurfaceParameters( *this );
-	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
 	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
@@ -900,6 +926,9 @@ TqInt CqParaboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 	{
 		cSplits += pNew1->Split(aSplits);
 		cSplits += pNew2->Split(aSplits);
+
+		pNew1->Release();
+		pNew2->Release();
 	}
 	else
 	{
@@ -1023,8 +1052,6 @@ TqInt CqTorus::Split( std::vector<CqBasicSurface*>& aSplits )
 		// Subdivide the parameter values
 		vSubdivideUserParameters( pNew1, pNew2 );
 	}
-	pNew1->SetSurfaceParameters( *this );
-	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
 	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
@@ -1038,6 +1065,9 @@ TqInt CqTorus::Split( std::vector<CqBasicSurface*>& aSplits )
 	{
 		cSplits += pNew1->Split(aSplits);
 		cSplits += pNew2->Split(aSplits);
+
+		pNew1->Release();
+		pNew2->Release();
 	}
 	else
 	{
@@ -1161,8 +1191,6 @@ TqInt CqDisk::Split( std::vector<CqBasicSurface*>& aSplits )
 		// Subdivide the parameter values
 		vSubdivideUserParameters( pNew1, pNew2 );
 	}
-	pNew1->SetSurfaceParameters( *this );
-	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
 	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
@@ -1176,6 +1204,9 @@ TqInt CqDisk::Split( std::vector<CqBasicSurface*>& aSplits )
 	{
 		cSplits += pNew1->Split(aSplits);
 		cSplits += pNew2->Split(aSplits);
+
+		pNew1->Release();
+		pNew2->Release();
 	}
 	else
 	{
