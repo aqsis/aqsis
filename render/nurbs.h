@@ -115,6 +115,18 @@ class CqSurfaceNURBS : public CqSurface
 		{
 			return ( m_avKnots );
 		}
+		/** Determine how many segments in u for this surface patch.
+		 */
+		TqInt cuSegments() const
+		{
+			return(1 + m_cuVerts - m_uOrder );
+		}
+		/** Determine how many segments in v for this surface patch.
+		 */
+		TqInt cvSegments() const
+		{
+			return(1 + m_cvVerts - m_vOrder );
+		}
 
 		void	operator=( const CqSurfaceNURBS& From );
 		TqInt	operator==( const CqSurfaceNURBS& from );
@@ -160,7 +172,7 @@ class CqSurfaceNURBS : public CqSurface
 		void	BasisFunctions( TqFloat u, TqUint span, std::vector<TqFloat>& aKnots, TqInt k, std::vector<TqFloat>& BasisVals );
 		CqVector4D	Evaluate( TqFloat u, TqFloat v );
 		void	SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqBool dirflag );
-		void	Decompose( std::vector<CqSurfaceNURBS>& Array );
+		void	Decompose( std::vector<CqSurfaceNURBS*>& Array );
 		void	RefineKnotU( const std::vector<TqFloat>& X );
 		void	RefineKnotV( const std::vector<TqFloat>& X );
 		TqUint	InsertKnotU( TqFloat u, TqInt r );

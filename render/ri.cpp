@@ -2934,14 +2934,38 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 
 	if ( USES( bUses, EnvVars_u ) )
 	{
-		pSurface->u().pValue() [ 0 ] = pSurface->u().pValue() [ 2 ] = umin;
-		pSurface->u().pValue() [ 1 ] = pSurface->u().pValue() [ 3 ] = umax;
+		pSurface->u().SetSize( pSurface->cVarying() );
+
+		RtFloat uinc = ( umax - umin ) / (pSurface->cuSegments()+1);
+
+		RtInt c,r;
+		i = 0;
+		for( c = 0; c < pSurface->cvSegments()+1; c++ )
+		{
+			RtFloat uval = umin;
+			for( r = 0; r < pSurface->cuSegments()+1; r++ )
+			{
+				pSurface->u().pValue() [ i++ ] = uval;
+				uval += uinc;
+			}
+		}
 	}
 
 	if ( USES( bUses, EnvVars_v ) )
 	{
-		pSurface->v().pValue() [ 0 ] = pSurface->v().pValue() [ 1 ] = vmin;
-		pSurface->v().pValue() [ 2 ] = pSurface->v().pValue() [ 3 ] = vmax;
+		pSurface->v().SetSize( pSurface->cVarying() );
+
+		RtFloat vinc = ( vmax - vmin ) / (pSurface->cvSegments()+1);
+		RtFloat vval = vmin;
+
+		RtInt c,r;
+		i = 0;
+		for( c = 0; c < pSurface->cvSegments()+1; c++ )
+		{
+			for( r = 0; r < pSurface->cuSegments()+1; r++ )
+				pSurface->v().pValue() [ i++ ] = vval;
+			vval += vinc;
+		}
 	}
 
 	// Process any specified parameters

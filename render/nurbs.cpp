@@ -43,7 +43,7 @@ START_NAMESPACE( Aqsis )
 /** Constructor.
  */
 
-CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface()
+CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface(), m_cuVerts(0), m_cvVerts(0), m_uOrder(0), m_vOrder(0)
 {
 	TrimLoops() = static_cast<const CqAttributes*>(pAttributes()) ->TrimLoops();
 }
@@ -767,11 +767,12 @@ void CqSurfaceNURBS::SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqB
 /** Split this NURBS surface into an array of Bezier segments
  */
 
-void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS>& S )
+void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 {
-	TqInt i, m, a, b, nb, mult, j, r, save, s, k, row, col ;
+	TqInt i, m, a, b, nb, mult, j, r, save, _s, k, row, col ;
 	TqFloat numer, alpha ;
 
+	TqInt lUses = Uses();
 
 	//Vector<T> alphas(m_uOrder) ;
 	std::vector<TqFloat> alphas( MAX( m_uOrder, m_vOrder ) );
@@ -821,10 +822,10 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS>& S )
 			for ( j = 1;j <= r;j++ )
 			{
 				save = r - j;
-				s = mult + j;					// this many new points
-				for ( k = uDegree();k >= s;k-- )
+				_s = mult + j;					// this many new points
+				for ( k = uDegree();k >= _s;k-- )
 				{
-					alpha = alphas[ k - s ];
+					alpha = alphas[ k - _s ];
 					for ( row = 0;row < static_cast<TqInt>( m_cvVerts );++row )
 						Su[ nb ].CP( k, row ) = alpha * Su[ nb ].CP( k, row ) + ( 1.0 - alpha ) * Su[ nb ].CP( k - 1, row );
 				}
@@ -849,9 +850,19 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS>& S )
 
 	for ( i = 0;i < static_cast<TqInt>( S.size() );i++ )
 	{
-		S[ i ].Init( m_uOrder, m_vOrder, m_uOrder, m_vOrder );
-		S[ i ].m_auKnots = nU;
-		S[ i ].m_avKnots = nV;
+		S[ i ] = new CqSurfaceNURBS;
+		S[ i ]->Init( m_uOrder, m_vOrder, m_uOrder, m_vOrder );
+		S[ i ]->m_auKnots = nU;
+		S[ i ]->m_avKnots = nV;
+
+		// Initialise storage for u/v/s/t/Cs/Os/N and and user primitive variables.
+		if ( USES( lUses, EnvVars_N  ) && bHasN() ) S[ i ]->N().SetSize(4);
+		if ( USES( lUses, EnvVars_u  ) ) S[ i ]->u().SetSize(4);
+		if ( USES( lUses, EnvVars_v  ) ) S[ i ]->v().SetSize(4);
+		if ( USES( lUses, EnvVars_s  ) ) S[ i ]->s().SetSize(4);
+		if ( USES( lUses, EnvVars_t  ) ) S[ i ]->t().SetSize(4);
+		if ( USES( lUses, EnvVars_Cs ) && bHasCs() ) S[ i ]->Cs().SetSize(4);
+		if ( USES( lUses, EnvVars_Os ) && bHasOs() ) S[ i ]->Os().SetSize(4);
 	}
 
 	nb = 0;
@@ -861,7 +872,7 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS>& S )
 	{
 		for ( i = 0;i <= static_cast<TqInt>( uDegree() );i++ )
 			for ( j = 0;j <= static_cast<TqInt>( vDegree() );++j )
-				S[ nb ].CP( i, j ) = Su[ np ].CP( i, j );
+				S[ nb ]->CP( i, j ) = Su[ np ].CP( i, j );
 		m = m_cvVerts + vDegree();
 		a = vDegree() ;
 		b = m_vOrder;
@@ -879,16 +890,16 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS>& S )
 				for ( j = 1;j <= r;j++ )
 				{
 					save = r - j;
-					s = mult + j; // this many new points
-					for ( k = vDegree();k >= s;k-- )
+					_s = mult + j; // this many new points
+					for ( k = vDegree();k >= _s;k-- )
 					{
-						alpha = alphas[ k - s ];
+						alpha = alphas[ k - _s ];
 						for ( col = 0;col <= static_cast<TqInt>( uDegree() );++col )
-							S[ nb ].CP( col, k ) = alpha * S[ nb ].CP( col, k ) + ( 1.0 - alpha ) * S[ nb ].CP( col, k - 1 );
+							S[ nb ]->CP( col, k ) = alpha * S[ nb ]->CP( col, k ) + ( 1.0 - alpha ) * S[ nb ]->CP( col, k - 1 );
 					}
 					if ( b < m )          // control point of next patch
 						for ( col = 0;col <= static_cast<TqInt>( uDegree() );++col )
-							S[ nb + 1 ].CP( col, save ) = S[ nb ].CP( col, vDegree() );
+							S[ nb + 1 ]->CP( col, save ) = S[ nb ]->CP( col, vDegree() );
 				}
 			}
 			++nb;
@@ -896,7 +907,7 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS>& S )
 			{ // initialize for next patch
 				for ( i = vDegree() - mult; i <= static_cast<TqInt>( vDegree() ); ++i )
 					for ( col = 0;col <= static_cast<TqInt>( uDegree() );++col )
-						S[ nb ].CP( col, i ) = Su[ np ].CP( col, b - vDegree() + i );
+						S[ nb ]->CP( col, i ) = Su[ np ].CP( col, b - vDegree() + i );
 				a = b;
 				++b;
 			}
@@ -904,6 +915,116 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS>& S )
 	}
 
 	S.resize( nb );
+
+	TqInt irow, icol;
+	TqInt nuSegs = cuSegments();
+	TqInt nvSegs = cvSegments();
+	for( icol = 0; icol < nvSegs; icol++ )
+	{
+		for( irow = 0; irow < nuSegs; irow++ )
+		{
+			TqInt iPatch = ( icol * nuSegs ) + irow;
+			
+			if( USES( lUses, EnvVars_N ) && bHasN() )
+			{
+				S[ iPatch ]->N()[ 0 ] = N()[ ( icol * ( nuSegs + 1 ) ) + irow  ];
+				S[ iPatch ]->N()[ 1 ] = N()[ ( icol * ( nuSegs + 1 ) ) + irow + 1 ];
+				S[ iPatch ]->N()[ 2 ] = N()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  ];
+				S[ iPatch ]->N()[ 3 ] = N()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 ];
+			}
+
+			if( USES( lUses, EnvVars_u ) && bHasu() )
+			{
+				S[ iPatch ]->u()[ 0 ] = u()[ ( icol * ( nuSegs + 1 ) ) + irow  ];
+				S[ iPatch ]->u()[ 1 ] = u()[ ( icol * ( nuSegs + 1 ) ) + irow + 1 ];
+				S[ iPatch ]->u()[ 2 ] = u()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  ];
+				S[ iPatch ]->u()[ 3 ] = u()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 ];
+			}
+
+			if( USES( lUses, EnvVars_v ) && bHasv() )
+			{
+				S[ iPatch ]->v()[ 0 ] = v()[ ( icol * ( nuSegs + 1 ) ) + irow  ];
+				S[ iPatch ]->v()[ 1 ] = v()[ ( icol * ( nuSegs + 1 ) ) + irow + 1 ];
+				S[ iPatch ]->v()[ 2 ] = v()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  ];
+				S[ iPatch ]->v()[ 3 ] = v()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 ];
+			}
+
+			if( USES( lUses, EnvVars_s ) && bHass() )
+			{
+				S[ iPatch ]->s()[ 0 ] = s()[ ( icol * ( nuSegs + 1 ) ) + irow  ];
+				S[ iPatch ]->s()[ 1 ] = s()[ ( icol * ( nuSegs + 1 ) ) + irow + 1 ];
+				S[ iPatch ]->s()[ 2 ] = s()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  ];
+				S[ iPatch ]->s()[ 3 ] = s()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 ];
+			}
+
+			if( USES( lUses, EnvVars_t ) && bHast() )
+			{
+				S[ iPatch ]->t()[ 0 ] = t()[ ( icol * ( nuSegs + 1 ) ) + irow  ];
+				S[ iPatch ]->t()[ 1 ] = t()[ ( icol * ( nuSegs + 1 ) ) + irow + 1 ];
+				S[ iPatch ]->t()[ 2 ] = t()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  ];
+				S[ iPatch ]->t()[ 3 ] = t()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 ];
+			}
+
+			if( USES( lUses, EnvVars_Cs ) )
+			{
+				if( bHasCs() )
+				{
+					S[ iPatch ]->Cs()[ 0 ] = Cs()[ ( icol * ( nuSegs + 1 ) ) + irow  ];
+					S[ iPatch ]->Cs()[ 1 ] = Cs()[ ( icol * ( nuSegs + 1 ) ) + irow + 1 ];
+					S[ iPatch ]->Cs()[ 2 ] = Cs()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  ];
+					S[ iPatch ]->Cs()[ 3 ] = Cs()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 ];
+				}
+				else
+					S[ iPatch ]->Cs() = Cs();
+			}
+
+			if( USES( lUses, EnvVars_Os ) )
+			{
+				if( bHasOs() )
+				{
+					S[ iPatch ]->Os()[ 0 ] = Os()[ ( icol * ( nuSegs + 1 ) ) + irow  ];
+					S[ iPatch ]->Os()[ 1 ] = Os()[ ( icol * ( nuSegs + 1 ) ) + irow + 1 ];
+					S[ iPatch ]->Os()[ 2 ] = Os()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  ];
+					S[ iPatch ]->Os()[ 3 ] = Os()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 ];
+				}
+				else
+					S[ iPatch ]->Os() = Os();
+			}
+
+			std::vector<CqParameter*>::iterator iUP;
+			for( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
+			{
+				switch( (*iUP)->Type() )
+				{
+					case type_float:
+					{
+						CqParameterTyped<TqFloat, TqFloat>* pUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( (*iUP) );
+						CqParameterTyped<TqFloat, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pUPV->Clone() );
+						pNUPV->SetSize(4);
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( ( icol * ( nuSegs + 1 ) ) + irow  );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( ( icol * ( nuSegs + 1 ) ) + irow + 1 );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 );
+						S[ iPatch ]->aUserParams().push_back( pNUPV );
+					}
+					break;
+
+					case type_color:
+					{
+						CqParameterTyped<CqColor, CqColor>* pUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( (*iUP) );
+						CqParameterTyped<CqColor, CqColor>* pNUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( pUPV->Clone() );
+						pNUPV->SetSize(4);
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( ( icol * ( nuSegs + 1 ) ) + irow  );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( ( icol * ( nuSegs + 1 ) ) + irow + 1 );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 );
+						S[ iPatch ]->aUserParams().push_back( pNUPV );
+					}
+					break;
+				}
+			}
+		}
+	}
 }
 
 
@@ -1312,6 +1433,23 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 {
 	TqInt cSplits = 0;
 
+	if( cuSegments() > 1 || cvSegments() > 1 )
+	{
+		std::vector<CqSurfaceNURBS*> S;
+		Decompose(S);
+		TqInt i;
+		for( i = 0; i < S.size(); i++ )
+		{
+			S[ i ]->SetSurfaceParameters( *this );
+			S[ i ]->m_fDiceable = TqTrue;
+			S[ i ]->m_SplitDir = m_SplitDir;
+			S[ i ]->m_EyeSplitCount = m_EyeSplitCount;
+			S[ i ]->AddRef();
+			aSplits.push_back( S[ i ] );
+		}
+		return( i );
+	}
+
 	// Split the surface in u or v
 	CqSurfaceNURBS * pNew1;
 	CqSurfaceNURBS * pNew2;
@@ -1554,12 +1692,12 @@ TqInt	CqSurfaceNURBS::TrimDecimation( const CqTrimCurve& Curve )
 
 void CqSurfaceNURBS::OutputMesh()
 {
-	TqUint Granularity = 30;  // Controls the number of steps in u and v
+	TqUint Granularity = 10;  // Controls the number of steps in u and v
 
 
-	std::vector<CqSurfaceNURBS>	S( 1 );
-	S[ 0 ] = *this;
-	//	Decompose(S);
+	std::vector<CqSurfaceNURBS*>	S;
+//	S[ 0 ] = *this;
+	Decompose(S);
 
 	// Save the grid as a .raw file.
 	FILE* fp = fopen( "NURBS.RAW", "w" );
@@ -1579,17 +1717,17 @@ void CqSurfaceNURBS::OutputMesh()
 		for ( i = 0; i <= Granularity; i++ )
 		{
 			TqFloat v = ( static_cast<TqFloat>( i ) / static_cast<TqFloat>( Granularity ) )
-			            * ( S[ s ].m_avKnots[ S[ s ].m_cvVerts ] - S[ s ].m_avKnots[ S[ s ].m_vOrder - 1 ] )
-			            + S[ s ].m_avKnots[ S[ s ].m_vOrder - 1 ];
+			            * ( S[ s ]->m_avKnots[ S[ s ]->m_cvVerts ] - S[ s ]->m_avKnots[ S[ s ]->m_vOrder - 1 ] )
+			            + S[ s ]->m_avKnots[ S[ s ]->m_vOrder - 1 ];
 
 			TqUint j;
 			for ( j = 0; j <= Granularity; j++ )
 			{
 				TqFloat u = ( static_cast<TqFloat>( j ) / static_cast<TqFloat>( Granularity ) )
-				            * ( S[ s ].m_auKnots[ S[ s ].m_cuVerts ] - S[ s ].m_auKnots[ S[ s ].m_uOrder - 1 ] )
-				            + S[ s ].m_auKnots[ S[ s ].m_uOrder - 1 ];
+				            * ( S[ s ]->m_auKnots[ S[ s ]->m_cuVerts ] - S[ s ]->m_auKnots[ S[ s ]->m_uOrder - 1 ] )
+				            + S[ s ]->m_auKnots[ S[ s ]->m_uOrder - 1 ];
 
-				aaPoints[ i ][ j ] = S[ s ].Evaluate( u, v );
+				aaPoints[ i ][ j ] = S[ s ]->Evaluate( u, v );
 			}
 		}
 

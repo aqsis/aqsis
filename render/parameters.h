@@ -1027,7 +1027,7 @@ void CqParameterTypedVarying<T, I, SLT>::BilinearDice( TqInt u, TqInt v, IqShade
 	assert( NULL != pResData );
 
 	// Check if a valid 4 point quad, do nothing if not.
-	if ( m_aValues.size() == 4 )
+	if ( m_aValues.size() >= 4 )
 	{
 		// Note it is assumed that the variable has been
 		// initialised to the correct size prior to calling.
