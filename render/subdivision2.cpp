@@ -1519,7 +1519,7 @@ CqBound	CqSurfaceSubdivisionMesh::Bound() const
 		for( PointIndex = m_pTopology->pPoints()->P()->Size()-1; PointIndex >= 0; PointIndex-- )
 			B.Encapsulate( m_pTopology->pPoints()->P()->pValue()[PointIndex] );
 	}
-	return(B);
+	return( AdjustBoundForTransformationMotion( B ) );
 }
 
 TqInt CqSurfaceSubdivisionMesh::Split( std::vector<CqBasicSurface*>& aSplits )
