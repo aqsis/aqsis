@@ -68,6 +68,8 @@ class CqTeapot : public CqSurface
 						 */
 	virtual	TqUint		cVertex() const						{return(16);}
 
+	CqSurface           *pPatchMeshBicubic[7];
+    TqInt               cNbrPatchMeshBicubic;
 
 	// Overrides from CqSurface
 	virtual	CqMicroPolyGridBase* Dice();
@@ -79,9 +81,9 @@ class CqTeapot : public CqSurface
 			CqTeapot&	operator=(const CqTeapot& From);
 
 	private:
-		static CqVector3D	m_aptTeapot[306];	///< static points table.
-		static TqInt		m_Teapot[32*16];	///< static patch table.
 			TqBool			m_CrowBase;			///< Utah teapot was missing a bottom.  F. Crow added one.
+
+    protected:
 			CqMatrix		m_matTx;		///< Transformation matrix from object to camera.
 			CqMatrix		m_matITTx;		///< Inverse transpose transformation matrix, for transforming normals.
 };
