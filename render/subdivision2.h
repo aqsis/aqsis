@@ -77,6 +77,22 @@ public:
 	TqBool		Finalise();
 	void		SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFaces);
 	TqBool		CanUsePatch( CqLath* pFace );
+	TqBool		SetInterpolateBoundary( TqBool state = TqTrue )
+				{
+					m_bInterpolateBoundary = state;
+				}
+	TqBool		isInterpolateBoundary( ) const
+				{
+					return( m_bInterpolateBoundary );
+				}
+	void		SetHoleFace( TqInt iFaceIndex )
+				{
+					m_mapHoles[ iFaceIndex ] = TqTrue;
+				}
+	TqBool		isHoleFace( TqInt iFaceIndex ) const
+				{
+					return( m_mapHoles.find( iFaceIndex ) != m_mapHoles.end() );
+				}
 
 	TqInt		AddVertex(CqLath* pVertex);
 	template<class TypeA, class TypeB>
@@ -87,11 +103,10 @@ public:
 					TypeA R = TypeA(0.0f);
 					TqInt n;
 					
-#if 1
 					if(pParam->Class() == class_vertex)
 					{
 						// Determine if we have a boundary vertex.
-						//if( ( NULL != pVertex->cv() ) && ( NULL != pVertex->ccv() ) )
+						if( ( NULL != pVertex->cv() ) && ( NULL != pVertex->ccv() ) )
 						{
 							// Smooth
 							// Vertex point is...
@@ -146,7 +161,7 @@ public:
 							
 							pParam->pValue( iIndex )[0] = Q+R+S;
 						}
-						/*else
+						else
 						{
 							// The vertex is on a boundary.
 							std::vector<CqLath*> apQve;
@@ -184,10 +199,9 @@ public:
 								S = pParam->pValue( pVertex->VertexIndex() )[0];
 								pParam->pValue( iIndex )[0] = ( R + ( S * 6.0f ) ) / 8.0f;;
 							}
-						}*/
+						}
 					}
 					else
-#endif
 					{
 						pParam->pValue( iIndex )[0] = pParam->pValue( pVertex->VertexIndex() )[0];
 					}
@@ -200,10 +214,9 @@ public:
 					TypeA B = TypeA(0.0f);
 					TypeA C = TypeA(0.0f);
 
-#if 1
 					if(pParam->Class() == class_vertex)
 					{
-						//if( NULL != pEdge->ec() )
+						if( NULL != pEdge->ec() )
 						{
 							// Edge point is the average of the centrepoint of the original edge and the
 							// average of the two new face points of the adjacent faces.
@@ -228,15 +241,14 @@ public:
 							A = (A+B)/2.0f;
 							A = (A+C)/2.0f;
 						}
-						/*else
+						else
 						{
 							A = pParam->pValue( pEdge->VertexIndex() )[0];
 							B = pParam->pValue( pEdge->ccf()->VertexIndex() )[0];
 							A = (A+B)/2.0f;
-						}*/
+						}
 					}
 					else
-#endif
 					{
 						A = pParam->pValue( pEdge->VertexIndex() )[0];
 						B = pParam->pValue( pEdge->ccf()->VertexIndex() )[0];
@@ -287,6 +299,11 @@ private:
 	std::vector<std::vector<CqLath*> >	m_aapVertices;
 	/// Array of lath pointers, one for each lath generated.
 	std::vector<CqLath*>				m_apLaths;
+	/// Map of face indices which are to be treated as holes in the surface, i.e. not rendered.
+	std::map<TqInt, TqBool>				m_mapHoles;
+	/// Flag indicating whether this surface interpolates it's boundaries or not.
+	TqBool								m_bInterpolateBoundary;
+
 
 	/// Flag indicating whether the topology structures have been finalised.
 	TqBool							m_fFinalised;

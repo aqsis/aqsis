@@ -4159,21 +4159,59 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			}
 			if ( pSubd2->Finalise() )
 			{
+				// Process tags.
+				TqInt argcIndex = 0;
+				TqInt floatargIndex = 0;
+				TqInt intargIndex = 0;
+				for ( TqInt i = 0; i < ntags; i++ )
+				{
+					if ( strcmp( tags[ i ], "interpolateboundary" ) == 0 )
+						pSubd2->SetInterpolateBoundary( TqTrue );
+					else if ( strcmp( tags [ i ], "crease" ) == 0 )
+					{
+						TqFloat creaseSharpness = floatargs[ floatargIndex ];
+						TqInt iEdge = 0;
+						while ( iEdge < nargs[ argcIndex ] - 1 )
+						{
+							if ( intargs[ iEdge + intargIndex ] < pSubd2->cVertices() &&
+								 intargs[ iEdge + intargIndex + 1 ] < pSubd2->cVertices() )
+							{
+								// Store the crease sharpness somehow.
+							}
+							iEdge++;
+						}
+					}
+					else if ( strcmp( tags [ i ], "hole" ) == 0 )
+					{
+						TqInt iFace = 0;
+						while ( iFace < nargs[ argcIndex ] )
+						{
+							pSubd2->SetHoleFace( intargs[ iFace + intargIndex ] );
+							iFace++;
+						}
+					}
+
+					intargIndex += nargs[ argcIndex++ ];
+					floatargIndex += nargs[ argcIndex++ ];
+				}
+
 				pSubd2->AddRef();
 				for ( face = 0; face < nfaces; face++ )
 				{
 					// Don't add faces which are on the boundary, unless "interpolateboundary" is specified.
-					if( !pSubd2->pFacet( face )->isBoundaryFacet() )
+					if( ( !pSubd2->pFacet( face )->isBoundaryFacet() ) || ( pSubd2->isInterpolateBoundary() ) )
 					{
-						// Add a patch surface to the bucket queue
-						CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( pSubd2, pSubd2->pFacet( face ) );
-						CreateGPrim( pNew );
+						// Don't add "hole" faces
+						if( !pSubd2->isHoleFace( face ) )
+						{
+							// Add a patch surface to the bucket queue
+							CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( pSubd2, pSubd2->pFacet( face ) );
+							CreateGPrim( pNew );
+						}
 					}
 				}
 				pSubd2->Release();
 				pPointsClass->Release();
-
-				pSubd2->OutputMesh("green.obj");
 			}
 			else
 			{

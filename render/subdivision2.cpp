@@ -37,7 +37,7 @@ START_NAMESPACE( Aqsis )
  *	Constructor.
  */
 
-CqSubdivision2::CqSubdivision2( CqPolygonPoints* pPoints ) : m_fFinalised(TqFalse),
+CqSubdivision2::CqSubdivision2( CqPolygonPoints* pPoints ) : m_fFinalised(TqFalse), m_bInterpolateBoundary( TqFalse ),
 	CqMotionSpec<CqPolygonPoints*>(pPoints)
 {
 	if( pPoints )
