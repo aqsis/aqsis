@@ -2981,8 +2981,9 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminance( POINTVAL P, VECTORVAL Axis, FLOATVAL
 		if( NULL != Axis )	Axis->GetVector( vecAxis, __iGrid );
 		TqFloat fAngle = PIO2;
 		if( NULL != Angle )	Angle->GetFloat( fAngle, __iGrid );
-		
+
 		TqFloat cosangle = Ln * vecAxis;
+		cosangle = CLAMP(cosangle,-1,1);
 		if ( acos( cosangle ) > fAngle )
 			m_CurrentState.SetValue( __iGrid, TqFalse );
 		else
@@ -3028,6 +3029,7 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminate( POINTVAL P, VECTORVAL Axis, FLOATVAL 
 		TqFloat fAngle = PI;
 		if( NULL != Angle ) Angle->GetFloat( fAngle, __iGrid );
 		TqFloat cosangle = Ln * vecAxis;
+		cosangle = CLAMP(cosangle,-1,1);
 		if ( acos( cosangle ) > fAngle )
 		{
 			// Make sure we set the light color to zero in the areas that won't be lit.
