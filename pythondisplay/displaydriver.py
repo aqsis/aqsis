@@ -162,8 +162,8 @@ class DisplayDriver:
                 self.onData(XMin,XMaxPlus1,YMin,YMaxPlus1,ElementSize,Data)
             # Open
             elif msgid==MSGID_OPEN:
-                XRes,YRes,SamplesPerElement,BitsPerSample,CropWindowXMin,CropWindowXMax,CropWindowYMin,CropWindowYMax = struct.unpack("iiiiiiii",msgbody)
-                self.onOpen(XRes, YRes, SamplesPerElement, BitsPerSample, CropWindowXMin, CropWindowXMax, CropWindowYMin, CropWindowYMax)
+                XRes,YRes,Channels,NotUsed,CropWindowXMin,CropWindowXMax,CropWindowYMin,CropWindowYMax = struct.unpack("iiiiiiii",msgbody)
+                self.onOpen(XRes, YRes, Channels, CropWindowXMin, CropWindowXMax, CropWindowYMin, CropWindowYMax)
             # Close
             elif msgid==MSGID_CLOSE:
                 self.onClose()
@@ -293,7 +293,7 @@ class DisplayDriver:
     def onDisplayType(self, dtype): pass
     def onNL(self, m): pass
     def onNP(self, m): pass
-    def onOpen(self, XRes, YRes, SamplesPerElement, BitsPerSample, CropWindowXMin, CropWindowXMax, CropWindowYMin, CropWindowYMax): pass
+    def onOpen(self, XRes, YRes, Channels, CropWindowXMin, CropWindowXMax, CropWindowYMin, CropWindowYMax): pass
     def onClose(self): pass
     def onData(self, XMin,XMaxPlus1,YMin,YMaxPlus1,ElementSize,Data): pass
     def onAbandon(self): pass
@@ -341,9 +341,9 @@ class InspectDisplayDriver(DisplayDriver):
     def onNP(self, m):
         print "NP",m
 
-    def onOpen(self, XRes, YRes, SamplesPerElement, BitsPerSample,
+    def onOpen(self, XRes, YRes, Channels, 
                CropWindowXMin, CropWindowXMax, CropWindowYMin, CropWindowYMax):
-        print "Open - Res:%dx%d  SamplesPerElement:%d  BitsPerSample:%d  Crop:(%d,%d)-(%d,%d)"%(XRes,YRes,SamplesPerElement,BitsPerSample,CropWindowXMin,CropWindowYMin,CropWindowXMax,CropWindowYMax)
+        print "Open - Res:%dx%d  Channels:%d  Crop:(%d,%d)-(%d,%d)"%(XRes,YRes,Channels,CropWindowXMin,CropWindowYMin,CropWindowXMax,CropWindowYMax)
 
     def onClose(self):
         print "Close"
@@ -372,12 +372,12 @@ class FileDisplayDriver(DisplayDriver):
     def onFileName(self, filename):
         self.filename = filename
 
-    def onOpen(self, XRes, YRes, SamplesPerElement, BitsPerSample,
+    def onOpen(self, XRes, YRes, Channels, 
                CropWindowXMin, CropWindowXMax, CropWindowYMin, CropWindowYMax):
 
-        self.imagemanager.initialise(XRes, YRes, SamplesPerElement)
+        self.imagemanager.initialise(XRes, YRes, Channels)
 
-#        if SamplesPerElement==4:
+#        if Channels==4:
 #            mode = "RGBA"
 #        else:
 #            mode = "RGB"
@@ -672,12 +672,12 @@ def EVT_DD_ABANDON(win, func):
 
 # Display device events
 class DDOpenEvent(wxPyEvent):
-    def __init__(self, XRes, YRes, SamplesPerElement):
+    def __init__(self, XRes, YRes, Channels):
         wxPyEvent.__init__(self)
         self.SetEventType(EVT_DD_OPEN_ID)
         self.XRes = XRes
         self.YRes = YRes
-        self.SamplesPerElement = SamplesPerElement
+        self.Channels = Channels
 
 class DDCloseEvent(wxPyEvent):
     def __init__(self):
@@ -826,9 +826,9 @@ class MainWin(wxFrame):
         yres = event.YRes
 
         self.SetTitle(self.filename)
-        if event.SamplesPerElement==3:
+        if event.Channels==3:
             mode = "RGB"
-        elif event.SamplesPerElement==4:
+        elif event.Channels==4:
             mode = "RGBA"    
         self.SetStatusText('"%s", %dx%d, %s'%(self.filename,xres,yres,mode),1)
 
@@ -840,7 +840,7 @@ class MainWin(wxFrame):
         self.SetSize((xres+dw,yres+dh))
 
         self.imagemanager.initialise(event.XRes, event.YRes,
-                                     event.SamplesPerElement)
+                                     event.Channels)
 
         # Test
         img = self.imagemanager.getImage(comp=0)
@@ -1077,9 +1077,9 @@ class FrameBufferDisplayDriver(DisplayDriver):
     def onFileName(self, filename):
         wxPostEvent(self.win, DDFileNameEvent(filename))
 
-    def onOpen(self, XRes, YRes, SamplesPerElement, BitsPerSample,
+    def onOpen(self, XRes, YRes, Channels, 
                CropWindowXMin, CropWindowXMax, CropWindowYMin, CropWindowYMax):
-        wxPostEvent(self.win, DDOpenEvent(XRes, YRes, SamplesPerElement))
+        wxPostEvent(self.win, DDOpenEvent(XRes, YRes, Channels))
 
     def onClose(self):
         wxPostEvent(self.win, DDCloseEvent())
