@@ -143,8 +143,12 @@ int main(int argc, const char** argv)
 		for (ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++)
 		{
 			FILE *file=fopen(e->c_str(),"rb");
-			RenderFile(file, e->c_str());
-			fclose(file);
+			if (file!=NULL) {
+			    RenderFile(file, e->c_str());
+			    fclose(file);
+			} else {
+			    std::cout << "Warning: Cannot open file \"" << *e << "\"" << std::endl;
+			}
 		}
 	}
 
