@@ -86,6 +86,7 @@ int main( int argc, const char** argv )
 {
 	ArgParse ap;
 	CqCodeGenVM codegen; // Should be a pointer determined by what we want to generate
+	bool error = false; ///! Couldn't compile shader
 
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options]" );
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
@@ -200,6 +201,8 @@ int main( int argc, const char** argv )
 					std::ifstream ppfile( tempname );
 					if ( Parse( ppfile, e->c_str(), std::cerr ) )
 						codegen.OutputTree( GetParseTree(), g_stroutname );
+					else
+						error = true;
 
 					// Delete the temporary file.
 					ppfile.close();
@@ -218,6 +221,6 @@ int main( int argc, const char** argv )
 		}
 	}
 
-	return 0;
+	return error ? -1 : 0;
 }
 
