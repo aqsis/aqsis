@@ -123,7 +123,7 @@ void idle( void )
         totalsamples++;
 
         // Skip background pixels ...
-        if ( g_Data[ i ] == FLT_MAX )
+        if ( g_Data[ i ] >= FLT_MAX )
             continue;
 
 #ifdef	AQSIS_SYSTEM_WIN32

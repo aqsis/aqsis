@@ -218,75 +218,78 @@ void SaveAsShadowMap()
     if ( strFilename.compare( "" ) != 0 )
     {
         TIFF * pshadow = TIFFOpen( strFilename.c_str(), mode );
-        TIFFCreateDirectory( pshadow );
-
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-        sprintf( version, "%s %s", STRNAME, VERSION_STR );
-#else
-        sprintf( version, "%s %s", STRNAME, VERSION );
-#endif
-        TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
-        TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, matWorldToCamera );
-        TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, matWorldToScreen );
-        TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
-        TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
-
-        // Write the floating point image to the directory.
-        TqFloat *depths = ( TqFloat * ) pData;
+		if( pshadow != NULL )
+		{
+			TIFFCreateDirectory( pshadow );
 
 	#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-        sprintf( version, "%s %s", STRNAME, VERSION_STR );
+			sprintf( version, "%s %s", STRNAME, VERSION_STR );
 	#else
-        sprintf( version, "%s %s", STRNAME, VERSION );
+			sprintf( version, "%s %s", STRNAME, VERSION );
 	#endif
-        TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
-        TIFFSetField( pshadow, TIFFTAG_IMAGEWIDTH, XRes );
-        TIFFSetField( pshadow, TIFFTAG_IMAGELENGTH, YRes );
-        TIFFSetField( pshadow, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
-        TIFFSetField( pshadow, TIFFTAG_BITSPERSAMPLE, 32 );
-        TIFFSetField( pshadow, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
-        TIFFSetField( pshadow, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
-        TIFFSetField( pshadow, TIFFTAG_TILEWIDTH, twidth );
-        TIFFSetField( pshadow, TIFFTAG_TILELENGTH, tlength );
-        TIFFSetField( pshadow, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
-        TIFFSetField( pshadow, TIFFTAG_COMPRESSION, g_Compression );
+			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
+			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, matWorldToCamera );
+			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, matWorldToScreen );
+			TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
+			TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
+
+			// Write the floating point image to the directory.
+			TqFloat *depths = ( TqFloat * ) pData;
+
+		#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+			sprintf( version, "%s %s", STRNAME, VERSION_STR );
+		#else
+			sprintf( version, "%s %s", STRNAME, VERSION );
+		#endif
+			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
+			TIFFSetField( pshadow, TIFFTAG_IMAGEWIDTH, XRes );
+			TIFFSetField( pshadow, TIFFTAG_IMAGELENGTH, YRes );
+			TIFFSetField( pshadow, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
+			TIFFSetField( pshadow, TIFFTAG_BITSPERSAMPLE, 32 );
+			TIFFSetField( pshadow, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
+			TIFFSetField( pshadow, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
+			TIFFSetField( pshadow, TIFFTAG_TILEWIDTH, twidth );
+			TIFFSetField( pshadow, TIFFTAG_TILELENGTH, tlength );
+			TIFFSetField( pshadow, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
+			TIFFSetField( pshadow, TIFFTAG_COMPRESSION, g_Compression );
 
 
-        TqInt tsize = twidth * tlength;
-        TqInt tperrow = ( XRes + twidth - 1 ) / twidth;
-        TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * g_Channels * sizeof( TqFloat ) ) );
+			TqInt tsize = twidth * tlength;
+			TqInt tperrow = ( XRes + twidth - 1 ) / twidth;
+			TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * g_Channels * sizeof( TqFloat ) ) );
 
-        if ( ptile != NULL )
-        {
-            TqInt ctiles = tperrow * ( ( YRes + tlength - 1 ) / tlength );
-            TqInt itile;
-            for ( itile = 0; itile < ctiles; itile++ )
-            {
-                TqInt x = ( itile % tperrow ) * twidth;
-                TqInt y = ( itile / tperrow ) * tlength;
-                TqFloat* ptdata = pData + ( ( y * XRes ) + x ) * g_Channels;
-                // Clear the tile to black.
-                memset( ptile, 0, tsize * g_Channels * sizeof( TqFloat ) );
-                for ( TqUlong i = 0; i < tlength; i++ )
-                {
-                    for ( TqUlong j = 0; j < twidth; j++ )
-                    {
-                        if ( ( x + j ) < XRes && ( y + i ) < YRes )
-                        {
-                            TqInt ii;
-                            for ( ii = 0; ii < g_Channels; ii++ )
-                                ptile[ ( i * twidth * g_Channels ) + ( ( ( j * g_Channels ) + ii ) ) ] = ptdata[ ( ( j * g_Channels ) + ii ) ];
-                        }
-                    }
-                    ptdata += ( XRes * g_Channels );
-                }
-                TIFFWriteTile( pshadow, ptile, x, y, 0, 0 );
-            }
-            TIFFWriteDirectory( pshadow );
+			if ( ptile != NULL )
+			{
+				TqInt ctiles = tperrow * ( ( YRes + tlength - 1 ) / tlength );
+				TqInt itile;
+				for ( itile = 0; itile < ctiles; itile++ )
+				{
+					TqInt x = ( itile % tperrow ) * twidth;
+					TqInt y = ( itile / tperrow ) * tlength;
+					TqFloat* ptdata = pData + ( ( y * XRes ) + x ) * g_Channels;
+					// Clear the tile to black.
+					memset( ptile, 0, tsize * g_Channels * sizeof( TqFloat ) );
+					for ( TqUlong i = 0; i < tlength; i++ )
+					{
+						for ( TqUlong j = 0; j < twidth; j++ )
+						{
+							if ( ( x + j ) < XRes && ( y + i ) < YRes )
+							{
+								TqInt ii;
+								for ( ii = 0; ii < g_Channels; ii++ )
+									ptile[ ( i * twidth * g_Channels ) + ( ( ( j * g_Channels ) + ii ) ) ] = ptdata[ ( ( j * g_Channels ) + ii ) ];
+							}
+						}
+						ptdata += ( XRes * g_Channels );
+					}
+					TIFFWriteTile( pshadow, ptile, x, y, 0, 0 );
+				}
+				TIFFWriteDirectory( pshadow );
 
-        }
+			}
 
-        TIFFClose( pshadow );
+			TIFFClose( pshadow );
+		}
     }
 }
 

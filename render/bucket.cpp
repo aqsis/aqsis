@@ -429,12 +429,13 @@ void CqBucket::FilterBucket(TqBool empty)
                 }
             }
 
-            // Set depth to infinity if no samples.
-            if ( SampleCount <= 0 )
-                samples[ 6 ] = FLT_MAX;
 
             for ( TqInt k = 0; k < datasize; k ++)
                 m_aDatas[ i*datasize + k ] = samples[k] / gTot;
+
+            // Set depth to infinity if no samples.
+            if ( SampleCount <= 0 )
+                m_aDatas[ i*datasize+6 ] = FLT_MAX;
 
             if ( SampleCount >= numsubpixels)
                 m_aCoverages[ i ] = 1.0;
