@@ -1471,8 +1471,7 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 		}
 		else
 		{
-			///! TODO: Check if this can happen...
-			QGetRenderContextI() ->Logger() ->fatal( "Type mismatch in shader \"%s\"", m_strName.c_str() );
+			QGetRenderContextI() ->Logger() ->warn( "Type mismatch in shader \"%s\"", m_strName.c_str() );
 		}
 	}
 	else
