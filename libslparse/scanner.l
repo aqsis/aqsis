@@ -1,3 +1,12 @@
+/*
+ * THIS FILE HAS BEEN SPERSCEDED BY SCANNER.LXX AND SHOULD BE CONSIDERED
+ * AS DEPRECATED.
+ */
+
+
+
+
+
 /* -------------- declaration section -------------- */
 
 

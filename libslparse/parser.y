@@ -1,3 +1,13 @@
+/* 
+ * THIS FILE AS NOW BEEN SUPERSCEDED BY PARSER.YXX AND SHOULD BE
+ * CONSIDERED AS DEPRECATED.
+ */
+
+
+
+
+
+
 /* -------------- declaration section -------------- */
 
 %expect 22
