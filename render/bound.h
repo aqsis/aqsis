@@ -135,7 +135,6 @@ public:
 private:
     CqVector3D	m_vecMin;
     CqVector3D	m_vecMax;
-	CqVector3D	m_vecCross;	//!	Vector crossing the bound
 };
 
 //----------------------------------------------------------------------
