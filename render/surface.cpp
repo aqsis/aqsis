@@ -200,6 +200,10 @@ CqSurface::CqSurface( const CqSurface& From ) :
 CqSurface& CqSurface::operator=( const CqSurface& From )
 {
 	CqBasicSurface::operator=( From );
+	// Nullify the standard primitive variables index table.
+	TqInt i;
+	for( i = 0; i < EnvVars_Last; i++ )
+		m_aiStdPrimitiveVars[ i ] = -1;	
 	return ( *this );
 }
 
