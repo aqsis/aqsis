@@ -178,27 +178,124 @@ TqUint CqSurfaceNURBS::FindSpanV( TqFloat v ) const
 /** Return the basis functions for the specified parameter value.
  */
 
-void CqSurfaceNURBS::BasisFunctions( TqFloat u, TqUint span, std::vector<TqFloat>& aKnots, TqInt k, std::vector<TqFloat>& BasisVals )
+void CqSurfaceNURBS::BasisFunctions( TqFloat u, TqUint i, std::vector<TqFloat>& U, TqInt k, std::vector<TqFloat>& N )
 {
-	register TqInt r, s, i;
-	register double omega;
+	register TqInt j, r;
+	register TqFloat saved, temp;
+	std::vector<TqFloat> left(k), right(k);
 
-	BasisVals[ 0 ] = 1.0;
-	for ( r = 2; r <= k; r++ )
+	N[ 0 ] = 1.0f;
+	for( j=1; j<=k-1; j++ )
 	{
-		i = span - r + 1;
-		BasisVals[ r - 1 ] = 0.0;
-		for ( s = r - 2; s >= 0; s-- )
+		left[ j ] = u - U[ i + 1 - j ];
+		right[ j ] = U[ i + j ] - u;
+		saved = 0.0f;
+		for( r = 0; r < j; r++ )
 		{
-			i++;
-			if ( i < 0 )
-				omega = 0;
-			else
-				omega = ( u - aKnots[ i ] ) / ( aKnots[ i + r - 1 ] - aKnots[ i ] );
-
-			BasisVals[ s + 1 ] = BasisVals[ s + 1 ] + ( 1 - omega ) * BasisVals[ s ];
-			BasisVals[ s ] = omega * BasisVals[ s ];
+			temp = N[ r ] / ( right[ r + 1 ] + left[ j - r ] );
+			N[ r ] = saved + right[ r + 1 ] * temp;
+			saved = left[ j - r ] * temp;
 		}
+		N[ j ] = saved;
+	}
+}
+
+
+
+//---------------------------------------------------------------------
+/** Return the basis functions for the specified parameter value.
+ */
+
+void CqSurfaceNURBS::DersBasisFunctions( TqFloat u, TqUint i, std::vector<TqFloat>& U, TqInt k, TqInt n, std::vector<std::vector<TqFloat> >& ders )
+{
+	register TqInt j, r;
+	register TqFloat saved, temp;
+	std::vector<TqFloat> left(k), right(k);
+	std::vector<std::vector<TqFloat> > ndu(k), a(2);
+	for( j = 0; j < k; j++ )	ndu[ j ].resize(k);
+	ders.resize( n+1 );
+	for( j = 0; j < n+1; j++ )	ders[ j ].resize(k);
+	a[ 0 ].resize(k);
+	a[ 1 ].resize(k);
+
+	TqUint p = k-1;
+
+	ndu[ 0 ][ 0 ] = 1.0f;
+	for( j = 1; j <= p; j++ )
+	{
+		left[ j ] = u - U[ i + 1 - j ];
+		right[ j ] = U[ i + j ] - u;
+		saved = 0.0f;
+		for( r = 0; r < j; r++ )
+		{
+			ndu[ j ][ r ] = right[ r + 1 ] + left[ j - r ];
+			temp = ndu[ r ][ j -1 ] / ndu[ j ][ r ];
+			
+			ndu[ r ][ j ] = saved + right[ r + 1 ] * temp;
+			saved = left[ j - r ] * temp;
+		}
+		ndu[ j ][ j ] = saved;
+	}
+
+	// Load the basis functions
+	for( j = 0; j <= p; j++ )
+		ders[ 0 ][ j ] = ndu[ j ][ p ];
+
+	// Compute the derivatives.
+	for( r = 0; r <= p; r ++)
+	{
+		// Alternate rows in array a.
+		TqInt s1 = 0;
+		TqInt s2 = 1;
+		a[ 0 ][ 0 ] = 1.0f;
+		TqInt j1, j2;
+
+		// Loop to compute the kth derivative
+		for( k = 1; k <= n; k++ )
+		{
+			TqFloat d = 0.0f;
+			TqInt rk = r - k;
+			TqInt pk = p - k;
+			if( r >= k )
+			{
+				a[ s2 ][ 0 ] = a[ s1 ][ 0 ] / ndu[ pk+1 ][ rk ];
+				d = a[ s2 ][ 0 ] * ndu[ rk ][ pk ];
+			}
+			if( rk >= -1 )
+				j1 = 1;
+			else
+				j1 = -rk;
+
+			if( r-1 <= pk )
+				j2 = k-1;
+			else
+				j2 = p-r;
+
+			for( j = j1; j <= j2; j++)
+			{
+				a[ s2 ][ j ] = (a[ s1 ][ j ] - a[ s1 ][ j-1 ]) / ndu[ pk+1 ][ rk+j ];
+				d += a[ s2 ][ j ] * ndu[ rk+j ][ pk ];
+			}
+			if( r <= pk )
+			{
+				a[ s2 ][ k ] = -a[ s1 ][ k-1 ] / ndu[ pk+1 ][ r ];
+				d += a[ s2 ][ k ] * ndu[ r ][ pk ];
+			}
+			ders[ k ][ r ] = d;
+			
+			// Switch rows.
+			j = s1;
+			s1 = s2;
+			s2 = j;
+		}
+	}
+	// Multiply through the correct factors.
+	r = p;
+	for( k = 1; k <= n; k++ )
+	{
+		for( j = 0; j <= p; j++ )
+			ders[ k ][ j ] *= r;
+		r *= ( p-k );
 	}
 }
 
@@ -209,42 +306,84 @@ void CqSurfaceNURBS::BasisFunctions( TqFloat u, TqUint span, std::vector<TqFloat
 
 CqVector4D	CqSurfaceNURBS::Evaluate( TqFloat u, TqFloat v )
 {
-	std::vector<TqFloat> bu( m_uOrder );
-	std::vector<TqFloat> bv( m_vOrder );
+	std::vector<TqFloat> Nu( m_uOrder );
+	std::vector<TqFloat> Nv( m_vOrder );
 
 	CqVector4D r( 0, 0, 0, 0 );
 
 	/* Evaluate non-uniform basis functions (and derivatives) */
 
 	TqUint uspan = FindSpanU( u );
-	TqUint ufirst = uspan - m_uOrder + 1;
-	BasisFunctions( u, uspan, m_auKnots, m_uOrder, bu );
-
+	BasisFunctions( u, uspan, m_auKnots, m_uOrder, Nu );
 	TqUint vspan = FindSpanV( v );
-	TqUint vfirst = vspan - m_vOrder + 1;
-	BasisFunctions( v, vspan, m_avKnots, m_vOrder, bv );
+	BasisFunctions( v, vspan, m_avKnots, m_vOrder, Nv );
+	TqUint uind = uspan - uDegree();
 
-	// Weight control points against the basis functions
-
-	TqUint i;
-	for ( i = 0; i < m_vOrder; i++ )
+	CqVector4D S(0.0f, 0.0f, 0.0f, 1.0f);
+	TqUint l, k;
+	for( l = 0; l <= vDegree(); l++)
 	{
-		TqUint j;
-		for ( j = 0; j < m_uOrder; j++ )
-		{
-			TqUint ri = m_vOrder - 1L - i;
-			TqUint rj = m_uOrder - 1L - j;
+		CqVector4D temp(0.0f, 0.0f, 0.0f, 1.0f);
+		TqUint vind = vspan - vDegree() + l;
+		for( k = 0; k <= uDegree(); k++ )
+			temp = temp + Nu[ k ] * CP( uind + k, vind );
+		S = S + Nv[ l ] * temp;
+	}
+	return(S);
+}
 
-			TqFloat tmp = bu[ rj ] * bv[ ri ];
-			CqVector4D& cp = CP( j + ufirst, i + vfirst );
-			//r+=cp*tmp;
-			r.x( r.x() + cp.x() * tmp );
-			r.y( r.y() + cp.y() * tmp );
-			r.z( r.z() + cp.z() * tmp );
-			r.h( r.h() + cp.h() * tmp );
+
+//---------------------------------------------------------------------
+/** Evaluate the nurbs surface at parameter values u,v.
+ */
+
+CqVector4D	CqSurfaceNURBS::EvaluateNormal( TqFloat u, TqFloat v )
+{
+	CqVector4D N;
+	TqInt d = 1;	// Default to 1st order derivatives.
+	TqInt k, l, s, r;
+	TqInt p = uDegree();
+	TqInt q = vDegree();
+
+	std::vector<std::vector<CqVector4D> > SKL( d+1 );
+	for( k = 0; k <= d; k++ )	SKL[ k ].resize( d+1 );
+	std::vector<std::vector<TqFloat> > Nu, Nv;
+	std::vector<CqVector4D> temp( q+1 );
+
+	TqInt du = MIN(d, p);
+	for( k = p+1; k <= d; k++ )
+		for( l = 0; l <= d - k; l++ )
+			SKL[ k ][ l ] = CqVector4D( 0.0f, 0.0f, 0.0f, 1.0f );
+
+	TqInt dv = MIN(d, q);
+	for( l = q+1; l <= d; l++ )
+		for( k = 0; k <= d - l; k++ )
+			SKL[ k ][ l ] = CqVector4D( 0.0f, 0.0f, 0.0f, 1.0f );
+
+	TqUint uspan = FindSpanU( u );
+	DersBasisFunctions( u, uspan, m_auKnots, m_uOrder, du, Nu );
+	TqUint vspan = FindSpanV( v );
+	DersBasisFunctions( v, vspan, m_avKnots, m_vOrder, dv, Nv );
+
+	for( k = 0; k <= du; k++ )
+	{
+		for( s = 0; s <= q; s++ )
+		{
+			temp[ s ] = CqVector4D( 0.0f, 0.0f, 0.0f, 1.0f );
+			for( r = 0; r <= p; r++ )
+				temp[ s ] = temp[ s ] + Nu[ k ][ r ] * CP( uspan-p+r, vspan-q+s );
+		}
+		TqInt dd = MIN( d-k, dv );
+		for( l = 0; l <= dd; l++ )
+		{
+			SKL[ k ][ l ] = CqVector4D( 0.0f, 0.0f, 0.0f, 1.0f );
+			for( s = 0; s <= q; s++ )
+				SKL[ k ][ l ] = SKL[ k ][ l ] + Nv[ l ][ s ] * temp[ s ];
 		}
 	}
-	return ( r );
+	N = SKL[0][1]%SKL[1][0];
+	N.Unit();
+	return( N );	
 }
 
 
@@ -259,7 +398,6 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 	CqSurfaceNURBS nS( *this );
 	nS.P() = P();
 
-	// Compute k and s      u = [ u_k , u_k+1)  with u_k having multiplicity s
 	TqInt k = m_auKnots.size() - 1, s = 0;
 	TqInt i, j;
 	TqInt p = uDegree();
@@ -1419,6 +1557,38 @@ void CqSurfaceNURBS::NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize
 	}
 }
 
+
+//---------------------------------------------------------------------
+/** Generate the vertex normals if not specified.
+ */
+
+void CqSurfaceNURBS::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
+{
+	// Get the handedness of the coordinate system (at the time of creation) and
+	// the coordinate system specified, to check for normal flipping.
+	TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
+
+	CqVector3D	N;
+	TqInt iv, iu;
+	for ( iv = 0; iv <= vDiceSize; iv++ )
+	{
+		TqFloat sv = ( static_cast<TqFloat>( iv ) / static_cast<TqFloat>( vDiceSize ) )
+					 * ( m_avKnots[ m_cvVerts ] - m_avKnots[ m_vOrder - 1 ] )
+					 + m_avKnots[ m_vOrder - 1 ];
+		for ( iu = 0; iu <= uDiceSize; iu++ )
+		{
+			TqFloat su = ( static_cast<TqFloat>( iu ) / static_cast<TqFloat>( uDiceSize ) )
+						 * ( m_auKnots[ m_cuVerts ] - m_auKnots[ m_uOrder - 1 ] )
+						 + m_auKnots[ m_uOrder - 1 ];
+			TqInt igrid = ( iv * ( uDiceSize + 1 ) ) + iu;
+			N = EvaluateNormal( su, sv );
+			N = ( O == OrientationLH )? N : -N;
+			pNormals->SetNormal( N, igrid );
+		}
+	}
+}
+
+
 //---------------------------------------------------------------------
 /** Split the patch into smaller patches.
  */
@@ -1686,12 +1856,12 @@ TqInt	CqSurfaceNURBS::TrimDecimation( const CqTrimCurve& Curve )
 
 void CqSurfaceNURBS::OutputMesh()
 {
-	TqUint Granularity = 10;  // Controls the number of steps in u and v
+	TqUint Granularity = 30;  // Controls the number of steps in u and v
 
 
 	std::vector<CqSurfaceNURBS*>	S(1);
-	S[ 0 ] = this;
-//	Decompose(S);
+//	S[ 0 ] = this;
+	Decompose(S);
 
 	// Save the grid as a .raw file.
 	FILE* fp = fopen( "NURBS.RAW", "w" );
@@ -1746,27 +1916,36 @@ void CqSurfaceNURBS::OutputMesh()
 }
 
 
-void CqSurfaceNURBS::Output( char* name )
+void CqSurfaceNURBS::Output( const char* name )
 {
+	TqUint i;
+
 	// Save the grid as a .out file.
 	FILE * fp = fopen( name, "w" );
-	fprintf( fp, "Renderer V2\n\n" );
+	fputs( "NuPatch ", fp );
 
-	fprintf( fp, "uOrder: %d\n", m_uOrder );
-	fprintf( fp, "vOrder: %d\n", m_vOrder );
-	fprintf( fp, "cuVerts: %d\n", m_cuVerts );
-	fprintf( fp, "cvVerts: %d\n", m_cvVerts );
+	fprintf( fp, "%d ", m_cuVerts );
+	fprintf( fp, "%d ", m_uOrder );
 
-	TqUint i;
+	fputs( "[", fp );
 	for ( i = 0; i < m_auKnots.size(); i++ )
 		fprintf( fp, "%f ", m_auKnots[ i ] );
-	fprintf( fp, "\n" );
+	fputs( "]", fp );
+	fprintf( fp, "%f %f ", 0.0f, 1.0f );
+
+	fprintf( fp, "%d ", m_cvVerts );
+	fprintf( fp, "%d ", m_vOrder );
+
+	fputs( "[", fp );
 	for ( i = 0; i < m_avKnots.size(); i++ )
 		fprintf( fp, "%f ", m_avKnots[ i ] );
-	fprintf( fp, "\n" );
+	fputs( "]", fp );
+	fprintf( fp, "%f %f ", 0.0f, 1.0f );
 
+	fputs( "\"P\" [", fp );
 	for ( i = 0; i < P().Size(); i++ )
-		fprintf( fp, "%f,%f,%f,%f\n", P() [ i ].x(), P() [ i ].y(), P() [ i ].z(), P() [ i ].h() );
+		fprintf( fp, "%f %f %f %f ", P() [ i ].x(), P() [ i ].y(), P() [ i ].z(), P() [ i ].h() );
+	fputs( "]\n", fp );
 
 	fclose( fp );
 }

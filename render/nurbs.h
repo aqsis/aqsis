@@ -218,7 +218,9 @@ class CqSurfaceNURBS : public CqSurface
 		TqUint	FindSpanU( TqFloat u ) const;
 		TqUint	FindSpanV( TqFloat v ) const;
 		void	BasisFunctions( TqFloat u, TqUint span, std::vector<TqFloat>& aKnots, TqInt k, std::vector<TqFloat>& BasisVals );
+		void	DersBasisFunctions( TqFloat u, TqUint i, std::vector<TqFloat>& U, TqInt k, TqInt n, std::vector<std::vector<TqFloat> >& ders );
 		CqVector4D	Evaluate( TqFloat u, TqFloat v );
+		CqVector4D	EvaluateNormal( TqFloat u, TqFloat v );
 		void	SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqBool dirflag );
 		void	Decompose( std::vector<CqSurfaceNURBS*>& Array );
 		void	RefineKnotU( const std::vector<TqFloat>& X );
@@ -247,7 +249,7 @@ class CqSurfaceNURBS : public CqSurface
 		void	ProjectToLine( const CqVector3D& S, const CqVector3D& Trj, const CqVector3D& pnt, CqVector3D& p );
 
 		void	OutputMesh();
-		void	Output( char* name );
+		void	Output( const char* name );
 
 		const CqTrimLoopArray&	TrimLoops() const
 		{
@@ -262,6 +264,8 @@ class CqSurfaceNURBS : public CqSurface
 		virtual void uSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB );
 		virtual void vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB );
 		virtual void NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
+		virtual TqBool CanGenerateNormals() const	{ return( TqTrue ); }
+		virtual	void GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 		virtual	CqBound	Bound() const;
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );

@@ -25,6 +25,7 @@
 
 #include	<stdarg.h>
 #include	<math.h>
+#include	<strstream>
 
 #include	"aqsis.h"
 #include	"imagebuffer.h"
@@ -2942,6 +2943,17 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 	{
 		// Clamp the surface to ensure non-periodic.
 		pSurface->Clamp();
+
+		std::vector<CqSurfaceNURBS*> S;
+		pSurface->Decompose(S);
+		TqInt i;
+		for( i = 0; i < S.size(); i++ )
+		{
+			std::strstream strName;
+			strName << "decomp" << i << ".out" << std::ends;
+//			S[ i ]->Output(strName.str());
+			strName.freeze(false);
+		}
 		CreateGPrim( pSurface );
 	}
 	else
