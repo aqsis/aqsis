@@ -189,21 +189,36 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
  */
 TqInt CqTextureMap::Convert( CqString &strName )
 {
-    if (strName.rfind(".") == -1) return 0;
-    const CqString extension = strName.substr(strName.rfind(".")).substr(1);
-#ifdef	AQSIS_SYSTEM_POSIX
-    const CqString plugin_path = DEFAULT_PLUGIN_PATH "/" + extension + "2tif.so";
+    // Suspicious if this does not have an extension.
+    if (strName.rfind(".") == -1) return 0; 
 
-    if (access(plugin_path.c_str(), F_OK) != 0) return 0;
+    const CqString extension = strName.substr(strName.rfind(".")).substr(1);
+
+#if defined(AQSIS_SYSTEM_POSIX)
+    const CqString plugin_path = DEFAULT_PLUGIN_PATH "/lib" + extension + "2tif.so";
+    // Check for lib<ext>2tif.so; it it is existing than let the converter to 
+    // be called.
+    // I assume on MacOSX and Linux the file we are looking will be something:
+    //     libjpg2tif.so, libtga2tif.so, lib...2tif.so or
+    //     libjpg2tif.dylib, libtga2tif.dylib, ...2tif.dylib
+    if (access(plugin_path.c_str(), F_OK) != 0)  
+    { 
+	plugin_path = DEFAULT_PLUGIN_PATH "/lib" + extension + "2tif.dylib";
+        if (access(plugin_path.c_str(), F_OK) != 0)  
+		return 0; 
+    }
+
 #elif	AQSIS_SYSTEM_WIN32
-	char acPath[256];
-	if ( GetModuleFileName( NULL, acPath, 256 ) != 0) 
-	{
-		// guaranteed file name of at least one character after path
-		*( strrchr( acPath, '\\' ) + 1 ) = '\0';
+    char acPath[255];
+
+    if ( GetModuleFileName( NULL, acPath, 256 ) != 0) 
+    {
+	// guaranteed file name of at least one character after path
+	*( strrchr( acPath, '\\' ) + 1 ) = '\0';
     } else return 0;
+
     CqString plugin_path = acPath;
-	plugin_path.append( CqString("/" + extension + "2tif.dll") );
+    plugin_path.append( CqString("/" + extension + "2tif.dll") );
 #endif
     const CqString plugin_function = extension + "2tif";
 
@@ -253,14 +268,14 @@ void CqTextureMap::CriticalMeasure()
         /* Extreme case no more memory to play */
 
         /* It is time to delete some tile's memory associated with
-                       * texturemap objects.
+         * texturemap objects.
          *
          * In principle the oldest texturemaps are freed first 
-                       * (regardless of their current usage. Therefore this method 
-                       * could only be 
-                       * called at a place where the fact of release 
-                       * texturemapbuffer will not impact the subsequent 
-                       * GetBuffer() calls.
+         * (regardless of their current usage. Therefore this method 
+         * could only be 
+         * called at a place where the fact of release 
+         * texturemapbuffer will not impact the subsequent 
+         * GetBuffer() calls.
          *
          */
         for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -1086,18 +1101,18 @@ void CqTextureMap::Open()
     CqString strRealName( fileImage.strRealName() );
     fileImage.Close();
 
-		// Now try to converted first to tif file
-    // if the plugin is not existant than goes straight to TIFFOpen()
-		wasconverted = Convert( strRealName );
-		if ( wasconverted )
-		{
-			CqString * strnew = new CqString( strRealName );
-			m_ConvertString_Cache.push_back( strnew );
-			// Now open it as a tiff file.
-			m_pImage = TIFFOpen( strRealName.c_str(), "r" );
+   // Now try to converted first to tif file
+   // if the plugin is not existant than goes straight to TIFFOpen()
+   wasconverted = Convert( strRealName );
+   if ( wasconverted )
+   {
+	CqString * strnew = new CqString( strRealName );
+	m_ConvertString_Cache.push_back( strnew );
+	// Now open it as a tiff file.
+	m_pImage = TIFFOpen( strRealName.c_str(), "r" );
     } else {
         m_pImage = TIFFOpen( strRealName.c_str(), "r" );
-		}
+    }
 
 
     if ( m_pImage )
@@ -1112,7 +1127,7 @@ void CqTextureMap::Open()
         uint16 planarconfig;
         TIFFGetField( m_pImage, TIFFTAG_PLANARCONFIG, &planarconfig );
         m_PlanarConfig = planarconfig;
-        uint16 samplesperpixel;
+        uint16 samplesperpixel = 1;
         TIFFGetField( m_pImage, TIFFTAG_SAMPLESPERPIXEL, &samplesperpixel );
         m_SamplesPerPixel = samplesperpixel;
         uint16 sampleformat;
