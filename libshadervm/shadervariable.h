@@ -1359,7 +1359,7 @@ public:
     }
     virtual	void	GetString( CqString& res, TqInt index = 0 ) const
     {
-        res = m_aValue[ index ];
+        res = m_aValue[ 0 ];
     }
     virtual	void	GetStringPtr( const CqString*& res ) const
     {
@@ -1371,35 +1371,24 @@ public:
     }
     virtual	void	SetString( const CqString& s, TqInt index )
     {
-        m_aValue[ index ] = s;
+        m_aValue[ 0 ] = s;
     }
     virtual	void	SetString( const CqString& s )
     {
-        m_aValue.assign( m_aValue.size(), s );
+        m_aValue.assign( 0, s );
     }
     /** Copy the values from the passed variable into this, taking into account any class differences.
      * \param pVal The variable to copy from.
      */
     virtual	void	SetValueFromVariable( const IqShaderData* pVal )
     {
-        TqUint i;
-        if ( pVal->Size() > 1 )
-        {
-            const CqString * pData;
-            pVal->GetStringPtr( pData );
-            for ( i = 0; i < Size(); i++ )
-                m_aValue[ i ] = pData [ i ];
-        }
-        else
-        {
-            CqString temp;
-            pVal->GetString( temp );
-            m_aValue.assign( m_aValue.size(), temp );
-        }
+        CqString temp;
+        pVal->GetString( temp );
+        m_aValue.assign( 0, temp );
     }
     virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
     {
-        res = m_aValue[ index ].compare( "" ) == 0;
+        res = m_aValue[ 0 ].compare( "" ) == 0;
     }
     /** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
      * \param pVal The stack entry to assign.
@@ -1407,7 +1396,7 @@ public:
      */
     virtual	void	SetValueFromVariable( const IqShaderData* pVal, TqInt index )
     {
-        pVal->GetString( m_aValue[ index ], index );
+        pVal->GetString( m_aValue[ 0 ], index );
     }
     virtual	IqShaderData* Clone() const
     {
