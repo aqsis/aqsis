@@ -177,6 +177,12 @@ TqInt CqDDManager::OpenDisplays()
 
 TqInt CqDDManager::CloseDisplays()
 {
+	// First wait to ensure that any display requests are completely satisfied.
+	m_Listener.FrameEnd();
+
+	// Clean up the disk cace.
+	m_DiskStore.CloseDown();
+
     return ( 0 );
 }
 
@@ -301,6 +307,12 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 	args.push_back(modeArg.c_str());
 	args.push_back(req.m_customParamsArgs.c_str());
     args.push_back(NULL);
+
+	std::cerr << debug << "Launch Display: " << strDriverPathAndFile.c_str() << " [ ";
+	std::vector<const char*>::iterator iarg;
+	for(iarg = args.begin(); iarg != args.end()-1; iarg++)
+		std:: cerr << *iarg << " ";
+	std::cerr << "]" << std::endl;
 
 #ifdef AQSIS_SYSTEM_WIN32
 

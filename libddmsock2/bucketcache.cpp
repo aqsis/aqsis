@@ -47,12 +47,7 @@ START_NAMESPACE( Aqsis )
 
 CqBucketDiskStore::~CqBucketDiskStore()
 {
-	if( m_Temporary )
-	{
-		if(unlink(m_fileName.c_str()) < 0)
-			std::cerr << error << "Could not delete temporary bucket store " << m_fileName.c_str() << std::endl;
-	}
-	free(m_Header);
+	CloseDown();
 }
 
 
@@ -282,5 +277,30 @@ CqBucketDiskStore::SqBucketDiskStoreRecord* CqBucketDiskStore::RetrieveBucketOff
 	}
 	return(0);
 }
+
+
+/**	\brief	Shutdown the bucket cache, deleting the temporary file and cleaning up any data relevant to the current pass.
+
+	This function should be called after each complete frame to clear up the current cache in preparation for reinitialising
+	for the next render using PrepareFile.
+
+
+	\return	void
+
+	
+*/
+void CqBucketDiskStore::CloseDown()
+{
+	if( m_Temporary )
+	{
+		if(unlink(m_fileName.c_str()) < 0)
+			std::cerr << error << "Could not delete temporary bucket store " << m_fileName.c_str() << std::endl;
+	}
+	free(m_Header);
+
+	m_OriginTable.clear();
+	m_IndexTable.clear();
+}
+
 
 END_NAMESPACE( Aqsis )

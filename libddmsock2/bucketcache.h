@@ -91,6 +91,7 @@ class CqBucketDiskStore
 		};
 
 		void	PrepareFile(std::string& name, TqBool temp = TqTrue);
+		void	CloseDown();
 		TqLong	StoreBucket(IqBucket* bucket, SqBucketDiskStoreRecord** record_out = NULL, TqInt* index_out = NULL);
 		SqBucketDiskStoreRecord* RetrieveBucketOrigin(TqInt originx, TqInt originy);
 		SqBucketDiskStoreRecord* RetrieveBucketIndex(TqInt index);

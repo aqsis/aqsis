@@ -96,7 +96,7 @@ CqDisplayListener::~CqDisplayListener()
 
 void CqDisplayListener::Close()
 {
-	m_senderThreads.join_all();
+	FrameEnd();
 	//m_listenerThread->join();
 	delete(m_listenerThread);
 
@@ -112,6 +112,25 @@ void CqDisplayListener::Close()
 
     m_Socket = INVALID_SOCKET;
 
+}
+
+
+//---------------------------------------------------------------------
+/** The Frame is complete, wait to see if there are any outstanding requests
+ *  before allowing Aqsis to continue onto the next frame.
+ */
+
+void CqDisplayListener::FrameEnd()
+{
+	std::cerr << debug << "Waiting for all threads to finish..." << std::flush;
+	std::vector<boost::thread*>::iterator i;
+	for(i=m_senderThreads.begin(); i!=m_senderThreads.end(); i++)
+	{
+		(*i)->join();
+		delete(*i);
+	}
+	m_senderThreads.clear();
+	std::cerr << debug << "...done" << std::endl;
 }
 
 
@@ -192,17 +211,15 @@ void CqDisplayListener::operator()()
 {
     SOCKET c;
 
-//	std::cerr << debug << "Listener thread started: " << reinterpret_cast<long>(this) << std::endl;
-
     while(1)
 	{
 		c = accept( m_Socket, NULL, NULL );
 		if(c != INVALID_SOCKET)
 		{
-			m_senderThreads.add_thread(new boost::thread(CqSender(c, m_pManager)));
+			boost::thread* thrd = new boost::thread(CqSender(c, m_pManager));
+			m_senderThreads.push_back(thrd);
 		}
 	}
-//	std::cerr << debug << "Listener thread ended: " << reinterpret_cast<long>(this) << std::endl;
 }
 
 

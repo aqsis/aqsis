@@ -621,7 +621,7 @@ void CqRenderer::RenderWorld()
 
     pImage() ->RenderImage();
 
-    m_pDDManager->CloseDisplays();
+	m_pDDManager->CloseDisplays();
 }
 
 

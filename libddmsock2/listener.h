@@ -65,6 +65,7 @@ public:
     TqBool	Prepare( TqInt port, CqDDManager* manager );
 	void	operator()();
     void	Close();
+	void	FrameEnd();
 
 	SOCKET	Socket()	{return(m_Socket);}
 
@@ -72,7 +73,7 @@ private:
     SOCKET	m_Socket;			///< Socket ID of the server.
     int m_Port;				///< Port number used by this server.
 	boost::thread* m_listenerThread;
-	boost::thread_group m_senderThreads;
+	std::vector<boost::thread*>	m_senderThreads;
 	CqDDManager* m_pManager;
 }
 ;
