@@ -38,7 +38,6 @@
 #include	"ilightsource.h"
 #include	"version.h"
 
-
 START_NAMESPACE( Aqsis )
 
 IqRenderer* QGetRenderContextI();
@@ -4898,7 +4897,7 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 
 // SIGGRAPH 2002; Larry G. Bake functions
 
-const int batchsize = 1; // elements to buffer before writing
+const int batchsize = 8; // elements to buffer before writing
 // Make sure we're thread-safe on those file writes
 
 class BakingChannel {
@@ -5008,24 +5007,29 @@ extern "C" int bake_3(BakingData *bd, char *name, float s, float t, float *baked
 }
 
 
+
 STD_SOIMPL CqShaderExecEnv::SO_bake_f( STRINGVAL name, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVARIMPL )
 {
 	INIT_SO
+	
+	CHECKVARY( f );
+	CHECKVARY( s );
+	CHECKVARY( t );
 
 	BEGIN_UNIFORM_SECTION
-        GETSTRING( name);
-        BakingData *bd = bake_init(/*STRING( name).c_str() */);
+	GETSTRING( name );
+	BakingData *bd = bake_init( /*STRING( name).c_str() */ );
 	END_UNIFORM_SECTION
+
 	BEGIN_VARYING_SECTION
-       
-	
-	GETFLOAT( s );
-        GETFLOAT( t );
-        GETFLOAT( f );
-        bake_f( bd, (char *) STRING( name ).c_str(), FLOAT(s), FLOAT(t),  FLOAT(f) );
-        END_VARYING_SECTION
+		GETFLOAT( s );
+		GETFLOAT( t );
+		GETFLOAT( f );
+		bake_f( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), FLOAT( f ) );
+	END_VARYING_SECTION
+
 	BEGIN_UNIFORM_SECTION
-	bake_done(bd);
+	bake_done( bd );
 	END_UNIFORM_SECTION
 }
 
@@ -5033,51 +5037,54 @@ STD_SOIMPL CqShaderExecEnv::SO_bake_3c( STRINGVAL name, FLOATVAL s, FLOATVAL t, 
 {
 	INIT_SO
 
+	CHECKVARY( f );
+	CHECKVARY( s );
+	CHECKVARY( t );
+	
 	BEGIN_UNIFORM_SECTION
-        GETSTRING( name);
-        BakingData *bd = bake_init(/*(char *) STRING( name ).c_str()*/ );
+	TqFloat rgb[ 3 ];
+
+	GETSTRING( name );
+	BakingData *bd = bake_init( /*(char *) STRING( name ).c_str()*/ );
 	END_UNIFORM_SECTION
 	BEGIN_VARYING_SECTION
-       
-	
-	GETFLOAT( s );
-        GETFLOAT( t );
-        GETCOLOR( f );
-        TqFloat rgb[3];
-        
-        COLOR( f ).GetColorRGB( &rgb[0], &rgb[1], &rgb[2] );
-        bake_3( bd,  (char *) STRING( name ).c_str(), FLOAT(s), FLOAT(t), rgb);
-        END_VARYING_SECTION
+		GETFLOAT( s );
+		GETFLOAT( t );
+		GETCOLOR( f );
+		COLOR( f ).GetColorRGB( &rgb[ 0 ], &rgb[ 1 ], &rgb[ 2 ] );
+		bake_3( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), rgb );
+	END_VARYING_SECTION
 	BEGIN_UNIFORM_SECTION
-	bake_done(bd);
+	bake_done( bd );
 	END_UNIFORM_SECTION
 }
 
-STD_SOIMPL CqShaderExecEnv::SO_bake_3n( STRINGVAL name, FLOATVAL s, FLOATVAL t, NORMALVAL f, DEFVOIDPARAMVARIMPL  )
+STD_SOIMPL CqShaderExecEnv::SO_bake_3n( STRINGVAL name, FLOATVAL s, FLOATVAL t, NORMALVAL f, DEFVOIDPARAMVARIMPL )
 {
 	INIT_SO
 
+	CHECKVARY( f );
+	CHECKVARY( s );
+	CHECKVARY( t );
+
 	BEGIN_UNIFORM_SECTION
-        GETSTRING( name);
-        BakingData *bd = bake_init(/*(char *) STRING( name ).c_str() */ );
+	GETSTRING( name );
+	BakingData *bd = bake_init( /*(char *) STRING( name ).c_str() */ );
 	END_UNIFORM_SECTION
+
 	BEGIN_VARYING_SECTION
-       
-	
-	GETFLOAT( s );
-        GETFLOAT( t );
-        GETNORMAL( f );
-        TqFloat rgb[3];
-        
-        rgb[0] = VECTOR( f )[0];
-        rgb[1] = VECTOR( f )[1];
-        rgb[2] = VECTOR( f )[2];
-        
-        bake_3( bd,  (char *) STRING( name ).c_str(), FLOAT(s), FLOAT(t), rgb);
-        
-        END_VARYING_SECTION
+		GETFLOAT( s );
+		GETFLOAT( t );
+		GETNORMAL( f );
+		TqFloat rgb[ 3 ];
+		rgb[ 0 ] = VECTOR( f ) [ 0 ];
+		rgb[ 1 ] = VECTOR( f ) [ 1 ];
+		rgb[ 2 ] = VECTOR( f ) [ 2 ];
+		bake_3( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), rgb );
+	END_VARYING_SECTION
+
 	BEGIN_UNIFORM_SECTION
-	bake_done(bd);
+	bake_done( bd );
 	END_UNIFORM_SECTION
 }
 
@@ -5085,51 +5092,56 @@ STD_SOIMPL CqShaderExecEnv::SO_bake_3p( STRINGVAL name, FLOATVAL s, FLOATVAL t, 
 {
 	INIT_SO
 
+	CHECKVARY( f );
+	CHECKVARY( s );
+	CHECKVARY( t );
+
 	BEGIN_UNIFORM_SECTION
-        GETSTRING( name);
-	BakingData *bd = bake_init(/*(char *) STRING( name ).c_str()  */);
+	GETSTRING( name );
+	BakingData *bd = bake_init( /*(char *) STRING( name ).c_str()  */ );
 	END_UNIFORM_SECTION
+
 	BEGIN_VARYING_SECTION
-       
-	GETFLOAT( s );
-        GETFLOAT( t );
-        GETPOINT( f );
-        TqFloat rgb[3];
-        
-        rgb[0] = VECTOR( f )[0];
-        rgb[1] = VECTOR( f )[1];
-        rgb[2] = VECTOR( f )[2];
-        
-        bake_3( bd,  (char *) STRING( name ).c_str(), FLOAT(s), FLOAT(t), rgb);
-        END_VARYING_SECTION
+		GETFLOAT( s );
+		GETFLOAT( t );
+		GETPOINT( f );
+		TqFloat rgb[ 3 ];
+		rgb[ 0 ] = VECTOR( f ) [ 0 ];
+		rgb[ 1 ] = VECTOR( f ) [ 1 ];
+		rgb[ 2 ] = VECTOR( f ) [ 2 ];
+		bake_3( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), rgb );
+	END_VARYING_SECTION
+
 	BEGIN_UNIFORM_SECTION
-	bake_done(bd);
+	bake_done( bd );
 	END_UNIFORM_SECTION
 }
 
 STD_SOIMPL CqShaderExecEnv::SO_bake_3v( STRINGVAL name, FLOATVAL s, FLOATVAL t, VECTORVAL f, DEFVOIDPARAMVARIMPL )
 {
 	INIT_SO
+	CHECKVARY( f );
+	CHECKVARY( s );
+	CHECKVARY( t );
 
 	BEGIN_UNIFORM_SECTION
-        GETSTRING( name);
-	BakingData *bd = bake_init(/*(char *) STRING( name ).c_str()  */);
+	GETSTRING( name );
+	BakingData *bd = bake_init( /*(char *) STRING( name ).c_str()  */ );
 	END_UNIFORM_SECTION
+
 	BEGIN_VARYING_SECTION
-       
-	GETFLOAT( s );
-        GETFLOAT( t );
-        GETVECTOR( f );
-        TqFloat rgb[3];
-        
-        rgb[0] = VECTOR( f )[0];
-        rgb[1] = VECTOR( f )[1];
-        rgb[2] = VECTOR( f )[2];
-        
-        bake_3( bd,  (char *) STRING( name ).c_str(), FLOAT(s), FLOAT(t), rgb);
-        END_VARYING_SECTION
+		GETFLOAT( s );
+		GETFLOAT( t );
+		GETVECTOR( f );
+		TqFloat rgb[ 3 ];
+		rgb[ 0 ] = VECTOR( f ) [ 0 ];
+		rgb[ 1 ] = VECTOR( f ) [ 1 ];
+		rgb[ 2 ] = VECTOR( f ) [ 2 ];
+		bake_3( bd, ( char * ) STRING( name ).c_str(), FLOAT( s ), FLOAT( t ), rgb );
+	END_VARYING_SECTION
+
 	BEGIN_UNIFORM_SECTION
-	bake_done(bd);
+	bake_done( bd );
 	END_UNIFORM_SECTION
 }
 
