@@ -1206,7 +1206,7 @@ class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, 
 			TqInt i;
 			if ( pVal->Size() > 1 )
 			{
-				TqFloat * pData;
+				const TqFloat * pData;
 				pVal->GetFloatPtr( pData );
 				for ( i = 0; i < Size(); i++ )
 					m_aValue[ i ] = pData [ i ];
@@ -1287,7 +1287,7 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 			TqInt i;
 			if ( pVal->Size() > 1 )
 			{
-				CqString * pData;
+				const CqString * pData;
 				pVal->GetStringPtr( pData );
 				for ( i = 0; i < Size(); i++ )
 					m_aValue[ i ] = pData [ i ];
@@ -1402,7 +1402,7 @@ class CqShaderVariableVaryingPoint : public CqShaderVariableVarying<type_point, 
 			TqInt i;
 			if ( pVal->Size() > 1 )
 			{
-				CqVector3D * pData;
+				const CqVector3D * pData;
 				pVal->GetPointPtr( pData );
 				for ( i = 0; i < Size(); i++ )
 					m_aValue[ i ] = pData [ i ];
@@ -1513,7 +1513,7 @@ class CqShaderVariableVaryingVector : public CqShaderVariableVarying<type_vector
 			TqInt i;
 			if ( pVal->Size() > 1 )
 			{
-				CqVector3D * pData;
+				const CqVector3D * pData;
 				pVal->GetVectorPtr( pData );
 				for ( i = 0; i < Size(); i++ )
 					m_aValue[ i ] = pData [ i ];
@@ -1624,7 +1624,7 @@ class CqShaderVariableVaryingNormal : public CqShaderVariableVarying<type_normal
 			TqInt i;
 			if ( pVal->Size() > 1 )
 			{
-				CqVector3D * pData;
+				const CqVector3D * pData;
 				pVal->GetNormalPtr( pData );
 				for ( i = 0; i < Size(); i++ )
 					m_aValue[ i ] = pData [ i ];
@@ -1691,7 +1691,7 @@ class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, 
 			TqInt i;
 			if ( pVal->Size() > 1 )
 			{
-				CqColor * pData;
+				const CqColor * pData;
 				pVal->GetColorPtr( pData );
 				for ( i = 0; i < Size(); i++ )
 					m_aValue[ i ] = pData [ i ];
@@ -1762,7 +1762,7 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 			TqInt i;
 			if ( pVal->Size() > 1 )
 			{
-				CqMatrix * pData;
+				const CqMatrix * pData;
 				pVal->GetMatrixPtr( pData );
 				for ( i = 0; i < Size(); i++ )
 					m_aValue[ i ] = pData [ i ];
