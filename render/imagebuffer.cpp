@@ -1740,7 +1740,7 @@ void CqImageBuffer::RenderImage()
 	RtProgressFunc pProgressHandler;
 	if ( ( pProgressHandler = QGetRenderContext() ->optCurrent().pProgressHandler() ) != 0 )
 	{
-		( *pProgressHandler ) ( 101.0f );
+		( *pProgressHandler ) ( 100.0f );
 	}
 	m_fDone = TqTrue;
 }
