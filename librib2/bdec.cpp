@@ -842,11 +842,15 @@ TqInt CqRibBinaryDecoder::read( TqPchar buffer, TqUint size )
         while ( cv.size() < size )
         {
             getNext();
-            if( cv.back() == '\n' )
+
+            if( !cv.empty() )
             {
-                size = cv.size() + 1;
-                break;
-            };
+                if( cv.back() == '\n' )
+                {
+                    size = cv.size() + 1;
+                    break;
+                }
+            }
         }
     }
     catch ( std::string & s )
