@@ -71,7 +71,7 @@ typedef int SOCKET;
 static std::string	g_Filename( "output.tif" );
 static TqInt g_ImageWidth = 0;
 static TqInt g_ImageHeight = 0;
-static TqInt g_SamplesPerElement = 0;
+static TqInt g_SamplesPerElement = 0, g_BitsPerSample = 0;
 static int g_Window = 0;
 static GLubyte* g_Image = 0;
 static TqInt g_CWXmin, g_CWYmin;
@@ -194,6 +194,7 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 	g_ImageWidth = ( message->m_CropWindowXMax - message->m_CropWindowXMin );
 	g_ImageHeight = ( message->m_CropWindowYMax - message->m_CropWindowYMin );
 	g_SamplesPerElement = message->m_SamplesPerElement;
+	g_BitsPerSample = message->m_BitsPerSample;
 
 	g_CWXmin = message->m_CropWindowXMin;
 	g_CWYmin = message->m_CropWindowYMin;
@@ -231,18 +232,24 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 			{
 				const TqInt so = ( ( g_ImageHeight - y - 1 ) * linelength ) + ( x * 3 );
 
+				TqFloat quantize = 1;
+				// If we are displaying an FP image we will need to quantize ourselves.
+				if( g_BitsPerSample != 8 )
+					quantize = 256;
+
 				if ( g_SamplesPerElement >= 3 )
 				{
-					g_Image[ so + 0 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 0 ] );
-					g_Image[ so + 1 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 1 ] );
-					g_Image[ so + 2 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 2 ] );
+					g_Image[ so + 0 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 0 ] * quantize);
+					g_Image[ so + 1 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 1 ] * quantize );
+					g_Image[ so + 2 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 2 ] * quantize );
 				}
 				else
 				{
-					g_Image[ so + 0 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 0 ] );
-					g_Image[ so + 1 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 0 ] );
-					g_Image[ so + 2 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 0 ] );
+					g_Image[ so + 0 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 0 ] * quantize );
+					g_Image[ so + 1 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 0 ] * quantize );
+					g_Image[ so + 2 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 0 ] * quantize );
 				}
+
 			}
 			bucket += message->m_ElementSize;
 		}

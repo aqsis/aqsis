@@ -815,6 +815,10 @@ void CqBucket::QuantizeBucket()
 		TqInt min = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "ColorQuantizeMin")[0];
 		TqInt max = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "ColorQuantizeMax")[0];
 
+		// If settings are 0,0,0,0 then leave as floating point and we will save an FP tiff.
+		if( one == 0 && min == 0 && max == 0 )
+			return;
+
 		CqImagePixel* pie;
 		ImageElement( XOrigin(), YOrigin(), pie );
 		TqInt x, y;

@@ -591,10 +591,14 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 				TqInt SamplesPerElement = mode & ModeRGB ? 3 : 0;
 				SamplesPerElement += mode & ModeA ? 1 : 0;
 				SamplesPerElement = mode & ModeZ ? 1 : SamplesPerElement;
+				TqInt one = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "ColorQuantizeOne")[0];
+				TqInt min = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "ColorQuantizeMin")[0];
+				TqInt max = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "ColorQuantizeMax")[0];
+				TqInt BitsPerSample = ( one == 0 && min == 0 && max == 0 )? 32:8;
 				SqDDMessageOpen msgopen( QGetRenderContext() ->pImage() ->iXRes(),
 				                         QGetRenderContext() ->pImage() ->iYRes(),
 				                         SamplesPerElement,
-										 8,	// Bits per sample.
+										 BitsPerSample,	// Bits per sample.
 				                         QGetRenderContext() ->pImage() ->CropWindowXMin(),
 				                         QGetRenderContext() ->pImage() ->CropWindowXMax(),
 				                         QGetRenderContext() ->pImage() ->CropWindowYMin(),

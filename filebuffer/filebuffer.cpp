@@ -88,8 +88,9 @@ int main( int argc, char* argv[] )
 
 
 TqInt	XRes, YRes;
-TqInt	SamplesPerElement;
+TqInt	SamplesPerElement,BitsPerSample;
 unsigned char* pByteData;
+float*	pFloatData;
 TIFF*	pOut;
 TqInt	g_CWXmin, g_CWYmin;
 TqInt	g_CWXmax, g_CWYmax;
@@ -119,6 +120,7 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 	XRes = ( pMsg->m_CropWindowXMax - pMsg->m_CropWindowXMin );
 	YRes = ( pMsg->m_CropWindowYMax - pMsg->m_CropWindowYMin );
 	SamplesPerElement = pMsg->m_SamplesPerElement;
+	BitsPerSample = pMsg->m_BitsPerSample;
 
 	g_CWXmin = pMsg->m_CropWindowXMin;
 	g_CWYmin = pMsg->m_CropWindowYMin;
@@ -126,7 +128,10 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 	g_CWYmax = pMsg->m_CropWindowYMax;
 
 	// Create a buffer big enough to hold a row of buckets.
-	pByteData = new unsigned char[ XRes * YRes * SamplesPerElement ];
+	if(BitsPerSample == 8)
+		pByteData = new unsigned char[ XRes * YRes * SamplesPerElement ];
+	else
+		pFloatData = new float[ XRes * YRes * SamplesPerElement ];
 	return ( 0 );
 }
 
@@ -158,7 +163,10 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 				TqInt i = 0;
 				while ( i < SamplesPerElement )
 				{
-					pByteData[ so++ ] = static_cast<char>( reinterpret_cast<TqFloat*>( pBucket ) [ i ] );
+					if(BitsPerSample == 8)
+						pByteData[ so++ ] = static_cast<char>( reinterpret_cast<TqFloat*>( pBucket ) [ i ] );
+					else
+						pFloatData[ so++ ] = reinterpret_cast<TqFloat*>( pBucket ) [ i ];
 					i++;
 				}
 			}
@@ -193,36 +201,104 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 #else
 		sprintf( version, "%s %s", STRNAME, VERSION );
 #endif
+
+		bool use_logluv = false;
+
+		// Set common tags
 		TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( uint32 ) version );
 		TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) XRes );
 		TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) YRes );
 		TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
 		TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, SamplesPerElement );
-		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
-		TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
-		TIFFSetField( pOut, TIFFTAG_COMPRESSION, compression );
-		if (compression == COMPRESSION_JPEG)
-			TIFFSetField( pOut, TIFFTAG_JPEGQUALITY, quality );
-		//if (description != "")
-			//TIFFSetField(TIFFTAG_IMAGEDESCRIPTION, description);
-		TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, photometric );
-		TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
 
-		if ( SamplesPerElement == 4 )
-			TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
-
-		// Set the position tages in case we aer dealing with a cropped image.
-		TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
-		TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
-
-		TqInt	linelen = XRes * SamplesPerElement;
-		TqInt row;
-		for ( row = 0; row < YRes; row++ )
+		// Write out an 8 bits per pixel integer image.
+		if(BitsPerSample == 8)
 		{
-			if ( TIFFWriteScanline( pOut, pByteData + ( row * linelen ), row, 0 ) < 0 )
-				break;
+			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
+			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
+			TIFFSetField( pOut, TIFFTAG_COMPRESSION, compression );
+			if (compression == COMPRESSION_JPEG)
+				TIFFSetField( pOut, TIFFTAG_JPEGQUALITY, quality );
+			//if (description != "")
+				//TIFFSetField(TIFFTAG_IMAGEDESCRIPTION, description);
+			TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, photometric );
+			TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
+
+			if ( SamplesPerElement == 4 )
+				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
+
+			// Set the position tages in case we aer dealing with a cropped image.
+			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
+			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
+
+			TqInt	linelen = XRes * SamplesPerElement;
+			TqInt row;
+			for ( row = 0; row < YRes; row++ )
+			{
+				if ( TIFFWriteScanline( pOut, pByteData + ( row * linelen ), row, 0 ) < 0 )
+					break;
+			}
+			TIFFClose( pOut );
 		}
-		TIFFClose( pOut );
+		else
+		{
+			// Write out a floating point image.
+			TIFFSetField(pOut, TIFFTAG_STONITS, (double) 1.0);
+
+//			if(/* user wants logluv compression*/)
+//			{
+//				if(/* user wants to save the alpha channel */)
+//				{
+//					warn("SGI LogLuv encoding does not allow an alpha channel"
+//							" - using uncompressed IEEEFP instead");
+//				}
+//				else
+//				{
+//					use_logluv = true;
+//				}
+//
+//				if(/* user wants LZW compression*/)
+//				{
+//					warn("LZW compression is not available with SGI LogLuv encoding\n");
+//				}
+//			}
+		
+			if(use_logluv)
+			{
+				/* use SGI LogLuv compression */
+				TIFFSetField(pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT);
+				TIFFSetField(pOut, TIFFTAG_BITSPERSAMPLE, 16);
+				TIFFSetField(pOut, TIFFTAG_COMPRESSION, COMPRESSION_SGILOG);
+				TIFFSetField(pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_LOGLUV);
+				TIFFSetField(pOut, TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT_FLOAT);
+			}
+			else
+			{
+				/* use uncompressed IEEEFP pixels */
+				TIFFSetField(pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
+				TIFFSetField(pOut, TIFFTAG_BITSPERSAMPLE, 32);
+				TIFFSetField(pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+				TIFFSetField(pOut, TIFFTAG_COMPRESSION, compression);
+			}
+
+			TIFFSetField(pOut, TIFFTAG_SAMPLESPERPIXEL, SamplesPerElement);
+
+			if ( SamplesPerElement == 4 )
+				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
+			// Set the position tages in case we aer dealing with a cropped image.
+			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
+			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
+			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
+
+			TqInt	linelen = XRes * SamplesPerElement;
+			TqInt row = 0;
+			for ( row = 0; row < YRes; row++ )
+			{
+				if ( TIFFWriteScanline( pOut, pFloatData + ( row * linelen ), row, 0 ) < 0 )
+					break;
+			}
+			TIFFClose( pOut );
+		}
 	}
 	if ( DDSendMsg( s, &closeack ) <= 0 )
 		return ( -1 );
