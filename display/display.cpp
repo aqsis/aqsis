@@ -117,10 +117,10 @@ Fl_FrameBuffer_Widget *g_uiImageWidget;
 Fl_RGB_Image* g_uiImage;
 
 // Command line arguments 
-ArgParse::apstring g_type = "";
-ArgParse::apstring g_filename = "cloutput.tif";
-ArgParse::apstring g_hostname = "localhost";
-ArgParse::apstring g_port = "277472";
+ArgParse::apstring g_type;
+ArgParse::apstring g_filename = "output.tif";
+ArgParse::apstring g_hostname;
+ArgParse::apstring g_port;
 bool g_help = 0;
 
 /// Hides incompatibilities between sockets and WinSock
@@ -440,7 +440,6 @@ void ProcessFormat()
 	TiXmlElement* formatElement = respHandle.FirstChildElement("aqsis:response").FirstChildElement("aqsis:format").Element();
 	if( formatElement )
 	{
-		formatElement->Print(stdout,0);
 		TiXmlAttribute* pAttr = formatElement->FirstAttribute();
 		formatElement->QueryIntAttribute("xres", &g_ImageWidth);
 		formatElement->QueryIntAttribute("yres", &g_ImageHeight);
@@ -511,12 +510,19 @@ int main( int argc, char** argv )
         std::cout << ap.usagemsg();
         exit( 0 );
     }
-	std::cout << g_filename << std::endl;
 
-    // Connect to Aqsis ...
-    const char* port_string = getenv( "AQSIS_DD_PORT" );
-    //int port = port_string ? atoi(port_string) : -1;
+    /// Port is defined as the value passed into the -port= command line argument.
+	/// if that is empty, then the value stored in the environment variable AQSIS_DD_PORT,
+	/// if that is not available, then the fallback is 27742 ('A', 'Q', 'S', 'I' 'S', '2' on phone keypad)
 	int port = 277472;
+	if(g_port.empty())
+	{
+	    const char* port_string_env = getenv( "AQSIS_DD_PORT" );
+		if( port_string_env )
+			port = atoi(port_string_env);
+	}
+	else
+		port = atoi(g_port.c_str());
 
 	InitializeSockets();
 
@@ -525,13 +531,15 @@ int main( int argc, char** argv )
 	if ( g_Socket == INVALID_SOCKET )
 		return -1;
 
-    // If no host name specified, use the local machine
-	std::string hostName;
-	hostName.resize(256);
-	gethostname( &hostName[0], hostName.size() );
-	hostName.resize(strlen(hostName.c_str()));
+    /// Host name is the value passed into the -host= command line argument,
+	/// or the local host.
+	if(g_hostname.empty())
+	{
+		g_hostname.resize(256);
+		gethostname( &g_hostname[0], g_hostname.size() );
+	}
 		
-    hostent* const pHost = GetHostByName(hostName);
+    hostent* const pHost = GetHostByName(g_hostname);
 
     SOCKADDR_IN saTemp;
     memset( &saTemp, 0, sizeof( saTemp ) );
@@ -542,7 +550,7 @@ int main( int argc, char** argv )
 
 	if(SOCKET_ERROR == connect( g_Socket, PSOCKADDR(&saTemp), sizeof(saTemp)))
 	{
-		std::cerr << "Connecting to " << hostName.c_str() << ":" << port << " ... " << strerror(errno) << std::endl;
+		std::cerr << "Connecting to " << g_hostname.c_str() << ":" << port << " ... " << strerror(errno) << std::endl;
 		CloseSocket(g_Socket);
 		return -1;
 	}
@@ -556,7 +564,7 @@ int main( int argc, char** argv )
 		g_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, g_ImageWidth, g_ImageHeight, g_byteData);
 		g_theWindow->resizable(g_uiImageWidget);
 		g_theWindow->end();
-		g_theWindow->show(argc, argv);
+		g_theWindow->show();
 	}
 
 	// Create a thread to request buckets from Aqsis
