@@ -98,14 +98,14 @@ extern TqInt gDefLightUses;
 #define	BEGIN_VARYING_SECTION	FOR_EACH
 #define	END_VARYING_SECTION		END_FOR
 
-#define	GETFLOAT(Val)		TqFloat _##Val; (Val).Value(_##Val,__iGrid)
-#define	GETPOINT(Val)		CqVector3D _##Val; (Val).Value(_##Val,__iGrid)
-#define	GETVECTOR(Val)		CqVector3D _##Val; (Val).Value(_##Val,__iGrid)
-#define	GETNORMAL(Val)		CqVector3D _##Val; (Val).Value(_##Val,__iGrid)
-#define	GETCOLOR(Val)		CqColor _##Val; (Val).Value(_##Val,__iGrid)
-#define	GETSTRING(Val)		CqString _##Val; (Val).Value(_##Val,__iGrid)
-#define	GETBOOLEAN(Val)		TqBool _##Val; (Val).Value(_##Val,__iGrid)
-#define	GETMATRIX(Val)		CqMatrix _##Val; (Val).Value(_##Val,__iGrid)
+#define	GETFLOAT(Val)		TqFloat _##Val; (Val).GetFloat(_##Val,__iGrid)
+#define	GETPOINT(Val)		CqVector3D _##Val; (Val).GetPoint(_##Val,__iGrid)
+#define	GETVECTOR(Val)		CqVector3D _##Val; (Val).GetVector(_##Val,__iGrid)
+#define	GETNORMAL(Val)		CqVector3D _##Val; (Val).GetNormal(_##Val,__iGrid)
+#define	GETCOLOR(Val)		CqColor _##Val; (Val).GetColor(_##Val,__iGrid)
+#define	GETSTRING(Val)		CqString _##Val; (Val).GetString(_##Val,__iGrid)
+#define	GETBOOLEAN(Val)		TqBool _##Val; (Val).GetBool(_##Val,__iGrid)
+#define	GETMATRIX(Val)		CqMatrix _##Val; (Val).GetMatrix(_##Val,__iGrid)
 
 #define	_GET_STDVAR(Val)	CqVMStackEntry __##Val; \
 							Val##()->GetValue( __iGrid, __##Val); \
@@ -119,14 +119,14 @@ extern TqInt gDefLightUses;
 #define	GET_STDVAR_BOOLEAN(Val) TqBool _##Val; _GET_STDVAR(Val)
 #define	GET_STDVAR_MATRIX(Val) CqMatrix _##Val; _GET_STDVAR(Val)
 
-#define	SETFLOAT(Val, v)	(Val).SetValue(__iGrid, v)
-#define	SETPOINT(Val, v)	(Val).SetValue(__iGrid, v)
-#define	SETVECTOR(Val, v)	(Val).SetValue(__iGrid, v)
-#define	SETNORMAL(Val, v)	(Val).SetValue(__iGrid, v)
-#define	SETCOLOR(Val, v)	(Val).SetValue(__iGrid, v)
-#define	SETSTRING(Val, v)	(Val).SetValue(__iGrid, v)
-#define	SETBOOLEAN(Val, v)	(Val).SetValue(__iGrid, v)
-#define	SETMATRIX(Val, v)	(Val).SetValue(__iGrid, v)
+#define	SETFLOAT(Val, v)	(Val).SetFloat(v,__iGrid)
+#define	SETPOINT(Val, v)	(Val).SetPoint(v,__iGrid)
+#define	SETVECTOR(Val, v)	(Val).SetVector(v,__iGrid)
+#define	SETNORMAL(Val, v)	(Val).SetNormal(v,__iGrid)
+#define	SETCOLOR(Val, v)	(Val).SetColor(v,__iGrid)
+#define	SETSTRING(Val, v)	(Val).SetString(v,__iGrid)
+#define	SETBOOLEAN(Val, v)	(Val).SetBool(v,__iGrid)
+#define	SETMATRIX(Val, v)	(Val).SetMatrix(v,__iGrid)
 
 #define	FLOAT(Val)			_##Val
 #define	POINT(Val)			_##Val

@@ -37,6 +37,7 @@
 #include	"sstring.h"
 #include	"matrix.h"
 #include	"shadervariable.h"
+#include	"ishaderdata.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -169,7 +170,7 @@ struct SqVMStackEntry
 	// Cast to the various types
 	/** Type checked cast to a float
 	 */
-	void GetValue( TqFloat& res)
+	void GetValue( TqFloat& res) const
 	{
 		if ( m_Type == StackEntryType_Int )
 			res = static_cast<TqFloat>( m_Value.m_int );
@@ -178,7 +179,7 @@ struct SqVMStackEntry
 	}
 	/** Type checked cast to an integer
 	 */
-	void GetValue( TqInt& res )
+	void GetValue( TqInt& res ) const
 	{
 		if ( m_Type == StackEntryType_Float )
 			res = static_cast<TqInt>( m_Value.m_float );
@@ -187,14 +188,14 @@ struct SqVMStackEntry
 	}
 	/** Type checked cast to a boolean
 	 */
-	void GetValue( bool& res)
+	void GetValue( bool& res) const
 	{
 		assert( m_Type == StackEntryType_Bool );
 		res = m_Value.m_bool;
 	}
 	/** Type checked cast to a 3D vector
 	 */
-	void GetValue( CqVector3D& res )
+	void GetValue( CqVector3D& res ) const
 	{
 		if ( m_Type == StackEntryType_Float )
 		{
@@ -230,7 +231,7 @@ struct SqVMStackEntry
 
 	/** Type checked cast to a 4D vector.
 	 */
-	void GetValue( CqVector4D& res )
+	void GetValue( CqVector4D& res ) const
 	{
 		if ( m_Type == StackEntryType_Float )
 		{
@@ -270,7 +271,7 @@ struct SqVMStackEntry
 	}
 	/** Type checked cast to a color
 	 */
-	void GetValue( CqColor& res )
+	void GetValue( CqColor& res ) const
 	{
 		if ( m_Type == StackEntryType_Float )
 		{
@@ -305,14 +306,14 @@ struct SqVMStackEntry
 	}
 	/** Type checked cast to a string
 	 */
-	void GetValue( CqString& res )
+	void GetValue( CqString& res ) const
 	{
 		assert( m_Type == StackEntryType_String );
 		res = m_Value.m_str;
 	}
 	/** Type checked cast to a matrix
 	 */
-	void GetValue( CqMatrix& res )
+	void GetValue( CqMatrix& res ) const
 	{
 		assert( m_Type == StackEntryType_Matrix );
 		res[0][0] = m_Value.m_matrix[0 ];
@@ -450,7 +451,7 @@ struct SqVMStackEntry
 ;
 
 
-class CqVMStackEntry
+class CqVMStackEntry : public IqShaderData
 {
 	public:
 		CqVMStackEntry( TqInt size = 1 );
@@ -496,17 +497,121 @@ class CqVMStackEntry
 		~CqVMStackEntry()
 		{}
 
-		// Value access functions
-		// NOTE: The seemingly unused T& parameter is to overcome a VC++ compiler problem, you cannot call a template member
-		// function as normal i.e. Foo.Value<int>(), but instead must let the compiler decide automatically the template to use.
-		// Hopefully this will be fixed in VC++ 7.0
+		// Value access functions overridden from IqShaderData
+		virtual void GetFloat( TqFloat& res, TqInt index ) const
+		{
+			Value( res, index );
+		}
+		virtual void GetInteger( TqInt& res, TqInt index ) const
+		{
+			Value( res, index );
+		}
+		virtual void GetBool( TqBool& res, TqInt index ) const
+		{
+			Value( res, index );
+		}
+		virtual void GetString( CqString& res, TqInt index ) const
+		{
+			Value( res, index );
+		}
+		virtual void GetPoint( CqVector3D& res, TqInt index ) const
+		{
+			Value( res, index );
+		}
+		virtual void GetVector( CqVector3D& res, TqInt index ) const
+		{
+			Value( res, index );
+		}
+		virtual void GetNormal( CqVector3D& res, TqInt index ) const
+		{
+			Value( res, index );
+		}
+		virtual void GetHPoint( CqVector4D& res, TqInt index ) const
+		{
+			Value( res, index );
+		}
+		virtual void GetColor( CqColor& res, TqInt index ) const
+		{
+			Value( res, index );
+		}
+		virtual void GetMatrix( CqMatrix& res, TqInt index ) const
+		{
+			Value( res, index );
+		}
+
+		// Value setters, overridden from IqShaderData
+		virtual void SetFloat( const TqFloat& val, TqInt index )
+		{
+			SetValue( index, val );
+		}
+		virtual void SetInteger( const TqInt& val, TqInt index )
+		{
+			SetValue( index, val );
+		}
+		virtual void SetBool( const TqBool& val, TqInt index )
+		{
+			SetValue( index, val );
+		}
+		virtual void SetString( const CqString& val, TqInt index )
+		{
+			SetValue( index, val );
+		}
+		virtual void SetPoint( const CqVector3D& val, TqInt index )
+		{
+			SetValue( index, val );
+		}
+		virtual void SetVector( const CqVector3D& val, TqInt index )
+		{
+			SetValue( index, val );
+		}
+		virtual void SetNormal( const CqVector3D& val, TqInt index )
+		{
+			SetValue( index, val );
+		}
+		virtual void SetHPoint( const CqVector4D& val, TqInt index )
+		{
+			SetValue( index, val );
+		}
+		virtual void SetColor( const CqColor& val, TqInt index )
+		{
+			SetValue( index, val );
+		}
+		virtual void SetMatrix( const CqMatrix& val, TqInt index )
+		{
+			SetValue( index, val );
+		}
+		virtual	TqBool	fVarying() const
+		{
+			return ( Size() > 1 );
+		}
+		virtual	TqInt	Size() const;
+		virtual	void	SetSize( TqUint size )
+		{
+			m_Size = size;
+			if ( m_aValues.size() < size && size > 1 )
+				m_aValues.resize( size );
+		}
+		virtual	TqBool	fVariable() const
+		{
+			return ( m_pVarRef != 0 );
+		}
+		virtual	IqShaderVariable*	pVariable() const
+		{
+			return ( m_pVarRef );
+		}
+		virtual	void	SetpVariable( IqShaderVariable* pv )
+		{
+			*this = pv;
+		}
+
+
 		/** Get the value from the stack entry by index.
 		 * \param temp Temporary, to aid in the identification of the template argument for VC++.
 		 * \param Index The integer index into the SIMD value array.
 		 * \return A reference to the value.
 		 */
 		template <class T>
-		void Value( T& res, TqInt Index = 0 )
+		void Value( T& res, TqInt Index = 0 ) const
 		{
 			if ( m_pVarRef != 0 )
 			{
@@ -544,36 +649,6 @@ class CqVMStackEntry
 			}
 		}
 
-		/** Determine whether the value is varying or uniform.
-		 */
-		TqBool	fVarying() const
-		{
-			return ( Size() > 1 );
-		}
-		TqInt	Size() const;
-		/** Set the size of the SIMD array.
-		 * \param size The new size.
-		 */
-		void	SetSize( TqUint size )
-		{
-			m_Size = size;
-			if ( m_aValues.size() < size && size > 1 )
-				m_aValues.resize( size );
-		}
-		/** Determine whether the stack entry is in fact a shader variable reference.
-		 */
-		TqBool	fVariable() const
-		{
-			return ( m_pVarRef != 0 );
-		}
-		/** Get a pointer to the referenced shader variable.
-		 * Only valid if fVariable returns TqTrue.
-		 * \return A pointer to a IqShaderVariable.
-		 */
-		IqShaderVariable*	pVariable() const
-		{
-			return ( m_pVarRef );
-		}
 		/** Clear the variable reference pointer.
 		 */
 		void	ClearVariable()

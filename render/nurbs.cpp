@@ -1297,7 +1297,7 @@ CqMicroPolyGridBase* CqSurfaceNURBS::Dice()
 		TqInt iu;
 		for ( iu = 0; iu <= m_uDiceSize; iu++ )
 		{
-			TqInt igrid = ( iv * ( m_uDiceSize ) ) + iu;
+			TqInt igrid = ( iv * ( m_uDiceSize + 1) ) + iu;
 			TqFloat su = ( static_cast<TqFloat>( iu ) / static_cast<TqFloat>( m_uDiceSize ) )
 			             * ( m_auKnots[ m_cuVerts ] - m_auKnots[ m_uOrder - 1 ] )
 			             + m_auKnots[ m_uOrder - 1 ];
