@@ -40,12 +40,18 @@
 
 #ifdef AQSIS_SYSTEM_MACOSX
 extern "C" {
+// For Mac OS X, define MACOSX_NO_LIBDL if libdl not installed
+#ifndef MACOSX_NO_LIBDL	
 #include <dlfcn.h>                /* dlopen() */
+#endif
 }
 #endif /* AQSIS_SYSTEM_MACOSX */
 #ifdef AQSIS_SYSTEM_POSIX
 extern "C" {
+// For Mac OS X, define MACOSX_NO_LIBDL if libdl not installed
+#ifndef MACOSX_NO_LIBDL	
 #include <dlfcn.h>                /* dlopen() */
+#endif
 }
 #endif /* AQSIS_SYSTEM_POSIX */
 
@@ -67,7 +73,10 @@ CqPlugins::CqPlugins(char *searchpath, char *library, char *function)
 #ifdef AQSIS_SYSTEM_WIN32
        strcpy(dynamicfunction, function);
 #elif defined(AQSIS_SYSTEM_MACOSX)
+// For Mac OS X, define MACOSX_NO_LIBDL if libdl not installed
+#ifndef MACOSX_NO_LIBDL
        sprintf(dynamicfunction,"_%s", function);
+#endif
 #else
        strcpy(dynamicfunction, function);
 #endif
@@ -140,6 +149,8 @@ void *function_pt = NULL;
 #elif defined(AQSIS_SYSTEM_MACOSX)
      // We probably need an interface for CFPlugins here
      // But for now, we will not implement plugins
+// For Mac OS X, define MACOSX_NO_LIBDL if libdl not installed
+#ifndef MACOSX_NO_LIBDL
     handle = (void *) dlopen( dynamiclibrary, RTLD_NOW | RTLD_GLOBAL);
     if ( !handle )
     {
@@ -152,6 +163,7 @@ void *function_pt = NULL;
 	    sprintf(errorlog, "%s(): %s", dynamicfunction, dlerror());
         }
     }
+#endif
 #elif defined(AQSIS_SYSTEM_BEOS)
 	// We probably need an interface for CFPlugins here
 	// But for now, we will not implement plugins
@@ -199,8 +211,11 @@ void CqPlugins::Close()
         if (handle)
 	   FreeLibrary( ( HINSTANCE ) handle );
 #elif defined(AQSIS_SYSTEM_MACOSX)
+// For Mac OS X, define MACOSX_NO_LIBDL if libdl not installed
+#ifndef MACOSX_NO_LIBDL	
 	if (handle)
 	   dlclose( handle );
+#endif
 #elif defined(AQSIS_SYSTEM_BEOS)
 	// Do nothing for now
 #else
