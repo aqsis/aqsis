@@ -56,12 +56,10 @@ copy ..\..\ribfiles\*.rib .
 
 cd ..\lib
 copy ..\..\library\release\libri2rib.lib .
-copy ..\..\library\release\libslxargs.lib .
 
 cd ..\include
 copy ..\..\render\ri.h .
 copy ..\..\libaqsistypes\win32\intel\share.h .
-copy ..\..\libslxargs\slx.h .
 
 cd ..\..\
 erase /f /q Aqsis_Win32.zip
