@@ -33,7 +33,7 @@
 			<NoCache/>
 			<Arguments/>
 			<Valid>
-				<Outside/>
+				<BeginEnd/>
 			</Valid>
 		</Procedure>
 
@@ -49,7 +49,7 @@
 		<Procedure name="RiFrameEnd" return="RtVoid">
 			<Arguments/>
 			<Valid>
-				<BeginEnd/>
+				<Frame/>
 			</Valid>
 		</Procedure>
 
@@ -64,8 +64,7 @@
 		<Procedure name="RiWorldEnd" return="RtVoid">
 			<Arguments/>
 			<Valid>
-				<BeginEnd/>
-				<Frame/>
+				<World/>
 			</Valid>
 		</Procedure>
 
@@ -378,13 +377,7 @@
 		<Procedure name="RiAttributeEnd" return="RtVoid">
 			<Arguments/>
 			<Valid>
-				<BeginEnd/>
-				<Frame/>
-				<World/>
 				<Attribute/>
-				<Transform/>
-				<Solid/>
-				<Object Aqsis="true"/>
 			</Valid>
 		</Procedure>
 
@@ -947,13 +940,7 @@
 		<Procedure name="RiTransformEnd" return="RtVoid">
 			<Arguments/>
 			<Valid>
-				<BeginEnd/>
-				<Frame/>
-				<World/>
-				<Attribute/>
 				<Transform/>
-				<Solid/>
-				<Object Aqsis="true"/>
 			</Valid>
 		</Procedure>
 
@@ -1495,11 +1482,7 @@
 		<Procedure name="RiSolidEnd" return="RtVoid">
 			<Arguments/>
 			<Valid>
-				<World/>
-				<Attribute/>
-				<Transform/>
 				<Solid/>
-				<Object Aqsis="true"/>
 			</Valid>
 		</Procedure>
 
@@ -1518,12 +1501,7 @@
 		<Procedure name="RiObjectEnd" return="RtVoid">
 			<Arguments/>
 			<Valid>
-				<BeginEnd/>
-				<Frame/>
-				<World/>
-				<Attribute/>
-				<Transform/>
-				<Solid/>
+				<Object/>
 			</Valid>
 		</Procedure>
 
@@ -1579,13 +1557,7 @@
 		<Procedure name="RiMotionEnd" return="RtVoid">
 			<Arguments/>
 			<Valid>
-				<BeginEnd/>
-				<Frame/>
-				<World/>
-				<Attribute/>
-				<Transform/>
-				<Solid/>
-				<Object Aqsis="true"/>
+				<Motion/>
 			</Valid>
 		</Procedure>
 

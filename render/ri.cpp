@@ -383,9 +383,9 @@ const char*	GetStateAsString()
 //
 RtToken	RiDeclare( RtString name, RtString declaration )
 {
-	Validate_RiDeclare
-
 	Cache_RiDeclare
+
+	Validate_RiDeclare
 
     CqString strName( name ), strDecl( declaration );
     QGetRenderContext() ->AddParameterDecl( strName.c_str(), strDecl.c_str() );
@@ -506,9 +506,9 @@ RtVoid	RiEnd()
 //
 RtVoid	RiFrameBegin( RtInt number )
 {
-	Validate_RiFrameBegin
-
 	Cache_RiFrameBegin
+
+	Validate_RiFrameBegin
 
     // Initialise the statistics variables. If the RIB doesn't contain
     // a Frame-block the initialisation was previously done in CqStats::Initilise()
@@ -532,9 +532,9 @@ RtVoid	RiFrameBegin( RtInt number )
 //
 RtVoid	RiFrameEnd()
 {
-	Validate_RiFrameEnd
-
 	Cache_RiFrameEnd
+
+	Validate_RiFrameEnd
 
     QGetRenderContext() ->EndFrameModeBlock();
     QGetRenderContext() ->ClearDisplayRequests();
@@ -549,9 +549,9 @@ RtVoid	RiFrameEnd()
 //
 RtVoid	RiWorldBegin()
 {
-	Validate_RiWorldBegin
-
 	Cache_RiWorldBegin
+
+	Validate_RiWorldBegin
 
     // Start the frame timer (just in case there was no FrameBegin block. If there
     // was, nothing happens)
@@ -622,9 +622,9 @@ RtVoid	RiWorldBegin()
 
 RtVoid	RiWorldEnd()
 {
-	Validate_RiWorldEnd
-
 	Cache_RiWorldEnd
+
+	Validate_RiWorldEnd
 
     TqBool fFailed = TqFalse;
     // Call any specified pre render function.
@@ -683,9 +683,9 @@ RtVoid	RiWorldEnd()
 //
 RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio )
 {
-	Validate_RiFormat
-
 	Cache_RiFormat
+
+	Validate_RiFormat
 
     QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = xresolution ;
     QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = yresolution ;
@@ -704,9 +704,9 @@ RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio 
 //
 RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 {
-	Validate_RiFrameAspectRatio
-
 	Cache_RiFrameAspectRatio
+
+	Validate_RiFrameAspectRatio
 
     CqLogRangeCheckCallback rc;
 
@@ -741,9 +741,9 @@ RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 //
 RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top )
 {
-	Validate_RiScreenWindow
-
 	Cache_RiScreenWindow
+
+	Validate_RiScreenWindow
 
     QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ScreenWindow" ) [ 0 ] = left ;
     QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ScreenWindow" ) [ 1 ] = right ;
@@ -764,9 +764,9 @@ RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top 
 //
 RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 {
-	Validate_RiCropWindow
-
 	Cache_RiCropWindow
+
+	Validate_RiCropWindow
 
     CqLogRangeCheckCallback rc;
 
@@ -835,9 +835,9 @@ RtVoid	RiProjection( RtToken name, ... )
 //
 RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 {
-	Validate_RiProjection
-
 	Cache_RiProjection
+
+	Validate_RiProjection
 
     if ( strcmp( name, RI_PERSPECTIVE ) == 0 )
         QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "Projection" ) [ 0 ] = ProjectionPerspective ;
@@ -871,9 +871,9 @@ RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 {
-	Validate_RiClipping
-
 	Cache_RiClipping
+
+	Validate_RiClipping
 
     CqLogRangeCheckCallback rc;
 
@@ -911,9 +911,9 @@ RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 //
 RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance )
 {
-	Validate_RiDepthOfField
-
 	Cache_RiDepthOfField
+
+	Validate_RiDepthOfField
 
     CqLogRangeCheckCallback rc;
 
@@ -957,9 +957,9 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 //
 RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 {
-	Validate_RiShutter
-
 	Cache_RiShutter
+
+	Validate_RiShutter
 
     CqLogRangeCheckCallback rc;
 
@@ -998,9 +998,9 @@ RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 //
 RtVoid	RiPixelVariance( RtFloat variance )
 {
-	Validate_RiPixelVariance
-
 	Cache_RiPixelVariance
+
+	Validate_RiPixelVariance
 
     CqLogRangeCheckCallback rc;
 
@@ -1030,9 +1030,9 @@ RtVoid	RiPixelVariance( RtFloat variance )
 //
 RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 {
-	Validate_RiPixelSamples
-
 	Cache_RiPixelSamples
+
+	Validate_RiPixelSamples
 
     CqLogRangeCheckCallback rc;
 
@@ -1070,9 +1070,9 @@ RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 //
 RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 {
-	Validate_RiPixelFilter
-
 	Cache_RiPixelFilter
+
+	Validate_RiPixelFilter
 
     QGetRenderContext() ->optCurrent().SetfuncFilter( function );
     QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ] = xwidth ;
@@ -1088,9 +1088,9 @@ RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 //
 RtVoid	RiExposure( RtFloat gain, RtFloat gamma )
 {
-	Validate_RiExposure
-
 	Cache_RiExposure
+
+	Validate_RiExposure
 
     QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Exposure" ) [ 0 ] = gain ;
     QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Exposure" ) [ 1 ] = gamma ;
@@ -1122,9 +1122,9 @@ RtVoid	RiImager( RtToken name, ... )
 //
 RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 {
-	Validate_RiImager
-
 	Cache_RiImager
+
+	Validate_RiImager
 
     RtInt i;
 
@@ -1151,9 +1151,9 @@ RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude )
 {
-	Validate_RiQuantize
-
 	Cache_RiQuantize
+
+	Validate_RiQuantize
 
     if ( strcmp( type, "rgba" ) == 0 )
     {
@@ -1212,9 +1212,9 @@ RtVoid	RiDisplay( RtToken name, RtToken type, RtToken mode, ... )
 //
 RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
 {
-	Validate_RiDisplay
-
 	Cache_RiDisplay
+
+	Validate_RiDisplay
 
     CqString strName( name );
     CqString strType( type );
@@ -1554,9 +1554,9 @@ RtVoid	RiHider( RtToken name, ... )
 //
 RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 {
-	Validate_RiHider
-
 	Cache_RiHider
+
+	Validate_RiHider
 
     if ( !strcmp( name, "hidden" ) || !strcmp( name, "painter" ) )
     {
@@ -1593,9 +1593,9 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 {
-	Validate_RiColorSamples
-
 	Cache_RiColorSamples
+
+	Validate_RiColorSamples
 
     std::cerr << warning << "RiColorSamples not supported" << std::endl;
     return ;
@@ -1608,9 +1608,9 @@ RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 //
 RtVoid	RiRelativeDetail( RtFloat relativedetail )
 {
-	Validate_RiRelativeDetail
-
 	Cache_RiRelativeDetail
+
+	Validate_RiRelativeDetail
 
     if ( relativedetail < 0.0f )
     {
@@ -1647,9 +1647,9 @@ RtVoid	RiOption( RtToken name, ... )
 //
 RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 {
-	Validate_RiOption
-
 	Cache_RiOption
+
+	Validate_RiOption
 
     // Find the parameter on the current options.
     CqNamedParameterList * pOpt = QGetRenderContext() ->optCurrent().pOptionWrite( name );
@@ -1811,9 +1811,9 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiAttributeBegin()
 {
-	Validate_RiAttributeBegin
-
 	Cache_RiAttributeBegin
+
+	Validate_RiAttributeBegin
 
     QGetRenderContext() ->BeginAttributeModeBlock();
 
@@ -1827,9 +1827,9 @@ RtVoid	RiAttributeBegin()
 //
 RtVoid	RiAttributeEnd()
 {
-	Validate_RiAttributeEnd
-
 	Cache_RiAttributeEnd
+
+	Validate_RiAttributeEnd
 
     QGetRenderContext() ->EndAttributeModeBlock();
 
@@ -1843,9 +1843,9 @@ RtVoid	RiAttributeEnd()
 //
 RtVoid	RiColor( RtColor Cq )
 {
-	Validate_RiColor
-
 	Cache_RiColor
+
+	Validate_RiColor
 
     QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite( "System", "Color" ) [ 0 ] = CqColor( Cq );
     QGetRenderContext() ->AdvanceTime();
@@ -1859,9 +1859,9 @@ RtVoid	RiColor( RtColor Cq )
 //
 RtVoid	RiOpacity( RtColor Os )
 {
-	Validate_RiOpacity
-
 	Cache_RiOpacity
+
+	Validate_RiOpacity
 
     QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite( "System", "Opacity" ) [ 0 ] = CqColor( Os );
     QGetRenderContext() ->AdvanceTime();
@@ -1878,9 +1878,9 @@ RtVoid	RiTextureCoordinates( RtFloat s1, RtFloat t1,
                              RtFloat s3, RtFloat t3,
                              RtFloat s4, RtFloat t4 )
 {
-	Validate_RiTextureCoordinates
-
 	Cache_RiTextureCoordinates
+
+	Validate_RiTextureCoordinates
 
     TqFloat * pTC = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "TextureCoordinates" );
 
@@ -1923,9 +1923,9 @@ RtLightHandle	RiLightSource( RtToken name, ... )
 //
 RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 {
-	Validate_RiLightSource
-
 	Cache_RiLightSource
+
+	Validate_RiLightSource
 
     // Find the lightsource shader.
     IqShader * pShader = static_cast<CqShader*>( QGetRenderContext() ->CreateShader( name, Type_Lightsource ) );
@@ -1984,9 +1984,9 @@ RtLightHandle	RiAreaLightSource( RtToken name, ... )
 //
 RtLightHandle	RiAreaLightSourceV( RtToken name, PARAMETERLIST )
 {
-	Validate_RiAreaLightSource
-
 	Cache_RiAreaLightSource
+
+	Validate_RiAreaLightSource
 
     std::cerr << warning << "RiAreaLightSource not supported, will produce a point light" << std::endl;
 
@@ -2000,9 +2000,9 @@ RtLightHandle	RiAreaLightSourceV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiIlluminate( RtLightHandle light, RtBoolean onoff )
 {
-	Validate_RiIlluminate
-
 	Cache_RiIlluminate
+
+	Validate_RiIlluminate
 
     // Check if we are turning the light on or off.
     if ( light == NULL ) return ;
@@ -2037,9 +2037,9 @@ RtVoid	RiSurface( RtToken name, ... )
 //
 RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 {
-	Validate_RiSurface
-
 	Cache_RiSurface
+
+	Validate_RiSurface
 
     // Find the shader.
     IqShader * pshadSurface = QGetRenderContext() ->CreateShader( name, Type_Surface );
@@ -2087,9 +2087,9 @@ RtVoid	RiAtmosphere( RtToken name, ... )
 //
 RtVoid	RiAtmosphereV( RtToken name, PARAMETERLIST )
 {
-	Validate_RiAtmosphere
-
 	Cache_RiAtmosphere
+
+	Validate_RiAtmosphere
 
     // Find the shader.
     IqShader * pshadAtmosphere = QGetRenderContext() ->CreateShader( name, Type_Volume );
@@ -2132,9 +2132,9 @@ RtVoid	RiInterior( RtToken name, ... )
 //
 RtVoid	RiInteriorV( RtToken name, PARAMETERLIST )
 {
-	Validate_RiInterior
-
 	Cache_RiInterior
+
+	Validate_RiInterior
 
     std::cerr << warning << "RiInterior not supported" << std::endl;
     return ;
@@ -2158,9 +2158,9 @@ RtVoid	RiExterior( RtToken name, ... )
 //
 RtVoid	RiExteriorV( RtToken name, PARAMETERLIST )
 {
-	Validate_RiExterior
-
 	Cache_RiExterior
+
+	Validate_RiExterior
 
     std::cerr << warning << "ExInterior not supported" << std::endl;
     return ;
@@ -2173,9 +2173,9 @@ RtVoid	RiExteriorV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiShadingRate( RtFloat size )
 {
-	Validate_RiShadingRate
-
 	Cache_RiShadingRate
+
+	Validate_RiShadingRate
 
     CqLogRangeCheckCallback rc;
 
@@ -2207,9 +2207,9 @@ RtVoid	RiShadingRate( RtFloat size )
 //
 RtVoid	RiShadingInterpolation( RtToken type )
 {
-	Validate_RiShadingInterpolation
-
 	Cache_RiShadingInterpolation
+
+	Validate_RiShadingInterpolation
 
     if ( strcmp( type, RI_CONSTANT ) == 0 )
         QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingConstant;
@@ -2230,9 +2230,9 @@ RtVoid	RiShadingInterpolation( RtToken type )
 //
 RtVoid	RiMatte( RtBoolean onoff )
 {
-	Validate_RiMatte
-
 	Cache_RiMatte
+
+	Validate_RiMatte
 
     QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Matte" ) [ 0 ] = onoff != 0;
     QGetRenderContext() ->AdvanceTime();
@@ -2246,9 +2246,9 @@ RtVoid	RiMatte( RtBoolean onoff )
 //
 RtVoid	RiBound( RtBound bound )
 {
-	Validate_RiBound
-
 	Cache_RiBound
+
+	Validate_RiBound
 
     // TODO: Need to add a "Bound" attribute here, and fill it in.
     QGetRenderContext() ->AdvanceTime();
@@ -2263,9 +2263,9 @@ RtVoid	RiBound( RtBound bound )
 //
 RtVoid	RiDetail( RtBound bound )
 {
-	Validate_RiDetail
-
 	Cache_RiDetail
+
+	Validate_RiDetail
 
     CqBound Bound( bound );
 
@@ -2287,9 +2287,9 @@ RtVoid	RiDetail( RtBound bound )
 //
 RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh )
 {
-	Validate_RiDetailRange
-
 	Cache_RiDetailRange
+
+	Validate_RiDetailRange
 
     if ( offlow > onlow || onhigh > offhigh )
     {
@@ -2338,9 +2338,9 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 //
 RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 {
-	Validate_RiGeometricApproximation
-
 	Cache_RiGeometricApproximation
+
+	Validate_RiGeometricApproximation
 
     std::cerr << warning << "RiGeometricApproximation not supported" << std::endl;
     return ;
@@ -2353,9 +2353,9 @@ RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 //
 RtVoid	RiOrientation( RtToken orientation )
 {
-	Validate_RiOrientation
-
 	Cache_RiOrientation
+
+	Validate_RiOrientation
 
     if ( orientation != 0 )
     {
@@ -2382,9 +2382,9 @@ RtVoid	RiOrientation( RtToken orientation )
 //
 RtVoid	RiReverseOrientation()
 {
-	Validate_RiReverseOrientation
-
 	Cache_RiReverseOrientation
+
+	Validate_RiReverseOrientation
 
     QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
     QGetRenderContext() ->AdvanceTime();
@@ -2398,9 +2398,9 @@ RtVoid	RiReverseOrientation()
 //
 RtVoid	RiSides( RtInt nsides )
 {
-	Validate_RiSides
-
 	Cache_RiSides
+
+	Validate_RiSides
 
     QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Sides" ) [ 0 ] = nsides;
     QGetRenderContext() ->AdvanceTime();
@@ -2415,9 +2415,9 @@ RtVoid	RiSides( RtInt nsides )
 //
 RtVoid	RiIdentity()
 {
-	Validate_RiIdentity
-
 	Cache_RiIdentity
+
+	Validate_RiIdentity
 
     QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), CqMatrix() );
 
@@ -2446,9 +2446,9 @@ RtVoid	RiIdentity()
 //
 RtVoid	RiTransform( RtMatrix transform )
 {
-	Validate_RiTransform
-
 	Cache_RiTransform
+
+	Validate_RiTransform
 
     // TODO: Determine if this matrix requires a change in orientation.
     CqMatrix matTrans( transform );
@@ -2470,9 +2470,9 @@ RtVoid	RiTransform( RtMatrix transform )
 //
 RtVoid	RiConcatTransform( RtMatrix transform )
 {
-	Validate_RiConcatTransform
-
 	Cache_RiConcatTransform
+
+	Validate_RiConcatTransform
 
     // Check if this transformation results in a change in orientation.
     CqMatrix matTrans( transform );
@@ -2494,9 +2494,9 @@ RtVoid	RiConcatTransform( RtMatrix transform )
 //
 RtVoid	RiPerspective( RtFloat fov )
 {
-	Validate_RiPerspective
-
 	Cache_RiPerspective
+
+	Validate_RiPerspective
 
     if ( fov <= 0 )
     {
@@ -2529,9 +2529,9 @@ RtVoid	RiPerspective( RtFloat fov )
 //
 RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
 {
-	Validate_RiTranslate
-
 	Cache_RiTranslate
+
+	Validate_RiTranslate
 
     CqMatrix	matTrans( CqVector3D( dx, dy, dz ) );
     // Check if this transformation results in a change in orientation.
@@ -2554,9 +2554,9 @@ RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
 //
 RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 {
-	Validate_RiRotate
-
 	Cache_RiRotate
+
+	Validate_RiRotate
 
     CqMatrix	matRot( RAD( angle ), CqVector4D( dx, dy, dz ) );
     // Check if this transformation results in a change in orientation.
@@ -2578,9 +2578,9 @@ RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 //
 RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 {
-	Validate_RiScale
-
 	Cache_RiScale
+
+	Validate_RiScale
 
     CqMatrix	matScale( sx, sy, sz );
     // Check if this transformation results in a change in orientation.
@@ -2603,9 +2603,9 @@ RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
                RtFloat dx2, RtFloat dy2, RtFloat dz2 )
 {
-	Validate_RiSkew
-
 	Cache_RiSkew
+
+	Validate_RiSkew
 
     CqMatrix	matSkew( RAD( angle ), dx1, dy1, dz1, dx2, dy2, dz2 );
 
@@ -2634,9 +2634,9 @@ RtVoid	RiDeformation( RtToken name, ... )
 //
 RtVoid	RiDeformationV( RtToken name, PARAMETERLIST )
 {
-	Validate_RiDeformation
-
 	Cache_RiDeformation
+
+	Validate_RiDeformation
 
     std::cerr << warning << "RiDeformation not supported" << std::endl;
     return ;
@@ -2666,9 +2666,9 @@ RtVoid	RiDisplacement( RtToken name, ... )
 //
 RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
 {
-	Validate_RiDisplacement
-
 	Cache_RiDisplacement
+
+	Validate_RiDisplacement
 
     // Find the shader.
     IqShader * pshadDisplacement = QGetRenderContext() ->CreateShader( name, Type_Displacement );
@@ -2700,9 +2700,9 @@ RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
 //
 RtVoid	RiCoordinateSystem( RtToken space )
 {
-	Validate_RiCoordinateSystem
-
 	Cache_RiCoordinateSystem
+
+	Validate_RiCoordinateSystem
 
     // Insert the named coordinate system into the list help on the renderer.
     QGetRenderContext() ->SetCoordSystem( space, QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ) );
@@ -2719,9 +2719,9 @@ RtVoid	RiCoordinateSystem( RtToken space )
 
 RtVoid	RiCoordSysTransform( RtToken space )
 {
-	Validate_RiCoordSysTransform
-
 	Cache_RiCoordSysTransform
+
+	Validate_RiCoordSysTransform
 
     // Insert the named coordinate system into the list help on the renderer.
     QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), QGetRenderContext() ->matSpaceToSpace( space, "world" ) );
@@ -2737,9 +2737,9 @@ RtVoid	RiCoordSysTransform( RtToken space )
 //
 RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[] )
 {
-	Validate_RiTransformPoints
-
 	Cache_RiTransformPoints
+
+	Validate_RiTransformPoints
 
     std::cerr << warning << "RiTransformPoints not supported" << std::endl;
     return ( 0 );
@@ -2752,9 +2752,9 @@ RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, R
 //
 RtVoid	RiTransformBegin()
 {
-	Validate_RiTransformBegin
-
 	Cache_RiTransformBegin
+
+	Validate_RiTransformBegin
 
     QGetRenderContext() ->BeginTransformModeBlock();
 
@@ -2768,9 +2768,9 @@ RtVoid	RiTransformBegin()
 //
 RtVoid	RiTransformEnd()
 {
-	Validate_RiTransformEnd
-
 	Cache_RiTransformEnd
+
+	Validate_RiTransformEnd
 
     QGetRenderContext() ->EndTransformModeBlock();
 
@@ -2801,9 +2801,9 @@ RtVoid	RiAttribute( RtToken name, ... )
 //
 RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 {
-	Validate_RiAttribute
-
 	Cache_RiAttribute
+
+	Validate_RiAttribute
 
     // Find the parameter on the current options.
     CqNamedParameterList * pAttr = QGetRenderContext() ->pattrWriteCurrent() ->pAttributeWrite( name );
@@ -2934,9 +2934,9 @@ RtVoid	RiPolygon( RtInt nvertices, ... )
 //
 RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 {
-	Validate_RiPolygon
-
 	Cache_RiPolygon
+
+	Validate_RiPolygon
 
     // Create a new polygon surface primitive.
     CqSurfacePolygon * pSurface = new CqSurfacePolygon( nvertices );
@@ -2991,9 +2991,9 @@ RtVoid	RiGeneralPolygon( RtInt nloops, RtInt nverts[], ... )
 //
 RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 {
-	Validate_RiGeneralPolygon
-
 	Cache_RiGeneralPolygon
+
+	Validate_RiGeneralPolygon
 
     TqInt iloop;
 
@@ -3127,9 +3127,9 @@ RtVoid RiBlobby( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloa
 RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[],
                   RtInt nstr, RtString str[], PARAMETERLIST )
 {
-	Validate_RiBlobby
-
 	Cache_RiBlobby
+
+	Validate_RiBlobby
 
     std::cerr << warning << "RiBlobby not supported" << std::endl;
 
@@ -3163,9 +3163,9 @@ RtVoid	RiPoints( RtInt nvertices, ... )
  **/
 RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 {
-	Validate_RiPoints
-
 	Cache_RiPoints
+
+	Validate_RiPoints
 
     // Create a storage class for all the points.
     CqPolygonPoints* pPointsClass = new CqPolygonPoints( npoints, 1, npoints );
@@ -3270,9 +3270,9 @@ RtVoid RiCurves( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, .
  **/
 RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, PARAMETERLIST )
 {
-	Validate_RiCurves
-
 	Cache_RiCurves
+
+	Validate_RiCurves
 
     // find out whether the curve is periodic or non-periodic
     TqBool periodic = TqFalse;
@@ -3376,9 +3376,9 @@ RtVoid	RiPointsPolygons( RtInt npolys, RtInt nverts[], RtInt verts[], ... )
 
 RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERLIST )
 {
-	Validate_RiPointsPolygons
-
 	Cache_RiPointsPolygons
+
+	Validate_RiPointsPolygons
 
     // Calculate how many vertices there are.
     RtInt cVerts = 0;
@@ -3443,9 +3443,9 @@ RtVoid	RiPointsGeneralPolygons( RtInt npolys, RtInt nloops[], RtInt nverts[], Rt
 //
 RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], PARAMETERLIST )
 {
-	Validate_RiPointsGeneralPolygons
-
 	Cache_RiPointsGeneralPolygons
+
+	Validate_RiPointsGeneralPolygons
 
     TqInt ipoly;
     TqInt iloop;
@@ -3659,9 +3659,9 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 //
 RtVoid	RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep )
 {
-	Validate_RiBasis
-
 	Cache_RiBasis
+
+	Validate_RiBasis
 
     CqMatrix u;
     CqMatrix v;
@@ -3731,9 +3731,9 @@ RtVoid	RiPatch( RtToken type, ... )
 //
 RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 {
-	Validate_RiPatch
-
 	Cache_RiPatch
+
+	Validate_RiPatch
 
     if ( strcmp( type, RI_BICUBIC ) == 0 )
     {
@@ -3811,9 +3811,9 @@ RtVoid	RiPatchMesh( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 
 RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, PARAMETERLIST )
 {
-	Validate_RiPatchMesh
-
 	Cache_RiPatchMesh
+
+	Validate_RiPatchMesh
 
     if( strcmp( uwrap, RI_PERIODIC ) && strcmp( uwrap, RI_NONPERIODIC ) )
         std::cerr << error << "RiPatchMesh invalid u-wrap type: \"" << uwrap << "\"" << std::endl;
@@ -3910,9 +3910,9 @@ RtVoid	RiNuPatch( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat
 RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax,
                    RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, PARAMETERLIST )
 {
-	Validate_RiNuPatch
-
 	Cache_RiNuPatch
+
+	Validate_RiNuPatch
 
     // Create a NURBS patch
     CqSurfaceNURBS * pSurface = new CqSurfaceNURBS();
@@ -3955,9 +3955,9 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 //
 RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[] )
 {
-	Validate_RiTrimCurve
-
 	Cache_RiTrimCurve
+
+	Validate_RiTrimCurve
 
     // Clear the current loop array.
     QGetRenderContext() ->pattrWriteCurrent() ->TrimLoops().Clear();
@@ -4026,9 +4026,9 @@ RtVoid	RiSphere( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, .
 //
 RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
-	Validate_RiSphere
-
 	Cache_RiSphere
+
+	Validate_RiSphere
 
     CqLogRangeCheckCallback rc;
 
@@ -4078,9 +4078,9 @@ RtVoid	RiCone( RtFloat height, RtFloat radius, RtFloat thetamax, ... )
 //
 RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST )
 {
-	Validate_RiCone
-
 	Cache_RiCone
+
+	Validate_RiCone
 
     /// \note This should be an exception and get caught further up.
     if( thetamax == 0 )
@@ -4127,9 +4127,9 @@ RtVoid	RiCylinder( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
 //
 RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
-	Validate_RiCylinder
-
 	Cache_RiCylinder
+
+	Validate_RiCylinder
 
     // Create a cylinder
     CqCylinder * pSurface = new CqCylinder( radius, zmin, zmax, 0, thetamax );
@@ -4172,9 +4172,9 @@ RtVoid	RiHyperboloid( RtPoint point1, RtPoint point2, RtFloat thetamax, ... )
 //
 RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMETERLIST )
 {
-	Validate_RiHyperboloid
-
 	Cache_RiHyperboloid
+
+	Validate_RiHyperboloid
 
     // Create a hyperboloid
     CqVector3D v0( point1[ 0 ], point1[ 1 ], point1[ 2 ] );
@@ -4219,9 +4219,9 @@ RtVoid	RiParaboloid( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
 //
 RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
-	Validate_RiParaboloid
-
 	Cache_RiParaboloid
+
+	Validate_RiParaboloid
 		
     // Create a paraboloid
     CqParaboloid * pSurface = new CqParaboloid( rmax, zmin, zmax, 0, thetamax );
@@ -4264,9 +4264,9 @@ RtVoid	RiDisk( RtFloat height, RtFloat radius, RtFloat thetamax, ... )
 //
 RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST )
 {
-	Validate_RiDisk
-
 	Cache_RiDisk
+
+	Validate_RiDisk
 
     // Create a disk
     CqDisk * pSurface = new CqDisk( height, 0, radius, 0, thetamax );
@@ -4309,9 +4309,9 @@ RtVoid	RiTorus( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phim
 //
 RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, PARAMETERLIST )
 {
-	Validate_RiTorus
-
 	Cache_RiTorus
+
+	Validate_RiTorus
 
     // Create a torus
     CqTorus * pSurface = new CqTorus( majorrad, minorrad, phimin, phimax, 0, thetamax );
@@ -4338,9 +4338,9 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 //
 RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc )
 {
-	Validate_RiProcedural
-
 	Cache_RiProcedural
+
+	Validate_RiProcedural
 
     CqBound B(bound);
 
@@ -4386,9 +4386,9 @@ RtVoid	RiGeometry( RtToken type, ... )
 //
 RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 {
-	Validate_RiGeometry
-
 	Cache_RiGeometry
+
+	Validate_RiGeometry
 
     if ( strcmp( type, "teapot" ) == 0 )
     {
@@ -4454,9 +4454,9 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 //
 RtVoid	RiSolidBegin( RtToken type )
 {
-	Validate_RiSolidBegin
-
 	Cache_RiSolidBegin
+
+	Validate_RiSolidBegin
 
     CqString strType( type );
     QGetRenderContext() ->BeginSolidModeBlock( strType );
@@ -4471,9 +4471,9 @@ RtVoid	RiSolidBegin( RtToken type )
 //
 RtVoid	RiSolidEnd()
 {	
-	Validate_RiSolidEnd
-
 	Cache_RiSolidEnd
+
+	Validate_RiSolidEnd
 
     QGetRenderContext() ->EndSolidModeBlock();
 
@@ -4487,9 +4487,9 @@ RtVoid	RiSolidEnd()
 //
 RtObjectHandle	RiObjectBegin()
 {
-	Validate_RiObjectBegin
-
 	Cache_RiObjectBegin
+
+	Validate_RiObjectBegin
 
     QGetRenderContext() ->BeginObjectModeBlock();
 	RtObjectHandle ObjectHandle = static_cast<RtObjectHandle>(QGetRenderContext() ->OpenNewObjectInstance());
@@ -4521,9 +4521,9 @@ RtVoid	RiObjectEnd()
 //
 RtVoid	RiObjectInstance( RtObjectHandle handle )
 {
-	Validate_RiObjectInstance
-
 	Cache_RiObjectInstance
+
+	Validate_RiObjectInstance
 
 	QGetRenderContext() ->InstantiateObject( reinterpret_cast<CqObjectInstance*>( handle ) );
     return ;
@@ -4557,9 +4557,9 @@ RtVoid	RiMotionBegin( RtInt N, ... )
 //
 RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] )
 {
-	Validate_RiMotionBeginV
-
 	Cache_RiMotionBeginV
+
+	Validate_RiMotionBeginV
 
     QGetRenderContext() ->BeginMotionModeBlock( N, times );
 
@@ -4573,9 +4573,9 @@ RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] )
 //
 RtVoid	RiMotionEnd()
 {
-	Validate_RiMotionEnd
-
 	Cache_RiMotionEnd
+
+	Validate_RiMotionEnd
 
     QGetRenderContext() ->EndMotionModeBlock();
 
@@ -4607,9 +4607,9 @@ RtVoid RiMakeTexture ( RtString pic, RtString tex, RtToken swrap, RtToken twrap,
 //
 RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
-	Validate_RiMakeTexture
-
 	Cache_RiMakeTexture
+
+	Validate_RiMakeTexture
 
     char modes[ 1024 ];
     assert( imagefile != 0 && texturefile != 0 && swrap != 0 && twrap != 0 && filterfunc != 0 );
@@ -4710,9 +4710,9 @@ RtVoid	RiMakeBump( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken
 //
 RtVoid	RiMakeBumpV( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
-	Validate_RiMakeBump
-
 	Cache_RiMakeBump
+
+	Validate_RiMakeBump
 
     std::cerr << warning << "RiMakeBump not supported" << std::endl;
     return ;
@@ -4743,9 +4743,9 @@ RtVoid	RiMakeLatLongEnvironment( RtString imagefile, RtString reflfile, RtFilter
 //
 RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
-	Validate_RiMakeLatLongEnvironment
-
 	Cache_RiMakeLatLongEnvironment
+
+	Validate_RiMakeLatLongEnvironment
 
     char modes[ 1024 ];
     char *swrap = "periodic";
@@ -4839,9 +4839,9 @@ RtVoid	RiMakeCubeFaceEnvironment( RtString px, RtString nx, RtString py, RtStrin
 //
 RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
-	Validate_RiMakeCubeFaceEnvironment
-
 	Cache_RiMakeCubeFaceEnvironment
+
+	Validate_RiMakeCubeFaceEnvironment
 
     QGetRenderContext() ->Stats().MakeEnvTimer().Start();
     assert( px != 0 && nx != 0 && py != 0 && ny != 0 && pz != 0 && nz != 0 &&
@@ -4966,9 +4966,9 @@ RtVoid	RiMakeShadow( RtString picfile, RtString shadowfile, ... )
 //
 RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 {
-	Validate_RiMakeShadow
-
 	Cache_RiMakeShadow
+
+	Validate_RiMakeShadow
 
     QGetRenderContext() ->Stats().MakeShadowTimer().Start();
     CqShadowMap ZFile( picfile );
@@ -5008,9 +5008,9 @@ RtVoid	RiMakeOcclusion( RtInt npics, RtString picfiles[], RtString shadowfile, .
 //
 RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-	Validate_RiMakeOcclusion
-
 	Cache_RiMakeOcclusion
+
+	Validate_RiMakeOcclusion
 
     QGetRenderContext() ->Stats().MakeShadowTimer().Start();
 
@@ -5038,9 +5038,9 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
 //
 RtVoid	RiErrorHandler( RtErrorFunc handler )
 {
-	Validate_RiErrorHandler
-
 	Cache_RiErrorHandler
+
+	Validate_RiErrorHandler
 
     QGetRenderContext() ->optCurrent().SetpErrorHandler( handler );
     return ;
@@ -5101,9 +5101,9 @@ RtVoid	RiSubdivisionMesh( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 //
 RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], PARAMETERLIST )
 {
-	Validate_RiSubdivisionMesh
-
 	Cache_RiSubdivisionMesh
+
+	Validate_RiSubdivisionMesh
 
     // Calculate how many vertices there are.
     RtInt cVerts = 0;
@@ -5257,9 +5257,9 @@ RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
 
 RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
 {
-	Validate_RiReadArchive
-
 	Cache_RiReadArchive
+
+	Validate_RiReadArchive
 
     CqRiFile	fileArchive( name, "archive" );
     const TqInt* poptVerbose = QGetRenderContext() ->optCurrent().GetIntegerOption( "statistics", "verbose" );
