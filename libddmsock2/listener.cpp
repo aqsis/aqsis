@@ -169,6 +169,7 @@ TqBool	CqDisplayListener::Prepare( TqInt port, CqDDManager* manager )
         }
     }
     m_Port = port;
+    std::cerr << info << "Aqsis listening for displays on port " << port << std::endl;
 
     if ( listen( m_Socket, SOMAXCONN ) == SOCKET_ERROR )
     {

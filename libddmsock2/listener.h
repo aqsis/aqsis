@@ -49,7 +49,7 @@ typedef int SOCKET;
 
 #include	<boost/thread.hpp>
 
-#define		AQSIS_LISTENER_PORT	277472	///< Aqsis display driver port ( AQSIS2 on phone keypad )
+#define		AQSIS_LISTENER_PORT	27747	///< Aqsis display driver port ( AQSIS2 on phone keypad )
 
 START_NAMESPACE( Aqsis )
 
