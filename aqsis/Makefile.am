@@ -2,9 +2,9 @@ bin_PROGRAMS = aqsis
 
 aqsis_SOURCES = aqsis.cpp
 if PLUGINS
-aqsis_LDADD = $(top_builddir)/librib2ri/librib2ri.la $(top_builddir)/librib2/librib2.la $(top_builddir)/render/libaqsis.la $(top_builddir)/libddmsock/libddmsock.la $(top_builddir)/libshadervm/libshadervm.la $(top_builddir)/libshaderexecenv/libshaderexecenv.la $(top_builddir)/libaqsistypes/libaqsistypes.la -ltiff -largparse -ldl
+aqsis_LDADD = $(top_builddir)/librib2ri/librib2ri.la $(top_builddir)/librib2/librib2.la $(top_builddir)/render/libaqsis.la $(top_builddir)/libddmsock/libddmsock.la $(top_builddir)/libshadervm/libshadervm.la $(top_builddir)/libshaderexecenv/libshaderexecenv.la $(top_builddir)/libaqsistypes/libaqsistypes.la -ltiff -largparse -ldl -llog4cpp
 else
-aqsis_LDADD = $(top_builddir)/librib2ri/librib2ri.la $(top_builddir)/librib2/librib2.la $(top_builddir)/render/libaqsis.la $(top_builddir)/libddmsock/libddmsock.la $(top_builddir)/libshadervm/libshadervm.la $(top_builddir)/libshaderexecenv/libshaderexecenv.la $(top_builddir)/libaqsistypes/libaqsistypes.la -ltiff -largparse
+aqsis_LDADD = $(top_builddir)/librib2ri/librib2ri.la $(top_builddir)/librib2/librib2.la $(top_builddir)/render/libaqsis.la $(top_builddir)/libddmsock/libddmsock.la $(top_builddir)/libshadervm/libshadervm.la $(top_builddir)/libshaderexecenv/libshaderexecenv.la $(top_builddir)/libaqsistypes/libaqsistypes.la -ltiff -largparse -llog4cpp
 endif
 
 if DEBUG

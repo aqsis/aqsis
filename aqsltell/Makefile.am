@@ -2,9 +2,9 @@ bin_PROGRAMS = aqsltell
 
 aqsltell_SOURCES = aqsltell.cpp
 if PLUGINS
-aqsltell_LDADD = $(top_builddir)/libslxargs/libslxargs.la $(top_builddir)/libshadervm/libshadervm.la $(top_builddir)/libshaderexecenv/libshaderexecenv.la $(top_builddir)/libaqsistypes/libaqsistypes.la -largparse -ldl
+aqsltell_LDADD = $(top_builddir)/libslxargs/libslxargs.la $(top_builddir)/libshadervm/libshadervm.la $(top_builddir)/libshaderexecenv/libshaderexecenv.la $(top_builddir)/libaqsistypes/libaqsistypes.la -largparse -ldl -llog4cpp
 else
-aqsltell_LDADD = $(top_builddir)/libslxargs/libslxargs.la $(top_builddir)/libshadervm/libshadervm.la $(top_builddir)/libshaderexecenv/libshaderexecenv.la $(top_builddir)/libaqsistypes/libaqsistypes.la -largparse
+aqsltell_LDADD = $(top_builddir)/libslxargs/libslxargs.la $(top_builddir)/libshadervm/libshadervm.la $(top_builddir)/libshaderexecenv/libshaderexecenv.la $(top_builddir)/libaqsistypes/libaqsistypes.la -largparse -llog4cpp
 endif
 
 if DEBUG

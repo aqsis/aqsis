@@ -1,7 +1,7 @@
 bin_PROGRAMS = aqsis_framebuffer_glut
 
 aqsis_framebuffer_glut_SOURCES = framebuffer_glut.cpp
-aqsis_framebuffer_glut_LDADD = $(top_builddir)/libdd/libdd.la $(top_builddir)/libaqsistypes/libaqsistypes.la -lglut -lGLU -lGL
+aqsis_framebuffer_glut_LDADD = $(top_builddir)/libdd/libdd.la $(top_builddir)/libaqsistypes/libaqsistypes.la -lglut -lGLU -lGL -llog4cpp
 
 if DEBUG
 AM_CXXFLAGS = -g -Wall

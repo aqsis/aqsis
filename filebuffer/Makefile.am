@@ -1,7 +1,7 @@
 bin_PROGRAMS = filebuffer
 
 filebuffer_SOURCES = filebuffer.cpp
-filebuffer_LDADD = $(top_builddir)/libdd/libdd.la $(top_builddir)/libaqsistypes/libaqsistypes.la -ltiff
+filebuffer_LDADD = $(top_builddir)/libdd/libdd.la $(top_builddir)/libaqsistypes/libaqsistypes.la -ltiff -llog4cpp
 
 if DEBUG
 AM_CXXFLAGS = -g -Wall
