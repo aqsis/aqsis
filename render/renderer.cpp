@@ -42,6 +42,7 @@
 #include	"log.h"
 #include	"mtable.h"
 #include	"inlineparse.h"
+#include	"tiffio.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -124,6 +125,10 @@ CqRenderer::CqRenderer() :
 
 	// Connect the message table with the log
 	m_theLog->setMessageTable( m_theTable );
+
+	// Set the TIFF Error/Warn handler
+	TIFFSetErrorHandler( &TIFF_ErrorHandler );
+	TIFFSetWarningHandler( &TIFF_WarnHandler );
 }
 
 //---------------------------------------------------------------------
@@ -1290,6 +1295,17 @@ TqInt CqRenderer::OutputDataSamples( const char* name )
 	return( 0 );
 }
 
+void TIFF_ErrorHandler(const char* mdl, const char* fmt, va_list va)
+{
+	char err_string[256];
+	vsprintf( err_string, fmt, va ); 
+	QGetRenderContextI() ->Logger() ->error( "%s in file: \"%s\"", err_string, mdl );
+}
+
+void TIFF_WarnHandler(const char* mdl, const char* fmt, va_list va)
+{
+	// Ignore warnings
+}
 
 //---------------------------------------------------------------------
 

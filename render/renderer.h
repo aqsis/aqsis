@@ -410,6 +410,7 @@ class CqRenderer : public IqRenderer
 
 		CqOptions *m_pOptDefault;	///< Pointer to default options.
 		TqInt	m_FrameNo;
+
 	public:
 		std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.
 }

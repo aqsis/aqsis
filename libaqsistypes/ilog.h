@@ -4,8 +4,8 @@
  *	@author	Matthäus G. Chajdas
  *	@brief	Declare the interface structure for the log class.
  *
- *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/05/12 16:19:10 $
+ *	Last change by:		$Author: mw_matti $
+ *	Last change date:	$Date: 2003/08/05 12:32:13 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___ilog_Loaded___
@@ -102,6 +102,14 @@ void DeleteLogger( IqLog* );
 
 //-----------------------------------------------------------------------
 
+//-------------------------------- Tiff error handlers
+	void TIFF_ErrorHandler(const char*, const char*, va_list);
+	void TIFF_WarnHandler(const char*, const char*, va_list);
+
+//-----------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------
 END_NAMESPACE( Aqsis )
 
 #endif	//	___ilog_Loaded___
