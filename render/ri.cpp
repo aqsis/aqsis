@@ -649,6 +649,10 @@ RtVoid	RiWorldEnd()
     if( NULL != poptGridSize )
         QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "SqrtGridSize" )[0] = sqrt( static_cast<float>(poptGridSize[0]) );
 
+	// Finalise the raytracer database now that all primitives are in.
+	if(QGetRenderContext()->pRaytracer())
+		QGetRenderContext()->pRaytracer()->Finalise();
+
     // Render the world
     try
     {
@@ -5588,6 +5592,10 @@ RtVoid	CreateGPrim( CqBasicSurface* pSurface )
         QGetRenderContext() ->pImage() ->PostSurface( pSurface );
         STATS_INC( GPR_created );
         RELEASEREF( pSurface );
+
+		// Add to the raytracer database also
+		if(QGetRenderContext()->pRaytracer())
+			QGetRenderContext()->pRaytracer()->AddPrimitive(pSurface);
     }
 
     return ;

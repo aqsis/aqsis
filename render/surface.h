@@ -81,9 +81,6 @@ CqString className() const { return CqString("CqBasicSurface"); }
         SplitDir_V,
     };
 
-    /** Get the gemoetric bound of this GPrim.
-     */
-    virtual	CqBound	Bound() const = 0;
     /** Dice this GPrim.
      * \return A pointer to a new micropolygrid..
      */

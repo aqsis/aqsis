@@ -44,6 +44,7 @@
 #include	"symbols.h"
 #include	"iddmanager.h"
 #include	"irenderer.h"
+#include	"iraytrace.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -438,6 +439,12 @@ public:
         m_pPreWorldFunction = pfunction;
     }
 
+	/** Get a pointer to the raytracing subsystem
+	 */
+	IqRaytrace*	pRaytracer() const
+	{
+		return( m_pRaytracer );
+	}
 
 private:
     CqModeBlock*	m_pconCurrent;					///< Pointer to the current context.
@@ -476,6 +483,8 @@ private:
     RtProgressFunc	m_pProgressHandler;		///< A pointer to the progress hadling function.
     RtFunc	m_pPreRenderFunction;	///< A pointer to the function called just prior to rendering.
     RtFunc	m_pPreWorldFunction;	///< A pointer to the function called just prior to starting the world.
+
+	IqRaytrace*	m_pRaytracer;		///< Pointer to the raytracing subsystem interface.
 
 public:
     std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.

@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/12/28 18:26:21 $
+ *	Last change date:	$Date: 2004/02/09 20:04:48 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___isurface_Loaded___
@@ -16,6 +16,7 @@
 #include	"aqsis.h"
 #include	"matrix.h"
 #include	"sstring.h"
+#include	"bound.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -103,6 +104,9 @@ struct IqSurface
     /** The main processing loop is finished with this surface now, so clean up any data it doesn't need anymore.
      */
     virtual void	RenderComplete() = 0;
+    /** Get the gemoetric bound of this GPrim.
+     */
+    virtual	CqBound	Bound() const = 0;
 };
 
 

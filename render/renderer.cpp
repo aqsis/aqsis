@@ -47,6 +47,7 @@
 START_NAMESPACE( Aqsis )
 
 extern IqDDManager* CreateDisplayDriverManager();
+extern IqRaytrace* CreateRaytracer();
 
 static CqShaderRegister * pOShaderRegister = NULL;
 
@@ -81,7 +82,8 @@ CqRenderer::CqRenderer() :
         m_pErrorHandler( &RiErrorPrint ),
         m_pProgressHandler( NULL ),
         m_pPreRenderFunction( NULL ),
-        m_pPreWorldFunction( NULL )
+        m_pPreWorldFunction( NULL ),
+		m_pRaytracer( NULL )
 {
     m_pconCurrent = 0;
     m_pImageBuffer = new	CqImageBuffer();
@@ -116,6 +118,9 @@ CqRenderer::CqRenderer() :
 
     m_pDDManager = CreateDisplayDriverManager();
     m_pDDManager->Initialise();
+
+    m_pRaytracer = CreateRaytracer();
+    m_pRaytracer->Initialise();
 
     // Set up DoF stuff for pinhole lens ( i.e. no DoF )
     m_UsingDepthOfField = false;
