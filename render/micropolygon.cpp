@@ -420,6 +420,12 @@ void CqMicroPolyGrid::Split(CqImageBuffer* pImage, TqInt iBucket, long xmin, lon
 {
 	TqInt cu=uGridRes();
 	TqInt cv=vGridRes();
+
+	// Get the required trim curve sense, if specified, defaults to "inside".
+	const CqString* pattrTrimSense=pAttributes()->GetStringAttribute("trimcurve","sense");
+	CqString strTrimSense("inside");
+	if(pattrTrimSense!=0)	strTrimSense=pattrTrimSense[0];
+	TqBool bOutside = strTrimSense=="outside";
 	
 	AddRef();
 	
@@ -435,7 +441,7 @@ void CqMicroPolyGrid::Split(CqImageBuffer* pImage, TqInt iBucket, long xmin, lon
 			// If culled, ignore it
  			if(m_vfCulled)
 			{
-		       	        QGetRenderContext()->Stats().IncCulledMPGs(1);
+				QGetRenderContext()->Stats().IncCulledMPGs(1);
 				Advance();
 				continue;
 			}
@@ -452,6 +458,14 @@ void CqMicroPolyGrid::Split(CqImageBuffer* pImage, TqInt iBucket, long xmin, lon
 				TqBool fTrimC = pSurface()->bIsPointTrimmed(vecT);
 				vecT=CqVector2D(u()[iIndex+cu+1],v()[iIndex+cu+1]);
 				TqBool fTrimD = pSurface()->bIsPointTrimmed(vecT);
+
+				if(bOutside)
+				{
+					fTrimA = !fTrimA;
+					fTrimB = !fTrimB;
+					fTrimC = !fTrimC;
+					fTrimD = !fTrimD;
+				}
 
 				// If al points are trimmed discard the MPG
 				if(fTrimA && fTrimB && fTrimC && fTrimD)
@@ -792,6 +806,12 @@ TqBool CqMicroPolygonStatic::Sample(CqVector2D& vecSample, TqFloat time, TqFloat
 		// Now check if it is trimmed.
 		if(m_fTrimmed)
 		{
+			// Get the required trim curve sense, if specified, defaults to "inside".
+			const CqString* pattrTrimSense=pGrid()->pAttributes()->GetStringAttribute("trimcurve","sense");
+			CqString strTrimSense("inside");
+			if(pattrTrimSense!=0)	strTrimSense=pattrTrimSense[0];
+			TqBool bOutside = strTrimSense=="outside";
+
 			CqVector2D vecUV = ReverseBilinear(vecSample);
 
 			CqVector2D uvA(pGrid()->u()[m_Index],pGrid()->v()[m_Index]);
@@ -801,7 +821,7 @@ TqBool CqMicroPolygonStatic::Sample(CqVector2D& vecSample, TqFloat time, TqFloat
 
 			CqVector2D vR = BilinearEvaluate(uvA,uvB,uvC,uvD,vecUV.x(),vecUV.y());
 
-			if(pGrid()->pSurface()->bCanBeTrimmed() && pGrid()->pSurface()->bIsPointTrimmed(vR))
+			if(pGrid()->pSurface()->bCanBeTrimmed() && pGrid()->pSurface()->bIsPointTrimmed(vR) && !bOutside)
 				return(TqFalse);
 		}
 		return(TqTrue);
