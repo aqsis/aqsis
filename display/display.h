@@ -104,6 +104,7 @@ struct SqDisplayInstance
 	TqFloat		m_matWorldToScreen[ 4 ][ 4 ];
 
 	void*		m_data;
+	unsigned char*	m_zfbdata;
 
 	Fl_Window*	m_theWindow;
 	Fl_FrameBuffer_Widget* m_uiImageWidget;

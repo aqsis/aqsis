@@ -405,6 +405,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, pImage->m_iFormatCount, reinterpret_cast<unsigned char*>(pImage->m_data));
 			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
 			pImage->m_theWindow->end();
+			Fl::visual(FL_RGB);
 			pImage->m_theWindow->show();
 		}
         else
@@ -433,6 +434,19 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		}
 		pImage->m_lineLength = pImage->m_entrySize * pImage->m_width;
 		pImage->m_format = widestFormat;
+
+		// If in "zframebuffer" mode, we need another buffer for the displayed depth data.
+		if(pImage->m_imageType == Type_ZFramebuffer)
+		{
+			pImage->m_zfbdata = reinterpret_cast<unsigned char*>(malloc( pImage->m_width * pImage->m_height * 3 * sizeof(float)));
+
+			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
+			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, 3, reinterpret_cast<unsigned char*>(pImage->m_zfbdata));
+			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
+			pImage->m_theWindow->end();
+			Fl::visual(FL_RGB);
+			pImage->m_theWindow->show();
+		}
 
 		// If we are recieving "rgba" data, ensure that it is in the correct order.
 		PtDspyDevFormat outFormat[] = 
@@ -490,7 +504,7 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 	if( pImage && data && xmin >= 0 && ymin >= 0 && xmaxplus1 <= pImage->m_width && ymaxplus1 <= pImage->m_height )
 	{
 		// If rendering to a file, or an "rgb" framebuffer, we can just copy the data.
-		if(pImage->m_imageType != Type_Framebuffer || pImage->m_iFormatCount <= 3)
+		if( pImage->m_imageType != Type_Framebuffer || pImage->m_iFormatCount <= 3 )
 		{
 			TqInt y;
 			for ( y = ymin; y < ymaxplus1; y++ )
@@ -530,9 +544,29 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 				}
 			}
 		}
+
+		// If rendering into a zframebuffer, we need to setup a separate image store for the displayed data.
+		if(pImage->m_imageType == Type_ZFramebuffer)
+		{
+			const unsigned char* pdatarow = data;
+			TqInt y;
+			for ( y = ymin; y < ymaxplus1; y++ )
+			{
+				TqInt x;
+				for ( x = xmin; x < xmaxplus1; x++ )
+				{
+					TqFloat value = reinterpret_cast<const RtFloat*>(pdatarow)[0];
+					TqInt so = ( y * pImage->m_width * 3 * sizeof(unsigned char) ) + ( x * 3 * sizeof(unsigned char) );
+					pImage->m_zfbdata[ so + 0 ] = 
+					pImage->m_zfbdata[ so + 1 ] = 
+					pImage->m_zfbdata[ so + 2 ] = value < FLT_MAX ? 255 : 0;
+					pdatarow += entrysize;
+				}
+			}
+		}
 	}	
 
-	if(pImage->m_imageType == Type_Framebuffer)
+	if(pImage->m_imageType == Type_Framebuffer || pImage->m_imageType == Type_ZFramebuffer)
 	{
 		pImage->m_uiImageWidget->damage(1, xmin, ymin, xmaxplus1-xmin, ymaxplus1-ymin);
 		Fl::check();
@@ -554,6 +588,8 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 
 	// Delete the image structure.
 	free(pImage->m_data);
+	if(pImage->m_imageType == Type_ZFramebuffer)
+		free(pImage->m_zfbdata);
 	delete[](pImage->m_filename);
 	delete(pImage);
 
@@ -568,8 +604,67 @@ PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
 
 	if(pImage)
 	{
-		if(pImage->m_imageType == Type_Framebuffer)
+		if(pImage->m_imageType == Type_Framebuffer || pImage->m_imageType == Type_ZFramebuffer)
 		{
+			if( pImage->m_imageType == Type_ZFramebuffer )
+			{
+				// Now that we have all of our data, calculate some handy statistics ...
+				TqFloat mindepth = FLT_MAX;
+				TqFloat maxdepth = -FLT_MAX;
+				TqUint totalsamples = 0;
+				TqUint samples = 0;
+				TqFloat totaldepth = 0;
+				for ( TqInt i = 0; i < pImage->m_width * pImage->m_height; i++ )
+				{
+					totalsamples++;
+
+					// Skip background pixels ...
+					if( reinterpret_cast<const TqFloat*>(pImage->m_data)[i] >= FLT_MAX )
+						continue;
+
+					mindepth = MIN( mindepth, reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ] );
+					maxdepth = MAX( maxdepth, reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ] );
+
+					totaldepth += reinterpret_cast<const TqFloat*>(pImage->m_data)[ i ];
+					samples++;
+				}
+
+				const TqFloat dynamicrange = maxdepth - mindepth;
+
+		/*		std::cerr << info << g_Filename << " total samples: " << totalsamples << std::endl;
+				std::cerr << info << g_Filename << " depth samples: " << samples << std::endl;
+				std::cerr << info << g_Filename << " coverage: " << static_cast<TqFloat>( samples ) / static_cast<TqFloat>( totalsamples ) << std::endl;
+				std::cerr << info << g_Filename << " minimum depth: " << mindepth << std::endl;
+				std::cerr << info << g_Filename << " maximum depth: " << maxdepth << std::endl;
+				std::cerr << info << g_Filename << " dynamic range: " << dynamicrange << std::endl;
+				std::cerr << info << g_Filename << " average depth: " << totaldepth / static_cast<TqFloat>( samples ) << std::endl;
+		*/
+				const TqInt linelength = pImage->m_width * 3;
+				for ( TqInt y = 0; y < pImage->m_height; y++ )
+				{
+					for ( TqInt x = 0; x < pImage->m_height; x++ )
+					{
+						const TqInt imageindex = ( y * linelength ) + ( x * 3 );
+						const TqInt dataindex = ( y * pImage->m_width ) + x;
+
+						if( reinterpret_cast<const TqFloat*>(pImage->m_data)[dataindex] == FLT_MAX)
+						{
+							pImage->m_zfbdata[imageindex + 0] = 
+							pImage->m_zfbdata[imageindex + 1] = 
+							pImage->m_zfbdata[imageindex + 2] = 0;
+						}
+						else
+						{
+							const TqFloat normalized = ( reinterpret_cast<const TqFloat*>(pImage->m_data)[ dataindex ] - mindepth ) / dynamicrange;
+							pImage->m_zfbdata[imageindex + 0] = static_cast<unsigned char>( 255 * ( 1.0 - normalized ) );
+							pImage->m_zfbdata[imageindex + 1] = static_cast<unsigned char>( 255 * ( 1.0 - normalized ) );
+							pImage->m_zfbdata[imageindex + 2] = 255;
+						}
+					}
+				}
+				pImage->m_uiImageWidget->damage(1);
+				Fl::check();		
+			}
 			Fl::run();
 		}
 		return(DspyImageClose(image));
