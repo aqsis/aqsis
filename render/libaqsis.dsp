@@ -133,10 +133,6 @@ SOURCE=.\micropolygon.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\mtable.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\nurbs.cpp
 # End Source File
 # Begin Source File
@@ -326,10 +322,6 @@ SOURCE=.\micropolygon.h
 # Begin Source File
 
 SOURCE=.\motion.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\mtable.h
 # End Source File
 # Begin Source File
 

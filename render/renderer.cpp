@@ -98,6 +98,7 @@ CqRenderer::CqRenderer() :
 	if ( chash == 0 ) chash = CqParameter::hash( "camera" );
 	if ( cuhash == 0 ) cuhash = CqParameter::hash( "current" );
 
+	m_theLog.setMessageTable( &m_theTable );
 }
 
 //---------------------------------------------------------------------

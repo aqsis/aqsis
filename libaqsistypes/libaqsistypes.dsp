@@ -42,7 +42,6 @@ RSC=rc.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
 # ADD CPP /nologo /MD /W3 /GR /GX /O2 /I ".\win32\intel" /I "..\libaqsistypes" /I "..\render" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /c
-# SUBTRACT CPP /Z<none>
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -106,7 +105,15 @@ SOURCE=.\file.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\log.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\matrix.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\mtable.cpp
 # End Source File
 # Begin Source File
 
@@ -178,11 +185,19 @@ SOURCE=.\list.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\log.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\matrix.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\memorypool.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\mtable.h
 # End Source File
 # Begin Source File
 
