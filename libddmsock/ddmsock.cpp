@@ -108,6 +108,7 @@ void CqDDServer::Close()
 	shutdown(m_Socket,SD_BOTH);
 	closesocket( m_Socket );
 #else // AQSIS_SYSTEM_WIN32	
+	shutdown(m_Socket,SD_BOTH);
 	close(m_Socket);
 #endif // !AQSIS_SYSTEM_WIN32
 	
@@ -256,6 +257,7 @@ void CqDDClient::Close()
 	shutdown(m_Socket,SD_BOTH);
 	closesocket(m_Socket);
 #else // AQSIS_SYSTEM_WIN32
+	shutdown(m_Socket,SD_BOTH);
 	close(m_Socket);
 #endif // !AQSIS_SYSTEM_WIN32
 

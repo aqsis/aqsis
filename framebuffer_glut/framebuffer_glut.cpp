@@ -63,6 +63,9 @@ void reshape(int w, int h)
 
 void idle(void)
 {
+	if(g_RenderComplete)
+		glutIdleFunc(0);
+		
 /*
 	if(!g_RenderComplete)
 		{

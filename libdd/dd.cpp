@@ -48,6 +48,7 @@ typedef sockaddr* PSOCKADDR;
 
 static const int INVALID_SOCKET = -1;
 static const int SOCKET_ERROR = -1;
+static const int SD_BOTH = 2;
 
 #endif // !AQSIS_SYSTEM_WIN32
 
@@ -195,11 +196,7 @@ TqInt DDInitialise(const TqChar* phostname, TqInt port)
 			return(0);
 		else
 		{
-#ifdef AQSIS_SYSTEM_WIN32
-			closesocket(s);
-#else // AQSIS_SYSTEM_WIN32
-			close(s);
-#endif // !AQSIS_SYSTEM_WIN32
+			CloseSocket(s);
 			return(-1);
 		}
 	}
@@ -301,6 +298,7 @@ static void CloseSocket(SOCKET s)
 	shutdown(s,SD_BOTH);
 	closesocket(s);
 #else // AQSIS_SYSTEM_WIN32
+	shutdown(s, SD_BOTH);
 	close(s);
 #endif // !AQSIS_SYSTEM_WIN32
 }
