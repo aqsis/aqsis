@@ -10,20 +10,9 @@
 #define		_qShareName	BUILD_LIBRIB
 #include	"share.h"
 
+
 namespace librib
 {
-
-// Forward class declarations
-class RendermanInterface;
-
-/// Initializes the parser and callback object with a set of standard declarations
-void StandardDeclarations( RendermanInterface& CallbackInterface );
-/// Parses an input stream, using the supplied callback object and sending error data to the supplied output stream
-bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream );
-/// Resets the state of the parser, clearing any symbol tables, etc.
-void ResetParser();
-/// Setup the defaut setting for the archive searchpath, automatically updated when an appropriate RiOption is seen.
-void UpdateArchivePath( std::string strPath );
 
 /// Provides an abstract base class for objects that implement the Renderman Interface
 class RendermanInterface
@@ -135,6 +124,7 @@ class RendermanInterface
 		virtual	RtVoid	RiProcedural( RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc ) = 0;
 		virtual	RtVoid	RiProjectionV( const char * name, RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude ) = 0;
+		virtual	RtVoid	RiReadArchive( RtToken data, RtArchiveCallback callback ) = 0;
 		virtual	RtVoid	RiRelativeDetail( RtFloat relativedetail ) = 0;
 		virtual	RtVoid	RiReverseOrientation() = 0;
 		virtual	RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz ) = 0;
@@ -164,6 +154,18 @@ class RendermanInterface
 		virtual	RtVoid	RiWorldEnd() = 0;
 
 };
+
+
+/// Initializes the parser and callback object with a set of standard declarations
+void StandardDeclarations( RendermanInterface& CallbackInterface );
+
+/// Parses an input stream, using the supplied callback object and sending error data to the supplied output stream
+bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream );
+/// Resets the state of the parser, clearing any symbol tables, etc.
+void ResetParser();
+//
+/// Setup the defaut setting for the archive searchpath, automatically updated when an appropriate RiOption is seen.
+void UpdateArchivePath( std::string strPath );
 
 }
 ; // namespace librib

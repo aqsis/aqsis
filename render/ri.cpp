@@ -48,9 +48,12 @@
 #include	"points.h"
 #include	"curves.h"
 #include	"rifile.h"
-//#include	"librib2ri.h"
+#include	"librib2ri.h"
 #include	"converter.h"
 #include	"shadervm.h"
+#include	"librib.h"
+#include	"libribtypes.h"
+#include	"parserstate.h"
 
 #include	"subdivision2.h"
 
@@ -4764,16 +4767,17 @@ RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
 {
-//	CqRiFile	fileArchive( name, "texture" );
-//	if ( !fileArchive.IsValid() )
-//	{
-//		CqString strRealName( fileArchive.strRealName() );
-//		fileArchive.Close();
-//		FILE *file;
-//		if ( ( file = fopen( strRealName.c_str(), "rb" ) ) != NULL )
-//		{
-//			librib2ri::Engine renderengine;
-//			librib::Parse( file, name, renderengine, std::cerr );
-//		}
-//	}
+	CqRiFile	fileArchive( name, "archive" );
+	if ( fileArchive.IsValid() )
+	{
+		CqString strRealName( fileArchive.strRealName() );
+		fileArchive.Close();
+		FILE *file;
+		if ( ( file = fopen( strRealName.c_str(), "rb" ) ) != NULL )
+		{
+			CqRIBParserState currstate = librib::GetParserState();
+			librib::Parse( file, name, *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream) );
+			librib::SetParserState( currstate );
+		}
+	}
 }

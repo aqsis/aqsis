@@ -29,12 +29,21 @@
 
 
 #include "librib.h"
+#include "libribtypes.h"
+#include "parserstate.h"
 
 #include <iostream>
 #include <cassert>
 #include <stdio.h>
 #include "bdec.h"
 
+// 
+// from scanner.lxx and parser.yxx
+struct yy_buffer_state;
+extern struct yy_buffer_state* current_flex_buffer(void) ;
+extern struct yy_buffer_state* yy_create_buffer(FILE*,int) ;
+extern void yy_switch_to_buffer(struct yy_buffer_state*) ;
+extern void yy_delete_buffer(struct yy_buffer_state*) ;
 extern int yyparse();
 extern int yydebug;
 
@@ -50,6 +59,14 @@ RendermanInterface* ParseCallbackInterface = 0;
 std::ostream* ParseErrorStream = &std::cerr;
 unsigned int ParseLineNumber;
 bool ParseSucceeded = true;
+
+// From the parser itself
+extern bool    fRecovering;
+
+// From inside the scanner
+extern bool    fRequest;
+extern bool    fParams;
+
 
 void StandardDeclarations( RendermanInterface& CallbackInterface )
 {
@@ -118,6 +135,48 @@ void StandardDeclarations( RendermanInterface& CallbackInterface )
 }
 
 
+/// Retrieve the current state of the parser internal variables
+CqRIBParserState GetParserState()
+{
+	CqRIBParserState state;
+
+	state.m_pParseInputFile = ParseInputFile;
+	state.m_ParseStreamName = ParseStreamName;
+	state.m_pBinaryDecoder = BinaryDecoder;
+	state.m_pParseErrorStream = ParseErrorStream;
+
+	state.m_pParseCallbackInterface = ParseCallbackInterface;
+	state.m_ParseLineNumber = ParseLineNumber;
+	state.m_ParseSucceeded = ParseSucceeded;
+
+        state.m_fRecovering = fRecovering;
+	state.m_fRequest = fRequest;
+	state.m_fParams = fParams;
+
+	state.m_pYY_STATE = (void*) current_flex_buffer();
+
+	return state;
+};
+
+/// Retrieve the current state of the parser internal variables
+void SetParserState( CqRIBParserState& state)
+{
+	ParseInputFile = state.m_pParseInputFile;
+	ParseStreamName = state.m_ParseStreamName;
+	BinaryDecoder = state.m_pBinaryDecoder;
+	ParseErrorStream = state.m_pParseErrorStream;
+
+	ParseCallbackInterface = state.m_pParseCallbackInterface;
+	ParseLineNumber = state.m_ParseLineNumber;
+	ParseSucceeded = state.m_ParseSucceeded;
+
+ 	fRecovering = state.m_fRecovering;
+	fRequest = state.m_fRequest;
+	fParams = state.m_fParams;
+
+	yy_switch_to_buffer( (struct yy_buffer_state*) state.m_pYY_STATE ) ;
+};
+
 bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream )
 {
 	ParseInputFile = InputStream;
@@ -126,11 +185,20 @@ bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface&
 	ParseErrorStream = &ErrorStream;
 	ParseLineNumber = 1;
 	ParseSucceeded = true;
+	fRequest = false;
+ 	fRecovering = false;
+	fParams = false;
 
 	BinaryDecoder = new CqRibBinaryDecoder( InputStream );
+	// 16384 is knicked from flex, in reality since we read via BinaryDecoder, this is not used
+	struct yy_buffer_state *yybuffer = ::yy_create_buffer( InputStream, 16384);
+	::yy_switch_to_buffer(yybuffer);
+
 	// Reenable this to get parse tree output in debug version.
 	//yydebug = 1;
 	yyparse();
+
+	::yy_delete_buffer(yybuffer);
 	delete BinaryDecoder;
 
 	return ParseSucceeded;

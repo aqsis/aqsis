@@ -340,6 +340,10 @@ RendermanInterface::RtVoid Engine::RiQuantize( RtToken type, RtInt one, RtInt mi
 {
 	::RiQuantize( type, one, min, max, ditheramplitude );
 }
+RendermanInterface::RtVoid Engine::RiReadArchive( RtToken data, RtArchiveCallback callback )
+{
+	::RiReadArchive( data , callback);
+}
 RendermanInterface::RtVoid Engine::RiRelativeDetail( RtFloat relativedetail )
 {
 	::RiRelativeDetail( relativedetail );

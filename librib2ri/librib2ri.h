@@ -96,6 +96,7 @@ class Engine :
 		virtual	RtVoid	RiPolygonV( RtInt nvertices, RtInt count, RtToken tokens[], RtPointer values[] );
 		virtual	RtVoid	RiProjectionV( const char * name, RtInt count, RtToken tokens[], RtPointer values[] );
 		virtual	RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude );
+		virtual	RtVoid	RiReadArchive( RtToken data, RtArchiveCallback callback );
 		virtual	RtVoid	RiRelativeDetail( RtFloat relativedetail );
 		virtual	RtVoid	RiReverseOrientation();
 		virtual	RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz );

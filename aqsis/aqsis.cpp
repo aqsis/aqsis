@@ -392,7 +392,6 @@ void RenderFile( FILE* file, const char* name )
 	popt[ 0 ] = g_dso_libs.c_str();
 	RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
 
-	librib::UpdateArchivePath( g_archives );
 	RiProgressHandler( &PrintProgress );
 	RiPreRenderFunction( &PreRender );
 

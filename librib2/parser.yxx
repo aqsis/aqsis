@@ -34,7 +34,6 @@ namespace librib
 {
 
 void ParserDeclare(librib::RendermanInterface& CallbackInterface, const std::string Name, const std::string Type);
-void UpdateArchivePath(std::string strPath);
 void ParserBasisFromName( RtBasis*& b, const char* name);
 extern std::string ParseStreamName;
 extern RendermanInterface* ParseCallbackInterface;
@@ -43,9 +42,11 @@ extern unsigned int ParseLineNumber;
 extern bool ParseSucceeded;
 extern bool fRequest;
 extern bool fParams;
-bool fRecovering = false;
+
+bool fRecovering;
 
 }; // namespace librib
+
 
 %}
 
@@ -183,6 +184,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %token	<ctype>	REQUEST_TOKEN_PROCEDURAL
 %token	<ctype>	REQUEST_TOKEN_PROJECTION
 %token	<ctype>	REQUEST_TOKEN_QUANTIZE
+%token	<ctype>	REQUEST_TOKEN_READARCHIVE
 %token	<ctype>	REQUEST_TOKEN_RELATIVEDETAIL
 %token	<ctype>	REQUEST_TOKEN_REVERSEORIENTATION
 %token	<ctype>	REQUEST_TOKEN_ROTATE
@@ -288,6 +290,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %type	<ctype>	polygon
 %type	<ctype>	projection
 %type	<ctype>	quantize
+%type	<ctype>	readarchive
 %type	<ctype>	relativedetail
 %type	<ctype>	reverseorientation
 %type	<ctype>	rotate
@@ -426,20 +429,6 @@ complete_request
 	|	option string opttvpairs
 			{
 				ParseCallbackInterface->RiOptionV($2, $3->Count(), $3->Tokens(), $3->Values());
-				// If this is a 'searchpath' option for archive, then we need this info too.
-				if( strcmp($2, "searchpath") == 0 )
-				{
-					int i;
-					for(i=0; i<$3->Count(); i++)
-					{
-						if( strcmp( $3->Tokens()[i], "archive" ) == 0)
-						{
-							std::string strPath(*static_cast<char**>($3->Values()[i]));
-							UpdateArchivePath(strPath);
-						}
-					}
-				}
-
 				DiscardStringValue($2);
 				DiscardTokenValuePairs($3);
 			}
@@ -776,6 +765,11 @@ complete_request
                 DiscardArrayValue($5); 
 		        DiscardTokenValuePairs($6);
             }
+    |   readarchive string 
+	    {
+                ParseCallbackInterface->RiReadArchive( $2, NULL );
+		DiscardStringValue( $2 );
+	    }
     |   procedural string string scalar_array opttvpairs
             {
                 if (!(
@@ -1248,6 +1242,7 @@ pointspolygons : REQUEST_TOKEN_POINTSPOLYGONS	{ ExpectParams(); };
 polygon : REQUEST_TOKEN_POLYGON	{ ExpectParams(); };
 projection : REQUEST_TOKEN_PROJECTION	{ ExpectParams(); };
 quantize : REQUEST_TOKEN_QUANTIZE	{ ExpectParams(); };
+readarchive: REQUEST_TOKEN_READARCHIVE	{ ExpectParams(); };
 relativedetail : REQUEST_TOKEN_RELATIVEDETAIL	{ ExpectParams(); };
 reverseorientation : REQUEST_TOKEN_REVERSEORIENTATION	{ ExpectParams(); };
 rotate : REQUEST_TOKEN_ROTATE	{ ExpectParams(); };
@@ -1810,33 +1805,6 @@ void ParserDeclare(librib::RendermanInterface& CallbackInterface, const std::str
 		
 	CallbackInterface.RiDeclare(Name.c_str(), Type.c_str());
 }
-
-std::string ArchivePath;
-
-void UpdateArchivePath(std::string strPath)
-{
-	std::string str("");
-	
-	// Build the string, checking for & character and replace with old string.
-	unsigned int strt = 0;
-	unsigned int len = 0;
-	while ( 1 )
-	{
-		if ( ( len = strcspn( &strPath[ strt ], "&" ) ) < strlen( &strPath[ strt ] ) )
-		{
-			str = str + strPath.substr( strt, len );
-			str = str + ArchivePath;
-			strt += len + 1;
-		}
-		else
-		{
-			str = str + strPath.substr( strt );
-			break;
-		}
-	}
-	ArchivePath = str;
-}
-
 
 void ParserBasisFromName( RtBasis*& b, const char* name)
 {

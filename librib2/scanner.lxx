@@ -35,10 +35,9 @@ extern FILE* ParseInputFile;
 extern CqRibBinaryDecoder *BinaryDecoder;
 extern unsigned int ParseLineNumber;
 extern std::string ParseStreamName;
-extern std::string ArchivePath;
 
-bool	fRequest;
-bool	fParams;
+bool fRequest;
+bool fParams;
 
 }; // namespace librib
 
@@ -50,7 +49,6 @@ static std::stack<unsigned int> LineNumberStack;
 #define YY_DECL int yylex( YYSTYPE *lvalp )
 
 static int scannerinput(char* Buffer, int MaxSize);
-std::string FindArchive(const std::string strFilename);
 #undef YY_INPUT
 #define YY_INPUT(buffer, result, max_size) (result = scannerinput(buffer, max_size))
 
@@ -210,56 +208,13 @@ MakeCubeFaceEnvironment { return REQUEST_TOKEN_MAKECUBEFACEENVIRONMENT; }
 MakeShadow				{ return REQUEST_TOKEN_MAKESHADOW; }
 ErrorHandler			{ return REQUEST_TOKEN_ERRORHANDLER; }
 SubdivisionMesh			{ return REQUEST_TOKEN_SUBDIVISIONMESH; }
-ReadArchive				{ BEGIN(incl); }
+ReadArchive				{ return REQUEST_TOKEN_READARCHIVE; }
 {letter}({letter}|{digit})*	{ return UNKNOWN_TOKEN; }
 .						{ return(yytext[0]); }
 
-<incl>[ \t]*		{ }	
-<incl>{string}	{
-							std::string filepath(yytext);
-							filepath = filepath.substr(1, filepath.size() - 2);
-
-							filepath = FindArchive( filepath );
-							
-							CqRibBinaryDecoder* newstream = new CqRibBinaryDecoder(filepath);
-							if(newstream->fail())
-								{
-									std::cerr << "librib > scanner > Unable to open archive file " << filepath << std::endl;
-									delete newstream;
-								}
-							else
-								{
-									StreamStack.push(newstream);
-									StreamNameStack.push(ParseStreamName);
-									ParseStreamName = filepath;
-									LineNumberStack.push(ParseLineNumber);
-									ParseLineNumber = 1;
-									BufferStack.push(YY_CURRENT_BUFFER);
-									yy_switch_to_buffer(yy_create_buffer(0, YY_BUF_SIZE));
-								}
-
-							BEGIN(INITIAL);
-						}
-						
 <<EOF>>			{
-							if(BufferStack.empty())
-								{
 									yyterminate();
 									return EOF_TOKEN;
-								}
-							else
-								{
-									assert(!StreamStack.empty());
-									delete StreamStack.top();
-									StreamStack.pop();
-									ParseStreamName = StreamNameStack.top();
-									StreamNameStack.pop();
-									ParseLineNumber = LineNumberStack.top();
-									LineNumberStack.pop();
-									yy_delete_buffer(YY_CURRENT_BUFFER);
-									yy_switch_to_buffer(BufferStack.top());
-									BufferStack.pop();
-								}
 						}
 
 
@@ -272,83 +227,22 @@ int yywrap()
 	return 1;
 }
 
-static int scannerinput(CqRibBinaryDecoder* Stream, char* Buffer, int MaxSize)
+static int scannerinput(char* Buffer, int MaxSize)
 {
 	// Sanity checks ...
-	assert(Stream);
+	assert(BinaryDecoder);
 	assert(Buffer);
 	assert(MaxSize);
 
 	int count = 0;
-	if(!Stream->eof())
-		count=Stream->read(Buffer,MaxSize);
+	if(!BinaryDecoder->eof())
+		count=BinaryDecoder->read(Buffer,MaxSize);
 
  	return count;
 }
 
-static int scannerinput(char* Buffer, int MaxSize)
+struct yy_buffer_state* current_flex_buffer(void)
 {
-	if(StreamStack.empty())
-		return scannerinput(BinaryDecoder, Buffer, MaxSize);
-
-	return scannerinput(StreamStack.top(), Buffer, MaxSize);
+        return YY_CURRENT_BUFFER;
 }
-
-
-
-std::string FindArchive(const std::string strFilename)
-{
-#ifdef WIN32
-	std::ifstream* pFStream = new std::ifstream( strFilename.c_str(), std::ios_base::binary|std::ios_base::in );
-#else
-	std::ifstream* pFStream = new std::ifstream( strFilename.c_str(), std::ios::binary|std::ios::in );
-#endif
-	if ( !pFStream->is_open() )
-	{
-		// If a searchpath option name was specified, use it.
-		if ( strcmp( ArchivePath.c_str(), "" ) != 0 )
-		{
-			// if not found there, search in the specified option searchpath.
-			std::string SearchPath( ArchivePath );
-			// Search each specified path in the search path (separated by ':' or ';')
-			unsigned int start = 0;
-			while ( 1 )
-			{
-				// Find the next search path in the spec.
-				unsigned int len = SearchPath.find_first_of( ";:", start ) - start;
-				// Check if it is realy meant as a drive spec.
-				if ( len == 1 && isalpha( SearchPath[ start ] ) )
-					len += strcspn( &SearchPath[ start + 2 ], ";:" ) + 1;
-				std::string strPath = SearchPath.substr( start, len );
-				if ( strPath == "" ) break;
-
-				// See if the shader can be found in this directory
-				std::string strAlternativeFilename = strPath;
-				// Check the path is correctly terminated
-				if ( strAlternativeFilename[ strAlternativeFilename.size() - 1 ] != '/' &&
-				        strAlternativeFilename[ strAlternativeFilename.size() - 1 ] != '\\' )
-				strAlternativeFilename += "/";
-				strAlternativeFilename += strFilename;
-
-				// Clear the previous error first.
-				pFStream->clear();
-				pFStream->open( strAlternativeFilename.c_str(), std::ios::in );
-				if ( pFStream->is_open() )
-				{
-					pFStream->close();
-					return( strAlternativeFilename );
-				}
-				
-				if ( len < strlen( &SearchPath[ start ] ) )
-					start += len + 1;
-				else
-					break;
-			}
-		}
-	}
-	pFStream->close();
-
-	return( strFilename );
-}
-
 
