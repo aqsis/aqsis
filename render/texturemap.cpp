@@ -906,7 +906,7 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 	SampleMap(R1,R2,R3,R4,sblur,tblur,coverage,depth);
 	previousdepth = depth;
 
-	//if(soft shadows turned on)
+	if(sblur!=0 || tblur!=0)
 	{
 		int maxiterations=5; // cap the no of times we go round in case we get stuck in a loop
 		int iterations=0; 
@@ -926,8 +926,13 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 			previousdepth = depth;
 			iterations++;
 		}
+		val = coverage;		
 	}
-	val = coverage;		
+	else
+	{
+		// get coverage and average depth again
+		SampleMap(R1,R2,R3,R4,sblur,tblur,val,depth);
+	}
 }
 
 
