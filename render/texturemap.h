@@ -230,7 +230,9 @@ class _qShareC CqTextureMap : public IqTextureMap
 				m_smode( WrapMode_Clamp ),
 				m_tmode( WrapMode_Clamp ),
 				m_FilterFunc( RiBoxFilter ),
-				m_swidth( 1.0 ), m_twidth( 1.0 )
+				m_swidth( 1.0 ), m_twidth( 1.0 ),
+				m_compression(COMPRESSION_NONE), 
+				m_quality(70)
 
 		{}
 		_qShareM	virtual	~CqTextureMap();
@@ -269,6 +271,26 @@ class _qShareC CqTextureMap : public IqTextureMap
 		_qShareM virtual	EqTexFormat	Format() const
 		{
 			return ( m_Format );
+		}
+
+		_qShareM virtual	TqInt Compression() const
+		{
+			return(m_compression);
+		}
+
+		_qShareM virtual	void SetCompression(TqInt Compression)
+		{
+			m_compression = Compression;
+		}
+
+		_qShareM virtual	TqInt Quality() const
+		{
+			return(m_quality);
+		}
+
+		_qShareM virtual	void SetQuality(TqInt Quality)
+		{
+			m_quality = Quality;
 		}
 
 		/** Get the image type.
@@ -345,15 +367,16 @@ class _qShareC CqTextureMap : public IqTextureMap
 			m_TextureMap_Cache.clear();
 
 		}
-		_qShareM static void WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples );
-		_qShareM static void WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples );
-		_qShareM static void WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples );
-		_qShareM static void WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples );
-
+		_qShareM static void WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );
+		_qShareM static void WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality );
+		_qShareM static void WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );
+		_qShareM static void WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality );
 
 	protected:
 		static	std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loaded textures.
 
+		TqInt m_compression;            ///< TIFF Compression model
+		TqInt m_quality;                ///< If Jpeg compression is used than its overall quality
 
 		TqFloat m_MinZ;                 ///< Minimum Depth
 		TqUint	m_XRes;					///< Horizontal resolution.

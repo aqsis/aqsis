@@ -151,7 +151,11 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 {
 	uint16 photometric = PHOTOMETRIC_RGB;
 	uint16 config = PLANARCONFIG_CONTIG;
-	uint16 compression = COMPRESSION_NONE;
+	uint16 compression, quality;
+	SqDDMessageClose *pClose = (SqDDMessageClose *) pMsgB;
+	compression = pClose->m_Compression;
+	quality = pClose->m_Quality;
+	//description = pClose->m_Description;
 
 	pOut = TIFFOpen( strFilename.c_str(), "w" );
 
@@ -175,6 +179,10 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 		TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
 		TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
 		TIFFSetField( pOut, TIFFTAG_COMPRESSION, compression );
+		if (compression == COMPRESSION_JPEG)
+			TIFFSetField( pOut, TIFFTAG_JPEGQUALITY, quality );
+		//if (description != "")
+			//TIFFSetField(TIFFTAG_IMAGEDESCRIPTION, description);
 		TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, photometric );
 		TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
 

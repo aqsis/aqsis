@@ -43,6 +43,7 @@
 #include	"messages.h"
 #include	"trimcurve.h"
 #include	"genpoly.h"
+#include	"points.h"
 
 #include	"ri.h"
 
@@ -51,6 +52,7 @@
 using namespace Aqsis;
 
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
+static void ProcessCompression(TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values);
 template <class T>
 RtVoid	CreateGPrim( T* pSurface );
 void SetShaderArgument( IqShader* pShader, const char* name, TqPchar val );
@@ -135,6 +137,7 @@ RtToken	RI_T	= "t";
 RtToken	RI_ST	= "st";
 RtToken	RI_BILINEAR	= "bilinear";
 RtToken	RI_BICUBIC	= "bicubic";
+RtToken	RI_LINEAR	= "linear";
 RtToken	RI_PRIMITIVE	= "primitive";
 RtToken	RI_INTERSECTION	= "intersection";
 RtToken	RI_UNION	= "union";
@@ -695,6 +698,7 @@ RtVoid	RiDisplay( const char *name, RtToken type, RtToken mode, ... )
 //
 RtVoid	RiDisplayV( const char *name, RtToken type, RtToken mode, PARAMETERLIST )
 {
+	TqInt compression, quality;
 	CqString strName( name );
 	CqString strType( type );
 
@@ -710,6 +714,9 @@ RtVoid	RiDisplayV( const char *name, RtToken type, RtToken mode, PARAMETERLIST )
 	if ( strstr( mode, RI_Z ) != NULL )
 		eValue |= ModeZ;
 
+	// Check if the request is to use different tiff's compression
+	ProcessCompression(&compression, &quality, count, tokens, values);
+
 	// Check if the request is to add a display driver.
 	if ( strName[ 0 ] == '+' )
 	{
@@ -723,7 +730,7 @@ RtVoid	RiDisplayV( const char *name, RtToken type, RtToken mode, PARAMETERLIST )
 		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "DisplayMode")[0] =  eValue ;
 	}
 	// Add a display driver to the list of requested drivers.
-	QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode );
+	QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode, compression, quality);
 
 	return ;
 }
@@ -2251,6 +2258,144 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 
 
 //----------------------------------------------------------------------
+/** Specify a small Points primitives
+ *  
+ *\return	nothing
+ **/
+RtVoid	RiPoints( RtInt nvertices,...)
+{
+	va_list	pArgs;
+	va_start( pArgs, nvertices );
+
+	RtToken* pTokens;
+	RtPointer* pValues;
+	RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+
+	RiPointsV( nvertices, count, pTokens, pValues );
+	
+	return ;
+}
+
+//----------------------------------------------------------------------
+/** List based version of above.
+ *  
+ *\return	nothing
+ **/
+RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
+{
+
+	TqInt n = nvertices;
+	
+	RtFloat*	pOrigins = 0;
+	RtFloat*	pSizes = 0;
+	RtFloat     constantwidth= 1.0f;
+	
+	
+	RtToken	token;
+	RtPointer	value;
+
+	RtInt i;
+	
+	for ( i = 0; i < count; i++ )
+	{
+		token = tokens[ i ];
+		value = values[ i ];
+
+		
+		if ( strcmp( token, "width" ) == 0)
+		{
+			pSizes = ( RtFloat* ) value;
+		}
+		
+		else if ( strcmp( token, RI_P ) == 0 )
+		{
+		
+			pOrigins = ( RtFloat* ) value;
+		} else if ( strstr( token, "constantwidth" ))
+		{
+			constantwidth = *( RtFloat* ) value;
+		}
+	}
+	
+	
+	if ((n != 0) && (pOrigins)) 
+	{
+		CqPoints* pSurface = new CqPoints( n, pOrigins , pSizes, constantwidth );
+
+		if (pSurface) 
+		{
+			pSurface->AddRef();
+
+			CqSurfacePolygon **iE;
+
+			for ( iE = pSurface->m_pPolygons.begin(); iE != pSurface->m_pPolygons.end(); iE++ )
+			{
+				CreateGPrim( ( CqSurfacePolygon* ) (*iE) );
+			}
+			pSurface->Release();
+		}
+	}
+
+	return ;
+}
+
+//----------------------------------------------------------------------
+/** Specify a small line primitives 
+ *  
+ *\param	type could be "linear" "bicubic"
+ *\param	ncurves : number of vertices
+ *\param	nvertices: vertices index
+ *\param	wrap could be "periodic" "nonperiodic"
+ *\return	nothing
+ **/
+
+RtVoid RiCurves(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, ...)
+{
+	va_list	pArgs;
+	va_start( pArgs, wrap );
+
+	RtToken* pTokens;
+	RtPointer* pValues;
+	RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+
+	RiCurvesV( type, ncurves, nvertices, wrap, count, pTokens, pValues );
+	
+	return ;
+}
+
+//----------------------------------------------------------------------
+/** List based version of above.
+ *  
+ *\return	nothing
+ **/
+RtVoid RiCurvesV(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, PARAMETERLIST)
+{
+
+	CqBasicError( 0, Severity_Normal, "RiCurvesV not supported" );
+
+	if ( strcmp( type, RI_BICUBIC ) == 0 ) {
+
+    } else if ( strcmp( type, RI_LINEAR ) == 0 ) {
+
+    } else {
+		CqBasicError( 0, Severity_Normal, "RiCurvesV (unknown type)" );
+    }
+
+	if ( strcmp( wrap, RI_PERIODIC ) == 0 ) {
+
+    } else if ( strcmp( wrap, RI_NONPERIODIC ) == 0 ) {
+
+    } else {
+		CqBasicError( 0, Severity_Normal, "RiCurvesV (unknown wrap mode)" );
+    }
+    if (ncurves <= 0)  {
+		CqBasicError( 0, Severity_Normal, "RiCurvesV (ncurves <= 0)" );
+    }
+	return;
+}
+
+
+//----------------------------------------------------------------------
 // RiPointsPolygons
 // Specify a list of convex coplanar polygons and their shared vertices.
 //
@@ -3321,6 +3466,10 @@ RtVoid	RiMakeTextureV( const char *pic, const char *tex, RtToken swrap, RtToken 
 	// Now load the original image.
 	CqTextureMap Source( pic );
 	Source.Open();
+	TqInt comp, qual;
+	ProcessCompression(&comp, &qual, count, tokens, values);
+	Source.SetCompression(comp);
+	Source.SetQuality(qual);
 
 	if ( Source.IsValid() && Source.Format() == TexFormat_Plain )
 	{
@@ -3337,7 +3486,7 @@ RtVoid	RiMakeTextureV( const char *pic, const char *tex, RtToken swrap, RtToken 
 		TIFFSetField( ptex, TIFFTAG_PIXAR_WRAPMODES, modes );
 		TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, Source.SamplesPerPixel() );
 		TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
-		TIFFSetField( ptex, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS ); /* COMPRESSION_DEFLATE */
+ 		TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
 		int log2 = MIN( Source.XRes(), Source.YRes() );
 		log2 = ( int ) ( log( log2 ) / log( 2.0 ) );
 
@@ -3347,7 +3496,7 @@ RtVoid	RiMakeTextureV( const char *pic, const char *tex, RtToken swrap, RtToken 
 			// Write the floating point image to the directory.
 			CqTextureMapBuffer* pBuffer = Source.GetBuffer( 0, 0, i );
 			if ( !pBuffer ) break;
-			Source.WriteTileImage( ptex, pBuffer->pBufferData(), Source.XRes() / ( 1 << i ), Source.YRes() / ( 1 << i ), 64, 64, Source.SamplesPerPixel() );
+			Source.WriteTileImage( ptex, pBuffer->pBufferData(), Source.XRes() / ( 1 << i ), Source.YRes() / ( 1 << i ), 64, 64, Source.SamplesPerPixel(), Source.Compression(), Source.Quality() );
 		}
 		TIFFClose( ptex );
 	}
@@ -3431,6 +3580,10 @@ RtVoid	RiMakeLatLongEnvironmentV( const char *pic, const char *tex, RtFilterFunc
 	// Now load the original image.
 	CqTextureMap Source( pic );
 	Source.Open();
+	TqInt comp, qual;
+	ProcessCompression(&comp, &qual, count, tokens, values);
+	Source.SetCompression(comp);
+	Source.SetQuality(qual);
 
 	if ( Source.IsValid() && Source.Format() == TexFormat_Plain )
 	{
@@ -3447,7 +3600,7 @@ RtVoid	RiMakeLatLongEnvironmentV( const char *pic, const char *tex, RtFilterFunc
 		TIFFSetField( ptex, TIFFTAG_PIXAR_WRAPMODES, modes );
 		TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, Source.SamplesPerPixel() );
 		TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
-		TIFFSetField( ptex, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS ); /* COMPRESSION_DEFLATE */
+		TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
 		int log2 = MIN( Source.XRes(), Source.YRes() );
 		log2 = ( int ) ( log( log2 ) / log( 2.0 ) );
 
@@ -3457,7 +3610,7 @@ RtVoid	RiMakeLatLongEnvironmentV( const char *pic, const char *tex, RtFilterFunc
 			// Write the floating point image to the directory.
 			CqTextureMapBuffer* pBuffer = Source.GetBuffer( 0, 0, i );
 			if ( !pBuffer ) break;
-			Source.WriteTileImage( ptex, pBuffer->pBufferData(), Source.XRes() / ( 1 << i ), Source.YRes() / ( 1 << i ), 64, 64, Source.SamplesPerPixel() );
+			Source.WriteTileImage( ptex, pBuffer->pBufferData(), Source.XRes() / ( 1 << i ), Source.YRes() / ( 1 << i ), 64, 64, Source.SamplesPerPixel(), Source.Compression(), Source.Quality() );
 		}
 		TIFFClose( ptex );
 	}
@@ -3579,7 +3732,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( const char *px, const char *nx, const char *p
 			TIFFCreateDirectory( ptex );
 			TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 			TIFFSetField( ptex, TIFFTAG_PIXAR_TEXTUREFORMAT, CUBEENVMAP_HEADER );
-			tpx.WriteTileImage( ptex, pImage, ( xRes * 3 ), ( yRes * 2 ), 64, 64, tpx.SamplesPerPixel() );
+			tpx.WriteTileImage( ptex, pImage, ( xRes * 3 ), ( yRes * 2 ), 64, 64, tpx.SamplesPerPixel(), tpx.Compression(), tpx.Quality() );
 			xRes /= 2;
 			yRes /= 2;
 		}
@@ -3616,6 +3769,12 @@ RtVoid	RiMakeShadowV( const char *picfile, const char *shadowfile, PARAMETERLIST
 	QGetRenderContext() ->Stats().MakeShadowTimer().Start();
 	CqShadowMap ZFile( picfile );
 	ZFile.LoadZFile();
+
+	TqInt comp, qual;
+	ProcessCompression(&comp, &qual, count, tokens, values);
+	ZFile.SetCompression(comp);
+	ZFile.SetQuality(qual);
+
 	ZFile.SaveShadowMap( shadowfile );
 	QGetRenderContext() ->Stats().MakeShadowTimer().Stop();
 	return ;
@@ -4149,3 +4308,51 @@ void SetShaderArgument( IqShader* pShader, const char* name, TqPchar val )
 	pShader->SetArgument( Decl.m_strName, Decl.m_Type, Decl.m_strSpace, val );
 }
 
+
+//----------------------------------------------------------------------
+/** Analyze the parameter list and figure what kind of compression is required for texturemapping output files.
+ 
+	\param	compression	compression	Pointer to an integer to containing the TIFF compression
+	\param	quality it is the quality of jpeg's compression
+	\param	count list counter
+	\param	token list of tokens
+	\param	values list of values
+ 
+	\return	nothing
+ */
+
+static void ProcessCompression(TqInt *compression, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values)
+{
+   *compression = COMPRESSION_NONE;
+   *quality = 70;
+
+    for (int i = 0; i < count; i++ ) {
+	RtToken	token = tokens[ i ];
+	RtString *value = (RtString *) values[ i ];
+
+		if ( strstr( token, "compression" ) != 0 ) {
+
+			if ( strstr(*value, "none" ) != 0 )
+				*compression = COMPRESSION_NONE;
+			
+			else if ( strstr(*value, "lzw" ) != 0 )
+				*compression = COMPRESSION_LZW;
+			
+			else if ( strstr(*value, "deflate" ) != 0 )
+				*compression = COMPRESSION_DEFLATE;
+			
+			else if ( strstr( *value, "jpeg" ) != 0 )
+				*compression = COMPRESSION_JPEG;
+			
+			else if ( strstr( *value, "packbits" ) != 0 )
+				*compression = COMPRESSION_PACKBITS;
+			
+		
+		} else if ( strstr( token, "quality" ) != 0 ) {
+		
+			*quality = (int) *(float *)value;
+			if (*quality < 0) *quality = 0;
+			if (*quality > 100) *quality = 100;
+		}
+    }
+}

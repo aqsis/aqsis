@@ -73,7 +73,8 @@ CqRibBinaryDecoder::CqRibBinaryDecoder(FILE *filename)
 
 CqRibBinaryDecoder::~CqRibBinaryDecoder()
 {
-    gzclose(gzf);
+	if (gzf)
+		gzclose(gzf);
 //    Aqsis::QGetRenderContext()->Stats().ReadArchiveTimer().Stop();
 
 }

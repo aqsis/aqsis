@@ -301,6 +301,15 @@ RendermanInterface::RtVoid Stream::RiPixelVariance( RtFloat variance )
 {
 	m_Stream << "RiPixelVariance()" << std::endl;
 }
+RendermanInterface::RtVoid Stream::RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap,
+						   RtInt n, RtToken tokens[], RtPointer values[])
+{
+	m_Stream << "RiCurvesV()" << std::endl;
+}
+RendermanInterface::RtVoid Stream::RiPointsV( RtInt vertices, RtInt count, RtToken tokens[], RtPointer values[] )
+{
+	m_Stream << "RiPointsV()" << std::endl;
+}
 RendermanInterface::RtVoid Stream::RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[] )
 {
 	m_Stream << "RiPointsGeneralPolygonsV()" << std::endl;

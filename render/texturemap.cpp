@@ -1867,10 +1867,13 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName )
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, matWorldToScreen );
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
 			TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
+			TIFFSetField(pshadow,TIFFTAG_COMPRESSION, m_compression );
+			//if (m_compression == COMPRESSION_JPEG)
+			//	TIFFSetField(pshadow,TIFFTAG_JPEGQUALITY, m_quality);
 
 			// Write the floating point image to the directory.
 			TqFloat *depths = ( TqFloat * ) m_apSegments[ 0 ] ->pBufferData();
-			WriteTileImage( pshadow, depths, XRes(), YRes(), 32, 32, 1 );
+			WriteTileImage( pshadow, depths, XRes(), YRes(), 32, 32, 1, m_compression, m_quality );
 			TIFFClose( pshadow );
 		}
 	}
@@ -1913,7 +1916,7 @@ void CqShadowMap::ReadMatrices()
  * as TqFloat values
  */
 
-void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples )
+void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
 	//TIFFCreateDirectory(ptex);
 	TqChar version[ 80 ];
@@ -1932,6 +1935,8 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
 	TIFFSetField( ptex, TIFFTAG_TILEWIDTH, twidth );
 	TIFFSetField( ptex, TIFFTAG_TILELENGTH, tlength );
 	TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
+
+	TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression );
 
 	TqInt tsize = twidth * tlength;
 	TqInt tperrow = ( width + twidth - 1 ) / twidth;
@@ -1973,7 +1978,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
  */
 
 
-void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples )
+void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
 	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );
@@ -1995,6 +2000,10 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlo
 	TIFFSetField( ptex, TIFFTAG_ROWSPERSTRIP, 1 );
 	TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 
+	TIFFSetField( ptex,TIFFTAG_COMPRESSION, compression );
+	//if (compression == COMPRESSION_JPEG)
+	//	TIFFGetField( ptex, TIFFTAG_JPEGQUALITY, quality );
+
 	TqFloat *pdata = raster;
 	for ( TqUlong i = 0; i < length; i++ )
 	{
@@ -2008,7 +2017,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlo
  * as unsigned char values
  */
 
-void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples )
+void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
 	TqChar version[ 80 ];
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
@@ -2026,7 +2035,10 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, T
 	TIFFSetField( ptex, TIFFTAG_TILEWIDTH, twidth );
 	TIFFSetField( ptex, TIFFTAG_TILELENGTH, tlength );
 	TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
-	TIFFSetField( ptex, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS );
+
+	//if (compression != COMPRESSION_NONE)
+	TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression );
+
 	TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 
 	TqInt tsize = twidth * tlength;
@@ -2068,7 +2080,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, T
  * as unsigned char values
  */
 
-void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples )
+void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
 	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );
@@ -2086,7 +2098,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlo
 	TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
 	TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
 	TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
-	TIFFSetField( ptex, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS );
+	TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression );
 	TIFFSetField( ptex, TIFFTAG_ROWSPERSTRIP, 1 );
 
 	unsigned char *pdata = raster;

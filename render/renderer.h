@@ -204,7 +204,7 @@ class CqRenderer : public IqRenderer
 		virtual	void	Initialise();
 		virtual	void	RenderWorld();
 
-		virtual	void	AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode );
+		virtual	void	AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality);
 		virtual	void	ClearDisplayRequests();
 		virtual	IqDDManager*	pDDmanager()
 		{

@@ -142,6 +142,9 @@ struct SqDDMessageClose : public SqDDMessageBase
 	SqDDMessageClose() :
 			SqDDMessageBase( MessageID_Close, sizeof( SqDDMessageClose ) )
 	{}
+	TqInt m_Compression;
+	TqInt m_Quality;
+	//TqChar m_Description[80];
 }
 ;
 

@@ -16,6 +16,7 @@
 
 bool	g_version = 0;
 bool	g_help = 0;
+
 bool	g_envcube;
 bool	g_envlatl;
 bool	g_shadow;
@@ -24,8 +25,10 @@ ArgParse::apstring	g_twrap = "black";
 ArgParse::apstring g_filter = "box";
 ArgParse::apfloat g_swidth = 1.0;
 ArgParse::apfloat g_twidth = 1.0;
-ArgParse::apfloat g_fov = 0.0;
+ArgParse::apfloat g_fov = 90.0;
 ArgParse::apfloat g_width = -1.0;
+ArgParse::apstring g_compress = "none";
+ArgParse::apfloat g_quality = 70.0;
 
 
 void version( std::ostream& Stream )
@@ -46,6 +49,7 @@ int main( int argc, const char** argv )
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] outfile" );
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
 	ap.argFlag( "version", "print version information and exit", &g_version );
+	ap.argString( "compression", "=string [none|lzw|packbits|deflate]", &g_compress);
 	ap.argFlag( "envcube", " px nx py ny pz nz\aproduce a cubeface environment map from 6 images.", &g_envcube );
 	ap.argFlag( "envlatl", " produce a latlong environment map from an image file.", &g_envlatl );
 	ap.argFlag( "shadow", " produce a shadow map from a z file.", &g_shadow );
@@ -56,6 +60,7 @@ int main( int argc, const char** argv )
 	ap.argFloat( "swidth", "=float s width [>0.0f]", &g_swidth );
 	ap.argFloat( "twidth", "=float t width [>0.0f]", &g_twidth );
 	ap.argFloat( "width", "=float width [>0,0f] set both swidth and twidth", &g_width );
+	ap.argFloat( "quality", "=float [>=1.0f && <= 100.0f]", &g_quality );
 
 
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
@@ -131,6 +136,25 @@ int main( int argc, const char** argv )
 		g_twidth = g_swidth = g_width;
 	}
 
+	/* protect the compression mode */
+	if ( !( ( g_compress == "deflate") || 
+			( g_compress == "lzw" )  ||
+			( g_compress == "none" ) || 
+			( g_compress == "packbits") 
+		  )
+	   )
+	{
+		std::cerr << "Unknown compression mode: " << g_compress << ". none." << std::endl;
+		g_compress = "none";
+	}
+	/* protect the quality mode */
+	if ( g_quality < 1.0f ) g_quality = 1.0;
+	if ( g_quality > 100.0f ) g_quality = 100.0;
+
+	char *compression = (char *) g_compress.c_str();
+	float quality = (float) g_quality;
+
+
 	RiBegin( "teqser" );
 
 	if ( g_envcube )
@@ -141,7 +165,7 @@ int main( int argc, const char** argv )
 			return ( -1 );
 		}
 
-		printf( "CubeFace Environment %s %s %s %s %s %s ----> %s \n\t\"fov\"= %4.1f\n\t\"filter\"= %s \n\t\"swidth\"= %4.1f\n\t\"twidth\"= %4.1f\n",
+		printf( "CubeFace Environment %s %s %s %s %s %s ----> %s \n\t\"fov\"= %4.1f\n\t\"filter\"= %s \n\t\"swidth\"= %4.1f\n\t\"twidth\"= %4.1f\n\t\"compression\" = %s\n",
 		        ( char* ) ap.leftovers() [ 0 ].c_str(),
 		        ( char* ) ap.leftovers() [ 1 ].c_str(),
 		        ( char* ) ap.leftovers() [ 2 ].c_str(),
@@ -152,51 +176,57 @@ int main( int argc, const char** argv )
 		        g_fov,
 		        g_filter.c_str(),
 		        g_swidth,
-		        g_twidth
+		        g_twidth,
+				(char*) g_compress.c_str() 
 		      );
 
 		RiMakeCubeFaceEnvironment( ap.leftovers() [ 0 ].c_str(), ap.leftovers() [ 1 ].c_str(), ap.leftovers() [ 2 ].c_str(),
 		                           ap.leftovers() [ 3 ].c_str(), ap.leftovers() [ 4 ].c_str(), ap.leftovers() [ 5 ].c_str(), ap.leftovers() [ 6 ].c_str(),
 		                           g_fov,
-		                           filterfunc, ( float ) g_swidth, ( float ) g_twidth );
+		                           filterfunc, ( float ) g_swidth, ( float ) g_twidth, "compression", &compression, "quality", &quality, RI_NULL );
 	}
 	else if ( g_shadow )
 	{
-		printf( "Shadow %s ----> %s \n",
+		printf( "Shadow %s ----> %s \n\t\"compression\" = %s\n",
 		        ( char* ) ap.leftovers() [ 0 ].c_str(),
-		        ( char* ) ap.leftovers() [ 1 ].c_str() );
+		        ( char* ) ap.leftovers() [ 1 ].c_str(),
+				(char*) g_compress.c_str() );
 
 
 
-		RiMakeShadow( ( char* ) ap.leftovers() [ 0 ].c_str(), ( char* ) ap.leftovers() [ 1 ].c_str() );
+		RiMakeShadow( ( char* ) ap.leftovers() [ 0 ].c_str(), ( char* ) ap.leftovers() [ 1 ].c_str(), ( float ) g_twidth, "compression", &compression, "quality", &quality, RI_NULL );
 	}
 	else if ( g_envlatl )
 	{
-		printf( "LatLong Environment %s ----> %s \n",
+		printf( "LatLong Environment %s ----> %s \n\t\"compression\" = %s \n",
 		        ( char* ) ap.leftovers() [ 0 ].c_str(),
-		        ( char* ) ap.leftovers() [ 1 ].c_str() );
+		        ( char* ) ap.leftovers() [ 1 ].c_str(),
+				(char*) g_compress.c_str() );
 
 
 
 		RiMakeLatLongEnvironment( ( char* ) ap.leftovers() [ 0 ].c_str(), ( char* ) ap.leftovers() [ 1 ].c_str(), filterfunc,
-		                          ( float ) g_swidth, ( float ) g_twidth );
+		                          ( float ) g_swidth, ( float ) g_twidth, "compression", &compression, "quality", &quality, RI_NULL );
 	}
 	else
 	{
-		printf( "Texture %s ----> %s \n\t\"swrap\"= %s \n\t\"twrap\"= %s \n\t\"filter\"= %s \n\t\"swidth\"= %4.1f \n\
-		        \t\"twidth\"= %4.1f\n",
+		
+		printf( "Texture %s ----> %s \n\t\"swrap\"= %s \n\t\"twrap\"= %s \n\t\"filter\"= %s \n\t\"swidth\"= %4.1f\n\
+\t\"twidth\"= %4.1f\n\t\"compression\" = %s\n",
 		        ( char* ) ap.leftovers() [ 0 ].c_str(),
 		        ( char* ) ap.leftovers() [ 1 ].c_str(),
 		        ( char* ) g_swrap.c_str(),
 		        ( char* ) g_twrap.c_str(),
 		        ( char* ) g_filter.c_str(),
 		        g_swidth,
-		        g_twidth
+		        g_twidth,
+				compression 
 		      );
+
 
 		RiMakeTexture( ( char* ) ap.leftovers() [ 0 ].c_str(), ( char* ) ap.leftovers() [ 1 ].c_str(),
 		               ( char* ) g_swrap.c_str(), ( char* ) g_twrap.c_str(), filterfunc,
-		               ( float ) g_swidth, ( float ) g_twidth );
+		               ( float ) g_swidth, ( float ) g_twidth, "compression", &compression, "quality", &quality, RI_NULL);
 
 	}
 

@@ -313,9 +313,7 @@ void CqDDClient::Receive( void* buffer, TqInt len )
 }
 
 
-/// Global map of display names to display devices, initialised from ddmsock.ini
 std::map<std::string, std::string>	g_mapDisplayNames;
-/// Flag indicating whether g_mapDisplayNames has been successfully initialised.
 TqBool	g_fDisplayMapInitialised = false;
 
 CqDDManager::CqDDManager()
@@ -350,15 +348,19 @@ TqInt CqDDManager::Shutdown()
 	return ( 0 );
 }
 
-TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode )
+TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality )
 {
 	m_aDisplayRequests.push_back( CqDDClient( name, type, mode ) );
+	m_aDisplayCompression.push_back(compression);
+	m_aDisplayQuality.push_back(quality);
 	return ( 0 );
 }
 
 TqInt CqDDManager::ClearDisplays()
 {
 	m_aDisplayRequests.clear();
+	m_aDisplayCompression.clear();
+	m_aDisplayQuality.clear();
 	return ( 0 );
 }
 
@@ -376,10 +378,19 @@ TqInt CqDDManager::CloseDisplays()
 	SqDDMessageCloseAcknowledge ack;
 
 	std::vector<CqDDClient>::iterator i;
-	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+	std::vector<TqInt>::iterator j;
+    std::vector<TqInt>::iterator k;
+
+	i = m_aDisplayRequests.begin();
+	j = m_aDisplayCompression.begin();
+	k = m_aDisplayQuality.begin(); 
+
+	for ( ; i != m_aDisplayRequests.end(); i++, j++, k++ )
 	{
 		if ( i->Socket() != INVALID_SOCKET )
 		{
+			msg.m_Compression = *j;
+			msg.m_Quality = *k;
 			i->SendMsg( &msg );
 			i->Receive( &ack, sizeof( ack ) );
 

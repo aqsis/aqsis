@@ -87,7 +87,7 @@ struct IqDDManager
 	virtual	TqInt	Shutdown() = 0;
 	/** Add a display request to the managers list.
 	 */
-	virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode ) = 0;
+	virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality ) = 0;
 	/** Clear all display requests from the managers list.
 	 */
 	virtual	TqInt	ClearDisplays() = 0;

@@ -228,6 +228,10 @@ extern	"C"
 	_qShare	RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST );
 	_qShare	RtVoid	RiGeneralPolygon( RtInt nloops, RtInt nverts[], ... );
 	_qShare	RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST );
+	_qShare RtVoid	RiPoints(RtInt npoints, ...);
+	_qShare RtVoid	RiPointsV(RtInt npoints, RtInt n, RtToken tokens[], RtPointer parms[]);
+	_qShare RtVoid	RiCurves(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, ...);
+	_qShare RtVoid	RiCurvesV(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, RtInt n, RtToken tokens[], RtPointer parms[]);
 	_qShare	RtVoid	RiPointsPolygons( RtInt npolys, RtInt nverts[], RtInt verts[], ... );
 	_qShare	RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERLIST );
 	_qShare	RtVoid	RiPointsGeneralPolygons( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], ... );

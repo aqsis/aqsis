@@ -105,6 +105,9 @@ void StandardDeclarations( RendermanInterface& CallbackInterface )
 	ParserDeclare( CallbackInterface, "name", "uniform string" );
 	ParserDeclare( CallbackInterface, "shadinggroup", "uniform string" );
 	ParserDeclare( CallbackInterface, "sense", "uniform string" );
+	ParserDeclare( CallbackInterface, "compression", "uniform string" );
+	ParserDeclare( CallbackInterface, "quality", "uniform integer" );
+
 }
 
 bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream )
