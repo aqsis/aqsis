@@ -2565,8 +2565,38 @@ RtVoid	RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc fre
 
 
 
-//	RtVoid				RiGeometry();
-//	RtVoid				RiGeometryV();
+//----------------------------------------------------------------------
+// RiGeometry
+// Specify a special primitive.
+//
+RtVoid	RiGeometry(RtToken type, ...)
+{
+	va_list	pArgs;
+	va_start(pArgs, type);
+
+	RtToken* pTokens;
+	RtPointer* pValues;
+	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
+
+	return(RiGeometryV(type, count, pTokens, pValues));
+}
+
+
+//----------------------------------------------------------------------
+// RiGeometryV
+// List based version of above.
+//
+RtVoid	RiGeometryV(RtToken type, PARAMETERLIST)
+{
+	// Create something
+	//CqTeapot* pSurface=new CqTeapot();
+	//pSurface->SetDefaultPrimitiveVariables();
+	//ProcessPrimitiveVariables(pSurface,count,tokens,values);
+
+	//CreateGPrim(pSurface);
+
+	return(0);
+}
 
 //----------------------------------------------------------------------
 // RiSolidBegin

@@ -243,8 +243,8 @@ _qShare	RtVoid			RiDiskV(RtFloat height, RtFloat radius, RtFloat thetamax, PARAM
 _qShare	RtVoid			RiTorus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, ...);
 _qShare	RtVoid			RiTorusV(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, PARAMETERLIST);
 _qShare	RtVoid			RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc);
-//_qShare	RtVoid			RiGeometry();
-//_qShare	RtVoid			RiGeometryV();
+_qShare	RtVoid			RiGeometry(RtToken type, ... );
+_qShare	RtVoid			RiGeometryV(RtToken type, PARAMETERLIST);
 
 _qShare	RtVoid			RiSolidBegin(RtToken type);
 _qShare	RtVoid			RiSolidEnd();

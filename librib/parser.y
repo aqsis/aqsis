@@ -958,10 +958,10 @@ complete_request
 									}
 	|		geometry string opttvpairs
 									{
-										//RiGeometryV((char*)($2->c_str()),
-										//				$3.atokens->size(), 
-										//				&(*$3.atokens)[0],
-										//				&(*$3.avalues)[0]);
+										RiGeometryV((char*)($2->c_str()),
+														$3.atokens->size(), 
+														&(*$3.atokens)[0],
+														&(*$3.avalues)[0]);
 										DiscardStringValue($2);
 										DiscardTokenValuePairs(&($3));
 									}
