@@ -331,6 +331,7 @@ RtToken	RiDeclare( const char *name, const char *declaration )
 // RiBegin
 // Begin a Renderman render phase.
 //
+extern "C" char *StandardParameters[][2];
 RtVoid	RiBegin( RtToken name )
 {
 	// Create a new renderer
@@ -352,6 +353,35 @@ RtVoid	RiBegin( RtToken name )
 
 	// Clear any options.
 	QGetRenderContext() ->optCurrent().ClearOptions();
+
+	// Include the standard options (how can we opt out of this).
+	int param = 0;
+	while( StandardParameters[param][0] != NULL )
+	{
+		RiDeclare( 
+		  StandardParameters[param][0],
+		  StandardParameters[param][1]
+		);
+		param++;
+	};
+
+	// Setup default paths
+        const char* popt[ 1 ];
+        popt[ 0 ] = (Aqsis::CqFile::GetSystemSetting( "shaders" )).c_str();
+        RiOption( "searchpath", "shader", &popt, RI_NULL );
+        popt[ 0 ] = (Aqsis::CqFile::GetSystemSetting( "archives" )).c_str();
+        RiOption( "searchpath", "archive", &popt, RI_NULL );
+        popt[ 0 ] = (Aqsis::CqFile::GetSystemSetting( "textures" )).c_str();
+        RiOption( "searchpath", "texture", &popt, RI_NULL );
+        popt[ 0 ] = (Aqsis::CqFile::GetSystemSetting( "display" )).c_str();
+        RiOption( "searchpath", "display", &popt, RI_NULL );
+        popt[ 0 ] = (Aqsis::CqFile::GetSystemSetting( "dsolibs" )).c_str();
+        RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
+        popt[ 0 ] = (Aqsis::CqFile::GetSystemSetting( "procedurals" )).c_str();
+        RiOption( "searchpath", "procedural", &popt, RI_NULL );
+
+	// Setup a default Display
+	RiDisplay( "ri.pic", "file", "rgba", NULL );
 
 	// Setup a default surface shader
 	CqShaderVM * pShader = new CqShaderVM();

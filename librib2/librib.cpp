@@ -70,74 +70,86 @@ extern bool fRecovering;
 extern bool fRequest;
 extern bool fParams;
 
+extern "C" const char* StandardParameters[][2] = 
+{
+	{"Ka", "uniform float" },
+	{"Kd", "uniform float" },
+	{"Ks", "uniform float" },
+	{"Kr", "uniform float" },
+	{"roughness", "uniform float" },
+	{"texturename", "uniform string" },
+	{"specularcolor", "uniform color" },
+	{"intensity", "uniform float" },
+	{"lightcolor", "uniform color" },
+	{"from", "uniform point" },
+	{"to", "uniform point" },
+	{"coneangle", "uniform float" },
+	{"conedeltaangle", "uniform float" },
+	{"beamdistribution", "uniform float" },
+	{"mindistance", "uniform float" },
+	{"maxdistance", "uniform float" },
+	{"distance", "uniform float" },
+	{"background", "uniform color" },
+	{"fov", "uniform float" },
+	{"P", "vertex point" },
+	{"Pz", "vertex point" },
+	{"Pw", "vertex hpoint" },
+	{"N", "varying normal" },
+	{"Np", "uniform normal" },
+	{"Cs", "varying color" },
+	{"Os", "varying color" },
+	{"s", "varying float" },
+	{"t", "varying float" },
+	{"st", "varying float" },
+	{"gridsize", "uniform integer" },
+	{"texturememory", "uniform integer" },
+	{"bucketsize", "uniform integer[2]" },
+	{"eyesplits", "uniform integer" },
+	{"shader", "uniform string" },
+	{"archive", "uniform string" },
+	{"texture", "uniform string" },
+	{"display", "uniform string" },
+	{"dsolibs", "uniform string" },
+	{"auto_shadows", "uniform string" },
+	{"endofframe", "uniform integer" },
+	{"verbose", "uniform integer" },
+	{"sphere", "uniform float" },
+	{"coordinatesystem", "uniform string" },
+	{"shadows", "uniform string" },
+	{"shadowmapsize", "uniform integer[2]" },
+	{"shadowangle", "uniform float" },
+	{"shadowmapname", "uniform string" },
+	{"shadow_shadingrate", "uniform float" },
+	{"name", "uniform string" },
+	{"shadinggroup", "uniform string" },
+	{"sense", "uniform string" },
+	{"compression", "uniform string" },
+	{"quality", "uniform integer" },
+	{"bias0", "uniform float" },
+	{"bias1", "uniform float" },
+	{"bias", "uniform float" },
+	{"jitter", "uniform integer" },
+	{"depthfilter", "uniform string" },
+	{"width", "varying float" },
+	{"constantwidth", "constant float" },
+	{"binary", "uniform integer" },
+	{"procedural", "uniform string" },
+	{"quantize", "uniform float[4]" },
+	{"dither", "uniform float" },
+	{ NULL , NULL }
+};
 
 void StandardDeclarations( RendermanInterface& CallbackInterface )
 {
 	// Declare standard arguments
-	ParserDeclare( CallbackInterface, "Ka", "uniform float" );
-	ParserDeclare( CallbackInterface, "Kd", "uniform float" );
-	ParserDeclare( CallbackInterface, "Ks", "uniform float" );
-	ParserDeclare( CallbackInterface, "Kr", "uniform float" );
-	ParserDeclare( CallbackInterface, "roughness", "uniform float" );
-	ParserDeclare( CallbackInterface, "texturename", "uniform string" );
-	ParserDeclare( CallbackInterface, "specularcolor", "uniform color" );
-	ParserDeclare( CallbackInterface, "intensity", "uniform float" );
-	ParserDeclare( CallbackInterface, "lightcolor", "uniform color" );
-	ParserDeclare( CallbackInterface, "from", "uniform point" );
-	ParserDeclare( CallbackInterface, "to", "uniform point" );
-	ParserDeclare( CallbackInterface, "coneangle", "uniform float" );
-	ParserDeclare( CallbackInterface, "conedeltaangle", "uniform float" );
-	ParserDeclare( CallbackInterface, "beamdistribution", "uniform float" );
-	ParserDeclare( CallbackInterface, "mindistance", "uniform float" );
-	ParserDeclare( CallbackInterface, "maxdistance", "uniform float" );
-	ParserDeclare( CallbackInterface, "distance", "uniform float" );
-	ParserDeclare( CallbackInterface, "background", "uniform color" );
-	ParserDeclare( CallbackInterface, "fov", "uniform float" );
-	ParserDeclare( CallbackInterface, "P", "vertex point" );
-	ParserDeclare( CallbackInterface, "Pz", "vertex point" );
-	ParserDeclare( CallbackInterface, "Pw", "vertex hpoint" );
-	ParserDeclare( CallbackInterface, "N", "varying normal" );
-	ParserDeclare( CallbackInterface, "Np", "uniform normal" );
-	ParserDeclare( CallbackInterface, "Cs", "varying color" );
-	ParserDeclare( CallbackInterface, "Os", "varying color" );
-	ParserDeclare( CallbackInterface, "s", "varying float" );
-	ParserDeclare( CallbackInterface, "t", "varying float" );
-	ParserDeclare( CallbackInterface, "st", "varying float" );
-	ParserDeclare( CallbackInterface, "gridsize", "uniform integer" );
-	ParserDeclare( CallbackInterface, "texturememory", "uniform integer" );
-	ParserDeclare( CallbackInterface, "bucketsize", "uniform integer[2]" );
-	ParserDeclare( CallbackInterface, "eyesplits", "uniform integer" );
-	ParserDeclare( CallbackInterface, "shader", "uniform string" );
-	ParserDeclare( CallbackInterface, "archive", "uniform string" );
-	ParserDeclare( CallbackInterface, "texture", "uniform string" );
-	ParserDeclare( CallbackInterface, "display", "uniform string" );
-	ParserDeclare( CallbackInterface, "dsolibs", "uniform string" );
-	ParserDeclare( CallbackInterface, "auto_shadows", "uniform string" );
-	ParserDeclare( CallbackInterface, "endofframe", "uniform integer" );
-	ParserDeclare( CallbackInterface, "verbose", "uniform integer" );
-	ParserDeclare( CallbackInterface, "sphere", "uniform float" );
-	ParserDeclare( CallbackInterface, "coordinatesystem", "uniform string" );
-	ParserDeclare( CallbackInterface, "shadows", "uniform string" );
-	ParserDeclare( CallbackInterface, "shadowmapsize", "uniform integer[2]" );
-	ParserDeclare( CallbackInterface, "shadowangle", "uniform float" );
-	ParserDeclare( CallbackInterface, "shadowmapname", "uniform string" );
-	ParserDeclare( CallbackInterface, "shadow_shadingrate", "uniform float" );
-	ParserDeclare( CallbackInterface, "name", "uniform string" );
-	ParserDeclare( CallbackInterface, "shadinggroup", "uniform string" );
-	ParserDeclare( CallbackInterface, "sense", "uniform string" );
-	ParserDeclare( CallbackInterface, "compression", "uniform string" );
-	ParserDeclare( CallbackInterface, "quality", "uniform integer" );
-	ParserDeclare( CallbackInterface, "bias0", "uniform float" );
-	ParserDeclare( CallbackInterface, "bias1", "uniform float" );
-	ParserDeclare( CallbackInterface, "bias", "uniform float" );
-	ParserDeclare( CallbackInterface, "jitter", "uniform integer" );
-	ParserDeclare( CallbackInterface, "depthfilter", "uniform string" );
-	ParserDeclare( CallbackInterface, "width", "varying float" );
-	ParserDeclare( CallbackInterface, "constantwidth", "constant float" );
-	ParserDeclare( CallbackInterface, "binary", "uniform integer" );
-	ParserDeclare( CallbackInterface, "procedural", "uniform string" );
-	ParserDeclare( CallbackInterface, "quantize", "uniform float[4]" );
-	ParserDeclare( CallbackInterface, "dither", "uniform float" );
+	unsigned int i = 0;
+	while( StandardParameters[ i ][0] != NULL )
+	{
+		std::string name( StandardParameters[i][0] );
+		std::string type( StandardParameters[i][1] );
+		ParserDeclare( CallbackInterface, name, type );
+		i++;
+	};
 }
 
 

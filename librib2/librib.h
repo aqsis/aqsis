@@ -158,6 +158,7 @@ class RendermanInterface
 
 /// Initializes the parser and callback object with a set of standard declarations
 extern "C" {
+
 	void StandardDeclarations( RendermanInterface& CallbackInterface );
 
 	/// Parses an input stream, using the supplied callback object and sending error data to the supplied output stream
