@@ -19,8 +19,13 @@ extern "C" int isatty(int);
 #ifdef	WIN32
 #include "parser.hpp"
 #else
+#ifdef AQSIS_SYSTEM_MACOSX
+#include "parser.cpp.h"
+#else
 #include "parser.h"
-#endif
+#endif /* AQSIS_SYSTEM_MACOSX */
+#endif /* WIN32 */
+
 #include "bdec.h"
 
 namespace librib
@@ -293,7 +298,11 @@ static int scannerinput(char* Buffer, int MaxSize)
 
 std::string FindArchive(const std::string strFilename)
 {
+#ifdef WIN32
 	std::ifstream* pFStream = new std::ifstream( strFilename.c_str(), std::ios_base::binary|std::ios_base::in );
+#else
+	std::ifstream* pFStream = new std::ifstream( strFilename.c_str(), std::ios::binary|std::ios::in );
+#endif
 	if ( !pFStream->is_open() )
 	{
 		// If a searchpath option name was specified, use it.

@@ -241,7 +241,7 @@ TqInt CqTextureMap::Convert( CqString &strName )
 	char *aqsis_home = getenv( "AQSIS_BASE_PATH" );
 
 	if ( aqsis_home == NULL )
-#ifdef	AQSIS_SYSTEM_POSIX
+#if defined(AQSIS_SYSTEM_POSIX) && !defined(AQSIS_SYSTEM_MACOSX)
 		aqsis_home = BASE_PATH;
 #else
 		aqsis_home = ".";
@@ -282,7 +282,9 @@ TqInt CqTextureMap::Convert( CqString &strName )
 	if ( ( convert = ( char * ( * ) (const  char * s ) ) plug->Function() ) != NULL )
 	{
 
+#ifdef DEBUG
 		std::cout << "strName: " << strName.c_str() << std::endl;
+#endif
 		if ( ( tiff = convert (  strName.c_str() ) ) != NULL )
 		{
 			strName = tiff;

@@ -26,8 +26,12 @@
 #include	"aqsis.h"
 
 #include	<iostream>
-#include	<sstream>
 
+#ifndef AQSIS_SYSTEM_MACOSX
+#include	<sstream>
+#else
+#include	<strstream>
+#endif
 #include	<ctype.h>
 
 #include	"log.h"
@@ -723,7 +727,12 @@ void CqShaderVM::DefaultSurface()
 	                           pop Ci \
 	                           ";
 
+#ifndef AQSIS_SYSTEM_MACOSX
 	std::stringstream defStream(pDefSurfaceShader);
+#else
+	std::strstream defStream;
+        defStream  << pDefSurfaceShader << std::ends;
+#endif
 
 	LoadProgram(&defStream);
 }
@@ -998,7 +1007,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							  	candidates = getShadeOpMethods(&strFunc);
 								if( candidates == NULL )
 								{
-									logger->fatal("%s: No DSO found for extenral shadeop: %s\n", strName().c_str(), strFunc.c_str());
+									logger->fatal("%s: No DSO found for external shadeop: %s\n", strName().c_str(), strFunc.c_str());
 									return ;
 								}
 								m_ActiveDSOMap[strFunc]=candidates;
@@ -1021,7 +1030,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							*pFile >> strArgTypes;
 							for ( int x=1; x < strArgTypes.length()-1; x++ )
 							{
-								EqVariableType type;
 								m_itTypeIdMap = m_TypeIdMap.find( strArgTypes[x] );
 								if ( m_itTypeIdMap != m_TypeIdMap.end() )
 								{

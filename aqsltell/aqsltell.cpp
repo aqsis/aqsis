@@ -47,9 +47,9 @@ struct IqRenderer;
 extern IqRenderer* QGetRenderContextI();
 }
 
-bool g_pause;
-bool g_help;
-bool g_version;
+bool g_pause=0;
+bool g_help=0;
+bool g_version=0;
 
 
 void version( std::ostream& Stream )

@@ -653,7 +653,11 @@ void CqDDManager::InitialiseDisplayNameMap()
 	env = getenv( "AQSIS_CONFIG_PATH" );
 	if ( env == NULL )
 	{
+#ifndef AQSIS_SYSTEM_MACOSX
 		ddmsock_path = CONFIG_PATH;
+#else
+		ddmsock_path = ".";
+#endif
 	}
 	else
 	{

@@ -24,7 +24,7 @@
 #include	"irenderer.h"
 #include	"ishaderdata.h"
 #include	"dsoshadeops.h"
-#include	<sstream>
+
 
 START_NAMESPACE( Aqsis )
 
@@ -117,7 +117,14 @@ std::list<SqDSOExternalCall*>*
 CqDSORepository::getShadeOpMethods(CqString* pShadeOpName)
 {
 	IqLog *logger = QGetRenderContextI()->Logger();
-	CqString strTableSymbol = *pShadeOpName + "_shadeops" ;
+	CqString strTableSymbol;
+#ifdef AQSIS_SYSTEM_MACOSX
+        strTableSymbol = "_";
+#else
+        strTableSymbol = "";
+#endif
+        strTableSymbol += *pShadeOpName;
+        strTableSymbol += "_shadeops" ;
 	std::list<SqDSOExternalCall*>* oplist = new (std::list<SqDSOExternalCall*>);
 	std::list<CqString*>::iterator itPathEntry;
 	SqShadeOp *pTableSymbol = NULL;
@@ -168,7 +175,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 	
   	IqLog *logger = QGetRenderContextI()->Logger();
 	TqInt length = strlen(pShadeOpEntry->m_opspec)+1;
-	char *temp = new (char [length]);
+	char temp[1024];
 	strncpy(temp, pShadeOpEntry->m_opspec,length);
 
 	// We remove all the '(),' charachters, so we are left with 
@@ -177,73 +184,98 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 		if(temp[x]=='('||temp[x]==')'||temp[x]==',')temp[x]=' ';
 
 	CqString strSpec(temp);
-	std::istringstream strOpSpec(strSpec, std::ios::in);
-
+	
 	// Get the return type of the function
-	std::stringbuf strRetType;
-	strOpSpec.get(strRetType,' ') ;
-	m_itTypeNameMap = m_TypeNameMap.find(strRetType.str());
+	std::string strRetType;
+	
+	
+	strRetType = strtok(temp, " ");
+	m_itTypeNameMap = m_TypeNameMap.find(strRetType.c_str());
+	
 	// ERROR if we cant find this types name;
 	if (m_itTypeNameMap == m_TypeNameMap.end())
 	{
-	  	logger->warn( "Discarding DSO Table entry due to unsupported return type: %s\n" , strRetType.str().c_str() );
+	  	logger->warn( "Discarding DSO Table entry due to unsupported return type: %s\n" , strRetType.c_str() );
 		return NULL;
 	}
 	EqVariableType rettype = (*m_itTypeNameMap).second;
-	strOpSpec >> std::ws;
+	
 
 	// Get function name
-	std::stringbuf strMethodName;
-	strOpSpec.get(strMethodName,' ') ;
-	CqString s = strMethodName.str();
+	std::string strMethodName;
+	
+#ifdef AQSIS_SYSTEM_MACOSX
+	strMethodName = "_";
+#else
+	strMethodName = "";
+#endif
+        strMethodName += strtok(NULL, " ");
+	CqString s = strMethodName.c_str();
 	DSOMethod method = (DSOMethod) DLSym (handle,&s);
 	if(method == NULL) 
 	{
-	  	logger->warn( "Discarding DSO Table entry due to unknown symbol for method: %s\n" , strMethodName.str().c_str() );
+	  	logger->warn( "Discarding DSO Table entry due to unknown symbol for method: %s\n" , strMethodName.c_str());
 	 	return NULL;
 	};
-	strOpSpec >> std::ws;
+	
 	
 	// Parse each arg type, presumably we need to handle arrays here
 	std::list<EqVariableType> arglist;
-	while(!strOpSpec.eof())
+	char *nextarg = NULL;
+	do 
 	{
 		// Get the next arguments type 
-		std::stringbuf strArgType;
-		strOpSpec.get(strArgType,' ') ;
-		m_itTypeNameMap = m_TypeNameMap.find(strArgType.str());
+		std::string strArgType;
+		
+		nextarg = strtok(NULL, " ");
+		if (nextarg == NULL) break;
+		strArgType = nextarg;
+		m_itTypeNameMap = m_TypeNameMap.find(strArgType.c_str());
+		
 		// ERROR if we cant find this arguments type name;
 		if (m_itTypeNameMap == m_TypeNameMap.end())
 		{
-	  		logger->warn( "Discarding DSO Table entry due to unsupported argumetn type: %s\n", strArgType.str().c_str());
+	  		logger->warn( "Discarding DSO Table entry due to unsupported argument type: %s\n", strArgType.c_str());
 			return NULL;
 		}; 
 		arglist.push_back((*m_itTypeNameMap).second);
-		strOpSpec >> std::ws;
-	};
+
+	}while(nextarg);
 
 	// Check if there is a valid init function
-	CqString strInit(pShadeOpEntry->m_init);
+	CqString strInit;
+#ifdef AQSIS_SYSTEM_MACOSX
+        strInit = "_";
+#else
+        strInit = "";
+#endif
+        strInit += pShadeOpEntry->m_init;
 	DSOInit initfunc = NULL;
 	if (strcmp(pShadeOpEntry->m_init,""))
 	{
 		initfunc = (DSOInit) DLSym(handle,&strInit);
 		if (initfunc == NULL)
 		{
-	  		logger->warn( "Discarding DSO Table entry dut to unknown symbol for init: %s\n" , strInit.c_str()); 
+	  		logger->warn( "Discarding DSO Table entry due to unknown symbol for init: %s\n" , strInit.c_str()); 
 			return NULL; // ERROR ;
 		};
 	} 
 	
 	// Check if there is a valid shutdown function
-	CqString strShutdown(pShadeOpEntry->m_shutdown);
+	CqString strShutdown;
+#ifdef AQSIS_SYSTEM_MACOSX
+        strShutdown = "_";
+#else
+        strShutdown = "";
+#endif
+        strShutdown += pShadeOpEntry->m_shutdown;
 	DSOShutdown shutdownfunc = NULL;
 	if (strcmp(pShadeOpEntry->m_shutdown,""))
 	{
 		shutdownfunc = (DSOShutdown) DLSym(handle,&strShutdown);
 		if (shutdownfunc == NULL)
 		{
- 			logger->warn( "Discarding DSO Table entry dut to unknown symbol for shutdown: %s\n" , strShutdown.c_str()); 
+ 			logger->warn( "Discarding DSO Table entry due to unknown symbol for shutdown: %s\n" , strShutdown.c_str()); 
 			return NULL; // ERROR ;
 		};
 	};

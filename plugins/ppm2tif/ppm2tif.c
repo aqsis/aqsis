@@ -19,7 +19,7 @@
 
 
 /** \file
-		\brief Implements a gif importer
+		\brief Implements a PPM importer
 		\author Michel Joron (joron@sympatico.ca)
 */
 
@@ -30,7 +30,7 @@
 // The conversion must create a valid .tif file and return
 // the filename of the new file created.
 // Eg. this function ppm2tif() created a .tif file at the same place
-// as the .gif filename provided.
+// as the .ppm filename provided.
 // Minimal implemantation is just doing a call to ppm2tif.exe provided with the
 // standard libtiff source codes.
 // IN ORDER TO CONVERSION OCCURRED the dll/dso must be present in
@@ -59,10 +59,10 @@ _qShareM char *ppm2tif( char *in )
 
 
 	strcpy( tiffname, in );
-	if ( ( result = strstr( tiffname, ".gif" ) ) != 0 ) strcpy( result, ".tif" );
+	if ( ( result = strstr( tiffname, ".ppm" ) ) != 0 ) strcpy( result, ".tif" );
 	if ( !result )
 	{
-		if ( ( result = strstr( tiffname, ".GIF" ) ) != 0 ) strcpy( result, ".tif" );
+		if ( ( result = strstr( tiffname, ".PPM" ) ) != 0 ) strcpy( result, ".tif" );
 	}
 	if ( !result ) return result;
 

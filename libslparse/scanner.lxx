@@ -15,7 +15,11 @@ using namespace Aqsis;
 #ifdef	WIN32
 #include "parser.hpp"
 #else
+#ifdef AQSIS_SYSTEM_MACOSX
+#include "parser.cpp.h"
+#else
 #include "parser.h"
+#endif
 #endif
 
 #ifdef	WIN32

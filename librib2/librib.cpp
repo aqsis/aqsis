@@ -114,6 +114,7 @@ void StandardDeclarations( RendermanInterface& CallbackInterface )
 	ParserDeclare( CallbackInterface, "depthfilter", "uniform string" );
 	ParserDeclare( CallbackInterface, "width", "varying float" );
 	ParserDeclare( CallbackInterface, "constantwidth", "constant float" );
+	ParserDeclare( CallbackInterface, "dsolibs", "uniform string" );
 }
 
 

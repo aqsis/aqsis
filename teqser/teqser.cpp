@@ -218,8 +218,7 @@ int main( int argc, const char** argv )
 	else
 	{
 
-		printf( "Texture %s ----> %s \n\t\"swrap\"= %s \n\t\"twrap\"= %s \n\t\"filter\"= %s \n\t\"swidth\"= %4.1f\n\
-		        \t\"twidth\"= %4.1f\n\t\"compression\" = %s\n",
+		printf( "Texture %s ----> %s \n\t\"swrap\"= %s \n\t\"twrap\"= %s \n\t\"filter\"= %s \n\t\"swidth\"= %4.1f\n\t\"twidth\"= %4.1f\n\t\"compression\" = %s\n",
 		        ( char* ) ap.leftovers() [ 0 ].c_str(),
 		        ( char* ) ap.leftovers() [ 1 ].c_str(),
 		        ( char* ) g_swrap.c_str(),

@@ -54,6 +54,9 @@
 
 START_NAMESPACE( Aqsis )
 
+struct IqShader;
+struct IqShaderData;
+
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
 #else // AQSIS_SYSTEM_WIN32
