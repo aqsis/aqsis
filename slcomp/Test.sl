@@ -33,7 +33,7 @@ matrix MatrixFunc(float mx[16])
 
 
 volume
-Test(	
+TestVolume(	
 	uniform float Ka = 1;
 	uniform float Kd = .5;
 	uniform float Ks = .5;
@@ -99,8 +99,8 @@ Test(
 	Du(vv);
 	p=Du(P); 
 	p=Dv(P); 
-	c=Du(Ci); 
-	c=Dv(Ci); 
+//	c=Du(Ci); 
+//	c=Dv(Ci); 
 	f2=Deriv(f3,f2); 
 	p=Deriv(P,f2); 
 	c=Deriv(Ci,f2); 
@@ -189,4 +189,18 @@ Test(
 	{
 		printf("%p",P);
 	}
+}
+
+volume
+TestSurface(	
+	uniform float Ka = 1;
+	uniform float Kd = .5;
+	uniform float Ks = .5;
+	uniform float roughness = .1;
+	uniform color specularcolor = 1;
+)
+{
+	Ci=Cs;
+	Oi=Os;
+	Ci*=Os;
 }
