@@ -1495,22 +1495,25 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 								}
 
 								// Update max depth values
-								if ( colMPGOpacity == gColWhite )
+								if( !(DisplayMode() & ModeZ) )
 								{
-									if ( c == 0 )
+									if ( colMPGOpacity == gColWhite )
 									{
-										Bucket.DecMaxDepthCount();
-									}
-									else
-									{
-										int j = 0;
-										// Find first opaque sample
-										while ( j < c /*&& aValues[ j ].m_colOpacity != gColWhite */) j++;
-										if ( j < c && aValues[ j ].m_Depth == Bucket.MaxDepth()/* && aValues[ j ].m_colOpacity == gColWhite*/ )
+										if ( c == 0 )
 										{
-											if ( aValues[ j ].m_Depth > ImageVal.m_Depth )
+											Bucket.DecMaxDepthCount();
+										}
+										else
+										{
+											int j = 0;
+											// Find first opaque sample
+											while ( j < c && aValues[ j ].m_colOpacity != gColWhite ) j++;
+											if ( j < c && aValues[ j ].m_Depth == Bucket.MaxDepth() && aValues[ j ].m_colOpacity == gColWhite )
 											{
-												Bucket.DecMaxDepthCount();
+												if ( aValues[ j ].m_Depth > ImageVal.m_Depth )
+												{
+													Bucket.DecMaxDepthCount();
+												}
 											}
 										}
 									}
@@ -1522,14 +1525,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 								ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
 								if ( NULL != ImageVal.m_pCSGNode ) ImageVal.m_pCSGNode->AddRef();
 
-								// Truncate sample list if opaque.
-//								if ( ( colMPGOpacity == gColWhite ) && ( pMPG->pGrid() ->pCSGNode() == NULL ) )
-//								{
-//									aValues.erase( aValues.begin() + i, aValues.end() );
-//									aValues.push_back( ImageVal );
-//								}
-//								else
-									aValues.insert( aValues.begin() + i, ImageVal );
+								aValues.insert( aValues.begin() + i, ImageVal );
 							}
 						}
 						else
@@ -1612,30 +1608,33 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 		if ( fDiceable )
 		{
 			//Cull surface if it's hidden
-			QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
-			TqBool fCull = OcclusionCullSurface( iBucket, pSurface );
-			QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
-			if ( fCull )
+			if( !(DisplayMode() & ModeZ) )
 			{
-				if ( pSurface == Bucket.pTopSurface() )
-					counter ++;
-				else
-					counter = 0;
-				pSurface = Bucket.pTopSurface();
-				if ( counter > MaxEyeSplits )
+				QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
+				TqBool fCull = OcclusionCullSurface( iBucket, pSurface );
+				QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
+				if ( fCull )
 				{
-					/* the same primitive was processed by the occlusion a MaxEyeSplits times !!
-					 * A bug occurred with the renderer probably.
-					 * We need a way out of this forloop. So I unlink the primitive
-					 * and try with the next one
-					 * 
-					 */
-					CqAttributeError( ErrorID_OcclusionMaxEyeSplits, Severity_Normal, "Geometry gets culled too many times", pSurface->pAttributes(), TqTrue );
-					counter = 0;
-					pSurface->UnLink();
+					if ( pSurface == Bucket.pTopSurface() )
+						counter ++;
+					else
+						counter = 0;
 					pSurface = Bucket.pTopSurface();
+					if ( counter > MaxEyeSplits )
+					{
+						/* the same primitive was processed by the occlusion a MaxEyeSplits times !!
+						 * A bug occurred with the renderer probably.
+						 * We need a way out of this forloop. So I unlink the primitive
+						 * and try with the next one
+						 * 
+						 */
+						CqAttributeError( ErrorID_OcclusionMaxEyeSplits, Severity_Normal, "Geometry gets culled too many times", pSurface->pAttributes(), TqTrue );
+						counter = 0;
+						pSurface->UnLink();
+						pSurface = Bucket.pTopSurface();
+					}
+					continue;
 				}
-				continue;
 			}
 
 
