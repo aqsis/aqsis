@@ -1,18 +1,18 @@
 @ECHO OFF
-cribber -nowait bucket_test.rib
-cribber -nowait coordsys_test.rib
-cribber -nowait disp_test.rib
-cribber -nowait eyeplanetest.rib
-cribber -nowait mod_st2_test.rib
-cribber -nowait mod_st_test.rib
-cribber -nowait orient_test.rib
-cribber -nowait periodic_test.rib
-cribber -nowait persptest.rib
-cribber -nowait shadtest.rib
-cribber -nowait space_test.rib
-cribber -nowait std_st_test.rib
-cribber -nowait tmap_test.rib
-cribber -nowait uv_test.rib
-cribber -nowait autoshadows.rib
-cribber -nowait colpervertex_test.rib
-cribber -nowait env_test.rib
+cribber bucket_test.rib
+cribber coordsys_test.rib
+cribber disp_test.rib
+cribber eyeplanetest.rib
+cribber mod_st2_test.rib
+cribber mod_st_test.rib
+cribber orient_test.rib
+cribber periodic_test.rib
+cribber persptest.rib
+cribber shadtest.rib
+cribber space_test.rib
+cribber std_st_test.rib
+cribber tmap_test.rib
+cribber uv_test.rib
+cribber autoshadows.rib
+cribber colpervertex_test.rib
+cribber env_test.rib
