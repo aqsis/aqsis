@@ -88,7 +88,7 @@ CqAttributes::CqAttributes() :
 	CqSystemOption*  pdefattrs = new CqSystemOption("System");
 
 	ADD_SYSTEM_ATTR(Color, CqColor, type_color, CqColor(0.0f,0.0f,0.0f));		// the current color attribute.
-	ADD_SYSTEM_ATTR(Opacity, CqColor, type_color, CqColor(0.0f,0.0f,0.0f));	// the current opacity attribute.
+	ADD_SYSTEM_ATTR(Opacity, CqColor, type_color, CqColor(1.0f,1.0f,1.0f));	// the current opacity attribute.
 	ADD_SYSTEM_ATTR8(TextureCoordinates, TqFloat, type_float, 0.0f,0.0f,1.0f,0.0f,0.0f,1.0f,1.0f,1.0f);	// an array of 2D vectors representing the coordinate space.
 	ADD_SYSTEM_ATTR(ShadingRate, TqFloat, type_float, 1.0f);					// the current effective shading rate.
 	ADD_SYSTEM_ATTR(ShadingInterpolation , TqInt, type_integer, ShadingConstant);	// the current shading interpolation mode.
