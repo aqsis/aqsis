@@ -98,7 +98,8 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 	if ( ( g_progress == 0 ) && ( g_Progress == 0 ) )
 		return ;
 
-	if ( percent > 100 )
+	// If g_Progress is set, 100% have to be reported. In all other cases the 100% are not displayed
+	if ( percent >= 100 && !g_Progress )
 	{
 		std::cout << "                                                                              \r" << std::flush;
 		return ;
