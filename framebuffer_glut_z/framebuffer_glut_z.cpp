@@ -19,64 +19,68 @@
 
 
 /** \file
-		\brief Implements a GLUT based framebuffer display driver for Aqsis
+		\brief Implements a GLUT based framebuffer display driver for Aqsis for viewing Z buffers
 		\author Timothy M. Shead (tshead@k-3d.com)
 */
 
-#include <algorithm>
-#include <iostream>
-#include <string>
-#include <algorithm>
-
-#include "aqsis.h"
+#include <aqsis.h>
+#include <dd.h>
+#include <displaydriver.h>
 #include <logging.h>
 #include <logging_streambufs.h>
 
+using namespace Aqsis;
+
+#include <algorithm>
+#include <cfloat>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
+
 #ifdef AQSIS_SYSTEM_WIN32
 
-#include	<winsock2.h>
+	#include <winsock2.h>
 
 #else // AQSIS_SYSTEM_WIN32
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <sys/socket.h>
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <unistd.h>
+	#include <netdb.h>
+	#include <netinet/in.h>
+	#include <sys/types.h>
+	#include <sys/socket.h>
 
-typedef int SOCKET;
-typedef sockaddr_in SOCKADDR_IN;
-typedef sockaddr* PSOCKADDR;
+	typedef int SOCKET;
+	typedef sockaddr_in SOCKADDR_IN;
+	typedef sockaddr* PSOCKADDR;
 
-static const int INVALID_SOCKET = -1;
-static const int SOCKET_ERROR = -1;
+	static const int INVALID_SOCKET = -1;
+	static const int SOCKET_ERROR = -1;
 
 #endif // !AQSIS_SYSTEM_WIN32
-
-#include "displaydriver.h"
-#include "dd.h"
-
-using namespace Aqsis;
 
 #ifdef AQSIS_SYSTEM_MACOSX
-#include <GLUT/glut.h>
-#include <GLUT/macxglut_utilities.h>
-#include <ApplicationServices/ApplicationServices.h>
+
+	#include <GLUT/glut.h>
+	#include <GLUT/macxglut_utilities.h>
+	#include <ApplicationServices/ApplicationServices.h>
+
 #else
-#include <GL/glut.h>
+
+	#include <GL/glut.h>
+
 #endif //!AQSIS_SYSTEM_MACOSX
 
-#include <float.h>
+namespace
+{
 
-#ifndef AQSIS_SYSTEM_WIN32
-typedef int SOCKET;
-#endif // !AQSIS_SYSTEM_WIN32
-
-static std::string	g_Filename( "output.tif" );
+static bool g_DoubleBuffer = true;
+static std::string g_Filename( "output.tif" );
 static TqInt g_ImageWidth = 0;
 static TqInt g_ImageHeight = 0;
+static TqInt g_PixelsProcessed = 0;
 static TqInt g_Channels = 0;
 static int g_Window = 0;
 static GLubyte* g_Image = 0;
@@ -84,16 +88,56 @@ static TqFloat* g_Data = 0;
 static TqInt g_CWXmin, g_CWYmin;
 static TqInt g_CWXmax, g_CWYmax;
 
-void display( void )
+const std::string GetWindowTitle()
+{
+    std::ostringstream buffer;
+    buffer << g_Filename << ": " << std::fixed << std::setprecision(1) << 100.0 * static_cast<double>(g_PixelsProcessed) / static_cast<double>(g_ImageWidth * g_ImageHeight) << "% complete";
+
+    return buffer.str();
+}
+
+void GetImageOffset(GLint& X, GLint& Y)
+{
+    double viewport[4];
+    glGetDoublev(GL_VIEWPORT, viewport);
+
+    X = static_cast<GLint>(std::max(0.0, (viewport[2] - g_ImageWidth) / 2));
+    Y = static_cast<GLint>(std::max(0.0, (viewport[3] - g_ImageHeight) / 2));
+}
+
+void Display( )
+{
+    GLint imagex, imagey = 0;
+    GetImageOffset(imagex, imagey);
+
+    glRasterPos2i( imagex, imagey );
+    glDrawPixels( g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image );
+
+    // Note ... calling glutSwapBuffers() implicitly calls glFlush(),
+    // and is safe for single-buffered windows
+    glutSwapBuffers();
+}
+
+void BucketDisplay(const GLint X, const GLint Y, const GLsizei Width, const GLsizei Height)
+{
+    GLint imagex, imagey = 0;
+    GetImageOffset(imagex, imagey);
+
+    glScissor( X + imagex, Y + imagey, Width, Height );
+    glEnable( GL_SCISSOR_TEST );
+
+    Display();
+}
+
+void FullDisplay()
 {
     glDisable( GL_SCISSOR_TEST );
     glClear( GL_COLOR_BUFFER_BIT );
-    glRasterPos2i( 0, 0 );
-    glDrawPixels( g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image );
-    glFlush();
+
+    Display();
 }
 
-void reshape( int w, int h )
+void OnReshape( int w, int h )
 {
     glViewport( 0, 0, ( GLsizei ) w, ( GLsizei ) h );
     glMatrixMode( GL_PROJECTION );
@@ -103,7 +147,7 @@ void reshape( int w, int h )
     glLoadIdentity();
 }
 
-void idle( void )
+void OnIdle()
 {
     if ( DDProcessMessageAsync( 0, 1000 ) )
         return ;
@@ -145,15 +189,13 @@ void idle( void )
     sleep( 2 );
 #endif
 
-    std::cout << std::endl;
-    std::cout << "Total Samples: " << totalsamples << std::endl;
-    std::cout << "Depth Samples: " << samples << std::endl;
-    std::cout << "Coverage: " << static_cast<TqFloat>( samples ) / static_cast<TqFloat>( totalsamples ) << std::endl;
-    std::cout << "Minimum Depth: " << mindepth << std::endl;
-    std::cout << "Maximum Depth: " << maxdepth << std::endl;
-    std::cout << "Dynamic Range: " << dynamicrange << std::endl;
-    std::cout << "Average Depth: " << totaldepth / static_cast<TqFloat>( samples ) << std::endl;
-    std::cout << std::endl;
+    std::cerr << info << g_Filename << " total samples: " << totalsamples << std::endl;
+    std::cerr << info << g_Filename << " depth samples: " << samples << std::endl;
+    std::cerr << info << g_Filename << " coverage: " << static_cast<TqFloat>( samples ) / static_cast<TqFloat>( totalsamples ) << std::endl;
+    std::cerr << info << g_Filename << " minimum depth: " << mindepth << std::endl;
+    std::cerr << info << g_Filename << " maximum depth: " << maxdepth << std::endl;
+    std::cerr << info << g_Filename << " dynamic range: " << dynamicrange << std::endl;
+    std::cerr << info << g_Filename << " average depth: " << totaldepth / static_cast<TqFloat>( samples ) << std::endl;
 
     // Normalize the depth values to the range [0, 1] and regenerate our image ..
     const TqInt linelength = g_ImageWidth * 3;
@@ -182,11 +224,12 @@ void idle( void )
     glutPostRedisplay();
 }
 
-void keyboard( unsigned char key, int x, int y )
+void OnKeyboard( unsigned char key, int x, int y )
 {
     switch ( key )
     {
-    case 27:
+    case 3: // CTRL-C
+    case 27: // ESC
     case 'q':
         exit( 0 );
         break;
@@ -195,21 +238,20 @@ void keyboard( unsigned char key, int x, int y )
     }
 }
 
+} // namespace
+
 int main( int argc, char** argv )
 {
-    std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(std::cerr) );
-    std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(std::cerr) );
-    std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(std::cerr) );
-    std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
-    std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::WARNING, std::cerr) );
+    // Setup logging output options (write all log messages to std::cerr)
+    std::auto_ptr<std::streambuf> reset_level( new reset_level_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> show_timestamps( new timestamp_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> fold_duplicates( new fold_duplicates_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> show_level( new show_level_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> filter_level( new filter_by_level_buf(INFO, std::cerr) );
 
-    int port = -1;
-    char *portStr = getenv( "AQSIS_DD_PORT" );
-
-    if ( portStr != NULL )
-    {
-        port = atoi( portStr );
-    }
+    // Connect to Aqsis ...
+    const char* port_string = getenv( "AQSIS_DD_PORT" );
+    int port = port_string ? atoi(port_string) : -1;
 
     if ( -1 == DDInitialise( NULL, port ) )
     {
@@ -217,9 +259,10 @@ int main( int argc, char** argv )
         return 1;
     }
 
+    // Initialize GLUT so we can create a window ...
     glutInit( &argc, argv );
 
-    // Process messages until we have enough data to create our window ...
+    // Process incoming messages from Aqsis until we have enough data to create a window ...
     while ( 0 == g_Window )
     {
         if ( !DDProcessMessage() )
@@ -230,10 +273,10 @@ int main( int argc, char** argv )
     }
 
     // Start the glut message loop ...
-    glutDisplayFunc( display );
-    glutReshapeFunc( reshape );
-    glutKeyboardFunc( keyboard );
-    glutIdleFunc( idle );
+    glutDisplayFunc( FullDisplay );
+    glutReshapeFunc( OnReshape );
+    glutKeyboardFunc( OnKeyboard );
+    glutIdleFunc( OnIdle );
 
     // Setup GL context.
     glClearColor( 0.0, 0.0, 0.0, 0.0 );
@@ -246,21 +289,16 @@ int main( int argc, char** argv )
     // Start up.
     glutMainLoop();
 
-    // Lose our image & data buffers ...
-    delete g_Image;
-    delete g_Data;
-
     return 0;
 }
 
-//----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////
 // Functions required by libdd.
-
-SqDDMessageFormatResponse frmt( DataFormat_Signed32 );
-SqDDMessageCloseAcknowledge closeack;
 
 TqInt Query( SOCKET s, SqDDMessageBase* pMsgB )
 {
+    static SqDDMessageFormatResponse frmt( DataFormat_Signed32 );
+
     switch ( pMsgB->m_MessageID )
     {
     case MessageID_FormatQuery:
@@ -296,9 +334,9 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
     g_Data = new TqFloat[ g_ImageWidth * g_ImageHeight ];
     memset( g_Data, 0, g_ImageWidth * g_ImageHeight );
 
-    glutInitDisplayMode( GLUT_SINGLE | GLUT_RGBA );
+    glutInitDisplayMode( ( g_DoubleBuffer ? GLUT_DOUBLE : GLUT_SINGLE ) | GLUT_RGBA );
     glutInitWindowSize( g_ImageWidth, g_ImageHeight );
-    g_Window = glutCreateWindow( g_Filename.c_str() );
+    g_Window = glutCreateWindow( GetWindowTitle().c_str() );
 
     return ( 0 );
 }
@@ -337,17 +375,18 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
     const TqInt BucketW = message->m_XMaxPlus1 - message->m_XMin;
     const TqInt BucketH = message->m_YMaxPlus1 - message->m_YMin;
 
-    glEnable( GL_SCISSOR_TEST );
-    glScissor( BucketX, BucketY, BucketW, BucketH );
-    glRasterPos2i( 0, 0 );
-    glDrawPixels( g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image );
-    glFlush();
+    BucketDisplay( BucketX, BucketY, BucketW, BucketH );
+
+    g_PixelsProcessed += (BucketW * BucketH);
+    glutSetWindowTitle(GetWindowTitle().c_str());
 
     return ( 0 );
 }
 
 TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 {
+    static SqDDMessageCloseAcknowledge closeack;
+
     if ( DDSendMsg( s, &closeack ) <= 0 )
         return ( -1 );
     else
@@ -367,6 +406,15 @@ TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
         {
             SqDDMessageFilename * message = static_cast<SqDDMessageFilename*>( pMsgB );
             g_Filename = message->m_String;
+        }
+        break;
+    case MessageID_UserParam:
+        {
+            SqDDMessageUserParam * pMsg = static_cast<SqDDMessageUserParam*>( pMsgB );
+            if( strncmp( pMsg->m_NameAndData, "doublebuffer", pMsg->m_NameLength ) == 0 )
+            {
+                g_DoubleBuffer = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+            }
         }
         break;
     }

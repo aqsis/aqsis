@@ -23,87 +23,90 @@
 		\author Timothy M. Shead (tshead@k-3d.com)
 */
 
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <string>
-#include <memory>
-
-#include "aqsis.h"
+#include <aqsis.h>
+#include <dd.h>
+#include <displaydriver.h>
 #include <logging.h>
 #include <logging_streambufs.h>
 
-#ifdef AQSIS_SYSTEM_WIN32
-
-#include <winsock2.h>
-#include <locale>
-#include <direct.h>
-
-#define getcwd _getcwd
-#define PATH_SEPARATOR "\\"
-
-#else // !AQSIS_SYSTEM_WIN32
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-
-typedef int SOCKET;
-typedef sockaddr_in SOCKADDR_IN;
-typedef sockaddr* PSOCKADDR;
-
-static const int INVALID_SOCKET = -1;
-static const int SOCKET_ERROR = -1;
-
-#define PATH_SEPARATOR "/"
-
-#endif // !AQSIS_SYSTEM_WIN32
-
 #include <tiffio.h>
-
-#include "displaydriver.h"
-#include "dd.h"
 
 using namespace Aqsis;
 
-#ifdef AQSIS_SYSTEM_MACOSX
-#include <GLUT/glut.h>
-#include <GLUT/macxglut_utilities.h>
-#include <ApplicationServices/ApplicationServices.h>
-#else
-#include <GL/glut.h>
-#endif //!AQSIS_SYSTEM_MACOSX
+#include <iomanip>
+#include <iostream>
+#include <memory>
+#include <sstream>
+#include <string>
 
-#ifndef AQSIS_SYSTEM_WIN32
-typedef int SOCKET;
+#ifdef AQSIS_SYSTEM_WIN32
+
+	#include <winsock2.h>
+	#include <locale>
+	#include <direct.h>
+
+	#define getcwd _getcwd
+	#define PATH_SEPARATOR "\\"
+
+#else // !AQSIS_SYSTEM_WIN32
+
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <unistd.h>
+	#include <netdb.h>
+	#include <netinet/in.h>
+	#include <sys/types.h>
+	#include <sys/socket.h>
+
+	typedef int SOCKET;
+	typedef sockaddr_in SOCKADDR_IN;
+	typedef sockaddr* PSOCKADDR;
+
+	static const int INVALID_SOCKET = -1;
+	static const int SOCKET_ERROR = -1;
+
+	#define PATH_SEPARATOR "/"
+
 #endif // !AQSIS_SYSTEM_WIN32
 
-static std::string	g_Filename( "output.tif" );
-static TqInt g_ImageWidth = 0;
-static TqInt g_ImageHeight = 0;
-static TqInt g_PixelsProcessed = 0;
-static TqInt g_Channels = 0;
-static TqInt g_Format = 0;
-static int g_Window = 0;
-static GLubyte* g_Image = 0;
-static TqInt g_CWXmin, g_CWYmin;
-static TqInt g_CWXmax, g_CWYmax;
-static TqFloat	quantize_zeroval = 0.0f;
-static TqFloat	quantize_oneval  = 0.0f;
-static TqFloat	quantize_minval  = 0.0f;
-static TqFloat	quantize_maxval  = 0.0f;
-static TqFloat dither_val       = 0.0f;
+#ifdef AQSIS_SYSTEM_MACOSX
 
-typedef void (text_callback)(const std::string&);
-static std::string g_text_prompt;
-static std::string g_text_input;
-static text_callback* g_text_ok_callback = 0;
+	#include <GLUT/glut.h>
+	#include <GLUT/macxglut_utilities.h>
+	#include <ApplicationServices/ApplicationServices.h>
+	
+#else // AQSIS_SYSTEM_MACOSX
 
-const std::string get_window_title()
+	#include <GL/glut.h>
+
+#endif //!AQSIS_SYSTEM_MACOSX
+
+namespace
+{
+
+bool g_DoubleBuffer = true;
+std::string g_Filename( "output.tif" );
+TqInt g_ImageWidth = 0;
+TqInt g_ImageHeight = 0;
+TqInt g_PixelsProcessed = 0;
+TqInt g_Channels = 0;
+TqInt g_Format = 0;
+int g_Window = 0;
+GLubyte* g_Image = 0;
+TqInt g_CWXmin, g_CWYmin;
+TqInt g_CWXmax, g_CWYmax;
+TqFloat g_QuantizeZeroVal = 0.0f;
+TqFloat g_QuantizeOneVal = 0.0f;
+TqFloat g_QuantizeMinVal = 0.0f;
+TqFloat g_QuantizeMaxVal = 0.0f;
+TqFloat g_QuantizeDitherVal = 0.0f;
+
+std::string g_TextPrompt;
+std::string g_TextInput;
+typedef void (TextCallback)(const std::string&);
+TextCallback* g_TextOKCallback = 0;
+
+const std::string GetWindowTitle()
 {
     std::ostringstream buffer;
     buffer << g_Filename << ": " << std::fixed << std::setprecision(1) << 100.0 * static_cast<double>(g_PixelsProcessed) / static_cast<double>(g_ImageWidth * g_ImageHeight) << "% complete";
@@ -111,7 +114,7 @@ const std::string get_window_title()
     return buffer.str();
 }
 
-const std::string get_current_working_directory()
+const std::string GetCurrentWorkingDirectory()
 {
     std::string result(1024, '\0');
     getcwd(const_cast<char*>(result.c_str()), result.size());
@@ -120,12 +123,12 @@ const std::string get_current_working_directory()
     return result;
 }
 
-const std::string append_path(const std::string& LHS, const std::string& RHS)
+const std::string AppendPath(const std::string& LHS, const std::string& RHS)
 {
     return LHS + PATH_SEPARATOR + RHS;
 }
 
-void write_tiff(const std::string& filename)
+void WriteTIFF(const std::string& filename)
 {
     TIFF* const file = TIFFOpen(filename.c_str(), "w");
     if(!file)
@@ -159,39 +162,50 @@ void write_tiff(const std::string& filename)
     TIFFClose(file);
 }
 
-void text_prompt(const std::string& Prompt, const std::string& DefaultValue, text_callback* Callback)
+void TextPrompt(const std::string& Prompt, const std::string& DefaultValue, TextCallback* Callback)
 {
-    g_text_prompt = Prompt;
-    g_text_input = DefaultValue;
-    g_text_ok_callback = Callback;
+    g_TextPrompt = Prompt;
+    g_TextInput = DefaultValue;
+    g_TextOKCallback = Callback;
 
     glutPostRedisplay();
 }
 
-void menu(int value)
+void CancelTextPrompt()
 {
-    switch (value)
-    {
-    case 1:
-        text_prompt("Save TIFF: ", append_path(get_current_working_directory(), g_Filename), &write_tiff);
-        break;
-    }
+    g_TextPrompt.clear();
+    g_TextInput.clear();
+    g_TextOKCallback = 0;
+
+    glutPostRedisplay();
 }
 
-void draw_text(const std::string& Text)
+void DrawText(const std::string& Text)
 {
     for(std::string::const_iterator c = Text.begin(); c != Text.end(); ++c)
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_12, *c);
 }
 
-void display()
+void GetImageOffset(GLint& X, GLint& Y)
 {
+    double viewport[4];
+    glGetDoublev(GL_VIEWPORT, viewport);
+
+    X = static_cast<GLint>(std::max(0.0, (viewport[2] - g_ImageWidth) / 2));
+    Y = static_cast<GLint>(std::max(0.0, (viewport[3] - g_ImageHeight) / 2));
+}
+
+void Display()
+{
+    GLint imagex, imagey = 0;
+    GetImageOffset(imagex, imagey);
+
     glDisable(GL_BLEND);
-    glRasterPos2i( 0, 0 );
+    glRasterPos2i( imagex, imagey );
     glDrawPixels( g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image );
 
     // Prompt the user for input ...
-    if(g_text_prompt.size())
+    if(!g_TextPrompt.empty())
     {
         double viewport[4];
         glGetDoublev(GL_VIEWPORT, viewport);
@@ -202,24 +216,36 @@ void display()
 
         glColor4d(1, 1, 1, 1);
         glRasterPos2d(viewport[0] + 10, viewport[3] / 2);
-        draw_text(g_text_prompt);
-        draw_text(g_text_input);
-        draw_text("_");
+        DrawText(g_TextPrompt);
+        DrawText(g_TextInput);
+        DrawText("_");
     }
 
-    // We're done ...
-    glFlush();
+    // Note ... calling glutSwapBuffers() implicitly calls glFlush(),
+    // and is safe for single-buffered windows
+    glutSwapBuffers();
 }
 
-void full_display()
+void BucketDisplay(const GLint X, const GLint Y, const GLsizei Width, const GLsizei Height)
+{
+    GLint imagex, imagey = 0;
+    GetImageOffset(imagex, imagey);
+
+    glScissor( X + imagex, Y + imagey, Width, Height );
+    glEnable( GL_SCISSOR_TEST );
+
+    Display();
+}
+
+void FullDisplay()
 {
     glDisable( GL_SCISSOR_TEST );
     glClear( GL_COLOR_BUFFER_BIT );
 
-    display();
+    Display();
 }
 
-void reshape( int w, int h )
+void OnReshape( int w, int h )
 {
     glViewport( 0, 0, ( GLsizei ) w, ( GLsizei ) h );
     glMatrixMode( GL_PROJECTION );
@@ -229,45 +255,39 @@ void reshape( int w, int h )
     glLoadIdentity();
 }
 
-void idle( void )
+void OnIdle( void )
 {
     if ( !DDProcessMessageAsync( 0, 1000 ) )
         glutIdleFunc( 0 );
 }
 
-void keyboard( unsigned char key, int x, int y )
+void OnKeyboard( unsigned char key, int x, int y )
 {
     // If the text prompt is active, it consumes all input ...
-    if(g_text_prompt.size())
+    if(g_TextPrompt.size())
     {
         switch(key)
         {
         case 8: // Backspace
-            if(g_text_input.size())
-            {
-                std::string::iterator i = g_text_input.end();
-                g_text_input.erase(--i);
-            }
-            glutPostRedisplay();
+            if(g_TextInput.size())
+	    {
+                g_TextInput.erase(--g_TextInput.end());
+                glutPostRedisplay();
+	    }
             break;
         case 3: // CTRL-C
         case 27: // ESC
-            g_text_prompt = "";
-            g_text_input = "";
-            g_text_ok_callback = 0;
-            glutPostRedisplay();
+	    CancelTextPrompt();
             break;
 
         case 13: // ENTER
-            g_text_ok_callback(g_text_input);
-            g_text_prompt= "";
-            g_text_input = "";
-            g_text_ok_callback = 0;
-            glutPostRedisplay();
+            g_TextOKCallback(g_TextInput);
+	    CancelTextPrompt();
+	    break;
         default:
             if(isprint(key))
             {
-                g_text_input += key;
+                g_TextInput += key;
                 glutPostRedisplay();
             }
             break;
@@ -279,8 +299,9 @@ void keyboard( unsigned char key, int x, int y )
     switch ( key )
     {
     case 'w':
-        text_prompt("Save TIFF: ", append_path(get_current_working_directory(), g_Filename), &write_tiff);
+        TextPrompt("Save TIFF: ", AppendPath(GetCurrentWorkingDirectory(), g_Filename), &WriteTIFF);
         break;
+    case 3: // CTRL-C
     case 27: // ESC
     case 'q':
         exit( 0 );
@@ -290,21 +311,30 @@ void keyboard( unsigned char key, int x, int y )
     }
 }
 
+void OnMenu(int value)
+{
+    switch (value)
+    {
+    case 1:
+        TextPrompt("Save TIFF: ", AppendPath(GetCurrentWorkingDirectory(), g_Filename), &WriteTIFF);
+        break;
+    }
+}
+
+} // namespace
+
 int main( int argc, char** argv )
 {
-    std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(std::cerr) );
-    std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(std::cerr) );
-    std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(std::cerr) );
-    std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
-    std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::WARNING, std::cerr) );
+    // Setup logging output options (write all log messages to std::cerr)
+    std::auto_ptr<std::streambuf> reset_level( new reset_level_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> show_timestamps( new timestamp_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> fold_duplicates( new fold_duplicates_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> show_level( new show_level_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> filter_level( new filter_by_level_buf(INFO, std::cerr) );
 
-    int port = -1;
-    char *portStr = getenv( "AQSIS_DD_PORT" );
-
-    if ( portStr != NULL )
-    {
-        port = atoi( portStr );
-    }
+    // Connect to Aqsis ...
+    const char* port_string = getenv( "AQSIS_DD_PORT" );
+    int port = port_string ? atoi(port_string) : -1;
 
     if ( -1 == DDInitialise( NULL, port ) )
     {
@@ -312,9 +342,10 @@ int main( int argc, char** argv )
         return 1;
     }
 
+    // Initialize GLUT so we can create a window ...
     glutInit( &argc, argv );
 
-    // Process messages until we have enough data to create our window ...
+    // Process incoming messages from Aqsis until we have enough data to create a window ...
     while ( 0 == g_Window )
     {
         if ( !DDProcessMessage() )
@@ -325,11 +356,11 @@ int main( int argc, char** argv )
     }
 
     // Start the glut message loop ...
-    glutDisplayFunc( full_display );
-    glutReshapeFunc( reshape );
-    glutKeyboardFunc( keyboard );
-    glutIdleFunc( idle );
-    glutCreateMenu(menu);
+    glutDisplayFunc( FullDisplay );
+    glutReshapeFunc( OnReshape );
+    glutKeyboardFunc( OnKeyboard );
+    glutIdleFunc( OnIdle );
+    glutCreateMenu(OnMenu);
     glutAddMenuEntry("Write TIFF file", 1);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
 
@@ -344,20 +375,16 @@ int main( int argc, char** argv )
     // Start up.
     glutMainLoop();
 
-    // Lose our image buffer ...
-    delete g_Image;
-
     return 0;
 }
 
-//----------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////
 // Functions required by libdd.
-
-SqDDMessageFormatResponse frmt( DataFormat_Signed32 );
-SqDDMessageCloseAcknowledge closeack;
 
 TqInt Query( SOCKET s, SqDDMessageBase* pMsgB )
 {
+    static SqDDMessageFormatResponse frmt( DataFormat_Signed32 );
+
     switch ( pMsgB->m_MessageID )
     {
     case MessageID_FormatQuery:
@@ -390,7 +417,6 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
     g_CWYmax = message->m_CropWindowYMax;
 
     g_Image = new GLubyte[ g_ImageWidth * g_ImageHeight * 3 ];
-    //memset( g_Image, 128, g_ImageWidth * g_ImageHeight * 3 );
     for (TqInt i = 0; i < g_ImageHeight; i ++) {
         for (TqInt j=0; j < g_ImageWidth; j++)
         {
@@ -411,10 +437,9 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
     }
 
 
-    //	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
-    glutInitDisplayMode( GLUT_SINGLE | GLUT_RGBA );
+    glutInitDisplayMode( ( g_DoubleBuffer ? GLUT_DOUBLE : GLUT_SINGLE) | GLUT_RGBA);
     glutInitWindowSize( g_ImageWidth, g_ImageHeight );
-    g_Window = glutCreateWindow( get_window_title().c_str() );
+    g_Window = glutCreateWindow( GetWindowTitle().c_str() );
 
     return ( 0 );
 }
@@ -460,19 +485,19 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
                 if ( g_Channels > 3 )
                     alpha = (reinterpret_cast<TqFloat*>( bucket ) [ 3 ]);
 
-                if( !( quantize_zeroval == 0.0f &&
-                        quantize_oneval  == 0.0f &&
-                        quantize_minval  == 0.0f &&
-                        quantize_maxval  == 0.0f ) )
+                if( !( g_QuantizeZeroVal == 0.0f &&
+                        g_QuantizeOneVal  == 0.0f &&
+                        g_QuantizeMinVal  == 0.0f &&
+                        g_QuantizeMaxVal  == 0.0f ) )
                 {
-                    value0 = ROUND(quantize_zeroval + value0 * (quantize_oneval - quantize_zeroval) + dither_val );
-                    value0 = CLAMP(value0, quantize_minval, quantize_maxval) ;
-                    value1 = ROUND(quantize_zeroval + value1 * (quantize_oneval - quantize_zeroval) + dither_val );
-                    value1 = CLAMP(value1, quantize_minval, quantize_maxval) ;
-                    value2 = ROUND(quantize_zeroval + value2 * (quantize_oneval - quantize_zeroval) + dither_val );
-                    value2 = CLAMP(value2, quantize_minval, quantize_maxval) ;
-                    alpha  = ROUND(quantize_zeroval + alpha * (quantize_oneval - quantize_zeroval) + dither_val );
-                    alpha  = CLAMP(alpha, quantize_minval, quantize_maxval) ;
+                    value0 = ROUND(g_QuantizeZeroVal + value0 * (g_QuantizeOneVal - g_QuantizeZeroVal) + g_QuantizeDitherVal );
+                    value0 = CLAMP(value0, g_QuantizeMinVal, g_QuantizeMaxVal) ;
+                    value1 = ROUND(g_QuantizeZeroVal + value1 * (g_QuantizeOneVal - g_QuantizeZeroVal) + g_QuantizeDitherVal );
+                    value1 = CLAMP(value1, g_QuantizeMinVal, g_QuantizeMaxVal) ;
+                    value2 = ROUND(g_QuantizeZeroVal + value2 * (g_QuantizeOneVal - g_QuantizeZeroVal) + g_QuantizeDitherVal );
+                    value2 = CLAMP(value2, g_QuantizeMinVal, g_QuantizeMaxVal) ;
+                    alpha  = ROUND(g_QuantizeZeroVal + alpha * (g_QuantizeOneVal - g_QuantizeZeroVal) + g_QuantizeDitherVal );
+                    alpha  = CLAMP(alpha, g_QuantizeMinVal, g_QuantizeMaxVal) ;
                 }
                 else if ( g_Format != DataFormat_Unsigned8 )
                 {
@@ -487,9 +512,9 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
                 TqInt t;
                 if( alpha > 0 )
                 {
-                    int A = INT_PRELERP( g_Image[ so + 0 ], value0, alpha, t );
-                    int B = INT_PRELERP( g_Image[ so + 1 ], value1, alpha, t );
-                    int C = INT_PRELERP( g_Image[ so + 2 ], value2, alpha, t );
+                    int A = static_cast<int>(INT_PRELERP( g_Image[ so + 0 ], value0, alpha, t ));
+                    int B = static_cast<int>(INT_PRELERP( g_Image[ so + 1 ], value1, alpha, t ));
+                    int C = static_cast<int>(INT_PRELERP( g_Image[ so + 2 ], value2, alpha, t ));
                     g_Image[ so + 0 ] = CLAMP( A, 0, 255 );
                     g_Image[ so + 1 ] = CLAMP( B, 0, 255 );
                     g_Image[ so + 2 ] = CLAMP( C, 0, 255 );
@@ -506,12 +531,10 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
     const TqInt BucketW = message->m_XMaxPlus1 - message->m_XMin;
     const TqInt BucketH = message->m_YMaxPlus1 - message->m_YMin;
 
-    glEnable( GL_SCISSOR_TEST );
-    glScissor( BucketX, BucketY, BucketW, BucketH );
-    display();
-
+    BucketDisplay( BucketX, BucketY, BucketW, BucketH );
+    
     g_PixelsProcessed += (BucketW * BucketH);
-    glutSetWindowTitle(get_window_title().c_str());
+    glutSetWindowTitle(GetWindowTitle().c_str());
 
     return ( 0 );
 }
@@ -519,6 +542,9 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 {
     glutPostRedisplay();
+
+    static SqDDMessageCloseAcknowledge closeack;
+
     if ( DDSendMsg( s, &closeack ) <= 0 )
         return ( -1 );
     else
@@ -548,16 +574,18 @@ TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
             if( strncmp( pMsg->m_NameAndData, "quantize", pMsg->m_NameLength ) == 0 )
             {
                 TqFloat* quantize = reinterpret_cast<TqFloat*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
-                quantize_zeroval = quantize[0];
-                quantize_oneval  = quantize[1];
-                quantize_minval  = quantize[2];
-                quantize_maxval  = quantize[3];
+                g_QuantizeZeroVal = quantize[0];
+                g_QuantizeOneVal  = quantize[1];
+                g_QuantizeMinVal  = quantize[2];
+                g_QuantizeMaxVal  = quantize[3];
+            }
+            else if( strncmp( pMsg->m_NameAndData, "doublebuffer", pMsg->m_NameLength ) == 0 )
+            {
+                g_DoubleBuffer = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
             }
         }
         break;
     }
     return ( 0 );
 }
-
-
 
