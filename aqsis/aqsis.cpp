@@ -46,6 +46,7 @@ bool g_verbose = 0;
 bool g_environment = 0;
 bool g_fb = 0;
 bool g_progress = 0;
+bool g_Progress = 0;
 TqInt verbose = 1;
 ArgParse::apstring g_config = "";
 ArgParse::apstring g_shaders = "";
@@ -74,7 +75,7 @@ void version( std::ostream& Stream )
  */
 RtVoid PrintProgress( RtFloat percent )
 {
-	if ( g_progress == 0 )
+	if ( (g_progress == 0) && (g_Progress == 0) )
 		return ;
 
 	if ( percent > 100 )
@@ -112,7 +113,19 @@ RtVoid PrintProgress( RtFloat percent )
 
 	// Now print the line with substitution.
 	TqInt ipos = 0;
-	std::string strProgress( g_strprogress );
+
+	std::string strProgress;
+
+	if( g_Progress ) // Override the outputformat
+	{
+		strProgress = "%p%%";
+		percent = static_cast<int>(percent);
+	}
+	else			// Use the default style
+	{
+		strProgress = g_strprogress;
+	}
+
 	std::ostrstream strOutput;
 	while ( 1 )
 	{
@@ -179,7 +192,14 @@ RtVoid PrintProgress( RtFloat percent )
 	// Pad to the end of the line.
 	while ( strOutput.pcount() < 79 )
 		strOutput << " ";
-	std::cout << std::string( strOutput.str(), strOutput.pcount() ).c_str() << "\r";
+
+	std::cout << std::string( strOutput.str(), strOutput.pcount() ).c_str();
+	
+	if ( g_Progress )
+		std::cout << "\n";
+	else
+		std::cout << "\r";
+
 	strOutput.freeze(false);
 	std:: cout << std::flush;
 }
@@ -230,6 +250,7 @@ int main( int argc, const char** argv )
 	ap.argFlag( "version", "\aprint version information and exit", &g_version );
 	ap.argFlag( "pause", "\await for a keypress on completion", &g_pause );
 	ap.argFlag( "progress", "\aprint progress information", &g_progress );
+	ap.argFlag( "Progress", "\aprint progress information in new line", &g_Progress );
 	ap.argString( "progressformat", "\astring representing the format of the progress message", &g_strprogress );
 	ap.argInt( "endofframe", "=integer\aequivalent to \"endofframe\" option", &g_endofframe );
 	ap.argFlag( "nostandard", "\adisables declaration of standard RenderMan parameter types", &g_nostandard );
