@@ -40,13 +40,12 @@ CqList<CqCSGTreeNode>	CqModeBlock::m_lCSGTrees;
 /** Default constructor.
  */
 
-CqModeBlock::CqModeBlock( CqModeBlock* pconParent, EqModeBlock modetype ) :
+CqModeBlock::CqModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent, EqModeBlock modetype ) :
         m_pattrCurrent( 0 ),
         m_ptransCurrent( 0 ),
         m_pconParent( pconParent ),
         m_modetype( modetype)
 {
-    if( m_pconParent ) ADDREF( m_pconParent );
 }
 
 //---------------------------------------------------------------------
@@ -55,7 +54,6 @@ CqModeBlock::CqModeBlock( CqModeBlock* pconParent, EqModeBlock modetype ) :
 
 CqModeBlock::~CqModeBlock()
 {
-    if( m_pconParent ) RELEASEREF( m_pconParent );
 }
 
 
@@ -63,12 +61,8 @@ CqModeBlock::~CqModeBlock()
 /** Default constructor.
  */
 
-CqMainModeBlock::CqMainModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent, BeginEnd )
+CqMainModeBlock::CqMainModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, BeginEnd )
 {
-    // Copy the current graphics state.
-    if ( pconParent != 0 )
-        m_optCurrent = pconParent->optCurrent();
-
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes();
     ADDREF( m_pattrCurrent );
@@ -92,7 +86,7 @@ CqMainModeBlock::~CqMainModeBlock()
 /** Default constructor.
  */
 
-CqFrameModeBlock::CqFrameModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent , Frame), m_optCurrent(pconParent->optCurrent())
+CqFrameModeBlock::CqFrameModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent , Frame), m_optCurrent(pconParent->optCurrent())
 {
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
@@ -117,7 +111,7 @@ CqFrameModeBlock::~CqFrameModeBlock()
 /** Default constructor.
  */
 
-CqWorldModeBlock::CqWorldModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent, World )
+CqWorldModeBlock::CqWorldModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, World )
 {
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
@@ -158,7 +152,7 @@ void CqWorldModeBlock::AddContextLightSource( CqLightsource* pLS )
 /** Default constructor.
  */
 
-CqAttributeModeBlock::CqAttributeModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent, Attribute )
+CqAttributeModeBlock::CqAttributeModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Attribute )
 {
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
@@ -183,7 +177,7 @@ CqAttributeModeBlock::~CqAttributeModeBlock()
 /** Default constructor.
  */
 
-CqTransformModeBlock::CqTransformModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent, Transform )
+CqTransformModeBlock::CqTransformModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Transform )
 {
     // Copy the parents attributes, as this state change doesn't save attributes.
     if ( pconParent != 0 )
@@ -217,7 +211,7 @@ CqTransformModeBlock::~CqTransformModeBlock()
 /** Default constructor.
  */
 
-CqSolidModeBlock::CqSolidModeBlock( CqString& type, CqModeBlock* pconParent ) : CqModeBlock( pconParent, Solid ), m_strType( type )
+CqSolidModeBlock::CqSolidModeBlock( CqString& type, const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Solid ), m_strType( type )
 {
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
@@ -231,7 +225,7 @@ CqSolidModeBlock::CqSolidModeBlock( CqString& type, CqModeBlock* pconParent ) : 
 
     if ( pconParent && pconParent->isSolid() )
     {
-        CqSolidModeBlock * pParentSolid = static_cast<CqSolidModeBlock*>( pconParent );
+        CqSolidModeBlock * pParentSolid = static_cast<CqSolidModeBlock*>( pconParent.get() );
         // Check if we are linking under a Primitive node, if so warn, and link at the top.
         if ( pParentSolid->pCSGNode() ->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive )
         {
@@ -266,7 +260,7 @@ CqSolidModeBlock::~CqSolidModeBlock()
 /** Default constructor.
  */
 
-CqObjectModeBlock::CqObjectModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent, Object )
+CqObjectModeBlock::CqObjectModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Object )
 {
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes();
@@ -291,7 +285,7 @@ CqObjectModeBlock::~CqObjectModeBlock()
 /** Default constructor.
  */
 
-CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], CqModeBlock* pconParent ) : CqModeBlock( pconParent, Motion ), m_pDeformingSurface( NULL )
+CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Motion ), m_pDeformingSurface( NULL )
 {
     // Copy the parents attributes, as this state change doesn't save attributes.
     if ( pconParent != 0 )

@@ -3203,7 +3203,7 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
         // If in a motion block, confirm that the current deformation surface can accept the passed one as a keyframe.
         if( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
         {
-            CqMotionModeBlock* pMMB = static_cast<CqMotionModeBlock*>(QGetRenderContext() ->pconCurrent());
+            CqMotionModeBlock* pMMB = static_cast<CqMotionModeBlock*>(QGetRenderContext() ->pconCurrent().get());
 
             CqDeformingSurface* pMS;
             // If this is the first frame, then generate the appropriate CqDeformingSurface and fill in the first frame.
@@ -5600,7 +5600,7 @@ RtVoid	CreateGPrim( CqBasicSurface* pSurface )
     {
         pSurface->PrepareTrimCurve();
 
-        CqMotionModeBlock* pMMB = static_cast<CqMotionModeBlock*>(QGetRenderContext() ->pconCurrent());
+        CqMotionModeBlock* pMMB = static_cast<CqMotionModeBlock*>(QGetRenderContext() ->pconCurrent().get());
 
         CqDeformingSurface* pMS;
         // If this is the first frame, then generate the appropriate CqDeformingSurface and fill in the first frame.

@@ -85,7 +85,6 @@ CqRenderer::CqRenderer() :
         m_pPreWorldFunction( NULL ),
 		m_pRaytracer( NULL )
 {
-    m_pconCurrent = 0;
     m_pImageBuffer = new	CqImageBuffer();
 
     // Initialize the default options
@@ -142,13 +141,6 @@ CqRenderer::CqRenderer() :
 
 CqRenderer::~CqRenderer()
 {
-    // Delete the current context, should be main, unless render has been aborted.
-    while ( m_pconCurrent != 0 )
-    {
-        CqModeBlock * pconParent = m_pconCurrent->pconParent();
-        RELEASEREF( m_pconCurrent );
-        m_pconCurrent = pconParent;
-    }
     if ( m_pImageBuffer )
     {
         m_pImageBuffer->Release();
@@ -211,16 +203,16 @@ CqRenderer::~CqRenderer()
  * context created.  If first, create with this as the parent.
  */
 
-CqModeBlock*	CqRenderer::BeginMainModeBlock()
+boost::shared_ptr<CqModeBlock>	CqRenderer::BeginMainModeBlock()
 {
-    if ( m_pconCurrent == 0 )
+    // XXX: Error checking may eventually be unnecessary.  - ajb
+    if ( !m_pconCurrent )
     {
-        m_pconCurrent = new CqMainModeBlock();
-        ADDREF( m_pconCurrent );
+        m_pconCurrent = boost::shared_ptr<CqModeBlock>( new CqMainModeBlock( m_pconCurrent ) );
         return ( m_pconCurrent );
     }
     else
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>( );
 }
 
 
@@ -230,22 +222,22 @@ CqModeBlock*	CqRenderer::BeginMainModeBlock()
  * with it so I don't need to worry.
  */
 
-CqModeBlock*	CqRenderer::BeginFrameModeBlock()
+boost::shared_ptr<CqModeBlock>	CqRenderer::BeginFrameModeBlock()
 {
-    if ( m_pconCurrent != 0 )
+    // XXX: Error checking may eventually be unnecessary.  - ajb
+    if ( m_pconCurrent )
     {
-        CqModeBlock * pconNew = m_pconCurrent->BeginFrameModeBlock();
-        if ( pconNew != 0 )
+	boost::shared_ptr<CqModeBlock> pconNew = m_pconCurrent->BeginFrameModeBlock();
+        if ( pconNew )
         {
-            ADDREF( pconNew );
             m_pconCurrent = pconNew;
             return ( pconNew );
         }
         else
-            return ( 0 );
+            return boost::shared_ptr<CqModeBlock>( );
     }
     else
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>( );
 }
 
 
@@ -254,22 +246,22 @@ CqModeBlock*	CqRenderer::BeginFrameModeBlock()
  * with invalid calls.
  */
 
-CqModeBlock*	CqRenderer::BeginWorldModeBlock()
+boost::shared_ptr<CqModeBlock>	CqRenderer::BeginWorldModeBlock()
 {
-    if ( m_pconCurrent != 0 )
+    // XXX: Error checking may eventually be unnecessary.  - ajb
+    if ( m_pconCurrent )
     {
-        CqModeBlock * pconNew = m_pconCurrent->BeginWorldModeBlock();
-        if ( pconNew != 0 )
+	boost::shared_ptr<CqModeBlock> pconNew = m_pconCurrent->BeginWorldModeBlock();
+        if ( pconNew )
         {
-            ADDREF( pconNew );
             m_pconCurrent = pconNew;
             return ( pconNew );
         }
         else
-            return ( 0 );
+            return boost::shared_ptr<CqModeBlock>( );
     }
     else
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>( );
 }
 
 
@@ -277,22 +269,22 @@ CqModeBlock*	CqRenderer::BeginWorldModeBlock()
 /** Create a new attribute context.
  */
 
-CqModeBlock*	CqRenderer::BeginAttributeModeBlock()
+boost::shared_ptr<CqModeBlock>	CqRenderer::BeginAttributeModeBlock()
 {
-    if ( m_pconCurrent != 0 )
+    // XXX: Error checking may eventually be unnecessary.  - ajb
+    if ( m_pconCurrent )
     {
-        CqModeBlock * pconNew = m_pconCurrent->BeginAttributeModeBlock();
-        if ( pconNew != 0 )
+	boost::shared_ptr<CqModeBlock> pconNew = m_pconCurrent->BeginAttributeModeBlock();
+        if ( pconNew )
         {
-            ADDREF( pconNew );
             m_pconCurrent = pconNew;
             return ( pconNew );
         }
         else
-            return ( 0 );
+            return boost::shared_ptr<CqModeBlock>( );
     }
     else
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>( );
 }
 
 
@@ -301,22 +293,22 @@ CqModeBlock*	CqRenderer::BeginAttributeModeBlock()
 /** Create a new transform context.
  */
 
-CqModeBlock*	CqRenderer::BeginTransformModeBlock()
+boost::shared_ptr<CqModeBlock>	CqRenderer::BeginTransformModeBlock()
 {
-    if ( m_pconCurrent != 0 )
+    // XXX: Error checking may eventually be unnecessary.  - ajb
+    if ( m_pconCurrent )
     {
-        CqModeBlock * pconNew = m_pconCurrent->BeginTransformModeBlock();
-        if ( pconNew != 0 )
+	boost::shared_ptr<CqModeBlock> pconNew = m_pconCurrent->BeginTransformModeBlock();
+        if ( pconNew )
         {
-            ADDREF( pconNew );
             m_pconCurrent = pconNew;
             return ( pconNew );
         }
         else
-            return ( 0 );
+            return boost::shared_ptr<CqModeBlock>( );
     }
     else
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>( );
 }
 
 
@@ -325,22 +317,22 @@ CqModeBlock*	CqRenderer::BeginTransformModeBlock()
 /** Create a new solid context.
  */
 
-CqModeBlock*	CqRenderer::BeginSolidModeBlock( CqString& type )
+boost::shared_ptr<CqModeBlock>	CqRenderer::BeginSolidModeBlock( CqString& type )
 {
-    if ( m_pconCurrent != 0 )
+    // XXX: Error checking may eventually be unnecessary.  - ajb
+    if ( m_pconCurrent )
     {
-        CqModeBlock * pconNew = m_pconCurrent->BeginSolidModeBlock( type );
-        if ( pconNew != 0 )
+	boost::shared_ptr<CqModeBlock> pconNew = m_pconCurrent->BeginSolidModeBlock( type );
+        if ( pconNew )
         {
-            ADDREF( pconNew );
             m_pconCurrent = pconNew;
             return ( pconNew );
         }
         else
-            return ( 0 );
+            return boost::shared_ptr<CqModeBlock>( );
     }
     else
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>( );
 }
 
 
@@ -349,22 +341,22 @@ CqModeBlock*	CqRenderer::BeginSolidModeBlock( CqString& type )
 /** Create a new object context.
  */
 
-CqModeBlock*	CqRenderer::BeginObjectModeBlock()
+boost::shared_ptr<CqModeBlock>	CqRenderer::BeginObjectModeBlock()
 {
-    if ( m_pconCurrent != 0 )
+    // XXX: Error checking may eventually be unnecessary.  - ajb
+    if ( m_pconCurrent )
     {
-        CqModeBlock * pconNew = m_pconCurrent->BeginObjectModeBlock();
-        if ( pconNew != 0 )
+        boost::shared_ptr<CqModeBlock> pconNew = m_pconCurrent->BeginObjectModeBlock();
+        if ( pconNew )
         {
-            ADDREF( pconNew );
             m_pconCurrent = pconNew;
             return ( pconNew );
         }
         else
-            return ( 0 );
+            return boost::shared_ptr<CqModeBlock>( );
     }
     else
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>( );
 }
 
 
@@ -373,22 +365,22 @@ CqModeBlock*	CqRenderer::BeginObjectModeBlock()
 /** Create a new motion context.
  */
 
-CqModeBlock*	CqRenderer::BeginMotionModeBlock( TqInt N, TqFloat times[] )
+boost::shared_ptr<CqModeBlock>	CqRenderer::BeginMotionModeBlock( TqInt N, TqFloat times[] )
 {
-    if ( m_pconCurrent != 0 )
+    // XXX: Error checking may eventually be unnecessary.  - ajb
+    if ( m_pconCurrent )
     {
-        CqModeBlock * pconNew = m_pconCurrent->BeginMotionModeBlock( N, times );
-        if ( pconNew != 0 )
+        boost::shared_ptr<CqModeBlock> pconNew = m_pconCurrent->BeginMotionModeBlock( N, times );
+        if ( pconNew )
         {
-            ADDREF( pconNew );
             m_pconCurrent = pconNew;
             return ( pconNew );
         }
         else
-            return ( 0 );
+            return boost::shared_ptr<CqModeBlock>( );
     }
     else
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>( );
 }
 
 
@@ -398,12 +390,10 @@ CqModeBlock*	CqRenderer::BeginMotionModeBlock( TqInt N, TqFloat times[] )
 
 void	CqRenderer::EndMainModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == BeginEnd))
+    if ( m_pconCurrent && (m_pconCurrent->Type() == BeginEnd))
     {
-        CqModeBlock * pconParent = m_pconCurrent->pconParent();
         m_pconCurrent->EndMainModeBlock();
-        RELEASEREF( m_pconCurrent );
-        m_pconCurrent = pconParent;
+        m_pconCurrent = m_pconCurrent->pconParent();
     }
 }
 
@@ -414,12 +404,10 @@ void	CqRenderer::EndMainModeBlock()
 
 void	CqRenderer::EndFrameModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == Frame ))
+    if ( m_pconCurrent && (m_pconCurrent->Type() == Frame ))
     {
-        CqModeBlock * pconParent = m_pconCurrent->pconParent();
         m_pconCurrent->EndFrameModeBlock();
-        RELEASEREF( m_pconCurrent );
-        m_pconCurrent = pconParent;
+        m_pconCurrent = m_pconCurrent->pconParent();
     }
 }
 
@@ -430,12 +418,10 @@ void	CqRenderer::EndFrameModeBlock()
 
 void	CqRenderer::EndWorldModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == World))
+    if ( m_pconCurrent && (m_pconCurrent->Type() == World))
     {
-        CqModeBlock * pconParent = m_pconCurrent->pconParent();
         m_pconCurrent->EndWorldModeBlock();
-        RELEASEREF( m_pconCurrent );
-        m_pconCurrent = pconParent;
+        m_pconCurrent = m_pconCurrent->pconParent();
     }
 }
 
@@ -446,12 +432,10 @@ void	CqRenderer::EndWorldModeBlock()
 
 void	CqRenderer::EndAttributeModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == Attribute))
+    if ( m_pconCurrent && (m_pconCurrent->Type() == Attribute))
     {
-        CqModeBlock * pconParent = m_pconCurrent->pconParent();
         m_pconCurrent->EndAttributeModeBlock();
-        RELEASEREF( m_pconCurrent );
-        m_pconCurrent = pconParent;
+        m_pconCurrent = m_pconCurrent->pconParent();
     }
 }
 
@@ -462,14 +446,12 @@ void	CqRenderer::EndAttributeModeBlock()
 
 void	CqRenderer::EndTransformModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == Transform))
+    if ( m_pconCurrent && (m_pconCurrent->Type() == Transform))
     {
-        CqModeBlock * pconParent = m_pconCurrent->pconParent();
         // Copy the current state of the attributes UP the stack as a TransformBegin/End doesn't store them
-        pconParent->m_pattrCurrent = m_pconCurrent->m_pattrCurrent;
+        m_pconCurrent->pconParent()->m_pattrCurrent = m_pconCurrent->m_pattrCurrent;
         m_pconCurrent->EndTransformModeBlock();
-        RELEASEREF( m_pconCurrent );
-        m_pconCurrent = pconParent;
+        m_pconCurrent = m_pconCurrent->pconParent();
     }
 }
 
@@ -480,12 +462,10 @@ void	CqRenderer::EndTransformModeBlock()
 
 void	CqRenderer::EndSolidModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == Solid ) )
+    if ( m_pconCurrent && (m_pconCurrent->Type() == Solid ) )
     {
-        CqModeBlock * pconParent = m_pconCurrent->pconParent();
         m_pconCurrent->EndSolidModeBlock();
-        RELEASEREF( m_pconCurrent );
-        m_pconCurrent = pconParent;
+        m_pconCurrent = m_pconCurrent->pconParent();
     }
 }
 
@@ -496,12 +476,10 @@ void	CqRenderer::EndSolidModeBlock()
 
 void	CqRenderer::EndObjectModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == Object ) )
+    if ( m_pconCurrent && (m_pconCurrent->Type() == Object ) )
     {
-        CqModeBlock * pconParent = m_pconCurrent->pconParent();
         m_pconCurrent->EndObjectModeBlock();
-        RELEASEREF( m_pconCurrent );
-        m_pconCurrent = pconParent;
+        m_pconCurrent = m_pconCurrent->pconParent();
     }
 }
 
@@ -512,14 +490,13 @@ void	CqRenderer::EndObjectModeBlock()
 
 void	CqRenderer::EndMotionModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == Motion) )
+    if ( m_pconCurrent && (m_pconCurrent->Type() == Motion) )
     {
-        CqModeBlock * pconParent = m_pconCurrent->pconParent();
+	boost::shared_ptr<CqModeBlock> pconParent = m_pconCurrent->pconParent();
         // Copy the current state of the attributes UP the stack as a TransformBegin/End doesn't store them
         pconParent->m_pattrCurrent = m_pconCurrent->m_pattrCurrent;
         pconParent->m_ptransCurrent = m_pconCurrent->m_ptransCurrent;
         m_pconCurrent->EndMotionModeBlock();
-        RELEASEREF( m_pconCurrent );
         m_pconCurrent = pconParent;
     }
 }
@@ -532,7 +509,7 @@ void	CqRenderer::EndMotionModeBlock()
 
 TqFloat	CqRenderer::Time() const
 {
-    if ( m_pconCurrent != 0 && m_pconCurrent->Type() == Motion)
+    if ( m_pconCurrent && m_pconCurrent->Type() == Motion)
         return ( m_pconCurrent->Time() );
     else
         return ( QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 0 ] );
@@ -544,7 +521,7 @@ TqFloat	CqRenderer::Time() const
 
 void CqRenderer::AdvanceTime()
 {
-    if ( m_pconCurrent != 0 )
+    if ( m_pconCurrent )
         m_pconCurrent->AdvanceTime();
 }
 
@@ -555,7 +532,7 @@ void CqRenderer::AdvanceTime()
 
 CqOptions& CqRenderer::optCurrent() const
 {
-    if ( m_pconCurrent != 0 )
+    if ( m_pconCurrent )
         return ( m_pconCurrent->optCurrent() );
     else
     {
@@ -571,7 +548,7 @@ CqOptions& CqRenderer::optCurrent() const
 
 const CqAttributes* CqRenderer::pattrCurrent()
 {
-    if ( m_pconCurrent != 0 )
+    if ( m_pconCurrent )
         return ( m_pconCurrent->pattrCurrent() );
     else
         return ( m_pAttrDefault );
@@ -584,7 +561,7 @@ const CqAttributes* CqRenderer::pattrCurrent()
 
 CqAttributes* CqRenderer::pattrWriteCurrent()
 {
-    if ( m_pconCurrent != 0 )
+    if ( m_pconCurrent )
         return ( m_pconCurrent->pattrWriteCurrent() );
     else
         return ( m_pAttrDefault );
@@ -597,7 +574,7 @@ CqAttributes* CqRenderer::pattrWriteCurrent()
 
 const CqTransform* CqRenderer::ptransCurrent()
 {
-    if ( m_pconCurrent != 0 )
+    if ( m_pconCurrent )
         return ( m_pconCurrent->ptransCurrent() );
     else
         return ( m_pTransDefault );
@@ -610,7 +587,7 @@ const CqTransform* CqRenderer::ptransCurrent()
 
 CqTransform* CqRenderer::ptransWriteCurrent()
 {
-    if ( m_pconCurrent != 0 )
+    if ( m_pconCurrent )
         return ( m_pconCurrent->ptransWriteCurrent() );
     else
         return ( m_pTransDefault );

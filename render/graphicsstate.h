@@ -28,6 +28,8 @@
 #define CONTEXT_H_INCLUDED 1
 
 #include	<vector>
+#include	<boost/shared_ptr.hpp>
+#include	<boost/enable_shared_from_this.hpp>
 
 #include	"aqsis.h"
 
@@ -62,23 +64,23 @@ enum EqModeBlock
  * stores information about the current scoping and previous contexts.
  */
 
-class CqModeBlock : public CqRefCount
+class CqModeBlock : public boost::enable_shared_from_this<CqModeBlock>
 {
 public:
     /** Default constructor
      * \param pconParent a pointer to the previous context.
      */
-    CqModeBlock( CqModeBlock* pconParent = 0, EqModeBlock modetype = Outside);
+    CqModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent, EqModeBlock modetype = Outside);
     virtual	~CqModeBlock();
 
-    virtual	CqModeBlock*	BeginMainModeBlock();
-    virtual	CqModeBlock*	BeginFrameModeBlock();
-    virtual	CqModeBlock*	BeginWorldModeBlock();
-    virtual	CqModeBlock*	BeginAttributeModeBlock();
-    virtual	CqModeBlock*	BeginTransformModeBlock();
-    virtual	CqModeBlock*	BeginSolidModeBlock( CqString& type );
-    virtual	CqModeBlock*	BeginObjectModeBlock();
-    virtual	CqModeBlock*	BeginMotionModeBlock( TqInt N, TqFloat times[] );
+    virtual	boost::shared_ptr<CqModeBlock>	BeginMainModeBlock();
+    virtual	boost::shared_ptr<CqModeBlock>	BeginFrameModeBlock();
+    virtual	boost::shared_ptr<CqModeBlock>	BeginWorldModeBlock();
+    virtual	boost::shared_ptr<CqModeBlock>	BeginAttributeModeBlock();
+    virtual	boost::shared_ptr<CqModeBlock>	BeginTransformModeBlock();
+    virtual	boost::shared_ptr<CqModeBlock>	BeginSolidModeBlock( CqString& type );
+    virtual	boost::shared_ptr<CqModeBlock>	BeginObjectModeBlock();
+    virtual	boost::shared_ptr<CqModeBlock>	BeginMotionModeBlock( TqInt N, TqFloat times[] );
 
 #ifdef _DEBUG
     CqString className() const { return CqString("CqModeBlock"); }
@@ -216,7 +218,7 @@ public:
     /** Get a pointer to the previuos context.
      * \return a context pointer.
      */
-    CqModeBlock*	pconParent()
+    boost::shared_ptr<CqModeBlock>	pconParent()
     {
         return ( m_pconParent );
     }
@@ -265,7 +267,7 @@ public:
     CqTransform* m_ptransCurrent;		///< The current transformation.
 
 private:
-    CqModeBlock*	m_pconParent;			///< The previous context.
+    boost::shared_ptr<CqModeBlock>	m_pconParent;			///< The previous context.
     EqModeBlock		m_modetype;				///< The current type of motionblock in order to double check the delete
 }
 ;
@@ -278,15 +280,15 @@ private:
 class CqMainModeBlock : public CqModeBlock
 {
 public:
-    CqMainModeBlock( CqModeBlock* pconParent = 0 );
+    CqMainModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent );
     virtual	~CqMainModeBlock();
 
     /** Create a main context.
      * \warning It is an error to call this within a main context block.
      */
-    virtual	CqModeBlock*	BeginMainModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginMainModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }		// Error
 
     /** Delete the main context.
@@ -317,29 +319,29 @@ private:
 class CqFrameModeBlock : public CqModeBlock
 {
 public:
-    CqFrameModeBlock( CqModeBlock* pconParent = 0 );
+    CqFrameModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent );
     virtual	~CqFrameModeBlock();
 
     /** Create a main context.
      * \warning It is an error to call this within a frame context.
      */
-    virtual	CqModeBlock*	BeginMainModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginMainModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
     /** Create a frame context.
      * \warning It is an error to call this within a frame context.
      */
-    virtual	CqModeBlock*	BeginFrameModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginFrameModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
     /** Create a solid context.
      * \warning It is an error to call this within a frame context.
      */
-    virtual	CqModeBlock*	BeginSolidModeBlock( CqString& type )
+    virtual	boost::shared_ptr<CqModeBlock>	BeginSolidModeBlock( CqString& type )
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
 
     /** Delete the frame context.
@@ -370,29 +372,29 @@ private:
 class CqWorldModeBlock : public CqModeBlock
 {
 public:
-    CqWorldModeBlock( CqModeBlock* pconParent = 0 );
+    CqWorldModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent );
     virtual	~CqWorldModeBlock();
 
     /** Create a main context.
      * \warning It is an error to call this within a world context.
      */
-    virtual	CqModeBlock*	BeginMainModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginMainModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
     /** Create a frame context.
      * \warning It is an error to call this within a world context.
      */
-    virtual	CqModeBlock*	BeginFrameModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginFrameModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
     /** Create a world context.
      * \warning It is an error to call this within a world context.
      */
-    virtual	CqModeBlock*	BeginWorldModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginWorldModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
 
     /** Delete the world context.
@@ -424,29 +426,29 @@ private:
 class CqAttributeModeBlock : public CqModeBlock
 {
 public:
-    CqAttributeModeBlock( CqModeBlock* pconParent = 0 );
+    CqAttributeModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent );
     virtual	~CqAttributeModeBlock();
 
     /** Create a main context.
      * \warning It is an error to call this within a attribute context.
      */
-    virtual	CqModeBlock*	BeginMainModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginMainModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
     /** Create a frame context.
      * \warning It is an error to call this within a attribute context.
      */
-    virtual	CqModeBlock*	BeginFrameModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginFrameModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
     /** Create a world context.
      * \warning It is an error to call this within a attribute context.
      */
-    virtual	CqModeBlock*	BeginWorldModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginWorldModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
 
     /** Delete the attribute context.
@@ -475,29 +477,29 @@ private:
 class CqTransformModeBlock : public CqModeBlock
 {
 public:
-    CqTransformModeBlock( CqModeBlock* pconParent = 0 );
+    CqTransformModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent );
     virtual	~CqTransformModeBlock();
 
     /** Create a main context.
      * \warning It is an error to call this within a transform context.
      */
-    virtual	CqModeBlock*	BeginMainModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginMainModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
     /** Create a frame context.
      * \warning It is an error to call this within a transform context.
      */
-    virtual	CqModeBlock*	BeginFrameModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginFrameModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
     /** Create a world context.
      * \warning It is an error to call this within a transform context.
      */
-    virtual	CqModeBlock*	BeginWorldModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginWorldModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
 
     /** Delete the transform context.
@@ -526,29 +528,29 @@ private:
 class CqSolidModeBlock : public CqModeBlock
 {
 public:
-    CqSolidModeBlock( CqString& type, CqModeBlock* pconParent = 0 );
+    CqSolidModeBlock( CqString& type, const boost::shared_ptr<CqModeBlock>& pconParent );
     virtual	~CqSolidModeBlock();
 
     /** Create a main context.
      * \warning It is an error to call this within a solid context.
      */
-    virtual	CqModeBlock*	BeginMainModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginMainModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
     /** Create a frame context.
      * \warning It is an error to call this within a solid context.
      */
-    virtual	CqModeBlock*	BeginFrameModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginFrameModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
     /** Create a world context.
      * \warning It is an error to call this within a solid context.
      */
-    virtual	CqModeBlock*	BeginWorldModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginWorldModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
 
     /** Delete the solid context.
@@ -590,29 +592,29 @@ private:
 class CqObjectModeBlock : public CqModeBlock
 {
 public:
-    CqObjectModeBlock( CqModeBlock* pconParent = 0 );
+    CqObjectModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent );
     virtual	~CqObjectModeBlock();
 
     /** Create a main context.
      * \warning It is an error to call this within an object context.
      */
-    virtual	CqModeBlock*	BeginMainModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginMainModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }		// Error
     /** Create a frame context.
      * \warning It is an error to call this within an object context.
      */
-    virtual	CqModeBlock*	BeginFrameModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginFrameModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }		// Error
     /** Create a world context.
      * \warning It is an error to call this within an object context.
      */
-    virtual	CqModeBlock*	BeginWorldModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginWorldModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }		// Error
 
     /** Delete the object context.
@@ -655,64 +657,64 @@ private:
 class CqMotionModeBlock : public CqModeBlock
 {
 public:
-    CqMotionModeBlock( TqInt N, TqFloat times[], CqModeBlock* pconParent = 0 );
+    CqMotionModeBlock( TqInt N, TqFloat times[], const boost::shared_ptr<CqModeBlock>& pconParent );
     virtual	~CqMotionModeBlock();
 
     /** Create a main context.
      * \warning It is an error to call this within a motion context.
      */
-    virtual	CqModeBlock*	BeginMainModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginMainModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }		// Error
     /** Create a frame context.
      * \warning It is an error to call this within a motion context.
      */
-    virtual	CqModeBlock*	BeginFrameModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginFrameModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }		// Error
     /** Create a world context.
      * \warning It is an error to call this within a motion context.
      */
-    virtual	CqModeBlock*	BeginWorldModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginWorldModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }		// Error
     /** Create a attribute context.
      * \warning It is an error to call this within a motion context.
      */
-    virtual	CqModeBlock*	BeginAttributeModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginAttributeModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
     /** Create a transform context.
      * \warning It is an error to call this within a motion context.
      */
-    virtual	CqModeBlock*	BeginTransformModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginTransformModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }	// Error
     /** Create a solid context.
      * \warning It is an error to call this within a motion context.
      */
-    virtual	CqModeBlock*	BeginSolidModeBlock( CqString& type )
+    virtual	boost::shared_ptr<CqModeBlock>	BeginSolidModeBlock( CqString& type )
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }		// Error
     /** Create a object context.
      * \warning It is an error to call this within a motion context.
      */
-    virtual	CqModeBlock*	BeginObjectModeBlock()
+    virtual	boost::shared_ptr<CqModeBlock>	BeginObjectModeBlock()
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }		// Error
     /** Create a motion context.
      * \warning It is an error to call this within a motion context.
      */
-    virtual	CqModeBlock*	BeginMotionModeBlock( TqInt N, TqFloat times[] )
+    virtual	boost::shared_ptr<CqModeBlock>	BeginMotionModeBlock( TqInt N, TqFloat times[] )
     {
-        return ( 0 );
+        return boost::shared_ptr<CqModeBlock>();
     }		// Error
 
     /** Delete the object context.
@@ -783,9 +785,9 @@ private:
  * \return a pointer to the new context.
  */
 
-inline CqModeBlock* CqModeBlock::BeginMainModeBlock()
+inline boost::shared_ptr<CqModeBlock> CqModeBlock::BeginMainModeBlock()
 {
-    return ( new CqMainModeBlock( this ) );
+    return boost::shared_ptr<CqModeBlock>( new CqMainModeBlock( shared_from_this() ) );
 }
 
 
@@ -794,9 +796,9 @@ inline CqModeBlock* CqModeBlock::BeginMainModeBlock()
  * \return a pointer to the new context.
  */
 
-inline CqModeBlock* CqModeBlock::BeginFrameModeBlock()
+inline boost::shared_ptr<CqModeBlock> CqModeBlock::BeginFrameModeBlock()
 {
-    return ( new CqFrameModeBlock( this ) );
+    return boost::shared_ptr<CqModeBlock>( new CqFrameModeBlock( shared_from_this() ) );
 }
 
 
@@ -805,9 +807,9 @@ inline CqModeBlock* CqModeBlock::BeginFrameModeBlock()
  * \return a pointer to the new context.
  */
 
-inline CqModeBlock* CqModeBlock::BeginWorldModeBlock()
+inline boost::shared_ptr<CqModeBlock> CqModeBlock::BeginWorldModeBlock()
 {
-    return ( new CqWorldModeBlock( this ) );
+    return boost::shared_ptr<CqModeBlock>( new CqWorldModeBlock( shared_from_this() ) );
 }
 
 
@@ -816,9 +818,9 @@ inline CqModeBlock* CqModeBlock::BeginWorldModeBlock()
  * \return a pointer to the new context.
  */
 
-inline CqModeBlock* CqModeBlock::BeginAttributeModeBlock()
+inline boost::shared_ptr<CqModeBlock> CqModeBlock::BeginAttributeModeBlock()
 {
-    return ( new CqAttributeModeBlock( this ) );
+    return boost::shared_ptr<CqModeBlock>( new CqAttributeModeBlock( shared_from_this() ) );
 }
 
 
@@ -827,9 +829,9 @@ inline CqModeBlock* CqModeBlock::BeginAttributeModeBlock()
  * \return a pointer to the new context.
  */
 
-inline CqModeBlock* CqModeBlock::BeginTransformModeBlock()
+inline boost::shared_ptr<CqModeBlock> CqModeBlock::BeginTransformModeBlock()
 {
-    return ( new CqTransformModeBlock( this ) );
+    return boost::shared_ptr<CqModeBlock>( new CqTransformModeBlock( shared_from_this() ) );
 }
 
 
@@ -838,9 +840,9 @@ inline CqModeBlock* CqModeBlock::BeginTransformModeBlock()
  * \return a pointer to the new context.
  */
 
-inline CqModeBlock* CqModeBlock::BeginSolidModeBlock( CqString& type )
+inline boost::shared_ptr<CqModeBlock> CqModeBlock::BeginSolidModeBlock( CqString& type )
 {
-    return ( new CqSolidModeBlock( type, this ) );
+    return boost::shared_ptr<CqModeBlock>( new CqSolidModeBlock( type, shared_from_this() ) );
 }
 
 
@@ -849,9 +851,9 @@ inline CqModeBlock* CqModeBlock::BeginSolidModeBlock( CqString& type )
  * \return a pointer to the new context.
  */
 
-inline CqModeBlock* CqModeBlock::BeginObjectModeBlock()
+inline boost::shared_ptr<CqModeBlock> CqModeBlock::BeginObjectModeBlock()
 {
-    return ( new CqObjectModeBlock( this ) );
+    return boost::shared_ptr<CqModeBlock>( new CqObjectModeBlock( shared_from_this() ) );
 }
 
 
@@ -860,9 +862,9 @@ inline CqModeBlock* CqModeBlock::BeginObjectModeBlock()
  * \return a pointer to the new context.
  */
 
-inline CqModeBlock* CqModeBlock::BeginMotionModeBlock( TqInt N, TqFloat times[] )
+inline boost::shared_ptr<CqModeBlock> CqModeBlock::BeginMotionModeBlock( TqInt N, TqFloat times[] )
 {
-    return ( new CqMotionModeBlock( N, times, this ) );
+    return boost::shared_ptr<CqModeBlock>( new CqMotionModeBlock( N, times, shared_from_this() ) );
 }
 
 //-----------------------------------------------------------------------

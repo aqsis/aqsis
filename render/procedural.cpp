@@ -77,7 +77,6 @@ CqProcedural::CqProcedural(RtPointer data, CqBound &B, RtProcSubdivFunc subfunc,
     m_pFreeFunc = freefunc;
 
     m_pconStored = QGetRenderContext()->pconCurrent();
-    ADDREF( m_pconStored );
 
     STATS_INC( GEO_prc_created );
 }
@@ -88,7 +87,7 @@ CqProcedural::CqProcedural(RtPointer data, CqBound &B, RtProcSubdivFunc subfunc,
 TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
 {
     // Store current context, set current context to the stored one
-    CqModeBlock *pconSave = QGetRenderContext()->pconCurrent( m_pconStored );
+    boost::shared_ptr<CqModeBlock> pconSave = QGetRenderContext()->pconCurrent( m_pconStored );
 
 	m_pconStored->m_pattrCurrent = m_pAttributes;
 	ADDREF(m_pAttributes);
@@ -134,7 +133,6 @@ void    CqProcedural::Transform( const CqMatrix& matTx, const CqMatrix& matITTx,
  */
 CqProcedural::~CqProcedural()
 {
-    RELEASEREF( m_pconStored );
     if( m_pFreeFunc ) m_pFreeFunc( m_pData );
 }
 

@@ -104,7 +104,7 @@ public:
     //------------------------------------------------------ Protexted
 protected:
     /* Contexy saved when the Procedural was declared */
-    CqModeBlock *m_pconStored;
+    boost::shared_ptr<CqModeBlock> m_pconStored;
 
     /* The RIB request data */
     RtPointer m_pData;

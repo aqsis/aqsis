@@ -104,14 +104,14 @@ public:
     CqRenderer();
     virtual	~CqRenderer();
 
-    virtual	CqModeBlock*	BeginMainModeBlock();
-    virtual	CqModeBlock*	BeginFrameModeBlock();
-    virtual	CqModeBlock*	BeginWorldModeBlock();
-    virtual	CqModeBlock*	BeginAttributeModeBlock();
-    virtual	CqModeBlock*	BeginTransformModeBlock();
-    virtual	CqModeBlock*	BeginSolidModeBlock( CqString& type );
-    virtual	CqModeBlock*	BeginObjectModeBlock();
-    virtual	CqModeBlock*	BeginMotionModeBlock( TqInt N, TqFloat times[] );
+    virtual	boost::shared_ptr<CqModeBlock>	BeginMainModeBlock();
+    virtual	boost::shared_ptr<CqModeBlock>	BeginFrameModeBlock();
+    virtual	boost::shared_ptr<CqModeBlock>	BeginWorldModeBlock();
+    virtual	boost::shared_ptr<CqModeBlock>	BeginAttributeModeBlock();
+    virtual	boost::shared_ptr<CqModeBlock>	BeginTransformModeBlock();
+    virtual	boost::shared_ptr<CqModeBlock>	BeginSolidModeBlock( CqString& type );
+    virtual	boost::shared_ptr<CqModeBlock>	BeginObjectModeBlock();
+    virtual	boost::shared_ptr<CqModeBlock>	BeginMotionModeBlock( TqInt N, TqFloat times[] );
 
     virtual	void	EndMainModeBlock();
     virtual	void	EndFrameModeBlock();
@@ -135,23 +135,23 @@ public:
      * Primarily for Procedural objects
      * \return Pointer to a previous CqModeBlock.
      */
-    virtual	CqModeBlock*	pconCurrent(CqModeBlock* pcon )
+    virtual	boost::shared_ptr<CqModeBlock>	pconCurrent(const boost::shared_ptr<CqModeBlock>& pcon )
     {
-        CqModeBlock* prev = m_pconCurrent;
+	boost::shared_ptr<CqModeBlock> prev = m_pconCurrent;
         m_pconCurrent = pcon;
         return ( prev );
     }
     /** Get a pointer to the current context.
      * \return Pointer to a CqModeBlock derived class.
      */
-    virtual	CqModeBlock*	pconCurrent()
+    virtual	boost::shared_ptr<CqModeBlock>	pconCurrent()
     {
         return ( m_pconCurrent );
     }
     /** Get a erad only pointer to the current context.
      * \return Pointer to a CqModeBlock derived class.
      */
-    virtual const	CqModeBlock*	pconCurrent() const
+    virtual const	boost::shared_ptr<CqModeBlock>	pconCurrent() const
     {
         return ( m_pconCurrent );
     }
@@ -450,7 +450,7 @@ public:
 	}
 
 private:
-    CqModeBlock*	m_pconCurrent;					///< Pointer to the current context.
+	boost::shared_ptr<CqModeBlock>	m_pconCurrent;					///< Pointer to the current context.
     CqStats	m_Stats;						///< Global statistics.
     CqAttributes*	m_pAttrDefault;					///< Default attributes.
     CqTransform*	m_pTransDefault;				///< Default transformation.
