@@ -49,6 +49,8 @@ typedef	RtVoid		(*RtFunc)();
 typedef	RtVoid		(*RtErrorFunc)(RtInt code, RtInt severity, const char* message);
 typedef	RtErrorFunc	RtErrorHandler;
 
+typedef	RtVoid		(*RtProcSubdivFunc)(RtPointer, RtFloat);
+typedef	RtVoid		(*RtProcFreeFunc)(RtPointer);
 typedef	RtVoid		(*RtArchiveCallback)(RtToken, char *, ...);
 
 typedef	RtPointer	RtObjectHandle;
@@ -255,7 +257,7 @@ _qShare	RtVoid			RiDisk(RtFloat height, RtFloat radius, RtFloat thetamax, ...);
 _qShare	RtVoid			RiDiskV(RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST);
 _qShare	RtVoid			RiTorus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, ...);
 _qShare	RtVoid			RiTorusV(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phimax, RtFloat thetamax, PARAMETERLIST);
-_qShare	RtVoid			RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc);
+_qShare	RtVoid			RiProcedural(RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc);
 _qShare	RtVoid			RiGeometry(RtToken type, ... );
 _qShare	RtVoid			RiGeometryV(RtToken type, PARAMETERLIST);
 

@@ -2809,7 +2809,7 @@ RtVoid	RiTorusV(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phim
 // RiProcedural
 // Implement the procedural type primitive.
 //
-RtVoid	RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc)
+RtVoid	RiProcedural(RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc)
 {
 	CqBasicError(0,Severity_Normal,"RiProcedural not supported");
 	return;
