@@ -456,11 +456,7 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 			for ( i = 0;i <= p - j - s;i++ )
 			{
 				alpha = ( u - m_auKnots[ L + i ] ) / ( m_auKnots[ i + k + 1 ] - m_auKnots[ L + i ] );
-				R[ i ] = CqVector4D( alpha * R[ i + 1 ].x() + ( 1.0 - alpha ) * R[ i ].x(),
-				                     alpha * R[ i + 1 ].y() + ( 1.0 - alpha ) * R[ i ].y(),
-				                     alpha * R[ i + 1 ].z() + ( 1.0 - alpha ) * R[ i ].z(),
-				                     alpha * R[ i + 1 ].h() + ( 1.0 - alpha ) * R[ i ].h() );
-				//				R[i]=alpha*R[i+1]+(1.0-alpha)*R[i];
+				R[ i ] = alpha * R[ i + 1 ] + ( 1.0 - alpha ) * R[ i ];
 			}
 			P()[ ( row * m_cuVerts ) + L ] = R[ 0 ];
 			if ( p - j - s > 0 )
@@ -484,6 +480,7 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 {
 	// Compute k and s      v = [ v_k , v_k+1)  with v_k having multiplicity s
+	TqUint m = static_cast<TqUint>( m_cvVerts );
 	TqInt k = m_avKnots.size() - 1, s = 0;
 	TqInt i, j;
 	TqInt p = vDegree();
@@ -549,7 +546,7 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 	{
 		for ( i = 0; i <= k - p; i++ ) 
 			P()[ ( i * m_cuVerts ) + col ] = aCPHold[ ( i * m_cuVerts ) + col ];
-		for ( i = k - s; i < static_cast<TqInt>( m_cvVerts ); i++ )
+		for ( i = k - s; i < m; i++ )
 			P()[ ( ( i + r ) * m_cuVerts ) + col ] = aCPHold[ ( i * m_cuVerts ) + col ];
 		for ( i = 0; i <= p - s; i++ ) 
 			R[ i ] = aCPHold[ ( ( k - p + i ) * m_cuVerts ) + col ];
@@ -563,11 +560,7 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 			for ( i = 0;i <= p - j - s;i++ )
 			{
 				alpha = ( v - m_avKnots[ L + i ] ) / ( m_avKnots[ i + k + 1 ] - m_avKnots[ L + i ] );
-				R[ i ] = CqVector4D( alpha * R[ i + 1 ].x() + ( 1.0 - alpha ) * R[ i ].x(),
-				                     alpha * R[ i + 1 ].y() + ( 1.0 - alpha ) * R[ i ].y(),
-				                     alpha * R[ i + 1 ].z() + ( 1.0 - alpha ) * R[ i ].z(),
-				                     alpha * R[ i + 1 ].h() + ( 1.0 - alpha ) * R[ i ].h() );
-				//				R[i]=alpha*R[i+1]+(1.0-alpha)*R[i];
+				R[ i ] = alpha * R[ i + 1 ] + ( 1.0 - alpha ) * R[ i ];
 			}
 			P()[ ( L * m_cuVerts ) + col ] = R[ 0 ];
 			if ( p - j - s > 0 )
@@ -1180,7 +1173,12 @@ void CqSurfaceNURBS::SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqB
 			for ( i = 0L; i < nrbB.m_cvVerts; i++ )
 			{
 				for ( j = 0L; j < nrbB.m_cuVerts; j++ )
-					pNewB->SetValue( (*iUP), ( i * nrbB.cuVerts() +  j ), ( ( ( dirflag ) ? i : ( i + SplitPoint ) ) * m_cuVerts ) + ( dirflag ) ? j + SplitPoint : j );
+				{
+					TqUint iSrc = ( dirflag ) ? i : i + SplitPoint;
+					iSrc *= m_cuVerts;
+					iSrc += ( dirflag ) ? j + SplitPoint : j;
+					pNewB->SetValue( (*iUP), ( i * nrbB.cuVerts() +  j ), iSrc );
+				}
 			}
 			nrbB.AddPrimitiveVariable( pNewB );
 		}
@@ -1386,7 +1384,7 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 		std::vector<CqSurfaceNURBS*> S;
 
 		SubdivideSegments( S );
-		TqInt i;
+		TqInt i = 0;
 		for( i = 0; i < S.size(); i++ )
 		{
 			S[ i ]->SetSurfaceParameters( *this );

@@ -389,11 +389,16 @@ void CqSurface::vSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
-		CqParameter* pNewA = (*iUP)->Clone();
-		CqParameter* pNewB = (*iUP)->Clone();
-		pNewA->vSubdivide( pNewB );
-		pA->AddPrimitiveVariable( pNewA );
-		pB->AddPrimitiveVariable( pNewB );
+		// We can only do this common linear subdivide if it is varying, vertex must be handled by the surface,
+		// as it needs to be done using surface specific natural interpolation.
+		if( (*iUP)->Class() == class_varying )
+		{
+			CqParameter* pNewA = (*iUP)->Clone();
+			CqParameter* pNewB = (*iUP)->Clone();
+			pNewA->vSubdivide( pNewB );
+			pA->AddPrimitiveVariable( pNewA );
+			pB->AddPrimitiveVariable( pNewB );
+		}
 	}
 }
 
