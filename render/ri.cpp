@@ -1514,9 +1514,29 @@ RtVoid	RiConcatTransform(RtMatrix transform)
 // RiPerspective
 // Concatenate a perspective transformation into the current transformation.
 //
-RtVoid	RiPerspective(RtFloat fov)
+RtVoid	RiPerspective(RtFloat f)
 {
-	CqBasicError(0,Severity_Normal,"RiPerspective not supported");
+	if (f<=0) 
+	{
+		CqBasicError(0,Severity_Normal,"RiPerspective given bad fov value.");
+		return 0;
+	}
+
+	f = tan(RAD(f/2));
+
+	// This matches PRMan 3.9 in testing, but not BMRT 2.6's rgl and rendrib.
+	CqMatrix	matP( 1, 0, 0, 0,  0, 1, 0, 0,  0, 0, f, f,  0, 0, -f, 0 );
+
+	// Check if this transformation results in a change in orientation.
+	if(matP.Determinant()<0)
+	{
+		QGetRenderContext()->pattrWriteCurrent()->FlipeOrientation(QGetRenderContext()->Time());
+		QGetRenderContext()->pattrWriteCurrent()->FlipeCoordsysOrientation(QGetRenderContext()->Time());
+	}
+
+	QGetRenderContext()->ptransWriteCurrent()->ConcatCurrentTransform(QGetRenderContext()->Time(),matP);
+	QGetRenderContext()->AdvanceTime();
+
 	return(0);
 }
 
