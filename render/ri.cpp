@@ -2027,7 +2027,7 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
     // Execute the intiialisation code here, as we now have our shader context complete.
     pShader->PrepareDefArgs();
 
-    if ( pNew != 0 )
+    if ( pNew )
     {
         RtInt i;
         for ( i = 0; i < count; ++i )

@@ -323,7 +323,7 @@ public:
     {
         m_radius = radius;
     }
-    virtual	CqBound			GetTotalBound( TqBool fForce = TqFalse )
+    virtual	CqBound			GetTotalBound( )
     {
         CqVector3D Pmin, Pmax;
         pGrid()->pVar(EnvVars_P)->GetPoint(Pmin, m_Index);

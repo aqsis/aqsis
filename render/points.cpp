@@ -615,7 +615,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
             pNew->SetGrid( this );
             pNew->SetIndex( iu );
             pNew->Initialise( radius );
-            pNew->GetTotalBound( TqTrue );
+            //pNew->GetTotalBound();
 
             pImage->AddMPG( pNew );
         }
