@@ -21,6 +21,7 @@ RendermanInterface::RtVoid Stream::RiAttributeEnd() { m_Stream << "RiAttributeEn
 RendermanInterface::RtVoid Stream::RiAttributeV(const char *name, RtInt count, RtToken tokens[], RtPointer values[]) { m_Stream << "RiAttributeV()" << std::endl; }
 RendermanInterface::RtVoid Stream::RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep) { m_Stream << "RiBasis()" << std::endl; }
 RendermanInterface::RtVoid Stream::RiBegin(RtToken name) { m_Stream << "RiBegin(" << name << ")" << std::endl; }
+RendermanInterface::RtFloat Stream::RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) { m_Stream << "RiBesselFilter()" << std::endl; return 0; }
 RendermanInterface::RtVoid Stream::RiBound(RtBound bound) { m_Stream << "RiBound()" << std::endl; }
 RendermanInterface::RtFloat Stream::RiBoxFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) { m_Stream << "RiBoxFilter()" << std::endl; return 0; }
 RendermanInterface::RtFloat Stream::RiCatmullRomFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) { m_Stream << "RiCatmullRomFilter()" << std::endl; return 0; }
@@ -38,6 +39,7 @@ RendermanInterface::RtVoid Stream::RiDeformationV(const char *name, RtInt count,
 RendermanInterface::RtVoid Stream::RiDepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focaldistance) { m_Stream << "RiDepthOfField()" << std::endl; }
 RendermanInterface::RtVoid Stream::RiDetail(RtBound bound) { m_Stream << "RiDetail()" << std::endl; }
 RendermanInterface::RtVoid Stream::RiDetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh) { m_Stream << "RiDetailRange()" << std::endl; }
+RendermanInterface::RtFloat Stream::RiDiskFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) { m_Stream << "RiDiskFilter()" << std::endl; return 0; }
 RendermanInterface::RtVoid Stream::RiDiskV(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) { m_Stream << "RiDiskV()" << std::endl; }
 RendermanInterface::RtVoid Stream::RiDisplacementV(const char *name, RtInt count, RtToken tokens[], RtPointer values[]) { m_Stream << "RiDisplacementV()" << std::endl; }
 RendermanInterface::RtVoid Stream::RiDisplayV(const char *name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[]) { m_Stream << "RiDisplayV(" << name << ", " << type << ", " << mode << ", " << count << ")" << std::endl; }
@@ -122,8 +124,10 @@ RendermanInterface::RtVoid Stream::RiWorldEnd() { m_Stream << "RiWorldEnd()" << 
 }; // namespace librib2stream
 
 
+RtFloat RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)		{return(0.0);}
 RtFloat RiBoxFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)			{return(0.0);}
 RtFloat RiCatmullRomFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)	{return(0.0);}
+RtFloat RiDiskFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)			{return(0.0);}
 RtFloat RiGaussianFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)		{return(0.0);}
 RtFloat RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)			{return(0.0);}
 RtFloat RiTriangleFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)		{return(0.0);}

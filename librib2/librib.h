@@ -46,6 +46,7 @@ public:
 	virtual	RtVoid	RiAttributeV(const char *name, RtInt count, RtToken tokens[], RtPointer values[]) = 0;	
 	virtual	RtVoid	RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep) = 0;	
 	virtual	RtVoid	RiBegin(RtToken name) = 0;	
+	virtual	RtFloat RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) = 0;	
 	virtual	RtVoid	RiBound(RtBound bound) = 0;	
 	virtual	RtFloat RiBoxFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) = 0;	
 	virtual	RtFloat RiCatmullRomFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) = 0;	
@@ -63,6 +64,7 @@ public:
 	virtual	RtVoid	RiDepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focaldistance) = 0;	
 	virtual	RtVoid	RiDetail(RtBound bound) = 0;	
 	virtual	RtVoid	RiDetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh) = 0;	
+	virtual	RtFloat RiDiskFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) = 0;	
 	virtual	RtVoid	RiDiskV(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) = 0;	
 	virtual	RtVoid	RiDisplacementV(const char *name, RtInt count, RtToken tokens[], RtPointer values[]) = 0;	
 	virtual	RtVoid	RiDisplayV(const char *name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[]) = 0;	
@@ -149,8 +151,10 @@ public:
 
 
 typedef	librib::RendermanInterface::RtFloat RtFloat;
+extern "C" RtFloat RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
 extern "C" RtFloat RiBoxFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
 extern "C" RtFloat RiCatmullRomFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
+extern "C" RtFloat RiDiskFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
 extern "C" RtFloat RiGaussianFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
 extern "C" RtFloat RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
 extern "C" RtFloat RiTriangleFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);

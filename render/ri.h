@@ -146,6 +146,8 @@ _qShare	RtFloat			RiBoxFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywid
 _qShare	RtFloat			RiTriangleFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
 _qShare	RtFloat			RiCatmullRomFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
 _qShare	RtFloat			RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
+_qShare	RtFloat			RiDiskFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
+_qShare	RtFloat			RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
 
 _qShare	RtVoid			RiHider(RtToken type, ...);
 _qShare	RtVoid			RiHiderV(RtToken type, PARAMETERLIST);

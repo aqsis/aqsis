@@ -21,6 +21,7 @@ RendermanInterface::RtVoid Engine::RiAttributeEnd() { ::RiAttributeEnd(); }
 RendermanInterface::RtVoid Engine::RiAttributeV(const char *name, RtInt count, RtToken tokens[], RtPointer values[]) { ::RiAttributeV(name, count, tokens, values); }
 RendermanInterface::RtVoid Engine::RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep) { ::RiBasis(ubasis, ustep, vbasis, vstep); }
 RendermanInterface::RtVoid Engine::RiBegin(RtToken name) { ::RiBegin(name); }
+RendermanInterface::RtFloat Engine::RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) { return ::RiBesselFilter(x, y, xwidth, ywidth); }
 RendermanInterface::RtVoid Engine::RiBound(RtBound bound) { ::RiBound(bound); }
 RendermanInterface::RtFloat Engine::RiBoxFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) { return ::RiBoxFilter(x, y, xwidth, ywidth); }
 RendermanInterface::RtFloat Engine::RiCatmullRomFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) { return ::RiCatmullRomFilter(x, y, xwidth, ywidth); }
@@ -38,6 +39,7 @@ RendermanInterface::RtVoid Engine::RiDeformationV(const char *name, RtInt count,
 RendermanInterface::RtVoid Engine::RiDepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focaldistance) { ::RiDepthOfField(fstop, focallength, focaldistance); }
 RendermanInterface::RtVoid Engine::RiDetail(RtBound bound) { ::RiDetail(bound); }
 RendermanInterface::RtVoid Engine::RiDetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh) { ::RiDetailRange(offlow, onlow, onhigh, offhigh); }
+RendermanInterface::RtFloat Engine::RiDiskFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) { return ::RiDiskFilter(x, y, xwidth, ywidth); }
 RendermanInterface::RtVoid Engine::RiDiskV(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]) { ::RiDiskV(height, radius, thetamax, count, tokens, values); }
 RendermanInterface::RtVoid Engine::RiDisplacementV(const char *name, RtInt count, RtToken tokens[], RtPointer values[]) { ::RiDisplacementV(name, count, tokens, values); }
 RendermanInterface::RtVoid Engine::RiDisplayV(const char *name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[]) { ::RiDisplayV(name, type, mode, count, tokens, values); }

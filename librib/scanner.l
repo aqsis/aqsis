@@ -119,6 +119,8 @@ BoxFilter				{return(RIBParser::REQUEST_TOKEN_BOXFILTER);}
 TriangleFilter			{return(RIBParser::REQUEST_TOKEN_TRIANGLEFILTER);}
 CatmullRomFilter		{return(RIBParser::REQUEST_TOKEN_CATMULLROMFILTER);}
 SincFilter				{return(RIBParser::REQUEST_TOKEN_SINCFILTER);}
+DiskFilter				{return(RIBParser::REQUEST_TOKEN_DISKFILTER);}
+BesselFilter			{return(RIBParser::REQUEST_TOKEN_BESSELFILTER);}
 Hider					{return(RIBParser::REQUEST_TOKEN_HIDER);}
 ColorSamples			{return(RIBParser::REQUEST_TOKEN_COLORSAMPLES);}
 RelativeDetail			{return(RIBParser::REQUEST_TOKEN_RELATIVEDETAIL);}

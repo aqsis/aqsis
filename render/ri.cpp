@@ -894,6 +894,30 @@ RtFloat	RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
 
 
 //----------------------------------------------------------------------
+// RiDiskFilter -- this is in Pixar's ri.h
+// Cylindrical filter used as a possible value passed to RiPixelFilter
+//
+RtFloat	RiDiskFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
+{
+	/* Add code later. */
+	CqBasicError(0,Severity_Normal,"RiDiskFilter not supported, defaults to 1.0");
+	return 1.0;
+}
+
+
+//----------------------------------------------------------------------
+// RiBesselFilter -- this is in Pixar's ri.h
+// Besselj0 filter used as a possible value passed to RiPixelFilter
+//
+RtFloat	RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
+{
+	/* Add code later. */
+	CqBasicError(0,Severity_Normal,"RiBesselFilter not supported, defaults to 1.0");
+	return 1.0;
+}
+
+
+//----------------------------------------------------------------------
 // RiHider
 // Specify a hidden surface calculation mode.
 //

@@ -22,6 +22,7 @@ public:
 	virtual	RtVoid	RiAttributeV(const char *name, RtInt count, RtToken tokens[], RtPointer values[]);
 	virtual	RtVoid	RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep);
 	virtual	RtVoid	RiBegin(RtToken name);
+	virtual	RtFloat RiBesselFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
 	virtual	RtVoid	RiBound(RtBound bound);
 	virtual	RtFloat RiBoxFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
 	virtual	RtFloat RiCatmullRomFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
@@ -39,6 +40,7 @@ public:
 	virtual	RtVoid	RiDepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focaldistance);
 	virtual	RtVoid	RiDetail(RtBound bound);
 	virtual	RtVoid	RiDetailRange(RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh);
+	virtual	RtFloat RiDiskFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth);
 	virtual	RtVoid	RiDiskV(RtFloat height, RtFloat radius, RtFloat thetamax, RtInt count, RtToken tokens[], RtPointer values[]);
 	virtual	RtVoid	RiDisplacementV(const char *name, RtInt count, RtToken tokens[], RtPointer values[]);
 	virtual	RtVoid	RiDisplayV(const char *name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[]);
