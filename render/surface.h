@@ -101,6 +101,8 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 
 		virtual void	PreDice( TqInt uDiceSize, TqInt vDiceSize )
 		{}
+		virtual TqInt	DiceAll( CqMicroPolyGrid* pGrid )
+		{ return(0); }
 		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
 		{}
 		virtual void	PostDice(CqMicroPolyGrid * pGrid)
@@ -118,6 +120,20 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		 */
 		virtual	void	PrepareTrimCurve()
 		{}
+
+		/** Get the value of the dice size in u, determined during a Diceable() call
+		 */
+		TqInt uDiceSize() const
+		{
+			return( m_uDiceSize );
+		}
+
+		/** Get the value of the dice size in v, determined during a Diceable() call
+		 */
+		TqInt vDiceSize() const
+		{
+			return( m_vDiceSize );
+		}
 
 		/** Get the surface paramter values for the given vertex index. Used when constructing a surface
 		 * using "Pz" point specification.
@@ -630,6 +646,7 @@ class _qShareC CqSurface : public CqBasicSurface
 
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
+		virtual TqBool	Diceable()	{ return(false); }
 
 	protected:
 		std::vector<CqParameter*>	m_aUserParams;						///< Storage for user defined paramter variables.

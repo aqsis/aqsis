@@ -5,7 +5,7 @@
  *	@brief	Declare the interface which all shaders must implement.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/10/31 11:51:11 $
+ *	Last change date:	$Date: 2003/03/27 21:55:12 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -35,6 +35,8 @@ enum EqShaderType
 };
 
 #define	USES(a,b)	((a)&(0x00000001<<(b))?TqTrue:TqFalse)
+#define	isDONE(a,b)	((a)&(0x00000001<<(b))?TqTrue:TqFalse)
+#define	DONE(a,b)	((a)=(a)|(0x00000001<<(b)))
 
 
 struct IqShaderExecEnv;

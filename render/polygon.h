@@ -48,9 +48,7 @@ class CqPolygonBase
 		{}
 
 		virtual	CqBound	Bound() const;
-		virtual	CqMicroPolyGridBase* Dice();
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
-		virtual TqBool	Diceable();
 
 		/** Get a reference to the surface this polygon is associated with.
 		 */
@@ -167,17 +165,9 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		{
 			return ( AdjustBoundForTransformationMotion( CqPolygonBase::Bound() ) );
 		}
-		virtual	CqMicroPolyGridBase* Dice()
-		{
-			return ( CqPolygonBase::Dice() );
-		}
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits )
 		{
 			return ( CqPolygonBase::Split( aSplits ) );
-		}
-		virtual TqBool	Diceable()
-		{
-			return ( CqPolygonBase::Diceable() );
 		}
 
 		virtual	TqUint	cUniform() const
@@ -407,22 +397,20 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		}
 
 		// Overridden from CqBasicSurface
+		virtual CqMicroPolyGridBase* Dice()
+		{
+			assert(TqFalse);
+			return( 0 );
+		}
 		virtual	CqBound	Bound() const
 		{
 			return ( AdjustBoundForTransformationMotion( CqPolygonBase::Bound() ) );
-		}
-		virtual	CqMicroPolyGridBase* Dice()
-		{
-			return ( CqPolygonBase::Dice() );
 		}
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits )
 		{
 			return ( CqPolygonBase::Split( aSplits ) );
 		}
-		virtual TqBool	Diceable()
-		{
-			return ( CqPolygonBase::Diceable() );
-		}
+		virtual TqBool	Diceable()	{ return(false); }
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
 		{

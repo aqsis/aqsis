@@ -27,6 +27,7 @@
 
 #include  <strstream>
 #include  <math.h>
+#include  <iomanip>
 
 #include	"renderer.h"
 #include	"attributes.h"
@@ -51,7 +52,7 @@ void CqStats::Initialise()
 {
 	m_State = State_Parsing;
 	m_Complete = 0.0f;
-	m_timeTotal = 0;
+//	m_timeTotal = 0;
 	InitialiseFrame();
 }
 
@@ -95,8 +96,8 @@ void CqStats::InitialiseFrame()
 	m_cTextureMemory = 0;
 	memset( m_cTextureMisses, '\0', sizeof( m_cTextureMisses ) );
 	memset( m_cTextureHits, '\0', sizeof( m_cTextureHits ) );
-	m_timeTotalFrame = 0;
-	m_frameTimerRunning = TqFalse;
+//	m_timeTotalFrame = 0;
+//	m_frameTimerRunning = TqFalse;
 	m_timeSurface.Reset();
 	m_timeDisplacement.Reset();
 	m_timeImager.Reset();
@@ -128,11 +129,8 @@ void CqStats::InitialiseFrame()
  */
 void CqStats::StartFrameTimer()
 {
-	if ( !m_frameTimerRunning )
-	{
-		m_frameTimerRunning = TqTrue;
-		m_timeTotalFrame = time( 0 );
-	}
+	if( !m_timeTotalFrame.isStarted() )
+		m_timeTotalFrame.Start();
 }
 
 /** Stop the frame timer.
@@ -143,9 +141,8 @@ void CqStats::StartFrameTimer()
  */
 void CqStats::StopFrameTimer()
 {
-	m_timeTotalFrame = time( 0 ) - m_timeTotalFrame;
-	m_timeTotal += m_timeTotalFrame;
-	m_frameTimerRunning = TqFalse;
+	m_timeTotalFrame.Stop();
+	m_timeTotal+=m_timeTotalFrame;
 }
 
 
@@ -167,54 +164,79 @@ void CqStats::PrintStats( TqInt level ) const
 	std::strstream MSG;
 
 
-	TqFloat timeSurface = static_cast<TqFloat>( m_timeSurface.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeDisplacement = static_cast<TqFloat>( m_timeDisplacement.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeImager = static_cast<TqFloat>( m_timeImager.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeAtmosphere = static_cast<TqFloat>( m_timeAtmosphere.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeSplits = static_cast<TqFloat>( m_timeSplits.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeDicing = static_cast<TqFloat>( m_timeDicing.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeRenderMPGs = static_cast<TqFloat>( m_timeRenderMPGs.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeOcclusionCull = static_cast<TqFloat>( m_timeOcclusionCull.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeDiceable = static_cast<TqFloat>( m_timeDiceable.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeMakeTexture = static_cast<TqFloat>( m_timeMakeTexture.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeMakeShadow = static_cast<TqFloat>( m_timeMakeShadow.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeMakeEnv = static_cast<TqFloat>( m_timeMakeEnv.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeTM = static_cast<TqFloat>( m_timeTM.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeFB = static_cast<TqFloat>( m_timeFB.TimeTotal() - m_timeImager.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeDB = static_cast<TqFloat>( m_timeDB.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeParse = static_cast<TqFloat>( m_timeParse.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeProject = static_cast<TqFloat>( m_timeProject.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeCombine = static_cast<TqFloat>( m_timeCombine.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeOthers = static_cast<TqFloat>( m_timeOthers.TimeTotal() ) / CLOCKS_PER_SEC;
+	TqFloat timeTotal = m_timeSurface.TimeTotal() + 
+						m_timeDisplacement.TimeTotal() + 
+						m_timeImager.TimeTotal() + 
+						m_timeAtmosphere.TimeTotal() + 
+						m_timeSplits.TimeTotal() +
+						m_timeDicing.TimeTotal() + 
+						m_timeRenderMPGs.TimeTotal() + 
+						m_timeOcclusionCull.TimeTotal() + 
+						m_timeDiceable.TimeTotal() + 
+						m_timeMakeTexture.TimeTotal() +
+						m_timeMakeShadow.TimeTotal() + 
+						m_timeMakeEnv.TimeTotal() + 
+						m_timeTM.TimeTotal() + 
+						m_timeFB.TimeTotal() + 
+						m_timeDB.TimeTotal() + 
+						m_timeParse.TimeTotal() + 
+						m_timeProject.TimeTotal() +
+						m_timeCombine.TimeTotal() + 
+						m_timeOthers.TimeTotal();
 
 	//! level >= 0
 	MSG << "Total render time   : ";
-	TimeToString( MSG, m_timeTotal ) << std::endl;
+	TimeToString( MSG, m_timeTotal.TimeTotal(), -1 ) << std::endl;
 	MSG << "Last frame          : ";
-	TimeToString( MSG, m_timeTotalFrame ) << std::endl;
+	TimeToString( MSG, m_timeTotalFrame.TimeTotal(), -1 ) << std::endl;
 
 	if ( level >= 1 )
 	{
-		MSG << "Imager shading      : ";
-		TimeToString( MSG, timeImager ) << " (" << 100.0f * timeImager / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "Surface shading     : ";
-		TimeToString( MSG, timeSurface ) << " (" << 100.0f * timeSurface / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "Displacement shading: ";
-		TimeToString( MSG, timeDisplacement ) << " (" << 100.0f * timeDisplacement / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "Atmosphere shading  : ";
-		TimeToString( MSG, timeAtmosphere ) << " (" << 100.0f * timeAtmosphere / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "Splits              : ";
-		TimeToString( MSG, timeSplits ) << " (" << 100.0f * timeSplits / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "Dicing              : ";
-		TimeToString( MSG, timeDicing ) << " (" << 100.0f * timeDicing / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "Render MPGs         : ";
-		TimeToString( MSG, timeRenderMPGs ) << " (" << 100.0f * timeRenderMPGs / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "Occlusion Culling   : ";
-		TimeToString( MSG, timeOcclusionCull ) << " (" << 100.0f * timeOcclusionCull / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "Parsing             : "; 
+		TimeToString( MSG, m_timeParse.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
 		MSG << "Diceable check      : ";
-		TimeToString( MSG, timeDiceable ) << " (" << 100.0f * timeDiceable / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "Textures            : " << m_cTextureMemory << " bytes used." << std::endl;
+		TimeToString( MSG, m_timeDiceable.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "Splitting           : ";
+		TimeToString( MSG, m_timeSplits.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "Dicing              : ";
+		TimeToString( MSG, m_timeDicing.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "Render MPGs         : ";
+		TimeToString( MSG, m_timeRenderMPGs.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "Occlusion Culling   : ";
+		TimeToString( MSG, m_timeOcclusionCull.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "Imager shading      : ";
+		TimeToString( MSG, m_timeImager.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "Surface shading     : ";
+		TimeToString( MSG, m_timeSurface.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "Displacement shading: ";
+		TimeToString( MSG, m_timeDisplacement.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "Atmosphere shading  : ";
+		TimeToString( MSG, m_timeAtmosphere.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "SampleTexture       : "; 
+		TimeToString( MSG, m_timeTM.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "Combine             : "; 
+		TimeToString( MSG, m_timeDB.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "Project             : "; 
+		TimeToString( MSG, m_timeProject.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "FilterBucket        : "; 
+		TimeToString( MSG, m_timeCombine.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "DisplayBucket       : "; 
+		TimeToString( MSG, m_timeFB.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "MakeTexture         : "; 
+		TimeToString( MSG, m_timeMakeTexture.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "MakeShadow          : "; 
+		TimeToString( MSG, m_timeMakeShadow.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "MakeCubeEnv         : "; 
+		TimeToString( MSG, m_timeMakeEnv.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
+		MSG << "Others              : ";
+		TimeToString( MSG, m_timeOthers.TimeTotal(), m_timeTotalFrame.TimeTotal() ) << std::endl;
 
+		MSG << "Total time measured : ";
+		TimeToString( MSG, timeTotal, m_timeTotalFrame.TimeTotal() ) << std::endl;
+
+		MSG << std::endl;
+
+		MSG << "Textures            : " << m_cTextureMemory << " bytes used." << std::endl;
 		MSG << "Textures hits       : " << std::endl;
 		for ( TqInt i = 0; i < 5; i++ )
 		{
@@ -280,11 +302,6 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << m_cVariablesAllocated << " created" << std::endl;
 
 		MSG << "Parameters: \t" << m_cParametersAllocated << " created" << std::endl;
-		MSG << "MakeTexture check: \t"; TimeToString( MSG, timeMakeTexture ) << " (" << 100.0f * timeMakeTexture / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "MakeShadow  check: \t"; TimeToString( MSG, timeMakeShadow ) << " (" << 100.0f * timeMakeShadow / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "MakeCubeEnv check: \t"; TimeToString( MSG, timeMakeEnv ) << " (" << 100.0f * timeMakeEnv / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "SampleTexture check:\t"; TimeToString( MSG, timeTM ) << " (" << 100.0f * timeTM / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "FilterBucket check:\t"; TimeToString( MSG, timeFB ) << " (" << 100.0f * timeFB / m_timeTotalFrame << "%)" << std::endl;
 
 	}
 	if ( level == 3 )
@@ -326,16 +343,6 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "Parameters: \t" << m_cParametersAllocated << " created / ";
 		MSG << m_cParametersAllocated - m_cParametersDeallocated << " remaining (5 expected) / ";
 		MSG << m_cParametersPeak << " peak" << std::endl;
-		MSG << "MakeTexture check: \t"; TimeToString( MSG, timeMakeTexture ) << " (" << 100.0f * timeMakeTexture / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "MakeShadow  check: \t"; TimeToString( MSG, timeMakeShadow ) << " (" << 100.0f * timeMakeShadow / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "MakeCubeEnv check: \t"; TimeToString( MSG, timeMakeEnv ) << " (" << 100.0f * timeMakeEnv / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "SampleTexture check:\t"; TimeToString( MSG, timeTM ) << " (" << 100.0f * timeTM / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "Combine check:\t"; TimeToString( MSG, timeCombine ) << " (" << 100.0f * timeCombine / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "DisplayBucket check:\t"; TimeToString( MSG, timeDB ) << " (" << 100.0f * timeDB / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "Parsing check:\t"; TimeToString( MSG, timeParse ) << " (" << 100.0f * timeParse / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "Project check:\t"; TimeToString( MSG, timeProject ) << " (" << 100.0f * timeProject / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "Init. Buckets: ";
-		TimeToString( MSG, timeOthers ) << " (" << 100.0f * timeOthers / m_timeTotalFrame << "%)" << std::endl;
 	}
 
 
@@ -354,8 +361,10 @@ void CqStats::PrintStats( TqInt level ) const
 		\param t   Time value (in seconds).
 		\return  os
  */
-std::ostream& CqStats::TimeToString( std::ostream& os, TqFloat t ) const
+std::ostream& CqStats::TimeToString( std::ostream& os, TqFloat ticks, TqFloat tot ) const
 {
+	TqFloat t = static_cast<TqFloat>(ticks) / CLOCKS_PER_SEC;
+
 	// Is the time negative? Then there's a bug somewhere.
 	if ( t < 0.0 )
 	{
@@ -369,9 +378,13 @@ std::ostream& CqStats::TimeToString( std::ostream& os, TqFloat t ) const
 	TqInt h = static_cast<TqInt>( t / ( 60 * 60 ) );
 	TqInt m = static_cast<TqInt>( ( t / 60 ) - ( h * 60 ) );
 	TqFloat s = ( t ) - ( h * 60 * 60 ) - ( m * 60 );
-	if ( h > 0 ) os << h << "hrs ";
-	if ( m > 0 ) os << m << "mins ";
-	os << s << "secs";
+	if ( h > 0 ) 
+		os << std::setiosflags(std::ios::fixed) << std::setprecision(1) << std::setw(6) << h << "hrs ";
+	if ( m > 0 ) 
+		os << std::setiosflags(std::ios::fixed) << std::setprecision(1) << std::setw(6) << m << "mins ";
+	os << std::setiosflags(std::ios::fixed) << std::setprecision(1) << std::setw(6) << s << "secs";
+	if( tot >= 0 )
+	      os << " (" << std::setprecision(2) << std::setw(6) << 100.0f * ticks / tot << "%)";
 	return os;
 }
 

@@ -78,6 +78,117 @@ void	CqQuadric::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const
 
 
 //---------------------------------------------------------------------
+/** Dice the quadric filling in as much information on the grid as possible.
+ */
+
+TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
+{
+	TqInt lUses = Uses();
+	TqInt lDone = 0;
+
+	CqVector3D	P, N;
+	int v, u;
+
+	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* ps = s();
+	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pt = t();
+	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pu = this->u();
+	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pv = this->v();
+
+	TqFloat s0,s1,s2,s3;
+	if( USES( lUses, EnvVars_s ) && NULL != pGrid->s() && bHass() )
+	{
+		s0 = ps->pValue( 0 )[0];
+		s1 = ps->pValue( 1 )[0];
+		s2 = ps->pValue( 2 )[0];
+		s3 = ps->pValue( 3 )[0];
+
+		DONE( lDone, EnvVars_s );
+	}
+
+	TqFloat t0,t1,t2,t3;
+	if( USES( lUses, EnvVars_t ) && NULL != pGrid->t() && bHast() )
+	{
+		t0 = pt->pValue( 0 )[0];
+		t1 = pt->pValue( 1 )[0];
+		t2 = pt->pValue( 2 )[0];
+		t3 = pt->pValue( 3 )[0];
+
+		DONE( lDone, EnvVars_t );
+	}
+
+	TqFloat u0,u1,u2,u3;
+	if( USES( lUses, EnvVars_u ) && NULL != pGrid->u() && bHasu() )
+	{
+		u0 = pu->pValue( 0 )[0];
+		u1 = pu->pValue( 1 )[0];
+		u2 = pu->pValue( 2 )[0];
+		u3 = pu->pValue( 3 )[0];
+
+		DONE( lDone, EnvVars_u );
+	}
+
+	TqFloat v0,v1,v2,v3;
+	if( USES( lUses, EnvVars_v ) && NULL != pGrid->v() && bHasv() )
+	{
+		v0 = pv->pValue( 0 )[0];
+		v1 = pv->pValue( 1 )[0];
+		v2 = pv->pValue( 2 )[0];
+		v3 = pv->pValue( 3 )[0];
+
+		DONE( lDone, EnvVars_v );
+	}
+
+	if( USES( lUses, EnvVars_P ) && NULL != pGrid->P() )
+		DONE( lDone, EnvVars_P );
+	if( USES( lUses, EnvVars_Ng ) && NULL != pGrid->Ng() )
+		DONE( lDone, EnvVars_Ng );
+
+	for ( v = 0; v <= vDiceSize(); v++ )
+	{
+		for ( u = 0; u <= uDiceSize(); u++ )
+		{
+			TqInt igrid = ( v * ( uDiceSize() + 1 ) ) + u;
+			if( USES( lUses, EnvVars_P ) && NULL != pGrid->P() )
+			{
+				if( USES( lUses, EnvVars_Ng ) && NULL != pGrid->Ng() )
+				{
+					P = DicePoint( u, v, N );
+					pGrid->P()->SetPoint( m_matTx * P, igrid );
+					pGrid->Ng()->SetNormal( m_matITTx * N, igrid );
+
+				}
+				else
+				{
+					P = DicePoint( u, v );
+					pGrid->P()->SetPoint( m_matTx * P, igrid );
+				}
+			}
+			if( USES( lUses, EnvVars_s ) && NULL != pGrid->s() && bHass() )
+			{
+				TqFloat _s = BilinearEvaluate( s0, s1, s2, s3, u, v );
+				pGrid->s()->SetFloat( _s, igrid );
+			}
+			if( USES( lUses, EnvVars_t ) && NULL != pGrid->t() && bHast() )
+			{
+				TqFloat _t = BilinearEvaluate( t0, t1, t2, t3, u, v );
+				pGrid->t()->SetFloat( _t, igrid );
+			}
+			if( USES( lUses, EnvVars_u ) && NULL != pGrid->u() && bHasu() )
+			{
+				TqFloat _u = BilinearEvaluate( u0, u1, u2, u3, u, v );
+				pGrid->u()->SetFloat( _u, igrid );
+			}
+			if( USES( lUses, EnvVars_v ) && NULL != pGrid->v() && bHasv() )
+			{
+				TqFloat _v = BilinearEvaluate( v0, v1, v2, v3, u, v );
+				pGrid->v()->SetFloat( _v, igrid );
+			}
+		}
+	}
+	return( lDone );
+}
+
+//---------------------------------------------------------------------
 /** Dice the quadric into a grid of MPGs for rendering.
  */
 

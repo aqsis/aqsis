@@ -646,27 +646,6 @@ void	CqTeapot::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const 
 
 
 //---------------------------------------------------------------------
-/** Dice the quadric into a grid of MPGs for rendering.
- */
-
-CqMicroPolyGridBase* CqTeapot::Dice()
-{
-	CqBasicError( 0, Severity_Normal, "Teapot Dice() called." );
-
-	return NULL;
-}
-
-
-//---------------------------------------------------------------------
-/** Determine whether the quadric is suitable for dicing.
- */
-
-TqBool	CqTeapot::Diceable()
-{
-	return ( TqFalse );
-}
-
-//---------------------------------------------------------------------
 /** Get the geometric bound of this GPrim.
  */
 

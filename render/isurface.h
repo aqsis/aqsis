@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/02/22 12:53:22 $
+ *	Last change date:	$Date: 2003/03/27 21:55:13 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___isurface_Loaded___
@@ -72,6 +72,10 @@ struct IqSurface
 	 *  \param vDiceSize Size that the surface will be diced to in u.
 	 */
 	virtual void	PreDice( TqInt uDiceSize, TqInt vDiceSize ) = 0;
+	/** Fill in any primitive variables the surface can in one go.
+	 *  \return A bitvector representing the standard primitive variables initialised.
+	 */
+	virtual TqInt	DiceAll( CqMicroPolyGrid* pGrid ) = 0;
 	/** Interpolate the specified value using the natural interpolation method for the surface.
 	 *  Fills in the given shader data with the resulting data.
 	 */

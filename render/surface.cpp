@@ -445,8 +445,11 @@ CqMicroPolyGridBase* CqSurface::Dice()
 
 	TqInt lUses = Uses();
 
+	// Allow the surface to fill in as much as possible on the grid in one go for speed.
+	TqInt lDone = DiceAll( pGrid );
+
 	// Dice the primitive variables.
-	if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) )
+	if ( !isDONE( lDone, EnvVars_Cs ) && USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) )
 	{
 		if ( bHasCs() )
 			Cs() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->Cs(), this );
@@ -456,7 +459,7 @@ CqMicroPolyGridBase* CqSurface::Dice()
 			pGrid->Cs() ->SetColor( CqColor( 1, 1, 1 ) );
 	}
 
-	if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) )
+	if ( !isDONE( lDone, EnvVars_Os ) && USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) )
 	{
 		if ( bHasOs() )
 			Os() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->Os(), this );
@@ -466,30 +469,30 @@ CqMicroPolyGridBase* CqSurface::Dice()
 			pGrid->Os() ->SetColor( CqColor( 1, 1, 1 ) );
 	}
 
-	if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && bHass() )
+	if ( !isDONE( lDone, EnvVars_s ) && USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && bHass() )
 		s() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->s(), this );
 
-	if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && bHast() )
+	if ( !isDONE( lDone, EnvVars_t ) && USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && bHast() )
 		t() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->t(), this );
 
-	if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && bHasu() )
+	if ( !isDONE( lDone, EnvVars_u ) && USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && bHasu() )
 		u() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->u(), this );
 
-	if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && bHasv() )
+	if ( !isDONE( lDone, EnvVars_v ) && USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && bHasv() )
 		v() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->v(), this );
 
 
-	if ( NULL != pGrid->P() )
+	if ( !isDONE( lDone, EnvVars_P ) && NULL != pGrid->P() )
 		NaturalDice( P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
 
 	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
-	if ( USES( lUses, EnvVars_N ) && ( NULL != pGrid->N() ) && bHasN() )
+	if ( !isDONE( lDone, EnvVars_N ) && USES( lUses, EnvVars_N ) && ( NULL != pGrid->N() ) && bHasN() )
 	{
 		N() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->N(), this );
 		pGrid->SetbShadingNormals( TqTrue );
 	}
 
-	if ( CanGenerateNormals() && USES( lUses, EnvVars_Ng ) )
+	if ( !isDONE( lDone, EnvVars_Ng ) && CanGenerateNormals() && USES( lUses, EnvVars_Ng ) )
 	{
 		GenerateGeometricNormals( m_uDiceSize, m_vDiceSize, pGrid->Ng() );
 		pGrid->SetbGeometricNormals( TqTrue );
@@ -500,15 +503,17 @@ CqMicroPolyGridBase* CqSurface::Dice()
 	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
 	for ( iUP = m_aUserParams.begin(); iUP != end ; iUP++ )
 	{
-		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
-		if ( NULL != pGrid->pAttributes() ->pshadSurface() )
-			pGrid->pAttributes() ->pshadSurface() ->SetArgument( ( *iUP ), this );
+		if( ( *iUP )->Class() == class_varying || ( *iUP )->Class() == class_vertex )
+		{
+			if ( NULL != pGrid->pAttributes() ->pshadSurface() )
+				pGrid->pAttributes() ->pshadSurface() ->SetArgument( ( *iUP ), this );
 
-		if ( NULL != pGrid->pAttributes() ->pshadDisplacement() )
-			pGrid->pAttributes() ->pshadDisplacement() ->SetArgument( ( *iUP ), this );
+			if ( NULL != pGrid->pAttributes() ->pshadDisplacement() )
+				pGrid->pAttributes() ->pshadDisplacement() ->SetArgument( ( *iUP ), this );
 
-		if ( NULL != pGrid->pAttributes() ->pshadAtmosphere() )
-			pGrid->pAttributes() ->pshadAtmosphere() ->SetArgument( ( *iUP ), this );
+			if ( NULL != pGrid->pAttributes() ->pshadAtmosphere() )
+				pGrid->pAttributes() ->pshadAtmosphere() ->SetArgument( ( *iUP ), this );
+		}
 	}
 
 	PostDice( pGrid );

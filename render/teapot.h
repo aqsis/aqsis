@@ -84,9 +84,6 @@ class CqTeapot : public CqSurface
 		TqInt cNbrPatchMeshBicubic;
 
 		// Overrides from CqSurface
-		virtual	CqMicroPolyGridBase* Dice();
-		virtual TqBool	Diceable();
-
 		virtual	CqBound	Bound() const;
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 

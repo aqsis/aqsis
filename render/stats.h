@@ -96,6 +96,21 @@ class CqStatTimer
 			m_cStarted = 0;
 		}
 
+		/** Check if this timer is started.
+		 */
+		TqBool	isStarted()
+		{
+			return( m_cStarted > 0 );
+		}
+
+		/** Add two timers together
+		 */
+		CqStatTimer& operator+=( const CqStatTimer& from )
+		{
+			m_timeTotal += from.m_timeTotal;
+			return(*this);
+		}
+
 	private:
 		clock_t	m_timeStart;		///< Time at which the current interval started.
 		clock_t	m_timeTotal;		///< Total time recorded by this timer.
@@ -430,7 +445,7 @@ class CqStats
 		void PrintInfo() const;
 
 	private:
-		std::ostream& TimeToString( std::ostream& os, TqFloat t ) const;
+		std::ostream& TimeToString( std::ostream& os, TqFloat t, TqFloat tot ) const;
 
 	private:
 		EqState	m_State;						///< Current process identifier.
@@ -466,9 +481,8 @@ class CqStats
 		TqInt m_cTextureHits[ 2 ][ 5 ];     ///< Count of the hits encountered used by texturemap.cpp
 		TqInt m_cTextureMisses[ 5 ];     ///< Count of the hits encountered used by texturemap.cpp
 
-		time_t	m_timeTotal;					///< Total time spent on the entire animation.
-		time_t m_timeTotalFrame;				///< Time spent on processing one individual frame.
-		TqBool m_frameTimerRunning;			///< True, if the frame timer was started and not yet stopped.
+		CqStatTimer	m_timeTotal;				///< Total time spent on the entire animation.
+		CqStatTimer m_timeTotalFrame;			///< Time spent on processing one individual frame.
 
 		CqStatTimer m_timeSurface;				///< Time spent on surface shading.
 		CqStatTimer m_timeImager;			///< Time spent on imager shading.
