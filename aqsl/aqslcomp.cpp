@@ -29,6 +29,7 @@
 #include	<iostream>
 #include	<fstream>
 #include	<sstream>
+#include	<stdio.h>
 
 #ifdef	AQSIS_SYSTEM_WIN32
 #include	"io.h"
