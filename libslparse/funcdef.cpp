@@ -267,8 +267,8 @@ CqFuncDef	gStandardFuncs[] = {
                                  CqFuncDef( Type_String, "format", "format", "s*" ),
                                  CqFuncDef( Type_Float, "match", "match", "ss" ),
                                  CqFuncDef( Type_Point, "rotate", "rotate", "pfpp" ),
-                                 CqFuncDef( Type_Float, "filterstep", "filterstep2", "fff*" ),
-                                 CqFuncDef( Type_Float, "filterstep", "filterstep", "ff*" ),
+                                 CqFuncDef( Type_Float, "filterstep", "filterstep2", "fff*"),
+                                 CqFuncDef( Type_Float, "filterstep", "filterstep", "ff*", ( 1 << EnvVars_du ) | ( 1 << EnvVars_u ) | ( 1 << EnvVars_dv ) | ( 1 << EnvVars_v ) ),
                                  CqFuncDef( Type_Color, "specularbrdf", "specularbrdf", "vnvf" ),
 
                                  CqFuncDef( Type_Float, "pnoise", "fpnoise1", "ff" ),
