@@ -21,6 +21,7 @@ if test x$debug = xtrue ; then
   DEBUG_FLAGS="-g -Wall" 
   OPT_FLAGS="-O0"
 else
+  AC_DEFINE(NDEBUG,[],"Disable C99 asserts.")
   DEBUG_FLAGS="" 
   OPT_FLAGS="-O2"
 fi
