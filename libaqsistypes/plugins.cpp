@@ -72,7 +72,6 @@ CqPluginBase::DLOpen( CqString *library )
 #endif
 #endif
     if ( handle ) m_activeHandles.push_back( handle );
-	std::cerr << info << "Done! " << handle << " " << dlerror() << std::endl;
     return handle;
 }
 
