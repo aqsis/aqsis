@@ -111,6 +111,8 @@ void StandardDeclarations( RendermanInterface& CallbackInterface )
 	ParserDeclare( CallbackInterface, "bias1", "uniform float" );
 	ParserDeclare( CallbackInterface, "jitter", "uniform integer" );
 	ParserDeclare( CallbackInterface, "depthfilter", "uniform string" );
+        ParserDeclare( CallbackInterface, "width", "varying float" );
+        ParserDeclare( CallbackInterface, "constantwidth", "uniform float" );
 }
 
 bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream )
