@@ -204,6 +204,10 @@ class CqCylinder : public CqQuadric
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual TqBool	CanGenerateNormals() const
+		{
+			return ( TqTrue );
+		}
 
 		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 
