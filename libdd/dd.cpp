@@ -21,9 +21,11 @@
 /** \file
 		\brief Implements the base message handling functionality required by display drivers.
 		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Timothy M. Shead (tshead@k-3d.com)
 */
 
 #include	<iostream>
+#include <memory>
 #include	<strstream>
 
 #include	"aqsis.h"
@@ -34,7 +36,6 @@
 
 #else // AQSIS_SYSTEM_WIN32
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <netdb.h>
@@ -65,7 +66,7 @@ TqInt HandleMessage(SOCKET s,SqDDMessageBase* pMsg);
 
 START_NAMESPACE(Aqsis)
 
-static void CloseSocket(SOCKET s);
+static void CloseSocket(SOCKET& Socket);
 
 //----------------------------------------------------------------------
 /** Receive a specified length of data from the specified socket.
@@ -159,7 +160,7 @@ TqInt DDSendMsg(TqInt s, SqDDMessageBase* pMsg)
 /** Enter a loop processing messages from the server.
  */
 
-SOCKET s;
+static SOCKET g_Socket = INVALID_SOCKET;
 
 TqInt DDInitialise(const TqChar* phostname, TqInt port)
 {
@@ -169,8 +170,8 @@ TqInt DDInitialise(const TqChar* phostname, TqInt port)
 #endif // AQSIS_SYSTEM_WIN32
 
 	// Open a socket.
-	s=socket(AF_INET,SOCK_STREAM,0);
-	if(s!=INVALID_SOCKET)
+	g_Socket = socket(AF_INET,SOCK_STREAM,0);
+	if(g_Socket != INVALID_SOCKET)
 	{
 		// If no host name specified, use the local machine.
 		char hostName[255];
@@ -192,11 +193,11 @@ TqInt DDInitialise(const TqChar* phostname, TqInt port)
 
 		memcpy(&saTemp.sin_addr,pHost->h_addr,pHost->h_length);
 		TqInt conret;
-		if((conret=connect(s,(PSOCKADDR)&saTemp,sizeof(saTemp)))!=SOCKET_ERROR)
+		if((conret=connect(g_Socket, (PSOCKADDR)&saTemp,sizeof(saTemp)))!=SOCKET_ERROR)
 			return(0);
 		else
 		{
-			CloseSocket(s);
+			CloseSocket(g_Socket);
 			return(-1);
 		}
 	}
@@ -204,6 +205,109 @@ TqInt DDInitialise(const TqChar* phostname, TqInt port)
 		return(-1);
 }
 
+//----------------------------------------------------------------------
+/** Process a single message synchronously (blocks), returning false iff there are no more messages to process
+ */
+
+bool DDProcessMessage()
+{
+	SqDDMessageBase* message = 0;
+	const TqInt length = DDReceiveMsg(g_Socket, message);
+	if(0 == length)
+		{
+			// Connection closed gracefully by server ...
+			CloseSocket(g_Socket);
+			return false;
+		}
+	else if(length < 0)
+		{
+			std::cerr << "Error reading from socket" << std::endl;
+			CloseSocket(g_Socket);
+			return false;
+		}
+
+	// Make sure our message gets deallocated ...
+	std::auto_ptr<SqDDMessageBase> messagestorage(message);
+	
+	switch(message->m_MessageID)
+		{
+			case MessageID_FormatQuery:
+				{
+					if(0 != Query(g_Socket, message))
+						{
+							CloseSocket(g_Socket);
+							return false;
+						}
+				}
+				break;
+
+			case MessageID_Open:
+				{
+					if(0 != Open(g_Socket, message))
+						{
+							CloseSocket(g_Socket);
+							return false;
+						}
+				}
+				break;
+
+			case MessageID_Data:
+				{
+					if(0 != Data(g_Socket, message))
+						{
+							CloseSocket(g_Socket);
+							return false;
+						}
+				}
+				break;
+
+			case MessageID_Close:
+				{
+					if(0 != Close(g_Socket, message))
+						{
+							CloseSocket(g_Socket);
+							return false;
+						}
+				}
+				break;
+
+			default:
+				{
+					if(0 != HandleMessage(g_Socket, message))
+						{
+							CloseSocket(g_Socket);
+							return false;
+						}
+				}
+				break;
+		}
+		
+	return true;
+}
+
+//----------------------------------------------------------------------
+/**	Process a single message asynchronously (returns after the given timeout if there are no messages to process), 
+		returning false iff there are no more messages to process
+ */
+
+bool DDProcessMessageAsync(const TqUint TimeoutSeconds, const TqUint TimeoutMicroSeconds)
+{
+	// Check to see if we have anything waiting ...
+	fd_set files;
+	FD_ZERO(&files);
+	FD_SET(g_Socket, &files);
+
+	timeval timeout;
+	timeout.tv_sec = TimeoutSeconds;
+	timeout.tv_usec = TimeoutMicroSeconds;
+	
+	const int ready = select(g_Socket + 1, &files, 0, 0, &timeout);
+	if(0 == ready)
+		return true;
+		
+	// We've got data waiting, so process it normally ...
+	return DDProcessMessage();
+}
 
 //----------------------------------------------------------------------
 /** Enter a loop processing messages from the server.
@@ -216,15 +320,15 @@ TqInt DDProcessMessages()
 		SqDDMessageBase* pMsg;
 		TqInt len;
 		TqInt ret;
-		if((len=DDReceiveMsg(s,pMsg))>0)
+		if((len=DDReceiveMsg(g_Socket,pMsg))>0)
 		{
 			switch(pMsg->m_MessageID)
 			{
 				case MessageID_FormatQuery:
 				{
-					if((ret=Query(s,pMsg))!=0)
+					if((ret=Query(g_Socket,pMsg))!=0)
 					{
-						CloseSocket(s);
+						CloseSocket(g_Socket);
 						return(ret);
 					}
 				}
@@ -232,9 +336,9 @@ TqInt DDProcessMessages()
 
 				case MessageID_Open:
 				{
-					if((ret=Open(s,pMsg))!=0)
+					if((ret=Open(g_Socket,pMsg))!=0)
 					{
-						CloseSocket(s);
+						CloseSocket(g_Socket);
 						return(ret);
 					}
 				}
@@ -242,9 +346,9 @@ TqInt DDProcessMessages()
 
 				case MessageID_Data:
 				{
-					if((ret=Data(s,pMsg))!=0)
+					if((ret=Data(g_Socket,pMsg))!=0)
 					{
-						CloseSocket(s);
+						CloseSocket(g_Socket);
 						return(ret);
 					}
 				}
@@ -252,9 +356,9 @@ TqInt DDProcessMessages()
 
 				case MessageID_Close:
 				{
-					if((ret=Close(s,pMsg))!=0)
+					if((ret=Close(g_Socket,pMsg))!=0)
 					{
-						CloseSocket(s);
+						CloseSocket(g_Socket);
 						return(ret);
 					}
 				}
@@ -262,9 +366,9 @@ TqInt DDProcessMessages()
 
 				default:
 				{
-					if((ret=HandleMessage(s,pMsg))!=0)
+					if((ret=HandleMessage(g_Socket,pMsg))!=0)
 					{
-						CloseSocket(s);
+						CloseSocket(g_Socket);
 						return(ret);
 					}
 				}
@@ -274,33 +378,34 @@ TqInt DDProcessMessages()
 		else if(len==0)
 		{
 			// Connection closed gracefully by server.
-			CloseSocket(s);
+			CloseSocket(g_Socket);
 			return(0);
 		}
 		else
 		{
 			std::cerr << "Error reading from socket" << std::endl;
-			CloseSocket(s);
+			CloseSocket(g_Socket);
 			return(-1);
 		}
 	}
 }
 
-
-static void CloseSocket(SOCKET s)
+static void CloseSocket(SOCKET& Socket)
 {
 #ifdef AQSIS_SYSTEM_WIN32
 	int x=1;
 	LINGER ling;
 	ling.l_onoff=1;
 	ling.l_linger=10;
-	setsockopt(s,SOL_SOCKET,SO_LINGER,reinterpret_cast<const char*>(&ling),sizeof(ling));
-	shutdown(s,SD_BOTH);
-	closesocket(s);
+	setsockopt(Socket,SOL_SOCKET,SO_LINGER,reinterpret_cast<const char*>(&ling),sizeof(ling));
+	shutdown(Socket,SD_BOTH);
+	closesocket(Socket);
 #else // AQSIS_SYSTEM_WIN32
-	shutdown(s, SD_BOTH);
-	close(s);
+	shutdown(Socket, SD_BOTH);
+	close(Socket);
 #endif // !AQSIS_SYSTEM_WIN32
+
+	Socket = INVALID_SOCKET;
 }
 
 

@@ -67,51 +67,51 @@ static std::string	g_Filename("output.tif");
 static TqInt g_ImageWidth = 0;
 static TqInt g_ImageHeight = 0;
 static TqInt g_SamplesPerElement = 0;
+static int g_Window = 0;
 static GLubyte* g_Image = 0;
 
 void display(void)
 {
-   glClear(GL_COLOR_BUFFER_BIT);
-   glRasterPos2i(0, 0);
-   glDrawPixels(g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image);
-   glFlush();
+	glClearColor (0.0, 0.0, 0.0, 0.0);
+	glShadeModel(GL_FLAT);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glClear(GL_COLOR_BUFFER_BIT);
+	glRasterPos2i(0, 0);
+	glDrawPixels(g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image);
+	glFlush();
+
+	glutSwapBuffers();
 }
 
 void reshape(int w, int h)
 {
-   glViewport(0, 0, (GLsizei) w, (GLsizei) h);
-   glMatrixMode(GL_PROJECTION);
-   glLoadIdentity();
-   gluOrtho2D(0.0, (GLdouble) w, 0.0, (GLdouble) h);
-   glMatrixMode(GL_MODELVIEW);
-   glLoadIdentity();
+	glViewport(0, 0, (GLsizei) w, (GLsizei) h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluOrtho2D(0.0, (GLdouble) w, 0.0, (GLdouble) h);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 }
 
 void idle(void)
 {
-	if(g_RenderComplete)
-		glutIdleFunc(0);
-		
-/*
-	if(!g_RenderComplete)
+	if(!DDProcessMessageAsync(0, 1000))
 		{
-			const TqInt result = DDProcessMessage();
-			if((0 == result) || (-1 == result))
-				g_RenderComplete = true;
+			g_RenderComplete = true;
+			glutIdleFunc(0);
 		}
-*/		
-//	glutPostRedisplay();
 }
 
 void keyboard(unsigned char key, int x, int y)
 {
-   switch (key) {
-      case 27:
-         exit(0);
-         break;
-      default:
-         break;
-   }
+	switch(key)
+		{
+			case 27:
+				exit(0);
+				break;
+			default:
+				break;
+		}
 }
 
 int main(int argc, char** argv)
@@ -123,14 +123,22 @@ int main(int argc, char** argv)
 		}
 
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
 
-	if(-1 == DDProcessMessages())
+	// Process messages until we have enough data to create our window ...
+	while(0 == g_Window)
 		{
-			std::cerr << "Error processing messages" << std::endl;
-			return 2;
+			if(!DDProcessMessage())
+				{
+					std::cerr << "Premature end of messages" << std::endl;
+					return 2;
+				}
 		}
 
+	// Start the glut message loop ...
+	glutDisplayFunc(display);
+	glutReshapeFunc(reshape);
+	glutKeyboardFunc(keyboard);
+	glutIdleFunc(idle);
 	glutMainLoop();
 
 	// Lose our image buffer ...
@@ -159,7 +167,6 @@ TqInt Query(SOCKET s,SqDDMessageBase* pMsgB)
 	return(0);
 }
 
-
 TqInt Open(SOCKET s, SqDDMessageBase* pMsgB)
 {
 	SqDDMessageOpen* const message = static_cast<SqDDMessageOpen*>(pMsgB);
@@ -169,23 +176,15 @@ TqInt Open(SOCKET s, SqDDMessageBase* pMsgB)
 	g_SamplesPerElement = message->m_SamplesPerElement;
 
 	g_Image = new GLubyte[g_ImageWidth * g_ImageHeight * 3];
-	memset(g_Image, 255, g_ImageWidth* g_ImageHeight * 3);
+	memset(g_Image, 128, g_ImageWidth* g_ImageHeight * 3);
 
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
+//	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGBA);
 	glutInitWindowSize(g_ImageWidth, g_ImageHeight);
-	//   glutInitWindowPosition(100, 100);
-	glutCreateWindow(g_Filename.c_str());
-	glClearColor (0.0, 0.0, 0.0, 0.0);
-	glShadeModel(GL_FLAT);
-	
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-	glutDisplayFunc(display);
-	glutReshapeFunc(reshape);
-	glutKeyboardFunc(keyboard);
-	glutIdleFunc(idle);
+	g_Window = glutCreateWindow(g_Filename.c_str());
 	
 	return(0);
 }
-
 
 TqInt Data(SOCKET s, SqDDMessageBase* pMsgB)
 {
@@ -224,13 +223,11 @@ TqInt Data(SOCKET s, SqDDMessageBase* pMsgB)
 	return(0);
 }
 
-
 TqInt Close(SOCKET s, SqDDMessageBase* pMsgB)
 {
 	g_RenderComplete = true;
 	return(1);	
 }
-
 
 TqInt HandleMessage(SOCKET s, SqDDMessageBase* pMsgB)
 {

@@ -39,6 +39,8 @@ TqInt DDReceiveMsg(TqInt s, SqDDMessageBase*& pMsg);
 TqInt DDSendSome(TqInt s,void* buffer, TqInt len);
 TqInt DDSendMsg(TqInt s, SqDDMessageBase* pMsg);
 TqInt DDInitialise(const TqChar* phostname, TqInt port);
+bool DDProcessMessage();
+bool DDProcessMessageAsync(const TqUint TimeoutSeconds, const TqUint TimeoutMicroSeconds);
 TqInt DDProcessMessages();
 
 //----------------------------------------------------------------------
