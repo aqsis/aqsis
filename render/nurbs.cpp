@@ -39,6 +39,8 @@
 
 START_NAMESPACE( Aqsis )
 
+long CountMemUsage();
+
 
 //---------------------------------------------------------------------
 /** Constructor.
@@ -384,7 +386,7 @@ CqVector4D	CqSurfaceNURBS::EvaluateNormal( TqFloat u, TqFloat v )
 				SKL[ k ][ l ] = SKL[ k ][ l ] + Nv[ l ][ s ] * temp[ s ];
 		}
 	}
-	N = SKL[0][1]%SKL[1][0];
+	N = SKL[1][0]%SKL[0][1];
 	N.Unit();
 	return( N );	
 }
@@ -2103,17 +2105,17 @@ void CqSurfaceNURBS::SubdivideSegments(std::vector<CqSurfaceNURBS*>& S)
 
 			// The index of the patch we are working on.
 			TqInt iS = ( vPatch * uSplits ) + uPatch;
-			S[iS] = new CqSurfaceNURBS(*this);
+			S[iS] = new CqSurfaceNURBS;
 			S[iS]->SetfPatchMesh( TqFalse );
 			// Initialise it to the same orders as us, with the calculated control point densities.
 			S[iS]->Init( m_uOrder, m_vOrder, (uEnd+1)-uOffset, (vEnd+1)-vOffset );
 
 			// Copy the control points out of the our storage.
 			TqInt iPu, iPv;
-			for( iPv = 0; iPv <= vEnd; iPv++ )
+			for( iPv = 0; iPv <= vEnd-vOffset; iPv++ )
 			{
 				TqInt iPIndex = ( ( vOffset + iPv ) * m_cuVerts ) + uOffset;
-				for( iPu = 0; iPu <= uEnd; iPu++ )
+				for( iPu = 0; iPu <= uEnd-uOffset; iPu++ )
 				{
 					TqInt iSP = ( iPv * S[iS]->cuVerts() ) + iPu; 
 					S[iS]->P()[ iSP ] = P()[ iPIndex++ ];
@@ -2142,7 +2144,7 @@ void CqSurfaceNURBS::SubdivideSegments(std::vector<CqSurfaceNURBS*>& S)
 	{
 		for( irow = 0; irow < nuSegs; irow++ )
 		{
-			TqInt iPatch = ( icol * nvSegs ) + irow;
+			TqInt iPatch = ( icol * nuSegs ) + irow;
 			TqInt iA = ( icol * ( nuSegs + 1 ) ) + irow;
 			TqInt iB = ( icol * ( nuSegs + 1 ) ) + irow + 1;
 			TqInt iC = ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow;
