@@ -2380,7 +2380,15 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 //
 RtVoid	RiPointsGeneralPolygons( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], ... )
 {
-	CqBasicError( 0, Severity_Normal, "RiPointsGeneralPolygons not supported" );
+	va_list	pArgs;
+	va_start( pArgs, nverts );
+
+	RtToken* pTokens;
+	RtPointer* pValues;
+	RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+
+	RiPointsGeneralPolygonsV( npolys, nloops, nverts, verts, count, pTokens, pValues );
+
 	return ;
 }
 
@@ -2391,7 +2399,117 @@ RtVoid	RiPointsGeneralPolygons( RtInt npolys, RtInt nloops[], RtInt nverts[], Rt
 //
 RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], PARAMETERLIST )
 {
-	CqBasicError( 0, Severity_Normal, "RiPointsGeneralPolygons not supported" );
+	TqInt ipoly;
+	TqInt iloop;
+	TqInt igloop = 0;
+	TqInt cVerts = 0;
+	TqInt igvert = 0;
+
+	// Calculate how many points overall.
+	RtInt* pVerts = verts;
+	for( ipoly = 0; ipoly < npolys; ipoly++ )
+	{
+		for ( iloop = 0; iloop < nloops[ ipoly ]; iloop++, igloop++ )
+		{	
+			TqInt v;
+			for ( v = 0; v < nverts[ igloop ]; v++ )
+			{
+				if ( ( ( *pVerts ) + 1 ) > cVerts )
+					cVerts = ( *pVerts ) + 1;
+				pVerts++;
+			}
+		}
+	}
+
+	// Create a storage class for all the points.
+	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts );
+	pPointsClass->AddRef();
+	// Process any specified primitive variables
+	pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
+
+	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
+	{
+		// Reset loop counter.
+		igloop = 0;
+		TqUint ctris = 0;
+		std::vector<TqInt>	aiTriangles;
+
+		for( ipoly = 0; ipoly < npolys; ipoly++ )
+		{
+			// Create a general 2D polygon using the points in each loop.
+			CqPolygonGeneral2D poly;
+			TqUint ipoint = 0;
+			for ( iloop = 0; iloop < nloops[ ipoly ]; iloop++, igloop++ )
+			{
+				TqFloat	MinX, MaxX;
+				TqFloat	MinY, MaxY;
+				TqFloat	MinZ, MaxZ;
+				CqVector3D	vecTemp = pPointsClass->P() [ verts[ igvert ] ];
+				MinX = MaxX = vecTemp.x();
+				MinY = MaxY = vecTemp.y();
+				MinZ = MaxZ = vecTemp.z();
+
+				CqPolygonGeneral2D polya;
+				polya.SetpVertices( pPointsClass );
+				TqInt ivert;
+				for ( ivert = 0; ivert < nverts[ igloop ]; ivert++, igvert++ )
+				{
+					ipoint = verts[ igvert ];
+					assert( ipoint < pPointsClass->P().Size() );
+					polya.aiVertices().push_back( ipoint );
+
+					vecTemp = pPointsClass->P() [ verts[ igvert ] ];
+					MinX = ( MinX < vecTemp.x() ) ? MinX : vecTemp.x();
+					MinY = ( MinY < vecTemp.y() ) ? MinY : vecTemp.y();
+					MinZ = ( MinZ < vecTemp.z() ) ? MinZ : vecTemp.z();
+					MaxX = ( MaxX > vecTemp.x() ) ? MaxX : vecTemp.x();
+					MaxY = ( MaxY > vecTemp.y() ) ? MaxY : vecTemp.y();
+					MaxZ = ( MaxZ > vecTemp.z() ) ? MaxZ : vecTemp.z();
+				}
+				
+				// Work out which plane to project to.
+				TqFloat	DiffX = MaxX - MinX;
+				TqFloat	DiffY = MaxY - MinY;
+				TqFloat	DiffZ = MaxZ - MinZ;
+
+				TqInt Axis;
+				if ( DiffX < DiffY && DiffX < DiffZ )
+					Axis = CqPolygonGeneral2D::Axis_YZ;
+				else if ( DiffY < DiffX && DiffY < DiffZ )
+					Axis = CqPolygonGeneral2D::Axis_XZ;
+				else
+					Axis = CqPolygonGeneral2D::Axis_XY;
+				polya.SetAxis( Axis );
+
+				if ( iloop == 0 )
+				{
+					if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
+						polya.SwapDirection();
+					poly = polya;
+				}
+				else
+				{
+					if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
+						polya.SwapDirection();
+					poly.Combine( polya );
+				}
+			}
+			// Now triangulate the general polygon
+
+			poly.CalcOrientation();
+			poly.Triangulate( aiTriangles );
+
+		}
+		pPointsClass->Release();
+
+		// Build an array of point counts (always 3 each).
+		ctris = aiTriangles.size() / 3;
+		std::vector<RtInt> _nverts;
+		_nverts.resize( ctris, 3 );
+
+		RiPointsPolygonsV( ctris, &_nverts[ 0 ], &aiTriangles[ 0 ], count, tokens, values );
+	}
+
 	return ;
 }
 

@@ -303,7 +303,7 @@ RendermanInterface::RtVoid Engine::RiPixelVariance( RtFloat variance )
 }
 RendermanInterface::RtVoid Engine::RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[] )
 {
-	::RiPointsGeneralPolygons( npolys, nloops, nverts, verts, count, tokens, values );
+	::RiPointsGeneralPolygonsV( npolys, nloops, nverts, verts, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[] )
 {
