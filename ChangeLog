@@ -1,3 +1,368 @@
+2003-01-19  pgregory
+	* shadowmap/Makefile.am 1.5:
+		Make work with new save directly to shadow map mode.
+
+	* ribfiles/Makefile.am 1.4:
+		Remove test.rib, not valid.
+
+	* configure.in 1.53:
+		Update version number.
+
+	* render/version.h 1.19:
+		Update version number
+
+2003-01-18  pgregory
+	* render/ri.cpp 1.135:
+	* render/texturemap.cpp 1.69:
+	* render/texturemap.h 1.32:
+		Now supports HDRI as far as I can tell. Increased default
+		texture memory from 1MB to 8MB otherwise things get a bit silly.
+
+2003-01-17  mw_matti
+	* librib2/librib.cpp 1.18:
+		Declare "bias" "uniform float"
+
+	* render/texturemap.cpp 1.67:
+		Use Option "bias" float,
+		extended shadow() call to use bias if specified
+
+2003-01-17  oedo808
+	* libri2rib/ascii.h 1.11:
+	* libri2rib/binary.cpp 1.5:
+	* libri2rib/binary.h 1.4:
+	* libri2rib/context.cpp 1.8:
+	* libri2rib/context.h 1.7:
+	* libri2rib/options.h 1.4:
+	* libri2rib/output.cpp 1.7:
+	* libri2rib/output.h 1.4:
+	* libri2rib/ri2ribtest.cpp 1.3:
+		useless FileOpenType option removed.
+
+2003-01-17  pgregory
+	* render/texturemap.cpp 1.68:
+	* render/texturemap.h 1.31:
+		Initial support for HDRI tiff texturing. Still needs work. In
+		particular the cache management causes some problems.
+
+	* render/ri.cpp 1.134:
+	* render/texturemap.cpp 1.66:
+		More changes to prepare for HDRI support. Now environment map
+		generation uses standard methods to avoid presumptions on
+		texture format.
+
+2003-01-15  pgregory
+	* render/ri.cpp 1.132:
+	* render/ri.cpp 1.133:
+	* render/texturemap.cpp 1.65:
+	* render/texturemap.h 1.30:
+		More changes to texturing in preparation for HDRI support.
+
+	* libri2rib/output.cpp 1.6:
+	* libri2rib/outstream.cpp 1.7:
+		Fixes for windows compilation.
+
+	* render/texturemap.cpp 1.64:
+	* render/texturemap.h 1.29:
+		Initial changes to texture buffer managerment to support HDRI
+		images.
+
+2003-01-14  oedo808
+	* libri2rib/output.cpp 1.5:
+	* libri2rib/outstream.cpp 1.6:
+		Closing files when done
+
+2003-01-13  pgregory
+	* ribfiles/test.rib 1.5:
+		Removed.
+
+	* libddmsock/ddmsock.cpp 1.19:
+	* libddmsock/displaydriver.h 1.9:
+	* render/ri.cpp 1.131:
+	* shadowmap/shadowmap.cpp 1.9:
+		Update shadowmap display device to write a proper shadow map if
+		the requested display type is "shadow", or a zfile if the
+		display type is "zfile". Allows you to bypass teqser if you use
+		"shadow".
+
+	* libshadervm/shadervariable.cpp 1.7:
+		Fix problem with include order and warnings.
+
+	* render/ri.cpp 1.130:
+	* render/subdivision2.cpp 1.13:
+	* render/subdivision2.h 1.9:
+		Check for and cope with non-manifold case.
+
+	* libaqsistypes/sstring.cpp 1.6:
+	* libaqsistypes/sstring.h 1.3:
+	* libshaderexecenv/shadeops.cpp 1.22:
+	* render/renderer.h 1.25:
+		Fix SL printf function to not automatically append a newline, 
+		and to accept and process the most common escape sequences.
+
+2003-01-12  pgregory
+	* render/texturemap.cpp 1.62:
+		Reenable shadow sampleing (Doh!)
+		Set texture mapping blur default to 0.0 as well (Doh! Doh!)
+
+	* render/texturemap.cpp 1.61:
+		Default blur value should be 0.0 if not specified.
+
+	* render/texturemap.cpp 1.63:
+		Fix texturing functions to check for "blur" as well as "sblur" 
+		or "tblur"
+
+	* ribfiles/shadtest.rib 1.4:
+		Use midpoint sampling for shadows to avoid the need for bias.
+
+2003-01-11  pgregory
+	* libaqsistypes/libaqsistypes.dsp 1.11:
+	* libshaderexecenv/shadeops.cpp 1.21:
+	* libshaderexecenv/shaderexecenv.h 1.12:
+	* render/imagebuffer.cpp 1.86:
+	* render/ishaderexecenv.h 1.8:
+	* render/itexturemap.h 1.5:
+	* render/nurbs.cpp 1.58:
+	* render/renderer.cpp 1.49:
+	* render/ri.cpp 1.129:
+	* render/stats.cpp 1.20:
+	* render/texturemap.cpp 1.60:
+	* render/texturemap.h 1.28:
+		Improve the mechanism used to pass parameters to the texture sampling functions. Now uses a map, so the paramters can be extended at will.
+		Implement support for the "samples" parameter to shadow sampling.
+
+	* render/lath.cpp 1.5:
+	* render/lath.h 1.5:
+	* render/ri.cpp 1.128:
+	* render/subdivision2.cpp 1.12:
+	* render/subdivision2.h 1.8:
+		Improve handling of irregular meshes.
+		Fix decision about dicing to go to a patch if possible, as patches are much faster.
+		Fix bug in construction to AddRef and Release around the patch generation in case the first patch gets culled, and the releasing deletes the topology class.
+		Improve speed a lot, using memory pool for laths.
+
+2003-01-10  pgregory
+	* libslparse/vardef.cpp 1.4:
+		Make L read/write in lightsource shaders.
+
+	* render/lath.h 1.4:
+	* render/subdivision2.cpp 1.11:
+		Fix some more issues with irregular meshes.
+
+2003-01-10  oedo808
+	* libri2rib/ascii.h 1.10:
+	* libri2rib/binary.cpp 1.4:
+	* libri2rib/binary.h 1.3:
+	* libri2rib/context.cpp 1.7:
+	* libri2rib/context.h 1.6:
+	* libri2rib/options.h 1.3:
+	* libri2rib/output.cpp 1.4:
+	* libri2rib/output.h 1.3:
+	* libri2rib/outstream.cpp 1.5:
+	* libri2rib/outstream.h 1.5:
+	* libri2rib/ri.cpp 1.11:
+	* libri2rib/ri2ribtest.cpp 1.2:
+		libri2rib simplification and Gzip output to Pipe added.
+
+2003-01-09  pgregory
+	* render/lath.cpp 1.4:
+	* render/subdivision2.cpp 1.10:
+	* render/subdivision2.h 1.7:
+		More changes to new subdivision code, handles irregular meshes
+		better now. Had problems with meshes with 'star' points, and
+		filling in the link data during subdivision.
+
+	* render/imagebuffer.cpp 1.85:
+		Had to roll back Matti's change, Michel pointed out that not
+		filtering/quantizing/exposing an empty bucket won't work when
+		an imager shader is used. Doesn't work for shadow maps either.
+
+2003-01-08  pgregory
+	* aqsis/aqsis.cpp 1.43:
+		Change timer according to system, thanks to Giuseppe Zompatori..
+
+2003-01-07  pgregory
+	* aqsl/aqsl 1.2:
+	* libslparse/scanner.l 1.8:
+		Apply Tristan Colgate's patch to make POSIX version output
+		proper line number information for errors.
+
+2003-01-06  pgregory
+	* libddmsock/ddmsock.cpp 1.18:
+	* render/renderer.cpp 1.48:
+	* render/ri.cpp 1.127:
+		Improve error reporting in case of missing ddmsock.ini or
+		inrecognised display type.
+
+	* configure.in 1.52:
+	* plugins/Makefile.am 1.5:
+	* plugins/bake2tif/Makefile.am 1.1:
+		Update POSIX build to include bake2tif plugin.
+
+	* plugins/bake2tif/Makefile 1.2:
+		*** empty log message ***
+
+2003-01-03  pgregory
+	* Renderer.dsw 1.49:
+	* libshaderexecenv/shadeops.cpp 1.20:
+	* libshaderexecenv/shaderexecenv.h 1.11:
+	* libshadervm/shadervm.cpp 1.21:
+	* libshadervm/shadervm.h 1.20:
+	* libshadervm/shadervm2.cpp 1.2:
+	* libslparse/funcdef.cpp 1.6:
+	* plugins/bake2tif/Makefile 1.1:
+	* plugins/bake2tif/bake2tif.c 1.1:
+	* plugins/bake2tif/bake2tif.dsp 1.1:
+	* render/ishaderexecenv.h 1.7:
+	* render/libaqsis.dsp 1.30:
+	* ribfiles/bake.rib 1.1:
+	* ribfiles/baketest.rib 1.1:
+	* shaders/bake.h 1.1:
+	* shaders/expensive.sl 1.1:
+	* teqser/teqser.cpp 1.13:
+		Added Michel Joron's work on baking textures.
+
+2003-01-02  mw_matti
+	* render/imagebuffer.cpp 1.84:
+		Faster rendering of empty buckets ( 2-3 times faster )
+
+2003-01-01  pgregory
+	* libcodegenvm/vmoutput.cpp 1.12:
+		Fix so that only the code segment tree is output in the code
+		segment. This is because we needed to link the parameters under
+		the shader as well so that they can get back up to there shader
+		during type checking.
+
+	* aqsis/Makefile.am 1.18:
+		Alter test target to create a temporary ddmsock.ini so that '
+		make test' can be run after 'make all' but without the need to
+		run 'make install'.
+
+	* render/Makefile.am 1.27:
+		Alter makefile to include mtable files.
+
+2002-12-31  pgregory
+	* libslparse/iparsenode.h 1.5:
+	* libslparse/libslparse.cpp 1.4:
+	* libslparse/parsenode.cpp 1.7:
+	* libslparse/parsenode.h 1.7:
+	* libslparse/parser.y 1.9:
+	* libslparse/typecheck.cpp 1.6:
+	* libslparse/vardef.cpp 1.3:
+	* libslparse/vardef.h 1.4:
+		Fix bug in parser, shaders can now be called the same as functions.
+		Fix bug in parser local functions are now found in any parent scope.
+		Fix bug in parser, predefined variables are now considered read-only where appropriate.
+		Handle errors through exceptions.
+
+2002-12-29  pgregory
+	* ribfiles/subdiv3.rib 1.1:
+		Check subdivision in boundary case.
+
+	* render/subdivision2.cpp 1.9:
+	* render/subdivision2.h 1.6:
+		Fix some problems with boundary conditions.
+
+2002-12-28  mw_matti
+	* render/mtable.cpp 1.3:
+	* render/mtable.h 1.4:
+		new functions
+
+2002-12-28  selcott
+	* render/csgtree.cpp 1.8:
+		CSGs now calculate initial state, allowing for cases where the
+		camera starts inside a solid.
+
+	* ribfiles/csg_test2.rib 1.1:
+		CSG test case where the camera starts inside a solid.
+
+	* libaqsistypes/aqsis_types.h 1.8:
+		Fixed error whereby CEIL_POW2( 2^x ) would return 2^(x+1). This
+		was causing some primitives to be diced more finely than
+		necessary.
+
+2002-12-27  pgregory
+	* render/mtable.h 1.2:
+		Disable C4786 warnings.
+
+2002-12-27  mw_matti
+	* render/mtable.cpp 1.1:
+	* render/mtable.h 1.1:
+		Message table class ( CqMessageTable )
+
+	* render/libaqsis.dsp 1.29:
+		Files added
+
+	* render/mtable.cpp 1.2:
+	* render/mtable.h 1.3:
+		small changes
+
+	* render/ri.cpp 1.126:
+	* teqser/teqser.cpp 1.12:
+		added support for mtable
+
+	* aqsis/aqsis.cpp 1.42:
+		Message table added | global variable mTable
+
+2002-12-26  mw_matti
+	* aqsis/aqsis.cpp 1.41:
+		more detailed version
+
+2002-12-24  mw_matti
+	* render/teapot.cpp 1.11:
+		typo fixed
+
+2002-12-23  pgregory
+	* aqsis/aqsis.cpp 1.40:
+	* render/imagebuffer.cpp 1.83:
+	* render/imagebuffer.h 1.30:
+	* render/ri.cpp 1.125:
+	* render/subdivision2.cpp 1.8:
+	* render/subdivision2.h 1.5:
+		Arbitrary primitive variables now work on new SDS.
+		Normals are now correct when new SDS splits inot bicubic patches.
+		Fix some memory leaks.
+
+2002-12-22  mw_matti
+	* libslxargs/slx.cpp 1.16:
+		aqsltell test.slx is now equivalent to aqsltell test
+
+2002-12-21  pgregory
+	* render/patch.cpp 1.50:
+	* render/patch.h 1.22:
+	* render/ri.cpp 1.124:
+	* render/subdivision2.cpp 1.7:
+		Fix patch primitive to allow specification of the native basis
+		during the call to convert. Allows new subdivision primitive to
+		create b-spline patches without needing to play with attributes.
+
+2002-12-20  pgregory
+	* libslparse/parser.y 1.8:
+		Improve error reporting in the case of an unknown procedure
+		call.
+
+2002-12-19  pgregory
+	* render/bound.h 1.7:
+	* render/imagebuffer.cpp 1.82:
+	* render/ri.cpp 1.123:
+	* render/subdivision2.cpp 1.6:
+	* render/subdivision2.h 1.4:
+		Updates to the new subdivision scheme, works largely untested, 
+		known to have problems with non-closed meshes.
+
+2002-12-15  pgregory
+	* aqsis/aqsis.cpp 1.39:
+		Change -b to -d, to match BMRT and Entropy.
+
+	* librib2/librib.cpp 1.17:
+	* librib2/parser.y 1.24:
+	* librib2/scanner.l 1.19:
+		Improve error recovery in RIB parser, still needs a lot of work.
+		Handle odd case which it seems other renderers deal with, where GeometricApproximation is passed an array for it's value.
+
+2002-12-15  mw_matti
+	* aqsis/aqsis.cpp 1.38:
+		New command line option -b equals -fb
+
 2002-12-14  pgregory
 	* render/version.h 1.18:
 		Update version number for release.
