@@ -733,7 +733,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
     {
         TqFloat time0;
         CqBound Bound = pMPG->SubBound( bound_num, time0 );
-        TqFloat time1 = 1.0f;
+        TqFloat time1 = QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 1 ];
         if ( bound_num != bound_max_1 )
             pMPG->SubBound( bound_num + 1, time1 );
 
@@ -901,6 +901,8 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
 
                         TqFloat t;
                         t = sampleData.m_Time;
+						if( time1 < 9.8 || time1 > 10.2)
+							std::cout << time1 << std::endl;
                         if( t < time0 || t > time1)
                             continue;
 

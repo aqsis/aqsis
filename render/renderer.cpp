@@ -535,7 +535,7 @@ TqFloat	CqRenderer::Time() const
     if ( m_pconCurrent != 0 )
         return ( m_pconCurrent->Time() );
     else
-        return ( 0 );
+        return ( QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 0 ] );
 }
 
 //----------------------------------------------------------------------
