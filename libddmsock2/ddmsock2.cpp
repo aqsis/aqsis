@@ -293,11 +293,11 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
         args.push_back(argstrings.back().c_str());
     }
 	// Send the name argument.
-	CqString nameArg = CqString("-name=") + req.m_name;
+	CqString nameArg = CqString("-name=") + CqString(req.m_name);
 	args.push_back(nameArg.c_str());
-	CqString typeArg = CqString("-type=") + req.m_type;
+	CqString typeArg = CqString("-type=") + CqString(req.m_type);
 	args.push_back(typeArg.c_str());
-	CqString modeArg = CqString("-mode=") + req.m_mode;
+	CqString modeArg = CqString("-mode=") + CqString(req.m_mode);
 	args.push_back(modeArg.c_str());
 	args.push_back(req.m_customParamsArgs.c_str());
     args.push_back(NULL);
