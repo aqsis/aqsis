@@ -792,9 +792,9 @@ TqBool CqMicroPolygonStaticBase::fContains( const CqVector2D& vecP, TqFloat& Dep
 	TqFloat r1, r2, r3, r4;
 	TqFloat x = vecP.x(), y = vecP.y();
 	TqFloat x0 = m_vecPoints[ 0 ].x(), y0 = m_vecPoints[ 0 ].y(), x1 = m_vecPoints[ 1 ].x(), y1 = m_vecPoints[ 1 ].y();
-	if ( ( r1 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
+	if ( ( r1 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
 	x0 = x1; y0 = y1; x1 = m_vecPoints[ 2 ].x(); y1 = m_vecPoints[ 2 ].y();
-	if ( ( r2 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
+	if ( ( r2 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
 	x0 = x1; y0 = y1; x1 = m_vecPoints[ 3 ].x(); y1 = m_vecPoints[ 3 ].y();
 	if ( ( r3 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
 	x0 = x1; y0 = y1; x1 = m_vecPoints[ 0 ].x(); y1 = m_vecPoints[ 0 ].y();
