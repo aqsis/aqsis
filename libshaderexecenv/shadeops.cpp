@@ -3014,9 +3014,6 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 
 	INIT_SO
 
-	IqShaderData* _sblur = 0;
-	IqShaderData* _tblur = 0;
-
 	if ( NULL == QGetRenderContextI() )
 		return ;
 
@@ -3034,21 +3031,6 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 		std::valarray<TqFloat> fv;
 		pMap->PrepareSampleOptions( paramMap );
 
-		CqString type("");
-		if( ( paramMap.size() != 0 ) && ( paramMap.find( "type" ) != paramMap.end() ) )
-			paramMap[ "type" ] ->GetString( type );
-
-		if( type == "soft_m" )
-		{
-			// Need to setup my own local sblur and tblur values in the parameter map
-			// so that we don't damage any variables in the shader VM
-			_sblur = pShader->CreateTemporaryStorage( type_float, class_uniform );
-			_tblur = pShader->CreateTemporaryStorage( type_float, class_uniform );
-		
-			_sblur -> SetFloat( 0.0f );
-			_tblur -> SetFloat( 0.0f );
-		}
-
 		BEGIN_VARYING_SECTION
 		CqVector3D swidth = 0.0f, twidth = 0.0f, nullv = 0.0f;
 
@@ -3056,85 +3038,11 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 		twidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
 
 		GETPOINT( P );
-		if( type == "soft_m" )
-		{
-			TqFloat maxblur = 10, sblur = 1, tblur = 1, fadeto = 0.0;
-
-			// Get Max blur
-			if ( ( paramMap.size() != 0 ) )
-			{
-				if( ( paramMap.find( "soft_maxblur" ) != paramMap.end() ) )
-					paramMap[ "soft_maxblur" ] ->GetFloat( maxblur );
-				if( ( paramMap.find( "soft_sblur" ) != paramMap.end() ) )
-					paramMap[ "soft_sblur" ] ->GetFloat( sblur );
-				if( ( paramMap.find( "soft_tblur" ) != paramMap.end() ) )
-					paramMap[ "soft_tblur" ] ->GetFloat( tblur );
-				if( ( paramMap.find( "soft_fadeto" ) != paramMap.end() ) )
-					paramMap[ "soft_fadeto" ] ->GetFloat( fadeto );
-			}
-
-
-			// Check if 2 maps
-			if( pMap->NumPages() < 2 || pMap->NumPages() > 2 )
-			{
-				QGetRenderContextI() ->Logger() ->error( "SoftShadows need 2 maps" );
-				
-				// Return 0
-				BEGIN_VARYING_SECTION
-				SETFLOAT( Result, 0.0f );	// Default, completely lit
-				END_VARYING_SECTION
-				
-				return;
-			}
-			else
-			{
-			
-				// Map 0 == mid, Map 1 == min
-
-				// Check if we are in shadow
-				pMap->SampleMap( POINT( P ), nullv, nullv, fv, 0 );
-
-				if( fv[ 0 ] > 0 )
-				{
-					// We are
-					TqFloat depth, shadow_depth;
-					pMap->SampleMap( POINT( P ), nullv, nullv, fv, 1, &depth, &shadow_depth );
-					
-					if( ( ( sblur * shadow_depth ) > maxblur ) && ( ( tblur * shadow_depth ) > maxblur ) )
-					{
-						// Return 0, too much blur
-						BEGIN_VARYING_SECTION
-						SETFLOAT( Result, fadeto );	// Default, completely lit
-						END_VARYING_SECTION					
-						
-						return;
-					}
-					else
-					{
-						_sblur -> SetFloat( shadow_depth * sblur );
-						_tblur -> SetFloat( shadow_depth * tblur );
-						IqShaderData* __sblur = paramMap[ "sblur" ];
-						IqShaderData* __tblur = paramMap[ "tblur" ];
-						paramMap[ "sblur" ] = _sblur;
-						paramMap[ "tblur" ] = _tblur;
-						pMap->PrepareSampleOptions( paramMap );
-						paramMap[ "sblur" ] = __sblur;
-						paramMap[ "tblur" ] = __tblur;
-					}
-				}
-			}
-		}
 
 		pMap->SampleMap( POINT( P ), swidth, twidth, fv, 0 );
 		pMap->PrepareSampleOptions( paramMap );
 		SETFLOAT( Result, fv[ 0 ] );
 		END_VARYING_SECTION
-
-		if( type == "soft_m" )
-		{
-			pShader->DeleteTemporaryStorage( _sblur );
-			pShader->DeleteTemporaryStorage( _tblur );
-		}
 	}
 	else
 	{
