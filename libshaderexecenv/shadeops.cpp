@@ -5411,7 +5411,7 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 	};
 
 	// Free up the storage allocated for the args
-	for(int p=1;p<=cParams;p++){
+	for(p=1;p<=cParams;p++){
 		switch(apParams[p-1]->Type()){
 			case type_float:
 				delete (float*) dso_argv[p]; break;
