@@ -355,7 +355,8 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		if( USES( iUses, EnvVars_s ) || USES( iUses, EnvVars_t ) || USES( iUses, EnvVars_u ) || USES( iUses, EnvVars_v ) )
 		{
 			CqVector3D PA,PB,PC,PD;
-			CqMatrix& matCurrentToWorld = QGetRenderContext() ->matSpaceToSpace( "current", "object", CqMatrix(), Surface().pTransform()->matObjectToWorld() );
+			CqMatrix matID;
+			const CqMatrix& matCurrentToWorld = QGetRenderContext() ->matSpaceToSpace( "current", "object", matID, Surface().pTransform()->matObjectToWorld() );
 			PA = matCurrentToWorld * PolyP( indexA );
 			PB = matCurrentToWorld * PolyP( indexB );
 			PC = matCurrentToWorld * PolyP( indexC );

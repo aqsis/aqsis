@@ -2464,10 +2464,6 @@ RtVoid	RiPointsPolygons( RtInt npolys, RtInt nverts[], RtInt verts[], ... )
 
 RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERLIST )
 {
-	static gcPolys = 0;
-
-	gcPolys+=npolys;
-	
 	// Calculate how many vertices there are.
 	RtInt cVerts = 0;
 	RtInt* pVerts = verts;
