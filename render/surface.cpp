@@ -325,7 +325,7 @@ CqMicroPolyGridBase* CqSurface::Dice()
 		pGrid->SetbShadingNormals( TqTrue );
 	}
 
-	if( CanGenerateNormals() && USES( lUses, EnvVars_N ) )
+	if( CanGenerateNormals() && USES( lUses, EnvVars_Ng ) )
 	{
 		GenerateGeometricNormals( m_uDiceSize, m_vDiceSize, pGrid->Ng() );
 		pGrid->SetbGeometricNormals( TqTrue );
