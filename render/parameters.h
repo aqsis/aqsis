@@ -688,7 +688,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		}
 		virtual	TqUint	Size() const
 		{
-			return ( m_aValues[ 0 ].size() );
+			return ( m_aValues.size() );
 		}
 		virtual	void	Clear()
 		{

@@ -4540,10 +4540,11 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 				{
 					CqParameterTyped<TqFloat, TqFloat>* pFloatParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pNewParam);
 					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
-					TqInt iArrayIndex;
-					for( i = 0; i < cValues; )
+					TqInt iArrayIndex, iValIndex;
+					i=0;
+					for( iValIndex = 0; iValIndex < cValues; iValIndex++)
 						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pFloatParam->pValue( i )[iArrayIndex] = pValue[ i ];
+							pFloatParam->pValue( iValIndex )[iArrayIndex] = pValue[ i ];
 				}
 				break;
 
@@ -4551,10 +4552,11 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 				{
 					CqParameterTyped<TqInt, TqFloat>* pIntParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>(pNewParam);
 					TqInt* pValue = reinterpret_cast<TqInt*>(values[ *iUserParam ]);
-					TqInt iArrayIndex;
-					for( i = 0; i < cValues; )
+					TqInt iArrayIndex, iValIndex;
+					i=0;
+					for( iValIndex = 0; iValIndex < cValues; iValIndex++)
 						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pIntParam->pValue( i )[iArrayIndex] = pValue[ i ];
+							pIntParam->pValue( iValIndex )[iArrayIndex] = pValue[ i ];
 				}
 				break;
 
@@ -4564,10 +4566,11 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 				{
 					CqParameterTyped<CqVector3D, CqVector3D>* pVectorParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(pNewParam);
 					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
-					TqInt iArrayIndex;
-					for( i = 0; i < cValues; )
+					TqInt iArrayIndex, iValIndex;
+					i=0;
+					for( iValIndex = 0; iValIndex < cValues; iValIndex++)
 						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pVectorParam->pValue( i )[iArrayIndex] = CqVector3D( pValue[ (i*3) ], pValue[ (i*3)+1 ], pValue[ (i*3)+2 ] );
+							pVectorParam->pValue( iValIndex )[iArrayIndex] = CqVector3D( pValue[ (i*3) ], pValue[ (i*3)+1 ], pValue[ (i*3)+2 ] );
 				}
 				break;
 
@@ -4575,10 +4578,11 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 				{
 					CqParameterTyped<CqString, CqString>* pStringParam = static_cast<CqParameterTyped<CqString, CqString>*>(pNewParam);
 					char** pValue = reinterpret_cast<char**>(values[ *iUserParam ]);
-					TqInt iArrayIndex;
-					for( i = 0; i < cValues; )
+					TqInt iArrayIndex, iValIndex;
+					i=0;
+					for( iValIndex = 0; iValIndex < cValues; iValIndex++)
 						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pStringParam->pValue( i )[iArrayIndex] = CqString( pValue[ i ] );
+							pStringParam->pValue( iValIndex )[iArrayIndex] = CqString( pValue[ i ] );
 				}
 				break;
 
@@ -4586,10 +4590,11 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 				{
 					CqParameterTyped<CqColor, CqColor>* pColorParam = static_cast<CqParameterTyped<CqColor, CqColor>*>(pNewParam);
 					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
-					TqInt iArrayIndex;
-					for( i = 0; i < cValues; )
+					TqInt iArrayIndex, iValIndex;
+					i=0;
+					for( iValIndex = 0; iValIndex < cValues; iValIndex++)
 						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pColorParam->pValue( i )[iArrayIndex] = CqColor( pValue[ (i*3) ], pValue[ (i*3)+1 ], pValue[ (i*3)+2 ] );
+							pColorParam->pValue( iValIndex )[iArrayIndex] = CqColor( pValue[ (i*3) ], pValue[ (i*3)+1 ], pValue[ (i*3)+2 ] );
 				}
 				break;
 
@@ -4597,10 +4602,11 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 				{
 					CqParameterTyped<CqVector4D, CqVector3D>* pVectorParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pNewParam);
 					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
-					TqInt iArrayIndex;
-					for( i = 0; i < cValues; )
+					TqInt iArrayIndex, iValIndex;
+					i=0;
+					for( iValIndex = 0; iValIndex < cValues; iValIndex++)
 						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pVectorParam->pValue( i )[iArrayIndex] = CqVector4D( pValue[ (i*4) ], pValue[ (i*4)+1 ], pValue[ (i*4)+2 ], pValue[ (i*4)+3 ] );
+							pVectorParam->pValue( iValIndex )[iArrayIndex] = CqVector4D( pValue[ (i*4) ], pValue[ (i*4)+1 ], pValue[ (i*4)+2 ], pValue[ (i*4)+3 ] );
 				}
 				break;
 
@@ -4608,10 +4614,11 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 				{
 					CqParameterTyped<CqMatrix, CqMatrix>* pMatrixParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(pNewParam);
 					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
-					TqInt iArrayIndex;
-					for( i = 0; i < cValues; )
+					TqInt iArrayIndex, iValIndex;
+					i=0;
+					for( iValIndex = 0; iValIndex < cValues; iValIndex++)
 						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pMatrixParam->pValue( i )[iArrayIndex] = CqMatrix( pValue[ (i*16)    ], pValue[ (i*16)+1  ], pValue[ (i*16)+2  ], pValue[ (i*16)+3  ],
+							pMatrixParam->pValue( iValIndex )[iArrayIndex] = CqMatrix( pValue[ (i*16)    ], pValue[ (i*16)+1  ], pValue[ (i*16)+2  ], pValue[ (i*16)+3  ],
 																			   pValue[ (i*16)+4  ], pValue[ (i*16)+5  ], pValue[ (i*16)+6  ], pValue[ (i*16)+7  ],
 																			   pValue[ (i*16)+8  ], pValue[ (i*16)+9  ], pValue[ (i*16)+10 ], pValue[ (i*16)+11 ],
 																			   pValue[ (i*16)+12 ], pValue[ (i*16)+13 ], pValue[ (i*16)+14 ], pValue[ (i*16)+15 ]
