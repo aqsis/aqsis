@@ -60,4 +60,5 @@ Declare "prmanspecular" "integer"
 Option "searchpath" "shader" ["shaders/"]
 Option "searchpath" "archive" ["archive/"]
 Option "searchpath" "texture" ["textures/"]
+Option "searchpath" "texture" ["images/"]
 Option "searchpath" "display" ["./"]
