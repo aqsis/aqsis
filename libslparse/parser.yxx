@@ -26,6 +26,9 @@ namespace std
 #include	"ilog.h"
 #include	"log.h"
 
+# define YYMAXDEPTH 100000
+# define YYINITDEPTH  2000
+
 using namespace Aqsis;
 
 namespace
