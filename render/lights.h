@@ -74,9 +74,9 @@ class CqLightsource : public CqListEntry<CqLightsource>, public CqShaderExecEnv
 		/** Evaluate the shader.
 		 * \param Ps the point being lit.
 		 */
-		void	Evaluate( CqVMStackEntry& Ps )
+		void	Evaluate( IqShaderData* pPs )
 		{
-			CqShaderExecEnv::Ps()->SetValue( Ps );
+			CqShaderExecEnv::Ps()->SetValueFromVariable( pPs );
 			m_pShader->Evaluate( *this );
 		}
 		/** Get a pointer to the attributes associated with this lightsource.
@@ -126,8 +126,8 @@ class CqShaderLightsourceAmbient : public CqShader
 		}
 
 	private:
-		IqShaderVariable*	m_intensity;
-		IqShaderVariable*	m_lightcolor;
+		IqShaderData*	m_intensity;
+		IqShaderData*	m_lightcolor;
 };
 
 

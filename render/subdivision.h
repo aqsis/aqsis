@@ -33,7 +33,7 @@
 #include "vector3d.h"
 #include "surface.h"
 #include "polygon.h"
-#include "shadervariable.h"
+#include "ishaderdata.h"
 #include "memorypool.h"
 
 #define		_qShareName	CORE

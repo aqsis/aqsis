@@ -24,7 +24,6 @@
 */
 
 #include	"aqsis.h"
-#include	"shaderstack.h"
 #include	"spline.h"
 #include	"patch.h"
 #include	"imagebuffer.h"

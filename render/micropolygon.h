@@ -39,7 +39,7 @@
 #include	"vector3d.h"
 #include	"vector4d.h"
 #include	"shaderexecenv.h"
-#include	"shadervariable.h"
+#include	"ishaderdata.h"
 #include	"motion.h"
 #include	"csgtree.h"
 
@@ -310,9 +310,7 @@ class CqMicroPolygonBase
 		const	CqColor	colColor() const
 		{
 			CqColor colRes;
-			CqVMStackEntry SE;
-			m_pGrid->Ci()->GetValue(m_Index, SE);
-			SE.Value( colRes );
+			m_pGrid->Ci()->GetColor( colRes, m_Index );
 			return ( colRes );
 		}
 		/** Get the opacity of this micropoly.
@@ -321,9 +319,7 @@ class CqMicroPolygonBase
 		const	CqColor	colOpacity() const
 		{
 			CqColor colRes;
-			CqVMStackEntry SE;
-			m_pGrid->Oi()->GetValue(m_Index, SE);
-			SE.Value(colRes);
+			m_pGrid->Oi()->GetColor( colRes, m_Index );
 			return ( colRes );
 		}
 

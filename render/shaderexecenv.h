@@ -38,9 +38,8 @@
 #include	"cellnoise.h"
 #include	"vector3d.h"
 #include	"vector4d.h"
-#include	"shadervariable.h"
+#include	"ishaderdata.h"
 #include	"matrix.h"
-#include	"shaderstack.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -83,7 +82,7 @@ extern TqInt gDefLightUses;
 
 #define	INIT_SO			TqBool __fVarying=TqFalse; /* A flag which will be set to indicate if the operation has any varying components. */ \
 						TqInt __iGrid; /* Integer index used to track progress through the varying data */
-#define	CHECKVARY(A)	__fVarying=(A).Size()>1||__fVarying;
+#define	CHECKVARY(A)	__fVarying=(A)->Class()==class_varying||__fVarying;
 #define	FOR_EACH		__iGrid = 0; \
 						do \
 						{ \
@@ -98,35 +97,23 @@ extern TqInt gDefLightUses;
 #define	BEGIN_VARYING_SECTION	FOR_EACH
 #define	END_VARYING_SECTION		END_FOR
 
-#define	GETFLOAT(Val)		TqFloat _##Val; (Val).GetFloat(_##Val,__iGrid)
-#define	GETPOINT(Val)		CqVector3D _##Val; (Val).GetPoint(_##Val,__iGrid)
-#define	GETVECTOR(Val)		CqVector3D _##Val; (Val).GetVector(_##Val,__iGrid)
-#define	GETNORMAL(Val)		CqVector3D _##Val; (Val).GetNormal(_##Val,__iGrid)
-#define	GETCOLOR(Val)		CqColor _##Val; (Val).GetColor(_##Val,__iGrid)
-#define	GETSTRING(Val)		CqString _##Val; (Val).GetString(_##Val,__iGrid)
-#define	GETBOOLEAN(Val)		TqBool _##Val; (Val).GetBool(_##Val,__iGrid)
-#define	GETMATRIX(Val)		CqMatrix _##Val; (Val).GetMatrix(_##Val,__iGrid)
+#define	GETFLOAT(Val)		TqFloat _##Val; (Val)->GetFloat(_##Val,__iGrid)
+#define	GETPOINT(Val)		CqVector3D _##Val; (Val)->GetPoint(_##Val,__iGrid)
+#define	GETVECTOR(Val)		CqVector3D _##Val; (Val)->GetVector(_##Val,__iGrid)
+#define	GETNORMAL(Val)		CqVector3D _##Val; (Val)->GetNormal(_##Val,__iGrid)
+#define	GETCOLOR(Val)		CqColor _##Val; (Val)->GetColor(_##Val,__iGrid)
+#define	GETSTRING(Val)		CqString _##Val; (Val)->GetString(_##Val,__iGrid)
+#define	GETBOOLEAN(Val)		TqBool _##Val; (Val)->GetBool(_##Val,__iGrid)
+#define	GETMATRIX(Val)		CqMatrix _##Val; (Val)->GetMatrix(_##Val,__iGrid)
 
-#define	_GET_STDVAR(Val)	CqVMStackEntry __##Val; \
-							Val##()->GetValue( __iGrid, __##Val); \
-							__##Val.Value(_##Val)
-#define	GET_STDVAR_FLOAT(Val) TqFloat _##Val; _GET_STDVAR(Val)
-#define	GET_STDVAR_POINT(Val) CqVector3D _##Val; _GET_STDVAR(Val)
-#define	GET_STDVAR_VECTOR(Val) CqVector3D _##Val; _GET_STDVAR(Val)
-#define	GET_STDVAR_NORMAL(Val) CqVector3D _##Val; _GET_STDVAR(Val)
-#define	GET_STDVAR_COLOR(Val) CqColor _##Val; _GET_STDVAR(Val)
-#define	GET_STDVAR_STRING(Val) CqString _##Val; _GET_STDVAR(Val)
-#define	GET_STDVAR_BOOLEAN(Val) TqBool _##Val; _GET_STDVAR(Val)
-#define	GET_STDVAR_MATRIX(Val) CqMatrix _##Val; _GET_STDVAR(Val)
-
-#define	SETFLOAT(Val, v)	(Val).SetFloat(v,__iGrid)
-#define	SETPOINT(Val, v)	(Val).SetPoint(v,__iGrid)
-#define	SETVECTOR(Val, v)	(Val).SetVector(v,__iGrid)
-#define	SETNORMAL(Val, v)	(Val).SetNormal(v,__iGrid)
-#define	SETCOLOR(Val, v)	(Val).SetColor(v,__iGrid)
-#define	SETSTRING(Val, v)	(Val).SetString(v,__iGrid)
-#define	SETBOOLEAN(Val, v)	(Val).SetBool(v,__iGrid)
-#define	SETMATRIX(Val, v)	(Val).SetMatrix(v,__iGrid)
+#define	SETFLOAT(Val, v)	(Val)->SetFloat(v,__iGrid)
+#define	SETPOINT(Val, v)	(Val)->SetPoint(v,__iGrid)
+#define	SETVECTOR(Val, v)	(Val)->SetVector(v,__iGrid)
+#define	SETNORMAL(Val, v)	(Val)->SetNormal(v,__iGrid)
+#define	SETCOLOR(Val, v)	(Val)->SetColor(v,__iGrid)
+#define	SETSTRING(Val, v)	(Val)->SetString(v,__iGrid)
+#define	SETBOOLEAN(Val, v)	(Val)->SetBool(v,__iGrid)
+#define	SETMATRIX(Val, v)	(Val)->SetMatrix(v,__iGrid)
 
 #define	FLOAT(Val)			_##Val
 #define	POINT(Val)			_##Val
@@ -138,15 +125,15 @@ extern TqInt gDefLightUses;
 #define	MATRIX(Val)			_##Val
 
 
-#define	DEFPARAM		CqVMStackEntry& Result, CqShader* pShader=0
+#define	DEFPARAM		IqShaderData* Result, CqShader* pShader=0
 #define	DEFVOIDPARAM	CqShader* pShader=0
-#define	DEFPARAMVAR		DEFPARAM, int cParams=0, CqVMStackEntry** apParams=0
-#define	DEFVOIDPARAMVAR	DEFVOIDPARAM, int cParams=0, CqVMStackEntry** apParams=0
+#define	DEFPARAMVAR		DEFPARAM, int cParams=0, IqShaderData** apParams=0
+#define	DEFVOIDPARAMVAR	DEFVOIDPARAM, int cParams=0, IqShaderData** apParams=0
 
-#define	DEFPARAMIMPL		CqVMStackEntry& Result, CqShader* pShader
+#define	DEFPARAMIMPL		IqShaderData* Result, CqShader* pShader
 #define	DEFVOIDPARAMIMPL	CqShader* pShader
-#define DEFPARAMVARIMPL		DEFPARAMIMPL, int cParams, CqVMStackEntry** apParams
-#define	DEFVOIDPARAMVARIMPL	DEFVOIDPARAMIMPL, int cParams, CqVMStackEntry** apParams
+#define DEFPARAMVARIMPL		DEFPARAMIMPL, int cParams, IqShaderData** apParams
+#define	DEFVOIDPARAMVARIMPL	DEFVOIDPARAMIMPL, int cParams, IqShaderData** apParams
 
 #define	STD_SO		void
 #define	STD_SOIMPL	void
@@ -156,29 +143,29 @@ extern TqInt gDefLightUses;
 #define	GET_TEXTURE_PARAMS	float _pswidth=1.0f,_ptwidth=1.0f,_psblur=0.0f,_ptblur=0.0f, _pfill=0.0f; \
 							GetTexParams(cParams, apParams, _pswidth,_ptwidth,_psblur,_ptblur,_pfill);
 
-#define	FLOATVAL	CqVMStackEntry&
-#define	POINTVAL	CqVMStackEntry&
-#define	VECTORVAL	CqVMStackEntry&
-#define	NORMALVAL	CqVMStackEntry&
-#define	COLORVAL	CqVMStackEntry&
-#define	STRINGVAL	CqVMStackEntry&
-#define	MATRIXVAL	CqVMStackEntry&
+#define	FLOATVAL	IqShaderData*
+#define	POINTVAL	IqShaderData*
+#define	VECTORVAL	IqShaderData*
+#define	NORMALVAL	IqShaderData*
+#define	COLORVAL	IqShaderData*
+#define	STRINGVAL	IqShaderData*
+#define	MATRIXVAL	IqShaderData*
 
-#define	FLOATPTR	CqVMStackEntry**
-#define	POINTPTR	CqVMStackEntry**
-#define	VECTORPTR	CqVMStackEntry**
-#define	NORMALPTR	CqVMStackEntry**
-#define	COLORPTR	CqVMStackEntry**
-#define	STRINGPTR	CqVMStackEntry**
-#define	MATRIXPTR	CqVMStackEntry**
+#define	FLOATPTR	IqShaderData**
+#define	POINTPTR	IqShaderData**
+#define	VECTORPTR	IqShaderData**
+#define	NORMALPTR	IqShaderData**
+#define	COLORPTR	IqShaderData**
+#define	STRINGPTR	IqShaderData**
+#define	MATRIXPTR	IqShaderData**
 
-#define	FLOATARRAYVAL	CqVMStackEntry&
-#define	POINTARRAYVAL	CqVMStackEntry&
-#define	VECTORARRAYVAL	CqVMStackEntry&
-#define	NORMALARRAYVAL	CqVMStackEntry&
-#define	COLORARRAYVAL	CqVMStackEntry&
-#define	STRINGARRAYVAL	CqVMStackEntry&
-#define	MATRIXARRAYVAL	CqVMStackEntry&
+#define	FLOATARRAYVAL	IqShaderData*
+#define	POINTARRAYVAL	IqShaderData*
+#define	VECTORARRAYVAL	IqShaderData*
+#define	NORMALARRAYVAL	IqShaderData*
+#define	COLORARRAYVAL	IqShaderData*
+#define	STRINGARRAYVAL	IqShaderData*
+#define	MATRIXARRAYVAL	IqShaderData*
 
 class CqLightsource;
 class CqShader;
@@ -241,7 +228,7 @@ class CqShaderExecEnv
 		}
 		const CqMatrix&	matObjectToWorld() const;
 
-		void	ValidateIlluminanceCache( CqVMStackEntry& P, CqShader* pShader );
+		void	ValidateIlluminanceCache( IqShaderData* pP, CqShader* pShader );
 		/** Reset the illuminance cache.
 		 */
 		void	InvalidateIlluminanceCache()
@@ -294,9 +281,9 @@ class CqShaderExecEnv
 		}
 		/** Find a named standard variable in the list.
 		 * \param pname Character pointer to the name.
-		 * \return IqShaderVariable pointer or 0.
+		 * \return IqShaderData pointer or 0.
 		 */
-		IqShaderVariable* FindStandardVar( char* pname )
+		IqShaderData* FindStandardVar( char* pname )
 		{
 			TqInt i;
 			for ( i = 0; i < EnvVars_Last; i++ )
@@ -323,9 +310,9 @@ class CqShaderExecEnv
 
 		/** Get a standard variable pointer given an index.
 		 * \param Index The integer index returned from FindStandardVarIndex.
-		 * \return IqShaderVariable pointer.
+		 * \return IqShaderData pointer.
 		 */
-		IqShaderVariable*	pVar( TqInt Index )
+		IqShaderData*	pVar( TqInt Index )
 		{
 			return ( m_apVariables[ Index ] );
 		}
@@ -340,145 +327,145 @@ class CqShaderExecEnv
 
 		/** Get a reference to the Cq standard variable.
 		 */
-		IqShaderVariable* Cs()
+		IqShaderData* Cs()
 		{
 			return ( m_apVariables[ EnvVars_Cs ] );
 		}
 		/** Get a reference to the Os standard variable.
 		 */
-		IqShaderVariable* 	Os()
+		IqShaderData* 	Os()
 		{
 			return ( m_apVariables[ EnvVars_Os ] );
 		}
 		/** Get a reference to the Ng standard variable.
 		 */
-		IqShaderVariable* Ng()
+		IqShaderData* Ng()
 		{
 			return ( m_apVariables[ EnvVars_Ng ] );
 		}
 		/** Get a reference to the du standard variable.
 		 */
-		IqShaderVariable* du()
+		IqShaderData* du()
 		{
 			return ( m_apVariables[ EnvVars_du ] );
 		}
 		/** Get a reference to the dv standard variable.
 		 */
-		IqShaderVariable* dv()
+		IqShaderData* dv()
 		{
 			return ( m_apVariables[ EnvVars_dv ] );
 		}
 		/** Get a reference to the L standard variable.
 		 */
-		IqShaderVariable* L()
+		IqShaderData* L()
 		{
 			return ( m_apVariables[ EnvVars_L ] );
 		}
 		/** Get a reference to the Cl standard variable.
 		 */
-		IqShaderVariable* Cl()
+		IqShaderData* Cl()
 		{
 			return ( m_apVariables[ EnvVars_Cl ] );
 		}
 		/** Get a reference to the Ol standard variable.
 		 */
-		IqShaderVariable* Ol()
+		IqShaderData* Ol()
 		{
 			return ( m_apVariables[ EnvVars_Ol ] );
 		}
 		/** Get a reference to the P standard variable.
 		 */
-		IqShaderVariable* P()
+		IqShaderData* P()
 		{
 			return ( m_apVariables[ EnvVars_P ] );
 		}
 		/** Get a reference to the dPdu standard variable.
 		 */
-		IqShaderVariable* dPdu()
+		IqShaderData* dPdu()
 		{
 			return ( m_apVariables[ EnvVars_dPdu ] );
 		}
 		/** Get a reference to the dPdv standard variable.
 		 */
-		IqShaderVariable* dPdv()
+		IqShaderData* dPdv()
 		{
 			return ( m_apVariables[ EnvVars_dPdv ] );
 		}
 		/** Get a reference to the N standard variable.
 		 */
-		IqShaderVariable* N()
+		IqShaderData* N()
 		{
 			return ( m_apVariables[ EnvVars_N ] );
 		}
 		/** Get a reference to the u standard variable.
 		 */
-		IqShaderVariable* u()
+		IqShaderData* u()
 		{
 			return ( m_apVariables[ EnvVars_u ] );
 		}
 		/** Get a reference to the v standard variable.
 		 */
-		IqShaderVariable* v()
+		IqShaderData* v()
 		{
 			return ( m_apVariables[ EnvVars_v ] );
 		}
 		/** Get a reference to the s standard variable.
 		 */
-		IqShaderVariable* s()
+		IqShaderData* s()
 		{
 			return ( m_apVariables[ EnvVars_s ] );
 		}
 		/** Get a reference to the t standard variable.
 		 */
-		IqShaderVariable* t()
+		IqShaderData* t()
 		{
 			return ( m_apVariables[ EnvVars_t ] );
 		}
 		/** Get a reference to the I standard variable.
 		 */
-		IqShaderVariable* I()
+		IqShaderData* I()
 		{
 			return ( m_apVariables[ EnvVars_I ] );
 		}
 		/** Get a reference to the Ci standard variable.
 		 */
-		IqShaderVariable* Ci()
+		IqShaderData* Ci()
 		{
 			return ( m_apVariables[ EnvVars_Ci ] );
 		}
 		/** Get a reference to the Oi standard variable.
 		 */
-		IqShaderVariable* Oi()
+		IqShaderData* Oi()
 		{
 			return ( m_apVariables[ EnvVars_Oi ] );
 		}
 		/** Get a reference to the Ps standard variable.
 		 */
-		IqShaderVariable* Ps()
+		IqShaderData* Ps()
 		{
 			return ( m_apVariables[ EnvVars_Ps ] );
 		}
 		/** Get a reference to the E standard variable.
 		 */
-		IqShaderVariable* E()
+		IqShaderData* E()
 		{
 			return ( m_apVariables[ EnvVars_E ] );
 		}
 		/** Get a reference to the ncomps standard variable.
 		 */
-		IqShaderVariable* ncomps()
+		IqShaderData* ncomps()
 		{
 			return ( m_apVariables[ EnvVars_ncomps ] );
 		}
 		/** Get a reference to the time standard variable.
 		 */
-		IqShaderVariable* time()
+		IqShaderData* time()
 		{
 			return ( m_apVariables[ EnvVars_time ] );
 		}
 		/** Get a reference to the alpha standard variable.
 		 */
-		IqShaderVariable* alpha()
+		IqShaderData* alpha()
 		{
 			return ( m_apVariables[ EnvVars_alpha ] );
 		}
@@ -486,7 +473,7 @@ class CqShaderExecEnv
 	private:
 		/** Internal function to extract additional named filter parameters from an array of stack entries.
 		 */
-		void	GetFilterParams( int cParams, CqVMStackEntry** apParams, float& _pswidth, float& _ptwidth )
+		void	GetFilterParams( int cParams, IqShaderData** apParams, float& _pswidth, float& _ptwidth )
 		{
 			CqString strParam;
 			TqFloat f;
@@ -494,8 +481,8 @@ class CqShaderExecEnv
 			int i = 0;
 			while ( cParams > 0 )
 			{
-				apParams[ i ] ->Value( strParam, 0 );
-				apParams[ i + 1 ] ->Value( f, 0 );
+				apParams[ i ] ->GetString( strParam, 0 );
+				apParams[ i + 1 ] ->GetFloat( f, 0 );
 
 				if ( strParam.compare( "width" ) == 0 ) _pswidth = _ptwidth = f;
 				else if ( strParam.compare( "swidth" ) == 0 ) _pswidth = f;
@@ -506,7 +493,7 @@ class CqShaderExecEnv
 		}
 		/** Internal function to extract additional named texture control parameters from an array of stack entries.
 		 */
-		void	GetTexParams( int cParams, CqVMStackEntry** apParams, float& _pswidth, float& _ptwidth, float& _psblur, float& _ptblur, float& _pfill )
+		void	GetTexParams( int cParams, IqShaderData** apParams, float& _pswidth, float& _ptwidth, float& _psblur, float& _ptblur, float& _pfill )
 		{
 			CqString strParam;
 			TqFloat f;
@@ -514,8 +501,8 @@ class CqShaderExecEnv
 			int i = 0;
 			while ( cParams > 0 )
 			{
-				apParams[ i ] ->Value( strParam, 0 );
-				apParams[ i + 1 ] ->Value( f, 0 );
+				apParams[ i ] ->GetString( strParam, 0 );
+				apParams[ i + 1 ] ->GetFloat( f, 0 );
 				if ( strParam.compare( "width" ) == 0 ) _pswidth = _ptwidth = f;
 				else if ( strParam.compare( "swidth" ) == 0 ) _pswidth = f;
 				else if ( strParam.compare( "twidth" ) == 0 ) _ptwidth = f;
@@ -528,7 +515,7 @@ class CqShaderExecEnv
 			}
 		}
 
-		std::vector<IqShaderVariable*>	m_apVariables;	///< Vector of pointers to shader variables.
+		std::vector<IqShaderData*>	m_apVariables;	///< Vector of pointers to shader variables.
 		struct SqVarName
 		{
 			char*	m_strName;
@@ -679,15 +666,15 @@ class CqShaderExecEnv
 		STD_SO	SO_printf( STRINGVAL str, DEFVOIDPARAMVAR );
 		STD_SO	SO_format( STRINGVAL str, DEFPARAMVAR );
 		STD_SO	SO_concat( STRINGVAL stra, STRINGVAL strb, DEFPARAMVAR );
-		STD_SO	SO_atmosphere( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_displacement( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_lightsource( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_surface( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_attribute( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_option( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_rendererinfo( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_incident( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
-		STD_SO	SO_opposite( STRINGVAL name, IqShaderVariable* pV, DEFPARAM );
+		STD_SO	SO_atmosphere( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		STD_SO	SO_displacement( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		STD_SO	SO_lightsource( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		STD_SO	SO_surface( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		STD_SO	SO_attribute( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		STD_SO	SO_option( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		STD_SO	SO_rendererinfo( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		STD_SO	SO_incident( STRINGVAL name, IqShaderData* pV, DEFPARAM );
+		STD_SO	SO_opposite( STRINGVAL name, IqShaderData* pV, DEFPARAM );
 		STD_SO	SO_fcellnoise1( FLOATVAL v, DEFPARAM );
 		STD_SO	SO_fcellnoise2( FLOATVAL u, FLOATVAL v, DEFPARAM );
 		STD_SO	SO_fcellnoise3( POINTVAL p, DEFPARAM );
@@ -734,164 +721,34 @@ class CqShaderExecEnv
 		STD_SO	SO_spsplinea( STRINGVAL basis, FLOATVAL value, POINTARRAYVAL a, DEFPARAM );
 		STD_SO	SO_shadername( DEFPARAM );
 		STD_SO	SO_shadername2( STRINGVAL shader, DEFPARAM );
-		STD_SO	SO_textureinfo( STRINGVAL shader, STRINGVAL dataname, IqShaderVariable* pV, DEFPARAM );
+		STD_SO	SO_textureinfo( STRINGVAL shader, STRINGVAL dataname, IqShaderData* pV, DEFPARAM );
 };
-
-/** Templatised derivative function. Calculates the derivative of the provided shader variable with respect to u.
- */
-template <class R>
-R SO_DuType( R& temp, IqShaderVariable* pVar, TqInt i, CqShaderExecEnv& s )
-{
-	R Ret;
-	TqInt uRes = s.uGridRes();
-	TqInt GridX = i % ( uRes + 1 );
-	if ( GridX < uRes )
-	{
-		CqVMStackEntry SE1, SE2, SEu;
-		pVar->GetValue( i + 1, SE1 );
-		pVar->GetValue( i, SE2 );
-		s.du()->GetValue( i, SEu );
-		R v1, v2;
-		TqFloat u;
-		SE1.Value( v1 );
-		SE2.Value( v2 );
-		SEu.Value( u );
-		Ret = ( v1 - v2 ) / u;
-	}
-	else
-	{
-		CqVMStackEntry SE1, SE2, SEu;
-		pVar->GetValue( i, SE1 );
-		pVar->GetValue( i - 1, SE2 );
-		s.du()->GetValue( i, SEu );
-		R v1, v2;
-		TqFloat u;
-		SE1.Value( v1 );
-		SE2.Value( v2 );
-		SEu.Value( u );
-		Ret = ( v1 - v2 ) / u;
-	}
-	return ( Ret );
-}
-
-
-/** Templatised derivative function. Calculates the derivative of the provided shader variable with respect to v.
- */
-template <class R>
-R SO_DvType( R& temp, IqShaderVariable* pVar, TqInt i, CqShaderExecEnv& s )
-{
-	R Ret;
-	TqInt uRes = s.uGridRes();
-	TqInt vRes = s.vGridRes();
-	TqInt GridY = ( i / ( uRes + 1 ) );
-	if ( GridY < vRes )
-	{
-		CqVMStackEntry SE1, SE2, SEv;
-		pVar->GetValue( i + uRes + 1, SE1 );
-		pVar->GetValue( i, SE2 );
-		s.dv()->GetValue( i, SEv );
-		R v1, v2;
-		TqFloat v;
-		SE1.Value( v1 );
-		SE2.Value( v2 );
-		SEv.Value( v );
-		Ret = ( v1 - v2 ) / v;
-	}
-	else
-	{
-		CqVMStackEntry SE1, SE2, SEv;
-		pVar->GetValue( i, SE1 );
-		pVar->GetValue( i - ( uRes + 1 ), SE2 );
-		s.dv()->GetValue( i, SEv );
-		R v1, v2;
-		TqFloat v;
-		SE1.Value( v1 );
-		SE2.Value( v2 );
-		SEv.Value( v );
-		Ret = ( v1 - v2 ) / v;
-	}
-	return ( Ret );
-}
-
-
-/** Templatised derivative function. Calculates the derivative of the provided shader variable with respect to a second variable.
- */
-template <class R>
-R SO_DerivType( R& temp, IqShaderVariable* pVar, IqShaderVariable* pDen, TqInt i, CqShaderExecEnv& s )
-{
-	R Retu, Retv;
-	TqInt uRes = s.uGridRes();
-	TqInt vRes = s.vGridRes();
-	TqInt GridX = i % ( uRes + 1 );
-	TqInt GridY = ( i / ( uRes + 1 ) );
-
-	
-	CqVMStackEntry SEden;
-	pDen->GetValue( i, SEden );
-
-	// Calculate deriviative in u
-	if ( GridX < uRes )
-	{
-		CqVMStackEntry SE1, SE2;
-		pVar->GetValue( i + 1, SE1 );
-		pVar->GetValue( i, SE2 );
-		Retu = ( SE1.Value( Retu ) - SE2.Value( Retu ) ) / SEden.Value( 0.0f );
-	}
-	else
-	{
-		CqVMStackEntry SE1, SE2;
-		pVar->GetValue( i, SE1 );
-		pVar->GetValue( i - 1, SE2 );
-		Retu = ( SE1.Value( Retu ) - SE2.Value( Retu ) ) / SEden.Value( 0.0f );
-	}
-
-	// Calculate deriviative in v
-	if ( GridY < vRes )
-	{
-		CqVMStackEntry SE1, SE2;
-		pVar->GetValue( i + uRes + 1, SE1 );
-		pVar->GetValue( i, SE2 );
-		Retv = ( SE1.Value( Retv ) - SE2.Value( Retv ) ) / SEden.Value( 0.0f );
-	}
-	else
-	{
-		CqVMStackEntry SE1, SE2;
-		pVar->GetValue( i, SE1 );
-		pVar->GetValue( i - ( uRes + 1 ), SE2 );
-		Retv = ( SE1.Value( Retv ) - SE2.Value( Retv ) ) / SEden.Value( 0.0f );
-	}
-
-	return ( Retu + Retv );
-}
 
 
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to u.
  */
 template <class R>
-R SO_DuType( CqVMStackEntry& Var, TqInt i, CqShaderExecEnv& s )
+R SO_DuType( IqShaderData* Var, TqInt i, CqShaderExecEnv& s )
 {
 	R Ret;
 	TqInt uRes = s.uGridRes();
 	TqInt GridX = i % ( uRes + 1 );
 	
-	CqVMStackEntry SEu;
-	s.du()->GetValue( i, SEu );
+	TqFloat fdu;
+	s.du()->GetFloat( fdu );
 	
 	R v1,v2;
-	TqFloat u;
 	if ( GridX < uRes )
 	{
-		Var.Value( v1, i + 1 );
-		Var.Value( v2, i );
-		SEu.Value( u );
-		Ret = ( v1 - v2 ) / u;
+		Var->GetValue( v1, i + 1 );
+		Var->GetValue( v2, i );
+		Ret = ( v1 - v2 ) / fdu;
 	}
 	else
 	{
-		Var.Value( v1, i );
-		Var.Value( v2, i - 1 );
-		SEu.Value( u );
-		Ret = ( v1 - v2 ) / u;
+		Var->GetValue( v1, i );
+		Var->GetValue( v2, i - 1 );
+		Ret = ( v1 - v2 ) / fdu;
 	}
 	return ( Ret );
 }
@@ -900,31 +757,28 @@ R SO_DuType( CqVMStackEntry& Var, TqInt i, CqShaderExecEnv& s )
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to v.
  */
 template <class R>
-R SO_DvType( CqVMStackEntry& Var, TqInt i, CqShaderExecEnv& s )
+R SO_DvType( IqShaderData* Var, TqInt i, CqShaderExecEnv& s )
 {
 	R Ret;
 	TqInt uRes = s.uGridRes();
 	TqInt vRes = s.vGridRes();
 	TqInt GridY = ( i / ( uRes + 1 ) );
 
-	CqVMStackEntry SEv;
-	s.dv()->GetValue( i, SEv );
+	TqFloat fdv;
+	s.dv()->GetFloat( fdv );
 
 	R v1,v2;
-	TqFloat v;
 	if ( GridY < vRes )
 	{
-		Var.Value( v1, i + uRes + 1 );
-		Var.Value( v2, i );
-		SEv.Value( v );
-		Ret = ( v1 - v2 ) / v;
+		Var->GetValue( v1, i + uRes + 1 );
+		Var->GetValue( v2, i );
+		Ret = ( v1 - v2 ) / fdv;
 	}
 	else
 	{
-		Var.Value( v1, i );
-		Var.Value( v2, i - ( uRes + 1 ) );
-		SEv.Value( v );
-		Ret = ( v1 - v2 ) / v;
+		Var->GetValue( v1, i );
+		Var->GetValue( v2, i - ( uRes + 1 ) );
+		Ret = ( v1 - v2 ) / fdv;
 	}
 	return ( Ret );
 }
@@ -933,8 +787,10 @@ R SO_DvType( CqVMStackEntry& Var, TqInt i, CqShaderExecEnv& s )
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to a second stack entry.
  */
 template <class R>
-R SO_DerivType( CqVMStackEntry& Var, CqVMStackEntry& den, TqInt i, CqShaderExecEnv& s )
+R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, CqShaderExecEnv& s )
 {
+	assert( NULL != Var );
+	
 	R Retu, Retv;
 	TqInt uRes = s.uGridRes();
 	TqInt vRes = s.vGridRes();
@@ -942,37 +798,41 @@ R SO_DerivType( CqVMStackEntry& Var, CqVMStackEntry& den, TqInt i, CqShaderExecE
 	TqInt GridY = ( i / ( uRes + 1 ) );
 
 	R v1, v2;
-	TqFloat u,v;
+	TqFloat u = 1.0f, v = 1.0f;
 
 	// Calculate deriviative in u
 	if ( GridX < uRes )
 	{
-		Var.Value( v1, i + 1);
-		Var.Value( v2, i );
-		den.Value( u, i );
+		Var->GetValue( v1, i + 1);
+		Var->GetValue( v2, i );
+		if( NULL != den )	
+			den->GetValue( u, i );
 		Retu = ( v1 - v2 ) / u;
 	}
 	else
 	{
-		Var.Value( v1, i );
-		Var.Value( v2, i - 1 );
-		den.Value( u, i );
+		Var->GetValue( v1, i );
+		Var->GetValue( v2, i - 1 );
+		if( NULL != den )	
+			den->GetValue( u, i );
 		Retu = ( v1 - v2 ) / u;
 	}
 
 	// Calculate deriviative in v
 	if ( GridY < vRes )
 	{
-		Var.Value( v1, i + uRes + 1 );
-		Var.Value( v2, i );
-		den.Value( v, i );
+		Var->GetValue( v1, i + uRes + 1 );
+		Var->GetValue( v2, i );
+		if( NULL != den )	
+			den->GetValue( v, i );
 		Retv = ( v1 - v2 ) / v;
 	}
 	else
 	{
-		Var.Value( v1, i );
-		Var.Value( v2, i - ( uRes - 1 ) );
-		den.Value( v, i );
+		Var->GetValue( v1, i );
+		Var->GetValue( v2, i - ( uRes - 1 ) );
+		if( NULL != den )	
+			den->GetValue( v, i );
 		Retv = ( v1 - v2 ) / v;
 	}
 

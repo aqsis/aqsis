@@ -130,7 +130,7 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Cq
 	if ( USES( Uses, EnvVars_dv ) && m_apVariables[ EnvVars_dv ] == 0 ) 
 		m_apVariables[ EnvVars_dv ] = CqShaderVM::CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_dv ] );
 	if ( USES( Uses, EnvVars_L ) && m_apVariables[ EnvVars_L ] == 0 ) 
-		m_apVariables[ EnvVars_L ] = CqShaderVM::CreateVariable( type_point, class_varying, m_apVariableNames[ EnvVars_L ] );
+		m_apVariables[ EnvVars_L ] = CqShaderVM::CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_L ] );
 	if ( USES( Uses, EnvVars_Cl ) && m_apVariables[ EnvVars_Cl ] == 0 ) 
 		m_apVariables[ EnvVars_Cl ] = CqShaderVM::CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Cl ] );
 	if ( USES( Uses, EnvVars_Ol ) && m_apVariables[ EnvVars_Ol ] == 0 ) 
@@ -138,9 +138,9 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Cq
 	if ( USES( Uses, EnvVars_P ) && m_apVariables[ EnvVars_P ] == 0 ) 
 		m_apVariables[ EnvVars_P ] = CqShaderVM::CreateVariable( type_point, class_varying, m_apVariableNames[ EnvVars_P ] );
 	if ( USES( Uses, EnvVars_dPdu ) && m_apVariables[ EnvVars_dPdu ] == 0 ) 
-		m_apVariables[ EnvVars_dPdu ] = CqShaderVM::CreateVariable( type_point, class_varying, m_apVariableNames[ EnvVars_dPdu ] );
+		m_apVariables[ EnvVars_dPdu ] = CqShaderVM::CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_dPdu ] );
 	if ( USES( Uses, EnvVars_dPdv ) && m_apVariables[ EnvVars_dPdv ] == 0 ) 
-		m_apVariables[ EnvVars_dPdv ] = CqShaderVM::CreateVariable( type_point, class_varying, m_apVariableNames[ EnvVars_dPdv ] );
+		m_apVariables[ EnvVars_dPdv ] = CqShaderVM::CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_dPdv ] );
 	if ( USES( Uses, EnvVars_N ) && m_apVariables[ EnvVars_N ] == 0 ) 
 		m_apVariables[ EnvVars_N ] = CqShaderVM::CreateVariable( type_normal, class_varying, m_apVariableNames[ EnvVars_N ] );
 	if ( USES( Uses, EnvVars_u ) && m_apVariables[ EnvVars_u ] == 0 ) 
@@ -152,7 +152,7 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Cq
 	if ( USES( Uses, EnvVars_t ) && m_apVariables[ EnvVars_t ] == 0 ) 
 		m_apVariables[ EnvVars_t ] = CqShaderVM::CreateVariable( type_float, class_varying, m_apVariableNames[ EnvVars_t ] );
 	if ( USES( Uses, EnvVars_I ) && m_apVariables[ EnvVars_I ] == 0 ) 
-		m_apVariables[ EnvVars_I ] = CqShaderVM::CreateVariable( type_point, class_varying, m_apVariableNames[ EnvVars_I ] );
+		m_apVariables[ EnvVars_I ] = CqShaderVM::CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_I ] );
 	if ( USES( Uses, EnvVars_Ci ) && m_apVariables[ EnvVars_Ci ] == 0 ) 
 		m_apVariables[ EnvVars_Ci ] = CqShaderVM::CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Ci ] );
 	if ( USES( Uses, EnvVars_Oi ) && m_apVariables[ EnvVars_Oi ] == 0 ) 

@@ -31,7 +31,7 @@
 
 #include	"aqsis.h"
 
-#include	"shadervariable.h"
+#include	"ishaderdata.h"
 #include	"parameters.h"
 
 START_NAMESPACE( Aqsis )

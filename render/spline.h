@@ -31,6 +31,8 @@
 
 #include	"aqsis.h"
 
+#include	"ri.h"
+
 #include	"matrix.h"
 #include	"vector4d.h"
 #include	"sstring.h"

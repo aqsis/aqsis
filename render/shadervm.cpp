@@ -34,6 +34,7 @@
 #include	"version.h"
 #include	"sstring.h"
 #include	"imagebuffer.h"
+#include	"shadervariable.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -432,9 +433,9 @@ static	TqFloat	temp_float;
 static	TqBool	temp_bool;
 
 
-IqShaderVariable* CqShaderVM::CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name)
+IqShaderData* CqShaderVM::CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name)
 {
-	// Create a VM specific shader variable, which implements the IqShaderVariable interface,
+	// Create a VM specific shader variable, which implements the IqShaderData interface,
 	// based on the type and class specified.
 	switch(Type)
 	{
@@ -443,22 +444,9 @@ IqShaderVariable* CqShaderVM::CreateVariable(EqVariableType Type, EqVariableClas
 			switch(Class)
 			{
 				case class_varying:
-					return(new CqShaderVariableVarying<type_float, TqFloat>( name.c_str() ) );
+					return(new CqShaderVariableVaryingFloat( name.c_str() ) );
 				case class_uniform:
-					return(new CqShaderVariableUniform<type_float, TqFloat>( name.c_str() ) );
-			}
-			assert(TqFalse);	// If we get here, something is wrong with the request.
-			return(NULL);
-		}
-
-		case type_integer:
-		{
-			switch(Class)
-			{
-				case class_varying:
-					return(new CqShaderVariableVarying<type_integer, TqInt>( name.c_str() ) );
-				case class_uniform:
-					return(new CqShaderVariableUniform<type_integer, TqInt>( name.c_str() ) );
+					return(new CqShaderVariableUniformFloat( name.c_str() ) );
 			}
 			assert(TqFalse);	// If we get here, something is wrong with the request.
 			return(NULL);
@@ -469,9 +457,9 @@ IqShaderVariable* CqShaderVM::CreateVariable(EqVariableType Type, EqVariableClas
 			switch(Class)
 			{
 				case class_varying:
-					return(new CqShaderVariableVarying<type_point, CqVector3D>( name.c_str() ) );
+					return(new CqShaderVariableVaryingPoint( name.c_str() ) );
 				case class_uniform:
-					return(new CqShaderVariableUniform<type_point, CqVector3D>( name.c_str() ) );
+					return(new CqShaderVariableUniformPoint( name.c_str() ) );
 			}
 			assert(TqFalse);	// If we get here, something is wrong with the request.
 			return(NULL);
@@ -482,9 +470,9 @@ IqShaderVariable* CqShaderVM::CreateVariable(EqVariableType Type, EqVariableClas
 			switch(Class)
 			{
 				case class_varying:
-					return(new CqShaderVariableVarying<type_normal, CqVector3D>( name.c_str() ) );
+					return(new CqShaderVariableVaryingNormal( name.c_str() ) );
 				case class_uniform:
-					return(new CqShaderVariableUniform<type_normal, CqVector3D>( name.c_str() ) );
+					return(new CqShaderVariableUniformNormal( name.c_str() ) );
 			}
 			assert(TqFalse);	// If we get here, something is wrong with the request.
 			return(NULL);
@@ -495,9 +483,9 @@ IqShaderVariable* CqShaderVM::CreateVariable(EqVariableType Type, EqVariableClas
 			switch(Class)
 			{
 				case class_varying:
-					return(new CqShaderVariableVarying<type_vector, CqVector3D>( name.c_str() ) );
+					return(new CqShaderVariableVaryingVector( name.c_str() ) );
 				case class_uniform:
-					return(new CqShaderVariableUniform<type_vector, CqVector3D>( name.c_str() ) );
+					return(new CqShaderVariableUniformVector( name.c_str() ) );
 			}
 			assert(TqFalse);	// If we get here, something is wrong with the request.
 			return(NULL);
@@ -508,9 +496,9 @@ IqShaderVariable* CqShaderVM::CreateVariable(EqVariableType Type, EqVariableClas
 			switch(Class)
 			{
 				case class_varying:
-					return(new CqShaderVariableVarying<type_string, CqString>( name.c_str() ) );
+					return(new CqShaderVariableVaryingString( name.c_str() ) );
 				case class_uniform:
-					return(new CqShaderVariableUniform<type_string, CqString>( name.c_str() ) );
+					return(new CqShaderVariableUniformString( name.c_str() ) );
 			}
 			assert(TqFalse);	// If we get here, something is wrong with the request.
 			return(NULL);
@@ -521,9 +509,9 @@ IqShaderVariable* CqShaderVM::CreateVariable(EqVariableType Type, EqVariableClas
 			switch(Class)
 			{
 				case class_varying:
-					return(new CqShaderVariableVarying<type_color, CqColor>( name.c_str() ) );
+					return(new CqShaderVariableVaryingColor( name.c_str() ) );
 				case class_uniform:
-					return(new CqShaderVariableUniform<type_color, CqColor>( name.c_str() ) );
+					return(new CqShaderVariableUniformColor( name.c_str() ) );
 			}
 			assert(TqFalse);	// If we get here, something is wrong with the request.
 			return(NULL);
@@ -540,9 +528,9 @@ IqShaderVariable* CqShaderVM::CreateVariable(EqVariableType Type, EqVariableClas
 			switch(Class)
 			{
 				case class_varying:
-					return(new CqShaderVariableVarying<type_matrix, CqMatrix>( name.c_str() ) );
+					return(new CqShaderVariableVaryingMatrix( name.c_str() ) );
 				case class_uniform:
-					return(new CqShaderVariableUniform<type_matrix, CqMatrix>( name.c_str() ) );
+					return(new CqShaderVariableUniformMatrix( name.c_str() ) );
 			}
 			assert(TqFalse);	// If we get here, something is wrong with the request.
 			return(NULL);
@@ -554,58 +542,58 @@ IqShaderVariable* CqShaderVM::CreateVariable(EqVariableType Type, EqVariableClas
 
 
 
-IqShaderVariable* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariableClass VarClass, const CqString& name, TqInt Count )
+IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariableClass VarClass, const CqString& name, TqInt Count )
 {
-	IqShaderVariable * pVar = 0;
+	IqShaderData * pVar = 0;
 	switch ( VarType )
 	{
 			case type_float:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVarying<type_float, TqFloat>( name.c_str() );
+				pVar = new CqShaderVariableVaryingFloat( name.c_str() );
 			else
-				pVar = new CqShaderVariableUniform<type_float, TqFloat>( name.c_str() );
+				pVar = new CqShaderVariableUniformFloat( name.c_str() );
 			break;
 
 			case type_point:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVarying<type_point, CqVector3D>( name.c_str() );
+				pVar = new CqShaderVariableVaryingPoint( name.c_str() );
 			else
-				pVar = new CqShaderVariableUniform<type_point, CqVector3D>( name.c_str() );
+				pVar = new CqShaderVariableUniformPoint( name.c_str() );
 			break;
 
 			case type_normal:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVarying<type_normal, CqVector3D>( name.c_str() );
+				pVar = new CqShaderVariableVaryingNormal( name.c_str() );
 			else
-				pVar = new CqShaderVariableUniform<type_normal, CqVector3D>( name.c_str() );
+				pVar = new CqShaderVariableUniformNormal( name.c_str() );
 			break;
 
 			case type_vector:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVarying<type_vector, CqVector3D>( name.c_str() );
+				pVar = new CqShaderVariableVaryingVector( name.c_str() );
 			else
-				pVar = new CqShaderVariableUniform<type_vector, CqVector3D>( name.c_str() );
+				pVar = new CqShaderVariableUniformVector( name.c_str() );
 			break;
 
 			case type_color:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVarying<type_color, CqColor>( name.c_str() );
+				pVar = new CqShaderVariableVaryingColor( name.c_str() );
 			else
-				pVar = new CqShaderVariableUniform<type_color, CqColor>( name.c_str() );
+				pVar = new CqShaderVariableUniformColor( name.c_str() );
 			break;
 
 			case type_string:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVarying<type_string, CqString>( name.c_str() );
+				pVar = new CqShaderVariableVaryingString( name.c_str() );
 			else
-				pVar = new CqShaderVariableUniform<type_string, CqString>( name.c_str() );
+				pVar = new CqShaderVariableUniformString( name.c_str() );
 			break;
 
 			case type_matrix:
 			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVarying<type_matrix, CqMatrix>( name.c_str() );
+				pVar = new CqShaderVariableVaryingMatrix( name.c_str() );
 			else
-				pVar = new CqShaderVariableUniform<type_matrix, CqMatrix>( name.c_str() );
+				pVar = new CqShaderVariableUniformMatrix( name.c_str() );
 			break;
 	}
 	CqShaderVariableArray* pArray = new CqShaderVariableArray( name.c_str(), Count );
@@ -615,6 +603,18 @@ IqShaderVariable* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVar
 		pArray->aVariables() [ i ] = pVar->Clone();
 
 	return ( pArray );
+}
+
+
+IqShaderData* CqShaderVM::CreateTemporaryStorage( )
+{
+	return( new CqVMStackEntry);
+}
+
+
+void CqShaderVM::DeleteTemporaryStorage( IqShaderData* pData )
+{
+	delete( pData );
 }
 
 //---------------------------------------------------------------------
@@ -799,63 +799,63 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							if ( bVarArray )
 								AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count ) );
 							else if ( VarClass == class_varying )
-								AddLocalVariable( new CqShaderVariableVarying<type_float, TqFloat>( token ) );
+								AddLocalVariable( new CqShaderVariableVaryingFloat( token ) );
 							else
-								AddLocalVariable( new CqShaderVariableUniform<type_float, TqFloat>( token ) );
+								AddLocalVariable( new CqShaderVariableUniformFloat( token ) );
 							break;
 
 							case type_point:
 							if ( bVarArray )
 								AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count ) );
 							else if ( VarClass == class_varying )
-								AddLocalVariable( new CqShaderVariableVarying<type_point, CqVector3D>( token ) );
+								AddLocalVariable( new CqShaderVariableVaryingPoint( token ) );
 							else
-								AddLocalVariable( new CqShaderVariableUniform<type_point, CqVector3D>( token ) );
+								AddLocalVariable( new CqShaderVariableUniformPoint( token ) );
 							break;
 
 							case type_normal:
 							if ( bVarArray )
 								AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count ) );
 							else if ( VarClass == class_varying )
-								AddLocalVariable( new CqShaderVariableVarying<type_normal, CqVector3D>( token ) );
+								AddLocalVariable( new CqShaderVariableVaryingNormal( token ) );
 							else
-								AddLocalVariable( new CqShaderVariableUniform<type_normal, CqVector3D>( token ) );
+								AddLocalVariable( new CqShaderVariableUniformNormal( token ) );
 							break;
 
 							case type_vector:
 							if ( bVarArray )
 								AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count ) );
 							else if ( VarClass == class_varying )
-								AddLocalVariable( new CqShaderVariableVarying<type_vector, CqVector3D>( token ) );
+								AddLocalVariable( new CqShaderVariableVaryingVector( token ) );
 							else
-								AddLocalVariable( new CqShaderVariableUniform<type_vector, CqVector3D>( token ) );
+								AddLocalVariable( new CqShaderVariableUniformVector( token ) );
 							break;
 
 							case type_color:
 							if ( bVarArray )
 								AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count ) );
 							else if ( VarClass == class_varying )
-								AddLocalVariable( new CqShaderVariableVarying<type_color, CqColor>( token ) );
+								AddLocalVariable( new CqShaderVariableVaryingColor( token ) );
 							else
-								AddLocalVariable( new CqShaderVariableUniform<type_color, CqColor>( token ) );
+								AddLocalVariable( new CqShaderVariableUniformColor( token ) );
 							break;
 
 							case type_string:
 							if ( bVarArray )
 								AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count ) );
 							else if ( VarClass == class_varying )
-								AddLocalVariable( new CqShaderVariableVarying<type_string, CqString>( token ) );
+								AddLocalVariable( new CqShaderVariableVaryingString( token ) );
 							else
-								AddLocalVariable( new CqShaderVariableUniform<type_string, CqString>( token ) );
+								AddLocalVariable( new CqShaderVariableUniformString( token ) );
 							break;
 
 							case type_matrix:
 							if ( bVarArray )
 								AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count ) );
 							else if ( VarClass == class_varying )
-								AddLocalVariable( new CqShaderVariableVarying<type_matrix, CqMatrix>( token ) );
+								AddLocalVariable( new CqShaderVariableVaryingMatrix( token ) );
 							else
-								AddLocalVariable( new CqShaderVariableUniform<type_matrix, CqMatrix>( token ) );
+								AddLocalVariable( new CqShaderVariableUniformMatrix( token ) );
 							break;
 					}
 					break;
@@ -990,7 +990,7 @@ void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, CqShade
 	for ( i = m_LocalVars.size() - 1; i >= 0; i-- )
 		m_LocalVars[ i ] ->Initialise( uGridRes, vGridRes );
 
-	gVaryingResult.SetSize( ( uGridRes + 1 ) * ( vGridRes + 1 ) );
+	gVaryingResult.Initialise( uGridRes, vGridRes );
 
 	// Reset the program counter.
 	m_PC = 0;
@@ -1004,7 +1004,7 @@ void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, CqShade
 CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 {
 	// Copy the local variables...
-	std::vector<IqShaderVariable*>::const_iterator i;
+	std::vector<IqShaderData*>::const_iterator i;
 	for ( i = From.m_LocalVars.begin(); i != From.m_LocalVars.end(); i++ )
 		m_LocalVars.push_back( ( *i ) ->Clone() );
 
@@ -1150,7 +1150,7 @@ void CqShaderVM::SetValue( const char* name, TqPchar val )
 				if ( Decl.m_strName != "" && Decl.m_strSpace != "" )
 					strSpace = Decl.m_strSpace;
 				CqVector3D p;
-				VMVal.Value( p );
+				VMVal.GetPoint( p, 0 );
 				VMVal = QGetRenderContext() ->matSpaceToSpace( strSpace.c_str(), "camera", matCurrent(), QGetRenderContext() ->matCurrent() ) * p;
 			}
 			else if ( m_LocalVars[ i ] ->Type() == type_normal )
@@ -1159,7 +1159,7 @@ void CqShaderVM::SetValue( const char* name, TqPchar val )
 				if ( Decl.m_strName != "" && Decl.m_strSpace != "" )
 					strSpace = Decl.m_strSpace;
 				CqVector3D p;
-				VMVal.Value( p );
+				VMVal.GetPoint( p, 0 );
 				VMVal = QGetRenderContext() ->matNSpaceToSpace( strSpace.c_str(), "camera", matCurrent(), QGetRenderContext() ->matCurrent() ) * p;
 			}
 			else if ( m_LocalVars[ i ] ->Type() == type_vector )
@@ -1168,7 +1168,7 @@ void CqShaderVM::SetValue( const char* name, TqPchar val )
 				if ( Decl.m_strName != "" && Decl.m_strSpace != "" )
 					strSpace = Decl.m_strSpace;
 				CqVector3D p;
-				VMVal.Value( p );
+				VMVal.GetPoint( p, 0 );
 				VMVal = QGetRenderContext() ->matVSpaceToSpace( strSpace.c_str(), "camera", matCurrent(), QGetRenderContext() ->matCurrent() ) * p;
 			}
 			else if ( m_LocalVars[ i ] ->Type() == type_matrix )
@@ -1177,12 +1177,14 @@ void CqShaderVM::SetValue( const char* name, TqPchar val )
 				if ( Decl.m_strName != "" && Decl.m_strSpace != "" )
 					strSpace = Decl.m_strSpace;
 				CqMatrix m;
-				VMVal.Value( m );
+				VMVal.GetMatrix( m, 0 );
 				VMVal = QGetRenderContext() ->matVSpaceToSpace( strSpace.c_str(), "camera", matCurrent(), QGetRenderContext() ->matCurrent() ) * m;
 			}
 
-			if ( pArray ) ( *pArray ) [ arrayindex++ ] ->SetValue( VMVal );
-			else	m_LocalVars[ i ] ->SetValue( VMVal );
+			if ( pArray ) 
+				( *pArray ) [ arrayindex++ ] ->SetValueFromVariable( &VMVal );
+			else
+				m_LocalVars[ i ] ->SetValueFromVariable( &VMVal );
 		}
 	}
 }
@@ -1192,18 +1194,19 @@ void CqShaderVM::SetValue( const char* name, TqPchar val )
 /** Get a value from an instance variable on this shader, and fill in the passed variable reference.
  */
 
-TqBool CqShaderVM::GetValue( const char* name, IqShaderVariable* res )
+TqBool CqShaderVM::GetValue( const char* name, IqShaderData* res )
 {
 	// Find the relevant variable.
 	TqInt i = FindLocalVarIndex( name );
 	if ( i >= 0 )
 	{
-		CqVMStackEntry VMVal;
-		// TODO: Should check for varying here, and avoid overhead of repeated GetValue calls.
-		TqInt j;
-		for ( j = 0; j < m_pEnv->GridSize(); j++ )
-			m_LocalVars[ i ] ->GetValue( j, VMVal );
-		res->SetValue( VMVal );
+		res->SetValueFromVariable( m_LocalVars[ i ]);
+//		CqVMStackEntry VMVal;
+//		// TODO: Should check for varying here, and avoid overhead of repeated GetValue calls.
+//		TqInt j;
+//		for ( j = 0; j < m_pEnv->GridSize(); j++ )
+//			m_LocalVars[ i ] ->GetValue( j, VMVal );
+//		res->SetValue( VMVal );
 		return ( TqTrue );
 	}
 	return ( TqFalse );
@@ -1216,9 +1219,9 @@ int CqShaderVM::GetShaderVarCount()
     return m_LocalVars.size();
 }
 
-IqShaderVariable * CqShaderVM::GetShaderVarAt(int varIndex)
+IqShaderData * CqShaderVM::GetShaderVarAt(int varIndex)
 {
-    IqShaderVariable * result;
+    IqShaderData * result;
     result = NULL;
     if (varIndex >= 0)
     {
@@ -1278,22 +1281,21 @@ void CqShaderVM::SO_ipushv()
 	AUTOFUNC;
 	POPV( A );	// Index
 	RESULT;
-	IqShaderVariable* pVar = GetVar( ReadNext().m_iVariable );
+	IqShaderData* pVar = GetVar( ReadNext().m_iVariable );
 	if ( pVar->ArrayLength() == 0 )
 	{
 		// Report error.
 		CqBasicError( 0, Severity_Fatal, "Attempt to index a non array variable" );
 		return ;
 	}
-	CqShaderVariableArray* pVarArray = static_cast<CqShaderVariableArray*>( pVar );
 	//TqInt ext=__fVarying?m_pEnv->GridSize():1;
 	TqInt ext = m_pEnv->GridSize();
 	TqInt i;
 	for ( i = 0; i < ext; i++ )
 	{
 		TqFloat _A;
-		A.Value( _A, i );
-		( *pVarArray ) [ static_cast<unsigned int>( _A ) ] ->GetValue( i, Result );
+		A.GetFloat( _A, i );
+		Result.SetValueFromVariable( pVar->ArrayEntry( static_cast<unsigned int>( _A ) ), i );
 	}
 	Push( Result );
 }
@@ -1301,16 +1303,22 @@ void CqShaderVM::SO_ipushv()
 void CqShaderVM::SO_pop()
 {
 	AUTOFUNC;
-	IqShaderVariable* pV = GetVar( ReadNext().m_iVariable );
+	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
-	pV->SetValue( Val, m_pEnv->RunningState() );
+	TqInt ext = m_pEnv->GridSize();
+	TqInt i;
+	for ( i = 0; i < ext; i++ )
+	{
+		if(m_pEnv->RunningState().Value( i ))
+			pV->SetValueFromVariable( &Val, i );
+	}
 }
 
 void CqShaderVM::SO_ipop()
 {
 	AUTOFUNC;
 	UsProgramElement& el = ReadNext();
-	IqShaderVariable* pV = GetVar( el.m_iVariable );
+	IqShaderData* pV = GetVar( el.m_iVariable );
 	CqShaderVariableArray* pVA = static_cast<CqShaderVariableArray*>( pV );
 	if ( pV->ArrayLength() == 0 )
 	{
@@ -1327,9 +1335,10 @@ void CqShaderVM::SO_ipop()
 	{
 		if ( m_pEnv->RunningState().Value( i ) )
 		{
-			TqFloat _A;
-			A.Value( _A, i );
-			( *pVA ) [ static_cast<unsigned int>( _A ) ] ->SetValue( i, Val );
+			TqFloat fIndex;
+			A.GetFloat( fIndex, i );
+			TqInt index = static_cast<unsigned int>( fIndex );
+			( *pVA ) [ index ] ->SetValueFromVariable( &Val, i );
 		}
 	}
 }
@@ -1347,11 +1356,11 @@ void CqShaderVM::SO_mergef()
 	{
 		TqBool _A;
 		TqFloat _T, _F;
-		A.Value( _A, i );
-		T.Value( _T, i );
-		F.Value( _F, i );
-		if ( _A ) Result.SetValue( i, _T );
-		else	Result.SetValue( i, _F );
+		A.GetBool( _A, i );
+		T.GetFloat( _T, i );
+		F.GetFloat( _F, i );
+		if ( _A ) Result.SetValue( _T, i );
+		else	Result.SetValue( _F, i );
 	}
 	Push( Result );
 }
@@ -1369,11 +1378,11 @@ void CqShaderVM::SO_merges()
 	{
 		TqBool _A;
 		CqString _T, _F;
-		A.Value( _A, i );
-		T.Value( _T, i );
-		F.Value( _F, i );
-		if ( _A ) Result.SetValue( i, _T );
-		else	Result.SetValue( i, _F );
+		A.GetBool( _A, i );
+		T.GetString( _T, i );
+		F.GetString( _F, i );
+		if ( _A ) Result.SetValue( _T, i );
+		else	Result.SetValue( _F, i );
 	}
 	Push( Result );
 }
@@ -1391,11 +1400,11 @@ void CqShaderVM::SO_mergep()
 	{
 		TqBool _A;
 		CqVector3D _T, _F;
-		A.Value( _A, i );
-		T.Value( _T, i );
-		F.Value( _F, i );
-		if ( _A ) Result.SetValue( i, _T );
-		else	Result.SetValue( i, _F );
+		A.GetBool( _A, i );
+		T.GetPoint( _T, i );
+		F.GetPoint( _F, i );
+		if ( _A ) Result.SetValue( _T, i );
+		else	Result.SetValue( _F, i );
 	}
 	Push( Result );
 }
@@ -1413,11 +1422,11 @@ void CqShaderVM::SO_mergec()
 	{
 		TqBool _A;
 		CqColor _T, _F;
-		A.Value( _A, i );
-		T.Value( _T, i );
-		F.Value( _F, i );
-		if ( _A ) Result.SetValue( i, _T );
-		else	Result.SetValue( i, _F );
+		A.GetBool( _A, i );
+		T.GetColor( _T, i );
+		F.GetColor( _F, i );
+		if ( _A ) Result.SetValue( _T, i );
+		else	Result.SetValue( _F, i );
 	}
 	Push( Result );
 }
@@ -1550,7 +1559,7 @@ void CqShaderVM::SO_S_GET()
 		if ( m_pEnv->RunningState().Value( i ) )
 		{
 			TqBool _A;
-			A.Value( _A, i );
+			A.GetBool( _A, i );
 			m_pEnv->CurrentState().SetValue( i, _A );
 		}
 	}
@@ -1608,7 +1617,7 @@ void CqShaderVM::SO_jnz()
 		if ( !__fVarying || m_pEnv->RunningState().Value( i ) )
 		{
 			TqBool _f;
-			f.Value( _f, i );
+			f.GetBool( _f, i );
 			if ( !_f ) return ;
 		}
 	}
@@ -1629,7 +1638,7 @@ void CqShaderVM::SO_jz()
 		if ( !__fVarying || m_pEnv->RunningState().Value( i ) )
 		{
 			TqBool _f;
-			f.Value( _f, i );
+			f.GetBool( _f, i );
 			if ( _f ) return ;
 		}
 	}
@@ -2877,7 +2886,7 @@ void CqShaderVM::SO_init_illuminance()
 	VARFUNC;
 	POPV( A );
 	m_pEnv->InvalidateIlluminanceCache();
-	m_pEnv->ValidateIlluminanceCache( A, this );
+	m_pEnv->ValidateIlluminanceCache( &A, this );
 	Push( m_pEnv->SO_init_illuminance() );
 }
 
@@ -2920,70 +2929,70 @@ void CqShaderVM::SO_printf()
 void CqShaderVM::SO_atmosphere()
 {
 	AUTOFUNC;
-	IqShaderVariable* pV = GetVar( ReadNext().m_iVariable );
+	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_atmosphere( Val, pV, Result );
+	m_pEnv->SO_atmosphere( &Val, pV, &Result );
 	Push( Result );
 }
 
 void CqShaderVM::SO_displacement()
 {
 	AUTOFUNC;
-	IqShaderVariable* pV = GetVar( ReadNext().m_iVariable );
+	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_displacement( Val, pV, Result );
+	m_pEnv->SO_displacement( &Val, pV, &Result );
 	Push( Result );
 }
 
 void CqShaderVM::SO_lightsource()
 {
 	AUTOFUNC;
-	IqShaderVariable* pV = GetVar( ReadNext().m_iVariable );
+	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_lightsource( Val, pV, Result );
+	m_pEnv->SO_lightsource( &Val, pV, &Result );
 	Push( Result );
 }
 
 void CqShaderVM::SO_surface()
 {
 	AUTOFUNC;
-	IqShaderVariable* pV = GetVar( ReadNext().m_iVariable );
+	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_surface( Val, pV, Result );
+	m_pEnv->SO_surface( &Val, pV, &Result );
 	Push( Result );
 }
 
 void CqShaderVM::SO_attribute()
 {
 	AUTOFUNC;
-	IqShaderVariable* pV = GetVar( ReadNext().m_iVariable );
+	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_attribute( Val, pV, Result );
+	m_pEnv->SO_attribute( &Val, pV, &Result );
 	Push( Result );
 }
 
 void CqShaderVM::SO_option()
 {
 	AUTOFUNC;
-	IqShaderVariable* pV = GetVar( ReadNext().m_iVariable );
+	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_option( Val, pV, Result );
+	m_pEnv->SO_option( &Val, pV, &Result );
 	Push( Result );
 }
 
 void CqShaderVM::SO_rendererinfo()
 {
 	AUTOFUNC;
-	IqShaderVariable* pV = GetVar( ReadNext().m_iVariable );
+	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_rendererinfo( Val, pV, Result );
+	m_pEnv->SO_rendererinfo( &Val, pV, &Result );
 	Push( Result );
 }
 
@@ -2991,31 +3000,31 @@ void CqShaderVM::SO_textureinfo()
 {
 
 	AUTOFUNC;
-	IqShaderVariable* pV = GetVar( ReadNext().m_iVariable );
+	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	POPV( DataInfo );
 	RESULT;
-	m_pEnv->SO_textureinfo( Val, DataInfo, pV, Result );
+	m_pEnv->SO_textureinfo( &Val, &DataInfo, pV, &Result );
 	Push( Result );
 }
 
 void CqShaderVM::SO_incident()
 {
 	AUTOFUNC;
-	IqShaderVariable* pV = GetVar( ReadNext().m_iVariable );
+	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_incident( Val, pV, Result );
+	m_pEnv->SO_incident( &Val, pV, &Result );
 	Push( Result );
 }
 
 void CqShaderVM::SO_opposite()
 {
 	AUTOFUNC;
-	IqShaderVariable* pV = GetVar( ReadNext().m_iVariable );
+	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_opposite( Val, pV, Result );
+	m_pEnv->SO_opposite( &Val, pV, &Result );
 	Push( Result );
 }
 

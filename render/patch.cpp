@@ -494,7 +494,7 @@ CqMicroPolyGridBase* CqSurfacePatchBicubic::Dice()
 		for ( iu = 0; iu <= m_uDiceSize; iu++ )
 		{
 			TqInt igrid = ( iv * ( m_uDiceSize + 1 ) ) + iu;
-			pGrid->P()->SetValue( igrid, CqVMStackEntry( EvaluateFD( matDDx, matDDy, matDDz, DDxA, DDyA, DDzA ) ) );
+			pGrid->P()->SetPoint( static_cast<CqVector3D>( EvaluateFD( matDDx, matDDy, matDDz, DDxA, DDyA, DDzA ) ), igrid );
 		}
 		AdvanceFD( matDDx, matDDy, matDDz, DDxA, DDyA, DDzA );
 	}
@@ -926,8 +926,8 @@ CqMicroPolyGridBase* CqSurfacePatchBilinear::Dice()
 		for ( iu = 0; iu <= m_uDiceSize; iu++ )
 		{
 			TqInt igrid = ( iv * ( m_uDiceSize + 1 ) ) + iu;
-			if ( bNormals ) pGrid->N()->SetValue( igrid, CqVMStackEntry( EvaluateNormal( iu * diu, iv * div ) ) );
-			pGrid->P()->SetValue( igrid, CqVMStackEntry( BilinearEvaluate<CqVector4D>( P() [ 0 ], P() [ 1 ], P() [ 2 ], P() [ 3 ], iu * diu, iv * div ) ) );
+			if ( bNormals ) pGrid->N()->SetNormal( static_cast<CqVector3D>( EvaluateNormal( iu * diu, iv * div ) ), igrid );
+			pGrid->P()->SetPoint( static_cast<CqVector3D>( BilinearEvaluate<CqVector4D>( P() [ 0 ], P() [ 1 ], P() [ 2 ], P() [ 3 ], iu * diu, iv * div ) ), igrid );
 		}
 	}
 	return ( pGrid );

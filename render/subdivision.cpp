@@ -698,38 +698,38 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		TqInt ivC = rE.peNext().pvHead() ->iVertex();
 		TqInt ivD = rE.peNext().pvHead() ->iVertex();
 
-		pGrid->P()->SetValue( ( ( vOff ) * cuv ) + uOff, CqVMStackEntry( SubdP( pPoints, ivA ) ) );
-		pGrid->P()->SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( SubdP( pPoints, ivB ) ) );
-		pGrid->P()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdP( pPoints, ivC ) ) );
-		pGrid->P()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdP( pPoints, ivD ) ) );
+		pGrid->P()->SetPoint( SubdP( pPoints, ivA ), ( ( vOff ) * cuv ) + uOff );
+		pGrid->P()->SetPoint( SubdP( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
+		pGrid->P()->SetPoint( SubdP( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+		pGrid->P()->SetPoint( SubdP( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
 
 		if ( uses_s && has_s )
 		{
-			pGrid->s()->SetValue( ( ( vOff ) * cuv ) + uOff, CqVMStackEntry( Subds( pPoints, ivA ) ) );
-			pGrid->s()->SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( Subds( pPoints, ivB ) ) );
-			pGrid->s()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( Subds( pPoints, ivC ) ) );
-			pGrid->s()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( Subds( pPoints, ivD ) ) );
+			pGrid->s()->SetFloat( Subds( pPoints, ivA ), ( ( vOff ) * cuv ) + uOff );
+			pGrid->s()->SetFloat( Subds( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->s()->SetFloat( Subds( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->s()->SetFloat( Subds( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 		if ( uses_t && has_t )
 		{
-			pGrid->t()->SetValue( ( ( vOff ) * cuv ) + uOff, CqVMStackEntry( Subdt( pPoints, ivA ) ) );
-			pGrid->t()->SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( Subdt( pPoints, ivB ) ) );
-			pGrid->t()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( Subdt( pPoints, ivC ) ) );
-			pGrid->t()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( Subdt( pPoints, ivD ) ) );
+			pGrid->t()->SetFloat( Subdt( pPoints, ivA ), ( ( vOff ) * cuv ) + uOff );
+			pGrid->t()->SetFloat( Subdt( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->t()->SetFloat( Subdt( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->t()->SetFloat( Subdt( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 		if ( uses_Cs && has_Cs )
 		{
-			pGrid->Cs()->SetValue( ( ( vOff ) * cuv ) + uOff, CqVMStackEntry( SubdCs( pPoints, ivA ) ) );
-			pGrid->Cs()->SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( SubdCs( pPoints, ivB ) ) );
-			pGrid->Cs()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdCs( pPoints, ivC ) ) );
-			pGrid->Cs()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdCs( pPoints, ivD ) ) );
+			pGrid->Cs()->SetColor( SubdCs( pPoints, ivA ), ( ( vOff ) * cuv ) + uOff );
+			pGrid->Cs()->SetColor( SubdCs( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->Cs()->SetColor( SubdCs( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->Cs()->SetColor( SubdCs( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 		if ( uses_Os && has_Os )
 		{
-			pGrid->Os()->SetValue( ( ( vOff ) * cuv ) + uOff, CqVMStackEntry( SubdOs( pPoints, ivA ) ) );
-			pGrid->Os()->SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( SubdOs( pPoints, ivB ) ) );
-			pGrid->Os()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdOs( pPoints, ivC ) ) );
-			pGrid->Os()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdOs( pPoints, ivD ) ) );
+			pGrid->Os()->SetColor( SubdOs( pPoints, ivA ), ( ( vOff ) * cuv ) + uOff );
+			pGrid->Os()->SetColor( SubdOs( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->Os()->SetColor( SubdOs( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->Os()->SetColor( SubdOs( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 	}
 
@@ -743,28 +743,28 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		TqInt ivB = rE.pvHead() ->iVertex();
 		TqInt ivC = rE.peNext().pvHead() ->iVertex();
 
-		pGrid->P()->SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( SubdP( pPoints, ivB ) ) );
-		pGrid->P()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdP( pPoints, ivC ) ) );
+		pGrid->P()->SetPoint( SubdP( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
+		pGrid->P()->SetPoint( SubdP( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
 
 		if ( uses_s && has_s )
 		{
-			pGrid->s()->SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( Subds( pPoints, ivB ) ) );
-			pGrid->s()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( Subds( pPoints, ivC ) ) );
+			pGrid->s()->SetFloat( Subds( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->s()->SetFloat( Subds( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
 		}
 		if ( uses_t && has_t )
 		{
-			pGrid->t()->SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( Subdt( pPoints, ivB ) ) );
-			pGrid->t()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( Subdt( pPoints, ivC ) ) );
+			pGrid->t()->SetFloat( Subdt( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->t()->SetFloat( Subdt( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
 		}
 		if ( uses_Cs && has_Cs )
 		{
-			pGrid->Cs()->SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( SubdCs( pPoints, ivB ) ) );
-			pGrid->Cs()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdCs( pPoints, ivC ) ) );
+			pGrid->Cs()->SetColor( SubdCs( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->Cs()->SetColor( SubdCs( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
 		}
 		if ( uses_Os && has_Os )
 		{
-			pGrid->Os()->SetValue( ( ( vOff ) * cuv ) + uOff + 1, CqVMStackEntry( SubdOs( pPoints, ivB ) ) );
-			pGrid->Os()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdOs( pPoints, ivC ) ) );
+			pGrid->Os()->SetColor( SubdOs( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->Os()->SetColor( SubdOs( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
 		}
 	}
 
@@ -778,28 +778,28 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		TqInt ivC = rE.pvHead() ->iVertex();
 		TqInt ivD = rE.peNext().pvHead() ->iVertex();
 
-		pGrid->P()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdP( pPoints, ivC ) ) );
-		pGrid->P()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdP( pPoints, ivD ) ) );
+		pGrid->P()->SetPoint( SubdP( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+		pGrid->P()->SetPoint( SubdP( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
 
 		if ( uses_s && has_s )
 		{
-			pGrid->s()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( Subds( pPoints, ivC ) ) );
-			pGrid->s()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( Subds( pPoints, ivD ) ) );
+			pGrid->s()->SetFloat( Subds( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->s()->SetFloat( Subds( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 		if ( uses_t && has_t )
 		{
-			pGrid->t()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( Subdt( pPoints, ivC ) ) );
-			pGrid->t()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( Subdt( pPoints, ivD ) ) );
+			pGrid->t()->SetFloat( Subdt( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->t()->SetFloat( Subdt( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 		if ( uses_Cs && has_Cs )
 		{
-			pGrid->Cs()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdCs( pPoints, ivC ) ) );
-			pGrid->Cs()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdCs( pPoints, ivD ) ) );
+			pGrid->Cs()->SetColor( SubdCs( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->Cs()->SetColor( SubdCs( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 		if ( uses_Os && has_Os )
 		{
-			pGrid->Os()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff + 1, CqVMStackEntry( SubdOs( pPoints, ivC ) ) );
-			pGrid->Os()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdOs( pPoints, ivD ) ) );
+			pGrid->Os()->SetColor( SubdOs( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->Os()->SetColor( SubdOs( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 	}
 
@@ -812,11 +812,15 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		rE.Reset( pF->pEdge( 3 ), pF );
 		TqInt ivD = rE.pvHead() ->iVertex();
 
-		pGrid->P()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdP( pPoints, ivD ) ) );
-		if ( uses_s && has_s ) pGrid->s()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( Subds( pPoints, ivD ) ) );
-		if ( uses_t && has_t ) pGrid->t()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( Subdt( pPoints, ivD ) ) );
-		if ( uses_Cs && has_Cs ) pGrid->Cs()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdCs( pPoints, ivD ) ) );
-		if ( uses_Os && has_Os ) pGrid->Os()->SetValue( ( ( vOff + 1 ) * cuv ) + uOff, CqVMStackEntry( SubdOs( pPoints, ivD ) ) );
+		pGrid->P()->SetPoint( SubdP( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+		if ( uses_s && has_s ) 
+			pGrid->s()->SetFloat( Subds( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+		if ( uses_t && has_t )
+			pGrid->t()->SetFloat( Subdt( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+		if ( uses_Cs && has_Cs )
+			pGrid->Cs()->SetColor( SubdCs( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+		if ( uses_Os && has_Os )
+			pGrid->Os()->SetColor( SubdOs( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
 	}
 
 	vOff -= 1 << ( Level - 1 );

@@ -24,7 +24,6 @@
 */
 
 #include	"aqsis.h"
-#include	"shaderstack.h"
 #include	"parameters.h"
 #include	"vector3d.h"
 #include	"vector4d.h"

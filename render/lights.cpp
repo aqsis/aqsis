@@ -82,14 +82,14 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
 	Cl()->Initialise( uGridRes, vGridRes );
 
 	// Initialise the geometric parameters in the shader exec env.
-	P()->SetValue( CqVMStackEntry( QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->matCurrent() ) * CqVector3D( 0.0f, 0.0f, 0.0f ) ) );
-	if ( USES( Uses, EnvVars_u ) ) u()->SetValue( CqVMStackEntry( 0.0f ) );
-	if ( USES( Uses, EnvVars_v ) ) v()->SetValue( CqVMStackEntry( 0.0f ) );
-	if ( USES( Uses, EnvVars_du ) ) du()->SetValue( CqVMStackEntry( 0.0f ) );
-	if ( USES( Uses, EnvVars_du ) ) dv()->SetValue( CqVMStackEntry( 0.0f ) );
-	if ( USES( Uses, EnvVars_s ) ) s()->SetValue( CqVMStackEntry( 0.0f ) );
-	if ( USES( Uses, EnvVars_t ) ) t()->SetValue( CqVMStackEntry( 0.0f ) );
-	if ( USES( Uses, EnvVars_N ) ) N()->SetValue( CqVMStackEntry( CqVector3D( 0.0f, 0.0f, 0.0f ) ) );
+	P()->SetPoint( QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->matCurrent() ) * CqVector3D( 0.0f, 0.0f, 0.0f ) );
+	if ( USES( Uses, EnvVars_u ) ) u()->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_v ) ) v()->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_du ) ) du()->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_du ) ) dv()->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_s ) ) s()->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_t ) ) t()->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_N ) ) N()->SetNormal( CqVector3D( 0.0f, 0.0f, 0.0f ) );
 }
 
 
@@ -173,8 +173,8 @@ CqShaderLightsourceAmbient::CqShaderLightsourceAmbient() : m_intensity(NULL), m_
 	m_lightcolor = CqShaderVM::CreateVariable(type_color, class_uniform, "lightcolor" );
 
 	// Set up the default values for the parameters.
-	m_intensity->SetValue( CqVMStackEntry( 1.0f ) );
-	m_lightcolor->SetValue( CqVMStackEntry( CqColor(1,1,1) ) );
+	m_intensity->SetFloat( 1.0f );
+	m_lightcolor->SetColor( CqColor(1,1,1) );
 }
 
 
@@ -188,32 +188,25 @@ CqShaderLightsourceAmbient::~CqShaderLightsourceAmbient()
 void CqShaderLightsourceAmbient::SetValue( const char* name, TqPchar val )
 {
 	if ( strcmp( name, "intensity" ) == 0 ) 
-		m_intensity->SetValue( CqVMStackEntry( *reinterpret_cast<TqFloat*>( val ) ) );
+		m_intensity->SetFloat( *reinterpret_cast<TqFloat*>( val ) );
 	else
 		if ( strcmp( name, "lightcolor" ) == 0 ) 
-			m_lightcolor->SetValue( CqVMStackEntry( CqColor ( reinterpret_cast<TqFloat*>( val ) ) ) );
+			m_lightcolor->SetColor( CqColor ( reinterpret_cast<TqFloat*>( val ) ) );
 }
 
 
 void CqShaderLightsourceAmbient::Evaluate( CqShaderExecEnv& Env )
 {
-	TqFloat fTemp;
-	CqColor cTemp;
-	CqVMStackEntry color, intensity;
+	TqFloat fTemp = 1.0f;
+	CqColor cTemp = CqColor(1,1,1);
 	
 	if(m_lightcolor)
-		m_lightcolor->GetValue( 0, color );
-	else
-		color.SetValue( 0, CqColor(1,1,1) );
+		m_lightcolor->GetColor( cTemp, 0 );
 
 	if(m_intensity)
-		m_intensity->GetValue( 0, intensity );
-	else
-		intensity.SetValue( 0, 1.0f );
+		m_intensity->GetFloat( fTemp, 0 );
 
-	color.Value( cTemp );
-	intensity.Value( fTemp );
-	Env.Cl()->SetValue( CqVMStackEntry( cTemp * fTemp ) );
+	Env.Cl()->SetColor( cTemp * fTemp );
 }
 
 

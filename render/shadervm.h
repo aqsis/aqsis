@@ -39,7 +39,7 @@
 #include	"sstring.h"
 #include	"matrix.h"
 #include	"noise.h"
-#include	"shadervariable.h"
+#include	"ishaderdata.h"
 #include	"shaderexecenv.h"
 #include	"shaderstack.h"
 
@@ -131,10 +131,10 @@ class _qShareC CqShader
 		{}
 		/** Get the value of a named shader paramter.
 		 * \param name The name of the shader paramter.
-		 * \param res IqShaderVariable pointer to store the result in, will be typechecked for suitability.
+		 * \param res IqShaderData pointer to store the result in, will be typechecked for suitability.
 		 * \return Boolean indicating the parameter existed and res was of an appropriate type.
 		 */
-		virtual	_qShareM TqBool	GetValue( const char* name, IqShaderVariable* res )
+		virtual	_qShareM TqBool	GetValue( const char* name, IqShaderData* res )
 		{
 			return ( TqFalse );
 		}
@@ -242,29 +242,29 @@ union UsProgramElement
 #define	AUTOFUNC		TqBool __fVarying=TqFalse;
 
 #define	FUNC(Func)		RESULT; \
-						Func(Result,this); \
+						Func(&Result,this); \
 						Push(Result);
 #define	FUNC1(Func)		POPV(ValA); \
 						RESULT; \
-						Func(ValA,Result,this); \
+						Func(&ValA,&Result,this); \
 						Push(Result);
 #define	FUNC2(Func)		POPV(ValA); \
 						POPV(ValB); \
 						RESULT; \
-						Func(ValA,ValB,Result,this); \
+						Func(&ValA,&ValB,&Result,this); \
 						Push(Result);
 #define	FUNC3(Func)		POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						RESULT; \
-						Func(ValA,ValB,ValC,Result,this); \
+						Func(&ValA,&ValB,&ValC,&Result,this); \
 						Push(Result);
 #define	FUNC4(Func)		POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						POPV(ValD); \
 						RESULT; \
-						Func(ValA,ValB,ValC,ValD,Result,this); \
+						Func(&ValA,&ValB,&ValC,&ValD,&Result,this); \
 						Push(Result);
 #define	FUNC5(Func)		POPV(ValA); \
 						POPV(ValB); \
@@ -272,7 +272,7 @@ union UsProgramElement
 						POPV(ValD); \
 						POPV(ValE); \
 						RESULT; \
-						Func(ValA,ValB,ValC,ValD,ValE,Result,this); \
+						Func(&ValA,&ValB,&ValC,&ValD,&ValE,&Result,this); \
 						Push(Result);
 #define	FUNC7(Func)		POPV(ValA); \
 						POPV(ValB); \
@@ -282,70 +282,70 @@ union UsProgramElement
 						POPV(ValF); \
 						POPV(ValG); \
 						RESULT; \
-						Func(ValA,ValB,ValC,ValD,ValE,ValF,ValG,Result,this); \
+						Func(&ValA,&ValB,&ValC,&ValD,&ValE,&ValF,&ValG,&Result,this); \
 						Push(Result);
 #define FUNC1PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						/* Read all the additional values. */ \
-						static TqInt __iGrid=0; \
-						GETFLOAT(count); \
-						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
-						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
+						TqFloat fc; \
+						count.GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=&POP; \
 						RESULT; \
-						Func(a,Result,this, cParams, aParams); \
+						Func(&a,&Result,this, cParams, aParams); \
 						Push(Result);
 #define FUNC2PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						POPV(b);		/* second value */ \
 						/* Read all the additional values. */ \
-						static TqInt __iGrid=0; \
-						GETFLOAT(count); \
-						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
-						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
+						TqFloat fc; \
+						count.GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=&POP; \
 						RESULT; \
-						Func(a,b,Result,this, cParams, aParams); \
+						Func(&a,&b,&Result,this, cParams, aParams); \
 						Push(Result);
 #define FUNC3PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						POPV(b);		/* second value */ \
 						POPV(c);		/* third value */ \
 						/* Read all the additional values. */ \
-						static TqInt __iGrid=0; \
-						GETFLOAT(count); \
-						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
-						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
+						TqFloat fc; \
+						count.GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=&POP; \
 						RESULT; \
-						Func(a,b,c,Result,this, cParams, aParams); \
+						Func(&a,&b,&c,&Result,this, cParams, aParams); \
 						Push(Result);
 
 
 #define	VOIDFUNC(Func)	Func(this);
 #define	VOIDFUNC1(Func)	POPV(ValA); \
-						Func(ValA,this);
+						Func(&ValA,this);
 #define	VOIDFUNC2(Func)	POPV(ValA); \
 						POPV(ValB); \
-						Func(ValA,ValB,this);
+						Func(&ValA,&ValB,this);
 #define	VOIDFUNC3(Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
-						Func(ValA,ValB,ValC,this);
+						Func(&ValA,&ValB,&ValC,this);
 #define	VOIDFUNC4(Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						POPV(ValD); \
-						Func(ValA,ValB,ValC,ValD,this);
+						Func(&ValA,&ValB,&ValC,&ValD,this);
 #define	VOIDFUNC5(Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						POPV(ValD); \
 						POPV(ValE); \
-						Func(ValA,ValB,ValC,ValD,ValE,this);
+						Func(&ValA,&ValB,&ValC,&ValD,&ValE,this);
 #define	VOIDFUNC7(Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
@@ -353,17 +353,17 @@ union UsProgramElement
 						POPV(ValE); \
 						POPV(ValF); \
 						POPV(ValG); \
-						Func(ValA,ValB,ValC,ValD,ValE,ValF,ValG,this);
+						Func(&ValA,&ValB,&ValC,&ValD,&ValE,&ValF,&ValG,this);
 #define VOIDFUNC1PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						/* Read all the additional values. */ \
-						static TqInt __iGrid=0; \
-						GETFLOAT(count); \
-						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
-						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
+						TqFloat fc; \
+						count.GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=&POP; \
-						Func(a,this, cParams, aParams);
+						Func(&a,this, cParams, aParams);
 
 #define	SPLINE(func)	POPV(count);	\
 						POPV(value); \
@@ -371,16 +371,16 @@ union UsProgramElement
 						POPV(valb);	\
 						POPV(valc);	\
 						POPV(vald);	\
-						TqInt __iGrid=0; \
-						GETFLOAT(count); \
-						TqInt cParams=static_cast<TqInt>(FLOAT(count))+4; \
-						CqVMStackEntry** apSplinePoints=new CqVMStackEntry*[cParams]; \
+						TqFloat fc; \
+						count.GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ) + 4; \
+						IqShaderData** apSplinePoints=new IqShaderData*[cParams]; \
 						apSplinePoints[0]=&vala; apSplinePoints[1]=&valb; apSplinePoints[2]=&valc; apSplinePoints[3]=&vald; \
 						TqInt iSP; \
 						for(iSP=4; iSP<cParams; iSP++) \
 							apSplinePoints[iSP]=&POP; \
 						RESULT; \
-						func(value,Result,this,cParams,apSplinePoints); \
+						func(&value,&Result,this,cParams,apSplinePoints); \
 						Push(Result);
 
 #define	SSPLINE(func)	POPV(count); \
@@ -390,56 +390,56 @@ union UsProgramElement
 						POPV(valb);	\
 						POPV(valc);	\
 						POPV(vald);	\
-						TqInt __iGrid=0; \
-						GETFLOAT(count); \
-						TqInt cParams=static_cast<TqInt>(FLOAT(count))+4; \
-						CqVMStackEntry** apSplinePoints=new CqVMStackEntry*[cParams]; \
+						TqFloat fc; \
+						count.GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ) + 4; \
+						IqShaderData** apSplinePoints=new IqShaderData*[cParams]; \
 						apSplinePoints[0]=&vala; apSplinePoints[1]=&valb; apSplinePoints[2]=&valc; apSplinePoints[3]=&vald; \
 						TqInt iSP; \
 						for(iSP=4; iSP<cParams; iSP++) \
 							apSplinePoints[iSP]=&POP; \
 						RESULT; \
-						func(basis,value,Result,this,cParams,apSplinePoints); \
+						func(&basis,&value,&Result,this,cParams,apSplinePoints); \
 						Push(Result);
 
 #define	TEXTURE(func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
-						TqInt __iGrid=0; \
-						GETFLOAT(count); \
-						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
-						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
+						TqFloat fc; \
+						count.GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=&POP; \
 						RESULT; \
-						func(name,channel,Result,this,cParams,aParams); \
+						func(&name,&channel,&Result,this,cParams,aParams); \
 						Push(Result);
 #define	TEXTURE1(func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
 						POPV(R); /* point */\
-						TqInt __iGrid=0; \
-						GETFLOAT(count); \
-						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
-						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
+						TqFloat fc; \
+						count.GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=&POP; \
 						RESULT; \
-						func(name,channel,R,Result,this, cParams, aParams); \
+						func(&name,&channel,&R,&Result,this, cParams, aParams); \
 						Push(Result);
 #define	TEXTURE2(func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
 						POPV(s); /* s */\
 						POPV(t); /* t */\
-						TqInt __iGrid=0; \
-						GETFLOAT(count); \
-						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
-						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
+						TqFloat fc; \
+						count.GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=&POP; \
 						RESULT; \
-						func(name,channel,s,t,Result,this, cParams, aParams); \
+						func(&name,&channel,&s,&t,&Result,this, cParams, aParams); \
 						Push(Result);
 #define	TEXTURE4(func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
@@ -448,14 +448,14 @@ union UsProgramElement
 						POPV(R2); /* R2 */\
 						POPV(R3); /* R3 */\
 						POPV(R4); /* R4 */\
-						TqInt __iGrid=0; \
-						GETFLOAT(count); \
-						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
-						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
+						TqFloat fc; \
+						count.GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=&POP; \
 						RESULT; \
-						func(name,channel,R1,R2,R3,R4,Result,this,cParams,aParams); \
+						func(&name,&channel,&R1,&R2,&R3,&R4,&Result,this,cParams,aParams); \
 						Push(Result);
 #define	TEXTURE8(func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
@@ -468,14 +468,14 @@ union UsProgramElement
 						POPV(t3); /* t3 */\
 						POPV(s4); /* s4 */\
 						POPV(t4); /* t4 */\
-						TqInt __iGrid=0; \
-						GETFLOAT(count); \
-						TqInt cParams=static_cast<TqInt>(FLOAT(count)); \
-						CqVMStackEntry** aParams=new CqVMStackEntry*[cParams]; \
+						TqFloat fc; \
+						count.GetFloat( fc ); \
+						TqInt cParams=static_cast<TqInt>( fc ); \
+						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=&POP; \
 						RESULT; \
-						func(name,channel,s1,t1,s2,t2,s3,t3,s4,t4,Result,this,cParams,aParams); \
+						func(&name,&channel,&s1,&t1,&s2,&t2,&s3,&t3,&s4,&t4,&Result,this,cParams,aParams); \
 						Push(Result);
 
 #define	TRIPLE(T)		POPV(ValA); \
@@ -509,7 +509,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 		virtual _qShareM ~CqShaderVM()
 		{
 			// Delete the local variables.
-			for ( std::vector<IqShaderVariable*>::iterator i = m_LocalVars.begin(); i != m_LocalVars.end(); i++ )
+			for ( std::vector<IqShaderData*>::iterator i = m_LocalVars.begin(); i != m_LocalVars.end(); i++ )
 				if ( ( *i ) != NULL ) delete( *i );
 		}
 
@@ -518,10 +518,10 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 		_qShareM	void	ExecuteInit();
 
 		virtual	void	SetValue( const char* name, TqPchar val );
-		virtual	TqBool	GetValue( const char* name, IqShaderVariable* res );
+		virtual	TqBool	GetValue( const char* name, IqShaderData* res );
 
         _qShareM int				GetShaderVarCount();				// for libslxargs
-        _qShareM IqShaderVariable * GetShaderVarAt(int varIndex);  		// for libslxargs     
+        _qShareM IqShaderData * GetShaderVarAt(int varIndex);  		// for libslxargs     
         _qShareM EqShaderType		Type()			{return(m_Type);}	// for libslxargs
         
 		virtual	void	Evaluate( CqShaderExecEnv& Env )
@@ -548,16 +548,22 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 
 		/** Static variable creation function.
 		 */
-		static IqShaderVariable* CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name);
+		static IqShaderData* CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name);
 		/** Static variable array creation function.
 		 */
-		static IqShaderVariable* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count);
+		static IqShaderData* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count);
+		/** Static function to create some temporary storage which complies to the IqShaderData interface.
+		 */
+		static IqShaderData* CreateTemporaryStorage();
+		/** Static function to destroy temporary storage created with CreateTemporaryStorage.
+		 */
+		static void DeleteTemporaryStorage( IqShaderData* pData );
 
 	private:
         EqShaderType 		m_Type;							///< Shader type for libslxargs
 		TqUint m_LocalIndex;                   ///<  Local Index to speed up
 		CqShaderExecEnv*	m_pEnv;							///< Pointer to the current excution environment.
-		std::vector<IqShaderVariable*>	m_LocalVars;		///< Array of local variables.
+		std::vector<IqShaderData*>	m_LocalVars;		///< Array of local variables.
 		std::vector<UsProgramElement>	m_ProgramInit;		///< Bytecodes of the intialisation program.
 		std::vector<UsProgramElement>	m_Program;			///< Bytecodes of the main program.
 		UsProgramElement*	m_PC;							///< Current program pointer.
@@ -579,9 +585,9 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 		}
 		/** Get a shader variable by index.
 		 * \param Index Integer index, top bit indicates system variable.
-		 * \return Pointer to a IqShaderVariable derived class.
+		 * \return Pointer to a IqShaderData derived class.
 		 */
-		IqShaderVariable*	GetVar( TqInt Index )
+		IqShaderData*	GetVar( TqInt Index )
 		{
 			if ( Index & 0x8000 )
 				return ( m_pEnv->pVar( Index & 0x7FFF ) );
@@ -589,9 +595,9 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 				return ( m_LocalVars[ Index ] );
 		}
 		/** Add a variable to the list of local ones.
-		 * \param pVar Pointer to a IqShaderVariable derived class.
+		 * \param pVar Pointer to a IqShaderData derived class.
 		 */
-		void	AddLocalVariable( IqShaderVariable* pVar )
+		void	AddLocalVariable( IqShaderData* pVar )
 		{
 			m_LocalVars.push_back( pVar );
 		}

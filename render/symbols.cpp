@@ -28,7 +28,6 @@
 #include	"color.h"
 #include	"vector3d.h"
 #include	"parameters.h"
-#include	"shaderstack.h"
 
 START_NAMESPACE( Aqsis )
 

@@ -62,17 +62,23 @@ char* gVariableStorageNames[] =
     };
 TqInt gcVariableStorageNames = sizeof( gVariableStorageNames ) / sizeof( gVariableStorageNames[ 0 ] );
 
+
+
+TqFloat		CqShaderVariable::m_DefFloat = 0.0f;
+CqString	CqShaderVariable::m_DefString = CqString("");
+CqVector3D	CqShaderVariable::m_DefPoint = CqVector3D(0.0f,0.0f,0.0f);
+CqVector3D	CqShaderVariable::m_DefVector = CqVector3D(0.0f,0.0f,0.0f);
+CqVector3D	CqShaderVariable::m_DefNormal = CqVector3D(0.0f,0.0f,0.0f);
+CqColor		CqShaderVariable::m_DefColor = CqColor(0.0f,0.0f,0.0f);
+CqMatrix	CqShaderVariable::m_DefMatrix = CqMatrix();
+
+
 CqShaderVariable::CqShaderVariable()
 {
 	QGetRenderContext() ->Stats().IncVariablesAllocated();
 }
 
 CqShaderVariable::CqShaderVariable( const char* strName ) : m_strName( strName )
-{
-	QGetRenderContext() ->Stats().IncVariablesAllocated();
-}
-
-CqShaderVariable::CqShaderVariable( const CqShaderVariable& From ) : m_strName( From.m_strName )
 {
 	QGetRenderContext() ->Stats().IncVariablesAllocated();
 }
@@ -91,17 +97,6 @@ std::ostream &operator<<( std::ostream &Stream, EqVariableType t )
 {
 	Stream << gVariableTypeNames[ t ];
 	return ( Stream );
-}
-
-
-//----------------------------------------------------------------------
-/** Clone function for variable array.
- */
-
-IqShaderVariable* CqShaderVariableArray::Clone() const
-{
-	CqShaderVariableArray * pNew = new CqShaderVariableArray( *this );
-	return ( pNew );
 }
 
 

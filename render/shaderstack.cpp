@@ -25,9 +25,12 @@
 
 #include	"aqsis.h"
 #include	"shaderstack.h"
-#include	"shadervariable.h"
+#include	"ishaderdata.h"
 
 START_NAMESPACE( Aqsis )
+
+
+CqString CqVMStackEntry::m_strName = CqString("__temporary__");
 
 
 CqVMStackEntry::CqVMStackEntry( TqInt size )
@@ -40,7 +43,7 @@ CqVMStackEntry::CqVMStackEntry( TqInt size )
 }
 
 
-CqVMStackEntry&	CqVMStackEntry::operator=( IqShaderVariable* pv )
+CqVMStackEntry&	CqVMStackEntry::operator=( IqShaderData* pv )
 {
 	//pv->GetValue(*this);
 	m_pVarRef = pv;
@@ -48,7 +51,7 @@ CqVMStackEntry&	CqVMStackEntry::operator=( IqShaderVariable* pv )
 }
 
 
-TqInt CqVMStackEntry::Size() const
+TqUint CqVMStackEntry::Size() const
 {
 	if ( m_pVarRef != 0 ) return ( m_pVarRef->Size() );
 	else	return ( m_Size );

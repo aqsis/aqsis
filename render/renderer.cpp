@@ -38,6 +38,8 @@
 #include	"transform.h"
 #include	"rifile.h"
 
+#include	"shadervariable.h"
+
 START_NAMESPACE( Aqsis )
 
 extern IqDDManager* CreateDisplayDriverManager();
