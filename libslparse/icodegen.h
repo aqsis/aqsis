@@ -61,7 +61,7 @@ static const char* const gVariableTypeNames[] =
         "triple",
         "hpoint",
         "normal",
-        "vector"
+        "vector",
         "void",
         "matrix",
         "hextuple"
