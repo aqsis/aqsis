@@ -28,7 +28,7 @@ A RenderMan(tm)-compatible renderer
 #./bootstrap
 export CFLAGS="-O2" 
 export CXXFLAGS="-O29" 
-./configure $features
+./configure $features --prefix=%{_prefix} --bindir=%{_bindir} --mandir=%{_mandir} --libdir=%{_libdir} --datadir=%{_datadir} --includedir=%{_includedir} --sysconfdir=%{_sysconfdir}
 
 make
 #make check
