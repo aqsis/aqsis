@@ -145,6 +145,10 @@ SOURCE=.\curves.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\environment.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\genpoly.cpp
 # End Source File
 # Begin Source File
@@ -234,6 +238,10 @@ SOURCE=.\ri.cpp
 # Begin Source File
 
 SOURCE=.\shaders.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\shadowmap.cpp
 # End Source File
 # Begin Source File
 
