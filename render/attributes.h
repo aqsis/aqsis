@@ -169,51 +169,51 @@ public:
         GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = ( co ) ? 1 : 0;
     }
 
-    virtual IqShader*	pshadDisplacement( TqFloat time ) const
+    virtual boost::shared_ptr<IqShader> pshadDisplacement( TqFloat time ) const
     {
         return ( m_pshadDisplacement );
     }
-    virtual void	SetpshadDisplacement( IqShader* pshadDisplacement, TqFloat time )
+    virtual void SetpshadDisplacement( const boost::shared_ptr<IqShader>& pshadDisplacement, TqFloat time )
     {
         m_pshadDisplacement = pshadDisplacement;
     }
-    virtual IqShader*	pshadAreaLightSource( TqFloat time ) const
+    virtual boost::shared_ptr<IqShader> pshadAreaLightSource( TqFloat time ) const
     {
         return ( m_pshadAreaLightSource );
     }
-    virtual void	SetpshadAreaLightSource( IqShader* pshadAreaLightSource, TqFloat time )
+    virtual void SetpshadAreaLightSource( const boost::shared_ptr<IqShader>& pshadAreaLightSource, TqFloat time )
     {
         m_pshadAreaLightSource = pshadAreaLightSource;
     }
-    virtual IqShader*	pshadSurface( TqFloat time ) const
+    virtual boost::shared_ptr<IqShader> pshadSurface( TqFloat time ) const
     {
         return ( m_pshadSurface );
     }
-    virtual void	SetpshadSurface( IqShader* pshadSurface, TqFloat time )
+    virtual void SetpshadSurface( const boost::shared_ptr<IqShader>& pshadSurface, TqFloat time )
     {
         m_pshadSurface = pshadSurface;
     }
-    virtual IqShader*	pshadAtmosphere( TqFloat time ) const
+    virtual boost::shared_ptr<IqShader> pshadAtmosphere( TqFloat time ) const
     {
         return ( m_pshadAtmosphere );
     }
-    virtual void	SetpshadAtmosphere( IqShader* pshadAtmosphere, TqFloat time )
+    virtual void SetpshadAtmosphere( const boost::shared_ptr<IqShader>& pshadAtmosphere, TqFloat time )
     {
         m_pshadAtmosphere = pshadAtmosphere;
     }
-    virtual IqShader*	pshadExteriorVolume( TqFloat time ) const
+    virtual boost::shared_ptr<IqShader> pshadExteriorVolume( TqFloat time ) const
     {
         return ( m_pshadExteriorVolume );
     }
-    virtual void	SetpshadExteriorVolume( IqShader* pshadExteriorVolume, TqFloat time )
+    virtual void SetpshadExteriorVolume( const boost::shared_ptr<IqShader>& pshadExteriorVolume, TqFloat time )
     {
         m_pshadExteriorVolume = pshadExteriorVolume;
     }
-    virtual IqShader*	pshadAreaInteriorVolume( TqFloat time ) const
+    virtual boost::shared_ptr<IqShader> pshadAreaInteriorVolume( TqFloat time ) const
     {
         return ( m_pshadInteriorVolume );
     }
-    virtual void	SetpshadInteriorVolume( IqShader* pshadInteriorVolume, TqFloat time )
+    virtual void SetpshadInteriorVolume( const boost::shared_ptr<IqShader>& pshadInteriorVolume, TqFloat time )
     {
         m_pshadInteriorVolume = pshadInteriorVolume;
     }
@@ -488,12 +488,12 @@ private:
 
     CqHashTable	m_aAttributes;						///< a vector of user defined attribute pointers.
 
-    IqShader*	m_pshadDisplacement;				///< a pointer to the current displacement shader.
-    IqShader*	m_pshadAreaLightSource;				///< a pointer to the current area ligthsource shader.
-    IqShader*	m_pshadSurface;						///< a pointer to the current surface shader.
-    IqShader*	m_pshadAtmosphere;					///< a pointer to the current atmosphere shader.
-    IqShader*	m_pshadInteriorVolume;				///< a pointer to the current interior shader.
-    IqShader*	m_pshadExteriorVolume;				///< a pointer to the current exterior shader.
+    boost::shared_ptr<IqShader> m_pshadDisplacement;            ///< a pointer to the current displacement shader.
+    boost::shared_ptr<IqShader> m_pshadAreaLightSource;         ///< a pointer to the current area ligthsource shader.
+    boost::shared_ptr<IqShader> m_pshadSurface;                 ///< a pointer to the current surface shader.
+    boost::shared_ptr<IqShader> m_pshadAtmosphere;              ///< a pointer to the current atmosphere shader.
+    boost::shared_ptr<IqShader> m_pshadInteriorVolume;          ///< a pointer to the current interior shader.
+    boost::shared_ptr<IqShader> m_pshadExteriorVolume;          ///< a pointer to the current exterior shader.
 
     CqTrimLoopArray m_TrimLoops;					///< the array of closed trimcurve loops.
     std::vector<CqLightsource*> m_apLightsources;	///< a vector of currently available lightsources.

@@ -3172,7 +3172,7 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
     // SO_init_illuminance returns TRUE if there are any non ambient ligthsources available.
     if ( SO_init_illuminance() )
     {
-        IqShader * pLightsource = 0;
+        boost::shared_ptr<IqShader> pLightsource;
         do
         {
             // Get the "__nondiffuse" setting from the current lightsource, if specified.
@@ -3251,7 +3251,7 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
     // SO_init_illuminance returns TRUE if there are any non ambient ligthsources available.
     if ( SO_init_illuminance() )
     {
-        IqShader * pLightsource = 0;
+        boost::shared_ptr<IqShader> pLightsource;
         do
         {
             // Get the "__nonspecular" setting from the current lightsource, if specified.
@@ -3904,9 +3904,9 @@ STD_SOIMPL CqShaderExecEnv::SO_atmosphere( STRINGVAL name, IqShaderData* pV, DEF
 
     INIT_SO
 
-    IqShader * pAtmosphere = NULL;
+    boost::shared_ptr<IqShader> pAtmosphere;
 
-    if ( NULL != m_pAttributes && NULL != m_pAttributes ->pshadAtmosphere(QGetRenderContextI()->Time()) )
+    if ( NULL != m_pAttributes && (m_pAttributes ->pshadAtmosphere(QGetRenderContextI()->Time())) )
         pAtmosphere = m_pAttributes ->pshadAtmosphere(QGetRenderContextI()->Time());
 
     BEGIN_UNIFORM_SECTION
@@ -3929,9 +3929,9 @@ STD_SOIMPL CqShaderExecEnv::SO_displacement( STRINGVAL name, IqShaderData* pV, D
 
     INIT_SO
 
-    IqShader * pDisplacement = NULL;
+    boost::shared_ptr<IqShader> pDisplacement;
 
-    if ( NULL != m_pAttributes && NULL != m_pAttributes ->pshadDisplacement(QGetRenderContextI()->Time()) )
+    if ( NULL != m_pAttributes && (m_pAttributes ->pshadDisplacement(QGetRenderContextI()->Time())) )
         pDisplacement = m_pAttributes ->pshadDisplacement(QGetRenderContextI()->Time());
 
     BEGIN_UNIFORM_SECTION
@@ -3955,7 +3955,7 @@ STD_SOIMPL CqShaderExecEnv::SO_lightsource( STRINGVAL name, IqShaderData* pV, DE
     INIT_SO
 
     // This should only be called within an Illuminance construct, so m_li should be valid.
-    IqShader * pLightsource = 0;
+    boost::shared_ptr<IqShader> pLightsource;
 
     BEGIN_UNIFORM_SECTION
     GETSTRING( name );
@@ -3979,7 +3979,7 @@ STD_SOIMPL CqShaderExecEnv::SO_surface( STRINGVAL name, IqShaderData* pV, DEFPAR
 
     INIT_SO
 
-    IqShader * pSurface = NULL;
+    boost::shared_ptr<IqShader> pSurface;
 
     if ( GetCurrentSurface() &&
 		 NULL != GetCurrentSurface()->pAttributes() && 
@@ -5250,9 +5250,9 @@ STD_SOIMPL	CqShaderExecEnv::SO_shadername2( STRINGVAL shader, DEFPARAMIMPL )
 
     CqString strName( "" );
     CqString strShader;
-	IqShader* pSurface = 0;
-	IqShader* pDisplacement = 0;
-	IqShader* pAtmosphere = 0;
+	boost::shared_ptr<IqShader> pSurface;
+	boost::shared_ptr<IqShader> pDisplacement;
+	boost::shared_ptr<IqShader> pAtmosphere;
     if( m_pAttributes )
 	{
 		pSurface = m_pAttributes ->pshadSurface(QGetRenderContextI()->Time());

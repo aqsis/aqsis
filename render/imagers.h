@@ -51,13 +51,13 @@ START_NAMESPACE( Aqsis )
 class CqImagersource : public CqListEntry<CqImagersource>
 {
 public:
-    CqImagersource( IqShader* pShader, TqBool fActive = TqTrue );
+    CqImagersource( const boost::shared_ptr<IqShader>& pShader, TqBool fActive = TqTrue );
     virtual	~CqImagersource();
 
     /** Get a pointer to the associated Imagersource shader.
      * \return a pointer to a CqShader derived class.
      */
-    IqShader*	pShader()
+    boost::shared_ptr<IqShader>	pShader()
     {
         return ( m_pShader );
     }
@@ -65,7 +65,7 @@ public:
     /** Get a pointer to the associated Imagersource shader.
      * \return a pointer to a IqShader derived class.
      */
-    const IqShader*	pShader() const
+    const boost::shared_ptr<IqShader>	pShader() const
     {
         return ( m_pShader );
     }
@@ -198,7 +198,7 @@ public:
     TqFloat Alpha( TqFloat x, TqFloat y );
 
 private:
-    IqShader*	m_pShader;				///< Pointer to the associated shader.
+    boost::shared_ptr<IqShader>	m_pShader;				///< Pointer to the associated shader.
     CqAttributes*	m_pAttributes;			///< Pointer to the associated attributes.
 
     TqInt m_vGridRes;						///< Size of the bucket X

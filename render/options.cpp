@@ -599,9 +599,9 @@ void CqOptions::LoadImager( const CqString& strName )
 {
     DeleteImager();
 
-    IqShader* pShader = static_cast<IqShader*>( QGetRenderContext() ->CreateShader( strName.c_str(), Type_Imager ) );
+    boost::shared_ptr<IqShader> pShader = QGetRenderContext() ->CreateShader( strName.c_str(), Type_Imager );
 
-    if ( pShader == 0 ) return ;
+    if ( !pShader ) return ;
 
     m_pshadImager = new CqImagersource( pShader, RI_TRUE );
     m_pshadImager->pShader() ->PrepareDefArgs();

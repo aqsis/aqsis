@@ -205,14 +205,14 @@ CqMicroPolyGridBase* CqPoints::Dice()
     for ( iUP = pPoints()->aUserParams().begin(); iUP != end ; iUP++ )
     {
         /// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
-        IqShader* pShader;
-		if ( NULL != (pShader = pGrid->pAttributes() ->pshadSurface(QGetRenderContext()->Time())) )
+        boost::shared_ptr<IqShader> pShader;
+		if ( pShader = pGrid->pAttributes() ->pshadSurface(QGetRenderContext()->Time()) )
             pShader->SetArgument( ( *iUP ), this );
 
-        if ( NULL != (pShader=pGrid->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time())) )
+        if ( pShader = pGrid->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time()) )
             pShader->SetArgument( ( *iUP ), this );
 
-        if ( NULL != (pShader=pGrid->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time())) )
+        if ( pShader = pGrid->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time()) )
             pShader->SetArgument( ( *iUP ), this );
     }
 

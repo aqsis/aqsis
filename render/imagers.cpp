@@ -35,7 +35,7 @@ START_NAMESPACE( Aqsis )
 /** Default constructor.
  */
 
-CqImagersource::CqImagersource( IqShader* pShader, TqBool fActive ) :
+CqImagersource::CqImagersource( const boost::shared_ptr<IqShader>& pShader, TqBool fActive ) :
         m_pShader( pShader ),
         m_pAttributes( NULL ),
         m_pShaderExecEnv( new CqShaderExecEnv )
@@ -94,7 +94,7 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 
     TqInt Uses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi | ( 1 << EnvVars_ncomps ) | ( 1 << EnvVars_time ) | ( 1 << EnvVars_alpha ) );
 
-    m_pShaderExecEnv->Initialise( uGridRes, vGridRes, 0, 0, m_pShader, Uses );
+    m_pShaderExecEnv->Initialise( uGridRes, vGridRes, 0, 0, m_pShader.get(), Uses );
 
     // Initialise the geometric parameters in the shader exec env.
 

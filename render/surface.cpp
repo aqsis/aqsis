@@ -160,9 +160,9 @@ CqString CqBasicSurface::strName() const
 TqInt CqBasicSurface::Uses() const
 {
     TqInt Uses = gDefUses | QGetRenderContext()->pDDmanager()->Uses();
-    IqShader* pshadSurface = pAttributes() ->pshadSurface(QGetRenderContextI()->Time());
-    IqShader* pshadDisplacement = pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time());
-    IqShader* pshadAtmosphere = pAttributes() ->pshadAtmosphere(QGetRenderContextI()->Time());
+    boost::shared_ptr<IqShader> pshadSurface = pAttributes() ->pshadSurface(QGetRenderContextI()->Time());
+    boost::shared_ptr<IqShader> pshadDisplacement = pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time());
+    boost::shared_ptr<IqShader> pshadAtmosphere = pAttributes() ->pshadAtmosphere(QGetRenderContextI()->Time());
 
     if ( NULL == pshadSurface && NULL == pshadDisplacement && NULL == pshadAtmosphere )
         return ( 0 );
@@ -545,14 +545,14 @@ CqMicroPolyGridBase* CqSurface::Dice()
     std::vector<CqParameter*>::iterator end = m_aUserParams.end();
     for ( iUP = m_aUserParams.begin(); iUP != end ; iUP++ )
     {
-        IqShader* pShader;
-		if ( NULL != (pShader=pGrid->pAttributes() ->pshadSurface(QGetRenderContext()->Time())) )
+        boost::shared_ptr<IqShader> pShader;
+		if ( pShader=pGrid->pAttributes() ->pshadSurface(QGetRenderContext()->Time()) )
             pShader->SetArgument( ( *iUP ), this );
 
-        if ( NULL != (pShader=pGrid->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time())) )
+        if ( pShader=pGrid->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time()) )
             pShader->SetArgument( ( *iUP ), this );
 
-        if ( NULL != (pShader=pGrid->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time())) )
+        if ( pShader=pGrid->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time()) )
             pShader->SetArgument( ( *iUP ), this );
     }
 

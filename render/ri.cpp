@@ -77,7 +77,7 @@ using namespace Aqsis;
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
 static void ProcessCompression( TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values );
 RtVoid	CreateGPrim( const boost::shared_ptr<CqBasicSurface>& pSurface );
-void SetShaderArgument( IqShader* pShader, const char* name, TqPchar val );
+void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char* name, TqPchar val );
 TqBool	ValidateState(...);
 
 
@@ -470,13 +470,9 @@ RtVoid	RiBegin( RtToken name )
     RiDisplay( "ri.pic", "file", "rgba", NULL );
 
     // Setup a default surface shader
-    CqShaderVM * pShader = new CqShaderVM();
-    pShader->SetstrName( "_def_" );
-    pShader->DefaultSurface();
-    pShader->matCurrent() = QGetRenderContext() ->matCurrent(QGetRenderContext()->Time());
-    pShader->PrepareDefArgs();
-    QGetRenderContext() ->RegisterShader( "_def_", Type_Surface, pShader );
-    QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( pShader, QGetRenderContext() ->Time() );
+    boost::shared_ptr<IqShader> pDefaultSurfaceShader = 
+        QGetRenderContext()->getDefaultSurfaceShader();
+    QGetRenderContext() ->pattrWriteCurrent() ->SetpshadSurface( pDefaultSurfaceShader, QGetRenderContext() ->Time() );
 
 	// Setup the initial transformation.
 //	QGetRenderContext()->ptransWriteCurrent() ->SetHandedness( TqFalse );
@@ -1929,10 +1925,11 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 	Validate_RiLightSource
 
     // Find the lightsource shader.
-    IqShader * pShader = static_cast<CqShader*>( QGetRenderContext() ->CreateShader( name, Type_Lightsource ) );
+    //IqShader * pShader = static_cast<CqShader*>( QGetRenderContext() ->CreateShader( name, Type_Lightsource ) );
+    boost::shared_ptr<IqShader> pShader = QGetRenderContext()->CreateShader( name, Type_Lightsource );
 
     // TODO: Report error.
-    if ( pShader == 0 ) return ( 0 );
+    if ( !pShader ) return ( 0 );
 
     pShader->matCurrent() = QGetRenderContext() ->ptransCurrent()->matObjectToWorld(QGetRenderContext()->Time());
     CqLightsource* pNew = new CqLightsource( pShader, RI_TRUE );
@@ -2043,9 +2040,10 @@ RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 	Validate_RiSurface
 
     // Find the shader.
-    IqShader * pshadSurface = QGetRenderContext() ->CreateShader( name, Type_Surface );
+    //IqShader * pshadSurface = QGetRenderContext() ->CreateShader( name, Type_Surface );
+    boost::shared_ptr<IqShader> pshadSurface = QGetRenderContext()->CreateShader( name, Type_Surface );
 
-    if ( pshadSurface != 0 )
+    if ( pshadSurface )
     {
         TqFloat time = QGetRenderContext()->Time();
 		pshadSurface->matCurrent() = QGetRenderContext() ->matCurrent(time);
@@ -2094,9 +2092,9 @@ RtVoid	RiAtmosphereV( RtToken name, PARAMETERLIST )
 	Validate_RiAtmosphere
 
     // Find the shader.
-    IqShader * pshadAtmosphere = QGetRenderContext() ->CreateShader( name, Type_Volume );
+    boost::shared_ptr<IqShader> pshadAtmosphere = QGetRenderContext()->CreateShader( name, Type_Volume );
 
-    if ( pshadAtmosphere != 0 )
+    if ( pshadAtmosphere )
     {
         pshadAtmosphere->matCurrent() = QGetRenderContext() ->matCurrent(QGetRenderContext()->Time());
         // Execute the intiialisation code here, as we now have our shader context complete.
@@ -2637,9 +2635,9 @@ RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
 	Validate_RiDisplacement
 
     // Find the shader.
-    IqShader * pshadDisplacement = QGetRenderContext() ->CreateShader( name, Type_Displacement );
+    boost::shared_ptr<IqShader> pshadDisplacement = QGetRenderContext() ->CreateShader( name, Type_Displacement );
 
-    if ( pshadDisplacement != 0 )
+    if ( pshadDisplacement )
     {
         pshadDisplacement->matCurrent() = QGetRenderContext() ->matCurrent(QGetRenderContext()->Time());
         // Execute the intiialisation code here, as we now have our shader context complete.
@@ -5606,7 +5604,7 @@ RtFunc	RiPreWorldFunction( RtFunc function )
 }
 
 
-void SetShaderArgument( IqShader * pShader, const char * name, TqPchar val )
+void SetShaderArgument( const boost::shared_ptr<IqShader>& pShader, const char * name, TqPchar val )
 {
     // Find the relevant variable.
     SqParameterDeclaration Decl;

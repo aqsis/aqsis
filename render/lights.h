@@ -52,7 +52,7 @@ START_NAMESPACE( Aqsis )
 class CqLightsource : public CqListEntry<CqLightsource>, public IqLightsource, public CqRefCount
 {
 public:
-    CqLightsource( IqShader* pShader, TqBool fActive = TqTrue );
+    CqLightsource( const boost::shared_ptr<IqShader>& pShader, TqBool fActive = TqTrue );
     virtual	~CqLightsource();
 
 #ifdef _DEBUG
@@ -62,7 +62,7 @@ public:
     /** Get a pointer to the associated lightsource shader.
      * \return a pointer to a IqShader derived class.
      */
-    virtual IqShader*	pShader()
+    virtual boost::shared_ptr<IqShader>	pShader()
     {
         return ( m_pShader );
     }
@@ -209,7 +209,7 @@ public:
     }
 
 private:
-    IqShader*	m_pShader;				///< Pointer to the associated shader.
+    boost::shared_ptr<IqShader>	m_pShader;				///< Pointer to the associated shader.
     CqAttributes*	m_pAttributes;			///< Pointer to the associated attributes.
     boost::shared_ptr<IqShaderExecEnv>	m_pShaderExecEnv;	///< Pointer to the shader execution environment.
 }

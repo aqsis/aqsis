@@ -242,14 +242,15 @@ public:
     /** Get the list of currently registered shaders.
      * \return A reference to a list of CqShaderRegister classes.
      */
-    virtual	IqShader* CreateShader( const char* strName, EqShaderType type );
+    virtual boost::shared_ptr<IqShader> CreateShader( const char* strName, EqShaderType type );
 
     /** Flush any registered shaders.
      */
     virtual	void	FlushShaders()
     {
-        while ( m_Shaders.pFirst() != 0 )
-            delete( m_Shaders.pFirst() );
+        //while ( m_Shaders.pFirst() != 0 )
+        //    delete( m_Shaders.pFirst() );
+        m_Shaders.clear();
     }
 
     /** Set the world to screen matrix.
@@ -333,8 +334,9 @@ public:
         return CqVector2D(m_DepthOfFieldScale * c);
     }
 
-    void	RegisterShader( const char* strName, EqShaderType type, IqShader* pShader );
-    CqShaderRegister* FindShader( const char* strName, EqShaderType type );
+    //void	RegisterShader( const char* strName, EqShaderType type, IqShader* pShader );
+    //CqShaderRegister* FindShader( const char* strName, EqShaderType type );
+    boost::shared_ptr<IqShader> getDefaultSurfaceShader();
 
     struct SqOutputDataEntry
     {
@@ -453,7 +455,10 @@ private:
     IqDDManager*	m_pDDManager;
 
     EqRenderMode	m_Mode;
-    CqList<CqShaderRegister> m_Shaders;				///< List of registered shaders.
+    //CqList<CqShaderRegister> m_Shaders;				///< List of registered shaders.
+    // JSM:
+    std::map< CqShaderKey, boost::shared_ptr<IqShader> > m_Shaders;
+    
     TqBool	m_fSaveGPrims;
     CqTransform*	m_pTransCamera;					///< The camera transform.
     std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.

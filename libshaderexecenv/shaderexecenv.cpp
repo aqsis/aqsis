@@ -198,7 +198,7 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Iq
     m_RunningState.SetAll( TqTrue );
 
 
-    if ( NULL != pShader )
+    if ( pShader )
     {
         if ( USES( Uses, EnvVars_P ) && m_apVariables[ EnvVars_P ] == 0 )
             m_apVariables[ EnvVars_P ] = pShader->CreateVariable( type_point, class_varying, gVariableNames[ EnvVars_P ] );

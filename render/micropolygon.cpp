@@ -114,15 +114,15 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<Cq
 
     /// \note This should delete through the interface that created it.
 
-    m_pShaderExecEnv->Initialise( cu, cv, pSurface->pAttributes(), pSurface->pTransform(), pSurface->pAttributes() ->pshadSurface(QGetRenderContext()->Time()), lUses );
+    m_pShaderExecEnv->Initialise( cu, cv, pSurface->pAttributes(), pSurface->pTransform(), pSurface->pAttributes()->pshadSurface(QGetRenderContext()->Time()).get(), lUses );
 
-    IqShader* pshadSurface = pSurface ->pAttributes() ->pshadSurface(QGetRenderContext()->Time());
-    IqShader* pshadDisplacement = pSurface ->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time());
-    IqShader* pshadAtmosphere = pSurface ->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time());
+    boost::shared_ptr<IqShader> pshadSurface = pSurface ->pAttributes() ->pshadSurface(QGetRenderContext()->Time());
+    boost::shared_ptr<IqShader> pshadDisplacement = pSurface ->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time());
+    boost::shared_ptr<IqShader> pshadAtmosphere = pSurface ->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time());
 
-    if ( NULL != pshadSurface ) pshadSurface->Initialise( cu, cv, m_pShaderExecEnv );
-    if ( NULL != pshadDisplacement ) pshadDisplacement->Initialise( cu, cv, m_pShaderExecEnv );
-    if ( NULL != pshadAtmosphere ) pshadAtmosphere->Initialise( cu, cv, m_pShaderExecEnv );
+    if ( pshadSurface ) pshadSurface->Initialise( cu, cv, m_pShaderExecEnv );
+    if ( pshadDisplacement ) pshadDisplacement->Initialise( cu, cv, m_pShaderExecEnv );
+    if ( pshadAtmosphere ) pshadAtmosphere->Initialise( cu, cv, m_pShaderExecEnv );
 
     // Initialise the local/public culled variable.
     m_CulledPolys.SetSize( ( cu + 1 ) * ( cv + 1 ) );
@@ -258,9 +258,9 @@ void CqMicroPolyGrid::Shade()
 
     CqStats& theStats = QGetRenderContext() ->Stats();
 
-    IqShader* pshadSurface = pSurface() ->pAttributes() ->pshadSurface(QGetRenderContext()->Time());
-    IqShader* pshadDisplacement = pSurface() ->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time());
-    IqShader* pshadAtmosphere = pSurface() ->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time());
+    boost::shared_ptr<IqShader> pshadSurface = pSurface() ->pAttributes() ->pshadSurface(QGetRenderContext()->Time());
+    boost::shared_ptr<IqShader> pshadDisplacement = pSurface() ->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time());
+    boost::shared_ptr<IqShader> pshadAtmosphere = pSurface() ->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time());
 
     TqInt lUses = pSurface() ->Uses();
     TqInt gs = GridSize();
@@ -499,7 +499,7 @@ void CqMicroPolyGrid::Shade()
 
 void CqMicroPolyGrid::TransferOutputVariables()
 {
-    IqShader* pShader = this->pAttributes()->pshadSurface(QGetRenderContext()->Time());
+    boost::shared_ptr<IqShader> pShader = this->pAttributes()->pshadSurface(QGetRenderContext()->Time());
 
     // Only bother transferring ones that have been used in a RiDisplay request.
     std::map<std::string, CqRenderer::SqOutputDataEntry>& outputVars = QGetRenderContext()->GetMapOfOutputDataEntries();

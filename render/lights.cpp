@@ -35,7 +35,7 @@ CqList<CqLightsource>	Lightsource_stack;
 /** Default constructor.
  */
 
-CqLightsource::CqLightsource( IqShader* pShader, TqBool fActive ) :
+CqLightsource::CqLightsource( const boost::shared_ptr<IqShader>& pShader, TqBool fActive ) :
         m_pShader( pShader ),
         m_pAttributes( NULL ),
 	m_pShaderExecEnv(new CqShaderExecEnv)
@@ -75,7 +75,7 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
     if ( m_pShader )
     {
         Uses |= m_pShader->Uses();
-        m_pShaderExecEnv->Initialise( uGridRes, vGridRes, m_pAttributes, 0, m_pShader, Uses );
+        m_pShaderExecEnv->Initialise( uGridRes, vGridRes, m_pAttributes, 0, m_pShader.get(), Uses );
     }
 
     if ( m_pShader )

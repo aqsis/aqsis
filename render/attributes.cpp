@@ -107,13 +107,7 @@ const TqInt CqAttributes::CqHashTable::tableSize = 127;
 /** Constructor.
  */
 
-CqAttributes::CqAttributes() :
-        m_pshadDisplacement( 0 ),
-        m_pshadAreaLightSource( 0 ),
-        m_pshadSurface( 0 ),
-        m_pshadAtmosphere( 0 ),
-        m_pshadInteriorVolume( 0 ),
-        m_pshadExteriorVolume( 0 )
+CqAttributes::CqAttributes()
 {
     Attribute_stack.push_front( this );
     m_StackIterator = Attribute_stack.begin();

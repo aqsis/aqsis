@@ -49,7 +49,7 @@ START_NAMESPACE( Aqsis )
 extern IqDDManager* CreateDisplayDriverManager();
 extern IqRaytrace* CreateRaytracer();
 
-static CqShaderRegister * pOShaderRegister = NULL;
+//static CqShaderRegister * pOShaderRegister = NULL;
 
 CqRenderer* pCurrRenderer = 0;
 
@@ -1013,18 +1013,19 @@ void CqRenderer::AddParameterDecl( const char* strName, const char* strType )
 //---------------------------------------------------------------------
 /** Register a shader of the specified type with the specified name.
  */
-
+#if 0
 void CqRenderer::RegisterShader( const char* strName, EqShaderType type, IqShader* pShader )
 {
     assert( pShader );
     m_Shaders.LinkLast( new CqShaderRegister( strName, type, pShader ) );
 }
+#endif
 
 
 //---------------------------------------------------------------------
 /** Find a shader of the specified type with the specified name.
  */
-
+#if 0
 CqShaderRegister* CqRenderer::FindShader( const char* strName, EqShaderType type )
 {
     // Search the register list.
@@ -1044,13 +1045,121 @@ CqShaderRegister* CqRenderer::FindShader( const char* strName, EqShaderType type
     }
     return ( 0 );
 }
+#endif
 
+//---------------------------------------------------------------------
+/** Returns a pointer to the default surface.
+ */
+boost::shared_ptr<IqShader> CqRenderer::getDefaultSurfaceShader()
+{
+        // construct a key to index the default surface
+        CqShaderKey key( "_def_", Type_Surface );
+
+        // check for the shader in the existing map
+        boost::shared_ptr<IqShader> pMapCheck = 
+                CreateShader( "_def_", Type_Surface );
+        if (pMapCheck)
+                return pMapCheck;
+
+        // insert the default surface template into the map
+        boost::shared_ptr<IqShader> pRet( new CqShaderVM() );
+        CqShaderVM* pShader = static_cast<CqShaderVM*>( pRet.get() );
+        pShader->SetstrName( "_def_" );
+        pShader->DefaultSurface();
+        pShader->matCurrent() = matCurrent(Time());
+        pShader->PrepareDefArgs();
+        m_Shaders[key] = pRet;
+        
+        // return a clone of the default surface template
+        return boost::shared_ptr<IqShader>( pRet->Clone() );
+        
+}
+
+//---------------------------------------------------------------------
+/** Find a shader of the specified type with the specified name.
+ * If not found, try to load one.
+ */
+boost::shared_ptr<IqShader> CqRenderer::CreateShader( 
+        const char* strName, EqShaderType type )
+{
+        // construct the key which is used to index the shader
+        CqShaderKey key( strName, type );
+        
+        // first, look for the shader of the appropriate type and name in the
+        //  map of shader "templates"
+        if ( m_Shaders.find(key) != m_Shaders.end() )
+        {
+                // the shader template is present, so return its clone
+                return boost::shared_ptr<IqShader>( m_Shaders[key]->Clone() );
+        }
+
+        // we now create the shader...
+
+        // search in the current directory first
+        CqString strFilename( strName );
+        strFilename += RI_SHADER_EXTENSION;
+        CqRiFile SLXFile( strFilename.c_str(), "shader" );
+        if ( SLXFile.IsValid() )
+        {
+                boost::shared_ptr<IqShader> pRet( new CqShaderVM() );
+        
+                CqShaderVM* pShader = static_cast<CqShaderVM*>( pRet.get() );
+                const CqString* poptDSOPath = QGetRenderContext()->
+                    optCurrent().GetStringOption( "searchpath", "dsolibs" );
+                pShader->SetDSOPath( poptDSOPath );
+
+                CqString strRealName( SLXFile.strRealName() );
+                std::cerr << info << "Loading shader \"" << strName 
+                          << "\" from file \"" << strRealName.c_str()
+                          << "\"" << std::endl;
+
+                pShader->SetstrName( strName );
+                pShader->LoadProgram( SLXFile );
+                
+                // add the shader to the map as a template and return its 
+                //  clone
+                m_Shaders[key] = pRet;
+                return boost::shared_ptr<IqShader>( pRet->Clone() );
+        }
+        else
+        {
+                if ( 
+                        (strcmp( strName, "null" )  != 0) &&
+                        (strcmp( strName, "_def_" ) != 0)
+                )
+                {
+                        CqString strError;
+                        strError.Format( "Shader \"%s\" not found",
+                                strName ? strName : "" );
+                        std::cerr << error << strError.c_str() << std::endl;
+                }
+                if ( type == Type_Surface )
+                {
+                        boost::shared_ptr<IqShader> pRet( new CqShaderVM() );
+                
+                        CqShaderVM* pShader = static_cast<CqShaderVM*>(
+                                pRet.get() );
+                        pShader->SetstrName( "null" );
+                        pShader->DefaultSurface();
+
+                        // add the shader to the map and return its clone
+                        m_Shaders[key] = pRet;
+                        return boost::shared_ptr<IqShader>( pRet->Clone() );
+                }
+                else
+                {
+                        // the boost::shared_ptr analogue of return NULL:
+                        return boost::shared_ptr<IqShader>();
+                }
+        }
+        
+}
 
 //---------------------------------------------------------------------
 /** Find a shader of the specified type with the specified name.
  * If not found, try and load one.
  */
-
+#if 0
 IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 {
     CqShaderRegister * pReg = NULL;
@@ -1106,6 +1215,7 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
         }
     }
 }
+#endif
 
 
 

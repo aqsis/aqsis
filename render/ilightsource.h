@@ -4,8 +4,8 @@
  *	@author	Authors name
  *	@brief	Brief description of the file contents
  *
- *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2004/06/07 23:00:47 $
+ *	Last change by:		$Author: jpgrad $
+ *	Last change date:	$Date: 2004/06/18 16:29:39 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ struct IqLightsource
     /** Get a pointer to the associated lightsource shader.
      * \return a pointer to a IqShader derived class.
      */
-    virtual	IqShader*	pShader() = 0;
+    virtual	boost::shared_ptr<IqShader>	pShader() = 0;
     /** Initialise the shader execution environment.
      * \param uGridRes Integer grid size, not used.
      * \param vGridRes Integer grid size, not used.

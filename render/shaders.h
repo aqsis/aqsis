@@ -41,10 +41,54 @@
 START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
+/**
+ * \class CqShaderKey
+ * Key class for keeping track of shaders.
+ */
+class CqShaderKey
+{
+        public:
+                CqShaderKey( const char* strName, EqShaderType type ) :
+                        m_name( strName ),
+                        m_type( type )
+                {}
+                CqShaderKey( const CqShaderKey &other ) :
+                        m_name( other.m_name ),
+                        m_type( other.m_type )
+                {}
+                virtual ~CqShaderKey()
+                {}
+                CqShaderKey &operator=( const CqShaderKey &other )
+                {
+                        m_name = other.m_name;
+                        m_type = other.m_type;
+                        return (*this);
+                }
+                bool operator==( const CqShaderKey &other ) const
+                {
+                        return (
+                                ( m_name == other.m_name ) &&
+                                ( m_type == other.m_type )
+                        );
+                }
+                bool operator<( const CqShaderKey &other ) const
+                {
+                        if ( m_name < other.m_name )
+                                return true;
+                        else if ( m_name > other.m_name )
+                                return false;
+                        else
+                                return m_type < other.m_type;
+                }
+        private:
+                CqString        m_name; ///< Name of the shader.
+                EqShaderType    m_type; ///< Type of the shader.
+};
+
+#if 0
 /** \class CqShaderRegister
  * Class for registering shaders.
  */
-
 class CqShaderRegister : public CqListEntry<CqShaderRegister>
 {
 public:
@@ -86,6 +130,7 @@ private:
     IqShader*	m_pShader;		///< Pointer to the shader class.
 }
 ;
+#endif
 
 
 //----------------------------------------------------------------------

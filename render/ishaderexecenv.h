@@ -107,8 +107,8 @@ enum EqEnvVars
 #define	STRINGARRAYVAL	IqShaderData*
 #define	MATRIXARRAYVAL	IqShaderData*
 
-#define	DEFPARAM		IqShaderData* Result, IqShader* pShader=0
-#define	DEFVOIDPARAM	IqShader* pShader=0
+#define	DEFPARAM		IqShaderData* Result,IqShader* pShader=0
+#define	DEFVOIDPARAM	        IqShader* pShader=0
 #define	DEFPARAMVAR		DEFPARAM, int cParams=0, IqShaderData** apParams=0
 #define	DEFVOIDPARAMVAR	DEFVOIDPARAM, int cParams=0, IqShaderData** apParams=0
 

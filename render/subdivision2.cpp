@@ -1139,7 +1139,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 
 
 
-static void StoreDiceAPVar( IqShader* pShader, CqParameter* pParam, TqUint ivA, TqUint indexA )
+static void StoreDiceAPVar( const boost::shared_ptr<IqShader>& pShader, CqParameter* pParam, TqUint ivA, TqUint indexA )
 {
     // Find the argument
     IqShaderData * pArg = pShader->FindArgument( pParam->strName() );
@@ -1264,14 +1264,14 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
     for ( iUP = pPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++ )
     {
         /// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
-        IqShader* pShader;
-		if ( (pShader=pGrid->pAttributes() ->pshadSurface(QGetRenderContextI()->Time())) != NULL )
+        boost::shared_ptr<IqShader> pShader;
+		if ( pShader=pGrid->pAttributes() ->pshadSurface(QGetRenderContextI()->Time()) )
             StoreDiceAPVar( pShader, ( *iUP ), iParam, iData );
 
-        if ( (pShader=pGrid->pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time())) != NULL )
+        if ( pShader=pGrid->pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time()) )
             StoreDiceAPVar( pShader, ( *iUP ), iParam, iData );
 
-        if ( (pShader=pGrid->pAttributes() ->pshadAtmosphere(QGetRenderContextI()->Time())) != NULL )
+        if ( pShader=pGrid->pAttributes() ->pshadAtmosphere(QGetRenderContextI()->Time()) )
             StoreDiceAPVar( pShader, ( *iUP ), iParam, iData );
     }
 }
