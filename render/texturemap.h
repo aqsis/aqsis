@@ -636,9 +636,7 @@ class CqLatLongMap : public CqEnvironmentMap
 class CqShadowMap : public CqTextureMap
 {
 	public:
-		CqShadowMap( const CqString& strName ) :
-				CqTextureMap( strName )
-		{}
+		CqShadowMap( const CqString& strName );
 		virtual	~CqShadowMap()
 		{}
 

@@ -51,8 +51,27 @@ START_NAMESPACE( Aqsis )
 
 // Local Variables
 
-TqInt	CqShadowMap::m_rand_index = 0;
+TqInt	CqShadowMap::m_rand_index = -1;
 TqFloat	CqShadowMap::m_aRand_no[ 256 ];
+
+
+//---------------------------------------------------------------------
+/** Constructor.
+ */
+
+CqShadowMap::CqShadowMap( const CqString& strName ) :
+		CqTextureMap( strName )
+{
+	static CqRandom rand;
+
+	// Initialise the random table the first time it is needed.
+	if( m_rand_index < 0 )
+	{
+		TqInt i;
+		for ( i = 0; i < 256; i++ )
+			m_aRand_no[ i ] = ( rand.RandomFloat( 2.0f ) - 1.0f );
+	}
+}
 
 
 //---------------------------------------------------------------------
@@ -61,8 +80,6 @@ TqFloat	CqShadowMap::m_aRand_no[ 256 ];
 
 void CqShadowMap::AllocateMap( TqInt XRes, TqInt YRes )
 {
-	static CqRandom rand;
-
 	std::list<CqTextureMapBuffer*>::iterator s;
 	for ( s = m_apSegments.begin(); s != m_apSegments.end(); s++ )
 		delete( *s );
@@ -70,10 +87,6 @@ void CqShadowMap::AllocateMap( TqInt XRes, TqInt YRes )
 	m_XRes = XRes;
 	m_YRes = YRes;
 	m_apSegments.push_back( CreateBuffer( 0, 0, m_XRes, m_YRes, 1 ) );
-
-	TqInt i;
-	for ( i = 0; i < 256; i++ )
-		m_aRand_no[ i ] = ( rand.RandomFloat( 2.0f ) - 1.0f );
 }
 
 
@@ -384,8 +397,8 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	vecR3m = matCameraToMap * R3;
 	vecR4m = matCameraToMap * R4;
 
-	TqFloat sbo2 = ( m_sblur * 0.5f ) * m_XRes;
-	TqFloat tbo2 = ( m_tblur * 0.5f ) * m_YRes;
+	TqFloat sbo2 = m_sblur * m_XRes;
+	TqFloat tbo2 = m_tblur * m_YRes;
 
 	// If point is behind light, call it not in shadow.
 	//if(z1<0.0)	return;
@@ -478,6 +491,9 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 			TqUint iu = static_cast<TqUint>( s + m_aRand_no[ m_rand_index ] * js );
 			m_rand_index = ( m_rand_index + 1 ) & 255;
 			TqUint iv = static_cast<TqUint>( t + m_aRand_no[ m_rand_index ] * jt );
+
+			if( iu < 0 || iu > m_XRes || iv < 0 || iv > m_YRes )
+				continue;
 
 			if( ( pTMBa == NULL )  || !pTMBa->IsValid( iu, iv, index ) )
 				pTMBa = GetBuffer( iu, iv, index );
