@@ -31,6 +31,7 @@
 
 #include	"renderer.h"
 #include	"attributes.h"
+#include	"transform.h"
 #include	"stats.h"
 //#include	"messages.h"
 #include	"imagebuffer.h"
@@ -734,7 +735,7 @@ void CqStats::PrintStats( TqInt level ) const
         MSG << ( TqInt ) Attribute_stack.size() << " created\n" << std::endl;
 
         MSG << "Transforms:\n\t";
-        MSG << QGetRenderContext() ->TransformStack().size() << " created\n" << std::endl;
+        MSG << ( TqInt ) Transform_stack.size() << " created\n" << std::endl;
 
         MSG << "Parameters:\n\t" << STATS_INT_GETI( PRM_created ) << " created, " << STATS_INT_GETI( PRM_peak ) << " peak\n" << std::endl;
 

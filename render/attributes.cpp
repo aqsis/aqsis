@@ -35,7 +35,7 @@
 START_NAMESPACE( Aqsis )
 
 
-std::vector<CqAttributes*>	Attribute_stack;
+std::list<CqAttributes*>	Attribute_stack;
 
 
 const TqInt CqAttributes::CqHashTable::tableSize = 127;
@@ -115,8 +115,8 @@ CqAttributes::CqAttributes() :
         m_pshadInteriorVolume( 0 ),
         m_pshadExteriorVolume( 0 )
 {
-    Attribute_stack.push_back( this );
-    m_StackIndex = Attribute_stack.size() - 1;
+    Attribute_stack.push_front( this );
+    m_StackIterator = Attribute_stack.begin();
 
     boost::shared_ptr<CqNamedParameterList> pdefattrs( new CqNamedParameterList( "System" ) );
 
@@ -148,8 +148,8 @@ CqAttributes::CqAttributes( const CqAttributes& From )
     *this = From;
 
     // Register ourself with the global attribute stack.
-    Attribute_stack.push_back( this );
-    m_StackIndex = Attribute_stack.size() - 1;
+    Attribute_stack.push_front( this );
+    m_StackIterator = Attribute_stack.begin();
 }
 
 
@@ -170,15 +170,7 @@ CqAttributes::~CqAttributes()
     //	}
 
     // Remove ourself from the stack
-    std::vector<CqAttributes*>::iterator p = Attribute_stack.begin();
-    p += m_StackIndex;
-    std::vector<CqAttributes*>::iterator p2 = p;
-    while ( p2 != Attribute_stack.end() )
-    {
-        ( *p2 ) ->m_StackIndex--;
-        p2++;
-    }
-    Attribute_stack.erase( p );
+    Attribute_stack.erase( m_StackIterator );
 }
 
 //---------------------------------------------------------------------

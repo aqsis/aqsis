@@ -507,12 +507,12 @@ private:
     CqTrimLoopArray m_TrimLoops;					///< the array of closed trimcurve loops.
     std::vector<CqLightsource*> m_apLightsources;	///< a vector of currently available lightsources.
 
-    TqInt	m_StackIndex;							///< the index of this attribute state in the global stack, used for destroying when last reference is removed.
+    std::list<CqAttributes*>::iterator	m_StackIterator;	///< the index of this attribute state in the global stack, used for destroying when last reference is removed.
 }
 ;
 
 /// Global attribute stack.
-extern std::vector<CqAttributes*>	Attribute_stack;
+extern std::list<CqAttributes*>	Attribute_stack;
 
 
 //-----------------------------------------------------------------------

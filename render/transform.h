@@ -28,6 +28,7 @@
 #define TRANSFORM_H_INCLUDED 1
 
 #include	<vector>
+#include	<list>
 
 #include	"aqsis.h"
 
@@ -128,11 +129,14 @@ public:
 
 private:
     TqInt	m_cReferences;		///< Number of references to this transform.
-    TqInt	m_StackIndex;		///< Index in the transform stack of this transform.
 	TqBool	m_IsMoving;			///< Flag indicating this transformation describes a changing transform.
 	CqMatrix	m_StaticMatrix;	///< Matrix storing the transformation should there be no motion involved.
+    std::list<CqTransform*>::iterator	m_StackIterator;		///< Iterator in the transform stack for this transform.
 }
 ;
+
+/// Global transform
+extern std::list<CqTransform*>	Transform_stack;
 
 
 //-----------------------------------------------------------------------

@@ -287,15 +287,8 @@ public:
     {
         return( m_pTransCamera );
     }
-    /** Get the current transformation stack.
-     * \return A reference to a vector of CqTransform class pointers.
-     */
-    virtual std::vector<CqTransform*>&	TransformStack()
-    {
-        return ( m_TransformStack );
-    }
 
-    /** Set the lens data associated with depth of field effects.
+	/** Set the lens data associated with depth of field effects.
      * \param fstop The f-stop of the lens.
      * \param focalLength The size of the lens.
      * \param focalDistance The distance at which everything is in focus.
@@ -461,7 +454,6 @@ private:
     EqRenderMode	m_Mode;
     CqList<CqShaderRegister> m_Shaders;				///< List of registered shaders.
     TqBool	m_fSaveGPrims;
-    std::vector<CqTransform*>	m_TransformStack;	///< The global transformation stack.
     CqTransform*	m_pTransCamera;					///< The camera transform.
     std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
 

@@ -30,25 +30,25 @@
 
 START_NAMESPACE( Aqsis )
 
-
+std::list<CqTransform*> Transform_stack;
 
 //---------------------------------------------------------------------
 /** Constructor.
  */
 
-CqTransform::CqTransform() : CqMotionSpec<CqMatrix>( CqMatrix() ), m_cReferences( 0 ), m_StackIndex( 0 ), m_IsMoving(TqFalse)
+CqTransform::CqTransform() : CqMotionSpec<CqMatrix>( CqMatrix() ), m_cReferences( 0 ), m_IsMoving(TqFalse)
 {
-    if ( QGetRenderContext() != 0 )
-    {
-        QGetRenderContext() ->TransformStack().push_back( this );
-        m_StackIndex = QGetRenderContext() ->TransformStack().size() - 1;
-    }
-    // Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
-    // if the previous level has motion specification, the value will be interpolated.
-    CqMatrix matOtoWLast;
-    if ( m_StackIndex > 0 )
-        matOtoWLast = QGetRenderContext() ->TransformStack() [ m_StackIndex - 1 ] ->matObjectToWorld();
-    SetDefaultObject( matOtoWLast );
+	// Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
+	// if the previous level has motion specification, the value will be interpolated.
+	CqMatrix matOtoWLast;
+	if ( !Transform_stack.empty() )
+		matOtoWLast =  Transform_stack.front() ->matObjectToWorld();
+
+	SetDefaultObject( matOtoWLast );
+
+	// Register ourself with the global transform stack.
+	Transform_stack.push_front( this );
+	m_StackIterator = Transform_stack.begin();
 }
 
 
@@ -56,20 +56,21 @@ CqTransform::CqTransform() : CqMotionSpec<CqMatrix>( CqMatrix() ), m_cReferences
 /** Copy constructor.
  */
 
-CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<CqMatrix>( From ), m_cReferences( 0 ), m_StackIndex( -1 ), m_IsMoving(TqFalse)
+CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<CqMatrix>( From ), m_cReferences( 0 ), m_IsMoving(TqFalse)
 {
     *this = From;
 
-    // Register ourself with the global transform stack.
-    QGetRenderContext() ->TransformStack().push_back( this );
-    m_StackIndex = QGetRenderContext() ->TransformStack().size() - 1;
+	// Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
+	// if the previous level has motion specification, the value will be interpolated.
+	CqMatrix matOtoWLast;
+	if ( !Transform_stack.empty() )
+		matOtoWLast =  Transform_stack.front() ->matObjectToWorld();
 
-    // Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
-    // if the previous level has motion specification, the value will be interpolated.
-    CqMatrix matOtoWLast;
-    if ( m_StackIndex > 0 )
-        matOtoWLast = QGetRenderContext() ->TransformStack() [ m_StackIndex - 1 ] ->matObjectToWorld();
-    SetDefaultObject( matOtoWLast );
+	SetDefaultObject( matOtoWLast );
+
+   // Register ourself with the global transform stack.
+	Transform_stack.push_front( this );
+	m_StackIterator = Transform_stack.begin();
 }
 
 
@@ -81,19 +82,8 @@ CqTransform::~CqTransform()
 {
     assert( RefCount() == 0 );
 
-    if ( m_StackIndex >= 0 && m_StackIndex < static_cast<TqInt>( QGetRenderContext() ->TransformStack().size() ) )
-    {
-        // Remove ourself from the stack
-        std::vector<CqTransform*>::iterator p = QGetRenderContext() ->TransformStack().begin();
-        p += m_StackIndex;
-        std::vector<CqTransform*>::iterator p2 = p;
-        while ( p2 != QGetRenderContext() ->TransformStack().end() )
-        {
-            ( *p2 ) ->m_StackIndex--;
-            p2++;
-        }
-        QGetRenderContext() ->TransformStack().erase( p );
-    }
+	// Remove ourself from the stack
+	Transform_stack.erase(m_StackIterator);
 }
 
 //---------------------------------------------------------------------
