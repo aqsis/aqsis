@@ -6,6 +6,6 @@ AM_CFLAGS=@AQSIS_CFLAGS@
 
 bin_PROGRAMS = aqsis_framebuffer_glut_z
 aqsis_framebuffer_glut_z_SOURCES = framebuffer_glut_z.cpp
-aqsis_framebuffer_glut_z_LDADD = $(top_builddir)/libdd/libdd.la $(top_builddir)/libaqsistypes/libaqsistypes.la $(LDFLAGS) $(GL_LIBS)
+aqsis_framebuffer_glut_z_LDADD = $(top_builddir)/libdd/libdd.la $(top_builddir)/libaqsistypes/libaqsistypes.la $(GL_LIBS)
 
 EXTRA_DIST = framebuffer_glut_z.dsp 
