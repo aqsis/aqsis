@@ -400,6 +400,12 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 				}
 			}
 			widestFormat = PkDspyUnsigned8;
+
+			pImage->m_theWindow = new Fl_Window(pImage->m_width, pImage->m_height);
+			pImage->m_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, pImage->m_width, pImage->m_height, pImage->m_iFormatCount, reinterpret_cast<unsigned char*>(pImage->m_data));
+			pImage->m_theWindow->resizable(pImage->m_uiImageWidget);
+			pImage->m_theWindow->end();
+			pImage->m_theWindow->show();
 		}
         else
 		{
@@ -493,6 +499,11 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 		}
 	}	
 
+	if(pImage->m_imageType == Type_Framebuffer)
+	{
+		pImage->m_uiImageWidget->damage(1);
+		Fl::check();
+	}
 	return(PkDspyErrorNone);	
 }
 
