@@ -108,7 +108,7 @@ class CqRenderer
 				virtual	CqContext*	CreateWorldContext();
 				virtual	CqContext*	CreateAttributeContext();
 				virtual	CqContext*	CreateTransformContext();
-				virtual	CqContext*	CreateSolidContext();
+				virtual	CqContext*	CreateSolidContext(CqString& type);
 				virtual	CqContext*	CreateObjectContext();
 				virtual	CqContext*	CreateMotionContext(TqInt N, TqFloat times[]);
 

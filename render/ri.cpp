@@ -2925,7 +2925,7 @@ RtVoid	RiGeometryV(RtToken type, PARAMETERLIST)
 RtVoid	RiSolidBegin(RtToken type)
 {
 	CqBasicError(0,Severity_Normal,"RiSolidBegin, CSG not supported");
-	QGetRenderContext()->CreateSolidContext();
+	QGetRenderContext()->CreateSolidContext(CqString(type));
 
 	return;
 }
@@ -3038,6 +3038,7 @@ RtVoid RiMakeTexture (const char *pic, const char *tex, RtToken swrap, RtToken t
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
 	RiMakeTextureV(pic, tex, swrap, twrap, filterfunc, swidth, twidth, count, pTokens, pValues);
+
 } 
 
 
@@ -3050,6 +3051,7 @@ RtVoid	RiMakeTextureV(const char *pic, const char *tex, RtToken swrap, RtToken t
 	char modes[1024];
 	assert(pic!=0 && tex!=0 && swrap!=0 && twrap!=0 && filterfunc!=0);
 
+	QGetRenderContext()->Stats().MakeTextureTimer().Start();
 	// Get the wrap modes first.
 	enum EqWrapMode smode=WrapMode_Clamp;
 	if(strcmp(swrap,RI_PERIODIC)==0)
@@ -3094,6 +3096,7 @@ RtVoid	RiMakeTextureV(const char *pic, const char *tex, RtToken swrap, RtToken t
 		// Hopefully CqTextureMap will take care of closing the tiff file after
 		// it has SAT mapped it so we can overwrite if needs be.
 		// Create a new image.
+		Source.Interpreted(modes);
 		Source.CreateSATMap();
 		TIFF* ptex=TIFFOpen(tex,"w");
 
@@ -3115,6 +3118,7 @@ RtVoid	RiMakeTextureV(const char *pic, const char *tex, RtToken swrap, RtToken t
 	}
 
 	Source.Close();
+	QGetRenderContext()->Stats().MakeTextureTimer().Stop();
 }
 
 
@@ -3185,6 +3189,7 @@ RtVoid	RiMakeCubeFaceEnvironment(const char *px, const char *nx, const char *py,
 //
 RtVoid	RiMakeCubeFaceEnvironmentV(const char *px, const char *nx, const char *py, const char *ny, const char *pz, const char *nz, const char *reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST)
 {
+	QGetRenderContext()->Stats().MakeEnvTimer().Start();
 	assert(px!=0 && nx!=0 && py!=0 && ny!=0 && pz!=0 && nz!=0 && 
 			 reflfile!=0 && filterfunc!=0);
 
@@ -3247,6 +3252,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV(const char *px, const char *nx, const char *py
 		}
 		TIFFClose(ptex);
 	}
+	QGetRenderContext()->Stats().MakeEnvTimer().Stop();
 	return;
 }
 
@@ -3274,9 +3280,11 @@ RtVoid	RiMakeShadow(const char *picfile, const char *shadowfile, ...)
 //
 RtVoid	RiMakeShadowV(const char *picfile, const char *shadowfile, PARAMETERLIST)
 {
+	QGetRenderContext()->Stats().MakeShadowTimer().Start();
 	CqShadowMap ZFile(picfile);
 	ZFile.LoadZFile();
 	ZFile.SaveShadowMap(shadowfile);
+	QGetRenderContext()->Stats().MakeShadowTimer().Stop();
 	return;
 }
 

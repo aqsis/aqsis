@@ -264,6 +264,11 @@ class CqStats
           /** Get the diceable timer.
 	    	 */
 			CqStatTimer& DiceableTimer() { return(m_timeDiceable); };
+			/** Get the MakeTextureV, MakeShadowV, ... timers 
+			*/
+			CqStatTimer& MakeTextureTimer() { return(m_timeMakeTexture); };
+			CqStatTimer& MakeShadowTimer() { return(m_timeMakeShadow); };
+			CqStatTimer& MakeEnvTimer() { return(m_timeMakeEnv); };
 			//@}
 
 			void    PrintStats(TqInt level) const;
@@ -314,6 +319,9 @@ class CqStats
 			CqStatTimer m_timeRenderMPGs;			///< Time spent on rendering MPGs.
 			CqStatTimer m_timeOcclusionCull;		///< Time spent on occlusion culling.
 			CqStatTimer m_timeDiceable;				///< Time spent on diceable checking.
+			CqStatTimer m_timeMakeTexture;			///< Time spent on MakeTextureV call.
+			CqStatTimer m_timeMakeShadow;			///< Time spent on MakeShadowV call.
+			CqStatTimer m_timeMakeEnv;		    	///< Time spent on MakeCubeEnvironmenV call.
 
 };
 

@@ -27,8 +27,13 @@
 
 #include "context.h"
 #include "lights.h"
+#include "csgtree.h"
 
 START_NAMESPACE(Aqsis)
+
+
+CqList<CqCSGTreeNode>	CqContext::m_lCSGTrees;
+
 
 //---------------------------------------------------------------------
 /** Default constructor.
@@ -184,13 +189,25 @@ CqTransformContext::~CqTransformContext()
 /** Default constructor.
  */
 
-CqSolidContext::CqSolidContext(CqContext* pconParent) : CqContext(pconParent)
+CqSolidContext::CqSolidContext(CqString& type, CqContext* pconParent) : CqContext(pconParent)
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent=new CqAttributes(*pconParent->m_pattrCurrent);
 	m_pattrCurrent->AddRef();
 	m_ptransCurrent=new CqTransform(*pconParent->m_ptransCurrent);
 	m_ptransCurrent->AddRef();
+
+	// Create a new CSG tree node of the appropriate type.
+	m_pCSGNode = CqCSGTreeNode::CreateNode(type);
+	m_pCSGNode->AddRef();
+	if(pconParent && pconParent->isSolid())
+	{
+		CqSolidContext* pParentSolid = static_cast<CqSolidContext*>(pconParent);
+		pParentSolid->pCSGNode()->lChildren().LinkLast(m_pCSGNode);
+		m_pCSGNode->AddRef();
+	}
+	else
+		m_lCSGTrees.LinkLast(m_pCSGNode);
 }
 
 
@@ -202,6 +219,7 @@ CqSolidContext::~CqSolidContext()
 {
 	m_pattrCurrent->Release();
 	m_ptransCurrent->Release();
+//	if(m_pCSGNode)	m_pCSGNode->Release();
 }
 
 

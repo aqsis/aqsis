@@ -24,6 +24,7 @@ ArgParse::apstring  g_filter="box";
 ArgParse::apfloat   g_swidth = 1.0;
 ArgParse::apfloat   g_twidth = 1.0;
 ArgParse::apfloat   g_fov = 0.0;
+ArgParse::apfloat   g_width = -1.0;
 
 
 void version(std::ostream& Stream)
@@ -50,10 +51,12 @@ int main(int argc, const char** argv)
 	ap.argFlag("shadow", " produce a shadow map from a z file.", &g_shadow);
 	ap.argString("swrap", "=string s wrap [black|periodic|clamp]", &g_swrap);
 	ap.argString("twrap", "=string t wrap [black|periodic|clamp]", &g_twrap);
-	ap.argString("filter", "=string [sinc|box|catmull-rom|triangle|disk|bessel]", &g_filter);
+	ap.argString("filter", "=string [box|bessel|catmull-rom|disk|gaussian|sinc|triangle]", &g_filter);
 	ap.argFloat("fov(envcube)", "=float [>=0.0f]", &g_fov);
 	ap.argFloat("swidth", "=float s width [>0.0f]", &g_swidth);
 	ap.argFloat("twidth", "=float t width [>0.0f]", &g_twidth);
+	ap.argFloat("width", "=float width [>0,0f] set both swidth and twidth", &g_width);
+	
 
 	if (argc>1 && !ap.parse(argc-1, argv+1))
 	{
@@ -94,6 +97,9 @@ int main(int argc, const char** argv)
 		filterfunc =RiBesselFilter;
 	else if (g_filter=="triangle")
 		filterfunc = RiTriangleFilter;
+	else if (g_filter=="gaussian")
+		filterfunc =RiGaussianFilter;
+	
 	
 
 	/* protect the s,t width */
@@ -112,9 +118,14 @@ int main(int argc, const char** argv)
 		g_swrap = "black";
 	}
 	if (!((g_twrap=="black") || (g_twrap=="periodic") || (g_twrap=="clamp") ) ) {
-		std::cerr  << "Unknow t wrap mode: " << g_twrap << ". black will be used instead." << std::endl;
+		std::cerr  << "Unknown t wrap mode: " << g_twrap << ". black will be used instead." << std::endl;
 		g_twrap = "black";
     }
+	/* Need to set both st width ? */
+	if (g_width > 0.0) 
+	{
+		g_twidth = g_swidth = g_width;
+	}
 
 	RiBegin("teqser");
 

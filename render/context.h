@@ -35,6 +35,8 @@
 #include	"attributes.h"
 #include	"transform.h"
 #include	"messages.h"
+#include	"list.h"
+#include	"csgtree.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -62,7 +64,7 @@ class CqContext
 	virtual				CqContext*	CreateWorldContext();
 	virtual				CqContext*	CreateAttributeContext();
 	virtual				CqContext*	CreateTransformContext();
-	virtual				CqContext*	CreateSolidContext();
+	virtual				CqContext*	CreateSolidContext(CqString& type);
 	virtual				CqContext*	CreateObjectContext();
 	virtual				CqContext*	CreateMotionContext(TqInt N, TqFloat times[]);
 
@@ -148,11 +150,16 @@ class CqContext
 																pconParent()->AddContextLightSource(pLS);
 														}
 
-//	protected:
+	virtual		TqBool	isSolid() const	{return(TqFalse);}
+
+	public:
+	static	CqList<CqCSGTreeNode>	m_lCSGTrees;
+	public:
 			CqAttributes* m_pattrCurrent;		///< The current attributes.
 			CqTransform*  m_ptransCurrent;		///< The current transformation.
 	private:
 			CqContext*	m_pconParent;			///< The previous context.
+
 };
 
 
@@ -207,7 +214,7 @@ class CqFrameContext : public CqContext
 						/** Create a solid context.
 						 * \warning It is an error to call this within a frame context.
 						 */
-	virtual	CqContext*	CreateSolidContext() {return(0);}	// Error
+	virtual	CqContext*	CreateSolidContext(CqString& type) {return(0);}	// Error
 
 						/** Delete the frame context.
 						 * \attention This is the only valid context deletion from within this block.
@@ -348,7 +355,7 @@ class CqTransformContext : public CqContext
 class CqSolidContext : public CqContext
 {
 	public:
-						CqSolidContext(CqContext* pconParent=0);
+						CqSolidContext(CqString& type, CqContext* pconParent=0);
 	virtual				~CqSolidContext();
 
 						/** Create a main context.
@@ -374,7 +381,16 @@ class CqSolidContext : public CqContext
 						 */
 	virtual			CqOptions&		optCurrent()		{return(pconParent()->optCurrent());}
  
+			
+	virtual		TqBool	isSolid() const	{return(TqTrue);}
+
+						/** Get a pointer to the CSG tree node related to this context.
+						 * \return an options reference.
+						 */
+			CqCSGTreeNode*	pCSGNode() const	{return(m_pCSGNode);}
+
 	private:
+			CqCSGTreeNode*	m_pCSGNode;		///< Pointer to the node in the CSG tree for this level in the solid definition.
 };
 
 
@@ -456,7 +472,7 @@ class CqMotionContext : public CqContext
 						/** Create a solid context.
 						 * \warning It is an error to call this within a motion context.
 						 */
-	virtual	CqContext*	CreateSolidContext() {return(0);}		// Error
+	virtual	CqContext*	CreateSolidContext(CqString& type) {return(0);}		// Error
 						/** Create a object context.
 						 * \warning It is an error to call this within a motion context.
 						 */
@@ -563,9 +579,9 @@ inline CqContext* CqContext::CreateTransformContext()
  * \return a pointer to the new context.
  */
 
-inline CqContext* CqContext::CreateSolidContext()
+inline CqContext* CqContext::CreateSolidContext(CqString& type)
 { 
-	return(new CqSolidContext(this));
+	return(new CqSolidContext(type, this));
 }
 
 

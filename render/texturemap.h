@@ -173,7 +173,9 @@ class _qShareC CqTextureMapBuffer
 					 */
 	_qShareM		TqBool	IsValid(unsigned long s, unsigned long t, int directory=0)
 					{
-						return(s>=m_sOrigin && t>=m_tOrigin && s<m_sOrigin+m_Width && t<m_tOrigin+m_Height && directory==m_Directory);
+						return(
+    s>=m_sOrigin && t>=m_tOrigin && s<m_sOrigin+m_Width && t<m_tOrigin+m_Height && 
+ directory==m_Directory);
 					}
 
 					/** Get a pointer to the data for this buffer segment.
@@ -194,6 +196,7 @@ class _qShareC CqTextureMapBuffer
 					/** Get the directory index of this buffer segment.
 					 */
 	_qShareM		int			  Directory() const	{return(m_Directory);}
+
 
 	
 	_qShareM	static 	float* AllocSegment(unsigned long width, unsigned long height, int samples);
@@ -290,6 +293,10 @@ class _qShareC CqTextureMap
 	_qShareM	static	CqTextureMap* GetTextureMap(const char* strName);
 	_qShareM	static	CqTextureMap* GetEnvironmentMap(const char* strName);
 	_qShareM	static	CqTextureMap* GetShadowMap(const char* strName);
+
+	_qShareM    uint32              ImageFilterVal(uint32* p, int x, int y, int directory);
+
+	_qShareM    void                Interpreted(char *mode);
 
 									/** Clear the cache of texture maps.
 									 */

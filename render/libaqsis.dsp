@@ -126,6 +126,10 @@ SOURCE=.\context.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\csgtree.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\imagebuffer.cpp
 # End Source File
 # Begin Source File
@@ -263,6 +267,10 @@ SOURCE=.\cellnoise.h
 # Begin Source File
 
 SOURCE=.\Context.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\csgtree.h
 # End Source File
 # Begin Source File
 

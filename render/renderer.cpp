@@ -209,11 +209,11 @@ CqContext*	CqRenderer::CreateTransformContext()
 /** Create a new solid context.
  */
 
-CqContext*	CqRenderer::CreateSolidContext()
+CqContext*	CqRenderer::CreateSolidContext(CqString& type)
 {
 	if(m_pconCurrent!=0)
 	{
-		CqContext* pconNew=m_pconCurrent->CreateSolidContext();
+		CqContext* pconNew=m_pconCurrent->CreateSolidContext(type);
 		if(pconNew!=0)
 		{
 			m_pconCurrent=pconNew;

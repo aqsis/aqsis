@@ -36,6 +36,7 @@
 START_NAMESPACE(Aqsis)
 
 static	TqFloat	temp_float;
+static TqInt FindDirectory(CqTextureMap* pTMap);
 
 //----------------------------------------------------------------------
 // SO_sprintf
@@ -1505,6 +1506,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1(STRINGVAL name, FLOATVAL channel, DEFPA
 	
 	TqInt i=0;
 	CqTextureMap* pTMap=CqTextureMap::GetTextureMap(STRING(name).c_str());
+    TqInt directory = FindDirectory(pTMap);
+	
 	INIT_SOR
 	__fVarying=TqTrue;
 	if(pTMap!=0 && pTMap->IsValid())
@@ -1528,10 +1531,14 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1(STRINGVAL name, FLOATVAL channel, DEFPA
 
 			swidth*=_pswidth;
 			twidth*=_ptwidth;
+			
+			swidth /= (1<<directory);
+			twidth /= (1<<directory);
 
 			// Sample the texture.
 			std::valarray<float> val;
-			pTMap->SampleSATMap(s(),t(),swidth,twidth,_psblur,_ptblur,val);
+
+			pTMap->SampleSATMap(s(),t(),swidth,twidth,_psblur,_ptblur,val,directory);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1554,6 +1561,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2(STRINGVAL name, FLOATVAL channel, FLOAT
 	TqInt i=0;
 	TqFloat f;
 	CqTextureMap* pTMap=CqTextureMap::GetTextureMap(STRING(name).c_str());
+	TqInt directory = FindDirectory(pTMap);
+
 	INIT_SOR
 	__fVarying=TqTrue;
 	if(pTMap!=0 && pTMap->IsValid())
@@ -1580,7 +1589,11 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2(STRINGVAL name, FLOATVAL channel, FLOAT
 		
 			// Sample the texture.
 			std::valarray<float> val;
-			pTMap->SampleSATMap(s.Value(f,m_GridI),t.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val);
+
+			swidth /= (1<<directory);
+			twidth /= (1<<directory);
+
+			pTMap->SampleSATMap(s.Value(f,m_GridI),t.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val, directory);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1610,6 +1623,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3(STRINGVAL name, FLOATVAL channel, FLOAT
 		FOR_EACHR
 			// Sample the texture.
 			std::valarray<float> val;
+
 			pTMap->SampleSATMap(s1.Value(f,m_GridI),t1.Value(f,m_GridI),s2.Value(f,m_GridI),t2.Value(f,m_GridI),s3.Value(f,m_GridI),t3.Value(f,m_GridI),s4.Value(f,m_GridI),t4.Value(f,m_GridI),_psblur,_ptblur,val);
 
 			// Grab the appropriate channel.
@@ -1632,6 +1646,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1(STRINGVAL name, FLOATVAL channel, DEFPA
 
 	TqInt i=0;
 	CqTextureMap* pTMap=CqTextureMap::GetTextureMap(STRING(name).c_str());
+	TqInt directory = FindDirectory(pTMap);
+
 	INIT_SOR
 	__fVarying=TqTrue;
 	if(pTMap!=0 && pTMap->IsValid())
@@ -1658,7 +1674,11 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1(STRINGVAL name, FLOATVAL channel, DEFPA
 
 			// Sample the texture.
 			std::valarray<float> val;
-			pTMap->SampleSATMap(s(),t(),swidth,twidth,_psblur,_ptblur,val);
+
+			swidth /= (1<<directory);
+			twidth /= (1<<directory);
+
+			pTMap->SampleSATMap(s(),t(),swidth,twidth,_psblur,_ptblur,val,directory);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1680,6 +1700,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2(STRINGVAL name, FLOATVAL channel, FLOAT
 
 	TqInt i=0;
 	CqTextureMap* pTMap=CqTextureMap::GetTextureMap(STRING(name).c_str());
+	TqInt directory = FindDirectory(pTMap);
+
 	TqFloat f;
 	INIT_SOR
 	__fVarying=TqTrue;
@@ -1707,7 +1729,11 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2(STRINGVAL name, FLOATVAL channel, FLOAT
 
 			// Sample the texture.
 			std::valarray<float> val;
-			pTMap->SampleSATMap(s.Value(f,m_GridI),t.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val);
+
+			swidth /= (1<<directory);
+			twidth /= (1<<directory);
+
+			pTMap->SampleSATMap(s.Value(f,m_GridI),t.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val, directory);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1961,8 +1987,6 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow(STRINGVAL name, FLOATVAL channel, POINTVAL
 			
 			swidth=SO_DerivType<CqVector3D>(P,den,m_GridI,*this);
 			twidth=SO_DerivType<CqVector3D>(P,den,m_GridI,*this);
-			//swidth=1.0f;
-			//twidth=1.0f;
 
 			swidth*=_pswidth;
 			twidth*=_ptwidth;
@@ -3587,6 +3611,27 @@ STD_SOIMPL	CqShaderExecEnv::SO_shadername2(STRINGVAL shader, DEFPARAMIMPL)
 	END_FORR
 }
 
+//----------------------------------------------------------------------
+// FindDirectory() find which directory specified in the Option "limits" "texturedirectory"
+// and make sure it is within the range of the TextureMap
+//
+static TqInt FindDirectory(CqTextureMap* pTMap)
+{
+
+const TqInt* poptDirectory =  QGetRenderContext()->optCurrent().GetIntegerOption("limits","texturedirectory");
+	TqInt directory = 0;
+	if (poptDirectory)
+		directory = poptDirectory[0];
+	
+	/* the map is invalid */
+	if (!pTMap) return 0;
+
+	/* the user wants too much compression */
+	if (directory > log(pTMap->XRes())/log(2.0)) directory = log(pTMap->XRes())/log(2.0);
+	if (directory > log(pTMap->YRes())/log(2.0)) directory = log(pTMap->YRes())/log(2.0);
+
+	return directory;
+}
 
 END_NAMESPACE(Aqsis)
 //---------------------------------------------------------------------
