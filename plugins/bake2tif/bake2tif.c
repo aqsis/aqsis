@@ -127,6 +127,7 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 	char buffer[ 200 ];
 	int i, j, n, o;
 	int x, y;
+	int bytesize = size * size * 3;
 
 	h = w = size;
 	pixels = ( unsigned char * ) calloc( 3, size * size );
@@ -156,12 +157,13 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 
 	xpixels = ( unsigned char * ) calloc( 3, size * size );
 
-	memcpy(xpixels, pixels, 3 * size * size);
+	memcpy(xpixels, pixels, bytesize);
 
 
 #ifdef REMOVEDARK 
    
 	/* in X */
+	
 	for (i=0; i < size; i++)
 	{
 		for(j =0; j < size* 3; j+=3)
@@ -180,16 +182,18 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 					m-=3;
 				}
 				o = n;
-				while (o < size * size * 3) {
+				while (o < bytesize-2) {
 					if (!( ( pixels[ o ] == pixels[ o + 1 ] ) &&
 					( pixels[ o + 1 ] == pixels[ o + 2 ] ) &&
 					( pixels[ o + 2 ] == 0 ) ))
 					break;
 					o+=3;
 				}
-				xpixels[ n ] = lerp(pixels[o], pixels[m], o, m, n);
-				xpixels[ n +1] = lerp(pixels[o+1], pixels[m+1], o, m, n);
-				xpixels[ n +2] = lerp(pixels[o+2], pixels[m+2], o, m, n);
+				if ((o < bytesize-2) && (m < bytesize-2) && (n < bytesize-2)) {
+					xpixels[ n ] = lerp(pixels[o], pixels[m], o, m, n);
+					xpixels[ n +1] = lerp(pixels[o+1], pixels[m+1], o, m, n);
+					xpixels[ n +2] = lerp(pixels[o+2], pixels[m+2], o, m, n);
+				}
 			}
 		}
 	}
