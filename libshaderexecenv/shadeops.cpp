@@ -2795,6 +2795,11 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 		ValidateIlluminanceCache( NULL, pShader );
 	}
 
+	IqShaderData* pDefAngle = pShader->CreateTemporaryStorage(type_float, class_uniform);
+	if( NULL == pDefAngle )	return;
+
+	pDefAngle->SetFloat(PIO2);
+
 	Result->SetColor( gColBlack );
 
 	__fVarying = TqTrue;
@@ -2804,7 +2809,7 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 		do
 		{
 			// SO_illuminance sets the current state to whether the lightsource illuminates the points or not.
-			SO_illuminance( NULL, N, NULL, NULL );
+			SO_illuminance( NULL, N, pDefAngle, NULL );
 			
 			PushState();
 			GetCurrentState();
@@ -2829,6 +2834,7 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 		}
 		while ( SO_advance_illuminance() );
 	}
+	pShader->DeleteTemporaryStorage( pDefAngle );
 }
 
 
@@ -2844,6 +2850,11 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
 		ValidateIlluminanceCache( NULL, pShader );
 	}
 
+	IqShaderData* pDefAngle = pShader->CreateTemporaryStorage(type_float, class_uniform);
+	if( NULL == pDefAngle )	return;
+
+	pDefAngle->SetFloat(PIO2);
+
 	Result->SetColor( gColBlack );
 	__fVarying = TqTrue;
 
@@ -2853,7 +2864,7 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
 		do
 		{
 			// SO_illuminance sets the current state to whether the lightsource illuminates the points or not.
-			SO_illuminance( NULL, N, NULL, NULL );
+			SO_illuminance( NULL, N, pDefAngle, NULL );
 
 			PushState();
 			GetCurrentState();
@@ -2882,6 +2893,7 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
 		}
 		while ( SO_advance_illuminance() );
 	}
+	pShader->DeleteTemporaryStorage( pDefAngle );
 }
 
 
@@ -2913,6 +2925,11 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 		ValidateIlluminanceCache( NULL, pShader );
 	}
 
+	IqShaderData* pDefAngle = pShader->CreateTemporaryStorage(type_float, class_uniform);
+	if( NULL == pDefAngle )	return;
+
+	pDefAngle->SetFloat(PIO2);
+
 	// Initialise the return value
 	Result->SetColor( gColBlack );
 
@@ -2922,7 +2939,7 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 		do
 		{
 			// SO_illuminance sets the current state to whether the lightsource illuminates the points or not.
-			SO_illuminance( NULL, N, NULL, NULL );
+			SO_illuminance( NULL, N, pDefAngle, NULL );
 			
 			PushState();
 			GetCurrentState();
@@ -2950,6 +2967,7 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 		}
 		while ( SO_advance_illuminance() );
 	}
+	pShader->DeleteTemporaryStorage( pDefAngle );
 }
 
 
@@ -2974,6 +2992,7 @@ STD_SOIMPL CqShaderExecEnv::SO_trace( POINTVAL P, VECTORVAL R, DEFPARAMIMPL )
 STD_SOIMPL CqShaderExecEnv::SO_illuminance( POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, FLOATVAL nsamples, DEFVOIDPARAMIMPL )
 {
 	INIT_SO
+	__fVarying = TqTrue;
 
 	// Fill in the lightsource information, and transfer the results to the shader variables,
 	if ( m_pAttributes != 0 )
@@ -3000,7 +3019,7 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminance( POINTVAL P, VECTORVAL Axis, FLOATVAL
 		Ln.Unit();
 		CqVector3D vecAxis(0,1,0);
 		if( NULL != Axis )	Axis->GetVector( vecAxis, __iGrid );
-		TqFloat fAngle = PIO2;
+		TqFloat fAngle = PI;
 		if( NULL != Angle )	Angle->GetFloat( fAngle, __iGrid );
 
 		TqFloat cosangle = Ln * vecAxis;
@@ -3031,9 +3050,9 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminate( POINTVAL P, VECTORVAL Axis, FLOATVAL 
 	if ( m_Illuminate > 0 ) res = TqFalse;
 
 	__fVarying = TqTrue;
-	BEGIN_VARYING_SECTION
 	if ( res )
 	{
+		BEGIN_VARYING_SECTION
 		// Get the point being lit and set the ligth vector.
 		GETPOINT( P );
 		CqVector3D vecPs;
@@ -3059,8 +3078,8 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminate( POINTVAL P, VECTORVAL Axis, FLOATVAL 
 		}
 		else
 			m_CurrentState.SetValue( __iGrid, TqTrue );
+		END_VARYING_SECTION
 	}
-	END_VARYING_SECTION
 
 	m_Illuminate++;
 }
