@@ -127,7 +127,7 @@ CqString CqFile::GetSystemSetting(const CqString& strAsset)
 			result = env;
 		else
 		{
-			result = base_path;
+			result = CqString( ".:" ) + base_path;
 			result.append( "/archives" );
 		}
 	}
@@ -137,7 +137,7 @@ CqString CqFile::GetSystemSetting(const CqString& strAsset)
 			result = env;
 		else
 		{
-			result = base_path;
+			result = CqString( ".:" ) + base_path;
 			result.append( "/textures" );
 		}
 	}
