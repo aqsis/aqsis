@@ -402,12 +402,6 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 {
 	QGetRenderContext() ->Stats().IncTextureMisses( 4 );
 
-	if ( m_apSegments.front() ->IsValid( s, t, directory ) )
-	{
-		QGetRenderContext() ->Stats().IncTextureHits( 1, 4 );
-		return( m_apSegments.front() );
-	}
-
 	// Search already cached segments first.
 	for ( std::list<CqTextureMapBuffer*>::iterator i = m_apSegments.begin(); i != m_apSegments.end(); i++ )
 	{
@@ -417,8 +411,11 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 			// Move this segment to the top of the list, so that next time it is found first. This
 			// allows us to take advantage of likely spatial coherence during shading.
 			CqTextureMapBuffer* pbuffer = *i;
-			m_apSegments.erase(i);
-			m_apSegments.push_front(pbuffer);
+			if( i != m_apSegments.begin() )
+			{
+				m_apSegments.erase(i);
+				m_apSegments.push_front(pbuffer);
+			}
 			return ( pbuffer );
 		}
 	}
