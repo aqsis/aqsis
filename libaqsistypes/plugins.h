@@ -50,7 +50,7 @@ START_NAMESPACE( Aqsis )
 class CqPluginBase
 {
 	public:
-		~CqPluginBase();
+		virtual ~CqPluginBase();
 		const CqString DLError();
 
 	private:
@@ -64,6 +64,41 @@ class CqPluginBase
 		// we record all the DLOpen'ed handles to close them properly on destruction.
 		std::list<void*> m_activeHandles;
 
+} ;
+
+
+//----------------------------------------------------------------------
+/** \class CqPluginBase
+ * Class encapsulating the functionality of Plugins. It hides the intersect
+ * dynamic loading up some function from a .dll on NT or .so on Unix.
+ * The macosx works if you download dlopen package from dev apple.
+ *  I will later hide its implementation in this class.
+ *
+ * This class will be used for loading/unloading the bitmap converter 
+ * in texturemap.cpp. In ri.cpp to implement RiProcedural and later in
+ * the shadervm to loading up any user shared routine in .sl 
+ *  
+ */
+
+class CqSimplePlugin : public CqPluginBase
+{
+	public:
+		virtual ~CqSimplePlugin()	{}
+
+		void *SimpleDLOpen( CqString *library )
+		{
+			return(DLOpen( library ) );
+		}
+		void SimpleDLClose( void* handle )
+		{	
+			DLClose( handle );
+		}
+		void *SimpleDLSym( void* handle, CqString* name )
+		{
+			return( DLSym( handle, name ) );
+		}
+	private:
+	protected:
 } ;
 
 //-----------------------------------------------------------------------

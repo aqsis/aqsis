@@ -101,6 +101,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name aqsl
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name dspylink
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -235,6 +238,24 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name slpp
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "dspylink"=.\dspylink\dspylink.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libaqsistypes
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libdd
     End Project Dependency
 }}}
 
@@ -488,6 +509,12 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name libaqsistypes
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libdd
+    End Project Dependency
 }}}
 
 ###############################################################################
