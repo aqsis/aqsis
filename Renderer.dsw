@@ -1,0 +1,242 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+###############################################################################
+
+Project: "All"=.\All\All.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Content
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name cribber
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name file
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name framebuffer
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name librib
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Render
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Shaders
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name shadowmap
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name slcomp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name slpp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name texer
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "Content"=.\Content\Content.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name cribber
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name slcomp
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "Render"=.\Render\Render.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "Shaders"=.\Shaders\shaders.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name slcomp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name slpp
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "cribber"=.\cribber\cribber.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name file
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name framebuffer
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name librib
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Render
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name shadowmap
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "file"=.\file\file.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Render
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "framebuffer"=.\framebuffer\framebuffer.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Render
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "librib"=.\librib\librib.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Render
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "shadowmap"=.\shadowmap\shadowmap.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Render
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "slcomp"=.\slcomp\slcomp.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Render
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name slpp
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "slpp"=.\slpp\slpp.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "texer"=.\texer\texer.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name Render
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+
