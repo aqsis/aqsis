@@ -144,6 +144,7 @@ static  TqChar gz_magic[2] = {(TqChar) 0x1f, (TqChar) 0x8b}; /* gzip magic heade
 void
 CqRibBinaryDecoder::initZlib( int buffersize )
 {
+
 	zavailable = 0;
 	zstrm.zalloc = (alloc_func)0;
 	zstrm.zfree = (free_func)0;
@@ -172,6 +173,15 @@ CqRibBinaryDecoder::initZlib( int buffersize )
 				zavailable++, zcurrent--;
 			is_gzip = 0;
 			zbuffersize = buffersize;
+
+			if (zin)
+				delete [] zin;
+			if (zout)
+				delete [] zout;
+
+			zin = zout = NULL;
+			fseek( file, 0, SEEK_SET);
+
 			return;
 		}
 	}
@@ -254,6 +264,7 @@ CqRibBinaryDecoder::CqRibBinaryDecoder( FILE *filehandle, int buffersize )
 	//filehandle.
 	file = fdopen( dup( fileno( filehandle ) ), "rb");
 
+
 	if ( file == NULL )
 	{
 		fail_flag = TqTrue; eof_flag = TqTrue;
@@ -271,15 +282,14 @@ CqRibBinaryDecoder::CqRibBinaryDecoder( FILE *filehandle, int buffersize )
  **/
 CqRibBinaryDecoder::~CqRibBinaryDecoder()
 {
-	delete[] zin;
-	delete[] zout;
-
+	if (zin)
+		delete[] zin;
+	if (zin)
+		delete[] zout;
 	if ( file )
 		fclose( file );
 
-	if ( is_gzip )
-		inflateEnd( &zstrm );
-
+	inflateEnd( &zstrm );
 }
 
 
@@ -352,7 +362,6 @@ TqUint CqRibBinaryDecoder::ctui( TqChar a, TqChar b, TqChar c, TqChar d )
 
 void CqRibBinaryDecoder::gc( TqChar &c )
 {
-	TqInt i;
 
 	if( !zavailable )
 	{
@@ -825,24 +834,31 @@ TqInt CqRibBinaryDecoder::writeToBuffer( TqPchar buffer, TqUint size )
 
 TqInt CqRibBinaryDecoder::read( TqPchar buffer, TqUint size )
 {
-//	if ( gzf == NULL ) return -1;
+	TqInt n;
 
-	try
-	{
-		while ( cv.size() < size )
+	if (is_gzip) {
+		try
 		{
-			getNext();
-			if( cv.back() == '\n' )
+			while ( cv.size() < size )
 			{
-				size = cv.size() + 1;
-				break;
-			};
+				getNext();
+				if( cv.back() == '\n' )
+				{
+					size = cv.size() + 1;
+					break;
+				};
+			}
 		}
-	}
-	catch ( std::string & s )
-	{
-		if ( s != "" ) std::cerr << s << std::endl;
-	}
+		catch ( std::string & s )
+		{
+			if ( s != "" ) std::cerr << s << std::endl;
+		}
 
-	return writeToBuffer( buffer, size );
+		n = writeToBuffer( buffer, size );
+
+	} else  
+	{
+		n = fread(buffer, 1,  size, file);
+	}
+	return n;
 }
