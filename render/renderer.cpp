@@ -738,9 +738,10 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 	// First check if the declaration has embedded type information.
 	CqString strLocalDecl( strDecl );
 	TqInt i;
-	for ( i = 0; i < gcVariableClassNames; i++ )
+	/// \note Go backwards through the type names to make sure facevarying is matched before varying.
+	for ( i = gcVariableClassNames-1; i >= 0; i-- )
 	{
-		if ( strLocalDecl.find( gVariableClassNames[ i ] ) != CqString::npos )
+		if ( strLocalDecl.find( gVariableClassNames[ i ]) != CqString::npos )
 		{
 			ILClass = static_cast< EqVariableClass > ( i );
 			break;
