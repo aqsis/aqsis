@@ -294,55 +294,35 @@ CqSurfacePatchBicubic& CqSurfacePatchBicubic::operator=( const CqSurfacePatchBic
 
 void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfacePatchBicubic* pNew2 )
 {
-	TqFloat	aDlb[ 16 ] = {
-	                         8, 0, 0, 0,
-	                         4, 4, 0, 0,
-	                         2, 4, 2, 0,
-	                         1, 3, 3, 1
-	                     };
-
-	TqFloat	aDrb[ 16 ] = {
-	                         1, 3, 3, 1,
-	                         0, 2, 4, 2,
-	                         0, 0, 4, 4,
-	                         0, 0, 0, 8
-	                     };
-
-	CqMatrix	Dlb( aDlb );
-	CqMatrix	Drb( aDrb );
-	Dlb = ( 1.0f / 8.0f ) * Dlb;
-	Drb = ( 1.0f / 8.0f ) * Drb;
-
 	pNew1->P().SetSize( cVertex() );
 	pNew2->P().SetSize( cVertex() );
 
-	// Create the geometry matrix and storage area for the left and right split matrices.
-	CqMatrix	G;
-	CqMatrix	Gl;
-	CqMatrix	Gr;
-
-	TqInt i;
-	for ( i = 0; i < 4; i++ )
+	TqUint iv;
+	for( iv = 0; iv < 4; iv++ )
 	{
-		G[ 0 ][ 0 ] = CP( i, 0 ).x();	G[ 0 ][ 1 ] = CP( i, 0 ).y();	G[ 0 ][ 2 ] = CP( i, 0 ).z();	G[ 0 ][ 3 ] = CP( i, 0 ).h();
-		G[ 1 ][ 0 ] = CP( i, 1 ).x();	G[ 1 ][ 1 ] = CP( i, 1 ).y();	G[ 1 ][ 2 ] = CP( i, 1 ).z();	G[ 1 ][ 3 ] = CP( i, 1 ).h();
-		G[ 2 ][ 0 ] = CP( i, 2 ).x();	G[ 2 ][ 1 ] = CP( i, 2 ).y();	G[ 2 ][ 2 ] = CP( i, 2 ).z();	G[ 2 ][ 3 ] = CP( i, 2 ).h();
-		G[ 3 ][ 0 ] = CP( i, 3 ).x();	G[ 3 ][ 1 ] = CP( i, 3 ).y();	G[ 3 ][ 2 ] = CP( i, 3 ).z();	G[ 3 ][ 3 ] = CP( i, 3 ).h();
-		G.SetfIdentity( TqFalse );
+		TqUint ivo = ( iv * 4 );
+		pNew1->P()[ ivo + 0 ] = P()[ ivo + 0 ];
+		pNew1->P()[ ivo + 1 ] = ( P()[ ivo + 0 ] + P()[ ivo + 1 ] ) / 2.0f;
+		pNew1->P()[ ivo + 2 ] = pNew1->P()[ ivo + 1 ] / 2.0f + ( P()[ ivo + 1 ] + P()[ ivo + 2 ] ) / 4.0f;
 
-		Gl = ( G * Dlb );
-		Gr = ( G * Drb );
+		pNew2->P()[ ivo + 3 ] = P()[ ivo + 3 ];
+		pNew2->P()[ ivo + 2 ] = ( P()[ ivo + 2 ] + P()[ ivo + 3 ] ) / 2.0f;
+		pNew2->P()[ ivo + 1 ] = pNew2->P()[ ivo + 2 ] / 2.0f + ( P()[ ivo + 1 ] + P()[ ivo + 2 ] ) / 4.0f;
 
-		pNew1->CP( i, 0 ) = CqVector4D( Gl[ 0 ][ 0 ], Gl[ 0 ][ 1 ], Gl[ 0 ][ 2 ], 1 );
-		pNew1->CP( i, 1 ) = CqVector4D( Gl[ 1 ][ 0 ], Gl[ 1 ][ 1 ], Gl[ 1 ][ 2 ], 1 );
-		pNew1->CP( i, 2 ) = CqVector4D( Gl[ 2 ][ 0 ], Gl[ 2 ][ 1 ], Gl[ 2 ][ 2 ], 1 );
-		pNew1->CP( i, 3 ) = CqVector4D( Gl[ 3 ][ 0 ], Gl[ 3 ][ 1 ], Gl[ 3 ][ 2 ], 1 );
+		pNew1->P()[ ivo + 3 ] = ( pNew1->P()[ ivo + 2] + pNew2->P()[ ivo + 1 ] ) / 2.0f;
+		pNew2->P()[ ivo + 0 ] = pNew1->P()[ ivo + 3 ];
 
-		pNew2->CP( i, 0 ) = CqVector4D( Gr[ 0 ][ 0 ], Gr[ 0 ][ 1 ], Gr[ 0 ][ 2 ], 1 );
-		pNew2->CP( i, 1 ) = CqVector4D( Gr[ 1 ][ 0 ], Gr[ 1 ][ 1 ], Gr[ 1 ][ 2 ], 1 );
-		pNew2->CP( i, 2 ) = CqVector4D( Gr[ 2 ][ 0 ], Gr[ 2 ][ 1 ], Gr[ 2 ][ 2 ], 1 );
-		pNew2->CP( i, 3 ) = CqVector4D( Gr[ 3 ][ 0 ], Gr[ 3 ][ 1 ], Gr[ 3 ][ 2 ], 1 );
+		pNew1->P()[ ivo + 0 ].Homogenize();
+		pNew1->P()[ ivo + 1 ].Homogenize();
+		pNew1->P()[ ivo + 2 ].Homogenize();
+		pNew1->P()[ ivo + 3 ].Homogenize();
+
+		pNew2->P()[ ivo + 0 ].Homogenize();
+		pNew2->P()[ ivo + 1 ].Homogenize();
+		pNew2->P()[ ivo + 2 ].Homogenize();
+		pNew2->P()[ ivo + 3 ].Homogenize();
 	}
+
 
 	// Subdivide the normals
 	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
@@ -364,54 +344,32 @@ void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 
 void CqSurfacePatchBicubic::vSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfacePatchBicubic* pNew2 )
 {
-	TqFloat	aDlb[ 16 ] = {
-	                         8, 0, 0, 0,
-	                         4, 4, 0, 0,
-	                         2, 4, 2, 0,
-	                         1, 3, 3, 1
-	                     };
-
-	TqFloat	aDrb[ 16 ] = {
-	                         1, 3, 3, 1,
-	                         0, 2, 4, 2,
-	                         0, 0, 4, 4,
-	                         0, 0, 0, 8
-	                     };
-
-	CqMatrix	Dlb( aDlb );
-	CqMatrix	Drb( aDrb );
-	Dlb = ( 1.0f / 8.0f ) * Dlb;
-	Drb = ( 1.0f / 8.0f ) * Drb;
-
-	// Create the geometry matrix and storage area for the left and right split matrices.
-	CqMatrix	G;
-	CqMatrix	Gl;
-	CqMatrix	Gr;
-
 	pNew1->P().SetSize( cVertex() );
 	pNew2->P().SetSize( cVertex() );
 
-	TqInt i;
-	for ( i = 0; i < 4; i++ )
+	TqUint iu;
+	for( iu = 0; iu < 4; iu++ )
 	{
-		G[ 0 ][ 0 ] = CP( 0, i ).x();	G[ 0 ][ 1 ] = CP( 0, i ).y();	G[ 0 ][ 2 ] = CP( 0, i ).z();	G[ 0 ][ 3 ] = CP( 0, i ).h();
-		G[ 1 ][ 0 ] = CP( 1, i ).x();	G[ 1 ][ 1 ] = CP( 1, i ).y();	G[ 1 ][ 2 ] = CP( 1, i ).z();	G[ 1 ][ 3 ] = CP( 1, i ).h();
-		G[ 2 ][ 0 ] = CP( 2, i ).x();	G[ 2 ][ 1 ] = CP( 2, i ).y();	G[ 2 ][ 2 ] = CP( 2, i ).z();	G[ 2 ][ 3 ] = CP( 2, i ).h();
-		G[ 3 ][ 0 ] = CP( 3, i ).x();	G[ 3 ][ 1 ] = CP( 3, i ).y();	G[ 3 ][ 2 ] = CP( 3, i ).z();	G[ 3 ][ 3 ] = CP( 3, i ).h();
-		G.SetfIdentity( TqFalse );
+		pNew1->P()[  0 + iu ] = P()[ 0 + iu ];
+		pNew1->P()[  4 + iu ] = ( P()[ 0 + iu ] + P()[ 4 + iu ] ) / 2.0f;
+		pNew1->P()[  8 + iu ] = pNew1->P()[ 4 + iu ] / 2.0f + ( P()[ 4 + iu ] + P()[ 8 + iu ] ) / 4.0f;
 
-		Gl = ( G * Dlb );
-		Gr = ( G * Drb );
+		pNew2->P()[ 12 + iu ] = P()[ 12 + iu ];
+		pNew2->P()[  8 + iu ] = ( P()[ 8 + iu ] + P()[ 12 + iu ] ) / 2.0f;
+		pNew2->P()[  4 + iu ] = pNew2->P()[ 8 + iu ] / 2.0f + ( P()[ 4 + iu ] + P()[ 8 + iu ] ) / 4.0f;
 
-		pNew1->CP( 0, i ) = CqVector4D( Gl[ 0 ][ 0 ], Gl[ 0 ][ 1 ], Gl[ 0 ][ 2 ], 1 );
-		pNew1->CP( 1, i ) = CqVector4D( Gl[ 1 ][ 0 ], Gl[ 1 ][ 1 ], Gl[ 1 ][ 2 ], 1 );
-		pNew1->CP( 2, i ) = CqVector4D( Gl[ 2 ][ 0 ], Gl[ 2 ][ 1 ], Gl[ 2 ][ 2 ], 1 );
-		pNew1->CP( 3, i ) = CqVector4D( Gl[ 3 ][ 0 ], Gl[ 3 ][ 1 ], Gl[ 3 ][ 2 ], 1 );
+		pNew1->P()[ 12 + iu ] = ( pNew1->P()[ 8 + iu ] + pNew2->P()[ 4 + iu ] ) / 2.0f;
+		pNew2->P()[  0 + iu ] = pNew1->P()[ 12 + iu ];
 
-		pNew2->CP( 0, i ) = CqVector4D( Gr[ 0 ][ 0 ], Gr[ 0 ][ 1 ], Gr[ 0 ][ 2 ], 1 );
-		pNew2->CP( 1, i ) = CqVector4D( Gr[ 1 ][ 0 ], Gr[ 1 ][ 1 ], Gr[ 1 ][ 2 ], 1 );
-		pNew2->CP( 2, i ) = CqVector4D( Gr[ 2 ][ 0 ], Gr[ 2 ][ 1 ], Gr[ 2 ][ 2 ], 1 );
-		pNew2->CP( 3, i ) = CqVector4D( Gr[ 3 ][ 0 ], Gr[ 3 ][ 1 ], Gr[ 3 ][ 2 ], 1 );
+		pNew1->P()[  0 + iu ].Homogenize();
+		pNew1->P()[  4 + iu ].Homogenize();
+		pNew1->P()[  8 + iu ].Homogenize();
+		pNew1->P()[ 12 + iu ].Homogenize();
+
+		pNew2->P()[  0 + iu ].Homogenize();
+		pNew2->P()[  4 + iu ].Homogenize();
+		pNew2->P()[  8 + iu ].Homogenize();
+		pNew2->P()[ 12 + iu ].Homogenize();
 	}
 
 	// Subdivide the normals
