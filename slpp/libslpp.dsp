@@ -20,7 +20,6 @@ CFG=libslpp - Win32 Debug
 !MESSAGE "libslpp - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "libslpp - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE "libslpp - Win32 Profile" (based on "Win32 (x86) Static Library")
-!MESSAGE "libslpp - Win32 MPatrol" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -65,8 +64,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "..\Library\Debug"
 # PROP Intermediate_Dir "..\Object\Debug\libslpp"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ  /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "SLPP_LIBRARY" /YX /FD /GZ  /c
+# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "SLPP_LIBRARY" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
 # ADD RSC /l 0x809 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -99,29 +98,6 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ELSEIF  "$(CFG)" == "libslpp - Win32 MPatrol"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "MPatrol"
-# PROP BASE Intermediate_Dir "MPatrol"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\MPatrol"
-# PROP Intermediate_Dir "..\Object\MPatrol\libslpp"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "SLPP_LIBRARY" /YX /FD /c
-# ADD BASE RSC /l 0x809 /d "NDEBUG"
-# ADD RSC /l 0x809 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
-
 !ENDIF 
 
 # Begin Target
@@ -129,7 +105,6 @@ LIB32=link.exe -lib
 # Name "libslpp - Win32 Release"
 # Name "libslpp - Win32 Debug"
 # Name "libslpp - Win32 Profile"
-# Name "libslpp - Win32 MPatrol"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"

@@ -20,7 +20,6 @@ CFG=libaqsis - Win32 Debug
 !MESSAGE "libaqsis - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "libaqsis - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE "libaqsis - Win32 Profile" (based on "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "libaqsis - Win32 MPatrol" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -110,33 +109,6 @@ LINK32=link.exe
 # ADD BASE LINK32 libaqsistypes.lib libshaderexecenv.lib libshadervm.lib libddmsock.lib libz.lib libtiff.lib ws2_32.lib librib2.lib librib2ri.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /libpath:"..\Library\Release"
 # ADD LINK32 libz.lib libtiff.lib ws2_32.lib log4cpp.lib libaqsistypes.lib librib2.lib librib2ri.lib /nologo /dll /profile /debug /machine:I386 /libpath:"..\Library\Profile"
 
-!ELSEIF  "$(CFG)" == "libaqsis - Win32 MPatrol"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "libaqsis___Win32_MPatrol"
-# PROP BASE Intermediate_Dir "libaqsis___Win32_MPatrol"
-# PROP BASE Ignore_Export_Lib 0
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\MPatrol"
-# PROP Intermediate_Dir "..\Object\MPatrol\libaqsis"
-# PROP Ignore_Export_Lib 0
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "PLUGINS" /D "AQSIS_DYNAMIC_LINK" /D "WIN32" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /Zm200 /c
-# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libshadervm" /I "..\libshaderexecenv" /I "..\librib2ri" /I "..\librib2" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "PLUGINS" /D "AQSIS_DYNAMIC_LINK" /D "WIN32" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /Zm200 /c
-# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
-# ADD BASE RSC /l 0x809 /d "NDEBUG"
-# ADD RSC /l 0x809 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 libz.lib libtiff.lib ws2_32.lib log4cpp.lib libaqsistypes.lib librib2.lib librib2ri.lib /nologo /dll /profile /debug /machine:I386 /libpath:"..\Library\Profile"
-# ADD LINK32 libz.lib libtiff.lib ws2_32.lib log4cpp.lib libaqsistypes.lib librib2.lib librib2ri.lib /nologo /dll /profile /debug /machine:I386 /libpath:"..\Library\MPatrol"
-
 !ENDIF 
 
 # Begin Target
@@ -144,7 +116,6 @@ LINK32=link.exe
 # Name "libaqsis - Win32 Release"
 # Name "libaqsis - Win32 Debug"
 # Name "libaqsis - Win32 Profile"
-# Name "libaqsis - Win32 MPatrol"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"

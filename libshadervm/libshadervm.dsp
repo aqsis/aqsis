@@ -20,7 +20,6 @@ CFG=libshadervm - Win32 Debug
 !MESSAGE "libshadervm - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "libshadervm - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE "libshadervm - Win32 Profile" (based on "Win32 (x86) Static Library")
-!MESSAGE "libshadervm - Win32 MPatrol" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -99,29 +98,6 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ELSEIF  "$(CFG)" == "libshadervm - Win32 MPatrol"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "libshadervm___Win32_MPatrol"
-# PROP BASE Intermediate_Dir "libshadervm___Win32_MPatrol"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\MPatrol"
-# PROP Intermediate_Dir "..\Object\MPatrol\libshadervm"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshaderexecenv" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADERVM /D BUILD_LIBSHADERVM=1 /FR /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\libshaderexecenv" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSHADERVM /D BUILD_LIBSHADERVM=1 /FR /YX /FD /c
-# ADD BASE RSC /l 0x809 /d "NDEBUG"
-# ADD RSC /l 0x809 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
-
 !ENDIF 
 
 # Begin Target
@@ -129,7 +105,6 @@ LIB32=link.exe -lib
 # Name "libshadervm - Win32 Release"
 # Name "libshadervm - Win32 Debug"
 # Name "libshadervm - Win32 Profile"
-# Name "libshadervm - Win32 MPatrol"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"

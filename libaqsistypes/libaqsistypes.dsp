@@ -20,7 +20,6 @@ CFG=libaqsistypes - Win32 Debug
 !MESSAGE "libaqsistypes - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "libaqsistypes - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE "libaqsistypes - Win32 Profile" (based on "Win32 (x86) Static Library")
-!MESSAGE "libaqsistypes - Win32 MPatrol" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -99,29 +98,6 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ELSEIF  "$(CFG)" == "libaqsistypes - Win32 MPatrol"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "libaqsistypes___Win32_MPatrol"
-# PROP BASE Intermediate_Dir "libaqsistypes___Win32_MPatrol"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\MPatrol"
-# PROP Intermediate_Dir "..\Object\MPatrol\libaqsistypes"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GR /GX /O2 /I ".\win32\intel" /I "..\libaqsis" /I ".\\" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "PLUGINS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I ".\win32\intel" /I "..\libaqsis" /I ".\\" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "PLUGINS" /YX /FD /c
-# ADD BASE RSC /l 0x809 /d "NDEBUG"
-# ADD RSC /l 0x809 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
-
 !ENDIF 
 
 # Begin Target
@@ -129,7 +105,6 @@ LIB32=link.exe -lib
 # Name "libaqsistypes - Win32 Release"
 # Name "libaqsistypes - Win32 Debug"
 # Name "libaqsistypes - Win32 Profile"
-# Name "libaqsistypes - Win32 MPatrol"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
