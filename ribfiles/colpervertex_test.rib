@@ -64,6 +64,11 @@ WorldBegin
 	Translate -2 -1 0
 	Rotate -90 1 0 0
 	Disk 0 1 360
+					"Cs" [ 1 0 0
+						   0 1 0
+						   0 0 1
+						   1 1 0
+						]
   TransformEnd
 
   TransformBegin
@@ -155,6 +160,14 @@ WorldBegin
 			-1.0 1.0 -0.3
 		]
 	"Cs" [ 1 0 0
+		   0 1 0
+		   0 0 1
+		   1 1 0
+		   1 0 0
+		   0 1 0
+		   0 0 1
+		   1 1 0
+		   1 0 0
 		   0 1 0
 		   0 0 1
 		   1 1 0

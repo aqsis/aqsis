@@ -490,8 +490,8 @@ TqInt CqSurfacePatchBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 	TqInt cSplits = 0;
 
 	// Split the surface in u or v
-	CqSurfacePatchBicubic * pNew1 = new CqSurfacePatchBicubic(*this);
-	CqSurfacePatchBicubic * pNew2 = new CqSurfacePatchBicubic(*this);
+	CqSurfacePatchBicubic * pNew1 = new CqSurfacePatchBicubic;
+	CqSurfacePatchBicubic * pNew2 = new CqSurfacePatchBicubic;
 
 	// If this primitive is being split because it spans the e and hither planes, then
 	// we should split in both directions to ensure we overcome the crossing.

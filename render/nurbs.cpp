@@ -52,8 +52,7 @@ CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface(), m_cuVerts(0), m_cvVerts(0), m_uO
 /** Copy constructor.
  */
 
-CqSurfaceNURBS::CqSurfaceNURBS( const CqSurfaceNURBS& From ) :
-		CqSurface( From )
+CqSurfaceNURBS::CqSurfaceNURBS( const CqSurfaceNURBS& From )
 {
 	*this = From;
 }
@@ -253,6 +252,7 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 {
 	// Work on a copy.
 	CqSurfaceNURBS nS( *this );
+	nS.P() = P();
 
 	// Compute k and s      u = [ u_k , u_k+1)  with u_k having multiplicity s
 	TqInt k = m_auKnots.size() - 1, s = 0;
@@ -340,6 +340,7 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 		}
 	}
 	*this = nS;
+	P() = nS.P();
 
 	return ( r );
 }
@@ -354,6 +355,7 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 {
 	// Work on a copy.
 	CqSurfaceNURBS nS( *this );
+	nS.P() = P();
 
 	// Compute k and s      v = [ v_k , v_k+1)  with v_k having multiplicity s
 	TqInt k = m_avKnots.size() - 1, s = 0;
@@ -441,6 +443,7 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 		}
 	}
 	*this = nS;
+	P() = nS.P();
 
 	return ( r );
 }
@@ -463,6 +466,7 @@ void CqSurfaceNURBS::RefineKnotU( const std::vector<TqFloat>& X )
 	TqInt r = X.size() - 1;
 
 	CqSurfaceNURBS nS( *this );
+	nS.P() = P();
 
 	nS.Init( m_uOrder, m_vOrder, r + 1 + n + 1, m_cvVerts );
 
@@ -526,6 +530,7 @@ void CqSurfaceNURBS::RefineKnotU( const std::vector<TqFloat>& X )
 		--k;
 	}
 	*this = nS;
+	P() = nS.P();
 }
 
 
@@ -543,7 +548,9 @@ void CqSurfaceNURBS::RefineKnotV( const std::vector<TqFloat>& X )
 	TqInt m = n + p + 1;
 	TqInt a, b;
 	TqInt r = X.size() - 1;
+	
 	CqSurfaceNURBS nS( *this );
+	nS.P() = P();
 
 	nS.Init( m_uOrder, m_vOrder, m_cuVerts, r + 1 + n + 1 );
 
@@ -605,6 +612,7 @@ void CqSurfaceNURBS::RefineKnotV( const std::vector<TqFloat>& X )
 		--k;
 	}
 	*this = nS;
+	P() = nS.P();
 }
 
 
@@ -621,6 +629,7 @@ void CqSurfaceNURBS::ClampU()
 	if ( n1 || n2 )
 	{
 		CqSurfaceNURBS nS( *this );
+		nS.P() = P();
 		m_auKnots.resize( m_auKnots.size() - n1 - n2 );
 		P().SetSize( ( m_cuVerts - n1 - n2 ) * m_cvVerts );
 		m_cuVerts -= n1 + n2;
@@ -651,6 +660,7 @@ void CqSurfaceNURBS::ClampV()
 	if ( n1 || n2 )
 	{
 		CqSurfaceNURBS nS( *this );
+		nS.P() = P();
 		m_avKnots.resize( m_avKnots.size() - n1 - n2 );
 		P().SetSize( ( m_cvVerts - n1 - n2 ) * m_cuVerts );
 		m_cvVerts -= n1 + n2;
@@ -851,13 +861,10 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 
 	for ( i = 0;i < static_cast<TqInt>( S.size() );i++ )
 	{
-		S[ i ] = new CqSurfaceNURBS;
+		S[ i ] = new CqSurfaceNURBS(*this);
 		S[ i ]->Init( m_uOrder, m_vOrder, m_uOrder, m_vOrder );
 		S[ i ]->m_auKnots = nU;
 		S[ i ]->m_avKnots = nV;
-
-		// Initialise storage for u/v/s/t/Cs/Os/N and and user primitive variables.
-		S[ i ]->ClonePrimitiveVariables( *this );
 	}
 
 	nb = 0;
@@ -925,15 +932,16 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 			TqInt iC = ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow;
 			TqInt iD = ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1;
 
-			std::vector<CqParameter*>::iterator iUP, iNUP;
-			for( iUP = aUserParams().begin(), iNUP = S[ iPatch ]->aUserParams().begin(); iUP != aUserParams().end(); iUP++, iNUP++ )
+			std::vector<CqParameter*>::iterator iUP;
+			for( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
 			{
 				switch( (*iUP)->Type() )
 				{
 					case type_integer:
 					{
 						CqParameterTyped<TqInt, TqFloat>* pUPV = static_cast<CqParameterTyped<TqInt, TqFloat>*>( (*iUP) );
-						CqParameterTyped<TqInt, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqInt, TqFloat>*>( (*iNUP) );
+						CqParameterTyped<TqInt, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqInt, TqFloat>*>( (*iUP)->Clone() );
+						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
 						pNUPV->SetSize(4);
 						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
 						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
@@ -945,7 +953,8 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 					case type_float:
 					{
 						CqParameterTyped<TqFloat, TqFloat>* pUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( (*iUP) );
-						CqParameterTyped<TqFloat, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( (*iNUP) );
+						CqParameterTyped<TqFloat, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( (*iUP)->Clone() );
+						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
 						pNUPV->SetSize(4);
 						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
 						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
@@ -957,7 +966,8 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 					case type_color:
 					{
 						CqParameterTyped<CqColor, CqColor>* pUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( (*iUP) );
-						CqParameterTyped<CqColor, CqColor>* pNUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( (*iNUP) );
+						CqParameterTyped<CqColor, CqColor>* pNUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( (*iUP)->Clone() );
+						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
 						pNUPV->SetSize(4);
 						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
 						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
@@ -971,7 +981,8 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 					case type_vector:
 					{
 						CqParameterTyped<CqVector3D, CqVector3D>* pUPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( (*iUP) );
-						CqParameterTyped<CqVector3D, CqVector3D>* pNUPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( (*iNUP) );
+						CqParameterTyped<CqVector3D, CqVector3D>* pNUPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( (*iUP)->Clone() );
+						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
 						pNUPV->SetSize(4);
 						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
 						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
@@ -983,7 +994,8 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 					case type_hpoint:
 					{
 						CqParameterTyped<CqVector4D, CqVector3D>* pUPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( (*iUP) );
-						CqParameterTyped<CqVector4D, CqVector3D>* pNUPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( (*iNUP) );
+						CqParameterTyped<CqVector4D, CqVector3D>* pNUPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( (*iUP)->Clone() );
+						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
 						pNUPV->SetSize(4);
 						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
 						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
@@ -995,7 +1007,8 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 					case type_string:
 					{
 						CqParameterTyped<CqString, CqString>* pUPV = static_cast<CqParameterTyped<CqString, CqString>*>( (*iUP) );
-						CqParameterTyped<CqString, CqString>* pNUPV = static_cast<CqParameterTyped<CqString, CqString>*>( (*iNUP) );
+						CqParameterTyped<CqString, CqString>* pNUPV = static_cast<CqParameterTyped<CqString, CqString>*>( (*iUP)->Clone() );
+						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
 						pNUPV->SetSize(4);
 						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
 						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
@@ -1007,7 +1020,8 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 					case type_matrix:
 					{
 						CqParameterTyped<CqMatrix, CqMatrix>* pUPV = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( (*iUP) );
-						CqParameterTyped<CqMatrix, CqMatrix>* pNUPV = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( (*iNUP) );
+						CqParameterTyped<CqMatrix, CqMatrix>* pNUPV = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( (*iUP)->Clone() );
+						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
 						pNUPV->SetSize(4);
 						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
 						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
@@ -1315,7 +1329,6 @@ void CqSurfaceNURBS::uSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 {
 	pnrbA = new CqSurfaceNURBS( *this );
 	pnrbB = new CqSurfaceNURBS( *this );
-	pnrbA->P() = P();
 	SplitNURBS( *pnrbA, *pnrbB, TqTrue );
 
 	// Subdivide the normals
@@ -1337,7 +1350,6 @@ void CqSurfaceNURBS::vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 {
 	pnrbA = new CqSurfaceNURBS( *this );
 	pnrbB = new CqSurfaceNURBS( *this );
-	pnrbA->P() = P();
 	SplitNURBS( *pnrbA, *pnrbB, TqFalse );
 
 	// Subdivide the normals
