@@ -129,6 +129,12 @@ class CqPolygonBase
 		/** Determine whether this surface has per vertex v coordinates.
 		 */
 		virtual	const	TqBool	bHasv() const = 0;
+		/** Get the index of this polygon if it is a member of a polygon mesh
+		 */
+		virtual const	TqInt	MeshIndex() const
+		{
+			return(0);
+		}
 
 		/** Get a bit vector representing the standard shader variables this polygon needs.
 		 */
@@ -297,13 +303,15 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 class CqPolygonPoints : public CqSurface
 {
 	public:
-		CqPolygonPoints( TqInt cVertices ) :
+		CqPolygonPoints( TqInt cVertices, TqInt cFaces ) :
 				m_cVertices( cVertices ),
+				m_cFaces( cFaces ),
 				m_Transformed( TqFalse )
 		{}
 		CqPolygonPoints( const CqPolygonPoints& From ) :
 				CqSurface( From ),
 				m_cVertices( From.m_cVertices ),
+				m_cFaces( From.m_cFaces ),
 				m_Transformed( From.m_Transformed )
 		{}
 		virtual	~CqPolygonPoints()
@@ -341,7 +349,7 @@ class CqPolygonPoints : public CqSurface
 		virtual	void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
 		virtual	TqUint	cUniform() const
 		{
-			return ( RefCount() );
+			return ( m_cFaces );
 		}
 		virtual	TqUint	cVarying() const
 		{
@@ -368,6 +376,7 @@ class CqPolygonPoints : public CqSurface
 	protected:
 		TqInt	m_cVertices;		///< Count of vertices in this list.
 		TqBool	m_Transformed;		///< Flag indicatign that the list has been transformed.
+		TqInt	m_cFaces;			///< Expected count of faces referencing this list.
 }
 ;
 
@@ -380,8 +389,9 @@ class CqPolygonPoints : public CqSurface
 class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 {
 	public:
-		CqSurfacePointsPolygon( CqPolygonPoints* pPoints ) : CqBasicSurface(),
-				m_pPoints( pPoints )
+		CqSurfacePointsPolygon( CqPolygonPoints* pPoints, TqInt index ) : CqBasicSurface(),
+				m_pPoints( pPoints ),
+				m_Index( index )
 		{
 			m_pPoints->AddRef();
 		}
@@ -542,12 +552,19 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		{
 			return ( m_pPoints->bHasv() );
 		}
+		/** Get the index of this polygon if it is a member of a polygon mesh
+		 */
+		virtual const	TqInt	MeshIndex() const
+		{
+			return(m_Index);
+		}
 
 
 
 	protected:
 		std::vector<TqInt>	m_aIndices;		///< Array of indices into the associated vertex list.
 		CqPolygonPoints*	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
+		TqInt				m_Index;		/// Polygon index, used for looking up Uniform values.
 }
 ;
 

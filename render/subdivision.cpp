@@ -1418,7 +1418,7 @@ CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
 	InterpolateBoundary( pSurf->bInterpolateBoundary() );
 
 	// Allocate a new points class for points storage.
-	CqPolygonPoints* pPointsClass = new CqPolygonPoints( pSurf->cVerts() );
+	CqPolygonPoints* pPointsClass = new CqPolygonPoints( pSurf->cVerts(), 1 );
 	pPointsClass->SetSurfaceParameters( *pSurf->pPoints() );
 	m_pPoints = pPointsClass;
 	pPointsClass->AddRef();
@@ -2008,7 +2008,7 @@ CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec
 	TqInt i;
 	for ( i = 0; i < pSurf->cTimes(); i++ )
 	{
-		CqPolygonPoints* pPointsClass = new CqPolygonPoints( pSurf->cVerts() );
+		CqPolygonPoints* pPointsClass = new CqPolygonPoints( pSurf->cVerts(), 1 );
 		pPointsClass->SetSurfaceParameters( *pSurf->GetMotionObject( Time( i ) ) );
 		pPointsClass->AddRef();
 		AddTimeSlot( pSurf->Time( i ), pPointsClass );

@@ -327,12 +327,25 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		for( iUP = Surface().aUserParams().begin(); iUP != Surface().aUserParams().end(); iUP++ )
 		{
 			CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
-			pNewUP->SetSize( pNew->cVarying() );
-
-			pNewUP->SetValue( (*iUP), 0, iUPA );
-			pNewUP->SetValue( (*iUP), 1, iUPB );
-			pNewUP->SetValue( (*iUP), 2, iUPD );
-			pNewUP->SetValue( (*iUP), 3, iUPC );
+			
+			if( pNewUP->Class() == class_varying || pNewUP->Class() == class_vertex )
+			{
+				pNewUP->SetSize( pNew->cVarying() );
+				pNewUP->SetValue( (*iUP), 0, iUPA );
+				pNewUP->SetValue( (*iUP), 1, iUPB );
+				pNewUP->SetValue( (*iUP), 2, iUPD );
+				pNewUP->SetValue( (*iUP), 3, iUPC );
+			}
+			else if( pNewUP->Class() == class_uniform )
+			{
+				pNewUP->SetSize( pNew->cUniform() );
+				pNewUP->SetValue( (*iUP), 0, MeshIndex() );
+			}
+			else if( pNewUP->Class() == class_constant )
+			{
+				pNewUP->SetSize( 1 );
+				pNewUP->SetValue( (*iUP), 0, 0 );
+			}
 
 			pNew->AddPrimitiveVariable( pNewUP );
 		}
@@ -575,6 +588,7 @@ CqSurfacePointsPolygon& CqSurfacePointsPolygon::operator=( const CqSurfacePoints
 	// last reference.
 	CqPolygonPoints*	pOldPoints = m_pPoints;
 	m_pPoints = From.m_pPoints;
+	m_Index = From.m_Index;
 	m_pPoints->AddRef();
 	if ( pOldPoints ) pOldPoints->Release();
 

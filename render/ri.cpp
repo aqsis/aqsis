@@ -2196,7 +2196,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 		cVerts += nverts[ iloop ];
 
 	// Create a storage class for all the points.
-	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts );
+	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, 1 );
 	// Process any specified primitive variables
 	pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
 
@@ -2490,7 +2490,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 	}
 
 	// Create a storage class for all the points.
-	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts );
+	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, npolys );
 	pPointsClass->AddRef();
 	// Process any specified primitive variables
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
@@ -2510,7 +2510,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 			for ( poly = 0; poly < npolys; poly++ )
 			{
 				// Create a surface polygon
-				CqSurfacePointsPolygon*	pSurface = new CqSurfacePointsPolygon( pPointsClass );
+				CqSurfacePointsPolygon*	pSurface = new CqSurfacePointsPolygon( pPointsClass, poly );
 				pSurface->AddRef();
 				RtBoolean fValid = RI_TRUE;
 
@@ -2649,7 +2649,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 	}
 
 	// Create a storage class for all the points.
-	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts );
+	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, npolys );
 	pPointsClass->AddRef();
 	// Process any specified primitive variables
 	pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
@@ -4042,7 +4042,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 	}
 
 	// Create a storage class for all the points.
-	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts );
+	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, nfaces );
 	pPointsClass->AddRef();
 
 	CqWSurf* pSubdivision = NULL;
