@@ -127,11 +127,11 @@ public:
     {
         return ( TqFalse );
     }
-    virtual	void	Evaluate( IqShaderExecEnv* pEnv )
+    virtual	void	Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv )
     {}
     virtual	void	PrepareDefArgs()
     {}
-    virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShaderExecEnv* pEnv )
+    virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const boost::shared_ptr<IqShaderExecEnv>& pEnv )
     {}
     virtual	TqBool	fAmbient() const
     {

@@ -38,15 +38,11 @@ START_NAMESPACE( Aqsis )
 CqImagersource::CqImagersource( IqShader* pShader, TqBool fActive ) :
         m_pShader( pShader ),
         m_pAttributes( NULL ),
-        m_pShaderExecEnv( NULL )
+        m_pShaderExecEnv( new CqShaderExecEnv )
 {
 
     m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
     ADDREF( m_pAttributes );
-
-    m_pShaderExecEnv = new CqShaderExecEnv;
-    ADDREF( m_pShaderExecEnv );
-
 }
 
 
@@ -59,12 +55,6 @@ CqImagersource::~CqImagersource()
     if ( m_pAttributes )
         RELEASEREF( m_pAttributes );
     m_pAttributes = 0;
-
-    /// \note This should delete through the interface that created it.
-    if ( NULL != m_pShaderExecEnv ) {
-        RELEASEREF( m_pShaderExecEnv );
-        m_pShaderExecEnv = NULL;
-    }
 }
 
 //---------------------------------------------------------------------

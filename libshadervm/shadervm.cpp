@@ -793,8 +793,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
     EqSegment	Segment = Seg_Data;
     std::vector<UsProgramElement>*	pProgramArea = NULL;
     std::vector<TqInt>	aLabels;
-    CqShaderExecEnv	*StdEnv = new CqShaderExecEnv;
-    ADDREF( StdEnv );
+    boost::shared_ptr<CqShaderExecEnv> StdEnv(new CqShaderExecEnv);
     TqInt	array_count = 0;
     TqUlong  htoken, i;
 	/*
@@ -942,7 +941,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
                     {
                         //CqBasicError( 0, Severity_Fatal, "Invalid variable specification in slx file" );
                         std::cerr << critical << "Invalid variable specification in slx file" << std::endl;
-                        RELEASEREF( StdEnv );
                         return ;
                     }
                     token[ strlen( token ) - 1 ] = '\0';
@@ -1005,7 +1003,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
                             candidates = getShadeOpMethods(&strFunc);
                             if( candidates == NULL )
                             {
-                                RELEASEREF( StdEnv );
                                 std::cerr << critical << "\"" << strName().c_str() << "\": No DSO found for external shadeop: \"" << strFunc.c_str() << "\"" << std::endl;
                                 exit(1);
                             }
@@ -1022,7 +1019,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
                         else
                         {
                             //error, we dont know this return type
-                            RELEASEREF( StdEnv );
                             std::cerr << critical << "\"" << strName().c_str() << "\": Invalid return type in call to external shadeop: \"" << strFunc.c_str() << "\" : \"" << strRetType.c_str() << "\"" << std::endl;
                             exit(1);
                         };
@@ -1038,7 +1034,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
                             else
                             {
                                 // Error, unknown arg type
-                                RELEASEREF( StdEnv );
                                 std::cerr << critical << "\"" << strName().c_str() << "\": Invalid argument type in call to external shadeop: \"" << strFunc.c_str() << "\" : \"" << strArgTypes[x] << "\"" << std::endl;
                                 exit(1);
                             };
@@ -1092,7 +1087,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
                                 std::cerr << info << "\"" << strName().c_str() << "\": \t" << strProto.c_str() << std::endl;
                                 candidate++;
                             };
-                            RELEASEREF( StdEnv );
                             exit(1);
                         };
 
@@ -1180,7 +1174,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
                     CqString strErr( "Invalid opcode found : " );
                     strErr += token;
                     std::cerr << critical << strErr.c_str() << std::endl;
-                    RELEASEREF( StdEnv );
                     return ;
                 }
                 break;
@@ -1222,7 +1215,6 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
         }
     }
 
-    RELEASEREF( StdEnv );
 }
 
 
@@ -1230,7 +1222,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 /**	Ready the shader for execution.
 */
 
-void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShaderExecEnv* pEnv )
+void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, const boost::shared_ptr<IqShaderExecEnv>& pEnv )
 {
     m_pEnv = pEnv;
     // Initialise local variables.
@@ -1279,7 +1271,7 @@ CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 /**	Execute a series of shader language bytecodes.
 */
 
-void CqShaderVM::Execute( IqShaderExecEnv* pEnv )
+void CqShaderVM::Execute( const boost::shared_ptr<IqShaderExecEnv>& pEnv )
 {
     // Check if there is anything to execute.
     if ( m_Program.size() <= 0 )
@@ -1317,10 +1309,9 @@ void CqShaderVM::ExecuteInit()
         return ;
 
     // Fake an environment
-    IqShaderExecEnv* pOldEnv = m_pEnv;
+    boost::shared_ptr<IqShaderExecEnv> pOldEnv = m_pEnv;
 
-    CqShaderExecEnv* Env = new CqShaderExecEnv;
-    ADDREF( Env );
+    boost::shared_ptr<IqShaderExecEnv> Env(new CqShaderExecEnv);
     Env->Initialise( 1, 1, 0, 0, this, m_Uses );
     Initialise( 1, 1, Env );
 
@@ -1340,8 +1331,6 @@ void CqShaderVM::ExecuteInit()
     m_Stack.clear();
 
     m_pEnv = pOldEnv;
-
-    RELEASEREF( Env );
 }
 
 

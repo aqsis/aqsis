@@ -4,8 +4,8 @@
  *	@author	Paul Gregory
  *	@brief	Declare the interface which all shaders must implement.
  *
- *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/12/28 18:26:21 $
+ *	Last change by:		$Author: pseudonym $
+ *	Last change date:	$Date: 2004/02/27 07:00:01 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -14,6 +14,7 @@
 #define	___ishader_Loaded___
 
 #include	"aqsis.h"
+#include	<boost/shared_ptr.hpp>
 
 
 START_NAMESPACE( Aqsis )
@@ -77,7 +78,7 @@ struct IqShader
     /** Evaluate the shader code.
      * \param pEnv The shader execution environment to evaluate within.
      */
-    virtual	void	Evaluate( IqShaderExecEnv* pEnv ) = 0;
+    virtual	void	Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv ) = 0;
     /** Initialise the state of any arguments with default values.
      */
     virtual	void	PrepareDefArgs() = 0;
@@ -86,7 +87,7 @@ struct IqShader
      * \param vGridRes The resolution of the grid being shaded in v
      * \param pEnv Pointer to the IqShaderExecEnv to evaluate within.
      */
-    virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShaderExecEnv* pEnv ) = 0;
+    virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const boost::shared_ptr<IqShaderExecEnv>& pEnv ) = 0;
     /** Determine whether this shader is an aambient ligthsource shader.
      * i.e. A lightsource shader with no Illuminate or Solar constructs.
      */

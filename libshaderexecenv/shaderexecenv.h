@@ -43,7 +43,6 @@
 #include	"ishader.h"
 #include	"ishaderexecenv.h"
 #include	"matrix.h"
-#include	"refcount.h"
 
 #include	"iattributes.h"
 #include	"itransform.h"
@@ -124,7 +123,7 @@ extern TqInt gDefLightUses;
  * Standard shader execution environment. Contains standard variables, and provides SIMD functionality.
  */
 
-class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
+class CqShaderExecEnv : public IqShaderExecEnv
 {
 public:
     CqShaderExecEnv();
@@ -368,13 +367,6 @@ private:
     TqInt	m_LocalIndex;			///< Local cached variable index to speed repeated access to the same local variable.
 
 public:
-#ifndef _DEBUG
-    virtual void AddRef()  { CqRefCount::AddRef();  }
-    virtual void Release() { CqRefCount::Release(); }
-#else
-    virtual void AddRef(const TqChar* file, TqInt line)  { CqRefCount::AddRef(file, line);  }
-    virtual void Release(const TqChar* file, TqInt line) { CqRefCount::Release(file, line); }
-#endif
 
     virtual	TqBool	SO_init_illuminance();
     virtual	TqBool	SO_advance_illuminance();

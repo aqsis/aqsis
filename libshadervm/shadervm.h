@@ -28,6 +28,7 @@
 #define SHADERVM_H_INCLUDED 1
 
 #include	<vector>
+#include	<boost/shared_ptr.hpp>
 
 #include	"aqsis.h"
 
@@ -511,9 +512,9 @@ static CqMatrix temp_matrix;
 class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 {
 public:
-    CqShaderVM() : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
+    CqShaderVM() : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
     {}
-    CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
+    CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
     {
         *this = From;
     }
@@ -542,7 +543,7 @@ public:
     virtual	void	SetArgument( CqParameter* pParam, IqSurface* pSurface );
     virtual	IqShaderData*	FindArgument( const CqString& name );
     virtual	TqBool	GetValue( const char* name, IqShaderData* res );
-    virtual	void	Evaluate( IqShaderExecEnv* pEnv )
+    virtual	void	Evaluate( const boost::shared_ptr<IqShaderExecEnv>& pEnv )
     {
         Execute( pEnv );
     }
@@ -550,7 +551,7 @@ public:
     {
         ExecuteInit();
     }
-    virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShaderExecEnv* pEnv );
+    virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, const boost::shared_ptr<IqShaderExecEnv>& pEnv );
     virtual	TqBool	fAmbient() const
     {
         return ( m_fAmbient );
@@ -581,7 +582,7 @@ public:
 
 
     void	LoadProgram( std::istream* pFile );
-    void	Execute( IqShaderExecEnv* pEnv );
+    void	Execute( const boost::shared_ptr<IqShaderExecEnv>& pEnv );
     void	ExecuteInit();
 
 
@@ -604,7 +605,7 @@ private:
 
     EqShaderType m_Type;							///< Shader type for libslxargs
     TqUint	m_LocalIndex;                   ///<  Local Index to speed up
-    IqShaderExecEnv*	m_pEnv;							///< Pointer to the current excution environment.
+    boost::shared_ptr<IqShaderExecEnv>	m_pEnv;							///< Pointer to the current excution environment.
     std::vector<IqShaderData*>	m_LocalVars;		///< Array of local variables.
     std::vector<UsProgramElement>	m_ProgramInit;		///< Bytecodes of the intialisation program.
     std::vector<UsProgramElement>	m_Program;			///< Bytecodes of the main program.

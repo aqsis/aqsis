@@ -48,7 +48,6 @@ CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(),
         m_bGeometricNormals( TqFalse ),
         m_pSurface( NULL ),
         m_pCSGNode( NULL ),
-        m_pShaderExecEnv( NULL ),
         m_fTriangular( TqFalse )
 
 {
@@ -75,14 +74,6 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
     if ( m_pCSGNode != 0 ) RELEASEREF( m_pCSGNode );
     m_pCSGNode = 0;
 
-    // Delete.
-    /// \note This should delete throught the interface that created it.
-    if ( m_pShaderExecEnv != 0 )
-    {
-        RELEASEREF( m_pShaderExecEnv );
-        m_pShaderExecEnv = 0;
-    }
-
     // Delete any cloned shader output variables.
     std::vector<IqShaderData*>::iterator outputVar;
     for( outputVar = m_apShaderOutputVariables.begin(); outputVar != m_apShaderOutputVariables.end(); outputVar++ )
@@ -98,9 +89,8 @@ CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) :
         m_bShadingNormals( TqFalse ),
         m_bGeometricNormals( TqFalse ),
         m_pSurface( NULL ),
-        m_pShaderExecEnv( NULL ),
-        m_fTriangular( TqFalse )
-
+        m_fTriangular( TqFalse ),
+        m_pShaderExecEnv( new CqShaderExecEnv )
 {
     STATS_INC( GRD_created );
     STATS_INC( GRD_current );
@@ -110,8 +100,6 @@ CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) :
     STATS_SETI( GRD_peak, cGRD > cPeak ? cGRD : cPeak );
     // Initialise the shader execution environment
 
-    m_pShaderExecEnv = new CqShaderExecEnv;
-    ADDREF( m_pShaderExecEnv );
     Initialise( cu, cv, pSurface );
 }
 
@@ -377,11 +365,11 @@ void CqMicroPolyGrid::Shade()
 
         if ( bdpu )
         {
-            dPdu() ->SetVector( SO_DuType<CqVector3D>( pSDP, i, m_pShaderExecEnv, Defvec ), i );
+            dPdu() ->SetVector( SO_DuType<CqVector3D>( pSDP, i, m_pShaderExecEnv.get(), Defvec ), i );
         }
         if ( bdpv )
         {
-            dPdv() ->SetVector( SO_DvType<CqVector3D>( pSDP, i, m_pShaderExecEnv, Defvec ), i );
+            dPdv() ->SetVector( SO_DvType<CqVector3D>( pSDP, i, m_pShaderExecEnv.get(), Defvec ), i );
         }
     }
     // Now try and cull any transparent MPs

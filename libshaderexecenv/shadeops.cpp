@@ -5513,7 +5513,7 @@ class BakingChannel
     // simultaneous multithreaded writes from clobbering each other.
 public:
     // Constructors
-    BakingChannel ( void ) : filename( NULL ), data( NULL ), buffered( 0 )
+    BakingChannel ( void ) : buffered( 0 ), data( NULL ), filename( NULL )
     { }
     BakingChannel ( const char *_filename, int _elsize )
     {
