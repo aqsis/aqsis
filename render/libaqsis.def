@@ -270,7 +270,6 @@ EXPORTS
 	StandardDeclarations
 	CreateRIBEngine
 	DestroyRIBEngine
-	report_refcounts
 
 	??0CqColor@Aqsis@@QAE@XZ
 	??0CqFile@Aqsis@@QAE@PBD0@Z

@@ -5,7 +5,7 @@
  *	@brief	Declare a reference counting class.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/06/13 07:20:40 $
+ *	Last change date:	$Date: 2003/06/13 07:33:25 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@
 #ifdef _DEBUG
 // report_refcounts() should be called at the end of rendering, at such a
 // time when all reference-counted objects should have been released.
-extern "C" void report_refcounts();
+extern "C" __declspec(dllexport) void report_refcounts();
 class RefCountRecord;
 typedef std::vector<RefCountRecord*> RecordVector;
 typedef std::vector<RefCountRecord*>::const_iterator RecordIterator;

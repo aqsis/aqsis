@@ -8,7 +8,14 @@
 #include "librib2ri.h"
 #include "aqsis.h"
 #include "file.h"
-#include "refcount.h"
+
+#ifdef	_DEBUG
+#ifdef	AQSIS_SYSTEM_WIN32
+extern "C" __declspec(dllimport) report_refcounts();
+#else
+extern "C" report_refcounts();
+#endif // AQSIS_SYSTEM_WIN32
+#endif // _DEBUG
 
 #if defined(AQSIS_SYSTEM_WIN32)
 #include <windows.h>
