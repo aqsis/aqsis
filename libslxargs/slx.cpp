@@ -681,12 +681,16 @@ static bool LoadShaderInfo ( char *name )
 	}
 	while ( doLoop == true )
 	{
-		// Build a full file path description
-		stringLength = strlen( name ) + sizeof( RI_SHADER_EXTENSION ) + 1;
-		shaderFileName = ( char * ) malloc( stringLength );
-		strcpy( shaderFileName, name );
-		strcat( shaderFileName, RI_SHADER_EXTENSION );
-
+		// Check if .slx appears in filename
+		if ( strstr( name , RI_SHADER_EXTENSION ) == NULL )
+		{		
+			// Build a full file path description
+			stringLength = strlen( name ) + sizeof( RI_SHADER_EXTENSION ) + 1;
+			shaderFileName = ( char * ) malloc( stringLength );
+			strcpy( shaderFileName, name );
+			strcat( shaderFileName, RI_SHADER_EXTENSION );
+		}
+		
 		stringLength = strlen( currentShaderSearchPath ) + strlen( shaderFileName ) + 2;
 		currentShaderFilePath = ( char * ) malloc( stringLength );
 		strcpy( currentShaderFilePath, currentShaderSearchPath );
@@ -802,8 +806,21 @@ int SLX_SetShader ( char *name )
 	if ( SlxLastError == RIE_NOERROR )
 	{
 		stringLength = strlen( name ) + 1;
-		currentShader = ( char * ) malloc( stringLength );
-		strcpy( currentShader, name );
+
+		// Append .slx if not given already
+		if ( strstr( name , RI_SHADER_EXTENSION ) == NULL )
+		{		
+			// Create new string with .slx
+			stringLength = strlen( name ) + sizeof( RI_SHADER_EXTENSION ) + 1;
+			currentShader = ( char * ) malloc( stringLength );
+			strcpy( currentShader, name );
+			strcat( currentShader, RI_SHADER_EXTENSION );
+		}
+		else
+		{
+			currentShader = ( char * ) malloc( stringLength );
+			strcpy( currentShader, name );
+		}
 		result = 0;
 	}
 	else
