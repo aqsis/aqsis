@@ -494,7 +494,7 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 				{
 					if ( samples >= 3 )
 					{
-						const TqFloat* pSamples = pBucket->Samples( sx, sy );
+						const TqFloat* pSamples = pBucket->Data( sx, sy );
 						pData[ so + 0 ] = pSamples[0];
 						pData[ so + 1 ] = pSamples[1];
 						pData[ so + 2 ] = pSamples[2];
@@ -506,7 +506,7 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 					}
 					else if ( samples == 1 )
 					{
-						const TqFloat* pSamples = pBucket->Samples( sx, sy );
+						const TqFloat* pSamples = pBucket->Data( sx, sy );
 						TqFloat a = ( pSamples[3] + pSamples[4] + pSamples[5] ) / 3.0f;
 						pData[ so + 0 ] = a * pBucket->Coverage( sx, sy );
 					}

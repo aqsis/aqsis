@@ -66,9 +66,9 @@ class CqCSGTreeNode;
 
 struct SqImageSample
 {
-	SqImageSample( TqInt NumSamples = 7 )
+	SqImageSample( TqInt NumData = 7 )
 	{
-		m_Samples.resize( NumSamples );
+		m_Data.resize( NumData );
 	}
 	enum {
 	    Flag_Occludes = 0x0001,
@@ -77,53 +77,53 @@ struct SqImageSample
 
 	CqColor Cs() const
 	{
-		return( CqColor( m_Samples[0], m_Samples[1], m_Samples[2] ) );
+		return( CqColor( m_Data[0], m_Data[1], m_Data[2] ) );
 	}
 
 	void SetCs( const CqColor& col )
 	{
-		assert( m_Samples.size() >= 3 );
-		m_Samples[0] = col.fRed();
-		m_Samples[1] = col.fGreen();
-		m_Samples[2] = col.fBlue();
+		assert( m_Data.size() >= 3 );
+		m_Data[0] = col.fRed();
+		m_Data[1] = col.fGreen();
+		m_Data[2] = col.fBlue();
 	}
 
 	CqColor Os() const
 	{
-		return( CqColor( m_Samples[3], m_Samples[4], m_Samples[5] ) );
+		return( CqColor( m_Data[3], m_Data[4], m_Data[5] ) );
 	}
 
 	void SetOs( const CqColor& col )
 	{
-		assert( m_Samples.size() >= 6 );
-		m_Samples[3] = col.fRed();
-		m_Samples[4] = col.fGreen();
-		m_Samples[5] = col.fBlue();
+		assert( m_Data.size() >= 6 );
+		m_Data[3] = col.fRed();
+		m_Data[4] = col.fGreen();
+		m_Data[5] = col.fBlue();
 	}
 
 	TqFloat Depth() const
 	{
-		return( m_Samples[6] );
+		return( m_Data[6] );
 	}
 
 	void SetDepth( TqFloat d )
 	{
-		assert( m_Samples.size() >= 7 );
-		m_Samples[6] = d;
+		assert( m_Data.size() >= 7 );
+		m_Data[6] = d;
 	}
 
-	TqInt NumSamples() const
+	TqInt DataSize() const
 	{
-		return( m_Samples.size() );
+		return( m_Data.size() );
 	}
 
-	void SetNumSamples( TqInt NumSamples )
+	void SetDataSize( TqInt NumData )
 	{
-		m_Samples.resize( NumSamples );
+		m_Data.resize( NumData );
 	}
 
 	TqInt m_flags;
-	std::valarray<TqFloat>	m_Samples;
+	std::valarray<TqFloat>	m_Data;
 	TqFloat	m_Coverage;
 	CqCSGTreeNode*	m_pCSGNode;	///< Pointer to the CSG node this sample is part of, NULL if not part of a solid.
 }
@@ -174,11 +174,11 @@ class CqImagePixel
 		 */
 		CqColor	Color()
 		{
-			return ( m_Samples.Cs() );
+			return ( m_Data.Cs() );
 		}
 		void	SetColor(const CqColor& col)
 		{
-			m_Samples.SetCs( col );
+			m_Data.SetCs( col );
 		}
 		/** Get the averaged opacity of this pixel
 		 * \return A color representing the averaged opacity at this pixel.
@@ -186,11 +186,11 @@ class CqImagePixel
 		 */
 		CqColor	Opacity()
 		{
-			return ( m_Samples.Os() );
+			return ( m_Data.Os() );
 		}
 		void	SetOpacity(const CqColor& col)
 		{
-			m_Samples.SetOs( col );
+			m_Data.SetOs( col );
 		}
 		/** Get the averaged depth of this pixel
 		 * \return A float representing the averaged depth at this pixel.
@@ -198,30 +198,29 @@ class CqImagePixel
 		 */
 		TqFloat	Depth()
 		{
-			return ( m_Samples.Depth() );
+			return ( m_Data.Depth() );
 		}
 		void	SetDepth( TqFloat d )
 		{
-			m_Samples.SetDepth( d );
+			m_Data.SetDepth( d );
 		}
-		/** Get a pointer to the samples
-		 * \return A float representing the averaged depth at this pixel.
-		 * \attention Only call this after already calling FilterBucket().
+		/** Get a pointer to the sample data
+		 * \return A constant pointer to the sample data.
 		 */
-		const TqFloat*	Samples()
+		const TqFloat*	Data()
 		{
-			return ( &m_Samples.m_Samples[0] );
+			return ( &m_Data.m_Data[0] );
 		}
-		SqImageSample&	GetSamples()
+		SqImageSample&	GetPixelSample()
 		{
-			return ( m_Samples );
+			return ( m_Data );
 		}
-		/** Get a count of samples
+		/** Get a count of data
 		 * \return A count of the samples on this pixel.
 		 */
-		TqInt	NumSamples()
+		TqInt	DataSize()
 		{
-			return ( m_Samples.m_Samples.size() );
+			return ( m_Data.m_Data.size() );
 		}
 		/** Get the maximum depth of this pixel
 		 * \return A float representing the maximum depth at this pixel.
@@ -351,7 +350,7 @@ class CqImagePixel
 		std::vector<TqInt>	m_aSubCellIndex;				///< Vector of subcell indices.
 		std::vector<TqFloat> m_aTimes;						///< A vector of float sample times for the sample points.
 		std::vector<TqFloat> m_aDetailLevels;					///< A vector of float level-of-detail samples for the sample points.
-		SqImageSample	m_Samples;
+		SqImageSample	m_Data;
 		TqFloat	m_Coverage;						///< The approximate coverage, just the ratio of sample hits to misses.
 		TqFloat m_MaxDepth;						///< The maximum depth of any sample in this pixel. used for occlusion culling
 		TqFloat m_MinDepth;						///< The minimum depth of any sample in this pixel. used for occlusion culling

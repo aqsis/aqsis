@@ -291,12 +291,12 @@ TqFloat CqBucket::MaxDepth( TqInt iXPos, TqInt iYPos )
  * \param iYPos Screen position of sample.
  */
 
-const TqFloat* CqBucket::Samples( TqInt iXPos, TqInt iYPos )
+const TqFloat* CqBucket::Data( TqInt iXPos, TqInt iYPos )
 {
 	CqImagePixel * pie;
 	ImageElement( iXPos, iYPos, pie );
 	if( NULL != pie )
-		return ( pie->Samples() );
+		return ( pie->Data() );
 	else
 		return ( NULL );
 }
@@ -308,12 +308,12 @@ const TqFloat* CqBucket::Samples( TqInt iXPos, TqInt iYPos )
  * \param iYPos Screen position of sample.
  */
 
-TqInt CqBucket::NumSamples( TqInt iXPos, TqInt iYPos )
+TqInt CqBucket::DataSize( TqInt iXPos, TqInt iYPos )
 {
 	CqImagePixel * pie;
 	ImageElement( iXPos, iYPos, pie );
 	if( NULL != pie )
-		return ( pie->NumSamples() );
+		return ( pie->DataSize() );
 	else
 		return ( 0 );
 }
@@ -396,13 +396,13 @@ void CqBucket::FilterBucket()
 									c += pSample->Cs() * g;
 									o += pSample->Os() * g;
 									d += pSample->Depth();
-									samples += pSample->m_Samples * g;
+									samples += pSample->m_Data * g;
 									SampleCount++;
 								}
 							}
 						}
 					}
-					pie2->GetSamples().m_Samples = samples / gTot;
+					pie2->GetPixelSample().m_Data = samples / gTot;
 					pie2++;
 				}
 				pie += xlen;

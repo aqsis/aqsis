@@ -241,7 +241,7 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 		}
 
 	}
-	m_Samples.m_Samples.resize( QGetRenderContext()->GetOutputDataTotalSize() );
+	m_Data.m_Data.resize( QGetRenderContext()->GetOutputDataTotalSize() );
 }
 
 

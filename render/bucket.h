@@ -106,8 +106,8 @@ class CqBucket : public IqBucket
 		virtual	TqFloat Coverage( TqInt iXPos, TqInt iYPos );
 		virtual	TqFloat Depth( TqInt iXPos, TqInt iYPos );
 		virtual	TqFloat MaxDepth( TqInt iXPos, TqInt iYPos );
-		virtual	TqInt NumSamples( TqInt iXPos, TqInt iYPos );
-		virtual	const TqFloat* Samples( TqInt iXPos, TqInt iYPos );
+		virtual	TqInt DataSize( TqInt iXPos, TqInt iYPos );
+		virtual	const TqFloat* Data( TqInt iXPos, TqInt iYPos );
 
 		static	void	InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqInt xfwidth, TqInt yfwidth, TqInt xsamples, TqInt ysamples, TqBool fJitter = TqTrue );
 		static	void	InitialiseFilterValues();

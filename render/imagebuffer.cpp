@@ -932,7 +932,7 @@ inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2
 		// If it is exactly the same, chances are we've hit a MPG grid line.
 		if ( i < c && p[ i ].Depth() == ImageVal.Depth() )
 		{
-			p[ i ].m_Samples = ( p[ i ].m_Samples + val ) * 0.5f;
+			p[ i ].m_Data = ( p[ i ].m_Data + val ) * 0.5f;
 			return;
 		}
 	}
@@ -946,7 +946,7 @@ inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2
 
 
 	// Store the sample information.
-	ImageVal.m_Samples = val;
+	ImageVal.m_Data = val;
 	ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
 	if ( NULL != ImageVal.m_pCSGNode ) ImageVal.m_pCSGNode->AddRef();
 
