@@ -402,14 +402,14 @@ TqBool CqImageBuffer::OcclusionCullSurface( CqBasicSurface* pSurface )
 			//  reference must be removed *after* the new one
 			//  has been added to stop the surface from being
 			//  deleted. - Jonathan Merritt.
-			pSurface->UnLink();
-			Bucket( nextBucket, CurrentBucketRow() ).AddGPrim( pSurface );
-			RELEASEREF( pSurface );
-			STATS_INC( GPR_culled );
 			CqString objname( "unnamed" );
 			const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
 			if( pattrName )	objname = *pattrName;
 			std::cerr << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
+			pSurface->UnLink();
+			Bucket( nextBucket, CurrentBucketRow() ).AddGPrim( pSurface );
+			RELEASEREF( pSurface );
+			STATS_INC( GPR_culled );
 			return TqTrue;
 		}
 
@@ -425,25 +425,25 @@ TqBool CqImageBuffer::OcclusionCullSurface( CqBasicSurface* pSurface )
 			 ( RasterBound.vecMax().y() >= pos.y() ) )
 		{
 			// See above for comments... - Jonathan Merritt.
-			pSurface->UnLink();
-			Bucket( nextBucketX, nextBucket ).AddGPrim( pSurface );
-			RELEASEREF( pSurface );
-			STATS_INC( GPR_culled );
 			CqString objname( "unnamed" );
 			const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
 			if( pattrName )	objname = *pattrName;
 			std::cerr << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
+			pSurface->UnLink();
+			Bucket( nextBucketX, nextBucket ).AddGPrim( pSurface );
+			RELEASEREF( pSurface );
+			STATS_INC( GPR_culled );
 			return TqTrue;
 		}
 
 		// Bound covers no more buckets
-		pSurface->UnLink();
-		RELEASEREF( pSurface );
-		STATS_INC( GPR_culled );
 		CqString objname( "unnamed" );
 		const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
 		if( pattrName )	objname = *pattrName;
 		std::cerr << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
+		pSurface->UnLink();
+		RELEASEREF( pSurface );
+		STATS_INC( GPR_culled );
 		return TqTrue;
 	}
 	else
