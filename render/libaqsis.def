@@ -327,14 +327,6 @@ EXPORTS
 	??8CqVector4D@Aqsis@@QBE_NABV01@@Z
 	??9CqVector4D@Aqsis@@QBE_NABV01@@Z
 	??ACqVector4D@Aqsis@@QAEAAMH@Z
-	??D@YA?AVCqColor@Aqsis@@ABV01@0@Z
-	??D@YA?AVCqColor@Aqsis@@ABV01@M@Z
-	??D@YA?AVCqColor@Aqsis@@MABV01@@Z
-	??D@YA?AVCqVector2D@Aqsis@@ABV01@M@Z
-	??D@YA?AVCqVector3D@Aqsis@@ABV01@M@Z
-	??D@YA?AVCqVector3D@Aqsis@@MABV01@@Z
-	??D@YA?AVCqVector4D@Aqsis@@ABV01@M@Z
-	??D@YA?AVCqVector4D@Aqsis@@MABV01@@Z
 	??DAqsis@@YA?AVCqMatrix@0@MABV10@@Z
 	??DAqsis@@YA?AVCqString@0@ABV10@0@Z
 	??DAqsis@@YA?AVCqString@0@ABV10@M@Z
@@ -344,25 +336,9 @@ EXPORTS
 	??DCqMatrix@Aqsis@@QBE?AV01@M@Z
 	??DCqMatrix@Aqsis@@QBE?AVCqVector3D@1@ABV21@@Z
 	??DCqMatrix@Aqsis@@QBE?AVCqVector4D@1@ABV21@@Z
-	??G@YA?AVCqColor@Aqsis@@ABV01@0@Z
-	??G@YA?AVCqColor@Aqsis@@ABV01@@Z
-	??G@YA?AVCqColor@Aqsis@@MABV01@@Z
-	??G@YA?AVCqVector2D@Aqsis@@ABV01@0@Z
-	??G@YA?AVCqVector3D@Aqsis@@ABV01@0@Z
-	??G@YA?AVCqVector3D@Aqsis@@ABV01@@Z
-	??G@YA?AVCqVector3D@Aqsis@@MABV01@@Z
-	??G@YA?AVCqVector4D@Aqsis@@ABV01@0@Z
 	??GAqsis@@YA?AVCqString@0@ABV10@0@Z
 	??GCqMatrix@Aqsis@@QBE?AV01@ABV01@@Z
 	??GCqMatrix@Aqsis@@QBE?AV01@ABVCqVector4D@1@@Z
-	??H@YA?AVCqColor@Aqsis@@ABV01@0@Z
-	??H@YA?AVCqColor@Aqsis@@ABV01@M@Z
-	??H@YA?AVCqColor@Aqsis@@MABV01@@Z
-	??H@YA?AVCqVector2D@Aqsis@@ABV01@0@Z
-	??H@YA?AVCqVector3D@Aqsis@@ABV01@0@Z
-	??H@YA?AVCqVector3D@Aqsis@@ABV01@M@Z
-	??H@YA?AVCqVector3D@Aqsis@@MABV01@@Z
-	??H@YA?AVCqVector4D@Aqsis@@ABV01@0@Z
 	??HAqsis@@YA?AVCqString@0@ABV10@0@Z
 	??HAqsis@@YA?AVCqString@0@ABV10@D@Z
 	??HAqsis@@YA?AVCqString@0@ABV10@PBD@Z
@@ -370,13 +346,6 @@ EXPORTS
 	??HAqsis@@YA?AVCqString@0@PBDABV10@@Z
 	??HCqMatrix@Aqsis@@QBE?AV01@ABV01@@Z
 	??HCqMatrix@Aqsis@@QBE?AV01@ABVCqVector4D@1@@Z
-	??K@YA?AVCqColor@Aqsis@@ABV01@0@Z
-	??K@YA?AVCqColor@Aqsis@@ABV01@M@Z
-	??K@YA?AVCqColor@Aqsis@@MABV01@@Z
-	??K@YA?AVCqVector3D@Aqsis@@ABV01@0@Z
-	??K@YA?AVCqVector3D@Aqsis@@ABV01@M@Z
-	??K@YA?AVCqVector3D@Aqsis@@MABV01@@Z
-	??K@YA?AVCqVector4D@Aqsis@@ABV01@M@Z
 	??KAqsis@@YA?AVCqString@0@ABV10@0@Z
 	??LAqsis@@YA?AVCqVector3D@0@ABV10@0@Z
 	??LAqsis@@YA?AVCqVector4D@0@ABV10@0@Z
@@ -405,14 +374,7 @@ EXPORTS
 	??_0CqVector4D@Aqsis@@QAEAAV01@M@Z
 	??_1CqVector3D@Aqsis@@QAEAAV01@ABV01@@Z
 	??_1CqVector4D@Aqsis@@QAEAAV01@ABV01@@Z
-	??_C@_01FCOA@?5?$AA@
-	??_C@_05EBLP@power?$AA@
-	??_C@_06CMIE@bezier?$AA@
-	??_C@_07BDMH@bspline?$AA@
-	??_C@_07IKDD@hermite?$AA@
-	??_C@_08PHOA@AqsisLog?$AA@
-	??_C@_0M@EAGH@catmull?9rom?$AA@
-	?CGNoise1@CqNoise@Aqsis@@SA?AVCqColor@2@M@Z
+
 	?CGNoise2@CqNoise@Aqsis@@SA?AVCqColor@2@MM@Z
 	?CGNoise3@CqNoise@Aqsis@@SA?AVCqColor@2@ABVCqVector3D@2@@Z
 	?CGNoise3@CqNoise@Aqsis@@SA?AVCqColor@2@MMM@Z
