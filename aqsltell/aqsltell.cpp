@@ -25,6 +25,10 @@
 
 #include "aqsis.h"
 
+#ifdef AQSIS_SYSTEM_WIN32
+#include <windows.h>
+#endif
+
 #ifdef	AQSIS_COMPILER_MSVC6
 #pragma warning(disable : 4786 )
 #endif //AQSIS_COMPILER_MSVC6
@@ -50,7 +54,10 @@ struct IqRenderer;
 extern IqRenderer* QGetRenderContextI();
 }
 
-std::string g_shader_path = DEFAULT_SHADER_PATH;
+std::string g_shader_path;
+#ifdef	AQSIS_SYSTEM_POSIX
+g_shader_path = DEFAULT_SHADER_PATH;
+#endif
 
 bool g_cl_pause = 0;
 bool g_cl_help = 0;
@@ -59,6 +66,22 @@ ArgParse::apstring g_cl_shader_path = "";
 
 int main( int argc, const char** argv )
 {
+
+#ifdef	AQSIS_SYSTEM_WIN32
+	char acPath[256];
+	char rootPath[256];
+	if( GetModuleFileName( NULL, acPath, 256 ) != 0) 
+	{
+		// guaranteed file name of at least one character after path
+		*( strrchr( acPath, '\\' ) + 1 ) = '\0';
+		std::string	 stracPath(acPath);
+		stracPath.append("..\\");
+		_fullpath(rootPath,&stracPath[0],256);
+	}
+	g_shader_path = rootPath;
+	g_shader_path.append( "shaders" );
+#endif
+
     Aqsis::QGetRenderContextI();
     ArgParse ap;
     ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " <shadername>" );

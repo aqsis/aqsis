@@ -39,7 +39,7 @@ RSC=rc.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\..\procedures"
+# PROP Output_Dir "..\..\plugins"
 # PROP Intermediate_Dir "..\..\Object\Release\plugins\ppm2tif\"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
@@ -65,7 +65,7 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\..\procedures"
+# PROP Output_Dir "..\..\plugins\debug"
 # PROP Intermediate_Dir "..\..\Object\Debug\plugins\ppm2tif"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
@@ -92,7 +92,7 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\..\procedures\Profile"
+# PROP Output_Dir "..\..\plugins\profile"
 # PROP Intermediate_Dir "..\Object\Profile\plugins\ppm2tif"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""

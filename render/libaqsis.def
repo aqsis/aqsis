@@ -107,7 +107,6 @@ EXPORTS
 	?FGNoise2@CqNoise@Aqsis@@SAMMM@Z
 	?FGNoise3@CqNoise@Aqsis@@SAMMMM@Z
 	?Format@CqString@Aqsis@@QAAAAV12@PBDZZ
-	?GetSystemSetting@CqFile@Aqsis@@SA?AVCqString@2@ABV32@@Z
 	?Glob@CqFile@Aqsis@@SA?AV?$list@PAVCqString@Aqsis@@V?$allocator@PAVCqString@Aqsis@@@std@@@std@@ABVCqString@2@@Z
 	?Identity@CqMatrix@Aqsis@@QAEXXZ
 	?InitFD@CqSplineCubic@Aqsis@@UAEXH@Z
@@ -192,3 +191,4 @@ EXPORTS
 	?GetShaderVarAt@CqShaderVM@Aqsis@@QAEPAUIqShaderData@2@H@Z
 	?CreateVariable@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@ABVCqString@2@_N3@Z
 	?CreateVariableArray@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@ABVCqString@2@H_N3@Z
+	?info@Aqsis@@YAAAV?$basic_ostream@DU?$char_traits@D@std@@@std@@AAV23@@Z

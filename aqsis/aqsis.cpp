@@ -77,14 +77,24 @@
 
 #endif
 
+std::string g_rc_path;
+std::string g_shader_path;
+std::string g_archive_path;
+std::string g_texture_path;
+std::string g_display_path;
+std::string g_dso_path;
+std::string g_procedural_path;
+
 // Set default resource paths ...
-std::string g_rc_path = DEFAULT_RC_PATH;
-std::string g_shader_path = DEFAULT_SHADER_PATH;
-std::string g_archive_path = DEFAULT_ARCHIVE_PATH;
-std::string g_texture_path = DEFAULT_TEXTURE_PATH;
-std::string g_display_path = DEFAULT_DISPLAY_PATH;
-std::string g_dso_path = DEFAULT_DSO_PATH;
-std::string g_procedural_path = DEFAULT_PROCEDURAL_PATH;
+#ifdef	AQSIS_SYSTEM_POSIX
+g_rc_path = DEFAULT_RC_PATH;
+g_shader_path = DEFAULT_SHADER_PATH;
+g_archive_path = DEFAULT_ARCHIVE_PATH;
+g_texture_path = DEFAULT_TEXTURE_PATH;
+g_display_path = DEFAULT_DISPLAY_PATH;
+g_dso_path = DEFAULT_DSO_PATH;
+g_procedural_path = DEFAULT_PROCEDURAL_PATH;
+#endif
 
 // Forward declarations
 void RenderFile( FILE* file, std::string& name );
@@ -305,6 +315,33 @@ RtVoid PreWorld()
 
 int main( int argc, const char** argv )
 {
+#ifdef AQSIS_SYSTEM_WIN32
+	char acPath[256];
+	char rootPath[256];
+	if( GetModuleFileName( NULL, acPath, 256 ) != 0) 
+	{
+		// guaranteed file name of at least one character after path
+		*( strrchr( acPath, '\\' ) + 1 ) = '\0';
+		std::string	 stracPath(acPath);
+		stracPath.append("..\\");
+		_fullpath(rootPath,&stracPath[0],256);
+	}
+	g_rc_path = rootPath;
+	g_shader_path = rootPath;
+	g_archive_path = rootPath;
+	g_texture_path = rootPath;
+	g_display_path = rootPath;
+	g_dso_path = rootPath;
+	g_procedural_path = rootPath;
+
+	g_shader_path.append( "shaders" );
+	g_archive_path.append( "archives" );
+	g_texture_path.append( "textures" );
+	g_display_path.append( "bin" );
+	g_dso_path.append( "dsos" );
+	g_procedural_path.append( "procedures" );
+#endif
+
     StartMemoryDebugging();
     {
         ArgParse ap;
