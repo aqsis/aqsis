@@ -267,8 +267,8 @@ class CqImageBuffer
 		TqBool	CullSurface( CqBound& Bound, CqBasicSurface* pSurface );
 		TqBool	OcclusionCullSurface( CqBasicSurface* pSurface );
 		void	AddMPG( CqMicroPolygon* pmpgNew );
-		TqBool	PushMPGForward( CqMicroPolygon* pmpg );
-		TqBool	PushMPGDown( CqMicroPolygon*, TqInt, TqInt );
+		TqBool	PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row );
+		TqBool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );
 		void	RenderMPGs( long xmin, long xmax, long ymin, long ymax );
 		void	RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax );
 		void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax );

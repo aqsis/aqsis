@@ -477,57 +477,10 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 	// situation.
 	if ( Bucket(iXBa,iYBa).IsProcessed() )
 	{
-		// It is possible that the grid this MP belongs to was occlusion culled from
-		// the ideal bucket and pushed forward, so check if the MP should be pushed down into the
-		// next row of buckets.
-		CqVector2D BucketMin = BucketPosition(iXBa, CurrentBucketY());
-		CqVector2D BucketMax = BucketMin + BucketSize(iXBa, CurrentBucketY());
-		if ( B.vecMax().y() >= BucketMax.y() )
-		{
-			// Make sure it is pushed down from the appropriate column but this row, just in case the
-			// bound extends into previous rows as well.
-			if ( PushMPGDown( pmpgNew, iXBa, CurrentBucketY() ) ) 
-				STATS_INC( MPG_pushed_down );
-		
-			// If the x doesn't extend into this bucket, release it.
-			if (B.vecMax().x() < BucketPosition().x()) 
-			{
-				RELEASEREF( pmpgNew );
-				return ;
-			}
-			iXBa = CurrentBucketX();
-			iYBa = CurrentBucketY();
-			pmpgNew->MarkPushedForward();
-		}
-		// This can be hit if the grid was occluded in the previous bucket, then diced in this one. 
-		// There may be some MP's that when busted belong in the previous bucket, but we have already 
-		// determined that they can play no real part in that bucket, so discard them.
-		else if (B.vecMax().x() < BucketMin.x()) 
-		{
-			RELEASEREF( pmpgNew );
-			return ;
-		}
-		else
-		{
-			// If the bucket is less than the current, see if it fits in the current bucket, this
-			// should allow for trimmed u-polys that lie on a bucket boundary, as is the case with
-			// bilinear patches with 3 points.
-			CqVector2D BucketMin = BucketPosition(CurrentBucketX(), CurrentBucketY());
-			CqVector2D BucketMax = BucketMin + BucketSize(CurrentBucketX(), CurrentBucketY());
-			if ((( B.vecMax().x() >= BucketMin.x() ) &&
-				 ( B.vecMax().y() >= BucketMin.y() )) ||
-				 ( B.vecMax().y() >= BucketMax.y() ) )
-
-			{
-				iXBa = CurrentBucketX();
-				iYBa = CurrentBucketY();
-			}
-			else
-			{
-				RELEASEREF( pmpgNew );
-				return ;
-			}
-		}
+		PushMPGDown( pmpgNew, iXBa, iYBa ); 
+		PushMPGForward( pmpgNew, iXBa, iYBa );
+		RELEASEREF( pmpgNew );
+		return ;
 	} 
 
 	assert( !Bucket(iXBa, iYBa).IsProcessed() );
@@ -543,25 +496,26 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
  * \param pmpg Pointer to a CqMicroPolygon derived class.
  */
 
-TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg )
+TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 {
 	// Should always mark as pushed forward even if not. As this is an idicator
 	// that the attempt has been made, used by the PushDown function. If this wasn't set
 	// then the mpg would be pushed down again when the next row is hit.
 	pmpg->MarkPushedForward();
 
-	TqInt BucketRow = CurrentBucketY();
-	TqInt BucketCol = CurrentBucketX();
-
 	// Check if there is anywhere to push forward to.
-	if ( CurrentBucketX() == ( cXBuckets() - 1 ) )
+	if ( Col == ( cXBuckets() - 1 ) )
 		return ( TqFalse );
 
-	TqInt NextBucketForward = CurrentBucketX() + 1;
+	TqInt NextBucketForward = Col + 1;
+
+	// If the next bucket forward has already been processed, try the one following that.
+	if( Bucket( NextBucketForward, Row ).IsProcessed() )
+		return( PushMPGForward( pmpg, NextBucketForward, Row ) );
 
 	// Find out if any of the subbounds touch this bucket.
-	CqVector2D BucketMin = BucketPosition( NextBucketForward, CurrentBucketY() );
-	CqVector2D BucketMax = BucketMin + BucketSize( NextBucketForward, CurrentBucketY() );
+	CqVector2D BucketMin = BucketPosition( NextBucketForward, Row );
+	CqVector2D BucketMax = BucketMin + BucketSize( NextBucketForward, Row );
 	CqVector2D FilterWidth( m_FilterXWidth * 0.5f, m_FilterYWidth * 0.5f );
 	BucketMin -= FilterWidth;
 	BucketMax += FilterWidth;
@@ -580,7 +534,7 @@ TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg )
 	else
 	{
 		ADDREF( pmpg );
-		Bucket( NextBucketForward, CurrentBucketY() ).AddMPG( pmpg );
+		Bucket( NextBucketForward, Row ).AddMPG( pmpg );
 		return ( TqTrue );
 	}
 	return ( TqFalse );
@@ -601,7 +555,27 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 	if ( Row == ( m_cYBuckets - 1 ) )
 		return ( TqFalse );
 
+	// Passing in -1 as the column means to get the minimum bucket on the row that the MPG touches.
+	CqBound	B( pmpg->GetTotalBound( ) );
+
+	if( Col == -1 )
+	{
+		Col = static_cast<TqInt>(B.vecMin().x()) / XBucketSize();
+		Col = CLAMP( Col, 0, cXBuckets() );
+	}
+
 	TqInt NextBucketDown = Row + 1;
+
+	// If the next bucket down has already been processed, 
+	// try pushing forward from there.
+	if( Bucket( Col, NextBucketDown ).IsProcessed() )
+	{
+		if( PushMPGForward( pmpg, Col, NextBucketDown ) )
+			return( TqTrue );
+		else
+		// If that fails, push down again.
+			return( PushMPGDown( pmpg, Col, NextBucketDown ) );
+	}
 
 	// Find out if any of the subbounds touch this bucket.
 	CqVector2D BucketMin = BucketPosition( Col, NextBucketDown );
@@ -609,8 +583,6 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 	CqVector2D FilterWidth( m_FilterXWidth * 0.5f, m_FilterYWidth * 0.5f );
 	BucketMin -= FilterWidth;
 	BucketMax += FilterWidth;
-
-	CqBound	B( pmpg->GetTotalBound( ) );
 
 	const CqVector3D& vMin = B.vecMin();
 	const CqVector3D& vMax = B.vecMax();
@@ -665,9 +637,9 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 			for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
 			{
 				RenderMicroPoly( *impg, xmin, xmax, ymin, ymax );
-				if ( PushMPGDown( ( *impg ), CurrentBucketX(), CurrentBucketY() ) )
+				if ( PushMPGDown( ( *impg ), -1, CurrentBucketY() ) )
 					STATS_INC( MPG_pushed_down );
-				if ( PushMPGForward( ( *impg ) ) )
+				if ( PushMPGForward( ( *impg ), CurrentBucketX(), CurrentBucketY() ) )
 					STATS_INC( MPG_pushed_forward );
 				RELEASEREF( ( *impg ) );
 			}
@@ -683,9 +655,9 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 	for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
 	{
 		RenderMicroPoly( *impg, xmin, xmax, ymin, ymax );
-		if ( PushMPGDown( ( *impg ), CurrentBucketX(), CurrentBucketY() ) ) 
+		if ( PushMPGDown( ( *impg ), -1, CurrentBucketY() ) ) 
 			STATS_INC( MPG_pushed_down );
-		if ( PushMPGForward( ( *impg ) ) ) 
+		if ( PushMPGForward( ( *impg ), CurrentBucketX(), CurrentBucketY() ) ) 
 			STATS_INC( MPG_pushed_forward );
 		RELEASEREF( ( *impg ) );
 	}
