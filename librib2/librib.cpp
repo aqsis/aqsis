@@ -56,9 +56,6 @@ void StandardDeclarations( RendermanInterface& CallbackInterface )
 	ParserDeclare( CallbackInterface, "Ka", "uniform float" );
 	ParserDeclare( CallbackInterface, "Kd", "uniform float" );
 	ParserDeclare( CallbackInterface, "Ks", "uniform float" );
-	ParserDeclare( CallbackInterface, "Ka", "uniform float" );
-	ParserDeclare( CallbackInterface, "Kd", "uniform float" );
-	ParserDeclare( CallbackInterface, "Ks", "uniform float" );
 	ParserDeclare( CallbackInterface, "Kr", "uniform float" );
 	ParserDeclare( CallbackInterface, "roughness", "uniform float" );
 	ParserDeclare( CallbackInterface, "texturename", "uniform string" );
