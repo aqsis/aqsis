@@ -5,11 +5,5 @@ libplatform_la_LDFLAGS = -rpath $(libdir) -static
 
 include_HEADERS = share.h
 
-if DEBUG
-AM_CXXFLAGS = -g -Wall
-else
-AM_CXXFLAGS =
-endif
-
 INCLUDES = -I$(top_srcdir)/libaqsistypes 
 

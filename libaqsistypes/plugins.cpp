@@ -87,7 +87,6 @@ CqPluginBase::DLOpen(CqString *library)
 #else  
 	handle = ( void * ) dlopen( library->c_str(), RTLD_LAZY );
 #endif
-
 #endif
 	if (handle) m_activeHandles.push_back(handle);
 	return handle;
@@ -185,6 +184,8 @@ CqPluginBase::DLError(void)
         errorlog = dlerror() ;
 #endif
 
+#else
+	errorlog = "Aqsis was built without plugin support\m";
 #endif
 	return errorlog;
 }

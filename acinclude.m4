@@ -1,49 +1,10 @@
-dnl HAVE_OPENGL
-dnl
-AC_DEFUN([HAVE_OPENGL],
-[
-  AC_CACHE_CHECK([for OpenGL], have_OpenGL,
-  [
-  AC_ARG_WITH(opengl_lib,[  --with-opengl-lib=DIR path to OpenGL libraries [defaults to /usr/local/lib]],
-						[if test "$withval" != no; then
-							OPENGL_LIB="$withval"
-						else
-							OPENGL_LIB=/usr/local/lib
-						fi],[OPENGL_LIB=/usr/local/lib])
-	AC_ARG_WITH(opengl_include,[  --with-opengl-include=DIR path to OpenGL includes [defaults to /usr/local/include]],
-						[if test "$withval" != no; then
-							OPENGL_INC="$withval"
-						else
-							OPENGL_INC=/usr/local/include
-						fi],[OPENGL_INC=/usr/local/include])
-	AC_SUBST(OPENGL_LIB)
-	AC_SUBST(OPENGL_INC)
-  ])
-])
-
-dnl WITH_GLUT
-dnl
-AC_DEFUN([HAVE_GLUT],
-[
-	AC_ARG_ENABLE(glut,[  --enable-glut             compile with glut library [default= yes]],
-							[case "${enableval}" in
-								true) glut=true;;
-								false) glut=false;;
-								yes) glut=true;;
-								no) glut=false;;
-								*) AC_MSG_ERROR(bad value ${enableval} for --enable-glut);;
-							esac],
-							[glut=true])
-	AM_CONDITIONAL(GLUT, test x$glut = xtrue)
-])
-
 dnl HAVE_LIBTIFF
 dnl
 AC_DEFUN([HAVE_LIBTIFF],
 [
   AC_CACHE_CHECK([for libTIFF], have_libTIFF,
   [
-  AC_ARG_WITH(tiff_lib,[  --with-tiff-lib=DIR path to TIFF libraries [defaults to /usr/local/lib]],
+  	AC_ARG_WITH(tiff_lib,[  --with-tiff-lib=DIR path to TIFF libraries [defaults to /usr/local/lib]],
 						[if test "$withval" != no; then
 							TIFF_LIB="$withval"
 						else
@@ -51,11 +12,37 @@ AC_DEFUN([HAVE_LIBTIFF],
 						fi],[TIFF_LIB=/usr/local/lib])
 	AC_ARG_WITH(tiff_include,[  --with-tiff-include=DIR path to TIFF includes [defaults to /usr/local/include]],
 						[if test "$withval" != no; then
-							TIFF_INC="$withval"
+							TIFF_INC="-I$withval"
 						else
-							TIFF_INC=/usr/local/include
-						fi],[TIFF_INC=/usr/local/include])
-	AC_SUBST(TIFF_LIB)
+							TIFF_INC=-I/usr/local/include
+						fi],[TIFF_INC=-I/usr/local/include])
+	TIFF_FLAGS="-L$TIFF_LIB -ltiff" 
+	AC_SUBST(TIFF_FLAGS)
 	AC_SUBST(TIFF_INC)
   ])
 ])
+
+dnl HAVE_LIBARGPARSE
+dnl
+AC_DEFUN([HAVE_LIBARGPARSE],
+[
+  AC_CACHE_CHECK([for libARGPARSE], have_libARGPARSE,
+  [
+  	AC_ARG_WITH(argparse_lib,[  --with-argparse-lib=DIR path to argparse library [defaults to /usr/local/lib]],
+						[if test "$withval" != no; then
+							ARGPARSE_LIB="$withval"
+						else
+							ARGPARSE_LIB=/usr/local/lib
+						fi],[ARGPARSE_LIB=/usr/local/lib])
+	AC_ARG_WITH(argparse_include,[  --with-argparse-include=DIR path to argparse.h [defaults to /usr/local/include]],
+						[if test "$withval" != no; then
+							ARGPARSE_INC="-I$withval"
+						else
+							ARGPARSE_INC=-I/usr/local/include
+						fi],[ARGPARSE_INC=-I/usr/local/include])
+	ARGPARSE_FLAGS="-L$ARGPARSE_LIB -largparse" 
+	AC_SUBST(ARGPARSE_FLAGS)
+	AC_SUBST(ARGPARSE_INC)
+  ])
+])
+

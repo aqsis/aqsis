@@ -65,7 +65,6 @@ void *CqConverter::Function()
 {
 	void * function_pt = NULL;
 
-#ifdef	PLUGINS
 	if ( !m_handle )
 		m_handle = ( void* ) DLOpen ( &m_dynamiclibrary ) ;
 
@@ -81,8 +80,6 @@ void *CqConverter::Function()
 	{
 		m_errorlog = m_dynamiclibrary + DLError() ;
 	};
-
-#endif //PLUGINS
 
 	return function_pt;
 }
@@ -101,12 +98,10 @@ const char * CqConverter::ErrorLog()
 void CqConverter::Close()
 {
 
-#ifdef	PLUGINS
 	if ( m_handle )
 		DLClose( m_handle );
 
 	m_handle = NULL;
-#endif //PLUGINS
 
 }
 

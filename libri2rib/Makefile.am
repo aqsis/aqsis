@@ -9,10 +9,4 @@ bin_PROGRAMS = ri2ribtest
 ri2ribtest_SOURCES = ri2ribtest.cpp
 ri2ribtest_LDADD = $(top_builddir)/libri2rib/libri2rib.la
 
-if DEBUG
-AM_CXXFLAGS = -g -Wall
-else
-AM_CXXFLAGS =
-endif
-
 EXTRA_DIST = libri2rib.dsp COPYING_LGPL

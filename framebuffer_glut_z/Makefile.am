@@ -1,17 +1,7 @@
+INCLUDES = -I$(top_srcdir)/libdd -I$(top_srcdir)/libddmsock -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix $(GL_CFLAGS)
+
 bin_PROGRAMS = aqsis_framebuffer_glut_z
-
 aqsis_framebuffer_glut_z_SOURCES = framebuffer_glut_z.cpp
-aqsis_framebuffer_glut_z_LDADD = $(top_builddir)/libdd/libdd.la $(top_builddir)/libaqsistypes/libaqsistypes.la -lglut -lGLU -lGL -llog4cpp
-
-if DEBUG
-AM_CXXFLAGS = -g -Wall
-else
-AM_CXXFLAGS =
-endif
-
-INCLUDES = -I$(top_srcdir)/libdd -I$(top_srcdir)/libddmsock -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I@OPENGL_INC@
-
-LDFLAGS = @LDFLAGS@ -L@OPENGL_LIB@
+aqsis_framebuffer_glut_z_LDADD = $(top_builddir)/libdd/libdd.la $(top_builddir)/libaqsistypes/libaqsistypes.la $(LDFLAGS) $(GL_LIBS)
 
 EXTRA_DIST = framebuffer_glut_z.dsp 
-

@@ -7,11 +7,5 @@ librib2stream_la_LDFLAGS = -rpath $(libdir)
 
 include_HEADERS = librib2stream.h
 
-if DEBUG
-AM_CXXFLAGS = -g -Wall
-else
-AM_CXXFLAGS =
-endif
-
 INCLUDES = -I$(top_srcdir)/librib2
 
