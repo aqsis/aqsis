@@ -547,6 +547,7 @@ void CqTextureMap::Interpreted(char *mode)
 TqUlong CqTextureMap::ImageFilterVal(uint32* p, TqInt x, TqInt y,  TqInt directory)
 {
 	TqUlong val = 0;
+        RtFilterFunc pFilter = m_FilterFunc;
 	
 	TqInt ydelta =  (1 << directory);
 	TqInt xdelta =  (1 << directory);
@@ -566,7 +567,7 @@ TqUlong CqTextureMap::ImageFilterVal(uint32* p, TqInt x, TqInt y,  TqInt directo
 				/* find the filter value */
 				TqFloat xfilt = i-directory;
 				TqFloat yfilt = j-directory;
-				mul = RiBoxFilter(xfilt, yfilt, xdelta, ydelta);
+				mul = (*pFilter)(xfilt, yfilt, xdelta, ydelta);
 
 				/* find the value in the original image */
 				TqInt pos = m_YRes - ((y * ydelta) + j) - 1;
@@ -738,6 +739,18 @@ void CqTextureMap::SampleMIPMAP(float s1, float t1, float swidth, float twidth, 
 		if(tt2>static_cast<long>(m_YRes-1))	tt2=(m_YRes-1);
 	}
 
+	if (m_smode == WrapMode_Black) {
+		if ( (ss1<0) || 
+		     (ss2<0) ||
+		     (ss2>static_cast<long>(m_xres-1.0))	||
+             (ss1>static_cast<long>(m_xres-1.0)) )	return;
+	}
+	if (m_tmode == WrapMode_Black) {
+		if ((tt1<0) ||
+		    (tt2<0) ||
+		    (tt2>static_cast<long>(m_yres-1.0)) ||
+		    (tt1>static_cast<long>(m_yres-1.0)) ) return;
+	}
 	// TODO: This is effectively 'clamp' mode, by default
 	if (m_smode == WrapMode_Clamp) {
 		if (ss1<0) ss1=0;
@@ -1686,7 +1699,7 @@ void CqTextureMap::WriteImage(TIFF* ptex, float *raster, unsigned long width, un
 	TIFFSetField(ptex,TIFFTAG_SAMPLESPERPIXEL, samples);
 	TIFFSetField(ptex,TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
 	TIFFSetField(ptex,TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
-	TIFFSetField(ptex,TIFFTAG_COMPRESSION, COMPRESSION_DEFLATE);
+	TIFFSetField(ptex,TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS ); /* COMPRESSION_DEFLATE */
 	TIFFSetField(ptex,TIFFTAG_ROWSPERSTRIP, 1);
 	TIFFSetField(ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 
@@ -1721,7 +1734,7 @@ void CqTextureMap::WriteTileImage(TIFF* ptex, unsigned char *raster, unsigned lo
 	TIFFSetField(ptex,TIFFTAG_TILEWIDTH, twidth);
 	TIFFSetField(ptex,TIFFTAG_TILELENGTH, tlength);
 	TIFFSetField(ptex,TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
-	TIFFSetField(ptex, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+	TIFFSetField(ptex, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS);
 	TIFFSetField(ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 
 	int tsize=twidth*tlength;
