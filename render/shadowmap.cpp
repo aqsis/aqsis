@@ -63,7 +63,7 @@ void CqShadowMap::AllocateMap( TqInt XRes, TqInt YRes )
 {
 	static CqRandom rand;
 
-	std::vector<CqTextureMapBuffer*>::iterator s;
+	std::list<CqTextureMapBuffer*>::iterator s;
 	for ( s = m_apSegments.begin(); s != m_apSegments.end(); s++ )
 		delete( *s );
 
@@ -189,7 +189,7 @@ void CqShadowMap::LoadZFile()
 
 			// Now output the depth values
 			AllocateMap( m_XRes, m_YRes );
-			file.read( reinterpret_cast<TqPchar>( m_apSegments[ 0 ] ->pVoidBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
+			file.read( reinterpret_cast<TqPchar>( m_apSegments.front() ->pVoidBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
 
 			// Set the matrixes to general, not Identity as default.
 			matWorldToCamera().SetfIdentity( TqFalse );
@@ -331,7 +331,7 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, TqInt index, TqFloat* average_depth )
 {
 	// Check the memory and make sure we don't abuse it
-	CriticalMeasure();
+	//CriticalMeasure();
 
 	// If no map defined, not in shadow.
 	val.resize( 1 );
@@ -537,7 +537,7 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName, TqBool append )
 			TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
 
 			// Write the floating point image to the directory.
-			TqFloat *depths = reinterpret_cast<TqFloat*>( m_apSegments[ 0 ] ->pVoidBufferData() );
+			TqFloat *depths = reinterpret_cast<TqFloat*>( m_apSegments.front() ->pVoidBufferData() );
 			WriteTileImage( pshadow, depths, XRes(), YRes(), 32, 32, 1, m_Compression, m_Quality );
 			TIFFClose( pshadow );
 		}
@@ -575,7 +575,7 @@ void CqShadowMap::SaveZFile()
 			ofile.write( reinterpret_cast<TqPchar>( matWorldToScreen()[ 3 ] ), sizeof( matWorldToScreen()[ 0 ][ 0 ] ) * 4 );
 
 			// Now output the depth values
-			ofile.write( reinterpret_cast<TqPchar>( m_apSegments[ 0 ] ->pVoidBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
+			ofile.write( reinterpret_cast<TqPchar>( m_apSegments.front() ->pVoidBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
 			ofile.close();
 		}
 	}
