@@ -26,7 +26,6 @@
 #include	<stdio.h>
 
 #include	<stdarg.h>
-#include	<strstream>
 
 #include	"aqsis.h"
 #include	"sstring.h"
@@ -204,11 +203,7 @@ CqString& CqString::Format( const TqChar* strFmt, ... )
 							case 'f':
 							{
 								TqFloat val = static_cast<TqFloat>( va_arg( marker, double ) );
-
-								std::strstream strVal;
-								strVal << val << std::ends;
-								*this += strVal.str();
-								strVal.freeze( false );
+								*this += ToString(val);
 							}
 							break;
 
@@ -216,22 +211,14 @@ CqString& CqString::Format( const TqChar* strFmt, ... )
 							case 'i':
 							{
 								TqInt val = va_arg( marker, TqInt );
-
-								std::strstream strVal;
-								strVal << val << std::ends;
-								*this += strVal.str();
-								strVal.freeze( false );
+								*this += ToString(val);
 							}
 							break;
 
 							case 'x':
 							{
 								TqInt val = va_arg( marker, TqInt );
-
-								std::strstream strVal;
-								strVal << val << std::ends;
-								*this += strVal.str();
-								strVal.freeze( false );
+								*this += ToString(val);
 							}
 							break;
 
@@ -274,23 +261,14 @@ CqString& CqString::operator+=( TqChar c )
 
 CqString& CqString::operator+=( TqInt i )
 {
-	std::strstream val;
-	val << i << std::ends;
-	*this += val.str();
-	val.freeze( false );
-
+	*this += ToString(i);
 	return *this;
 }
 
 CqString& CqString::operator+=( TqFloat f )
 {
-	char buf[ 5 ];
-#ifdef	AQSIS_COMPILER_MSVC6
-	_snprintf( buf, 5, "%f", f );
-#else
-	snprintf( buf, 5, "%f", f );
-#endif
-	return ( *this += buf );
+	*this += ToString(f);
+	return *this;
 }
 
 

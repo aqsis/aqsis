@@ -28,6 +28,7 @@
 #define SSTRING_H_INCLUDED 1
 
 #include <string>
+#include <sstream>
 #include <iostream>
 
 #include "aqsis.h"
@@ -95,6 +96,14 @@ CqString operator*( const CqString& strAdd1, const CqString& strAdd2 );
 CqString operator*( const CqString& strAdd1, TqFloat f );
 CqString operator-( const CqString& strAdd1, const CqString& strAdd2 );
 
+/// The ultimate function for converting anything into a string
+template<typename value_t>
+CqString ToString(const value_t& Value)
+{
+	std::ostringstream buffer;
+	buffer << Value;
+	return CqString(buffer.str());
+}
 
 //-----------------------------------------------------------------------
 
