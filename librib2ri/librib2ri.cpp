@@ -44,6 +44,10 @@ RendermanInterface::RtFloat Engine::RiBesselFilter( RtFloat x, RtFloat y, RtFloa
 {
 	return ::RiBesselFilter( x, y, xwidth, ywidth );
 }
+RendermanInterface::RtVoid Engine::RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], RtInt count, RtToken tokens[], RtPointer values[] )
+{
+	::RiBlobbyV( nleaf, ncode, code, nflt, flt, nstr, str, count, tokens,values );
+}
 RendermanInterface::RtVoid Engine::RiBound( RtBound bound )
 {
 	::RiBound( bound );

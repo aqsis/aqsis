@@ -43,12 +43,12 @@ extern "C" {
 #include <dlfcn.h>                /* dlopen() */
 }
 #endif /* AQSIS_SYSTEM_MACOSX */
-
 #ifdef AQSIS_SYSTEM_POSIX
 extern "C" {
 #include <dlfcn.h>                /* dlopen() */
 }
 #endif /* AQSIS_SYSTEM_POSIX */
+
 
 #include "plugins.h"
 
@@ -61,6 +61,7 @@ START_NAMESPACE( Aqsis )
  */
 CqPlugins::CqPlugins(char *searchpath, char *library, char *function)
 {
+       strcpy(errorlog, "");
        strcpy(dynamicsearch, searchpath);
        strcpy(dynamiclibrary, library);
 #ifdef AQSIS_SYSTEM_WIN32
@@ -76,6 +77,8 @@ CqPlugins::CqPlugins(char *searchpath, char *library, char *function)
 /** Main function to call!
  * return the function pointer based on the construction information 
  * if possible otherwise it returns NULL;
+ * If the return value is NULL you could call ErrorLog() to get a string
+ * explaining why it failed earlier.
  */
 void *CqPlugins::Function() 
 {
@@ -105,7 +108,8 @@ void *function_pt = NULL;
 			// Process any inserts in lpMsgBuf.
 			// ...
 			// Display the string.
-			printf("%s: %s", dynamicfunction, (LPCTSTR)lpMsgBuf);
+			sprintf(errorlog, "%s(): %s", dynamicfunction, (LPCTSTR)lpMsgBuf);
+            
 			// Free the buffer.
 			LocalFree( lpMsgBuf );
 
@@ -127,18 +131,26 @@ void *function_pt = NULL;
 			// Process any inserts in lpMsgBuf.
 			// ...
 			// Display the string.
-			printf("%s: %s", dynamiclibrary, (LPCTSTR)lpMsgBuf);
+			sprintf(errorlog, "%s: %s", dynamiclibrary, (LPCTSTR)lpMsgBuf);
+            
 			// Free the buffer.
 			LocalFree( lpMsgBuf );
 
 	}
 #elif defined(AQSIS_SYSTEM_MACOSX)
-	// We probably need an interface for CFPlugins here
-	// But for now, we will not implement plugins
-	handle = (void *) dlopen( dynamiclibrary, RTLD_NOW | RTLD_GLOBAL);
-    if (handle) 
+     // We probably need an interface for CFPlugins here
+     // But for now, we will not implement plugins
+    handle = (void *) dlopen( dynamiclibrary, RTLD_NOW | RTLD_GLOBAL);
+    if ( !handle )
+    {
+        sprintf(errorlog, "%s: %s", dynamiclibrary, dlerror());
+    } else
     {
         function_pt = ( void * ) dlsym( handle, dynamicfunction );
+        if (!function_pt) 
+        {
+	    sprintf(errorlog, "%s(): %s", dynamicfunction, dlerror());
+        }
     }
 #elif defined(AQSIS_SYSTEM_BEOS)
 	// We probably need an interface for CFPlugins here
@@ -148,10 +160,19 @@ void *function_pt = NULL;
 
 	/* so was never loaded before */
 	if ( !handle )
-		handle = dlopen( dynamiclibrary, RTLD_LAZY );
-	if ( handle )
+        {
+	    handle = dlopen( dynamiclibrary, RTLD_LAZY );
+        }
+	if ( !handle )
+        {
+	    sprintf(errorlog, "%s: %s", dynamiclibrary, dlerror());
+        } else
 	{
-		function_pt = ( void  * ) dlsym( handle, dynamicfunction );
+	    function_pt = ( void  * ) dlsym( handle, dynamicfunction );
+            if (!function_pt) 
+            {
+	        sprintf(errorlog, "%s(): %s", dynamicfunction, dlerror());
+            }
 	}
 
 #endif
@@ -159,6 +180,14 @@ void *function_pt = NULL;
     return function_pt;
 }
 
+//---------------------------------------------------------------------
+/** Return the current log in case of error occurred in Function();
+ *  the string comes from the OS.
+ */
+char * CqPlugins::ErrorLog() 
+{
+   return errorlog;
+}
 //---------------------------------------------------------------------
 /** Close and unload the .dll, .dso, .so
  */
@@ -176,7 +205,7 @@ void CqPlugins::Close()
 	// Do nothing for now
 #else
         if (handle)
-			dlclose( handle );
+	    dlclose( handle );
 #endif
         handle = NULL;
 

@@ -44,10 +44,10 @@
 #include	"trimcurve.h"
 #include	"genpoly.h"
 #include	"points.h"
-#include    "plugins.h"
-#ifndef	AQSIS_SYSTEM_WIN32
-#include	"unistd.h"
-#endif
+#include        "plugins.h"
+#ifndef    AQSIS_SYSTEM_WIN32
+#include        "unistd.h"
+#endif /* AQSIS_SYSTEM_WIN32 */
 
 #include	"ri.h"
 
@@ -2262,6 +2262,39 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 	return ;
 }
 
+RtVoid RiBlobby(RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloat floats[],
+					 RtInt nstrings, RtString strings[], ...)
+{
+
+	va_list	pArgs;
+	va_start( pArgs, strings );
+
+	RtToken* pTokens;
+	RtPointer* pValues;
+	RtInt count = BuildParameterList( pArgs, pTokens, pValues );
+
+	RiBlobbyV( nleaf, ncodes, codes, nfloats, floats, nstrings, strings, count, pTokens, pValues );
+	
+	return ;
+
+	return;
+}
+
+//----------------------------------------------------------------------
+/** List based version of above.
+ *  
+ *\return	nothing
+ **/
+RtVoid RiBlobbyV(RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloat floats[],
+					 RtInt nstrings, RtString strings[], PARAMETERLIST)
+{
+
+	CqBasicError( 0, Severity_Normal, "RiBlobbyV not supported" );
+
+
+	return;
+}
+
 
 //----------------------------------------------------------------------
 /** Specify a small Points primitives
@@ -3323,17 +3356,17 @@ char opdata[4096];
 	pFree = new CqPlugins("", dsoname, "Subdivide");
 
 	if ((pvfcts = (void*(*)(char *))pConvertParameters->Function()) == NULL)	
-		CqBasicError( 0, Severity_Normal, "ConvertParameters Function Not Found" );
+		CqBasicError( 0, Severity_Normal, pConvertParameters->ErrorLog() );
 	else
 		priv = (*pvfcts)(opdata);
 
 	if ((vfctpvf = (void (*)(void *, float))pSubdivide->Function()) == NULL)		
-		CqBasicError( 0, Severity_Normal, "Subdivide Function Not Found" );
+		CqBasicError( 0, Severity_Normal, pSubdivide->ErrorLog());
 	else 
 		(*vfctpvf)(priv, 1.0);
 
 	if ((vfctpv = (void (*)(void *)) pFree->Function()) == NULL)	
-		CqBasicError( 0, Severity_Normal, "Free Function Not Found" );
+		CqBasicError( 0, Severity_Normal, pFree->ErrorLog());
 	else
 		(*vfctpv)(priv);
 

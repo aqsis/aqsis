@@ -52,12 +52,14 @@ class CqPlugins
         	CqPlugins(char *searchpath, char *library, char *function);
         	void Close();
         	void *Function();
+		TqChar * ErrorLog();
 
 	private:
 	
 	protected:
 		void *handle;
 		void *function;
+		TqChar errorlog[ 1024 ];
 		TqChar dynamiclibrary[ 1024 ];
 		TqChar dynamicfunction[ 1024 ];
 		TqChar dynamicsearch[ 1024 ];

@@ -50,6 +50,10 @@ class RendermanInterface
 		virtual	RtVoid	RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep ) = 0;
 		virtual	RtVoid	RiBegin( RtToken name ) = 0;
 		virtual	RtFloat RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth ) = 0;
+		virtual RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[],
+		                  RtInt nflt, RtFloat flt[],
+		                  RtInt nstr, RtToken str[],
+		                  RtInt n, RtToken tokens[], RtPointer parms[] ) = 0;
 		virtual	RtVoid	RiBound( RtBound bound ) = 0;
 		virtual	RtFloat RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth ) = 0;
 		virtual	RtFloat RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth ) = 0;
