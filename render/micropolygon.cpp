@@ -415,7 +415,7 @@ void CqMicroPolyGrid::Shade()
     }
 
     // Now try and cull any hidden MPs if Sides==1
-    if ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 && m_pCSGNode )
+    if ( ( pAttributes() ->GetIntegerAttribute( "System", "Sides" ) [ 0 ] == 1 ) && !m_pCSGNode )
     {
         cCulled = 0;
         theStats.OcclusionCullTimer().Start();

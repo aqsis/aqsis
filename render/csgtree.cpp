@@ -40,8 +40,7 @@ std::list<boost::weak_ptr<CqCSGTreeNode> >	CqCSGNodePrimitive::m_lDefPrimChildre
  *
  */
 CqCSGTreeNode::~CqCSGTreeNode()
-{
-}
+{}
 
 
 //------------------------------------------------------------------------------
