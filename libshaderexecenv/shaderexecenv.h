@@ -190,21 +190,33 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		}
 		virtual IqShaderData* FindStandardVar( char* pname )
 		{
-			TqInt i;
-			for ( i = 0; i < EnvVars_Last; i++ )
+			TqInt tmp = m_LocalIndex;
+			for (; m_LocalIndex < EnvVars_Last; m_LocalIndex++ )
 			{
-				if ( strcmp( m_apVariableNames[ i ], pname ) == 0 )
-					return ( m_apVariables[ i ] );
+				if ( strcmp( m_apVariableNames[ m_LocalIndex ], pname ) == 0 )
+					return ( m_apVariables[ m_LocalIndex ] );
+			}
+			
+			for ( m_LocalIndex = 0; m_LocalIndex < tmp; m_LocalIndex++ )
+			{
+				if ( strcmp( m_apVariableNames[ m_LocalIndex ], pname ) == 0 )
+					return ( m_apVariables[ m_LocalIndex ] );
 			}
 			return ( 0 );
 		}
 		virtual	TqInt	FindStandardVarIndex( char* pname )
 		{
-			TqInt i;
-			for ( i = 0; i < EnvVars_Last; i++ )
+			TqInt tmp = m_LocalIndex;
+			for ( ; m_LocalIndex < EnvVars_Last; m_LocalIndex++ )
 			{
-				if ( strcmp( m_apVariableNames[ i ], pname ) == 0 )
-					return ( i );
+				if ( strcmp( m_apVariableNames[ m_LocalIndex ], pname ) == 0 )
+					return ( m_LocalIndex );
+			}
+			
+			for ( m_LocalIndex = 0; m_LocalIndex < tmp; m_LocalIndex++ )
+			{
+				if ( strcmp( m_apVariableNames[ m_LocalIndex ], pname ) == 0 )
+					return ( m_LocalIndex );
 			}
 			return ( -1 );
 		}

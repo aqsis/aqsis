@@ -524,8 +524,12 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		 */
 		TqInt	FindLocalVarIndex( const char* strName )
 		{
-			if ( ( m_LocalIndex < m_LocalVars.size() ) && ( m_LocalVars[ m_LocalIndex ] ->strName().compare( strName ) == 0 ) ) return ( m_LocalIndex );
-			for ( m_LocalIndex = 0; m_LocalIndex < m_LocalVars.size(); m_LocalIndex++ )
+			TqInt tmp = m_LocalIndex;
+			
+			for ( ; m_LocalIndex < m_LocalVars.size(); m_LocalIndex++ )
+				if ( m_LocalVars[ m_LocalIndex ] ->strName().compare( strName ) == 0 ) return ( m_LocalIndex );
+
+			for (m_LocalIndex=0; m_LocalIndex < tmp; m_LocalIndex++ )
 				if ( m_LocalVars[ m_LocalIndex ] ->strName().compare( strName ) == 0 ) return ( m_LocalIndex );
 			return ( -1 );
 		}
