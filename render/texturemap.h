@@ -66,6 +66,11 @@ START_NAMESPACE( Aqsis )
 #define	MIPMAP_HEADER		"Aqsis MIP MAP"
 
 
+enum EqBufferType
+{
+	BufferType_RGBA = 0,
+	BufferType_Float,
+};
 
 
 //----------------------------------------------------------------------
@@ -150,13 +155,28 @@ class _qShareC CqTextureMapBuffer
 		{
 			return( m_Samples * sizeof(TqUchar) );
 		}
+		/** Get the type of the data in the buffer
+		 */
+		_qShareM	virtual EqBufferType	BufferType()
+		{
+			return( BufferType_RGBA );
+		}
+
 		/** Get the float value at the specified pixel/element (0.0 --> 1.0)
 		 */
 		_qShareM virtual TqFloat	GetValue(TqInt x, TqInt y, TqInt sample)
 		{
 			TqInt iv = y * ( m_Width * ElemSize() );
 			TqInt iu = x * ElemSize();
-			return ( m_pBufferData[ iv + iu + sample ] / 255.0f );
+			return ( m_pBufferData[ iv + iu + sample ] / 256.0f );
+		}
+		/** Set the float value at the specified pixel/element (0.0 --> 1.0)
+		 */
+		_qShareM virtual void	SetValue(TqInt x, TqInt y, TqInt sample, TqFloat value)
+		{
+			TqInt iv = y * ( m_Width * ElemSize() );
+			TqInt iu = x * ElemSize();
+			m_pBufferData[ iv + iu + sample ] = value * 256.0f;
 		}
 		/** Get the origin of this buffer segment.
 		 */
@@ -188,12 +208,16 @@ class _qShareC CqTextureMapBuffer
 		{
 			return ( m_Directory );
 		}
+		/** Get the number of samples per element.
+		 */
+		_qShareM	TqInt	Samples() const
+		{
+			return ( m_Samples );
+		}
 
 
 		_qShareM TqPuchar AllocSegment( TqUlong width, TqUlong height, TqInt samples );
 		_qShareM void	FreeSegment( TqPuchar pBufferData, TqUlong width, TqUlong height, TqInt samples );
-
-
 
 	protected:
 		TqPuchar	m_pBufferData;	///< Pointer to the image data.
@@ -228,9 +252,21 @@ class _qShareC CqShadowMapBuffer : public CqTextureMapBuffer
 			TqInt iu = x * ElemSize();
 			return ( *(reinterpret_cast<TqFloat*>(&m_pBufferData[ iv + iu + sample ])) );
 		}
+		_qShareM virtual void	SetValue(TqInt x, TqInt y, TqInt sample, TqFloat value)
+		{
+			TqInt iv = y * ( m_Width * ElemSize() );
+			TqInt iu = x * ElemSize();
+			*(reinterpret_cast<TqFloat*>(&m_pBufferData[ iv + iu + sample ])) = value;
+		}
 		_qShareM	virtual TqInt	ElemSize()
 		{
 			return( m_Samples * sizeof(TqFloat) );
+		}
+		/** Get the type of the data in the buffer
+		 */
+		_qShareM	virtual EqBufferType	BufferType()
+		{
+			return( BufferType_Float );
 		}
 }
 ;
@@ -394,7 +430,7 @@ class _qShareC CqTextureMap : public IqTextureMap
 		_qShareM	static	CqTextureMap* GetShadowMap( const CqString& strName );
 		_qShareM	static	CqTextureMap* GetLatLongMap( const CqString& strName );
 
-		_qShareM TqUlong	ImageFilterVal( uint32* p, TqInt x, TqInt y, TqInt directory );
+		_qShareM void	ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt directory, std::vector<TqFloat>& accum );
 
 		_qShareM void Interpreted( TqPchar mode );
 
@@ -411,6 +447,7 @@ class _qShareC CqTextureMap : public IqTextureMap
 		}
 		_qShareM void CriticalMeasure();
 
+		_qShareM static void WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUlong twidth, TqUlong theight, TqInt compression, TqInt quality );
 		_qShareM static void WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );
 		_qShareM static void WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality );
 		_qShareM static void WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );

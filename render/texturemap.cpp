@@ -859,19 +859,19 @@ void CqTextureMap::Interpreted( TqPchar mode )
   * The values of the current filterfunc/swrap/twrap are used ; if ever swrap or twrap is equal to
   * zero than the filterfunc is not done anymore.
   **/
-TqUlong CqTextureMap::ImageFilterVal( uint32* p, TqInt x, TqInt y, TqInt directory )
+void CqTextureMap::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt directory, std::vector<TqFloat>& accum )
 {
-	TqUlong val = 0;
 	RtFilterFunc pFilter = m_FilterFunc;
 
 	TqInt ydelta = ( 1 << directory );
 	TqInt xdelta = ( 1 << directory );
 	TqFloat div = 0.0;
 	TqFloat mul;
-	TqFloat accum[ 4 ];
-
-	accum[ 0 ] = accum[ 1 ] = accum[ 2 ] = accum[ 3 ] = 0.0;
-
+	TqInt isample;
+	
+	// Clear the accumulator
+	accum.assign( SamplesPerPixel(), 0.0f );
+	
 	if ( directory )
 	{
 		TqInt i, j;
@@ -885,100 +885,62 @@ TqUlong CqTextureMap::ImageFilterVal( uint32* p, TqInt x, TqInt y, TqInt directo
 				mul = ( *pFilter ) ( xfilt, yfilt, xdelta, ydelta );
 
 				/* find the value in the original image */
-				TqInt pos = m_YRes - ( ( y * ydelta ) + j ) - 1;
-				pos *= m_XRes;
-				pos += ( ( x * xdelta ) + i );
-				val = p[ pos ];
+				TqInt ypos = ( ( y * ydelta ) + j );
+				TqInt xpos = ( ( x * xdelta ) + i );
 
 				/* ponderate the value */
-				accum[ 0 ] += ( TIFFGetR( val ) / 255.0 ) * mul;
-				accum[ 1 ] += ( TIFFGetG( val ) / 255.0 ) * mul;
-				accum[ 2 ] += ( TIFFGetB( val ) / 255.0 ) * mul;
-				accum[ 3 ] += ( TIFFGetA( val ) / 255.0 ) * mul;
+				for( isample = 0; isample < SamplesPerPixel(); isample++ )
+					accum[ isample ] += ( pData->GetValue( xpos, ypos, isample ) ) * mul;
 
 				/* accumulate the ponderation factor */
 				div += mul;
-
 			}
 		}
 
 		/* use the accumulated ponderation factor */
-		accum[ 0 ] /= static_cast<TqFloat>( div );
-		accum[ 1 ] /= static_cast<TqFloat>( div );
-		accum[ 2 ] /= static_cast<TqFloat>( div );
-		accum[ 3 ] /= static_cast<TqFloat>( div );
-
-		/* restore the byte from the floating values RGB */
-		/* this is assuming tiff decoding is using shifting operations */
-		val = ( static_cast<TqUint>( accum[ 0 ] * 255.0 ) & 0xff ) +         /* R */
-		      ( ( static_cast<TqUint>( accum[ 1 ] * 255.0 ) << 8 ) & 0x0ff00 ) +        /* G */
-		      ( ( static_cast<TqUint>( accum[ 2 ] * 255.0 ) << 16 ) & 0x0ff0000 ) +        /* B */
-		      ( ( static_cast<TqUint>( accum[ 3 ] * 255.0 ) << 24 ) & 0x0ff000000 ); /* A */
-
-
+		for( isample = 0; isample < SamplesPerPixel(); isample++ )
+			accum[ isample ] /= static_cast<TqFloat>( div );
 	}
 	else
 	{
 		/* copy the byte don't bother much */
-		val = p[ ( ( m_YRes - y - 1 ) * m_XRes ) + x ];
+		for( isample = 0; isample < SamplesPerPixel(); isample++ )
+			accum[ isample ] = ( pData->GetValue( x, ( m_YRes - y - 1 ), isample ) );
 
 	}
-
-	return val;
 }
 
 
 
 void CqTextureMap::CreateMIPMAP()
 {
-
-
 	if ( m_pImage != 0 )
 	{
-		uint32 * pImage = static_cast<uint32*>( _TIFFmalloc( m_XRes * m_YRes * sizeof( uint32 ) ) );
-		TIFFReadRGBAImage( m_pImage, m_XRes, m_YRes, pImage, 0 );
+		// Read the whole image into a buffer.
+		CqTextureMapBuffer* pBuffer = GetBuffer(0,0,0);
+
 		TqInt m_xres = m_XRes;
 		TqInt m_yres = m_YRes;
 		TqInt directory = 0;
 
-
 		do
 		{
-
-			//CqTextureMapBuffer* pTMB = new CqTextureMapBuffer();
 			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, m_xres, m_yres, m_SamplesPerPixel, directory );
-			//pTMB->Init( 0, 0, m_xres, m_yres, m_SamplesPerPixel, directory );
 
-			if ( pTMB->pBufferData() != NULL )
+			if ( pTMB->pVoidBufferData() != NULL )
 			{
-				TqPuchar pMIPMAP = pTMB->pBufferData();
-				long rowlen = m_xres * pTMB->ElemSize();
-
-				if ( pImage != NULL )
+				for ( TqInt y = 0; y < m_yres; y++ )
 				{
-					for ( TqInt y = 0; y < m_yres; y++ )
+					//unsigned char accum[ 4 ];
+					std::vector<TqFloat> accum;
+					for ( TqInt x = 0; x < m_xres; x++ )
 					{
-						unsigned char accum[ 4 ];
-
-
-						for ( TqInt x = 0; x < m_xres; x++ )
-						{
-							uint32 val = ImageFilterVal( pImage, x, y, directory );
-
-							accum[ 0 ] = TIFFGetR( val );
-							accum[ 1 ] = TIFFGetG( val );
-							accum[ 2 ] = TIFFGetB( val );
-							accum[ 3 ] = TIFFGetA( val );
-
-							for ( TqInt sample = 0; sample < m_SamplesPerPixel; sample++ )
-								pMIPMAP[ ( y * rowlen ) + ( x * m_SamplesPerPixel ) + sample ] = accum[ sample ];
-						}
+						ImageFilterVal( pBuffer, x, y, directory, accum );
+						for ( TqInt sample = 0; sample < m_SamplesPerPixel; sample++ )
+							pTMB->SetValue(x, y, sample, accum[ sample ] );
 					}
-
 				}
-
 				m_apSegments.push_back( pTMB );
-
 			}
 
 			m_xres /= 2;
@@ -987,11 +949,7 @@ void CqTextureMap::CreateMIPMAP()
 
 		}
 		while ( ( m_xres > 2 ) && ( m_yres > 2 ) ) ;
-
-		_TIFFfree( pImage );
-
 	}
-
 }
 
 
@@ -1957,12 +1915,11 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 			        iv >= 0 && iv < m_YRes )
 			{
 				CqTextureMapBuffer * pTMBa = GetBuffer( iu, iv, 0 );
-				if ( pTMBa != 0 && pTMBa->pBufferData() != 0 )
+				if ( pTMBa != 0 && pTMBa->pVoidBufferData() != 0 )
 				{
 					iu -= pTMBa->sOrigin();
 					iv -= pTMBa->tOrigin();
 					TqInt rowlen = pTMBa->Width();
-					TqFloat *depths = ( TqFloat * ) pTMBa->pBufferData();
 					if ( z > pTMBa->GetValue(iu, iv, 0) )
 						inshadow += 1;
 				}
@@ -2029,7 +1986,7 @@ void CqShadowMap::SaveZFile()
 			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 3 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
 
 			// Now output the depth values
-			ofile.write( reinterpret_cast<TqPchar>( m_apSegments[ 0 ] ->pBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
+			ofile.write( reinterpret_cast<TqPchar>( m_apSegments[ 0 ] ->pVoidBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
 			ofile.close();
 		}
 	}
@@ -2080,7 +2037,7 @@ void CqShadowMap::LoadZFile()
 
 			// Now output the depth values
 			AllocateMap( m_XRes, m_YRes );
-			file.read( reinterpret_cast<TqPchar>( m_apSegments[ 0 ] ->pBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
+			file.read( reinterpret_cast<TqPchar>( m_apSegments[ 0 ] ->pVoidBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
 
 			// Set the matrixes to general, not Identity as default.
 			m_matWorldToCamera.SetfIdentity( TqFalse );
@@ -2136,7 +2093,7 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName )
 			TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
 
 			// Write the floating point image to the directory.
-			TqFloat *depths = ( TqFloat * ) m_apSegments[ 0 ] ->pBufferData();
+			TqFloat *depths = reinterpret_cast<TqFloat*>(m_apSegments[ 0 ] ->pVoidBufferData() );
 			WriteTileImage( pshadow, depths, XRes(), YRes(), 32, 32, 1, m_Compression, m_Quality );
 			TIFFClose( pshadow );
 		}
@@ -2172,6 +2129,31 @@ void CqShadowMap::ReadMatrices()
 	// Set the matrixes to general, not Identity as default.
 	m_matWorldToCamera.SetfIdentity( TqFalse );
 	m_matWorldToScreen.SetfIdentity( TqFalse );
+}
+
+
+
+//----------------------------------------------------------------------
+/** Write an image to an open TIFF file in the current directory as tiled storage.
+ * determine the size and type from the buffer.
+ */
+
+void CqTextureMap::WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUlong twidth, TqUlong theight, TqInt compression, TqInt quality )
+{
+	switch( pBuffer->BufferType() )
+	{
+		case BufferType_RGBA:
+		{
+			WriteTileImage( ptex, static_cast<TqPuchar>(pBuffer->pVoidBufferData()), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), twidth, theight, compression, quality );
+			break;
+		}
+
+		case BufferType_Float:
+		{
+			WriteTileImage( ptex, static_cast<TqFloat*>(pBuffer->pVoidBufferData()), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), twidth, theight, compression, quality );
+			break;
+		}
+	}
 }
 
 
