@@ -389,7 +389,7 @@ CqModeBlock*	CqRenderer::BeginMotionModeBlock( TqInt N, TqFloat times[] )
 
 void	CqRenderer::EndMainModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == MainModeBlock))
+    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == BeginEnd))
     {
         CqModeBlock * pconParent = m_pconCurrent->pconParent();
         m_pconCurrent->EndMainModeBlock();
@@ -405,7 +405,7 @@ void	CqRenderer::EndMainModeBlock()
 
 void	CqRenderer::EndFrameModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == FrameModeBlock ))
+    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == Frame ))
     {
         CqModeBlock * pconParent = m_pconCurrent->pconParent();
         m_pconCurrent->EndFrameModeBlock();
@@ -421,7 +421,7 @@ void	CqRenderer::EndFrameModeBlock()
 
 void	CqRenderer::EndWorldModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == WorldModeBlock))
+    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == World))
     {
         CqModeBlock * pconParent = m_pconCurrent->pconParent();
         m_pconCurrent->EndWorldModeBlock();
@@ -437,7 +437,7 @@ void	CqRenderer::EndWorldModeBlock()
 
 void	CqRenderer::EndAttributeModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == AttributeModeBlock))
+    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == Attribute))
     {
         CqModeBlock * pconParent = m_pconCurrent->pconParent();
         m_pconCurrent->EndAttributeModeBlock();
@@ -453,7 +453,7 @@ void	CqRenderer::EndAttributeModeBlock()
 
 void	CqRenderer::EndTransformModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == TransformModeBlock))
+    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == Transform))
     {
         CqModeBlock * pconParent = m_pconCurrent->pconParent();
         // Copy the current state of the attributes UP the stack as a TransformBegin/End doesn't store them
@@ -471,7 +471,7 @@ void	CqRenderer::EndTransformModeBlock()
 
 void	CqRenderer::EndSolidModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == CsgModeBlock) )
+    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == Solid ) )
     {
         CqModeBlock * pconParent = m_pconCurrent->pconParent();
         m_pconCurrent->EndSolidModeBlock();
@@ -487,7 +487,7 @@ void	CqRenderer::EndSolidModeBlock()
 
 void	CqRenderer::EndObjectModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == ObjectModeBlock ) )
+    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == Object ) )
     {
         CqModeBlock * pconParent = m_pconCurrent->pconParent();
         m_pconCurrent->EndObjectModeBlock();
@@ -503,7 +503,7 @@ void	CqRenderer::EndObjectModeBlock()
 
 void	CqRenderer::EndMotionModeBlock()
 {
-    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == MotionModeBlock) )
+    if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == Motion) )
     {
         CqModeBlock * pconParent = m_pconCurrent->pconParent();
         // Copy the current state of the attributes UP the stack as a TransformBegin/End doesn't store them

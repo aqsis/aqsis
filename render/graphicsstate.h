@@ -46,16 +46,15 @@ class CqDeformingSurface;
 
 enum EqModeBlock
 {
-    MainModeBlock = 0,
-    FrameModeBlock,
-    WorldModeBlock,
-    AttributeModeBlock,
-    TransformModeBlock,
-    CsgModeBlock,
-    ObjectModeBlock,
-    MotionModeBlock,
-
-    MainModeBlock_last,
+    Outside = 0,
+	BeginEnd,
+    Frame,
+    World,
+    Attribute,
+    Transform,
+    Solid,
+    Object,
+    Motion
 };
 
 //----------------------------------------------------------------------
@@ -69,7 +68,7 @@ public:
     /** Default constructor
      * \param pconParent a pointer to the previous context.
      */
-    CqModeBlock( CqModeBlock* pconParent = 0, EqModeBlock modetype = MainModeBlock);
+    CqModeBlock( CqModeBlock* pconParent = 0, EqModeBlock modetype = Outside);
     virtual	~CqModeBlock();
 
     virtual	CqModeBlock*	BeginMainModeBlock();
