@@ -101,7 +101,8 @@ void CqShaderVM::SO_ipushv()
         std::cerr << critical << "Attempt to index a non array variable" << std::endl;
         return ;
     }
-    RESULT(pVar->Type(), pVar->Class());
+	//If either the value or the index is varying, so must the result be.
+	RESULT(pVar->Type(), (pVar->Size()>1 || A->Size()>1)?class_varying:class_uniform);
     TqInt ext = m_pEnv->GridSize();
     TqInt i;
     for ( i = 0; i < ext; i++ )
