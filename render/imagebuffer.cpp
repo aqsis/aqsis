@@ -932,89 +932,70 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 								continue;
 							}
 
-							CqDetachedMicroPolygon mp(pMPG, time);
 							// check if sample lies inside mpg bounding box.
 							if ( UsingDof )
 							{
-								/* Create a new MP detatched from the grid so that we can
-								 * shift the vertices to account for the CoC of DoF.
-								 */
-								CqVector3D& vA = mp.PointA();
-								CqVector2D coc = QGetRenderContext()->GetCircleOfConfusion(vA.z());
-								vA.x(vA.x() - ( coc.x() * sampleData.m_DofOffset.x() ));
-								vA.y(vA.y() - ( coc.y() * sampleData.m_DofOffset.y() ));
-
-								CqVector3D& vB = mp.PointB();
-								coc = QGetRenderContext()->GetCircleOfConfusion(vB.z());
-								vB.x(vB.x() - ( coc.x() * sampleData.m_DofOffset.x() ));
-								vB.y(vB.y() - ( coc.y() * sampleData.m_DofOffset.y() ));
-
-								CqVector3D& vC = mp.PointC();
-								coc = QGetRenderContext()->GetCircleOfConfusion(vC.z());
-								vC.x(vC.x() - ( coc.x() * sampleData.m_DofOffset.x() ));
-								vC.y(vC.y() - ( coc.y() * sampleData.m_DofOffset.y() ));
-
-								CqVector3D& vD = mp.PointD();
-								coc = QGetRenderContext()->GetCircleOfConfusion(vD.z());
-								vD.x(vD.x() - ( coc.x() * sampleData.m_DofOffset.x() ));
-								vD.y(vD.y() - ( coc.y() * sampleData.m_DofOffset.y() ));
-			
-								CqBound DofBound(Bound);
-								DofBound.vecMin().x(DofBound.vecMin().x() - (coc.x() * sampleData.m_DofOffset.x() ));
-								DofBound.vecMin().y(DofBound.vecMin().y() - (coc.y() * sampleData.m_DofOffset.y() ));
-								DofBound.vecMax().x(DofBound.vecMax().x() - (coc.x() * sampleData.m_DofOffset.x() ));
-								DofBound.vecMax().y(DofBound.vecMax().y() - (coc.y() * sampleData.m_DofOffset.y() ));
+								CqBound DofBound(bminx, bminy, bminz, bmaxx, bmaxy, bmaxz);
 
 								if(!DofBound.Contains2D( vecP ))
 									continue;
 
-								mp.CacheHitTestValues(&hitTestCache);
-								cachedHitData = TqTrue;
+								// Check to see if the sample is within the sample's level of detail
+								if ( UsingLevelOfDetail)
+								{
+									TqFloat LevelOfDetail = sampleData.m_DetailLevel;
+									if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
+									{
+										continue;
+									}
+								}
+
+
+								CqStats::IncI( CqStats::SPL_bound_hits );
+
+								// Now check if the subsample hits the micropoly
+								TqBool SampleHit;
+								TqFloat D;
+
+								SampleHit = pMPG->Sample( sampleData, D, time, UsingDof );
+								if ( SampleHit )
+								{
+									sample_hits++;
+									// note index has already been incremented, so we use the previous value.
+									StoreSample( pMPG, pie2, index-1, D );
+								}
 							}
 							else
 							{
 								if(!Bound.Contains2D( vecP ))
 									continue;
-							}
-
-							// Check to see if the sample is within the sample's level of detail
-							if ( UsingLevelOfDetail)
-							{
-								TqFloat LevelOfDetail = sampleData.m_DetailLevel;
-								if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
+								// Check to see if the sample is within the sample's level of detail
+								if ( UsingLevelOfDetail)
 								{
-									continue;
+									TqFloat LevelOfDetail = sampleData.m_DetailLevel;
+									if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
+									{
+										continue;
+									}
 								}
-							}
 
 
-							CqStats::IncI( CqStats::SPL_bound_hits );
+								CqStats::IncI( CqStats::SPL_bound_hits );
 
+								// Now check if the subsample hits the micropoly
+								TqBool SampleHit;
+								TqFloat D;
 
-							// Now check if the subsample hits the micropoly
-							TqBool SampleHit;
-							TqFloat D;
-
-							if(!cachedHitData)
-							{
 								pMPG->CacheHitTestValues(&hitTestCache);
 								cachedHitData = TqTrue;
-							}
 
-							if( UsingDof )
-							{
-								SampleHit = mp.Sample( vecP, D, time );
-							}
-							else
-							{
-								SampleHit = pMPG->Sample( vecP, D, time );
-							}
-
-							if ( SampleHit )
-							{
-								sample_hits++;
-								// note index has already been incremented, so we use the previous value.
-								StoreSample( pMPG, pie2, index-1, D );
+								SampleHit = pMPG->Sample( sampleData, D, time );
+								if ( SampleHit )
+								{
+									sample_hits++;
+									// note index has already been incremented, so we use the previous value.
+									StoreSample( pMPG, pie2, index-1, D );
+								}
 							}
 						} while (!UsingDof && index < indexT1);
 					}
@@ -1132,7 +1113,7 @@ void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax
 						TqBool SampleHit;
 						TqFloat D;
 
-						SampleHit = pMPG->Sample( vecP, D, time );
+						SampleHit = pMPG->Sample( sampleData, D, time );
 
 						if ( SampleHit )
 						{

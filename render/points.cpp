@@ -552,7 +552,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 
                 pNew->AppendKey( Point, radius, pSurface()->pTransform()->Time( iTime ) );
             }
-            pNew->GetTotalBound( TqTrue );
+            pNew->CalculateTotalBound( );
             pImage->AddMPG( pNew );
         }
     }
@@ -620,6 +620,21 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 }
 
 
+TqBool	CqMicroPolygonPoints::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof )
+{
+	const CqVector2D& vecSample = sample.m_Position;
+
+    CqVector3D P;
+    pGrid()->pVar(EnvVars_P)->GetPoint(P, m_Index);
+    if( (CqVector2D( P.x(), P.y() ) - vecSample).Magnitude() < m_radius )
+    {
+        D = P.z();
+        return( TqTrue );
+    }
+    return( TqFalse );
+}
+
+
 //---------------------------------------------------------------------
 /** Split the micropolygrid into individual MPGs,
  * \param pImage Pointer to image being rendered into.
@@ -630,7 +645,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, 
  * \param ymax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  */
 
-void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax )
+void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax )
 {
     // Get the main object, the one that was shaded.
     CqMicroPolyGrid * pGridA = static_cast<CqMicroPolyGridPoints*>( GetMotionObject( Time( 0 ) ) );
@@ -751,39 +766,40 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, l
 
             pNew->AppendKey( Point, radius, Time( iTime ) );
         }
-        pNew->GetTotalBound( TqTrue );
+        pNew->CalculateTotalBound( );
         pImage->AddMPG( pNew );
     }
 
     RELEASEREF( pGridA );
 
     // Delete the donor motion grids, as their work is done.
-    for ( iTime = 1; iTime < cTimes(); iTime++ )
+/*    for ( iTime = 1; iTime < cTimes(); iTime++ )
     {
         CqMicroPolyGrid* pg = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
         if ( NULL != pg )
             RELEASEREF( pg );
     }
-    //		delete( GetMotionObject( Time( iTime ) ) );
+*/    //		delete( GetMotionObject( Time( iTime ) ) );
 }
 
+
+void CqMicroPolygonMotionPoints::CalculateTotalBound()
+{
+    assert( NULL != m_Keys[0] );
+
+    m_Bound = m_Keys[0]->GetTotalBound();
+    std::vector<CqMovingMicroPolygonKeyPoints*>::iterator i;
+    for ( i = m_Keys.begin(); i != m_Keys.end(); i++ )
+        m_Bound.Encapsulate( (*i)->GetTotalBound() );
+}
 
 //---------------------------------------------------------------------
 /** Calculate the 2D boundary of this micropolygon,
  * \param fForce Boolean flag to force the recalculation of the cached bound.
  */
 
-CqBound CqMicroPolygonMotionPoints::GetTotalBound( TqBool fForce )
+CqBound CqMicroPolygonMotionPoints::GetTotalBound( )
 {
-    if ( fForce )
-    {
-        assert( NULL != m_Keys[0] );
-
-        m_Bound = m_Keys[0]->GetTotalBound();
-        std::vector<CqMovingMicroPolygonKeyPoints*>::iterator i;
-        for ( i = m_Keys.begin(); i != m_Keys.end(); i++ )
-            m_Bound.Encapsulate( (*i)->GetTotalBound() );
-    }
     return ( m_Bound );
 }
 
@@ -836,8 +852,9 @@ void CqMicroPolygonMotionPoints::BuildBoundList()
  * \return Boolean indicating smaple hit.
  */
 
-TqBool CqMicroPolygonMotionPoints::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time )
+TqBool CqMicroPolygonMotionPoints::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof )
 {
+	const CqVector2D& vecSample = sample.m_Position;
     return( fContains( vecSample, D, time ) );
 }
 

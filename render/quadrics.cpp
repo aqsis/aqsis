@@ -204,7 +204,7 @@ TqInt CqQuadric::DiceAll( CqMicroPolyGrid* pGrid )
                 TqFloat _t = BilinearEvaluate( t0, t1, t2, t3, uf, vf );
                 pGrid->pVar(EnvVars_t)->SetFloat( _t, igrid );
             }
-            if( USES( lUses, EnvVars_u ) && NULL != pGrid->pVar(EnvVars_u) && bHasVar(EnvVars_u) )
+			if( USES( lUses, EnvVars_u ) && NULL != pGrid->pVar(EnvVars_u) && bHasVar(EnvVars_u) )
             {
                 TqFloat _u = BilinearEvaluate( u0, u1, u2, u3, uf, vf );
                 pGrid->pVar(EnvVars_u)->SetFloat( _u, igrid );

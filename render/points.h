@@ -312,7 +312,7 @@ public:
     CqMotionMicroPolyGridPoints() : CqMotionMicroPolyGrid()	{}
     virtual	~CqMotionMicroPolyGridPoints()	{}
 
-    virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
+    virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
 };
 
 //----------------------------------------------------------------------
@@ -342,17 +342,7 @@ public:
         Pmax.y( Pmax.y() + m_radius );
         return( CqBound( Pmin, Pmax ) );
     }
-    virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time )
-    {
-        CqVector3D P;
-        pGrid()->pVar(EnvVars_P)->GetPoint(P, m_Index);
-        if( (CqVector2D( P.x(), P.y() ) - vecSample).Magnitude() < m_radius )
-        {
-            D = P.z();
-            return( TqTrue );
-        }
-        return( TqFalse );
-    }
+    virtual	TqBool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof = TqFalse );
 
 
 private:
@@ -436,7 +426,8 @@ void	DeleteVariables( TqBool all )	{}
 
     // Overrides from CqMicroPolygon
     virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
-    virtual	CqBound			GetTotalBound( TqBool fForce = TqFalse );
+	virtual void CalculateTotalBound();
+    virtual	CqBound			GetTotalBound( /*TqBool fForce = TqFalse */);
     virtual const CqBound	GetTotalBound() const
     {
         return ( m_Bound );
@@ -457,7 +448,11 @@ void	DeleteVariables( TqBool all )	{}
     }
     virtual void	BuildBoundList();
 
-    virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
+	virtual TqBool IsMoving()
+	{
+		return TqTrue;
+	}
+    virtual	TqBool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof = TqFalse );
 private:
     CqBound	m_Bound;					///< Stored bound.
     CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
@@ -495,7 +490,8 @@ public:
 	    {
 		CqMicroPolyGridBase* pGrid2 = GetMotionObject( Time( i ) ) ->Dice();
 		pGrid->AddTimeSlot( Time( i ), pGrid2 );
-	    }
+		ADDREF( pGrid2);
+		}
 	    return ( pGrid );
 	}
 	/** Split this GPrim, creating a series of CqDeformingSurface with all times in.

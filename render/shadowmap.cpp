@@ -174,7 +174,7 @@ void CqShadowMap::LoadZFile()
             // Check validity of shadow map.
             if ( strncmp( strHeader, origHeader, headerLength ) != 0 )
             {
-                std::cerr << error << "Invalid shadow map format \"" << m_strName.c_str() << "\"" << std::endl;
+                std::cerr << error << "Invalid shadow map format \"" << m_strName.c_str() << "\"" << " : \"" << strHeader << "\"" << std::endl;
                 return ;
             }
 
@@ -203,6 +203,7 @@ void CqShadowMap::LoadZFile()
             // Set the matrixes to general, not Identity as default.
             matWorldToCamera().SetfIdentity( TqFalse );
             matWorldToScreen().SetfIdentity( TqFalse );
+	    m_Directory = 0;
         }
         else
         {
@@ -371,10 +372,14 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
     TqFloat z = vecR1l.z();
 
     vecR1m = matCameraToMap * R1;
-    vecR2m = matCameraToMap * R2;
-    vecR3m = matCameraToMap * R3;
-    vecR4m = matCameraToMap * R4;
-
+    if ((R1 == R2) && (R2 == R3) && (R3 == R4))
+    {
+        vecR2m = vecR3m = vecR4m = vecR1m;
+    } else {
+        vecR2m = matCameraToMap * R2;
+        vecR3m = matCameraToMap * R3;
+        vecR4m = matCameraToMap * R4;
+    }
 
     TqFloat sbo2 = m_sblur * (m_XRes - 1) * 0.5;
     TqFloat tbo2 = m_tblur * (m_YRes - 1) * 0.5;
@@ -426,7 +431,11 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
     TqInt nt, ns;
     if ( m_samples > 0 )
     {
-        nt = ns = static_cast<TqInt>( CEIL( sqrt( m_samples ) ) );
+		if (m_samples == 16.0) nt = ns = 4;
+		else if (m_samples == 4.0) nt = ns = 2;
+		else if (m_samples == 256.0) nt = ns = 16;
+		else if (m_samples == 64.0) nt = ns = 8;
+		else nt = ns = static_cast<TqInt>( CEIL( sqrt( m_samples ) ) );
     }
     else
     {

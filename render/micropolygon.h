@@ -49,6 +49,7 @@ START_NAMESPACE( Aqsis )
 class CqVector3D;
 class CqImageBuffer;
 class CqSurface;
+struct SqSampleData;
 
 //----------------------------------------------------------------------
 /** \class CqMicroPolyGridBase
@@ -515,14 +516,6 @@ public:
         return ( GetTotalBound() );
     }
 
-    /** Check if the sample point is within the micropoly.
-     * \param vecSample 2D sample point.
-     * \param time The frame time at which to check.
-     * \param D storage to put the depth at the sample point if success.
-     * \return Boolean success.
-     */
-    virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
-
     /** Query if the micropolygon has been successfully hit by a pixel sample.
      */
     TqBool IsHit() const
@@ -560,6 +553,14 @@ public:
 	{
 		return TqFalse;
 	}
+
+    /** Check if the sample point is within the micropoly.
+     * \param vecSample 2D sample point.
+     * \param time The frame time at which to check.
+     * \param D storage to put the depth at the sample point if success.
+     * \return Boolean success.
+     */
+    virtual	TqBool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof = TqFalse );
 
     virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 	void	CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points);
@@ -648,11 +649,14 @@ public:
     {}
 
 public:
-    TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
-
     const CqBound&	GetTotalBound();
     void	Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD );
     CqVector2D ReverseBilinear( const CqVector2D& v );
+
+    const TqBool IsDegenerate() const
+    {
+        return ( m_Point2 == m_Point3 );
+    }
 
     CqVector3D	m_Point0;
     CqVector3D	m_Point1;
@@ -690,7 +694,6 @@ public:
 {}
 
     // Overrides from CqMicroPolygon
-    virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 	virtual void CalculateTotalBound();
 	virtual	CqBound	GetTotalBound() { return m_Bound; }
     virtual const CqBound	GetTotalBound() const
@@ -713,7 +716,7 @@ public:
     }
     virtual void	BuildBoundList();
 
-    virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
+    virtual	TqBool	Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof = TqFalse );
 
     virtual void	MarkTrimmed()
     {
@@ -724,6 +727,11 @@ public:
 	{
 		return TqTrue;
 	}
+
+    virtual const TqBool IsDegenerate() const
+    {
+        return ( m_Keys[0]->IsDegenerate() );
+    }
 
 	virtual TqInt cKeys() const
 	{
@@ -751,125 +759,6 @@ private:
 
     CqMicroPolygonMotion( const CqMicroPolygonMotion& From )
     {}
-}
-;
-
-
-
-//----------------------------------------------------------------------
-/** \class CqDetachedMicroPolygon
- * Derivation of the CqMicroPolygon class, that doesn't refer to a grid for its points.
- */
-
-class CqDetachedMicroPolygon : public CqMicroPolygon
-{
-public:
-    CqDetachedMicroPolygon( CqMicroPolygon* pMPG, TqFloat time ) 
-    {
-		CqMicroPolygon::operator=(*pMPG);
-        if( pMPG->IsMoving() )
-		{
-			// Need to get the appropriate position at the given time.
-			TqInt iIndex = 0;
-			TqFloat Fraction = 0.0f;
-			TqBool Exact = TqTrue;
-			CqMicroPolygonMotion* pMMP = dynamic_cast<CqMicroPolygonMotion*>(pMPG);
-
-			TqInt cKeys = pMMP->cKeys();
-			if ( time > pMMP->Time(0) )
-			{
-				if ( time >= pMMP->Time(cKeys-1) )
-					iIndex = cKeys - 1;
-				else
-				{
-					// Find the appropriate time span.
-					iIndex = 0;
-					while ( time >= pMMP->Time( iIndex + 1 ) )
-						iIndex += 1;
-					Fraction = ( time - pMMP->Time( iIndex ) ) / ( pMMP->Time( iIndex + 1 ) - pMMP->Time( iIndex ) );
-					Exact = ( pMMP->Time( iIndex ) == time );
-				}
-			}
-
-			if ( Exact )
-			{
-				CqMovingMicroPolygonKey * pMP1 = pMMP->Key( iIndex );
-				m_Point0 = pMP1->m_Point0;
-				m_Point1 = pMP1->m_Point1;
-				m_Point2 = pMP1->m_Point2;
-				m_Point3 = pMP1->m_Point3;
-			}
-			else
-			{
-				TqFloat F1 = 1.0f - Fraction;
-				CqMovingMicroPolygonKey* pMP1 = pMMP->Key( iIndex );
-				CqMovingMicroPolygonKey* pMP2 = pMMP->Key( iIndex + 1 );
-				
-				m_Point0 = ( F1 * pMP1->m_Point0 ) + ( Fraction * pMP2->m_Point0 );
-				m_Point1 = ( F1 * pMP1->m_Point1 ) + ( Fraction * pMP2->m_Point1 );
-				m_Point2 = ( F1 * pMP1->m_Point2 ) + ( Fraction * pMP2->m_Point2 );
-				m_Point3 = ( F1 * pMP1->m_Point3 ) + ( Fraction * pMP2->m_Point3 );
-			}
-			m_IsDegenerate = m_Point2 == m_Point3;
-		}
-		else
-		{
-			m_Point0 = pMPG->PointA();
-			m_Point1 = pMPG->PointB();
-			m_Point2 = pMPG->PointC();
-			m_Point3 = pMPG->PointD();
-			m_IsDegenerate = pMPG->IsDegenerate();
-		}
-    }
-    ~CqDetachedMicroPolygon()
-    {}
-
-    virtual const CqVector3D& PointA() const
-    {
-        return ( m_Point0 );
-    }
-    virtual const CqVector3D& PointB() const
-    {
-        return ( m_Point1 );
-    }
-    virtual const CqVector3D& PointC() const
-    {
-        return ( m_Point2 );
-    }
-    virtual const CqVector3D& PointD() const
-    {
-        return ( m_Point3 );
-    }
-    virtual const TqBool IsDegenerate() const
-    {
-        return ( m_IsDegenerate );
-    }
-
-
-    virtual CqVector3D& PointA()
-    {
-        return ( m_Point0 );
-    }
-    virtual CqVector3D& PointB()
-    {
-        return ( m_Point1 );
-    }
-    virtual CqVector3D& PointC()
-    {
-        return ( m_Point2 );
-    }
-    virtual CqVector3D& PointD()
-    {
-        return ( m_Point3 );
-    }
-
-
-public:
-    CqVector3D	m_Point0;
-    CqVector3D	m_Point1;
-    CqVector3D	m_Point2;
-    CqVector3D	m_Point3;
-	TqBool		m_IsDegenerate;
 }
 ;
 

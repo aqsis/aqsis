@@ -300,43 +300,15 @@ void CqMicroPolyGrid::Shade()
 
     for ( i = gsmin1; i >= 0; i-- )
     {
-    if ( USES( lUses, EnvVars_du ) )
-    {
-/*            TqFloat v1, v2;
-            TqInt GridX = i % ( uRes + 1 );
+	    if ( USES( lUses, EnvVars_du ) )
+		{
 
-            if ( GridX < uRes )
-            {
-                pVar(EnvVars_u) ->GetValue( v1, i + 1 );
-                pVar(EnvVars_u) ->GetValue( v2, i );
-                pVar(EnvVars_du) ->SetFloat( v1 - v2, i );
-            }
-            else
-            {
-                pVar(EnvVars_u) ->GetValue( v1, i );
-                pVar(EnvVars_u) ->GetValue( v2, i - 1 );
-                pVar(EnvVars_du) ->SetFloat( v1 - v2, i );
-            }*/
             pVar(EnvVars_du) ->SetFloat( 1.0f, i );
 
         }
-    if ( USES( lUses, EnvVars_dv ) )
-    {
-/*            TqFloat v1, v2;
-            TqInt GridY = ( i / ( uRes + 1 ) );
+		if ( USES( lUses, EnvVars_dv ) )
+		{
 
-            if ( GridY < vRes )
-            {
-                pVar(EnvVars_v) ->GetValue( v1, i + uRes + 1 );
-                pVar(EnvVars_v) ->GetValue( v2, i );
-                pVar(EnvVars_dv) ->SetFloat( v1 - v2, i );
-            }
-            else
-            {
-                pVar(EnvVars_v) ->GetValue( v1, i );
-                pVar(EnvVars_v) ->GetValue( v2, i - ( uRes + 1 ) );
-                pVar(EnvVars_dv) ->SetFloat( v1 - v2, i );
-            }*/
             pVar(EnvVars_dv) ->SetFloat( 1.0f, i );
         }
 		switch ( proj )
@@ -350,17 +322,25 @@ void CqMicroPolyGrid::Shade()
 				pI->SetVector( pP[ i ], i );
 				break;
 		}
-
-        if ( bdpu )
-        {
-            pVar(EnvVars_dPdu) ->SetVector( SO_DuType<CqVector3D>( pSDP, i, m_pShaderExecEnv.get(), Defvec ), i );
-        }
-        if ( bdpv )
-        {
-            pVar(EnvVars_dPdv) ->SetVector( SO_DvType<CqVector3D>( pSDP, i, m_pShaderExecEnv.get(), Defvec ), i );
-        }
     }
-    
+
+	/// \note: This second pass over the grid is necessary, as the "P" primitive variable isn't fully populated
+	/// until the previous loop is complete, making it impossible to calculate derivatives.
+    if ( bdpu || bdpv )
+	{
+		for ( i = gsmin1; i >= 0; i-- )
+		{
+			if ( bdpu )
+			{
+				pVar(EnvVars_dPdu) ->SetVector( SO_DuType<CqVector3D>( pSDP, i, m_pShaderExecEnv.get(), Defvec ), i );
+			}
+			if ( bdpv )
+			{
+				pVar(EnvVars_dPdv) ->SetVector( SO_DvType<CqVector3D>( pSDP, i, m_pShaderExecEnv.get(), Defvec ), i );
+			}
+		}
+    }
+
     if ( USES( lUses, EnvVars_Ci ) ) pVar(EnvVars_Ci) ->SetColor( gColBlack );
     if ( USES( lUses, EnvVars_Oi ) ) pVar(EnvVars_Oi) ->SetColor( gColWhite );
 
@@ -1144,42 +1124,8 @@ void CqMicroPolygon::Initialise()
  * \return Boolean indicating sample hit.
  */
 
-TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
+TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time) const
 {
-/*    // Check against each line of the quad, if outside any then point is outside MPG, therefore early exit.
-    const CqVector3D& pA = PointA();
-    const CqVector3D& pB = PointB();
-    TqFloat x = vecP.x(), y = vecP.y();
-    TqFloat x0 = pA.x(), y0 = pA.y(), x1 = pB.x(), y1 = pB.y();
-    if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
-    const CqVector3D& pC = PointC();
-    x0 = x1; y0 = y1; x1 = pC.x(); y1 = pC.y();
-    if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
-
-    // Check for degeneracy.
-    if ( !( IsDegenerate() ) )
-    {
-        const CqVector3D& pD = PointD();
-        x0 = x1; y0 = y1; x1 = pD.x(); y1 = pD.y();
-        if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
-        x0 = x1; y0 = y1; x1 = pA.x(); y1 = pA.y();
-        if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
-    }
-    else
-    {
-        x0 = x1; y0 = y1; x1 = pA.x(); y1 = pA.y();
-        if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
-    }
-
-    CqVector3D vecN = ( pA - pB ) % ( pC - pB );
-    vecN.Unit();
-    TqFloat D = vecN * pA;
-
-    Depth = ( D - ( vecN.x() * vecP.x() ) - ( vecN.y() * vecP.y() ) ) / vecN.z();
-
-    return ( TqTrue );
-*/
-
 	// AGG - optimised version of above.
 	TqFloat x = vecP.x(), y = vecP.y();
 
@@ -1196,9 +1142,6 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
 		// ie if it is exactly coincident with the edge it can't be on both
 		// or neither sides.
 		if(e & 2)
-//		if( m_pHitTestCache->m_Y[e] > m_pHitTestCache->m_Y[prev] ||
-//			( m_pHitTestCache->m_Y[e] == m_pHitTestCache->m_Y[prev] &&
-//			  m_pHitTestCache->m_X[e] > m_pHitTestCache->m_X[prev] ) )
 		{
 			if( (( y - m_pHitTestCache->m_Y[e]) * m_pHitTestCache->m_YMultiplier[e] ) -
 					(( x - m_pHitTestCache->m_X[e]) * m_pHitTestCache->m_XMultiplier[e] ) < 0)
@@ -1376,9 +1319,38 @@ CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
  * \return Boolean indicating smaple hit.
  */
 
-TqBool CqMicroPolygon::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time )
+TqBool CqMicroPolygon::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof )
 {
-    if ( fContains( vecSample, D, time  ) )
+	const CqVector2D& vecSample = sample.m_Position;
+
+	// If using DoF, we need to adjust the point positions, and the hit test cache,
+	// \note: this invalidates the hit test cache, but we are using DoF, so all bets are off anyway.
+	// still, would be good to find out if there is a better way of doing this.
+	CqHitTestCache hitTestCache;
+
+	if(UsingDof)
+	{
+		CqVector3D points[4] = { PointB(), PointC(), PointD(), PointA() };
+		CqVector2D coc = QGetRenderContext()->GetCircleOfConfusion(points[0].z());
+		points[0].x(points[0].x() - ( coc.x() * sample.m_DofOffset.x() ));
+		points[0].y(points[0].y() - ( coc.y() * sample.m_DofOffset.y() ));
+
+		coc = QGetRenderContext()->GetCircleOfConfusion(points[1].z());
+		points[1].x(points[1].x() - ( coc.x() * sample.m_DofOffset.x() ));
+		points[1].y(points[1].y() - ( coc.y() * sample.m_DofOffset.y() ));
+
+		coc = QGetRenderContext()->GetCircleOfConfusion(points[2].z());
+		points[2].x(points[2].x() - ( coc.x() * sample.m_DofOffset.x() ));
+		points[2].y(points[2].y() - ( coc.y() * sample.m_DofOffset.y() ));
+
+		coc = QGetRenderContext()->GetCircleOfConfusion(points[3].z());
+		points[3].x(points[3].x() - ( coc.x() * sample.m_DofOffset.x() ));
+		points[3].y(points[3].y() - ( coc.y() * sample.m_DofOffset.y() ));
+
+		CacheHitTestValues(&hitTestCache, points);
+	}
+
+    if ( fContains( vecSample, D, time ) )
     {
         // Now check if it is trimmed.
         if ( IsTrimmed() )
@@ -1607,9 +1579,73 @@ void CqMicroPolygonMotion::BuildBoundList()
  * \return Boolean indicating smaple hit.
  */
 
-TqBool CqMicroPolygonMotion::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time )
+TqBool CqMicroPolygonMotion::Sample( const SqSampleData& sample, TqFloat& D, TqFloat time, TqBool UsingDof )
 {
-    if ( fContains( vecSample, D, time ) )
+	const CqVector2D& vecSample = sample.m_Position;
+	CqHitTestCache hitTestCache;
+	CqVector3D points[4];
+
+	// Calculate the position in time of the MP.
+    TqInt iIndex = 0;
+    TqFloat Fraction = 0.0f;
+    TqBool Exact = TqTrue;
+
+    if ( time > m_Times.front() )
+    {
+        if ( time >= m_Times.back() )
+            iIndex = m_Times.size() - 1;
+        else
+        {
+            // Find the appropriate time span.
+            iIndex = 0;
+            while ( time >= m_Times[ iIndex + 1 ] )
+                iIndex += 1;
+            Fraction = ( time - m_Times[ iIndex ] ) / ( m_Times[ iIndex + 1 ] - m_Times[ iIndex ] );
+            Exact = ( m_Times[ iIndex ] == time );
+        }
+    }
+
+    // Then adjust for DoF if necessary and setup a hittestcache structure for hit testing.
+	if ( Exact )
+    {
+        CqMovingMicroPolygonKey * pMP1 = m_Keys[ iIndex ];
+		points[1] = pMP1->m_Point0;
+		points[2] = pMP1->m_Point1;
+		points[3] = pMP1->m_Point2;
+		points[0] = pMP1->m_Point3;
+    }
+    else
+    {
+        TqFloat F1 = 1.0f - Fraction;
+        CqMovingMicroPolygonKey* pMP1 = m_Keys[ iIndex ];
+        CqMovingMicroPolygonKey* pMP2 = m_Keys[ iIndex + 1 ];
+		points[1] = ( F1 * pMP1->m_Point0 ) + ( Fraction * pMP2->m_Point0 );
+		points[2] = ( F1 * pMP1->m_Point1 ) + ( Fraction * pMP2->m_Point1 );
+		points[3] = ( F1 * pMP1->m_Point2 ) + ( Fraction * pMP2->m_Point2 );
+		points[0] = ( F1 * pMP1->m_Point3 ) + ( Fraction * pMP2->m_Point3 );
+    }
+
+	if(UsingDof)
+	{
+		CqVector2D coc = QGetRenderContext()->GetCircleOfConfusion(points[0].z());
+		points[0].x(points[0].x() - ( coc.x() * sample.m_DofOffset.x() ));
+		points[0].y(points[0].y() - ( coc.y() * sample.m_DofOffset.y() ));
+
+		coc = QGetRenderContext()->GetCircleOfConfusion(points[1].z());
+		points[1].x(points[1].x() - ( coc.x() * sample.m_DofOffset.x() ));
+		points[1].y(points[1].y() - ( coc.y() * sample.m_DofOffset.y() ));
+
+		coc = QGetRenderContext()->GetCircleOfConfusion(points[2].z());
+		points[2].x(points[2].x() - ( coc.x() * sample.m_DofOffset.x() ));
+		points[2].y(points[2].y() - ( coc.y() * sample.m_DofOffset.y() ));
+
+		coc = QGetRenderContext()->GetCircleOfConfusion(points[3].z());
+		points[3].x(points[3].x() - ( coc.x() * sample.m_DofOffset.x() ));
+		points[3].y(points[3].y() - ( coc.y() * sample.m_DofOffset.y() ));
+	}
+	CacheHitTestValues(&hitTestCache, points);
+
+    if ( CqMicroPolygon::fContains(vecSample, D, time) )
     {
         // Now check if it is trimmed.
         if ( IsTrimmed() )
@@ -1617,35 +1653,6 @@ TqBool CqMicroPolygonMotion::Sample( const CqVector2D& vecSample, TqFloat& D, Tq
             // Get the required trim curve sense, if specified, defaults to "inside".
 
             /// \todo: Implement trimming of motion blurred surfaces!
-            /*			const CqString * pattrTrimSense = pGrid() ->pAttributes() ->GetStringAttribute( "trimcurve", "sense" );
-            			CqString strTrimSense( "inside" );
-            			if ( pattrTrimSense != 0 ) strTrimSense = pattrTrimSense[ 0 ];
-            			TqBool bOutside = strTrimSense == "outside";
-
-            			CqVector2D vecUV = ReverseBilinear( vecSample );
-             
-            			TqFloat u, v;
-             
-            			pGrid() ->u() ->GetFloat( u, m_Index );
-            			pGrid() ->v() ->GetFloat( v, m_Index );
-            			CqVector2D uvA( u, v );
-             
-            			pGrid() ->u() ->GetFloat( u, m_Index + 1 );
-            			pGrid() ->v() ->GetFloat( v, m_Index + 1 );
-            			CqVector2D uvB( u, v );
-
-            			pGrid() ->u() ->GetFloat( u, m_Index + pGrid() ->uGridRes() + 1 );
-            			pGrid() ->v() ->GetFloat( v, m_Index + pGrid() ->uGridRes() + 1 );
-            			CqVector2D uvC( u, v );
-             
-            			pGrid() ->u() ->GetFloat( u, m_Index + pGrid() ->uGridRes() + 2 );
-            			pGrid() ->v() ->GetFloat( v, m_Index + pGrid() ->uGridRes() + 2 );
-            			CqVector2D uvD( u, v );
-             
-            			CqVector2D vR = BilinearEvaluate( uvA, uvB, uvC, uvD, vecUV.x(), vecUV.y() );
-             
-            			if ( pGrid() ->pSurface() ->bCanBeTrimmed() && pGrid() ->pSurface() ->bIsPointTrimmed( vR ) && !bOutside )
-            				return ( TqFalse );*/
         }
 
         if ( pGrid() ->fTriangular() )
@@ -1693,82 +1700,6 @@ void CqMicroPolygonMotion::AppendKey( const CqVector3D& vA, const CqVector3D& vB
 
 
 //---------------------------------------------------------------------
-/** Determinde whether the 2D point specified lies within this micropolygon.
- * \param vecP 2D vector to test for containment.
- * \param Depth Place to put the depth if valid intersection.
- * \param time The frame time at which to check containment.
- * \return Boolean indicating sample hit.
- */
-
-TqBool CqMicroPolygonMotion::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
-{
-    TqInt iIndex = 0;
-    TqFloat Fraction = 0.0f;
-    TqBool Exact = TqTrue;
-
-    if ( time > m_Times.front() )
-    {
-        if ( time >= m_Times.back() )
-            iIndex = m_Times.size() - 1;
-        else
-        {
-            // Find the appropriate time span.
-            iIndex = 0;
-            while ( time >= m_Times[ iIndex + 1 ] )
-                iIndex += 1;
-            Fraction = ( time - m_Times[ iIndex ] ) / ( m_Times[ iIndex + 1 ] - m_Times[ iIndex ] );
-            Exact = ( m_Times[ iIndex ] == time );
-        }
-    }
-
-    if ( Exact )
-    {
-        CqMovingMicroPolygonKey * pMP1 = m_Keys[ iIndex ];
-        return ( pMP1->fContains( vecP, Depth, time ) );
-    }
-    else
-    {
-        TqFloat F1 = 1.0f - Fraction;
-        CqMovingMicroPolygonKey* pMP1 = m_Keys[ iIndex ];
-        CqMovingMicroPolygonKey* pMP2 = m_Keys[ iIndex + 1 ];
-        // Check against each line of the quad, if outside any then point is outside MPG, therefore early exit.
-        TqFloat r1, r2, r3, r4;
-        TqFloat x = vecP.x(), y = vecP.y();
-        TqFloat x0 = ( F1 * pMP1->m_Point0.x() ) + ( Fraction * pMP2->m_Point0.x() ),
-                y0 = ( F1 * pMP1->m_Point0.y() ) + ( Fraction * pMP2->m_Point0.y() ),
-                x1 = ( F1 * pMP1->m_Point1.x() ) + ( Fraction * pMP2->m_Point1.x() ),
-                y1 = ( F1 * pMP1->m_Point1.y() ) + ( Fraction * pMP2->m_Point1.y() );
-        TqFloat x0_hold = x0;
-        TqFloat y0_hold = y0;
-        if ( ( r1 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
-        x0 = x1;
-        y0 = y1;
-        x1 = ( F1 * pMP1->m_Point2.x() ) + ( Fraction * pMP2->m_Point2.x() );
-        y1 = ( F1 * pMP1->m_Point2.y() ) + ( Fraction * pMP2->m_Point2.y() );
-        if ( ( r2 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
-        x0 = x1;
-        y0 = y1;
-        x1 = ( F1 * pMP1->m_Point3.x() ) + ( Fraction * pMP2->m_Point3.x() );
-        y1 = ( F1 * pMP1->m_Point3.y() ) + ( Fraction * pMP2->m_Point3.y() );
-        if ( ( r3 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
-
-        // Check for degeneracy.
-        if ( ! ( x1 == x0_hold && y1 == y0_hold ) )
-            if ( ( r4 = ( y - y1 ) * ( x0_hold - x1 ) - ( x - x1 ) * ( y0_hold - y1 ) ) < 0 ) return ( TqFalse );
-
-        CqVector3D vecN = ( F1 * pMP1->m_N ) + ( Fraction * pMP2->m_N );
-        TqFloat D = ( F1 * pMP1->m_D ) + ( Fraction * pMP2->m_D );
-        Depth = ( D - ( vecN.x() * vecP.x() ) - ( vecN.y() * vecP.y() ) ) / vecN.z();
-
-        return ( TqTrue );
-    }
-}
-
-
-
-
-
-//---------------------------------------------------------------------
 /** Store the vectors of the micropolygon.
  * \param vA 3D Vector.
  * \param vB 3D Vector.
@@ -1812,83 +1743,6 @@ void CqMovingMicroPolygonKey::Initialise( const CqVector3D& vA, const CqVector3D
 
 
 //---------------------------------------------------------------------
-/** Determinde whether the 2D point specified lies within this micropolygon.
- * \param vecP 2D vector to test for containment.
- * \param Depth Place to put the depth if valid intersection.
- * \param time The frame time at which to check containment.
- * \return Boolean indicating sample hit.
- */
-
-TqBool CqMovingMicroPolygonKey::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
-{
-    // Check against each line of the quad, if outside any then point is outside MPG, therefore early exit.
-    TqFloat r1, r2, r3, r4;
-    TqFloat x = vecP.x(), y = vecP.y();
-    TqFloat x0 = m_Point0.x(), y0 = m_Point0.y(), x1 = m_Point1.x(), y1 = m_Point1.y();
-    if ( ( r1 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
-    x0 = x1; y0 = y1; x1 = m_Point2.x(); y1 = m_Point2.y();
-    if ( ( r2 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
-    x0 = x1; y0 = y1; x1 = m_Point3.x(); y1 = m_Point3.y();
-    if ( ( r3 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
-    x0 = x1; y0 = y1; x1 = m_Point0.x(); y1 = m_Point0.y();
-
-    // Check for degeneracy.
-    if ( ! ( x0 == x1 && y0 == y1 ) )
-        if ( ( r4 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
-
-    Depth = ( m_D - ( m_N.x() * vecP.x() ) - ( m_N.y() * vecP.y() ) ) / m_N.z();
-
-    return ( TqTrue );
-}
-
-
-CqVector2D CqMovingMicroPolygonKey::ReverseBilinear( const CqVector2D& v )
-{
-    CqVector2D kA, kB, kC, kD;
-
-    kA = CqVector2D( m_Point0 );
-    kB = CqVector2D( m_Point1 ) - kA;
-    kC = CqVector2D( m_Point3 ) - kA;
-    kD = CqVector2D( m_Point2 ) + kA - CqVector2D( m_Point1 ) - CqVector2D( m_Point3 );
-
-    TqFloat fBCdet = kB.x() * kC.y() - kB.y() * kC.x();
-    TqFloat fCDdet = kC.y() * kD.x() - kC.x() * kD.y();
-
-    CqVector2D kDiff = kA - v;
-    TqFloat fABdet = kDiff.y() * kB.x() - kDiff.x() * kB.y();
-    TqFloat fADdet = kDiff.y() * kD.x() - kDiff.x() * kD.y();
-    TqFloat fA = fCDdet;
-    TqFloat fB = fADdet + fBCdet;
-    TqFloat fC = fABdet;
-    CqVector2D kResult;
-
-    if ( fabs( fA ) >= 1.0e-6 )
-    {
-        // t-equation is quadratic
-        TqFloat fDiscr = sqrt( fabs( fB * fB - 4.0f * fA * fC ) );
-        kResult.y( ( -fB + fDiscr ) / ( 2.0f * fA ) );
-        if ( kResult.y() < 0.0f || kResult.y() > 1.0f )
-        {
-            kResult.y( ( -fB - fDiscr ) / ( 2.0f * fA ) );
-            if ( kResult.y() < 0.0f || kResult.y() > 1.0f )
-            {
-                // point p not inside quadrilateral, return invalid result
-                return ( CqVector2D( -1.0f, -1.0f ) );
-            }
-        }
-    }
-    else
-    {
-        // t-equation is linear
-        kResult.y( -fC / fB );
-    }
-    kResult.x( -( kDiff.x() + kResult.y() * kC.x() ) / ( kB.x() + kResult.y() * kD.x() ) );
-
-    return ( kResult );
-}
-
-
-//---------------------------------------------------------------------
 /** Calculate the 2D boundary of this micropolygon,
  */
 
@@ -1922,7 +1776,6 @@ const CqBound& CqMovingMicroPolygonKey::GetTotalBound()
 	m_BoundReady = true;
     return ( m_Bound );
 }
-
 
 
 END_NAMESPACE( Aqsis )

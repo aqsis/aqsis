@@ -8,7 +8,7 @@ endif
 
 SUBDIRS = . $(MAINDIRS) $(PLUGINSDIRS)
 
-EXTRA_DIST = Doxyfile Renderer.dsw bootstrap doxygen.dsp Renderer.sln
+EXTRA_DIST = Doxyfile Renderer.dsw bootstrap doxygen.dsp Renderer.sln aqsis.spec
 
 .PHONY: strace
 strace:

@@ -3147,6 +3147,8 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
                     CqString str( ps[ 0 ] );
                     static_cast<CqParameterTypedUniform<CqString, type_string, RtFloat>*>( pParam ) ->pValue() [ 0 ] = str;
                 }
+				if( (strcmp(name, "identifier")==0) && (strcmp(token, "name")==0))
+					std::cerr << info << "Identifier: " << ps[ 0 ] << std::endl;
             }
             // TODO: Rest of parameter types.
         }
@@ -3879,15 +3881,18 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
                 elem_size = sizeof(RtMatrix);
                 break;
             }
+			// Take into account array primitive variables.
+			TqInt array_size = Decl.m_Count;
+
             if( Decl.m_Class == class_facevarying )
             {
-                char* pNew = static_cast<char*>( malloc( elem_size * fvcount ) );
+                char* pNew = static_cast<char*>( malloc( elem_size * fvcount * array_size) );
                 aNewParams.push_back( pNew );
                 TqInt iElem;
                 for( iElem = 0; iElem < fvcount; ++iElem )
                 {
                     const unsigned char* pval = static_cast<const unsigned char*>( values[ iUserParam ] ) + ( aFVList[ iElem ] * elem_size );
-                    memcpy( pNew, pval, elem_size );
+                    memcpy( pNew, pval, ( elem_size * array_size ));
                     pNew += elem_size;
                 }
                 values[ iUserParam ] = aNewParams.back();
@@ -3896,7 +3901,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
             {
 				// Allocate enough for 1 value per triangle, then duplicate values from the original list
 				// accordingly.
-                char* pNew = static_cast<char*>( malloc( elem_size * ctris ) );
+                char* pNew = static_cast<char*>( malloc( elem_size * ctris * array_size ) );
                 aNewParams.push_back( pNew );
                 TqInt iElem;
 				const unsigned char* pval = static_cast<const unsigned char*>( values[ iUserParam ] );
@@ -3906,7 +3911,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 					TqInt dup;
 					for(dup=0; dup < dup_count; dup++)
 					{
-						memcpy( pNew, pval, elem_size );
+						memcpy( pNew, pval, ( elem_size * array_size ));
 	                    pNew += elem_size;
 					}
 					pval += elem_size;
