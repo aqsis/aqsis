@@ -1134,7 +1134,7 @@ TqInt CqDisk::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->u().uSubdivide( &pNew2->u() );
 		pNew1->v().uSubdivide( &pNew2->v() );
 		pNew1->s().uSubdivide( &pNew2->s() );
-		pNew1->t().uSubdivide( &pNew2->t() );
+		pNew2->t().uSubdivide( &pNew1->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
 		pNew1->m_uDiceSize = m_uDiceSize / 2;
@@ -1149,7 +1149,7 @@ TqInt CqDisk::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->u().vSubdivide( &pNew2->u() );
 		pNew1->v().vSubdivide( &pNew2->v() );
 		pNew1->s().vSubdivide( &pNew2->s() );
-		pNew1->t().vSubdivide( &pNew2->t() );
+		pNew2->t().vSubdivide( &pNew1->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
 		pNew1->m_vDiceSize = m_vDiceSize / 2;
