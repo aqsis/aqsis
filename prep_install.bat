@@ -21,8 +21,7 @@ copy ..\library\release\slpp.exe .
 copy ..\library\release\teqser.exe .
 copy ..\library\release\ddmsock.ini .
 
-copy \Libraries\tiff-v3.5.5\libtiff\libtiff.dll .
-copy \Libraries\zlib-1.1.3\zlib.dll .
+copy \Libraries\tiff-v3.5.7\libtiff\libtiff.dll .
 
 copy ..\ribber.cfg .
 
