@@ -24,9 +24,14 @@
 */
 
 /* TO DO:
- *  1 - Set svd_arraylen and svd_spacename in SLX_VISSYMDEF records.  Currently set to 0 and NULL respectively.
- *  2 - Implement SLX_GetArrayArgElement().
- *  3 - Implement libshadervm and use it instead of libaqsis.  Eliminate other unnecessary libs.
+ *  1 - Currently, this routine returns all uniform variables, including local variables.  When a 'param' flag is available from ShaderVM, modify this routine to return shader arguments only.
+ *  2 - Set svd_arraylen in SLX_VISSYMDEF records.  Currently hard coded to 0.
+ *  3 - Set svd_spacename for type SLX_TYPE_POINT in SLX_VISSYMDEF records.  Currently hard coded to RI_SHADER.
+ *      Valid values should include RI_CURRENT, RI_SHADER, RI_EYE or RI_NDC.
+ *  3 - Set svd_spacename for type SLX_TYPE_COLOR in SLX_VISSYMDEF records.  Currently hard codes to RI_RGB.
+ *      Valid values should include RI_RGB, RI_RGBA, RI_RGBZ, RI_RGBAZ, RI_A, RI_Z or RI_AZ.
+ *  5 - Implement SLX_GetArrayArgElement().
+ *  6 - Implement libshadervm and use it instead of libaqsis.  Eliminate other unnecessary libs.
  */
 
 #include <stdio.h>
@@ -43,9 +48,7 @@
 
 using namespace Aqsis;
 
-#define kBufferSize 256
-#define kModeSeek 0
-#define kModeParse 1
+#define RI_SHADER_EXTENSION ".slx"
 
 // Global variables
 RtInt SlxLastError;
@@ -63,7 +66,7 @@ static SLX_VISSYMDEF * currentShaderArgsArray = NULL;
 static char * SLX_TYPE_UNKNOWN_STR = "unknown";
 static char * SLX_TYPE_POINT_STR = "point";
 static char * SLX_TYPE_COLOR_STR = "color";
-static char * SLX_TYPE_SCALAR_STR = "scalar";
+static char * SLX_TYPE_SCALAR_STR = "float";
 static char * SLX_TYPE_STRING_STR = "string";
 static char * SLX_TYPE_SURFACE_STR = "surface";
 static char * SLX_TYPE_LIGHT_STR = "light";
@@ -206,8 +209,10 @@ static void FreeArgRecStorage(SLX_VISSYMDEF * theShaderArgArray, int theShaderNA
 static RtInt StoreShaderArgDef(SLX_VISSYMDEF * theArgsArray, int argsArrayIdx, 
         char * varName, SLX_TYPE varType, char * spacename, char * defaultVal)
 {
-    //SLX_TYPE theType;
     SLX_VISSYMDEF * theShaderArgRec;
+    RtInt result;
+
+    result = RIE_NOERROR;
 
     theShaderArgRec = GetShaderArgRecAt(theArgsArray, argsArrayIdx);
 
@@ -222,6 +227,8 @@ static RtInt StoreShaderArgDef(SLX_VISSYMDEF * theArgsArray, int argsArrayIdx,
     theShaderArgRec->svd_spacename = spacename;
     
     theShaderArgRec->svd_default.stringval = defaultVal;
+    
+    return result;
 }
 
 
@@ -303,6 +310,8 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     defaultValLength = sizeof(RtFloat);
                     defaultVal = (char *)malloc(defaultValLength);
                     memcpy(defaultVal, &aRtFloat, defaultValLength);
+                    spacename = (char *)malloc(1);
+                    *spacename = 0x0;	// NULL string
                     StoreShaderArgDef(theArgsArray, *theNArgs, theVarNameStr, slxType, 
                             spacename, defaultVal);
                     (*theNArgs)++;
@@ -318,6 +327,8 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     defaultValLength = strlen(aCString) + 1;
                     defaultVal = (char *)malloc(defaultValLength);
                     strcpy(defaultVal, aCString);
+                    spacename = (char *)malloc(1);
+                    *spacename = 0x0;	// NULL string
                     StoreShaderArgDef(theArgsArray, *theNArgs, theVarNameStr, slxType, 
                             spacename, defaultVal);
                     (*theNArgs)++;
@@ -335,6 +346,12 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     defaultValLength = sizeof(RtPoint);
                     defaultVal = (char *)malloc(defaultValLength);
                     memcpy(defaultVal, &aRtPoint, defaultValLength);
+                    
+                    // shader evaluation space - RI_CURRENT, RI_SHADER, RI_EYE or RI_NDC
+                    // just go with RI_SHADER for now
+                    spacename = (char *)malloc(sizeof(RI_SHADER) + 1);	
+                    strcpy(spacename, RI_SHADER);
+                    
                     StoreShaderArgDef(theArgsArray, *theNArgs, theVarNameStr, slxType, 
                             spacename, defaultVal);
                     (*theNArgs)++;
@@ -352,6 +369,12 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     defaultValLength = sizeof(RtColor);
                     defaultVal = (char *)malloc(defaultValLength);
                     memcpy(defaultVal, &aRtColor, defaultValLength);
+                    
+                    // shader evaluation space - RI_RGB, RI_RGBA, RI_RGBZ, RI_RGBAZ, RI_A, RI_Z or RI_AZ
+                    // just go with RI_RGB for now
+                    spacename = (char *)malloc(sizeof(RI_RGB) + 1);
+                    strcpy(spacename, RI_RGB);
+                    
                     StoreShaderArgDef(theArgsArray, *theNArgs, theVarNameStr, slxType, 
                             spacename, defaultVal);
                     (*theNArgs)++;
@@ -368,7 +391,7 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
  * Read shader info from , set these global variables -
  *    currentShaderType, currentShaderNArgs, currentShaderArgsArray.
  */
-static RtInt GetCurrentShaderInfo(char * strName)
+static RtInt GetCurrentShaderInfo(char * name, char * filePath)
 {
     RtInt result;
     int i;
@@ -384,7 +407,7 @@ static RtInt GetCurrentShaderInfo(char * strName)
     librib2ri::Engine renderengine;	
     RiBegin("CRIBBER");
     
-    CqString strFilename(strName);
+    CqString strFilename(filePath);
     CqRiFile SLXFile(strFilename.c_str(),"");
     result = RIE_NOERROR;
     theNArgs = 0;
@@ -393,7 +416,7 @@ static RtInt GetCurrentShaderInfo(char * strName)
     {
         CqShaderVM* pShader=new CqShaderVM();
         pShader->LoadProgram(SLXFile);
-        pShader->SetstrName(strName);
+        pShader->SetstrName(filePath);
         pShader->ExecuteInit();
  
         varCount = pShader->GetShaderVarCount();
@@ -550,6 +573,7 @@ static int GetSearchPathEntryAtIndex(int pathIdx)
 static bool LoadShaderInfo (char *name)
 {
     bool result;
+    char * shaderFileName;
     int stringLength;
     FILE * shaderInputFile;
     int pathListCount;
@@ -576,10 +600,15 @@ static bool LoadShaderInfo (char *name)
     while (doLoop == true)
     {
         // Build a full file path description
-        stringLength = strlen(currentShaderSearchPath) + strlen(name) + 1;
+        stringLength = strlen(name) + sizeof(RI_SHADER_EXTENSION) + 1;
+        shaderFileName = (char *)malloc(stringLength);
+        strcpy(shaderFileName, name);
+        strcat(shaderFileName, RI_SHADER_EXTENSION);        
+        
+        stringLength = strlen(currentShaderSearchPath) + strlen(shaderFileName) + 1;
         currentShaderFilePath = (char *)malloc(stringLength);
         strcpy(currentShaderFilePath, currentShaderSearchPath);
-        strcat(currentShaderFilePath, name);
+        strcat(currentShaderFilePath, shaderFileName);
         
         // attempt to open the shader file
         shaderInputFile = OpenCurrentShader();
@@ -587,7 +616,7 @@ static bool LoadShaderInfo (char *name)
         {
             CloseCurrentShader(shaderInputFile);	// Success
 
-            GetCurrentShaderInfo(currentShaderFilePath);
+            GetCurrentShaderInfo(name, currentShaderFilePath);
             
             result = true;
             doLoop = false;
