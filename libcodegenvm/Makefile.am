@@ -3,6 +3,7 @@ EXTRA_DIST = libcodegenvm.dsp
 lib_LTLIBRARIES =  libcodegenvm.la
 
 libcodegenvm_la_SOURCES = vmoutput.cpp vmoutput.h 
+libcodegenvm_la_LDFLAGS = -rpath $(libdir)
 
 if DEBUG
 CXXFLAGS = -g -Wall

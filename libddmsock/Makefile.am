@@ -1,6 +1,7 @@
 noinst_LTLIBRARIES = libddmsock.la
 
 libddmsock_la_SOURCES = ddmsock.cpp ddmsock.h displaydriver.h
+libddmsock_la_LDFLAGS = -rpath $(libdir)
 
 if DEBUG
 CXXFLAGS = -g -Wall

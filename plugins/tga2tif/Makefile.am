@@ -4,6 +4,7 @@ lib_LTLIBRARIES = libtga2tif.la
 
 libtga2tif_la_SOURCES = tga2tif.c
 libtga2tif_la_LIBADD = ../common/libcommon.la
+libtga2tif_la_LDFLAGS = -rpath $(libdir)
 
 if DEBUG
 CXXFLAGS = -g -Wall

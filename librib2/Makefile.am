@@ -5,7 +5,7 @@ EXTRA_DIST = parser.y scanner.l librib2.dsp
 lib_LTLIBRARIES =  librib2.la
 
 librib2_la_SOURCES = bdec.cpp bdec.h librib.cpp librib.h libribtypes.h parser.cpp parser.cpp.h scanner.cpp
-librib2_la_LDFLAGS = -lz
+librib2_la_LDFLAGS = -lz -rpath $(libdir)
 
 include_HEADERS = librib.h
 

@@ -32,6 +32,13 @@
  */
 #define	AQSIS_SYSTEM_POSIX	1
 
+/** If on a BeOS platform add this, as it is mainly Posix, but needs some changes.
+ */
+#ifdef __BEOS__
+#define	AQSIS_SYSTEM_BEOS	1
+#define	SOMAXCONN		128
+#endif
+
 /** Define the compiler.
  */
 #define	AQSIS_COMPILER_GCC	1

@@ -4,6 +4,7 @@ lib_LTLIBRARIES = libppm2tif.la
 
 libppm2tif_la_SOURCES = ppm2tif.c
 libppm2tif_la_LIBADD  = ../common/libcommon.la
+libppm2tif_la_LDFLAGS = -rpath $(libdir)
 
 if DEBUG
 CXXFLAGS = -g -Wall

@@ -3,6 +3,7 @@ EXTRA_DIST = libdd.dsp
 lib_LTLIBRARIES = libdd.la
 
 libdd_la_SOURCES = dd.cpp dd.h 
+libdd_la_LDFLAGS = -rpath $(libdir)
 
 if DEBUG
 CXXFLAGS = -g -Wall

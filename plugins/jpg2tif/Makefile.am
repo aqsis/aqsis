@@ -4,6 +4,7 @@ lib_LTLIBRARIES = libjpg2tif.la
 
 libjpg2tif_la_SOURCES = jpg2tif.c
 libjpg2tif_la_LIBADD  = ../common/libcommon.la
+libjpg2tif_la_LDFLAGS = -rpath $(libdir)
 
 if DEBUG
 CXXFLAGS = -g -Wall

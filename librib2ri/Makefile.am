@@ -3,6 +3,7 @@ EXTRA_DIST = librib2ri.dsp
 lib_LTLIBRARIES =  librib2ri.la
 
 librib2ri_la_SOURCES = librib2ri.cpp librib2ri.h
+librib2ri_la_LDFLAGS = -rpath $(libdir)
 
 include_HEADERS = librib2ri.h
 

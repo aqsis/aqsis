@@ -3,6 +3,7 @@ INCLUDES = -I$(top_srcdir)/render -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/
 lib_LTLIBRARIES = libri2rib.la
 
 libri2rib_la_SOURCES = ascii.cpp ascii.h context.cpp context.h dictionary.cpp dictionary.h error.cpp error.h inlineparse.cpp inlineparse.h plstore.cpp plstore.h ri.cpp tokens.cpp
+libri2rib_la_LDFLAGS = -rpath $(libdir)
 
 bin_PROGRAMS = ri2ribtest
 ri2ribtest_SOURCES = ri2rib_test.c

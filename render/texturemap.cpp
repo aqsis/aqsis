@@ -189,7 +189,9 @@ CqTextureMap::~CqTextureMap()
 
 #ifndef AQSIS_SYSTEM_WIN32
 #ifndef AQSIS_SYSTEM_MACOSX
+#ifndef AQSIS_SYSTEM_BEOS
 #include <dlfcn.h>                /* dlopen() */
+#endif
 #endif
 #endif
 
@@ -251,6 +253,10 @@ TqInt  CqTextureMap::Convert(CqString &strName )
         // We probably need an interface for CFPlugins here
         // But for now, we will not implement plugins
         function_pt = NULL;
+#elif defined(AQSIS_SYSTEM_BEOS)
+        // We probably need an interface for CFPlugins here
+        // But for now, we will not implement plugins
+        function_pt = NULL;
 #else
 	
 	 /***********************************/
@@ -279,6 +285,8 @@ TqInt  CqTextureMap::Convert(CqString &strName )
 #ifdef AQSIS_SYSTEM_WIN32
                 FreeLibrary((HINSTANCE)handle);
 #elif defined(AQSIS_SYSTEM_MACOSX)
+                // Do nothing for now
+#elif defined(AQSIS_SYSTEM_BEOS)
                 // Do nothing for now
 #else
                 dlclose(handle);
