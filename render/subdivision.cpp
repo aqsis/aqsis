@@ -1558,7 +1558,7 @@ TqBool CqWSurf::Diceable()
 	TqFloat l=MAX(lA,MAX(lB,(MAX(lC,lD))));
 
 	l=sqrt(l);
-	l=ROUND(l);
+//	l=ROUND(l);
 
 	// Get the shading rate.
 	float ShadingRate=pAttributes()->fEffectiveShadingRate();
@@ -1709,7 +1709,7 @@ TqBool CqMotionWSurf::Diceable()
 	TqFloat l=MAX(lA,MAX(lB,(MAX(lC,lD))));
 
 	l=sqrt(l);
-	l=ROUND(l);
+//	l=ROUND(l);
 
 
 	// Get the shading rate.
