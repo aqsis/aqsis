@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright  1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.com
 //
@@ -174,7 +174,8 @@ TqBool CqInlineParse::is_class ( const std::string &str )
     if ( ( str == "constant" ) ||
             ( str == "uniform" ) ||
             ( str == "varying" ) ||
-            ( str == "vertex" ) )
+            ( str == "vertex" )  ||
+			( str == "facevarying") )
         return TqTrue;
     return TqFalse;
 }

@@ -1,6 +1,6 @@
 // -*- C++ -*-
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright  1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.com
 //
@@ -33,7 +33,7 @@
 
 START_NAMESPACE( libri2rib )
 
-enum EqTokenClass { CONSTANT, UNIFORM, VARYING, VERTEX };
+enum EqTokenClass { CONSTANT, UNIFORM, VARYING, VERTEX, FACEVARYING };
 enum EqTokenType { FLOAT, POINT, VECTOR, NORMAL, COLOR, STRING, MATRIX, HPOINT, INTEGER };
 typedef unsigned int TqTokenId;
 

@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright  1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.com
 //
@@ -44,7 +44,8 @@ void SqTokenEntry::printClassType ()
     case CONSTANT: cout << "CONSTANT"; break;
     case UNIFORM: cout << "UNIFORM"; break;
     case VARYING: cout << "VARYING"; break;
-    case VERTEX: cout << "VERTEX";
+    case VERTEX: cout << "VERTEX"; break;
+	case FACEVARYING: cout <<"FACEVARYING";
     }
     cout << setw( 8 );
     switch ( ttype )
@@ -178,7 +179,7 @@ TqTokenId CqDictionary::getTokenId ( std::string n )
 }
 
 
-TqUint CqDictionary::allocSize ( TqTokenId id, TqUint vertex, TqUint varying, TqUint uniform )
+TqUint CqDictionary::allocSize ( TqTokenId id, TqUint vertex, TqUint varying, TqUint uniform, TqUint facevarying )
 {
     TqUint size;
     std::vector<SqTokenEntry>::iterator first = te.begin();

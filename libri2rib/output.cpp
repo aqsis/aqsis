@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright  1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.com
 //
@@ -113,7 +113,7 @@ void CqOutput::pop()
 // ******* ******* ******* PRINTING TOOLS ******* ******* *******
 // **************************************************************
 void CqOutput::printPL( RtInt n, RtToken tokens[], RtPointer parms[],
-                        RtInt vertex, RtInt varying, RtInt uniform )
+                        RtInt vertex, RtInt varying, RtInt uniform, RtInt facevarying )
 {
     RtFloat * flt;
     RtInt *nt;
@@ -138,9 +138,8 @@ void CqOutput::printPL( RtInt n, RtToken tokens[], RtPointer parms[],
         }
 
         printToken( tokens[ i ] ); S;
-
         tt = m_Dictionary.getType( id );
-        sz = m_Dictionary.allocSize( id, vertex, varying, uniform );
+        sz = m_Dictionary.allocSize( id, vertex, varying, uniform, facevarying);
 
         switch ( tt )
         {
