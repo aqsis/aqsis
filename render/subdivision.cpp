@@ -758,6 +758,8 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 	}
 
 	uOff += 1 << ( Level - 1 );
+	indexB = ( ( vOff ) * cuv ) + uOff + 1;
+	indexC = ( ( vOff + 1 ) * cuv ) + uOff + 1;
 	if ( Level > 1 )
 		StoreDice( Level - 1, iFace, pPoints, uOff, vOff, cuv, pGrid, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
 	else
@@ -799,6 +801,8 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 	}
 
 	vOff += 1 << ( Level - 1 );
+	indexC = ( ( vOff + 1 ) * cuv ) + uOff + 1;
+	indexD = ( ( vOff + 1 ) * cuv ) + uOff;
 	if ( Level > 1 )
 		StoreDice( Level - 1, iFace, pPoints, uOff, vOff, cuv, pGrid, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
 	else
@@ -840,6 +844,7 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 	}
 
 	uOff -= 1 << ( Level - 1 );
+	indexD = ( ( vOff + 1 ) * cuv ) + uOff;
 	if ( Level > 1 )
 		StoreDice( Level - 1, iFace, pPoints, uOff, vOff, cuv, pGrid, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
 	else
@@ -1520,7 +1525,68 @@ CqWVert* CqWSurf::TransferVert( CqWSurf* pSurf, TqInt iVert, TqBool uses_s, TqBo
 	{
 		if ( (*iTUP)->Size() <= iV ) (*iTUP)->SetSize( iV + 1 );
 
-		(*iTUP)->SetValue( (*iUP), iV, iVert );
+//		(*iTUP)->SetValue( (*iUP), iV, iVert );
+		switch( (*iUP)->Type() )
+		{
+			case type_float:
+			{
+				CqParameterTyped<TqFloat, TqFloat>* pNParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP));
+				CqParameterTyped<TqFloat, TqFloat>* pNTarget = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iTUP));
+				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
+			}
+			break;
+
+			case type_integer:
+			{
+				CqParameterTyped<TqInt, TqFloat>* pNParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP));
+				CqParameterTyped<TqInt, TqFloat>* pNTarget = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iTUP));
+				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
+			}
+			break;
+
+			case type_point:
+			case type_vector:
+			case type_normal:
+			{
+				CqParameterTyped<CqVector3D, CqVector3D>* pNParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP));
+				CqParameterTyped<CqVector3D, CqVector3D>* pNTarget = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iTUP));
+				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
+			}
+			break;
+
+			case type_hpoint:
+			{
+				CqParameterTyped<CqVector4D, CqVector3D>* pNParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP));
+				CqParameterTyped<CqVector4D, CqVector3D>* pNTarget = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iTUP));
+				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
+			}
+			break;
+
+			case type_color:
+			{
+				CqParameterTyped<CqColor, CqColor>* pNParam = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP));
+				CqParameterTyped<CqColor, CqColor>* pNTarget = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iTUP));
+				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
+			}
+			break;
+
+			case type_string:
+			{
+				CqParameterTyped<CqString, CqString>* pNParam = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP));
+				CqParameterTyped<CqString, CqString>* pNTarget = static_cast<CqParameterTyped<CqString, CqString>*>((*iTUP));
+				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
+			}
+			break;
+
+			case type_matrix:
+			{
+				CqParameterTyped<CqMatrix, CqMatrix>* pNParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP));
+				CqParameterTyped<CqMatrix, CqMatrix>* pNTarget = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iTUP));
+				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
+			}
+			break;
+
+		}
 	}
 
 	return ( pNew );
@@ -1681,19 +1747,19 @@ CqMicroPolyGridBase* CqWSurf::Dice()
 	}
 
 	// Now we need to dice the user specified parameters as appropriate.
-	std::vector<CqParameter*>::iterator iUP;
-	for( iUP = m_pPoints->aUserParams().begin(); iUP != m_pPoints->aUserParams().end(); iUP++ )
-	{
-		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
-		if( NULL != pGrid->pAttributes()->pshadSurface() )
-			pGrid->pAttributes()->pshadSurface()->SetArgument( (*iUP), this );
-
-		if( NULL != pGrid->pAttributes()->pshadDisplacement() )
-			pGrid->pAttributes()->pshadDisplacement()->SetArgument( (*iUP), this );
-
-		if( NULL != pGrid->pAttributes()->pshadAtmosphere() )
-			pGrid->pAttributes()->pshadAtmosphere()->SetArgument( (*iUP), this );
-	}
+//	std::vector<CqParameter*>::iterator iUP;
+//	for( iUP = m_pPoints->aUserParams().begin(); iUP != m_pPoints->aUserParams().end(); iUP++ )
+//	{
+//		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
+//		if( NULL != pGrid->pAttributes()->pshadSurface() )
+//			pGrid->pAttributes()->pshadSurface()->SetArgument( (*iUP), this );
+//
+//		if( NULL != pGrid->pAttributes()->pshadDisplacement() )
+//			pGrid->pAttributes()->pshadDisplacement()->SetArgument( (*iUP), this );
+//
+//		if( NULL != pGrid->pAttributes()->pshadAtmosphere() )
+//			pGrid->pAttributes()->pshadAtmosphere()->SetArgument( (*iUP), this );
+//	}
 
 	return ( pGrid );
 }
