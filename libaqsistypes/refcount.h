@@ -5,7 +5,7 @@
  *	@brief	Declare a reference counting class.
  *
  *	Last change by:		$Author: jpgrad $
- *	Last change date:	$Date: 2003/06/14 08:47:56 $
+ *	Last change date:	$Date: 2003/06/16 04:48:03 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -98,6 +98,9 @@ class CqRefCount
 		/// Record of reference counting events for this
 		///  particular instance of CqRefCount.
 		RecordVector m_records;
+		/// Flag that, when true, indicates that the instance had
+		///  ADDREF called at least once.
+		TqBool m_addRefCalled;
 
 #else ///< #ifdef _DEBUG
 		

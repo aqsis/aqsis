@@ -238,14 +238,13 @@ class RefCountRecord {
 };
 
 
-CqRefCount::CqRefCount() : m_cReferences( 0 )
+CqRefCount::CqRefCount() : m_cReferences( 0 ), m_addRefCalled( TqFalse )
 {
 	// Add the reference count object to the global list.
 	RefCountTracker::addRefCountObj( this );
-
 }
 
-CqRefCount::CqRefCount( const CqRefCount& From )
+CqRefCount::CqRefCount( const CqRefCount& From ) : m_cReferences( 0 ), m_addRefCalled( TqFalse )
 {
 
 	// Add the new reference count object to the global list.
@@ -255,6 +254,24 @@ CqRefCount::CqRefCount( const CqRefCount& From )
 
 CqRefCount::~CqRefCount()
 {
+	// Trap objects that never had ADDREF called, and remove them
+	//  from the global list since they will not have been removed
+	//  during RELEASEREF
+	if ( !m_addRefCalled ) {
+		std::cout << "Warning.  Class of type "
+			<< className()
+			<< " never had ADDREF called.\n";
+		RefCountTracker::removeRefCountObj( this );
+	}
+	// Trap cases where delete() is called on objects while they
+	//  still have active references.
+	else if ( m_cReferences != 0 )
+	{
+		std::cout << "Warning.  Deleting class of type "
+			<< className()
+			<< " with " << m_cReferences
+			<< " references active.\n";
+	}
 }
 
 TqInt CqRefCount::RefCount() const
@@ -266,6 +283,9 @@ void CqRefCount::AddRef(const TqChar* file, TqInt line)
 {
 	// Increment the number of references
 	m_cReferences++;
+
+	// Set the flag indicating that AddRef has been called
+	m_addRefCalled = TqTrue;
 
 	// Record the AddRef event.
 	RefCountRecord *rcr = new RefCountRecord(
@@ -286,7 +306,8 @@ void CqRefCount::Release(const TqChar* file, TqInt line)
 	
 	// Delete the reference counting class if there are no more
 	//  references to it.
-	if (m_cReferences <= 0)
+	assert( m_cReferences >= 0 );
+	if (m_cReferences == 0)
 	{
 
 		// Delete the reference counting records that are stored.
@@ -319,6 +340,7 @@ void CqRefCount::dump() const
 {
 	std::cout << "Reference history for un-freed CqRefCount class of type: ";
 	std::cout << className() << "\n";
+	std::cout << "\n";
 	
         ConstRecordIterator end = m_records.end();
         for (ConstRecordIterator i = m_records.begin(); i != end; i++)
