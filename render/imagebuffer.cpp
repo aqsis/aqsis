@@ -762,26 +762,26 @@ void CqBucket::QuantizeBucket()
 			for(x=0; x<XSize(); x++)
 			{
 				double r,g,b;
-				double or,og,ob;
+				double _or,_og,_ob;
 				double s=random.RandomFloat();
 				if(modf(one*pie2->Color().fRed  ()  +ditheramplitude*s,&r)>0.5)		r+=1;
 				if(modf(one*pie2->Color().fGreen()  +ditheramplitude*s,&g)>0.5)		g+=1;
 				if(modf(one*pie2->Color().fBlue ()  +ditheramplitude*s,&b)>0.5)		b+=1;
-				if(modf(one*pie2->Opacity().fRed  ()+ditheramplitude*s,&or)>0.5)	or+=1;
-				if(modf(one*pie2->Opacity().fGreen()+ditheramplitude*s,&og)>0.5)	og+=1;
-				if(modf(one*pie2->Opacity().fBlue ()+ditheramplitude*s,&ob)>0.5)	ob+=1;
+				if(modf(one*pie2->Opacity().fRed  ()+ditheramplitude*s,&_or)>0.5)	_or+=1;
+				if(modf(one*pie2->Opacity().fGreen()+ditheramplitude*s,&_og)>0.5)	_og+=1;
+				if(modf(one*pie2->Opacity().fBlue ()+ditheramplitude*s,&_ob)>0.5)	_ob+=1;
 				r=CLAMP(r,min,max);
 				g=CLAMP(g,min,max);
 				b=CLAMP(b,min,max);
-				or=CLAMP(or,min,max);
-				og=CLAMP(og,min,max);
-				ob=CLAMP(ob,min,max);
+				_or=CLAMP(_or,min,max);
+				_og=CLAMP(_og,min,max);
+				_ob=CLAMP(_ob,min,max);
 				pie2->Color().SetfRed  (r);
 				pie2->Color().SetfGreen(g);
 				pie2->Color().SetfBlue (b);
-				pie2->Opacity().SetfRed  (or);
-				pie2->Opacity().SetfGreen(og);
-				pie2->Opacity().SetfBlue (ob);
+				pie2->Opacity().SetfRed  (_or);
+				pie2->Opacity().SetfGreen(_og);
+				pie2->Opacity().SetfBlue (_ob);
 				
 				pie2++;
 			}
