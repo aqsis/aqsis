@@ -1654,11 +1654,30 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 	CqVector3D	vecR1m, vecR2m, vecR3m, vecR4m;
 
 	// Add in the bias at this point in camera coordinates.
-	TqFloat bias = 0.0f;
+	TqFloat bias0 = 0.0f;
 	const TqFloat* poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias0" );
 	if ( poptBias != 0 )
-		bias = poptBias[ 0 ];
+		bias0 = poptBias[ 0 ];
 
+	TqFloat bias1 = 0.0f;
+	poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias1" );
+	if ( poptBias != 0 )
+		bias1 = poptBias[ 0 ];
+
+	static CqRandom random(42);
+	TqFloat bias;
+	
+	
+	if (bias1 >= bias0) 
+	{
+		bias = random.RandomFloat(bias1 - bias0) + bias0;
+		if (bias > bias1) bias = bias1;
+	}
+	else 
+	{
+		bias = random.RandomFloat(bias0 - bias1) + bias1;
+		if (bias > bias0) bias = bias0;
+	}
 	CqVector3D vecBias( 0, 0, bias );
 	// Generate a matrix to transform points from camera space into the space of the light source used in the
 	// definition of the shadow map.
