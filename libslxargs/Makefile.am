@@ -2,7 +2,7 @@ EXTRA_DIST = libslxargs.dsp
 
 lib_LTLIBRARIES = libslxargs.la
 
-libslxargs_la_SOURCES = slx.cpp slx.h 
+libslxargs_la_SOURCES = slx.cpp slx.h rcdummy.cpp
 libslxargs_la_LDFLAGS = -rpath $(libdir)
 
 include_HEADERS = slx.h

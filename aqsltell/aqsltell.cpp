@@ -41,19 +41,6 @@
 #include <argparse.h>
 
 
-/*
- * Define a dummy render context function, needed by the shader VM, if any initialisation code need the
- * render core, it will fail.
- */
-namespace Aqsis
-{
-	struct IqRenderer;
-	IqRenderer* QGetRenderContextI()
-	{
-		return(NULL);
-	}
-}
-
 bool g_pause;
 bool g_help;
 bool g_version;
