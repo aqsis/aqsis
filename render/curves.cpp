@@ -1038,7 +1038,8 @@ TqInt CqLinearCurvesGroup::Split( std::vector<CqBasicSurface*>& aSplits )
 void CqLinearCurvesGroup::Transform(
     const CqMatrix& matTx,
     const CqMatrix& matITTx,
-    const CqMatrix& matRTx
+    const CqMatrix& matRTx,
+	TqInt iTime
 )
 {
 	// First, we want to transform the width array.  For each curve in the
@@ -1071,7 +1072,7 @@ void CqLinearCurvesGroup::Transform(
 	}
 
 	// finally, we want to call the base class transform
-	CqCurve::Transform( matTx, matITTx, matRTx );
+	CqCurve::Transform( matTx, matITTx, matRTx, iTime );
 }
 
 
@@ -1415,7 +1416,8 @@ TqInt CqCubicCurvesGroup::Split(
 void CqCubicCurvesGroup::Transform(
     const CqMatrix& matTx,
     const CqMatrix& matITTx,
-    const CqMatrix& matRTx
+    const CqMatrix& matRTx,
+	TqInt iTime
 )
 {
 
@@ -1497,7 +1499,7 @@ void CqCubicCurvesGroup::Transform(
 	}
 
 	// finally, we want to call the base class transform
-	CqCurve::Transform( matTx, matITTx, matRTx );
+	CqCurve::Transform( matTx, matITTx, matRTx, iTime );
 
 
 }

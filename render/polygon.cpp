@@ -595,11 +595,11 @@ CqSurfacePointsPolygon& CqSurfacePointsPolygon::operator=( const CqSurfacePoints
 /** Transform the points by the specified matrix.
  */
 
-void	CqPolygonPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
+void	CqPolygonPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime )
 {
 	if ( m_Transformed ) return ;
 
-	CqSurface::Transform( matTx, matITTx, matRTx );
+	CqSurface::Transform( matTx, matITTx, matRTx, iTime );
 
 	m_Transformed = TqTrue;
 }

@@ -587,7 +587,7 @@ void CqSurface::vSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 /** Transform the surface by the specified matrix.
  */
 
-void	CqSurface::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
+void	CqSurface::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime )
 {
 	// Tansform the control hull by the specified matrix.
 	std::vector<CqParameter*>::iterator iUP;

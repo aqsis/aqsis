@@ -61,7 +61,7 @@ class CqTeapot : public CqSurface
 		virtual	~CqTeapot()
 		{}
 
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 		virtual	TqUint	cUniform() const
 		{
 			return ( 1 );

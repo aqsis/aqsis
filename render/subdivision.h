@@ -839,9 +839,9 @@ class CqWSurf : public CqSubdivider, public CqBasicSurface
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual TqBool	Diceable();
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
 		{
-			m_pPoints->Transform( matTx, matITTx, matRTx );
+			m_pPoints->Transform( matTx, matITTx, matRTx, iTime );
 		}
 		virtual	TqUint	cUniform() const
 		{
@@ -939,11 +939,9 @@ class CqMotionWSurf : public CqSubdivider, public CqBasicSurface, public CqMotio
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual TqBool	Diceable();
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
 		{
-			TqInt i;
-			for ( i = 0; i < cTimes(); i++ )
-				GetMotionObject( Time( i ) ) ->Transform( matTx, matITTx, matRTx );
+			GetMotionObject( Time( iTime ) ) ->Transform( matTx, matITTx, matRTx, iTime );
 		}
 		virtual	TqUint	cUniform() const
 		{

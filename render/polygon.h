@@ -344,7 +344,7 @@ class CqPolygonPoints : public CqSurface
 		{
 			return ( TqFalse );
 		}
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 
 		virtual	TqUint	cUniform() const
 		{
@@ -424,7 +424,7 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 			return ( CqPolygonBase::Diceable() );
 		}
 
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
 		{
 			m_pPoints->Transform( matTx, matITTx, matRTx );
 		}
@@ -600,7 +600,7 @@ class CqMotionSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual TqBool	Diceable();
 
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime )
 		{
 			TqInt i;
 			for ( i = 0; i < cTimes(); i++ )

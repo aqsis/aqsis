@@ -511,7 +511,7 @@ class _qShareC CqSurface : public CqBasicSurface
 
 		/* From IqSurface.
 		 */
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 
 		/** Add a primitive variable to the array.
 		 */
@@ -763,9 +763,9 @@ class CqMotionSurface : public CqBasicSurface, public CqMotionSpec<T>
 		 * \param matITTx Reference to the inverse transpose of the transformation matrix, used to transform normals.
 		 * \param matRTx Reference to the rotation only transformation matrix, used to transform vectors.
 		 */
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
 		{
-			GetMotionObject( 0 ) ->Transform( matTx, matITTx, matRTx );
+			GetMotionObject( iTime ) ->Transform( matTx, matITTx, matRTx, iTime );
 		}
 
 		/** Set the surface parameters of all GPrims to match those on the spefified one.

@@ -55,30 +55,30 @@ class CqPointsKDTreeData : public IqKDTreeData<TqInt>
 		class CqPointsKDTreeDataComparator
 		{
 			public:
-				CqPointsKDTreeDataComparator(CqPoints* pPoints, TqInt dimension) : m_pPoints( pPoints ), m_Dim( dimension )
+				CqPointsKDTreeDataComparator(CqPoints* pPoints, TqInt dimension) : m_pPointsSurface( pPoints ), m_Dim( dimension )
 				{}
 			
 				bool operator()(TqInt a, TqInt b);
 
 			private:
-				CqPoints*	m_pPoints;
+				CqPoints*	m_pPointsSurface;
 				TqInt		m_Dim;
 		};
 
 	public:
-				CqPointsKDTreeData( CqPoints* pPoints = NULL ) : m_pPoints( pPoints )
+				CqPointsKDTreeData( CqPoints* pPoints = NULL ) : m_pPointsSurface( pPoints )
 				{}
 
 		virtual void SortElements(std::vector<TqInt>& aLeaves, TqInt dimension)
 				{
-					std::sort(aLeaves.begin(), aLeaves.end(), CqPointsKDTreeDataComparator(m_pPoints, dimension) );
+					std::sort(aLeaves.begin(), aLeaves.end(), CqPointsKDTreeDataComparator(m_pPointsSurface, dimension) );
 				}
 		virtual TqInt Dimensions() const	{return(3);}
 
 				void	SetpPoints( CqPoints* pPoints );
 
 	private:
-		CqPoints*	m_pPoints;
+		CqPoints*	m_pPointsSurface;
 };
 
 
@@ -87,22 +87,23 @@ class CqPointsKDTreeData : public IqKDTreeData<TqInt>
  * Class encapsulating the functionality of Points geometry.
  */
 
-class CqPoints : public CqSurface
+class CqPoints : public CqSurface, public CqMotionSpec<CqPolygonPoints*>
 {
 	public:
 
-		CqPoints( TqInt nVertices, CqPolygonPoints* pPoints );
-		CqPoints( const CqPoints& From ) : m_KDTree( &m_KDTreeData ), m_pPoints( NULL )
+		CqPoints( TqInt nVertices, CqPolygonPoints* pPoints = NULL );
+		CqPoints( const CqPoints& From ) : m_KDTree( &m_KDTreeData ),
+					CqMotionSpec<CqPolygonPoints*>(From.pPoints())
 		{
 			*this = From;
 		}
 		virtual	~CqPoints()
 		{
-			if( NULL != m_pPoints )
-				m_pPoints->Release();
+			// Release the reference to our points.
+			TqInt i;
+			for ( i = 0; i < cTimes(); i++ )
+				GetMotionObject( Time( i ) ) ->Release();
 		}
-
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
 
 		virtual	TqUint	cUniform() const
 		{
@@ -135,13 +136,13 @@ class CqPoints : public CqSurface
 			return ( m_nVertices );
 		}
 
-		CqPolygonPoints* pPoints()
+		CqPolygonPoints* pPoints( TqInt TimeIndex = 0 )
 		{
-			return( m_pPoints );
+			return( GetMotionObject( Time( TimeIndex ) ) );
 		}
-		CqPolygonPoints* pPoints() const
+		CqPolygonPoints* pPoints( TqInt TimeIndex = 0) const
 		{
-			return( m_pPoints );
+			return( GetMotionObject( Time( TimeIndex ) ) );
 		}
 
 		const std::vector<CqParameter*>& aUserParams() const
@@ -173,7 +174,7 @@ class CqPoints : public CqSurface
 		 * the parameter is not present. */
 		const CqParameterTypedVarying <
 		TqFloat, type_float, TqFloat
-		> * width() const
+		> * width( TqInt iTime ) const
 		{
 			if ( m_widthParamIndex >= 0 )
 			{
@@ -181,7 +182,7 @@ class CqPoints : public CqSurface
 				       const CqParameterTypedVarying <
 				       TqFloat, type_float, TqFloat
 				       > *
-				       > ( aUserParams()[ m_widthParamIndex ] );
+				       > ( pPoints( iTime )->aUserParams()[ m_widthParamIndex ] );
 			}
 			else
 			{
@@ -193,7 +194,7 @@ class CqPoints : public CqSurface
 		 * the parameter is not present. */
 		CqParameterTypedVarying <
 		TqFloat, type_float, TqFloat
-		> * width()
+		> * width( TqInt iTime )
 		{
 			if ( m_widthParamIndex >= 0 )
 			{
@@ -201,7 +202,7 @@ class CqPoints : public CqSurface
 				       CqParameterTypedVarying <
 				       TqFloat, type_float, TqFloat
 				       > *
-				       > ( aUserParams()[ m_widthParamIndex ] );
+				       > ( pPoints( iTime )->aUserParams()[ m_widthParamIndex ] );
 			}
 			else
 			{
@@ -209,8 +210,6 @@ class CqPoints : public CqSurface
 			}
 
 		}
-
-		void PopulateWidth();
 
 		/** Get a reference to the user parameter variables array
 		 */
@@ -227,6 +226,19 @@ class CqPoints : public CqSurface
 		void	InitialiseKDTree();
 
 		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
+
+		// Overrides from CqMotionSpec
+		virtual	void	ClearMotionObject( CqPolygonPoints*& A ) const
+			{}
+		;
+		virtual	CqPolygonPoints* ConcatMotionObjects( CqPolygonPoints* const & A, CqPolygonPoints* const & B ) const
+		{
+			return ( A );
+		}
+		virtual	CqPolygonPoints* LinearInterpolateMotionObjects( TqFloat Fraction, CqPolygonPoints* const & A, CqPolygonPoints* const & B ) const
+		{
+			return ( A );
+		}
 
 	protected:
 		template <class T, class SLT>
@@ -254,6 +266,15 @@ class CqMicroPolyGridPoints : public CqMicroPolyGrid
 			CqMicroPolyGridPoints() : CqMicroPolyGrid()	{}
 			CqMicroPolyGridPoints( TqInt cu, TqInt cv, CqSurface* pSurface ) : CqMicroPolyGrid( cu, cv, pSurface )	{}
 			virtual	~CqMicroPolyGridPoints()	{}
+	
+	virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
+};
+
+class CqMotionMicroPolyGridPoints : public CqMotionMicroPolyGrid
+{
+	public:
+			CqMotionMicroPolyGridPoints() : CqMotionMicroPolyGrid()	{}
+			virtual	~CqMotionMicroPolyGridPoints()	{}
 	
 	virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
 };

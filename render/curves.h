@@ -319,7 +319,8 @@ class CqLinearCurvesGroup : public CqCurvesGroup
 		virtual void Transform(
 		    const CqMatrix& matTx,
 		    const CqMatrix& matITTx,
-		    const CqMatrix& matRTx
+		    const CqMatrix& matRTx,
+			TqInt iTime = 0
 		);
 		//---------------------------------------------- Inlined Public Methods
 	public:
@@ -373,7 +374,8 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 		virtual void Transform(
 		    const CqMatrix& matTx,
 		    const CqMatrix& matITTx,
-		    const CqMatrix& matRTx
+		    const CqMatrix& matRTx,
+			TqInt iTime = 0
 		);
 		//---------------------------------------------- Inlined Public Methods
 	public:

@@ -70,7 +70,7 @@ CqQuadric&	CqQuadric::operator=( const CqQuadric& From )
 /** Transform the quadric primitive by the specified matrix.
  */
 
-void	CqQuadric::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
+void	CqQuadric::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime )
 {
 	m_matTx *= matTx;
 	m_matITTx *= matITTx;

@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/11/07 19:18:31 $
+ *	Last change date:	$Date: 2003/02/22 12:53:22 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___isurface_Loaded___
@@ -42,7 +42,7 @@ struct IqSurface
 	 * \param matITTx Reference to the inverse transpose of the transformation matrix, used to transform normals.
 	 * \param matRTx Reference to the rotation only transformation matrix, used to transform vectors.
 	 */
-	virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx ) = 0;
+	virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 ) = 0;
 	/** Get the number of uniform parameters required for this GPrim.
 	 */
 	virtual	TqUint	cUniform() const = 0;
