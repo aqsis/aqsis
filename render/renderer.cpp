@@ -989,7 +989,16 @@ void CqRenderer::AddParameterDecl( const char* strName, const char* strType )
 	CqString strDecl( strType );
 	strDecl += " ";
 	strDecl += strName;
-	SqParameterDeclaration Decl = FindParameterDecl( strDecl.c_str() );
+	SqParameterDeclaration Decl;
+	try
+	{
+		Decl = FindParameterDecl( strDecl.c_str() );
+	}
+	catch( XqException e )
+	{
+		QGetRenderContext()->Logger()->error( e.strReason() );
+		return;
+	}
 
 	// Put new declaration at the top to make it take priority over pervious
 	m_Symbols.insert( m_Symbols.begin(), Decl );
@@ -1226,7 +1235,16 @@ TqInt CqRenderer::RegisterOutputData( const char* name )
 	if( ( offset = OutputDataIndex( name ) ) != -1 )
 		return(offset);
 
-	SqParameterDeclaration Decl = FindParameterDecl( name );
+	SqParameterDeclaration Decl;
+	try
+	{
+		Decl = FindParameterDecl( name );
+	}
+	catch( XqException e )
+	{
+		QGetRenderContext()->Logger()->error( e.strReason() );
+		return(-1);
+	}
 	if( Decl.m_Type != type_invalid )
 	{
 		if( Decl.m_Count != 1 )
@@ -1276,7 +1294,16 @@ TqInt CqRenderer::RegisterOutputData( const char* name )
 
 TqInt CqRenderer::OutputDataIndex( const char* name )
 {
-	SqParameterDeclaration Decl = FindParameterDecl( name );
+	SqParameterDeclaration Decl;
+	try
+	{
+		Decl = FindParameterDecl( name );
+	}
+	catch( XqException e )
+	{
+		QGetRenderContext()->Logger()->error( e.strReason() );
+		return(-1);
+	}
 	if( Decl.m_Type != type_invalid )
 	{
 		std::map<std::string, SqOutputDataEntry>::iterator entry = m_OutputDataEntries.find( Decl.m_strName );
@@ -1288,7 +1315,16 @@ TqInt CqRenderer::OutputDataIndex( const char* name )
 
 TqInt CqRenderer::OutputDataSamples( const char* name )
 {
-	SqParameterDeclaration Decl = FindParameterDecl( name );
+	SqParameterDeclaration Decl;
+	try
+	{
+		Decl = FindParameterDecl( name );
+	}
+	catch( XqException e )
+	{
+		QGetRenderContext()->Logger()->error( e.strReason() );
+		return(-1);
+	}
 	if( Decl.m_Type != type_invalid )
 	{
 		std::map<std::string, SqOutputDataEntry>::iterator entry = m_OutputDataEntries.find( Decl.m_strName );

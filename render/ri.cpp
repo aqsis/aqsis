@@ -1406,7 +1406,16 @@ RtVoid	RiHiderV( const char *name, PARAMETERLIST )
 	TqInt i;
 	for ( i = 0; i < count; i++ )
 	{
-		SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( tokens[ i ] );
+		SqParameterDeclaration Decl;
+		try
+		{
+			Decl = QGetRenderContext()->FindParameterDecl( tokens[ i ] );
+		}
+		catch( XqException e )
+		{
+			QGetRenderContext()->Logger()->error( e.strReason() );
+			continue;
+		}
 		if ( Decl.m_strName.compare( "depthfilter" ) == 0 )
 			RiOption( "Hider", "depthfilter", ( RtToken ) values[ i ], NULL );
 		else if ( Decl.m_strName.compare( "jitter" ) == 0 )
@@ -1480,7 +1489,16 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 
 		// Search for the parameter in the declarations.
 		// Note Options can only be uniform.
-		SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( token );
+		SqParameterDeclaration Decl;
+		try
+		{
+			Decl = QGetRenderContext()->FindParameterDecl( token );
+		}
+		catch( XqException e )
+		{
+			QGetRenderContext()->Logger()->error( e.strReason() );
+			continue;
+		}
 		TqInt Type = Decl.m_Type;
 		TqInt Class = Decl.m_Class;
 		TqBool bArray = Decl.m_Count > 1;
@@ -2479,7 +2497,16 @@ RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 		{
 			// Search for the parameter in the declarations.
 			// Note attributes can only be uniform.
-			SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( token );
+			SqParameterDeclaration Decl;
+			try
+			{
+				Decl = QGetRenderContext()->FindParameterDecl( token );
+			}
+			catch( XqException e )
+			{
+				QGetRenderContext()->Logger()->error( e.strReason() );
+				continue;
+			}
 			if ( Decl.m_strName != "" && Decl.m_Class == class_uniform )
 			{
 				pParam = Decl.m_pCreate( Decl.m_strName.c_str(), Decl.m_Count );
@@ -4901,7 +4928,16 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		 std::vector<TqInt>::iterator iUserParam;
 		 for ( iUserParam = aUserParams.begin(); iUserParam != aUserParams.end(); iUserParam++ )
 		 {
-			 SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( tokens[ *iUserParam ] );
+			SqParameterDeclaration Decl;
+			try
+			{
+				Decl = QGetRenderContext()->FindParameterDecl( tokens[ *iUserParam ] );
+			}
+			catch( XqException e )
+			{
+				QGetRenderContext()->Logger()->error( e.strReason() );
+				continue;
+			}
 
 			 CqParameter* pNewParam = ( *Decl.m_pCreate ) ( Decl.m_strName.c_str(), Decl.m_Count );
 			 // Now go across all values and fill in the parameter variable.
@@ -5156,7 +5192,16 @@ RtFunc	RiPreRenderFunction( RtFunc function )
 void SetShaderArgument( IqShader * pShader, const char * name, TqPchar val )
 {
 	// Find the relevant variable.
-	SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( name );
+	SqParameterDeclaration Decl;
+	try
+	{
+		Decl = QGetRenderContext() ->FindParameterDecl( name );
+	}
+	catch( XqException e )
+	{
+		QGetRenderContext()->Logger()->error( e.strReason() );
+		return;
+	}
 
 	pShader->SetArgument( Decl.m_strName, Decl.m_Type, Decl.m_strSpace, val );
 }

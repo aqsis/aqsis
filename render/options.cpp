@@ -658,7 +658,16 @@ void CqOptions::SetValueImager( char *token, char *value )
 {
 	if ( m_pshadImager != NULL )
 	{
-		SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( token );
+		SqParameterDeclaration Decl;
+		try
+		{
+			Decl = QGetRenderContext()->FindParameterDecl( token );
+		}
+		catch( XqException e )
+		{
+			QGetRenderContext()->Logger()->error( e.strReason() );
+			return;
+		}
 		m_pshadImager->pShader() ->SetArgument( Decl.m_strName, Decl.m_Type, Decl.m_strSpace, value );
 	}
 }

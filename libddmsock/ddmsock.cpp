@@ -893,7 +893,16 @@ void SendUserParameters( std::map<std::string, void*>& mapParams, CqDDClient* cl
 	std::map<std::string, void*>::iterator param;
 	for ( param = mapParams.begin(); param != mapParams.end(); param++ )
 	{
-		SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( param->first.c_str() );
+		SqParameterDeclaration Decl;
+		try
+		{
+			Decl = QGetRenderContext() ->FindParameterDecl( param->first.c_str() );
+		}
+		catch( XqException e )
+		{
+			QGetRenderContext()->Logger()->error( e.strReason() );
+			return;
+		}
 
 		// Check the parameter type is uniform, not valid for non-surface requests otherwise.
 		if( Decl.m_Class != class_uniform )
