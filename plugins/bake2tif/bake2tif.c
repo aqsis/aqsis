@@ -120,6 +120,7 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 	unsigned short h, w;
 	float s, t, r1, g1, b1;
 	unsigned char *pixels;
+	unsigned char *xpixels;
 	char buffer[ 200 ];
 	int i, j, n, o;
 	int x, y;
@@ -150,8 +151,14 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 
 	}
 
-#ifdef REMOVEDARK
+	xpixels = ( unsigned char * ) calloc( 3, size * size );
 
+	memcpy(xpixels, pixels, 3 * size * size);
+
+
+#ifdef REMOVEDARK 
+   
+	/* in X */
 	for (i=0; i < size; i++)
 	{
 		for(j =0; j < size* 3; j+=3)
@@ -161,7 +168,7 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 			( pixels[ n + 1 ] == pixels[ n + 2 ] ) &&
 			( pixels[ n + 2 ] == 0 ) )
 			{
-				int m =  n-3;
+				int m = n;
 				while (m > 0) {
 					if (!( ( pixels[ m ] == pixels[ m + 1 ] ) &&
 					( pixels[ m + 1 ] == pixels[ m + 2 ] ) &&
@@ -169,7 +176,7 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 					break;
 					m-=3;
 				}
-				o = n + 3;
+				o = n;
 				while (o < size * size * 3) {
 					if (!( ( pixels[ o ] == pixels[ o + 1 ] ) &&
 					( pixels[ o + 1 ] == pixels[ o + 2 ] ) &&
@@ -177,12 +184,14 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 					break;
 					o+=3;
 				}
-				pixels[ n ] = lerp(pixels[o], pixels[m], o, m, n);
-				pixels[ n +1] = lerp(pixels[o+1], pixels[m+1], o, m, n);
-				pixels[ n +2] = lerp(pixels[o+2], pixels[m+2], o, m, n);
+				xpixels[ n ] = lerp(pixels[o], pixels[m], o, m, n);
+				xpixels[ n +1] = lerp(pixels[o+1], pixels[m+1], o, m, n);
+				xpixels[ n +2] = lerp(pixels[o+2], pixels[m+2], o, m, n);
 			}
 		}
 	}
+
+	memcpy(pixels, xpixels, 3 * size * size);
 
 #endif
 	// Should we do some filterings prior to save to tif file ?
@@ -192,6 +201,8 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 	save_tiff( tiffname, pixels, w, h, 3, "bake2tif" );
 
 	free( pixels );
+	free( xpixels );
+
 	return tiffname;
 }
 
