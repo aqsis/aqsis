@@ -1639,10 +1639,13 @@ RtVoid RiArchiveRecord (RtToken type, char *format, ...)
 	va_list args;
 	va_start(args, format);
 
-	#ifdef	AQSIS_COMPILER_MSVC6
 	TqInt size=256;
 	char* buffer=new char[size];
+	#ifdef	AQSIS_COMPILER_MSVC6
 	while(_vsnprintf(buffer,256,format,args)<0)
+	#else
+	while(vsnprintf(buffer,256,format,args)<0)
+	#endif
 	{
 		size*=2;
 		delete[](buffer);
@@ -1651,13 +1654,6 @@ RtVoid RiArchiveRecord (RtToken type, char *format, ...)
 	std::string i(buffer);
 	delete[](buffer);
 	i+="/n";
-	#else
-	std::strstream str;
-	str.vform(format,args);
-	str << std::ends;
-	std::string i(str.str());
-	str.freeze(false);
-	#endif
 
 	va_end(args);
 	context.current().RiArchiveRecord(type, i);
