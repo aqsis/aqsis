@@ -133,6 +133,10 @@ SOURCE=.\nurbs.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\occlusion.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\options.cpp
 # End Source File
 # Begin Source File
@@ -310,6 +314,10 @@ SOURCE=.\motion.h
 # Begin Source File
 
 SOURCE=.\nurbs.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\occlusion.h
 # End Source File
 # Begin Source File
 
