@@ -4411,6 +4411,7 @@ RtVoid	CreateGPrim( T* pSurface )
 			RtFloat time = QGetRenderContext() ->ptransCurrent() ->Time( i );
 
 			T* pTimeSurface = new T( *pSurface );
+			pTimeSurface->AddRef();
 			pMotionSurface->AddTimeSlot( time, pTimeSurface );
 
 			// Transform the points into camera space for processing,
