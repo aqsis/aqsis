@@ -409,7 +409,6 @@ RtVoid	RiFrameBegin( RtInt number )
 
 	QGetRenderContext() ->BeginFrameModeBlock();
 	CqCSGTreeNode::SetRequired( TqFalse );
-	CqSurface::SqrtGridSize( -1.0f );
 	return ;
 }
 
@@ -480,7 +479,6 @@ RtVoid	RiWorldBegin()
 	QGetRenderContext() ->optCurrent().InitialiseCamera();
 	QGetRenderContext() ->pImage() ->SetImage();
 
-	CqSurface::SqrtGridSize( -1.0f );
 	return ;
 }
 
@@ -507,6 +505,9 @@ RtVoid	RiWorldEnd()
 		QGetRenderContext() -> Stats().PrintInfo();
 	}
 
+	const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
+	if( NULL != poptGridSize )
+		QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "SqrtGridSize" )[0] = sqrt( poptGridSize[0] );
 
 	// Render the world
 	try

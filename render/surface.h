@@ -253,42 +253,6 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 			return ( m_pCSGNode );
 		}
 
-		static TqFloat SqrtGridSize(TqFloat gs)
-        {
-            m_fGridSize = gs;
-			return m_fGridSize;
-        }
-        TqFloat SqrtGridSize()
-		{
-			if (m_fGridSize == -1.0f)
-			{
-				TqInt gridsize;
-
-				const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
-
-				TqInt m_XBucketSize = 16;
-				TqInt m_YBucketSize = 16;
-
-				const TqInt* poptBucketSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "bucketsize" );
-				if ( poptBucketSize != 0 )
-				{
-					m_XBucketSize = poptBucketSize[ 0 ];
-					m_YBucketSize = poptBucketSize[ 1 ];
-				}
-				TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
-
-				if ( poptGridSize )
-					gridsize = poptGridSize[ 0 ];
-				else
-					gridsize = static_cast<TqInt>( m_XBucketSize * m_XBucketSize / ShadingRate );
-				
-				m_fGridSize = sqrt(gridsize);
-
-			}
-		return m_fGridSize;
-
-		}
-
 		TqBool	m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
 		TqBool	m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
 		TqInt	m_EyeSplitCount;	///< The number of times this GPrim has been split because if crossing the epsilon and eye planes.

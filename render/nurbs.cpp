@@ -1556,7 +1556,12 @@ TqBool	CqSurfaceNURBS::Diceable()
 	// Convert the control hull to raster space.
 	CqVector2D * avecHull = new CqVector2D[ m_cuVerts * m_cvVerts ];
 	TqUint i;
-        TqFloat gs = SqrtGridSize();
+	
+	TqFloat gs = 16.0f;
+	const TqFloat* poptGridSize = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "SqrtGridSize" );
+	if( NULL != poptGridSize )
+		gs = poptGridSize[0];
+	
 	TqInt gridsize = 1.0;
 
         if (gs >= 1.0) gridsize = gs * gs;

@@ -257,7 +257,10 @@ TqBool	CqQuadric::Diceable()
 
 	m_SplitDir = ( m_uDiceSize > m_vDiceSize ) ? SplitDir_U : SplitDir_V;
 
-	TqFloat gs = SqrtGridSize();
+	TqFloat gs = 16.0f;
+	const TqFloat* poptGridSize = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "SqrtGridSize" );
+	if( NULL != poptGridSize )
+		gs = poptGridSize[0];
 
 	if (toomuch > TOOLARGEQUADS) return TqFalse;
 
@@ -313,8 +316,8 @@ TqUlong CqQuadric::EstimateGridSize()
 
 	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRateSqrt" ) [ 0 ];
 
-	m_uDiceSize = ROUND( ESTIMATEGRIDSIZE * maxusize / ( ShadingRate ) );
-	m_vDiceSize = ROUND( ESTIMATEGRIDSIZE * maxvsize / ( ShadingRate ) );
+	m_uDiceSize = CEIL( ESTIMATEGRIDSIZE * maxusize / ( ShadingRate ) );
+	m_vDiceSize = CEIL( ESTIMATEGRIDSIZE * maxvsize / ( ShadingRate ) );
 
 	// Ensure power of 2 to avoid cracking
 	const TqInt *binary = pAttributes() ->GetIntegerAttribute( "dice", "binary" );

@@ -1414,7 +1414,10 @@ TqBool CqSurfaceSubdivisionPatch::Diceable()
 		return ( TqFalse );
 	}
 
-	TqFloat gs = SqrtGridSize();
+	TqFloat gs = 16.0f;
+	const TqFloat* poptGridSize = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "SqrtGridSize" );
+	if( NULL != poptGridSize )
+		gs = poptGridSize[0];
 
 	if ( m_uDiceSize > gs) return TqFalse;
 	if ( m_vDiceSize > gs) return TqFalse;
