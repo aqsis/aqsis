@@ -1595,7 +1595,6 @@ RtVoid	RiShadingInterpolation( RtToken type )
 //
 RtVoid	RiMatte( RtBoolean onoff )
 {
-	CqBasicError( 0, Severity_Normal, "RiMatte not supported" );
 	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Matte")[0] = onoff != 0;
 	QGetRenderContext() ->AdvanceTime();
 	return ;

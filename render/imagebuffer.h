@@ -65,9 +65,15 @@ struct SqImageSample
 	SqImageSample( CqColor& col,
 	               CqColor& opac = gColWhite,
 	               TqFloat depth = FLT_MAX ) :
-			m_colColor( col ), m_colOpacity( opac ), m_Depth( depth )
+			m_flags( 0 ), m_colColor( col ), m_colOpacity( opac ), m_Depth( depth )
 	{}
 
+	enum {
+		Flag_Occludes = 0x0001,
+		Flag_Matte    = 0x0002
+	};
+
+	TqInt   m_flags;
 	CqColor	m_colColor;		///< The color at this sample point.
 	CqColor	m_colOpacity;		///< The opacity value of this sample point.
 	TqFloat	m_Depth;			///< The depth of the sample point.

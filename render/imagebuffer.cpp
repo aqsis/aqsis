@@ -265,8 +265,33 @@ void CqImagePixel::Combine()
 		TqBool samplehit = TqFalse;
 		for ( std::vector<SqImageSample>::reverse_iterator sample = samples->rbegin(); sample != samples->rend(); sample++ )
 		{
-			samplecolor = ( samplecolor * ( gColWhite - sample->m_colOpacity ) ) + sample->m_colColor;
-			sampleopacity = ( ( gColWhite - sampleopacity ) * sample->m_colOpacity ) + sampleopacity;
+			if ( sample->m_flags & SqImageSample::Flag_Matte )
+			{
+				if ( sample->m_flags & SqImageSample::Flag_Occludes )
+				{
+					// Optimise common case
+					samplecolor   = gColBlack;
+					sampleopacity = gColBlack;
+				}
+				else
+				{
+					samplecolor.SetColorRGB(
+						LERP(sample->m_colOpacity.fRed(), samplecolor.fRed(), 0),
+						LERP(sample->m_colOpacity.fGreen(), samplecolor.fGreen(), 0),
+						LERP(sample->m_colOpacity.fBlue(), samplecolor.fBlue(), 0)
+					);
+					sampleopacity.SetColorRGB(
+						LERP(sample->m_colOpacity.fRed(), sampleopacity.fRed(), 0),
+						LERP(sample->m_colOpacity.fGreen(), sampleopacity.fGreen(), 0),
+						LERP(sample->m_colOpacity.fBlue(), sampleopacity.fBlue(), 0)
+					);
+				}
+			}
+			else
+			{
+				samplecolor = ( samplecolor * ( gColWhite - sample->m_colOpacity ) ) + sample->m_colColor;
+				sampleopacity = ( ( gColWhite - sampleopacity ) * sample->m_colOpacity ) + sampleopacity;
+			}
 			samplehit = TqTrue;
 		}
 
@@ -335,7 +360,7 @@ void CqImagePixel::UpdateZValues()
 			{
 				std::vector<SqImageSample>::iterator sc = aValues.begin();
 				// find first opaque sample
-				while ( sc != aValues.end() && ( ( sc->m_colOpacity != gColWhite ) || ( sc->m_pCSGNode != NULL ) ) )
+				while ( sc != aValues.end() && ( ! ( sc->m_flags & SqImageSample::Flag_Occludes ) || ( sc->m_pCSGNode != NULL ) ) )
 					sc++;
 				if ( sc != aValues.end() )
 				{
@@ -622,9 +647,9 @@ TqFloat CqBucket::MaxDepth( TqInt iXPos, TqInt iYPos )
 	CqImagePixel * pie;
 	if ( ImageElement( iXPos, iYPos, pie ) )
 		return ( pie->MaxDepth() );
-						else
+	else
 		return ( FLT_MAX );
-	}
+}
 
 
 //----------------------------------------------------------------------
@@ -1382,6 +1407,8 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 	const TqFloat* LodBounds = pMPG->pGrid()->pAttributes()->GetFloatAttribute("System", "LevelOfDetailBounds");
 	TqBool UsingLevelOfDetail = LodBounds[0] >= 0.0f;
 
+	TqBool IsMatte = pMPG->pGrid()->pAttributes()->GetIntegerAttribute("System", "Matte")[0];
+
 	for ( TqInt bound_num = 0; bound_num < pMPG->cSubBounds(); bound_num++ )
 	{
 		TqFloat time0;
@@ -1512,14 +1539,13 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 									}
 								}
 
+								TqBool Occludes = colMPGOpacity >= gColWhite;
+
 								// Update max depth values
-								if( !(DisplayMode() & ModeZ) )
+								if( !(DisplayMode() & ModeZ) && Occludes )
 								{
-									if ( colMPGOpacity == gColWhite )
-									{
-										CqOcclusionBox::MarkForUpdate(pie->OcclusionBoxId());
-										pie->MarkForZUpdate();
-									}
+									CqOcclusionBox::MarkForUpdate(pie->OcclusionBoxId());
+									pie->MarkForZUpdate();
 								}
 							
 
@@ -1528,6 +1554,16 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 								ImageVal.m_colOpacity = colMPGOpacity;
 								ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
 								if ( NULL != ImageVal.m_pCSGNode ) ImageVal.m_pCSGNode->AddRef();
+
+								ImageVal.m_flags = 0;
+								if ( Occludes )
+								{
+									ImageVal.m_flags |= SqImageSample::Flag_Occludes;
+								}
+								if ( IsMatte )
+								{
+									ImageVal.m_flags |= SqImageSample::Flag_Matte;
+								}
 
 								aValues.insert( aValues.begin() + i, ImageVal );
 							}
