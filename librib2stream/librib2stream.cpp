@@ -329,6 +329,10 @@ RendermanInterface::RtVoid Stream::RiPolygonV( RtInt nvertices, RtInt count, RtT
 	m_Stream << "RiPolygonV(" << nvertices << ", " << count << ")" << std::endl;
 }
 
+RendermanInterface::RtVoid Stream::RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], RtInt count, RtToken tokens[], RtPointer values[] )
+{
+	m_Stream << "RiBlobbyV()" << std::endl;
+}
 RendermanInterface::RtVoid Stream::RiProjectionV( const char * name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
 	m_Stream << "RiProjectionV()" << std::endl;

@@ -88,9 +88,9 @@ class Engine :
 		virtual	RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples );
 		virtual	RtVoid	RiPixelVariance( RtFloat variance );
 		virtual	RtVoid	RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc);
-		virtual	RtVoid	RiPoints( RtInt vertices, RtInt count, RtToken tokens[], RtPointer values[] );
+		virtual	RtVoid	RiPointsV( RtInt vertices, RtInt count, RtToken tokens[], RtPointer values[] );
                 virtual RtVoid	RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], RtInt count, RtToken tokens[], RtPointer values[] );
-		virtual RtVoid  RiCurves( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, RtInt n, RtToken tokens[], RtPointer values[]);
+		virtual RtVoid  RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, RtInt n, RtToken tokens[], RtPointer values[]);
 		virtual	RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[] );
 		virtual	RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[] );
 		virtual	RtVoid	RiPolygonV( RtInt nvertices, RtInt count, RtToken tokens[], RtPointer values[] );

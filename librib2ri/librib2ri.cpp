@@ -306,13 +306,13 @@ RendermanInterface::RtVoid Engine::RiPixelVariance( RtFloat variance )
 	::RiPixelVariance( variance );
 }
 
-RendermanInterface::RtVoid Engine::RiCurves( RtToken type, RtInt ncurves,
+RendermanInterface::RtVoid Engine::RiCurvesV( RtToken type, RtInt ncurves,
                                                    RtInt nvertices[], RtToken wrap,
                                                    RtInt n, RtToken tokens[], RtPointer values[] )
 {
 	::RiCurvesV( type, ncurves,nvertices,wrap,n,tokens,values);
 }
-RendermanInterface::RtVoid Engine::RiPoints( RtInt vertices, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiPointsV( RtInt vertices, RtInt count, RtToken tokens[], RtPointer values[] )
 {
 	::RiPointsV( vertices, count, tokens, values);
 }

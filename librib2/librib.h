@@ -119,9 +119,9 @@ class RendermanInterface
 		virtual	RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth ) = 0;
 		virtual	RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples ) = 0;
 		virtual	RtVoid	RiPixelVariance( RtFloat variance ) = 0;
-		virtual	RtVoid	RiCurves( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap,
+		virtual	RtVoid	RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap,
 						   RtInt n, RtToken tokens[], RtPointer values[]) = 0;
-		virtual	RtVoid	RiPoints( RtInt vertices, RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
+		virtual	RtVoid	RiPointsV( RtInt vertices, RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiPolygonV( RtInt nvertices, RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
