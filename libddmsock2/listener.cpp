@@ -264,15 +264,21 @@ void CqSender::operator()()
 
 			// Check if the bucket is available.
 			CqBucketDiskStore::SqBucketDiskStoreRecord* precord;
-			//boost::mutex::scoped_lock lk(m_pManager->StoreAccess());
-			while((precord = m_pManager->getDiskStore().RetrieveBucketIndex(index)) == NULL)
+			if((precord = m_pManager->getDiskStore().RetrieveBucketIndex(index)) == NULL)
 			{
-				//lk.unlock();
-				// Register an interest in the bucket with the manager.
-				boost::mutex monitor;
-				boost::mutex::scoped_lock lk(monitor);
+				// Lock the buckets so that Aqsis can't slip in and ready the bucket while we are
+				// preparing to notify interest.
+				boost::mutex::scoped_lock lk(m_pManager->getBucketsLock());
+				// Check again, just to see if the bucket has been entered while locking.
+				if((precord = m_pManager->getDiskStore().RetrieveBucketIndex(index)) != NULL)
+					break;
+				// Register an interest in the bucket with the manager. This will block until the bucket is ready.
 				m_pManager->BucketReadyCondition(index)->wait(lk);
-				//lk.lock();
+				if((precord = m_pManager->getDiskStore().RetrieveBucketIndex(index)) == NULL)
+				{
+					std::cerr << error << "Bucket manager has notified the availability of bucket " << index << " but I still can't get it" << std::endl;
+					throw( XqException("Listener") );
+				}
 			}
 			// Construct a response
 			TiXmlDocument doc;

@@ -92,6 +92,10 @@ public:
 					m_BucketRequestsWaiting[index] = new boost::condition();
 				return(m_BucketRequestsWaiting[index]);
 			}
+	boost::mutex& getBucketsLock()
+			{
+				return(m_BucketsLock);
+			}
 	boost::mutex& StoreAccess()
 			{
 				return(m_StoreAccess);
@@ -116,6 +120,7 @@ private:
 private:
 	CqBucketDiskStore	m_DiskStore;
 	CqDisplayListener	m_Listener;
+	boost::mutex		m_BucketsLock;
 	std::map<TqInt, boost::condition*>	m_BucketRequestsWaiting;
 	std::vector<SqDisplayRequest>	m_displayRequests;
 	boost::mutex		m_StoreAccess;
