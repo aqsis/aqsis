@@ -371,6 +371,7 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 	TqInt k = m_auKnots.size() - 1, s = 0;
 	TqInt i, j;
 	TqInt p = uDegree();
+	TqInt mp = m_auKnots.size() + p + 1;
 
 	// If the specified u value falls outside the current range, then fail.
 	if ( u < m_auKnots[ uDegree() ] || u > m_auKnots[ m_cuVerts ] )
@@ -391,7 +392,7 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 	if ( u <= m_auKnots[ k ] )
 	{
 		s = 1;
-		for ( i = k; i > 0; i-- )
+		for ( i = k; i > uDegree(); i-- )
 		{
 			if ( m_auKnots[ i ] <= m_auKnots[ i - 1 ] )
 				s++;
@@ -414,14 +415,7 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 	m_cuVerts = m_cuVerts + r;
 	m_auKnots.resize( m_cuVerts + m_uOrder );
 
-	std::vector<CqVector4D>	aCPHold( P()->Size() );
 	std::vector<TqFloat>	auHold( m_auKnots );
-
-	TqUint iCP;
-	for( iCP = 0; iCP < P()->Size(); iCP++ )		aCPHold[ iCP ] = (*P())[ iCP ];
-
-	P()->SetSize( m_cuVerts * m_cvVerts );
-
 	// Load new knot vector
 	// Copy up to the insertion point.
 	for ( i = 0;i <= k;i++ ) 
@@ -430,45 +424,119 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 	for ( i = 1;i <= r;i++ ) 
 		m_auKnots[ k + i ] = u;
 	// Copy after the insertion point up to the end.
-	for ( i = k + 1;i < static_cast<TqInt>( m_auKnots.size() ); i++ )
+	for ( i = k + 1; i < static_cast<TqInt>( m_auKnots.size() ); i++ )
 		m_auKnots[ i + r ] = auHold[ i ];
 
-	// Save unaltered control points
-	std::vector<CqVector4D> R( p + 1 );
 
-	// Insert control points as required on each row.
-	TqUint row;
-	for ( row = 0; row < m_cvVerts; row++ )
+	// Now process all the 'vertex' class variables.
+	std::vector<CqParameter*>::iterator iUP;
+	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
-		// First copy the first set of control points up to the insertion point minus the degree
-		for ( i = 0; i <= k - p; i++ ) 
-			(*P())[ ( row * m_cuVerts ) + i ] = aCPHold[ ( row * n ) + i ];
-		for ( i = k - s; i < static_cast<TqInt>( m_cuVerts ); i++ )
-			(*P())[ ( row * m_cuVerts ) + i + r ] = aCPHold[ ( row * n ) + i ];
-		for ( i = 0; i <= p - s; i++ ) 
-			R[ i ] = aCPHold[ ( row * n ) + k - p + i ];
-
-		// Insert the knot r times
-		TqUint L = 0 ;
-		TqFloat alpha;
-		for ( j = 1; j <= r; j++ )
+		if( (*iUP)->Class() == class_vertex )
 		{
-			L = k - p + j;
-			for ( i = 0;i <= p - j - s;i++ )
+			CqParameter* pHold = (*iUP)->Clone();
+			(*iUP)->SetSize( m_cuVerts * m_cvVerts );
+
+			// Save unaltered control points
+			CqParameter* R = (*iUP)->CloneType("R");
+			R->SetSize( p + 1 );
+
+			// Insert control points as required on each row.
+			TqUint row;
+			for ( row = 0; row < m_cvVerts; row++ )
 			{
-				alpha = ( u - m_auKnots[ L + i ] ) / ( m_auKnots[ i + k + 1 ] - m_auKnots[ L + i ] );
-				R[ i ] = alpha * R[ i + 1 ] + ( 1.0 - alpha ) * R[ i ];
+				// First copy the first set of control points up to the insertion point minus the degree
+				for ( i = 0; i <= k - p; i++ ) 
+					// Qw[i][row] = Pw[i][row]
+					(*iUP)->SetValue(pHold, ( row * m_cuVerts ) + i, ( row * n ) + i );
+				for ( i = k - s; i < static_cast<TqInt>( m_cuVerts ); i++ )
+					// Qw[i+r][row] = Pw[i][row]
+					(*iUP)->SetValue(pHold, ( row * m_cuVerts ) + i + r, ( row * n ) + i );
+				for ( i = 0; i <= p - s; i++ ) 
+					// Rw[i] = Pw[k-p+i][row]
+					R->SetValue(pHold, i, ( row * n ) + k - p + i );
+
+				// Insert the knot r times
+				TqUint L = 0 ;
+				TqFloat alpha;
+				for ( j = 1; j <= r; j++ )
+				{
+					L = k - p + j;
+					for ( i = 0;i <= p - j - s;i++ )
+					{
+						alpha = ( u - auHold[ L + i ] ) / ( auHold[ i + k + 1 ] - auHold[ L + i ] );
+						
+						switch( (*iUP)->Type() )
+						{
+							case type_float:
+							{
+								CqParameterTyped<TqFloat, TqFloat>* pTR = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(R);
+								(*pTR->pValue( i )) = alpha * (*pTR->pValue( i + 1 )) + ( 1.0 - alpha ) * (*pTR->pValue( i ));
+								break;
+							}
+
+							case type_integer:
+							{
+								CqParameterTyped<TqInt, TqFloat>* pTR = static_cast<CqParameterTyped<TqInt, TqFloat>*>(R);
+								(*pTR->pValue( i )) = alpha * (*pTR->pValue( i + 1 )) + ( 1.0 - alpha ) * (*pTR->pValue( i ));
+								break;
+							}
+
+							case type_point:
+							case type_normal:
+							case type_vector:
+							{
+								CqParameterTyped<CqVector3D, CqVector3D>* pTR = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(R);
+								(*pTR->pValue( i )) = alpha * (*pTR->pValue( i + 1 )) + ( 1.0 - alpha ) * (*pTR->pValue( i ));
+								break;
+							}
+
+							case type_hpoint:
+							{
+								CqParameterTyped<CqVector4D, CqVector3D>* pTR = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(R);
+								(*pTR->pValue( i )) = alpha * (*pTR->pValue( i + 1 )) + ( 1.0 - alpha ) * (*pTR->pValue( i ));
+								break;
+							}
+
+							case type_color:
+							{
+								CqParameterTyped<CqColor, CqColor>* pTR = static_cast<CqParameterTyped<CqColor, CqColor>*>(R);
+								(*pTR->pValue( i )) = alpha * (*pTR->pValue( i + 1 )) + ( 1.0 - alpha ) * (*pTR->pValue( i ));
+								break;
+							}
+
+//							case type_string:
+//							{
+//								CqParameterTyped<CqString, CqString>* pTR = static_cast<CqParameterTyped<CqString, CqString>*>(R);
+//								(*pTR->pValue( i )) = alpha * (*pTR->pValue( i + 1 )) + ( 1.0 - alpha ) * (*pTR->pValue( i ));
+//								break;
+//							}
+
+							case type_matrix:
+							{
+								CqParameterTyped<CqMatrix, CqMatrix>* pTR = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(R);
+								(*pTR->pValue( i )) = alpha * (*pTR->pValue( i + 1 )) + ( 1.0 - alpha ) * (*pTR->pValue( i ));
+								break;
+							}
+						}
+					}
+					// Qw[L][row] = Rw[0]
+					(*iUP)->SetValue(R, ( row * m_cuVerts ) + L, 0 );
+					if ( p - j - s > 0 )
+						// Qw[k+r-j-s][row] = Rw[p-j-s]
+						(*iUP)->SetValue(R, ( row * m_cuVerts ) + k + r - j - s, p - j - s );
+				}
+
+				// Load remaining control points
+				for ( i = L + 1; i < k - s; i++ )
+					// Qw[i][row] = Rw[i-L]
+					(*iUP)->SetValue( R, ( row * m_cuVerts ) + i, i - L );
 			}
-			(*P())[ ( row * m_cuVerts ) + L ] = R[ 0 ];
-			if ( p - j - s > 0 )
-				(*P())[ ( row * m_cuVerts ) + k + r - j - s ] = R[ p - j - s ];
+
+			delete(R);
+			delete(pHold);
 		}
-
-		// Load remaining control points
-		for ( i = L + 1; i < k - s; i++ )
-			(*P())[ ( row * m_cuVerts ) + i ] = R[ i - L ];
 	}
-
 	return ( r );
 }
 
@@ -501,7 +569,7 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 	if ( v <= m_avKnots[ k ] )
 	{
 		s = 1;
-		for ( i = k; i > 0; i-- )
+		for ( i = k; i > vDegree(); i-- )
 		{
 			if ( m_avKnots[ i ] <= m_avKnots[ i - 1 ] )
 				s++;
@@ -521,14 +589,7 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 	// Work on a copy.
 	m_cvVerts = m_cvVerts + r;
 	m_avKnots.resize( m_cvVerts + m_vOrder );
-
-	std::vector<CqVector4D>	aCPHold( P()->Size() );
 	std::vector<TqFloat>	avHold( m_avKnots );
-
-	TqUint iCP;
-	for( iCP = 0; iCP < P()->Size(); iCP++ )		aCPHold[ iCP ] = (*P())[ iCP ];
-
-	P()->SetSize( m_cuVerts * m_cvVerts );
 
 	// Load new knot vector
 	for ( i = 0;i <= k;i++ ) 
@@ -538,39 +599,113 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 	for ( i = k + 1;i < static_cast<TqInt>( m_avKnots.size() ); i++ )
 		m_avKnots[ i + r ] = avHold[ i ];
 
-	// Save unaltered control points
-	std::vector<CqVector4D> R( p + 1 );
-
-	// Insert control points as required on each row.
-	TqUint col;
-	for ( col = 0; col < m_cuVerts; col++ )
+	// Now process all the 'vertex' class variables.
+	std::vector<CqParameter*>::iterator iUP;
+	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
-		for ( i = 0; i <= k - p; i++ ) 
-			(*P())[ ( i * m_cuVerts ) + col ] = aCPHold[ ( i * m_cuVerts ) + col ];
-		for ( i = k - s; i < m; i++ )
-			(*P())[ ( ( i + r ) * m_cuVerts ) + col ] = aCPHold[ ( i * m_cuVerts ) + col ];
-		for ( i = 0; i <= p - s; i++ ) 
-			R[ i ] = aCPHold[ ( ( k - p + i ) * m_cuVerts ) + col ];
-
-		// Insert the knot r times
-		TqUint L = 0 ;
-		TqFloat alpha;
-		for ( j = 1; j <= r; j++ )
+		if( (*iUP)->Class() == class_vertex )
 		{
-			L = k - p + j;
-			for ( i = 0;i <= p - j - s;i++ )
-			{
-				alpha = ( v - m_avKnots[ L + i ] ) / ( m_avKnots[ i + k + 1 ] - m_avKnots[ L + i ] );
-				R[ i ] = alpha * R[ i + 1 ] + ( 1.0 - alpha ) * R[ i ];
-			}
-			(*P())[ ( L * m_cuVerts ) + col ] = R[ 0 ];
-			if ( p - j - s > 0 )
-				(*P())[ ( ( k + r - j - s ) * m_cuVerts ) + col ] = R[ p - j - s ];
-		}
+			CqParameter* pHold = (*iUP)->Clone();
+			(*iUP)->SetSize( m_cuVerts * m_cvVerts );
 
-		// Load remaining control points
-		for ( i = L + 1; i < k - s; i++ )
-			(*P())[ ( i * m_cuVerts ) + col ] = R[ i - L ];
+			// Save unaltered control points
+			CqParameter* R = (*iUP)->CloneType("R");
+			R->SetSize( p + 1 );
+
+			// Insert control points as required on each row.
+			TqUint col;
+			for ( col = 0; col < m_cuVerts; col++ )
+			{
+				for ( i = 0; i <= k - p; i++ ) 
+					// Qw[col][i] = Pw[col][i]
+					(*iUP)->SetValue(pHold, ( i * m_cuVerts ) + col, ( i * m_cuVerts ) + col );
+				for ( i = k - s; i < m; i++ )
+					// Qw[col][i+r] = Pw[col][i]
+					(*iUP)->SetValue(pHold, ( ( i + r ) * m_cuVerts ) + col, ( i * m_cuVerts ) + col );
+				for ( i = 0; i <= p - s; i++ ) 
+					// Rw[i] = Pw[col][k-p+i]
+					R->SetValue( pHold, i, ( ( k - p + i ) * m_cuVerts ) + col );
+
+				// Insert the knot r times
+				TqUint L = 0 ;
+				TqFloat alpha;
+				for ( j = 1; j <= r; j++ )
+				{
+					L = k - p + j;
+					for ( i = 0;i <= p - j - s;i++ )
+					{
+						alpha = ( v - avHold[ L + i ] ) / ( avHold[ i + k + 1 ] - avHold[ L + i ] );
+
+						switch( (*iUP)->Type() )
+						{
+							case type_float:
+							{
+								CqParameterTyped<TqFloat, TqFloat>* pTR = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(R);
+								(*pTR->pValue( i )) = alpha * (*pTR->pValue( i + 1 )) + ( 1.0 - alpha ) * (*pTR->pValue( i ));
+								break;
+							}
+
+							case type_integer:
+							{
+								CqParameterTyped<TqInt, TqFloat>* pTR = static_cast<CqParameterTyped<TqInt, TqFloat>*>(R);
+								(*pTR->pValue( i )) = alpha * (*pTR->pValue( i + 1 )) + ( 1.0 - alpha ) * (*pTR->pValue( i ));
+								break;
+							}
+
+							case type_point:
+							case type_normal:
+							case type_vector:
+							{
+								CqParameterTyped<CqVector3D, CqVector3D>* pTR = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(R);
+								(*pTR->pValue( i )) = alpha * (*pTR->pValue( i + 1 )) + ( 1.0 - alpha ) * (*pTR->pValue( i ));
+								break;
+							}
+
+							case type_hpoint:
+							{
+								CqParameterTyped<CqVector4D, CqVector3D>* pTR = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(R);
+								(*pTR->pValue( i )) = alpha * (*pTR->pValue( i + 1 )) + ( 1.0 - alpha ) * (*pTR->pValue( i ));
+								break;
+							}
+
+							case type_color:
+							{
+								CqParameterTyped<CqColor, CqColor>* pTR = static_cast<CqParameterTyped<CqColor, CqColor>*>(R);
+								(*pTR->pValue( i )) = alpha * (*pTR->pValue( i + 1 )) + ( 1.0 - alpha ) * (*pTR->pValue( i ));
+								break;
+							}
+
+//							case type_string:
+//							{
+//								CqParameterTyped<CqString, CqString>* pTR = static_cast<CqParameterTyped<CqString, CqString>*>(R);
+//								(*pTR->pValue( i )) = alpha * (*pTR->pValue( i + 1 )) + ( 1.0 - alpha ) * (*pTR->pValue( i ));
+//								break;
+//							}
+
+							case type_matrix:
+							{
+								CqParameterTyped<CqMatrix, CqMatrix>* pTR = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(R);
+								(*pTR->pValue( i )) = alpha * (*pTR->pValue( i + 1 )) + ( 1.0 - alpha ) * (*pTR->pValue( i ));
+								break;
+							}
+						}
+					}
+					// Qw[col][L] = Rw[0]
+					(*iUP)->SetValue( R, ( L * m_cuVerts ) + col, 0 );
+					if ( p - j - s > 0 )
+						// Qw[col][k+r-j-s] = Rw[p-j-s]
+						(*iUP)->SetValue( R, ( ( k + r - j - s ) * m_cuVerts ) + col, p - j - s );
+				}
+
+				// Load remaining control points
+				for ( i = L + 1; i < k - s; i++ )
+					// Qw[col][i] = Rw[i-L]
+					(*iUP)->SetValue( R, ( i * m_cuVerts ) + col, i - L );
+			}
+
+			delete(R);
+			delete(pHold);
+		}
 	}
 	return ( r );
 }
@@ -905,33 +1040,44 @@ void CqSurfaceNURBS::RefineKnotV( const std::vector<TqFloat>& X )
 
 void CqSurfaceNURBS::ClampU()
 {
-	TqUint n1 = InsertKnotU( m_auKnots[ uDegree() ], uDegree() );
-	TqUint n2 = InsertKnotU( m_auKnots[ m_cuVerts ], uDegree() );
+	TqFloat u1 = m_auKnots[ uDegree() ];
+	TqFloat u2 = m_auKnots[ m_cuVerts ];
+
+	TqUint n1 = InsertKnotU( u1, uDegree() );
+	TqUint n2 = InsertKnotU( u2, uDegree() );
 
 	// Now trim unnecessary knots and control points
 	if ( n1 || n2 )
 	{
-		CqParameter* pPHold = P()->Clone();
 		std::vector<TqFloat> auHold(m_auKnots);
-		
 		m_auKnots.resize( m_auKnots.size() - n1 - n2 );
-		P()->SetSize( ( m_cuVerts - n1 - n2 ) * m_cvVerts );
-		
-		TqInt n = m_cuVerts;
-		m_cuVerts -= n1 + n2;
-		
+
 		TqUint i;
 		for ( i = n1; i < auHold.size() - n2; i++ )
 			m_auKnots[ i - n1 ] = auHold[ i ];
-		
-		TqUint row;
-		for ( row = 0; row < m_cvVerts; row++ )
+
+		TqInt n = m_cuVerts;
+		m_cuVerts -= n1 + n2;
+
+		// Now process all the 'vertex' class variables.
+		std::vector<CqParameter*>::iterator iUP;
+		for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 		{
-			TqUint i;
-			for ( i = n1; i < n - n2; i++ )
-				P()->SetValue( pPHold, ( row * m_cuVerts ) + i - n1, ( row * n ) + i );
+			if( (*iUP)->Class() == class_vertex )
+			{
+				CqParameter* pHold = (*iUP)->Clone();
+				(*iUP)->SetSize( ( m_cuVerts ) * m_cvVerts );
+				
+				TqUint row;
+				for ( row = 0; row < m_cvVerts; row++ )
+				{
+					TqUint i;
+					for ( i = n1; i < n - n2; i++ )
+						(*iUP)->SetValue( pHold, ( row * m_cuVerts ) + i - n1, ( row * n ) + i );
+				}
+				delete( pHold );
+			}
 		}
-		delete( pPHold );
 	}
 }
 
@@ -942,32 +1088,44 @@ void CqSurfaceNURBS::ClampU()
 
 void CqSurfaceNURBS::ClampV()
 {
-	TqUint n1 = InsertKnotV( m_avKnots[ vDegree() ], vDegree() );
-	TqUint n2 = InsertKnotV( m_avKnots[ m_cvVerts ], vDegree() );
+	TqFloat v1 = m_avKnots[ vDegree() ];
+	TqFloat v2 = m_avKnots[ m_cvVerts ];
+
+	TqUint n1 = InsertKnotV( v1, vDegree() );
+	TqUint n2 = InsertKnotV( v2, vDegree() );
 
 	// Now trim unnecessary knots and control points
 	if ( n1 || n2 )
 	{
-		CqParameter* pPHold = P()->Clone();
 		std::vector<TqFloat> avHold(m_avKnots);
-
 		m_avKnots.resize( m_avKnots.size() - n1 - n2 );
-		P()->SetSize( ( m_cvVerts - n1 - n2 ) * m_cuVerts );
-
-		m_cvVerts -= n1 + n2;
 
 		TqUint i;
 		for ( i = n1; i < avHold.size() - n2; i++ )
 			m_avKnots[ i - n1 ] = avHold[ i ];
 
-		TqUint col;
-		for ( col = 0; col < m_cuVerts; col++ )
+		TqInt n = m_cvVerts;
+		m_cvVerts -= n1 + n2;
+
+		// Now process all the 'vertex' class variables.
+		std::vector<CqParameter*>::iterator iUP;
+		for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 		{
-			TqUint i;
-			for ( i = n1; i < m_cvVerts - n2; i++ )
-				P()->SetValue( pPHold, ( ( i - n1 ) * m_cuVerts ) + col, ( i * m_cuVerts ) + col );
+			if( (*iUP)->Class() == class_vertex )
+			{
+				CqParameter* pHold = (*iUP)->Clone();
+				(*iUP)->SetSize( ( m_cvVerts ) * m_cuVerts );
+				
+				TqUint col;
+				for ( col = 0; col < m_cuVerts; col++ )
+				{
+					TqUint i;
+					for ( i = n1; i < n - n2; i++ )
+						(*iUP)->SetValue( pHold, ( ( i - n1 ) * m_cuVerts ) + col, ( i * m_cuVerts ) + col );
+				}
+				delete( pHold );
+			}
 		}
-		delete( pPHold );
 	}
 }
 
@@ -1389,8 +1547,8 @@ TqBool	CqSurfaceNURBS::Diceable()
 	const CqMatrix& matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), pTransform() ->matObjectToWorld() );
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
 	{
-		CqVector4D vT =  (*P())[i];
-		vT.h(1.0f);
+		CqVector3D vT =  (*P())[i];
+		//vT.h(1.0f);
 		vT = matCtoR * vT;
 		avecHull[ i ] = vT;
 	}
@@ -1566,6 +1724,58 @@ void CqSurfaceNURBS::OutputMesh()
 	fclose( fp );
 }
 
+void CqSurfaceNURBS::AppendMesh( const char *name, TqInt index)
+{
+	TqUint Granularity = 10;  // Controls the number of steps in u and v
+
+	// Save the grid as a .raw file.
+	FILE* fp = fopen( name, "a" );
+
+	fprintf( fp, "Surface_%d\n", index );
+	std::vector<std::vector<CqVector3D> > aaPoints( Granularity + 1 );
+	TqUint p;
+	for ( p = 0; p <= Granularity; p++ ) aaPoints[ p ].resize( Granularity + 1 );
+
+
+	// Compute points on curve
+
+	TqUint i;
+	for ( i = 0; i <= Granularity; i++ )
+	{
+		TqFloat v = ( static_cast<TqFloat>( i ) / static_cast<TqFloat>( Granularity ) )
+			        * ( m_avKnots[ m_cvVerts ] - m_avKnots[ m_vOrder - 1 ] )
+			        + m_avKnots[ m_vOrder - 1 ];
+
+		TqUint j;
+		for ( j = 0; j <= Granularity; j++ )
+		{
+			TqFloat u = ( static_cast<TqFloat>( j ) / static_cast<TqFloat>( Granularity ) )
+				        * ( m_auKnots[ m_cuVerts ] - m_auKnots[ m_uOrder - 1 ] )
+				        + m_auKnots[ m_uOrder - 1 ];
+
+			aaPoints[ i ][ j ] = Evaluate( u, v, P() );
+		}
+	}
+
+
+	for ( i = 0; i < Granularity; i++ )
+	{
+		TqUint j;
+		for ( j = 0; j < Granularity; j++ )
+		{
+			fprintf( fp, "%f %f %f %f %f %f %f %f %f\n",
+				     aaPoints[ i ][ j ].x(), aaPoints[ i ][ j ].y(), aaPoints[ i ][ j ].z(),
+				     aaPoints[ i + 1 ][ j + 1 ].x(), aaPoints[ i + 1 ][ j + 1 ].y(), aaPoints[ i + 1 ][ j + 1 ].z(),
+				     aaPoints[ i + 1 ][ j ].x(), aaPoints[ i + 1 ][ j ].y(), aaPoints[ i + 1 ][ j ].z() );
+			fprintf( fp, "%f %f %f %f %f %f %f %f %f\n",
+				     aaPoints[ i ][ j ].x(), aaPoints[ i ][ j ].y(), aaPoints[ i ][ j ].z(),
+				     aaPoints[ i ][ j + 1 ].x(), aaPoints[ i ][ j + 1 ].y(), aaPoints[ i ][ j + 1 ].z(),
+				     aaPoints[ i + 1 ][ j + 1 ].x(), aaPoints[ i + 1 ][ j + 1 ].y(), aaPoints[ i + 1 ][ j + 1 ].z() );
+		}
+	}
+	fclose(fp);
+}
+
 
 void CqSurfaceNURBS::Output( const char* name )
 {
@@ -1578,24 +1788,24 @@ void CqSurfaceNURBS::Output( const char* name )
 	fprintf( fp, "%d ", m_cuVerts );
 	fprintf( fp, "%d ", m_uOrder );
 
-	fputs( "[", fp );
+	fputs( "[\n", fp );
 	for ( i = 0; i < m_auKnots.size(); i++ )
-		fprintf( fp, "%f ", m_auKnots[ i ] );
-	fputs( "]", fp );
+		fprintf( fp, "%f \n", m_auKnots[ i ] );
+	fputs( "]\n", fp );
 	fprintf( fp, "%f %f ", 0.0f, 1.0f );
 
 	fprintf( fp, "%d ", m_cvVerts );
 	fprintf( fp, "%d ", m_vOrder );
 
-	fputs( "[", fp );
+	fputs( "[\n", fp );
 	for ( i = 0; i < m_avKnots.size(); i++ )
-		fprintf( fp, "%f ", m_avKnots[ i ] );
-	fputs( "]", fp );
+		fprintf( fp, "%f \n", m_avKnots[ i ] );
+	fputs( "]\n", fp );
 	fprintf( fp, "%f %f ", 0.0f, 1.0f );
 
-	fputs( "\"Pw\" [", fp );
+	fputs( "\"Pw\" [\n", fp );
 	for ( i = 0; i < P()->Size(); i++ )
-		fprintf( fp, "%f %f %f %f ", (*P()) [ i ].x(), (*P()) [ i ].y(), (*P()) [ i ].z(), (*P()) [ i ].h() );
+		fprintf( fp, "%f %f %f %f \n", (*P()) [ i ].x(), (*P()) [ i ].y(), (*P()) [ i ].z(), (*P()) [ i ].h() );
 	fputs( "]\n", fp );
 
 	fclose( fp );

@@ -276,6 +276,7 @@ class CqSurfaceNURBS : public CqSurface
 		}
 
 		void	OutputMesh();
+		void	AppendMesh( const char* name, TqInt index );
 		void	Output( const char* name );
 
 		const CqTrimLoopArray&	TrimLoops() const
@@ -291,7 +292,7 @@ class CqSurfaceNURBS : public CqSurface
 		virtual void uSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB );
 		virtual void vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB );
 		virtual void NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
-		virtual TqBool		CanGenerateNormals() const	{ return( TqTrue ); }
+		//virtual TqBool		CanGenerateNormals() const	{ return( TqTrue ); }
 		virtual	void		GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 		virtual	CqBound	Bound() const;
