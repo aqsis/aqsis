@@ -8,7 +8,8 @@ light shadowspot(
     float beamdistribution = 2;
     string shadowname = "";
     float samples = 16;
-    float width = 1;)
+    float width = 1;
+	float blur = 0;)
 {
     float atten, cosangle;
     uniform point A = (to - from) / length(to - from);
@@ -21,6 +22,6 @@ light shadowspot(
         atten *= smoothstep(cosoutside, cosinside, cosangle);
         Cl = atten * intensity * lightcolor;
         if (shadowname != "")
-            Cl *= 1 - shadow(shadowname, Ps, "width", width);
+            Cl *= 1 - shadow(shadowname, Ps, "blur", blur, "width", width);
     }
 }
