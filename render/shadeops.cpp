@@ -1964,7 +1964,7 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow(STRINGVAL name, FLOATVAL channel, POINTVAL
 		END_FORR
 	}
 	else
-		Result.SetValue(i,0);	// Default, completely lit
+		Result.SetValue(i,0.0f);	// Default, completely lit
 }
 
 //----------------------------------------------------------------------
@@ -1987,7 +1987,7 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow1(STRINGVAL name, FLOATVAL channel, POINTVA
 		END_FORR
 	}
 	else
-		Result.SetValue(i,0);	// Default, completely lit
+		Result.SetValue(i,0.0f);	// Default, completely lit
 }
 
 
