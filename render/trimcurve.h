@@ -5,17 +5,17 @@
  *	@brief	NURB based trim cureve class.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2001/11/15 08:58:45 $
+ *	Last change date:	$Date: 2002/01/31 16:20:26 $
  */
 //------------------------------------------------------------------------------
 
 #ifndef	___trimcurve_Loaded___
 #define	___trimcurve_Loaded___
 
+#include	"aqsis.h"
 
 #include	<vector>
 
-#include	"aqsis.h"
 #include	"vector3d.h"
 
 START_NAMESPACE(Aqsis)

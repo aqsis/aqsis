@@ -27,9 +27,9 @@
 #ifndef CSGTREE_H_INCLUDED
 #define CSGTREE_H_INCLUDED 1
 
-#include	<vector>
-
 #include	"aqsis.h"
+
+#include	<vector>
 
 #include	"refcount.h"
 #include	"list.h"
