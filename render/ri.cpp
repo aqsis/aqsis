@@ -48,7 +48,7 @@
 #include	"points.h"
 #include	"curves.h"
 #include	"rifile.h"
-#include	"librib2ri.h"
+//#include	"librib2ri.h"
 #include	"converter.h"
 #include	"shadervm.h"
 
@@ -4774,16 +4774,16 @@ RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
 {
-	CqRiFile	fileArchive( name, "texture" );
-	if ( !fileArchive.IsValid() )
-	{
-		CqString strRealName( fileArchive.strRealName() );
-		fileArchive.Close();
-		FILE *file;
-		if ( ( file = fopen( strRealName.c_str(), "rb" ) ) != NULL )
-		{
-			librib2ri::Engine renderengine;
-			librib::Parse( file, name, renderengine, std::cerr );
-		}
-	}
+//	CqRiFile	fileArchive( name, "texture" );
+//	if ( !fileArchive.IsValid() )
+//	{
+//		CqString strRealName( fileArchive.strRealName() );
+//		fileArchive.Close();
+//		FILE *file;
+//		if ( ( file = fopen( strRealName.c_str(), "rb" ) ) != NULL )
+//		{
+//			librib2ri::Engine renderengine;
+//			librib::Parse( file, name, renderengine, std::cerr );
+//		}
+//	}
 }

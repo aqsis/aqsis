@@ -32,7 +32,7 @@
 
 #include	"vector3d.h"
 
-#define		_qShareName	CORE
+#define		_qShareName	BUILD_LIBAQSISTYPES
 #include	"share.h"
 
 #include <iostream>
@@ -457,15 +457,15 @@ class _qShareC	CqColor
 
 
 /// Static white color
-extern CqColor	gColWhite;
+_qShareM extern CqColor	gColWhite;
 /// Static black color
-extern CqColor	gColBlack;
+_qShareM extern CqColor	gColBlack;
 /// Static red color
-extern CqColor	gColRed;
+_qShareM extern CqColor	gColRed;
 /// Static green color
-extern CqColor	gColGreen;
+_qShareM extern CqColor	gColGreen;
 /// Static blue color
-extern CqColor	gColBlue;
+_qShareM extern CqColor	gColBlue;
 
 //-----------------------------------------------------------------------
 

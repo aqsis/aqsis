@@ -454,7 +454,7 @@ RendermanInterface::RtVoid Stream::RiWorldEnd()
 ; // namespace librib2stream
 
 
-RtFloat RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
+/*RtFloat RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	return ( 0.0 );
 }
@@ -488,3 +488,4 @@ RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
 {}
 RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 {}
+*/

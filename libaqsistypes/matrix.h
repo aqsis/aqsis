@@ -34,7 +34,7 @@
 #include	"vector3d.h"
 #include	"vector4d.h"
 
-#define		_qShareName	CORE
+#define		_qShareName	BUILD_LIBAQSISTYPES
 #include	"share.h"
 
 START_NAMESPACE( Aqsis )
@@ -175,8 +175,8 @@ class _qShareC CqMatrix
 		_qShareM	CqVector4D	PreMultiply( const CqVector4D &Vector ) const;
 		_qShareM	CqMatrix&	operator*=( const TqFloat S );
 
-		friend _qShare std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
-		friend CqMatrix	operator*( TqFloat S, const CqMatrix& a );
+		friend _qShareM std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
+		friend _qShareM CqMatrix	operator*( TqFloat S, const CqMatrix& a );
 
 		_qShareM	TqFloat	Determinant() const;
 

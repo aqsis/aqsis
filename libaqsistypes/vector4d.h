@@ -31,7 +31,7 @@
 
 #include	"aqsis.h"
 
-#define		_qShareName	CORE
+#define		_qShareName	BUILD_LIBAQSISTYPES
 #include	"share.h"
 
 START_NAMESPACE( Aqsis )

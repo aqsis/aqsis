@@ -46,7 +46,7 @@
 #include	"shadervariable.h"
 #include 	"dsoshadeops.h"
 
-#define		_qShareName	CORE
+#define		_qShareName	BUILD_LIBSHADERVM
 #include	"share.h"
 
 START_NAMESPACE( Aqsis )

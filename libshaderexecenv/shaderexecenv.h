@@ -48,6 +48,9 @@
 #include	"iattributes.h"
 #include	"itransform.h"
 
+#define	 _qShareName	BUILD_LIBSHADEREXECENV
+#include "share.h"
+
 START_NAMESPACE( Aqsis )
 
 
@@ -57,9 +60,6 @@ _qShareM	extern char*	gVariableTypeNames[];
 _qShareM	extern TqInt	gcVariableTypeNames;
 _qShareM	extern char*	gVariableNames[];	///< Vector of variable names.
 _qShareM	extern TqUlong	gVariableTokens[];	///< Vector of hash key from above names.
-
-_qShare	std::ostream &operator<<( std::ostream &Stream, EqVariableType t );
-_qShare	std::ostream &operator<<( std::ostream &Stream, EqVariableClass t );
 
 
 extern TqInt gDefUses;

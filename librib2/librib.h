@@ -5,6 +5,11 @@
 #include <string>
 #include <stdio.h>
 
+#include "ri.h"
+
+#define		_qShareName	BUILD_LIBRIB
+#include	"share.h"
+
 namespace librib
 {
 
@@ -164,26 +169,26 @@ class RendermanInterface
 ; // namespace librib
 
 
-typedef	librib::RendermanInterface::RtFloat RtFloat;
-extern "C" RtFloat RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
-extern "C" RtFloat RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
-extern "C" RtFloat RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
-extern "C" RtFloat RiDiskFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
-extern "C" RtFloat RiGaussianFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
-extern "C" RtFloat RiSincFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
-extern "C" RtFloat RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+//typedef	librib::RendermanInterface::RtFloat RtFloat;
+//extern "C" _qShareM RtFloat RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+//extern "C" _qShareM RtFloat RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+//extern "C" _qShareM RtFloat RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+//extern "C" _qShareM RtFloat RiDiskFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+//extern "C" _qShareM RtFloat RiGaussianFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+//extern "C" _qShareM RtFloat RiSincFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+//extern "C" _qShareM RtFloat RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
 
-typedef	librib::RendermanInterface::RtVoid RtVoid;
-typedef	librib::RendermanInterface::RtPointer RtPointer;
-extern "C" RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail );
-extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail );
-extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail );
+//typedef	librib::RendermanInterface::RtVoid RtVoid;
+//typedef	librib::RendermanInterface::RtPointer RtPointer;
+//extern "C" _qShareM RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail );
+//extern "C" _qShareM RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail );
+//extern "C" _qShareM RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail );
 
-typedef	librib::RendermanInterface::RtBasis RtBasis;
-extern "C" RtBasis RiBezierBasis;
-extern "C" RtBasis RiBSplineBasis;
-extern "C" RtBasis RiCatmullRomBasis;
-extern "C" RtBasis RiHermiteBasis;
-extern "C" RtBasis RiPowerBasis;
+//typedef	librib::RendermanInterface::RtBasis RtBasis;
+//extern "C" _qShareM RtBasis RiBezierBasis;
+//extern "C" _qShareM RtBasis RiBSplineBasis;
+//extern "C" _qShareM RtBasis RiCatmullRomBasis;
+//extern "C" _qShareM RtBasis RiHermiteBasis;
+//extern "C" _qShareM RtBasis RiPowerBasis;
 
 #endif // LIBRIB_H

@@ -35,7 +35,7 @@ namespace librib
 
 void ParserDeclare(librib::RendermanInterface& CallbackInterface, const std::string Name, const std::string Type);
 void UpdateArchivePath(std::string strPath);
-void BasisFromName( RtBasis*& b, const char* name);
+void ParserBasisFromName( RtBasis*& b, const char* name);
 extern std::string ParseStreamName;
 extern RendermanInterface* ParseCallbackInterface;
 extern std::ostream* ParseErrorStream;
@@ -831,8 +831,8 @@ complete_request
 			{
 
 				RendermanInterface::RtBasis *u = &RiBezierBasis, *v = &RiBezierBasis;
-				BasisFromName(u, $2);
-				BasisFromName(v, $4);
+				ParserBasisFromName(u, $2);
+				ParserBasisFromName(v, $4);
 				ParseCallbackInterface->RiBasis(*u, $3, *v, $5);
 				DiscardStringValue($2);
 				DiscardStringValue($4);
@@ -849,7 +849,7 @@ complete_request
 							for(j=0; j<4; j++)
 								v[i][j]=(*$4)[(i*4)+j];
 
-						BasisFromName(u, $2);
+						ParserBasisFromName(u, $2);
 						ParseCallbackInterface->RiBasis(*u, $3,v, $5);
 					}
 				else
@@ -872,7 +872,7 @@ complete_request
 							for(j=0; j<4; j++)
 								u[i][j]=(*$2)[(i*4)+j];
 
-						BasisFromName(v, $4);
+						ParserBasisFromName(v, $4);
 						ParseCallbackInterface->RiBasis(u, $3,*v, $5);
 					}
 				else
@@ -1838,7 +1838,7 @@ void UpdateArchivePath(std::string strPath)
 }
 
 
-void BasisFromName( RtBasis*& b, const char* name)
+void ParserBasisFromName( RtBasis*& b, const char* name)
 {
 	// TODO: names should be stored elsewhere.
 	if(strcmp(name,"bezier")==0)			b=&RiBezierBasis;

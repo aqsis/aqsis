@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "BAKE2TIF_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\..\libaqsistypes" /I "..\..\libaqsistypes\win32\intel" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "AQSIS_SYSTEM_WIN32" /D _qBUILDING=bake2tif /D "AQSIS_DYNAMIC_LINK" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\..\libaqsistypes" /I "..\..\libaqsistypes\win32\intel" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "AQSIS_SYSTEM_WIN32" /D "AQSIS_DYNAMIC_LINK" /D "WIN32" /D _qBUILDING=BUILD_BAKE2TIF /D BUILD_BAKE2TIF=1 /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
@@ -68,8 +68,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "..\..\Object\Debug\plugings\bake2tif"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "BAKE2TIF_EXPORTS" /YX /FD /GZ  /c
-# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\..\libaqsistypes" /I "..\..\libaqsistypes\win32\intel" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "AQSIS_SYSTEM_WIN32" /D _qBUILDING=gif2tif /D "AQSIS_DYNAMIC_LINK" /YX /FD /GZ  /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "BAKE2TIF_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\..\libaqsistypes" /I "..\..\libaqsistypes\win32\intel" /D "_DEBUG" /D _qBUILDING=gif2tif /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "AQSIS_SYSTEM_WIN32" /D "AQSIS_DYNAMIC_LINK" /D "WIN32" /D _qBUILDING=BUILD_BAKE2TIF /D BUILD_BAKE2TIF=1 /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x809 /d "_DEBUG"

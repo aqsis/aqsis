@@ -35,7 +35,7 @@
 #include	"vector4d.h"
 #include	"sstring.h"
 
-#define		_qShareName	CORE
+#define		_qShareName	BUILD_LIBAQSISTYPES
 #include	"share.h"
 
 START_NAMESPACE( Aqsis )
@@ -43,11 +43,11 @@ START_NAMESPACE( Aqsis )
 
 typedef	TqFloat	__Basis[ 4 ][ 4 ];
 
-extern __Basis	gBezierBasis;
-extern __Basis	gBSplineBasis;
-extern __Basis	gCatmullRomBasis;
-extern __Basis	gHermiteBasis;
-extern __Basis	gPowerBasis;
+extern _qShareM __Basis	gBezierBasis;
+extern _qShareM __Basis	gBSplineBasis;
+extern _qShareM __Basis	gCatmullRomBasis;
+extern _qShareM __Basis	gHermiteBasis;
+extern _qShareM __Basis	gPowerBasis;
 
 
 //----------------------------------------------------------------------

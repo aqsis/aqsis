@@ -42,7 +42,8 @@
 #include	"bitvector.h"
 #include	"shadervariable.h"
 
-
+#define	 _qShareName	BUILD_LIBSHADERVM
+#include "share.h"
 
 START_NAMESPACE( Aqsis )
 

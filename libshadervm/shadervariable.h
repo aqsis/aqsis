@@ -41,6 +41,10 @@
 
 #include	"ishaderdata.h"
 
+#define	 _qShareName	BUILD_LIBSHADERVM
+#include "share.h"
+
+
 START_NAMESPACE( Aqsis )
 
 
@@ -1663,6 +1667,9 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 			return ( new CqShaderVariableVaryingMatrix( *this ) );
 		}
 };
+
+_qShare	std::ostream &operator<<( std::ostream &Stream, EqVariableType t );
+_qShare	std::ostream &operator<<( std::ostream &Stream, EqVariableClass t );
 
 
 //-----------------------------------------------------------------------

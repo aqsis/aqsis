@@ -43,6 +43,9 @@
 #include "ilog.h"
 #include "aqsis.h"
 
+#define	 _qShareName	BUILD_LIBAQSISTYPES
+#include "share.h"
+
 namespace log4cpp
 {
 
@@ -60,63 +63,63 @@ namespace log4cpp
 
 START_NAMESPACE( Aqsis )
 
-class CqLog	: public IqLog
+class _qShareC CqLog	: public IqLog
 {
 	public:
-		CqLog( char* name = "AqsisLog", bool noConsoleOutput = false );
-		virtual ~CqLog();
+		_qShareM CqLog( char* name = "AqsisLog", bool noConsoleOutput = false );
+		_qShareM virtual ~CqLog();
 
-		void addFileLog( std::string filename = "render.log", std::string name = "AqsisFileLog" );
-		void removeFileLog( std::string name );
+		_qShareM void addFileLog( std::string filename = "render.log", std::string name = "AqsisFileLog" );
+		_qShareM void removeFileLog( std::string name );
 		
-		void setMessageTable( CqMessageTable* pTable );
-		CqMessageTable* getMessageTable();
+		_qShareM void setMessageTable( CqMessageTable* pTable );
+		_qShareM CqMessageTable* getMessageTable();
 
-		void log( const char* priority, const char* stringFormat, ... );
-		void log( const char* priority, const CqString &stringFormat );
+		_qShareM void log( const char* priority, const char* stringFormat, ... );
+		_qShareM void log( const char* priority, const CqString &stringFormat );
 		
 		/** Log an error message
 		 */
-		void error( int table, int error_id );
-		void error( const char* stringFormat, ... );
-		void error( const CqString &string );
+		_qShareM void error( int table, int error_id );
+		_qShareM void error( const char* stringFormat, ... );
+		_qShareM void error( const CqString &string );
 
 		/** Log an warning
 		 */
-		void warn( int table, int error_id );
-		void warn( const char* stringFormat, ... );
-		void warn( const CqString &string );
+		_qShareM void warn( int table, int error_id );
+		_qShareM void warn( const char* stringFormat, ... );
+		_qShareM void warn( const CqString &string );
 
 		/** Log an critical error message
 		 */
-		void critical( int table, int error_id );
-		void critical( const char* stringFormat, ... );
-		void critical( const CqString &string );
+		_qShareM void critical( int table, int error_id );
+		_qShareM void critical( const char* stringFormat, ... );
+		_qShareM void critical( const CqString &string );
 
 		/** Log an notice message
 		 */
-		void notice( int table, int error_id );
-		void notice( const char* stringFormat, ... );
-		void notice( const CqString &string );
+		_qShareM void notice( int table, int error_id );
+		_qShareM void notice( const char* stringFormat, ... );
+		_qShareM void notice( const CqString &string );
 		
 		/** Log an info message
 		 */
-		void info( int table, int error_id );
-		void info( const char* stringFormat, ... );
-		void info( const CqString &string );
+		_qShareM void info( int table, int error_id );
+		_qShareM void info( const char* stringFormat, ... );
+		_qShareM void info( const CqString &string );
 		
 		/** Log an fatal error
 		 */
-		void fatal( int table, int error_id );
-		void fatal( const char* stringFormat, ... );
-		void fatal( const CqString &string );
+		_qShareM void fatal( int table, int error_id );
+		_qShareM void fatal( const char* stringFormat, ... );
+		_qShareM void fatal( const CqString &string );
 		
 		/** Log an debug message
 		 */
-		void debug( const char* stringFormat, ... );
-		void debug( const CqString &string );
+		_qShareM void debug( const char* stringFormat, ... );
+		_qShareM void debug( const CqString &string );
 
-		const char* getError( int table, int error_id );
+		_qShareM const char* getError( int table, int error_id );
 
 		enum {	BASIC_ERROR_TABLE = 0,
 				RI_ERROR_TABLE,

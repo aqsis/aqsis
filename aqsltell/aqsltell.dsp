@@ -1,24 +1,24 @@
 # Microsoft Developer Studio Project File - Name="aqsltell" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
-# ** NICHT BEARBEITEN **
+# ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Console Application" 0x0103
 
 CFG=aqsltell - Win32 Debug
-!MESSAGE Dies ist kein gültiges Makefile. Zum Erstellen dieses Projekts mit NMAKE
-!MESSAGE verwenden Sie den Befehl "Makefile exportieren" und führen Sie den Befehl
+!MESSAGE This is not a valid makefile. To build this project using NMAKE,
+!MESSAGE use the Export Makefile command and run
 !MESSAGE 
 !MESSAGE NMAKE /f "aqsltell.mak".
 !MESSAGE 
-!MESSAGE Sie können beim Ausführen von NMAKE eine Konfiguration angeben
-!MESSAGE durch Definieren des Makros CFG in der Befehlszeile. Zum Beispiel:
+!MESSAGE You can specify a configuration when running NMAKE
+!MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
 !MESSAGE NMAKE /f "aqsltell.mak" CFG="aqsltell - Win32 Debug"
 !MESSAGE 
-!MESSAGE Für die Konfiguration stehen zur Auswahl:
+!MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "aqsltell - Win32 Release" (basierend auf  "Win32 (x86) Console Application")
-!MESSAGE "aqsltell - Win32 Debug" (basierend auf  "Win32 (x86) Console Application")
+!MESSAGE "aqsltell - Win32 Release" (based on "Win32 (x86) Console Application")
+!MESSAGE "aqsltell - Win32 Debug" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libslxargs" /I "..\libshaderexecenv" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "AQSIS_SYSTEM_WIN32" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libslxargs" /I "..\libshaderexecenv" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "AQSIS_SYSTEM_WIN32" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_AQSLTELL /D BUILD_AQSLTELL=1 /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -66,7 +66,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\libslxargs" /I "..\libshaderexecenv" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "AQSIS_SYSTEM_WIN32" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\libslxargs" /I "..\libshaderexecenv" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "AQSIS_SYSTEM_WIN32" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_AQSLTELL /D BUILD_AQSLTELL=1 /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe

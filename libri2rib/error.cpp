@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include "error.h"
 
+/*
 /// Storage for the last error number reported.
 RtInt RiLastError;
 
@@ -39,6 +40,7 @@ RtVoid RiErrorPrint( RtInt cd, RtInt sev, const char *msg )
 
 RtVoid RiErrorAbort( RtInt cd, RtInt sev, const char *msg )
 {}
+*/
 
 USING_NAMESPACE( libri2rib );
 
