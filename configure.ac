@@ -297,7 +297,6 @@ boost/libs/thread/src/mac/Makefile \
 boost/libs/thread/src/mac/msl_replacements/Makefile \
 display/Makefile \
 dsotest/Makefile \
-d_exr/Makefile \
 images/Makefile \
 libaqsistypes/Makefile \
 libaqsistypes/posix/Makefile \
@@ -327,7 +326,6 @@ plugins/pcx2tif/Makefile \
 plugins/ppm2tif/Makefile \
 plugins/tga2tif/Makefile \
 plugins/bmp2tif/Makefile \
-plugins/exr2tif/Makefile \
 render/Makefile \
 ribfiles/Makefile \
 shaders/Makefile \
