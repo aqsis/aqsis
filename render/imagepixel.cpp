@@ -104,6 +104,9 @@ void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
 
 void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 {
+	TqFloat opentime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
+	TqFloat closetime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 1 ];
+
 	TqFloat subcell_width = 1.0f / ( m_XSamples * m_YSamples );
 	TqInt m = m_XSamples;
 	TqInt n = m_YSamples;
@@ -223,7 +226,10 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 
 		for ( i = 0; i < nSamples; i++ )
 		{
-			m_aTimes[ i ] = time + random.RandomFloat( dtime );
+			// Scale the value of time to the shutter time.
+			TqFloat t = time + random.RandomFloat( dtime );
+			t = ( closetime - opentime ) * t + opentime;
+			m_aTimes[ i ] = t;
 			time += dtime;
 			m_aDetailLevels[ i ] = lod + random.RandomFloat( dlod );
 			lod += dlod;
