@@ -629,6 +629,7 @@ private:
 ;
 
 
+
 //----------------------------------------------------------------------
 /** \class CqMovingMicroPolygonKey
  * Base lass for static micropolygons. Stores point information about the geometry of the micropoly.
@@ -724,6 +725,23 @@ public:
 		return TqTrue;
 	}
 
+	virtual TqInt cKeys() const
+	{
+		return(m_Keys.size());
+	}
+
+	virtual TqFloat Time(TqInt index) const
+	{
+		assert(index < m_Times.size());
+		return(m_Times[index]);
+	}
+
+	virtual CqMovingMicroPolygonKey* Key(TqInt index) const
+	{
+		assert(index < m_Keys.size());
+		return(m_Keys[index]);
+	}
+
 private:
     CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
     TqBool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
@@ -736,6 +754,124 @@ private:
 }
 ;
 
+
+
+//----------------------------------------------------------------------
+/** \class CqDetatchedMicroPolygon
+ * Derivation of the CqMicroPolygon class, that doesn't refer to a grid for it's points.
+ */
+
+class CqDetatchedMicroPolygon : public CqMicroPolygon
+{
+public:
+    CqDetatchedMicroPolygon( CqMicroPolygon* pMPG, TqFloat time ) 
+    {
+		CqMicroPolygon::operator=(*pMPG);
+        if( pMPG->IsMoving() )
+		{
+			// Need to get the appropriate position at the given time.
+			TqInt iIndex = 0;
+			TqFloat Fraction = 0.0f;
+			TqBool Exact = TqTrue;
+			CqMicroPolygonMotion* pMMP = dynamic_cast<CqMicroPolygonMotion*>(pMPG);
+
+			TqInt cKeys = pMMP->cKeys();
+			if ( time > pMMP->Time(0) )
+			{
+				if ( time >= pMMP->Time(cKeys-1) )
+					iIndex = cKeys - 1;
+				else
+				{
+					// Find the appropriate time span.
+					iIndex = 0;
+					while ( time >= pMMP->Time( iIndex + 1 ) )
+						iIndex += 1;
+					Fraction = ( time - pMMP->Time( iIndex ) ) / ( pMMP->Time( iIndex + 1 ) - pMMP->Time( iIndex ) );
+					Exact = ( pMMP->Time( iIndex ) == time );
+				}
+			}
+
+			if ( Exact )
+			{
+				CqMovingMicroPolygonKey * pMP1 = pMMP->Key( iIndex );
+				m_Point0 = pMP1->m_Point0;
+				m_Point1 = pMP1->m_Point1;
+				m_Point2 = pMP1->m_Point2;
+				m_Point3 = pMP1->m_Point3;
+			}
+			else
+			{
+				TqFloat F1 = 1.0f - Fraction;
+				CqMovingMicroPolygonKey* pMP1 = pMMP->Key( iIndex );
+				CqMovingMicroPolygonKey* pMP2 = pMMP->Key( iIndex + 1 );
+				
+				m_Point0 = ( F1 * pMP1->m_Point0 ) + ( Fraction * pMP2->m_Point0 );
+				m_Point1 = ( F1 * pMP1->m_Point1 ) + ( Fraction * pMP2->m_Point1 );
+				m_Point2 = ( F1 * pMP1->m_Point2 ) + ( Fraction * pMP2->m_Point2 );
+				m_Point3 = ( F1 * pMP1->m_Point3 ) + ( Fraction * pMP2->m_Point3 );
+			}
+			m_IsDegenerate = pMPG->IsDegenerate();
+		}
+		else
+		{
+			m_Point0 = pMPG->PointA();
+			m_Point1 = pMPG->PointB();
+			m_Point2 = pMPG->PointC();
+			m_Point3 = pMPG->PointD();
+			m_IsDegenerate = pMPG->IsDegenerate();
+		}
+    }
+    ~CqDetatchedMicroPolygon()
+    {}
+
+    virtual const CqVector3D& PointA() const
+    {
+        return ( m_Point0 );
+    }
+    virtual const CqVector3D& PointB() const
+    {
+        return ( m_Point1 );
+    }
+    virtual const CqVector3D& PointC() const
+    {
+        return ( m_Point2 );
+    }
+    virtual const CqVector3D& PointD() const
+    {
+        return ( m_Point3 );
+    }
+    virtual const TqBool IsDegenerate() const
+    {
+        return ( m_IsDegenerate );
+    }
+
+
+    virtual CqVector3D& PointA()
+    {
+        return ( m_Point0 );
+    }
+    virtual CqVector3D& PointB()
+    {
+        return ( m_Point1 );
+    }
+    virtual CqVector3D& PointC()
+    {
+        return ( m_Point2 );
+    }
+    virtual CqVector3D& PointD()
+    {
+        return ( m_Point3 );
+    }
+
+
+public:
+    CqVector3D	m_Point0;
+    CqVector3D	m_Point1;
+    CqVector3D	m_Point2;
+    CqVector3D	m_Point3;
+	TqBool		m_IsDegenerate;
+}
+;
 
 
 //-----------------------------------------------------------------------

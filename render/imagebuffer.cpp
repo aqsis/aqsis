@@ -929,26 +929,44 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 								continue;
 							}
 
-							TqFloat vecX;
-							TqFloat vecY;
+							CqDetatchedMicroPolygon mp(pMPG, time);
 							// check if sample lies inside mpg bounding box.
 							if ( UsingDof )
 							{
-								// check if the displaced sample will fall outside the mpg
-								// if outside in x dimension, don't bother transforming y
-								vecX = vecP.x() + maxCocX*sampleData.m_DofOffset.x();
-								if(mpgbminx > vecX || mpgbmaxx < vecX)
-								{
+								/* Create a new MP detatched from the grid so that we can
+								 * shift the vertices to account for the CoC of DoF.
+								 */
+								CqVector3D& vA = mp.PointA();
+								CqVector2D coc = QGetRenderContext()->GetCircleOfConfusion(vA.z());
+								vA.x(vA.x() - ( coc.x() * sampleData.m_DofOffset.x() ));
+								vA.y(vA.y() - ( coc.y() * sampleData.m_DofOffset.y() ));
+
+								CqVector3D& vB = mp.PointB();
+								coc = QGetRenderContext()->GetCircleOfConfusion(vB.z());
+								vB.x(vB.x() - ( coc.x() * sampleData.m_DofOffset.x() ));
+								vB.y(vB.y() - ( coc.y() * sampleData.m_DofOffset.y() ));
+
+								CqVector3D& vC = mp.PointC();
+								coc = QGetRenderContext()->GetCircleOfConfusion(vC.z());
+								vC.x(vC.x() - ( coc.x() * sampleData.m_DofOffset.x() ));
+								vC.y(vC.y() - ( coc.y() * sampleData.m_DofOffset.y() ));
+
+								CqVector3D& vD = mp.PointD();
+								coc = QGetRenderContext()->GetCircleOfConfusion(vD.z());
+								vD.x(vD.x() - ( coc.x() * sampleData.m_DofOffset.x() ));
+								vD.y(vD.y() - ( coc.y() * sampleData.m_DofOffset.y() ));
+			
+								CqBound DofBound(Bound);
+								DofBound.vecMin().x(DofBound.vecMin().x() - (coc.x() * sampleData.m_DofOffset.x() ));
+								DofBound.vecMin().y(DofBound.vecMin().y() - (coc.y() * sampleData.m_DofOffset.y() ));
+								DofBound.vecMax().x(DofBound.vecMax().x() - (coc.x() * sampleData.m_DofOffset.x() ));
+								DofBound.vecMax().y(DofBound.vecMax().y() - (coc.y() * sampleData.m_DofOffset.y() ));
+
+								if(!DofBound.Contains2D( vecP ))
 									continue;
-								}
-								else
-								{
-									vecY = vecP.y() + maxCocY*sampleData.m_DofOffset.y();
-									if(mpgbminy > vecY || mpgbmaxy < vecY)
-									{
-										continue;
-									}
-								}
+
+								mp.CacheHitTestValues(&hitTestCache);
+								cachedHitData = TqTrue;
 							}
 							else
 							{
@@ -982,8 +1000,7 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 
 							if( UsingDof )
 							{
-								CqVector2D vecPDof(vecX, vecY);
-								SampleHit = pMPG->Sample( vecPDof, D, time );
+								SampleHit = mp.Sample( vecP, D, time );
 							}
 							else
 							{
