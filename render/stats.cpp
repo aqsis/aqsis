@@ -89,6 +89,7 @@ void CqStats::InitialiseFrame()
 	m_cTotalGPrims = 0;
 	m_cCulledGPrims = 0;
 	m_cCulledGrids = 0;
+	m_cMissedMPGs = 0;
 	m_cCulledMPGs = 0;
 	m_cTextureMemory = 0;
 	m_timeTotalFrame = 0;
@@ -205,7 +206,11 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "Micropolygons: \t" << m_cMPGsAllocated << " created / ";
 		MSG << m_cMPGsAllocated - m_cMPGsDeallocated << " remaining / ";
 		MSG << m_cMPGsPeak << " peak (+ ";
-		MSG << m_cCulledMPGs << " culled)" << std::endl;
+		MSG << m_cCulledMPGs << " culled)";
+		if ( m_cMissedMPGs > 0 )
+			MSG << " (** " << m_cMissedMPGs << " missed **)" << std::endl;
+		else
+			MSG << std::endl;
 
 		MSG << "Sampling: \t" << m_cSamples << " samples" << std::endl;
 		MSG << "          \t" << m_cSampleBoundHits << " bound hits (";

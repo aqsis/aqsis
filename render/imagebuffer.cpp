@@ -1329,7 +1329,6 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 
 	CqBucket& Bucket = m_aBuckets[ iBucket ];
 
-
 	for ( TqInt bound_num = 0; bound_num < pMPG->cSubBounds(); bound_num++ )
 	{
 		TqFloat time0;
@@ -1429,6 +1428,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 							if ( pMPG->Sample( vecP, t, ImageVal.m_Depth ) )
 							{
 								QGetRenderContext() ->Stats().IncSampleHits();
+								pMPG->BeenHit();
 								// Sort the color/opacity into the visible point list
 								std::vector<SqImageSample>& aValues = pie->Values( m, n );
 								int i = 0;

@@ -102,12 +102,12 @@ CqMicroPolyGridBase* CqQuadric::Dice()
 		{
 			P = DicePoint( u, v, N );
 			pGrid->P() = m_matTx * P;
-			pGrid->N() = m_matITTx * N;
+			pGrid->Ng() = m_matITTx * N;
 			pGrid->Advance();
 		}
 	}
 
-	pGrid->SetNormals( CanGenerateNormals() );
+	pGrid->SetbGeometricNormals( CanGenerateNormals() );
 
 	return ( pGrid );
 }

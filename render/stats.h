@@ -282,6 +282,12 @@ class CqStats
 		{
 			m_cCulledMPGs += n;
 		}
+		/** Increase the missed MPG count by 1.
+		 */
+		void	IncMissedMPGs()
+		{
+			m_cMissedMPGs++;
+		}
 
 		//@}
 		void	IncTextureMemory( TqInt n = 0 )
@@ -419,6 +425,7 @@ class CqStats
 		TqInt	m_cCulledGPrims;				///< Count of culled GPrims.
 		TqInt	m_cCulledGrids;					///< Count of culled micro poly grids.
 		TqInt	m_cCulledMPGs;					///< Count of culled micro polys.
+		TqInt	m_cMissedMPGs;				///< Count of missed MPGs.
 		TqInt m_cTextureMemory;     ///< Count of the memory used by texturemap.cpp
 
 		time_t	m_timeTotal;					///< Total time spent on the entire animation.

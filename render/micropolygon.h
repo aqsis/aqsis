@@ -108,13 +108,33 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqShaderExecEnv
 		virtual	~CqMicroPolyGrid();
 
 		void	CalcNormals();
-		/** Set the normals flag, indicating this grid has normals already specified.
+		/** Set the shading normals flag, indicating this grid has shading (N) normals already specified.
 		 * \param f The new state of the flag.
 		 */
-		void	SetNormals( TqBool f )
+		void	SetbShadingNormals( TqBool f )
 		{
-			m_fNormals = f;
+			m_bShadingNormals = f;
 		}
+		/** Set the geometric normals flag, indicating this grid has geometric (Ng) normals already specified.
+		 * \param f The new state of the flag.
+		 */
+		void	SetbGeometricNormals( TqBool f )
+		{
+			m_bGeometricNormals = f;
+		}
+		/** Query whether shading (N) normals have been filled in by the surface at dice time.
+		 */
+		TqBool bShadingNormals() const
+		{
+			return(m_bShadingNormals);
+		}
+		/** Query whether geometric (Ng) normals have been filled in by the surface at dice time.
+		 */
+		TqBool bGeometricNormals() const
+		{
+			return(m_bGeometricNormals);
+		}
+		
 		void	Initialise( TqInt cu, TqInt cv, CqSurface* pSurface );
 
 		/** Increase the count of references to this grid.
@@ -156,7 +176,8 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqShaderExecEnv
 		}
 
 	private:
-		TqBool	m_fNormals;			///< Flag indicating normals have been filled in and don't need to be calculated during shading.
+		TqBool	m_bShadingNormals;		///< Flag indicating shading normals have been filled in and don't need to be calculated during shading.
+		TqBool	m_bGeometricNormals;	///< Flag indicating geometric normals have been filled in and don't need to be calculated during shading.
 		TqInt	m_cReferences;		///< Count of references to this grid.
 		CqAttributes* m_pAttributes;	///< Pointer to the attributes for this grid.
 		CqCSGTreeNode* m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
@@ -331,10 +352,15 @@ class CqMicroPolygonBase
 		 */
 		virtual	TqBool	Sample( CqVector2D& vecSample, TqFloat time, TqFloat& D ) = 0;
 
+		/** Set the flag to state that the MPG has eben hit by a sample point.
+		 */
+		void BeenHit()	{ m_bHit = TqTrue; }
+
 	protected:
 		CqMicroPolyGrid*	m_pGrid;		///< Pointer to the donor grid.
 		TqInt	m_Index;		///< Index within the donor grid.
 		TqInt	m_RefCount;		///< Number of references to this micropoly.
+		TqBool	m_bHit;			///< Flag indicating the MPG has been sampled.
 }
 ;
 

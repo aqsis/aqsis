@@ -43,7 +43,7 @@ DEFINE_STATIC_MEMORYPOOL( CqMicroPolygonStatic );
 /** Default constructor
  */
 
-CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(), m_fNormals( TqFalse ), m_cReferences( 0 ), m_pAttributes( 0 ), m_pCSGNode( NULL )
+CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(), m_bShadingNormals( TqFalse ), m_bGeometricNormals( TqFalse ), m_cReferences( 0 ), m_pAttributes( 0 ), m_pCSGNode( NULL )
 {
 	QGetRenderContext() ->Stats().IncGridsAllocated();
 }
@@ -71,7 +71,7 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
 /** Constructor
  */
 
-CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) : m_fNormals( TqFalse ), m_cReferences( 0 ), m_pAttributes( 0 )
+CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) : m_bShadingNormals( TqFalse ), m_bGeometricNormals( TqFalse ), m_cReferences( 0 ), m_pAttributes( 0 )
 {
 	QGetRenderContext() ->Stats().IncGridsAllocated();
 	// Initialise the shader execution environment
@@ -194,8 +194,10 @@ void CqMicroPolyGrid::Shade()
 	long cCulled = 0;
 
 
-	// Calculate geometric normals.
-	CalcNormals();
+	// Calculate geometric normals if not specified by the surface.
+	if ( !bGeometricNormals() )	CalcNormals();
+	// If shading normals are not explicitly specified, they default to the geometric normal.
+	if ( !bShadingNormals() ) N().SetValue( Ng() );	
 
 	// Setup uniform variables.
 	if ( USES( lUses, EnvVars_E ) ) E() = vecE;
@@ -214,7 +216,6 @@ void CqMicroPolyGrid::Shade()
 
 	if ( USES( lUses, EnvVars_Ci ) ) Ci().SetValue( gColBlack );
 	if ( USES( lUses, EnvVars_Oi ) ) Oi().SetValue( gColWhite );
-	if ( !m_fNormals ) N().SetValue( Ng() );	// If normals are no explicitly specified, they default to the geometric normal.
 
 	// Setup varying variables.
 	Reset();
@@ -352,7 +353,7 @@ void CqMicroPolyGrid::Shade()
 	// Delete unneeded variables so that we don't use up unnecessary memory
 	DeleteVariable( EnvVars_Cs );
 	DeleteVariable( EnvVars_Os );
-	DeleteVariable( EnvVars_Ng );
+	//DeleteVariable( EnvVars_Ng );
 	DeleteVariable( EnvVars_du );
 	DeleteVariable( EnvVars_dv );
 	DeleteVariable( EnvVars_L );
@@ -622,7 +623,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 /** Default constructor
  */
 
-CqMicroPolygonBase::CqMicroPolygonBase() : m_pGrid( 0 ), m_RefCount( 0 )
+CqMicroPolygonBase::CqMicroPolygonBase() : m_pGrid( 0 ), m_RefCount( 0 ), m_bHit( TqFalse )
 {
 	QGetRenderContext() ->Stats().IncMPGsAllocated();
 }
@@ -632,7 +633,7 @@ CqMicroPolygonBase::CqMicroPolygonBase() : m_pGrid( 0 ), m_RefCount( 0 )
 /** Copy constructor
  */
 
-CqMicroPolygonBase::CqMicroPolygonBase( const CqMicroPolygonBase& From )
+CqMicroPolygonBase::CqMicroPolygonBase( const CqMicroPolygonBase& From ) : m_bHit( TqFalse )
 {
 	QGetRenderContext() ->Stats().IncMPGsAllocated();
 	*this = From;
@@ -647,6 +648,8 @@ CqMicroPolygonBase::~CqMicroPolygonBase()
 {
 	if ( m_pGrid ) m_pGrid->Release();
 	QGetRenderContext() ->Stats().IncMPGsDeallocated();
+	if( !m_bHit )
+		QGetRenderContext() ->Stats().IncMissedMPGs();
 }
 
 
@@ -660,24 +663,32 @@ CqMicroPolygonBase::~CqMicroPolygonBase()
 
 void CqMicroPolygonStaticBase::Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD )
 {
-	bool fFlip = ( ( vA.x() - vB.x() ) * ( vB.y() - vC.y() ) ) > ( ( vA.y() - vB.y() ) * ( vB.x() - vC.x() ) );
+	// Check for degenerate case, if any of the neighbouring points are the same, shuffle them down, and 
+	// duplicate the last point exactly. Exact duplication of the last two points is used as a marker in the 
+	// fContains function to indicate degeneracy. If more that two points are coincident, we are in real trouble!
+	const CqVector3D& vvB = (vA-vB).Magnitude()<1e-2?vC:vB;
+	const CqVector3D& vvC = (vvB-vC).Magnitude()<1e-2?vD:vC;
+	const CqVector3D& vvD = (vvC-vD).Magnitude()<1e-2?vvC:vD;
+
+	// Determine whether the MPG is CW or CCW, must be CCW for fContains to work.
+	bool fFlip = ( ( vA.x() - vvB.x() ) * ( vvB.y() - vvC.y() ) ) >= ( ( vA.y() - vvB.y() ) * ( vvB.x() - vvC.x() ) );
 
 	if ( !fFlip )
 	{
 		m_vecPoints[ 0 ] = vA;
-		m_vecPoints[ 1 ] = vD;
-		m_vecPoints[ 2 ] = vC;
-		m_vecPoints[ 3 ] = vB;
+		m_vecPoints[ 1 ] = vvD;
+		m_vecPoints[ 2 ] = vvC;
+		m_vecPoints[ 3 ] = vvB;
 	}
 	else
 	{
 		m_vecPoints[ 0 ] = vA;
-		m_vecPoints[ 1 ] = vB;
-		m_vecPoints[ 2 ] = vC;
-		m_vecPoints[ 3 ] = vD;
+		m_vecPoints[ 1 ] = vvB;
+		m_vecPoints[ 2 ] = vvC;
+		m_vecPoints[ 3 ] = vvD;
 	}
 
-	m_vecN = ( vB - vA ) % ( vC - vA );
+	m_vecN = (vA - vvB) % (vvC - vvB);
 	m_vecN.Unit();
 	m_D = m_vecN * vA;
 }
@@ -692,6 +703,7 @@ void CqMicroPolygonStaticBase::Initialise( const CqVector3D& vA, const CqVector3
 
 TqBool CqMicroPolygonStaticBase::fContains( const CqVector2D& vecP, TqFloat& Depth )
 {
+	// Check against each line of the quad, if outside any then point is outside MPG, therefore early exit.
 	TqFloat r1, r2, r3, r4;
 	TqFloat x = vecP.x(), y = vecP.y();
 	TqFloat x0 = m_vecPoints[ 0 ].x(), y0 = m_vecPoints[ 0 ].y(), x1 = m_vecPoints[ 1 ].x(), y1 = m_vecPoints[ 1 ].y();
@@ -701,7 +713,10 @@ TqBool CqMicroPolygonStaticBase::fContains( const CqVector2D& vecP, TqFloat& Dep
 	x0 = x1; y0 = y1; x1 = m_vecPoints[ 3 ].x(); y1 = m_vecPoints[ 3 ].y();
 	if ( ( r3 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
 	x0 = x1; y0 = y1; x1 = m_vecPoints[ 0 ].x(); y1 = m_vecPoints[ 0 ].y();
-	if ( ( r4 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
+	
+	// Check for degeneracy.
+	if ( ! ( x0 == x1 && y0 == y1 ) )
+		if ( ( r4 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
 
 	Depth = ( m_D - ( m_vecN.x() * vecP.x() ) - ( m_vecN.y() * vecP.y() ) ) / m_vecN.z();
 
