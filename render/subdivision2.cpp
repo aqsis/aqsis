@@ -618,7 +618,7 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
         std::vector<CqLath*>::iterator iF;
         for( iF = aQff.begin(); iF != aQff.end(); iF++ )
 		{
-		    if( NULL != (*iF)->pFaceVertex() )
+		    if( NULL == (*iF)->pFaceVertex() )
 			    SubdivideFace(*iF, apSubFaces2);
 		}
     }
