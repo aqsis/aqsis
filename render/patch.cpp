@@ -281,9 +281,9 @@ CqSurfacePatchBicubic& CqSurfacePatchBicubic::operator=(const CqSurfacePatchBicu
 	// Perform per surface copy function
 	CqSurface::operator=(From);
 
-	TqInt i;
-	for(i=0; i<16; i++)
-		P()[i]=From.P()[i];
+//	TqInt i;
+//	for(i=0; i<16; i++)
+//		P()[i]=From.P()[i];
 
 	return(*this);
 }
@@ -1034,6 +1034,440 @@ void	CqSurfacePatchBilinear::Transform(const CqMatrix& matTx, const CqMatrix& ma
 		P()[i]=matTx*P()[i];
 		if(N().Size()==4)	N()[i]=matITTx*N()[i];
 	}
+}
+
+
+//---------------------------------------------------------------------
+/** Copy constructor.
+ */
+
+CqSurfacePatchMeshBicubic::CqSurfacePatchMeshBicubic(const CqSurfacePatchMeshBicubic& From) :
+							CqSurface(From)
+{
+	*this=From;
+}
+
+
+//---------------------------------------------------------------------
+/** Destructor.
+ */
+
+CqSurfacePatchMeshBicubic::~CqSurfacePatchMeshBicubic()
+{
+}
+
+
+//---------------------------------------------------------------------
+/** Assignment operator.
+ */
+
+CqSurfacePatchMeshBicubic& CqSurfacePatchMeshBicubic::operator=(const CqSurfacePatchMeshBicubic& From)	
+{
+	// Perform per surface copy function
+	CqSurface::operator=(From);
+	return(*this);
+}
+
+
+//---------------------------------------------------------------------
+/** Get the boundary extents in camera space of the surface patch mesh
+ */
+
+CqBound CqSurfacePatchMeshBicubic::Bound() const
+{
+	// Get the boundary in camera space.
+	CqVector3D	vecA(FLT_MAX, FLT_MAX, FLT_MAX);
+	CqVector3D	vecB(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+	TqInt i;
+	for(i=0; i<P().Size(); i++)
+	{
+		CqVector3D	vecV=P()[i];
+		if(vecV.x()<vecA.x())	vecA.x(vecV.x());
+		if(vecV.y()<vecA.y())	vecA.y(vecV.y());
+		if(vecV.x()>vecB.x())	vecB.x(vecV.x());
+		if(vecV.y()>vecB.y())	vecB.y(vecV.y());
+		if(vecV.z()<vecA.z())	vecA.z(vecV.z());
+		if(vecV.z()>vecB.z())	vecB.z(vecV.z());
+	}
+	CqBound	B;
+	B.vecMin()=vecA;
+	B.vecMax()=vecB;
+	return(B);
+}
+
+
+//---------------------------------------------------------------------
+/** Transform the patch by the specified matrix.
+ */
+
+void CqSurfacePatchMeshBicubic::Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx)
+{
+	// Tansform the control hull by the specified matrix.
+	TqInt i;
+	for(i=0; i<P().Size(); i++)
+		P()[i]=matTx*P()[i];
+}
+
+
+//---------------------------------------------------------------------
+/** Split the patch mesh into individual patches and post them.
+ */
+
+#define	PatchCoord(v,u)	((((v)%m_nv)*m_nu)+((u)%m_nu))
+#define	PatchCorner(v,u)	((((v)%nvaryingv)*nvaryingu)+((u)%nvaryingu));
+
+TqInt CqSurfacePatchMeshBicubic::Split(std::vector<CqBasicSurface*>& aSplits)
+{
+	TqInt cSplits=0;
+
+	CqVector4D vecPoint;
+	RtInt iP=0;
+	RtInt uStep=pAttributes()->uSteps();
+	RtInt vStep=pAttributes()->vSteps();
+	
+	RtInt nvaryingu=(m_uPeriodic)?m_uPatches:m_uPatches+1;
+	RtInt nvaryingv=(m_vPeriodic)?m_vPatches:m_vPatches+1;
+	
+	RtFloat up,vp;
+	RtFloat du=1.0/m_uPatches;
+	RtFloat dv=1.0/m_vPatches;
+
+	TqInt MyUses=Uses();
+
+	CqVector2D st1,st2,st3,st4;
+	st1=pAttributes()->aTextureCoordinates()[0];
+	st2=pAttributes()->aTextureCoordinates()[1];
+	st3=pAttributes()->aTextureCoordinates()[2];
+	st4=pAttributes()->aTextureCoordinates()[3];
+	
+	vp=0;
+	// Fill in the points
+	TqInt i;
+	for(i=0; i<m_vPatches; i++)	
+	{
+		up=0;
+		// vRow is the coordinate row of the mesh.
+		RtInt	vRow=i*vStep;
+		RtInt j;
+		for(j=0; j<m_uPatches; j++)
+		{
+			// uCol is the coordinate column of the mesh.
+			RtInt uCol=j*uStep;
+			CqSurfacePatchBicubic*	pSurface=new CqSurfacePatchBicubic();
+			pSurface->SetDefaultPrimitiveVariables();
+			pSurface->P().SetSize(pSurface->cVertex());
+			RtInt v;
+			for(v=0; v<4; v++)
+			{
+				iP=PatchCoord(vRow+v,uCol  );
+				pSurface->P()[(v*4)]=P()[iP];
+				iP=PatchCoord(vRow+v,uCol+1);
+				pSurface->P()[(v*4)+1]=P()[iP];
+				iP=PatchCoord(vRow+v,uCol+2);
+				pSurface->P()[(v*4)+2]=P()[iP];
+				iP=PatchCoord(vRow+v,uCol+3);
+				pSurface->P()[(v*4)+3]=P()[iP];
+			}
+			// Fill in the surface parameters for the mesh.
+			if(USES(MyUses,EnvVars_u))
+			{
+				pSurface->u()[0]=up;	
+				pSurface->u()[1]=up+du;	
+				pSurface->u()[2]=up;	
+				pSurface->u()[3]=up+du;	
+			}
+
+			if(USES(MyUses,EnvVars_v))
+			{
+				pSurface->v()[0]=vp;
+				pSurface->v()[1]=vp;
+				pSurface->v()[2]=vp+dv;
+				pSurface->v()[3]=vp+dv;
+			}
+
+			// Fill in the texture coordinates for the mesh.
+			// Use the attribute texture coordinates of none explicitly specified.
+			// If any textures coordinates have been sxplicilty specified, they override the
+			// attribute level settings.
+			RtInt iTa=PatchCorner(i,j);
+			RtInt iTb=PatchCorner(i,j+1);
+			RtInt iTc=PatchCorner(i+1,j);
+			RtInt iTd=PatchCorner(i+1,j+1);
+			if(USES(MyUses,EnvVars_s))
+			{
+				pSurface->s().SetSize(4);
+				if(bHass())
+				{
+					pSurface->s()[0]=s()[iTa];
+					pSurface->s()[1]=s()[iTb];
+					pSurface->s()[2]=s()[iTc];
+					pSurface->s()[3]=s()[iTd];
+				}
+				else
+				{
+					pSurface->s()[0]=BilinearEvaluate<RtFloat>(st1.x(),st2.x(),st3.x(),st4.x(),up,vp);
+					pSurface->s()[1]=BilinearEvaluate<RtFloat>(st1.x(),st2.x(),st3.x(),st4.x(),up+du,vp);
+					pSurface->s()[2]=BilinearEvaluate<RtFloat>(st1.x(),st2.x(),st3.x(),st4.x(),up,vp+dv);
+					pSurface->s()[3]=BilinearEvaluate<RtFloat>(st1.x(),st2.x(),st3.x(),st4.x(),up+du,vp+dv);
+				}
+			}
+
+			if(USES(MyUses,EnvVars_t))
+			{
+				pSurface->t().SetSize(4);
+				if(bHast())
+				{
+					pSurface->t()[0]=t()[iTa];
+					pSurface->t()[1]=t()[iTb];
+					pSurface->t()[2]=t()[iTc];
+					pSurface->t()[3]=t()[iTd];
+				}
+				else
+				{
+					pSurface->t()[0]=BilinearEvaluate<RtFloat>(st1.y(),st2.y(),st3.y(),st4.y(),up,vp);
+					pSurface->t()[1]=BilinearEvaluate<RtFloat>(st1.y(),st2.y(),st3.y(),st4.y(),up+du,vp);
+					pSurface->t()[2]=BilinearEvaluate<RtFloat>(st1.y(),st2.y(),st3.y(),st4.y(),up,vp+dv);
+					pSurface->t()[3]=BilinearEvaluate<RtFloat>(st1.y(),st2.y(),st3.y(),st4.y(),up+du,vp+dv);
+				}
+			}
+
+			if(USES(MyUses,EnvVars_Cs) && bHasCs())
+			{
+				pSurface->Cs().SetSize(4);
+				pSurface->Cs()[0]=Cs()[iTa];
+				pSurface->Cs()[1]=Cs()[iTb];
+				pSurface->Cs()[2]=Cs()[iTc];
+				pSurface->Cs()[3]=Cs()[iTd];
+			}
+
+			if(USES(MyUses,EnvVars_Os) && bHasOs())
+			{
+				pSurface->Os().SetSize(4);
+				pSurface->Os()[0]=Os()[iTa];
+				pSurface->Os()[1]=Os()[iTb];
+				pSurface->Os()[2]=Os()[iTc];
+				pSurface->Os()[3]=Os()[iTd];
+			}
+
+			up+=du;
+
+			aSplits.push_back(pSurface);
+			cSplits++;
+		}
+		vp+=dv;
+	}
+	return(cSplits);
+}
+
+
+//---------------------------------------------------------------------
+/** Copy constructor.
+ */
+
+CqSurfacePatchMeshBilinear::CqSurfacePatchMeshBilinear(const CqSurfacePatchMeshBilinear& From) :
+							CqSurface(From)
+{
+	*this=From;
+}
+
+
+//---------------------------------------------------------------------
+/** Destructor.
+ */
+
+CqSurfacePatchMeshBilinear::~CqSurfacePatchMeshBilinear()
+{
+}
+
+
+//---------------------------------------------------------------------
+/** Assignment operator.
+ */
+
+CqSurfacePatchMeshBilinear& CqSurfacePatchMeshBilinear::operator=(const CqSurfacePatchMeshBilinear& From)	
+{
+	// Perform per surface copy function
+	CqSurface::operator=(From);
+	return(*this);
+}
+
+
+//---------------------------------------------------------------------
+/** Get the boundary extents in camera space of the surface patch mesh
+ */
+
+CqBound CqSurfacePatchMeshBilinear::Bound() const
+{
+	// Get the boundary in camera space.
+	CqVector3D	vecA(FLT_MAX, FLT_MAX, FLT_MAX);
+	CqVector3D	vecB(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+	TqInt i;
+	for(i=0; i<P().Size(); i++)
+	{
+		CqVector3D	vecV=P()[i];
+		if(vecV.x()<vecA.x())	vecA.x(vecV.x());
+		if(vecV.y()<vecA.y())	vecA.y(vecV.y());
+		if(vecV.x()>vecB.x())	vecB.x(vecV.x());
+		if(vecV.y()>vecB.y())	vecB.y(vecV.y());
+		if(vecV.z()<vecA.z())	vecA.z(vecV.z());
+		if(vecV.z()>vecB.z())	vecB.z(vecV.z());
+	}
+	CqBound	B;
+	B.vecMin()=vecA;
+	B.vecMax()=vecB;
+	return(B);
+}
+
+
+//---------------------------------------------------------------------
+/** Transform the patch by the specified matrix.
+ */
+
+void CqSurfacePatchMeshBilinear::Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx)
+{
+	// Tansform the control hull by the specified matrix.
+	TqInt i;
+	for(i=0; i<P().Size(); i++)
+		P()[i]=matTx*P()[i];
+}
+
+
+//---------------------------------------------------------------------
+/** Split the patch mesh into individual patches and post them.
+ */
+
+#define	PatchCoord(v,u)	((((v)%m_nv)*m_nu)+((u)%m_nu))
+#define	PatchCorner(v,u)	((((v)%nvaryingv)*nvaryingu)+((u)%nvaryingu));
+
+TqInt CqSurfacePatchMeshBilinear::Split(std::vector<CqBasicSurface*>& aSplits)
+{
+	TqInt cSplits=0;
+
+	// Create a surface patch
+	RtInt iP=0;
+	
+	RtFloat up,vp;
+	RtFloat du=1.0/m_uPatches;
+	RtFloat dv=1.0/m_vPatches;
+
+	TqInt MyUses=Uses();
+
+	CqVector2D st1,st2,st3,st4;
+	st1=pAttributes()->aTextureCoordinates()[0];
+	st2=pAttributes()->aTextureCoordinates()[1];
+	st3=pAttributes()->aTextureCoordinates()[2];
+	st4=pAttributes()->aTextureCoordinates()[3];
+	
+	vp=0;
+	TqInt i;
+	for(i=0; i<m_vPatches; i++)	// Fill in the points
+	{
+		up=0;
+		RtInt j;
+		for(j=0; j<m_uPatches; j++)
+		{
+			CqSurfacePatchBilinear*	pSurface=new CqSurfacePatchBilinear();
+			pSurface->SetDefaultPrimitiveVariables();
+			pSurface->P().SetSize(4);
+
+			// Calculate the position in the point table for u taking into account
+			// periodic patches.
+			iP=PatchCoord(i,j);
+			pSurface->P()[0]=P()[iP];
+			iP=PatchCoord(i,j+1);
+			pSurface->P()[1]=P()[iP];
+			iP=PatchCoord(i+1,j);
+			pSurface->P()[2]=P()[iP];
+			iP=PatchCoord(i+1,j+1);
+			pSurface->P()[3]=P()[iP];
+
+			// Fill in the surface parameters for the mesh.
+			if(USES(MyUses,EnvVars_u))
+			{
+				pSurface->u()[0]=up;
+				pSurface->u()[1]=up+du;
+				pSurface->u()[2]=up;
+				pSurface->u()[3]=up+du;
+			}
+
+			if(USES(MyUses,EnvVars_v))
+			{
+				pSurface->v()[0]=vp;
+				pSurface->v()[1]=vp;
+				pSurface->v()[2]=vp+dv;
+				pSurface->v()[3]=vp+dv;
+			}
+
+			// Fill in the texture coordinates for the mesh.
+			// If any textures coordinates have been sxplicilty specified, they override the
+			// attribute level settings.
+			RtInt iTa=PatchCoord(i,j);
+			RtInt iTb=PatchCoord(i,j+1);
+			RtInt iTc=PatchCoord(i+1,j);
+			RtInt iTd=PatchCoord(i+1,j+1);
+
+			if(USES(MyUses,EnvVars_s))
+			{
+				if(bHass())
+				{
+					pSurface->s()[0]=s()[iTa];
+					pSurface->s()[1]=s()[iTb];
+					pSurface->s()[2]=s()[iTc];
+					pSurface->s()[3]=s()[iTd];
+				}
+				else
+				{
+					pSurface->s()[0]=BilinearEvaluate<RtFloat>(st1.x(),st2.x(),st3.x(),st4.x(),up,vp);
+					pSurface->s()[1]=BilinearEvaluate<RtFloat>(st1.x(),st2.x(),st3.x(),st4.x(),up+du,vp);
+					pSurface->s()[2]=BilinearEvaluate<RtFloat>(st1.x(),st2.x(),st3.x(),st4.x(),up,vp+dv);
+					pSurface->s()[3]=BilinearEvaluate<RtFloat>(st1.x(),st2.x(),st3.x(),st4.x(),up+du,vp+dv);
+				}
+			}
+
+			if(USES(MyUses,EnvVars_t))
+			{
+				if(bHast())
+				{
+					pSurface->t()[0]=t()[iTa];
+					pSurface->t()[1]=t()[iTb];
+					pSurface->t()[2]=t()[iTc];
+					pSurface->t()[3]=t()[iTd];
+				}
+				else
+				{
+					pSurface->t()[0]=BilinearEvaluate<RtFloat>(st1.y(),st2.y(),st3.y(),st4.y(),up,vp);
+					pSurface->t()[1]=BilinearEvaluate<RtFloat>(st1.y(),st2.y(),st3.y(),st4.y(),up+du,vp);
+					pSurface->t()[2]=BilinearEvaluate<RtFloat>(st1.y(),st2.y(),st3.y(),st4.y(),up,vp+dv);
+					pSurface->t()[3]=BilinearEvaluate<RtFloat>(st1.y(),st2.y(),st3.y(),st4.y(),up+du,vp+dv);
+				}
+			}
+
+			if(USES(pSurface->Uses(),EnvVars_Cs) && bHasCs())
+			{
+				pSurface->Cs().SetSize(4);
+				pSurface->Cs()[0]=Cs()[iTa];
+				pSurface->Cs()[1]=Cs()[iTb];
+				pSurface->Cs()[2]=Cs()[iTc];
+				pSurface->Cs()[3]=Cs()[iTd];
+			}
+
+			if(USES(pSurface->Uses(),EnvVars_Os) && bHasOs())
+			{
+				pSurface->Os().SetSize(4);
+				pSurface->Os()[0]=Os()[iTa];
+				pSurface->Os()[1]=Os()[iTb];
+				pSurface->Os()[2]=Os()[iTc];
+				pSurface->Os()[3]=Os()[iTd];
+			}
+
+			up+=du;
+
+			aSplits.push_back(pSurface);
+			cSplits++;
+		}
+		vp+=dv;
+	}
+	return(cSplits);
 }
 
 

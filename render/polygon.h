@@ -90,28 +90,6 @@ class CqPolygonBase
 							 */
 		virtual	const	TqFloat& Polyv(TqInt i) const=0;
 
-							/** Determine whether the GPrim has user specified normals.
-							 */
-		virtual	TqBool		bHasNormals() const=0;
-							/** Determine whether the GPrim has user specified texture s coordinates.
-							 */
-		virtual	TqBool		bHass() const=0;
-							/** Determine whether the GPrim has user specified texture s coordinates.
-							 */
-		virtual	TqBool		bHast() const=0;
-							/** Determine whether the GPrim has user specified surface u coordinates.
-							 */
-		virtual	TqBool		bHasu() const=0;
-							/** Determine whether the GPrim has user specified surface u coordinates.
-							 */
-		virtual	TqBool		bHasv() const=0;
-							/** Determine whether the GPrim has user specified vertex colors.
-							 */
-		virtual	TqBool		bHasCs() const=0;
-							/** Determine whether the GPrim has user specified vertex opacities.
-							 */
-		virtual	TqBool		bHasOs() const=0;
-
 							/** Get the number of vertices in this polygon.
 							 */
 		virtual	TqInt		NumVertices() const=0;
@@ -122,6 +100,29 @@ class CqPolygonBase
 							/** Get a pointer to the transfrom associated with this polygon.
 							 */
 		virtual	const CqTransform*	pTransform() const=0;
+
+
+						/** Determine whether this surface has per vertex normals.
+						 */
+		virtual	const	TqBool		bHasN() const=0;
+						/** Determine whether this surface has per vertex colors.
+						 */
+		virtual	const	TqBool		bHasCs() const=0;
+						/** Determine whether this surface has per vertex opacities.
+						 */
+		virtual	const	TqBool		bHasOs() const=0;
+						/** Determine whether this surface has per vertex s cordinates.
+						 */
+		virtual	const	TqBool		bHass() const=0;
+						/** Determine whether this surface has per vertex t coordinates.
+						 */
+		virtual	const	TqBool		bHast() const=0;
+						/** Determine whether this surface has per vertex u coordinates.
+						 */
+		virtual	const	TqBool		bHasu() const=0;
+						/** Determine whether this surface has per vertex v coordinates.
+						 */
+		virtual	const	TqBool		bHasv() const=0;
 
 							/** Get a bit vector representing the standard shader variables this polygon needs.
 							 */
@@ -169,13 +170,13 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		virtual	const	TqFloat& Polyu(TqInt i) const		{return(u()[i]);}
 		virtual	const	TqFloat& Polyv(TqInt i) const		{return(v()[i]);}
 
-		virtual	TqBool		bHasNormals() const			{return(N().Size()>=P().Size());}
-		virtual	TqBool		bHass() const				{return(s().Size()>=P().Size());}
-		virtual	TqBool		bHast() const				{return(t().Size()>=P().Size());}
-		virtual	TqBool		bHasu() const				{return(u().Size()>=P().Size());}
-		virtual	TqBool		bHasv() const				{return(v().Size()>=P().Size());}
-		virtual	TqBool		bHasCs() const				{return(Cs().Size()>=P().Size());}
-		virtual	TqBool		bHasOs() const				{return(Os().Size()>=P().Size());}
+		virtual	const	TqBool		bHasN() const			{return(CqSurface::bHasN());}
+		virtual	const	TqBool		bHasCs() const			{return(CqSurface::bHasCs());}
+		virtual	const	TqBool		bHasOs() const			{return(CqSurface::bHasOs());}
+		virtual	const	TqBool		bHass() const			{return(CqSurface::bHass());}
+		virtual	const	TqBool		bHast() const			{return(CqSurface::bHast());}
+		virtual	const	TqBool		bHasu() const			{return(CqSurface::bHasu());}
+		virtual	const	TqBool		bHasv() const			{return(CqSurface::bHasv());}
 
 		virtual	TqInt		NumVertices() const				{return(P().Size());}
 
@@ -216,29 +217,6 @@ class CqPolygonPoints : public CqSurface
 		virtual	TqInt		cVarying() const	{return(m_cVertices);}
 		virtual	TqInt		cVertex() const		{return(m_cVertices);}
 
-							/** Determine whether the list contains user specified normals.
-							 */
-		virtual	TqBool		bHasNormals() const	{return(N().Size()>=P().Size());}
-							/** Determine whether the list contains texture s coordinates.
-							 */
-		virtual	TqBool		bHass() const		{return(s().Size()>=P().Size());}
-							/** Determine whether the list contains texture s coordinates.
-							 */
-		virtual	TqBool		bHast() const		{return(t().Size()>=P().Size());}
-							/** Determine whether the list contains surface u coordinates.
-							 */
-		virtual	TqBool		bHasu() const		{return(u().Size()>=P().Size());}
-							/** Determine whether the list contains surface v coordinates.
-							 */
-		virtual	TqBool		bHasv() const		{return(v().Size()>=P().Size());}
-							/** Determine whether the list contains vertex colors.
-							 */
-		virtual	TqBool		bHasCs() const		{return(Cs().Size()>=P().Size());}
-							/** Determine whether the list contains vertex opacities.
-							 */
-		virtual	TqBool		bHasOs() const		{return(Os().Size()>=P().Size());}
-
-							
 							/** Increment the number of polygons referercing this list.
 							 */		
 				void		Reference()			{m_cReferences++;}
@@ -307,18 +285,34 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		virtual	const TqFloat& Polyu(TqInt i) const		{return(m_pPoints->u()[m_aIndices[i]]);}
 		virtual	const TqFloat& Polyv(TqInt i) const		{return(m_pPoints->v()[m_aIndices[i]]);}
 
-		virtual	TqBool		bHasNormals() const			{return(m_pPoints->bHasNormals());}
-		virtual	TqBool		bHass() const				{return(m_pPoints->bHass());}
-		virtual	TqBool		bHast() const				{return(m_pPoints->bHast());}
-		virtual	TqBool		bHasu() const				{return(m_pPoints->bHasu());}
-		virtual	TqBool		bHasv() const				{return(m_pPoints->bHasv());}
-		virtual	TqBool		bHasCs() const				{return(m_pPoints->bHasCs());}
-		virtual	TqBool		bHasOs() const				{return(m_pPoints->bHasOs());}
-
 		virtual	TqInt		NumVertices() const				{return(m_aIndices.size());}
 
 		virtual	const CqAttributes*	pAttributes() const	{return(m_pPoints->pAttributes());}
 		virtual	const CqTransform*	pTransform() const	{return(m_pPoints->pTransform());}
+
+						/** Determine whether this surface has per vertex normals.
+						 */
+	const	TqBool		bHasN() const									{return(m_pPoints->bHasN());}
+						/** Determine whether this surface has per vertex colors.
+						 */
+	const	TqBool		bHasCs() const									{return(m_pPoints->bHasCs());}
+						/** Determine whether this surface has per vertex opacities.
+						 */
+	const	TqBool		bHasOs() const									{return(m_pPoints->bHasOs());}
+						/** Determine whether this surface has per vertex s cordinates.
+						 */
+	const	TqBool		bHass() const									{return(m_pPoints->bHass());}
+						/** Determine whether this surface has per vertex t coordinates.
+						 */
+	const	TqBool		bHast() const									{return(m_pPoints->bHast());}
+						/** Determine whether this surface has per vertex u coordinates.
+						 */
+	const	TqBool		bHasu() const									{return(m_pPoints->bHasu());}
+						/** Determine whether this surface has per vertex v coordinates.
+						 */
+	const	TqBool		bHasv() const									{return(m_pPoints->bHasv());}
+
+
 
 	protected:
 		std::vector<TqInt>	m_aIndices;		///< Array of indices into the associated vertex list.

@@ -697,7 +697,7 @@ void CqRenderer::Initialise()
 	RiDeclare("s","varying float");
 	RiDeclare("t","varying float");
 	RiDeclare("st","varying float");
-	RiDeclare("bucketsize","uniform integere[2]");
+	RiDeclare("bucketsize","uniform integer[2]");
 	RiDeclare("eyesplits","uniform integer");
 	RiDeclare("shader","uniform string");
 	RiDeclare("archive","uniform string");
@@ -962,6 +962,7 @@ SqParameterDeclaration CqRenderer::FindParameterDecl(const char* strDecl)
 		if((e=strLocalDecl.find(']'))!=CqString::npos && e>s)
 		{
 			Count=static_cast<TqInt>(atoi(strLocalDecl.substr(s+1,e-(s+1)).c_str()));
+			ILType=(EqVariableType)(ILType|Type_Array);
 		}
 	}
 	
@@ -986,16 +987,31 @@ SqParameterDeclaration CqRenderer::FindParameterDecl(const char* strDecl)
 		switch(ILType&Storage_Mask)
 		{
 			case Type_Uniform:
-				Decl.m_pCreate=gVariableCreateFuncsUniform[ILType&Type_Mask];
-				break;
+			{
+				if(ILType&Type_Array)
+					Decl.m_pCreate=gVariableCreateFuncsUniformArray[ILType&Type_Mask];
+				else
+					Decl.m_pCreate=gVariableCreateFuncsUniform[ILType&Type_Mask];
+			}
+			break;
 
 			case Type_Varying:
-				Decl.m_pCreate=gVariableCreateFuncsVarying[ILType&Type_Mask];
-				break;
+			{
+				if(ILType&Type_Array)
+					Decl.m_pCreate=gVariableCreateFuncsVaryingArray[ILType&Type_Mask];
+				else				
+					Decl.m_pCreate=gVariableCreateFuncsVarying[ILType&Type_Mask];
+			}	
+			break;
 
 			case Type_Vertex:
-				Decl.m_pCreate=gVariableCreateFuncsVertex[ILType&Type_Mask];
-				break;
+			{
+				if(ILType&Type_Array)
+					Decl.m_pCreate=gVariableCreateFuncsVertexArray[ILType&Type_Mask];
+				else
+					Decl.m_pCreate=gVariableCreateFuncsVertex[ILType&Type_Mask];
+			}	
+			break;
 		}
 		return(Decl);
 	}

@@ -103,7 +103,7 @@ CqMicroPolyGridBase* CqPolygonBase::Dice()
 
 	const CqMatrix& matObjToRaster=QGetRenderContext()->matSpaceToSpace("camera","raster");
 
-	TqBool	bhasN=bHasNormals();
+	TqBool	bhasN=bHasN();
 	TqBool	bhass=bHass();
 	TqBool	bhast=bHast();
 	TqBool	bhasu=bHasu();
@@ -257,7 +257,7 @@ TqInt CqPolygonBase::Split(std::vector<CqBasicSurface*>& aSplits)
 	CqColor	colA,colB,colC,colD;
 	CqColor	opaA,opaB,opaC,opaD;
 
-	TqBool	bhasN=bHasNormals();
+	TqBool	bhasN=bHasN();
 	TqBool	bhass=bHass();
 	TqBool	bhast=bHast();
 	TqBool	bhasu=bHasu();

@@ -650,6 +650,9 @@ void CqParameterTypedVaryingArray<T,I>::BilinearDice(TqInt u, TqInt v, CqShaderV
 _qShareM	extern CqParameter* (*gVariableCreateFuncsUniform[])(const char* strName, TqInt Count);
 _qShareM	extern CqParameter* (*gVariableCreateFuncsVarying[])(const char* strName, TqInt Count);
 _qShareM	extern CqParameter* (*gVariableCreateFuncsVertex[])(const char* strName, TqInt Count);
+_qShareM	extern CqParameter* (*gVariableCreateFuncsUniformArray[])(const char* strName, TqInt Count);
+_qShareM	extern CqParameter* (*gVariableCreateFuncsVaryingArray[])(const char* strName, TqInt Count);
+_qShareM	extern CqParameter* (*gVariableCreateFuncsVertexArray[])(const char* strName, TqInt Count);
 
 //-----------------------------------------------------------------------
 

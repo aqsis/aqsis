@@ -244,6 +244,10 @@ SOURCE=.\Options.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\parameters.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\patch.cpp
 
 !IF  "$(CFG)" == "Render - Win32 Release"

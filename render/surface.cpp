@@ -140,31 +140,6 @@ TqInt CqBasicSurface::Uses() const
 
 
 //---------------------------------------------------------------------
-/** Work out which standard shader variables this surface requires by looking at the shaders.
- */
-
-void CqBasicSurface::ExpandBoundForMotion(CqBound& Bound)
-{
-	if(pTransform()->cTimes()>1)
-	{
-		CqBound	B1(FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX);
-		TqInt i;
-		for(i=0; i<pTransform()->cTimes(); i++)
-		{
-			TqFloat time=pTransform()->Time(i);
-			CqBound B2=Bound;
-			B2.Transform(QGetRenderContext()->matSpaceToSpace("camera","object",CqMatrix(),pTransform()->matObjectToWorld()));
-			// Transform to world coordinates at the correct time.
-			B2.Transform(pTransform()->matObjectToWorld(time));
-			B1=B1.Combine(B2);
-		}
-		B1.Transform(QGetRenderContext()->matSpaceToSpace("world","camera"));
-		Bound=B1;
-	}
-}
-
-
-//---------------------------------------------------------------------
 /** Default constructor
  */
 

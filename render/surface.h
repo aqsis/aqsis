@@ -134,8 +134,6 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>
 												m_SplitDir=From.m_SplitDir;
 											}
 
-			void		ExpandBoundForMotion(CqBound& Bound);
-
 			CqBasicSurface&	operator=(const CqBasicSurface& From);
 
 			TqBool		m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
@@ -222,16 +220,38 @@ class _qShareC CqSurface : public CqBasicSurface
 						 */
 	const	CqParameterTypedVarying<TqFloat, Type_Float>& v() const		{return(m_v);}
 
+						/** Determine whether this surface has per vertex normals.
+						 */
+	const	TqBool		bHasN() const									{return(m_N.Size()>=cVertex());}
+						/** Determine whether this surface has per vertex colors.
+						 */
+	const	TqBool		bHasCs() const									{return(m_Cs.Size()>=cVertex());}
+						/** Determine whether this surface has per vertex opacities.
+						 */
+	const	TqBool		bHasOs() const									{return(m_Os.Size()>=cVertex());}
+						/** Determine whether this surface has per vertex s cordinates.
+						 */
+	const	TqBool		bHass() const									{return(m_s.Size()>=cVertex());}
+						/** Determine whether this surface has per vertex t coordinates.
+						 */
+	const	TqBool		bHast() const									{return(m_t.Size()>=cVertex());}
+						/** Determine whether this surface has per vertex u coordinates.
+						 */
+	const	TqBool		bHasu() const									{return(m_u.Size()>=cVertex());}
+						/** Determine whether this surface has per vertex v coordinates.
+						 */
+	const	TqBool		bHasv() const									{return(m_v.Size()>=cVertex());}
+
 	protected:
 			// Default primitive variables
 			CqParameterTypedVarying<CqVector4D, Type_hPoint>	m_P;		///< Default parameter P.
 			CqParameterTypedVarying<CqVector3D, Type_Normal>	m_N;		///< Default parameter N.
 			CqParameterTypedVarying<CqColor, Type_Color>		m_Cs;		///< Default parameter Cq.
 			CqParameterTypedVarying<CqColor, Type_Color>		m_Os;		///< Default parameter Os.
-			CqParameterTypedVarying<TqFloat, Type_Float>			m_s;		///< Default parameter s.
-			CqParameterTypedVarying<TqFloat, Type_Float>			m_t;		///< Default parameter t.
-			CqParameterTypedVarying<TqFloat, Type_Float>			m_u;		///< Default parameter u.
-			CqParameterTypedVarying<TqFloat, Type_Float>			m_v;		///< Default parameter v.
+			CqParameterTypedVarying<TqFloat, Type_Float>		m_s;		///< Default parameter s.
+			CqParameterTypedVarying<TqFloat, Type_Float>		m_t;		///< Default parameter t.
+			CqParameterTypedVarying<TqFloat, Type_Float>		m_u;		///< Default parameter u.
+			CqParameterTypedVarying<TqFloat, Type_Float>		m_v;		///< Default parameter v.
 
 };
 

@@ -737,7 +737,6 @@ void CqImageBuffer::AddSurfacePointer(CqBasicSurface* pSurface)
 {
 	// Bound the primitive in camera space taking into account any motion specification.
 	CqBound Bound(pSurface->Bound());
-	pSurface->ExpandBoundForMotion(Bound);
 
 	// Take into account the displacement bound extension.
 	TqFloat db=0;
@@ -789,7 +788,6 @@ void CqImageBuffer::PostSurface(CqBasicSurface* pSurface)
 {
 	// Bound the primitive in its current space (camera) space taking into account any motion specification.
 	CqBound Bound(pSurface->Bound());
-	pSurface->ExpandBoundForMotion(Bound);
 
 	// Take into account the displacement bound extension.
 	TqFloat db=0;
@@ -841,7 +839,6 @@ void CqImageBuffer::AddGrid(CqMicroPolyGridBase* pGrid)
 {
 	// Bound the primitive in its current space (camera) space taking into account any motion specification.
 	CqBound Bound(pGrid->Bound());
-	pGrid->pSurface()->ExpandBoundForMotion(Bound);
 
 	Bound.vecMin().x(Bound.vecMin().x()-m_FilterXWidth/2);
 	Bound.vecMin().y(Bound.vecMin().y()-m_FilterYWidth/2);

@@ -389,7 +389,7 @@ CqBound CqMotionMicroPolyGrid::Bound()
 	for(iTime=0; iTime<cTimes(); iTime++)
 	{
 		CqMicroPolyGrid* pGrid=static_cast<CqMicroPolyGrid*>(GetMotionObject(Time(iTime)));
-		B.Combine(pGrid->Bound());
+		B=B.Combine(pGrid->Bound());
 	}
 	return(B);
 }
@@ -441,6 +441,7 @@ void CqMotionMicroPolyGrid::Split(CqImageBuffer* pImage, TqInt iBucket, long xmi
 				CqVector3D& vD=pGridT->P()[iIndex+cu+1];
 				pNew->Initialise(vA, vB, vC, vD,Time(iTime));
 			}
+			pNew->Bound(TqTrue);
 			pImage->AddMPG(pNew);
 			pGridA->Advance();
 		}
@@ -637,7 +638,7 @@ CqBound& CqMicroPolygonMotion::Bound(TqBool fForce)
 		m_Bound=GetMotionObject(Time(0)).Bound();
 		TqInt i;
 		for(i=1; i<cTimes(); i++)
-			m_Bound.Combine(GetMotionObject(Time(i)).Bound());
+			m_Bound=m_Bound.Combine(GetMotionObject(Time(i)).Bound());
 		
 	}
 	return(m_Bound);

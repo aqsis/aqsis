@@ -66,10 +66,10 @@ class CqSurfacePatchBicubic : public CqSurface
 									 * \return CqVector4D reference.
 									 */
 				CqVector4D& CP(TqInt iRow, TqInt iCol)		{return(P()[(iRow*4)+iCol]); }
-									/** Get a reference to the basis atrix for the u direction.
+									/** Get a reference to the basis matrix for the u direction.
 									 */
 		const	CqMatrix&	matuBasis()			{return(pAttributes()->matuBasis());}
-									/** Get a reference to the basis atrix for the v direction.
+									/** Get a reference to the basis matrix for the v direction.
 									 */
 		const	CqMatrix&	matvBasis()			{return(pAttributes()->matvBasis());}
 				CqSurfacePatchBicubic& operator=(const CqSurfacePatchBicubic& From);
@@ -146,6 +146,104 @@ class _qShareC CqSurfacePatchBilinear : public CqSurface
 
 	protected:
 };
+
+
+//----------------------------------------------------------------------
+/** \class CqSurfacePatchMeshBicubic
+ * Bicubic spline patch mesh
+ */
+
+class CqSurfacePatchMeshBicubic : public CqSurface
+{
+	public:
+				CqSurfacePatchMeshBicubic(TqInt nu, TqInt nv, TqBool uPeriodic=TqFalse, TqBool vPeriodic=TqFalse) :
+												CqSurface(),
+												m_nu(nu),
+												m_nv(nv),
+												m_uPeriodic(uPeriodic),
+												m_vPeriodic(vPeriodic)
+												{
+													TqInt uStep=pAttributes()->uSteps();
+													TqInt vStep=pAttributes()->vSteps();
+													m_uPatches=(uPeriodic)?nu/uStep:((nu-4)/uStep)+1;
+													m_vPatches=(vPeriodic)?nv/vStep:((nv-4)/vStep)+1;
+												}
+				CqSurfacePatchMeshBicubic(const CqSurfacePatchMeshBicubic& From);
+		virtual	~CqSurfacePatchMeshBicubic();
+
+				CqSurfacePatchMeshBicubic& operator=(const CqSurfacePatchMeshBicubic& From);
+
+									/** Get a reference to the basis matrix for the u direction.
+									 */
+		const	CqMatrix&	matuBasis()			{return(pAttributes()->matuBasis());}
+									/** Get a reference to the basis matrix for the v direction.
+									 */
+		const	CqMatrix&	matvBasis()			{return(pAttributes()->matvBasis());}
+
+		virtual	CqBound		Bound() const;
+		virtual	CqMicroPolyGridBase* Dice()		{return(0);}
+		virtual	TqInt		Split(std::vector<CqBasicSurface*>& aSplits);
+		virtual TqBool		Diceable()			{return(TqFalse);}
+
+		virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
+		virtual	TqInt		cUniform() const	{return(m_uPatches*m_vPatches);}
+		virtual	TqInt		cVarying() const	{return(((m_uPeriodic)?m_uPatches:m_uPatches+1)*((m_vPeriodic)?m_vPatches:m_vPatches+1));}
+		virtual	TqInt		cVertex() const		{return(m_nu*m_nv);}
+
+	protected:
+
+				TqInt		m_uPatches,			///< Number of patches in u.
+							m_vPatches;			///< Number of patches in v.
+				TqInt		m_nu,				///< Number of control points in u.
+							m_nv;				///< Number of control points in v.
+				TqBool		m_uPeriodic,		///< Is patches mesh periodic in u?
+							m_vPeriodic;		///< Is patches mesh periodic in v?
+};
+
+
+//----------------------------------------------------------------------
+/** \class CqSurfacePatchMeshlinear
+ * Bilinear spline patch mesh
+ */
+
+class CqSurfacePatchMeshBilinear : public CqSurface
+{
+	public:
+				CqSurfacePatchMeshBilinear(TqInt nu, TqInt nv, TqBool uPeriodic=TqFalse, TqBool vPeriodic=TqFalse) :
+												CqSurface(),
+												m_nu(nu),
+												m_nv(nv),
+												m_uPeriodic(uPeriodic),
+												m_vPeriodic(vPeriodic)
+												{
+													m_uPatches=(uPeriodic)?nu:nu-1;
+													m_vPatches=(vPeriodic)?nv:nv-1;
+												}
+				CqSurfacePatchMeshBilinear(const CqSurfacePatchMeshBilinear& From);
+		virtual	~CqSurfacePatchMeshBilinear();
+
+				CqSurfacePatchMeshBilinear& operator=(const CqSurfacePatchMeshBilinear& From);
+
+		virtual	CqBound		Bound() const;
+		virtual	CqMicroPolyGridBase* Dice()		{return(0);}
+		virtual	TqInt		Split(std::vector<CqBasicSurface*>& aSplits);
+		virtual TqBool		Diceable()			{return(TqFalse);}
+
+		virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
+		virtual	TqInt		cUniform() const	{return(m_uPatches*m_vPatches);}
+		virtual	TqInt		cVarying() const	{return(((m_uPeriodic)?m_uPatches:m_uPatches+1)*((m_vPeriodic)?m_vPatches:m_vPatches+1));}
+		virtual	TqInt		cVertex() const		{return(m_nu*m_nv);}
+
+	protected:
+
+				TqInt		m_uPatches,			///< Number of patches in u.
+							m_vPatches;			///< Number of patches in v.
+				TqInt		m_nu,				///< Number of control points in u.
+							m_nv;				///< Number of control points in v.
+				TqBool		m_uPeriodic,		///< Is patches mesh periodic in u?
+							m_vPeriodic;		///< Is patches mesh periodic in v?
+};
+
 
 //-----------------------------------------------------------------------
 

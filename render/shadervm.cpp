@@ -47,53 +47,6 @@ char* gShaderTypeNames[]=
 };
 TqInt gcShaderTypeNames=sizeof(gShaderTypeNames)/sizeof(gShaderTypeNames[0]);
 
-
-CqParameter* (*gVariableCreateFuncsUniform[])(const char* strName, TqInt Count)=
-{
-	0,
-	CqParameterTypedUniform<TqFloat,Type_UniformFloat>::Create,
-	CqParameterTypedUniform<TqInt,Type_UniformInteger>::Create,
-	CqParameterTypedUniform<CqVector3D,Type_UniformPoint>::Create,
-	CqParameterTypedUniform<CqString,Type_UniformString>::Create,
-	CqParameterTypedUniform<CqColor,Type_UniformColor>::Create,
-	0,
-	CqParameterTypedUniform<CqVector4D,Type_UniformhPoint>::Create,
-	CqParameterTypedUniform<CqVector3D,Type_UniformNormal>::Create,
-	CqParameterTypedUniform<CqVector3D,Type_UniformVector>::Create,
-	CqParameterTypedUniform<CqMatrix,Type_UniformMatrix>::Create,
-};
-
-CqParameter* (*gVariableCreateFuncsVarying[])(const char* strName, TqInt Count)=
-{
-	0,
-	CqParameterTypedVarying<TqFloat,Type_VaryingFloat>::Create,
-	CqParameterTypedVarying<TqInt,Type_VaryingInteger>::Create,
-	CqParameterTypedVarying<CqVector3D,Type_VaryingPoint>::Create,
-	CqParameterTypedVarying<CqString,Type_VaryingString>::Create,
-	CqParameterTypedVarying<CqColor,Type_VaryingColor>::Create,
-	0,
-	CqParameterTypedVarying<CqVector4D,Type_VaryinghPoint>::Create,
-	CqParameterTypedVarying<CqVector3D,Type_VaryingNormal>::Create,
-	CqParameterTypedVarying<CqVector3D,Type_VaryingVector>::Create,
-	CqParameterTypedVarying<CqMatrix,Type_VaryingMatrix>::Create,
-};
-
-CqParameter* (*gVariableCreateFuncsVertex[])(const char* strName, TqInt Count)=
-{
-	0,
-	CqParameterTypedVertex<TqFloat,Type_VertexFloat>::Create,
-	CqParameterTypedVertex<TqInt,Type_VertexInteger>::Create,
-	CqParameterTypedVertex<CqVector3D,Type_VertexPoint>::Create,
-	CqParameterTypedVertex<CqString,Type_VertexString>::Create,
-	CqParameterTypedVertex<CqColor,Type_VertexColor>::Create,
-	0,
-	CqParameterTypedVertex<CqVector4D,Type_VertexhPoint>::Create,
-	CqParameterTypedVertex<CqVector3D,Type_VertexNormal>::Create,
-	CqParameterTypedVertex<CqVector3D,Type_VertexVector>::Create,
-	CqParameterTypedVertex<CqMatrix,Type_VertexMatrix>::Create,
-};
-
-
 /** Default constructor
  * \param strName Character pointer to parameter name.
  * \param Count Integer value count, for arrays.
