@@ -1,14 +1,377 @@
+2003-03-16  minty
+	* libri2rib/Makefile.am 1.9:
+	* librib2stream/Makefile.am 1.9:
+	* render/parameters.h 1.29:
+		Updates to Makefiles for recent libri2rib work
+		Updates to the hashing function for data allignments issues on Alpha
+
+2003-03-16  pgregory
+	* aqsltell/aqsltell.cpp 1.7:
+	* libaqsistypes/aqsis.h 1.6:
+	* libddmsock/ddmsock.cpp 1.22:
+	* librib2/librib.cpp 1.22:
+	* librib2/scanner.lxx 1.3:
+	* libshadervm/dsoshadeops.cpp 1.5:
+	* libshadervm/shadervm.cpp 1.27:
+	* libshadervm/shadervm1.cpp 1.4:
+	* libshadervm/shadervm2.cpp 1.6:
+	* libslparse/scanner.lxx 1.2:
+	* plugins/ppm2tif/ppm2tif.c 1.6:
+	* render/itexturemap.h 1.7:
+	* render/occlusion.cpp 1.4:
+	* render/texturemap.cpp 1.75:
+	* render/texturemap.h 1.33:
+	* teqser/teqser.cpp 1.15:
+		Lots of small changes to try to achive (and maintain) direct
+		MacOSX compatibility.
+
+2003-03-15  minty
+	* librib2/tests/ribscanner.cpp 1.5:
+		Updated ribscanner.cpp to compile with reentrant parser support.
+
+2003-03-15  pgregory
+	* libri2rib/error.cpp 1.8:
+		Reenable default error handlers.
+
+2003-03-13  pgregory
+	* Renderer.dsw 1.52:
+	* aqsis/aqsis.dsp 1.12:
+	* aqsl/aqslcomp.dsp 1.9:
+	* aqsltell/aqsltell.dsp 1.8:
+	* filebuffer/filebuffer.dsp 1.8:
+	* framebuffer_glut/framebuffer_glut.dsp 1.6:
+	* framebuffer_glut_z/framebuffer_glut_z.dsp 1.6:
+	* libaqsistypes/bitvector.h 1.4:
+	* libaqsistypes/cellnoise.h 1.2:
+	* libaqsistypes/color.h 1.8:
+	* libaqsistypes/exception.h 1.3:
+	* libaqsistypes/file.h 1.4:
+	* libaqsistypes/libaqsistypes.dsp 1.15:
+	* libaqsistypes/log.h 1.11:
+	* libaqsistypes/matrix.h 1.6:
+	* libaqsistypes/memorypool.h 1.6:
+	* libaqsistypes/mtable.h 1.4:
+	* libaqsistypes/noise.h 1.3:
+	* libaqsistypes/plugins.h 1.2:
+	* libaqsistypes/random.h 1.7:
+	* libaqsistypes/spline.h 1.3:
+	* libaqsistypes/sstring.h 1.4:
+	* libaqsistypes/vector2d.h 1.4:
+	* libaqsistypes/vector3d.h 1.4:
+	* libaqsistypes/vector4d.h 1.6:
+	* libcodegenvm/libcodegenvm.dsp 1.7:
+	* libdd/libdd.dsp 1.8:
+	* libddmsimple/libddmsimple.dsp 1.9:
+	* libddmsock/libddmsock.dsp 1.9:
+	* libri2rib/error.cpp 1.7:
+	* libri2rib/libri2rib.dsp 1.7:
+	* librib2/librib.h 1.16:
+	* librib2/librib2.dsp 1.11:
+	* librib2/parser.yxx 1.3:
+	* librib2ri/librib2ri.dsp 1.6:
+	* librib2stream/librib2stream.cpp 1.11:
+	* librib2stream/librib2stream.dsp 1.6:
+	* libshaderexecenv/libshaderexecenv.dsp 1.3:
+	* libshaderexecenv/shaderexecenv.h 1.16:
+	* libshadervm/libshadervm.dsp 1.6:
+	* libshadervm/shaderstack.h 1.20:
+	* libshadervm/shadervariable.h 1.13:
+	* libshadervm/shadervm.h 1.23:
+	* libslparse/libslparse.dsp 1.9:
+	* libslxargs/libslxargs.dsp 1.6:
+	* plugins/bake2tif/bake2tif.dsp 1.2:
+	* plugins/gif2tif/gif2tif.dsp 1.7:
+	* plugins/jpg2tif/jpg2tif.dsp 1.7:
+	* plugins/pcx2tif/pcx2tif.dsp 1.6:
+	* plugins/ppm2tif/ppm2tif.dsp 1.7:
+	* plugins/tga2tif/tga2tif.dsp 1.4:
+	* render/libaqsis.dsp 1.36:
+	* render/parameters.h 1.28:
+	* render/ri.cpp 1.155:
+	* render/ri.h 1.15:
+	* shadowmap/shadowmap.dsp 1.11:
+	* slpp/slpp.dsp 1.6:
+	* teqser/teqser.dsp 1.10:
+		First moves to switch back to a dynamic linking setup for
+		Windows.
+
+	* Renderer.dsw 1.54:
+	* libaqsistypes/mtable.cpp 1.4:
+	* libaqsistypes/mtable.cpp 1.5:
+	* libaqsistypes/mtable.h 1.5:
+	* libri2rib/ri.h 1.1:
+	* libshaderexecenv/shaderexecenv.h 1.17:
+	* libshadervm/shaderstack.h 1.21:
+	* libshadervm/shadervm.h 1.24:
+		More changes to get dynamic library support under Windows
+		working.
+
+	* Renderer.dsw 1.53:
+	* plugins/bake2tif/bake2tif.c 1.3:
+	* plugins/gif2tif/gif2tif.c 1.5:
+	* plugins/jpg2tif/jpg2tif.c 1.6:
+	* plugins/pcx2tif/pcx2tif.c 1.3:
+	* plugins/ppm2tif/ppm2tif.c 1.5:
+	* plugins/tga2tif/tga2tif.c 1.3:
+		More changes to Windows dynamic library support.
+
+2003-03-12  minty
+	* libshaderexecenv/shadeops.cpp 1.31:
+		Support matricies in DSO's.
+		Bugfixes to DSO strig handling.
+		Support hpoint as point.
+
+	* configure.in 1.60:
+		Use _DEBUG instead of DEBUG as before.
+		--enable-debug disables optimisation
+		restore using -O2 by default
+
+	* libshadervm/dsoshadeops.cpp 1.4:
+		Dont attempt to access a NULL string.
+
+2003-03-12  pgregory
+	* Renderer.dsw 1.51:
+	* libaqsistypes/libaqsistypes.dsp 1.14:
+	* teqser/teqser.dsp 1.9:
+		Update to ensure that PLUGINS is set.
+
+2003-03-11  pgregory
+	* render/ri.cpp 1.154:
+	* render/subdivision2.cpp 1.19:
+	* render/subdivision2.h 1.15:
+		Implement INFINITE "crease" and "corner" support for SDS.
+
+2003-03-10  minty
+	* libshadervm/shadervm2.cpp 1.5:
+		Force return type for DSO calls to be varying rather than uniform
+
+	* libslparse/icodegen.h 1.2:
+		Serious typing error causing "vector" to be output as "vectorvoid" in compiled
+		shaders.
+
+2003-03-10  mw_matti
+	* libaqsistypes/ilog.h 1.6:
+	* libaqsistypes/log.cpp 1.7:
+	* libaqsistypes/log.h 1.10:
+		modified the CqString support
+
+2003-03-09  pgregory
+	* render/ri.cpp 1.153:
+	* render/subdivision2.cpp 1.18:
+	* render/subdivision2.h 1.14:
+		Implement "interpolateboundary" and "hole" support for SDS.
+
+2003-03-09  minty
+	* libslparse/Makefile.am 1.11:
+		AM_YFLAGS set for libslparse to generate parser.h
+
+2003-03-08  minty
+	* librib2/Makefile.am 1.11:
+		Add AM_YFLAGS to get parser.h to be generated by bison
+
+	* librib2/parser.yxx 1.2:
+	* librib2/scanner.lxx 1.2:
+		Migrate to a bison based reentrant (pure) parser.
+
+	* libaqsistypes/aqsis.h 1.5:
+		Fix #warn should have been #warning, but we can #error anyway
+
+2003-03-08  pgregory
+	* render/lath.h 1.6:
+	* render/ri.cpp 1.152:
+	* render/subdivision2.h 1.13:
+		Fix bug in boundary condition handling. Make faces adjacent to
+		mesh boundary invisible.
+
+	* libaqsistypes/aqsis.h 1.4:
+		Fix for MSVC
+
+2003-03-07  mw_matti
+	* render/ri.cpp 1.151:
+		changed some more errors to the new style
+
+	* libaqsistypes/ilog.h 1.5:
+	* libaqsistypes/log.cpp 1.6:
+	* libaqsistypes/log.h 1.9:
+	* libaqsistypes/mtable.cpp 1.3:
+		added CqString error message support
+
+2003-03-02  minty
+	* bootstrap 1.4:
+	* configure.in 1.59:
+	* libaqsistypes/aqsis.h 1.3:
+		Move to using a autoconf config.h to clean up the POSIX build
+		output a bit
+
+2003-03-02  mw_matti
+	* libaqsistypes/plugins.cpp 1.4:
+		fixed typo
+
+	* libaqsistypes/aqsis_types.h 1.9:
+		fixed DEG bug
+
+2003-03-01  minty
+	* render/Makefile.am 1.33:
+		Update Makefile.am for the renaming of context to graphicsstate
+
+2003-03-01  mw_matti
+	* aqsltell/aqsltell.dsp 1.7:
+		link to log4cpp.lib
+
+2003-03-01  pgregory
+	* librib2/librib2.dsp 1.10:
+	* libslparse/libslparse.dsp 1.8:
+		Update to use new .yxx and .lxx files.
+
+2003-02-28  pgregory
+	* render/bound.cpp 1.3:
+	* render/bound.h 1.8:
+	* render/libaqsis.dsp 1.35:
+	* render/micropolygon.cpp 1.60:
+	* render/polygon.cpp 1.36:
+	* render/renderer.h 1.28:
+	* render/surface.cpp 1.39:
+	* render/surface.h 1.37:
+		Code cleanups.
+
+	* render/points.cpp 1.12:
+	* render/points.h 1.7:
+	* render/ri.cpp 1.150:
+		Fix transformation motion blur on points.
+
+	* render/context.cpp 1.13:
+	* render/context.h 1.10:
+	* render/graphicsstate.cpp 1.1:
+	* render/graphicsstate.h 1.1:
+		Change of name for context.h/cpp to something more suitable.
+
+2003-02-28  minty
+	* Makefile.am 1.37:
+	* acinclude.m4 1.5:
+	* aqsis/Makefile.am 1.20:
+	* aqsl/Makefile.am 1.15:
+	* aqsltell/Makefile.am 1.7:
+	* bootstrap 1.3:
+	* configure.in 1.58:
+	* filebuffer/Makefile.am 1.7:
+	* framebuffer_glut/Makefile.am 1.7:
+	* framebuffer_glut_z/Makefile.am 1.7:
+	* libaqsistypes/Makefile.am 1.13:
+	* libaqsistypes/plugins.cpp 1.3:
+	* libaqsistypes/posix/Makefile.am 1.7:
+	* libcodegenvm/Makefile.am 1.8:
+	* libdd/Makefile.am 1.6:
+	* libddmsimple/Makefile.am 1.11:
+	* libddmsock/Makefile.am 1.12:
+	* libri2rib/Makefile.am 1.8:
+	* librib2/Makefile.am 1.10:
+	* librib2ri/Makefile.am 1.8:
+	* librib2stream/Makefile.am 1.8:
+	* libshaderexecenv/Makefile.am 1.2:
+	* libshadervm/Makefile.am 1.5:
+	* libslparse/Makefile.am 1.10:
+	* libslxargs/Makefile.am 1.6:
+	* plugins/bake2tif/Makefile.am 1.2:
+	* plugins/common/Makefile.am 1.5:
+	* plugins/gif2tif/Makefile.am 1.5:
+	* plugins/jpg2tif/Makefile.am 1.5:
+	* plugins/pcx2tif/Makefile.am 1.5:
+	* plugins/ppm2tif/Makefile.am 1.5:
+	* plugins/tga2tif/Makefile.am 1.5:
+	* render/Makefile.am 1.32:
+	* render/converter.cpp 1.2:
+	* render/texturemap.cpp 1.74:
+	* shadowmap/Makefile.am 1.7:
+	* teqser/Makefile.am 1.11:
+		Revamp the autoconf/automake support.
+		AC_DISABLE_STATIC - disable statics libraries as default, speeds up build times.
+		Moved the DEBUG flags back to jsut the main Makefile
+		Do proper checks for log4cpp,glut,libtiff and libargparse
+		Clean up linking of log4cpp
+		Clean up linking of libtiff
+		Conditional compilation of plugin code only where needed
+		Plugins anounce an error if plugin support is not built in.
+		Use standard techniques for parsers/scanners
+
+	* aqsl/aqslcomp.cpp 1.8:
+	* libcodegenvm/vmoutput.cpp 1.14:
+	* libcodegenvm/vmoutput.h 1.6:
+		Objectify the code generator interface.
+
+	* render/surface.cpp 1.38:
+	* render/surface.h 1.36:
+		Compile fix.
+
+	* libslparse/icodegen.h 1.1:
+		New header defining a code generator abstraction.
+
+	* librib2/parser.y 1.1:
+	* librib2/parser.yxx 1.1:
+	* librib2/scanner.l 1.1:
+	* librib2/scanner.lxx 1.1:
+		Move these to C++ namings for correct automake support
+
+	* libslparse/parser.y 1.1:
+	* libslparse/parser.yxx 1.1:
+	* libslparse/scanner.l 1.1:
+	* libslparse/scanner.lxx 1.1:
+		Move parser.y and scanner.l to yxx/lxx so that flex/bison automake support
+		will correctly use C++ insteaad of C.
+
+	* libshadervm/shadervm.cpp 1.26:
+		Aqsltell can call into the shadervm with no current rendering context so
+		we much check that the return value of QGetRenderContextI is valid before
+		trying to retrieve Logger.
+
+2003-02-27  pgregory
+	* render/curves.cpp 1.7:
+	* render/imagebuffer.cpp 1.91:
+	* render/itransform.h 1.3:
+	* render/micropolygon.cpp 1.58:
+	* render/micropolygon.h 1.26:
+	* render/nurbs.cpp 1.60:
+	* render/patch.cpp 1.51:
+	* render/points.cpp 1.11:
+	* render/polygon.cpp 1.35:
+	* render/polygon.h 1.23:
+	* render/quadrics.cpp 1.44:
+	* render/quadrics.h 1.17:
+	* render/ri.cpp 1.148:
+	* render/subdivision2.cpp 1.17:
+	* render/subdivision2.h 1.12:
+	* render/surface.cpp 1.37:
+	* render/surface.h 1.35:
+	* render/teapot.cpp 1.13:
+	* render/transform.h 1.7:
+		Lots of changes to Motion Blur, currently broken.
+
+	* render/micropolygon.cpp 1.59:
+	* render/ri.cpp 1.149:
+		More motion blur changes.
+
+2003-02-25  minty
+	* render/renderer.cpp 1.53:
+		Set the strName for the shader before LoadProgram so that we can  report the
+		name of the shader that errors during LoadProgram occurred in.
+
+2003-02-24  pgregory
+	* configure.in 1.57:
+	* render/version.h 1.21:
+		Update version number to new 'approaching' format, we have
+		released 0.7.4, now we are 'approaching' 0.7.5
+
 2003-02-23  pgregory
 	* render/version.h 1.20:
 		Update version ready for release.
 
+	* libshadervm/Makefile.am 1.4:
+	* render/Makefile.am 1.31:
+		Some small sources changes to ensure the appropriate files are
+		included in the distro.
+
 	* configure.in 1.56:
 	* libaqsistypes/Makefile.am 1.12:
 		Updates to build system to allow distcheck to work.
-
-2003-02-22  tshead
-	* libslparse/parser.y 1.13:
-		 Fix: pLogger() declared in namespace Aqsis, then defined static
 
 2003-02-22  pgregory
 	* render/curves.cpp 1.6:
@@ -28,9 +391,6 @@
 	* render/teapot.cpp 1.12:
 	* render/teapot.h 1.5:
 		Some changes to motion blur, to allow RiPoints to motion blur.
-
-	* libslparse/parser.y 1.12:
-		pLogger() was declared extern then defined static.
 
 	* libri2rib/outstream.h 1.6:
 	* libshaderexecenv/shadeops.cpp 1.30:
@@ -178,7 +538,6 @@
 
 2003-02-16  pgregory
 	* libslparse/libslparse.cpp 1.5:
-	* libslparse/parser.y 1.11:
 		Fix problem with logger, seems MSVC doesn't like having an
 		instance of a CqLog class as a static global. Now created and
 		deleted as required.
@@ -205,7 +564,6 @@
 	* libslparse/optimise.cpp 1.3:
 	* libslparse/parsenode.cpp 1.8:
 	* libslparse/parsenode.h 1.8:
-	* libslparse/parser.y 1.10:
 	* libslparse/typecheck.cpp 1.7:
 	* render/Makefile.am 1.30:
 	* render/ishaderexecenv.h 1.9:
@@ -761,7 +1119,6 @@
 
 2003-01-07  pgregory
 	* aqsl/aqsl 1.2:
-	* libslparse/scanner.l 1.8:
 		Apply Tristan Colgate's patch to make POSIX version output
 		proper line number information for errors.
 
@@ -824,7 +1181,6 @@
 	* libslparse/libslparse.cpp 1.4:
 	* libslparse/parsenode.cpp 1.7:
 	* libslparse/parsenode.h 1.7:
-	* libslparse/parser.y 1.9:
 	* libslparse/typecheck.cpp 1.6:
 	* libslparse/vardef.cpp 1.3:
 	* libslparse/vardef.h 1.4:
@@ -914,11 +1270,6 @@
 		during the call to convert. Allows new subdivision primitive to
 		create b-spline patches without needing to play with attributes.
 
-2002-12-20  pgregory
-	* libslparse/parser.y 1.8:
-		Improve error reporting in the case of an unknown procedure
-		call.
-
 2002-12-19  pgregory
 	* render/bound.h 1.7:
 	* render/imagebuffer.cpp 1.82:
@@ -933,8 +1284,6 @@
 		Change -b to -d, to match BMRT and Entropy.
 
 	* librib2/librib.cpp 1.17:
-	* librib2/parser.y 1.24:
-	* librib2/scanner.l 1.19:
 		Improve error recovery in RIB parser, still needs a lot of work.
 		Handle odd case which it seems other renderers deal with, where GeometricApproximation is passed an array for it's value.
 
@@ -1042,10 +1391,8 @@
 	* aqsltell/Makefile.am 1.4:
 	* aqsltell/aqsltell.cpp 1.5:
 	* librib2/Makefile.am 1.9:
-	* librib2/scanner.l 1.18:
 	* libshadervm/Makefile.am 1.2:
 	* libslparse/Makefile.am 1.9:
-	* libslparse/scanner.l 1.7:
 	* render/Makefile.am 1.26:
 	* teqser/Makefile.am 1.8:
 		Try to make POSIX bison and flex stuff less version dependent.
@@ -1137,7 +1484,6 @@
 		Fix the phong function to allocate temp variables correctly, 
 		and clean up after itself.
 
-	* librib2/parser.y 1.23:
 	* libshadervm/shaderstack.cpp 1.4:
 	* libshadervm/shaderstack.h 1.16:
 	* libshadervm/shadervm.cpp 1.19:
@@ -1445,10 +1791,6 @@
 		Fix some typos in asserts.
 		        - Michel Joron
 
-	* libslparse/parser.y 1.7:
-		Make sure libslparse complains if a non-viod function has <> 1 
-		return call.
-
 2002-10-23  pgregory
 	* render/irenderer.h 1.6:
 	* render/options.cpp 1.21:
@@ -1568,14 +1910,12 @@
 	* ribfiles/detail.rib 1.1:
 		Test Andrew's LOD code.
 
-	* librib2/parser.y 1.22:
 	* render/patch.cpp 1.42:
 	* render/patch.h 1.17:
 	* render/ri.cpp 1.104:
 		Implement basis support for RiPatch, still need to work on RiPatchMesh
 
 	* librib2/librib.h 1.14:
-	* librib2/parser.y 1.21:
 		Implement initial support for RiBasis calls.
 
 2002-10-11  oedo808
@@ -1700,9 +2040,6 @@
 		Add bits per sample in preparation for floating point output.
 
 2002-09-23  pgregory
-	* librib2/scanner.l 1.17:
-		Fix handle leak when searching for archive files.
-
 	* libaqsistypes/posix/Makefile.am 1.6:
 		Added share.h to dist thanks to Will Newton.
 
@@ -1894,10 +2231,6 @@
 	* aqsltell/aqsltell.cpp 1.3:
 	* libslxargs/Makefile.am 1.5:
 		Added default dummy for QGetRenderContextI to libslxargs.
-
-2002-08-29  pgregory
-	* librib2/scanner.l 1.16:
-		Fix scanner so that "1." is a valid float.
 
 2002-08-27  pgregory
 	* render/surface.cpp 1.25:
@@ -2339,12 +2672,6 @@
 		now swaps between on subsequent checks, much more likely to hit
 		a valid split eventually.
 
-2002-08-01  pgregory
-	* librib2/scanner.l 1.15:
-		Handle unrecognised RIB requests more gracefully. Now will
-		ignore all following parameters to the request and look for the
-		next request.
-
 2002-07-29  pgregory
 	* aqsis/aqsis.cpp 1.32:
 	* render/imagebuffer.cpp 1.59:
@@ -2373,16 +2700,10 @@
 	* render/surface.h 1.17:
 		Fix a couple of issues with eyeplits and occlusion culling.
 
-	* librib2/parser.y 1.20:
-		Remove light ID validation as it is perfectly normal to have duplicate light IDs
-		in a multi frame RIB. The tracking of light IDs should be left up to the renderer.
-
 2002-07-28  pgregory
 	* aqsis/aqsis.cpp 1.31:
 	* librib2/librib.cpp 1.12:
 	* librib2/librib.h 1.13:
-	* librib2/parser.y 1.19:
-	* librib2/scanner.l 1.14:
 	* render/texturemap.cpp 1.43:
 		Fix librib2 to keep track of RiOption "searchpath" "archive" calls so that it knows where to find archives.
 		Fix shadow bias functionality to use "bias0" and "bias1" as per prman usage.
@@ -2553,10 +2874,6 @@
 		Fix bug, make sure that matrix variables are not identity
 		marked when there components have been changed.
 
-	* librib2/parser.y 1.18:
-		Fix bug in tag allocation in subdivision surface, wasn't
-		allocating enough for the string and terminator.
-
 	* render/attributes.cpp 1.18:
 	* render/attributes.h 1.15:
 		Implement a hash table for attribute lookup.
@@ -2705,7 +3022,6 @@
 		Update for release.
 
 	* librib2/librib.h 1.12:
-	* librib2/parser.y 1.17:
 	* librib2ri/librib2ri.cpp 1.9:
 	* librib2ri/librib2ri.h 1.8:
 	* librib2stream/librib2stream.cpp 1.9:
@@ -2730,8 +3046,6 @@
 		Fixes to latest changes to work under Posix.
 
 	* librib2/librib.h 1.11:
-	* librib2/parser.y 1.16:
-	* librib2/scanner.l 1.13:
 	* librib2ri/librib2ri.cpp 1.8:
 	* librib2ri/librib2ri.h 1.7:
 	* render/plugins.cpp 1.3:
@@ -2748,7 +3062,6 @@
 
 2002-05-18  pgregory
 	* librib2/librib.h 1.10:
-	* librib2/parser.y 1.15:
 	* librib2ri/librib2ri.cpp 1.7:
 	* librib2ri/librib2ri.h 1.6:
 	* librib2stream/librib2stream.cpp 1.7:
@@ -2805,8 +3118,6 @@
 	* librib2/bdec.cpp 1.6:
 	* librib2/librib.cpp 1.11:
 	* librib2/librib.h 1.9:
-	* librib2/parser.y 1.14:
-	* librib2/scanner.l 1.12:
 	* librib2ri/librib2ri.cpp 1.6:
 	* librib2ri/librib2ri.h 1.5:
 	* librib2stream/librib2stream.cpp 1.6:
@@ -3136,16 +3447,9 @@
 		More shaderVM separation effort.
 
 2002-04-25  pgregory
-	* librib2/scanner.l 1.11:
-	* libslparse/scanner.l 1.6:
-		Can't use the AQSIS defines as it is not ties to Aqsis, use
-		normal WIN32 instead.
-
 	* Makefile.am 1.33:
 	* aqsis/Makefile.am 1.14:
 	* configure.in 1.42:
-	* librib2/scanner.l 1.10:
-	* libslparse/scanner.l 1.5:
 	* libslxargs/Makefile.am 1.2:
 	* render/Makefile.am 1.18:
 	* teqser/Makefile.am 1.5:
@@ -3483,12 +3787,9 @@
 	* libddmsock/libddmsock.dsp 1.6:
 	* libri2rib/libri2rib.dsp 1.4:
 	* librib2/librib2.dsp 1.8:
-	* librib2/parser.y 1.13:
-	* librib2/scanner.l 1.9:
 	* librib2ri/librib2ri.dsp 1.4:
 	* librib2stream/librib2stream.dsp 1.4:
 	* libslparse/libslparse.dsp 1.6:
-	* libslparse/scanner.l 1.4:
 	* plugins/gif2tif/gif2tif.dsp 1.5:
 	* plugins/jpg2tif/jpg2tif.dsp 1.5:
 	* plugins/pcx2tif/pcx2tif.dsp 1.4:
@@ -3513,9 +3814,6 @@
 		we now require UnxUtils bison 1.28, anything newer is a problem.
 
 2002-04-03  pgregory
-	* libslparse/parser.y 1.6:
-		Fix to work with latest Bison on Cygwin.
-
 	* prep_install.bat 1.17:
 		Remove libslxargs from the binary release, currently relies on
 		too many other libraries.
@@ -3590,7 +3888,6 @@
 		Allow quadrics to specify their own normals.
 
 	* librib2/librib2.dsp 1.6:
-	* librib2/parser.y 1.12:
 		Small fixes to allow parser to work with latest bison.
 
 2002-03-18  pgregory
@@ -3789,8 +4086,6 @@
 	* librib2/librib.cpp 1.10:
 	* librib2/librib.h 1.8:
 	* librib2/libribtypes.h 1.3:
-	* librib2/parser.y 1.11:
-	* librib2/scanner.l 1.8:
 	* librib2/tests/ribprinter.cpp 1.3:
 	* librib2/tests/ribscanner.cpp 1.3:
 	* librib2ri/librib2ri.cpp 1.4:
@@ -4141,7 +4436,6 @@
 	* filebuffer/filebuffer.cpp 1.5:
 	* libaqsistypes/matrix.cpp 1.3:
 	* libcodegenvm/vmoutput.cpp 1.7:
-	* librib2/parser.y 1.10:
 	* libslparse/parsenode.cpp 1.2:
 	* render/shadeops.cpp 1.24:
 	* render/texturemap.cpp 1.31:
@@ -4168,8 +4462,6 @@
 	* libcodegenvm/vmoutput.cpp 1.6:
 	* libslparse/iparsenode.h 1.2:
 	* libslparse/parsenode.h 1.3:
-	* libslparse/parser.y 1.5:
-	* libslparse/scanner.l 1.3:
 	* render/ri.cpp 1.58:
 	* render/shadeops.cpp 1.22:
 		Changes from Michel Joron to tie the 'textureinfo' command into
@@ -4895,7 +5187,6 @@
 	* librib2/bdec.h 1.1:
 	* librib2/librib.cpp 1.3:
 	* librib2/librib.h 1.7:
-	* librib2/scanner.l 1.7:
 		added binary rib and gzip file support for librib2
 
 2001-11-16  pgregory
@@ -5149,10 +5440,6 @@
 
 	* configure.in 1.20:
 		Removed the framebuffer project
-
-2001-10-26  pgregory
-	* librib2/scanner.l 1.6:
-		Report parse errors in ReadArchive included files correctly.
 
 2001-10-25  pgregory
 	* framebuffer_glut_z/framebuffer_glut_z.dsp 1.1:
@@ -5580,10 +5867,6 @@
 	* render/renderer.cpp 1.25:
 		Fix the locating of display drivers temporarily
 
-2001-07-24  pgregory
-	* librib2/parser.y 1.9:
-		Make subdivision surfaces work properly again.
-
 2001-07-19  pgregory
 	* configure.in 1.12:
 	* prep_install.bat 1.7:
@@ -5771,7 +6054,6 @@
 
 	* librib2/librib.cpp 1.2:
 	* librib2/librib.h 1.5:
-	* librib2/parser.y 1.8:
 		 Added "StandardConfiguration()" function to librib namespace, 
 		which declares a standard set of Renderman arguments
 
@@ -5817,7 +6099,6 @@
 		Added teapot code to Linux build -- not really tested but
 		atleast trying to avoid breaking it.  Sorry.
 
-	* librib2/parser.y 1.7:
 	* render/libaqsis.dsp 1.5:
 	* render/ri.cpp 1.27:
 	* render/teapot.cpp 1.1:
@@ -6067,13 +6348,8 @@
 	* prep_install.bat 1.4:
 		Change build directory.
 
-	* libslparse/parser.y 1.4:
-		Add ';' terminators to two missing constructs.
-
 2001-06-05  tburge
 	* librib2/librib.h 1.4:
-	* librib2/parser.y 1.6:
-	* librib2/scanner.l 1.5:
 	* librib2ri/librib2ri.cpp 1.3:
 	* librib2ri/librib2ri.h 1.3:
 	* librib2stream/librib2stream.cpp 1.4:
@@ -6111,8 +6387,6 @@
 	* libslparse/funcdef.h 1.2:
 	* libslparse/ifuncdef.h 1.2:
 	* libslparse/parsenode.h 1.2:
-	* libslparse/parser.y 1.3:
-	* libslparse/scanner.l 1.2:
 	* libslparse/vardef.h 1.2:
 		* Autoconfiscated libslparse and libcodegenvm
 		* Created aqsl shading-language to Aqsis bytecode compiler
@@ -6150,8 +6424,6 @@
 	* libslparse/optimise.cpp 1.1:
 	* libslparse/parsenode.cpp 1.1:
 	* libslparse/parsenode.h 1.1:
-	* libslparse/parser.y 1.1:
-	* libslparse/scanner.l 1.1:
 	* libslparse/typecheck.cpp 1.1:
 	* libslparse/vardef.cpp 1.1:
 	* libslparse/vardef.h 1.1:
@@ -6176,7 +6448,6 @@
 		file better.
 
 	* libslparse/libslparse.cpp 1.2:
-	* libslparse/parser.y 1.2:
 		Fix problem with namespace intialisation.
 
 2001-05-31  mbaas
@@ -6259,10 +6530,6 @@
 	* Renderer.dsw 1.12:
 		Make cribber use the new librib2 library.
 
-	* librib2/scanner.l 1.2:
-		Minor fix to get working under Win32. use std:: namespace for
-		ifstream, and include assert.h
-
 	* librib2/librib2.dsp 1.2:
 		Internal MsDev changes
 
@@ -6270,7 +6537,6 @@
 		Create build project for librib2stream under Win32.
 
 	* librib2/librib.h 1.3:
-	* librib2/parser.y 1.4:
 	* librib2stream/librib2stream.cpp 1.2:
 		Re-enable PixelFilter function.
 
@@ -6278,22 +6544,11 @@
 	* librib2ri/librib2ri.dsp 1.1:
 		Create build project for librib2 under Win32.
 
-	* librib2/parser.y 1.3:
-	* librib2/scanner.l 1.3:
-		Fix some win32 build problems, fix the EOF handling for RiReadArchive support.
-		Fix problem with passing inline parameter declarations through to the Ri app.
-
-	* librib2/parser.y 1.5:
-	* librib2/scanner.l 1.4:
-		Reintroduce mode switch to allow graceful recovery from invalid
-		RIB requests.
-
 	* libaqsistypes/libaqsistypes.dsp 1.2:
 		Internal MsDev changes.
 
 2001-05-22  tburge
 	* librib2/librib.h 1.2:
-	* librib2/parser.y 1.2:
 	* librib2ri/librib2ri.cpp 1.2:
 	* librib2ri/librib2ri.h 1.2:
 		Added the Geometry call.
@@ -6315,8 +6570,6 @@
 	* librib2/librib.cpp 1.1:
 	* librib2/librib.h 1.1:
 	* librib2/libribtypes.h 1.1:
-	* librib2/parser.y 1.1:
-	* librib2/scanner.l 1.1:
 	* librib2/tests/.cvsignore 1.1:
 	* librib2/tests/Makefile.am 1.1:
 	* librib2/tests/Makefile.in 1.1:
