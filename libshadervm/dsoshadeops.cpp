@@ -87,6 +87,8 @@ CqDSORepository::SetDSOPath(const CqString* pPath)
 	CqString::size_type iLeft = 0;
 	CqString::size_type iRight = iLeft ;
 
+	if ( pPath == NULL ) return;
+
 	// Split the string up into the components of the path;
 	while(iRight <= pPath->length())
 	{
