@@ -2114,7 +2114,7 @@ STD_SOIMPL CqShaderExecEnv::SO_calculatenormal( POINTVAL p, DEFPARAMIMPL )
     TqBool CSO = pTransform()->GetHandedness(QGetRenderContextI()->Time());
     TqBool O = TqFalse;
 	if( pAttributes() )
-	    TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
+	    O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
     TqFloat neg = 1;
 	if ( O != CSO ) neg = -1;
 
