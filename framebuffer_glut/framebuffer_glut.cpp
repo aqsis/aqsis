@@ -76,6 +76,11 @@ static int g_Window = 0;
 static GLubyte* g_Image = 0;
 static TqInt g_CWXmin, g_CWYmin;
 static TqInt g_CWXmax, g_CWYmax;
+static TqFloat	quantize_zeroval = 0.0f;
+static TqFloat	quantize_oneval  = 0.0f;
+static TqFloat	quantize_minval  = 0.0f;
+static TqFloat	quantize_maxval  = 0.0f;
+static TqFloat dither_val       = 0.0f;
 
 void display( void )
 {
@@ -221,7 +226,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 
 	// CHeck if the beck is not at all within the crop window.
 	if ( message->m_XMin > g_CWXmax || message->m_XMaxPlus1 < g_CWXmin ||
-	        message->m_YMin > g_CWYmax || message->m_YMaxPlus1 < g_CWYmin )
+	     message->m_YMin > g_CWYmax || message->m_YMaxPlus1 < g_CWYmin )
 		return ( 0 );
 
 	for ( TqInt y = message->m_YMin - g_CWYmin; y < message->m_YMaxPlus1 - g_CWYmin; y++ )
@@ -232,24 +237,43 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 			{
 				const TqInt so = ( ( g_ImageHeight - y - 1 ) * linelength ) + ( x * 3 );
 
-				TqFloat quantize = 1;
-				// If we are displaying an FP image we will need to quantize ourselves.
-				if ( g_BitsPerSample != 8 )
-					quantize = 255;
-
+				TqFloat value0, value1, value2;
 				if ( g_SamplesPerElement >= 3 )
 				{
-					g_Image[ so + 0 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 0 ] * quantize );
-					g_Image[ so + 1 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 1 ] * quantize );
-					g_Image[ so + 2 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 2 ] * quantize );
+					value0 = reinterpret_cast<TqFloat*>( bucket ) [ 0 ];
+					value1 = reinterpret_cast<TqFloat*>( bucket ) [ 1 ];
+					value2 = reinterpret_cast<TqFloat*>( bucket ) [ 2 ];
 				}
 				else
 				{
-					g_Image[ so + 0 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 0 ] * quantize );
-					g_Image[ so + 1 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 0 ] * quantize );
-					g_Image[ so + 2 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 0 ] * quantize );
+					value0 = reinterpret_cast<TqFloat*>( bucket ) [ 0 ];
+					value1 = reinterpret_cast<TqFloat*>( bucket ) [ 0 ];
+					value2 = reinterpret_cast<TqFloat*>( bucket ) [ 0 ];
 				}
 
+				if( !( quantize_zeroval == 0.0f &&
+					   quantize_oneval  == 0.0f &&
+					   quantize_minval  == 0.0f &&
+					   quantize_maxval  == 0.0f ) )
+				{
+					value0 = ROUND(quantize_zeroval + value0 * (quantize_oneval - quantize_zeroval) + dither_val );
+					value0 = CLAMP(value0, quantize_minval, quantize_maxval) ;
+					value1 = ROUND(quantize_zeroval + value1 * (quantize_oneval - quantize_zeroval) + dither_val );
+					value1 = CLAMP(value1, quantize_minval, quantize_maxval) ;
+					value2 = ROUND(quantize_zeroval + value2 * (quantize_oneval - quantize_zeroval) + dither_val );
+					value2 = CLAMP(value2, quantize_minval, quantize_maxval) ;
+				}
+				else if ( g_BitsPerSample != 8 )
+				{
+					// If we are displaying an FP image we will need to quantize ourselves.
+					value0 *= 255;
+					value1 *= 255;
+					value2 *= 255;
+				}
+
+				g_Image[ so + 0 ] = static_cast<char>( value0 );
+				g_Image[ so + 1 ] = static_cast<char>( value1 );
+				g_Image[ so + 2 ] = static_cast<char>( value2 );
 			}
 			bucket += message->m_ElementSize;
 		}
@@ -293,6 +317,21 @@ TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
 			{
 				SqDDMessageFilename * message = static_cast<SqDDMessageFilename*>( pMsgB );
 				g_Filename = message->m_String;
+			}
+			break;
+
+			case MessageID_UserParam:
+			{
+				SqDDMessageUserParam * pMsg = static_cast<SqDDMessageUserParam*>( pMsgB );
+				// Check if we understand the parameter.
+				if( strncmp( pMsg->m_NameAndData, "quantize", pMsg->m_NameLength ) == 0 )
+				{
+					TqFloat* quantize = reinterpret_cast<TqFloat*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+					quantize_zeroval = quantize[0];
+					quantize_oneval  = quantize[1];
+					quantize_minval  = quantize[2];
+					quantize_maxval  = quantize[3];
+				}
 			}
 			break;
 	}

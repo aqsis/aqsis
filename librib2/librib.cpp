@@ -136,6 +136,8 @@ void StandardDeclarations( RendermanInterface& CallbackInterface )
 	ParserDeclare( CallbackInterface, "constantwidth", "constant float" );
 	ParserDeclare( CallbackInterface, "binary", "uniform integer" );
 	ParserDeclare( CallbackInterface, "procedural", "uniform string" );
+	ParserDeclare( CallbackInterface, "quantize", "uniform float[4]" );
+	ParserDeclare( CallbackInterface, "dither", "uniform float" );
 }
 
 

@@ -98,7 +98,11 @@ TIFF*	pOut;
 TqInt	g_CWXmin, g_CWYmin;
 TqInt	g_CWXmax, g_CWYmax;
 uint16	compression = COMPRESSION_NONE, quality = 0;
-
+TqFloat	quantize_zeroval = 0.0f;
+TqFloat	quantize_oneval  = 0.0f;
+TqFloat	quantize_minval  = 0.0f;
+TqFloat	quantize_maxval  = 0.0f;
+TqFloat dither_val       = 0.0f;
 
 /// Storage for the output file name.
 std::string	strFilename( "output.tif" );
@@ -153,7 +157,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 
 	// CHeck if the beck is not at all within the crop window.
 	if ( message->m_XMin > g_CWXmax || message->m_XMaxPlus1 < g_CWXmin ||
-	        message->m_YMin > g_CWYmax || message->m_YMaxPlus1 < g_CWYmin )
+	     message->m_YMin > g_CWYmax || message->m_YMaxPlus1 < g_CWYmin )
 		return ( 0 );
 
 	TqInt y;
@@ -169,10 +173,21 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 				TqInt i = 0;
 				while ( i < SamplesPerElement )
 				{
+					TqFloat value = reinterpret_cast<TqFloat*>( pBucket ) [ i ];
+
+					if( !( quantize_zeroval == 0.0f &&
+						   quantize_oneval  == 0.0f &&
+						   quantize_minval  == 0.0f &&
+						   quantize_maxval  == 0.0f ) )
+					{
+						value = ROUND(quantize_zeroval + value * (quantize_oneval - quantize_zeroval) + dither_val );
+						value = CLAMP(value, quantize_minval, quantize_maxval) ;
+					}
+
 					if ( BitsPerSample == 8 )
-						pByteData[ so++ ] = static_cast<char>( reinterpret_cast<TqFloat*>( pBucket ) [ i ] );
+						pByteData[ so++ ] = static_cast<char>( value );
 					else
-						pFloatData[ so++ ] = reinterpret_cast<TqFloat*>( pBucket ) [ i ];
+						pFloatData[ so++ ] = value;
 					i++;
 				}
 			}
@@ -355,6 +370,14 @@ TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
 					quality = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
 					if ( quality < 0 )		quality = 0;
 					if ( quality > 100 )	quality = 100;
+				}
+				else if( strncmp( pMsg->m_NameAndData, "quantize", pMsg->m_NameLength ) == 0 )
+				{
+					TqFloat* quantize = reinterpret_cast<TqFloat*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+					quantize_zeroval = quantize[0];
+					quantize_oneval  = quantize[1];
+					quantize_minval  = quantize[2];
+					quantize_maxval  = quantize[3];
 				}
 			}
 			break;
