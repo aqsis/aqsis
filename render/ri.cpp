@@ -2301,10 +2301,10 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, 1 );
 	// Process any specified primitive variables
-	pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
-
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
+		pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
+
 		// Work out which plane to project to.
 		TqFloat	MinX, MaxX;
 		TqFloat	MinY, MaxY;
@@ -2552,11 +2552,11 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 		CqCubicCurvesGroup * pSurface =
 		    new CqCubicCurvesGroup( ncurves, nvertices, periodic );
 		pSurface->AddRef();
-		// set the default primitive variables
-		pSurface->SetDefaultPrimitiveVariables();
 		// read in the parameter list
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 		{
+			// set the default primitive variables
+			pSurface->SetDefaultPrimitiveVariables();
 			CreateGPrim( pSurface );
 		}
 		else
@@ -2571,11 +2571,11 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 		    new CqLinearCurvesGroup( ncurves, nvertices, periodic );
 
 		pSurface->AddRef();
-		// set the default primitive variables
-		pSurface->SetDefaultPrimitiveVariables();
 		// read in the parameter list
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 		{
+			// set the default primitive variables
+			pSurface->SetDefaultPrimitiveVariables();
 			CreateGPrim( pSurface );
 		}
 		else
@@ -2792,10 +2792,10 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, npolys );
 	pPointsClass->AddRef();
 	// Process any specified primitive variables
-	pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
-
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
+		pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
+	
 		// Reset loop counter.
 		igloop = 0;
 		TqUint ctris = 0;
@@ -2960,11 +2960,11 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 		// Create a surface patch
 		CqSurfacePatchBicubic * pSurface = new CqSurfacePatchBicubic();
 		pSurface->AddRef();
-		// Fill in default values for all primitive variables not explicitly specified.
-		pSurface->SetDefaultPrimitiveVariables();
 		// Fill in primitive variables specified.
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 		{
+			// Fill in default values for all primitive variables not explicitly specified.
+			pSurface->SetDefaultPrimitiveVariables();
 			CqMatrix matuBasis = pSurface->pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 0 ];
 			CqMatrix matvBasis = pSurface->pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 1 ];
 			pSurface->ConvertToBezierBasis( matuBasis, matvBasis );
@@ -2978,11 +2978,13 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 		// Create a surface patch
 		CqSurfacePatchBilinear * pSurface = new CqSurfacePatchBilinear();
 		pSurface->AddRef();
-		// Fill in default values for all primitive variables not explicitly specified.
-		pSurface->SetDefaultPrimitiveVariables();
 		// Fill in primitive variables specified.
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
+		{
+			// Fill in default values for all primitive variables not explicitly specified.
+			pSurface->SetDefaultPrimitiveVariables();
 			CreateGPrim( pSurface );
+		}
 		else
 			pSurface->Release();
 	}
@@ -3022,11 +3024,11 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 
 		CqSurfacePatchMeshBicubic* pSurface = new CqSurfacePatchMeshBicubic( nu, nv, uPeriodic, vPeriodic );
 		pSurface->AddRef();
-		// Fill in default values for all primitive variables not explicitly specified.
-		pSurface->SetDefaultPrimitiveVariables();
 		// Fill in primitive variables specified.
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 		{
+			// Fill in default values for all primitive variables not explicitly specified.
+			pSurface->SetDefaultPrimitiveVariables();
 			std::vector<CqBasicSurface*> aSplits;
 			pSurface->Split( aSplits );
 			std::vector<CqBasicSurface*>::iterator iSS;
@@ -3049,11 +3051,13 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 
 		CqSurfacePatchMeshBilinear* pSurface = new CqSurfacePatchMeshBilinear( nu, nv, uPeriodic, vPeriodic );
 		pSurface->AddRef();
-		// Fill in default values for all primitive variables not explicitly specified.
-		pSurface->SetDefaultPrimitiveVariables();
 		// Fill in primitive variables specified.
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
+		{
+			// Fill in default values for all primitive variables not explicitly specified.
+			pSurface->SetDefaultPrimitiveVariables();
 			CreateGPrim( pSurface );
+		}
 		else
 			pSurface->Release();
 	}
@@ -3107,12 +3111,11 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 	for ( i = 0; i < nu + uorder; i++ ) pSurface->auKnots() [ i ] = uknot[ i ];
 	for ( i = 0; i < nv + vorder; i++ ) pSurface->avKnots() [ i ] = vknot[ i ];
 
-	// Set up the default primitive variables.
-	pSurface->SetDefaultPrimitiveVariables();
-
 	// Process any specified parameters
 	if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 	{
+		// Set up the default primitive variables.
+		pSurface->SetDefaultPrimitiveVariables();
 		// Clamp the surface to ensure non-periodic.
 		pSurface->Clamp();
 		CreateGPrim( pSurface );
@@ -3201,8 +3204,8 @@ RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
 	// Create a sphere
 	CqSphere * pSurface = new CqSphere( radius, zmin, zmax, 0, thetamax );
 	pSurface->AddRef();
-	pSurface->SetDefaultPrimitiveVariables();
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
+	pSurface->SetDefaultPrimitiveVariables();
 
 	CreateGPrim( pSurface );
 
@@ -3236,8 +3239,8 @@ RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 	// Create a cone
 	CqCone * pSurface = new CqCone( height, radius, 0, thetamax, 0, height );
 	pSurface->AddRef();
-	pSurface->SetDefaultPrimitiveVariables();
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
+	pSurface->SetDefaultPrimitiveVariables();
 
 	CreateGPrim( pSurface );
 
@@ -3271,8 +3274,8 @@ RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 	// Create a cylinder
 	CqCylinder * pSurface = new CqCylinder( radius, zmin, zmax, 0, thetamax );
 	pSurface->AddRef();
-	pSurface->SetDefaultPrimitiveVariables();
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
+	pSurface->SetDefaultPrimitiveVariables();
 
 	CreateGPrim( pSurface );
 
@@ -3308,8 +3311,8 @@ RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMET
 	CqVector3D v1( point2[ 0 ], point2[ 1 ], point2[ 2 ] );
 	CqHyperboloid* pSurface = new CqHyperboloid( v0, v1, 0, thetamax );
 	pSurface->AddRef();
-	pSurface->SetDefaultPrimitiveVariables();
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
+	pSurface->SetDefaultPrimitiveVariables();
 
 	CreateGPrim( pSurface );
 
@@ -3343,8 +3346,8 @@ RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 	// Create a paraboloid
 	CqParaboloid * pSurface = new CqParaboloid( rmax, zmin, zmax, 0, thetamax );
 	pSurface->AddRef();
-	pSurface->SetDefaultPrimitiveVariables();
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
+	pSurface->SetDefaultPrimitiveVariables();
 
 	CreateGPrim( pSurface );
 
@@ -3378,8 +3381,8 @@ RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 	// Create a disk
 	CqDisk * pSurface = new CqDisk( height, 0, radius, 0, thetamax );
 	pSurface->AddRef();
-	pSurface->SetDefaultPrimitiveVariables();
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
+	pSurface->SetDefaultPrimitiveVariables();
 
 	CreateGPrim( pSurface );
 
@@ -3412,8 +3415,8 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 	// Create a torus
 	CqTorus * pSurface = new CqTorus( majorrad, minorrad, phimin, phimax, 0, thetamax );
 	pSurface->AddRef();
-	pSurface->SetDefaultPrimitiveVariables();
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
+	pSurface->SetDefaultPrimitiveVariables();
 
 	CreateGPrim( pSurface );
 
@@ -3599,9 +3602,9 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 		CqTeapot * pSurface = new CqTeapot( true ); // add a bottom if true/false otherwise
 		pSurface->AddRef();
 
-		pSurface->SetDefaultPrimitiveVariables();
 		pSurface->SetSurfaceParameters( *pSurface );
 		ProcessPrimitiveVariables( pSurface, count, tokens, values );
+		pSurface->SetDefaultPrimitiveVariables();
 
 		// I don't use the original teapot primitives as defined by T. Burge
 		// but an array of Patch Bicubic (stolen from example from Pixar) and
@@ -3625,10 +3628,9 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 		// Create a sphere
 		CqSphere * pSurface = new CqSphere( 1, -1, 1, 0, 360.0 );
 		pSurface->AddRef();
-		pSurface->SetDefaultPrimitiveVariables();
 		ProcessPrimitiveVariables( pSurface, count, tokens, values );
+		pSurface->SetDefaultPrimitiveVariables();
 		CreateGPrim( pSurface );
-
 	}
 	else
 	{

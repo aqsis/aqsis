@@ -236,7 +236,7 @@ void CqSurface::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 
 	// s and t default to four values, if the particular surface type requires different it is up
 	// to the surface to override or change this after the fact.
-	if ( USES( bUses, EnvVars_s ) && bUseDef_st )
+	if ( USES( bUses, EnvVars_s ) && bUseDef_st && !bHass() )
 	{
 		AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" ) );
 		s() ->SetSize( 4 );
@@ -245,7 +245,7 @@ void CqSurface::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 			s() ->pValue() [ i ] = m_pAttributes->GetFloatAttribute( "System", "TextureCoordinates" ) [ i * 2 ];
 	}
 
-	if ( USES( bUses, EnvVars_t ) && bUseDef_st )
+	if ( USES( bUses, EnvVars_t ) && bUseDef_st && !bHast())
 	{
 		AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" ) );
 		t() ->SetSize( 4 );
