@@ -77,6 +77,8 @@ void CqStats::InitialiseFrame()
 	m_cGridsAllocated        = 0;
 	m_cGridsDeallocated      = 0;
 	m_cGPrims                = 0;
+	m_cTotalGPrims           = 0;
+  m_cCulledGPrims          = 0;
 
   m_timeTotalFrame         = 0;
 	m_frameTimerRunning      = TqFalse;
@@ -145,19 +147,22 @@ void CqStats::PrintStats(TqInt level) const
 		TimeToString(MSG,timeAtmosphere) << " (" << 100.0f*timeAtmosphere/m_timeTotalFrame << "%)" << std::endl;
 		MSG << std::endl;
 
+		MSG << "GPrims: \t" << m_cGPrims << std::endl;
+		MSG << "Total GPrims:\t" << m_cTotalGPrims << " (" << m_cCulledGPrims << " culled)" << std::endl;
+
 		MSG << "Grids:    \t" << m_cGridsAllocated << " created / ";
-		MSG << m_cGridsAllocated-m_cGridsDeallocated << " remaining" << std::endl;
+		MSG << m_cGridsAllocated-m_cGridsDeallocated << " remaining  (";
+		MSG << m_cCulledGrids << " culled)" << std::endl;
 
 		MSG << "Micropolygons: \t" << m_cMPGsAllocated << " created / ";
-		MSG << m_cMPGsAllocated-m_cMPGsDeallocated << " remaining" << std::endl;
+		MSG << m_cMPGsAllocated-m_cMPGsDeallocated << " remaining (+ ";
+		MSG << m_cCulledMPGs << " culled)" << std::endl;
 
 		MSG << "Sampling: \t" << m_cSamples << " samples" << std::endl;
 		MSG << "          \t" << m_cSampleBoundHits << " bound hits (";
 		MSG << (100.0f/m_cSamples)*m_cSampleBoundHits << "% of samples)" << std::endl;
 		MSG << "          \t" << m_cSampleHits << " hits (";
 		MSG << (100.0f/m_cSamples)*m_cSampleHits << "% of samples)" << std::endl;
-
-		MSG << "GPrims: \t" << m_cGPrims << std::endl;
 
 		MSG << "Attributes: \t";
 		MSG << (TqInt)Attribute_stack.size() << " created" << std::endl;

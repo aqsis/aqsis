@@ -125,8 +125,31 @@ class CqStats
 					 */
 			void	IncGridsDeallocated()	{ m_cGridsDeallocated++; }
 					/** Increase the GPrim count by 1.
+					    These counter should only be increased when adding a toplevel gprim
+							(e.g. in the Ri...() calls).
 					 */
 			void	IncGPrims()			{ m_cGPrims++; }
+					/** Increase the total GPrim count by 1.
+					    Here \em every gprim is counted (including those resulting from a split).
+					 */
+			void	IncTotalGPrims()	{ m_cTotalGPrims++; }
+					/** Decrease the total GPrim count by 1.
+					    This method should be called when a gprim is split since the
+							gprim will be replaced by a number of smaller gprims and therefore 
+							shouldn't appear in the statistics.
+					 */
+			void	DecTotalGPrims()	{ m_cTotalGPrims--; }
+					/** Increase the culled GPrim count by 1.
+					 */
+			void	IncCulledGPrims()	{ m_cCulledGPrims++; }
+					/** Increase the culled micropoly grid count by 1.
+					 */
+			void	IncCulledGrids()	{ m_cCulledGrids++; }
+					/** Increase the culled micropoly count by n.
+					    This counter should only be increased if the according grid
+							was \em not culled.
+					 */
+			void	IncCulledMPGs(TqInt n=1)	{ m_cCulledMPGs+=n; }
 
 			//@}
 
@@ -194,8 +217,11 @@ class CqStats
 			TqInt	m_cParametersDeallocated;		///< Count of surface parameters deallocated.
 			TqInt	m_cGridsAllocated;				///< Count of micropolygrids allocated.
 			TqInt	m_cGridsDeallocated;			///< Count of micropolygrids deallocated.
-
 			TqInt	m_cGPrims;						///< Count of GPrims.
+			TqInt	m_cTotalGPrims;				///< Count of total GPrims (including gprims resulting from splits).
+			TqInt m_cCulledGPrims;      ///< Count of culled GPrims.
+			TqInt m_cCulledGrids;       ///< Count of culled micro poly grids.
+			TqInt m_cCulledMPGs;        ///< Count of culled micro polys.
 
 			time_t	m_timeTotal;				 ///< Total time spent on the entire animation.
 			time_t  m_timeTotalFrame;    ///< Time spent on processing one individual frame.

@@ -872,6 +872,9 @@ TqBool CqImageBuffer::CullSurface(CqBound& Bound, CqBasicSurface* pSurface)
 
 void CqImageBuffer::PostSurface(CqBasicSurface* pSurface)
 {
+  // Count the number of total gprims
+  QGetRenderContext()->Stats().IncTotalGPrims();
+
 	// Bound the primitive in its current space (camera) space taking into account any motion specification.
 	CqBound Bound(pSurface->Bound());
 
@@ -894,6 +897,7 @@ void CqImageBuffer::PostSurface(CqBasicSurface* pSurface)
 	if(CullSurface(Bound,pSurface))
 	{
 		delete(pSurface);
+		QGetRenderContext()->Stats().IncCulledGPrims();
 		return;
 	}
 
@@ -1038,12 +1042,18 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 	TqFloat bmaxy=Bound.vecMax().y();
 
 	if(bmaxx<xmin || bmaxy<ymin || bminx>xmax || bminy>ymax)
+	{
+	  QGetRenderContext()->Stats().IncCulledMPGs();
 		return;
+	}
 
 	// If the micropolygon is outside the hither-yon range, cull it.
 	if(Bound.vecMin().z()>QGetRenderContext()->optCurrent().fClippingPlaneFar() ||
 	   Bound.vecMax().z()<QGetRenderContext()->optCurrent().fClippingPlaneNear())
+	{
+	  QGetRenderContext()->Stats().IncCulledMPGs();
 		return;
+	}
 
 	// Now go across all pixels touched by the micropolygon bound.
 	// The first pixel position is at (initX, initY), the last one
@@ -1187,6 +1197,7 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 	{
 		if(m_fQuit)	return;
 
+    // Dice & shade the surface if it's small enough...
 		if(pSurface->Diceable())
 		{
 			CqMicroPolyGridBase* pGrid;
@@ -1200,9 +1211,13 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 				Bucket.AddGrid(pGrid);
 			}
 		}
-     	else if(!pSurface->fDiscard())
+		// The surface is not small enough, so split it...
+   	else if(!pSurface->fDiscard())
 		{
 			std::vector<CqBasicSurface*> aSplits;
+			// Decrease the total gprim count since this gprim is replaced by other gprims
+			QGetRenderContext()->Stats().DecTotalGPrims();
+			// Split it
 			TqInt cSplits=pSurface->Split(aSplits);
 			TqInt i;
 			for(i=0; i<cSplits; i++)

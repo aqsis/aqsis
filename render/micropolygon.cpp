@@ -236,7 +236,14 @@ void CqMicroPolyGrid::Shade()
 		}while(Advance());
 		// If the whole grid is culled don't bother going any further.
 		if(cCulled==(uGridRes()*vGridRes()))
+		{
+  	  QGetRenderContext()->Stats().IncCulledGrids();
 			return;
+		}
+		else
+		{
+  	  QGetRenderContext()->Stats().IncCulledMPGs(cCulled);
+		}
 	}
 
 	// Now shade the grid.
