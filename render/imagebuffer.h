@@ -90,8 +90,8 @@ class CqImageBuffer
 				m_CropWindowXMax( 0 ),
 				m_CropWindowYMax( 0 ),
 				m_DisplayMode( ModeRGB ),
-				m_CurrentBucketX( 0 ),
-				m_CurrentBucketY( 0 )
+				m_CurrentBucketCol( 0 ),
+				m_CurrentBucketRow( 0 )
 		{}
 		virtual	~CqImageBuffer();
 
@@ -222,27 +222,27 @@ class CqImageBuffer
 		/** Get the column index of the bucket currently being processed.
 		 * \return Integer bucket index.
 		 */
-		TqInt	CurrentBucketX() const
+		TqInt	CurrentBucketCol() const
 		{
-			return ( m_CurrentBucketX );
+			return ( m_CurrentBucketCol );
 		}
 		/** Get the row index of the bucket currently being processed.
 		 * \return Integer bucket index.
 		 */
-		TqInt	CurrentBucketY() const
+		TqInt	CurrentBucketRow() const
 		{
-			return ( m_CurrentBucketY );
+			return ( m_CurrentBucketRow );
 		}
 		/** Move to the next bucket to process.
 		 */
 		bool NextBucket()
 		{
-			m_CurrentBucketX++;
-			if( m_CurrentBucketX >= m_cXBuckets )
+			m_CurrentBucketCol++;
+			if( m_CurrentBucketCol >= m_cXBuckets )
 			{
-				m_CurrentBucketX = 0;
-				m_CurrentBucketY++;
-				if( m_CurrentBucketY >= m_cYBuckets )
+				m_CurrentBucketCol = 0;
+				m_CurrentBucketRow++;
+				if( m_CurrentBucketRow >= m_cYBuckets )
 					return( TqFalse );
 			}
 			return( TqTrue );
@@ -251,7 +251,7 @@ class CqImageBuffer
 		 */
 		CqBucket& CurrentBucket()
 		{
-			return( m_Buckets[CurrentBucketY()][CurrentBucketX()] );
+			return( m_Buckets[CurrentBucketRow()][CurrentBucketCol()] );
 		}
 		/** Get a pointer to the bucket at position x,y in the grid.
 		 */
@@ -317,8 +317,8 @@ class CqImageBuffer
 		TqInt	m_DisplayMode;		///< Integer display mode, a member of the enum Mode.
 
 		std::vector<std::vector<CqBucket> >	m_Buckets; ///< Array of bucket storage classes (row/col)
-		TqInt	m_CurrentBucketX;	///< Column index of the bucket currently being processed.
-		TqInt	m_CurrentBucketY;	///< Row index of the bucket currently being processed.
+		TqInt	m_CurrentBucketCol;	///< Column index of the bucket currently being processed.
+		TqInt	m_CurrentBucketRow;	///< Row index of the bucket currently being processed.
 
 		// This struct is used to hold info about a mpg that is used when rendering the mpg.
 		// It caches the info for use by multiple samples.

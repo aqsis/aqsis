@@ -69,11 +69,11 @@ class CqBucket : public IqBucket
 		}
 
 		// Overridden from IqBucket
-		virtual	TqInt	XSize() const
+		virtual	TqInt	Width() const
 		{
 			return ( m_XSize );
 		}
-		virtual	TqInt	YSize() const
+		virtual	TqInt	Height() const
 		{
 			return ( m_YSize );
 		}
@@ -85,21 +85,21 @@ class CqBucket : public IqBucket
 		{
 			return ( m_YOrigin );
 		}
-		virtual	TqInt	XFWidth() const
+		virtual	TqInt	FilterXWidth() const
 		{
-			return ( m_XFWidth );
+			return ( m_FilterXWidth );
 		}
-		virtual	TqInt	YFWidth() const
+		virtual	TqInt	FilterYWidth() const
 		{
-			return ( m_YFWidth );
+			return ( m_FilterYWidth );
 		}
-		virtual	TqInt	XPixelSamples() const
+		virtual	TqInt	PixelXSamples() const
 		{
-			return ( m_XPixelSamples );
+			return ( m_PixelXSamples );
 		}
-		virtual	TqInt	YPixelSamples() const
+		virtual	TqInt	PixelYSamples() const
 		{
-			return ( m_YPixelSamples );
+			return ( m_PixelYSamples );
 		}
 
 		virtual	CqColor Color( TqInt iXPos, TqInt iYPos );
@@ -121,7 +121,7 @@ class CqBucket : public IqBucket
 			//assert( iXPos < -m_XMax && iXPos < m_XSize + m_XMax &&
 			//		iYPos < -m_YMax && iYPos < m_YSize + m_YMax );
 
-			TqInt i = ( ( iYPos + m_YMax ) * ( m_XSize + m_XFWidth ) ) + ( iXPos + m_XMax );
+			TqInt i = ( ( iYPos + m_YMax ) * ( m_XSize + m_FilterXWidth ) ) + ( iXPos + m_XMax );
 			pie = &m_aieImage[ i ];
 		}
 		static	void	CombineElements();
@@ -206,12 +206,12 @@ class CqBucket : public IqBucket
 	private:
 		static	TqInt	m_XSize;
 		static	TqInt	m_YSize;
-		static	TqInt	m_XFWidth;
-		static	TqInt	m_YFWidth;
+		static	TqInt	m_FilterXWidth;
+		static	TqInt	m_FilterYWidth;
 		static	TqInt	m_XMax;
 		static	TqInt	m_YMax;
-		static	TqInt	m_XPixelSamples;
-		static	TqInt	m_YPixelSamples;
+		static	TqInt	m_PixelXSamples;
+		static	TqInt	m_PixelYSamples;
 		static	TqInt	m_XOrigin;
 		static	TqInt	m_YOrigin;
 		static	std::vector<CqImagePixel>	m_aieImage;

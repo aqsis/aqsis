@@ -83,8 +83,8 @@ void CqImagersource::Initialise( IqBucket* pBucket )
 {
 	QGetRenderContext() ->Stats().ImagerTimer().Start();
 
-	TqInt uGridRes = pBucket->XSize();
-	TqInt vGridRes = pBucket->YSize();
+	TqInt uGridRes = pBucket->Width();
+	TqInt vGridRes = pBucket->Height();
 	TqInt x = pBucket->XOrigin();
 	TqInt y = pBucket->YOrigin();
 

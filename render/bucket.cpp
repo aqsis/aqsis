@@ -49,14 +49,14 @@ START_NAMESPACE( Aqsis )
 
 TqInt	CqBucket::m_XSize;
 TqInt	CqBucket::m_YSize;
-TqInt	CqBucket::m_XFWidth;
-TqInt	CqBucket::m_YFWidth;
+TqInt	CqBucket::m_FilterXWidth;
+TqInt	CqBucket::m_FilterYWidth;
 TqInt	CqBucket::m_XMax;
 TqInt	CqBucket::m_YMax;
 TqInt	CqBucket::m_XOrigin;
 TqInt	CqBucket::m_YOrigin;
-TqInt	CqBucket::m_XPixelSamples;
-TqInt	CqBucket::m_YPixelSamples;
+TqInt	CqBucket::m_PixelXSamples;
+TqInt	CqBucket::m_PixelYSamples;
 std::vector<CqImagePixel>	CqBucket::m_aieImage;
 std::vector<std::vector<CqVector2D> >	CqBucket::m_aSamplePositions;
 std::vector<TqFloat> CqBucket::m_aFilterValues;
@@ -75,16 +75,16 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
 	m_YOrigin = yorigin;
 	m_XSize = xsize;
 	m_YSize = ysize;
-	m_XFWidth = xfwidth;
-	m_YFWidth = yfwidth;
+	m_FilterXWidth = xfwidth;
+	m_FilterYWidth = yfwidth;
 	m_XMax = static_cast<TqInt>( CEIL( ( xfwidth - 1 ) * 0.5f ) );
 	m_YMax = static_cast<TqInt>( CEIL( ( xfwidth - 1 ) * 0.5f ) );
-	m_XPixelSamples = xsamples;
-	m_YPixelSamples = ysamples;
+	m_PixelXSamples = xsamples;
+	m_PixelYSamples = ysamples;
 
 	TqInt ywidth1, xwidth1;
-	ywidth1 = m_YSize + m_YFWidth;
-	xwidth1 = m_XSize + m_XFWidth;
+	ywidth1 = m_YSize + m_FilterYWidth;
+	xwidth1 = m_XSize + m_FilterXWidth;
 
 	// Allocate the image element storage if this is the first bucket
 	if(m_aieImage.empty())
@@ -119,7 +119,7 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
 		for ( TqInt j = 0; j < xwidth1; j++ )
 		{
 			CqVector2D bPos2( m_XOrigin, m_YOrigin );
-			bPos2 += CqVector2D( ( j - m_XFWidth / 2 ), ( i - m_YFWidth / 2 ) );
+			bPos2 += CqVector2D( ( j - m_FilterXWidth / 2 ), ( i - m_FilterYWidth / 2 ) );
 
 		    m_aieImage[which].Clear();
 			m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[sourceIndex] );
@@ -141,10 +141,10 @@ void CqBucket::InitialiseFilterValues()
 		return;
 
 	// Allocate and fill in the filter values array for each pixel.
-	TqInt numsubpixels = ( m_XPixelSamples * m_YPixelSamples );
+	TqInt numsubpixels = ( m_PixelXSamples * m_PixelYSamples );
 	TqInt numperpixel = numsubpixels * numsubpixels;
 
-	TqUint numvalues = static_cast<TqUint>( ( ( m_XFWidth + 1 ) * ( m_YFWidth + 1 ) ) * ( numperpixel ) );
+	TqUint numvalues = static_cast<TqUint>( ( ( m_FilterXWidth + 1 ) * ( m_FilterYWidth + 1 ) ) * ( numperpixel ) );
 
 		m_aFilterValues.resize( numvalues );
 
@@ -157,9 +157,9 @@ void CqBucket::InitialiseFilterValues()
 
 	TqFloat xmax = m_XMax;
 	TqFloat ymax = m_YMax;
-	TqFloat xfwo2 = m_XFWidth * 0.5f;
-	TqFloat yfwo2 = m_YFWidth * 0.5f;
-	TqFloat xfw = m_XFWidth;
+	TqFloat xfwo2 = m_FilterXWidth * 0.5f;
+	TqFloat yfwo2 = m_FilterYWidth * 0.5f;
+	TqFloat xfw = m_FilterXWidth;
 	
 	TqFloat subcellwidth = 1.0f / numsubpixels;
 	TqFloat subcellcentre = subcellwidth * 0.5f;
@@ -176,27 +176,27 @@ void CqBucket::InitialiseFilterValues()
 			TqFloat pfy = py - 0.5f;
 			// Go over every subpixel in the pixel.
 			TqInt sx, sy;
-			for ( sy = 0; sy < m_YPixelSamples; sy++ )
+			for ( sy = 0; sy < m_PixelYSamples; sy++ )
 			{
-				for ( sx = 0; sx < m_XPixelSamples; sx++ )
+				for ( sx = 0; sx < m_PixelXSamples; sx++ )
 				{
 					// Get the index of the subpixel in the array
-					TqInt sindex = index + ( ( ( sy * m_XPixelSamples ) + sx ) * numsubpixels );
-					TqFloat sfx = static_cast<TqFloat>( sx ) / m_XPixelSamples;
-					TqFloat sfy = static_cast<TqFloat>( sy ) / m_YPixelSamples;
+					TqInt sindex = index + ( ( ( sy * m_PixelXSamples ) + sx ) * numsubpixels );
+					TqFloat sfx = static_cast<TqFloat>( sx ) / m_PixelXSamples;
+					TqFloat sfy = static_cast<TqFloat>( sy ) / m_PixelYSamples;
 					// Go over each subcell in the subpixel
 					TqInt cx, cy;
-					for ( cy = 0; cy < m_XPixelSamples; cy++ )
+					for ( cy = 0; cy < m_PixelXSamples; cy++ )
 					{
-						for ( cx = 0; cx < m_YPixelSamples; cx++ )
+						for ( cx = 0; cx < m_PixelYSamples; cx++ )
 						{
 							// Get the index of the subpixel in the array
-							TqInt cindex = sindex + ( ( cy * m_YPixelSamples ) + cx );
+							TqInt cindex = sindex + ( ( cy * m_PixelYSamples ) + cx );
 							TqFloat fx = ( cx * subcellwidth ) + sfx + pfx + subcellcentre;
 							TqFloat fy = ( cy * subcellwidth ) + sfy + pfy + subcellcentre;
 							TqFloat w = 0.0f;
 							if ( fx >= -xfwo2 && fy >= -yfwo2 && fx <= xfwo2 && fy <= yfwo2 )
-								w = ( *pFilter ) ( fx, fy, m_XFWidth, m_YFWidth );
+								w = ( *pFilter ) ( fx, fy, m_FilterXWidth, m_FilterYWidth );
 							m_aFilterValues[ cindex ] = w;
 						}
 					}
@@ -353,17 +353,17 @@ void CqBucket::FilterBucket(TqBool empty)
 	CqImagePixel * pie;
 	
 	TqInt datasize = QGetRenderContext()->GetOutputDataTotalSize();
-	m_aDatas.resize( datasize * XSize() * YSize() );
-	m_aCoverages.resize( XSize() * YSize() );
+	m_aDatas.resize( datasize * Width() * Height() );
+	m_aCoverages.resize( Width() * Height() );
 
-	TqInt xmax = static_cast<TqInt>( CEIL( ( XFWidth() - 1 ) * 0.5f ) );
-	TqInt ymax = static_cast<TqInt>( CEIL( ( YFWidth() - 1 ) * 0.5f ) );
-	TqFloat xfwo2 = XFWidth() * 0.5f;
-	TqFloat yfwo2 = YFWidth() * 0.5f;
-	TqInt numsubpixels = ( m_XPixelSamples * m_YPixelSamples );
+	TqInt xmax = static_cast<TqInt>( CEIL( ( FilterXWidth() - 1 ) * 0.5f ) );
+	TqInt ymax = static_cast<TqInt>( CEIL( ( FilterYWidth() - 1 ) * 0.5f ) );
+	TqFloat xfwo2 = FilterXWidth() * 0.5f;
+	TqFloat yfwo2 = FilterYWidth() * 0.5f;
+	TqInt numsubpixels = ( m_PixelXSamples * m_PixelYSamples );
 
 	TqInt numperpixel = numsubpixels * numsubpixels;
-	TqInt	xlen = XSize() + XFWidth();
+	TqInt	xlen = Width() + FilterXWidth();
 
 	TqInt SampleCount = 0;
 	CqColor imager;
@@ -373,8 +373,8 @@ void CqBucket::FilterBucket(TqBool empty)
 
 	TqBool fImager = ( QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) [ 0 ] != "null" );
 
-	TqInt endy = YOrigin() + YSize();
-	TqInt endx = XOrigin() + XSize();
+	TqInt endy = YOrigin() + Height();
+	TqInt endx = XOrigin() + Width();
 
 	for ( y = YOrigin(); y < endy ; y++ )
 	{
@@ -396,15 +396,15 @@ void CqBucket::FilterBucket(TqBool empty)
 					CqImagePixel* pie2 = pie;
 					for ( fx = -xmax; fx <= xmax; fx++ )
 					{
-						TqInt index = ( ( ( fy + ymax ) * XFWidth() ) + ( fx + xmax ) ) * numperpixel;
+						TqInt index = ( ( ( fy + ymax ) * FilterXWidth() ) + ( fx + xmax ) ) * numperpixel;
 						// Now go over each subsample within the pixel
 						TqInt sx, sy;
 						TqInt sampleIndex = 0;
-						for ( sy = 0; sy < m_YPixelSamples; sy++ )
+						for ( sy = 0; sy < m_PixelYSamples; sy++ )
 						{
-							for ( sx = 0; sx < m_XPixelSamples; sx++ )
+							for ( sx = 0; sx < m_PixelXSamples; sx++ )
 							{
-								TqInt sindex = index + ( ( ( sy * m_XPixelSamples ) + sx ) * numsubpixels );
+								TqInt sindex = index + ( ( ( sy * m_PixelXSamples ) + sx ) * numsubpixels );
 								const SqSampleData& sampleData = pie2->SampleData( sampleIndex );
 								CqVector2D vecS = sampleData.m_Position;
 								vecS -= CqVector2D( xcent, ycent );
@@ -447,8 +447,8 @@ void CqBucket::FilterBucket(TqBool empty)
 
 	i = 0;
 	ImageElement( XOrigin(), YOrigin(), pie );
-	endy = YSize();
-	endx = XSize();
+	endy = Height();
+	endx = Width();
 	
 	for ( y = 0; y < endy; y++ )
 	{
@@ -463,8 +463,8 @@ void CqBucket::FilterBucket(TqBool empty)
 		pie += xlen;
 	}
 
-	endy = YOrigin() + YSize();
-	endx = XOrigin() + XSize();
+	endy = YOrigin() + Height();
+	endx = XOrigin() + Width();
 
 	if ( NULL != QGetRenderContext() ->optCurrent().pshadImager() && NULL != QGetRenderContext() ->optCurrent().pshadImager() ->pShader() )
 	{
@@ -521,9 +521,9 @@ void CqBucket::ExposeBucket()
 		TqFloat oneovergamma = 1.0f / exposegamma;
 		TqFloat endx, endy;
 		TqInt   nextx;
-		endy = YSize();
-		endx = XSize();
-		nextx = XSize() + XFWidth();
+		endy = Height();
+		endx = Width();
+		nextx = Width() + FilterXWidth();
 	
 		for ( y = 0; y < endy; y++ )
 		{
@@ -560,9 +560,9 @@ void CqBucket::QuantizeBucket()
 	static CqRandom random( 61 );
 	TqFloat endx, endy;
 	TqInt   nextx;
-	endy = YSize();
-	endx = XSize();
-	nextx = XSize() + XFWidth();
+	endy = Height();
+	endx = Width();
+	nextx = Width() + FilterXWidth();
 
 
 	if ( QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )

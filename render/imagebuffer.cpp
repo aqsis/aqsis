@@ -60,7 +60,7 @@ CqImageBuffer::~CqImageBuffer()
 
 CqVector2D	CqImageBuffer::BucketPosition( ) const
 {
-	return( BucketPosition( CurrentBucketX(), CurrentBucketY() ) );
+	return( BucketPosition( CurrentBucketCol(), CurrentBucketRow() ) );
 }
 
 
@@ -92,7 +92,7 @@ CqVector2D	CqImageBuffer::BucketPosition( TqInt x, TqInt y ) const
 
 CqVector2D CqImageBuffer::BucketSize( ) const
 {
-	return( BucketSize( CurrentBucketX(), CurrentBucketY() ) );
+	return( BucketSize( CurrentBucketCol(), CurrentBucketRow() ) );
 }
 
 
@@ -167,7 +167,7 @@ void	CqImageBuffer::SetImage()
 			b->SetProcessed( TqFalse );
 	}
 
-	m_CurrentBucketX = m_CurrentBucketY = 0;
+	m_CurrentBucketCol = m_CurrentBucketRow = 0;
 }
 
 
@@ -333,7 +333,7 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 	// If the primitive has been marked as undiceable by the eyeplane check, then we cannot get a valid
 	// bucket index from it as the projection of the bound would cross the camera plane and therefore give a false
 	// result, so just put it back in the current bucket for further splitting.
-	TqInt XMinb = CurrentBucketX(), YMinb = CurrentBucketY();
+	TqInt XMinb = CurrentBucketCol(), YMinb = CurrentBucketRow();
 	if ( !pSurface->IsUndiceable() )
 	{
 		// Find out which bucket(s) the surface belongs to.
@@ -351,8 +351,8 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 
 		if( Bucket(XMinb, YMinb).IsProcessed() )
 		{
-			XMinb = CurrentBucketX();
-			YMinb = CurrentBucketY();
+			XMinb = CurrentBucketCol();
+			YMinb = CurrentBucketRow();
 		}
 	}
 	// Sanity check we are not putting into a bucket that has already been processed.
@@ -388,8 +388,8 @@ TqBool CqImageBuffer::OcclusionCullSurface( CqBasicSurface* pSurface )
 		// pSurface is behind everying in this bucket but it may be
 		// visible in other buckets it overlaps.
 		// bucket to the right
-		TqInt nextBucket = CurrentBucketX() + 1;
-		CqVector2D pos = BucketPosition( nextBucket, CurrentBucketY() );
+		TqInt nextBucket = CurrentBucketCol() + 1;
+		CqVector2D pos = BucketPosition( nextBucket, CurrentBucketRow() );
 		if ( ( nextBucket < cXBuckets() ) &&
 		     ( RasterBound.vecMax().x() >= pos.x() ) )
 		{
@@ -403,13 +403,13 @@ TqBool CqImageBuffer::OcclusionCullSurface( CqBasicSurface* pSurface )
 			//  has been added to stop the surface from being
 			//  deleted. - Jonathan Merritt.
 			pSurface->UnLink();
-			Bucket( nextBucket, CurrentBucketY() ).AddGPrim( pSurface );
+			Bucket( nextBucket, CurrentBucketRow() ).AddGPrim( pSurface );
 			RELEASEREF( pSurface );
 			return TqTrue;
 		}
 
 		// next row
-		nextBucket = CurrentBucketY() + 1;
+		nextBucket = CurrentBucketRow() + 1;
 		// find bucket containing left side of bound
 		TqInt nextBucketX = static_cast<TqInt>( RasterBound.vecMin().x() ) / XBucketSize();
 		nextBucketX = MAX( nextBucketX, 0 );
@@ -642,9 +642,9 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 			for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
 			{
 				RenderMicroPoly( *impg, xmin, xmax, ymin, ymax );
-				if ( PushMPGDown( ( *impg ), -1, CurrentBucketY() ) )
+				if ( PushMPGDown( ( *impg ), -1, CurrentBucketRow() ) )
 					STATS_INC( MPG_pushed_down );
-				if ( PushMPGForward( ( *impg ), CurrentBucketX(), CurrentBucketY() ) )
+				if ( PushMPGForward( ( *impg ), CurrentBucketCol(), CurrentBucketRow() ) )
 					STATS_INC( MPG_pushed_forward );
 				RELEASEREF( ( *impg ) );
 			}
@@ -660,9 +660,9 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 	for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
 	{
 		RenderMicroPoly( *impg, xmin, xmax, ymin, ymax );
-		if ( PushMPGDown( ( *impg ), -1, CurrentBucketY() ) ) 
+		if ( PushMPGDown( ( *impg ), -1, CurrentBucketRow() ) ) 
 			STATS_INC( MPG_pushed_down );
-		if ( PushMPGForward( ( *impg ), CurrentBucketX(), CurrentBucketY() ) ) 
+		if ( PushMPGForward( ( *impg ), CurrentBucketCol(), CurrentBucketRow() ) ) 
 			STATS_INC( MPG_pushed_forward );
 		RELEASEREF( ( *impg ) );
 	}
@@ -834,7 +834,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
 			coc = QGetRenderContext()->GetCircleOfConfusion( ad );
 		}
 
-		TqInt nextx = Bucket.XSize() + Bucket.XFWidth();
+		TqInt nextx = Bucket.Width() + Bucket.FilterXWidth();
 		Bucket.ImageElement( sX, sY, pie );
 
 		// quadX and quadY hold which quadrant we are currently sampling in
@@ -1407,7 +1407,7 @@ void CqImageBuffer::RenderImage()
 		{
 			// Inform the status class how far we have got, and update UI.
 			float Complete = ( float ) ( cXBuckets() * cYBuckets() );
-			TqInt iBucket = ( CurrentBucketY() * cXBuckets() ) + CurrentBucketX();
+			TqInt iBucket = ( CurrentBucketRow() * cXBuckets() ) + CurrentBucketCol();
 			Complete /= iBucket;
 			Complete = 100.0f / Complete;
 			QGetRenderContext() ->Stats().SetComplete( Complete );

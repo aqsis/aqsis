@@ -509,8 +509,8 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 	// Copy the bucket to the display buffer.
 	TqInt	xmin = pBucket->XOrigin();
 	TqInt	ymin = pBucket->YOrigin();
-	TqInt	xsize = pBucket->XSize();
-	TqInt	ysize = pBucket->YSize();
+	TqInt	xsize = pBucket->Width();
+	TqInt	ysize = pBucket->Height();
 	TqInt	xmaxplus1 = xmin + xsize;
 	TqInt	ymaxplus1 = ymin + ysize;
 
