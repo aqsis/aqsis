@@ -42,9 +42,6 @@ Package=<4>
     Project_Dep_Name filebuffer
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name framebuffer
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name libaqsis
     End Project Dependency
     Begin Project Dependency
@@ -181,21 +178,6 @@ Package=<4>
 ###############################################################################
 
 Project: "filebuffer"=.\filebuffer\filebuffer.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name libdd
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "framebuffer"=.\framebuffer\win32\intel\framebuffer.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

@@ -46,12 +46,12 @@ OUTPUT_LANGUAGE        = English
 # Private class members and static file members will be hidden unless 
 # the EXTRACT_PRIVATE and EXTRACT_STATIC tags are set to YES 
 
-EXTRACT_ALL            = YES
+EXTRACT_ALL            = NO
 
 # If the EXTRACT_PRIVATE tag is set to YES all private members of a class 
 # will be included in the documentation. 
 
-EXTRACT_PRIVATE        = YES
+EXTRACT_PRIVATE        = NO
 
 # If the EXTRACT_STATIC tag is set to YES all static members of a file 
 # will be included in the documentation. 
@@ -273,7 +273,7 @@ WARNINGS               = YES
 # for undocumented members. If EXTRACT_ALL is set to YES then this flag will 
 # automatically be disabled. 
 
-WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_UNDOCUMENTED   = YES
 
 # The WARN_FORMAT tag determines the format of the warning messages that 
 # doxygen can produce. The string should contain the $file, $line, and $text 
@@ -297,8 +297,10 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces. 
 
-#INPUT                  = ./render ./file ./framebuffer ./slcomp ./slpp ./shadowmap ./cribber ./ribber ./libarg ./texer
-INPUT                  = .
+INPUT                  = ./aqsis ./aqsl ./filebuffer ./framebuffer_glut ./framebuffer_glut_z 
+INPUT				  += ./libaqsistypes ./libaqsistypes/win32/intel ./libcodegenvm ./libdd 
+INPUT				  += ./libddmsimple ./libddmsock ./librib2 ./librib2ri ./librib2stream 
+INPUT				  += ./libslparse ./render ./shadowmap ./teqser
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -311,7 +313,7 @@ FILE_PATTERNS          = *.h *.cpp
 # should be searched for input files as well. Possible values are YES and NO. 
 # If left blank NO is used. 
 
-RECURSIVE              = YES
+RECURSIVE              = NO
 
 # The EXCLUDE tag can be used to specify files and/or directories that should 
 # excluded from the INPUT source files. This way you can easily exclude a 
