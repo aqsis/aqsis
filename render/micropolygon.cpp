@@ -302,7 +302,9 @@ void CqMicroPolyGrid::Project()
 	do
 	{
 		CqVector3D&	vecP=P();
+		TqFloat zdepth=vecP.z();
 		vecP=matCameraToRaster*vecP;
+		vecP.z(zdepth);
 	}while(Advance());
 }
 

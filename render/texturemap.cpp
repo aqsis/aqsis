@@ -900,7 +900,8 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 	// If no map defined, not in shadow.
 	val=0.0f;
 
-	CqVector3D	vecR1s,vecR2s,vecR3s,vecR4s;
+	CqVector3D	vecR1l,vecR2l,vecR3l,vecR4l;
+	CqVector3D	vecR1m,vecR2m,vecR3m,vecR4m;
 
 	// Add in the bias at this point in camera coordinates.
 	TqFloat bias=0.225f;
@@ -909,17 +910,26 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 		bias=poptBias[0];
 
 	CqVector3D vecBias(0,0,bias);
-	CqMatrix matCameraToScreen=m_matWorldToScreen*QGetRenderContext()->matSpaceToSpace("camera","world");
+	// Generate a matrix to transform points from camera space into the space of the light source used in the 
+	// defintiion of the shadow map.
+	CqMatrix matCameraToLight=m_matWorldToCamera*QGetRenderContext()->matSpaceToSpace("camera","world");
+	// Generate a matrix to transform points from camera space into the space of the shadow map.
+	CqMatrix matCameraToMap=m_matWorldToScreen*QGetRenderContext()->matSpaceToSpace("camera","world");
 
-	vecR1s=matCameraToScreen*(R1-vecBias);
-	vecR2s=matCameraToScreen*(R2-vecBias);
-	vecR3s=matCameraToScreen*(R3-vecBias);
-	vecR4s=matCameraToScreen*(R4-vecBias);
+	vecR1l=matCameraToLight*(R1-vecBias);
+	vecR2l=matCameraToLight*(R2-vecBias);
+	vecR3l=matCameraToLight*(R3-vecBias);
+	vecR4l=matCameraToLight*(R4-vecBias);
 
-	TqFloat z1=vecR1s.z();
-	TqFloat z2=vecR2s.z();
-	TqFloat z3=vecR3s.z();
-	TqFloat z4=vecR4s.z();
+	vecR1m=matCameraToMap*(R1-vecBias);
+	vecR2m=matCameraToMap*(R2-vecBias);
+	vecR3m=matCameraToMap*(R3-vecBias);
+	vecR4m=matCameraToMap*(R4-vecBias);
+
+	TqFloat z1=vecR1l.z();
+	TqFloat z2=vecR2l.z();
+	TqFloat z3=vecR3l.z();
+	TqFloat z4=vecR4l.z();
 	TqFloat z=(z1+z2+z3+z4)*0.25;
 
 	float sbo2=(sblur*0.5f)*m_XRes;
@@ -931,14 +941,14 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 	TqFloat xro2=m_XRes*0.5;
 	TqFloat yro2=m_YRes*0.5;
 	
-	TqFloat s1=vecR1s.x()*xro2+xro2;
-	TqFloat t1=m_YRes-(vecR1s.y()*yro2+yro2);
-	TqFloat s2=vecR2s.x()*xro2+xro2;
-	TqFloat t2=m_YRes-(vecR2s.y()*yro2+yro2);
-	TqFloat s3=vecR3s.x()*xro2+xro2;
-	TqFloat t3=m_YRes-(vecR3s.y()*yro2+yro2);
-	TqFloat s4=vecR4s.x()*xro2+xro2;
-	TqFloat t4=m_YRes-(vecR4s.y()*yro2+yro2);
+	TqFloat s1=vecR1m.x()*xro2+xro2;
+	TqFloat t1=m_YRes-(vecR1m.y()*yro2+yro2);
+	TqFloat s2=vecR2m.x()*xro2+xro2;
+	TqFloat t2=m_YRes-(vecR2m.y()*yro2+yro2);
+	TqFloat s3=vecR3m.x()*xro2+xro2;
+	TqFloat t3=m_YRes-(vecR3m.y()*yro2+yro2);
+	TqFloat s4=vecR4m.x()*xro2+xro2;
+	TqFloat t4=m_YRes-(vecR4m.y()*yro2+yro2);
 
 	TqFloat smin=(s1<s2)?s1:(s2<s3)?s2:(s3<s4)?s3:s4;
 	TqFloat smax=(s1>s2)?s1:(s2>s3)?s2:(s3>s4)?s3:s4;
