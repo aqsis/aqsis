@@ -138,7 +138,7 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 
 	if ( g_Progress )  // Override the outputformat
 	{
-		strProgress = "%p%%";
+		strProgress = "R90000%p%%";
 		percent = static_cast<int>( percent );
 	}
 	else			// Use the default style
@@ -164,7 +164,7 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 			switch ( strProgress[ itag + 1 ] )
 			{
 					case 'p':
-					strOutput << std::setw( 6 ) << std::setfill( ' ' ) << std::setprecision( 4 ) << percent;
+					strOutput << std::setw( 5 ) << std::setfill( ' ' ) << std::setprecision( 4 ) << percent;
 					break;
 
 					case 's':
