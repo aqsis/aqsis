@@ -1302,8 +1302,9 @@ TqInt CqRenderer::OutputDataSamples( const char* name )
 
 void TIFF_ErrorHandler(const char* mdl, const char* fmt, va_list va)
 {
-	CqString err_string = QGetRenderContextI() ->Logger() ->vprintf( fmt, va ); 
-	QGetRenderContextI() ->Logger() ->error( "%s in file: \"%s\"", err_string.c_str(), mdl );
+	char err_string[384];
+	vsprintf( err_string, fmt, va ); 
+	QGetRenderContextI() ->Logger() ->error( "%s in file: \"%s\"", err_string, mdl );
 }
 
 void TIFF_WarnHandler(const char* mdl, const char* fmt, va_list va)

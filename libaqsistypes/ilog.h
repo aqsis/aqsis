@@ -4,8 +4,8 @@
  *	@author	Matthäus G. Chajdas
  *	@brief	Declare the interface structure for the log class.
  *
- *	Last change by:		$Author: mw_matti $
- *	Last change date:	$Date: 2003/08/05 17:11:08 $
+ *	Last change by:		$Author: pgregory $
+ *	Last change date:	$Date: 2003/08/06 07:51:27 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___ilog_Loaded___
@@ -93,10 +93,6 @@ public:
 	/** Get an error from the message table
 	 */
 	virtual const char* getError( int table, int error_id ) = 0;
-
-	/** Parse a string just like vprintf
-	 */
-	virtual CqString	vprintf(const char* strfrmt, va_list va) = 0;
 
 };
 

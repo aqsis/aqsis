@@ -338,13 +338,6 @@ void CqLog::debug( const CqString &string )
 	log2( log4cpp::Priority::DEBUG, string.c_str() );
 }
 
-//------------------------------- vprintf
-CqString	CqLog::vprintf(const char* strfrmt, va_list va)
-{
-	return	log4cpp::StringUtil::vform( strfrmt, va );
-}
-
-
 //-------------------------------- Utility functions
 IqLog* CreateLogger()
 {
