@@ -20,6 +20,7 @@ CFG=aqsis - Win32 Debug
 !MESSAGE "aqsis - Win32 Release" (based on "Win32 (x86) Console Application")
 !MESSAGE "aqsis - Win32 Debug" (based on "Win32 (x86) Console Application")
 !MESSAGE "aqsis - Win32 Profile" (based on "Win32 (x86) Console Application")
+!MESSAGE "aqsis - Win32 MPatrol" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
@@ -105,6 +106,33 @@ LINK32=link.exe
 # ADD LINK32 libargparse.lib /nologo /subsystem:console /profile /debug /machine:I386 /libpath:"..\Library\Profile"
 # SUBTRACT LINK32 /nodefaultlib
 
+!ELSEIF  "$(CFG)" == "aqsis - Win32 MPatrol"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "aqsis___Win32_MPatrol"
+# PROP BASE Intermediate_Dir "aqsis___Win32_MPatrol"
+# PROP BASE Ignore_Export_Lib 0
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\Library\MPatrol"
+# PROP Intermediate_Dir "..\Object\MPatrol\aqsis"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\Render" /I "..\librib2" /I "..\librib2ri" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libargparse" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_AQSIS /D BUILD_AQSIS=1 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\Render" /I "..\librib2" /I "..\librib2ri" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libargparse" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_AQSIS /D BUILD_AQSIS=1 /FR /YX /FD /c
+# ADD BASE RSC /l 0x809 /d "NDEBUG"
+# ADD RSC /l 0x809 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 libargparse.lib /nologo /subsystem:console /profile /debug /machine:I386 /libpath:"..\Library\Profile"
+# SUBTRACT BASE LINK32 /nodefaultlib
+# ADD LINK32 libargparse.lib /nologo /subsystem:console /profile /debug /machine:I386 /libpath:"..\Library\Profile"
+# SUBTRACT LINK32 /nodefaultlib
+
 !ENDIF 
 
 # Begin Target
@@ -112,6 +140,7 @@ LINK32=link.exe
 # Name "aqsis - Win32 Release"
 # Name "aqsis - Win32 Debug"
 # Name "aqsis - Win32 Profile"
+# Name "aqsis - Win32 MPatrol"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"

@@ -20,6 +20,7 @@ CFG=All - Win32 Debug
 !MESSAGE "All - Win32 Release" (based on "Win32 (x86) Generic Project")
 !MESSAGE "All - Win32 Debug" (based on "Win32 (x86) Generic Project")
 !MESSAGE "All - Win32 Profile" (based on "Win32 (x86) Generic Project")
+!MESSAGE "All - Win32 MPatrol" (based on "Win32 (x86) Generic Project")
 !MESSAGE 
 
 # Begin Project
@@ -68,8 +69,26 @@ PostBuild_Cmds=REM call ..\prep_install.bat
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\Profile"
-# PROP Intermediate_Dir "All___Win32_Profile"
+# PROP Output_Dir ""
+# PROP Intermediate_Dir ""
+# PROP Target_Dir ""
+# Begin Special Build Tool
+SOURCE="$(InputPath)"
+PostBuild_Desc=Preparing installation
+PostBuild_Cmds=REM call ..\prep_install.bat
+# End Special Build Tool
+
+!ELSEIF  "$(CFG)" == "All - Win32 MPatrol"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "All___Win32_MPatrol"
+# PROP BASE Intermediate_Dir "All___Win32_MPatrol"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir ""
+# PROP Intermediate_Dir ""
 # PROP Target_Dir ""
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
@@ -84,5 +103,6 @@ PostBuild_Cmds=REM call ..\prep_install.bat
 # Name "All - Win32 Release"
 # Name "All - Win32 Debug"
 # Name "All - Win32 Profile"
+# Name "All - Win32 MPatrol"
 # End Target
 # End Project

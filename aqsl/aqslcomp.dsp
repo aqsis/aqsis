@@ -20,6 +20,7 @@ CFG=aqslcomp - Win32 Debug
 !MESSAGE "aqslcomp - Win32 Release" (based on "Win32 (x86) Console Application")
 !MESSAGE "aqslcomp - Win32 Debug" (based on "Win32 (x86) Console Application")
 !MESSAGE "aqslcomp - Win32 Profile" (based on "Win32 (x86) Console Application")
+!MESSAGE "aqslcomp - Win32 MPatrol" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
@@ -102,6 +103,31 @@ LINK32=link.exe
 # ADD BASE LINK32 libargparse.lib log4cpp.lib libcodegenvm.lib libslparse.lib libaqsistypes.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /libpath:"..\Library\Release"
 # ADD LINK32 libargparse.lib log4cpp.lib libcodegenvm.lib libslparse.lib libaqsistypes.lib /nologo /subsystem:console /profile /debug /machine:I386 /libpath:"..\Library\Profile"
 
+!ELSEIF  "$(CFG)" == "aqslcomp - Win32 MPatrol"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "aqslcomp___Win32_MPatrol"
+# PROP BASE Intermediate_Dir "aqslcomp___Win32_MPatrol"
+# PROP BASE Ignore_Export_Lib 0
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\Library\MPatrol"
+# PROP Intermediate_Dir "..\Object\MPatrol\aqslcomp"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\Render" /I "..\libslparse" /I "..\libcodegenvm" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libargparse" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_AQSLCOMP /D BUILD_AQSLCOMP=1 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\Render" /I "..\libslparse" /I "..\libcodegenvm" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libargparse" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_AQSLCOMP /D BUILD_AQSLCOMP=1 /FR /YX /FD /c
+# ADD BASE RSC /l 0x809 /d "NDEBUG"
+# ADD RSC /l 0x809 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 libargparse.lib log4cpp.lib libcodegenvm.lib libslparse.lib libaqsistypes.lib /nologo /subsystem:console /profile /debug /machine:I386 /libpath:"..\Library\Profile"
+# ADD LINK32 libargparse.lib log4cpp.lib libcodegenvm.lib libslparse.lib libaqsistypes.lib /nologo /subsystem:console /profile /debug /machine:I386 /libpath:"..\Library\Profile"
+
 !ENDIF 
 
 # Begin Target
@@ -109,6 +135,7 @@ LINK32=link.exe
 # Name "aqslcomp - Win32 Release"
 # Name "aqslcomp - Win32 Debug"
 # Name "aqslcomp - Win32 Profile"
+# Name "aqslcomp - Win32 MPatrol"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"

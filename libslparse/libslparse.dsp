@@ -20,6 +20,7 @@ CFG=libslparse - Win32 Debug
 !MESSAGE "libslparse - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "libslparse - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE "libslparse - Win32 Profile" (based on "Win32 (x86) Static Library")
+!MESSAGE "libslparse - Win32 MPatrol" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -98,6 +99,29 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "libslparse___Win32_MPatrol"
+# PROP BASE Intermediate_Dir "libslparse___Win32_MPatrol"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\Library\MPatrol"
+# PROP Intermediate_Dir "..\Object\MPatrol\libslparse"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\libslparse" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSLPARSE /D BUILD_LIBSLPARSE=1 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\libslparse" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSLPARSE /D BUILD_LIBSLPARSE=1 /FR /YX /FD /c
+# ADD BASE RSC /l 0x809 /d "NDEBUG"
+# ADD RSC /l 0x809 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo
+# ADD LIB32 /nologo
+
 !ENDIF 
 
 # Begin Target
@@ -105,6 +129,7 @@ LIB32=link.exe -lib
 # Name "libslparse - Win32 Release"
 # Name "libslparse - Win32 Debug"
 # Name "libslparse - Win32 Profile"
+# Name "libslparse - Win32 MPatrol"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
@@ -176,6 +201,22 @@ BuildCmds= \
    $(BuildCmds)
 # End Custom Build
 
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
+# Begin Custom Build - Building Parser from $(InputPath)
+IntDir=.\..\Object\MPatrol\libslparse
+InputPath=.\parser.yxx
+
+BuildCmds= \
+	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
+
+"$(IntDir)\parser.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(IntDir)\parser.hpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
 !ENDIF 
 
 # End Source File
@@ -209,6 +250,17 @@ InputPath=.\scanner.lxx
 
 # Begin Custom Build - Building Lexical Scanner from $(InputPath)
 IntDir=.\..\Object\Profile\libslparse
+InputPath=.\scanner.lxx
+
+"$(IntDir)\scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	flex -o$(IntDir)\scanner.cpp $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
+# Begin Custom Build - Building Lexical Scanner from $(InputPath)
+IntDir=.\..\Object\MPatrol\libslparse
 InputPath=.\scanner.lxx
 
 "$(IntDir)\scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -278,6 +330,8 @@ SOURCE=..\Object\Release\libslparse\parser.cpp
 
 !ELSEIF  "$(CFG)" == "libslparse - Win32 Profile"
 
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
 !ENDIF 
 
 # End Source File
@@ -293,6 +347,8 @@ SOURCE=..\Object\Release\libslparse\parser.hpp
 
 !ELSEIF  "$(CFG)" == "libslparse - Win32 Profile"
 
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
 !ENDIF 
 
 # End Source File
@@ -307,6 +363,8 @@ SOURCE=..\Object\Release\libslparse\scanner.cpp
 # PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "libslparse - Win32 Profile"
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
 
 !ENDIF 
 
@@ -330,6 +388,11 @@ SOURCE=..\Object\Debug\libslparse\parser.cpp
 # PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
 
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
 !ENDIF 
 
 # End Source File
@@ -348,6 +411,11 @@ SOURCE=..\Object\Debug\libslparse\parser.hpp
 # PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
 
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
 !ENDIF 
 
 # End Source File
@@ -362,6 +430,11 @@ SOURCE=..\Object\Debug\libslparse\scanner.cpp
 !ELSEIF  "$(CFG)" == "libslparse - Win32 Debug"
 
 !ELSEIF  "$(CFG)" == "libslparse - Win32 Profile"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "libslparse - Win32 MPatrol"
 
 # PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1

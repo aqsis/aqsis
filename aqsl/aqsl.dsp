@@ -20,6 +20,7 @@ CFG=aqsl - Win32 Debug
 !MESSAGE "aqsl - Win32 Release" (based on "Win32 (x86) Generic Project")
 !MESSAGE "aqsl - Win32 Debug" (based on "Win32 (x86) Generic Project")
 !MESSAGE "aqsl - Win32 Profile" (based on "Win32 (x86) Generic Project")
+!MESSAGE "aqsl - Win32 MPatrol" (based on "Win32 (x86) Generic Project")
 !MESSAGE 
 
 # Begin Project
@@ -67,6 +68,19 @@ MTL=midl.exe
 # PROP Intermediate_Dir "..\Object\Profile\aqsl"
 # PROP Target_Dir ""
 
+!ELSEIF  "$(CFG)" == "aqsl - Win32 MPatrol"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "aqsl___Win32_MPatrol"
+# PROP BASE Intermediate_Dir "aqsl___Win32_MPatrol"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\Library\MPatrol"
+# PROP Intermediate_Dir "..\Object\MPatrol\aqsl"
+# PROP Target_Dir ""
+
 !ENDIF 
 
 # Begin Target
@@ -74,6 +88,7 @@ MTL=midl.exe
 # Name "aqsl - Win32 Release"
 # Name "aqsl - Win32 Debug"
 # Name "aqsl - Win32 Profile"
+# Name "aqsl - Win32 MPatrol"
 # Begin Source File
 
 SOURCE=.\aqsl.bat
@@ -108,6 +123,19 @@ InputPath=.\aqsl.bat
 # PROP Intermediate_Dir "..\Library\Debug"
 # Begin Custom Build - Copying $(InputPath) to $(OutDir)
 OutDir=.\..\Library\Profile
+InputPath=.\aqsl.bat
+
+"$(OutDir)\$(InputPath)" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy /Y $(InputPath) $(OutDir)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "aqsl - Win32 MPatrol"
+
+# PROP BASE Intermediate_Dir "..\Library\Debug"
+# PROP Intermediate_Dir "..\Library\Debug"
+# Begin Custom Build - Copying $(InputPath) to $(OutDir)
+OutDir=.\..\Library\MPatrol
 InputPath=.\aqsl.bat
 
 "$(OutDir)\$(InputPath)" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"

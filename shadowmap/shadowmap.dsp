@@ -20,6 +20,7 @@ CFG=shadowmap - Win32 Debug
 !MESSAGE "shadowmap - Win32 Release" (based on "Win32 (x86) Console Application")
 !MESSAGE "shadowmap - Win32 Debug" (based on "Win32 (x86) Console Application")
 !MESSAGE "shadowmap - Win32 Profile" (based on "Win32 (x86) Console Application")
+!MESSAGE "shadowmap - Win32 MPatrol" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
@@ -102,6 +103,31 @@ LINK32=link.exe
 # ADD BASE LINK32 wsock32.lib libtiff.lib libdd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /libpath:"..\Library\release"
 # ADD LINK32 wsock32.lib libtiff.lib libdd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /profile /debug /machine:I386 /libpath:"..\Library\Profile"
 
+!ELSEIF  "$(CFG)" == "shadowmap - Win32 MPatrol"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "shadowmap___Win32_MPatrol"
+# PROP BASE Intermediate_Dir "shadowmap___Win32_MPatrol"
+# PROP BASE Ignore_Export_Lib 0
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\Library\MPatrol"
+# PROP Intermediate_Dir "..\Object\MPatrol\shadowmap"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libdd" /I "..\libddmsock" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_SHADOWMAP /D BUILD_SHADOWMAP=1 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libdd" /I "..\libddmsock" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_SHADOWMAP /D BUILD_SHADOWMAP=1 /FR /YX /FD /c
+# ADD BASE RSC /l 0x809 /d "NDEBUG"
+# ADD RSC /l 0x809 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 wsock32.lib libtiff.lib libdd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /profile /debug /machine:I386 /libpath:"..\Library\Profile"
+# ADD LINK32 wsock32.lib libtiff.lib libdd.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /profile /debug /machine:I386 /libpath:"..\Library\Profile"
+
 !ENDIF 
 
 # Begin Target
@@ -109,6 +135,7 @@ LINK32=link.exe
 # Name "shadowmap - Win32 Release"
 # Name "shadowmap - Win32 Debug"
 # Name "shadowmap - Win32 Profile"
+# Name "shadowmap - Win32 MPatrol"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
