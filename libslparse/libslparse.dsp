@@ -135,7 +135,7 @@ IntDir=.\..\Object\Release\libslparse
 InputPath=.\parser.y
 
 BuildCmds= \
-	bison --no-lines --defines=$(IntDir)\parser.cpp.h -o$(IntDir)\parser.cpp $(InputPath)
+	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
 
 "$(IntDir)\parser.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -151,7 +151,7 @@ IntDir=.\..\Object\Debug\libslparse
 InputPath=.\parser.y
 
 BuildCmds= \
-	bison --no-lines --defines=$(IntDir)\parser.cpp.h -o$(IntDir)\parser.cpp $(InputPath)
+	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
 
 "$(IntDir)\parser.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -167,7 +167,7 @@ IntDir=.\..\Object\ReleaseWithDebug\libslparse
 InputPath=.\parser.y
 
 BuildCmds= \
-	bison --no-lines --defines=$(IntDir)\parser.cpp.h -o$(IntDir)\parser.cpp $(InputPath)
+	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
 
 "$(IntDir)\parser.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
