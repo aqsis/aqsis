@@ -98,8 +98,8 @@ void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 				case type_float:
 				{
 					CqParameterTyped<TqFloat, TqFloat>* pTParam =  static_cast<CqParameterTyped<TqFloat, TqFloat>*>(*iUP);
-					CqParameterTyped<TqFloat, TqFloat>* pTParam1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP)->Clone());
-					CqParameterTyped<TqFloat, TqFloat>* pTParam2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP)->Clone());
+					CqParameterTyped<TqFloat, TqFloat>* pTParam1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
+					CqParameterTyped<TqFloat, TqFloat>* pTParam2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
 					pTParam1->SetSize( pNew1->cVertex() );
 					pTParam2->SetSize( pNew2->cVertex() );
 					for( iv = 0; iv < 4; iv++ )
@@ -124,8 +124,8 @@ void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 				case type_integer:
 				{
 					CqParameterTyped<TqInt, TqFloat>* pTParam =  static_cast<CqParameterTyped<TqInt, TqFloat>*>(*iUP);
-					CqParameterTyped<TqInt, TqFloat>* pTParam1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP)->Clone());
-					CqParameterTyped<TqInt, TqFloat>* pTParam2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP)->Clone());
+					CqParameterTyped<TqInt, TqFloat>* pTParam1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
+					CqParameterTyped<TqInt, TqFloat>* pTParam2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
 					pTParam1->SetSize( pNew1->cVertex() );
 					pTParam2->SetSize( pNew2->cVertex() );
 					for( iv = 0; iv < 4; iv++ )
@@ -152,8 +152,8 @@ void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 				case type_normal:
 				{
 					CqParameterTyped<CqVector3D, CqVector3D>* pTParam =  static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(*iUP);
-					CqParameterTyped<CqVector3D, CqVector3D>* pTParam1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP)->Clone());
-					CqParameterTyped<CqVector3D, CqVector3D>* pTParam2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP)->Clone());
+					CqParameterTyped<CqVector3D, CqVector3D>* pTParam1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
+					CqParameterTyped<CqVector3D, CqVector3D>* pTParam2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
 					pTParam1->SetSize( pNew1->cVertex() );
 					pTParam2->SetSize( pNew2->cVertex() );
 					for( iv = 0; iv < 4; iv++ )
@@ -178,8 +178,8 @@ void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 				case type_hpoint:
 				{
 					CqParameterTyped<CqVector4D, CqVector3D>* pTParam =  static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(*iUP);
-					CqParameterTyped<CqVector4D, CqVector3D>* pTParam1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP)->Clone());
-					CqParameterTyped<CqVector4D, CqVector3D>* pTParam2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP)->Clone());
+					CqParameterTyped<CqVector4D, CqVector3D>* pTParam1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
+					CqParameterTyped<CqVector4D, CqVector3D>* pTParam2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
 					pTParam1->SetSize( pNew1->cVertex() );
 					pTParam2->SetSize( pNew2->cVertex() );
 					for( iv = 0; iv < 4; iv++ )
@@ -205,8 +205,8 @@ void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 				case type_color:
 				{
 					CqParameterTyped<CqColor, CqColor>* pTParam =  static_cast<CqParameterTyped<CqColor, CqColor>*>(*iUP);
-					CqParameterTyped<CqColor, CqColor>* pTParam1 = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP)->Clone());
-					CqParameterTyped<CqColor, CqColor>* pTParam2 = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP)->Clone());
+					CqParameterTyped<CqColor, CqColor>* pTParam1 = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
+					CqParameterTyped<CqColor, CqColor>* pTParam2 = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
 					pTParam1->SetSize( pNew1->cVertex() );
 					pTParam2->SetSize( pNew2->cVertex() );
 					for( iv = 0; iv < 4; iv++ )
@@ -231,8 +231,8 @@ void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 				case type_string:
 				{
 					CqParameterTyped<CqString, CqString>* pTParam =  static_cast<CqParameterTyped<CqString, CqString>*>(*iUP);
-					CqParameterTyped<CqString, CqString>* pTParam1 = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP)->Clone());
-					CqParameterTyped<CqString, CqString>* pTParam2 = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP)->Clone());
+					CqParameterTyped<CqString, CqString>* pTParam1 = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
+					CqParameterTyped<CqString, CqString>* pTParam2 = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
 					pTParam1->SetSize( pNew1->cVertex() );
 					pTParam2->SetSize( pNew2->cVertex() );
 					for( iv = 0; iv < 4; iv++ )
@@ -257,8 +257,8 @@ void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 				case type_matrix:
 				{
 //					CqParameterTyped<CqMatrix, CqMatrix>* pTParam =  static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(*iUP);
-//					CqParameterTyped<CqMatrix, CqMatrix>* pTParam1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP)->Clone());
-//					CqParameterTyped<CqMatrix, CqMatrix>* pTParam2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP)->Clone());
+//					CqParameterTyped<CqMatrix, CqMatrix>* pTParam1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
+//					CqParameterTyped<CqMatrix, CqMatrix>* pTParam2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
 //					pTParam1->SetSize( pNew1->cVertex() );
 //					pTParam2->SetSize( pNew2->cVertex() );
 //					for( iv = 0; iv < 4; iv++ )
@@ -306,8 +306,8 @@ void CqSurfacePatchBicubic::vSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 				case type_float:
 				{
 					CqParameterTyped<TqFloat, TqFloat>* pTParam =  static_cast<CqParameterTyped<TqFloat, TqFloat>*>(*iUP);
-					CqParameterTyped<TqFloat, TqFloat>* pTParam1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP)->Clone());
-					CqParameterTyped<TqFloat, TqFloat>* pTParam2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP)->Clone());
+					CqParameterTyped<TqFloat, TqFloat>* pTParam1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
+					CqParameterTyped<TqFloat, TqFloat>* pTParam2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
 					pTParam1->SetSize( pNew1->cVertex() );
 					pTParam2->SetSize( pNew2->cVertex() );
 					for( iu = 0; iu < 4; iu++ )
@@ -331,8 +331,8 @@ void CqSurfacePatchBicubic::vSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 				case type_integer:
 				{
 					CqParameterTyped<TqInt, TqFloat>* pTParam =  static_cast<CqParameterTyped<TqInt, TqFloat>*>(*iUP);
-					CqParameterTyped<TqInt, TqFloat>* pTParam1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP)->Clone());
-					CqParameterTyped<TqInt, TqFloat>* pTParam2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP)->Clone());
+					CqParameterTyped<TqInt, TqFloat>* pTParam1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
+					CqParameterTyped<TqInt, TqFloat>* pTParam2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
 					pTParam1->SetSize( pNew1->cVertex() );
 					pTParam2->SetSize( pNew2->cVertex() );
 					for( iu = 0; iu < 4; iu++ )
@@ -358,8 +358,8 @@ void CqSurfacePatchBicubic::vSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 				case type_vector:
 				{
 					CqParameterTyped<CqVector3D, CqVector3D>* pTParam =  static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(*iUP);
-					CqParameterTyped<CqVector3D, CqVector3D>* pTParam1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP)->Clone());
-					CqParameterTyped<CqVector3D, CqVector3D>* pTParam2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP)->Clone());
+					CqParameterTyped<CqVector3D, CqVector3D>* pTParam1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
+					CqParameterTyped<CqVector3D, CqVector3D>* pTParam2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
 					pTParam1->SetSize( pNew1->cVertex() );
 					pTParam2->SetSize( pNew2->cVertex() );
 					for( iu = 0; iu < 4; iu++ )
@@ -383,8 +383,8 @@ void CqSurfacePatchBicubic::vSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 				case type_hpoint:
 				{
 					CqParameterTyped<CqVector4D, CqVector3D>* pTParam =  static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(*iUP);
-					CqParameterTyped<CqVector4D, CqVector3D>* pTParam1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP)->Clone());
-					CqParameterTyped<CqVector4D, CqVector3D>* pTParam2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP)->Clone());
+					CqParameterTyped<CqVector4D, CqVector3D>* pTParam1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
+					CqParameterTyped<CqVector4D, CqVector3D>* pTParam2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
 					pTParam1->SetSize( pNew1->cVertex() );
 					pTParam2->SetSize( pNew2->cVertex() );
 					for( iu = 0; iu < 4; iu++ )
@@ -408,8 +408,8 @@ void CqSurfacePatchBicubic::vSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 				case type_color:
 				{
 					CqParameterTyped<CqColor, CqColor>* pTParam =  static_cast<CqParameterTyped<CqColor, CqColor>*>(*iUP);
-					CqParameterTyped<CqColor, CqColor>* pTParam1 = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP)->Clone());
-					CqParameterTyped<CqColor, CqColor>* pTParam2 = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP)->Clone());
+					CqParameterTyped<CqColor, CqColor>* pTParam1 = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
+					CqParameterTyped<CqColor, CqColor>* pTParam2 = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
 					pTParam1->SetSize( pNew1->cVertex() );
 					pTParam2->SetSize( pNew2->cVertex() );
 					for( iu = 0; iu < 4; iu++ )
@@ -433,8 +433,8 @@ void CqSurfacePatchBicubic::vSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 				case type_string:
 				{
 					CqParameterTyped<CqString, CqString>* pTParam =  static_cast<CqParameterTyped<CqString, CqString>*>(*iUP);
-					CqParameterTyped<CqString, CqString>* pTParam1 = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP)->Clone());
-					CqParameterTyped<CqString, CqString>* pTParam2 = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP)->Clone());
+					CqParameterTyped<CqString, CqString>* pTParam1 = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
+					CqParameterTyped<CqString, CqString>* pTParam2 = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
 					pTParam1->SetSize( pNew1->cVertex() );
 					pTParam2->SetSize( pNew2->cVertex() );
 					for( iu = 0; iu < 4; iu++ )
@@ -458,8 +458,8 @@ void CqSurfacePatchBicubic::vSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 //				case type_matrix:
 //				{
 //					CqParameterTyped<CqMatrix, CqMatrix>* pTParam =  static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(*iUP);
-//					CqParameterTyped<CqMatrix, CqMatrix>* pTParam1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP)->Clone());
-//					CqParameterTyped<CqMatrix, CqMatrix>* pTParam2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP)->Clone());
+//					CqParameterTyped<CqMatrix, CqMatrix>* pTParam1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
+//					CqParameterTyped<CqMatrix, CqMatrix>* pTParam2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() ));
 //					pTParam1->SetSize( pNew1->cVertex() );
 //					pTParam2->SetSize( pNew2->cVertex() );
 //					for( iu = 0; iu < 4; iu++ )
@@ -1227,8 +1227,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 				if( (*iUP)->Class() == class_varying )
 				{
 					// Copy any 'varying' class primitive variables.
-					CqParameter* pNewUP = (*iUP)->Clone();
-					pNewUP->Clear();
+					CqParameter* pNewUP = (*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() );
 					pNewUP->SetSize( pSurface->cVarying() );
 
 					pNewUP->SetValue( (*iUP), 0, iTa );
@@ -1240,7 +1239,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 				else if( (*iUP)->Class() == class_vertex )
 				{
 					// Copy any 'vertex' class primitive variables.
-					CqParameter* pNewUP = (*iUP)->Clone();
+					CqParameter* pNewUP = (*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() );
 					pNewUP->Clear();
 					pNewUP->SetSize( pSurface->cVertex() );
 
@@ -1438,7 +1437,7 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 				if( (*iUP)->Class() == class_varying )
 				{
 					// Copy any 'varying' class primitive variables.
-					CqParameter* pNewUP = (*iUP)->Clone();
+					CqParameter* pNewUP = (*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() );
 					pNewUP->Clear();
 					pNewUP->SetSize( pSurface->cVarying() );
 
@@ -1452,7 +1451,7 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 				else if( (*iUP)->Class() == class_vertex )
 				{
 					// Copy any 'vertex' class primitive variables.
-					CqParameter* pNewUP = (*iUP)->Clone();
+					CqParameter* pNewUP = (*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() );
 					pNewUP->Clear();
 					pNewUP->SetSize( pSurface->cVertex() );
 

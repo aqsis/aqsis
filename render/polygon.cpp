@@ -30,6 +30,23 @@
 
 START_NAMESPACE( Aqsis )
 
+#include	<windows.h>
+inline long CountMemUsage()
+{
+	MEMORY_BASIC_INFORMATION mbi;
+	DWORD      dwMemUsed = 0;
+	PVOID      pvAddress = 0;
+
+	memset(&mbi, 0, sizeof(MEMORY_BASIC_INFORMATION));
+	while(VirtualQuery(pvAddress, &mbi, sizeof(MEMORY_BASIC_INFORMATION)) == sizeof(MEMORY_BASIC_INFORMATION))
+	{
+		if(mbi.State == MEM_COMMIT && mbi.Type == MEM_PRIVATE)
+			dwMemUsed += mbi.RegionSize;
+		pvAddress = ((BYTE*)mbi.BaseAddress) + mbi.RegionSize;
+	} 
+	return dwMemUsed;
+}
+
 
 //---------------------------------------------------------------------
 /** Return the boundary extents in camera space of the polygon
@@ -309,7 +326,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		std::vector<CqParameter*>::iterator iUP;
 		for( iUP = Surface().aUserParams().begin(); iUP != Surface().aUserParams().end(); iUP++ )
 		{
-			CqParameter* pNewUP = (*iUP)->Clone();
+			CqParameter* pNewUP = (*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() );
 			pNewUP->SetSize( pNew->cVarying() );
 
 			pNewUP->SetValue( (*iUP), 0, iUPA );

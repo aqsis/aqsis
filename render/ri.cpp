@@ -2464,6 +2464,10 @@ RtVoid	RiPointsPolygons( RtInt npolys, RtInt nverts[], RtInt verts[], ... )
 
 RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERLIST )
 {
+	static gcPolys = 0;
+
+	gcPolys+=npolys;
+	
 	// Calculate how many vertices there are.
 	RtInt cVerts = 0;
 	RtInt* pVerts = verts;
@@ -2531,6 +2535,8 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 			{
 				RtFloat time = QGetRenderContext() ->ptransCurrent() ->Time( i );
 				CqPolygonPoints* pPointsClass2 = new CqPolygonPoints( *pPointsClass );
+				// Clone the primitive variables.
+				pPointsClass2->ClonePrimitiveVariables( *pPointsClass );
 
 				// Transform the points into camera space for processing,
 				pPointsClass2->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ) ),
@@ -4398,7 +4404,6 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 		for( iUserParam = aUserParams.begin(); iUserParam!=aUserParams.end(); iUserParam++ )
 		{
 			SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( tokens[ *iUserParam ] );
-			std::cout << "Processing user parameter : \"" << Decl.m_strName.c_str() << "\", which is of type \"" << Decl.m_Class << " " << Decl.m_Type << "\"" << std::endl;
 
 			CqParameter* pNewParam = (*Decl.m_pCreate)(Decl.m_strName.c_str(), Decl.m_Count);
 			// Now go across all values and fill in the parameter variable.
