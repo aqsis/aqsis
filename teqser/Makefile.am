@@ -1,7 +1,7 @@
 bin_PROGRAMS = teqser 
 
 teqser_SOURCES = teqser.cpp
-teqser_LDADD = $(top_builddir)/render/libaqsis.la $(top_builddir)/libddmsimple/libddmsimple.la $(top_builddir)/libaqsistypes/libaqsistypes.la -ltiff -largparse
+teqser_LDADD = $(top_builddir)/render/libaqsis.la $(top_builddir)/libddmsimple/libddmsimple.la $(top_builddir)/libaqsistypes/libaqsistypes.la -ltiff -largparse -ldl
 
 if DEBUG
 CXXFLAGS = -g -Wall

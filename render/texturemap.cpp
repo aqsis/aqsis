@@ -250,14 +250,14 @@ TqInt CqTextureMap::Convert(CqString &strName )
 	 /***********************************/
 	 /* Get the shared library on UNIX  */
 	 /***********************************/
-	 sprintf(dynamiclibrary, "%s/procedures/%s.so", aqsis_home, dynamicfunction);
+	 sprintf(dynamiclibrary, "%s/lib/lib%s.so", aqsis_home, dynamicfunction);
 
 	 /* so was never loaded before */
-/*	 if (!handle)
+	 if (!handle)
 		handle = dlopen(dynamiclibrary, RTLD_LAZY);
 	 if (handle) {
 		function_pt = (char * (*) (char *)) dlsym(handle, dynamicfunction);
-	 }*/
+	 }
 
 #endif
 
@@ -273,7 +273,7 @@ TqInt CqTextureMap::Convert(CqString &strName )
 #ifdef AQSIS_SYSTEM_WIN32
 		FreeLibrary((HINSTANCE)handle);
 #else
-//		dlclose(handle);
+		dlclose(handle);
 #endif
 
 	 }
