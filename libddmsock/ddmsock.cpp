@@ -474,7 +474,7 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 
 		TqInt	linelen = xsize * samples;
 
-		SqImageSample val;
+		SqImageSample val( QGetRenderContext()->GetOutputDataTotalSize() );
 		TqInt y;
 		for ( y = 0; y < ysize; y++ )
 		{
@@ -494,21 +494,20 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 				{
 					if ( samples >= 3 )
 					{
-						CqColor col = pBucket->Color( sx, sy );
-						pData[ so + 0 ] = col.fRed();
-						pData[ so + 1 ] = col.fGreen();
-						pData[ so + 2 ] = col.fBlue();
+						const TqFloat* pSamples = pBucket->Samples( sx, sy );
+						pData[ so + 0 ] = pSamples[0];
+						pData[ so + 1 ] = pSamples[1];
+						pData[ so + 2 ] = pSamples[2];
 						if ( samples == 4 )
 						{
-							CqColor o = pBucket->Opacity( sx, sy );
-							TqFloat a = ( o.fRed() + o.fGreen() + o.fBlue() ) / 3.0f;
+							TqFloat a = ( pSamples[3] + pSamples[4] + pSamples[5] ) / 3.0f;
 							pData[ so + 3 ] = a * pBucket->Coverage( sx, sy );
 						}
 					}
 					else if ( samples == 1 )
 					{
-						CqColor o = pBucket->Opacity( sx, sy );
-						TqFloat a = ( o.fRed() + o.fGreen() + o.fBlue() ) / 3.0f;
+						const TqFloat* pSamples = pBucket->Samples( sx, sy );
+						TqFloat a = ( pSamples[3] + pSamples[4] + pSamples[5] ) / 3.0f;
 						pData[ so + 0 ] = a * pBucket->Coverage( sx, sy );
 					}
 				}

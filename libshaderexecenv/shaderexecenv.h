@@ -188,9 +188,9 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 			if ( !m_stkState.empty() )
 				m_RunningState.Intersect( m_stkState.top() );
 		}
-		virtual IqShaderData* FindStandardVar( char* pname );
+		virtual IqShaderData* FindStandardVar( const char* pname );
 
-		virtual	TqInt	FindStandardVarIndex( char* pname );
+		virtual	TqInt	FindStandardVarIndex( const char* pname );
 
 		virtual IqShaderData*	pVar( TqInt Index )
 		{

@@ -246,6 +246,7 @@ class CqImageBuffer
 		void	RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
 		void	RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
 		void	RenderImage();
+		void	StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt m, TqInt n, TqFloat D );
 		/** Get completion status of this rendered image.
 		 * \return bool indicating finished or not.
 		 */

@@ -366,15 +366,26 @@ class CqRenderer : public IqRenderer
 		void	RegisterShader( const char* strName, EqShaderType type, IqShader* pShader );
 		CqShaderRegister* FindShader( const char* strName, EqShaderType type );
 
-		/** Set the locally stored render time.
-		 * \param time System time value representing the seconds taken to render.
-		 */ 
-		//						void	SettimeTaken(time_t time)	{m_timeTaken=time;}
-		/** Get the time taken to complete the last render in seconds.
-		 */ 
-		//						time_t	timeTaken() const			{return(m_timeTaken);}
-
-		//						void		PrintStats(TqInt level);
+		struct SqOutputDataEntry
+		{
+			TqInt	m_Offset;
+			TqInt	m_NumSamples;
+		};
+		TqInt	RegisterOutputData( const char* name );
+		TqInt	OutputDataIndex( const char* name );
+		TqInt	OutputDataSamples( const char* name );
+		std::map<std::string, SqOutputDataEntry>& GetMapOfOutputDataEntries()
+		{
+			return( m_OutputDataEntries );
+		}
+		
+		
+		/** Get the number if samples needed to fulfil the display requests.
+		 */
+		TqInt	GetOutputDataTotalSize() const
+		{
+			return( m_OutputDataTotalSize );
+		}
 
 	private:
 		CqModeBlock*	m_pconCurrent;					///< Pointer to the current context.
@@ -401,6 +412,9 @@ class CqRenderer : public IqRenderer
 
 		IqLog*			m_theLog;	///< Pointer to the global log.
 		IqMessageTable*	m_theTable;	///< Pointer to the global message table, used by the log. 
+		std::map<std::string, SqOutputDataEntry>	m_OutputDataEntries;
+		TqInt	m_OutputDataOffset;
+		TqInt	m_OutputDataTotalSize;
 	public:
 		std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.
 }

@@ -300,6 +300,10 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 		{
 			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->alpha() );
 		}
+		virtual	IqShaderData* FindStandardVar( const char* pname )
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->FindStandardVar( pname ) );
+		}
 
 
 	private:
@@ -426,6 +430,12 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 		CqMicroPolyGrid* pGrid() const
 		{
 			return ( m_pGrid );
+		}
+		/** Get the index into the grid of this MPG
+		 */
+		TqInt GetIndex() const
+		{
+			return( m_Index );
 		}
 		/** Set the index within the donor grid.
 		 * \param Index Integer grid index.

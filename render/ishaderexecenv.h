@@ -172,12 +172,12 @@ struct IqShaderExecEnv
 	 * \param pname Character pointer to the name.
 	 * \return IqShaderData pointer or 0.
 	 */
-	virtual	IqShaderData* FindStandardVar( char* pname ) = 0;
+	virtual	IqShaderData* FindStandardVar( const char* pname ) = 0;
 	/** Find a named standard variable in the list.
 	 * \param pname Character pointer to the name.
 	 * \return Integer index in the list or -1.
 	 */
-	virtual	TqInt	FindStandardVarIndex( char* pname ) = 0;
+	virtual	TqInt	FindStandardVarIndex( const char* pname ) = 0;
 	/** Get a standard variable pointer given an index.
 	 * \param Index The integer index returned from FindStandardVarIndex.
 	 * \return IqShaderData pointer.

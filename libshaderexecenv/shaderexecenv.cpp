@@ -248,7 +248,7 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Iq
 	}
 }
 
-IqShaderData* CqShaderExecEnv::FindStandardVar( char* pname )
+IqShaderData* CqShaderExecEnv::FindStandardVar( const char* pname )
 {
 	TqInt tmp = m_LocalIndex;
 	TqUlong htoken = CqParameter::hash( pname );
@@ -266,7 +266,7 @@ IqShaderData* CqShaderExecEnv::FindStandardVar( char* pname )
 	}
 	return ( 0 );
 }
-TqInt	CqShaderExecEnv::FindStandardVarIndex( char* pname )
+TqInt	CqShaderExecEnv::FindStandardVarIndex( const char* pname )
 {
 	TqInt tmp = m_LocalIndex;
 	TqUlong htoken = CqParameter::hash( pname );

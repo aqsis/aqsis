@@ -68,7 +68,9 @@ static CqMatrix oldresult[2];
 CqRenderer::CqRenderer() :
 		m_pImageBuffer( 0 ),
 		m_Mode( RenderMode_Image ),
-		m_fSaveGPrims( TqFalse )
+		m_fSaveGPrims( TqFalse ),
+		m_OutputDataOffset(7),		// Cs, Os, z
+		m_OutputDataTotalSize(7)	// Cs, Os, z
 {
 	m_pconCurrent = 0;
 	m_pImageBuffer = new	CqImageBuffer();
@@ -565,13 +567,12 @@ void CqRenderer::RenderWorld()
 	if ( pImage() == 0 )
 		SetImage( new CqImageBuffer );
 
-	// Store the time at start.
-	//	m_timeTaken=time(0);
-
-	// Print to the defined output what we are rendering.
-	//	CqString strMsg("Rendering - ");
-	//	strMsg+=optCurrent().strDisplayName();
-	//	CqBasicError(0,Severity_Normal,strMsg.c_str());
+	// \debug:
+	std::map<std::string, SqOutputDataEntry>::iterator entry;
+	for( entry = m_OutputDataEntries.begin(); entry != m_OutputDataEntries.end(); entry++ )
+	{
+		std::cout << entry->first.c_str() << " - " << entry->second.m_Offset << "," << entry->second.m_NumSamples << std::endl;
+	}
 
 	m_pDDManager->OpenDisplays();
 
@@ -607,6 +608,11 @@ void CqRenderer::Initialise()
 
 	// Truncate the array of named coordinate systems to just the standard ones.
 	m_aCoordSystems.resize( CoordSystem_Last );
+
+	// Clear the output data entries
+	m_OutputDataEntries.clear();
+	m_OutputDataOffset = 7;		// Cs, Os, z
+	m_OutputDataTotalSize = 7;	// Cs, Os, z
 }
 
 
@@ -1207,6 +1213,84 @@ void CqRenderer::WhichMatWorldTo( CqMatrix &matB, TqUlong thash )
 		}
 	}
 }
+
+
+TqInt CqRenderer::RegisterOutputData( const char* name )
+{
+	TqInt offset;
+	if( ( offset = OutputDataIndex( name ) ) != -1 )
+		return(offset);
+
+	SqParameterDeclaration Decl = FindParameterDecl( name );
+	if( Decl.m_Type != type_invalid )
+	{
+		if( Decl.m_Count != 1 )
+			throw("Error: Cannot use array as an output type");
+
+		SqOutputDataEntry DataEntry;
+		TqInt NumSamples = 0;
+		switch( Decl.m_Type )
+		{
+			case type_float:
+			case type_integer:
+				NumSamples = 1;
+				break;
+			case type_point:
+			case type_normal:
+			case type_vector:
+			case type_hpoint:
+				NumSamples = 3;
+				break;
+			case type_color:
+				// \note: Color is handled separately in case we ever support RiColorSamples
+				NumSamples = 3;
+				break;
+			case type_matrix:
+				NumSamples = 16;
+				break;
+			case type_string:
+				throw("Error: String not valid as an output type");
+				break;
+		}
+		
+		DataEntry.m_Offset = m_OutputDataOffset;
+		DataEntry.m_NumSamples = NumSamples;
+		m_OutputDataOffset += NumSamples;
+		m_OutputDataTotalSize += NumSamples;
+
+		// Add the new entry to the map, using the Decl name as the key.
+		m_OutputDataEntries[Decl.m_strName] = DataEntry;
+
+		return( DataEntry.m_Offset );
+	}	
+
+	return( -1 );
+}
+
+TqInt CqRenderer::OutputDataIndex( const char* name )
+{
+	SqParameterDeclaration Decl = FindParameterDecl( name );
+	if( Decl.m_Type != type_invalid )
+	{
+		std::map<std::string, SqOutputDataEntry>::iterator entry = m_OutputDataEntries.find( Decl.m_strName );
+		if( entry != m_OutputDataEntries.end() )
+			return( entry->second.m_Offset );
+	}
+	return( -1 );
+}
+
+TqInt CqRenderer::OutputDataSamples( const char* name )
+{
+	SqParameterDeclaration Decl = FindParameterDecl( name );
+	if( Decl.m_Type != type_invalid )
+	{
+		std::map<std::string, SqOutputDataEntry>::iterator entry = m_OutputDataEntries.find( Decl.m_strName );
+		if( entry != m_OutputDataEntries.end() )
+			return( entry->second.m_NumSamples );
+	}
+	return( 0 );
+}
+
 
 //---------------------------------------------------------------------
 

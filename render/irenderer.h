@@ -5,7 +5,7 @@
  *	@brief	Declare the common interface structure for a Renderer core class.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/02/14 20:34:13 $
+ *	Last change date:	$Date: 2003/05/22 07:23:51 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___irenderer_Loaded___
@@ -67,6 +67,9 @@ struct IqRenderer
 
 	virtual IqLog* Logger() = 0;
 
+	virtual TqInt	RegisterOutputData( const char* name ) = 0;
+	virtual TqInt	OutputDataIndex( const char* name ) = 0;
+	virtual TqInt	OutputDataSamples( const char* name ) = 0;
 };
 
 IqRenderer* QGetRenderContextI();

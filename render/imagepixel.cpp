@@ -47,9 +47,6 @@ START_NAMESPACE( Aqsis )
 CqImagePixel::CqImagePixel() :
 		m_XSamples( 0 ),
 		m_YSamples( 0 ),
-		//				m_aValues(0),
-		//				m_avecSamples(0),
-		m_colColor( 0, 0, 0 ),
 		m_MaxDepth( FLT_MAX ),
 		m_MinDepth( FLT_MAX ),
 		m_OcclusionBoxId( -1 ),
@@ -69,7 +66,7 @@ CqImagePixel::~CqImagePixel()
 /** Copy constructor
  */
 
-CqImagePixel::CqImagePixel( const CqImagePixel& ieFrom ) : m_aValues( 0 ), m_avecSamples( 0 )
+CqImagePixel::CqImagePixel( const CqImagePixel& ieFrom )
 {
 	*this = ieFrom;
 }
@@ -244,6 +241,7 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 		}
 
 	}
+	m_Samples.m_Samples.resize( QGetRenderContext()->GetOutputDataTotalSize() );
 }
 
 
@@ -270,8 +268,6 @@ void CqImagePixel::Clear()
 
 void CqImagePixel::Combine()
 {
-	m_colColor = gColBlack;
-	m_Depth = 0;
 	m_Coverage = 0;
 	TqInt depthfilter = 0;
 
@@ -330,21 +326,21 @@ void CqImagePixel::Combine()
 				else
 				{
 					samplecolor.SetColorRGB(
-					    LERP( sample->m_colOpacity.fRed(), samplecolor.fRed(), 0 ),
-					    LERP( sample->m_colOpacity.fGreen(), samplecolor.fGreen(), 0 ),
-					    LERP( sample->m_colOpacity.fBlue(), samplecolor.fBlue(), 0 )
+					    LERP( sample->Os().fRed(), samplecolor.fRed(), 0 ),
+					    LERP( sample->Os().fGreen(), samplecolor.fGreen(), 0 ),
+					    LERP( sample->Os().fBlue(), samplecolor.fBlue(), 0 )
 					);
 					sampleopacity.SetColorRGB(
-					    LERP( sample->m_colOpacity.fRed(), sampleopacity.fRed(), 0 ),
-					    LERP( sample->m_colOpacity.fGreen(), sampleopacity.fGreen(), 0 ),
-					    LERP( sample->m_colOpacity.fBlue(), sampleopacity.fBlue(), 0 )
+					    LERP( sample->Os().fRed(), sampleopacity.fRed(), 0 ),
+					    LERP( sample->Os().fGreen(), sampleopacity.fGreen(), 0 ),
+					    LERP( sample->Os().fBlue(), sampleopacity.fBlue(), 0 )
 					);
 				}
 			}
 			else
 			{
-				samplecolor = ( samplecolor * ( gColWhite - sample->m_colOpacity ) ) + sample->m_colColor;
-				sampleopacity = ( ( gColWhite - sampleopacity ) * sample->m_colOpacity ) + sampleopacity;
+				samplecolor = ( samplecolor * ( gColWhite - sample->Os() ) ) + sample->Cs();
+				sampleopacity = ( ( gColWhite - sampleopacity ) * sample->Os() ) + sampleopacity;
 			}
 			samplehit = TqTrue;
 		}
@@ -358,8 +354,8 @@ void CqImagePixel::Combine()
 		// Write the collapsed color values back into the top entry.
 		if ( samples->size() > 0 )
 		{
-			samples->begin() ->m_colColor = samplecolor;
-			samples->begin() ->m_colOpacity = sampleopacity;
+			samples->begin() ->SetCs( samplecolor );
+			samples->begin() ->SetOs( sampleopacity );
 		
 			if ( depthfilter != 0)
 			{
@@ -367,23 +363,23 @@ void CqImagePixel::Combine()
 				{
 					// Use midpoint for depth
 					if ( samples->size() > 1 )
-						( *samples ) [ 0 ].m_Depth = ( ( *samples ) [ 0 ].m_Depth + ( *samples ) [ 1 ].m_Depth ) * 0.5f;
+						( *samples ) [ 0 ].SetDepth( ( ( *samples ) [ 0 ].Depth() + ( *samples ) [ 1 ].Depth() ) * 0.5f );
 					else
-						( *samples ) [ 0 ].m_Depth = FLT_MAX;
+						( *samples ) [ 0 ].SetDepth( FLT_MAX );
 				}
 				else if ( depthfilter == 2)
 				{
-					( *samples ) [ 0 ].m_Depth = samples->back().m_Depth;
+					( *samples ) [ 0 ].SetDepth( samples->back().Depth() );
 				}
 				else if ( depthfilter == 3 )
 				{
 					std::vector<SqImageSample>::iterator sample;
 					TqFloat totDepth = 0.0f;
 					for ( sample = samples->begin(); sample != samples->end(); sample++ )
-						totDepth += sample->m_Depth;
+						totDepth += sample->Depth();
 					totDepth /= samples->size();
 
-					( *samples ) [ 0 ].m_Depth = totDepth;
+					( *samples ) [ 0 ].SetDepth( totDepth );
 				}
 				// Default to "min"
 			}
@@ -417,13 +413,13 @@ void CqImagePixel::UpdateZValues()
 					sc++;
 				if ( sc != aValues.end() )
 				{
-					if ( sc->m_Depth > currentMax )
+					if ( sc->Depth() > currentMax )
 					{
-						currentMax = sc->m_Depth;
+						currentMax = sc->Depth();
 					}
-					if ( sc->m_Depth < currentMin )
+					if ( sc->Depth() < currentMin )
 					{
-						currentMin = sc->m_Depth;
+						currentMin = sc->Depth();
 					}
 				}
 				else

@@ -630,15 +630,11 @@ void CqImageBuffer::RenderMPGs( TqInt iBucket, long xmin, long xmax, long ymin, 
 
 inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax )
 {
-	static	SqImageSample	ImageVal;
-
 	CqBucket& Bucket = m_aBuckets[ iBucket ];
 	CqStats& theStats = QGetRenderContext() ->Stats();
 
 	const TqFloat* LodBounds = pMPG->pGrid() ->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
 	TqBool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
-
-	TqBool IsMatte = ( TqBool ) ( pMPG->pGrid() ->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1 );
 
 	TqBool UsingDepthOfField = QGetRenderContext() ->UsingDepthOfField();
 	const TqFloat* dofdata = 0;
@@ -726,15 +722,6 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 
 		register long iY = sY;
 
-		CqColor colMPGColor( 1.0f, 1.0f, 1.0f );
-		CqColor colMPGOpacity( 1.0f, 1.0f, 1.0f );
-		// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
-		if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
-			colMPGColor = pMPG->colColor();
-		// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
-		if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
-			colMPGOpacity = pMPG->colOpacity();
-
 		TqFloat dc = 0.0f;
 		if( UsingDepthOfField )
 		{
@@ -808,64 +795,19 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 
 							// Now check if the subsample hits the micropoly
 							TqBool SampleHit;
+							TqFloat D;
 
 							if ( UsingDepthOfField )
-							{
-								SampleHit = pMPG->Sample( vecP + dc * samplelens, ImageVal.m_Depth, t );
-							}
+								SampleHit = pMPG->Sample( vecP + dc * samplelens, D, t );
 							else
-							{
-								SampleHit = pMPG->Sample( vecP, ImageVal.m_Depth, t );
-							}
+								SampleHit = pMPG->Sample( vecP, D, t );
 
 							if ( SampleHit )
 							{
 								theStats.IncSampleHits();
 								pMPG->MarkHit();
-								// Sort the color/opacity into the visible point list
-								std::vector<SqImageSample>& aValues = pie2->Values( m, n );
-								int i = 0;
-								int c = aValues.size();
-								if ( c > 0 && aValues[ 0 ].m_Depth < ImageVal.m_Depth )
-								{
-									SqImageSample * p = &aValues[ 0 ];
-									while ( i < c && p[ i ].m_Depth < ImageVal.m_Depth ) i++;
-									// If it is exactly the same, chances are we've hit a MPG grid line.
-									if ( i < c && p[ i ].m_Depth == ImageVal.m_Depth )
-									{
-										p[ i ].m_colColor = ( p[ i ].m_colColor + colMPGColor ) * 0.5f;
-										p[ i ].m_colOpacity = ( p[ i ].m_colOpacity + colMPGOpacity ) * 0.5f;
-										continue;
-									}
-								}
 
-								TqBool Occludes = colMPGOpacity >= gColWhite;
-
-								// Update max depth values
-								if ( !( DisplayMode() & ModeZ ) && Occludes )
-								{
-									CqOcclusionBox::MarkForUpdate( pie2->OcclusionBoxId() );
-									pie2->MarkForZUpdate();
-								}
-
-
-								// Now that we have updated the samples, set the
-								ImageVal.m_colColor = colMPGColor;
-								ImageVal.m_colOpacity = colMPGOpacity;
-								ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
-								if ( NULL != ImageVal.m_pCSGNode ) ImageVal.m_pCSGNode->AddRef();
-
-								ImageVal.m_flags = 0;
-								if ( Occludes )
-								{
-									ImageVal.m_flags |= SqImageSample::Flag_Occludes;
-								}
-								if ( IsMatte )
-								{
-									ImageVal.m_flags |= SqImageSample::Flag_Matte;
-								}
-
-								aValues.insert( aValues.begin() + i, ImageVal );
+								StoreSample( pMPG, pie2, m, n, D );
 							}
 						}
 						else
@@ -883,6 +825,142 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 			iY++;
 		}
 	}
+}
+
+
+
+inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt m, TqInt n, TqFloat D )
+{
+	SqImageSample	ImageVal( QGetRenderContext()->GetOutputDataTotalSize() );
+	ImageVal.SetDepth( D );
+
+	std::valarray<TqFloat>	val( 0.0f, QGetRenderContext()->GetOutputDataTotalSize() );
+	
+	TqBool Occludes = TqTrue;
+	val[0] = val[1] = val[2] = val[3] = val[4] = val[5] = 1.0f;
+	val[6] = D;
+	// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
+	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
+	{
+		val[0] = pMPG->colColor().fRed();
+		val[1] = pMPG->colColor().fGreen();
+		val[2] = pMPG->colColor().fBlue();
+	}
+	// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
+	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
+	{
+		val[3] = pMPG->colOpacity().fRed();
+		val[4] = pMPG->colOpacity().fGreen();
+		val[5] = pMPG->colOpacity().fBlue();
+		Occludes = pMPG->colOpacity() >= gColWhite;
+	}
+
+	// Now store any other data types that have been registered.
+	std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext()->GetMapOfOutputDataEntries();
+	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
+	for( entry = DataMap.begin(); entry != DataMap.end(); entry++ )
+	{	
+		IqShaderData* pData;
+		if( ( pData = pMPG->pGrid()->FindStandardVar( entry->first.c_str() ) ) != NULL )
+		{
+			switch( pData->Type() )
+			{
+				case type_float:
+				case type_integer:
+				{
+					TqFloat f;
+					pData->GetFloat( f, pMPG->GetIndex() );
+					val[ entry->second.m_Offset ] = f;
+					break;
+				}
+				case type_point:
+				case type_normal:
+				case type_vector:
+				case type_hpoint:
+				{
+					CqVector3D v;
+					pData->GetPoint( v, pMPG->GetIndex() );
+					val[ entry->second.m_Offset    ] = v.x();
+					val[ entry->second.m_Offset + 1] = v.y();
+					val[ entry->second.m_Offset + 2] = v.z();
+					break;
+				}
+				case type_color:
+				{
+					CqColor c;
+					pData->GetColor( c, pMPG->GetIndex() );
+					val[ entry->second.m_Offset    ] = c.fRed();
+					val[ entry->second.m_Offset + 1] = c.fGreen();
+					val[ entry->second.m_Offset + 2] = c.fBlue();
+					break;
+				}
+				case type_matrix:
+				{
+					CqMatrix m;
+					pData->GetMatrix( m, pMPG->GetIndex() );
+					TqFloat* pElements = m.pElements();
+					val[ entry->second.m_Offset     ] = pElements[0 ];
+					val[ entry->second.m_Offset + 1 ] = pElements[1 ];
+					val[ entry->second.m_Offset + 2 ] = pElements[2 ];
+					val[ entry->second.m_Offset + 3 ] = pElements[3 ];
+					val[ entry->second.m_Offset + 4 ] = pElements[4 ];
+					val[ entry->second.m_Offset + 5 ] = pElements[5 ];
+					val[ entry->second.m_Offset + 6 ] = pElements[6 ];
+					val[ entry->second.m_Offset + 7 ] = pElements[7 ];
+					val[ entry->second.m_Offset + 8 ] = pElements[8 ];
+					val[ entry->second.m_Offset + 9 ] = pElements[9 ];
+					val[ entry->second.m_Offset + 10] = pElements[10];
+					val[ entry->second.m_Offset + 11] = pElements[11];
+					val[ entry->second.m_Offset + 12] = pElements[12];
+					val[ entry->second.m_Offset + 13] = pElements[13];
+					val[ entry->second.m_Offset + 14] = pElements[14];
+					val[ entry->second.m_Offset + 15] = pElements[15];
+					break;
+				}
+			}
+		}
+	}
+
+	// Sort the color/opacity into the visible point list
+	std::vector<SqImageSample>& aValues = pie2->Values( m, n );
+	int i = 0;
+	int c = aValues.size();
+	if ( c > 0 && aValues[ 0 ].Depth() < ImageVal.Depth() )
+	{
+		SqImageSample * p = &aValues[ 0 ];
+		while ( i < c && p[ i ].Depth() < ImageVal.Depth() ) i++;
+		// If it is exactly the same, chances are we've hit a MPG grid line.
+		if ( i < c && p[ i ].Depth() == ImageVal.Depth() )
+		{
+			p[ i ].m_Samples = ( p[ i ].m_Samples + val ) * 0.5f;
+			return;
+		}
+	}
+
+	// Update max depth values
+	if ( !( DisplayMode() & ModeZ ) && Occludes )
+	{
+		CqOcclusionBox::MarkForUpdate( pie2->OcclusionBoxId() );
+		pie2->MarkForZUpdate();
+	}
+
+
+	// Store the sample information.
+	ImageVal.m_Samples = val;
+	ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
+	if ( NULL != ImageVal.m_pCSGNode ) ImageVal.m_pCSGNode->AddRef();
+
+	ImageVal.m_flags = 0;
+	if ( Occludes )
+	{
+		ImageVal.m_flags |= SqImageSample::Flag_Occludes;
+	}
+	if( pMPG->pGrid() ->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1 )
+	{
+		ImageVal.m_flags |= SqImageSample::Flag_Matte;
+	}
+
+	aValues.insert( aValues.begin() + i, ImageVal );
 }
 
 //----------------------------------------------------------------------

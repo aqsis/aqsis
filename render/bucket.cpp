@@ -285,6 +285,41 @@ TqFloat CqBucket::MaxDepth( TqInt iXPos, TqInt iYPos )
 
 
 //----------------------------------------------------------------------
+/** Get a pointer to the samples for a given pixel.
+ * If position is outside bucket, returns NULL.
+ * \param iXPos Screen position of sample.
+ * \param iYPos Screen position of sample.
+ */
+
+const TqFloat* CqBucket::Samples( TqInt iXPos, TqInt iYPos )
+{
+	CqImagePixel * pie;
+	ImageElement( iXPos, iYPos, pie );
+	if( NULL != pie )
+		return ( pie->Samples() );
+	else
+		return ( NULL );
+}
+
+//----------------------------------------------------------------------
+/** Get count of samples.
+ * If position is outside bucket, returns 0.
+ * \param iXPos Screen position of sample.
+ * \param iYPos Screen position of sample.
+ */
+
+TqInt CqBucket::NumSamples( TqInt iXPos, TqInt iYPos )
+{
+	CqImagePixel * pie;
+	ImageElement( iXPos, iYPos, pie );
+	if( NULL != pie )
+		return ( pie->NumSamples() );
+	else
+		return ( 0 );
+}
+
+
+//----------------------------------------------------------------------
 /** Filter the samples in this bucket according to type and filter widths.
  */
 
@@ -330,6 +365,7 @@ void CqBucket::FilterBucket()
 			TqFloat d = 0;
 			TqFloat gTot = 0.0;
 			SampleCount = 0;
+			std::valarray<TqFloat> samples( 0.0f, QGetRenderContext()->GetOutputDataTotalSize() );
 
 			TqInt fx, fy;
 			// Get the element at the upper left corner of the filter area.
@@ -356,14 +392,17 @@ void CqBucket::FilterBucket()
 								gTot += g;
 								if ( pie2->Values( sx, sy ).size() > 0 )
 								{
-									c += pie2->Values( sx, sy ) [ 0 ].m_colColor * g;
-									o += pie2->Values( sx, sy ) [ 0 ].m_colOpacity * g;
-									d += pie2->Values( sx, sy ) [ 0 ].m_Depth;
+									SqImageSample* pSample = &pie2->Values( sx, sy ) [ 0 ];
+									c += pSample->Cs() * g;
+									o += pSample->Os() * g;
+									d += pSample->Depth();
+									samples += pSample->m_Samples * g;
 									SampleCount++;
 								}
 							}
 						}
 					}
+					pie2->GetSamples().m_Samples = samples / gTot;
 					pie2++;
 				}
 				pie += xlen;
@@ -418,8 +457,8 @@ void CqBucket::FilterBucket()
 		CqImagePixel* pie2 = pie;
 		for ( x = 0; x < endx; x++ )
 		{
-			pie2->Color() = pCols[ i ];
-			pie2->Opacity() = pOpacs[ i ];
+			pie2->SetColor( pCols[ i ] );
+			pie2->SetOpacity( pOpacs[ i ] );
 			pie2->SetDepth( pDepths[ i++ ] );
 			pie2++;
 		}
@@ -462,13 +501,15 @@ void CqBucket::ExposeBucket()
 			{
 				// color=(color*gain)^1/gamma
 				if ( exposegain != 1.0 )
-					pie2->Color() *= exposegain;
+					pie2->SetColor( pie2->Color() * exposegain );
 
 				if ( exposegamma != 1.0 )
 				{
-					pie2->Color().SetfRed ( pow( pie2->Color().fRed (), oneovergamma ) );
-					pie2->Color().SetfGreen( pow( pie2->Color().fGreen(), oneovergamma ) );
-					pie2->Color().SetfBlue ( pow( pie2->Color().fBlue (), oneovergamma ) );
+					CqColor col = pie2->Color();
+					col.SetfRed ( pow( col.fRed (), oneovergamma ) );
+					col.SetfGreen( pow( col.fGreen(), oneovergamma ) );
+					col.SetfBlue ( pow( col.fBlue (), oneovergamma ) );
+					pie2->SetColor( col );
 				}
 				pie2++;
 			}
@@ -485,8 +526,6 @@ void CqBucket::ExposeBucket()
 void CqBucket::QuantizeBucket()
 {
 	// Initiliaze the random with a value based on the X,Y coordinate
-//	CqVector2D area(XOrigin(), YOrigin()); 
-//	CqRandom random( area.Magnitude() );
 	static CqRandom random( 61 );
 	TqFloat endx, endy;
 	TqInt   nextx;
@@ -518,24 +557,28 @@ void CqBucket::QuantizeBucket()
 				double r, g, b;
 				double _or, _og, _ob;
 				double s = random.RandomFloat();
-				if ( modf( one * pie2->Color().fRed () + ditheramplitude * s, &r ) > 0.5 ) r += 1;
-				if ( modf( one * pie2->Color().fGreen() + ditheramplitude * s, &g ) > 0.5 ) g += 1;
-				if ( modf( one * pie2->Color().fBlue () + ditheramplitude * s, &b ) > 0.5 ) b += 1;
-				if ( modf( one * pie2->Opacity().fRed () + ditheramplitude * s, &_or ) > 0.5 ) _or += 1;
-				if ( modf( one * pie2->Opacity().fGreen() + ditheramplitude * s, &_og ) > 0.5 ) _og += 1;
-				if ( modf( one * pie2->Opacity().fBlue () + ditheramplitude * s, &_ob ) > 0.5 ) _ob += 1;
+				CqColor col = pie2->Color();
+				CqColor opa = pie2->Opacity();
+				if ( modf( one * col.fRed () + ditheramplitude * s, &r ) > 0.5 ) r += 1;
+				if ( modf( one * col.fGreen() + ditheramplitude * s, &g ) > 0.5 ) g += 1;
+				if ( modf( one * col.fBlue () + ditheramplitude * s, &b ) > 0.5 ) b += 1;
+				if ( modf( one * opa.fRed () + ditheramplitude * s, &_or ) > 0.5 ) _or += 1;
+				if ( modf( one * opa.fGreen() + ditheramplitude * s, &_og ) > 0.5 ) _og += 1;
+				if ( modf( one * opa.fBlue () + ditheramplitude * s, &_ob ) > 0.5 ) _ob += 1;
 				r = CLAMP( r, min, max );
 				g = CLAMP( g, min, max );
 				b = CLAMP( b, min, max );
 				_or = CLAMP( _or, min, max );
 				_og = CLAMP( _og, min, max );
 				_ob = CLAMP( _ob, min, max );
-				pie2->Color().SetfRed ( r );
-				pie2->Color().SetfGreen( g );
-				pie2->Color().SetfBlue ( b );
-				pie2->Opacity().SetfRed ( _or );
-				pie2->Opacity().SetfGreen( _og );
-				pie2->Opacity().SetfBlue ( _ob );
+				col.SetfRed ( r );
+				col.SetfGreen( g );
+				col.SetfBlue ( b );
+				opa.SetfRed ( _or );
+				opa.SetfGreen( _og );
+				opa.SetfBlue ( _ob );
+				pie2->SetColor( col );
+				pie2->SetOpacity( opa );
 
 				pie2++;
 			}

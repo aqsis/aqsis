@@ -791,13 +791,29 @@ RtVoid	RiDisplayV( const char *name, RtToken type, RtToken mode, PARAMETERLIST )
 	QGetRenderContext() ->optCurrent().GetStringOptionWrite( "System", "DisplayType" ) [ 0 ] = strType.c_str() ;
 
 	// Append the display mode to the current setting.
-	RtInt eValue = 0;
-	if ( strstr( mode, RI_RGB ) != NULL )
+	TqInt eValue = 0;
+	TqInt index = 0;
+	if ( strncmp( mode, RI_RGB, strlen(RI_RGB) ) == 0 )
+	{
 		eValue |= ModeRGB;
-	if ( strstr( mode, RI_A ) != NULL )
+		index += strlen( RI_RGB );
+	}
+	if ( strncmp( &mode[index], RI_A, strlen( RI_A ) ) == 0 )
+	{
 		eValue |= ModeA;
-	if ( strstr( mode, RI_Z ) != NULL )
+		index += strlen( RI_A );
+	}
+	if ( strncmp( &mode[index], RI_Z, strlen( RI_Z ) ) == 0 )
+	{
 		eValue |= ModeZ;
+		index += strlen( RI_Z );
+	}
+
+	// If none of the standard "rgbaz" strings match, then it is an alternative 'arbitrary output variable'
+	if( eValue == 0 || index <= strlen( mode ) )
+	{
+		QGetRenderContext()->RegisterOutputData( mode );
+	}
 
 	// Check if the request is to use different tiff's compression
 	ProcessCompression( &compression, &quality, count, tokens, values );
