@@ -31,6 +31,7 @@
 #include <vector>
 
 #include "aqsis.h"
+#include "file.h"
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #include "version.h"
@@ -101,25 +102,10 @@ int main( int argc, const char** argv )
 	{
 		for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
 		{
-			char shaderpath[ 1024 ];
-			strcpy( shaderpath, "" );
+			std::string shaderpath;
+			shaderpath = Aqsis::CqFile::GetSystemSetting("shaders");
 
-			char *ev;
-
-			ev = getenv( "AQSIS_SHADERS_PATH" );
-			if ( ev && *ev )
-			{
-				strcat( shaderpath, ev );
-				strcat( shaderpath, ":" );
-			}
-			ev = getenv( "AQSIS_BASE_PATH" );
-			if ( ev && *ev )
-			{
-				strcat( shaderpath, ev );
-				strcat( shaderpath, "/shaders:&" );
-			}
-
-			SLX_SetPath( shaderpath );
+			SLX_SetPath( const_cast<char*>(shaderpath.c_str()) );
 
 			if ( SLX_SetShader( ( char* ) e->c_str() ) == 0 )
 			{

@@ -120,6 +120,8 @@ class _qShareC CqFile
 			return ( len );
 		}
 
+		_qShareM static CqString GetSystemSetting(const CqString& strAsset);
+
 	private:
 		std::istream*	m_pStream;		///< a poimter to the stream associated with this file object.
 		CqString	m_strRealName;	///< the name of this file object, usually the filename.

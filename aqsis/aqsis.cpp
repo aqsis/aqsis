@@ -4,6 +4,7 @@
 #include "librib.h"
 #include "librib2ri.h"
 #include "aqsis.h"
+#include "file.h"
 
 #if defined(AQSIS_SYSTEM_WIN32)
 #include <windows.h>
@@ -332,102 +333,33 @@ int main( int argc, const char** argv )
 
 void GetOptions()
 {
-	char * env;
 	// If --base not specified, check for env.
 	if ( g_base_path.compare( "" ) == 0 )
-	{
-		if ( ( env = getenv( "AQSIS_BASE_PATH" ) ) != NULL )
-			g_base_path = env;
-#ifdef	AQSIS_SYSTEM_POSIX
-		else
-			g_base_path = BASE_PATH;
-#endif
-
-	}
+		g_base_path = Aqsis::CqFile::GetSystemSetting("base");
 
 	// If --config not specified try to locate the config file.
 	if ( g_config.compare( "" ) == 0 )
-	{
-		if ( ( env = getenv( "AQSIS_CONFIG" ) ) != NULL )
-			g_config = env;
-		else
-		{
-#ifdef	AQSIS_SYSTEM_POSIX
-			g_config = CONFIG_PATH;
-#else
-			g_config = g_base_path;
-#endif
-			g_config.append( "/.aqsisrc" );
-		}
-
-		std::ifstream cfgfile( g_config.c_str() );
-		if ( !cfgfile.is_open() )
-			if ( ( env = getenv( "HOME" ) ) != NULL )
-			{
-				g_config = env;
-				g_config.append( "/.aqsisrc" );
-				std::ifstream cfgfile( g_config.c_str() );
-				if ( !cfgfile.is_open() )
-				{
-					g_config = "/etc/.aqsisrc";
-				}
-			}
-	}
+		g_config = Aqsis::CqFile::GetSystemSetting("config");
 
 	// if --shaders is not specified, try and get a default shaders searchpath.
 	if ( g_shaders.compare( "" ) == 0 )
-	{
-		if ( ( env = getenv( "AQSIS_SHADERS_PATH" ) ) != 0 )
-			g_shaders = env;
-		else
-		{
-			g_shaders = g_base_path;
-			g_shaders.append( "/shaders" );
-		}
-	}
+		g_shaders = Aqsis::CqFile::GetSystemSetting("shaders");
 
 	// if --archives is not specified, try and get a default archives searchpath.
 	if ( g_archives.compare( "" ) == 0 )
-	{
-		if ( ( env = getenv( "AQSIS_ARCHIVES_PATH" ) ) != 0 )
-			g_archives = env;
-		else
-		{
-			g_archives = g_base_path;
-			g_archives.append( "/archives" );
-		}
-	}
+		g_archives = Aqsis::CqFile::GetSystemSetting("archives");
 
 	// if --textures is not specified, try and get a default textures searchpath.
 	if ( g_textures.compare( "" ) == 0 )
-	{
-		if ( ( env = getenv( "AQSIS_TEXTURES_PATH" ) ) != 0 )
-			g_textures = env;
-		else
-		{
-			g_textures = g_base_path;
-			g_textures.append( "/textures" );
-		}
-	}
+		g_textures = Aqsis::CqFile::GetSystemSetting("textures");
 
 	// if --displays is not specified, try and get a default displays searchpath.
 	if ( g_displays.compare( "" ) == 0 )
-	{
-		if ( ( env = getenv( "AQSIS_DISPLAYS_PATH" ) ) != 0 )
-			g_displays = env;
-		else
-		{
-			g_displays = g_base_path;
-			g_displays.append( "/displays" );
-		}
-	}
+		g_displays = Aqsis::CqFile::GetSystemSetting("displays");
 
 	// if --displays is not specified, try and get a default dso libraries.
 	if ( g_dso_libs.compare( "" ) == 0 )
-	{
-		if ( ( env = getenv( "AQSIS_DSO_LIBS" ) ) != 0 )
-			g_dso_libs = env;
-	}
+		g_dso_libs = Aqsis::CqFile::GetSystemSetting("dsolibs");
 }
 
 void RenderFile( FILE* file, const char* name )
@@ -477,7 +409,7 @@ void RenderFile( FILE* file, const char* name )
 			"%AQSIS_CONFIG%" << std::endl <<
 			"%AQSIS_BASE_PATH%/.aqsisrc" << std::endl <<
 			"%HOME%/.aqsisrc" << std::endl <<
-			"/etc/.aqsisrc" << std::endl;
+			".aqsisrc" << std::endl;
 #else
 			std::cout << "Warning: Config file not found in" << std::endl <<
 			"$AQSIS_CONFIG" << std::endl <<

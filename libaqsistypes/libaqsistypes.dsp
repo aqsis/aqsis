@@ -68,8 +68,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "..\Object\Debug\libaqsistypes"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LIBAQSISTYPES_EXPORTS" /YX /FD /GZ  /c
-# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I ".\win32\intel" /I ".\\" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "PLUGINS" /D "AQSIS_DYNAMIC_LINK" /D "WIN32" /D _qBUILDING=BUILD_LIBAQSISTYPES /D BUILD_LIBAQSISTYPES=1 /FR /YX /FD /GZ  /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "LIBAQSISTYPES_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I ".\win32\intel" /I ".\\" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "PLUGINS" /D "AQSIS_DYNAMIC_LINK" /D "WIN32" /D _qBUILDING=BUILD_LIBAQSISTYPES /D BUILD_LIBAQSISTYPES=1 /FR /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
@@ -109,6 +109,10 @@ SOURCE=.\win32\intel\criticalsection.cpp
 # Begin Source File
 
 SOURCE=.\file.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\win32\intel\file_system.cpp
 # End Source File
 # Begin Source File
 
