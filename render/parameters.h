@@ -1033,7 +1033,6 @@ class CqParameterTypedFaceVaryingArray : public CqParameterTypedVaryingArray<T, 
 template <class T, EqVariableType I, class SLT>
 void CqParameterTypedVarying<T, I, SLT>::BilinearDice( TqInt u, TqInt v, IqShaderData* pResult )
 {
-	assert( pResult->Type() == Type() );
 	assert( pResult->Class() == class_varying );
 	
 	T res;

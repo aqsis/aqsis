@@ -331,7 +331,6 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		CqSurfacePatchBilinear* pNew = new CqSurfacePatchBilinear();
 		pNew->AddRef();
 		pNew->SetSurfaceParameters( Surface() );
-//		pNew->SetDefaultPrimitiveVariables();
 
 		pNew->P().SetSize( 4 ); 
 		pNew->N().SetSize( 4 );
@@ -359,8 +358,8 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 
 			pNewUP->SetValue( (*iUP), 0, iUPA );
 			pNewUP->SetValue( (*iUP), 1, iUPB );
-			pNewUP->SetValue( (*iUP), 2, iUPC );
-			pNewUP->SetValue( (*iUP), 3, iUPD );
+			pNewUP->SetValue( (*iUP), 2, iUPD );
+			pNewUP->SetValue( (*iUP), 3, iUPC );
 
 			pNew->aUserParams().push_back(pNewUP);
 		}

@@ -2134,7 +2134,6 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 	pSurface->AddRef();
 
 	// Process any specified primitive variables.
-	pSurface->SetDefaultPrimitiveVariables( RI_FALSE );
 	if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 	{
 		if ( !pSurface->CheckDegenerate() )
@@ -2484,7 +2483,6 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts );
 	pPointsClass->AddRef();
 	// Process any specified primitive variables
-	pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
 		// Check if s/t, u/v are needed and not specified, and if so get them from the object space points.
@@ -4042,7 +4040,6 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 
 	std::vector<CqPolygonPoints*>	apPoints;
 	// Process any specified primitive variables
-//	pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
 		// Check if s/t, u/v are needed and not specified, and if so get them from the object space points.

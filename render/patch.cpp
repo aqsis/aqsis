@@ -962,6 +962,19 @@ void CqSurfacePatchBilinear::uSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfac
 	pNew1->P() = P();
 	pNew1->P().uSubdivide( &pNew2->P() );
 
+	std::vector<CqParameter*>::iterator iUP;
+	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	{
+		if( (*iUP)->Class() == class_vertex )
+		{
+			CqParameter* pParam1 = (*iUP)->Clone();
+			CqParameter* pParam2 = (*iUP)->Clone();
+			pParam1->uSubdivide( pParam2 );
+			pNew1->AddPrimitiveVariable( pParam1 );
+			pNew2->AddPrimitiveVariable( pParam2 );
+		}
+	}
+
 	// Subdivide the normals
 	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
 	{
@@ -987,6 +1000,19 @@ void CqSurfacePatchBilinear::vSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfac
 	// Subdivide the vertices.
 	pNew1->P() = P();
 	pNew1->P().vSubdivide( &pNew2->P() );
+
+	std::vector<CqParameter*>::iterator iUP;
+	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	{
+		if( (*iUP)->Class() == class_vertex )
+		{
+			CqParameter* pParam1 = (*iUP)->Clone();
+			CqParameter* pParam2 = (*iUP)->Clone();
+			pParam1->vSubdivide( pParam2 );
+			pNew1->AddPrimitiveVariable( pParam1 );
+			pNew2->AddPrimitiveVariable( pParam2 );
+		}
+	}
 
 	// Subdivide the normals
 	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
@@ -1035,21 +1061,7 @@ CqBound CqSurfacePatchBilinear::Bound() const
 
 void CqSurfacePatchBilinear::NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
 {
-	// \note: Only to avoid problems with not used warnings, remove when proper implementation in place.
-	pParameter = pParameter;
-
-	TqFloat diu = 1.0 / uDiceSize;
-	TqFloat div = 1.0 / vDiceSize;
-
-	TqInt iv, iu;
-	for ( iv = 0; iv <= vDiceSize; iv++ )
-	{
-		for ( iu = 0; iu <= uDiceSize; iu++ )
-		{
-			TqInt igrid = ( iv * ( uDiceSize + 1 ) ) + iu;
-			pData->SetPoint( static_cast<CqVector3D>( BilinearEvaluate<CqVector4D>( P() [ 0 ], P() [ 1 ], P() [ 2 ], P() [ 3 ], iu * diu, iv * div ) ), igrid );
-		}
-	}
+	pParameter->BilinearDice(uDiceSize, vDiceSize, pData);
 }
 
 
@@ -1284,12 +1296,12 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 	TqInt cSplits = 0;
 
 	CqVector4D vecPoint;
-	RtInt iP = 0;
-	RtInt uStep = pAttributes() ->GetIntegerAttribute("System", "BasisStep")[0];
-	RtInt vStep = pAttributes() ->GetIntegerAttribute("System", "BasisStep")[1];
+	TqInt iP = 0;
+	TqInt uStep = pAttributes() ->GetIntegerAttribute("System", "BasisStep")[0];
+	TqInt vStep = pAttributes() ->GetIntegerAttribute("System", "BasisStep")[1];
 
-	RtInt nvaryingu = ( m_uPeriodic ) ? m_uPatches : m_uPatches + 1;
-	RtInt nvaryingv = ( m_vPeriodic ) ? m_vPatches : m_vPatches + 1;
+	TqInt nvaryingu = ( m_uPeriodic ) ? m_uPatches : m_uPatches + 1;
+	TqInt nvaryingv = ( m_vPeriodic ) ? m_vPatches : m_vPatches + 1;
 
 	TqInt MyUses = Uses();
 
@@ -1315,6 +1327,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 			CqSurfacePatchBicubic*	pSurface = new CqSurfacePatchBicubic();
 			pSurface->AddRef();
 			pSurface->SetSurfaceParameters( *this );
+
 			pSurface->P().SetSize( pSurface->cVertex() );
 			RtInt v;
 			for ( v = 0; v < 4; v++ )
@@ -1341,16 +1354,37 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 			std::vector<CqParameter*>::iterator iUP;
 			for( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
 			{
-				CqParameter* pNewUP = (*iUP)->Clone();
-				pNewUP->Clear();
-				pNewUP->SetSize(4);
+				if( (*iUP)->Class() == class_varying )
+				{
+					CqParameter* pNewUP = (*iUP)->Clone();
+					pNewUP->Clear();
+					pNewUP->SetSize( pSurface->cVarying() );
 
-				pNewUP->SetValue( (*iUP), 0, iTa );
-				pNewUP->SetValue( (*iUP), 1, iTb );
-				pNewUP->SetValue( (*iUP), 2, iTc );
-				pNewUP->SetValue( (*iUP), 3, iTd );
+					pNewUP->SetValue( (*iUP), 0, iTa );
+					pNewUP->SetValue( (*iUP), 1, iTb );
+					pNewUP->SetValue( (*iUP), 2, iTc );
+					pNewUP->SetValue( (*iUP), 3, iTd );
+					pSurface->AddPrimitiveVariable(pNewUP);
+				}
+				else if( (*iUP)->Class() == class_vertex )
+				{
+					CqParameter* pNewUP = (*iUP)->Clone();
+					pNewUP->Clear();
+					pNewUP->SetSize( pSurface->cVertex() );
 
-				pSurface->AddPrimitiveVariable(pNewUP);
+					for ( v = 0; v < 4; v++ )
+					{
+						iP = PatchCoord( vRow + v, uCol );
+						pNewUP->SetValue( (*iUP), ( v * 4 ), iP );
+						iP = PatchCoord( vRow + v, uCol + 1 );
+						pNewUP->SetValue( (*iUP), ( v * 4 ) + 1, iP );
+						iP = PatchCoord( vRow + v, uCol + 2 );
+						pNewUP->SetValue( (*iUP), ( v * 4 ) + 2, iP );
+						iP = PatchCoord( vRow + v, uCol + 3 );
+						pNewUP->SetValue( (*iUP), ( v * 4 ) + 3, iP );
+					}
+					pSurface->AddPrimitiveVariable(pNewUP);
+				}
 			}
 
 			// If the shaders need u/v or s/t and they are not specified, then we need to put them in as defaults.
@@ -1538,16 +1572,36 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 			std::vector<CqParameter*>::iterator iUP;
 			for( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
 			{
-				CqParameter* pNewUP = (*iUP)->Clone();
-				pNewUP->Clear();
-				pNewUP->SetSize(4);
+				if( (*iUP)->Class() == class_varying )
+				{
+					CqParameter* pNewUP = (*iUP)->Clone();
+					pNewUP->Clear();
+					pNewUP->SetSize( pSurface->cVarying() );
 
-				pNewUP->SetValue( (*iUP), 0, iTa );
-				pNewUP->SetValue( (*iUP), 1, iTb );
-				pNewUP->SetValue( (*iUP), 2, iTc );
-				pNewUP->SetValue( (*iUP), 3, iTd );
+					pNewUP->SetValue( (*iUP), 0, iTa );
+					pNewUP->SetValue( (*iUP), 1, iTb );
+					pNewUP->SetValue( (*iUP), 2, iTc );
+					pNewUP->SetValue( (*iUP), 3, iTd );
 
-				pSurface->AddPrimitiveVariable(pNewUP);
+					pSurface->AddPrimitiveVariable(pNewUP);
+				}
+				else if( (*iUP)->Class() == class_vertex )
+				{
+					CqParameter* pNewUP = (*iUP)->Clone();
+					pNewUP->Clear();
+					pNewUP->SetSize( pSurface->cVertex() );
+
+					iP = PatchCoord( i, j );
+					pNewUP->SetValue( (*iUP), 0, iP );
+					iP = PatchCoord( i, j + 1 );
+					pNewUP->SetValue( (*iUP), 1, iP );
+					iP = PatchCoord( i + 1, j );
+					pNewUP->SetValue( (*iUP), 2, iP );
+					iP = PatchCoord( i + 1, j + 1 );
+					pNewUP->SetValue( (*iUP), 3, iP );
+
+					pSurface->AddPrimitiveVariable(pNewUP);
+				}
 			}
 
 			// If the shaders need u/v or s/t and they are not specified, then we need to put them in as defaults.
