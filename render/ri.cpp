@@ -312,7 +312,7 @@ TqBool	ValidateState(int count, ... )
     va_start( pArgs, count );
 
 	int currentState = Outside;
-	if( QGetRenderContext()->pconCurrent() != NULL )
+	if(  QGetRenderContext() != NULL && QGetRenderContext()->pconCurrent() != NULL )
 		currentState = QGetRenderContext()->pconCurrent()->Type();
 
 	int i;
@@ -323,6 +323,57 @@ TqBool	ValidateState(int count, ... )
 			return(TqTrue);
 	}
 	return(TqFalse);
+}
+
+
+//----------------------------------------------------------------------
+// GetStateAsString
+// Get a string representing the current state.
+//
+const char*	GetStateAsString()
+{
+	int currentState = Outside;
+	if( QGetRenderContext()->pconCurrent() != NULL )
+		currentState = QGetRenderContext()->pconCurrent()->Type();
+	switch( currentState )
+	{
+		case Outside:
+			return("Outside");
+			break;
+
+		case BeginEnd:
+			return("BeginEnd");
+			break;
+
+		case Frame:
+			return("Frame");
+			break;
+
+		case World:
+			return("World");
+			break;
+
+		case Attribute:
+			return("Attribute");
+			break;
+
+		case Transform:
+			return("Transform");
+			break;
+
+		case Solid:
+			return("Solid");
+			break;
+
+		case Object:
+			return("Object");
+			break;
+
+		case Motion:
+			return("Motion");
+			break;
+	}
+	return("");
 }
 
 

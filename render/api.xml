@@ -367,8 +367,6 @@
 		<Procedure name="RiAttributeBegin" return="RtVoid">
 			<Arguments/>
 			<Valid>
-				<BeginEnd/>
-				<Frame/>
 				<World/>
 				<Attribute/>
 				<Transform/>
