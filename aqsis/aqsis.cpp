@@ -1,3 +1,6 @@
+// Aqsis main executable
+
+// Includes
 #include <time.h>
 
 #include "ri.h"
@@ -18,6 +21,7 @@
 #include <crtdbg.h>
 #endif
 
+// Include libargparse
 #include <argparse.h>
 
 #include <iostream>
@@ -34,11 +38,14 @@ void RenderFile( FILE* file, const char* name );
 void GetOptions();
 
 bool g_pause;
+// Set verbose stats if in debug mode
 #ifdef	_DEBUG
 int g_endofframe = 3;
 #else
 int g_endofframe = -1;
 #endif
+
+// Declare vars used by argparse
 bool g_nostandard = 0;
 bool g_help = 0;
 bool g_version = 0;
@@ -48,6 +55,8 @@ bool g_fb = 0;
 bool g_progress = 0;
 bool g_Progress = 0;
 TqInt verbose = 1;
+
+// Define strings used by argparse
 ArgParse::apstring g_config = "";
 ArgParse::apstring g_shaders = "";
 ArgParse::apstring g_archives = "";
@@ -60,6 +69,8 @@ ArgParse::apstring g_addtype = "";
 ArgParse::apstring g_mode = "rgba";
 ArgParse::apstring g_strprogress = "Done Computing %p%% [ %s secs / %S left ]";
 
+/** Function to print out the version to a std::ostream
+ */
 void version( std::ostream& Stream )
 {
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
