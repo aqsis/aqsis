@@ -3094,16 +3094,23 @@ RtVoid	RiMakeTextureV(const char *pic, const char *tex, RtToken swrap, RtToken t
 		// Hopefully CqTextureMap will take care of closing the tiff file after
 		// it has SAT mapped it so we can overwrite if needs be.
 		// Create a new image.
-	        Source.CreateSATMap();
+		Source.CreateSATMap();
 		TIFF* ptex=TIFFOpen(tex,"w");
 
 		TIFFCreateDirectory(ptex);
 		TIFFSetField(ptex,TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 		TIFFSetField(ptex,TIFFTAG_PIXAR_TEXTUREFORMAT, SATMAP_HEADER);
 		TIFFSetField(ptex,TIFFTAG_PIXAR_WRAPMODES,modes);
-		// Write the floating point image to the directory.
-		CqTextureMapBuffer* pBuffer=Source.GetBuffer(0,0);
-		WriteTileImage(ptex,pBuffer->pBufferData(),Source.XRes(),Source.YRes(),64,64,Source.SamplesPerPixel());
+		int log2 = MIN(Source.XRes(), Source.YRes());
+		log2 = (int)(log(log2)/log(2.0));
+
+
+		for(int i=0; i < log2; i ++) {
+			// Write the floating point image to the directory.
+			CqTextureMapBuffer* pBuffer=Source.GetBuffer(0,0, i);
+			if (!pBuffer) break;
+			WriteTileImage(ptex,pBuffer->pBufferData(),Source.XRes()/(1<<i),Source.YRes()/(1<<i),64,64,Source.SamplesPerPixel());
+		}
 		TIFFClose(ptex);
 	}
 

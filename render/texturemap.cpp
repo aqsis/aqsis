@@ -66,7 +66,7 @@ static void project(int face);
 
 CqVector3D	cube[max_no];	// Stores the projection of the reflected beam onto the cube.
 int		cube_no;		// Stores the number of points making up the projection.
-TqFloat	uv[max_no][2];	// Stores the values of this projection fro a given face.
+TqFloat	uv[max_no][2];	// Stores the values of this projection for a given face.
 
 TqInt		CqShadowMap::m_rand_index=0;
 TqFloat		CqShadowMap::m_aRand_no[256];
@@ -76,7 +76,8 @@ TqFloat		CqShadowMap::m_aRand_no[256];
  */
 
 std::vector<CqTextureMap*>	CqTextureMap::m_TextureMap_Cache;
-
+static int stdir = -1;
+inline static uint32 ImageFilterVal(uint32* p, int x, int y, int m_XRes, int m_YRes, RtFilterFunc mFilterFunc, float swidth, float twidth, int directory);
 
 //---------------------------------------------------------------------
 /** Allocate a cache segment to hold the specified image tile.
@@ -160,7 +161,7 @@ void CqTextureMap::Open()
 		TIFFGetField(m_pImage, TIFFTAG_PLANARCONFIG, &m_PlanarConfig);
 		TIFFGetField(m_pImage, TIFFTAG_SAMPLESPERPIXEL, &m_SamplesPerPixel);
 		TIFFGetField(m_pImage,  TIFFTAG_PIXAR_TEXTUREFORMAT, &pFormat);
-        	TIFFGetField(m_pImage,  TIFFTAG_PIXAR_WRAPMODES, &pModes);
+        TIFFGetField(m_pImage,  TIFFTAG_PIXAR_WRAPMODES, &pModes);
 
 		if (pModes) 
 		{
@@ -387,6 +388,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer(unsigned long s, unsigned long t, in
 		// Now open it as a tiff file.
 		m_pImage=TIFFOpen(strRealName.c_str(),"r");
 	}
+
 	if(m_pImage)
 	{
 		uint32 tsx,tsy;
@@ -408,8 +410,8 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer(unsigned long s, unsigned long t, in
 		}
 		else
 		{
-			size_t npixels;
-			npixels = m_XRes * m_YRes;
+			//size_t npixels;
+			//npixels = m_XRes * m_YRes;
 
 			pTMB=new CqTextureMapBuffer(0,0,m_XRes,m_YRes,m_SamplesPerPixel,directory);
 			
@@ -428,73 +430,89 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer(unsigned long s, unsigned long t, in
 }
 
 
+inline static uint32 ImageFilterVal(uint32* p, int x, int y, int m_XRes, int m_YRes, RtFilterFunc mFilterFunc, float swidth, float twidth, int directory)
+{
+	/* this is the right place to call the filter function for 
+     * downsampling the texture at lower resolution
+     * right now I just downsampling at regular interval (based on directory) the original
+     * image. (when directory is different than 0)
+	 */
+
+	/* it will required to init. the filtervalues. breakdown rgba values in floats. 
+	 * Accumulate the floating value rgba and ponderate the sum with the filter values.
+	 * and converte back to uint32 the rgba floating values.
+	 * The values of the current filterfunc/swrap/twrap are passed but ignored in this current 
+	 * implementation.
+     */
+	float ydelta =  (1 << directory);
+	float xdelta =  (1 << directory);
+
+    return p[((m_YRes-(int) (ydelta*y)-1)*m_XRes)+(int) (x * xdelta)];
+}
+
 void CqTextureMap::CreateSATMap()
 {
 	if(m_pImage!=0)
 	{
-		CqTextureMapBuffer* pTMB=new CqTextureMapBuffer(0,0,m_XRes,m_YRes,m_SamplesPerPixel);
+		uint32* pImage=static_cast<uint32*>(_TIFFmalloc(m_XRes*m_YRes*sizeof(uint32)));
+		TIFFReadRGBAImage(m_pImage, m_XRes, m_YRes, pImage, 0);
+		int m_xres = m_XRes;
+		int m_yres = m_YRes;
+		int directory = 0;
+		
+		do {
+			
+			CqTextureMapBuffer* pTMB=new CqTextureMapBuffer();
+			pTMB->Init(0,0,m_xres,m_yres,m_SamplesPerPixel, directory);
 
-		if(pTMB->pBufferData() != NULL)
-		{
-			m_apSegments.push_back(pTMB);
-
-			float* pSATMap=pTMB->pBufferData();
-			long rowlen=m_XRes*m_SamplesPerPixel;
-
-			size_t npixels;
-			npixels = m_XRes * m_YRes;
-
-			uint32* pImage=static_cast<uint32*>(_TIFFmalloc(m_XRes*m_YRes*sizeof(uint32)));
-			TIFFReadRGBAImage(m_pImage, m_XRes, m_YRes, pImage, 0);
-
-			if(pImage!=NULL)
+			if(pTMB->pBufferData() != NULL)
 			{
-				for(uint32 y=0; y<m_YRes; y++)
+				float* pSATMap=pTMB->pBufferData();
+				long rowlen=m_xres*m_SamplesPerPixel;
+
+				if(pImage!=NULL)
 				{
-					float accum[3];
-					accum[0] = accum[1] = accum[2] = 0.0f;
-					
-					for(uint32 x=0; x<m_XRes; x++)
+					for(TqInt y=0; y<m_yres; y++)
 					{
-						uint32 val=pImage[((m_YRes-y-1)*m_XRes)+x];
-
-						float r=TIFFGetR(val);
-						float g=TIFFGetG(val);
-						float b=TIFFGetB(val);
-                                                TqInt sample;
-						r/=255.0;
-						g/=255.0;
-						b/=255.0;
-
-						accum[0]+=r;
-						accum[1]+=g;
-						accum[2]+=b;
-
-						if(y==0)
+						float accum[4];
+						accum[0] = accum[1] = accum[2] = accum[3] = 0.0f;
+						
+						for(TqInt x=0; x<m_xres; x++) 
 						{
-							for(sample=0; sample<m_SamplesPerPixel; sample++) {
-								pSATMap[(x*m_SamplesPerPixel)+sample]=accum[sample];
-							}
+							uint32 val=ImageFilterVal(pImage, x, y, m_XRes, m_YRes, m_FilterFunc, m_swrap, m_twrap, directory);
+							
+							accum[0]=TIFFGetR(val)/255.0;
+							accum[1]=TIFFGetG(val)/255.0;
+							accum[2]=TIFFGetB(val)/255.0;
+               				accum[3]=TIFFGetA(val)/255.0;   
+						
+               				for(TqInt sample=0; sample<m_SamplesPerPixel; sample++) 
+								pSATMap[(y*rowlen)+(x*m_SamplesPerPixel)+sample]=accum[sample];
 						}
-						else
-						{
-							for(sample=0; sample<m_SamplesPerPixel; sample++) {
-								pSATMap[(y*rowlen)+(x*m_SamplesPerPixel)+sample]=accum[sample]+pSATMap[((y-1)*rowlen)+(x*m_SamplesPerPixel)+sample];
-								
-							}
-						}
-					}		
+					}
+						
 				}
-				_TIFFfree(pImage);
-			}
-		}
+				
+				m_apSegments.push_back(pTMB);
+
+			}		
+
+			m_xres /= 2;
+			m_yres /= 2;
+			directory++;
+		
+		} while ( (m_xres > 2) && (m_yres > 2) );
+		
+		_TIFFfree(pImage);
 	}
 }
+
 
 void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, float sblur, float tblur, 
 								std::valarray<float>& val, int directory)
 {
 	// T(s2,t2)-T(s2,t1)-T(s1,t2)+T(s1,t1)
+	
 	int i;
 
 	if(!IsValid())	return;
@@ -615,19 +633,21 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, 
 
 void CqTextureMap::GetSample(long ss1, long tt1, long ss2, long tt2, std::valarray<float>& val, bool fss, bool ftt, int directory)
 {
+	//directory = 1;
 	// Read in the relevant texture tiles.
 	CqTextureMapBuffer* pTMBa=GetBuffer(ss1,tt1,directory);
 	CqTextureMapBuffer* pTMBb=GetBuffer(ss2,tt1,directory);
 	CqTextureMapBuffer* pTMBc=GetBuffer(ss1,tt2,directory);
 	CqTextureMapBuffer* pTMBd=GetBuffer(ss2,tt2,directory);
 
-	long rowlen=pTMBa->Width()*m_SamplesPerPixel;
+	long rowlen=  pTMBa->Width()*m_SamplesPerPixel; /* m_XRes * m_SamplesPerPixel / (1 << directory); */  
 
 	TqFloat ds=ss2-ss1;
 	TqFloat dt=tt2-tt1;
 	TqFloat d=fabs(ds*dt);
 
 	// Adjust the offsets according to the buffer offset and size.
+
 	ss1-=pTMBa->sOrigin();
 	tt1-=pTMBa->tOrigin();
 	ss2-=pTMBb->sOrigin();
@@ -638,20 +658,27 @@ void CqTextureMap::GetSample(long ss1, long tt1, long ss2, long tt2, std::valarr
 	ss2*=m_SamplesPerPixel;
 	tt2*=rowlen;
 
+
 	int c;
+	TqFloat ratio = 4.0;
+
 	for(c=0; c<m_SamplesPerPixel; c++)
 	{
 		val[c]=pTMBd->pBufferData()[tt2+ss2+c];
 
-		if(!ftt)
-			val[c]-=pTMBb->pBufferData()[tt1+ss2+c];
+		if(!ftt) 
+			val[c]+=pTMBb->pBufferData()[tt1+ss2+c];
+		else 
+			ratio -= 1.0;
 
 		if(!fss)
-			val[c]-=pTMBc->pBufferData()[tt2+ss1+c];
+			val[c]+=pTMBc->pBufferData()[tt2+ss1+c];
+		else
+			ratio -= 1.0;
 
 		val[c]+=pTMBa->pBufferData()[tt1+ss1+c];
+		val[c] /= ratio;
 	}
-	val/=d;
 }
 
 //----------------------------------------------------------------------
@@ -800,6 +827,7 @@ void CqEnvironmentMap::SampleSATMap(CqVector3D& R1, CqVector3D& R2, CqVector3D& 
 		// Normalize the weightings
 		val/=total_area;
 	}
+	
 }
 
 
@@ -1204,8 +1232,10 @@ void CqShadowMap::AllocateMap(TqInt XRes, TqInt YRes)
 {
 	static CqRandom rand;
 
-	if(m_apSegments.size()>0)	delete(m_apSegments[0]);
-	
+	std::vector<CqTextureMapBuffer*>::iterator s;
+	for(s=m_apSegments.begin(); s!=m_apSegments.end(); s++)
+		delete(*s);
+
 	m_XRes=XRes;
 	m_YRes=YRes;
 	m_apSegments.push_back(new	CqTextureMapBuffer(0,0,m_XRes,m_YRes,1));
