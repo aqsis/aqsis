@@ -113,6 +113,8 @@ class RiCacheBase
 						
 							SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( token );
 
+							// Work out the amount of data to copy determined by the
+							// class, the type and the array size.
 							int size = 1;
 							switch( Decl.m_Class )
 							{
@@ -137,6 +139,7 @@ class RiCacheBase
 								break;
 							}
 
+							// If it is a compound type, increase the length by the number of elements.
 							if( Decl.m_Type == type_point ||
 								Decl.m_Type == type_normal ||
 								Decl.m_Type == type_color ||
@@ -146,6 +149,9 @@ class RiCacheBase
 								size *= 4;
 							else if( Decl.m_Type == type_matrix)
 								size *= 16;
+
+							// If it is an array, increase the size by the number of elements in the array.
+							size *= Decl.m_Count;
 
 							int j;
 							switch( Decl.m_Type )
