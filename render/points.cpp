@@ -481,7 +481,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 			TqFloat radius;
 			TqFloat i_radius = 1.0f;
 			if( NULL != pConstantWidthParam )
-				pConstantWidthParam->pValue( 0 )[ 0 ];
+				i_radius = pConstantWidthParam->pValue( 0 )[ 0 ];
 			// Find out if the "width" parameter was specified.
 			CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pWidthParam = pPoints->width( 0 );
 
@@ -498,6 +498,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 				TqFloat ztemp = Point.z();
 				Point = matCameraToRaster * Point;
 				Point.z( ztemp );
+				pP[ iu ] = Point;
 
 				// first, create a horizontal vector in object space which is
 				//  the length of the current width.
@@ -547,7 +548,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 
 			TqFloat radius = 1.0f;
 			if( NULL != pConstantWidthParam )
-				pConstantWidthParam->pValue( 0 )[ 0 ];
+				radius = pConstantWidthParam->pValue( 0 )[ 0 ];
 			// Find out if the "width" parameter was specified.
 			CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pWidthParam = pPoints->width( 0 );
 
@@ -576,7 +577,6 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 			vecRasP2.z( ztemp );
 			TqFloat ras_radius = ( vecRasP2 - Point ).Magnitude();
 			radius = ras_radius * 0.5f;
-			pP[ iu ] = vecRasP2;
 
 			CqMicroPolygonPoints *pNew = new CqMicroPolygonPoints();
 			pNew->SetGrid( this );
@@ -614,6 +614,7 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, l
 
 	TqInt cu = pGridA->uGridRes();	// Only need cu, as we know cv is 1.
 
+	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pSurface()->pTransform()->matObjectToWorld() );
 	CqMatrix matObjectToCamera = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld() );
 	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
 
@@ -621,73 +622,114 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, l
 	CqMatrix matITTx = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform() ->matObjectToWorld( ) );
 
 	CqVector3D vecdefOriginRaster = matCameraToRaster * CqVector3D( 0.0f,0.0f,0.0f );
-	
-	// Get a pointer to the surface, so that we can interrogate the "width" parameters.
-	CqPoints* pPoints = static_cast<CqPoints*>( pSurface() );
 
-	const CqParameterTypedConstant<TqFloat, type_float, TqFloat>* pConstantWidthParam = pPoints->constantwidth( );
+	TqInt NumTimes = cTimes();
+	
+	// Get an array of P's for all time positions.
+	std::vector<std::vector<CqVector3D> > aaPtimes;
+	aaPtimes.resize( NumTimes );
+
+	// Array of cached object to camera matrices for each time slot.
+	std::vector<CqMatrix>	amatObjectToCameraT;
+	amatObjectToCameraT.resize( NumTimes );
+	std::vector<CqMatrix>	amatNObjectToCameraT;
+	amatNObjectToCameraT.resize( NumTimes );
+
+	CqMatrix matObjectToCameraT;
+	register TqInt i;
+	TqInt gsmin1;
+	gsmin1 = pGridA->GridSize() - 1;
+
+	for( iTime = 0; iTime < NumTimes; iTime++ )
+	{
+		CqMatrix matCameraToObjectT = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ), Time( iTime ) );
+		amatObjectToCameraT[ iTime ] = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ),  Time( iTime ) );
+		amatNObjectToCameraT[ iTime ] = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ), Time( iTime ) );
+
+		aaPtimes[ iTime ].resize( gsmin1 + 1 );
+
+		CqMicroPolyGridPoints* pGridT = static_cast<CqMicroPolyGridPoints*>( GetMotionObject( Time( iTime ) ) );
+
+		// Get a pointer to the surface, so that we can interrogate the "width" parameters.
+		CqPoints* pPoints = static_cast<CqPoints*>( pGridT->pSurface() );
+		CqParameterTyped<CqVector4D, CqVector3D>* pPParam = pPoints->pPoints( iTime )->P();
+		assert( NULL != pPParam );
+
+		const CqParameterTypedConstant<TqFloat, type_float, TqFloat>* pConstantWidthParam = pPoints->constantwidth( );
+
+		CqVector3D* pP;
+		pGridT->P() ->GetPointPtr( pP );
+
+		for ( i = gsmin1; i >= 0; i-- )
+		{
+			// This makes sure all our points are in object space.
+			aaPtimes[ iTime ][ i ] = matCameraToObject0 * pP[ i ];
+		}
+	}
 
 	TqInt iu;
 	for ( iu = 0; iu < cu; iu++ )
 	{
-		CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion();
+		CqMicroPolygonMotionPoints *pNew = new CqMicroPolygonMotionPoints();
 		pNew->SetGrid( pGridA );
-		TqInt iIndex = iu;
-		pNew->SetIndex( iIndex );
-		for ( iTime = 0; iTime < cTimes(); iTime++ )
+		pNew->SetIndex( iu );
+
+		TqFloat radius;
+		TqInt iTime;
+		for( iTime = 0; iTime < NumTimes; iTime++ )
 		{
-			CqParameterTyped<CqVector4D, CqVector3D>* pPParam = pPoints->pPoints( iTime )->P();
-			CqMicroPolyGrid* pGridT = static_cast<CqMicroPolyGridPoints*>( GetMotionObject( Time( iTime ) ) );
+			radius = 1.0f;
 
-			CqVector3D* pP;
-			pGridT->P() ->GetPointPtr( pP );
-			CqVector3D Point = pP[ iu ];
+			CqMicroPolyGridPoints* pGridT = static_cast<CqMicroPolyGridPoints*>( GetMotionObject( Time( iTime ) ) );
 
-			TqFloat radius = 1.0f;
+			// Get a pointer to the surface, so that we can interrogate the "width" parameters.
+			CqPoints* pPoints = static_cast<CqPoints*>( pGridT->pSurface() );
+
+			const CqParameterTypedConstant<TqFloat, type_float, TqFloat>* pConstantWidthParam = 
+				pPoints->constantwidth( );
+
 			if( NULL != pConstantWidthParam )
-				pConstantWidthParam->pValue( 0 )[ 0 ];
+				radius = pConstantWidthParam->pValue( 0 )[ 0 ];
+
 			// Find out if the "width" parameter was specified.
 			CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pWidthParam = pPoints->width( 0 );
 
 			if( NULL != pWidthParam )
 				radius = pWidthParam->pValue( pPoints->KDTree().aLeaves()[ iu ] )[ 0 ];
-			
-			// first, create a horizontal vector in the new space which is
-			//  the length of the current width in current space
+
+			// Get point in camera space.
+			CqVector3D Point, pt, vecCamP;
+			Point = pt = vecCamP = amatObjectToCameraT[ iTime ] * aaPtimes[ iTime ][ iu ];
+			// Ensure z is retained in camera space when we convert to raster.
+			TqFloat ztemp = Point.z();
+			Point = matCameraToRaster * Point;
+			Point.z( ztemp );
+
+			// first, create a horizontal vector in object space which is
+			//  the length of the current width.
 			CqVector3D horiz( 1, 0, 0 );
-			horiz = matITTx * horiz;
+			horiz = amatNObjectToCameraT[ iTime ] * horiz;
 			horiz *= radius / horiz.Magnitude();
 
-			// now, create two points; one at the vertex in current space
-			//  and one which is offset horizontally in the new space by
-			//  the width in the current space.  transform both points
-			//  into the new space
-			CqVector3D pt = pPParam->pValue( pPoints->KDTree().aLeaves()[ iu ] ) [ 0 ];
+			// Get the current point in object space.
 			CqVector3D pt_delta = pt + horiz;
-			pt = matTx * pt;
-			pt_delta = matTx * pt_delta;
+			pt = amatObjectToCameraT[ iTime ] * pt;
+			pt_delta = amatObjectToCameraT[ iTime ] * pt_delta;
 
 			// finally, find the difference between the two points in
 			//  the new space - this is the transformed width
 			CqVector3D widthVector = pt_delta - pt;
 			radius = widthVector.Magnitude();
 
-			CqVector3D vecCamP = pPParam->pValue( pPoints->KDTree().aLeaves()[ iu ] )[ 0 ];
 			CqVector3D vecCamP2 = vecCamP + CqVector3D( radius, 0.0f, 0.0f );
-			TqFloat ztemp = vecCamP2.z();
+			ztemp = vecCamP2.z();
 			CqVector3D vecRasP2 = matCameraToRaster * vecCamP2;
 			vecRasP2.z( ztemp );
 			TqFloat ras_radius = ( vecRasP2 - Point ).Magnitude();
 			radius = ras_radius * 0.5f;
 
-			CqVector3D p1( Point.x() - radius, Point.y() - radius, Point.z() );
-			CqVector3D p2( Point.x() + radius, Point.y() - radius, Point.z() );
-			CqVector3D p3( Point.x() + radius, Point.y() + radius, Point.z() );
-			CqVector3D p4( Point.x() - radius, Point.y() + radius, Point.z() );
-			
-			pNew->AppendKey( p1, p2, p3, p4, Time( iTime ) );
+			pNew->AppendKey( Point, radius, Time( iTime ) );
 		}
-
 		pNew->GetTotalBound( TqTrue );
 		pImage->AddMPG( pNew );
 	}

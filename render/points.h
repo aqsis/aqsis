@@ -443,6 +443,63 @@ class CqMicroPolygonMotionPoints : public CqMicroPolygon
 ;
 
 
+//----------------------------------------------------------------------
+/** \class CqDeformingPointsSurface
+ * Templatised class containing a series of motion stages of a specific surface type for motion blurring.
+ */
+
+class CqDeformingPointsSurface : public CqDeformingSurface
+{
+	public:
+		CqDeformingPointsSurface( CqBasicSurface* const& a ) : CqDeformingSurface( a )
+		{}
+		CqDeformingPointsSurface( const CqDeformingPointsSurface& From ) : CqDeformingSurface( From )
+		{}
+		virtual	~CqDeformingPointsSurface()
+		{}
+
+		/** Dice this GPrim, creating a CqMotionMicroPolyGrid with all times in.
+		 */
+		virtual	CqMicroPolyGridBase* Dice()
+		{
+			CqMotionMicroPolyGridPoints * pGrid = new CqMotionMicroPolyGridPoints;
+			TqInt i;
+			for ( i = 0; i < cTimes(); i++ )
+			{
+				CqMicroPolyGridBase* pGrid2 = GetMotionObject( Time( i ) ) ->Dice();
+				pGrid->AddTimeSlot( Time( i ), pGrid2 );
+			}
+			return ( pGrid );
+		}
+		/** Split this GPrim, creating a series of CqDeformingSurface with all times in.
+		 */
+		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits )
+		{
+			std::vector<std::vector<CqBasicSurface*> > aaMotionSplits;
+			aaMotionSplits.resize( cTimes() );
+			TqInt cSplits = 0;
+			TqInt i;
+			for ( i = 0; i < cTimes(); i++ )
+				cSplits = GetMotionObject( Time( i ) ) ->Split( aaMotionSplits[ i ] );
+
+			// Now build motion surfaces from the splits and pass them back.
+			for ( i = 0; i < cSplits; i++ )
+			{
+				CqDeformingPointsSurface* pNewMotion = new CqDeformingPointsSurface( 0 );
+				pNewMotion->AddRef();
+				pNewMotion->m_fDiceable = TqTrue;
+				pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
+				TqInt j;
+				for ( j = 0; j < cTimes(); j++ )
+					pNewMotion->AddTimeSlot( Time( j ), aaMotionSplits[ j ][ i ] );
+				aSplits.push_back( pNewMotion );
+			}
+			return ( cSplits );
+		}
+	protected:
+};
+
+
 //-----------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )
