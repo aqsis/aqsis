@@ -315,7 +315,7 @@ void CqImagePixel::Combine()
 			QGetRenderContext() ->Logger() ->warn( "Invalid depthfilter \"%s\", depthfilter set to \"min\"", pstrDepthFilter[ 0 ].c_str() );
 	}
 	else
-		QGetRenderContext() ->Logger() ->warn( "No depthfilter, depthfilter set to \"min\"", pstrDepthFilter[ 0 ].c_str() );
+		QGetRenderContext() ->Logger() ->warn( "No depthfilter, depthfilter set to \"min\"" );
 
 	
 
