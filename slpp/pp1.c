@@ -134,7 +134,11 @@ extern	unsigned	_stklen = 32767;
 #endif	/* MSC_OPT */
 
 void
+#ifdef	SLPP_LIBRARY
+PreProcess(argc,argv)
+#else
 main(argc,argv)
+#endif
 	int			argc;
 	char			**argv;
 	{
@@ -527,7 +531,11 @@ main(argc,argv)
 
 	if((Output != stdout) && (fclose(Output) == EOF))
 		fatal("Unable to close output file: ",Outfile);
+#ifdef	SLPP_LIBRARY
+	return;
+#else
 	exit(Eflag ? 0 : Errors);
+#endif	/* SLPP_LIBRARY */
 	}
 
 #ifdef	MSC_OPT

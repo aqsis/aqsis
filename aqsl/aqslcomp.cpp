@@ -48,6 +48,7 @@
 
 using namespace Aqsis;
 
+extern "C" void PreProcess(int argc, char** argv);
 
 ArgParse::apstring	g_stroutname = "";
 bool	g_help = 0;
@@ -65,6 +66,18 @@ void version( std::ostream& Stream )
 	Stream << "aqslcomp version " << VERSION << std::endl;
 #endif
 }
+
+
+char* g_slppDefArgs[] = 
+{
+	"slpp",
+	"-d",
+	"PI=3.141592654",
+	"-d",
+	"AQSIS",
+	"-c6",
+};
+int g_cslppDefArgs = sizeof( g_slppDefArgs ) / sizeof( g_slppDefArgs[0] );
 
 
 /** Process the sl file from stdin and produce an slx bytestream.
@@ -110,20 +123,6 @@ int main( int argc, const char** argv )
 	}
 	else
 	{
-		std::stringstream strCommand;
-		strCommand << "slpp -d PI=3.141592654 -d AQSIS -c6 ";
-		// Append the -d arguments passed in to forward them to the preprocessor.
-		for ( ArgParse::apstringvec::const_iterator define = g_defines.begin(); define != g_defines.end(); define++ )
-			strCommand << "-d " << define->c_str() << " ";
-
-		// Append the -i arguments passed in to forward them to the preprocessor.
-		for ( ArgParse::apstringvec::const_iterator include = g_includes.begin(); include != g_includes.end(); include++ )
-			strCommand << "-i " << include->c_str() << " ";
-
-		// Append the -u arguments passed in to forward them to the preprocessor.
-		for ( ArgParse::apstringvec::const_iterator undefine = g_undefines.begin(); undefine != g_undefines.end(); undefine++ )
-			strCommand << "-u " << undefine->c_str() << " ";
-
 		const char* _template = "slppXXXXXX";
 		char ifile[11];
 		for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
@@ -141,12 +140,62 @@ int main( int argc, const char** argv )
 				#endif //AQSIS_SYSTEM_WIN32
 				if( NULL != tempname )
 				{
-					std::stringstream strThisCommand;
-					strThisCommand << strCommand.str();
+					// Build the arguments array for slpp.
+					std::vector<char*>	slppArgs;
+					for ( int defArg = 0; defArg != g_cslppDefArgs; defArg++ )
+					{
+						char* Arg = new char[strlen(g_slppDefArgs[ defArg ]) + 1];
+						sprintf( Arg, g_slppDefArgs[ defArg ] );
+						slppArgs.push_back(Arg);
+					}
+
+					// Append the -d arguments passed in to forward them to the preprocessor.
+					for ( ArgParse::apstringvec::const_iterator define = g_defines.begin(); define != g_defines.end(); define++ )
+					{
+						char* Arg = new char[strlen("-d") + 1];
+						strcpy( Arg, "-d" );
+						slppArgs.push_back(Arg);
+						Arg = new char[define->size() + 1];
+						strcpy( Arg, define->c_str() );
+						slppArgs.push_back(Arg);
+					}
+
+					// Append the -i arguments passed in to forward them to the preprocessor.
+					for ( ArgParse::apstringvec::const_iterator include = g_includes.begin(); include != g_includes.end(); include++ )
+					{
+						char* Arg = new char[strlen("-i") + 1];
+						strcpy( Arg, "-i" );
+						slppArgs.push_back(Arg);
+						Arg = new char[include->size() + 1];
+						strcpy( Arg, include->c_str() );
+						slppArgs.push_back(Arg);
+					}
+
+					// Append the -u arguments passed in to forward them to the preprocessor.
+					for ( ArgParse::apstringvec::const_iterator undefine = g_undefines.begin(); undefine != g_undefines.end(); undefine++ )
+					{
+						char* Arg = new char[strlen("-u") + 1];
+						strcpy( Arg, "-u" );
+						slppArgs.push_back(Arg);
+						Arg = new char[undefine->size() + 1];
+						strcpy( Arg, undefine->c_str() );
+						slppArgs.push_back(Arg);
+					}
+
 					// Set the output filename.
-					strThisCommand << "-o " << tempname << " ";
-					strThisCommand << e->c_str() << std::ends;
-					system( strThisCommand.str().c_str() );
+					char* Arg = new char[strlen("-o") + 1];
+					strcpy( Arg, "-o" );
+					slppArgs.push_back(Arg);
+					Arg = new char[strlen(tempname) + 1];
+					strcpy( Arg, tempname );
+					slppArgs.push_back(Arg);
+	
+					// Set the input filename.				
+					char* fileArg = new char[e->size() + 1];
+					sprintf( fileArg, e->c_str() );
+					slppArgs.push_back(fileArg);
+					
+					PreProcess(slppArgs.size(),&slppArgs[0]);
 
 					std::ifstream ppfile( tempname );
 					if ( Parse( ppfile, e->c_str(), std::cerr ) )

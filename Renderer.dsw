@@ -101,6 +101,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name aqsl
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libslpp
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -148,6 +151,9 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name slpp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libslpp
     End Project Dependency
 }}}
 
@@ -484,6 +490,18 @@ Package=<4>
 ###############################################################################
 
 Project: "libslparse"=.\libslparse\libslparse.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libslpp"=.\lib\libslpp.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
