@@ -59,7 +59,7 @@ class _qShareC CqRiFile : public CqFile
 								{
 									Open(strFilename,strSearchPathOption);
 								}
-								/** Dectructor. Takes care of closing the stream if the constructor opened it.
+								/** Destructor. Takes care of closing the stream if the constructor opened it.
 								 */
 		_qShareM	virtual		~CqRiFile()				{}
 
