@@ -26,9 +26,6 @@ aqsis/Makefile \
 aqsl/Makefile \
 aqsl/tests/Makefile \
 filebuffer/Makefile \
-framebuffer/Makefile \
-framebuffer/win32/Makefile \
-framebuffer/win32/intel/Makefile \
 framebuffer_glut/Makefile \
 framebuffer_glut_z/Makefile \
 images/Makefile \
