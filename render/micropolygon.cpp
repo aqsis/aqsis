@@ -191,8 +191,8 @@ void CqMicroPolyGrid::CalcNormals()
 		{
 			vecMP[ 0 ] = &pP[ igrid ];
 			vecMP[ 1 ] = &pP[ igrid + 1 ];
-			vecMP[ 2 ] = &pP[ igrid + ur + 1 ];
-			vecMP[ 3 ] = &pP[ igrid + ur ];
+			vecMP[ 2 ] = &pP[ igrid + ur + 2 ];
+			vecMP[ 3 ] = &pP[ igrid + ur + 1];
 			int a, b, c;
 			a = 0;
 			b = a + 1;
