@@ -312,16 +312,18 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 class CqPolygonPoints : public CqSurface
 {
 	public:
-		CqPolygonPoints( TqInt cVertices, TqInt cFaces ) :
+		CqPolygonPoints( TqInt cVertices, TqInt cFaces, TqInt sumnVerts ) :
 				m_cVertices( cVertices ),
 				m_Transformed( TqFalse ),
-				m_cFaces( cFaces )
+				m_cFaces( cFaces ),
+				m_sumnVerts( sumnVerts )
 		{}
 		CqPolygonPoints( const CqPolygonPoints& From ) :
 				CqSurface( From ),
 				m_cVertices( From.m_cVertices ),
 				m_Transformed( From.m_Transformed ),
-				m_cFaces( From.m_cFaces )
+				m_cFaces( From.m_cFaces ),
+				m_sumnVerts( From.m_sumnVerts )
 		{}
 		virtual	~CqPolygonPoints()
 		{
@@ -383,8 +385,7 @@ class CqPolygonPoints : public CqSurface
 		}
 		virtual	TqUint	cFaceVarying() const
 		{
-			/// \todo Must work out what this value should be.
-			return ( 1 );
+			return ( m_sumnVerts );
 		}
 
 		/** Get the number of vertices in the list.
@@ -398,6 +399,7 @@ class CqPolygonPoints : public CqSurface
 		TqInt	m_cVertices;		///< Count of vertices in this list.
 		TqBool	m_Transformed;		///< Flag indicatign that the list has been transformed.
 		TqInt	m_cFaces;			///< Expected count of faces referencing this list.
+		TqInt	m_sumnVerts;
 }
 ;
 
@@ -624,10 +626,8 @@ class CqSurfacePointsPolygons : public CqSurface
 			ADDREF( m_pPoints );
 			m_PointCounts.resize( NumPolys );
 			TqInt i,vindex=0;
-			m_sumnVerts = 0;
 			for( i = 0; i < NumPolys; i++ )
 			{
-				m_sumnVerts += nverts[ i ];
 				m_PointCounts[i] = nverts[i];
 				TqInt polyvertex;
 				for( polyvertex = 0; polyvertex < nverts[i]; polyvertex++ )
@@ -688,204 +688,13 @@ class CqSurfacePointsPolygons : public CqSurface
 		}
 		virtual	TqUint	cFaceVarying() const
 		{
-			return ( m_sumnVerts );
+			assert( NULL != m_pPoints );
+			return ( m_pPoints->cFaceVarying() );
 		}
 
-		virtual void AddPrimitiveVariable( CqParameter* pParam )
-		{
-			assert( NULL != m_pPoints );
-			m_pPoints->AddPrimitiveVariable( pParam );
-		}
-
-		/** Get a reference the to P default parameter.
-		 */
-		CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>* P()
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->P( ) );
-		}
-		/** Get a reference the to N default parameter.
-		 */
-		CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* N()
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->N( ) );
-		}
-		/** Get a reference the to Cq default parameter.
-		 */
-		CqParameterTypedVarying<CqColor, type_color, CqColor>* Cs()
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->Cs( ) );
-		}
-		/** Get a reference the to Os default parameter.
-		 */
-		CqParameterTypedVarying<CqColor, type_color, CqColor>* Os()
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->Os( ) );
-		}
-		/** Get a reference the to s default parameter.
-		 */
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* s()
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->s( ) );
-		}
-		/** Get a reference the to t default parameter.
-		 */
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* t()
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->t( ) );
-		}
-		/** Get a reference the to u default parameter.
-		 */
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* u()
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->u( ) );
-		}
-		/** Get a reference the to v default parameter.
-		 */
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* v()
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->v( ) );
-		}
-
-		/** Get a reference the to P default parameter.
-		 */
-		const	CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>* P() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->P( ) );
-		}
-		/** Get a reference the to N default parameter.
-		 */
-		const	CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* N() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->N( ) );
-		}
-		/** Get a reference the to Cq default parameter.
-		 */
-		const	CqParameterTypedVarying<CqColor, type_color, CqColor>* Cs() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->Cs( ) );
-		}
-		/** Get a reference the to Os default parameter.
-		 */
-		const	CqParameterTypedVarying<CqColor, type_color, CqColor>* Os() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->Os( ) );
-		}
-		/** Get a reference the to s default parameter.
-		 */
-		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* s() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->s( ) );
-		}
-		/** Get a reference the to t default parameter.
-		 */
-		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* t() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->t( ) );
-		}
-		/** Get a reference the to u default parameter.
-		 */
-		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* u() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->u( ) );
-		}
-		/** Get a reference the to v default parameter.
-		 */
-		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* v() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->v( ) );
-		}
-
-		/** Determine whether this surface has per vertex normals.
-		 */
-		const	TqBool	bHasN() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->bHasN( ) );
-		}
-		/** Determine whether this surface has per vertex colors.
-		 */
-		const	TqBool	bHasCs() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->bHasCs( ) );
-		}
-		/** Determine whether this surface has per vertex opacities.
-		 */
-		const	TqBool	bHasOs() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->bHasOs( ) );
-		}
-		/** Determine whether this surface has per vertex s cordinates.
-		 */
-		const	TqBool	bHass() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->bHass( ) );
-		}
-		/** Determine whether this surface has per vertex t coordinates.
-		 */
-		const	TqBool	bHast() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->bHast( ) );
-		}
-		/** Determine whether this surface has per vertex u coordinates.
-		 */
-		const	TqBool	bHasu() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->bHasu( ) );
-		}
-		/** Determine whether this surface has per vertex v coordinates.
-		 */
-		const	TqBool	bHasv() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->bHasv( ) );
-		}
-
-		/** Get a reference to the user parameter variables array
-		 */
-		const std::vector<CqParameter*>& aUserParams() const
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->aUserParams( ) );
-		}
-
-		/** Get a reference to the user parameter variables array
-		 */
-		std::vector<CqParameter*>& aUserParams()
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->aUserParams( ) );
-		}
-
-		CqParameter* FindUserParam( const char* strName )
-		{
-			assert( NULL != m_pPoints );
-			return( m_pPoints->FindUserParam( strName ) );
-		}
 
 	private:
 		TqInt	m_NumPolys;
-		TqInt	m_sumnVerts;
 		CqPolygonPoints*	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
 		std::vector<TqInt>	m_PointCounts;
 		std::vector<TqInt>	m_PointIndices;

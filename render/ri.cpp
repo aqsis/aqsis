@@ -2607,7 +2607,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 		cVerts += nverts[ iloop ];
 
 	// Create a storage class for all the points.
-	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, 1 );
+	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, 1, cVerts );
 	// Process any specified primitive variables
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
@@ -2746,7 +2746,7 @@ RtVoid	RiPoints( RtInt nvertices, ... )
 RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 {
 	// Create a storage class for all the points.
-	CqPolygonPoints* pPointsClass = new CqPolygonPoints( nvertices, 1 );
+	CqPolygonPoints* pPointsClass = new CqPolygonPoints( nvertices, 1, nvertices );
 	ADDREF( pPointsClass );
 
 	// Create a new points storage class
@@ -2943,9 +2943,11 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 	RtInt cVerts = 0;
 	RtInt* pVerts = verts;
 	RtInt poly;
+	RtInt sumnVerts = 0;
 	for ( poly = 0; poly < npolys; poly++ )
 	{
 		RtInt v;
+		sumnVerts += nverts[ poly ];
 		for ( v = 0; v < nverts[ poly ]; v++ )
 		{
 			cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
@@ -2954,12 +2956,12 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 	}
 
 	// Create a storage class for all the points.
-	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, npolys );
+	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, npolys, sumnVerts );
 	ADDREF( pPointsClass );
-	CqSurfacePointsPolygons* pPsPs = new CqSurfacePointsPolygons(pPointsClass, npolys, nverts, verts );
 	// Process any specified primitive variables
-	if ( ProcessPrimitiveVariables( pPsPs, count, tokens, values ) )
+	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
+		CqSurfacePointsPolygons* pPsPs = new CqSurfacePointsPolygons(pPointsClass, npolys, nverts, verts );
 		ADDREF( pPsPs );
 		TqFloat time = QGetRenderContext()->Time();
 		// Transform the points into camera space for processing,
@@ -2969,8 +2971,6 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 		CreateGPrim(pPsPs);
 		RELEASEREF( pPsPs );
 	}
-	else
-		RELEASEREF( pPsPs );	
 	RELEASEREF( pPointsClass );
 
 	return ;
@@ -3007,6 +3007,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 	TqInt igloop = 0;
 	TqInt cVerts = 0;
 	TqInt igvert = 0;
+	TqInt sumnVerts = 0;
 
 	// Calculate how many points overall.
 	RtInt* pVerts = verts;
@@ -3015,6 +3016,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 		for ( iloop = 0; iloop < nloops[ ipoly ]; iloop++, igloop++ )
 		{
 			TqInt v;
+			sumnVerts += nverts[ igloop ];
 			for ( v = 0; v < nverts[ igloop ]; v++ )
 			{
 				cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
@@ -3024,7 +3026,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 	}
 
 	// Create a storage class for all the points.
-	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, npolys );
+	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, npolys, sumnVerts );
 	ADDREF( pPointsClass );
 	// Process any specified primitive variables
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
@@ -4446,9 +4448,11 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 	RtInt cVerts = 0;
 	RtInt* pVerts = vertices;
 	RtInt face;
+	RtInt sumnVerts = 0;
 	for ( face = 0; face < nfaces; face++ )
 	{
 		RtInt v;
+		sumnVerts += nvertices[ face ];
 		for ( v = 0; v < nvertices[ face ]; v++ )
 		{
 			cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
@@ -4457,7 +4461,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 	}
 
 	// Create a storage class for all the points.
-	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, nfaces );
+	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, nfaces, sumnVerts );
 	//ADDREF( pPointsClass );
 
 	std::vector<CqPolygonPoints*>	apPoints;
