@@ -860,8 +860,6 @@ void CqTextureMap::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, 
  */
 void CqTextureMap::Open()
 {
-	TqChar swrap[ 80 ], twrap[ 80 ], filterfunc[ 80 ];
-	TqFloat swidth, twidth;
 	TqInt wasconverted = 0;
 
 	m_IsValid = TqFalse;
