@@ -2077,9 +2077,44 @@ STD_SOIMPL CqShaderExecEnv::SO_calculatenormal( POINTVAL p, DEFPARAMIMPL )
 	CHECKVARY( Result )
 
 	BEGIN_VARYING_SECTION
-	CqVector3D	dPdu = SO_DuType<CqVector3D>( p, __iGrid, this, Defvec );
-	CqVector3D	dPdv = SO_DvType<CqVector3D>( p, __iGrid, this, Defvec );
-	CqVector3D	N = dPdu % dPdv;
+	//CqVector3D	dPdu = SO_DuType<CqVector3D>( p, __iGrid, this, Defvec );
+	//CqVector3D	dPdv = SO_DvType<CqVector3D>( p, __iGrid, this, Defvec );
+	//CqVector3D	N = dPdu % dPdv;
+
+	CqVector3D Ret, Ret2;
+	TqInt uRes = uGridRes();
+	TqInt GridX = __iGrid % ( uRes + 1 );
+
+	CqVector3D v1, v2;
+	if ( GridX < uRes )
+	{
+		p->GetValue( v1, __iGrid + 1 );
+		p->GetValue( v2, __iGrid );
+		Ret = ( v1 - v2 );
+	}
+	else
+	{
+		p->GetValue( v1, __iGrid );
+		p->GetValue( v2, __iGrid - 1 );
+		Ret = ( v1 - v2 );
+	}
+	TqInt vRes = vGridRes();
+	TqInt GridY = ( __iGrid / ( uRes + 1 ) );
+
+	if ( GridY < vRes )
+	{
+		p->GetValue( v1, __iGrid + uRes + 1 );
+		p->GetValue( v2, __iGrid );
+		Ret2 = ( v1 - v2 );
+	}
+	else
+	{
+		p->GetValue( v1, __iGrid );
+		p->GetValue( v2, __iGrid - ( uRes + 1 ) );
+		Ret = ( v1 - v2 );
+	}
+
+	CqVector3D N = Ret % Ret2;
 	N.Unit();
 	N *= neg;
 	SETNORMAL( Result, N );
