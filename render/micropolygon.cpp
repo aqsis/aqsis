@@ -173,7 +173,7 @@ void CqMicroPolyGrid::CalcNormals()
 	TqInt O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
 	const CqVector3D* vecMP[ 4 ];
 	CqVector3D	vecN, vecTemp;
-	CqVector3D	vecLastN( 0, 0, 0 );
+	CqVector3D	vecFailsafeN;
 
 	const CqVector3D* pP;
 	P() ->GetPointPtr( pP );
@@ -182,6 +182,11 @@ void CqMicroPolyGrid::CalcNormals()
 	// Calculate each normal from the top left, top right and bottom left points.
 	register TqInt ur = uGridRes();
 	register TqInt vr = vGridRes();
+
+	// Create a failsafe normal from the corners of the grid, in case we encounter degenerate MP's
+	vecFailsafeN = ( pP[ur] - pP[0] ) % ( pP[(vr*(ur+1))+ur] - pP[0] );
+	vecFailsafeN.Unit();
+
 	TqInt igrid = 0;
 	TqInt iv;
 	for ( iv = 0; iv < vr; iv++ )
@@ -193,35 +198,37 @@ void CqMicroPolyGrid::CalcNormals()
 			vecMP[ 1 ] = &pP[ igrid + 1 ];
 			vecMP[ 2 ] = &pP[ igrid + ur + 2 ];
 			vecMP[ 3 ] = &pP[ igrid + ur + 1];
-			int a, b, c;
-			a = 0;
-			b = a + 1;
-			while ( ( ( ( *vecMP[ a ] ) - ( *vecMP[ b ] ) ).Magnitude() < FLT_EPSILON ) && b < 3 ) b++;
-			if ( b < 3 )
+			TqInt a=0, b=1, c=2;
+			CqVector3D vecBA = ( *vecMP[ b ] ) - ( *vecMP[ a ] );
+			CqVector3D vecCA = ( *vecMP[ c ] ) - ( *vecMP[ a ] );
+			TqFloat bma = vecBA.Magnitude();
+			TqFloat cma = vecCA.Magnitude();
+			if( bma < FLT_EPSILON )
 			{
-				c = b + 1;
-				while ( ( ( ( *vecMP[ c ] ) - ( *vecMP[ b ] ) ).Magnitude() < FLT_EPSILON || ( ( *vecMP[ c ] ) - ( *vecMP[ a ] ) ).Magnitude() < FLT_EPSILON ) && c < 3 )
-					c++;
-				if ( c <= 3 )
-				{
-					vecN = ( ( *vecMP[ b ] ) - ( *vecMP[ a ] ) ) % ( ( *vecMP[ c ] ) - ( *vecMP[ a ] ) );	// Cross product is normal.*/
-					vecN.Unit();
-					// Flip the normal if the 'current orientation' differs from the 'coordinate system orientation'
-					// see RiSpec 'Orientation and Sides'
-					vecN = ( O == OrientationLH ) ? vecN : -vecN;
-					vecLastN = vecN;
-				}
-				else
-				{
-					//assert(false);
-					vecN = vecLastN;
-				}
+				b = 3;
+				vecBA = ( *vecMP[ b ] ) - ( *vecMP[ a ] );
+				bma = vecBA.Magnitude();
+			}
+
+
+			if( ( bma > FLT_EPSILON ) &&
+			    ( cma > FLT_EPSILON ) && 
+				( vecBA != vecCA ) )
+			{
+				vecN = vecBA % vecCA;	// Cross product is normal.*/
+				vecN.Unit();
+				// Flip the normal if the 'current orientation' differs from the 'coordinate system orientation'
+				// see RiSpec 'Orientation and Sides'
+				vecN = ( O == OrientationLH ) ? vecN : -vecN;
 			}
 			else
 			{
 				//assert(false);
-				vecN = vecLastN;
+				vecN = vecFailsafeN;
 			}
+
+			std::cout << "N: " << vecN << " FSN: " << vecFailsafeN << std::endl;
+
 			pNg->SetNormal( vecN, igrid );
 			igrid++;
 			// If we are at the last row, last row normal to the same.
