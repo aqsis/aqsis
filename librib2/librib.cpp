@@ -36,6 +36,7 @@
 #include "bdec.h"
 
 extern int yyparse();
+extern int yydebug;
 
 namespace librib
 {
@@ -112,6 +113,7 @@ void StandardDeclarations( RendermanInterface& CallbackInterface )
 	ParserDeclare( CallbackInterface, "constantwidth", "uniform float" );
 }
 
+
 bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream )
 {
 	ParseInputFile = InputStream;
@@ -122,6 +124,8 @@ bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface&
 	ParseSucceeded = true;
 
 	BinaryDecoder = new CqRibBinaryDecoder( InputStream );
+	// Reenable this to get parse tree output in debug version.
+	//yydebug = 1;
 	yyparse();
 	delete BinaryDecoder;
 
