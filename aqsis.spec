@@ -9,7 +9,7 @@ URL: www.aqsis.com
 Packager: cgtobix
 Source: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-root
-Requires: /sbin/ldconfig
+Requires: /sbin/ldconfig, libtiff >= 3.5.7, libjpeg >= 6b, zlib >= 1.1.4, glut
 AutoReqProv: no
 
 
