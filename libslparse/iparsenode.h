@@ -100,6 +100,7 @@ enum EqCommType
 	CommTypeRendererInfo,
 	CommTypeIncident,
 	CommTypeOpposite,
+	CommTypeTextureInfo
 };
 
 
@@ -327,6 +328,7 @@ struct IqParseNodeMessagePassingFunction
 {
 	virtual	SqVarRef	VarRef() const=0;
 	virtual	TqInt		CommType() const=0;
+	virtual CqString    Extra() const=0;
 
 	const static EqParseNodeType m_ID;
 };

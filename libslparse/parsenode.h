@@ -292,7 +292,8 @@ class CqParseNodeVariable : public CqParseNode, public IqParseNodeVariable
 	public:
 				CqParseNodeVariable(const CqParseNodeVariable& from) :
 								CqParseNode(from),
-								m_VarRef(from.m_VarRef)
+								m_VarRef(from.m_VarRef),
+								m_Extra(from.m_Extra)
 								{}
 				CqParseNodeVariable(SqVarRef VarRef);
 				CqParseNodeVariable(CqParseNodeVariable* pVar);
@@ -302,6 +303,7 @@ class CqParseNodeVariable : public CqParseNode, public IqParseNodeVariable
 				// Overridden from IqParseNodeVariable
 	virtual		const char*		strName() const;
 	virtual		SqVarRef		VarRef() const	{return(m_VarRef);}
+	virtual     CqString        Extra() const {return(m_Extra); }
 	virtual		TqBool			IsLocal() const	{return(m_VarRef.m_Type==VarTypeLocal);}
 												
 				// Overridden from IqParseNode
@@ -337,7 +339,8 @@ class CqParseNodeVariable : public CqParseNode, public IqParseNodeVariable
 												}
 
 	protected:
-				SqVarRef		m_VarRef;	
+				SqVarRef		m_VarRef;
+				CqString        m_Extra;
 };
 
 
@@ -1263,18 +1266,28 @@ class CqParseNodeCommFunction : public CqParseNode, public IqParseNodeMessagePas
 				CqParseNodeCommFunction(const CqParseNodeCommFunction& from) :
 								CqParseNode(from),
 								m_vrVariable(from.m_vrVariable),
+								m_vrExtra(from.m_vrExtra),
 								m_commType(from.m_commType)
+								{}
+				CqParseNodeCommFunction(TqInt Type, CqString vrExtra, SqVarRef vrVariable) : 
+								CqParseNode(),
+								m_vrVariable(vrVariable),
+								m_vrExtra(vrExtra),
+								m_commType(Type)
 								{}
 				CqParseNodeCommFunction(TqInt Type, SqVarRef vrVariable) : 
 								CqParseNode(),
+								m_vrExtra(""),
 								m_vrVariable(vrVariable),
 								m_commType(Type)
 								{}
+
 	virtual		~CqParseNodeCommFunction()	
 								{}
 
 				// Overridden from IqParseNodeMessagePassingFunction
 	virtual		SqVarRef		VarRef() const	{return(m_vrVariable);}
+	virtual     CqString        Extra() const {return(m_vrExtra);}
 	virtual		TqInt			CommType() const
 												{return(m_commType);}
 				// Overridden from IqParseNode
@@ -1298,6 +1311,7 @@ class CqParseNodeCommFunction : public CqParseNode, public IqParseNodeMessagePas
 
 	private:
 				SqVarRef		m_vrVariable;
+				CqString 		m_vrExtra;
 				TqInt			m_commType;
 };
 

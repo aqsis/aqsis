@@ -1147,10 +1147,8 @@ STD_SOIMPL CqShaderExecEnv::SO_faceforward(NORMALVAL N, VECTORVAL I, DEFPARAMIMP
 	FOR_EACHR
 		CqVector3D vN=NORMAL(N);
 		CqVector3D vI=VECTOR(I);
-                CqVector3D vNg=Ng();
 		TqFloat s=(((-vI)*vN)<0.0f)?-1.0f:1.0f;
-		   Result.SetValue(i,vN*s);
-		
+		Result.SetValue(i,vN*s);
 	END_FORR
 }
 
@@ -3646,76 +3644,138 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo(STRINGVAL name, STRINGVAL dataname, C
    CqString strName=dataname.Value(strName,0);
    TqFloat Ret=0.0f;
    CqVMStackEntry se;
-   CqTextureMap* pTMap=CqTextureMap::GetTextureMap(STRING(name).c_str());
+   CqShaderVariableArray* paV=static_cast<CqShaderVariableArray*>(pV);
+   CqTextureMap* pMap= NULL;
+   CqShadowMap *pSMap= NULL; 
+   CqLatLongMap *pLMap= NULL;
+   CqEnvironmentMap *pEMap= NULL;
+   CqTextureMap *pTMap= NULL;
 
-   if (pTMap == 0) return;
+    
+   if (!pMap && strstr(STRING(name).c_str(), ".tif")) 
+   {
+		pTMap=(CqTextureMap*) CqTextureMap::GetTextureMap(STRING(name).c_str());
+		if (pTMap && (pTMap->Type() == MapType_Texture)) {
+			pMap = pTMap;
+		} else if (pTMap) delete pTMap;
+   }
+   if (!pMap) 
+   {
+	   pSMap=(CqShadowMap *) CqTextureMap::GetShadowMap(STRING(name).c_str());
+	   if (pSMap && (pSMap->Type() == MapType_Shadow)) {
+			pMap = pSMap;
+	   } else if (pSMap) delete pSMap;
+   }
+   
+   if (!pMap) 
+   {
+		pEMap=(CqEnvironmentMap*) CqTextureMap::GetEnvironmentMap(STRING(name).c_str());
+		if (pEMap && (pEMap->Type() == MapType_Environment)) {
+			pMap = pEMap;
+		} else if (pEMap) delete pEMap;
+			
+		pLMap=(CqLatLongMap *) CqTextureMap::GetLatLongMap(STRING(name).c_str());
+		if (pLMap && (pLMap->Type() == MapType_LatLong)) 
+		{
+			pMap = pLMap;
+		} else if (pLMap) delete pLMap;
+   }
+   
+   if (!pMap) 
+   {
+		pTMap=(CqTextureMap*) CqTextureMap::GetTextureMap(STRING(name).c_str());
+		if (pTMap && (pTMap->Type() == MapType_Texture)) {
+			pMap = pTMap;
+		} else if (pTMap) delete pTMap;
+   }
+
+   
+   if (pMap == 0) return;
 
    if(strName.compare("resolution")==0)
    {
 		if((pV->Type()&Type_Mask)==Type_Float && (pV->Type()&Type_Array))
 		{			
-		CqShaderVariableArray* paV=static_cast<CqShaderVariableArray*>(pV);
+		
 			if(paV->ArrayLength()==2)
 			{
-				se=static_cast<TqFloat>(pTMap->XRes());
+				se=static_cast<TqFloat>(pMap->XRes());
 				(*paV)[0]->SetValue(se);
-				se=static_cast<TqFloat>(pTMap->YRes());
+				se=static_cast<TqFloat>(pMap->YRes());
 				(*paV)[1]->SetValue(se);
 				Ret=1.0f;
+   			
 			}
 		}
    }
    if(strName.compare("type")==0)
    {
 	if((pV->Type()&Type_Mask)==Type_String)
-	{			
-		if (pTMap->Type() == MapType_Texture) 
+	{
+		if (pMap->Type() == MapType_Texture) 
 		{
-			se="texture";
+			se = "texture";
+			pV->SetValue(se);
 			Ret=1.0f;
+   			
 		}
-		if (pTMap->Type() == MapType_Environment) 
+		if (pMap->Type() == MapType_Bump) 
 		{
-			se="environment";
+			se = "bump";
+			pV->SetValue(se);
 			Ret=1.0f;
+   		
 		}
-		if (pTMap->Type() == MapType_Bump) 
+		
+		if (pMap->Type() == MapType_Shadow) 
 		{
-			se="bump";
+			se = "shadow";
+			pV->SetValue(se);
 			Ret=1.0f;
+   			
 		}
-		if (pTMap->Type() == MapType_Shadow) 
+		if (pMap->Type() == MapType_Environment) 
 		{
-			se="shadow";
+			se = "environment";
+			pV->SetValue(se);
 			Ret=1.0f;
+   			
 		}
-		if (pTMap->Type() == MapType_LatLong) 
+		if (pMap->Type() == MapType_LatLong) 
 		{
 			// both latlong/cube respond the same way according to BMRT 
 			// It makes sense since both use environment() shader fct.
-			se="environment";
+			se = "environment";
+			pV->SetValue(se);
 			Ret=1.0f;
+   			
 		}
+		
+		
 	}
    }
+
    if(strName.compare("channels")==0)
    {
-	if((pV->Type()&Type_Mask)==Type_Integer)
-	{			
-		se=static_cast<TqFloat> (pTMap->SamplesPerPixel());
+	if((pV->Type()&Type_Mask)==Type_Float)
+	{
+		se = (static_cast<TqFloat>(pMap->SamplesPerPixel()));
+		pV->SetValue(se);
 		Ret=1.0f;
-	}
+   	}
+
    }
+
    if(strName.compare("viewingmatrix")==0)
    {
 	if((pV->Type()&Type_Mask)==Type_Float && (pV->Type()&Type_Array))
 	{			
-		if (pTMap->Type() == MapType_Shadow) 
+		if (pSMap )// && pSMap->Type() == MapType_Shadow) 
 		{
-		CqShaderVariableArray* paV=static_cast<CqShaderVariableArray*>(pV);
+		
 			if(paV->ArrayLength()==16)
 			{
-			CqShadowMap *pSMap = (CqShadowMap *) pTMap;
+			
 			CqMatrix m = pSMap->matWorldToCamera();
 
 				se=static_cast<TqFloat>(m[0][0]);
@@ -3754,18 +3814,20 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo(STRINGVAL name, STRINGVAL dataname, C
 				Ret=1.0f;
 			}
 		}
+   		
 	}
    }
+   
    if(strName.compare("projectionmatrix")==0)
    {
 	if((pV->Type()&Type_Mask)==Type_Float && (pV->Type()&Type_Array))
 	{			
-		if (pTMap->Type() == MapType_Shadow) 
+		if (pSMap ) // && pSMap->Type() == MapType_Shadow) 
 		{
-		CqShaderVariableArray* paV=static_cast<CqShaderVariableArray*>(pV);
+		
 			if(paV->ArrayLength()==16)
 			{
-			CqShadowMap *pSMap = (CqShadowMap *) pTMap;
+			
 			CqMatrix m = pSMap->matWorldToScreen();
 
 				se=static_cast<TqFloat>(m[0][0]);
@@ -3805,11 +3867,15 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo(STRINGVAL name, STRINGVAL dataname, C
 				Ret=1.0f;
 			}
 		}
+   		
 	}
    }
 
-   delete pTMap;
+  
+   delete pMap;
+
    Result.SetValue(0,Ret);
+   return;
 }
 
 //----------------------------------------------------------------------

@@ -456,12 +456,13 @@ void OutputTreeNode(const IqParseNode* pNode, std::ostream& out)
 	{
 		TqInt iLabelA=gcLabels++;
 		TqInt iLabelB=gcLabels++;
-
+        IqParseNode* pStmtInc = NULL;
 		IqParseNode* pArg=pNode->pChild();
 		assert(pArg!=0);
 		IqParseNode* pStmt=pArg->pNextSibling();
-		assert(pStmt!=0);
-		IqParseNode* pStmtInc=pStmt->pNextSibling();
+		//assert(pStmt!=0);
+		if (pStmt)
+			pStmtInc=pStmt->pNextSibling();
 		
 		out << ":" << iLabelA << std::endl;		// loop back label
 		out << "\tS_CLEAR" << std::endl;		// clear current state
@@ -471,7 +472,7 @@ void OutputTreeNode(const IqParseNode* pNode, std::ostream& out)
 		out << "\tS_JZ " << iLabelB << std::endl;	// exit loop if false
 		out << "\tRS_PUSH" << std::endl;		// Push running state
 		out << "\tRS_GET" << std::endl;			// set running state
-		OutputTreeNode(pStmt,out);				// statement
+		if (pStmt) OutputTreeNode(pStmt,out);				// statement
 		out << "\tRS_POP" << std::endl;			// Pop the running state
 		out << "\tjmp " << iLabelA << std::endl;// loop back jump
 		out << ":" << iLabelB << std::endl;		// completion label
@@ -599,8 +600,9 @@ void OutputTreeNode(const IqParseNode* pNode, std::ostream& out)
 	else if(pNode->GetInterface(ParseNode_MessagePassingFunction, (void**)&pMessagePassingFunction))
 	{
 		IqParseNode* pExpr=pNode->pChild();
+	
 		OutputTreeNode(pExpr,out);
-
+        
 		CqString strCommType("surface");
 		switch(pMessagePassingFunction->CommType())
 		{
@@ -635,6 +637,11 @@ void OutputTreeNode(const IqParseNode* pNode, std::ostream& out)
 			case CommTypeOpposite:
 				strCommType="opposite";
 				break;
+
+			case CommTypeTextureInfo:
+				strCommType="textureinfo";
+				break;
+
 		}
 		// Output the comm function.
 		SqVarRef temp(pMessagePassingFunction->VarRef());
@@ -642,7 +649,14 @@ void OutputTreeNode(const IqParseNode* pNode, std::ostream& out)
 		if(pVD)
 		{
 			pVD->IncUseCount();
-			out << "\t" << strCommType.c_str() << " " << pVD->strName() << std::endl;
+			if (strCommType != "textureinfo")
+				out << "\t" << strCommType.c_str() << " " << pVD->strName() << std::endl;
+			else {
+				CqString strExtra(pMessagePassingFunction->Extra());
+				out << "\tpushv ";
+				out << strExtra.c_str() << std::endl;
+				out << "\t" << strCommType.c_str() << " " << pVD->strName() << std::endl;
+			}
 		}
 	}
 }

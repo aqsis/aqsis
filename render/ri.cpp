@@ -3177,7 +3177,7 @@ RtVoid	RiMakeLatLongEnvironmentV(const char *pic, const char *tex, RtFilterFunc 
 
 	assert(pic!=0 && tex!=0 && swrap!=0 && twrap!=0 && filterfunc!=0);
 
-	QGetRenderContext()->Stats().MakeTextureTimer().Start();
+	QGetRenderContext()->Stats().MakeEnvTimer().Start();
 	
 	sprintf(modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth);
 	if (filterfunc == RiGaussianFilter)
@@ -3230,7 +3230,7 @@ RtVoid	RiMakeLatLongEnvironmentV(const char *pic, const char *tex, RtFilterFunc 
 	}
 
 	Source.Close();
-	QGetRenderContext()->Stats().MakeTextureTimer().Stop();
+	QGetRenderContext()->Stats().MakeEnvTimer().Stop();
 	return;
 }
 
