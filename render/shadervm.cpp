@@ -335,6 +335,7 @@ SqOpCodeTrans CqShaderVM::m_TransTable[]=
 	{"ctexture1",	&CqShaderVM::SO_ctexture1,	0, },
 	{"ctexture2",	&CqShaderVM::SO_ctexture2,	0, },
 	{"ctexture3",	&CqShaderVM::SO_ctexture3,	0, },
+	{"textureinfo", &CqShaderVM::SO_textureinfo, 1, Type_Variable},
 	{"fenvironment2",&CqShaderVM::SO_fenvironment2,0, },
 	{"fenvironment3",&CqShaderVM::SO_fenvironment3,0, },
 	{"cenvironment2",&CqShaderVM::SO_cenvironment2,0, },
@@ -419,6 +420,7 @@ SqOpCodeTrans CqShaderVM::m_TransTable[]=
 
 	{"shadername",	&CqShaderVM::SO_shadername,	0, },
 	{"shadername2",	&CqShaderVM::SO_shadername2,	0, },
+	
 };
 TqInt CqShaderVM::m_cTransSize=sizeof(m_TransTable)/sizeof(m_TransTable[0]);
 
@@ -2765,9 +2767,21 @@ void CqShaderVM::SO_rendererinfo()
 {
 	AUTOFUNC;
 	CqShaderVariable* pV=GetVar(ReadNext().m_iVariable); 
-	POPV(Val);
+    POPV(Val);
 	RESULT;
 	m_pEnv->SO_rendererinfo(Val,pV,Result);
+	Push(Result);
+}
+
+void CqShaderVM::SO_textureinfo()				
+{
+
+	AUTOFUNC;
+	CqShaderVariable* pV=GetVar(ReadNext().m_iVariable); 
+	POPV(Val);
+	POPV(DataInfo); 
+	RESULT;
+	m_pEnv->SO_textureinfo(Val,DataInfo,pV,Result);
 	Push(Result);
 }
 

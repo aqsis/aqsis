@@ -228,6 +228,7 @@ class CqStats
 
 			//@}
 			void	IncTextureMemory(TqInt n=0)	{ m_cTextureMemory         +=n; }
+			TqInt   GetTextureMemory() { return m_cTextureMemory;}
 			//@}
 
 

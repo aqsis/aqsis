@@ -36,7 +36,8 @@
 START_NAMESPACE(Aqsis)
 
 static	TqFloat	temp_float;
-static TqInt FindDirectory(CqTextureMap* pTMap);
+static  TqInt   FindDirectory(CqTextureMap* pTMap, CqSurface *pSurface);
+
 
 //----------------------------------------------------------------------
 // SO_sprintf
@@ -1506,7 +1507,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1(STRINGVAL name, FLOATVAL channel, DEFPA
 	
 	TqInt i=0;
 	CqTextureMap* pTMap=CqTextureMap::GetTextureMap(STRING(name).c_str());
-    TqInt directory = FindDirectory(pTMap);
+    TqInt directory = FindDirectory(pTMap, m_pSurface);
 	
 	INIT_SOR
 	__fVarying=TqTrue;
@@ -1531,14 +1532,15 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1(STRINGVAL name, FLOATVAL channel, DEFPA
 
 			swidth*=_pswidth;
 			twidth*=_ptwidth;
-			
+			                        
 			swidth /= (1<<directory);
 			twidth /= (1<<directory);
 
+			
 			// Sample the texture.
 			std::valarray<float> val;
 
-			pTMap->SampleSATMap(s(),t(),swidth,twidth,_psblur,_ptblur,val,directory);
+			pTMap->SampleMIPMAP(s(),t(),swidth,twidth,_psblur,_ptblur,val,directory);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1561,7 +1563,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2(STRINGVAL name, FLOATVAL channel, FLOAT
 	TqInt i=0;
 	TqFloat f;
 	CqTextureMap* pTMap=CqTextureMap::GetTextureMap(STRING(name).c_str());
-	TqInt directory = FindDirectory(pTMap);
+	TqInt directory = FindDirectory(pTMap, m_pSurface);
 
 	INIT_SOR
 	__fVarying=TqTrue;
@@ -1589,11 +1591,12 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2(STRINGVAL name, FLOATVAL channel, FLOAT
 		
 			// Sample the texture.
 			std::valarray<float> val;
-
+                        
 			swidth /= (1<<directory);
 			twidth /= (1<<directory);
+			
 
-			pTMap->SampleSATMap(s.Value(f,m_GridI),t.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val, directory);
+			pTMap->SampleMIPMAP(s.Value(f,m_GridI),t.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val, directory);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1624,7 +1627,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3(STRINGVAL name, FLOATVAL channel, FLOAT
 			// Sample the texture.
 			std::valarray<float> val;
 
-			pTMap->SampleSATMap(s1.Value(f,m_GridI),t1.Value(f,m_GridI),s2.Value(f,m_GridI),t2.Value(f,m_GridI),s3.Value(f,m_GridI),t3.Value(f,m_GridI),s4.Value(f,m_GridI),t4.Value(f,m_GridI),_psblur,_ptblur,val);
+			pTMap->SampleMIPMAP(s1.Value(f,m_GridI),t1.Value(f,m_GridI),s2.Value(f,m_GridI),t2.Value(f,m_GridI),s3.Value(f,m_GridI),t3.Value(f,m_GridI),s4.Value(f,m_GridI),t4.Value(f,m_GridI),_psblur,_ptblur,val);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1646,7 +1649,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1(STRINGVAL name, FLOATVAL channel, DEFPA
 
 	TqInt i=0;
 	CqTextureMap* pTMap=CqTextureMap::GetTextureMap(STRING(name).c_str());
-	TqInt directory = FindDirectory(pTMap);
+	TqInt directory = FindDirectory(pTMap, m_pSurface);
 
 	INIT_SOR
 	__fVarying=TqTrue;
@@ -1675,10 +1678,10 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1(STRINGVAL name, FLOATVAL channel, DEFPA
 			// Sample the texture.
 			std::valarray<float> val;
 
-			swidth /= (1<<directory);
+            swidth /= (1<<directory);
 			twidth /= (1<<directory);
-
-			pTMap->SampleSATMap(s(),t(),swidth,twidth,_psblur,_ptblur,val,directory);
+            
+			pTMap->SampleMIPMAP(s(),t(),swidth,twidth,_psblur,_ptblur,val,directory);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1700,7 +1703,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2(STRINGVAL name, FLOATVAL channel, FLOAT
 
 	TqInt i=0;
 	CqTextureMap* pTMap=CqTextureMap::GetTextureMap(STRING(name).c_str());
-	TqInt directory = FindDirectory(pTMap);
+	TqInt directory = FindDirectory(pTMap, m_pSurface);
 
 	TqFloat f;
 	INIT_SOR
@@ -1730,10 +1733,11 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2(STRINGVAL name, FLOATVAL channel, FLOAT
 			// Sample the texture.
 			std::valarray<float> val;
 
+                        
 			swidth /= (1<<directory);
 			twidth /= (1<<directory);
 
-			pTMap->SampleSATMap(s.Value(f,m_GridI),t.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val, directory);
+			pTMap->SampleMIPMAP(s.Value(f,m_GridI),t.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val, directory);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1763,7 +1767,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3(STRINGVAL name, FLOATVAL channel, FLOAT
 		FOR_EACHR
 			// Sample the texture.
 			std::valarray<float> val;
-			pTMap->SampleSATMap(s1.Value(f,m_GridI),t1.Value(f,m_GridI),s2.Value(f,m_GridI),t2.Value(f,m_GridI),s3.Value(f,m_GridI),t3.Value(f,m_GridI),s4.Value(f,m_GridI),t4.Value(f,m_GridI),_psblur,_ptblur,val);
+			pTMap->SampleMIPMAP(s1.Value(f,m_GridI),t1.Value(f,m_GridI),s2.Value(f,m_GridI),t2.Value(f,m_GridI),s3.Value(f,m_GridI),t3.Value(f,m_GridI),s4.Value(f,m_GridI),t4.Value(f,m_GridI),_psblur,_ptblur,val);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1808,10 +1812,11 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2(STRINGVAL name, FLOATVAL channel, V
 
 			swidth*=_pswidth;
 			twidth*=_ptwidth;
-
+                        
+            
 			// Sample the texture.
 			std::valarray<float> val;
-			pTMap->SampleSATMap(R.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val);
+			pTMap->SampleMIPMAP(R.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1841,7 +1846,7 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment3(STRINGVAL name, FLOATVAL channel, V
 		FOR_EACHR
 			// Sample the texture.
 			std::valarray<float> val;
-			pTMap->SampleSATMap(R1.Value(f,m_GridI),R2.Value(f,m_GridI),R3.Value(f,m_GridI),R4.Value(f,m_GridI),_psblur,_ptblur,val);
+			pTMap->SampleMIPMAP(R1.Value(f,m_GridI),R2.Value(f,m_GridI),R3.Value(f,m_GridI),R4.Value(f,m_GridI),_psblur,_ptblur,val);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1886,10 +1891,12 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2(STRINGVAL name, FLOATVAL channel, V
 
 			swidth*=_pswidth;
 			twidth*=_ptwidth;
+                        
 
 			// Sample the texture.
 			std::valarray<float> val;
-			pTMap->SampleSATMap(R.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val);
+			pTMap->SampleMIPMAP(R.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val);
+            
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1920,7 +1927,7 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment3(STRINGVAL name, FLOATVAL channel, V
 			// Sample the texture.
 			// TODO: need to get and pass width,blur etc. values.
 			std::valarray<float> val;
-			pTMap->SampleSATMap(R1.Value(f,m_GridI),R2.Value(f,m_GridI),R3.Value(f,m_GridI),R4.Value(f,m_GridI),_psblur,_ptblur,val);
+			pTMap->SampleMIPMAP(R1.Value(f,m_GridI),R2.Value(f,m_GridI),R3.Value(f,m_GridI),R4.Value(f,m_GridI),_psblur,_ptblur,val);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1990,6 +1997,7 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow(STRINGVAL name, FLOATVAL channel, POINTVAL
 
 			swidth*=_pswidth;
 			twidth*=_ptwidth;
+                        
 			float fv;
 			pMap->SampleMap(P.Value(p,m_GridI),swidth,twidth,_psblur,_ptblur,fv);	
 			Result.SetValue(i,fv);
@@ -3611,22 +3619,257 @@ STD_SOIMPL	CqShaderExecEnv::SO_shadername2(STRINGVAL shader, DEFPARAMIMPL)
 	END_FORR
 }
 
+
 //----------------------------------------------------------------------
-// FindDirectory() find which directory specified in the Option "limits" "texturedirectory"
-// and make sure it is within the range of the TextureMap
+// textureinfo
+// support resolution, type, channels, projectionmatrix(*) and viewingmatrix(*)
+// User has to provide an array of float (2) for resolution
+//                     an string for type
+//                     an integer for channels
+//                     an array of floats (16) for both projectionmatrix and viewingmatrix
+//                     (*) the name must be a shadow map
 //
-static TqInt FindDirectory(CqTextureMap* pTMap)
+
+STD_SOIMPL CqShaderExecEnv::SO_textureinfo(STRINGVAL name, STRINGVAL dataname, CqShaderVariable* pV, DEFPARAMIMPL)
+{
+	
+   TqInt i=0;
+   CqString strName=dataname.Value(strName,0);
+   TqFloat Ret=0.0f;
+   CqVMStackEntry se;
+   CqTextureMap* pTMap=CqTextureMap::GetTextureMap(STRING(name).c_str());
+
+   if (pTMap == 0) return;
+
+   if(strName.compare("resolution")==0)
+   {
+		if((pV->Type()&Type_Mask)==Type_Float && (pV->Type()&Type_Array))
+		{			
+		CqShaderVariableArray* paV=static_cast<CqShaderVariableArray*>(pV);
+			if(paV->ArrayLength()==2)
+			{
+				se=static_cast<TqFloat>(pTMap->XRes());
+				(*paV)[0]->SetValue(se);
+				se=static_cast<TqFloat>(pTMap->YRes());
+				(*paV)[1]->SetValue(se);
+				Ret=1.0f;
+			}
+		}
+   }
+   if(strName.compare("type")==0)
+   {
+	if((pV->Type()&Type_Mask)==Type_String)
+	{			
+		if (pTMap->Type() == MapType_Texture) 
+		{
+			se="texture";
+			Ret=1.0f;
+		}
+		if (pTMap->Type() == MapType_Environment) 
+		{
+			se="environment";
+			Ret=1.0f;
+		}
+		if (pTMap->Type() == MapType_Bump) 
+		{
+			se="bump";
+			Ret=1.0f;
+		}
+		if (pTMap->Type() == MapType_Shadow) 
+		{
+			se="shadow";
+			Ret=1.0f;
+		}
+	}
+   }
+   if(strName.compare("channels")==0)
+   {
+	if((pV->Type()&Type_Mask)==Type_Integer)
+	{			
+		se=static_cast<TqFloat> (pTMap->SamplesPerPixel());
+		Ret=1.0f;
+	}
+   }
+   if(strName.compare("viewingmatrix")==0)
+   {
+	if((pV->Type()&Type_Mask)==Type_Float && (pV->Type()&Type_Array))
+	{			
+		if (pTMap->Type() == MapType_Shadow) 
+		{
+		CqShaderVariableArray* paV=static_cast<CqShaderVariableArray*>(pV);
+			if(paV->ArrayLength()==16)
+			{
+			CqShadowMap *pSMap = (CqShadowMap *) pTMap;
+			CqMatrix m = pSMap->matWorldToCamera();
+
+				se=static_cast<TqFloat>(m[0][0]);
+				(*paV)[0]->SetValue(se);
+				se=static_cast<TqFloat>(m[0][1]);
+				(*paV)[1]->SetValue(se);
+				se=static_cast<TqFloat>(m[0][2]);
+				(*paV)[2]->SetValue(se);
+				se=static_cast<TqFloat>(m[0][3]);
+				(*paV)[3]->SetValue(se);
+				se=static_cast<TqFloat>(m[1][0]);
+				(*paV)[4]->SetValue(se);
+				se=static_cast<TqFloat>(m[1][1]);
+				(*paV)[5]->SetValue(se);
+				se=static_cast<TqFloat>(m[1][2]);
+				(*paV)[6]->SetValue(se);
+				se=static_cast<TqFloat>(m[1][3]);
+				(*paV)[7]->SetValue(se);
+				se=static_cast<TqFloat>(m[2][0]);
+				(*paV)[8]->SetValue(se);
+				se=static_cast<TqFloat>(m[2][1]);
+				(*paV)[9]->SetValue(se);
+				se=static_cast<TqFloat>(m[2][2]);
+				(*paV)[10]->SetValue(se);
+				se=static_cast<TqFloat>(m[2][3]);
+				(*paV)[11]->SetValue(se);
+				se=static_cast<TqFloat>(m[3][0]);
+				(*paV)[12]->SetValue(se);
+				se=static_cast<TqFloat>(m[3][1]);
+				(*paV)[13]->SetValue(se);
+				se=static_cast<TqFloat>(m[3][2]);
+				(*paV)[14]->SetValue(se);
+				se=static_cast<TqFloat>(m[3][3]);
+				(*paV)[15]->SetValue(se);
+				
+				Ret=1.0f;
+			}
+		}
+	}
+   }
+   if(strName.compare("projectionmatrix")==0)
+   {
+	if((pV->Type()&Type_Mask)==Type_Float && (pV->Type()&Type_Array))
+	{			
+		if (pTMap->Type() == MapType_Shadow) 
+		{
+		CqShaderVariableArray* paV=static_cast<CqShaderVariableArray*>(pV);
+			if(paV->ArrayLength()==16)
+			{
+			CqShadowMap *pSMap = (CqShadowMap *) pTMap;
+			CqMatrix m = pSMap->matWorldToScreen();
+
+				se=static_cast<TqFloat>(m[0][0]);
+				(*paV)[0]->SetValue(se);
+				se=static_cast<TqFloat>(m[0][1]);
+				(*paV)[1]->SetValue(se);
+				se=static_cast<TqFloat>(m[0][2]);
+				(*paV)[2]->SetValue(se);
+				se=static_cast<TqFloat>(m[0][3]);
+				(*paV)[3]->SetValue(se);
+				se=static_cast<TqFloat>(m[1][0]);
+				(*paV)[4]->SetValue(se);
+				se=static_cast<TqFloat>(m[1][1]);
+				(*paV)[5]->SetValue(se);
+				se=static_cast<TqFloat>(m[1][2]);
+				(*paV)[6]->SetValue(se);
+				se=static_cast<TqFloat>(m[1][3]);
+				(*paV)[7]->SetValue(se);
+				se=static_cast<TqFloat>(m[2][0]);
+				(*paV)[8]->SetValue(se);
+				se=static_cast<TqFloat>(m[2][1]);
+				(*paV)[9]->SetValue(se);
+				se=static_cast<TqFloat>(m[2][2]);
+				(*paV)[10]->SetValue(se);
+				se=static_cast<TqFloat>(m[2][3]);
+				(*paV)[11]->SetValue(se);
+				se=static_cast<TqFloat>(m[3][0]);
+				(*paV)[12]->SetValue(se);
+				se=static_cast<TqFloat>(m[3][1]);
+				(*paV)[13]->SetValue(se);
+				se=static_cast<TqFloat>(m[3][2]);
+				(*paV)[14]->SetValue(se);
+				se=static_cast<TqFloat>(m[3][3]);
+				(*paV)[15]->SetValue(se);
+
+
+				Ret=1.0f;
+			}
+		}
+	}
+   }
+
+   delete pTMap;
+   Result.SetValue(0,Ret);
+}
+
+//----------------------------------------------------------------------
+// FindDirectory() find which directory specified in the Option "limits" 
+// "texturedirectory", ponderates with the minimum value of the depth of  
+// current surface. At the end it makes sure the returned value will be also in 
+// the possible range of the TextureMap.
+//
+// The surface must be not too close to the camera in order 
+// to compute a sensible "texturedirectory" 
+//
+// I assume the surface which is closer to the camera must have the texture 
+// at the extreme level of details (0) and I'll keep track its mininum depth 
+// in the texture map's cache.
+//
+// For the rest of surfaces I divide their depths with the found (so far) 
+// minimum depth.
+// 
+// example
+// a surface A at 5.0
+// following any surface B between 10.0 and 20.0
+// following to a surface C at 20.0
+// will return directory for A 0
+// will return           for B 1 (0 + log(10/5)/log(2.0) = 0 + 1 = 1)
+// will return           for C 2 (0 + log(20/5)/log(2.0) = 0 + 2 = 2)
+//
+// I assume the primitive are sorted somehow prior to render based on the 
+// max/min depths. It is true per bucket but not for the overall image.
+//
+// Option "limits" "texturedirectory" is the starting point for surface A
+// By default it is 0.
+// Option "limits" "texturedirectory" == -1 means the subsampling is turn off
+//                    or unused in rib file means the subsampling is turn off too.
+// 
+
+static TqInt FindDirectory(CqTextureMap* pTMap, CqSurface *pSurface)
 {
 
 const TqInt* poptDirectory =  QGetRenderContext()->optCurrent().GetIntegerOption("limits","texturedirectory");
-	TqInt directory = 0;
+	TqInt directory = -1;
 	if (poptDirectory)
 		directory = poptDirectory[0];
 	
 	/* the map is invalid */
 	if (!pTMap) return 0;
 
-	/* the user wants too much compression */
+	TqFloat MinZ;
+    if (pSurface)
+		MinZ = pSurface->GetCachedRasterBound().vecMin().z();
+    else 
+		return 0;
+
+	// The user doesn't want to benefit from the texture subsampling 
+	 
+    if (directory < 0) return 0;
+
+	if (MinZ < 1.0) 
+	{
+		// The Object is too close to the camera; 
+		// so I will take the mean between its max and min depth 
+		MinZ = (pSurface->GetCachedRasterBound().vecMax().z()  -
+			   pSurface->GetCachedRasterBound().vecMin().z()) / 2.0;
+	
+	}
+	if (MinZ > 1.0) {
+		
+		if (MinZ > pTMap->MinZ()) 
+		{
+			  directory += (int) log(MinZ/pTMap->MinZ())/log(2.0);
+		} else 
+		{
+			 pTMap->SetMinZ(MinZ);
+		}
+	}
+
+	// the user wants too much compression 
 	if (directory > log(pTMap->XRes())/log(2.0)) directory = log(pTMap->XRes())/log(2.0);
 	if (directory > log(pTMap->YRes())/log(2.0)) directory = log(pTMap->YRes())/log(2.0);
 

@@ -578,6 +578,7 @@ class CqShaderExecEnv
 			STD_SO	SO_spsplinea(STRINGVAL basis, FLOATVAL value, POINTARRAYVAL a, DEFPARAM);
 			STD_SO	SO_shadername(DEFPARAM);
 			STD_SO	SO_shadername2(STRINGVAL shader, DEFPARAM);
+			STD_SO	SO_textureinfo(STRINGVAL shader, STRINGVAL dataname, CqShaderVariable* pV, DEFPARAM);
 };
 
 /** Templatised derivative function. Calculates the derivative of the provided shader variable with respect to u.

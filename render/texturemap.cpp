@@ -33,6 +33,7 @@
 #include	"exception.h"
 #include	"renderer.h"
 
+
 START_NAMESPACE(Aqsis)
 
 
@@ -77,39 +78,76 @@ TqFloat		CqShadowMap::m_aRand_no[256];
 
 std::vector<CqTextureMap*>	CqTextureMap::m_TextureMap_Cache;
 
+#undef ALLOCSEGMENTSTATUS
 
+#ifdef ALLOCSEGMENTSTATUS
+static int alloc_cnt = 0;
+static int free_cnt = 0;
+#endif
 //---------------------------------------------------------------------
 /** Allocate a cache segment to hold the specified image tile.
  */
 
-float* CqTextureMapBuffer::AllocSegment(unsigned long width, unsigned long height, int samples)
+unsigned char* CqTextureMapBuffer::AllocSegment(unsigned long width, unsigned long height, int samples)
 {
-	// TODO: Implement proper global cache handling.
-    QGetRenderContext()->Stats().IncTextureMemory( width * height * samples * sizeof(float));
-	return(static_cast<float*>(calloc((width*height)*samples, sizeof(float))));
+static TqInt limit = -1;
+static TqInt report=  1;
+TqInt demand = width*height*samples;
+
+#ifdef ALLOCSEGMENTSTATUS
+        alloc_cnt ++;
+#endif
+    	if (limit == -1)
+    	{
+			const TqInt* poptMem=QGetRenderContext()->optCurrent().GetIntegerOption("limits","texturememory");
+			limit = 0;
+			if (poptMem)
+				limit = poptMem[0] * 1024;
+    	}
+
+
+    	if (limit > 0) 
+    	{
+			TqInt more = QGetRenderContext()->Stats().GetTextureMemory() + demand;
+
+
+			if ((more > limit) ) //&& report)
+			{
+
+        		// We need to zap the cache we are exceeding the required texturememory demand
+				// For now, we will just warn the user the texturememory's demand will exceed the 
+				// request number.
+				char warnings[400];
+
+				sprintf(warnings, "Exceeding the allocated texturememory by %d", 
+								more - limit);
+				RiErrorPrint(0, 1, warnings);
+				report = 0;
+			}
+			
+			
+		} 
+        QGetRenderContext()->Stats().IncTextureMemory(demand);
+			
+		// just do a malloc since the texturemapping will set individual member of the allocated buffer
+		// a calloc is wastefull operation in this case.
+		return (static_cast<unsigned char*>(malloc(demand)));
 }
-
-//---------------------------------------------------------------------
-/** Allocate a cache segment to hold the specified image tile.
- */
-
-unsigned char* CqTextureMapBuffer::AllocSegmentB(unsigned long width, unsigned long height, int samples)
-{
-	// TODO: Implement proper global cache handling.
-    QGetRenderContext()->Stats().IncTextureMemory( width * height * samples);
-	return(static_cast<unsigned char*>(calloc((width*height)*samples, 1)));
-}
-
 
 //---------------------------------------------------------------------
 /** Static array of cached texture maps.
  */
 
-void	CqTextureMapBuffer::FreeSegment(void* pBufferData, unsigned long width, unsigned long height, int samples)
+void	CqTextureMapBuffer::FreeSegment(unsigned char* pBufferData, unsigned long width, unsigned long height, int samples)
 {
-	// TODO: Implement proper global cache handling.
-	//QGetRenderContext()->Stats().IncTextureMemory( -width * height * samples * sizeof(float));
+	TqInt demand = (width*height*samples);
+#ifdef ALLOCSEGMENTSTATUS
+	free_cnt ++;
+#endif
+
+	QGetRenderContext()->Stats().IncTextureMemory( -demand);
 	free(pBufferData);
+	
 }
 
 
@@ -121,7 +159,8 @@ CqTextureMap::~CqTextureMap()
 {
 	// Search for it in the cache and remove the reference.
 	std::vector<CqTextureMap*>::iterator i;
-	for(i=m_TextureMap_Cache.begin(); i!=m_TextureMap_Cache.end(); i++)
+	
+    for(i=m_TextureMap_Cache.begin(); i!=m_TextureMap_Cache.end(); i++)
 	{
 		if((*i)==this)
 		{
@@ -129,11 +168,23 @@ CqTextureMap::~CqTextureMap()
 			break;
 		}
 	}
-
 	// Delete any held cache buffer segments.
 	std::vector<CqTextureMapBuffer*>::iterator s;
 	for(s=m_apSegments.begin(); s!=m_apSegments.end(); s++)
 		delete(*s);
+
+	m_apSegments.resize(0);
+
+	
+#ifdef ALLOCSEGMENTSTATUS
+	{
+	// We count each allocation/free at the end they should match
+	char report[200];
+
+		sprintf(report, "alloc/free %d %d\n Memory Usage %d", alloc_cnt, free_cnt, QGetRenderContext()->Stats().GetTextureMemory());
+		RiErrorPrint(0, 1, report);
+	}
+#endif
 }
 
 
@@ -225,15 +276,15 @@ void CqTextureMap::Open()
 		  }
 
 		  /// Pixel's Filter x,y 
-		  m_swrap = swidth;
-		  m_twrap = twidth;
+		  m_swidth = swidth;
+		  m_twidth = twidth;
 		}
 
 
-		if(pFormat && strcmp(pFormat, SATMAP_HEADER)==0 ||
+		if(pFormat && strcmp(pFormat, MIPMAP_HEADER)==0 ||
 		   pFormat && strcmp(pFormat, CUBEENVMAP_HEADER)==0)
 		{
-			m_Format=TexFormat_SAT;
+			m_Format=TexFormat_MIPMAP;
 			m_IsValid=TqTrue;
 		}
 		else
@@ -282,9 +333,9 @@ CqTextureMap* CqTextureMap::GetTextureMap(const char* strName)
 	pNew->Open();
 
 	// Ensure that it is in the correct format
-	if(pNew->Format()!=TexFormat_SAT)
+	if(pNew->Format()!=TexFormat_MIPMAP)
 	{
-		pNew->CreateSATMap();
+		pNew->CreateMIPMAP();
 		pNew->Close();
 	}
 
@@ -410,12 +461,11 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer(unsigned long s, unsigned long t, in
 			// Work out the coordinates of this tile.
 			unsigned long ox=(s/tsx)*tsx;
 			unsigned long oy=(t/tsy)*tsy;
-			
 			if (Type() == MapType_Shadow)
 				pTMB=new CqTextureMapBuffer(ox,oy,tsx,tsy,sizeof(float) * m_SamplesPerPixel,directory);
 			else
 				pTMB=new CqTextureMapBuffer(ox,oy,tsx,tsy,m_SamplesPerPixel,directory);
-
+			
 			TIFFSetDirectory(m_pImage, directory);
             
 			unsigned char* pData=pTMB->pBufferData();
@@ -428,6 +478,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer(unsigned long s, unsigned long t, in
 				pTMB=new CqTextureMapBuffer(0,0,sizeof(float) * m_XRes,m_YRes,m_SamplesPerPixel,directory);
 			else
 				pTMB=new CqTextureMapBuffer(0,0,m_XRes,m_YRes,m_SamplesPerPixel,directory);
+
 
 			TIFFSetDirectory(m_pImage, directory);
 			unsigned char* pdata=pTMB->pBufferData();
@@ -457,7 +508,7 @@ void CqTextureMap::Interpreted(char *mode)
 	char smode[80];
 	char tmode[80];
 
-	sscanf(mode, "%s %s %s %f %f", smode, tmode, filter, &m_swrap, &m_twrap);
+	sscanf(mode, "%s %s %s %f %f", smode, tmode, filter, &m_swidth, &m_twidth);
 
 	m_FilterFunc = RiBoxFilter;
 	if (strcmp(filter,"gaussian") == 0) m_FilterFunc = RiGaussianFilter;
@@ -493,63 +544,35 @@ void CqTextureMap::Interpreted(char *mode)
   * The values of the current filterfunc/swrap/twrap are used ; if ever swrap or twrap is equal to
   * zero than the filterfunc is not done anymore.
   **/
-uint32 CqTextureMap::ImageFilterVal(uint32* p, int x, int y,  int directory)
+TqUlong CqTextureMap::ImageFilterVal(uint32* p, TqInt x, TqInt y,  TqInt directory)
 {
-	uint32 val = 0;
-	RtFilterFunc pFilter = m_FilterFunc;
+	TqUlong val = 0;
 	
-	float ydelta =  (1 << directory);
-	float xdelta =  (1 << directory);
-    float div = 0.0;
-	float mul;
-	float accum[4];
-	float dx, dy;
-	int ox, oy;
+	TqInt ydelta =  (1 << directory);
+	TqInt xdelta =  (1 << directory);
+    TqFloat div = 0.0;
+	TqFloat mul;
+	TqFloat accum[4];
 		
 	accum[0] = accum[1] = accum[2] = accum[3] = 0.0;
 
-	if (directory) {
-		/* downsampling */
-		dx = -m_swrap /2.0;
-		dy = -m_twrap /2.0;
-
-		 	
-		
-		for (int j=(int) dy; j <  m_twrap/2; j ++, dy += 1.0) {
-			for (int i=(int) dx; i < m_swrap/2; i ++, dx += 1.0) {
-	
-				ox = i;
-				oy = j;
-				
-				/* clamp the offset to be inside the row,col 
-				 * of the original image 
-				 */
-				if ((x * xdelta) + i < 0.0) 
-				{
-					ox = 0;
-				}
-				if ((y * ydelta) + j < 0.0)
-				{
-					oy = 0;
-				}
-
-				if (((float)x * xdelta) + i >= (float) m_XRes ) 
-				{
-					ox = 0;
-				}
-				if (((float)y * ydelta) + j >= (float) m_YRes ) 
-				{
-					oy = 0;
-				}
+	if (directory)
+	{
+		TqInt i,j;
+		for (j=0; j<ydelta; j++)
+		{
+			for (i=0; i<xdelta; i++)
+			{
+				/* find the filter value */
+				TqFloat xfilt = i-directory;
+				TqFloat yfilt = j-directory;
+				mul = RiBoxFilter(xfilt, yfilt, xdelta, ydelta);
 
 				/* find the value in the original image */
-				int pos = m_YRes - (int) ((float)y * ydelta +  oy) - 1;
+				TqInt pos = m_YRes - ((y * ydelta) + j) - 1;
 				pos *= m_XRes;
-				pos += (int) ((float)x * xdelta) + ox;
+				pos += ((x * xdelta) + i);
 				val = p[pos];
-
-				/* find the filter value */
-				mul = (*pFilter)(dx, dy, m_swrap, m_twrap);
 
 				/* ponderate the value */
 				accum[0]+=(TIFFGetR(val)/255.0) * mul;
@@ -563,46 +586,34 @@ uint32 CqTextureMap::ImageFilterVal(uint32* p, int x, int y,  int directory)
 			}
 		}
 
-		if ((m_swrap <= 0.0) || m_twrap <= 0.0) 
-		{
-			/* The user provides an swidth or twidth == 0.0
-			 * if swidth/twidth equal to 0.0 than turn off the filterfunction.
-			 */
-			div = 1.0;
-			val = p[((m_YRes-(int) (ydelta*y)-1)*m_XRes)+(int) (x * xdelta)];
-			accum[0]=TIFFGetR(val)/255.0;
-			accum[1]=TIFFGetG(val)/255.0;
-			accum[2]=TIFFGetB(val)/255.0;
-			accum[3]=TIFFGetA(val)/255.0;  
-
-		}
-	
-	
 		/* use the accumulated ponderation factor */
-		accum[0]/=(float)div;
-		accum[1]/=(float)div;
-		accum[2]/=(float)div;
-		accum[3]/=(float)div;
+		accum[0]/=static_cast<TqFloat>(div);
+		accum[1]/=static_cast<TqFloat>(div);
+		accum[2]/=static_cast<TqFloat>(div);
+		accum[3]/=static_cast<TqFloat>(div);
 
 		/* restore the byte from the floating values RGB */
     	/* this is assuming tiff decoding is using shifting operations */
-		val = ((unsigned int) (accum[0] * 255.0) & 0xff) +  /* R */
-				(((unsigned int)(accum[1] * 255.0) << 8) & 0x0ff00) + /* G */
-				(((unsigned int)(accum[2] * 255.0) << 16) & 0x0ff0000) + /* B */
-				(((unsigned int)(accum[3] * 255.0) << 24) & 0x0ff000000); /* A */
+		val = ( static_cast<TqUint>(accum[0] * 255.0) & 0xff) +  /* R */
+			  ((static_cast<TqUint>(accum[1] * 255.0) << 8) & 0x0ff00) + /* G */
+			  ((static_cast<TqUint>(accum[2] * 255.0) << 16) & 0x0ff0000) + /* B */
+			  ((static_cast<TqUint>(accum[3] * 255.0) << 24) & 0x0ff000000); /* A */
 	
 
-	} else  {
+	}
+	else 
+	{
 		/* copy the byte don't bother much */
-		val = p[((m_YRes-(int) y-1)*m_XRes)+(int) x];
+		val = p[((m_YRes-y-1)*m_XRes)+x];
 		
 	}
-
 	
 	return val;
 }
 
-void CqTextureMap::CreateSATMap()
+
+
+void CqTextureMap::CreateMIPMAP()
 {
     if(m_pImage!=0)
     {
@@ -618,7 +629,7 @@ void CqTextureMap::CreateSATMap()
 		pTMB->Init(0,0,m_xres,m_yres,m_SamplesPerPixel, directory);
 
 		if(pTMB->pBufferData() != NULL)	{
-			unsigned char* pSATMap=pTMB->pBufferData();
+			unsigned char* pMIPMAP=pTMB->pBufferData();
 			long rowlen=m_xres*m_SamplesPerPixel;
 
 			if(pImage!=NULL)
@@ -638,7 +649,7 @@ void CqTextureMap::CreateSATMap()
 						accum[3]=TIFFGetA(val);   
 						
 						for(TqInt sample=0; sample<m_SamplesPerPixel; sample++) 
-							pSATMap[(y*rowlen)+(x*m_SamplesPerPixel)+sample]=accum[sample];
+							pMIPMAP[(y*rowlen)+(x*m_SamplesPerPixel)+sample]=accum[sample];
 					}
 				}
 					
@@ -660,7 +671,7 @@ void CqTextureMap::CreateSATMap()
 }
 
 
-void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, float sblur, float tblur, 
+void CqTextureMap::SampleMIPMAP(float s1, float t1, float swidth, float twidth, float sblur, float tblur, 
 								std::valarray<float>& val, int directory)
 {
 	// T(s2,t2)-T(s2,t1)-T(s1,t2)+T(s1,t1)
@@ -852,10 +863,10 @@ void CqTextureMap::GetSample(long ss1, long tt1, long ss2, long tt2, std::valarr
 }
 
 //----------------------------------------------------------------------
-/** Retrieve a sample from the SAT map over the area specified by the four vertices
+/** Retrieve a sample from the MIP MAP over the area specified by the four vertices
  */
 
-void CqTextureMap::SampleSATMap(float s1, float t1, float s2, float t2, float s3, float t3, float s4, float t4, 
+void CqTextureMap::SampleMIPMAP(float s1, float t1, float s2, float t2, float s3, float t3, float s4, float t4, 
 									float sblur, float tblur, 
 									std::valarray<float>& val, int directory)
 {
@@ -871,7 +882,7 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float s2, float t2, float s3
 	ss1=ss1+(swidth*0.5f);
 	tt1=tt1+(twidth*0.5f);
 
-	SampleSATMap(ss1,tt1,swidth,twidth,sblur,tblur,val,directory);
+	SampleMIPMAP(ss1,tt1,swidth,twidth,sblur,tblur,val,directory);
 }
 
 
@@ -880,7 +891,7 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float s2, float t2, float s3
  * Filtering is done using swidth, twidth and nsamples.
  */
 
-void CqEnvironmentMap::SampleSATMap(CqVector3D& R1, CqVector3D& swidth, CqVector3D& twidth, float sblur, float tblur, 
+void CqEnvironmentMap::SampleMIPMAP(CqVector3D& R1, CqVector3D& swidth, CqVector3D& twidth, float sblur, float tblur, 
 									std::valarray<float>& val)
 {
 	if(m_pImage!=0)
@@ -890,7 +901,7 @@ void CqEnvironmentMap::SampleSATMap(CqVector3D& R1, CqVector3D& swidth, CqVector
 		R3=R1+twidth;
 		R4=R1+swidth+twidth;
 
-		SampleSATMap(R1,R2,R3,R4,sblur,tblur,val);
+		SampleMIPMAP(R1,R2,R3,R4,sblur,tblur,val);
 	}
 }
 
@@ -899,7 +910,7 @@ void CqEnvironmentMap::SampleSATMap(CqVector3D& R1, CqVector3D& swidth, CqVector
 /** Retrieve a sample from the environment map using R as the reflection vector. 
  */
 
-void CqEnvironmentMap::SampleSATMap(CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, float sblur, float tblur, 
+void CqEnvironmentMap::SampleMIPMAP(CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, float sblur, float tblur, 
 									std::valarray<float>& val)
 {
 	if(m_pImage!=0)
@@ -987,7 +998,7 @@ void CqEnvironmentMap::SampleSATMap(CqVector3D& R1, CqVector3D& R2, CqVector3D& 
 				s1+=(swidth*0.5f);
 				t1+=(twidth*0.5f);
 
-				CqTextureMap::SampleSATMap(s1,t1,swidth,twidth,sblur,tblur,run_val,i);
+				CqTextureMap::SampleMIPMAP(s1,t1,swidth,twidth,sblur,tblur,run_val,i);
 
 				// Add the color contribution weighted by the area
 				val+=run_val*texture_area;
@@ -1677,6 +1688,7 @@ void CqTextureMap::WriteImage(TIFF* ptex, float *raster, unsigned long width, un
 	TIFFSetField(ptex,TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP);
 	TIFFSetField(ptex,TIFFTAG_COMPRESSION, COMPRESSION_DEFLATE);
 	TIFFSetField(ptex,TIFFTAG_ROWSPERSTRIP, 1);
+	TIFFSetField(ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 
 	float *pdata=raster;
 	for(unsigned long i=0; i<length; i++)
@@ -1709,7 +1721,8 @@ void CqTextureMap::WriteTileImage(TIFF* ptex, unsigned char *raster, unsigned lo
 	TIFFSetField(ptex,TIFFTAG_TILEWIDTH, twidth);
 	TIFFSetField(ptex,TIFFTAG_TILELENGTH, tlength);
 	TIFFSetField(ptex,TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT);
-	TIFFSetField(ptex, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS);
+	TIFFSetField(ptex, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+	TIFFSetField(ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 
 	int tsize=twidth*tlength;
 	int tperrow=(width+twidth-1)/twidth;

@@ -780,6 +780,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 				void	SO_ftexture1();
 				void	SO_ftexture2();
 				void	SO_ftexture3();
+				void    SO_textureinfo();
 				void	SO_ctexture1();
 				void	SO_ctexture2();
 				void	SO_ctexture3();

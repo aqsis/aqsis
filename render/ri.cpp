@@ -3097,12 +3097,12 @@ RtVoid	RiMakeTextureV(const char *pic, const char *tex, RtToken swrap, RtToken t
 		// it has SAT mapped it so we can overwrite if needs be.
 		// Create a new image.
 		Source.Interpreted(modes);
-		Source.CreateSATMap();
+		Source.CreateMIPMAP();
 		TIFF* ptex=TIFFOpen(tex,"w");
 
 		TIFFCreateDirectory(ptex);
 		TIFFSetField(ptex,TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
-		TIFFSetField(ptex,TIFFTAG_PIXAR_TEXTUREFORMAT, SATMAP_HEADER);
+		TIFFSetField(ptex,TIFFTAG_PIXAR_TEXTUREFORMAT, MIPMAP_HEADER);
 		TIFFSetField(ptex,TIFFTAG_PIXAR_WRAPMODES,modes);
 		TIFFSetField(ptex,TIFFTAG_SAMPLESPERPIXEL, Source.SamplesPerPixel());
 		TIFFSetField(ptex,TIFFTAG_BITSPERSAMPLE, 8);
@@ -3210,12 +3210,13 @@ RtVoid	RiMakeCubeFaceEnvironmentV(const char *px, const char *nx, const char *py
 	tny.Open();
 	tpz.Open();
 	tnz.Open();
-	if(tpx.Format()!=TexFormat_SAT)	tpx.CreateSATMap();
-	if(tnx.Format()!=TexFormat_SAT)	tnx.CreateSATMap();
-	if(tpy.Format()!=TexFormat_SAT)	tpy.CreateSATMap();
-	if(tny.Format()!=TexFormat_SAT)	tny.CreateSATMap();
-	if(tpz.Format()!=TexFormat_SAT)	tpz.CreateSATMap();
-	if(tnz.Format()!=TexFormat_SAT)	tnz.CreateSATMap();
+
+	if(tpx.Format()!=TexFormat_MIPMAP)	tpx.CreateMIPMAP();
+	if(tnx.Format()!=TexFormat_MIPMAP)	tnx.CreateMIPMAP();
+	if(tpy.Format()!=TexFormat_MIPMAP)	tpy.CreateMIPMAP();
+	if(tny.Format()!=TexFormat_MIPMAP)	tny.CreateMIPMAP();
+	if(tpz.Format()!=TexFormat_MIPMAP)	tpz.CreateMIPMAP();
+	if(tnz.Format()!=TexFormat_MIPMAP)	tnz.CreateMIPMAP();
 	if(tpx.IsValid() && tnx.IsValid() && tpy.IsValid() && tny.IsValid() && tpz.IsValid() && tnz.IsValid())
 	{
 		// Check all the same size;
@@ -3245,13 +3246,43 @@ RtVoid	RiMakeCubeFaceEnvironmentV(const char *px, const char *nx, const char *py
 		TIFF* ptex=TIFFOpen(reflfile,"w");
 
 		RtInt ii;
-		for(ii=0; ii<6; ii++)
+		TqInt xRes = tpx.XRes();
+		TqInt yRes = tpx.YRes();
+
+		// Number of mip map levels.
+		int log2 = MIN(xRes, yRes);
+		log2 = (int)(log(log2)/log(2.0));
+
+		for(ii=0; ii<log2; ii++)
 		{
-			CqTextureMapBuffer* pBuffer=Images[ii]->GetBuffer(0,0);
+
+			TqUchar* pImage = new TqUchar[(xRes*3)*(yRes*2)*tpx.SamplesPerPixel()*sizeof(TqUchar)];
+			TqInt linelen = (xRes*3)*tpx.SamplesPerPixel()*sizeof(TqUchar);
+			TqInt viewlinelen = xRes*tpx.SamplesPerPixel()*sizeof(TqUchar);
+
+			TqInt view = 0;
+			for(view = 0; view<6; view++)
+			{
+				CqTextureMapBuffer* pBuffer=Images[view]->GetBuffer(0,0,ii);
+				TqInt xoff = view%3;
+				xoff *= viewlinelen;
+				TqInt yoff = view/3;
+				yoff *= yRes*linelen;
+				TqUchar* ptr = pImage+xoff+yoff;
+				TqInt line;
+				for(line = 0; line < yRes; line++)
+				{
+					memcpy(ptr, (pBuffer->pBufferData()+(line*viewlinelen)), viewlinelen);
+					ptr+=linelen;
+				}
+			}
+
 			TIFFCreateDirectory(ptex);
 			TIFFSetField(ptex,TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 			TIFFSetField(ptex,TIFFTAG_PIXAR_TEXTUREFORMAT, CUBEENVMAP_HEADER);
-			tpx.WriteTileImage(ptex,pBuffer->pBufferData(),Images[ii]->XRes(),Images[ii]->YRes(),64,64,Images[ii]->SamplesPerPixel());
+			tpx.WriteTileImage(ptex,pImage,(xRes*3),(yRes*2),64,64,tpx.SamplesPerPixel());
+			xRes/=2;
+			yRes/=2;
 		}
 		TIFFClose(ptex);
 	}
