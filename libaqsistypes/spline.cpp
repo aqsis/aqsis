@@ -25,16 +25,36 @@
 
 #include	"aqsis.h"
 #include	"spline.h"
-#include	"patch.h"
-#include	"imagebuffer.h"
 
 START_NAMESPACE( Aqsis )
+
+__Basis	gBezierBasis	= {{ -1, 3, -3, 1},
+                         {3, -6, 3, 0},
+                         { -3, 3, 0, 0},
+                         {1, 0, 0, 0}};
+__Basis	gBSplineBasis	= {{ -1, 3, -3, 1},
+                          {3, -6, 3, 0},
+                          { -3, 0, 3, 0},
+                          {1, 4, 1, 0}};
+__Basis	gCatmullRomBasis	= {{ -1, 3, -3, 1},
+                             {2, -5, 4, -1},
+                             { -1, 0, 1, 0},
+                             {0, 2, 0, 0}};
+__Basis	gHermiteBasis	= {{ 2, 1, -2, 1},
+                          { -3, -2, 3, -1},
+                          {0, 1, 0, 0},
+                          {1, 0, 0, 0}};
+__Basis	gPowerBasis	= {{ 1, 0, 0, 0},
+                        {0, 1, 0, 0},
+                        {0, 0, 1, 0},
+                        {0, 0, 0, 1}};
+
 
 //---------------------------------------------------------------------
 /** Default constructor for a cubic spline curve, defaults to bezier basis matrix.
  */
 
-CqSplineCubic::CqSplineCubic( TqInt cu ) : m_matBasis( RiBezierBasis )
+CqSplineCubic::CqSplineCubic( TqInt cu ) : m_matBasis( gBezierBasis )
 {
 	m_aControlPoints.resize( cu );
 	m_cu = cu;

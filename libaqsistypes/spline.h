@@ -31,8 +31,6 @@
 
 #include	"aqsis.h"
 
-#include	"ri.h"
-
 #include	"matrix.h"
 #include	"vector4d.h"
 #include	"sstring.h"
@@ -41,6 +39,15 @@
 #include	"share.h"
 
 START_NAMESPACE( Aqsis )
+
+
+typedef	TqFloat	__Basis[ 4 ][ 4 ];
+
+extern __Basis	gBezierBasis;
+extern __Basis	gBSplineBasis;
+extern __Basis	gCatmullRomBasis;
+extern __Basis	gHermiteBasis;
+extern __Basis	gPowerBasis;
 
 
 //----------------------------------------------------------------------
@@ -82,27 +89,32 @@ class _qShareC CqSplineCubic
 		/** Set the cubic spline basis matrix.
 		 * \param name Basis name.
 		 */
-		_qShareM	void	SetmatBasis( const char* name )
+		_qShareM	void	SetmatBasis( const CqString& strName )
 		{
-			RtBasis b;
-			if ( BasisFromName( &b, name ) )
+			__Basis* pVals = 0;
+			if ( strName.compare("bezier") == 0 )
+				pVals = &gBezierBasis;
+			else if ( strName.compare("bspline") == 0 )
+				pVals = &gBSplineBasis;
+			else if ( strName.compare("catmull-rom") == 0 )
+				pVals = &gCatmullRomBasis;
+			else if ( strName.compare("hermite") == 0 )
+				pVals = &gHermiteBasis;
+			else if ( strName.compare("power") == 0 )
+				pVals = &gPowerBasis;
+
+			if ( pVals )
 			{
-				CqMatrix m( b );
+				CqMatrix m;
+				m = *pVals;
 				SetmatBasis( m );
+//				TqInt i, j;
+//				for ( i = 0; i < 4; i++ )
+//					for ( j = 0; j < 4; j++ )
+//						( *b ) [ i ][ j ] = ( *pVals ) [ i ][ j ];
 			}
 		}
-		/** Set the cubic spline basis matrix.
-		 * \param name Basis name.
-		 */
-		_qShareM	void	SetmatBasis( const CqString& name )
-		{
-			RtBasis b;
-			if ( BasisFromName( &b, name.c_str() ) )
-			{
-				CqMatrix m( b );
-				SetmatBasis( m );
-			}
-		}
+
 		/** Get the control point step size for the evaluation window.
 		 * \return Integer step size.
 		 */
