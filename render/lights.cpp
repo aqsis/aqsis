@@ -49,6 +49,7 @@ CqLightsource::CqLightsource( IqShader* pShader, TqBool fActive ) :
 	// Add a reference from the stack.
 	ADDREF( this );
 	m_pShaderExecEnv = new CqShaderExecEnv;
+	ADDREF( m_pShaderExecEnv );
 }
 
 
@@ -64,8 +65,9 @@ CqLightsource::~CqLightsource()
 	m_pAttributes = 0;
 
 	// Delete the shader execution environment..
-	if ( m_pShaderExecEnv )
-		delete( m_pShaderExecEnv );
+	if ( m_pShaderExecEnv ) {
+		RELEASEREF( m_pShaderExecEnv );
+	}
 	m_pShaderExecEnv = 0;
 }
 

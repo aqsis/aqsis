@@ -78,8 +78,11 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
 
 	// Delete.
 	/// \note This should delete throught the interface that created it.
-	if ( m_pShaderExecEnv != 0 ) delete( m_pShaderExecEnv );
-	m_pShaderExecEnv = 0;
+	if ( m_pShaderExecEnv != 0 ) 
+	{
+		RELEASEREF( m_pShaderExecEnv );
+		m_pShaderExecEnv = 0;
+	}
 
 	// Delete any cloned shader output variables.
 	std::vector<IqShaderData*>::iterator outputVar;
@@ -104,6 +107,7 @@ CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) :
 	// Initialise the shader execution environment
 
 	m_pShaderExecEnv = new CqShaderExecEnv;
+	ADDREF( m_pShaderExecEnv );
 	Initialise( cu, cv, pSurface );
 }
 
