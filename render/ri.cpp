@@ -1448,12 +1448,12 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 		TqInt Type = Decl.m_Type;
 		TqInt Class = Decl.m_Class;
 		TqBool bArray = Decl.m_Count > 1;
-		CqParameter* pParam = pOpt->pParameter( token );
+		CqParameter* pParam = pOpt->pParameter( Decl.m_strName.c_str() );
 		if ( pParam == 0 )
 		{
 			if ( Decl.m_strName != "" && ( Decl.m_Class ) == class_uniform )
 			{
-				pParam = Decl.m_pCreate( token, Decl.m_Count );
+				pParam = Decl.m_pCreate( Decl.m_strName.c_str(), Decl.m_Count );
 				pOpt->AddParameter( pParam );
 			}
 			else
