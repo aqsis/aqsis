@@ -790,7 +790,14 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	TqInt	array_count = 0;
 	TqLong  htoken, i;
 
-	IqLog *logger = QGetRenderContextI()->Logger();
+	IqLog *logger ;
+	if (QGetRenderContextI() != NULL)
+	{
+		logger = QGetRenderContextI()->Logger();
+	} else {
+		logger = new CqLog();
+	};
+	  	
 
  	// Initialise the private hash keys.
 	if (!dhash)
