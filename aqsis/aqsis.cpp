@@ -28,12 +28,6 @@
 
 #include <stdio.h>
 
-#define __MESSAGE_TABLE
-#include "mtable.h"
-#undef __MESSAGE_TABLE
-
-CqMessageTable mTable; // Create the message table
-
 
 void RenderFile( FILE* file, const char* name );
 void GetOptions();

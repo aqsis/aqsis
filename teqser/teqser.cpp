@@ -14,12 +14,6 @@
 #include	"argparse.h"
 #include	"ri.h"
 
-#define __MESSAGE_TABLE
-#include "mtable.h"
-#undef __MESSAGE_TABLE
-
-CqMessageTable mTable; // Create the message table
-
 TqBool	g_version = TqFalse;
 TqBool	g_help = TqFalse;
 TqBool	g_envcube = TqFalse;
