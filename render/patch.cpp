@@ -490,8 +490,8 @@ TqInt CqSurfacePatchBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 	TqInt cSplits = 0;
 
 	// Split the surface in u or v
-	CqSurfacePatchBicubic * pNew1 = new CqSurfacePatchBicubic;
-	CqSurfacePatchBicubic * pNew2 = new CqSurfacePatchBicubic;
+	CqSurfacePatchBicubic * pNew1 = new CqSurfacePatchBicubic(*this);
+	CqSurfacePatchBicubic * pNew2 = new CqSurfacePatchBicubic(*this);
 
 	// If this primitive is being split because it spans the e and hither planes, then
 	// we should split in both directions to ensure we overcome the crossing.
@@ -506,8 +506,6 @@ TqInt CqSurfacePatchBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 	pNew2->m_fDiceable = TqTrue;
 	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
 	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 	pNew1->AddRef();
 	pNew2->AddRef();
 
@@ -811,7 +809,6 @@ void CqSurfacePatchBilinear::uSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfac
 	pNew2->P().SetSize( cVertex() );
 	// Subdivide the vertices
 	pNew1->P() = P();
-	pNew2->P() = P();
 	pNew1->P().uSubdivide( &pNew2->P() );
 
 	// Subdivide the normals
@@ -835,7 +832,6 @@ void CqSurfacePatchBilinear::vSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfac
 	pNew2->P().SetSize( cVertex() );
 	// Subdivide the vertices.
 	pNew1->P() = P();
-	pNew2->P() = P();
 	pNew1->P().vSubdivide( &pNew2->P() );
 
 	// Subdivide the normals
@@ -1138,10 +1134,6 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 	RtInt nvaryingu = ( m_uPeriodic ) ? m_uPatches : m_uPatches + 1;
 	RtInt nvaryingv = ( m_vPeriodic ) ? m_vPatches : m_vPatches + 1;
 
-	RtFloat up, vp;
-	RtFloat du = 1.0 / m_uPatches;
-	RtFloat dv = 1.0 / m_vPatches;
-
 	TqInt MyUses = Uses();
 
 	const TqFloat* pTC = pAttributes() ->GetFloatAttribute("System", "TextureCoordinates");
@@ -1150,12 +1142,10 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 	CqVector2D st3( pTC[4], pTC[5]);
 	CqVector2D st4( pTC[6], pTC[7]);
 
-	vp = 0;
 	// Fill in the points
 	TqInt i;
 	for ( i = 0; i < m_vPatches; i++ )
 	{
-		up = 0;
 		// vRow is the coordinate row of the mesh.
 		RtInt	vRow = i * vStep;
 		RtInt j;
@@ -1166,7 +1156,6 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 			CqSurfacePatchBicubic*	pSurface = new CqSurfacePatchBicubic();
 			pSurface->AddRef();
 			pSurface->SetSurfaceParameters( *this );
-//			pSurface->SetDefaultPrimitiveVariables();
 			pSurface->P().SetSize( pSurface->cVertex() );
 			RtInt v;
 			for ( v = 0; v < 4; v++ )
@@ -1277,31 +1266,9 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 				pSurface->AddPrimitiveVariable(pNewUP);
 			}
 
-			// Fill in the surface parameters for the mesh.
-			if ( USES( MyUses, EnvVars_u ) && bHasu() )
-			{
-				pSurface->u()->SetSize( 4 );
-				(*pSurface->u())[ 0 ] = up;
-				(*pSurface->u())[ 1 ] = up + du;
-				(*pSurface->u())[ 2 ] = up;
-				(*pSurface->u())[ 3 ] = up + du;
-			}
-
-			if ( USES( MyUses, EnvVars_v ) && bHasv() )
-			{
- 				pSurface->v()->SetSize( 4 );
-				(*pSurface->v())[ 0 ] = vp;
-				(*pSurface->v())[ 1 ] = vp;
-				(*pSurface->v())[ 2 ] = vp + dv;
-				(*pSurface->v())[ 3 ] = vp + dv;
-			}
-
-			up += du;
-
 			aSplits.push_back( pSurface );
 			cSplits++;
 		}
-		vp += dv;
 	}
 	return ( cSplits );
 }
@@ -1399,11 +1366,6 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	// Create a surface patch
 	RtInt iP = 0;
-
-	RtFloat up, vp;
-	RtFloat du = 1.0 / m_uPatches;
-	RtFloat dv = 1.0 / m_vPatches;
-
 	TqInt MyUses = Uses();
 
 	const TqFloat* pTC = pAttributes() ->GetFloatAttribute("System", "TextureCoordinates");
@@ -1412,18 +1374,15 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 	CqVector2D st3( pTC[4], pTC[5]);
 	CqVector2D st4( pTC[6], pTC[7]);
 
-	vp = 0;
 	TqInt i;
 	for ( i = 0; i < m_vPatches; i++ )      	// Fill in the points
 	{
-		up = 0;
 		RtInt j;
 		for ( j = 0; j < m_uPatches; j++ )
 		{
 			CqSurfacePatchBilinear*	pSurface = new CqSurfacePatchBilinear;
 			pSurface->AddRef();
 			pSurface->SetSurfaceParameters( *this );
-			pSurface->SetDefaultPrimitiveVariables();
 			pSurface->P().SetSize( 4 );
 
 			// Calculate the position in the point table for u taking into account
@@ -1532,34 +1491,191 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 				}
 				pSurface->AddPrimitiveVariable(pNewUP);
 			}
-
-			// Fill in the surface parameters for the mesh.
-			if ( USES( MyUses, EnvVars_u ) && bHasu() )
-			{
-				pSurface->u()->SetSize( 4 );
-				(*pSurface->u())[ 0 ] = up;
-				(*pSurface->u())[ 1 ] = up + du;
-				(*pSurface->u())[ 2 ] = up;
-				(*pSurface->u())[ 3 ] = up + du;
-			}
-
-			if ( USES( MyUses, EnvVars_v ) && bHasv() )
-			{
-				pSurface->v()->SetSize( 4 );
-				(*pSurface->v())[ 0 ] = vp;
-				(*pSurface->v())[ 1 ] = vp;
-				(*pSurface->v())[ 2 ] = vp + dv;
-				(*pSurface->v())[ 3 ] = vp + dv;
-			}
-
-			up += du;
-
 			aSplits.push_back( pSurface );
 			cSplits++;
 		}
-		vp += dv;
 	}
 	return ( cSplits );
+}
+
+
+//---------------------------------------------------------------------
+/** Set the default values (where available) from the attribute state for all standard
+ * primitive variables.
+ */
+
+void CqSurfacePatchMeshBilinear::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
+{
+	TqInt bUses = Uses();
+
+	// Set default values for all of our parameters
+
+	// s and t default to four values, if the particular surface type requires different it is up
+	// to the surface to override or change this after the fact.
+	if ( USES( bUses, EnvVars_s ) && bUseDef_st )
+	{
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
+		TqFloat s0 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 0 ];
+		TqFloat s1 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 2 ];
+		TqFloat s2 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 4 ];
+		TqFloat s3 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 6 ];
+		s()->SetSize( cVarying() );
+		TqInt r,c;
+		TqInt cr = ( ( m_uPeriodic ) ? m_uPatches : m_uPatches + 1 ), cc = ( ( m_vPeriodic ) ? m_vPatches : m_vPatches + 1 );
+		for ( c = 0; c < cc; c++ )
+		{
+			for ( r = 0; r < cr; r++ )
+			{
+				TqFloat ss = BilinearEvaluate(s0,s1,s2,s3,(1.0f/(cr-1))*r,(1.0f/(cc-1))*c);
+				s()->pValue() [ ( c * cr ) + r ] = ss;
+			}
+
+		}
+	}
+
+	if ( USES( bUses, EnvVars_t ) && bUseDef_st )
+	{
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
+		TqFloat t0 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 1 ];
+		TqFloat t1 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 3 ];
+		TqFloat t2 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 5 ];
+		TqFloat t3 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 7 ];
+		t()->SetSize( cVarying() );
+		TqInt r,c;
+		TqInt cr = ( ( m_uPeriodic ) ? m_uPatches : m_uPatches + 1 ), cc = ( ( m_vPeriodic ) ? m_vPatches : m_vPatches + 1 );
+		for ( c = 0; c < cc; c++ )
+		{
+			for ( r = 0; r < cr; r++ )
+			{
+				TqFloat tt = BilinearEvaluate(t0,t1,t2,t3,(1.0f/(cr-1))*r,(1.0f/(cc-1))*c);
+				t()->pValue() [ ( c * cr ) + r ] = tt;
+			}
+
+		}
+	}
+
+	if ( USES( bUses, EnvVars_u ) )
+	{
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
+		u()->SetSize( cVarying() );
+		TqInt r,c;
+		TqInt cr = ( ( m_uPeriodic ) ? m_uPatches : m_uPatches + 1 ), cc = ( ( m_vPeriodic ) ? m_vPatches : m_vPatches + 1 );
+		for ( c = 0; c < cc; c++ )
+		{
+			for ( r = 0; r < cr; r++ )
+			{
+				TqFloat uu = BilinearEvaluate(0.0f,1.0f,0.0f,1.0f,(1.0f/(cr-1))*r,(1.0f/(cc-1))*c);
+				u()->pValue() [ ( c * cr ) + r ] = uu;
+			}
+
+		}
+	}
+
+	if ( USES( bUses, EnvVars_v ) )
+	{
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
+		v()->SetSize( cVarying() );
+		TqInt r,c;
+		TqInt cr = ( ( m_uPeriodic ) ? m_uPatches : m_uPatches + 1 ), cc = ( ( m_vPeriodic ) ? m_vPatches : m_vPatches + 1 );
+		for ( c = 0; c < cc; c++ )
+		{
+			for ( r = 0; r < cr; r++ )
+			{
+				TqFloat vv = BilinearEvaluate(0.0f,0.0f,1.0f,1.0f,(1.0f/(cr-1))*r,(1.0f/(cc-1))*c);
+				v()->pValue() [ ( c * cr ) + r ] = vv;
+			}
+
+		}
+	}
+}
+
+
+
+
+//---------------------------------------------------------------------
+/** Set the default values (where available) from the attribute state for all standard
+ * primitive variables.
+ */
+
+void CqSurfacePatchMeshBicubic::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
+{
+	TqInt bUses = Uses();
+
+	// Set default values for all of our parameters
+
+	// s and t default to four values, if the particular surface type requires different it is up
+	// to the surface to override or change this after the fact.
+	if ( USES( bUses, EnvVars_s ) && bUseDef_st )
+	{
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
+		TqFloat s0 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 0 ];
+		TqFloat s1 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 2 ];
+		TqFloat s2 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 4 ];
+		TqFloat s3 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 6 ];
+		s()->SetSize( cVarying() );
+		TqInt r,c;
+		TqInt cr = ( ( m_uPeriodic ) ? m_uPatches : m_uPatches + 1 ), cc = ( ( m_vPeriodic ) ? m_vPatches : m_vPatches + 1 );
+		for ( c = 0; c < cc; c++ )
+		{
+			for ( r = 0; r < cr; r++ )
+			{
+				TqFloat ss = BilinearEvaluate(s0,s1,s2,s3,(1.0f/(cr-1))*r,(1.0f/(cc-1))*c);
+				s()->pValue() [ ( c * cr ) + r ] = ss;
+			}
+		}
+	}
+
+	if ( USES( bUses, EnvVars_t ) && bUseDef_st )
+	{
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
+		TqFloat t0 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 1 ];
+		TqFloat t1 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 3 ];
+		TqFloat t2 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 5 ];
+		TqFloat t3 = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ 7 ];
+		t()->SetSize( cVarying() );
+		TqInt r,c;
+		TqInt cr = ( ( m_uPeriodic ) ? m_uPatches : m_uPatches + 1 ), cc = ( ( m_vPeriodic ) ? m_vPatches : m_vPatches + 1 );
+		for ( c = 0; c < cc; c++ )
+		{
+			for ( r = 0; r < cr; r++ )
+			{
+				TqFloat tt = BilinearEvaluate(t0,t1,t2,t3,(1.0f/(cr-1))*r,(1.0f/(cc-1))*c);
+				t()->pValue() [ ( c * cr ) + r ] = tt;
+			}
+		}
+	}
+
+	if ( USES( bUses, EnvVars_u ) )
+	{
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
+		u()->SetSize( cVarying() );
+		TqInt r,c;
+		TqInt cr = ( ( m_uPeriodic ) ? m_uPatches : m_uPatches + 1 ), cc = ( ( m_vPeriodic ) ? m_vPatches : m_vPatches + 1 );
+		for ( c = 0; c < cc; c++ )
+		{
+			for ( r = 0; r < cr; r++ )
+			{
+				TqFloat uu = BilinearEvaluate(0.0f,1.0f,0.0f,1.0f,(1.0f/(cr-1))*r,(1.0f/(cc-1))*c);
+				u()->pValue() [ ( c * cr ) + r ] = uu;
+			}
+		}
+	}
+
+	if ( USES( bUses, EnvVars_v ) )
+	{
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
+		v()->SetSize( cVarying() );
+		TqInt r,c;
+		TqInt cr = ( ( m_uPeriodic ) ? m_uPatches : m_uPatches + 1 ), cc = ( ( m_vPeriodic ) ? m_vPatches : m_vPatches + 1 );
+		for ( c = 0; c < cc; c++ )
+		{
+			for ( r = 0; r < cr; r++ )
+			{
+				TqFloat vv = BilinearEvaluate(0.0f,0.0f,1.0f,1.0f,(1.0f/(cr-1))*r,(1.0f/(cc-1))*c);
+				v()->pValue() [ ( c * cr ) + r ] = vv;
+			}
+		}
+	}
 }
 
 

@@ -116,7 +116,7 @@ class CqQuadric : public CqSurface
 class CqSphere : public CqQuadric
 {
 	public:
-		CqSphere( TqFloat radius, TqFloat zmin, TqFloat zmax, TqFloat thetamin, TqFloat thetamax );
+		CqSphere( TqFloat radius = 1.0f, TqFloat zmin = -1.0f, TqFloat zmax = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
 		CqSphere( const CqSphere& From )
 		{
 			*this = From;
@@ -151,7 +151,7 @@ class CqSphere : public CqQuadric
 class CqCone : public CqQuadric
 {
 	public:
-		CqCone( TqFloat height, TqFloat radius, TqFloat thetamin, TqFloat thetamax, TqFloat zmin, TqFloat zmax );
+		CqCone( TqFloat height = 1.0f, TqFloat radius = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f, TqFloat zmin = 0.0f, TqFloat zmax = 1.0f );
 		CqCone( const CqCone& From )
 		{
 			*this = From;
@@ -186,7 +186,7 @@ class CqCone : public CqQuadric
 class CqCylinder : public CqQuadric
 {
 	public:
-		CqCylinder( TqFloat radius, TqFloat zmin, TqFloat zmax, TqFloat thetamin, TqFloat thetamax );
+		CqCylinder( TqFloat radius = 1.0f, TqFloat zmin = -1.0f, TqFloat zmax = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
 		CqCylinder( const CqCylinder& From )
 		{
 			*this = From;
@@ -220,7 +220,7 @@ class CqCylinder : public CqQuadric
 class CqHyperboloid : public CqQuadric
 {
 	public:
-		CqHyperboloid( CqVector3D& point1, CqVector3D& point2, TqFloat thetamin, TqFloat thetamax );
+		CqHyperboloid( CqVector3D& point1 = CqVector3D(0.0f,0.0f,0.0f), CqVector3D& point2 = CqVector3D(1.0f,1.0f,1.0f), TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
 		CqHyperboloid( const CqHyperboloid& From )
 		{
 			*this = From;
@@ -253,7 +253,7 @@ class CqHyperboloid : public CqQuadric
 class CqParaboloid : public CqQuadric
 {
 	public:
-		CqParaboloid( TqFloat rmax, TqFloat zmin, TqFloat zmax, TqFloat thetamin, TqFloat thetamax );
+		CqParaboloid( TqFloat rmax = 1.0f, TqFloat zmin = -1.0f, TqFloat zmax = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
 		CqParaboloid( const CqParaboloid& From )
 		{
 			*this = From;
@@ -287,7 +287,7 @@ class CqParaboloid : public CqQuadric
 class CqTorus : public CqQuadric
 {
 	public:
-		CqTorus( TqFloat majorradius, TqFloat minorradius, TqFloat phimin, TqFloat phimax, TqFloat thetamin, TqFloat thetamax );
+		CqTorus( TqFloat majorradius = 1.0f, TqFloat minorradius = 0.2f, TqFloat phimin = 0.0f, TqFloat phimax = 360.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
 		CqTorus( const CqTorus& From )
 		{
 			*this = From;
@@ -322,7 +322,7 @@ class CqTorus : public CqQuadric
 class CqDisk : public CqQuadric
 {
 	public:
-		CqDisk( TqFloat height, TqFloat minorradius, TqFloat majorradius, TqFloat thetamin, TqFloat thetamax );
+		CqDisk( TqFloat height = 0.0f, TqFloat minorradius = 0.0f, TqFloat majorradius = 1.0f, TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
 		CqDisk( const CqDisk& From )
 		{
 			*this = From;

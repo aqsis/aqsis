@@ -224,6 +224,7 @@ class _qShareC CqSurface : public CqBasicSurface
 		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
 
 		CqSurface&	operator=( const CqSurface& From );
+		void ClonePrimitiveVariables( const CqSurface& From );
 
 		/** Get a reference the to P default parameter.
 		 */

@@ -93,8 +93,8 @@ CqBasicSurface& CqBasicSurface::operator=( const CqBasicSurface& From )
 	m_fDiceable = From.m_fDiceable;
 	m_EyeSplitCount = From.m_EyeSplitCount;
 	m_fDiscard = From.m_fDiscard;
-	m_pCSGNode = From.m_pCSGNode;
-	if ( m_pCSGNode ) m_pCSGNode->AddRef();
+
+	SetSurfaceParameters(From);
 
 	return ( *this );
 }
@@ -200,7 +200,15 @@ CqSurface::CqSurface( const CqSurface& From ) :
 CqSurface& CqSurface::operator=( const CqSurface& From )
 {
 	CqBasicSurface::operator=( From );
+	return ( *this );
+}
 
+//---------------------------------------------------------------------
+/** Copy all the primitive variables from the donor to this.
+ */
+
+void CqSurface::ClonePrimitiveVariables( const CqSurface& From )
+{
 	// Copy primitive variables.
 	m_P = From.m_P;
 	m_N = From.m_N;
@@ -215,10 +223,7 @@ CqSurface& CqSurface::operator=( const CqSurface& From )
 	TqInt i;
 	for( i = 0; i < EnvVars_Last; i++ )
 		m_aiStdPrimitiveVars[ i ] = From.m_aiStdPrimitiveVars[ i ];	
-
-	return ( *this );
 }
-
 
 //---------------------------------------------------------------------
 /** Set the default values (where available) from the attribute state for all standard

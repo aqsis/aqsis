@@ -253,6 +253,9 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	CqColor	colA, colB, colC, colD;
 	CqColor	opaA, opaB, opaC, opaD;
+	
+	CqColor colSys = pAttributes() ->GetColorAttribute("System", "Color")[0];
+	CqColor opaSys = pAttributes() ->GetColorAttribute("System", "Opacity")[0];
 
 	TqBool	bhasN = bHasN();
 	TqBool	bhass = bHass();
@@ -341,7 +344,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		colB = PolyCs( indexB );
 	}
 	else
-		colA = pAttributes() ->GetColorAttribute("System", "Color")[0];
+		colA = colSys;
 
 	if ( bhasOs )
 	{
@@ -349,7 +352,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		opaB = PolyOs( indexB );
 	}
 	else
-		opaA = pAttributes() ->GetColorAttribute("System", "Opacity")[0];
+		opaA = opaSys;
 
 	TqInt cNew = 0;
 	TqInt i;
@@ -416,55 +419,90 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		}
 
 		// Create bilinear patches
-/*		CqSurfacePatchBilinear* pNew = new CqSurfacePatchBilinear();
+		CqSurfacePatchBilinear* pNew = new CqSurfacePatchBilinear();
 		pNew->AddRef();
 		pNew->SetSurfaceParameters( Surface() );
-		pNew->SetDefaultPrimitiveVariables();
+//		pNew->SetDefaultPrimitiveVariables();
 
-		pNew->P().SetSize( 4 ); pNew->N().SetSize( 4 );
-		pNew->P() [ 0 ] = vecA; pNew->P() [ 1 ] = vecB; pNew->P() [ 2 ] = vecD;	pNew->P() [ 3 ] = vecC;
-		pNew->N() [ 0 ] = vecNA; pNew->N() [ 1 ] = vecNB; pNew->N() [ 2 ] = vecND; pNew->N() [ 3 ] = vecNC;
+		pNew->P().SetSize( 4 ); 
+		pNew->N().SetSize( 4 );
+		pNew->P() [ 0 ] = vecA; 
+		pNew->P() [ 1 ] = vecB; 
+		pNew->P() [ 2 ] = vecD;	
+		pNew->P() [ 3 ] = vecC;
+		pNew->N() [ 0 ] = vecNA; 
+		pNew->N() [ 1 ] = vecNB; 
+		pNew->N() [ 2 ] = vecND; 
+		pNew->N() [ 3 ] = vecNC;
 		if ( USES( iUses, EnvVars_u ) )
 		{
-			pNew->u() [ 0 ] = uA;	pNew->u() [ 1 ] = uB; pNew->u() [ 2 ] = uD; pNew->u() [ 3 ] = uC;
+			pNew->AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u"));
+			pNew->u()->SetSize(4);
+			(*pNew->u())[ 0 ] = uA;	
+			(*pNew->u())[ 1 ] = uB; 
+			(*pNew->u())[ 2 ] = uD; 
+			(*pNew->u())[ 3 ] = uC;
 		}
 		if ( USES( iUses, EnvVars_v ) )
 		{
-			pNew->v() [ 0 ] = vA;	pNew->v() [ 1 ] = vB; pNew->v() [ 2 ] = vD; pNew->v() [ 3 ] = vC;
+			pNew->AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v"));
+			pNew->v()->SetSize(4);
+			(*pNew->v())[ 0 ] = vA;	
+			(*pNew->v())[ 1 ] = vB; 
+			(*pNew->v())[ 2 ] = vD; 
+			(*pNew->v())[ 3 ] = vC;
 		}
 		if ( USES( iUses, EnvVars_s ) )
 		{
-			pNew->s() [ 0 ] = sA;	pNew->s() [ 1 ] = sB; pNew->s() [ 2 ] = sD; pNew->s() [ 3 ] = sC;
+			pNew->AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s"));
+			pNew->s()->SetSize(4);
+			(*pNew->s())[ 0 ] = sA;	
+			(*pNew->s())[ 1 ] = sB; 
+			(*pNew->s())[ 2 ] = sD; 
+			(*pNew->s())[ 3 ] = sC;
 		}
 		if ( USES( iUses, EnvVars_t ) )
 		{
-			pNew->t() [ 0 ] = tA;	pNew->t() [ 1 ] = tB; pNew->t() [ 2 ] = tD; pNew->t() [ 3 ] = tC;
+			pNew->AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t"));
+			pNew->t()->SetSize(4);
+			(*pNew->t())[ 0 ] = tA;	
+			(*pNew->t())[ 1 ] = tB; 
+			(*pNew->t())[ 2 ] = tD; 
+			(*pNew->t())[ 3 ] = tC;
 		}
 		if ( USES( iUses, EnvVars_Cs ) )
 		{
+			pNew->AddPrimitiveVariable(new CqParameterTypedVarying<CqColor, type_color, CqColor>("Cs"));
 			if ( bhasCs )
 			{
-				pNew->Cs().SetSize( 4 );
-				pNew->Cs() [ 0 ] = colA;
-				pNew->Cs() [ 1 ] = colB;
-				pNew->Cs() [ 2 ] = colD;
-				pNew->Cs() [ 3 ] = colC;
+				pNew->Cs()->SetSize( 4 );
+				(*pNew->Cs())[ 0 ] = colA;
+				(*pNew->Cs())[ 1 ] = colB;
+				(*pNew->Cs())[ 2 ] = colD;
+				(*pNew->Cs())[ 3 ] = colC;
 			}
 			else
-				pNew->Cs() [ 0 ] = colA;
+			{
+				pNew->Cs()->SetSize( 1 );
+				(*pNew->Cs())[ 0 ] = colA;
+			}
 		}
 		if ( USES( iUses, EnvVars_Os ) )
 		{
+			pNew->AddPrimitiveVariable(new CqParameterTypedVarying<CqColor, type_color, CqColor>("Os"));
 			if ( bhasOs )
 			{
-				pNew->Os().SetSize( 4 );
-				pNew->Os() [ 0 ] = opaA;
-				pNew->Os() [ 1 ] = opaB;
-				pNew->Os() [ 2 ] = opaD;
-				pNew->Os() [ 3 ] = opaC;
+				pNew->Os()->SetSize( 4 );
+				(*pNew->Os())[ 0 ] = opaA;
+				(*pNew->Os())[ 1 ] = opaB;
+				(*pNew->Os())[ 2 ] = opaD;
+				(*pNew->Os())[ 3 ] = opaC;
 			}
 			else
-				pNew->Os() [ 0 ] = opaA;
+			{
+				pNew->Os()->SetSize( 1 );
+				(*pNew->Os())[ 0 ] = opaA;
+			}
 		}
 
 		// Copy any user specified primitive variables.
@@ -564,7 +602,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 
 		aSplits.push_back( pNew );
 		cNew++;
-*/
+
 		// Move onto the next quad
 		indexB = indexD;
 		vecB = vecD;

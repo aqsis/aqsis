@@ -14,7 +14,6 @@ Translate 0 -4 5
 Option "limits" "eyesplits" [3]
 Option "statistics" "endofframe" [3]
 Option "searchpath" "shader" ["./:&"]
-Sides 1
 
 WorldBegin
       

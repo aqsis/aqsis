@@ -217,6 +217,8 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 
 		CqSurfacePatchMeshBicubic& operator=( const CqSurfacePatchMeshBicubic& From );
 
+		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
+
 		/** Get a reference to the basis matrix for the u direction.
 		 */
 		const	CqMatrix&	matuBasis()
@@ -292,6 +294,8 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 		}
 		CqSurfacePatchMeshBilinear( const CqSurfacePatchMeshBilinear& From );
 		virtual	~CqSurfacePatchMeshBilinear();
+
+		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
 
 		CqSurfacePatchMeshBilinear& operator=( const CqSurfacePatchMeshBilinear& From );
 

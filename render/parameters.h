@@ -205,6 +205,8 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 			// Check if a valid 4 point quad, do nothing if not.
 			if ( m_aValues.size() == 4 && pVS->m_aValues.size() == 4 )
 			{
+				pVS->pValue( 1 ) [ 0 ] = pValue( 1 ) [ 0 ];
+				pVS->pValue( 3 ) [ 0 ] = pValue( 3 ) [ 0 ];
 				pValue( 1 ) [ 0 ] = pVS->pValue( 0 ) [ 0 ] = static_cast<T>( ( pValue( 0 ) [ 0 ] + pValue( 1 ) [ 0 ] ) * 0.5 );
 				pValue( 3 ) [ 0 ] = pVS->pValue( 2 ) [ 0 ] = static_cast<T>( ( pValue( 2 ) [ 0 ] + pValue( 3 ) [ 0 ] ) * 0.5 );
 			}
@@ -216,6 +218,8 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 			// Check if a valid 4 point quad, do nothing if not.
 			if ( m_aValues.size() == 4 && pVS->m_aValues.size() == 4 )
 			{
+				pVS->pValue( 2 ) [ 0 ] = pValue( 2 ) [ 0 ];
+				pVS->pValue( 3 ) [ 0 ] = pValue( 3 ) [ 0 ];
 				pValue( 2 ) [ 0 ] = pVS->pValue( 0 ) [ 0 ] = static_cast<T>( ( pValue( 0 ) [ 0 ] + pValue( 2 ) [ 0 ] ) * 0.5 );
 				pValue( 3 ) [ 0 ] = pVS->pValue( 1 ) [ 0 ] = static_cast<T>( ( pValue( 1 ) [ 0 ] + pValue( 3 ) [ 0 ] ) * 0.5 );
 			}

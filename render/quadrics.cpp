@@ -1143,8 +1143,8 @@ TqInt CqDisk::Split( std::vector<CqBasicSurface*>& aSplits )
 	}
 	else
 	{
-		pNew1->m_MajorRadius = zcent;
-		pNew2->m_MinorRadius = zcent;
+		pNew1->m_MinorRadius = zcent;
+		pNew2->m_MajorRadius = zcent;
 
 		// Subdivide the parameter values
 		vSubdivideUserParameters( pNew1, pNew2 );

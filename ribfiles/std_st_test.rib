@@ -10,11 +10,10 @@ Rotate -40 1 0 0
 Translate 0 -4 5
 
 Option "limits" "eyesplits" 3
-Sides 1
+Sides 2
 
 WorldBegin
       
-  Attribute "light" "shadows" "off"
   LightSource "ambientlight" 0 "intensity" [1]
 
   Color [1 1 1]
@@ -57,7 +56,6 @@ WorldBegin
   AttributeBegin
 	Translate -2 -1 0
 	Rotate -90 1 0 0
-	Surface "constant"
 	Color [ 1 1 1 ]
 	Orientation "rh"
 	Disk 0 1 360
