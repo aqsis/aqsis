@@ -1,3 +1,91 @@
+2003-08-14 02:17  minty
+
+	* librib2/librib.cpp, render/ri.cpp, librib2/librib.h: Add a
+	default display (RiDisplay( "ri.pic", "file", "rgba", NULL ))
+	Modify librib2 and libaqsis to read standard declarations from a
+	common table Add standard declarations to libaqsis for directly
+	linked apps Add default searchpath handling to libaqsis for
+	directly linked apps
+
+2003-08-14 00:24  pgregory
+
+	* render/micropolygon.cpp: Small optimisations
+
+2003-08-12 14:16  pgregory
+
+	* libaqsistypes/libaqsistypes.dsp,
+	libaqsistypes/win32/intel/share.h, libddmsimple/libddmsimple.dsp,
+	libddmsock/libddmsock.dsp, librib2/librib2.dsp,
+	librib2ri/librib2ri.dsp, libshaderexecenv/libshaderexecenv.dsp,
+	libshadervm/libshadervm.dsp, render/focus.h, render/libaqsis.def,
+	render/libaqsis.dsp, render/procedural.cpp, render/ri.cpp,
+	render/ri.h: Change the way that the dll export/import of the
+	standard RI stuff works under Windows. Makes the RI_... data
+	exports work properly.
+
+2003-08-10 12:01  pgregory
+
+	* framebuffer_glut/framebuffer_glut.cpp: Initial work on filename
+	entry using just GLUT, Tim Shead.
+
+2003-08-08 23:11  pgregory
+
+	* render/texturemap.cpp: Beef up the mipmap file checking, at least
+	until an official fomrat is defined.
+
+2003-08-08 20:23  pgregory
+
+	* render/stats.cpp: Change some incorrect integer output to float.
+	Michel Joron.
+
+2003-08-08 20:22  pgregory
+
+	* framebuffer_glut/framebuffer_glut.cpp: Change the way the checker
+	pattern is initialised in the case of odd height images, so that
+	the bucket/grid matches. Purely cosmetic but nice. Michel Joron
+
+2003-08-06 10:47  mw_matti
+
+	* libshaderexecenv/shadeops.cpp, render/environment.cpp,
+	render/itexturemap.h, render/shadowmap.cpp, render/texturemap.h:
+	softshadows support
+
+2003-08-06 08:51  pgregory
+
+	* libaqsistypes/ilog.h, libaqsistypes/log.cpp, libaqsistypes/log.h,
+	render/renderer.cpp: Rollback changes to use log4cpp's vprintf
+
+2003-08-05 18:11  mw_matti
+
+	* libaqsistypes/ilog.h, libaqsistypes/log.cpp, libaqsistypes/log.h,
+	render/renderer.cpp: using log4cpp's vprintf
+
+2003-08-05 15:17  mw_matti
+
+	* libaqsistypes/ilog.h, render/renderer.cpp: cleaned up
+
+2003-08-05 13:32  mw_matti
+
+	* libaqsistypes/ilog.h, render/renderer.cpp, render/renderer.h:
+	Custom TIFF error handling
+
+2003-08-03 10:00  pgregory
+
+	* framebuffer_glut/Makefile.am,
+	framebuffer_glut/framebuffer_glut.cpp,
+	framebuffer_glut/framebuffer_glut.dsp,
+	libshaderexecenv/shadeops.cpp: Fix typo in shadaow shadeop (Tim
+	Shead) Add support for writing TIFF image from framebuffer. (Tim
+	Shead)
+
+2003-08-01 17:49  pgregory
+
+	* configure.in, render/version.h: Update to version 0.7.15
+
+2003-08-01 14:25  pgregory
+
+	* ChangeLog: Update changes.
+
 2003-08-01 14:03  pgregory
 
 	* libaqsistypes/Makefile.am, librib2stream/librib2stream.cpp,
