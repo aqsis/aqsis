@@ -262,11 +262,10 @@ class CqImageBuffer
 		// Callbacks to overridden image buffer class to allow display/processing etc.
 		virtual	void	BucketComplete( TqInt iBucket )
 		{
-			
 		}
 		virtual	void	ImageComplete()
 		{}
-		virtual	TqBool	IsEmpty(TqInt iBucket );
+		virtual	TqBool	IsEmpty( TqInt iBucket );
 
 	private:
 		TqBool	m_fQuit;			///< Set by system if a quit has been requested.

@@ -209,10 +209,10 @@ void CqMicroPolyGrid::CalcNormals()
 			if ( iv == vr - 1 )
 			{
 				CqVector3D vecNN( vecN );
-				if( vr > 2 )
+				if ( vr > 2 )
 				{
 					CqVector3D vecNm1, vecNm2;
-					pNg->GetNormal( vecNm1, ( ( vr - 1 ) * ( ur + 1 ) ) + iu ); 
+					pNg->GetNormal( vecNm1, ( ( vr - 1 ) * ( ur + 1 ) ) + iu );
 					pNg->GetNormal( vecNm2, ( ( vr - 2 ) * ( ur + 1 ) ) + iu );
 					vecNN = ( vecNm1 - vecNm2 ) + vecN;
 				}
@@ -220,11 +220,11 @@ void CqMicroPolyGrid::CalcNormals()
 			}
 		}
 		// Set the last one on the row to the same.
-		CqVector3D vecNN(vecN);
-		if( igrid > 2 )
+		CqVector3D vecNN( vecN );
+		if ( igrid > 2 )
 		{
 			CqVector3D vecNm1, vecNm2;
-			pNg->GetNormal( vecNm1, igrid - 1 ); 
+			pNg->GetNormal( vecNm1, igrid - 1 );
 			pNg->GetNormal( vecNm2, igrid - 2 );
 			vecNN = ( vecNm1 - vecNm2 ) + vecN;
 		}
@@ -232,11 +232,11 @@ void CqMicroPolyGrid::CalcNormals()
 		igrid++;
 	}
 	// Set the very last corner value to the last normal calculated.
-	CqVector3D vecNN(vecN);
-	if( vr > 2 && ur > 2 )
+	CqVector3D vecNN( vecN );
+	if ( vr > 2 && ur > 2 )
 	{
 		CqVector3D vecNm1, vecNm2;
-		pNg->GetNormal( vecNm1, ( vr - 1 ) * ( ur - 1 ) - 1 ); 
+		pNg->GetNormal( vecNm1, ( vr - 1 ) * ( ur - 1 ) - 1 );
 		pNg->GetNormal( vecNm2, ( vr - 2 ) * ( ur - 2 ) - 1 );
 		vecNN = ( vecNm1 - vecNm2 ) + vecN;
 	}
@@ -258,7 +258,7 @@ void CqMicroPolyGrid::Shade()
 
 	static CqVector3D	vecE( 0, 0, 0 );
 	static CqVector3D	Defvec( 0, 0, 0 );
-	static TqFloat		DefFloat = 0.0f;
+	static TqFloat	DefFloat = 0.0f;
 
 	CqStats& theStats = QGetRenderContext() ->Stats();
 
@@ -302,54 +302,40 @@ void CqMicroPolyGrid::Shade()
 
 			if ( GridX < uRes )
 			{
-				u()->GetValue( v1, i + 1 );
-				u()->GetValue( v2, i );
+				u() ->GetValue( v1, i + 1 );
+				u() ->GetValue( v2, i );
 				du() ->SetFloat( v1 - v2, i );
 			}
 			else
 			{
-				u()->GetValue( v1, i );
-				u()->GetValue( v2, i - 1 );
+				u() ->GetValue( v1, i );
+				u() ->GetValue( v2, i - 1 );
 				du() ->SetFloat( v1 - v2, i );
 			}
 		}
-/*		TqFloat u1, u2, u3;
-		u() ->GetFloat( u1, 0 );
-		u() ->GetFloat( u2, uGridRes() );
-		u() ->GetFloat( u3, vGridRes() * ( uGridRes() + 1 ) );
-		TqFloat adu = ( ( u2 - u1 ) / uGridRes() );
-		TqFloat bdu = ( ( u3 - u1 ) / vGridRes() );
-		du() ->SetFloat( adu + bdu );*/
 	}
 	if ( USES( lUses, EnvVars_dv ) )
 	{
 		for ( i = gsmin1; i >= 0; i-- )
 		{
-			TqFloat v1,v2;
+			TqFloat v1, v2;
 			TqInt uRes = uGridRes();
 			TqInt vRes = vGridRes();
 			TqInt GridY = ( i / ( uRes + 1 ) );
 
 			if ( GridY < vRes )
 			{
-				v()->GetValue( v1, i + uRes + 1 );
-				v()->GetValue( v2, i );
-				dv()->SetFloat( v1 - v2, i );
+				v() ->GetValue( v1, i + uRes + 1 );
+				v() ->GetValue( v2, i );
+				dv() ->SetFloat( v1 - v2, i );
 			}
 			else
 			{
-				v()->GetValue( v1, i );
-				v()->GetValue( v2, i - ( uRes + 1 ) );
-				dv()->SetFloat( v1 - v2, i );
+				v() ->GetValue( v1, i );
+				v() ->GetValue( v2, i - ( uRes + 1 ) );
+				dv() ->SetFloat( v1 - v2, i );
 			}
 		}
-/*		TqFloat v1, v2, v3;
-		v() ->GetFloat( v1, 0 );
-		v() ->GetFloat( v2, uGridRes() );
-		v() ->GetFloat( v3, vGridRes() * ( uGridRes() + 1 ) );
-		TqFloat adv = ( ( v2 - v1 ) / uGridRes() );
-		TqFloat bdv = ( ( v3 - v1 ) / vGridRes() );
-		dv() ->SetFloat( adv + bdv );*/
 	}
 
 	if ( USES( lUses, EnvVars_Ci ) ) Ci() ->SetColor( gColBlack );
@@ -512,56 +498,56 @@ void CqMicroPolyGrid::Shade()
  */
 void CqMicroPolyGrid::DeleteVariables( TqBool all )
 {
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Cs" ) || all )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Cs" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Cs );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Os" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Os" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Os );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "du" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "du" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_du );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "dv" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "dv" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_dv );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "L" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "L" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_L );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Cl" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Cl" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Cl );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Ol" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ol" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ol );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "dPdu" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "dPdu" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_dPdu );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "dPdv" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "dPdv" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_dPdv );
 
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "s" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "s" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_s );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "t" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "t" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_t );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "I" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "I" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_I );
 
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Ps" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ps" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ps );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "E" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "E" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_E );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "ncomps" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "ncomps" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_ncomps );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "time" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "time" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_time );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "alpha" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "alpha" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_alpha );
 
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "N" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "N" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_N );
-	if( /*!QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "u" ) ||*/ all  )		// \note: Needed by trim curves, need to work out how to check for their existence.
+	if (  /*!QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "u" ) ||*/ all ) 		// \note: Needed by trim curves, need to work out how to check for their existence.
 		m_pShaderExecEnv->DeleteVariable( EnvVars_u );
-	if( /*!QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "v" ) ||*/ all  )		// \note: Needed by trim curves, need to work out how to check for their existence.
+	if (  /*!QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "v" ) ||*/ all ) 		// \note: Needed by trim curves, need to work out how to check for their existence.
 		m_pShaderExecEnv->DeleteVariable( EnvVars_v );
-	if( all  )
+	if ( all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_P );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Ng" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ng" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ng );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Ci" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ci );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Oi" ) || all  )
+	if ( !QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) || all )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Oi );
 }
 
@@ -584,7 +570,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 
 	QGetRenderContext() ->Stats().MakeProject().Start();
 	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
-	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( 0 ) ) );
+	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pSurface() ->pTransform() ->matObjectToWorld( pSurface() ->pTransform() ->Time( 0 ) ) );
 
 	// Transform the whole grid to hybrid camera/raster space
 	CqVector3D* pP;
@@ -592,17 +578,17 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 
 	// Get an array of P's for all time positions.
 	std::vector<std::vector<CqVector3D> > aaPtimes;
-	aaPtimes.resize( pSurface()->pTransform()->cTimes() );
+	aaPtimes.resize( pSurface() ->pTransform() ->cTimes() );
 
-	TqInt iTime, tTime = pSurface()->pTransform()->cTimes();
+	TqInt iTime, tTime = pSurface() ->pTransform() ->cTimes();
 	CqMatrix matObjectToCameraT;
 	register TqInt i;
 	TqInt gsmin1;
 	gsmin1 = GridSize() - 1;
 
-	for( iTime = 1; iTime < tTime; iTime++ )
+	for ( iTime = 1; iTime < tTime; iTime++ )
 	{
-		matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
+		matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface() ->pTransform() ->matObjectToWorld( pSurface() ->pTransform() ->Time( iTime ) ) );
 		aaPtimes[ iTime ].resize( gsmin1 + 1 );
 
 		for ( i = gsmin1; i >= 0; i-- )
@@ -701,14 +687,14 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 					fTrimmed = TqTrue;
 			}
 
-			if( tTime > 1 )
+			if ( tTime > 1 )
 			{
-				CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion();
+				CqMicroPolygonMotion * pNew = new CqMicroPolygonMotion();
 				pNew->SetGrid( this );
 				pNew->SetIndex( iIndex );
-				if( fTrimmed )	pNew->MarkTrimmed();
+				if ( fTrimmed ) pNew->MarkTrimmed();
 				for ( iTime = 0; iTime < tTime; iTime++ )
-					pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], pSurface()->pTransform()->Time( iTime ) );
+					pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], pSurface() ->pTransform() ->Time( iTime ) );
 				pImage->AddMPG( pNew );
 			}
 			else
@@ -716,7 +702,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 				CqMicroPolygon *pNew = new CqMicroPolygon();
 				pNew->SetGrid( this );
 				pNew->SetIndex( iIndex );
-				if( fTrimmed )	pNew->MarkTrimmed();
+				if ( fTrimmed ) pNew->MarkTrimmed();
 				pNew->Initialise();
 				pNew->GetTotalBound( TqTrue );
 				pImage->AddMPG( pNew );
@@ -772,9 +758,9 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 	TqInt gsmin1;
 	gsmin1 = pGridA->GridSize() - 1;
 
-	for( iTime = 0; iTime < tTime; iTime++ )
+	for ( iTime = 0; iTime < tTime; iTime++ )
 	{
-		matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
+		matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface() ->pTransform() ->matObjectToWorld( pSurface() ->pTransform() ->Time( iTime ) ) );
 		aaPtimes[ iTime ].resize( gsmin1 + 1 );
 
 		// Transform the whole grid to hybrid camera/raster space
@@ -918,10 +904,10 @@ void CqMicroPolygon::Initialise()
 	TqShort CodeB = 1;
 	TqShort CodeC = 2;
 	TqShort CodeD = 3;
-	
+
 	const CqVector3D* pP;
-	m_pGrid->P()->GetPointPtr( pP );
-	if( (pP[ IndexA ] - pP[ IndexB ]).Magnitude2() < 1e-8 )	
+	m_pGrid->P() ->GetPointPtr( pP );
+	if ( ( pP[ IndexA ] - pP[ IndexB ] ).Magnitude2() < 1e-8 )
 	{
 		// A--B is degenerate
 		IndexB = IndexC;
@@ -931,7 +917,7 @@ void CqMicroPolygon::Initialise()
 		IndexD = -1;
 		CodeD = -1;
 	}
-	else if( (pP[ IndexB ] - pP[ IndexC ]).Magnitude2() < 1e-8 )	
+	else if ( ( pP[ IndexB ] - pP[ IndexC ] ).Magnitude2() < 1e-8 )
 	{
 		// B--C is degenerate
 		IndexB = IndexC;
@@ -941,7 +927,7 @@ void CqMicroPolygon::Initialise()
 		IndexD = -1;
 		CodeD = -1;
 	}
-	else if( (pP[ IndexC ] - pP[ IndexD ]).Magnitude2() < 1e-8 )	
+	else if ( ( pP[ IndexC ] - pP[ IndexD ] ).Magnitude2() < 1e-8 )
 	{
 		// C--D is degenerate
 		IndexC = IndexD;
@@ -949,7 +935,7 @@ void CqMicroPolygon::Initialise()
 		IndexD = -1;
 		CodeD = -1;
 	}
-	else if( (pP[ IndexD ] - pP[ IndexA ]).Magnitude2() < 1e-8 )	
+	else if ( ( pP[ IndexD ] - pP[ IndexA ] ).Magnitude2() < 1e-8 )
 	{
 		// D--A is degenerate
 		IndexD = IndexC;
@@ -969,15 +955,15 @@ void CqMicroPolygon::Initialise()
 
 	if ( !fFlip )
 	{
-		m_IndexCode = ( CodeD == -1 ) ? 
-						(( CodeA & 0x3 ) | (( CodeC &0x3 ) << 2 ) | (( CodeB & 0x3 ) << 4 ) | 0x8000 ) :
-						(( CodeA & 0x3 ) | (( CodeD &0x3 ) << 2 ) | (( CodeC & 0x3 ) << 4 ) | (( CodeB & 0x3 ) << 6 ) );
+		m_IndexCode = ( CodeD == -1 ) ?
+		              ( ( CodeA & 0x3 ) | ( ( CodeC & 0x3 ) << 2 ) | ( ( CodeB & 0x3 ) << 4 ) | 0x8000 ) :
+		              ( ( CodeA & 0x3 ) | ( ( CodeD & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | ( ( CodeB & 0x3 ) << 6 ) );
 	}
 	else
 	{
-		m_IndexCode = ( CodeD == -1 ) ? 
-						(( CodeA & 0x3 ) | (( CodeB &0x3 ) << 2 ) | (( CodeC & 0x3 ) << 4 ) | 0x8000 ) :
-						(( CodeA & 0x3 ) | (( CodeB &0x3 ) << 2 ) | (( CodeC & 0x3 ) << 4 ) | (( CodeD & 0x3 ) << 6 ) );
+		m_IndexCode = ( CodeD == -1 ) ?
+		              ( ( CodeA & 0x3 ) | ( ( CodeB & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | 0x8000 ) :
+		              ( ( CodeA & 0x3 ) | ( ( CodeB & 0x3 ) << 2 ) | ( ( CodeC & 0x3 ) << 4 ) | ( ( CodeD & 0x3 ) << 6 ) );
 	}
 }
 
@@ -1004,7 +990,7 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
 	x0 = x1; y0 = y1; x1 = PointA().x(); y1 = PointA().y();
 
 	// Check for degeneracy.
-	if ( !(IsDegenerate()) )
+	if ( !( IsDegenerate() ) )
 		if ( ( r4 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
 
 	CqVector3D vecN = ( PointA() - PointB() ) % ( PointC() - PointB() );
@@ -1156,38 +1142,38 @@ TqBool CqMicroPolygon::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat 
 
 TqBool CqMicroPolygon::SampleDof( const CqVector2D& vecSample, TqFloat time, const TqFloat* DofParameters, const CqVector2D& LensPosition, TqFloat& D )
 {
-/*	TqFloat C;
+	TqFloat C;
 
-	C = CircleOfConfusion( DofParameters, m_vecPoints[0].z() );
+	C = CircleOfConfusion( DofParameters, PointA().z() );
 	CqVector3D p0(
-		m_vecPoints[0].x() + C * LensPosition.x(),
-		m_vecPoints[0].y() + C * LensPosition.y(),
-		m_vecPoints[0].z()
+	    PointA().x() + C * LensPosition.x(),
+	    PointA().y() + C * LensPosition.y(),
+	    PointA().z()
 	);
-	
-	C = CircleOfConfusion( DofParameters, m_vecPoints[1].z() );
+
+	C = CircleOfConfusion( DofParameters, PointB().z() );
 	CqVector3D p1(
-		m_vecPoints[1].x() + C * LensPosition.x(),
-		m_vecPoints[1].y() + C * LensPosition.y(),
-		m_vecPoints[1].z()
+	    PointB().x() + C * LensPosition.x(),
+	    PointB().y() + C * LensPosition.y(),
+	    PointB().z()
 	);
 
-	C = CircleOfConfusion( DofParameters, m_vecPoints[2].z() );
+	C = CircleOfConfusion( DofParameters, PointC().z() );
 	CqVector3D p2(
-		m_vecPoints[2].x() + C * LensPosition.x(),
-		m_vecPoints[2].y() + C * LensPosition.y(),
-		m_vecPoints[2].z()
+	    PointC().x() + C * LensPosition.x(),
+	    PointC().y() + C * LensPosition.y(),
+	    PointC().z()
 	);
 
-	C = CircleOfConfusion( DofParameters, m_vecPoints[3].z() );
+	C = CircleOfConfusion( DofParameters, PointD().z() );
 	CqVector3D p3(
-		m_vecPoints[3].x() + C * LensPosition.x(),
-		m_vecPoints[3].y() + C * LensPosition.y(),
-		m_vecPoints[3].z()
+	    PointD().x() + C * LensPosition.x(),
+	    PointD().y() + C * LensPosition.y(),
+	    PointD().z()
 	);
 
-	CqMovingMicroPolygonKey newpoly(p0, p1, p2, p3);
-	return newpoly.fContains( vecSample, D );*/
+	CqMovingMicroPolygonKey newpoly( p0, p1, p2, p3 );
+	//return newpoly.fContains( vecSample, D );
 	return fContains( vecSample, D );
 }
 
@@ -1198,12 +1184,12 @@ TqBool CqMicroPolygon::SampleDof( const CqVector2D& vecSample, TqFloat time, con
 
 CqBound CqMicroPolygon::GetTotalBound( TqBool fForce )
 {
-	CqVector3D* pP;
-	m_pGrid->P()->GetPointPtr( pP );
+	CqVector3D * pP;
+	m_pGrid->P() ->GetPointPtr( pP );
 	if ( fForce )
 	{
 		// Calculate the boundary, and store the indexes in the cache.
-		const CqVector3D& A = pP[ m_Index ];
+		const CqVector3D & A = pP[ m_Index ];
 		const CqVector3D& B = pP[ m_Index + 1 ];
 		const CqVector3D& C = pP[ m_Index + m_pGrid->uGridRes() + 2 ];
 		const CqVector3D& D = pP[ m_Index + m_pGrid->uGridRes() + 1 ];
@@ -1215,49 +1201,49 @@ CqBound CqMicroPolygon::GetTotalBound( TqBool fForce )
 		TqShort BCMinZ = 0;
 		TqShort BCMaxZ = 0;
 		m_BoundCode = 0xe4;
-		TqInt TempIndexTable[4] = {	GetCodedIndex( m_BoundCode, 0 ),
-									GetCodedIndex( m_BoundCode, 1 ),
-									GetCodedIndex( m_BoundCode, 2 ),
-									GetCodedIndex( m_BoundCode, 3 ) };
-		if( B.x() < pP[ TempIndexTable[ BCMinX ] ].x() )	BCMinX = 1;
-		if( B.x() > pP[ TempIndexTable[ BCMaxX ] ].x() )	BCMaxX = 1;
-		if( B.y() < pP[ TempIndexTable[ BCMinY ] ].y() )	BCMinY = 1;
-		if( B.y() > pP[ TempIndexTable[ BCMaxY ] ].y() )	BCMaxY = 1;
-		if( B.z() < pP[ TempIndexTable[ BCMinZ ] ].z() )	BCMinZ = 1;
-		if( B.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() )	BCMaxZ = 1;
+		TqInt TempIndexTable[ 4 ] = {	GetCodedIndex( m_BoundCode, 0 ),
+		                              GetCodedIndex( m_BoundCode, 1 ),
+		                              GetCodedIndex( m_BoundCode, 2 ),
+		                              GetCodedIndex( m_BoundCode, 3 ) };
+		if ( B.x() < pP[ TempIndexTable[ BCMinX ] ].x() ) BCMinX = 1;
+		if ( B.x() > pP[ TempIndexTable[ BCMaxX ] ].x() ) BCMaxX = 1;
+		if ( B.y() < pP[ TempIndexTable[ BCMinY ] ].y() ) BCMinY = 1;
+		if ( B.y() > pP[ TempIndexTable[ BCMaxY ] ].y() ) BCMaxY = 1;
+		if ( B.z() < pP[ TempIndexTable[ BCMinZ ] ].z() ) BCMinZ = 1;
+		if ( B.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() ) BCMaxZ = 1;
 
-		if( C.x() < pP[ TempIndexTable[ BCMinX ] ].x() )	BCMinX = 2;
-		if( C.x() > pP[ TempIndexTable[ BCMaxX ] ].x() )	BCMaxX = 2;
-		if( C.y() < pP[ TempIndexTable[ BCMinY ] ].y() )	BCMinY = 2;
-		if( C.y() > pP[ TempIndexTable[ BCMaxY ] ].y() )	BCMaxY = 2;
-		if( C.z() < pP[ TempIndexTable[ BCMinZ ] ].z() )	BCMinZ = 2;
-		if( C.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() )	BCMaxZ = 2;
+		if ( C.x() < pP[ TempIndexTable[ BCMinX ] ].x() ) BCMinX = 2;
+		if ( C.x() > pP[ TempIndexTable[ BCMaxX ] ].x() ) BCMaxX = 2;
+		if ( C.y() < pP[ TempIndexTable[ BCMinY ] ].y() ) BCMinY = 2;
+		if ( C.y() > pP[ TempIndexTable[ BCMaxY ] ].y() ) BCMaxY = 2;
+		if ( C.z() < pP[ TempIndexTable[ BCMinZ ] ].z() ) BCMinZ = 2;
+		if ( C.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() ) BCMaxZ = 2;
 
-		if( !IsDegenerate() )
+		if ( !IsDegenerate() )
 		{
-			if( D.x() < pP[ TempIndexTable[ BCMinX ] ].x() )	BCMinX = 3;
-			if( D.x() > pP[ TempIndexTable[ BCMaxX ] ].x() )	BCMaxX = 3;
-			if( D.y() < pP[ TempIndexTable[ BCMinY ] ].y() )	BCMinY = 3;
-			if( D.y() > pP[ TempIndexTable[ BCMaxY ] ].y() )	BCMaxY = 3;
-			if( D.z() < pP[ TempIndexTable[ BCMinZ ] ].z() )	BCMinZ = 3;
-			if( D.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() )	BCMaxZ = 3;
+			if ( D.x() < pP[ TempIndexTable[ BCMinX ] ].x() ) BCMinX = 3;
+			if ( D.x() > pP[ TempIndexTable[ BCMaxX ] ].x() ) BCMaxX = 3;
+			if ( D.y() < pP[ TempIndexTable[ BCMinY ] ].y() ) BCMinY = 3;
+			if ( D.y() > pP[ TempIndexTable[ BCMaxY ] ].y() ) BCMaxY = 3;
+			if ( D.z() < pP[ TempIndexTable[ BCMinZ ] ].z() ) BCMinZ = 3;
+			if ( D.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() ) BCMaxZ = 3;
 		}
-		m_BoundCode = (( BCMinX & 0x3 ) | 
-					   (( BCMinY &0x3 ) << 2 ) | 
-					   (( BCMinZ & 0x3 ) << 4 ) | 
-					   (( BCMaxX & 0x3 ) << 6 ) | 
-					   (( BCMaxY & 0x3 ) << 8 ) |
-					   (( BCMaxZ & 0x3 ) << 10 ) );
+		m_BoundCode = ( ( BCMinX & 0x3 ) |
+		                ( ( BCMinY & 0x3 ) << 2 ) |
+		                ( ( BCMinZ & 0x3 ) << 4 ) |
+		                ( ( BCMaxX & 0x3 ) << 6 ) |
+		                ( ( BCMaxY & 0x3 ) << 8 ) |
+		                ( ( BCMaxZ & 0x3 ) << 10 ) );
 	}
-	CqBound B( pP[ GetCodedIndex( m_BoundCode, 0 ) ].x(), pP[ GetCodedIndex( m_BoundCode, 1 ) ].y(), pP[ GetCodedIndex( m_BoundCode, 2 ) ].z(), 
-			   pP[ GetCodedIndex( m_BoundCode, 3 ) ].x(), pP[ GetCodedIndex( m_BoundCode, 4 ) ].y(), pP[ GetCodedIndex( m_BoundCode, 5 ) ].z() );
+	CqBound B( pP[ GetCodedIndex( m_BoundCode, 0 ) ].x(), pP[ GetCodedIndex( m_BoundCode, 1 ) ].y(), pP[ GetCodedIndex( m_BoundCode, 2 ) ].z(),
+	           pP[ GetCodedIndex( m_BoundCode, 3 ) ].x(), pP[ GetCodedIndex( m_BoundCode, 4 ) ].y(), pP[ GetCodedIndex( m_BoundCode, 5 ) ].z() );
 
 	// Adjust for DOF
 	if ( QGetRenderContext() ->UsingDepthOfField() )
 	{
-		const TqFloat* dofdata = QGetRenderContext() ->GetDepthOfFieldData();
+		const TqFloat * dofdata = QGetRenderContext() ->GetDepthOfFieldData();
 
-		TqFloat C = MAX( CircleOfConfusion(dofdata, B.vecMin().z()), CircleOfConfusion(dofdata, B.vecMax().z()) );
+		TqFloat C = MAX( CircleOfConfusion( dofdata, B.vecMin().z() ), CircleOfConfusion( dofdata, B.vecMax().z() ) );
 
 		B.vecMin().x( B.vecMin().x() - C );
 		B.vecMin().y( B.vecMin().y() - C );
@@ -1278,12 +1264,12 @@ CqBound CqMicroPolygonMotion::GetTotalBound( TqBool fForce )
 {
 	if ( fForce )
 	{
-		assert( NULL != m_Keys[0] );
+		assert( NULL != m_Keys[ 0 ] );
 
-		m_Bound = m_Keys[0]->GetTotalBound();
+		m_Bound = m_Keys[ 0 ] ->GetTotalBound();
 		std::vector<CqMovingMicroPolygonKey*>::iterator i;
 		for ( i = m_Keys.begin(); i != m_Keys.end(); i++ )
-			m_Bound.Encapsulate( (*i)->GetTotalBound() );
+			m_Bound.Encapsulate( ( *i ) ->GetTotalBound() );
 	}
 	return ( m_Bound );
 }
@@ -1296,14 +1282,14 @@ void CqMicroPolygonMotion::BuildBoundList()
 	m_BoundList.Clear();
 	TqInt cBounds = 4;
 
-	assert( NULL != m_Keys[0] );
+	assert( NULL != m_Keys[ 0 ] );
 
-	CqBound start = m_Keys[0]->GetTotalBound();
+	CqBound start = m_Keys[ 0 ] ->GetTotalBound();
 	TqFloat	startTime = m_Times[ 0 ];
 	TqInt cTimes = m_Keys.size();
 	for ( TqInt i = 1; i < cTimes; i++ )
 	{
-		CqBound end = m_Keys[i]->GetTotalBound();
+		CqBound end = m_Keys[ i ] ->GetTotalBound();
 		CqBound mid0( start );
 		CqBound mid1;
 		TqFloat endTime = m_Times[ i ];
@@ -1318,7 +1304,7 @@ void CqMicroPolygonMotion::BuildBoundList()
 		{
 			mid1.vecMin() = delta * ( end.vecMin() - start.vecMin() ) + start.vecMin();
 			mid1.vecMax() = delta * ( end.vecMax() - start.vecMax() ) + start.vecMax();
-			m_BoundList.Set( d-1, mid0.Combine( mid1 ), time );
+			m_BoundList.Set( d - 1, mid0.Combine( mid1 ), time );
 			time = delta * ( endTime - startTime ) + startTime;
 			mid0 = mid1;
 			delta += delta;
@@ -1340,7 +1326,7 @@ void CqMicroPolygonMotion::BuildBoundList()
 
 TqBool CqMicroPolygonMotion::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time )
 {
-	if( fContains( vecSample, D, time ) )
+	if ( fContains( vecSample, D, time ) )
 	{
 		// Now check if it is trimmed.
 		if ( IsTrimmed() )
@@ -1348,35 +1334,35 @@ TqBool CqMicroPolygonMotion::Sample( const CqVector2D& vecSample, TqFloat& D, Tq
 			// Get the required trim curve sense, if specified, defaults to "inside".
 
 			/// \todo: Implement trimming of motion blurred surfaces!
-/*			const CqString * pattrTrimSense = pGrid() ->pAttributes() ->GetStringAttribute( "trimcurve", "sense" );
-			CqString strTrimSense( "inside" );
-			if ( pattrTrimSense != 0 ) strTrimSense = pattrTrimSense[ 0 ];
-			TqBool bOutside = strTrimSense == "outside";
-
-			CqVector2D vecUV = ReverseBilinear( vecSample );
-
-			TqFloat u, v;
-
-			pGrid() ->u() ->GetFloat( u, m_Index );
-			pGrid() ->v() ->GetFloat( v, m_Index );
-			CqVector2D uvA( u, v );
-
-			pGrid() ->u() ->GetFloat( u, m_Index + 1 );
-			pGrid() ->v() ->GetFloat( v, m_Index + 1 );
-			CqVector2D uvB( u, v );
-
-			pGrid() ->u() ->GetFloat( u, m_Index + pGrid() ->uGridRes() + 1 );
-			pGrid() ->v() ->GetFloat( v, m_Index + pGrid() ->uGridRes() + 1 );
-			CqVector2D uvC( u, v );
-
-			pGrid() ->u() ->GetFloat( u, m_Index + pGrid() ->uGridRes() + 2 );
-			pGrid() ->v() ->GetFloat( v, m_Index + pGrid() ->uGridRes() + 2 );
-			CqVector2D uvD( u, v );
-
-			CqVector2D vR = BilinearEvaluate( uvA, uvB, uvC, uvD, vecUV.x(), vecUV.y() );
-
-			if ( pGrid() ->pSurface() ->bCanBeTrimmed() && pGrid() ->pSurface() ->bIsPointTrimmed( vR ) && !bOutside )
-				return ( TqFalse );*/
+			/*			const CqString * pattrTrimSense = pGrid() ->pAttributes() ->GetStringAttribute( "trimcurve", "sense" );
+						CqString strTrimSense( "inside" );
+						if ( pattrTrimSense != 0 ) strTrimSense = pattrTrimSense[ 0 ];
+						TqBool bOutside = strTrimSense == "outside";
+			 
+						CqVector2D vecUV = ReverseBilinear( vecSample );
+			 
+						TqFloat u, v;
+			 
+						pGrid() ->u() ->GetFloat( u, m_Index );
+						pGrid() ->v() ->GetFloat( v, m_Index );
+						CqVector2D uvA( u, v );
+			 
+						pGrid() ->u() ->GetFloat( u, m_Index + 1 );
+						pGrid() ->v() ->GetFloat( v, m_Index + 1 );
+						CqVector2D uvB( u, v );
+			 
+						pGrid() ->u() ->GetFloat( u, m_Index + pGrid() ->uGridRes() + 1 );
+						pGrid() ->v() ->GetFloat( v, m_Index + pGrid() ->uGridRes() + 1 );
+						CqVector2D uvC( u, v );
+			 
+						pGrid() ->u() ->GetFloat( u, m_Index + pGrid() ->uGridRes() + 2 );
+						pGrid() ->v() ->GetFloat( v, m_Index + pGrid() ->uGridRes() + 2 );
+						CqVector2D uvD( u, v );
+			 
+						CqVector2D vR = BilinearEvaluate( uvA, uvB, uvC, uvD, vecUV.x(), vecUV.y() );
+			 
+						if ( pGrid() ->pSurface() ->bCanBeTrimmed() && pGrid() ->pSurface() ->bIsPointTrimmed( vR ) && !bOutside )
+							return ( TqFalse );*/
 		}
 
 		if ( pGrid() ->fTriangular() )
@@ -1424,10 +1410,10 @@ TqBool CqMicroPolygonMotion::Sample( const CqVector2D& vecSample, TqFloat& D, Tq
 
 void CqMicroPolygonMotion::AppendKey( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD, TqFloat time )
 {
-//	assert( time >= m_Times.back() );
+	//	assert( time >= m_Times.back() );
 
 	// Add a new planeset at the specified time.
-	CqMovingMicroPolygonKey* pMP = new CqMovingMicroPolygonKey( vA, vB, vC, vD );
+	CqMovingMicroPolygonKey * pMP = new CqMovingMicroPolygonKey( vA, vB, vC, vD );
 	m_Times.push_back( time );
 	m_Keys.push_back( pMP );
 	if ( m_Times.size() == 1 )
@@ -1466,10 +1452,10 @@ TqBool CqMicroPolygonMotion::fContains( const CqVector2D& vecP, TqFloat& Depth, 
 		}
 	}
 
-	if( Exact )
+	if ( Exact )
 	{
-		CqMovingMicroPolygonKey* pMP1 = m_Keys[ iIndex ];
-		return( pMP1->fContains( vecP, Depth, time ) );
+		CqMovingMicroPolygonKey * pMP1 = m_Keys[ iIndex ];
+		return ( pMP1->fContains( vecP, Depth, time ) );
 	}
 	else
 	{
@@ -1480,20 +1466,20 @@ TqBool CqMicroPolygonMotion::fContains( const CqVector2D& vecP, TqFloat& Depth, 
 		TqFloat r1, r2, r3, r4;
 		TqFloat x = vecP.x(), y = vecP.y();
 		TqFloat x0 = ( F1 * pMP1->m_Point0.x() ) + ( Fraction * pMP2->m_Point0.x() ),
-				y0 = ( F1 * pMP1->m_Point0.y() ) + ( Fraction * pMP2->m_Point0.y() ),
-				x1 = ( F1 * pMP1->m_Point1.x() ) + ( Fraction * pMP2->m_Point1.x() ),
-				y1 = ( F1 * pMP1->m_Point1.y() ) + ( Fraction * pMP2->m_Point1.y() );
+		             y0 = ( F1 * pMP1->m_Point0.y() ) + ( Fraction * pMP2->m_Point0.y() ),
+		                  x1 = ( F1 * pMP1->m_Point1.x() ) + ( Fraction * pMP2->m_Point1.x() ),
+		                       y1 = ( F1 * pMP1->m_Point1.y() ) + ( Fraction * pMP2->m_Point1.y() );
 		TqFloat x0_hold = x0;
 		TqFloat y0_hold = y0;
 		if ( ( r1 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
-		x0 = x1; 
-		y0 = y1; 
-		x1 = ( F1 * pMP1->m_Point2.x() ) + ( Fraction * pMP2->m_Point2.x() ); 
+		x0 = x1;
+		y0 = y1;
+		x1 = ( F1 * pMP1->m_Point2.x() ) + ( Fraction * pMP2->m_Point2.x() );
 		y1 = ( F1 * pMP1->m_Point2.y() ) + ( Fraction * pMP2->m_Point2.y() );
 		if ( ( r2 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
-		x0 = x1; 
-		y0 = y1; 
-		x1 = ( F1 * pMP1->m_Point3.x() ) + ( Fraction * pMP2->m_Point3.x() ); 
+		x0 = x1;
+		y0 = y1;
+		x1 = ( F1 * pMP1->m_Point3.x() ) + ( Fraction * pMP2->m_Point3.x() );
 		y1 = ( F1 * pMP1->m_Point3.y() ) + ( Fraction * pMP2->m_Point3.y() );
 		if ( ( r3 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
 
@@ -1526,7 +1512,7 @@ void CqMovingMicroPolygonKey::Initialise( const CqVector3D& vA, const CqVector3D
 	// Check for degenerate case, if any of the neighbouring points are the same, shuffle them down, and
 	// duplicate the last point exactly. Exact duplication of the last two points is used as a marker in the
 	// fContains function to indicate degeneracy. If more that two points are coincident, we are in real trouble!
-	const CqVector3D& vvB = ( vA - vB ).Magnitude() < 1e-2 ? vC : vB;
+	const CqVector3D & vvB = ( vA - vB ).Magnitude() < 1e-2 ? vC : vB;
 	const CqVector3D& vvC = ( vvB - vC ).Magnitude() < 1e-2 ? vD : vC;
 	const CqVector3D& vvD = ( vvC - vD ).Magnitude() < 1e-2 ? vvC : vD;
 

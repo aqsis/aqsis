@@ -140,7 +140,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 		 */
 		TqBool fTriangular() const
 		{
-			return( m_fTriangular );
+			return ( m_fTriangular );
 		}
 		/** Set this grid as being rendered as a triangle or not.
 		 */
@@ -153,13 +153,13 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 		 */
 		CqBitVector& CulledPolys()
 		{
-			return( m_CulledPolys );
+			return ( m_CulledPolys );
 		}
 		/** Get a reference to the bitvector representing the culled status of each u-poly in this grid.
 		 */
 		const CqBitVector& CulledPolys() const
 		{
-			return( m_CulledPolys );
+			return ( m_CulledPolys );
 		}
 
 		void	Initialise( TqInt cu, TqInt cv, CqSurface* pSurface );
@@ -405,10 +405,10 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 	private:
 		enum EqMicroPolyFlags
 		{
-			MicroPolyFlags_Trimmed			= 0x0001,
-			MicroPolyFlags_Hit				= 0x0002,
-			MicroPolyFlags_PushedForward	= 0x0004,
-		};
+		    MicroPolyFlags_Trimmed	= 0x0001,
+		    MicroPolyFlags_Hit	= 0x0002,
+		    MicroPolyFlags_PushedForward	= 0x0004,
+	};
 
 	public:
 		/** Set up the pointer to the grid this micropoly came from.
@@ -470,7 +470,7 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 		 * \param fForce Flag indicating do not get the stored bound, but recalculate it.
 		 * \return CqBound representing the conservative bound.
 		 */
-		virtual	CqBound			GetTotalBound( TqBool fForce = TqFalse );
+		virtual	CqBound	GetTotalBound( TqBool fForce = TqFalse );
 		/** Get the bound of the micropoly.
 		 * \return CqBound representing the conservative bound.
 		 */
@@ -478,11 +478,11 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 		{
 			return ( GetTotalBound() );
 		}
-		virtual	TqInt			cSubBounds()
+		virtual	TqInt	cSubBounds()
 		{
 			return ( 1 );
 		}
-		virtual	CqBound			SubBound( TqInt iIndex, TqFloat& time )
+		virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time )
 		{
 			time = 0.0f;
 			return ( GetTotalBound() );
@@ -495,7 +495,7 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 		 * \return Boolean success.
 		 */
 		virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
-		
+
 		/** Check if the sample point is within the micropoly.
 		 * \param vecSample 2D sample point.
 		 * \param time The frame time at which to check.
@@ -508,7 +508,7 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 		 */
 		TqBool IsHit() const
 		{
-			return( ( m_Flags & MicroPolyFlags_Hit ) != 0 );
+			return ( ( m_Flags & MicroPolyFlags_Hit ) != 0 );
 		}
 		/** Set the flag to state that the MPG has eben hit by a sample point.
 		 */
@@ -520,7 +520,7 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 		 */
 		TqBool	IsPushedForward() const
 		{
-			return( ( m_Flags & MicroPolyFlags_PushedForward ) != 0 );
+			return ( ( m_Flags & MicroPolyFlags_PushedForward ) != 0 );
 		}
 		/** Set the flag indicating if the micropoly has already beed pushed forward to the next bucket.
 		 */
@@ -534,7 +534,7 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 		}
 		virtual TqBool	IsTrimmed() const
 		{
-			return( ( m_Flags & MicroPolyFlags_Trimmed ) != 0 );
+			return ( ( m_Flags & MicroPolyFlags_Trimmed ) != 0 );
 		}
 
 
@@ -544,56 +544,57 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 
 		virtual const CqVector3D& PointA() const
 		{
-			CqVector3D* pP;
-			m_pGrid->P()->GetPointPtr( pP );
-			return( pP[ GetCodedIndex( m_IndexCode, 0 ) ] );
+			CqVector3D * pP;
+			m_pGrid->P() ->GetPointPtr( pP );
+			return ( pP[ GetCodedIndex( m_IndexCode, 0 ) ] );
 		}
 		virtual const CqVector3D& PointB() const
 		{
-			CqVector3D* pP;
-			m_pGrid->P()->GetPointPtr( pP );
-			return( pP[ GetCodedIndex( m_IndexCode, 1 ) ] );
+			CqVector3D * pP;
+			m_pGrid->P() ->GetPointPtr( pP );
+			return ( pP[ GetCodedIndex( m_IndexCode, 1 ) ] );
 		}
 		virtual const CqVector3D& PointC() const
 		{
-			CqVector3D* pP;
-			m_pGrid->P()->GetPointPtr( pP );
-			return( pP[ GetCodedIndex( m_IndexCode, 2 ) ] );
+			CqVector3D * pP;
+			m_pGrid->P() ->GetPointPtr( pP );
+			return ( pP[ GetCodedIndex( m_IndexCode, 2 ) ] );
 		}
 		virtual const CqVector3D& PointD() const
 		{
-			CqVector3D* pP;
-			m_pGrid->P()->GetPointPtr( pP );
-			return( pP[ GetCodedIndex( m_IndexCode, 3 ) ] );
+			CqVector3D * pP;
+			m_pGrid->P() ->GetPointPtr( pP );
+			return ( pP[ GetCodedIndex( m_IndexCode, 3 ) ] );
 		}
 		virtual const TqBool IsDegenerate() const
 		{
-			return( ( m_IndexCode & 0x8000 ) != 0 );
+			return ( ( m_IndexCode & 0x8000 ) != 0 );
 		}
 
 	protected:
 		TqInt GetCodedIndex( TqShort code, TqShort shift ) const
 		{
-			switch( ( ( code >> ( shift<<1) ) & 0x3 ) )
-			{	
-				case 1:
-					return( m_Index + 1 );
-				case 2:
-					return( m_Index + m_pGrid->uGridRes() + 2 );
-				case 3:
-					return( m_Index + m_pGrid->uGridRes() + 1 );
-				default:
-					return( m_Index );
+			switch ( ( ( code >> ( shift << 1 ) ) & 0x3 ) )
+			{
+					case 1:
+					return ( m_Index + 1 );
+					case 2:
+					return ( m_Index + m_pGrid->uGridRes() + 2 );
+					case 3:
+					return ( m_Index + m_pGrid->uGridRes() + 1 );
+					default:
+					return ( m_Index );
 			}
 		}
-		TqShort				m_IndexCode;
-		TqShort				m_BoundCode;
+		TqShort	m_IndexCode;
+		TqShort	m_BoundCode;
 		CqMicroPolyGrid*	m_pGrid;		///< Pointer to the donor grid.
-		TqInt				m_Index;		///< Index within the donor grid.
+		TqInt	m_Index;		///< Index within the donor grid.
 
-		TqShort				m_Flags;		///< Bitvector of general flags, using EqMicroPolyFlags as bitmasks.
+		TqShort	m_Flags;		///< Bitvector of general flags, using EqMicroPolyFlags as bitmasks.
 	private:
-		CqMicroPolygon( const CqMicroPolygon& From )	{}
+		CqMicroPolygon( const CqMicroPolygon& From )
+	{}
 }
 ;
 
@@ -645,28 +646,29 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		virtual	~CqMicroPolygonMotion()
 		{
 			std::vector<CqMovingMicroPolygonKey*>::iterator	ikey;
-			for( ikey = m_Keys.begin(); ikey != m_Keys.end(); ikey++ )
-				delete( (*ikey) );
+			for ( ikey = m_Keys.begin(); ikey != m_Keys.end(); ikey++ )
+				delete( ( *ikey ) );
 		}
 
 	public:
 		void	AppendKey( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD, TqFloat time );
-		void	DeleteVariables( TqBool all )	{}
+		void	DeleteVariables( TqBool all )
+	{}
 
 		// Overrides from CqMicroPolygon
 		virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
-		virtual	CqBound			GetTotalBound( TqBool fForce = TqFalse );
+		virtual	CqBound	GetTotalBound( TqBool fForce = TqFalse );
 		virtual const CqBound	GetTotalBound() const
 		{
 			return ( m_Bound );
 		}
-		virtual	TqInt			cSubBounds()
+		virtual	TqInt	cSubBounds()
 		{
 			if ( !m_BoundReady )
 				BuildBoundList();
 			return ( m_BoundList.Size() );
 		}
-		virtual	CqBound			SubBound( TqInt iIndex, TqFloat& time )
+		virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time )
 		{
 			if ( !m_BoundReady )
 				BuildBoundList();
@@ -690,7 +692,8 @@ class CqMicroPolygonMotion : public CqMicroPolygon
 		std::vector<CqMovingMicroPolygonKey*>	m_Keys;
 		TqBool	m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
 
-		CqMicroPolygonMotion( const CqMicroPolygonMotion& From ) {}
+		CqMicroPolygonMotion( const CqMicroPolygonMotion& From )
+		{}
 }
 ;
 
