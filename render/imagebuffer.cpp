@@ -1054,7 +1054,7 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 		return ( TqTrue );
 
 	// If the primitive spans the epsilon plane and the hither plane and can be split,
-	if ( Bound.vecMin().z() <= FLT_EPSILON )
+	if ( Bound.vecMin().z() <= 0.0f && Bound.vecMax().z() > FLT_EPSILON )
 	{
 		// Mark the primitive as not dicable.
 		pSurface->ForceUndiceable();
@@ -1112,22 +1112,25 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 	CqBound Bound( pSurface->Bound() );
 
 	// Take into account the displacement bound extension.
-	TqFloat db = 0;
+	TqFloat db = 0.0f;
 	CqString strCoordinateSystem( "object" );
 	const TqFloat* pattrDispclacementBound = pSurface->pAttributes() ->GetFloatAttribute( "displacementbound", "sphere" );
 	const CqString* pattrCoordinateSystem = pSurface->pAttributes() ->GetStringAttribute( "displacementbound", "coordinatesystem" );
 	if ( pattrDispclacementBound != 0 ) db = pattrDispclacementBound[ 0 ];
 	if ( pattrCoordinateSystem != 0 ) strCoordinateSystem = pattrCoordinateSystem[ 0 ];
 
-	CqVector3D	vecDB( db, 0, 0 );
-	CqMatrix matShaderToWorld;
-	if( NULL != pSurface->pAttributes() ->pshadSurface() )
-		matShaderToWorld = pSurface->pAttributes() ->pshadSurface() ->matCurrent();
-	vecDB = QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", matShaderToWorld, pSurface->pTransform() ->matObjectToWorld() ) * vecDB;
-	db = vecDB.Magnitude();
+	if( db != 0.0f )
+	{
+		CqVector3D	vecDB( db, 0, 0 );
+		CqMatrix matShaderToWorld;
+		if( NULL != pSurface->pAttributes() ->pshadSurface() )
+			matShaderToWorld = pSurface->pAttributes() ->pshadSurface() ->matCurrent();
+		vecDB = QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", matShaderToWorld, pSurface->pTransform() ->matObjectToWorld() ) * vecDB;
+		db = vecDB.Magnitude();
 
-	Bound.vecMax() += db;
-	Bound.vecMin() -= db;
+		Bound.vecMax() += db;
+		Bound.vecMin() -= db;
+	}
 
 	// Check if the surface can be culled. (also converts Bound to raster space).
 	if ( CullSurface( Bound, pSurface ) )
@@ -1572,10 +1575,16 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 	{
 		if ( m_fQuit ) return ;
 
-		// Dice & shade the surface if it's small enough...
-		QGetRenderContext() ->Stats().DiceableTimer().Start();
-		TqBool fDiceable = pSurface->Diceable();
-		QGetRenderContext() ->Stats().DiceableTimer().Stop();
+		// If the epsilon check has deemed this surface to be undiceable, don't bother asking.
+		TqBool fDiceable = TqFalse;
+		if( !pSurface->IsUndiceable() )
+		{
+			// Dice & shade the surface if it's small enough...
+			QGetRenderContext() ->Stats().DiceableTimer().Start();
+			fDiceable = pSurface->Diceable();
+			QGetRenderContext() ->Stats().DiceableTimer().Stop();
+		}
+
 		if ( fDiceable )
 		{
 			//Cull surface if it's hidden

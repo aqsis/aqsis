@@ -1,4 +1,4 @@
-// Aqsis
+ // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.com
@@ -178,7 +178,7 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		 */
 		CqBound	GetCachedRasterBound()
 		{
-			if ( m_CachedBound == TqFalse )
+			if ( m_CachedBound == TqFalse && m_fDiceable)
 				CqBasicError( 0, Severity_Fatal, "Bug in Renderer; No cached bound available" );
 
 			return m_Bound;
