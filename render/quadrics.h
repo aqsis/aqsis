@@ -75,7 +75,7 @@ class CqQuadric : public CqSurface
 		// Overrides from CqSurface
 		virtual TqBool	Diceable();
 
-		void	EstimateGridSize();
+		TqUlong	EstimateGridSize();
 		void	Circle( const CqVector3D& O, const CqVector3D& X, const CqVector3D& Y, TqFloat r, TqFloat as, TqFloat ae, std::vector<CqVector3D>& points ) const;
 		CqBound	RevolveForBound( const std::vector<CqVector3D>& profile, const CqVector3D& S, const CqVector3D& Tvec, TqFloat theta ) const;
 

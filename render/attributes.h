@@ -406,10 +406,7 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 				{
 					assert ( string != 0 && string[ 0 ] != 0 );
 
-					TqUchar h = string[ 0 ];
-					for ( TqInt i = 1; string[ i ] != 0; ++i )
-						h = ( h << 4 ) + string[ i ];
-
+					TqUlong h = CqParameter::hash( string );
 					return ( h % tableSize ); // remainder
 				}
 

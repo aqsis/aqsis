@@ -514,7 +514,7 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 
 		enum EqWrapMode smode = pNew->m_smode;
 		char* swrap, *twrap;
-		if ( smode == WrapMode_Periodic)
+		if ( smode == WrapMode_Periodic )
 			swrap = RI_PERIODIC;
 		else if ( smode == WrapMode_Clamp )
 			swrap = RI_CLAMP;
@@ -522,7 +522,7 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 			swrap = RI_BLACK;
 
 		enum EqWrapMode tmode = pNew->m_tmode;
-		if ( tmode == WrapMode_Periodic)
+		if ( tmode == WrapMode_Periodic )
 			twrap = RI_PERIODIC;
 		else if ( tmode == WrapMode_Clamp )
 			twrap = RI_CLAMP;
@@ -861,7 +861,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 			for ( i = 0; i < m_YRes; i++ )
 			{
 				TIFFReadScanline( m_pImage, pdata, i );
-				pdata = reinterpret_cast<void*>(reinterpret_cast<char*>( pdata ) + m_XRes * pTMB->ElemSize() );
+				pdata = reinterpret_cast<void*>( reinterpret_cast<char*>( pdata ) + m_XRes * pTMB->ElemSize() );
 			}
 			m_apSegments.push_back( pTMB );
 		}
@@ -929,10 +929,10 @@ void CqTextureMap::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, 
 	TqFloat div = 0.0;
 	TqFloat mul;
 	TqInt isample;
-	
+
 	// Clear the accumulator
 	accum.assign( SamplesPerPixel(), 0.0f );
-	
+
 	if ( directory )
 	{
 		TqInt i, j;
@@ -950,7 +950,7 @@ void CqTextureMap::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, 
 				TqInt xpos = ( ( x * xdelta ) + i );
 
 				/* ponderate the value */
-				for( isample = 0; isample < SamplesPerPixel(); isample++ )
+				for ( isample = 0; isample < SamplesPerPixel(); isample++ )
 					accum[ isample ] += ( pData->GetValue( xpos, ypos, isample ) ) * mul;
 
 				/* accumulate the ponderation factor */
@@ -959,13 +959,13 @@ void CqTextureMap::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, 
 		}
 
 		/* use the accumulated ponderation factor */
-		for( isample = 0; isample < SamplesPerPixel(); isample++ )
+		for ( isample = 0; isample < SamplesPerPixel(); isample++ )
 			accum[ isample ] /= static_cast<TqFloat>( div );
 	}
 	else
 	{
 		/* copy the byte don't bother much */
-		for( isample = 0; isample < SamplesPerPixel(); isample++ )
+		for ( isample = 0; isample < SamplesPerPixel(); isample++ )
 			accum[ isample ] = ( pData->GetValue( x, ( m_YRes - y - 1 ), isample ) );
 
 	}
@@ -978,7 +978,7 @@ void CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 	if ( m_pImage != 0 )
 	{
 		// Read the whole image into a buffer.
-		CqTextureMapBuffer* pBuffer = GetBuffer(0,0,0, fProtectBuffers);
+		CqTextureMapBuffer * pBuffer = GetBuffer( 0, 0, 0, fProtectBuffers );
 
 		TqInt m_xres = m_XRes;
 		TqInt m_yres = m_YRes;
@@ -998,7 +998,7 @@ void CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 					{
 						ImageFilterVal( pBuffer, x, y, directory, accum );
 						for ( TqInt sample = 0; sample < m_SamplesPerPixel; sample++ )
-							pTMB->SetValue(x, y, sample, accum[ sample ] );
+							pTMB->SetValue( x, y, sample, accum[ sample ] );
 					}
 				}
 				m_apSegments.push_back( pTMB );
@@ -1027,43 +1027,46 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 	TqFloat ptwidth = 1.0f;
 
 	// Get parameters out of the map.
-	if( paramMap.find("width") != paramMap.end() )
+	if ( paramMap.size() != 0 )
 	{
-		paramMap["width"]->GetFloat( pswidth );
-		ptwidth = pswidth;
+		if ( paramMap.find( "width" ) != paramMap.end() )
+		{
+			paramMap[ "width" ] ->GetFloat( pswidth );
+			ptwidth = pswidth;
+		}
+		else
+		{
+			if ( paramMap.find( "swidth" ) != paramMap.end() )
+				paramMap[ "swidth" ] ->GetFloat( pswidth );
+			if ( paramMap.find( "twidth" ) != paramMap.end() )
+				paramMap[ "twidth" ] ->GetFloat( ptwidth );
+		}
+		if ( paramMap.find( "blur" ) != paramMap.end() )
+		{
+			paramMap[ "blur" ] ->GetFloat( sblur );
+			tblur = sblur;
+		}
+		else
+		{
+			if ( paramMap.find( "sblur" ) != paramMap.end() )
+				paramMap[ "sblur" ] ->GetFloat( sblur );
+			if ( paramMap.find( "tblur" ) != paramMap.end() )
+				paramMap[ "tblur" ] ->GetFloat( tblur );
+		}
 	}
-	else
-	{
-		if( paramMap.find("swidth") != paramMap.end() )
-			paramMap["swidth"]->GetFloat( pswidth );
-		if( paramMap.find("twidth") != paramMap.end() )
-			paramMap["twidth"]->GetFloat( ptwidth );
-	}
-	if( paramMap.find("blur") != paramMap.end() )
-	{
-		paramMap["blur"]->GetFloat( sblur );
-		tblur = sblur;
-	}
-	else
-	{
-		if( paramMap.find("sblur") != paramMap.end() )
-			paramMap["sblur"]->GetFloat( sblur );
-		if( paramMap.find("tblur") != paramMap.end() )
-			paramMap["tblur"]->GetFloat( tblur );
-	}
-	
+
 	swidth *= pswidth;
 	twidth *= ptwidth;
 
 	// T(s2,t2)-T(s2,t1)-T(s1,t2)+T(s1,t1)
-	TqInt i;
+
 
 	val.resize( m_SamplesPerPixel );
 
-	TqFloat ss1 = s1 - swidth - (sblur*0.5f);
-	TqFloat tt1 = t1 - twidth - (tblur*0.5f);
-	TqFloat ss2 = s1 + swidth + (sblur*0.5f);
-	TqFloat tt2 = t1 + twidth + (tblur*0.5f);
+	TqFloat ss1 = s1 - swidth - ( sblur * 0.5f );
+	TqFloat tt1 = t1 - twidth - ( tblur * 0.5f );
+	TqFloat ss2 = s1 + swidth + ( sblur * 0.5f );
+	TqFloat tt2 = t1 + twidth + ( tblur * 0.5f );
 
 	m_tempval1 = 0.0f;
 	m_tempval2 = 0.0f;
@@ -1148,8 +1151,9 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 
 
 	// Clamp the result
-//	for ( i = 0; i < m_SamplesPerPixel; i++ )
-//		val[ i ] = CLAMP( val[ i ], 0.0f, 1.0f );
+	//      TqInt i;
+	//	for ( i = 0; i < m_SamplesPerPixel; i++ )
+	//		val[ i ] = CLAMP( val[ i ], 0.0f, 1.0f );
 }
 //----------------------------------------------------------------------
 /** this is used for remove any memory exceed the command Option "limits" "texturememory"
@@ -1197,9 +1201,9 @@ void CqTextureMap::CriticalMeasure()
 			for ( j = ( *i ) ->m_apSegments.begin(); j != ( *i ) ->m_apSegments.end(); j++ )
 			{
 				if ( *j == previous ) previous = NULL;
-				
+
 				// Only release if not protected.
-				if( !( *j )->fProtected() )
+				if ( !( *j ) ->fProtected() )
 					( *j ) ->Release();
 			}
 			( *i ) ->m_apSegments.resize( 0 );
@@ -1253,25 +1257,25 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 	iv = iv % vmapsize;		/// \todo This is wrap mode periodic.
 	iv_n = iv_n % vmapsize;	/// \todo This is wrap mode periodic.
 
-	
+
 	// Read in the relevant texture tiles.
 	CqTextureMapBuffer* pTMBa = GetBuffer( iu, iv, id );		// Val00
 	CqTextureMapBuffer* pTMBb = pTMBa;
-    if (iv != iv_n) 
-    {
-       pTMBb = GetBuffer( iu, iv_n, id );	// Val01
-    }
-     
+	if ( iv != iv_n )
+	{
+		pTMBb = GetBuffer( iu, iv_n, id );	// Val01
+	}
+
 	CqTextureMapBuffer* pTMBc = pTMBa;
-    if (iu_n != iu)
-    {
+	if ( iu_n != iu )
+	{
 		pTMBc = GetBuffer( iu_n, iv, id );	// Val10
-    }
+	}
 	CqTextureMapBuffer* pTMBd = NULL;
-	if ( iv == iv_n) pTMBd = pTMBc;
-	else if (iu == iu_n) pTMBd = pTMBb;
+	if ( iv == iv_n ) pTMBd = pTMBc;
+	else if ( iu == iu_n ) pTMBd = pTMBb;
 	else
-		pTMBd = GetBuffer( iu_n, iv_n, id);	// Val11
+		pTMBd = GetBuffer( iu_n, iv_n, id );	// Val11
 
 	TqInt c;
 	/* cannot find anything than goodbye */
@@ -1279,7 +1283,7 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 	{
 		TqChar warnings[ 400 ];
 		for ( c = 0; c < m_SamplesPerPixel; c++ )
-			val[c] = 1.0f;
+			val[ c ] = 1.0f;
 
 		sprintf( warnings, "Cannot find value for either pTMPB[a,b,c,d]" );
 		RiErrorPrint( 0, 1, warnings );
@@ -1298,10 +1302,10 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 
 	for ( c = 0; c < m_SamplesPerPixel; c++ )
 	{
-		TqFloat Val00 = pTMBa->GetValue(iu,iv,c);
-		TqFloat Val01 = pTMBb->GetValue(iu,iv_n,c);
-		TqFloat Val10 = pTMBc->GetValue(iu_n,iv,c);
-		TqFloat Val11 = pTMBd->GetValue(iu_n,iv_n,c);
+		TqFloat Val00 = pTMBa->GetValue( iu, iv, c );
+		TqFloat Val01 = pTMBb->GetValue( iu, iv_n, c );
+		TqFloat Val10 = pTMBc->GetValue( iu_n, iv, c );
+		TqFloat Val11 = pTMBd->GetValue( iu_n, iv_n, c );
 		TqFloat bot = Val00 + ( ru * ( Val10 - Val00 ) );
 		TqFloat top = Val01 + ( ru * ( Val11 - Val01 ) );
 		m_low_color[ c ] = bot + ( rv * ( top - bot ) );
@@ -1332,21 +1336,21 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		// Read in the relevant texture tiles.
 		CqTextureMapBuffer* pTMBa = GetBuffer( iu, iv, id + 1 );		// Val00
 		CqTextureMapBuffer* pTMBb = pTMBa;
-        if (iv != iv_n) 
-        {
-           	pTMBb = GetBuffer( iu, iv_n, id + 1 );	// Val01
-        }
- 
+		if ( iv != iv_n )
+		{
+			pTMBb = GetBuffer( iu, iv_n, id + 1 );	// Val01
+		}
+
 		CqTextureMapBuffer* pTMBc = pTMBa;
-        if (iu_n != iu)
-        {
-	   		pTMBc = GetBuffer( iu_n, iv, id + 1 );	// Val10
-        }
+		if ( iu_n != iu )
+		{
+			pTMBc = GetBuffer( iu_n, iv, id + 1 );	// Val10
+		}
 		CqTextureMapBuffer* pTMBd = NULL;
-		if ( iv == iv_n) pTMBd = pTMBc;
-		else if (iu == iu_n) pTMBd = pTMBb;
+		if ( iv == iv_n ) pTMBd = pTMBc;
+		else if ( iu == iu_n ) pTMBd = pTMBb;
 		else
-			pTMBd = GetBuffer( iu_n, iv_n, id + 1);	// Val11
+			pTMBd = GetBuffer( iu_n, iv_n, id + 1 );	// Val11
 
 		/* cannot find anything than goodbye */
 		if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
@@ -1368,10 +1372,10 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		TqInt c;
 		for ( c = 0; c < m_SamplesPerPixel; c++ )
 		{
-			TqFloat Val00 = pTMBa->GetValue(iu,iv,c);
-			TqFloat Val01 = pTMBb->GetValue(iu,iv_n,c);
-			TqFloat Val10 = pTMBc->GetValue(iu_n,iv,c);
-			TqFloat Val11 = pTMBd->GetValue(iu_n,iv_n,c);
+			TqFloat Val00 = pTMBa->GetValue( iu, iv, c );
+			TqFloat Val01 = pTMBb->GetValue( iu, iv_n, c );
+			TqFloat Val10 = pTMBc->GetValue( iu_n, iv, c );
+			TqFloat Val11 = pTMBd->GetValue( iu_n, iv_n, c );
 			TqFloat bot = Val00 + ( ru * ( Val10 - Val00 ) );
 			TqFloat top = Val01 + ( ru * ( Val11 - Val01 ) );
 			m_high_color[ c ] = bot + ( rv * ( top - bot ) );
@@ -1386,7 +1390,7 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 
 
 	}
-	
+
 }
 
 //----------------------------------------------------------------------
@@ -1577,7 +1581,7 @@ static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, TqInt* fa
 	TqFloat t;
 
 	// Test nz direction
-	if ( n.z() < 0 )       	// Test intersection with nz
+	if ( n.z() < 0 )        	// Test intersection with nz
 	{
 		t = -0.5 / n.z();
 		pt->x( n.x() * t );
@@ -1589,7 +1593,7 @@ static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, TqInt* fa
 			return ;
 		}
 	}
-	else if ( n.z() > 0 )       	// Test intersection with pz
+	else if ( n.z() > 0 )        	// Test intersection with pz
 	{
 		t = 0.5 / n.z();
 		pt->x( n.x() * t );
@@ -1604,7 +1608,7 @@ static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, TqInt* fa
 
 
 	// Test ny direction
-	if ( n.y() < 0 )       	// Test intersection with ny
+	if ( n.y() < 0 )        	// Test intersection with ny
 	{
 		t = -0.5 / n.y();
 		pt->x( n.x() * t );
@@ -1616,7 +1620,7 @@ static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, TqInt* fa
 			return ;
 		}
 	}
-	else if ( n.y() > 0 )       	// Test intersection with py
+	else if ( n.y() > 0 )        	// Test intersection with py
 	{
 		t = 0.5 / n.y();
 		pt->x( n.x() * t );
@@ -1630,7 +1634,7 @@ static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, TqInt* fa
 	}
 
 	// Test nx direction
-	if ( n.x() < 0 )       	// Test intersection with nx
+	if ( n.x() < 0 )        	// Test intersection with nx
 	{
 		t = -0.5 / n.x();
 		pt->x( n.x() * t );
@@ -1642,7 +1646,7 @@ static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, TqInt* fa
 			return ;
 		}
 	}
-	else if ( n.x() > 0 )       	// Test intersection with px
+	else if ( n.x() > 0 )        	// Test intersection with px
 	{
 		t = 0.5 / n.x();
 		pt->x( n.x() * t );
@@ -1770,19 +1774,22 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 		TqFloat ptwidth = 1.0f;
 
 		// Get parameters out of the map.
-		if( paramMap.find("width") != paramMap.end() )
+		if ( paramMap.size() != 0 )
 		{
-			paramMap["width"]->GetFloat( pswidth );
-			ptwidth = pswidth;
+			if ( paramMap.find( "width" ) != paramMap.end() )
+			{
+				paramMap[ "width" ] ->GetFloat( pswidth );
+				ptwidth = pswidth;
+			}
+			else
+			{
+				if ( paramMap.find( "swidth" ) != paramMap.end() )
+					paramMap[ "swidth" ] ->GetFloat( pswidth );
+				if ( paramMap.find( "twidth" ) != paramMap.end() )
+					paramMap[ "twidth" ] ->GetFloat( ptwidth );
+			}
 		}
-		else
-		{
-			if( paramMap.find("swidth") != paramMap.end() )
-				paramMap["swidth"]->GetFloat( pswidth );
-			if( paramMap.find("twidth") != paramMap.end() )
-				paramMap["twidth"]->GetFloat( ptwidth );
-		}
-		
+
 		swidth *= pswidth;
 		twidth *= ptwidth;
 
@@ -1793,7 +1800,8 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 		R4 = vecPoint + ( swidth / 2.0f ) + ( twidth / 2.0f );
 
 		SampleMap( R1, R2, R3, R4, val, paramMap );
-	} else 
+	}
+	else
 	{
 		// If no map defined, not in shadow.
 		val.resize( 1 );
@@ -1812,20 +1820,23 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	TqFloat samples = 0.0f;
 
 	// Get parameters out of the map.
-	if( paramMap.find("blur") != paramMap.end() )
+	if ( paramMap.size() != 0 )
 	{
-		paramMap["blur"]->GetFloat( sblur );
-		tblur = sblur;
+		if ( paramMap.find( "blur" ) != paramMap.end() )
+		{
+			paramMap[ "blur" ] ->GetFloat( sblur );
+			tblur = sblur;
+		}
+		else
+		{
+			if ( paramMap.find( "sblur" ) != paramMap.end() )
+				paramMap[ "sblur" ] ->GetFloat( sblur );
+			if ( paramMap.find( "tblur" ) != paramMap.end() )
+				paramMap[ "tblur" ] ->GetFloat( tblur );
+		}
+		if ( paramMap.find( "samples" ) != paramMap.end() )
+			paramMap[ "samples" ] ->GetFloat( samples );
 	}
-	else
-	{
-		if( paramMap.find("sblur") != paramMap.end() )
-			paramMap["sblur"]->GetFloat( sblur );
-		if( paramMap.find("tblur") != paramMap.end() )
-			paramMap["tblur"]->GetFloat( tblur );
-	}
-	if( paramMap.find("samples") != paramMap.end() )
-		paramMap["samples"]->GetFloat( samples );
 
 	// If no map defined, not in shadow.
 	val.resize( 1 );
@@ -1839,10 +1850,10 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	TqFloat bias = 0.0f;
 	TqFloat bias0 = 0.0f;
 	TqFloat bias1 = 0.0f;
-				
-	if ( paramMap.find("bias") != paramMap.end() )
+
+	if ( ( paramMap.size() != 0 ) && ( paramMap.find( "bias" ) != paramMap.end() ) )
 	{
-		paramMap["bias"]->GetFloat( bias );
+		paramMap[ "bias" ] ->GetFloat( bias );
 	}
 	else
 	{
@@ -1943,7 +1954,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 	// Calculate no. of samples.
 	TqInt nt, ns;
-	if( samples > 0 )
+	if ( samples > 0 )
 	{
 		nt = ns = static_cast<TqInt>( sqrt( samples ) );
 	}
@@ -1966,8 +1977,8 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	}
 
 	// Setup jitter variables
-	TqFloat ds =       /*2.0f**/sres / ns;
-	TqFloat dt =       /*2.0f**/tres / nt;
+	TqFloat ds =        /*2.0f**/sres / ns;
+	TqFloat dt =        /*2.0f**/tres / nt;
 	TqFloat js = ds * 0.5f;
 	TqFloat jt = dt * 0.5f;
 
@@ -1996,8 +2007,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 				{
 					iu -= pTMBa->sOrigin();
 					iv -= pTMBa->tOrigin();
-					TqInt rowlen = pTMBa->Width();
-					if ( z > pTMBa->GetValue(iu, iv, 0) )
+					if ( z > pTMBa->GetValue( iu, iv, 0 ) )
 						inshadow += 1;
 				}
 			}
@@ -2170,7 +2180,7 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName )
 			TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
 
 			// Write the floating point image to the directory.
-			TqFloat *depths = reinterpret_cast<TqFloat*>(m_apSegments[ 0 ] ->pVoidBufferData() );
+			TqFloat *depths = reinterpret_cast<TqFloat*>( m_apSegments[ 0 ] ->pVoidBufferData() );
 			WriteTileImage( pshadow, depths, XRes(), YRes(), 32, 32, 1, m_Compression, m_Quality );
 			TIFFClose( pshadow );
 		}
@@ -2217,19 +2227,19 @@ void CqShadowMap::ReadMatrices()
 
 void CqTextureMap::WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUlong twidth, TqUlong theight, TqInt compression, TqInt quality )
 {
-	switch( pBuffer->BufferType() )
+	switch ( pBuffer->BufferType() )
 	{
-		case BufferType_RGBA:
-		{
-			WriteTileImage( ptex, static_cast<TqPuchar>(pBuffer->pVoidBufferData()), pBuffer->Width(), pBuffer->Height(), twidth, theight, pBuffer->Samples(), compression, quality );
-			break;
-		}
+			case BufferType_RGBA:
+			{
+				WriteTileImage( ptex, static_cast<TqPuchar>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), twidth, theight, pBuffer->Samples(), compression, quality );
+				break;
+			}
 
-		case BufferType_Float:
-		{
-			WriteTileImage( ptex, static_cast<TqFloat*>(pBuffer->pVoidBufferData()), pBuffer->Width(), pBuffer->Height(), twidth, theight, pBuffer->Samples(), compression, quality );
-			break;
-		}
+			case BufferType_Float:
+			{
+				WriteTileImage( ptex, static_cast<TqFloat*>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), twidth, theight, pBuffer->Samples(), compression, quality );
+				break;
+			}
 	}
 }
 
@@ -2241,19 +2251,19 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUl
 
 void CqTextureMap::WriteImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqInt compression, TqInt quality )
 {
-	switch( pBuffer->BufferType() )
+	switch ( pBuffer->BufferType() )
 	{
-		case BufferType_RGBA:
-		{
-			WriteImage( ptex, static_cast<TqPuchar>(pBuffer->pVoidBufferData()), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), compression, quality );
-			break;
-		}
+			case BufferType_RGBA:
+			{
+				WriteImage( ptex, static_cast<TqPuchar>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), compression, quality );
+				break;
+			}
 
-		case BufferType_Float:
-		{
-			WriteImage( ptex, static_cast<TqFloat*>(pBuffer->pVoidBufferData()), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), compression, quality );
-			break;
-		}
+			case BufferType_Float:
+			{
+				WriteImage( ptex, static_cast<TqFloat*>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), compression, quality );
+				break;
+			}
 	}
 }
 

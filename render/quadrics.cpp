@@ -41,6 +41,7 @@ START_NAMESPACE( Aqsis )
 static TqBool IntersectLine( CqVector3D& P1, CqVector3D& T1, CqVector3D& P2, CqVector3D& T2, CqVector3D& P );
 static void ProjectToLine( const CqVector3D& S, const CqVector3D& Trj, const CqVector3D& pnt, CqVector3D& p );
 
+#define TOOLARGEQUADS 10000
 
 CqQuadric::CqQuadric()
 {
@@ -129,6 +130,7 @@ void CqQuadric::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqSh
 /** Determine whether the quadric is suitable for dicing.
  */
 
+
 TqBool	CqQuadric::Diceable()
 {
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
@@ -136,11 +138,13 @@ TqBool	CqQuadric::Diceable()
 	if ( !m_fDiceable )
 		return ( TqFalse );
 
-	EstimateGridSize();
+	TqInt toomuch = EstimateGridSize();
 
 	m_SplitDir = ( m_uDiceSize > m_vDiceSize ) ? SplitDir_U : SplitDir_V;
 
 	TqFloat gs = SqrtGridSize();
+
+	if (toomuch > TOOLARGEQUADS) return TqFalse;
 
 	if ( m_uDiceSize > gs) return TqFalse;
 	if ( m_vDiceSize > gs) return TqFalse;
@@ -155,7 +159,7 @@ TqBool	CqQuadric::Diceable()
 /** Estimate the size of the micropolygrid required to dice this GPrim to a suitable shading rate.
  */
 
-void CqQuadric::EstimateGridSize()
+TqUlong CqQuadric::EstimateGridSize()
 {
 	TqFloat maxusize, maxvsize;
 	maxusize = maxvsize = 0;
@@ -192,7 +196,7 @@ void CqQuadric::EstimateGridSize()
 	maxusize = sqrt( maxusize );
 	maxvsize = sqrt( maxvsize );
 
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
+	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRateSqrt" ) [ 0 ];
 
 	m_uDiceSize = ROUND( ESTIMATEGRIDSIZE * maxusize / ( ShadingRate ) );
 	m_vDiceSize = ROUND( ESTIMATEGRIDSIZE * maxvsize / ( ShadingRate ) );
@@ -200,6 +204,8 @@ void CqQuadric::EstimateGridSize()
 	// Ensure power of 2 to avoid cracking
 	m_uDiceSize = CEIL_POW2( m_uDiceSize );
 	m_vDiceSize = CEIL_POW2( m_vDiceSize );
+
+    return  (TqUlong) m_uDiceSize * m_vDiceSize;
 }
 
 

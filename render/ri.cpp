@@ -207,6 +207,16 @@ enum RIL_POINTS
     RIL_t = RIL_s,
     RIL_st,
 };
+static TqUlong RIH_S = CqParameter::hash( RI_S );
+static TqUlong RIH_T = CqParameter::hash( RI_T );
+static TqUlong RIH_ST = CqParameter::hash( RI_ST );
+static TqUlong RIH_CS = CqParameter::hash( RI_CS );
+static TqUlong RIH_OS = CqParameter::hash( RI_OS );
+static TqUlong RIH_P = CqParameter::hash( RI_P );
+static TqUlong RIH_PZ = CqParameter::hash( RI_PZ );
+static TqUlong RIH_PW = CqParameter::hash( RI_PW );
+static TqUlong RIH_N = CqParameter::hash( RI_N );
+static TqUlong RIH_NP = CqParameter::hash( RI_NP );
 
 //----------------------------------------------------------------------
 // BuildParameterList
@@ -224,7 +234,7 @@ RtInt BuildParameterList( va_list pArgs, RtToken*& pTokens, RtPointer*& pValues 
 	RtPointer pValue;
 	aTokens.clear();
 	aValues.clear();
-	while ( pToken != 0 && pToken != RI_NULL )         	// While not RI_NULL
+	while ( pToken != 0 && pToken != RI_NULL )          	// While not RI_NULL
 	{
 		aTokens.push_back( pToken );
 		pValue = va_arg( pArgs, RtPointer );
@@ -332,8 +342,8 @@ RtVoid	RiFrameBegin( RtInt number )
 	QGetRenderContext() ->Stats().StartFrameTimer();
 
 	QGetRenderContext() ->BeginFrameModeBlock();
-	CqCSGTreeNode::SetRequired(TqFalse);
-	CqSurface::SqrtGridSize(-1.0f);
+	CqCSGTreeNode::SetRequired( TqFalse );
+	CqSurface::SqrtGridSize( -1.0f );
 	return ;
 }
 
@@ -403,7 +413,7 @@ RtVoid	RiWorldBegin()
 	QGetRenderContext() ->optCurrent().InitialiseCamera();
 	QGetRenderContext() ->pImage() ->SetImage();
 
-	CqSurface::SqrtGridSize(-1.0f);
+	CqSurface::SqrtGridSize( -1.0f );
 	return ;
 }
 
@@ -428,7 +438,7 @@ RtVoid	RiWorldEnd()
 	{
 		QGetRenderContext() ->RenderWorld();
 	}
-	catch(CqString strError)
+	catch ( CqString strError )
 	{
 		std::cout << strError.c_str() << std::endl;
 		fFailed = TqTrue;
@@ -440,7 +450,7 @@ RtVoid	RiWorldEnd()
 	// Stop the frame timer
 	QGetRenderContext() ->Stats().StopFrameTimer();
 
-	if(!fFailed)
+	if ( !fFailed )
 	{
 		// Get the verbosity level from the options...
 		TqInt verbosity = 0;
@@ -1088,7 +1098,7 @@ RtVoid	RiHiderV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 1 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 1 ) );
 	return ;
 }
 
@@ -1103,7 +1113,7 @@ RtVoid	RiRelativeDetail( RtFloat relativedetail )
 	{
 		CqBasicError(
 		    ErrorID_InvalidData, Severity_Normal,
-		    QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 2 )
+		    QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 2 )
 		);
 	}
 	else
@@ -1138,7 +1148,7 @@ RtVoid	RiOption( const char *name, ... )
 RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 {
 	// Find the parameter on the current options.
-	CqNamedParameterList* pOpt = QGetRenderContext() ->optCurrent().pOptionWrite( name );
+	CqNamedParameterList * pOpt = QGetRenderContext() ->optCurrent().pOptionWrite( name );
 
 	RtInt i;
 	for ( i = 0; i < count; i++ )
@@ -1163,7 +1173,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 			else
 			{
 				if ( Decl.m_strName == "" )
-					CqBasicError( ErrorID_UnknownSymbol, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 3 ) );
+					CqBasicError( ErrorID_UnknownSymbol, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 3 ) );
 				else
 					CqBasicError( ErrorID_InvalidType, Severity_Normal, "Options can only be uniform" );
 				return ;
@@ -1437,7 +1447,7 @@ RtLightHandle	RiAreaLightSource( const char *name, ... )
 //
 RtLightHandle	RiAreaLightSourceV( const char *name, PARAMETERLIST )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 4 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 4 ) );
 	return ( RiLightSourceV( name, count, tokens, values ) );
 }
 
@@ -1557,7 +1567,7 @@ RtVoid	RiAtmosphereV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiInterior( const char *name, ... )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 5 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 5 ) );
 	return ;
 }
 
@@ -1568,7 +1578,7 @@ RtVoid	RiInterior( const char *name, ... )
 //
 RtVoid	RiInteriorV( const char *name, PARAMETERLIST )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 5 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 5 ) );
 	return ;
 }
 
@@ -1579,7 +1589,7 @@ RtVoid	RiInteriorV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiExterior( const char *name, ... )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 6 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 6 ) );
 	return ;
 }
 
@@ -1590,7 +1600,7 @@ RtVoid	RiExterior( const char *name, ... )
 //
 RtVoid	RiExteriorV( const char *name, PARAMETERLIST )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 6 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 6 ) );
 	return ;
 }
 
@@ -1602,7 +1612,7 @@ RtVoid	RiExteriorV( const char *name, PARAMETERLIST )
 RtVoid	RiShadingRate( RtFloat size )
 {
 	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ] = size;
-	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRateSqrt" ) [ 0 ] = sqrt(size);
+	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRateSqrt" ) [ 0 ] = sqrt( size );
 	QGetRenderContext() ->AdvanceTime();
 
 	return ;
@@ -1683,7 +1693,7 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 	{
 		CqBasicError(
 		    ErrorID_InvalidData, Severity_Normal,
-		    QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 7 )
+		    QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 7 )
 		);
 		return ;
 	}
@@ -1729,7 +1739,7 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 //
 RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 8 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 8 ) );
 	return ;
 }
 
@@ -1859,7 +1869,7 @@ RtVoid	RiPerspective( RtFloat f )
 {
 	if ( f <= 0 )
 	{
-		CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 9 ) );
+		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 9 ) );
 		return ;
 	}
 
@@ -1966,7 +1976,7 @@ RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
 //
 RtVoid	RiDeformation( const char *name, ... )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 10 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 10 ) );
 	return ;
 }
 
@@ -1977,7 +1987,7 @@ RtVoid	RiDeformation( const char *name, ... )
 //
 RtVoid	RiDeformationV( const char *name, PARAMETERLIST )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 10 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 10 ) );
 	return ;
 }
 
@@ -2064,7 +2074,7 @@ RtVoid	RiCoordSysTransform( RtToken space )
 //
 RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[] )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 11 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 11 ) );
 	return ( 0 );
 }
 
@@ -2117,7 +2127,7 @@ RtVoid	RiAttribute( const char *name, ... )
 RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 {
 	// Find the parameter on the current options.
-	CqNamedParameterList* pAttr = QGetRenderContext() ->pattrWriteCurrent() ->pAttributeWrite( name );
+	CqNamedParameterList * pAttr = QGetRenderContext() ->pattrWriteCurrent() ->pAttributeWrite( name );
 
 	RtInt i;
 	for ( i = 0; i < count; i++ )
@@ -2145,7 +2155,7 @@ RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 			else
 			{
 				if ( Decl.m_strName == "" )
-					CqBasicError( ErrorID_UnknownSymbol, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 3 ) );
+					CqBasicError( ErrorID_UnknownSymbol, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 3 ) );
 				else
 					CqBasicError( ErrorID_InvalidType, Severity_Normal, "Attributes can only be uniform" );
 				return ;
@@ -2395,7 +2405,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFlo
                   RtInt nstrings, RtString strings[], PARAMETERLIST )
 {
 
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 12 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 12 ) );
 
 
 	return ;
@@ -2531,7 +2541,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 		// the wrap mode was neither "periodic" nor "nonperiodic"
 		CqBasicError(
 		    0, Severity_Normal,
-		    QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 13 )
+		    QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 13 )
 		);
 	}
 
@@ -2578,7 +2588,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 		// the type of curve was neither "linear" nor "cubic"
 		CqBasicError(
 		    0, Severity_Normal,
-		    QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 14 )
+		    QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 14 )
 		);
 	}
 }
@@ -2618,7 +2628,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 		RtInt v;
 		for ( v = 0; v < nverts[ poly ]; v++ )
 		{
-			cVerts = MAX( ((*pVerts ) + 1 ), cVerts );
+			cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
 			pVerts++;
 		}
 	}
@@ -2647,7 +2657,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 
 				pSurface->aIndices().resize( nverts[ poly ] );
 				RtInt i;
-				for ( i = 0; i < nverts[ poly ]; i++ )         	// Fill in the points
+				for ( i = 0; i < nverts[ poly ]; i++ )          	// Fill in the points
 				{
 					if ( verts[ iP ] >= cVerts )
 					{
@@ -2696,7 +2706,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 
 				pSurface->aIndices().resize( nverts[ poly ] );
 				RtInt i;
-				for ( i = 0; i < nverts[ poly ]; i++ )         	// Fill in the points
+				for ( i = 0; i < nverts[ poly ]; i++ )          	// Fill in the points
 				{
 					if ( verts[ iP ] >= cVerts )
 					{
@@ -2772,7 +2782,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			TqInt v;
 			for ( v = 0; v < nverts[ igloop ]; v++ )
 			{
-				cVerts = MAX( ((*pVerts ) + 1 ), cVerts );
+				cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
 				pVerts++;
 			}
 		}
@@ -3428,7 +3438,7 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 
 	if ( refineproc == RiProcDelayedReadArchive )
 	{
-		CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 15 ) );
+		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 15 ) );
 		printf( "ReadArchive %s\n", ( const char * ) data );
 		RiReadArchive( ( char* ) data, NULL, NULL );
 
@@ -3436,7 +3446,7 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 	else if ( refineproc == RiProcRunProgram )
 	{
 
-		CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 16 ) );
+		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 16 ) );
 
 
 		/* Your program must writes its output to a pipe. Open this
@@ -3498,7 +3508,7 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 		char opdata[ 4096 ];
 
 
-		CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 17 ) );
+		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 17 ) );
 
 		// take the first filename is saved to be the name of the .dll/.so
 		// the reset is passed as such to ConvertParameters function later on
@@ -3549,7 +3559,7 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 	}
 	else
 	{
-		CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 18 ) );
+		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 18 ) );
 	}
 
 
@@ -3622,7 +3632,7 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 	}
 	else
 	{
-		CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 19 ) );
+		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 19 ) );
 	}
 
 	return ;
@@ -3659,7 +3669,7 @@ RtVoid	RiSolidEnd()
 //
 RtObjectHandle	RiObjectBegin()
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 20 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 20 ) );
 	QGetRenderContext() ->BeginObjectModeBlock();
 
 	return ( 0 );
@@ -3684,7 +3694,7 @@ RtVoid	RiObjectEnd()
 //
 RtVoid	RiObjectInstance( RtObjectHandle handle )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 21 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 21 ) );
 	return ;
 }
 
@@ -3846,7 +3856,7 @@ RtVoid	RiMakeTextureV( const char * pic, const char * tex, RtToken swrap, RtToke
 //
 RtVoid	RiMakeBump( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 22 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 22 ) );
 	return ;
 }
 
@@ -3857,7 +3867,7 @@ RtVoid	RiMakeBump( const char * imagefile, const char * bumpfile, RtToken swrap,
 //
 RtVoid	RiMakeBumpV( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext()->Logger().getError( RI_ERROR_TABLE, 22 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( RI_ERROR_TABLE, 22 ) );
 	return ;
 }
 
@@ -4042,7 +4052,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char 
 
 		for ( ii = 0; ii < log2; ii++ )
 		{
-			CqTextureMapBuffer* pLevelBuffer = tpx.CreateBuffer(0,0,xRes * 3, yRes * 2, numsamples);
+			CqTextureMapBuffer* pLevelBuffer = tpx.CreateBuffer( 0, 0, xRes * 3, yRes * 2, numsamples );
 			TqInt view;
 			for ( view = 0; view < 6; view++ )
 			{
@@ -4059,7 +4069,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char 
 					for ( col = 0; col < xRes; col++ )
 					{
 						for ( sample = 0; sample < numsamples; sample++ )
-							pLevelBuffer->SetValue( col + xoff, line + yoff, sample, pBuffer->GetValue( col, line, sample) );
+							pLevelBuffer->SetValue( col + xoff, line + yoff, sample, pBuffer->GetValue( col, line, sample ) );
 					}
 				}
 			}
@@ -4189,7 +4199,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		RtInt v;
 		for ( v = 0; v < nvertices[ face ]; v++ )
 		{
-			cVerts = MAX( ((*pVerts ) + 1 ), cVerts );
+			cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
 			pVerts++;
 		}
 	}
@@ -4208,18 +4218,18 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
 		// Create experimental version
-		if(strcmp(scheme, "catmull-clark")==0)
+		if ( strcmp( scheme, "catmull-clark" ) == 0 )
 		{
-			CqSubdivision2* pSubd2;
+			CqSubdivision2 * pSubd2;
 
 			if ( QGetRenderContext() ->ptransCurrent() ->cTimes() <= 1 )
 			{
 				// Transform the points into camera space for processing,
 				pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
-										 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
-										 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
+				                         QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
+				                         QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
 
-				pSubd2 = new CqSubdivision2(pPointsClass);
+				pSubd2 = new CqSubdivision2( pPointsClass );
 			}
 			else
 			{
@@ -4234,16 +4244,16 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 
 					// Transform the points into camera space for processing,
 					pPointsClass2->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ),
-											  QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ),
-											  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ) );
+					                          QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ),
+					                          QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ) );
 					apPoints.push_back( pPointsClass2 );
 				}
 				pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
-										 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
-										 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
-			
+				                         QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
+				                         QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
+
 				pSubd2 = new CqSubdivision2();
-				
+
 				for ( i = 0; i < QGetRenderContext() ->ptransCurrent() ->cTimes(); i++ )
 				{
 					RtFloat time = QGetRenderContext() ->ptransCurrent() ->Time( i );
@@ -4252,15 +4262,15 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 				}
 			}
 
-			pSubd2->Prepare(cVerts);
+			pSubd2->Prepare( cVerts );
 
 			RtInt	iP = 0;
 			for ( face = 0; face < nfaces; face++ )
 			{
-				pSubd2->AddFacet(nvertices[ face ], &vertices[ iP ]);
-				iP+=nvertices[ face ];
+				pSubd2->AddFacet( nvertices[ face ], &vertices[ iP ] );
+				iP += nvertices[ face ];
 			}
-			if( pSubd2->Finalise() )
+			if ( pSubd2->Finalise() )
 			{
 				pSubd2->AddRef();
 				for ( face = 0; face < nfaces; face++ )
@@ -4280,14 +4290,14 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 				pSubd2->Release();
 			}
 		}
-		else if(strcmp(scheme, "old-cc")==0)
-		{	
+		else if ( strcmp( scheme, "old-cc" ) == 0 )
+		{
 			if ( QGetRenderContext() ->ptransCurrent() ->cTimes() <= 1 )
 			{
 				// Transform the points into camera space for processing,
 				pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
-										 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
-										 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
+				                         QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
+				                         QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
 
 				// Create the subdivision structure class.
 				pSubdivider = pSubdivision = new CqWSurf( cVerts, nfaces, pPointsClass );
@@ -4310,13 +4320,13 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 
 					// Transform the points into camera space for processing,
 					pPointsClass2->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ),
-											  QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ),
-											  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ) );
+					                          QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ),
+					                          QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ) );
 					apPoints.push_back( pPointsClass2 );
 				}
 				pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
-										 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
-										 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
+				                         QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
+				                         QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
 			}
 			// Intitialise the vertices of the hull
 			TqInt i;
@@ -4332,7 +4342,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 				// Create a surface face
 				RtBoolean fValid = RI_TRUE;
 				RtInt i;
-				for ( i = 0; i < nvertices[ face ]; i++ )         	// Fill in the points
+				for ( i = 0; i < nvertices[ face ]; i++ )          	// Fill in the points
 				{
 					if ( vertices[ iP ] >= cVerts )
 					{
@@ -4413,10 +4423,10 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 					while ( iEdge < nargs[ argcIndex ] - 1 )
 					{
 						if ( intargs[ iEdge + intargIndex ] < pSubdivision->cVerts() &&
-								intargs[ iEdge + intargIndex + 1 ] < pSubdivision->cVerts() )
+						        intargs[ iEdge + intargIndex + 1 ] < pSubdivision->cVerts() )
 						{
 							CqWEdge edge( pSubdivision->pVert( intargs[ iEdge + intargIndex ] ),
-										  pSubdivision->pVert( intargs[ iEdge + intargIndex + 1 ] ) );
+							              pSubdivision->pVert( intargs[ iEdge + intargIndex + 1 ] ) );
 							CqWEdge* pSharpEdge = NULL;
 							if ( ( pSharpEdge = pSubdivision->FindEdge( &edge ) ) != NULL )
 								pSharpEdge->SetSharpness( RI_INFINITY );
@@ -4471,54 +4481,55 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 	for ( i = 0; i < count; i++ )
 	{
 		RtToken	token = tokens[ i ];
+		TqUlong htoken = CqParameter::hash( tokens[ i ] );
 		RtPointer	value = values[ i ];
 
-		if ( strcmp( token, RI_S ) == 0 )
+		if ( htoken == RIH_S )
 		{
 			fT = RIL_s;
 			pTextures_s = ( RtFloat* ) value;
 		}
-		else if ( strcmp( token, RI_T ) == 0 )
+		else if ( htoken == RIH_T )
 		{
 			fT = RIL_t;
 			pTextures_t = ( RtFloat* ) value;
 		}
-		else if ( strcmp( token, RI_ST ) == 0 )
+		else if ( htoken == RIH_ST )
 		{
 			fT = RIL_st;
 			pTextures_st = ( RtFloat* ) value;
 		}
-		else if ( strcmp( token, RI_CS ) == 0 )
+		else if ( htoken == RIH_CS )
 		{
 			fCs = RI_TRUE;
 			pCs = ( RtFloat* ) value;
 		}
-		else if ( strcmp( token, RI_OS ) == 0 )
+		else if ( htoken == RIH_OS )
 		{
 			fOs = RI_TRUE;
 			pOs = ( RtFloat* ) value;
 		}
-		else if ( strcmp( token, RI_P ) == 0 )
+		else if ( htoken == RIH_P )
 		{
 			fP = RIL_P;
 			pPoints = ( RtFloat* ) value;
 		}
-		else if ( strcmp( token, RI_PZ ) == 0 )
+		else if ( htoken == RIH_PZ )
 		{
 			fP = RIL_Pz;
 			pPoints = ( RtFloat* ) value;
 		}
-		else if ( strcmp( token, RI_PW ) == 0 )
+		else if ( htoken == RIH_PW )
 		{
 			fP = RIL_Pw;
 			pPoints = ( RtFloat* ) value;
 		}
-		else if ( strcmp( token, RI_N ) == 0 )
+		else if ( htoken == RIH_N )
 		{
 			fN = RIL_N;
 			pNormals = ( RtFloat* ) value;
 		}
-		else if ( strcmp( token, RI_NP ) == 0 )
+		else if ( htoken == RIH_NP )
 		{
 			fN = RIL_Np;
 			pNormals = ( RtFloat* ) value;
