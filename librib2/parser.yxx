@@ -762,7 +762,7 @@ complete_request
                 ParseCallbackInterface->RiReadArchive( $2, NULL );
 		DiscardStringValue( $2 );
 	    }
-    |   procedural string string scalar_array opttvpairs
+    |   procedural string string_array scalar_array opttvpairs
             {
                 if (!(
                      (strcmp($2, "RunProgram") == 0) ||
@@ -772,12 +772,22 @@ complete_request
 		    
 		        if($4->Count() != 6)
 		           yyerror("Expecting 6 Values");
+
+		char** pdata=new char*[$3->Count()];
+		int i;
+		for(i=0; i<$3->Count(); i++)
+		{
+			char* pval=new char[strlen((*$3)[i]) + 1];
+			strcpy(pval, (*$3)[i]);
+			pdata[i]=pval;
+		}
+
                 RendermanInterface::RtFunc pFunc = ParseCallbackInterface->GetProceduralFunction($2);
-				ParseCallbackInterface->RiProcedural($3, &(*$4)[0], (void (*)(void ) ) pFunc, NULL);
+				ParseCallbackInterface->RiProcedural(pdata, &(*$4)[0], (void (*)(void ) ) pFunc, NULL);
                 DiscardStringValue($2);
-                DiscardStringValue($3);
+                DiscardArrayValue($3);
                 DiscardArrayValue($4); 
-		        DiscardTokenValuePairs($5);
+	        DiscardTokenValuePairs($5);
             }
 	|   points opttvpairs
             {
