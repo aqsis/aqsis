@@ -25,7 +25,7 @@
 
 #include	"aqsis.h"
 
-#include "context.h"
+#include "graphicsstate.h"
 #include "lights.h"
 #include "csgtree.h"
 
