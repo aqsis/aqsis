@@ -243,7 +243,8 @@ class CqShaderStack
 			m_Stack[ m_iTop ].m_Data = pv;
 			m_Stack[ m_iTop ].m_IsTemp = TqTrue;
 			m_iTop ++;
-			m_maxsamples = MAX(m_maxsamples, static_cast<TqInt>( m_iTop ));
+			STATS_INC( SHD_stk_push );
+			STATS_SETI( SHD_stk_peak, MAX( STATS_GETI( SHD_stk_peak ), static_cast<TqInt>( m_iTop )) );
 		}
 
 		//----------------------------------------------------------------------
@@ -262,7 +263,8 @@ class CqShaderStack
 			m_Stack[ m_iTop ].m_Data = pv;
 			m_Stack[ m_iTop ].m_IsTemp = TqFalse;
 			m_iTop ++;
-			m_maxsamples = MAX(m_maxsamples, static_cast<TqInt>( m_iTop ));
+			STATS_INC( SHD_stk_pushv );
+			STATS_SETI( SHD_stk_peak, MAX( STATS_GETI( SHD_stk_peak ), static_cast<TqInt>( m_iTop )) );
 		}
 
 		//----------------------------------------------------------------------
@@ -276,6 +278,9 @@ class CqShaderStack
 
 			SqStackEntry Val = m_Stack[ m_iTop ];
 			f = Val.m_Data->Size() > 1 || f;
+
+			STATS_INC( SHD_stk_pop );
+
 			return ( Val );
 		}
 
@@ -291,6 +296,8 @@ class CqShaderStack
 			IqShaderData* s = GetNextTemp( m_Stack[ iTop ].m_Data ->Type(), m_Stack[ iTop ].m_Data ->Class() );
 			s->SetValueFromVariable( m_Stack[ iTop ].m_Data );
 			Push( s );
+
+			STATS_INC( SHD_stk_dup );
 		}
 
 		/** Drop the top stack entry.
@@ -299,6 +306,8 @@ class CqShaderStack
 		{
 			TqBool f = TqFalse;
 			Pop( f );
+
+			STATS_INC( SHD_stk_drop );
 		}
 
 		/**

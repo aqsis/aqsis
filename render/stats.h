@@ -309,6 +309,16 @@ class CqStats
 
 				// Shading stats
 
+					// Shaderstack
+					SHD_stk_push,
+					SHD_stk_pushv,
+					SHD_stk_peak,
+					SHD_stk_pop,
+					SHD_stk_release,
+					SHD_stk_dup,
+					SHD_stk_drop,
+
+
 					// Variables
 					SHD_var_created_total,
 					

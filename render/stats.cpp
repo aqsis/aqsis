@@ -546,6 +546,11 @@ void CqStats::PrintStats( TqInt level ) const
 		
 
 			MSG << 	"Shading:\n\t"
+				<<					"Stack:\n\t\t"
+				<<					STATS_INT_GETI( SHD_stk_peak ) << " max stack depth\n\t\t"
+				<<					STATS_INT_GETI( SHD_stk_push ) << " push, " << STATS_INT_GETI( SHD_stk_pushv ) << " pushv\n\t\t"
+				<<					STATS_INT_GETI( SHD_stk_pop ) << " pop, " << STATS_INT_GETI( SHD_stk_release ) << " release\n\t\t"
+				<<					STATS_INT_GETI( SHD_stk_dup ) << " dup, " << STATS_INT_GETI( SHD_stk_drop ) << " drop\n\n\t"
 				<<					"Variables:\n\t\t"
 				<<							STATS_INT_GETI( SHD_var_created_total )  << " created\n\n\t\t"
 				<<					"Arrays:\n\t\t"
@@ -573,170 +578,171 @@ void CqStats::PrintStats( TqInt level ) const
 				<<					"\t\t" << STATS_INT_GETI( SHD_var_varying_matrix ) << " matrix\n\n\t"
 
 
-				<<	"Shadeop calls:\n\t\t"
-					<< STATS_INT_GETI( SHD_so_abs ) << "\tabs\n\t\t"
-					<< STATS_INT_GETI( SHD_so_acos ) << "\tacos\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ambient ) << "\tambient\n\t\t"
-					<< STATS_INT_GETI( SHD_so_area ) << "\tarea\n\t\t"
-					<< STATS_INT_GETI( SHD_so_asin ) << "\tasin\n\t\t"
-					<< STATS_INT_GETI( SHD_so_atan ) << "\tatan\n\t\t"
-					<< STATS_INT_GETI( SHD_so_atmosphere ) << "\tatmosphere\n\t\t"
-					<< STATS_INT_GETI( SHD_so_attribute ) << "\tattribute\n\t\t"
-					<< STATS_INT_GETI( SHD_so_bake ) << "\tbake\n\t\t"
-					<< STATS_INT_GETI( SHD_so_bump ) << "\tbump\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cDeriv ) << "\tcDeriv\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cDu ) << "\tcDu\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cDv ) << "\tcDv\n\t\t"
-					<< STATS_INT_GETI( SHD_so_calculatenormal ) << "\tcalculatenormal\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ccellnoise1 ) << "\tccellnoise1\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ccellnoise2 ) << "\tccellnoise2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ccellnoise3 ) << "\tccellnoise3\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ccellnoise4 ) << "\tccellnoise4\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ceil ) << "\tceil\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cenvironment2 ) << "\tcenvironment2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cenvironment3 ) << "\tcenvironment3\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cclamp ) << "\tcclamp\n\t\t"
-					<< STATS_INT_GETI( SHD_so_clamp ) << "\tclamp\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cmax ) << "\tcmax\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cmin ) << "\tcmin\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cmix ) << "\tcmix\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cnoise1 ) << "\tcnoise1\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cnoise2 ) << "\tcnoise2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cnoise3 ) << "\tcnoise3\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cnoise4 ) << "\tcnoise4\n\t\t"
-					<< STATS_INT_GETI( SHD_so_concat ) << "\tconcat\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cos ) << "\tcos\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cpnoise1 ) << "\tcpnoise1\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cpnoise2 ) << "\tcpnoise2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cpnoise3 ) << "\tcpnoise3\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cpnoise4 ) << "\tcpnoise4\n\t\t"
-					<< STATS_INT_GETI( SHD_so_crandom ) << "\tcrandom\n\t\t"
-					<< STATS_INT_GETI( SHD_so_cspline ) << "\tcspline\n\t\t"
-					<< STATS_INT_GETI( SHD_so_csplinea ) << "\tcsplinea\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ctexture1 ) << "\tctexture1\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ctexture2 ) << "\tctexture2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ctexture3 ) << "\tctexture3\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ctransform ) << "\tctransform\n\t\t"
-					<< STATS_INT_GETI( SHD_so_degrees ) << "\tdegrees\n\t\t"
-					<< STATS_INT_GETI( SHD_so_depth ) << "\tdepth\n\t\t"
-					<< STATS_INT_GETI( SHD_so_determinant ) << "\tdeterminant\n\t\t"
-					<< STATS_INT_GETI( SHD_so_diffuse ) << "\tdiffuse\n\t\t"
-					<< STATS_INT_GETI( SHD_so_displacement ) << "\tdisplacement\n\t\t"
-					<< STATS_INT_GETI( SHD_so_distance ) << "\tdistance\n\t\t"
-					<< STATS_INT_GETI( SHD_so_exp ) << "\texp\n\t\t"
-					<< STATS_INT_GETI( SHD_so_external ) << "\texternal\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fDeriv ) << "\tfDeriv\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fDu ) << "\tfDu\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fDv ) << "\tfDv\n\t\t"
-					<< STATS_INT_GETI( SHD_so_faceforward ) << "\tfaceforward\n\t\t"
-					<< STATS_INT_GETI( SHD_so_faceforward2 ) << "\tfaceforward2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fcellnoise1 ) << "\tfcellnoise1\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fcellnoise2 ) << "\tfcellnoise2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fcellnoise3 ) << "\tfcellnoise3\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fcellnoise4 ) << "\tfcellnoise4\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fenvironment2 ) << "\tfenvironment2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fenvironment3 ) << "\tfenvironment3\n\t\t"
-					<< STATS_INT_GETI( SHD_so_filterstep ) << "\tfilterstep\n\t\t"
-					<< STATS_INT_GETI( SHD_so_filterstep2 ) << "\tfilterstep2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_floor ) << "\tfloor\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fmix ) << "\tfmix\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fnoise1 ) << "\tfnoise1\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fnoise2 ) << "\tfnoise2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fnoise3 ) << "\tfnoise3\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fnoise4 ) << "\tfnoise4\n\t\t"
-					<< STATS_INT_GETI( SHD_so_format ) << "\tformat\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fpnoise1 ) << "\tfpnoise1\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fpnoise2 ) << "\tfpnoise2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fpnoise3 ) << "\tfpnoise3\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fpnoise4 ) << "\tfpnoise4\n\t\t"
-					<< STATS_INT_GETI( SHD_so_frandom ) << "\tfrandom\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fresnel ) << "\tfresnel\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fspline ) << "\tfspline\n\t\t"
-					<< STATS_INT_GETI( SHD_so_fsplinea ) << "\tfsplinea\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ftexture1 ) << "\tftexture1\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ftexture2 ) << "\tftexture2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ftexture3 ) << "\tftexture3\n\t\t"
-					<< STATS_INT_GETI( SHD_so_illuminance ) << "\tilluminance\n\t\t"
-					<< STATS_INT_GETI( SHD_so_illuminate ) << "\tilluminate\n\t\t"
-					<< STATS_INT_GETI( SHD_so_incident ) << "\tincident\n\t\t"
-					<< STATS_INT_GETI( SHD_so_inversesqrt ) << "\tinversesqrt\n\t\t"
-					<< STATS_INT_GETI( SHD_so_length ) << "\tlength\n\t\t"
-					<< STATS_INT_GETI( SHD_so_lightsource ) << "\tlightsource\n\t\t"
-					<< STATS_INT_GETI( SHD_so_log ) << "\tlog\n\t\t"
-					<< STATS_INT_GETI( SHD_so_match ) << "\tmatch\n\t\t"
-					<< STATS_INT_GETI( SHD_so_max ) << "\tmax\n\t\t"
-					<< STATS_INT_GETI( SHD_so_min ) << "\tmin\n\t\t"
-					<< STATS_INT_GETI( SHD_so_mod ) << "\tmod\n\t\t"
-					<< STATS_INT_GETI( SHD_so_mrotate ) << "\tmrotate\n\t\t"
-					<< STATS_INT_GETI( SHD_so_mscale ) << "\tmscale\n\t\t"
-					<< STATS_INT_GETI( SHD_so_mtranslate ) << "\tmtranslate\n\t\t"
-					<< STATS_INT_GETI( SHD_so_normalize ) << "\tnormalize\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ntransform ) << "\tntransform\n\t\t"
-					<< STATS_INT_GETI( SHD_so_occlusion ) << "\tocclusion\n\t\t"
-					<< STATS_INT_GETI( SHD_so_opposite ) << "\topposite\n\t\t"
-					<< STATS_INT_GETI( SHD_so_option ) << "\toption\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pDeriv ) << "\tpDeriv\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pDu ) << "\tpDu\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pDv ) << "\tpDv\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pcellnoise1 ) << "\tpcellnoise1\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pcellnoise2 ) << "\tpcellnoise2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pcellnoise3 ) << "\tpcellnoise3\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pcellnoise4 ) << "\tpcellnoise4\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pclamp ) << "\tpclamp\n\t\t"
-					<< STATS_INT_GETI( SHD_so_phong ) << "\tphong\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pmax ) << "\tpmax\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pmin ) << "\tpmin\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pmix ) << "\tpmix\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pnoise1 ) << "\tpnoise1\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pnoise2 ) << "\tpnoise2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pnoise3 ) << "\tpnoise3\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pnoise4 ) << "\tpnoise4\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pow ) << "\tpow\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ppnoise1 ) << "\tppnoise1\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ppnoise2 ) << "\tppnoise2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ppnoise3 ) << "\tppnoise3\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ppnoise4 ) << "\tppnoise4\n\t\t"
-					<< STATS_INT_GETI( SHD_so_prandom ) << "\tprandom\n\t\t"
-					<< STATS_INT_GETI( SHD_so_printf ) << "\tprintf\n\t\t"
-					<< STATS_INT_GETI( SHD_so_pspline ) << "\tpspline\n\t\t"
-					<< STATS_INT_GETI( SHD_so_psplinea ) << "\tpsplinea\n\t\t"
-					<< STATS_INT_GETI( SHD_so_ptlined ) << "\tptlined\n\t\t"
-					<< STATS_INT_GETI( SHD_so_radians ) << "\tradians\n\t\t"
-					<< STATS_INT_GETI( SHD_so_reflect ) << "\treflect\n\t\t"
-					<< STATS_INT_GETI( SHD_so_refract ) << "\trefract\n\t\t"
-					<< STATS_INT_GETI( SHD_so_rendererinfo ) << "\trendererinfo\n\t\t"
-					<< STATS_INT_GETI( SHD_so_rotate ) << "\trotate\n\t\t"
-					<< STATS_INT_GETI( SHD_so_round ) << "\tround\n\t\t"
-					<< STATS_INT_GETI( SHD_so_scspline ) << "\tscspline\n\t\t"
-					<< STATS_INT_GETI( SHD_so_scsplinea ) << "\tscsplinea\n\t\t"
-					<< STATS_INT_GETI( SHD_so_setcomp ) << "\tsetcomp\n\t\t"
-					<< STATS_INT_GETI( SHD_so_setmcomp ) << "\tsetmcomp\n\t\t"
-					<< STATS_INT_GETI( SHD_so_setxcomp ) << "\tsetxcomp\n\t\t"
-					<< STATS_INT_GETI( SHD_so_setycomp ) << "\tsetycomp\n\t\t"
-					<< STATS_INT_GETI( SHD_so_setzcomp ) << "\tsetzcomp\n\t\t"
-					<< STATS_INT_GETI( SHD_so_sfspline ) << "\tsfspline\n\t\t"
-					<< STATS_INT_GETI( SHD_so_sfsplinea ) << "\tsfsplinea\n\t\t"
-					<< STATS_INT_GETI( SHD_so_shadername ) << "\tshadername\n\t\t"
-					<< STATS_INT_GETI( SHD_so_shadername2 ) << "\tshadername2\n\t\t"
-					<< STATS_INT_GETI( SHD_so_shadow ) << "\tshadow\n\t\t"
-					<< STATS_INT_GETI( SHD_so_shadow1 ) << "\tshadow1\n\t\t"
-					<< STATS_INT_GETI( SHD_so_sign ) << "\tsign\n\t\t"
-					<< STATS_INT_GETI( SHD_so_sin ) << "\tsin\n\t\t"
-					<< STATS_INT_GETI( SHD_so_smoothstep ) << "\tsmoothstep\n\t\t"
-					<< STATS_INT_GETI( SHD_so_solar ) << "\tsolar\n\t\t"
-					<< STATS_INT_GETI( SHD_so_specular ) << "\tspecular\n\t\t"
-					<< STATS_INT_GETI( SHD_so_specularbrdf ) << "\tspecularbrdf\n\t\t"
-					<< STATS_INT_GETI( SHD_so_spspline ) << "\tspspline\n\t\t"
-					<< STATS_INT_GETI( SHD_so_spsplinea ) << "\tspsplinea\n\t\t"
-					<< STATS_INT_GETI( SHD_so_sqrt ) << "\tsqrt\n\t\t"
-					<< STATS_INT_GETI( SHD_so_step ) << "\tstep\n\t\t"
-					<< STATS_INT_GETI( SHD_so_surface ) << "\tsurface\n\t\t"
-					<< STATS_INT_GETI( SHD_so_tan ) << "\ttan\n\t\t"
-					<< STATS_INT_GETI( SHD_so_textureinfo ) << "\ttextureinfo\n\t\t"
-					<< STATS_INT_GETI( SHD_so_trace ) << "\ttrace\n\t\t"
-					<< STATS_INT_GETI( SHD_so_transform ) << "\ttransform\n\t\t"
-					<< STATS_INT_GETI( SHD_so_vmix ) << "\tvmix\n\t\t"
-					<< STATS_INT_GETI( SHD_so_vtransform ) << "\tvtransform\n\t\t" << std::endl;
+				<<	"Shadeop calls:\n\t\t";
+					if( STATS_INT_GETI( SHD_so_abs ) ) MSG << STATS_INT_GETI( SHD_so_abs ) << "\tabs\n\t\t";
+					if( STATS_INT_GETI( SHD_so_acos ) ) MSG << STATS_INT_GETI( SHD_so_acos ) << "\tacos\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ambient ) ) MSG << STATS_INT_GETI( SHD_so_ambient ) << "\tambient\n\t\t";
+					if( STATS_INT_GETI( SHD_so_area ) ) MSG << STATS_INT_GETI( SHD_so_area ) << "\tarea\n\t\t";
+					if( STATS_INT_GETI( SHD_so_asin ) ) MSG << STATS_INT_GETI( SHD_so_asin ) << "\tasin\n\t\t";
+					if( STATS_INT_GETI( SHD_so_atan ) ) MSG << STATS_INT_GETI( SHD_so_atan ) << "\tatan\n\t\t";
+					if( STATS_INT_GETI( SHD_so_atmosphere ) ) MSG << STATS_INT_GETI( SHD_so_atmosphere ) << "\tatmosphere\n\t\t";
+					if( STATS_INT_GETI( SHD_so_attribute ) ) MSG << STATS_INT_GETI( SHD_so_attribute ) << "\tattribute\n\t\t";
+					if( STATS_INT_GETI( SHD_so_bake ) ) MSG << STATS_INT_GETI( SHD_so_bake ) << "\tbake\n\t\t";
+					if( STATS_INT_GETI( SHD_so_bump ) ) MSG << STATS_INT_GETI( SHD_so_bump ) << "\tbump\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cDeriv ) ) MSG << STATS_INT_GETI( SHD_so_cDeriv ) << "\tcDeriv\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cDu ) ) MSG << STATS_INT_GETI( SHD_so_cDu ) << "\tcDu\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cDv ) ) MSG << STATS_INT_GETI( SHD_so_cDv ) << "\tcDv\n\t\t";
+					if( STATS_INT_GETI( SHD_so_calculatenormal ) ) MSG << STATS_INT_GETI( SHD_so_calculatenormal ) << "\tcalculatenormal\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ccellnoise1 ) ) MSG << STATS_INT_GETI( SHD_so_ccellnoise1 ) << "\tccellnoise1\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ccellnoise2 ) ) MSG << STATS_INT_GETI( SHD_so_ccellnoise2 ) << "\tccellnoise2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ccellnoise3 ) ) MSG << STATS_INT_GETI( SHD_so_ccellnoise3 ) << "\tccellnoise3\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ccellnoise4 ) ) MSG << STATS_INT_GETI( SHD_so_ccellnoise4 ) << "\tccellnoise4\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ceil ) ) MSG << STATS_INT_GETI( SHD_so_ceil ) << "\tceil\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cenvironment2 ) ) MSG << STATS_INT_GETI( SHD_so_cenvironment2 ) << "\tcenvironment2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cenvironment3 ) ) MSG << STATS_INT_GETI( SHD_so_cenvironment3 ) << "\tcenvironment3\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cclamp ) ) MSG << STATS_INT_GETI( SHD_so_cclamp ) << "\tcclamp\n\t\t";
+					if( STATS_INT_GETI( SHD_so_clamp ) ) MSG << STATS_INT_GETI( SHD_so_clamp ) << "\tclamp\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cmax ) ) MSG << STATS_INT_GETI( SHD_so_cmax ) << "\tcmax\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cmin ) ) MSG << STATS_INT_GETI( SHD_so_cmin ) << "\tcmin\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cmix ) ) MSG << STATS_INT_GETI( SHD_so_cmix ) << "\tcmix\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cnoise1 ) ) MSG << STATS_INT_GETI( SHD_so_cnoise1 ) << "\tcnoise1\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cnoise2 ) ) MSG << STATS_INT_GETI( SHD_so_cnoise2 ) << "\tcnoise2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cnoise3 ) ) MSG << STATS_INT_GETI( SHD_so_cnoise3 ) << "\tcnoise3\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cnoise4 ) ) MSG << STATS_INT_GETI( SHD_so_cnoise4 ) << "\tcnoise4\n\t\t";
+					if( STATS_INT_GETI( SHD_so_concat ) ) MSG << STATS_INT_GETI( SHD_so_concat ) << "\tconcat\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cos ) ) MSG << STATS_INT_GETI( SHD_so_cos ) << "\tcos\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cpnoise1 ) ) MSG << STATS_INT_GETI( SHD_so_cpnoise1 ) << "\tcpnoise1\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cpnoise2 ) ) MSG << STATS_INT_GETI( SHD_so_cpnoise2 ) << "\tcpnoise2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cpnoise3 ) ) MSG << STATS_INT_GETI( SHD_so_cpnoise3 ) << "\tcpnoise3\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cpnoise4 ) ) MSG << STATS_INT_GETI( SHD_so_cpnoise4 ) << "\tcpnoise4\n\t\t";
+					if( STATS_INT_GETI( SHD_so_crandom ) ) MSG << STATS_INT_GETI( SHD_so_crandom ) << "\tcrandom\n\t\t";
+					if( STATS_INT_GETI( SHD_so_cspline ) ) MSG << STATS_INT_GETI( SHD_so_cspline ) << "\tcspline\n\t\t";
+					if( STATS_INT_GETI( SHD_so_csplinea ) ) MSG << STATS_INT_GETI( SHD_so_csplinea ) << "\tcsplinea\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ctexture1 ) ) MSG << STATS_INT_GETI( SHD_so_ctexture1 ) << "\tctexture1\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ctexture2 ) ) MSG << STATS_INT_GETI( SHD_so_ctexture2 ) << "\tctexture2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ctexture3 ) ) MSG << STATS_INT_GETI( SHD_so_ctexture3 ) << "\tctexture3\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ctransform ) ) MSG << STATS_INT_GETI( SHD_so_ctransform ) << "\tctransform\n\t\t";
+					if( STATS_INT_GETI( SHD_so_degrees ) ) MSG << STATS_INT_GETI( SHD_so_degrees ) << "\tdegrees\n\t\t";
+					if( STATS_INT_GETI( SHD_so_depth ) ) MSG << STATS_INT_GETI( SHD_so_depth ) << "\tdepth\n\t\t";
+					if( STATS_INT_GETI( SHD_so_determinant ) ) MSG << STATS_INT_GETI( SHD_so_determinant ) << "\tdeterminant\n\t\t";
+					if( STATS_INT_GETI( SHD_so_diffuse ) ) MSG << STATS_INT_GETI( SHD_so_diffuse ) << "\tdiffuse\n\t\t";
+					if( STATS_INT_GETI( SHD_so_displacement ) ) MSG << STATS_INT_GETI( SHD_so_displacement ) << "\tdisplacement\n\t\t";
+					if( STATS_INT_GETI( SHD_so_distance ) ) MSG << STATS_INT_GETI( SHD_so_distance ) << "\tdistance\n\t\t";
+					if( STATS_INT_GETI( SHD_so_exp ) ) MSG << STATS_INT_GETI( SHD_so_exp ) << "\texp\n\t\t";
+					if( STATS_INT_GETI( SHD_so_external ) ) MSG << STATS_INT_GETI( SHD_so_external ) << "\texternal\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fDeriv ) ) MSG << STATS_INT_GETI( SHD_so_fDeriv ) << "\tfDeriv\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fDu ) ) MSG << STATS_INT_GETI( SHD_so_fDu ) << "\tfDu\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fDv ) ) MSG << STATS_INT_GETI( SHD_so_fDv ) << "\tfDv\n\t\t";
+					if( STATS_INT_GETI( SHD_so_faceforward ) ) MSG << STATS_INT_GETI( SHD_so_faceforward ) << "\tfaceforward\n\t\t";
+					if( STATS_INT_GETI( SHD_so_faceforward2 ) ) MSG << STATS_INT_GETI( SHD_so_faceforward2 ) << "\tfaceforward2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fcellnoise1 ) ) MSG << STATS_INT_GETI( SHD_so_fcellnoise1 ) << "\tfcellnoise1\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fcellnoise2 ) ) MSG << STATS_INT_GETI( SHD_so_fcellnoise2 ) << "\tfcellnoise2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fcellnoise3 ) ) MSG << STATS_INT_GETI( SHD_so_fcellnoise3 ) << "\tfcellnoise3\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fcellnoise4 ) ) MSG << STATS_INT_GETI( SHD_so_fcellnoise4 ) << "\tfcellnoise4\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fenvironment2 ) ) MSG << STATS_INT_GETI( SHD_so_fenvironment2 ) << "\tfenvironment2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fenvironment3 ) ) MSG << STATS_INT_GETI( SHD_so_fenvironment3 ) << "\tfenvironment3\n\t\t";
+					if( STATS_INT_GETI( SHD_so_filterstep ) ) MSG << STATS_INT_GETI( SHD_so_filterstep ) << "\tfilterstep\n\t\t";
+					if( STATS_INT_GETI( SHD_so_filterstep2 ) ) MSG << STATS_INT_GETI( SHD_so_filterstep2 ) << "\tfilterstep2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_floor ) ) MSG << STATS_INT_GETI( SHD_so_floor ) << "\tfloor\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fmix ) ) MSG << STATS_INT_GETI( SHD_so_fmix ) << "\tfmix\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fnoise1 ) ) MSG << STATS_INT_GETI( SHD_so_fnoise1 ) << "\tfnoise1\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fnoise2 ) ) MSG << STATS_INT_GETI( SHD_so_fnoise2 ) << "\tfnoise2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fnoise3 ) ) MSG << STATS_INT_GETI( SHD_so_fnoise3 ) << "\tfnoise3\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fnoise4 ) ) MSG << STATS_INT_GETI( SHD_so_fnoise4 ) << "\tfnoise4\n\t\t";
+					if( STATS_INT_GETI( SHD_so_format ) ) MSG << STATS_INT_GETI( SHD_so_format ) << "\tformat\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fpnoise1 ) ) MSG << STATS_INT_GETI( SHD_so_fpnoise1 ) << "\tfpnoise1\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fpnoise2 ) ) MSG << STATS_INT_GETI( SHD_so_fpnoise2 ) << "\tfpnoise2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fpnoise3 ) ) MSG << STATS_INT_GETI( SHD_so_fpnoise3 ) << "\tfpnoise3\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fpnoise4 ) ) MSG << STATS_INT_GETI( SHD_so_fpnoise4 ) << "\tfpnoise4\n\t\t";
+					if( STATS_INT_GETI( SHD_so_frandom ) ) MSG << STATS_INT_GETI( SHD_so_frandom ) << "\tfrandom\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fresnel ) ) MSG << STATS_INT_GETI( SHD_so_fresnel ) << "\tfresnel\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fspline ) ) MSG << STATS_INT_GETI( SHD_so_fspline ) << "\tfspline\n\t\t";
+					if( STATS_INT_GETI( SHD_so_fsplinea ) ) MSG << STATS_INT_GETI( SHD_so_fsplinea ) << "\tfsplinea\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ftexture1 ) ) MSG << STATS_INT_GETI( SHD_so_ftexture1 ) << "\tftexture1\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ftexture2 ) ) MSG << STATS_INT_GETI( SHD_so_ftexture2 ) << "\tftexture2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ftexture3 ) ) MSG << STATS_INT_GETI( SHD_so_ftexture3 ) << "\tftexture3\n\t\t";
+					if( STATS_INT_GETI( SHD_so_illuminance ) ) MSG << STATS_INT_GETI( SHD_so_illuminance ) << "\tilluminance\n\t\t";
+					if( STATS_INT_GETI( SHD_so_illuminate ) ) MSG << STATS_INT_GETI( SHD_so_illuminate ) << "\tilluminate\n\t\t";
+					if( STATS_INT_GETI( SHD_so_incident ) ) MSG << STATS_INT_GETI( SHD_so_incident ) << "\tincident\n\t\t";
+					if( STATS_INT_GETI( SHD_so_inversesqrt ) ) MSG << STATS_INT_GETI( SHD_so_inversesqrt ) << "\tinversesqrt\n\t\t";
+					if( STATS_INT_GETI( SHD_so_length ) ) MSG << STATS_INT_GETI( SHD_so_length ) << "\tlength\n\t\t";
+					if( STATS_INT_GETI( SHD_so_lightsource ) ) MSG << STATS_INT_GETI( SHD_so_lightsource ) << "\tlightsource\n\t\t";
+					if( STATS_INT_GETI( SHD_so_log ) ) MSG << STATS_INT_GETI( SHD_so_log ) << "\tlog\n\t\t";
+					if( STATS_INT_GETI( SHD_so_match ) ) MSG << STATS_INT_GETI( SHD_so_match ) << "\tmatch\n\t\t";
+					if( STATS_INT_GETI( SHD_so_max ) ) MSG << STATS_INT_GETI( SHD_so_max ) << "\tmax\n\t\t";
+					if( STATS_INT_GETI( SHD_so_min ) ) MSG << STATS_INT_GETI( SHD_so_min ) << "\tmin\n\t\t";
+					if( STATS_INT_GETI( SHD_so_mod ) ) MSG << STATS_INT_GETI( SHD_so_mod ) << "\tmod\n\t\t";
+					if( STATS_INT_GETI( SHD_so_mrotate ) ) MSG << STATS_INT_GETI( SHD_so_mrotate ) << "\tmrotate\n\t\t";
+					if( STATS_INT_GETI( SHD_so_mscale ) ) MSG << STATS_INT_GETI( SHD_so_mscale ) << "\tmscale\n\t\t";
+					if( STATS_INT_GETI( SHD_so_mtranslate ) ) MSG << STATS_INT_GETI( SHD_so_mtranslate ) << "\tmtranslate\n\t\t";
+					if( STATS_INT_GETI( SHD_so_normalize ) ) MSG << STATS_INT_GETI( SHD_so_normalize ) << "\tnormalize\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ntransform ) ) MSG << STATS_INT_GETI( SHD_so_ntransform ) << "\tntransform\n\t\t";
+					if( STATS_INT_GETI( SHD_so_occlusion ) ) MSG << STATS_INT_GETI( SHD_so_occlusion ) << "\tocclusion\n\t\t";
+					if( STATS_INT_GETI( SHD_so_opposite ) ) MSG << STATS_INT_GETI( SHD_so_opposite ) << "\topposite\n\t\t";
+					if( STATS_INT_GETI( SHD_so_option ) ) MSG << STATS_INT_GETI( SHD_so_option ) << "\toption\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pDeriv ) ) MSG << STATS_INT_GETI( SHD_so_pDeriv ) << "\tpDeriv\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pDu ) ) MSG << STATS_INT_GETI( SHD_so_pDu ) << "\tpDu\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pDv ) ) MSG << STATS_INT_GETI( SHD_so_pDv ) << "\tpDv\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pcellnoise1 ) ) MSG << STATS_INT_GETI( SHD_so_pcellnoise1 ) << "\tpcellnoise1\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pcellnoise2 ) ) MSG << STATS_INT_GETI( SHD_so_pcellnoise2 ) << "\tpcellnoise2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pcellnoise3 ) ) MSG << STATS_INT_GETI( SHD_so_pcellnoise3 ) << "\tpcellnoise3\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pcellnoise4 ) ) MSG << STATS_INT_GETI( SHD_so_pcellnoise4 ) << "\tpcellnoise4\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pclamp ) ) MSG << STATS_INT_GETI( SHD_so_pclamp ) << "\tpclamp\n\t\t";
+					if( STATS_INT_GETI( SHD_so_phong ) ) MSG << STATS_INT_GETI( SHD_so_phong ) << "\tphong\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pmax ) ) MSG << STATS_INT_GETI( SHD_so_pmax ) << "\tpmax\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pmin ) ) MSG << STATS_INT_GETI( SHD_so_pmin ) << "\tpmin\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pmix ) ) MSG << STATS_INT_GETI( SHD_so_pmix ) << "\tpmix\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pnoise1 ) ) MSG << STATS_INT_GETI( SHD_so_pnoise1 ) << "\tpnoise1\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pnoise2 ) ) MSG << STATS_INT_GETI( SHD_so_pnoise2 ) << "\tpnoise2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pnoise3 ) ) MSG << STATS_INT_GETI( SHD_so_pnoise3 ) << "\tpnoise3\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pnoise4 ) ) MSG << STATS_INT_GETI( SHD_so_pnoise4 ) << "\tpnoise4\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pow ) ) MSG << STATS_INT_GETI( SHD_so_pow ) << "\tpow\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ppnoise1 ) ) MSG << STATS_INT_GETI( SHD_so_ppnoise1 ) << "\tppnoise1\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ppnoise2 ) ) MSG << STATS_INT_GETI( SHD_so_ppnoise2 ) << "\tppnoise2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ppnoise3 ) ) MSG << STATS_INT_GETI( SHD_so_ppnoise3 ) << "\tppnoise3\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ppnoise4 ) ) MSG << STATS_INT_GETI( SHD_so_ppnoise4 ) << "\tppnoise4\n\t\t";
+					if( STATS_INT_GETI( SHD_so_prandom ) ) MSG << STATS_INT_GETI( SHD_so_prandom ) << "\tprandom\n\t\t";
+					if( STATS_INT_GETI( SHD_so_printf ) ) MSG << STATS_INT_GETI( SHD_so_printf ) << "\tprintf\n\t\t";
+					if( STATS_INT_GETI( SHD_so_pspline ) ) MSG << STATS_INT_GETI( SHD_so_pspline ) << "\tpspline\n\t\t";
+					if( STATS_INT_GETI( SHD_so_psplinea ) ) MSG << STATS_INT_GETI( SHD_so_psplinea ) << "\tpsplinea\n\t\t";
+					if( STATS_INT_GETI( SHD_so_ptlined ) ) MSG << STATS_INT_GETI( SHD_so_ptlined ) << "\tptlined\n\t\t";
+					if( STATS_INT_GETI( SHD_so_radians ) ) MSG << STATS_INT_GETI( SHD_so_radians ) << "\tradians\n\t\t";
+					if( STATS_INT_GETI( SHD_so_reflect ) ) MSG << STATS_INT_GETI( SHD_so_reflect ) << "\treflect\n\t\t";
+					if( STATS_INT_GETI( SHD_so_refract ) ) MSG << STATS_INT_GETI( SHD_so_refract ) << "\trefract\n\t\t";
+					if( STATS_INT_GETI( SHD_so_rendererinfo ) ) MSG << STATS_INT_GETI( SHD_so_rendererinfo ) << "\trendererinfo\n\t\t";
+					if( STATS_INT_GETI( SHD_so_rotate ) ) MSG << STATS_INT_GETI( SHD_so_rotate ) << "\trotate\n\t\t";
+					if( STATS_INT_GETI( SHD_so_round ) ) MSG << STATS_INT_GETI( SHD_so_round ) << "\tround\n\t\t";
+					if( STATS_INT_GETI( SHD_so_scspline ) ) MSG << STATS_INT_GETI( SHD_so_scspline ) << "\tscspline\n\t\t";
+					if( STATS_INT_GETI( SHD_so_scsplinea ) ) MSG << STATS_INT_GETI( SHD_so_scsplinea ) << "\tscsplinea\n\t\t";
+					if( STATS_INT_GETI( SHD_so_setcomp ) ) MSG << STATS_INT_GETI( SHD_so_setcomp ) << "\tsetcomp\n\t\t";
+					if( STATS_INT_GETI( SHD_so_setmcomp ) ) MSG << STATS_INT_GETI( SHD_so_setmcomp ) << "\tsetmcomp\n\t\t";
+					if( STATS_INT_GETI( SHD_so_setxcomp ) ) MSG << STATS_INT_GETI( SHD_so_setxcomp ) << "\tsetxcomp\n\t\t";
+					if( STATS_INT_GETI( SHD_so_setycomp ) ) MSG << STATS_INT_GETI( SHD_so_setycomp ) << "\tsetycomp\n\t\t";
+					if( STATS_INT_GETI( SHD_so_setzcomp ) ) MSG << STATS_INT_GETI( SHD_so_setzcomp ) << "\tsetzcomp\n\t\t";
+					if( STATS_INT_GETI( SHD_so_sfspline ) ) MSG << STATS_INT_GETI( SHD_so_sfspline ) << "\tsfspline\n\t\t";
+					if( STATS_INT_GETI( SHD_so_sfsplinea ) ) MSG << STATS_INT_GETI( SHD_so_sfsplinea ) << "\tsfsplinea\n\t\t";
+					if( STATS_INT_GETI( SHD_so_shadername ) ) MSG << STATS_INT_GETI( SHD_so_shadername ) << "\tshadername\n\t\t";
+					if( STATS_INT_GETI( SHD_so_shadername2 ) ) MSG << STATS_INT_GETI( SHD_so_shadername2 ) << "\tshadername2\n\t\t";
+					if( STATS_INT_GETI( SHD_so_shadow ) ) MSG << STATS_INT_GETI( SHD_so_shadow ) << "\tshadow\n\t\t";
+					if( STATS_INT_GETI( SHD_so_shadow1 ) ) MSG << STATS_INT_GETI( SHD_so_shadow1 ) << "\tshadow1\n\t\t";
+					if( STATS_INT_GETI( SHD_so_sign ) ) MSG << STATS_INT_GETI( SHD_so_sign ) << "\tsign\n\t\t";
+					if( STATS_INT_GETI( SHD_so_sin ) ) MSG << STATS_INT_GETI( SHD_so_sin ) << "\tsin\n\t\t";
+					if( STATS_INT_GETI( SHD_so_smoothstep ) ) MSG << STATS_INT_GETI( SHD_so_smoothstep ) << "\tsmoothstep\n\t\t";
+					if( STATS_INT_GETI( SHD_so_solar ) ) MSG << STATS_INT_GETI( SHD_so_solar ) << "\tsolar\n\t\t";
+					if( STATS_INT_GETI( SHD_so_specular ) ) MSG << STATS_INT_GETI( SHD_so_specular ) << "\tspecular\n\t\t";
+					if( STATS_INT_GETI( SHD_so_specularbrdf ) ) MSG << STATS_INT_GETI( SHD_so_specularbrdf ) << "\tspecularbrdf\n\t\t";
+					if( STATS_INT_GETI( SHD_so_spspline ) ) MSG << STATS_INT_GETI( SHD_so_spspline ) << "\tspspline\n\t\t";
+					if( STATS_INT_GETI( SHD_so_spsplinea ) ) MSG << STATS_INT_GETI( SHD_so_spsplinea ) << "\tspsplinea\n\t\t";
+					if( STATS_INT_GETI( SHD_so_sqrt ) ) MSG << STATS_INT_GETI( SHD_so_sqrt ) << "\tsqrt\n\t\t";
+					if( STATS_INT_GETI( SHD_so_step ) ) MSG << STATS_INT_GETI( SHD_so_step ) << "\tstep\n\t\t";
+					if( STATS_INT_GETI( SHD_so_surface ) ) MSG << STATS_INT_GETI( SHD_so_surface ) << "\tsurface\n\t\t";
+					if( STATS_INT_GETI( SHD_so_tan ) ) MSG << STATS_INT_GETI( SHD_so_tan ) << "\ttan\n\t\t";
+					if( STATS_INT_GETI( SHD_so_textureinfo ) ) MSG << STATS_INT_GETI( SHD_so_textureinfo ) << "\ttextureinfo\n\t\t";
+					if( STATS_INT_GETI( SHD_so_trace ) ) MSG << STATS_INT_GETI( SHD_so_trace ) << "\ttrace\n\t\t";
+					if( STATS_INT_GETI( SHD_so_transform ) ) MSG << STATS_INT_GETI( SHD_so_transform ) << "\ttransform\n\t\t";
+					if( STATS_INT_GETI( SHD_so_vmix ) ) MSG << STATS_INT_GETI( SHD_so_vmix ) << "\tvmix\n\t\t";
+					if( STATS_INT_GETI( SHD_so_vtransform ) ) MSG << STATS_INT_GETI( SHD_so_vtransform ) << "\tvtransform\n\t\t"; 
+					MSG << std::endl;
 
 		MSG << "Attributes: \t";
 		MSG << ( TqInt ) Attribute_stack.size() << " created" << std::endl;
