@@ -29,6 +29,8 @@
 #include <string>
 
 #include "aqsis.h"
+#include <logging.h>
+#include <logging_streambufs.h>
 
 #ifdef AQSIS_SYSTEM_WIN32
 
@@ -127,7 +129,7 @@ void write_tiff(const std::string& filename)
     TIFF* const file = TIFFOpen(filename.c_str(), "w");
     if(!file)
     {
-        std::cerr << "Error opening [" << filename << "] for TIFF output" << std::endl;
+        std::cerr << error << "Could not open [" << filename << "] for TIFF output" << std::endl;
         return;
     }
 
@@ -147,7 +149,7 @@ void write_tiff(const std::string& filename)
         if(TIFFWriteScanline(file, p, i, 0) < 0)
         {
             TIFFClose(file);
-            std::cerr << "Error writing data to [" << filename << "] for TIFF output" << std::endl;
+            std::cerr << error << "Could not write data to [" << filename << "] for TIFF output" << std::endl;
             return;
         }
         p += g_ImageWidth * sizeof(GLubyte) * 3;
@@ -289,6 +291,12 @@ void keyboard( unsigned char key, int x, int y )
 
 int main( int argc, char** argv )
 {
+    std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::WARNING, std::cerr) );
+
     int port = -1;
     char *portStr = getenv( "AQSIS_DD_PORT" );
 
@@ -299,7 +307,7 @@ int main( int argc, char** argv )
 
     if ( -1 == DDInitialise( NULL, port ) )
     {
-        std::cerr << "ERROR: Could not open communications channel to Aqsis" << std::endl;
+        std::cerr << error << "Could not open communications channel to Aqsis" << std::endl;
         return 1;
     }
 

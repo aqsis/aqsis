@@ -27,6 +27,8 @@
 #include	<stdlib.h>
 
 #include	"aqsis.h"
+#include	"logging.h"
+#include	"logging_streambufs.h"
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #include	<version.h>
@@ -74,6 +76,12 @@ TqInt Abandon( SOCKET s, SqDDMessageBase* pMsg );
 /// Main loop,, just cycle handling any recieved messages.
 int main( int argc, char* argv[] )
 {
+    std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
+    std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::WARNING, std::cerr) );
+
     int port = -1;
     char *portStr = getenv( "AQSIS_DD_PORT" );
 
@@ -88,7 +96,7 @@ int main( int argc, char* argv[] )
     }
     else
     {
-        std::cerr << "ERROR: Could not open communications channel to Aqsis" << std::endl;
+        std::cerr << error << "Could not open communications channel to Aqsis" << std::endl;
         return 1;
     }
 

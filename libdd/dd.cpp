@@ -24,14 +24,15 @@
 		\author Timothy M. Shead (tshead@k-3d.com)
 */
 
-#include	<iostream>
+#include <iostream>
 #include <memory>
 
-#include	"aqsis.h"
+#include "aqsis.h"
+#include <logging.h>
 
 #ifdef AQSIS_SYSTEM_WIN32
 
-#include	<winsock2.h>
+#include <winsock2.h>
 
 #else // AQSIS_SYSTEM_WIN32
 
@@ -80,6 +81,28 @@ TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsg );
 START_NAMESPACE( Aqsis )
 
 static void CloseSocket( SOCKET& Socket );
+
+/// Hides incompatibilities between sockets and WinSock
+void InitializeSockets()
+{
+#ifdef AQSIS_SYSTEM_WIN32
+	WSADATA wsaData;
+	WSAStartup( MAKEWORD( 2, 0 ), &wsaData );
+#endif // AQSIS_SYSTEM_WIN32
+}
+
+/// Hides incompatibilities amongst platforms
+hostent* GetHostByName(const std::string& HostName)
+{
+#ifdef AQSIS_SYSTEM_MACOSX
+	// Remove this conditional section and use gethostbyname() if Apple ever
+	// fixes the problem of resolving localhost without a connection to a DNS server
+	return gethostent();	// assumes localhost defined first in /etc/hosts
+#else // AQSIS_SYSTEM_MACOSX
+	return gethostbyname( HostName.c_str() );
+#endif // !AQSIS_SYSTEM_MACOSX
+}
+
 
 //----------------------------------------------------------------------
 /** Receive a specified length of data from the specified socket.
@@ -177,51 +200,42 @@ static SOCKET g_Socket = INVALID_SOCKET;
 
 TqInt DDInitialise( const TqChar* phostname, TqInt port )
 {
-#ifdef AQSIS_SYSTEM_WIN32
-    WSADATA wsaData;
-    WSAStartup( MAKEWORD( 2, 0 ), &wsaData );
-#endif // AQSIS_SYSTEM_WIN32
+	InitializeSockets();
 
-    // Open a socket.
-    g_Socket = socket( AF_INET, SOCK_STREAM, 0 );
-    if ( g_Socket != INVALID_SOCKET )
-    {
-        // If no host name specified, use the local machine.
-        char hostName[ 255 ];
-        if ( phostname != NULL )
-            strcpy( hostName, phostname );
-        else
-            gethostname( hostName, 255 );
+	// Open a socket.
+	g_Socket = socket( AF_INET, SOCK_STREAM, 0 );
+	if ( g_Socket == INVALID_SOCKET )
+		return -1;
 
-        hostent* pHost;
-#ifdef AQSIS_SYSTEM_MACOSX
-        // Remove this conditional section and use gethostbyname() if Apple ever
-        // fixes the problem of resolving localhost without a connection to a DNS server
-        pHost = gethostent();	// assumes localhost defined first in /etc/hosts
-#else
-        pHost = gethostbyname( hostName );
-#endif /* AQSIS_SYSTEM_MACOSX */
+        // If no host name specified, use the local machine
+	std::string hostName(phostname ? phostname : "");
+	if(hostName.empty())
+		{
+			hostName.resize(256);
+			gethostname( &hostName[0], hostName.size() );
+			hostName.resize(strlen(hostName.c_str()));
+		}
+		
+        hostent* const pHost = GetHostByName(hostName);
 
         SOCKADDR_IN saTemp;
         memset( &saTemp, 0, sizeof( saTemp ) );
         saTemp.sin_family = AF_INET;
-        if ( port < 0 )
-            saTemp.sin_port = htons( 27747 );
-        else
-            saTemp.sin_port = htons( port );
+        
+	if ( port < 0 )
+		port = 27747;
 
+        saTemp.sin_port = htons( port );
         memcpy( &saTemp.sin_addr, pHost->h_addr, pHost->h_length );
-        TqInt conret;
-        if ( ( conret = connect( g_Socket, ( PSOCKADDR ) & saTemp, sizeof( saTemp ) ) ) != SOCKET_ERROR )
-            return ( 0 );
-        else
-        {
-            CloseSocket( g_Socket );
-            return ( -1 );
-        }
-    }
-    else
-        return ( -1 );
+
+	if(SOCKET_ERROR == connect( g_Socket, PSOCKADDR(&saTemp), sizeof(saTemp)))
+		{
+			std::cerr << error << "Connecting to " << hostName << ":" << port << " ... " << strerror(errno) << std::endl;
+			CloseSocket(g_Socket);
+			return -1;
+		}
+
+	return 0;
 }
 
 //----------------------------------------------------------------------
