@@ -1,3 +1,22 @@
+2002-02-12 15:42  pgregory
+
+	* Makefile.am, configure.in, aqsl/Makefile.am, render/version.h,
+	shaders/Makefile.am: Minor update to archive for Win32 build
+
+2002-02-12 15:10  pgregory
+
+	* Renderer.dsw: rename release archive project to avoid spaces on
+	Posix.
+
+2002-02-12 13:31  pgregory
+
+	* releasearchive/releasearchive.dsp: Renamed old utility project
+	because Posix has problems with spaces.
+
+2002-02-12 12:18  pgregory
+
+	* ChangeLog: Update to changes
+
 2002-02-12 11:36  pgregory
 
 	* configure.in, render/version.h: Set new version number 0.6.000
@@ -1059,16 +1078,11 @@
 	processing is done before responding. Means shadowmaps in
 	particular can be finished before RiMakeShadow is called.
 
-2001-10-11 12:47  pgregory
-
-	* Release Archive/Release Archive.dsp: Make sure spurious output
-	directories aren't created.
-
 2001-10-11 12:46  pgregory
 
-	* Renderer.dsw, prep_install.bat, all/All.dsp, Release
-	Archive/Release Archive.dsp: Change All build to just buid all and
-	add a new project to generate the release archive.
+	* Renderer.dsw, prep_install.bat, all/All.dsp: Change All build to
+	just buid all and add a new project to generate the release
+	archive.
 
 2001-10-11 12:32  pgregory
 
