@@ -569,7 +569,7 @@ TqInt CqLinearCurveSegment::SplitToPatch(
     pPatch->P()->pValue( 3 )[0] = static_cast<CqVector3D>( P()->pValue( 1 )[0] ) - widthOffset1;
 
     // set the normals on the patch
-    pPatch->AddPrimitiveVariable(
+/*    pPatch->AddPrimitiveVariable(
         new CqParameterTypedVertex <
         CqVector3D, type_normal, CqVector3D
         > ( "N", 0 )
@@ -577,7 +577,7 @@ TqInt CqLinearCurveSegment::SplitToPatch(
     pPatch->N() ->SetSize( 4 );
     pPatch->N()->pValue( 0 )[0] = pPatch->N()->pValue( 1 )[0] = normal0;
     pPatch->N()->pValue( 2 )[0] = pPatch->N()->pValue( 3 )[0] = normal1;
-
+*/
     TqInt bUses = Uses();
 
     // set u, v coordinates of the patch
@@ -1002,6 +1002,25 @@ TqInt CqCubicCurveSegment::SplitToCurves(
 }
 
 
+CqVector3D	CqCubicCurveSegment::CalculateTangent(TqFloat u)
+{
+	int i;
+	std::vector<CqVector4D> pg(4), pg0(4);
+	for(i=0; i <= 3; i++) 
+		pg[i] = pg0[i] =*P()->pValue( i );
+	for(int j=1; j <= 3; j++)
+	{
+		for(int i=0; i <= 3-j; i++)
+		{ 
+			pg0[i]=pg[i];
+			pg[i]=pg[i]*(1-u)+pg[i+1]*u;
+		}
+	}
+	return(3*(pg[1]-pg0[0]));
+}
+
+
+
 /**
  * Converts a linear curve segment into a patch for rendering.
  *
@@ -1023,10 +1042,10 @@ TqInt CqCubicCurveSegment::SplitToPatch(
     //                      the first point
     //  widthOffset1  - offset to account for the width of the patch at
     //                      the second point
-    CqVector3D direction0 = P()->pValue( 1 ) - P()->pValue( 0 );
-    CqVector3D direction1 = P()->pValue( 2 ) - P()->pValue( 1 );
-    CqVector3D direction2 = P()->pValue( 3 ) - P()->pValue( 2 );
-    CqVector3D direction3 = P()->pValue( 3 ) - P()->pValue( 2 );
+    CqVector3D direction0 = *P()->pValue( 1 ) - *P()->pValue( 0 );
+    CqVector3D direction3 = *P()->pValue( 3 ) - *P()->pValue( 2 );
+	CqVector3D direction1 = CalculateTangent(0.333);
+	CqVector3D direction2 = CalculateTangent(0.666);
 
     CqVector3D normal0, normal1, normal2, normal3;
     GetNormal( 0, normal0 );

@@ -378,6 +378,8 @@ public:
     {
         return "CqCubicCurveSegment";
     }
+	/** Calculate the tangent at a given u on the curve segment using de Casteljau */
+	CqVector3D	CalculateTangent(TqFloat u);
 
     /** Typed natural subdivision for the surface. */
     template <class T, class SLT> void TypedNaturalSubdivide(
