@@ -22,6 +22,8 @@
 		\brief Implements the CqCellNoise class fro producing cellular noise.
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
+// This is based on code authored orignally by Thomas Burge published on
+//   the Affine webpages.
 
 #include	"aqsis.h"
 
@@ -52,7 +54,7 @@ TqFloat CqCellNoise::FCellNoise2(TqFloat u, TqFloat v)
 	TqInt i=m_PermuteTable[((unsigned int)(u))&0x7ff];
 
 	if(v<0.0)	v-=1;
-	i=m_PermuteTable[m_PermuteTable[i]+(unsigned int)(v)&0x7ff];
+	i=m_PermuteTable[i+(unsigned int)(v)&0x7ff];
 
 	return(m_RandomTable[i]);
 }
