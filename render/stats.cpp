@@ -231,7 +231,7 @@ std::ostream& CqStats::TimeToString(std::ostream& os, TqFloat t) const
 		}
 
     // Round the time if it's more than 5sec
-    if (t>5.0)  t = fmod(t,1)<0.5? floor(t) : ceil(t);
+    if (t>5.0)  t = fmod(t,1)<0.5? FLOOR(t) : CEIL(t);
 
 		TqInt   h = static_cast<TqInt>(t/(60*60));
 		TqInt   m = static_cast<TqInt>((t/60)-(h*60));

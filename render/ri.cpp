@@ -3530,7 +3530,7 @@ static RtBoolean ProcessPrimitiveVariables(CqSurface* pSurface, PARAMETERLIST)
 			case RIL_Pz:
 				pSurface->P().SetSize(pSurface->cVertex());
 				for(i=0; i<pSurface->cVertex(); i++)
-					pSurface->P()[i]=CqVector3D(i%1, floor(i/2), pPoints[i]);
+					pSurface->P()[i]=CqVector3D(i%1, FLOOR(i/2), pPoints[i]);
 				break;
 
 			case RIL_Pw:

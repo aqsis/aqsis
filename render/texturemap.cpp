@@ -425,10 +425,10 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, 
 	float sbo2=(sblur*0.5f)*m_XRes;
 	float tbo2=(tblur*0.5f)*m_YRes;
 	
-	long ss1=static_cast<long>(floor((s1-swo2)*(m_XRes-1))-sbo2);
-	long tt1=static_cast<long>(floor((t1-two2)*(m_YRes-1))-tbo2);
-	long ss2=static_cast<long>(ceil ((s1+swo2)*(m_XRes-1))+sbo2);
-	long tt2=static_cast<long>(ceil ((t1+two2)*(m_YRes-1))+sbo2);
+	long ss1=static_cast<long>(FLOOR((s1-swo2)*(m_XRes-1))-sbo2);
+	long tt1=static_cast<long>(FLOOR((t1-two2)*(m_YRes-1))-tbo2);
+	long ss2=static_cast<long>(CEIL ((s1+swo2)*(m_XRes-1))+sbo2);
+	long tt2=static_cast<long>(CEIL ((t1+two2)*(m_YRes-1))+sbo2);
 
 	bool fss=ss2-ss1==0;
 	bool ftt=tt2-tt1==0;
@@ -998,10 +998,10 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 	TqFloat tmax=(t1>t2)?t1:(t2>t3)?t2:(t3>t4)?t3:t4;
 	
 	// Cull if outside bounding box.
-	TqUint lu=static_cast<TqInt>(floor(smin));
-	TqUint hu=static_cast<TqInt>(ceil(smax));
-	TqUint lv=static_cast<TqInt>(floor(tmin));
-	TqUint hv=static_cast<TqInt>(ceil(tmax));
+	TqUint lu=static_cast<TqInt>(FLOOR(smin));
+	TqUint hu=static_cast<TqInt>(CEIL (smax));
+	TqUint lv=static_cast<TqInt>(FLOOR(tmin));
+	TqUint hv=static_cast<TqInt>(CEIL (tmax));
 
 	lu-=static_cast<TqInt>(sbo2);
 	lv-=static_cast<TqInt>(tbo2);

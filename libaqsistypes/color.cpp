@@ -182,7 +182,7 @@ CqColor CqColor::hsvtorgb() const
 	{
 		if(H==360)	H=0;
 		H/=60;	// H is now in [0,6]
-		TqInt   i=static_cast<TqInt>(floor(H));
+		TqInt   i=static_cast<TqInt>(FLOOR(H));
 		TqFloat f=H-i;
 		TqFloat p=V*(1.0-S);
 		TqFloat q=V*(1.0-(S*f));

@@ -254,6 +254,8 @@ class CqBucket : public IqBucket
 	static	TqInt	m_YSize;
 	static	TqInt	m_XFWidth;
 	static	TqInt	m_YFWidth;
+	static	TqInt	m_XMax;
+	static	TqInt	m_YMax;
 	static	TqInt	m_XPixelSamples;
 	static	TqInt	m_YPixelSamples;
 	static	TqInt	m_XOrigin;

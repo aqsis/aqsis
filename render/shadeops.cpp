@@ -511,7 +511,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_floor(FLOATVAL x, DEFPARAMIMPL)
 	CHECKVARY(x)
 	CHECKVARY(Result)
 	FOR_EACHR
-		Result.SetValue(i,static_cast<TqFloat>(floor(FLOAT(x))));
+		Result.SetValue(i,static_cast<TqFloat>(FLOOR(FLOAT(x))));
 	END_FORR
 }
 
@@ -521,7 +521,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_ceil(FLOATVAL x, DEFPARAMIMPL)
 	CHECKVARY(x)
 	CHECKVARY(Result)
 	FOR_EACHR
-		Result.SetValue(i,static_cast<TqFloat>(ceil(FLOAT(x))));
+		Result.SetValue(i,static_cast<TqFloat>(FLOOR(FLOAT(x))));
 	END_FORR
 }
 
@@ -2009,7 +2009,10 @@ STD_SOIMPL CqShaderExecEnv::SO_ambient(DEFPARAMIMPL)
 	if(m_pSurface!=0)
 	{
 		// If this is the first call to illuminance this time round, call all lights and setup the Cl and L caches.
-		ValidateIlluminanceCache(Point,pShader);
+		if(!m_IlluminanceCacheValid)
+		{
+			ValidateIlluminanceCache(Point,pShader);
+		}
 
 		for(TqUint light_index=0; light_index<m_pSurface->pAttributes()->apLights().size(); light_index++)
 		{

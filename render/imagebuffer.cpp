@@ -252,6 +252,8 @@ TqInt	CqBucket::m_XSize;
 TqInt	CqBucket::m_YSize;
 TqInt	CqBucket::m_XFWidth;
 TqInt	CqBucket::m_YFWidth;
+TqInt	CqBucket::m_XMax;
+TqInt	CqBucket::m_YMax;
 TqInt	CqBucket::m_XOrigin;
 TqInt	CqBucket::m_YOrigin;
 TqInt	CqBucket::m_XPixelSamples;
@@ -275,9 +277,9 @@ TqBool CqBucket::ImageElement(TqInt iXPos, TqInt iYPos, CqImagePixel*& pie)
 	iXPos-=m_XOrigin;
 	iYPos-=m_YOrigin;
 
-	TqInt fxo2=static_cast<TqInt>(ceil((m_XFWidth-1)*0.5f));
-	TqInt fyo2=static_cast<TqInt>(ceil((m_YFWidth-1)*0.5f));
-	
+	TqInt fxo2 = m_XMax;
+	TqInt fyo2 = m_YMax;
+
 	// Check within renderable range
 	if(iXPos>=-fxo2 && iXPos<=m_XSize+fxo2 &&
 	   iYPos>=-fyo2 && iYPos<=m_YSize+fyo2)
@@ -288,7 +290,7 @@ TqBool CqBucket::ImageElement(TqInt iXPos, TqInt iYPos, CqImagePixel*& pie)
 	}
 	else
 	{
-std::cerr << "CqBucket::ImageElement() outside bucket boundary!" << std::endl;
+		std::cerr << "CqBucket::ImageElement() outside bucket boundary!" << std::endl;
 		return(TqFalse);
 	}
 }
@@ -318,6 +320,8 @@ void CqBucket::InitialiseBucket(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt
 	m_YSize=ysize;
 	m_XFWidth=xfwidth;
 	m_YFWidth=yfwidth;
+	m_XMax=static_cast<TqInt>(CEIL((xfwidth-1)*0.5f));
+	m_YMax=static_cast<TqInt>(CEIL((xfwidth-1)*0.5f));
 	m_XPixelSamples=xsamples;
 	m_YPixelSamples=ysamples;
 
@@ -354,8 +358,8 @@ void CqBucket::InitialiseFilterValues()
 	RtFilterFunc pFilter;
 	pFilter=QGetRenderContext()->optCurrent().funcFilter();
 
-	TqFloat xmax=ceil((m_XFWidth-1)*0.5f);
-	TqFloat ymax=ceil((m_YFWidth-1)*0.5f);
+	TqFloat xmax=m_XMax;
+	TqFloat ymax=m_YMax;
 	TqFloat xfwo2=m_XFWidth*0.5f;
 	TqFloat yfwo2=m_YFWidth*0.5f;
 	TqFloat xfw=m_XFWidth;
@@ -556,8 +560,8 @@ void CqBucket::FilterBucket()
 
 	CqColor* pCols=new CqColor[XSize()*YSize()];
 	TqFloat* pDepths=new TqFloat[XSize()*YSize()];
-	TqInt xmax=static_cast<TqInt>(ceil((XFWidth()-1)*0.5f));
-	TqInt ymax=static_cast<TqInt>(ceil((YFWidth()-1)*0.5f));
+	TqInt xmax=static_cast<TqInt>(CEIL((XFWidth()-1)*0.5f));
+	TqInt ymax=static_cast<TqInt>(CEIL((YFWidth()-1)*0.5f));
 	TqFloat xfwo2=XFWidth()*0.5f;
 	TqFloat yfwo2=YFWidth()*0.5f;
 	TqInt numsubpixels=(m_XPixelSamples*m_YPixelSamples);
@@ -888,10 +892,10 @@ void	CqImageBuffer::SetImage()
 
 	m_iXRes=QGetRenderContext()->optCurrent().iXResolution();
 	m_iYRes=QGetRenderContext()->optCurrent().iYResolution();
-	m_CropWindowXMin=static_cast<TqInt>(CLAMP(ceil(m_iXRes*QGetRenderContext()->optCurrent().fCropWindowXMin()  ),0,m_iXRes));
-	m_CropWindowXMax=static_cast<TqInt>(CLAMP(ceil(m_iXRes*QGetRenderContext()->optCurrent().fCropWindowXMax()  ),0,m_iXRes));
-	m_CropWindowYMin=static_cast<TqInt>(CLAMP(ceil(m_iYRes*QGetRenderContext()->optCurrent().fCropWindowYMin()  ),0,m_iYRes));
-	m_CropWindowYMax=static_cast<TqInt>(CLAMP(ceil(m_iYRes*QGetRenderContext()->optCurrent().fCropWindowYMax()  ),0,m_iYRes));
+	m_CropWindowXMin=static_cast<TqInt>(CLAMP(CEIL(m_iXRes*QGetRenderContext()->optCurrent().fCropWindowXMin()  ),0,m_iXRes));
+	m_CropWindowXMax=static_cast<TqInt>(CLAMP(CEIL(m_iXRes*QGetRenderContext()->optCurrent().fCropWindowXMax()  ),0,m_iXRes));
+	m_CropWindowYMin=static_cast<TqInt>(CLAMP(CEIL(m_iYRes*QGetRenderContext()->optCurrent().fCropWindowYMin()  ),0,m_iYRes));
+	m_CropWindowYMax=static_cast<TqInt>(CLAMP(CEIL(m_iYRes*QGetRenderContext()->optCurrent().fCropWindowYMax()  ),0,m_iYRes));
 	m_cXBuckets=(m_iXRes/m_XBucketSize)+1;
 	m_cYBuckets=(m_iYRes/m_YBucketSize)+1;
 	m_PixelXSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelXSamples());
@@ -1276,26 +1280,26 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 		// Now go across all pixels touched by the micropolygon bound.
 		// The first pixel position is at (initX, initY), the last one
 		// at (eX, eY).
-		long eX=static_cast<TqInt>(ceil(bmaxx));
-		long eY=static_cast<TqInt>(ceil(bmaxy));
+		long eX=static_cast<TqInt>(CEIL(bmaxx));
+		long eY=static_cast<TqInt>(CEIL(bmaxy));
 		if(eX>=xmax)	eX=xmax-1;
 		if(eY>=ymax)	eY=ymax-1;
 
 		CqImagePixel* pie;
 	
-		long initY=static_cast<long>(floor(Bound.vecMin().y()));
+		long initY=static_cast<long>(FLOOR(Bound.vecMin().y()));
 		if(initY<ymin)	initY=ymin;
 	
-		long initX=static_cast<long>(floor(Bound.vecMin().x()));
+		long initX=static_cast<long>(FLOOR(Bound.vecMin().x()));
 		if(initX<xmin)	initX=xmin;
 
 		TqInt iXSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelXSamples());
 		TqInt iYSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelYSamples());
 	
-		TqInt im=static_cast<TqInt>((bminx<initX)?0:floor((bminx-initX)*iXSamples));
-		TqInt in=static_cast<TqInt>((bminy<initY)?0:floor((bminy-initY)*iYSamples));
-		TqInt em=static_cast<TqInt>((bmaxx>eX)?iXSamples:ceil((bmaxx-eX)*iXSamples));
-		TqInt en=static_cast<TqInt>((bmaxy>eY)?iYSamples:ceil((bmaxy-eY)*iYSamples));
+		TqInt im=static_cast<TqInt>((bminx<initX)?0:FLOOR((bminx-initX)*iXSamples));
+		TqInt in=static_cast<TqInt>((bminy<initY)?0:FLOOR((bminy-initY)*iYSamples));
+		TqInt em=static_cast<TqInt>((bmaxx>eX)?iXSamples:CEIL((bmaxx-eX)*iXSamples));
+		TqInt en=static_cast<TqInt>((bmaxy>eY)?iYSamples:CEIL((bmaxy-eY)*iYSamples));
 
 		register long iY=initY;
 	
