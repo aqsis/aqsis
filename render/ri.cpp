@@ -473,7 +473,7 @@ RtVoid	RiProjection(const char *name, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiProjectionV(name, count, pTokens, pValues));
+	RiProjectionV(name, count, pTokens, pValues);
 }
 
 
@@ -610,7 +610,7 @@ RtVoid	RiImager(const char *name, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiImagerV(name, count, pTokens, pValues));
+	RiImagerV(name, count, pTokens, pValues);
 }
 
 
@@ -678,7 +678,7 @@ RtVoid	RiDisplay(const char *name, RtToken type, RtToken mode, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiDisplayV(name, type, mode, count, pTokens, pValues));
+	RiDisplayV(name, type, mode, count, pTokens, pValues);
 }
 
 
@@ -987,7 +987,7 @@ RtVoid	RiHider(const char *name, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiHiderV(name, count, pTokens, pValues));
+	RiHiderV(name, count, pTokens, pValues);
 
 }
 
@@ -1041,7 +1041,7 @@ RtVoid	RiOption(const char *name, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiOptionV(name, count, pTokens, pValues));
+	RiOptionV(name, count, pTokens, pValues);
 }
 
 
@@ -1368,7 +1368,7 @@ RtVoid	RiSurface(const char *name, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiSurfaceV(name, count, pTokens, pValues));
+	RiSurfaceV(name, count, pTokens, pValues);
 }
 
 
@@ -1414,7 +1414,7 @@ RtVoid	RiAtmosphere(const char *name, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiAtmosphereV(name, count, pTokens, pValues));
+	RiAtmosphereV(name, count, pTokens, pValues);
 }
 
 
@@ -1531,7 +1531,7 @@ RtVoid	RiShadingInterpolation(RtToken type)
 RtVoid	RiMatte(RtBoolean onoff)
 {
 	CqBasicError(0,Severity_Normal,"RiMatte not supported");
-	QGetRenderContext()->pattrWriteCurrent()->SetbMatteSurfaceFlag(onoff,QGetRenderContext()->Time());
+	QGetRenderContext()->pattrWriteCurrent()->SetbMatteSurfaceFlag(onoff!=0,QGetRenderContext()->Time());
 	QGetRenderContext()->AdvanceTime();
 	return;
 }
@@ -1822,7 +1822,7 @@ RtVoid	RiDisplacement(const char *name, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiDisplacementV(name, count, pTokens, pValues));
+	RiDisplacementV(name, count, pTokens, pValues);
 }
 
 
@@ -1933,7 +1933,7 @@ RtVoid	RiAttribute(const char *name, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiAttributeV(name, count, pTokens, pValues));
+	RiAttributeV(name, count, pTokens, pValues);
 }
 
 
@@ -2045,7 +2045,7 @@ RtVoid	RiPolygon(RtInt nvertices, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiPolygonV(nvertices, count, pTokens, pValues));
+	RiPolygonV(nvertices, count, pTokens, pValues);
 }
 
 
@@ -2094,7 +2094,7 @@ RtVoid	RiGeneralPolygon(RtInt nloops, RtInt nverts[], ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiGeneralPolygonV(nloops, nverts, count, pTokens, pValues));
+	RiGeneralPolygonV(nloops, nverts, count, pTokens, pValues);
 }
 
 
@@ -2123,7 +2123,7 @@ RtVoid	RiPointsPolygons(RtInt npolys, RtInt nverts[], RtInt verts[], ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiPointsPolygonsV(npolys, nverts, verts, count, pTokens, pValues));
+	RiPointsPolygonsV(npolys, nverts, verts, count, pTokens, pValues);
 }
 
 
@@ -2346,7 +2346,7 @@ RtVoid	RiPatch(RtToken type, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiPatchV(type, count, pTokens, pValues));
+	RiPatchV(type, count, pTokens, pValues);
 }
 
 
@@ -2397,7 +2397,7 @@ RtVoid	RiPatchMesh(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwra
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiPatchMeshV(type, nu, uwrap, nv, vwrap, count, pTokens, pValues));
+	RiPatchMeshV(type, nu, uwrap, nv, vwrap, count, pTokens, pValues);
 }
 
 
@@ -2411,8 +2411,8 @@ RtVoid	RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 	if(strcmp(type, RI_BICUBIC)==0)
 	{
 		// Create a surface patch
-		RtBoolean	uPeriodic=(strcmp(uwrap,RI_PERIODIC)==0)?RI_TRUE:RI_FALSE;
-		RtBoolean	vPeriodic=(strcmp(vwrap,RI_PERIODIC)==0)?RI_TRUE:RI_FALSE;
+		TqBool	uPeriodic=(strcmp(uwrap,RI_PERIODIC)==0)?TqTrue:TqFalse;
+		TqBool	vPeriodic=(strcmp(vwrap,RI_PERIODIC)==0)?TqTrue:TqFalse;
 
 		CqSurfacePatchMeshBicubic* pSurface=new CqSurfacePatchMeshBicubic(nu,nv,uPeriodic,vPeriodic);
 		// Fill in default values for all primitive variables not explicitly specified.
@@ -2426,8 +2426,8 @@ RtVoid	RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 	else if(strcmp(type, RI_BILINEAR)==0)
 	{
 		// Create a surface patch
-		RtBoolean	uPeriodic=(strcmp(uwrap,RI_PERIODIC)==0)?RI_TRUE:RI_FALSE;
-		RtBoolean	vPeriodic=(strcmp(vwrap,RI_PERIODIC)==0)?RI_TRUE:RI_FALSE;
+		TqBool	uPeriodic=(strcmp(uwrap,RI_PERIODIC)==0)?TqTrue:TqFalse;
+		TqBool	vPeriodic=(strcmp(vwrap,RI_PERIODIC)==0)?TqTrue:TqFalse;
 
 		CqSurfacePatchMeshBilinear* pSurface=new CqSurfacePatchMeshBilinear(nu,nv,uPeriodic,vPeriodic);
 		// Fill in default values for all primitive variables not explicitly specified.
@@ -2456,7 +2456,7 @@ RtVoid	RiNuPatch(RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat 
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiNuPatchV(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, count, pTokens, pValues));
+	RiNuPatchV(nu, uorder, uknot, umin, umax, nv, vorder, vknot, vmin, vmax, count, pTokens, pValues);
 }
 
 
@@ -2537,16 +2537,13 @@ RtVoid	RiTrimCurve(RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[],
 				Curve.CP(i)=vec;
 			}
 			Loop.aCurves().push_back(Curve);
-			std::strstream name;
-			name << "Curve" << icurve << "-" << iloop << ".crv" << std::ends;
-			Curve.Output(name.str());
 		}
 		pTrimLoops->aLoops().push_back(Loop);
 	}
 	QGetRenderContext()->pattrWriteCurrent()->SetpTrimLoops(pTrimLoops);
 	pTrimLoops->Prepare();
 
-	return(0);
+	return;
 }
 
 
@@ -2564,7 +2561,7 @@ RtVoid	RiSphere(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, ..
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiSphereV(radius, zmin, zmax, thetamax, count, pTokens, pValues));
+	RiSphereV(radius, zmin, zmax, thetamax, count, pTokens, pValues);
 }
 
 
@@ -2598,7 +2595,7 @@ RtVoid	RiCone(RtFloat height, RtFloat radius, RtFloat thetamax, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiConeV(height, radius, thetamax, count, pTokens, pValues));
+	RiConeV(height, radius, thetamax, count, pTokens, pValues);
 }
 
 
@@ -2632,7 +2629,7 @@ RtVoid	RiCylinder(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiCylinderV(radius, zmin, zmax, thetamax, count, pTokens, pValues));
+	RiCylinderV(radius, zmin, zmax, thetamax, count, pTokens, pValues);
 }
 
 
@@ -2666,7 +2663,7 @@ RtVoid	RiHyperboloid(RtPoint point1, RtPoint point2, RtFloat thetamax, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiHyperboloidV(point1, point2, thetamax, count, pTokens, pValues));
+	RiHyperboloidV(point1, point2, thetamax, count, pTokens, pValues);
 }
 
 
@@ -2702,7 +2699,7 @@ RtVoid	RiParaboloid(RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiParaboloidV(rmax, zmin, zmax, thetamax, count, pTokens, pValues));
+	RiParaboloidV(rmax, zmin, zmax, thetamax, count, pTokens, pValues);
 }
 
 
@@ -2736,7 +2733,7 @@ RtVoid	RiDisk(RtFloat height, RtFloat radius, RtFloat thetamax, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiDiskV(height, radius, thetamax, count, pTokens, pValues));
+	RiDiskV(height, radius, thetamax, count, pTokens, pValues);
 }
 
 
@@ -2769,7 +2766,7 @@ RtVoid	RiTorus(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phima
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiTorusV(majorrad, minorrad, phimin, phimax, thetamax, count, pTokens, pValues));
+	RiTorusV(majorrad, minorrad, phimin, phimax, thetamax, count, pTokens, pValues);
 }
 
 
@@ -2815,7 +2812,7 @@ RtVoid	RiGeometry(RtToken type, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiGeometryV(type, count, pTokens, pValues));
+	RiGeometryV(type, count, pTokens, pValues);
 }
 
 
@@ -2981,7 +2978,7 @@ RtVoid RiMakeTexture (const char *pic, const char *tex, RtToken swrap, RtToken t
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiMakeTextureV(pic, tex, swrap, twrap, filterfunc, swidth, twidth, count, pTokens, pValues));
+	RiMakeTextureV(pic, tex, swrap, twrap, filterfunc, swidth, twidth, count, pTokens, pValues);
 } 
 
 
@@ -3089,7 +3086,7 @@ RtVoid	RiMakeCubeFaceEnvironment(const char *px, const char *nx, const char *py,
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiMakeCubeFaceEnvironmentV(px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, count, pTokens, pValues));
+	RiMakeCubeFaceEnvironmentV(px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, count, pTokens, pValues);
 }
 
 
@@ -3178,7 +3175,7 @@ RtVoid	RiMakeShadow(const char *picfile, const char *shadowfile, ...)
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiMakeShadowV(picfile, shadowfile, count, pTokens, pValues));
+	RiMakeShadowV(picfile, shadowfile, count, pTokens, pValues);
 }
 
 
@@ -3250,7 +3247,7 @@ RtVoid	RiSubdivisionMesh(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt 
 	RtPointer* pValues;
 	RtInt count=BuildParameterList(pArgs, pTokens, pValues);
 
-	return(RiSubdivisionMeshV(scheme, nfaces, nvertices, vertices, ntags, tags, nargs, intargs, floatargs, count, pTokens, pValues));
+	RiSubdivisionMeshV(scheme, nfaces, nvertices, vertices, ntags, tags, nargs, intargs, floatargs, count, pTokens, pValues);
 }
 
 //----------------------------------------------------------------------
