@@ -28,7 +28,7 @@
 #define DDSERVER_H_INCLUDED 1
 
 #include	<vector>
-#include	<winsock.h>
+#include	<winsock2.h>
 
 #include	"aqsis.h"
 
@@ -56,7 +56,7 @@ class CqDDClient
 
 				/** Close the socket this client is associated with.
 				 */
-		void	Close()		{closesocket(m_Socket);}
+		void	Close();
 		void	SendData(void* buffer, TqInt len);
 		void	SendMsg(SqDDMessageBase* pMsg);
 		void	Receive(void* buffer, TqInt len);
@@ -105,7 +105,7 @@ class CqDDServer
 		TqBool	Open();
 				/** Close the socket this server is associated with.
 				 */
-		void	Close()		{closesocket(m_Socket);}
+		void	Close();
 		TqBool	Bind(TqInt port);
 		TqBool	Listen();
 		TqBool	Accept(CqDDClient& dd);
@@ -134,7 +134,9 @@ class CqDDManager : public IqDDManager
 									WSADATA data;
 									WSAStartup(MAKEWORD(2,0),&data);
 								}
-				~CqDDManager()	{}
+				~CqDDManager()	{
+									WSACleanup();
+								}
 
 	// Overridden from IqDDManager
 	virtual	TqInt	Initialise();

@@ -24,10 +24,11 @@
 */
 
 #include	<iostream>
+#include	<strstream>
 
 #include	"aqsis.h"
 
-#include	<winsock.h>
+#include	<winsock2.h>
 #include	<stdio.h>
 #include	"displaydriver.h"
 
@@ -39,8 +40,9 @@ TqInt Data(SOCKET s,SqDDMessageBase* pMsg);
 TqInt Close(SOCKET s,SqDDMessageBase* pMsg);
 TqInt HandleMessage(SOCKET s,SqDDMessageBase* pMsg);
 
-
 START_NAMESPACE(Aqsis)
+
+static void CloseSocket(SOCKET s);
 
 //----------------------------------------------------------------------
 /** Receive a specified length of data from the specified socket.
@@ -156,6 +158,7 @@ TqInt DDInitialise(const TqChar* phostname, TqInt port)
 		pHost=gethostbyname(hostName);
 
 		SOCKADDR_IN saTemp;
+		memset(&saTemp,0,sizeof(saTemp));
 		saTemp.sin_family=AF_INET;
 		if(port<0)
 			saTemp.sin_port=htons(27747);
@@ -163,7 +166,8 @@ TqInt DDInitialise(const TqChar* phostname, TqInt port)
 			saTemp.sin_port=htons(port);
 
 		memcpy(&saTemp.sin_addr,pHost->h_addr,pHost->h_length);
-		if(connect(s,(PSOCKADDR)&saTemp,sizeof(saTemp))!=SOCKET_ERROR)
+		TqInt conret;
+		if((conret=connect(s,(PSOCKADDR)&saTemp,sizeof(saTemp)))!=SOCKET_ERROR)
 			return(0);
 		else
 		{
@@ -195,7 +199,7 @@ TqInt DDProcessMessages()
 				{
 					if((ret=Query(s,pMsg))!=0)
 					{
-						closesocket(s);
+						CloseSocket(s);
 						return(ret);
 					}
 				}
@@ -205,7 +209,7 @@ TqInt DDProcessMessages()
 				{
 					if((ret=Open(s,pMsg))!=0)
 					{
-						closesocket(s);
+						CloseSocket(s);
 						return(ret);
 					}
 				}
@@ -215,7 +219,7 @@ TqInt DDProcessMessages()
 				{
 					if((ret=Data(s,pMsg))!=0)
 					{
-						closesocket(s);
+						CloseSocket(s);
 						return(ret);
 					}
 				}
@@ -225,7 +229,7 @@ TqInt DDProcessMessages()
 				{
 					if((ret=Close(s,pMsg))!=0)
 					{
-						closesocket(s);
+						CloseSocket(s);
 						return(ret);
 					}
 				}
@@ -235,7 +239,7 @@ TqInt DDProcessMessages()
 				{
 					if((ret=HandleMessage(s,pMsg))!=0)
 					{
-						closesocket(s);
+						CloseSocket(s);
 						return(ret);
 					}
 				}
@@ -245,16 +249,28 @@ TqInt DDProcessMessages()
 		else if(len==0)
 		{
 			// Connection closed gracefully by server.
-			closesocket(s);
+			CloseSocket(s);
 			return(0);
 		}
 		else
 		{
 			std::cerr << "Error reading from socket" << std::endl;
-			closesocket(s);
+			CloseSocket(s);
 			return(-1);
 		}
 	}
+}
+
+
+static void CloseSocket(SOCKET s)
+{
+	int x=1;
+	LINGER ling;
+	ling.l_onoff=1;
+	ling.l_linger=10;
+	setsockopt(s,SOL_SOCKET,SO_LINGER,reinterpret_cast<const char*>(&ling),sizeof(ling));
+	shutdown(s,SD_BOTH);
+	closesocket(s);
 }
 
 

@@ -26,6 +26,8 @@
 
 #include	"aqsis.h"
 
+#include	<strstream>
+
 #include	<process.h>
 
 #include	"renderer.h"
@@ -51,6 +53,20 @@ IqDDManager* CreateDisplayDriverManager()
 CqDDServer::CqDDServer(TqInt port)
 {
 	Prepare(port);
+}
+
+
+//---------------------------------------------------------------------
+/** Close the servers socket, waiting for any connectsion acticity to finish first,
+ */
+
+void CqDDServer::Close()
+{
+	int x=1;
+	setsockopt(m_Socket,SOL_SOCKET,SO_DONTLINGER,reinterpret_cast<const char*>(&x),sizeof(x));
+	shutdown(m_Socket,SD_BOTH);
+	closesocket( m_Socket );
+	m_Socket = INVALID_SOCKET;							
 }
 
 
@@ -83,6 +99,10 @@ TqBool CqDDServer::Open()
 		CqBasicError(0,0,"Error opening DD server socket");
 		return(TqFalse);
 	}
+
+	TqInt x=1;
+	setsockopt(m_Socket,SOL_SOCKET,SO_REUSEADDR,reinterpret_cast<const char*>(&x),sizeof(x));
+	BOOL Ret=SetHandleInformation((HANDLE)m_Socket, HANDLE_FLAG_INHERIT, 0);
 	return(TqTrue);
 }
 
@@ -94,12 +114,14 @@ TqBool CqDDServer::Open()
 TqBool CqDDServer::Bind(TqInt port)
 {
 	SOCKADDR_IN saTemp;
+	memset(&saTemp,0,sizeof(saTemp));
 	saTemp.sin_family=AF_INET;
 	saTemp.sin_port=htons(port);
 	saTemp.sin_addr.s_addr=INADDR_ANY;
 
 	if(bind(m_Socket,(PSOCKADDR)&saTemp,sizeof(saTemp))==SOCKET_ERROR)
 	{
+		TqInt iE=WSAGetLastError();
 		CqBasicError(0,0,"Error binding to DD socket");
 		Close();
 		return(TqFalse);
@@ -135,6 +157,7 @@ TqBool CqDDServer::Accept(CqDDClient& dd)
 	if((c=accept(Socket(),NULL,NULL))!=INVALID_SOCKET)
 	{
 		dd.SetSocket(c);
+
 		// Issue a format request so that we know what data to send to the client.
 		SqDDMessageBase msg;
 		SqDDMessageFormatResponse frmt;
@@ -163,6 +186,20 @@ CqDDServer::~CqDDServer()
 {
 	Close();
 }
+
+
+
+//---------------------------------------------------------------------
+/** Close the socket this client is associated with.
+ */
+void CqDDClient::Close()		
+{
+	int x=1;
+	setsockopt(m_Socket,SOL_SOCKET,SO_DONTLINGER,reinterpret_cast<const char*>(&x),sizeof(x));
+	shutdown(m_Socket,SD_BOTH);
+	closesocket(m_Socket);
+}
+
 
 
 //---------------------------------------------------------------------
