@@ -50,8 +50,7 @@ CqProcedural::CqProcedural( CqBound &B ) : CqSurface()
 {
 	m_Bound = B;	
 	m_pconStored = QGetRenderContext()->pconCurrent();
-//	m_pconStored = *(QGetRenderContext()->pconCurrent());
-	m_pconStored.AddRef();
+	m_pconStored->AddRef();
 //	m_pAttributes = m_pAttributes->Write();
 //	m_pTransform = m_pTransform->Write();
 }
@@ -64,9 +63,9 @@ TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
 	// Store current context, set current context to the stored one
 	CqModeBlock *pconSave = QGetRenderContext()->pconCurrent( m_pconStored );
 //	if( !m_pAttributes ) m_pAttributes = QGetRenderContext()->pattrWriteCurrent();
-	const CqAttributes *pattrsSave = QGetRenderContext()->pconCurrent()->pattrCurrent( m_pAttributes ); 
+	CqAttributes *pattrsSave = const_cast<CqAttributes*> (QGetRenderContext()->pconCurrent()->pattrCurrent( m_pAttributes )); 
 //	if( !m_pTransform ) m_pTransform = QGetRenderContext()->ptransWriteCurrent();
-	const CqTransform *ptransSave = QGetRenderContext()->pconCurrent()->ptransCurrent( m_pTransform );
+	CqTransform *ptransSave = const_cast<CqTransform*> (QGetRenderContext()->pconCurrent()->ptransCurrent( m_pTransform ));
 
 	// Call the procedural secific Split()
 	SplitProcedural();
