@@ -718,7 +718,7 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 			pProgramArea->push_back( E );
 		}
 		/** Add an an external call descriptor to the program area
-		 * \param iVar Integer variable index to add, top bit indicates system variable.
+		 * \param pExtCall Pointer to the external call descriptor.
 		 * \param pProgramArea Pointer to the program area, either init, or main code areas.
 		 */
 		void	AddDSOExternalCall( SqDSOExternalCall *pExtCall, std::vector<UsProgramElement>* pProgramArea )

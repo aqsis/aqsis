@@ -1010,6 +1010,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							CqString strFunc, strRetType, strArgTypes ;
 							EqVariableType RetType;
 							std::list<EqVariableType> ArgTypes;
+							bool error = false; // Error in DSO resolution
 
 							*pFile >> strFunc;
 							strFunc = strFunc.substr(1,strFunc.length() - 2);
@@ -1026,7 +1027,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								{
 									RELEASEREF( StdEnv );
 									Logger()->critical("\"%s\": No DSO found for external shadeop: \"%s\"", strName().c_str(), strFunc.c_str());
-									return ;
+									exit(1);
 								}
 								m_ActiveDSOMap[strFunc]=candidates;
 							};
@@ -1043,7 +1044,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								//error, we dont know this return type
 								RELEASEREF( StdEnv );
 								Logger()->critical("\"%s\": Invalid return type in call to external shadeop: \"%s\": \"%s\"", strName().c_str(), strFunc.c_str(), strRetType.c_str());
-								return;
+								exit(1);
 							};
 
 							*pFile >> strArgTypes;
@@ -1059,7 +1060,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 									// Error, unknown arg type
 									RELEASEREF( StdEnv );
 									Logger()->critical("\"%s\": Invalid argument type in call to external shadeop: \"%s\": %c", strName().c_str(), strFunc.c_str(), strArgTypes[x]);
-									return;
+									exit(1);
 								};
 
 							};  
@@ -1074,6 +1075,31 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								    (*candidate)->arg_types == ArgTypes) break;
 								candidate++;
 							};
+
+							// If we are looking for a void return type but have not
+							// found an exact match, we will take the first match with
+							// suitable arguments and force the return value to be
+							// discarded.
+							bool forcedrop = false;
+							if(candidate == candidates->end() && RetType == type_void) 
+							{ 
+								candidate = candidates->begin();
+								while (candidate !=candidates->end())
+								{
+									// Do we have a match
+									if ( (*candidate)->arg_types == ArgTypes)
+									{
+										CqString strProto = strPrototype(&strFunc, (*candidate));
+										Logger()->info("\"%s\": Using non-void DSO shadeop:  \"%s\"", strName().c_str(), strProto.c_str());
+										Logger()->info("\"%s\": In place of requested void shadeop: \"%s\"", strName().c_str(), strFunc.c_str());
+										Logger()->info("\"%s\": If this is not the operation you intended you should force the correct shadeop in your shader source.", strName().c_str());
+										forcedrop = true;
+								       		break;
+									};
+									candidate++;
+								};
+							}
+
 							if(candidate == candidates->end())
 							{ 
 								Logger()->critical("\"%s\": No candidate found for call to external shadeop: \"%s\"", strName().c_str(), strFunc.c_str());
@@ -1083,11 +1109,11 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 								while (candidate !=candidates->end())
 								{
 									CqString strProto = strPrototype(&strFunc, (*candidate));
-									Logger()->info("%s:\t%s\n", strName().c_str(), strProto.c_str());
+									Logger()->info("\"%s\": \t%s", strName().c_str(), strProto.c_str());
 									candidate++;
 								};
 								RELEASEREF( StdEnv );
-								return ; //ERROR
+								exit(1);
 							};
 
 							if(!(*candidate)->initialised )
@@ -1102,6 +1128,10 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							
 							AddCommand( &CqShaderVM::SO_external, pProgramArea );
 							AddDSOExternalCall( (*candidate),pProgramArea );
+
+							if( forcedrop )
+								AddCommand( &CqShaderVM::SO_drop, pProgramArea );
+
 							break;
 						}
 

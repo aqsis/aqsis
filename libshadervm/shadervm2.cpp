@@ -1261,6 +1261,32 @@ void CqShaderVM::SO_external()
 	};
 }
 
+/*
+void CqShaderVM::SO_external_error()
+{
+	AUTOFUNC;
+	SqDSOExternalCall *pCall = ReadNext().m_pExtCall;
+	// This is a little ugly, but it means we can still use RESULT with Voids.
+	RESULT( (pCall->return_type != type_void ? pCall->return_type : type_float) , class_varying);
+
+	SqStackEntry *stackitems = new SqStackEntry[pCall->arg_types.size()];
+	unsigned int x = 0;
+	for ( x = 0 ; x < pCall->arg_types.size();x++){
+	  	stackitems[x] = POP;
+		Release( stackitems[x] );
+	};
+
+	delete( stackitems );
+
+	if( pCall->return_type != type_void )
+	{
+		Push( pResult );
+	} else {
+	  	DeleteTemporaryStorage( pResult );
+	};
+}
+*/
+
 void CqShaderVM::SO_occlusion()
 {
 	VARFUNC;
