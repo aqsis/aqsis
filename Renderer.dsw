@@ -54,9 +54,6 @@ Package=<4>
     Project_Dep_Name libddmsimple
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name libddmsock
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name shadowmap
     End Project Dependency
 }}}
@@ -100,9 +97,6 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libaqsistypes
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libddmsock
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libaqsis
@@ -176,18 +170,6 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libdd
     End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "framebuffer_glut"=.\framebuffer_glut\framebuffer_glut.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
 }}}
 
 ###############################################################################
