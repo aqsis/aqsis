@@ -89,11 +89,11 @@ class CqBound
 									}
 			TqBool	Contains2D(const CqVector2D& v)
 									{	
-										if((v.x()>=m_vecMin.x() && v.x()<=m_vecMax.x()) &&
-										   (v.y()>=m_vecMin.y() && v.y()<=m_vecMax.y()))
-											return(TqTrue);
-										else
+										if((v.x()<m_vecMin.x() || v.x()>m_vecMax.x()) ||
+										   (v.y()<m_vecMin.y() || v.y()>m_vecMax.y()))
 											return(TqFalse);
+										else
+											return(TqTrue);
 									}
 
 	private:
