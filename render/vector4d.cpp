@@ -61,31 +61,6 @@ TqFloat CqVector4D::Magnitude() const
 	return(sqrt(Magnitude2()));
 }
 
-//---------------------------------------------------------------------
-/** Rescale this vector to be a unit vector.
- */
-
-void CqVector4D::Unit()
-{
-	m_h=(Magnitude());		
-}
-
-
-//---------------------------------------------------------------------
-/** Renormalises vector so that h=1.
- */
-
-void CqVector4D::Homogenize()
-{
-	if(m_h!=1.0)
-	{
-		m_x/=m_h;	
-		m_y/=m_h;	
-		m_z/=m_h;	
-		m_h=1.0;
-	}
-}
-
 
 //---------------------------------------------------------------------
 /** Add a vector to this vector.

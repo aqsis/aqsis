@@ -105,7 +105,12 @@ class _qShareC CqVector2D
 							/** Get the length.
 							 */
 		_qShareM	TqFloat	Magnitude()	 const	{return(sqrt((m_x*m_x)+(m_y*m_y)));}
-		_qShareM	void	Unit();
+		_qShareM	void	Unit()				{
+													TqFloat Mag=Magnitude();
+
+													m_x/=Mag;
+													m_y/=Mag;
+												}
 
 		_qShareM	CqVector2D& operator= (const CqVector3D &From);
 		_qShareM	CqVector2D& operator= (const CqVector4D &From);

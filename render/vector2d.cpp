@@ -42,19 +42,6 @@ CqVector2D::CqVector2D(const CqVector3D &From)
 }
 
 //---------------------------------------------------------------------
-/** Rescale this vector to be a unit vector.
- */
-
-void CqVector2D::Unit()
-{
-	TqFloat Mag=Magnitude();
-
-	m_x/=Mag;
-	m_y/=Mag;
-}
-
-
-//---------------------------------------------------------------------
 /** Copy from specified 3D vector.
  */
 

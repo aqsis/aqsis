@@ -118,8 +118,18 @@ class _qShareC CqVector4D
 							 */ 
 		_qShareM	TqFloat	Magnitude() const;
 
-		_qShareM	void	Unit();
-		_qShareM	void	Homogenize();
+		_qShareM	void	Unit()				{
+													m_h=(Magnitude());		
+												}
+		_qShareM	void	Homogenize()		{
+													if(m_h!=1.0)
+													{
+														m_x/=m_h;	
+														m_y/=m_h;	
+														m_z/=m_h;	
+														m_h=1.0;
+													}
+												}
 
 		_qShareM	CqVector4D& operator= (const CqVector3D &From);
 		_qShareM	CqVector4D& operator+=(const CqVector4D &From);

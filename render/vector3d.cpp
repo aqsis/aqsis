@@ -53,19 +53,6 @@ CqVector3D::CqVector3D(const CqColor &From)
 
 
 //---------------------------------------------------------------------
-/** Rescale this vector to be a unit vector.
- */
-
-void CqVector3D::Unit()
-{
-	TqFloat Mag=Magnitude();
-
-	m_x/=Mag;
-	m_y/=Mag;
-	m_z/=Mag;
-}
-
-//---------------------------------------------------------------------
 /** Cross product of two vectors.
  */
 

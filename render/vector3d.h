@@ -115,7 +115,13 @@ class _qShareC CqVector3D
 							/** Get the length.
 							 */ 
 		_qShareM	TqFloat	Magnitude()	 const	{return(sqrt((m_x*m_x)+(m_y*m_y)+(m_z*m_z)));}
-		_qShareM	void	Unit();
+		_qShareM	void	Unit()				{
+													TqFloat Mag=Magnitude();
+
+													m_x/=Mag;
+													m_y/=Mag;
+													m_z/=Mag;
+												}
 
 		_qShareM	CqVector3D& operator= (const CqVector4D &From);
 		_qShareM	CqVector3D& operator= (const CqColor &From);
