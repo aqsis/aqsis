@@ -187,7 +187,7 @@ class RiCacheBase
 			int j;
 			for(j=0; j<size; j++)
 				copyvalue[j] = value[j];
-			return((RtPointer)value);
+			return((RtPointer)copyvalue);
 		}
 
 
