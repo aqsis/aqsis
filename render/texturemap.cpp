@@ -1207,6 +1207,10 @@ void CqEnvironmentMap::SampleMIPMAP(CqVector3D& R1, CqVector3D& R2, CqVector3D& 
 		run_val.resize(m_SamplesPerPixel);
 		run_val=0.0f;
 		val=0.0f;
+
+		TqFloat facewidth = 1.0f/3.0f;
+		TqFloat faceheight = 1.0f*0.5f;
+
 		for(i=0,project_face=1; i<6; i++,project_face+=project_face)
 		{
 			if(project_face & projection_bit)
@@ -1228,13 +1232,20 @@ void CqEnvironmentMap::SampleMIPMAP(CqVector3D& R1, CqVector3D& R2, CqVector3D& 
 				texture_area=(s2-s1)*(t2-t1);
 				if(texture_area<=0.0)	texture_area=1.0f;
 
-				// Calculate the widths and offset the origin before passing onto standard sampling routine.
-				float swidth=(s2-s1);
-				float twidth=(s2-s1);
-				s1+=(swidth*0.5f);
-				t1+=(twidth*0.5f);
-
-				CqTextureMap::SampleMIPMAP(s1,t1,swidth,twidth,sblur,tblur,run_val);
+				// Adjust for the appropriate section of the cube map.
+				// Clamp to the cubemap face, this is OK, as the wrap over a boundary is handled
+				// by the preceeding code which gets multiple samples for the cube if a sample crosses
+				// edges.
+				s1 = CLAMP(s1,0.0f,1.0f);
+				s2 = CLAMP(s2,0.0f,1.0f);
+				t1 = CLAMP(t1,0.0f,1.0f);
+				t2 = CLAMP(t2,0.0f,1.0f);
+				s1 = (s1*facewidth)+(facewidth*(i%3));
+				s2 = (s2*facewidth)+(facewidth*(i%3));
+				t1 = (t1*faceheight)+(faceheight*(i/3));
+				t2 = (t2*faceheight)+(faceheight*(i/3));
+				
+				GetSample(s1,t1,s2,t2,run_val);
 
 				// Add the color contribution weighted by the area
 				val+=run_val*texture_area;
