@@ -813,7 +813,38 @@ CqVector3D CqHyperboloid::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqHyperboloid::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	return ( DicePoint( u, v ) );
+
+	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat sin_theta = sin( theta );
+	TqFloat cos_theta = cos( theta );
+
+	CqVector3D p;
+	TqFloat vv = static_cast<TqFloat>( v ) / m_vDiceSize;
+	p = m_Point1 * ( 1.0 - vv ) + m_Point2 * vv;
+	
+	// Calculate the normal vector - this is a bit tortuous, and uses the general
+	//  formula for the normal to a surface that is specified by two parametric
+	//  parameters.
+	
+	// Calculate a vector, a, of derivatives of coordinates w.r.t. u
+	TqFloat dxdu = -p.x() * m_ThetaMax * sin_theta - p.y() * m_ThetaMax * cos_theta;
+	TqFloat dydu =  p.x() * m_ThetaMax * cos_theta - p.y() * m_ThetaMax * sin_theta;
+	TqFloat dzdu = 0.0;
+	CqVector3D a(dxdu, dydu, dzdu);
+	
+	// Calculate a vector, b, of derivatives of coordinates w.r.t. v
+	CqVector3D p2p1 = m_Point2 - m_Point1;
+	TqFloat dxdv = p2p1.x() * cos_theta  -  p2p1.y() * sin_theta;
+	TqFloat dydv = p2p1.x() * sin_theta  +  p2p1.y() * cos_theta;
+	TqFloat dzdv = p2p1.z();
+	CqVector3D b(dxdv, dydv, dzdv);
+
+	// The normal vector points in the direction of: a x b
+	Normal = a % b;
+	Normal.Unit();
+
+	// Return the point on the surface.
+	return ( CqVector3D( p.x() * cos_theta - p.y() * sin_theta, p.x() * sin_theta + p.y() * cos_theta, p.z() ) );
 }
 
 
