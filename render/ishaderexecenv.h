@@ -519,7 +519,7 @@ R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
 	{
 		Var->GetValue( v1, i );
 		Var->GetValue( v2, i - ( uRes + 1 ) );
-		Ret = ( v2 - v1 ) / fdv;
+		Ret = ( v1 - v2 ) / fdv;
 	}
 	return ( Ret );
 }
