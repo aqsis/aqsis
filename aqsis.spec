@@ -1,12 +1,16 @@
 Name: aqsis
-Version: 0.7.0
-Release: 1
+Version: 0.9.1
+Release: cvs
 Summary: RenderMan(tm)-compatible renderer
 License: GPL
-Group: Applications/Multimedia
-BuildRoot: %{_tmppath}/%{name}-root
+Group: Applications/Graphics
+Vendor: none
+URL: www.aqsis.com
+Packager: cgtobix
 Source: %{name}-%{version}.tar.gz
-BuildPreReq: libargparse
+BuildRoot: %{_tmppath}/%{name}-root
+Requires: /sbin/ldconfig
+AutoReqProv: no
 
 %description
 A RenderMan(tm)-compatible renderer
@@ -15,16 +19,13 @@ A RenderMan(tm)-compatible renderer
 %setup -q
 
 %build
-./bootstrap
+#./bootstrap
 %configure
 make
-
-%clean
-rm -fr $RPM_BUILD_ROOT
+#make check
 
 %install
-rm -fr $RPM_BUILD_ROOT
-export LD_LIBRARY_PATH=$RPM_BUILD_ROOT/usr/lib 
+rm -fr %{buildroot}
 %makeinstall
 mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/aqsis
 cat << EOF > $RPM_BUILD_ROOT/%{_sysconfdir}/aqsis/ddmsock.ini
@@ -41,17 +42,26 @@ EOF
 
 %postun -p /sbin/ldconfig
 
+%clean
+rm -fr %{buildroot}
+
 %files
 %defattr(-,root,root)
 %doc ChangeLog COPYING AUTHORS README ribfiles
 %{_bindir}/*
 %{_libdir}/*
-%dir %{_datadir}/shaders
-%{_datadir}/shaders/*
+%dir %{_datadir}/aqsis/shaders
+%{_datadir}/aqsis/shaders/*
 %{_includedir}/*
-%dir %{_sysconfdir}/aqsis
-%{_sysconfdir}/aqsis/*
+%dir %{_sysconfdir}/
+%{_sysconfdir}/*
 
 %changelog
+
 * Wed Oct 23 2002 Damien Miller <djm@mindrot.org>
 - Make an RPM
+* Thu Mar 18 2004 cgtobix
+- RPM from aqsis cvs 0.9.1
+
+
+

@@ -604,7 +604,7 @@ public:
 
     virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
     {
-        assert( NULL != m_pTopology );
+        assert( m_pTopology );
         m_pTopology->pPoints()->Transform( matTx, matITTx, matRTx, iTime );
     }
 
@@ -619,20 +619,20 @@ public:
     }
     virtual	TqUint	cVarying() const
     {
-        assert( NULL != m_pTopology );
-        assert( NULL != m_pTopology->pPoints() );
+        assert( m_pTopology );
+        assert( m_pTopology->pPoints() );
         return ( m_pTopology->pPoints()->cVarying() );
     }
     virtual	TqUint	cVertex() const
     {
-        assert( NULL != m_pTopology );
-        assert( NULL != m_pTopology->pPoints() );
+        assert( m_pTopology );
+        assert( m_pTopology->pPoints() );
         return ( m_pTopology->pPoints()->cVarying() );
     }
     virtual	TqUint	cFaceVarying() const
     {
-        assert( NULL != m_pTopology );
-        assert( NULL != m_pTopology->pPoints() );
+        assert( m_pTopology );
+        assert( m_pTopology->pPoints() );
         return ( m_pTopology->pPoints()->cFaceVarying() );
     }
 

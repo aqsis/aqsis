@@ -584,7 +584,7 @@ public:
 
     virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
     {
-        assert( NULL != m_pPoints );
+        assert( m_pPoints );
         m_pPoints->Transform( matTx, matITTx, matRTx, iTime );
     }
 
@@ -599,24 +599,24 @@ public:
     }
     virtual	TqUint	cVarying() const
     {
-        assert( NULL != m_pPoints );
+        assert( m_pPoints );
         return ( m_pPoints->cVarying() );
     }
     virtual	TqUint	cVertex() const
     {
-        assert( NULL != m_pPoints );
+        assert( m_pPoints );
         return ( m_pPoints->cVarying() );
     }
     virtual	TqUint	cFaceVarying() const
     {
-        assert( NULL != m_pPoints );
+        assert( m_pPoints );
         return ( m_pPoints->cFaceVarying() );
     }
 
 
 private:
     TqInt	m_NumPolys;
-    const boost::shared_ptr<CqPolygonPoints>&	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
+    boost::shared_ptr<CqPolygonPoints>	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
     std::vector<TqInt>	m_PointCounts;
     std::vector<TqInt>	m_PointIndices;
 };

@@ -50,7 +50,7 @@ public:
      * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
      * \return Integer count of new GPrims created.
      */
-    virtual TqInt   Split( std::vector<CqBasicSurface*>& aSplits );
+    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
     virtual ~CqProcedural();
 
     //---------------------------------------------- Inlined Public Methods

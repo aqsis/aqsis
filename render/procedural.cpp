@@ -83,7 +83,7 @@ CqProcedural::CqProcedural(RtPointer data, CqBound &B, RtProcSubdivFunc subfunc,
 
 
 
-TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqProcedural::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
     // Store current context, set current context to the stored one
     boost::shared_ptr<CqModeBlock> pconSave = QGetRenderContext()->pconCurrent( m_pconStored );

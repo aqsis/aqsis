@@ -91,7 +91,9 @@ CqPoints::CqPoints( TqInt nvertices, const boost::shared_ptr<CqPolygonPoints>& p
         else if( (*iUP)->strName() == "width" && (*iUP)->Type() == type_float && (*iUP)->Class() == class_varying )
             m_widthParamIndex = index;
 
-    m_KDTreeData.SetpPoints( boost::static_pointer_cast<CqPoints>( shared_from_this() ) );
+/// \note: Needed to move this to the InitialiseKDTree function, as the shared_from_this() 
+///			call is not valid in a constructor or so it seems.
+//    m_KDTreeData.SetpPoints( boost::static_pointer_cast<CqPoints>( shared_from_this() ) );
 
     STATS_INC( GPR_points );
 }
@@ -394,6 +396,8 @@ TqInt CqPoints::CopySplit( std::vector<boost::shared_ptr<CqBasicSurface> >& aSpl
 
 void CqPoints::InitialiseKDTree()
 {
+    m_KDTreeData.SetpPoints( boost::static_pointer_cast<CqPoints>( shared_from_this() ) );
+
     m_KDTree.aLeaves().reserve( nVertices() );
     TqUint i;
     for( i = 0; i < nVertices(); i++ )
