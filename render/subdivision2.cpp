@@ -166,6 +166,8 @@ void CqSubdivision2::AddVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIndex)
                 iFVIndex = iIndex;
                 ( *iUP )->SetSize( iIndex+1 );
             }
+			else
+				continue;
 
             switch ( ( *iUP )->Type() )
             {
@@ -275,6 +277,8 @@ void CqSubdivision2::AddEdgeVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIn
                 iFVIndex = iIndex;
                 ( *iUP )->SetSize( iIndex+1 );
             }
+			else
+				continue;
 
             switch ( ( *iUP )->Type() )
             {
@@ -360,6 +364,9 @@ void CqSubdivision2::AddFaceVertex(CqLath* pVertex, TqInt& iVIndex, TqInt& iFVIn
     {
         for ( iUP = pPoints( iTime )->aUserParams().begin(); iUP != pPoints( iTime )->aUserParams().end(); iUP++ )
         {
+            if( ( *iUP )->Class() == class_uniform )
+				continue;
+
             TqInt iIndex = ( *iUP )->Size();
             ( *iUP )->SetSize( iIndex+1 );
             // Store the index in the return variable based on its type.
@@ -954,7 +961,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
     for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
     {
 		pSurface = Extract(iTime);
-		boost::shared_ptr<CqSurfaceSubdivisionPatch> pPatch( new CqSurfaceSubdivisionPatch(pSurface, pSurface->pFacet(0)) );
+		boost::shared_ptr<CqSurfaceSubdivisionPatch> pPatch( new CqSurfaceSubdivisionPatch(pSurface, pSurface->pFacet(0), 0) );
 		pPatch->m_uDiceSize = m_uDiceSize;
 		pPatch->m_vDiceSize = m_vDiceSize;
 		CqMicroPolyGridBase* pGrid = pPatch->DiceExtract();
@@ -1000,7 +1007,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
     {
         CqMicroPolyGrid* pGrid = new CqMicroPolyGrid( dicesize, dicesize, pTopology()->pPoints() );
 
-	boost::shared_ptr<CqPolygonPoints> pMotionPoints = pTopology()->pPoints( iTime );
+		boost::shared_ptr<CqPolygonPoints> pMotionPoints = pTopology()->pPoints( iTime );
 
         TqInt isd;
         std::vector<CqLath*> apSubFace1, apSubFace2;
@@ -1260,6 +1267,8 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
             pGrid->pVar(EnvVars_s) ->SetFloat( pPoints->s()->pValue( iParam )[0], iData );
         else if( pPoints->s()->Class() == class_facevarying )
             pGrid->pVar(EnvVars_s) ->SetFloat( pPoints->s()->pValue( iFVParam )[0], iData );
+        else if( pPoints->s()->Class() == class_uniform )
+            pGrid->pVar(EnvVars_s) ->SetFloat( pPoints->s()->pValue( 0 )[0], iData );
     }
 
     if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->pVar(EnvVars_t) ) && ( pPoints->bHasVar(EnvVars_t) ) && !isDONE(lDone, EnvVars_t ) )
@@ -1268,6 +1277,8 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
             pGrid->pVar(EnvVars_t) ->SetFloat( pPoints->t()->pValue( iParam )[0], iData );
         else if( pPoints->t()->Class() == class_facevarying )
             pGrid->pVar(EnvVars_t) ->SetFloat( pPoints->t()->pValue( iFVParam )[0], iData );
+        else if( pPoints->t()->Class() == class_uniform )
+            pGrid->pVar(EnvVars_t) ->SetFloat( pPoints->t()->pValue( 0 )[0], iData );
     }
 
     if ( USES( lUses, EnvVars_Cs ) && ( pGrid->pVar(EnvVars_Cs) ) && ( pPoints->bHasVar(EnvVars_Cs) ) )
@@ -1276,10 +1287,19 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
             pGrid->pVar(EnvVars_Cs) ->SetColor( pPoints->Cs()->pValue(iParam)[0], iData );
         else if( pPoints->Cs()->Class() == class_facevarying )
             pGrid->pVar(EnvVars_Cs) ->SetColor( pPoints->Cs()->pValue(iFVParam)[0], iData );
+        else if( pPoints->Cs()->Class() == class_uniform )
+            pGrid->pVar(EnvVars_Cs) ->SetColor( pPoints->Cs()->pValue(0)[0], iData );
     }
 
     if ( USES( lUses, EnvVars_Os ) && ( pGrid->pVar(EnvVars_Os) ) && ( pPoints->bHasVar(EnvVars_Os) ) )
-        pGrid->pVar(EnvVars_Os) ->SetColor( pPoints->Os()->pValue(iParam)[0], iData );
+    {
+        if( pPoints->Os()->Class() == class_varying || pPoints->Os()->Class() == class_vertex )
+            pGrid->pVar(EnvVars_Os) ->SetColor( pPoints->Os()->pValue(iParam)[0], iData );
+        else if( pPoints->Os()->Class() == class_facevarying )
+            pGrid->pVar(EnvVars_Os) ->SetColor( pPoints->Os()->pValue(iFVParam)[0], iData );
+        else if( pPoints->Os()->Class() == class_uniform )
+            pGrid->pVar(EnvVars_Os) ->SetColor( pPoints->Os()->pValue(0)[0], iData );
+    }
 
     // Now lets store the diced user specified primitive variables.
     std::vector<CqParameter*>::iterator iUP;
@@ -1384,7 +1404,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqBasicSur
         for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
         {
             // Create a surface patch
-	    boost::shared_ptr<CqSurfacePatchBicubic> pSurface( new CqSurfacePatchBicubic() );
+			boost::shared_ptr<CqSurfacePatchBicubic> pSurface( new CqSurfacePatchBicubic() );
             // Fill in default values for all primitive variables not explicitly specified.
             pSurface->SetSurfaceParameters( *pTopology()->pPoints( iTime ) );
 
@@ -1428,7 +1448,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqBasicSur
                     // Copy any 'uniform' class primitive variables.
                     CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
                     pNewUP->SetSize( pSurface->cUniform() );
-                    pNewUP->SetValue( ( *iUP ), 0, 0 );
+                    pNewUP->SetValue( ( *iUP ), 0, m_FaceIndex );
                     pSurface->AddPrimitiveVariable( pNewUP );
                 }
                 else if ( ( *iUP ) ->Class() == class_constant )
@@ -1533,7 +1553,9 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqBasicSur
         std::vector<CqLath*>::iterator iSF;
         for( iSF = apSubFaces.begin(); iSF != apSubFaces.end(); iSF++ )
         {
-	    boost::shared_ptr<CqSurfaceSubdivisionPatch> pNew( new CqSurfaceSubdivisionPatch( pTopology(), (*iSF) ) );
+			// Create a new patch object, note the use of the same face index as the current patch, as "uniform" values won't change, 
+			// so can be shared up the subdivision stack.
+			boost::shared_ptr<CqSurfaceSubdivisionPatch> pNew( new CqSurfaceSubdivisionPatch( pTopology(), (*iSF), m_FaceIndex ) );
             aSplits.push_back(pNew);
         }
     }
@@ -1722,7 +1744,7 @@ TqInt CqSurfaceSubdivisionMesh::Split( std::vector<boost::shared_ptr<CqBasicSurf
             if( !m_pTopology->isHoleFace( face ) )
             {
                 // Add a patch surface to the bucket queue
-		boost::shared_ptr<CqSurfaceSubdivisionPatch> pNew( new CqSurfaceSubdivisionPatch( m_pTopology, m_pTopology->pFacet( face ) ) );
+				boost::shared_ptr<CqSurfaceSubdivisionPatch> pNew( new CqSurfaceSubdivisionPatch( m_pTopology, m_pTopology->pFacet( face ), face ) );
                 aSplits.push_back( pNew );
                 CreatedPolys++;
             }
@@ -1804,7 +1826,7 @@ boost::shared_ptr<CqSubdivision2> CqSurfaceSubdivisionPatch::Extract( TqInt iTim
             // Copy any 'uniform' class primitive variables.
             CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
             pNewUP->SetSize( pSurface->pPoints()->cUniform() );
-            pNewUP->SetValue( ( *iUP ), 0, 0 );
+            pNewUP->SetValue( ( *iUP ), 0, m_FaceIndex );
             pSurface->pPoints()->AddPrimitiveVariable( pNewUP );
         }
         else if ( ( *iUP ) ->Class() == class_constant )

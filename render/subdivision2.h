@@ -475,12 +475,13 @@ private:
 class CqSurfaceSubdivisionPatch : public CqBasicSurface
 {
 public:
-    CqSurfaceSubdivisionPatch( const boost::shared_ptr<CqSubdivision2>& pTopology, CqLath* pFace)
+    CqSurfaceSubdivisionPatch( const boost::shared_ptr<CqSubdivision2>& pTopology, CqLath* pFace, TqInt faceIndex)
     {
         m_pTopology = pTopology;
         m_pFace = pFace;
 	    m_Uses = Uses();
 		m_Time = QGetRenderContextI()->Time();
+		m_FaceIndex = faceIndex;
     }
 
     virtual	~CqSurfaceSubdivisionPatch()
@@ -561,6 +562,7 @@ private:
     CqLath*			m_pFace;
 	TqInt			m_Uses;
 	TqFloat			m_Time;
+	TqInt			m_FaceIndex;
 };
 
 //----------------------------------------------------------------------
