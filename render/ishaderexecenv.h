@@ -445,6 +445,125 @@ struct IqShaderExecEnv
 	virtual STD_SO	SO_bake_3v( STRINGVAL shader, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVAR) = 0;
 };
 
+/** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to u.
+ */
+template <class R>
+R SO_DuType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
+{
+	R Ret;
+	TqInt uRes = ps->uGridRes();
+	TqInt GridX = i % ( uRes + 1 );
+
+	TqFloat fdu;
+	ps->du() ->GetFloat( fdu );
+
+	if ( fdu == 0 ) return ( Def );
+
+	R v1, v2;
+	if ( GridX < uRes )
+	{
+		Var->GetValue( v1, i + 1 );
+		Var->GetValue( v2, i );
+		Ret = ( v1 - v2 ) / fdu;
+	}
+	else
+	{
+		Var->GetValue( v1, i );
+		Var->GetValue( v2, i - 1 );
+		Ret = ( v1 - v2 ) / fdu;
+	}
+	return ( Ret );
+}
+
+
+/** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to v.
+ */
+template <class R>
+R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
+{
+	R Ret;
+	TqInt uRes = ps->uGridRes();
+	TqInt vRes = ps->vGridRes();
+	TqInt GridY = ( i / ( uRes + 1 ) );
+
+	TqFloat fdv;
+	ps->dv() ->GetFloat( fdv );
+
+	if ( fdv == 0 ) return ( Def );
+
+	R v1, v2;
+	if ( GridY < vRes )
+	{
+		Var->GetValue( v1, i + uRes + 1 );
+		Var->GetValue( v2, i );
+		Ret = ( v1 - v2 ) / fdv;
+	}
+	else
+	{
+		Var->GetValue( v1, i );
+		Var->GetValue( v2, i - ( uRes + 1 ) );
+		Ret = ( v1 - v2 ) / fdv;
+	}
+	return ( Ret );
+}
+
+
+/** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to a second stack entry.
+ */
+template <class R>
+R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* ps )
+{
+	assert( NULL != Var );
+
+	R Retu, Retv;
+	TqInt uRes = ps->uGridRes();
+	TqInt vRes = ps->vGridRes();
+	TqInt GridX = i % ( uRes + 1 );
+	TqInt GridY = ( i / ( uRes + 1 ) );
+
+	R v1, v2;
+	TqFloat u = 1.0f, v = 1.0f;
+
+	// Calculate deriviative in u
+	if ( GridX < uRes )
+	{
+		Var->GetValue( v1, i + 1 );
+		Var->GetValue( v2, i );
+		if ( NULL != den )
+			den->GetValue( u, i );
+		Retu = ( v1 - v2 ) / u;
+	}
+	else
+	{
+		Var->GetValue( v1, i );
+		Var->GetValue( v2, i - 1 );
+		if ( NULL != den )
+			den->GetValue( u, i );
+		Retu = ( v1 - v2 ) / u;
+	}
+
+	// Calculate deriviative in v
+	if ( GridY < vRes )
+	{
+		Var->GetValue( v1, i + uRes + 1 );
+		Var->GetValue( v2, i );
+		if ( NULL != den )
+			den->GetValue( v, i );
+		Retv = ( v1 - v2 ) / v;
+	}
+	else
+	{
+		Var->GetValue( v1, i );
+		Var->GetValue( v2, i - ( uRes - 1 ) );
+		if ( NULL != den )
+			den->GetValue( v, i );
+		Retv = ( v1 - v2 ) / v;
+	}
+
+	return ( Retu + Retv );
+}
+
+
 //-----------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )

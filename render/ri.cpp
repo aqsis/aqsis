@@ -23,11 +23,12 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include	"aqsis.h"
+
 #include	<stdarg.h>
 #include	<math.h>
 #include	<strstream>
 
-#include	"aqsis.h"
 #include	"imagebuffer.h"
 #include	"lights.h"
 #include	"renderer.h"

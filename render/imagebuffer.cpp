@@ -24,13 +24,14 @@
 		\author Andy Gill (billybobjimboy@users.sf.net)
 */
 
+#include	"aqsis.h"
+
 #include	<strstream>
 #ifdef WIN32
 #include    <windows.h>
 #endif
 #include	<math.h>
 
-#include	"aqsis.h"
 #include	"stats.h"
 #include	"options.h"
 #include	"renderer.h"

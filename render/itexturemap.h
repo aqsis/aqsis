@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/10/31 11:51:11 $
+ *	Last change date:	$Date: 2003/01/11 14:58:56 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -13,15 +13,18 @@
 #ifndef	___itexturemap_Loaded___
 #define	___itexturemap_Loaded___
 
+#include	"aqsis.h"
 
 #ifdef AQSIS_SYSTEM_MACOSX
 #include	"macosx/valarray"
 #else
 #include	<valarray>
+#include	<map>
 #endif
 
 START_NAMESPACE( Aqsis )
 
+struct IqShaderData;
 
 //----------------------------------------------------------------------
 /** \enum EqMapType
@@ -98,16 +101,13 @@ struct IqTextureMap
 	 */
 	virtual bool	IsValid() const = 0;
 
-	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, TqFloat sblur, TqFloat tblur,
-	                        std::valarray<TqFloat>& val ) = 0;
+	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap ) = 0;
 	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
-	                        TqFloat sblur, TqFloat tblur,
-	                        std::valarray<TqFloat>& val ) = 0;
-	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur,
-	                        std::valarray<TqFloat>& val ) = 0;
+	                           std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap ) = 0;
+	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
+	                        std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap ) = 0;
 	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-	                        TqFloat sblur, TqFloat tblur,
-	                        std::valarray<TqFloat>& val ) = 0;
+	                        std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap ) = 0;
 	virtual CqMatrix& GetMatrix( TqInt which ) = 0;
 
 };

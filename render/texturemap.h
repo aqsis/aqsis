@@ -44,10 +44,10 @@
 
 #include	"sstring.h"
 #include	"color.h" 
-//#include	"lights.h"
 #include	"matrix.h"
 #include	"itexturemap.h"
 #include	"ri.h"
+#include	"ishaderexecenv.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -344,17 +344,14 @@ class _qShareC CqTextureMap : public IqTextureMap
 		_qShareM	virtual	CqTextureMapBuffer*	GetBuffer( TqUlong s, TqUlong t, TqInt directory = 0 );
 		void	CreateMIPMAP();
 
-		_qShareM	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, TqFloat sblur, TqFloat tblur,
-		                                 std::valarray<TqFloat>& val );
+		_qShareM	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
 		_qShareM	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
-		                                 TqFloat sblur, TqFloat tblur,
-		                                 std::valarray<TqFloat>& val );
-		_qShareM	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur,
-		                                 std::valarray<TqFloat>& val )
+		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
+		_qShareM	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
+		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
 		{}
 		_qShareM	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-		                                 TqFloat sblur, TqFloat tblur,
-		                                 std::valarray<TqFloat>& val )
+		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
 		{}
 
 		_qShareM	virtual	void	GetSample( TqFloat ss1, TqFloat tt1, TqFloat ss2, TqFloat tt2, std::valarray<TqFloat>& val );
@@ -445,11 +442,10 @@ class _qShareC CqEnvironmentMap : public CqTextureMap
 			return ( IsValid() ? MapType_Environment : MapType_Invalid );
 		}
 
-		_qShareM	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur,
-		                                 std::valarray<TqFloat>& val );
+		_qShareM	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
+		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
 		_qShareM	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-		                                 TqFloat sblur, TqFloat tblur,
-		                                 std::valarray<TqFloat>& val );
+		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
 
 		_qShareM CqMatrix& CqEnvironmentMap::GetMatrix( TqInt which )
 		{
@@ -530,11 +526,8 @@ class _qShareC CqShadowMap : public CqTextureMap
 		_qShareM	void	SaveShadowMap( const CqString& strShadowName );
 		_qShareM	void	ReadMatrices();
 
-		_qShareM	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val );
-		_qShareM	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val );
-
-
-		_qShareM	virtual	void	SampleMap( const CqVector3D& R1, const CqVector3D& R2, const CqVector3D& R3, const CqVector3D& R4, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val, TqFloat& depth );
+		_qShareM	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
+		_qShareM	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
 		_qShareM CqMatrix& CqShadowMap::GetMatrix( TqInt which )
 		{
 			if ( which == 0 ) return m_matWorldToCamera;

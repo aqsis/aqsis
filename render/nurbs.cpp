@@ -23,12 +23,13 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include	"aqsis.h"
+
 #include	<math.h>
 #include	<strstream>
 
 #include	<stdio.h>
 
-#include	"aqsis.h"
 #include	"nurbs.h"
 #include	"micropolygon.h"
 #include	"renderer.h"

@@ -23,11 +23,12 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include	"aqsis.h"
+
 #include	<math.h>
 #include	<iostream>
 #include	<fstream>
 
-#include	"aqsis.h"
 #include	"texturemap.h"
 #include	"rifile.h"
 #include	"exception.h"
@@ -1005,18 +1006,41 @@ void CqTextureMap::CreateMIPMAP()
 }
 
 
-void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, TqFloat sblur, TqFloat tblur,
-                              std::valarray<TqFloat>& val )
+void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
 {
 	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
 
+	if ( !IsValid() ) return ;
+
+	TqFloat sblur = 1.0f;
+	TqFloat tblur = 1.0f;
+	TqFloat pswidth = 1.0f;
+	TqFloat ptwidth = 1.0f;
+
+	// Get parameters out of the map.
+	if( paramMap.find("width") != paramMap.end() )
+	{
+		paramMap["width"]->GetFloat( pswidth );
+		ptwidth = pswidth;
+	}
+	else
+	{
+		if( paramMap.find("swidth") != paramMap.end() )
+			paramMap["swidth"]->GetFloat( pswidth );
+		if( paramMap.find("twidth") != paramMap.end() )
+			paramMap["twidth"]->GetFloat( ptwidth );
+	}
+	if( paramMap.find("sblur") != paramMap.end() )
+		paramMap["sblur"]->GetFloat( sblur );
+	if( paramMap.find("tblur") != paramMap.end() )
+		paramMap["tblur"]->GetFloat( tblur );
+	
+	swidth *= pswidth;
+	twidth *= ptwidth;
 
 	// T(s2,t2)-T(s2,t1)-T(s1,t2)+T(s1,t1)
 	TqInt i;
-
-
-	if ( !IsValid() ) return ;
 
 	val.resize( m_SamplesPerPixel );
 
@@ -1389,8 +1413,7 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
  */
 
 void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
-                              TqFloat sblur, TqFloat tblur,
-                              std::valarray<TqFloat>& val )
+                              std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
 {
 	// Work out the width and height
 	TqFloat ss1, tt1, ss2, tt2;
@@ -1404,7 +1427,7 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, Tq
 	ss1 = ss1 + ( swidth * 0.5f );
 	tt1 = tt1 + ( twidth * 0.5f );
 
-	SampleMap( ss1, tt1, swidth, twidth, sblur, tblur, val );
+	SampleMap( ss1, tt1, swidth, twidth, val, paramMap );
 }
 
 
@@ -1414,8 +1437,8 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, Tq
  * Filtering is done using swidth, twidth and nsamples.
  */
 
-void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur,
-                                  std::valarray<TqFloat>& val )
+void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D& twidth,
+                                  std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
 {
 	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
@@ -1429,7 +1452,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D
 			R3 = R1 + twidth;
 			R4 = R1 + swidth + twidth;
 
-			SampleMap( R1, R2, R3, R4, sblur, tblur, val );
+			SampleMap( R1, R2, R3, R4, val, paramMap );
 		}
 		else if ( Type() == MapType_LatLong )
 		{
@@ -1443,7 +1466,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D
 			ss1 = ss1 + 0.5; /* remaps to 0 -> 1 */
 			tt1 = acos( -V.z() ) / RI_PI;
 
-			CqTextureMap::SampleMap( ss1, tt1, sswidth, stwidth, sblur, tblur, val );
+			CqTextureMap::SampleMap( ss1, tt1, sswidth, stwidth, val, paramMap );
 		}
 	}
 }
@@ -1453,11 +1476,12 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D
 /** Retrieve a sample from the environment map using R as the reflection vector.
  */
 
-void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, TqFloat sblur, TqFloat tblur,
-                                  std::valarray<TqFloat>& val )
+void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
+                                  std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
 {
 	if ( m_pImage != 0 )
 	{
+
 		CqVector3D	last_R, R, pt;
 		TqFloat	texture_area, total_area;
 		TqInt	i, j;
@@ -1757,7 +1781,7 @@ static void project( TqInt face )
 /** Sample the shadow map data to see if the point vecPoint is in shadow.
  */
 
-void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val )
+void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
 {
 	if ( m_pImage != 0 )
 	{
@@ -1767,7 +1791,7 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 		R3 = vecPoint - ( swidth / 2.0f ) + ( twidth / 2.0f );
 		R4 = vecPoint + ( swidth / 2.0f ) + ( twidth / 2.0f );
 
-		SampleMap( R1, R2, R3, R4, sblur, tblur, val );
+		SampleMap( R1, R2, R3, R4, val, paramMap );
 	} else 
 	{
 		// If no map defined, not in shadow.
@@ -1777,61 +1801,26 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 }
 
 
-void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val )
-{
-	TqFloat depth;
-	SampleMap( R1, R2, R3, R4, sblur, tblur, val, depth );
-	/*	TqFloat previousdepth;
-		std::valarray<TqFloat> coverage;
-		coverage.resize(m_SamplesPerPixel);
-		val.resize(m_SamplesPerPixel);
-	 
-		// get coverage and average depth
-		SampleMap( R1, R2, R3, R4, sblur, tblur, coverage, depth );
-		previousdepth = depth;
-	 
-		if ( sblur != 0 || tblur != 0 )
-		{
-			TqInt maxiterations = 5; // cap the no of times we go round in case we get stuck in a loop
-			TqInt iterations = 0;
-			while ( depth != 0.0 && iterations < maxiterations )
-			{
-				// resize the filter
-				sblur *= 1 - depth;
-				tblur *= 1 - depth;
-	 
-				// get coverage and average depth again
-				SampleMap( R1, R2, R3, R4, sblur, tblur, coverage, depth );
-	 
-				// stop if we get roughly the same answer twice
-				if ( fabs( depth - previousdepth ) < 0.05 )
-					break;
-	 
-				previousdepth = depth;
-				iterations++;
-			}
-			val = coverage;
-		}
-		else
-		{
-			// get coverage and average depth again
-			//SampleMap( R1, R2, R3, R4, sblur, tblur, val, depth );
-			val = coverage;
-		}*/
-}
-
-
-void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const CqVector3D& R3, const CqVector3D& R4, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val, TqFloat& depth )
+void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
 {
 	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
 
+	TqFloat sblur = 1.0f;
+	TqFloat tblur = 1.0f;
+	TqFloat samples = 0.0f;
 
+	// Get parameters out of the map.
+	if( paramMap.find("sblur") != paramMap.end() )
+		paramMap["sblur"]->GetFloat( sblur );
+	if( paramMap.find("tblur") != paramMap.end() )
+		paramMap["tblur"]->GetFloat( tblur );
+	if( paramMap.find("samples") != paramMap.end() )
+		paramMap["samples"]->GetFloat( samples );
 
 	// If no map defined, not in shadow.
 	val.resize( 1 );
 	val[ 0 ] = 0.0f;
-	depth = 0.0f;
 
 	CqVector3D	vecR1l, vecR2l, vecR3l, vecR4l;
 	CqVector3D	vecR1m, vecR2m, vecR3m, vecR4m;
@@ -1926,19 +1915,26 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 
 	// Calculate no. of samples.
 	TqInt nt, ns;
-	if ( sres * tres * 4.0 < NumSamples )
+	if( samples > 0 )
 	{
-		ns = static_cast<TqInt>( sres * 2.0 + 0.5 );
-		ns = ( ns < MinSamples ? MinSamples : ( ns > NumSamples ? NumSamples : ns ) );
-		nt = static_cast<TqInt>( tres * 2.0 + 0.5 );
-		nt = ( nt < MinSamples ? MinSamples : ( nt > NumSamples ? NumSamples : nt ) );
+		nt = ns = static_cast<TqInt>( sqrt( samples ) );
 	}
 	else
 	{
-		nt = static_cast<TqInt>( sqrt( tres * NumSamples / sres ) + 0.5 );
-		nt = ( nt < MinSamples ? MinSamples : ( nt > NumSamples ? NumSamples : nt ) );
-		ns = static_cast<TqInt>( static_cast<TqFloat>( NumSamples ) / nt + 0.5 );
-		ns = ( ns < MinSamples ? MinSamples : ( ns > NumSamples ? NumSamples : ns ) );
+		if ( sres * tres * 4.0 < NumSamples )
+		{
+			ns = static_cast<TqInt>( sres * 2.0 + 0.5 );
+			ns = ( ns < MinSamples ? MinSamples : ( ns > NumSamples ? NumSamples : ns ) );
+			nt = static_cast<TqInt>( tres * 2.0 + 0.5 );
+			nt = ( nt < MinSamples ? MinSamples : ( nt > NumSamples ? NumSamples : nt ) );
+		}
+		else
+		{
+			nt = static_cast<TqInt>( sqrt( tres * NumSamples / sres ) + 0.5 );
+			nt = ( nt < MinSamples ? MinSamples : ( nt > NumSamples ? NumSamples : nt ) );
+			ns = static_cast<TqInt>( static_cast<TqFloat>( NumSamples ) / nt + 0.5 );
+			ns = ( ns < MinSamples ? MinSamples : ( ns > NumSamples ? NumSamples : ns ) );
+		}
 	}
 
 	// Setup jitter variables
@@ -1977,7 +1973,6 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 					if ( z > depths[ ( iv * rowlen ) + iu ] )
 					{
 						inshadow += 1;
-						depth += depths[ ( iv * rowlen ) + iu ];
 					}
 				}
 			}
@@ -1987,10 +1982,6 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 	}
 
 	val[ 0 ] = ( static_cast<TqFloat>( inshadow ) / ( ns * nt ) );
-
-	// get the average depth of occluded samples
-	TqFloat lightdistance = MAX( MAX( MAX( vecR1l.Magnitude(), vecR2l.Magnitude() ), vecR3l.Magnitude() ), vecR4l.Magnitude() );
-	depth = ( depth / inshadow ) / lightdistance;
 }
 
 

@@ -23,10 +23,11 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include	"aqsis.h"
+
 #include  <strstream>
 #include  <math.h>
 
-#include	"aqsis.h"
 #include	"renderer.h"
 #include	"attributes.h"
 #include	"stats.h"
