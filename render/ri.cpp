@@ -621,19 +621,19 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 {
 	if( fstop < 0 )
 	{
-		QGetRenderContext() ->Logger()->error( "Negative fstop: %f, DepthOfField ignored", fstop );
+		QGetRenderContext() ->Logger()->warn( "Negative fstop: %f, DepthOfField ignored", fstop );
 		return;
 	}
 	
 	if( focallength < 0 )
 	{
-		QGetRenderContext() ->Logger()->error( "Negative focallength: %f, DepthOfField ignored", focallength );
+		QGetRenderContext() ->Logger()->warn( "Negative focallength: %f, DepthOfField ignored", focallength );
 		return;
 	}
 	
 	if( focaldistance < 0 )
 	{
-		QGetRenderContext() ->Logger()->error( "Negative focaldistance: %f, DepthOfField ignored", focaldistance );
+		QGetRenderContext() ->Logger()->warn( "Negative focaldistance: %f, DepthOfField ignored", focaldistance );
 		return;
 	}
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "DepthOfField" ) [ 0 ] = fstop ;
