@@ -675,11 +675,16 @@ class CqEnvironmentMap : public CqTextureMap
 
 			return ( m_matWorldToScreen );
 		}
+		virtual void SetFov(TqFloat f)
+		{		
+			m_fov = f;
+		}
 
 
 	private:
 		void	Getst( CqVector3D& R, TqUlong fullwidth, TqUlong fulllength, TqFloat& s, TqFloat& t );
 		CqMatrix	m_matWorldToScreen;		///< Matrix to convert points from world space to screen space.
+		TqFloat m_fov;                  ///< cotangent()
 
 }
 ;

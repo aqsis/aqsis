@@ -1855,6 +1855,8 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 
 		if ((R1 * R1) == 0) return;
 
+		TqFloat dfovu = fabs(1.0f - m_fov)/(TqFloat) (m_XRes);
+		TqFloat dfovv = fabs(1.0f - m_fov)/(TqFloat) (m_YRes);
 		for (i=0; i < m_samples; i++)
 		{
 			CalculateNoise(x, y, i);
@@ -1864,6 +1866,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 			mul = (*m_FilterFunc)(x-0.5, y-0.5, 1.0, 1.0);
 			if (mul < m_pixelvariance)
 				continue;
+
 			contrib += mul;
 
 			// Find the side of the cube that we're looking at
@@ -1948,16 +1951,20 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 					break;
 			}
 
-                        /* At this point: u,v are between 0..1.0 
-			 * They must be remapped to their correct 
-      			 * position 
-			 */
-			u = side[0] + MIN(u*ONETHIRD, ONETHIRD);
-			v = side[1] + MIN(v*ONEHALF, ONEHALF);
-			u = MAX(0.0, u);
-			v = MAX(0.0, v);
-                     
+			/* At this point: u,v are between 0..1.0 
+			* They must be remapped to their correct 
+			* position 
+			*/
+			
+			u = CLAMP(u, dfovu, 1.0f );
+			v = CLAMP(v, dfovv, 1.0f );
+
+			u = side[0] + u*ONETHIRD;
+			v = side[1] + v*ONEHALF;
+			u = CLAMP(u, 0.0f, 1.0f);
+			v = CLAMP(v, 0.0f, 1.0f);
 			CalculateLevel(u, v);
+			
 			BiLinear(u, v, m_umapsize, m_vmapsize, m_level, m_pixel_variance);
 			if (bLerp)
 				BiLinear(u, v, m_umapsize/2, m_vmapsize/2, m_level+1, m_pixel_sublevel);

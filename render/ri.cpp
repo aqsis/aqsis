@@ -3149,8 +3149,10 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
                     CqString str( ps[ 0 ] );
                     static_cast<CqParameterTypedUniform<CqString, type_string, RtFloat>*>( pParam ) ->pValue() [ 0 ] = str;
                 }
-				if( (strcmp(name, "identifier")==0) && (strcmp(token, "name")==0))
-					std::cerr << info << "Identifier: " << ps[ 0 ] << std::endl;
+#ifdef REQUIRED
+		if( (strcmp(name, "identifier")==0) && (strcmp(token, "name")==0))
+			std::cerr << info << "Identifier: " << ps[ 0 ] << std::endl;
+#endif
             }
             // TODO: Rest of parameter types.
         }
@@ -5179,6 +5181,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
             TIFFCreateDirectory( ptex );
             TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
             TIFFSetField( ptex, TIFFTAG_PIXAR_TEXTUREFORMAT, CUBEENVMAP_HEADER );
+            TIFFSetField( ptex, TIFFTAG_PIXAR_FOVCOT, 1.0/tan(RAD(fov)/2.0) );
             tpx.WriteTileImage( ptex, pLevelBuffer, 64, 64, tpx.Compression(), tpx.Quality() );
             xRes /= 2;
             yRes /= 2;

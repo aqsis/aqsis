@@ -54,31 +54,31 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 	QGetRenderContext() ->Stats().IncTextureMisses( 2 );
 
 	if ( size == static_cast<int>( m_TextureMap_Cache.size() ) )
-if ( previous && ( previous->m_strName == strName ) )
-{
-	QGetRenderContext() ->Stats().IncTextureHits( 0, 2 );
-	return previous;
-}
+		if ( previous && ( previous->m_strName == strName ) )
+		{
+			QGetRenderContext() ->Stats().IncTextureHits( 0, 2 );
+			return previous;
+		}
 
 
 
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
-if ( ( *i ) ->m_strName == strName )
-{
-	if ( ( *i ) ->Type() == MapType_LatLong )
-	{
-previous = *i;
-size = m_TextureMap_Cache.size();
-QGetRenderContext() ->Stats().IncTextureHits( 1, 2 );
-return ( *i );
-	}
-	else
-	{
-return ( NULL );
-	}
-}
+		if ( ( *i ) ->m_strName == strName )
+		{
+			if ( ( *i ) ->Type() == MapType_LatLong )
+			{
+				previous = *i;
+				size = m_TextureMap_Cache.size();
+				QGetRenderContext() ->Stats().IncTextureHits( 1, 2 );
+				return ( *i );
+			}
+			else
+			{
+				return ( NULL );
+			}
+		}
 	}
 	// If we got here, it doesn't exist yet, so we must create and load it.
 	CqTextureMap* pNew = new CqLatLongMap( strName );
@@ -92,9 +92,9 @@ return ( NULL );
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        strcmp( ptexfmt, LATLONG_HEADER ) != 0 )
 	{
-std::cerr << error << "Map \"" << strName.c_str() << "\" is not an environment map, use RiMakeLatLongEnvironment" << std::endl;
+		std::cerr << error << "Map \"" << strName.c_str() << "\" is not an environment map, use RiMakeLatLongEnvironment" << std::endl;
 
-pNew->SetInvalid();
+		pNew->SetInvalid();
 	}
 
 	previous = pNew;
@@ -116,31 +116,31 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 
 	/* look if the last item return by this function was ok */
 	if ( size == static_cast<int>( m_TextureMap_Cache.size() ) )
-if ( ( previous ) && ( previous->m_strName == strName ) )
-{
-	QGetRenderContext() ->Stats().IncTextureHits( 0, 1 );
-	return previous;
-}
+		if ( ( previous ) && ( previous->m_strName == strName ) )
+		{
+			QGetRenderContext() ->Stats().IncTextureHits( 0, 1 );
+			return previous;
+		}
 
 
 
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
-if ( ( *i ) ->m_strName == strName )
-{
-	if ( ( *i ) ->Type() == MapType_Environment )
-	{
-previous = *i;
-size = m_TextureMap_Cache.size();
-QGetRenderContext() ->Stats().IncTextureHits( 1, 1 );
-return ( *i );
-	}
-	else
-	{
-return ( NULL );
-	}
-}
+		if ( ( *i ) ->m_strName == strName )
+		{
+			if ( ( *i ) ->Type() == MapType_Environment )
+			{
+				previous = *i;
+				size = m_TextureMap_Cache.size();
+				QGetRenderContext() ->Stats().IncTextureHits( 1, 1 );
+				return ( *i );
+			}
+			else
+			{
+				return ( NULL );
+			}
+		}
 	}
 	// If we got here, it doesn't exist yet, so we must create and load it.
 	CqTextureMap* pNew = new CqEnvironmentMap( strName );
@@ -154,19 +154,26 @@ return ( NULL );
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        ( strcmp( ptexfmt, CUBEENVMAP_HEADER ) != 0 ) && ( strcmp( ptexfmt, LATLONG_HEADER ) != 0 ) )
 	{
-std::cerr << error << "Map \"" << strName.c_str() << "\" is not an environment map, use RiMakeCubeFaceEnvironment" << std::endl;
-pNew->SetInvalid();
-delete pNew;
-pNew = NULL;
+		std::cerr << error << "Map \"" << strName.c_str() << "\" is not an environment map, use RiMakeCubeFaceEnvironment" << std::endl;
+		pNew->SetInvalid();
+		delete pNew;
+		pNew = NULL;
 
+	} else
+	{
+		TqFloat fov;
+		if (TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_FOVCOT, &fov) == 1)
+			((CqEnvironmentMap *)pNew)->SetFov(fov);
+		else
+			((CqEnvironmentMap *)pNew)->SetFov(1.0);
 	}
 
 	// remove from the list a LatLong env. map since in shadeops.cpp we will cope with it.
 	if ( ptexfmt && strcmp( ptexfmt, LATLONG_HEADER ) == 0 )
 	{
-pNew->SetInvalid();
-delete pNew;
-pNew = NULL;
+		pNew->SetInvalid();
+		delete pNew;
+		pNew = NULL;
 	}
 
 	previous = pNew;
@@ -180,9 +187,9 @@ pNew = NULL;
  */
 
 void CqEnvironmentMap::SampleMap( CqVector3D& R1,
-       CqVector3D& swidth, CqVector3D& twidth,
-       std::valarray<TqFloat>& val, TqInt index,
-       TqFloat* average_depth, TqFloat* shadow_depth )
+                                  CqVector3D& swidth, CqVector3D& twidth,
+                                  std::valarray<TqFloat>& val, TqInt index,
+                                  TqFloat* average_depth, TqFloat* shadow_depth )
 {
 	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
@@ -205,10 +212,10 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1,
 			TqFloat sswidth = swidth.Magnitude();
 			TqFloat stwidth = twidth.Magnitude();
 
-			TqFloat ss1 = atan2( V.y(), V.x() ) / ( 2.0 * RI_PI );  // -.5 -> .5 
-			ss1 = ss1 + 0.5; // remaps to 0 -> 1 
+			TqFloat ss1 = atan2( V.y(), V.x() ) / ( 2.0 * RI_PI );  // -.5 -> .5
+			ss1 = ss1 + 0.5; // remaps to 0 -> 1
 			TqFloat tt1 = acos( V.z() ) / RI_PI;
-         
+
 			CqTextureMap::SampleMap( ss1, tt1, sswidth/RI_PI, stwidth/RI_PI, val );
 		}
 	}
