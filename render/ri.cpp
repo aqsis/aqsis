@@ -189,26 +189,26 @@ RtToken	RI_TEXTURENAME	=	"texturename";
 RtToken	RI_VERBATIM	=	"verbatim";
 RtToken	RI_WIDTH	=	"width";
 
-RtBasis	RiBezierBasis	= {{ -1, 3, -3, 1},
-                         {3, -6, 3, 0},
-                         { -3, 3, 0, 0},
-                         {1, 0, 0, 0}};
-RtBasis	RiBSplineBasis	= {{ -1, 3, -3, 1},
-                          {3, -6, 3, 0},
-                          { -3, 0, 3, 0},
-                          {1, 4, 1, 0}};
-RtBasis	RiCatmullRomBasis	= {{ -1, 3, -3, 1},
-                             {2, -5, 4, -1},
-                             { -1, 0, 1, 0},
-                             {0, 2, 0, 0}};
-RtBasis	RiHermiteBasis	= {{ 2, 1, -2, 1},
-                          { -3, -2, 3, -1},
-                          {0, 1, 0, 0},
-                          {1, 0, 0, 0}};
-RtBasis	RiPowerBasis	= {{ 1, 0, 0, 0},
-                        {0, 1, 0, 0},
-                        {0, 0, 1, 0},
-                        {0, 0, 0, 1}};
+RtBasis	RiBezierBasis	= {{ -1.0f,       3.0f,      -3.0f,       1.0f},
+                           {  3.0f,      -6.0f,       3.0f,       0.0f},
+                           { -3.0f,       3.0f,       0.0f,       0.0f},
+                           {  1.0f,       0.0f,       0.0f,       0.0f}};
+RtBasis	RiBSplineBasis	= {{ -1.0f/6.0f,  0.5f,      -0.5f,       1.0f/6.0f},
+						   {  0.5f,      -1.0f,       0.5f,       0.0f},
+                           { -0.5f,       0.0f,	      0.5f,       0.0f},
+                           {  1.0f/6.0f,  2.0f/3.0f,  1.0f/6.0f,  0.0f}};
+RtBasis	RiCatmullRomBasis={{ -0.5f,       1.5f,      -1.5f,       0.5f},
+                           {  1.0f,      -2.5f,       2.0f,      -0.5f},
+                           { -0.5f,       0.0f,       0.5f,       0.0f},
+                           {  0.0f,       1.0f,       0.0f,       0.0f}};
+RtBasis	RiHermiteBasis	= {{  2.0f,       1.0f,      -2.0f,       1.0f},
+                           { -3.0f,      -2.0f,       3.0f,      -1.0f},
+                           {  0.0f,       1.0f,       0.0f,       0.0f},
+                           {  1.0f,       0.0f,       0.0f,       0.0f}};
+RtBasis	RiPowerBasis	= {{  1.0f,       0.0f,       0.0f,       0.0f},
+                           {  0.0f,       1.0f,       0.0f,       0.0f},
+                           {  0.0f,       0.0f,       1.0f,       0.0f},
+                           {  0.0f,       0.0f,       0.0f,       1.0f}};
 
 enum RIL_POINTS
 {
