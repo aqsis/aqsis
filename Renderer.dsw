@@ -384,6 +384,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "libshadervm"=.\libshadervm\libshadervm.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "libslparse"=.\libslparse\libslparse.dsp - Package Owner=<4>
 
 Package=<5>

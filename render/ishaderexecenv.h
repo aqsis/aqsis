@@ -31,6 +31,7 @@
 #include	"vector3d.h"
 #include	"matrix.h"
 #include	"sstring.h"
+#include	"bitvector.h"
 
 START_NAMESPACE( Aqsis )
 

@@ -27,11 +27,12 @@
 
 #include	"aqsis.h"
 #include	"lights.h"
-#include	"shadervm.h"
 #include	"shaderexecenv.h"
 #include	"texturemap.h"
 #include	"spline.h"
 #include	"surface.h"
+#include	"shadervm.h"
+
 
 START_NAMESPACE( Aqsis )
 

@@ -35,7 +35,8 @@
 #include "sstring.h"
 #include "vector3d.h"
 #include "list.h"
-#include "shadervm.h"
+#include "ishader.h"
+#include "ishaderexecenv.h"
 
 START_NAMESPACE( Aqsis )
 

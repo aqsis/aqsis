@@ -36,7 +36,6 @@
 #include "color.h"
 #include "list.h"
 #include "matrix.h"
-#include "shadervm.h"
 #include "shaderexecenv.h"
 #include "vector4d.h"
 #include "imagebuffer.h"

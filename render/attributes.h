@@ -44,6 +44,7 @@
 #include	"share.h"
 
 START_NAMESPACE( Aqsis )
+struct IqShader;
 
 /// The options for the orientation of a coordinate system.
 enum EqOrientation

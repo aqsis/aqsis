@@ -26,6 +26,7 @@
 #include	"aqsis.h"
 #include	"lights.h"
 #include	"file.h"
+#include	"shadervm.h"
 
 START_NAMESPACE( Aqsis )
 

@@ -34,9 +34,10 @@
 #include	"shaders.h"
 #include	"nurbs.h"
 #include	"render.h"
-#include	"shadervm.h"
 #include	"transform.h"
 #include	"rifile.h"
+
+#include	"shadervm.h"
 
 #include	"shadervariable.h"
 

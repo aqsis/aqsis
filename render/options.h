@@ -37,7 +37,6 @@
 #include	"color.h"
 #include	"exception.h"
 #include	"parameters.h"
-#include	"shadervm.h"
 
 
 #define  _qShareName CORE

@@ -25,9 +25,10 @@
 
 #include	"aqsis.h"
 #include	"shaderexecenv.h"
-#include	"shadervm.h"
 #include	"surface.h"
 #include	"imagebuffer.h"
+
+#include	"shadervm.h"
 
 START_NAMESPACE( Aqsis )
 

@@ -5,7 +5,7 @@
  *	@brief	Declare the interface which all shaders must implement.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/04/24 16:08:57 $
+ *	Last change date:	$Date: 2002/04/24 21:48:06 $
  */
 //------------------------------------------------------------------------------
 
@@ -17,6 +17,25 @@
 
 
 START_NAMESPACE( Aqsis )
+
+
+//----------------------------------------------------------------------
+/** \enum EqShaderType
+ * Shader type identifier.
+ */
+
+enum EqShaderType
+{
+    Type_Surface,  			///< Surface shader
+    Type_Lightsource,  		///< Lightsource shader.
+    Type_Volume,  			///< Volume shader.
+    Type_Displacement,  		///< Displacement shader.
+    Type_Transformation,  	///< Transformation shader.
+    Type_Imager,  			///< Image shader.
+};
+
+#define	USES(a,b)	((a)&(0x00000001<<(b))?TqTrue:TqFalse)
+
 
 struct IqShaderExecEnv;
 

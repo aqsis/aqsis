@@ -35,7 +35,6 @@
 #include	"options.h"
 #include	"renderer.h"
 #include	"surface.h"
-#include	"shadervm.h"
 #include	"micropolygon.h"
 #include	"imagebuffer.h"
 #include	"imagers.h"
