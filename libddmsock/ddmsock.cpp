@@ -85,6 +85,8 @@ IqDDManager* CreateDisplayDriverManager()
 	return new CqDDManager;
 }
 
+//////////////////////////// CqDDServer ///////////////////////////////
+
 //---------------------------------------------------------------------
 /** Default constructor.
  */
@@ -259,6 +261,9 @@ TqBool CqDDServer::Accept( CqDDClient& dd )
 	return ( TqFalse );
 }
 
+//////////////////////////// CqDDClient ///////////////////////////////
+
+
 CqDDClient::CqDDClient( const TqChar* name, const TqChar* type, const TqChar* mode ) :
 		m_Socket( INVALID_SOCKET ),
 		m_strName( name ),
@@ -340,6 +345,9 @@ void CqDDClient::Receive( void* buffer, TqInt len )
 		tot += n;
 	}
 }
+
+
+//////////////////////////// CqDDManager ///////////////////////////////
 
 
 std::map<std::string, std::string>	g_mapDisplayNames;
@@ -538,14 +546,19 @@ TqBool CqDDManager::fDisplayNeeds(const TqChar* var)
 	return ( TqFalse );
 }
 
+/**
+  Load the requested display library according to the specified mode in the RiDisplay command.
 
+*/
 void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 {
 	if ( !g_fDisplayMapInitialised )
 		InitialiseDisplayNameMap();
 
-	// Load the requested display library according to the specified mode in the RiDisplay command.
-	CqString strDriverFile = g_mapDisplayNames[ dd.strType() ];
+	// strDriverFileAndArgs: Second part of the ddmsock.ini line (e.g. "mydriver.exe --foo")
+	CqString strDriverFileAndArgs = g_mapDisplayNames[ dd.strType() ];
+	// strDriverFile: Only the executable without arguments (e.g. "mydriver.exe")
+	CqString strDriverFile = GetStringField(strDriverFileAndArgs, 0);
 
 	// Check-ins said temporary way to handle locating display drivers.
 	// Until finished provide a helpful message for folks instead of
@@ -556,88 +569,134 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 		throw( CqString("Invalid display type \"") + dd.strType() + CqString("\"") );
 	}
 
+	// Try to open the file to see if it's really there
 	CqRiFile fileDriver( strDriverFile.c_str(), "display" );
-	if ( fileDriver.IsValid() )
-	{
-		char envBuffer[ 32 ];
-#ifdef AQSIS_SYSTEM_WIN32
-		_snprintf( envBuffer, 32, "%d", m_DDServer.getPort() );
-		SetEnvironmentVariable( "AQSIS_DD_PORT", envBuffer );
-		const TqInt ProcHandle = _spawnl( _P_NOWAITO, fileDriver.strRealName().c_str(), strDriverFile.c_str() , NULL );
-		if ( ProcHandle < 0 )
-		{
-			CqBasicError( 0, 0, "Error spawning display driver process" );
-		}
-#else // AQSIS_SYSTEM_WIN32
-		snprintf( envBuffer, 32, "%d", m_DDServer.getPort() );
-		setenv( "AQSIS_DD_PORT", envBuffer, 1 );
-		const int forkresult = fork();
-		if ( 0 == forkresult )
-		{
-			execlp( fileDriver.strRealName().c_str(), strDriverFile.c_str(), NULL );
-		}
-		else if ( -1 == forkresult )
-		{
-			CqBasicError( 0, 0, "Error forking display driver process" );
-		}
-#endif // !AQSIS_SYSTEM_WIN32
-		else
-		{
-			// wait for a connection request from the client
-			if ( m_DDServer.Accept( dd ) )
-			{
-				// Send a filename message
-				SqDDMessageFilename * pmsgfname = SqDDMessageFilename::Construct( dd.strName().c_str() );
-				dd.SendMsg( pmsgfname );
-				pmsgfname->Destroy();
 
-				// Send a display type message
-				SqDDMessageDisplayType * pmsgdtype = SqDDMessageDisplayType::Construct( dd.strType().c_str() );
-				dd.SendMsg( pmsgdtype );
-				pmsgdtype->Destroy();
-
-				CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera" );
-				CqMatrix matWorldToScreen = QGetRenderContext() ->matSpaceToSpace( "world", "screen" );
-
-				if ( matWorldToCamera.fIdentity() ) matWorldToCamera.Identity();
-				if ( matWorldToScreen.fIdentity() ) matWorldToScreen.Identity();
-
-				SqDDMessageNl msgnl( matWorldToCamera.pElements() );
-				dd.SendMsg( &msgnl );
-
-				SqDDMessageNP msgnp( matWorldToScreen.pElements() );
-				dd.SendMsg( &msgnp );
-
-				// Send the open message..
-				RtInt mode = 0;
-				if ( strstr( dd.strMode().c_str(), RI_RGB ) != NULL )
-					mode |= ModeRGB;
-				if ( strstr( dd.strMode().c_str(), RI_A ) != NULL )
-					mode |= ModeA;
-				if ( strstr( dd.strMode().c_str(), RI_Z ) != NULL )
-					mode |= ModeZ;
-				TqInt SamplesPerElement = mode & ModeRGB ? 3 : 0;
-				SamplesPerElement += mode & ModeA ? 1 : 0;
-				SamplesPerElement = mode & ModeZ ? 1 : SamplesPerElement;
-				TqInt one = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeOne" ) [ 0 ];
-				TqInt min = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeMin" ) [ 0 ];
-				TqInt max = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeMax" ) [ 0 ];
-				TqInt BitsPerSample = ( one == 0 && min == 0 && max == 0 ) ? 32 : 8;
-				SqDDMessageOpen msgopen( QGetRenderContext() ->pImage() ->iXRes(),
-				                         QGetRenderContext() ->pImage() ->iYRes(),
-				                         SamplesPerElement,
-				                         BitsPerSample, 	// Bits per sample.
-				                         QGetRenderContext() ->pImage() ->CropWindowXMin(),
-				                         QGetRenderContext() ->pImage() ->CropWindowXMax(),
-				                         QGetRenderContext() ->pImage() ->CropWindowYMin(),
-				                         QGetRenderContext() ->pImage() ->CropWindowYMax() );
-				dd.SendMsg( &msgopen );
-			}
-		}
-	}
-	else
+	if ( !fileDriver.IsValid() )
 	{
 		CqBasicError( 0, 0, ( "Error loading display driver [ " + strDriverFile + " ]" ).c_str() );
+		return;  /* and how is the error reported to the caller? */
+	}
+
+	CqString strDriverPathAndFile = fileDriver.strRealName();
+
+	char envBuffer[ 32 ];
+	const int maxargs = 20;
+	const char* args[maxargs];
+	std::string argstrings[maxargs];
+	int i;
+
+	// Prepare an arry with the arguments
+	// (the first argument (the file name) begins at position 2 because
+	// the Windows version might have to call cmd.exe which will be 
+	// prepended to the argument list)
+	args[2] = strDriverFile.c_str();
+	args[3] = NULL;
+	args[maxargs-1] = NULL;
+	for(i=1; i<maxargs-3; i++)
+	{
+		argstrings[i] = GetStringField(strDriverFileAndArgs,i);
+		if (argstrings[i].length()==0)
+		{
+			args[i+2]=NULL;
+			break;
+		}
+		args[i+2]=argstrings[i].c_str();
+	}
+
+
+#ifdef AQSIS_SYSTEM_WIN32
+
+	// Set the AQSIS_DD_PORT environment variable
+	_snprintf( envBuffer, 32, "%d", m_DDServer.getPort() );
+	SetEnvironmentVariable( "AQSIS_DD_PORT", envBuffer );
+
+	// Spawn the driver (1st try)...
+	TqInt ProcHandle = _spawnv( _P_NOWAITO, strDriverPathAndFile.c_str(), &args[2]);
+	// If it didn't work try a second time via "cmd.exe"...
+	if ( ProcHandle < 0 )
+	{
+		args[0] = "cmd.exe";
+		args[1] = "/C";
+		args[2] = strDriverPathAndFile.c_str();
+		ProcHandle = _spawnvp( _P_NOWAITO, "cmd.exe", args);
+	}
+	if ( ProcHandle < 0 )
+	{
+		CqBasicError( 0, 0, "Error spawning display driver process" );
+		return; /* should that be a throw? */
+	}
+
+#else // AQSIS_SYSTEM_WIN32
+
+	// Set the AQSIS_DD_PORT environment variable
+	snprintf( envBuffer, 32, "%d", m_DDServer.getPort() );
+	setenv( "AQSIS_DD_PORT", envBuffer, 1 );
+	// Spawn the driver
+	const int forkresult = fork();
+	// Start the driver in the child process
+	if ( 0 == forkresult )
+	{
+//		execlp( strDriverPathAndFile.c_str(), strDriverFile.c_str(), NULL );
+		execvp( strDriverPathAndFile.c_str(), &args[2] );
+		/* error checking? */
+		return;
+	}
+	else if ( -1 == forkresult )
+	{
+		CqBasicError( 0, 0, "Error forking display driver process" );
+		return; /* should that be a throw? */
+	}
+#endif // !AQSIS_SYSTEM_WIN32
+
+	// wait for a connection request from the client
+	if ( m_DDServer.Accept( dd ) )
+	{
+		// Send a filename message
+		SqDDMessageFilename * pmsgfname = SqDDMessageFilename::Construct( dd.strName().c_str() );
+		dd.SendMsg( pmsgfname );
+		pmsgfname->Destroy();
+		// Send a display type message
+		SqDDMessageDisplayType * pmsgdtype = SqDDMessageDisplayType::Construct( dd.strType().c_str() );
+		dd.SendMsg( pmsgdtype );
+		pmsgdtype->Destroy();
+
+		CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera" );
+		CqMatrix matWorldToScreen = QGetRenderContext() ->matSpaceToSpace( "world", "screen" );
+
+		if ( matWorldToCamera.fIdentity() ) matWorldToCamera.Identity();
+		if ( matWorldToScreen.fIdentity() ) matWorldToScreen.Identity();
+
+		SqDDMessageNl msgnl( matWorldToCamera.pElements() );
+		dd.SendMsg( &msgnl );
+
+		SqDDMessageNP msgnp( matWorldToScreen.pElements() );
+		dd.SendMsg( &msgnp );
+
+		// Send the open message..
+		RtInt mode = 0;
+		if ( strstr( dd.strMode().c_str(), RI_RGB ) != NULL )
+			mode |= ModeRGB;
+		if ( strstr( dd.strMode().c_str(), RI_A ) != NULL )
+			mode |= ModeA;
+		if ( strstr( dd.strMode().c_str(), RI_Z ) != NULL )
+			mode |= ModeZ;
+		TqInt SamplesPerElement = mode & ModeRGB ? 3 : 0;
+		SamplesPerElement += mode & ModeA ? 1 : 0;
+		SamplesPerElement = mode & ModeZ ? 1 : SamplesPerElement;
+		TqInt one = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeOne" ) [ 0 ];
+		TqInt min = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeMin" ) [ 0 ];
+		TqInt max = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeMax" ) [ 0 ];
+		TqInt BitsPerSample = ( one == 0 && min == 0 && max == 0 ) ? 32 : 8;
+		SqDDMessageOpen msgopen( QGetRenderContext() ->pImage() ->iXRes(),
+		                         QGetRenderContext() ->pImage() ->iYRes(),
+		                         SamplesPerElement,
+		                         BitsPerSample, 	// Bits per sample.
+		                         QGetRenderContext() ->pImage() ->CropWindowXMin(),
+		                         QGetRenderContext() ->pImage() ->CropWindowXMax(),
+		                         QGetRenderContext() ->pImage() ->CropWindowYMin(),
+		                         QGetRenderContext() ->pImage() ->CropWindowYMax() );
+		dd.SendMsg( &msgopen );
 	}
 }
 
@@ -715,5 +774,69 @@ void CqDDManager::InitialiseDisplayNameMap()
 		CqBasicError( ErrorID_DisplayDriver, Severity_Normal, "Could not find ddmsock.ini file." );
 	}
 }
+
+/**
+  Return the substring with the given index.
+
+  The string \a s is conceptually broken into substrings that are separated by blanks
+  or tabs. A continuous sequence of blanks/tabs counts as one individual separator.
+  The substring with number \a idx is returned (0-based). If \a idx is higher than the
+  number of substrings then an empty string is returned.
+
+  \param s Input string.
+  \param idx Index (0-based)
+  \return Sub string with given index
+*/
+std::string CqDDManager::GetStringField(const std::string& s, int idx)
+{
+	int z=1;   /* state variable  0=skip whitespace  1=skip chars  2=search end  3=end */
+	std::string::const_iterator it;
+	std::string::size_type start = 0;
+	std::string::size_type end = 0;
+
+	for(it=s.begin(); it!=s.end(); it++)
+	{
+		char c=*it;
+
+		if (idx==0 && z<2)
+		{
+			z=2;
+		}	
+
+		switch(z)
+		{
+		case 0:	if (c!=' ' && c!='\t')
+				{
+					idx--;
+					end=start+1;
+					z=1;
+				}
+				if (idx>0) start++;
+				break;
+		case 1:	if (c==' ' || c=='\t')
+				{
+					z=0;				
+				}
+				start++;
+				break;
+		case 2: if (c==' ' || c=='\t')
+				{
+					z=3;
+				}
+				else
+				{
+					end++;
+				}
+				break;
+		}
+	}
+	
+	if (idx==0)
+		return s.substr(start,end-start);
+	else
+		return std::string("");
+
+}
+
 
 END_NAMESPACE( Aqsis )

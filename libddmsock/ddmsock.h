@@ -28,6 +28,7 @@
 #define DDSERVER_H_INCLUDED 1
 
 #include	<vector>
+#include	<string>
 
 #ifdef AQSIS_SYSTEM_WIN32
 
@@ -188,6 +189,9 @@ class CqDDManager : public IqDDManager
 
 		void	LoadDisplayLibrary( CqDDClient& dd );
 		void	InitialiseDisplayNameMap();
+
+	private:
+		std::string	GetStringField(const std::string& s, int idx);
 
 	private:
 		CqDDServer	m_DDServer;
