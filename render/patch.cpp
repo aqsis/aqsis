@@ -292,7 +292,7 @@ CqSurfacePatchBicubic& CqSurfacePatchBicubic::operator=( const CqSurfacePatchBic
 /** Subdivide a bicubic patch in the u direction, return the left side.
  */
 
-CqSurfacePatchBicubic* CqSurfacePatchBicubic::uSubdivide()
+void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfacePatchBicubic* pNew2 )
 {
 	TqFloat	aDlb[ 16 ] = {
 	                         8, 0, 0, 0,
@@ -313,7 +313,8 @@ CqSurfacePatchBicubic* CqSurfacePatchBicubic::uSubdivide()
 	Dlb = ( 1.0f / 8.0f ) * Dlb;
 	Drb = ( 1.0f / 8.0f ) * Drb;
 
-	CqSurfacePatchBicubic* pmResult = new CqSurfacePatchBicubic( *this );
+	pNew1->P().SetSize( cVertex() );
+	pNew2->P().SetSize( cVertex() );
 
 	// Create the geometry matrix and storage area for the left and right split matrices.
 	CqMatrix	G;
@@ -332,35 +333,25 @@ CqSurfacePatchBicubic* CqSurfacePatchBicubic::uSubdivide()
 		Gl = ( G * Dlb );
 		Gr = ( G * Drb );
 
-		CP( i, 0 ) = CqVector4D( Gl[ 0 ][ 0 ], Gl[ 0 ][ 1 ], Gl[ 0 ][ 2 ], 1 );
-		CP( i, 1 ) = CqVector4D( Gl[ 1 ][ 0 ], Gl[ 1 ][ 1 ], Gl[ 1 ][ 2 ], 1 );
-		CP( i, 2 ) = CqVector4D( Gl[ 2 ][ 0 ], Gl[ 2 ][ 1 ], Gl[ 2 ][ 2 ], 1 );
-		CP( i, 3 ) = CqVector4D( Gl[ 3 ][ 0 ], Gl[ 3 ][ 1 ], Gl[ 3 ][ 2 ], 1 );
+		pNew1->CP( i, 0 ) = CqVector4D( Gl[ 0 ][ 0 ], Gl[ 0 ][ 1 ], Gl[ 0 ][ 2 ], 1 );
+		pNew1->CP( i, 1 ) = CqVector4D( Gl[ 1 ][ 0 ], Gl[ 1 ][ 1 ], Gl[ 1 ][ 2 ], 1 );
+		pNew1->CP( i, 2 ) = CqVector4D( Gl[ 2 ][ 0 ], Gl[ 2 ][ 1 ], Gl[ 2 ][ 2 ], 1 );
+		pNew1->CP( i, 3 ) = CqVector4D( Gl[ 3 ][ 0 ], Gl[ 3 ][ 1 ], Gl[ 3 ][ 2 ], 1 );
 
-		pmResult->CP( i, 0 ) = CqVector4D( Gr[ 0 ][ 0 ], Gr[ 0 ][ 1 ], Gr[ 0 ][ 2 ], 1 );
-		pmResult->CP( i, 1 ) = CqVector4D( Gr[ 1 ][ 0 ], Gr[ 1 ][ 1 ], Gr[ 1 ][ 2 ], 1 );
-		pmResult->CP( i, 2 ) = CqVector4D( Gr[ 2 ][ 0 ], Gr[ 2 ][ 1 ], Gr[ 2 ][ 2 ], 1 );
-		pmResult->CP( i, 3 ) = CqVector4D( Gr[ 3 ][ 0 ], Gr[ 3 ][ 1 ], Gr[ 3 ][ 2 ], 1 );
+		pNew2->CP( i, 0 ) = CqVector4D( Gr[ 0 ][ 0 ], Gr[ 0 ][ 1 ], Gr[ 0 ][ 2 ], 1 );
+		pNew2->CP( i, 1 ) = CqVector4D( Gr[ 1 ][ 0 ], Gr[ 1 ][ 1 ], Gr[ 1 ][ 2 ], 1 );
+		pNew2->CP( i, 2 ) = CqVector4D( Gr[ 2 ][ 0 ], Gr[ 2 ][ 1 ], Gr[ 2 ][ 2 ], 1 );
+		pNew2->CP( i, 3 ) = CqVector4D( Gr[ 3 ][ 0 ], Gr[ 3 ][ 1 ], Gr[ 3 ][ 2 ], 1 );
 	}
 
 	// Subdivide the normals
-	if ( USES( Uses(), EnvVars_N ) && bHasN() ) N().uSubdivide( &pmResult->N() );
+	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
+	{
+		pNew1->N() = N();
+		pNew1->N().uSubdivide( &pNew2->N() );
+	}
 
-	// Subdivide the u/v vectors
-	if ( USES( Uses(), EnvVars_u ) && bHasu() ) u().uSubdivide( &pmResult->u() );
-	if ( USES( Uses(), EnvVars_v ) && bHasv() ) v().uSubdivide( &pmResult->v() );
-
-	// Subdivide the s/t vectors
-	if ( USES( Uses(), EnvVars_s ) && bHass() ) s().uSubdivide( &pmResult->s() );
-	if ( USES( Uses(), EnvVars_t ) && bHast() ) t().uSubdivide( &pmResult->t() );
-
-	// Subdivide the colors
-	if ( USES( Uses(), EnvVars_Cs ) && bHasCs() ) Cs().uSubdivide( &pmResult->Cs() );
-	if ( USES( Uses(), EnvVars_Os ) && bHasOs() ) Os().uSubdivide( &pmResult->Os() );
-
-	uSubdivideUserParameters( pmResult );
-
-	return ( pmResult );
+	uSubdivideUserParameters( pNew1, pNew2 );
 }
 
 
@@ -368,7 +359,7 @@ CqSurfacePatchBicubic* CqSurfacePatchBicubic::uSubdivide()
 /** Subdivide a bicubic patch in the v direction, return the top side.
  */
 
-CqSurfacePatchBicubic* CqSurfacePatchBicubic::vSubdivide()
+void CqSurfacePatchBicubic::vSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfacePatchBicubic* pNew2 )
 {
 	TqFloat	aDlb[ 16 ] = {
 	                         8, 0, 0, 0,
@@ -389,12 +380,13 @@ CqSurfacePatchBicubic* CqSurfacePatchBicubic::vSubdivide()
 	Dlb = ( 1.0f / 8.0f ) * Dlb;
 	Drb = ( 1.0f / 8.0f ) * Drb;
 
-	CqSurfacePatchBicubic* pmResult = new CqSurfacePatchBicubic( *this );
-
 	// Create the geometry matrix and storage area for the left and right split matrices.
 	CqMatrix	G;
 	CqMatrix	Gl;
 	CqMatrix	Gr;
+
+	pNew1->P().SetSize( cVertex() );
+	pNew2->P().SetSize( cVertex() );
 
 	TqInt i;
 	for ( i = 0; i < 4; i++ )
@@ -408,36 +400,25 @@ CqSurfacePatchBicubic* CqSurfacePatchBicubic::vSubdivide()
 		Gl = ( G * Dlb );
 		Gr = ( G * Drb );
 
-		CP( 0, i ) = CqVector4D( Gl[ 0 ][ 0 ], Gl[ 0 ][ 1 ], Gl[ 0 ][ 2 ], 1 );
-		CP( 1, i ) = CqVector4D( Gl[ 1 ][ 0 ], Gl[ 1 ][ 1 ], Gl[ 1 ][ 2 ], 1 );
-		CP( 2, i ) = CqVector4D( Gl[ 2 ][ 0 ], Gl[ 2 ][ 1 ], Gl[ 2 ][ 2 ], 1 );
-		CP( 3, i ) = CqVector4D( Gl[ 3 ][ 0 ], Gl[ 3 ][ 1 ], Gl[ 3 ][ 2 ], 1 );
+		pNew1->CP( 0, i ) = CqVector4D( Gl[ 0 ][ 0 ], Gl[ 0 ][ 1 ], Gl[ 0 ][ 2 ], 1 );
+		pNew1->CP( 1, i ) = CqVector4D( Gl[ 1 ][ 0 ], Gl[ 1 ][ 1 ], Gl[ 1 ][ 2 ], 1 );
+		pNew1->CP( 2, i ) = CqVector4D( Gl[ 2 ][ 0 ], Gl[ 2 ][ 1 ], Gl[ 2 ][ 2 ], 1 );
+		pNew1->CP( 3, i ) = CqVector4D( Gl[ 3 ][ 0 ], Gl[ 3 ][ 1 ], Gl[ 3 ][ 2 ], 1 );
 
-		pmResult->CP( 0, i ) = CqVector4D( Gr[ 0 ][ 0 ], Gr[ 0 ][ 1 ], Gr[ 0 ][ 2 ], 1 );
-		pmResult->CP( 1, i ) = CqVector4D( Gr[ 1 ][ 0 ], Gr[ 1 ][ 1 ], Gr[ 1 ][ 2 ], 1 );
-		pmResult->CP( 2, i ) = CqVector4D( Gr[ 2 ][ 0 ], Gr[ 2 ][ 1 ], Gr[ 2 ][ 2 ], 1 );
-		pmResult->CP( 3, i ) = CqVector4D( Gr[ 3 ][ 0 ], Gr[ 3 ][ 1 ], Gr[ 3 ][ 2 ], 1 );
+		pNew2->CP( 0, i ) = CqVector4D( Gr[ 0 ][ 0 ], Gr[ 0 ][ 1 ], Gr[ 0 ][ 2 ], 1 );
+		pNew2->CP( 1, i ) = CqVector4D( Gr[ 1 ][ 0 ], Gr[ 1 ][ 1 ], Gr[ 1 ][ 2 ], 1 );
+		pNew2->CP( 2, i ) = CqVector4D( Gr[ 2 ][ 0 ], Gr[ 2 ][ 1 ], Gr[ 2 ][ 2 ], 1 );
+		pNew2->CP( 3, i ) = CqVector4D( Gr[ 3 ][ 0 ], Gr[ 3 ][ 1 ], Gr[ 3 ][ 2 ], 1 );
 	}
 
 	// Subdivide the normals
-	if ( USES( Uses(), EnvVars_N ) && bHasN() ) N().vSubdivide( &pmResult->N() );
+	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
+	{
+		pNew1->N() = N();
+		pNew1->N().vSubdivide( &pNew2->N() );
+	}
 
-	// Subdivide the u/v vectors
-	if ( USES( Uses(), EnvVars_u ) && bHasu() ) u().vSubdivide( &pmResult->u() );
-	if ( USES( Uses(), EnvVars_v ) && bHasv() ) v().vSubdivide( &pmResult->v() );
-
-
-	// Subdivide the s/t vectors
-	if ( USES( Uses(), EnvVars_s ) && bHass() ) s().vSubdivide( &pmResult->s() );
-	if ( USES( Uses(), EnvVars_t ) && bHast() ) t().vSubdivide( &pmResult->t() );
-
-	// Subdivide the colors
-	if ( USES( Uses(), EnvVars_Cs ) && bHasCs() ) Cs().vSubdivide( &pmResult->Cs() );
-	if ( USES( Uses(), EnvVars_Os ) && bHasOs() ) Os().vSubdivide( &pmResult->Os() );
-
-	vSubdivideUserParameters( pmResult );
-
-	return ( pmResult );
+	vSubdivideUserParameters( pNew1, pNew2 );
 }
 
 
@@ -509,62 +490,41 @@ TqInt CqSurfacePatchBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 	TqInt cSplits = 0;
 
 	// Split the surface in u or v
-	CqSurfacePatchBicubic * pNew1 = new CqSurfacePatchBicubic( *this );
-	CqSurfacePatchBicubic * pNew2;
+	CqSurfacePatchBicubic * pNew1 = new CqSurfacePatchBicubic;
+	CqSurfacePatchBicubic * pNew2 = new CqSurfacePatchBicubic;
 
 	// If this primitive is being split because it spans the e and hither planes, then
 	// we should split in both directions to ensure we overcome the crossing.
 	if ( m_SplitDir == SplitDir_U )
-		pNew2 = pNew1->uSubdivide();
+		uSubdivide(pNew1, pNew2);
 	else
-		pNew2 = pNew1->vSubdivide();
+		vSubdivide(pNew1, pNew2);
 
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_SplitDir = m_SplitDir;
-	pNew2->m_SplitDir = m_SplitDir;
+	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
+	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
 	pNew1->m_EyeSplitCount = m_EyeSplitCount;
 	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 	pNew1->AddRef();
 	pNew2->AddRef();
 
-	aSplits.push_back( pNew1 );
-	aSplits.push_back( pNew2 );
-
-	cSplits += 2;
-
 	if ( !m_fDiceable)
 	{
-		CqSurfacePatchBicubic * pNew3, * pNew4;
-
-		if ( m_SplitDir == SplitDir_U)
-		{
-			pNew3 = pNew1->vSubdivide();
-			pNew4 = pNew2->vSubdivide();
-		}
-		else
-		{
-			pNew3 = pNew1->uSubdivide();
-			pNew4 = pNew2->uSubdivide();
-		}
-
-		pNew3->SetSurfaceParameters( *this );
-		pNew4->SetSurfaceParameters( *this );
-		pNew3->m_fDiceable = TqTrue;
-		pNew4->m_fDiceable = TqTrue;
-		pNew3->m_EyeSplitCount = m_EyeSplitCount;
-		pNew4->m_EyeSplitCount = m_EyeSplitCount;
-		pNew3->AddRef();
-		pNew4->AddRef();
-
-		aSplits.push_back( pNew3 );
-		aSplits.push_back( pNew4 );
+		cSplits += pNew1->Split( aSplits );
+		cSplits += pNew2->Split( aSplits );
+		pNew1->Release();
+		pNew2->Release();
+	}
+	else
+	{
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
 
 		cSplits += 2;
 	}
-
 	return ( cSplits );
 }
 
@@ -845,31 +805,23 @@ void CqSurfacePatchBilinear::GenerateGeometricNormals( TqInt uDiceSize, TqInt vD
 /** Subdivide a bicubic patch in the u direction, return the left side.
  */
 
-CqSurfacePatchBilinear* CqSurfacePatchBilinear::uSubdivide()
+void CqSurfacePatchBilinear::uSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfacePatchBilinear* pNew2 )
 {
-	CqSurfacePatchBilinear * pmResult = new CqSurfacePatchBilinear( *this );
-
+	pNew1->P().SetSize( cVertex() );
+	pNew2->P().SetSize( cVertex() );
 	// Subdivide the vertices
-	P().uSubdivide( &pmResult->P() );
+	pNew1->P() = P();
+	pNew2->P() = P();
+	pNew1->P().uSubdivide( &pNew2->P() );
 
 	// Subdivide the normals
-	if ( USES( Uses(), EnvVars_N ) && bHasN() ) N().uSubdivide( &pmResult->N() );
+	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
+	{
+		pNew1->N() = N();
+		pNew1->N().uSubdivide( &pNew2->N() );
+	}
 
-	// Subdivide the u/v vectors
-	if ( USES( Uses(), EnvVars_u ) && bHasu() ) u().uSubdivide( &pmResult->u() );
-	if ( USES( Uses(), EnvVars_v ) && bHasv() ) v().uSubdivide( &pmResult->v() );
-
-	// Subdivide the s/t vectors
-	if ( USES( Uses(), EnvVars_s ) && bHass() ) s().uSubdivide( &pmResult->s() );
-	if ( USES( Uses(), EnvVars_t ) && bHast() ) t().uSubdivide( &pmResult->t() );
-
-	// Subdivide the colors
-	if ( USES( Uses(), EnvVars_Cs ) && bHasCs() ) Cs().uSubdivide( &pmResult->Cs() );
-	if ( USES( Uses(), EnvVars_Os ) && bHasOs() ) Os().uSubdivide( &pmResult->Os() );
-
-	uSubdivideUserParameters( pmResult );
-
-	return ( pmResult );
+	uSubdivideUserParameters( pNew1, pNew2 );
 }
 
 
@@ -877,31 +829,23 @@ CqSurfacePatchBilinear* CqSurfacePatchBilinear::uSubdivide()
 /** Subdivide a bicubic patch in the v direction, return the top side.
  */
 
-CqSurfacePatchBilinear* CqSurfacePatchBilinear::vSubdivide()
+void CqSurfacePatchBilinear::vSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfacePatchBilinear* pNew2 )
 {
-	CqSurfacePatchBilinear * pmResult = new CqSurfacePatchBilinear( *this );
-
+	pNew1->P().SetSize( cVertex() );
+	pNew2->P().SetSize( cVertex() );
 	// Subdivide the vertices.
-	P().vSubdivide( &pmResult->P() );
+	pNew1->P() = P();
+	pNew2->P() = P();
+	pNew1->P().vSubdivide( &pNew2->P() );
 
 	// Subdivide the normals
-	if ( USES( Uses(), EnvVars_N ) && bHasN() ) N().vSubdivide( &pmResult->N() );
+	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
+	{
+		pNew1->N() = N();
+		pNew1->N().vSubdivide( &pNew2->N() );
+	}
 
-	// Subdivide the u/v vectors
-	if ( USES( Uses(), EnvVars_u ) && bHasu() ) u().vSubdivide( &pmResult->u() );
-	if ( USES( Uses(), EnvVars_v ) && bHasv() ) v().vSubdivide( &pmResult->v() );
-
-	// Subdivide the s/t vectors
-	if ( USES( Uses(), EnvVars_s ) && bHass() ) s().vSubdivide( &pmResult->s() );
-	if ( USES( Uses(), EnvVars_t ) && bHast() ) t().vSubdivide( &pmResult->t() );
-
-	// Subdivide the colors
-	if ( USES( Uses(), EnvVars_Cs ) && bHasCs() ) Cs().vSubdivide( &pmResult->Cs() );
-	if ( USES( Uses(), EnvVars_Os ) && bHasOs() ) Os().vSubdivide( &pmResult->Os() );
-
-	vSubdivideUserParameters( pmResult );
-
-	return ( pmResult );
+	vSubdivideUserParameters( pNew1, pNew2 );
 }
 
 
@@ -965,20 +909,20 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 	TqInt cSplits = 0;
 
 	// Split the surface in u or v
-	CqSurfacePatchBilinear * pNew1 = new CqSurfacePatchBilinear( *this );
-	CqSurfacePatchBilinear* pNew2;
+	CqSurfacePatchBilinear* pNew1 = new CqSurfacePatchBilinear;
+	CqSurfacePatchBilinear* pNew2 = new CqSurfacePatchBilinear;
 
 	if ( m_SplitDir == SplitDir_U )
-		pNew2 = pNew1->uSubdivide();
+		uSubdivide(pNew1, pNew2);
 	else
-		pNew2 = pNew1->vSubdivide();
+		vSubdivide(pNew1, pNew2);
 
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_SplitDir = m_SplitDir;
-	pNew2->m_SplitDir = m_SplitDir;
+	pNew1->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
+	pNew2->m_SplitDir = (m_SplitDir == SplitDir_U)? SplitDir_V:SplitDir_U;
 	pNew1->m_EyeSplitCount = m_EyeSplitCount;
 	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 	pNew1->AddRef();
@@ -986,34 +930,10 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	if( !m_fDiceable )
 	{
-		CqSurfacePatchBilinear * pNew3, * pNew4;
-		
-		if ( m_SplitDir == SplitDir_U)
-		{
-			pNew3 = pNew1->vSubdivide();
-			pNew4 = pNew2->vSubdivide();
-		}
-		else
-		{
-			pNew3 = pNew1->uSubdivide();
-			pNew4 = pNew2->uSubdivide();
-		}
-
-		pNew3->SetSurfaceParameters( *this );
-		pNew4->SetSurfaceParameters( *this );
-		pNew3->m_fDiceable = TqTrue;
-		pNew4->m_fDiceable = TqTrue;
-		pNew3->m_EyeSplitCount = m_EyeSplitCount;
-		pNew4->m_EyeSplitCount = m_EyeSplitCount;
-		pNew3->AddRef();
-		pNew4->AddRef();
-
-		aSplits.push_back( pNew1 );
-		aSplits.push_back( pNew2 );
-		aSplits.push_back( pNew3 );
-		aSplits.push_back( pNew4 );
-
-		cSplits += 4;
+		cSplits += pNew1->Split( aSplits );
+		cSplits += pNew2->Split( aSplits );
+		pNew1->Release();
+		pNew2->Release();
 	}
 	else
 	{
@@ -1246,7 +1166,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 			CqSurfacePatchBicubic*	pSurface = new CqSurfacePatchBicubic();
 			pSurface->AddRef();
 			pSurface->SetSurfaceParameters( *this );
-			pSurface->SetDefaultPrimitiveVariables();
+//			pSurface->SetDefaultPrimitiveVariables();
 			pSurface->P().SetSize( pSurface->cVertex() );
 			RtInt v;
 			for ( v = 0; v < 4; v++ )
@@ -1260,88 +1180,11 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 				iP = PatchCoord( vRow + v, uCol + 3 );
 				pSurface->P() [ ( v * 4 ) + 3 ] = P() [ iP ];
 			}
-			// Fill in the surface parameters for the mesh.
-			if ( USES( MyUses, EnvVars_u ) )
-			{
-				pSurface->u().SetSize( 4 );
-				pSurface->u() [ 0 ] = up;
-				pSurface->u() [ 1 ] = up + du;
-				pSurface->u() [ 2 ] = up;
-				pSurface->u() [ 3 ] = up + du;
-			}
 
-			if ( USES( MyUses, EnvVars_v ) )
-			{
- 				pSurface->v().SetSize( 4 );
-				pSurface->v() [ 0 ] = vp;
-				pSurface->v() [ 1 ] = vp;
-				pSurface->v() [ 2 ] = vp + dv;
-				pSurface->v() [ 3 ] = vp + dv;
-			}
-
-			// Fill in the texture coordinates for the mesh.
-			// Use the attribute texture coordinates of none explicitly specified.
-			// If any textures coordinates have been sxplicilty specified, they override the
-			// attribute level settings.
 			RtInt iTa = PatchCorner( i, j );
 			RtInt iTb = PatchCorner( i, j + 1 );
 			RtInt iTc = PatchCorner( i + 1, j );
 			RtInt iTd = PatchCorner( i + 1, j + 1 );
-			if ( USES( MyUses, EnvVars_s ) )
-			{
-				pSurface->s().SetSize( 4 );
-				if ( bHass() )
-				{
-					pSurface->s() [ 0 ] = s() [ iTa ];
-					pSurface->s() [ 1 ] = s() [ iTb ];
-					pSurface->s() [ 2 ] = s() [ iTc ];
-					pSurface->s() [ 3 ] = s() [ iTd ];
-				}
-				else
-				{
-					pSurface->s() [ 0 ] = BilinearEvaluate<RtFloat>( st1.x(), st2.x(), st3.x(), st4.x(), up, vp );
-					pSurface->s() [ 1 ] = BilinearEvaluate<RtFloat>( st1.x(), st2.x(), st3.x(), st4.x(), up + du, vp );
-					pSurface->s() [ 2 ] = BilinearEvaluate<RtFloat>( st1.x(), st2.x(), st3.x(), st4.x(), up, vp + dv );
-					pSurface->s() [ 3 ] = BilinearEvaluate<RtFloat>( st1.x(), st2.x(), st3.x(), st4.x(), up + du, vp + dv );
-				}
-			}
-
-			if ( USES( MyUses, EnvVars_t ) )
-			{
-				pSurface->t().SetSize( 4 );
-				if ( bHast() )
-				{
-					pSurface->t() [ 0 ] = t() [ iTa ];
-					pSurface->t() [ 1 ] = t() [ iTb ];
-					pSurface->t() [ 2 ] = t() [ iTc ];
-					pSurface->t() [ 3 ] = t() [ iTd ];
-				}
-				else
-				{
-					pSurface->t() [ 0 ] = BilinearEvaluate<RtFloat>( st1.y(), st2.y(), st3.y(), st4.y(), up, vp );
-					pSurface->t() [ 1 ] = BilinearEvaluate<RtFloat>( st1.y(), st2.y(), st3.y(), st4.y(), up + du, vp );
-					pSurface->t() [ 2 ] = BilinearEvaluate<RtFloat>( st1.y(), st2.y(), st3.y(), st4.y(), up, vp + dv );
-					pSurface->t() [ 3 ] = BilinearEvaluate<RtFloat>( st1.y(), st2.y(), st3.y(), st4.y(), up + du, vp + dv );
-				}
-			}
-
-			if ( USES( MyUses, EnvVars_Cs ) && bHasCs() )
-			{
-				pSurface->Cs().SetSize( 4 );
-				pSurface->Cs() [ 0 ] = Cs() [ iTa ];
-				pSurface->Cs() [ 1 ] = Cs() [ iTb ];
-				pSurface->Cs() [ 2 ] = Cs() [ iTc ];
-				pSurface->Cs() [ 3 ] = Cs() [ iTd ];
-			}
-
-			if ( USES( MyUses, EnvVars_Os ) && bHasOs() )
-			{
-				pSurface->Os().SetSize( 4 );
-				pSurface->Os() [ 0 ] = Os() [ iTa ];
-				pSurface->Os() [ 1 ] = Os() [ iTb ];
-				pSurface->Os() [ 2 ] = Os() [ iTc ];
-				pSurface->Os() [ 3 ] = Os() [ iTd ];
-			}
 
 			// Copy any user specified primitive variables.
 			std::vector<CqParameter*>::iterator iUP;
@@ -1431,7 +1274,26 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 					}
 					break;
 				}
-				pSurface->aUserParams().push_back(pNewUP);
+				pSurface->AddPrimitiveVariable(pNewUP);
+			}
+
+			// Fill in the surface parameters for the mesh.
+			if ( USES( MyUses, EnvVars_u ) && bHasu() )
+			{
+				pSurface->u()->SetSize( 4 );
+				(*pSurface->u())[ 0 ] = up;
+				(*pSurface->u())[ 1 ] = up + du;
+				(*pSurface->u())[ 2 ] = up;
+				(*pSurface->u())[ 3 ] = up + du;
+			}
+
+			if ( USES( MyUses, EnvVars_v ) && bHasv() )
+			{
+ 				pSurface->v()->SetSize( 4 );
+				(*pSurface->v())[ 0 ] = vp;
+				(*pSurface->v())[ 1 ] = vp;
+				(*pSurface->v())[ 2 ] = vp + dv;
+				(*pSurface->v())[ 3 ] = vp + dv;
 			}
 
 			up += du;
@@ -1558,7 +1420,7 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 		RtInt j;
 		for ( j = 0; j < m_uPatches; j++ )
 		{
-			CqSurfacePatchBilinear*	pSurface = new CqSurfacePatchBilinear();
+			CqSurfacePatchBilinear*	pSurface = new CqSurfacePatchBilinear;
 			pSurface->AddRef();
 			pSurface->SetSurfaceParameters( *this );
 			pSurface->SetDefaultPrimitiveVariables();
@@ -1575,88 +1437,10 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 			iP = PatchCoord( i + 1, j + 1 );
 			pSurface->P() [ 3 ] = P() [ iP ];
 
-			// Fill in the surface parameters for the mesh.
-			if ( USES( MyUses, EnvVars_u ) )
-			{
-				pSurface->u().SetSize( 4 );
-				pSurface->u() [ 0 ] = up;
-				pSurface->u() [ 1 ] = up + du;
-				pSurface->u() [ 2 ] = up;
-				pSurface->u() [ 3 ] = up + du;
-			}
-
-			if ( USES( MyUses, EnvVars_v ) )
-			{
-				pSurface->v().SetSize( 4 );
-				pSurface->v() [ 0 ] = vp;
-				pSurface->v() [ 1 ] = vp;
-				pSurface->v() [ 2 ] = vp + dv;
-				pSurface->v() [ 3 ] = vp + dv;
-			}
-
-			// Fill in the texture coordinates for the mesh.
-			// If any textures coordinates have been sxplicilty specified, they override the
-			// attribute level settings.
 			RtInt iTa = PatchCoord( i, j );
 			RtInt iTb = PatchCoord( i, j + 1 );
 			RtInt iTc = PatchCoord( i + 1, j );
 			RtInt iTd = PatchCoord( i + 1, j + 1 );
-
-			if ( USES( MyUses, EnvVars_s ) )
-			{
-				pSurface->s().SetSize( 4 );
-				if ( bHass() )
-				{
-					pSurface->s() [ 0 ] = s() [ iTa ];
-					pSurface->s() [ 1 ] = s() [ iTb ];
-					pSurface->s() [ 2 ] = s() [ iTc ];
-					pSurface->s() [ 3 ] = s() [ iTd ];
-				}
-				else
-				{
-					pSurface->s() [ 0 ] = BilinearEvaluate<RtFloat>( st1.x(), st2.x(), st3.x(), st4.x(), up, vp );
-					pSurface->s() [ 1 ] = BilinearEvaluate<RtFloat>( st1.x(), st2.x(), st3.x(), st4.x(), up + du, vp );
-					pSurface->s() [ 2 ] = BilinearEvaluate<RtFloat>( st1.x(), st2.x(), st3.x(), st4.x(), up, vp + dv );
-					pSurface->s() [ 3 ] = BilinearEvaluate<RtFloat>( st1.x(), st2.x(), st3.x(), st4.x(), up + du, vp + dv );
-				}
-			}
-
-			if ( USES( MyUses, EnvVars_t ) )
-			{
-				pSurface->t().SetSize( 4 );
-				if ( bHast() )
-				{
-					pSurface->t() [ 0 ] = t() [ iTa ];
-					pSurface->t() [ 1 ] = t() [ iTb ];
-					pSurface->t() [ 2 ] = t() [ iTc ];
-					pSurface->t() [ 3 ] = t() [ iTd ];
-				}
-				else
-				{
-					pSurface->t() [ 0 ] = BilinearEvaluate<RtFloat>( st1.y(), st2.y(), st3.y(), st4.y(), up, vp );
-					pSurface->t() [ 1 ] = BilinearEvaluate<RtFloat>( st1.y(), st2.y(), st3.y(), st4.y(), up + du, vp );
-					pSurface->t() [ 2 ] = BilinearEvaluate<RtFloat>( st1.y(), st2.y(), st3.y(), st4.y(), up, vp + dv );
-					pSurface->t() [ 3 ] = BilinearEvaluate<RtFloat>( st1.y(), st2.y(), st3.y(), st4.y(), up + du, vp + dv );
-				}
-			}
-
-			if ( USES( pSurface->Uses(), EnvVars_Cs ) && bHasCs() )
-			{
-				pSurface->Cs().SetSize( 4 );
-				pSurface->Cs() [ 0 ] = Cs() [ iTa ];
-				pSurface->Cs() [ 1 ] = Cs() [ iTb ];
-				pSurface->Cs() [ 2 ] = Cs() [ iTc ];
-				pSurface->Cs() [ 3 ] = Cs() [ iTd ];
-			}
-
-			if ( USES( pSurface->Uses(), EnvVars_Os ) && bHasOs() )
-			{
-				pSurface->Os().SetSize( 4 );
-				pSurface->Os() [ 0 ] = Os() [ iTa ];
-				pSurface->Os() [ 1 ] = Os() [ iTb ];
-				pSurface->Os() [ 2 ] = Os() [ iTc ];
-				pSurface->Os() [ 3 ] = Os() [ iTd ];
-			}
 
 			// Copy any user specified primitive variables.
 			std::vector<CqParameter*>::iterator iUP;
@@ -1746,7 +1530,26 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 					}
 					break;
 				}
-				pSurface->aUserParams().push_back(pNewUP);
+				pSurface->AddPrimitiveVariable(pNewUP);
+			}
+
+			// Fill in the surface parameters for the mesh.
+			if ( USES( MyUses, EnvVars_u ) && bHasu() )
+			{
+				pSurface->u()->SetSize( 4 );
+				(*pSurface->u())[ 0 ] = up;
+				(*pSurface->u())[ 1 ] = up + du;
+				(*pSurface->u())[ 2 ] = up;
+				(*pSurface->u())[ 3 ] = up + du;
+			}
+
+			if ( USES( MyUses, EnvVars_v ) && bHasv() )
+			{
+				pSurface->v()->SetSize( 4 );
+				(*pSurface->v())[ 0 ] = vp;
+				(*pSurface->v())[ 1 ] = vp;
+				(*pSurface->v())[ 2 ] = vp + dv;
+				(*pSurface->v())[ 3 ] = vp + dv;
 			}
 
 			up += du;

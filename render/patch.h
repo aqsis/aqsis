@@ -86,8 +86,8 @@ class CqSurfacePatchBicubic : public CqSurface
 		}
 		CqSurfacePatchBicubic& operator=( const CqSurfacePatchBicubic& From );
 
-		CqSurfacePatchBicubic*	uSubdivide();
-		CqSurfacePatchBicubic*	vSubdivide();
+		void uSubdivide(CqSurfacePatchBicubic* pNew1, CqSurfacePatchBicubic* pNew2);
+		void vSubdivide(CqSurfacePatchBicubic* pNew1, CqSurfacePatchBicubic* pNew2);
 
 		virtual	CqBound	Bound() const;
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
@@ -158,8 +158,8 @@ class _qShareC CqSurfacePatchBilinear : public CqSurface
 		CqSurfacePatchBilinear& operator=( const CqSurfacePatchBilinear& From );
 
 		void	GenNormals();
-		CqSurfacePatchBilinear*	uSubdivide();
-		CqSurfacePatchBilinear*	vSubdivide();
+		void	uSubdivide(CqSurfacePatchBilinear* pNew1, CqSurfacePatchBilinear* pNew2);
+		void	vSubdivide(CqSurfacePatchBilinear* pNew1, CqSurfacePatchBilinear* pNew2);
 
 		virtual	CqBound	Bound() const;
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );

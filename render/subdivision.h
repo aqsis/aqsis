@@ -852,29 +852,29 @@ class CqSubdivider
 		 */
 		TqFloat	Subds( CqPolygonPoints* pPoints, TqInt index )
 		{
-			assert( static_cast<TqUint>( index ) < pPoints->s().Size() );
-			return ( pPoints->s() [ index ] );
+			assert( static_cast<TqUint>( index ) < pPoints->s()->Size() );
+			return ( (*pPoints->s())[ index ] );
 		}
 		/** Get an indexed t value from the specified points storage class.
 		 */
 		TqFloat	Subdt( CqPolygonPoints* pPoints, TqInt index )
 		{
-			assert( static_cast<TqUint>( index ) < pPoints->t().Size() );
-			return ( pPoints->t() [ index ] );
+			assert( static_cast<TqUint>( index ) < pPoints->t()->Size() );
+			return ( (*pPoints->t())[ index ] );
 		}
 		/** Get an indexed Cs value from the specified points storage class.
 		 */
 		CqColor	SubdCs( CqPolygonPoints* pPoints, TqInt index )
 		{
-			assert( static_cast<TqUint>( index ) < pPoints->Cs().Size() );
-			return ( pPoints->Cs() [ index ] );
+			assert( static_cast<TqUint>( index ) < pPoints->Cs()->Size() );
+			return ( (*pPoints->Cs())[ index ] );
 		}
 		/** Get an indexed Os value from the specified points storage class.
 		 */
 		CqColor	SubdOs( CqPolygonPoints* pPoints, TqInt index )
 		{
-			assert( static_cast<TqUint>( index ) < pPoints->Os().Size() );
-			return ( pPoints->Os() [ index ] );
+			assert( static_cast<TqUint>( index ) < pPoints->Os()->Size() );
+			return ( (*pPoints->Os())[ index ] );
 		}
 
 		void	Subdivide();
@@ -1032,27 +1032,27 @@ class CqWSurf : public CqSubdivider, public CqBasicSurface
 		}
 		virtual	TqBool	bHasCs() const
 		{
-			return ( m_pPoints->Cs().Size() >= cVarying() );
+			return ( m_pPoints->bHasCs() );
 		}
 		virtual	TqBool	bHasOs() const
 		{
-			return ( m_pPoints->Os().Size() >= cVarying() );
+			return ( m_pPoints->bHasOs() );
 		}
 		virtual	TqBool	bHass() const
 		{
-			return ( m_pPoints->s().Size() >= cVarying() );
+			return ( m_pPoints->bHass() );
 		}
 		virtual	TqBool	bHast() const
 		{
-			return ( m_pPoints->t().Size() >= cVarying() );
+			return ( m_pPoints->bHast() );
 		}
 		virtual	TqBool	bHasu() const
 		{
-			return ( m_pPoints->u().Size() >= cVarying() );
+			return ( m_pPoints->bHasu() );
 		}
 		virtual	TqBool	bHasv() const
 		{
-			return ( m_pPoints->v().Size() >= cVarying() );
+			return ( m_pPoints->bHasv() );
 		}
 
 	protected:

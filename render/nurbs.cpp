@@ -857,12 +857,12 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 
 		// Initialise storage for u/v/s/t/Cs/Os/N and and user primitive variables.
 		if ( USES( lUses, EnvVars_N  ) && bHasN() ) S[ i ]->N().SetSize(4);
-		if ( USES( lUses, EnvVars_u  ) ) S[ i ]->u().SetSize(4);
-		if ( USES( lUses, EnvVars_v  ) ) S[ i ]->v().SetSize(4);
-		if ( USES( lUses, EnvVars_s  ) ) S[ i ]->s().SetSize(4);
-		if ( USES( lUses, EnvVars_t  ) ) S[ i ]->t().SetSize(4);
-		if ( USES( lUses, EnvVars_Cs ) && bHasCs() ) S[ i ]->Cs().SetSize(4);
-		if ( USES( lUses, EnvVars_Os ) && bHasOs() ) S[ i ]->Os().SetSize(4);
+		if ( USES( lUses, EnvVars_u  ) && bHasu() ) S[ i ]->u()->SetSize(4);
+		if ( USES( lUses, EnvVars_v  ) && bHasv() ) S[ i ]->v()->SetSize(4);
+		if ( USES( lUses, EnvVars_s  ) && bHass() ) S[ i ]->s()->SetSize(4);
+		if ( USES( lUses, EnvVars_t  ) && bHast() ) S[ i ]->t()->SetSize(4);
+		if ( USES( lUses, EnvVars_Cs ) && bHasCs() ) S[ i ]->Cs()->SetSize(4);
+		if ( USES( lUses, EnvVars_Os ) && bHasOs() ) S[ i ]->Os()->SetSize(4);
 	}
 
 	nb = 0;
@@ -974,13 +974,13 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 			{
 				if( bHasCs() )
 				{
-					S[ iPatch ]->Cs()[ 0 ] = Cs()[ iA ];
-					S[ iPatch ]->Cs()[ 1 ] = Cs()[ iB ];
-					S[ iPatch ]->Cs()[ 2 ] = Cs()[ iC ];
-					S[ iPatch ]->Cs()[ 3 ] = Cs()[ iD ];
+					(*S[ iPatch ]->Cs())[ 0 ] = (*Cs())[ iA ];
+					(*S[ iPatch ]->Cs())[ 1 ] = (*Cs())[ iB ];
+					(*S[ iPatch ]->Cs())[ 2 ] = (*Cs())[ iC ];
+					(*S[ iPatch ]->Cs())[ 3 ] = (*Cs())[ iD ];
 				}
 				else
-					S[ iPatch ]->Cs() = Cs();
+					(*S[ iPatch ]->Cs()) = (*Cs());
 			}
 
 			if( USES( lUses, EnvVars_Os ) )
@@ -993,7 +993,7 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 					S[ iPatch ]->Os()[ 3 ] = Os()[ iD ];
 				}
 				else
-					S[ iPatch ]->Os() = Os();
+					(*S[ iPatch ]->Os()) = (*Os());
 			}
 
 			std::vector<CqParameter*>::iterator iUP;
@@ -1331,19 +1331,7 @@ void CqSurfaceNURBS::uSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 	// Subdivide the normals
 	if ( USES( Uses(), EnvVars_N ) ) pnrbA->N().uSubdivide( &pnrbB->N() );
 
-	// Subdivide the u/v vectors
-	if ( USES( Uses(), EnvVars_u ) ) pnrbA->u().uSubdivide( &pnrbB->u() );
-	if ( USES( Uses(), EnvVars_v ) ) pnrbA->v().uSubdivide( &pnrbB->v() );
-
-	// Subdivide the s/t vectors
-	if ( USES( Uses(), EnvVars_s ) ) pnrbA->s().uSubdivide( &pnrbB->s() );
-	if ( USES( Uses(), EnvVars_t ) ) pnrbA->t().uSubdivide( &pnrbB->t() );
-
-	// Subdivide the colors
-	if ( USES( Uses(), EnvVars_Cs ) ) pnrbA->Cs().uSubdivide( &pnrbB->Cs() );
-	if ( USES( Uses(), EnvVars_Os ) ) pnrbA->Os().uSubdivide( &pnrbB->Os() );
-
-	pnrbA->uSubdivideUserParameters( pnrbB );
+	uSubdivideUserParameters( pnrbA, pnrbB );
 }
 
 
@@ -1360,19 +1348,7 @@ void CqSurfaceNURBS::vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 	// Subdivide the normals
 	if ( USES( Uses(), EnvVars_N ) ) pnrbA->N().vSubdivide( &pnrbB->N() );
 
-	// Subdivide the u/v vectors
-	if ( USES( Uses(), EnvVars_u ) ) pnrbA->u().vSubdivide( &pnrbB->u() );
-	if ( USES( Uses(), EnvVars_v ) ) pnrbA->v().vSubdivide( &pnrbB->v() );
-
-	// Subdivide the s/t vectors
-	if ( USES( Uses(), EnvVars_s ) ) pnrbA->s().vSubdivide( &pnrbB->s() );
-	if ( USES( Uses(), EnvVars_t ) ) pnrbA->t().vSubdivide( &pnrbB->t() );
-
-	// Subdivide the colors
-	if ( USES( Uses(), EnvVars_Cs ) ) pnrbA->Cs().vSubdivide( &pnrbB->Cs() );
-	if ( USES( Uses(), EnvVars_Os ) ) pnrbA->Os().vSubdivide( &pnrbB->Os() );
-
-	pnrbA->vSubdivideUserParameters( pnrbB );
+	vSubdivideUserParameters( pnrbA, pnrbB );
 }
 
 

@@ -90,25 +90,6 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		virtual	void	Reset()
 	{}
 
-		/** Transform this GPrim using the specified matrices.
-		 * \param matTx Reference to the transformation matrix.
-		 * \param matITTx Reference to the inverse transpose of the transformation matrix, used to transform normals.
-		 * \param matRTx Reference to the rotation only transformation matrix, used to transform vectors.
-		 */
-		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx ) = 0;
-		/** Get the number of uniform parameters required for this GPrim.
-		 */
-		virtual	TqUint	cUniform() const = 0;
-		/** Get the number of varying parameters required for this GPrim.
-		 */
-		virtual	TqUint	cVarying() const = 0;
-		/** Get the number of vertex parameters required for this GPrim.
-		 */
-		virtual	TqUint	cVertex() const = 0;
-		/** Get the number of facearying parameters required for this GPrim.
-		 */
-		virtual	TqUint	cFaceVarying() const = 0;
-
 		virtual CqString	strName() const;
 		virtual	TqInt	Uses() const;
 
@@ -258,39 +239,57 @@ class _qShareC CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to Cq default parameter.
 		 */
-		CqParameterTypedVarying<CqColor, type_color, CqColor>& Cs()
+		CqParameterTypedVarying<CqColor, type_color, CqColor>* Cs()
 		{
-			return ( m_Cs );
+			if( m_aiStdPrimitiveVars[ EnvVars_Cs ] >= 0 )
+				return( static_cast<CqParameterTypedVarying<CqColor, type_color, CqColor>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Cs ] ] ) );
+			else
+				return( NULL );
 		}
 		/** Get a reference the to Os default parameter.
 		 */
-		CqParameterTypedVarying<CqColor, type_color, CqColor>& Os()
+		CqParameterTypedVarying<CqColor, type_color, CqColor>* Os()
 		{
-			return ( m_Os );
+			if( m_aiStdPrimitiveVars[ EnvVars_Os ] >= 0 )
+				return( static_cast<CqParameterTypedVarying<CqColor, type_color, CqColor>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Os ] ] ) );
+			else
+				return( NULL );
 		}
 		/** Get a reference the to s default parameter.
 		 */
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>& s()
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* s()
 		{
-			return ( m_s );
+			if( m_aiStdPrimitiveVars[ EnvVars_s ] >= 0 )
+				return( static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_s ] ] ) );
+			else
+				return( NULL );
 		}
 		/** Get a reference the to t default parameter.
 		 */
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>& t()
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* t()
 		{
-			return ( m_t );
+			if( m_aiStdPrimitiveVars[ EnvVars_t ] >= 0 )
+				return( static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_t ] ] ) );
+			else
+				return( NULL );
 		}
 		/** Get a reference the to u default parameter.
 		 */
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>& u()
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* u()
 		{
-			return ( m_u );
+			if( m_aiStdPrimitiveVars[ EnvVars_u ] >= 0 )
+				return( static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_u ] ] ) );
+			else
+				return( NULL );
 		}
 		/** Get a reference the to v default parameter.
 		 */
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>& v()
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* v()
 		{
-			return ( m_v );
+			if( m_aiStdPrimitiveVars[ EnvVars_v ] >= 0 )
+				return( static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_v ] ] ) );
+			else
+				return( NULL );
 		}
 
 		/** Get a reference the to P default parameter.
@@ -307,39 +306,57 @@ class _qShareC CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to Cq default parameter.
 		 */
-		const	CqParameterTypedVarying<CqColor, type_color, CqColor>& Cs() const
+		const	CqParameterTypedVarying<CqColor, type_color, CqColor>* Cs() const
 		{
-			return ( m_Cs );
+			if( m_aiStdPrimitiveVars[ EnvVars_Cs ] >= 0 )
+				return( static_cast<const CqParameterTypedVarying<CqColor, type_color, CqColor>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Cs ] ] ) );
+			else
+				return( NULL );
 		}
 		/** Get a reference the to Os default parameter.
 		 */
-		const	CqParameterTypedVarying<CqColor, type_color, CqColor>& Os() const
+		const	CqParameterTypedVarying<CqColor, type_color, CqColor>* Os() const
 		{
-			return ( m_Os );
+			if( m_aiStdPrimitiveVars[ EnvVars_Os ] >= 0 )
+				return( static_cast<const CqParameterTypedVarying<CqColor, type_color, CqColor>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Os ] ] ) );
+			else
+				return( NULL );
 		}
 		/** Get a reference the to s default parameter.
 		 */
-		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>& s() const
+		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* s() const
 		{
-			return ( m_s );
+			if( m_aiStdPrimitiveVars[ EnvVars_s ] >= 0 )
+				return( static_cast<const CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_s ] ] ) );
+			else
+				return( NULL );
 		}
 		/** Get a reference the to t default parameter.
 		 */
-		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>& t() const
+		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* t() const
 		{
-			return ( m_t );
+			if( m_aiStdPrimitiveVars[ EnvVars_t ] >= 0 )
+				return( static_cast<const CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_t ] ] ) );
+			else
+				return( NULL );
 		}
 		/** Get a reference the to u default parameter.
 		 */
-		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>& u() const
+		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* u() const
 		{
-			return ( m_u );
+			if( m_aiStdPrimitiveVars[ EnvVars_u ] >= 0 )
+				return( static_cast<const CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_u ] ] ) );
+			else
+				return( NULL );
 		}
 		/** Get a reference the to v default parameter.
 		 */
-		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>& v() const
+		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* v() const
 		{
-			return ( m_v );
+			if( m_aiStdPrimitiveVars[ EnvVars_v ] >= 0 )
+				return( static_cast<const CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_v ] ] ) );
+			else
+				return( NULL );
 		}
 
 		/** Determine whether this surface has per vertex normals.
@@ -352,37 +369,37 @@ class _qShareC CqSurface : public CqBasicSurface
 		 */
 		const	TqBool	bHasCs() const
 		{
-			return ( m_Cs.Size() >= cVarying() );
+			return( m_aiStdPrimitiveVars[ EnvVars_Cs ] >= 0 );
 		}
 		/** Determine whether this surface has per vertex opacities.
 		 */
 		const	TqBool	bHasOs() const
 		{
-			return ( m_Os.Size() >= cVarying() );
+			return( m_aiStdPrimitiveVars[ EnvVars_Os ] >= 0 );
 		}
 		/** Determine whether this surface has per vertex s cordinates.
 		 */
 		const	TqBool	bHass() const
 		{
-			return ( m_s.Size() >= cVarying() );
+			return( m_aiStdPrimitiveVars[ EnvVars_s ] >= 0 );
 		}
 		/** Determine whether this surface has per vertex t coordinates.
 		 */
 		const	TqBool	bHast() const
 		{
-			return ( m_t.Size() >= cVarying() );
+			return( m_aiStdPrimitiveVars[ EnvVars_t ] >= 0 );
 		}
 		/** Determine whether this surface has per vertex u coordinates.
 		 */
 		const	TqBool	bHasu() const
 		{
-			return ( m_u.Size() >= cVarying() );
+			return( m_aiStdPrimitiveVars[ EnvVars_u ] >= 0 );
 		}
 		/** Determine whether this surface has per vertex v coordinates.
 		 */
 		const	TqBool	bHasv() const
 		{
-			return ( m_v.Size() >= cVarying() );
+			return( m_aiStdPrimitiveVars[ EnvVars_v ] >= 0 );
 		}
 
 		/** Get a reference to the user parameter variables array
@@ -397,6 +414,27 @@ class _qShareC CqSurface : public CqBasicSurface
 		std::vector<CqParameter*>& aUserParams()
 		{
 			return(m_aUserParams);
+		}
+
+		/** Add a primitive variable to the array.
+		 */
+		void AddPrimitiveVariable( CqParameter* pParam )
+		{
+			m_aUserParams.push_back( pParam );
+			if( pParam->strName() == "Cs" )
+				m_aiStdPrimitiveVars[ EnvVars_Cs ] = m_aUserParams.size() - 1;
+			else if( pParam->strName() == "Os" )
+				m_aiStdPrimitiveVars[ EnvVars_Os ] = m_aUserParams.size() - 1;
+			else if( pParam->strName() == "s" )
+				m_aiStdPrimitiveVars[ EnvVars_s ] = m_aUserParams.size() - 1;
+			else if( pParam->strName() == "t" )
+				m_aiStdPrimitiveVars[ EnvVars_t ] = m_aUserParams.size() - 1;
+			else if( pParam->strName() == "u" )
+				m_aiStdPrimitiveVars[ EnvVars_u ] = m_aUserParams.size() - 1;
+			else if( pParam->strName() == "v" )
+				m_aiStdPrimitiveVars[ EnvVars_v ] = m_aUserParams.size() - 1;
+			else if( pParam->strName() == "N" )
+				m_aiStdPrimitiveVars[ EnvVars_N ] = m_aUserParams.size() - 1;
 		}
 
 		/** Determine whether this surface can be trimmed
@@ -424,8 +462,8 @@ class _qShareC CqSurface : public CqBasicSurface
 		virtual	void	PrepareTrimCurve()
 		{}
 
-		void	uSubdivideUserParameters( CqSurface* pTarget );
-		void	vSubdivideUserParameters( CqSurface* pTarget );
+		void	uSubdivideUserParameters( CqSurface* pA, CqSurface* pB );
+		void	vSubdivideUserParameters( CqSurface* pA, CqSurface* pB );
 
 		/** Interpolate the specified value using the natural interpolation method for the surface.
 		 *  Fills in the given shader data with the resulting data.
@@ -448,15 +486,10 @@ class _qShareC CqSurface : public CqBasicSurface
 		// Default primitive variables
 		CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>	m_P;		///< Default parameter P.
 		CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>	m_N;		///< Default parameter N.
-		CqParameterTypedVarying<CqColor, type_color, CqColor>	m_Cs;		///< Default parameter Cq.
-		CqParameterTypedVarying<CqColor, type_color, CqColor>	m_Os;		///< Default parameter Os.
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>	m_s;		///< Default parameter s.
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>	m_t;		///< Default parameter t.
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>	m_u;		///< Default parameter u.
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>	m_v;		///< Default parameter v.
 
 		std::vector<CqParameter*>	m_aUserParams;						///< Storage for user defined paramter variables.
 
+		TqInt			m_aiStdPrimitiveVars[EnvVars_Last];		///< Quick lookup index into the primitive variables table for standard variables.
 }
 ;
 

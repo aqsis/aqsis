@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/05/14 03:53:13 $
+ *	Last change date:	$Date: 2002/08/07 17:14:32 $
  */
 //------------------------------------------------------------------------------
 #ifndef	___isurface_Loaded___
@@ -43,6 +43,9 @@ struct IqSurface
 	/** Get the number of vertex parameters required for this GPrim.
 	 */
 	virtual	TqUint	cVertex() const = 0;
+	/** Get the number of facearying parameters required for this GPrim.
+	 */
+	virtual	TqUint	cFaceVarying() const = 0;
 
 	virtual CqString	strName() const = 0;
 	virtual	TqInt	Uses() const = 0;

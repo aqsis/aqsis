@@ -416,7 +416,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		}
 
 		// Create bilinear patches
-		CqSurfacePatchBilinear* pNew = new CqSurfacePatchBilinear();
+/*		CqSurfacePatchBilinear* pNew = new CqSurfacePatchBilinear();
 		pNew->AddRef();
 		pNew->SetSurfaceParameters( Surface() );
 		pNew->SetDefaultPrimitiveVariables();
@@ -564,7 +564,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 
 		aSplits.push_back( pNew );
 		cNew++;
-
+*/
 		// Move onto the next quad
 		indexB = indexD;
 		vecB = vecD;
@@ -662,30 +662,34 @@ void CqSurfacePolygon::TransferDefaultSurfaceParameters()
 	TqInt iUses = PolyUses();
 	if ( USES( iUses, EnvVars_s ) && !bHass() )
 	{
-		s().SetSize( NumVertices() );
+		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
+		s()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			s() [ i ] = P() [ i ].x();
+			(*s())[ i ] = P() [ i ].x();
 	}
 
 	if ( USES( iUses, EnvVars_t ) && !bHast() )
 	{
-		t().SetSize( NumVertices() );
+		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
+		t()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			t() [ i ] = P() [ i ].y();
+			(*t())[ i ] = P() [ i ].y();
 	}
 
 	if ( USES( iUses, EnvVars_u ) )
 	{
-		u().SetSize( NumVertices() );
+		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
+		u()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			u() [ i ] = P() [ i ].x();
+			(*u())[ i ] = P() [ i ].x();
 	}
 
 	if ( USES( iUses, EnvVars_v ) )
 	{
-		v().SetSize( NumVertices() );
+		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
+		v()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			v() [ i ] = P() [ i ].y();
+			(*v())[ i ] = P() [ i ].y();
 	}
 }
 
@@ -757,30 +761,34 @@ void CqPolygonPoints::TransferDefaultSurfaceParameters()
 	TqInt iUses = Uses();
 	if ( USES( iUses, EnvVars_s ) && !bHass() )
 	{
-		s().SetSize( NumVertices() );
+		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
+		s()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			s() [ i ] = P() [ i ].x();
+			(*s())[ i ] = P() [ i ].x();
 	}
 
 	if ( USES( iUses, EnvVars_t ) && !bHast() )
 	{
-		t().SetSize( NumVertices() );
+		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
+		t()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			t() [ i ] = P() [ i ].y();
+			(*t())[ i ] = P() [ i ].y();
 	}
 
 	if ( USES( iUses, EnvVars_u ) )
 	{
-		u().SetSize( NumVertices() );
+		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
+		u()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			u() [ i ] = P() [ i ].x();
+			(*u())[ i ] = P() [ i ].x();
 	}
 
 	if ( USES( iUses, EnvVars_v ) )
 	{
-		v().SetSize( NumVertices() );
+		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
+		v()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			v() [ i ] = P() [ i ].y();
+			(*v())[ i ] = P() [ i ].y();
 	}
 }
 

@@ -211,27 +211,27 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		}
 		virtual	const	CqColor& PolyCs( TqInt i ) const
 		{
-			return ( Cs() [ i ] );
+			return ( (*Cs())[ i ] );
 		}
 		virtual	const	CqColor& PolyOs( TqInt i ) const
 		{
-			return ( Os() [ i ] );
+			return ( (*Os())[ i ] );
 		}
 		virtual	const	TqFloat& Polys( TqInt i ) const
 		{
-			return ( s() [ i ] );
+			return ( (*s())[ i ] );
 		}
 		virtual	const	TqFloat& Polyt( TqInt i ) const
 		{
-			return ( t() [ i ] );
+			return ( (*t())[ i ] );
 		}
 		virtual	const	TqFloat& Polyu( TqInt i ) const
 		{
-			return ( u() [ i ] );
+			return ( (*u())[ i ] );
 		}
 		virtual	const	TqFloat& Polyv( TqInt i ) const
 		{
-			return ( v() [ i ] );
+			return ( (*v())[ i ] );
 		}
 		virtual	const	TqInt PolyIndex( TqInt i ) const
 		{
@@ -459,27 +459,27 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		}
 		virtual	const CqColor& PolyCs( TqInt i ) const
 		{
-			return ( m_pPoints->Cs() [ m_aIndices[ i ] ] );
+			return ( (*m_pPoints->Cs())[ m_aIndices[ i ] ] );
 		}
 		virtual	const CqColor& PolyOs( TqInt i ) const
 		{
-			return ( m_pPoints->Os() [ m_aIndices[ i ] ] );
+			return ( (*m_pPoints->Os())[ m_aIndices[ i ] ] );
 		}
 		virtual	const TqFloat& Polys( TqInt i ) const
 		{
-			return ( m_pPoints->s() [ m_aIndices[ i ] ] );
+			return ( (*m_pPoints->s())[ m_aIndices[ i ] ] );
 		}
 		virtual	const TqFloat& Polyt( TqInt i ) const
 		{
-			return ( m_pPoints->t() [ m_aIndices[ i ] ] );
+			return ( (*m_pPoints->t())[ m_aIndices[ i ] ] );
 		}
 		virtual	const TqFloat& Polyu( TqInt i ) const
 		{
-			return ( m_pPoints->u() [ m_aIndices[ i ] ] );
+			return ( (*m_pPoints->u())[ m_aIndices[ i ] ] );
 		}
 		virtual	const TqFloat& Polyv( TqInt i ) const
 		{
-			return ( m_pPoints->v() [ m_aIndices[ i ] ] );
+			return ( (*m_pPoints->v())[ m_aIndices[ i ] ] );
 		}
 		virtual	const	TqInt PolyIndex( TqInt i ) const
 		{
@@ -630,27 +630,27 @@ class CqMotionSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		}
 		virtual	const CqColor& PolyCs( TqInt i ) const
 		{
-			return ( GetMotionObject( Time( m_CurrTimeIndex ) ) ->Cs() [ m_aIndices[ i ] ] );
+			return ( (*GetMotionObject( Time( m_CurrTimeIndex ) ) ->Cs())[ m_aIndices[ i ] ] );
 		}
 		virtual	const CqColor& PolyOs( TqInt i ) const
 		{
-			return ( GetMotionObject( Time( m_CurrTimeIndex ) ) ->Os() [ m_aIndices[ i ] ] );
+			return ( (*GetMotionObject( Time( m_CurrTimeIndex ) ) ->Os())[ m_aIndices[ i ] ] );
 		}
 		virtual	const TqFloat& Polys( TqInt i ) const
 		{
-			return ( GetMotionObject( Time( m_CurrTimeIndex ) ) ->s() [ m_aIndices[ i ] ] );
+			return ( (*GetMotionObject( Time( m_CurrTimeIndex ) ) ->s())[ m_aIndices[ i ] ] );
 		}
 		virtual	const TqFloat& Polyt( TqInt i ) const
 		{
-			return ( GetMotionObject( Time( m_CurrTimeIndex ) ) ->t() [ m_aIndices[ i ] ] );
+			return ( (*GetMotionObject( Time( m_CurrTimeIndex ) ) ->t())[ m_aIndices[ i ] ] );
 		}
 		virtual	const TqFloat& Polyu( TqInt i ) const
 		{
-			return ( GetMotionObject( Time( m_CurrTimeIndex ) ) ->u() [ m_aIndices[ i ] ] );
+			return ( (*GetMotionObject( Time( m_CurrTimeIndex ) ) ->u())[ m_aIndices[ i ] ] );
 		}
 		virtual	const TqFloat& Polyv( TqInt i ) const
 		{
-			return ( GetMotionObject( Time( m_CurrTimeIndex ) ) ->v() [ m_aIndices[ i ] ] );
+			return ( (*GetMotionObject( Time( m_CurrTimeIndex ) ) ->v())[ m_aIndices[ i ] ] );
 		}
 		virtual	const	TqInt PolyIndex( TqInt i ) const
 		{

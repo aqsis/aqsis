@@ -67,10 +67,10 @@ CqPoints::CqPoints(TqInt n, TqFloat *origins , TqFloat *sizes, TqFloat constantw
 		pSurface->SetDefaultPrimitiveVariables();
 		pSurface->SetSurfaceParameters( *this );
 		pSurface->P().SetSize( NBR_SEGMENTS );
-		pSurface->Cs().SetSize( NBR_SEGMENTS );
-		pSurface->Os().SetSize( NBR_SEGMENTS );
-		pSurface->s().SetSize( NBR_SEGMENTS );
-		pSurface->t().SetSize( NBR_SEGMENTS );
+		pSurface->Cs()->SetSize( NBR_SEGMENTS );
+		pSurface->Os()->SetSize( NBR_SEGMENTS );
+		pSurface->s()->SetSize( NBR_SEGMENTS );
+		pSurface->t()->SetSize( NBR_SEGMENTS );
 		
 		
 
@@ -89,8 +89,8 @@ CqPoints::CqPoints(TqInt n, TqFloat *origins , TqFloat *sizes, TqFloat constantw
 				si *= constantwidth;
 			}
 	
-			pSurface->s()[j] = 0.5 * cos(angle) + 0.5;
-			pSurface->t()[j] = 0.5 * sin(angle) + 0.5;
+			(*pSurface->s())[j] = 0.5 * cos(angle) + 0.5;
+			(*pSurface->t())[j] = 0.5 * sin(angle) + 0.5;
 			pSurface->P()[j] = CqVector3D(
 					co + origins[3*i], 
 					si + origins[3*i+1], 
@@ -100,8 +100,8 @@ CqPoints::CqPoints(TqInt n, TqFloat *origins , TqFloat *sizes, TqFloat constantw
 		}
 		for (j=0; j<NBR_SEGMENTS; j++)
 		{
-			pSurface->Cs() [ j ] = m_pAttributes->GetColorAttribute("System", "Color")[0]; //m_pAttributes->colColor();
-			pSurface->Os() [ j ] = m_pAttributes->GetColorAttribute("System", "Opacity")[0];//m_pAttributes->colOpacity();
+			(*pSurface->Cs())[ j ] = m_pAttributes->GetColorAttribute("System", "Color")[0]; //m_pAttributes->colColor();
+			(*pSurface->Os())[ j ] = m_pAttributes->GetColorAttribute("System", "Opacity")[0];//m_pAttributes->colOpacity();
 		}
 		
         m_pPolygons[i]  = pSurface;

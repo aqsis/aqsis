@@ -173,28 +173,21 @@ TqInt CqBasicSurface::Uses() const
 
 CqSurface::CqSurface() : CqBasicSurface(),
 		m_P( "P" ),
-		m_N( "N" ),
-		m_Cs( "Cs" ),
-		m_Os( "Os" ),
-		m_s( "s" ),
-		m_t( "t" ),
-		m_u( "u" ),
-		m_v( "v" )
-{}
+		m_N( "N" )
+{
+	// Nullify the standard primitive variables index table.
+	TqInt i;
+	for( i = 0; i < EnvVars_Last; i++ )
+		m_aiStdPrimitiveVars[ i ] = -1;	
+}
 
 //---------------------------------------------------------------------
 /** Copy constructor
  */
 
-CqSurface::CqSurface( const CqSurface& From ) : CqBasicSurface( From ),
+CqSurface::CqSurface( const CqSurface& From ) :
 		m_P( "P" ),
-		m_N( "N" ),
-		m_Cs( "Cs" ),
-		m_Os( "Os" ),
-		m_s( "s" ),
-		m_t( "t" ),
-		m_u( "u" ),
-		m_v( "v" )
+		m_N( "N" )
 {
 	*this = From;
 }
@@ -211,18 +204,17 @@ CqSurface& CqSurface::operator=( const CqSurface& From )
 	// Copy primitive variables.
 	m_P = From.m_P;
 	m_N = From.m_N;
-	m_Cs = From.m_Cs;
-	m_Os = From.m_Os;
-	m_s = From.m_s;
-	m_t = From.m_t;
-	m_u = From.m_u;
-	m_v = From.m_v;
 
 	// Clone any user parameters.
 	m_aUserParams.clear();
 	std::vector<CqParameter*>::const_iterator iUP;
 	for( iUP = From.m_aUserParams.begin(); iUP != From.m_aUserParams.end(); iUP++ )
-		m_aUserParams.push_back( (*iUP)->Clone() );
+		AddPrimitiveVariable( (*iUP)->Clone() );
+
+	// Copy the standard primitive variables index table.
+	TqInt i;
+	for( i = 0; i < EnvVars_Last; i++ )
+		m_aiStdPrimitiveVars[ i ] = From.m_aiStdPrimitiveVars[ i ];	
 
 	return ( *this );
 }
@@ -238,61 +230,42 @@ void CqSurface::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 	TqInt bUses = Uses();
 
 	// Set default values for all of our parameters
-	if ( USES( bUses, EnvVars_Cs ) )
-	{
-		m_Cs.SetSize( 1 );
-		m_Cs.pValue() [ 0 ] = m_pAttributes->GetColorAttribute("System", "Color")[0];
-	}
-	else
-		m_Cs.SetSize( 0 );
-
-	if ( USES( bUses, EnvVars_Os ) )
-	{
-		m_Os.SetSize( 1 );
-		m_Os.pValue() [ 0 ] = m_pAttributes->GetColorAttribute("System", "Opacity")[0];
-	}
-	else
-		m_Os.SetSize( 0 );
 
 	// s and t default to four values, if the particular surface type requires different it is up
 	// to the surface to override or change this after the fact.
 	if ( USES( bUses, EnvVars_s ) && bUseDef_st )
 	{
-		m_s.SetSize( 4 );
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
+		s()->SetSize( 4 );
 		TqInt i;
 		for ( i = 0; i < 4; i++ )
-			m_s.pValue() [ i ] = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ i*2 ];
+			s()->pValue() [ i ] = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ i*2 ];
 	}
-	else
-		m_s.SetSize( 0 );
 
 	if ( USES( bUses, EnvVars_t ) && bUseDef_st )
 	{
-		m_t.SetSize( 4 );
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
+		t()->SetSize( 4 );
 		TqInt i;
 		for ( i = 0; i < 4; i++ )
-			m_t.pValue() [ i ] = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ (i*2)+1 ];
+			t()->pValue() [ i ] = m_pAttributes->GetFloatAttribute("System", "TextureCoordinates") [ (i*2)+1 ];
 	}
-	else
-		m_t.SetSize( 0 );
 
 	if ( USES( bUses, EnvVars_u ) )
 	{
-		m_u.SetSize( 4 );
-		m_u.pValue() [ 0 ] = m_u.pValue() [ 2 ] = 0.0;
-		m_u.pValue() [ 1 ] = m_u.pValue() [ 3 ] = 1.0;
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
+		u()->SetSize( 4 );
+		u()->pValue() [ 0 ] = u()->pValue() [ 2 ] = 0.0;
+		u()->pValue() [ 1 ] = u()->pValue() [ 3 ] = 1.0;
 	}
-	else
-		m_u.SetSize( 0 );
 
 	if ( USES( bUses, EnvVars_v ) )
 	{
-		m_v.SetSize( 4 );
-		m_v.pValue() [ 0 ] = m_v.pValue() [ 1 ] = 0.0;
-		m_v.pValue() [ 2 ] = m_v.pValue() [ 3 ] = 1.0;
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
+		v()->SetSize( 4 );
+		v()->pValue() [ 0 ] = v()->pValue() [ 1 ] = 0.0;
+		v()->pValue() [ 2 ] = v()->pValue() [ 3 ] = 1.0;
 	}
-	else
-		m_v.SetSize( 0 );
 }
 
 
@@ -308,12 +281,51 @@ CqMicroPolyGridBase* CqSurface::Dice()
 	TqInt lUses = Uses();
 
 	// Dice the primitive variables.
-	if ( USES( lUses, EnvVars_u ) ) u().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->u() );
-	if ( USES( lUses, EnvVars_v ) ) v().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->v() );
-	if ( USES( lUses, EnvVars_s ) ) s().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->s() );
-	if ( USES( lUses, EnvVars_t ) ) t().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
-	if ( USES( lUses, EnvVars_Cs ) ) Cs().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
-	if ( USES( lUses, EnvVars_Os ) ) Os().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
+	if ( USES( lUses, EnvVars_Cs ) ) 
+	{
+		if( bHasCs() )
+			Cs()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
+		else if( NULL != pAttributes()->GetColorAttribute("System", "Color") )
+			pGrid->Cs()->SetColor( pAttributes()->GetColorAttribute("System", "Color")[0]);
+		else
+			pGrid->Cs()->SetColor( CqColor( 1,1,1 ) );
+	}
+
+	if ( USES( lUses, EnvVars_Os ) ) 
+	{
+		if( bHasOs() )
+			Os()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
+		else if( NULL != pAttributes()->GetColorAttribute("System", "Opacity") )
+			pGrid->Os()->SetColor( pAttributes()->GetColorAttribute("System", "Opacity")[0]);
+		else
+			pGrid->Os()->SetColor( CqColor( 1,1,1 ) );
+	}
+
+	if ( USES( lUses, EnvVars_s ) ) 
+	{
+		if( bHass() )
+			s()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->s() );
+	}
+
+	if ( USES( lUses, EnvVars_t ) ) 
+	{
+		if( bHast() )
+			t()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
+	}
+
+	if ( USES( lUses, EnvVars_u ) ) 
+	{
+		if( bHasu() )
+			u()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->u() );
+	}
+
+	if ( USES( lUses, EnvVars_v ) ) 
+	{
+		if( bHasv() )
+			v()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->v() );
+	}
+	
+
 	NaturalInterpolate( &P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
 
 	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
@@ -356,12 +368,18 @@ CqMicroPolyGridBase* CqSurface::Dice()
 /** uSubdivide any user defined parameter variables.
  */
 
-void CqSurface::uSubdivideUserParameters( CqSurface* pTarget )
+void CqSurface::uSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 {
 	// Iterate through any use parameters subdividing and storing the second value in the target surface.
-	std::vector<CqParameter*>::iterator iUP, iUPT;
-	for( iUP = m_aUserParams.begin(), iUPT = pTarget->m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++, iUPT++ )
-		(*iUP)->uSubdivide( (*iUPT ) );
+	std::vector<CqParameter*>::iterator iUP;
+	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	{
+		CqParameter* pNewA = (*iUP)->Clone();
+		CqParameter* pNewB = (*iUP)->Clone();
+		pNewA->uSubdivide( pNewB );
+		pA->AddPrimitiveVariable( pNewA );
+		pB->AddPrimitiveVariable( pNewB );
+	}
 }
 
 
@@ -369,12 +387,18 @@ void CqSurface::uSubdivideUserParameters( CqSurface* pTarget )
 /** vSubdivide any user defined parameter variables.
  */
 
-void CqSurface::vSubdivideUserParameters( CqSurface* pTarget )
+void CqSurface::vSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 {
 	// Iterate through any use parameters subdividing and storing the second value in the target surface.
-	std::vector<CqParameter*>::iterator iUP, iUPT;
-	for( iUP = m_aUserParams.begin(), iUPT = pTarget->m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++, iUPT++ )
-		(*iUP)->vSubdivide( (*iUPT ) );
+	std::vector<CqParameter*>::iterator iUP;
+	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	{
+		CqParameter* pNewA = (*iUP)->Clone();
+		CqParameter* pNewB = (*iUP)->Clone();
+		pNewA->vSubdivide( pNewB );
+		pA->AddPrimitiveVariable( pNewA );
+		pB->AddPrimitiveVariable( pNewB );
+	}
 }
 
 //---------------------------------------------------------------------

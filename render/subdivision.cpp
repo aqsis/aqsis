@@ -99,29 +99,29 @@ CqWVert* CqWEdge::CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pP
 	if ( uses_s && has_s )
 	{
 		TqFloat s = CreateSubdivideScalar( s, &CqSubdivider::Subds, pSurf, pPoints );
-		if ( pPoints->s().Size() <= index ) pPoints->s().SetSize( index + 1 );
-		pPoints->s() [ index ] = s;
+		if ( pPoints->s()->Size() <= index ) pPoints->s()->SetSize( index + 1 );
+		(*pPoints->s())[ index ] = s;
 	}
 
 	if ( uses_t && has_t )
 	{
 		TqFloat t = CreateSubdivideScalar( t, &CqSubdivider::Subdt, pSurf, pPoints );
-		if ( pPoints->t().Size() <= index ) pPoints->t().SetSize( index + 1 );
-		pPoints->t() [ index ] = t;
+		if ( pPoints->t()->Size() <= index ) pPoints->t()->SetSize( index + 1 );
+		(*pPoints->t())[ index ] = t;
 	}
 
 	if ( uses_Cs && has_Cs )
 	{
 		CqColor Cq = CreateSubdivideScalar( Cq, &CqSubdivider::SubdCs, pSurf, pPoints );
-		if ( pPoints->Cs().Size() <= index ) pPoints->Cs().SetSize( index + 1 );
-		pPoints->Cs() [ index ] = Cq;
+		if ( pPoints->Cs()->Size() <= index ) pPoints->Cs()->SetSize( index + 1 );
+		(*pPoints->Cs())[ index ] = Cq;
 	}
 
 	if ( uses_Os && has_Os )
 	{
 		CqColor Os = CreateSubdivideScalar( Os, &CqSubdivider::SubdOs, pSurf, pPoints );
-		if ( pPoints->Os().Size() <= index ) pPoints->Os().SetSize( index + 1 );
-		pPoints->Os() [ index ] = Os;
+		if ( pPoints->Os()->Size() <= index ) pPoints->Os()->SetSize( index + 1 );
+		(*pPoints->Os())[ index ] = Os;
 	}
 
 	return ( pV );
@@ -204,29 +204,29 @@ CqWVert* CqWFace::CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pP
 	if ( uses_s && has_s )
 	{
 		TqFloat s = CreateSubdivideScalar( s, &CqSubdivider::Subds, pSurf, pPoints );
-		if ( pPoints->s().Size() <= index ) pPoints->s().SetSize( index + 1 );
-		pPoints->s() [ index ] = s;
+		if ( pPoints->s()->Size() <= index ) pPoints->s()->SetSize( index + 1 );
+		(*pPoints->s())[ index ] = s;
 	}
 
 	if ( uses_t && has_t )
 	{
 		TqFloat t = CreateSubdivideScalar( t, &CqSubdivider::Subdt, pSurf, pPoints );
-		if ( pPoints->t().Size() <= index ) pPoints->t().SetSize( index + 1 );
-		pPoints->t() [ index ] = t;
+		if ( pPoints->t()->Size() <= index ) pPoints->t()->SetSize( index + 1 );
+		(*pPoints->t())[ index ] = t;
 	}
 
 	if ( uses_Cs && has_Cs )
 	{
 		CqColor Cq = CreateSubdivideScalar( Cq, &CqSubdivider::SubdCs, pSurf, pPoints );
-		if ( pPoints->Cs().Size() <= index ) pPoints->Cs().SetSize( index + 1 );
-		pPoints->Cs() [ index ] = Cq;
+		if ( pPoints->Cs()->Size() <= index ) pPoints->Cs()->SetSize( index + 1 );
+		(*pPoints->Cs())[ index ] = Cq;
 	}
 
 	if ( uses_Os && has_Os )
 	{
 		CqColor Os = CreateSubdivideScalar( Os, &CqSubdivider::SubdOs, pSurf, pPoints );
-		if ( pPoints->Os().Size() <= index ) pPoints->Os().SetSize( index + 1 );
-		pPoints->Os() [ index ] = Os;
+		if ( pPoints->Os()->Size() <= index ) pPoints->Os()->SetSize( index + 1 );
+		(*pPoints->Os())[ index ] = Os;
 	}
 
 	return ( pV );
@@ -990,10 +990,10 @@ void CqWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t,
 	for ( i = 0; i < oldcVerts; i++ )
 	{
 		pPoints->P() [ pVert( i ) ->iVertex() ] = aVertices[ i ].P;
-		if ( uses_s && has_s ) pPoints->s() [ pVert( i ) ->iVertex() ] = aVertices[ i ].s;
-		if ( uses_t && has_t ) pPoints->t() [ pVert( i ) ->iVertex() ] = aVertices[ i ].t;
-		if ( uses_Cs && has_Cs ) pPoints->Cs() [ pVert( i ) ->iVertex() ] = aVertices[ i ].Cq;
-		if ( uses_Os && has_Os ) pPoints->Os() [ pVert( i ) ->iVertex() ] = aVertices[ i ].Os;
+		if ( uses_s && has_s )		(*pPoints->s())[ pVert( i ) ->iVertex() ] = aVertices[ i ].s;
+		if ( uses_t && has_t )		(*pPoints->t())[ pVert( i ) ->iVertex() ] = aVertices[ i ].t;
+		if ( uses_Cs && has_Cs )	(*pPoints->Cs())[ pVert( i ) ->iVertex() ] = aVertices[ i ].Cq;
+		if ( uses_Os && has_Os )	(*pPoints->Os())[ pVert( i ) ->iVertex() ] = aVertices[ i ].Os;
 	}
 }
 
@@ -1412,10 +1412,10 @@ CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
 	// Initialise the P() array to a sensible size first.
 	m_pPoints->P().SetSize( 0 );
 
-	if ( pSurf->pPoints() ->Cs().Size() == 1 ) m_pPoints->Cs() = pSurf->pPoints() ->Cs();
-	else	m_pPoints->Cs().SetSize( 0 );
-	if ( pSurf->pPoints() ->Os().Size() == 1 ) m_pPoints->Os() = pSurf->pPoints() ->Os();
-	else	m_pPoints->Os().SetSize( 0 );
+	if ( pSurf->pPoints() ->Cs()->Size() == 1 ) (*m_pPoints->Cs()) = (*pSurf->pPoints() ->Cs());
+	else	m_pPoints->Cs()->SetSize( 0 );
+	if ( pSurf->pPoints() ->Os()->Size() == 1 ) (*m_pPoints->Os()) = (*pSurf->pPoints() ->Os());
+	else	m_pPoints->Os()->SetSize( 0 );
 
 	// Add the main face by adding each edge, by adding each vertex.
 	CqWReference rEdge( pF->pEdge( 0 ), pF );
@@ -1485,26 +1485,26 @@ CqWVert* CqWSurf::TransferVert( CqWSurf* pSurf, TqInt iVert, TqBool uses_s, TqBo
 
 	if ( uses_s && has_s )
 	{
-		if ( m_pPoints->s().Size() <= iV ) m_pPoints->s().SetSize( iV + 1 );
-		m_pPoints->s() [ iV ] = pSurf->pPoints() ->s() [ iVert ];
+		if ( m_pPoints->s()->Size() <= iV ) m_pPoints->s()->SetSize( iV + 1 );
+		(*m_pPoints->s())[ iV ] = (*pSurf->pPoints() ->s())[ iVert ];
 	}
 
 	if ( uses_t && has_t )
 	{
-		if ( m_pPoints->t().Size() <= iV ) m_pPoints->t().SetSize( iV + 1 );
-		m_pPoints->t() [ iV ] = pSurf->pPoints() ->t() [ iVert ];
+		if ( m_pPoints->t()->Size() <= iV ) m_pPoints->t()->SetSize( iV + 1 );
+		(*m_pPoints->t())[ iV ] = (*pSurf->pPoints() ->t())[ iVert ];
 	}
 
 	if ( uses_Cs && has_Cs )
 	{
-		if ( m_pPoints->Cs().Size() <= iV ) m_pPoints->Cs().SetSize( iV + 1 );
-		m_pPoints->Cs() [ iV ] = pSurf->pPoints() ->Cs() [ iVert ];
+		if ( m_pPoints->Cs()->Size() <= iV ) m_pPoints->Cs()->SetSize( iV + 1 );
+		(*m_pPoints->Cs())[ iV ] = (*pSurf->pPoints() ->Cs())[ iVert ];
 	}
 
 	if ( uses_Os && has_Os )
 	{
-		if ( m_pPoints->Os().Size() <= iV ) m_pPoints->Os().SetSize( iV + 1 );
-		m_pPoints->Os() [ iV ] = pSurf->pPoints() ->Os() [ iVert ];
+		if ( m_pPoints->Os()->Size() <= iV ) m_pPoints->Os()->SetSize( iV + 1 );
+		(*m_pPoints->Os())[ iV ] = (*pSurf->pPoints() ->Os())[ iVert ];
 	}
 
 	return ( pNew );
@@ -1640,8 +1640,8 @@ CqMicroPolyGridBase* CqWSurf::Dice()
 	TqBool has_Cs = bHasCs();
 	TqBool has_Os = bHasOs();
 
-	if ( uses_Cs && !has_Cs ) m_pPoints->Cs().BilinearDice( cuv, cuv, pGrid->Cs() );
-	if ( uses_Os && !has_Os ) m_pPoints->Os().BilinearDice( cuv, cuv, pGrid->Os() );
+	if ( uses_Cs && !has_Cs ) m_pPoints->Cs()->BilinearDice( cuv, cuv, pGrid->Cs() );
+	if ( uses_Os && !has_Os ) m_pPoints->Os()->BilinearDice( cuv, cuv, pGrid->Os() );
 
 	DiceSubdivide( m_DiceCount );
 
@@ -1810,8 +1810,8 @@ CqMicroPolyGridBase* CqMotionWSurf::Dice()
 		CqPolygonPoints* pPoints = GetMotionObject( Time( i ) );
 		CqMicroPolyGrid* pGrid2 = new CqMicroPolyGrid( cuv, cuv, pPoints );
 
-		if ( uses_Cs && !has_Cs ) pPoints->Cs().BilinearDice( cuv, cuv, pGrid2->Cs() );
-		if ( uses_Os && !has_Os ) pPoints->Os().BilinearDice( cuv, cuv, pGrid2->Os() );
+		if ( uses_Cs && !has_Cs ) pPoints->Cs()->BilinearDice( cuv, cuv, pGrid2->Cs() );
+		if ( uses_Os && !has_Os ) pPoints->Os()->BilinearDice( cuv, cuv, pGrid2->Os() );
 
 		TqInt iFace = 0;
 		StoreDice( m_DiceCount, iFace, pPoints, 0, 0, cuv + 1, pGrid2, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
@@ -1952,10 +1952,10 @@ void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool u
 		for ( i = 0; i < oldcVerts; i++ )
 		{
 			pPoints->P() [ pVert( i ) ->iVertex() ] = aVertices[ i ].P;
-			if ( uses_s && has_s ) pPoints->s() [ pVert( i ) ->iVertex() ] = aVertices[ i ].s;
-			if ( uses_t && has_t ) pPoints->t() [ pVert( i ) ->iVertex() ] = aVertices[ i ].t;
-			if ( uses_Cs && has_Cs ) pPoints->Cs() [ pVert( i ) ->iVertex() ] = aVertices[ i ].Cq;
-			if ( uses_Os && has_Os ) pPoints->Os() [ pVert( i ) ->iVertex() ] = aVertices[ i ].Os;
+			if ( uses_s && has_s )		(*pPoints->s())[ pVert( i ) ->iVertex() ] = aVertices[ i ].s;
+			if ( uses_t && has_t )		(*pPoints->t())[ pVert( i ) ->iVertex() ] = aVertices[ i ].t;
+			if ( uses_Cs && has_Cs )	(*pPoints->Cs())[ pVert( i ) ->iVertex() ] = aVertices[ i ].Cq;
+			if ( uses_Os && has_Os )	(*pPoints->Os())[ pVert( i ) ->iVertex() ] = aVertices[ i ].Os;
 		}
 	}
 }
@@ -1982,10 +1982,10 @@ CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec
 
 		// Initialise the P() array to a sensible size first.
 		pPointsClass->P().SetSize( 0 );
-		if ( pSurfPoints->Cs().Size() == 1 ) pPointsClass->Cs() = pSurfPoints->Cs();
-		else	pPointsClass->Cs().SetSize( 0 );
-		if ( pSurfPoints->Os().Size() == 1 ) pPointsClass->Os() = pSurfPoints->Os();
-		else	pPointsClass->Os().SetSize( 0 );
+		if ( pSurfPoints->Cs()->Size() == 1 ) (*pPointsClass->Cs()) = (*pSurfPoints->Cs());
+		else	pPointsClass->Cs()->SetSize( 0 );
+		if ( pSurfPoints->Os()->Size() == 1 ) (*pPointsClass->Os()) = (*pSurfPoints->Os());
+		else	pPointsClass->Os()->SetSize( 0 );
 	}
 
 	TqInt lUses = pSurf->Uses();
@@ -2078,26 +2078,26 @@ CqWVert* CqMotionWSurf::TransferVert( CqMotionWSurf* pSurf, TqInt iVert, TqBool 
 
 		if ( uses_s && has_s )
 		{
-			if ( pMyPoints->s().Size() <= iV ) pMyPoints->s().SetSize( iV + 1 );
-			pMyPoints->s() [ iV ] = pSurfPoints->s() [ iVert ];
+			if ( pMyPoints->s()->Size() <= iV ) pMyPoints->s()->SetSize( iV + 1 );
+			(*pMyPoints->s())[ iV ] = (*pSurfPoints->s())[ iVert ];
 		}
 
 		if ( uses_t && has_t )
 		{
-			if ( pMyPoints->t().Size() <= iV ) pMyPoints->t().SetSize( iV + 1 );
-			pMyPoints->t() [ iV ] = pSurfPoints->t() [ iVert ];
+			if ( pMyPoints->t()->Size() <= iV ) pMyPoints->t()->SetSize( iV + 1 );
+			(*pMyPoints->t())[ iV ] = (*pSurfPoints->t())[ iVert ];
 		}
 
 		if ( uses_Cs && has_Cs )
 		{
-			if ( pMyPoints->Cs().Size() <= iV ) pMyPoints->Cs().SetSize( iV + 1 );
-			pMyPoints->Cs() [ iV ] = pSurfPoints->Cs() [ iVert ];
+			if ( pMyPoints->Cs()->Size() <= iV ) pMyPoints->Cs()->SetSize( iV + 1 );
+			(*pMyPoints->Cs())[ iV ] = (*pSurfPoints->Cs())[ iVert ];
 		}
 
 		if ( uses_Os && has_Os )
 		{
-			if ( pMyPoints->Os().Size() <= iV ) pMyPoints->Os().SetSize( iV + 1 );
-			pMyPoints->Os() [ iV ] = pSurfPoints->Os() [ iVert ];
+			if ( pMyPoints->Os()->Size() <= iV ) pMyPoints->Os()->SetSize( iV + 1 );
+			(*pMyPoints->Os())[ iV ] = (*pSurfPoints->Os())[ iVert ];
 		}
 	}
 

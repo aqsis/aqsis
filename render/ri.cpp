@@ -2934,7 +2934,7 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 
 	if ( USES( bUses, EnvVars_u ) )
 	{
-		pSurface->u().SetSize( pSurface->cVarying() );
+		pSurface->u()->SetSize( pSurface->cVarying() );
 
 		RtFloat uinc = ( umax - umin ) / (pSurface->cuSegments()+1);
 
@@ -2945,7 +2945,7 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 			RtFloat uval = umin;
 			for( r = 0; r < pSurface->cuSegments()+1; r++ )
 			{
-				pSurface->u().pValue() [ i++ ] = uval;
+				pSurface->u()->pValue() [ i++ ] = uval;
 				uval += uinc;
 			}
 		}
@@ -2953,7 +2953,7 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 
 	if ( USES( bUses, EnvVars_v ) )
 	{
-		pSurface->v().SetSize( pSurface->cVarying() );
+		pSurface->v()->SetSize( pSurface->cVarying() );
 
 		RtFloat vinc = ( vmax - vmin ) / (pSurface->cvSegments()+1);
 		RtFloat vval = vmin;
@@ -2963,7 +2963,7 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 		for( c = 0; c < pSurface->cvSegments()+1; c++ )
 		{
 			for( r = 0; r < pSurface->cuSegments()+1; r++ )
-				pSurface->v().pValue() [ i++ ] = vval;
+				pSurface->v()->pValue() [ i++ ] = vval;
 			vval += vinc;
 		}
 	}
@@ -4364,29 +4364,37 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 		switch ( fT )
 		{
 				case RIL_s:
-				if ( pTextures_s != 0 )
 				{
-					pSurface->s().SetSize( pSurface->cVarying() );
-					for ( i = 0; i < pSurface->cVarying(); i++ )
-						pSurface->s() [ i ] = pTextures_s[ i ];
-				}
+					if ( pTextures_s != 0 )
+					{
+						pSurface->AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
+						pSurface->s()->SetSize( pSurface->cVarying() );
+						for ( i = 0; i < pSurface->cVarying(); i++ )
+							(*pSurface->s())[ i ] = pTextures_s[ i ];
+					}
 
-				if ( pTextures_t != 0 )
-				{
-					pSurface->t().SetSize( pSurface->cVarying() );
-					for ( i = 0; i < pSurface->cVarying(); i++ )
-						pSurface->t() [ i ] = pTextures_t[ i ];
+					if ( pTextures_t != 0 )
+					{
+						pSurface->AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
+						pSurface->t()->SetSize( pSurface->cVarying() );
+						for ( i = 0; i < pSurface->cVarying(); i++ )
+							(*pSurface->t())[ i ] = pTextures_t[ i ];
+					}
 				}
 				break;
 
 				case RIL_st:
-				assert( pTextures_st != 0 );
-				pSurface->s().SetSize( pSurface->cVarying() );
-				pSurface->t().SetSize( pSurface->cVarying() );
-				for ( i = 0; i < pSurface->cVarying(); i++ )
 				{
-					pSurface->s() [ i ] = pTextures_st[ ( i * 2 ) ];
-					pSurface->t() [ i ] = pTextures_st[ ( i * 2 ) + 1 ];
+					assert( pTextures_st != 0 );
+					pSurface->AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
+					pSurface->AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
+					pSurface->s()->SetSize( pSurface->cVarying() );
+					pSurface->t()->SetSize( pSurface->cVarying() );
+					for ( i = 0; i < pSurface->cVarying(); i++ )
+					{
+						(*pSurface->s())[ i ] = pTextures_st[ ( i * 2 ) ];
+						(*pSurface->t())[ i ] = pTextures_st[ ( i * 2 ) + 1 ];
+					}
 				}
 				break;
 		}
@@ -4395,18 +4403,20 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 	// Copy any specified varying color values to the surface
 	if ( fCs )
 	{
+		pSurface->AddPrimitiveVariable(  new CqParameterTypedVarying<CqColor, type_color, CqColor>("Cs") );
 		TqUint i;
-		pSurface->Cs().SetSize( pSurface->cVarying() );
+		pSurface->Cs()->SetSize( pSurface->cVarying() );
 		for ( i = 0; i < pSurface->cVarying(); i++ )
-			pSurface->Cs() [ i ] = CqColor( pCs[ ( i * 3 ) ], pCs[ ( i * 3 ) + 1 ], pCs[ ( i * 3 ) + 2 ] );
+			(*pSurface->Cs())[ i ] = CqColor( pCs[ ( i * 3 ) ], pCs[ ( i * 3 ) + 1 ], pCs[ ( i * 3 ) + 2 ] );
 	}
 
 	if ( fOs )
 	{
+		pSurface->AddPrimitiveVariable(  new CqParameterTypedVarying<CqColor, type_color, CqColor>("Os") );
 		TqUint i;
-		pSurface->Os().SetSize( pSurface->cVarying() );
+		pSurface->Os()->SetSize( pSurface->cVarying() );
 		for ( i = 0; i < pSurface->cVarying(); i++ )
-			pSurface->Os() [ i ] = CqColor( pOs[ ( i * 3 ) ], pOs[ ( i * 3 ) + 1 ], pOs[ ( i * 3 ) + 2 ] );
+			(*pSurface->Os())[ i ] = CqColor( pOs[ ( i * 3 ) ], pOs[ ( i * 3 ) + 1 ], pOs[ ( i * 3 ) + 2 ] );
 	}
 
 	// Now process any user defined paramter variables.
