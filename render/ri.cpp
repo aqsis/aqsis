@@ -3260,10 +3260,10 @@ RtVoid	RiPatchMesh( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 
 RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, PARAMETERLIST )
 {
-	if( strcmp( uwrap, RI_BICUBIC ) && strcmp( uwrap, RI_BILINEAR ) )
+	if( strcmp( uwrap, RI_PERIODIC ) && strcmp( uwrap, RI_NONPERIODIC ) )
 		QGetRenderContext() ->Logger() ->error( "RiPatchMesh: Invalid u-wrap type: \"%s\"", type );
 
-	if( strcmp( vwrap, RI_BICUBIC ) && strcmp( vwrap, RI_BILINEAR ) )
+	if( strcmp( vwrap, RI_PERIODIC ) && strcmp( vwrap, RI_NONPERIODIC ) )
 		QGetRenderContext() ->Logger() ->error( "RiPatchMesh: Invalid v-wrap type: \"%s\"", type );
 	
 	if ( strcmp( type, RI_BICUBIC ) == 0 )
