@@ -53,8 +53,8 @@ CqRenderer* pCurrRenderer = 0;
 
 // Forward declaration
 //-------------------------------- Tiff error handlers
-	void TIFF_ErrorHandler(const char*, const char*, va_list);
-	void TIFF_WarnHandler(const char*, const char*, va_list);
+void TIFF_ErrorHandler(const char*, const char*, va_list);
+void TIFF_WarnHandler(const char*, const char*, va_list);
 
 
 static TqUlong ohash = 0; //< == "object"
@@ -234,7 +234,7 @@ CqModeBlock*	CqRenderer::BeginFrameModeBlock()
 		else
 			return ( 0 );
 	}
-	else
+ 	else	
 		return ( 0 );
 }
 
@@ -388,7 +388,7 @@ CqModeBlock*	CqRenderer::BeginMotionModeBlock( TqInt N, TqFloat times[] )
 
 void	CqRenderer::EndMainModeBlock()
 {
-	if ( m_pconCurrent != 0 )
+	if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == MainModeBlock))
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndMainModeBlock();
@@ -404,7 +404,7 @@ void	CqRenderer::EndMainModeBlock()
 
 void	CqRenderer::EndFrameModeBlock()
 {
-	if ( m_pconCurrent != 0 )
+	if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == FrameModeBlock ))
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndFrameModeBlock();
@@ -420,7 +420,7 @@ void	CqRenderer::EndFrameModeBlock()
 
 void	CqRenderer::EndWorldModeBlock()
 {
-	if ( m_pconCurrent != 0 )
+	if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == WorldModeBlock))
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndWorldModeBlock();
@@ -436,7 +436,7 @@ void	CqRenderer::EndWorldModeBlock()
 
 void	CqRenderer::EndAttributeModeBlock()
 {
-	if ( m_pconCurrent != 0 )
+	if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == AttributeModeBlock))
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndAttributeModeBlock();
@@ -452,7 +452,7 @@ void	CqRenderer::EndAttributeModeBlock()
 
 void	CqRenderer::EndTransformModeBlock()
 {
-	if ( m_pconCurrent != 0 )
+	if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == TransformModeBlock))
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		// Copy the current state of the attributes UP the stack as a TransformBegin/End doesn't store them
@@ -470,7 +470,7 @@ void	CqRenderer::EndTransformModeBlock()
 
 void	CqRenderer::EndSolidModeBlock()
 {
-	if ( m_pconCurrent != 0 )
+	if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == CsgModeBlock) )
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndSolidModeBlock();
@@ -486,7 +486,7 @@ void	CqRenderer::EndSolidModeBlock()
 
 void	CqRenderer::EndObjectModeBlock()
 {
-	if ( m_pconCurrent != 0 )
+	if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == ObjectModeBlock ) )
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndObjectModeBlock();
@@ -502,7 +502,7 @@ void	CqRenderer::EndObjectModeBlock()
 
 void	CqRenderer::EndMotionModeBlock()
 {
-	if ( m_pconCurrent != 0 )
+	if ( m_pconCurrent != 0 && (m_pconCurrent->Type() == MotionModeBlock) )
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		// Copy the current state of the attributes UP the stack as a TransformBegin/End doesn't store them
@@ -1297,6 +1297,7 @@ TqInt CqRenderer::OutputDataSamples( const char* name )
 	}
 	return( 0 );
 }
+
 
 void TIFF_ErrorHandler(const char* mdl, const char* fmt, va_list va)
 {

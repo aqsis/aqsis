@@ -1304,8 +1304,8 @@ CqLinearCurvesGroup::CqLinearCurvesGroup(
 		{
 			//CqBasicError(
 			//    0, Severity_Normal,
-			//    "Encountered a periodic group of " \
-			//    "linear curves with at least one " \
+			//    "Encountered a periodic group of " 
+			//    "linear curves with at least one " 
 			//    "curve that has only two vertices.");
 			QGetRenderContext() ->Logger() ->warn( "Periodic linear curves should have more than two vertices" );
 		}

@@ -230,11 +230,17 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 
 		if ( pSurface->EyeSplitCount() > MaxEyeSplits )
 		{
-			//CqAttributeError( ErrorID_MaxEyeSplits, Severity_Normal, "Max eyesplits exceeded", pSurface->pAttributes(), TqTrue );
 			CqString objname( "unnamed" );
 			const CqString* pattrName = pSurface->pAttributes()->GetStringAttribute( "identifier", "name" );
 			if ( pattrName != 0 ) objname = pattrName[ 0 ];
-			QGetRenderContext() ->Logger() ->warn( "Max eyesplits for object \"%s\" exceeded", objname.c_str()  );
+			CqString warn = "Max eyesplits for object \"";
+			warn += objname.c_str();
+			warn += "\" exceeded"; 
+		 	static CqString oldwarn = "";	
+			if (oldwarn != warn) {
+				QGetRenderContext() ->Logger() ->warn( warn);
+				oldwarn = warn;
+			}
 			pSurface->Discard();
 		}
 		return ( TqFalse );

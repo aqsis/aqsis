@@ -44,6 +44,20 @@ class CqLightsource;
 class CqBasicSurface;
 class CqDeformingSurface;
 
+enum EqModeBlock
+{
+    MainModeBlock = 0,
+    FrameModeBlock,
+    WorldModeBlock,
+    AttributeModeBlock,
+    TransformModeBlock,
+    CsgModeBlock,
+    ObjectModeBlock,
+    MotionModeBlock,
+
+    MainModeBlock_last,
+};
+
 //----------------------------------------------------------------------
 /** Abstract base class to handle the current context of the renderer,
  * stores information about the current scoping and previous contexts.
@@ -55,7 +69,7 @@ class CqModeBlock : public CqRefCount
 		/** Default constructor
 		 * \param pconParent a pointer to the previous context.
 		 */
-		CqModeBlock( CqModeBlock* pconParent = 0 );
+		CqModeBlock( CqModeBlock* pconParent = 0, EqModeBlock modetype = MainModeBlock);
 		virtual	~CqModeBlock();
 
 		virtual	CqModeBlock*	BeginMainModeBlock();
@@ -210,6 +224,14 @@ class CqModeBlock : public CqRefCount
 		{
 			return ( m_pconParent );
 		}
+
+		/** Get the type.
+		 * \return a m_ModeType;
+		 */
+		EqModeBlock Type()
+		{
+			return ( m_modetype );
+		}
 		/** Get a reference to the current transformation matrix, the result of combining all transformations up to this point.
 		 * \return a matrix reference.
 		 */
@@ -245,8 +267,10 @@ class CqModeBlock : public CqRefCount
 	public:
 		CqAttributes* m_pattrCurrent;		///< The current attributes.
 		CqTransform* m_ptransCurrent;		///< The current transformation.
+		
 	private:
 		CqModeBlock*	m_pconParent;			///< The previous context.
+		EqModeBlock		m_modetype;				///< The current type of motionblock in order to double check the delete
 }
 ;
 
