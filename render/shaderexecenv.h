@@ -397,7 +397,6 @@ class CqShaderExecEnv
 			std::stack<CqBitVector>	m_stkState;				///< Stack of execution state bit vectors.
 			TqInt					m_LocalIndex;			///< Local cached variable index to speed repeated access to the same local variable.
 	
-
 	public:
 			TqInt	m_vfCulled;	///< Shader variable indicating whether the individual micropolys are culled.
 

@@ -33,6 +33,7 @@
 #include	"renderer.h"
 #include	"version.h"
 #include	"sstring.h"
+#include	"imagebuffer.h"
 
 START_NAMESPACE(Aqsis)
 

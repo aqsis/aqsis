@@ -28,6 +28,7 @@
 #define CSGTREE_H_INCLUDED 1
 
 #include	<ostream>
+#include	<vector>
 
 #include	"aqsis.h"
 
@@ -38,13 +39,24 @@
 
 START_NAMESPACE(Aqsis)
 
+struct SqImageSample;
 
+
+//------------------------------------------------------------------------------
+/**
+ *	Base CSG node class.
+ *	Handles all linkage and basic processing, derived classes provide operation specific details.
+ */
 class CqCSGTreeNode : public CqRefCount, public CqListEntry<CqCSGTreeNode>
 {
 	public:
-			CqCSGTreeNode()	{}
+			/** Default constructor.
+			 */
+			CqCSGTreeNode()	: m_pParent(NULL)	{}
 	virtual	~CqCSGTreeNode();
 
+			/** Enumeration of known CSG operation types.
+			 */
 			enum EqCSGNodeType
 			{
 				CSGNodeType_Primitive,
@@ -53,78 +65,132 @@ class CqCSGTreeNode : public CqRefCount, public CqListEntry<CqCSGTreeNode>
 				CSGNodeType_Difference,
 			};
 
+			/** Get a reference to the list of children of this node.
+			 */
 	virtual CqList<CqCSGTreeNode>& lChildren()	{return(m_lChildren);}
-	
-	virtual	EqCSGNodeType	NodeType() const=0;
-	virtual	CqString		StrNodeType() const=0;
-
-			void			Print(TqInt tab, std::ostream& out)
+			/** Add a child to this node.
+			 *  Takes care of unreferencing the parent if not already done.
+			 */
+	virtual	void			AddChild(CqCSGTreeNode* pChild)
 							{
-								for(TqInt i=0; i<tab; i++)
-									out << "\t";
-								out << StrNodeType().c_str() << std::endl;
-
-								CqCSGTreeNode* pChild = m_lChildren.pFirst();
-								while(pChild)
-								{
-									pChild->Print(tab+1, out);
-									pChild=pChild->pNext();
-								}
+								pChild->UnLink();
+								lChildren().LinkLast(pChild);
+								pChild->AddRef();
+								if(pChild->m_pParent)	pChild->m_pParent->Release();
+								pChild->m_pParent = this;
+								AddRef();
 							}
+	virtual	TqInt			isChild(const CqCSGTreeNode* pNode);
+			/** Get the pointer to the parent CSG node for this node.
+			 */
+	virtual	CqCSGTreeNode*	pParent() const {return(m_pParent);}
+	virtual	TqInt			cChildren();
+	
+			/** Get the type identifier for this CSG node, overridded per derived node.
+			 */
+	virtual	EqCSGNodeType	NodeType() const=0;
+			/** Evaluate the state of the CSG operation for the given in/out states.
+			 *  Given an array of in/out booleans for each of the children of this node,
+			 *  evaluate the resulting in/out state after applying the operation.
+			 */
+	virtual	TqBool			EvaluateState(std::vector<TqBool>& abChildStates)=0;
+
+	virtual	void			ProcessSampleList(std::vector<SqImageSample>& samples);
+
+			void			ProcessTree(std::vector<SqImageSample>& samples);
 
 	static CqCSGTreeNode* CreateNode(CqString& type);
 
 	private:
-			CqList<CqCSGTreeNode>	m_lChildren;
+			CqCSGTreeNode*			m_pParent;		///< Pointer to the parent CSG node.
+			CqList<CqCSGTreeNode>	m_lChildren;	///< List of children nodes.
 };
 
 
 
+//------------------------------------------------------------------------------
+/**
+ *	Primitive CSG node.
+ *	Does very little, primitive is basically a grouping node.
+ */
 class CqCSGNodePrimitive : public CqCSGTreeNode
 {
 	public:
+			///	Default constructor.
 			CqCSGNodePrimitive() : CqCSGTreeNode()	{}
+			///	Destructor.
 	virtual ~CqCSGNodePrimitive()	{}
 
 	virtual CqList<CqCSGTreeNode>& lChildren()	{assert(TqFalse); return(m_lDefPrimChildren);}
+	virtual	void			AddChild(CqCSGTreeNode* pChild)
+												{assert(TqFalse);}
 
 	virtual	EqCSGNodeType	NodeType() const	{return(CSGNodeType_Primitive);}
-	virtual	CqString		StrNodeType() const	{return(CqString("primitive"));}
+	virtual	void			ProcessSampleList(std::vector<SqImageSample>& samples)	{}
+	virtual	TqBool			EvaluateState(std::vector<TqBool>& abChildStates)	{return(TqTrue);}
 
 	private:
-	static	CqList<CqCSGTreeNode>	m_lDefPrimChildren;
+	static	CqList<CqCSGTreeNode>	m_lDefPrimChildren;		///< Static empty child list, as primitives cannot have children nodes.
 };
 
 
+//------------------------------------------------------------------------------
+/**
+ *	Union CSG node.
+ *	Creates a union of the surfaces of all its children.
+ */
 class CqCSGNodeUnion : public CqCSGTreeNode
 {
 	public:
+			///	Default constructor.
 			CqCSGNodeUnion() : CqCSGTreeNode()	{}
+			///	Destructor.
 	virtual ~CqCSGNodeUnion()	{}
 
 	virtual	EqCSGNodeType	NodeType() const	{return(CSGNodeType_Union);}
-	virtual	CqString		StrNodeType() const	{return(CqString("union"));}
+	virtual	TqBool			EvaluateState(std::vector<TqBool>& abChildStates);
+
+	private:
 };
 
+
+//------------------------------------------------------------------------------
+/**
+ *	Intersection CSG node.
+ *	Creates an intersection of the surfaces of all its children.
+ */
 class CqCSGNodeIntersection : public CqCSGTreeNode
 {
 	public:
+			///	Default constructor.
 			CqCSGNodeIntersection() : CqCSGTreeNode()	{}
+			///	Destructor.
 	virtual ~CqCSGNodeIntersection()	{}
 
 	virtual	EqCSGNodeType	NodeType() const	{return(CSGNodeType_Intersection);}
-	virtual	CqString		StrNodeType() const	{return(CqString("intersection"));}
+	virtual	TqBool			EvaluateState(std::vector<TqBool>& abChildStates);
+
+	private:
 };
 
 
+//------------------------------------------------------------------------------
+/**
+ *	Intersection CSG node.
+ *	Creates an difference between the first child surfaces and all other children.
+ */
 class CqCSGNodeDifference : public CqCSGTreeNode
 {
 	public:
+			///	Default constructor.
 			CqCSGNodeDifference() : CqCSGTreeNode()	{}
+			///	Destructor.
 	virtual ~CqCSGNodeDifference()	{}
 
 	virtual	EqCSGNodeType	NodeType() const	{return(CSGNodeType_Difference);}
-	virtual	CqString		StrNodeType() const	{return(CqString("difference"));}
+	virtual	TqBool			EvaluateState(std::vector<TqBool>& abChildStates);
+
+	private:
 };
 
 

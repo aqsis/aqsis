@@ -29,6 +29,7 @@
 #include	"renderer.h"
 #include	"shaders.h"
 #include	"trimcurve.h"
+#include	"imagebuffer.h"
 
 START_NAMESPACE(Aqsis)
 

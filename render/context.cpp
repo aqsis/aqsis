@@ -203,8 +203,7 @@ CqSolidContext::CqSolidContext(CqString& type, CqContext* pconParent) : CqContex
 	if(pconParent && pconParent->isSolid())
 	{
 		CqSolidContext* pParentSolid = static_cast<CqSolidContext*>(pconParent);
-		pParentSolid->pCSGNode()->lChildren().LinkLast(m_pCSGNode);
-		m_pCSGNode->AddRef();
+		pParentSolid->pCSGNode()->AddChild(m_pCSGNode);
 	}
 	else
 		m_lCSGTrees.LinkLast(m_pCSGNode);

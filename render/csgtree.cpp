@@ -25,13 +25,22 @@
 
 #include	"aqsis.h"
 
-#include "csgtree.h"
+#include	"csgtree.h"
+#include	"imagebuffer.h"
 
 START_NAMESPACE(Aqsis)
 
+/** Static empty children list for use by primitive node type.
+ */
 CqList<CqCSGTreeNode>	CqCSGNodePrimitive::m_lDefPrimChildren;
 
 
+//------------------------------------------------------------------------------
+/**
+ *	Destructor.
+ *	Takes care of unreferencing any children.
+ *
+ */
 CqCSGTreeNode::~CqCSGTreeNode()
 {
 	CqCSGTreeNode* pChild = m_lChildren.pFirst();
@@ -44,6 +53,16 @@ CqCSGTreeNode::~CqCSGTreeNode()
 }
 
 
+//------------------------------------------------------------------------------
+/**
+ *	Static function to create a CSG node from the name.
+ *	Used to create a node type from just the name.
+ *
+ *	@param	type	String identifier of CSG node type, one of "primitive",
+ *					"union", "intersection", "difference"
+ *
+ *	@return			Pointer to the new node.
+ */
 CqCSGTreeNode* CqCSGTreeNode::CreateNode(CqString& type)
 {
 	if(type == "primitive")
@@ -56,6 +75,213 @@ CqCSGTreeNode* CqCSGTreeNode::CreateNode(CqString& type)
 		return(new CqCSGNodeDifference);
 	else
 		return(NULL);
+}
+
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Determine if the given node is a child of this one.
+ *	If the node is a child, the index is returned, else -1.
+ *
+ *	@param	pNode	Pointer to a CSG node to test.
+ *
+ *	@return			Index of the node in the children list, or -1.
+ */
+TqInt CqCSGTreeNode::isChild(const CqCSGTreeNode* pNode)
+{
+	TqInt iChild = 0;
+	CqCSGTreeNode* pChild = lChildren().pFirst();
+	while(pChild)
+	{
+		if(pChild == pNode)	return(iChild);
+		pChild = pChild->pNext();
+		iChild++;
+	}
+	return(-1);
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Get the number of children.
+ *	Count the number of children nodes this node has.
+ *
+ *	@return	Integer children count.
+ */
+TqInt CqCSGTreeNode::cChildren()
+{
+	TqInt c = 0;
+	CqCSGTreeNode* pChild = lChildren().pFirst();
+	while(pChild)
+	{
+		c++;
+		pChild = pChild->pNext();
+	}
+	return(c);
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Process the CSG tree over the given sample list.
+ *	First goes back up the tree to the top, then starts processing nodes from
+ *	there using ProcessSampleList.
+ *
+ *	@param	samples	Array of samples to pass through the CSG tree.
+ */
+void CqCSGTreeNode::ProcessTree(std::vector<SqImageSample>& samples)
+{
+	// Follow the tree back up to the top, then process the list from there
+	CqCSGTreeNode* pTop = this;
+	while(NULL != pTop->pParent())
+		pTop = pTop->pParent();
+
+	pTop->ProcessSampleList(samples);
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Pass the sample list through the CSG node.
+ *	The sample list will contain only the relevant entry and exit points for
+ *	the resulting surface for this operation, and they will be promoted to
+ *	this node for further processing up the tree.
+ *
+ *	@param	samples	Array of samples to process.
+ */
+void CqCSGTreeNode::ProcessSampleList(std::vector<SqImageSample>& samples)
+{
+	// First process any children nodes.
+	// Process all nodes depth first.
+	CqCSGTreeNode* pChild = lChildren().pFirst();
+	while(NULL!=pChild)
+	{
+		pChild->ProcessSampleList(samples);
+		pChild = pChild->pNext();
+	}
+
+	// \todo First find out the initial state
+	std::vector<TqBool> abChildState;
+	abChildState.resize(cChildren());
+	TqInt iChild;
+	for(iChild=0; iChild<cChildren(); iChild++)	abChildState[iChild] = TqFalse;
+
+	TqBool bCurrentI = TqFalse;
+	
+	// Now go through samples, clearing any where the state doesn't change, and
+	// promoting any where it does to this node.
+	std::vector<SqImageSample>::iterator i;
+	for(i=samples.begin(); i!=samples.end();)
+	{
+		// Find out if sample is in out children nodes, if so are we entering or leaving.
+		TqInt iChild;
+		if((iChild = isChild(i->m_pCSGNode)) >= 0)
+			abChildState[iChild] = !abChildState[iChild];
+		else
+		{
+			i++;
+			continue;
+		}
+
+		// Work out the new state
+		TqBool bNewI = EvaluateState(abChildState);
+
+		// If it hasn't changed, remove the sample.
+		if(bNewI == bCurrentI)
+			i = samples.erase(i);
+		else
+		// Otherwise promote it to this node
+		{
+			bCurrentI = bNewI;
+			CqCSGTreeNode* poldnode = i->m_pCSGNode;
+			i->m_pCSGNode = this;
+			poldnode->Release();
+			AddRef();
+			i++;
+		}
+	}
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Evaluate the in/out state of the children and determine if the result is
+ *	in or out after the operatioin.
+ *	Given an array of booleans representing in or out of the children of this
+ *	node, apply the rules for the union operator and determine if we are
+ *	inside or out the union surface.
+ *
+ *	@param	abChildStates	Array of booleans representing in or out for each child.
+ *
+ *	@return					Boolean indicating in or out for the resulting solid.
+ */
+TqBool CqCSGNodeUnion::EvaluateState(std::vector<TqBool>& abChildStates)
+{
+	// Work out the new state
+	std::vector<TqBool>::iterator iChildState;
+	for(iChildState = abChildStates.begin(); iChildState!=abChildStates.end(); iChildState++)
+	{
+		if(*iChildState)
+			return(TqTrue);
+	}
+	return(TqFalse);
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Evaluate the in/out state of the children and determine if the result is
+ *	in or out after the operatioin.
+ *	Given an array of booleans representing in or out of the children of this
+ *	node, apply the rules for the intersection operator and determine if we are
+ *	inside or out the intersection surface.
+ *
+ *	@param	abChildStates	Array of booleans representing in or out for each child.
+ *
+ *	@return					Boolean indicating in or out for the resulting solid.
+ */
+TqBool CqCSGNodeIntersection::EvaluateState(std::vector<TqBool>& abChildStates)
+{
+	// Work out the new state
+	std::vector<TqBool>::iterator iChildState;
+	for(iChildState = abChildStates.begin(); iChildState!=abChildStates.end(); iChildState++)
+	{
+		if(!(*iChildState))
+			return(TqFalse);
+	}
+	return(TqTrue);
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Evaluate the in/out state of the children and determine if the result is
+ *	in or out after the operatioin.
+ *	Given an array of booleans representing in or out of the children of this
+ *	node, apply the rules for the difference operator and determine if we are
+ *	inside or out the difference surface.
+ *
+ *	@param	abChildStates	Array of booleans representing in or out for each child.
+ *
+ *	@return					Boolean indicating in or out for the resulting solid.
+ */
+TqBool CqCSGNodeDifference::EvaluateState(std::vector<TqBool>& abChildStates)
+{
+	// Work out the new state
+	if(abChildStates[0])
+	{
+		std::vector<TqBool>::iterator iChildState;
+		iChildState = abChildStates.begin();
+		iChildState++;
+		for(; iChildState!=abChildStates.end(); iChildState++)
+		{
+			if(*iChildState)
+				return(TqFalse);
+		}
+		return(TqTrue);
+	}
+	return(TqFalse);
 }
 
 

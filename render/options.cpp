@@ -28,6 +28,7 @@
 #include	"aqsis.h"
 #include	"options.h"
 #include	"renderer.h"
+#include	"imagebuffer.h"
 
 #include	"ri.h"
 

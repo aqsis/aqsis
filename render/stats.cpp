@@ -27,10 +27,11 @@
 #include  <math.h>
 
 #include	"aqsis.h"
-#include  "renderer.h"
-#include  "attributes.h"
+#include	"renderer.h"
+#include	"attributes.h"
 #include	"stats.h"
-#include  "messages.h"
+#include	"messages.h"
+#include	"imagebuffer.h"
 
 START_NAMESPACE(Aqsis)
 

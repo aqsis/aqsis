@@ -28,6 +28,7 @@
 #include	"micropolygon.h"
 #include	"surface.h"
 #include	"vector2d.h"
+#include	"imagebuffer.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -37,7 +38,7 @@ START_NAMESPACE(Aqsis)
  */
 
 CqBasicSurface::CqBasicSurface()	:	CqListEntry<CqBasicSurface>(), m_fDiceable(TqTrue), m_fDiscard(TqFalse), m_EyeSplitCount(0), 
-										m_pAttributes(0), m_pTransform(0), m_SplitDir(SplitDir_U)
+										m_pAttributes(0), m_pTransform(0), m_SplitDir(SplitDir_U), m_pCSGNode(NULL)
 {
 	// Set a refernce with the current attributes.
 	m_pAttributes=const_cast<CqAttributes*>(QGetRenderContext()->pattrCurrent());
@@ -47,6 +48,17 @@ CqBasicSurface::CqBasicSurface()	:	CqListEntry<CqBasicSurface>(), m_fDiceable(Tq
 	m_pTransform->AddRef();
 
 	m_CachedBound=TqFalse;
+
+	// If the current context is a solid node, and is a 'primitive', attatch this surface to the node.
+	if(QGetRenderContext()->pconCurrent()->isSolid())
+	{
+		CqContext* pSolid = QGetRenderContext()->pconCurrent();
+		if(pSolid->pCSGNode()->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive)
+		{
+			m_pCSGNode = pSolid->pCSGNode();
+			m_pCSGNode->AddRef();
+		}
+	}
 }
 
 
@@ -79,6 +91,8 @@ CqBasicSurface& CqBasicSurface::operator=(const CqBasicSurface& From)
 	m_fDiceable=From.m_fDiceable;
 	m_EyeSplitCount=From.m_EyeSplitCount;
 	m_fDiscard=From.m_fDiscard;
+	m_pCSGNode = From.m_pCSGNode;
+	if(m_pCSGNode)	m_pCSGNode->AddRef();
 	
 	return(*this);
 }
@@ -93,6 +107,7 @@ void CqBasicSurface::SetSurfaceParameters(const CqBasicSurface& From)
 	// If we already have attributes, unreference them now as we don't need them anymore.
 	if(m_pAttributes)	m_pAttributes->Release();
 	if(m_pTransform)	m_pTransform->Release();
+	if(m_pCSGNode)		m_pCSGNode->Release();
 
 	// Now store and reference our new attributes.
 	m_pAttributes=From.m_pAttributes;
@@ -100,6 +115,9 @@ void CqBasicSurface::SetSurfaceParameters(const CqBasicSurface& From)
 
 	m_pTransform=From.m_pTransform;
 	m_pTransform->AddRef();
+
+	m_pCSGNode = From.m_pCSGNode;
+	if(m_pCSGNode)	m_pCSGNode->AddRef();
 }
 
 

@@ -43,7 +43,7 @@ DEFINE_STATIC_MEMORYPOOL(CqMicroPolygonStatic);
 /** Default constructor
  */
 
-CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(), m_fNormals(TqFalse), m_cReferences(0), m_pAttributes(0)
+CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(), m_fNormals(TqFalse), m_cReferences(0), m_pAttributes(0), m_pCSGNode(NULL)
 {
 	QGetRenderContext()->Stats().IncGridsAllocated();
 }
@@ -61,6 +61,10 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
 	// Release the reference to the attributes.
 	if(m_pAttributes!=0)	m_pAttributes->Release();
 	m_pAttributes=0;
+
+	// Release the reference to the CSG node.
+	if(m_pCSGNode!=0)	m_pCSGNode->Release();
+	m_pCSGNode=0;
 }
 
 //---------------------------------------------------------------------
@@ -91,6 +95,9 @@ void CqMicroPolyGrid::Initialise(TqInt cu, TqInt cv, CqSurface* pSurface)
 		lUses=pSurface->Uses();
 		m_pAttributes=const_cast<CqAttributes*>(pSurface->pAttributes());
 		m_pAttributes->AddRef();
+
+		m_pCSGNode = pSurface->pCSGNode();
+		if(m_pCSGNode)	m_pCSGNode->AddRef();
 	}
 
 	CqShaderExecEnv::Initialise(cu,cv,pSurface,lUses);
@@ -274,17 +281,16 @@ void CqMicroPolyGrid::Shade()
 	}
 
 	// Now try and cull any hidden MPs if Sides==1
-	if(pSurface()->pAttributes()->iNumberOfSides()==1)
+	if(pSurface()->pAttributes()->iNumberOfSides()==1 && m_pCSGNode==NULL)
 	{
 		cCulled=0;
 	        QGetRenderContext()->Stats().OcclusionCullTimer().Start();
 		Reset();
 		do
 		{
+			// Calulate the direction the MPG is facing.
 			if((N()*P())>=0)	
-			{
 				cCulled++;
-			} else break;
 		}while(Advance());
 		QGetRenderContext()->Stats().OcclusionCullTimer().Stop();
 
@@ -347,7 +353,7 @@ void CqMicroPolyGrid::Shade()
 	//DeleteVariable(EnvVars_P);
 	DeleteVariable(EnvVars_dPdu);
 	DeleteVariable(EnvVars_dPdv);
-	DeleteVariable(EnvVars_N);
+//	DeleteVariable(EnvVars_N);
 //	DeleteVariable(EnvVars_u);
 //	DeleteVariable(EnvVars_v);
 	DeleteVariable(EnvVars_s);
@@ -466,6 +472,7 @@ void CqMicroPolyGrid::Split(CqImageBuffer* pImage, TqInt iBucket, long xmin, lon
 			if(fTrimmed)	pNew->MarkTrimmed();
 			pNew->Initialise(P()[iIndex], P()[iIndex+1], P()[iIndex+cu+2], P()[iIndex+cu+1]);
 			pNew->GetTotalBound(TqTrue);
+			
 			pImage->AddMPG(pNew);
 			Advance();
 		}
@@ -571,6 +578,7 @@ void CqMotionMicroPolyGrid::Split(CqImageBuffer* pImage, TqInt iBucket, long xmi
 				pNew->Initialise(vA, vB, vC, vD,Time(iTime));
 			}
 			pNew->GetTotalBound(TqTrue);
+
 			pImage->AddMPG(pNew);
 			pGridA->Advance();
 		}

@@ -27,6 +27,7 @@
 #include	"shaderstack.h"
 #include	"spline.h"
 #include	"patch.h"
+#include	"imagebuffer.h"
 
 START_NAMESPACE(Aqsis)
 

@@ -41,6 +41,7 @@
 #include	"shaderexecenv.h"
 #include	"shadervariable.h"
 #include	"motion.h"
+#include	"csgtree.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -85,6 +86,9 @@ class CqMicroPolyGridBase
 	virtual CqSurface*	pSurface() const=0;
 
 	virtual	CqAttributes* pAttributes() const=0;
+
+	virtual	CqCSGTreeNode* pCSGNode() const=0;
+
 	private:
 };
 
@@ -131,11 +135,13 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqShaderExecEnv
 					 */
 	virtual CqSurface*	pSurface() const	{return(CqShaderExecEnv::pSurface());}
 	virtual	CqAttributes* pAttributes() const	{return(m_pAttributes);}
+	virtual	CqCSGTreeNode* pCSGNode() const		{return(m_pCSGNode);}
 
 	private:
 			TqBool	m_fNormals;			///< Flag indicating normals have been filled in and don't need to be calculated during shading.
 			TqInt	m_cReferences;		///< Count of references to this grid.
 			CqAttributes* m_pAttributes;	///< Pointer to the attributes for this grid.
+			CqCSGTreeNode* m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
 };
 
 
@@ -162,6 +168,8 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 	virtual CqSurface*	pSurface() const	{return(static_cast<CqMicroPolyGrid*>(GetMotionObject(Time(0)))->pSurface());}
 
 	virtual CqAttributes* pAttributes() const	{return(static_cast<CqMicroPolyGrid*>(GetMotionObject(Time(0)))->pAttributes());}
+
+	virtual CqCSGTreeNode* pCSGNode() const	{return(static_cast<CqMicroPolyGrid*>(GetMotionObject(Time(0)))->pCSGNode());}
 
 	virtual		void		ClearMotionObject(CqMicroPolyGridBase*& A) const	{}
 					/** Overridden from CqMotionSpec, does nothing.

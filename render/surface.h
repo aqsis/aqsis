@@ -40,6 +40,7 @@
 #include	"parameters.h"
 #include	"bound.h"
 #include	"micropolygon.h"
+#include	"csgtree.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -64,6 +65,8 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount
 											m_pAttributes=0;
 											if(m_pTransform)
 												m_pTransform->Release();
+											if(m_pCSGNode)
+												m_pCSGNode->Release();
 											m_pTransform=0;
 										}
 
@@ -159,6 +162,8 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount
 
 			CqBasicSurface&	operator=(const CqBasicSurface& From);
 
+			CqCSGTreeNode* pCSGNode()	{return(m_pCSGNode);}
+
 			TqBool		m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
 			TqBool		m_fDiscard;			///< Flag to indicate that this GPrim is to be discarded.
 			TqInt		m_EyeSplitCount;	///< The number of times this GPrim has been split because if crossing the epsilon and eye planes.
@@ -176,6 +181,7 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount
 			EqSplitDir	m_SplitDir;			///< The direction to split this GPrim to achieve best results.
 			TqBool		m_CachedBound;		///< Whether or not the bound has been cached
 			CqBound		m_Bound;			///< The cached object bound
+			CqCSGTreeNode*	m_pCSGNode;		///< Pointer to the 'primitive' CSG node this surface belongs to, NULL if not part of a solid.
 };
 
 

@@ -150,7 +150,11 @@ class CqContext
 																pconParent()->AddContextLightSource(pLS);
 														}
 
-	virtual		TqBool	isSolid() const	{return(TqFalse);}
+	virtual		TqBool	isSolid()						{return((NULL!=pconParent())?pconParent()->isSolid():TqFalse);}
+						/** Get a pointer to the CSG tree node related to this context.
+						 * \return an options reference.
+						 */
+	virtual		CqCSGTreeNode*	pCSGNode()				{return((NULL!=pconParent())?pconParent()->pCSGNode():NULL);}
 
 	public:
 	static	CqList<CqCSGTreeNode>	m_lCSGTrees;
@@ -159,7 +163,6 @@ class CqContext
 			CqTransform*  m_ptransCurrent;		///< The current transformation.
 	private:
 			CqContext*	m_pconParent;			///< The previous context.
-
 };
 
 
@@ -382,15 +385,11 @@ class CqSolidContext : public CqContext
 	virtual			CqOptions&		optCurrent()		{return(pconParent()->optCurrent());}
  
 			
-	virtual		TqBool	isSolid() const	{return(TqTrue);}
-
-						/** Get a pointer to the CSG tree node related to this context.
-						 * \return an options reference.
-						 */
-			CqCSGTreeNode*	pCSGNode() const	{return(m_pCSGNode);}
+	virtual		TqBool	isSolid()						{return(TqTrue);}
+	virtual		CqCSGTreeNode*	pCSGNode()				{return(m_pCSGNode);}
 
 	private:
-			CqCSGTreeNode*	m_pCSGNode;		///< Pointer to the node in the CSG tree for this level in the solid definition.
+			CqCSGTreeNode*	m_pCSGNode;			///< Pointer to the node in the CSG tree for this level in the solid definition.
 };
 
 

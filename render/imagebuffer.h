@@ -51,6 +51,8 @@ START_NAMESPACE(Aqsis)
 /** Structure representing the information at a sample point in the image.
  */
 
+class CqCSGTreeNode;
+
 struct SqImageSample
 {
 				SqImageSample()	{}
@@ -68,6 +70,7 @@ struct SqImageSample
 	CqColor	m_colOpacity;		///< The opacity value of this sample point.
 	TqFloat		m_Depth;			///< The depth of the sample point.
 	TqFloat		m_Coverage;
+	CqCSGTreeNode*	m_pCSGNode;	///< Pointer to the CSG node this sample is part of, NULL if not part of a solid.
 };
 
 //-----------------------------------------------------------------------

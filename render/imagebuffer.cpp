@@ -228,6 +228,16 @@ void CqImagePixel::Combine()
 	TqUint numsamples = XSamples()*YSamples();
 	for(std::vector<std::vector<SqImageSample> >::iterator samples = m_aValues.begin(); samples != m_aValues.end(); samples++)
 	{
+		// Find out if any of the samples are in a CSG tree.
+		for(std::vector<SqImageSample>::iterator isample = samples->begin(); isample != samples->end(); isample++)
+		{
+			if(NULL != isample->m_pCSGNode)
+			{
+				isample->m_pCSGNode->ProcessTree(*samples);
+				break;
+			}
+		}
+		
 		CqColor samplecolor = gColBlack;
 		CqColor sampleopacity = gColBlack;
 		TqBool samplehit=TqFalse;
@@ -531,23 +541,22 @@ void CqBucket::UpdateMaxDepth()
 				for(sx=0; sx<m_XPixelSamples; sx++)
 				{
 					std::vector<SqImageSample>& aValues = pie->Values(sx,sy);
-					TqInt c = aValues.size();
-					if(c > 0)
+
+					if(aValues.size() > 0)
 					{
-						int sc=0;
+						std::vector<SqImageSample>::iterator sc = aValues.begin();
 						// find first opaque sample
-						while(sc<c && aValues[sc].m_colOpacity != gColWhite) sc++;
-						if( aValues[sc].m_colOpacity == gColWhite )
+						while(sc!=aValues.end() && ((sc->m_colOpacity != gColWhite) || (sc->m_pCSGNode != NULL))) 
+							sc++;
+						if( sc!=aValues.end() )
 						{
-							if( aValues[sc].m_Depth > currentMax )
+							if( sc->m_Depth > currentMax )
 							{
-								currentMax = aValues[sc].m_Depth;
+								currentMax = sc->m_Depth;
 								count = 1;
 							}
-							else if( aValues[sc].m_Depth == currentMax )
-							{
+							else if( sc->m_Depth == currentMax )
 								count++;
-							}
 						}
 						else
 						{
@@ -1125,6 +1134,9 @@ TqBool CqImageBuffer::OcclusionCullSurface(TqInt iBucket, CqBasicSurface* pSurfa
 	if(currentBucket.MaxDepthCount() <= 0)
 		currentBucket.UpdateMaxDepth();
 
+	if(pSurface->pCSGNode() != NULL)
+		return(TqFalse);
+	
 	if( RasterBound.vecMin().z() > currentBucket.MaxDepth() )
 	{
 		// pSurface is behind everying in this bucket but it may be 
@@ -1149,7 +1161,7 @@ TqBool CqImageBuffer::OcclusionCullSurface(TqInt iBucket, CqBasicSurface* pSurfa
 		
 		if( (nextBucket < m_cXBuckets * m_cYBuckets) &&
 			(RasterBound.vecMax().y() >= pos.y() ) )
-{		
+		{		
 			pSurface->UnLink();
 			m_aBuckets[nextBucket].AddGPrim(pSurface);
 			return TqTrue;
@@ -1421,9 +1433,11 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 									
 								ImageVal.m_colColor=pMPG->colColor();
 								ImageVal.m_colOpacity=pMPG->colOpacity();
+								ImageVal.m_pCSGNode = pMPG->pGrid()->pCSGNode();
+								if(NULL != ImageVal.m_pCSGNode)	ImageVal.m_pCSGNode->AddRef();
 								
 								// Truncate sample list if opaque.
-								if( pMPG->colOpacity() == gColWhite )
+								if((pMPG->colOpacity() == gColWhite) && (pMPG->pGrid()->pCSGNode() == NULL))
 								{
 									aValues.erase(aValues.begin()+i, aValues.end());
 									aValues.push_back(ImageVal);

@@ -5,13 +5,14 @@
  *	@brief	Implementation of trimcurce functionality.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2001/11/15 08:58:45 $
+ *	Last change date:	$Date: 2002/01/29 17:39:34 $
  */
 //------------------------------------------------------------------------------
 
 
 #include	"trimcurve.h"
 #include	"surface.h"
+#include	"imagebuffer.h"
 
 START_NAMESPACE(Aqsis)
 

@@ -27,6 +27,7 @@
 
 #include	"messages.h"
 #include	"renderer.h"
+#include	"imagebuffer.h"
 
 START_NAMESPACE(Aqsis)
 
