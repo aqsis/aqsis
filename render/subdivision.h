@@ -32,6 +32,7 @@
 #include "ri.h"
 #include "vector3d.h"
 #include "surface.h"
+#include "polygon.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -576,17 +577,24 @@ class CqWEdge
  * Subdivision surface GPrim.
  */
 
-class CqWSurf : public CqSurface
+class CqWSurf : public CqBasicSurface
 {
+	protected:
+					CqWSurf() :	CqBasicSurface(),
+								m_pVertices(0)
+										{}
 	public:
-					CqWSurf()	: CqSurface()	{}
-					CqWSurf(TqInt cExpectedVertices, TqInt cExpectedFaces)	: CqSurface(),
+					CqWSurf(CqPolygonPoints* pVertices)	: CqBasicSurface(),
+													  m_pVertices(pVertices)
+										{}
+					CqWSurf(TqInt cExpectedVertices, TqInt cExpectedFaces, CqPolygonPoints* pVertices)	: CqBasicSurface(),
 																			  m_cExpectedVertices(cExpectedVertices),
-																			  m_cExpectedFaces(cExpectedFaces)
+																			  m_cExpectedFaces(cExpectedFaces),
+																			  m_pVertices(pVertices)
 										{}
 	virtual			~CqWSurf();
 
-	// Overridden from CqSurface
+	// Overridden from CqBasicSurface
 	virtual	CqBound		Bound() const;
 						/** Should never be called.
 						 */
@@ -675,23 +683,96 @@ class CqWSurf : public CqSurface
 						/** Get indexed vertex.
 						 * \param i Integer index.
 						 */
-			CqVector3D	SubdP(TqInt i)		{return(CqSurface::P()[i]);}
+			CqVector3D	SubdP(TqInt i)		{return(P()[i]);}
 						/** Get indexed texture s coordinate.
 						 * \param i Integer index.
 						 */
-			TqFloat		Subds(TqInt i)		{return(CqSurface::s()[i]);}
+			TqFloat		Subds(TqInt i)		{return(s()[i]);}
 						/** Get indexed texture t coordinate.
 						 * \param i Integer index.
 						 */
-			TqFloat		Subdt(TqInt i)		{return(CqSurface::t()[i]);}
+			TqFloat		Subdt(TqInt i)		{return(t()[i]);}
 						/** Get indexed color.
 						 * \param i Integer index.
 						 */
-			CqColor	SubdCs(TqInt i)		{return(CqSurface::Cs()[i]);}
+			CqColor	SubdCs(TqInt i)		{return(Cs()[i]);}
 						/** Get indexed opacity.
 						 * \param i Integer index.
 						 */
-			CqColor	SubdOs(TqInt i)		{return(CqSurface::Os()[i]);}
+			CqColor	SubdOs(TqInt i)		{return(Os()[i]);}
+
+	// Passthrough functions to the CqSurface containing the vertices.
+						/** Get a reference the to P default parameter.
+						 */
+			CqParameterTypedVarying<CqVector4D, Type_hPoint>& P()	{return(m_pVertices->P());}
+						/** Get a reference the to N default parameter.
+						 */
+			CqParameterTypedVarying<CqVector3D, Type_Normal>& N()	{return(m_pVertices->N());}
+						/** Get a reference the to Cq default parameter.
+						 */
+			CqParameterTypedVarying<CqColor, Type_Color>& Cs()		{return(m_pVertices->Cs());}
+						/** Get a reference the to Os default parameter.
+						 */
+			CqParameterTypedVarying<CqColor, Type_Color>& Os()		{return(m_pVertices->Os());}
+						/** Get a reference the to s default parameter.
+						 */
+			CqParameterTypedVarying<TqFloat, Type_Float>& s()		{return(m_pVertices->s());}
+						/** Get a reference the to t default parameter.
+						 */
+			CqParameterTypedVarying<TqFloat, Type_Float>& t()		{return(m_pVertices->t());}
+						/** Get a reference the to u default parameter.
+						 */
+			CqParameterTypedVarying<TqFloat, Type_Float>& u()		{return(m_pVertices->u());}
+						/** Get a reference the to v default parameter.
+						 */
+			CqParameterTypedVarying<TqFloat, Type_Float>& v()		{return(m_pVertices->v());}
+
+						/** Get a reference the to P default parameter.
+						 */
+	const	CqParameterTypedVarying<CqVector4D, Type_hPoint>& P() const	{return(m_pVertices->P());}
+						/** Get a reference the to N default parameter.
+						 */
+	const	CqParameterTypedVarying<CqVector3D, Type_Normal>& N() const	{return(m_pVertices->N());}
+						/** Get a reference the to Cq default parameter.
+						 */
+	const	CqParameterTypedVarying<CqColor, Type_Color>& Cs() const	{return(m_pVertices->Cs());}
+						/** Get a reference the to Os default parameter.
+						 */
+	const	CqParameterTypedVarying<CqColor, Type_Color>& Os() const	{return(m_pVertices->Os());}
+						/** Get a reference the to s default parameter.
+						 */
+	const	CqParameterTypedVarying<TqFloat, Type_Float>& s() const		{return(m_pVertices->s());}
+						/** Get a reference the to t default parameter.
+						 */
+	const	CqParameterTypedVarying<TqFloat, Type_Float>& t() const		{return(m_pVertices->t());}
+						/** Get a reference the to u default parameter.
+						 */
+	const	CqParameterTypedVarying<TqFloat, Type_Float>& u() const		{return(m_pVertices->u());}
+						/** Get a reference the to v default parameter.
+						 */
+	const	CqParameterTypedVarying<TqFloat, Type_Float>& v() const		{return(m_pVertices->v());}
+
+						/** Determine whether this surface has per vertex normals.
+						 */
+	const	TqBool		bHasN() const									{return(m_pVertices->bHasN());}
+						/** Determine whether this surface has per vertex colors.
+						 */
+	const	TqBool		bHasCs() const									{return(m_pVertices->bHasCs());}
+						/** Determine whether this surface has per vertex opacities.
+						 */
+	const	TqBool		bHasOs() const									{return(m_pVertices->bHasOs());}
+						/** Determine whether this surface has per vertex s cordinates.
+						 */
+	const	TqBool		bHass() const									{return(m_pVertices->bHass());}
+						/** Determine whether this surface has per vertex t coordinates.
+						 */
+	const	TqBool		bHast() const									{return(m_pVertices->bHast());}
+						/** Determine whether this surface has per vertex u coordinates.
+						 */
+	const	TqBool		bHasu() const									{return(m_pVertices->bHasu());}
+						/** Determine whether this surface has per vertex v coordinates.
+						 */
+	const	TqBool		bHasv() const									{return(m_pVertices->bHasv());}
 
 	protected:
 		std::vector<CqWVert*>	m_apVerts;				///< Array of pointers to winged edge vertex structures. 
@@ -699,6 +780,7 @@ class CqWSurf : public CqSurface
 		std::vector<CqWFace*>	m_apFaces;				///< Array of pointers to winged edge face structures. 
 		TqInt					m_cExpectedVertices;	///< Number of vertices to be filled in.
 		TqInt					m_cExpectedFaces;		///< Number of faces to be filled in.
+		CqPolygonPoints*		m_pVertices;			///> Pointer to the CqSurface class with the surface vertices on.
 };
 
 

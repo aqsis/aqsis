@@ -30,6 +30,7 @@
 #include	"renderer.h"
 #include	"micropolygon.h"
 #include	"imagebuffer.h"
+#include	"polygon.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -374,6 +375,7 @@ CqWFace* CqWSurf::AddFace(CqWEdge** pE, TqInt cE)
 }
 
 
+
 //---------------------------------------------------------------------
 /** Destructor
  */
@@ -390,6 +392,9 @@ CqWSurf::~CqWSurf()
 
 	for(i=0; i<m_apEdges.size(); i++)
 		delete(m_apEdges[i]);
+
+	// Unreference the vertex storage class.
+	m_pVertices->UnReference();
 }
 
 
@@ -491,11 +496,11 @@ void CqWSurf::SmoothVertexPoints(TqInt oldcVerts, TqBool uses_s, TqBool uses_t, 
 	// Copy the modified points back to the surface.
 	for(i=0; i<oldcVerts; i++)
 	{
-		CqSurface::P()[pVert(i)->iVertex()]=aVertices[i].P;
-		if(uses_s && has_s)		CqSurface::s()[pVert(i)->iVertex()]=aVertices[i].s;
-		if(uses_t && has_t)		CqSurface::t()[pVert(i)->iVertex()]=aVertices[i].t;
-		if(uses_Cs && has_Cs)	CqSurface::Cs()[pVert(i)->iVertex()]=aVertices[i].Cq;
-		if(uses_Os && has_Os)	CqSurface::Os()[pVert(i)->iVertex()]=aVertices[i].Os;
+		P()[pVert(i)->iVertex()]=aVertices[i].P;
+		if(uses_s && has_s)		s()[pVert(i)->iVertex()]=aVertices[i].s;
+		if(uses_t && has_t)		t()[pVert(i)->iVertex()]=aVertices[i].t;
+		if(uses_Cs && has_Cs)	Cs()[pVert(i)->iVertex()]=aVertices[i].Cq;
+		if(uses_Os && has_Os)	Os()[pVert(i)->iVertex()]=aVertices[i].Os;
 	}
 }
 
@@ -520,16 +525,16 @@ void CqWSurf::Subdivide()
 	TqBool has_Os=Os().Size()>=P().Size();
 	
 	// Create an array big enough to hold all the additional points to be created.
-	TqInt newcVerts=CqSurface::P().Size();
-	TqInt oldcVerts=CqSurface::P().Size();
+	TqInt newcVerts=P().Size();
+	TqInt oldcVerts=P().Size();
 	newcVerts+=cFaces();
 	newcVerts+=cEdges();
 
-	CqSurface::P().SetSize(newcVerts);
-	if(uses_s && has_s)		CqSurface::s().SetSize(newcVerts);
-	if(uses_t && has_t)		CqSurface::t().SetSize(newcVerts);
-	if(uses_Cs && has_Cs)	CqSurface::Cs().SetSize(newcVerts);
-	if(uses_Os && has_Os)	CqSurface::Os().SetSize(newcVerts);
+	P().SetSize(newcVerts);
+	if(uses_s && has_s)		s().SetSize(newcVerts);
+	if(uses_t && has_t)		t().SetSize(newcVerts);
+	if(uses_Cs && has_Cs)	Cs().SetSize(newcVerts);
+	if(uses_Os && has_Os)	Os().SetSize(newcVerts);
 
 	m_apVerts.reserve(cVerts()+cFaces()+cEdges());
 	m_apFaces.reserve(cFaces()+(cFaces()*4));
@@ -978,6 +983,11 @@ void CqWReference::SetpeHeadHeadRight(CqWEdge* pe)
 
 CqSubdivisionPatch::CqSubdivisionPatch(CqWSurf* pSurf, TqInt iFace)
 {
+	// Allocate a new points class for points storage.
+	CqPolygonPoints* pPointsClass=new CqPolygonPoints(pSurf->cVerts());
+	m_pVertices=pPointsClass;
+	pPointsClass->Reference();
+
 	TqInt lUses=pSurf->Uses();
 	TqBool uses_s=USES(lUses,EnvVars_s);
 	TqBool uses_t=USES(lUses,EnvVars_t);
@@ -1121,16 +1131,16 @@ void CqSubdivisionPatch::DiceSubdivide()
 	aVertices.resize(cVerts());
 
 	// Create an array big enough to hold all the additional points to be created.
-	TqInt newcVerts=CqSurface::P().Size();
-	TqInt oldcVerts=CqSurface::P().Size();
+	TqInt newcVerts=P().Size();
+	TqInt oldcVerts=P().Size();
 	newcVerts+=cFaces();
 	newcVerts+=cEdges();
 
-	CqSurface::P().SetSize(newcVerts);
-	if(uses_s && has_s)		CqSurface::s().SetSize(newcVerts);
-	if(uses_t && has_t)		CqSurface::t().SetSize(newcVerts);
-	if(uses_Cs && has_Cs)	CqSurface::Cs().SetSize(newcVerts);
-	if(uses_Os && has_Os)	CqSurface::Os().SetSize(newcVerts);
+	P().SetSize(newcVerts);
+	if(uses_s && has_s)		s().SetSize(newcVerts);
+	if(uses_t && has_t)		t().SetSize(newcVerts);
+	if(uses_Cs && has_Cs)	Cs().SetSize(newcVerts);
+	if(uses_Os && has_Os)	Os().SetSize(newcVerts);
 	
 	m_apVerts.reserve(cVerts()+cFaces()+cEdges());
 	m_apFaces.reserve(cFaces()*4);
@@ -1393,7 +1403,7 @@ CqMicroPolyGridBase* CqSubdivisionPatch::Dice()
 {
 	// Create a new CqMicroPolyGrid for this patch
 	TqInt cuv=(1<<m_DiceCount);
-	CqMicroPolyGrid* pGrid=new CqMicroPolyGrid(cuv, cuv, this);
+	CqMicroPolyGrid* pGrid=new CqMicroPolyGrid(cuv, cuv, m_pVertices);
 	
 	TqInt lUses=Uses();
 	TqBool uses_s=USES(lUses,EnvVars_s);

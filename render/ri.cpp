@@ -3156,16 +3156,19 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 	}
 
 	// Create a storage class for all the points.
-	CqWSurf* pSubdivision=new CqWSurf(cVerts,nfaces);
+	CqPolygonPoints* pPointsClass=new CqPolygonPoints(cVerts);
+
+	// Create the subdivision structure class.
+	CqWSurf* pSubdivision=new CqWSurf(cVerts,nfaces,pPointsClass);
 	
 	// Process any specified primitive variables
-	pSubdivision->SetDefaultPrimitiveVariables(); 
-	if(ProcessPrimitiveVariables(pSubdivision,count,tokens,values))
+	pPointsClass->SetDefaultPrimitiveVariables(); 
+	if(ProcessPrimitiveVariables(pPointsClass,count,tokens,values))
 	{
 		// Transform the points into camera space for processing,
-		pSubdivision->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pSubdivision->pTransform()->matObjectToWorld()),
-								QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pSubdivision->pTransform()->matObjectToWorld()),
-								QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSubdivision->pTransform()->matObjectToWorld()));
+		pPointsClass->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()),
+								QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()),
+								QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()));
 		
 		// Intitialise the vertices of the hull
 		int i;
@@ -3224,6 +3227,7 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 			apEdges.clear();
 			iPStart=iP;
 		}
+		pPointsClass->Reference();
 		QGetRenderContext()->pImage()->PostSurface(pSubdivision);
 		QGetRenderContext()->Stats().IncGPrims();
 	}
