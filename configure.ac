@@ -145,6 +145,7 @@ libcodegenvm/Makefile \
 libdd/Makefile \
 libddmsimple/Makefile \
 libddmsock/Makefile \
+libraytrace/Makefile \
 libri2rib/Makefile \
 librib2/Makefile \
 librib2/tests/Makefile \

@@ -106,7 +106,7 @@ CqBasicError::CqBasicError( TqInt code, TqInt severity, const char* message, TqB
 {
     if ( gReportedErrors.CheckReport( this ) )
     {
-        ( *QGetRenderContext() ->optCurrent().pErrorHandler() ) ( code, severity, const_cast<char*>(message) );
+        ( *QGetRenderContext() ->pErrorHandler() ) ( code, severity, const_cast<char*>(message) );
         if ( onceper )
             gReportedErrors.SetReported( new CqBasicError( *this ) );
     }
@@ -134,7 +134,7 @@ CqAttributeError::CqAttributeError( TqInt code, TqInt severity, const char* mess
         strMessage = message;
         strMessage += " : ";
         strMessage += strName;
-        ( *QGetRenderContext() ->optCurrent().pErrorHandler() ) ( code, severity, ( char* ) strMessage.c_str() );
+        ( *QGetRenderContext() ->pErrorHandler() ) ( code, severity, ( char* ) strMessage.c_str() );
         if ( onceper )
             gReportedErrors.SetReported( new CqAttributeError( *this ) );
     }
