@@ -33,7 +33,7 @@
 
 #define	VERMAJOR	0
 #define	VERMINOR	6
-#define	BUILD		3
+#define	BUILD		4
 
 #define	STRX(x)	#x
 #define	STR(x)	STRX(x)
