@@ -1113,7 +1113,7 @@ void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt
 			break;
 
 		if(((*sample).m_flags & SqImageSample::Flag_Occludes) &&
-			(*sample).m_pCSGNode && m_CurrentMpgSampleInfo.m_IsCullable)
+			!(*sample).m_pCSGNode && m_CurrentMpgSampleInfo.m_IsCullable)
 			return;
 
 		++sample;
