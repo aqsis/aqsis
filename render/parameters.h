@@ -437,12 +437,12 @@ public:
     virtual	const	T*	pValue( const TqInt Index ) const
     {
         assert( 0 < m_aValues.size() );
-        return ( &m_aValues[ 0 ] );
+        return ( &m_aValues[ Index ] );
     }
     virtual	T*	pValue( const TqInt Index )
     {
         assert( 0 < m_aValues.size() );
-        return ( &m_aValues[ 0 ] );
+        return ( &m_aValues[ Index ] );
     }
 
 

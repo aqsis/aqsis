@@ -3478,6 +3478,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
         TqUint ctris = 0;
         std::vector<TqInt>	aiTriangles;
         std::vector<TqInt> aFVList;
+        std::vector<TqInt> aUVList;
 
         for ( ipoly = 0; ipoly < npolys; ipoly++ )
         {
@@ -3589,6 +3590,12 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
                 }
                 assert( found );
             }
+
+            // Store the count of triangles generated for this general poly, so that we
+			// can duplicate up the uniform values as appropriate.
+            /// \note This code relies on the fact that vertex indices cannot be duplicated
+            /// within the loops of a single poly. Make sure this is a reasonable assumption.
+			aUVList.push_back( ( iEndTri - iStartTri ) / 3 );
         }
         RELEASEREF( pPointsClass );
 
@@ -3597,7 +3604,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
         std::vector<RtInt> _nverts;
         _nverts.resize( ctris, 3 );
 
-        // Rebuild any facevarying variables.
+        // Rebuild any facevarying or uniform variables.
         TqInt iUserParam;
         TqInt fvcount = ctris * 3;
         assert( aFVList.size() == fvcount );
@@ -3605,26 +3612,26 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
         for( iUserParam = 0; iUserParam < count; iUserParam++ )
         {
             SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( tokens[ iUserParam ] );
+            TqInt elem_size;
+            switch( Decl.m_Type )
+            {
+            case type_float:
+                elem_size = sizeof(RtFloat);
+                break;
+            case type_vector:
+            case type_point:
+            case type_normal:
+                elem_size = sizeof(RtPoint);
+                break;
+            case type_color:
+                elem_size = sizeof(RtColor);
+                break;
+            case type_matrix:
+                elem_size = sizeof(RtMatrix);
+                break;
+            }
             if( Decl.m_Class == class_facevarying )
             {
-                TqInt elem_size;
-                switch( Decl.m_Type )
-                {
-                case type_float:
-                    elem_size = sizeof(RtFloat);
-                    break;
-                case type_vector:
-                case type_point:
-                case type_normal:
-                    elem_size = sizeof(RtPoint);
-                    break;
-                case type_color:
-                    elem_size = sizeof(RtColor);
-                    break;
-                case type_matrix:
-                    elem_size = sizeof(RtMatrix);
-                    break;
-                }
                 char* pNew = static_cast<char*>( malloc( elem_size * fvcount ) );
                 aNewParams.push_back( pNew );
                 TqInt iElem;
@@ -3633,6 +3640,27 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
                     const unsigned char* pval = static_cast<const unsigned char*>( values[ iUserParam ] ) + ( aFVList[ iElem ] * elem_size );
                     memcpy( pNew, pval, elem_size );
                     pNew += elem_size;
+                }
+                values[ iUserParam ] = aNewParams.back();
+            }
+            else if( Decl.m_Class == class_uniform )
+            {
+				// Allocate enough for 1 value per triangle, then duplicate values from the original list
+				// accordingly.
+                char* pNew = static_cast<char*>( malloc( elem_size * ctris ) );
+                aNewParams.push_back( pNew );
+                TqInt iElem;
+				const unsigned char* pval = static_cast<const unsigned char*>( values[ iUserParam ] );
+                for( iElem = 0; iElem < npolys; iElem++ )
+                {
+                    TqInt dup_count = aUVList[ iElem ]; 
+					TqInt dup;
+					for(dup=0; dup < dup_count; dup++)
+					{
+						memcpy( pNew, pval, elem_size );
+	                    pNew += elem_size;
+					}
+					pval += elem_size;
                 }
                 values[ iUserParam ] = aNewParams.back();
             }
