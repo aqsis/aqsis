@@ -65,7 +65,11 @@ RtVoid PrintProgress(RtFloat percent)
 /** Function to setup specific options needed after world loading but before rendering.
 	Used as the callback function to a RiPreRenderFunction call.
  */
+#ifdef	AQSIS_SYSTEM_BEOS
 RtVoid PreRender(...)
+#else
+RtVoid PreRender()
+#endif
 {
 	if(g_fb)
 	{
