@@ -111,7 +111,7 @@ class _qShareC	CqImageElement
 								/** Get a reference to the array of values for the specified sample.
 								 * \param m The horizontal index of the required sample point.
 								 * \param n The vertical index of the required sample point.
-								 * \return A Reference to a vector of SqImageElement data.
+								 * \return A Reference to a vector of SqImageValue data.
 								 */
 	_qShareM	std::vector<SqImageValue>&	Values(TqInt m, TqInt n)	
 											{
@@ -162,7 +162,7 @@ class _qShareC	CqImageElement
 /** Class holding data about a particular bucket.
  */
 
-class CqBucket
+class CqBucket : public IqBucket
 {
 	public:
 					CqBucket()	{}
@@ -180,26 +180,33 @@ class CqBucket
 									return(*this);
 								}
 				
-				TqInt	XSize() const	{return(m_XSize);}
-				TqInt	YSize() const	{return(m_YSize);}
-				TqInt	XOrigin() const	{return(m_XOrigin);}
-				TqInt	YOrigin() const	{return(m_YOrigin);}
-				TqInt	XFWidth() const	{return(m_XFWidth);}
-				TqInt	YFWidth() const	{return(m_YFWidth);}
+		// Overridden from IqBucket
+		virtual	TqInt	XSize() const	{return(m_XSize);}
+		virtual	TqInt	YSize() const	{return(m_YSize);}
+		virtual	TqInt	XOrigin() const	{return(m_XOrigin);}
+		virtual	TqInt	YOrigin() const	{return(m_YOrigin);}
+		virtual	TqInt	XFWidth() const	{return(m_XFWidth);}
+		virtual	TqInt	YFWidth() const	{return(m_YFWidth);}
+
+		virtual	TqBool	FilteredElement(TqInt iXPos, TqInt iYPos, SqImageValue& Val);
+		virtual	TqBool	Element(TqInt iXPos, TqInt iYPos, SqImageValue& Val);
+		virtual	void	ExposeElement(SqImageValue& Val);
+		virtual	void	QuantizeElement(SqImageValue& Val);
 
 		static	void	InitialiseBucket(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqInt xfwidth, TqInt yfwidth, TqInt xsamples, TqInt ysamples, TqBool fJitter=TqTrue);
+		static	void	InitialiseFilterValues();
 		static	void	Clear();
 		static	TqBool	ImageElement(TqInt iXPos, TqInt iYPos, CqImageElement*& pie);
 		static	void	CombineElements();
-				void		AddGPrim(CqBasicSurface* pGPrim)
+				void	AddGPrim(CqBasicSurface* pGPrim)
 								{
 									m_aGPrims.LinkFirst(pGPrim);
 								}
-				void		AddMPG(CqMicroPolygonBase* pmpgNew)
+				void	AddMPG(CqMicroPolygonBase* pmpgNew)
 								{
 									m_ampgWaiting.push_back(pmpgNew);
 								}
-				void		AddGrid(CqMicroPolyGridBase* pgridNew)
+				void	AddGrid(CqMicroPolyGridBase* pgridNew)
 								{
 									m_agridWaiting.push_back(pgridNew);
 								}
@@ -215,6 +222,7 @@ class CqBucket
 	static	TqInt	m_XOrigin;
 	static	TqInt	m_YOrigin;
 	static	std::vector<CqImageElement>	m_aieImage;
+	static	std::vector<std::vector<TqFloat> >	m_aaFilterValues;	///< Vector of vector of filter weights precalculated fro each jittered sample point in each pixel.
 
 			std::vector<CqMicroPolygonBase*> m_ampgWaiting;			///< Vector of vectors of waiting micropolygons in this bucket
 			std::vector<CqMicroPolyGridBase*> m_agridWaiting;		///< Vector of vectors of waiting micropolygrids in this bucket
@@ -319,11 +327,6 @@ class _qShareC	CqImageBuffer
 	_qShareM			void	DeleteImage();
 	_qShareM			void	SaveImage(const char* strName);
 
-	_qShareM			TqBool	Pixel(TqInt iXPos, TqInt iYPos, TqInt iBucket, CqImageElement*& pie);
-	_qShareM			void	FilterPixel(TqInt X, TqInt Y, TqInt iBucket,SqImageValue& val);
-	_qShareM			void	ExposePixel(SqImageValue& Pixel);
-	_qShareM			void	QuantizePixel(SqImageValue& Pixel);
-
 	_qShareM			void	PostSurface(CqBasicSurface* pSurface);
 	_qShareM			TqBool	CullSurface(CqBound& Bound, CqBasicSurface* pSurface);
 	_qShareM			void	AddMPG(CqMicroPolygonBase* pmpgNew);
@@ -331,7 +334,6 @@ class _qShareC	CqImageBuffer
 	_qShareM			void	RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax);
 	_qShareM			void	RenderSurfaces(TqInt iBucket, long xmin, long xmax, long ymin, long ymax);
 	_qShareM			void	RenderImage();
-	_qShareM			void	PostBucket(TqInt iBucket);
 								/** Get comlpetion status of this rendered image.
 								 * \return bool indicating finished or not.
 								 */
@@ -366,7 +368,6 @@ class _qShareC	CqImageBuffer
 			TqInt				m_CropWindowYMax;	///< Integer maximum vertical pixel to render.
 			TqInt				m_DisplayMode;		///< Integer display mode, a member of the enum Mode.
 
-			std::vector<std::vector<TqFloat> >	m_aaFilterValues;	///< Vector of vector of filter weights precalculated fro each jittered sample point in each pixel.
 			std::vector<CqBucket>	m_aBuckets;
 };
 

@@ -29,13 +29,12 @@
 
 #include	"aqsis.h"
 #include	"stats.h"
-#include	"imagebuffer.h"
 #include	"options.h"
 #include	"renderer.h"
 #include	"surface.h"
 #include	"shadervm.h"
 #include	"micropolygon.h"
-#include	"displaydriver.h"
+#include	"imagebuffer.h"
 
 #include	<map>
 
@@ -254,6 +253,7 @@ TqInt	CqBucket::m_YFWidth;
 TqInt	CqBucket::m_XOrigin;
 TqInt	CqBucket::m_YOrigin;
 std::vector<CqImageElement>	CqBucket::m_aieImage;
+std::vector<std::vector<TqFloat> > CqBucket::m_aaFilterValues;
 
 //----------------------------------------------------------------------
 /** Get a reference to pixel data.
@@ -310,7 +310,7 @@ void CqBucket::InitialiseBucket(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt
 	m_XFWidth=xfwidth;
 	m_YFWidth=yfwidth;
 	// Allocate the image element storage for a single bucket
-	m_aieImage.resize((xsize+xfwidth)*(ysize*yfwidth));
+	m_aieImage.resize((xsize+xfwidth)*(ysize+yfwidth));
 
 	// Initialise the samples for this bucket.
 	TqInt i;
@@ -328,10 +328,170 @@ void CqBucket::InitialiseBucket(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt
 }
 
 
+void CqBucket::InitialiseFilterValues()
+{
+	// Allocate and fill in the filter values array for each pixel.
+	RtFilterFunc pFilter;
+	pFilter=QGetRenderContext()->optCurrent().funcFilter();
+	m_aaFilterValues.resize(m_XSize*m_YSize);
+	TqInt NumFilterValues=((m_YFWidth+1)*(m_XFWidth+1));//*(m_PixelXSamples*m_PixelYSamples);
+	TqInt y;
+	for(y=0; y<m_YSize; y++)
+	{
+		TqInt x;
+		for(x=0; x<m_XSize; x++)
+		{
+			// Allocate enough entries
+			m_aaFilterValues[(y*m_XSize)+x].resize(NumFilterValues);
+			TqFloat* pFilterValues=&m_aaFilterValues[(y*m_XSize)+x][0];
+			TqInt fy=-m_YFWidth/2;
+			while(fy<=m_YFWidth/2)
+			{
+				TqInt fx=-m_XFWidth/2;
+				while(fx<=m_YFWidth/2)
+				{
+					TqFloat g=(*pFilter)(fx, fy, m_XFWidth, m_YFWidth);
+					*pFilterValues++=g;
+
+					fx++;
+				}
+				fy++;
+			}
+		}
+	}
+}
+
+
 void CqBucket::CombineElements()
 {
 	for(std::vector<CqImageElement>::iterator i=m_aieImage.begin(); i!=m_aieImage.end(); i++)
 		i->Combine();
+}
+
+
+TqBool CqBucket::FilteredElement(TqInt iXPos, TqInt iYPos, SqImageValue& Val)
+{
+	CqImageElement* pie;
+
+	TqInt X=iXPos-XOrigin();
+	TqInt Y=iYPos-YOrigin();
+
+	if(!ImageElement(iXPos-(XFWidth()*0.5f),iYPos-(YFWidth()*0.5f),pie))
+		return(TqFalse);
+
+	TqInt xsize=QGetRenderContext()->pImage()->XBucketSize();
+	TqInt ysize=QGetRenderContext()->pImage()->YBucketSize();
+	TqFloat* pFilterValues=&m_aaFilterValues[((Y%ysize)*xsize)+(X%xsize)][0];
+
+	CqColor c(0,0,0);
+	TqFloat d=0.0f;
+	TqFloat gTot=0.0;
+	TqFloat xmax=XFWidth()*0.5f;
+	TqFloat ymax=YFWidth()*0.5f;
+	TqInt fy=static_cast<TqInt>(-ymax);
+	while(fy<=ymax)
+	{
+		TqInt fx=static_cast<TqInt>(-xmax);
+		CqImageElement* pie2=pie;
+		while(fx<=xmax)
+		{
+			TqFloat g=*pFilterValues++;
+			c+=pie2->Color()*g;
+			d+=pie2->Depth()*g;
+
+			gTot+=g;
+
+			pie2++;
+			fx++;
+		}
+		pie+=(xsize+XFWidth());
+		fy++;
+	}
+
+	Val.m_colColor=c/gTot;
+	Val.m_colOpacity=(CqColor(1,1,1)); // TODO: Work out the A value properly.
+	Val.m_Depth=d/gTot;
+
+	return(TqTrue);
+}
+
+
+TqBool CqBucket::Element(TqInt iXPos, TqInt iYPos, SqImageValue& Val)
+{
+	CqImageElement* pie;
+
+	if(!ImageElement(iXPos, iYPos, pie))
+		return(TqFalse);
+
+	Val.m_colColor=pie->Color();
+	Val.m_colOpacity=(CqColor(1,1,1)); // TODO: Work out the A value properly.
+	Val.m_Depth=pie->Depth();
+
+	return(TqTrue);
+}
+
+
+void CqBucket::ExposeElement(SqImageValue& Val)
+{
+	if(QGetRenderContext()->optCurrent().fExposureGain()==1.0 &&
+	   QGetRenderContext()->optCurrent().fExposureGamma()==1.0)
+		return;
+	else
+	{
+		// color=(color*gain)^1/gamma
+		if(QGetRenderContext()->optCurrent().fExposureGain()!=1.0)
+			Val.m_colColor*=QGetRenderContext()->optCurrent().fExposureGain();
+
+		if(QGetRenderContext()->optCurrent().fExposureGamma()!=1.0)
+		{
+			TqFloat oneovergamma=1.0f/QGetRenderContext()->optCurrent().fExposureGamma();
+			Val.m_colColor.SetfRed  (pow(Val.m_colColor.fRed  (),oneovergamma));
+			Val.m_colColor.SetfGreen(pow(Val.m_colColor.fGreen(),oneovergamma));
+			Val.m_colColor.SetfBlue (pow(Val.m_colColor.fBlue (),oneovergamma));
+		}
+	}
+}
+
+void CqBucket::QuantizeElement(SqImageValue& Val)
+{
+	static CqRandom random;
+
+	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
+	{
+		double ditheramplitude=QGetRenderContext()->optCurrent().fColorQuantizeDitherAmplitude();
+		if(ditheramplitude==0)	return;
+		TqInt one=QGetRenderContext()->optCurrent().iColorQuantizeOne();
+		TqInt min=QGetRenderContext()->optCurrent().iColorQuantizeMin();
+		TqInt max=QGetRenderContext()->optCurrent().iColorQuantizeMax();
+
+		double r,g,b,a;
+		double s=random.RandomFloat();
+		if(modf(one*Val.m_colColor.fRed  ()+ditheramplitude*s,&r)>0.5)	r+=1;
+		if(modf(one*Val.m_colColor.fGreen()+ditheramplitude*s,&g)>0.5)	g+=1;
+		if(modf(one*Val.m_colColor.fBlue ()+ditheramplitude*s,&b)>0.5)	b+=1;
+		if(modf(one*Val.m_Coverage		   +ditheramplitude*s,&a)>0.5)	a+=1;
+		r=CLAMP(r,min,max);
+		g=CLAMP(g,min,max);
+		b=CLAMP(b,min,max);
+		a=CLAMP(a,min,max);
+		Val.m_colColor.SetfRed  (r);
+		Val.m_colColor.SetfGreen(g);
+		Val.m_colColor.SetfBlue (b);
+		Val.m_Coverage=a;
+	}
+	else
+	{
+		double ditheramplitude=QGetRenderContext()->optCurrent().fDepthQuantizeDitherAmplitude();
+		if(ditheramplitude==0)	return;
+		TqInt one=QGetRenderContext()->optCurrent().iDepthQuantizeOne();
+		TqInt min=QGetRenderContext()->optCurrent().iDepthQuantizeMin();
+		TqInt max=QGetRenderContext()->optCurrent().iDepthQuantizeMax();
+
+		double d;
+		if(modf(one*Val.m_Depth+ditheramplitude*random.RandomFloat(),&d)>0.5)	d+=1;
+		d=CLAMP(d,min,max);
+		Val.m_Depth=d;
+	}
 }
 
 
@@ -443,35 +603,8 @@ void	CqImageBuffer::SetImage()
 
 	m_aBuckets.resize(m_cXBuckets*m_cYBuckets);
 
-	// Allocate and fill in the filter values array for each pixel.
-	RtFilterFunc pFilter;
-	pFilter=QGetRenderContext()->optCurrent().funcFilter();
-	m_aaFilterValues.resize(m_XBucketSize*m_YBucketSize);
-	TqInt NumFilterValues=((m_FilterYWidth+1)*(m_FilterXWidth+1));//*(m_PixelXSamples*m_PixelYSamples);
-	TqInt y;
-	for(y=0; y<m_YBucketSize; y++)
-	{
-		TqInt x;
-		for(x=0; x<m_XBucketSize; x++)
-		{
-			// Allocate enough entries
-			m_aaFilterValues[(y*m_XBucketSize)+x].resize(NumFilterValues);
-			TqFloat* pFilterValues=&m_aaFilterValues[(y*m_XBucketSize)+x][0];
-			TqInt fy=-m_FilterYWidth/2;
-			while(fy<=m_FilterYWidth/2)
-			{
-				TqInt fx=-m_FilterXWidth/2;
-				while(fx<=m_FilterXWidth/2)
-				{
-					TqFloat g=(*pFilter)(fx, fy, m_FilterXWidth, m_FilterYWidth);
-					*pFilterValues++=g;
-
-					fx++;
-				}
-				fy++;
-			}
-		}
-	}
+	CqBucket::InitialiseBucket(0,0,m_XBucketSize,m_YBucketSize,m_FilterXWidth,m_FilterYWidth,m_PixelXSamples,m_PixelXSamples);
+	CqBucket::InitialiseFilterValues();
 }
 
 
@@ -495,132 +628,6 @@ void	CqImageBuffer::Release()
 	delete(this);
 }
 
-
-//----------------------------------------------------------------------
-/** Get the value of the specified pixel using the current filter function.
- * \param iXPos Integer pixel coordinate.
- * \param iYPos Integer pixel coordinate.
- * \param iBucket Integer bucket index.
- * \param Val SqImageValue structure to fill in.
- */
-
-void CqImageBuffer::FilterPixel(TqInt X, TqInt Y, TqInt iBucket, SqImageValue& Val)
-{
-	CqImageElement* pie;
-	CqBucket& Bucket=m_aBuckets[iBucket];
-	
-	if(!Bucket.ImageElement(X-(m_FilterXWidth/2),Y-(m_FilterYWidth/2),pie))
-	{
-		CqBasicError(ErrorID_InvalidPixel,Severity_Fatal,"Invalid Pixel filter request");
-		return;
-	}
-
-	TqFloat* pFilterValues=&m_aaFilterValues[((Y%Bucket.YSize())*Bucket.XSize())+(X%Bucket.XSize())][0];
-
-	CqColor c(0,0,0);
-	TqFloat d=0.0f;
-	TqFloat gTot=0.0;
-	TqFloat xmax=m_FilterXWidth*0.5f;
-	TqFloat ymax=m_FilterYWidth*0.5f;
-	TqInt fy=static_cast<TqInt>(-ymax);
-	while(fy<=ymax)
-	{
-		TqInt fx=static_cast<TqInt>(-xmax);
-		CqImageElement* pie2=pie;
-		while(fx<=xmax)
-		{
-			TqFloat g=*pFilterValues++;
-			c+=pie2->Color()*g;
-			d+=pie2->Depth()*g;
-
-			gTot+=g;
-
-			pie2++;
-			fx++;
-		}
-		pie+=(Bucket.XSize()+Bucket.XFWidth());
-		fy++;
-	}
-
-	Val.m_colColor=c/gTot;
-	Val.m_colOpacity=(CqColor(1,1,1)); // TODO: Work out the A value properly.
-	Val.m_Depth=d/gTot;
-}
-
-
-//----------------------------------------------------------------------
-/** Perform standard exposure correction on the specified pixel value.
- * \param Pixel SqImageElement structure to modify.
- */
-
-void CqImageBuffer::ExposePixel(SqImageValue& Pixel)
-{
-	if(QGetRenderContext()->optCurrent().fExposureGain()==1.0 &&
-	   QGetRenderContext()->optCurrent().fExposureGamma()==1.0)
-		return;
-	else
-	{
-		// color=(color*gain)^1/gamma
-		if(QGetRenderContext()->optCurrent().fExposureGain()!=1.0)
-			Pixel.m_colColor*=QGetRenderContext()->optCurrent().fExposureGain();
-
-		if(QGetRenderContext()->optCurrent().fExposureGamma()!=1.0)
-		{
-			TqFloat oneovergamma=1.0f/QGetRenderContext()->optCurrent().fExposureGamma();
-			Pixel.m_colColor.SetfRed  (pow(Pixel.m_colColor.fRed  (),oneovergamma));
-			Pixel.m_colColor.SetfGreen(pow(Pixel.m_colColor.fGreen(),oneovergamma));
-			Pixel.m_colColor.SetfBlue (pow(Pixel.m_colColor.fBlue (),oneovergamma));
-		}
-	}
-}
-
-
-//----------------------------------------------------------------------
-/** Perform standard color quantisation on the specified pixel value.
- * \param Pixel SqImageElement to modify.
- */
-
-void CqImageBuffer::QuantizePixel(SqImageValue& Pixel)
-{
-	static CqRandom random;
-
-	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
-	{
-		double ditheramplitude=QGetRenderContext()->optCurrent().fColorQuantizeDitherAmplitude();
-		if(ditheramplitude==0)	return;
-		TqInt one=QGetRenderContext()->optCurrent().iColorQuantizeOne();
-		TqInt min=QGetRenderContext()->optCurrent().iColorQuantizeMin();
-		TqInt max=QGetRenderContext()->optCurrent().iColorQuantizeMax();
-
-		double r,g,b,a;
-		double s=random.RandomFloat();
-		if(modf(one*Pixel.m_colColor.fRed  ()+ditheramplitude*s,&r)>0.5)	r+=1;
-		if(modf(one*Pixel.m_colColor.fGreen()+ditheramplitude*s,&g)>0.5)	g+=1;
-		if(modf(one*Pixel.m_colColor.fBlue ()+ditheramplitude*s,&b)>0.5)	b+=1;
-		if(modf(one*Pixel.m_Coverage		  +ditheramplitude*s,&a)>0.5)	a+=1;
-		r=CLAMP(r,min,max);
-		g=CLAMP(g,min,max);
-		b=CLAMP(b,min,max);
-		a=CLAMP(a,min,max);
-		Pixel.m_colColor.SetfRed  (r);
-		Pixel.m_colColor.SetfGreen(g);
-		Pixel.m_colColor.SetfBlue (b);
-		Pixel.m_Coverage=a;
-	}
-	else
-	{
-		double ditheramplitude=QGetRenderContext()->optCurrent().fDepthQuantizeDitherAmplitude();
-		if(ditheramplitude==0)	return;
-		TqInt one=QGetRenderContext()->optCurrent().iDepthQuantizeOne();
-		TqInt min=QGetRenderContext()->optCurrent().iDepthQuantizeMin();
-		TqInt max=QGetRenderContext()->optCurrent().iDepthQuantizeMax();
-
-		double d;
-		if(modf(one*Pixel.m_Depth+ditheramplitude*random.RandomFloat(),&d)>0.5)	d+=1;
-		d=CLAMP(d,min,max);
-		Pixel.m_Depth=d;
-	}
-}
 
 //----------------------------------------------------------------------
 /** Check if a surface can be culled.
@@ -988,112 +995,9 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 		CqBucket::CombineElements();
 
 	BucketComplete(iBucket);
-#ifdef	AQSIS_SYSTEM_WIN32
-	PostBucket(iBucket);
-#endif // AQSIS_SYSTEM_WIN32
+	QGetRenderContext()->pDDmanager()->DisplayBucket(&m_aBuckets[iBucket]);
 }
 
-
-//----------------------------------------------------------------------
-/** Post the specified bucket to the dd clients via the dd server.
- */
-
-#ifdef	AQSIS_SYSTEM_WIN32
-
-void CqImageBuffer::PostBucket(TqInt iBucket)
-{
-	CqBucket& Bucket=m_aBuckets[iBucket];
-	
-	// Copy the bucket to the display buffer.
-	TqInt		xmin=Bucket.XOrigin();
-	TqInt		ymin=Bucket.YOrigin();
-	TqInt		xsize=Bucket.XSize();
-	TqInt		ysize=Bucket.YSize();
-	TqInt		xmaxplus1=xmin+xsize;
-	TqInt		ymaxplus1=ymin+ysize;
-
-	// Check if this bucket is outside the crop window.
-	if(xmaxplus1<CropWindowXMin() ||
-	   ymaxplus1<CropWindowYMin() ||
-	   xmin>CropWindowXMax() ||
-	   ymin>CropWindowYMax())
-		return;
-
-	for(std::vector<CqDDClient>::iterator i=QGetRenderContext()->aDisplayDrivers().begin(); i!=QGetRenderContext()->aDisplayDrivers().end(); i++)
-	{
-		TqInt		samples=i->Mode()&ModeRGB?3:0;
-					samples+=i->Mode()&ModeA?1:0;
-					samples=i->Mode()&ModeZ?1:samples;
-		TqInt		elementsize=samples*sizeof(TqFloat);
-		TqInt		datalen=xsize*ysize*elementsize;
-
-		TqFloat*	pData=new TqFloat[xsize*ysize*samples];
-
-		TqInt		linelen=xsize*samples;
-
-		SqImageValue val;
-		TqInt y;
-		for(y=0; y<ysize; y++)
-		{
-			TqInt sy=y+ymin;
-			TqInt x;
-			for(x=0; x<xsize; x++)
-			{
-				TqInt sx=x+xmin;
-				TqInt isx=sx-CropWindowXMin();
-				TqInt isy=sy-CropWindowYMin();
-				if(isx<0 || isy<0 || isx>=iXRes() || isy>=iYRes())
-					continue;
-
-				TqInt so=(y*linelen)+(x*samples);
-				// If outputting a zfile, use the midpoint method.
-				/// \todo Should really be generalising this section to use specif Filter/Expose/Quantize functions.
-				if(i->Mode()&ModeZ)
-				{
-					CqImageElement* pie;
-					if(Bucket.ImageElement(sx,sy,pie))
-					{
-						std::vector<SqImageValue>& aValues=pie->Values(0,0);
-			
-						TqFloat Depth;
-						if(aValues.size()<=1)
-							Depth=FLT_MAX;
-						else
-						{
-							TqFloat Diff=(aValues[1].m_Depth-aValues[0].m_Depth);
-							Depth=(Diff/2.0)+aValues[0].m_Depth;
-						}
-						
-						pData[so]=Depth;
-					}
-				}
-				else
-				{
-					FilterPixel(sx,sy,iBucket,val);
-					ExposePixel(val);
-					QuantizePixel(val);
-			
-					if(samples>=3)
-					{
-						pData[so+0]=val.m_colColor.fRed();
-						pData[so+1]=val.m_colColor.fGreen();
-						pData[so+2]=val.m_colColor.fBlue();
-						if(samples==4)
-							pData[so+3]=val.m_Coverage;
-					}
-					if(samples==1)
-							pData[so+0]=val.m_Coverage;
-				}
-			}
-		}
-		SqDDMessageData* pmsg=SqDDMessageData::Construct(xmin,xmaxplus1,ymin,ymaxplus1,elementsize,pData,datalen);
-		delete[](pData);
-		i->SendMsg(pmsg);
-		pmsg->Destroy();
-	}
-}
-
-#endif	//AQSIS_SYSTEM_WIN32
 
 //----------------------------------------------------------------------
 /** Render any waiting Surfaces

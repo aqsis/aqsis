@@ -28,10 +28,6 @@
 //{
 #define RENDERER_H_INCLUDED 1
 
-#ifdef	AQSIS_SYSTEM_WIN32
-#include	<windows.h>
-#endif // AQSIS_SYSTEM_WIN32
-
 #include	<vector>
 #include	<iostream>
 #include	<time.h>
@@ -47,10 +43,7 @@
 #include	"shaders.h"
 #include	"renderer.h"
 #include	"symbols.h"
-
-#ifdef	AQSIS_SYSTEM_WIN32
-#include	"ddserver.h"
-#endif //	AQSIS_SYSTEM_WIN32
+#include	"iddmanager.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -169,16 +162,10 @@ class CqRenderer
 				virtual	void		Initialise();
 				virtual	void		RenderWorld();
 
-				virtual	void		AddDisplayDriver(const TqChar* name, const TqChar* type, const TqInt mode);
-				virtual	void		ClearDisplayDrivers();
-#ifdef AQSIS_SYSTEM_WIN32
-				virtual	void		LoadDisplayLibrary(CqDDClient& dd);
-				virtual	CqDDServer&	DDServer()			{return(m_DDServer);}
-				virtual	std::vector<CqDDClient>& aDisplayDrivers()
-														{
-															return(m_aDisplayDrivers);
-														}
-#endif // AQSIS_SYSTEM_WIN32
+				virtual	void		AddDisplayRequest(const TqChar* name, const TqChar* type, const TqChar* mode);
+				virtual	void		ClearDisplayRequests();
+				virtual	IqDDManager*	pDDmanager()	{return(m_pDDManager);}
+
 				virtual	void		Quit();
 				virtual	void		UpdateStatus()		{}
 						/** Get the global statistics class.
@@ -272,10 +259,7 @@ class CqRenderer
 			CqTransform		m_transDefault;					///< Default transformation.
 			CqImageBuffer*	m_pImageBuffer;					///< Pointer to the current image buffer.
 
-#ifdef  AQSIS_SYSTEM_WIN32
-			std::vector<CqDDClient>	m_aDisplayDrivers;		///< Array of requested display drivers.
-			CqDDServer		m_DDServer;
-#endif // AQSIS_SYSTEM_WIN32
+			IqDDManager*	m_pDDManager;
 
 			EqRenderMode	m_Mode;							
 			CqList<CqShaderRegister> m_Shaders;				///< List of registered shaders.

@@ -182,9 +182,9 @@ void CqFileBuffer::BucketComplete(TqInt iBucket)
 
 			TqInt so=((isy-vecA.y())*linelen)+(isx*m_SamplesPerPixel);
 			
-			FilterPixel(sx,sy,iBucket,val);
-			ExposePixel(val);
-			QuantizePixel(val);
+//			FilterPixel(sx,sy,iBucket,val);
+//			ExposePixel(val);
+//			QuantizePixel(val);
 	
 			if(m_SamplesPerPixel>=3)
 			{

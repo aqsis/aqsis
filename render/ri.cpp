@@ -678,9 +678,9 @@ RtVoid	RiDisplayV(const char *name, RtToken type, RtToken mode, PARAMETERLIST)
 	if(strName[0]=='+')
 		strName=strName.substr(1);
 	else
-		QGetRenderContext()->ClearDisplayDrivers();
+		QGetRenderContext()->ClearDisplayRequests();
 	// Add a display driver to the list of requested drivers.
-	QGetRenderContext()->AddDisplayDriver(strName.c_str(), strType.c_str(), eValue);
+	QGetRenderContext()->AddDisplayRequest(strName.c_str(), strType.c_str(), mode);
 
 	return(0);
 }

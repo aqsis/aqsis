@@ -41,7 +41,8 @@
 #include	"shadervm.h"
 #include	"transform.h"
 #include	"file.h"
-#include	"displaydriver.h"
+
+#include	"ddmsock.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -70,7 +71,8 @@ CqRenderer::CqRenderer() :
 	m_aCoordSystems[CoordSystem_Raster]	.m_strName="raster";
 
 #ifdef	AQSIS_SYSTEM_WIN32
-	m_DDServer.Prepare(AQSIS_DD_PORT);
+	m_pDDManager=new CqDDManager;
+	m_pDDManager->Initialise();
 #endif
 }
 
@@ -94,10 +96,8 @@ CqRenderer::~CqRenderer()
 	}
 	FlushShaders();
 
-#ifdef	AQSIS_SYSTEM_WIN32
-	// Close down the Display Driver server.
-	m_DDServer.Close();
-#endif // AQSIS_SYSTEM_WIN32
+	// Close down the Display device manager.
+	m_pDDManager->Shutdown();
 }
 
 
@@ -511,12 +511,7 @@ void CqRenderer::RenderWorld()
 	strMsg+=optCurrent().strDisplayName();
 	CqBasicError(0,Severity_Normal,strMsg.c_str());
 
-#ifdef  AQSIS_SYSTEM_WIN32
-	// Load and initialise the display drivers.
-	std::vector<CqDDClient>::iterator i;
-	for(i=m_aDisplayDrivers.begin(); i!=m_aDisplayDrivers.end(); i++)
-		LoadDisplayLibrary(*i);
-#endif // AQSIS_SYSTEM_WIN32
+	m_pDDManager->OpenDisplays();
 
 	pImage()->RenderImage();
 
@@ -530,11 +525,7 @@ void CqRenderer::RenderWorld()
 
 	PrintStats(verbosity);
 
-#ifdef  AQSIS_SYSTEM_WIN32
-	SqDDMessageClose msg;
-	for(i=m_aDisplayDrivers.begin(); i!=m_aDisplayDrivers.end(); i++)
-		i->SendMsg(&msg);
-#endif // AQSIS_SYSTEM_WIN32
+	m_pDDManager->CloseDisplays();
 }
 
 
@@ -768,83 +759,6 @@ CqMatrix	CqRenderer::matNSpaceToSpace(const char* strFrom, const char* strTo, co
 }
 
 
-#ifdef	AQSIS_SYSTEM_WIN32
-
-//----------------------------------------------------------------------
-/** Load the display driver specified in the current setup.
- */
-
-void CqRenderer::LoadDisplayLibrary(CqDDClient& dd)
-{
-	// Load the requested display library according to the specified mode in the RiDisplay command.
-	CqString strDriverFile("framebuffer.exe");
-
-	// Find the display driver in the map loaded from the ini file.
-	TqBool	bFound=TqFalse;
-	TqInt i;
-	for(i=0; i<gaDisplayMap.size(); i++)
-	{
-		if(dd.strType().compare(gaDisplayMap[i].m_strName)==0)
-		{
-			strDriverFile=gaDisplayMap[i].m_strLocation;
-			bFound=TqTrue;
-			break;
-		}
-	}
-
-	if(!bFound)
-	{
-		CqString strErr("Cannot find display driver ");
-		strErr+=dd.strType().c_str();
-		strErr+=" : defaulting to framebuffer";
-		//strErr.Format("Cannot find display driver %s : defaulting to framebuffer", QGetRenderContext()->optCurrent().strDisplayType().String());
-		CqBasicError(ErrorID_DisplayDriver,Severity_Normal,strErr.c_str());
-	}
-
-	CqFile fileDriver(strDriverFile.c_str(), "display");
-	if(fileDriver.IsValid())
-	{
-		TqInt ProcHandle=_spawnl(_P_NOWAITO, fileDriver.strRealName().c_str(), strDriverFile.c_str() ,NULL);
-		if(ProcHandle>=0)
-		{
-			// wait for a connection request from the client
-			if(m_DDServer.Accept(dd))
-			{
-				// Send a filename message
-				SqDDMessageFilename* pmsgfname=SqDDMessageFilename::Construct(dd.strName().c_str());
-				dd.SendMsg(pmsgfname);
-				pmsgfname->Destroy();
-
-				CqMatrix& matWorldToCamera=QGetRenderContext()->matSpaceToSpace("world","camera");
-				CqMatrix& matWorldToScreen=QGetRenderContext()->matSpaceToSpace("world","raster");
-
-				SqDDMessageNl msgnl(matWorldToCamera.pElements());
-				dd.SendMsg(&msgnl);
-
-				SqDDMessageNP msgnp(matWorldToScreen.pElements());
-				dd.SendMsg(&msgnp);
-				
-				// Send the open message..
-				TqInt SamplesPerElement=dd.Mode()&ModeRGB?3:0;
-					  SamplesPerElement+=dd.Mode()&ModeA?1:0;
-					  SamplesPerElement=dd.Mode()&ModeZ?1:SamplesPerElement;
-				SqDDMessageOpen msgopen(QGetRenderContext()->pImage()->iXRes(),
-										QGetRenderContext()->pImage()->iYRes(),
-										SamplesPerElement,
-										QGetRenderContext()->pImage()->CropWindowXMin(),
-										QGetRenderContext()->pImage()->CropWindowXMax(),
-										QGetRenderContext()->pImage()->CropWindowYMin(),
-										QGetRenderContext()->pImage()->CropWindowYMax());
-				dd.SendMsg(&msgopen);
-			}
-		}
-		else
-			CqBasicError(0,0,"Error loading display driver");
-	}
-}
-
-#endif // AQSIS_SYSTEM_WIN32
-
 //----------------------------------------------------------------------
 /** Store the named coordinate system in the array of named coordinate systems, overwrite any existing
  * with the same name. Returns TqTrue if system already exists.
@@ -1066,12 +980,9 @@ CqShader* CqRenderer::CreateShader(const char* strName, EqShaderType type)
 /** Add a new requested display driver to the list.
  */
 
-void CqRenderer::AddDisplayDriver(const TqChar* name, const TqChar* type, const TqInt mode)
+void CqRenderer::AddDisplayRequest(const TqChar* name, const TqChar* type, const TqChar* mode)
 {
-#ifdef  AQSIS_SYSTEM_WIN32
-	CqDDClient dd(name, type, mode);
-	m_aDisplayDrivers.push_back(dd);
-#endif // AQSIS_SYSTEM_WIN32
+	m_pDDManager->AddDisplay(name, type, mode);
 }
 
 
@@ -1080,11 +991,9 @@ void CqRenderer::AddDisplayDriver(const TqChar* name, const TqChar* type, const 
 /** Clear the list of requested display drivers.
  */
 
-void CqRenderer::ClearDisplayDrivers()
+void CqRenderer::ClearDisplayRequests()
 {
-#ifdef AQSIS_SYSTEM_WIN32
-	m_aDisplayDrivers.clear();
-#endif // AQSIS_SYSTEM_WIN32
+	m_pDDManager->ClearDisplays();
 }
 
 
