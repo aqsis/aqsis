@@ -469,8 +469,6 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 			err = (*req.m_QueryMethod)(req.m_imageHandle, PkOverwriteQuery, sizeof(owinfo), &owinfo);
 		}
     }
-
-	std::cerr << debug << "Load Display: " << strDriverPathAndFile.c_str() << std::endl;
 }
 
 void CqDDManager::CloseDisplayLibrary( SqDisplayRequest& req )
@@ -521,6 +519,8 @@ void CqDDManager::InitialiseDisplayNameMap()
     CqString strConfigFile = "displays.ini";
 #endif /* AQSIS_SYSTEM_POSIX */
 
+    std::cerr << info << "Loading display configuration from file \"" << strConfigFile << "\"" << std::endl;
+
     CqRiFile fileINI( strConfigFile.c_str(), "display" );
     if ( fileINI.IsValid() )
     {
@@ -531,10 +531,10 @@ void CqDDManager::InitialiseDisplayNameMap()
         while ( std::getline( strmINI, strLine ) )
         {
             std::string strName, strDriverName;
-            std::string::size_type iStartN = strLine.find_first_not_of( '\t ' );
-            std::string::size_type iEndN = strLine.find_first_of( '\t ', iStartN );
-            std::string::size_type iStartD = strLine.find_first_not_of( '\t ', iEndN );
-            std::string::size_type iEndD = strLine.find_first_of( '\t ', iStartD );
+            std::string::size_type iStartN = strLine.find_first_not_of( "\t " );
+            std::string::size_type iEndN = strLine.find_first_of( "\t ", iStartN );
+            std::string::size_type iStartD = strLine.find_first_not_of( "\t ", iEndN );
+            std::string::size_type iEndD = strLine.find_first_of( "\t ", iStartD );
             if ( iStartN != std::string::npos && iEndN != std::string::npos &&
                     iStartD != std::string::npos )
             {

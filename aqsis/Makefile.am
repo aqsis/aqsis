@@ -20,7 +20,7 @@ check-local: clean-local
 	echo "zframebuffer	$(DISPLAY_LIB)" >> $(CONFIG_FILE)
 	echo "zfile	$(DISPLAY_LIB)" >> $(CONFIG_FILE)
 	echo "shadow	$(DISPLAY_LIB)" >> $(CONFIG_FILE)
-	for file in $(top_srcdir)/ribfiles/*.rib; do echo "Rendering $$file ..."; AQSIS_CONFIG_PATH="." $(top_builddir)/aqsis/aqsis -shaders=$(top_builddir)/shaders $$file; done
+	for file in $(top_srcdir)/ribfiles/*.rib; do echo "Rendering $$file ..."; AQSIS_CONFIG_PATH="." $(top_builddir)/aqsis/aqsis -environment -v3 -shaders=$(top_builddir)/shaders $$file; done
 
 clean-local:
 	rm -f $(CONFIG_FILE)
