@@ -41,10 +41,10 @@ CqBasicSurface::CqBasicSurface()	:	CqListEntry<CqBasicSurface>(), m_fDiceable(Tq
 {
 	// Set a refernce with the current attributes.
 	m_pAttributes=const_cast<CqAttributes*>(QGetRenderContext()->pattrCurrent());
-	m_pAttributes->Reference();
+	m_pAttributes->AddRef();
 
 	m_pTransform=const_cast<CqTransform*>(QGetRenderContext()->ptransCurrent());
-	m_pTransform->Reference();
+	m_pTransform->AddRef();
 
 	m_CachedBound=TqFalse;
 }
@@ -60,10 +60,10 @@ CqBasicSurface::CqBasicSurface(const CqBasicSurface& From) : m_fDiceable(TqTrue)
 
 	// Set a reference with the donors attributes.
 	m_pAttributes=From.m_pAttributes;
-	m_pAttributes->Reference();
+	m_pAttributes->AddRef();
 
 	m_pTransform=From.m_pTransform;
-	m_pTransform->Reference();
+	m_pTransform->AddRef();
 
 	m_CachedBound=From.m_CachedBound;
 	m_Bound=From.m_Bound;
@@ -91,15 +91,15 @@ CqBasicSurface& CqBasicSurface::operator=(const CqBasicSurface& From)
 void CqBasicSurface::SetSurfaceParameters(const CqBasicSurface& From)
 {
 	// If we already have attributes, unreference them now as we don't need them anymore.
-	if(m_pAttributes)	m_pAttributes->UnReference();
-	if(m_pTransform)	m_pTransform->UnReference();
+	if(m_pAttributes)	m_pAttributes->Release();
+	if(m_pTransform)	m_pTransform->Release();
 
 	// Now store and reference our new attributes.
 	m_pAttributes=From.m_pAttributes;
-	m_pAttributes->Reference();
+	m_pAttributes->AddRef();
 
 	m_pTransform=From.m_pTransform;
-	m_pTransform->Reference();
+	m_pTransform->AddRef();
 }
 
 

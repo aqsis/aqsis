@@ -173,6 +173,10 @@ SOURCE=.\random.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\refcount.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\win32\intel\semaphore.h
 # End Source File
 # Begin Source File

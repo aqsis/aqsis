@@ -2066,6 +2066,7 @@ RtVoid	RiPolygonV(RtInt nvertices, PARAMETERLIST)
 {
 	// Create a new polygon surface primitive.
 	CqSurfacePolygon*	pSurface=new CqSurfacePolygon(nvertices);
+	pSurface->AddRef();
 
 	// Process any specified primitive variables.
 	pSurface->SetDefaultPrimitiveVariables(RI_FALSE); 
@@ -2080,11 +2081,11 @@ RtVoid	RiPolygonV(RtInt nvertices, PARAMETERLIST)
 		else
 		{
 			CqBasicError(ErrorID_InvalidData,Severity_Normal,"Degenerate polygon found");
-			delete(pSurface);
+			pSurface->Release();
 		}	
 	}
 	else
-		delete(pSurface);
+		pSurface->Release();
 
 	return;
 }
@@ -2161,7 +2162,7 @@ RtVoid	RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERL
 
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass=new CqPolygonPoints(cVerts);
-	pPointsClass->Reference();
+	pPointsClass->AddRef();
 	// Process any specified primitive variables
 	pPointsClass->SetDefaultPrimitiveVariables(RI_FALSE); 
 	if(ProcessPrimitiveVariables(pPointsClass,count,tokens,values))
@@ -2182,6 +2183,7 @@ RtVoid	RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERL
 			{
 				// Create a surface polygon
 				CqSurfacePointsPolygon*	pSurface=new CqSurfacePointsPolygon(pPointsClass);
+				pSurface->AddRef();
 				RtBoolean fValid=RI_TRUE;
 
 				pSurface->aIndices().resize(nverts[poly]);
@@ -2247,20 +2249,20 @@ RtVoid	RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERL
 				if(fValid)
 				{
 					pSurface->AddTimeSlot(QGetRenderContext()->ptransCurrent()->Time(0),pPointsClass);
-					pPointsClass->Reference();
+					pPointsClass->AddRef();
 
 					for(i=1; i<QGetRenderContext()->ptransCurrent()->cTimes(); i++)
 					{
 						RtFloat time=QGetRenderContext()->ptransCurrent()->Time(i);
 						pSurface->AddTimeSlot(time,apPoints[i]);
-						apPoints[i]->Reference();
+						apPoints[i]->AddRef();
 					}
 					QGetRenderContext()->pImage()->PostSurface(pSurface);
 				}
 			}
 			QGetRenderContext()->Stats().IncGPrims();
 		}
-                pPointsClass->UnReference();
+                pPointsClass->Release();
 	}
 	else
 		delete(pPointsClass);
@@ -2369,25 +2371,27 @@ RtVoid	RiPatchV(RtToken type, PARAMETERLIST)
 	{
 		// Create a surface patch
 		CqSurfacePatchBicubic*	pSurface=new CqSurfacePatchBicubic();
+		pSurface->AddRef();
 		// Fill in default values for all primitive variables not explicitly specified.
 		pSurface->SetDefaultPrimitiveVariables(); 
 		// Fill in primitive variables specified.
 		if(ProcessPrimitiveVariables(pSurface, count, tokens, values))
 			CreateGPrim(pSurface);
 		else
-			delete(pSurface);
+			pSurface->Release();
 	}
 	else if(strcmp(type, RI_BILINEAR)==0)
 	{
 		// Create a surface patch
 		CqSurfacePatchBilinear*	pSurface=new CqSurfacePatchBilinear();
+		pSurface->AddRef();
 		// Fill in default values for all primitive variables not explicitly specified.
 		pSurface->SetDefaultPrimitiveVariables(); 
 		// Fill in primitive variables specified.
 		if(ProcessPrimitiveVariables(pSurface, count, tokens, values))
 			CreateGPrim(pSurface);
 		else
-			delete(pSurface);
+			pSurface->Release();
 	}
 	return;
 }
@@ -2424,13 +2428,14 @@ RtVoid	RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 		TqBool	vPeriodic=(strcmp(vwrap,RI_PERIODIC)==0)?TqTrue:TqFalse;
 
 		CqSurfacePatchMeshBicubic* pSurface=new CqSurfacePatchMeshBicubic(nu,nv,uPeriodic,vPeriodic);
+		pSurface->AddRef();
 		// Fill in default values for all primitive variables not explicitly specified.
 		pSurface->SetDefaultPrimitiveVariables(); 
 		// Fill in primitive variables specified.
 		if(ProcessPrimitiveVariables(pSurface, count, tokens, values))
 			CreateGPrim(pSurface);
 		else
-			delete(pSurface);
+			pSurface->Release();
 	}
 	else if(strcmp(type, RI_BILINEAR)==0)
 	{
@@ -2439,13 +2444,14 @@ RtVoid	RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 		TqBool	vPeriodic=(strcmp(vwrap,RI_PERIODIC)==0)?TqTrue:TqFalse;
 
 		CqSurfacePatchMeshBilinear* pSurface=new CqSurfacePatchMeshBilinear(nu,nv,uPeriodic,vPeriodic);
+		pSurface->AddRef();
 		// Fill in default values for all primitive variables not explicitly specified.
 		pSurface->SetDefaultPrimitiveVariables(); 
 		// Fill in primitive variables specified.
 		if(ProcessPrimitiveVariables(pSurface, count, tokens, values))
 			CreateGPrim(pSurface);
 		else
-			delete(pSurface);
+			pSurface->Release();
 	}
 	return;
 }
@@ -2478,6 +2484,7 @@ RtVoid	RiNuPatchV(RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat
 {
 	// Create a NURBS patch
 	CqSurfaceNURBS* pSurface=new CqSurfaceNURBS();
+	pSurface->AddRef();
 	pSurface->Init(uorder, vorder, nu, nv);
 
 	// Copy the knot vectors.
@@ -2495,7 +2502,7 @@ RtVoid	RiNuPatchV(RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat
 		CreateGPrim(pSurface);
 	}
 	else
-		delete(pSurface);
+		pSurface->Release();
 
 	return;
 }
@@ -2509,7 +2516,7 @@ RtVoid	RiNuPatchV(RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat
 RtVoid	RiTrimCurve(RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[])
 {
 	// Clear the current loop array.
-	delete(QGetRenderContext()->pattrWriteCurrent()->pTrimLoops());
+	QGetRenderContext()->pattrWriteCurrent()->TrimLoops().Clear();
 
 	// Build an array of curves per specified loop.
 	TqInt in=0;
@@ -2518,7 +2525,6 @@ RtVoid	RiTrimCurve(RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[],
 	TqInt ivert=0;
 	TqInt iloop;
 
-	CqTrimLoopArray* pTrimLoops = new CqTrimLoopArray();
 	for(iloop=0; iloop<nloops; iloop++)
 	{
 		CqTrimLoop Loop;
@@ -2546,11 +2552,8 @@ RtVoid	RiTrimCurve(RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[],
 			}
 			Loop.aCurves().push_back(Curve);
 		}
-		pTrimLoops->aLoops().push_back(Loop);
+		QGetRenderContext()->pattrWriteCurrent()->TrimLoops().aLoops().push_back(Loop);
 	}
-	QGetRenderContext()->pattrWriteCurrent()->SetpTrimLoops(pTrimLoops);
-	pTrimLoops->Prepare();
-
 	return;
 }
 
@@ -2581,6 +2584,7 @@ RtVoid	RiSphereV(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, P
 {
 	// Create a sphere
 	CqSphere* pSurface=new CqSphere(radius,zmin,zmax,0,thetamax);
+	pSurface->AddRef();
 	pSurface->SetDefaultPrimitiveVariables();
 	ProcessPrimitiveVariables(pSurface,count,tokens,values);
 
@@ -2615,6 +2619,7 @@ RtVoid	RiConeV(RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST)
 {
 	// Create a cone
 	CqCone* pSurface=new CqCone(height,radius,0,thetamax,0,height);
+	pSurface->AddRef();
 	pSurface->SetDefaultPrimitiveVariables();
 	ProcessPrimitiveVariables(pSurface,count,tokens,values);
 	
@@ -2649,6 +2654,7 @@ RtVoid	RiCylinderV(RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
 {
 	// Create a cylinder
 	CqCylinder* pSurface=new CqCylinder(radius,zmin,zmax,0,thetamax);
+	pSurface->AddRef();
 	pSurface->SetDefaultPrimitiveVariables();
 	ProcessPrimitiveVariables(pSurface,count,tokens,values);
 
@@ -2685,6 +2691,7 @@ RtVoid	RiHyperboloidV(RtPoint point1, RtPoint point2, RtFloat thetamax,PARAMETER
 	CqVector3D v0(point1[0],point1[1],point1[2]);
 	CqVector3D v1(point2[0],point2[1],point2[2]);
 	CqHyperboloid* pSurface=new CqHyperboloid(v0,v1,0,thetamax);
+	pSurface->AddRef();
 	pSurface->SetDefaultPrimitiveVariables();
 	ProcessPrimitiveVariables(pSurface,count,tokens,values);
 
@@ -2719,6 +2726,7 @@ RtVoid	RiParaboloidV(RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax,
 {
 	// Create a paraboloid
 	CqParaboloid* pSurface=new CqParaboloid(rmax,zmin,zmax,0,thetamax);
+	pSurface->AddRef();
 	pSurface->SetDefaultPrimitiveVariables();
 	ProcessPrimitiveVariables(pSurface,count,tokens,values);
 
@@ -2753,6 +2761,7 @@ RtVoid	RiDiskV(RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST)
 {
 	// Create a disk
 	CqDisk* pSurface=new CqDisk(height,0,radius,0,thetamax);
+	pSurface->AddRef();
 	pSurface->SetDefaultPrimitiveVariables();
 	ProcessPrimitiveVariables(pSurface,count,tokens,values);
 
@@ -2786,6 +2795,7 @@ RtVoid	RiTorusV(RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phim
 {
 	// Create a torus
 	CqTorus* pSurface=new CqTorus(majorrad,minorrad,phimin,phimax,0,thetamax);
+	pSurface->AddRef();
 	pSurface->SetDefaultPrimitiveVariables();
 	ProcessPrimitiveVariables(pSurface,count,tokens,values);
 
@@ -2834,6 +2844,7 @@ RtVoid	RiGeometryV(RtToken type, PARAMETERLIST)
 
 		// Create a standard teapot
 		CqTeapot* pSurface=new CqTeapot(true); // add a bottom if true/false otherwise
+		pSurface->AddRef();
 
 		pSurface->SetDefaultPrimitiveVariables();
 		pSurface->SetSurfaceParameters(*pSurface);
@@ -2853,9 +2864,11 @@ RtVoid	RiGeometryV(RtToken type, PARAMETERLIST)
 			
 			CreateGPrim(	(CqSurfacePatchMeshBicubic* )pMesh);
 		}
+		pSurface->Release();
 	} else if (strcmp(type, "sphere") == 0){
 		// Create a sphere
 		CqSphere* pSurface=new CqSphere(1,-1,1,0,360.0);
+		pSurface->AddRef();
 		pSurface->SetDefaultPrimitiveVariables();
 		ProcessPrimitiveVariables(pSurface,count,tokens,values);
 		CreateGPrim(pSurface);
@@ -3281,6 +3294,7 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass=new CqPolygonPoints(cVerts);
+	pPointsClass->AddRef();
 
 	CqWSurf* pSubdivision;
 	CqMotionWSurf* pMotionSubdivision;
@@ -3388,7 +3402,7 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 		}
 
 		// Set up points references according to motion details.
-		pPointsClass->Reference();
+		pPointsClass->AddRef();
 		if(QGetRenderContext()->ptransCurrent()->cTimes()>1)
 		{
 			pMotionSubdivision->AddTimeSlot(QGetRenderContext()->ptransCurrent()->Time(0),pPointsClass);
@@ -3397,7 +3411,7 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 			{
 				RtFloat time=QGetRenderContext()->ptransCurrent()->Time(i);
 				pMotionSubdivision->AddTimeSlot(time,apPoints[i]);
-				apPoints[i]->Reference();
+				apPoints[i]->AddRef();
 			}
 			QGetRenderContext()->pImage()->PostSurface(pMotionSubdivision);
 			QGetRenderContext()->Stats().IncGPrims();

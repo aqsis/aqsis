@@ -263,6 +263,7 @@ TqInt CqSphere::Split(std::vector<CqBasicSurface*>& aSplits)
 {
 	// Create a NURBS patch
 	CqSurfaceNURBS* pNew=new CqSurfaceNURBS();
+	pNew->AddRef();
 
 	TqFloat phimin=(m_ZMin>-m_Radius)?asin(m_ZMin/m_Radius):-(RI_PIO2);
 	TqFloat phimax=(m_ZMax< m_Radius)?asin(m_ZMax/m_Radius): (RI_PIO2);
@@ -407,6 +408,7 @@ TqInt CqCone::Split(std::vector<CqBasicSurface*>& aSplits)
 {
 	// Create a NURBS patch
 	CqSurfaceNURBS* pNew=new CqSurfaceNURBS();
+	pNew->AddRef();
 
 	CqSurfaceNURBS Curve;
 	CqVector3D vA(m_Radius,0,0), vB(0,0,m_Height), vC(0,0,0), vD(0,0,1);
@@ -538,6 +540,7 @@ TqInt CqCylinder::Split(std::vector<CqBasicSurface*>& aSplits)
 {
 	// Create a NURBS patch
 	CqSurfaceNURBS* pNew=new CqSurfaceNURBS();
+	pNew->AddRef();
 
 	CqSurfaceNURBS Curve;
 	CqVector3D vA(m_Radius,0,m_ZMin), vB(m_Radius,0,m_ZMax), vC(0,0,0), vD(0,0,1);
@@ -656,6 +659,7 @@ TqInt CqHyperboloid::Split(std::vector<CqBasicSurface*>& aSplits)
 {
 	// Create a NURBS patch
 	CqSurfaceNURBS* pNew=new CqSurfaceNURBS();
+	pNew->AddRef();
 
 	CqSurfaceNURBS Curve;
 	Curve.LineSegment(m_Point1,m_Point2); 
@@ -793,6 +797,8 @@ TqInt CqParaboloid::Split(std::vector<CqBasicSurface*>& aSplits)
 
 	CqParaboloid* pNew1=new CqParaboloid(*this);
 	CqParaboloid* pNew2=new CqParaboloid(*this);
+	pNew1->AddRef();
+	pNew2->AddRef();
 	if(m_uDiceSize>m_vDiceSize)
 	{
 		pNew1->m_ThetaMax=arccent;
@@ -943,6 +949,7 @@ TqInt CqTorus::Split(std::vector<CqBasicSurface*>& aSplits)
 {
 	// Create a NURBS patch
 	CqSurfaceNURBS* pNew=new CqSurfaceNURBS();
+	pNew->AddRef();
 
 	CqSurfaceNURBS Curve;
 	CqVector3D vA(m_MajorRadius,0,0), vB(1,0,0), vC(0,0,1), vD(0,0,0);
@@ -1075,6 +1082,7 @@ TqInt CqDisk::Split(std::vector<CqBasicSurface*>& aSplits)
 {
 	// Create a NURBS patch
 	CqSurfaceNURBS* pNew=new CqSurfaceNURBS();
+	pNew->AddRef();
 
 	CqSurfaceNURBS Curve;
 	CqVector3D vA(m_MajorRadius,0,m_Height), vB(0,0,m_Height), vC(0,0,0), vD(0,0,1);

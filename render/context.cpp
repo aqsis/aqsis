@@ -53,9 +53,9 @@ CqMainContext::CqMainContext(CqContext* pconParent) : CqContext(pconParent)
 
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent=new CqAttributes();
-	m_pattrCurrent->Reference();
+	m_pattrCurrent->AddRef();
 	m_ptransCurrent=new CqTransform();
-	m_ptransCurrent->Reference();
+	m_ptransCurrent->AddRef();
 }
 
 
@@ -65,8 +65,8 @@ CqMainContext::CqMainContext(CqContext* pconParent) : CqContext(pconParent)
 
 CqMainContext::~CqMainContext()
 {
-	m_pattrCurrent->UnReference();
-	m_ptransCurrent->UnReference();
+	m_pattrCurrent->Release();
+	m_ptransCurrent->Release();
 }
 
 
@@ -81,9 +81,9 @@ CqFrameContext::CqFrameContext(CqContext* pconParent) : CqContext(pconParent)
 
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent=new CqAttributes(*pconParent->m_pattrCurrent);
-	m_pattrCurrent->Reference();
+	m_pattrCurrent->AddRef();
 	m_ptransCurrent=new CqTransform(*pconParent->m_ptransCurrent);
-	m_ptransCurrent->Reference();
+	m_ptransCurrent->AddRef();
 }
 
 
@@ -93,8 +93,8 @@ CqFrameContext::CqFrameContext(CqContext* pconParent) : CqContext(pconParent)
 
 CqFrameContext::~CqFrameContext()
 {
-	m_pattrCurrent->UnReference();
-	m_ptransCurrent->UnReference();
+	m_pattrCurrent->Release();
+	m_ptransCurrent->Release();
 }
 
 
@@ -106,9 +106,9 @@ CqWorldContext::CqWorldContext(CqContext* pconParent) : CqContext(pconParent)
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent=new CqAttributes(*pconParent->m_pattrCurrent);
-	m_pattrCurrent->Reference();
+	m_pattrCurrent->AddRef();
 	m_ptransCurrent=new CqTransform(*pconParent->m_ptransCurrent);
-	m_ptransCurrent->Reference();
+	m_ptransCurrent->AddRef();
 }
 
 
@@ -118,8 +118,8 @@ CqWorldContext::CqWorldContext(CqContext* pconParent) : CqContext(pconParent)
 
 CqWorldContext::~CqWorldContext()
 {
-	m_pattrCurrent->UnReference();
-	m_ptransCurrent->UnReference();
+	m_pattrCurrent->Release();
+	m_ptransCurrent->Release();
 }
 
 
@@ -131,9 +131,9 @@ CqAttributeContext::CqAttributeContext(CqContext* pconParent) : CqContext(pconPa
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent=new CqAttributes(*pconParent->m_pattrCurrent);
-	m_pattrCurrent->Reference();
+	m_pattrCurrent->AddRef();
 	m_ptransCurrent=new CqTransform(*pconParent->m_ptransCurrent);
-	m_ptransCurrent->Reference();
+	m_ptransCurrent->AddRef();
 }
 
 
@@ -143,8 +143,8 @@ CqAttributeContext::CqAttributeContext(CqContext* pconParent) : CqContext(pconPa
 
 CqAttributeContext::~CqAttributeContext()
 {
-	m_pattrCurrent->UnReference();
-	m_ptransCurrent->UnReference();
+	m_pattrCurrent->Release();
+	m_ptransCurrent->Release();
 }
 
 
@@ -161,7 +161,7 @@ CqTransformContext::CqTransformContext(CqContext* pconParent) : CqContext(pconPa
 		m_pattrCurrent=new CqAttributes();
 
 	m_ptransCurrent=new CqTransform(*pconParent->m_ptransCurrent);
-	m_ptransCurrent->Reference();
+	m_ptransCurrent->AddRef();
 }
 
 
@@ -182,9 +182,9 @@ CqSolidContext::CqSolidContext(CqContext* pconParent) : CqContext(pconParent)
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent=new CqAttributes(*pconParent->m_pattrCurrent);
-	m_pattrCurrent->Reference();
+	m_pattrCurrent->AddRef();
 	m_ptransCurrent=new CqTransform(*pconParent->m_ptransCurrent);
-	m_ptransCurrent->Reference();
+	m_ptransCurrent->AddRef();
 }
 
 
@@ -194,8 +194,8 @@ CqSolidContext::CqSolidContext(CqContext* pconParent) : CqContext(pconParent)
 
 CqSolidContext::~CqSolidContext()
 {
-	m_pattrCurrent->UnReference();
-	m_ptransCurrent->UnReference();
+	m_pattrCurrent->Release();
+	m_ptransCurrent->Release();
 }
 
 
@@ -207,9 +207,9 @@ CqObjectContext::CqObjectContext(CqContext* pconParent) : CqContext(pconParent)
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent=new CqAttributes();
-	m_pattrCurrent->Reference();
+	m_pattrCurrent->AddRef();
 	m_ptransCurrent=new CqTransform(*pconParent->m_ptransCurrent);
-	m_ptransCurrent->Reference();
+	m_ptransCurrent->AddRef();
 }
 
 
@@ -219,8 +219,8 @@ CqObjectContext::CqObjectContext(CqContext* pconParent) : CqContext(pconParent)
 
 CqObjectContext::~CqObjectContext()
 {
-	m_pattrCurrent->UnReference();
-	m_ptransCurrent->UnReference();
+	m_pattrCurrent->Release();
+	m_ptransCurrent->Release();
 }
 
 

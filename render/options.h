@@ -33,6 +33,7 @@
 #include	"ri.h"
 #include	"matrix.h"
 #include	"sstring.h"
+#include	"refcount.h"
 #include	"color.h"
 #include	"exception.h"
 #include	"parameters.h"
@@ -49,10 +50,10 @@ START_NAMESPACE(Aqsis)
  * Renderman option/attribute class, has a name and a number of parameter name/value pairs.
  */
 
-class CqSystemOption
+class CqSystemOption : public CqRefCount
 {
 	public:
-						CqSystemOption(const char* strName) : m_strName(strName), m_cReferences(0)
+						CqSystemOption(const char* strName) : m_strName(strName)
 											{}
 						CqSystemOption(const CqSystemOption& From);
 						~CqSystemOption()	{
@@ -103,19 +104,9 @@ class CqSystemOption
 													if((*i)->strName().compare(strName)==0)	return(*i);
 												return(0);
 											}
-						/** Get the number of references to this option/attribute.
-						 */
-			TqInt		Refcount() const	{return(m_cReferences);}
-						/** Increment the reference count on this option/attribute.
-						 */
-			void		Reference()			{m_cReferences++;}
-						/** Decrement the reference count on this option/attribute, delete it if it no longer has any references.
-						 */
-			void		UnReference()		{m_cReferences--; if(m_cReferences==0)	delete(this);}
 	private:
 			CqString					m_strName;			///< The name of this option/attribute.
 			std::vector<CqParameter*>	m_aParameters;		///< A vector of name/value parameters.
-			TqInt						m_cReferences;		///< The number of references to this option/attribute.
 };
 
 
@@ -654,19 +645,19 @@ class CqOptions : public CqDisplay, public CqCamera
 												{
 													if((*i)->strName().compare(strName)==0)
 													{
-														if((*i)->Refcount()==1)
+														if((*i)->RefCount()==1)
 															return(*i);
 														else
 														{
-															(*i)->UnReference();
+															(*i)->Release();
 															(*i)=new CqSystemOption(*(*i));
-															(*i)->Reference();
+															(*i)->AddRef();
 															return(*i);
 														}
 													}
 												}
 												m_aOptions.push_back(new CqSystemOption(strName));
-												m_aOptions.back()->Reference();
+												m_aOptions.back()->AddRef();
 												return(m_aOptions.back());
 											}
 	const	CqParameter* pParameter(const char* strName, const char* strParam) const;

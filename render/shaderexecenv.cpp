@@ -90,6 +90,8 @@ CqShaderExecEnv::~CqShaderExecEnv()
 	TqInt i;
 	for(i=0; i<EnvVars_Last; i++)
 		delete(m_apVariables[i]);
+
+	if(pSurface())	pSurface()->Release();
 }				                
 
 //---------------------------------------------------------------------
@@ -106,6 +108,7 @@ void CqShaderExecEnv::Initialise(const TqInt uGridRes, const TqInt vGridRes, CqS
 
 	// Store a pointer to the surface definition.
 	m_pSurface=pSurface;
+	if(pSurface)	pSurface->AddRef();
 
 	m_li=0;
 	m_Illuminate=0;

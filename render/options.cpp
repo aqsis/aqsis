@@ -38,8 +38,7 @@ START_NAMESPACE(Aqsis)
  */
 
 CqSystemOption::CqSystemOption(const CqSystemOption& From) :
-				m_strName(From.m_strName),
-				m_cReferences(0)
+				m_strName(From.m_strName)
 {
 	TqInt i=From.m_aParameters.size();
 	while(i-->0)
@@ -240,7 +239,7 @@ CqOptions::~CqOptions()
 	TqInt i=m_aOptions.size();
 	while(i-->0)
 	{
-		m_aOptions[i]->UnReference();
+		m_aOptions[i]->Release();
 		m_aOptions[i]=0;
 	}
 }
@@ -268,7 +267,7 @@ CqOptions& CqOptions::operator=(const CqOptions& From)
 	while(i-->0)
 	{
 		m_aOptions[i]=From.m_aOptions[i];
-		m_aOptions[i]->Reference();
+		m_aOptions[i]->AddRef();
 	}
 	return(*this);
 }

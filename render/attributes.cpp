@@ -81,7 +81,6 @@ CqGeometricAttributes::CqGeometricAttributes(CqGeometricAttributes& From) :
 							m_iNumberOfSides(From.m_iNumberOfSides),
 							m_pshadDisplacement(From.m_pshadDisplacement)
 {
-	m_pTrimLoops=new CqTrimLoopArray(*From.m_pTrimLoops);
 }
 
 
@@ -90,7 +89,6 @@ CqGeometricAttributes::CqGeometricAttributes(CqGeometricAttributes& From) :
  */
 CqGeometricAttributes::~CqGeometricAttributes()	
 {
-	delete(m_pTrimLoops);
 }
 
 
@@ -126,11 +124,13 @@ CqAttributes::CqAttributes(const CqAttributes& From) : m_cReferences(0)
 
 CqAttributes::~CqAttributes()
 {
+	assert(RefCount()==0);
+	
 	// Unreference the system attributes.
 	TqInt i=m_aAttributes.size();
 	while(i-->0)
 	{
-		m_aAttributes[i]->UnReference();
+		m_aAttributes[i]->Release();
 		m_aAttributes[i]=0;
 	}
 
@@ -161,7 +161,7 @@ CqAttributes& CqAttributes::operator=(const CqAttributes& From)
 	while(i-->0)
 	{
 		m_aAttributes[i]=From.m_aAttributes[i];
-		m_aAttributes[i]->Reference();
+		m_aAttributes[i]->AddRef();
 	}
 
 	// Copy the lightsource list.

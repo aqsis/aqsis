@@ -200,16 +200,14 @@ class CqPolygonPoints : public CqSurface
 	public:
 				CqPolygonPoints(TqInt cVertices) :
 					m_cVertices(cVertices),
-					m_cReferences(0),	
 					m_Transformed(TqFalse)
 															{}
 				CqPolygonPoints(const CqPolygonPoints& From) :
 																CqSurface(From),
 																m_cVertices(From.m_cVertices),
-																m_cReferences(0),
 																m_Transformed(From.m_Transformed)
 															{}
-		virtual	~CqPolygonPoints()							{}
+		virtual	~CqPolygonPoints()							{assert(RefCount()==0);}
 
 		// Overridden from CqSurface.
 		// NOTE: These should never be called.
@@ -225,20 +223,10 @@ class CqPolygonPoints : public CqSurface
 		virtual TqBool		Diceable()			{return(TqFalse);}
 
 		virtual	void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
-		virtual	TqUint		cUniform() const	{return(m_cReferences);}
+		virtual	TqUint		cUniform() const	{return(RefCount());}
 		virtual	TqUint		cVarying() const	{return(m_cVertices);}
 		virtual	TqUint		cVertex() const		{return(m_cVertices);}
 
-							/** Increment the number of polygons referercing this list.
-							 */		
-				void		Reference()			{m_cReferences++;}
-							/** Decrement the number of polygons referercing this list, delete it if not needed.
-							 */		
-				void		UnReference()		{
-													m_cReferences--;
-													if(m_cReferences<=0)
-														delete(this);
-												}
 				void		TransferDefaultSurfaceParameters();
 							/** Get the number of vertices in the list.
 							 */
@@ -246,7 +234,6 @@ class CqPolygonPoints : public CqSurface
 
 	protected:
 		TqInt			m_cVertices;		///< Count of vertices in this list.
-		TqInt			m_cReferences;		///< Count of polygons referencing this list.
 		TqBool			m_Transformed;		///< Flag indicatign that the list has been transformed.
 };
 
@@ -261,9 +248,9 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 	public:
 				CqSurfacePointsPolygon(CqPolygonPoints* pPoints)	:	CqBasicSurface(),
 																		m_pPoints(pPoints)
-																	{m_pPoints->Reference();}
+																	{m_pPoints->AddRef();}
 				CqSurfacePointsPolygon(const CqSurfacePointsPolygon& From);
-		virtual	~CqSurfacePointsPolygon()							{m_pPoints->UnReference();}
+		virtual	~CqSurfacePointsPolygon()							{m_pPoints->Release();}
 
 				CqSurfacePointsPolygon& operator=(const CqSurfacePointsPolygon& From);
 
@@ -348,7 +335,7 @@ class CqMotionSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		virtual	~CqMotionSurfacePointsPolygon()		{
 														TqInt i;
 														for(i=0; i<cTimes(); i++)
-															GetMotionObject(Time(i))->UnReference();
+															GetMotionObject(Time(i))->Release();
 													}
 
 				CqMotionSurfacePointsPolygon& operator=(const CqMotionSurfacePointsPolygon& From);

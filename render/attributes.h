@@ -38,6 +38,7 @@
 #include	"options.h"
 #include	"bound.h"
 #include	"spline.h"
+#include	"trimcurve.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -53,7 +54,6 @@ enum EqOrientation
 
 class CqLightsource;
 class CqShader;
-class CqTrimLoopArray;
 
 //-----------------------------------------------------------------------
 /**
@@ -241,8 +241,7 @@ class CqGeometricAttributes
 													m_eOrientation(OrientationLH),
 													m_eCoordsysOrientation(OrientationLH),
 													m_iNumberOfSides(2),
-													m_pshadDisplacement(0),
-													m_pTrimLoops(0)
+													m_pshadDisplacement(0)
 													{}
 						CqGeometricAttributes(CqGeometricAttributes& From);
 	virtual				~CqGeometricAttributes();
@@ -417,12 +416,11 @@ class CqGeometricAttributes
 						/** Get the array of trim curve loops.
 						 *	\return A pointer to the trim loops array object.
 						 */
-			CqTrimLoopArray* pTrimLoops() const		{return(m_pTrimLoops);}
-						/** Set the array of trim curve loops.
-						 *	\param A pointer to the trim loops array object.
+			const CqTrimLoopArray& TrimLoops() const		{return(m_TrimLoops);}
+						/** Get the array of trim curve loops.
+						 *	\return A pointer to the trim loops array object.
 						 */
-			void		SetpTrimLoops(CqTrimLoopArray* pTrimLoops)			
-													{m_pTrimLoops=pTrimLoops;}
+			CqTrimLoopArray& TrimLoops()					{return(m_TrimLoops);}
 
 	protected:
 			CqBound		m_Bound;							///< the bound used for any associated primitives.
@@ -440,7 +438,7 @@ class CqGeometricAttributes
 			EqOrientation	m_eCoordsysOrientation;			///< the orientation of the current coordinate system.
 			TqInt		m_iNumberOfSides;					///< the number of visible sides associated primitives have.
 			CqShader*	m_pshadDisplacement;				///< a pointer to the current displacement shader.
-			CqTrimLoopArray* m_pTrimLoops;					///< the array of closed trimcurve loops.
+			CqTrimLoopArray m_TrimLoops;					///< the array of closed trimcurve loops.
 };
 
 
@@ -449,17 +447,13 @@ class CqGeometricAttributes
 	Container class for the attributes definitions of the graphics state.
 */
 
-class _qShareC	CqAttributes : public CqShadingAttributes, public CqGeometricAttributes
+class _qShareC	CqAttributes : public CqShadingAttributes, public CqGeometricAttributes, public CqRefCount
 {
 	public:
 	_qShareM			CqAttributes();
 	_qShareM			CqAttributes(const CqAttributes& From);
 	_qShareM	virtual	~CqAttributes();
 
-						/// increment the number of external references to this attribute state.
-	_qShareM	void	Reference()			{m_cReferences++;}
-						/// decrement the number of external references to theses attributes, destroy them if no more references.
-	_qShareM	void	UnReference()		{m_cReferences--; if(m_cReferences==0)	delete(this);}
 						/** Get a pointer to this attribute state suitable for writing.
 						 * I the external references count is greater than 1, then create a copy on the stack and return that.
 						 * \return a pointer to these attribute safe to write into.
@@ -469,8 +463,8 @@ class _qShareC	CqAttributes : public CqShadingAttributes, public CqGeometricAttr
 												if(m_cReferences>1)
 												{
 													CqAttributes* pWrite=Clone();
-													pWrite->Reference();
-													UnReference();
+													pWrite->AddRef();
+													Release();
 													return(pWrite);
 												}
 												else
@@ -506,19 +500,19 @@ class _qShareC	CqAttributes : public CqShadingAttributes, public CqGeometricAttr
 												{
 													if((*i)->strName().compare(strName)==0)
 													{
-														if((*i)->Refcount()==1)
+														if((*i)->RefCount()==1)
 															return(*i);
 														else
 														{
-															(*i)->UnReference();
+															(*i)->Release();
 															(*i)=new CqSystemOption(*(*i));
-															(*i)->Reference();
+															(*i)->AddRef();
 															return(*i);
 														}
 													}
 												}
 												m_aAttributes.push_back(new CqSystemOption(strName));
-												m_aAttributes.back()->Reference();
+												m_aAttributes.back()->AddRef();
 												return(m_aAttributes.back());
 											}
 

@@ -524,6 +524,8 @@ TqInt CqSurfacePatchBicubic::Split(std::vector<CqBasicSurface*>& aSplits)
 	pNew2->m_fDiceable=TqTrue;
 	pNew1->m_EyeSplitCount=m_EyeSplitCount;
 	pNew2->m_EyeSplitCount=m_EyeSplitCount;
+	pNew1->AddRef();
+	pNew2->AddRef();
 
 	aSplits.push_back(pNew1);
 	aSplits.push_back(pNew2);
@@ -943,6 +945,8 @@ TqInt CqSurfacePatchBilinear::Split(std::vector<CqBasicSurface*>& aSplits)
 	pNew2->m_fDiceable=TqTrue;
 	pNew1->m_EyeSplitCount=m_EyeSplitCount;
 	pNew2->m_EyeSplitCount=m_EyeSplitCount;
+	pNew1->AddRef();
+	pNew2->AddRef();
 
 	aSplits.push_back(pNew1);
 	aSplits.push_back(pNew2);
@@ -1151,6 +1155,7 @@ TqInt CqSurfacePatchMeshBicubic::Split(std::vector<CqBasicSurface*>& aSplits)
 			// uCol is the coordinate column of the mesh.
 			RtInt uCol=j*uStep;
 			CqSurfacePatchBicubic*	pSurface=new CqSurfacePatchBicubic();
+			pSurface->AddRef();
 			pSurface->SetDefaultPrimitiveVariables();
 			pSurface->SetSurfaceParameters(*this);
 			pSurface->P().SetSize(pSurface->cVertex());
@@ -1373,6 +1378,7 @@ TqInt CqSurfacePatchMeshBilinear::Split(std::vector<CqBasicSurface*>& aSplits)
 		for(j=0; j<m_uPatches; j++)
 		{
 			CqSurfacePatchBilinear*	pSurface=new CqSurfacePatchBilinear();
+			pSurface->AddRef();
 			pSurface->SetDefaultPrimitiveVariables();
 			pSurface->P().SetSize(4);
 

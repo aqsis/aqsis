@@ -60,7 +60,7 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
 	QGetRenderContext()->Stats().IncGridsDeallocated();
 	
 	// Release the reference to the attributes.
-	if(m_pAttributes!=0)	m_pAttributes->UnReference();
+	if(m_pAttributes!=0)	m_pAttributes->Release();
 	m_pAttributes=0;
 }
 
@@ -91,7 +91,7 @@ void CqMicroPolyGrid::Initialise(TqInt cu, TqInt cv, CqSurface* pSurface)
 	{
 		lUses=pSurface->Uses();
 		m_pAttributes=const_cast<CqAttributes*>(pSurface->pAttributes());
-		m_pAttributes->Reference();
+		m_pAttributes->AddRef();
 	}
 
 	CqShaderExecEnv::Initialise(cu,cv,pSurface,lUses);
@@ -371,16 +371,16 @@ void CqMicroPolyGrid::Split(CqImageBuffer* pImage, TqInt iBucket, long xmin, lon
 
 			// If the MPG is trimmed then don't add it.
 			TqBool fTrimmed = TqFalse;
-			if(pAttributes()->pTrimLoops()!=0)
+			if(pSurface()->bCanBeTrimmed())
 			{
 				CqVector2D vecT(u()[iIndex],v()[iIndex]);
-				TqBool fTrimA = pAttributes()->pTrimLoops()->TrimPoint(vecT);
+				TqBool fTrimA = pSurface()->bIsPointTrimmed(vecT);
 				vecT=CqVector2D(u()[iIndex+1],v()[iIndex+1]);
-				TqBool fTrimB = pAttributes()->pTrimLoops()->TrimPoint(vecT);
+				TqBool fTrimB = pSurface()->bIsPointTrimmed(vecT);
 				vecT=CqVector2D(u()[iIndex+cu+2],v()[iIndex+cu+2]);
-				TqBool fTrimC = pAttributes()->pTrimLoops()->TrimPoint(vecT);
+				TqBool fTrimC = pSurface()->bIsPointTrimmed(vecT);
 				vecT=CqVector2D(u()[iIndex+cu+1],v()[iIndex+cu+1]);
-				TqBool fTrimD = pAttributes()->pTrimLoops()->TrimPoint(vecT);
+				TqBool fTrimD = pSurface()->bIsPointTrimmed(vecT);
 
 				// If al points are trimmed discard the MPG
 				if(fTrimA && fTrimB && fTrimC && fTrimD)
@@ -727,7 +727,7 @@ TqBool CqMicroPolygonStatic::Sample(CqVector2D& vecSample, TqFloat time, TqFloat
 
 			CqVector2D vR = BilinearEvaluate(uvA,uvB,uvC,uvD,vecUV.x(),vecUV.y());
 
-			if(pGrid()->pAttributes()->pTrimLoops()->TrimPoint(vR))
+			if(pGrid()->pSurface()->bCanBeTrimmed() && pGrid()->pSurface()->bIsPointTrimmed(vR))
 				return(TqFalse);
 		}
 		return(TqTrue);

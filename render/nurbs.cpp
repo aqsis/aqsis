@@ -44,6 +44,8 @@ START_NAMESPACE(Aqsis)
 
 CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface()
 {
+	TrimLoops()=pAttributes()->TrimLoops();
+	TrimLoops().Prepare();
 }
 
 //---------------------------------------------------------------------
@@ -75,6 +77,8 @@ void CqSurfaceNURBS::operator=(const CqSurfaceNURBS& From)
 		m_auKnots[i]=From.m_auKnots[i];
 	for(	  i=From.m_avKnots.size()-1; i>=0; i--)
 		m_avKnots[i]=From.m_avKnots[i];
+
+	TrimLoops()=From.TrimLoops();
 }
 
 
@@ -1327,6 +1331,8 @@ TqInt CqSurfaceNURBS::Split(std::vector<CqBasicSurface*>& aSplits)
 	pNew2->m_fDiceable=TqTrue;
 	pNew1->m_EyeSplitCount=m_EyeSplitCount;
 	pNew2->m_EyeSplitCount=m_EyeSplitCount;
+	pNew1->AddRef();
+	pNew2->AddRef();
 
 	aSplits.push_back(pNew1);
 	aSplits.push_back(pNew2);

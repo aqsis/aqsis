@@ -403,6 +403,7 @@ TqInt CqPolygonBase::Split(std::vector<CqBasicSurface*>& aSplits)
 
 		// Create bilinear patches
 		CqSurfacePatchBilinear* pNew=new CqSurfacePatchBilinear();
+		pNew->AddRef();
 		pNew->SetSurfaceParameters(Surface());
 		pNew->SetDefaultPrimitiveVariables();
 
@@ -595,8 +596,8 @@ CqSurfacePointsPolygon& CqSurfacePointsPolygon::operator=(const CqSurfacePointsP
 	// last reference.
 	CqPolygonPoints*	pOldPoints=m_pPoints;
 	m_pPoints=From.m_pPoints;
-	m_pPoints->Reference();
-	if(pOldPoints)		pOldPoints->UnReference();	
+	m_pPoints->AddRef();
+	if(pOldPoints)		pOldPoints->Release();	
 
 	return(*this);
 }
@@ -721,6 +722,7 @@ TqInt CqMotionSurfacePointsPolygon::Split(std::vector<CqBasicSurface*>& aSplits)
 	for(i=0; i<cSplits; i++)
 	{
 		CqMotionSurface<CqBasicSurface*>* pNewMotion=new CqMotionSurface<CqBasicSurface*>(0);
+		pNewMotion->AddRef();
 		pNewMotion->m_fDiceable=TqTrue;
 		pNewMotion->m_EyeSplitCount=m_EyeSplitCount;
 		TqInt j;

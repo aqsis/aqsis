@@ -41,7 +41,7 @@ CqLightsource::CqLightsource(CqShader* pShader, TqBool fActive) :
 {
 	// Set a refernce with the current attributes.
 	m_pAttributes=const_cast<CqAttributes*>(QGetRenderContext()->pattrCurrent());
-	m_pAttributes->Reference();
+	m_pAttributes->AddRef();
 //	m_matLightToWorld=QGetRenderContext()->matCurrent();
 //	m_matWorldToLight=QGetRenderContext()->matCurrent().Inverse();
 
@@ -58,7 +58,7 @@ CqLightsource::~CqLightsource()
 {
 	// Release our reference on the current attributes.
 	if(m_pAttributes)
-		m_pAttributes->UnReference();
+		m_pAttributes->Release();
 	m_pAttributes=0;
 
 	// Unlink from the stack.

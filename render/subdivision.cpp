@@ -822,7 +822,7 @@ void CqSubdivider::StoreDice(TqInt Level, TqInt& iFace, CqPolygonPoints* pPoints
 CqWSurf::~CqWSurf()
 {
 	// Unreference the vertex storage class.
-	m_pPoints->UnReference();
+	m_pPoints->Release();
 }
 
 
@@ -988,6 +988,7 @@ TqInt CqWSurf::Split(std::vector<CqBasicSurface*>& aSplits)
 		for(i=0; i<cE; i++)
 		{
 			CqWSurf* pNew=new CqWSurf(this,i);
+			pNew->AddRef();
 			pNew->SetSurfaceParameters(*m_pPoints);
 			pNew->m_fDiceable=TqTrue;
 			pNew->m_EyeSplitCount=m_EyeSplitCount;
@@ -1004,6 +1005,7 @@ TqInt CqWSurf::Split(std::vector<CqBasicSurface*>& aSplits)
 		for(i=0; i<cE; i++)
 		{
 			CqWSurf* pNew=new CqWSurf(this,i);
+			pNew->AddRef();
 			pNew->SetSurfaceParameters(*m_pPoints);
 			pNew->m_fDiceable=TqTrue;
 			pNew->m_EyeSplitCount=m_EyeSplitCount;
@@ -1356,7 +1358,7 @@ CqWSurf::CqWSurf(CqWSurf* pSurf, TqInt iFace)
 	CqPolygonPoints* pPointsClass=new CqPolygonPoints(pSurf->cVerts());
 	pPointsClass->SetSurfaceParameters(*pSurf->pPoints());
 	m_pPoints=pPointsClass;
-	pPointsClass->Reference();
+	pPointsClass->AddRef();
 
 	TqInt lUses=pSurf->Uses();
 	TqBool uses_s=USES(lUses,EnvVars_s);
@@ -1643,6 +1645,7 @@ TqInt CqMotionWSurf::Split(std::vector<CqBasicSurface*>& aSplits)
 		for(i=0; i<cE; i++)
 		{
 			CqMotionWSurf* pNew=new CqMotionWSurf(this,i);
+			pNew->AddRef();
 			pNew->SetSurfaceParameters(*GetMotionObject(Time(0)));
 			pNew->m_fDiceable=TqTrue;
 			pNew->m_EyeSplitCount=m_EyeSplitCount;
@@ -1659,6 +1662,7 @@ TqInt CqMotionWSurf::Split(std::vector<CqBasicSurface*>& aSplits)
 		for(i=0; i<cE; i++)
 		{
 			CqMotionWSurf* pNew=new CqMotionWSurf(this,i);
+			pNew->AddRef();
 			pNew->SetSurfaceParameters(*GetMotionObject(Time(0)));
 			pNew->m_fDiceable=TqTrue;
 			pNew->m_EyeSplitCount=m_EyeSplitCount;
@@ -1915,7 +1919,7 @@ CqMotionWSurf::CqMotionWSurf(CqMotionWSurf* pSurf, TqInt iFace) : CqMotionSpec<C
 	{
 		CqPolygonPoints* pPointsClass=new CqPolygonPoints(pSurf->cVerts());
 		pPointsClass->SetSurfaceParameters(*pSurf->GetMotionObject(Time(i)));
-		pPointsClass->Reference();
+		pPointsClass->AddRef();
 		AddTimeSlot(pSurf->Time(i),pPointsClass);
 
 		CqPolygonPoints* pSurfPoints=pSurf->GetMotionObject(pSurf->Time(i));

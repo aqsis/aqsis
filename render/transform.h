@@ -47,29 +47,23 @@ START_NAMESPACE(Aqsis)
  * Container class for the transform definitions of the graphics state.
  */
 
-class _qShareC	CqTransform : public CqMotionSpec<CqMatrix>
+class _qShareC	CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount
 {
 	public:
 	_qShareM			CqTransform();
 	_qShareM			CqTransform(const CqTransform& From);
 	_qShareM	virtual	~CqTransform();
 
-						/** Increment the number of references to this transform.
-						 */
-	_qShareM	void	Reference()			{m_cReferences++;}
-						/** Decrement the number of references to this transform, delete it if no more.
-						 */
-	_qShareM	void	UnReference()		{m_cReferences--; if(m_cReferences==0)	delete(this);}
 						/** Get a writable copy of this, if the reference count is greater than 1
 						 * create a new copy and retirn that.
 						 */
 	_qShareM	CqTransform* Write()		{
 												// We are about to write to this attribute,so clone if references exist.
-												if(m_cReferences>1)
+												if(RefCount()>1)
 												{
 													CqTransform* pWrite=Clone();
-													pWrite->Reference();
-													UnReference();
+													pWrite->AddRef();
+													Release();
 													return(pWrite);
 												}
 												else

@@ -5,7 +5,7 @@
  *	@brief	Implementation of trimcurce functionality.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2001/11/13 13:49:49 $
+ *	Last change date:	$Date: 2001/11/13 23:32:54 $
  */
 //------------------------------------------------------------------------------
 
@@ -132,7 +132,7 @@ void CqTrimLoop::Prepare()
 }
 
 
-TqBool	CqTrimLoop::TrimPoint(CqVector2D& v)
+const TqBool	CqTrimLoop::TrimPoint(const CqVector2D& v) const
 {
 	TqFloat x=v.x();
 	TqFloat y=v.y();
@@ -158,11 +158,11 @@ void CqTrimLoopArray::Prepare()
 }
 
 
-TqBool	CqTrimLoopArray::TrimPoint(CqVector2D& v)
+const TqBool	CqTrimLoopArray::TrimPoint(const CqVector2D& v) const
 {
 	TqBool	fTrim=false;
 
-	std::vector<CqTrimLoop>::iterator iLoop;
+	std::vector<CqTrimLoop>::const_iterator iLoop;
 	for(iLoop=m_aLoops.begin(); iLoop!=m_aLoops.end(); iLoop++)
 		fTrim=fTrim || iLoop->TrimPoint(v);
 	

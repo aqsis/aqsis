@@ -78,6 +78,8 @@ CqTransform::CqTransform(const CqTransform& From) : CqMotionSpec<CqMatrix>(From)
 
 CqTransform::~CqTransform()
 {
+	assert(RefCount()==0);
+
 	if(m_StackIndex>=0 && m_StackIndex<static_cast<TqInt>(QGetRenderContext()->TransformStack().size()))
 	{
 		// Remove ourself from the stack

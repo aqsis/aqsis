@@ -430,6 +430,7 @@ CqTeapot::CqTeapot(TqBool addCrowBase) : m_CrowBase(addCrowBase)
 {
 int i;
 	CqSurfacePatchMeshBicubic* pSurface=new CqSurfacePatchMeshBicubic( 13,10,RI_TRUE,RI_TRUE);
+	pSurface->AddRef();
    
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
@@ -451,6 +452,7 @@ int i;
 	this->pPatchMeshBicubic[0]=pSurface;
 
 	pSurface=new CqSurfacePatchMeshBicubic( 13,7,RI_TRUE,RI_TRUE);
+	pSurface->AddRef();
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
 	pSurface->P().SetSize(13*7);
@@ -469,6 +471,7 @@ int i;
 	this->pPatchMeshBicubic[1]=pSurface;
 
 	pSurface=new CqSurfacePatchMeshBicubic( 4, 7,RI_TRUE,RI_TRUE);
+	pSurface->AddRef();
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
 	pSurface->P().SetSize(4*7);
@@ -487,6 +490,7 @@ int i;
 	this->pPatchMeshBicubic[2]=pSurface;
 
 	pSurface=new CqSurfacePatchMeshBicubic( 4, 7,RI_TRUE,RI_TRUE);
+	pSurface->AddRef();
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
 	pSurface->P().SetSize(4*7);
@@ -505,6 +509,7 @@ int i;
 	this->pPatchMeshBicubic[3]=pSurface;
 
 	pSurface=new CqSurfacePatchMeshBicubic( 4, 7,RI_TRUE,RI_TRUE);
+	pSurface->AddRef();
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
 	pSurface->P().SetSize(4*7);
@@ -523,6 +528,7 @@ int i;
 	this->pPatchMeshBicubic[4]=pSurface;
 
 	pSurface=new CqSurfacePatchMeshBicubic( 4, 7,RI_TRUE,RI_TRUE);
+	pSurface->AddRef();
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
 	pSurface->P().SetSize(4*7);
@@ -543,6 +549,7 @@ int i;
 	// bottom 
 	if ( m_CrowBase) {
 		pSurface=new CqSurfacePatchMeshBicubic( 13, 4,RI_TRUE,RI_TRUE);
+		pSurface->AddRef();
 		// Fill in default values for all primitive variables not explicitly specified.
 		// Fill in primitive variables specified.
 		pSurface->P().SetSize(13*4);

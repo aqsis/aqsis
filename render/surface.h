@@ -35,6 +35,7 @@
 #include	"attributes.h"
 #include	"transform.h"
 #include	"list.h"
+#include	"refcount.h"
 #include	"matrix.h"
 #include	"parameters.h"
 #include	"bound.h"
@@ -51,7 +52,7 @@ START_NAMESPACE(Aqsis)
  * Abstract base surface class, which provides interfaces to geometry.  
  */
 
-class CqBasicSurface : public CqListEntry<CqBasicSurface>
+class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount
 {
 	public:
 						CqBasicSurface();
@@ -59,10 +60,10 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>
 	virtual				~CqBasicSurface()	{
 											// Release our reference on the current attributes.
 											if(m_pAttributes)
-												m_pAttributes->UnReference();
+												m_pAttributes->Release();
 											m_pAttributes=0;
 											if(m_pTransform)
-												m_pTransform->UnReference();
+												m_pTransform->Release();
 											m_pTransform=0;
 										}
 
@@ -188,7 +189,6 @@ class _qShareC CqSurface : public CqBasicSurface
 	public:
 						CqSurface();
 						CqSurface(const CqSurface& From);
-	virtual				~CqSurface()	{}
 
 	virtual	void		SetDefaultPrimitiveVariables(TqBool bUseDef_st=TqTrue);
 
@@ -265,6 +265,15 @@ class _qShareC CqSurface : public CqBasicSurface
 						/** Determine whether this surface has per vertex v coordinates.
 						 */
 	const	TqBool		bHasv() const									{return(m_v.Size()>=cVertex());}
+
+
+						/** Determine whether this surface can be trimmed
+						 */
+	virtual const	TqBool	bCanBeTrimmed() const						{return(TqFalse);}
+	
+						/** Determine if the specified point is trimmed.
+						 */
+	virtual	const	TqBool	bIsPointTrimmed(const CqVector2D& p) const	{return(TqFalse);}
 
 	protected:
 			// Default primitive variables

@@ -1033,7 +1033,8 @@ void CqImageBuffer::PostSurface(CqBasicSurface* pSurface)
 	// Check if the surface can be culled. (also converts Bound to raster space).
 	if(CullSurface(Bound,pSurface))
 	{
-		delete(pSurface);
+		pSurface->UnLink();
+		pSurface->Release();
 		QGetRenderContext()->Stats().IncCulledGPrims();
 		return;
 	}
@@ -1107,7 +1108,8 @@ TqBool CqImageBuffer::OcclusionCullSurface(TqInt iBucket, CqBasicSurface* pSurfa
 		}
 		
 		// Bound covers no more buckets
-		delete(pSurface);
+		pSurface->UnLink();
+		pSurface->Release();
 		QGetRenderContext()->Stats().IncCulledGPrims();
 		return TqTrue;
 	}
@@ -1498,7 +1500,8 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 				PostSurface(aSplits[i]);
 		}
 
-		delete(pSurface);
+		pSurface->UnLink();
+		pSurface->Release();
 		pSurface=Bucket.pTopSurface();
 		// Render any waiting micro polygon grids.
 		RenderMPGs(iBucket, xmin, xmax, ymin, ymax);

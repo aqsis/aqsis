@@ -35,6 +35,7 @@
 #include	"vector4d.h"
 #include	"vector2d.h"
 #include	"surface.h"
+#include	"trimcurve.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -149,6 +150,8 @@ class CqSurfaceNURBS : public CqSurface
 				void		OutputMesh();
 				void		Output(char* name);
 
+				const CqTrimLoopArray&	TrimLoops() const	{return(m_TrimLoops);}
+				CqTrimLoopArray& TrimLoops()				{return(m_TrimLoops);}
 
 				// Function from CqSurface
 						void uSubdivide(CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB);
@@ -170,6 +173,9 @@ class CqSurfaceNURBS : public CqSurface
 							 */	
 				virtual	TqUint cVertex() const		{return(m_cuVerts*m_cvVerts);}
 
+				virtual const TqBool bCanBeTrimmed() const	{return(TqTrue);}
+				virtual const TqBool bIsPointTrimmed(const CqVector2D& p) const	{return(m_TrimLoops.TrimPoint(p));}
+
 				
 	protected:
 				std::vector<TqFloat>	m_auKnots;	///< Knot vector for the u direction.
@@ -178,6 +184,7 @@ class CqSurfaceNURBS : public CqSurface
 				TqUint				m_vOrder;	///< Surface order in the v direction.
 				TqUint				m_cuVerts;	///< Control point count in the u direction.
 				TqUint				m_cvVerts;	///< Control point count in the v direction.
+				CqTrimLoopArray		m_TrimLoops;	///< Local trim curves, prepared for this surface.
 };
 
 
