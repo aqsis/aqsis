@@ -928,14 +928,17 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 	// If point is behind light, call it not in shadow.
 	//if(z1<0.0)	return;
 	
-	TqFloat s1=vecR1s.x();
-	TqFloat t1=vecR1s.y();
-	TqFloat s2=vecR2s.x();
-	TqFloat t2=vecR2s.y();
-	TqFloat s3=vecR3s.x();
-	TqFloat t3=vecR3s.y();
-	TqFloat s4=vecR4s.x();
-	TqFloat t4=vecR4s.y();
+	TqFloat xro2=m_XRes*0.5;
+	TqFloat yro2=m_YRes*0.5;
+	
+	TqFloat s1=vecR1s.x()*xro2+xro2;
+	TqFloat t1=m_YRes-(vecR1s.y()*yro2+yro2);
+	TqFloat s2=vecR2s.x()*xro2+xro2;
+	TqFloat t2=m_YRes-(vecR2s.y()*yro2+yro2);
+	TqFloat s3=vecR3s.x()*xro2+xro2;
+	TqFloat t3=m_YRes-(vecR3s.y()*yro2+yro2);
+	TqFloat s4=vecR4s.x()*xro2+xro2;
+	TqFloat t4=m_YRes-(vecR4s.y()*yro2+yro2);
 
 	TqFloat smin=(s1<s2)?s1:(s2<s3)?s2:(s3<s4)?s3:s4;
 	TqFloat smax=(s1>s2)?s1:(s2>s3)?s2:(s3>s4)?s3:s4;
@@ -987,6 +990,11 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 	// Test the samples.
 	TqInt inshadow=0;
 
+	TqFloat bias=0.225f;
+	const TqFloat* poptBias=QGetRenderContext()->optCurrent().GetFloatOption("shadow","bias");
+	if(poptBias!=0)
+		bias=poptBias[0];
+
 	TqFloat s=lu;
 	TqInt i;
 	for(i=0; i<ns; i++)
@@ -1010,7 +1018,7 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 					iu-=pTMBa->sOrigin();
 					iv-=pTMBa->tOrigin();
 					TqInt rowlen=pTMBa->Width();
-					if(z>pTMBa->pBufferData()[(iv*rowlen)+iu])
+					if((z-bias)>pTMBa->pBufferData()[(iv*rowlen)+iu])
 						inshadow+=1;
 				}
 			}
