@@ -114,6 +114,7 @@ void CqStats::InitialiseFrame()
 	m_timeParse.Reset();
 	m_timeProject.Reset();
 	m_timeCombine.Reset();
+	m_timeOthers.Reset();
 
 }
 
@@ -183,6 +184,7 @@ void CqStats::PrintStats( TqInt level ) const
 	TqFloat timeParse = static_cast<TqFloat>( m_timeParse.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeProject = static_cast<TqFloat>( m_timeProject.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeCombine = static_cast<TqFloat>( m_timeCombine.TimeTotal() ) / CLOCKS_PER_SEC;
+	TqFloat timeOthers = static_cast<TqFloat>( m_timeOthers.TimeTotal() ) / CLOCKS_PER_SEC;
 
 	//! level >= 0
 	MSG << "Total render time   : ";
@@ -331,6 +333,8 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "DisplayBucket check:\t"; TimeToString( MSG, timeDB ) << " (" << 100.0f * timeDB / m_timeTotalFrame << "%)" << std::endl;
 		MSG << "Parsing check:\t"; TimeToString( MSG, timeParse ) << " (" << 100.0f * timeParse / m_timeTotalFrame << "%)" << std::endl;
 		MSG << "Project check:\t"; TimeToString( MSG, timeProject ) << " (" << 100.0f * timeProject / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "Init. Buckets: ";
+		TimeToString( MSG, timeOthers ) << " (" << 100.0f * timeOthers / m_timeTotalFrame << "%)" << std::endl;
 	}
 
 

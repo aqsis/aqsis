@@ -418,6 +418,10 @@ class CqStats
 		{
 			return ( m_timeProject );
 		};
+		CqStatTimer& Others()
+		{
+			return ( m_timeOthers );
+		};
 
 
 		//@}
@@ -483,6 +487,7 @@ class CqStats
 		CqStatTimer m_timeCombine;		    ///< Time spent on combining the bucket subpixels
 		CqStatTimer m_timeParse;		    ///< Time spent on sending the parsing RIB file or Ri Calls
 		CqStatTimer m_timeProject;		    ///< Time spent on sending the Project grids to raster space
+		CqStatTimer m_timeOthers;		    ///< Time spent on other things
 
 }
 ;

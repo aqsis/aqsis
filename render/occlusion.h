@@ -46,11 +46,11 @@ class CqOcclusionBox
 			UpdateLevel( m_HierarchyLevels - 1 );
 		}
 
-		static bool CanCull( CqBound* bound )
+		static TqBool CanCull( CqBound* bound )
 		{
 			return m_Hierarchy[ 0 ].IsCullable( bound );
 		}
-		static void MarkForUpdate( int id )
+		static void MarkForUpdate( TqInt id )
 		{
 			assert( id >= 0 && id < m_TotalBoxes );
 			m_Hierarchy[ id ].MarkForUpdate();
@@ -61,21 +61,21 @@ class CqOcclusionBox
 		~CqOcclusionBox();
 
 		void SetupChildren();
-		static void UpdateLevel( int level );
-		bool UpdateZValues(); // returns true if we changed anything
+		static void UpdateLevel( TqInt level );
+		TqBool UpdateZValues(); // returns true if we changed anything
 		void Clear();
 
 		void SetBounds( TqInt x0, TqInt y0, TqInt x1, TqInt y1 );
 		bool Overlaps( CqBound* bound );
 
-		bool IsCullable( CqBound* bound );
-		bool NeedsUpdating()
+		TqBool IsCullable( CqBound* bound );
+		TqBool NeedsUpdating()
 		{
 			return m_NeedsUpdating;
 		}
 		void MarkForUpdate()
 		{
-			m_NeedsUpdating = true;
+			m_NeedsUpdating = TqTrue;
 		}
 
 		TqInt m_MinX; // pixel positions of box boundary
@@ -83,10 +83,10 @@ class CqOcclusionBox
 		TqInt m_MaxX;
 		TqInt m_MaxY;
 
-		float m_MinZ;
-		float m_MaxZ;
+		TqFloat m_MinZ;
+		TqFloat m_MaxZ;
 
-		int m_Id;
+		TqInt m_Id;
 
 		/*
 			m_Hierarchy is a tree but implemented as an array for speed.
@@ -100,11 +100,11 @@ class CqOcclusionBox
 
 		static CqBucket* m_Bucket;
 		static CqOcclusionBox* m_Hierarchy; // tree of OcclusionBoxes
-		static int m_HierarchyLevels; // the depth of the tree
-		static int m_TotalBoxes;
-		static int* m_LevelStartId; // the id for the start of each level, ie 0,1,5,21... etc
+		static TqInt m_HierarchyLevels; // the depth of the tree
+		static TqInt m_TotalBoxes;
+		static TqInt* m_LevelStartId; // the id for the start of each level, ie 0,1,5,21... etc
 
-		bool m_NeedsUpdating;
+		TqBool m_NeedsUpdating;
 };
 
 END_NAMESPACE( Aqsis )

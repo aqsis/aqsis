@@ -109,6 +109,8 @@ class _qShareC	CqImagePixel
 		}
 		_qShareM	void	AllocateSamples( TqInt XSamples, TqInt YSamples );
 		_qShareM	void	InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter = TqTrue );
+		_qShareM	void	FreeSamples();
+
 		/** Get the approximate coverage of this pixel.
 		 * \return Float fraction of the pixel covered.
 		 */
@@ -345,13 +347,12 @@ class CqBucket : public IqBucket
 
 		static	void	InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqInt xfwidth, TqInt yfwidth, TqInt xsamples, TqInt ysamples, TqBool fJitter = TqTrue );
 		static	void	InitialiseFilterValues();
-		static	void	Clear();
 		static	TqBool	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie );
 		static	void	CombineElements();
 		void	FilterBucket();
 		void	ExposeBucket();
 		void	QuantizeBucket();
-
+		
 		/** Add a GPRim to the list of deferred GPrims.
 		 */
 		void	AddGPrim( CqBasicSurface* pGPrim );
@@ -620,7 +621,9 @@ class _qShareC	CqImageBuffer
 
 		// Callbacks to overridden image buffer class to allow display/processing etc.
 		_qShareM	virtual	void	BucketComplete( TqInt iBucket )
-		{}
+		{
+			
+		}
 		_qShareM	virtual	void	ImageComplete()
 		{}
 

@@ -34,6 +34,7 @@ START_NAMESPACE( Aqsis )
  */
 CqList<CqCSGTreeNode>	CqCSGNodePrimitive::m_lDefPrimChildren;
 
+TqBool CqCSGTreeNode::m_bCSGRequired = TqFalse;
 
 //------------------------------------------------------------------------------
 /**
@@ -65,6 +66,7 @@ CqCSGTreeNode::~CqCSGTreeNode()
  */
 CqCSGTreeNode* CqCSGTreeNode::CreateNode( CqString& type )
 {
+    SetRequired(TqTrue);
 	if ( type == "primitive" )
 		return ( new CqCSGNodePrimitive );
 	else if ( type == "union" )
@@ -77,6 +79,15 @@ CqCSGTreeNode* CqCSGTreeNode::CreateNode( CqString& type )
 		return ( NULL );
 }
 
+TqBool CqCSGTreeNode::IsRequired()
+{
+	return m_bCSGRequired;
+}
+
+void CqCSGTreeNode::SetRequired(TqBool value)
+{
+	m_bCSGRequired = value;
+}
 
 
 //------------------------------------------------------------------------------

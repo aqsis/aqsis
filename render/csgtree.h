@@ -106,10 +106,14 @@ class CqCSGTreeNode : public CqRefCount, public CqListEntry<CqCSGTreeNode>
 		void	ProcessTree( std::vector<SqImageSample>& samples );
 
 		static CqCSGTreeNode* CreateNode( CqString& type );
+		static TqBool CqCSGTreeNode::IsRequired();
+		static void CqCSGTreeNode::SetRequired(TqBool value);
+
 
 	private:
 		CqCSGTreeNode*	m_pParent;		///< Pointer to the parent CSG node.
 		CqList<CqCSGTreeNode>	m_lChildren;	///< List of children nodes.
+		static TqBool m_bCSGRequired;    ///< Tell imagebuffer the processing for CSG is not required
 }
 ;
 
