@@ -244,6 +244,19 @@ class CqCubicCurveSegment : public CqCurve
 		CqCubicCurveSegment( const CqCubicCurveSegment &from );
 		virtual ~CqCubicCurveSegment();
 		CqCubicCurveSegment& operator=( const CqCubicCurveSegment& from );
+		void NaturalSubdivide(
+		    CqParameter* pParam,
+		    CqParameter* pParam1, CqParameter* pParam2,
+		    TqBool u
+		);
+		void VaryingNaturalSubdivide(
+		    CqParameter* pParam,
+		    CqParameter* pParam1, CqParameter* pParam2,
+		    TqBool u
+		);
+		virtual TqInt Split( std::vector<CqBasicSurface*>& aSplits );
+		TqInt SplitToCurves( std::vector<CqBasicSurface*>& aSplits );
+		TqInt SplitToPatch( std::vector<CqBasicSurface*>& aSplits );
 		//---------------------------------------------- Inlined Public Methods
 	public:
 		/** Returns the number of facevarying class parameters. */
@@ -270,6 +283,53 @@ class CqCubicCurveSegment : public CqCurve
 		virtual CqString strName() const
 		{
 			return "CqCubicCurveSegment";
+		}
+
+		/** Typed natural subdivision for the surface. */
+		template <class T, class SLT> void TypedNaturalSubdivide(
+		    CqParameterTyped<T, SLT>* pParam,
+		    CqParameterTyped<T, SLT>* pResult1,
+		    CqParameterTyped<T, SLT>* pResult2,
+		    TqBool u
+		)
+		{
+			// we can only split curves along v, so enforce this
+			assert( u == false );
+
+			CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
+			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
+			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
+
+			pTResult1->pValue() [ 0 ] = pTParam->pValue() [ 0 ];
+			pTResult1->pValue() [ 1 ] = ( pTParam->pValue() [ 0 ] + pTParam->pValue() [ 1 ] ) / 2.0f;
+			pTResult1->pValue() [ 2 ] = pTResult1->pValue() [ 1 ] / 2.0f + ( pTParam->pValue() [ 1 ] + pTParam->pValue() [ 2 ] ) / 4.0f;
+
+			pTResult2->pValue() [ 3 ] = pTParam->pValue() [ 3 ];
+			pTResult2->pValue() [ 2 ] = ( pTParam->pValue() [ 2 ] + pTParam->pValue() [ 3 ] ) / 2.0f;
+			pTResult2->pValue() [ 1 ] = pTResult2->pValue() [ 2 ] / 2.0f + ( pTParam->pValue() [ 1 ] + pTParam->pValue() [ 2 ] ) / 4.0f;
+
+			pTResult1->pValue() [ 3 ] = ( pTResult1->pValue() [ 2 ] + pTResult2->pValue() [ 1 ] ) / 2.0f;
+			pTResult2->pValue() [ 0 ] = pTResult1->pValue() [ 3 ];
+		}
+
+		/** Typed natural subdivision for the surface. */
+		template <class T, class SLT> void VaryingTypedNaturalSubdivide(
+		    CqParameterTyped<T, SLT>* pParam,
+		    CqParameterTyped<T, SLT>* pResult1,
+		    CqParameterTyped<T, SLT>* pResult2,
+		    TqBool u
+		)
+		{
+			// we can only split curves along v, so enforce this
+			assert( u == false );
+
+			CqParameterTyped<T, SLT>* pTParam = static_cast<CqParameterTyped<T, SLT>*>( pParam );
+			CqParameterTyped<T, SLT>* pTResult1 = static_cast<CqParameterTyped<T, SLT>*>( pResult1 );
+			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
+
+			pTResult1->pValue() [ 0 ] = pTParam->pValue() [ 0 ];
+			pTResult1->pValue() [ 1 ] = pTResult2->pValue() [ 0 ] = static_cast<T>( ( pTParam->pValue() [ 0 ] + pTParam->pValue() [ 1 ] ) * 0.5f );
+			pTResult2->pValue() [ 1 ] = pTParam->pValue() [ 1 ];
 		}
 };
 

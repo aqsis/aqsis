@@ -733,6 +733,520 @@ CqCubicCurveSegment& CqCubicCurveSegment::operator=(
 }
 
 
+/**
+ * Implements natural subdivision for this curve segment.
+ *
+ * @param pParam        Original parameter.
+ * @param pParam1       First new parameter.
+ * @param pParam2       Second new parameter.
+ * @param u             true if the split is along u (should
+ *                              always be false!)
+ */
+void CqCubicCurveSegment::NaturalSubdivide(
+    CqParameter* pParam,
+    CqParameter* pParam1, CqParameter* pParam2,
+    TqBool u
+)
+{
+
+	assert( u == false );
+	switch ( pParam->Type() )
+	{
+			case type_float:
+			{
+				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
+				CqParameterTyped<TqFloat, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam1 );
+				CqParameterTyped<TqFloat, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam2 );
+				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
+
+			case type_integer:
+			{
+				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
+				CqParameterTyped<TqInt, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam1 );
+				CqParameterTyped<TqInt, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam2 );
+				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
+
+			case type_point:
+			case type_vector:
+			case type_normal:
+			{
+				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
+				CqParameterTyped<CqVector3D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam1 );
+				CqParameterTyped<CqVector3D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam2 );
+				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
+
+			case type_hpoint:
+			{
+				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
+				CqParameterTyped<CqVector4D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam1 );
+				CqParameterTyped<CqVector4D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam2 );
+				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
+
+
+			case type_color:
+			{
+				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
+				CqParameterTyped<CqColor, CqColor>* pTResult1 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam1 );
+				CqParameterTyped<CqColor, CqColor>* pTResult2 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam2 );
+				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
+
+			case type_string:
+			{
+				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
+				CqParameterTyped<CqString, CqString>* pTResult1 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam1 );
+				CqParameterTyped<CqString, CqString>* pTResult2 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam2 );
+				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
+
+			case type_matrix:
+			{
+				//			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
+				//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam1 );
+				//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam2 );
+				//			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				//			break;
+			}
+
+			default:
+			{
+				break;
+			}
+	}
+
+}
+
+
+/**
+ * Implements natural subdivision for this curve segment.
+ *
+ * @param pParam        Original parameter.
+ * @param pParam1       First new parameter.
+ * @param pParam2       Second new parameter.
+ * @param u             true if the split is along u (should
+ *                              always be false!)
+ */
+void CqCubicCurveSegment::VaryingNaturalSubdivide(
+    CqParameter* pParam,
+    CqParameter* pParam1, CqParameter* pParam2,
+    TqBool u
+)
+{
+
+	assert( u == false );
+	switch ( pParam->Type() )
+	{
+			case type_float:
+			{
+				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
+				CqParameterTyped<TqFloat, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam1 );
+				CqParameterTyped<TqFloat, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam2 );
+				VaryingTypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
+
+			case type_integer:
+			{
+				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
+				CqParameterTyped<TqInt, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam1 );
+				CqParameterTyped<TqInt, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam2 );
+				VaryingTypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
+
+			case type_point:
+			case type_vector:
+			case type_normal:
+			{
+				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
+				CqParameterTyped<CqVector3D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam1 );
+				CqParameterTyped<CqVector3D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam2 );
+				VaryingTypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
+
+			case type_hpoint:
+			{
+				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
+				CqParameterTyped<CqVector4D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam1 );
+				CqParameterTyped<CqVector4D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam2 );
+				VaryingTypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
+
+
+			case type_color:
+			{
+				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
+				CqParameterTyped<CqColor, CqColor>* pTResult1 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam1 );
+				CqParameterTyped<CqColor, CqColor>* pTResult2 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam2 );
+				VaryingTypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
+
+			case type_string:
+			{
+				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
+				CqParameterTyped<CqString, CqString>* pTResult1 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam1 );
+				CqParameterTyped<CqString, CqString>* pTResult2 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam2 );
+				VaryingTypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
+
+			case type_matrix:
+			{
+				//			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
+				//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam1 );
+				//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam2 );
+				//			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				//			break;
+			}
+
+			default:
+			{
+				break;
+			}
+	}
+
+}
+
+
+/**
+ * Splits a CqCubicCurveSegment into either two smaller segments or a
+ * patch.
+ *
+ * @param aSplits       Vector to store the split objects in.
+ *
+ * @return      The number of objects we've created.
+ */
+TqInt CqCubicCurveSegment::Split( std::vector<CqBasicSurface*>& aSplits )
+{
+
+	// OK, here the CqCubicCurveSegment line has two options:
+	//  1. split into two more lines
+	//  2. turn into a bilinear patch for rendering
+	// We don't want to go turning into a patch unless absolutely
+	// necessary, since patches cost more.  We only want to become a patch
+	// if the current curve is "best handled" as a patch.  For now, I'm
+	// choosing to define that the curve is best handled as a patch under
+	// one or more of the following two conditions:
+	//  1. If the maximum width is a significant fraction of the length of
+	//      the line (width greater than 0.75 x length; ignoring normals).
+	//  2. If the length of the line (ignoring the width; cos' it's
+	//      covered by point 1) is such that it's likely a bilinear
+	//      patch would be diced immediately if we created one (so that
+	//      patches don't have to get split!).
+	//  3. If the curve crosses the eye plane (m_fDiceable == false).
+
+	// find the length of the CqLinearCurveSegment line in raster space
+	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace(
+	                               "camera", "raster"
+	                           );
+	CqVector2D hull[ 2 ];     // control hull
+	hull[ 0 ] = matCtoR * ( *P() ) [ 0 ];
+	hull[ 1 ] = matCtoR * ( *P() ) [ 1 ];
+	CqVector2D lengthVector = hull[ 1 ] - hull[ 0 ];
+	TqFloat lengthraster = lengthVector.Magnitude();
+
+	// find the maximum width of the line in raster space
+	CqVector3D pp0 = hull[ 0 ] -
+	                 matCtoR * ( ( *P() ) [ 0 ] + CqVector4D( ( *width() ) [ 0 ], 0, 0, 1 ) );
+	CqVector3D pp1 = hull[ 1 ] -
+	                 matCtoR * ( ( *P() ) [ 1 ] + CqVector4D( ( *width() ) [ 1 ], 0, 0, 1 ) );
+	TqFloat width0 = pp0.Magnitude();
+	TqFloat width1 = pp1.Magnitude();
+	TqFloat maxwidthraster = ( width0 > width1 ) ? width0 : width1;
+
+	// find the approximate "length" of a diced patch in raster space
+	TqFloat gridlength = GetGridLength();
+
+
+	// decide whether to split into more curve segments or a patch
+	if (
+	    ( maxwidthraster > ( 0.75 * lengthraster ) ) ||
+	    ( lengthraster <= gridlength ) ||
+	    ( !m_fDiceable )
+	)
+	{
+
+		// split into a patch
+		return SplitToPatch( aSplits );
+	}
+	else
+	{
+		// split into smaller curves
+		return SplitToCurves( aSplits );
+	}
+}
+
+
+
+/**
+ * Splits a cubic curve segment into two smaller curves.
+ *
+ * @param aSplits       Vector of split surfaces to add the segment to.
+ *
+ * @return Number of created objects.
+ */
+TqInt CqCubicCurveSegment::SplitToCurves(
+    std::vector<CqBasicSurface*>& aSplits
+)
+{
+
+	// split into more curves
+	//  This bit right here looks a lot like CqSurface::Split().
+	//  The difference is that we *don't* want the default splitter
+	//  to handle varying class variables because it inconveniently
+	//  sets them up to have 4 elements.
+
+	aSplits.push_back( new CqCubicCurveSegment );
+	aSplits.push_back( new CqCubicCurveSegment );
+
+	aSplits[ 0 ] ->SetSurfaceParameters( *this );
+	aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
+	aSplits[ 0 ] ->AddRef();
+
+	aSplits[ 1 ] ->SetSurfaceParameters( *this );
+	aSplits[ 1 ] ->SetEyeSplitCount( EyeSplitCount() );
+	aSplits[ 1 ] ->AddRef();
+
+	// Iterate through any user parameters, subdividing and storing
+	//  the second value in the target surface.
+	std::vector<CqParameter*>::iterator iUP;
+	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	{
+
+		// clone the parameters
+		CqParameter* pNewA = ( *iUP ) ->Clone();
+		CqParameter* pNewB = ( *iUP ) ->Clone();
+
+		// let the standard system handle all but varying class
+		//  primitive variables
+		if ( ( *iUP ) ->Class() == class_varying )
+		{
+			// for varying class variables, we want to
+			//  handle them the same way as vertex class
+			//  variables for the simple case of a
+			//  CqSingleCurveLinear
+			VaryingNaturalSubdivide( ( *iUP ), pNewA, pNewB, TqFalse );
+		}
+		else
+		{
+			( *iUP ) ->Subdivide( pNewA, pNewB, false, this );
+		}
+
+		static_cast<CqSurface*>( aSplits[ 0 ] ) ->
+		AddPrimitiveVariable( pNewA );
+		static_cast<CqSurface*>( aSplits[ 1 ] ) ->
+		AddPrimitiveVariable( pNewB );
+
+	}
+
+	return 2;
+
+}
+
+
+/**
+ * Converts a linear curve segment into a patch for rendering.
+ *
+ * @param aSplits       Vector of split surfaces to add the segment to.
+ *
+ * @return Number of created objects.
+ */
+TqInt CqCubicCurveSegment::SplitToPatch(
+    std::vector<CqBasicSurface*>& aSplits
+)
+{
+
+	// first, we find the following vectors:
+	//  direction     - from the first point to the second along the line
+	//                      segment
+	//  normal0       - normal at the first point
+	//  normal1       - normal at the second point
+	//  widthOffset0  - offset to account for the width of the patch at
+	//                      the first point
+	//  widthOffset1  - offset to account for the width of the patch at
+	//                      the second point
+	CqVector3D direction = ( *P() ) [ 3 ] - ( *P() ) [ 0 ];
+	CqVector3D normal0, normal1;
+	GetNormal( 0, normal0 ); 
+	GetNormal( 1, normal1 );
+	normal0.Unit();
+	normal1.Unit();
+	CqVector3D widthOffset0 = normal0 % direction;
+	CqVector3D widthOffset1 = normal1 % direction;
+	CqVector3D widthOffset02 = widthOffset0 *
+	    ( *width() ) [ 0 ] / widthOffset0.Magnitude() / 4.0;
+	CqVector3D widthOffset12 = widthOffset1 *
+	    ( *width() ) [ 1 ] / widthOffset1.Magnitude() / 4.0;
+
+	widthOffset0 *=
+	    ( *width() ) [ 0 ] / widthOffset0.Magnitude() / 2.0;
+	widthOffset1 *=
+	    ( *width() ) [ 1 ] / widthOffset1.Magnitude() / 2.0;
+
+	// next, we create the bilinear patch
+	CqSurfacePatchBicubic *pPatch = new CqSurfacePatchBicubic();
+	pPatch->SetSurfaceParameters( *this );
+	pPatch->AddRef();
+	pPatch->SetDefaultPrimitiveVariables();
+
+	// set the points on the patch
+	pPatch->AddPrimitiveVariable(
+	    new CqParameterTypedVertex <
+	    CqVector4D, type_hpoint, CqVector3D
+	    > ( "P", 0 )
+	);
+	pPatch->P() ->SetSize( 16 );
+	( *pPatch->P() ) [ 0  ] = static_cast<CqVector3D>( ( *P() ) [ 0 ] ) + widthOffset0;
+	( *pPatch->P() ) [ 1  ] = static_cast<CqVector3D>( ( *P() ) [ 0 ] ) + widthOffset02;
+	( *pPatch->P() ) [ 2  ] = static_cast<CqVector3D>( ( *P() ) [ 0 ] ) - widthOffset02;
+	( *pPatch->P() ) [ 3  ] = static_cast<CqVector3D>( ( *P() ) [ 0 ] ) - widthOffset0;
+
+	( *pPatch->P() ) [ 4  ] = static_cast<CqVector3D>( ( *P() ) [ 1 ] ) + widthOffset0;
+	( *pPatch->P() ) [ 5  ] = static_cast<CqVector3D>( ( *P() ) [ 1 ] ) + widthOffset02;
+	( *pPatch->P() ) [ 6  ] = static_cast<CqVector3D>( ( *P() ) [ 1 ] ) - widthOffset02;
+	( *pPatch->P() ) [ 7  ] = static_cast<CqVector3D>( ( *P() ) [ 1 ] ) - widthOffset0;
+
+	( *pPatch->P() ) [ 8  ] = static_cast<CqVector3D>( ( *P() ) [ 2 ] ) + widthOffset1;
+	( *pPatch->P() ) [ 9  ] = static_cast<CqVector3D>( ( *P() ) [ 2 ] ) + widthOffset12;
+	( *pPatch->P() ) [ 10 ] = static_cast<CqVector3D>( ( *P() ) [ 2 ] ) - widthOffset12;
+	( *pPatch->P() ) [ 11 ] = static_cast<CqVector3D>( ( *P() ) [ 2 ] ) - widthOffset1;
+
+	( *pPatch->P() ) [ 12 ] = static_cast<CqVector3D>( ( *P() ) [ 3 ] ) + widthOffset1;
+	( *pPatch->P() ) [ 13 ] = static_cast<CqVector3D>( ( *P() ) [ 3 ] ) + widthOffset12;
+	( *pPatch->P() ) [ 14 ] = static_cast<CqVector3D>( ( *P() ) [ 3 ] ) - widthOffset12;
+	( *pPatch->P() ) [ 15 ] = static_cast<CqVector3D>( ( *P() ) [ 3 ] ) - widthOffset1;
+
+	// set the normals on the patch
+//	pPatch->AddPrimitiveVariable(
+//	    new CqParameterTypedVertex <
+//	    CqVector3D, type_normal, CqVector3D
+//	    > ( "N", 0 )
+//	);
+//	pPatch->N() ->SetSize( 16 );
+//	( *pPatch->N() ) [ 0  ] = ( *pPatch->N() ) [ 1  ] = ( *pPatch->N() ) [ 2  ] = ( *pPatch->N() ) [ 3  ] = normal0;
+//	( *pPatch->N() ) [ 4  ] = ( *pPatch->N() ) [ 5  ] = ( *pPatch->N() ) [ 6  ] = ( *pPatch->N() ) [ 7  ] = normal1;
+//	( *pPatch->N() ) [ 8  ] = ( *pPatch->N() ) [ 9  ] = ( *pPatch->N() ) [ 10 ] = ( *pPatch->N() ) [ 11 ] = normal2;
+//	( *pPatch->N() ) [ 12 ] = ( *pPatch->N() ) [ 13 ] = ( *pPatch->N() ) [ 14 ] = ( *pPatch->N() ) [ 15 ] = normal3;
+
+	TqInt bUses = Uses();
+
+	// set u, v coordinates of the patch
+	if ( USES( bUses, EnvVars_u ) || USES( bUses, EnvVars_v ) )
+	{
+		( *pPatch->u() ) [ 0 ] = ( *pPatch->u() ) [ 2 ] = 0.0;
+		( *pPatch->u() ) [ 1 ] = ( *pPatch->u() ) [ 3 ] = 1.0;
+		( *pPatch->v() ) [ 0 ] = ( *pPatch->v() ) [ 1 ] = ( *v() ) [ 0 ];
+		( *pPatch->v() ) [ 2 ] = ( *pPatch->v() ) [ 3 ] = ( *v() ) [ 1 ];
+	}
+
+	// helllllp!!! WHAT DO I DO WITH s,t!!!???
+	//  for now, they're set equal to u and v
+	if ( USES( bUses, EnvVars_s ) || USES( bUses, EnvVars_t ) )
+	{
+		( *pPatch->s() ) [ 0 ] = ( *pPatch->s() ) [ 2 ] = 0.0;
+		( *pPatch->s() ) [ 1 ] = ( *pPatch->s() ) [ 3 ] = 1.0;
+		( *pPatch->t() ) [ 0 ] = ( *pPatch->t() ) [ 1 ] = ( *v() ) [ 0 ];
+		( *pPatch->t() ) [ 2 ] = ( *pPatch->t() ) [ 3 ] = ( *v() ) [ 1 ];
+	}
+
+	// set any remaining user parameters
+	std::vector<CqParameter*>::iterator iUP;
+	for ( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	{
+		if (
+		    ( ( *iUP ) ->strName() != "P" ) &&
+		    ( ( *iUP ) ->strName() != "N" ) &&
+		    ( ( *iUP ) ->strName() != "u" ) &&
+		    ( ( *iUP ) ->strName() != "v" )
+		)
+		{
+
+			if ( ( *iUP ) ->Class() == class_vertex )
+			{
+				// copy "vertex" class variables
+				CqParameter * pNewUP =
+				    ( *iUP ) ->CloneType(
+				        ( *iUP ) ->strName().c_str(),
+				        ( *iUP ) ->Count()
+				    );
+				pNewUP->SetSize( pPatch->cVertex() );
+
+				pNewUP->SetValue( ( *iUP ), 0,  0 );
+				pNewUP->SetValue( ( *iUP ), 1,  0 );
+				pNewUP->SetValue( ( *iUP ), 2,  0 );
+				pNewUP->SetValue( ( *iUP ), 3,  0 );
+				pNewUP->SetValue( ( *iUP ), 4,  1 );
+				pNewUP->SetValue( ( *iUP ), 5,  1 );
+				pNewUP->SetValue( ( *iUP ), 6,  1 );
+				pNewUP->SetValue( ( *iUP ), 7,  1 );
+				pNewUP->SetValue( ( *iUP ), 8,  2 );
+				pNewUP->SetValue( ( *iUP ), 9,  2 );
+				pNewUP->SetValue( ( *iUP ), 10, 2 );
+				pNewUP->SetValue( ( *iUP ), 11, 2 );
+				pNewUP->SetValue( ( *iUP ), 12, 3 );
+				pNewUP->SetValue( ( *iUP ), 13, 3 );
+				pNewUP->SetValue( ( *iUP ), 14, 3 );
+				pNewUP->SetValue( ( *iUP ), 15, 3 );
+				pPatch->AddPrimitiveVariable( pNewUP );
+
+			}
+			else if ( ( *iUP ) ->Class() == class_varying )
+			{
+				// copy "varying" class variables
+				CqParameter * pNewUP =
+				    ( *iUP ) ->CloneType(
+				        ( *iUP ) ->strName().c_str(),
+				        ( *iUP ) ->Count()
+				    );
+				pNewUP->SetSize( pPatch->cVarying() );
+
+				pNewUP->SetValue( ( *iUP ), 0, 0 );
+				pNewUP->SetValue( ( *iUP ), 1, 0 );
+				pNewUP->SetValue( ( *iUP ), 2, 1 );
+				pNewUP->SetValue( ( *iUP ), 3, 1 );
+				pPatch->AddPrimitiveVariable( pNewUP );
+
+			}
+			else if (
+			    ( ( *iUP ) ->Class() == class_uniform ) ||
+			    ( ( *iUP ) ->Class() == class_constant )
+			)
+			{
+
+				// copy "uniform" or "constant" class variables
+				CqParameter * pNewUP =
+				    ( *iUP ) ->CloneType(
+				        ( *iUP ) ->strName().c_str(),
+				        ( *iUP ) ->Count()
+				    );
+				assert( pPatch->cUniform() == 1 );
+				pNewUP->SetSize( pPatch->cUniform() );
+
+				pNewUP->SetValue( ( *iUP ), 0, 0 );
+				pPatch->AddPrimitiveVariable( pNewUP );
+			}
+		}
+	}
+
+	// add the patch to the split surfaces vector
+	aSplits.push_back( pPatch );
+
+	return 1;
+}
+
 
 /**
  * CqCurvesGroup constructor.
@@ -1294,8 +1808,8 @@ TqInt CqCubicCurvesGroup::Split(
 
 			// create the new CqLinearCurveSegment for the current
 			//  curve segment
-			CqLinearCurveSegment *pSeg =
-			    new CqLinearCurveSegment();
+			CqCubicCurveSegment *pSeg =
+			    new CqCubicCurveSegment();
 			pSeg->AddRef();
 			pSeg->SetSurfaceParameters( *this );
 
@@ -1387,8 +1901,7 @@ TqInt CqCubicCurvesGroup::Split(
 			vertexI += 4;
 			varyingI++;
 			nsplits++;
-
-
+			aSplits.push_back( pSeg );
 		}
 
 		// we've finished our current curve, so we can get the next
