@@ -149,10 +149,10 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
             for ( x = xmin; x < xmaxplus1; x++ )
             {
 				TqInt index = 0;
+				const TqFloat* pSamples = pBucket->Data( x, y );
 				std::vector<PtDspyDevFormat>::iterator iformat;
 				for(iformat = i->m_formats.begin(); iformat != i->m_formats.end(); iformat++)
 				{
-					const TqFloat* pSamples = pBucket->Data( x, y );
 					TqFloat value = pSamples[i->m_dataOffsets[index]];
 					// If special quantization instructions have been given for this display, do it now.
 					if( !( i->m_QuantizeZeroVal == 0.0f &&
@@ -460,11 +460,12 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 
 void CqDDManager::CloseDisplayLibrary( SqDisplayRequest& req )
 {
-	if( NULL != req.m_CloseMethod )
-	{
-		// Call the DspyImageOpen method on the display to initialise things.
-		PtDspyError err = (*req.m_CloseMethod)(req.m_imageHandle);
-	}
+	// Call the DspyImageClose method on the display to shut things down.
+	// If there is a delayed close method, call it in preference.
+	if( req.m_DelayCloseMethod)
+		(*req.m_DelayCloseMethod)(req.m_imageHandle);
+	else if( NULL != req.m_CloseMethod )
+		(*req.m_CloseMethod)(req.m_imageHandle);
 }
 
 void CqDDManager::InitialiseDisplayNameMap()

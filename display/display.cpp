@@ -561,6 +561,23 @@ PtDspyError DspyImageClose(PtDspyImageHandle image)
 }
 
 
+PtDspyError DspyImageDelayClose(PtDspyImageHandle image)
+{
+	SqDisplayInstance* pImage;
+	pImage = reinterpret_cast<SqDisplayInstance*>(image);
+
+	if(pImage)
+	{
+		if(pImage->m_imageType == Type_Framebuffer)
+		{
+			Fl::run();
+		}
+		return(DspyImageClose(image));
+	}
+	return(PkDspyErrorNone);
+}
+
+
 PtDspyError DspyImageQuery(PtDspyImageHandle image,
 									PtDspyQueryType type,
 									int size,
