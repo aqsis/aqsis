@@ -280,6 +280,7 @@ int main( int argc, const char** argv )
 	ap.argString( "textures", "=string\aspecify a default textures searchpath", &g_textures );
 	ap.argString( "displays", "=string\aspecify a default displays searchpath", &g_displays );
 	ap.argString( "dsolibs", "=string\aspecify default DSO libraries", &g_dso_libs );
+	ap.allowUnrecognizedOptions();
 
 	//_crtBreakAlloc = 1305;
 	
