@@ -108,6 +108,7 @@ CqDictionary::CqDictionary()
     addToken( RI_SHADER, UNIFORM, STRING );
     addToken( "archive", UNIFORM, STRING );
     addToken( "texture", UNIFORM, STRING );
+    addToken( "dsolibs", UNIFORM, STRING );
     addToken( "display", UNIFORM, STRING );
     addToken( "auto_shadows", UNIFORM, STRING );
     addToken( "endofframe", UNIFORM, INTEGER );
