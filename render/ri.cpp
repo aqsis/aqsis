@@ -847,39 +847,49 @@ RtFloat	RiSincFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth)
 	//   function similar in shape to what PRMan 3.9 uses.  
 	// tburge 5-28-01
 
-	/* Modified version of the RI Spec 3.2 sinc filter but also with a 
-	 *   raised cosine window applied.  (von Hann Window)
+	/* Modified version of the RI Spec 3.2 sinc filter to be 
+	 *   radially symmetric and also windowed with a positive
+	 *   lobe of a cosine which is half of a cosine period.  
 	 */
-	double d,w,xx,yy;
 
-	xx = x*x;
-	yy = y*y;
+   double d,w,xx,yy;
 
-	xwidth *= 0.5;
-	ywidth *= 0.5;
+   xx = x*x;
+   yy = y*y;
 
-	if ( (xx)/(xwidth*xwidth)+(yy)/(ywidth*ywidth)<1.0 )
-	{   
-		d = sqrt(xx+yy);
-		if (d!=0.0)
-		{
-			/* Raised cosine window (von Hann Window) described in 
-			 *   R. W. Hamming "Digital Filters" 3rd Ed. p.117. 
-			 */
-			x = (1+cos(RI_PI*x/xwidth))/2;
-			y = (1+cos(RI_PI*y/ywidth))/2;
-			w = x*y;
-			return w * sin(RI_PI*d)/(RI_PI*d);
-		}
-		else
-		{
-			return 1.0;
-		}
-	}
-	else
-	{
-		return 0.0;
-	}
+   xwidth *= 0.5;
+   ywidth *= 0.5;
+
+   /* Get a window width that can handle odd eliptical shapes
+	* resulting from xwidth and ywidth not being equal.  
+	* The w is a parabola from 0 to 1.  Taking the square root
+	* later turns it into a nice 0 to 1 parameter for cosine.
+	* No reason to do the sqrt() call now.  
+    */
+   w = (xx)/(xwidth*xwidth)+(yy)/(ywidth*ywidth);
+   if ( w<1.0 )
+   {   
+      d = sqrt(xx+yy);
+      if (d!=0.0)
+      {
+         /* Half cosine window. */
+         w = cos(0.5*RI_PI*sqrt(w));
+		 /* The 0.5 above stretches the positive lobe of the 
+		  * cosine across the windowed space and the sqrt() 
+		  * makes w linear.  The PI scales everything so that 
+		  * cosine is at a zero for integer values of w.  
+		  */
+         return w * sin(RI_PI*d)/(RI_PI*d);
+      }
+      else
+      {
+         return 1.0;
+      }
+   }
+   else
+   {
+      return 0.0;
+   }
 }
 
 
