@@ -25,7 +25,6 @@
 
 #ifndef RIB_BINARY_DECODER_H
 #define RIB_BINARY_DECODER_H
-
 #include <strstream>
 #include <string>
 #include <vector>
@@ -39,6 +38,8 @@ namespace librib
 #ifdef _DEBUG
 #define gzFile FILE *
 #endif
+
+
 class CqRibBinaryDecoder
 {
 	private:
@@ -64,12 +65,12 @@ class CqRibBinaryDecoder
 		void gc( TqChar & );
 
 		// Send N Characters
-		void snc( TqUint, std::strstream & );
+		void snc( TqUint, std::string & );
 
-		void sendFloat( std::strstream & );
-		void sendDouble( std::strstream & );
+		void sendFloat( std::string & );
+		void sendDouble( std::string & );
 
-		void readString( TqChar, std::strstream & );
+		void readString( TqChar, std::string & );
 
 		// Decode Next Char
 		void getNext();
@@ -78,8 +79,7 @@ class CqRibBinaryDecoder
 		TqBool eof_flag;
 		TqBool fail_flag;
 
-		CqRibBinaryDecoder( CqRibBinaryDecoder const & )
-		{}
+		CqRibBinaryDecoder( CqRibBinaryDecoder const & ) {}
 		CqRibBinaryDecoder const &operator=( CqRibBinaryDecoder const & )
 		{
 			return * this;
@@ -99,6 +99,7 @@ class CqRibBinaryDecoder
 		{
 			return fail_flag;
 		};
+
 };
 
 } // namespace librib

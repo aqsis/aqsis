@@ -37,8 +37,6 @@
 #include <stdio.h>
 #include "bdec.h"
 
-//#include "renderer.h"
-
 using namespace librib;
 
 
@@ -47,50 +45,13 @@ using namespace librib;
 #define gzclose fclose
 #define gzgetc fgetc
 #define gzeof  feof
+#define gzgets(a,b,c)  fgets(b,c,a)
 #endif
 
-CqRibBinaryDecoder::CqRibBinaryDecoder( std::string filename )
-{
-	gzf = gzopen( filename.c_str(), "rb" );
-	if ( gzf == NULL )
-	{
-		fail_flag = TqTrue; eof_flag = TqTrue;
-	}
-	else
-	{
-		fail_flag = TqFalse; eof_flag = TqFalse;
-	}
-	//	Aqsis::QGetRenderContext()->Stats().ReadArchiveTimer().Start();
-
-}
-
-CqRibBinaryDecoder::CqRibBinaryDecoder( FILE *filename )
-{
-#ifndef _DEBUG
-	gzf = gzdopen( fileno( filename ), "rb" );
-#else
-	gzf = filename;
-#endif
-	if ( gzf == NULL )
-	{
-		fail_flag = TqTrue; eof_flag = TqTrue;
-	}
-	else
-	{
-		fail_flag = TqFalse; eof_flag = TqFalse;
-	}
-	//    Aqsis::QGetRenderContext()->Stats().ReadArchiveTimer().Start();
-
-}
-
-CqRibBinaryDecoder::~CqRibBinaryDecoder()
-{
-	if ( gzf )
-		gzclose( gzf );
-	//    Aqsis::QGetRenderContext()->Stats().ReadArchiveTimer().Stop();
-
-}
-
+/*--------------------------------------------*/
+ /**
+  * Some macros
+  **/
 /**
    \def GET1
    Get one character from the input file.
@@ -132,6 +93,92 @@ CqRibBinaryDecoder::~CqRibBinaryDecoder()
 */
 #define GET8 gc(b1); gc(b2); gc(b3); gc(b4); gc(b5); gc(b6); gc(b7); gc(b8)
 
+/*
+ * Some support static functions 
+ */
+/*--------------------------------------------*/
+ /**
+  * Convert a decimal number to ascii
+  **/
+static char *dtoa(TqInt i)
+{
+	static char decimal[100];
+	sprintf(decimal, "%d", i);
+	return decimal;
+}
+/*--------------------------------------------*/
+ /**
+  * Convert a floating number to ascii
+  **/
+static char *ftoa(TqFloat f)
+{
+	static char floating[100];
+	sprintf(floating, "%f", f);
+	return floating;
+}
+/*--------------------------------------------*/
+ /**
+  * Convert a double number to ascii
+  **/
+static char *lftoa(TqDouble d)
+{
+	static char floating[100];
+	sprintf(floating, "%lf", d);
+	return floating;
+}
+
+/*--------------------------------------------*/
+ /**
+  * Open a rib file using ZLIB 
+  **/
+
+CqRibBinaryDecoder::CqRibBinaryDecoder( std::string filename )
+{
+
+	gzf = gzopen( filename.c_str(), "rb" );
+	if ( gzf == NULL )
+	{
+		fail_flag = TqTrue; eof_flag = TqTrue;
+	}
+	else
+	{
+		fail_flag = TqFalse; eof_flag = TqFalse;
+	}
+	
+}
+
+/*--------------------------------------------*/
+ /**
+  * ReOpen using ZLIB a stream (point to RIB file)
+  **/
+CqRibBinaryDecoder::CqRibBinaryDecoder( FILE *filename )
+{
+
+#ifndef _DEBUG
+	gzf = gzdopen( fileno( filename ), "rb" );
+#else
+	gzf = filename;
+#endif
+	if ( gzf == NULL )
+	{
+		fail_flag = TqTrue; eof_flag = TqTrue;
+	}
+	else
+	{
+		fail_flag = TqFalse; eof_flag = TqFalse;
+	}
+	
+}
+
+/*--------------------------------------------*/
+ /**
+  * Destructor; close the stream
+  **/
+CqRibBinaryDecoder::~CqRibBinaryDecoder()
+{
+	if ( gzf )
+		gzclose( gzf );
+}
 
 
 /* Convert To Signed Integer */
@@ -163,8 +210,6 @@ TqInt CqRibBinaryDecoder::ctsi( TqChar a, TqChar b, TqChar c, TqChar d )
 	j = d; j &= 0xff; i |= j;
 	return i;
 }
-
-
 
 /* Convert To Unsigned Integer */
 TqUint CqRibBinaryDecoder::ctui( TqChar a )
@@ -199,11 +244,16 @@ TqUint CqRibBinaryDecoder::ctui( TqChar a, TqChar b, TqChar c, TqChar d )
 }
 
 
+/*--------------------------------------------------------------------*/
+/* Get 1 Char 
+ * But in order to be more efficient I prefetch BUFSIZE characters and
+ * return later one by one the read buffer (by return prefetch[i])
+ */
 
-/* Get Char */
 void CqRibBinaryDecoder::gc( TqChar &c )
 {
 	TqInt i;
+
 	i = gzgetc( gzf );
 	if ( i == -1 )
 	{
@@ -213,20 +263,26 @@ void CqRibBinaryDecoder::gc( TqChar &c )
 	c = i;
 }
 
-
-/* Send N Characters */
-void CqRibBinaryDecoder::snc( TqUint n, std::strstream &str )
+/*--------------------------------------------------------------------*/
+/* Get N Char 
+ * call gc() in order to fill str with n characters.
+ */
+void CqRibBinaryDecoder::snc( TqUint n, std::string &str )
 {
 	TqChar a;
 	for ( TqUint i = 0; i < n; i++ )
 	{
 		gc( a );
-		str << a;
+		str += a;
 	}
 }
 
+/*--------------------------------------------------------------------*/
+/* Get 1 float
+ * call gc() in order to fill str with n characters.
+ */
 
-void CqRibBinaryDecoder::sendFloat( std::strstream &str )
+void CqRibBinaryDecoder::sendFloat( std::string &str )
 {
 	TqChar b1, b2, b3, b4;
 	TqFloat f;
@@ -238,10 +294,19 @@ void CqRibBinaryDecoder::sendFloat( std::strstream &str )
 #else
 	g[ 0 ] = b4; g[ 1 ] = b3; g[ 2 ] = b2; g[ 3 ] = b1;
 #endif
-	str << " " << f << " ";
+	str += " ";
+	str += ftoa(f);
+	str += " ";
+	
 }
 
-void CqRibBinaryDecoder::sendDouble( std::strstream &str )
+/*--------------------------------------------------------------------*/
+/* Get 1 double 
+ * call gc() in order to fill str with n characters.
+ */
+/* Send N Characters */
+
+void CqRibBinaryDecoder::sendDouble( std::string &str )
 {
 	TqChar b1, b2, b3, b4, b5, b6, b7, b8;
 	TqDouble d;
@@ -253,10 +318,17 @@ void CqRibBinaryDecoder::sendDouble( std::strstream &str )
 #else
 	g[ 0 ] = b8; g[ 1 ] = b7; g[ 2 ] = b6; g[ 3 ] = b5; g[ 4 ] = b4; g[ 5 ] = b3; g[ 6 ] = b2; g[ 7 ] = b1;
 #endif
-	str << " " << d << " ";
+	str += " ";
+	str += lftoa(d);
+	str += " ";
 }
 
-void CqRibBinaryDecoder::readString ( TqChar c, std::strstream &str )
+/*--------------------------------------------------------------------*/
+/* Get 1 string
+ * call gc() in order to fill str with n characters.
+ */
+
+void CqRibBinaryDecoder::readString ( TqChar c, std::string &str )
 {
 	TqChar b1, b2, b3, b4;
 	TqUint ui;
@@ -286,23 +358,28 @@ void CqRibBinaryDecoder::readString ( TqChar c, std::strstream &str )
 			case '"':
 			for ( gc( c );c != '"';gc( c ) )
 			{
-				str << c;
+				str += c;
 			}
 			break;
 			default:
-			throw std::string( "CqRibBinaryDecoder::readString (TqChar, strstream &) --> invalid char" );
+			throw std::string( "CqRibBinaryDecoder::readString (TqChar, string &) --> invalid char" );
 	}
 }
 
 
+/*--------------------------------------------------------------------*/
+/* Get 1 token
+ * call gc() in order to fill str with n characters.
+ */
+
 void CqRibBinaryDecoder::getNext ()
 {
-	TqChar c, b1, b2, b3, b4;
+	TqChar c;
+	TqChar b1, b2, b3, b4;
 	TqUint ui;
 	TqFloat f;
-	TqPchar cp;
-	std::strstream ostr;
-	std::strstream str;
+	std::string ostr;
+	std::string str;
 	std::string tmpstr;
 
 	gc( c );
@@ -312,47 +389,63 @@ void CqRibBinaryDecoder::getNext ()
 			/* Decode integers */
 			case '\200':    //0x80 B
 			GET1;
-			ostr << " " << ctsi( b1 ) << " ";
+			ostr = " ";
+			ostr += dtoa(ctsi( b1 ));
+			ostr += " ";
 			break;
 
 			case '\201':    //0x81 BB
 			GET2;
-			ostr << " " << ctsi( b1, b2 ) << " ";
+			ostr = " ";
+			ostr += dtoa(ctsi( b1, b2 ));
+			ostr += " ";
 			break;
 
 			case '\202':    //0x82 BBB
 			GET3;
-			ostr << " " << ctsi( b1, b2, b3 ) << " ";
+			ostr = " ";
+			ostr += ctsi(b1,b2,b3);
+			ostr += " ";
 			break;
 
 			case '\203':    //0x83 BBBB
 			GET4;
-			ostr << " " << ctsi( b1, b2, b3, b4 ) << " ";
+			ostr = " ";
+			ostr += dtoa(ctsi( b1, b2, b3, b4 ));
+			ostr += " ";
 			break;
 
 			/* Decode fixed point numbers */
 			case '\204':    //0x84 .B
 			GET1;
 			f = ctui( b1 ); f /= 256;
-			ostr << " " << f << " ";
+			ostr = " ";
+			ostr += ftoa(f);
+			ostr += " ";
 			break;
 
 			case '\205':    //0x85 B.B
 			GET2;
 			f = ctui( b2 ); f /= 256; f += ctsi( b1 );
-			ostr << " " << f << " ";
+			ostr = " ";
+			ostr += ftoa(f);
+			ostr += " ";
 			break;
 
 			case '\206':    //0x86 BB.B
 			GET3;
 			f = ctui( b3 ); f /= 256; f += ctsi( b1, b2 );
-			ostr << " " << f << " ";
+			ostr = " ";
+			ostr += ftoa(f );
+			ostr += " ";
 			break;
 
 			case '\207':    //0x87 BBB.B
 			GET4;
 			f = b4; f /= 256; f += ctsi( b1, b2, b3 );
-			ostr << " " << f << " ";
+			ostr = " ";
+			ostr += ftoa( f );
+			ostr += " ";
 			break;
 
 			case '\210': break; // -
@@ -360,19 +453,25 @@ void CqRibBinaryDecoder::getNext ()
 			case '\211':    //0x89 .BB
 			GET2;
 			f = ctui( b1, b2 ); f /= 65536;
-			ostr << " " << f << " ";
+			ostr = " ";
+			ostr += ftoa(f);
+			ostr += " ";
 			break;
 
 			case '\212':    //0x8A B.BB
 			GET3;
 			f = ctui( b2, b3 ); f /= 65536; f += ctsi( b1 );
-			ostr << " " << f << " ";
+			ostr = " ";
+			ostr += ftoa(f);
+			ostr += " ";
 			break;
 
 			case '\213':    //0x8B BB.BB
 			GET4;
 			f = ctui( b3, b4 ); f /= 65536; f += ctsi( b1, b2 );
-			ostr << " " << f << " ";
+			ostr = " ";
+			ostr += ftoa(f);
+			ostr += " ";
 			break;
 
 			case '\214': break; // -
@@ -381,38 +480,42 @@ void CqRibBinaryDecoder::getNext ()
 			case '\216':    // 0x8E .BBB
 			GET3;
 			f = ctui( b1, b2, b3 ); f /= 16777216;
-			ostr << " " << f << " ";
+			ostr = " ";
+			ostr += ftoa(f);
+			ostr += " ";
 			break;
 
 			case '\217':    // 0x8F B.BBB
 			GET4;
 			f = ctui( b2, b3, b4 ); f /= 16777216; f += ctsi( b1 );
-			ostr << " " << f << " ";
+			ostr = " ";
+			ostr += ftoa(f);
+			ostr += " ";
 			break;
 
 			/* Decode small strings */
 			case '\220': break;  // 0x90
-			case '\221': ostr << " \""; snc( 1, ostr ); ostr << "\" "; break;
-			case '\222': ostr << " \""; snc( 2, ostr ); ostr << "\" "; break;
-			case '\223': ostr << " \""; snc( 3, ostr ); ostr << "\" "; break;
-			case '\224': ostr << " \""; snc( 4, ostr ); ostr << "\" "; break;
-			case '\225': ostr << " \""; snc( 5, ostr ); ostr << "\" "; break;
-			case '\226': ostr << " \""; snc( 6, ostr ); ostr << "\" "; break;
-			case '\227': ostr << " \""; snc( 7, ostr ); ostr << "\" "; break;
-			case '\230': ostr << " \""; snc( 8, ostr ); ostr << "\" "; break;
-			case '\231': ostr << " \""; snc( 9, ostr ); ostr << "\" "; break;
-			case '\232': ostr << " \""; snc( 10, ostr ); ostr << "\" "; break;
-			case '\233': ostr << " \""; snc( 11, ostr ); ostr << "\" "; break;
-			case '\234': ostr << " \""; snc( 12, ostr ); ostr << "\" "; break;
-			case '\235': ostr << " \""; snc( 13, ostr ); ostr << "\" "; break;
-			case '\236': ostr << " \""; snc( 14, ostr ); ostr << "\" "; break;
-			case '\237': ostr << " \""; snc( 15, ostr ); ostr << "\" "; break;
+			case '\221': ostr = " \""; snc( 1, ostr ); ostr += "\" "; break;
+			case '\222': ostr = " \""; snc( 2, ostr ); ostr += "\" "; break;
+			case '\223': ostr = " \""; snc( 3, ostr ); ostr += "\" "; break;
+			case '\224': ostr = " \""; snc( 4, ostr ); ostr += "\" "; break;
+			case '\225': ostr = " \""; snc( 5, ostr ); ostr += "\" "; break;
+			case '\226': ostr = " \""; snc( 6, ostr ); ostr += "\" "; break;
+			case '\227': ostr = " \""; snc( 7, ostr ); ostr += "\" "; break;
+			case '\230': ostr = " \""; snc( 8, ostr ); ostr += "\" "; break;
+			case '\231': ostr = " \""; snc( 9, ostr ); ostr += "\" "; break;
+			case '\232': ostr = " \""; snc( 10, ostr ); ostr += "\" "; break;
+			case '\233': ostr = " \""; snc( 11, ostr ); ostr += "\" "; break;
+			case '\234': ostr = " \""; snc( 12, ostr ); ostr += "\" "; break;
+			case '\235': ostr = " \""; snc( 13, ostr ); ostr += "\" "; break;
+			case '\236': ostr = " \""; snc( 14, ostr ); ostr += "\" "; break;
+			case '\237': ostr = " \""; snc( 15, ostr ); ostr += "\" "; break;
 
 			/* Decode strings of any size */
-			case '\240': GET1; ui = ctui( b1 ); ostr << " \""; snc( ui, ostr ); ostr << "\" "; break;  // 0xA0
-			case '\241': GET2; ui = ctui( b1, b2 ); ostr << " \""; snc( ui, ostr ); ostr << "\" "; break;
-			case '\242': GET3; ui = ctui( b1, b2, b3 ); ostr << " \""; snc( ui, ostr ); ostr << "\" "; break;
-			case '\243': GET4; ui = ctui( b1, b2, b3, b4 ); ostr << " \""; snc( ui, ostr ); ostr << "\" "; break;
+			case '\240': GET1; ui = ctui( b1 ); ostr = " \""; snc( ui, ostr ); ostr += "\" "; break;  // 0xA0
+			case '\241': GET2; ui = ctui( b1, b2 ); ostr = " \""; snc( ui, ostr ); ostr += "\" "; break;
+			case '\242': GET3; ui = ctui( b1, b2, b3 ); ostr = " \""; snc( ui, ostr ); ostr += "\" "; break;
+			case '\243': GET4; ui = ctui( b1, b2, b3, b4 ); ostr = " \""; snc( ui, ostr ); ostr += "\" "; break;
 
 			/* Decode a single precision floating point value */
 			case '\244': sendFloat( ostr ); break;  // 0xA4
@@ -424,7 +527,9 @@ void CqRibBinaryDecoder::getNext ()
 			case '\246':    // 0xA6
 			GET1;
 			ui = ctui( b1 );
-			ostr << "\n" << ritab[ ui ] << " ";
+			ostr = "\n";
+			ostr += ritab[ ui ];
+			ostr += " ";
 			break;
 
 
@@ -440,37 +545,37 @@ void CqRibBinaryDecoder::getNext ()
 			case '\310':    // 0xC8 L
 			GET1;
 			ui = ctui( b1 );
-			ostr << "[";
+			ostr += "[";
 			for ( ;ui > 0; ui-- )
 				sendFloat( ostr );
-			ostr << "]";
+			ostr += "]";
 			break;
 
 			case '\311':    // 0xC9 LL
 			GET2;
 			ui = ctui( b1, b2 );
-			ostr << "[";
+			ostr += "[";
 			for ( ;ui > 0; ui-- )
 				sendFloat( ostr );
-			ostr << "]";
+			ostr += "]";
 			break;
 
 			case '\312':    // 0xCA LLL
 			GET3;
 			ui = ctui( b1, b2, b3 );
-			ostr << "[";
+			ostr += "[";
 			for ( ;ui > 0; ui-- )
 				sendFloat( ostr );
-			ostr << "]";
+			ostr += "]";
 			break;
 
 			case '\313':    // 0xCB LLLL
 			GET4;
 			ui = ctui( b1, b2, b3, b4 );
-			ostr << "[";
+			ostr = "[";
 			for ( ;ui > 0; ui-- )
 				sendFloat( ostr );
-			ostr << "]";
+			ostr += "]";
 			break;
 
 			/* Declare a RI request */
@@ -478,10 +583,9 @@ void CqRibBinaryDecoder::getNext ()
 			GET1;
 			ui = ctui( b1 );
 			gc( c );
-			readString( c, str ); str << std::ends;
-			tmpstr = str.str();
+			readString( c, str ); //str << std::ends;
+			tmpstr = str.c_str();
 			ritab[ ui ] = tmpstr;
-			str.freeze( false );
 			break;
 
 			/* Declare strings */
@@ -489,35 +593,37 @@ void CqRibBinaryDecoder::getNext ()
 			GET1;
 			ui = ctui( b1 );
 			gc( c );
-			str << "\""; readString( c, str ); str << "\"" << std::ends;
+			str += "\""; readString( c, str ); str += "\"" ;//<< std::ends;
 			if ( stringtab.size() <= ui ) stringtab.resize( ui + 1 );
-			tmpstr = str.str();
+			tmpstr = str.c_str();
 			stringtab[ ui ] = tmpstr;
-			str.freeze( false );
 			break;
 
 			case '\316':    // 0xCE LL
 			GET2;
 			ui = ctui( b1, b2 );
 			gc( c );
-			str << "\""; readString( c, str ); str << "\"" << std::ends;
+			str += "\""; readString( c, str ); str += "\"" ;//std::ends;
 			if ( stringtab.size() <= ui ) stringtab.resize( ui + 1 );
-			tmpstr = str.str();
+			tmpstr = str.c_str();
 			stringtab[ ui ] = tmpstr;
-			str.freeze( false );
 			break;
 
 			/* Decode previously declared strings */
 			case '\317':    // 0xCF L
 			GET1;
 			ui = ctui( b1 );
-			ostr << " " << stringtab[ ui ] << " ";
+			ostr += " ";
+			ostr += stringtab[ ui ];
+			ostr += " ";
 			break;
 
 			case '\320':   // 0xD0 LL
 			GET2;
 			ui = ctui( b1, b2 );
-			ostr << " " << stringtab[ ui ] << " ";
+			ostr += " ";
+			ostr += stringtab[ ui ];
+			ostr +=  " ";
 			break;
 
 
@@ -531,17 +637,19 @@ void CqRibBinaryDecoder::getNext ()
 			break;
 
 			default:
-			ostr << c;
+			ostr += c;
 	}
 
-	TqUint size = ostr.pcount();
-	cp = ostr.str();
-	for ( ui = 0;ui < size;ui++ )
-		cv.push_back( cp[ ui ] );
+	
+	for ( ui = 0;ui < ostr.size();ui++ )
+		cv.push_back( ostr[ ui ] );
 
-	// unfreeze the string so that the destructor cleans up.
-	ostr.freeze( false );
 }
+
+/*--------------------------------------------------------------------*/
+/* Write N Chars 
+ * 
+ */
 
 
 TqInt CqRibBinaryDecoder::writeToBuffer( TqPchar buffer, TqUint size )
@@ -564,6 +672,11 @@ TqInt CqRibBinaryDecoder::writeToBuffer( TqPchar buffer, TqUint size )
 		return size;
 	}
 }
+
+/*--------------------------------------------------------------------*/
+/* Get N Char 
+ * call gc() in order to fill str with n characters.
+ */
 
 
 TqInt CqRibBinaryDecoder::read( TqPchar buffer, TqUint size )
