@@ -692,7 +692,12 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 
 	// Delete the donor motion grids, as their work is done.
 	for ( iTime = 1; iTime < cTimes(); iTime++ )
-		delete( GetMotionObject( Time( iTime ) ) );
+	{
+		CqMicroPolyGrid* pg = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
+		if( NULL != pg )
+			pg->Release();
+	}
+//		delete( GetMotionObject( Time( iTime ) ) );
 }
 
 
