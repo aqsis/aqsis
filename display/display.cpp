@@ -114,6 +114,7 @@ TqFloat g_QuantizeDitherVal = 0.0f;
 uint16	g_Compression = COMPRESSION_NONE, g_Quality = 0;
 TqInt	g_BucketsPerCol, g_BucketsPerRow;
 TqInt	g_BucketWidthMax, g_BucketHeightMax;
+TqBool	g_RenderWholeFrame = TqFalse;
 
 unsigned char* g_byteData;
 float*	g_floatData;
@@ -205,9 +206,12 @@ void WriteTIFF(const std::string& filename)
         bool use_logluv = false;
 
         // Set common tags
+		TqInt XRes = ( g_CWXmax - g_CWXmin );
+		TqInt YRes = ( g_CWYmax - g_CWYmin );
+
         TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( uint32 ) version );
-        TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) g_ImageWidth );
-        TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) g_ImageHeight );
+        TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) XRes );
+        TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) YRes );
         TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
         TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
 
@@ -233,7 +237,7 @@ void WriteTIFF(const std::string& filename)
 
             TqInt	linelen = g_ImageWidth * g_Channels;
             TqInt row;
-            for ( row = 0; row < g_ImageHeight; row++ )
+            for ( row = 0; row < YRes; row++ )
             {
                 if ( TIFFWriteScanline( pOut, g_byteData + ( row * linelen ), row, 0 ) < 0 )
                     break;
@@ -292,7 +296,7 @@ void WriteTIFF(const std::string& filename)
 
             TqInt	linelen = g_ImageWidth * g_Channels;
             TqInt row = 0;
-            for ( row = 0; row < g_ImageHeight; row++ )
+            for ( row = 0; row < YRes; row++ )
             {
                 if ( TIFFWriteScanline( pOut, g_floatData + ( row * linelen ), row, 0 ) < 0 )
                     break;
@@ -356,11 +360,19 @@ void BucketFunction()
 					TqInt t;
 					TqFloat alpha = 255.0f;
 					TqInt y;
+					// Choose the start/end coordinates depending on if in "file" mode or not,
+					// If rendering to a framebuffer, show whole frame and render into crop window.
+					TqInt ystart = (g_RenderWholeFrame)? ymin : ymin - g_CWYmin;
+					TqInt yend = (g_RenderWholeFrame)? ymaxp1 : ymaxp1 - g_CWYmin;
 					TqBool use_alpha = g_mode.compare("rgba")==0;
-					for ( y = ymin - g_CWYmin; y < ymaxp1 - g_CWYmin; y++ )
+					for ( y = ystart; y < yend; y++ )
 					{
 						TqInt x;
-						for ( x = xmin - g_CWXmin; x < xmaxp1 - g_CWXmin; x++ )
+						// Choose the start/end coordinates depending on if in "file" mode or not,
+						// If rendering to a framebuffer, show whole frame and render into crop window.
+						TqInt xstart = (g_RenderWholeFrame)? xmin : xmin - g_CWXmin;
+						TqInt xend = (g_RenderWholeFrame)? xmaxp1 : xmaxp1 - g_CWXmin;
+						for ( x = xstart; x < xend; x++ )
 						{
 							if ( x >= 0 && y >= 0 && x < g_ImageWidth && y < g_ImageHeight )
 							{
@@ -522,13 +534,14 @@ void ProcessFormat()
 		if(g_Format==1)
 		{
             g_byteData = new unsigned char[ g_ImageWidth * g_ImageHeight * g_Channels ];
+			memset(g_byteData, 0, g_ImageWidth * g_ImageHeight * g_Channels);
 
 			// If working as a framebuffer, initialise the display to a checkerboard to show alpha
 			if(g_type.compare("framebuffer")==0)
 			{
-				for (TqInt i = 0; i < g_ImageHeight; i ++) 
+				for (TqInt i = g_CWYmin; i < g_CWYmax; i ++) 
 				{
-					for (TqInt j=0; j < g_ImageWidth; j++)
+					for (TqInt j=g_CWXmin; j < g_CWXmax; j++)
 					{
 						int     t       = 0;
 						unsigned char d = 255;
@@ -582,6 +595,10 @@ int main( int argc, char** argv )
         std::cout << ap.usagemsg();
         exit( 0 );
     }
+
+	// If rendering to a framebuffer, default to showing the whole frame and render to the clip window.
+	if(g_type.compare("framebuffer")==0)
+		g_RenderWholeFrame = TqTrue;
 
     /// Port is defined as the value passed into the -port= command line argument.
 	/// if that is empty, then the value stored in the environment variable AQSIS_DD_PORT,
