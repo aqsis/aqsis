@@ -152,6 +152,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libargparse
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name inline
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -275,6 +278,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libdd
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name inline
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -354,6 +360,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "inline"=.\RENDER\inline.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "jpg2tif"=.\plugins\jpg2tif\jpg2tif.dsp - Package Owner=<4>
 
 Package=<5>
@@ -392,6 +410,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libaqsistypes
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name inline
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -404,6 +425,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name inline
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -452,6 +476,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name inline
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -476,6 +503,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name inline
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -488,6 +518,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name inline
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -500,6 +533,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name inline
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -578,6 +614,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name inline
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -620,6 +659,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libaqsistypes
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name inline
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -652,6 +694,9 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libargparse
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name inline
     End Project Dependency
 }}}
 

@@ -15,10 +15,11 @@
 	</xsl:template>
 
 	<xsl:template match="Procedure">
-		<xsl:value-of select="concat('#define Validate_', @name, '\&#xa;')"/>
+		<xsl:value-of select="concat('#define Validate_', @name)"/>
 		<xsl:if test="Valid">
+			<xsl:value-of select="string(' \&#xa;')"/>
 			<xsl:text>{ \&#xa;</xsl:text>
-			<xsl:value-of select="string('&#x9;if(!ValidateState(')"/>
+			<xsl:value-of select="concat('&#x9;if(!ValidateState(', count(Valid/child::*), ', ')"/>
 			<xsl:for-each select="Valid/child::*">
 				<xsl:value-of select="string(name())"/>
 				<xsl:if test="position() != last()">
@@ -33,6 +34,7 @@
 			<xsl:text>; \&#xa;</xsl:text>
 			<xsl:text>}&#xa;</xsl:text>
 		</xsl:if>
+		<xsl:text>&#xa;</xsl:text>
 	</xsl:template>
 
 </xsl:stylesheet>
