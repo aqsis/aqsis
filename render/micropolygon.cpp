@@ -1204,10 +1204,14 @@ CqBound CqMicroPolygon::GetTotalBound( TqBool fForce )
 
 		TqFloat C = MAX( CircleOfConfusion( dofdata, B.vecMin().z() ), CircleOfConfusion( dofdata, B.vecMax().z() ) );
 
-		B.vecMin().x( B.vecMin().x() - C );
-		B.vecMin().y( B.vecMin().y() - C );
-		B.vecMax().x( B.vecMax().x() + C );
-		B.vecMax().y( B.vecMax().y() + C );
+		TqFloat sx = QGetRenderContext() ->GetDepthOfFieldScaleX();
+		TqFloat sy = QGetRenderContext() ->GetDepthOfFieldScaleY();
+		
+
+		B.vecMin().x( B.vecMin().x() - C * sx );
+		B.vecMin().y( B.vecMin().y() - C * sy );
+		B.vecMax().x( B.vecMax().x() + C * sx );
+		B.vecMax().y( B.vecMax().y() + C * sy );
 	}
 
 	return ( B );

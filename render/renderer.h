@@ -347,6 +347,22 @@ class CqRenderer : public IqRenderer
 			return m_depthOfFieldTMatrix;
 		}
 
+		void SetDepthOfFieldScale( TqFloat x, TqFloat y )
+		{
+			m_depthOfFieldScale[0] = x;
+			m_depthOfFieldScale[1] = y;
+		}
+
+		TqFloat GetDepthOfFieldScaleX() const
+		{
+			return m_depthOfFieldScale[0];
+		}
+
+		TqFloat GetDepthOfFieldScaleY() const
+		{
+			return m_depthOfFieldScale[1];
+		}
+
 		void	RegisterShader( const char* strName, EqShaderType type, IqShader* pShader );
 		CqShaderRegister* FindShader( const char* strName, EqShaderType type );
 
@@ -378,6 +394,7 @@ class CqRenderer : public IqRenderer
 
 		TqFloat m_depthOfFieldData[4];	///< DoF data
 		CqMatrix m_depthOfFieldTMatrix;
+		TqFloat m_depthOfFieldScale[2];
 
 		void WhichMatWorldTo(CqMatrix &a, TqUlong thash);
 		void WhichMatToWorld(CqMatrix &b, TqUlong thash);

@@ -246,11 +246,12 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 	{
 		const TqFloat * dofdata = QGetRenderContext() ->GetDepthOfFieldData();
 		TqFloat C = MAX( CircleOfConfusion( dofdata, minz ), CircleOfConfusion( dofdata, maxz ) );
-
-		Bound.vecMin().x( Bound.vecMin().x() - C );
-		Bound.vecMin().y( Bound.vecMin().y() - C );
-		Bound.vecMax().x( Bound.vecMax().x() + C );
-		Bound.vecMax().y( Bound.vecMax().y() + C );
+		TqFloat sx = QGetRenderContext() ->GetDepthOfFieldScaleX();
+		TqFloat sy = QGetRenderContext() ->GetDepthOfFieldScaleY();
+		Bound.vecMin().x( Bound.vecMin().x() - C * sx );
+		Bound.vecMin().y( Bound.vecMin().y() - C * sy );
+		Bound.vecMax().x( Bound.vecMax().x() + C * sx );
+		Bound.vecMax().y( Bound.vecMax().y() + C * sy);
 	}
 
 	// Convert the bounds to raster space.
@@ -641,6 +642,9 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 
 	TqBool UsingDepthOfField = QGetRenderContext() ->UsingDepthOfField();
 	const TqFloat* dofdata = 0;
+	TqFloat sx = QGetRenderContext() ->GetDepthOfFieldScaleX();
+	TqFloat sy = QGetRenderContext() ->GetDepthOfFieldScaleY();
+		
 	if ( UsingDepthOfField )
 	{
 		dofdata = QGetRenderContext() ->GetDepthOfFieldData();
@@ -664,11 +668,11 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 		if ( UsingDepthOfField )
 		{
 			TqFloat C = MAX( CircleOfConfusion( dofdata, Bound.vecMin().z() ), CircleOfConfusion( dofdata, Bound.vecMax().z() ) );
-
-			bminx -= C;
-			bminy -= C;
-			bmaxx += C;
-			bmaxy += C;
+			
+			bminx -= C * sx;
+			bminy -= C * sy;
+			bmaxx += C * sx;
+			bmaxy += C * sy;
 		}
 
 		if ( bmaxx < xmin || bmaxy < ymin || bminx > xmax || bminy > ymax )
@@ -735,14 +739,14 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 		if( UsingDepthOfField )
 		{
 			TqFloat ad; // Average depth
+			
 			ad = pMPG->PointA().z() + pMPG->PointB().z() + pMPG->PointC().z() + pMPG->PointD().z();
 			ad /= 4;
 			dc = CircleOfConfusion( dofdata, ad );
 			/*
 			CqVector4D dct( dc, dc, 0.0 );
-
-			dct = QGetRenderContext() -> GetDepthOfFieldTMatrix() * dct;
-
+			*/
+			/*
 			dc = dct.Magnitude();*/
 		}
 
@@ -776,8 +780,14 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 
 						CqVector2D samplelens;
 						if( UsingDepthOfField )
+						{
 							samplelens = pie2->SampleLens( m, n );
-
+							//std::cout << samplelens.x() << " " << samplelens.y() << std::endl;
+							samplelens.x( samplelens.x() * QGetRenderContext() ->GetDepthOfFieldScaleX() );
+							samplelens.y( samplelens.y() * QGetRenderContext() ->GetDepthOfFieldScaleX() );
+							//std::cout << samplelens.x() << " " << samplelens.y() << std::endl;
+							
+						}
 						theStats.IncSamples();
 
 						TqFloat t = pie2->SampleTime( m, n );
