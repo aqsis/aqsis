@@ -592,7 +592,6 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 		TqInt				m_Index;		///< Index within the donor grid.
 
 		TqShort				m_Flags;		///< Bitvector of general flags, using EqMicroPolyFlags as bitmasks.
-		CqVector3D			m_vecPoints[4];
 	private:
 		CqMicroPolygon( const CqMicroPolygon& From )	{}
 }

@@ -1156,7 +1156,7 @@ TqBool CqMicroPolygon::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat 
 
 TqBool CqMicroPolygon::SampleDof( const CqVector2D& vecSample, TqFloat time, const TqFloat* DofParameters, const CqVector2D& LensPosition, TqFloat& D )
 {
-	TqFloat C;
+/*	TqFloat C;
 
 	C = CircleOfConfusion( DofParameters, m_vecPoints[0].z() );
 	CqVector3D p0(
@@ -1187,7 +1187,8 @@ TqBool CqMicroPolygon::SampleDof( const CqVector2D& vecSample, TqFloat time, con
 	);
 
 	CqMovingMicroPolygonKey newpoly(p0, p1, p2, p3);
-	return newpoly.fContains( vecSample, D );
+	return newpoly.fContains( vecSample, D );*/
+	return fContains( vecSample, D );
 }
 
 
