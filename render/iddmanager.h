@@ -44,18 +44,18 @@ struct IqBucket
     /** Get the bucket size in Y
      */
     virtual	TqInt	Height() const = 0;
+    /** Get the bucket size in X including filtering extra
+     */
+    virtual	TqInt	RealWidth() const = 0;
+    /** Get the bucket size in Y including filtering extra
+     */
+    virtual	TqInt	RealHeight() const = 0;
     /** Get the position of this bucket in X
      */
     virtual	TqInt	XOrigin() const = 0;
     /** Get the position of this bucket in Y
      */
     virtual	TqInt	YOrigin() const = 0;
-    /** Get the filter width of this bucket in X
-     */
-    virtual	TqInt	FilterXWidth() const = 0;
-    /** Get the filter width of this bucket in Y
-     */
-    virtual	TqInt	FilterYWidth() const = 0;
 
     /** Get an element color from this bucket. If the requested address is not within this bucket, returns black.
      * \param iXPos Screen position of the requested element.

@@ -49,14 +49,13 @@ START_NAMESPACE( Aqsis )
 
 TqInt	CqBucket::m_XSize;
 TqInt	CqBucket::m_YSize;
-TqInt	CqBucket::m_FilterXWidth;
-TqInt	CqBucket::m_FilterYWidth;
-TqInt	CqBucket::m_XMax;
-TqInt	CqBucket::m_YMax;
+TqInt	CqBucket::m_RealWidth;
+TqInt	CqBucket::m_RealHeight;
+TqInt	CqBucket::m_DiscreteShiftX;
+TqInt	CqBucket::m_DiscreteShiftY;
 TqInt	CqBucket::m_XOrigin;
 TqInt	CqBucket::m_YOrigin;
-TqInt	CqBucket::m_PixelXSamples;
-TqInt	CqBucket::m_PixelYSamples;
+CqImageBuffer* CqBucket::m_ImageBuffer;
 std::vector<CqImagePixel>	CqBucket::m_aieImage;
 std::vector<std::vector<CqVector2D> >	CqBucket::m_aSamplePositions;
 std::vector<TqFloat> CqBucket::m_aFilterValues;
@@ -69,37 +68,33 @@ std::vector<TqFloat> CqBucket::m_aCoverages;
  *  Clear,Allocate, Init. the m_aieImage samples
  */
 
-void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqInt xfwidth, TqInt yfwidth, TqInt xsamples, TqInt ysamples, TqBool fJitter )
+void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqBool fJitter )
 {
     m_XOrigin = xorigin;
     m_YOrigin = yorigin;
     m_XSize = xsize;
     m_YSize = ysize;
-    m_FilterXWidth = xfwidth;
-    m_FilterYWidth = yfwidth;
-    m_XMax = static_cast<TqInt>( CEIL( ( xfwidth - 1 ) * 0.5f ) );
-    m_YMax = static_cast<TqInt>( CEIL( ( xfwidth - 1 ) * 0.5f ) );
-    m_PixelXSamples = xsamples;
-    m_PixelYSamples = ysamples;
-
-    TqInt ywidth1, xwidth1;
-    ywidth1 = m_YSize + m_FilterYWidth;
-    xwidth1 = m_XSize + m_FilterXWidth;
+	m_DiscreteShiftX = FLOOR(FilterXWidth()/2.0f);
+	m_DiscreteShiftY = FLOOR(FilterYWidth()/2.0f);
+    //m_RealWidth = m_XSize + CEIL(FilterXWidth());
+    //m_RealHeight = m_YSize + CEIL(FilterYWidth());
+	m_RealWidth = m_XSize + (m_DiscreteShiftX*2);
+	m_RealHeight = m_YSize + (m_DiscreteShiftY*2);
 
     // Allocate the image element storage if this is the first bucket
     if(m_aieImage.empty())
     {
-        m_aieImage.resize( xwidth1 * ywidth1);
-        m_aSamplePositions.resize( xwidth1 * ywidth1 );
+        m_aieImage.resize( m_RealWidth * m_RealHeight);
+        m_aSamplePositions.resize( m_RealWidth * m_RealHeight );
 
         // Initialise the samples for this bucket.
         TqInt which = 0;
-        for ( TqInt i = 0; i < ywidth1; i++ )
+        for ( TqInt i = 0; i < m_RealHeight; i++ )
         {
-            for ( TqInt j = 0; j < xwidth1; j++ )
+            for ( TqInt j = 0; j < m_RealWidth; j++ )
             {
                 m_aieImage[which].Clear();
-                m_aieImage[which].AllocateSamples( xsamples, ysamples );
+                m_aieImage[which].AllocateSamples( PixelXSamples(), PixelYSamples() );
                 m_aieImage[which].InitialiseSamples( m_aSamplePositions[which], fJitter );
 
                 which++;
@@ -109,17 +104,17 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
 
     // now shuffle the pixels around and add in the pixel offset to the position.
     static CqRandom random(  53 );
-    TqInt shuffleX = random.RandomInt( xwidth1 );
-    TqInt shuffleY = random.RandomInt( ywidth1 );
+    TqInt shuffleX = random.RandomInt( m_RealWidth );
+    TqInt shuffleY = random.RandomInt( m_RealHeight );
     TqInt which = 0;
-    TqInt sourceIndex = shuffleY*xwidth1 + shuffleX;
-    TqInt numPixels = xwidth1*ywidth1;
-    for ( TqInt i = 0; i < ywidth1; i++ )
+    TqInt sourceIndex = shuffleY * m_RealWidth + shuffleX;
+    TqInt numPixels = m_RealWidth*m_RealHeight;
+    for ( TqInt i = 0; i < m_RealHeight; i++ )
     {
-        for ( TqInt j = 0; j < xwidth1; j++ )
+        for ( TqInt j = 0; j < m_RealWidth; j++ )
         {
             CqVector2D bPos2( m_XOrigin, m_YOrigin );
-            bPos2 += CqVector2D( ( j - m_FilterXWidth / 2 ), ( i - m_FilterYWidth / 2 ) );
+            bPos2 += CqVector2D( ( j - m_DiscreteShiftX ), ( i - m_DiscreteShiftY ) );
 
             m_aieImage[which].Clear();
             m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[sourceIndex] );
@@ -141,10 +136,10 @@ void CqBucket::InitialiseFilterValues()
         return;
 
     // Allocate and fill in the filter values array for each pixel.
-    TqInt numsubpixels = ( m_PixelXSamples * m_PixelYSamples );
+    TqInt numsubpixels = ( PixelXSamples() * PixelYSamples() );
     TqInt numperpixel = numsubpixels * numsubpixels;
 
-    TqUint numvalues = static_cast<TqUint>( ( ( m_FilterXWidth + 1 ) * ( m_FilterYWidth + 1 ) ) * ( numperpixel ) );
+    TqUint numvalues = static_cast<TqUint>( ( ( CEIL(FilterXWidth()) + 1 ) * ( CEIL(FilterYWidth()) + 1 ) ) * ( numperpixel ) );
 
     m_aFilterValues.resize( numvalues );
 
@@ -155,11 +150,11 @@ void CqBucket::InitialiseFilterValues()
     if( NULL == pFilter )
         pFilter = RiBoxFilter;
 
-    TqFloat xmax = m_XMax;
-    TqFloat ymax = m_YMax;
-    TqFloat xfwo2 = m_FilterXWidth * 0.5f;
-    TqFloat yfwo2 = m_FilterYWidth * 0.5f;
-    TqFloat xfw = m_FilterXWidth;
+    TqFloat xmax = m_DiscreteShiftX;
+    TqFloat ymax = m_DiscreteShiftY;
+    TqFloat xfwo2 = CEIL(FilterXWidth()) * 0.5f;
+    TqFloat yfwo2 = CEIL(FilterYWidth()) * 0.5f;
+    TqFloat xfw = CEIL(FilterXWidth());
 
     TqFloat subcellwidth = 1.0f / numsubpixels;
     TqFloat subcellcentre = subcellwidth * 0.5f;
@@ -176,27 +171,27 @@ void CqBucket::InitialiseFilterValues()
             TqFloat pfy = py - 0.5f;
             // Go over every subpixel in the pixel.
             TqInt sx, sy;
-            for ( sy = 0; sy < m_PixelYSamples; sy++ )
+            for ( sy = 0; sy < PixelYSamples(); sy++ )
             {
-                for ( sx = 0; sx < m_PixelXSamples; sx++ )
+                for ( sx = 0; sx < PixelXSamples(); sx++ )
                 {
                     // Get the index of the subpixel in the array
-                    TqInt sindex = index + ( ( ( sy * m_PixelXSamples ) + sx ) * numsubpixels );
-                    TqFloat sfx = static_cast<TqFloat>( sx ) / m_PixelXSamples;
-                    TqFloat sfy = static_cast<TqFloat>( sy ) / m_PixelYSamples;
+                    TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
+                    TqFloat sfx = static_cast<TqFloat>( sx ) / PixelXSamples();
+                    TqFloat sfy = static_cast<TqFloat>( sy ) / PixelYSamples();
                     // Go over each subcell in the subpixel
                     TqInt cx, cy;
-                    for ( cy = 0; cy < m_PixelXSamples; cy++ )
+                    for ( cy = 0; cy < PixelXSamples(); cy++ )
                     {
-                        for ( cx = 0; cx < m_PixelYSamples; cx++ )
+                        for ( cx = 0; cx < PixelYSamples(); cx++ )
                         {
                             // Get the index of the subpixel in the array
-                            TqInt cindex = sindex + ( ( cy * m_PixelYSamples ) + cx );
+                            TqInt cindex = sindex + ( ( cy * PixelYSamples() ) + cx );
                             TqFloat fx = ( cx * subcellwidth ) + sfx + pfx + subcellcentre;
                             TqFloat fy = ( cy * subcellwidth ) + sfy + pfy + subcellcentre;
                             TqFloat w = 0.0f;
                             if ( fx >= -xfwo2 && fy >= -yfwo2 && fx <= xfwo2 && fy <= yfwo2 )
-                                w = ( *pFilter ) ( fx, fy, m_FilterXWidth, m_FilterYWidth );
+                                w = ( *pFilter ) ( fx, fy, CEIL(FilterXWidth()), CEIL(FilterYWidth()) );
                             m_aFilterValues[ cindex ] = w;
                         }
                     }
@@ -353,17 +348,17 @@ void CqBucket::FilterBucket(TqBool empty)
     CqImagePixel * pie;
 
     TqInt datasize = QGetRenderContext()->GetOutputDataTotalSize();
-    m_aDatas.resize( datasize * Width() * Height() );
-    m_aCoverages.resize( Width() * Height() );
+    m_aDatas.resize( datasize * RealWidth() * RealHeight() );
+    m_aCoverages.resize( RealWidth() * RealHeight() );
 
-    TqInt xmax = static_cast<TqInt>( CEIL( ( FilterXWidth() - 1 ) * 0.5f ) );
-    TqInt ymax = static_cast<TqInt>( CEIL( ( FilterYWidth() - 1 ) * 0.5f ) );
-    TqFloat xfwo2 = FilterXWidth() * 0.5f;
-    TqFloat yfwo2 = FilterYWidth() * 0.5f;
-    TqInt numsubpixels = ( m_PixelXSamples * m_PixelYSamples );
+    TqInt xmax = m_DiscreteShiftX;
+    TqInt ymax = m_DiscreteShiftY;
+    TqFloat xfwo2 = CEIL(FilterXWidth()) * 0.5f;
+    TqFloat yfwo2 = CEIL(FilterYWidth()) * 0.5f;
+    TqInt numsubpixels = ( PixelXSamples() * PixelYSamples() );
 
     TqInt numperpixel = numsubpixels * numsubpixels;
-    TqInt	xlen = Width() + FilterXWidth();
+    TqInt	xlen = RealWidth();
 
     TqInt SampleCount = 0;
     CqColor imager;
@@ -396,15 +391,15 @@ void CqBucket::FilterBucket(TqBool empty)
                     CqImagePixel* pie2 = pie;
                     for ( fx = -xmax; fx <= xmax; fx++ )
                     {
-                        TqInt index = ( ( ( fy + ymax ) * FilterXWidth() ) + ( fx + xmax ) ) * numperpixel;
+                        TqInt index = ( ( ( fy + ymax ) * CEIL(FilterXWidth()) ) + ( fx + xmax ) ) * numperpixel;
                         // Now go over each subsample within the pixel
                         TqInt sx, sy;
                         TqInt sampleIndex = 0;
-                        for ( sy = 0; sy < m_PixelYSamples; sy++ )
+                        for ( sy = 0; sy < PixelYSamples(); sy++ )
                         {
-                            for ( sx = 0; sx < m_PixelXSamples; sx++ )
+                            for ( sx = 0; sx < PixelXSamples(); sx++ )
                             {
-                                TqInt sindex = index + ( ( ( sy * m_PixelXSamples ) + sx ) * numsubpixels );
+                                TqInt sindex = index + ( ( ( sy * PixelXSamples() ) + sx ) * numsubpixels );
                                 const SqSampleData& sampleData = pie2->SampleData( sampleIndex );
                                 CqVector2D vecS = sampleData.m_Position;
                                 vecS -= CqVector2D( xcent, ycent );
@@ -464,8 +459,8 @@ void CqBucket::FilterBucket(TqBool empty)
         pie += xlen;
     }
 
-    endy = YOrigin() + Height();
-    endx = XOrigin() + Width();
+    endy = YOrigin() + RealHeight();
+    endx = XOrigin() + RealWidth();
 
     if ( NULL != QGetRenderContext() ->optCurrent().pshadImager() && NULL != QGetRenderContext() ->optCurrent().pshadImager() ->pShader() )
     {
@@ -522,9 +517,9 @@ void CqBucket::ExposeBucket()
         TqFloat oneovergamma = 1.0f / exposegamma;
         TqFloat endx, endy;
         TqInt   nextx;
-        endy = Height();
-        endx = Width();
-        nextx = Width() + FilterXWidth();
+        endy = RealHeight()-1;
+        endx = RealWidth()-1;
+        nextx = RealWidth();
 
         for ( y = 0; y < endy; y++ )
         {
@@ -563,7 +558,7 @@ void CqBucket::QuantizeBucket()
     TqInt   nextx;
     endy = Height();
     endx = Width();
-    nextx = Width() + FilterXWidth();
+    nextx = RealWidth();
 
 
     if ( QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
@@ -700,6 +695,41 @@ void CqBucket::ShutdownBucket()
 		(*i).clear();
 	m_aSamplePositions.clear();
 }
+
+TqInt CqBucket::PixelXSamples()
+{
+    return ( m_ImageBuffer->PixelXSamples() );
+}
+
+TqInt CqBucket::PixelYSamples()
+{
+    return ( m_ImageBuffer->PixelYSamples() );
+}
+
+TqFloat CqBucket::FilterXWidth()
+{
+    return ( m_ImageBuffer->FilterXWidth() );
+}
+
+TqFloat CqBucket::FilterYWidth()
+{
+    return ( m_ImageBuffer->FilterYWidth() );
+}
+
+
+void CqBucket::ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
+{
+    iXPos -= m_XOrigin;
+    iYPos -= m_YOrigin;
+
+    // Check within renderable range
+    //assert( iXPos < -m_XMax && iXPos < m_XSize + m_XMax &&
+    //		iYPos < -m_YMax && iYPos < m_YSize + m_YMax );
+
+    TqInt i = ( ( iYPos + m_DiscreteShiftY ) * ( m_RealWidth ) ) + ( iXPos + m_DiscreteShiftX );
+    pie = &m_aieImage[ i ];
+}
+
 
 //---------------------------------------------------------------------
 

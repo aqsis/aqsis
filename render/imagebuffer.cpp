@@ -136,8 +136,8 @@ void	CqImageBuffer::SetImage()
     }
     /* add artificially a border around based on the current filterwidth so the diced primitives
         * may fit better within a bucket */
-    m_FilterXWidth = static_cast<TqInt>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 0 ] );
-    m_FilterYWidth = static_cast<TqInt>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 1 ] );
+    m_FilterXWidth = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 0 ];
+    m_FilterYWidth = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 1 ];
 
     m_iXRes = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 0 ];
     m_iYRes = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 1 ];
@@ -150,13 +150,11 @@ void	CqImageBuffer::SetImage()
     m_PixelXSamples = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
     m_PixelYSamples = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
 
-    //    m_XBucketSize += (2 * m_FilterXWidth);
-    //    m_YBucketSize += (2 * m_FilterYWidth);
-
     m_ClippingNear = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 0 ] );
     m_ClippingFar = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 1 ] );
     m_DisplayMode = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ];
 
+	CqBucket::SetImageBuffer(this);
     m_Buckets.resize( m_cYBuckets );
     std::vector<std::vector<CqBucket> >::iterator i;
     for( i = m_Buckets.begin(); i!=m_Buckets.end(); i++)
@@ -256,16 +254,16 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqBas
 
     // Convert the bounds to raster space.
     Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), CqMatrix(), QGetRenderContext()->Time() ) );
-    Bound.vecMin().x( Bound.vecMin().x() - m_FilterXWidth / 2 );
-    Bound.vecMin().y( Bound.vecMin().y() - m_FilterYWidth / 2 );
-    Bound.vecMax().x( Bound.vecMax().x() + m_FilterXWidth / 2 );
-    Bound.vecMax().y( Bound.vecMax().y() + m_FilterYWidth / 2 );
+    Bound.vecMin().x( Bound.vecMin().x() - m_FilterXWidth / 2.0f );
+    Bound.vecMin().y( Bound.vecMin().y() - m_FilterYWidth / 2.0f );
+    Bound.vecMax().x( Bound.vecMax().x() + m_FilterXWidth / 2.0f );
+    Bound.vecMax().y( Bound.vecMax().y() + m_FilterYWidth / 2.0f );
 
     // If the bounds are completely outside the viewing frustum, cull the primitive.
-    if ( Bound.vecMin().x() > CropWindowXMax() + m_FilterXWidth / 2 ||
-            Bound.vecMin().y() > CropWindowYMax() + m_FilterYWidth / 2 ||
-            Bound.vecMax().x() < CropWindowXMin() - m_FilterXWidth / 2 ||
-            Bound.vecMax().y() < CropWindowYMin() - m_FilterYWidth / 2 )
+    if ( Bound.vecMin().x() > CropWindowXMax() ||
+         Bound.vecMin().y() > CropWindowYMax() ||
+         Bound.vecMax().x() < CropWindowXMin() ||
+         Bound.vecMax().y() < CropWindowYMin() )
         return ( TqTrue );
 
     // Restore Z-Values to camera space.
@@ -429,8 +427,8 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
     CqBound	B( pmpgNew->GetTotalBound() );
     ADDREF( pmpgNew );
 
-    if ( B.vecMax().x() < m_CropWindowXMin - m_FilterXWidth / 2 || B.vecMax().y() < m_CropWindowYMin - m_FilterYWidth / 2 ||
-            B.vecMin().x() > m_CropWindowXMax + m_FilterXWidth / 2 || B.vecMin().y() > m_CropWindowYMax + m_FilterYWidth / 2 )
+    if ( B.vecMax().x() < m_CropWindowXMin - m_FilterXWidth / 2.0f || B.vecMax().y() < m_CropWindowYMin - m_FilterYWidth / 2.0f ||
+         B.vecMin().x() > m_CropWindowXMax + m_FilterXWidth / 2.0f || B.vecMin().y() > m_CropWindowYMax + m_FilterYWidth / 2.0f )
     {
         RELEASEREF( pmpgNew );
         return ;
@@ -439,10 +437,10 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
     // Find out the minimum bucket touched by the micropoly bound.
     TqInt iBkt = m_cXBuckets * m_cYBuckets;
 
-    B.vecMin().x( B.vecMin().x() - m_FilterXWidth / 2 );
-    B.vecMin().y( B.vecMin().y() - m_FilterYWidth / 2 );
-    B.vecMax().x( B.vecMax().x() + m_FilterXWidth / 2 );
-    B.vecMax().y( B.vecMax().y() + m_FilterYWidth / 2 );
+    B.vecMin().x( B.vecMin().x() - m_FilterXWidth / 2.0f );
+    B.vecMin().y( B.vecMin().y() - m_FilterYWidth / 2.0f );
+    B.vecMax().x( B.vecMax().x() + m_FilterXWidth / 2.0f );
+    B.vecMax().y( B.vecMax().y() + m_FilterYWidth / 2.0f );
 
     TqInt iXBa = static_cast<TqInt>( B.vecMin().x() / ( m_XBucketSize ) );
     TqInt iYBa = static_cast<TqInt>( B.vecMin().y() / ( m_YBucketSize ) );
@@ -450,7 +448,7 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
     TqInt iYBb = static_cast<TqInt>( B.vecMax().y() / ( m_YBucketSize ) );
 
     if ( ( iXBb < 0 ) || ( iYBb < 0 ) ||
-            ( iXBa >= m_cXBuckets ) || ( iYBa >= m_cYBuckets ) )
+         ( iXBa >= m_cXBuckets ) || ( iYBa >= m_cYBuckets ) )
     {
         RELEASEREF( pmpgNew );
         return ;
@@ -807,7 +805,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
             coc = QGetRenderContext()->GetCircleOfConfusion( ad );
         }
 
-        TqInt nextx = Bucket.Width() + Bucket.FilterXWidth();
+        TqInt nextx = Bucket.RealWidth();
         Bucket.ImageElement( sX, sY, pie );
 
         // quadX and quadY hold which quadrant we are currently sampling in
@@ -920,7 +918,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
                         // Now check if the subsample hits the micropoly
                         TqBool SampleHit;
                         TqFloat D;
-			
+
                         if( UsingDepthOfField )
                         {
                             CqVector2D vecPDof(vecX, vecY);
@@ -1302,7 +1300,7 @@ void CqImageBuffer::RenderImage()
     // Render the surface at the front of the list.
     m_fDone = TqFalse;
 
-    CqVector2D bHalf = CqVector2D( m_FilterXWidth / 2, m_FilterYWidth / 2 );
+    CqVector2D bHalf = CqVector2D( FLOOR(m_FilterXWidth / 2.0f), FLOOR(m_FilterYWidth / 2.0f) );
 
     // Setup the hierarchy of boxes for occlusion culling
     CqOcclusionBox::CreateHierarchy( m_XBucketSize, m_YBucketSize, m_FilterXWidth, m_FilterYWidth );
@@ -1320,7 +1318,7 @@ void CqImageBuffer::RenderImage()
         // TODO: fix non jittered bucket initialisation.
         // Warning Jitter must be True is all cases; the InitialiseBucket when it is not in jittering mode
         // doesn't initialise correctly so later we have problem in the FilterBucket()
-        CqBucket::InitialiseBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), m_FilterXWidth, m_FilterYWidth, m_PixelXSamples, m_PixelYSamples, true );
+        CqBucket::InitialiseBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), true );
         CqBucket::InitialiseFilterValues();
 
         // Set up some bounds for the bucket.
@@ -1334,10 +1332,10 @@ void CqImageBuffer::RenderImage()
         long xmax = static_cast<long>( vecMax.x() );
         long ymax = static_cast<long>( vecMax.y() );
 
-        if ( xmin < CropWindowXMin() - m_FilterXWidth / 2 ) xmin = CropWindowXMin() - m_FilterXWidth / 2;
-        if ( ymin < CropWindowYMin() - m_FilterYWidth / 2 ) ymin = CropWindowYMin() - m_FilterYWidth / 2;
-        if ( xmax > CropWindowXMax() + m_FilterXWidth / 2 ) xmax = CropWindowXMax() + m_FilterXWidth / 2;
-        if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 ) ymax = CropWindowYMax() + m_FilterYWidth / 2;
+        if ( xmin < CropWindowXMin() - m_FilterXWidth / 2 ) xmin = CropWindowXMin() - m_FilterXWidth / 2.0f;
+        if ( ymin < CropWindowYMin() - m_FilterYWidth / 2 ) ymin = CropWindowYMin() - m_FilterYWidth / 2.0f;
+        if ( xmax > CropWindowXMax() + m_FilterXWidth / 2 ) xmax = CropWindowXMax() + m_FilterXWidth / 2.0f;
+        if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 ) ymax = CropWindowYMax() + m_FilterYWidth / 2.0f;
 
         QGetRenderContext() ->Stats().Others().Stop();
 

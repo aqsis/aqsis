@@ -1105,10 +1105,10 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
     const CqVector3D& pB = PointB();
     TqFloat x = vecP.x(), y = vecP.y();
     TqFloat x0 = pA.x(), y0 = pA.y(), x1 = pB.x(), y1 = pB.y();
-    if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
+    if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
     const CqVector3D& pC = PointC();
     x0 = x1; y0 = y1; x1 = pC.x(); y1 = pC.y();
-    if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
+    if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
 
     // Check for degeneracy.
     if ( !( IsDegenerate() ) )
@@ -1536,12 +1536,12 @@ TqBool CqMicroPolygonMotion::fContains( const CqVector2D& vecP, TqFloat& Depth, 
                 y1 = ( F1 * pMP1->m_Point1.y() ) + ( Fraction * pMP2->m_Point1.y() );
         TqFloat x0_hold = x0;
         TqFloat y0_hold = y0;
-        if ( ( r1 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
+        if ( ( r1 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
         x0 = x1;
         y0 = y1;
         x1 = ( F1 * pMP1->m_Point2.x() ) + ( Fraction * pMP2->m_Point2.x() );
         y1 = ( F1 * pMP1->m_Point2.y() ) + ( Fraction * pMP2->m_Point2.y() );
-        if ( ( r2 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
+        if ( ( r2 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
         x0 = x1;
         y0 = y1;
         x1 = ( F1 * pMP1->m_Point3.x() ) + ( Fraction * pMP2->m_Point3.x() );

@@ -79,6 +79,14 @@ public:
     {
         return ( m_YSize );
     }
+    virtual	TqInt	RealWidth() const
+    {
+        return ( m_RealWidth );
+    }
+    virtual	TqInt	RealHeight() const
+    {
+        return ( m_RealHeight );
+    }
     virtual	TqInt	XOrigin() const
     {
         return ( m_XOrigin );
@@ -87,22 +95,10 @@ public:
     {
         return ( m_YOrigin );
     }
-    virtual	TqInt	FilterXWidth() const
-    {
-        return ( m_FilterXWidth );
-    }
-    virtual	TqInt	FilterYWidth() const
-    {
-        return ( m_FilterYWidth );
-    }
-    virtual	TqInt	PixelXSamples() const
-    {
-        return ( m_PixelXSamples );
-    }
-    virtual	TqInt	PixelYSamples() const
-    {
-        return ( m_PixelYSamples );
-    }
+    static	TqInt	PixelXSamples();
+    static	TqInt	PixelYSamples();
+    static	TqFloat	FilterXWidth();
+    static	TqFloat	FilterYWidth();
 
     virtual	CqColor Color( TqInt iXPos, TqInt iYPos );
     virtual	CqColor Opacity( TqInt iXPos, TqInt iYPos );
@@ -112,20 +108,9 @@ public:
     virtual	TqInt DataSize( TqInt iXPos, TqInt iYPos );
     virtual	const TqFloat* Data( TqInt iXPos, TqInt iYPos );
 
-    static	void	InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqInt xfwidth, TqInt yfwidth, TqInt xsamples, TqInt ysamples, TqBool fJitter = TqTrue );
+    static	void	InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqBool fJitter = TqTrue );
     static	void	InitialiseFilterValues();
-    static	void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
-    {
-        iXPos -= m_XOrigin;
-        iYPos -= m_YOrigin;
-
-        // Check within renderable range
-        //assert( iXPos < -m_XMax && iXPos < m_XSize + m_XMax &&
-        //		iYPos < -m_YMax && iYPos < m_YSize + m_YMax );
-
-        TqInt i = ( ( iYPos + m_YMax ) * ( m_XSize + m_FilterXWidth ) ) + ( iXPos + m_XMax );
-        pie = &m_aieImage[ i ];
-    }
+    static	void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie );
     static	void	CombineElements();
     void	FilterBucket(TqBool empty);
     void	ExposeBucket();
@@ -214,24 +199,29 @@ public:
     {
         m_bProcessed = bProc;
     }
+    /** Set the pointer to the image buffer
+     */
+    static void SetImageBuffer( CqImageBuffer* pBuffer )
+    {
+        m_ImageBuffer = pBuffer;
+    }
 
 
 private:
-    static	TqInt	m_XSize;
-    static	TqInt	m_YSize;
-    static	TqInt	m_FilterXWidth;
-    static	TqInt	m_FilterYWidth;
-    static	TqInt	m_XMax;
-    static	TqInt	m_YMax;
-    static	TqInt	m_PixelXSamples;
-    static	TqInt	m_PixelYSamples;
-    static	TqInt	m_XOrigin;
-    static	TqInt	m_YOrigin;
+    static	TqInt	m_XOrigin;		///< Origin in discrete coordinates of this bucket.
+    static	TqInt	m_YOrigin;		///< Origin in discrete coordinates of this bucket.
+    static	TqInt	m_XSize;		///< Size of the rendered area of this bucket in discrete coordinates.
+    static	TqInt	m_YSize;		///< Size of the rendered area of this bucket in discrete coordinates.
+	static	TqInt	m_RealWidth;	///< Actual size of the data for this bucket including filter overlap.
+	static	TqInt	m_RealHeight;	///< Actual size of the data for this bucket including filter overlap.
+	static	TqInt	m_DiscreteShiftX;	///< 
+	static	TqInt	m_DiscreteShiftY;
     static	std::vector<CqImagePixel>	m_aieImage;
     static	std::vector<std::vector<CqVector2D> >	m_aSamplePositions;///< Vector of vectors of jittered sample positions precalculated.
     static	std::vector<TqFloat>	m_aFilterValues;				///< Vector of filter weights precalculated.
     static	std::vector<TqFloat>	m_aDatas;
     static	std::vector<TqFloat>	m_aCoverages;
+	static	CqImageBuffer*	m_ImageBuffer;	///< Pointer to the image buffer this bucket belongs to.
 
 	// this is a compare functor for sorting surfaces in order of depth.
 	struct closest_surface

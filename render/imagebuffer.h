@@ -187,14 +187,14 @@ public:
     /** Get the width of the pixel filter in the horizontal direction.
      * \return Integer filter width, in pixels.
      */
-    TqInt	FilterXWidth() const
+    TqFloat	FilterXWidth() const
     {
         return ( m_FilterXWidth );
     }
     /** Get the width of the pixel filter in the vertical direction.
      * \return Integer filter width, in pixels.
      */
-    TqInt	FilterYWidth() const
+    TqFloat	FilterYWidth() const
     {
         return ( m_FilterYWidth );
     }
@@ -306,8 +306,8 @@ private:
     TqInt	m_YBucketSize;		///< Integer vertical bucket size.
     TqInt	m_PixelXSamples;	///< Integer horizontal sample per pixel count.
     TqInt	m_PixelYSamples;	///< Integer vertical sample per pixel count.
-    TqInt	m_FilterXWidth;		///< Integer horizontal pixel filter width in pixels.
-    TqInt	m_FilterYWidth;		///< Integer vertical pixel filter width in pixels.
+    TqFloat	m_FilterXWidth;		///< Integer horizontal pixel filter width in pixels.
+    TqFloat	m_FilterYWidth;		///< Integer vertical pixel filter width in pixels.
     TqInt	m_CropWindowXMin;	///< Integer minimum horizontal pixel to render.
     TqInt	m_CropWindowYMin;	///< Integer minimum vertical pixel to render.
     TqInt	m_CropWindowXMax;	///< Integer maximum horizontal pixel to render.
