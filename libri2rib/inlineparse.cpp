@@ -23,7 +23,7 @@
  */
 #include "inlineparse.h"
 
-using namespace libri2rib;
+USING_NAMESPACE( libri2rib );
 
 void CqInlineParse::check_syntax ()
 {

@@ -19,39 +19,20 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /** \file
- *  \brief A class to temporary store RtTokens and RtPointers from parameter lists.
+ *  \brief Enums related to Options
  *  \author Lionel J. Lacour (intuition01@online.fr)
  */
 
-#ifndef RI2RIB_PLSTORE_H
-#define RI2RIB_PLSTORE_H 1
-
-#include <stdarg.h>
-#include <vector>
-#include "ri.h"
-#include "aqsis.h"
+#ifndef RI2RIB_OPTIONS_H
+#define RI2RIB_OPTIONS_H 1
 
 START_NAMESPACE( libri2rib )
 
-class CqPLStore
+struct SqOptions
 {
-	public:
-		CqPLStore ( va_list args );
-		~CqPLStore ()
-		{}
-	private:
-		std::vector<RtToken> m_Token;
-		std::vector<RtPointer> m_Parameter;
-	public:
-		RtInt n;
-		RtToken *tokens()
-		{
-			return & m_Token[ 0 ];
-		};
-		RtPointer *parms()
-		{
-			return & m_Parameter[ 0 ];
-		};
+	enum EqOutputType { OutputType_Ascii, OutputType_Binary };
+	enum EqCompression { Compression_None, Compression_Gzip };
+	enum EqIndentation { Indentation_None, Indentation_Space, Indentation_Tab };
 };
 
 END_NAMESPACE( libri2rib )

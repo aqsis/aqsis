@@ -1,3 +1,4 @@
+// -*- C++ -*-
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
@@ -30,8 +31,7 @@
 #include "aqsis.h"
 #include "ri.h"
 
-namespace libri2rib
-{
+START_NAMESPACE( libri2rib )
 
 enum EqTokenClass { CONSTANT, UNIFORM, VARYING, VERTEX };
 enum EqTokenType { FLOAT, POINT, VECTOR, NORMAL, COLOR, STRING, MATRIX, HPOINT, INTEGER };
@@ -81,5 +81,5 @@ class CqDictionary
 };
 
 
-} /* namespace libri2rib */
+END_NAMESPACE( libri2rib )
 #endif

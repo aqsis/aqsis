@@ -23,7 +23,7 @@
  */
 #include "plstore.h"
 
-using namespace libri2rib;
+USING_NAMESPACE( libri2rib );
 
 CqPLStore::CqPLStore ( va_list args )
 {
@@ -33,9 +33,9 @@ CqPLStore::CqPLStore ( va_list args )
 	t = va_arg( args, RtToken );
 	while ( t != RI_NULL )
 	{
-		tk.push_back( t );
+		m_Token.push_back( t );
 		p = va_arg( args, RtPointer );
-		pr.push_back( p );
+		m_Parameter.push_back( p );
 
 		n++;
 		t = va_arg( args, RtToken );

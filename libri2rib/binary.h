@@ -19,61 +19,52 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /** \file
- *  \brief RiContext and Options parsing class
+ *  \brief Binary encoding output class
  *  \author Lionel J. Lacour (intuition01@online.fr)
  */
 
-#ifndef RI2RIB_CONTEXT_H
-#define RI2RIB_CONTEXT_H 1
+#ifndef RI2RIB_BINARY_H
+#define RI2RIB_BINARY_H 1
 
 #include <list>
-#include "ri.h"
-#include "aqsis.h"
-#include "options.h"
 #include "output.h"
 
 START_NAMESPACE( libri2rib )
 
-
-class CqContext
+class CqBinary : public CqOutput
 {
 	private:
-		struct SqPair
-		{
-			CqOutput *output;
-			CqStream *stream;
+		void intToChar( RtInt n, TqChar &b1, TqChar &b2, TqChar &b3, TqChar &b4 );
+		void floatToChar( RtFloat f, TqChar &b1, TqChar &b2, TqChar &b3, TqChar &b4 );
+		void addString( std::string &, TqBool &, TqUint & );
+		void encodeString( const char * );
 
-			SqPair() : output( ( CqOutput * ) RI_NULL ), stream( ( CqStream * ) RI_NULL )
-			{}
-			~SqPair()
-			{}
-		}
-		;
+		TqBool m_aRequest[ LAST_Function ];
+		std::list<std::string> m_aStrings;
 
-		std::list<SqPair> m_lContextHandle;
-		CqOutput *m_Active;
-
-		SqOptions::EqOutputType m_OutputType;
-		SqOptions::EqCompression m_Compression;
-		SqOptions::EqIndentation m_Indentation;
-		TqInt m_IndentSize;
-
-		void parseOutputType( RtInt n, RtToken[], RtPointer params[] );
-		void parseIndentation( RtInt n, RtToken[], RtPointer params[] );
-
-	public:
-		CqContext();
-		~CqContext()
+	protected:
+		void printHeader();
+		void printRequest( const char *, EqFunctions );
+		void printInteger( const RtInt );
+		void printFloat( const RtFloat );
+		void printString( std::string & );
+		void printSpace()
+		{}
+		void printEOL()
 		{}
 
-		void addContext();
-		RtContextHandle getContext();
-		CqOutput & current();
-		void switchTo ( RtContextHandle );
-		void removeCurrent();
+		void printArray ( RtInt n, RtInt *p );
+		void printArray ( RtInt n, RtFloat *p );
+		void printToken ( RtToken t );
+		void printCharP ( const char *c );
+		void print ( const char *c );
 
-		void parseOption( const char *name, RtInt n, RtToken tokens[], RtPointer params[] );
-};
+	public:
+		CqBinary( CqStream *o, SqOptions::EqIndentation i, TqInt isize );
+		~CqBinary()
+		{}
+}
+;
 
 END_NAMESPACE( libri2rib )
 #endif

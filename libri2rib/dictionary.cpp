@@ -30,7 +30,7 @@
 #include "inlineparse.h"
 #include "error.h"
 
-using namespace libri2rib;
+USING_NAMESPACE( libri2rib );
 
 #ifdef DEBUG
 using std::cout;
@@ -66,49 +66,64 @@ void SqTokenEntry::printClassType ()
 
 CqDictionary::CqDictionary()
 {
-	//=== Standard Geometric Primitive Variables ===
-	addToken ( RI_P, VERTEX, POINT );
-	addToken ( RI_PZ, VERTEX, FLOAT );
-	addToken ( RI_PW, VERTEX, HPOINT );
-	addToken ( RI_N, VARYING, NORMAL );
-	addToken ( RI_NP, UNIFORM, NORMAL );
-	addToken ( RI_CS, VARYING, COLOR );
-	addToken ( RI_OS, VARYING, COLOR );
-	addToken ( RI_S, VARYING, FLOAT );
-	addToken ( RI_T, VARYING, FLOAT );
-	addToken ( RI_ST, VARYING, FLOAT, 2 );
+	addToken( RI_KA, UNIFORM, FLOAT );
+	addToken( RI_KD, UNIFORM, FLOAT );
+	addToken( RI_KS, UNIFORM, FLOAT );
+	addToken( RI_KR, UNIFORM, FLOAT );
+	addToken( RI_ROUGHNESS, UNIFORM, FLOAT );
+	addToken( RI_TEXTURENAME, UNIFORM, STRING );
+	addToken( RI_SPECULARCOLOR, UNIFORM, COLOR );
+	addToken( RI_INTENSITY, UNIFORM, FLOAT );
+	addToken( RI_LIGHTCOLOR, UNIFORM, COLOR );
+	addToken( RI_FROM, UNIFORM, POINT );
+	addToken( RI_TO, UNIFORM, POINT );
+	addToken( RI_CONEANGLE, UNIFORM, FLOAT );
+	addToken( RI_CONEDELTAANGLE, UNIFORM, FLOAT );
+	addToken( RI_BEAMDISTRIBUTION, UNIFORM, FLOAT );
+	addToken( RI_MINDISTANCE, UNIFORM, FLOAT );
+	addToken( RI_MAXDISTANCE, UNIFORM, FLOAT );
+	addToken( RI_DISTANCE, UNIFORM, FLOAT );
+	addToken( RI_BACKGROUND, UNIFORM, COLOR );
+	addToken( RI_FOV, UNIFORM, FLOAT );
+	addToken( RI_P, VERTEX, POINT );
+	addToken( RI_PZ, VERTEX, POINT );
+	addToken( RI_PW, VERTEX, HPOINT );
+	addToken( RI_N, VARYING, NORMAL );
+	addToken( RI_NP, UNIFORM, NORMAL );
+	addToken( RI_CS, VARYING, COLOR );
+	addToken( RI_OS, VARYING, COLOR );
+	addToken( RI_S, VARYING, FLOAT );
+	addToken( RI_T, VARYING, FLOAT );
+	addToken( RI_ST, VARYING, FLOAT, 2 );
 
-	//=== Standard Light Source Shader Parameters ===
-	addToken ( RI_INTENSITY, CONSTANT, FLOAT );
-	addToken ( RI_LIGHTCOLOR, CONSTANT, COLOR );
-	addToken ( RI_FROM, CONSTANT, POINT );
-	addToken ( RI_TO, CONSTANT, POINT );
-	addToken ( RI_CONEANGLE, CONSTANT, FLOAT );
-	addToken ( RI_CONEDELTAANGLE, CONSTANT, FLOAT );
-	addToken ( RI_BEAMDISTRIBUTION, CONSTANT, FLOAT );
-
-	//=== Standard Surface Shader Parameters ===
-	addToken ( RI_KA, CONSTANT, FLOAT );
-	addToken ( RI_KD, CONSTANT, FLOAT );
-	addToken ( RI_KS, CONSTANT, FLOAT );
-	addToken ( RI_KR, CONSTANT, FLOAT );
-	addToken ( RI_ROUGHNESS, CONSTANT, FLOAT );
-	addToken ( RI_SPECULARCOLOR, CONSTANT, COLOR );
-	addToken ( RI_TEXTURENAME, CONSTANT, STRING );
-
-	//=== Standard Volume Shader Parameters ===
-	addToken ( RI_MINDISTANCE, CONSTANT, FLOAT );
-	addToken ( RI_MAXDISTANCE, CONSTANT, FLOAT );
-	addToken ( RI_BACKGROUND, CONSTANT, COLOR );
-	addToken ( RI_DISTANCE, CONSTANT, FLOAT );
-
-	//=== Standard Displacement Shader Parameter ===
-	addToken ( RI_AMPLITUDE, CONSTANT, FLOAT );
-
-	addToken ( RI_FOV, CONSTANT, FLOAT );
-	//addToken (RI_ORIGIN, CONSTANT, INTEGER, 2);
+	addToken ( RI_AMPLITUDE, UNIFORM, FLOAT );
 	addToken ( RI_WIDTH, VARYING, FLOAT );
 	addToken ( RI_CONSTANTWIDTH, CONSTANT, FLOAT );
+
+	addToken( "gridsize", UNIFORM, INTEGER );
+	addToken( "texturememory", UNIFORM, INTEGER );
+	addToken( "bucketsize", UNIFORM, INTEGER, 2 );
+	addToken( "eyesplits", UNIFORM, INTEGER );
+	addToken( RI_SHADER, UNIFORM, STRING );
+	addToken( "archive", UNIFORM, STRING );
+	addToken( "texture", UNIFORM, STRING );
+	addToken( "display", UNIFORM, STRING );
+	addToken( "auto_shadows", UNIFORM, STRING );
+	addToken( "endofframe", UNIFORM, INTEGER );
+	addToken( "sphere", UNIFORM, FLOAT );
+	addToken( "coordinatesystem", UNIFORM, STRING );
+	addToken( "shadows", UNIFORM, STRING );
+	addToken( "shadowmapsize", UNIFORM, INTEGER, 2 );
+	addToken( "shadowangle", UNIFORM, FLOAT );
+	addToken( "shadowmapname", UNIFORM, STRING );
+	addToken( "shadow_shadingrate", UNIFORM, FLOAT );
+	addToken( RI_NAME, UNIFORM, STRING );
+	addToken( "shadinggroup", UNIFORM, STRING );
+	addToken( "sense", UNIFORM, STRING );
+	addToken( "compression", UNIFORM, STRING );
+	addToken( "quality", UNIFORM, INTEGER );
+	addToken( "bias0", UNIFORM, FLOAT );
+	addToken( "bias1", UNIFORM, FLOAT );
 }
 
 
@@ -192,7 +207,7 @@ TqUint CqDictionary::getTypeSize ( EqTokenType t )
 			case POINT: return 3;
 			case VECTOR: return 3;
 			case NORMAL: return 3;
-			case COLOR: return 3;
+			case COLOR: return 1;
 			case STRING: return 1;
 			case MATRIX: return 16;
 			case HPOINT: return 4;

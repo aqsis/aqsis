@@ -13,7 +13,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include <stdarg.h>
-#include <strstream>
 #include <string>
 #include <stdio.h>
 #include "aqsis.h"
@@ -23,10 +22,9 @@
 #include "context.h"
 
 
-namespace libri2rib
-{
+START_NAMESPACE( libri2rib )
 static CqContext context;
-}
+END_NAMESPACE( libri2rib )
 
 using libri2rib::context;
 using libri2rib::CqPLStore;
@@ -530,7 +528,14 @@ RtVoid RiOptionV ( const char *name, RtInt n, RtToken tokens[], RtPointer parms[
 {
 	try
 	{
-		context.current().RiOptionV( name, n, tokens, parms );
+		if ( context.getContext() == ( RtContextHandle ) RI_NULL )
+		{
+			context.parseOption( name, n, tokens, parms );
+		}
+		else
+		{
+			context.current().RiOptionV( name, n, tokens, parms );
+		}
 	}
 	catch ( CqError & r )
 	{
@@ -2093,9 +2098,6 @@ RtVoid RiArchiveRecord ( RtToken type, char *format, ... )
 		}
 		std::string i( buffer );
 		delete[] ( buffer );
-#ifdef  AQSIS_COMPILER_MSVC6
-		i += "/n";
-#endif
 
 		va_end( args );
 		context.current().RiArchiveRecord( type, i );

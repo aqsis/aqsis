@@ -38,23 +38,25 @@ RtVoid RiErrorPrint( RtInt cd, RtInt sev, const char *msg )
 RtVoid RiErrorAbort( RtInt cd, RtInt sev, const char *msg )
 {}
 
-using namespace libri2rib;
+USING_NAMESPACE( libri2rib );
 
 RtVoid CqError::manage ()
 {
-	RiLastError = code;
-	std::cerr << "RI2RIB: " << message << std::endl;
-	if ( severity == RIE_SEVERE ) exit( EXIT_FAILURE );
+	RiLastError = m_Code;
+	std::cerr << "RI2RIB: " << m_Message1 << m_Message2 << m_Message3 << std::endl;
+	if ( m_Severity == RIE_SEVERE ) exit( EXIT_FAILURE );
 
-	if ( to_rib == TqTrue )
+	if ( m_ToRib == TqTrue )
 	{
-		switch ( severity )
+		std::string tmp;
+		switch ( m_Severity )
 		{
-				case RIE_INFO: message.insert( 0, "INFO: " ); break;
-				case RIE_WARNING: message.insert( 0, "WARNING: " ); break;
-				case RIE_ERROR: message.insert( 0, "ERROR: " ); break;
+				case RIE_INFO: tmp = std::string( "INFO: " ); break;
+				case RIE_WARNING: tmp = std::string( "WARNING: " ); break;
+				case RIE_ERROR: tmp = std::string( "ERROR: " ); break;
 				default: break;
 		}
-		RiArchiveRecord( RI_COMMENT, const_cast<char *> ( message.c_str() ) );
+		tmp += m_Message1 + m_Message2 + m_Message3;
+		RiArchiveRecord( RI_COMMENT, const_cast<char *> ( tmp.c_str() ) );
 	}
 }

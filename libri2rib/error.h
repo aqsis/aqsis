@@ -1,3 +1,4 @@
+// -*- C++ -*-
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
@@ -29,25 +30,34 @@
 #include "aqsis.h"
 #include "ri.h"
 
-namespace libri2rib
-{
+START_NAMESPACE( libri2rib )
 
 class CqError
 {
 	private:
-		RtInt code;
-		RtInt severity;
-		std::string message;
-		TqBool to_rib;
+		RtInt m_Code;
+		RtInt m_Severity;
+		std::string m_Message1;
+		std::string m_Message2;
+		std::string m_Message3;
+		TqBool m_ToRib;
 
 	public:
 		CqError( RtInt cd, RtInt sev, std::string msg, TqBool tr )
-				: code( cd ), severity( sev ), message( msg ), to_rib( tr )
+				: m_Code( cd ), m_Severity( sev ),
+				m_Message1( msg ), m_Message2 ( "" ), m_Message3( "" ), m_ToRib( tr )
 		{}
+
+		CqError( RtInt cd, RtInt sev, std::string msg1, std::string msg2, std::string msg3, TqBool tr )
+				: m_Code ( cd ), m_Severity( sev ),
+				m_Message1( msg1 ), m_Message2( msg2 ), m_Message3( msg3 ), m_ToRib( tr )
+		{}
+
 		~CqError()
 		{}
+
 		RtVoid manage();
 };
 
-} /* namespace libri2rib */
+END_NAMESPACE( libri2rib )
 #endif

@@ -1,3 +1,4 @@
+// -*- C++ -*-
 // Aqsis
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
@@ -34,8 +35,7 @@
 #include "dictionary.h"
 #include "error.h"
 
-namespace libri2rib
-{
+START_NAMESPACE( libri2rib )
 
 class CqInlineParse
 {
@@ -90,5 +90,5 @@ class CqInlineParse
 		}
 };
 
-} /* namespace libri2rib */
+END_NAMESPACE( libri2rib )
 #endif
