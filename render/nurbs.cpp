@@ -785,10 +785,7 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 
 	TqInt lUses = Uses();
 
-	//Vector<T> alphas(m_uOrder) ;
 	std::vector<TqFloat> alphas( MAX( m_uOrder, m_vOrder ) );
-	// all the surfaces will have the same knot vector in both the U and V
-	// direction
 
 	std::vector<TqFloat> nU( 2 * m_uOrder );
 	for ( i = 0;i < static_cast<TqInt>( nU.size() / 2 );++i )
@@ -1687,9 +1684,9 @@ void CqSurfaceNURBS::OutputMesh()
 	TqUint Granularity = 10;  // Controls the number of steps in u and v
 
 
-	std::vector<CqSurfaceNURBS*>	S;
-//	S[ 0 ] = *this;
-	Decompose(S);
+	std::vector<CqSurfaceNURBS*>	S(1);
+	S[ 0 ] = this;
+//	Decompose(S);
 
 	// Save the grid as a .raw file.
 	FILE* fp = fopen( "NURBS.RAW", "w" );

@@ -347,6 +347,9 @@ void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 	// Subdivide the normals
 	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
 	{
+		pNew1->N().SetSize( cVertex() );
+		pNew2->N().SetSize( cVertex() );
+		// Subdivide the Normals.
 		pNew1->N() = N();
 		pNew1->N().uSubdivide( &pNew2->N() );
 	}
@@ -414,6 +417,9 @@ void CqSurfacePatchBicubic::vSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 	// Subdivide the normals
 	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
 	{
+		pNew1->N().SetSize( cVertex() );
+		pNew2->N().SetSize( cVertex() );
+		// Subdivide the Normals.
 		pNew1->N() = N();
 		pNew1->N().vSubdivide( &pNew2->N() );
 	}
@@ -814,6 +820,9 @@ void CqSurfacePatchBilinear::uSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfac
 	// Subdivide the normals
 	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
 	{
+		pNew1->N().SetSize( cVertex() );
+		pNew2->N().SetSize( cVertex() );
+		// Subdivide the Normals.
 		pNew1->N() = N();
 		pNew1->N().uSubdivide( &pNew2->N() );
 	}
@@ -837,6 +846,9 @@ void CqSurfacePatchBilinear::vSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfac
 	// Subdivide the normals
 	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
 	{
+		pNew1->N().SetSize( cVertex() );
+		pNew2->N().SetSize( cVertex() );
+		// Subdivide the Normals.
 		pNew1->N() = N();
 		pNew1->N().vSubdivide( &pNew2->N() );
 	}

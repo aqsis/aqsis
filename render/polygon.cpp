@@ -246,14 +246,8 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 {
 	CqVector3D	vecA, vecB, vecC, vecD;
 	CqVector3D	vecNA, vecNB, vecNC, vecND;
-
-	TqFloat	uA = 0.0f, uB = 0.0f, uC = 0.0f, uD = 0.0f, vA = 0.0f, vB = 0.0f, vC = 0.0f, vD = 0.0f;
-	TqFloat	sA = 0.0f, sB = 0.0f, sC = 0.0f, sD = 0.0f, tA = 0.0f, tB = 0.0f, tC = 0.0f, tD = 0.0f;
 	TqInt indexA, indexB, indexC, indexD;
 
-	CqColor	colA, colB, colC, colD;
-	CqColor	opaA, opaB, opaC, opaD;
-	
 	CqColor colSys = pAttributes() ->GetColorAttribute("System", "Color")[0];
 	CqColor opaSys = pAttributes() ->GetColorAttribute("System", "Opacity")[0];
 
@@ -312,48 +306,6 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 	}
 
 
-	if ( bhasu )
-	{
-		uA = Polyu( indexA );
-		uB = Polyu( indexB );
-	}
-
-	if ( bhasv )
-	{
-		vA = Polyv( indexA );
-		vB = Polyv( indexB );
-	}
-
-	// Get the texture coordinates, or use the parameter space values if not specified.
-	if ( bhass )
-	{
-		sA = Polys( indexA );
-		sB = Polys( indexB );
-	}
-
-	if ( bhast )
-	{
-		tA = Polyt( indexA );
-		tB = Polyt( indexB );
-	}
-
-	// Get any specified per vertex colors and opacities.
-	if ( bhasCs )
-	{
-		colA = PolyCs( indexA );
-		colB = PolyCs( indexB );
-	}
-	else
-		colA = colSys;
-
-	if ( bhasOs )
-	{
-		opaA = PolyOs( indexA );
-		opaB = PolyOs( indexB );
-	}
-	else
-		opaA = opaSys;
-
 	TqInt cNew = 0;
 	TqInt i;
 	for ( i = 2; i < NumVertices(); i += 2 )
@@ -366,20 +318,6 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 			vecD = PolyP( indexD );
 		}
 
-		if ( bhasu )
-		{
-			uC = uD = Polyu( indexC );
-			if ( NumVertices() > i + 1 ) 
-				uD = Polyu( indexD );
-		}
-
-		if ( bhasv )
-		{
-			vC = vD = Polyv( indexC );
-			if ( NumVertices() > i + 1 ) 
-				vD = Polyv( indexD );
-		}
-
 		if ( bhasN )
 		{
 			vecNC = vecND = PolyN( indexC );
@@ -388,35 +326,6 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		}
 		else
 			vecNC = vecND = vecNA;
-
-		if ( bhass )
-		{
-			sC = sD = Polys( indexC );
-			if ( NumVertices() > i + 1 ) 
-				sD = Polys( indexD );
-		}
-
-		if ( bhast )
-		{
-			tC = tD = Polyt( indexC );
-			if ( NumVertices() > i + 1 ) 
-				tD = Polyt( indexD );
-		}
-
-		// Get any specified per vertex colors and opacities.
-		if ( bhasCs )
-		{
-			colC = colD = PolyCs( indexC );
-			if ( NumVertices() > i + 1 ) 
-				colD = PolyCs( indexD );
-		}
-
-		if ( bhasOs )
-		{
-			opaC = opaD = PolyOs( indexC );
-			if ( NumVertices() > i + 1 ) 
-				opaD = PolyOs( indexD );
-		}
 
 		// Create bilinear patches
 		CqSurfacePatchBilinear* pNew = new CqSurfacePatchBilinear();
@@ -434,76 +343,6 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew->N() [ 1 ] = vecNB; 
 		pNew->N() [ 2 ] = vecND; 
 		pNew->N() [ 3 ] = vecNC;
-		if ( USES( iUses, EnvVars_u ) )
-		{
-			pNew->AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u"));
-			pNew->u()->SetSize(4);
-			(*pNew->u())[ 0 ] = uA;	
-			(*pNew->u())[ 1 ] = uB; 
-			(*pNew->u())[ 2 ] = uD; 
-			(*pNew->u())[ 3 ] = uC;
-		}
-		if ( USES( iUses, EnvVars_v ) )
-		{
-			pNew->AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v"));
-			pNew->v()->SetSize(4);
-			(*pNew->v())[ 0 ] = vA;	
-			(*pNew->v())[ 1 ] = vB; 
-			(*pNew->v())[ 2 ] = vD; 
-			(*pNew->v())[ 3 ] = vC;
-		}
-		if ( USES( iUses, EnvVars_s ) )
-		{
-			pNew->AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s"));
-			pNew->s()->SetSize(4);
-			(*pNew->s())[ 0 ] = sA;	
-			(*pNew->s())[ 1 ] = sB; 
-			(*pNew->s())[ 2 ] = sD; 
-			(*pNew->s())[ 3 ] = sC;
-		}
-		if ( USES( iUses, EnvVars_t ) )
-		{
-			pNew->AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t"));
-			pNew->t()->SetSize(4);
-			(*pNew->t())[ 0 ] = tA;	
-			(*pNew->t())[ 1 ] = tB; 
-			(*pNew->t())[ 2 ] = tD; 
-			(*pNew->t())[ 3 ] = tC;
-		}
-		if ( USES( iUses, EnvVars_Cs ) )
-		{
-			pNew->AddPrimitiveVariable(new CqParameterTypedVarying<CqColor, type_color, CqColor>("Cs"));
-			if ( bhasCs )
-			{
-				pNew->Cs()->SetSize( 4 );
-				(*pNew->Cs())[ 0 ] = colA;
-				(*pNew->Cs())[ 1 ] = colB;
-				(*pNew->Cs())[ 2 ] = colD;
-				(*pNew->Cs())[ 3 ] = colC;
-			}
-			else
-			{
-				pNew->Cs()->SetSize( 1 );
-				(*pNew->Cs())[ 0 ] = colA;
-			}
-		}
-		if ( USES( iUses, EnvVars_Os ) )
-		{
-			pNew->AddPrimitiveVariable(new CqParameterTypedVarying<CqColor, type_color, CqColor>("Os"));
-			if ( bhasOs )
-			{
-				pNew->Os()->SetSize( 4 );
-				(*pNew->Os())[ 0 ] = opaA;
-				(*pNew->Os())[ 1 ] = opaB;
-				(*pNew->Os())[ 2 ] = opaD;
-				(*pNew->Os())[ 3 ] = opaC;
-			}
-			else
-			{
-				pNew->Os()->SetSize( 1 );
-				(*pNew->Os())[ 0 ] = opaA;
-			}
-		}
 
 		// Copy any user specified primitive variables.
 		std::vector<CqParameter*>::iterator iUP;
@@ -607,10 +446,6 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		indexB = indexD;
 		vecB = vecD;
 		vecNB = vecND;
-		uB = uD; vB = vD;
-		sB = sD; tB = tD;
-		colB = colD;
-		opaB = opaD;
 	}
 	return ( cNew );
 }
