@@ -28,7 +28,6 @@ EXPORTS
 	??0CqVector3D@Aqsis@@QAE@ABVCqVector4D@1@@Z
 	??0CqVector3D@Aqsis@@QAE@MMM@Z
 	??0CqVector3D@Aqsis@@QAE@XZ
-	??0CqVector4D@Aqsis@@QAE@ABVCqVector3D@1@@Z
 	??0CqVector4D@Aqsis@@QAE@MMMM@Z
 	??0CqVector4D@Aqsis@@QAE@XZ
 	??1CqBitVector@Aqsis@@QAE@XZ
@@ -50,14 +49,11 @@ EXPORTS
 	??4CqVector4D@Aqsis@@QAEAAV01@ABVCqVector3D@1@@Z
 	??6Aqsis@@YAAAV?$basic_ostream@DU?$char_traits@D@std@@@std@@AAV12@ABVCqString@0@@Z
 	??8CqColor@Aqsis@@QBE_NABV01@@Z
-	??8CqVector4D@Aqsis@@QBE_NABV01@@Z
-	??9CqVector4D@Aqsis@@QBE_NABV01@@Z
 	??ACqVector4D@Aqsis@@QAEAAMH@Z
 	??DAqsis@@YA?AVCqMatrix@0@MABV10@@Z
 	??DAqsis@@YA?AVCqString@0@ABV10@0@Z
 	??DAqsis@@YA?AVCqString@0@ABV10@M@Z
 	??DAqsis@@YA?AVCqVector4D@0@ABV10@ABVCqMatrix@0@@Z
-	??DAqsis@@YAMABVCqVector4D@0@0@Z
 	??DCqMatrix@Aqsis@@QBE?AV01@ABV01@@Z
 	??DCqMatrix@Aqsis@@QBE?AV01@M@Z
 	??DCqMatrix@Aqsis@@QBE?AVCqVector3D@1@ABV21@@Z
@@ -75,13 +71,8 @@ EXPORTS
 	??KAqsis@@YA?AVCqString@0@ABV10@0@Z
 	??LAqsis@@YA?AVCqVector3D@0@ABV10@0@Z
 	??LAqsis@@YA?AVCqVector4D@0@ABV10@0@Z
-	??MCqVector4D@Aqsis@@QBE_NABV01@@Z
-	??NCqVector4D@Aqsis@@QBE_NABV01@@Z
-	??OCqVector4D@Aqsis@@QBE_NABV01@@Z
-	??PCqVector4D@Aqsis@@QBE_NABV01@@Z
 	??XCqMatrix@Aqsis@@QAEAAV01@ABV01@@Z
 	??XCqMatrix@Aqsis@@QAEAAV01@M@Z
-	??XCqVector4D@Aqsis@@QAEAAV01@M@Z
 	??YCqMatrix@Aqsis@@QAEAAV01@ABV01@@Z
 	??YCqMatrix@Aqsis@@QAEAAV01@ABVCqVector4D@1@@Z
 	??YCqString@Aqsis@@QAEAAV01@ABV01@@Z
@@ -90,13 +81,9 @@ EXPORTS
 	??YCqString@Aqsis@@QAEAAV01@M@Z
 	??YCqString@Aqsis@@QAEAAV01@PBD@Z
 	??YCqVector3D@Aqsis@@QAEAAV01@ABV01@@Z
-	??YCqVector4D@Aqsis@@QAEAAV01@ABV01@@Z
 	??ZCqMatrix@Aqsis@@QAEAAV01@ABV01@@Z
 	??ZCqMatrix@Aqsis@@QAEAAV01@ABVCqVector4D@1@@Z
-	??ZCqVector4D@Aqsis@@QAEAAV01@ABV01@@Z
-	??_0CqVector4D@Aqsis@@QAEAAV01@M@Z
 	??_1CqVector3D@Aqsis@@QAEAAV01@ABV01@@Z
-	??_1CqVector4D@Aqsis@@QAEAAV01@ABV01@@Z
 
 	?CGNoise2@CqNoise@Aqsis@@SA?AVCqColor@2@MM@Z
 	?CGNoise3@CqNoise@Aqsis@@SA?AVCqColor@2@ABVCqVector3D@2@@Z
@@ -126,9 +113,7 @@ EXPORTS
 	?InitFD@CqSplineCubic@Aqsis@@UAEXH@Z
 	?Intersect@CqBitVector@Aqsis@@QAEAAV12@AAV12@@Z
 	?Inverse@CqMatrix@Aqsis@@QBE?AV12@XZ
-	?Magnitude2@CqVector4D@Aqsis@@QBEMXZ
 	?Magnitude@CqVector3D@Aqsis@@QBEMXZ
-	?Magnitude@CqVector4D@Aqsis@@QBEMXZ
 	?NextState@CqRandom@Aqsis@@IAEXXZ
 	?Normalise@CqMatrix@Aqsis@@QAEXXZ
 	?Open@CqFile@Aqsis@@QAEXPBD0H@Z
