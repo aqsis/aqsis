@@ -103,6 +103,54 @@ class CqSurfaceNURBS : public CqSurface
 		{
 			return ( m_cvVerts + m_vOrder );
 		}
+		/** Get the minimum u value of the surface.
+		 */
+		TqFloat	umin() const
+		{
+			return ( m_umin );
+		}
+		/** Set the minimum u value of the surface.
+		 */
+		void	Setumin(TqFloat umin)
+		{
+			m_umin = umin;
+		}
+		/** Get the minimum v value of the surface.
+		 */
+		TqFloat	vmin() const
+		{
+			return ( m_vmin );
+		}
+		/** Set the minimum v value of the surface.
+		 */
+		void	Setvmin(TqFloat vmin)
+		{
+			m_vmin = vmin;
+		}
+		/** Get the maximum u value of the surface.
+		 */
+		TqFloat	umax() const
+		{
+			return ( m_umax );
+		}
+		/** Set the maximum u value of the surface.
+		 */
+		void	Setumax(TqFloat umax)
+		{
+			m_umax = umax;
+		}
+		/** Get the maximum v value of the surface.
+		 */
+		TqFloat	vmax() const
+		{
+			return ( m_vmax );
+		}
+		/** Set the maximum v value of the surface.
+		 */
+		void	Setvmax(TqFloat vmax)
+		{
+			m_vmax = vmax;
+		}
 		/** Get a reference to the knot vector for the u direction.
 		 */
 		std::vector<TqFloat>& auKnots()
@@ -219,6 +267,8 @@ class CqSurfaceNURBS : public CqSurface
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual TqBool	Diceable();
 
+		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
+
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
 		/** Get the number of uniform variables for a NURBS surface.
 		 */
@@ -272,6 +322,10 @@ class CqSurfaceNURBS : public CqSurface
 		TqUint	m_vOrder;	///< Surface order in the v direction.
 		TqUint	m_cuVerts;	///< Control point count in the u direction.
 		TqUint	m_cvVerts;	///< Control point count in the v direction.
+		TqFloat	m_umin;		///< Minimum value of u over surface.
+		TqFloat m_umax;		///< Maximum value of u over surface.
+		TqFloat	m_vmin;		///< Minimum value of v over surface.
+		TqFloat m_vmax;		///< Maximum value of v over surface.
 		CqTrimLoopArray	m_TrimLoops;	///< Local trim curves, prepared for this surface.
 }
 ;

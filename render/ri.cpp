@@ -2922,6 +2922,11 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 	pSurface->AddRef();
 	pSurface->Init( uorder, vorder, nu, nv );
 
+	pSurface->Setumin( umin );
+	pSurface->Setumax( umax );
+	pSurface->Setvmin( vmin );
+	pSurface->Setvmax( vmax );
+
 	// Copy the knot vectors.
 	RtInt i;
 	for ( i = 0; i < nu + uorder; i++ ) pSurface->auKnots() [ i ] = uknot[ i ];
@@ -2929,44 +2934,6 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 
 	// Set up the default primitive variables.
 	pSurface->SetDefaultPrimitiveVariables();
-
-	TqInt bUses = pSurface->Uses();
-
-	if ( USES( bUses, EnvVars_u ) )
-	{
-		pSurface->u()->SetSize( pSurface->cVarying() );
-
-		RtFloat uinc = ( umax - umin ) / (pSurface->cuSegments()+1);
-
-		RtInt c,r;
-		i = 0;
-		for( c = 0; c < pSurface->cvSegments()+1; c++ )
-		{
-			RtFloat uval = umin;
-			for( r = 0; r < pSurface->cuSegments()+1; r++ )
-			{
-				pSurface->u()->pValue() [ i++ ] = uval;
-				uval += uinc;
-			}
-		}
-	}
-
-	if ( USES( bUses, EnvVars_v ) )
-	{
-		pSurface->v()->SetSize( pSurface->cVarying() );
-
-		RtFloat vinc = ( vmax - vmin ) / (pSurface->cvSegments()+1);
-		RtFloat vval = vmin;
-
-		RtInt c,r;
-		i = 0;
-		for( c = 0; c < pSurface->cvSegments()+1; c++ )
-		{
-			for( r = 0; r < pSurface->cuSegments()+1; r++ )
-				pSurface->v()->pValue() [ i++ ] = vval;
-			vval += vinc;
-		}
-	}
 
 	// Process any specified parameters
 	if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )

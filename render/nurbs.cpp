@@ -43,7 +43,7 @@ START_NAMESPACE( Aqsis )
 /** Constructor.
  */
 
-CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface(), m_cuVerts(0), m_cvVerts(0), m_uOrder(0), m_vOrder(0)
+CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface(), m_cuVerts(0), m_cvVerts(0), m_uOrder(0), m_vOrder(0), m_umin(0.0f), m_umax(1.0f), m_vmin(0.0f), m_vmax(1.0f)
 {
 	TrimLoops() = static_cast<const CqAttributes*>(pAttributes()) ->TrimLoops();
 }
@@ -69,6 +69,11 @@ void CqSurfaceNURBS::operator=( const CqSurfaceNURBS& From )
 
 	// Initialise the NURBS surface.
 	Init( From.m_uOrder, From.m_vOrder, From.m_cuVerts, From.m_cvVerts );
+
+	m_umin = From.m_umin;
+	m_umax = From.m_umax;
+	m_vmin = From.m_vmin;
+	m_vmax = From.m_vmax;
 
 	// Copy the knot vectors.
 	TqInt i;
@@ -1765,6 +1770,51 @@ void CqSurfaceNURBS::Output( char* name )
 
 	fclose( fp );
 }
+
+
+void CqSurfaceNURBS::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
+{
+	TqInt bUses = Uses();
+
+	if ( USES( bUses, EnvVars_u ) )
+	{
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
+		u()->SetSize( cVarying() );
+
+		TqFloat uinc = ( m_umax - m_umin ) / (cuSegments());
+
+		TqInt c,r;
+		TqInt i = 0;
+		for( c = 0; c < cvSegments()+1; c++ )
+		{
+			TqFloat uval = m_umin;
+			for( r = 0; r < cuSegments()+1; r++ )
+			{
+				u()->pValue() [ i++ ] = uval;
+				uval += uinc;
+			}
+		}
+	}
+
+	if ( USES( bUses, EnvVars_v ) )
+	{
+		AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
+		v()->SetSize( cVarying() );
+
+		TqFloat vinc = ( m_vmax - m_vmin ) / (cvSegments());
+		TqFloat vval = m_vmin;
+
+		TqInt c,r;
+		TqInt i = 0;
+		for( c = 0; c < cvSegments()+1; c++ )
+		{
+			for( r = 0; r < cuSegments()+1; r++ )
+				v()->pValue() [ i++ ] = vval;
+			vval += vinc;
+		}
+	}
+}
+
 
 //-------------------------------------------------------
 
