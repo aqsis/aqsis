@@ -187,6 +187,99 @@ CqTextureMap::~CqTextureMap()
 #endif
 }
 
+#ifndef AQSIS_SYSTEM_WIN32
+#include <dlfcn.h>                /* dlopen() */
+#endif
+
+//--------------------------------------------------------------------------
+/** Support for plugins mainly converter from any bitmap format to .tif file.
+ */
+
+int CqTextureMap::Convert(CqString &strName )
+{
+	int result = 0;
+	int lenght = 0;
+
+	void *handle =NULL;
+	char * (*function_pt)(char *) = NULL;
+	char dynamiclibrary[1024];
+    char dynamicfunction[1024];
+	char *convert = NULL;
+	char *ext = NULL;
+	char *aqsis_home = getenv("AQSIS_BASE_PATH");
+
+	if (aqsis_home == NULL) return 0;
+	
+	ext = (char*)strName.c_str();
+	if (ext && *ext)
+		lenght = strlen(ext);
+
+	if (lenght > 4)
+	{
+		
+		/* find the extension in the string             
+		 * than try to match which extension goes with which dll 
+		 **/
+		ext = strstr(&ext[lenght-5], ".");
+		if (ext == NULL) return 0;
+		ext++;
+	} else 
+	{
+		return 0;
+	}
+
+	sprintf(dynamicfunction, "%s2tif", ext);
+
+
+#ifdef AQSIS_SYSTEM_WIN32
+
+	/*********************************/
+	/* Get the dynamic library on NT */
+	/*********************************/
+	sprintf(dynamiclibrary, "%s\\procedures\\%s.dll", aqsis_home, dynamicfunction);
+
+	/* dll was never loaded before */
+	if (!handle)
+	handle = LoadLibrary(dynamiclibrary);
+	if (handle) 
+	{
+		function_pt = (char * (*) (char *)) GetProcAddress((HINSTANCE) handle, dynamicfunction);
+	}
+#else
+	
+	 /***********************************/
+	 /* Get the shared library on UNIX  */
+	 /***********************************/
+	 sprintf(dynamiclibrary, "%s/procedures/%s.so", aqsis_home, dynamicfunction);
+
+	 /* so was never loaded before */
+	 if (!handle)
+		handle = dlopen(dynamiclibrary, RTLD_LAZY);
+	 if (handle) {
+		function_pt = (char * (*) (char *)) dlsym(handle, dynamicfunction);
+	 }
+
+#endif
+
+	if (function_pt) 
+	{
+		convert = (char *)(*function_pt)((char *)strName.c_str());
+		if (convert) 
+		{
+			strName = convert;
+			result = 1; // success
+		}
+        
+#ifdef AQSIS_SYSTEM_WIN32
+		FreeLibrary((HINSTANCE)handle);
+#else
+		dlclose(handle);
+#endif
+
+	 }
+
+	 return result;
+}
 
 //---------------------------------------------------------------------
 /** Open a named texture map.
@@ -196,8 +289,11 @@ void CqTextureMap::Open()
 {
 	char swrap[80], twrap[80], filterfunc[80];
 	float swidth, twidth;
+	int wasconverted = 0;
 
 	m_IsValid=TqFalse;
+	
+
 	// Find the file required.
 	CqRiFile	fileImage(m_strName.c_str(),"texture");
 	if(!fileImage.IsValid())
@@ -210,6 +306,9 @@ void CqTextureMap::Open()
 	CqString strRealName(fileImage.strRealName());
 	fileImage.Close();
 
+    // Now try to converted first to tif file
+	wasconverted = Convert(strRealName);
+	
 	// Now open it as a tiff file.
 	m_pImage=TIFFOpen(strRealName.c_str(),"r");
 	if(m_pImage)
@@ -293,6 +392,7 @@ void CqTextureMap::Open()
 			m_IsValid=TqTrue;
 		}
 	}
+		
 }
 
 

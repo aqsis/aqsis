@@ -266,7 +266,12 @@ class _qShareC CqTextureMap
 									 */
 	_qShareM	virtual	EqMapType	Type() const			{return(IsValid()?MapType_Texture:MapType_Invalid);}
 									/** Open this image ready for reading.
-									 */
+	                                 */
+
+									/** Use the plugin to convert to a tif file any texture file provided
+									**/
+	_qShareM    virtual Convert	(CqString &strName);
+
 	_qShareM	virtual	void		Open();
 									/** Close this image file.
 									 */
