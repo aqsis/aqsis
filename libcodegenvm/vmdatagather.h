@@ -40,11 +40,6 @@
 
 START_NAMESPACE( Aqsis )
 
-struct	SssTempVar
-{
-	std::string m_Name; 
-	IqVarDef* m_pOriginal;
-};
 
 class CqCodeGenDataGather : public IqParseNodeVisitor
 {
@@ -81,7 +76,7 @@ class CqCodeGenDataGather : public IqParseNodeVisitor
 			{
 				return( m_VariableUsage );
 			}	
-			std::vector<SssTempVar>& TempVars()
+			std::map<std::string, IqVarDef*>& TempVars()
 			{
 				return( m_TempVars );
 			}
@@ -91,7 +86,7 @@ class CqCodeGenDataGather : public IqParseNodeVisitor
 	std::vector<std::vector<SqVarRefTranslator> > m_saTransTable;
 	std::deque<std::map<std::string, std::string> >	m_StackVarMap;
 	
-	std::vector<SssTempVar>		m_TempVars;
+	std::map<std::string, IqVarDef*>			m_TempVars;
 };
 
 //-----------------------------------------------------------------------

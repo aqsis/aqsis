@@ -47,7 +47,7 @@ std::string* FindTemporaryVariable( std::string strName, std::deque<std::map<std
 IqVarDef* pTranslatedVariable( SqVarRef& Ref, std::vector<std::vector<SqVarRefTranslator> >& Stack );
 void  CreateTranslationTable( IqParseNode* pParam, IqParseNode* pArg, std::vector<std::vector<SqVarRefTranslator> >& Stack );
 void CreateTempMap( IqParseNode* pParam, IqParseNode* pArg, std::deque<std::map<std::string, std::string> >& Stack,
-														   std::vector<std::vector<SqVarRefTranslator> >& Trans, std::vector<SssTempVar>& TempVars );
+														   std::vector<std::vector<SqVarRefTranslator> >& Trans, std::map<std::string, IqVarDef*>& TempVars );
 
 void CqCodeGenDataGather::Visit( IqParseNode& N)
 {
@@ -102,15 +102,25 @@ void CqCodeGenDataGather::Visit( IqParseNodeFunctionCall& FC)
 		IqParseNode * pParam = pFunc->pArgs() ->pChild();
 		IqParseNode* pArg = pArguments;
 
+		CreateTempMap( pParam, pArg, m_StackVarMap, m_saTransTable, TempVars() );
+
+		while ( pParam != 0 )
+		{
+			if ( !pArg->IsVariableRef() )
+				pArg->Accept( *this );
+			
+			pParam = pParam->pNextSibling();
+			pArg = pArg->pNextSibling();
+		}
+
 		IqParseNode* pDef = pFunc->pDef();
 		if( NULL != pDef )	
 		{
-			CreateTempMap( pParam, pArg, m_StackVarMap, m_saTransTable, TempVars() );
 			CreateTranslationTable( pFunc->pArgs()->pChild(), pArguments, m_saTransTable );
 			pDef->Accept( *this );
 			m_saTransTable.erase( m_saTransTable.end() - 1 );
-			m_StackVarMap.pop_back( );
 		}
+		m_StackVarMap.pop_back( );
 	}
 }
 

@@ -94,7 +94,7 @@ IqVarDef* pTranslatedVariable( SqVarRef& Ref, std::vector<std::vector<SqVarRefTr
 	{
 		std::vector<std::vector<SqVarRefTranslator> >::reverse_iterator iTable = Stack.rbegin();
 
-		int i = 0;
+		int depth = 0;
 		while ( iTable != Stack.rend() )
 		{
 			TqUint i;
@@ -109,7 +109,7 @@ IqVarDef* pTranslatedVariable( SqVarRef& Ref, std::vector<std::vector<SqVarRefTr
 			// Only continue looking for nested translations if it was found at the current level.
 			if ( i == (*iTable).size() ) break;
 			iTable++;
-			i++;
+			depth++;
 		}
 	}
 	return ( CqVarDef::GetVariablePtr( RealRef ) );
@@ -118,7 +118,7 @@ IqVarDef* pTranslatedVariable( SqVarRef& Ref, std::vector<std::vector<SqVarRefTr
 
 void CreateTempMap( IqParseNode* pParam, IqParseNode* pArg, std::deque<std::map<std::string, std::string> >& Stack,
 																   std::vector<std::vector<SqVarRefTranslator> >& Trans,
-																   std::vector<SssTempVar>& TempVars )
+																   std::map<std::string, IqVarDef*>& TempVars )
 {
 	assert( NULL != pParam && NULL != pArg );
 
@@ -137,11 +137,8 @@ void CreateTempMap( IqParseNode* pParam, IqParseNode* pArg, std::deque<std::map<
 
 			SqVarRef temp( pLocalVar->VarRef() );
 			IqVarDef* pVD = pTranslatedVariable( temp, Trans );
-			
-			SssTempVar tv;
-			tv.m_Name = strTempName.str();
-			tv.m_pOriginal = pVD;
-			TempVars.push_back( tv );
+			TempVars[strTempName.str()] = pVD;
+			pVD->IncUseCount();
 		}
 		pParam = pParam->pNextSibling();
 		pArg = pArg->pNextSibling();

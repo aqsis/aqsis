@@ -47,7 +47,7 @@ std::string* FindTemporaryVariable( std::string strName, std::deque<std::map<std
 IqVarDef* pTranslatedVariable( SqVarRef& Ref, std::vector<std::vector<SqVarRefTranslator> >& Stack );
 void  CreateTranslationTable( IqParseNode* pParam, IqParseNode* pArg, std::vector<std::vector<SqVarRefTranslator> >& Stack );
 void CreateTempMap( IqParseNode* pParam, IqParseNode* pArg, std::deque<std::map<std::string, std::string> >& Stack,
-														   std::vector<std::vector<SqVarRefTranslator> >& Trans, std::vector<SssTempVar>& TempVars );
+														   std::vector<std::vector<SqVarRefTranslator> >& Trans, std::map<std::string, IqVarDef*>& TempVars );
 
 
 void CqCodeGenOutput::Visit( IqParseNode& N)
@@ -104,13 +104,13 @@ void CqCodeGenOutput::Visit( IqParseNodeShader& S)
 		OutputLocalVariable( &gLocalVars[ i ], m_slxFile, strOutName() );
 
 	// Output temporary variables.
-	std::vector<SssTempVar>::iterator iTemp;
-	for(iTemp = TempVars().begin(); iTemp<TempVars().end(); iTemp++)
+	std::map<std::string, IqVarDef*>::iterator iTemp;
+	for(iTemp = TempVars().begin(); iTemp!=TempVars().end(); iTemp++)
 	{
-		IqVarDef* pVar = (*iTemp).m_pOriginal;
+		IqVarDef* pVar = (*iTemp).second;;
 		m_slxFile << StorageSpec( pVar->Type() ).c_str() << " "
 		<< gVariableTypeNames[ pVar->Type() & Type_Mask ] << " "
-		<< (*iTemp).m_Name;
+		<< (*iTemp).first;
 		if ( pVar->Type() & Type_Array )
 			m_slxFile << "[" << pVar->ArrayLength() << "]";
 	

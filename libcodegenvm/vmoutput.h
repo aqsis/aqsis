@@ -85,7 +85,7 @@ class CqCodeGenOutput : public IqParseNodeVisitor
 	{
 		return(m_strOutName);
 	}
-	std::vector<SssTempVar>& TempVars()
+	std::map<std::string, IqVarDef*>& TempVars()
 	{
 		assert( NULL != m_pDataGather );
 		return( m_pDataGather->TempVars() );
