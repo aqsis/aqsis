@@ -46,6 +46,7 @@ using namespace Aqsis;
 #include <sstream>
 #include <string>
 #include <fstream>
+#include <float.h>
 
 #ifdef	AQSIS_SYSTEM_WIN32
 #pragma warning(disable : 4275 4251)
@@ -470,6 +471,7 @@ SOCKET g_Socket;
 void BucketFunction()
 {
     TqInt	linelen = g_ImageWidth * g_Channels ;
+    TqInt	flinelen = g_ImageWidth * 3;
 	TqInt	dataLenMax = g_BucketWidthMax * g_BucketHeightMax * g_ElementSize;
 	std::vector<TqFloat> dataBin(dataLenMax);
 
@@ -551,17 +553,34 @@ void BucketFunction()
 										value = CLAMP(value, g_QuantizeMinVal, g_QuantizeMaxVal) ;
 									}
 
-									if ( g_appliedQuantizeOneVal == 255 )
+									// If rendering 8bit, or working as a framebuffer, update the byte array.
+									if( g_appliedQuantizeOneVal == 255 || g_ImageType == Type_Framebuffer || g_ImageType == Type_ZFramebuffer)
 									{
 										if( NULL != g_byteData )
 										{
-											// C’ = INT_PRELERP( A’, B’, b, t )
-											if( alpha > 0 )
+											if( g_ImageType != Type_ZFramebuffer )
 											{
-												int A = static_cast<int>(INT_PRELERP( g_byteData[ so + 0 ], value, alpha, t ));
-												g_byteData[ so ] = CLAMP( A, 0, 255 );
+												// C’ = INT_PRELERP( A’, B’, b, t )
+												if( alpha > 0 )
+												{
+													int A = static_cast<int>(INT_PRELERP( g_byteData[ so + 0 ], value, alpha, t ));
+													g_byteData[ so ] = CLAMP( A, 0, 255 );
+												}
+											}
+											else
+											{
+												// Fill in the framebuffer data for a zframebuffer.
+												// Initially, any surface gives white, then we quantize at the end.
+												TqInt fso = ( y * flinelen ) + ( x * 3 );
+												g_byteData[ fso + 0 ] = 
+												g_byteData[ fso + 1 ] = 
+												g_byteData[ fso + 2 ] = value < FLT_MAX ? 255 : 0;
 											}
 										}
+										// If a depth based framebuffer, then we need to update the float data too.
+										if( g_ImageType == Type_ZFramebuffer )
+											if( NULL != g_floatData )
+												g_floatData[ so ] = value;
 									}
 									else
 									{
@@ -599,6 +618,67 @@ void BucketFunction()
 	if(g_ImageType == Type_File || g_ImageType == Type_ZFile || g_ImageType == Type_Shadowmap )
 	{
 		WriteTIFF(g_filename);
+	}
+
+	// If we are in depth framebuffer mode, quantize the final data now to give a better visual
+	// representation of the depth buffer.
+    // Normalize the depth values to the range [0, 1] and regenerate our image ..
+	if(g_ImageType == Type_ZFramebuffer )
+	{
+		// Now that we have all of our data, calculate some handy statistics ...
+		TqFloat mindepth = FLT_MAX;
+		TqFloat maxdepth = -FLT_MAX;
+		TqUint totalsamples = 0;
+		TqUint samples = 0;
+		TqFloat totaldepth = 0;
+		for ( TqInt i = 0; i < g_ImageWidth * g_ImageHeight; i++ )
+		{
+			totalsamples++;
+
+			// Skip background pixels ...
+			if ( g_floatData[ i ] >= FLT_MAX )
+				continue;
+
+			mindepth = std::min( mindepth, g_floatData[ i ] );
+			maxdepth = std::max( maxdepth, g_floatData[ i ] );
+
+			totaldepth += g_floatData[ i ];
+			samples++;
+		}
+
+		const TqFloat dynamicrange = maxdepth - mindepth;
+
+/*		std::cerr << info << g_Filename << " total samples: " << totalsamples << std::endl;
+		std::cerr << info << g_Filename << " depth samples: " << samples << std::endl;
+		std::cerr << info << g_Filename << " coverage: " << static_cast<TqFloat>( samples ) / static_cast<TqFloat>( totalsamples ) << std::endl;
+		std::cerr << info << g_Filename << " minimum depth: " << mindepth << std::endl;
+		std::cerr << info << g_Filename << " maximum depth: " << maxdepth << std::endl;
+		std::cerr << info << g_Filename << " dynamic range: " << dynamicrange << std::endl;
+		std::cerr << info << g_Filename << " average depth: " << totaldepth / static_cast<TqFloat>( samples ) << std::endl;
+*/
+		const TqInt linelength = g_ImageWidth * 3;
+		for ( TqInt y = 0; y < g_ImageHeight; y++ )
+		{
+			for ( TqInt x = 0; x < g_ImageWidth; x++ )
+			{
+				const TqInt imageindex = ( y * linelength ) + ( x * 3 );
+				const TqInt dataindex = ( y * g_ImageWidth ) + x;
+
+				if ( g_floatData[ dataindex ] == FLT_MAX )
+				{
+					g_byteData[ imageindex + 0 ] = g_byteData[ imageindex + 1 ] = g_byteData[ imageindex + 2 ] = 0;
+				}
+				else
+				{
+					const TqFloat normalized = ( g_floatData[ dataindex ] - mindepth ) / dynamicrange;
+					g_byteData[ imageindex + 0 ] = static_cast<char>( 255 * ( 1.0 - normalized ) );
+					g_byteData[ imageindex + 1 ] = static_cast<char>( 255 * ( 1.0 - normalized ) );
+					g_byteData[ imageindex + 2 ] = 255;
+				}
+			}
+		}
+		g_uiImageWidget->damage(1);
+		Fl::check();
 	}
 
 	CloseSocket(g_Socket);
@@ -744,10 +824,21 @@ void ProcessFormat()
 
 		g_PixelsProcessed = 0;
 
-		if(g_appliedQuantizeOneVal == 255)
+		// Create and initialise a byte array if rendering 8bit image, or we are in framebuffer mode
+		if(g_appliedQuantizeOneVal == 255 || g_ImageType == Type_Framebuffer || g_ImageType == Type_ZFramebuffer)
 		{
-            g_byteData = new unsigned char[ g_ImageWidth * g_ImageHeight * g_Channels ];
-			memset(g_byteData, 0, g_ImageWidth * g_ImageHeight * g_Channels);
+			// For a normal image, allocate the same size as the number of channels.
+	        if(g_ImageType != Type_ZFramebuffer)
+			{
+				g_byteData = new unsigned char[ g_ImageWidth * g_ImageHeight * g_Channels ];
+				memset(g_byteData, 0, g_ImageWidth * g_ImageHeight * g_Channels);
+			}
+			else
+			// For a depth framebuffer, always allocate 3 channels, for rgb.
+			{
+				g_byteData = new unsigned char[ g_ImageWidth * g_ImageHeight * 3 ];
+				memset(g_byteData, 0, g_ImageWidth * g_ImageHeight * 3);
+			}
 
 			// If working as a framebuffer, initialise the display to a checkerboard to show alpha
 			if(g_ImageType == Type_Framebuffer)
@@ -772,6 +863,9 @@ void ProcessFormat()
 					}
 				}
 			}
+			// If rendering a depth framebuffer, we will need a float buffer too.
+			else if(g_ImageType == Type_ZFramebuffer)
+	            g_floatData = new float[ g_ImageWidth * g_ImageHeight * g_Channels ];
 		}
         else
             g_floatData = new float[ g_ImageWidth * g_ImageHeight * g_Channels ];
@@ -827,7 +921,7 @@ int main( int argc, char** argv )
 		g_ImageType = Type_Shadowmap;
 	
 	// If rendering to a framebuffer, default to showing the whole frame and render to the clip window.
-	if(g_ImageType == Type_Framebuffer)
+	if(g_ImageType == Type_Framebuffer || g_ImageType == Type_Framebuffer)
 		g_RenderWholeFrame = TqTrue;
 
 	// Extract the recognised custom parameters
@@ -938,10 +1032,10 @@ int main( int argc, char** argv )
 	// Request and process image format information.
 	ProcessFormat();
 
-	if(g_type.compare("framebuffer")==0)
+	if(g_ImageType == Type_Framebuffer || g_ImageType == Type_ZFramebuffer)
 	{
 		g_theWindow = new Fl_Window(g_ImageWidth,g_ImageHeight);
-		g_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, g_ImageWidth, g_ImageHeight, g_Channels, g_byteData);
+		g_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, g_ImageWidth, g_ImageHeight, (g_ImageType == Type_ZFramebuffer)?3:g_Channels, g_byteData);
 		g_theWindow->resizable(g_uiImageWidget);
 		g_theWindow->end();
 		g_theWindow->show();
@@ -950,7 +1044,7 @@ int main( int argc, char** argv )
 	// Create a thread to request buckets from Aqsis
 	boost::thread thrd(&BucketFunction);
 
-	if(g_type.compare("framebuffer")==0)
+	if(g_ImageType == Type_Framebuffer || g_ImageType == Type_ZFramebuffer)
 	{
 		// Open and run the window.
 		Fl::run();
