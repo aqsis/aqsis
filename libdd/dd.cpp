@@ -182,7 +182,13 @@ TqInt DDInitialise(const TqChar* phostname, TqInt port)
 			gethostname(hostName,255);
 
 		hostent* pHost;
+#ifdef AQSIS_SYSTEM_MACOSX
+                // Remove this conditional section and use gethostbyname() if Apple ever
+                // fixes the problem of resolving localhost without a connection to a DNS server
+		pHost=gethostent();	// assumes localhost defined first in /etc/hosts
+#else
 		pHost=gethostbyname(hostName);
+#endif /* AQSIS_SYSTEM_MACOSX */
 
 		SOCKADDR_IN saTemp;
 		memset(&saTemp,0,sizeof(saTemp));
