@@ -5163,11 +5163,7 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 	};
 
 	int dso_argc = cParams + 1; // dso_argv[0] is used for the return value
-	#ifdef	AQSIS_COMPILER_MSVC6
 	void **dso_argv = new void*[dso_argc] ;
-	#else
-	void **dso_argv = new (void*)[dso_argc] ;
-	#endif
 
 	// create storage for the returned value
 	switch(Result->Type()){
@@ -5179,6 +5175,7 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 		case type_triple:
 		case type_vector:
 		case type_normal: 
+		case type_hpoint:
 			dso_argv[0]=(void*) new TqFloat[3]; break;
 		case type_string:
 			dso_argv[0]=(void*) new STRING_DESC;
@@ -5187,9 +5184,8 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 			break;
 		case type_matrix:
 		case type_sixteentuple:
+			dso_argv[0]=(void*) new TqFloat[16];
 			break;
-		case type_hpoint:
-		case type_bool:
 		default:
 			// Unhandled TYpe
 			break;
@@ -5201,6 +5197,7 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 		switch(apParams[p-1]->Type()){
 			case type_float:
 				dso_argv[p] = (void*) new TqFloat; break;
+			case type_hpoint:
 			case type_point:
 			case type_triple: // This seems reasonable
 			case type_vector:
@@ -5214,9 +5211,8 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 				break;
 			case type_matrix:
 			case type_sixteentuple:
+				dso_argv[0]=(void*) new TqFloat[16];
 				break;
-			case type_hpoint:
-			case type_bool:
 			default: 
 				// Unhandled TYpe
 				break;
@@ -5233,6 +5229,7 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 			case type_float:
 				apParams[p-1]->GetFloat(*((float*)dso_argv[p]),__iGrid);
 				break;
+			case type_hpoint:
 			case type_point:{
 				CqVector3D v;
 				apParams[p-1]->GetPoint(v,__iGrid);
@@ -5271,10 +5268,14 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 				((STRING_DESC*) dso_argv[p])->bufflen = s.size() + 1;
 				}; break;
 			case type_matrix:
-			case type_sixteentuple:
-				break;
-			case type_hpoint:
-			case type_bool:
+			case type_sixteentuple:{
+				CqMatrix m;
+				int r,c;
+				apParams[p-1]->GetMatrix(m,__iGrid);
+				for(r=0; r<4; r++)
+					for(c=0; c<4; c++)
+						((TqFloat*) dso_argv[p])[(r*4)+c] = m[r][c];
+			        }; break;
 			default: 
 				// Unhandled TYpe
 				break;
@@ -5291,6 +5292,7 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 				TqFloat val= *((float*) (dso_argv[0]));
  				Result->SetFloat(val,__iGrid);
 			}; break;
+		case type_hpoint:
 		case type_point:{
 				CqVector3D v;
 				v[0] = ((float*) dso_argv[0])[0];
@@ -5314,23 +5316,24 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 				Result->SetNormal(v,__iGrid);
 			}; break;
 		case type_color:{
-				CqVector3D c;
+				CqColor c;
 				c[0] = ((float*) dso_argv[0])[0];
 				c[1] = ((float*) dso_argv[0])[1];
 				c[2] = ((float*) dso_argv[0])[2];
 				Result->SetColor(c,__iGrid);
 			}; break;
 		case type_string:{ 
-				CqString s(((STRING_DESC*)dso_argv[p])->s);
-				apParams[p-1]->SetString(s,__iGrid);
+				CqString s(((STRING_DESC*)dso_argv[0])->s);
+				Result->SetString(s,__iGrid);
 			}; break;
 		case type_matrix:
-		case type_sixteentuple:
-			break;
-		case type_hpoint:
-		case type_bool:
+		case type_sixteentuple:{
+				CqMatrix m((float*) dso_argv[0]);
+				Result->SetMatrix(m,__iGrid);
+		        }; break;
 		default:
 			// Unhandled TYpe
+				 std::cout << "Unsupported type" << std::endl;
 			break;
 	};
 
@@ -5342,6 +5345,7 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 				TqFloat val = *((float*)dso_argv[p]) ;
 				apParams[p-1]->SetFloat(val,__iGrid);
 				};break;
+			case type_hpoint:
 			case type_point:{
 				CqVector3D v;
 				v[0] = ((float*) dso_argv[p])[0];
@@ -5365,7 +5369,7 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 				apParams[p-1]->SetNormal(v,__iGrid);
 				};break;
 			case type_color:{
-				CqVector3D c;
+				CqColor c;
 				c[0] = ((float*) dso_argv[p])[0];
 				c[1] = ((float*) dso_argv[p])[1];
 				c[2] = ((float*) dso_argv[p])[2];
@@ -5376,10 +5380,10 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 				apParams[p-1]->SetString(s,__iGrid);
 				}; break;
 			case type_matrix:
-			case type_sixteentuple:
-				break;
-			case type_hpoint:
-			case type_bool:
+			case type_sixteentuple:{
+				CqMatrix m((float*) dso_argv[p]);
+				apParams[p-1]->SetMatrix(m,__iGrid);
+		        	}; break;
 			default: 
 				// Unhandled TYpe
 				break;
@@ -5398,14 +5402,13 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 		case type_vector:
 		case type_normal:
 		case type_color:
-			delete[] (float*) dso_argv[0];
+		case type_hpoint:
+			delete[] (float*) dso_argv[0]; break;
 		case type_string: // Need to look into these
-			break;
+			delete (STRING_DESC*) dso_argv[0]; break;
 		case type_matrix:
 		case type_sixteentuple:
-			break;
-		case type_hpoint:
-		case type_bool:
+			delete[] (float*) dso_argv[0]; break;
 		default:
 			// Unhandled TYpe
 			break;
@@ -5421,14 +5424,13 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 			case type_vector:
 			case type_normal:
 			case type_color:
+			case type_hpoint:
 				delete[] (float*) dso_argv[p]; break;
 			case type_string:
 				delete (STRING_DESC*) dso_argv[p]; break;
 			case type_matrix:
 			case type_sixteentuple:
-				break;
-			case type_hpoint:
-			case type_bool:
+				delete[] (float*) dso_argv[p]; break;
 			default: 
 				// Unhandled TYpe
 				break;
