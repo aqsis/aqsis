@@ -40,6 +40,7 @@
 #include	"texturemap.h"
 #include	"shadervm.h"
 #include	"log.h"
+#include	"mtable.h"
 
 
 START_NAMESPACE( Aqsis )

@@ -353,5 +353,10 @@ void CqMotionModeBlock::SetDeformingSurface( CqDeformingSurface* pDeformingSurfa
 	ADDREF( pDeformingSurface );
 }
 
+void CqModeBlock::logInvalidNesting() const
+{
+	QGetRenderContext() ->Logger() ->fatal( "Invalid context nesting" );
+}
+
 
 END_NAMESPACE( Aqsis )

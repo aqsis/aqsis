@@ -32,7 +32,7 @@
 #include	"renderer.h"
 #include	"attributes.h"
 #include	"stats.h"
-#include	"messages.h"
+//#include	"messages.h"
 #include	"imagebuffer.h"
 #include	<iostream>
 

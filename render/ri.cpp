@@ -41,7 +41,7 @@
 #include	"teapot.h"
 #include	"shaders.h"
 #include	"texturemap.h"
-#include	"messages.h"
+//#include	"messages.h"
 #include	"trimcurve.h"
 #include	"genpoly.h"
 #include	"points.h"
@@ -4398,7 +4398,8 @@ RtVoid	RiErrorIgnore( RtInt code, RtInt severity, const char * message )
 //
 RtVoid	RiErrorPrint( RtInt code, RtInt severity, const char * message )
 {
-	QGetRenderContext() ->PrintMessage( SqMessage( code, severity, message ) );
+	// Don't use this!
+	QGetRenderContext() ->Logger() ->error( "RiError: %i : %i : %s", code, severity, message );
 	return ;
 }
 

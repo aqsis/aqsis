@@ -34,7 +34,7 @@
 #include	"options.h"
 #include	"attributes.h"
 #include	"transform.h"
-#include	"messages.h"
+//#include	"messages.h"
 #include	"list.h"
 #include	"csgtree.h"
 
@@ -77,7 +77,7 @@ class CqModeBlock : public CqRefCount
 		virtual	void	EndMainModeBlock()
 		{
 			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
-			//QGetRenderContext() ->Logger() ->fatal( "Invalid context nesting" );
+			logInvalidNesting();
 		}
 		/** Delete the main context, overridable per derived class.
 		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
@@ -85,7 +85,7 @@ class CqModeBlock : public CqRefCount
 		virtual	void	EndFrameModeBlock()
 		{
 			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
-			//QGetRenderContext() ->Logger() ->fatal( "Invalid context nesting" );
+			logInvalidNesting();
 		}
 		/** Delete the main context, overridable per derived class.
 		 * \warning If caled at this level it is an error, as only the appropriate context can delete itself.
@@ -93,7 +93,7 @@ class CqModeBlock : public CqRefCount
 		virtual	void	EndWorldModeBlock()
 		{
 			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
-			//QGetRenderContext() ->Logger() ->fatal( "Invalid context nesting" );
+			logInvalidNesting();
 		}
 		/** Delete the main context, overridable per derived class.
 		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
@@ -101,7 +101,7 @@ class CqModeBlock : public CqRefCount
 		virtual	void	EndAttributeModeBlock()
 		{
 			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
-			//QGetRenderContext() ->Logger() ->fatal( "Invalid context nesting" );
+			logInvalidNesting();
 		}
 		/** Delete the main context, overridable per derived class.
 		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
@@ -109,7 +109,7 @@ class CqModeBlock : public CqRefCount
 		virtual	void	EndTransformModeBlock()
 		{
 			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
-			//QGetRenderContext() ->Logger() ->fatal( "Invalid context nesting" );
+			logInvalidNesting();
 		}
 		/** Delete the main context, overridable per derived class.
 		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
@@ -117,7 +117,7 @@ class CqModeBlock : public CqRefCount
 		virtual	void	EndSolidModeBlock()
 		{
 			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
-			//QGetRenderContext() ->Logger() ->fatal( "Invalid context nesting" );
+			logInvalidNesting();
 		}
 		/** Delete the main context, overridable per derived class.
 		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
@@ -125,7 +125,7 @@ class CqModeBlock : public CqRefCount
 		virtual	void	EndObjectModeBlock()
 		{
 			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
-			//QGetRenderContext() ->Logger() ->fatal( "Invalid context nesting" );
+			logInvalidNesting();
 		}
 		/** Delete the main context, overridable per derived class.
 		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
@@ -133,7 +133,7 @@ class CqModeBlock : public CqRefCount
 		virtual	void	EndMotionModeBlock()
 		{
 			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
-			//QGetRenderContext() ->Logger() ->fatal( "Invalid context nesting" );
+			logInvalidNesting();
 		}
 
 		virtual	CqOptions&	optCurrent() = 0;
@@ -235,6 +235,10 @@ class CqModeBlock : public CqRefCount
 		{
 			return ( ( NULL != pconParent() ) ? pconParent() ->pCSGNode() : NULL );
 		}
+
+		/** Log invalid context nesting
+		 */
+		virtual void logInvalidNesting() const;
 
 	public:
 		static	CqList<CqCSGTreeNode>	m_lCSGTrees;

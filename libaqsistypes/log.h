@@ -40,7 +40,7 @@
 #include <log4cpp/Priority.hh>
 
 #include "imtable.h"
-#include "mtable.h"		//!TODO: Remove this as soon as IqMessageTable is used everywhere
+//#include "mtable.h"		//!TODO: Remove this as soon as IqMessageTable is used everywhere
 
 #include "ilog.h"
 #include "aqsis.h"

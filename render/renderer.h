@@ -39,7 +39,7 @@
 #include	"stats.h"
 #include	"vector2d.h"
 #include	"semaphore.h"
-#include	"messages.h"
+//#include	"messages.h"
 #include	"shaders.h"
 #include	"symbols.h"
 #include	"iddmanager.h"
@@ -228,16 +228,6 @@ class CqRenderer : public IqRenderer
 		virtual	CqStats&	Stats()
 		{
 			return ( m_Stats );
-		}
-		/** Print a message to stdout, along with any relevant message codes.
-		 * \param msg A SqMessage structure to print.
-		 */
-		virtual	void	PrintMessage( const SqMessage& msg )
-		{
-			if ( msg.Code() > 0 )
-				std::cout << msg.Code() << " : " <<
-				msg.Severity() << " : ";
-			std::cout << msg.strMessage().c_str() << std::endl;
 		}
 
 		/**	Get the global log class instance
