@@ -453,8 +453,18 @@ TqInt	CqParseNodeOp::TypeCheck(TqInt* pTypes, TqInt Count, TqBool CheckOnly)
 TqInt	CqParseNodeRelOp::TypeCheck(TqInt* pTypes, TqInt Count, TqBool CheckOnly)
 {
 	// Cast the operands first
-//	TqInt TypeMe=Type_Float;
+	TqInt TypeMe=Type_Float;
 //	CqParseNodeOp::TypeCheck(&TypeMe,1,CheckOnly);
+
+	// Type check the expressions expression first.
+	CqParseNode* pExpr1=m_pChild;
+	CqParseNode* pExpr2=pExpr1->pNext();
+	if(pExpr1->TypeCheck(&TypeMe,1,CheckOnly)!=TypeMe)
+		return(Type_Nil);	// TODO: Should throw an exception here.
+
+	if(pExpr2->TypeCheck(&TypeMe,1,CheckOnly)!=TypeMe)
+		return(Type_Nil);	// TODO: Should throw an exception here.
+
 	// See if float is a requested type.
 	TqInt NewType;
 	if((NewType=FindCast(Type_Float, pTypes, Count))!=Type_Nil)
