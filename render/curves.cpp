@@ -1270,6 +1270,51 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 }
 
 
+//---------------------------------------------------------------------
+/** Convert from the current basis into Bezier for processing.
+ *
+ *  \param matBasis	Basis to convert from.
+ */
+
+void CqCubicCurveSegment::ConvertToBezierBasis( CqMatrix& matBasis )
+{
+	static CqMatrix matMim1;
+	TqInt i, j;
+
+	if ( matMim1.fIdentity() )
+	{
+		for ( i = 0; i < 4; i++ )
+			for ( j = 0; j < 4; j++ )
+				matMim1[ i ][ j ] = RiBezierBasis[ i ][ j ];
+		matMim1.SetfIdentity( TqFalse );
+		matMim1 = matMim1.Inverse();
+	}
+
+	CqMatrix matMj = matBasis;
+	CqMatrix matConv = matMj * matMim1;
+
+	CqMatrix matCP;
+	for ( i = 0; i < 4; i++ )
+	{
+		matCP[ 0 ][ i ] = (*P())[i].x();
+		matCP[ 1 ][ i ] = (*P())[i].y();
+		matCP[ 2 ][ i ] = (*P())[i].z();
+		matCP[ 3 ][ i ] = (*P())[i].h();
+	}
+	matCP.SetfIdentity( TqFalse );
+
+	matCP = matConv.Transpose() * matCP;
+
+	for ( i = 0; i < 4; i++ )
+	{
+		(*P())[i].x( matCP[ 0 ][ i ] );
+		(*P())[i].y( matCP[ 1 ][ i ] );
+		(*P())[i].z( matCP[ 2 ][ i ] );
+		(*P())[i].h( matCP[ 3 ][ i ] );
+	}
+}
+
+
 /**
  * CqCurvesGroup constructor.
  */
@@ -1923,6 +1968,10 @@ TqInt CqCubicCurvesGroup::Split(
 			vertexI += 4;
 			varyingI++;
 			nsplits++;
+
+			CqMatrix matBasis = pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 1 ];
+			pSeg ->ConvertToBezierBasis( matBasis );
+
 			aSplits.push_back( pSeg );
 		}
 

@@ -257,6 +257,8 @@ class CqCubicCurveSegment : public CqCurve
 		virtual TqInt Split( std::vector<CqBasicSurface*>& aSplits );
 		TqInt SplitToCurves( std::vector<CqBasicSurface*>& aSplits );
 		TqInt SplitToPatch( std::vector<CqBasicSurface*>& aSplits );
+
+		void ConvertToBezierBasis( CqMatrix& matBasis );
 		//---------------------------------------------- Inlined Public Methods
 	public:
 		/** Returns the number of facevarying class parameters. */
