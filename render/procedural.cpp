@@ -96,8 +96,10 @@ TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
 	m_pconStored->m_ptransCurrent = m_pTransform;
 	ADDREF(m_pTransform);
 
-    CqBound bound = m_Bound;
-    bound.Transform(QGetRenderContext()->matSpaceToSpace("camera", "raster"));
+    /// \note: The bound is in "raster" coordinates by now, as during posting to the imagebuffer
+	/// the the Culling routines do the job for us, see CqBasicSurface::CacheRasterBound.
+	CqBound bound = m_Bound;
+//    bound.Transform(QGetRenderContext()->matSpaceToSpace("camera", "raster"));
     float detail = ( bound.vecMax().x() - bound.vecMin().x() ) * ( bound.vecMax().y() - bound.vecMin().y() );
     //std::cout << "detail: " << detail << std::endl;
 
