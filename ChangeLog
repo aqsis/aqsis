@@ -1,3 +1,1358 @@
+2003-07-21  pgregory
+	* aqsis/aqsis.cpp 1.64:
+	* librib2/librib2.dsp 1.20:
+	* render/imagebuffer.cpp 1.121:
+	* render/irenderer.h 1.11:
+	* render/renderer.cpp 1.74:
+	* render/renderer.h 1.43:
+	* render/ri.cpp 1.212:
+	* render/ri.h 1.19:
+		Pass the frame number onto the progress handler so that it can
+		display the frame number being read in the progress string.
+
+2003-07-20  mw_matti
+	* aqsl/aqslcomp.cpp 1.15:
+		return -1 if compiling failed
+
+2003-07-19  minty
+	* libshadervm/shadervm.cpp 1.40:
+	* libshadervm/shadervm.h 1.32:
+	* libshadervm/shadervm2.cpp 1.12:
+		Allow void useage of DSO shadeops to use non-void implementations.
+		Exit on critical errors when resolveing DSO (not perfect).
+
+2003-07-19  tshead
+	* libshaderexecenv/shadeops.cpp 1.47:
+		 Standard SL depth() function was returning a vector instead of
+		a float, causing an assertion when using the standard depthcue shader
+
+2003-07-18  pgregory
+	* librib2/scanner.lxx 1.9:
+		Rollback optimisation, determined flex incremental token
+		matching is probably more efficient than hashing.
+
+	* ftime.bat 1.1:
+		Simple batch file to do a profile run on the Profile version of
+		Aqsis and store the function timings in aqsis.ftime.lst
+
+	* librib2/scanner.lxx 1.8:
+		Optimise request name lookup - Michel Joron.
+
+2003-07-18  tshead
+	* render/Makefile.am 1.41:
+		* Build fix: missing source files in render/Makefile.am
+
+2003-07-17  minty
+	* libshadervm/shadervm2.cpp 1.11:
+	* libslparse/typecheck.cpp 1.10:
+		Fix handling of void external DSO calls
+		Fix serious memory leak in SO_external
+
+2003-07-17  pgregory
+	* libcodegenvm/vmoutput.cpp 1.24:
+	* libshaderexecenv/shadeops.cpp 1.46:
+	* libshaderexecenv/shaderexecenv.h 1.26:
+	* libshadervm/shadervm.cpp 1.39:
+	* libshadervm/shadervm.h 1.31:
+	* libshadervm/shadervm2.cpp 1.10:
+	* render/ishaderexecenv.h 1.17:
+		Update illuminance code to pass N through to the
+		ValidateIlluminanceCache function so that it can set up Ns
+		properly.
+
+	* render/ri.cpp 1.211:
+		Fix RiHider so that the arguments passed into the parameter
+		list can properly be inline typed.
+
+2003-07-16  pgregory
+	* render/environment.cpp 1.1:
+	* render/libaqsis.dsp 1.57:
+	* render/shadowmap.cpp 1.1:
+	* render/texturemap.cpp 1.84:
+		Split texturemap functionality - Michel Joron.
+
+2003-07-14  pgregory
+	* aqsltell/aqsltell.cpp 1.12:
+		Fix incorrect output of color default values - Michel Joron.
+
+2003-07-12  tshead
+	* aqsl/.cvsignore 1.5:
+	* dsotest/.cvsignore 1.1:
+	* libaqsistypes/.cvsignore 1.5:
+	* libargparse/.cvsignore 1.1:
+	* librib2/.cvsignore 1.5:
+	* libslparse/.cvsignore 1.5:
+		* Source tree cleanup - updated .cvsignore files
+
+2003-07-10  tshead
+	* render/renderer.cpp 1.73:
+		 Fix: null pointer wasn't handled properly when printing "
+		Shader X not found" error message - stop the char* madness!!!
+
+2003-07-09  mw_matti
+	* render/procedural.cpp 1.11:
+		changed error format so it fits into the style which is used in
+		ri.cpp
+
+2003-07-07  pgregory
+	* render/procedural.cpp 1.10:
+		Initial implementation on Windows, doesn't work yet.
+
+2003-07-06  minty
+	* libaqsistypes/refcount.h 1.11:
+	* librib2/bdec.cpp 1.11:
+	* librib2/bdec.h 1.8:
+	* librib2/librib.cpp 1.29:
+	* librib2/librib.h 1.23:
+	* librib2/parser.yxx 1.11:
+	* librib2/scanner.lxx 1.7:
+	* render/procedural.cpp 1.8:
+	* render/procedural.h 1.7:
+	* render/ri.cpp 1.210:
+		Updates to bdec.cpp to provide fine grained control of buffering
+		POSIX RiProcRunProgram base don pipes
+
+	* libri2rib/output.cpp 1.9:
+	* libri2rib/outstream.cpp 1.12:
+		ri2rib end-of-line fix for comments
+
+2003-07-06  pgregory
+	* render/itexturemap.h 1.10:
+	* render/texturemap.cpp 1.83:
+	* render/texturemap.h 1.41:
+		Add extra parameter to depth sampling functions to enable the
+		retrieval of the average depth over the sample area in the
+		depth map.
+
+	* render/procedural.cpp 1.9:
+		Fix couple of small problems compiling under Windows.
+
+2003-07-05  mw_matti
+	* libaqsistypes/log.h 1.17:
+	* render/curves.cpp 1.17:
+	* render/graphicsstate.cpp 1.9:
+	* render/graphicsstate.h 1.9:
+	* render/renderer.cpp 1.72:
+	* render/renderer.h 1.42:
+	* render/ri.cpp 1.209:
+	* render/stats.cpp 1.30:
+		finishing off CqLog support
+
+2003-07-04  mw_matti
+	* libddmsock/ddmsock.cpp 1.38:
+	* render/curves.cpp 1.16:
+	* render/graphicsstate.h 1.8:
+	* render/stats.cpp 1.29:
+	* render/surface.h 1.50:
+	* render/texturemap.cpp 1.81:
+		further integration of CqLog based error reporting
+
+2003-07-04  pgregory
+	* libshaderexecenv/shadeops.cpp 1.45:
+		Fix normal handling in occlusion code.
+
+	* libshaderexecenv/shadeops.cpp 1.43:
+	* libshaderexecenv/shaderexecenv.cpp 1.14:
+	* libshaderexecenv/shaderexecenv.h 1.25:
+	* libslparse/ivardef.h 1.6:
+	* libslparse/vardef.cpp 1.7:
+	* render/ilightsource.h 1.4:
+	* render/imagers.h 1.10:
+	* render/ishaderexecenv.h 1.16:
+	* render/lights.h 1.19:
+	* render/micropolygon.cpp 1.84:
+	* render/micropolygon.h 1.41:
+		Introduce "Ns" for use in lightsource shaders.
+
+	* shadowmap/shadowmap.cpp 1.13:
+		Enable compression user setting in shadowmap device.
+
+	* libshaderexecenv/shadeops.cpp 1.44:
+	* render/texturemap.cpp 1.80:
+		Fix occlusion code to only check shadow maps from the visible side of the point being lit.
+		
+		Fix shadow map user samples setting to
+
+2003-07-04  tshead
+	* render/texturemap.cpp 1.82:
+	* slpp/Makefile.am 1.4:
+		* Fix: libslpp was being built with main() instead of PreProcess()
+		* Fix: syntax error in render/texturemap.cpp
+
+2003-07-03  pgregory
+	* render/ri.cpp 1.207:
+		Fix errant wrap check in RiPatchMesh.
+
+	* shadowmap/shadowmap.cpp 1.12:
+		Add support for "append" mode to allow generation of occlusion
+		maps.
+
+	* libshaderexecenv/shadeops.cpp 1.41:
+	* libshaderexecenv/shaderexecenv.h 1.23:
+	* render/itexturemap.h 1.8:
+	* render/texturemap.cpp 1.78:
+	* render/texturemap.h 1.38:
+		Laying the foundations for occlusion mapping.
+
+	* librib2/librib.h 1.22:
+	* librib2/parser.yxx 1.10:
+	* librib2/scanner.lxx 1.6:
+	* librib2ri/librib2ri.cpp 1.16:
+	* librib2ri/librib2ri.h 1.14:
+	* render/ri.cpp 1.208:
+	* render/ri.h 1.18:
+	* render/texturemap.cpp 1.79:
+	* render/texturemap.h 1.39:
+		More occlusion map preparation.
+
+	* libshaderexecenv/shadeops.cpp 1.42:
+	* libshaderexecenv/shaderexecenv.h 1.24:
+	* libshadervm/shadervm.cpp 1.38:
+	* libshadervm/shadervm.h 1.30:
+	* libshadervm/shadervm2.cpp 1.9:
+	* libslparse/funcdef.cpp 1.10:
+	* libslparse/parser.yxx 1.11:
+	* libslparse/scanner.lxx 1.4:
+	* render/ishaderexecenv.h 1.15:
+	* render/itexturemap.h 1.9:
+	* render/texturemap.h 1.40:
+		More occlusion mapping work.
+
+2003-07-02  mw_matti
+	* libshadervm/shadervm.cpp 1.37:
+		fixed wrong warning level
+
+2003-07-02  jpgrad
+	* render/imagepixel.cpp 1.8:
+		- Minor fix for warning information.  A NULL pstrDepthFilter was being
+		   accessed, causing segfaults.
+
+	* libddmsock/ddmsock.cpp 1.37:
+		- Changed the code to remove the last element of the m_aDisplayRequests
+		   vector.  This wasn't compiling under Linux using gcc 3.3
+
+2003-07-02  pgregory
+	* render/imagepixel.cpp 1.9:
+		Don't need to be warned on every bucket that we have no depth
+		filter set. Min is a valid default and should not be warned
+		about at all.
+
+2003-07-01  mw_matti
+	* libshadervm/dsoshadeops.cpp 1.12:
+	* libshadervm/shadervm.cpp 1.36:
+	* libshadervm/shadervm.h 1.29:
+	* libshadervm/shadervm1.cpp 1.8:
+	* render/imagepixel.cpp 1.7:
+	* render/ri.cpp 1.206:
+		improved error handling, as usual
+
+2003-06-30  pseudonym
+	* render/imagepixel.cpp 1.6:
+	* render/options.cpp 1.32:
+		Fix for incorrect DepthOfFieldScale factors.  DoF should be working
+		now.
+
+2003-06-30  mw_matti
+	* render/graphicsstate.cpp 1.8:
+	* render/imagebuffer.cpp 1.120:
+	* render/polygon.cpp 1.43:
+	* render/surface.cpp 1.47:
+		CqLog error handling instead of CqAttributeError
+
+	* libshadervm/shadervm.cpp 1.35:
+	* render/ri.cpp 1.205:
+		error handling improved
+
+	* libshadervm/shadervm1.cpp 1.7:
+		CqLog error handling instead of CqAttributeError/BasicError, 
+		not working yet so I commented it out.
+
+	* libshadervm/shadervm.cpp 1.34:
+		CqLog error handling instead of CqAttributeError/BasicError
+
+2003-06-29  mw_matti
+	* libddmsock/ddmsock.cpp 1.36:
+		CqLog error handling
+
+	* render/renderer.cpp 1.71:
+		CqLog error handling for unknown shaders
+
+2003-06-28  mw_matti
+	* dspylink/dspylink.cpp 1.5:
+	* filebuffer/filebuffer.cpp 1.17:
+	* framebuffer_glut/framebuffer_glut.cpp 1.21:
+	* framebuffer_glut_z/framebuffer_glut_z.cpp 1.13:
+		Added error handling
+
+	* libshaderexecenv/shaderexecenv.h 1.22:
+		SO_Illuminance fixed
+
+2003-06-28  pgregory
+	* render/imagepixel.cpp 1.5:
+		Implement support for RiShutter in the time sample generation.
+
+	* render/ri.cpp 1.204:
+		Issue a warning when RiReadArchive cannot locate the file.
+
+	* render/subdivision2.cpp 1.30:
+		Fix bound calculation for sds mesh, wasn't taking into account
+		Tx MB.
+
+	* render/ri.cpp 1.203:
+		Ignore surfaces with 'facevarying' primitive variables to avoid
+		crashes at the moment until proper support is in.
+
+	* aqsl/tests/test.sl 1.2:
+		Add some more tests, and enable some that has been disabled.
+
+	* libshaderexecenv/shadeops.cpp 1.40:
+		Fix bug in fresnel. SETFLOAT( Kt, 1.0f - FLOAT(Kr)) was
+		incorrectly using the previous value of Kr, prior to setting it
+		with the result. The result was a uniform incorrect value for
+		Kt.
+
+2003-06-26  pgregory
+	* plugins/bake2tif/bake2tif.c 1.5:
+		Fix interpolation code : Michel Joron.
+
+	* libshaderexecenv/shadeops.cpp 1.38:
+		Increase default buffer size for baking : Michel Joron.
+
+	* libri2rib/ascii.cpp 1.11:
+		Don't output empty arrays : Chris Harvey.
+
+	* libcodegenvm/vmdatagather.cpp 1.7:
+	* libcodegenvm/vmoutput.cpp 1.23:
+	* libshaderexecenv/shadeops.cpp 1.39:
+	* libslparse/parser.yxx 1.10:
+		Implement light categories.
+
+2003-06-25  pgregory
+	* pythondisplay/displaydriver.py 1.2:
+		Update to keep in line with changing API.
+
+2003-06-24  pgregory
+	* dspylink/dspylink.cpp 1.3:
+		Update initial format order to suite Shaderman.
+
+	* dspylink/dspylink.cpp 1.4:
+	* filebuffer/filebuffer.cpp 1.16:
+	* framebuffer_glut/framebuffer_glut.cpp 1.20:
+	* framebuffer_glut_z/framebuffer_glut_z.cpp 1.12:
+	* libddmsock/ddmsock.cpp 1.35:
+	* libddmsock/displaydriver.h 1.11:
+	* shadowmap/shadowmap.cpp 1.11:
+		Add some extra functionality to the FormatQuery message, now passes in a list of formats it can provide.
+		Added some error handling, now doesn't crash if display device cannot be loaded.
+
+2003-06-23  pgregory
+	* Renderer.dsw 1.74:
+	* dspylink/dspylink.cpp 1.2:
+	* dspylink/dspylink.dsp 1.2:
+	* libddmsock/ddmsock.cpp 1.34:
+		Make some changes to the order of message passing in ddmsock to
+		allow proper handling of the format query.
+
+	* configure.in 1.71:
+	* render/version.h 1.31:
+		Update version
+
+	* render/libaqsis.def 1.11:
+		Remove more inline color functions.
+
+2003-06-23  jpgrad
+	* libaqsistypes/validate.h 1.2:
+	* libshadervm/shaderstack.h 1.25:
+	* render/curves.h 1.12:
+	* render/forwarddiff.h 1.4:
+	* render/imagebuffer.cpp 1.119:
+	* render/kdtree.h 1.3:
+	* render/nurbs.cpp 1.66:
+	* render/nurbs.h 1.23:
+	* render/parameters.h 1.35:
+	* render/patch.cpp 1.56:
+	* render/patch.h 1.27:
+	* render/points.cpp 1.23:
+	* render/polygon.cpp 1.42:
+	* render/renderer.cpp 1.70:
+	* render/ri.cpp 1.202:
+	* render/subdivision2.cpp 1.29:
+	* render/subdivision2.h 1.22:
+	* render/surface.cpp 1.46:
+	* render/surface.h 1.49:
+	* render/texturemap.cpp 1.77:
+	* render/texturemap.h 1.37:
+	* render/trimcurve.cpp 1.12:
+		- Removed some gcc (3.3) warnings.  These warnings were of two sorts:
+		   1. Dangerous type casts.
+		   2. Unhandled enumeration types within switch statements.
+		  So, I've added (hopefully) appropriate type casts where necessary, and
+		  added the default case to switches that gcc was complaining about.  The
+		  compilation of the render directory is now much smoother under gcc,
+		  with the only remaining warnings concerning the use of deprecated STL
+		  headers and unrecognized pragmas.
+
+2003-06-22  pgregory
+	* all/All.dsp 1.9:
+	* aqsis/aqsis.dsp 1.26:
+	* aqsl/aqsl.dsp 1.15:
+	* aqsltell/aqsltell.dsp 1.18:
+	* dsotest/dsotest.dsp 1.4:
+	* filebuffer/filebuffer.dsp 1.16:
+	* framebuffer_glut/framebuffer_glut.dsp 1.14:
+	* framebuffer_glut_z/framebuffer_glut_z.dsp 1.14:
+	* libaqsistypes/libaqsistypes.dsp 1.27:
+	* libargparse/libargparse.dsp 1.6:
+	* libcodegenvm/libcodegenvm.dsp 1.14:
+	* libdd/libdd.dsp 1.14:
+	* libddmsimple/libddmsimple.dsp 1.15:
+	* libddmsock/libddmsock.dsp 1.15:
+	* libri2rib/libri2rib.dsp 1.14:
+	* librib2/librib2.dsp 1.19:
+	* librib2ri/librib2ri.dsp 1.12:
+	* librib2stream/librib2stream.dsp 1.13:
+	* libshaderexecenv/libshaderexecenv.dsp 1.9:
+	* libshadervm/libshadervm.dsp 1.12:
+	* libslparse/libslparse.dsp 1.17:
+	* libslxargs/libslxargs.dsp 1.12:
+	* plugins/bake2tif/bake2tif.dsp 1.8:
+	* plugins/gif2tif/gif2tif.dsp 1.13:
+	* plugins/jpg2tif/jpg2tif.dsp 1.14:
+	* plugins/pcx2tif/pcx2tif.dsp 1.13:
+	* plugins/ppm2tif/ppm2tif.dsp 1.13:
+	* plugins/tga2tif/tga2tif.dsp 1.11:
+	* render/libaqsis.dsp 1.56:
+	* shadowmap/shadowmap.dsp 1.19:
+	* slpp/libslpp.dsp 1.2:
+	* slpp/slpp.dsp 1.12:
+	* teqser/teqser.dsp 1.19:
+		Remove MPatrol configuration, not needed.
+
+	* Renderer.dsw 1.73:
+	* dspylink/dspy.h 1.1:
+	* dspylink/dspylink.cpp 1.1:
+	* dspylink/dspylink.dsp 1.1:
+	* libaqsistypes/plugins.h 1.5:
+	* render/libaqsis.def 1.10:
+		Add an initial implementation of a display device that works as
+		a forwarding agent to display drivers written to the Pixar '
+		dspy' interface standard. Some bits not working yet, only
+		proven on Windows.
+
+2003-06-19  jpgrad
+	* render/imagebuffer.cpp 1.117:
+		- When adding micropolygons, include any micropolygons which overlap the
+		  edges of the current bucket.  Previously, only micropolygons which were
+		  completely within the current bucket were kept.
+
+	* render/imagebuffer.cpp 1.118:
+		Reverted my previous commit
+
+2003-06-17  pgregory
+	* Renderer.dsw 1.72:
+		Inlcude the libslpp project.
+
+	* Doxyfile 1.6:
+		Update to use the new features of Docygen, i.e. CallGraph.
+
+	* libslparse/parser.yxx 1.9:
+		Allow empty array specifiers only when declaring arguments to
+		functions or shaders.
+
+2003-06-16  jpgrad
+	* render/ishaderexecenv.h 1.14:
+		- This is a bit complicated:
+		
+		  CqShaderExecEnv has CqRefCount as a superclass.  However, instances of
+		  CqShaderExecEnv are often passed around as IqShaderExecEnv pointers.
+		  Now, if we want to use reference counting properly with CqShaderExecEnv,
+		  then we have to be able to call ADDREF() and RELEASEREF() with the
+		  IqShaderExecEnv pointers.  Hence, I've added these two methods to
+		  IqShaderExecEnv.
+
+	* render/graphicsstate.cpp 1.7:
+		- Added some more ADDREFs and RELEASEREFs.  These may not yet be balancing
+		   perfectly (figuring out where they should go is complicated!), but are
+		   holding up to testing.
+
+	* libshadervm/shadervm.cpp 1.33:
+		- Only use dynamic allocation for CqRefCount-derived classes.  Static
+		   allocation is bad because it violates the contract for CqRefCount which
+		   says that when RELEASEREF() is called for the last time then the
+		   instance may be deleted.
+
+	* render/options.h 1.28:
+		- The CqOptions::ClearOptions() method shouldn't just call clear() on the
+		   list of options, it should also call RELEASEREF() on each option to
+		   decrement the reference count and allow the options (which are instances
+		   of CqNamedParameterList*) to be deleted if necessary.
+
+	* render/imagers.cpp 1.22:
+		- Don't delete m_pShaderExecEnv directly, since it's a CqRefCount-derived
+		  class.  Use RELEASEREF() instead.
+
+	* libshaderexecenv/shaderexecenv.h 1.21:
+		- Now that IqShaderExecEnv has pure virtual AddRef() and Release() methods,
+		   these have to be defined in CqShaderExecEnv.  These implementations
+		   simply call their CqRefCount equivalents.
+
+	* render/attributes.h 1.25:
+	* render/csgtree.h 1.11:
+	* render/graphicsstate.h 1.7:
+	* render/kdtree.h 1.2:
+	* render/lights.h 1.18:
+	* render/micropolygon.h 1.40:
+	* render/subdivision2.h 1.21:
+	* render/surface.h 1.48:
+		- Added more className() debugging methods to these CqRefCount-derived
+		   classes.
+
+	* render/renderer.cpp 1.69:
+	* render/renderer.h 1.41:
+		- Set up the default transform and attributes so that these objects are
+		   treated as CqRefCount sub-classes (which they are), and so use
+		   RELEASEREF() to delete them rather than just calling delete().
+		
+		- Made the default options a member variable of CqRenderer.
+		   Rationale:
+		   1. Previously, the default options were only ever accessed via the
+		       global instance of the CqRenderer class (this is also still the
+		       case).
+		   2. According to The RenderMan Companion, the RiOption() function may
+		       not be called outside of the RiBegin() ... RiEnd() block, which is
+		       the lifetime of the global CqRenderer instance.  Hence, the
+		       default options may safely be instantiated when CqRenderer is
+		       instantiated.
+		   3. This helps when debugging reference counting issues! :-)
+
+	* render/lights.cpp 1.23:
+	* render/micropolygon.cpp 1.83:
+		- Don't delete instances of IqShaderExecEnv directly.  Use RELEASEREF()
+		   instead.
+
+	* render/imagebuffer.cpp 1.116:
+		- Make sure that a reference is held on a micropolygon grid while it is
+		   being shaded.
+
+	* libaqsistypes/refcount.cpp 1.5:
+	* libaqsistypes/refcount.h 1.10:
+		- Added some code to flag warnings when reference count instances are
+		   deleted rather than released (via RELEASEREF).
+
+2003-06-16  pgregory
+	* slpp/libslpp.dsp 1.1:
+		New project to build slpp as a link library.
+
+2003-06-15  pgregory
+	* aqsl/Makefile.am 1.18:
+	* slpp/Makefile.am 1.3:
+		Make library version of slpp work with Posix.
+
+	* Renderer.dsw 1.70:
+	* aqsl/aqslcomp.cpp 1.13:
+	* slpp/pp1.c 1.2:
+		Use the -o functionality of slpp rather than redirecting stdout
+		 Much cleaner.
+
+	* Renderer.dsw 1.71:
+	* aqsl/aqsl.dsp 1.14:
+	* aqsl/aqslcomp.cpp 1.14:
+	* libslparse/libslparse.dsp 1.16:
+	* slpp/pp1.c 1.3:
+		Make slpp a library and link it directly into aqsl compiler. 
+		Now no external reliance.
+
+2003-06-14  pgregory
+	* slpp/Makefile.am 1.2:
+	* slpp/pp.h 1.1:
+	* slpp/pp1.c 1.1:
+	* slpp/pp2.c 1.1:
+	* slpp/pp3.c 1.1:
+	* slpp/pp4.c 1.1:
+	* slpp/pp5.c 1.1:
+	* slpp/pp6.c 1.1:
+	* slpp/pp7.c 1.1:
+	* slpp/pp8.c 1.1:
+	* slpp/ppext.h 1.1:
+		Renamed source files to lowercase to get them to work on  Posix.
+		Update makefile to build slpp.
+
+	* aqsl/aqslcomp.cpp 1.11:
+		Use _dup2 instead of freopen("CON") to restore stdout.
+
+	* aqsl/aqsl 1.3:
+	* aqsl/macaqsl 1.2:
+		Removed, aqsl executable now does the work.
+
+	* aqsl/Makefile.am 1.17:
+	* aqsl/aqslcomp.cpp 1.12:
+		Change makefile to build aqsl executable.
+		Fix use of dup2 to work on Posix.
+
+	* slpp/PP.H 1.5:
+	* slpp/PP1.C 1.3:
+	* slpp/PP2.C 1.2:
+	* slpp/PP3.C 1.2:
+	* slpp/PP4.C 1.2:
+	* slpp/PP5.C 1.2:
+	* slpp/PP6.C 1.2:
+	* slpp/PP7.C 1.2:
+	* slpp/PP8.C 1.2:
+	* slpp/PPEXT.H 1.2:
+		Need to rename them to lowercase to get posix to compile them.
+
+2003-06-14  jpgrad
+	* render/ri.cpp 1.201:
+		- Fix for reference counting for primitives that are culled for LOD
+		   reasons.  These culled primitives don't need to be released anymore -
+		   they just aren't added to a bucket.
+
+	* render/quadrics.cpp 1.52:
+		- Cone primitives now calculate their normals analytically.
+
+	* render/quadrics.cpp 1.53:
+		- Torus primitives now calculate their normals analytically.
+
+	* render/quadrics.cpp 1.54:
+		 Paraboloid primitives now calculate their normals analytically.
+
+	* render/quadrics.cpp 1.55:
+		 Hyperboloid primitives now calculate their normals
+		analytically.
+
+	* libaqsistypes/refcount.cpp 1.4:
+	* libaqsistypes/refcount.h 1.9:
+		- Some changes to the locations in which reporting of reference counting
+		  issues takes place.
+
+	* render/imagebuffer.cpp 1.115:
+		- A fix for reference counting on gprims that are culled.  This was causing
+		   a segfault for any culled primitive.
+
+2003-06-14  minty
+	* libri2rib/output.cpp 1.8:
+	* libri2rib/outstream.cpp 1.11:
+	* libri2rib/outstream.h 1.9:
+		Add stream flushing and zlib flushing for RunProgram support.
+
+2003-06-13  jpgrad
+	* libaqsistypes/refcount.cpp 1.3:
+	* libaqsistypes/refcount.h 1.5:
+		- Some more changes to the reference counting tracker.
+
+	* aqsis/aqsis.cpp 1.61:
+	* render/bucket.cpp 1.16:
+	* render/curves.cpp 1.15:
+	* render/curves.h 1.11:
+	* render/imagebuffer.cpp 1.114:
+	* render/nurbs.cpp 1.65:
+	* render/nurbs.h 1.22:
+	* render/parameters.h 1.34:
+	* render/patch.cpp 1.55:
+	* render/patch.h 1.26:
+	* render/points.h 1.16:
+	* render/polygon.cpp 1.41:
+	* render/polygon.h 1.31:
+	* render/renderer.cpp 1.68:
+	* render/ri.cpp 1.200:
+	* render/subdivision2.cpp 1.28:
+	* render/subdivision2.h 1.20:
+	* render/surface.cpp 1.45:
+	* render/transform.h 1.10:
+		- Changes to reference counting of CqSurface-derived types to allow these
+		  to be released at appropriate places in the rendering process, once they
+		  are no longer required.
+
+2003-06-13  pgregory
+	* aqsis/aqsis.cpp 1.63:
+		Add return type to report_refcounts function declaration.
+
+	* Renderer.dsw 1.69:
+	* aqsl/aqsl.dsp 1.13:
+	* aqsl/aqslcomp.cpp 1.10:
+	* libslparse/parser.yxx 1.8:
+		Make aqsl.exe work in place of aqsl.bat and aqslcomp.exe. Now
+		it preprocesses using slpp.exe automatically.
+
+	* filebuffer/.cvsignore 1.5:
+	* framebuffer_glut/.cvsignore 1.4:
+	* framebuffer_glut_z/.cvsignore 1.4:
+	* libaqsistypes/.cvsignore 1.4:
+	* librib2ri/.cvsignore 1.4:
+	* librib2stream/.cvsignore 1.4:
+	* plugins/bake2tif/.cvsignore 1.2:
+	* plugins/gif2tif/.cvsignore 1.2:
+	* plugins/jpg2tif/.cvsignore 1.2:
+	* plugins/pcx2tif/.cvsignore 1.2:
+	* plugins/ppm2tif/.cvsignore 1.2:
+	* plugins/tga2tif/.cvsignore 1.2:
+	* shadowmap/.cvsignore 1.5:
+	* teqser/.cvsignore 1.4:
+		Update to ignore .plg files
+
+	* libaqsistypes/refcount.h 1.6:
+	* render/libaqsis.def 1.8:
+		Some small fixes for the reference counting mechanism under
+		Windows.
+
+	* libaqsistypes/refcount.h 1.8:
+		Put Windows extern declaration inside an #ifdef.
+
+	* aqsl/aqsl.bat 1.2:
+	* aqsl/aqslcomp.dsp 1.18:
+		Removed in favour of a more powerful aqsl.exe
+
+	* aqsis/aqsis.cpp 1.62:
+	* libaqsistypes/refcount.h 1.7:
+	* render/libaqsis.def 1.9:
+		ReFix: Oops, now works on Release too. "Some small fixes for
+		the reference counting mechanism under Windows."
+
+2003-06-12  jpgrad
+	* libaqsistypes/Makefile.am 1.16:
+	* libaqsistypes/refcount.cpp 1.1:
+	* libaqsistypes/refcount.h 1.4:
+	* libshaderexecenv/shaderexecenv.cpp 1.13:
+	* render/attributes.h 1.24:
+	* render/bucket.cpp 1.15:
+	* render/csgtree.cpp 1.10:
+	* render/csgtree.h 1.10:
+	* render/curves.cpp 1.14:
+	* render/genpoly.cpp 1.6:
+	* render/genpoly.h 1.6:
+	* render/graphicsstate.cpp 1.6:
+	* render/iattributes.h 1.5:
+	* render/imagebuffer.cpp 1.113:
+	* render/imagebuffer.h 1.37:
+	* render/imagers.cpp 1.21:
+	* render/itransform.h 1.4:
+	* render/lights.cpp 1.22:
+	* render/micropolygon.cpp 1.82:
+	* render/micropolygon.h 1.39:
+	* render/nurbs.cpp 1.64:
+	* render/options.cpp 1.31:
+	* render/options.h 1.27:
+	* render/patch.cpp 1.54:
+	* render/points.cpp 1.22:
+	* render/points.h 1.15:
+	* render/polygon.cpp 1.40:
+	* render/polygon.h 1.30:
+	* render/procedural.cpp 1.7:
+	* render/quadrics.h 1.21:
+	* render/renderer.cpp 1.67:
+	* render/ri.cpp 1.199:
+	* render/subdivision2.cpp 1.27:
+	* render/subdivision2.h 1.19:
+	* render/surface.cpp 1.44:
+	* render/surface.h 1.47:
+	* render/teapot.cpp 1.15:
+	* render/transform.h 1.9:
+		- Added debugging information for reference counting.  Now, if Aqsis is
+		  compiled with _DEBUG defined then all CqRefCount class instances (and
+		  instances of derived classes) will be tracked to see where ADDREF() and
+		  RELEASEREF() are called.  When rendering has finished, all un-released
+		  CqRefCount objects are dumped, along with a history of their ADDREF()
+		  and RELEASEREF() calls.
+		
+		  Note that ADDREF() and RELEASEREF() are macros which replace the AddRef()
+		  and Release() method calls.  These macros take a pointer to a CqRefCount
+		  class instance as an argument.
+		
+		  I stress that these changes are _only_ for debugging, and they aren't
+		  fit, speed-wise, for an inclusion in a release build.  Ideally, don't
+		  use any of this code for tracking statistics that we might want to
+		  make available in a release build.
+
+2003-06-12  pgregory
+	* libaqsistypes/libaqsistypes.dsp 1.26:
+	* libaqsistypes/refcount.cpp 1.2:
+		Fix a couple of issues with new refcount tracking mechanism
+		under Windows.
+
+2003-06-11  pgregory
+	* render/quadrics.cpp 1.51:
+		Set the flag indicating the geometric normals have been
+		processed.
+
+	* render/libaqsis.def 1.7:
+		Remove inline functions from .def file as they shouldn't be
+		exported.
+
+2003-06-09  pgregory
+	* render/imagebuffer.cpp 1.112:
+		Fix problem where diced bilinear patches which have been
+		constructed from 3 point polygons (i.e. phantom 4th vertex case
+		 tried to place u-polys in the previous bucket. Now
+		automatically tries the current bucket to make sure any on the
+		boundary are caught.
+
+2003-06-06  pgregory
+	* all/All.dsp 1.8:
+	* aqsis/aqsis.dsp 1.24:
+	* aqsl/aqsl.dsp 1.12:
+	* aqsl/aqslcomp.dsp 1.16:
+	* aqsltell/aqsltell.dsp 1.16:
+	* filebuffer/filebuffer.dsp 1.14:
+	* framebuffer_glut/framebuffer_glut.dsp 1.12:
+	* framebuffer_glut_z/framebuffer_glut_z.dsp 1.12:
+	* libaqsistypes/libaqsistypes.dsp 1.25:
+	* libargparse/libargparse.dsp 1.5:
+	* libcodegenvm/libcodegenvm.dsp 1.13:
+	* libdd/libdd.dsp 1.13:
+	* libddmsimple/libddmsimple.dsp 1.14:
+	* libddmsock/libddmsock.dsp 1.14:
+	* libri2rib/libri2rib.dsp 1.13:
+	* librib2/librib2.dsp 1.17:
+	* librib2ri/librib2ri.dsp 1.11:
+	* librib2stream/librib2stream.dsp 1.12:
+	* libshaderexecenv/libshaderexecenv.dsp 1.8:
+	* libshadervm/libshadervm.dsp 1.11:
+	* libslparse/libslparse.dsp 1.14:
+	* libslxargs/libslxargs.dsp 1.11:
+	* plugins/bake2tif/bake2tif.dsp 1.7:
+	* plugins/gif2tif/gif2tif.dsp 1.12:
+	* plugins/jpg2tif/jpg2tif.dsp 1.13:
+	* plugins/pcx2tif/pcx2tif.dsp 1.12:
+	* plugins/ppm2tif/ppm2tif.dsp 1.12:
+	* plugins/tga2tif/tga2tif.dsp 1.10:
+	* render/libaqsis.dsp 1.54:
+	* shadowmap/shadowmap.dsp 1.17:
+	* slpp/slpp.dsp 1.11:
+	* teqser/teqser.dsp 1.17:
+		Add new build configuration to test using MPatrol.
+
+	* aqsis/aqsis.dsp 1.25:
+	* aqsl/aqslcomp.dsp 1.17:
+	* aqsltell/aqsltell.dsp 1.17:
+	* filebuffer/filebuffer.dsp 1.15:
+	* framebuffer_glut/framebuffer_glut.dsp 1.13:
+	* framebuffer_glut_z/framebuffer_glut_z.dsp 1.13:
+	* librib2/librib2.dsp 1.18:
+	* libslparse/libslparse.dsp 1.15:
+	* render/libaqsis.dsp 1.55:
+	* shadowmap/shadowmap.dsp 1.18:
+	* teqser/teqser.dsp 1.18:
+		More changes to get Profile and MPatrol configurations to build.
+
+	* render/imagers.cpp 1.20:
+	* render/points.cpp 1.21:
+	* render/points.h 1.14:
+	* render/polygon.cpp 1.39:
+	* render/polygon.h 1.29:
+	* render/stats.cpp 1.28:
+	* render/subdivision2.cpp 1.26:
+		More warning elimination from Michel Joron.
+
+2003-06-06  mw_matti
+	* libshadervm/shadervm.cpp 1.32:
+		added check for right parameters
+
+2003-06-05  pgregory
+	* aqsis/aqsis.cpp 1.60:
+	* libcodegenvm/codegenvm.cpp 1.6:
+	* libcodegenvm/vmdatagather.cpp 1.6:
+	* libcodegenvm/vmoutput.cpp 1.22:
+	* libshadervm/shadervariable.h 1.18:
+	* libshadervm/shadervm.cpp 1.31:
+	* libshadervm/shadervm.h 1.28:
+	* libshadervm/shadervm1.cpp 1.6:
+	* render/attributes.cpp 1.26:
+	* render/bucket.cpp 1.14:
+	* render/genpoly.cpp 1.5:
+	* render/imagebuffer.cpp 1.111:
+	* render/imagepixel.h 1.7:
+	* render/lath.cpp 1.6:
+	* render/lath.h 1.7:
+	* render/micropolygon.cpp 1.81:
+	* render/nurbs.cpp 1.63:
+	* render/options.cpp 1.30:
+	* render/parameters.h 1.33:
+	* render/points.cpp 1.20:
+	* render/points.h 1.13:
+	* render/polygon.h 1.28:
+	* render/quadrics.cpp 1.50:
+	* render/renderer.cpp 1.66:
+	* render/ri.cpp 1.198:
+	* render/subdivision2.cpp 1.25:
+	* render/surface.h 1.46:
+	* render/texturemap.h 1.36:
+		Fix a lot of warnings, particularly signed/unsigned mismatch. 
+		Thanks to Michel Joron.
+
+2003-06-04  mw_matti
+	* render/ri.cpp 1.196:
+		added more range checks
+
+2003-06-04  pgregory
+	* render/attributes.cpp 1.25:
+	* render/nurbs.cpp 1.62:
+	* render/patch.cpp 1.53:
+	* render/quadrics.cpp 1.49:
+	* render/ri.cpp 1.197:
+	* render/subdivision2.cpp 1.24:
+	* render/surface.cpp 1.43:
+	* render/surface.h 1.45:
+		Fix grid size calculation. No longer is dependent on the bucket
+		size, but defaults to 256, and can be user set. Setting it on
+		the bucket size makes not sense, the result of this was that at
+		high shading rate settings we were getting lots of 1x1 grids.
+
+2003-06-02  pgregory
+	* configure.in 1.70:
+	* render/version.h 1.30:
+		Update version [nightly]
+
+	* ddmsock.ini 1.3:
+		Add python displays
+
+	* render/ri.cpp 1.195:
+		Fix bug, culled objects are inadvertently double released.
+
+2003-06-01  minty
+	* libshadervm/shadervariable.h 1.17:
+		Some const fixes for gcc
+
+2003-06-01  mbaas
+	* pythondisplay/displaydriver.py 1.1:
+	* pythondisplay/filebuf.py 1.2:
+		Rename from filebuf.py to displaydriver.py. New features: 
+		framebuffer & image overlay
+
+2003-05-31  pgregory
+	* render/subdivision2.cpp 1.23:
+		Fix u/v coordinates. When splitting to a patch, the patch gets
+		the canonical u/v (0,0  1,0  0,1  1,1), and when dicing an SDS
+		patch directly it gets the same. Not sure if this is the
+		correct behaviour but at least it gives reasonable u/v
+		coordinates.
+
+2003-05-29  pgregory
+	* README 1.7:
+		Add OSI certification notice.
+
+	* BUILD 1.11:
+		Update to show latest Bison, and to include log4cpp.
+
+	* libcodegenvm/vmoutput.cpp 1.21:
+	* libshadervm/shadervariable.h 1.16:
+	* libshadervm/shadervm.cpp 1.30:
+	* libshadervm/shadervm.h 1.27:
+	* libslparse/ivardef.h 1.5:
+	* libslparse/parsenode.h 1.10:
+	* libslparse/parser.yxx 1.7:
+	* libslparse/scanner.lxx 1.3:
+	* libslparse/vardef.h 1.6:
+	* render/imagebuffer.cpp 1.110:
+	* render/ishader.h 1.17:
+	* render/ishaderdata.h 1.13:
+	* render/libaqsis.def 1.6:
+	* render/micropolygon.cpp 1.80:
+	* render/micropolygon.h 1.38:
+	* render/renderer.cpp 1.65:
+	* render/shaders.h 1.17:
+		Implement support for user specified shader output variables in
+		the AOV mechanism
+
+	* framebuffer_glut/framebuffer_glut.cpp 1.19:
+		Implement alpha display support courtesy of Michel Joron and
+		Alvy Ray Smith.
+
+2003-05-29  minty
+	* libaqsistypes/bitvector.h 1.6:
+	* render/ri.cpp 1.192:
+		Compile fixes and gcc3.3 fix from Will Newton
+
+	* render/ri.cpp 1.193:
+		Revert commit, accidentally commited some of my own changes :(
+
+	* config.guess 1.1:
+	* config.sub 1.1:
+		Latest config.sub/config.guess from gnu.org as per Will Newtons
+		 request
+
+	* bootstrap 1.5:
+		Bootstrap was overwriting the config.sub/guess
+
+	* render/ri.cpp 1.194:
+		Will Newtons' gcc3.3 patch, and ONLY that patch :)
+
+2003-05-28  mw_matti
+	* libaqsistypes/libaqsistypes.dsp 1.24:
+	* libaqsistypes/validate.h 1.1:
+	* render/ri.cpp 1.191:
+		using validate.h now
+
+2003-05-28  pgregory
+	* render/bucket.cpp 1.13:
+		Fix initialisation of data in filtering function.
+
+	* filebuffer/filebuffer.cpp 1.15:
+	* framebuffer_glut/framebuffer_glut.cpp 1.18:
+	* librib2/librib.cpp 1.28:
+		Implement support for custom quantization at the display device
+		level in filebuffer and framebuffer_glut.
+
+2003-05-27  mw_matti
+	* libaqsistypes/aqerror.h 1.1:
+	* libaqsistypes/libaqsistypes.dsp 1.23:
+	* render/ri.cpp 1.189:
+		New error handling stuff
+
+2003-05-27  pgregory
+	* render/version.h 1.29:
+		Update version [nightly]
+
+	* filebuffer/filebuffer.cpp 1.14:
+	* framebuffer_glut/framebuffer_glut.cpp 1.17:
+	* framebuffer_glut_z/framebuffer_glut_z.cpp 1.11:
+	* libdd/dd.cpp 1.13:
+	* libddmsimple/ddmsimple.cpp 1.14:
+	* libddmsimple/ddmsimple.h 1.10:
+	* libddmsock/ddmsock.cpp 1.33:
+	* libddmsock/ddmsock.h 1.11:
+	* libddmsock/displaydriver.h 1.10:
+	* render/iddmanager.h 1.12:
+	* render/renderer.cpp 1.64:
+	* render/renderer.h 1.40:
+	* render/ri.cpp 1.190:
+	* shadowmap/shadowmap.cpp 1.10:
+		Change the way additional parameters are handled by the display
+		system so that they are passed through to the device for
+		processing. Meaning A) devices can respond to user parameters
+		that are relevent to them, and B) user parameters can be
+		arbitrarily added and handled by the device without the need to
+		update the core.
+
+2003-05-24  mw_matti
+	* render/ri.cpp 1.187:
+		fixed typo
+
+	* render/renderer.cpp 1.63:
+	* render/renderer.h 1.39:
+	* render/ri.cpp 1.186:
+		cleaned up some code rot; added range check to RiDepthOfField
+
+	* render/ri.cpp 1.188:
+		changed DoF warning level to warning ( was: error )
+
+	* libaqsistypes/log.cpp 1.12:
+		changed format for console warnings
+
+2003-05-24  pgregory
+	* render/imagers.cpp 1.19:
+		Fix alpha to be the pixel coverage multiplied by the average
+		opacity, as per the spec.
+
+	* libddmsimple/ddmsimple.cpp 1.13:
+	* libddmsimple/ddmsimple.h 1.9:
+		Fix bugs introduced when implementing AOV's
+
+	* libshaderexecenv/shaderexecenv.cpp 1.12:
+	* render/bucket.cpp 1.12:
+		Fix alpha to be varying.
+
+	* shaders/background.sl 1.3:
+	* shaders/shaders.dsp 1.11:
+		Return to normal now that alpaha is right.
+		Add background.sl to Shaders project.
+
+2003-05-23  pgregory
+	* libddmsock/ddmsock.cpp 1.31:
+	* render/bucket.cpp 1.8:
+	* render/options.cpp 1.27:
+	* render/ri.cpp 1.184:
+		Refactor quantisation data storage for AOV.
+
+	* render/bucket.cpp 1.10:
+	* render/imagers.cpp 1.18:
+	* render/imagers.h 1.9:
+	* render/options.cpp 1.29:
+	* render/options.h 1.26:
+		Optimise the filtering to filter whole dataset (AOV).
+		Optimise imager shading, now shades a whole bucket at a time, instead of a single pixel.
+
+	* libddmsock/ddmsock.cpp 1.32:
+	* libddmsock/ddmsock.h 1.10:
+	* render/bucket.cpp 1.11:
+	* render/iddmanager.h 1.11:
+	* render/micropolygon.cpp 1.79:
+	* render/renderer.cpp 1.62:
+	* render/renderer.h 1.38:
+	* render/ri.cpp 1.185:
+	* render/surface.cpp 1.42:
+		Get AOV working.
+
+	* render/bucket.cpp 1.9:
+	* render/options.cpp 1.28:
+		Fix bug introduced into quantization.
+
+2003-05-22  pgregory
+	* libddmsimple/ddmsimple.cpp 1.12:
+	* libddmsock/ddmsock.cpp 1.29:
+	* libshaderexecenv/shaderexecenv.cpp 1.11:
+	* libshaderexecenv/shaderexecenv.h 1.20:
+	* render/bucket.cpp 1.6:
+	* render/bucket.h 1.4:
+	* render/iddmanager.h 1.9:
+	* render/imagebuffer.cpp 1.108:
+	* render/imagebuffer.h 1.36:
+	* render/imagepixel.cpp 1.3:
+	* render/imagepixel.h 1.5:
+	* render/irenderer.h 1.10:
+	* render/ishaderexecenv.h 1.13:
+	* render/micropolygon.h 1.37:
+	* render/renderer.cpp 1.61:
+	* render/renderer.h 1.37:
+	* render/ri.cpp 1.183:
+		Commit various changes to support arbitrary output variables. 
+		Not working yet. Needs filtering/quantization support, and
+		passing data to display devices properly.
+
+	* libddmsock/ddmsock.cpp 1.30:
+	* render/bucket.cpp 1.7:
+	* render/bucket.h 1.5:
+	* render/iddmanager.h 1.10:
+	* render/imagebuffer.cpp 1.109:
+	* render/imagepixel.cpp 1.4:
+	* render/imagepixel.h 1.6:
+		Change some naming of the new code for AOV's, to make it less
+		ambiguous.
+
+2003-05-21  pgregory
+	* shaders/background.sl 1.2:
+		Fix black halo problem, fix submitted by "hilbert" on the forums
+
+2003-05-17  mw_matti
+	* render/imagebuffer.cpp 1.107:
+	* render/micropolygon.cpp 1.78:
+	* render/options.cpp 1.26:
+	* render/renderer.h 1.36:
+		next DoF fix
+
+2003-05-16  mw_matti
+	* render/micropolygon.cpp 1.76:
+	* render/renderer.cpp 1.60:
+	* render/renderer.h 1.35:
+		now DoF takes into account the transformation from __camera__
+		to raster, but it blurs uniformly in x and y. I'll have to
+		investigate whether different xy blur is necessary.
+
+	* render/imagepixel.cpp 1.2:
+	* render/imagepixel.h 1.4:
+	* render/micropolygon.cpp 1.74:
+		DoF working, but CircleOfConfusion needs to be checked
+
+	* render/micropolygon.cpp 1.77:
+		rolled back, sry
+
+	* render/imagebuffer.cpp 1.104:
+	* render/imagebuffer.cpp 1.105:
+		added DoF fix
+
+	* render/imagebuffer.cpp 1.106:
+		rolled back again
+
+2003-05-16  pgregory
+	* render/imagebuffer.cpp 1.103:
+	* render/micropolygon.cpp 1.75:
+	* render/micropolygon.h 1.36:
+		Some small optimisations in the DoF sampling.
+
+2003-05-15  pgregory
+	* libaqsistypes/win32/intel/file_system.cpp 1.6:
+		Must have a default value for base_path in case AQSIS_BASE_PATH
+		is not defined.
+
+2003-05-14  pgregory
+	* configure.in 1.68:
+	* configure.in 1.69:
+	* render/version.h 1.27:
+	* render/version.h 1.28:
+		Update version [nightly]
+
+	* libslxargs/slx.cpp 1.24:
+		Add one more check to include the last path in the search
+		string.
+
+	* render/Makefile.am 1.40:
+		Add focus.h
+
+2003-05-13  pgregory
+	* render/patch.h 1.25:
+		Disable linear patch's ability to generate normals, as it fails
+		at the moment in the case of a degenrate patch. Leave it to the
+		u-poly grid until a solution is found.
+
+	* render/micropolygon.cpp 1.73:
+	* render/micropolygon.h 1.35:
+		Fix point coding to use a long, as a short isn't enough to hold
+		the code, and the degenerate bit, Doh!.
+
+2003-05-12  pgregory
+	* render/imagebuffer.cpp 1.102:
+	* render/imagebuffer.h 1.35:
+	* render/micropolygon.cpp 1.72:
+	* render/micropolygon.h 1.34:
+		Apply "Artistic Style"
+		Some small changes to WIP DoF support.
+
+	* render/micropolygon.cpp 1.71:
+	* render/micropolygon.h 1.33:
+		Remove errant addition of vecpoints array, disable DoF code
+		until intention is understood.
+
+	* aqsis/aqsis.cpp 1.59:
+	* aqsltell/aqsltell.cpp 1.11:
+	* libaqsistypes/color.h 1.10:
+	* libaqsistypes/file.h 1.9:
+	* libaqsistypes/ilog.h 1.9:
+	* libaqsistypes/imtable.h 1.2:
+	* libaqsistypes/log.cpp 1.11:
+	* libaqsistypes/log.h 1.16:
+	* libaqsistypes/matrix.cpp 1.9:
+	* libaqsistypes/matrix.h 1.8:
+	* libaqsistypes/mtable.cpp 1.9:
+	* libaqsistypes/mtable.h 1.10:
+	* libaqsistypes/plugins.cpp 1.7:
+	* libaqsistypes/plugins.h 1.4:
+	* libaqsistypes/posix/file_system.cpp 1.5:
+	* libaqsistypes/sstring.cpp 1.7:
+	* libaqsistypes/win32/intel/file_system.cpp 1.5:
+	* libcodegenvm/codegenvm.cpp 1.5:
+	* libcodegenvm/codegenvm.h 1.2:
+	* libcodegenvm/vmdatagather.cpp 1.5:
+	* libcodegenvm/vmdatagather.h 1.3:
+	* libcodegenvm/vmoutput.cpp 1.20:
+	* libcodegenvm/vmoutput.h 1.10:
+	* libddmsimple/ddmsimple.cpp 1.11:
+	* libddmsock/ddmsock.cpp 1.28:
+	* libddmsock/ddmsock.h 1.9:
+	* libri2rib/outstream.cpp 1.10:
+	* libri2rib/ri.h 1.3:
+	* librib2/bdec.cpp 1.10:
+	* librib2/bdec.h 1.7:
+	* librib2/librib.cpp 1.27:
+	* librib2/librib.h 1.21:
+	* librib2/parserstate.h 1.5:
+	* librib2/tests/ribscanner.cpp 1.6:
+	* librib2ri/librib2ri.cpp 1.15:
+	* librib2ri/librib2ri.h 1.13:
+	* librib2stream/librib2stream.cpp 1.16:
+	* librib2stream/librib2stream.h 1.12:
+	* libshaderexecenv/shadeops.cpp 1.37:
+	* libshaderexecenv/shaderexecenv.cpp 1.10:
+	* libshaderexecenv/shaderexecenv.h 1.19:
+		Apply "Artistic Style"
+
+2003-05-12  tshead
+	* libcodegenvm/codegenvm.cpp 1.4:
+	* libcodegenvm/vmoutput.h 1.9:
+		* Fix: aqslcomp was ignoring the -o option
+
+2003-05-11  pgregory
+	* render/ri.cpp 1.181:
+	* render/subdivision2.cpp 1.22:
+	* render/subdivision2.h 1.18:
+		Support deformation motion blur on subdivision surfaces.
+
+	* render/ri.cpp 1.180:
+		Fix reference counting of poly surfaces and subdivision.
+
+	* render/bucket.cpp 1.5:
+	* render/curves.cpp 1.13:
+	* render/curves.h 1.10:
+	* render/ri.cpp 1.182:
+	* render/surface.h 1.44:
+		Fix a bug in the reference counting of PatchMesh
+		Fix a bug in the surface insertion routine for buckets, wouldn't always addref the surface.
+		Fix problems with deformation motion blur on curves, where individual keyframes weren't being split in the same way. No split decisions are made in Diceable() and cached as all other surfaces.
+
+2003-05-11  mw_matti
+	* render/focus.h 1.1:
+		needed by DoF
+
+	* render/imagebuffer.cpp 1.101:
+	* render/imagepixel.h 1.3:
+	* render/libaqsis.dsp 1.53:
+	* render/micropolygon.cpp 1.70:
+	* render/micropolygon.h 1.32:
+		DoF implentation part II
+
+2003-05-10  pgregory
+	* render/points.cpp 1.19:
+		Convert micro poly grid points to raster space during split.
+
+2003-05-09  pgregory
+	* render/bucket.cpp 1.4:
+	* render/imagebuffer.cpp 1.100:
+	* render/isurface.h 1.11:
+	* render/points.cpp 1.18:
+	* render/points.h 1.12:
+	* render/ri.cpp 1.179:
+	* render/stats.cpp 1.27:
+	* render/surface.h 1.43:
+		Fix some problems with memory leaks and addref/release orders
+		with RiPoints. Need to look at all other primitive/motionblur
+		combinations to ensure that all else is OK.
+
+2003-05-08  pgregory
+	* render/ri.cpp 1.178:
+	* render/subdivision2.cpp 1.21:
+	* render/subdivision2.h 1.17:
+		Incorporate Andy Gill's changes to support variable sharpness
+		creases.
+
+2003-05-07  pgregory
+	* render/points.cpp 1.17:
+	* render/points.h 1.11:
+	* render/ri.cpp 1.176:
+		Implement deformation motion blur on RiPoints.
+
+	* render/ri.cpp 1.177:
+		Fix bug in transformation of patch mesh.
+
+2003-05-06  pgregory
+	* render/graphicsstate.cpp 1.5:
+	* render/graphicsstate.h 1.6:
+	* render/imagebuffer.cpp 1.99:
+	* render/micropolygon.cpp 1.69:
+	* render/micropolygon.h 1.31:
+	* render/polygon.cpp 1.38:
+	* render/polygon.h 1.27:
+	* render/ri.cpp 1.175:
+	* render/subdivision2.cpp 1.20:
+	* render/surface.h 1.42:
+		First stage implementation of deformation motion blur.
+
+2003-05-05  pgregory
+	* libslparse/typecheck.cpp 1.9:
+		Fix bug. When typechecking the ternary conditional operator, 
+		the conditional expression wasn't being checked.
+
+2003-05-04  pgregory
+	* libslxargs/slx.cpp 1.23:
+		Fix bug, wouldn't process last path in searchpath.
+
+	* render/curves.h 1.9:
+	* render/graphicsstate.cpp 1.4:
+	* render/graphicsstate.h 1.5:
+	* render/imagebuffer.cpp 1.98:
+	* render/libaqsis.dsp 1.52:
+	* render/nurbs.h 1.21:
+	* render/patch.h 1.24:
+	* render/points.cpp 1.16:
+	* render/points.h 1.10:
+	* render/polygon.h 1.26:
+	* render/procedural.h 1.6:
+	* render/quadrics.h 1.20:
+	* render/ri.cpp 1.174:
+	* render/subdivision2.h 1.16:
+	* render/surface.h 1.41:
+	* render/teapot.h 1.7:
+		Fix bug in Points, presumed "constantwidth" has been specified.
+		Fix occlusion cull to not perform cull check if surface is crossing eyeplane.
+		Implement first stages of deformation motion blur support structure.
+
 2003-05-02  pgregory
 	* aqsis.spec 1.2:
 		Removed reference to ribber.cfg
