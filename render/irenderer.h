@@ -4,8 +4,8 @@
  *	@author	Authors name
  *	@brief	Declare the common interface structure for a Renderer core class.
  *
- *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/10/31 11:51:11 $
+ *	Last change by:		$Author: minty $
+ *	Last change date:	$Date: 2003/02/14 19:15:26 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___irenderer_Loaded___
@@ -16,6 +16,7 @@
 START_NAMESPACE( Aqsis )
 
 struct IqTextureMap;
+struct IqLog;
 
 struct IqRenderer
 {
@@ -63,6 +64,8 @@ struct IqRenderer
 
 
 	virtual	TqBool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name ) = 0;
+
+	virtual IqLog& Logger() = 0;
 
 };
 
