@@ -555,7 +555,7 @@ TqInt CqLinearCurveSegment::SplitToPatch(
     pPatch->AddPrimitiveVariable(
         new CqParameterTypedVertex <
         CqVector4D, type_hpoint, CqVector3D
-        > ( "P", 0 )
+        > ( "P", 1 )
     );
     pPatch->P() ->SetSize( 4 );
     pPatch->P()->pValue( 0 )[0] = static_cast<CqVector3D>( P()->pValue( 0 )[0] ) + widthOffset0;
