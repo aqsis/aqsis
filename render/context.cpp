@@ -26,6 +26,7 @@
 #include	"aqsis.h"
 
 #include "context.h"
+#include "lights.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -118,6 +119,11 @@ CqWorldContext::CqWorldContext(CqContext* pconParent) : CqContext(pconParent)
 
 CqWorldContext::~CqWorldContext()
 {
+	// Delete any context lights
+	std::vector<CqLightsource*>::iterator i;
+	for(i=m_apWorldLights.begin(); i!=m_apWorldLights.end(); i++)
+		delete(*i);
+
 	m_pattrCurrent->Release();
 	m_ptransCurrent->Release();
 }

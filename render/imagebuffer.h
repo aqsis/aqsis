@@ -380,6 +380,14 @@ class _qShareC	CqImageBuffer
 								 * \return Integer display mode as a member of enum Mode.
 								 */
 	_qShareM			TqInt	DisplayMode() const		{return(m_DisplayMode);}
+								/** Get the index of the bucket currently being processed.
+								 * \return Integer bucket index.
+								 */
+	_qShareM			TqInt	iCurrentBucket() const	{return(m_iCurrentBucket);}
+								/** Set the current bucket index.
+								 * \param iBucket Integer index of the bucket being processed.
+								 */
+	_qShareM			void	SetiCurrentBucket(TqInt iBucket) {m_iCurrentBucket=iBucket;}
 
 	_qShareM			void	DeleteImage();
 	_qShareM			void	SaveImage(const char* strName);
@@ -416,6 +424,7 @@ class _qShareC	CqImageBuffer
 			TqInt				m_cYBuckets;		///< Integer vertical bucket count.
 			TqInt				m_XBucketSize;		///< Integer horizontal bucket size.
 			TqInt				m_YBucketSize;		///< Integer vertical bucket size.
+			TqInt				m_iCurrentBucket;	///< Index of the bucket currently being processed.
 			TqInt				m_PixelXSamples;	///< Integer horizontal sample per pixel count.
 			TqInt				m_PixelYSamples;	///< Integer vertical sample per pixel count.
 			TqInt				m_FilterXWidth;		///< Integer horizontal pixel filter width in pixels.

@@ -67,20 +67,28 @@ void CqStats::InitialiseFrame()
 {
 	m_cMPGsAllocated         = 0;
 	m_cMPGsDeallocated       = 0;
+	m_cMPGsCurrent			 = 0;
+	m_cMPGsPeak              = 0;
 	m_cSamples               = 0;
 	m_cSampleBoundHits       = 0;
 	m_cSampleHits            = 0;
 	m_cVariablesAllocated    = 0;
 	m_cVariablesDeallocated  = 0;
+	m_cVariablesCurrent      = 0;
+	m_cVariablesPeak         = 0;
 	m_cParametersAllocated   = 0;
 	m_cParametersDeallocated = 0;
+	m_cParametersCurrent     = 0;
+	m_cParametersPeak        = 0;
 	m_cGridsAllocated        = 0;
 	m_cGridsDeallocated      = 0;
+	m_cGridsCurrent          = 0;
+	m_cGridsPeak             = 0;
 	m_cGPrims                = 0;
 	m_cTotalGPrims           = 0;
-  m_cCulledGPrims          = 0;
+	m_cCulledGPrims          = 0;
 
-  m_timeTotalFrame         = 0;
+	m_timeTotalFrame         = 0;
 	m_frameTimerRunning      = TqFalse;
 	m_timeSurface            = 0;
 	m_timeDisplacement       = 0;
@@ -151,11 +159,13 @@ void CqStats::PrintStats(TqInt level) const
 		MSG << "Total GPrims:\t" << m_cTotalGPrims << " (" << m_cCulledGPrims << " culled)" << std::endl;
 
 		MSG << "Grids:    \t" << m_cGridsAllocated << " created / ";
-		MSG << m_cGridsAllocated-m_cGridsDeallocated << " remaining  (";
+		MSG << m_cGridsAllocated-m_cGridsDeallocated << " remaining  / ";
+		MSG << m_cGridsPeak << " peak  (";
 		MSG << m_cCulledGrids << " culled)" << std::endl;
 
 		MSG << "Micropolygons: \t" << m_cMPGsAllocated << " created / ";
-		MSG << m_cMPGsAllocated-m_cMPGsDeallocated << " remaining (+ ";
+		MSG << m_cMPGsAllocated-m_cMPGsDeallocated << " remaining / ";
+		MSG << m_cMPGsPeak << " peak (+ ";
 		MSG << m_cCulledMPGs << " culled)" << std::endl;
 
 		MSG << "Sampling: \t" << m_cSamples << " samples" << std::endl;
@@ -172,10 +182,12 @@ void CqStats::PrintStats(TqInt level) const
 
 		MSG << "Variables: \t";
 		MSG << m_cVariablesAllocated << " created / ";
-		MSG << m_cVariablesAllocated-m_cVariablesDeallocated << " remaining" << std::endl;
+		MSG << m_cVariablesAllocated-m_cVariablesDeallocated << " remaining / ";
+		MSG << m_cVariablesPeak << " peak" << std::endl;
 
 		MSG << "Parameters: \t" << m_cParametersAllocated << " created / ";
-		MSG << m_cParametersAllocated-m_cParametersDeallocated << " remaining" << std::endl;
+		MSG << m_cParametersAllocated-m_cParametersDeallocated << " remaining (5 expected) / ";
+		MSG << m_cParametersPeak << " peak" << std::endl;
 		MSG << std::ends;
 
 		CqString strMSG(MSG.str());

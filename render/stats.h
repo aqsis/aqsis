@@ -93,10 +93,17 @@ class CqStats
 
 					/** Increase the micropolygons allocated count by 1.
 					 */
-			void	IncMPGsAllocated()	{ m_cMPGsAllocated++; }
+			void	IncMPGsAllocated()	{
+											m_cMPGsAllocated++;
+											m_cMPGsCurrent++;
+											m_cMPGsPeak=(m_cMPGsCurrent>m_cMPGsPeak)?m_cMPGsCurrent:m_cMPGsPeak;
+										}
 					/** Increase the micropolygons deallocated count by 1.
 					 */
-			void	IncMPGsDeallocated()	{ m_cMPGsDeallocated++; }
+			void	IncMPGsDeallocated()	{ 
+												m_cMPGsDeallocated++; 
+												m_cMPGsCurrent--;
+											}
 					/** Increase the sample count by 1.
 					 */
 			void	IncSamples()			{ m_cSamples++; }
@@ -105,25 +112,46 @@ class CqStats
 			void	IncSampleBoundHits()	{ m_cSampleBoundHits++; }
 					/** Increase the sample hit count by 1.
 					 */
-			void	IncSampleHits()		{ m_cSampleHits++; }
+			void	IncSampleHits()			{ m_cSampleHits++; }
 					/** Increase the shader variables allocated count by 1.
 					 */
-			void	IncVariablesAllocated()	{ m_cVariablesAllocated++; }
+			void	IncVariablesAllocated()	{ 
+												m_cVariablesAllocated++; 
+												m_cVariablesCurrent++;
+												m_cVariablesPeak=(m_cVariablesCurrent>m_cVariablesPeak)?m_cVariablesCurrent:m_cVariablesPeak;
+											}
 					/** Increase the shader variables deallocated count by 1.
 					 */
-			void	IncVariablesDeallocated()	{ m_cVariablesDeallocated++; }
+			void	IncVariablesDeallocated(){
+												m_cVariablesDeallocated++; 
+												m_cVariablesCurrent--;
+											}
 					/** Increase the surface parameters allocated count by 1.
 					 */
-			void	IncParametersAllocated()	{ m_cParametersAllocated++;}
+			void	IncParametersAllocated() { 
+												m_cParametersAllocated++;
+												m_cParametersCurrent++;
+												m_cParametersPeak=(m_cParametersCurrent>m_cParametersPeak)?m_cParametersCurrent:m_cParametersPeak;
+											}
 					/** Increase the surface parameters deallocated count by 1.
 					 */
-			void	IncParametersDeallocated(){ m_cParametersDeallocated++; }
+			void	IncParametersDeallocated(){ 
+												m_cParametersDeallocated++; 
+												m_cParametersCurrent--;
+											}
 					/** Increase the micropolygrids allocated count by 1.
 					 */
-			void	IncGridsAllocated()	{ m_cGridsAllocated++; }
+			void	IncGridsAllocated()		{
+												m_cGridsAllocated++; 
+												m_cGridsCurrent++;
+												m_cGridsPeak=(m_cGridsCurrent>m_cGridsPeak)?m_cGridsCurrent:m_cGridsPeak;
+											}
 					/** Increase the micropolygrids deallocated count by 1.
 					 */
-			void	IncGridsDeallocated()	{ m_cGridsDeallocated++; }
+			void	IncGridsDeallocated()	{
+												m_cGridsDeallocated++; 
+												m_cGridsCurrent--;
+											}
 					/** Increase the GPrim count by 1.
 					    These counter should only be increased when adding a toplevel gprim
 							(e.g. in the Ri...() calls).
@@ -208,20 +236,28 @@ class CqStats
 			
 			TqInt	m_cMPGsAllocated;				///< Count of micropolygons allocated.
 			TqInt	m_cMPGsDeallocated;				///< Count of microplygons dallocated.
+			TqInt	m_cMPGsCurrent;					///< Current count of allocated MPGs.
+			TqInt	m_cMPGsPeak;					///< Peak count of allocated MPGs.
 			TqInt	m_cSamples;						///< Count of samples tested.
 			TqInt	m_cSampleBoundHits;				///< Count of sample boundary hits.
 			TqInt	m_cSampleHits;					///< Count of sample micropolygon hits.
 			TqInt	m_cVariablesAllocated;			///< Count of shader variables allocated.
 			TqInt	m_cVariablesDeallocated;		///< Count of shader variables deallocated.
+			TqInt	m_cVariablesCurrent;			///< Current count of variables allocated.
+			TqInt	m_cVariablesPeak;				///< Peak count of variables allocated.
 			TqInt	m_cParametersAllocated;			///< Count of surface parameters allocated.
 			TqInt	m_cParametersDeallocated;		///< Count of surface parameters deallocated.
+			TqInt	m_cParametersCurrent;			///< Current count of parameters allocated.
+			TqInt	m_cParametersPeak;				///< Peak count of parameters allocated.
 			TqInt	m_cGridsAllocated;				///< Count of micropolygrids allocated.
 			TqInt	m_cGridsDeallocated;			///< Count of micropolygrids deallocated.
+			TqInt	m_cGridsCurrent;				///< Current count of grids allocated.
+			TqInt	m_cGridsPeak;					///< Peak count of grids allocated.
 			TqInt	m_cGPrims;						///< Count of GPrims.
-			TqInt	m_cTotalGPrims;				///< Count of total GPrims (including gprims resulting from splits).
-			TqInt m_cCulledGPrims;      ///< Count of culled GPrims.
-			TqInt m_cCulledGrids;       ///< Count of culled micro poly grids.
-			TqInt m_cCulledMPGs;        ///< Count of culled micro polys.
+			TqInt	m_cTotalGPrims;					///< Count of total GPrims (including gprims resulting from splits).
+			TqInt	m_cCulledGPrims;				///< Count of culled GPrims.
+			TqInt	m_cCulledGrids;					///< Count of culled micro poly grids.
+			TqInt	m_cCulledMPGs;					///< Count of culled micro polys.
 
 			time_t	m_timeTotal;				 ///< Total time spent on the entire animation.
 			time_t  m_timeTotalFrame;    ///< Time spent on processing one individual frame.

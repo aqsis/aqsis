@@ -264,9 +264,6 @@ RtVoid	RiEnd()
 {
 	QGetRenderContext()->DeleteMainContext();
 
-	// Flush the shader cache.
-	QGetRenderContext()->FlushShaders();
-
 	// Flush the image cache.
 	CqTextureMap::FlushCache();
 
@@ -384,19 +381,24 @@ RtVoid	RiWorldEnd()
 	
 	// Render the world
 	QGetRenderContext()->RenderWorld();
+
+	// Delete the world context
 	QGetRenderContext()->DeleteWorldContext();
 
-  // Stop the frame timer
-  QGetRenderContext()->Stats().StopFrameTimer();
+	// Stop the frame timer
+	QGetRenderContext()->Stats().StopFrameTimer();
 
-  // Get the verbosity level from the options...
+	// Get the verbosity level from the options...
 	TqInt verbosity=0;
 	const TqInt* poptEndofframe=QGetRenderContext()->optCurrent().GetIntegerOption("statistics","endofframe");
 	if(poptEndofframe!=0)
 		verbosity=poptEndofframe[0];
 
-  // ...and print the statistics.
-  QGetRenderContext()->Stats().PrintStats(verbosity);
+	// Flush the shader cache.
+	QGetRenderContext()->FlushShaders();
+
+	// ...and print the statistics.
+	QGetRenderContext()->Stats().PrintStats(verbosity);
 
 	return;
 }
@@ -1312,6 +1314,9 @@ RtLightHandle	RiLightSourceV(const char *name, PARAMETERLIST)
 			pShader->SetValue(token,static_cast<TqPchar>(value));
 		}
 		QGetRenderContext()->pattrWriteCurrent()->AddLightsource(pNew);
+
+		// Add it as a Context light as well in case we are in a context that manages it's own lights.
+		QGetRenderContext()->pconCurrent()->AddContextLightSource(pNew);
 		return(reinterpret_cast<RtLightHandle>(pNew));
 	}
 	return(0);

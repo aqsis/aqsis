@@ -1053,7 +1053,7 @@ void CqImageBuffer::PostSurface(CqBasicSurface* pSurface)
 		if(YMinb<0)	YMinb=0;
 		iBucket=(YMinb*m_cXBuckets)+XMinb;
 	}
-	
+
 	m_aBuckets[iBucket].AddGPrim(pSurface);
 
 }
@@ -1127,6 +1127,7 @@ void CqImageBuffer::AddMPG(CqMicroPolygonBase* pmpgNew)
 {
 	// Find out which bucket(s) the mpg belongs to.
 	CqBound	B(pmpgNew->Bound());
+	pmpgNew->AddRef();
 
 	if(B.vecMax().x()<m_CropWindowXMin-m_FilterXWidth/2 || B.vecMax().y()<m_CropWindowYMin-m_FilterYWidth/2 ||
 	   B.vecMin().x()>m_CropWindowXMax+m_FilterXWidth/2 || B.vecMin().y()>m_CropWindowYMax+m_FilterYWidth/2)
@@ -1156,14 +1157,19 @@ void CqImageBuffer::AddMPG(CqMicroPolygonBase* pmpgNew)
 			{
 				if(iXB>=0 && iXB<m_cXBuckets)
 				{
-					m_aBuckets[(iYB*m_cXBuckets)+iXB].AddMPG(pmpgNew);
-					pmpgNew->AddRef();
+					TqInt iBkt = (iYB*m_cXBuckets)+iXB;
+					if(iBkt>=iCurrentBucket())
+					{
+						m_aBuckets[iBkt].AddMPG(pmpgNew);
+						pmpgNew->AddRef();
+					}
 				}
 				iXB+=1;
 			}while(iXB<=iXBb);
 		}
 		iYB+=1;
 	}while(iYB<=iYBb);
+	pmpgNew->Release();
 }
 
 
@@ -1537,6 +1543,7 @@ void CqImageBuffer::RenderImage()
 	TqInt iBucket;
 	for(iBucket=0; iBucket<m_cXBuckets*m_cYBuckets; iBucket++)
 	{
+		SetiCurrentBucket(iBucket);
 		// Prepare the bucket.
 		CqBucket::Clear();
 		CqVector2D bPos=Position(iBucket);

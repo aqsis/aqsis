@@ -142,6 +142,12 @@ class CqContext
 						 */
 				const	CqMatrix&	matCurrent(TqFloat time=0.0f) const	{return(ptransCurrent()->matObjectToWorld(time));}
 
+	virtual		void	AddContextLightSource(CqLightsource* pLS)	
+														{
+															if(pconParent())
+																pconParent()->AddContextLightSource(pLS);
+														}
+
 //	protected:
 			CqAttributes* m_pattrCurrent;		///< The current attributes.
 			CqTransform*  m_ptransCurrent;		///< The current transformation.
@@ -251,7 +257,13 @@ class CqWorldContext : public CqContext
 						 */
 	virtual			CqOptions&		optCurrent()		{return(pconParent()->optCurrent());}
 
+	virtual		void	AddContextLightSource(CqLightsource* pLS)
+														{
+															m_apWorldLights.push_back(pLS);
+														}
+
 	private:
+		std::vector<CqLightsource*>	m_apWorldLights;
 };
 
 
