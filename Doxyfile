@@ -127,7 +127,7 @@ SOURCE_BROWSER         = YES
 # Setting the INLINE_SOURCES tag to YES will include the body 
 # of functions and classes directly in the documentation. 
 
-INLINE_SOURCES         = NO
+INLINE_SOURCES         = YES
 
 # Setting the STRIP_CODE_COMMENTS tag to YES (the default) will instruct 
 # doxygen to hide any special comment blocks from generated source code 
@@ -197,7 +197,7 @@ DISTRIBUTE_GROUP_DOC   = NO
 # The TAB_SIZE tag can be used to set the number of spaces in a tab. 
 # Doxygen uses this value to replace tabs by spaces in code fragments. 
 
-TAB_SIZE               = 4
+TAB_SIZE               = 2
 
 # The ENABLE_SECTIONS tag can be used to enable conditional 
 # documentation sections, marked by \if sectionname ... \endif. 
@@ -297,7 +297,8 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces. 
 
-INPUT                  = ./render ./file ./framebuffer ./slcomp ./slpp ./shadowmap ./cribber ./ribber ./libarg ./texer
+#INPUT                  = ./render ./file ./framebuffer ./slcomp ./slpp ./shadowmap ./cribber ./ribber ./libarg ./texer
+INPUT                  = .
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -310,7 +311,7 @@ FILE_PATTERNS          = *.h *.cpp
 # should be searched for input files as well. Possible values are YES and NO. 
 # If left blank NO is used. 
 
-RECURSIVE              = NO
+RECURSIVE              = YES
 
 # The EXCLUDE tag can be used to specify files and/or directories that should 
 # excluded from the INPUT source files. This way you can easily exclude a 
@@ -462,7 +463,7 @@ ENUM_VALUES_PER_LINE   = 4
 # JavaScript and frames is required (for instance Netscape 4.0+ 
 # or Internet explorer 4.0+). 
 
-GENERATE_TREEVIEW      = YES
+GENERATE_TREEVIEW      = NO
 
 # If the treeview is enabled (see GENERATE_TREEVIEW) then this tag can be 
 # used to set the initial width (in pixels) of the frame in which the tree 
@@ -675,7 +676,7 @@ PERL_PATH              = /usr/bin/perl
 # toolkit from AT&T and Lucent Bell Labs. The other options in this section 
 # have no effect if this option is set to NO (the default) 
 
-HAVE_DOT               = YES
+HAVE_DOT               = NO
 
 # If the CLASS_GRAPH and HAVE_DOT tags are set to YES then doxygen 
 # will generate a graph for each documented class showing the direct and 
