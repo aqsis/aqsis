@@ -1,4 +1,5 @@
 SUBDIRS = . tests
+EXTRA_DIST = aqsl test.sl
 
 bin_PROGRAMS = aqslcomp
 bin_SCRIPTS = aqsl 
