@@ -309,7 +309,7 @@ void CqSurfaceNURBS::DersBasisFunctions( TqFloat u, TqUint i, std::vector<TqFloa
 /** Evaluate the nurbs surface at parameter values u,v.
  */
 
-CqVector4D	CqSurfaceNURBS::EvaluateNormal( TqFloat u, TqFloat v )
+CqVector4D	CqSurfaceNURBS::EvaluateWithNormal( TqFloat u, TqFloat v, CqVector4D& P )
 {
 	CqVector4D N;
 	TqInt d = 1;	// Default to 1st order derivatives.
@@ -355,6 +355,9 @@ CqVector4D	CqSurfaceNURBS::EvaluateNormal( TqFloat u, TqFloat v )
 	}
 	N = SKL[1][0]%SKL[0][1];
 	N.Unit();
+
+	P = SKL[0][0];
+
 	return( N );	
 }
 
@@ -1344,13 +1347,14 @@ void CqSurfaceNURBS::NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize
 /** Generate the vertex normals if not specified.
  */
 
-void CqSurfaceNURBS::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
+void CqSurfaceNURBS::DicePointsAndNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pP, IqShaderData* pNormals )
 {
 	// Get the handedness of the coordinate system (at the time of creation) and
 	// the coordinate system specified, to check for normal flipping.
 	TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
 
 	CqVector3D	N;
+	CqVector4D  P;
 	TqInt iv, iu;
 	for ( iv = 0; iv <= vDiceSize; iv++ )
 	{
@@ -1363,9 +1367,10 @@ void CqSurfaceNURBS::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize,
 						 * ( m_auKnots[ m_cuVerts ] - m_auKnots[ m_uOrder - 1 ] )
 						 + m_auKnots[ m_uOrder - 1 ];
 			TqInt igrid = ( iv * ( uDiceSize + 1 ) ) + iu;
-			N = EvaluateNormal( su, sv );
+			N = EvaluateWithNormal( su, sv, P );
 			N = ( O == OrientationLH )? N : -N;
 			pNormals->SetNormal( N, igrid );
+			pP->SetPoint( P, igrid );
 		}
 	}
 }
@@ -1573,6 +1578,88 @@ TqBool	CqSurfaceNURBS::Diceable()
 	}
 	else
 		return ( TqTrue );
+}
+
+
+//---------------------------------------------------------------------
+/** Dice the patch into a mesh of micropolygons.
+ */
+
+CqMicroPolyGridBase* CqSurfaceNURBS::Dice()
+{
+	// Create a new CqMicorPolyGrid for this patch
+	CqMicroPolyGrid * pGrid = new CqMicroPolyGrid( m_uDiceSize, m_vDiceSize, this );
+
+	TqInt lUses = Uses();
+
+	// Dice the primitive variables.
+	if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) ) 
+	{
+		if( bHasCs() )
+			Cs()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
+		else if( NULL != pAttributes()->GetColorAttribute("System", "Color") )
+			pGrid->Cs()->SetColor( pAttributes()->GetColorAttribute("System", "Color")[0]);
+		else
+			pGrid->Cs()->SetColor( CqColor( 1,1,1 ) );
+	}
+
+	if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) ) 
+	{
+		if( bHasOs() )
+			Os()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
+		else if( NULL != pAttributes()->GetColorAttribute("System", "Opacity") )
+			pGrid->Os()->SetColor( pAttributes()->GetColorAttribute("System", "Opacity")[0]);
+		else
+			pGrid->Os()->SetColor( CqColor( 1,1,1 ) );
+	}
+
+	if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && bHass() ) 
+		s()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->s() );
+
+	if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && bHast() ) 
+		t()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
+
+	if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && bHasu() ) 
+		u()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->u() );
+
+	if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && bHasv() ) 
+		v()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->v() );
+	
+
+	if( NULL != pGrid->P() )
+	{
+		if( USES( lUses, EnvVars_N ) && ( NULL != pGrid->Ng() ) && !bHasN() )
+		{
+			DicePointsAndNormals( m_uDiceSize, m_vDiceSize, pGrid->P(), pGrid->Ng() );
+			pGrid->SetbGeometricNormals( TqTrue );
+		}
+		else
+			NaturalInterpolate( &P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
+	}
+
+	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
+	if ( USES( lUses, EnvVars_N ) && ( NULL != pGrid->N() ) && bHasN() )
+	{
+		N().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->N() );
+		pGrid->SetbShadingNormals( TqTrue );
+	}
+
+	// Now we need to dice the user specified parameters as appropriate.
+	std::vector<CqParameter*>::iterator iUP;
+	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
+	{
+		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
+		if( NULL != pGrid->pAttributes()->pshadSurface() )
+			pGrid->pAttributes()->pshadSurface()->SetArgument( (*iUP), this );
+
+		if( NULL != pGrid->pAttributes()->pshadDisplacement() )
+			pGrid->pAttributes()->pshadDisplacement()->SetArgument( (*iUP), this );
+
+		if( NULL != pGrid->pAttributes()->pshadAtmosphere() )
+			pGrid->pAttributes()->pshadAtmosphere()->SetArgument( (*iUP), this );
+	}
+
+	return ( pGrid );
 }
 
 
