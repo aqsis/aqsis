@@ -1,4 +1,4 @@
-MAINDIRS = all images libaqsistypes libcodegenvm libdd libddmsimple libddmsock filebuffer librib2 librib2ri librib2stream libslparse render ribfiles shadowmap slpp teqser aqsl shaders aqsis libri2rib aqsltell releasearchive libslxargs
+MAINDIRS = all images libaqsistypes libcodegenvm libdd libddmsimple libddmsock filebuffer librib2 librib2ri librib2stream libslparse render ribfiles shadowmap slpp teqser aqsl shaders aqsis libri2rib aqsltell releasearchive libslxargs libshadervm
 
 if GLUT
 GLUTDIRS = framebuffer_glut framebuffer_glut_z
