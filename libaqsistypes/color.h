@@ -49,7 +49,7 @@ class _qShareC	CqColor
 {
 	public:
 		/// Default constructor.
-		_qShareM	CqColor()
+		_qShareM	CqColor() : m_fBlue( 0.0f ), m_fGreen( 0.0f ), m_fRed( 0.0f )
 		{}
 		/** Component constructor
 		 * \param fRed red component 0.0-1.0
