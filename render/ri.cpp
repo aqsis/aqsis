@@ -3454,6 +3454,14 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
         {
             TqInt v;
             sumnVerts += nverts[ igloop ];
+			// Check for degenerate loops.
+			if( nverts[ igloop ] < 3 )
+			{
+                CqString objname( "unnamed" );
+                const CqString* pattrName = QGetRenderContext()->pattrCurrent()->GetStringAttribute( "identifier", "name" );
+                if ( pattrName != 0 ) objname = pattrName[ 0 ];
+                std::cerr << warning << "Degenerate loop in PointsGeneralPolygons object \"" << objname.c_str() << "\"" << std::endl;
+			}
             for ( v = 0; v < nverts[ igloop ]; v++ )
             {
                 cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
