@@ -1,3 +1,570 @@
+2002-05-24 12:19  pgregory
+
+	* librib2/librib.h, librib2/parser.y, librib2ri/librib2ri.cpp,
+	librib2ri/librib2ri.h, librib2stream/librib2stream.cpp,
+	librib2stream/librib2stream.h: Fix RiBlobby support in the stream
+	RI library to fix 'make check' issues.
+
+2002-05-23 09:21  pgregory
+
+	* configure.in, render/Makefile.am: Updates ready for a release
+
+2002-05-23 09:18  pgregory
+
+	* librib2stream/librib2stream.cpp: Added implementation of the
+	procedurals so that the test can link.
+
+2002-05-22 22:23  pgregory
+
+	* librib2/librib.h, librib2/parser.y, librib2/scanner.l,
+	librib2ri/librib2ri.cpp, librib2ri/librib2ri.h, render/plugins.cpp,
+	render/plugins.h, render/ri.cpp: Changes from Michel Joron, to add
+	parser support for RiBlobby, and to add logfile support to the
+	plugin class.
+
+2002-05-22 12:14  pgregory
+
+	* render/: Makefile.am, plugins.cpp, ri.cpp, texturemap.cpp: Fixes
+	to latest changes to work under Posix.
+
+2002-05-20 22:27  pgregory
+
+	* render/: libaqsis.dsp, plugins.cpp, plugins.h: Add missing files
+	from Michels plugins update.
+
+2002-05-19 00:12  dsward2
+
+	* libslxargs/slx.cpp: Added const to some static strings (e.g.
+	SLX_TYPE_UNKNOWN_STR).	Declared GetShaderAreRecAt and
+	GetShaderArgRecByName as static functions.
+
+2002-05-19 00:08  dsward2
+
+	* libshadervm/shadervm.cpp: Modify local variable names to avoid
+	conflict with Mac OS X gcc preprocessor.  In general, variables
+	named with an underscore followed by a single capital letter have
+	been modified.	For example, "_A" is renamed "_aq_A".
+
+2002-05-19 00:02  dsward2
+
+	* libshaderexecenv/shaderexecenv.h: Modify macro expressions to
+	avoid conflict with Mac OS X gcc preprocessor.	"_##Val" is changed
+	to "_aq_##Val" in GETFLOAT, GETPOINT, GETVECTOR, GETNORMAL,
+	GETCOLOR, GETSTRING, GETBOOLEAN, GETMATRIX, FLOAT, POINT, VECTOR,
+	NORMAL, COLOR, STRING, BOOLEAN, MATRIX macro definitions
+
+2002-05-18 23:58  dsward2
+
+	* render/itexturemap.h: Add conditional include of local valarray
+	template for Mac OS X.	I hope Apple fixes this in the next release
+	of Project Builder
+
+2002-05-18 18:01  pgregory
+
+	* render/imagebuffer.cpp, render/imagers.cpp, render/libaqsis.dsp,
+	librib2/librib.h, librib2/parser.y, librib2ri/librib2ri.cpp,
+	librib2ri/librib2ri.h, librib2stream/librib2stream.cpp,
+	librib2stream/librib2stream.h, render/lights.cpp,
+	render/micropolygon.cpp, render/points.cpp, render/points.h,
+	render/ri.cpp, render/stats.cpp, render/stats.h, render/teapot.cpp,
+	render/texturemap.cpp, render/texturemap.h: More changes from
+	Michel Joron, implementation of CqPlugin, and preliminary work to
+	make procedurals work.
+
+2002-05-16 23:20  pgregory
+
+	* ribfiles/torus.rib: Use the new compression tags as a test.
+
+2002-05-16 23:16  pgregory
+
+	* filebuffer/filebuffer.cpp, libddmsimple/ddmsimple.cpp,
+	libddmsimple/ddmsimple.h, libddmsock/ddmsock.cpp,
+	libddmsock/ddmsock.h, libddmsock/displaydriver.h, librib2/bdec.cpp,
+	librib2/librib.cpp, librib2/librib.h, librib2/parser.y,
+	librib2/scanner.l, librib2ri/librib2ri.cpp, librib2ri/librib2ri.h,
+	librib2stream/librib2stream.cpp, render/iddmanager.h,
+	render/points.cpp, render/points.h, render/renderer.cpp,
+	render/renderer.h, render/ri.cpp, render/ri.h,
+	render/texturemap.cpp, render/texturemap.h,
+	librib2stream/librib2stream.h, teqser/teqser.cpp: Add Michel
+	Joron's changes to allow "compression" tag support for display
+	devices.  And his preliminary work on RiCurves and RiPoints
+	primitives.
+
+2002-05-15 15:46  pgregory
+
+	* Makefile.am, configure.in, aqsis/Makefile.am,
+	aqsltell/Makefile.am, libaqsistypes/Makefile.am,
+	libddmsimple/Makefile.am, libddmsimple/ddmsimple.cpp,
+	libddmsimple/ddmsimple.h, libddmsock/Makefile.am,
+	libshaderexecenv/Makefile.am, libshadervm/Makefile.am,
+	libslxargs/Makefile.am, render/Makefile.am, teqser/Makefile.am: Get
+	new shader separation and aqsltell implementation working under
+	Posix
+
+2002-05-14 04:53  pgregory
+
+	* Doxyfile, Renderer.dsw, doxygen.dsp, aqsl/aqsl_win.cpp,
+	aqsl/aqslcomp.cpp, filebuffer/filebuffer.cpp,
+	libaqsistypes/aqsis_types.h, libaqsistypes/bitvector.h,
+	libaqsistypes/color.cpp, libaqsistypes/color.h, libdd/dd.cpp,
+	libddmsock/ddmsock.cpp, libddmsock/ddmsock.h,
+	libddmsock/displaydriver.h, libri2rib/error.cpp,
+	render/attributes.cpp, render/attributes.h, render/imagers.cpp,
+	render/imagers.h, render/ishader.h, render/isurface.h,
+	render/parameters.h, render/rifile.h, render/stats.h,
+	render/texturemap.cpp, libshadervm/shadervm.h,
+	libslparse/funcdef.cpp, libslparse/funcdef.h,
+	libslparse/parsenode.cpp, libslparse/parsenode.h: Various updates
+	to the Doxygen documentation generation.
+
+2002-05-11 22:29  pgregory
+
+	* render/options.cpp: Fix error in macro usage, spotted by Doug
+	Ward.
+
+2002-05-09 15:50  pgregory
+
+	* aqsltell/aqsltell.c, aqsltell/aqsltell.cpp,
+	aqsltell/aqsltell.dsp, aqsltell/slxargstest.cpp,
+	libshadervm/shadervariable.h, libshadervm/shadervm.cpp,
+	libslxargs/slx.cpp, libslxargs/slx.h: Changes to aqsltell and
+	libslxargs to handle arrays, and output in the same format as
+	sloinfo and slctell.
+
+2002-05-09 08:14  pgregory
+
+	* aqsltell/aqsltell.dsp, aqsltell/slxargstest.cpp,
+	libshadervm/shaderstack.h, libshadervm/shadervariable.cpp,
+	libshadervm/shadervariable.h, libshadervm/shadervm.cpp,
+	libshadervm/shadervm.h, libslxargs/slx.cpp, render/ishader.h,
+	render/ishaderdata.h, render/shaders.h: Start to get aqsltell to
+	work with libslxargs.  Add extra functionality to shader variables
+	to identify if they are arguments to the shader or not.
+
+2002-05-08 08:23  pgregory
+
+	* libshaderexecenv/shadeops.cpp, libslxargs/slx.cpp,
+	aqsltell/slxargstest.cpp: Some more fixes to allow aqsltell to link
+	with minimum library requirements.
+
+2002-05-07 23:37  pgregory
+
+	* libaqsistypes/aqsis_types.h, libaqsistypes/libaqsistypes.dsp,
+	libshaderexecenv/libshaderexecenv.dsp,
+	libshaderexecenv/shadeops.cpp, libshaderexecenv/shaderexecenv.cpp,
+	libshaderexecenv/shaderexecenv.h, libshadervm/shadervariable.cpp,
+	libshadervm/shadervm.cpp, libshadervm/shadervm.h,
+	libslxargs/slx.cpp, render/attributes.cpp, render/attributes.h,
+	render/iattributes.h, render/irenderer.h, render/ishader.h,
+	render/ishaderexecenv.h, render/libaqsis.dsp, render/lights.h,
+	render/messages.cpp, render/messages.h, render/micropolygon.h,
+	render/nurbs.cpp, render/options.cpp, render/polygon.h,
+	render/renderer.cpp, render/renderer.h, render/ri.cpp,
+	render/rifile.h, render/shaders.h, render/surface.h,
+	render/transform.h: More letter/envolope abstraction for access to
+	core functionality. Almost at a point now where we can use the VM
+	without the core.
+
+2002-05-07 23:33  pgregory
+
+	* render/: ilightsource.h, isurface.h, itexturemap.h, itransform.h:
+	New interface structures for non invasive access to core
+	functionality.
+
+2002-05-07 23:30  pgregory
+
+	* libshaderexecenv/texturemap.cpp, libshaderexecenv/texturemap.h,
+	render/texturemap.cpp, render/texturemap.h: Move texture handling
+	back into the core where it belongs, other modules can access it
+	via the new interfaces. This decision is due to the nature of the
+	texture cacheing mechanism which is/will be very core specific.
+
+2002-05-07 23:28  pgregory
+
+	* libaqsistypes/spline.cpp, libaqsistypes/spline.h,
+	render/spline.cpp, render/spline.h: Move basic spline functionality
+	into the libaqsistypes utility library where other projects can use
+	it.
+
+2002-05-04 11:03  pgregory
+
+	* render/: options.cpp, options.h: Fix perspective calculation.
+
+2002-05-04 00:47  pgregory
+
+	* render/: attributes.cpp, micropolygon.cpp, ri.cpp: Fix motion
+	blur.  Fix s/t specification.  Fix defaults for common attributes.
+
+2002-05-03 18:01  pgregory
+
+	* render/libaqsis.dsp: Add new attributes interface file.
+
+2002-05-03 17:37  pgregory
+
+	* render/attributes.cpp: Default opacity is 1,1,1
+
+2002-05-03 17:18  pgregory
+
+	* libshaderexecenv/shadeops.cpp,
+	libshaderexecenv/shaderexecenv.cpp,
+	libshaderexecenv/shaderexecenv.h, render/attributes.cpp,
+	render/attributes.h, render/iattributes.h, render/ishaderexecenv.h,
+	render/micropolygon.cpp, render/micropolygon.h, render/nurbs.cpp,
+	render/options.cpp, render/patch.cpp, render/patch.h,
+	render/polygon.cpp, render/quadrics.cpp, render/ri.cpp,
+	render/subdivision.cpp, render/surface.cpp, render/teapot.cpp:
+	First stage abstraction/generalisation of default attribute access.
+
+2002-05-03 00:33  pgregory
+
+	* aqsis/aqsis.cpp, render/ishaderdata.h: Fix memory leak in shader.
+	 Add code to debug Windows version to dump memory leaks.
+
+2002-05-02 21:52  pgregory
+
+	* libshadervm/: shadervm.cpp, shadervm.h: Fix ambient lights.
+
+2002-05-02 17:40  pgregory
+
+	* libshaderexecenv/shaderexecenv.cpp, render/imagebuffer.cpp,
+	render/micropolygon.cpp, render/nurbs.cpp, render/patch.cpp,
+	render/quadrics.cpp, render/renderer.cpp, render/ri.cpp,
+	render/subdivision.cpp, render/surface.cpp: Fix various problems
+	with unspecified/not found shaders, now deals with this much
+	better.
+
+2002-05-02 13:38  pgregory
+
+	* libshaderexecenv/shadeops.cpp, libshadervm/shaderstack.h: Fix bug
+	(read: my stupid mistake missing out code) in array handling the
+	VM.
+
+2002-05-01 23:12  pgregory
+
+	* render/libaqsis.dsp: Begin abstracting the main renderer core via
+	an interface to allow external libraries to use it.
+
+2002-05-01 23:11  pgregory
+
+	* render/irenderer.h, libshaderexecenv/shadeops.cpp,
+	libshaderexecenv/texturemap.cpp, render/renderer.cpp,
+	render/renderer.h: Begin abstracting the main renderer core via an
+	interface for external libraries to access.
+
+2002-05-01 21:20  pgregory
+
+	* libshaderexecenv/shadeops.cpp, render/imagebuffer.cpp,
+	render/imagers.cpp, render/options.cpp, render/ri.cpp: Group some
+	common system options together for simplicity, and to match the sl
+	option request standards.
+
+2002-04-30 17:09  pgregory
+
+	* libshaderexecenv/shadeops.cpp, render/imagebuffer.cpp,
+	render/imagers.cpp, render/micropolygon.cpp, render/options.cpp,
+	render/options.h, render/ri.cpp: Change options to use a standard
+	method for both user defined, and system level options. Should
+	(eventually) mean we have a common access method to all options,
+	and sl can get at everything.
+
+2002-04-28 22:32  pgregory
+
+	* render/imagebuffer.cpp, render/imagers.cpp,
+	render/micropolygon.cpp, render/options.cpp, render/options.h,
+	render/parameters.cpp, render/ri.cpp, Renderer.dsw,
+	libshaderexecenv/shadeops.cpp: Change option handler to use common
+	method for representing userdefined options and standard options.
+	Will make lookup easier.
+
+2002-04-26 22:30  pgregory
+
+	* aqsis/aqsis.dsp, aqsltell/aqsltell.dsp,
+	libaqsistypes/libaqsistypes.dsp, libaqsistypes/random.h,
+	render/libaqsis.dsp, render/lights.cpp, render/lights.h,
+	Renderer.dsw, libddmsimple/libddmsimple.dsp,
+	libddmsock/libddmsock.dsp, libshadervm/libshadervm.dsp,
+	libslxargs/libslxargs.dsp, libslxargs/slx.cpp, teqser/teqser.dsp:
+	More shaderVM separation effort.
+
+2002-04-26 22:26  pgregory
+
+	* render/cellnoise.cpp, render/cellnoise.h, render/noise.cpp,
+	render/noise.h, render/shadeops.cpp, render/shaderexecenv.cpp,
+	render/shaderexecenv.h, render/texturemap.cpp, render/texturemap.h,
+	libaqsistypes/cellnoise.cpp, libaqsistypes/cellnoise.h,
+	libaqsistypes/noise.cpp, libaqsistypes/noise.h,
+	libshaderexecenv/libshaderexecenv.dsp,
+	libshaderexecenv/shadeops.cpp, libshaderexecenv/shaderexecenv.cpp,
+	libshaderexecenv/shaderexecenv.h, libshaderexecenv/texturemap.cpp,
+	libshaderexecenv/texturemap.h: Moved during shaderVM separation
+	effort.
+
+2002-04-26 01:06  pgregory
+
+	* render/: imagers.cpp, imagers.h, micropolygon.cpp,
+	micropolygon.h, shaderexecenv.cpp, shaderexecenv.h: Begin removal
+	dependence on CqShaderExecEnv so that it can be removed into the
+	shaderVM.
+
+2002-04-26 00:38  pgregory
+
+	* librib2/scanner.l, libslparse/scanner.l: Can't use the AQSIS
+	defines as it is not ties to Aqsis, use normal WIN32 instead.
+
+2002-04-25 18:08  pgregory
+
+	* libshadervm/: shaderstack.h, shadervm.h: Fix ordering of
+	initializers, and add virtual to CqVMStackEntry destructor.
+
+2002-04-25 14:02  pgregory
+
+	* Makefile.am, configure.in, aqsis/Makefile.am, librib2/scanner.l,
+	libslparse/scanner.l, libslxargs/Makefile.am, render/Makefile.am,
+	teqser/Makefile.am: Make current status of shadervm separation work
+	under Posix
+
+2002-04-25 08:19  pgregory
+
+	* libslxargs/libslxargs.dsp, ribfiles/torus.rib: Testing for new
+	shadervm split.
+
+2002-04-25 08:15  pgregory
+
+	* aqsltell/aqsltell.dsp, aqsltell/slxargstest.cpp, Renderer.dsw:
+	Testing for new shadervm split.
+
+2002-04-24 23:54  pgregory
+
+	* libshadervm/shadervariable.cpp, libshadervm/shadervariable.h,
+	render/renderer.cpp, render/shaderexecenv.cpp,
+	render/shaderexecenv.h: Abstract shaderVM into separate library
+
+2002-04-24 23:27  pgregory
+
+	* Renderer.dsw, libshadervm/libshadervm.dsp,
+	libshadervm/shadervm.cpp, libshadervm/shadervm.h,
+	render/attributes.cpp, render/imagers.cpp, render/ishader.h,
+	render/ishaderexecenv.h, render/libaqsis.dsp, render/lights.cpp,
+	render/lights.h, render/micropolygon.cpp, render/renderer.cpp,
+	render/shadeops.cpp, render/shaderexecenv.cpp,
+	render/shaderexecenv.h, render/shaders.cpp, render/shaders.h:
+	Abstract shaderVM into separate library
+
+2002-04-24 22:48  pgregory
+
+	* render/attributes.h, render/imagebuffer.cpp, render/imagers.h,
+	render/ishader.h, render/ishaderexecenv.h, render/lights.cpp,
+	render/lights.h, render/options.h, render/renderer.cpp,
+	render/shadeops.cpp, render/shaderexecenv.cpp, Renderer.dsw,
+	libshadervm/libshadervm.dsp, libshadervm/shaderstack.cpp,
+	libshadervm/shaderstack.h, libshadervm/shadervariable.cpp,
+	libshadervm/shadervariable.h, libshadervm/shadervm.cpp,
+	libshadervm/shadervm.h, render/shaders.h: Abstract shaderVM into
+	separate library
+
+2002-04-24 22:46  pgregory
+
+	* render/: Render.dsp, shaderstack.cpp, shaderstack.h,
+	shadervariable.cpp, shadervariable.h, shadervm.cpp, shadervm.h:
+	Removed during shadervm sbstraction
+
+2002-04-24 17:29  pgregory
+
+	* render/ishaderexecenv.h: New interface to shader execution
+	environment.
+
+2002-04-24 17:09  pgregory
+
+	* libslxargs/slx.cpp: Fix to use new shader data access mechanisms.
+
+2002-04-24 17:08  pgregory
+
+	* render/: imagers.cpp, ishader.h, ishaderdata.h, libaqsis.dsp,
+	lights.cpp, lights.h, micropolygon.cpp, shadeops.cpp,
+	shaderexecenv.h, shaders.cpp, shaders.h, shadervariable.h,
+	shadervm.cpp, shadervm.h: Abstract out access to shader execution
+	environment via IqShaderExecEnv
+
+2002-04-24 10:35  pgregory
+
+	* .cvsignore, all/.cvsignore, aqsis/.cvsignore, aqsl/.cvsignore,
+	aqsl/tests/.cvsignore, filebuffer/.cvsignore,
+	framebuffer_glut/.cvsignore, framebuffer_glut_z/.cvsignore,
+	images/.cvsignore, libaqsistypes/.cvsignore,
+	libaqsistypes/posix/.cvsignore, libaqsistypes/win32/.cvsignore,
+	libaqsistypes/win32/intel/.cvsignore, libcodegenvm/.cvsignore,
+	libdd/.cvsignore, libddmsimple/.cvsignore, libddmsock/.cvsignore,
+	librib2/.cvsignore, librib2/tests/.cvsignore, librib2ri/.cvsignore,
+	librib2stream/.cvsignore, libslparse/.cvsignore, render/.cvsignore,
+	ribfiles/.cvsignore, shaders/.cvsignore, shadowmap/.cvsignore,
+	slpp/.cvsignore, teqser/.cvsignore: Various updates to clean up CVS
+	ignoring.
+
+2002-04-24 01:25  pgregory
+
+	* render/: attributes.h, imagers.cpp, imagers.h, ishader.h,
+	libaqsis.dsp, lights.cpp, lights.h, micropolygon.cpp, options.cpp,
+	parameters.cpp, renderer.cpp, renderer.h, ri.cpp, shadeops.cpp,
+	shaderexecenv.h, shaders.h, shadervm.cpp, shadervm.h, surface.cpp:
+	Abstract out the interface to shaders via IqShader
+
+2002-04-23 23:56  pgregory
+
+	* render/ishadervariable.h: Removed, now all shader data access is
+	via IqShaderData
+
+2002-04-23 21:55  pgregory
+
+	* aqsis/aqsis.dsp, aqsl/aqsl.dsp, aqsl/aqslcomp.dsp,
+	filebuffer/filebuffer.dsp, framebuffer_glut/framebuffer_glut.dsp,
+	framebuffer_glut_z/framebuffer_glut_z.dsp,
+	plugins/gif2tif/gif2tif.dsp, render/imagers.cpp,
+	render/ishaderdata.h, render/libaqsis.dsp, render/lights.cpp,
+	render/lights.h, render/micropolygon.cpp, render/micropolygon.h,
+	render/nurbs.cpp, render/parameters.cpp, render/parameters.h,
+	render/patch.cpp, render/quadrics.cpp, render/renderer.cpp,
+	render/shadeops.cpp, render/shaderexecenv.cpp,
+	render/shaderexecenv.h, render/shaders.cpp,
+	libaqsistypes/libaqsistypes.dsp, libcodegenvm/libcodegenvm.dsp,
+	libdd/libdd.dsp, libddmsimple/libddmsimple.dsp,
+	libddmsock/libddmsock.dsp, libri2rib/libri2rib.dsp,
+	librib2/librib2.dsp, librib2ri/librib2ri.dsp,
+	librib2stream/librib2stream.dsp, libslparse/libslparse.dsp,
+	libslxargs/libslxargs.dsp, plugins/jpg2tif/jpg2tif.dsp,
+	plugins/pcx2tif/pcx2tif.dsp, render/shaderstack.cpp,
+	render/shaderstack.h, render/shadervariable.cpp,
+	render/shadervariable.h, render/shadervm.cpp, render/shadervm.h,
+	render/spline.cpp, render/spline.h, render/subdivision.cpp,
+	render/subdivision.h, render/symbols.cpp, render/symbols.h,
+	plugins/ppm2tif/ppm2tif.dsp, plugins/tga2tif/tga2tif.dsp,
+	shadowmap/shadowmap.dsp, slpp/slpp.dsp, teqser/teqser.dsp: Next
+	(major) step in shader framework refactoring.  Enable RTTI in all
+	projects, no noticable impact on speed or size, but could be useful
+	in the next step.
+
+2002-04-23 15:48  pgregory
+
+	* BUILD: Update to latest GnuWin32 bison package.
+
+2002-04-16 17:48  pgregory
+
+	* render/: shadeops.cpp, shaderstack.h: Fix a few small bugs
+	introduced during the refactoring of the shading engine.
+
+2002-04-16 13:09  pgregory
+
+	* render/: shadeops.cpp, shadervm.cpp: Couple of fixes to texture
+	mapping.
+
+2002-04-16 08:16  pgregory
+
+	* render/: ishaderdata.h, nurbs.cpp, shaderexecenv.h,
+	shaderstack.h: Stage 4
+
+2002-04-15 23:01  pgregory
+
+	* render/: shadervariable.h, shadervm.cpp, shadervm.h, imagers.cpp,
+	ishadervariable.h, lights.cpp, lights.h, micropolygon.cpp,
+	nurbs.cpp, patch.cpp, quadrics.cpp, shadeops.cpp,
+	shaderexecenv.cpp, shaderexecenv.h, shaders.cpp, shaderstack.h:
+	Stage 3
+
+2002-04-13 18:53  mw_matti
+
+	* render/stats.cpp: Different verbosity levels (0-3) implented
+
+2002-04-12 18:00  pgregory
+
+	* render/imagers.cpp, render/ishadervariable.h,
+	render/libaqsis.dsp, render/lights.cpp, render/lights.h,
+	render/micropolygon.cpp, render/micropolygon.h, render/nurbs.cpp,
+	render/parameters.h, render/patch.cpp, render/quadrics.cpp,
+	render/shadeops.cpp, render/shaderexecenv.cpp,
+	render/shaderexecenv.h, render/shaders.cpp,
+	render/shadervariable.h, render/shadervm.cpp, render/shadervm.h,
+	render/subdivision.cpp, ribfiles/torus.rib: Stage 2 of the shader
+	engine refactor, now all shader variable access outside of the VM
+	is via IqShaderVariable.
+
+2002-04-12 13:56  pgregory
+
+	* aqsl/aqsl_win.cpp: Enable 'aqsl' to pass on any arguments
+	specified on the command line to slpp. Thus making it possible to
+	specify -i paths on the command line. Helpful to make Aqsis work
+	with ShaderMan.
+
+2002-04-11 23:36  pgregory
+
+	* libslxargs/slx.cpp: Fist step of the shader engine framework
+	refactoring.
+
+2002-04-11 22:56  pgregory
+
+	* render/shaderstack.h, render/shadervariable.cpp,
+	render/shadervariable.h, render/shadervm.cpp, render/shadervm.h,
+	render/subdivision.cpp, render/surface.h, render/symbols.h,
+	render/micropolygon.h, render/nurbs.cpp, render/parameters.cpp,
+	render/parameters.h, render/patch.cpp, render/quadrics.cpp,
+	render/renderer.cpp, render/ri.cpp, render/shadeops.cpp,
+	render/shaderexecenv.cpp, render/shaderexecenv.h,
+	render/shaders.cpp, render/shaderstack.cpp, render/lights.cpp,
+	render/lights.h, render/micropolygon.cpp,
+	libaqsistypes/aqsis_types.h, libslxargs/slx.cpp,
+	render/attributes.cpp, render/imagers.cpp,
+	render/ishadervariable.h: Fist step of the shader engine framework
+	refactoring.
+
+2002-04-10 23:48  pgregory
+
+	* librib2/: bdec.cpp, bdec.h: Temporary fix to the problem with
+	linking zlib as debug, courtesy of Michel Joron. Will change to
+	allow this to be a 'gzip disable' mode later.
+
+2002-04-06 22:22  pgregory
+
+	* plugins/tga2tif/tga2tif.dsp, shadowmap/shadowmap.dsp,
+	slpp/slpp.dsp, teqser/teqser.dsp, librib2/librib2.dsp,
+	librib2/parser.y, librib2/scanner.l,
+	librib2stream/librib2stream.dsp, libslparse/libslparse.dsp,
+	libslparse/scanner.l, plugins/pcx2tif/pcx2tif.dsp,
+	plugins/ppm2tif/ppm2tif.dsp, libdd/libdd.dsp,
+	libddmsimple/libddmsimple.dsp, libddmsock/libddmsock.dsp,
+	libri2rib/libri2rib.dsp, librib2ri/librib2ri.dsp,
+	libaqsistypes/libaqsistypes.dsp, libcodegenvm/libcodegenvm.dsp,
+	render/libaqsis.dsp, filebuffer/filebuffer.dsp,
+	framebuffer_glut/framebuffer_glut.dsp,
+	framebuffer_glut_z/framebuffer_glut_z.dsp,
+	plugins/gif2tif/gif2tif.dsp, plugins/jpg2tif/jpg2tif.dsp,
+	all/All.dsp, aqsis/aqsis.dsp, aqsl/aqsl.dsp, aqsl/aqslcomp.dsp,
+	BUILD: Switch to using the latest versions of thrid party tools and
+	libraries. Will break existing build. See BUILD for instructions.
+
+2002-04-06 22:04  pgregory
+
+	* BUILD: Switch to using the latest versions of thrid party tools
+	and libraries. Will break existing build. See BUILD for
+	instructions.
+
+2002-04-06 19:49  pgregory
+
+	* aqsis/aqsis.dsp: Use the new zlib1.1.4 from sourceforge.
+
+2002-04-04 14:17  pgregory
+
+	* BUILD: Update Win32 build instructions to indicate the
+	restrictions on Bison versions.
+
+2002-04-04 14:15  pgregory
+
+	* librib2/librib2.dsp, libslparse/libslparse.dsp: Switch back to
+	using the older style command options to bison, we now require
+	UnxUtils bison 1.28, anything newer is a problem.
+
+2002-04-03 16:22  pgregory
+
+	* ChangeLog: [no log message]
+
 2002-04-03 16:20  pgregory
 
 	* Makefile.am, configure.in: Updated version number ready for
