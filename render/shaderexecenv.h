@@ -589,24 +589,10 @@ R SO_DuType(CqShaderVariableTyped<R>& Var, TqInt i, CqShaderExecEnv& s)
 	R Ret;
 	TqInt uRes=s.uGridRes();
 	TqInt GridX=i%(uRes+1);
-	if(GridX<=(uRes-1))
+	if(GridX<uRes)
 		Ret=(static_cast<R>(Var[i+1])-static_cast<R>(Var[i]))/s.du()[i];
 	else
-	{
-		if(GridX>1)
-		{
-			R Tm1=static_cast<R>(Var[i-1]);
-			R Tm2=static_cast<R>(Var[i-2]);
-			R dTm1=(static_cast<R>(Var[i])-static_cast<R>(Tm1))/s.du()[i];
-			R dTm2=(Tm1-Tm2)/s.du()[i];
-			Ret=2*dTm1-dTm2;
-		}
-		else
-		{
-			R Tm1=static_cast<R>(Var[i-1]);
-			Ret=(static_cast<R>(Var[i])-Tm1)/s.du()[i];
-		}
-	}
+		Ret=(static_cast<R>(Var[i])-static_cast<R>(Var[i-1]))/s.du()[i];
 	return(Ret);
 }
 
@@ -620,24 +606,10 @@ R SO_DvType(CqShaderVariableTyped<R>& Var, TqInt i, CqShaderExecEnv& s)
 	TqInt uRes=s.uGridRes();
 	TqInt vRes=s.vGridRes();
 	TqInt GridY=(i/(uRes+1));
-	if(GridY<=(vRes-1))
+	if(GridY<vRes)
 		Ret=(static_cast<R>(Var[i+uRes+1])-static_cast<R>(Var[i]))/s.dv()[i];
 	else
-	{
-		if(GridY>1)
-		{
-			R Tm1=static_cast<R>(Var[i-(uRes+1)]);
-			R Tm2=static_cast<R>(Var[i-(2*(uRes+1))]);
-			R dTm1=(static_cast<R>(Var[i])-Tm1)/s.dv()[i];
-			R dTm2=(Tm1-Tm2)/s.dv()[i];
-			Ret=2*dTm1-dTm2;
-		}
-		else
-		{
-			R Tm1=static_cast<R>(Var[i-(uRes+1)]);
-			Ret=(static_cast<R>(Var[i])-Tm1)/s.dv()[i];
-		}
-	}
+		Ret=(static_cast<R>(Var[i])-static_cast<R>(Var[i-(uRes+1)]))/s.dv()[i];
 	return(Ret);
 }
 
@@ -654,44 +626,16 @@ R SO_DerivType(CqShaderVariableTyped<R>& Var, CqShaderVariableTyped<TqFloat>& de
 	TqInt GridY=(i/(uRes+1));
 
 	// Calculate deriviative in u
-	if(GridX<=uRes)
+	if(GridX<uRes)
 		Retu=(static_cast<R>(Var[i+1])-static_cast<R>(Var[i]))/static_cast<TqFloat>(den[i]);
 	else
-	{
-		if(GridX>1)
-		{
-			R Tm1=static_cast<R>(Var[i-1]);
-			R Tm2=static_cast<R>(Var[i-2]);
-			R dTm1=(static_cast<R>(Var[i])-static_cast<R>(Tm1))/static_cast<TqFloat>(den[i]);
-			R dTm2=(Tm1-Tm2)/static_cast<TqFloat>(den[i]);
-			Retu=2*dTm1-dTm2;
-		}
-		else
-		{
-			R Tm1=static_cast<R>(Var[i-1]);
-			Retu=(static_cast<R>(Var[i])-Tm1)/static_cast<TqFloat>(den[i]);
-		}
-	}
+		Retu=(static_cast<R>(Var[i])-static_cast<R>(Var[i-1]))/static_cast<TqFloat>(den[i]);
 
 	// Calculate deriviative in v
-	if(GridY<=(vRes-1))
+	if(GridY<vRes)
 		Retv=(static_cast<R>(Var[i+uRes+1])-static_cast<R>(Var[i]))/static_cast<TqFloat>(den[i]);
 	else
-	{
-		if(GridY>1)
-		{
-			R Tm1=static_cast<R>(Var[i-(uRes+1)]);
-			R Tm2=static_cast<R>(Var[i-(2*(uRes+1))]);
-			R dTm1=(static_cast<R>(Var[i])-Tm1)/static_cast<TqFloat>(den[i]);
-			R dTm2=(Tm1-Tm2)/static_cast<TqFloat>(den[i]);
-			Retv=2*dTm1-dTm2;
-		}
-		else
-		{
-			R Tm1=static_cast<R>(Var[i-(uRes+1)]);
-			Retv=(static_cast<R>(Var[i])-Tm1)/static_cast<TqFloat>(den[i]);
-		}
-	}
+		Retv=(static_cast<R>(Var[i])-static_cast<R>(Var[i-(uRes+1)]))/static_cast<TqFloat>(den[i]);
 
 	return(Retu+Retv);
 }
@@ -708,21 +652,7 @@ R SO_DuType(CqVMStackEntry& Var, TqInt i, CqShaderExecEnv& s)
 	if(GridX<uRes)
 		Ret=(Var.Value(Ret,i+1)-Var.Value(Ret,i))/s.du()[i];
 	else
-	{
-		if(GridX>1)
-		{
-			R Tm1=Var.Value(Ret,i-1);
-			R Tm2=Var.Value(Ret,i-2);
-			R dTm1=(Var.Value(Ret,i)-Tm1)/s.du()[i];
-			R dTm2=(Tm1-Tm2)/s.du()[i];
-			Ret=2*dTm1-dTm2;
-		}
-		else
-		{
-			R Tm1=Var.Value(Ret,i-1);
-			Ret=(Var.Value(Ret,i)-Tm1)/s.du()[i];
-		}
-	}
+		Ret=(Var.Value(Ret,i)-Var.Value(Ret,i-1))/s.du()[i];
 	return(Ret);
 }
 
@@ -736,24 +666,10 @@ R SO_DvType(CqVMStackEntry& Var, TqInt i, CqShaderExecEnv& s)
 	TqInt uRes=s.uGridRes();
 	TqInt vRes=s.vGridRes();
 	TqInt GridY=(i/(uRes+1));
-	if(GridY<(vRes-1))
+	if(GridY<vRes)
 		Ret=(Var.Value(Ret,i+uRes+1)-Var.Value(Ret,i))/s.dv()[i];
 	else
-	{
-		if(GridY>1)
-		{
-			R Tm1=Var.Value(Ret,i-(uRes+1));
-			R Tm2=Var.Value(Ret,i-(2*(uRes+1)));
-			R dTm1=(Var.Value(Ret,i)-Tm1)/s.dv()[i];
-			R dTm2=(Tm1-Tm2)/s.dv()[i];
-			Ret=2*dTm1-dTm2;
-		}
-		else
-		{
-			R Tm1=Var.Value(Ret,i-(uRes+1));
-			Ret=(Var.Value(Ret,i)-Tm1)/s.dv()[i];
-		}
-	}
+		Ret=(Var.Value(Ret,i)-Var.Value(Ret,i-(uRes+1)))/s.dv()[i];
 	return(Ret);
 }
 
@@ -774,41 +690,13 @@ R SO_DerivType(CqVMStackEntry& Var, CqVMStackEntry& den, TqInt i, CqShaderExecEn
 	if(GridX<uRes)
 		Retu=(Var.Value(Retu,i+1)-Var.Value(Retu,i))/den.Value(f,i);
 	else
-	{
-		if(GridX>1)
-		{
-			R Tm1=Var.Value(Retu,i-1);
-			R Tm2=Var.Value(Retu,i-2);
-			R dTm1=(Var.Value(Retu,i)-Tm1)/den.Value(f,i);
-			R dTm2=(Tm1-Tm2)/den.Value(f,i);
-			Retu=2*dTm1-dTm2;
-		}
-		else
-		{
-			R Tm1=Var.Value(Retu,i-1);
-			Retu=(Var.Value(Retu,i)-Tm1)/den.Value(f,i);
-		}
-	}
+		Retu=(Var.Value(Retu,i)-Var.Value(Retu,i-1))/den.Value(f,i);
 
 	// Calculate deriviative in v
-	if(GridY<(vRes-1))
+	if(GridY<vRes)
 		Retv=(Var.Value(Retu,i+uRes+1)-Var.Value(Retu,i))/den.Value(f,i);
 	else
-	{
-		if(GridY>1)
-		{
-			R Tm1=Var.Value(Retu,i-(uRes+1));
-			R Tm2=Var.Value(Retu,i-(2*(uRes+1)));
-			R dTm1=(Var.Value(Retu,i)-Tm1)/den.Value(f,i);
-			R dTm2=(Tm1-Tm2)/den.Value(f,i);
-			Retv=2*dTm1-dTm2;
-		}
-		else
-		{
-			R Tm1=Var.Value(Retu,i-(uRes+1));
-			Retv=(Var.Value(Retu,i)-Tm1)/den.Value(f,i);
-		}
-	}
+		Retv=(Var.Value(Retu,i)-Var.Value(Retu,i-(uRes+1)))/den.Value(f,i);
 
 	return(Retu+Retv);
 }

@@ -521,7 +521,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_ceil(FLOATVAL x, DEFPARAMIMPL)
 	CHECKVARY(x)
 	CHECKVARY(Result)
 	FOR_EACHR
-		Result.SetValue(i,static_cast<TqFloat>(FLOOR(FLOAT(x))));
+		Result.SetValue(i,static_cast<TqFloat>(CEIL(FLOAT(x))));
 	END_FORR
 }
 
