@@ -3,6 +3,7 @@ Aqsis Rendering System README
 * The Aqsis Rendering System consists of a set of libraries and applications for creating high-quality computer imagery using the Pixar RenderMan Interface.
 
 * Aqsis is licensed under the GNU GPL.  See the COPYING file for details.
+  libri2rib is licensed under the GNU LGPL. See the libri2rib/COPYING_LGPL file for details.
 
 * Aqsis was originally written by Paul Gregory for use under Win32.  See the AUTHORS file for subsequent contributors.
 
