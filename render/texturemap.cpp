@@ -472,6 +472,13 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 	m_TextureMap_Cache.push_back( pNew );
 	pNew->Open();
 
+	// Ensure that it is in the correct format
+	if ( pNew->Format() != TexFormat_MIPMAP )
+	{
+		pNew->CreateMIPMAP();
+		pNew->Close();
+	}
+
 	return ( pNew );
 }
 
