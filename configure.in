@@ -84,19 +84,6 @@ if test ! "$ac_cv_header_tiff_h" ; then
         AC_MSG_ERROR([*** Cannot find tiff.h, please ensure you have libtiff installed ***]);
 fi
 
-dnl ArgParse
-AC_LANG_SAVE
-AC_LANG(C++)
-saveCXXFLAGS=$CXXFLAGS
-HAVE_LIBARGPARSE
-CFLAGS=$ARGPARSE_INC
-AC_CHECK_HEADER(argparse.h)
-AC_LANG_RESTORE
-CXXFLAGS=$saveCXXFLAGS
-if test ! "$ac_cv_header_argparse_h" ; then
-        AC_MSG_ERROR([*** Cannot find argparse.h, please ensure you have libargparse installed ***]);
-fi
-
 CPPFLAGS="-DBASE_PATH=\\\"\"$datadir\\\"\" -DCONFIG_PATH=\\\"\"$sysconfdir\\\"\""
 CXXFLAGS="$DEBUG_FLAGS $OPT_FLAGS"
 CFLAGS="$DEBUG_FLAGS $OPT_FLAGS"
@@ -145,5 +132,6 @@ releasearchive/Makefile \
 libslxargs/Makefile \
 libshadervm/Makefile \
 libshaderexecenv/Makefile \
+libargparse/Makefile \
 Makefile )
 
