@@ -237,6 +237,10 @@ SOURCE=.\imagers.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\irenderer.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ishader.h
 # End Source File
 # Begin Source File
