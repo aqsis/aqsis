@@ -303,18 +303,22 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 
 		virtual	const	T*	pValue() const
 		{
+			assert( 0 < m_aValues.size() );
 			return ( &m_aValues[ 0 ] );
 		}
 		virtual	T*	pValue()
 		{
+			assert( 0 < m_aValues.size() );
 			return ( &m_aValues[ 0 ] );
 		}
 		virtual	const	T*	pValue( const TqInt Index ) const
 		{
+			assert( Index < m_aValues.size() );
 			return ( &m_aValues[ Index ] );
 		}
 		virtual	T*	pValue( const TqInt Index )
 		{
+			assert( Index < m_aValues.size() );
 			return ( &m_aValues[ Index ] );
 		}
 
@@ -442,19 +446,23 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 		// Overridden from CqParameterTyped<T>
 		virtual	const	T*	pValue() const
 		{
+			assert( 0 < m_aValues.size() );
 			return ( &m_aValues[ 0 ] );
 		}
 		virtual	T*	pValue()
 		{
+			assert( 0 < m_aValues.size() );
 			return ( &m_aValues[ 0 ] );
 		}
 		virtual	const	T*	pValue( const TqInt Index ) const
 		{
-			return ( &m_aValues[ Index ] );
+			assert( 0 < m_aValues.size() );
+			return ( &m_aValues[ 0 ] );
 		}
 		virtual	T*	pValue( const TqInt Index )
 		{
-			return ( &m_aValues[ Index ] );
+			assert( 0 < m_aValues.size() );
+			return ( &m_aValues[ 0 ] );
 		}
 
 
@@ -782,18 +790,26 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		// Overridden from CqParameterTyped<T>
 		virtual	const	T*	pValue() const
 		{
+			assert( 0 < m_aValues.size() );
+			assert( 0 < m_aValues[0].size() );
 			return ( &m_aValues[ 0 ][ 0 ] );
 		}
 		virtual	T*	pValue()
 		{
+			assert( 0 < m_aValues.size() );
+			assert( 0 < m_aValues[0].size() );
 			return ( &m_aValues[ 0 ][ 0 ] );
 		}
 		virtual	const	T*	pValue( const TqInt Index ) const
 		{
+			assert( Index < m_aValues.size() );
+			assert( 0 < m_aValues[0].size() );
 			return ( &m_aValues[ Index ][ 0 ] );
 		}
 		virtual	T*	pValue( const TqInt Index )
 		{
+			assert( Index < m_aValues.size() );
+			assert( 0 < m_aValues[0].size() );
 			return ( &m_aValues[ Index ][ 0 ] );
 		}
 
@@ -913,19 +929,23 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 		// Overridden from CqParameterTyped<T>
 		virtual	const	T*	pValue() const
 		{
+			assert( 0 < m_aValues.size() );
 			return ( &m_aValues[ 0 ] );
 		}
 		virtual	T*	pValue()
 		{
+			assert( 0 < m_aValues.size() );
 			return ( &m_aValues[ 0 ] );
 		}
 		virtual	const	T*	pValue( const TqInt Index ) const
 		{
-			return ( &m_aValues[ Index ] );
+			assert( 0 < m_aValues.size() );
+			return ( &m_aValues[ 0 ] );
 		}
 		virtual	T*	pValue( const TqInt Index )
 		{
-			return ( &m_aValues[ Index ] );
+			assert( 0 < m_aValues.size() );
+			return ( &m_aValues[ 0 ] );
 		}
 
 		/** Assignment operator.
@@ -1019,19 +1039,23 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 		// Overridden from CqParameterTyped<T>
 		virtual	const	T*	pValue() const
 		{
+			assert( 0 < m_aValues.size() );
 			return ( &m_aValues[ 0 ] );
 		}
 		virtual	T*	pValue()
 		{
+			assert( 0 < m_aValues.size() );
 			return ( &m_aValues[ 0 ] );
 		}
 		virtual	const	T*	pValue( const TqInt Index ) const
 		{
-			return ( &m_aValues[ Index ] );
+			assert( 0 < m_aValues.size() );
+			return ( &m_aValues[ 0 ] );
 		}
 		virtual	T*	pValue( const TqInt Index )
 		{
-			return ( &m_aValues[ Index ] );
+			assert( 0 < m_aValues.size() );
+			return ( &m_aValues[ 0 ] );
 		}
 
 		/** Assignment operator.

@@ -452,7 +452,7 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 				for ( i = 0; i <= k - p; i++ )
 					// Qw[i][row] = Pw[i][row]
 					( *iUP ) ->SetValue( pHold, ( row * m_cuVerts ) + i, ( row * n ) + i );
-				for ( i = k - s; i < static_cast<TqInt>( m_cuVerts ); i++ )
+				for ( i = k - s; i < static_cast<TqInt>( m_cuVerts ) - r; i++ )
 					// Qw[i+r][row] = Pw[i][row]
 					( *iUP ) ->SetValue( pHold, ( row * m_cuVerts ) + i + r, ( row * n ) + i );
 				for ( i = 0; i <= p - s; i++ )
@@ -822,13 +822,14 @@ void CqSurfaceNURBS::RefineKnotU( const std::vector<TqFloat>& X )
 					else
 					{
 						alpha /= m_auKnots[ k + l ] - auHold[ i - p + l ];
+						// Make sure index is OK.
 						switch ( ( *iUP ) ->Type() )
 						{
 								case type_float:
 								{
 									CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
 									for ( row = 0; row < static_cast<TqInt>( m_cvVerts ); row++ )
-										pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] = alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ];
+										pTParam->pValue( ( row * m_cuVerts ) + ind - 1 ) [ 0 ] = alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ];
 									break;
 								}
 
@@ -836,7 +837,7 @@ void CqSurfaceNURBS::RefineKnotU( const std::vector<TqFloat>& X )
 								{
 									CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
 									for ( row = 0; row < static_cast<TqInt>( m_cvVerts ); row++ )
-										pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] = alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ];
+										pTParam->pValue( ( row * m_cuVerts ) + ind - 1 ) [ 0 ] = alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ];
 									break;
 								}
 
@@ -846,7 +847,7 @@ void CqSurfaceNURBS::RefineKnotU( const std::vector<TqFloat>& X )
 								{
 									CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
 									for ( row = 0; row < static_cast<TqInt>( m_cvVerts ); row++ )
-										pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] = alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ];
+										pTParam->pValue( ( row * m_cuVerts ) + ind - 1 ) [ 0 ] = alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ];
 									break;
 								}
 
@@ -859,7 +860,7 @@ void CqSurfaceNURBS::RefineKnotU( const std::vector<TqFloat>& X )
 										               alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ].y() + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ].y(),
 										               alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ].z() + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ].z(),
 										               alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ].h() + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ].h() );
-										pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] = cp;
+										pTParam->pValue( ( row * m_cuVerts ) + ind - 1 ) [ 0 ] = cp;
 									}
 									break;
 								}
@@ -868,7 +869,7 @@ void CqSurfaceNURBS::RefineKnotU( const std::vector<TqFloat>& X )
 								{
 									CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
 									for ( row = 0; row < static_cast<TqInt>( m_cvVerts ); row++ )
-										pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] = alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ];
+										pTParam->pValue( ( row * m_cuVerts ) + ind - 1 ) [ 0 ] = alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ];
 									break;
 								}
 
@@ -876,7 +877,7 @@ void CqSurfaceNURBS::RefineKnotU( const std::vector<TqFloat>& X )
 								{
 									CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
 									for ( row = 0; row < static_cast<TqInt>( m_cvVerts ); row++ )
-										pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] = alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ];
+										pTParam->pValue( ( row * m_cuVerts ) + ind - 1 ) [ 0 ] = alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ];
 									break;
 								}
 
@@ -884,7 +885,7 @@ void CqSurfaceNURBS::RefineKnotU( const std::vector<TqFloat>& X )
 								{
 									CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
 									for ( row = 0; row < static_cast<TqInt>( m_cvVerts ); row++ )
-										pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] = alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ];
+										pTParam->pValue( ( row * m_cuVerts ) + ind - 1 ) [ 0 ] = alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ];
 									break;
 								}
 						}
