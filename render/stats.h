@@ -60,13 +60,15 @@ class CqStats
 								  m_cMPGsAllocated(0),
 								  m_cMPGsDeallocated(0),
 								  m_cSamples(0),
+									m_cSampleBoundHits(0),
 								  m_cSampleHits(0),
 								  m_cVariablesAllocated(0),
 								  m_cVariablesDeallocated(0),
 								  m_cParametersAllocated(0),
 								  m_cParametersDeallocated(0),
 								  m_cGridsAllocated(0),
-								  m_cGridsDeallocated(0)
+								  m_cGridsDeallocated(0),
+									m_cGPrims(0)
 								{}
 					~CqStats()	{}
 
@@ -78,7 +80,7 @@ class CqStats
 			void	SetState(const EqState State)
 									{m_State=State;}
 
-					/** Get the precentage complete.
+					/** Get the percentage complete.
 					 */
 			TqFloat	Complete() const	{return(m_Complete);}
 					/** Set the percentage complete.
