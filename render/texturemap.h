@@ -454,7 +454,7 @@ class CqTextureMap : public IqTextureMap
 		}
 
 		virtual	CqTextureMapBuffer*	GetBuffer( TqUlong s, TqUlong t, TqInt directory = 0, TqBool fProt = TqFalse );
-		void	CreateMIPMAP( TqBool fProtectBuffers = TqFalse );
+		TqBool	CreateMIPMAP( TqBool fProtectBuffers = TqFalse );
 		virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt directory = 0, TqBool fProt = TqFalse )
 		{
 			CqTextureMapBuffer* pRes;

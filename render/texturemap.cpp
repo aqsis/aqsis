@@ -284,10 +284,18 @@ void CqTextureMap::Close()
 
 
 
-void CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
+TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 {
 	if ( m_pImage != 0 )
 	{
+		// Check if the format is normal scanline, otherwise we are unable to MIPMAP it yet.
+		uint32 tsx;
+		TqInt ret = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
+		if( ret )
+		{
+			QGetRenderContext()->Logger()->error("Cannot MIPMAP a tiled image (%s)", m_strName.c_str() );
+			return( TqFalse );
+		}
 		// Read the whole image into a buffer.
 		CqTextureMapBuffer * pBuffer = GetBuffer( 0, 0, 0, fProtectBuffers );
 
@@ -322,6 +330,7 @@ void CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 		}
 		while ( ( m_xres > 2 ) && ( m_yres > 2 ) ) ;
 	}
+	return( TqTrue );
 }
 
 
@@ -697,78 +706,17 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 	}
 	// If we got here, it doesn't exist yet, so we must create and load it.
 	CqTextureMap* pNew = new CqTextureMap( strName );
-	m_TextureMap_Cache.push_back( pNew );
 	pNew->Open();
 
 	// Ensure that it is in the correct format
 	if ( pNew->Format() != TexFormat_MIPMAP )
 	{
-		pNew->CreateMIPMAP( TqTrue );
-
-#if 0
-		TqFloat swidth = pNew->m_swidth;
-		TqFloat twidth = pNew->m_twidth;
-
-		enum EqWrapMode smode = pNew->m_smode;
-		char* swrap, *twrap;
-		if ( smode == WrapMode_Periodic )
-			swrap = RI_PERIODIC;
-		else if ( smode == WrapMode_Clamp )
-			swrap = RI_CLAMP;
-		else if ( smode == WrapMode_Black )
-			swrap = RI_BLACK;
-
-		enum EqWrapMode tmode = pNew->m_tmode;
-		if ( tmode == WrapMode_Periodic )
-			twrap = RI_PERIODIC;
-		else if ( tmode == WrapMode_Clamp )
-			twrap = RI_CLAMP;
-		else if ( tmode == WrapMode_Black )
-			twrap = RI_BLACK;
-
-		char modes[ 1024 ];
-		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth );
-		if ( pNew->m_FilterFunc == RiGaussianFilter )
-			sprintf( modes, "%s %s %s %f %f", swrap, twrap, "gaussian", swidth, twidth );
-		if ( pNew->m_FilterFunc == RiBoxFilter )
-			sprintf( modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth );
-		if ( pNew->m_FilterFunc == RiTriangleFilter )
-			sprintf( modes, "%s %s %s %f %f", swrap, twrap, "triangle", swidth, twidth );
-		if ( pNew->m_FilterFunc == RiCatmullRomFilter )
-			sprintf( modes, "%s %s %s %f %f", swrap, twrap, "catmull-rom", swidth, twidth );
-		if ( pNew->m_FilterFunc == RiSincFilter )
-			sprintf( modes, "%s %s %s %f %f", swrap, twrap, "sinc", swidth, twidth );
-		if ( pNew->m_FilterFunc == RiDiskFilter )
-			sprintf( modes, "%s %s %s %f %f", swrap, twrap, "disk", swidth, twidth );
-		if ( pNew->m_FilterFunc == RiBesselFilter )
-			sprintf( modes, "%s %s %s %f %f", swrap, twrap, "bessel", swidth, twidth );
-
-		TIFF* ptex = TIFFOpen( "test.tex", "w" );
-
-		TIFFCreateDirectory( ptex );
-		TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
-		TIFFSetField( ptex, TIFFTAG_PIXAR_TEXTUREFORMAT, MIPMAP_HEADER );
-		TIFFSetField( ptex, TIFFTAG_PIXAR_WRAPMODES, modes );
-		TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, pNew->SamplesPerPixel() );
-		TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
-		TIFFSetField( ptex, TIFFTAG_COMPRESSION, pNew->Compression() ); /* COMPRESSION_DEFLATE */
-		int log2 = MIN( pNew->XRes(), pNew->YRes() );
-		log2 = ( int ) ( log( log2 ) / log( 2.0 ) );
-
-
-		for ( int i = 0; i < log2; i ++ )
-		{
-			// Write the floating point image to the directory.
-			CqTextureMapBuffer* pBuffer = pNew->GetBuffer( 0, 0, i );
-			if ( !pBuffer ) break;
-			pNew->WriteTileImage( ptex, pBuffer, 64, 64, pNew->Compression(), pNew->Quality() );
-		}
-		TIFFClose( ptex );
-#endif
-
+		if( !pNew->CreateMIPMAP( TqTrue ) )
+			pNew->SetInvalid();
 		pNew->Close();
 	}
 
+	m_TextureMap_Cache.push_back( pNew );
 	previous = pNew;
 	size = m_TextureMap_Cache.size();
 	return ( pNew );
