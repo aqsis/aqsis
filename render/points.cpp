@@ -150,9 +150,9 @@ CqMicroPolyGridBase* CqPoints::Dice()
 
     if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->pVar(EnvVars_Os) ) )
     {
-        if ( bHasVar(EnvVars_Os) )
+        if ( pPoints()->bHasVar(EnvVars_Os) )
             NaturalDice( pPoints()->Os(), nVertices(), 1, pGrid->pVar(EnvVars_Os) );
-        else if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
+		else if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
             pGrid->pVar(EnvVars_Os) ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
         else
             pGrid->pVar(EnvVars_Os) ->SetColor( CqColor( 1, 1, 1 ) );
