@@ -93,7 +93,7 @@ public:
     virtual	void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
     virtual	void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
 
-    virtual	const CqMatrix&	matObjectToWorld( TqFloat time = 0.0f ) const;
+    virtual	const CqMatrix&	matObjectToWorld( TqFloat time ) const;
 
     virtual	TqFloat	Time( TqInt index ) const
     {
@@ -108,8 +108,8 @@ public:
     }
 
 	virtual void ResetTransform(const CqMatrix& mat, TqBool hand, TqBool makeStatic=TqTrue);
-	virtual	TqBool GetHandedness(TqFloat time = 0.0f) const;
-	virtual void FlipHandedness(TqFloat time = 0.0f)
+	virtual	TqBool GetHandedness(TqFloat time ) const;
+	virtual void FlipHandedness(TqFloat time )
 	{
 		m_Handedness = !m_Handedness;
 	}

@@ -163,57 +163,57 @@ public:
     /** Flip the orientation in which primitives are described between left and right handed.
      * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
      */
-    void	FlipeOrientation( TqFloat time = 0.0f )
+    void	FlipeOrientation( TqFloat time )
     {
         TqBool co = GetIntegerAttribute( "System", "Orientation" ) [ 0 ] == 0;
         GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = ( co ) ? 0 : 1;
     }
 
-    virtual IqShader*	pshadDisplacement( TqFloat time = 0.0f ) const
+    virtual IqShader*	pshadDisplacement( TqFloat time ) const
     {
         return ( m_pshadDisplacement );
     }
-    virtual void	SetpshadDisplacement( IqShader* pshadDisplacement, TqFloat time = 0.0f )
+    virtual void	SetpshadDisplacement( IqShader* pshadDisplacement, TqFloat time )
     {
         m_pshadDisplacement = pshadDisplacement;
     }
-    virtual IqShader*	pshadAreaLightSource( TqFloat time = 0.0f ) const
+    virtual IqShader*	pshadAreaLightSource( TqFloat time ) const
     {
         return ( m_pshadAreaLightSource );
     }
-    virtual void	SetpshadAreaLightSource( IqShader* pshadAreaLightSource, TqFloat time = 0.0f )
+    virtual void	SetpshadAreaLightSource( IqShader* pshadAreaLightSource, TqFloat time )
     {
         m_pshadAreaLightSource = pshadAreaLightSource;
     }
-    virtual IqShader*	pshadSurface( TqFloat time = 0.0f ) const
+    virtual IqShader*	pshadSurface( TqFloat time ) const
     {
         return ( m_pshadSurface );
     }
-    virtual void	SetpshadSurface( IqShader* pshadSurface, TqFloat time = 0.0f )
+    virtual void	SetpshadSurface( IqShader* pshadSurface, TqFloat time )
     {
         m_pshadSurface = pshadSurface;
     }
-    virtual IqShader*	pshadAtmosphere( TqFloat time = 0.0f ) const
+    virtual IqShader*	pshadAtmosphere( TqFloat time ) const
     {
         return ( m_pshadAtmosphere );
     }
-    virtual void	SetpshadAtmosphere( IqShader* pshadAtmosphere, TqFloat time = 0.0f )
+    virtual void	SetpshadAtmosphere( IqShader* pshadAtmosphere, TqFloat time )
     {
         m_pshadAtmosphere = pshadAtmosphere;
     }
-    virtual IqShader*	pshadExteriorVolume( TqFloat time = 0.0f ) const
+    virtual IqShader*	pshadExteriorVolume( TqFloat time ) const
     {
         return ( m_pshadExteriorVolume );
     }
-    virtual void	SetpshadExteriorVolume( IqShader* pshadExteriorVolume, TqFloat time = 0.0f )
+    virtual void	SetpshadExteriorVolume( IqShader* pshadExteriorVolume, TqFloat time )
     {
         m_pshadExteriorVolume = pshadExteriorVolume;
     }
-    virtual IqShader*	pshadAreaInteriorVolume( TqFloat time = 0.0f ) const
+    virtual IqShader*	pshadAreaInteriorVolume( TqFloat time ) const
     {
         return ( m_pshadInteriorVolume );
     }
-    virtual void	SetpshadInteriorVolume( IqShader* pshadInteriorVolume, TqFloat time = 0.0f )
+    virtual void	SetpshadInteriorVolume( IqShader* pshadInteriorVolume, TqFloat time )
     {
         m_pshadInteriorVolume = pshadInteriorVolume;
     }

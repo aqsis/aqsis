@@ -1264,14 +1264,15 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::
     for ( iUP = pPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++ )
     {
         /// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
-        if ( pGrid->pAttributes() ->pshadSurface() )
-            StoreDiceAPVar( pGrid->pAttributes()->pshadSurface(), ( *iUP ), iParam, iData );
+        IqShader* pShader;
+		if ( (pShader=pGrid->pAttributes() ->pshadSurface(QGetRenderContextI()->Time())) != NULL )
+            StoreDiceAPVar( pShader, ( *iUP ), iParam, iData );
 
-        if ( pGrid->pAttributes() ->pshadDisplacement() )
-            StoreDiceAPVar( pGrid->pAttributes()->pshadDisplacement(), ( *iUP ), iParam, iData );
+        if ( (pShader=pGrid->pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time())) != NULL )
+            StoreDiceAPVar( pShader, ( *iUP ), iParam, iData );
 
-        if ( pGrid->pAttributes() ->pshadAtmosphere() )
-            StoreDiceAPVar( pGrid->pAttributes()->pshadAtmosphere(), ( *iUP ), iParam, iData );
+        if ( (pShader=pGrid->pAttributes() ->pshadAtmosphere(QGetRenderContextI()->Time())) != NULL )
+            StoreDiceAPVar( pShader, ( *iUP ), iParam, iData );
     }
 }
 
@@ -1542,7 +1543,7 @@ TqBool CqSurfaceSubdivisionPatch::Diceable()
         return ( TqFalse );
 
     // Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
-    const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
+    const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), CqMatrix(), QGetRenderContext()->Time() );
 
     // Convert the control hull to raster space.
     CqVector2D	avecHull[ 4 ];

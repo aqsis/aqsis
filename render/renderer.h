@@ -169,9 +169,9 @@ public:
     }
 
     // Handle various coordinate system transformation requirements.
-    virtual	CqMatrix	matSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix(), TqFloat time = 0.0f );
-    virtual	CqMatrix	matVSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix(), TqFloat time = 0.0f );
-    virtual	CqMatrix	matNSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix(), TqFloat time = 0.0f );
+    virtual	CqMatrix	matSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time );
+    virtual	CqMatrix	matVSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time );
+    virtual	CqMatrix	matNSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time );
 
     virtual	const	TqFloat*	GetFloatOption( const char* strName, const char* strParam ) const;
     virtual	const	TqInt*	GetIntegerOption( const char* strName, const char* strParam ) const;
@@ -201,7 +201,7 @@ public:
     /** Get a read only reference to the current transformation matrix.
      * \return A constant reference to a CqMatrix.
      */
-    virtual const	CqMatrix&	matCurrent( TqFloat time = 0.0f ) const
+    virtual const	CqMatrix&	matCurrent( TqFloat time ) const
     {
         return ( pconCurrent() ->matCurrent( time ) );
     }

@@ -74,7 +74,7 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSp
     // We need to take into account Orientation here, even though most other
     // primitives leave it up to the CalcNormals function on the MPGrid, because we
     // are forcing N to be setup here, so clockwise nature is important.
-    TqBool CSO = pTransform()->GetHandedness();
+    TqBool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
     TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
 
     indexA = 0;
@@ -204,7 +204,7 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSp
         {
             CqVector3D PA, PB, PC, PD;
             CqMatrix matID;
-            const CqMatrix& matCurrentToWorld = QGetRenderContext() ->matSpaceToSpace( "current", "object", matID, Surface().pTransform() ->matObjectToWorld() );
+            const CqMatrix& matCurrentToWorld = QGetRenderContext() ->matSpaceToSpace( "current", "object", matID, Surface().pTransform() ->matObjectToWorld(Surface().pTransform() ->Time(0)), Surface().pTransform() ->Time(0) );
             PA = matCurrentToWorld * pNew->P() ->pValue() [ 0 ];
             PB = matCurrentToWorld * pNew->P() ->pValue() [ 1 ];
             PC = matCurrentToWorld * pNew->P() ->pValue() [ 3 ];

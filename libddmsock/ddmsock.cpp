@@ -416,8 +416,8 @@ TqInt CqDDManager::OpenDisplays()
     for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
     {
         CqDDClient& dd = *i;
-        CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera" );
-        CqMatrix matWorldToScreen = QGetRenderContext() ->matSpaceToSpace( "world", "screen" );
+        CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), CqMatrix(), QGetRenderContextI()->Time() );
+        CqMatrix matWorldToScreen = QGetRenderContext() ->matSpaceToSpace( "world", "screen", CqMatrix(), CqMatrix(), QGetRenderContextI()->Time() );
 
         if ( matWorldToCamera.fIdentity() ) matWorldToCamera.Identity();
         if ( matWorldToScreen.fIdentity() ) matWorldToScreen.Identity();

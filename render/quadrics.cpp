@@ -259,7 +259,7 @@ void CqQuadric::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqSh
         {
             TqInt igrid = ( v * ( uDiceSize + 1 ) ) + u;
             DicePoint( u, v, N );
-			TqBool CSO = pTransform()->GetHandedness();
+			TqBool CSO = pTransform()->GetHandedness(pTransform()->Time(0));
 			TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
             N = ( O == CSO ) ? N : -N;
             pNormals->SetNormal( m_matITTx * N, igrid );
@@ -309,7 +309,7 @@ TqUlong CqQuadric::EstimateGridSize()
     TqFloat maxusize, maxvsize;
     maxusize = maxvsize = 0;
 
-    CqMatrix matTx = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" ) * m_matTx;
+    CqMatrix matTx = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), CqMatrix(), QGetRenderContext()->Time() ) * m_matTx;
 
     m_uDiceSize = m_vDiceSize = ESTIMATEGRIDSIZE;
 

@@ -106,7 +106,9 @@ public:
         if( m_splitDecision == Split_Undecided )
         {
             const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace(
-                                           "camera", "raster"
+                                           "camera", "raster",
+											CqMatrix(), CqMatrix(),
+											QGetRenderContextI()->Time()
                                        );
             CqVector2D hull[ 2 ];     // control hull
             hull[ 0 ] = matCtoR * P()->pValue( 0 )[0];

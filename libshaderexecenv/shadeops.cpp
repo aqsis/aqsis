@@ -1819,7 +1819,7 @@ STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL fromspace, STRINGVAL tospace
         BEGIN_UNIFORM_SECTION
         GETSTRING( fromspace );
         GETSTRING( tospace );
-        const CqMatrix& mat = QGetRenderContextI() ->matSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+        const CqMatrix& mat = QGetRenderContextI() ->matSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld(), QGetRenderContextI()->Time() );
         END_UNIFORM_SECTION
 
         BEGIN_VARYING_SECTION
@@ -1854,7 +1854,7 @@ STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL tospace, POINTVAL p, DEFPARA
     {
         BEGIN_UNIFORM_SECTION
         GETSTRING( tospace );
-        const CqMatrix& mat = QGetRenderContextI() ->matSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+        const CqMatrix& mat = QGetRenderContextI() ->matSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld(), QGetRenderContextI()->Time() );
         END_UNIFORM_SECTION
 
         BEGIN_VARYING_SECTION
@@ -1911,7 +1911,7 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL fromspace, STRINGVAL tospac
         BEGIN_UNIFORM_SECTION
         GETSTRING( fromspace );
         GETSTRING( tospace );
-        const CqMatrix& mat = QGetRenderContextI() ->matVSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+        const CqMatrix& mat = QGetRenderContextI() ->matVSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld(), QGetRenderContextI()->Time() );
         END_UNIFORM_SECTION
 
         BEGIN_VARYING_SECTION
@@ -1946,7 +1946,7 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL tospace, VECTORVAL p, DEFPA
     {
         BEGIN_UNIFORM_SECTION
         GETSTRING( tospace );
-        const CqMatrix& mat = QGetRenderContextI() ->matVSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+        const CqMatrix& mat = QGetRenderContextI() ->matVSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld(), QGetRenderContextI()->Time() );
         END_UNIFORM_SECTION
 
         BEGIN_VARYING_SECTION
@@ -2003,7 +2003,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL fromspace, STRINGVAL tospac
         BEGIN_UNIFORM_SECTION
         GETSTRING( fromspace );
         GETSTRING( tospace );
-        const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+        const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld(), QGetRenderContextI()->Time() );
         BEGIN_UNIFORM_SECTION
 
         BEGIN_VARYING_SECTION
@@ -2038,7 +2038,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL tospace, NORMALVAL p, DEFPA
     {
         BEGIN_UNIFORM_SECTION
         GETSTRING( tospace );
-        const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+        const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld(), QGetRenderContextI()->Time() );
         BEGIN_UNIFORM_SECTION
 
         BEGIN_VARYING_SECTION
@@ -2111,7 +2111,7 @@ STD_SOIMPL CqShaderExecEnv::SO_calculatenormal( POINTVAL p, DEFPARAMIMPL )
     INIT_SO
 
     // Find out if the orientation is inverted.
-    TqBool CSO = pTransform()->GetHandedness();
+    TqBool CSO = pTransform()->GetHandedness(QGetRenderContextI()->Time());
     TqBool O = TqFalse;
 	if( pAttributes() )
 	    TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
@@ -3903,8 +3903,8 @@ STD_SOIMPL CqShaderExecEnv::SO_atmosphere( STRINGVAL name, IqShaderData* pV, DEF
 
     IqShader * pAtmosphere = NULL;
 
-    if ( NULL != m_pAttributes && NULL != m_pAttributes ->pshadAtmosphere() )
-        pAtmosphere = m_pAttributes ->pshadAtmosphere();
+    if ( NULL != m_pAttributes && NULL != m_pAttributes ->pshadAtmosphere(QGetRenderContextI()->Time()) )
+        pAtmosphere = m_pAttributes ->pshadAtmosphere(QGetRenderContextI()->Time());
 
     BEGIN_UNIFORM_SECTION
     GETSTRING( name );
@@ -3928,8 +3928,8 @@ STD_SOIMPL CqShaderExecEnv::SO_displacement( STRINGVAL name, IqShaderData* pV, D
 
     IqShader * pDisplacement = NULL;
 
-    if ( NULL != m_pAttributes && NULL != m_pAttributes ->pshadDisplacement() )
-        pDisplacement = m_pAttributes ->pshadDisplacement();
+    if ( NULL != m_pAttributes && NULL != m_pAttributes ->pshadDisplacement(QGetRenderContextI()->Time()) )
+        pDisplacement = m_pAttributes ->pshadDisplacement(QGetRenderContextI()->Time());
 
     BEGIN_UNIFORM_SECTION
     GETSTRING( name );
@@ -3978,8 +3978,8 @@ STD_SOIMPL CqShaderExecEnv::SO_surface( STRINGVAL name, IqShaderData* pV, DEFPAR
 
     IqShader * pSurface = NULL;
 
-    if ( NULL != m_pAttributes && NULL != m_pAttributes ->pshadSurface() )
-        pSurface = m_pAttributes ->pshadSurface();
+    if ( NULL != m_pAttributes && NULL != m_pAttributes ->pshadSurface(QGetRenderContextI()->Time()) )
+        pSurface = m_pAttributes ->pshadSurface(QGetRenderContextI()->Time());
 
     BEGIN_UNIFORM_SECTION
     GETSTRING( name );
@@ -5250,9 +5250,9 @@ STD_SOIMPL	CqShaderExecEnv::SO_shadername2( STRINGVAL shader, DEFPARAMIMPL )
 	IqShader* pAtmosphere = 0;
     if( m_pAttributes )
 	{
-		pSurface = m_pAttributes ->pshadSurface();
-		pDisplacement = m_pAttributes ->pshadDisplacement();
-		pAtmosphere = m_pAttributes ->pshadAtmosphere();
+		pSurface = m_pAttributes ->pshadSurface(QGetRenderContextI()->Time());
+		pDisplacement = m_pAttributes ->pshadDisplacement(QGetRenderContextI()->Time());
+		pAtmosphere = m_pAttributes ->pshadAtmosphere(QGetRenderContextI()->Time());
 	}
 
     CHECKVARY( Result )

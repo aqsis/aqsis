@@ -5,7 +5,7 @@
  *	@brief	Declare the common interface structure for a Renderer core class.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2004/01/26 23:40:20 $
+ *	Last change date:	$Date: 2004/03/23 22:26:55 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___irenderer_Loaded___
@@ -26,9 +26,9 @@ struct IqRenderer
 
     // Handle various coordinate system transformation requirements.
 
-    virtual	CqMatrix	matSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix(), TqFloat time = 0.0f ) = 0;
-    virtual	CqMatrix	matVSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix(), TqFloat time = 0.0f ) = 0;
-    virtual	CqMatrix	matNSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix(), TqFloat time = 0.0f ) = 0;
+    virtual	CqMatrix	matSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time ) = 0;
+    virtual	CqMatrix	matVSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time ) = 0;
+    virtual	CqMatrix	matNSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time ) = 0;
 
     virtual	const	TqFloat*	GetFloatOption( const char* strName, const char* strParam ) const = 0;
     virtual	const	TqInt*	GetIntegerOption( const char* strName, const char* strParam ) const = 0;
@@ -74,6 +74,8 @@ struct IqRenderer
     virtual	TqInt	CurrentFrame() const = 0;
 
 	virtual	CqObjectInstance*	pCurrentObject() = 0;
+
+    virtual	TqFloat	Time() const = 0;
 };
 
 IqRenderer* QGetRenderContextI();

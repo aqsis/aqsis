@@ -112,11 +112,11 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<Cq
 
     /// \note This should delete through the interface that created it.
 
-    m_pShaderExecEnv->Initialise( cu, cv, pSurface->pAttributes(), pSurface->pTransform(), pSurface->pAttributes() ->pshadSurface(), lUses );
+    m_pShaderExecEnv->Initialise( cu, cv, pSurface->pAttributes(), pSurface->pTransform(), pSurface->pAttributes() ->pshadSurface(QGetRenderContext()->Time()), lUses );
 
-    IqShader* pshadSurface = pSurface ->pAttributes() ->pshadSurface();
-    IqShader* pshadDisplacement = pSurface ->pAttributes() ->pshadDisplacement();
-    IqShader* pshadAtmosphere = pSurface ->pAttributes() ->pshadAtmosphere();
+    IqShader* pshadSurface = pSurface ->pAttributes() ->pshadSurface(QGetRenderContext()->Time());
+    IqShader* pshadDisplacement = pSurface ->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time());
+    IqShader* pshadAtmosphere = pSurface ->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time());
 
     if ( NULL != pshadSurface ) pshadSurface->Initialise( cu, cv, m_pShaderExecEnv );
     if ( NULL != pshadDisplacement ) pshadDisplacement->Initialise( cu, cv, m_pShaderExecEnv );
@@ -141,7 +141,7 @@ void CqMicroPolyGrid::CalcNormals()
 
     // Get the handedness of the coordinate system (at the time of creation) and
     // the coordinate system specified, to check for normal flipping.
-    TqBool CSO = this->pSurface()->pTransform()->GetHandedness();
+    TqBool CSO = this->pSurface()->pTransform()->GetHandedness(this->pSurface()->pTransform()->Time(0));
     TqBool O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
     const CqVector3D* vecMP[ 4 ];
     CqVector3D	vecN, vecTemp;
@@ -256,9 +256,9 @@ void CqMicroPolyGrid::Shade()
 
     CqStats& theStats = QGetRenderContext() ->Stats();
 
-    IqShader* pshadSurface = pSurface() ->pAttributes() ->pshadSurface();
-    IqShader* pshadDisplacement = pSurface() ->pAttributes() ->pshadDisplacement();
-    IqShader* pshadAtmosphere = pSurface() ->pAttributes() ->pshadAtmosphere();
+    IqShader* pshadSurface = pSurface() ->pAttributes() ->pshadSurface(QGetRenderContext()->Time());
+    IqShader* pshadDisplacement = pSurface() ->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time());
+    IqShader* pshadAtmosphere = pSurface() ->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time());
 
     TqInt lUses = pSurface() ->Uses();
     TqInt gs = GridSize();
@@ -496,7 +496,7 @@ void CqMicroPolyGrid::Shade()
 
 void CqMicroPolyGrid::TransferOutputVariables()
 {
-    IqShader* pShader = this->pAttributes()->pshadSurface();
+    IqShader* pShader = this->pAttributes()->pshadSurface(QGetRenderContext()->Time());
 
     // Only bother transferring ones that have been used in a RiDisplay request.
     std::map<std::string, CqRenderer::SqOutputDataEntry>& outputVars = QGetRenderContext()->GetMapOfOutputDataEntries();
@@ -591,8 +591,8 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
         return ;
 
 	QGetRenderContext() ->Stats().MakeProject().Start();
-    CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
-    CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pSurface() ->pTransform() ->matObjectToWorld( pSurface() ->pTransform() ->Time( 0 ) ) );
+    CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), CqMatrix(), QGetRenderContext()->Time() );
+    CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pSurface() ->pTransform() ->matObjectToWorld( pSurface() ->pTransform() ->Time( 0 ) ), QGetRenderContext()->Time() );
 
     // Transform the whole grid to hybrid camera/raster space
     CqVector3D* pP;
@@ -610,7 +610,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 
     for ( iTime = 1; iTime < tTime; iTime++ )
     {
-        matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface() ->pTransform() ->matObjectToWorld( pSurface() ->pTransform() ->Time( iTime ) ) );
+        matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface() ->pTransform() ->matObjectToWorld( pSurface() ->pTransform() ->Time( iTime ) ), QGetRenderContext()->Time() );
         aaPtimes[ iTime ].resize( gsmin1 + 1 );
 
         for ( i = gsmin1; i >= 0; i-- )
@@ -844,7 +844,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
     TqInt cv = pGridA->vGridRes();
     TqInt iTime;
 
-    CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
+    CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), CqMatrix(), QGetRenderContext()->Time() );
 
     ADDREF( pGridA );
 
@@ -860,7 +860,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 
     for ( iTime = 0; iTime < tTime; iTime++ )
     {
-        matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface() ->pTransform() ->matObjectToWorld( pSurface() ->pTransform() ->Time( iTime ) ) );
+        matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface() ->pTransform() ->matObjectToWorld( pSurface() ->pTransform() ->Time( iTime ) ), QGetRenderContext()->Time() );
         aaPtimes[ iTime ].resize( gsmin1 + 1 );
 
         // Transform the whole grid to hybrid camera/raster space
@@ -1193,7 +1193,7 @@ CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
 
 TqBool CqMicroPolygon::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time )
 {
-    if ( fContains( vecSample, D ) )
+    if ( fContains( vecSample, D, time  ) )
     {
         // Now check if it is trimmed.
         if ( IsTrimmed() )

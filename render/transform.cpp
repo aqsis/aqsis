@@ -44,8 +44,8 @@ CqTransform::CqTransform() : CqMotionSpec<SqTransformation>(SqTransformation()),
 	TqBool handLast = TqFalse;
 	if ( !Transform_stack.empty() )
 	{
-		matOtoWLast =  Transform_stack.front() ->matObjectToWorld();
-		handLast =  Transform_stack.front() ->GetHandedness();
+		matOtoWLast =  Transform_stack.front() ->matObjectToWorld(Transform_stack.front()->Time(0));
+		handLast =  Transform_stack.front() ->GetHandedness(Transform_stack.front()->Time(0));
 	}
 
 	SqTransformation ct;
@@ -73,8 +73,9 @@ CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<SqTransformat
 	TqBool handLast = TqFalse;
 	if ( !Transform_stack.empty() )
 	{
-		matOtoWLast =  Transform_stack.front() ->matObjectToWorld();
-		handLast =  Transform_stack.front() ->GetHandedness();
+		TqFloat time = QGetRenderContext()->Time();
+		matOtoWLast =  Transform_stack.front() ->matObjectToWorld( time );
+		handLast =  Transform_stack.front() ->GetHandedness( time );
 	}
 
 	SqTransformation ct;
@@ -155,7 +156,7 @@ void CqTransform::SetTransform( TqFloat time, const CqMatrix& matTrans )
 {
 	TqFloat det = matTrans.Determinant();
 	TqBool flip = ( !matTrans.fIdentity() && det < 0 );
-	CqMatrix matCtoW = QGetRenderContext()->matSpaceToSpace("world", "camera");
+	CqMatrix matCtoW = QGetRenderContext()->matSpaceToSpace("world", "camera", CqMatrix(), CqMatrix(), QGetRenderContext()->Time());
 	TqFloat camdet = matCtoW.Determinant();
 	TqBool camhand = ( !matCtoW.fIdentity() && camdet < 0 );
 

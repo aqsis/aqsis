@@ -109,7 +109,7 @@ public:
     virtual IqShaderData* pVar(TqInt index) = 0;
 	/** Get the points of the triangle split line if this grid represents a triangle.
 	 */
-	virtual void	TriangleSplitPoints(CqVector3D& v1, CqVector3D& v2, TqFloat Time = 0);
+	virtual void	TriangleSplitPoints(CqVector3D& v1, CqVector3D& v2, TqFloat Time );
 
 	struct SqTriangleSplitLine
 	{	
@@ -529,7 +529,7 @@ public:
     }
 
 
-    virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
+    virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
     void	Initialise();
     CqVector2D ReverseBilinear( const CqVector2D& v );
 
@@ -608,7 +608,7 @@ public:
     {}
 
 public:
-    TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
+    TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
 
     CqBound	GetTotalBound() const;
     void	Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD );
@@ -647,7 +647,7 @@ public:
 {}
 
     // Overrides from CqMicroPolygon
-    virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
+    virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
     virtual	CqBound	GetTotalBound( TqBool fForce = TqFalse );
     virtual const CqBound	GetTotalBound() const
     {

@@ -324,7 +324,7 @@ TqInt	CqShaderExecEnv::FindStandardVarIndex( const char* pname )
 const CqMatrix& CqShaderExecEnv::matObjectToWorld() const
 {
     //	return ( m_pSurface == 0 ? m_matIdentity : m_pSurface->pTransform() ->matObjectToWorld() );
-    return ( m_pTransform == 0 ? m_matIdentity : m_pTransform ->matObjectToWorld() );
+    return ( m_pTransform == 0 ? m_matIdentity : m_pTransform ->matObjectToWorld(m_pTransform->Time(0)) );
 }
 
 

@@ -372,7 +372,7 @@ public:
     {}
 
 public:
-    TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const
+    TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
     {
         if( (CqVector2D( m_Point0.x(), m_Point0.y() ) - vecP).Magnitude() < m_radius )
         {
@@ -427,7 +427,7 @@ public:
 void	DeleteVariables( TqBool all )	{}
 
     // Overrides from CqMicroPolygon
-    virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
+    virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
     virtual	CqBound			GetTotalBound( TqBool fForce = TqFalse );
     virtual const CqBound	GetTotalBound() const
     {

@@ -1422,7 +1422,7 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 
                 CqMatrix matObjectToWorld = matCurrent();
                 if( m_pEnv )
-                    matObjectToWorld = m_pEnv->pTransform()->matObjectToWorld();
+                    matObjectToWorld = m_pEnv->pTransform()->matObjectToWorld(m_pEnv->pTransform()->Time(0));
 
                 // If it is a color or a point, ensure it is the correct 'space'
                 if ( m_LocalVars[ i ] ->Type() == type_point || m_LocalVars[ i ] ->Type() == type_hpoint )
@@ -1432,7 +1432,7 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
                         _strSpace = strSpace;
                     CqVector3D p;
                     pVMVal->GetPoint( p, 0 );
-                    pVMVal->SetPoint( QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
+                    pVMVal->SetPoint( QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * p );
                 }
                 else if ( m_LocalVars[ i ] ->Type() == type_normal )
                 {
@@ -1441,7 +1441,7 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
                         _strSpace = strSpace;
                     CqVector3D p;
                     pVMVal->GetNormal( p, 0 );
-                    pVMVal->SetNormal( QGetRenderContextI() ->matNSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
+                    pVMVal->SetNormal( QGetRenderContextI() ->matNSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * p );
                 }
                 else if ( m_LocalVars[ i ] ->Type() == type_vector )
                 {
@@ -1450,7 +1450,7 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
                         _strSpace = strSpace;
                     CqVector3D p;
                     pVMVal->GetVector( p, 0 );
-                    pVMVal->SetVector( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
+                    pVMVal->SetVector( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * p );
                 }
                 else if ( m_LocalVars[ i ] ->Type() == type_matrix )
                 {
@@ -1459,7 +1459,7 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
                         _strSpace = strSpace;
                     CqMatrix m;
                     pVMVal->GetMatrix( m, 0 );
-                    pVMVal->SetMatrix( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * m );
+                    pVMVal->SetMatrix( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld, QGetRenderContextI()->Time() ) * m );
                 }
 
                 if ( pArray )

@@ -160,9 +160,9 @@ CqString CqBasicSurface::strName() const
 TqInt CqBasicSurface::Uses() const
 {
     TqInt Uses = gDefUses | QGetRenderContext()->pDDmanager()->Uses();
-    IqShader* pshadSurface = pAttributes() ->pshadSurface();
-    IqShader* pshadDisplacement = pAttributes() ->pshadDisplacement();
-    IqShader* pshadAtmosphere = pAttributes() ->pshadAtmosphere();
+    IqShader* pshadSurface = pAttributes() ->pshadSurface(QGetRenderContextI()->Time());
+    IqShader* pshadDisplacement = pAttributes() ->pshadDisplacement(QGetRenderContextI()->Time());
+    IqShader* pshadAtmosphere = pAttributes() ->pshadAtmosphere(QGetRenderContextI()->Time());
 
     if ( NULL == pshadSurface && NULL == pshadDisplacement && NULL == pshadAtmosphere )
         return ( 0 );
@@ -192,7 +192,7 @@ CqBound	CqBasicSurface::AdjustBoundForTransformationMotion( const CqBound& B ) c
 
     if( pTransform()->cTimes() > 1 )
     {
-        CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pTransform()->matObjectToWorld( pTransform()->Time( 0 ) ) );
+        CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pTransform()->matObjectToWorld( pTransform()->Time( 0 ) ), pTransform()->Time( 0 ) );
         CqBound B0( B );
         B0.Transform( matCameraToObject0 );
 
@@ -200,7 +200,7 @@ CqBound	CqBasicSurface::AdjustBoundForTransformationMotion( const CqBound& B ) c
         for( i = 1; i < pTransform()->cTimes(); i++ )
         {
             CqBound Btx( B0 );
-            CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pTransform()->matObjectToWorld( pTransform()->Time( i ) ) );
+            CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pTransform()->matObjectToWorld( pTransform()->Time( i ) ), pTransform()->Time( i ) );
             Btx.Transform( matObjectToCameraT );
             Bm.Encapsulate( Btx );
         }
@@ -545,14 +545,15 @@ CqMicroPolyGridBase* CqSurface::Dice()
     std::vector<CqParameter*>::iterator end = m_aUserParams.end();
     for ( iUP = m_aUserParams.begin(); iUP != end ; iUP++ )
     {
-        if ( NULL != pGrid->pAttributes() ->pshadSurface() )
-            pGrid->pAttributes() ->pshadSurface() ->SetArgument( ( *iUP ), this );
+        IqShader* pShader;
+		if ( NULL != (pShader=pGrid->pAttributes() ->pshadSurface(QGetRenderContext()->Time())) )
+            pShader->SetArgument( ( *iUP ), this );
 
-        if ( NULL != pGrid->pAttributes() ->pshadDisplacement() )
-            pGrid->pAttributes() ->pshadDisplacement() ->SetArgument( ( *iUP ), this );
+        if ( NULL != (pShader=pGrid->pAttributes() ->pshadDisplacement(QGetRenderContext()->Time())) )
+            pShader->SetArgument( ( *iUP ), this );
 
-        if ( NULL != pGrid->pAttributes() ->pshadAtmosphere() )
-            pGrid->pAttributes() ->pshadAtmosphere() ->SetArgument( ( *iUP ), this );
+        if ( NULL != (pShader=pGrid->pAttributes() ->pshadAtmosphere(QGetRenderContext()->Time())) )
+            pShader->SetArgument( ( *iUP ), this );
     }
 
     PostDice( pGrid );

@@ -233,7 +233,7 @@ public:
     /** Get a reference to the current transformation matrix, the result of combining all transformations up to this point.
      * \return a matrix reference.
      */
-    const	CqMatrix&	matCurrent( TqFloat time = 0.0f ) const
+    const	CqMatrix&	matCurrent( TqFloat time ) const
     {
         return ( ptransCurrent() ->matObjectToWorld( time ) );
     }
