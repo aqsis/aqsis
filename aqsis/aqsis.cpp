@@ -313,9 +313,9 @@ int main( int argc, const char** argv )
     ap.argString( "displays", "=string\aspecify a default displays searchpath", &g_displays );
     ap.argString( "dsolibs", "=string\aspecify default DSO libraries", &g_dso_libs );
     ap.argString( "procedurals", "=string\aspecify default searchpath for procedurals", &g_procedurals );
+#ifdef	AQSIS_SYSTEM_POSIX
     ap.argFlag( "nocolor", "\adisable colored output", &g_no_color );
     ap.alias( "nocolor", "nc" );
-#ifdef	AQSIS_SYSTEM_POSIX
     ap.argFlag( "syslog", "\alog messages to syslog", &g_syslog );
 #endif	// AQSIS_SYSTEM_POSIX
     ap.allowUnrecognizedOptions();
@@ -358,9 +358,14 @@ int main( int argc, const char** argv )
     std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(std::cerr) );
     std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(std::cerr) );
     std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(std::cerr) );
+#ifdef	AQSIS_SYSTEM_POSIX
     std::auto_ptr<std::streambuf> color_level;
     if(!g_no_color)
-    	color_level.reset( new Aqsis::color_level_buf(std::cerr) );
+	{
+		std::auto_ptr<std::streambuf> temp_color_level( new Aqsis::color_level_buf(std::cerr) );
+    	color_level = temp_color_level;
+	}
+#endif
     std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
     std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::INFO, std::cerr) );
 #ifdef	AQSIS_SYSTEM_POSIX
