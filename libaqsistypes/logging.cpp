@@ -28,6 +28,10 @@
 #include <syslog.h>
 #endif
 
+#if defined __GNUC__ && (__GNUC__ < 3)
+	#define pubsync sync
+#endif
+
 namespace detail
 {
 
@@ -122,12 +126,8 @@ int timestamp_buf::overflow(int c)
 
 int timestamp_buf::sync()
 {
-    #ifdef	AQSIS_SYSTEM_WIN32
 	m_streambuf->pubsync();
-	#else
-	m_streambuf->sync();
-	#endif
-    return 0;
+	return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -190,12 +190,8 @@ int show_level_buf::overflow(int c)
 
 int show_level_buf::sync()
 {
-	#ifdef	AQSIS_SYSTEM_WIN32
 	m_streambuf->pubsync();
-	#else
-    m_streambuf->sync();
-	#endif
-    return 0;
+	return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,12 +220,8 @@ int reset_level_buf::overflow(int c)
 
 int reset_level_buf::sync()
 {
-	#ifdef	AQSIS_SYSTEM_WIN32
 	m_streambuf->pubsync();
-	#else
-    m_streambuf->sync();
-	#endif
-    return 0;
+	return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -259,12 +251,8 @@ int filter_by_level_buf::overflow(int c)
 
 int filter_by_level_buf::sync()
 {
-	#ifdef	AQSIS_SYSTEM_WIN32
 	m_streambuf->pubsync();
-	#else
-    m_streambuf->sync();
-	#endif
-    return 0;
+	return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -343,12 +331,8 @@ int fold_duplicates_buf::overflow(int c)
 
 int fold_duplicates_buf::sync()
 {
-	#ifdef	AQSIS_SYSTEM_WIN32
 	m_streambuf->pubsync();
-	#else
-    m_streambuf->sync();
-	#endif
-    return 0;
+	return 0;
 }
 
 #ifndef	NO_SYSLOG
@@ -389,7 +373,7 @@ int syslog_buf::overflow(int c)
 
 int syslog_buf::sync()
 {
-    m_streambuf->sync();
+    m_streambuf->pubsync();
     return 0;
 }
 
