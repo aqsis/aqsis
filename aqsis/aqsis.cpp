@@ -45,7 +45,7 @@ void version(std::ostream& Stream)
 
 RtVoid PrintProgress(RtFloat percent)
 {
-	printf("%3.2f%% Complete\r",percent);
+	std::cout << std::setw(6) << std::setfill(' ') << std::setprecision(4) << percent << "% Complete\r" << std::flush;
 	return(0);
 }
 
