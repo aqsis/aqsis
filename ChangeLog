@@ -1,3 +1,71 @@
+2003-07-27  pgregory
+	* libshaderexecenv/shadeops.cpp 1.51:
+		Add support for "__nondiffuse" and "__nonspecular" in the
+		standard diffuse() and specular() SL functions.
+
+	* libshaderexecenv/shadeops.cpp 1.52:
+		Update __nonspecular and __nondiffuse to check for any non zero
+		value, instead of 1 specifically.
+
+	* render/polygon.h 1.33:
+	* render/ri.cpp 1.214:
+		Tidy up some of the RiPointsPolygons implementation of "
+		facevarying"
+
+2003-07-26  pgregory
+	* render/parameters.h 1.36:
+	* render/polygon.cpp 1.44:
+	* render/polygon.h 1.32:
+	* render/ri.cpp 1.213:
+	* render/surface.cpp 1.48:
+	* render/surface.h 1.51:
+		First work on "facevarying" support for polymeshes.
+
+2003-07-24  pgregory
+	* doxygen.dsp 1.6:
+	* librib2/parser.yxx 1.12:
+	* render/procedural.cpp 1.12:
+		Update RunProgram support to work with Windows.
+
+	* render/shadowmap.cpp 1.5:
+	* render/texturemap.cpp 1.90:
+	* render/texturemap.h 1.45:
+		Some more optimisations to shadow mapping.
+
+2003-07-23  pgregory
+	* ftime.bat 1.2:
+		Update to provide more information and to sort by function time.
+
+	* render/shadowmap.cpp 1.4:
+	* render/texturemap.cpp 1.87:
+	* render/texturemap.cpp 1.88:
+	* render/texturemap.cpp 1.89:
+	* render/texturemap.h 1.44:
+		Change texture map buffer caching to use a list so that it can
+		be reordered to aid coherency optimisation without the overhead
+		of static data and string comparisons.
+
+2003-07-23  mw_matti
+	* aqsis/aqsis.cpp 1.65:
+		alfred compliant progress output
+
+	* aqsis/aqsis.cpp 1.66:
+		further fixes
+
+2003-07-22  pgregory
+	* libshaderexecenv/shadeops.cpp 1.50:
+		More small optimisations.
+
+	* libshaderexecenv/shadeops.cpp 1.49:
+	* render/shadowmap.cpp 1.3:
+	* render/texturemap.cpp 1.86:
+	* render/texturemap.h 1.43:
+		Various optimisations to the occlusion map sampling.
+
+2003-07-21  mw_matti
+	* aqsl/AqBatchCompile.py 1.1:
+		Batch compiler
+
 2003-07-21  pgregory
 	* aqsis/aqsis.cpp 1.64:
 	* librib2/librib2.dsp 1.20:
@@ -9,6 +77,20 @@
 	* render/ri.h 1.19:
 		Pass the frame number onto the progress handler so that it can
 		display the frame number being read in the progress string.
+
+	* configure.in 1.72:
+	* render/version.h 1.32:
+		Update version number to 0.7.14
+
+	* libshaderexecenv/shadeops.cpp 1.48:
+	* render/environment.cpp 1.2:
+	* render/itexturemap.h 1.11:
+	* render/shadowmap.cpp 1.2:
+	* render/texturemap.cpp 1.85:
+	* render/texturemap.h 1.42:
+		Separate the one time initialisation of texture sampling so
+		that it doesn't need to be done for every sample in the varying
+		loop.
 
 2003-07-20  mw_matti
 	* aqsl/aqslcomp.cpp 1.15:
