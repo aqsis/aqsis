@@ -89,22 +89,28 @@ void CqASCII::printEOL()
 
 void CqASCII::printArray ( RtInt n, RtInt *p )
 {
-	OUT << "[ ";
-	for ( RtInt i = 0; i < n; i++ )
+	if( n > 0 )
 	{
-		OUT << p[ i ] << ' ';
+		OUT << "[ ";
+		for ( RtInt i = 0; i < n; i++ )
+		{
+			OUT << p[ i ] << ' ';
+		}
+		OUT << ']';
 	}
-	OUT << ']';
 }
 
 void CqASCII::printArray ( RtInt n, RtFloat *p )
 {
-	OUT << "[ ";
-	for ( RtInt i = 0; i < n; i++ )
+	if( n > 0 )
 	{
-		OUT << p[ i ] << ' ';
+		OUT << "[ ";
+		for ( RtInt i = 0; i < n; i++ )
+		{
+			OUT << p[ i ] << ' ';
+		}
+		OUT << ']';
 	}
-	OUT << ']';
 }
 
 void CqASCII::printToken( RtToken t )
