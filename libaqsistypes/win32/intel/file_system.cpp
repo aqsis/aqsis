@@ -41,7 +41,7 @@ START_NAMESPACE( Aqsis )
 /** Given a string representing a filename with wildcards, return a list
  * of filenames that match that string.
 */
-std::list<CqString*> Glob (const CqString& strFileGlob)
+std::list<CqString*> CqFile::Glob (const CqString& strFileGlob)
 {
 	_finddata_t     c_file;
 	long            hFile;
@@ -53,7 +53,8 @@ std::list<CqString*> Glob (const CqString& strFileGlob)
 		/* we found something here; then we list
 		* all of them with the directory first
 		*/
-		result.push_front( CqString(c_file.name) );
+		CqString strFile(c_file.name);
+		result.push_front( &strFile );
 		while( _findnext( hFile, &c_file ) == 0 ) {
 			result.push_front( new CqString(c_file.name) );
 		}

@@ -58,4 +58,8 @@
 #pragma warning( disable : 4305 )
 #pragma warning( disable : 4244 )
 
+#include <sys/stat.h>
+
+#define S_ISDIR(a) (a & S_IFDIR)
+
 #endif // AQSIS_COMPILER_H_INCLUDED
