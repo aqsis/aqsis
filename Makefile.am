@@ -22,15 +22,24 @@ test:
 	cd librib2/tests; $(MAKE) $(AM_MAKEFLAGS) test
 	cd aqsis; $(MAKE) $(AM_MAKEFLAGS) test
 
-devicedriver = $(bindir)/ddmsock.ini
+devicepath = $(sysconfdir)
+devicedriver = $(devicepath)/ddmsock.ini
+devicelocal = $(srcdir)/libddmsock/ddmsock.ini
+
+all-local:
+	cat /dev/null > $(devicelocal)
+	echo "file	@bindir@/filebuffer@EXEEXT@" >> $(devicelocal)
+	echo "tiff	@bindir@/filebuffer@EXEEXT@" >> $(devicelocal)
+	echo "framebuffer	@bindir@/aqsis_framebuffer_glut@EXEEXT@" >> $(devicelocal)	
+	echo "zframebuffer	@bindir@/aqsis_framebuffer_glut_z@EXEEXT@" >> $(devicelocal)
+	echo "zfile	@bindir@/shadowmap@EXEEXT@" >> $(devicelocal)
+	echo "shadow	@bindir@/shadowmap@EXEEXT@" >> $(devicelocal)
 
 install-data-local:
-	cat /dev/null > $(devicedriver)
-	echo "file	@bindir@/filebuffer@EXEEXT@" >> $(devicedriver)
-	echo "tiff	@bindir@/filebuffer@EXEEXT@" >> $(devicedriver)
-	echo "framebuffer	@bindir@/aqsis_framebuffer_glut@EXEEXT@" >> $(devicedriver)	
-	echo "zframebuffer	@bindir@/aqsis_framebuffer_glut_z@EXEEXT@" >> $(devicedriver)
-	echo "zfile	@bindir@/shadowmap@EXEEXT@" >> $(devicedriver)
-	echo "shadow	@bindir@/shadowmap@EXEEXT@" >> $(devicedriver)
+	mkdir -p $(devicepath)
+	cp $(devicelocal) $(devicedriver)
+
+uninstall-local:
+	rm $(devicedriver)
 
 
