@@ -1,7 +1,7 @@
 bin_PROGRAMS = aqsis 
 
 aqsis_SOURCES = aqsis.cpp
-aqsis_LDADD = $(top_builddir)/librib2ri/librib2ri.la $(top_builddir)/librib2/librib2.la $(top_builddir)/render/libaqsis.la $(top_builddir)/libddmsock/libddmsock.la $(top_builddir)/libshadervm/libshadervm.la $(top_builddir)/libshaderexecenv/libshaderexecenv.la $(top_builddir)/libaqsistypes/libaqsistypes.la $(top_builddir)/libargparse/libargparse.la
+aqsis_LDADD = $(top_builddir)/render/libaqsis.la $(top_builddir)/libargparse/libargparse.la
 
 INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I$(top_srcdir)/render -I$(top_srcdir)/librib2 -I$(top_srcdir)/librib2ri -I$(top_srcdir)/libargparse
 
