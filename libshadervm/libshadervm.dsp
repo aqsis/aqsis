@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\shadervm.lib"
 
 !ELSEIF  "$(CFG)" == "libshadervm - Win32 Debug"
 
@@ -77,7 +77,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\libshadervm_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\shadervm_d.lib"
 
 !ELSEIF  "$(CFG)" == "libshadervm - Win32 Profile"
 
@@ -100,7 +100,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Profile\shadervm.lib"
 
 !ELSEIF  "$(CFG)" == "libshadervm - Win32 Release_Static_MT"
 
@@ -123,7 +123,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Static_MT\shadervm.lib"
 
 !ELSEIF  "$(CFG)" == "libshadervm - Win32 Debug_Static_MT"
 
@@ -146,7 +146,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\Static_MT\libshadervm_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\Static_MT\shadervm_d.lib"
 
 !ELSEIF  "$(CFG)" == "libshadervm - Win32 Release_Static_ST"
 
@@ -169,7 +169,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Static_ST\shadervm.lib"
 
 !ELSEIF  "$(CFG)" == "libshadervm - Win32 Debug_Static_ST"
 
@@ -192,7 +192,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\Static_ST\libshadervm_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\Static_ST\shadervm_d.lib"
 
 !ENDIF 
 

@@ -50,7 +50,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\ddmsock.lib"
 
 !ELSEIF  "$(CFG)" == "libddmsock - Win32 Debug"
 
@@ -73,7 +73,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\libddmsock_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\ddmsock_d.lib"
 
 !ELSEIF  "$(CFG)" == "libddmsock - Win32 Profile"
 
@@ -96,7 +96,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Profile\ddmsock.lib"
 
 !ENDIF 
 

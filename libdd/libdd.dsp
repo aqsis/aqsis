@@ -55,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\dd.lib"
 
 !ELSEIF  "$(CFG)" == "libdd - Win32 Debug"
 
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\libdd_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\dd_d.lib"
 
 !ELSEIF  "$(CFG)" == "libdd - Win32 Profile"
 
@@ -104,7 +104,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Profile\dd.lib"
 
 !ELSEIF  "$(CFG)" == "libdd - Win32 Release_Static_MT"
 
@@ -129,7 +129,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Static_MT\dd.lib"
 
 !ELSEIF  "$(CFG)" == "libdd - Win32 Debug_Static_MT"
 
@@ -154,7 +154,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\Static_MT\libdd_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\Static_MT\dd_d.lib"
 
 !ELSEIF  "$(CFG)" == "libdd - Win32 Release_Static_ST"
 
@@ -179,7 +179,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Static_ST\dd.lib"
 
 !ELSEIF  "$(CFG)" == "libdd - Win32 Debug_Static_ST"
 
@@ -204,7 +204,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\Static_ST\libdd_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\Static_ST\dd_d.lib"
 
 !ENDIF 
 

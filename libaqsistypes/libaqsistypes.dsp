@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\aqsistypes.lib"
 
 !ELSEIF  "$(CFG)" == "libaqsistypes - Win32 Debug"
 
@@ -77,7 +77,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\libaqsistypes_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\aqsistypes_d.lib"
 
 !ELSEIF  "$(CFG)" == "libaqsistypes - Win32 Profile"
 
@@ -100,7 +100,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Profile\aqsistypes.lib"
 
 !ELSEIF  "$(CFG)" == "libaqsistypes - Win32 Release_Static_MT"
 
@@ -123,7 +123,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Static_MT\aqsistypes.lib"
 
 !ELSEIF  "$(CFG)" == "libaqsistypes - Win32 Debug_Static_MT"
 
@@ -146,7 +146,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\Static_MT\libaqsistypes_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\Static_MT\aqsistypes_d.lib"
 
 !ELSEIF  "$(CFG)" == "libaqsistypes - Win32 Release_Static_ST"
 
@@ -169,7 +169,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Static_ST\aqsistypes.lib"
 
 !ELSEIF  "$(CFG)" == "libaqsistypes - Win32 Debug_Static_ST"
 
@@ -192,7 +192,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\Static_ST\libaqsistypes_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\Static_ST\aqsistypes_d.lib"
 
 !ENDIF 
 

@@ -54,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\rib2ri.lib"
 
 !ELSEIF  "$(CFG)" == "librib2ri - Win32 Debug"
 
@@ -77,7 +77,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\librib2ri_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\rib2ri_d.lib"
 
 !ELSEIF  "$(CFG)" == "librib2ri - Win32 Profile"
 
@@ -100,7 +100,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Profile\rib2ri.lib"
 
 !ELSEIF  "$(CFG)" == "librib2ri - Win32 Release_Static_MT"
 
@@ -123,7 +123,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Static_MT\rib2ri.lib"
 
 !ELSEIF  "$(CFG)" == "librib2ri - Win32 Debug_Static_MT"
 
@@ -146,7 +146,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\Static_MT\librib2ri_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\Static_MT\rib2ri_d.lib"
 
 !ELSEIF  "$(CFG)" == "librib2ri - Win32 Release_Static_ST"
 
@@ -169,7 +169,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Static_ST\rib2ri.lib"
 
 !ELSEIF  "$(CFG)" == "librib2ri - Win32 Debug_Static_ST"
 
@@ -192,7 +192,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\Static_ST\librib2ri_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\Static_ST\rib2ri_d.lib"
 
 !ENDIF 
 

@@ -291,8 +291,8 @@ Display "vase.tif" "file" "rgba"
 Display "+vase.tif" "framebuffer" "rgba"
 
 Format 256 192 1
-PixelSamples 2 2
-PixelFilter "gaussian" 2 2
+PixelSamples 4 4
+PixelFilter "catmull-rom" 3 3
 ShadingRate 1
 Projection "perspective" "fov" [37 ]
 Rotate -18.4214 1 0 0

@@ -55,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\slxargs.lib"
 
 !ELSEIF  "$(CFG)" == "libslxargs - Win32 Debug"
 
@@ -79,7 +79,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\libslxargs_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\slxargs_d.lib"
 
 !ELSEIF  "$(CFG)" == "libslxargs - Win32 Profile"
 
@@ -104,7 +104,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Profile\slxargs.lib"
 
 !ELSEIF  "$(CFG)" == "libslxargs - Win32 Release_Static_MT"
 
@@ -129,7 +129,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Static_MT\slxargs.lib"
 
 !ELSEIF  "$(CFG)" == "libslxargs - Win32 Debug_Static_MT"
 
@@ -154,7 +154,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\Static_MT\libslxargs_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\Static_MT\slxargs_d.lib"
 
 !ELSEIF  "$(CFG)" == "libslxargs - Win32 Release_Static_ST"
 
@@ -179,7 +179,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Static_ST\slxargs.lib"
 
 !ELSEIF  "$(CFG)" == "libslxargs - Win32 Debug_Static_ST"
 
@@ -204,7 +204,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"..\lib\Static_ST\libslxargs_d.lib"
+# ADD LIB32 /nologo /out:"..\lib\Static_ST\slxargs_d.lib"
 
 !ENDIF 
 
