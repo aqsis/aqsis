@@ -534,7 +534,7 @@ RtVoid	RiWorldEnd()
 
     const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
     if( NULL != poptGridSize )
-        QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "SqrtGridSize" )[0] = sqrt( poptGridSize[0] );
+        QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "SqrtGridSize" )[0] = sqrt( static_cast<float>(poptGridSize[0]) );
 
     // Render the world
     try
@@ -4211,7 +4211,7 @@ RtVoid	RiMakeTextureV( const char * pic, const char * tex, RtToken swrap, RtToke
         TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
         TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
         int log2 = MIN( Source.XRes(), Source.YRes() );
-        log2 = ( int ) ( log( log2 ) / log( 2.0 ) );
+        log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );
 
 
         for ( int i = 0; i < log2; i ++ )
@@ -4325,7 +4325,7 @@ RtVoid	RiMakeLatLongEnvironmentV( const char * pic, const char * tex, RtFilterFu
         TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
         TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
         int log2 = MIN( Source.XRes(), Source.YRes() );
-        log2 = ( int ) ( log( log2 ) / log( 2.0 ) );
+        log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );
 
 
         for ( int i = 0; i < log2; i ++ )
@@ -4427,7 +4427,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char 
         TqInt numsamples = tpx.SamplesPerPixel();
         // Number of mip map levels.
         int log2 = MIN( xRes, yRes );
-        log2 = ( int ) ( log( log2 ) / log( 2.0 ) );
+        log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );
 
         for ( ii = 0; ii < log2; ii++ )
         {
@@ -4674,7 +4674,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
                             creaseSharpness = 5.0f;
                         creaseSharpness /= 5.0f;
                         // bend the curve so values behave more like pixars algorithm
-                        creaseSharpness = pow(creaseSharpness, 0.2);
+                        creaseSharpness = pow(creaseSharpness, 0.2f);
                         TqInt iEdge = 0;
                         while ( iEdge < nargs[ argcIndex ] - 1 )
                         {

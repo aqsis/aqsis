@@ -90,8 +90,8 @@ void CqOcclusionBox::CreateHierarchy( TqInt bucketXSize, TqInt bucketYSize, TqIn
     assert( m_Hierarchy == NULL );
     assert( m_LevelStartId == NULL );
 
-    int xdivisions = ( int ) ( log10( bucketXSize + XFWidth ) / log10( 2.0 ) );
-    int ydivisions = ( int ) ( log10( bucketYSize + YFWidth ) / log10( 2.0 ) );
+    int xdivisions = ( int ) ( log10( static_cast<float>(bucketXSize + XFWidth) ) / log10( 2.0 ) );
+    int ydivisions = ( int ) ( log10( static_cast<float>(bucketYSize + YFWidth) ) / log10( 2.0 ) );
 
     m_HierarchyLevels = MIN( xdivisions, ydivisions );
 

@@ -41,6 +41,13 @@ CqVector2D::CqVector2D( const CqVector3D &From )
 {}
 
 //---------------------------------------------------------------------
+/** Copy constructor from 4D Vector.
+ */
+
+CqVector2D::CqVector2D( const CqVector4D &From )
+        : m_x( From.x() / From.h() ), m_y( From.y() / From.h() )
+{}
+//---------------------------------------------------------------------
 /** Copy from specified 3D vector.
  */
 

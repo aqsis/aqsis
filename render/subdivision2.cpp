@@ -909,7 +909,7 @@ CqBound	CqSurfaceSubdivisionPatch::Bound() const
         {
             TqInt iTime;
             for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
-                B.Encapsulate(pTopology()->pPoints( iTime )->P()->pValue((*iQfv)->VertexIndex())[0]);
+                B.Encapsulate((CqVector3D)pTopology()->pPoints( iTime )->P()->pValue((*iQfv)->VertexIndex())[0]);
         }
     }
 
@@ -1622,7 +1622,7 @@ CqBound	CqSurfaceSubdivisionMesh::Bound() const
     {
         TqInt PointIndex;
         for( PointIndex = m_pTopology->pPoints()->P()->Size()-1; PointIndex >= 0; PointIndex-- )
-            B.Encapsulate( m_pTopology->pPoints()->P()->pValue()[PointIndex] );
+            B.Encapsulate( (CqVector3D)m_pTopology->pPoints()->P()->pValue()[PointIndex] );
     }
     return( AdjustBoundForTransformationMotion( B ) );
 }

@@ -489,7 +489,7 @@ CqBound	CqSurfacePointsPolygons::Bound() const
     {
         TqInt PointIndex;
         for( PointIndex = m_pPoints->P()->Size()-1; PointIndex >= 0; PointIndex-- )
-            B.Encapsulate( m_pPoints->P()->pValue()[PointIndex] );
+            B.Encapsulate( (CqVector3D)m_pPoints->P()->pValue()[PointIndex] );
     }
     return(B);
 }

@@ -329,7 +329,7 @@ CqBound	CqPoints::Bound() const
     {
         CqPolygonPoints* pTimePoints = pPoints( t );
         for( i = 0; i < nVertices(); i++ )
-            B.Encapsulate( pTimePoints->P()->pValue( m_KDTree.aLeaves()[ i ] )[0] );
+            B.Encapsulate( (CqVector3D)pTimePoints->P()->pValue( m_KDTree.aLeaves()[ i ] )[0] );
     }
 
     // Expand the bound to take into account the width of the particles.

@@ -53,6 +53,7 @@ public:
     CqVector2D( TqFloat x, TqFloat y ) : m_x( x ), m_y( y )
     {}
     CqVector2D( const CqVector3D &From );
+	CqVector2D( const CqVector4D &From );
     ~CqVector2D()
     {}
 
