@@ -297,6 +297,7 @@ boost/libs/thread/src/mac/Makefile \
 boost/libs/thread/src/mac/msl_replacements/Makefile \
 display/Makefile \
 dsotest/Makefile \
+d_exr/Makefile \
 images/Makefile \
 libaqsistypes/Makefile \
 libaqsistypes/posix/Makefile \
