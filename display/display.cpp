@@ -112,8 +112,8 @@ TqFloat g_QuantizeMinVal = 0.0f;
 TqFloat g_QuantizeMaxVal = 0.0f;
 TqFloat g_QuantizeDitherVal = 0.0f;
 uint16	g_Compression = COMPRESSION_NONE, g_Quality = 0;
-
 TqInt	g_BucketsPerCol, g_BucketsPerRow;
+TqInt	g_BucketWidthMax, g_BucketHeightMax;
 
 unsigned char* g_byteData;
 float*	g_floatData;
@@ -308,7 +308,9 @@ SOCKET g_Socket;
 
 void BucketFunction()
 {
-    TqInt	linelen = g_ImageWidth * g_Channels;
+    TqInt	linelen = g_ImageWidth * g_Channels ;
+	TqInt	dataLenMax = g_BucketWidthMax * g_BucketHeightMax * g_ElementSize;
+	std::vector<TqFloat> dataBin(dataLenMax);
 
 	TqInt iBucket;
 	for(iBucket = 0; iBucket < (g_BucketsPerCol * g_BucketsPerRow); iBucket++)
@@ -332,7 +334,7 @@ void BucketFunction()
 		// Parse the response
 		TiXmlDocument docResp;
 		docResp.Parse(resp);
-		free(resp);
+		//free(resp);
 
 		// Extract the format attributes.
 		TiXmlHandle respHandle(&docResp);
@@ -349,11 +351,8 @@ void BucketFunction()
 				TiXmlText* data = dataNode->ToText();
 				if(data)
 				{
-					TqInt dataLen = strlen(data->Value());
-					dataLen = (dataLen/4)*3;
-					char* dataBin = new char[dataLen];
-					TqFloat* dataPtr = reinterpret_cast<TqFloat*>(dataBin);
-					b64_decode(reinterpret_cast<char*>(dataBin), data->Value());
+					b64_decode(reinterpret_cast<char*>(&dataBin[0]), data->Value());
+					TqInt dataOffset=0;
 					TqInt t;
 					TqFloat alpha = 255.0f;
 					TqInt y;
@@ -369,10 +368,10 @@ void BucketFunction()
 
 								TqInt i = 0;
 								if(use_alpha)
-									alpha = dataPtr[3 + g_offset];
+									alpha = dataBin[3 + g_offset + dataOffset];
 								while ( i < g_Channels )
 								{
-									TqFloat value = dataPtr[i + g_offset];
+									TqFloat value = dataBin[i + g_offset + dataOffset];
 
 									if( !( g_QuantizeZeroVal == 0.0f &&
 										   g_QuantizeOneVal  == 0.0f &&
@@ -404,10 +403,9 @@ void BucketFunction()
 									i++;
 								}
 							}
-							dataPtr += g_ElementSize;
+							dataOffset += g_ElementSize;
 						}
 					}
-					delete[](dataBin);
 				}
 			}
 			else
@@ -427,6 +425,7 @@ void BucketFunction()
 			std::cerr << "Error: Invalid response from Aqsis2" << std::endl;
 			exit(-1);
 		}
+		free(resp);
 	}
 	if(g_type.compare("file")==0)
 	{
@@ -473,6 +472,8 @@ void ProcessFormat()
 		formatElement->QueryIntAttribute("cropymax", &g_CWYmax);
 		formatElement->QueryIntAttribute("bucketsperrow", &g_BucketsPerRow);
 		formatElement->QueryIntAttribute("bucketspercol", &g_BucketsPerCol);
+		formatElement->QueryIntAttribute("bucketwidthmax", &g_BucketWidthMax);
+		formatElement->QueryIntAttribute("bucketheightmax", &g_BucketHeightMax);
 		formatElement->QueryIntAttribute("elementsize", &g_ElementSize);
 
 		// Find the appropriate data if processing if using AOV.
@@ -518,26 +519,31 @@ void ProcessFormat()
 
 		g_PixelsProcessed = 0;
 
-        if ( g_Format == 1 )
+		if(g_Format==1)
 		{
             g_byteData = new unsigned char[ g_ImageWidth * g_ImageHeight * g_Channels ];
-			for (TqInt i = 0; i < g_ImageHeight; i ++) 
+
+			// If working as a framebuffer, initialise the display to a checkerboard to show alpha
+			if(g_type.compare("framebuffer")==0)
 			{
-				for (TqInt j=0; j < g_ImageWidth; j++)
+				for (TqInt i = 0; i < g_ImageHeight; i ++) 
 				{
-					int     t       = 0;
-					unsigned char d = 255;
-
-					if ( ( (g_ImageHeight - 1 - i) & 31 ) < 16 ) t ^= 1;
-					if ( ( j & 31 ) < 16 ) t ^= 1;
-
-					if ( t )
+					for (TqInt j=0; j < g_ImageWidth; j++)
 					{
-						d      = 128;
+						int     t       = 0;
+						unsigned char d = 255;
+
+						if ( ( (g_ImageHeight - 1 - i) & 31 ) < 16 ) t ^= 1;
+						if ( ( j & 31 ) < 16 ) t ^= 1;
+
+						if ( t )
+						{
+							d      = 128;
+						}
+						g_byteData[g_Channels * (i*g_ImageWidth + j) ] = d;
+						g_byteData[g_Channels * (i*g_ImageWidth + j) + 1] = d;
+						g_byteData[g_Channels * (i*g_ImageWidth + j) + 2] = d;
 					}
-					g_byteData[g_Channels * (i*g_ImageWidth + j) ] = d;
-					g_byteData[g_Channels * (i*g_ImageWidth + j) + 1] = d;
-					g_byteData[g_Channels * (i*g_ImageWidth + j) + 2] = d;
 				}
 			}
 		}

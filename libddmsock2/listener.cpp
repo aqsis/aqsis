@@ -236,6 +236,8 @@ void CqSender::operator()()
 			TiXmlElement format("aqsis:format");
 			format.SetAttribute("bucketsperrow", ToString(QGetRenderContext()->pImage()->cXBuckets()).c_str());
 			format.SetAttribute("bucketspercol", ToString(QGetRenderContext()->pImage()->cYBuckets()).c_str());
+			format.SetAttribute("bucketwidthmax", ToString(QGetRenderContext()->pImage()->XBucketSize()).c_str());
+			format.SetAttribute("bucketheightmax", ToString(QGetRenderContext()->pImage()->YBucketSize()).c_str());
 			format.SetAttribute("xres", ToString(QGetRenderContext()->pImage()->iXRes()).c_str());
 			format.SetAttribute("yres", ToString(QGetRenderContext()->pImage()->iYRes()).c_str());
 			format.SetAttribute("cropxmin", ToString(QGetRenderContext()->pImage()->CropWindowXMin()).c_str());
@@ -290,14 +292,15 @@ void CqSender::operator()()
 				// preparing to notify interest.
 				boost::mutex::scoped_lock lk(m_pManager->getBucketsLock());
 				// Check again, just to see if the bucket has been entered while locking.
-				if((precord = m_pManager->getDiskStore().RetrieveBucketIndex(index)) != NULL)
-					break;
-				// Register an interest in the bucket with the manager. This will block until the bucket is ready.
-				m_pManager->BucketReadyCondition(index)->wait(lk);
 				if((precord = m_pManager->getDiskStore().RetrieveBucketIndex(index)) == NULL)
 				{
-					std::cerr << error << "Bucket manager has notified the availability of bucket " << index << " but I still can't get it" << std::endl;
-					throw( XqException("Listener") );
+					// Register an interest in the bucket with the manager. This will block until the bucket is ready.
+					m_pManager->BucketReadyCondition(index)->wait(lk);
+					if((precord = m_pManager->getDiskStore().RetrieveBucketIndex(index)) == NULL)
+					{
+						std::cerr << error << "Bucket manager has notified the availability of bucket " << index << " but I still can't get it" << std::endl;
+						throw( XqException("Listener") );
+					}
 				}
 			}
 			// Construct a response
