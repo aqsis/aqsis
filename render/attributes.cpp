@@ -118,7 +118,7 @@ CqAttributes::CqAttributes() :
     Attribute_stack.push_back( this );
     m_StackIndex = Attribute_stack.size() - 1;
 
-    CqNamedParameterList* pdefattrs = new CqNamedParameterList( "System" );
+    boost::shared_ptr<CqNamedParameterList> pdefattrs( new CqNamedParameterList( "System" ) );
 
     ADD_SYSTEM_ATTR( Color, CqColor, CqColor, type_color, CqColor( 1.0f, 1.0f, 1.0f ) );		// the current color attribute.
     ADD_SYSTEM_ATTR( Opacity, CqColor, CqColor, type_color, CqColor( 1.0f, 1.0f, 1.0f ) );	// the current opacity attribute.
@@ -224,10 +224,10 @@ CqAttributes& CqAttributes::operator=( const CqAttributes& From )
 
 const CqParameter* CqAttributes::pParameter( const char* strName, const char* strParam ) const
 {
-    const CqNamedParameterList * pList;
-    if ( ( pList = pAttribute( strName ) ) != 0 )
+    const CqNamedParameterList* pList = pAttribute( strName ).get();
+    if ( pList )
     {
-        return (pList->pParameter( strParam ) );
+        return ( pList->pParameter( strParam ) );
     }
     return ( 0 );
 }
@@ -242,8 +242,8 @@ const CqParameter* CqAttributes::pParameter( const char* strName, const char* st
 
 CqParameter* CqAttributes::pParameterWrite( const char* strName, const char* strParam )
 {
-    CqNamedParameterList * pList;
-    if ( ( pList = pAttributeWrite( strName ) ) != 0 )
+    CqNamedParameterList * pList = pAttributeWrite( strName ).get();
+    if ( pList )
     {
         return (pList->pParameter( strParam ) );
     }

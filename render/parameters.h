@@ -33,7 +33,7 @@
 
 #include	"ishaderdata.h"
 #include	"bilinear.h"
-#include	"refcount.h"
+#include	<boost/shared_ptr.hpp>
 
 START_NAMESPACE( Aqsis )
 
@@ -1374,7 +1374,7 @@ void CqParameterTypedVaryingArray<T, I, SLT>::DiceOne( TqInt u, TqInt v, IqShade
  * Renderman option/attribute class, has a name and a number of parameter name/value pairs.
  */
 
-class CqNamedParameterList : public CqRefCount
+class CqNamedParameterList
 {
 public:
     CqNamedParameterList( const char* strName ) : m_strName( strName )

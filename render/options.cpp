@@ -199,14 +199,6 @@ CqOptions::CqOptions( const CqOptions& From ) :
 
 CqOptions::~CqOptions()
 {
-    // Unreference the system options.
-    TqInt i = m_aOptions.size();
-    while ( i-- > 0 )
-    {
-        RELEASEREF( m_aOptions[ i ] );
-        m_aOptions[ i ] = 0;
-    }
-
     DeleteImager();
 }
 
@@ -221,23 +213,14 @@ CqOptions& CqOptions::operator=( const CqOptions& From )
     m_bScreenWindowCalled = From.m_bScreenWindowCalled;
     m_bFormatCalled = From.m_bFormatCalled;
 
-    // Unreference the system options.
-    TqInt i = m_aOptions.size();
-    while ( i-- > 0 )
-    {
-        RELEASEREF( m_aOptions[ i ] );
-        m_aOptions[ i ] = 0;
-    }
-
     DeleteImager();
 
     // Copy the system options.
     m_aOptions.resize( From.m_aOptions.size() );
-    i = From.m_aOptions.size();
+    TqInt i = From.m_aOptions.size();
     while ( i-- > 0 )
     {
         m_aOptions[ i ] = From.m_aOptions[ i ];
-        ADDREF( m_aOptions[ i ] );
     }
 
     return ( *this );
@@ -274,7 +257,7 @@ CqOptions& CqOptions::operator=( const CqOptions& From )
 
 void CqOptions::InitialiseDefaultOptions()
 {
-    CqNamedParameterList* pdefopts = new CqNamedParameterList( "System" );
+    boost::shared_ptr<CqNamedParameterList> pdefopts( new CqNamedParameterList( "System" ) );
 
     ADD_SYSTEM_PARAM( PixelVariance, TqFloat, TqFloat, type_float, 1.0f );
     ADD_SYSTEM_PARAM2( PixelSamples, TqInt, TqFloat, type_integer, 2, 2 );
@@ -301,15 +284,13 @@ void CqOptions::InitialiseDefaultOptions()
     ADD_SYSTEM_PARAM( FOV, TqFloat, TqFloat, type_float, 90.0f );
     ADD_SYSTEM_PARAM( SqrtGridSize, TqFloat, TqFloat, type_float, 16.0f );					// Grid size square root.
 
-    ADDREF( pdefopts );
     AddOption( pdefopts );
 
-    pdefopts = new CqNamedParameterList( "Quantize" );
+    pdefopts = boost::shared_ptr<CqNamedParameterList>( new CqNamedParameterList( "Quantize" ) );
 
     ADD_SYSTEM_PARAM4( Color, TqFloat, TqFloat, type_float, 255.0f, 0.0f, 255.0f, 0.5f );
     ADD_SYSTEM_PARAM4( Depth, TqFloat, TqFloat, type_float,   0.0f, 0.0f,   0.0f, 0.0f );
 
-    ADDREF( pdefopts );
     AddOption( pdefopts );
 }
 
@@ -323,8 +304,8 @@ void CqOptions::InitialiseDefaultOptions()
 
 const CqParameter* CqOptions::pParameter( const char* strName, const char* strParam ) const
 {
-    const CqNamedParameterList* pList;
-    if ( ( pList = pOption( strName ) ) != 0 )
+    const CqNamedParameterList* pList = pOption( strName ).get();
+    if ( pList )
     {
         const CqParameter * pParam;
         if ( ( pParam = pList->pParameter( strParam ) ) != 0 )
@@ -343,8 +324,8 @@ const CqParameter* CqOptions::pParameter( const char* strName, const char* strPa
 
 CqParameter* CqOptions::pParameterWrite( const char* strName, const char* strParam )
 {
-    CqNamedParameterList* pList;
-    if ( ( pList = pOptionWrite( strName ) ) != 0 )
+    CqNamedParameterList* pList = pOptionWrite( strName ).get();
+    if ( pList )
     {
         CqParameter * pParam;
         if ( ( pParam = pList->pParameter( strParam ) ) != 0 )

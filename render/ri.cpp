@@ -1185,8 +1185,8 @@ RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat dither
     }
     else
     {
-        CqNamedParameterList* pOption = QGetRenderContext() ->optCurrent().pOptionWrite( "Quantize" );
-        if( NULL != pOption )
+        CqNamedParameterList* pOption = QGetRenderContext() ->optCurrent().pOptionWrite( "Quantize" ).get();
+        if( pOption )
         {
             CqParameterTypedUniformArray<TqFloat,type_float,TqFloat>* pQuant = new CqParameterTypedUniformArray<TqFloat,type_float,TqFloat>(type,4); \
             pQuant->pValue()[0] = static_cast<TqFloat>( one );
@@ -1665,7 +1665,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 	Validate_RiOption
 
     // Find the parameter on the current options.
-    CqNamedParameterList * pOpt = QGetRenderContext() ->optCurrent().pOptionWrite( name );
+    CqNamedParameterList * pOpt = QGetRenderContext() ->optCurrent().pOptionWrite( name ).get();
 
     RtInt i;
     for ( i = 0; i < count; i++ )
@@ -2786,7 +2786,7 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 	Validate_RiAttribute
 
     // Find the parameter on the current options.
-    CqNamedParameterList * pAttr = QGetRenderContext() ->pattrWriteCurrent() ->pAttributeWrite( name );
+    CqNamedParameterList * pAttr = QGetRenderContext() ->pattrWriteCurrent() ->pAttributeWrite( name ).get();
 
     RtInt i;
     for ( i = 0; i < count; i++ )

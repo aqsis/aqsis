@@ -84,7 +84,7 @@ public:
     /** Add a new user defined attribute.
      * \param pAttribute a pointer to the new user defined attribute.
      */
-    void	AddAttribute( CqNamedParameterList* pAttribute )
+    void	AddAttribute( const boost::shared_ptr<CqNamedParameterList>& pAttribute )
     {
         m_aAttributes.Add( pAttribute );
     }
@@ -92,7 +92,7 @@ public:
      * \param strName the name of the attribute to retrieve.
      * \return a pointer to the attribute or 0 if not found.
      */
-    const	CqNamedParameterList* pAttribute( const char* strName ) const
+    const	boost::shared_ptr<CqNamedParameterList> pAttribute( const char* strName ) const
     {
         return ( m_aAttributes.Find( strName ) );
     }
@@ -102,22 +102,22 @@ public:
      * \param strName the name of the attribute to retrieve.
      * \return a pointer to the attribute.
      */
-    CqNamedParameterList* pAttributeWrite( const char* strName )
+    boost::shared_ptr<CqNamedParameterList> pAttributeWrite( const char* strName )
     {
-        CqNamedParameterList * pAttr = m_aAttributes.Find( strName );
-        if ( NULL != pAttr )
+	boost::shared_ptr<CqNamedParameterList> pAttr = m_aAttributes.Find( strName );
+        if ( pAttr )
         {
-            if ( pAttr->RefCount() == 1 )
+            if ( pAttr.unique() )
                 return ( pAttr );
             else
             {
-                CqNamedParameterList* pNew = new CqNamedParameterList( *pAttr );
+		boost::shared_ptr<CqNamedParameterList> pNew( new CqNamedParameterList( *pAttr ) );
                 m_aAttributes.Remove( pAttr );
                 m_aAttributes.Add( pNew );
                 return ( pNew );
             }
         }
-        CqNamedParameterList* pNew = new CqNamedParameterList( strName );
+	boost::shared_ptr<CqNamedParameterList> pNew( new CqNamedParameterList( strName ) );
         m_aAttributes.Add( pNew );
         return ( pNew );
     }
@@ -312,27 +312,22 @@ private:
         }
         virtual	~CqHashTable()
         {
-            // Release all the system options we have a handle on.
-            std::vector<std::list<CqNamedParameterList*> >::iterator i;
-            for ( i = m_aLists.begin(); i != m_aLists.end(); i++ )
-            {
-                std::list<CqNamedParameterList*>::iterator i2;
-                for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
-                    RELEASEREF( (*i2) );
-                //( *i2 ) ->Release();
-            }
         }
 
-        const CqNamedParameterList*	Find( const TqChar* pname ) const
+        const boost::shared_ptr<CqNamedParameterList>	Find( const TqChar* pname ) const
         {
             TqUlong hash = CqParameter::hash(pname);
             TqInt i = _hash( hash);
 
             if ( m_aLists[ i ].empty() )
-                return ( 0 );
+	    {
+                boost::shared_ptr<CqNamedParameterList> retval;
+		return ( retval );
+                // return ( boost::shared_ptr<CqNamedParameterList>() );
+	    }
 
 
-            std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
+            std::list<boost::shared_ptr<CqNamedParameterList> >::const_iterator iEntry = m_aLists[ i ].begin();
             if ( iEntry == m_aLists[ i ].end() )
                 return ( *iEntry );
             else
@@ -341,23 +336,29 @@ private:
                 {
                     if ( ( *iEntry ) ->hash() == hash )
                         return ( *iEntry );
-                    iEntry++;
+                    ++iEntry;
                 }
             }
 
-            return ( 0 );
+            boost::shared_ptr<CqNamedParameterList> retval;
+	    return ( retval );
+            // return ( boost::shared_ptr<CqNamedParameterList>() );
         }
 
-        CqNamedParameterList*	Find( const TqChar* pname )
+	boost::shared_ptr<CqNamedParameterList>	Find( const TqChar* pname )
         {
             TqUlong hash = CqParameter::hash(pname);
             TqInt i = _hash( hash);
 
             if ( m_aLists[ i ].empty() )
-                return ( 0 );
+	    {
+		boost::shared_ptr<CqNamedParameterList> retval;
+		return ( retval );
+                // return ( boost::shared_ptr<CqNamedParameterList>() );
+	    }
 
 
-            std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
+            std::list<boost::shared_ptr<CqNamedParameterList> >::const_iterator iEntry = m_aLists[ i ].begin();
             if ( iEntry == m_aLists[ i ].end() )
                 return ( *iEntry );
             else
@@ -366,33 +367,32 @@ private:
                 {
                     if ( ( *iEntry ) ->hash() == hash )
                         return ( *iEntry );
-                    iEntry++;
+                    ++iEntry;
                 }
             }
 
-            return ( 0 );
+	    boost::shared_ptr<CqNamedParameterList> retval;
+	    return ( retval );
+            // return ( boost::shared_ptr<CqNamedParameterList>() );
         }
 
-        void Add( CqNamedParameterList* pOption )
+        void Add( const boost::shared_ptr<CqNamedParameterList>& pOption )
         {
             TqUlong hash = CqParameter::hash(pOption->strName().c_str());
             TqInt i = _hash( hash);
             m_aLists[ i ].push_back( pOption );
-            ADDREF( pOption );
         }
 
-        void Remove( CqNamedParameterList* pOption )
+        void Remove( const boost::shared_ptr<CqNamedParameterList>& pOption )
         {
             TqUlong hash = CqParameter::hash(pOption->strName().c_str());
             TqInt i = _hash( hash);
 
-            std::list<CqNamedParameterList*>::iterator iEntry = m_aLists[ i ].begin();
+            std::list<boost::shared_ptr<CqNamedParameterList> >::iterator iEntry = m_aLists[ i ].begin();
             while ( iEntry != m_aLists[ i ].end() )
             {
                 if ( ( *iEntry ) == pOption )
                 {
-                    //pOption->Release();
-                    RELEASEREF( pOption );
                     m_aLists[ i ].remove( *iEntry );
                     return ;
                 }
@@ -402,10 +402,10 @@ private:
 
         CqHashTable& operator=( const CqHashTable& From )
         {
-            std::vector<std::list<CqNamedParameterList*> >::const_iterator i;
+            std::vector<std::list<boost::shared_ptr<CqNamedParameterList> > >::const_iterator i;
             for ( i = From.m_aLists.begin(); i != From.m_aLists.end(); i++ )
             {
-                std::list<CqNamedParameterList*>::const_iterator i2;
+                std::list<boost::shared_ptr<CqNamedParameterList> >::const_iterator i2;
                 for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
                     Add( *i2 );
             }
@@ -425,7 +425,7 @@ private:
             return ( (TqUlong) h % tableSize ); // remainder
         }
 
-        std::vector<std::list<CqNamedParameterList*> >	m_aLists;
+        std::vector<std::list<boost::shared_ptr<CqNamedParameterList> > >	m_aLists;
     };
 #else
     class CqHashTable
@@ -433,7 +433,7 @@ private:
     private:
         static const TqInt tableSize;
 
-        typedef	std::map<std::string, CqNamedParameterList*, std::less<std::string> > plist_type;
+        typedef	std::map<std::string, boost::shared_ptr<CqNamedParameterList>, std::less<std::string> > plist_type;
         typedef	plist_type::value_type	value_type;
         typedef	plist_type::iterator plist_iterator;
         typedef	plist_type::const_iterator plist_const_iterator;
@@ -443,46 +443,38 @@ private:
         {}
         virtual	~CqHashTable()
         {
-            plist_iterator it = m_ParameterLists.begin();
-            while( it != m_ParameterLists.end() )
-            {
-                RELEASEREF( (*it).second );
-                ++it;
-            }
         }
 
-        const CqNamedParameterList*	Find( const TqChar* pname ) const
+        const boost::shared_ptr<CqNamedParameterList>	Find( const TqChar* pname ) const
         {
             std::string strName( pname );
             plist_const_iterator it = m_ParameterLists.find( strName );
             if( it != m_ParameterLists.end() )
                 return ( it->second );
             else
-                return ( NULL );
+                return ( boost::shared_ptr<CqNamedParameterList>() );
         }
 
-        CqNamedParameterList*	Find( const TqChar* pname )
+	boost::shared_ptr<CqNamedParameterList>	Find( const TqChar* pname )
         {
             std::string strName( pname );
             plist_iterator it = m_ParameterLists.find( strName );
             if( it != m_ParameterLists.end() )
                 return ( it->second );
             else
-                return ( NULL );
+                return ( boost::shared_ptr<CqNamedParameterList>() );
         }
 
-        void Add( CqNamedParameterList* pOption )
+        void Add( const boost::shared_ptr<CqNamedParameterList>& pOption )
         {
             m_ParameterLists.insert(value_type(pOption->strName(), pOption) );
-            ADDREF( pOption );
         }
 
-        void Remove( CqNamedParameterList* pOption )
+        void Remove( const boost::shared_ptr<CqNamedParameterList>& pOption )
         {
             plist_iterator it = m_ParameterLists.find( pOption->strName() );
             if( it != m_ParameterLists.end() )
             {
-                RELEASEREF( (*it).second );
                 m_ParameterLists.erase(it);
             }
         }

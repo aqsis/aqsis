@@ -85,7 +85,7 @@ public:
     /** Add a named user option to the current state.
      * \param pOption A pointer to a new CqNamedParameterList class containing the initialised option.
      */
-    void	AddOption( CqNamedParameterList* pOption )
+    void	AddOption( const boost::shared_ptr<CqNamedParameterList>& pOption )
     {
         m_aOptions.push_back( pOption );
     }
@@ -93,13 +93,6 @@ public:
      */
     void	ClearOptions()
     {
-        // unreference the options before clearing the list
-        TqInt i = m_aOptions.size();
-        while ( i-- > 0 )
-        {
-            RELEASEREF( m_aOptions[ i ] );
-            m_aOptions[ i ] = 0;
-        }
         m_aOptions.clear();
         InitialiseDefaultOptions();
     }
@@ -110,40 +103,48 @@ public:
      * \param strName Character pointer to the requested options name.
      * \return A pointer to the option, or 0 if not found. 
      */
-    const	CqNamedParameterList* pOption( const char* strName ) const
+    boost::shared_ptr<const CqNamedParameterList> pOption( const char* strName ) const
     {
         TqLong hash = CqParameter::hash( strName );
-        std::vector<CqNamedParameterList*>::const_iterator end = m_aOptions.end();
-        for ( std::vector<CqNamedParameterList*>::const_iterator i = m_aOptions.begin(); i != end; i++ )
-            if ( ( *i ) ->hash() == hash ) return ( *i );
-        return ( 0 );
+        std::vector<boost::shared_ptr<CqNamedParameterList> >::const_iterator
+	    i = m_aOptions.begin(), end = m_aOptions.end();
+        for ( i = m_aOptions.begin(); i != end; ++i )
+	{
+            if ( ( *i ) ->hash() == hash )
+	    {
+		return ( *i );
+	    }
+	}
+        boost::shared_ptr<const CqNamedParameterList> retval;
+        return ( retval );
+        // return ( boost::shared_ptr<const CqNamedParameterList>() );
     }
     /** Get a pointer to a named user option.
      * \param strName Character pointer to the requested options name.
      * \return A pointer to the option, or 0 if not found. 
      */
-    CqNamedParameterList* pOptionWrite( const char* strName )
+    boost::shared_ptr<CqNamedParameterList> pOptionWrite( const char* strName )
     {
         TqLong hash = CqParameter::hash( strName );
-        std::vector<CqNamedParameterList*>::iterator end = m_aOptions.end();
-        for ( std::vector<CqNamedParameterList*>::iterator i = m_aOptions.begin(); i != end; i++ )
+        std::vector<boost::shared_ptr<CqNamedParameterList> >::iterator
+	    i = m_aOptions.begin(), end = m_aOptions.end();
+        for ( ; i != end; ++i )
         {
             if ( ( *i ) ->hash() == hash )
             {
-                if ( ( *i ) ->RefCount() == 1 )
+                if ( ( *i ).unique() )
+		{
                     return ( *i );
+		}
                 else
                 {
-                    CqNamedParameterList* pNew = new CqNamedParameterList( *( *i ) );
-                    RELEASEREF( ( *i ) );
+		    boost::shared_ptr<CqNamedParameterList> pNew( new CqNamedParameterList( *( *i ) ) );
                     ( *i ) = pNew;
-                    ADDREF( ( *i ) );
-                    return ( *i );
+                    return ( pNew );
                 }
             }
         }
-        m_aOptions.push_back( new CqNamedParameterList( strName ) );
-        ADDREF( m_aOptions.back() );
+        m_aOptions.push_back( boost::shared_ptr<CqNamedParameterList>( new CqNamedParameterList( strName ) ) );
         return ( m_aOptions.back() );
     }
     const	CqParameter* pParameter( const char* strName, const char* strParam ) const;
@@ -253,7 +254,7 @@ public:
     TqFloat GetAlphaImager( TqFloat x, TqFloat y );
 
 private:
-    std::vector<CqNamedParameterList*>	m_aOptions;	///< Vector of user specified options.
+    std::vector<boost::shared_ptr<CqNamedParameterList> >	m_aOptions;	///< Vector of user specified options.
 
     RtFilterFunc m_funcFilter;						///< Pointer to the pixel filter function.
     CqImagersource* m_pshadImager;		///< Pointer to the imager shader.
