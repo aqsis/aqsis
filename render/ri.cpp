@@ -2728,21 +2728,29 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 			if ( iloop == 0 )
 			{
 				if( O == OrientationRH )
+				{
 					if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
 						polya.SwapDirection();
+				}
 				else
+				{
 					if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
 						polya.SwapDirection();
+				}
 				poly = polya;
 			}
 			else
 			{
 				if( O == OrientationRH )
+				{
 					if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
 						polya.SwapDirection();
+				}
 				else
+				{
 					if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
 						polya.SwapDirection();
+				}
 				poly.Combine( polya );
 			}
 		}
@@ -3081,6 +3089,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 	TqInt igloop = 0;
 	TqInt cVerts = 0;
 	TqInt igvert = 0;
+	TqInt initial_index;
 	TqInt sumnVerts = 0;
 
 	// Calculate how many points overall.
@@ -3114,14 +3123,21 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 		igloop = 0;
 		TqUint ctris = 0;
 		std::vector<TqInt>	aiTriangles;
+		std::vector<TqInt> aFVList;
 
 		for ( ipoly = 0; ipoly < npolys; ipoly++ )
 		{
+			initial_index = igvert;
 			// Create a general 2D polygon using the points in each loop.
 			CqPolygonGeneral2D poly;
 			TqUint ipoint = 0;
+			TqUint imaxindex, iminindex;
+			imaxindex = cVerts;
+			iminindex = 0;
 			for ( iloop = 0; iloop < nloops[ ipoly ]; iloop++, igloop++ )
 			{
+				iminindex = MIN( iminindex, verts[ igvert ] );
+				imaxindex = MAX( imaxindex, verts[ igvert ] );
 				TqFloat	MinX, MaxX;
 				TqFloat	MinY, MaxY;
 				TqFloat	MinZ, MaxZ;
@@ -3165,29 +3181,55 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 				if ( iloop == 0 )
 				{
 					if( O == OrientationRH )
+					{
 						if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
 							polya.SwapDirection();
+					}
 					else
+					{
 						if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
 							polya.SwapDirection();
+					}
 					poly = polya;
 				}
 				else
 				{
 					if( O == OrientationRH )
+					{
 						if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
 							polya.SwapDirection();
+					}
 					else
+					{
 						if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
 							polya.SwapDirection();
+					}
 					poly.Combine( polya );
 				}
 			}
 			// Now triangulate the general polygon
 
 			poly.CalcOrientation();
+			TqInt iStartTri = aiTriangles.size();
 			poly.Triangulate( aiTriangles );
-
+			TqInt iEndTri = aiTriangles.size();
+			// Store the facevarying information 
+			/// \note This code relies on the fact that vertex indices cannot be duplicated
+			/// within the loops of a single poly. Make sure this is a reasonable assumption. 
+			for( TqInt ifv = iStartTri; ifv < iEndTri; ifv++ )
+			{
+				TqInt ivaryingindex = aiTriangles[ ifv ];
+				TqBool found = TqFalse;
+				for( TqInt iv = initial_index; iv != igvert; iv++ )
+				{
+					if( verts[ iv ] == ivaryingindex )
+					{
+						aFVList.push_back( iv );
+						found = TqTrue;
+					}
+				}
+				assert( found );
+			}
 		}
 		RELEASEREF( pPointsClass );
 
@@ -3196,7 +3238,52 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 		std::vector<RtInt> _nverts;
 		_nverts.resize( ctris, 3 );
 
+		// Rebuild any facevarying variables.
+		TqInt iUserParam;
+		TqInt fvcount = ctris * 3;
+		assert( aFVList.size() == fvcount );
+		std::vector<void*> aNewParams;
+		for( iUserParam = 0; iUserParam < count; iUserParam++ )
+		{
+			SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( tokens[ iUserParam ] );
+			if( Decl.m_Class == class_facevarying )
+			{
+				TqInt elem_size;
+				switch( Decl.m_Type )
+				{
+					case type_float:
+						elem_size = sizeof(RtFloat);
+					break;
+					case type_vector:
+					case type_point:
+					case type_normal:
+						elem_size = sizeof(RtPoint);
+					break;
+					case type_color:
+						elem_size = sizeof(RtColor);
+					break;
+					case type_matrix:
+						elem_size = sizeof(RtMatrix);
+					break;
+				}
+				char* pNew = static_cast<char*>( malloc( elem_size * fvcount ) );
+				aNewParams.push_back( pNew );
+				TqInt iElem;
+				for( iElem = 0; iElem < fvcount; iElem++ )
+				{
+					const unsigned char* pval = static_cast<const unsigned char*>( values[ iUserParam ] ) + ( aFVList[ iElem ] * elem_size );
+					memcpy( pNew, pval, elem_size );
+					pNew += elem_size;
+				}
+				values[ iUserParam ] = aNewParams.back();
+			}
+		}
+
 		RiPointsPolygonsV( ctris, &_nverts[ 0 ], &aiTriangles[ 0 ], count, tokens, values );
+
+		std::vector<void*>::iterator iNewParam;
+		for( iNewParam = aNewParams.begin(); iNewParam != aNewParams.end(); iNewParam++ )
+			free( *iNewParam ); 
 	}
 
 	return ;
