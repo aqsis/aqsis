@@ -5,7 +5,7 @@
  *	@brief	Implementation of trimcurce functionality.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2001/11/09 08:56:51 $
+ *	Last change date:	$Date: 2001/11/10 09:56:01 $
  */
 //------------------------------------------------------------------------------
 
@@ -15,20 +15,115 @@
 START_NAMESPACE(Aqsis)
 
 
+//---------------------------------------------------------------------
+/** Find the span in the knot vector containing the specified parameter value.
+ */
+
+TqUint CqTrimCurve::FindSpan(TqFloat u) const
+{
+	if(u>=m_aKnots[m_cVerts]) 
+		return(m_cVerts-1);
+	if(u<=m_aKnots[Degree()])
+		return(Degree());
+	
+	TqUint low=0;
+	TqUint high=m_cVerts+1; 
+	TqUint mid=(low+high)/2;
+
+	while(u<m_aKnots[mid] || u>=m_aKnots[mid+1])
+	{
+		if(u<m_aKnots[mid])
+			high=mid;
+		else
+			low=mid;
+		mid=(low+high)/2;
+	}
+	return(mid);  
+}
+
+
+//---------------------------------------------------------------------
+/** Return the basis functions for the specified parameter value.
+ */
+
+void CqTrimCurve::BasisFunctions(TqFloat u, TqUint span, std::vector<TqFloat>& BasisVals)
+{
+    register TqInt r, s, i;
+    register double omega;
+
+	BasisVals[0]=1.0;
+	for(r=2; r<=m_Order; r++)
+	{
+		i=span-r+1;
+		BasisVals[r-1]=0.0;
+		for(s=r-2; s>=0; s--)
+		{
+			i++;
+			if(i < 0)
+				omega=0;
+			else
+				omega=(u-m_aKnots[i])/(m_aKnots[i+r-1]-m_aKnots[i]);
+
+			BasisVals[s+1]=BasisVals[s+1]+(1-omega)*BasisVals[s];
+			BasisVals[s]=omega*BasisVals[s];
+		}
+	}
+}
+
+
+//---------------------------------------------------------------------
+/** Evaluate the nurbs curve at parameter value u.
+ */
+
+CqVector2D	CqTrimCurve::Evaluate(TqFloat u)
+{
+	std::vector<TqFloat> basis(m_Order);
+
+	CqVector3D r(0,0,0);
+
+	/* Evaluate non-uniform basis functions (and derivatives) */
+
+	TqUint span=FindSpan(u);
+	TqUint first=span-m_Order+1;
+	BasisFunctions(u, span, basis);
+
+	// Weight control points against the basis functions
+	TqUint j;
+	for(j=0; j<m_Order; j++)
+	{
+		TqUint rj=m_Order-1L-j;
+
+		TqFloat tmp=basis[rj];
+		CqVector3D& cp=CP(j+first);
+
+		r.x(r.x()+cp.x()*tmp);
+		r.y(r.y()+cp.y()*tmp);
+		r.z(r.z()+cp.z()*tmp);
+	}
+	
+	return(CqVector2D(r.x()/r.z(),r.y()/r.z()));
+}
+
+
+
 void CqTrimLoop::Prepare()
 {
 	TqInt cPoints=200;
 
 	std::vector<CqTrimCurve>::iterator iCurve;
 	TqInt iPoint;
-	TqFloat u=0.0f;
-	TqFloat du=1.0f/cPoints;
 
 	for(iCurve=m_aCurves.begin(); iCurve!=m_aCurves.end(); iCurve++)
 	{
+		iCurve->Clamp();
+
+		TqFloat range=iCurve->aKnots()[iCurve->cKnots()-1]-iCurve->aKnots()[0];
+		TqFloat u=iCurve->aKnots()[0];
+		TqFloat du=range/cPoints;
+
 		for(iPoint=0; iPoint<cPoints; iPoint++)
 		{
-			m_aCurvePoints.push_back(CqVector2D(iCurve->Evaluate(u)));
+			m_aCurvePoints.push_back(iCurve->Evaluate(u));
 			u+=du;
 		}
 	}
@@ -72,6 +167,124 @@ TqBool	CqTrimLoopArray::TrimPoint(CqVector2D& v)
 	return(fTrim); 
 }
 
+
+
+//---------------------------------------------------------------------
+/** Insert the specified knot into the U knot vector, and refine the control points accordingly.
+ * \return The number of new knots created.
+ */
+
+TqUint CqTrimCurve::InsertKnot(TqFloat u, TqInt r)
+{
+	// Work on a copy.
+	CqTrimCurve nS(*this);
+
+	// Compute k and s      u = [ u_k , u_k+1)  with u_k having multiplicity s
+	TqInt k=m_aKnots.size()-1,s=0;
+	TqInt i,j;
+	TqInt p=Degree();
+
+	if(u<m_aKnots[Degree()] || u>m_aKnots[m_cVerts])
+		return(0);
+
+	for(i=0; i<static_cast<TqInt>(m_aKnots.size()); i++)
+	{
+		if(m_aKnots[i]>u)
+		{
+			k=i-1;
+			break;
+		}
+	}
+
+	if(u<=m_aKnots[k])
+	{
+		s=1;
+		for(i=k; i>0; i--)
+		{
+			if(m_aKnots[i]<=m_aKnots[i-1])
+				s++;
+			else
+				break;
+		}
+	}
+	else
+		s=0;
+
+	if((r+s)>p+1)
+		r=p+1-s;
+
+	if(r<=0)
+		return(0); 
+
+	nS.Init(m_Order, m_cVerts+r);
+
+	// Load new knot vector
+	for(i=0;i<=k;i++)	nS.m_aKnots[i]=m_aKnots[i];
+	for(i=1;i<=r;i++)	nS.m_aKnots[k+i]=u;
+	for(i=k+1;i<static_cast<TqInt>(m_aKnots.size()); i++)
+		nS.m_aKnots[i+r]=m_aKnots[i];
+
+	// Save unaltered control points
+	std::vector<CqVector3D> R(p+1);
+
+	// Insert control points as required on each row.
+	for(i=0; i<=k-p; i++)			nS.CP(i)=CP(i);
+	for(i=k-s; i<static_cast<TqInt>(m_cVerts); i++)	
+		nS.CP(i+r)=CP(i);
+	for(i=0; i<=p-s; i++)			R[i]=CP(k-p+i);
+
+	// Insert the knot r times
+	TqUint L=0 ;
+	TqFloat alpha;
+	for(j=1; j<=r; j++)
+	{
+		L=k-p+j;
+		for(i=0;i<=p-j-s;i++)
+		{
+			alpha=(u-m_aKnots[L+i])/(m_aKnots[i+k+1]-m_aKnots[L+i]);
+			R[i]=CqVector3D(alpha*R[i+1].x()+(1.0-alpha)*R[i].x(),
+							alpha*R[i+1].y()+(1.0-alpha)*R[i].y(),
+							alpha*R[i+1].z()+(1.0-alpha)*R[i].z());
+		}
+		nS.CP(L)=R[0];
+		if(p-j-s > 0)
+			nS.CP(k+r-j-s)=R[p-j-s];
+	}
+
+	// Load remaining control points
+	for(i=L+1; i<k-s; i++)
+		nS.CP(i)=R[i-L];
+
+	*this=nS;
+	
+	return(r); 
+}
+
+
+
+//---------------------------------------------------------------------
+/** Ensure a nonperiodic (clamped) knot vector by inserting U[p] and U[m-p] multiple times.
+ */
+
+void CqTrimCurve::Clamp()
+{
+	TqUint n1=InsertKnot(m_aKnots[Degree()],Degree());
+	TqUint n2=InsertKnot(m_aKnots[m_cVerts],Degree());
+
+	// Now trim unnecessary knots and control points
+	if(n1||n2)
+	{
+		CqTrimCurve nS(*this);
+		m_aKnots.resize(m_aKnots.size()-n1-n2);
+		m_aVerts.resize(m_cVerts-n1-n2);
+		m_cVerts-=n1+n2;
+		TqUint i;
+		for(i=n1; i<nS.m_aKnots.size()-n2; i++)
+			m_aKnots[i-n1]=nS.m_aKnots[i];
+		for(i=n1; i<nS.m_cVerts-n2; i++)
+			CP(i-n1)=nS.CP(i);
+	}
+}
 
 
 //---------------------------------------------------------------------
