@@ -57,8 +57,9 @@
  *
  * I resisted the temptation to call this class "Agent Smith" ;-)
  */
-typedef std::list<CqRefCount*> RefCountVector;
+typedef std::list<CqRefCount*> RefCountList;
 typedef std::list<CqRefCount*>::iterator RefCountIterator;
+typedef std::list<CqRefCount*>::reverse_iterator RefCountRIterator;
 class RefCountTracker {
 	public:
 		/**
@@ -99,12 +100,16 @@ class RefCountTracker {
 			m_refCountObjs.remove(refCount);
 		}
 		void _report() {
-                        RefCountIterator end = m_refCountObjs.end();
-                        for (RefCountIterator i = m_refCountObjs.begin(); i != end; i++)
-                        {
-                                std::cout << (*i)->stringHistory();
-                        }
-			TqInt nObjs = m_refCountObjs.size();
+			TqInt nObjs = 0;
+			// Go through the list of un-released reference count objects,
+			// dumping each one and deleting them.
+			RefCountIterator end = m_refCountObjs.end();
+			for (RefCountIterator i = m_refCountObjs.begin(); i != end; i++)
+			{
+				(*i)->dump();
+				nObjs++;
+			}
+			// Report on the number of un-referenced objects.
 			if (nObjs == 0)
 			{
 				std::cout << "There were no un-released CqRefCounts.\n";
@@ -112,12 +117,12 @@ class RefCountTracker {
 			else
 			{
 	                        std::cout << "There were " << nObjs
-	                                << " un-released CqRefCount-derived classes.";
+	                                << " un-released CqRefCount-derived classes.\n";
 			}
 			std::cout.flush();
 		}
 	private:
-		RefCountVector m_refCountObjs;
+		RefCountList m_refCountObjs;
 		static RefCountTracker *m_tracker;
 
 		static RefCountTracker* theTracker()
@@ -204,24 +209,20 @@ class RefCountRecord {
 		 * Returns a string representation of the event, which
 		 * includes the event type, the filename and line number.
 		 */
-		Aqsis::CqString toString() const
+		void dump() const
 		{
 			Aqsis::CqString str;
 
 			// put in the event type
 			if (eventType() == AddRef)
-				str += "AddRef:  ";
+				std::cout << "AddRef:  ";
 			else if (eventType() == Release)
-				str += "Release: ";
+				std::cout << "Release: ";
 			else
 				throw;
 
 			// now put in the file name and line
-			str += fileName();
-			str += ": ";
-			str += lineNumber();
-
-			return str;
+			std::cout << fileName() << ": " << lineNumber();
 		}
 	
 	private:
@@ -311,25 +312,20 @@ void CqRefCount::Release(const TqChar* file, TqInt line)
  * Returns the history of this CqRefCount object, which is a list of
  * where it had AddRef and Release called.
  */
-Aqsis::CqString CqRefCount::stringHistory() const 
+void CqRefCount::dump() const 
 {
-	Aqsis::CqString str;
-
-	str += "Reference history for un-freed CqRefCount class of type: ";
-	str += className();
-	str += "\n";
+	std::cout << "Reference history for un-freed CqRefCount class of type: ";
+	std::cout << className() << "\n";
 	
         RecordIterator end = m_records.end();
         for (RecordIterator i = m_records.begin(); i != end; i++)
 	{
-		str += (*i)->toString();
-		str += "\n";
+		(*i)->dump();
+		std::cout << "\n";
 	}
 	
-	str += m_cReferences;
-	str += " references were left over in excess.\n";
-	
-	return str;
+	std::cout << m_cReferences;
+	std::cout << " references were left over in excess.\n";
 }
 
 #endif ///< #ifdef _DEBUG

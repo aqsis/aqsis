@@ -5,7 +5,7 @@
  *	@brief	Declare a reference counting class.
  *
  *	Last change by:		$Author: jpgrad $
- *	Last change date:	$Date: 2003/06/12 01:58:57 $
+ *	Last change date:	$Date: 2003/06/13 00:43:43 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -78,7 +78,7 @@ class CqRefCount
 		TqInt RefCount() const;
 		void AddRef(const TqChar* file, TqInt line);
 		void Release(const TqChar* file, TqInt line);
-		Aqsis::CqString stringHistory() const;
+		void dump() const;
 		/**
 		 * Returns the name of the class.  This function can be
 		 * overridden in sub-classes to provide better debugging
