@@ -14,7 +14,7 @@ URL: www.aqsis.com
 Packager: cgtobix
 Source: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-root
-Requires: /sbin/ldconfig, libtiff >= 3.5.7, libjpeg >= 6b, zlib >= 1.1.4, glut
+Requires: /sbin/ldconfig, libtiff >= 3.5.7, libjpeg >= 6b, zlib >= 1.1.4
 AutoReqProv: no
 
 
@@ -25,26 +25,25 @@ A RenderMan(tm)-compatible renderer
 %setup -q
 
 %build
-#./bootstrap
 export CFLAGS="-O2" 
 export CXXFLAGS="-O29" 
-./configure $features --prefix=%{_prefix} --bindir=%{_bindir} --mandir=%{_mandir} --libdir=%{_libdir} --datadir=%{_datadir} --includedir=%{_includedir} --sysconfdir=%{_sysconfdir}
+./configure --bindir=%{_bindir} --mandir=%{_mandir} --libdir=%{_libdir} --datadir=%{_datadir} --includedir=%{_includedir} --sysconfdir=%{_sysconfdir}
 
 make
-#make check
 
 %install
 rm -fr %{buildroot}
-%makeinstall
-mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/aqsis
-cat << EOF > $RPM_BUILD_ROOT/%{_sysconfdir}/aqsis/ddmsock.ini
 
-file                    /usr/bin/filebuffer
-framebuffer             /usr/bin/aqsis_framebuffer_glut
-zfile                   /usr/bin/shadowmap
-zframebuffer            /usr/bin/aqsis_framebuffer_glut_z
-shadow                  /usr/bin/shadowmap
-tiff                    /usr/bin/filebuffer
+%makeinstall
+#mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/aqsis
+cat << EOF > $RPM_BUILD_ROOT/%{_sysconfdir}/displays.ini
+
+file	%{_libdir}/aqsis/libdisplay.so
+framebuffer	%{_libdir}/aqsis/libdisplay.so
+zfile	%{_libdir}/aqsis/libdisplay.so
+zframebuffer	%{_libdir}/aqsis/libdisplay.so
+shadow	%{_libdir}/aqsis/libdisplay.so
+tiff	%{_libdir}/aqsis/libdisplay.so
 EOF
 
 %post -p /sbin/ldconfig
@@ -67,6 +66,8 @@ rm -fr %{buildroot}
 
 %changelog
 
+* Tue Jul 13 2004 cgtobix <cgtobix@users.sourceforge.net>
+- Update to the new display system
 * Sun Mar 21 2004 cgtobix <cgtobix@users.sourceforge.net>
 - Now building without debug information
 * Thu Mar 18 2004 cgtobix <cgtobix@users.sourceforge.net>
