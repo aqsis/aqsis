@@ -58,6 +58,11 @@ class CqColor
 				m_fGreen( fGreen ),
 				m_fBlue( fBlue )
 		{}
+		CqColor( TqFloat f ) :
+				m_fRed( f ),
+				m_fGreen( f ),
+				m_fBlue( f )
+		{}
 		/** 3D vector constructor.
 		 * \param From the vector to copy the component values from.
 		 */

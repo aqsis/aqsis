@@ -2477,8 +2477,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, 
 		}
 		else
 		{
-			swidth = 1.0 / pTMap->XRes();
-			twidth = 1.0 / pTMap->YRes();
+			swidth = CqVector3D( 1.0 / pTMap->XRes() );
+			twidth = CqVector3D( 1.0 / pTMap->YRes() );
 		}
 
 		// Sample the texture.
@@ -2611,8 +2611,8 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, 
 		}
 		else
 		{
-			swidth = 1.0 / pTMap->XRes();
-			twidth = 1.0 / pTMap->YRes();
+			swidth = CqVector3D( 1.0 / pTMap->XRes() );
+			twidth = CqVector3D( 1.0 / pTMap->YRes() );
 		}
 
 		// Sample the texture.
