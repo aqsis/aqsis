@@ -712,6 +712,8 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 	size = m_TextureMap_Cache.size();
 	return ( pNew );
 }
+
+
 //----------------------------------------------------------------------
 /** Check if a texture map exists in the cache, return a pointer to it if so, else
  * load it if possible..
@@ -772,7 +774,6 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 	size = m_TextureMap_Cache.size();
 	return ( pNew );
 }
-
 
 
 //----------------------------------------------------------------------
@@ -1767,7 +1768,7 @@ static void project( TqInt face )
 /** Sample the shadow map data to see if the point vecPoint is in shadow.
  */
 
-void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
+void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index )
 {
 	if ( m_pImage != 0 )
 	{
@@ -1800,7 +1801,7 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 		R3 = vecPoint - ( swidth / 2.0f ) + ( twidth / 2.0f );
 		R4 = vecPoint + ( swidth / 2.0f ) + ( twidth / 2.0f );
 
-		SampleMap( R1, R2, R3, R4, val, paramMap );
+		SampleMap( R1, R2, R3, R4, val, paramMap, index );
 	}
 	else
 	{
@@ -1811,7 +1812,7 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 }
 
 
-void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
+void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index )
 {
 	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
@@ -1893,9 +1894,9 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	CqVector3D vecBias( 0, 0, bias );
 	// Generate a matrix to transform points from camera space into the space of the light source used in the
 	// definition of the shadow map.
-	CqMatrix matCameraToLight = m_matWorldToCamera * QGetRenderContextI() ->matSpaceToSpace( "camera", "world" );
+	CqMatrix matCameraToLight = matWorldToCamera( index ) * QGetRenderContextI() ->matSpaceToSpace( "camera", "world" );
 	// Generate a matrix to transform points from camera space into the space of the shadow map.
-	CqMatrix matCameraToMap = m_matWorldToScreen * QGetRenderContextI() ->matSpaceToSpace( "camera", "world" );
+	CqMatrix matCameraToMap = matWorldToScreen( index ) * QGetRenderContextI() ->matSpaceToSpace( "camera", "world" );
 
 	vecR1l = matCameraToLight * ( R1 - vecBias );
 	vecR2l = matCameraToLight * ( R2 - vecBias );
@@ -2003,7 +2004,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 			if ( iu >= 0 && iu < m_XRes &&
 			        iv >= 0 && iv < m_YRes )
 			{
-				CqTextureMapBuffer * pTMBa = GetBuffer( iu, iv, 0 );
+				CqTextureMapBuffer * pTMBa = GetBuffer( iu, iv, index );
 				if ( pTMBa != 0 && pTMBa->pVoidBufferData() != 0 )
 				{
 					iu -= pTMBa->sOrigin();
@@ -2063,15 +2064,15 @@ void CqShadowMap::SaveZFile()
 			ofile.write( reinterpret_cast<TqPchar >( &m_YRes ), sizeof( m_XRes ) );
 
 			// Save the transformation matrices.
-			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 0 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 1 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 2 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 3 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( matWorldToCamera()[ 0 ] ), sizeof( matWorldToCamera()[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( matWorldToCamera()[ 1 ] ), sizeof( matWorldToCamera()[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( matWorldToCamera()[ 2 ] ), sizeof( matWorldToCamera()[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( matWorldToCamera()[ 3 ] ), sizeof( matWorldToCamera()[ 0 ][ 0 ] ) * 4 );
 
-			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 0 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 1 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 2 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 3 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( matWorldToScreen()[ 0 ] ), sizeof( matWorldToScreen()[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( matWorldToScreen()[ 1 ] ), sizeof( matWorldToScreen()[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( matWorldToScreen()[ 2 ] ), sizeof( matWorldToScreen()[ 0 ][ 0 ] ) * 4 );
+			ofile.write( reinterpret_cast<TqPchar>( matWorldToScreen()[ 3 ] ), sizeof( matWorldToScreen()[ 0 ][ 0 ] ) * 4 );
 
 			// Now output the depth values
 			ofile.write( reinterpret_cast<TqPchar>( m_apSegments[ 0 ] ->pVoidBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
@@ -2113,23 +2114,25 @@ void CqShadowMap::LoadZFile()
 			file.read( reinterpret_cast<TqPchar >( &m_YRes ), sizeof( m_YRes ) );
 
 			// Save the transformation matrices.
-			file.read( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 0 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			file.read( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 1 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			file.read( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 2 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			file.read( reinterpret_cast<TqPchar>( m_matWorldToCamera[ 3 ] ), sizeof( m_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+			m_WorldToScreenMatrices.resize(1);
+			m_WorldToCameraMatrices.resize(1);
+			file.read( reinterpret_cast<TqPchar>( matWorldToCamera()[ 0 ] ), sizeof( matWorldToCamera()[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( matWorldToCamera()[ 1 ] ), sizeof( matWorldToCamera()[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( matWorldToCamera()[ 2 ] ), sizeof( matWorldToCamera()[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( matWorldToCamera()[ 3 ] ), sizeof( matWorldToCamera()[ 0 ][ 0 ] ) * 4 );
 
-			file.read( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 0 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			file.read( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 1 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			file.read( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 2 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			file.read( reinterpret_cast<TqPchar>( m_matWorldToScreen[ 3 ] ), sizeof( m_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( matWorldToScreen()[ 0 ] ), sizeof( matWorldToScreen()[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( matWorldToScreen()[ 1 ] ), sizeof( matWorldToScreen()[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( matWorldToScreen()[ 2 ] ), sizeof( matWorldToScreen()[ 0 ][ 0 ] ) * 4 );
+			file.read( reinterpret_cast<TqPchar>( matWorldToScreen()[ 3 ] ), sizeof( matWorldToScreen()[ 0 ][ 0 ] ) * 4 );
 
 			// Now output the depth values
 			AllocateMap( m_XRes, m_YRes );
 			file.read( reinterpret_cast<TqPchar>( m_apSegments[ 0 ] ->pVoidBufferData() ), sizeof( TqFloat ) * ( m_XRes * m_YRes ) );
 
 			// Set the matrixes to general, not Identity as default.
-			m_matWorldToCamera.SetfIdentity( TqFalse );
-			m_matWorldToScreen.SetfIdentity( TqFalse );
+			matWorldToCamera().SetfIdentity( TqFalse );
+			matWorldToScreen().SetfIdentity( TqFalse );
 		}
 		else
 		{
@@ -2158,15 +2161,15 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName )
 			TIFFCreateDirectory( pshadow );
 
 			// Write the transform matrices.
-			TqFloat	matWorldToCamera[ 16 ];
-			TqFloat	matWorldToScreen[ 16 ];
+			TqFloat	matWToC[ 16 ];
+			TqFloat	matWToS[ 16 ];
 			TqInt r, c;
 			for ( r = 0; r < 4; r++ )
 			{
 				for ( c = 0; c < 4; c++ )
 				{
-					matWorldToCamera[ ( r * 4 ) + c ] = m_matWorldToCamera[ r ][ c ];
-					matWorldToScreen[ ( r * 4 ) + c ] = m_matWorldToScreen[ r ][ c ];
+					matWToC[ ( r * 4 ) + c ] = matWorldToCamera()[ r ][ c ];
+					matWToS[ ( r * 4 ) + c ] = matWorldToScreen()[ r ][ c ];
 				}
 			}
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
@@ -2175,8 +2178,8 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName )
 			sprintf( version, "%s %s", STRNAME, VERSION );
 #endif
 			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
-			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, matWorldToCamera );
-			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, matWorldToScreen );
+			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, matWToC );
+			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, matWToS );
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
 			TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
 
@@ -2196,10 +2199,11 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName )
 void CqShadowMap::ReadMatrices()
 {
 	// Read the transform matrices.
-	TqFloat * matWorldToCamera;
-	TqFloat*	matWorldToScreen;
-	TqInt reta = TIFFGetField( m_pImage, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, &matWorldToCamera );
-	TqInt retb = TIFFGetField( m_pImage, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, &matWorldToScreen );
+	TqFloat*	WToC;
+	TqFloat*	WToS;
+	CqMatrix	matWToC, matWToS;
+	TqInt reta = TIFFGetField( m_pImage, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, &WToC );
+	TqInt retb = TIFFGetField( m_pImage, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, &WToS );
 	if ( !reta || !retb )
 		SetInvalid();
 	else
@@ -2209,14 +2213,17 @@ void CqShadowMap::ReadMatrices()
 		{
 			for ( c = 0; c < 4; c++ )
 			{
-				m_matWorldToCamera[ r ][ c ] = matWorldToCamera[ ( r * 4 ) + c ];
-				m_matWorldToScreen[ r ][ c ] = matWorldToScreen[ ( r * 4 ) + c ];
+				matWToC[ r ][ c ] = WToC[ ( r * 4 ) + c ];
+				matWToS[ r ][ c ] = WToS[ ( r * 4 ) + c ];
 			}
 		}
 	}
 	// Set the matrixes to general, not Identity as default.
-	m_matWorldToCamera.SetfIdentity( TqFalse );
-	m_matWorldToScreen.SetfIdentity( TqFalse );
+	matWToC.SetfIdentity( TqFalse );
+	matWToS.SetfIdentity( TqFalse );
+
+	m_WorldToCameraMatrices.push_back( matWToC );
+	m_WorldToScreenMatrices.push_back( matWToS );
 }
 
 

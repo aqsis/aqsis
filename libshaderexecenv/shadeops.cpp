@@ -2745,7 +2745,7 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 		twidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
 
 		GETPOINT( P );
-		pMap->SampleMap( POINT( P ), swidth, twidth, fv, paramMap );
+		pMap->SampleMap( POINT( P ), swidth, twidth, fv, paramMap, 0 );
 		SETFLOAT( Result, fv[ 0 ] );
 		END_VARYING_SECTION
 	}
@@ -2785,7 +2785,7 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow1( STRINGVAL name, FLOATVAL channel, POINTV
 		GETPOINT( P2 );
 		GETPOINT( P3 );
 		GETPOINT( P4 );
-		pMap->SampleMap( POINT( P1 ), POINT( P2 ), POINT( P3 ), POINT( P4 ), fv, paramMap );
+		pMap->SampleMap( POINT( P1 ), POINT( P2 ), POINT( P3 ), POINT( P4 ), fv, paramMap, 0 );
 		SETFLOAT( Result, fv[ 0 ] );
 		END_VARYING_SECTION
 	}
@@ -2864,7 +2864,7 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
 		do
 		{
 			// SO_illuminance sets the current state to whether the lightsource illuminates the points or not.
-			SO_illuminance( NULL, N, pDefAngle, NULL );
+			SO_illuminance( NULL, NULL, N, pDefAngle, NULL );
 
 			PushState();
 			GetCurrentState();
@@ -2919,7 +2919,7 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
 		do
 		{
 			// SO_illuminance sets the current state to whether the lightsource illuminates the points or not.
-			SO_illuminance( NULL, N, pDefAngle, NULL );
+			SO_illuminance( NULL, NULL, N, pDefAngle, NULL );
 
 			PushState();
 			GetCurrentState();
@@ -3003,7 +3003,7 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 		do
 		{
 			// SO_illuminance sets the current state to whether the lightsource illuminates the points or not.
-			SO_illuminance( NULL, N, pDefAngle, NULL );
+			SO_illuminance( NULL, NULL, N, pDefAngle, NULL );
 
 			PushState();
 			GetCurrentState();
@@ -5605,6 +5605,49 @@ STD_SOIMPL CqShaderExecEnv::SO_external( DSOMethod method, void *initData, DEFPA
 
 	delete dso_argv;
 }
+
+//----------------------------------------------------------------------
+// occlusion(occlmap,P,N,samples)
+STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, POINTVAL P, NORMALVAL N, FLOATVAL samples, DEFPARAMVARIMPL )
+{
+	INIT_SO
+
+	if ( NULL == QGetRenderContextI() )
+		return ;
+
+	GET_TEXTURE_PARAMS;
+
+	BEGIN_UNIFORM_SECTION
+	GETSTRING( occlmap );
+	GETNORMAL( N );
+	GETFLOAT( samples );
+	IqTextureMap* pMap = QGetRenderContextI() ->GetShadowMap( STRING( occlmap ) );
+	END_UNIFORM_SECTION
+
+	__fVarying = TqTrue;
+	if ( pMap != 0 && pMap->IsValid() )
+	{
+		std::valarray<TqFloat> fv;
+
+		BEGIN_VARYING_SECTION
+		CqVector3D swidth = 0.0f, twidth = 0.0f;
+
+		swidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
+		twidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
+
+		GETPOINT( P );
+		pMap->SampleMap( POINT( P ), swidth, twidth, fv, paramMap );
+		SETFLOAT( Result, fv[ 0 ] );
+		END_VARYING_SECTION
+	}
+	else
+	{
+		BEGIN_VARYING_SECTION
+		SETFLOAT( Result, 0.0f );	// Default, completely lit
+		END_VARYING_SECTION
+	}
+}
+
 
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

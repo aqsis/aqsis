@@ -476,10 +476,10 @@ class CqTextureMap : public IqTextureMap
 		virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
 		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
 		virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
-		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
+		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0 )
 		{}
 		virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap )
+		                                 std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0 )
 		{}
 
 		virtual	void	GetSample( TqFloat ss1, TqFloat tt1, TqFloat ss2, TqFloat tt2, std::valarray<TqFloat>& val );
@@ -513,7 +513,8 @@ class CqTextureMap : public IqTextureMap
 		static void WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );
 		static void WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality );
 
-
+		TIFF*	pImage()			{ return( m_pImage ); }
+		const TIFF*	pImage() const	{ return( m_pImage ); }
 
 	protected:
 		static	std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loaded textures.
@@ -637,15 +638,17 @@ class CqShadowMap : public CqTextureMap
 
 		/** Get the matrix used to convert points from work into camera space.
 		 */
-		CqMatrix&	matWorldToCamera()
+		virtual CqMatrix&	matWorldToCamera(TqInt index = 0)
 		{
-			return ( m_matWorldToCamera );
+			assert( index < m_WorldToCameraMatrices.size() );
+			return ( m_WorldToCameraMatrices[index] );
 		}
 		/** Get the matrix used to convert points from work into screen space.
 		 */
-		CqMatrix&	matWorldToScreen()
+		virtual CqMatrix&	matWorldToScreen(TqInt index = 0)
 		{
-			return ( m_matWorldToScreen );
+			assert( index < m_WorldToScreenMatrices.size() );
+			return ( m_WorldToScreenMatrices[index] );
 		}
 
 
@@ -664,13 +667,13 @@ class CqShadowMap : public CqTextureMap
 			return( pRes );
 		}
 
-		virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
-		virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
-		CqMatrix& CqShadowMap::GetMatrix( TqInt which )
+		virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0 );
+		virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap, TqInt index = 0 );
+		CqMatrix& CqShadowMap::GetMatrix( TqInt which, TqInt index = 0 )
 		{
-			if ( which == 0 ) return m_matWorldToCamera;
-			else if ( which == 1 ) return m_matWorldToScreen;
-			return ( m_matWorldToCamera );
+			if ( which == 0 ) return matWorldToCamera(index);
+			else if ( which == 1 ) return matWorldToScreen(index);
+			return ( matWorldToCamera(index) );
 		}
 
 
@@ -678,11 +681,10 @@ class CqShadowMap : public CqTextureMap
 		static	TqInt	m_rand_index;			///< Static random number table index.
 		static	TqFloat	m_aRand_no[ 256 ];		///< Random no. table used for jittering the shadow sampling.
 
-		CqMatrix	m_matWorldToCamera;		///< Matrix to convert points from world space to light space.
-		CqMatrix	m_matWorldToScreen;		///< Matrix to convert points from world space to screen space.
+		std::vector<CqMatrix>	m_WorldToCameraMatrices;		///< Matrix to convert points from world space to light space.
+		std::vector<CqMatrix>	m_WorldToScreenMatrices;		///< Matrix to convert points from world space to screen space.
 }
 ;
-
 
 //-----------------------------------------------------------------------
 
