@@ -55,6 +55,8 @@
 #include 	"parserstate.h"
 #include	"procedural.h"
 
+#include	"ri_cache.h"
+
 #include	"subdivision2.h"
 
 #ifndef    AQSIS_SYSTEM_WIN32
