@@ -278,7 +278,7 @@ CqObjectModeBlock::~CqObjectModeBlock()
 /** Default constructor.
  */
 
-CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Motion ), m_pDeformingSurface( NULL )
+CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Motion )
 {
     // Copy the parents attributes, as this state change doesn't save attributes.
     if ( pconParent )
@@ -328,20 +328,18 @@ CqMotionModeBlock::~CqMotionModeBlock()
  */
 void CqMotionModeBlock::EndMotionModeBlock()
 {
-    if( NULL != m_pDeformingSurface )
+    if( m_pDeformingSurface )
     {
         QGetRenderContext() ->pImage() ->PostSurface( m_pDeformingSurface );
         STATS_INC( GPR_created );
-        RELEASEREF( m_pDeformingSurface );
     }
 }
 
 /** Set the CqDeformingSurface, if generating a deformation motion blur sequence.
  */
-void CqMotionModeBlock::SetDeformingSurface( CqDeformingSurface* pDeformingSurface)
+void CqMotionModeBlock::SetDeformingSurface( const boost::shared_ptr<CqDeformingSurface>& pDeformingSurface)
 {
     m_pDeformingSurface = pDeformingSurface;
-    ADDREF( pDeformingSurface );
 }
 
 void CqModeBlock::logInvalidNesting() const

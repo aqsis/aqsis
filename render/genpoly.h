@@ -57,8 +57,6 @@ public:
     CqPolygonGeneral2D( const CqPolygonGeneral2D& From );
     ~CqPolygonGeneral2D()
     {
-        if ( m_pVertices )
-            RELEASEREF( m_pVertices );
     }
 
     std::vector<TqInt>&	aiVertices()
@@ -81,10 +79,9 @@ public:
     {
         m_Axis = axis;
     }
-    void	SetpVertices( CqSurface* pVertices )
+    void	SetpVertices( const boost::shared_ptr<CqSurface>& pVertices )
     {
         m_pVertices = pVertices;
-        ADDREF( pVertices );
     }
 
     void	SwapDirection();
@@ -136,7 +133,7 @@ private:
     std::vector<TqInt>	m_aiVertices;
     TqInt	m_Orientation;
     TqInt	m_Axis;
-    CqSurface*	m_pVertices;
+    boost::shared_ptr<CqSurface>	m_pVertices;
 };
 
 

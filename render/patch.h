@@ -179,7 +179,7 @@ public:
     }
 
     virtual void NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
-    virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
+    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
     virtual void NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u );
 
     void	ConvertToBezierBasis( CqMatrix& matuBasis, CqMatrix& matvBasis );
@@ -246,8 +246,8 @@ public:
         return ( 1 );
     }
 
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
-    virtual	TqInt	PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
+    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+    virtual	TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
     virtual void	PostDice(CqMicroPolyGrid * pGrid)
     {
         if(m_fHasPhantomFourthVertex)
@@ -298,7 +298,7 @@ public:
     {
         return ( 0 );
     }
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
+    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
     virtual TqBool	Diceable()
     {
         return ( TqFalse );
@@ -389,7 +389,7 @@ public:
     {
         return ( 0 );
     }
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
+    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
     virtual TqBool	Diceable()
     {
         return ( TqFalse );

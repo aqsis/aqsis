@@ -263,9 +263,9 @@ public:
         CqParameter* pParam1, CqParameter* pParam2,
         TqBool u
     );
-    virtual TqInt Split( std::vector<CqBasicSurface*>& aSplits );
-    TqInt SplitToCurves( std::vector<CqBasicSurface*>& aSplits );
-    TqInt SplitToPatch( std::vector<CqBasicSurface*>& aSplits );
+    virtual TqInt Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+    TqInt SplitToCurves( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+    TqInt SplitToPatch( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
     //---------------------------------------------- Inlined Public Methods
 public:
 #ifdef _DEBUG
@@ -343,9 +343,9 @@ public:
         CqParameter* pParam1, CqParameter* pParam2,
         TqBool u
     );
-    virtual TqInt Split( std::vector<CqBasicSurface*>& aSplits );
-    TqInt SplitToCurves( std::vector<CqBasicSurface*>& aSplits );
-    TqInt SplitToPatch( std::vector<CqBasicSurface*>& aSplits );
+    virtual TqInt Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+    TqInt SplitToCurves( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
+    TqInt SplitToPatch( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
 
     void ConvertToBezierBasis( CqMatrix& matBasis );
     //---------------------------------------------- Inlined Public Methods
@@ -474,7 +474,7 @@ public:
     CqLinearCurvesGroup( const CqLinearCurvesGroup &from );
     virtual ~CqLinearCurvesGroup();
     CqLinearCurvesGroup& operator=( const CqLinearCurvesGroup& from );
-    virtual	TqInt Split( std::vector<CqBasicSurface*>& aSplits );
+    virtual	TqInt Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
     virtual void Transform(
         const CqMatrix& matTx,
         const CqMatrix& matITTx,
@@ -532,7 +532,7 @@ public:
     virtual ~CqCubicCurvesGroup();
     virtual	TqUint cVarying() const;
     CqCubicCurvesGroup& operator=( const CqCubicCurvesGroup& from );
-    virtual TqInt Split( std::vector<CqBasicSurface*>& aSplits );
+    virtual TqInt Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
     virtual void Transform(
         const CqMatrix& matTx,
         const CqMatrix& matITTx,

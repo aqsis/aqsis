@@ -54,8 +54,6 @@ CqPolygonGeneral2D& CqPolygonGeneral2D::operator=( const CqPolygonGeneral2D& Fro
     m_Axis = From.m_Axis;
 
     m_pVertices = From.m_pVertices;
-    if ( m_pVertices )
-        ADDREF( m_pVertices );
 
     return ( *this );
 }
@@ -77,9 +75,6 @@ void CqPolygonGeneral2D::SwapDirection()
 
         m_aiVertices[ iVertex ] = m_aiVertices[ which ];
         m_aiVertices[ which ] = tmp;
-
-
-
     }
     CalcOrientation();
 }

@@ -50,7 +50,7 @@ public:
     {}
 
     virtual	CqBound	Bound() const;
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
+	virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
 
     /** Get a reference to the surface this polygon is associated with.
      */
@@ -158,7 +158,7 @@ public:
     {
         return ( AdjustBoundForTransformationMotion( CqPolygonBase::Bound() ) );
     }
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits )
+    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
     {
         return ( CqPolygonBase::Split( aSplits ) );
     }
@@ -287,7 +287,6 @@ public:
     {}
     virtual	~CqPolygonPoints()
     {
-        assert( RefCount() == 0 );
     }
 
 #ifdef _DEBUG
@@ -312,7 +311,7 @@ public:
     {
         return ( 0 );
     }
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits )
+    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
     {
         return ( 0 );
     }
@@ -372,18 +371,16 @@ protected:
 class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 {
 public:
-    CqSurfacePointsPolygon( CqPolygonPoints* pPoints, TqInt index, TqInt FaceVaryingIndex  ) : CqBasicSurface(),
+    CqSurfacePointsPolygon( const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt index, TqInt FaceVaryingIndex  ) : CqBasicSurface(),
             m_pPoints( pPoints ),
             m_Index( index ),
             m_FaceVaryingIndex( FaceVaryingIndex )
     {
-        ADDREF( m_pPoints );
         STATS_INC( GPR_poly );
     }
     CqSurfacePointsPolygon( const CqSurfacePointsPolygon& From );
     virtual	~CqSurfacePointsPolygon()
     {
-        RELEASEREF( m_pPoints );
     }
 
     CqSurfacePointsPolygon& operator=( const CqSurfacePointsPolygon& From );
@@ -407,7 +404,7 @@ public:
     {
         return ( AdjustBoundForTransformationMotion( CqPolygonBase::Bound() ) );
     }
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits )
+    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
     {
         return ( CqPolygonBase::Split( aSplits ) );
     }
@@ -531,7 +528,7 @@ public:
 
 protected:
     std::vector<TqInt>	m_aIndices;		///< Array of indices into the associated vertex list.
-    CqPolygonPoints*	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
+    boost::shared_ptr<CqPolygonPoints>	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
     TqInt	m_Index;		/// Polygon index, used for looking up Uniform values.
     TqInt	m_FaceVaryingIndex;
 };
@@ -544,11 +541,10 @@ protected:
 class CqSurfacePointsPolygons : public CqSurface
 {
 public:
-    CqSurfacePointsPolygons(CqPolygonPoints* pPoints, TqInt NumPolys, TqInt nverts[], TqInt verts[]) :
+    CqSurfacePointsPolygons(const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt NumPolys, TqInt nverts[], TqInt verts[]) :
             m_NumPolys(NumPolys),
             m_pPoints( pPoints )
     {
-        ADDREF( m_pPoints );
         m_PointCounts.resize( NumPolys );
         TqInt i,vindex=0;
         for( i = 0; i < NumPolys; i++ )
@@ -562,7 +558,6 @@ public:
     }
     virtual	~CqSurfacePointsPolygons()
     {
-        RELEASEREF( m_pPoints );
     }
 
     /** Get the gemoetric bound of this GPrim.
@@ -579,7 +574,7 @@ public:
      * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
      * \return Integer count of new GPrims created.
      */
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
+    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
     /** Determine whether this GPrim is diceable at its current size.
      */
     virtual TqBool	Diceable()
@@ -621,7 +616,7 @@ public:
 
 private:
     TqInt	m_NumPolys;
-    CqPolygonPoints*	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
+    const boost::shared_ptr<CqPolygonPoints>&	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
     std::vector<TqInt>	m_PointCounts;
     std::vector<TqInt>	m_PointIndices;
 };

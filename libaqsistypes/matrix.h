@@ -45,8 +45,12 @@ START_NAMESPACE( Aqsis )
 class CqMatrix
 {
 public:
-    CqMatrix() : m_fIdentity( TqTrue )
-    {}
+    struct NoInit {};
+
+    CqMatrix();
+    CqMatrix(NoInit)
+    {
+    }
     CqMatrix( const TqFloat xs, const TqFloat ys, const TqFloat zs ); // Scaled ID
     CqMatrix( const CqVector3D& Trans ); // Translated
     CqMatrix( const TqFloat Angle, const CqVector3D Axis ); // Rotation2

@@ -38,7 +38,7 @@ TqFloat CqBasicSurface::m_fGridSize = sqrt(256.0);
 /** Default constructor
  */
 
-CqBasicSurface::CqBasicSurface() : CqListEntry<CqBasicSurface>(), m_fDiceable( TqTrue ), m_fDiscard( TqFalse ), m_EyeSplitCount( 0 ),
+CqBasicSurface::CqBasicSurface() : m_fDiceable( TqTrue ), m_fDiscard( TqFalse ), m_EyeSplitCount( 0 ),
         m_pAttributes( 0 ), m_pTransform( 0 ), m_SplitDir( SplitDir_U )
 {
     // Set a refernce with the current attributes.
@@ -467,7 +467,7 @@ CqMicroPolyGridBase* CqSurface::Dice()
     PreDice( m_uDiceSize, m_vDiceSize );
 
     // Create a new CqMicorPolyGrid for this patch
-    CqMicroPolyGrid * pGrid = new CqMicroPolyGrid( m_uDiceSize, m_vDiceSize, this );
+    CqMicroPolyGrid* pGrid = new CqMicroPolyGrid( m_uDiceSize, m_vDiceSize, shared_from_this() );
 
     TqInt lUses = Uses();
 
@@ -561,7 +561,7 @@ CqMicroPolyGridBase* CqSurface::Dice()
 }
 
 
-TqInt CqSurface::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqSurface::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
     TqInt cSplits = PreSubdivide( aSplits, m_SplitDir == SplitDir_U );
 
@@ -589,20 +589,17 @@ TqInt CqSurface::Split( std::vector<CqBasicSurface*>& aSplits )
         CqParameter* pNewA = ( *iUP ) ->Clone();
         CqParameter* pNewB = ( *iUP ) ->Clone();
         ( *iUP ) ->Subdivide( pNewA, pNewB, direction , this );
-        static_cast<CqSurface*>( aSplits[ 0 ] ) ->AddPrimitiveVariable( pNewA );
-        static_cast<CqSurface*>( aSplits[ 1 ] ) ->AddPrimitiveVariable( pNewB );
+        static_cast<CqSurface*>( aSplits[ 0 ].get() ) ->AddPrimitiveVariable( pNewA );
+        static_cast<CqSurface*>( aSplits[ 1 ].get() ) ->AddPrimitiveVariable( pNewB );
     }
 
     if ( !m_fDiceable )
     {
-        std::vector<CqBasicSurface*> aSplits0;
-        std::vector<CqBasicSurface*> aSplits1;
+        std::vector<boost::shared_ptr<CqBasicSurface> > aSplits0;
+        std::vector<boost::shared_ptr<CqBasicSurface> > aSplits1;
 
         cSplits = aSplits[ 0 ] ->Split( aSplits0 );
         cSplits += aSplits[ 1 ] ->Split( aSplits1 );
-        // Release the old ones.
-        delete( aSplits[ 0 ] );
-        delete( aSplits[ 1 ] );
 
         aSplits.clear();
         aSplits.swap( aSplits0 );

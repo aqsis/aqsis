@@ -264,11 +264,11 @@ void CqSurfacePatchBicubic::NaturalDice( CqParameter* pParameter, TqInt uDiceSiz
 /** Split the patch into smaller patches.
  */
 
-TqInt CqSurfacePatchBicubic::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
+TqInt CqSurfacePatchBicubic::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
 {
     // Create two new surface of the appropriate type
-    aSplits.push_back( new CqSurfacePatchBicubic );
-    aSplits.push_back( new CqSurfacePatchBicubic );
+    aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBicubic ) );
+    aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBicubic ) );
 
     return ( 2 );
 }
@@ -675,10 +675,10 @@ CqBound CqSurfacePatchBilinear::Bound() const
 /** Split the patch into smaller patches.
  */
 
-TqInt CqSurfacePatchBilinear::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
+TqInt CqSurfacePatchBilinear::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
 {
-    aSplits.push_back( new CqSurfacePatchBilinear );
-    aSplits.push_back( new CqSurfacePatchBilinear );
+    aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
+    aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
 
     return ( 2 );
 }
@@ -759,15 +759,15 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 
 
 
-TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqSurfacePatchBilinear::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
-    aSplits.push_back( new CqSurfacePatchBilinear );
-    aSplits.push_back( new CqSurfacePatchBilinear );
+    aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
+    aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
 
     if ( m_fHasPhantomFourthVertex )
     {
-        aSplits.push_back( new CqSurfacePatchBilinear );
-        aSplits.push_back( new CqSurfacePatchBilinear );
+        aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
+        aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqSurfacePatchBilinear ) );
     }
     TqBool direction = SplitDir() == SplitDir_U;
     TqBool opposite = !direction;
@@ -778,7 +778,6 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
         aSplits[ i ] ->SetSplitDir( direction ? SplitDir_V : SplitDir_U );
         aSplits[ i ] ->SetEyeSplitCount( EyeSplitCount() );
         aSplits[ i ] ->m_fDiceable = TqTrue;
-        //ADDREF( aSplits[ i ] );
     }
 
     // Iterate through any use parameters subdividing and storing the second value in the target surface.
@@ -800,36 +799,35 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
             pNewA ->Subdivide( pNewC, pNewD, opposite, this );
             pNewB ->Subdivide( pNewE, pNewF, opposite, this );
 
-            static_cast<CqSurface*>( aSplits[ 0 ] ) ->AddPrimitiveVariable( pNewC );
-            static_cast<CqSurface*>( aSplits[ 1 ] ) ->AddPrimitiveVariable( pNewD );
-            static_cast<CqSurface*>( aSplits[ 2 ] ) ->AddPrimitiveVariable( pNewE );
-            static_cast<CqSurface*>( aSplits[ 3 ] ) ->AddPrimitiveVariable( pNewF );
+            static_cast<CqSurface*>( aSplits[ 0 ].get() ) ->AddPrimitiveVariable( pNewC );
+            static_cast<CqSurface*>( aSplits[ 1 ].get() ) ->AddPrimitiveVariable( pNewD );
+            static_cast<CqSurface*>( aSplits[ 2 ].get() ) ->AddPrimitiveVariable( pNewE );
+            static_cast<CqSurface*>( aSplits[ 3 ].get() ) ->AddPrimitiveVariable( pNewF );
 
             delete( pNewA );
             delete( pNewB );
         }
         else
         {
-            static_cast<CqSurface*>( aSplits[ 0 ] ) ->AddPrimitiveVariable( pNewA );
-            static_cast<CqSurface*>( aSplits[ 1 ] ) ->AddPrimitiveVariable( pNewB );
+            static_cast<CqSurface*>( aSplits[ 0 ].get() ) ->AddPrimitiveVariable( pNewA );
+            static_cast<CqSurface*>( aSplits[ 1 ].get() ) ->AddPrimitiveVariable( pNewB );
         }
     }
 
     if ( m_fHasPhantomFourthVertex )
     {
-        delete( aSplits.back() );
         aSplits.pop_back();
 
-        static_cast<CqSurfacePatchBilinear*>( aSplits[ 0 ] ) ->m_fHasPhantomFourthVertex = TqFalse;
-        static_cast<CqSurfacePatchBilinear*>( aSplits[ 1 ] ) ->m_fHasPhantomFourthVertex = TqTrue;
-        static_cast<CqSurfacePatchBilinear*>( aSplits[ 2 ] ) ->m_fHasPhantomFourthVertex = TqTrue;
+        static_cast<CqSurfacePatchBilinear*>( aSplits[ 0 ].get() ) ->m_fHasPhantomFourthVertex = TqFalse;
+        static_cast<CqSurfacePatchBilinear*>( aSplits[ 1 ].get() ) ->m_fHasPhantomFourthVertex = TqTrue;
+        static_cast<CqSurfacePatchBilinear*>( aSplits[ 2 ].get() ) ->m_fHasPhantomFourthVertex = TqTrue;
 
         return ( 3 );
     }
     else
     {
-        static_cast<CqSurfacePatchBilinear*>( aSplits[ 0 ] ) ->m_fHasPhantomFourthVertex = TqFalse;
-        static_cast<CqSurfacePatchBilinear*>( aSplits[ 1 ] ) ->m_fHasPhantomFourthVertex = TqFalse;
+        static_cast<CqSurfacePatchBilinear*>( aSplits[ 0 ].get() ) ->m_fHasPhantomFourthVertex = TqFalse;
+        static_cast<CqSurfacePatchBilinear*>( aSplits[ 1 ].get() ) ->m_fHasPhantomFourthVertex = TqFalse;
 
         return ( 2 );
     }
@@ -911,7 +909,7 @@ CqBound CqSurfacePatchMeshBicubic::Bound() const
 #define	PatchCoord(v,u)	((((v)%m_nv)*m_nu)+((u)%m_nu))
 #define	PatchCorner(v,u)	((((v)%nvaryingv)*nvaryingu)+((u)%nvaryingu));
 
-TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqSurfacePatchMeshBicubic::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
     TqInt cSplits = 0;
 
@@ -944,8 +942,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
         {
             // uCol is the coordinate column of the mesh.
             RtInt uCol = j * uStep;
-            CqSurfacePatchBicubic*	pSurface = new CqSurfacePatchBicubic();
-            //ADDREF( pSurface );
+	    boost::shared_ptr<CqSurfacePatchBicubic> pSurface( new CqSurfacePatchBicubic() );
             pSurface->SetSurfaceParameters( *this );
 
             RtInt v;
@@ -1136,7 +1133,7 @@ CqBound CqSurfacePatchMeshBilinear::Bound() const
 #define	PatchCoord(v,u)	((((v)%m_nv)*m_nu)+((u)%m_nu))
 #define	PatchCorner(v,u)	((((v)%nvaryingv)*nvaryingu)+((u)%nvaryingu));
 
-TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqSurfacePatchMeshBilinear::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
     TqInt cSplits = 0;
 
@@ -1158,8 +1155,7 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
         RtInt j;
         for ( j = 0; j < m_uPatches; j++ )
         {
-            CqSurfacePatchBilinear*	pSurface = new CqSurfacePatchBilinear;
-            //ADDREF( pSurface );
+	    boost::shared_ptr<CqSurfacePatchBilinear> pSurface( new CqSurfacePatchBilinear );
             pSurface->SetSurfaceParameters( *this );
 
             RtInt iTa = PatchCoord( i, j );

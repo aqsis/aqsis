@@ -416,7 +416,7 @@ void CqLinearCurveSegment::NaturalSubdivide(
  *
  * @return      The number of objects we've created.
  */
-TqInt CqLinearCurveSegment::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqLinearCurveSegment::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
     // Split based on the decision
     switch( m_splitDecision )
@@ -458,7 +458,7 @@ TqInt CqLinearCurveSegment::Split( std::vector<CqBasicSurface*>& aSplits )
  * @return Number of created objects.
  */
 TqInt CqLinearCurveSegment::SplitToCurves(
-    std::vector<CqBasicSurface*>& aSplits
+    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
 )
 {
 
@@ -468,16 +468,14 @@ TqInt CqLinearCurveSegment::SplitToCurves(
     //  to handle varying class variables because it inconveniently
     //  sets them up to have 4 elements.
 
-    aSplits.push_back( new CqLinearCurveSegment );
-    aSplits.push_back( new CqLinearCurveSegment );
+    aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqLinearCurveSegment ) );
+    aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqLinearCurveSegment ) );
 
     aSplits[ 0 ] ->SetSurfaceParameters( *this );
     aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
-    //ADDREF( aSplits[ 0 ] );
 
     aSplits[ 1 ] ->SetSurfaceParameters( *this );
     aSplits[ 1 ] ->SetEyeSplitCount( EyeSplitCount() );
-    //ADDREF( aSplits[ 1 ] );
 
     // Iterate through any user parameters, subdividing and storing
     //  the second value in the target surface.
@@ -504,10 +502,8 @@ TqInt CqLinearCurveSegment::SplitToCurves(
             ( *iUP ) ->Subdivide( pNewA, pNewB, false, this );
         }
 
-        static_cast<CqSurface*>( aSplits[ 0 ] ) ->
-        AddPrimitiveVariable( pNewA );
-        static_cast<CqSurface*>( aSplits[ 1 ] ) ->
-        AddPrimitiveVariable( pNewB );
+        static_cast<CqSurface*>( aSplits[ 0 ].get() ) -> AddPrimitiveVariable( pNewA );
+        static_cast<CqSurface*>( aSplits[ 1 ].get() ) -> AddPrimitiveVariable( pNewB );
 
     }
 
@@ -525,7 +521,7 @@ TqInt CqLinearCurveSegment::SplitToCurves(
  * @return Number of created objects.
  */
 TqInt CqLinearCurveSegment::SplitToPatch(
-    std::vector<CqBasicSurface*>& aSplits
+    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
 )
 {
 
@@ -551,9 +547,8 @@ TqInt CqLinearCurveSegment::SplitToPatch(
         width()->pValue( 1 )[0] / widthOffset1.Magnitude() / 2.0;
 
     // next, we create the bilinear patch
-    CqSurfacePatchBilinear *pPatch = new CqSurfacePatchBilinear();
+    boost::shared_ptr<CqSurfacePatchBilinear> pPatch( new CqSurfacePatchBilinear() );
     pPatch->SetSurfaceParameters( *this );
-    //ADDREF( pPatch );
     pPatch->SetDefaultPrimitiveVariables();
 
     // set the points on the patch
@@ -904,7 +899,7 @@ void CqCubicCurveSegment::VaryingNaturalSubdivide(
  *
  * @return      The number of objects we've created.
  */
-TqInt CqCubicCurveSegment::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqCubicCurveSegment::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
     // Split based on the decision
     switch( m_splitDecision )
@@ -944,7 +939,7 @@ TqInt CqCubicCurveSegment::Split( std::vector<CqBasicSurface*>& aSplits )
  * @return Number of created objects.
  */
 TqInt CqCubicCurveSegment::SplitToCurves(
-    std::vector<CqBasicSurface*>& aSplits
+    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
 )
 {
 
@@ -954,16 +949,14 @@ TqInt CqCubicCurveSegment::SplitToCurves(
     //  to handle varying class variables because it inconveniently
     //  sets them up to have 4 elements.
 
-    aSplits.push_back( new CqCubicCurveSegment );
-    aSplits.push_back( new CqCubicCurveSegment );
+    aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqCubicCurveSegment ) );
+    aSplits.push_back( boost::shared_ptr<CqBasicSurface>( new CqCubicCurveSegment ) );
 
     aSplits[ 0 ] ->SetSurfaceParameters( *this );
     aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
-    //ADDREF( aSplits[ 0 ] );
 
     aSplits[ 1 ] ->SetSurfaceParameters( *this );
     aSplits[ 1 ] ->SetEyeSplitCount( EyeSplitCount() );
-    //ADDREF( aSplits[ 1 ] );
 
     // Iterate through any user parameters, subdividing and storing
     //  the second value in the target surface.
@@ -990,10 +983,8 @@ TqInt CqCubicCurveSegment::SplitToCurves(
             ( *iUP ) ->Subdivide( pNewA, pNewB, false, this );
         }
 
-        static_cast<CqSurface*>( aSplits[ 0 ] ) ->
-        AddPrimitiveVariable( pNewA );
-        static_cast<CqSurface*>( aSplits[ 1 ] ) ->
-        AddPrimitiveVariable( pNewB );
+        static_cast<CqSurface*>( aSplits[ 0 ].get() ) -> AddPrimitiveVariable( pNewA );
+        static_cast<CqSurface*>( aSplits[ 1 ].get() ) -> AddPrimitiveVariable( pNewB );
 
     }
 
@@ -1029,7 +1020,7 @@ CqVector3D	CqCubicCurveSegment::CalculateTangent(TqFloat u)
  * @return Number of created objects.
  */
 TqInt CqCubicCurveSegment::SplitToPatch(
-    std::vector<CqBasicSurface*>& aSplits
+    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
 )
 {
 
@@ -1083,9 +1074,8 @@ TqInt CqCubicCurveSegment::SplitToPatch(
     CqVector3D widthOffset3 = widthOffset32 * 3;
 
     // next, we create the bilinear patch
-    CqSurfacePatchBicubic *pPatch = new CqSurfacePatchBicubic();
+    boost::shared_ptr<CqSurfacePatchBicubic> pPatch( new CqSurfacePatchBicubic() );
     pPatch->SetSurfaceParameters( *this );
-    //ADDREF( pPatch );
     pPatch->SetDefaultPrimitiveVariables();
 
     // set the points on the patch
@@ -1420,7 +1410,7 @@ CqLinearCurvesGroup& CqLinearCurvesGroup::operator=(
  *
  * @param aSplits       Vector of split objects.
  */
-TqInt CqLinearCurvesGroup::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqLinearCurvesGroup::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
 
     TqInt nSplits = 0;      // number of splits we've done
@@ -1460,9 +1450,7 @@ TqInt CqLinearCurvesGroup::Split( std::vector<CqBasicSurface*>& aSplits )
 
             // create the new CqLinearCurveSegment for the current
             //  curve segment
-            CqLinearCurveSegment *pSeg =
-                new CqLinearCurveSegment();
-            //ADDREF( pSeg );
+	    boost::shared_ptr<CqLinearCurveSegment> pSeg( new CqLinearCurveSegment() );
             pSeg->SetSurfaceParameters( *this );
 
             // set the value of "v"
@@ -1724,7 +1712,7 @@ CqCubicCurvesGroup& CqCubicCurvesGroup::operator=(
  *              created.
  */
 TqInt CqCubicCurvesGroup::Split(
-    std::vector<CqBasicSurface*>& aSplits
+    std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits
 )
 {
 
@@ -1810,9 +1798,7 @@ TqInt CqCubicCurvesGroup::Split(
 
             // create the new CqLinearCurveSegment for the current
             //  curve segment
-            CqCubicCurveSegment *pSeg =
-                new CqCubicCurveSegment();
-            //ADDREF( pSeg );
+	    boost::shared_ptr<CqCubicCurveSegment> pSeg( new CqCubicCurveSegment() );
             pSeg->SetSurfaceParameters( *this );
 
             // set the value of "v"

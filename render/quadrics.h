@@ -148,7 +148,7 @@ public:
         return ( TqTrue );
     }
 
-    virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
+    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
     CqSphere&	operator=( const CqSphere& From );
 
@@ -187,7 +187,7 @@ public:
     virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
     virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-    virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
+    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
     CqCone&	operator=( const CqCone& From );
 
@@ -231,7 +231,7 @@ public:
         return ( TqTrue );
     }
 
-    virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
+    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
     CqCylinder&	operator=( const CqCylinder& From );
 
@@ -271,7 +271,7 @@ public:
     virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
     virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-    virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
+    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
     CqHyperboloid&	operator=( const CqHyperboloid& From );
 
@@ -309,7 +309,7 @@ public:
     virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
     virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-    virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
+    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
     CqParaboloid&	operator=( const CqParaboloid& From );
 
@@ -348,7 +348,7 @@ public:
     virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
     virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
-    virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
+    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
     CqTorus&	operator=( const CqTorus& From );
 
@@ -392,7 +392,7 @@ public:
         return ( TqTrue );
     }
 
-    virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
+    virtual	TqInt PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u );
 
     CqDisk&	operator=( const CqDisk& From );
 

@@ -690,32 +690,30 @@ void CqBucket::QuantizeBucket()
 /** Place GPrim into bucket in order of depth
  * \param The Gprim to be added.
  */
-void CqBucket::AddGPrim( CqBasicSurface* pGPrim )
+void CqBucket::AddGPrim( const boost::shared_ptr<CqBasicSurface>& pGPrim )
 {
     if ( pGPrim->fCachedBound() )
     {
-        CqBasicSurface * surf = m_aGPrims.pFirst();
-        while ( surf != 0 )
-        {
-            if (surf == pGPrim)
+	std::list<boost::shared_ptr<CqBasicSurface> >::iterator ii = m_aGPrims.begin(), ie = m_aGPrims.end();
+
+	for (; ii != ie; ++ii)
+	{
+            if (*ii == pGPrim)
             {
                 return;
             }
 
-            if ( surf->fCachedBound() )
+            if ( (*ii)->fCachedBound() )
             {
-                if ( surf->GetCachedRasterBound().vecMin().z() > pGPrim->GetCachedRasterBound().vecMin().z() )
+                if ( (*ii)->GetCachedRasterBound().vecMin().z() > pGPrim->GetCachedRasterBound().vecMin().z() )
                 {
-                    pGPrim->LinkBefore( surf );
-                    ADDREF( pGPrim );
+		    m_aGPrims.insert(ii, pGPrim);
                     return ;
                 }
             }
-            surf = surf->pNext();
         }
     }
-    m_aGPrims.LinkFirst( pGPrim );
-    ADDREF( pGPrim );
+    m_aGPrims.push_back(pGPrim);
 }
 
 

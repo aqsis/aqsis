@@ -32,8 +32,8 @@
 #include	<vector>
 #include	<list>
 
-#include	<boost/shared_ptr.hpp>
 #include	<boost/weak_ptr.hpp>
+#include	<boost/shared_ptr.hpp>
 #include	<boost/enable_shared_from_this.hpp>
 #include	"sstring.h"
 
@@ -143,7 +143,7 @@ public:
     {
         assert( TqFalse ); return ( m_lDefPrimChildren );
     }
-    virtual	void	AddChild( const boost::shared_ptr<CqCSGTreeNode>& pChild )
+    virtual	void	AddChild( const boost::weak_ptr<CqCSGTreeNode>& pChild )
     {
         assert( TqFalse );
     }

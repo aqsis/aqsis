@@ -430,9 +430,8 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 {
     int i;
     TqInt lUses;
-    CqSurfacePatchMeshBicubic* pSurface = new CqSurfacePatchMeshBicubic( 13, 10, RI_TRUE, RI_TRUE );
+    boost::shared_ptr<CqSurfacePatchMeshBicubic> pSurface( new CqSurfacePatchMeshBicubic( 13, 10, RI_TRUE, RI_TRUE ) );
     lUses = pSurface->Uses();
-    ADDREF( pSurface );
 
 
     // Fill in default values for all primitive variables not explicitly specified.
@@ -457,9 +456,8 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
     this->pPatchMeshBicubic[ 0 ] = pSurface;
 
-    pSurface = new CqSurfacePatchMeshBicubic( 13, 7, RI_TRUE, RI_TRUE );
+    pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 13, 7, RI_TRUE, RI_TRUE ) );
     lUses = pSurface->Uses();
-    ADDREF( pSurface );
 
     // Fill in default values for all primitive variables not explicitly specified.
     // Fill in primitive variables specified.
@@ -481,9 +479,8 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
     }
     this->pPatchMeshBicubic[ 1 ] = pSurface;
 
-    pSurface = new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE );
+    pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
     lUses = pSurface->Uses();
-    ADDREF( pSurface );
 
     // Fill in default values for all primitive variables not explicitly specified.
     // Fill in primitive variables specified.
@@ -505,9 +502,8 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
     }
     this->pPatchMeshBicubic[ 2 ] = pSurface;
 
-    pSurface = new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE );
+    pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
     lUses = pSurface->Uses();
-    ADDREF( pSurface );
 
     // Fill in default values for all primitive variables not explicitly specified.
     // Fill in primitive variables specified.
@@ -529,9 +525,8 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
     }
     this->pPatchMeshBicubic[ 3 ] = pSurface;
 
-    pSurface = new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE );
+    pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
     lUses = pSurface->Uses();
-    ADDREF( pSurface );
 
     // Fill in default values for all primitive variables not explicitly specified.
     // Fill in primitive variables specified.
@@ -553,9 +548,8 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
     }
     this->pPatchMeshBicubic[ 4 ] = pSurface;
 
-    pSurface = new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE );
+    pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE ) );
     lUses = pSurface->Uses();
-    ADDREF( pSurface );
 
     // Fill in default values for all primitive variables not explicitly specified.
     // Fill in primitive variables specified.
@@ -580,9 +574,8 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
     // bottom
     if ( m_CrowBase )
     {
-        pSurface = new CqSurfacePatchMeshBicubic( 13, 4, RI_TRUE, RI_TRUE );
+        pSurface = boost::shared_ptr<CqSurfacePatchMeshBicubic>( new CqSurfacePatchMeshBicubic( 13, 4, RI_TRUE, RI_TRUE ) );
         lUses = pSurface->Uses();
-        ADDREF( pSurface );
 
         // Fill in default values for all primitive variables not explicitly specified.
         // Fill in primitive variables specified.
@@ -663,7 +656,7 @@ CqBound	CqTeapot::Bound() const
 /** Split this GPrim into bicubic patches.
  */
 
-TqInt CqTeapot::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqTeapot::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
 
 

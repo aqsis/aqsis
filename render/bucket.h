@@ -31,6 +31,7 @@
 #include	"aqsis.h"
 
 #include	<vector>
+#include	<list>
 
 #include	"bitvector.h"
 #include	"micropolygon.h"
@@ -130,9 +131,9 @@ public:
     void	QuantizeBucket();
     static	void	ShutdownBucket();
 
-    /** Add a GPRim to the list of deferred GPrims.
+    /** Add a GPRim to the stack of deferred GPrims.
      */
-    void	AddGPrim( CqBasicSurface* pGPrim );
+    void	AddGPrim( const boost::shared_ptr<CqBasicSurface>& pGPrim );
 
     /** Add an MPG to the list of deferred MPGs.
      */
@@ -158,24 +159,30 @@ public:
 #endif
         m_agridWaiting.push_back( pgridNew );
     }
-    /** Get a pointer to the top GPrim in the list of deferred GPrims.
+    /** Get a pointer to the top GPrim in the stack of deferred GPrims.
      */
-    CqBasicSurface* pTopSurface()
+    boost::shared_ptr<CqBasicSurface> pTopSurface()
     {
-        return ( m_aGPrims.pFirst() );
+	if (!m_aGPrims.empty())
+	{
+	    return m_aGPrims.front();
+	}
+	else
+	{
+	    return boost::shared_ptr<CqBasicSurface>();
+	}
+    }
+    /** Pop the top GPrim in the stack of deferred GPrims.
+     */
+    void popSurface()
+    {
+	m_aGPrims.pop_front();
     }
     /** Get a count of deferred GPrims.
      */
     TqInt cGPrims()
     {
-        TqInt count = 0;
-        CqBasicSurface* pSurf = pTopSurface();
-        while( pSurf )
-        {
-            count++;
-            pSurf=pSurf->pNext();
-        }
-        return ( count );
+	return ( m_aGPrims.size() );
     }
     /** Get a reference to the vetor of deferred MPGs.
      */
@@ -222,7 +229,7 @@ private:
 
     std::vector<CqMicroPolygon*> m_ampgWaiting;			///< Vector of vectors of waiting micropolygons in this bucket
     std::vector<CqMicroPolyGridBase*> m_agridWaiting;		///< Vector of vectors of waiting micropolygrids in this bucket
-    CqList<CqBasicSurface>	m_aGPrims;						///< Vector of lists of split surfaces for this bucket.
+    std::list<boost::shared_ptr<CqBasicSurface> >	m_aGPrims;						///< Vector of lists of split surfaces for this bucket.
     TqBool	m_bProcessed;	///< Flag indicating if this bucket has been processed yet.
 }
 ;

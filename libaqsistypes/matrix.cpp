@@ -28,6 +28,17 @@
 
 START_NAMESPACE( Aqsis )
 
+
+//---------------------------------------------------------------------
+/** Identity matrix constructor
+ */
+
+CqMatrix::CqMatrix( )
+{
+    Identity();
+}
+
+
 //---------------------------------------------------------------------
 /** Scale matrix constructor
  * \param xs Float scale in x.
@@ -46,6 +57,7 @@ CqMatrix::CqMatrix( const TqFloat xs, const TqFloat ys, const TqFloat zs )
         m_aaElement[ 0 ][ 0 ] = xs;
         m_aaElement[ 1 ][ 1 ] = ys;
         m_aaElement[ 2 ][ 2 ] = zs;
+        m_aaElement[ 3 ][ 3 ] = 1.0;
 
         m_fIdentity = TqFalse;
     }

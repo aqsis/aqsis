@@ -4,8 +4,8 @@
  *	@author	Paul Gregory
  *	@brief	Implement the basic raytracer subsystem interface implementation.
  *
- *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2004/02/09 20:04:49 $
+ *	Last change by:		$Author: pseudonym $
+ *	Last change date:	$Date: 2004/03/19 06:11:15 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@ struct CqRaytrace : public IqRaytrace
 
 	// Interface functions overridden from IqRaytrace
 	virtual	void	Initialise();
-	virtual	void	AddPrimitive(IqSurface* pSurface);
+	virtual	void	AddPrimitive(const boost::shared_ptr<IqSurface>& pSurface);
 	virtual void	Finalise();
 };
 

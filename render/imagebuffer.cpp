@@ -210,7 +210,7 @@ void	CqImageBuffer::Release()
    inserts EVERY gprim into buckets (using a bound that is still in camera space).
  */
 
-TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
+TqBool CqImageBuffer::CullSurface( CqBound& Bound, const boost::shared_ptr<CqBasicSurface>& pSurface )
 {
     // If the primitive is completely outside of the hither-yon z range, cull it.
     if ( Bound.vecMin().z() >= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 1 ] ||
@@ -283,11 +283,8 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
  * \param pSurface A pointer to a CqBasicSurface derived class, surface should at this point be in camera space.
  */
 
-void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
+void CqImageBuffer::PostSurface( const boost::shared_ptr<CqBasicSurface>& pSurface )
 {
-    // Initially, the surface enters this method with zero references, so add one.
-    ADDREF( pSurface );
-
     // Count the number of total gprims
     STATS_INC( GPR_created_total );
 
@@ -308,9 +305,9 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
         CqMatrix matShaderToWorld;
 		// Default "shader" space to the displacement shader, unless there isn't one, in which
 		// case use the surface shader.
-        if ( NULL != pSurface->pAttributes() ->pshadDisplacement() )
+        if ( pSurface->pAttributes() ->pshadDisplacement() )
             matShaderToWorld = pSurface->pAttributes() ->pshadDisplacement() ->matCurrent();
-        else if ( NULL != pSurface->pAttributes() ->pshadSurface() )
+        else if ( pSurface->pAttributes() ->pshadSurface() )
             matShaderToWorld = pSurface->pAttributes() ->pshadSurface() ->matCurrent();
         vecDB = QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", matShaderToWorld, pSurface->pTransform() ->matObjectToWorld() ) * vecDB;
         db = vecDB.Magnitude();
@@ -322,8 +319,6 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
     // Check if the surface can be culled. (also adjusts for DOF and converts Bound to raster space).
     if ( CullSurface( Bound, pSurface ) )
     {
-        pSurface->UnLink();
-        RELEASEREF( pSurface );
         STATS_INC( GPR_culled );
         return ;
     }
@@ -357,8 +352,6 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
     assert( !Bucket(XMinb, YMinb).IsProcessed() );
     Bucket(XMinb, YMinb).AddGPrim( pSurface );
 
-    // Release the reference acquired for the surface for this method.
-    RELEASEREF( pSurface );
     return ;
 
 }
@@ -372,7 +365,7 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
  * \return Boolean indicating that the GPrim has been culled.
 */
 
-TqBool CqImageBuffer::OcclusionCullSurface( CqBasicSurface* pSurface )
+TqBool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqBasicSurface>& pSurface )
 {
     CqBound RasterBound( pSurface->GetCachedRasterBound() );
 
@@ -404,9 +397,7 @@ TqBool CqImageBuffer::OcclusionCullSurface( CqBasicSurface* pSurface )
             const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
             if( pattrName )	objname = *pattrName;
             std::cerr << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
-            pSurface->UnLink();
             Bucket( nextBucket, CurrentBucketRow() ).AddGPrim( pSurface );
-            RELEASEREF( pSurface );
             STATS_INC( GPR_culled );
             return TqTrue;
         }
@@ -427,9 +418,7 @@ TqBool CqImageBuffer::OcclusionCullSurface( CqBasicSurface* pSurface )
             const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
             if( pattrName )	objname = *pattrName;
             std::cerr << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
-            pSurface->UnLink();
             Bucket( nextBucketX, nextBucket ).AddGPrim( pSurface );
-            RELEASEREF( pSurface );
             STATS_INC( GPR_culled );
             return TqTrue;
         }
@@ -439,8 +428,6 @@ TqBool CqImageBuffer::OcclusionCullSurface( CqBasicSurface* pSurface )
         const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
         if( pattrName )	objname = *pattrName;
         std::cerr << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
-        pSurface->UnLink();
-        RELEASEREF( pSurface );
         STATS_INC( GPR_culled );
         return TqTrue;
     }
@@ -1162,8 +1149,8 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
     CqBucket& Bucket = CurrentBucket();
 
     // Render any waiting subsurfaces.
-    CqBasicSurface* pSurface = Bucket.pTopSurface();
-    while ( pSurface != 0 )
+    boost::shared_ptr<CqBasicSurface> pSurface = Bucket.pTopSurface();
+    while ( pSurface )
     {
         if ( m_fQuit ) return ;
 
@@ -1195,7 +1182,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
                     {
                         /* the same primitive was processed by the occlusion a MaxEyeSplits times !!
                          * A bug occurred with the renderer probably.
-                         * We need a way out of this forloop. So I unlink the primitive
+                         * We need a way out of this forloop. So I pop the primitive
                          * and try with the next one
                          * 
                          */ 
@@ -1206,13 +1193,14 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
                         std::cerr << warning << "Primitive \"" << objname.c_str() << "\" gets culled too many times" << std::endl;
 
                         counter = 0;
-                        pSurface->UnLink();
+			Bucket.popSurface();
                         pSurface = Bucket.pTopSurface();
                     }
                     continue;
                 }
             }
 
+	    Bucket.popSurface();
             CqMicroPolyGridBase* pGrid;
             QGetRenderContext() ->Stats().DicingTimer().Start();
             pGrid = pSurface->Dice();
@@ -1239,11 +1227,14 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
         // The surface is not small enough, so split it...
         else if ( !pSurface->fDiscard() )
         {
-            std::vector<CqBasicSurface*> aSplits;
+	    Bucket.popSurface();
+
             // Decrease the total gprim count since this gprim is replaced by other gprims
             STATS_DEC( GPR_created_total );
+
             // Split it
             QGetRenderContext() ->Stats().SplitsTimer().Start();
+            std::vector<boost::shared_ptr<CqBasicSurface> > aSplits;
             TqInt cSplits = pSurface->Split( aSplits );
             TqInt i;
             for ( i = 0; i < cSplits; i++ )
@@ -1252,7 +1243,6 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
             QGetRenderContext() ->Stats().SplitsTimer().Stop();
         }
 
-        pSurface->RenderComplete();
         pSurface = Bucket.pTopSurface();
         // Render any waiting micro polygon grids.
         QGetRenderContext() ->Stats().RenderMPGsTimer().Start();

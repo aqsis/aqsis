@@ -98,13 +98,17 @@ void CqCSGTreeNode::SetRequired(TqBool value)
  */
 TqInt CqCSGTreeNode::isChild( const CqCSGTreeNode* pNode )
 {
+    if ( !pNode )
+    {
+	return ( -1 );
+    }
     TqInt iChild = 0;
     std::list<boost::weak_ptr<CqCSGTreeNode> >::const_iterator
 	ii = lChildren().begin(), ie = lChildren().end();
     for (; ii != ie; ++ii, ++iChild)
     {
-	boost::shared_ptr<CqCSGTreeNode> pChild(*ii);
-        if ( pChild.get() == pNode ) return ( iChild );
+	boost::shared_ptr<CqCSGTreeNode> pChild = ii->lock();
+	if ( pChild.get() == pNode ) return ( iChild );
     }
     return ( -1 );
 }
@@ -143,7 +147,9 @@ void CqCSGTreeNode::ProcessTree( std::vector<SqImageSample>& samples )
     // Follow the tree back up to the top, then process the list from there
     boost::shared_ptr<CqCSGTreeNode> pTop = shared_from_this();
     while ( pTop->pParent() )
+    {
         pTop = pTop->pParent();
+    }
 
     pTop->ProcessSampleList( samples );
 }
@@ -169,8 +175,8 @@ void CqCSGTreeNode::ProcessSampleList( std::vector<SqImageSample>& samples )
         // If the node is a primitive, no need to process it.
         // In fact as the primitive, just nulls out its owned samples
         // this would break the CSG code.
-	boost::shared_ptr<CqCSGTreeNode> pChild(*ii);
-        if ( pChild->NodeType() != CSGNodeType_Primitive )
+	boost::shared_ptr<CqCSGTreeNode> pChild = ii->lock();
+        if ( pChild.get() && pChild->NodeType() != CSGNodeType_Primitive )
             pChild->ProcessSampleList( samples );
     }
 
@@ -186,7 +192,9 @@ void CqCSGTreeNode::ProcessSampleList( std::vector<SqImageSample>& samples )
     for ( i = samples.begin(); i != samples.end(); ++i, ++j )
     {
         if ( ( aChildIndex[j] = isChild( i->m_pCSGNode.get() ) ) >= 0 )
+	{
             abChildState[ aChildIndex[j] ] = !abChildState[ aChildIndex[j] ];
+	}
     }
 
     // Now get the initial state
@@ -201,7 +209,7 @@ void CqCSGTreeNode::ProcessSampleList( std::vector<SqImageSample>& samples )
             abChildState[ aChildIndex[j] ] = !abChildState[ aChildIndex[j] ];
         else
         {
-            i++;
+            ++i;
             continue;
         }
 
@@ -241,7 +249,7 @@ void CqCSGNodePrimitive::ProcessSampleList( std::vector<SqImageSample>& samples 
 {
     // Now go through samples, clearing samples related to this node.
     std::vector<SqImageSample>::iterator i;
-    for ( i = samples.begin(); i != samples.end(); i++ )
+    for ( i = samples.begin(); i != samples.end(); ++i )
     {
         if ( i->m_pCSGNode.get() == this )
         {

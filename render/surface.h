@@ -29,6 +29,7 @@
 #define SURFACE_H_INCLUDED 1
 
 #include	"aqsis.h"
+#include	<boost/enable_shared_from_this.hpp>
 
 #include	"attributes.h"
 #include	"renderer.h"
@@ -51,7 +52,7 @@ START_NAMESPACE( Aqsis )
  * Abstract base surface class, which provides interfaces to geometry.  
  */
 
-class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, public IqSurface
+class CqBasicSurface : public IqSurface
 {
 public:
     CqBasicSurface();
@@ -87,7 +88,7 @@ CqString className() const { return CqString("CqBasicSurface"); }
      * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
      * \return Integer count of new GPrims created.
      */
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits ) = 0;
+    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits ) = 0;
     /** Determine whether this GPrim is diceable at its current size.
      */
     virtual TqBool	Diceable() = 0;
@@ -109,18 +110,16 @@ CqString className() const { return CqString("CqBasicSurface"); }
     virtual void	PostDice(CqMicroPolyGrid * pGrid)
     {}
 
-    virtual TqInt	PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
+    virtual TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
     {
         return ( 0 );
     }
     virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u )
     {}
-    virtual void	PostSubdivide(std::vector<CqBasicSurface*>& aSplits)
+    virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits)
     {}
     virtual void	RenderComplete()
     {
-        UnLink();
-        RELEASEREF( this );
     }
     /** Prepare the trim curve once the surface has been completed.
      */
@@ -280,7 +279,7 @@ protected:
  * Abstract base surface class, which provides interfaces to a geometric surface.  
  */
 
-class CqSurface : public CqBasicSurface
+class CqSurface : public CqBasicSurface, public boost::enable_shared_from_this<CqSurface>
 {
 public:
     CqSurface();
@@ -584,12 +583,12 @@ public:
     virtual void	PostDice(CqMicroPolyGrid * pGrid)
     {}
 
-    virtual TqInt	PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
+    virtual TqInt	PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
     {
         return ( 0 );
     }
     virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u );
-    virtual void	PostSubdivide(std::vector<CqBasicSurface*>& aSplits)
+    virtual void	PostSubdivide(std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits)
     {}
 
     /** Virtual function to indicate whether a particular surface is able
@@ -608,7 +607,7 @@ public:
     // Derived from CqBasicSurface
 
     virtual	CqMicroPolyGridBase* Dice();
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
+    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
     virtual TqBool	Diceable()	{ return(false); }
 
 protected:
@@ -664,18 +663,15 @@ protected:
  * Templatised class containing a series of motion stages of a specific surface type for motion blurring.
  */
 
-class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<CqBasicSurface*>
+class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<boost::shared_ptr<CqBasicSurface> >
 {
 public:
-    CqDeformingSurface( CqBasicSurface* const& a ) : CqBasicSurface(), CqMotionSpec<CqBasicSurface*>( a )
+    CqDeformingSurface( boost::shared_ptr<CqBasicSurface> const& a ) : CqBasicSurface(), CqMotionSpec<boost::shared_ptr<CqBasicSurface> >( a )
     {}
-    CqDeformingSurface( const CqDeformingSurface& From ) : CqBasicSurface( From ), CqMotionSpec<CqBasicSurface*>( From )
+    CqDeformingSurface( const CqDeformingSurface& From ) : CqBasicSurface( From ), CqMotionSpec<boost::shared_ptr<CqBasicSurface> >( From )
     {}
     virtual	~CqDeformingSurface()
     {
-        TqInt i;
-        for ( i = 0; i < cTimes(); i++ )
-            RELEASEREF( GetMotionObject( Time( i ) ) );
     }
 
     /** Get combnied bound for all times
@@ -707,9 +703,9 @@ public:
     }
     /** Split this GPrim, creating a series of CqDeformingSurface with all times in.
      */
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits )
+    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
     {
-        std::vector<std::vector<CqBasicSurface*> > aaMotionSplits;
+        std::vector<std::vector<boost::shared_ptr<CqBasicSurface> > > aaMotionSplits;
         aaMotionSplits.resize( cTimes() );
         TqInt cSplits = 0;
         TqInt i;
@@ -728,14 +724,13 @@ public:
         // Now build motion surfaces from the splits and pass them back.
         for ( i = 0; i < cSplits; i++ )
         {
-            CqDeformingSurface* pNewMotion = new CqDeformingSurface( 0 );
-            ADDREF( pNewMotion );
+	    boost::shared_ptr<CqDeformingSurface> pNewMotion( new CqDeformingSurface( boost::shared_ptr<CqBasicSurface>() ) );
             pNewMotion->m_fDiceable = TqTrue;
             pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
             TqInt j;
             for ( j = 0; j < cTimes(); j++ )
                 pNewMotion->AddTimeSlot( Time( j ), aaMotionSplits[ j ][ i ] );
-            aSplits.push_back( pNewMotion );
+            aSplits.push_back( boost::static_pointer_cast<CqBasicSurface>( pNewMotion ) );
         }
         return ( cSplits );
     }
@@ -749,7 +744,7 @@ public:
         // Copy the split info so that at each time slot, the gprims split the same.
         TqInt i;
         for ( i = 1; i < cTimes(); i++ )
-            GetMotionObject( Time( i ) ) ->CopySplitInfo( GetMotionObject( Time( 0 ) ) );
+            GetMotionObject( Time( i ) ) ->CopySplitInfo( GetMotionObject( Time( 0 ) ).get() );
         return ( f );
     }
 
@@ -818,14 +813,14 @@ public:
         return ( GetMotionObject( Time( 0 ) ) ->cFaceVarying() );
     }
     // Overrides from CqMotionSpec
-    virtual	void	ClearMotionObject( CqBasicSurface*& A ) const
+    virtual	void	ClearMotionObject( boost::shared_ptr<CqBasicSurface>& A ) const
         {}
     ;
-    virtual	CqBasicSurface*	ConcatMotionObjects( CqBasicSurface* const& A, CqBasicSurface* const& B ) const
+    virtual	boost::shared_ptr<CqBasicSurface>	ConcatMotionObjects( boost::shared_ptr<CqBasicSurface> const& A, boost::shared_ptr<CqBasicSurface> const& B ) const
     {
         return ( A );
     }
-    virtual	CqBasicSurface*	LinearInterpolateMotionObjects( TqFloat Fraction, CqBasicSurface* const& A, CqBasicSurface* const& B ) const
+    virtual	boost::shared_ptr<CqBasicSurface>	LinearInterpolateMotionObjects( TqFloat Fraction, boost::shared_ptr<CqBasicSurface> const& A, boost::shared_ptr<CqBasicSurface> const& B ) const
     {
         return ( A );
     }

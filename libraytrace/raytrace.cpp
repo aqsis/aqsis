@@ -40,7 +40,7 @@ void CqRaytrace::Initialise()
 {
 }
 
-void CqRaytrace::AddPrimitive(IqSurface* pSurface)
+void CqRaytrace::AddPrimitive(const boost::shared_ptr<IqSurface>& pSurface)
 {
 }
 

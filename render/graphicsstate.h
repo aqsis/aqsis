@@ -757,18 +757,18 @@ public:
     }
     /** Get the CqDeformingSurface, if generating a deformation motion blur sequence.
      */
-    virtual CqDeformingSurface* GetDeformingSurface() const
+    virtual boost::shared_ptr<CqDeformingSurface> GetDeformingSurface() const
     {
         return( m_pDeformingSurface );
     }
     /** Set the CqDeformingSurface, if generating a deformation motion blur sequence.
      */
-    virtual void SetDeformingSurface( CqDeformingSurface* pMotionSurface);
+    virtual void SetDeformingSurface( const boost::shared_ptr<CqDeformingSurface>& pMotionSurface);
 
 private:
     TqUint	m_iTime;		///< The index of the current frame time.
     std::vector<TqFloat>	m_aTimes;		///< An array of specified frame times.
-    CqDeformingSurface*		m_pDeformingSurface;
+    boost::shared_ptr<CqDeformingSurface>		m_pDeformingSurface;
 }
 ;
 

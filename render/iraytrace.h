@@ -4,8 +4,8 @@
  *	@author	Paul Gregory
  *	@brief	Declare the interface class for common raytracer access.
  *
- *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2004/02/09 20:04:49 $
+ *	Last change by:		$Author: pseudonym $
+ *	Last change date:	$Date: 2004/03/19 06:11:16 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -14,6 +14,7 @@
 #define	___iraytrace_Loaded___
 
 #include	"aqsis.h"
+#include	<boost/shared_ptr.hpp>
 
 START_NAMESPACE( Aqsis )
 
@@ -31,7 +32,7 @@ struct IqRaytrace
 
 	/** Add a primitive to the raytracing space subdivision structure.
 	 */
-	virtual	void	AddPrimitive(IqSurface* pSurface)=0;
+	virtual	void	AddPrimitive(const boost::shared_ptr<IqSurface>& pSurface)=0;
 
 	/** Prepare the structure for raytrace queries.
 	 */

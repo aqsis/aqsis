@@ -76,7 +76,7 @@ using namespace Aqsis;
 
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
 static void ProcessCompression( TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values );
-RtVoid	CreateGPrim( CqBasicSurface* pSurface );
+RtVoid	CreateGPrim( const boost::shared_ptr<CqBasicSurface>& pSurface );
 void SetShaderArgument( IqShader* pShader, const char* name, TqPchar val );
 TqBool	ValidateState(...);
 
@@ -239,6 +239,16 @@ static TqUlong RIH_DEPTHFILTER = CqParameter::hash( "depthfilter" );
 static TqUlong RIH_JITTER = CqParameter::hash( "jitter" );
 
 RtInt	RiLastError = 0;
+
+//----------------------------------------------------------------------
+// CreateGPrim
+// Helper function to build a GPrim from any boost::shared_ptr<> type..
+template<class T>
+inline
+RtVoid	CreateGPrim( const boost::shared_ptr<T>& pSurface )
+{
+    CreateGPrim( boost::static_pointer_cast<CqBasicSurface,T>( pSurface ) );
+}
 
 //----------------------------------------------------------------------
 // BuildParameterList
@@ -608,7 +618,7 @@ RtVoid	RiWorldBegin()
 		CqMatrix matOpenShutterInverse = QGetRenderContext() ->ptransCurrent() ->matObjectToWorld( QGetRenderContext() ->ptransCurrent() ->Time( 0 ) );
 		matOpenShutterInverse = matOpenShutterInverse.Inverse();
 		QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->ptransCurrent() ->Time( 0 ), CqMatrix() );
-		for ( i = 1; i < QGetRenderContext() ->ptransWriteCurrent() ->cTimes(); i++ )
+		for ( i = 1; i < QGetRenderContext() ->ptransWriteCurrent() ->cTimes(); ++i )
 			QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->ptransCurrent() ->Time( i ), matOpenShutterInverse * QGetRenderContext() ->ptransCurrent() ->matObjectToWorld( QGetRenderContext() ->ptransCurrent() ->Time( i ) ) );
 	}
 	else
@@ -863,7 +873,7 @@ RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
     }
 
     RtInt i;
-    for ( i = 0; i < count; i++ )
+    for ( i = 0; i < count; ++i )
     {
         RtToken	token = tokens[ i ];
         RtPointer	value = values[ i ];
@@ -1145,7 +1155,7 @@ RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
     {
         QGetRenderContext() ->optCurrent().GetStringOptionWrite( "System", "Imager" ) [ 0 ] = name ;
         QGetRenderContext() ->optCurrent().LoadImager( name );
-        for ( i = 0; i < count; i++ )
+        for ( i = 0; i < count; ++i )
         {
             RtToken	token = tokens[ i ];
             RtPointer	value = values[ i ];
@@ -1269,7 +1279,7 @@ RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
     // Gather the additional arguments into a map to pass through to the manager.
     std::map<std::string, void*> mapOfArguments;
     TqInt i;
-    for( i = 0; i < count; i++ )
+    for( i = 0; i < count; ++i )
         mapOfArguments[ tokens[ i ] ] = values[ i ];
 
     // Check if the request is to add a display driver.
@@ -1578,7 +1588,7 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 
     // Check options.
     TqInt i;
-    for ( i = 0; i < count; i++ )
+    for ( i = 0; i < count; ++i )
     {
         SqParameterDeclaration Decl;
         try
@@ -1669,7 +1679,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
     CqNamedParameterList * pOpt = QGetRenderContext() ->optCurrent().pOptionWrite( name ).get();
 
     RtInt i;
-    for ( i = 0; i < count; i++ )
+    for ( i = 0; i < count; ++i )
     {
         RtToken	token = tokens[ i ];
         RtPointer	value = values[ i ];
@@ -1721,7 +1731,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
                 if ( bArray )
                 {
                     RtInt j;
-                    for ( j = 0; j < pParam->Count(); j++ )
+                    for ( j = 0; j < pParam->Count(); ++j )
                         static_cast<CqParameterTypedUniformArray<RtFloat, type_float, RtFloat>*>( pParam ) ->pValue() [ j ] = pf[ j ];
                 }
                 else
@@ -1735,7 +1745,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
                 if ( bArray )
                 {
                     RtInt j;
-                    for ( j = 0; j < pParam->Count(); j++ )
+                    for ( j = 0; j < pParam->Count(); ++j )
                         static_cast<CqParameterTypedUniformArray<RtInt, type_integer, RtFloat>*>( pParam ) ->pValue() [ j ] = pi[ j ];
                 }
                 else
@@ -1749,7 +1759,7 @@ RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
                 if ( bArray )
                 {
                     RtInt j;
-                    for ( j = 0; j < pParam->Count(); j++ )
+                    for ( j = 0; j < pParam->Count(); ++j )
                     {
                         CqString str( "" );
                         if ( strcmp( name, "searchpath" ) == 0 )
@@ -1956,7 +1966,7 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
     if ( pNew != 0 )
     {
         RtInt i;
-        for ( i = 0; i < count; i++ )
+        for ( i = 0; i < count; ++i )
         {
             RtToken	token = tokens[ i ];
             RtPointer	value = values[ i ];
@@ -2064,7 +2074,7 @@ RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
         // Execute the intiialisation code here, as we now have our shader context complete.
         pshadSurface->PrepareDefArgs();
         RtInt i;
-        for ( i = 0; i < count; i++ )
+        for ( i = 0; i < count; ++i )
         {
             RtToken	token = tokens[ i ];
             RtPointer	value = values[ i ];
@@ -2114,7 +2124,7 @@ RtVoid	RiAtmosphereV( RtToken name, PARAMETERLIST )
         // Execute the intiialisation code here, as we now have our shader context complete.
         pshadAtmosphere->PrepareDefArgs();
         RtInt i;
-        for ( i = 0; i < count; i++ )
+        for ( i = 0; i < count; ++i )
         {
             RtToken	token = tokens[ i ];
             RtPointer	value = values[ i ];
@@ -2660,7 +2670,7 @@ RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
         // Execute the intiialisation code here, as we now have our shader context complete.
         pshadDisplacement->PrepareDefArgs();
         RtInt i;
-        for ( i = 0; i < count; i++ )
+        for ( i = 0; i < count; ++i )
         {
             RtToken	token = tokens[ i ];
             RtPointer	value = values[ i ];
@@ -2790,7 +2800,7 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
     CqNamedParameterList * pAttr = QGetRenderContext() ->pattrWriteCurrent() ->pAttributeWrite( name ).get();
 
     RtInt i;
-    for ( i = 0; i < count; i++ )
+    for ( i = 0; i < count; ++i )
     {
         RtToken	token = tokens[ i ];
         RtPointer	value = values[ i ];
@@ -2845,7 +2855,7 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
                 if ( bArray )
                 {
                     RtInt j;
-                    for ( j = 0; j < pParam->Count(); j++ )
+                    for ( j = 0; j < pParam->Count(); ++j )
                         static_cast<CqParameterTypedUniformArray<RtFloat, type_float, RtFloat>*>( pParam ) ->pValue() [ j ] = pf[ j ];
                 }
                 else
@@ -2859,7 +2869,7 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
                 if ( bArray )
                 {
                     RtInt j;
-                    for ( j = 0; j < pParam->Count(); j++ )
+                    for ( j = 0; j < pParam->Count(); ++j )
                         static_cast<CqParameterTypedUniformArray<RtInt, type_integer, RtFloat>*>( pParam ) ->pValue() [ j ] = pi[ j ];
                 }
                 else
@@ -2873,7 +2883,7 @@ RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
                 if ( bArray )
                 {
                     RtInt j;
-                    for ( j = 0; j < pParam->Count(); j++ )
+                    for ( j = 0; j < pParam->Count(); ++j )
                     {
                         CqString str( ps[ j ] );
                         static_cast<CqParameterTypedUniform<CqString, type_string, RtFloat>*>( pParam ) ->pValue() [ j ] = str;
@@ -2920,11 +2930,10 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 	Validate_RiPolygon
 
     // Create a new polygon surface primitive.
-    CqSurfacePolygon * pSurface = new CqSurfacePolygon( nvertices );
-    ADDREF( pSurface );
+    boost::shared_ptr<CqSurfacePolygon> pSurface( new CqSurfacePolygon( nvertices ) );
 
 	// Process any specified primitive variables.
-    if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
+    if ( ProcessPrimitiveVariables( pSurface.get(), count, tokens, values ) )
     {
         if ( !pSurface->CheckDegenerate() )
         {
@@ -2934,16 +2943,12 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
                                  QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
                                  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
             CreateGPrim( pSurface );
-            RELEASEREF( pSurface );
         }
         else
         {
             std::cerr << error << "Found degenerate polygon" << std::endl;
-            RELEASEREF( pSurface );
         }
     }
-    else
-        RELEASEREF( pSurface );
 
     return ;
 }
@@ -2980,7 +2985,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 
     // Calcualte how many points there are.
     TqInt cVerts = 0;
-    for ( iloop = 0; iloop < nloops; iloop++ )
+    for ( iloop = 0; iloop < nloops; ++iloop )
 	{
         cVerts += nverts[ iloop ];
 		// Check for degenerate loops.
@@ -2994,9 +2999,9 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 	}
 
     // Create a storage class for all the points.
-    CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, 1, cVerts );
+    boost::shared_ptr<CqPolygonPoints> pPointsClass( new CqPolygonPoints( cVerts, 1, cVerts ) );
     // Process any specified primitive variables
-    if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
+    if ( ProcessPrimitiveVariables( pPointsClass.get(), count, tokens, values ) )
     {
         pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
 
@@ -3013,7 +3018,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
         TqBool O = QGetRenderContext()->pattrCurrent() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
 
         TqUint iVert;
-        for ( iVert = 1; iVert < pPointsClass->P() ->Size(); iVert++ )
+        for ( iVert = 1; iVert < pPointsClass->P() ->Size(); ++iVert )
         {
             vecTemp = pPointsClass->P()->pValue( iVert )[0];
             MinX = ( MinX < vecTemp.x() ) ? MinX : vecTemp.x();
@@ -3038,13 +3043,13 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
         // Create a general 2D polygon using the points in each loop.
         CqPolygonGeneral2D poly;
         TqUint ipoint = 0;
-        for ( iloop = 0; iloop < nloops; iloop++ )
+        for ( iloop = 0; iloop < nloops; ++iloop )
         {
             CqPolygonGeneral2D polya;
             polya.SetAxis( Axis );
             polya.SetpVertices( pPointsClass );
             TqInt ivert;
-            for ( ivert = 0; ivert < nverts[ iloop ]; ivert++ )
+            for ( ivert = 0; ivert < nverts[ iloop ]; ++ivert )
             {
                 assert( ipoint < pPointsClass->P() ->Size() );
                 polya.aiVertices().push_back( ipoint++ );
@@ -3170,14 +3175,13 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
 	Validate_RiPoints
 
     // Create a storage class for all the points.
-    CqPolygonPoints* pPointsClass = new CqPolygonPoints( npoints, 1, npoints );
-    ADDREF( pPointsClass );
+    boost::shared_ptr<CqPolygonPoints> pPointsClass( new CqPolygonPoints( npoints, 1, npoints ) );
 
     // Create a new points storage class
-    CqPoints* pSurface;
+    boost::shared_ptr<CqPoints> pSurface;
 
     // read in the parameter list
-    if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
+    if ( ProcessPrimitiveVariables( pPointsClass.get(), count, tokens, values ) )
     {
         // Transform the points into camera space for processing,
         // This needs to be done before initialising the KDTree as the tree must be formulated in 'current' (camera) space.
@@ -3185,8 +3189,7 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
                                  QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
                                  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
 
-        pSurface = new CqPoints( npoints, pPointsClass );
-        ADDREF( pSurface );
+        pSurface = boost::shared_ptr<CqPoints>( new CqPoints( npoints, pPointsClass ) );
         // Initialise the KDTree for the points to contain all.
         pSurface->InitialiseKDTree();
         pSurface->InitialiseMaxWidth();
@@ -3194,8 +3197,6 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
         if ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "LevelOfDetailBounds" ) [ 1 ] < 0.0f )
         {
             // Cull this geometry for LOD reasons
-            RELEASEREF( pSurface );
-            RELEASEREF( pPointsClass );
             return ;
         }
 
@@ -3206,21 +3207,19 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
         {
             CqMotionModeBlock* pMMB = static_cast<CqMotionModeBlock*>(QGetRenderContext() ->pconCurrent().get());
 
-            CqDeformingSurface* pMS;
+	    boost::shared_ptr<CqDeformingSurface> pMS = pMMB->GetDeformingSurface();
             // If this is the first frame, then generate the appropriate CqDeformingSurface and fill in the first frame.
             // Then cache the pointer on the motion block.
-            if( ( pMS = pMMB->GetDeformingSurface() ) == NULL )
+            if( !pMS )
             {
-                CqDeformingPointsSurface* pNewMS = new CqDeformingPointsSurface( pSurface );
+		boost::shared_ptr<CqDeformingPointsSurface> pNewMS( new CqDeformingPointsSurface( pSurface ) );
                 pNewMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
-                ADDREF( pSurface );
 
                 pMMB->SetDeformingSurface( pNewMS );
             }
             else
             {
                 pMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
-                ADDREF( pSurface );
             }
             QGetRenderContext() ->AdvanceTime();
         }
@@ -3229,13 +3228,6 @@ RtVoid	RiPointsV( RtInt npoints, PARAMETERLIST )
             QGetRenderContext() ->pImage() ->PostSurface( pSurface );
             STATS_INC( GPR_created );
         }
-
-        RELEASEREF( pPointsClass );
-        RELEASEREF( pSurface );
-    }
-    else
-    {
-        RELEASEREF( pPointsClass );
     }
 
     return ;
@@ -3296,11 +3288,9 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
     if ( strcmp( type, RI_CUBIC ) == 0 )
     {
         // create a new group of cubic curves
-        CqCubicCurvesGroup * pSurface =
-            new CqCubicCurvesGroup( ncurves, nvertices, periodic );
-        ADDREF( pSurface );
+	boost::shared_ptr<CqCubicCurvesGroup> pSurface( new CqCubicCurvesGroup( ncurves, nvertices, periodic ) );
         // read in the parameter list
-        if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
+        if ( ProcessPrimitiveVariables( pSurface.get(), count, tokens, values ) )
         {
             // set the default primitive variables
             pSurface->SetDefaultPrimitiveVariables();
@@ -3311,28 +3301,22 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
                                  QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
                                  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 			
-			std::vector<CqBasicSurface*> aSplits;
+            std::vector<boost::shared_ptr<CqBasicSurface> > aSplits;
             pSurface->Split( aSplits );
-            std::vector<CqBasicSurface*>::iterator iSS;
-            for ( iSS = aSplits.begin(); iSS != aSplits.end(); iSS++ )
+            std::vector<boost::shared_ptr<CqBasicSurface> >::iterator iSS;
+            for ( iSS = aSplits.begin(); iSS != aSplits.end(); ++iSS )
             {
-                // Transform the points into camera space for processing,
-                ADDREF( (*iSS) );
-                CreateGPrim( static_cast<CqSurfacePatchBicubic*>( *iSS ) );
-                RELEASEREF( (*iSS) );
+                CreateGPrim( *iSS );
             }
         }
-        RELEASEREF( pSurface );
     }
     else if ( strcmp( type, RI_LINEAR ) == 0 )
     {
         // create a new group of linear curves
-        CqLinearCurvesGroup * pSurface =
-            new CqLinearCurvesGroup( ncurves, nvertices, periodic );
+	boost::shared_ptr<CqLinearCurvesGroup> pSurface( new CqLinearCurvesGroup( ncurves, nvertices, periodic ) );
 
-        ADDREF( pSurface );
         // read in the parameter list
-        if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
+        if ( ProcessPrimitiveVariables( pSurface.get(), count, tokens, values ) )
         {
             // set the default primitive variables
             pSurface->SetDefaultPrimitiveVariables();
@@ -3343,7 +3327,6 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
                                  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
             CreateGPrim( pSurface );
         }
-        RELEASEREF( pSurface );
     }
     else
     {
@@ -3387,11 +3370,11 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
     RtInt* pVerts = verts;
     RtInt poly;
     RtInt sumnVerts = 0;
-    for ( poly = 0; poly < npolys; poly++ )
+    for ( poly = 0; poly < npolys; ++poly )
     {
         RtInt v;
         sumnVerts += nverts[ poly ];
-        for ( v = 0; v < nverts[ poly ]; v++ )
+        for ( v = 0; v < nverts[ poly ]; ++v )
         {
             cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
             pVerts++;
@@ -3399,22 +3382,18 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
     }
 
     // Create a storage class for all the points.
-    CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, npolys, sumnVerts );
-    ADDREF( pPointsClass );
+    boost::shared_ptr<CqPolygonPoints> pPointsClass( new CqPolygonPoints( cVerts, npolys, sumnVerts ) );
     // Process any specified primitive variables
-    if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
+    if ( ProcessPrimitiveVariables( pPointsClass.get(), count, tokens, values ) )
     {
-        CqSurfacePointsPolygons* pPsPs = new CqSurfacePointsPolygons(pPointsClass, npolys, nverts, verts );
-        ADDREF( pPsPs );
+	boost::shared_ptr<CqSurfacePointsPolygons> pPsPs( new CqSurfacePointsPolygons(pPointsClass, npolys, nverts, verts ) );
         TqFloat time = QGetRenderContext()->Time();
        // Transform the points into camera space for processing,
         pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time) ),
                                  QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time) ),
                                  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time) ) );
         CreateGPrim(pPsPs);
-        RELEASEREF( pPsPs );
     }
-    RELEASEREF( pPointsClass );
 
     return ;
 }
@@ -3459,9 +3438,9 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 
     // Calculate how many points overall.
     RtInt* pVerts = verts;
-    for ( ipoly = 0; ipoly < npolys; ipoly++ )
+    for ( ipoly = 0; ipoly < npolys; ++ipoly )
     {
-        for ( iloop = 0; iloop < nloops[ ipoly ]; iloop++, igloop++ )
+        for ( iloop = 0; iloop < nloops[ ipoly ]; ++iloop, ++igloop )
         {
             TqInt v;
             sumnVerts += nverts[ igloop ];
@@ -3473,7 +3452,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
                 if ( pattrName != 0 ) objname = pattrName[ 0 ];
                 std::cerr << warning << "Degenerate loop in PointsGeneralPolygons object \"" << objname.c_str() << "\"" << std::endl;
 			}
-            for ( v = 0; v < nverts[ igloop ]; v++ )
+            for ( v = 0; v < nverts[ igloop ]; ++v )
             {
                 cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
                 pVerts++;
@@ -3485,10 +3464,9 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
     TqBool O = QGetRenderContext()->pattrCurrent() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ] != 0;
 
     // Create a storage class for all the points.
-    CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, npolys, sumnVerts );
-    ADDREF( pPointsClass );
+    boost::shared_ptr<CqPolygonPoints> pPointsClass( new CqPolygonPoints( cVerts, npolys, sumnVerts ) );
     // Process any specified primitive variables
-    if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
+    if ( ProcessPrimitiveVariables( pPointsClass.get(), count, tokens, values ) )
     {
         pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
 
@@ -3499,7 +3477,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
         std::vector<TqInt> aFVList;
         std::vector<TqInt> aUVList;
 
-        for ( ipoly = 0; ipoly < npolys; ipoly++ )
+        for ( ipoly = 0; ipoly < npolys; ++ipoly )
         {
             initial_index = igvert;
             // Create a general 2D polygon using the points in each loop.
@@ -3508,7 +3486,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
             TqUint imaxindex, iminindex;
             imaxindex = cVerts;
             iminindex = 0;
-            for ( iloop = 0; iloop < nloops[ ipoly ]; iloop++, igloop++ )
+            for ( iloop = 0; iloop < nloops[ ipoly ]; ++iloop, ++igloop )
             {
                 iminindex = MIN( iminindex, verts[ igvert ] );
                 imaxindex = MAX( imaxindex, verts[ igvert ] );
@@ -3523,7 +3501,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
                 CqPolygonGeneral2D polya;
                 polya.SetpVertices( pPointsClass );
                 TqInt ivert;
-                for ( ivert = 0; ivert < nverts[ igloop ]; ivert++, igvert++ )
+                for ( ivert = 0; ivert < nverts[ igloop ]; ++ivert, ++igvert )
                 {
                     ipoint = verts[ igvert ];
                     assert( ipoint < pPointsClass->P() ->Size() );
@@ -3595,11 +3573,11 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
             // Store the facevarying information
             /// \note This code relies on the fact that vertex indices cannot be duplicated
             /// within the loops of a single poly. Make sure this is a reasonable assumption.
-            for( TqInt ifv = iStartTri; ifv < iEndTri; ifv++ )
+            for( TqInt ifv = iStartTri; ifv < iEndTri; ++ifv )
             {
                 TqInt ivaryingindex = aiTriangles[ ifv ];
                 TqBool found = TqFalse;
-                for( TqInt iv = initial_index; iv != igvert; iv++ )
+                for( TqInt iv = initial_index; iv != igvert; ++iv )
                 {
                     if( verts[ iv ] == ivaryingindex )
                     {
@@ -3616,7 +3594,6 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
             /// within the loops of a single poly. Make sure this is a reasonable assumption.
 			aUVList.push_back( ( iEndTri - iStartTri ) / 3 );
         }
-        RELEASEREF( pPointsClass );
 
         // Build an array of point counts (always 3 each).
         ctris = aiTriangles.size() / 3;
@@ -3628,7 +3605,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
         TqInt fvcount = ctris * 3;
         assert( aFVList.size() == fvcount );
         std::vector<void*> aNewParams;
-        for( iUserParam = 0; iUserParam < count; iUserParam++ )
+        for( iUserParam = 0; iUserParam < count; ++iUserParam )
         {
             SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( tokens[ iUserParam ] );
             TqInt elem_size;
@@ -3654,7 +3631,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
                 char* pNew = static_cast<char*>( malloc( elem_size * fvcount ) );
                 aNewParams.push_back( pNew );
                 TqInt iElem;
-                for( iElem = 0; iElem < fvcount; iElem++ )
+                for( iElem = 0; iElem < fvcount; ++iElem )
                 {
                     const unsigned char* pval = static_cast<const unsigned char*>( values[ iUserParam ] ) + ( aFVList[ iElem ] * elem_size );
                     memcpy( pNew, pval, elem_size );
@@ -3670,7 +3647,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
                 aNewParams.push_back( pNew );
                 TqInt iElem;
 				const unsigned char* pval = static_cast<const unsigned char*>( values[ iUserParam ] );
-                for( iElem = 0; iElem < npolys; iElem++ )
+                for( iElem = 0; iElem < npolys; ++iElem )
                 {
                     TqInt dup_count = aUVList[ iElem ]; 
 					TqInt dup;
@@ -3688,7 +3665,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
         RiPointsPolygonsV( ctris, &_nverts[ 0 ], &aiTriangles[ 0 ], count, tokens, values );
 
         std::vector<void*>::iterator iNewParam;
-        for( iNewParam = aNewParams.begin(); iNewParam != aNewParams.end(); iNewParam++ )
+        for( iNewParam = aNewParams.begin(); iNewParam != aNewParams.end(); ++iNewParam )
             free( *iNewParam );
     }
 
@@ -3730,10 +3707,10 @@ RtVoid	RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep )
     //}
 
     RtInt i;
-    for ( i = 0; i < 4; i++ )
+    for ( i = 0; i < 4; ++i )
     {
         RtInt j;
-        for ( j = 0; j < 4; j++ )
+        for ( j = 0; j < 4; ++j )
         {
             u.SetElement( i, j, ubasis[ i ][ j ] );
             v.SetElement( i, j, vbasis[ i ][ j ] );
@@ -3781,10 +3758,9 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
     if ( strcmp( type, RI_BICUBIC ) == 0 )
     {
         // Create a surface patch
-        CqSurfacePatchBicubic * pSurface = new CqSurfacePatchBicubic();
-        ADDREF( pSurface );
+	boost::shared_ptr<CqSurfacePatchBicubic> pSurface( new CqSurfacePatchBicubic() );
         // Fill in primitive variables specified.
-        if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
+        if ( ProcessPrimitiveVariables( pSurface.get(), count, tokens, values ) )
         {
             // Fill in default values for all primitive variables not explicitly specified.
             pSurface->SetDefaultPrimitiveVariables();
@@ -3800,15 +3776,13 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 
             CreateGPrim( pSurface );
         }
-        RELEASEREF( pSurface );
     }
     else if ( strcmp( type, RI_BILINEAR ) == 0 )
     {
         // Create a surface patch
-        CqSurfacePatchBilinear * pSurface = new CqSurfacePatchBilinear();
-        ADDREF( pSurface );
+	boost::shared_ptr<CqSurfacePatchBilinear> pSurface( new CqSurfacePatchBilinear() );
         // Fill in primitive variables specified.
-        if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
+        if ( ProcessPrimitiveVariables( pSurface.get(), count, tokens, values ) )
         {
             // Fill in default values for all primitive variables not explicitly specified.
             pSurface->SetDefaultPrimitiveVariables();
@@ -3819,7 +3793,6 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
                                  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
             CreateGPrim( pSurface );
         }
-        RELEASEREF( pSurface );
     }
     else
     {
@@ -3870,32 +3843,28 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
         TqBool	uPeriodic = ( strcmp( uwrap, RI_PERIODIC ) == 0 ) ? TqTrue : TqFalse;
         TqBool	vPeriodic = ( strcmp( vwrap, RI_PERIODIC ) == 0 ) ? TqTrue : TqFalse;
 
-        CqSurfacePatchMeshBicubic* pSurface = new CqSurfacePatchMeshBicubic( nu, nv, uPeriodic, vPeriodic );
-        ADDREF( pSurface );
+	boost::shared_ptr<CqSurfacePatchMeshBicubic> pSurface( new CqSurfacePatchMeshBicubic( nu, nv, uPeriodic, vPeriodic ) );
         // Fill in primitive variables specified.
-        if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
+        if ( ProcessPrimitiveVariables( pSurface.get(), count, tokens, values ) )
         {
             // Fill in default values for all primitive variables not explicitly specified.
             pSurface->SetDefaultPrimitiveVariables();
-            std::vector<CqBasicSurface*> aSplits;
+            std::vector<boost::shared_ptr<CqBasicSurface> > aSplits;
             pSurface->Split( aSplits );
-            std::vector<CqBasicSurface*>::iterator iSS;
-            for ( iSS = aSplits.begin(); iSS != aSplits.end(); iSS++ )
+            std::vector<boost::shared_ptr<CqBasicSurface> >::iterator iSS;
+            for ( iSS = aSplits.begin(); iSS != aSplits.end(); ++iSS )
             {
                 CqMatrix matuBasis = pSurface->pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 0 ];
                 CqMatrix matvBasis = pSurface->pAttributes() ->GetMatrixAttribute( "System", "Basis" ) [ 1 ];
-                static_cast<CqSurfacePatchBicubic*>( *iSS ) ->ConvertToBezierBasis( matuBasis, matvBasis );
+                static_cast<CqSurfacePatchBicubic*>( iSS->get() ) ->ConvertToBezierBasis( matuBasis, matvBasis );
                 TqFloat time = QGetRenderContext()->Time();
                 // Transform the points into camera space for processing,
-                ADDREF( (*iSS) );
                 (*iSS)->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
                                    QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
                                    QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
-                CreateGPrim( static_cast<CqSurfacePatchBicubic*>( *iSS ) );
-                RELEASEREF( (*iSS) );
+                CreateGPrim( *iSS );
             }
         }
-        RELEASEREF( pSurface );
     }
     else if ( strcmp( type, RI_BILINEAR ) == 0 )
     {
@@ -3903,10 +3872,9 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
         TqBool	uPeriodic = ( strcmp( uwrap, RI_PERIODIC ) == 0 ) ? TqTrue : TqFalse;
         TqBool	vPeriodic = ( strcmp( vwrap, RI_PERIODIC ) == 0 ) ? TqTrue : TqFalse;
 
-        CqSurfacePatchMeshBilinear* pSurface = new CqSurfacePatchMeshBilinear( nu, nv, uPeriodic, vPeriodic );
-        ADDREF( pSurface );
+	boost::shared_ptr<CqSurfacePatchMeshBilinear> pSurface( new CqSurfacePatchMeshBilinear( nu, nv, uPeriodic, vPeriodic ) );
         // Fill in primitive variables specified.
-        if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
+        if ( ProcessPrimitiveVariables( pSurface.get(), count, tokens, values ) )
         {
             // Fill in default values for all primitive variables not explicitly specified.
             pSurface->SetDefaultPrimitiveVariables();
@@ -3917,7 +3885,6 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
                                  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
             CreateGPrim( pSurface );
         }
-        RELEASEREF( pSurface );
     }
     else
     {
@@ -3958,9 +3925,8 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 	Validate_RiNuPatch
 
     // Create a NURBS patch
-    CqSurfaceNURBS * pSurface = new CqSurfaceNURBS();
+    boost::shared_ptr<CqSurfaceNURBS> pSurface( new CqSurfaceNURBS() );
     pSurface->SetfPatchMesh();
-    ADDREF( pSurface );
     pSurface->Init( uorder, vorder, nu, nv );
 
     pSurface->Setumin( umin );
@@ -3970,11 +3936,11 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 
     // Copy the knot vectors.
     RtInt i;
-    for ( i = 0; i < nu + uorder; i++ ) pSurface->auKnots() [ i ] = uknot[ i ];
-    for ( i = 0; i < nv + vorder; i++ ) pSurface->avKnots() [ i ] = vknot[ i ];
+    for ( i = 0; i < nu + uorder; ++i ) pSurface->auKnots() [ i ] = uknot[ i ];
+    for ( i = 0; i < nv + vorder; ++i ) pSurface->avKnots() [ i ] = vknot[ i ];
 
     // Process any specified parameters
-    if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
+    if ( ProcessPrimitiveVariables( pSurface.get(), count, tokens, values ) )
     {
         // Set up the default primitive variables.
         pSurface->SetDefaultPrimitiveVariables();
@@ -3987,7 +3953,6 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
                              QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
         CreateGPrim( pSurface );
     }
-    RELEASEREF( pSurface );
 
     return ;
 }
@@ -4012,11 +3977,11 @@ RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[]
     TqInt ivert = 0;
     TqInt iloop;
 
-    for ( iloop = 0; iloop < nloops; iloop++ )
+    for ( iloop = 0; iloop < nloops; ++iloop )
     {
         CqTrimLoop Loop;
         TqInt icurve;
-        for ( icurve = 0; icurve < ncurves[ iloop ]; icurve++ )
+        for ( icurve = 0; icurve < ncurves[ iloop ]; ++icurve )
         {
             // Create a NURBS patch
             CqTrimCurve Curve;
@@ -4026,11 +3991,11 @@ RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[]
 
             // Copy the knot vectors.
             RtInt i;
-            for ( i = 0; i < o + cverts; i++ ) Curve.aKnots() [ i ] = knot[ iknot++ ];
+            for ( i = 0; i < o + cverts; ++i ) Curve.aKnots() [ i ] = knot[ iknot++ ];
 
             // Copy the vertices from the u,v,w arrays.
             CqVector3D vec( 0, 0, 1 );
-            for ( i = 0; i < cverts; i++ )
+            for ( i = 0; i < cverts; ++i )
             {
                 vec.x( u[ ivert ] );
                 vec.y( v[ ivert ] );
@@ -4081,9 +4046,8 @@ RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
     CheckMinMax( zmax, -radius, radius, &rc );
 
     // Create a sphere
-    CqSphere * pSurface = new CqSphere( radius, zmin, zmax, 0, thetamax );
-    ADDREF( pSurface );
-    ProcessPrimitiveVariables( pSurface, count, tokens, values );
+    boost::shared_ptr<CqSphere> pSurface( new CqSphere( radius, zmin, zmax, 0, thetamax ) );
+    ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
     pSurface->SetDefaultPrimitiveVariables();
 
     TqFloat time = QGetRenderContext()->Time();
@@ -4092,7 +4056,6 @@ RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
                          QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
                          QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
     CreateGPrim( pSurface );
-    RELEASEREF( pSurface );
 
     return ;
 }
@@ -4130,9 +4093,8 @@ RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
         return;
 
     // Create a cone
-    CqCone * pSurface = new CqCone( height, radius, 0, thetamax, 0, 1.0f );
-    ADDREF( pSurface );
-    ProcessPrimitiveVariables( pSurface, count, tokens, values );
+    boost::shared_ptr<CqCone> pSurface( new CqCone( height, radius, 0, thetamax, 0, 1.0f ) );
+    ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
     pSurface->SetDefaultPrimitiveVariables();
 
     TqFloat time = QGetRenderContext()->Time();
@@ -4141,7 +4103,6 @@ RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
                          QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
                          QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
     CreateGPrim( pSurface );
-    RELEASEREF( pSurface );
 
     return ;
 }
@@ -4175,9 +4136,8 @@ RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 	Validate_RiCylinder
 
     // Create a cylinder
-    CqCylinder * pSurface = new CqCylinder( radius, zmin, zmax, 0, thetamax );
-    ADDREF( pSurface );
-    ProcessPrimitiveVariables( pSurface, count, tokens, values );
+    boost::shared_ptr<CqCylinder> pSurface( new CqCylinder( radius, zmin, zmax, 0, thetamax ) );
+    ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
     pSurface->SetDefaultPrimitiveVariables();
 
     TqFloat time = QGetRenderContext()->Time();
@@ -4186,7 +4146,6 @@ RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax
                          QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
                          QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
     CreateGPrim( pSurface );
-    RELEASEREF( pSurface );
 
     return ;
 }
@@ -4222,9 +4181,8 @@ RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMET
     // Create a hyperboloid
     CqVector3D v0( point1[ 0 ], point1[ 1 ], point1[ 2 ] );
     CqVector3D v1( point2[ 0 ], point2[ 1 ], point2[ 2 ] );
-    CqHyperboloid* pSurface = new CqHyperboloid( v0, v1, 0, thetamax );
-    ADDREF( pSurface );
-    ProcessPrimitiveVariables( pSurface, count, tokens, values );
+    boost::shared_ptr<CqHyperboloid> pSurface( new CqHyperboloid( v0, v1, 0, thetamax ) );
+    ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
     pSurface->SetDefaultPrimitiveVariables();
 
     TqFloat time = QGetRenderContext()->Time();
@@ -4233,7 +4191,6 @@ RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMET
                          QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
                          QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
     CreateGPrim( pSurface );
-    RELEASEREF( pSurface );
 
     return ;
 }
@@ -4267,9 +4224,8 @@ RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 	Validate_RiParaboloid
 		
     // Create a paraboloid
-    CqParaboloid * pSurface = new CqParaboloid( rmax, zmin, zmax, 0, thetamax );
-    ADDREF( pSurface );
-    ProcessPrimitiveVariables( pSurface, count, tokens, values );
+    boost::shared_ptr<CqParaboloid> pSurface( new CqParaboloid( rmax, zmin, zmax, 0, thetamax ) );
+    ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
     pSurface->SetDefaultPrimitiveVariables();
 
     TqFloat time = QGetRenderContext()->Time();
@@ -4278,7 +4234,6 @@ RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax
                          QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
                          QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
     CreateGPrim( pSurface );
-    RELEASEREF( pSurface );
 
     return ;
 }
@@ -4312,9 +4267,8 @@ RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 	Validate_RiDisk
 
     // Create a disk
-    CqDisk * pSurface = new CqDisk( height, 0, radius, 0, thetamax );
-    ADDREF( pSurface );
-    ProcessPrimitiveVariables( pSurface, count, tokens, values );
+    boost::shared_ptr<CqDisk> pSurface( new CqDisk( height, 0, radius, 0, thetamax ) );
+    ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
     pSurface->SetDefaultPrimitiveVariables();
 
     TqFloat time = QGetRenderContext()->Time();
@@ -4324,7 +4278,6 @@ RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
                          QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 
     CreateGPrim( pSurface );
-    RELEASEREF( pSurface );
 
     return ;
 }
@@ -4357,9 +4310,8 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 	Validate_RiTorus
 
     // Create a torus
-    CqTorus * pSurface = new CqTorus( majorrad, minorrad, phimin, phimax, 0, thetamax );
-    ADDREF( pSurface );
-    ProcessPrimitiveVariables( pSurface, count, tokens, values );
+    boost::shared_ptr<CqTorus> pSurface( new CqTorus( majorrad, minorrad, phimin, phimax, 0, thetamax ) );
+    ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
     pSurface->SetDefaultPrimitiveVariables();
 
     TqFloat time = QGetRenderContext()->Time();
@@ -4369,7 +4321,6 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
                          QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 
     CreateGPrim( pSurface );
-    RELEASEREF( pSurface );
 
     return ;
 }
@@ -4392,14 +4343,12 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
     // I suspect that in order to handle the RtFreeProc correctly that we need to reference count
     // the instances of CqProcedural so that FreeProc gets called on the final Release();
 
-    CqProcedural *pProc = new CqProcedural(data, B, refineproc, freeproc );
-    ADDREF( pProc );
+    boost::shared_ptr<CqProcedural> pProc( new CqProcedural(data, B, refineproc, freeproc ) );
 	TqFloat time = QGetRenderContext()->Time();
     pProc->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pProc->pTransform() ->matObjectToWorld(time) ),
                       QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pProc->pTransform() ->matObjectToWorld(time) ),
                       QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pProc->pTransform() ->matObjectToWorld(time) ) );
     CreateGPrim( pProc );
-	RELEASEREF( pProc );
 
     return ;
 }
@@ -4437,11 +4386,10 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
     {
 
         // Create a standard teapot
-        CqTeapot * pSurface = new CqTeapot( true ); // add a bottom if true/false otherwise
-        ADDREF( pSurface );
+	boost::shared_ptr<CqTeapot> pSurface( new CqTeapot( true ) ); // add a bottom if true/false otherwise
 
         pSurface->SetSurfaceParameters( *pSurface );
-        ProcessPrimitiveVariables( pSurface, count, tokens, values );
+        ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
         pSurface->SetDefaultPrimitiveVariables();
 
         // I don't use the original teapot primitives as defined by T. Burge
@@ -4453,9 +4401,9 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
         // I suspect the 6/7 meshes are equivalent in size/definition as the T. Burge
         // definition. The 7th is the bottom part of the teapot (see teapot.cpp).
 
-        for ( int i = 0; i < pSurface->cNbrPatchMeshBicubic; i++ )
+        for ( int i = 0; i < pSurface->cNbrPatchMeshBicubic; ++i )
         {
-            CqSurface *pMesh = pSurface->pPatchMeshBicubic[ i ];
+	    boost::shared_ptr<CqSurface> pMesh = pSurface->pPatchMeshBicubic[ i ];
 
             TqFloat time = QGetRenderContext()->Time();
             // Transform the points into camera space for processing,
@@ -4463,16 +4411,14 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
                               QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
                               QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 
-            CreateGPrim( ( CqSurfacePatchMeshBicubic* ) pMesh );
+            CreateGPrim( boost::static_pointer_cast<CqBasicSurface>( pMesh ) );
         }
-        RELEASEREF( pSurface );
     }
     else if ( strcmp( type, "sphere" ) == 0 )
     {
         // Create a sphere
-        CqSphere * pSurface = new CqSphere( 1, -1, 1, 0, 360.0 );
-        ADDREF( pSurface );
-        ProcessPrimitiveVariables( pSurface, count, tokens, values );
+	boost::shared_ptr<CqSphere> pSurface( new CqSphere( 1, -1, 1, 0, 360.0 ) );
+        ProcessPrimitiveVariables( pSurface.get(), count, tokens, values );
         pSurface->SetDefaultPrimitiveVariables();
 
         TqFloat time = QGetRenderContext()->Time();
@@ -4584,7 +4530,7 @@ RtVoid	RiMotionBegin( RtInt N, ... )
 
     RtFloat* times = new RtFloat[ N ];
     RtInt i;
-    for ( i = 0; i < N; i++ )
+    for ( i = 0; i < N; ++i )
         times[ i ] = va_arg( pArgs, double );
 
     RiMotionBeginV( N, times );
@@ -4721,7 +4667,7 @@ RtVoid	RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, 
         log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );
 
 
-        for ( int i = 0; i < log2; i ++ )
+        for ( int i = 0; i < log2; ++i )
         {
             // Write the floating point image to the directory.
             CqTextureMapBuffer* pBuffer = Source.GetBuffer( 0, 0, i );
@@ -4843,7 +4789,7 @@ RtVoid	RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilte
         log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );
 
 
-        for ( int i = 0; i < log2; i ++ )
+        for ( int i = 0; i < log2; ++i )
         {
             // Write the floating point image to the directory.
             CqTextureMapBuffer* pBuffer = Source.GetBuffer( 0, 0, i );
@@ -4948,11 +4894,11 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
         int log2 = MIN( xRes, yRes );
         log2 = ( int ) ( log( static_cast<float>(log2) ) / log( 2.0 ) );
 
-        for ( ii = 0; ii < log2; ii++ )
+        for ( ii = 0; ii < log2; ++ii )
         {
             CqTextureMapBuffer* pLevelBuffer = tpx.CreateBuffer( 0, 0, xRes * 3, yRes * 2, numsamples );
             TqInt view;
-            for ( view = 0; view < 6; view++ )
+            for ( view = 0; view < 6; ++view )
             {
                 // Get the buffer for the approriate cube side at this level.
                 CqTextureMapBuffer* pBuffer = Images[ view ] ->GetBuffer( 0, 0, ii );
@@ -4962,11 +4908,11 @@ RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtStri
                 TqInt yoff = view / 3;
                 yoff *= yRes;
                 TqInt line, col, sample;
-                for ( line = 0; line < yRes; line++ )
+                for ( line = 0; line < yRes; ++line )
                 {
-                    for ( col = 0; col < xRes; col++ )
+                    for ( col = 0; col < xRes; ++col )
                     {
-                        for ( sample = 0; sample < numsamples; sample++ )
+                        for ( sample = 0; sample < numsamples; ++sample )
                             pLevelBuffer->SetValue( col + xoff, line + yoff, sample, pBuffer->GetValue( col, line, sample ) );
                     }
                 }
@@ -5058,7 +5004,7 @@ RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, 
     QGetRenderContext() ->Stats().MakeShadowTimer().Start();
 
     RtInt index;
-    for( index = 0; index < npics; index++ )
+    for( index = 0; index < npics; ++index )
     {
         CqShadowMap ZFile( picfiles[index] );
         ZFile.LoadZFile();
@@ -5153,11 +5099,11 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
     RtInt* pVerts = vertices;
     RtInt face;
     RtInt sumnVerts = 0;
-    for ( face = 0; face < nfaces; face++ )
+    for ( face = 0; face < nfaces; ++face )
     {
         RtInt v;
         sumnVerts += nvertices[ face ];
-        for ( v = 0; v < nvertices[ face ]; v++ )
+        for ( v = 0; v < nvertices[ face ]; ++v )
         {
             cVerts = MAX( ( ( *pVerts ) + 1 ), cVerts );
             pVerts++;
@@ -5165,28 +5111,25 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
     }
 
     // Create a storage class for all the points.
-    CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, nfaces, sumnVerts );
-    //ADDREF( pPointsClass );
+    boost::shared_ptr<CqPolygonPoints> pPointsClass( new CqPolygonPoints( cVerts, nfaces, sumnVerts ) );
 
-    std::vector<CqPolygonPoints*>	apPoints;
+    std::vector<boost::shared_ptr<CqPolygonPoints> >	apPoints;
     // Process any specified primitive variables
-    if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
+    if ( ProcessPrimitiveVariables( pPointsClass.get(), count, tokens, values ) )
     {
         // Create experimental version
         if ( strcmp( scheme, "catmull-clark" ) == 0 )
         {
-            CqSubdivision2 * pSubd2;
-
             // Transform the points into camera space for processing,
             pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
                                      QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
                                      QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
 
-            pSubd2 = new CqSubdivision2( pPointsClass );
+	    boost::shared_ptr<CqSubdivision2> pSubd2( new CqSubdivision2( pPointsClass ) );
             pSubd2->Prepare( cVerts );
 
             RtInt	iP = 0;
-            for ( face = 0; face < nfaces; face++ )
+            for ( face = 0; face < nfaces; ++face )
             {
                 pSubd2->AddFacet( nvertices[ face ], &vertices[ iP ], iP );
                 iP += nvertices[ face ];
@@ -5197,7 +5140,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
                 TqInt argcIndex = 0;
                 TqInt floatargIndex = 0;
                 TqInt intargIndex = 0;
-                for ( TqInt i = 0; i < ntags; i++ )
+                for ( TqInt i = 0; i < ntags; ++i )
                 {
                     if ( strcmp( tags[ i ], "interpolateboundary" ) == 0 )
                         pSubd2->SetInterpolateBoundary( TqTrue );
@@ -5221,7 +5164,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
                                 std::vector<CqLath*> aQve;
                                 pEdge->Qve( aQve );
                                 std::vector<CqLath*>::iterator iOpp;
-                                for( iOpp = aQve.begin(); iOpp != aQve.end(); iOpp++ )
+                                for( iOpp = aQve.begin(); iOpp != aQve.end(); ++iOpp )
                                 {
                                     if( ( NULL != (*iOpp)->ec() ) && (*iOpp)->ec()->VertexIndex() == intargs[ iEdge + intargIndex + 1 ] )
                                     {
@@ -5262,17 +5205,12 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
                     floatargIndex += nargs[ argcIndex++ ];
                 }
 
-                CqSurfaceSubdivisionMesh* pMesh = new CqSurfaceSubdivisionMesh(pSubd2, nfaces );
-                ADDREF( pMesh );
+		boost::shared_ptr<CqSurfaceSubdivisionMesh> pMesh( new CqSurfaceSubdivisionMesh(pSubd2, nfaces ) );
                 CreateGPrim(pMesh);
-                RELEASEREF( pMesh );
             }
             else
             {
                 std::cerr << error << "RiSubdivisionMesh contains non-manifold data" << std::endl;
-                // Invalid mesh, delete it.
-                RELEASEREF( pPointsClass );
-                RELEASEREF( pSubd2 );
             }
         }
         else
@@ -5370,7 +5308,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
     RtFloat*	pPoints = 0;
 
     RtInt i;
-    for ( i = 0; i < count; i++ )
+    for ( i = 0; i < count; ++i )
     {
         RtToken	token = tokens[ i ];
         RtPointer	value = values[ i ];
@@ -5408,12 +5346,12 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
         switch ( fP )
         {
         case RIL_P:
-            for ( i = 0; i < pSurface->cVertex(); i++ )
+            for ( i = 0; i < pSurface->cVertex(); ++i )
                 pSurface->P()->pValue( i )[0] = CqVector3D( pPoints[ ( i * 3 ) ], pPoints[ ( i * 3 ) + 1 ], pPoints[ ( i * 3 ) + 2 ] );
             break;
 
         case RIL_Pz:
-            for ( i = 0; i < pSurface->cVertex(); i++ )
+            for ( i = 0; i < pSurface->cVertex(); ++i )
             {
                 CqVector3D vecP = pSurface->SurfaceParametersAtVertex( i );
                 vecP.z( pPoints[ i ] );
@@ -5422,7 +5360,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
             break;
 
         case RIL_Pw:
-            for ( i = 0; i < pSurface->cVertex(); i++ )
+            for ( i = 0; i < pSurface->cVertex(); ++i )
                 pSurface->P()->pValue( i )[0] = CqVector4D( pPoints[ ( i * 4 ) ], pPoints[ ( i * 4 ) + 1 ], pPoints[ ( i * 4 ) + 2 ], pPoints[ ( i * 4 ) + 3 ] );
             break;
         }
@@ -5432,7 +5370,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
     if ( aUserParams.size() > 0 )
     {
         std::vector<TqInt>::iterator iUserParam;
-        for ( iUserParam = aUserParams.begin(); iUserParam != aUserParams.end(); iUserParam++ )
+        for ( iUserParam = aUserParams.begin(); iUserParam != aUserParams.end(); ++iUserParam )
         {
             SqParameterDeclaration Decl;
             try
@@ -5477,8 +5415,8 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
                     TqFloat* pValue = reinterpret_cast<TqFloat*>( values[ *iUserParam ] );
                     TqInt iArrayIndex, iValIndex;
                     i = 0;
-                    for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
-                        for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+                    for ( iValIndex = 0; iValIndex < cValues; ++iValIndex )
+                        for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; ++iArrayIndex, ++i )
                             pFloatParam->pValue( iValIndex ) [ iArrayIndex ] = pValue[ i ];
                 }
                 break;
@@ -5489,8 +5427,8 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
                     TqInt* pValue = reinterpret_cast<TqInt*>( values[ *iUserParam ] );
                     TqInt iArrayIndex, iValIndex;
                     i = 0;
-                    for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
-                        for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+                    for ( iValIndex = 0; iValIndex < cValues; ++iValIndex )
+                        for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; ++iArrayIndex, ++i )
                             pIntParam->pValue( iValIndex ) [ iArrayIndex ] = pValue[ i ];
                 }
                 break;
@@ -5503,8 +5441,8 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
                     TqFloat* pValue = reinterpret_cast<TqFloat*>( values[ *iUserParam ] );
                     TqInt iArrayIndex, iValIndex;
                     i = 0;
-                    for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
-                        for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+                    for ( iValIndex = 0; iValIndex < cValues; ++iValIndex )
+                        for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; ++iArrayIndex, ++i )
                             pVectorParam->pValue( iValIndex ) [ iArrayIndex ] = CqVector3D( pValue[ ( i * 3 ) ], pValue[ ( i * 3 ) + 1 ], pValue[ ( i * 3 ) + 2 ] );
                 }
                 break;
@@ -5515,8 +5453,8 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
                     char** pValue = reinterpret_cast<char**>( values[ *iUserParam ] );
                     TqInt iArrayIndex, iValIndex;
                     i = 0;
-                    for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
-                        for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+                    for ( iValIndex = 0; iValIndex < cValues; ++iValIndex )
+                        for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; ++iArrayIndex, ++i )
                             pStringParam->pValue( iValIndex ) [ iArrayIndex ] = CqString( pValue[ i ] );
                 }
                 break;
@@ -5527,8 +5465,8 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
                     TqFloat* pValue = reinterpret_cast<TqFloat*>( values[ *iUserParam ] );
                     TqInt iArrayIndex, iValIndex;
                     i = 0;
-                    for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
-                        for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+                    for ( iValIndex = 0; iValIndex < cValues; ++iValIndex )
+                        for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; ++iArrayIndex, ++i )
                             pColorParam->pValue( iValIndex ) [ iArrayIndex ] = CqColor( pValue[ ( i * 3 ) ], pValue[ ( i * 3 ) + 1 ], pValue[ ( i * 3 ) + 2 ] );
                 }
                 break;
@@ -5539,8 +5477,8 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
                     TqFloat* pValue = reinterpret_cast<TqFloat*>( values[ *iUserParam ] );
                     TqInt iArrayIndex, iValIndex;
                     i = 0;
-                    for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
-                        for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+                    for ( iValIndex = 0; iValIndex < cValues; ++iValIndex )
+                        for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; ++iArrayIndex, ++i )
                             pVectorParam->pValue( iValIndex ) [ iArrayIndex ] = CqVector4D( pValue[ ( i * 4 ) ], pValue[ ( i * 4 ) + 1 ], pValue[ ( i * 4 ) + 2 ], pValue[ ( i * 4 ) + 3 ] );
                 }
                 break;
@@ -5551,8 +5489,8 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
                     TqFloat* pValue = reinterpret_cast<TqFloat*>( values[ *iUserParam ] );
                     TqInt iArrayIndex, iValIndex;
                     i = 0;
-                    for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
-                        for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+                    for ( iValIndex = 0; iValIndex < cValues; ++iValIndex )
+                        for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; ++iArrayIndex, ++i )
                             pMatrixParam->pValue( iValIndex ) [ iArrayIndex ] = CqMatrix( pValue[ ( i * 16 ) ], pValue[ ( i * 16 ) + 1 ], pValue[ ( i * 16 ) + 2 ], pValue[ ( i * 16 ) + 3 ],
                                     pValue[ ( i * 16 ) + 4 ], pValue[ ( i * 16 ) + 5 ], pValue[ ( i * 16 ) + 6 ], pValue[ ( i * 16 ) + 7 ],
                                     pValue[ ( i * 16 ) + 8 ], pValue[ ( i * 16 ) + 9 ], pValue[ ( i * 16 ) + 10 ], pValue[ ( i * 16 ) + 11 ],
@@ -5580,19 +5518,12 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 // CreateGPrin
 // Create and register a GPrim according to the current attributes/transform
 //
-RtVoid	CreateGPrim( CqBasicSurface* pSurface )
+RtVoid	CreateGPrim( const boost::shared_ptr<CqBasicSurface>& pSurface )
 {
 
     if ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "LevelOfDetailBounds" ) [ 1 ] < 0.0f )
     {
         // Cull this geometry for LOD reasons.
-        // NB: The surface does not need to be released - it is simply *not* added to
-        //     a bucket.  The buckets keep references to the surfaces and the surfaces
-        //     should be released once the buckets have finished with them.  Hence,
-        //     needing to release a surface at this point is a Bad Thing (TM) because
-        //     it means that reference counts for non-culled surfaces will never reach
-        //     zero.
-        //RELEASEREF( pSurface );
         return ;
     }
 
@@ -5603,35 +5534,30 @@ RtVoid	CreateGPrim( CqBasicSurface* pSurface )
 
         CqMotionModeBlock* pMMB = static_cast<CqMotionModeBlock*>(QGetRenderContext() ->pconCurrent().get());
 
-        CqDeformingSurface* pMS;
+        CqDeformingSurface* pMS = pMMB->GetDeformingSurface().get();
         // If this is the first frame, then generate the appropriate CqDeformingSurface and fill in the first frame.
         // Then cache the pointer on the motion block.
-        if( ( pMS = pMMB->GetDeformingSurface() ) == NULL )
+        if( pMS )
         {
-            CqDeformingSurface* pNewMS = new CqDeformingSurface( pSurface );
-            ADDREF( pSurface );
+	    boost::shared_ptr<CqDeformingSurface> pNewMS( new CqDeformingSurface( pSurface ) );
             pNewMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
-            ADDREF( pNewMS );
             pMMB->SetDeformingSurface( pNewMS );
         }
         else
         {
-            ADDREF( pSurface );
             pMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
         }
         QGetRenderContext() ->AdvanceTime();
     }
     else
     {
-        ADDREF( pSurface );
         pSurface->PrepareTrimCurve();
         QGetRenderContext() ->pImage() ->PostSurface( pSurface );
         STATS_INC( GPR_created );
-        RELEASEREF( pSurface );
 
-		// Add to the raytracer database also
-		if(QGetRenderContext()->pRaytracer())
-			QGetRenderContext()->pRaytracer()->AddPrimitive(pSurface);
+        // Add to the raytracer database also
+        if(QGetRenderContext()->pRaytracer())
+            QGetRenderContext()->pRaytracer()->AddPrimitive(pSurface);
     }
 
     return ;
@@ -5662,8 +5588,8 @@ RtBoolean	BasisFromName( RtBasis * b, const char * strName )
     if ( pVals )
     {
         TqInt i, j;
-        for ( i = 0; i < 4; i++ )
-            for ( j = 0; j < 4; j++ )
+        for ( i = 0; i < 4; ++i )
+            for ( j = 0; j < 4; ++j )
                 ( *b ) [ i ][ j ] = ( *pVals ) [ i ][ j ];
         return ( TqTrue );
     }
@@ -5745,7 +5671,7 @@ static void ProcessCompression( TqInt * compression, TqInt * quality, TqInt coun
     *compression = COMPRESSION_NONE;
     *quality = 70;
 
-    for ( int i = 0; i < count; i++ )
+    for ( int i = 0; i < count; ++i )
     {
         RtToken	token = tokens[ i ];
         RtString *value = ( RtString * ) values[ i ];

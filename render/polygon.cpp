@@ -66,7 +66,7 @@ CqBound CqPolygonBase::Bound() const
  *  everything on the right (the same side as point 3) is not.
  */
 
-TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
     CqVector3D	vecN;
     TqInt indexA, indexB, indexC, indexD;
@@ -123,7 +123,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
             indexD = i + 1;
 
         // Create bilinear patches
-        CqSurfacePatchBilinear* pNew = new CqSurfacePatchBilinear();
+	boost::shared_ptr<CqSurfacePatchBilinear> pNew( new CqSurfacePatchBilinear() );
         //ADDREF( pNew );
         pNew->SetSurfaceParameters( Surface() );
 
@@ -419,7 +419,7 @@ CqSurfacePolygon& CqSurfacePolygon::operator=( const CqSurfacePolygon& From )
 /** Copy constructor.
  */
 
-CqSurfacePointsPolygon::CqSurfacePointsPolygon( const CqSurfacePointsPolygon& From ) : m_pPoints( 0 )
+CqSurfacePointsPolygon::CqSurfacePointsPolygon( const CqSurfacePointsPolygon& From )
 {
     *this = From;
 }
@@ -439,12 +439,9 @@ CqSurfacePointsPolygon& CqSurfacePointsPolygon::operator=( const CqSurfacePoints
     // Store the old points array pointer, as we must reference first then
     // unreference to avoid accidental deletion if they are the same and we are the
     // last reference.
-    CqPolygonPoints*	pOldPoints = m_pPoints;
     m_pPoints = From.m_pPoints;
     m_Index = From.m_Index;
     m_FaceVaryingIndex = From.m_FaceVaryingIndex;
-    ADDREF( m_pPoints );
-    if ( pOldPoints ) RELEASEREF( pOldPoints );
 
     return ( *this );
 }
@@ -469,7 +466,7 @@ void	CqPolygonPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx,
 CqBound	CqSurfacePointsPolygons::Bound() const
 {
     CqBound B;
-    if( NULL != m_pPoints && NULL != m_pPoints->P() )
+    if( m_pPoints && m_pPoints->P() )
     {
         TqInt PointIndex;
         for( PointIndex = m_pPoints->P()->Size()-1; PointIndex >= 0; PointIndex-- )
@@ -478,15 +475,14 @@ CqBound	CqSurfacePointsPolygons::Bound() const
     return(B);
 }
 
-TqInt CqSurfacePointsPolygons::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqSurfacePointsPolygons::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
     TqInt	CreatedPolys = 0;
     TqInt	iP = 0, poly;
     for ( poly = 0; poly < m_NumPolys; poly++ )
     {
         // Create a surface polygon
-        CqSurfacePointsPolygon*	pSurface = new CqSurfacePointsPolygon( m_pPoints, poly, iP );
-        //ADDREF( pSurface );
+	boost::shared_ptr<CqSurfacePointsPolygon> pSurface( new CqSurfacePointsPolygon( m_pPoints, poly, iP ) );
         RtBoolean fValid = RI_TRUE;
 
         pSurface->aIndices().resize( m_PointCounts[ poly ] );

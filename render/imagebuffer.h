@@ -263,9 +263,9 @@ public:
     void	DeleteImage();
     void	SaveImage( const char* strName );
 
-    void	PostSurface( CqBasicSurface* pSurface );
-    TqBool	CullSurface( CqBound& Bound, CqBasicSurface* pSurface );
-    TqBool	OcclusionCullSurface( CqBasicSurface* pSurface );
+    void	PostSurface( const boost::shared_ptr<CqBasicSurface>& pSurface );
+    TqBool	CullSurface( CqBound& Bound, const boost::shared_ptr<CqBasicSurface>& pSurface );
+    TqBool	OcclusionCullSurface( const boost::shared_ptr<CqBasicSurface>& pSurface );
     void	AddMPG( CqMicroPolygon* pmpgNew );
     TqBool	PushMPGForward( CqMicroPolygon* pmpg, TqInt Col, TqInt Row );
     TqBool	PushMPGDown( CqMicroPolygon*, TqInt Col, TqInt Row );

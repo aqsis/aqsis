@@ -37,14 +37,23 @@ START_NAMESPACE( Aqsis )
  *	Constructor.
  */
 
-CqSubdivision2::CqSubdivision2( CqPolygonPoints* pPoints ) :  CqMotionSpec<CqPolygonPoints*>(pPoints), m_bInterpolateBoundary( TqFalse ), m_fFinalised(TqFalse)
+CqSubdivision2::CqSubdivision2( )
+    : CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >( boost::shared_ptr<CqPolygonPoints>() ),
+      m_bInterpolateBoundary( TqFalse ),
+      m_fFinalised(TqFalse)
 {
-    if( pPoints )
-    {
-        // Store the reference to our points.
-        ADDREF( pPoints );
-        AddTimeSlot( 0, pPoints );
-    }
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Constructor.
+ */
+
+CqSubdivision2::CqSubdivision2( const boost::shared_ptr<CqPolygonPoints>& pPoints ) :  CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(pPoints), m_bInterpolateBoundary( TqFalse ), m_fFinalised(TqFalse)
+{
+    // Store the reference to our points.
+    AddTimeSlot( 0, pPoints );
 
     STATS_INC( GPR_subdiv );
 }
@@ -60,11 +69,6 @@ CqSubdivision2::~CqSubdivision2()
     // Delete the array of laths generated during the facet adding phase.
     for(std::vector<CqLath*>::const_iterator iLath=apLaths().begin(); iLath!=apLaths().end(); iLath++)
         if(*iLath)	delete(*iLath);
-
-    // Release the reference to our points.
-    TqInt i;
-    for ( i = 0; i < cTimes(); i++ )
-        RELEASEREF( GetMotionObject( Time( i ) ) );
 }
 
 
@@ -464,7 +468,7 @@ CqLath* CqSubdivision2::AddFacet(TqInt cVerts, TqInt* pIndices, TqInt iFVIndex)
         pNewLath->SetVertexIndex(pIndices[iVert]);
         pNewLath->SetFaceVertexIndex(iFVIndex+iVert);
 
-        if(NULL != pLastLath)
+        if(pLastLath)
             pNewLath->SetpClockwiseFacet(pLastLath);
 
         m_apLaths.push_back(pNewLath);
@@ -593,10 +597,10 @@ struct SqFaceLathList {
 
 void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFaces)
 {
-    assert(NULL != pFace);
+    assert(pFace);
 
     // If this has already beed subdivided then skip it.
-    if( NULL != pFace->pFaceVertex() )
+    if( pFace->pFaceVertex() )
     {
         apSubFaces.clear();
         std::vector<CqLath*> aQvf;
@@ -610,7 +614,7 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
     }
 
     // First make sure that the appropriate neighbour facets have been subdivided if this is >0 level face.
-    if( NULL != pFace->pParentFacet() )
+    if( pFace->pParentFacet() )
     {
         std::vector<CqLath*> aQff;
         std::vector<CqLath*> apSubFaces2;
@@ -652,7 +656,7 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
     {
         TqInt iVert=-1, iFVert=-2;
         // Create new vertices for the edge mid points.
-        if( NULL != aQfv[i]->ec() && NULL != aQfv[i]->ec()->pMidVertex() )
+        if( aQfv[i]->ec() && NULL != aQfv[i]->ec()->pMidVertex() )
             // There is already a next level vertex for this, so reuse the 'vertex' class index.
             iVert = aQfv[i]->ec()->pMidVertex()->VertexIndex();
         // Create new vertex for the edge midpoint.
@@ -668,7 +672,7 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
     {
         TqInt iVert=-1, iFVert=-3;
         // Create new vertices for the original points.
-        if( NULL != aQfv[i]->pChildVertex() )
+        if( aQfv[i]->pChildVertex() )
             // There is already a next level vertex for this, so reuse the 'vertex' class index.
             iVert = aQfv[i]->pChildVertex()->VertexIndex();
 
@@ -824,7 +828,7 @@ void CqSubdivision2::OutputMesh(const char* fname, std::vector<CqLath*>* paFaces
         }
     }
 
-    if( NULL != paFaces)
+    if( paFaces)
     {
         file << "g CurrentFace" << std::endl;
         for(i = 0; i < static_cast<TqInt>( paFaces->size() ); i++)
@@ -878,12 +882,12 @@ void CqSubdivision2::OutputInfo(const char* fname, std::vector<CqLath*>* paFaces
 
 CqBound	CqSurfaceSubdivisionPatch::Bound() const
 {
-    assert( NULL != pTopology() );
-    assert( NULL != pTopology()->pPoints() );
-    assert( NULL != pFace() );
+    assert( pTopology() );
+    assert( pTopology()->pPoints() );
+    assert( pFace() );
 
     // First make sure that the appropriate neighbour facets have been subdivided if this is >0 level face.
-    if( NULL != pFace()->pParentFacet() )
+    if( pFace()->pParentFacet() )
     {
         std::vector<CqLath*> aQff;
         std::vector<CqLath*> apSubFaces2;
@@ -921,20 +925,18 @@ CqBound	CqSurfaceSubdivisionPatch::Bound() const
 
 CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 {
-	CqSubdivision2* pSurface;
+    boost::shared_ptr<CqSubdivision2> pSurface;
     std::vector<CqMicroPolyGridBase*> apGrids;
 
     TqInt iTime;
     for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
     {
 		pSurface = Extract(iTime);
-		CqSurfaceSubdivisionPatch* pPatch = new CqSurfaceSubdivisionPatch(pSurface, pSurface->pFacet(0));
-		ADDREF(pPatch);
+		boost::shared_ptr<CqSurfaceSubdivisionPatch> pPatch( new CqSurfaceSubdivisionPatch(pSurface, pSurface->pFacet(0)) );
 		pPatch->m_uDiceSize = m_uDiceSize;
 		pPatch->m_vDiceSize = m_vDiceSize;
 		CqMicroPolyGridBase* pGrid = pPatch->DiceExtract();
 		apGrids.push_back( pGrid );
-		RELEASEREF(pPatch);
 	}
 
     if( apGrids.size() == 1 )
@@ -959,9 +961,9 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 {
 	// Dice rate table			  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16
     static TqInt aDiceSizes[] = { 0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4 };
-	assert( NULL != pTopology() );
-    assert( NULL != pTopology()->pPoints() );
-    assert( NULL != pFace() );
+	assert( pTopology() );
+    assert( pTopology()->pPoints() );
+    assert( pFace() );
 
     TqInt dicesize = MAX(m_uDiceSize, m_vDiceSize);
 
@@ -975,7 +977,8 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
     for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
     {
         CqMicroPolyGrid* pGrid = new CqMicroPolyGrid( dicesize, dicesize, pTopology()->pPoints() );
-        CqPolygonPoints* pMotionPoints = pTopology()->pPoints( iTime );
+
+	boost::shared_ptr<CqPolygonPoints> pMotionPoints = pTopology()->pPoints( iTime );
 
         TqInt isd;
         std::vector<CqLath*> apSubFace1, apSubFace2;
@@ -1064,7 +1067,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
         // If the color and opacity are not defined, use the system values.
         if ( USES( lUses, EnvVars_Cs ) && !pTopology()->pPoints()->bHasVar(EnvVars_Cs) )
         {
-            if ( NULL != pAttributes() ->GetColorAttribute( "System", "Color" ) )
+            if ( pAttributes() ->GetColorAttribute( "System", "Color" ) )
                 pGrid->pVar(EnvVars_Cs) ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
             else
                 pGrid->pVar(EnvVars_Cs) ->SetColor( CqColor( 1, 1, 1 ) );
@@ -1072,7 +1075,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 
         if ( USES( lUses, EnvVars_Os ) && !pTopology()->pPoints()->bHasVar(EnvVars_Os) )
         {
-            if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
+            if ( pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
                 pGrid->pVar(EnvVars_Os) ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
             else
                 pGrid->pVar(EnvVars_Os) ->SetColor( CqColor( 1, 1, 1 ) );
@@ -1140,7 +1143,7 @@ static void StoreDiceAPVar( IqShader* pShader, CqParameter* pParam, TqUint ivA, 
 {
     // Find the argument
     IqShaderData * pArg = pShader->FindArgument( pParam->strName() );
-    if ( NULL != pArg )
+    if ( pArg )
     {
         switch ( pParam->Type() )
         {
@@ -1205,7 +1208,7 @@ static void StoreDiceAPVar( IqShader* pShader, CqParameter* pParam, TqUint ivA, 
 }
 
 
-void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoints* pPoints, TqInt iParam, TqInt iFVParam, TqInt iData)
+void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, const boost::shared_ptr<CqPolygonPoints>& pPoints, TqInt iParam, TqInt iFVParam, TqInt iData)
 {
     TqInt lUses = Uses();
     TqInt lDone = 0;
@@ -1245,7 +1248,7 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoin
             pGrid->pVar(EnvVars_t) ->SetFloat( pPoints->t()->pValue( iFVParam )[0], iData );
     }
 
-    if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->pVar(EnvVars_Cs) ) && ( pPoints->bHasVar(EnvVars_Cs) ) )
+    if ( USES( lUses, EnvVars_Cs ) && ( pGrid->pVar(EnvVars_Cs) ) && ( pPoints->bHasVar(EnvVars_Cs) ) )
     {
         if( pPoints->Cs()->Class() == class_varying || pPoints->Cs()->Class() == class_vertex )
             pGrid->pVar(EnvVars_Cs) ->SetColor( pPoints->Cs()->pValue(iParam)[0], iData );
@@ -1253,7 +1256,7 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoin
             pGrid->pVar(EnvVars_Cs) ->SetColor( pPoints->Cs()->pValue(iFVParam)[0], iData );
     }
 
-    if ( USES( lUses, EnvVars_Os ) && ( NULL != pGrid->pVar(EnvVars_Os) ) && ( pPoints->bHasVar(EnvVars_Os) ) )
+    if ( USES( lUses, EnvVars_Os ) && ( pGrid->pVar(EnvVars_Os) ) && ( pPoints->bHasVar(EnvVars_Os) ) )
         pGrid->pVar(EnvVars_Os) ->SetColor( pPoints->Os()->pValue(iParam)[0], iData );
 
     // Now lets store the diced user specified primitive variables.
@@ -1261,22 +1264,22 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoin
     for ( iUP = pPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++ )
     {
         /// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
-        if ( NULL != pGrid->pAttributes() ->pshadSurface() )
+        if ( pGrid->pAttributes() ->pshadSurface() )
             StoreDiceAPVar( pGrid->pAttributes()->pshadSurface(), ( *iUP ), iParam, iData );
 
-        if ( NULL != pGrid->pAttributes() ->pshadDisplacement() )
+        if ( pGrid->pAttributes() ->pshadDisplacement() )
             StoreDiceAPVar( pGrid->pAttributes()->pshadDisplacement(), ( *iUP ), iParam, iData );
 
-        if ( NULL != pGrid->pAttributes() ->pshadAtmosphere() )
+        if ( pGrid->pAttributes() ->pshadAtmosphere() )
             StoreDiceAPVar( pGrid->pAttributes()->pshadAtmosphere(), ( *iUP ), iParam, iData );
     }
 }
 
-TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
-    assert( NULL != pTopology() );
-    assert( NULL != pTopology()->pPoints() );
-    assert( NULL != pFace() );
+    assert( pTopology() );
+    assert( pTopology()->pPoints() );
+    assert( pFace() );
 
     if( pTopology()->CanUsePatch( pFace() ) )
     {
@@ -1351,15 +1354,14 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
         aiVertices.push_back( pPoint->VertexIndex() );
         aiFVertices.push_back( pPoint->FaceVertexIndex() );
 
-        std::vector< CqSurfacePatchBicubic* > apSurfaces;
+        std::vector< boost::shared_ptr<CqSurfacePatchBicubic> > apSurfaces;
 
         TqInt iTime;
 
         for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
         {
             // Create a surface patch
-            CqSurfacePatchBicubic * pSurface = new CqSurfacePatchBicubic();
-            //ADDREF( pSurface );
+	    boost::shared_ptr<CqSurfacePatchBicubic> pSurface( new CqSurfacePatchBicubic() );
             // Fill in default values for all primitive variables not explicitly specified.
             pSurface->SetSurfaceParameters( *pTopology()->pPoints( iTime ) );
 
@@ -1489,7 +1491,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
             aSplits.push_back(apSurfaces[ 0 ]);
         else if( apSurfaces.size() > 1 )
         {
-            CqDeformingSurface* pMotionSurface = new CqDeformingSurface( 0 );
+	    boost::shared_ptr<CqDeformingSurface> pMotionSurface( new CqDeformingSurface( boost::shared_ptr<CqBasicSurface>() ) );
             for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
             {
                 RtFloat time = pTopology()->Time( iTime );
@@ -1508,7 +1510,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
         std::vector<CqLath*>::iterator iSF;
         for( iSF = apSubFaces.begin(); iSF != apSubFaces.end(); iSF++ )
         {
-            CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( pTopology(), (*iSF) );
+	    boost::shared_ptr<CqSurfaceSubdivisionPatch> pNew( new CqSurfaceSubdivisionPatch( pTopology(), (*iSF) ) );
             aSplits.push_back(pNew);
         }
     }
@@ -1518,9 +1520,9 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 
 TqBool CqSurfaceSubdivisionPatch::Diceable()
 {
-    assert( NULL != pTopology() );
-    assert( NULL != pTopology()->pPoints() );
-    assert( NULL != pFace() );
+    assert( pTopology() );
+    assert( pTopology()->pPoints() );
+    assert( pFace() );
 
     // If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
     // then we can return immediately.
@@ -1586,7 +1588,7 @@ TqBool CqSurfaceSubdivisionPatch::Diceable()
 
     TqFloat gs = 16.0f;
     const TqFloat* poptGridSize = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "SqrtGridSize" );
-    if( NULL != poptGridSize )
+    if( poptGridSize )
         gs = poptGridSize[0];
 
     if ( m_uDiceSize > gs) return TqFalse;
@@ -1678,7 +1680,7 @@ TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
 CqBound	CqSurfaceSubdivisionMesh::Bound() const
 {
     CqBound B;
-    if( NULL != m_pTopology && NULL != m_pTopology->pPoints() && NULL != m_pTopology->pPoints()->P() )
+    if( m_pTopology && m_pTopology->pPoints() && m_pTopology->pPoints()->P() )
     {
         TqInt PointIndex;
         for( PointIndex = m_pTopology->pPoints()->P()->Size()-1; PointIndex >= 0; PointIndex-- )
@@ -1687,12 +1689,11 @@ CqBound	CqSurfaceSubdivisionMesh::Bound() const
     return( AdjustBoundForTransformationMotion( B ) );
 }
 
-TqInt CqSurfaceSubdivisionMesh::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqSurfaceSubdivisionMesh::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
     TqInt	CreatedPolys = 0;
     TqInt	face;
-    // Guard
-    ADDREF( this );
+
     for ( face = 0; face < m_NumFaces; face++ )
     {
         // Don't add faces which are on the boundary, unless "interpolateboundary" is specified.
@@ -1702,24 +1703,21 @@ TqInt CqSurfaceSubdivisionMesh::Split( std::vector<CqBasicSurface*>& aSplits )
             if( !m_pTopology->isHoleFace( face ) )
             {
                 // Add a patch surface to the bucket queue
-                CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( m_pTopology, m_pTopology->pFacet( face ) );
-                //ADDREF( pNew );
+		boost::shared_ptr<CqSurfaceSubdivisionPatch> pNew( new CqSurfaceSubdivisionPatch( m_pTopology, m_pTopology->pFacet( face ) ) );
                 aSplits.push_back( pNew );
                 CreatedPolys++;
             }
         }
     }
-    // !Guard
-    RELEASEREF( this );
     return( CreatedPolys );
 }
 
 
-CqSubdivision2* CqSurfaceSubdivisionPatch::Extract( TqInt iTime )
+boost::shared_ptr<CqSubdivision2> CqSurfaceSubdivisionPatch::Extract( TqInt iTime )
 {
-    assert( NULL != pTopology() );
-    assert( NULL != pTopology()->pPoints() );
-    assert( NULL != pFace() );
+    assert( pTopology() );
+    assert( pTopology()->pPoints() );
+    assert( pFace() );
 
     // Find the point indices for the polygons surrounding this one.
 	// Use a map to ensure that shared vertices are only counted once.
@@ -1750,11 +1748,11 @@ CqSubdivision2* CqSurfaceSubdivisionPatch::Extract( TqInt iTime )
 	TqInt cFaces = aQff.size();
 
     // Create a storage class for all the points.
-    CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, aQff.size(), FVertices.size() );
+	boost::shared_ptr<CqPolygonPoints> pPointsClass( new CqPolygonPoints( cVerts, aQff.size(), FVertices.size() ) );
     // Fill in default values for all primitive variables not explicitly specified.
     pPointsClass->SetSurfaceParameters( *pTopology()->pPoints( iTime ) );
 
-    CqSubdivision2* pSurface = new CqSubdivision2( pPointsClass );
+    boost::shared_ptr<CqSubdivision2> pSurface( new CqSubdivision2( pPointsClass ) );
     pSurface->Prepare( cVerts );
 
     std::vector<CqParameter*>::iterator iUP;

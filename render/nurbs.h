@@ -265,7 +265,7 @@ public:
 
     CqVector4D	EvaluateWithNormal( TqFloat u, TqFloat v, CqVector4D& P );
     void	SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqBool dirflag );
-    void	SubdivideSegments( std::vector<CqSurfaceNURBS*>& Array );
+    void	SubdivideSegments( std::vector<boost::shared_ptr<CqSurfaceNURBS> >& Array );
     void	RefineKnotU( const std::vector<TqFloat>& X );
     void	RefineKnotV( const std::vector<TqFloat>& X );
     TqUint	InsertKnotU( TqFloat u, TqInt r );
@@ -300,7 +300,7 @@ public:
     virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
     virtual	CqBound	Bound() const;
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
+    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
     virtual TqBool	Diceable();
 
     /** Determine whether the passed surface is valid to be used as a

@@ -89,12 +89,12 @@ public:
         return ( 1 );
     }
 
-    CqSurface *pPatchMeshBicubic[ 7 ];
+    boost::shared_ptr<CqSurface> pPatchMeshBicubic[ 7 ];
     TqInt cNbrPatchMeshBicubic;
 
     // Overrides from CqSurface
     virtual	CqBound	Bound() const;
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
+    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
 
     CqTeapot&	operator=( const CqTeapot& From );
 

@@ -154,7 +154,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 {
 public:
     CqMicroPolyGrid();
-    CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface );
+    CqMicroPolyGrid( TqInt cu, TqInt cv, const boost::shared_ptr<CqSurface>& pSurface );
     virtual	~CqMicroPolyGrid();
 
 #ifdef _DEBUG
@@ -202,7 +202,7 @@ public:
         return ( m_CulledPolys );
     }
 
-    void	Initialise( TqInt cu, TqInt cv, CqSurface* pSurface );
+    void	Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<CqSurface>& pSurface );
 
     void DeleteVariables( TqBool all );
 
@@ -216,7 +216,7 @@ public:
      */
     virtual CqSurface*	pSurface() const
     {
-        return ( m_pSurface );
+        return ( m_pSurface.get() );
     }
     virtual	const IqAttributes* pAttributes() const
     {
@@ -270,7 +270,7 @@ public:
 private:
     TqBool	m_bShadingNormals;		///< Flag indicating shading normals have been filled in and don't need to be calculated during shading.
     TqBool	m_bGeometricNormals;	///< Flag indicating geometric normals have been filled in and don't need to be calculated during shading.
-    CqSurface* m_pSurface;	///< Pointer to the attributes for this grid.
+    boost::shared_ptr<CqSurface> m_pSurface;	///< Pointer to the surface for this grid.
     boost::shared_ptr<CqCSGTreeNode> m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
     CqBitVector	m_CulledPolys;		///< Bitvector indicating whether the individual micro polygons are culled.
     std::vector<IqShaderData*>	m_apShaderOutputVariables;	///< Vector of pointers to shader output variables.

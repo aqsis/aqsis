@@ -421,13 +421,13 @@ CqBound	CqSphere::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqSphere::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
+TqInt CqSphere::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
 {
     TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
     TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 
-    CqSphere* pNew1 = new CqSphere( *this );
-    CqSphere* pNew2 = new CqSphere( *this );
+    boost::shared_ptr<CqSphere> pNew1( new CqSphere( *this ) );
+    boost::shared_ptr<CqSphere> pNew2( new CqSphere( *this ) );
 
     if ( u )
     {
@@ -541,14 +541,14 @@ CqBound	CqCone::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqCone::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
+TqInt CqCone::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
 {
     TqFloat vcent = ( m_vMin + m_vMax ) * 0.5;
     TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
     //TqFloat rcent=m_RMax*sqrt(zcent/m_ZMax);
 
-    CqCone* pNew1 = new CqCone( *this );
-    CqCone* pNew2 = new CqCone( *this );
+    boost::shared_ptr<CqCone> pNew1( new CqCone( *this ) );
+    boost::shared_ptr<CqCone> pNew2( new CqCone( *this ) );
 
     if ( u )
     {
@@ -673,13 +673,13 @@ CqBound	CqCylinder::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqCylinder::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
+TqInt CqCylinder::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
 {
     TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
     TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 
-    CqCylinder* pNew1 = new CqCylinder( *this );
-    CqCylinder* pNew2 = new CqCylinder( *this );
+    boost::shared_ptr<CqCylinder> pNew1( new CqCylinder( *this ) );
+    boost::shared_ptr<CqCylinder> pNew2( new CqCylinder( *this ) );
 
     if ( u )
     {
@@ -797,13 +797,13 @@ CqBound	CqHyperboloid::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqHyperboloid::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
+TqInt CqHyperboloid::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
 {
     TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
     CqVector3D midpoint = ( m_Point1 + m_Point2 ) / 2.0;
 
-    CqHyperboloid* pNew1 = new CqHyperboloid( *this );
-    CqHyperboloid* pNew2 = new CqHyperboloid( *this );
+    boost::shared_ptr<CqHyperboloid> pNew1( new CqHyperboloid( *this ) );
+    boost::shared_ptr<CqHyperboloid> pNew2( new CqHyperboloid( *this ) );
 
     if ( u )
     {
@@ -954,14 +954,14 @@ CqBound	CqParaboloid::Bound() const
 /** Split this GPrim into smaller quadrics.
  */
 
-TqInt CqParaboloid::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
+TqInt CqParaboloid::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
 {
     TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
     TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
     TqFloat rcent = m_RMax * sqrt( zcent / m_ZMax );
 
-    CqParaboloid* pNew1 = new CqParaboloid( *this );
-    CqParaboloid* pNew2 = new CqParaboloid( *this );
+    boost::shared_ptr<CqParaboloid> pNew1( new CqParaboloid( *this ) );
+    boost::shared_ptr<CqParaboloid> pNew2( new CqParaboloid( *this ) );
 
     if ( u )
     {
@@ -1080,13 +1080,13 @@ CqBound	CqTorus::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqTorus::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
+TqInt CqTorus::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
 {
     TqFloat zcent = ( m_PhiMax + m_PhiMin ) * 0.5;
     TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 
-    CqTorus* pNew1 = new CqTorus( *this );
-    CqTorus* pNew2 = new CqTorus( *this );
+    boost::shared_ptr<CqTorus> pNew1( new CqTorus( *this ) );
+    boost::shared_ptr<CqTorus> pNew2( new CqTorus( *this ) );
 
     if ( u )
     {
@@ -1202,13 +1202,13 @@ CqBound	CqDisk::Bound() const
 /** Split this GPrim into a NURBS surface. Temp implementation, should split into smalled quadrics.
  */
 
-TqInt CqDisk::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
+TqInt CqDisk::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
 {
     TqFloat zcent = ( m_MajorRadius + m_MinorRadius ) * 0.5;
     TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 
-    CqDisk* pNew1 = new CqDisk( *this );
-    CqDisk* pNew2 = new CqDisk( *this );
+    boost::shared_ptr<CqDisk> pNew1( new CqDisk( *this ) );
+    boost::shared_ptr<CqDisk> pNew2( new CqDisk( *this ) );
 
     if ( u )
     {

@@ -1498,13 +1498,13 @@ void CqSurfaceNURBS::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize,
 /** Split the patch into smaller patches.
  */
 
-TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqSurfaceNURBS::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
 {
     TqInt cSplits = 0;
 
     if ( fPatchMesh() && ( cuSegments() > 1 || cvSegments() > 1 ) )
     {
-        std::vector<CqSurfaceNURBS*> S;
+        std::vector<boost::shared_ptr<CqSurfaceNURBS> > S;
 
         SubdivideSegments( S );
         TqUint i;
@@ -1522,8 +1522,8 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
     }
 
     // Split the surface in u or v
-    CqSurfaceNURBS * pNew1 = new CqSurfaceNURBS();
-    CqSurfaceNURBS * pNew2 = new CqSurfaceNURBS();
+    boost::shared_ptr<CqSurfaceNURBS> pNew1( new CqSurfaceNURBS() );
+    boost::shared_ptr<CqSurfaceNURBS> pNew2( new CqSurfaceNURBS() );
 
     // If this primitive is being split because it spans the e and hither planes, then
     // we should split in both directions to ensure we overcome the crossing.
@@ -1552,8 +1552,6 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
     pNew2->m_SplitDir = ( m_SplitDir == SplitDir_U )? SplitDir_V : SplitDir_U;
     pNew1->m_EyeSplitCount = m_EyeSplitCount;
     pNew2->m_EyeSplitCount = m_EyeSplitCount;
-    //ADDREF( pNew1 );
-    //ADDREF( pNew2 );
     pNew1->SetfPatchMesh( TqFalse );
     pNew2->SetfPatchMesh( TqFalse );
 
@@ -1564,14 +1562,11 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 
     if ( !m_fDiceable )
     {
-        std::vector<CqBasicSurface*> aSplits0;
-        std::vector<CqBasicSurface*> aSplits1;
+        std::vector<boost::shared_ptr<CqBasicSurface> > aSplits0;
+        std::vector<boost::shared_ptr<CqBasicSurface> > aSplits1;
 
         cSplits = aSplits[ 0 ] ->Split( aSplits0 );
         cSplits += aSplits[ 1 ] ->Split( aSplits1 );
-        // Release the old ones.
-        RELEASEREF( aSplits[ 0 ] );
-        RELEASEREF( aSplits[ 1 ] );
 
         aSplits.clear();
         aSplits.swap( aSplits0 );
@@ -1967,7 +1962,7 @@ void CqSurfaceNURBS::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 /** Split the NURBS surface into B-Spline (sub) surfaces
  */
 
-void CqSurfaceNURBS::SubdivideSegments( std::vector<CqSurfaceNURBS*>& S )
+void CqSurfaceNURBS::SubdivideSegments( std::vector<boost::shared_ptr<CqSurfaceNURBS> >& S )
 {
     TqInt uSplits = cuSegments();
     TqInt vSplits = cvSegments();
@@ -2112,7 +2107,7 @@ void CqSurfaceNURBS::SubdivideSegments( std::vector<CqSurfaceNURBS*>& S )
 
             // The index of the patch we are working on.
             TqInt iS = ( vPatch * uSplits ) + uPatch;
-            S[ iS ] = new CqSurfaceNURBS;
+            S[ iS ] = boost::shared_ptr<CqSurfaceNURBS>( new CqSurfaceNURBS );
             S[ iS ] ->SetfPatchMesh( TqFalse );
             // Initialise it to the same orders as us, with the calculated control point densities.
             S[ iS ] ->Init( m_uOrder, m_vOrder, ( uEnd + 1 ) - uOffset, ( vEnd + 1 ) - vOffset );

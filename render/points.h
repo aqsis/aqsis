@@ -55,18 +55,18 @@ class CqPointsKDTreeData : public IqKDTreeData<TqInt>
     class CqPointsKDTreeDataComparator
     {
     public:
-        CqPointsKDTreeDataComparator(CqPoints* pPoints, TqInt dimension) : m_pPointsSurface( pPoints ), m_Dim( dimension )
+        CqPointsKDTreeDataComparator(const boost::shared_ptr<CqPoints>& pPoints, TqInt dimension) : m_pPointsSurface( pPoints ), m_Dim( dimension )
         {}
 
         bool operator()(TqInt a, TqInt b);
 
     private:
-        CqPoints*	m_pPointsSurface;
+	boost::shared_ptr<CqPoints>	m_pPointsSurface;
         TqInt		m_Dim;
     };
 
 public:
-    CqPointsKDTreeData( CqPoints* pPoints = NULL ) : m_pPointsSurface( pPoints )
+    CqPointsKDTreeData( const boost::shared_ptr<CqPoints>& pPoints ) : m_pPointsSurface( pPoints )
     {}
 
     virtual void SortElements(std::vector<TqInt>& aLeaves, TqInt dimension)
@@ -75,11 +75,11 @@ public:
     }
     virtual TqInt Dimensions() const	{return(3);}
 
-    void	SetpPoints( CqPoints* pPoints );
+    void	SetpPoints( const boost::shared_ptr<CqPoints>& pPoints );
     void	FreePoints();
 
 private:
-    CqPoints*	m_pPointsSurface;
+    boost::shared_ptr<CqPoints>	m_pPointsSurface;
 };
 
 
@@ -88,12 +88,13 @@ private:
  * Class encapsulating the functionality of Points geometry.
  */
 
-class CqPoints : public CqSurface, public CqMotionSpec<CqPolygonPoints*>
+class CqPoints : public CqSurface, public CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >
 {
 public:
 
-    CqPoints( TqInt nVertices, CqPolygonPoints* pPoints = NULL );
-    CqPoints( const CqPoints& From ) : CqMotionSpec<CqPolygonPoints*>(From.pPoints()),
+    CqPoints( TqInt nVertices, const boost::shared_ptr<CqPolygonPoints>& pPoints );
+    CqPoints( const CqPoints& From ) : CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(From.pPoints()),
+	    m_KDTreeData( boost::shared_ptr<CqPoints>() ),
             m_KDTree( &m_KDTreeData )
 
     {
@@ -101,10 +102,6 @@ public:
     }
     virtual	~CqPoints()
     {
-        // Release the reference to our points.
-        TqInt i;
-        for ( i = 0; i < cTimes(); i++ )
-            RELEASEREF( GetMotionObject( Time( i ) ) );
     }
 
 #ifdef _DEBUG
@@ -146,7 +143,7 @@ CqString className() const { return CqString("CqPoints"); }
     }
 
     virtual	CqBound	Bound() const;
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
+    virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits );
 
     CqPoints&	operator=( const CqPoints& From );
 
@@ -155,11 +152,11 @@ CqString className() const { return CqString("CqPoints"); }
         return ( m_nVertices );
     }
 
-    CqPolygonPoints* pPoints( TqInt TimeIndex = 0 )
+    boost::shared_ptr<CqPolygonPoints> pPoints( TqInt TimeIndex = 0 )
     {
         return( GetMotionObject( Time( TimeIndex ) ) );
     }
-    CqPolygonPoints* pPoints( TqInt TimeIndex = 0) const
+    boost::shared_ptr<CqPolygonPoints> pPoints( TqInt TimeIndex = 0) const
     {
         return( GetMotionObject( Time( TimeIndex ) ) );
     }
@@ -168,7 +165,7 @@ CqString className() const { return CqString("CqPoints"); }
     {
         return ( pPoints()->aUserParams() );
     }
-    TqInt CopySplit( std::vector<CqBasicSurface*>& aSplits, CqPoints* pFrom1, CqPoints* pFrom2 );
+    TqInt CopySplit( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, CqPoints* pFrom1, CqPoints* pFrom2 );
 
     /** Returns a const reference to the "constantwidth" parameter, or
      * NULL if the parameter is not present. */
@@ -254,14 +251,14 @@ CqString className() const { return CqString("CqPoints"); }
     virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
 
     // Overrides from CqMotionSpec
-    virtual	void	ClearMotionObject( CqPolygonPoints*& A ) const
+    virtual	void	ClearMotionObject( boost::shared_ptr<CqPolygonPoints>& A ) const
         {}
     ;
-    virtual	CqPolygonPoints* ConcatMotionObjects( CqPolygonPoints* const & A, CqPolygonPoints* const & B ) const
+    virtual	boost::shared_ptr<CqPolygonPoints> ConcatMotionObjects( const boost::shared_ptr<CqPolygonPoints> & A, const boost::shared_ptr<CqPolygonPoints> & B ) const
     {
         return ( A );
     }
-    virtual	CqPolygonPoints* LinearInterpolateMotionObjects( TqFloat Fraction, CqPolygonPoints* const & A, CqPolygonPoints* const & B ) const
+    virtual	boost::shared_ptr<CqPolygonPoints> LinearInterpolateMotionObjects( TqFloat Fraction, const boost::shared_ptr<CqPolygonPoints>& A, const boost::shared_ptr<CqPolygonPoints>& B ) const
     {
         return ( A );
     }
@@ -276,7 +273,7 @@ protected:
     }
 
 private:
-    CqPolygonPoints* m_pPoints;				///< Pointer to the surface storing the primtive variables.
+    boost::shared_ptr<CqPolygonPoints> m_pPoints;				///< Pointer to the surface storing the primtive variables.
     TqInt	m_nVertices;					///< Number of points this surfaces represents.
     CqPointsKDTreeData	m_KDTreeData;		///< KD Tree data handling class.
     CqKDTree<TqInt>		m_KDTree;			///< KD Tree node for this part of the entire primitive.
@@ -290,7 +287,7 @@ class CqMicroPolyGridPoints : public CqMicroPolyGrid
 {
 public:
     CqMicroPolyGridPoints() : CqMicroPolyGrid()	{}
-    CqMicroPolyGridPoints( TqInt cu, TqInt cv, CqSurface* pSurface ) : CqMicroPolyGrid( cu, cv, pSurface )	{}
+    CqMicroPolyGridPoints( TqInt cu, TqInt cv, const boost::shared_ptr<CqSurface>& pSurface ) : CqMicroPolyGrid( cu, cv, pSurface )	{}
     virtual	~CqMicroPolyGridPoints()	{}
 
     virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
@@ -473,74 +470,72 @@ CqMicroPolygonMotionPoints( const CqMicroPolygonMotionPoints& From ) {}
 class CqDeformingPointsSurface : public CqDeformingSurface
 {
 public:
-    CqDeformingPointsSurface( CqBasicSurface* const& a ) : CqDeformingSurface( a )
-    {}
-    CqDeformingPointsSurface( const CqDeformingPointsSurface& From ) : CqDeformingSurface( From )
-    {}
-    virtual	~CqDeformingPointsSurface()
-    {}
+	CqDeformingPointsSurface( const boost::shared_ptr<CqBasicSurface>& a ) : CqDeformingSurface( a )
+	{}
+	CqDeformingPointsSurface( const CqDeformingPointsSurface& From ) : CqDeformingSurface( From )
+	{}
+	virtual	~CqDeformingPointsSurface()
+	{}
 
-    /** Dice this GPrim, creating a CqMotionMicroPolyGrid with all times in.
-     */
-    virtual	CqMicroPolyGridBase* Dice()
-    {
-        CqMotionMicroPolyGridPoints * pGrid = new CqMotionMicroPolyGridPoints;
-        TqInt i;
-        for ( i = 0; i < cTimes(); i++ )
-        {
-            CqMicroPolyGridBase* pGrid2 = GetMotionObject( Time( i ) ) ->Dice();
-            pGrid->AddTimeSlot( Time( i ), pGrid2 );
-        }
-        return ( pGrid );
-    }
-    /** Split this GPrim, creating a series of CqDeformingSurface with all times in.
-     */
-    virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits )
-    {
-        std::vector<std::vector<CqBasicSurface*> > aaMotionSplits;
-        aaMotionSplits.resize( cTimes() );
-        TqInt cSplits = 0;
-        TqInt i;
-        CqPoints* pFrom1, *pFrom2;
-        cSplits = GetMotionObject( Time( 0 ) ) ->Split( aaMotionSplits[ 0 ] );
-        pFrom1 = static_cast<CqPoints*>(aaMotionSplits[ 0 ][ 0 ]);
-        pFrom2 = static_cast<CqPoints*>(aaMotionSplits[ 0 ][ 1 ]);
+	/** Dice this GPrim, creating a CqMotionMicroPolyGrid with all times in.
+	 */
+	virtual	CqMicroPolyGridBase* Dice()
+	{
+	    CqMotionMicroPolyGridPoints * pGrid = new CqMotionMicroPolyGridPoints;
+	    TqInt i;
+	    for ( i = 0; i < cTimes(); i++ )
+	    {
+		CqMicroPolyGridBase* pGrid2 = GetMotionObject( Time( i ) ) ->Dice();
+		pGrid->AddTimeSlot( Time( i ), pGrid2 );
+	    }
+	    return ( pGrid );
+	}
+	/** Split this GPrim, creating a series of CqDeformingSurface with all times in.
+	 */
+	virtual	TqInt	Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
+	{
+	    std::vector<std::vector<boost::shared_ptr<CqBasicSurface> > > aaMotionSplits;
+	    aaMotionSplits.resize( cTimes() );
+	    TqInt cSplits = 0;
+	    TqInt i;
+	    cSplits = GetMotionObject( Time( 0 ) ) ->Split( aaMotionSplits[ 0 ] );
+	    CqPoints* pFrom1 = static_cast<CqPoints*>(aaMotionSplits[ 0 ][ 0 ].get());
+	    CqPoints* pFrom2 = static_cast<CqPoints*>(aaMotionSplits[ 0 ][ 1 ].get());
 
-        // Now we have the appropriate split information, use this to make sure the rest
-        // of the keyframes split at the same point.
-        for ( i = 1; i < cTimes(); i++ )
-            cSplits = static_cast<CqPoints*>(GetMotionObject( Time( i ) )) ->CopySplit( aaMotionSplits[ i ], pFrom1, pFrom2 );
+	    // Now we have the appropriate split information, use this to make sure the rest
+	    // of the keyframes split at the same point.
+	    for ( i = 1; i < cTimes(); i++ )
+		cSplits = static_cast<CqPoints*>( GetMotionObject( Time( i ) ).get() ) ->CopySplit( aaMotionSplits[ i ], pFrom1, pFrom2 );
 
-        // Now build motion surfaces from the splits and pass them back.
-        for ( i = 0; i < cSplits; i++ )
-        {
-            CqDeformingPointsSurface* pNewMotion = new CqDeformingPointsSurface( 0 );
-            ADDREF( pNewMotion );
-            pNewMotion->m_fDiceable = TqTrue;
-            pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
-            TqInt j;
-            for ( j = 0; j < cTimes(); j++ )
-                pNewMotion->AddTimeSlot( Time( j ), aaMotionSplits[ j ][ i ] );
-            aSplits.push_back( pNewMotion );
-        }
-        return ( cSplits );
-    }
-    virtual void	RenderComplete()
-    {
-        TqInt i;
-        for ( i = 0; i < cTimes(); i++ )
-        {
-            CqPoints* Points = static_cast<CqPoints*>( GetMotionObject( Time( i ) ) );
-            Points->ClearKDTree();
-        }
-        CqBasicSurface::RenderComplete();
-    }
-protected:
-};
+	    // Now build motion surfaces from the splits and pass them back.
+	    for ( i = 0; i < cSplits; i++ )
+	    {
+		boost::shared_ptr<CqDeformingPointsSurface> pNewMotion( new CqDeformingPointsSurface( boost::shared_ptr<CqBasicSurface>() ) );
+		pNewMotion->m_fDiceable = TqTrue;
+		pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
+		TqInt j;
+		for ( j = 0; j < cTimes(); j++ )
+		    pNewMotion->AddTimeSlot( Time( j ), aaMotionSplits[ j ][ i ] );
+		aSplits.push_back( pNewMotion );
+	    }
+	    return ( cSplits );
+	}
+	virtual void	RenderComplete()
+	{
+	    TqInt i;
+	    for ( i = 0; i < cTimes(); i++ )
+	    {
+		CqPoints* Points = static_cast<CqPoints*>( GetMotionObject( Time( i ) ).get() );
+		Points->ClearKDTree();
+	    }
+	    CqBasicSurface::RenderComplete();
+	}
+    protected:
+    };
 
 
-//-----------------------------------------------------------------------
+    //-----------------------------------------------------------------------
 
-END_NAMESPACE( Aqsis )
+    END_NAMESPACE( Aqsis )
 
 #endif	// !POINTS_H_INCLUDED

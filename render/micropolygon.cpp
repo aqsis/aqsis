@@ -45,8 +45,7 @@ DEFINE_STATIC_MEMORYPOOL( CqMovingMicroPolygonKey, 512 );
 
 CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(),
         m_bShadingNormals( TqFalse ),
-        m_bGeometricNormals( TqFalse ),
-        m_pSurface( NULL )
+        m_bGeometricNormals( TqFalse )
 {
     STATS_INC( GRD_allocated );
 }
@@ -63,10 +62,6 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
     STATS_INC( GRD_deallocated );
     STATS_DEC( GRD_current );
 
-    // Release the reference to the attributes.
-    if ( m_pSurface != 0 ) RELEASEREF( m_pSurface );
-    m_pSurface = 0;
-
     // Delete any cloned shader output variables.
     std::vector<IqShaderData*>::iterator outputVar;
     for( outputVar = m_apShaderOutputVariables.begin(); outputVar != m_apShaderOutputVariables.end(); outputVar++ )
@@ -78,10 +73,9 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
 /** Constructor
  */
 
-CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) :
+CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, const boost::shared_ptr<CqSurface>& pSurface ) :
         m_bShadingNormals( TqFalse ),
         m_bGeometricNormals( TqFalse ),
-        m_pSurface( NULL ),
         m_pShaderExecEnv( new CqShaderExecEnv )
 {
     STATS_INC( GRD_created );
@@ -103,7 +97,7 @@ CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) :
  * \param pSurface CqSurface pointer to associated GPrim.
  */
 
-void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
+void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, const boost::shared_ptr<CqSurface>& pSurface )
 {
     // Initialise the shader execution environment
     TqInt lUses = -1;
@@ -111,7 +105,6 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
     {
         lUses = pSurface->Uses();
         m_pSurface = pSurface;
-        ADDREF( m_pSurface );
 
         m_pCSGNode = pSurface->pCSGNode();
     }
