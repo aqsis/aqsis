@@ -173,6 +173,9 @@ extern "C" {
     //
     /// Setup the defaut setting for the archive searchpath, automatically updated when an appropriate RiOption is seen.
     void UpdateArchivePath( std::string strPath );
+
+	int AppendFrames(const char* frames);
+	void ClearFrames();
 }
 
 }

@@ -5,6 +5,8 @@ EXPORTS
 	CleanupDeclarations
 	CreateRIBEngine
 	DestroyRIBEngine
+	AppendFrames
+	ClearFrames
 
 	??0CqColor@Aqsis@@QAE@XZ
 	??0CqFile@Aqsis@@QAE@PBD0@Z

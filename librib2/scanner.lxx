@@ -41,6 +41,7 @@ extern RtArchiveCallback pArchiveCallback;
 
 bool fRequest;
 bool fParams;
+bool fSkipFrame;
 
 }; // namespace librib
 
@@ -73,7 +74,7 @@ array_start		\[
 array_end		\]
 
 %s params
-%x incl
+%x incl skip_frame
 
 /* %option lex-compat */
 %option noreject
@@ -94,11 +95,20 @@ array_end		\]
 		fParams=false;
 	}
 
+	if(fSkipFrame)
+	{
+		BEGIN(skip_frame);
+		fSkipFrame=false;
+	}
+
 {comment}			{ 
-					lvalp->stype = new char[strlen(yytext)+1]; strcpy(lvalp->stype, yytext); return COMMENT; 
-				}
-{eol}							{ ParseLineNumber++; }
-{whitespace}			{  }
+						lvalp->stype = new char[strlen(yytext)+1]; strcpy(lvalp->stype, yytext); return COMMENT; 
+					}
+<*>{eol}			{ ParseLineNumber++; }
+<*>{whitespace}		{  }
+
+<skip_frame>FrameEnd	{BEGIN(INITIAL);}
+<skip_frame>.
 
 <params>{integer}		{ lvalp->itype = atoi(yytext); return INTEGER_TOKEN; }
 <params>{float}			{ lvalp->ftype = atof(yytext); return FLOAT_TOKEN; }
@@ -108,6 +118,7 @@ array_end		\]
 <INITIAL>{string}		{ return INVALID_VALUE; }
 <INITIAL>{array_start}	{ return INVALID_VALUE; }
 <INITIAL>{array_end}	{ return INVALID_VALUE; }
+
 							
 version					{ return REQUEST_TOKEN_VERSION; }
 Declare					{ return REQUEST_TOKEN_DECLARE; }

@@ -43,6 +43,7 @@ extern unsigned int ParseLineNumber;
 extern bool ParseSucceeded;
 extern bool fRequest;
 extern bool fParams;
+extern bool fSkipFrame;
 extern RtArchiveCallback pArchiveCallback;
 
 bool fRecovering;
@@ -77,6 +78,8 @@ static void yyerror(const std::string Message);
 
 static void ExpectRequest();
 static void ExpectParams();
+static void SkipFrame();
+static bool IsFrameSkipped(int);
 static void DiscardStringValue(char* const Value);
 static void DiscardTokenValuePairs(TokenValuePairs* const Value);
 static void DiscardArrayValue(Array* const Value);
@@ -386,7 +389,13 @@ complete_request
 				DiscardStringValue($3);
 			}
 	|	framebegin integer
-			{ ParseCallbackInterface->RiFrameBegin($2); }
+			{ 
+				/* Check if the frame should be skipped */
+				if(IsFrameSkipped($2))
+					SkipFrame();
+				else
+					ParseCallbackInterface->RiFrameBegin($2);
+			}
 	|	frameend
 			{ ParseCallbackInterface->RiFrameEnd(); }
 	|	worldbegin
@@ -1673,6 +1682,11 @@ static void ExpectParams()
 	fParams=true;
 }
 
+static void SkipFrame()
+{
+	fSkipFrame=true;
+}
+
 static void DiscardStringValue(char* const Value)
 {
 	delete[] Value;
@@ -1936,6 +1950,21 @@ static ParameterType LookupParameterType(const std::string& Name)
 }
 
 
+std::vector<int>	FrameList;
+bool IsFrameSkipped(int number)
+{
+	// Check the frame list to see if the requested frame is included.
+	if(FrameList.size() == 0)
+		return(false);
+	else if(FrameList.size() <= number)
+		return(true);
+	else if(FrameList[number])
+		return(false);
+	else
+		return(true);
+}
+
+
 namespace librib
 {
 
@@ -1956,6 +1985,66 @@ void ParserDeclare(librib::RendermanInterface& CallbackInterface, const std::str
 void ClearDeclarations()
 {
 	TypeMap.clear();
+}
+
+void ClearFrames()
+{
+	FrameList.clear();
+}
+
+int AppendFrames(const char* frames)
+{
+	int n=0;
+	int length = strlen(frames);
+	char *endptr;
+	const char* nptr = frames;
+	while(n < length)
+	{
+		int f1, f2;
+		f1 = strtol(nptr, &endptr, 10);
+		if(endptr != nptr)
+		{
+			n += endptr - nptr;
+			// Check for a range.
+			if(endptr[0] == '-')
+			{
+				nptr = endptr+1;
+				n+=1;
+				f2 = strtol(nptr, &endptr, 10);
+				if(endptr != nptr)
+				{
+					n += endptr - nptr;
+					// Store the range between f1 and f2;
+					if(FrameList.size() <= MAX(f1, f2))
+						FrameList.resize(MAX(f1, f2)+1, 0);
+					int start = MIN(f1, f2);
+					int end = MAX(f1, f2);
+					int i;
+					for(i = start; i <= end; i++)
+						FrameList[i] = 1;
+					nptr = endptr;
+				}
+			}
+			else
+			{
+				// store the single frame value
+				if(FrameList.size() <= f1)
+					FrameList.resize(f1+1, 0);
+				FrameList[f1] = 1;
+				nptr = endptr;
+			}
+		}
+		else if(endptr[0] == ',')
+		{
+			n += 1;
+			nptr += 1;
+		}
+		else
+		{
+			return(-1);
+		}
+	}
+	return(0);
 }
 
 }; // namespace librib

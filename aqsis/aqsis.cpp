@@ -124,6 +124,8 @@ ArgParse::apstring g_cl_type = "";
 ArgParse::apstring g_cl_addtype = "";
 ArgParse::apstring g_cl_mode = "rgba";
 ArgParse::apstring g_cl_strprogress = "Frame (%f) %p%% complete [ %s secs / %S left ]";
+ArgParse::apstring g_cl_framesList = "";
+ArgParse::apintvec g_cl_frames;
 
 #ifdef	AQSIS_SYSTEM_POSIX
 bool g_cl_syslog = 0;
@@ -405,6 +407,8 @@ int main( int argc, const char** argv )
         ap.argString( "dsolibs", "=string\aOverride the default dso searchpath(s) [" + g_dso_path + "]", &g_cl_dso_path );
         ap.argString( "procedurals", "=string\aOverride the default procedural searchpath(s) [" + g_procedural_path + "]", &g_cl_procedural_path );
         ap.argString( "plugins", "=string\aOverride the default plugin searchpath(s) [" + g_plugin_path + "]", &g_cl_plugin_path );
+		ap.argInts( "frames", " f1 f2\aSpecify a starting/ending frame to render (inclusive).", &g_cl_frames, ArgParse::SEP_ARGV, 2);
+		ap.argString( "frameslist", "=string\aSpecify a range of frames to render, ',' separated with '-' to indicate ranges.", &g_cl_framesList);
         ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
         ap.alias( "nocolor", "nc" );
 #ifdef	AQSIS_SYSTEM_POSIX
@@ -584,6 +588,17 @@ void RenderFile( FILE* file, std::string&  name )
 	librib::Parse( rcfile, "config", *renderengine, std::cerr, NULL );
 	fclose( rcfile );
     }
+
+	librib::ClearFrames();
+	// Pass in specified frame lists.
+	if(g_cl_frames.size() == 2)
+	{
+		std::stringstream strframes;
+		strframes << g_cl_frames[0] << "-" << g_cl_frames[1] << std::ends;
+		librib::AppendFrames(strframes.str().c_str());
+	}
+	if(!g_cl_framesList.empty())
+		librib::AppendFrames(g_cl_framesList.c_str());
 
     librib::Parse( file, name, *renderengine, std::cerr, NULL );
 
