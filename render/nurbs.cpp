@@ -675,6 +675,7 @@ void CqSurfaceNURBS::ClampV()
 void CqSurfaceNURBS::SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqBool dirflag )
 {
 	CqSurfaceNURBS tmp( *this );
+	tmp.P() = P();
 
 	std::vector<TqFloat>& aKnots = ( dirflag ) ? m_auKnots : m_avKnots;
 	TqUint Order = ( dirflag ) ? m_uOrder : m_vOrder;
@@ -856,13 +857,7 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 		S[ i ]->m_avKnots = nV;
 
 		// Initialise storage for u/v/s/t/Cs/Os/N and and user primitive variables.
-		if ( USES( lUses, EnvVars_N  ) && bHasN() ) S[ i ]->N().SetSize(4);
-		if ( USES( lUses, EnvVars_u  ) && bHasu() ) S[ i ]->u()->SetSize(4);
-		if ( USES( lUses, EnvVars_v  ) && bHasv() ) S[ i ]->v()->SetSize(4);
-		if ( USES( lUses, EnvVars_s  ) && bHass() ) S[ i ]->s()->SetSize(4);
-		if ( USES( lUses, EnvVars_t  ) && bHast() ) S[ i ]->t()->SetSize(4);
-		if ( USES( lUses, EnvVars_Cs ) && bHasCs() ) S[ i ]->Cs()->SetSize(4);
-		if ( USES( lUses, EnvVars_Os ) && bHasOs() ) S[ i ]->Os()->SetSize(4);
+		S[ i ]->ClonePrimitiveVariables( *this );
 	}
 
 	nb = 0;
@@ -929,101 +924,95 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 			TqInt iB = ( icol * ( nuSegs + 1 ) ) + irow + 1;
 			TqInt iC = ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow;
 			TqInt iD = ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1;
-			
-			if( USES( lUses, EnvVars_N ) && bHasN() )
-			{
-				S[ iPatch ]->N()[ 0 ] = N()[ iA ];
-				S[ iPatch ]->N()[ 1 ] = N()[ iB ];
-				S[ iPatch ]->N()[ 2 ] = N()[ iC ];
-				S[ iPatch ]->N()[ 3 ] = N()[ iD ];
-			}
 
-			if( USES( lUses, EnvVars_u ) && bHasu() )
-			{
-				S[ iPatch ]->u()[ 0 ] = u()[ iA ];
-				S[ iPatch ]->u()[ 1 ] = u()[ iB ];
-				S[ iPatch ]->u()[ 2 ] = u()[ iC ];
-				S[ iPatch ]->u()[ 3 ] = u()[ iD ];
-			}
-
-			if( USES( lUses, EnvVars_v ) && bHasv() )
-			{
-				S[ iPatch ]->v()[ 0 ] = v()[ iA ];
-				S[ iPatch ]->v()[ 1 ] = v()[ iB ];
-				S[ iPatch ]->v()[ 2 ] = v()[ iC ];
-				S[ iPatch ]->v()[ 3 ] = v()[ iD ];
-			}
-
-			if( USES( lUses, EnvVars_s ) && bHass() )
-			{
-				S[ iPatch ]->s()[ 0 ] = s()[ iA ];
-				S[ iPatch ]->s()[ 1 ] = s()[ iB ];
-				S[ iPatch ]->s()[ 2 ] = s()[ iC ];
-				S[ iPatch ]->s()[ 3 ] = s()[ iD ];
-			}
-
-			if( USES( lUses, EnvVars_t ) && bHast() )
-			{
-				S[ iPatch ]->t()[ 0 ] = t()[ iA ];
-				S[ iPatch ]->t()[ 1 ] = t()[ iB ];
-				S[ iPatch ]->t()[ 2 ] = t()[ iC ];
-				S[ iPatch ]->t()[ 3 ] = t()[ iD ];
-			}
-
-			if( USES( lUses, EnvVars_Cs ) )
-			{
-				if( bHasCs() )
-				{
-					(*S[ iPatch ]->Cs())[ 0 ] = (*Cs())[ iA ];
-					(*S[ iPatch ]->Cs())[ 1 ] = (*Cs())[ iB ];
-					(*S[ iPatch ]->Cs())[ 2 ] = (*Cs())[ iC ];
-					(*S[ iPatch ]->Cs())[ 3 ] = (*Cs())[ iD ];
-				}
-				else
-					(*S[ iPatch ]->Cs()) = (*Cs());
-			}
-
-			if( USES( lUses, EnvVars_Os ) )
-			{
-				if( bHasOs() )
-				{
-					S[ iPatch ]->Os()[ 0 ] = Os()[ iA ];
-					S[ iPatch ]->Os()[ 1 ] = Os()[ iB ];
-					S[ iPatch ]->Os()[ 2 ] = Os()[ iC ];
-					S[ iPatch ]->Os()[ 3 ] = Os()[ iD ];
-				}
-				else
-					(*S[ iPatch ]->Os()) = (*Os());
-			}
-
-			std::vector<CqParameter*>::iterator iUP;
-			for( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
+			std::vector<CqParameter*>::iterator iUP, iNUP;
+			for( iUP = aUserParams().begin(), iNUP = S[ iPatch ]->aUserParams().begin(); iUP != aUserParams().end(); iUP++, iNUP++ )
 			{
 				switch( (*iUP)->Type() )
 				{
-					case type_float:
+					case type_integer:
 					{
-						CqParameterTyped<TqFloat, TqFloat>* pUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( (*iUP) );
-						CqParameterTyped<TqFloat, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pUPV->Clone() );
+						CqParameterTyped<TqInt, TqFloat>* pUPV = static_cast<CqParameterTyped<TqInt, TqFloat>*>( (*iUP) );
+						CqParameterTyped<TqInt, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqInt, TqFloat>*>( (*iNUP) );
 						pNUPV->SetSize(4);
 						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
 						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
 						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
 						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-						S[ iPatch ]->aUserParams().push_back( pNUPV );
+					}
+					break;
+
+					case type_float:
+					{
+						CqParameterTyped<TqFloat, TqFloat>* pUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( (*iUP) );
+						CqParameterTyped<TqFloat, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( (*iNUP) );
+						pNUPV->SetSize(4);
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
 					}
 					break;
 
 					case type_color:
 					{
 						CqParameterTyped<CqColor, CqColor>* pUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( (*iUP) );
-						CqParameterTyped<CqColor, CqColor>* pNUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( pUPV->Clone() );
+						CqParameterTyped<CqColor, CqColor>* pNUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( (*iNUP) );
 						pNUPV->SetSize(4);
 						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
 						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
 						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
 						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-						S[ iPatch ]->aUserParams().push_back( pNUPV );
+					}
+					break;
+
+					case type_point:
+					case type_normal:
+					case type_vector:
+					{
+						CqParameterTyped<CqVector3D, CqVector3D>* pUPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( (*iUP) );
+						CqParameterTyped<CqVector3D, CqVector3D>* pNUPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( (*iNUP) );
+						pNUPV->SetSize(4);
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
+					}
+					break;
+
+					case type_hpoint:
+					{
+						CqParameterTyped<CqVector4D, CqVector3D>* pUPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( (*iUP) );
+						CqParameterTyped<CqVector4D, CqVector3D>* pNUPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( (*iNUP) );
+						pNUPV->SetSize(4);
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
+					}
+					break;
+
+					case type_string:
+					{
+						CqParameterTyped<CqString, CqString>* pUPV = static_cast<CqParameterTyped<CqString, CqString>*>( (*iUP) );
+						CqParameterTyped<CqString, CqString>* pNUPV = static_cast<CqParameterTyped<CqString, CqString>*>( (*iNUP) );
+						pNUPV->SetSize(4);
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
+					}
+					break;
+
+					case type_matrix:
+					{
+						CqParameterTyped<CqMatrix, CqMatrix>* pUPV = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( (*iUP) );
+						CqParameterTyped<CqMatrix, CqMatrix>* pNUPV = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( (*iNUP) );
+						pNUPV->SetSize(4);
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
 					}
 					break;
 				}
@@ -1326,10 +1315,15 @@ void CqSurfaceNURBS::uSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 {
 	pnrbA = new CqSurfaceNURBS( *this );
 	pnrbB = new CqSurfaceNURBS( *this );
+	pnrbA->P() = P();
 	SplitNURBS( *pnrbA, *pnrbB, TqTrue );
 
 	// Subdivide the normals
-	if ( USES( Uses(), EnvVars_N ) ) pnrbA->N().uSubdivide( &pnrbB->N() );
+	if ( USES( Uses(), EnvVars_N ) ) 
+	{
+		pnrbA->N() = N();
+		pnrbA->N().uSubdivide( &pnrbB->N() );
+	}
 
 	uSubdivideUserParameters( pnrbA, pnrbB );
 }
@@ -1343,10 +1337,15 @@ void CqSurfaceNURBS::vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 {
 	pnrbA = new CqSurfaceNURBS( *this );
 	pnrbB = new CqSurfaceNURBS( *this );
+	pnrbA->P() = P();
 	SplitNURBS( *pnrbA, *pnrbB, TqFalse );
 
 	// Subdivide the normals
-	if ( USES( Uses(), EnvVars_N ) ) pnrbA->N().vSubdivide( &pnrbB->N() );
+	if ( USES( Uses(), EnvVars_N ) ) 
+	{
+		pnrbA->N() = N();
+		pnrbA->N().vSubdivide( &pnrbB->N() );
+	}
 
 	vSubdivideUserParameters( pnrbA, pnrbB );
 }
