@@ -55,6 +55,8 @@ _qShareM	extern char*	gVariableClassNames[];
 _qShareM	extern TqInt	gcVariableClassNames;
 _qShareM	extern char*	gVariableTypeNames[];
 _qShareM	extern TqInt	gcVariableTypeNames;
+_qShareM	extern char*	gVariableNames[];	///< Vector of variable names.
+_qShareM	extern TqUlong	gVariableTokens[];	///< Vector of hash key from above names.
 
 _qShare	std::ostream &operator<<( std::ostream &Stream, EqVariableType t );
 _qShare	std::ostream &operator<<( std::ostream &Stream, EqVariableClass t );
@@ -189,38 +191,10 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 			if ( !m_stkState.empty() )
 				m_RunningState.Intersect( m_stkState.top() );
 		}
-		virtual IqShaderData* FindStandardVar( char* pname )
-		{
-			TqInt tmp = m_LocalIndex;
-			for ( ; m_LocalIndex < EnvVars_Last; m_LocalIndex++ )
-			{
-				if ( strcmp( m_apVariableNames[ m_LocalIndex ], pname ) == 0 )
-					return ( m_apVariables[ m_LocalIndex ] );
-			}
-
-			for ( m_LocalIndex = 0; m_LocalIndex < tmp; m_LocalIndex++ )
-			{
-				if ( strcmp( m_apVariableNames[ m_LocalIndex ], pname ) == 0 )
-					return ( m_apVariables[ m_LocalIndex ] );
-			}
-			return ( 0 );
-		}
-		virtual	TqInt	FindStandardVarIndex( char* pname )
-		{
-			TqInt tmp = m_LocalIndex;
-			for ( ; m_LocalIndex < EnvVars_Last; m_LocalIndex++ )
-			{
-				if ( strcmp( m_apVariableNames[ m_LocalIndex ], pname ) == 0 )
-					return ( m_LocalIndex );
-			}
-
-			for ( m_LocalIndex = 0; m_LocalIndex < tmp; m_LocalIndex++ )
-			{
-				if ( strcmp( m_apVariableNames[ m_LocalIndex ], pname ) == 0 )
-					return ( m_LocalIndex );
-			}
-			return ( -1 );
-		}
+		virtual IqShaderData* FindStandardVar( char* pname );
+		
+		virtual	TqInt	FindStandardVarIndex( char* pname );
+		
 		virtual IqShaderData*	pVar( TqInt Index )
 		{
 			return ( m_apVariables[ Index ] );
@@ -373,7 +347,6 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		static	CqCellNoise	m_cellnoise;	///< One off cell noise generator, used by all envs.
 		static	CqRandom	m_random;		///< One off random number generator used by all envs.
 		static	CqMatrix	m_matIdentity;
-		static	char*	m_apVariableNames[];	///< Vector of variable names.
 
 		TqInt	m_uGridRes;				///< The resolution of the grid in u.
 		TqInt	m_vGridRes;				///< The resolution of the grid in u.

@@ -66,7 +66,7 @@ CqCellNoise	CqShaderExecEnv::m_cellnoise;
 CqRandom	CqShaderExecEnv::m_random;
 CqMatrix	CqShaderExecEnv::m_matIdentity;
 
-char*	CqShaderExecEnv::m_apVariableNames[ EnvVars_Last ] =
+char*	gVariableNames[ EnvVars_Last ] =
     {
         "Cs",
         "Os",
@@ -92,6 +92,33 @@ char*	CqShaderExecEnv::m_apVariableNames[ EnvVars_Last ] =
         "ncomps",
         "time",
         "alpha"
+    };
+TqUlong	gVariableTokens[ EnvVars_Last ] =
+    {
+        CqParameter::hash(gVariableNames[0]),
+        CqParameter::hash(gVariableNames[1]),
+        CqParameter::hash(gVariableNames[2]),
+        CqParameter::hash(gVariableNames[3]),
+        CqParameter::hash(gVariableNames[4]),
+        CqParameter::hash(gVariableNames[5]),
+        CqParameter::hash(gVariableNames[6]),
+        CqParameter::hash(gVariableNames[7]),
+        CqParameter::hash(gVariableNames[8]),
+        CqParameter::hash(gVariableNames[9]),
+        CqParameter::hash(gVariableNames[10]),
+        CqParameter::hash(gVariableNames[11]),
+        CqParameter::hash(gVariableNames[12]),
+        CqParameter::hash(gVariableNames[13]),
+        CqParameter::hash(gVariableNames[14]),
+        CqParameter::hash(gVariableNames[15]),
+        CqParameter::hash(gVariableNames[16]),
+        CqParameter::hash(gVariableNames[17]),
+        CqParameter::hash(gVariableNames[18]),
+        CqParameter::hash(gVariableNames[19]),
+        CqParameter::hash(gVariableNames[20]),
+        CqParameter::hash(gVariableNames[21]),
+        CqParameter::hash(gVariableNames[22]),
+        CqParameter::hash(gVariableNames[23]),
     };
 
 
@@ -164,53 +191,53 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Iq
 	if ( NULL != pShader )
 	{
 		if ( USES( Uses, EnvVars_P ) && m_apVariables[ EnvVars_P ] == 0 )
-			m_apVariables[ EnvVars_P ] = pShader->CreateVariable( type_point, class_varying, m_apVariableNames[ EnvVars_P ] );
+			m_apVariables[ EnvVars_P ] = pShader->CreateVariable( type_point, class_varying, gVariableNames[ EnvVars_P ] );
 		if ( USES( Uses, EnvVars_Cs ) && m_apVariables[ EnvVars_Cs ] == 0 )
-			m_apVariables[ EnvVars_Cs ] = pShader->CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Cs ] );
+			m_apVariables[ EnvVars_Cs ] = pShader->CreateVariable( type_color, class_varying, gVariableNames[ EnvVars_Cs ] );
 		if ( USES( Uses, EnvVars_Os ) && m_apVariables[ EnvVars_Os ] == 0 )
-			m_apVariables[ EnvVars_Os ] = pShader->CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Os ] );
+			m_apVariables[ EnvVars_Os ] = pShader->CreateVariable( type_color, class_varying, gVariableNames[ EnvVars_Os ] );
 		if ( USES( Uses, EnvVars_Ng ) && m_apVariables[ EnvVars_Ng ] == 0 )
-			m_apVariables[ EnvVars_Ng ] = pShader->CreateVariable( type_normal, class_varying, m_apVariableNames[ EnvVars_Ng ] );
+			m_apVariables[ EnvVars_Ng ] = pShader->CreateVariable( type_normal, class_varying, gVariableNames[ EnvVars_Ng ] );
 		if ( USES( Uses, EnvVars_du ) && m_apVariables[ EnvVars_du ] == 0 )
-			m_apVariables[ EnvVars_du ] = pShader->CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_du ] );
+			m_apVariables[ EnvVars_du ] = pShader->CreateVariable( type_float, class_uniform, gVariableNames[ EnvVars_du ] );
 		if ( USES( Uses, EnvVars_dv ) && m_apVariables[ EnvVars_dv ] == 0 )
-			m_apVariables[ EnvVars_dv ] = pShader->CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_dv ] );
+			m_apVariables[ EnvVars_dv ] = pShader->CreateVariable( type_float, class_uniform, gVariableNames[ EnvVars_dv ] );
 		if ( USES( Uses, EnvVars_L ) && m_apVariables[ EnvVars_L ] == 0 )
-			m_apVariables[ EnvVars_L ] = pShader->CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_L ] );
+			m_apVariables[ EnvVars_L ] = pShader->CreateVariable( type_vector, class_varying, gVariableNames[ EnvVars_L ] );
 		if ( USES( Uses, EnvVars_Cl ) && m_apVariables[ EnvVars_Cl ] == 0 )
-			m_apVariables[ EnvVars_Cl ] = pShader->CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Cl ] );
+			m_apVariables[ EnvVars_Cl ] = pShader->CreateVariable( type_color, class_varying, gVariableNames[ EnvVars_Cl ] );
 		if ( USES( Uses, EnvVars_Ol ) && m_apVariables[ EnvVars_Ol ] == 0 )
-			m_apVariables[ EnvVars_Ol ] = pShader->CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Ol ] );
+			m_apVariables[ EnvVars_Ol ] = pShader->CreateVariable( type_color, class_varying, gVariableNames[ EnvVars_Ol ] );
 		if ( USES( Uses, EnvVars_dPdu ) && m_apVariables[ EnvVars_dPdu ] == 0 )
-			m_apVariables[ EnvVars_dPdu ] = pShader->CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_dPdu ] );
+			m_apVariables[ EnvVars_dPdu ] = pShader->CreateVariable( type_vector, class_varying, gVariableNames[ EnvVars_dPdu ] );
 		if ( USES( Uses, EnvVars_dPdv ) && m_apVariables[ EnvVars_dPdv ] == 0 )
-			m_apVariables[ EnvVars_dPdv ] = pShader->CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_dPdv ] );
+			m_apVariables[ EnvVars_dPdv ] = pShader->CreateVariable( type_vector, class_varying, gVariableNames[ EnvVars_dPdv ] );
 		if ( USES( Uses, EnvVars_N ) && m_apVariables[ EnvVars_N ] == 0 )
-			m_apVariables[ EnvVars_N ] = pShader->CreateVariable( type_normal, class_varying, m_apVariableNames[ EnvVars_N ] );
+			m_apVariables[ EnvVars_N ] = pShader->CreateVariable( type_normal, class_varying, gVariableNames[ EnvVars_N ] );
 		if ( USES( Uses, EnvVars_u ) && m_apVariables[ EnvVars_u ] == 0 )
-			m_apVariables[ EnvVars_u ] = pShader->CreateVariable( type_float, class_varying, m_apVariableNames[ EnvVars_u ] );
+			m_apVariables[ EnvVars_u ] = pShader->CreateVariable( type_float, class_varying, gVariableNames[ EnvVars_u ] );
 		if ( USES( Uses, EnvVars_v ) && m_apVariables[ EnvVars_v ] == 0 )
-			m_apVariables[ EnvVars_v ] = pShader->CreateVariable( type_float, class_varying, m_apVariableNames[ EnvVars_v ] );
+			m_apVariables[ EnvVars_v ] = pShader->CreateVariable( type_float, class_varying, gVariableNames[ EnvVars_v ] );
 		if ( USES( Uses, EnvVars_s ) && m_apVariables[ EnvVars_s ] == 0 )
-			m_apVariables[ EnvVars_s ] = pShader->CreateVariable( type_float, class_varying, m_apVariableNames[ EnvVars_s ] );
+			m_apVariables[ EnvVars_s ] = pShader->CreateVariable( type_float, class_varying, gVariableNames[ EnvVars_s ] );
 		if ( USES( Uses, EnvVars_t ) && m_apVariables[ EnvVars_t ] == 0 )
-			m_apVariables[ EnvVars_t ] = pShader->CreateVariable( type_float, class_varying, m_apVariableNames[ EnvVars_t ] );
+			m_apVariables[ EnvVars_t ] = pShader->CreateVariable( type_float, class_varying, gVariableNames[ EnvVars_t ] );
 		if ( USES( Uses, EnvVars_I ) && m_apVariables[ EnvVars_I ] == 0 )
-			m_apVariables[ EnvVars_I ] = pShader->CreateVariable( type_vector, class_varying, m_apVariableNames[ EnvVars_I ] );
+			m_apVariables[ EnvVars_I ] = pShader->CreateVariable( type_vector, class_varying, gVariableNames[ EnvVars_I ] );
 		if ( USES( Uses, EnvVars_Ci ) && m_apVariables[ EnvVars_Ci ] == 0 )
-			m_apVariables[ EnvVars_Ci ] = pShader->CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Ci ] );
+			m_apVariables[ EnvVars_Ci ] = pShader->CreateVariable( type_color, class_varying, gVariableNames[ EnvVars_Ci ] );
 		if ( USES( Uses, EnvVars_Oi ) && m_apVariables[ EnvVars_Oi ] == 0 )
-			m_apVariables[ EnvVars_Oi ] = pShader->CreateVariable( type_color, class_varying, m_apVariableNames[ EnvVars_Oi ] );
+			m_apVariables[ EnvVars_Oi ] = pShader->CreateVariable( type_color, class_varying, gVariableNames[ EnvVars_Oi ] );
 		if ( USES( Uses, EnvVars_Ps ) && m_apVariables[ EnvVars_Ps ] == 0 )
-			m_apVariables[ EnvVars_Ps ] = pShader->CreateVariable( type_point, class_varying, m_apVariableNames[ EnvVars_Ps ] );
+			m_apVariables[ EnvVars_Ps ] = pShader->CreateVariable( type_point, class_varying, gVariableNames[ EnvVars_Ps ] );
 		if ( USES( Uses, EnvVars_E ) && m_apVariables[ EnvVars_E ] == 0 )
-			m_apVariables[ EnvVars_E ] = pShader->CreateVariable( type_point, class_uniform, m_apVariableNames[ EnvVars_E ] );
+			m_apVariables[ EnvVars_E ] = pShader->CreateVariable( type_point, class_uniform, gVariableNames[ EnvVars_E ] );
 		if ( USES( Uses, EnvVars_ncomps ) && m_apVariables[ EnvVars_ncomps ] == 0 )
-			m_apVariables[ EnvVars_ncomps ] = pShader->CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_ncomps ] );
+			m_apVariables[ EnvVars_ncomps ] = pShader->CreateVariable( type_float, class_uniform, gVariableNames[ EnvVars_ncomps ] );
 		if ( USES( Uses, EnvVars_time ) && m_apVariables[ EnvVars_time ] == 0 )
-			m_apVariables[ EnvVars_time ] = pShader->CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_time ] );
+			m_apVariables[ EnvVars_time ] = pShader->CreateVariable( type_float, class_uniform, gVariableNames[ EnvVars_time ] );
 		if ( USES( Uses, EnvVars_alpha ) && m_apVariables[ EnvVars_alpha ] == 0 )
-			m_apVariables[ EnvVars_alpha ] = pShader->CreateVariable( type_float, class_uniform, m_apVariableNames[ EnvVars_alpha ] );
+			m_apVariables[ EnvVars_alpha ] = pShader->CreateVariable( type_float, class_uniform, gVariableNames[ EnvVars_alpha ] );
 	}
 
 	TqInt i;
@@ -221,6 +248,41 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Iq
 	}
 }
 
+IqShaderData* CqShaderExecEnv::FindStandardVar( char* pname )
+{
+	TqInt tmp = m_LocalIndex;
+	TqUlong htoken = CqParameter::hash(pname);
+
+	for ( ; m_LocalIndex < EnvVars_Last; m_LocalIndex++ )
+	{
+		if ( gVariableTokens[ m_LocalIndex ] == htoken)
+			return ( m_apVariables[ m_LocalIndex ] );
+	}
+
+	for ( m_LocalIndex = 0; m_LocalIndex < tmp; m_LocalIndex++ )
+	{
+		if (  gVariableTokens[ m_LocalIndex ] == htoken)
+			return ( m_apVariables[ m_LocalIndex ] );
+	}
+	return ( 0 );
+}
+TqInt	CqShaderExecEnv::FindStandardVarIndex( char* pname )
+{
+	TqInt tmp = m_LocalIndex;
+	TqUlong htoken = CqParameter::hash(pname);
+	for ( ; m_LocalIndex < EnvVars_Last; m_LocalIndex++ )
+	{
+		if ( gVariableTokens[ m_LocalIndex ] == htoken)
+			return ( m_LocalIndex );
+	}
+
+	for ( m_LocalIndex = 0; m_LocalIndex < tmp; m_LocalIndex++ )
+	{
+		if ( gVariableTokens[ m_LocalIndex ] == htoken)
+			return ( m_LocalIndex );
+	}
+	return ( -1 );
+}
 
 //---------------------------------------------------------------------
 /** Return the object to world matrix for the surface this shader is attached to, if
