@@ -13,7 +13,8 @@
 
 #include	"ri.h"
 #include	"argparse.h"
-#include	"iribcompiler.h"
+#include	"librib.h"
+#include	"librib2ri.h"
 
 void RenderFile(std::istream& file, const char* name);
 static void arg_filename(int argc, char**argv);
@@ -62,7 +63,7 @@ int main(int argc, const char** argv)
 
 void RenderFile(std::istream& file, const char* name)
 {
-	IqRIBCompiler* pRibber=IqRIBCompiler::Create();
+	librib2ri::Engine renderengine;
 
 	// Store the current working directory for later use
 	char strCurrWD[255];
@@ -82,8 +83,7 @@ void RenderFile(std::istream& file, const char* name)
 	std::ifstream cfgfile(strCFGFile);
 	if(cfgfile.is_open())
 	{
-		pRibber->SetFile(cfgfile, "config gile");
-		pRibber->Parse();
+		librib::Parse(cfgfile,"config file",renderengine,std::cerr);
 		cfgfile.close();
 	}
 	else
@@ -95,14 +95,12 @@ void RenderFile(std::istream& file, const char* name)
 	SetCurrentDirectory(strDir);
 
 	RiOption("statistics", "endofframe", &g_Verbose, RI_NULL);
-	pRibber->SetFile(file,name);
-	pRibber->Parse();
+
+	librib::Parse(file,name,renderengine,std::cerr);
 
 	SetCurrentDirectory(strCurrWD);
 
 	RiEnd();
-
-	pRibber->Destroy();
 }
 
 static void arg_filename(int argc, char**argv)
