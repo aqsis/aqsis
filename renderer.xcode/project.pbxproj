@@ -2092,14 +2092,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# shell script goes here\ncd $SRCROOT/shaders\nfor x in *.sl; do $BUILD_DIR/aqsl $x; done\nexit 0";
+			shellScript = "# shell script goes here\nmkdir $OBJROOT/shaders\ncd $OBJROOT/shaders\nfor x in $SRCROOT/shaders/*.sl; do $BUILD_DIR/aqsl $x; done\nexit 0";
 		};
 		71536C7306C171DD00BA5CC0 = {
 			buildPhases = (
 				71536C7206C171DD00BA5CC0,
 			);
 			buildSettings = {
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -2124,6 +2123,20 @@
 			isa = PBXTargetDependency;
 			target = 71536C7306C171DD00BA5CC0;
 			targetProxy = 71536C8206C1958B00BA5CC0;
+		};
+		715E335706F7A04200B7D425 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = Carbon.framework;
+			path = /System/Library/Frameworks/Carbon.framework;
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		715E335806F7A04200B7D425 = {
+			fileRef = 715E335706F7A04200B7D425;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 		715FC13706AEFA670052FAB7 = {
 			buildActionMask = 2147483647;
@@ -2574,6 +2587,7 @@
 			files = (
 				71AB55E506BB058E0074427F,
 				71AB55E606BB058E0074427F,
+				715E335806F7A04200B7D425,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -6526,6 +6540,7 @@
 		};
 		71DE6C6D0691FA5900145266 = {
 			children = (
+				715E335706F7A04200B7D425,
 				71536AE706BF00D900BA5CC0,
 				71536ADA06BF00C500BA5CC0,
 				71536A9F06BEFF4300BA5CC0,
@@ -6560,7 +6575,7 @@
 			);
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_PREPROCESSOR_DEFINITIONS = "PLUGINS CONFIG_PATH=\\\"$(TARGET_BUILD_DIR)\\\" BASE_PATH=\\\"$(TARGET_BUILD_DIR)\\\" $(value)";
+				GCC_PREPROCESSOR_DEFINITIONS = "NDEBUG PLUGINS CONFIG_PATH=\\\"$(TARGET_BUILD_DIR)\\\" BASE_PATH=\\\"$(TARGET_BUILD_DIR)\\\" $(value)";
 				HEADER_SEARCH_PATHS = "render librib2 boost libshaderexecenv libshadervm /sw/include $(value)";
 				INSTALL_PATH = "$(TARGET_BUILD_DIR)";
 			};
