@@ -72,7 +72,7 @@ TqInt	gDefLightUses=(1<<EnvVars_P)|(1<<EnvVars_L)|(1<<EnvVars_Ps);
 /** Constructor.
  */
 
-CqShaderExecEnv::CqShaderExecEnv() : m_LocalIndex(0), m_li(0), m_Illuminate(0), m_pSurface(0), m_vfCulled("__culled")
+CqShaderExecEnv::CqShaderExecEnv() : m_LocalIndex(0), m_li(0), m_Illuminate(0), m_pSurface(0), m_vfCulled(0)
 {
 	m_apVariables.resize(EnvVars_Last);
 	TqInt i;

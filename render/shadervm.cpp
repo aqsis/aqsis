@@ -780,7 +780,7 @@ void CqShaderVM::LoadProgram(std::istream* pFile)
 					// If we have not found the opcode, throw an error.
 					if(i==m_cTransSize)
 					{
-						CqString strErr("Invlaid opcode found : ");
+						CqString strErr("Invalid opcode found : ");
 						strErr+=token;
 						CqBasicError(0,Severity_Fatal,strErr.c_str());
 						return;
