@@ -489,8 +489,6 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 			err = (*req.m_QueryMethod)(req.m_imageHandle, PkOverwriteQuery, sizeof(owinfo), &owinfo);
 		}
     }
-
-	std::cerr << debug << "Load Display: " << strDriverPathAndFile.c_str() << std::endl;
 }
 
 void CqDDManager::CloseDisplayLibrary( SqDisplayRequest& req )
