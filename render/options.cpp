@@ -63,7 +63,7 @@ void CqOptions::InitialiseCamera()
 	CqMatrix	matScreenToCamera;
 	CqMatrix	matScreenToNDC;
 	CqMatrix	matNDCToRaster;
-	TqInt proj = GetIntegerOption("System", "CameraProjection")[0];
+	TqInt proj = GetIntegerOption("System", "Projection")[0];
 	switch ( proj )
 	{
 			case	ProjectionOrthographic:
@@ -71,12 +71,12 @@ void CqOptions::InitialiseCamera()
 				// Define a matrix to convert from right top left handed coordinate systems.
 				CqMatrix Trl( 1, 1, -1 );
 
-				TqFloat l = GetFloatOption("System", "ScreenWindowLeft")[0];
-				TqFloat r = GetFloatOption("System", "ScreenWindowRight")[0];
-				TqFloat t = GetFloatOption("System", "ScreenWindowTop")[0];
-				TqFloat b = GetFloatOption("System", "ScreenWindowBottom")[0];
-				TqFloat n = GetFloatOption("System", "ClippingPlaneNear")[0];
-				TqFloat f = GetFloatOption("System", "ClippingPlaneFar")[0];
+				TqFloat l = GetFloatOption("System", "ScreenWindow")[0];
+				TqFloat r = GetFloatOption("System", "ScreenWindow")[1];
+				TqFloat t = GetFloatOption("System", "ScreenWindow")[2];
+				TqFloat b = GetFloatOption("System", "ScreenWindow")[3];
+				TqFloat n = GetFloatOption("System", "Clipping")[0];
+				TqFloat f = GetFloatOption("System", "Clipping")[1];
 
 				matCameraToScreen.Identity();
 				matCameraToScreen.SetfIdentity( TqFalse );
@@ -93,10 +93,10 @@ void CqOptions::InitialiseCamera()
 				matCameraToScreen *= Trl;
 
 				// Set up the screen to frame matrix
-				TqFloat	FrameX = ( GetFloatOption("System", "FrameAspectRatio")[0] >= 1.0 ) ? GetIntegerOption("System", "XResolution")[0] :
-				                 ( GetIntegerOption("System", "XResolution")[0] * GetFloatOption("System", "FrameAspectRatio")[0] ) / GetFloatOption("System", "PixelAspectRatio")[0];
-				TqFloat	FrameY = ( GetIntegerOption("System", "FrameAspectRatio")[0] < 1.0 ) ? GetIntegerOption("System", "YResolution")[0] :
-				                 ( GetIntegerOption("System", "XResolution")[0] * GetFloatOption("System", "PixelAspectRatio")[0] ) / GetFloatOption("System", "FrameAspectRatio")[0];
+				TqFloat	FrameX = ( GetFloatOption("System", "FrameAspectRatio")[0] >= 1.0 ) ? GetIntegerOption("System", "Resolution")[0] :
+				                 ( GetIntegerOption("System", "Resolution")[1] * GetFloatOption("System", "FrameAspectRatio")[0] ) / GetFloatOption("System", "PixelAspectRatio")[0];
+				TqFloat	FrameY = ( GetIntegerOption("System", "FrameAspectRatio")[0] < 1.0 ) ? GetIntegerOption("System", "Resolution")[1] :
+				                 ( GetIntegerOption("System", "Resolution")[0] * GetFloatOption("System", "PixelAspectRatio")[0] ) / GetFloatOption("System", "FrameAspectRatio")[0];
 				matScreenToNDC.Identity();
 				matNDCToRaster.Identity();
 				// Translate from -1,-1-->1,1 to 0,0-->2,2
@@ -115,13 +115,13 @@ void CqOptions::InitialiseCamera()
 
 			case	ProjectionPerspective:
 			{
-				TqFloat fov = GetFloatOption("System", "ClippingPlaneNear")[0] * ( tan( RAD( GetFloatOption("System", "FOV")[0] / 2.0f ) ) );
-				TqFloat l = GetFloatOption("System", "ScreenWindowLeft")[0] * fov;
-				TqFloat r = GetFloatOption("System", "ScreenWindowRight")[0] * fov;
-				TqFloat t = GetFloatOption("System", "ScreenWindowTop")[0] * fov;
-				TqFloat b = GetFloatOption("System", "ScreenWindowBottom")[0] * fov;
-				TqFloat n = GetFloatOption("System", "ClippingPlaneNear")[0];
-				TqFloat f = GetFloatOption("System", "ClippingPlaneFar")[0];
+				TqFloat fov = GetFloatOption("System", "Clipping")[0] * ( tan( RAD( GetFloatOption("System", "FOV")[0] / 2.0f ) ) );
+				TqFloat l = GetFloatOption("System", "ScreenWindow")[0] * fov;
+				TqFloat r = GetFloatOption("System", "ScreenWindow")[1] * fov;
+				TqFloat t = GetFloatOption("System", "ScreenWindow")[2] * fov;
+				TqFloat b = GetFloatOption("System", "ScreenWindow")[3] * fov;
+				TqFloat n = GetFloatOption("System", "Clipping")[0];
+				TqFloat f = GetFloatOption("System", "Clipping")[1];
 
 				matCameraToScreen.Identity();
 				matCameraToScreen.SetfIdentity( TqFalse );
@@ -138,10 +138,10 @@ void CqOptions::InitialiseCamera()
 				matCameraToScreen.SetElement( 3, 3, 0 );
 
 				// Set up the screen to frame matrix
-				TqFloat	FrameX = ( GetFloatOption("System", "FrameAspectRatio")[0] >= 1.0 ) ? GetIntegerOption("System", "XResolution")[0] :
-				                 ( GetIntegerOption("System", "YResolution")[0] * GetFloatOption("System", "FrameAspectRatio")[0] ) / GetFloatOption("System", "PixelAspectRatio")[0];
-				TqFloat	FrameY = ( GetFloatOption("System", "FrameAspectRatio")[0] < 1.0 ) ? GetIntegerOption("System", "YResolution")[0] :
-				                 ( GetIntegerOption("System", "XResolution")[0] * GetFloatOption("System", "PixelAspectRatio")[0] ) / GetFloatOption("System", "FrameAspectRatio")[0];
+				TqFloat	FrameX = ( GetFloatOption("System", "FrameAspectRatio")[0] >= 1.0 ) ? GetIntegerOption("System", "Resolution")[0] :
+				                 ( GetIntegerOption("System", "Resolution")[1] * GetFloatOption("System", "FrameAspectRatio")[0] ) / GetFloatOption("System", "PixelAspectRatio")[0];
+				TqFloat	FrameY = ( GetFloatOption("System", "FrameAspectRatio")[0] < 1.0 ) ? GetIntegerOption("System", "Resolution")[1] :
+				                 ( GetIntegerOption("System", "Resolution")[0] * GetFloatOption("System", "PixelAspectRatio")[0] ) / GetFloatOption("System", "FrameAspectRatio")[0];
 
 				matScreenToNDC.Identity();
 				matNDCToRaster.Identity();
@@ -173,7 +173,7 @@ void CqOptions::InitialiseCamera()
 	vecn = vecn * matWorldToScreen;
 
 	// Set some additional information about the clip range.
-	m_fClippingRange = GetFloatOption("System", "ClippingPlaneFar")[0] - GetFloatOption("System", "ClippingPlaneNear")[0];
+	m_fClippingRange = GetFloatOption("System", "Clipping")[1] - GetFloatOption("System", "Clipping")[0];
 }
 
 
@@ -181,10 +181,6 @@ void CqOptions::InitialiseCamera()
 /** Default constructor.
  */
 
-#define	ADD_SYSTEM_PARAM(name, type, id, def) \
-	CqParameterTypedUniform<type,id>* p##name = new CqParameterTypedUniform<type,id>(#name); \
-	p##name->pValue()[0] = ( def ); \
-	pdefopts->AddParameter(p##name);
 
 
 CqOptions::CqOptions() :
@@ -248,25 +244,51 @@ CqOptions& CqOptions::operator=( const CqOptions& From )
 }
 
 
+
+#define	ADD_SYSTEM_PARAM(name, type, id, def) \
+	CqParameterTypedUniform<type,id>* p##name = new CqParameterTypedUniform<type,id>(#name); \
+	p##name->pValue()[0] = ( def ); \
+	pdefopts->AddParameter(p##name);
+
+#define	ADD_SYSTEM_PARAM2(name, type, id, def0, def1) \
+	CqParameterTypedUniformArray<type,id>* p##name = new CqParameterTypedUniformArray<type,id>(#name,2); \
+	p##name->pValue()[0] = ( def0 ); \
+	p##name->pValue()[1] = ( def1 ); \
+	pdefopts->AddParameter(p##name);
+
+#define	ADD_SYSTEM_PARAM3(name, type, id, def0, def1, def2) \
+	CqParameterTypedUniformArray<type,id>* p##name = new CqParameterTypedUniformArray<type,id>(#name,3); \
+	p##name->pValue()[0] = ( def0 ); \
+	p##name->pValue()[1] = ( def1 ); \
+	p##name->pValue()[2] = ( def2 ); \
+	pdefopts->AddParameter(p##name);
+
+#define	ADD_SYSTEM_PARAM4(name, type, id, def0, def1, def2, def3) \
+	CqParameterTypedUniformArray<type,id>* p##name = new CqParameterTypedUniformArray<type,id>(#name,4); \
+	p##name->pValue()[0] = ( def0 ); \
+	p##name->pValue()[1] = ( def1 ); \
+	p##name->pValue()[2] = ( def2 ); \
+	p##name->pValue()[3] = ( def3 ); \
+	pdefopts->AddParameter(p##name);
+
+
 void CqOptions::InitialiseDefaultOptions()
 {
 	CqSystemOption*  pdefopts = new CqSystemOption("System");
 
 	ADD_SYSTEM_PARAM(PixelVariance, TqFloat, type_float, 1.0f );
-	ADD_SYSTEM_PARAM(PixelSamplesX, TqInt, type_integer, 2 );
-	ADD_SYSTEM_PARAM(PixelSamplesY, TqInt, type_integer, 2 );
-	ADD_SYSTEM_PARAM(FilterWidthX, TqFloat, type_float, 2.0f );
-	ADD_SYSTEM_PARAM(FilterWidthY, TqFloat, type_float, 2.0f );
-	ADD_SYSTEM_PARAM(ExposureGain, TqFloat, type_float, 1.0f );
-	ADD_SYSTEM_PARAM(ExposureGamma, TqFloat, type_float, 1.0f );
+	ADD_SYSTEM_PARAM2(PixelSamples, TqInt, type_integer, 2, 2 );
+	ADD_SYSTEM_PARAM2(FilterWidth, TqFloat, type_float, 2.0f, 2.0f );
+	ADD_SYSTEM_PARAM2(Exposure, TqFloat, type_float, 1.0f, 1.0f );
 	ADD_SYSTEM_PARAM(ColorQuantizeOne, TqInt, type_integer, 255 );
 	ADD_SYSTEM_PARAM(ColorQuantizeMin, TqInt, type_integer, 0 );
-	ADD_SYSTEM_PARAM(ColorQuantizeMax, TqInt, type_integer, 2255 );
+	ADD_SYSTEM_PARAM(ColorQuantizeMax, TqInt, type_integer, 255 );
 	ADD_SYSTEM_PARAM(ColorQuantizeDitherAmplitude, TqFloat, type_float, 0.5f );
 	ADD_SYSTEM_PARAM(DepthQuantizeOne, TqInt, type_integer, 0 );
 	ADD_SYSTEM_PARAM(DepthQuantizeMin, TqInt, type_integer, 0 );
 	ADD_SYSTEM_PARAM(DepthQuantizeMax, TqInt, type_integer, 255 );
 	ADD_SYSTEM_PARAM(DepthQuantizeDitherAmplitude, TqFloat, type_float, 0.0f );
+	ADD_SYSTEM_PARAM(Imager, CqString, type_string, "null" );
 	ADD_SYSTEM_PARAM(DisplayType, CqString, type_string, "file" );
 	ADD_SYSTEM_PARAM(DisplayName, CqString, type_string, "aqsis.tif" );
 	ADD_SYSTEM_PARAM(DisplayMode, TqInt, type_integer, ModeRGB );
@@ -275,26 +297,15 @@ void CqOptions::InitialiseDefaultOptions()
 	ADD_SYSTEM_PARAM(ColorSamples, TqInt, type_integer, 3 );
 	ADD_SYSTEM_PARAM(RelativeDetail, TqFloat, type_float, 1.0f );
 
-	ADD_SYSTEM_PARAM(XResolution, TqInt, type_integer, 640 );
-	ADD_SYSTEM_PARAM(YResolution, TqInt, type_integer, 480 );
+	ADD_SYSTEM_PARAM2(Resolution, TqInt, type_integer, 640, 480 );
 	ADD_SYSTEM_PARAM(PixelAspectRatio, TqFloat, type_float, 1.0f );
-	ADD_SYSTEM_PARAM(CropWindowMinX, TqFloat, type_float, 0.0f );
-	ADD_SYSTEM_PARAM(CropWindowMinY, TqFloat, type_float, 0.0f );
-	ADD_SYSTEM_PARAM(CropWindowMaxX, TqFloat, type_float, 1.0f );
-	ADD_SYSTEM_PARAM(CropWindowMaxY, TqFloat, type_float, 1.0f );
+	ADD_SYSTEM_PARAM4(CropWindow, TqFloat, type_float, 0.0f, 1.0f, 0.0f, 1.0f );
 	ADD_SYSTEM_PARAM(FrameAspectRatio, TqFloat, type_float, 4.0f / 3.0f );
-	ADD_SYSTEM_PARAM(ScreenWindowLeft, TqFloat, type_float, -( 4.0f / 3.0f ) );
-	ADD_SYSTEM_PARAM(ScreenWindowRight, TqFloat, type_float, 4.0f / 3.0f );
-	ADD_SYSTEM_PARAM(ScreenWindowTop, TqFloat, type_float, 1.0f );
-	ADD_SYSTEM_PARAM(ScreenWindowBottom, TqFloat, type_float, -1.0f );
-	ADD_SYSTEM_PARAM(CameraProjection, TqInt, type_integer, ProjectionOrthographic );
-	ADD_SYSTEM_PARAM(ClippingPlaneNear, TqFloat, type_float, FLT_EPSILON );
-	ADD_SYSTEM_PARAM(ClippingPlaneFar, TqFloat, type_float, FLT_MAX );
-	ADD_SYSTEM_PARAM(FStop, TqFloat, type_float, , FLT_MAX );
-	ADD_SYSTEM_PARAM(FocalLength, TqFloat, type_float, , FLT_MAX );
-	ADD_SYSTEM_PARAM(FocalDistance, TqFloat, type_float, FLT_MAX );
-	ADD_SYSTEM_PARAM(ShutterOpen, TqFloat, type_float, 0.0f );
-	ADD_SYSTEM_PARAM(ShutterClose, TqFloat, type_float, 1.0f );
+	ADD_SYSTEM_PARAM4(ScreenWindow, TqFloat, type_float, -( 4.0f / 3.0f ), ( 4.0f / 3.0f ), 1.0f, -1.0f );
+	ADD_SYSTEM_PARAM(Projection, TqInt, type_integer, ProjectionOrthographic );
+	ADD_SYSTEM_PARAM2(Clipping, TqFloat, type_float, FLT_EPSILON, FLT_MAX );
+	ADD_SYSTEM_PARAM3(DepthOfField, TqFloat, type_float, , FLT_MAX, FLT_MAX, FLT_MAX );
+	ADD_SYSTEM_PARAM2(Shutter, TqFloat, type_float, 0.0f, 1.0f );
 	ADD_SYSTEM_PARAM(FOV, TqFloat, type_float, 90.0f );
 
 	AddOption(pdefopts);

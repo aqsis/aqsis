@@ -738,16 +738,16 @@ void CqBucket::FilterBucket()
 
 void CqBucket::ExposeBucket()
 {
-	if ( QGetRenderContext() ->optCurrent().GetFloatOption("System", "ExposureGain")[0] == 1.0 &&
-	        QGetRenderContext() ->optCurrent().GetFloatOption("System", "ExposureGamma")[0] == 1.0 )
+	if ( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Exposure")[0] == 1.0 &&
+	        QGetRenderContext() ->optCurrent().GetFloatOption("System", "Exposure")[1] == 1.0 )
 		return ;
 	else
 	{
 		CqImagePixel* pie;
 		ImageElement( XOrigin(), YOrigin(), pie );
 		TqInt x, y;
-		TqFloat exposegain = QGetRenderContext() ->optCurrent().GetFloatOption("System", "ExposureGain")[0];
-		TqFloat exposegamma = QGetRenderContext() ->optCurrent().GetFloatOption("System", "ExposureGamma")[0];
+		TqFloat exposegain = QGetRenderContext() ->optCurrent().GetFloatOption("System", "Exposure")[0];
+		TqFloat exposegamma = QGetRenderContext() ->optCurrent().GetFloatOption("System", "Exposure")[1];
 		TqFloat oneovergamma = 1.0f / exposegamma;
 		for ( y = 0; y < YSize(); y++ )
 		{
@@ -975,18 +975,18 @@ void	CqImageBuffer::SetImage()
 		m_YBucketSize = poptBucketSize[ 1 ];
 	}
 
-	m_iXRes = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "XResolution")[0];
-	m_iYRes = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "YResolution")[0];
-	m_CropWindowXMin = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindowMinX")[0] ), 0, m_iXRes ) );
-	m_CropWindowXMax = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindowMaxX")[0] ), 0, m_iXRes ) );
-	m_CropWindowYMin = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindowMinY")[0] ), 0, m_iYRes ) );
-	m_CropWindowYMax = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindowMaxY")[0] ), 0, m_iYRes ) );
+	m_iXRes = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "Resolution")[0];
+	m_iYRes = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "Resolution")[1];
+	m_CropWindowXMin = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[0] ), 0, m_iXRes ) );
+	m_CropWindowXMax = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[1] ), 0, m_iXRes ) );
+	m_CropWindowYMin = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[2] ), 0, m_iYRes ) );
+	m_CropWindowYMax = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[3] ), 0, m_iYRes ) );
 	m_cXBuckets = ( m_iXRes / m_XBucketSize ) + 1;
 	m_cYBuckets = ( m_iYRes / m_YBucketSize ) + 1;
-	m_PixelXSamples = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "PixelSamplesX")[0];
-	m_PixelYSamples = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "PixelSamplesY")[0];
-	m_FilterXWidth = static_cast<TqInt>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "FilterWidthX")[0] );
-	m_FilterYWidth = static_cast<TqInt>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "FilterWidthY")[0] );
+	m_PixelXSamples = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "PixelSamples")[0];
+	m_PixelYSamples = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "PixelSamples")[1];
+	m_FilterXWidth = static_cast<TqInt>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "FilterWidth")[0] );
+	m_FilterYWidth = static_cast<TqInt>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "FilterWidth")[1] );
 	m_DisplayMode = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "DisplayMode")[0];
 
 	m_aBuckets.resize( m_cXBuckets * m_cYBuckets );
@@ -1044,8 +1044,8 @@ void	CqImageBuffer::Release()
 TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 {
 	// If the primitive is completely outside of the hither-yon z range, cull it.
-	if ( Bound.vecMin().z() >= QGetRenderContext() ->optCurrent().GetFloatOption("System", "ClippingPlaneFar")[0] ||
-	        Bound.vecMax().z() <= QGetRenderContext() ->optCurrent().GetFloatOption("System", "ClippingPlaneNear")[0] )
+	if ( Bound.vecMin().z() >= QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[1] ||
+	        Bound.vecMax().z() <= QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[0] )
 		return ( TqTrue );
 
 	// If the primitive spans the epsilon plane and the hither plane and can be split,
@@ -1354,8 +1354,8 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 		}
 
 		// If the micropolygon is outside the hither-yon range, cull it.
-		if ( Bound.vecMin().z() > QGetRenderContext() ->optCurrent().GetFloatOption("System", "ClippingPlaneFar")[0] ||
-		        Bound.vecMax().z() < QGetRenderContext() ->optCurrent().GetFloatOption("System", "ClippingPlaneNear")[0] )
+		if ( Bound.vecMin().z() > QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[1] ||
+		        Bound.vecMax().z() < QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[0] )
 		{
 			if ( bound_num == pMPG->cSubBounds() - 1 )
 			{
@@ -1382,8 +1382,8 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 
 		CqImagePixel* pie;
 
-		TqInt iXSamples = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "PixelSamplesX")[0];
-		TqInt iYSamples = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "PixelSamplesY")[0];
+		TqInt iXSamples = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "PixelSamples")[0];
+		TqInt iYSamples = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "PixelSamples")[1];
 
 		TqInt im = ( bminx < sX ) ? 0 : FLOOR( ( bminx - sX ) * iXSamples );
 		TqInt in = ( bminy < sY ) ? 0 : FLOOR( ( bminy - sY ) * iYSamples );

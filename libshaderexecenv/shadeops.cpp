@@ -1816,8 +1816,8 @@ STD_SOIMPL CqShaderExecEnv::SO_depth( POINTVAL p, DEFPARAMIMPL )
 	BEGIN_VARYING_SECTION
 	GETPOINT( p );
 	TqFloat d = POINT( p ).z();
-	d = ( d - QGetRenderContext() ->optCurrent().GetFloatOption("System", "ClippingPlaneNear")[0] ) /
-	    ( QGetRenderContext() ->optCurrent().GetFloatOption("System", "ClippingPlaneFar")[0] - QGetRenderContext() ->optCurrent().GetFloatOption("System", "ClippingPlaneNear")[0] );
+	d = ( d - QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[0] ) /
+	    ( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[1] - QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[0] );
 	SETNORMAL( Result, d );
 	END_VARYING_SECTION
 }
@@ -3486,8 +3486,8 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 		{
 			if ( pV->ArrayLength() >= 3 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetIntegerOption("System", "XResolution")[0] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetIntegerOption("System", "YResolution")[0] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetIntegerOption("System", "Resolution")[0] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetIntegerOption("System", "Resolution")[1] ) );
 				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "PixelAspectRatio")[0] ) );
 				Ret = 1.0f;
 			}
@@ -3500,10 +3500,10 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 		{
 			if ( pV->ArrayLength() >= 4 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindowMinX")[0] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindowMaxX")[0] ) );
-				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindowMinY")[0] ) );
-				pV->ArrayEntry( 3 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindowMaxY")[0] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[0] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[1] ) );
+				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[2] ) );
+				pV->ArrayEntry( 3 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[3] ) );
 				Ret = 1.0f;
 			}
 		}
@@ -3523,9 +3523,9 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 		{
 			if ( pV->ArrayLength() >= 3 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "FStop")[0] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "FocalLength")[0] ) );
-				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "FocalDistance")[0] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "DepthOfField")[0] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "DepthOfField")[1] ) );
+				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "DepthOfField")[2] ) );
 				Ret = 1.0f;
 			}
 		}
@@ -3537,8 +3537,8 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 		{
 			if ( pV->ArrayLength() >= 2 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "ShutterOpen")[0] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "ShutterClose")[0] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Shutter")[0] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Shutter")[1] ) );
 				Ret = 1.0f;
 			}
 		}
@@ -3550,8 +3550,8 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 		{
 			if ( pV->ArrayLength() >= 2 )
 			{
-				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "ClippingPlaneNear")[0] ) );
-				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "ClippingPlaneFar")[0] ) );
+				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[0] ) );
+				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[1] ) );
 				Ret = 1.0f;
 			}
 		}
