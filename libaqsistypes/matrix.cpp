@@ -26,12 +26,6 @@
 #include	<math.h>
 #include	"matrix.h"
 
-#ifdef AQSIS_SYSTEM_MACOSX
-#define acosf acos
-#define tanf tan
-#define sqrtf sqrt
-#endif
-
 START_NAMESPACE( Aqsis )
 
 //---------------------------------------------------------------------
@@ -117,7 +111,7 @@ CqMatrix::CqMatrix( const TqFloat angle,
     // Assumes angle already changed to radians.
 
     TqFloat d1d2dot = d1 * d2;
-    TqFloat axisangle = acosf( d1d2dot );
+    TqFloat axisangle = static_cast<TqFloat>(acos( d1d2dot ));
     if ( angle >= axisangle || angle <= ( axisangle - PI ) )
     {
         // Skewed past the axes -- issue error, then just use identity matrix.
@@ -142,8 +136,8 @@ CqMatrix::CqMatrix( const TqFloat angle,
                       right[ 2 ], d1[ 2 ], d2[ 2 ], 0,
                       0, 0, 0, 1 );
         TqFloat par = d1d2dot;               // Amount of d1 parallel to d2
-        TqFloat perp = sqrtf( 1 - par * par );   // Amount perpendicular
-        TqFloat s = tanf ( angle + acosf( perp ) ) * perp - par;
+        TqFloat perp = static_cast<TqFloat>(sqrt( 1 - par * par ));   // Amount perpendicular
+        TqFloat s = static_cast<TqFloat>(tan( angle + acos( perp ) ) * perp - par);
         CqMatrix Skw( 1, 0, 0, 0,
                       0, 1, s, 0,
                       0, 0, 1, 0,
