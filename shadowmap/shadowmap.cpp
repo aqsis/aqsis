@@ -28,13 +28,24 @@
 
 #include	"aqsis.h"
 
+#ifdef AQSIS_SYSTEM_WIN32 
+
 #include	<process.h>
+
+#else
+
+typedef int SOCKET;
+
+#endif
 
 #include	"displaydriver.h"
 #include	"dd.h"
 #include	"tiffio.h"
 #include	"sstring.h"
+
+#ifdef AQSIS_SYSTEM_WIN32 
 #include	"version.h"
+#endif
 
 using namespace Aqsis;
 
@@ -53,7 +64,7 @@ int main(int argc, char* argv[])
 #ifdef AQSIS_SYSTEM_WIN32
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
 #else // AQSIS_SYSTEM_WIN32
-#define ZFILE_HEADER "Aqsis ZFile" VERSION
+#define ZFILE_HEADER		"Aqsis ZFile" VERSION
 #endif // !AQSIS_SYSTEM_WIN32
 
 
