@@ -6,3 +6,4 @@ Makefile
 
 ri.inl
 ri_cache.inl
+ri_validate.inl
