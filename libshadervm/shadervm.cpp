@@ -859,6 +859,14 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							if ( m_TransTable[ i ].m_pCommand == 0 )
 								break;
 
+							// If this is an 'illuminate' or 'solar' statement, then we can safely say this 
+							// is not an ambient light.
+							if( &CqShaderVM::SO_illuminate == m_TransTable[ i ].m_pCommand ||
+							    &CqShaderVM::SO_illuminate2 == m_TransTable[ i ].m_pCommand ||
+								&CqShaderVM::SO_solar == m_TransTable[ i ].m_pCommand ||
+								&CqShaderVM::SO_solar2 == m_TransTable[ i ].m_pCommand )
+								m_fAmbient = TqFalse;
+							
 							// Add this opcode to the program segment.
 							AddCommand( m_TransTable[ i ].m_pCommand, pProgramArea );
 							// Process this opcodes parameters.
@@ -980,6 +988,7 @@ CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 	m_Uses = From.m_Uses;
 	m_matCurrent = From.m_matCurrent;
 	m_strName = From.m_strName;
+	m_fAmbient = From.m_fAmbient;
 
 	// Copy the local variables...
 	std::vector<IqShaderData*>::const_iterator i;

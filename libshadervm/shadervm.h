@@ -374,9 +374,9 @@ static CqMatrix temp_matrix;
 class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 {
 	public:
-		_qShareM CqShaderVM() : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ) 
+		_qShareM CqShaderVM() : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
 		{}
-		_qShareM	CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_PC( 0 ) 
+		_qShareM	CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
 		{
 			*this = From;
 		}
@@ -414,7 +414,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShaderExecEnv* pEnv );
 		virtual	_qShareM TqBool	fAmbient() const
 		{
-			return ( TqFalse );
+			return ( m_fAmbient );
 		}
 		virtual	IqShader*	Clone() const
 		{
@@ -465,6 +465,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		UsProgramElement*	m_PC;							///< Current program pointer.
 		TqInt	m_PO;							///< Current program offset.
 		TqInt	m_PE;							///< Offset of the end of the program.
+		TqBool	m_fAmbient;						///< Flag indicating if this is an ambient light source ( if it is indeed a light source ).
 
 		/** Determine whether the program execution has finished.
 		 */
