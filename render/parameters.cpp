@@ -43,7 +43,9 @@ CqParameter::CqParameter( const char* strName, TqInt Count ) :
 		m_strName( strName ),
 		m_Count( Count )
 {
-	QGetRenderContext() ->Stats().IncParametersAllocated();
+	/// \note Had to remove this as paramters are now created as part of the Renderer construction, so the 
+	///		  renderer context isn't ready yet.
+//	QGetRenderContext() ->Stats().IncParametersAllocated();
 }
 
 /** Copy constructor
@@ -52,12 +54,16 @@ CqParameter::CqParameter( const CqParameter& From ) :
 		m_strName( From.m_strName ),
 		m_Count( From.m_Count )
 {
-	QGetRenderContext() ->Stats().IncParametersAllocated();
+	/// \note Had to remove this as paramters are now created as part of the Renderer construction, so the 
+	///		  renderer context isn't ready yet.
+//	QGetRenderContext() ->Stats().IncParametersAllocated();
 }
 
 CqParameter::~CqParameter()
 {
-	QGetRenderContext() ->Stats().IncParametersDeallocated();
+	/// \note Had to remove this as paramters are now created as part of the Renderer construction, so the 
+	///		  renderer context isn't ready yet.
+//	QGetRenderContext() ->Stats().IncParametersDeallocated();
 }
 
 

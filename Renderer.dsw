@@ -146,6 +146,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libshadervm
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libshaderexecenv
+    End Project Dependency
 }}}
 
 ###############################################################################

@@ -50,44 +50,12 @@ CqSystemOption::CqSystemOption( const CqSystemOption& From ) :
 }
 
 
-//---------------------------------------------------------------------
-/** Constructor
- */
-
-CqCamera::CqCamera() : m_iXResolution( 640 ),
-		m_iYResolution( 480 ),
-		m_fPixelAspectRatio( 1.0 ),
-		m_fCropWindowXMin( 0.0 ),
-		m_fCropWindowXMax( 1.0 ),
-		m_fCropWindowYMin( 0.0 ),
-		m_fCropWindowYMax( 1.0 ),
-		m_fFrameAspectRatio( 4.0 / 3.0 ),
-		m_fScreenWindowLeft( -( 4.0 / 3.0 ) ),
-		m_fScreenWindowRight( 4.0 / 3.0 ),
-		m_fScreenWindowTop( 1 ),
-		m_fScreenWindowBottom( -1 ),
-		m_eCameraProjection( ProjectionOrthographic ),
-		m_fClippingPlaneNear( FLT_EPSILON ),
-		m_fClippingPlaneFar( FLT_MAX ),
-		m_ffStop( FLT_MAX ),
-		m_fShutterOpen( 0.0 ),
-		m_fShutterClose( 0.0 ),
-		m_fFOV( 90 ),
-		m_bFrameAspectRatioCalled( TqFalse ),
-		m_bScreenWindowCalled( TqFalse ),
-		m_bFormatCalled( TqFalse )
-{
-	// Initialise the matrices for this camera according to the
-	// status of the camera attributes.
-	//	InitialiseCamera();
-}
-
 
 //---------------------------------------------------------------------
 /** Initialise the matrices for this camera according to the status of the camera attributes.
  */
 
-void CqCamera::InitialiseCamera()
+void CqOptions::InitialiseCamera()
 {
 	// Setup the Normalising and projection matrices according to the projection
 	// type
@@ -95,19 +63,20 @@ void CqCamera::InitialiseCamera()
 	CqMatrix	matScreenToCamera;
 	CqMatrix	matScreenToNDC;
 	CqMatrix	matNDCToRaster;
-	switch ( m_eCameraProjection )
+	TqInt proj = Get_cameraprojection();
+	switch ( proj )
 	{
 			case	ProjectionOrthographic:
 			{
 				// Define a matrix to convert from right top left handed coordinate systems.
 				CqMatrix Trl( 1, 1, -1 );
 
-				TqFloat l = m_fScreenWindowLeft;
-				TqFloat r = m_fScreenWindowRight;
-				TqFloat t = m_fScreenWindowTop;
-				TqFloat b = m_fScreenWindowBottom;
-				TqFloat n = m_fClippingPlaneNear;
-				TqFloat f = m_fClippingPlaneFar;
+				TqFloat l = Get_screenwindowleft();
+				TqFloat r = Get_screenwindowright();
+				TqFloat t = Get_screenwindowtop();
+				TqFloat b = Get_screenwindowbottom();
+				TqFloat n = Get_clippingplanenear();
+				TqFloat f = Get_clippingplanefar();
 
 				matCameraToScreen.Identity();
 				matCameraToScreen.SetfIdentity( TqFalse );
@@ -124,10 +93,10 @@ void CqCamera::InitialiseCamera()
 				matCameraToScreen *= Trl;
 
 				// Set up the screen to frame matrix
-				TqFloat	FrameX = ( m_fFrameAspectRatio >= 1.0 ) ? m_iXResolution :
-				                 ( m_iYResolution * m_fFrameAspectRatio ) / m_fPixelAspectRatio;
-				TqFloat	FrameY = ( m_fFrameAspectRatio < 1.0 ) ? m_iYResolution :
-				                 ( m_iXResolution * m_fPixelAspectRatio ) / m_fFrameAspectRatio;
+				TqFloat	FrameX = ( Get_frameaspectratio() >= 1.0 ) ? Get_resolutionx() :
+				                 ( Get_resolutiony() * Get_frameaspectratio() ) / Get_pixelaspectratio();
+				TqFloat	FrameY = ( Get_frameaspectratio() < 1.0 ) ? Get_resolutiony() :
+				                 ( Get_resolutionx() * Get_pixelaspectratio() ) / Get_frameaspectratio();
 				matScreenToNDC.Identity();
 				matNDCToRaster.Identity();
 				// Translate from -1,-1-->1,1 to 0,0-->2,2
@@ -146,13 +115,13 @@ void CqCamera::InitialiseCamera()
 
 			case	ProjectionPerspective:
 			{
-				TqFloat fov = m_fClippingPlaneNear * ( tan( RAD( m_fFOV / 2.0f ) ) );
-				TqFloat l = m_fScreenWindowLeft * fov;
-				TqFloat r = m_fScreenWindowRight * fov;
-				TqFloat t = m_fScreenWindowTop * fov;
-				TqFloat b = m_fScreenWindowBottom * fov;
-				TqFloat n = m_fClippingPlaneNear;
-				TqFloat f = m_fClippingPlaneFar;
+				TqFloat fov = Get_clippingplanenear() * ( tan( RAD( Get_fov() / 2.0f ) ) );
+				TqFloat l = Get_screenwindowleft() * fov;
+				TqFloat r = Get_screenwindowright() * fov;
+				TqFloat t = Get_screenwindowtop() * fov;
+				TqFloat b = Get_screenwindowbottom() * fov;
+				TqFloat n = Get_clippingplanenear();
+				TqFloat f = Get_clippingplanefar();
 
 				matCameraToScreen.Identity();
 				matCameraToScreen.SetfIdentity( TqFalse );
@@ -169,10 +138,11 @@ void CqCamera::InitialiseCamera()
 				matCameraToScreen.SetElement( 3, 3, 0 );
 
 				// Set up the screen to frame matrix
-				TqFloat	FrameX = ( m_fFrameAspectRatio >= 1.0f ) ? m_iXResolution :
-				                 ( m_iYResolution * m_fFrameAspectRatio ) / m_fPixelAspectRatio;
-				TqFloat	FrameY = ( m_fFrameAspectRatio < 1.0f ) ? m_iYResolution :
-				                 ( m_iXResolution * m_fPixelAspectRatio ) / m_fFrameAspectRatio;
+				TqFloat	FrameX = ( Get_frameaspectratio() >= 1.0 ) ? Get_resolutionx() :
+				                 ( Get_resolutiony() * Get_frameaspectratio() ) / Get_pixelaspectratio();
+				TqFloat	FrameY = ( Get_frameaspectratio() < 1.0 ) ? Get_resolutiony() :
+				                 ( Get_resolutionx() * Get_pixelaspectratio() ) / Get_frameaspectratio();
+
 				matScreenToNDC.Identity();
 				matNDCToRaster.Identity();
 				// Translate from -1,-1-->1,1 to 0,0-->2,2
@@ -203,21 +173,8 @@ void CqCamera::InitialiseCamera()
 	vecn = vecn * matWorldToScreen;
 
 	// Set some additional information about the clip range.
-	m_fClippingRange = fClippingPlaneFar() - fClippingPlaneNear();
+	m_fClippingRange = Get_clippingplanefar() - Get_clippingplanenear();
 }
-
-
-//---------------------------------------------------------------------
-/** Default constructor.
- */
-
-CqOptions::CqOptions() : m_strHider( "Hidden" ),
-		m_iColorSamples( 3 ),
-		m_fRelativeDetail( 1.0 ),
-		m_pErrorHandler( &RiErrorPrint ),
-		m_pProgressHandler( NULL ),
-		m_pPreRenderFunction( NULL )
-{}
 
 
 //---------------------------------------------------------------------
@@ -243,6 +200,12 @@ CqOptions::~CqOptions()
 		m_aOptions[ i ] ->Release();
 		m_aOptions[ i ] = 0;
 	}
+
+	i = option_last;
+	while( i-- > 0 )
+		delete( m_pParameters[ i ] );
+
+	DeleteImager();
 }
 
 
@@ -252,12 +215,6 @@ CqOptions::~CqOptions()
 
 CqOptions& CqOptions::operator=( const CqOptions& From )
 {
-	CqDisplay::operator=( From );
-	CqCamera::operator=( From );
-
-	m_strHider = From.m_strHider;
-	m_iColorSamples = From.m_iColorSamples;
-	m_fRelativeDetail = From.m_fRelativeDetail;
 	m_pErrorHandler = From.m_pErrorHandler;
 	m_pProgressHandler = From.m_pProgressHandler;
 	m_pPreRenderFunction = From.m_pPreRenderFunction;
@@ -270,6 +227,17 @@ CqOptions& CqOptions::operator=( const CqOptions& From )
 		m_aOptions[ i ] = From.m_aOptions[ i ];
 		m_aOptions[ i ] ->AddRef();
 	}
+
+	// Copy the system options.
+	i = option_last;
+	while ( i-- > 0 )
+	{
+		if( NULL != From.m_pParameters[ i ] )
+			m_pParameters[ i ] = From.m_pParameters[ i ]->Clone();
+		else
+			m_pParameters[ i ] = NULL;
+	}
+
 	return ( *this );
 }
 
@@ -489,7 +457,7 @@ const CqColor* CqOptions::GetColorOption( const char* strName, const char* strPa
  * \param gx, gy the size of the bucket grid
  * \param x, y its origin 
  */
-void CqDisplay::InitialiseColorImager(TqInt gx, TqInt gy, 
+void CqOptions::InitialiseColorImager(TqInt gx, TqInt gy, 
 									  TqFloat x, TqFloat y,
 									  CqColor *color, CqColor *opacity,
 									  TqFloat *depth, TqFloat *coverage)
@@ -509,7 +477,7 @@ void CqDisplay::InitialiseColorImager(TqInt gx, TqInt gy,
  * \return Color  Black if not found.
  * Right now it is returning the current background colour if found
  */
-CqColor CqDisplay::GetColorImager(TqFloat x, TqFloat y)
+CqColor CqOptions::GetColorImager(TqFloat x, TqFloat y)
 {
 	CqColor result(0,0,0);
 
@@ -529,7 +497,7 @@ CqColor CqDisplay::GetColorImager(TqFloat x, TqFloat y)
  * \return Color  Black if not found.
  * Right now it is returning the current background colour if found
  */
-TqFloat CqDisplay::GetAlphaImager(TqFloat x, TqFloat y)
+TqFloat CqOptions::GetAlphaImager(TqFloat x, TqFloat y)
 {
 	TqFloat result = 1.0;
 
@@ -551,7 +519,7 @@ TqFloat CqDisplay::GetAlphaImager(TqFloat x, TqFloat y)
  * Right now it is returning the current background colour if found
  */
 
-CqColor CqDisplay::GetOpacityImager(TqFloat x, TqFloat y)
+CqColor CqOptions::GetOpacityImager(TqFloat x, TqFloat y)
 {
 	CqColor result = gColWhite;
 
@@ -571,13 +539,12 @@ CqColor CqDisplay::GetOpacityImager(TqFloat x, TqFloat y)
  * \param strName the name of the shader like background.sl, 
  * Right now it is doing nothing.
  */
-void CqDisplay::LoadImager(const char* strName)
+void CqOptions::LoadImager(const CqString& strName)
 {
 	DeleteImager();
 	TqFloat dummy = 0.0;
 	
-
-	IqShader* pShader=static_cast<IqShader*>(QGetRenderContext()->CreateShader(strName, Type_Imager));
+	IqShader* pShader=static_cast<IqShader*>(QGetRenderContext()->CreateShader(strName.c_str(), Type_Imager));
 
 	if(pShader==0)	return;
 
@@ -586,7 +553,7 @@ void CqDisplay::LoadImager(const char* strName)
 	
 }
 
-void   CqDisplay::DeleteImager()
+void   CqOptions::DeleteImager()
 {
 
 	if (m_pshadImager != NULL)
@@ -595,7 +562,7 @@ void   CqDisplay::DeleteImager()
 		m_pshadImager = NULL;
 	}
 }
-void CqDisplay::SetValueImager(char *token, char *value)
+void CqOptions::SetValueImager(char *token, char *value)
 {
 	if (m_pshadImager != NULL) {
 		
