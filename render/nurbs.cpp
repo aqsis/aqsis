@@ -1893,7 +1893,7 @@ void CqSurfaceNURBS::SubdivideSegments(std::vector<CqSurfaceNURBS*>& S)
 		vOffset = vEnd + 1;
 	}
 
-	// Now setup any 'varying' class variables on the segments.
+	// Now setup any 'varying', 'uniform' or 'constant' class variables on the segments.
 	TqInt irow, icol;
 	TqInt nuSegs = uSplits;
 	TqInt nvSegs = vSplits;
@@ -1919,6 +1919,18 @@ void CqSurfaceNURBS::SubdivideSegments(std::vector<CqSurfaceNURBS*>& S)
 					pNewUP->SetValue( (*iUP), 2, iC );
 					pNewUP->SetValue( (*iUP), 3, iD );
 
+					S[ iPatch ]->AddPrimitiveVariable(pNewUP);
+				}
+				else if( (*iUP)->Class() == class_uniform )
+				{
+					CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
+					pNewUP->SetSize( 1 );
+					pNewUP->SetValue( (*iUP), 0, iPatch );
+					S[ iPatch ]->AddPrimitiveVariable(pNewUP);
+				}
+				else if( (*iUP)->Class() == class_constant )
+				{
+					CqParameter* pNewUP = (*iUP)->Clone( );
 					S[ iPatch ]->AddPrimitiveVariable(pNewUP);
 				}
 			}

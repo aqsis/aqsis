@@ -17,7 +17,7 @@ ConcatTransform [1.0 0.0 0.0 0  0.0 0.182057 -0.983288 0  0.0 0.983288 0.182057 
 
 WorldBegin
 # Default-Surface
-Surface "showuser"
+Surface "face_plastic"
 
 # Object "Punktlicht01"
 TransformBegin
@@ -51,6 +51,16 @@ NuPatch 6 4 [  0.0 0.0 0.0 0.0 79.0136 153.273 224.075 224.075 224.075 224.075] 
 							 0 0 0   1 0 0   0 0 0   1 0 0   0 0 1   0 0 0
 							 0 0 0   0 0 0   0 0 1   1 1 0   1 0 0   1 0 0
 							 1 1 1   1 1 0   1 0 1   0 0 0   0 0 0   1 1 1]
+	"uniform color facecol" [ 1 1 1
+							  1 0 1
+							  1 0 0
+							  0 1 0
+							  0 0 1
+							  1 1 0
+							  0 1 1
+							  0 0 1
+							  1 1 0
+							]
 
 AttributeEnd
 WorldEnd
