@@ -143,12 +143,12 @@ TqBool	CqQuadric::Diceable()
 	else
 		gridsize = static_cast<TqInt>(m_XBucketSize * m_XBucketSize / ShadingRate);
 
-	if ( ( m_uDiceSize == 0 ) || ( m_vDiceSize == 0 ) )
-		EstimateGridSize();
+	EstimateGridSize();
 
 	// if the gridsize is not set the computation of gridsize assuming
 	// a minimum of 0.4 shadingrate
-	if ( ( TqFloat ) ( m_uDiceSize * m_vDiceSize ) <= gridsize )
+	TqFloat esize = ( static_cast<TqFloat>( m_uDiceSize ) * static_cast<TqFloat>( m_vDiceSize ) );
+	if ( esize <= gridsize )
 		return ( TqTrue );
 
 	return( TqFalse );
