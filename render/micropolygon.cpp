@@ -470,9 +470,9 @@ void CqMicroPolyGrid::DeleteVariables( TqBool all )
 
 	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "N" ) || all  )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_N );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "u" ) || all  )
+	if( /*!QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "u" ) ||*/ all  )		// \note: Needed by trim curves, need to work out how to check for their existence.
 		m_pShaderExecEnv->DeleteVariable( EnvVars_u );
-	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "v" ) || all  )
+	if( /*!QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "v" ) ||*/ all  )		// \note: Needed by trim curves, need to work out how to check for their existence.
 		m_pShaderExecEnv->DeleteVariable( EnvVars_v );
 	if( all  )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_P );
