@@ -1084,9 +1084,7 @@ public:
     {
         R Def;
         if ( m_aValue.size() > 0 ) Def = m_aValue[ 0 ];
-        m_aValue.resize( ( uGridRes + 1 ) * ( vGridRes + 1 ) );
-        SetValue( Def );
-
+        m_aValue.assign( (( uGridRes + 1 ) * ( vGridRes + 1 )), Def );
         STATS_INC( SHD_Var_varying_init );
     }
 
@@ -1255,9 +1253,8 @@ public:
 
     virtual	void	operator=( const CqShaderVariableVarying<T, R>& From )
     {
-        TqInt i;
-        for ( i = m_aValue.size() - 1; i >= 0; i-- )
-            m_aValue[ i ] = From.m_aValue[ i ];
+        // use std::vector assignment
+        m_aValue = From.m_aValue;
     }
 
 protected:
@@ -1296,9 +1293,7 @@ public:
     }
     virtual	void	SetFloat( const TqFloat& f )
     {
-        TqUint i;
-        for ( i = 0; i < Size(); i++ )
-            m_aValue[ i ] = f;
+        m_aValue.assign( m_aValue.size(), f );
     }
     /** Copy the values from the passed variable into this, taking into account any class differences.
      * \param pVal The variable to copy from.
@@ -1317,8 +1312,7 @@ public:
         {
             TqFloat temp;
             pVal->GetFloat( temp );
-            for ( i = 0; i < Size(); i++ )
-                m_aValue[ i ] = temp;
+            m_aValue.assign( m_aValue.size(), temp );
         }
     }
     virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
@@ -1327,9 +1321,7 @@ public:
     }
     virtual void	SetBool( const TqBool& val )
     {
-        TqUint i;
-        for ( i = 0; i < Size(); i++ )
-            m_aValue[ i ] = val;
+        m_aValue.assign( m_aValue.size(), val );
     }
     virtual void	SetBool( const TqBool& val, TqInt index )
     {
@@ -1351,6 +1343,7 @@ public:
         return ( newVar );
     }
 };
+
 
 class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string, CqString>
 {
@@ -1381,9 +1374,7 @@ public:
     }
     virtual	void	SetString( const CqString& s )
     {
-        TqUint i;
-        for ( i = 0; i < Size(); i++ )
-            m_aValue[ i ] = s;
+        m_aValue.assign( m_aValue.size(), s );
     }
     /** Copy the values from the passed variable into this, taking into account any class differences.
      * \param pVal The variable to copy from.
@@ -1402,8 +1393,7 @@ public:
         {
             CqString temp;
             pVal->GetString( temp );
-            for ( i = 0; i < Size(); i++ )
-                m_aValue[ i ] = temp;
+            m_aValue.assign( m_aValue.size(), temp );
         }
     }
     virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
@@ -1456,9 +1446,7 @@ public:
     }
     virtual	void	SetPoint( const CqVector3D& p )
     {
-        TqUint i;
-        for ( i = 0; i < Size(); i++ )
-            m_aValue[ i ] = p;
+        m_aValue.assign( m_aValue.size(), p );
     }
     virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
     {
@@ -1521,8 +1509,7 @@ public:
         {
             CqVector3D temp;
             pVal->GetPoint( temp );
-            for ( i = 0; i < Size(); i++ )
-                m_aValue[ i ] = temp;
+            m_aValue.assign( m_aValue.size(), temp );
         }
     }
     /** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
@@ -1571,9 +1558,7 @@ public:
     }
     virtual	void	SetPoint( const CqVector3D& p )
     {
-        TqUint i;
-        for ( i = 0; i < Size(); i++ )
-            m_aValue[ i ] = p;
+        m_aValue.assign( m_aValue.size(), p );
     }
     virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
     {
@@ -1636,8 +1621,7 @@ public:
         {
             CqVector3D temp;
             pVal->GetVector( temp );
-            for ( i = 0; i < Size(); i++ )
-                m_aValue[ i ] = temp;
+            m_aValue.assign( m_aValue.size(), temp );
         }
     }
     /** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
@@ -1686,9 +1670,7 @@ public:
     }
     virtual	void	SetPoint( const CqVector3D& p )
     {
-        TqUint i;
-        for ( i = 0; i < Size(); i++ )
-            m_aValue[ i ] = p;
+        m_aValue.assign( m_aValue.size(), p );
     }
     virtual	void	GetVector( CqVector3D& res, TqInt index = 0 ) const
     {
@@ -1751,8 +1733,7 @@ public:
         {
             CqVector3D temp;
             pVal->GetNormal( temp );
-            for ( i = 0; i < Size(); i++ )
-                m_aValue[ i ] = temp;
+            m_aValue.assign( m_aValue.size(), temp );
         }
     }
     /** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
@@ -1801,9 +1782,7 @@ public:
     }
     virtual	void	SetColor( const CqColor& c )
     {
-        TqUint i;
-        for ( i = 0; i < Size(); i++ )
-            m_aValue[ i ] = c;
+        m_aValue.assign( m_aValue.size(), c );
     }
     /** Copy the values from the passed variable into this, taking into account any class differences.
      * \param pVal The variable to copy from.
@@ -1822,8 +1801,7 @@ public:
         {
             CqColor temp;
             pVal->GetColor( temp );
-            for ( i = 0; i < Size(); i++ )
-                m_aValue[ i ] = temp;
+            m_aValue.assign( m_aValue.size(), temp );
         }
     }
     virtual void	GetBool( TqBool& res, TqInt index = 0 ) const
@@ -1876,9 +1854,7 @@ public:
     }
     virtual	void	SetMatrix( const CqMatrix& m )
     {
-        TqUint i;
-        for ( i = 0; i < Size(); i++ )
-            m_aValue[ i ] = m;
+        m_aValue.assign( m_aValue.size(), m );
     }
     /** Copy the values from the passed variable into this, taking into account any class differences.
      * \param pVal The variable to copy from.
@@ -1897,8 +1873,7 @@ public:
         {
             CqMatrix temp;
             pVal->GetMatrix( temp );
-            for ( i = 0; i < Size(); i++ )
-                m_aValue[ i ] = temp;
+            m_aValue.assign( m_aValue.size(), temp );
         }
     }
     /** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
