@@ -895,11 +895,48 @@ void CqShadowMap::SampleMap(const CqVector3D& vecPoint, const CqVector3D& swidth
 	}
 }
 
+
 void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqVector3D& R3,const CqVector3D& R4, float sblur, float tblur, float& val)
+{
+	float depth;
+	float previousdepth;
+	float coverage;
+
+	// get coverage and average depth
+	SampleMap(R1,R2,R3,R4,sblur,tblur,coverage,depth);
+	previousdepth = depth;
+
+	//if(soft shadows turned on)
+	{
+		int maxiterations=5; // cap the no of times we go round in case we get stuck in a loop
+		int iterations=0; 
+		while (depth!=0.0 && iterations<maxiterations)
+		{ 
+			// resize the filter
+			sblur *= 1 - depth;
+			tblur *= 1 - depth;
+
+			// get coverage and average depth again
+			SampleMap(R1,R2,R3,R4,sblur,tblur,coverage,depth);
+
+			// stop if we get roughly the same answer twice
+			if(fabs(depth - previousdepth) < 0.05)
+				break;
+
+			previousdepth = depth;
+			iterations++;
+		}
+	}
+	val = coverage;		
+}
+
+
+void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqVector3D& R3,const CqVector3D& R4, float sblur, float tblur, float& val, float& depth)
 {
 	// If no map defined, not in shadow.
 	val=0.0f;
-
+	depth=0.0f;
+	
 	CqVector3D	vecR1l,vecR2l,vecR3l,vecR4l;
 	CqVector3D	vecR1m,vecR2m,vecR3m,vecR4m;
 
@@ -911,7 +948,7 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 
 	CqVector3D vecBias(0,0,bias);
 	// Generate a matrix to transform points from camera space into the space of the light source used in the 
-	// defintiion of the shadow map.
+	// definition of the shadow map.
 	CqMatrix matCameraToLight=m_matWorldToCamera*QGetRenderContext()->matSpaceToSpace("camera","world");
 	// Generate a matrix to transform points from camera space into the space of the shadow map.
 	CqMatrix matCameraToMap=m_matWorldToScreen*QGetRenderContext()->matSpaceToSpace("camera","world");
@@ -1022,7 +1059,10 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 					iv-=pTMBa->tOrigin();
 					TqInt rowlen=pTMBa->Width();
 					if(z>pTMBa->pBufferData()[(iv*rowlen)+iu])
+					{
 						inshadow+=1;
+						depth+=pTMBa->pBufferData()[(iv*rowlen)+iu];
+					}
 				}
 			}
 			t=t+dt;
@@ -1031,6 +1071,10 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 	}
 
 	val=(static_cast<TqFloat>(inshadow)/(ns*nt));
+	
+	// get the average depth of occluded samples
+	float lightdistance = MAX(MAX(MAX(vecR1l.Magnitude(), vecR2l.Magnitude()), vecR3l.Magnitude()), vecR4l.Magnitude());
+	depth = (depth/inshadow) / lightdistance;
 }
 
 

@@ -370,6 +370,7 @@ class _qShareC CqShadowMap : public CqTextureMap
 
 	_qShareM	virtual	void	SampleMap(const CqVector3D& R, const CqVector3D& swidth, const CqVector3D& twidth, float sblur, float tblur, float& val);
 	_qShareM	virtual	void	SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqVector3D& R3,const CqVector3D& R4, float sblur, float tblur, float& val);
+	_qShareM	virtual	void	SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqVector3D& R3,const CqVector3D& R4, float sblur, float tblur, float& val, float& depth);
 
 	private:
 static	TqInt		m_rand_index;			///< Static random number table index.
