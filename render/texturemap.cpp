@@ -81,6 +81,7 @@ TqFloat	uv[ max_no ][ 2 ];	// Stores the values of this projection for a given f
 
 TqInt	CqShadowMap::m_rand_index = 0;
 TqFloat	CqShadowMap::m_aRand_no[ 256 ];
+TqBool  m_critical = TqFalse;
 
 //---------------------------------------------------------------------
 /** Static array of cached texture maps.
@@ -121,8 +122,12 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 	{
 		TqInt more = QGetRenderContext() ->Stats().GetTextureMemory() + demand;
 
+		// Critical level of memory will be reached;
+		// I'm better starting the cleanup cache memory buffer
+		if ( more > (int) (0.8 * (float) limit))
+			m_critical = TqTrue;
 
-		if ( ( more > limit ) )       //&& report)
+		if ( more > limit)
 		{
 
 			// We need to zap the cache we are exceeding the required texturememory demand
@@ -132,8 +137,10 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 
 			sprintf( warnings, "Exceeding the allocated texturememory by %d",
 			         more - limit );
-			RiErrorPrint( 0, 1, warnings );
+			if (report)
+				RiErrorPrint( 0, 1, warnings );
 			report = 0;
+            m_critical = TqTrue;
 		}
 
 
@@ -464,13 +471,6 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 	m_TextureMap_Cache.push_back( pNew );
 	pNew->Open();
 
-	// Ensure that it is in the correct format
-	if ( pNew->Format() != TexFormat_MIPMAP )
-	{
-		pNew->CreateMIPMAP();
-		pNew->Close();
-	}
-
 	return ( pNew );
 }
 
@@ -610,6 +610,8 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 
 CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory )
 {
+	
+
 	// Search already cached segments first.
 	for ( std::vector<CqTextureMapBuffer*>::iterator i = m_apSegments.begin(); i != m_apSegments.end(); i++ )
 		if ( ( *i ) ->IsValid( s, t, directory ) ) return ( *i );
@@ -800,6 +802,8 @@ TqUlong CqTextureMap::ImageFilterVal( uint32* p, TqInt x, TqInt y, TqInt directo
 
 void CqTextureMap::CreateMIPMAP()
 {
+	
+
 	if ( m_pImage != 0 )
 	{
 		uint32 * pImage = static_cast<uint32*>( _TIFFmalloc( m_XRes * m_YRes * sizeof( uint32 ) ) );
@@ -808,6 +812,7 @@ void CqTextureMap::CreateMIPMAP()
 		TqInt m_yres = m_YRes;
 		TqInt directory = 0;
 
+		
 		do
 		{
 
@@ -852,10 +857,11 @@ void CqTextureMap::CreateMIPMAP()
 
 		}
 		while ( ( m_xres > 2 ) && ( m_yres > 2 ) ) ;
-
+		
 		_TIFFfree( pImage );
 
 	}
+	
 }
 
 
@@ -961,7 +967,43 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 	for ( i = 0; i < m_SamplesPerPixel; i++ )
 		val[ i ] = CLAMP( val[ i ], 0.0f, 1.0f );
 }
+//----------------------------------------------------------------------
+/** this is used for remove any memory exceed the command Option "limits" "texturememory" 
+  * directive
+  *   
+  * It zaps the m_apSegments for this TextureMap object completely.
+  * The idea here is to erase any "GetBuffer()" memory to respect the directive
+  * It looks into the big m_TextureMap_Cache release every things
+  **/
 
+void CqTextureMap::CriticalMeasure()
+{
+TqChar warnings[ 400 ];
+TqInt more, limit;
+
+	if (m_critical) 
+	{
+
+		more = QGetRenderContext() ->Stats().GetTextureMemory();
+
+		// Delete all the tile's memory associated with any texturemap objects
+		for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ ) {
+			for ( std::vector<CqTextureMapBuffer*>::iterator j = (*i)->m_apSegments.begin(); j != (*i)->m_apSegments.end(); j++ )
+				(*j)->Release();
+			(*i)->m_apSegments.resize(0);
+		}
+		
+
+		limit = QGetRenderContext() ->Stats().GetTextureMemory();
+		m_critical = TqFalse;
+
+#ifdef _DEBUG
+		sprintf( warnings, "I was forced to zap the tile segment buffers for %dK",
+							(more - limit)/ 1024 );
+		RiErrorPrint( 0, 1, warnings );
+#endif
+	}
+}
 
 void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<TqFloat>& val )
 {
@@ -995,6 +1037,10 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 	iv = iv % vmapsize;		/// \todo This is wrap mode periodic.
 	iv_n = iv_n % vmapsize;	/// \todo This is wrap mode periodic.
 
+	// Check the memory and make sure we don't abuse it
+	CriticalMeasure();
+
+	
 	// Read in the relevant texture tiles.
 	CqTextureMapBuffer* pTMBa = GetBuffer( iu, iv, id );		// Val00
 	CqTextureMapBuffer* pTMBb = GetBuffer( iu, iv_n, id );	// Val01
@@ -1003,7 +1049,10 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 
 
 	/* cannot find anything than goodbye */
-	if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd ) return ;
+	if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd ) 
+	{
+        return;
+    }
 
 	// all the tile are using the same size therefore the number is ok
 	long rowlen = pTMBa->Width() * m_SamplesPerPixel;
@@ -1062,6 +1111,9 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		iv = iv % vmapsize;		/// \todo This is wrap mode periodic.
 		iv_n = iv_n % vmapsize;	/// \todo This is wrap mode periodic.
 
+		// Check the memory and make sure we don't abuse it
+		CriticalMeasure();
+
 		// Read in the relevant texture tiles.
 		CqTextureMapBuffer* pTMBa = GetBuffer( iu, iv, id + 1 );		// Val00
 		CqTextureMapBuffer* pTMBb = GetBuffer( iu, iv_n, id + 1 );		// Val01
@@ -1069,7 +1121,10 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		CqTextureMapBuffer* pTMBd = GetBuffer( iu_n, iv_n, id + 1 );	// Val11
 
 		/* cannot find anything than goodbye */
-		if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd ) return ;
+		if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd ) 
+		{
+			return;
+		}
 
 		// all the tile are using the same size therefore the number is ok
 		long rowlen = pTMBa->Width() * m_SamplesPerPixel;
@@ -1107,7 +1162,13 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		TqFloat dinterp = ( MAX( umapsize, vmapsize ) * d ) - 1;
 		for ( c = 0; c < m_SamplesPerPixel; c++ )
 			val[ c ] = m_low_color[ c ] + dinterp * ( m_high_color[ c ] - m_low_color[ c ] );
+
+	
+		
 	}
+	// Check the memory and make sure we don't abuse it
+	CriticalMeasure();
+
 }
 
 //----------------------------------------------------------------------
@@ -2081,3 +2142,4 @@ void CqTextureMap::WriteImage( TIFF* ptex, unsigned char *raster, TqUlong width,
 
 
 END_NAMESPACE( Aqsis )
+

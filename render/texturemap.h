@@ -374,6 +374,8 @@ class _qShareC CqTextureMap : public IqTextureMap
 			m_TextureMap_Cache.clear();
 
 		}
+		_qShareM   void CriticalMeasure();
+
 		_qShareM static void WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );
 		_qShareM static void WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality );
 		_qShareM static void WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );
@@ -528,3 +530,4 @@ class _qShareC CqShadowMap : public CqTextureMap
 END_NAMESPACE( Aqsis )
 
 #endif	// !TEXTUREMAP_H_INCLUDED
+
