@@ -77,7 +77,7 @@ CqLog::~CqLog()
 }
 
 // Log a message, if possible, don't use this
-void CqLog::log(char* priority, const char* stringFormat, ...)
+void CqLog::log( const char* priority, const char* stringFormat, ...)
 {
 
 	if ( m_FirstRun )
@@ -109,7 +109,7 @@ void CqLog::log(char* priority, const char* stringFormat, ...)
 }
 
 // Log a message with CqString, if possible, don't use this
-void CqLog::log(const char *priority, const CqString &stringFormat, ...)
+void CqLog::log(const char *priority, const CqString &stringFormat)
 {
 
 	if ( m_FirstRun )
@@ -118,9 +118,6 @@ void CqLog::log(const char *priority, const CqString &stringFormat, ...)
 
 		m_FirstRun = false;
 	}
-
-	va_list va;
-	va_start(va, stringFormat);
 
 	log4cpp::Priority::Value pVal;
 	
@@ -134,10 +131,7 @@ void CqLog::log(const char *priority, const CqString &stringFormat, ...)
 		log( "ERROR", e.what() );
 	}
 
-	m_pRoot->logva(pVal, stringFormat.c_str(), va);
-
-
-	va_end(va);
+	m_pRoot->log(pVal, stringFormat.c_str());
 }
 
 // Internal log function for error(), debug() etc. calls, just like log4cpp does it
@@ -151,6 +145,19 @@ void CqLog::log2( log4cpp::Priority::Value priority, const char* stringFormat, v
 	}
 
 	m_pRoot->logva(priority, stringFormat, va);
+}
+
+// Internal log without ...
+void CqLog::log2( log4cpp::Priority::Value priority, const char* string )
+{
+	if ( m_FirstRun )
+	{
+		std::cout << "using log4cpp " << LOG4CPP_VERSION << " ( licensed under the LGPL )" << std::endl;
+
+		m_FirstRun = false;
+	}
+
+	m_pRoot->log(priority, string);
 }
 
 // Create a file log, i.e. pipe the output to a file
@@ -229,12 +236,9 @@ void CqLog::error( const char* stringFormat, ... )
 	va_end(va);
 }
 
-void CqLog::error( const CqString &stringFormat, ... )
+void CqLog::error( const CqString &string )
 {
-	va_list va;
-	va_start(va,stringFormat);
-	log2(log4cpp::Priority::ERROR, stringFormat.c_str(), va);
-	va_end(va);
+	log2(log4cpp::Priority::ERROR, string.c_str());
 }
 
 // -------------------------- Warning
@@ -251,12 +255,9 @@ void CqLog::warn( const char* stringFormat, ... )
 	va_end(va);
 }
 
-void CqLog::warn( const CqString &stringFormat, ... )
+void CqLog::warn( const CqString &string )
 {
-	va_list va;
-	va_start(va,stringFormat);
-	log2(log4cpp::Priority::WARN, stringFormat.c_str(), va);
-	va_end(va);
+	log2(log4cpp::Priority::WARN, string.c_str());
 }
 
 // --------------------------- Critical
@@ -273,12 +274,9 @@ void CqLog::critical( const char* stringFormat, ... )
 	va_end(va);
 }
 
-void CqLog::critical( const CqString &stringFormat, ... )
+void CqLog::critical( const CqString &string )
 {
-	va_list va;
-	va_start(va,stringFormat);
-	log2(log4cpp::Priority::CRIT, stringFormat.c_str(), va);
-	va_end(va);
+	log2(log4cpp::Priority::CRIT, string.c_str());
 }
 
 // ---------------------------- Notice
@@ -295,12 +293,9 @@ void CqLog::notice( const char* stringFormat, ... )
 	va_end(va);
 }
 
-void CqLog::notice( const CqString &stringFormat, ... )
+void CqLog::notice( const CqString &string )
 {
-	va_list va;
-	va_start(va,stringFormat);
-	log2(log4cpp::Priority::NOTICE, stringFormat.c_str(), va);
-	va_end(va);
+	log2(log4cpp::Priority::NOTICE, string.c_str());
 }
 
 // ---------------------------- Info
@@ -317,12 +312,9 @@ void CqLog::info( const char* stringFormat, ... )
 	va_end(va);
 }
 
-void CqLog::info( const CqString &stringFormat, ... )
+void CqLog::info( const CqString &string )
 {
-	va_list va;
-	va_start(va,stringFormat);
-	log2(log4cpp::Priority::INFO, stringFormat.c_str(), va);
-	va_end(va);
+	log2(log4cpp::Priority::INFO, string.c_str());
 }
 
 // ----------------------------- Fatal
@@ -339,12 +331,9 @@ void CqLog::fatal( const char* stringFormat, ... )
 	va_end(va);
 }
 
-void CqLog::fatal( const CqString &stringFormat, ... )
+void CqLog::fatal( const CqString &string )
 {
-	va_list va;
-	va_start(va,stringFormat);
-	log2(log4cpp::Priority::FATAL, stringFormat.c_str(), va);
-	va_end(va);
+	log2(log4cpp::Priority::FATAL, string.c_str());
 }
 
 // ------------------------------ Debug
@@ -356,12 +345,9 @@ void CqLog::debug( const char* stringFormat, ... )
 	va_end(va);
 }
 
-void CqLog::debug( const CqString &stringFormat, ... )
+void CqLog::debug( const CqString &string )
 {
-	va_list va;
-	va_start(va,stringFormat);
-	log2(log4cpp::Priority::DEBUG, stringFormat.c_str(), va);
-	va_end(va);
+	log2(log4cpp::Priority::DEBUG, string.c_str());
 }
 
 END_NAMESPACE( Aqsis )

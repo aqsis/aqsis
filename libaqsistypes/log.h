@@ -72,49 +72,49 @@ class CqLog	: public IqLog
 		void setMessageTable( CqMessageTable* pTable );
 		CqMessageTable* getMessageTable();
 
-		void log( char* priority, const char* stringFormat, ... );
-		void log( const char *priority, const CqString &stringFormat, ... );
+		void log( const char* priority, const char* stringFormat, ... );
+		void log( const char* priority, const CqString &stringFormat );
 		
 		/** Log an error message
 		 */
 		void error( int table, int error_id );
 		void error( const char* stringFormat, ... );
-		void error( const CqString &stringFormat, ... );
+		void error( const CqString &string );
 
 		/** Log an warning
 		 */
 		void warn( int table, int error_id );
 		void warn( const char* stringFormat, ... );
-		void warn( const CqString &stringFormat, ... );
+		void warn( const CqString &string );
 
 		/** Log an critical error message
 		 */
 		void critical( int table, int error_id );
 		void critical( const char* stringFormat, ... );
-		void critical( const CqString &stringFormat, ... );
+		void critical( const CqString &string );
 
 		/** Log an notice message
 		 */
 		void notice( int table, int error_id );
 		void notice( const char* stringFormat, ... );
-		void notice( const CqString &stringFormat, ... );
+		void notice( const CqString &string );
 		
 		/** Log an info message
 		 */
 		void info( int table, int error_id );
 		void info( const char* stringFormat, ... );
-		void info( const CqString &stringFormat, ... );
+		void info( const CqString &string );
 		
 		/** Log an fatal error
 		 */
 		void fatal( int table, int error_id );
 		void fatal( const char* stringFormat, ... );
-		void fatal( const CqString &stringFormat, ... );
+		void fatal( const CqString &string );
 		
 		/** Log an debug message
 		 */
 		void debug( const char* stringFormat, ... );
-		void debug( const CqString &stringFormat, ... );
+		void debug( const CqString &string );
 
 		const char* getError( int table, int error_id );
 
@@ -153,6 +153,7 @@ class CqLog	: public IqLog
 		void createCOUTLog( std::string name = "AqsisConsoleLog" );
 
 		void log2( log4cpp::Priority::Value priority, const char* stringFormat, va_list va );
+		void log2( log4cpp::Priority::Value priority, const char* string );
 
 		log4cpp::Appender* m_pAppender;
 		log4cpp::Appender* m_pFileAppender;
