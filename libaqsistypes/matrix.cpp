@@ -26,6 +26,12 @@
 #include	<math.h>
 #include	"matrix.h"
 
+#ifdef AQSIS_SYSTEM_MACOSX
+#define acosf acos
+#define tanf tan
+#define sqrtf sqrt
+#endif
+
 START_NAMESPACE(Aqsis)
 
 //---------------------------------------------------------------------
