@@ -227,13 +227,20 @@ void CqImagePixel::Combine()
 	m_Coverage = 0;
 	
 	TqUint samplecount = 0;
+	TqUint numsamples = XSamples()*YSamples();
 	for(std::vector<std::vector<SqImageSample> >::iterator samples = m_aValues.begin(); samples != m_aValues.end(); samples++)
 	{
 		CqColor samplecolor(0,0,0);
+		TqBool samplehit=TqFalse;
 		for(std::vector<SqImageSample>::reverse_iterator sample = samples->rbegin(); sample != samples->rend(); sample++)
 		{
 			samplecolor = (samplecolor * (white - sample->m_colOpacity)) + sample->m_colColor;
-			m_Coverage += 1;
+			samplehit=TqTrue;
+		}
+
+		if(samplehit)
+		{
+			m_Coverage+=1;
 			samplecount++;
 		}
 
@@ -242,7 +249,7 @@ void CqImagePixel::Combine()
 	}
 	
 	if(samplecount)
-		m_Coverage /= samplecount;
+		m_Coverage /= numsamples;
 }
 
 
