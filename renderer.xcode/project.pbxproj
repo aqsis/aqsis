@@ -2601,7 +2601,6 @@
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = NO;
 				INSTALL_PATH = /usr/local/lib;
-				LIBRARY_SEARCH_PATHS = /Users/pgregory/aqsis/renderer/build;
 				LIBRARY_STYLE = STATIC;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
@@ -2803,7 +2802,6 @@
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = NO;
 				INSTALL_PATH = /usr/local/bin;
-				LIBRARY_SEARCH_PATHS = /Users/pgregory/aqsis/renderer/build;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -3000,7 +2998,6 @@
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = NO;
 				INSTALL_PATH = /usr/local/bin;
-				LIBRARY_SEARCH_PATHS = /Users/pgregory/aqsis/renderer/build;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -3647,7 +3644,6 @@
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = NO;
 				INSTALL_PATH = /usr/local/bin;
-				LIBRARY_SEARCH_PATHS = /Users/pgregory/aqsis/renderer/build;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -3864,7 +3860,7 @@
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = NO;
 				INFOPLIST_FILE = "display-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
+				INSTALL_PATH = "$(TARGET_BUILD_DIR)";
 				LIBRARY_SEARCH_PATHS = "/sw/lib /usr/local/lib";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-framework Carbon -lfltk";
@@ -6649,7 +6645,7 @@
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = NO;
 				INSTALL_PATH = /usr/local/bin;
-				LIBRARY_SEARCH_PATHS = "\"$(TARGET_BUILD_DIR)\" /Users/pgregory/aqsis/renderer/build";
+				LIBRARY_SEARCH_PATHS = "\"$(TARGET_BUILD_DIR)\"";
 				OTHER_CFLAGS = "";
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = aqsis;
@@ -6861,6 +6857,7 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = "PLUGINS CONFIG_PATH=\\\"$(TARGET_BUILD_DIR)\\\" BASE_PATH=\\\"$(TARGET_BUILD_DIR)\\\" $(value)";
 				HEADER_SEARCH_PATHS = "render librib2 boost libshaderexecenv libshadervm /sw/include $(value)";
+				INSTALL_PATH = "$(TARGET_BUILD_DIR)";
 			};
 			isa = PBXBuildStyle;
 			name = Development;
@@ -7084,7 +7081,6 @@
 			buildRules = (
 			);
 			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = AQSIS_SYSTEM_MACOSX;
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = NO;
 				INSTALL_PATH = /usr/local/lib;
