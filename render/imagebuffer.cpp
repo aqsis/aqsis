@@ -468,17 +468,22 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 	if ( iYBa < 0 ) iYBa = 0;
 	iBkt = ( iYBa * m_cXBuckets ) + iXBa;
 
-	// If the bucket is less than the current, see if it overlaps the current bucket, this
+	// If the bucket is less than the current, see if it fits in the current bucket, this
 	// should allow for trimmed u-polys that lie on a bucket boundary, as is the case with 
 	// bilinear patches with 3 points.
 	if( iBkt < iCurrentBucket() )
 	{
 		CqVector2D BucketMin = Position( iCurrentBucket() );
-		if ( ( B.vecMax().x() >= BucketMin.x() ) &&
-			( B.vecMax().y() >= BucketMin.y() ) )
+		CqVector2D BucketMax = BucketMin + Size( iCurrentBucket() );
+		if ( !( ( B.vecMin().x() > BucketMax.x() ) ||
+			    ( B.vecMin().y() > BucketMax.y() ) ||
+			    ( B.vecMax().x() < BucketMin.x() ) ||
+			    ( B.vecMax().y() < BucketMin.y() ) ) )
 		{
 			iBkt = iCurrentBucket();
 		}
+		// I'm not sure if this should be here.  I've added it because I kept
+		// hitting the assert() below.  Jonathan Merritt, 20030612.
 		else
 		{
 			RELEASEREF( pmpgNew );
