@@ -92,7 +92,7 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 			//m_aAttributes.push_back( pAttribute );
 		}
 		/** Get a pointer to a named user defined attribute.
-		 * \param straName the name of the attribute to retrieve.
+		 * \param strName the name of the attribute to retrieve.
 		 * \return a pointer to the attribute or 0 if not found.
 		 */
 		const	CqSystemOption* pAttribute( const char* strName ) const
@@ -105,7 +105,7 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		/** Get a pointer to a named user defined attribute suitable for writing.
 		 * If the attribute has more than 1 external reference, create a duplicate an return that.
 		 * \attention If the attribute does not exist in the list, one will automatically be created and added.
-		 * \param straName the name of the attribute to retrieve.
+		 * \param strName the name of the attribute to retrieve.
 		 * \return a pointer to the attribute.
 		 */
 		CqSystemOption* pAttributeWrite( const char* strName )

@@ -5,7 +5,7 @@
  *	@brief	Declare the common interface structure for a Renderer core class.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/05/07 22:37:58 $
+ *	Last change date:	$Date: 2002/08/12 14:27:09 $
  */
 //------------------------------------------------------------------------------
 #ifndef	___irenderer_Loaded___
@@ -44,7 +44,7 @@ struct IqRenderer
 		 */
 //		virtual	CqStats&	Stats() = 0;
 		/** Print a message to stdout, along with any relevant message codes.
-		 * \param msg A SqMessage structure to print.
+		 * \param str A SqMessage structure to print.
 		 */
 		virtual	void	PrintString( const char* str ) = 0;
 

@@ -29,6 +29,7 @@ esac],
 AM_CONDITIONAL(PLUGINS, test x$plugins = xtrue)
 
 AC_PROG_CXX
+CXXFLAGS=-O2
 AM_ENABLE_SHARED
 AM_PROG_LIBTOOL
 AM_PROG_LEX
@@ -44,6 +45,8 @@ HAVE_LIBTIFF
 
 dnl Needed by librib2/bdec.cpp. Define WORDS_BIGENDIAN.
 AC_C_BIGENDIAN
+
+CPPFLAGS="$CPPFLAGS -DBASE_PATH=\\\"\"$datadir\\\"\" -DCONFIG_PATH=\\\"\"$sysconfdir/aqsis\\\"\""
 
 AC_OUTPUT( \
 all/Makefile \

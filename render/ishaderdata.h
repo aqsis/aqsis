@@ -5,7 +5,7 @@
  *	@brief	Decares the interface to generic shader variables.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/07/23 15:36:48 $
+ *	Last change date:	$Date: 2002/08/12 14:27:09 $
  */
 //------------------------------------------------------------------------------
 
@@ -210,7 +210,6 @@ struct IqShaderData
 		/** Pure virtual, prepare the variable for the SIMD size.
 		 * \param uGridRes The size of the SIMD grid in u.
 		 * \param vGridRes The size of the SIMD grid in v.
-		 * \param index A Reference to a SIMD index used to obtain the 'current', in terms of SIMD execution, value.
 		 */
 		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes ) = 0;
 		/** Create a duplicate of this variable.
@@ -218,17 +217,15 @@ struct IqShaderData
 		 */
 		virtual	IqShaderData* Clone() const = 0;
 		/** Set the all SIMD data ased on a state vector, only indexes whose bit is set are modified.
-		 * \param Val The stack entry to assign.
-		 * \param State The bit vector to control modification.
-		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal, TqInt index ) = 0;
-		/** Copy the values from the passed variable into this, taking into account any class differences.
-		 * \param Val The variable to copy from.
-		 */
-		virtual	void	SetValueFromVariable( IqShaderData* pVal ) = 0;
-		/** Get an indexed SIMD data value.
+		 * \param pFrom The stack entry to assign.
 		 * \param index Integer SIMD index.
-		 * \param Val A reference to a stackentry to store the value.
+		 */
+		virtual	void	SetValueFromVariable( IqShaderData* pFrom, TqInt index ) = 0;
+		/** Copy the values from the passed variable into this, taking into account any class differences.
+		 * \param pFrom The variable to copy from.
+		 */
+		virtual	void	SetValueFromVariable( IqShaderData* pFrom ) = 0;
+		/** Get an indexed SIMD data value.
 		 */
 		virtual	EqVariableClass	Class() const = 0;
 		/** Get the variable type.

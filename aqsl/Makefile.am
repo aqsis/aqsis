@@ -6,7 +6,7 @@ bin_SCRIPTS = aqsl
 EXTRA_DIST = aqsl aqsl_win.cpp aqsl.dsp aqslcomp.dsp macaqsl
 
 aqslcomp_SOURCES = aqslcomp.cpp
-aqslcomp_LDADD = $(top_builddir)/libslparse/libslparse.la $(top_builddir)/libcodegenvm/libcodegenvm.la $(top_builddir)/libaqsistypes/libaqsistypes.la
+aqslcomp_LDADD = $(top_builddir)/libslparse/libslparse.la $(top_builddir)/libcodegenvm/libcodegenvm.la $(top_builddir)/libaqsistypes/libaqsistypes.la -largparse
 
 if DEBUG
 AM_CXXFLAGS = -g -Wall

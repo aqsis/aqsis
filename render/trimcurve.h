@@ -5,7 +5,7 @@
  *	@brief	NURB based trim cureve class.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/03/01 18:00:36 $
+ *	Last change date:	$Date: 2002/08/12 14:27:10 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -69,7 +69,6 @@ class CqTrimCurve
 
 		/** Get the control point at the specified u,v index.
 		 * \param u Index in the u direction.
-		 * \param v Index in the v direction.
 		 * \return Reference to the 4D homogenous control point.
 		 */
 		CqVector3D&	CP( const TqUint u )
@@ -78,7 +77,6 @@ class CqTrimCurve
 		}
 		/** Get the control point at the specified u,v index.
 		 * \param u Index in the u direction.
-		 * \param v Index in the v direction.
 		 * \return Reference to the 4D homogenous control point.
 		 */
 		const	CqVector3D&	CP( const TqUint u ) const

@@ -67,12 +67,12 @@ class CqLightsource : public CqListEntry<CqLightsource>, public IqLightsource
 		}
 		/** Initialise the shader execution environment.
 		 * \param uGridRes Integer grid size, not used.
-		 * \param cGridRes Integer grid size, not used.
+		 * \param vGridRes Integer grid size, not used.
 		 */
 		virtual void	Initialise( TqInt uGridRes, TqInt vGridRes );
 		//			void		GenerateShadowMap(const char* strShadowName);
 		/** Evaluate the shader.
-		 * \param Ps the point being lit.
+		 * \param pPs the point being lit.
 		 */
 		virtual void	Evaluate( IqShaderData* pPs )
 		{

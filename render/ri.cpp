@@ -4673,7 +4673,7 @@ void SetShaderArgument( IqShader* pShader, const char* name, TqPchar val )
 	\param	compression	compression	Pointer to an integer to containing the TIFF compression
 	\param	quality it is the quality of jpeg's compression
 	\param	count list counter
-	\param	token list of tokens
+	\param	tokens list of tokens
 	\param	values list of values
  
 	\return	nothing

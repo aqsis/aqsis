@@ -237,7 +237,8 @@ TqInt CqTextureMap::Convert( CqString &strName )
 
 	char *aqsis_home = getenv( "AQSIS_BASE_PATH" );
 
-	if ( aqsis_home == NULL ) return 0;
+	if ( aqsis_home == NULL )
+	    aqsis_home = BASE_PATH;
 
 	ext = ( TqPchar ) strName.c_str();
 	if ( ext && *ext )
@@ -2049,7 +2050,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlo
  * as unsigned char values
  */
 
-void CqTextureMap::WriteTileImage( TIFF* ptex, unsigned char *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
+void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
 	TqChar version[ 80 ];
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
@@ -2110,7 +2111,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, unsigned char *raster, TqUlong wi
  */
 
 
-void CqTextureMap::WriteImage( TIFF* ptex, unsigned char *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
+void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
 	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );

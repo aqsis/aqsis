@@ -5,7 +5,7 @@
  *	@brief	Declare the interface which all shaders must implement.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/08/10 15:31:46 $
+ *	Last change date:	$Date: 2002/08/12 14:27:09 $
  */
 //------------------------------------------------------------------------------
 
@@ -59,7 +59,7 @@ struct IqShader
 		virtual	const CqString& strName() const = 0;
 		/** Set a named shader paramter to the specified value.
 		 * \param name Character pointer to parameter name.
-		 * \param val Character pointer to the vale storage, will be cast to a pointer of the appropriate type.
+		 * \param val Character pointer to the value storage, will be cast to a pointer of the appropriate type.
 		 */
 		virtual	void	SetArgument( const CqString& name, EqVariableType type, const CqString& space, void* val ) = 0;
 		/** Set a named varying shader paramter to the specified value.
@@ -79,7 +79,7 @@ struct IqShader
 		 */
 		virtual	TqBool	GetValue( const char* name, IqShaderData* res ) = 0;
 		/** Evaluate the shader code.
-		 * \param Env The shader execution environment to evaluate within.
+		 * \param pEnv The shader execution environment to evaluate within.
 		 */
 		virtual	void	Evaluate( IqShaderExecEnv* pEnv ) = 0;
 		/** Initialise the state of any arguments with default values.
@@ -88,7 +88,7 @@ struct IqShader
 		/** Prepare the shader for evaluation.
 		 * \param uGridRes The resolution of the grid being shaded in u.
 		 * \param vGridRes The resolution of the grid being shaded in v
-		 * \param Env Pointer to the IqShaderExecEnv to evaluate within.
+		 * \param pEnv Pointer to the IqShaderExecEnv to evaluate within.
 		 */
 		virtual void	Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShaderExecEnv* pEnv ) = 0;
 		/** Determine whether this shader is an aambient ligthsource shader.

@@ -903,7 +903,7 @@ CqBound CqMicroPolygonStaticBase::GetTotalBound() const
 
 //---------------------------------------------------------------------
 /** Sample the specified point against the MPG at the specified time.
- * \param vecP 2D vector to sample against.
+ * \param vecSample 2D vector to sample against.
  * \param time Shutter time to sample at.
  * \param D Storage for depth if valid hit.
  * \return Boolean indicating smaple hit.
@@ -1028,7 +1028,7 @@ void CqMicroPolygonMotion::BuildBoundList()
 
 //---------------------------------------------------------------------
 /** Sample the specified point against the MPG at the specified time.
- * \param vecP 2D vector to sample against.
+ * \param vecSample 2D vector to sample against.
  * \param time Shutter time to sample at.
  * \param D Storage for depth if valid hit.
  * \return Boolean indicating smaple hit.

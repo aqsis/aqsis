@@ -150,7 +150,7 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		}
 
 		/** Cache the calculated bound for further reference
-		 * \param The calculated bound in hybrid raster/camera space
+		 * \param pBound The calculated bound in hybrid raster/camera space
 		 */
 		void CacheRasterBound( CqBound& pBound )
 		{

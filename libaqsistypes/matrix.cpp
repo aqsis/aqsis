@@ -968,7 +968,7 @@ CqMatrix &CqMatrix::operator=( TqFloat From[ 16 ] )
 
 //---------------------------------------------------------------------
 /** Returns the inverse of this matrix using an algorithm from Graphics
- * \param Gems IV (p554) - Gauss-Jordan elimination with partial pivoting
+ *  Gems IV (p554) - Gauss-Jordan elimination with partial pivoting
  */
 
 CqMatrix CqMatrix::Inverse() const
@@ -1218,6 +1218,7 @@ std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix )
 //---------------------------------------------------------------------
 /** Scale each element by the specified value.
  * \param S The amount by which to scale the matrix elements.
+ * \param a The matrix to be scaled.
  * \return Result of scaling this matrix by S.
  */
 

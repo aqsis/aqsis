@@ -581,26 +581,28 @@ void CqDDManager::InitialiseDisplayNameMap()
 {
 	// Read in the configuration file.
 	// Find the config file in the same place as the display drivers.
-#ifdef AQSIS_SYSTEM_MACOSX
+#ifdef AQSIS_SYSTEM_POSIX
 	CqString ddmsock_path( "" );
 	char* env = NULL;
 
-	env = getenv( "AQSIS_BASE_PATH" );
+	env = getenv( "AQSIS_CONFIG_PATH" );
 	if ( env == NULL )
 	{
-		ddmsock_path = "./";
+		ddmsock_path = CONFIG_PATH;
 	}
 	else
 	{
 		ddmsock_path = env;
-		ddmsock_path.append( "/" );
 	}
+
+	ddmsock_path.append( "/" );
+
 	ddmsock_path.append( "ddmsock.ini" );
 
 	CqString strConfigFile = ddmsock_path;
 #else
 	CqString strConfigFile = "ddmsock.ini";
-#endif /* AQSIS_SYSTEM_MACOSX */
+#endif /* AQSIS_SYSTEM_POSIX */
 
 	CqRiFile fileINI( strConfigFile.c_str(), "display" );
 	if ( fileINI.IsValid() )

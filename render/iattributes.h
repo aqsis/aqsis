@@ -5,7 +5,7 @@
  *	@brief	Declare the interface class for common attributes access.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/05/07 22:37:58 $
+ *	Last change date:	$Date: 2002/08/12 14:27:09 $
  */
 //------------------------------------------------------------------------------
 
@@ -100,7 +100,7 @@ struct IqAttributes
 	 */
 	virtual	IqShader*	pshadDisplacement( TqFloat time = 0.0f ) const = 0;
 	/** Set the current displacement shader.
-	 * \param pshadAtmosphere a pointer to a shader to use as the displacement shader.
+	 * \param pshadDisplacement a pointer to a shader to use as the displacement shader.
 	 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
 	 */
 	virtual	void	SetpshadDisplacement( IqShader* pshadDisplacement, TqFloat time = 0.0f ) = 0;
@@ -111,7 +111,7 @@ struct IqAttributes
 	 */
 	virtual	IqShader*	pshadAreaLightSource( TqFloat time = 0.0f ) const = 0;
 	/** Set the current area light source shader.
-	 * \param pshadAtmosphere a pointer to a shader to use as the displacement shader.
+	 * \param pshadAreaLightSource a pointer to a shader to use as the area light source shader.
 	 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
 	 */
 	virtual	void	SetpshadAreaLightSource( IqShader* pshadAreaLightSource, TqFloat time = 0.0f ) = 0;
@@ -122,7 +122,7 @@ struct IqAttributes
 	 */
 	virtual	IqShader*	pshadSurface( TqFloat time = 0.0f ) const = 0;
 	/** Set the current surface shader.
-	 * \param pshadAtmosphere a pointer to a shader to use as the displacement shader.
+	 * \param pshadSurface a pointer to a shader to use as the surface shader.
 	 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
 	 */
 	virtual	void	SetpshadSurface( IqShader* pshadSurface, TqFloat time = 0.0f ) = 0;
@@ -133,7 +133,7 @@ struct IqAttributes
 	 */
 	virtual	IqShader*	pshadAtmosphere( TqFloat time = 0.0f ) const = 0;
 	/** Set the current atmosphere shader.
-	 * \param pshadAtmosphere a pointer to a shader to use as the displacement shader.
+	 * \param pshadAtmosphere a pointer to a shader to use as the atmosphere shader.
 	 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
 	 */
 	virtual	void	SetpshadAtmosphere( IqShader* pshadAtmosphere, TqFloat time = 0.0f ) = 0;
@@ -144,7 +144,7 @@ struct IqAttributes
 	 */
 	virtual	IqShader*	pshadExteriorVolume( TqFloat time = 0.0f ) const = 0;
 	/** Set the current external volume shader.
-	 * \param pshadAtmosphere a pointer to a shader to use as the displacement shader.
+	 * \param pshadExteriorVolume a pointer to a shader to use as the exterior volume shader.
 	 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
 	 */
 	virtual	void	SetpshadExteriorVolume( IqShader* pshadExteriorVolume, TqFloat time = 0.0f ) = 0;
@@ -155,7 +155,7 @@ struct IqAttributes
 	 */
 	virtual	IqShader*	pshadAreaInteriorVolume( TqFloat time = 0.0f ) const = 0;
 	/** Set the current internal volume shader.
-	 * \param pshadAtmosphere a pointer to a shader to use as the displacement shader.
+	 * \param pshadInteriorVolume a pointer to a shader to use as the interior volume shader.
 	 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
 	 */
 	virtual	void	SetpshadInteriorVolume( IqShader* pshadInteriorVolume, TqFloat time = 0.0f ) = 0;

@@ -220,7 +220,8 @@ class CqCylinder : public CqQuadric
 class CqHyperboloid : public CqQuadric
 {
 	public:
-		CqHyperboloid( CqVector3D& point1 = CqVector3D(0.0f,0.0f,0.0f), CqVector3D& point2 = CqVector3D(1.0f,1.0f,1.0f), TqFloat thetamin = 0.0f, TqFloat thetamax = 360.0f );
+		CqHyperboloid( );
+		CqHyperboloid( CqVector3D& point1, CqVector3D& point2, TqFloat thetamin, TqFloat thetamax );
 		CqHyperboloid( const CqHyperboloid& From )
 		{
 			*this = From;

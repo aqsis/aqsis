@@ -295,7 +295,6 @@ std::vector<TqFloat> CqBucket::m_aFilterValues;
 /** Get a reference to pixel data.
  * \param iXPos Integer pixel coordinate.
  * \param iYPos Integer pixel coordinate.
- * \param iBucket Integer bucket index.
  * \param pie Pointer to CqImagePixel to fill in.
  * \return Boolean indicating success, could fail if the specified pixel is not within the specified bucket.
  */

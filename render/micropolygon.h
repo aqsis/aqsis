@@ -69,7 +69,7 @@ class CqMicroPolyGridBase
 		 * \param xmin The minimum x pixel, taking into account clipping etc.
 		 * \param xmax The maximum x pixel, taking into account clipping etc.
 		 * \param ymin The minimum y pixel, taking into account clipping etc.
-		 * \param xmax The maximum y pixel, taking into account clipping etc.
+		 * \param ymax The maximum y pixel, taking into account clipping etc.
 		 */
 		virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax ) = 0;
 		/** Pure virtual, project the grid into raster space.

@@ -73,20 +73,20 @@ class CqASCII
 
 		/* RenderMan State machine */
 		RtVoid RiBegin( RtToken name );
-		RtVoid RiEnd();
+		RtVoid RiEnd( RtVoid );
 
 		RtVoid RiFrameBegin( RtInt frame );
-		RtVoid RiFrameEnd();
+		RtVoid RiFrameEnd( RtVoid );
 
-		RtVoid RiWorldBegin();
-		RtVoid RiWorldEnd();
+		RtVoid RiWorldBegin( RtVoid );
+		RtVoid RiWorldEnd( RtVoid );
 
-		RtObjectHandle RiObjectBegin();
-		RtVoid RiObjectEnd();
+		RtObjectHandle RiObjectBegin( RtVoid );
+		RtVoid RiObjectEnd( RtVoid );
 		RtVoid RiObjectInstance( RtObjectHandle handle );
 
-		RtVoid RiAttributeBegin();
-		RtVoid RiAttributeEnd();
+		RtVoid RiAttributeBegin( RtVoid );
+		RtVoid RiAttributeEnd( RtVoid );
 
 		RtVoid RiTransformBegin( RtVoid );
 		RtVoid RiTransformEnd( RtVoid );

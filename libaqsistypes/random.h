@@ -71,7 +71,6 @@ class _qShareC CqRandom
 		}
 
 		/** Get a random float (0.0 < value < 1.0).
-		 * \param Range Integer max value.
 		 */
 		_qShareM	TqFloat	RandomFloat()
 		{

@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/05/07 22:33:50 $
+ *	Last change date:	$Date: 2002/08/12 14:27:09 $
  */
 //------------------------------------------------------------------------------
 
@@ -36,12 +36,12 @@ struct IqLightsource
 	virtual	IqShader*	pShader() = 0;
 	/** Initialise the shader execution environment.
 	 * \param uGridRes Integer grid size, not used.
-	 * \param cGridRes Integer grid size, not used.
+	 * \param vGridRes Integer grid size, not used.
 	 */
 	virtual	void	Initialise( TqInt uGridRes, TqInt vGridRes ) = 0;
 	//			void		GenerateShadowMap(const char* strShadowName);
 	/** Evaluate the shader.
-	 * \param Ps the point being lit.
+	 * \param pPs the point being lit.
 	 */
 	virtual	void	Evaluate( IqShaderData* pPs ) = 0;
 	/** Get a pointer to the attributes associated with this lightsource.

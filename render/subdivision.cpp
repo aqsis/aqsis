@@ -2487,19 +2487,7 @@ void CqWFace::CreateSubdivideScalar( CqParameter* pCurrent, CqParameter* pTarget
 
 		case type_hpoint:
 		{
-//			_SubdivideParameterFace_(CqVector4D, CqVector3D);
-			CqParameterTyped<CqVector4D, CqVector3D>* pNCurrent = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pCurrent); 
-			CqParameterTyped<CqVector4D, CqVector3D>* pNTarget  = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pTarget); 
-			CqVector4D val = 0.0f; 
-			for ( TqUint j = 0; j < m_apEdges.size(); j++ ) 
-			{ 
-				val += *pNCurrent->pValue(grE.pvHead() ->iVertex() ); 
-				grE.peNext(); 
-			} 
-			val /= static_cast<TqFloat>(m_apEdges.size()); 
-			if( pNTarget->Size() <= trgIndex ) 
-				pNTarget->SetSize( trgIndex+1 ); 
-			*pNTarget->pValue( trgIndex ) = val;
+			_SubdivideParameterFace_(CqVector4D, CqVector3D);
 		}
 		break;
 

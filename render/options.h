@@ -242,7 +242,7 @@ class CqOptions
 			return ( m_pPreRenderFunction );
 		}
 		/** Set the progress handler function to use.
-		 * \param pprogresshandler A pointer to a function which conforms to RtProgressFunc.
+		 * \param pfunction A pointer to a function which conforms to RtProgressFunc.
 		 */
 		void	SetpPreRenderFunction( RtFunc pfunction )
 		{

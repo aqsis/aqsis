@@ -176,7 +176,7 @@ class _qShareC CqMatrix
 		_qShareM	CqMatrix&	operator*=( const TqFloat S );
 
 		friend _qShare std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix );
-		friend CqMatrix	operator*( TqFloat f, const CqMatrix& a );
+		friend CqMatrix	operator*( TqFloat S, const CqMatrix& a );
 
 		_qShareM	TqFloat	Determinant() const;
 

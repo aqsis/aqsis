@@ -646,6 +646,18 @@ CqVector3D CqCylinder::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 /** Constructor.
  */
 
+CqHyperboloid::CqHyperboloid(  ) 
+{
+	m_Point1 = CqVector3D(0.0f, 0.0f, 0.0f);
+	m_Point2 = CqVector3D(0.0f, 0.0f, 1.0f);
+	m_ThetaMin = 0.0f;
+	m_ThetaMax = 1.0f;
+}
+
+//---------------------------------------------------------------------
+/** Constructor.
+ */
+
 CqHyperboloid::CqHyperboloid( CqVector3D& point1, CqVector3D& point2, TqFloat thetamin, TqFloat thetamax ) :
 		m_Point1( point1 ),
 		m_Point2( point2 ),

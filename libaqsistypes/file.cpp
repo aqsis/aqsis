@@ -38,19 +38,20 @@ START_NAMESPACE( Aqsis )
 /** Constructor
  */
 
-CqFile::CqFile( const char* strFilename, const char* strSearchPath ) : m_pStream( 0 )
+CqFile::CqFile( const char* strFilename, const char* strSearchPathOption ) : m_pStream( 0 )
 {
-	Open( strFilename, strSearchPath );
+	Open( strFilename, strSearchPathOption );
 }
 
 
 //---------------------------------------------------------------------
 /** Attach this CqFile object to a new file if we can find it.
- * \param strFileName Character pointer to the filename.
- * \param strSearchPath Character pointer to name of RI "searchpath" option to use as the searchpath.
+ * \param strFilename Character pointer to the filename.
+ * \param strSearchPathOption Character pointer to name of RI "searchpath" option to use as the searchpath.
+ * \param mode iostream mode used to open the file.
  */
 
-void CqFile::Open( const char* strFilename, const char* strSearchPath, std::ios::openmode mode )
+void CqFile::Open( const char* strFilename, const char* strSearchPathOption, std::ios::openmode mode )
 {
 	// Search in the current directory first.
 	m_strRealName = strFilename;
@@ -59,10 +60,10 @@ void CqFile::Open( const char* strFilename, const char* strSearchPath, std::ios:
 	if ( !pFStream->is_open() )
 	{
 		// If a searchpath option name was specified, use it.
-		if ( strcmp( strSearchPath, "" ) != 0 )
+		if ( strcmp( strSearchPathOption, "" ) != 0 )
 		{
 			// if not found there, search in the specified option searchpath.
-			CqString SearchPath( strSearchPath );
+			CqString SearchPath( strSearchPathOption );
 			// Search each specified path in the search path (separated by ':' or ';')
 			unsigned int start = 0;
 			while ( 1 )

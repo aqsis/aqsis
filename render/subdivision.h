@@ -311,7 +311,7 @@ class CqWEdge;
 #define	_SubdivideParameterFace_(A,B) \
 					CqParameterTyped<A, B>* pNCurrent = static_cast<CqParameterTyped<A, B>*>(pCurrent); \
 					CqParameterTyped<A, B>* pNTarget  = static_cast<CqParameterTyped<A, B>*>(pTarget); \
-					A val = 0.0f; \
+					A val = A(0.0f); \
 					for ( TqUint j = 0; j < m_apEdges.size(); j++ ) \
 					{ \
 						val += *pNCurrent->pValue(grE.pvHead() ->iVertex() ); \

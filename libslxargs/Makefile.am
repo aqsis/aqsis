@@ -5,6 +5,8 @@ lib_LTLIBRARIES = libslxargs.la
 libslxargs_la_SOURCES = slx.cpp slx.h 
 libslxargs_la_LDFLAGS = -rpath $(libdir)
 
+include_HEADERS = slx.h
+
 if DEBUG
 AM_CXXFLAGS = -g -Wall
 else

@@ -105,7 +105,7 @@ class CqListEntry
 		}
 
 		/** Link this class into the list before the specified entry.
-		 * \param pPrevious The list member to link this node in before.
+		 * \param pNext The list member to link this node in before.
 		 */
 		virtual	void	LinkBefore( CqListEntry*	pNext )
 		{
