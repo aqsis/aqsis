@@ -48,6 +48,7 @@
 #include	"shaders.h"
 #include	"renderer.h"
 #include	"symbols.h"
+#include	"ddserver.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -171,6 +172,10 @@ class CqRenderer
 #ifdef AQSIS_SYSTEM_WIN32
 				virtual	void		LoadDisplayLibrary();
 #endif // AQSIS_SYSTEM_WIN32
+				virtual	void		SignalDDThreadFinished()
+														{
+															m_semDDThreadFinished.Signal();
+														}
 				virtual	void		Quit();
 				virtual	void		UpdateStatus()		{}
 						/** Get the global statistics class.
@@ -277,6 +282,9 @@ class CqRenderer
 			CqAttributes	m_attrDefault;					///< Default attributes.
 			CqTransform		m_transDefault;					///< Default transformation.
 			CqImageBuffer*	m_pImageBuffer;					///< Pointer to the current image buffer.
+			CqDDServer		m_DDServer;
+			CqSemaphore		m_semDDClientReady;				///< Semaphore used to check for safe startup of a display client.
+			CqSemaphore		m_semDDThreadFinished;			///< Semaphore used to determine that the DD server accept thread has safely ended.
 			
 #ifdef AQSIS_SYSTEM_WIN32			
 			HANDLE			m_hDisplayThread;				///< Handle to the display driver thread.

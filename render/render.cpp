@@ -44,9 +44,12 @@ BOOL APIENTRY DllMain( HINSTANCE hModule,
                        LPVOID lpReserved
 					 )
 {
+	WSADATA	sockdata;
+
 	switch (ul_reason_for_call)
 	{
 		case DLL_PROCESS_ATTACH:
+			WSAStartup(MAKEWORD(2,0),&sockdata);
 			InitialiseINIData();
 			break;
 		case DLL_THREAD_ATTACH:

@@ -37,6 +37,7 @@
 #include	"shadervm.h"
 #include	"transform.h"
 #include	"file.h"
+#include	"displaydriver.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -49,7 +50,8 @@ CqRenderer* pCurrRenderer=0;
 CqRenderer::CqRenderer() :
 	m_pImageBuffer(0),
 	m_Mode(RenderMode_Image),
-	m_fSaveGPrims(TqFalse)
+	m_fSaveGPrims(TqFalse),
+	m_DDServer(AQSIS_DD_PORT)
 {
 	m_pconCurrent=0;
 	//m_pImageBuffer=new	CqImageBuffer();
@@ -84,6 +86,11 @@ CqRenderer::~CqRenderer()
 		m_pImageBuffer=0;
 	}
 	FlushShaders();
+
+	// Close down the Display Driver server.
+	m_DDServer.Quit();
+	m_DDServer.Close();
+	m_semDDThreadFinished.Wait();
 }
 
 
