@@ -63,6 +63,8 @@
 
 #undef _qShareName
 
+#define SHARED_LIBRARY_SUFFIX ".dll"
+
 #endif	// AQSIS_DYNAMIC_LINK
 
 //-----------------------------------------------------------------------

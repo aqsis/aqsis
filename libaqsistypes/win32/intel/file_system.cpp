@@ -24,15 +24,46 @@
 */
 
 #include	<fstream>
+#include	<list>
 
 #include	<string.h>
 #include	<ctype.h>
+#include	<io.h>
+#include	<direct.h>
 
 #include	"aqsis.h"
 
 #include	"file.h"
 
 START_NAMESPACE( Aqsis )
+
+//---------------------------------------------------------------------
+/** Given a string representing a filename with wildcards, return a list
+ * of filenames that match that string.
+*/
+std::list<CqString*> Glob (const CqString& strFileGlob)
+{
+	_finddata_t     c_file;
+	long            hFile;
+	char            name[1024];
+	const char *pt = strFileGlob.c_str();
+
+	std::list<CqString*> result;
+	if( (hFile = _findfirst(pt, &c_file )) != -1L ) {
+		/* we found something here; then we list
+		* all of them with the directory first
+		*/
+		result.push_front( CqString(c_file.name) );
+		while( _findnext( hFile, &c_file ) == 0 ) {
+			result.push_front( new CqString(c_file.name) );
+		}
+		_findclose( hFile );
+	}
+
+	return result ;
+}
+
+
 
 //---------------------------------------------------------------------
 /** Get the searchpath for a the specified asset type. The way in which the

@@ -28,6 +28,7 @@
 #define FILE_H_INCLUDED 1
 
 #include	<iostream>
+#include	<list>
 
 #include	"aqsis.h"
 
@@ -120,6 +121,7 @@ class _qShareC CqFile
 			return ( len );
 		}
 
+		_qShareM static std::list<CqString*> Glob(const CqString& strFileGlob);
 		_qShareM static CqString GetSystemSetting(const CqString& strAsset);
 
 	private:

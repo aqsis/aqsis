@@ -27,6 +27,7 @@
 
 #include	<string.h>
 #include	<ctype.h>
+#include	<glob.h>
 
 #include	"aqsis.h"
 
@@ -34,6 +35,30 @@
 #include	"config.h"
 
 START_NAMESPACE( Aqsis )
+
+//---------------------------------------------------------------------
+/** Given a string representing a filename with wildcards, return a list
+ * of filenames that match that string.
+*/
+std::list<CqString*> CqFile::Glob (const CqString& strFileGlob)
+{
+	glob_t  globbuf;
+	const char *pt = strFileGlob.c_str();
+
+	globbuf.gl_offs =       0;
+	glob(pt,GLOB_DOOFFS,NULL,&globbuf);
+
+	std::list<CqString*> result;
+	int i;
+	for (i=0;i<globbuf.gl_pathc;i++) {
+		result.push_front( new CqString( globbuf.gl_pathv[i] ) );
+	}
+
+	globfree(&globbuf);
+	return result;
+}
+
+
 
 //---------------------------------------------------------------------
 /** Get the searchpath for a the specified asset type. The way in which the

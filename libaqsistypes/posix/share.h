@@ -53,6 +53,9 @@
 
 #undef _qShareName
 
+/* This may need to be different for other platforms */
+#define SHARED_LIBRARY_SUFFIX ".so"
+
 #ifdef	__cplusplus
 #endif
 
