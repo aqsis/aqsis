@@ -1,3 +1,77 @@
+2003-08-22 09:46  pgregory
+
+	* configure.in, render/version.h: Update version to 0.7.17
+
+2003-08-22 07:49  pgregory
+
+	* render/: shadowmap.cpp, texturemap.h: Fix bug in shadow sampling.
+	A) the random number table wasn't being initialised at all, hence
+	stripy shadows when blurred. B) the blur width should be applied as
+	is, not half, at least now Aqsis shows nearly identical results to
+	prman.
+
+2003-08-21 22:24  pgregory
+
+	* libslparse/typecheck.cpp, render/nurbs.cpp: Fix a bug in the
+	initialisation of default s/t values on NURBS patches.	Fix a bug
+	in the conversion of sixteentuples to matrices at compile time.
+
+2003-08-20 22:55  pgregory
+
+	* render/bucket.cpp: Rollback errant filtering optimisation.
+	Spotted by the regression tests!
+
+2003-08-20 22:21  pgregory
+
+	* render/libaqsis.def: Remove unnecessary CqColor::operator=
+	export.
+
+2003-08-20 15:18  minty
+
+	* libaqsistypes/color.h, libaqsistypes/matrix.h,
+	libshaderexecenv/shadeops.cpp: Fixes for compilation under gcc >
+	3.3 .
+
+2003-08-19 17:14  minty
+
+	* configure.in: Add an --enable-profile option for POSIX builds
+	with gcc3
+
+2003-08-18 21:15  tshead
+
+	* libcodegenvm/codegenvm.cpp, libcodegenvm/vmdatagather.cpp,
+	libcodegenvm/vmoutput.cpp, libdd/dd.cpp, libddmsock/ddmsock.cpp,
+	librib2/bdec.h, render/bucket.cpp, render/imagebuffer.cpp,
+	render/imagepixel.cpp, render/nurbs.cpp, render/renderer.cpp,
+	render/ri.cpp: * Fix: a missing "std::ends" compiling shaders led
+	to junk in the .slx file.  This manifested for me when compiling
+	the "brushedmetal" shader from Advanced RenderMan.  * Cleanup:
+	Removed unused "#include <strstream>" directives
+
+2003-08-16 20:03  pgregory
+
+	* render/: bucket.cpp, imagepixel.cpp: Some optimisations. Don't
+	delete and re-allocate the pixel storage data for each bucket.
+
+2003-08-15 13:42  pgregory
+
+	* aqsl/aqslcomp.cpp: Add #include <stdio.h> to allow safe compiling
+	on gcc 2.95.
+
+2003-08-14 21:49  pgregory
+
+	* render/ri.cpp: Fix problem with searchpath setup under Windows.
+	The temp string returned from the GetSystemSetting call was being
+	cleaned up before it could be used. Also "displays" was mispelled.
+
+2003-08-14 11:31  pgregory
+
+	* configure.in, render/version.h: Update version no. to 0.7.16
+
+2003-08-14 09:57  pgregory
+
+	* ChangeLog: Update with latest changes prior to 0.7.15 release.
+
 2003-08-14 02:17  minty
 
 	* librib2/librib.cpp, render/ri.cpp, librib2/librib.h: Add a
