@@ -579,6 +579,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 			TqFloat ztemp = Point.z();
 			Point = matCameraToRaster * Point;
 			Point.z( ztemp );
+			pP[ iu ] = Point;
 
 			TqFloat radius = 1.0f;
 			if( NULL != pConstantWidthParam )
