@@ -14,7 +14,7 @@ endif
 
 SUBDIRS = $(MAINDIRS) $(GLUTDIRS) $(PLUGINSDIRS)
 
-EXTRA_DIST = Doxyfile License.txt Renderer.dsw bootstrap prep_install.bat ribber.cfg ddmsock.ini ddmsock-macosx.ini MacAqsis_README.html MacAqsis-test.sh aqsisrc-macosx
+EXTRA_DIST = Doxyfile Renderer.dsw bootstrap prep_install.bat ribber.cfg ddmsock.ini 
 
 .PHONY: test
 test:
