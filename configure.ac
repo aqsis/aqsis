@@ -116,6 +116,22 @@ dnl    PTHREAD_LIBS
 dnl    PTHREAD_CFLAGS
 ACX_PTHREAD(LIBS="$PTHREAD_LIBS $LIBS",)
 
+dnl Check if we should use the new display devices refactor.
+dnl  NB: this should be temporary until the new display devices become standard
+AC_ARG_ENABLE( newdisplay,
+[  --enable-newdisplay     compile with new display refactor support [default=no, requires FLTK support]],
+[case "${enableval}" in
+  true)  newdisplay=true  ;;
+  yes)   newdisplay=true  ;;
+  false) newdisplay=false ;;
+  no)    newdisplay=false ;;
+  *)     AC_MSG_ERROR(bad value ${enableval} for --enable-newdisplay) ;;
+esac],
+[newdisplay=false])
+if test x$newdisplay = xtrue ; then
+  AC_DEFINE(AQSIS_NEWDISPLAY,,"Compile with the new Aqsis display device.")
+fi
+AM_CONDITIONAL(AQSIS_NEWDISPLAY, test x$newdisplay = xtrue)
 AQSIS_WITH_FLTK
 
 dnl TIFF library

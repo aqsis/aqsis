@@ -1,10 +1,6 @@
-MAINDIRS = boost all images libargparse libaqsistypes libcodegenvm libdd libdd2 libddmsimple libddmsock libddmsock2 filebuffer librib2 librib2ri librib2stream libslparse libshadervm libshaderexecenv libraytrace render ribfiles shadowmap slpp aqsl shaders libri2rib libslxargs teqser aqsis aqsltell dsotest thirdparty
+MAINDIRS = boost thirdparty all images libargparse libaqsistypes libcodegenvm librib2 librib2ri librib2stream libslparse libshadervm libshaderexecenv libraytrace ribfiles slpp aqsl shaders libri2rib libslxargs aqsltell dsotest
 
-if OPENGL
-GLUTDIRS = framebuffer_glut framebuffer_glut_z
-else
-GLUTDIRS = 
-endif
+RENDERDIRS = render aqsis
 
 if PLUGINS
 PLUGINSDIRS = plugins
@@ -12,13 +8,20 @@ else
 PLUGINSDIRS = 
 endif
 
+if AQSIS_NEWDISPLAY
+DISPLAYDIRS = libdd2 libddmsock2
 if AQSIS_FLTK
 FLTKDIRS = display
+endif
 else
-FLTKDIRS =
+DISPLAYDIRS = libdd libddmsimple libddmsock filebuffer shadowmap
+TOOLSDIRS = teqser
+if OPENGL
+GLUTDIRS = framebuffer_glut framebuffer_glut_z
+endif
 endif
 
-SUBDIRS = . $(MAINDIRS) $(GLUTDIRS) $(PLUGINSDIRS) $(FLTKDIRS)
+SUBDIRS = . $(MAINDIRS) $(DISPLAYDIRS) $(GLUTDIRS) $(PLUGINSDIRS) $(FLTKDIRS) $(RENDERDIRS) $(TOOLSDIRS)
 
 EXTRA_DIST = Doxyfile Renderer.dsw bootstrap doxygen.dsp
 
