@@ -119,6 +119,9 @@ class CqStats
 					/** Get a reference to the micropolygrids deallocated count.
 					 */
 			TqInt&	cGridsDeallocated()	{return(m_cGridsDeallocated);}
+					/** Get a reference to the GPrims count.
+					 */
+			TqInt&	cGPrims()			{return(m_cGPrims);}
 
 	private:
 			EqState	m_State;						///< Current process identifier.
@@ -135,6 +138,8 @@ class CqStats
 			TqInt	m_cParametersDeallocated;		///< Count of surface parameters deallocated.
 			TqInt	m_cGridsAllocated;				///< Count of micropolygrids allocated.
 			TqInt	m_cGridsDeallocated;			///< Count of micropolygrids allocated.
+
+			TqInt	m_cGPrims;						///< Count of GPrims.
 };
 
 

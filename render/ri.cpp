@@ -2015,6 +2015,7 @@ RtVoid	RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERL
 				if(fValid)
 					QGetRenderContext()->pImage()->PostSurface(pSurface);
 			}
+			QGetRenderContext()->Stats().cGPrims()++;
 		}
 		else
 		{
@@ -2072,6 +2073,7 @@ RtVoid	RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERL
 					QGetRenderContext()->pImage()->PostSurface(pSurface);
 				}
 			}
+			QGetRenderContext()->Stats().cGPrims()++;
 		}
 	}
 	else
@@ -2284,12 +2286,7 @@ RtVoid	RiNuPatchV(RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat
 	{
 		// Clamp the surface to ensure non-periodic.
 		pSurface->Clamp();
-
-		// Transform the points into camera space for processing,
-		pSurface->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
-							QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
-							QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
-		QGetRenderContext()->pImage()->PostSurface(pSurface);
+		CreateGPrim(pSurface);
 	}
 	else
 		delete(pSurface);
@@ -3045,6 +3042,7 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 			iPStart=iP;
 		}
 		QGetRenderContext()->pImage()->PostSurface(pSubdivision);
+		QGetRenderContext()->Stats().cGPrims()++;
 	}
 	else
 		delete(pSubdivision);
@@ -3249,6 +3247,7 @@ RtVoid	CreateGPrim(T* pSurface)
 							QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
 
 		QGetRenderContext()->pImage()->PostSurface(pSurface);
+		QGetRenderContext()->Stats().cGPrims()++;
 	}
 	else
 	{
@@ -3273,6 +3272,7 @@ RtVoid	CreateGPrim(T* pSurface)
 							QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
 							QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
 		QGetRenderContext()->pImage()->PostSurface(pMotionSurface);
+		QGetRenderContext()->Stats().cGPrims()++;
 	}
 
 	return(0);

@@ -544,7 +544,6 @@ void CqRenderer::PrintStats(TqInt level)
 	if(level>0)
 	{
 		std::strstream MSG;
-		TqInt cGPrims=0;		
 
 		TqFloat h=m_timeTaken/(60*60);
 		TqFloat m=(m_timeTaken/60)-(h*60);
@@ -558,42 +557,38 @@ void CqRenderer::PrintStats(TqInt level)
 			MSG << static_cast<TqInt>(s) << "secs ";
 		MSG << std::endl << std::endl;
 
-		MSG << "Grids:" << std::endl; 
-		MSG << "\t" << Stats().cGridsAllocated() << " created" << std::endl;
-		MSG << "\t" << Stats().cGridsAllocated()-Stats().cGridsDeallocated() << " remaining" << std::endl;
-		MSG << std::endl;
+		MSG << "Grids:    \t";
+		MSG << Stats().cGridsAllocated() << " created / ";
+		MSG << Stats().cGridsAllocated()-Stats().cGridsDeallocated() << " remaining" << std::endl;
 
-		MSG << "Micropolygons:" << std::endl; 
-		MSG << "\t" << Stats().cMPGsAllocated() << " created" << std::endl;
-		MSG << "\t" << Stats().cMPGsAllocated()-Stats().cMPGsDeallocated() << " remaining" << std::endl;
-		MSG << std::endl;
+		MSG << "Micropolygons: \t";
+		MSG << Stats().cMPGsAllocated() << " created / ";
+		MSG << Stats().cMPGsAllocated()-Stats().cMPGsDeallocated() << " remaining" << std::endl;
 
-		MSG << "Sampling:" << std::endl; 
-		MSG << "\t" << Stats().cSamples() << " samples" << std::endl;
-		MSG << "\t" << Stats().cSampleBoundHits() << " bound hits (" << (100.0f/Stats().cSamples())*Stats().cSampleBoundHits() << "% of samples)" << std::endl;
-		MSG << "\t" << Stats().cSampleHits() << " hits (" << (100.0f/Stats().cSamples())*Stats().cSampleHits() << "% of samples)" << std::endl;
+		MSG << "Sampling: \t";
+		MSG << Stats().cSamples() << " samples" << std::endl;
+		MSG << "          \t" << Stats().cSampleBoundHits() << " bound hits (";
+		MSG << (100.0f/Stats().cSamples())*Stats().cSampleBoundHits() << "% of samples)" << std::endl;
+		MSG << "          \t" << Stats().cSampleHits() << " hits (";
+		MSG << (100.0f/Stats().cSamples())*Stats().cSampleHits() << "% of samples)" << std::endl;
 
-		MSG << "GPrims:" << std::endl; 
-		MSG << "\t" << cGPrims << std::endl;
-		MSG << std::endl;
+		MSG << "GPrims: \t";
+		MSG << Stats().cGPrims() << std::endl;
 
-		MSG << "Attributes:" << std::endl; 
-		MSG << "\t" << (TqInt)Attribute_stack.size() << " created" << std::endl;
-		MSG << std::endl;
+		MSG << "Attributes: \t";
+		MSG << (TqInt)Attribute_stack.size() << " created" << std::endl;
 
-		MSG << "Transforms:" << std::endl; 
-		MSG << "\t" << (TqInt)TransformStack().size() << " created" << std::endl;
-		MSG << std::endl;
+		MSG << "Transforms: \t";
+		MSG << (TqInt)TransformStack().size() << " created" << std::endl;
 
-		MSG << "Variables:" << std::endl; 
-		MSG << "\t" << Stats().cVariablesAllocated() << " created" << std::endl;
-		MSG << "\t" << Stats().cVariablesAllocated()-Stats().cVariablesDeallocated() << " reminaing" << std::endl;
-		MSG << std::endl;
+		MSG << "Variables: \t";
+		MSG << Stats().cVariablesAllocated() << " created / ";
+		MSG << Stats().cVariablesAllocated()-Stats().cVariablesDeallocated() << " remaining" << std::endl;
 
-		MSG << "Parameters:" << std::endl; 
-		MSG << "\t" << Stats().cParametersAllocated() << " created" << std::endl;
-		MSG << "\t" << Stats().cParametersAllocated()-Stats().cParametersDeallocated() << " remaining" << std::endl;
-		MSG << std::endl << std::ends;
+		MSG << "Parameters: \t";
+		MSG << Stats().cParametersAllocated() << " created / ";
+		MSG << Stats().cParametersAllocated()-Stats().cParametersDeallocated() << " remaining" << std::endl;
+		MSG << std::ends;
 
 		CqString strMSG(MSG.str());
 		CqBasicError(0,Severity_Normal,strMSG.c_str());
