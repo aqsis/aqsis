@@ -500,6 +500,9 @@ void CqRibBinaryDecoder::getNext ()
     cp=ostr.str();
     for(ui=0;ui<size;ui++)
 	cv.push_back(cp[ui]);
+
+	// unfreeze the string so that the destructor cleans up.
+	ostr.freeze(false);
 }
 
 
