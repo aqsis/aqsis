@@ -170,6 +170,7 @@ CqWVert* CqWFace::CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pP
 	TqUint index = pV->iVertex();
 	m_pvSubdivide = pV;
 
+	CreateSubdivideScalar( &pPoints->P(), &pPoints->P(), index );
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = pPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++ )
 		CreateSubdivideScalar( (*iUP), (*iUP), index );
@@ -366,7 +367,7 @@ void CqSubdivider::Subdivide()
 	// Create edge points.
 	CreateEdgePoints( index, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
 	// Smooth vertex points
-	SmoothVertexPoints( oldcVerts, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+//	SmoothVertexPoints( oldcVerts, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
 
 	// Create new edges.
 	for ( i = 0; i < ieT; i++ )
@@ -861,7 +862,7 @@ void CqWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t,
 
 	CqPolygonPoints* pPoints = m_pPoints;
 	CqPolygonPoints* pNewPoints = new CqPolygonPoints(*pPoints);
-	pPoints->ClonePrimitiveVariables(*pPoints);
+	pNewPoints->ClonePrimitiveVariables(*pPoints);
 
 	// Smooth vertex points
 	TqInt iE, bE, sE, i;
@@ -946,10 +947,12 @@ TqInt CqWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 {
 	TqInt cE;
 
-	_OutputMesh("A.RAW");
 	if ( !m_fSubdivided )
 	{
+		_OutputMesh("A.RAW");
 		Subdivide();
+		Subdivide();
+		_OutputMesh("A.RAW");
 
 		cE = cFaces();
 
@@ -962,14 +965,16 @@ TqInt CqWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 			pNew->m_fDiceable = TqTrue;
 			pNew->m_EyeSplitCount = m_EyeSplitCount;
 			aSplits.push_back( pNew );
-			pNew->_OutputMesh("A.RAW");
+			pNew->_OutputMesh("B.RAW");
 		}
 	}
 	else
 	{
 		cE = m_apFaces[ 0 ] ->cEdges();
 
+		_OutputMesh("A.RAW");
 		Subdivide();
+		_OutputMesh("A.RAW");
 
 		int i;
 		for ( i = 0; i < cE; i++ )
@@ -980,7 +985,7 @@ TqInt CqWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 			pNew->m_fDiceable = TqTrue;
 			pNew->m_EyeSplitCount = m_EyeSplitCount;
 			aSplits.push_back( pNew );
-			pNew->_OutputMesh("A.RAW");
+			pNew->_OutputMesh("B.RAW");
 		}
 	}
 
@@ -2326,7 +2331,19 @@ void CqWFace::CreateSubdivideScalar( CqParameter* pCurrent, CqParameter* pTarget
 
 		case type_hpoint:
 		{
-			_SubdivideParameterFace_(CqVector4D, CqVector3D);
+//			_SubdivideParameterFace_(CqVector4D, CqVector3D);
+			CqParameterTyped<CqVector4D, CqVector3D>* pNCurrent = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pCurrent); 
+			CqParameterTyped<CqVector4D, CqVector3D>* pNTarget  = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pTarget); 
+			CqVector4D val = 0.0f; 
+			for ( TqUint j = 0; j < m_apEdges.size(); j++ ) 
+			{ 
+				val += *pNCurrent->pValue(grE.pvHead() ->iVertex() ); 
+				grE.peNext(); 
+			} 
+			val /= static_cast<TqFloat>(m_apEdges.size()); 
+			if( pNTarget->Size() <= trgIndex ) 
+				pNTarget->SetSize( trgIndex+1 ); 
+			*pNTarget->pValue( trgIndex ) = val;
 		}
 		break;
 

@@ -4066,7 +4066,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 
 	std::vector<CqPolygonPoints*>	apPoints;
 	// Process any specified primitive variables
-	pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
+//	pPointsClass->SetDefaultPrimitiveVariables( RI_FALSE );
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
 		// Check if s/t, u/v are needed and not specified, and if so get them from the object space points.
