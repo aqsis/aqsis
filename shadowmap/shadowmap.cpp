@@ -83,6 +83,7 @@ int main( int argc, char* argv[] )
 TqInt	XRes, YRes;
 TqInt	g_Channels;
 TqInt	g_append = 0;
+uint16	g_Compression = COMPRESSION_NONE;
 TqFloat* pData;
 TIFF*	pOut;
 TqInt	CWXMin, CWYMin;
@@ -248,7 +249,7 @@ void SaveAsShadowMap()
 		TIFFSetField( pshadow, TIFFTAG_TILEWIDTH, twidth );
 		TIFFSetField( pshadow, TIFFTAG_TILELENGTH, tlength );
 		TIFFSetField( pshadow, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
-		//TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression );
+		TIFFSetField( pshadow, TIFFTAG_COMPRESSION, g_Compression );
 
 
 		TqInt tsize = twidth * tlength;
@@ -329,6 +330,20 @@ TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
 				if( strncmp( pMsg->m_NameAndData, "append", pMsg->m_NameLength ) == 0 )
 				{
 					g_append = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+				}
+				else if( strncmp( pMsg->m_NameAndData, "compression", pMsg->m_NameLength ) == 0 )
+				{
+					const char* pvalue = reinterpret_cast<const char*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+					if ( strstr( pvalue, "none" ) != 0 )
+						g_Compression = COMPRESSION_NONE;
+					else if ( strstr( pvalue, "lzw" ) != 0 )
+						g_Compression = COMPRESSION_LZW;
+					else if ( strstr( pvalue, "deflate" ) != 0 )
+						g_Compression = COMPRESSION_DEFLATE;
+					else if ( strstr( pvalue, "jpeg" ) != 0 )
+						g_Compression = COMPRESSION_JPEG;
+					else if ( strstr( pvalue, "packbits" ) != 0 )
+						g_Compression = COMPRESSION_PACKBITS;
 				}
 			}
 			break;
