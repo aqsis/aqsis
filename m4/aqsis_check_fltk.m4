@@ -1,7 +1,7 @@
 ########################################################
 # AQSIS_CHECK_FLTK
 
-AC_DEFUN(AQSIS_CHECK_FLTK, [
+AC_DEFUN([AQSIS_CHECK_FLTK], [
 AC_SUBST(AQSIS_FLTK_CFLAGS)
 AC_SUBST(AQSIS_FLTK_LIBS)
 AC_MSG_CHECKING([for the fltk UI library])
