@@ -508,6 +508,11 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 
 		virtual	void	SetValue( const char* name, TqPchar val );
 		virtual	TqBool	GetValue( const char* name, CqShaderVariable* res );
+
+        _qShareM int				GetShaderVarCount();				// for libslxargs
+        _qShareM CqShaderVariable * GetShaderVarAt(int varIndex);  		// for libslxargs     
+        _qShareM EqShaderType		Type()			{return(m_Type);}	// for libslxargs
+        
 		virtual	void	Evaluate( CqShaderExecEnv& Env )
 		{
 			Execute( Env );
@@ -530,6 +535,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 		CqShaderVM&	operator=( const CqShaderVM& From );
 
 	private:
+        EqShaderType 		m_Type;							///< Shader type for libslxargs
 		TqUint m_LocalIndex;                   ///<  Local Index to speed up
 		CqShaderExecEnv*	m_pEnv;							///< Pointer to the current excution environment.
 		std::vector<CqShaderVariable*>	m_LocalVars;		///< Array of local variables.

@@ -545,6 +545,25 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 				if ( strcmp( token, gShaderTypeNames[ i ] ) == 0 )
 				{
 					// TODO: Should store the type so that it can be checked.
+                    
+                    /* Begin changes to store shader type for libslxargs */
+                    // Symbolic references for the tokens would be better than literal strings,
+                    // but we will use literals for now.
+                    // m_Type = Type_Unknown;
+                    if(strcmp(token,"surface")==0) 
+                            m_Type = Type_Surface;
+                    else if(strcmp(token,"lightsource")==0)
+                            m_Type = Type_Lightsource;
+                    else if(strcmp(token,"volume")==0)
+                            m_Type = Type_Volume;
+                    else if(strcmp(token,"displacement")==0)
+                            m_Type = Type_Displacement;
+                    else if(strcmp(token,"transformation")==0)
+                            m_Type = Type_Transformation;
+                    else if(strcmp(token,"imager")==0)
+                            m_Type = Type_Imager;
+                    /* End changes to store shader type for libslxargs */
+                    
 					fShaderSpec = TqTrue;
 					break;
 				}
@@ -1056,6 +1075,28 @@ TqBool CqShaderVM::GetValue( const char* name, CqShaderVariable* res )
 	}
 	return ( TqFalse );
 }
+
+
+/* Begin changes to add accessors for libslxargs */
+int CqShaderVM::GetShaderVarCount()
+{
+    return m_LocalVars.size();
+}
+
+CqShaderVariable * CqShaderVM::GetShaderVarAt(int varIndex)
+{
+    CqShaderVariable * result;
+    result = NULL;
+    if (varIndex >= 0)
+    {
+        if (varIndex < m_LocalVars.size())
+        {
+            result = m_LocalVars[varIndex];
+        }
+    }
+    return result;
+}
+/* End changes to add accessors for libslxargs */
 
 
 
