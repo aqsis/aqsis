@@ -249,6 +249,39 @@ Package=<4>
 
 ###############################################################################
 
+Project: "dsotest"=.\dsotest\dsotest.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name aqsis
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name aqsl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name aqslcomp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libshaderexecenv
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libshadervm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libslparse
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name slpp
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "filebuffer"=.\filebuffer\filebuffer.dsp - Package Owner=<4>
 
 Package=<5>
