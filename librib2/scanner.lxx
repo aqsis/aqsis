@@ -35,6 +35,7 @@ extern FILE* ParseInputFile;
 extern CqRibBinaryDecoder *BinaryDecoder;
 extern unsigned int ParseLineNumber;
 extern std::string ParseStreamName;
+extern RtArchiveCallback pArchiveCallback;
 
 bool fRequest;
 bool fParams;
@@ -72,7 +73,8 @@ array_end		\]
 %s params
 %x incl
 
-%option lex-compat
+/* %option lex-compat */
+%option noreject
 
 /* -------------- rules section -------------- */
 
@@ -90,7 +92,9 @@ array_end		\]
 		fParams=false;
 	}
 
-{comment}			{ lvalp->stype = new char[strlen(yytext)+1]; strcpy(lvalp->stype, yytext); return COMMENT; }
+{comment}			{ 
+					lvalp->stype = new char[strlen(yytext)+1]; strcpy(lvalp->stype, yytext); return COMMENT; 
+				}
 {eol}							{ ParseLineNumber++; }
 {whitespace}			{  }
 
@@ -246,4 +250,3 @@ struct yy_buffer_state* current_flex_buffer(void)
 {
         return YY_CURRENT_BUFFER;
 }
-

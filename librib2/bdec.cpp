@@ -37,16 +37,14 @@
 #include <stdio.h>
 #include "bdec.h"
 
+#ifdef AQSIS_SYSTEM_WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
+
 using namespace librib;
 
-
-#ifdef _DEBUG
-#define gzopen fopen
-#define gzclose fclose
-#define gzgetc fgetc
-#define gzeof  feof
-#define gzgets(a,b,c)  fgets(b,c,a)
-#endif
 
 /*--------------------------------------------*/
 /**
@@ -129,20 +127,118 @@ static char *lftoa( TqDouble d )
 
 /*--------------------------------------------*/
 /**
+ * Initailise the buffers and structures used by zlib
+ * Much of this is adapted from zlibs' gzio.c
+ * Copyright (C) 1995-2002 Jean-loup Gailly.
+ * 
+ **/
+static  TqChar gz_magic[2] = {(TqChar) 0x1f, (TqChar) 0x8b}; /* gzip magic header */
+/* gzip flag byte */
+#define ASCII_FLAG   0x01 /* bit 0 set: file probably ascii text */
+#define HEAD_CRC     0x02 /* bit 1 set: header CRC present */
+#define EXTRA_FIELD  0x04 /* bit 2 set: extra field present */
+#define ORIG_NAME    0x08 /* bit 3 set: original file name present */
+#define COMMENT      0x10 /* bit 4 set: file comment present */
+#define RESERVED     0xE0 /* bits 5..7: reserved */
+
+void
+CqRibBinaryDecoder::initZlib( int buffersize )
+{
+	zavailable = 0;
+	zstrm.zalloc = (alloc_func)0;
+	zstrm.zfree = (free_func)0;
+	zstrm.opaque = (voidpf)0;
+
+	zstrm.next_in  = zin = new Bytef[ buffersize < 2 ? 2 : buffersize ];
+	zcurrent = zin;
+	zstrm.avail_in = 0;
+	zstrm.next_out = zout = new Bytef[ buffersize < 2 ? 2 : buffersize ];
+	zstrm.avail_out = zbuffersize;
+	zerr = inflateInit2( &zstrm, -MAX_WBITS);	
+	is_gzip = 0;
+	TqChar c;
+	int len;
+
+	/* Check the gzip magic number */
+	// Start by only buffering 2 bytes 
+	zbuffersize = 2;
+	for (len = 0; len < 2; len++)
+       	{
+		gc( c );
+		if (c != gz_magic[len]) 
+		{
+			if (len != 0) zavailable++, zcurrent--;
+			if (c != EOF)
+				zavailable++, zcurrent--;
+			is_gzip = 0;
+			zbuffersize = buffersize;
+			return;
+		}
+	}
+
+	// It's now safe to use the requested buffering
+	zbuffersize = buffersize;
+	/* Read the gzip header */
+	zerr = Z_OK;
+	gc( c ); int method = (int) c;
+	gc( c ); int flags = (int) c;
+
+	if (method != Z_DEFLATED || (flags & RESERVED) != 0) 
+	{
+		zerr = Z_DATA_ERROR;
+		return;
+	}
+
+	/* Discard time, xflags and OS code: */
+	for (len = 0; len < 6; len++) gc(c);
+
+	if ((flags & EXTRA_FIELD) != 0) 
+	{ 	/* skip the extra field */
+		gc( c ); len  =  (uInt) c;
+		gc( c ); len += ((uInt) c )<<8;
+		/* len is garbage if EOF but the loop below will quit anyway */
+		gc( c );
+		while( len-- != 0 && c != EOF ) gc( c );
+	}
+	if ((flags & ORIG_NAME) != 0) 
+	{ /* skip the original file name */
+		gc( c );
+		while( c != 0 && c != EOF ) gc( c );
+	}
+	if ((flags & COMMENT) != 0) 
+	{   /* skip the .gz file comment */
+		gc( c );
+		while( c != 0 && c != EOF ) gc( c );
+	}
+	if ((flags & HEAD_CRC) != 0) 
+	{  /* skip the header crc */
+		for (len = 0; len < 2; len++) gc( c );
+	}
+
+	// Slightly confusing, but this transitions from in/out via
+	//zin in plain text to in -> inflate -> out.
+	zcurrent = zout;
+	zavailable = 0;
+	is_gzip = 1;
+}
+
+/*--------------------------------------------*/
+/**
  * Open a rib file using ZLIB 
  **/
 
-CqRibBinaryDecoder::CqRibBinaryDecoder( std::string filename )
+CqRibBinaryDecoder::CqRibBinaryDecoder( std::string filename, int buffersize )
 {
+	file = fopen(filename.c_str(), "rb");
 
-	gzf = gzopen( filename.c_str(), "rb" );
-	if ( gzf == NULL )
+	if ( file == NULL )
 	{
 		fail_flag = TqTrue; eof_flag = TqTrue;
 	}
 	else
 	{
 		fail_flag = TqFalse; eof_flag = TqFalse;
+		initZlib( buffersize );
 	}
 
 }
@@ -150,24 +246,23 @@ CqRibBinaryDecoder::CqRibBinaryDecoder( std::string filename )
 /*--------------------------------------------*/
 /**
  * ReOpen using ZLIB a stream (point to RIB file)
+ * buffersize defaults to the same as gzdopen from zlib
  **/
-CqRibBinaryDecoder::CqRibBinaryDecoder( FILE *filename )
+CqRibBinaryDecoder::CqRibBinaryDecoder( FILE *filehandle, int buffersize )
 {
+	//We dup here because we don't want to close the original 
+	//filehandle.
+	file = fdopen( dup( fileno( filehandle ) ), "rb");
 
-#ifndef _DEBUG
-	gzf = gzdopen( fileno( filename ), "rb" );
-#else
-	gzf = filename;
-#endif
-	if ( gzf == NULL )
+	if ( file == NULL )
 	{
 		fail_flag = TqTrue; eof_flag = TqTrue;
 	}
 	else
 	{
 		fail_flag = TqFalse; eof_flag = TqFalse;
+		initZlib( buffersize );
 	}
-
 }
 
 /*--------------------------------------------*/
@@ -176,8 +271,15 @@ CqRibBinaryDecoder::CqRibBinaryDecoder( FILE *filename )
  **/
 CqRibBinaryDecoder::~CqRibBinaryDecoder()
 {
-	if ( gzf )
-		gzclose( gzf );
+	delete[] zin;
+	delete[] zout;
+
+	if ( file )
+		fclose( file );
+
+	if ( is_gzip )
+		inflateEnd( &zstrm );
+
 }
 
 
@@ -246,21 +348,62 @@ TqUint CqRibBinaryDecoder::ctui( TqChar a, TqChar b, TqChar c, TqChar d )
 
 /*--------------------------------------------------------------------*/
 /* Get 1 Char
- * But in order to be more efficient I prefetch BUFSIZE characters and
- * return later one by one the read buffer (by return prefetch[i])
  */
 
 void CqRibBinaryDecoder::gc( TqChar &c )
 {
 	TqInt i;
 
-	i = gzgetc( gzf );
-	if ( i == -1 )
+	if( !zavailable )
 	{
-		if ( gzeof( gzf ) == 1 ) eof_flag = TqTrue;
-		throw std::string( "" );
-	}
-	c = i;
+		if( is_gzip )
+		{
+
+			zstrm.next_out = zout;
+			zstrm.avail_out = zbuffersize;
+			while( (int) zstrm.avail_out == zbuffersize )
+			{
+				if( !zstrm.avail_in )
+				{
+					int count = fread( zin, 1, zbuffersize, file );
+					zstrm.avail_in = count;
+					zstrm.next_in = zin;
+				}; 
+
+				zerr = inflate(&(zstrm), Z_SYNC_FLUSH);
+				
+				if( zerr == Z_STREAM_END && (int) zstrm.avail_out == zbuffersize)
+				{
+					eof_flag = TqTrue;
+			                throw std::string( "" );
+				};
+
+				if( zerr != Z_OK && zerr != Z_STREAM_END )
+				{
+					fail_flag = eof_flag = TqTrue;
+			                throw std::string( "" );
+				};
+			};
+			zcurrent = zout;
+			zavailable = zbuffersize - zstrm.avail_out;
+		} else {
+		  	// Read into zin, zout would be clearer but
+		  	//this makes the uncompressed->compress transition
+		  	//easier.
+			zavailable = zstrm.avail_in = fread( zin, 1, zbuffersize, file );
+			if( zavailable == 0 )
+			{
+				eof_flag = TqTrue;
+				throw std::string( "" );
+				return;
+			};
+			zcurrent = zstrm.next_in = zin;
+		};
+	};
+
+	c = (char) *zcurrent ; 
+	zavailable--; if( !is_gzip ) zstrm.avail_in--;
+	zcurrent++; if( !is_gzip ) zstrm.next_in++;
 }
 
 /*--------------------------------------------------------------------*/
@@ -632,7 +775,8 @@ void CqRibBinaryDecoder::getNext ()
 			case '\341': case '\342': case '\343': case '\344': case '\345': case '\346': case '\347': case '\350':
 			case '\351': case '\352': case '\353': case '\354': case '\355': case '\356': case '\357': case '\360':
 			case '\361': case '\362': case '\363': case '\364': case '\365': case '\366': case '\367': case '\370':
-			case '\371': case '\372': case '\373': case '\374': case '\375': case '\376': case '\377':
+			case '\371': case '\372': case '\373': case '\374': case '\375': case '\376':
+		       	//case '\377': Signals the end of a RunProgram block
 			throw std::string( " BINARY_DECODER_WARNING: reserved byte encountered" );
 			break;
 
@@ -681,13 +825,18 @@ TqInt CqRibBinaryDecoder::writeToBuffer( TqPchar buffer, TqUint size )
 
 TqInt CqRibBinaryDecoder::read( TqPchar buffer, TqUint size )
 {
-	if ( gzf == NULL ) return -1;
+//	if ( gzf == NULL ) return -1;
 
 	try
 	{
 		while ( cv.size() < size )
 		{
 			getNext();
+			if( cv.back() == '\n' )
+			{
+				size = cv.size() + 1;
+				break;
+			};
 		}
 	}
 	catch ( std::string & s )

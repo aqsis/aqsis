@@ -4,8 +4,8 @@
  *	@author	Paul Gregory
  *	@brief	Declare a reference counting class.
  *
- *	Last change by:		$Author: jpgrad $
- *	Last change date:	$Date: 2003/06/16 04:48:03 $
+ *	Last change by:		$Author: minty $
+ *	Last change date:	$Date: 2003/07/06 21:21:28 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -45,6 +45,7 @@ extern "C" __declspec(dllexport) void report_refcounts();
 #else
 extern "C" void report_refcounts();
 #endif	// AQSIS_SYSTEM_WIN32
+
 class RefCountRecord;
 typedef std::vector<RefCountRecord*> RecordVector;
 typedef std::vector<RefCountRecord*>::iterator RecordIterator;

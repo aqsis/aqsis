@@ -113,6 +113,12 @@ class CqProcedural : public CqSurface
 		
 };
 
+// The built in RiProcedurals
+extern "C" RtVoid  RiProcFree( RtPointer data );
+extern "C" RtVoid  RiProcDelayedReadArchive( RtPointer data, RtFloat detail );
+extern "C" RtVoid  RiProcRunProgram( RtPointer data, RtFloat detail );
+extern "C" RtVoid  RiProcDynamicLoad( RtPointer data, RtFloat detail );
+
 END_NAMESPACE( Aqsis )
 
 #endif // PROCEDURAL_H_INCLUDED

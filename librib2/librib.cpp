@@ -213,6 +213,32 @@ bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface&
 	return ParseSucceeded;
 }
 
+bool ParseOpenStream( CqRibBinaryDecoder *decoder, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream, RtArchiveCallback callback)
+{
+	BinaryDecoder = decoder;
+	ParseStreamName = StreamName;
+	ParseCallbackInterface = &CallbackInterface;
+	ParseErrorStream = &ErrorStream;
+	ParseLineNumber = 1;
+	ParseSucceeded = true;
+	fRequest = false;
+ 	fRecovering = false;
+	fParams = false;
+	pArchiveCallback = callback;
+
+	// 1 is used to attempt to force interactive scanning
+	struct yy_buffer_state *yybuffer = ::yy_create_buffer( stdin, 1);
+	::yy_switch_to_buffer(yybuffer);
+
+	// Reenable this to get parse tree output in debug version.
+	// yydebug = 1;
+	yyparse();
+
+	::yy_delete_buffer(yybuffer);
+
+	return ParseSucceeded;
+}
+
 void ResetParser()
 {
 	ParseInputFile = stdin;

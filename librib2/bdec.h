@@ -35,15 +35,18 @@
 namespace librib
 {
 
-#ifdef _DEBUG
-#define gzFile FILE *
-#endif
-
-
 class CqRibBinaryDecoder
 {
 	private:
-		gzFile gzf;
+		FILE *file; // File to read from
+		z_stream zstrm; // zlib strm description
+		int zerr; // zlib error state
+		bool is_gzip; // Is this a gzip'd stream
+		int zbuffersize; // Buffer size
+		Bytef *zin, *zout; // Data buffers 
+		int zavailable; // Available output bytes
+		Bytef *zcurrent; // Location in available output
+
 		std::vector<TqChar> cv;
 
 		std::string ritab[ 256 ];
@@ -79,7 +82,8 @@ class CqRibBinaryDecoder
 		TqBool eof_flag;
 		TqBool fail_flag;
 
-		CqRibBinaryDecoder( CqRibBinaryDecoder const & )
+		void initZlib( int buffersize = 0 );
+		CqRibBinaryDecoder( CqRibBinaryDecoder const &)
 		{}
 		CqRibBinaryDecoder const &operator=( CqRibBinaryDecoder const & )
 		{
@@ -87,8 +91,8 @@ class CqRibBinaryDecoder
 		}
 
 	public:
-		CqRibBinaryDecoder( std::string );
-		CqRibBinaryDecoder( FILE * );
+		CqRibBinaryDecoder( std::string, int buffersize = 16384 );
+		CqRibBinaryDecoder( FILE *, int buffersize = 16384 );
 		~CqRibBinaryDecoder();
 
 		TqInt read( TqPchar buffer, TqUint size );

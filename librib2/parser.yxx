@@ -336,13 +336,18 @@ request : complete_request
 				ExpectRequest(); 
 				fRecovering = false;
 			}
-	;
-
-complete_request
-	:	version float
-			{  }
 	|	COMMENT
 			{
+				// This is used to mark the end of a RunProgram chunk
+				// TODO: limit this to within a RunProgram only
+				if( !strcmp( $1, "#\377" ))
+				{
+					DiscardStringValue($1);
+					ExpectRequest(); 
+					fRecovering = false;
+					YYACCEPT;	
+				};
+
 				if( pArchiveCallback != NULL )
 				{
 					// RISpec 3.2 isn't very clear, not sure if stripping the '#'s is right or not
@@ -354,7 +359,15 @@ complete_request
 					};
 				};
 				DiscardStringValue($1);
+
+				ExpectRequest(); 
+				fRecovering = false;
 			}
+	;
+
+complete_request
+	:	version float
+			{  }
 	|	declare string string
 			{
 				ParserDeclare(*ParseCallbackInterface, $2, $3);

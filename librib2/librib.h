@@ -157,12 +157,14 @@ class RendermanInterface
 
 
 /// Initializes the parser and callback object with a set of standard declarations
-extern "C"
-{
-	void StandardDeclarations( RendermanInterface & CallbackInterface );
+extern "C" {
+	void StandardDeclarations( RendermanInterface& CallbackInterface );
 
 	/// Parses an input stream, using the supplied callback object and sending error data to the supplied output stream
-	bool Parse( FILE * InputStream, const std::string StreamName, RendermanInterface & CallbackInterface, std::ostream & ErrorStream, RtArchiveCallback callback );
+	bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream, RtArchiveCallback callback);
+	/// Parse the stream held in decoder, does not close the stream
+	class CqRibBinaryDecoder;
+	bool ParseOpenStream( CqRibBinaryDecoder *decoder, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream, RtArchiveCallback callback);
 	/// Resets the state of the parser, clearing any symbol tables, etc.
 	void ResetParser();
 	//
