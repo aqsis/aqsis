@@ -203,7 +203,7 @@ CqMicroPolyGridBase* CqPolygonBase::Dice()
 	 
 			CqMicroPolyGrid* pGrid=new CqMicroPolyGrid(ucount, vcount, &Surface());
 	 
-			if(bhasN)	pGrid->SetNormals(TqTrue);
+			if(bhasN)	pGrid->SetbShadingNormals(TqTrue);
 	 
 			// Need to copy a single Cq & Os if used, but not defined.
 			if(USES(iUses,EnvVars_Cs) && !bhasCs)	pGrid->Cs().SetValue(pAttributes()->colColor());

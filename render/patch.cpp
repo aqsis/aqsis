@@ -918,7 +918,7 @@ CqMicroPolyGridBase* CqSurfacePatchBilinear::Dice()
 	bool bNormals = false;
 	if ( N().Size() == 4 )
 	{
-		pGrid->SetNormals( TqTrue );
+		pGrid->SetbShadingNormals( TqTrue );
 		bNormals = true;
 	}
 
