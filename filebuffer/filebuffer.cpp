@@ -204,13 +204,16 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
                         value = CLAMP(value, quantize_minval, quantize_maxval) ;
                     }
 
-                    if( NULL != pByteData )
-                    {
-                        if ( g_Format == DataFormat_Unsigned8 )
-                            pByteData[ so ] = static_cast<char>( value );
-                        else
-                            pFloatData[ so ] = value;
-                    }
+					if ( g_Format == DataFormat_Unsigned8 )
+					{
+						if( NULL != pByteData )
+							pByteData[ so ] = static_cast<char>( value );
+					}
+					else
+					{
+						if( NULL != pFloatData )
+							pFloatData[ so ] = value;
+					}
                     so++;
                     i++;
                 }
