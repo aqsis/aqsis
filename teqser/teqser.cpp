@@ -17,6 +17,7 @@
 bool				g_version=0;
 bool				g_help=0;
 bool				g_envcube;
+bool				g_envlatl;
 bool				g_shadow;
 ArgParse::apstring	g_swrap="black";
 ArgParse::apstring	g_twrap="black";
@@ -48,6 +49,7 @@ int main(int argc, const char** argv)
 	ap.argFlag("help", "\aprint this help and exit", &g_help);
 	ap.argFlag("version", "print version information and exit", &g_version);	
 	ap.argFlag("envcube", " px nx py ny pz nz\aproduce a cubeface environment map from 6 images.", &g_envcube);
+	ap.argFlag("envlatl", " produce a latlong environment map from an image file.", &g_envlatl);
 	ap.argFlag("shadow", " produce a shadow map from a z file.", &g_shadow);
 	ap.argString("swrap", "=string s wrap [black|periodic|clamp]", &g_swrap);
 	ap.argString("twrap", "=string t wrap [black|periodic|clamp]", &g_twrap);
@@ -165,6 +167,17 @@ int main(int argc, const char** argv)
 	
 		
 		RiMakeShadow((char*)ap.leftovers()[0].c_str(),(char*)ap.leftovers()[1].c_str());
+	}
+	else if(g_envlatl)
+	{
+		printf("LatLong Environment %s ----> %s \n",
+			                        (char*)ap.leftovers()[0].c_str(),
+									(char*)ap.leftovers()[1].c_str());
+												
+	
+		
+		RiMakeLatLongEnvironment((char*)ap.leftovers()[0].c_str(),(char*)ap.leftovers()[1].c_str(),filterfunc, 
+						(float)g_swidth, (float)g_twidth);
 	}
 	else
 	{
