@@ -374,7 +374,7 @@ TqBool CqImageBuffer::OcclusionCullSurface( CqBasicSurface* pSurface )
 
     TqInt nBuckets = m_cXBuckets * m_cYBuckets;
 
-    if ( pSurface->pCSGNode() != NULL )
+    if ( pSurface->pCSGNode() )
         return ( TqFalse );
 
     if ( CqOcclusionBox::CanCull( &RasterBound ) )

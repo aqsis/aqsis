@@ -32,6 +32,8 @@ START_NAMESPACE( Aqsis )
 
 TqBool CqCSGTreeNode::m_bCSGRequired = TqFalse;
 
+std::list<boost::weak_ptr<CqCSGTreeNode> >	CqCSGNodePrimitive::m_lDefPrimChildren;		///< Static empty child list, as primitives cannot have children nodes.
+
 //------------------------------------------------------------------------------
 /**
  *	Destructor.

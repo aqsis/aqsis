@@ -355,7 +355,7 @@ void CqImagePixel::Combine()
                 //We could not optimized the for loop here at all.
                 for ( std::vector<SqImageSample>::iterator isample = samples->begin(); isample != samples->end(); ++isample )
                 {
-                    if ( NULL != isample->m_pCSGNode )
+                    if ( isample->m_pCSGNode )
                     {
                         isample->m_pCSGNode->ProcessTree( *samples );
                         bProcessed = TqTrue;
@@ -464,7 +464,7 @@ void CqImagePixel::UpdateZValues()
             {
                 std::vector<SqImageSample>::iterator sc = aValues.begin();
                 // find first opaque sample
-                while ( sc != aValues.end() && ( ! ( sc->m_flags & SqImageSample::Flag_Occludes ) || ( sc->m_pCSGNode != NULL ) ) )
+                while ( sc != aValues.end() && ( ! ( sc->m_flags & SqImageSample::Flag_Occludes ) || ( sc->m_pCSGNode ) ) )
                     sc++;
                 if ( sc != aValues.end() )
                 {
