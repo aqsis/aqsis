@@ -1730,6 +1730,12 @@ void CqImageBuffer::RenderImage()
 	}
 
 	ImageComplete();
+	// Pass >100 through to progress to allow it to indicate completion.
+	RtProgressFunc pProgressHandler;
+	if ( ( pProgressHandler = QGetRenderContext() ->optCurrent().pProgressHandler() ) != 0 )
+	{
+		( *pProgressHandler ) ( 101.0f );
+	}
 	m_fDone = TqTrue;
 }
 

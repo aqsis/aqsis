@@ -21,6 +21,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <strstream>
 
 #include <stdio.h>
 
@@ -41,6 +42,7 @@ bool g_help = 0;
 bool g_version = 0;
 bool g_verbose = 0;
 bool g_fb = 0;
+bool g_progress = 0;
 ArgParse::apstring g_config = "";
 ArgParse::apstring g_shaders = "";
 ArgParse::apstring g_archives = "";
@@ -50,6 +52,7 @@ ArgParse::apstring g_base_path = "";
 ArgParse::apstring g_type = "";
 ArgParse::apstring g_addtype = "";
 ArgParse::apstring g_mode = "rgba";
+ArgParse::apstring g_strprogress = "Done Computing %p%% [ %s secs / %S left ]";
 
 void version( std::ostream& Stream )
 {
@@ -66,38 +69,107 @@ void version( std::ostream& Stream )
  */
 RtVoid PrintProgress( RtFloat percent )
 {
-static long tick=0;
-long now;
+	if(g_progress == 0)	
+		return;
+
+	if(percent > 100)
+	{
+		std::cout << "                                                                              \r" << std::flush;
+		return;
+	}
+
+	static long tick=0;
+	long now;
     
 	if (tick == 0) 
-        {
 		time(&tick);
-	}
 
-        time(&now);
-	RtFloat second = (RtFloat) 1000.0 * 
-                         ((RtFloat)(now - tick) / (float)CLOCKS_PER_SEC);
+	time(&now);
 	
+	// Calculate the various values for putting in the string.
+	TqFloat total_secs = (RtFloat) 1000.0f * ((RtFloat)(now - tick) / (float)CLOCKS_PER_SEC);
+	TqFloat total_mins = total_secs / 60.0f;
+	TqFloat total_hrs = total_mins / 60.0f;
+    TqFloat sub_secs = total_secs - ((TqInt)total_mins * 60.0f);
+    TqFloat sub_mins = total_mins - ((TqInt)total_hrs * 60.0f);
+	
+	TqFloat total_secsleft = (((RtFloat) 100 / percent) * total_secs) - total_secs;    
+	TqFloat total_minsleft = total_secsleft / 60.0f;
+	TqFloat total_hrsleft = total_minsleft / 60.0f;
+    TqFloat sub_secsleft = total_secsleft - ((TqInt)total_minsleft * 60.0f);
+    TqFloat sub_minsleft = total_minsleft - ((TqInt)total_hrsleft * 60.0f);
 
-    RtInt timeleft = (((RtFloat) 100 / percent) * second) - second;    
-	if(!(timeleft == 0))
+	// Now print the line with substitution.
+	TqInt ipos = 0;
+	std::string strProgress(g_strprogress);
+	std::ostrstream strOutput;
+	while(1)
 	{
-		std::cout << "Done computing "<< 
-		std::setw(6) << std::setfill( ' ' ) << std::setprecision(4)<< 
-		percent << "% [" << 
-		std::setprecision(0) << second 
-		<< "s/ left: " << timeleft << "s" << "]     \r" << 
-		std::flush;
-	}else{
-		//If no time left clear the line
-		std::cout << "Done computing "<< 
-		std::setw(6) << std::setfill( ' ' ) << std::setprecision(4)<< 
-		percent << "% [" << 
-		std::setprecision(0) << second <<
-		"s]" << "                                            \r" <<
-		std::flush;
+		TqInt itag;
+		itag = strProgress.find('%', ipos);
+		if( itag == std::string::npos )
+		{
+			strOutput << strProgress.substr(ipos).c_str();
+			break;
+		}
+		else
+		{
+			if( ipos != itag )
+				strOutput << strProgress.substr(ipos, itag - ipos).c_str();
+
+			switch( strProgress[itag+1] )
+			{
+				case 'p':
+					strOutput << std::setw(6) << std::setfill( ' ' ) << std::setprecision(4) << percent;
+					break;
+
+				case 's':
+					strOutput << std::setprecision(0) << (TqInt)total_secs;
+					break;
+
+				case 'S':
+					strOutput << std::setprecision(0) << (TqInt)total_secsleft;
+					break;
+
+				case 'm':
+					strOutput << std::setprecision(0) << (TqInt)total_mins;
+					break;
+
+				case 'M':
+					strOutput << std::setprecision(0) << (TqInt)total_minsleft;
+					break;
+
+				case 'h':
+					strOutput << std::setprecision(0) << (TqInt)total_hrs;
+					break;
+
+				case 'H':
+					strOutput << std::setprecision(0) << (TqInt)total_hrsleft;
+					break;
+
+				case 't':
+					strOutput << std::setprecision(0) << (TqInt)total_hrs << ":" << (TqInt)sub_mins << ":" << (TqInt)sub_secs;
+					break;
+
+				case 'T':
+					strOutput << std::setprecision(0) << (TqInt)total_hrsleft << ":" << (TqInt)sub_minsleft << ":" << (TqInt)sub_secsleft;
+					break;
+
+				case '%':
+					strOutput << '%';
+					break;
+			}
+			ipos = itag+2;
+		}
+
+		if( ipos >= strProgress.size() )
+			break;
 	}
-	
+	// Pad to the end of the line.
+	while( strOutput.pcount() < 79 )	
+		strOutput << " ";
+	std::cout << std::string( strOutput.str(), strOutput.pcount() ).c_str() << "\r";
+	std:: cout << std::flush;
 }
 
 
@@ -140,6 +212,8 @@ int main( int argc, const char** argv )
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
 	ap.argFlag( "version", "\aprint version information and exit", &g_version );
 	ap.argFlag( "pause", "\await for a keypress on completion", &g_pause );
+	ap.argFlag( "progress", "\aprint progress information", &g_progress );
+	ap.argString( "progressformat", "\astring representing the format of the progress message", &g_strprogress );
 	ap.argInt( "endofframe", "=integer\aequivalent to \"endofframe\" option", &g_endofframe );
 	ap.argFlag( "nostandard", "\adisables declaration of standard RenderMan parameter types", &g_nostandard );
 	ap.argFlag( "verbose", "\aoutput environment information", &g_verbose );
