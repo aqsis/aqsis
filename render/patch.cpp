@@ -642,39 +642,6 @@ CqSurfacePatchBilinear& CqSurfacePatchBilinear::operator=( const CqSurfacePatchB
 
 
 //---------------------------------------------------------------------
-/** Generate the vertex normals if not specified.
- */
-
-void CqSurfacePatchBilinear::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
-{
-    assert( NULL != P() && P() ->Size() == 4 );
-
-    // Get the handedness of the coordinate system (at the time of creation) and
-    // the coordinate system specified, to check for normal flipping.
-    TqInt O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
-
-    // For each of the four points, calculate the normal as the cross product of its
-    // two vectors.
-    CqVector3D N1 = ( P()->pValue( 1 )[0] - P()->pValue( 0 )[0] ) % ( P()->pValue( 2 )[0] - P()->pValue( 0 )[0] );
-    CqVector3D N2 = ( P()->pValue( 3 )[0] - P()->pValue( 1 )[0] ) % ( P()->pValue( 0 )[0] - P()->pValue( 1 )[0] );
-    CqVector3D N3 = ( P()->pValue( 0 )[0] - P()->pValue( 2 )[0] ) % ( P()->pValue( 3 )[0] - P()->pValue( 2 )[0] );
-    CqVector3D N4 = ( P()->pValue( 2 )[0] - P()->pValue( 3 )[0] ) % ( P()->pValue( 1 )[0] - P()->pValue( 3 )[0] );
-
-    CqVector3D	N;
-    TqInt v, u;
-    for ( v = 0; v <= vDiceSize; v++ )
-    {
-        for ( u = 0; u <= uDiceSize; u++ )
-        {
-            N = BilinearEvaluate( N1, N2, N3, N4, u, v );
-            N = ( O == OrientationLH ) ? N : -N;
-            pNormals->SetNormal( N, ( v * ( uDiceSize + 1 ) ) + u );
-        }
-    }
-}
-
-
-//---------------------------------------------------------------------
 /** Return the boundary extents in camera space of the surface patch
  */
 

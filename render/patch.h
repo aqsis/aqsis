@@ -253,11 +253,6 @@ public:
         if(m_fHasPhantomFourthVertex)
             pGrid->SetfTriangular(TqTrue);
     }
-    virtual TqBool	CanGenerateNormals() const
-    {
-        return ( TqFalse );
-    }
-    virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 protected:
     TqBool	m_fHasPhantomFourthVertex;
