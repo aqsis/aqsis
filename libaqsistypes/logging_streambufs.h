@@ -21,6 +21,7 @@
 #define	___logging_streambufs_Loaded___
 
 #include <iostream>
+#include <string>
 
 #include "aqsis.h"
 

@@ -19,7 +19,7 @@
 #include "logging.h"
 #include "logging_streambufs.h"
 
-#include <ostream>
+#include <iostream>
 #include <sstream>
 #include <vector>
 #include <time.h>
@@ -122,7 +122,7 @@ int timestamp_buf::overflow(int c)
 
 int timestamp_buf::sync()
 {
-	m_streambuf->pubsync();
+	m_streambuf->sync();
 	return 0;
 }
 
@@ -186,7 +186,7 @@ int show_level_buf::overflow(int c)
 
 int show_level_buf::sync()
 {
-	m_streambuf->pubsync();
+	m_streambuf->sync();
 	return 0;
 }
 
@@ -216,7 +216,7 @@ int reset_level_buf::overflow(int c)
 
 int reset_level_buf::sync()
 {
-	m_streambuf->pubsync();
+	m_streambuf->sync();
 	return 0;
 }
 
@@ -247,7 +247,7 @@ int filter_by_level_buf::overflow(int c)
 
 int filter_by_level_buf::sync()
 {
-	m_streambuf->pubsync();
+	m_streambuf->sync();
 	return 0;
 }
 
@@ -327,7 +327,7 @@ int fold_duplicates_buf::overflow(int c)
 
 int fold_duplicates_buf::sync()
 {
-	m_streambuf->pubsync();
+	m_streambuf->sync();
 	return 0;
 }
 
@@ -369,7 +369,7 @@ int syslog_buf::overflow(int c)
 
 int syslog_buf::sync()
 {
-	m_streambuf->pubsync();
+	m_streambuf->sync();
 	return 0;
 }
 
