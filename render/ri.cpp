@@ -65,7 +65,8 @@
 #include	"ri.h"
 
 #include	"sstring.h"
-#include	"log.h"
+#include	"mtable.h"
+#include	"ilog.h"
 
 using namespace Aqsis;
 
@@ -1122,7 +1123,7 @@ RtVoid	RiHiderV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 {
-	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_COLOR_SAMPLES_INVALID );
+	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_COLOR_SAMPLES_INVALID );
 	return ;
 }
 
@@ -1135,7 +1136,7 @@ RtVoid	RiRelativeDetail( RtFloat relativedetail )
 {
 	if ( relativedetail < 0.0f )
 	{
-		QGetRenderContext() ->Logger()->error( CqLog::RI_ERROR_TABLE, CqLog::RI_RELATIVE_DETAIL_INVALID );
+		QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_RELATIVE_DETAIL_INVALID );
 	}
 	else
 	{
@@ -1194,9 +1195,9 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 			else
 			{
 				if ( Decl.m_strName == "" )
-					QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_UNKNOWN_SYMBOL );
+					QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_UNKNOWN_SYMBOL );
 				else
-					QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_ONLY_UNIFORM_OPTIONS );
+					QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_ONLY_UNIFORM_OPTIONS );
 				return ;
 			}
 		}
@@ -1468,7 +1469,7 @@ RtLightHandle	RiAreaLightSource( const char *name, ... )
 //
 RtLightHandle	RiAreaLightSourceV( const char *name, PARAMETERLIST )
 {
-	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_AREA_LIGHT_UNSUPPORTED );
+	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_AREA_LIGHT_UNSUPPORTED );
 	
 	return ( RiLightSourceV( name, count, tokens, values ) );
 }
@@ -1589,7 +1590,7 @@ RtVoid	RiAtmosphereV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiInterior( const char *name, ... )
 {
-	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_INTERIOR_UNSUPPORTED );
+	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_INTERIOR_UNSUPPORTED );
 	return ;
 }
 
@@ -1600,7 +1601,7 @@ RtVoid	RiInterior( const char *name, ... )
 //
 RtVoid	RiInteriorV( const char *name, PARAMETERLIST )
 {
-	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_INTERIOR_UNSUPPORTED );
+	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_INTERIOR_UNSUPPORTED );
 	return ;
 }
 
@@ -1611,7 +1612,7 @@ RtVoid	RiInteriorV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiExterior( const char *name, ... )
 {
-	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_EXTERIOR_UNSUPPORTED );
+	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_EXTERIOR_UNSUPPORTED );
 	return ;
 }
 
@@ -1622,7 +1623,7 @@ RtVoid	RiExterior( const char *name, ... )
 //
 RtVoid	RiExteriorV( const char *name, PARAMETERLIST )
 {
-	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_EXTERIOR_UNSUPPORTED );
+	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_EXTERIOR_UNSUPPORTED );
 	return ;
 }
 
@@ -1653,7 +1654,7 @@ RtVoid	RiShadingInterpolation( RtToken type )
 		if ( strcmp( type, RI_SMOOTH ) == 0 )
 			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingSmooth;
 		else
-			QGetRenderContext() ->Logger()->error( CqLog::RI_ERROR_TABLE, CqLog::RI_INVALID_SHADING_INTERPOLATION );
+			QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_INVALID_SHADING_INTERPOLATION );
 
 	QGetRenderContext() ->AdvanceTime();
 	return ;
@@ -1713,7 +1714,7 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 {
 	if ( offlow > onlow || onhigh > offhigh )
 	{
-		QGetRenderContext() ->Logger()->error( CqLog::RI_ERROR_TABLE, CqLog::RI_DETAIL_RANGE_INVALID );
+		QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_DETAIL_RANGE_INVALID );
 		return ;
 	}
 
@@ -1758,7 +1759,7 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 //
 RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 {
-	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_GEOMETRIC_APPROX_UNSUPPORTED );
+	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_GEOMETRIC_APPROX_UNSUPPORTED );
 	return ;
 }
 
@@ -1888,7 +1889,7 @@ RtVoid	RiPerspective( RtFloat f )
 {
 	if ( f <= 0 )
 	{
-		QGetRenderContext() ->Logger()->error( CqLog::RI_ERROR_TABLE, CqLog::RI_PERSPECTIVE_BAD_FOV );
+		QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_PERSPECTIVE_BAD_FOV );
 		return ;
 	}
 
@@ -1995,7 +1996,7 @@ RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
 //
 RtVoid	RiDeformation( const char *name, ... )
 {
-	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_DEFORMATION_UNSUPPORTED );
+	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_DEFORMATION_UNSUPPORTED );
 	return ;
 }
 
@@ -2006,7 +2007,7 @@ RtVoid	RiDeformation( const char *name, ... )
 //
 RtVoid	RiDeformationV( const char *name, PARAMETERLIST )
 {
-	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_DEFORMATION_UNSUPPORTED );
+	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_DEFORMATION_UNSUPPORTED );
 	return ;
 }
 
@@ -2093,7 +2094,7 @@ RtVoid	RiCoordSysTransform( RtToken space )
 //
 RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[] )
 {
-	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_TRANSFORM_POINTS_UNSUPPORTED );
+	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_TRANSFORM_POINTS_UNSUPPORTED );
 	return ( 0 );
 }
 
@@ -2174,9 +2175,9 @@ RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 			else
 			{
 				if ( Decl.m_strName == "" )
-					QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_UNKNOWN_SYMBOL );
+					QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_UNKNOWN_SYMBOL );
 				else
-					QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_ONLY_UNIFORM_ATTRIBUTES );
+					QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_ONLY_UNIFORM_ATTRIBUTES );
 				return ;
 			}
 		}
@@ -2276,7 +2277,7 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 			CreateGPrim( pSurface );
 		else
 		{
-			QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_DEGENRATE_POLYGON );
+			QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_DEGENRATE_POLYGON );
 			pSurface->Release();
 		}
 	}
@@ -2424,7 +2425,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFlo
                   RtInt nstrings, RtString strings[], PARAMETERLIST )
 {
 
-	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_BLOBBY_V_UNSUPPORTED );
+	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_BLOBBY_V_UNSUPPORTED );
 
 	return ;
 }
@@ -2533,7 +2534,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 	else
 	{
 		// the wrap mode was neither "periodic" nor "nonperiodic"
-	    QGetRenderContext() ->Logger()->error( CqLog::RI_ERROR_TABLE, CqLog::RI_CURVES_V_UNKNOWN_WRAP_MODE );
+	    QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_CURVES_V_UNKNOWN_WRAP_MODE );
 	}
 
 	// handle creation of linear and cubic curve groups separately
@@ -2577,7 +2578,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 	else
 	{
 		// the type of curve was neither "linear" nor "cubic"
-	    QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, CqLog::RI_CURVES_V_UNKNOWN_TYPE );
+	    QGetRenderContext() ->Logger()->getError( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_CURVES_V_UNKNOWN_TYPE );
 	}
 }
 
@@ -3433,7 +3434,7 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 	}
 	else
 	{
-		QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_GEOMETRY_V_UNKNOWN );
+		QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_GEOMETRY_V_UNKNOWN );
 	}
 
 	return ;
@@ -3470,7 +3471,7 @@ RtVoid	RiSolidEnd()
 //
 RtObjectHandle	RiObjectBegin()
 {
-	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_OBJECT_BEGIN_UNSUPPORTED );
+	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_OBJECT_BEGIN_UNSUPPORTED );
 	QGetRenderContext() ->BeginObjectModeBlock();
 
 	return ( 0 );
@@ -3495,7 +3496,7 @@ RtVoid	RiObjectEnd()
 //
 RtVoid	RiObjectInstance( RtObjectHandle handle )
 {
-	QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_OBJECT_END_UNSUPPORTED );
+	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_OBJECT_END_UNSUPPORTED );
 	return ;
 }
 
@@ -3657,7 +3658,7 @@ RtVoid	RiMakeTextureV( const char * pic, const char * tex, RtToken swrap, RtToke
 //
 RtVoid	RiMakeBump( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
-	QGetRenderContext() ->Logger()->error( CqLog::RI_ERROR_TABLE, CqLog::RI_MAKE_BUMP_UNSUPPORTED );
+	QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_MAKE_BUMP_UNSUPPORTED );
 	return ;
 }
 
@@ -3668,7 +3669,7 @@ RtVoid	RiMakeBump( const char * imagefile, const char * bumpfile, RtToken swrap,
 //
 RtVoid	RiMakeBumpV( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
-	QGetRenderContext() ->Logger()->error( CqLog::RI_ERROR_TABLE, CqLog::RI_MAKE_BUMP_UNSUPPORTED );
+	QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_MAKE_BUMP_UNSUPPORTED );
 	return ;
 }
 
@@ -3824,7 +3825,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char 
 
 		if ( !fValid )
 		{
-			QGetRenderContext() ->Logger()->error( CqLog::RI_ERROR_TABLE, CqLog::RI_MAKE_CUBE_ENV_WRONG_SIZE );
+			QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_MAKE_CUBE_ENV_WRONG_SIZE );
 			return ;
 		}
 
@@ -4122,7 +4123,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			}
 			else
 			{
-				QGetRenderContext() ->Logger()->error( CqLog::RI_ERROR_TABLE, CqLog::RI_SDS_NONMANIFOLD );
+				QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_SDS_NONMANIFOLD );
 				// Invalid mesh, delete it.
 				pPointsClass->Release();
 				pSubd2->Release();
