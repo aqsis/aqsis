@@ -1,6 +1,10 @@
 SUBDIRS = posix win32 .
 EXTRA_DIST = libaqsistypes.dsp
 
+AM_CXXFLAGS=@AQSIS_CXXFLAGS@
+AM_CPPFLAGS=@AQSIS_CPPFLAGS@
+AM_CFLAGS=@AQSIS_CFLAGS@
+
 lib_LTLIBRARIES = libaqsistypes.la
 INCLUDES = -I$(srcdir)/posix @LOG4CPP_CFLAGS@
 

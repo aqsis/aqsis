@@ -1,4 +1,8 @@
 bin_PROGRAMS = shadowmap
+AM_CXXFLAGS=@AQSIS_CXXFLAGS@
+AM_CPPFLAGS=@AQSIS_CPPFLAGS@
+AM_CFLAGS=@AQSIS_CFLAGS@
+
 
 shadowmap_SOURCES = shadowmap.cpp
 shadowmap_LDADD = $(top_builddir)/libdd/libdd.la $(top_builddir)/libaqsistypes/libaqsistypes.la @TIFF_FLAGS@

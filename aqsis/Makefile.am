@@ -1,4 +1,7 @@
 bin_PROGRAMS = aqsis 
+AM_CXXFLAGS=@AQSIS_CXXFLAGS@
+AM_CPPFLAGS=@AQSIS_CPPFLAGS@
+AM_CFLAGS=@AQSIS_CFLAGS@
 
 aqsis_SOURCES = aqsis.cpp
 aqsis_LDADD = $(top_builddir)/render/libaqsis.la $(top_builddir)/libargparse/libargparse.la

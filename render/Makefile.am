@@ -1,4 +1,8 @@
 SUBDIRS = macosx .
+AM_CXXFLAGS=@AQSIS_CXXFLAGS@
+AM_CPPFLAGS=@AQSIS_CPPFLAGS@
+AM_CFLAGS=@AQSIS_CFLAGS@
+
 EXTRA_DIST = libaqsis.dsp libaqsis.def
 
 lib_LTLIBRARIES = libaqsis.la

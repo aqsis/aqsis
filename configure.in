@@ -123,9 +123,12 @@ if test ! "$ac_cv_header_zlib_h" || test ! "ac_cv_lib_z_gzopen" ; then
         AC_MSG_ERROR([*** Please ensure you have zlib libraries and headers  installed ***]);
 fi
 
-CPPFLAGS="-DBASE_PATH=\\\"\"$datadir\\\"\" -DCONFIG_PATH=\\\"\"$sysconfdir\\\"\""
-CXXFLAGS="$DEBUG_FLAGS $OPT_FLAGS"
-CFLAGS="$DEBUG_FLAGS $OPT_FLAGS"
+AC_SUBST(AQSIS_CPPFLAGS)
+AC_SUBST(AQSIS_CXXFLAGS)
+AC_SUBST(AQSIS_CFLAGS)
+AQSIS_CPPFLAGS="-DBASE_PATH=\\\"\"$datadir\\\"\" -DCONFIG_PATH=\\\"\"$sysconfdir\\\"\""
+AQSIS_CXXFLAGS="$DEBUG_FLAGS $OPT_FLAGS"
+AQSIS_CFLAGS="$DEBUG_FLAGS $OPT_FLAGS"
 
 AC_OUTPUT( \
 all/Makefile \

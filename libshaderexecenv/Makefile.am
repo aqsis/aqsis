@@ -1,4 +1,8 @@
 EXTRA_DIST = libshaderexecenv.dsp 
+AM_CXXFLAGS=@AQSIS_CXXFLAGS@
+AM_CPPFLAGS=@AQSIS_CPPFLAGS@
+AM_CFLAGS=@AQSIS_CFLAGS@
+
 
 lib_LTLIBRARIES = libshaderexecenv.la
 

@@ -1,4 +1,8 @@
 SUBDIRS = . tests
+AM_CXXFLAGS=@AQSIS_CXXFLAGS@
+AM_CPPFLAGS=@AQSIS_CPPFLAGS@
+AM_CFLAGS=@AQSIS_CFLAGS@
+
 AM_YFLAGS=-d
 
 EXTRA_DIST = librib2.dsp parser.cxx parser.h scanner.cxx

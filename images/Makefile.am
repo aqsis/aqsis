@@ -1,1 +1,5 @@
 EXTRA_DIST = Image1.tif nx.tif ny.tif nz.tif px.tif py.tif pz.tif
+AM_CXXFLAGS=@AQSIS_CXXFLAGS@
+AM_CPPFLAGS=@AQSIS_CPPFLAGS@
+AM_CFLAGS=@AQSIS_CFLAGS@
+

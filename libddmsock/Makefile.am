@@ -1,4 +1,8 @@
 lib_LTLIBRARIES = libddmsock.la
+AM_CXXFLAGS=@AQSIS_CXXFLAGS@
+AM_CPPFLAGS=@AQSIS_CPPFLAGS@
+AM_CFLAGS=@AQSIS_CFLAGS@
+
 
 libddmsock_la_SOURCES = ddmsock.cpp ddmsock.h displaydriver.h
 
