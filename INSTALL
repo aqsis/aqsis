@@ -4,21 +4,37 @@ Aqsis Rendering System INSTALL
 
 	./bootstrap
 
-* Now (regardless of where how you obtained the source), you need to configure it for your system (note that shared libraries are not currently supported):
+* Now (regardless of where how you obtained the source), you need to configure it for your system.  Note that
+currently shared libraries are turned-off by default, and the default install prefix is "/usr/local/aqsis".
+You can obtain a listing of available configuration options by doing:
 
-	./configure --disable-shared
+	./configure --help
+
+* Once you've decided which (if any) configuration options you want to override, you can run the configure script:
+
+	./configure <options>
 
 * Assuming there were no errors, you may now build the project:
 
 	make
 
-* Then, run the built-in tests, which will build some sample applications and render several test images:
+* Now, run the standard built-in tests:
+
+	make check
+
+* Then, run the high-level rendering tests, which will compile a selection of shaders and render several test images
+(to view the images, you will have to manually cd into the "aqsis" subdirectory and view all of the ".tif" images
+there.  "xview *.tif" is a safe bet, if you don't already have a preferred bitmap viewer):
 
 	make test
 
+* You're now ready to install the Aqsis binaries for general use on your host.  You will have to have root access:
+	su
+	make install
+
 * If you want to make a copy of the Aqsis source available for others, you can roll your own distribution tarball:
 
-	make dist
+	make distcheck
 
 * Contact the Aqsis mailing list, <aqsis-development@lists.sourceforge.net> with any questions.
 
