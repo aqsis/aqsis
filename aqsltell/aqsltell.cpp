@@ -79,6 +79,7 @@ int main( int argc, const char** argv )
 	g_shader_path.append( "shaders" );
 	g_dso_path = rootPath;
 	g_dso_path.append( "dsos" );
+#elif defined(AQSIS_SYSTEM_MACOSX)
 #else
 	g_shader_path = DEFAULT_SHADER_PATH;
 #endif
