@@ -1733,7 +1733,7 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 	int counter = 0;
 	int MaxEyeSplits = 10;
 	TqBool bIsEmpty = IsEmpty(iBucket);
-	const TqInt* poptEyeSplits = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "eyesplits" );
+		const TqInt* poptEyeSplits = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "eyesplits" );
 	if ( poptEyeSplits != 0 )
 		MaxEyeSplits = poptEyeSplits[ 0 ];
 
@@ -1840,16 +1840,19 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 
 	// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
 	if ( m_fQuit ) return ;
-
+	
 	QGetRenderContext() ->Stats().MakeCombine().Start();
 	CqBucket::CombineElements();
 	QGetRenderContext() ->Stats().MakeCombine().Stop();
 
 	QGetRenderContext() ->Stats().MakeFilterBucket().Start();
-
-	Bucket.FilterBucket();
-	Bucket.ExposeBucket();
-	Bucket.QuantizeBucket();
+	
+	if ( !bIsEmpty )
+	{
+		Bucket.FilterBucket();
+		Bucket.ExposeBucket();
+		Bucket.QuantizeBucket();
+	}
 
 	QGetRenderContext() ->Stats().MakeFilterBucket().Stop();
 
