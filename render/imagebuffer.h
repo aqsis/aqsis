@@ -240,6 +240,17 @@ class _qShareC	CqImagePixel
 			assert( n < m_XSamples );
 			return ( m_aTimes[ n * m_XSamples + m ] );
 		}
+		/** Get the detail level associated with the specified sample.
+		 * \param m The horizontal index of the required sample point.
+		 * \param n The vertical index of the required sample point.
+		 * \return A float detail level.
+		 */
+		_qShareM	TqFloat	SampleLevelOfDetail( TqInt m, TqInt n )
+		{
+			assert( m < m_XSamples );
+			assert( n < m_XSamples );
+			return ( m_aDetailLevels[ n * m_XSamples + m ] );
+		}
 
 		//	_qShareM	CqImagePixel&	operator=(const CqImagePixel& ieFrom);
 
@@ -250,6 +261,7 @@ class _qShareC	CqImagePixel
 		std::vector<CqVector2D>	m_avecSamples;				///< Vector of sample positions.
 		std::vector<TqInt>	m_aSubCellIndex;				///< Vector of subcell indices.
 		std::vector<TqFloat> m_aTimes;						///< A vector of float sample times for the sample points.
+		std::vector<TqFloat> m_aDetailLevels;					///< A vector of float level-of-detail samples for the sample points.
 		TqFloat	m_Coverage;						///< The approximate coverage, just the ratio of sample hits to misses.
 		CqColor	m_colColor;						///< The averaged color of this pixel.
 		CqColor	m_colOpacity;					///< The averaged opacity of this pixel.

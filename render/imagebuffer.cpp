@@ -97,6 +97,8 @@ void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
 		m_avecSamples.resize( m_XSamples * m_YSamples );
 		m_aSubCellIndex.resize( m_XSamples * m_YSamples );
 		m_aTimes.resize( m_XSamples * m_YSamples );
+		// XXX TODO: Compute this lazily
+		m_aDetailLevels.resize( m_XSamples * m_YSamples );
 	}
 }
 
@@ -202,6 +204,16 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 		m_aTimes[ i ] = time + random.RandomFloat( dtime );
 		time += dtime;
 	}
+
+	// Fill in the sample detail levels for LOD.
+	TqFloat lod = 0;
+	TqFloat dlod = 1.0f / ( ( m_XSamples * m_YSamples ) );
+	for ( i = 0; i < m_XSamples*m_YSamples; i++ )
+	{
+		m_aDetailLevels[ i ] = lod + random.RandomFloat( dlod );
+		lod += dlod;
+	}
+	// XXX TODO: Shuffle the LOD samples
 }
 
 
@@ -1367,6 +1379,9 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 	CqBucket& Bucket = m_aBuckets[ iBucket ];
 	CqStats& theStats = QGetRenderContext() ->Stats();
 
+	const TqFloat* LodBounds = pMPG->pGrid()->pAttributes()->GetFloatAttribute("System", "LevelOfDetailBounds");
+	TqBool UsingLevelOfDetail = LodBounds[0] >= 0.0f;
+
 	for ( TqInt bound_num = 0; bound_num < pMPG->cSubBounds(); bound_num++ )
 	{
 		TqFloat time0;
@@ -1464,6 +1479,16 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 						if ( t >= time0 && t <= time1 && Bound.Contains2D( vecP ) )
 						{
 							theStats.IncSampleBoundHits();
+
+							// Check to see if the sample is within the sample's level of detail
+							if ( UsingLevelOfDetail )
+							{
+								TqFloat LevelOfDetail = pie->SampleLevelOfDetail( m, n );
+								if ( LodBounds[0] > LevelOfDetail || LevelOfDetail >= LodBounds[1] )
+								{
+									continue;
+								}
+							}
 
 							// Now check if the subsample hits the micropoly
 							if ( pMPG->Sample( vecP, t, ImageVal.m_Depth ) )

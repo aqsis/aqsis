@@ -1061,7 +1061,17 @@ RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 //
 RtVoid	RiRelativeDetail( RtFloat relativedetail )
 {
-	CqBasicError( 0, Severity_Normal, "RiRelativeDetail not supported" );
+	if ( relativedetail < 0.0f )
+	{
+		CqBasicError(
+			ErrorID_InvalidData, Severity_Normal, 
+			"RiRelativeDetail (invalid scaling factor)"
+		);
+	}
+	else
+	{
+		QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "RelativeDetail")[0] = relativedetail;
+	}
 	return ;
 }
 
@@ -1611,7 +1621,16 @@ RtVoid	RiBound( RtBound bound )
 //
 RtVoid	RiDetail( RtBound bound )
 {
-	CqBasicError( 0, Severity_Normal, "RiDetail not supported" );
+	CqBound Bound(bound);
+
+	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "raster", CqMatrix(), QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ) ) );
+
+	TqFloat ruler = fabs( MAX( Bound.vecMax().x() - Bound.vecMin().x(), Bound.vecMax().y() - Bound.vecMin().y() ) );
+
+	ruler *= QGetRenderContext() ->optCurrent().GetFloatOption("System", "RelativeDetail")[0];
+
+	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "LevelOfDetailRulerSize")[0] = ruler;
+	QGetRenderContext() ->AdvanceTime();
 	return ;
 }
 
@@ -1622,7 +1641,46 @@ RtVoid	RiDetail( RtBound bound )
 //
 RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat offhigh )
 {
-	CqBasicError( 0, Severity_Normal, "RiDetailRange not supported" );
+	if ( offlow > onlow || onhigh > offhigh )
+	{
+		CqBasicError(
+			ErrorID_InvalidData, Severity_Normal, 
+			"RiDetailRange (invalid levels of detail)"
+		);
+		return ;
+	}
+
+	TqFloat ruler = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "LevelOfDetailRulerSize")[0];
+
+	TqFloat minImportance;
+	if (onlow == offlow)
+	{
+		minImportance = ruler < onlow ? 1.0f : 0.0f;
+	}
+	else
+	{
+		minImportance = CLAMP((onlow - ruler) / (onlow - offlow), 0, 1);
+	}
+
+	TqFloat maxImportance;
+	if (onhigh == offhigh)
+	{
+		maxImportance = ruler < onhigh ? 1.0f : 0.0f;
+	}
+	else
+	{
+		maxImportance = CLAMP((offhigh - ruler) / (offhigh - onhigh), 0, 1);
+	}
+
+	if ( minImportance >= maxImportance )
+	{
+		// Geometry is culled.  Use the special value -1 to represent this.
+		minImportance = maxImportance = -1.0f;
+	}
+
+	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "LevelOfDetailBounds")[0] = minImportance;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "LevelOfDetailBounds")[1] = maxImportance;
+	QGetRenderContext() ->AdvanceTime();
 	return ;
 }
 
@@ -2861,7 +2919,10 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 		pSurface->SetDefaultPrimitiveVariables();
 		// Fill in primitive variables specified.
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
+		{
+			//pSurface->ConvertToBezierBasis();
 			CreateGPrim( pSurface );
+		}
 		else
 			pSurface->Release();
 	}
@@ -4573,6 +4634,13 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 template <class T>
 RtVoid	CreateGPrim( T* pSurface )
 {
+	if ( QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "LevelOfDetailBounds")[1] < 0.0f )
+	{
+		// Cull this geometry for LOD reasons
+		pSurface->Release();
+		return;
+	}
+
 	if ( QGetRenderContext() ->ptransCurrent() ->cTimes() <= 1 )
 	{
 		// Transform the points into camera space for processing,
