@@ -824,11 +824,9 @@ void CqTextureMap::CreateMIPMAP()
 
 
 void CqTextureMap::SampleMIPMAP(float s1, float t1, float swidth, float twidth, float sblur, float tblur, 
-								std::valarray<float>& val, int directory)
+								std::valarray<float>& val)
 {
 	// T(s2,t2)-T(s2,t1)-T(s1,t2)+T(s1,t1)
-
-	
 	int i;
 
 	
@@ -836,23 +834,10 @@ void CqTextureMap::SampleMIPMAP(float s1, float t1, float swidth, float twidth, 
 
 	val.resize(m_SamplesPerPixel);
 
-	float m_xres, m_yres;
-
-	m_xres = m_XRes/(1<<directory);
-	m_yres = m_YRes/(1<<directory);
-
-	float swo2=swidth*0.5f;
-	float two2=twidth*0.5f;
-	float sbo2=(sblur*0.5f)*m_xres;
-	float tbo2=(tblur*0.5f)*m_yres;
-	
-	long ss1=static_cast<long>(FLOOR((s1-swo2)*(m_xres-1.0))-sbo2);
-	long tt1=static_cast<long>(FLOOR((t1-two2)*(m_yres-1.0))-tbo2);
-	long ss2=static_cast<long>(CEIL ((s1+swo2)*(m_xres-1.0))+sbo2);
-	long tt2=static_cast<long>(CEIL ((t1+two2)*(m_yres-1.0))+sbo2);
-
-	bool fss=ss2-ss1==0;
-	bool ftt=tt2-tt1==0;
+	TqFloat ss1=s1-swidth;
+	TqFloat tt1=t1-twidth;
+	TqFloat ss2=s1+swidth;
+	TqFloat tt2=t1+twidth;
 
 	std::valarray<float> val1;
 	std::valarray<float> val2;
@@ -868,65 +853,52 @@ void CqTextureMap::SampleMIPMAP(float s1, float t1, float swidth, float twidth, 
 	val4 = 0.0f;
 
 	
-
 	if (m_smode == WrapMode_Periodic) 
 	{
-		while(ss1<0)	ss1+=m_xres;
-		while(ss1>static_cast<long>(m_xres-1.0))	ss1-=m_xres;
-		while(ss2<0)	ss2+=m_xres;
-		while(ss2>static_cast<long>(m_xres-1.0))	ss2-=m_xres;
+		ss1 = fmod(ss1,1.0f);
+		ss2 = fmod(ss2,1.0f);
 	} 
-	if (m_tmode == WrapMode_Periodic) {
-		while(tt1<0)	tt1+=m_yres;
-		while(tt1>static_cast<long>(m_yres-1.0))	tt1-=m_yres;
-		while(tt2<0)	tt2+=m_yres;
-		while(tt2>static_cast<long>(m_yres-1.0))	tt2-=m_yres;
-	}
-	if(Type()==MapType_Environment)
+	if (m_tmode == WrapMode_Periodic) 
 	{
-		if(ss1<0)	ss1=0;
-		if(tt1<0)	tt1=0;
-		if(ss2>static_cast<long>(m_XRes-1))	ss2=(m_XRes-1);
-		if(tt2>static_cast<long>(m_YRes-1))	tt2=(m_YRes-1);
+		tt1 = fmod(tt1,1.0f);
+		tt2 = fmod(tt2,1.0f);
+	}
+	
+	if (m_smode == WrapMode_Black) {
+		if ( (ss1<0.0f) || 
+		     (ss2<0.0f) ||
+		     (ss2>1.0f)	||
+             (ss1>1.0f) )	return;
+	}
+	if (m_tmode == WrapMode_Black)
+	{
+		if ((tt1<0.0f) ||
+		    (tt2<0.0f) ||
+		    (tt2>1.0f) ||
+		    (tt1>1.0f) ) return;
 	}
 
-	if (m_smode == WrapMode_Black) {
-		if ( (ss1<0) || 
-		     (ss2<0) ||
-		     (ss2>static_cast<long>(m_xres-1.0))	||
-             (ss1>static_cast<long>(m_xres-1.0)) )	return;
+	if(m_smode == WrapMode_Clamp || Type()==MapType_Environment)
+	{
+		ss1 = CLAMP(ss1,0.0f,1.0f);
+		ss2 = CLAMP(ss2,0.0f,1.0f);
 	}
-	if (m_tmode == WrapMode_Black) {
-		if ((tt1<0) ||
-		    (tt2<0) ||
-		    (tt2>static_cast<long>(m_yres-1.0)) ||
-		    (tt1>static_cast<long>(m_yres-1.0)) ) return;
-	}
-	// TODO: This is effectively 'clamp' mode, by default
-	if (m_smode == WrapMode_Clamp) {
-		if (ss1<0) ss1=0;
-		if (ss2<0) ss2=0;
-		if(ss2>static_cast<long>(m_xres-1.0))	ss2=(m_xres-1.0);
-		if(ss1>static_cast<long>(m_xres-1.0))	ss1=(m_xres-1.0);
-	}
-	if (m_tmode == WrapMode_Clamp) {
-		if (tt1<0) tt1=0;
-		if (tt2<0) tt2=0;
-		if(tt2>static_cast<long>(m_yres-1.0))	tt2=(m_yres-1.0);
-		if(tt1>static_cast<long>(m_yres-1.0))	tt1=(m_yres-1.0);
+	if(m_tmode == WrapMode_Clamp || Type()==MapType_Environment)
+	{
+		tt1 = CLAMP(tt1,0.0f,1.0f);
+		tt2 = CLAMP(tt2,0.0f,1.0f);
 	}
 
 	// If no boundaries are crossed, just do a single sample (the most common case)
 	if((ss1<ss2) && (tt1<tt2))
 	{
-		GetSample(ss1,tt1,ss2,tt2,val,fss,ftt,directory);
-		
+		GetSample(ss1,tt1,ss2,tt2,val);
 	}
 	// If it crosses only the s boundary, we need to get two samples.
 	else if((ss1>ss2) && (tt1<tt2))
 	{
-		GetSample(0,tt1,ss2,tt2,val1,fss, ftt, directory);
-		GetSample(ss1,tt1,m_xres-1,tt2,val2,fss,ftt,directory);
+		GetSample(0,tt1,ss2,tt2,val1);
+		GetSample(ss1,tt1,1.0f,tt2,val2);
 		val=(val1+val2);
 		val*=0.5f;
 		
@@ -934,8 +906,8 @@ void CqTextureMap::SampleMIPMAP(float s1, float t1, float swidth, float twidth, 
 	// If it crosses only the t boundary, we need to get two samples.
 	else if((ss1<ss2) && (tt1>tt2))
 	{
-		GetSample(ss1,0,ss2,tt2,val1,fss,ftt,directory);
-		GetSample(ss1,tt1,ss2,m_yres-1,val2,fss,ftt,directory);
+		GetSample(ss1,0,ss2,tt2,val1);
+		GetSample(ss1,tt1,ss2,1.0f,val2);
 		val=(val1+val2);
 		val*=0.5f;
 		
@@ -943,87 +915,172 @@ void CqTextureMap::SampleMIPMAP(float s1, float t1, float swidth, float twidth, 
 	// If it crosses the s and t boundary, we need to get four samples.
 	else
 	{
-		GetSample(0,0,ss2,tt2,val1,fss,ftt,directory);
-		GetSample(ss1,0,m_xres-1,tt2,val2,fss,ftt,directory);
-		GetSample(0,tt1,ss2,m_yres-1,val3,fss,ftt,directory);
-		GetSample(ss1,tt1,m_xres-1,m_yres-1,val4,fss,ftt,directory);
+		GetSample(0,0,ss2,tt2,val1);
+		GetSample(ss1,0,1.0f,tt2,val2);
+		GetSample(0,tt1,ss2,1.0f,val3);
+		GetSample(ss1,tt1,1.0f,1.0f,val4);
 		val=(val1+val2+val3+val4);
 		val*=0.25f;
-		
 	}
 
     
-	// Clamp and smoothstep() the result 
-	for (i=0; i< m_SamplesPerPixel; i++) {
-		if   (val[i] > 1.0)
-			val[i] = 1.0; 
-		else if (val[i] < 0.0)
-			val[i] = 0.0;
-		else if ( directory == 0 /* 1 */ ) {
-			/* Should we smoothstep the result since we already use the 
-			 * filterfunc better ? 
-			 * Not entirely sure about that for now.
-			 * It is a lowpass filter, it may produce darker image
-			 * (or in fact image with stronger contrast).
-			 */
-			val[i]=val[i]*val[i]*(3.0-2.0*val[i]);
-		}
-	}
-
+	// Clamp the result 
+	for (i=0; i< m_SamplesPerPixel; i++)
+		val[i] = CLAMP(val[i],0.0f,1.0f);
 }
 
 
-void CqTextureMap::GetSample(long ss1, long tt1, long ss2, long tt2, std::valarray<float>& val, bool fss, bool ftt, int directory)
+void CqTextureMap::GetSample(TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<float>& val)
 {
+	// u/v is average of sample positions.
+	TqFloat u = ((u2-u1)*0.5f)+u1;
+	TqFloat v = ((v2-v1)*0.5f)+v1;
+	
+	// Calculate the appropriate mipmap level from the area subtended by the sample.
+	TqFloat UVArea = (u2-u1)*(v2-v1);
+	TqFloat d = sqrt(fabs(UVArea));
+
+	// Find out which two layers the of the pyramid d lies between.
+	d = CLAMP(d, 0.0,1.0);
+	// Adjust u and v for the pyramid level.
+	TqInt idu = FLOOR(d*m_XRes);
+	TqInt idv = FLOOR(d*m_YRes);
+	TqInt id = 0;
+	TqBool singlelevel = ((idu==0)||(idu==m_XRes)||(idv==0)||(idv==m_YRes));
+	TqInt umapsize,vmapsize;
+	for(umapsize = m_XRes, vmapsize = m_YRes; idu > 1 && idv > 1; idu >>= 1, umapsize >>= 1, idv >>= 1, vmapsize >>= 1, id++);
+	
+	TqInt iu = FLOOR(u*umapsize);
+	TqFloat ru = u * umapsize - iu;
+	TqInt iu_n = iu + 1;
+		  iu = iu % umapsize;		/// \todo This is wrap mode periodic.
+		  iu_n = iu_n % umapsize;	/// \todo This is wrap mode periodic.
+
+	TqInt iv = FLOOR(v*vmapsize);
+	TqFloat rv = v * vmapsize - iv;
+	TqInt iv_n = iv + 1;
+		  iv = iv % vmapsize;		/// \todo This is wrap mode periodic.
+		  iv_n = iv_n % vmapsize;	/// \todo This is wrap mode periodic.
+
 	// Read in the relevant texture tiles.
-	CqTextureMapBuffer* pTMBa=GetBuffer(ss1,tt1,directory);
-	CqTextureMapBuffer* pTMBb=GetBuffer(ss2,tt1,directory);
-	CqTextureMapBuffer* pTMBc=GetBuffer(ss1,tt2,directory);
-	CqTextureMapBuffer* pTMBd=GetBuffer(ss2,tt2,directory);
+	CqTextureMapBuffer* pTMBa=GetBuffer(iu,iv,id);		// Val00
+	CqTextureMapBuffer* pTMBb=GetBuffer(iu,iv_n,id);	// Val01
+	CqTextureMapBuffer* pTMBc=GetBuffer(iu_n,iv,id);	// Val10
+	CqTextureMapBuffer* pTMBd=GetBuffer(iu_n,iv_n,id);	// Val11
     
 
-        /* cannot find anything than goodbye */
-        if (!pTMBa || !pTMBb || !pTMBc || !pTMBd) return;
+    /* cannot find anything than goodbye */
+    if (!pTMBa || !pTMBb || !pTMBc || !pTMBd) return;
 
 	// all the tile are using the same size therefore the number is ok 
 	long rowlen=  pTMBa->Width()*m_SamplesPerPixel; 
+
+	// Store the sample positions forl later use if need be.
+	TqInt iu_c = iu;
+	TqInt iv_c = iv;
+
+	// Bilinear intepolate the values at the corners of the sample.
+	iu-=  pTMBa->sOrigin();
+	iu_n-=pTMBc->sOrigin();
+	iv-=  pTMBa->tOrigin();
+	iv_n-=pTMBb->tOrigin();
+
+	TqUchar* mapa = pTMBa->pBufferData();
+	TqUchar* mapb = pTMBb->pBufferData();
+	TqUchar* mapc = pTMBc->pBufferData();
+	TqUchar* mapd = pTMBd->pBufferData();
+
+	iu*=m_SamplesPerPixel;
+	iu_n*=m_SamplesPerPixel;
+	iv*=rowlen;
+	iv_n*=rowlen;
 	
+	std::valarray<float> low_colour;
+	low_colour.resize(m_SamplesPerPixel);
 
-	TqFloat ds=ss2-ss1;
-	TqFloat dt=tt2-tt1;
-	TqFloat d=fabs(ds*dt);
-
-	// Adjust the offsets according to the buffer offset and size.
-
-	ss1-=pTMBa->sOrigin();
-	tt1-=pTMBa->tOrigin();
-	ss2-=pTMBb->sOrigin();
-	tt2-=pTMBc->tOrigin();
-
-	ss1*=m_SamplesPerPixel;
-	tt1*=rowlen;
-	ss2*=m_SamplesPerPixel;
-	tt2*=rowlen;
-
-
-	int c;
-	TqFloat ratio = 4.0;
-
+	TqInt c;
 	for(c=0; c<m_SamplesPerPixel; c++)
 	{
-		 val[c]=pTMBd->pBufferData()[tt2+ss2+c]/255.0;
-
-         if(!ftt) {
-              val[c]+=pTMBb->pBufferData()[tt1+ss2+c]/255.0;
-		 } else ratio -= 1.0;
-
-         if(!fss)
-               val[c]+=pTMBc->pBufferData()[tt2+ss1+c]/255.0;
-		 else ratio -= 1.0;
-
-         val[c]+=pTMBa->pBufferData()[tt1+ss1+c]/255.0;
-		 val[c] /= ratio;
+		 TqFloat Val00 = (mapa[iv+iu+c]/255.0); 
+		 TqFloat Val01 = (mapb[iv_n+iu+c]/255.0); 
+		 TqFloat Val10 = (mapc[iv+iu_n+c]/255.0); 
+		 TqFloat Val11 = (mapd[iv_n+iu_n+c]/255.0); 
+		 TqFloat bot = Val00 + (ru * (Val10 - Val00));
+		 TqFloat top = Val01 + (ru * (Val11 - Val01));
+		 low_colour[c]=bot + (rv * (top - bot));
 	}
+
+
+	if(singlelevel)
+	{
+		val = low_colour;
+	}
+	else
+	{
+		umapsize >>= 1;
+		vmapsize >>= 1;
+
+		ru = (ru + (iu_c % 2))/2;
+		iu = iu_c >> 1;
+		iu_n = iu + 1;
+		iu = iu % umapsize;		/// \todo This is wrap mode periodic.
+		iu_n = iu_n % umapsize;	/// \todo This is wrap mode periodic.
+
+		rv = (rv + (iv_c % 2))/2;
+		iv = iv_c >> 1;
+		iv_n = iv + 1;
+		iv = iv % vmapsize;		/// \todo This is wrap mode periodic.
+		iv_n = iv_n % vmapsize;	/// \todo This is wrap mode periodic.
+
+		// Read in the relevant texture tiles.
+		CqTextureMapBuffer* pTMBa=GetBuffer(iu,iv,id+1);		// Val00
+		CqTextureMapBuffer* pTMBb=GetBuffer(iu,iv_n,id+1);		// Val01
+		CqTextureMapBuffer* pTMBc=GetBuffer(iu_n,iv,id+1);		// Val10
+		CqTextureMapBuffer* pTMBd=GetBuffer(iu_n,iv_n,id+1);	// Val11
+    
+		/* cannot find anything than goodbye */
+		if (!pTMBa || !pTMBb || !pTMBc || !pTMBd) return;
+
+		// all the tile are using the same size therefore the number is ok 
+		long rowlen=  pTMBa->Width()*m_SamplesPerPixel; 
+
+		// Bilinear intepolate the values at the corners of the sample.
+		iu-=  pTMBa->sOrigin();
+		iu_n-=pTMBc->sOrigin();
+		iv-=  pTMBa->tOrigin();
+		iv_n-=pTMBb->tOrigin();
+
+		TqUchar* mapa = pTMBa->pBufferData();
+		TqUchar* mapb = pTMBb->pBufferData();
+		TqUchar* mapc = pTMBc->pBufferData();
+		TqUchar* mapd = pTMBd->pBufferData();
+
+		iu*=m_SamplesPerPixel;
+		iu_n*=m_SamplesPerPixel;
+		iv*=rowlen;
+		iv_n*=rowlen;
+		
+		std::valarray<float> high_colour;
+		high_colour.resize(m_SamplesPerPixel);
+
+		TqInt c;
+		for(c=0; c<m_SamplesPerPixel; c++)
+		{
+			 TqFloat Val00 = (mapa[iv+iu+c]/255.0); 
+			 TqFloat Val01 = (mapb[iv_n+iu+c]/255.0); 
+			 TqFloat Val10 = (mapc[iv+iu_n+c]/255.0); 
+			 TqFloat Val11 = (mapd[iv_n+iu_n+c]/255.0); 
+			 TqFloat bot = Val00 + (ru * (Val10 - Val00));
+			 TqFloat top = Val01 + (ru * (Val11 - Val01));
+			 high_colour[c]=bot + (rv * (top - bot));
+		}
+
+		// Linearly interpolate between low_colour and high_colour by dinterp.
+
+		TqFloat dinterp = (MAX(umapsize,vmapsize)*d)-1;
+		for(c=0; c<m_SamplesPerPixel; c++)
+			 val[c]=low_colour[c]+dinterp*(high_colour[c]-low_colour[c]);
+	}	
 }
 
 //----------------------------------------------------------------------
@@ -1032,7 +1089,7 @@ void CqTextureMap::GetSample(long ss1, long tt1, long ss2, long tt2, std::valarr
 
 void CqTextureMap::SampleMIPMAP(float s1, float t1, float s2, float t2, float s3, float t3, float s4, float t4, 
 									float sblur, float tblur, 
-									std::valarray<float>& val, int directory)
+									std::valarray<float>& val)
 {
 	// Work out the width and height
 	float ss1,tt1,ss2,tt2;
@@ -1046,7 +1103,7 @@ void CqTextureMap::SampleMIPMAP(float s1, float t1, float s2, float t2, float s3
 	ss1=ss1+(swidth*0.5f);
 	tt1=tt1+(twidth*0.5f);
 
-	SampleMIPMAP(ss1,tt1,swidth,twidth,sblur,tblur,val,directory);
+	SampleMIPMAP(ss1,tt1,swidth,twidth,sblur,tblur,val);
 }
 
 
@@ -1079,7 +1136,7 @@ void CqEnvironmentMap::SampleMIPMAP(CqVector3D& R1, CqVector3D& swidth, CqVector
 			ss1 = ss1 + 0.5; /* remaps to 0 -> 1 */
 			tt1 = acos(-V.z()) / RI_PI;
 			
-			CqTextureMap::SampleMIPMAP(ss1,tt1,sswidth,stwidth, sblur,tblur,val,0);
+			CqTextureMap::SampleMIPMAP(ss1,tt1,sswidth,stwidth, sblur,tblur,val);
 		}
 	}
 }
@@ -1177,7 +1234,7 @@ void CqEnvironmentMap::SampleMIPMAP(CqVector3D& R1, CqVector3D& R2, CqVector3D& 
 				s1+=(swidth*0.5f);
 				t1+=(twidth*0.5f);
 
-				CqTextureMap::SampleMIPMAP(s1,t1,swidth,twidth,sblur,tblur,run_val,i);
+				CqTextureMap::SampleMIPMAP(s1,t1,swidth,twidth,sblur,tblur,run_val);
 
 				// Add the color contribution weighted by the area
 				val+=run_val*texture_area;
@@ -1975,3 +2032,4 @@ void CqTextureMap::WriteImage(TIFF* ptex, unsigned char *raster, unsigned long w
 
 END_NAMESPACE(Aqsis)
 //---------------------------------------------------------------------
+

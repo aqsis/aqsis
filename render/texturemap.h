@@ -295,17 +295,17 @@ class _qShareC CqTextureMap
 						void		CreateMIPMAP();
 
 	_qShareM	virtual	void		SampleMIPMAP(float s1, float t1, float swidth, float twidth, float sblur, float tblur, 
-												 std::valarray<float>& val, int directory=0);
+												 std::valarray<float>& val);
 	_qShareM	virtual	void		SampleMIPMAP(float s1, float t1, float s2, float t2, float s3, float t3, float s4, float t4, 
 												 float sblur, float tblur, 
-												 std::valarray<float>& val, int directory=0);
+												 std::valarray<float>& val);
 	_qShareM	virtual	void		SampleMIPMAP(CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, float sblur, float tblur, 
 												 std::valarray<float>& val)	{}
 	_qShareM	virtual	void		SampleMIPMAP(CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, 
 												 float sblur, float tblur, 
 												 std::valarray<float>& val)	{}
 
-	_qShareM	virtual	void		GetSample(long ss1, long tt1, long ss2, long tt2, std::valarray<float>& val, bool fss, bool ftt, int directory);
+	_qShareM	virtual	void		GetSample(TqFloat ss1, TqFloat tt1, TqFloat ss2, TqFloat tt2, std::valarray<float>& val);
 
 	_qShareM	static	CqTextureMap* GetTextureMap(const char* strName);
 	_qShareM	static	CqTextureMap* GetEnvironmentMap(const char* strName);

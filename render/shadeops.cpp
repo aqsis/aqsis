@@ -36,8 +36,6 @@
 START_NAMESPACE(Aqsis)
 
 static	TqFloat	temp_float;
-static  TqInt   FindDirectory(CqTextureMap* pTMap, CqSurface *pSurface);
-
 
 //----------------------------------------------------------------------
 // SO_sprintf
@@ -1507,7 +1505,6 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1(STRINGVAL name, FLOATVAL channel, DEFPA
 	
 	TqInt i=0;
 	CqTextureMap* pTMap=CqTextureMap::GetTextureMap(STRING(name).c_str());
-    TqInt directory = FindDirectory(pTMap, m_pSurface);
 	
 	INIT_SOR
 	__fVarying=TqTrue;
@@ -1533,14 +1530,9 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1(STRINGVAL name, FLOATVAL channel, DEFPA
 			swidth*=_pswidth;
 			twidth*=_ptwidth;
 			                        
-			swidth /= (1<<directory);
-			twidth /= (1<<directory);
-
-			
 			// Sample the texture.
 			std::valarray<float> val;
-
-			pTMap->SampleMIPMAP(s(),t(),swidth,twidth,_psblur,_ptblur,val,directory);
+			pTMap->SampleMIPMAP(s(),t(),swidth,twidth,_psblur,_ptblur,val);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1563,7 +1555,6 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2(STRINGVAL name, FLOATVAL channel, FLOAT
 	TqInt i=0;
 	TqFloat f;
 	CqTextureMap* pTMap=CqTextureMap::GetTextureMap(STRING(name).c_str());
-	TqInt directory = FindDirectory(pTMap, m_pSurface);
 
 	INIT_SOR
 	__fVarying=TqTrue;
@@ -1591,12 +1582,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2(STRINGVAL name, FLOATVAL channel, FLOAT
 		
 			// Sample the texture.
 			std::valarray<float> val;
-                        
-			swidth /= (1<<directory);
-			twidth /= (1<<directory);
-			
-
-			pTMap->SampleMIPMAP(s.Value(f,m_GridI),t.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val, directory);
+			pTMap->SampleMIPMAP(s.Value(f,m_GridI),t.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1626,7 +1612,6 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3(STRINGVAL name, FLOATVAL channel, FLOAT
 		FOR_EACHR
 			// Sample the texture.
 			std::valarray<float> val;
-
 			pTMap->SampleMIPMAP(s1.Value(f,m_GridI),t1.Value(f,m_GridI),s2.Value(f,m_GridI),t2.Value(f,m_GridI),s3.Value(f,m_GridI),t3.Value(f,m_GridI),s4.Value(f,m_GridI),t4.Value(f,m_GridI),_psblur,_ptblur,val);
 
 			// Grab the appropriate channel.
@@ -1649,7 +1634,6 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1(STRINGVAL name, FLOATVAL channel, DEFPA
 
 	TqInt i=0;
 	CqTextureMap* pTMap=CqTextureMap::GetTextureMap(STRING(name).c_str());
-	TqInt directory = FindDirectory(pTMap, m_pSurface);
 
 	INIT_SOR
 	__fVarying=TqTrue;
@@ -1677,11 +1661,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1(STRINGVAL name, FLOATVAL channel, DEFPA
 
 			// Sample the texture.
 			std::valarray<float> val;
-
-            swidth /= (1<<directory);
-			twidth /= (1<<directory);
-            
-			pTMap->SampleMIPMAP(s(),t(),swidth,twidth,_psblur,_ptblur,val,directory);
+			pTMap->SampleMIPMAP(s(),t(),swidth,twidth,_psblur,_ptblur,val);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1703,7 +1683,6 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2(STRINGVAL name, FLOATVAL channel, FLOAT
 
 	TqInt i=0;
 	CqTextureMap* pTMap=CqTextureMap::GetTextureMap(STRING(name).c_str());
-	TqInt directory = FindDirectory(pTMap, m_pSurface);
 
 	TqFloat f;
 	INIT_SOR
@@ -1732,12 +1711,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2(STRINGVAL name, FLOATVAL channel, FLOAT
 
 			// Sample the texture.
 			std::valarray<float> val;
-
-                        
-			swidth /= (1<<directory);
-			twidth /= (1<<directory);
-
-			pTMap->SampleMIPMAP(s.Value(f,m_GridI),t.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val, directory);
+			pTMap->SampleMIPMAP(s.Value(f,m_GridI),t.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val);
 
 			// Grab the appropriate channel.
 			float fchan=FLOAT(channel);
@@ -1919,7 +1893,6 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2(STRINGVAL name, FLOATVAL channel, V
 
 			// Sample the texture.
 			std::valarray<float> val;
-			
 			pTMap->SampleMIPMAP(R.Value(f,m_GridI),swidth,twidth,_psblur,_ptblur,val);
 			
 
