@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\Object\Release\libcodegenvm"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libslparse" /I "..\render" /D "NDEBUG" /D "_WINDOWS" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBCODEGENVM /D BUILD_LIBCODEGENVM=1 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /I "..\libslparse" /I "..\render" /D "_WINDOWS" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBCODEGENVM /D BUILD_LIBCODEGENVM=1 /D "NDEBUG" /D "WIN32" /D "PLUGINS" /FR /YX /FD /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
