@@ -489,19 +489,52 @@ PtDspyError DspyImageData(PtDspyImageHandle image,
 
 	if( pImage && data && xmin >= 0 && ymin >= 0 && xmaxplus1 <= pImage->m_width && ymaxplus1 <= pImage->m_height )
 	{
-		TqInt y;
-		for ( y = ymin; y < ymaxplus1; y++ )
+		// If rendering to a file, or an "rgb" framebuffer, we can just copy the data.
+		if(pImage->m_imageType != Type_Framebuffer || pImage->m_iFormatCount <= 3)
 		{
-			// Copy a whole row at a time, as we know it is being sent in the proper format and order.
-			TqInt so = ( y * pImage->m_lineLength ) + ( xmin * pImage->m_entrySize );
-			memcpy(reinterpret_cast<char*>(pImage->m_data)+so, reinterpret_cast<const void*>(pdatarow), bucketlinelen);
-			pdatarow += bucketlinelen;
+			TqInt y;
+			for ( y = ymin; y < ymaxplus1; y++ )
+			{
+				// Copy a whole row at a time, as we know it is being sent in the proper format and order.
+				TqInt so = ( y * pImage->m_lineLength ) + ( xmin * pImage->m_entrySize );
+				memcpy(reinterpret_cast<char*>(pImage->m_data)+so, reinterpret_cast<const void*>(pdatarow), bucketlinelen);
+				pdatarow += bucketlinelen;
+			}
+		}
+		// otherwise we need to do alpha blending for the alpha data to show in the framebuffer
+		else
+		{
+			TqInt t;	// Not used, just a temporary needed for the INT_PRELERP macro.
+			TqInt y;
+			for ( y = ymin; y < ymaxplus1; y++ )
+			{
+				TqInt x;
+				for ( x = xmin; x < xmaxplus1; x++ )
+				{
+					unsigned char alpha = pdatarow[3];
+					if( alpha > 0 )
+					{
+						TqInt so = ( y * pImage->m_lineLength ) + ( x * pImage->m_entrySize );
+						unsigned char r = pdatarow[0];
+						unsigned char g = pdatarow[1];
+						unsigned char b = pdatarow[2];
+						// C’ = INT_PRELERP( A’, B’, b, t )
+						unsigned char R = static_cast<int>(INT_PRELERP( reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 0 ], r, alpha, t ));
+						unsigned char G = static_cast<int>(INT_PRELERP( reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 1 ], g, alpha, t ));
+						unsigned char B = static_cast<int>(INT_PRELERP( reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 2 ], b, alpha, t ));
+						reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 0 ] = CLAMP( R, 0, 255 );
+						reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 1 ] = CLAMP( G, 0, 255 );
+						reinterpret_cast<unsigned char*>(pImage->m_data)[ so + 2 ] = CLAMP( B, 0, 255 );
+					}
+					pdatarow += entrysize;
+				}
+			}
 		}
 	}	
 
 	if(pImage->m_imageType == Type_Framebuffer)
 	{
-		pImage->m_uiImageWidget->damage(1);
+		pImage->m_uiImageWidget->damage(1, xmin, ymin, xmaxplus1-xmin, ymaxplus1-ymin);
 		Fl::check();
 	}
 	return(PkDspyErrorNone);	

@@ -504,20 +504,6 @@ void CqImagePixel::Combine()
 	{
 		samplecount = m_OpaqueSampleCount;
 	}
-
-    if ( samplecount )
-	{
-		TqFloat coverage = (TqFloat)samplecount / numsamples;
-        SetCoverage(coverage);
-
-		// Calculate and set the alpha (pre-multiplied).
-		TqFloat a = ( Opacity()[0] + Opacity()[1] + Opacity()[2] ) / 3.0f;
-		SetAlpha(a * coverage);
-	}
-	else
-	{
-		SetAlpha(0.0f);
-	}
 }
 
 //----------------------------------------------------------------------

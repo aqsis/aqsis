@@ -690,6 +690,7 @@ void CqBucket::FilterBucket(TqBool empty)
 		memset(&m_aCoverages[0], 0, size * sizeof(float));
 		for(i = 0; i<size; ++i)
 		{
+			// Set the depth to infinity.
 			m_aDatas[ i*datasize+6 ] = FLT_MAX;
 		}
 	}
@@ -699,14 +700,21 @@ void CqBucket::FilterBucket(TqBool empty)
     endy = Height();
     endx = Width();
 
+	// Set the coverage and alpha values for the pixel.
     for ( y = 0; y < endy; y++ )
     {
         CqImagePixel* pie2 = pie;
         for ( x = 0; x < endx; x++ )
         {
-            for (TqInt k=0; k < datasize; k++)
-                pie2->GetPixelSample().m_Data[k] = m_aDatas[ i * datasize + k ];
-            pie2->SetCoverage( m_aCoverages[ i++ ] );
+            SqImageSample& spl = pie2->GetPixelSample();
+			for (TqInt k=0; k < datasize; k++)
+                spl.m_Data[k] = m_aDatas[ i * datasize + k ];
+            spl.SetCoverage( m_aCoverages[ i++ ] );
+	
+			// Calculate the alpha as the combination of the opacity and the coverage.
+			TqFloat a = ( spl.Os()[0] + spl.Os()[1] + spl.Os()[2] ) / 3.0f;
+			pie2->SetAlpha(a * spl.Coverage());
+
             pie2++;
         }
         pie += xlen;
@@ -835,23 +843,26 @@ void CqBucket::QuantizeBucket()
             CqImagePixel* pie2 = pie;
             for ( x = 0; x < endx; x++ )
             {
-                double r, g, b;
+                double r, g, b, a;
                 double _or, _og, _ob;
                 double s = random.RandomFloat();
                 CqColor col = pie2->Color();
                 CqColor opa = pie2->Opacity();
+				TqFloat alpha = pie2->Alpha();
                 if ( modf( one * col.fRed () + ditheramplitude * s, &r ) > 0.5 ) r += 1;
                 if ( modf( one * col.fGreen() + ditheramplitude * s, &g ) > 0.5 ) g += 1;
                 if ( modf( one * col.fBlue () + ditheramplitude * s, &b ) > 0.5 ) b += 1;
                 if ( modf( one * opa.fRed () + ditheramplitude * s, &_or ) > 0.5 ) _or += 1;
                 if ( modf( one * opa.fGreen() + ditheramplitude * s, &_og ) > 0.5 ) _og += 1;
                 if ( modf( one * opa.fBlue () + ditheramplitude * s, &_ob ) > 0.5 ) _ob += 1;
+                if ( modf( one * alpha + ditheramplitude * s, &a ) > 0.5 ) a += 1;
                 r = CLAMP( r, min, max );
                 g = CLAMP( g, min, max );
                 b = CLAMP( b, min, max );
                 _or = CLAMP( _or, min, max );
                 _og = CLAMP( _og, min, max );
                 _ob = CLAMP( _ob, min, max );
+                a = CLAMP( a, min, max );
                 col.SetfRed ( r );
                 col.SetfGreen( g );
                 col.SetfBlue ( b );
@@ -860,7 +871,7 @@ void CqBucket::QuantizeBucket()
                 opa.SetfBlue ( _ob );
                 pie2->SetColor( col );
                 pie2->SetOpacity( opa );
-
+				pie2->SetAlpha( a );
                 pie2++;
             }
             pie += nextx;
