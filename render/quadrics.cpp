@@ -95,19 +95,25 @@ CqMicroPolyGridBase* CqQuadric::Dice()
 
 	CqVector3D	P, N;
 	int v, u;
-	for ( v = 0; v <= m_vDiceSize; v++ )
+	if( USES( lUses, EnvVars_P ) || USES( lUses, EnvVars_Ng ) )
 	{
-		for ( u = 0; u <= m_uDiceSize; u++ )
+		for ( v = 0; v <= m_vDiceSize; v++ )
 		{
-			TqInt igrid = ( v * ( m_uDiceSize + 1 ) ) + u;
-			P = DicePoint( u, v, N );
-			pGrid->P()->SetPoint( m_matTx * P, igrid );
-			if(CanGenerateNormals())
+			for ( u = 0; u <= m_uDiceSize; u++ )
 			{
-				EqOrientation CSO = pAttributes() ->eCoordsysOrientation();
-				EqOrientation O = pAttributes() ->eOrientation();
-				N = ( CSO == O ) ? N : -N;
-				pGrid->Ng()->SetNormal( m_matITTx * N, igrid );
+				TqInt igrid = ( v * ( m_uDiceSize + 1 ) ) + u;
+				if( USES( lUses, EnvVars_P ) )
+				{
+					P = DicePoint( u, v, N );
+					pGrid->P()->SetPoint( m_matTx * P, igrid );
+				}
+				if(CanGenerateNormals() && USES( lUses, EnvVars_Ng ) )
+				{
+					EqOrientation CSO = pAttributes() ->eCoordsysOrientation();
+					EqOrientation O = pAttributes() ->eOrientation();
+					N = ( CSO == O ) ? N : -N;
+					pGrid->Ng()->SetNormal( m_matITTx * N, igrid );
+				}
 			}
 		}
 	}

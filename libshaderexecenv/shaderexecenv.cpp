@@ -150,6 +150,7 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Cq
 	m_RunningState.SetSize( ( uGridRes + 1 ) * ( vGridRes + 1 ) );
 	m_RunningState.SetAll( TqTrue );
 
+	
 	if( NULL != pShader )
 	{
 		if ( USES( Uses, EnvVars_Cs ) && m_apVariables[ EnvVars_Cs ] == 0 ) 

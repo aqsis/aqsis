@@ -582,8 +582,8 @@ RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 {
 	QGetRenderContext() ->optCurrent().SetfuncFilter( function );
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("system", "FilterWidth")[0] =  xwidth ;
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("system", "FilterWidth")[1] =  ywidth ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "FilterWidth")[0] =  xwidth ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "FilterWidth")[1] =  ywidth ;
 
 	return ;
 }

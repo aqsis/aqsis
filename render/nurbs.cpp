@@ -1289,20 +1289,23 @@ CqMicroPolyGridBase* CqSurfaceNURBS::Dice()
 	if ( USES( lUses, EnvVars_Os ) ) Os().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
 
 	TqInt iv;
-	for ( iv = 0; iv <= m_vDiceSize; iv++ )
+	if(USES( lUses, EnvVars_P ) )
 	{
-		TqFloat sv = ( static_cast<TqFloat>( iv ) / static_cast<TqFloat>( m_vDiceSize ) )
-		             * ( m_avKnots[ m_cvVerts ] - m_avKnots[ m_vOrder - 1 ] )
-		             + m_avKnots[ m_vOrder - 1 ];
-		TqInt iu;
-		for ( iu = 0; iu <= m_uDiceSize; iu++ )
+		for ( iv = 0; iv <= m_vDiceSize; iv++ )
 		{
-			TqInt igrid = ( iv * ( m_uDiceSize + 1) ) + iu;
-			TqFloat su = ( static_cast<TqFloat>( iu ) / static_cast<TqFloat>( m_uDiceSize ) )
-			             * ( m_auKnots[ m_cuVerts ] - m_auKnots[ m_uOrder - 1 ] )
-			             + m_auKnots[ m_uOrder - 1 ];
+			TqFloat sv = ( static_cast<TqFloat>( iv ) / static_cast<TqFloat>( m_vDiceSize ) )
+						 * ( m_avKnots[ m_cvVerts ] - m_avKnots[ m_vOrder - 1 ] )
+						 + m_avKnots[ m_vOrder - 1 ];
+			TqInt iu;
+			for ( iu = 0; iu <= m_uDiceSize; iu++ )
+			{
+				TqInt igrid = ( iv * ( m_uDiceSize + 1) ) + iu;
+				TqFloat su = ( static_cast<TqFloat>( iu ) / static_cast<TqFloat>( m_uDiceSize ) )
+							 * ( m_auKnots[ m_cuVerts ] - m_auKnots[ m_uOrder - 1 ] )
+							 + m_auKnots[ m_uOrder - 1 ];
 
-			pGrid->P()->SetPoint( static_cast<CqVector3D>( Evaluate( su, sv ) ), igrid );
+				pGrid->P()->SetPoint( static_cast<CqVector3D>( Evaluate( su, sv ) ), igrid );
+			}
 		}
 	}
 	return ( pGrid );

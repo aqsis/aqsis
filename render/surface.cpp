@@ -149,6 +149,9 @@ TqInt CqBasicSurface::Uses() const
 	IqShader* pshadDisplacement = pAttributes() ->pshadDisplacement();
 	IqShader* pshadAtmosphere = pAttributes() ->pshadAtmosphere();
 
+	if ( NULL == pshadSurface && NULL == pshadDisplacement && NULL == pshadAtmosphere )
+		return( 0 );
+	
 	if ( pshadSurface ) Uses |= pshadSurface->Uses();
 	if ( pshadDisplacement ) Uses |= pshadDisplacement->Uses();
 	if ( pshadAtmosphere ) Uses |= pshadAtmosphere->Uses();

@@ -489,14 +489,17 @@ CqMicroPolyGridBase* CqSurfacePatchBicubic::Dice()
 	if ( USES( lUses, EnvVars_Os ) ) Os().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
 
 	TqInt iv, iu;
-	for ( iv = 0; iv <= m_vDiceSize; iv++ )
+	if( USES( lUses, EnvVars_P ) )
 	{
-		for ( iu = 0; iu <= m_uDiceSize; iu++ )
+		for ( iv = 0; iv <= m_vDiceSize; iv++ )
 		{
-			TqInt igrid = ( iv * ( m_uDiceSize + 1 ) ) + iu;
-			pGrid->P()->SetPoint( static_cast<CqVector3D>( EvaluateFD( matDDx, matDDy, matDDz, DDxA, DDyA, DDzA ) ), igrid );
+			for ( iu = 0; iu <= m_uDiceSize; iu++ )
+			{
+				TqInt igrid = ( iv * ( m_uDiceSize + 1 ) ) + iu;
+				pGrid->P()->SetPoint( static_cast<CqVector3D>( EvaluateFD( matDDx, matDDy, matDDz, DDxA, DDyA, DDzA ) ), igrid );
+			}
+			AdvanceFD( matDDx, matDDy, matDDz, DDxA, DDyA, DDzA );
 		}
-		AdvanceFD( matDDx, matDDy, matDDz, DDxA, DDyA, DDzA );
 	}
 	return ( pGrid );
 }
@@ -921,13 +924,18 @@ CqMicroPolyGridBase* CqSurfacePatchBilinear::Dice()
 	}
 
 	TqInt iv, iu;
-	for ( iv = 0; iv <= m_vDiceSize; iv++ )
+	if( USES( lUses, EnvVars_P ) || USES( lUses, EnvVars_N ) )
 	{
-		for ( iu = 0; iu <= m_uDiceSize; iu++ )
+		for ( iv = 0; iv <= m_vDiceSize; iv++ )
 		{
-			TqInt igrid = ( iv * ( m_uDiceSize + 1 ) ) + iu;
-			if ( bNormals ) pGrid->N()->SetNormal( static_cast<CqVector3D>( EvaluateNormal( iu * diu, iv * div ) ), igrid );
-			pGrid->P()->SetPoint( static_cast<CqVector3D>( BilinearEvaluate<CqVector4D>( P() [ 0 ], P() [ 1 ], P() [ 2 ], P() [ 3 ], iu * diu, iv * div ) ), igrid );
+			for ( iu = 0; iu <= m_uDiceSize; iu++ )
+			{
+				TqInt igrid = ( iv * ( m_uDiceSize + 1 ) ) + iu;
+				if ( bNormals && USES( lUses, EnvVars_N ) ) 
+					pGrid->N()->SetNormal( static_cast<CqVector3D>( EvaluateNormal( iu * diu, iv * div ) ), igrid );
+				if( USES( lUses, EnvVars_P) )
+					pGrid->P()->SetPoint( static_cast<CqVector3D>( BilinearEvaluate<CqVector4D>( P() [ 0 ], P() [ 1 ], P() [ 2 ], P() [ 3 ], iu * diu, iv * div ) ), igrid );
+			}
 		}
 	}
 	return ( pGrid );

@@ -133,6 +133,8 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
 
 void CqMicroPolyGrid::CalcNormals()
 {
+	if( NULL == P() || NULL == N() )	return;
+	
 	// Get the handedness of the coordinate system (at the time of creation) and
 	// the coordinate system specified, to check for normal flipping.
 	//	EqOrientation CSO=pSurface()->pAttributes()->eCoordsysOrientation();
@@ -207,6 +209,9 @@ void CqMicroPolyGrid::CalcNormals()
 
 void CqMicroPolyGrid::Shade()
 {
+	// Sanity checks
+	if( NULL == P() || NULL == I() )	return;
+	
 	static CqVector3D	vecE( 0, 0, 0 );
 
 	IqShader* pshadSurface = pSurface() ->pAttributes() ->pshadSurface();
@@ -221,7 +226,7 @@ void CqMicroPolyGrid::Shade()
 	// Calculate geometric normals if not specified by the surface.
 	if ( !bGeometricNormals() )	CalcNormals();
 	// If shading normals are not explicitly specified, they default to the geometric normal.
-	if ( !bShadingNormals() ) 
+	if ( !bShadingNormals() && USES( lUses, EnvVars_N ) && NULL != Ng() && NULL != N() ) 
 	{
 		N()->SetValueFromVariable( Ng() );
 	}
@@ -353,8 +358,11 @@ void CqMicroPolyGrid::Shade()
 
 	// Now shade the grid.
 	QGetRenderContext() ->Stats().SurfaceTimer().Start();
-	pshadSurface->Initialise( uGridRes(), vGridRes(), m_pShaderExecEnv );
-	pshadSurface->Evaluate( m_pShaderExecEnv );
+	if( NULL != pshadSurface ) 
+	{
+		pshadSurface->Initialise( uGridRes(), vGridRes(), m_pShaderExecEnv );
+		pshadSurface->Evaluate( m_pShaderExecEnv );
+	}
 	QGetRenderContext() ->Stats().SurfaceTimer().Stop();
 
 	// Now try and cull any true transparent MPs (assigned by the shader code
@@ -426,6 +434,9 @@ void CqMicroPolyGrid::Shade()
 
 void CqMicroPolyGrid::Project()
 {
+	if( NULL == P() )
+		return;
+	
 	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
 	// Transform the whole grid to hybrid camera/raster space
 	TqInt i = 0;
@@ -474,6 +485,9 @@ CqBound CqMicroPolyGrid::Bound()
 
 void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax )
 {
+	if( NULL == P() )	
+		return;
+	
 	TqInt cu = uGridRes();
 	TqInt cv = vGridRes();
 
@@ -502,7 +516,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 
 			// If the MPG is trimmed then don't add it.
 			TqBool fTrimmed = TqFalse;
-			if ( pSurface() ->bCanBeTrimmed() )
+			if ( pSurface() ->bCanBeTrimmed() && NULL != u() && NULL != v() )
 			{
 				TqFloat fu, fv;
 				u()->GetFloat( fu, iIndex ); 

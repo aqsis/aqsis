@@ -698,10 +698,13 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		TqInt ivC = rE.peNext().pvHead() ->iVertex();
 		TqInt ivD = rE.peNext().pvHead() ->iVertex();
 
-		pGrid->P()->SetPoint( SubdP( pPoints, ivA ), ( ( vOff ) * cuv ) + uOff );
-		pGrid->P()->SetPoint( SubdP( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
-		pGrid->P()->SetPoint( SubdP( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
-		pGrid->P()->SetPoint( SubdP( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+		if( USES( Uses(), EnvVars_P ) )
+		{
+			pGrid->P()->SetPoint( SubdP( pPoints, ivA ), ( ( vOff ) * cuv ) + uOff );
+			pGrid->P()->SetPoint( SubdP( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->P()->SetPoint( SubdP( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->P()->SetPoint( SubdP( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+		}
 
 		if ( uses_s && has_s )
 		{
@@ -743,8 +746,11 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		TqInt ivB = rE.pvHead() ->iVertex();
 		TqInt ivC = rE.peNext().pvHead() ->iVertex();
 
-		pGrid->P()->SetPoint( SubdP( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
-		pGrid->P()->SetPoint( SubdP( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+		if( USES( Uses(), EnvVars_P ) )
+		{
+			pGrid->P()->SetPoint( SubdP( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->P()->SetPoint( SubdP( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+		}
 
 		if ( uses_s && has_s )
 		{
@@ -778,8 +784,11 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		TqInt ivC = rE.pvHead() ->iVertex();
 		TqInt ivD = rE.peNext().pvHead() ->iVertex();
 
-		pGrid->P()->SetPoint( SubdP( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
-		pGrid->P()->SetPoint( SubdP( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+		if( USES( Uses(), EnvVars_P ) )
+		{
+			pGrid->P()->SetPoint( SubdP( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->P()->SetPoint( SubdP( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+		}
 
 		if ( uses_s && has_s )
 		{
@@ -812,7 +821,8 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		rE.Reset( pF->pEdge( 3 ), pF );
 		TqInt ivD = rE.pvHead() ->iVertex();
 
-		pGrid->P()->SetPoint( SubdP( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+		if( USES( Uses(), EnvVars_P ) )
+			pGrid->P()->SetPoint( SubdP( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
 		if ( uses_s && has_s ) 
 			pGrid->s()->SetFloat( Subds( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
 		if ( uses_t && has_t )

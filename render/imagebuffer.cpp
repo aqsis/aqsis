@@ -1115,7 +1115,10 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 	if ( pattrCoordinateSystem != 0 ) strCoordinateSystem = pattrCoordinateSystem[ 0 ];
 
 	CqVector3D	vecDB( db, 0, 0 );
-	vecDB = QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", pSurface->pAttributes() ->pshadSurface() ->matCurrent(), pSurface->pTransform() ->matObjectToWorld() ) * vecDB;
+	CqMatrix matShaderToWorld;
+	if( NULL != pSurface->pAttributes() ->pshadSurface() )
+		matShaderToWorld = pSurface->pAttributes() ->pshadSurface() ->matCurrent();
+	vecDB = QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", matShaderToWorld, pSurface->pTransform() ->matObjectToWorld() ) * vecDB;
 	db = vecDB.Magnitude();
 
 	Bound.vecMax() += db;

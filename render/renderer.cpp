@@ -907,12 +907,18 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 		}
 		else
 		{
-			CqString strError( "Shader \"" );
-			strError += strName;
-			strError += "\" not found";
-			//strError.Format("Shader \"%s\" not found",strName.String());
-			CqBasicError( ErrorID_FileNotFound, Severity_Normal, strError.c_str() );
-			return ( 0 );
+			if( strcmp(strName, "null" ) != 0 )
+			{
+				CqString strError( "Shader \"" );
+				strError += strName;
+				strError += "\" not found";
+				//strError.Format("Shader \"%s\" not found",strName.String());
+				CqBasicError( ErrorID_FileNotFound, Severity_Normal, strError.c_str() );
+			}
+			CqShaderVM * pShader = new CqShaderVM();
+			pShader->SetstrName( "null" );
+			RegisterShader( strName, type, pShader );
+			return ( pShader );
 		}
 	}
 }
