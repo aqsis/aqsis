@@ -1,6 +1,7 @@
 #!/bin/sh
 
-aclocal -I ./m4
+cat ./m4/*.m4 > acinclude.m4
+aclocal 
 autoheader
 libtoolize --automake --copy 
 automake --add-missing --copy --gnu
