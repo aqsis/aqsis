@@ -121,6 +121,9 @@ CqRenderer::~CqRenderer()
 	}
 	FlushShaders();
 
+	// Shutdown the shaderVM.
+	CqShaderVM::ShutdownShaderEngine();
+
 	// Close down the Display device manager.
 	m_pDDManager->Shutdown();
 }
@@ -1001,12 +1004,7 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 	if ( pReg != 0 )
 	{
 		IqShader * pShader = pReg->Create();
-		/*
-		               * 
-		               * Doesn't need to register since it is already in the cache
-		               * 
-		               * RegisterShader( strName, type, pShader );
-		               */ 
+		RegisterShader( strName, type, pShader );
 		return ( pShader );
 	}
 	else

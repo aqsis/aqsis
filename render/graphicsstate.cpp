@@ -79,11 +79,8 @@ CqMainModeBlock::~CqMainModeBlock()
 /** Default constructor.
  */
 
-CqFrameModeBlock::CqFrameModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent )
+CqFrameModeBlock::CqFrameModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent ), m_optCurrent(pconParent->optCurrent())
 {
-	// Copy the current graphics state.
-	m_optCurrent = pconParent->optCurrent();
-
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
 	m_pattrCurrent->AddRef();

@@ -181,7 +181,15 @@ CqOptions::CqOptions() :
 /** Copy constructor.
  */
 
-CqOptions::CqOptions( const CqOptions& From )
+CqOptions::CqOptions( const CqOptions& From ) :
+		m_pErrorHandler( &RiErrorPrint ),
+		m_pProgressHandler( NULL ),
+		m_pPreRenderFunction( NULL ),
+		m_funcFilter( RiGaussianFilter ),
+		m_pshadImager( NULL ),
+		m_bFrameAspectRatioCalled( TqFalse ),
+		m_bScreenWindowCalled( TqFalse ),
+		m_bFormatCalled( TqFalse )
 {
 	*this = From;
 }
@@ -219,10 +227,19 @@ CqOptions& CqOptions::operator=( const CqOptions& From )
 	m_bScreenWindowCalled = From.m_bScreenWindowCalled;
 	m_bFormatCalled = From.m_bFormatCalled;
 
+	// Unreference the system options.
+	TqInt i = m_aOptions.size();
+	while ( i-- > 0 )
+	{
+		m_aOptions[ i ] ->Release();
+		m_aOptions[ i ] = 0;
+	}
+
+	DeleteImager();
 
 	// Copy the system options.
 	m_aOptions.resize( From.m_aOptions.size() );
-	TqInt i = From.m_aOptions.size();
+	i = From.m_aOptions.size();
 	while ( i-- > 0 )
 	{
 		m_aOptions[ i ] = From.m_aOptions[ i ];

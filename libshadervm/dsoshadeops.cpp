@@ -115,11 +115,16 @@ CqDSORepository::SetDSOPath(const CqString* pPath)
 					{
 						m_pDSOPathList.splice(m_pDSOPathList.end(), files);
 					}
-				}else{
+					delete(element);
+				}
+				else
+				{
 					m_pDSOPathList.push_back(element);
-				};
-			};
-		} ;
+				}
+			}
+			else
+				delete(element);
+		} 
 
 	  	if (    ( *pPath)[iRight] == ';' ||  // completed a path element with ';'
 		  	( ( *pPath)[iRight] == ':' && ( iRight - iLeft ) > 1) ) // completed a path element ':'

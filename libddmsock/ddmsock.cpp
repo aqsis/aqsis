@@ -382,6 +382,8 @@ TqInt CqDDManager::Shutdown()
 	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
 		i->Close();
 	m_DDServer.Close();
+	g_mapDisplayNames.clear();
+	g_fDisplayMapInitialised = false;
 	return ( 0 );
 }
 

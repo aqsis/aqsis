@@ -30,6 +30,7 @@
 
 #include	<vector>
 #include	<list>
+#include	<map>
 
 #include	"aqsis.h"
 
@@ -116,7 +117,6 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 					CqNamedParameterList* pNew = new CqNamedParameterList( *pAttr );
 					m_aAttributes.Remove( pAttr );
 					m_aAttributes.Add( pNew );
-					pNew->AddRef();
 					return ( pNew );
 				}
 			}
@@ -295,122 +295,73 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 			private:
 				static const TqInt tableSize;
 
+				typedef	std::map<std::string, CqNamedParameterList*, std::less<std::string> > plist_type;
+				typedef	plist_type::value_type	value_type;
+				typedef	plist_type::iterator plist_iterator;
+				typedef	plist_type::const_iterator plist_const_iterator;
+
 			public:
 				CqHashTable()
-				{
-					m_aLists.resize( tableSize );
-				}
+				{}
 				virtual	~CqHashTable()
 				{
-					// Release all the system options we have a handle on.
-					std::vector<std::list<CqNamedParameterList*> >::iterator i;
-					for ( i = m_aLists.begin(); i != m_aLists.end(); i++ )
+					plist_iterator it = m_ParameterLists.begin();
+					while( it != m_ParameterLists.end() )
 					{
-						std::list<CqNamedParameterList*>::iterator i2;
-						for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
-							( *i2 ) ->Release();
+						(*it).second->Release();
+						++it;
 					}
 				}
 
 				const CqNamedParameterList*	Find( const TqChar* pname ) const
 				{
-					TqInt i = _hash( pname );
-
-					if ( m_aLists[ i ].empty() )
-						return ( 0 );
-
-
-					std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
-					if ( iEntry == m_aLists[ i ].end() )
-						return ( *iEntry );
+					std::string strName( pname );
+					plist_const_iterator it = m_ParameterLists.find( strName );
+					if( it != m_ParameterLists.end() )
+						return ( it->second );
 					else
-					{
-						TqLong hash;
-						hash = CqParameter::hash( pname );
-						while ( iEntry != m_aLists[ i ].end() )
-						{
-							if ( ( *iEntry ) ->hash() == hash )
-								return ( *iEntry );
-							iEntry++;
-						}
-					}
-
-					return ( 0 );
+						return ( NULL );
 				}
 
 				CqNamedParameterList*	Find( const TqChar* pname )
 				{
-					TqInt i = _hash( pname );
-
-					if ( m_aLists[ i ].empty() )
-						return ( 0 );
-
-
-					std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
-					if ( iEntry == m_aLists[ i ].end() )
-						return ( *iEntry );
+					std::string strName( pname );
+					plist_iterator it = m_ParameterLists.find( strName );
+					if( it != m_ParameterLists.end() )
+						return ( it->second );
 					else
-					{
-						TqLong hash;
-
-						hash = CqParameter::hash( pname );
-						while ( iEntry != m_aLists[ i ].end() )
-						{
-							if ( ( *iEntry ) ->hash() == hash )
-								return ( *iEntry );
-							iEntry++;
-						}
-					}
-
-					return ( 0 );
+						return ( NULL );
 				}
 
 				void Add( CqNamedParameterList* pOption )
 				{
-					TqInt i = _hash( pOption->strName().c_str() );
-					m_aLists[ i ].push_back( pOption );
+					m_ParameterLists.insert(value_type(pOption->strName(), pOption) );
 					pOption->AddRef();
 				}
 
 				void Remove( CqNamedParameterList* pOption )
 				{
-					TqInt i = _hash( pOption->strName().c_str() );
-
-					std::list<CqNamedParameterList*>::iterator iEntry = m_aLists[ i ].begin();
-					while ( iEntry != m_aLists[ i ].end() )
+					plist_iterator it = m_ParameterLists.find( pOption->strName() );
+					if( it != m_ParameterLists.end() )
 					{
-						if ( ( *iEntry ) == pOption )
-						{
-							pOption->Release();
-							m_aLists[ i ].remove( *iEntry );
-							return ;
-						}
-						iEntry++;
+						(*it).second->Release();
+						m_ParameterLists.erase(it);
 					}
 				}
 
 				CqHashTable& operator=( const CqHashTable& From )
 				{
-					std::vector<std::list<CqNamedParameterList*> >::const_iterator i;
-					for ( i = From.m_aLists.begin(); i != From.m_aLists.end(); i++ )
+					plist_const_iterator it = From.m_ParameterLists.begin();
+					while( it != From.m_ParameterLists.end() )
 					{
-						std::list<CqNamedParameterList*>::const_iterator i2;
-						for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
-							Add( *i2 );
+						Add( (*it).second );
+						++it;
 					}
 					return ( *this );
 				}
 
 			private:
-				TqInt _hash( const TqChar* string ) const
-				{
-					assert ( string != 0 && string[ 0 ] != 0 );
-
-					TqUlong h = CqParameter::hash( string );
-					return ( h % tableSize ); // remainder
-				}
-
-				std::vector<std::list<CqNamedParameterList*> >	m_aLists;
+				plist_type	m_ParameterLists;
 		};
 
 		CqHashTable	m_aAttributes;						///< a vector of user defined attribute pointers.
