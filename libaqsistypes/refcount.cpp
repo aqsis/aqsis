@@ -297,7 +297,8 @@ void CqRefCount::AddRef(const TqChar* file, TqInt line)
 void CqRefCount::Release(const TqChar* file, TqInt line)
 {
 	// Decrement the number of references.
-	m_cReferences--;
+	if (m_cReferences > 0)
+		m_cReferences--;
 
 	// Record the Release event.
 	RefCountRecord *rcr = new RefCountRecord(

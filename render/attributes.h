@@ -299,6 +299,135 @@ class CqAttributes : public CqRefCount, public IqAttributes
 #endif
 
 	private:
+#ifndef REQUIRED
+		class CqHashTable
+		{
+            		private:
+				static const TqInt tableSize;
+
+			public:
+				CqHashTable()
+				{
+					m_aLists.resize( tableSize );
+				}
+				virtual	~CqHashTable()
+				{
+					// Release all the system options we have a handle on.
+					std::vector<std::list<CqNamedParameterList*> >::iterator i;
+					for ( i = m_aLists.begin(); i != m_aLists.end(); i++ )
+					{
+						std::list<CqNamedParameterList*>::iterator i2;
+						for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
+							RELEASEREF( (*i2) );
+							//( *i2 ) ->Release();
+					}
+				}
+
+				const CqNamedParameterList*	Find( const TqChar* pname ) const
+				{
+					TqUlong hash = CqParameter::hash(pname);
+					TqInt i = _hash( hash);
+
+					if ( m_aLists[ i ].empty() )
+						return ( 0 );
+
+
+					std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
+					if ( iEntry == m_aLists[ i ].end() )
+						return ( *iEntry );
+					else
+					{
+						while ( iEntry != m_aLists[ i ].end() )
+						{
+							if ( ( *iEntry ) ->hash() == hash )
+								return ( *iEntry );
+							iEntry++;
+						}
+					}
+
+					return ( 0 );
+				}
+
+				CqNamedParameterList*	Find( const TqChar* pname )
+				{
+					TqUlong hash = CqParameter::hash(pname);
+					TqInt i = _hash( hash);
+
+					if ( m_aLists[ i ].empty() )
+						return ( 0 );
+
+
+					std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
+					if ( iEntry == m_aLists[ i ].end() )
+						return ( *iEntry );
+					else
+					{
+						while ( iEntry != m_aLists[ i ].end() )
+						{
+							if ( ( *iEntry ) ->hash() == hash )
+								return ( *iEntry );
+							iEntry++;
+						}
+					}
+
+					return ( 0 );
+				}
+
+				void Add( CqNamedParameterList* pOption )
+				{
+					TqUlong hash = CqParameter::hash(pOption->strName().c_str());
+					TqInt i = _hash( hash);
+					m_aLists[ i ].push_back( pOption );
+					ADDREF( pOption );
+				}
+
+				void Remove( CqNamedParameterList* pOption )
+				{
+					TqUlong hash = CqParameter::hash(pOption->strName().c_str());
+					TqInt i = _hash( hash);
+
+					std::list<CqNamedParameterList*>::iterator iEntry = m_aLists[ i ].begin();
+					while ( iEntry != m_aLists[ i ].end() )
+					{
+						if ( ( *iEntry ) == pOption )
+						{
+							//pOption->Release();
+							RELEASEREF( pOption );
+							m_aLists[ i ].remove( *iEntry );
+							return ;
+						}
+						iEntry++;
+					}
+				}
+
+				CqHashTable& operator=( const CqHashTable& From )
+				{
+					std::vector<std::list<CqNamedParameterList*> >::const_iterator i;
+					for ( i = From.m_aLists.begin(); i != From.m_aLists.end(); i++ )
+					{
+						std::list<CqNamedParameterList*>::const_iterator i2;
+						for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
+							Add( *i2 );
+					}
+					return ( *this );
+				}
+
+			private:
+				TqInt _hash( TqUlong h ) const
+				{
+					return (h % tableSize);
+				}
+				TqInt _hash( const TqChar* string ) const
+				{
+					assert ( string != 0 && string[ 0 ] != 0 );
+
+					TqUlong h = CqParameter::hash( string );
+					return ( (TqUlong) h % tableSize ); // remainder
+				}
+
+				std::vector<std::list<CqNamedParameterList*> >	m_aLists;
+		};
+#else
 		class CqHashTable
 		{
 			private:
@@ -372,6 +501,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 			private:
 				plist_type	m_ParameterLists;
 		};
+#endif
 
 		CqHashTable	m_aAttributes;						///< a vector of user defined attribute pointers.
 
