@@ -1197,14 +1197,14 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 	CqBucket& Bucket=m_aBuckets[iBucket];
 
 	// Bound the microplygon in hybrid camera/raster space
-	CqBoundList* BoundList=pMPG->BoundList();
+	CqBoundList& BoundList=pMPG->BoundList();
 	
-	for( TqInt bound_num = 0; bound_num<BoundList->Size(); bound_num++)
+	for( TqInt bound_num = 0; bound_num<BoundList.Size(); bound_num++)
 	{
 		//CqBound Bound(pMPG->Bound());
-		CqBound Bound = *(BoundList->GetBound(bound_num));
-		TqFloat time0 = BoundList->GetTime(bound_num);
-		TqFloat time1 = (bound_num==BoundList->Size()-1) ? 1.0 : BoundList->GetTime(bound_num+1);
+		CqBound Bound = *(BoundList.GetBound(bound_num));
+		TqFloat time0 = BoundList.GetTime(bound_num);
+		TqFloat time1 = (bound_num==BoundList.Size()-1) ? 1.0 : BoundList.GetTime(bound_num+1);
 	
 		TqFloat bminx=Bound.vecMin().x();
 		TqFloat bmaxx=Bound.vecMax().x();
@@ -1213,7 +1213,7 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 
 		if(bmaxx<xmin || bmaxy<ymin || bminx>xmax || bminy>ymax)
 		{
-			if(bound_num == BoundList->Size() - 1)
+			if(bound_num == BoundList.Size() - 1)
 			{
 				// last bound so we can delete the mpg
 				QGetRenderContext()->Stats().IncCulledMPGs();
@@ -1227,7 +1227,7 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 		if(Bound.vecMin().z()>QGetRenderContext()->optCurrent().fClippingPlaneFar() ||
 		   Bound.vecMax().z()<QGetRenderContext()->optCurrent().fClippingPlaneNear())
 		{
-			if(bound_num == BoundList->Size() - 1)
+			if(bound_num == BoundList.Size() - 1)
 			{
 				// last bound so we can delete the mpg
 				QGetRenderContext()->Stats().IncCulledMPGs();
@@ -1318,11 +1318,11 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 								// Update max depth values
 								if(pMPG->colOpacity() == gColWhite)
 								{
-									if(c==0)
+								//	if(c==0)
 									{
 										Bucket.DecMaxDepthCount();
 									}
-									else 
+								/*	else 
 									{
 										int j=0;
 										// Find first opaque sample
@@ -1334,7 +1334,7 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 												Bucket.DecMaxDepthCount();
 											}
 										}
-									}
+									}*/
 								}
 									
 								ImageVal.m_colColor=pMPG->colColor();

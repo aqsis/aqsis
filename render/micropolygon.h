@@ -255,7 +255,7 @@ class CqMicroPolygonBase
 					 *  Useful for motion grids to get a tighter bound than a single rectangle.
 					 * \return CqBoundList a list of bounds.
 					 */
-	virtual CqBoundList* BoundList()=0;
+	virtual CqBoundList& BoundList()=0;
 					/** Pure virtual, check if the sample point is within the micropoly.
 					 * \param vecSample 2D sample point.
 					 * \param time The frame time at which to check.
@@ -351,11 +351,12 @@ class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonSta
 					 * \return CqBound representing the conservative bound.
 					 */
 	virtual const CqBound&	Bound() const	{return(m_Bound);}
-	virtual CqBoundList* BoundList();
+	virtual CqBoundList& BoundList();
 	virtual	TqBool	Sample(CqVector2D& vecSample, TqFloat time, TqFloat& D);
 	
 	private:
 			CqBound		m_Bound;		///< Stored bound.
+			CqBoundList	m_BoundList;	///< Bound as a (single element) list
 	
 	static	CqMemoryPool<CqMicroPolygonStatic>	m_thePool;	///< Static pool to allocated micropolys from.
 };
@@ -394,7 +395,7 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 					 * \return CqBound representing the conservative bound.
 					 */
 	virtual const CqBound&	Bound() const	{return(m_Bound);}
-	virtual CqBoundList* BoundList();
+	virtual CqBoundList& BoundList();
 	virtual	TqBool	Sample(CqVector2D& vecSample, TqFloat time, TqFloat& D);
 
 	// Overrides from CqMotionSpec
@@ -415,6 +416,7 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 							}
 	private:
 			CqBound		m_Bound;		///< Stored bound.
+			CqBoundList	m_BoundList;	///< List of bounds to get a tighter fit.
 };
 
 

@@ -108,13 +108,23 @@ class CqBound
 class CqBoundList
 {
 public:
-			CqBoundList(){}
-			~CqBoundList()
-						{
-							for(std::vector<CqBound*>::iterator i=m_Bounds.begin(); i!=m_Bounds.end(); i++)
-								delete (*i);
-						} 
-			
+	CqBoundList(){}
+	~CqBoundList()
+			{
+				for(std::vector<CqBound*>::iterator i=m_Bounds.begin(); i!=m_Bounds.end(); i++)
+					delete (*i);
+			}
+
+	/** Clear the list
+	 */
+	void 	Clear()
+					{ 
+						for(std::vector<CqBound*>::iterator i=m_Bounds.begin(); i!=m_Bounds.end(); i++)
+							delete (*i);
+						m_Bounds.clear(); 
+						m_Times.clear(); 
+					}	
+
 	/** Add a bound to the current list
 	 *\param bound The CqBound to add
 	 *\param time The shutter time that this bound becomes valid at. The bound

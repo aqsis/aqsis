@@ -649,13 +649,15 @@ CqBound& CqMicroPolygonStatic::Bound(TqBool fForce)
 //---------------------------------------------------------------------
 /** Calculate the 2D boundary of this micropolygon, returned in a list
  */
-CqBoundList* CqMicroPolygonStatic::BoundList()
+CqBoundList& CqMicroPolygonStatic::BoundList()
 {
-	m_Bound=CqMicroPolygonStaticBase::Bound();
-	CqBoundList* boundlist = new CqBoundList;
-	boundlist->Add(&m_Bound, 0.0);
+	m_BoundList.Clear();
+	//m_Bound=CqMicroPolygonStaticBase::Bound();
 	
-	return boundlist;
+	CqBound* bound = new CqBound( m_Bound );
+	m_BoundList.Add(bound, 0.0);
+	
+	return m_BoundList;
 }
 
 
@@ -681,10 +683,11 @@ CqBound& CqMicroPolygonMotion::Bound(TqBool fForce)
 //---------------------------------------------------------------------
 /** Calculate a list of 2D bounds for this micropolygon,
  */
-CqBoundList* CqMicroPolygonMotion::BoundList()
+CqBoundList& CqMicroPolygonMotion::BoundList()
 {
-	CqBoundList* boundlist = new CqBoundList;
-		
+	//CqBoundList* boundlist = new CqBoundList;
+	m_BoundList.Clear();
+	
 	CqBound start = GetMotionObject(Time(0)).Bound();
 	TqFloat startTime = Time(0);
 	for( TqInt i=1; i<cTimes(); i++ )
@@ -707,7 +710,7 @@ CqBoundList* CqMicroPolygonMotion::BoundList()
 
 			CqBound* combinedBound = new CqBound;
 			*combinedBound = mid0.Combine(mid1);
-			boundlist->Add(combinedBound, time);
+			m_BoundList.Add(combinedBound, time);
 
 			time = delta*(endTime - startTime) + startTime;
 			mid0 = mid1;
@@ -716,7 +719,7 @@ CqBoundList* CqMicroPolygonMotion::BoundList()
 		startTime = endTime;
 	}
 	
-	return boundlist;
+	return m_BoundList;
 }
 	
 
