@@ -111,50 +111,52 @@ void CqStreamFDesc::error()
 
 CqStream & CqStreamFDesc::operator<< ( int i )
 {
-	if ( fprintf( fstr, "%i", i ) < 0 ) error();
+	*ofstr << i;
+	if( ofstr->eof() )
+		error();
 	return *this;
 }
 
 CqStream & CqStreamFDesc::operator<< ( float f )
 {
-	if ( fprintf( fstr, "%f", f ) < 0 ) error();
+	*ofstr << f;
+	if( ofstr->eof() )
+		error();
 	return *this;
 }
 
 CqStream & CqStreamFDesc::operator<< ( std::string s )
 {
-	if ( fputs( s.c_str(), fstr ) == EOF ) error();
+	*ofstr << s;
+	if( ofstr->eof() )
+		error();
 	return *this;
 }
 
 CqStream & CqStreamFDesc::operator<< ( char c )
 {
-	if ( fputc( c, fstr ) == EOF ) error();
+	*ofstr << c;
+	if( ofstr->eof() )
+		error();
 	return *this;
 }
 
 void CqStreamFDesc::openFile( const char *name )
 {
-	fstr = fopen( name, "wb" );
-	if ( fstr == NULL )
+	ofstr->open( name, std::ios::binary | std::ios::out | std::ios::trunc );
+	if ( !ofstr->is_open() )
 	{
 		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file ", name, "", TqFalse );
 	}
 }
 
-void CqStreamFDesc::openFile ( int fdesc )
-{
-	fstr = fdopen ( dup(fdesc), "wb" );
-	if ( fstr == NULL )
-	{
-		char c[ 100 ];
-		sprintf( c, "%u", fdesc );
-		throw CqError( RIE_NOFILE, RIE_ERROR, "Unable to open file with descriptor=", c, "", TqFalse );
-	}
-}
-
 void CqStreamFDesc::closeFile()
 {
-	if ( fstr )
-		fclose( fstr );
+	if ( ofstr->is_open() )
+		ofstr->close();
+}
+
+void CqStreamFDesc::openFile( int )
+{
+	throw CqError( RIE_NOFILE, RIE_ERROR, "File descriptors unusable with std::stream" , TqFalse );
 }
