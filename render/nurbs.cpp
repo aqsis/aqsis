@@ -1306,11 +1306,15 @@ void CqSurfaceNURBS::NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize
 
 TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 {
+	TqInt cSplits = 0;
+
 	// Split the surface in u or v
 	CqSurfaceNURBS * pNew1;
-	CqSurfaceNURBS* pNew2;
+	CqSurfaceNURBS * pNew2;
 
-	if ( m_SplitDir == SplitDir_U )
+	// If this primitive is being split because it spans the e and hither planes, then
+	// we should split in both directions to ensure we overcome the crossing.
+	if ( m_SplitDir == SplitDir_U || !m_fDiceable )
 		uSubdivide( pNew1, pNew2 );
 	else
 		vSubdivide( pNew1, pNew2 );
@@ -1324,10 +1328,55 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 	pNew1->AddRef();
 	pNew2->AddRef();
 
-	aSplits.push_back( pNew1 );
-	aSplits.push_back( pNew2 );
+	if ( !m_fDiceable )
+	{
+		CqSurfaceNURBS * pNew3;
+		CqSurfaceNURBS * pNew4;
 
-	return ( 2 );
+		pNew1->vSubdivide( pNew3, pNew4 );
+
+		pNew3->SetSurfaceParameters( *this );
+		pNew4->SetSurfaceParameters( *this );
+		pNew3->m_fDiceable = TqTrue;
+		pNew4->m_fDiceable = TqTrue;
+		pNew3->m_EyeSplitCount = m_EyeSplitCount;
+		pNew4->m_EyeSplitCount = m_EyeSplitCount;
+		pNew3->AddRef();
+		pNew4->AddRef();
+
+		aSplits.push_back( pNew3 );
+		aSplits.push_back( pNew4 );
+
+		cSplits += 2;
+
+		pNew2->vSubdivide( pNew3, pNew4 );
+
+		pNew3->SetSurfaceParameters( *this );
+		pNew4->SetSurfaceParameters( *this );
+		pNew3->m_fDiceable = TqTrue;
+		pNew4->m_fDiceable = TqTrue;
+		pNew3->m_EyeSplitCount = m_EyeSplitCount;
+		pNew4->m_EyeSplitCount = m_EyeSplitCount;
+		pNew3->AddRef();
+		pNew4->AddRef();
+
+		aSplits.push_back( pNew3 );
+		aSplits.push_back( pNew4 );
+
+		cSplits += 2;
+
+		pNew1->Release();
+		pNew2->Release();
+	}
+	else
+	{
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+		cSplits += 2;
+	}
+
+	return ( cSplits );
 }
 
 //---------------------------------------------------------------------
@@ -1336,6 +1385,12 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 
 TqBool	CqSurfaceNURBS::Diceable()
 {
+	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
+	// then we can return immediately.
+	if ( !m_fDiceable )
+		return ( TqFalse );
+
+	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
 	// Convert the control hull to raster space.
 	CqVector2D * avecHull = new CqVector2D[ m_cuVerts * m_cvVerts ];
 	TqUint i;
@@ -1384,13 +1439,6 @@ TqBool	CqSurfaceNURBS::Diceable()
 			vLen += CqVector2D( avecHull[ ( ( v + 1 ) * m_cuVerts ) + u ] - avecHull[ ( v * m_cuVerts ) + u ] ).Magnitude();
 		if ( vLen > MaxvLen ) MaxvLen = vLen;
 		vLen = 0;
-	}
-
-	if ( !m_fDiceable )
-	{
-		m_SplitDir = ( MaxuLen > MaxvLen ) ? SplitDir_U : SplitDir_V;
-		delete[] ( avecHull );
-		return ( TqFalse );
 	}
 
 	if ( MaxvLen > 255 || MaxuLen > 255 )

@@ -130,6 +130,12 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		{
 			m_fDiceable = TqFalse; m_EyeSplitCount++;
 		}
+		/** Query if this primitive has been marked as undiceable by the eyesplit check.
+		 */
+		virtual TqBool	IsUndiceable() const
+		{
+			return( !m_fDiceable );
+		}
 		/** Force this GPrim to be discarded, usually if it has been split too many times due to crossing the epsilon and eye planes..
 		 */
 		virtual	void	Discard()

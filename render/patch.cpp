@@ -502,11 +502,15 @@ void CqSurfacePatchBicubic::NaturalInterpolate(CqParameter* pParameter, TqInt uD
 
 TqInt CqSurfacePatchBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 {
+	TqInt cSplits = 0;
+
 	// Split the surface in u or v
 	CqSurfacePatchBicubic * pNew1 = new CqSurfacePatchBicubic( *this );
-	CqSurfacePatchBicubic* pNew2;
+	CqSurfacePatchBicubic * pNew2;
 
-	if ( m_SplitDir == SplitDir_U )
+	// If this primitive is being split because it spans the e and hither planes, then
+	// we should split in both directions to ensure we overcome the crossing.
+	if ( m_SplitDir == SplitDir_U || !m_fDiceable)
 		pNew2 = pNew1->uSubdivide();
 	else
 		pNew2 = pNew1->vSubdivide();
@@ -523,7 +527,33 @@ TqInt CqSurfacePatchBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 	aSplits.push_back( pNew1 );
 	aSplits.push_back( pNew2 );
 
-	return ( 2 );
+	cSplits += 2;
+
+
+	if ( !m_fDiceable)
+	{
+		CqSurfacePatchBicubic * pNew3, * pNew4;
+
+		pNew3 = pNew1->vSubdivide();
+		pNew4 = pNew2->vSubdivide();
+
+		pNew3->SetSurfaceParameters( *this );
+		pNew4->SetSurfaceParameters( *this );
+		pNew3->m_fDiceable = TqTrue;
+		pNew4->m_fDiceable = TqTrue;
+		pNew3->m_EyeSplitCount = m_EyeSplitCount;
+		pNew4->m_EyeSplitCount = m_EyeSplitCount;
+		pNew3->AddRef();
+		pNew4->AddRef();
+
+		aSplits.push_back( pNew3 );
+		aSplits.push_back( pNew4 );
+
+		cSplits += 2;
+	}
+	
+
+	return ( cSplits );
 }
 
 //---------------------------------------------------------------------
@@ -532,6 +562,12 @@ TqInt CqSurfacePatchBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 
 TqBool	CqSurfacePatchBicubic::Diceable()
 {
+	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
+	// then we can return immediately.
+	if ( !m_fDiceable )
+		return ( TqFalse );
+
+	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
 	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
 
 	// Convert the control hull to raster space.
@@ -634,21 +670,11 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 		if ( Vec3.Magnitude2() > vLen ) vLen = Vec3.Magnitude2();
 	}
 
-	//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
-	//	{
-	//		const TqFloat* pattrShadowShadingRate=m_pAttributes->GetFloatAttribute("render","shadow_shadingrate");
-	//		if(pattrShadowShadingRate!=0)
-	//			ShadingRate=pattrShadowShadingRate[0];
-	//	}
-
 	ShadingRate = static_cast<float>( sqrt( ShadingRate ) );
 	uLen = sqrt( uLen ) / ShadingRate;
 	vLen = sqrt( vLen ) / ShadingRate;
 
 	m_SplitDir = ( uLen > vLen ) ? SplitDir_U : SplitDir_V;
-	if ( !m_fDiceable )
-		return ( TqFalse );
-
 	// TODO: Should ensure powers of half to prevent cracking.
 	uLen *= 3;
 	vLen *= 3;
@@ -916,11 +942,13 @@ void CqSurfacePatchBilinear::NaturalInterpolate(CqParameter* pParameter, TqInt u
 
 TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 {
+	TqInt cSplits = 0;
+
 	// Split the surface in u or v
 	CqSurfacePatchBilinear * pNew1 = new CqSurfacePatchBilinear( *this );
 	CqSurfacePatchBilinear* pNew2;
 
-	if ( m_SplitDir == SplitDir_U )
+	if ( m_SplitDir == SplitDir_U || !m_fDiceable)
 		pNew2 = pNew1->uSubdivide();
 	else
 		pNew2 = pNew1->vSubdivide();
@@ -937,7 +965,31 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 	aSplits.push_back( pNew1 );
 	aSplits.push_back( pNew2 );
 
-	return ( 2 );
+	cSplits += 2;
+
+	if( !m_fDiceable )
+	{
+		CqSurfacePatchBilinear * pNew3, * pNew4;
+		
+		pNew3 = pNew1->vSubdivide();
+		pNew4 = pNew2->vSubdivide();
+
+		pNew3->SetSurfaceParameters( *this );
+		pNew4->SetSurfaceParameters( *this );
+		pNew3->m_fDiceable = TqTrue;
+		pNew4->m_fDiceable = TqTrue;
+		pNew3->m_EyeSplitCount = m_EyeSplitCount;
+		pNew4->m_EyeSplitCount = m_EyeSplitCount;
+		pNew3->AddRef();
+		pNew4->AddRef();
+
+		aSplits.push_back( pNew3 );
+		aSplits.push_back( pNew4 );
+
+		cSplits += 2;
+	}
+
+	return ( cSplits );
 }
 
 
@@ -947,6 +999,12 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 
 TqBool	CqSurfacePatchBilinear::Diceable()
 {
+	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
+	// then we can return immediately.
+	if ( !m_fDiceable )
+		return ( TqFalse );
+
+	// Otherwise we should continue to try to find the most advantageous split direction, OR the dice size.
 	const CqMatrix & matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
 
 	// Convert the control hull to raster space.
@@ -982,20 +1040,11 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 	Vec2 = avecHull[ 3 ] - avecHull[ 1 ];
 	vLen = ( Vec1.Magnitude2() > Vec2.Magnitude2() ) ? Vec1.Magnitude2() : Vec2.Magnitude2();
 
-	//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
-	//	{
-	//		const TqFloat* pattrShadowShadingRate=m_pAttributes->GetFloatAttribute("render","shadow_shadingrate");
-	//		if(pattrShadowShadingRate!=0)
-	//			ShadingRate=pattrShadowShadingRate[0];
-	//	}
-
 	ShadingRate = static_cast<float>( sqrt( ShadingRate ) );
 	uLen = sqrt( uLen ) / ShadingRate;
 	vLen = sqrt( vLen ) / ShadingRate;
 
 	m_SplitDir = ( uLen > vLen ) ? SplitDir_U : SplitDir_V;
-	if ( !m_fDiceable )
-		return ( TqFalse );
 
 	// TODO: Should ensure powers of half to prevent cracking.
 	uLen = MAX( ROUND( uLen ), 1 );

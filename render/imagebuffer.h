@@ -388,6 +388,7 @@ class _qShareC	CqImageBuffer
 				m_cYBuckets( 0 ),
 				m_XBucketSize( 0 ),
 				m_YBucketSize( 0 ),
+				m_iCurrentBucket( 0 ),
 				m_PixelXSamples( 0 ),
 				m_PixelYSamples( 0 ),
 				m_FilterXWidth( 0 ),

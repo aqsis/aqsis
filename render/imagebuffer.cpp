@@ -1049,7 +1049,7 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 		return ( TqTrue );
 
 	// If the primitive spans the epsilon plane and the hither plane and can be split,
-	if ( Bound.vecMin().z() <= FLT_EPSILON && Bound.vecMax().z() >= FLT_EPSILON )
+	if ( Bound.vecMin().z() <= FLT_EPSILON )
 	{
 		// Mark the primitive as not dicable.
 		pSurface->ForceUndiceable();
@@ -1133,19 +1133,26 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 		return ;
 	}
 
-	// Find out which bucket(s) the surface belongs to.
-	TqInt XMinb, YMinb;
-	if ( Bound.vecMin().x() < 0 ) Bound.vecMin().x( 0.0f );
-	if ( Bound.vecMin().y() < 0 ) Bound.vecMin().y( 0.0f );
-	TqInt iBucket = Bucket( static_cast<TqInt>( Bound.vecMin().x() ), static_cast<TqInt>( Bound.vecMin().y() ), XMinb, YMinb );
+	// If the primitive has been marked as undiceable by the eyeplane check, then we cannot get a valid
+	// bucket index from it as the projection of the bound would cross the camera plane and therefore give a false
+	// result, so just put it back in the current bucket for further splitting.
+	TqInt iBucket = iCurrentBucket();
+	if(	!pSurface->IsUndiceable() )
+	{	
+		// Find out which bucket(s) the surface belongs to.
+		TqInt XMinb, YMinb;
+		if ( Bound.vecMin().x() < 0 ) Bound.vecMin().x( 0.0f );
+		if ( Bound.vecMin().y() < 0 ) Bound.vecMin().y( 0.0f );
+		iBucket = Bucket( static_cast<TqInt>( Bound.vecMin().x() ), static_cast<TqInt>( Bound.vecMin().y() ), XMinb, YMinb );
 
-	if ( XMinb >= m_cXBuckets || YMinb >= m_cYBuckets ) return ;
+		if ( XMinb >= m_cXBuckets || YMinb >= m_cYBuckets ) return ;
 
-	if ( XMinb < 0 || YMinb < 0 )
-	{
-		if ( XMinb < 0 ) XMinb = 0;
-		if ( YMinb < 0 ) YMinb = 0;
-		iBucket = ( YMinb * m_cXBuckets ) + XMinb;
+		if ( XMinb < 0 || YMinb < 0 )
+		{
+			if ( XMinb < 0 ) XMinb = 0;
+			if ( YMinb < 0 ) YMinb = 0;
+			iBucket = ( YMinb * m_cXBuckets ) + XMinb;
+		}
 	}
 
 	m_aBuckets[ iBucket ].AddGPrim( pSurface );

@@ -311,8 +311,8 @@ TqInt CqSphere::Split( std::vector<CqBasicSurface*>& aSplits )
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount + 1;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount + 1;
+	pNew1->m_EyeSplitCount = m_EyeSplitCount;
+	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 
 	aSplits.push_back( pNew1 );
 	aSplits.push_back( pNew2 );
@@ -457,8 +457,8 @@ TqInt CqCone::Split( std::vector<CqBasicSurface*>& aSplits )
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount + 1;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount + 1;
+	pNew1->m_EyeSplitCount = m_EyeSplitCount;
+	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 
 	aSplits.push_back( pNew1 );
 	aSplits.push_back( pNew2 );
@@ -596,8 +596,8 @@ TqInt CqCylinder::Split( std::vector<CqBasicSurface*>& aSplits )
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount + 1;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount + 1;
+	pNew1->m_EyeSplitCount = m_EyeSplitCount;
+	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 
 	aSplits.push_back( pNew1 );
 	aSplits.push_back( pNew2 );
@@ -735,8 +735,8 @@ TqInt CqHyperboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount + 1;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount + 1;
+	pNew1->m_EyeSplitCount = m_EyeSplitCount;
+	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 
 	aSplits.push_back( pNew1 );
 	aSplits.push_back( pNew2 );
@@ -889,8 +889,8 @@ TqInt CqParaboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount + 1;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount + 1;
+	pNew1->m_EyeSplitCount = m_EyeSplitCount;
+	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 
 	aSplits.push_back( pNew1 );
 	aSplits.push_back( pNew2 );
@@ -1027,8 +1027,8 @@ TqInt CqTorus::Split( std::vector<CqBasicSurface*>& aSplits )
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount + 1;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount + 1;
+	pNew1->m_EyeSplitCount = m_EyeSplitCount;
+	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 
 	aSplits.push_back( pNew1 );
 	aSplits.push_back( pNew2 );
@@ -1165,8 +1165,8 @@ TqInt CqDisk::Split( std::vector<CqBasicSurface*>& aSplits )
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount + 1;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount + 1;
+	pNew1->m_EyeSplitCount = m_EyeSplitCount;
+	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 
 	aSplits.push_back( pNew1 );
 	aSplits.push_back( pNew2 );
