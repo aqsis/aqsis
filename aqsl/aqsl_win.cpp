@@ -26,15 +26,27 @@
 #include	<iostream>
 #include	<strstream>
 
+#ifdef AQSIS_SYSTEM_MACOSX
+#include	<string.h>
+#endif /* AQSIS_SYSTEM_MACOSX */
+
+
 void compile_file(const char* sl_file)
 {
 	FILE* hPipeRead;
 	FILE* hPipeWrite;
 
 	std::strstream slppcommand;
+        
+#ifdef AQSIS_SYSTEM_MACOSX
+	slppcommand << "./slpp -d PI=3.141592654 -d AQSIS -c6 " << sl_file << std::ends;
+	hPipeRead = popen(slppcommand.str(),"r");
+	hPipeWrite = popen("./aqslcomp","w");
+#else
 	slppcommand << "slpp.exe -d PI=3.141592654 -d AQSIS -c6 " << sl_file << std::ends;
 	hPipeRead=_popen(slppcommand.str(),"r");
 	hPipeWrite=_popen("aqslcomp.exe","w");
+#endif /* AQSIS_SYSTEM_MACOSX */
 
 	char psBuffer[128];
 	while(!feof(hPipeRead))
@@ -43,8 +55,14 @@ void compile_file(const char* sl_file)
 			fputs(psBuffer, hPipeWrite);
 	}
 
+#ifdef AQSIS_SYSTEM_MACOSX
+	pclose(hPipeRead);
+	pclose(hPipeWrite);
+#else
 	_pclose(hPipeRead);
 	_pclose(hPipeWrite);
+#endif /* AQSIS_SYSTEM_MACOSX */
+
 }	
 
 
