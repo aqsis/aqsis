@@ -1,3 +1,402 @@
+2002-02-12 11:36  pgregory
+
+	* configure.in, render/version.h: Set new version number 0.6.000
+
+2002-02-12 11:35  pgregory
+
+	* Makefile.am, configure.in, aqsl/Makefile.am, render/Makefile.am:
+	Update makefiles to include Mac files in dist
+
+2002-02-12 10:31  dsward2
+
+	* aqsisrc-macosx: Added texture searchpath for images directory
+
+2002-02-12 10:00  dsward2
+
+	* MacAqsis-test.sh: Add Mac OS X support
+
+2002-02-12 09:33  dsward2
+
+	* MacAqsis_README.html, aqsisrc-macosx: Add Mac OS X support
+
+2002-02-12 04:20  dsward2
+
+	* ddmsock-macosx.ini: Add Mac OS X support
+
+2002-02-11 00:29  dsward2
+
+	* render/macosx/std/std_valarray.h,
+	render/macosx/std/valarray_array.h,
+	render/macosx/std/valarray_array.tcc,
+	render/macosx/std/valarray_meta.h, aqsl/macaqsl: Add Mac OS X
+	support
+
+2002-02-11 00:25  dsward2
+
+	* render/macosx/valarray: Add Mac OS X support
+
+2002-02-10 20:04  pgregory
+
+	* libslparse/iparsenode.h: Fix to compile under Posix
+
+2002-02-10 16:15  pgregory
+
+	* BUILD: Add libjpeg to the win32 build instructions.
+
+2002-02-10 13:15  dsward2
+
+	* aqsis/aqsis.cpp, aqsl/aqslcomp.cpp, filebuffer/filebuffer.cpp,
+	libcodegenvm/vmoutput.cpp, librib2/parser.y,
+	libslparse/parsenode.cpp, render/shadeops.cpp,
+	render/texturemap.cpp, render/texturemap.h,
+	shadowmap/shadowmap.cpp, teqser/teqser.cpp: Add Mac OS X support
+
+2002-02-10 11:19  dsward2
+
+	* libaqsistypes/matrix.cpp: Add Mac OS X support
+
+2002-02-10 10:45  pgregory
+
+	* render/shadeops.cpp: Fix default value of Angle in illuminate
+	function.
+
+2002-02-09 01:40  pgregory
+
+	* libcodegenvm/vmoutput.cpp, libslparse/iparsenode.h,
+	libslparse/parsenode.h, libslparse/parser.y, libslparse/scanner.l,
+	render/ri.cpp, render/shadeops.cpp: Changes from Michel Joron to
+	tie the 'textureinfo' command into the sl compiler.
+
+2002-02-09 00:54  pgregory
+
+	* render/shadeops.cpp: Fix lighting bug in illumiance function,
+	again.	Add cone checking to illuminate function.
+
+2002-02-08 17:39  pgregory
+
+	* render/: lights.cpp, shadeops.cpp: Couple of fixes to the
+	calculation and use of the shader variable 'L' in bothe surface and
+	light shaders.	Illuminate now properly uses the Angle/Axis if
+	specified to avoid lightinh surfaces outside its cone of influence.
+
+2002-02-07 17:25  pgregory
+
+	* render/texturemap.cpp: Fix MIPMAP singlelevel check.
+
+2002-02-07 15:24  pgregory
+
+	* teqser/teqser.cpp: Add -envlatl support.
+
+2002-02-07 12:11  pgregory
+
+	* render/texturemap.cpp: Fix environment mapping.
+
+2002-02-07 00:31  pgregory
+
+	* render/: shadeops.cpp, texturemap.cpp, texturemap.h: Implement
+	trilinear mipmap filtering.
+
+2002-02-06 11:12  pgregory
+
+	* configure.in, plugins/Makefile.am, plugins/tga2tif/Makefile.am:
+	Ensure tga2tif compiles under Posix
+
+2002-02-06 10:48  pgregory
+
+	* plugins/tga2tif/Makefile.am, plugins/tga2tif/tga2tif.c,
+	plugins/tga2tif/tga2tif.dsp, Renderer.dsw: Added tga2tif plugin
+	form Michel Joron.
+
+2002-02-05 23:54  pgregory
+
+	* plugins/: gif2tif/gif2tif.dsp, jpg2tif/jpg2tif.dsp,
+	pcx2tif/pcx2tif.dsp, ppm2tif/ppm2tif.dsp: Fix exporting problems
+	with Win32.
+
+2002-02-05 23:49  pgregory
+
+	* plugins/: ppm2tif/ppm2tif.dsp, common/pixelsave.c,
+	gif2tif/gif2tif.dsp, jpg2tif/jpg2tif.dsp, pcx2tif/pcx2tif.dsp: Fix
+	exporting problems with Win32.	Close TIFF file when done.
+
+2002-02-05 18:03  pgregory
+
+	* plugins/common/pixelsave.c, render/ri.cpp, render/shadeops.cpp,
+	render/texturemap.cpp, render/texturemap.h: LatLong environment
+	support from Michel Joron.
+
+2002-02-05 18:02  pgregory
+
+	* configure.in, plugins/Makefile.am, plugins/common/Makefile.am,
+	plugins/gif2tif/Makefile.am, plugins/jpg2tif/Makefile.am,
+	plugins/pcx2tif/Makefile.am, plugins/ppm2tif/Makefile.am: Get
+	teqser plugins to compiler under Posix
+
+2002-02-05 00:52  pgregory
+
+	* configure.in, plugins/Makefile.am, plugins/pcx2tif/Makefile.am:
+	Updates to teqser plugins
+
+2002-02-05 00:37  pgregory
+
+	* plugins/: common/pixelsave.c, common/pixelsave.h,
+	pcx2tif/pcx2tif.c, pcx2tif/pcx2tif.dsp: Updates to the teqser
+	plugins by Michel Joron.
+
+2002-02-05 00:29  pgregory
+
+	* Renderer.dsw, plugins/ppm2tif/ppm2tif.c,
+	plugins/ppm2tif/ppm2tif.dsp, render/options.h,
+	plugins/gif2tif/gif2tif.c, plugins/gif2tif/gif2tif.dsp,
+	plugins/jpg2tif/jpg2tif.c, plugins/jpg2tif/jpg2tif.dsp: Updates to
+	the teqser plugins by Michel Joron.
+
+2002-02-04 13:42  pgregory
+
+	* configure.in, aqsis/Makefile.am, render/texturemap.cpp,
+	teqser/Makefile.am: Get teqser plugins working under Posix, and
+	reenable shared libraries by default in configure script
+
+2002-02-04 08:23  pgregory
+
+	* render/: texturemap.cpp, texturemap.h: Get Teqser plugin stuff to
+	compile under Posix
+
+2002-02-03 22:55  pgregory
+
+	* aqsltell/Makefile.am: Fix name case problem
+
+2002-02-03 22:50  pgregory
+
+	* aqsltell/makefile.am: [no log message]
+
+2002-02-03 12:43  pgregory
+
+	* slpp/MAKEFILE: Removed, no longer needed
+
+2002-02-03 12:39  pgregory
+
+	* plugins/Makefile.am, plugins/gif2tif/Makefile.am,
+	plugins/gif2tif/gif2tif.c, plugins/jpg2tif/Makefile.am,
+	plugins/jpg2tif/jpg2tif.c, plugins/ppm2tif/Makefile.am,
+	plugins/ppm2tif/ppm2tif.c, Makefile.am, configure.in,
+	slpp/MAKEFILE: Preliminary support for teqser plugins
+
+2002-02-03 12:35  pgregory
+
+	* Renderer.dsw, render/texturemap.cpp, render/texturemap.h:
+	Preliminary ppm/gif/jpg conversion plugins.
+
+2002-02-03 10:05  pgregory
+
+	* plugins/: gif2tif/gif2tif.c, gif2tif/gif2tif.dsp,
+	gif2tif/p47d.gif, jpg2tif/jpg2save.c, jpg2tif/jpg2tif.c,
+	jpg2tif/jpg2tif.dsp, ppm2tif/ppm2tif.c, ppm2tif/ppm2tif.dsp:
+	Preliminary ppm/gif/jpg conversion plugins.
+
+2002-02-01 22:16  pgregory
+
+	* aqsis/Makefile.am, framebuffer_glut/Makefile.am,
+	framebuffer_glut_z/Makefile.am, libddmsock/Makefile.am,
+	libri2rib/Makefile.am: Include dsp files in dist archive.
+
+2002-02-01 17:38  pgregory
+
+	* render/: csgtree.cpp, imagebuffer.cpp: Fix problem where multiple
+	CSG trees at a single sample weren't being processed.
+
+2002-01-31 16:23  pgregory
+
+	* render/imagebuffer.cpp: Fix name clash in gcc compiler with 'or'
+	variable
+
+2002-01-31 16:21  pgregory
+
+	* render/texturemap.cpp: Fix bug in texture sampling when wrap mode
+	is black. Michel Joron.
+
+2002-01-31 16:20  pgregory
+
+	* render/: csgtree.h, imagebuffer.h, trimcurve.h: Get rid of MSVC++
+	warnings.
+
+2002-01-31 02:10  pgregory
+
+	* Renderer.dsw, ribber.cfg, render/ri.cpp, render/shadeops.cpp,
+	render/shaderexecenv.h, render/shadervm.cpp, render/shadervm.h,
+	render/stats.h, render/texturemap.cpp, render/texturemap.h,
+	librib2/librib.cpp: More sweeping texture mapping changes.  Now
+	includes a 'textureinfo' sl command, thanks to Michel Joron.  Mip
+	Map generation now filters better.  Generates 3x2 mip mapped env
+	maps, but can't use them yet!
+
+2002-01-30 01:11  ravenfire
+
+	* acinclude.m4: Was not setting OPENGL_LIB or OPENGL_INC when not
+	specified on the configure command line.  Fixed.
+
+2002-01-30 00:32  pgregory
+
+	* ribfiles/csg_test.rib: Better test, nicer picture.
+
+2002-01-29 23:57  pgregory
+
+	* render/csgtree.h: Get rid of unnecessary include
+
+2002-01-29 23:55  pgregory
+
+	* render/Makefile.am: Add CSG support
+
+2002-01-29 21:06  pgregory
+
+	* render/ri.cpp: Fix problem with passing a temporary in
+	RiSolidBegin.
+
+2002-01-29 17:39  pgregory
+
+	* render/: attributes.cpp, context.cpp, context.h, csgtree.cpp,
+	csgtree.h, imagebuffer.cpp, imagebuffer.h, messages.cpp,
+	micropolygon.cpp, micropolygon.h, options.cpp, shadeops.cpp,
+	shaderexecenv.cpp, shaderexecenv.h, shadervariable.cpp,
+	shadervm.cpp, spline.cpp, stats.cpp, surface.cpp, surface.h,
+	transform.cpp, trimcurve.cpp: First stab at CSG, possible problem
+	with CSG trees that span the view, i.e. viewpoint inside a CSG
+	object.
+
+2002-01-29 17:37  pgregory
+
+	* render/: ri.cpp, texturemap.cpp, texturemap.h: More texture
+	mapping changes from Michel, textures now use integer rgba for tiff
+	files to reduce memory requirements.
+
+2002-01-25 17:06  pgregory
+
+	* render/csgtree.cpp, render/csgtree.h, ribfiles/csg_test.rib:
+	Initial CSG work safety check in.
+
+2002-01-25 17:06  pgregory
+
+	* aqsltell/: aqsltell.c, aqsltell.dsp, makefile.am: Initial check
+	in of Michel Joron's aqsltell program.
+
+2002-01-25 17:02  pgregory
+
+	* librib2/librib.cpp, render/context.cpp, render/context.h,
+	render/renderer.cpp, render/renderer.h, render/ri.cpp,
+	render/shadeops.cpp, render/stats.cpp, render/stats.h,
+	render/texturemap.cpp, render/texturemap.h, teqser/teqser.cpp,
+	render/libaqsis.dsp: More MIP map changes from Michel.	Initial
+	safety check in for current status of CSG work.
+
+2002-01-23 23:24  pgregory
+
+	* render/: ri.cpp, texturemap.cpp: Michel Jorons inital changes to
+	move towards a MIP mapping approach of texturing similar to BMRT's
+	instead of the non-standard SAT mapping.
+
+2002-01-21 11:12  pgregory
+
+	* render/: ri.cpp, subdivision.cpp, subdivision.h: Implement
+	"interpolateboundary" subdivision tag support.
+
+2002-01-17 10:17  pgregory
+
+	* render/: imagebuffer.cpp, micropolygon.cpp, texturemap.cpp: More
+	texture mapping improvements from Michel Joron.
+
+2002-01-10 20:38  pgregory
+
+	* render/: shadeops.cpp, shaderexecenv.h: Refactoring of Du/Dv
+	functions by Michel Joron.
+
+2002-01-04 12:46  pgregory
+
+	* ribfiles/torus.rib: Make the torus transparent to test the rgba
+	transparency output.
+
+2002-01-04 12:36  pgregory
+
+	* libddmsimple/ddmsimple.cpp, libddmsock/ddmsock.cpp,
+	render/iddmanager.h, render/imagebuffer.cpp, render/imagebuffer.h:
+	Add support for transparency to the rgba rendering pipeline. Uses
+	averaged rgb components of the opacity combined with coverage.
+
+2002-01-02 02:12  ravenfire
+
+	* configure.in, filebuffer/Makefile.am,
+	framebuffer_glut/Makefile.am, framebuffer_glut_z/Makefile.am,
+	libddmsimple/Makefile.am: Start of conversion over to using the
+	TIFF and OpenGL configure macros.
+
+2002-01-02 01:52  ravenfire
+
+	* acinclude.m4, configure.in: Added start of macros for TIFF and
+	OpenGL.
+
+2001-12-30 23:21  pgregory
+
+	* render/noise.h: Fix typo in CGNoise3(x,y,z) function.
+
+2001-12-30 23:20  pgregory
+
+	* render/imagebuffer.cpp: Fix so that coverage for each pixel is
+	calculated correctly, giving an antialiased alpha mask.
+
+2001-12-27 20:21  pgregory
+
+	* libddmsock/ddmsock.cpp: Make sure that a device that failed
+	initialisation, doesn't cause a problem when closing down.
+
+2001-12-27 18:42  pgregory
+
+	* Makefile.am, ddmsock.ini: Fix naming errors, should be
+	'zframebuffer', not 'framebufferz', as 'zfile' is the standard for
+	outputting a depth file.
+
+2001-12-27 18:29  pgregory
+
+	* ribfiles/: anim.rib, bucket_test.rib, cellnoise.rib,
+	colpervertex_test.rib, cone.rib, coordsys_test.rib, cylinder.rib,
+	disp1.rib, disp_test.rib, dof.rib, env_test.rib, eyeplanetest.rib,
+	mblur.rib, mblur2a.rib, mblur2b.rib, mod_st2_test.rib,
+	mod_st_test.rib, noshadows.rib, nurbs.rib, orient_test.rib,
+	periodic_test.rib, persptest.rib, persptrans.rib, poly_test.rib,
+	quads_test.rib, shadtest.rib, simple.rib, skewtest.rib,
+	softshadow.rib, space_test.rib, sphere.rib, std_st_test.rib,
+	subdiv1.rib, subdiv2.rib, teapot.rib, test.rib, tmap_test.rib,
+	torus.rib, transmb_test.rib, trim_test.rib, uv_test.rib, vase.rib,
+	vase_shad1.rib, vase_shad2.rib: Update "shader" "searchpath" option
+	to make setting AQSIS_SHADERS_PATH no longer required to run the
+	tests.
+
+2001-12-27 03:59  ravenfire
+
+	* configure.in: Forgot to commit changes earlier.  Now able to
+	choose to compile with or without glut support.
+
+2001-12-26 22:18  ravenfire
+
+	* Makefile.am, acinclude.m4: Should now be able to compile on a
+	machine without the glut library.
+
+2001-12-26 19:14  ravenfire
+
+	* aclocal.m4: aclocal.m4 not needed in cvs archive since it is
+	automatically created when the bootstrap script is ran.
+
+2001-12-26 19:09  ravenfire
+
+	* acinclude.m4, aclocal.m4: Macros for OpenGL and glut options.
+
+2001-12-21 17:12  pgregory
+
+	* prep_install.bat: Fix location of tiff dll, need to make this non
+	specific.
+
+2001-12-21 15:08  pgregory
+
+	* ChangeLog: New changes
+
 2001-12-21 13:19  pgregory
 
 	* configure.in, render/version.h: Update version ready for release
