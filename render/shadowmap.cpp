@@ -218,6 +218,8 @@ void CqShadowMap::ReadMatrices()
 	
 	// Set the number of shadow maps initially to 0.
 	m_NumberOfMaps = 0;
+
+	CqMatrix matCToW = QGetRenderContextI() ->matSpaceToSpace( "camera", "world" );
 	
 	while(1)
 	{
@@ -241,8 +243,20 @@ void CqShadowMap::ReadMatrices()
 		matWToC.SetfIdentity( TqFalse );
 		matWToS.SetfIdentity( TqFalse );
 
+		matWToC *= matCToW;
+		matWToS *= matCToW;
+
+		// Generate normal conversion matrices to save time.
+		CqMatrix matITTCToL = matWToC;
+		matITTCToL[ 3 ][ 0 ] = matITTCToL[ 3 ][ 1 ] = matITTCToL[ 3 ][ 2 ] = matITTCToL[ 0 ][ 3 ] = matITTCToL[ 1 ][ 3 ] = matITTCToL[ 2 ][ 3 ] = 0.0;
+		matITTCToL[ 3 ][ 3 ] = 1.0;
+		matITTCToL.Inverse();
+		matITTCToL.Transpose();
+
 		m_WorldToCameraMatrices.push_back( matWToC );
 		m_WorldToScreenMatrices.push_back( matWToS );
+		m_ITTCameraToLightMatrices.push_back( matITTCToL );
+
 		m_NumberOfMaps++;	// Increment the number of maps.
 
 		if( TIFFReadDirectory( m_pImage ) == 0 )
@@ -346,9 +360,9 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	CqVector3D vecBias( 0, 0, m_bias );
 	// Generate a matrix to transform points from camera space into the space of the light source used in the
 	// definition of the shadow map.
-	CqMatrix matCameraToLight = matWorldToCamera( index ) * QGetRenderContextI() ->matSpaceToSpace( "camera", "world" );
+	CqMatrix& matCameraToLight = matWorldToCamera( index );
 	// Generate a matrix to transform points from camera space into the space of the shadow map.
-	CqMatrix matCameraToMap = matWorldToScreen( index ) * QGetRenderContextI() ->matSpaceToSpace( "camera", "world" );
+	CqMatrix& matCameraToMap = matWorldToScreen( index );
 
 	vecR1l = matCameraToLight * ( R1 - vecBias );
 	vecR2l = matCameraToLight * ( R2 - vecBias );

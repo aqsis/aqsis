@@ -265,7 +265,7 @@ void CqTextureMap::CriticalMeasure()
 	if ( now - current )
 	{
 		///! \todo Review this debug message
-		QGetRenderContextI() ->Logger() ->debug( "I was forced to zap the tile segment buffers for %dK", ( now - current ) / 1024 );
+		QGetRenderContextI() ->Logger() ->info( "I was forced to zap the tile segment buffers for %dK", ( now - current ) / 1024 );
 	}
 #endif
 

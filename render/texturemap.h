@@ -685,6 +685,7 @@ class CqShadowMap : public CqTextureMap
 		{
 			if ( which == 0 ) return matWorldToCamera(index);
 			else if ( which == 1 ) return matWorldToScreen(index);
+			else if ( which == 2 ) return m_ITTCameraToLightMatrices[index];
 			return ( matWorldToCamera(index) );
 		}
 		virtual	TqInt	NumPages() const	{ return(m_NumberOfMaps); }
@@ -700,6 +701,7 @@ class CqShadowMap : public CqTextureMap
 
 		std::vector<CqMatrix>	m_WorldToCameraMatrices;		///< Matrix to convert points from world space to light space.
 		std::vector<CqMatrix>	m_WorldToScreenMatrices;		///< Matrix to convert points from world space to screen space.
+		std::vector<CqMatrix>	m_ITTCameraToLightMatrices;
 		TqInt	m_NumberOfMaps;
 }
 ;
