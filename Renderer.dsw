@@ -191,6 +191,10 @@ Project: "libaqsistypes"=.\libaqsistypes\libaqsistypes.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    libaqsistypes
+    .\libaqsistypes
+    end source code control
 }}}
 
 Package=<4>
@@ -255,6 +259,46 @@ Package=<5>
     librib
     .
     end source code control
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "librib2"=.\librib2\librib2.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    librib2
+    .
+    end source code control
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "librib2ri"=.\librib2ri\librib2ri.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "librib2stream"=.\librib2stream\librib2stream.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
 }}}
 
 Package=<4>
