@@ -295,9 +295,10 @@ void GetOptions()
 	{
 		if ( ( env = getenv( "AQSIS_BASE_PATH" ) ) != NULL )
 			g_base_path = env;
+#ifdef	AQSIS_SYSTEM_POSIX
 		else
 			g_base_path = BASE_PATH;
-
+#endif
 	}
 
 	// If --config not specified try to locate the config file.
@@ -307,8 +308,12 @@ void GetOptions()
 			g_config = env;
 		else
 		{
+#ifdef	AQSIS_SYSTEM_POSIX
 			g_config = CONFIG_PATH;
-			g_config.append( "/aqsisrc" );
+#else
+			g_config = g_base_path;
+#endif
+			g_config.append( "/.aqsisrc" );
 		}
 
 		std::ifstream cfgfile( g_config.c_str() );

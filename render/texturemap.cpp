@@ -238,7 +238,11 @@ TqInt CqTextureMap::Convert( CqString &strName )
 	char *aqsis_home = getenv( "AQSIS_BASE_PATH" );
 
 	if ( aqsis_home == NULL )
+#ifdef	AQSIS_SYSTEM_POSIX
 	    aqsis_home = BASE_PATH;
+#else
+		aqsis_home = ".";
+#endif
 
 	ext = ( TqPchar ) strName.c_str();
 	if ( ext && *ext )
