@@ -114,6 +114,12 @@ if test ! "$ac_cv_header_zlib_h" || test ! "ac_cv_lib_z_gzopen" ; then
         AC_MSG_ERROR([*** Please ensure you have zlib libraries and headers  installed ***]);
 fi
 
+dnl See if we have xsltproc for rebuilding the ri.inl and ri_cache.inl
+AC_CHECK_PROG(have_xsltproc, xsltproc, yes, no)
+if test x$have_xsltproc = "xno" ; then
+	AC_MSG_WARN([*** Could not find xsltproc, you will need it if you edit any of the xml or xsl files ***]);
+fi
+
 AC_SUBST(AQSIS_CPPFLAGS)
 AC_SUBST(AQSIS_CXXFLAGS)
 AC_SUBST(AQSIS_CFLAGS)
