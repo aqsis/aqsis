@@ -229,6 +229,7 @@ void CqMicroPolyGrid::Shade()
 
 	static CqVector3D	vecE( 0, 0, 0 );
 	static CqVector3D	Defvec( 0, 0, 0 );
+	static TqFloat		DefFloat = 0.0f;
 
 	CqStats& theStats = QGetRenderContext() ->Stats();
 
@@ -264,23 +265,62 @@ void CqMicroPolyGrid::Shade()
 	if ( USES( lUses, EnvVars_E ) ) E() ->SetVector( vecE );
 	if ( USES( lUses, EnvVars_du ) )
 	{
-		TqFloat u1, u2, u3;
+		for ( i = gsmin1; i >= 0; i-- )
+		{
+			TqFloat v1, v2;
+			TqInt uRes = uGridRes();
+			TqInt GridX = i % ( uRes + 1 );
+
+			if ( GridX < uRes )
+			{
+				u()->GetValue( v1, i + 1 );
+				u()->GetValue( v2, i );
+				du() ->SetFloat( v1 - v2, i );
+			}
+			else
+			{
+				u()->GetValue( v1, i );
+				u()->GetValue( v2, i - 1 );
+				du() ->SetFloat( v1 - v2, i );
+			}
+		}
+/*		TqFloat u1, u2, u3;
 		u() ->GetFloat( u1, 0 );
 		u() ->GetFloat( u2, uGridRes() );
 		u() ->GetFloat( u3, vGridRes() * ( uGridRes() + 1 ) );
 		TqFloat adu = ( ( u2 - u1 ) / uGridRes() );
 		TqFloat bdu = ( ( u3 - u1 ) / vGridRes() );
-		du() ->SetFloat( adu + bdu );
+		du() ->SetFloat( adu + bdu );*/
 	}
 	if ( USES( lUses, EnvVars_dv ) )
 	{
-		TqFloat v1, v2, v3;
+		for ( i = gsmin1; i >= 0; i-- )
+		{
+			TqFloat v1,v2;
+			TqInt uRes = uGridRes();
+			TqInt vRes = vGridRes();
+			TqInt GridY = ( i / ( uRes + 1 ) );
+
+			if ( GridY < vRes )
+			{
+				v()->GetValue( v1, i + uRes + 1 );
+				v()->GetValue( v2, i );
+				dv()->SetFloat( v1 - v2, i );
+			}
+			else
+			{
+				v()->GetValue( v1, i );
+				v()->GetValue( v2, i - ( uRes + 1 ) );
+				dv()->SetFloat( v1 - v2, i );
+			}
+		}
+/*		TqFloat v1, v2, v3;
 		v() ->GetFloat( v1, 0 );
 		v() ->GetFloat( v2, uGridRes() );
 		v() ->GetFloat( v3, vGridRes() * ( uGridRes() + 1 ) );
 		TqFloat adv = ( ( v2 - v1 ) / uGridRes() );
 		TqFloat bdv = ( ( v3 - v1 ) / vGridRes() );
-		dv() ->SetFloat( adv + bdv );
+		dv() ->SetFloat( adv + bdv );*/
 	}
 
 	if ( USES( lUses, EnvVars_Ci ) ) Ci() ->SetColor( gColBlack );

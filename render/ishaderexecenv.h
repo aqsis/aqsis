@@ -504,7 +504,7 @@ R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
 	{
 		Var->GetValue( v1, i );
 		Var->GetValue( v2, i - ( uRes + 1 ) );
-		Ret = ( v1 - v2 ) / fdv;
+		Ret = ( v2 - v1 ) / fdv;
 	}
 	return ( Ret );
 }
@@ -541,7 +541,7 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 		Var->GetValue( v2, i - 1 );
 		if ( NULL != den )
 			den->GetValue( u, i );
-		Retu = ( v1 - v2 ) / u;
+		Retu = ( v2 - v1 ) / u;
 	}
 
 	// Calculate deriviative in v
@@ -559,7 +559,7 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 		Var->GetValue( v2, i - ( uRes - 1 ) );
 		if ( NULL != den )
 			den->GetValue( v, i );
-		Retv = ( v1 - v2 ) / v;
+		Retv = ( v2 - v1 ) / v;
 	}
 
 	return ( Retu + Retv );

@@ -4185,10 +4185,18 @@ STD_SOIMPL CqShaderExecEnv::SO_filterstep( FLOATVAL edge, FLOATVAL s1, DEFPARAMV
 	TqFloat dsdu = SO_DuType<TqFloat>( s1, __iGrid, this, Deffloat );
 	TqFloat dsdv = SO_DvType<TqFloat>( s1, __iGrid, this, Deffloat );
 
-	TqFloat w = fabs( dsdu * fdu * dsdv * fdv );
+	TqFloat w = fabs( dsdu * fdu ) + fabs( dsdv * fdv );
 	w *= _pswidth;
 
 	SETFLOAT( Result, CLAMP( ( FLOAT( s1 ) + w / 2.0f - FLOAT( edge ) ) / w, 0, 1 ) );
+
+//	TqFloat res  = RiCatmullRomFilter( FLOAT( s1 ) - FLOAT( edge ), 0, w, 0);
+//	SETFLOAT( Result, res );
+
+//	std::cout << res << std::endl;
+//	TqFloat res = 1.0f - CLAMP( ( FLOAT( s1 ) + w / 2.0f - FLOAT( edge ) ) / w, 0, 1 );
+//	if( res > 0.0f )
+//		std::cout << "Aqsis angle/dangle: " << FLOAT(s1) << ", edge: " << FLOAT(edge) << ", dsdu: " << dsdu << ", dsdv: " << dsdv << ", w: " << w << ", res: " << res << std::endl;
 	END_VARYING_SECTION
 }
 

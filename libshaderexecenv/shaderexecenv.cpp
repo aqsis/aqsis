@@ -199,9 +199,9 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Iq
 		if ( USES( Uses, EnvVars_Ng ) && m_apVariables[ EnvVars_Ng ] == 0 )
 			m_apVariables[ EnvVars_Ng ] = pShader->CreateVariable( type_normal, class_varying, gVariableNames[ EnvVars_Ng ] );
 		if ( USES( Uses, EnvVars_du ) && m_apVariables[ EnvVars_du ] == 0 )
-			m_apVariables[ EnvVars_du ] = pShader->CreateVariable( type_float, class_uniform, gVariableNames[ EnvVars_du ] );
+			m_apVariables[ EnvVars_du ] = pShader->CreateVariable( type_float, class_varying, gVariableNames[ EnvVars_du ] );
 		if ( USES( Uses, EnvVars_dv ) && m_apVariables[ EnvVars_dv ] == 0 )
-			m_apVariables[ EnvVars_dv ] = pShader->CreateVariable( type_float, class_uniform, gVariableNames[ EnvVars_dv ] );
+			m_apVariables[ EnvVars_dv ] = pShader->CreateVariable( type_float, class_varying, gVariableNames[ EnvVars_dv ] );
 		if ( USES( Uses, EnvVars_L ) && m_apVariables[ EnvVars_L ] == 0 )
 			m_apVariables[ EnvVars_L ] = pShader->CreateVariable( type_vector, class_varying, gVariableNames[ EnvVars_L ] );
 		if ( USES( Uses, EnvVars_Cl ) && m_apVariables[ EnvVars_Cl ] == 0 )
