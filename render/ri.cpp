@@ -242,28 +242,6 @@ RtVoid	RiBegin(RtToken name)
 	// Clear any options.
 	QGetRenderContext()->optCurrent().ClearOptions();
 
-#ifdef AQSIS_SYSTEM_WIN32
-	// Set the default search path for shaders to the shaders directory under the executable directory.
-	// Read config file name out of the ini file.
-	char strExe[255];
-	char strDrive[10];
-	char strPath[255];
-	char strShaderPath[255];
-	char strDisplayPath[255];
-	GetModuleFileName(NULL, strExe, 255);
-	_splitpath(strExe,strDrive,strPath,NULL,NULL);
-	_makepath(strShaderPath,strDrive,strPath,"shaders","");
-	_makepath(strDisplayPath,strDrive,strPath,"","");
-
-	char* strShaderOpt="shader";
-	char* pValue=strShaderPath;
-	RiOption("searchpath", (RtPointer)strShaderOpt, (RtPointer)&pValue, NULL);
-
-	char* strDisplayOpt="display";
-	pValue=strDisplayPath;
-	RiOption("searchpath", (RtPointer)strDisplayOpt, (RtPointer)&pValue, NULL);
-#endif // AQSIS_SYSTEM_WIN32
-
 	return(0);
 }
 

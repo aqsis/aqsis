@@ -27,10 +27,6 @@
 
 #include	<time.h>
 
-#ifdef AQSIS_SYSTEM_WIN32
-#include	<process.h>
-#endif // AQSIS_SYSTEM_WIN32
-
 #include	"aqsis.h"
 #include	"imagebuffer.h"
 #include	"lights.h"
@@ -41,11 +37,6 @@
 #include	"shadervm.h"
 #include	"transform.h"
 #include	"file.h"
-
-#ifdef	AQSIS_SYSTEM_WIN32
-#include	"ddmsock.h"
-#include	"ddmsimple.h"
-#endif // AQSIS_SYSTEM_WIN32
 
 START_NAMESPACE(Aqsis)
 
@@ -615,52 +606,6 @@ void CqRenderer::Initialise()
 	ClearSymbolTable();
 	FlushShaders();
 
-	RiDeclare("Ka","uniform float");
-	RiDeclare("Kd","uniform float");
-	RiDeclare("Ks","uniform float");
-	RiDeclare("Kr","uniform float");
-	RiDeclare("roughness","uniform float");
-	RiDeclare("texturename","uniform string");
-	RiDeclare("specularcolor","uniform color");
-	RiDeclare("intensity","uniform float");
-	RiDeclare("lightcolor","uniform color");
-	RiDeclare("from","uniform point");
-	RiDeclare("to","uniform point");
-	RiDeclare("coneangle","uniform float");
-	RiDeclare("conedeltaangle","uniform float");
-	RiDeclare("beamdistribution","uniform float");
-	RiDeclare("mindistance","uniform float");
-	RiDeclare("maxdistance","uniform float");
-	RiDeclare("distance","uniform float");
-	RiDeclare("background","uniform color");
-	RiDeclare("fov","uniform float");
-	RiDeclare("P","vertex point");
-	RiDeclare("Pz","vertex point");
-	RiDeclare("Pw","vertex hpoint");
-	RiDeclare("N","varying normal");
-	RiDeclare("Np","uniform normal");
-	RiDeclare("Cs","varying color");
-	RiDeclare("Os","varying color");
-	RiDeclare("s","varying float");
-	RiDeclare("t","varying float");
-	RiDeclare("st","varying float");
-	RiDeclare("bucketsize","uniform integer[2]");
-	RiDeclare("eyesplits","uniform integer");
-	RiDeclare("shader","uniform string");
-	RiDeclare("archive","uniform string");
-	RiDeclare("texture","uniform string");
-	RiDeclare("display","uniform string");
-	RiDeclare("auto_shadows","uniform string");
-	RiDeclare("endofframe","uniform integer");
-	RiDeclare("sphere","uniform float");
-	RiDeclare("coordinatesystem","uniform string");
-	RiDeclare("shadows","uniform string");
-	RiDeclare("shadowmapsize","uniform integer[2]");
-	RiDeclare("shadowangle","uniform float");
-	RiDeclare("shadowmapname","uniform string");
-	RiDeclare("shadow_shadingrate","uniform float");
-	RiDeclare("name","uniform string");
-	
 	// Register built in shaders.
 	RegisterShader("builtin_constant", Type_Surface, new CqShaderSurfaceConstant());
 
