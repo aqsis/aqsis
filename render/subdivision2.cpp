@@ -968,6 +968,33 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 				pGrid->Os() ->SetColor( CqColor( 1, 1, 1 ) );
 		}
 		apGrids.push_back( pGrid );
+
+		// Fill in u/v if required.
+		if ( USES( lUses, EnvVars_u ) && !pTopology()->pPoints()->bHasu() )
+		{
+			TqInt iv, iu;
+			for ( iv = 0; iv <= dicesize; iv++ )
+			{
+				for ( iu = 0; iu <= dicesize; iu++ )
+				{
+					TqInt igrid = ( iv * ( dicesize + 1 ) ) + iu;
+					pGrid->u()->SetFloat( BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, iu, iv ), igrid );
+				}
+			}
+		}
+
+		if ( USES( lUses, EnvVars_v ) && !pTopology()->pPoints()->bHasv() )
+		{
+			TqInt iv, iu;
+			for ( iv = 0; iv <= dicesize; iv++ )
+			{
+				for ( iu = 0; iu <= dicesize; iu++ )
+				{
+					TqInt igrid = ( iv * ( dicesize + 1 ) ) + iu;
+					pGrid->v()->SetFloat( BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, iu, iv ), igrid );
+				}
+			}
+		}
 	}
 
 	if( apGrids.size() == 1 )
@@ -1070,7 +1097,7 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoin
 			pGrid->t() ->SetFloat( ( *pPoints->P() ) [ iParam ].y(), iData );
 	}
 
-	if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) )
+/*	if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) )
 	{
 		if( pPoints->bHasu() )
 			pGrid->u() ->SetFloat( ( *pPoints->u() ) [ iParam ], iData );
@@ -1085,7 +1112,7 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoin
 		else
 			pGrid->v() ->SetFloat( ( *pPoints->P() ) [ iParam ].y(), iData );
 	}
-
+*/
 	if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) && ( pPoints->bHasCs() ) )
 		pGrid->Cs() ->SetColor( ( *pPoints->Cs() ) [ iParam ], iData );
 
@@ -1264,10 +1291,10 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 					CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "u" );
 					pNewUP->SetSize( pSurface->cVarying() );
 
-					pNewUP->pValue() [ 0 ] = PA.x();
-					pNewUP->pValue() [ 1 ] = PB.x();
-					pNewUP->pValue() [ 2 ] = PD.x();
-					pNewUP->pValue() [ 3 ] = PC.x();
+					pNewUP->pValue() [ 0 ] = 0;//PA.x();
+					pNewUP->pValue() [ 1 ] = 1;//PB.x();
+					pNewUP->pValue() [ 2 ] = 0;//PD.x();
+					pNewUP->pValue() [ 3 ] = 1;//PC.x();
 
 					pSurface->AddPrimitiveVariable( pNewUP );
 				}
@@ -1277,10 +1304,10 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 					CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "v" );
 					pNewUP->SetSize( pSurface->cVarying() );
 
-					pNewUP->pValue() [ 0 ] = PA.y();
-					pNewUP->pValue() [ 1 ] = PB.y();
-					pNewUP->pValue() [ 2 ] = PD.y();
-					pNewUP->pValue() [ 3 ] = PC.y();
+					pNewUP->pValue() [ 0 ] = 0;//PA.y();
+					pNewUP->pValue() [ 1 ] = 0;//PB.y();
+					pNewUP->pValue() [ 2 ] = 1;//PD.y();
+					pNewUP->pValue() [ 3 ] = 1;//PC.y();
 
 					pSurface->AddPrimitiveVariable( pNewUP );
 				}
