@@ -3,6 +3,7 @@ EXTRA_DIST = ppm2tif.dsp
 lib_LTLIBRARIES = libppm2tif.la
 
 libppm2tif_la_SOURCES = ppm2tif.c
+libppm2tif_la_LIBADD  = ../common/libcommon.la
 
 if DEBUG
 CXXFLAGS = -g -Wall

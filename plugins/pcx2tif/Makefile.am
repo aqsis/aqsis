@@ -3,6 +3,7 @@ EXTRA_DIST = pcx2tif.dsp
 lib_LTLIBRARIES = libpcx2tif.la
 
 libpcx2tif_la_SOURCES = pcx2tif.c
+libpcx2tif_la_LIBADD  = ../common/libcommon.la
 
 if DEBUG
 CXXFLAGS = -g -Wall

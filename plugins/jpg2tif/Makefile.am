@@ -3,6 +3,7 @@ EXTRA_DIST = jpg2tif.dsp
 lib_LTLIBRARIES = libjpg2tif.la
 
 libjpg2tif_la_SOURCES = jpg2tif.c
+libjpg2tif_la_LIBADD  = ../common/libcommon.la
 
 if DEBUG
 CXXFLAGS = -g -Wall

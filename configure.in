@@ -64,6 +64,7 @@ slpp/Makefile \
 teqser/Makefile \
 aqsltell/Makefile \
 plugins/Makefile \
+plugins/common/Makefile \
 plugins/gif2tif/Makefile \
 plugins/jpg2tif/Makefile \
 plugins/ppm2tif/Makefile \
