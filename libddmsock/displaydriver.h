@@ -61,6 +61,7 @@ enum EqDDMessageIDs
 	
 	
 	MessageID_FormatResponse=0x8001,
+	MessageID_CloseAcknowledge=0x8002,
 };
 
 //---------------------------------------------------------------------
@@ -133,6 +134,19 @@ struct SqDDMessageClose : public SqDDMessageBase
 {
 			SqDDMessageClose() : 
 												SqDDMessageBase(MessageID_Close, sizeof(SqDDMessageClose))
+												{}
+};
+
+
+//---------------------------------------------------------------------
+/** \struct SqDDMessageClose
+ * Message containing data issued when an image is being closed after rendering is complete.
+ */
+
+struct SqDDMessageCloseAcknowledge : public SqDDMessageBase
+{
+			SqDDMessageCloseAcknowledge() : 
+												SqDDMessageBase(MessageID_CloseAcknowledge, sizeof(SqDDMessageCloseAcknowledge))
 												{}
 };
 

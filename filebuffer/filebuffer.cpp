@@ -45,6 +45,7 @@ typedef int SOCKET;
 using namespace Aqsis;
 
 SqDDMessageFormatResponse frmt(2);
+SqDDMessageCloseAcknowledge closeack;
 
 TqInt Query(SOCKET s,SqDDMessageBase* pMsg);
 TqInt Open(SOCKET s,SqDDMessageBase* pMsg);
@@ -170,7 +171,10 @@ TqInt Close(SOCKET s,SqDDMessageBase* pMsgB)
 		}
 		TIFFClose(pOut);
 	}
-	return(1);
+	if(DDSendMsg(s,&closeack)<=0)
+		return(-1);
+	else
+		return(1);
 }
 
 

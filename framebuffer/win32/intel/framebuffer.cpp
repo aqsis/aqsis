@@ -245,6 +245,7 @@ TqInt	XRes,YRes;
 TqInt	SamplesPerElement;
 TqInt	CWXMin,CWYMin;
 SqDDMessageFormatResponse frmt(2);
+SqDDMessageCloseAcknowledge closeack;
 std::string	strFilename("output.tif");
 
 TqInt Query(SOCKET s,SqDDMessageBase* pMsgB)
@@ -380,7 +381,10 @@ TqInt Data(SOCKET s, SqDDMessageBase* pMsgB)
 
 TqInt Close(SOCKET s, SqDDMessageBase* pMsgB)
 {
-	return(1);	
+	if(DDSendMsg(s,&closeack)<=0)
+		return(-1);
+	else
+		return(1);
 }
 
 

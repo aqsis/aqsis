@@ -226,6 +226,7 @@ int main(int argc, char** argv)
 // Functions required by libdd.
 
 SqDDMessageFormatResponse frmt(DataFormat_Signed32);
+SqDDMessageCloseAcknowledge closeack;
 
 TqInt Query(SOCKET s,SqDDMessageBase* pMsgB)
 {
@@ -306,7 +307,10 @@ TqInt Data(SOCKET s, SqDDMessageBase* pMsgB)
 
 TqInt Close(SOCKET s, SqDDMessageBase* pMsgB)
 {
-	return(1);	
+	if(DDSendMsg(s,&closeack)<=0)
+		return(-1);
+	else
+		return(1);
 }
 
 TqInt HandleMessage(SOCKET s, SqDDMessageBase* pMsgB)

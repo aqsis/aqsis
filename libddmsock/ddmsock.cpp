@@ -374,10 +374,21 @@ TqInt CqDDManager::OpenDisplays()
 TqInt CqDDManager::CloseDisplays()
 {
 	SqDDMessageClose msg;
+	SqDDMessageCloseAcknowledge ack;
 
 	std::vector<CqDDClient>::iterator i;
 	for(i=m_aDisplayRequests.begin(); i!=m_aDisplayRequests.end(); i++)
+	{
 		i->SendMsg(&msg);
+		i->Receive(&ack,sizeof(ack));
+
+		// Confirm the message returned is as expected.
+		if(ack.m_MessageID==MessageID_CloseAcknowledge &&
+		   ack.m_MessageLength==sizeof(ack))
+			continue;
+		else
+	        CqBasicError(ErrorID_DisplayDriver,Severity_Normal, "Failed to close display device");
+	}
 	return(0);
 }
 

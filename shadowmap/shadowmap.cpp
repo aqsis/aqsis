@@ -50,6 +50,7 @@ typedef int SOCKET;
 using namespace Aqsis;
 
 SqDDMessageFormatResponse frmt(2);
+SqDDMessageCloseAcknowledge closeack;
 
 
 int main(int argc, char* argv[])
@@ -171,7 +172,10 @@ TqInt Close(SOCKET s,SqDDMessageBase* pMsgB)
 			ofile.close();
 		}	
 	}
-	return(1);
+	if(DDSendMsg(s,&closeack)<=0)
+		return(-1);
+	else
+		return(1);
 }
 
 
