@@ -1,1 +1,1 @@
-EXTRA_DIST = dsotest.dsp
+EXTRA_DIST = dsotest.dsp bbox.c bbox.sl dsotest.rib
