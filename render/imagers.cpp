@@ -92,7 +92,7 @@ void CqImagersource::Initialise( IqBucket* pBucket )
     components += mode & ModeA ? 1 : 0;
     components = mode & ModeZ ? 1 : components;
 
-    TqInt Uses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi | ( 1 << EnvVars_ncomps ) | ( 1 << EnvVars_time ) | ( 1 << EnvVars_alpha ) );
+    TqInt Uses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi | ( 1 << EnvVars_ncomps ) | ( 1 << EnvVars_time ) | ( 1 << EnvVars_alpha ) | ( 1 << EnvVars_s ) | ( 1 << EnvVars_t ) );
 
     m_pShaderExecEnv->Initialise( uGridRes, vGridRes, 0, boost::shared_ptr<IqTransform>(), m_pShader.get(), Uses );
 
@@ -102,6 +102,8 @@ void CqImagersource::Initialise( IqBucket* pBucket )
     Ci() ->Initialise( uGridRes, vGridRes );
     Oi() ->Initialise( uGridRes, vGridRes );
     alpha() ->Initialise( uGridRes, vGridRes );
+    s() ->Initialise( uGridRes, vGridRes );
+    t() ->Initialise( uGridRes, vGridRes );
 
     //TODO dtime is not initialised yet
     //dtime().Initialise(uGridRes, vGridRes, i);
@@ -122,6 +124,8 @@ void CqImagersource::Initialise( IqBucket* pBucket )
             Oi() ->SetColor( opa, off );
             TqFloat avopa = ( opa.fRed() + opa.fGreen() + opa.fBlue() ) /3.0f;
             alpha() ->SetFloat( pBucket->Coverage( x + i, y + j ) * avopa, off );
+            s() ->SetFloat( x + i + 0.5, off );
+            t() ->SetFloat( y + j + 0.5, off );
         }
     }
     // Execute the Shader VM

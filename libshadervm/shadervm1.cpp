@@ -98,12 +98,17 @@ void CqShaderVM::SO_ipushv()
 	//If either the value or the index is varying, so must the result be.
 	RESULT(pVar->Type(), (pVar->Size()>1 || A->Size()>1)?class_varying:class_uniform);
     TqInt ext = m_pEnv->GridSize();
+    TqBool fVarying = ext > 1;
     TqInt i;
+    CqBitVector& RS = m_pEnv->RunningState();
     for ( i = 0; i < ext; i++ )
     {
-        TqFloat _aq_A;
-        A->GetFloat( _aq_A, i );
-        pResult->SetValueFromVariable( pVar->ArrayEntry( static_cast<unsigned int>( _aq_A ) ), i );
+        if(!fVarying || RS.Value( i ))
+		{
+			TqFloat _aq_A;
+			A->GetFloat( _aq_A, i );
+			pResult->SetValueFromVariable( pVar->ArrayEntry( static_cast<unsigned int>( _aq_A ) ), i );
+		}
     }
     Push( pResult );
     RELEASE( A );
