@@ -3052,9 +3052,15 @@ STD_SOIMPL CqShaderExecEnv::SO_trace( POINTVAL P, VECTORVAL R, DEFPARAMIMPL )
 
 //----------------------------------------------------------------------
 // illuminance(P,nsamples)
-STD_SOIMPL CqShaderExecEnv::SO_illuminance( POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, FLOATVAL nsamples, DEFVOIDPARAMIMPL )
+STD_SOIMPL CqShaderExecEnv::SO_illuminance( STRINGVAL Category, POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAMIMPL )
 {
 	INIT_SO
+
+	BEGIN_UNIFORM_SECTION
+	CqString cat( "" );
+	if ( NULL != Category ) Category->GetString( cat );
+	END_UNIFORM_SECTION
+
 	__fVarying = TqTrue;
 
 	// Fill in the lightsource information, and transfer the results to the shader variables,
@@ -3064,42 +3070,88 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminance( POINTVAL P, VECTORVAL Axis, FLOATVAL
 
 		if ( NULL != Axis ) CHECKVARY( Axis )
 			if ( NULL != Angle ) CHECKVARY( Angle )
-				if ( NULL != nsamples ) CHECKVARY( nsamples )
+		
+		TqBool exec = TqTrue;
 
-					BEGIN_VARYING_SECTION
+		if( cat.size() )
+		{
 
-					CqVector3D Ln;
-		lp->L() ->GetVector( Ln, __iGrid );
-		Ln = -Ln;
+			TqBool exclude = TqFalse;
+			CqString lightcategories;
+			CqString catname;
 
-		// Store them locally on the surface.
-		L() ->SetVector( Ln, __iGrid );
-		CqColor colCl;
-		lp->Cl() ->GetColor( colCl, __iGrid );
-		Cl() ->SetColor( colCl, __iGrid );
+			
+			if( cat.find( "-" ) == 0 )
+			{
+				exclude = true;
+				catname = cat.substr( 1, cat.size() );
+			}
+			else
+			{
+				catname = cat;
+			}
+			
+			lp->pShader()->FindArgument("__category")->GetString( lightcategories );
 
-		// Check if its within the cone.
-		Ln.Unit();
-		CqVector3D vecAxis( 0, 1, 0 );
-		if ( NULL != Axis ) Axis->GetVector( vecAxis, __iGrid );
-		TqFloat fAngle = PI;
-		if ( NULL != Angle ) Angle->GetFloat( fAngle, __iGrid );
+			exec = TqFalse;
+			// While no matching category has been found...
+			TqInt tokenpos = 0, tokenend;
+			while( 1 )
+			{
+				tokenend = lightcategories.find(',', tokenpos);
+				CqString token = lightcategories.substr( tokenpos, tokenend );
+				if( catname.compare( token ) == 0 )
+				{
+					if( !exclude )
+					{
+						exec = TqTrue;
+						break;
+					}
+				}
+				if( tokenend == std::string::npos )
+					break;
+				else
+					tokenpos = tokenend+1;
+			}
+		}
 
-		TqFloat cosangle = Ln * vecAxis;
-		cosangle = CLAMP( cosangle, -1, 1 );
-		if ( acos( cosangle ) > fAngle )
-			m_CurrentState.SetValue( __iGrid, TqFalse );
-		else
-			m_CurrentState.SetValue( __iGrid, TqTrue );
+		if( exec )
+		{
+			BEGIN_VARYING_SECTION
 
-		END_VARYING_SECTION
+			CqVector3D Ln;
+			lp->L() ->GetVector( Ln, __iGrid );
+			Ln = -Ln;
+
+			// Store them locally on the surface.
+			L() ->SetVector( Ln, __iGrid );
+			CqColor colCl;
+			lp->Cl() ->GetColor( colCl, __iGrid );
+			Cl() ->SetColor( colCl, __iGrid );
+
+			// Check if its within the cone.
+			Ln.Unit();
+			CqVector3D vecAxis( 0, 1, 0 );
+			if ( NULL != Axis ) Axis->GetVector( vecAxis, __iGrid );
+			TqFloat fAngle = PI;
+			if ( NULL != Angle ) Angle->GetFloat( fAngle, __iGrid );
+
+			TqFloat cosangle = Ln * vecAxis;
+			cosangle = CLAMP( cosangle, -1, 1 );
+			if ( acos( cosangle ) > fAngle )
+				m_CurrentState.SetValue( __iGrid, TqFalse );
+			else
+				m_CurrentState.SetValue( __iGrid, TqTrue );
+
+			END_VARYING_SECTION
+		}
 	}
 }
 
 
-STD_SOIMPL	CqShaderExecEnv::SO_illuminance( POINTVAL P, FLOATVAL nsamples, DEFVOIDPARAMIMPL )
+STD_SOIMPL	CqShaderExecEnv::SO_illuminance( STRINGVAL Category, POINTVAL P, DEFVOIDPARAMIMPL )
 {
-	SO_illuminance( P, NULL, NULL, nsamples );
+	SO_illuminance( Category, P, NULL, NULL );
 }
 
 

@@ -520,6 +520,7 @@ void CqCodeGenOutput::Visit( IqParseNodeIlluminanceConstruct& IC )
 	// The last child of the arg node is the Point to be illuminated, see Parser.y for confirmation.
 	IqParseNode* pInitArg = pArg->pChild();
 	while ( pInitArg->pNextSibling() != 0 ) pInitArg = pInitArg->pNextSibling();
+	pInitArg = pInitArg->pPrevSibling();
 	pInitArg->Accept( *this );
 	m_slxFile << "\tinit_illuminance" << std::endl;
 	m_slxFile << "\tjz " << iLabelB << std::endl;	// Jump if no lightsources.

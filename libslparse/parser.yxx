@@ -1062,8 +1062,8 @@ loop_control
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								CqParseNode* pArg=new CqParseNode();
 								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								pArg->AddFirstChild(new CqParseNodeStringConst(""));	// [category]
 								pArg->AddFirstChild($3);
-								pArg->AddFirstChild(new CqParseNodeFloatConst(0));	// [nsamples]
 								$$->AddLastChild(pArg);
 								$$->AddLastChild($5);
 								// Make sure that any assigns in the two expressions don't dup
@@ -1089,10 +1089,10 @@ loop_control
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								CqParseNode* pArg=new CqParseNode();
 								pArg->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								pArg->AddFirstChild(new CqParseNodeStringConst(""));	// [category]
 								pArg->AddFirstChild($3);
 								pArg->AddFirstChild($5);
 								pArg->AddFirstChild($7);
-								pArg->AddFirstChild(new CqParseNodeFloatConst(0));	// [nsamples]
 								$$->AddLastChild(pArg);
 								$$->AddLastChild($9);
 								// Make sure that any assigns in the two expressions don't dup

@@ -310,10 +310,11 @@ void CqCodeGenDataGather::Visit( IqParseNodeIlluminanceConstruct& IC )
 	IqParseNode* pStmt = pArg->pNextSibling();
 	assert( pStmt != 0 );
 
-	// The last child of the arg node is the Point to be illuminated, see Parser.y for confirmation.
+	// The second to last child of the arg node is the Point to be illuminated, see Parser.y for confirmation.
 	IqParseNode* pInitArg = pArg->pChild();
 	while ( pInitArg->pNextSibling() != 0 )
 		pInitArg = pInitArg->pNextSibling();
+	pInitArg = pInitArg->pPrevSibling();
 	pInitArg->Accept( *this );
 	pArg->Accept( *this );
 	pStmt->Accept( *this );							// statement
