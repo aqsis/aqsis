@@ -1105,6 +1105,7 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 			QGetRenderContext() ->Stats().DicingTimer().Stop();
 			if ( NULL != pGrid )
 			{
+				ADDREF( pGrid );
 				// Only shade in all cases since the Displacement could be called in the shadow map creation too.
 				pGrid->Shade();
 				pGrid->TransferOutputVariables();
@@ -1118,8 +1119,7 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 					RenderMPGs( iBucket, xmin, xmax, ymin, ymax );
 					QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
 				}
-				else
-					delete( pGrid );
+				RELEASEREF( pGrid );
 			}
 		}
 		// The surface is not small enough, so split it...
