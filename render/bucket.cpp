@@ -68,7 +68,7 @@ std::vector<TqFloat> CqBucket::m_aCoverages;
  *  Clear,Allocate, Init. the m_aieImage samples
  */
 
-void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqBool fJitter )
+void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqBool fJitter, TqBool empty )
 {
     m_XOrigin = xorigin;
     m_YOrigin = yorigin;
@@ -116,7 +116,8 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
             CqVector2D bPos2( m_XOrigin, m_YOrigin );
             bPos2 += CqVector2D( ( j - m_DiscreteShiftX ), ( i - m_DiscreteShiftY ) );
 
-            m_aieImage[which].Clear();
+	    if(!empty)
+		    m_aieImage[which].Clear();
             m_aieImage[which].OffsetSamples( bPos2, m_aSamplePositions[sourceIndex] );
 
             which++;

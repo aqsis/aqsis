@@ -1265,8 +1265,8 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
     if(!bIsEmpty)
     {
         Bucket.ExposeBucket();
+	Bucket.QuantizeBucket();
     }
-    Bucket.QuantizeBucket();
 
     QGetRenderContext() ->Stats().MakeFilterBucket().Stop();
 
@@ -1353,7 +1353,7 @@ void CqImageBuffer::RenderImage()
         // TODO: fix non jittered bucket initialisation.
         // Warning Jitter must be True is all cases; the InitialiseBucket when it is not in jittering mode
         // doesn't initialise correctly so later we have problem in the FilterBucket()
-        CqBucket::InitialiseBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), true );
+        CqBucket::InitialiseBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), true, bIsEmpty );
         CqBucket::InitialiseFilterValues();
 
 		////////// Dump the pixel sample positions into a dump file //////////

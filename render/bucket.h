@@ -108,7 +108,7 @@ public:
     virtual	TqInt DataSize( TqInt iXPos, TqInt iYPos );
     virtual	const TqFloat* Data( TqInt iXPos, TqInt iYPos );
 
-    static	void	InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqBool fJitter = TqTrue );
+    static	void	InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqBool fJitter = TqTrue, TqBool empty = TqFalse );
     static	void	InitialiseFilterValues();
     static	void	ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie );
     static	void	CombineElements();
