@@ -29,7 +29,6 @@
 #define PLUGINS_H_INCLUDED
 
 #include	"aqsis.h"
-#include	"sstring.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -58,16 +57,12 @@ class CqPlugins
 	private:
 
 	protected:
-		void *DLOpen(CqString& library);
-		void DLClose(void*);
-		void *DLSym(void*, CqString& symbol);
-		
-		void *m_handle;
-		void *m_function;
+		void *handle;
+		void *function;
 		TqChar errorlog[ 1024 ];
-		CqString m_dynamiclibrary;
-		CqString m_dynamicfunction;
-		CqString m_dynamicsearch;
+		TqChar dynamiclibrary[ 1024 ];
+		TqChar dynamicfunction[ 1024 ];
+		TqChar dynamicsearch[ 1024 ];
 }
 ;
 
