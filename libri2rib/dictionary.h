@@ -38,11 +38,11 @@ typedef unsigned int TqTokenId;
 
 struct SqTokenEntry
 {
-    SqTokenEntry (string n, EqTokenClass tc, EqTokenType tt, TqUint qt, TqBool inln)
+    SqTokenEntry (std::string n, EqTokenClass tc, EqTokenType tt, TqUint qt, TqBool inln)
 	: name(n), tclass(tc), ttype(tt), in_line(inln), quantity(qt) {}
     ~SqTokenEntry() {}
 
-    string       name;
+    std::string       name;
     EqTokenClass tclass;
     EqTokenType  ttype;
     TqBool       in_line;
@@ -66,8 +66,8 @@ public:
     CqDictionary();
     ~CqDictionary() {}
 
-    TqTokenId   addToken   (string n, EqTokenClass tc, EqTokenType tt, TqUint qnt=1, TqBool inln=false);
-    TqTokenId   getTokenId (string n);
+    TqTokenId   addToken   (std::string n, EqTokenClass tc, EqTokenType tt, TqUint qnt=1, TqBool inln=false);
+    TqTokenId   getTokenId (std::string n);
     TqUint      allocSize  (TqTokenId id, TqUint vertex, TqUint varying, TqUint uniform);
     EqTokenType getType    (TqTokenId id);
 

@@ -1454,7 +1454,7 @@ RtVoid RiMotionBegin (RtInt n, ...)
     try {
 	va_list args;
 	va_start(args, n);
-	RtFloat times[n];
+	RtFloat* times=new RtFloat[n];
 
 	for (RtInt i=0;i<n;i++) {
 	    times[i]=va_arg(args, double);
@@ -1462,6 +1462,7 @@ RtVoid RiMotionBegin (RtInt n, ...)
 	va_end(args);
 
 	RiMotionBeginV(n, times);
+	delete[](times);
     } catch (CqError &r) {
 	r.manage();
     }
@@ -1635,13 +1636,29 @@ RtVoid RiMakeShadowV (const char *pic, const char *tex,
 RtVoid RiArchiveRecord (RtToken type, char *format, ...)
 {
     try {
-	std::strstream str;
 	va_list args;
 	va_start(args, format);
+
+	#ifdef	AQSIS_COMPILER_MSVC6
+	TqInt size=256;
+	char* buffer=new char[size];
+	while(_vsnprintf(buffer,256,format,args)<0)
+	{
+		size*=2;
+		delete[](buffer);
+		buffer=new char[size];
+	}
+	std::string i(buffer);
+	delete[](buffer);
+	i+="/n";
+	#else
+	std::strstream str;
 	str.vform(format,args);
 	str << std::ends;
 	std::string i(str.str());
 	str.freeze(false);
+	#endif
+
 	va_end(args);
 	context.current().RiArchiveRecord(type, i);
     } catch (CqError &r) {

@@ -40,36 +40,36 @@ class CqInlineParse
 {
 private:
     TqUint number_of_words;
-    string word[7];
+    std::string word[7];
 
     TqBool inline_def;
     EqTokenClass tc;
     EqTokenType tt;
     TqUint size;
-    string identifier;
+    std::string identifier;
 
 
-    TqBool is_class (const string &str);
-    TqBool is_type (const string &str);
-    TqBool is_int (const string &str);
+    TqBool is_class (const std::string &str);
+    TqBool is_type (const std::string &str);
+    TqBool is_int (const std::string &str);
 
-    EqTokenClass get_class (const string &str);
-    EqTokenType get_type (const string &str);
-    TqUint get_size (const string &str);
+    EqTokenClass get_class (const std::string &str);
+    EqTokenType get_type (const std::string &str);
+    TqUint get_size (const std::string &str);
 
     void check_syntax ();
-    void lc(string &);
+    void lc(std::string &);
 
 public:
     CqInlineParse() {}
     ~CqInlineParse() {}
-    void         parse (string &str);
+    void         parse (std::string &str);
 
     TqBool       isInline() { return inline_def; }
     EqTokenClass getClass() { return tc; }
     EqTokenType  getType() { return tt; }
     TqUint       getQuantity() { return size; }
-    string       getIdentifier() { return identifier; }
+    std::string       getIdentifier() { return identifier; }
 };
 
 } /* namespace libri2rib */

@@ -74,14 +74,14 @@ void CqASCII::printPL(RtInt n, RtToken tokens[], RtPointer parms[],
     TqUint j;
     for (i=0; i<n ; i++) {
 	try {
-	    id=dictionary.getTokenId(string(tokens[i]));
+	    id=dictionary.getTokenId(std::string(tokens[i]));
 	} catch (CqError &r) {
 	    r.manage();
 	    continue;
 	}
 	tt=dictionary.getType(id);
 
-	out << "\"" << string(tokens[i])<< "\" ";
+	out << "\"" << std::string(tokens[i])<< "\" ";
 	out << "[ ";
 
 	for (j=0; j<(dictionary.allocSize(id, vertex, varying, uniform)); j++ ) {
@@ -98,7 +98,7 @@ void CqASCII::printPL(RtInt n, RtToken tokens[], RtPointer parms[],
 		break;
 	    case STRING:
 		cp=static_cast<char **> (parms[i]);
-		out <<"\""<< string(cp[j]) <<"\" ";
+		out <<"\""<< std::string(cp[j]) <<"\" ";
 		break;
 	    case INTEGER:
 		nt=static_cast<RtInt *> (parms[i]);
@@ -113,11 +113,11 @@ void CqASCII::printPL(RtInt n, RtToken tokens[], RtPointer parms[],
 
 void CqASCII::printToken(RtToken t)
 {
-    out << "\"" << string(t) << "\" ";
+    out << "\"" << std::string(t) << "\" ";
 }
 void CqASCII::printCharP(const char *c)
 {
-    out << "\"" << string(c) << "\" ";
+    out << "\"" << std::string(c) << "\" ";
 }
 
 void CqASCII::printArray (RtInt n, RtInt *p)
@@ -138,7 +138,7 @@ void CqASCII::printArray (RtInt n, RtFloat *p)
     out << "] ";
 }
 
-string CqASCII::getFilterFuncName(RtFilterFunc filterfunc, string message)
+std::string CqASCII::getFilterFuncName(RtFilterFunc filterfunc, std::string message)
 {
     if (filterfunc==RiBoxFilter) return "box ";
     else if (filterfunc==RiTriangleFilter) return "triangle ";
@@ -148,7 +148,7 @@ string CqASCII::getFilterFuncName(RtFilterFunc filterfunc, string message)
     else if (filterfunc==RiDiskFilter) return "disk ";
     else if (filterfunc==RiBesselFilter) return "bessel ";
     else {
-	string st("Unknown RiFilterFunc. ");
+	std::string st("Unknown RiFilterFunc. ");
 	st+=message; st.append(" function skipped.");
 	throw CqError(RIE_CONSISTENCY, RIE_WARNING, st, TqTrue);
 	return "";
@@ -164,8 +164,8 @@ string CqASCII::getFilterFuncName(RtFilterFunc filterfunc, string message)
 RtToken CqASCII::RiDeclare(const char *name, const char *declaration) 
 {
     CqInlineParse ip;
-    string a(name);
-    string b(declaration);
+    std::string a(name);
+    std::string b(declaration);
 
     b+=" ";
     b+=a;
@@ -181,9 +181,9 @@ RtToken CqASCII::RiDeclare(const char *name, const char *declaration)
 }
 RtVoid CqASCII::RiBegin(RtToken name)
 {
-    out.open(name,ios::out);
+    out.open(name,std::ios::out);
     if (!out) {
-	throw CqError(RIE_NOFILE, RIE_ERROR, string("Unable to open file ")+string(name), TqFalse);
+	throw CqError(RIE_NOFILE, RIE_ERROR, std::string("Unable to open file ")+std::string(name), TqFalse);
     }
 }
 RtVoid CqASCII::RiEnd(RtVoid)
@@ -332,7 +332,7 @@ RtVoid  CqASCII::RiPixelSamples(RtFloat xsamples, RtFloat ysamples)
 }
 RtVoid  CqASCII::RiPixelFilter(RtFilterFunc filterfunc, RtFloat xwidth, RtFloat ywidth)
 {
-    string st=getFilterFuncName(filterfunc, "RiPixelFilter");
+    std::string st=getFilterFuncName(filterfunc, "RiPixelFilter");
     out <<"PixelFilter "<< st << xwidth << " " << ywidth << endl;
 }
 RtVoid  CqASCII::RiExposure(RtFloat gain, RtFloat gamma)
@@ -745,9 +745,9 @@ RtVoid  CqASCII::RiPatchV(RtToken type, RtInt n, RtToken tokens[], RtPointer par
     else if (type==RI_BICUBIC)
 	nb=16;
     else {
-	string st("Unknown RiPatch type: ");
-	st+=string(type);
-	st+=string("  RiPatch() instruction skipped");
+	std::string st("Unknown RiPatch type: ");
+	st+=std::string(type);
+	st+=std::string("  RiPatch() instruction skipped");
 	throw CqError(RIE_BADTOKEN, RIE_ERROR, st, TqTrue);
     }
 
@@ -768,9 +768,9 @@ RtVoid  CqASCII::RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap,
 	    nuptch=nu-1;
 	    ii+=1;
 	} else {
-	    string st("Unknown RiPatchMesh uwrap token:");
-	    st+=string(uwrap);
-	    st+=string("  RiPatchMesh instruction skipped");
+	    std::string st("Unknown RiPatchMesh uwrap token:");
+	    st+=std::string(uwrap);
+	    st+=std::string("  RiPatchMesh instruction skipped");
 	    throw CqError(RIE_BADTOKEN, RIE_ERROR, st, TqTrue);
 	}
 	if (vwrap==RI_PERIODIC) {
@@ -779,9 +779,9 @@ RtVoid  CqASCII::RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap,
 	    nvptch=nv-1;
 	    ii+=1;
 	} else {
-	    string st("Unknown RiPatchMesh vwrap token:");
-	    st+=string(vwrap);
-	    st+=string("  RiPatchMesh instruction skipped");
+	    std::string st("Unknown RiPatchMesh vwrap token:");
+	    st+=std::string(vwrap);
+	    st+=std::string("  RiPatchMesh instruction skipped");
 	    throw CqError(RIE_BADTOKEN, RIE_ERROR, st, TqTrue);
 	}
 	ii+=nuptch+nvptch;
@@ -797,9 +797,9 @@ RtVoid  CqASCII::RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap,
 	    nuptch=(nu-4)/nustep +1;
 	    ii+=1;
 	} else {
-	    string st("Unknown RiPatchMesh uwrap token:");
-	    st+=string(uwrap);
-	    st+=string("  RiPatchMesh instruction skipped");
+	    std::string st("Unknown RiPatchMesh uwrap token:");
+	    st+=std::string(uwrap);
+	    st+=std::string("  RiPatchMesh instruction skipped");
 	    throw CqError(RIE_BADTOKEN, RIE_ERROR, st, TqTrue);
 	}
 	if (vwrap==RI_PERIODIC) {
@@ -808,18 +808,18 @@ RtVoid  CqASCII::RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap,
 	    nvptch=(nv-4)/nvstep +1;
 	    ii+=1;
 	} else {
-	    string st("Unknown RiPatchMesh vwrap token:");
-	    st+=string(vwrap);
-	    st+=string("  RiPatchMesh instruction skipped");
+	    std::string st("Unknown RiPatchMesh vwrap token:");
+	    st+=std::string(vwrap);
+	    st+=std::string("  RiPatchMesh instruction skipped");
 	    throw CqError(RIE_BADTOKEN, RIE_ERROR, st, TqTrue);
 	}
 	ii+=nuptch+nvptch;
 
   
     } else {
-	string st("Unknown RiPatchMesh type:");
-	st+=string(type);
-	st+=string("  RiPatchMesh instruction skipped");
+	std::string st("Unknown RiPatchMesh type:");
+	st+=std::string(type);
+	st+=std::string("  RiPatchMesh instruction skipped");
 	throw CqError(RIE_BADTOKEN, RIE_ERROR, st, TqTrue);
     }
 
@@ -926,9 +926,9 @@ RtVoid  CqASCII::RiCurvesV(RtToken type, RtInt ncurves,
 		vval+=nvertices[i];
 	    }
 	} else {
-	    string st("Unknown RiCurves wrap token:");
-	    st+=string(wrap);
-	    st+=string("  RiCurves instruction skipped");
+	    std::string st("Unknown RiCurves wrap token:");
+	    st+=std::string(wrap);
+	    st+=std::string("  RiCurves instruction skipped");
 	    throw CqError(RIE_BADTOKEN, RIE_ERROR, st, TqTrue);
 	}
     } else if (type==RI_CUBIC) {
@@ -941,15 +941,15 @@ RtVoid  CqASCII::RiCurvesV(RtToken type, RtInt ncurves,
 		vval+=2 + (nvertices[i]-4)/steps.top().vStep;
 	    }
 	} else {
-	    string st("Unknown RiCurves wrap token:");
-	    st+=string(wrap);
-	    st+=string("  RiCurves instruction skipped");
+	    std::string st("Unknown RiCurves wrap token:");
+	    st+=std::string(wrap);
+	    st+=std::string("  RiCurves instruction skipped");
 	    throw CqError(RIE_BADTOKEN, RIE_ERROR, st, TqTrue);
 	}
     } else {
-	string st("Unknown RiCurves type:");
-	st+=string(type);
-	st+=string("  RiCurves instruction skipped");
+	std::string st("Unknown RiCurves type:");
+	st+=std::string(type);
+	st+=std::string("  RiCurves instruction skipped");
 	throw CqError(RIE_BADTOKEN, RIE_ERROR, st, TqTrue);
     }
 
@@ -1007,7 +1007,7 @@ RtVoid  CqASCII::RiProcedural(RtPointer data, RtBound bound,
 			      RtVoid (*subdivfunc)(RtPointer, RtFloat),
 			      RtVoid (*freefunc)(RtPointer))
 {
-    string sf;
+    std::string sf;
     RtInt a;
     if (subdivfunc==RiProcDelayedReadArchive) {
 	sf="DelayedReadArchive";
@@ -1023,26 +1023,27 @@ RtVoid  CqASCII::RiProcedural(RtPointer data, RtBound bound,
     }
 
     out <<"Procedural ";
-    switch (a) {
+    RtInt i;
+	switch (a) {
     case 1:
-	out << sf <<" [ "<< string(&((char *) data)[0]) <<" ] [ "; 
-	for (RtInt i=0; i<6 ; i++)
+	out << sf <<" [ "<< std::string(&((char *) data)[0]) <<" ] [ "; 
+	for (i=0; i<6 ; i++)
 	    out << bound[i] <<" ";
 	out << "]" << endl;
 	break;
     case 2:
 	out << sf <<" [ ";
-	out << string(&((char *) data)[0]) <<" ";
-	out << string(&((char *) data)[1]) <<" ] [ ";
-	for (RtInt i=0; i<6 ; i++)
+	out << std::string(&((char *) data)[0]) <<" ";
+	out << std::string(&((char *) data)[1]) <<" ] [ ";
+	for (i=0; i<6 ; i++)
 	    out << bound[i] <<" ";
 	out << "]" << endl;
 	break;
     case 3:
 	out << sf <<" [ ";
-	out << string(&((char *) data)[0]) <<" ";
-	out << string(&((char *) data)[1]) <<" ] [ ";
-	for (RtInt i=0; i<6 ; i++)
+	out << std::string(&((char *) data)[0]) <<" ";
+	out << std::string(&((char *) data)[1]) <<" ] [ ";
+	for (i=0; i<6 ; i++)
 	    out << bound[i] <<" ";
 	out << "]" << endl;
 	break;
@@ -1066,7 +1067,7 @@ RtVoid  CqASCII::RiMakeTextureV(const char *pic, const char *tex, RtToken swrap,
 				RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth,
 				RtInt n, RtToken tokens[], RtPointer parms[])
 {
-    string ff=getFilterFuncName(filterfunc, "RiMakeTexture");
+    std::string ff=getFilterFuncName(filterfunc, "RiMakeTexture");
 
     out <<"MakeTexture ";
     printCharP(pic);
@@ -1080,7 +1081,7 @@ RtVoid  CqASCII::RiMakeBumpV(const char *pic, const char *tex, RtToken swrap, Rt
 			     RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth,
 			     RtInt n, RtToken tokens[], RtPointer parms[])
 {
-    string ff=getFilterFuncName(filterfunc, "RiMakeBump");
+    std::string ff=getFilterFuncName(filterfunc, "RiMakeBump");
 
     out <<"MakeBump ";
     printCharP(pic);
@@ -1094,7 +1095,7 @@ RtVoid  CqASCII::RiMakeLatLongEnvironmentV(const char *pic, const char *tex, RtF
 					   RtFloat swidth, RtFloat twidth,
 					   RtInt n, RtToken tokens[], RtPointer parms[])
 {
-    string ff=getFilterFuncName(filterfunc, "RiMakeLatLongEnvironment");
+    std::string ff=getFilterFuncName(filterfunc, "RiMakeLatLongEnvironment");
 
     out <<"MakeLatLongEnvironment ";
     printCharP(pic);
@@ -1108,7 +1109,7 @@ RtVoid  CqASCII::RiMakeCubeFaceEnvironmentV(const char *px, const char *nx, cons
 					    RtFloat twidth,
 					    RtInt n, RtToken tokens[], RtPointer parms[])
 {
-    string ff=getFilterFuncName(filterfunc, "RiMakeCubeFaceEnvironment");
+    std::string ff=getFilterFuncName(filterfunc, "RiMakeCubeFaceEnvironment");
 
     out <<"MakeCubeFaceEnvironment ";
     printCharP(px);
@@ -1136,16 +1137,16 @@ RtVoid  CqASCII::RiMakeShadowV(const char *pic, const char *tex,
 // *******************************************************
 // ******* ******* ******* ARCHIVE ******* ******* *******
 // *******************************************************
-RtVoid CqASCII::RiArchiveRecord(RtToken type, string txt)
+RtVoid CqASCII::RiArchiveRecord(RtToken type, std::string txt)
 {
-    string tmp;
+    std::string tmp;
 
     if (type==RI_COMMENT) tmp="#";
     else if (type==RI_STRUCTURE) tmp="##";
     else if (type==RI_VERBATIM) { out << txt; return; }
     else {
-	string st("Unknown ArchiveRecord type: ");
-	st+=string(type);
+	std::string st("Unknown ArchiveRecord type: ");
+	st+=std::string(type);
 	throw CqError(RIE_BADTOKEN, RIE_ERROR, st, TqTrue);
     }
     out << tmp << txt << endl;
@@ -1167,7 +1168,7 @@ RtVoid CqASCII::RiReadArchiveV(RtToken name, RtArchiveCallback callback,
 // *************************************************************
 RtVoid CqASCII::RiErrorHandler(RtErrorFunc handler)
 {
-    string ch;
+    std::string ch;
     if (handler==RiErrorIgnore) ch="\"ignore\"";
     else if (handler==RiErrorPrint) ch="\"print\"";
     else if (handler==RiErrorAbort) ch="\"abort\"";

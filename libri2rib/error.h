@@ -36,11 +36,11 @@ class CqError
 private:
     RtInt  code;
     RtInt  severity;
-    string message;
+    std::string message;
     TqBool to_rib;
 
 public:
-    CqError(RtInt cd, RtInt sev, string msg, TqBool tr)
+    CqError(RtInt cd, RtInt sev, std::string msg, TqBool tr)
 	: code(cd), severity(sev), message(msg), to_rib(tr) {}
     ~CqError() {}
     RtVoid manage();

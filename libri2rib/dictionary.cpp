@@ -111,7 +111,7 @@ CqDictionary::CqDictionary()
 
 
 // If the token already exists, addToken() return the corresponding id 
-TqTokenId CqDictionary::addToken (string n, EqTokenClass tc, EqTokenType tt, TqUint qnt, TqBool inln)
+TqTokenId CqDictionary::addToken (std::string n, EqTokenClass tc, EqTokenType tt, TqUint qnt, TqBool inln)
 {
     std::vector<SqTokenEntry>::iterator first=te.begin();
     TqTokenId i;
@@ -131,7 +131,7 @@ TqTokenId CqDictionary::addToken (string n, EqTokenClass tc, EqTokenType tt, TqU
 
 // If the token given as input is in fact an inline definition,
 // getTokenId() will add it to the dictionary.
-TqTokenId CqDictionary::getTokenId (string n)
+TqTokenId CqDictionary::getTokenId (std::string n)
 {
     CqInlineParse ip;
     TqTokenId i,j=0;
@@ -148,7 +148,7 @@ TqTokenId CqDictionary::getTokenId (string n)
 		    j=i;
 	    }
 	if (j==0) {
-	    string st("Token not declared: ");
+	    std::string st("Token not declared: ");
 	    st+=n;
 	    throw CqError(RIE_ILLSTATE, RIE_ERROR, st, TqFalse);
 	}

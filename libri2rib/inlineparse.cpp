@@ -97,7 +97,7 @@ void CqInlineParse::check_syntax ()
     }
 }
 
-void CqInlineParse::parse (string &str)
+void CqInlineParse::parse (std::string &str)
 {
     TqUint i,j;
     size_t sp;
@@ -158,7 +158,7 @@ void CqInlineParse::parse (string &str)
     check_syntax ();
 }
 
-TqBool CqInlineParse::is_class (const string &str)
+TqBool CqInlineParse::is_class (const std::string &str)
 {
     if ((str=="constant") ||
 	(str=="uniform") ||
@@ -168,7 +168,7 @@ TqBool CqInlineParse::is_class (const string &str)
     return TqFalse;
 }
 
-TqBool CqInlineParse::is_type (const string &str)
+TqBool CqInlineParse::is_type (const std::string &str)
 {
     if ((str=="float") ||
 	(str=="point") ||
@@ -184,7 +184,7 @@ TqBool CqInlineParse::is_type (const string &str)
 }
 
 // check if this int is >0 too
-TqBool CqInlineParse::is_int (const string &str)
+TqBool CqInlineParse::is_int (const std::string &str)
 {
     int i,j;
     i=sscanf(str.c_str(),"%d",&j);
@@ -192,15 +192,16 @@ TqBool CqInlineParse::is_int (const string &str)
     return TqTrue;
 }
 
-EqTokenClass CqInlineParse::get_class (const string &str)
+EqTokenClass CqInlineParse::get_class (const std::string &str)
 {
     if (str=="constant") return CONSTANT;
     if (str=="uniform") return UNIFORM;
     if (str=="varying") return VARYING;
     if (str=="vertex") return VERTEX;
+	return(CONSTANT);
 }
 
-EqTokenType CqInlineParse::get_type (const string &str)
+EqTokenType CqInlineParse::get_type (const std::string &str)
 {
     if (str=="float") return FLOAT;
     if (str=="point") return POINT;
@@ -211,16 +212,17 @@ EqTokenType CqInlineParse::get_type (const string &str)
     if (str=="matrix") return MATRIX;
     if (str=="hpoint") return HPOINT;
     if (str=="integer") return INTEGER;
+	return(FLOAT);
 }
 
-TqUint  CqInlineParse::get_size (const string &str)
+TqUint  CqInlineParse::get_size (const std::string &str)
 {
     TqUint i;
     sscanf(str.c_str(),"%u",&i);
     return i;
 }
 
-void CqInlineParse::lc(string &str)
+void CqInlineParse::lc(std::string &str)
 {
     for(TqUint i=0;i<str.length();i++) {
 	str[i]=tolower(str[i]);

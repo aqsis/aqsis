@@ -50,14 +50,14 @@ private:
     };
     std::stack<Steps> steps;
 
-    ofstream  out;
+    std::ofstream  out;
     void  printArray (RtInt n, RtInt *p);
     void  printArray (RtInt n, RtFloat *p);
     void  printToken (RtToken t);
     void  printCharP (const char *c);
     void  printPL    (RtInt n, RtToken tokens[], RtPointer parms[],
 		      RtInt vertex=1, RtInt varying=1, RtInt uniform=1);
-    string getFilterFuncName (RtFilterFunc, string);
+    std::string getFilterFuncName (RtFilterFunc, std::string);
 
     void  push();
     void  pop();
@@ -248,7 +248,7 @@ public:
 			  RtInt n, RtToken tokens[], RtPointer parms[]);
 
     /* ARCHIVE */
-    RtVoid  RiArchiveRecord(RtToken type, string);
+    RtVoid  RiArchiveRecord(RtToken type, std::string);
     RtVoid  RiReadArchiveV(RtToken name, RtArchiveCallback callback,
 			   RtInt n, RtToken tokens[], RtPointer parms[]);
 

@@ -55,7 +55,7 @@ CqASCII & CqContext::current()
 
 void CqContext::switchTo(RtContextHandle ch)
 {
-    list<CqASCII *>::iterator first=chl.begin();
+    std::list<CqASCII *>::iterator first=chl.begin();
     CqASCII *r=(CqASCII *)ch;
     for (;first!=chl.end();first++) {
 	if (*first==r) { 
@@ -68,7 +68,7 @@ void CqContext::switchTo(RtContextHandle ch)
 
 void CqContext::removeCurrent()
 {
-    list<CqASCII *>::iterator first=chl.begin();
+    std::list<CqASCII *>::iterator first=chl.begin();
     for (;first!=chl.end();first++) {
 	if (*first==active) {
 	    delete *first;
