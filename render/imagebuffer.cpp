@@ -872,7 +872,7 @@ void CqBucket::AddGPrim( CqBasicSurface* pGPrim )
 			surf = surf->pNext();
 		}
 	}
-	m_aGPrims.LinkLast( pGPrim );
+	m_aGPrims.LinkFirst( pGPrim );
 }
 
 
