@@ -9,5 +9,8 @@ else
 CXXFLAGS =
 endif
 
-INCLUDES = -I$(top_srcdir)/libdd -I$(top_srcdir)/libddmsock -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix
+INCLUDES = -I$(top_srcdir)/libdd -I$(top_srcdir)/libddmsock -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I@OPENGL_INC@
+
+LDFLAGS = @LDFLAGS@ -L@OPENGL_LIB@
+
 

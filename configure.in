@@ -24,11 +24,11 @@ AC_PROG_YACC
 AC_EXEEXT
 
 dnl OpenGL
-dnl HAVE_OPENGL
+HAVE_OPENGL
 HAVE_GLUT
 
 dnl TIFF library
-dnl HAVE_LIBTIFF
+HAVE_LIBTIFF
 
 dnl Needed by librib2/bdec.cpp. Define WORDS_BIGENDIAN.
 AC_C_BIGENDIAN

@@ -9,7 +9,9 @@ else
 CXXFLAGS =
 endif
 
-INCLUDES = -I$(top_srcdir)/libddmsock -I$(top_srcdir)/libdd -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix 
+INCLUDES = -I$(top_srcdir)/libddmsock -I$(top_srcdir)/libdd -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I@TIFF_INC@
+
+LDFLAGS = @LDFLAGS@ -L@TIFF_LIB@
 
 EXTRA_DIST = filebuffer.dsp 
 
