@@ -4,8 +4,8 @@
  *	@author	Authors name
  *	@brief	Brief description of the file contents
  *
- *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/05/07 22:33:50 $
+ *	Last change by:		$Author: dsward2 $
+ *	Last change date:	$Date: 2002/05/18 22:58:58 $
  */
 //------------------------------------------------------------------------------
 
@@ -14,7 +14,11 @@
 #define	___itexturemap_Loaded___
 
 
+#ifdef AQSIS_SYSTEM_MACOSX
+#include	"macosx/valarray"
+#else
 #include	<valarray>
+#endif
 
 START_NAMESPACE( Aqsis )
 
