@@ -851,6 +851,7 @@ CqShader* CqRenderer::CreateShader(const char* strName, EqShaderType type)
 		{
 			CqShaderVM* pShader=new CqShaderVM();
 			pShader->LoadProgram(SLXFile);
+                        pShader->SetstrName(strName);
 			RegisterShader(strName,type,pShader);
 			return(pShader);
 		}
