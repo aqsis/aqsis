@@ -2282,6 +2282,52 @@ CqWVert* CqMotionWSurf::GetpWVert( CqPolygonPoints* pPoints, const CqVector4D& V
 }
 
 
+#define _SmoothScalar_(A,B) \
+			CqParameterTyped<A,B>* pNCurrent = static_cast<CqParameterTyped<A,B>*>(pCurrent); \
+			CqParameterTyped<A,B>* pNTarget  = static_cast<CqParameterTyped<A,B>*>(pTarget); \
+			/* Q the average of the face points surrounding the vertex. */ \
+			A Q = A( 0.0f ); \
+			std::vector<CqWEdge*>::iterator iE; \
+			CqWFace* pF; \
+			TqInt cE = 0; \
+			for ( iE = m_apEdges.begin(); iE != m_apEdges.end(); iE++ ) \
+			{ \
+				if ( ( *iE ) ->pvHead() == this )	pF = ( *iE ) ->pfLeft(); \
+				else								pF = ( *iE ) ->pfRight(); \
+				if ( pF ) \
+				{ \
+					assert( pF->pvSubdivide() ->iVertex() < pNCurrent->Size() ); \
+					Q += *pNCurrent->pValue( pF->pvSubdivide() ->iVertex() ); \
+					cE++; \
+				} \
+			} \
+			Q *= ( 1.0f / ( cE * cE ) ); \
+			/* R average of the midpoints of the edges that share the old vertex. */ \
+			A R = A( 0.0f ); \
+			cE = 0; \
+			for ( iE = m_apEdges.begin(); iE != m_apEdges.end(); iE++ ) \
+			{ \
+				if ( ( *iE ) ->IsValid() ) \
+				{ \
+					if ( ( *iE ) ->pvHead() == this ) \
+					{ \
+						assert( ( *iE ) ->pvTail() ->iVertex() < pNCurrent->Size() ); \
+						R += *pNCurrent->pValue( ( *iE ) ->pvTail() ->iVertex() ); \
+					} \
+					else	\
+					{ \
+						assert( ( *iE ) ->pvHead() ->iVertex() < pNCurrent->Size() ); \
+						R += *pNCurrent->pValue( ( *iE ) ->pvHead() ->iVertex() ); \
+					} \
+					cE++; \
+				} \
+			} \
+			R *= ( 1.0f / ( cE * cE ) ); \
+			A S = *pNCurrent->pValue( iVertex() ) * ( ( cE - 2.0f ) / ( TqFloat ) cE ); \
+			if( pNTarget->Size() <= trgIndex ) \
+				pNTarget->SetSize( trgIndex+1 ); \
+			*pNTarget->pValue( trgIndex) = ( S + R + Q );
+
 /** Perform the subdivision arithmetic on a paramter type.
  * \param t Temp of the template type to overcome the VC++ problem with template functions.
  * \param F A pointer to a function to get indexed values of the appropriate type.
@@ -2340,11 +2386,52 @@ void CqWVert::GetSmoothedScalar( CqParameter* pCurrent, CqParameter* pTarget, Tq
 	}
 }
 
+
+#define _CreaseScalar_(A,B) \
+			CqParameterTyped<A,B>* pNCurrent = static_cast<CqParameterTyped<A,B>*>(pCurrent); \
+			CqParameterTyped<A,B>* pNTarget  = static_cast<CqParameterTyped<A,B>*>(pTarget); \
+			A P = A( 0.0f ); \
+			std::vector<CqWEdge*>::iterator iE; \
+			TqFloat S = 0.0; \
+			TqInt cS = 0; \
+			for ( iE = m_apEdges.begin(); iE != m_apEdges.end(); iE++ ) \
+			{ \
+				if ( ( *iE ) ->Sharpness() > 0 && ( *iE ) ->IsValid() ) \
+				{ \
+					if ( ( *iE ) ->pvHead() == this ) \
+					{ \
+						assert( ( *iE ) ->pvTail() ->iVertex() < pNCurrent->Size() ); \
+						P += *pNCurrent->pValue( ( *iE ) ->pvTail() ->iVertex() ); \
+					} \
+					else	\
+					{ \
+						assert( ( *iE ) ->pvHead() ->iVertex() < pNCurrent->Size() ); \
+						P += *pNCurrent->pValue( ( *iE ) ->pvHead() ->iVertex() ); \
+					} \
+					S += ( *iE ) ->Sharpness(); \
+					cS++; \
+				} \
+			} \
+			P += *pNCurrent->pValue( iVertex() ) * 6.0f; \
+			P /= 8.0f;				/* Crease point */ \
+			S /= ( TqFloat ) cS; \
+			if ( cS == 2 && S > 0.0f && S < 1.0f ) \
+			{ \
+				A P2; \
+				GetSmoothedScalar( pCurrent, pTarget,  trgIndex); \
+				P2 = *pNTarget->pValue( trgIndex ); \
+				P = ( P2 * ( 1.0f - S ) ) + ( P * S );	/* Linear blend for variable crease. */ \
+			} \
+			if( pNTarget->Size() <= trgIndex ) \
+				pNTarget->SetSize( trgIndex+1 ); \
+			*pNTarget->pValue( trgIndex) = P;
+
 /** Templatised function to perform the subdivision arithmetic on a paramter type.
  * \param t Temp of the template type to overcome the VC++ problem with template functions.
  * \param F A pointer to a function to get indexed values of the appropriate type.
  * \param pSurf Pointer to the CqWSurf on which we are working. 
  */
+
 void CqWVert::GetCreaseScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex )
 {
 	switch( pCurrent->Type() )
@@ -2395,11 +2482,39 @@ void CqWVert::GetCreaseScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUi
 	}
 }
 
+#define	_BoundaryScalar_(A,B) \
+			CqParameterTyped<A,B>* pNCurrent = static_cast<CqParameterTyped<A,B>*>(pCurrent); \
+			CqParameterTyped<A,B>* pNTarget  = static_cast<CqParameterTyped<A,B>*>(pTarget); \
+			A P = A( 0.0f ); \
+			std::vector<CqWEdge*>::iterator iE; \
+			for ( iE = m_apEdges.begin(); iE != m_apEdges.end(); iE++ ) \
+			{ \
+				if ( ( *iE ) ->IsBoundary() ) \
+				{ \
+					if ( ( *iE ) ->pvHead() == this ) \
+					{ \
+						assert( ( *iE ) ->pvTail() ->iVertex() < pNCurrent->Size() ); \
+						P += *pNCurrent->pValue( ( *iE ) ->pvTail() ->iVertex() ); \
+					} \
+					else	\
+					{ \
+						assert( ( *iE ) ->pvHead() ->iVertex() < pNCurrent->Size() ); \
+						P += *pNCurrent->pValue( ( *iE ) ->pvHead() ->iVertex() ); \
+					} \
+				} \
+			} \
+			P += *pNCurrent->pValue( iVertex() ) * 6.0f; \
+			P /= 8.0f; \
+			if( pNTarget->Size() <= trgIndex ) \
+				pNTarget->SetSize( trgIndex+1 ); \
+			*pNTarget->pValue( trgIndex) = P;
+
 /** Templatised function to perform the subdivision arithmetic on a paramter type.
  * \param t Temp of the template type to overcome the VC++ problem with template functions.
  * \param F A pointer to a function to get indexed values of the appropriate type.
  * \param pSurf Pointer to the CqWSurf on which we are working. 
  */
+
 void CqWVert::GetBoundaryScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex )
 {
 	switch( pCurrent->Type() )
@@ -2450,6 +2565,16 @@ void CqWVert::GetBoundaryScalar( CqParameter* pCurrent, CqParameter* pTarget, Tq
 	}
 }
 
+
+
+#define	_CornerScalar_(A,B) \
+			CqParameterTyped<A,B>* pNCurrent = static_cast<CqParameterTyped<A,B>*>(pCurrent); \
+			CqParameterTyped<A,B>* pNTarget  = static_cast<CqParameterTyped<A,B>*>(pTarget); \
+			assert( iVertex() < pNCurrent->Size() ); \
+			A P = *pNCurrent->pValue( iVertex() ); \
+			if( pNTarget->Size() <= trgIndex ) \
+				pNTarget->SetSize( trgIndex+1 ); \
+			*pNTarget->pValue( trgIndex) = P;
 
 /** Templatised function to perform the subdivision arithmetic on a paramter type.
  * \param t Temp of the template type to overcome the VC++ problem with template functions.
@@ -2505,6 +2630,23 @@ void CqWVert::GetCornerScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUi
 		break;
 	}
 }
+
+
+#define	_SubdivideParameterFace_(A,B) \
+					CqParameterTyped<A, B>* pNCurrent = static_cast<CqParameterTyped<A, B>*>(pCurrent); \
+					CqParameterTyped<A, B>* pNTarget  = static_cast<CqParameterTyped<A, B>*>(pTarget); \
+					CqParameterTypedVarying<A,type_float,  B>* pVNTarget  = static_cast<CqParameterTypedVarying<A, type_float, B>*>(pTarget); \
+					A val = A(0.0f); \
+					for ( TqUint j = 0; j < m_apEdges.size(); j++ ) \
+					{ \
+						assert( grE.pvHead()->iVertex() < pNCurrent->Size() ); \
+						val += *pNCurrent->pValue(grE.pvHead() ->iVertex() ); \
+						grE.peNext(); \
+					} \
+					val /= static_cast<TqFloat>(m_apEdges.size()); \
+					if( pNTarget->Size() <= trgIndex ) \
+						pNTarget->SetSize( trgIndex+1 ); \
+					*pNTarget->pValue( trgIndex ) = val;
 
 
 /** Perform the subdivision arithmetic on a paramter type.
@@ -2565,6 +2707,39 @@ void CqWFace::CreateSubdivideScalar( CqParameter* pCurrent, CqParameter* pTarget
 }
 
 
+
+#define _SubdivideParameterEdge_(A,B) \
+			CqParameterTyped<A, B>* pNCurrent = static_cast<CqParameterTyped<A, B>*>(pCurrent); \
+			CqParameterTyped<A, B>* pNTarget  = static_cast<CqParameterTyped<A, B>*>(pTarget); \
+			A val = *pNCurrent->pValue( pvHead() ->iVertex() ); \
+			val += *pNCurrent->pValue( pvTail() ->iVertex() ); \
+			/* Check for forced mipoint interpolation, used for 'varying' primitive variables. */ \
+			if( bForceMidpoint ) \
+				val *= 0.5f; \
+			/* Check for sharp edges. */ \
+			else if ( IsBoundary() == TqTrue || m_Sharpness > 0 )  		/* Boundary check. */ \
+			{ \
+				if ( m_Sharpness < 1 && IsBoundary() == TqFalse )  	/* Infinitely sharp? */ \
+				{ \
+					A val2 = val; \
+					val *= 0.5; \
+					val2 += *pNCurrent->pValue( pfLeft() ->pvSubdivide() ->iVertex() ); \
+					val2 += *pNCurrent->pValue( pfRight() ->pvSubdivide() ->iVertex() ); \
+					val2 *= 0.25; \
+					val = ( val2 * ( 1.0f - m_Sharpness ) ) + ( val * m_Sharpness ); \
+				} \
+				else \
+					val *= 0.5f;						/* Sharp edges are just midpoint */ \
+			} \
+			else										/* Smooth. */ \
+			{ \
+				val += *pNCurrent->pValue( pfLeft() ->pvSubdivide() ->iVertex() ); \
+				val += *pNCurrent->pValue( pfRight() ->pvSubdivide() ->iVertex() ); \
+				val *= 0.25; \
+			} \
+			if( pNTarget->Size() <= trgIndex ) \
+				pNTarget->SetSize( trgIndex+1 ); \
+			*pNTarget->pValue( trgIndex ) = val
 
 
 /** Perform the subdivision arithmetic on a paramter type.
