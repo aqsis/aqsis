@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 #include "aqsis.h"
 
@@ -114,8 +115,13 @@ void idle(void)
 			if(g_Data[i] == FLT_MAX)
 				continue;
 				
+			#ifdef	AQSIS_SYSTEM_WIN32
+			mindepth = min(mindepth, g_Data[i]);
+			maxdepth = max(maxdepth, g_Data[i]);
+			#else // AQSIS_SYSTEM_WIN32
 			mindepth = std::min(mindepth, g_Data[i]);
 			maxdepth = std::max(maxdepth, g_Data[i]);
+			#endif // AQSIS_SYSTEM_WIN32
 			totaldepth += g_Data[i];
 			samples++;
 		}
