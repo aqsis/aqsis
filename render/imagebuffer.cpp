@@ -231,10 +231,12 @@ void CqImagePixel::Combine()
 	for(std::vector<std::vector<SqImageSample> >::iterator samples = m_aValues.begin(); samples != m_aValues.end(); samples++)
 	{
 		CqColor samplecolor(0,0,0);
+		CqColor sampleopacity(0,0,0);
 		TqBool samplehit=TqFalse;
 		for(std::vector<SqImageSample>::reverse_iterator sample = samples->rbegin(); sample != samples->rend(); sample++)
 		{
 			samplecolor = (samplecolor * (white - sample->m_colOpacity)) + sample->m_colColor;
+			sampleopacity = ((white - sampleopacity) * sample->m_colOpacity) + sampleopacity;
 			samplehit=TqTrue;
 		}
 
@@ -244,8 +246,12 @@ void CqImagePixel::Combine()
 			samplecount++;
 		}
 
+		// Write the collapsed color values back into the top entry.
 		if(samples->size()>0)
+		{
 			samples->begin()->m_colColor=samplecolor;
+			samples->begin()->m_colOpacity=sampleopacity;
+		}
 	}
 	
 	if(samplecount)
@@ -452,6 +458,22 @@ CqColor CqBucket::Color(TqInt iXPos, TqInt iYPos)
 		return(CqColor(0.0f,0.0f,0.0f));
 }
 
+//----------------------------------------------------------------------
+/** Get the sample opacity for the specified screen position.
+ * If position is outside bucket, returns black.
+ * \param iXPos Screen position of sample.
+ * \param iYPos Screen position of sample.
+ */
+
+CqColor CqBucket::Opacity(TqInt iXPos, TqInt iYPos)
+{
+	CqImagePixel* pie;
+	if(ImageElement(iXPos,iYPos,pie))
+		return(pie->Opacity());
+	else
+		return(CqColor(0.0f,0.0f,0.0f));
+}
+
 
 //----------------------------------------------------------------------
 /** Get the sample coverage for the specified screen position.
@@ -568,6 +590,7 @@ void CqBucket::FilterBucket()
 	CqImagePixel* pie;
 
 	CqColor* pCols=new CqColor[XSize()*YSize()];
+	CqColor* pOpacs=new CqColor[XSize()*YSize()];
 	TqFloat* pDepths=new TqFloat[XSize()*YSize()];
 	TqInt xmax=static_cast<TqInt>(CEIL((XFWidth()-1)*0.5f));
 	TqInt ymax=static_cast<TqInt>(CEIL((YFWidth()-1)*0.5f));
@@ -587,6 +610,7 @@ void CqBucket::FilterBucket()
 		{
 			TqFloat xcent=x+0.5f;
 			CqColor c(0,0,0);
+			CqColor o(0,0,0);
 			TqFloat d=0;
 			TqFloat gTot=0.0;
 			TqInt SampleCount=0;
@@ -617,6 +641,7 @@ void CqBucket::FilterBucket()
 								if(pie2->Values(sx,sy).size()>0)
 								{
 									c+=pie2->Values(sx,sy)[0].m_colColor*g;
+									o+=pie2->Values(sx,sy)[0].m_colOpacity*g;
 									d+=pie2->Values(sx,sy)[0].m_Depth;
 									SampleCount++;
 								}
@@ -629,6 +654,7 @@ void CqBucket::FilterBucket()
 				fy++;
 			}
 			pCols[i  ]=c/gTot;
+			pOpacs[i ]=o/gTot;
 			if(SampleCount>0)	
 				pDepths[i++]=d/SampleCount;
 			else
@@ -652,12 +678,14 @@ void CqBucket::FilterBucket()
 		for(x=0; x<XSize(); x++)
 		{
 			pie2->Color()=pCols[i];
+			pie2->Opacity()=pOpacs[i];
 			pie2->SetDepth(pDepths[i++]);
 			pie2++;
 		}
 		pie+=xlen;
 	}
 	delete[](pCols);
+	delete[](pOpacs);
 	delete[](pDepths);
 }
 
@@ -726,20 +754,27 @@ void CqBucket::QuantizeBucket()
 			CqImagePixel* pie2=pie;
 			for(x=0; x<XSize(); x++)
 			{
-				double r,g,b,a;
+				double r,g,b;
+				double or,og,ob;
 				double s=random.RandomFloat();
-				if(modf(one*pie2->Color().fRed  ()+ditheramplitude*s,&r)>0.5)	r+=1;
-				if(modf(one*pie2->Color().fGreen()+ditheramplitude*s,&g)>0.5)	g+=1;
-				if(modf(one*pie2->Color().fBlue ()+ditheramplitude*s,&b)>0.5)	b+=1;
-				if(modf(one*pie2->Coverage()	  +ditheramplitude*s,&a)>0.5)	a+=1;
+				if(modf(one*pie2->Color().fRed  ()  +ditheramplitude*s,&r)>0.5)		r+=1;
+				if(modf(one*pie2->Color().fGreen()  +ditheramplitude*s,&g)>0.5)		g+=1;
+				if(modf(one*pie2->Color().fBlue ()  +ditheramplitude*s,&b)>0.5)		b+=1;
+				if(modf(one*pie2->Opacity().fRed  ()+ditheramplitude*s,&or)>0.5)	or+=1;
+				if(modf(one*pie2->Opacity().fGreen()+ditheramplitude*s,&og)>0.5)	og+=1;
+				if(modf(one*pie2->Opacity().fBlue ()+ditheramplitude*s,&ob)>0.5)	ob+=1;
 				r=CLAMP(r,min,max);
 				g=CLAMP(g,min,max);
 				b=CLAMP(b,min,max);
-				a=CLAMP(a,min,max);
+				or=CLAMP(or,min,max);
+				og=CLAMP(og,min,max);
+				ob=CLAMP(ob,min,max);
 				pie2->Color().SetfRed  (r);
 				pie2->Color().SetfGreen(g);
 				pie2->Color().SetfBlue (b);
-				pie2->SetCoverage(a);
+				pie2->Opacity().SetfRed  (or);
+				pie2->Opacity().SetfGreen(og);
+				pie2->Opacity().SetfBlue (ob);
 				
 				pie2++;
 			}

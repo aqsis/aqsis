@@ -98,12 +98,17 @@ class _qShareC	CqImagePixel
 	_qShareM	void			SetCoverage(TqFloat c)		{m_Coverage=c;}
 								/** Get the averaged color of this pixel
 								 * \return A color representing the averaged color at this pixel.
-								 * \attention Only call this after already calling Combine().
+								 * \attention Only call this after already calling FilterBucket().
 								 */
 	_qShareM	CqColor&		Color()	{return(m_colColor);}
+								/** Get the averaged opacity of this pixel
+								 * \return A color representing the averaged opacity at this pixel.
+								 * \attention Only call this after already calling FilterBucket().
+								 */
+	_qShareM	CqColor&		Opacity()	{return(m_colOpacity);}
 								/** Get the averaged depth of this pixel
 								 * \return A float representing the averaged depth at this pixel.
-								 * \attention Only call this after already calling Combine().
+								 * \attention Only call this after already calling FilterBucket().
 								 */
 	_qShareM	TqFloat			Depth()		{return(m_Depth);}
 	_qShareM	void			SetDepth(TqFloat d)		{m_Depth=d;}
@@ -170,6 +175,7 @@ class _qShareC	CqImagePixel
 			std::vector<TqFloat> m_aTimes;						///< A vector of float sample times for the sample points.
 			TqFloat				m_Coverage;						///< The approximate coverage, just the ratio of sample hits to misses.
 			CqColor				m_colColor;						///< The averaged color of this pixel.
+			CqColor				m_colOpacity;					///< The averaged opacity of this pixel.
 			TqFloat				m_Depth;						///< The averaged depth of this pixel.
 };
 
@@ -206,6 +212,7 @@ class CqBucket : public IqBucket
 		virtual	TqInt	YPixelSamples() const	{return(m_YPixelSamples);}
 
 		virtual	CqColor Color(TqInt iXPos, TqInt iYPos);
+		virtual	CqColor Opacity(TqInt iXPos, TqInt iYPos);
 		virtual	TqFloat Coverage(TqInt iXPos, TqInt iYPos);
 		virtual	TqFloat Depth(TqInt iXPos, TqInt iYPos);
 

@@ -450,10 +450,18 @@ TqInt CqDDManager::DisplayBucket(IqBucket* pBucket)
 						pData[so+1]=col.fGreen();
 						pData[so+2]=col.fBlue();
 						if(samples==4)
-							pData[so+3]=pBucket->Coverage(sx,sy);
+						{
+							CqColor o = pBucket->Opacity(sx,sy);
+							TqFloat a = (o.fRed() + o.fGreen() + o.fBlue())/3.0f;
+							pData[so+3]=a * pBucket->Coverage(sx,sy);
+						}
 					}
 					else if(samples==1)
-						pData[so+0]=pBucket->Coverage(sx,sy);
+					{
+						CqColor o = pBucket->Opacity(sx,sy);
+						TqFloat a = (o.fRed() + o.fGreen() + o.fBlue())/3.0f;
+						pData[so+0]=a * pBucket->Coverage(sx,sy);
+					}
 				}
 			}
 		}

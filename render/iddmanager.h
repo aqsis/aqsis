@@ -60,6 +60,11 @@ struct IqBucket
 	 * \param iYPos Screen position of the requested element.
 	 */
 	virtual	CqColor Color(TqInt iXPos, TqInt iYPos)=0;
+	/** Get an element opacity from this bucket. If the requested address is not within this bucket, returns transparent.
+	 * \param iXPos Screen position of the requested element.
+	 * \param iYPos Screen position of the requested element.
+	 */
+	virtual	CqColor Opacity(TqInt iXPos, TqInt iYPos)=0;
 	/** Get an element coverage from this bucket. If the requested address is not within this bucket, returns 0.
 	 * \param iXPos Screen position of the requested element.
 	 * \param iYPos Screen position of the requested element.
