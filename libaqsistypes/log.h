@@ -38,6 +38,8 @@
 #include <log4cpp/Layout.hh>
 #include <log4cpp/BasicLayout.hh>
 #include <log4cpp/Priority.hh>
+#include "StringUtil.hh"
+
 
 #include "imtable.h"
 //#include "mtable.h"		//!TODO: Remove this as soon as IqMessageTable is used everywhere
@@ -130,6 +132,10 @@ class CqLog	: public IqLog
 		void debug( const CqString &string );
 
 		const char* getError( int table, int error_id );
+
+		/** Parse a string just like vprintf
+		 */
+		CqString	vprintf(const char* strfrmt, va_list va);
 
 	private:
 
