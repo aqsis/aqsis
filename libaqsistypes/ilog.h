@@ -4,8 +4,8 @@
  *	@author	Matthäus G. Chajdas
  *	@brief	Declare the interface structure for the log class.
  *
- *	Last change by:		$Author: mw_matti $
- *	Last change date:	$Date: 2003/02/08 18:02:55 $
+ *	Last change by:		$Author: tshead $
+ *	Last change date:	$Date: 2003/02/10 08:40:41 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___ilog_Loaded___
@@ -92,3 +92,4 @@ struct IqLog
 END_NAMESPACE( Aqsis )
 
 #endif	//	___ilog_Loaded___
+

@@ -6,3 +6,7 @@ scanner.cpp
 *.plg
 *.#*
 *~
+lex.yy.c
+y.tab.c
+y.tab.h
+

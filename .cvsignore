@@ -12,3 +12,7 @@ Makefile
 *~
 
 *.positions
+
+aclocal.m4
+depcomp
+

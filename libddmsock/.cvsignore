@@ -2,3 +2,5 @@ Makefile
 .#*
 *.#*
 *~
+ddmsock.ini
+

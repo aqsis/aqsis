@@ -160,3 +160,4 @@ class CqLog	: public IqLog
 END_NAMESPACE( Aqsis )
 
 #endif
+
