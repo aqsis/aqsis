@@ -304,7 +304,7 @@ class CqMotionSurface : public CqBasicSurface, public CqMotionSpec<T>
 										{
 											TqInt i;
 											for(i=0; i<cTimes(); i++)
-												delete(GetMotionObject(Time(i)));
+												GetMotionObject(Time(i))->Release();
 										}
 
 						/** Get combnied bound for all times
@@ -345,6 +345,7 @@ class CqMotionSurface : public CqBasicSurface, public CqMotionSpec<T>
 											for(i=0; i<cSplits; i++)
 											{
 												CqMotionSurface<T>* pNewMotion=new CqMotionSurface<T>(0);
+												pNewMotion->AddRef();
 												pNewMotion->m_fDiceable=TqTrue;
 												pNewMotion->m_EyeSplitCount=m_EyeSplitCount;
 												TqInt j;
