@@ -2237,7 +2237,7 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminance(POINTVAL P, VECTORVAL Axis, FLOATVAL 
 			{
 				CqVector3D nL=L();	nL.Unit();
 				TqFloat cosangle=nL*VECTOR(Axis);
-				if(acos(cosangle)>FLOAT(Angle))
+				if(acos(fabs(cosangle))>FLOAT(Angle))
 					m_CurrentState.SetValue(i,TqFalse);
 				else
 					m_CurrentState.SetValue(i,TqTrue);
@@ -2255,7 +2255,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_illuminance(POINTVAL P, FLOATVAL nsamples, DEFVOI
 	static CqVMStackEntry Angle;
 
 	Axis=CqVector3D(0,1,0);
-	Angle=RI_PI*2;
+	Angle=RI_PI;
 
 	SO_illuminance(P,Axis,Angle,nsamples);
 }
