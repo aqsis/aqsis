@@ -94,6 +94,13 @@ class CqParameter
 		 */
 		virtual	void	BilinearDice( TqInt u, TqInt v, IqShaderData* pResult ) = 0;
 
+		/** Pure virtual, set an indexed value from another parameter (must be the same type).
+		 * \param pFrom Pointer to parameter to get values from.
+		 * \param idxTarget Index of value to set,
+		 * \param idxSource Index of value to get,
+		 */
+		virtual	void	SetValue( CqParameter* pFrom, TqInt idxTarget, TqInt idxSource ) = 0;
+
 		/** Get a reference to the parameter name.
 		 */
 		const	CqString& strName() const
@@ -144,6 +151,14 @@ class CqParameterTyped : public CqParameter
 		/** Get a pointer to the value at the specified index, if uniform index is ignored.
 		 */
 		virtual	T*	pValue( const TqInt Index ) = 0;
+
+		virtual	void	SetValue( CqParameter* pFrom, TqInt idxTarget, TqInt idxSource )
+		{
+			assert( pFrom->Type() == Type() );
+
+			CqParameterTyped<T,SLT>* pFromTyped = static_cast<CqParameterTyped<T, SLT>*>(pFrom);
+			*pValue( idxTarget ) = *pFromTyped->pValue( idxSource );
+		}
 
 	protected:
 };

@@ -1520,67 +1520,7 @@ CqWVert* CqWSurf::TransferVert( CqWSurf* pSurf, TqInt iVert, TqBool uses_s, TqBo
 	{
 		if ( (*iTUP)->Size() <= iV ) (*iTUP)->SetSize( iV + 1 );
 
-		switch( (*iUP)->Type() )
-		{
-			case type_float:
-			{
-				CqParameterTyped<TqFloat, TqFloat>* pNParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP));
-				CqParameterTyped<TqFloat, TqFloat>* pNTarget = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iTUP));
-				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
-			}
-			break;
-
-			case type_integer:
-			{
-				CqParameterTyped<TqInt, TqFloat>* pNParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP));
-				CqParameterTyped<TqInt, TqFloat>* pNTarget = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iTUP));
-				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
-			}
-			break;
-
-			case type_point:
-			case type_vector:
-			case type_normal:
-			{
-				CqParameterTyped<CqVector3D, CqVector3D>* pNParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP));
-				CqParameterTyped<CqVector3D, CqVector3D>* pNTarget = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iTUP));
-				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
-			}
-			break;
-
-			case type_hpoint:
-			{
-				CqParameterTyped<CqVector4D, CqVector3D>* pNParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP));
-				CqParameterTyped<CqVector4D, CqVector3D>* pNTarget = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iTUP));
-				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
-			}
-			break;
-
-			case type_color:
-			{
-				CqParameterTyped<CqColor, CqColor>* pNParam = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP));
-				CqParameterTyped<CqColor, CqColor>* pNTarget = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iTUP));
-				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
-			}
-			break;
-
-			case type_string:
-			{
-				CqParameterTyped<CqString, CqString>* pNParam = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP));
-				CqParameterTyped<CqString, CqString>* pNTarget = static_cast<CqParameterTyped<CqString, CqString>*>((*iTUP));
-				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
-			}
-			break;
-
-			case type_matrix:
-			{
-				CqParameterTyped<CqMatrix, CqMatrix>* pNParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP));
-				CqParameterTyped<CqMatrix, CqMatrix>* pNTarget = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iTUP));
-				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
-			}
-			break;
-
-		}
+		(*iTUP)->SetValue( (*iUP), iV, iVert );
 	}
 
 	return ( pNew );

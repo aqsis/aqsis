@@ -1078,101 +1078,14 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 			std::vector<CqParameter*>::iterator iUP;
 			for( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
 			{
-				switch( (*iUP)->Type() )
-				{
-					case type_integer:
-					{
-						CqParameterTyped<TqInt, TqFloat>* pUPV = static_cast<CqParameterTyped<TqInt, TqFloat>*>( (*iUP) );
-						CqParameterTyped<TqInt, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqInt, TqFloat>*>( (*iUP)->Clone() );
-						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
-						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-					}
-					break;
+				CqParameter* pNewUP = (*iUP)->Clone();
+				pNewUP->SetSize(4);
+				pNewUP->SetValue( (*iUP), 0, iA );
+				pNewUP->SetValue( (*iUP), 1, iB );
+				pNewUP->SetValue( (*iUP), 2, iC );
+				pNewUP->SetValue( (*iUP), 3, iD );
 
-					case type_float:
-					{
-						CqParameterTyped<TqFloat, TqFloat>* pUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( (*iUP) );
-						CqParameterTyped<TqFloat, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( (*iUP)->Clone() );
-						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
-						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-					}
-					break;
-
-					case type_color:
-					{
-						CqParameterTyped<CqColor, CqColor>* pUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( (*iUP) );
-						CqParameterTyped<CqColor, CqColor>* pNUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( (*iUP)->Clone() );
-						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
-						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-					}
-					break;
-
-					case type_point:
-					case type_normal:
-					case type_vector:
-					{
-						CqParameterTyped<CqVector3D, CqVector3D>* pUPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( (*iUP) );
-						CqParameterTyped<CqVector3D, CqVector3D>* pNUPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( (*iUP)->Clone() );
-						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
-						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-					}
-					break;
-
-					case type_hpoint:
-					{
-						CqParameterTyped<CqVector4D, CqVector3D>* pUPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( (*iUP) );
-						CqParameterTyped<CqVector4D, CqVector3D>* pNUPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( (*iUP)->Clone() );
-						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
-						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-					}
-					break;
-
-					case type_string:
-					{
-						CqParameterTyped<CqString, CqString>* pUPV = static_cast<CqParameterTyped<CqString, CqString>*>( (*iUP) );
-						CqParameterTyped<CqString, CqString>* pNUPV = static_cast<CqParameterTyped<CqString, CqString>*>( (*iUP)->Clone() );
-						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
-						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-					}
-					break;
-
-					case type_matrix:
-					{
-						CqParameterTyped<CqMatrix, CqMatrix>* pUPV = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( (*iUP) );
-						CqParameterTyped<CqMatrix, CqMatrix>* pNUPV = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( (*iUP)->Clone() );
-						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
-						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-					}
-					break;
-				}
+				S[ iPatch ]->AddPrimitiveVariable(pNewUP);
 			}
 		}
 	}
@@ -2238,101 +2151,14 @@ void CqSurfaceNURBS::SubdivideSegments(std::vector<CqSurfaceNURBS*>& S)
 			std::vector<CqParameter*>::iterator iUP;
 			for( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
 			{
-				switch( (*iUP)->Type() )
-				{
-					case type_integer:
-					{
-						CqParameterTyped<TqInt, TqFloat>* pUPV = static_cast<CqParameterTyped<TqInt, TqFloat>*>( (*iUP) );
-						CqParameterTyped<TqInt, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqInt, TqFloat>*>( (*iUP)->Clone() );
-						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
-						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-					}
-					break;
+				CqParameter* pNewUP = (*iUP)->Clone();
+				pNewUP->SetSize(4);
+				pNewUP->SetValue( (*iUP), 0, iA );
+				pNewUP->SetValue( (*iUP), 1, iB );
+				pNewUP->SetValue( (*iUP), 2, iC );
+				pNewUP->SetValue( (*iUP), 3, iD );
 
-					case type_float:
-					{
-						CqParameterTyped<TqFloat, TqFloat>* pUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( (*iUP) );
-						CqParameterTyped<TqFloat, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( (*iUP)->Clone() );
-						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
-						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-					}
-					break;
-
-					case type_color:
-					{
-						CqParameterTyped<CqColor, CqColor>* pUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( (*iUP) );
-						CqParameterTyped<CqColor, CqColor>* pNUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( (*iUP)->Clone() );
-						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
-						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-					}
-					break;
-
-					case type_point:
-					case type_normal:
-					case type_vector:
-					{
-						CqParameterTyped<CqVector3D, CqVector3D>* pUPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( (*iUP) );
-						CqParameterTyped<CqVector3D, CqVector3D>* pNUPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( (*iUP)->Clone() );
-						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
-						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-					}
-					break;
-
-					case type_hpoint:
-					{
-						CqParameterTyped<CqVector4D, CqVector3D>* pUPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( (*iUP) );
-						CqParameterTyped<CqVector4D, CqVector3D>* pNUPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( (*iUP)->Clone() );
-						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
-						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-					}
-					break;
-
-					case type_string:
-					{
-						CqParameterTyped<CqString, CqString>* pUPV = static_cast<CqParameterTyped<CqString, CqString>*>( (*iUP) );
-						CqParameterTyped<CqString, CqString>* pNUPV = static_cast<CqParameterTyped<CqString, CqString>*>( (*iUP)->Clone() );
-						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
-						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-					}
-					break;
-
-					case type_matrix:
-					{
-						CqParameterTyped<CqMatrix, CqMatrix>* pUPV = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( (*iUP) );
-						CqParameterTyped<CqMatrix, CqMatrix>* pNUPV = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( (*iUP)->Clone() );
-						S[ iPatch ]->AddPrimitiveVariable(pNUPV);
-						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
-					}
-					break;
-				}
+				S[ iPatch ]->AddPrimitiveVariable(pNewUP);
 			}
 		}
 	}

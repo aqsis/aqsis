@@ -344,98 +344,24 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew->N() [ 2 ] = vecND; 
 		pNew->N() [ 3 ] = vecNC;
 
+		TqInt iUPA = PolyIndex(indexA);
+		TqInt iUPB = PolyIndex(indexB);
+		TqInt iUPC = PolyIndex(indexC);
+		TqInt iUPD = PolyIndex(indexD);
+
 		// Copy any user specified primitive variables.
 		std::vector<CqParameter*>::iterator iUP;
 		for( iUP = Surface().aUserParams().begin(); iUP != Surface().aUserParams().end(); iUP++ )
 		{
-			TqInt iUPA = PolyIndex(indexA);
-			TqInt iUPB = PolyIndex(indexB);
-			TqInt iUPC = PolyIndex(indexC);
-			TqInt iUPD = PolyIndex(indexD);
 			CqParameter* pNewUP = (*iUP)->Clone();
 			pNewUP->Clear();
 			pNewUP->SetSize(4);
-			switch( (*iUP)->Type() )
-			{
-				case type_float:
-				{
-					CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(*iUP);
-					CqParameterTyped<TqFloat, TqFloat>* pTNewUP = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pNewUP);
-					pTNewUP->pValue(0)[0] = pTParam->pValue(iUPA)[0];
-					pTNewUP->pValue(1)[0] = pTParam->pValue(iUPB)[0];
-					pTNewUP->pValue(2)[0] = pTParam->pValue(iUPD)[0];
-					pTNewUP->pValue(3)[0] = pTParam->pValue(iUPC)[0];
-				}
-				break;
 
-				case type_integer:
-				{
-					CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>(*iUP);
-					CqParameterTyped<TqInt, TqFloat>* pTNewUP = static_cast<CqParameterTyped<TqInt, TqFloat>*>(pNewUP);
-					pTNewUP->pValue(0)[0] = pTParam->pValue(iUPA)[0];
-					pTNewUP->pValue(1)[0] = pTParam->pValue(iUPB)[0];
-					pTNewUP->pValue(2)[0] = pTParam->pValue(iUPD)[0];
-					pTNewUP->pValue(3)[0] = pTParam->pValue(iUPC)[0];
-				}
-				break;
+			pNewUP->SetValue( (*iUP), 0, iUPA );
+			pNewUP->SetValue( (*iUP), 1, iUPB );
+			pNewUP->SetValue( (*iUP), 2, iUPC );
+			pNewUP->SetValue( (*iUP), 3, iUPD );
 
-				case type_point:
-				case type_normal:
-				case type_vector:
-				{
-					CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(*iUP);
-					CqParameterTyped<CqVector3D, CqVector3D>* pTNewUP = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(pNewUP);
-					pTNewUP->pValue(0)[0] = pTParam->pValue(iUPA)[0];
-					pTNewUP->pValue(1)[0] = pTParam->pValue(iUPB)[0];
-					pTNewUP->pValue(2)[0] = pTParam->pValue(iUPD)[0];
-					pTNewUP->pValue(3)[0] = pTParam->pValue(iUPC)[0];
-				}
-				break;
-
-				case type_hpoint:
-				{
-					CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(*iUP);
-					CqParameterTyped<CqVector4D, CqVector3D>* pTNewUP = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pNewUP);
-					pTNewUP->pValue(0)[0] = pTParam->pValue(iUPA)[0];
-					pTNewUP->pValue(1)[0] = pTParam->pValue(iUPB)[0];
-					pTNewUP->pValue(2)[0] = pTParam->pValue(iUPD)[0];
-					pTNewUP->pValue(3)[0] = pTParam->pValue(iUPC)[0];
-				}
-				break;
-
-				case type_color:
-				{
-					CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>(*iUP);
-					CqParameterTyped<CqColor, CqColor>* pTNewUP = static_cast<CqParameterTyped<CqColor, CqColor>*>(pNewUP);
-					pTNewUP->pValue(0)[0] = pTParam->pValue(iUPA)[0];
-					pTNewUP->pValue(1)[0] = pTParam->pValue(iUPB)[0];
-					pTNewUP->pValue(2)[0] = pTParam->pValue(iUPD)[0];
-					pTNewUP->pValue(3)[0] = pTParam->pValue(iUPC)[0];
-				}
-				break;
-
-				case type_string:
-				{
-					CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>(*iUP);
-					CqParameterTyped<CqString, CqString>* pTNewUP = static_cast<CqParameterTyped<CqString, CqString>*>(pNewUP);
-					pTNewUP->pValue(0)[0] = pTParam->pValue(iUPA)[0];
-					pTNewUP->pValue(1)[0] = pTParam->pValue(iUPB)[0];
-					pTNewUP->pValue(2)[0] = pTParam->pValue(iUPD)[0];
-					pTNewUP->pValue(3)[0] = pTParam->pValue(iUPC)[0];
-				}
-				break;
-
-				case type_matrix:
-				{
-					CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(*iUP);
-					CqParameterTyped<CqMatrix, CqMatrix>* pTNewUP = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(pNewUP);
-					pTNewUP->pValue(0)[0] = pTParam->pValue(iUPA)[0];
-					pTNewUP->pValue(1)[0] = pTParam->pValue(iUPB)[0];
-					pTNewUP->pValue(2)[0] = pTParam->pValue(iUPD)[0];
-					pTNewUP->pValue(3)[0] = pTParam->pValue(iUPC)[0];
-				}
-				break;
-			}
 			pNew->aUserParams().push_back(pNewUP);
 		}
 
