@@ -694,14 +694,16 @@ STD_SOIMPL	CqShaderExecEnv::SO_ceil( FLOATVAL x, DEFPARAMIMPL )
 STD_SOIMPL	CqShaderExecEnv::SO_round( FLOATVAL x, DEFPARAMIMPL )
 {
     INIT_SO
-    double v;
+	TqFloat res;
 
     CHECKVARY( x )
     CHECKVARY( Result )
 
     BEGIN_VARYING_SECTION
     GETFLOAT( x );
-    SETFLOAT( Result, ( modf( FLOAT( x ), &v ) > 0.5f ) ? static_cast<TqFloat>( v ) + 1.0f : static_cast<TqFloat>( v ) );
+	if ( FLOAT( x ) >= 0.0f )	res = static_cast<TqFloat>( static_cast<TqInt>( FLOAT( x ) + 0.5f ) );
+	else res = static_cast<TqFloat>( static_cast<TqInt>( ( CEIL( FLOAT( x ) - 0.5f ) ) ) );
+	SETFLOAT( Result, res );
     END_VARYING_SECTION
 }
 

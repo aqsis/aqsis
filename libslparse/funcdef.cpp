@@ -39,7 +39,7 @@ CqFuncDef	gStandardFuncs[] = {
                                  CqFuncDef( Type_Float, "operator/", "divff", "ff" ),
                                  CqFuncDef( Type_Float, "operator+", "addff", "ff" ),
                                  CqFuncDef( Type_Float, "operator-", "subff", "ff" ),
-                                 CqFuncDef( Type_Float, "operator-", "negf", "f" ),
+                                 CqFuncDef( Type_Float, "operatorneg", "negf", "f" ),
 
                                  CqFuncDef( Type_Point, "operator*", "mulpp", "pp" ),
                                  CqFuncDef( Type_Point, "operator/", "divpp", "pp" ),
@@ -47,13 +47,13 @@ CqFuncDef	gStandardFuncs[] = {
                                  CqFuncDef( Type_Point, "operator-", "subpp", "pp" ),
                                  CqFuncDef( Type_Point, "operator^", "crspp", "pp" ),
                                  CqFuncDef( Type_Float, "operator.", "dotpp", "pp" ),
-                                 CqFuncDef( Type_Point, "operator-", "negp", "p" ),
+                                 CqFuncDef( Type_Point, "operatorneg", "negp", "p" ),
 
                                  CqFuncDef( Type_Color, "operator*", "mulcc", "cc" ),
                                  CqFuncDef( Type_Color, "operator/", "divcc", "cc" ),
                                  CqFuncDef( Type_Color, "operator+", "addcc", "cc" ),
                                  CqFuncDef( Type_Color, "operator-", "subcc", "cc" ),
-                                 CqFuncDef( Type_Color, "operator-", "negc", "c" ),
+                                 CqFuncDef( Type_Color, "operatorneg", "negc", "c" ),
 
                                  CqFuncDef( Type_Vector, "operator*", "mulpp", "vv" ),
                                  CqFuncDef( Type_Vector, "operator/", "divpp", "vv" ),
@@ -61,7 +61,7 @@ CqFuncDef	gStandardFuncs[] = {
                                  CqFuncDef( Type_Vector, "operator-", "subpp", "vv" ),
                                  CqFuncDef( Type_Vector, "operator^", "crspp", "vv" ),
                                  CqFuncDef( Type_Float, "operator.", "dotpp", "vv" ),
-                                 CqFuncDef( Type_Vector, "operator-", "negp", "v" ),
+                                 CqFuncDef( Type_Vector, "operatorneg", "negp", "v" ),
 
                                  CqFuncDef( Type_Normal, "operator*", "mulpp", "nn" ),
                                  CqFuncDef( Type_Normal, "operator/", "divpp", "nn" ),
@@ -69,7 +69,7 @@ CqFuncDef	gStandardFuncs[] = {
                                  CqFuncDef( Type_Normal, "operator-", "subpp", "nn" ),
                                  CqFuncDef( Type_Normal, "operator^", "crspp", "nn" ),
                                  CqFuncDef( Type_Float, "operator.", "dotpp", "nn" ),
-                                 CqFuncDef( Type_Normal, "operator-", "negp", "n" ),
+                                 CqFuncDef( Type_Normal, "operatorneg", "negp", "n" ),
 
                                  CqFuncDef( Type_Point, "operator*", "mulfp", "fp" ),
                                  CqFuncDef( Type_Point, "operator/", "divfp", "fp" ),

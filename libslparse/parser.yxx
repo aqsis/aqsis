@@ -1203,7 +1203,7 @@ expression
 	|	'-' expression	%prec NEG
 							{
 								std::vector<SqFuncRef> func;
-								CqFuncDef::FindFunction("operator-", func);
+								CqFuncDef::FindFunction("operatorneg", func);
 								CqParseNodeFunctionCall* pFunc=new CqParseNodeFunctionCall(func);
 								pFunc->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								pFunc->AddFirstChild($2);

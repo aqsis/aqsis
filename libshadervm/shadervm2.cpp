@@ -282,19 +282,19 @@ void CqShaderVM::SO_pDeriv()
 
 void CqShaderVM::SO_frandom()
 {
-    AUTOFUNC;
+    VARFUNC;
     FUNC( type_float, m_pEnv->SO_frandom );
 }
 
 void CqShaderVM::SO_crandom()
 {
-    AUTOFUNC;
+    VARFUNC;
     FUNC( type_color, m_pEnv->SO_crandom );
 }
 
 void CqShaderVM::SO_prandom()
 {
-    AUTOFUNC;
+    VARFUNC;
     FUNC( type_point, m_pEnv->SO_prandom );
 }
 

@@ -27,6 +27,9 @@
 #include "parsenode.h"
 
 extern int yyparse();
+#ifdef	YYDEBUG
+extern int yydebug;
+#endif
 
 START_NAMESPACE( Aqsis )
 
@@ -56,6 +59,9 @@ TqBool Parse( std::istream& InputStream, const CqString StreamName, std::ostream
 
     try
     {
+#ifdef	YYDEBUG
+		yydebug = 1;
+#endif
         yyparse();
         TypeCheck();
     }
