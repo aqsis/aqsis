@@ -188,7 +188,10 @@ CqTransformModeBlock::CqTransformModeBlock( CqModeBlock* pconParent ) : CqModeBl
 	if ( pconParent != 0 )
 		m_pattrCurrent = pconParent->m_pattrCurrent;
 	else
+	{
 		m_pattrCurrent = new CqAttributes();
+		ADDREF( m_pattrCurrent );
+	}
 
 	m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
 	ADDREF( m_ptransCurrent );
@@ -200,7 +203,13 @@ CqTransformModeBlock::CqTransformModeBlock( CqModeBlock* pconParent ) : CqModeBl
  */
 
 CqTransformModeBlock::~CqTransformModeBlock()
-{}
+{
+	if ( m_ptransCurrent != NULL)
+	{
+		RELEASEREF( m_ptransCurrent );
+		m_ptransCurrent = NULL;
+	}
+}
 
 
 //---------------------------------------------------------------------
@@ -283,7 +292,10 @@ CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], CqModeBlock* pco
 	if ( pconParent != 0 )
 		m_pattrCurrent = pconParent->m_pattrCurrent;
 	else
+	{
 		m_pattrCurrent = new CqAttributes();
+		ADDREF( m_pattrCurrent );
+	}
 
 	if ( pconParent != 0 )
 	{
@@ -293,7 +305,10 @@ CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], CqModeBlock* pco
 		m_ptransCurrent->SetDefaultObject( m_ptransCurrent->GetMotionObject( m_ptransCurrent->Time( 0 ) ) );
 	}
 	else
+	{
 		m_ptransCurrent = new CqTransform();
+		ADDREF( m_ptransCurrent );
+	}
 
 
 	// Store the array of times.
