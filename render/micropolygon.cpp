@@ -1055,7 +1055,7 @@ CqMicroPolygon::~CqMicroPolygon()
 	if ( m_pGrid ) RELEASEREF( m_pGrid );
 	STATS_INC( MPG_deallocated );
 	STATS_DEC( MPG_current );
-	if ( IsHit() )
+	if ( !IsHit() )
 		STATS_INC( MPG_missed );
 }
 

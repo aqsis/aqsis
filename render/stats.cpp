@@ -451,11 +451,12 @@ void CqStats::PrintStats( TqInt level ) const
 		TqFloat _mpg_p_f =  100.0f * STATS_INT_GETI( MPG_pushed_forward ) / _mpg_pushes_all;
 		TqFloat _mpg_p_d = 100.0f * STATS_INT_GETI( MPG_pushed_down ) / _mpg_pushes_all;
 		TqFloat _mpg_p_fd = 100.0f * STATS_INT_GETI( MPG_pushed_far_down ) / _mpg_pushes_all;
-		TqFloat _mpg_p_a = 100.0f * _mpg_pushes_all /STATS_INT_GETI( MPG_allocated );
+		TqFloat _mpg_p_a = 100.0f * _mpg_pushes_all / STATS_INT_GETI( MPG_allocated );
+		TqFloat _mpg_m_q = 100.0f * STATS_INT_GETI( MPG_missed ) /STATS_INT_GETI( MPG_allocated );
 
 		MSG << "Micropolygons:\n\t"
 			<< STATS_INT_GETI( MPG_allocated ) << " created (" << STATS_INT_GETI( MPG_culled ) << " culled)\n"
-			<< "\t" <<STATS_INT_GETI( MPG_peak ) << " peak, " << STATS_INT_GETI( MPG_trimmed ) << " trimmed\n\t"
+			<< "\t" <<STATS_INT_GETI( MPG_peak ) << " peak, " << STATS_INT_GETI( MPG_trimmed ) << " trimmed, " << STATS_INT_GETI( MPG_missed ) << " missed (" << _mpg_m_q << "%)\n\t"
 			<< std::endl;
 		
 		/*
