@@ -23,13 +23,21 @@
  */
 
 // Create a dump file?
-#ifdef _DEBUG
- // Define the variable that's used by external code to include their dump code
- #define DEBUG_MPDUMP _DEBUG
+#ifdef __GNUC__
+        // GCC
+        #ifndef NDEBUG
+                #define DEBUG_MPDUMP 1
+        #endif
 #else
- // No dump file, so prevent the entire dump code from being seen by the compiler
- #define MPDUMP_H
+        // MSVC
+        #ifdef _DEBUG
+                #define DEBUG_MPDUMP _DEBUG
+        #endif
 #endif
+
+
+// If we're not including the dump code then skip this file
+#ifdef DEBUG_MPDUMP
 
 
 #ifndef MPDUMP_H
@@ -148,4 +156,6 @@ extern CqMPDump mpdump;
 
 END_NAMESPACE( Aqsis )
 
-#endif
+#endif // MPDUMP_H
+
+#endif // DEBUG_MPDUMP
