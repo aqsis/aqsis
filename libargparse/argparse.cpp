@@ -27,10 +27,11 @@ class OptionHandler {
 public:
     ArgParse::apstring usage;
     int separator;
+	int count;
     StringList aliases;
 
     OptionHandler(ArgParse::apstring usage_in,
-                  int separator_in = ArgParse::SEP_NONE);
+                  int separator_in = ArgParse::SEP_NONE, int count_in = -1);
     virtual ~OptionHandler();
     // Returns true if the option takes an argument.  This is the
     // same thing as saying it returns false if the option is a flag.
@@ -222,7 +223,8 @@ bool ArgParse::parse(int argc, const char** argv)
         // by itself as a regular argument, not as an option,
         // since it's a common abbreviation for stdin, and isn't
         // really meaningful as an option.
-        if (argv[i][0] != '-' || argv[i][1] == '\0') {
+        if (( argv[i][0] != '-' || argv[i][1] == '\0' ) && 
+		    ( argeater && ( argeater->count > 0 || argeater->count == -1 ) ) ) {
             if (argeater == NULL)
                 d->leftovers.push_back(argv[i]);
             else
@@ -433,8 +435,8 @@ static ArgParse::apstring parseFloat(ArgParse::apstring arg,
 
 /*-********************************************************************-*/
 
-OptionHandler::OptionHandler(ArgParse::apstring usage_in, int separator_in) :
-        usage(usage_in), separator(separator_in)
+OptionHandler::OptionHandler(ArgParse::apstring usage_in, int separator_in, int count_in) :
+        usage(usage_in), separator(separator_in), count(count_in)
 {
 }
 
@@ -664,13 +666,13 @@ public:
     ArgParse::apintvec* value;
 
     IntsHandler(ArgParse::apstring usage_in, ArgParse::apintvec* value_in,
-                int separator_in);
+                int separator_in, int count_in);
     ArgParse::apstring handlearg(ArgParse::apstring arg);
 };
 
 IntsHandler::IntsHandler(ArgParse::apstring usage_in,
-                         ArgParse::apintvec* value_in, int separator_in) :
-        OptionHandler(usage_in, separator_in), value(value_in)
+                         ArgParse::apintvec* value_in, int separator_in, int count_in) :
+        OptionHandler(usage_in, separator_in, count_in), value(value_in)
 {
 }
 
@@ -679,14 +681,17 @@ ArgParse::apstring IntsHandler::handlearg(ArgParse::apstring arg)
     ArgParse::apint newvalue;
     ArgParse::apstring ret = parseInt(arg, &newvalue);
     if (ret.size() == 0)
+	{
         value->push_back(newvalue);
+		count -= (count == -1)? 0 : 1;
+	}
     return ret;
 }
 
 void ArgParse::argInts(apstring name, apstring usage,
-                       apintvec* values, int separator)
+                       apintvec* values, int separator, int count)
 {
-    d->addOption(name, new IntsHandler(usage, values, separator));
+    d->addOption(name, new IntsHandler(usage, values, separator, count));
 }
 
 /*-********************************************************************-*/
@@ -696,14 +701,14 @@ public:
     ArgParse::apfloatvec* value;
 
     FloatsHandler(ArgParse::apstring usage_in, ArgParse::apfloatvec* value_in,
-                  int separator_in);
+                  int separator_in, int count);
     ArgParse::apstring handlearg(ArgParse::apstring arg);
 };
 
 FloatsHandler::FloatsHandler(ArgParse::apstring usage_in,
                              ArgParse::apfloatvec* value_in,
-                             int separator_in) :
-        OptionHandler(usage_in, separator_in), value(value_in)
+                             int separator_in, int count_in) :
+        OptionHandler(usage_in, separator_in, count_in), value(value_in)
 {
 }
 
@@ -712,14 +717,17 @@ ArgParse::apstring FloatsHandler::handlearg(ArgParse::apstring arg)
     ArgParse::apfloat newvalue;
     ArgParse::apstring ret = parseFloat(arg, &newvalue);
     if (ret.size() == 0)
+	{
         value->push_back(newvalue);
+		count -= (count == -1)? 0 : 1;
+	}
     return ret;
 }
 
 void ArgParse::argFloats(apstring name, apstring usage,
-                         apfloatvec* values, int separator)
+                         apfloatvec* values, int separator, int count)
 {
-    d->addOption(name, new FloatsHandler(usage, values, separator));
+    d->addOption(name, new FloatsHandler(usage, values, separator, count));
 }
 
 /*-********************************************************************-*/
@@ -730,25 +738,26 @@ public:
 
     StringsHandler(ArgParse::apstring usage_in,
                    ArgParse::apstringvec* value_in,
-                   int separator_in);
+                   int separator_in, int count_in);
     ArgParse::apstring handlearg(ArgParse::apstring arg);
 };
 
 StringsHandler::StringsHandler(ArgParse::apstring usage_in,
                                ArgParse::apstringvec* value_in,
-                               int separator_in) :
-        OptionHandler(usage_in, separator_in), value(value_in)
+                               int separator_in, int count_in) :
+        OptionHandler(usage_in, separator_in, count_in), value(value_in)
 {
 }
 
 ArgParse::apstring StringsHandler::handlearg(ArgParse::apstring arg)
 {
     value->push_back(arg);
+	count -= (count == -1)? 0 : 1;
     return "";
 }
 
 void ArgParse::argStrings(apstring name, apstring usage,
-                          apstringvec* values, int separator)
+                          apstringvec* values, int separator, int count)
 {
-    d->addOption(name, new StringsHandler(usage, values, separator));
+    d->addOption(name, new StringsHandler(usage, values, separator, count));
 }

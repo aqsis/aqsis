@@ -127,15 +127,15 @@ public:
 
     void argInt(apstring name, apstring usage, apint* value);
     void argInts(apstring name, apstring usage,
-                 apintvec* values, int separator = SEP_NONE);
+                 apintvec* values, int separator = SEP_NONE, int count = -1);
 
     void argFloat(apstring name, apstring usage, apfloat* value);
     void argFloats(apstring name, apstring usage,
-                   apfloatvec* values, int separator = SEP_NONE);
+                   apfloatvec* values, int separator = SEP_NONE, int count = -1);
 
     void argString(apstring name, apstring usage, apstring* value);
     void argStrings(apstring name, apstring usage,
-                    apstringvec* values, int separator = SEP_NONE);
+                    apstringvec* values, int separator = SEP_NONE, int count = -1);
 
     // Makes "aliasname" work just like "realname".  Note that
     // "realname" can be a negated flag name (if the flag allows

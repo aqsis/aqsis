@@ -67,6 +67,7 @@ bool g_Progress = 0;
 bool g_rinfo = 0;
 bool g_no_color = 0;
 int g_verbose = 1;
+ArgParse::apfloatvec g_cropWindow;
 
 // Define strings used by argparse
 ArgParse::apstring g_config = "";
@@ -267,10 +268,18 @@ RtVoid PreWorld()
         strcpy( mode, g_mode.c_str() );
         RiDisplay( "+aqsis", type, mode, NULL );
     }
-    else if ( g_endofframe >= 0 )
+    
+	// Pass the statistics option onto Aqsis.
+	if ( g_endofframe >= 0 )
     {
         RiOption( "statistics", "endofframe", &g_endofframe, RI_NULL );
     }
+
+	// Pass the crop window onto Aqsis.
+	if( g_cropWindow.size() == 4 )
+	{
+		RiCropWindow(g_cropWindow[0], g_cropWindow[1], g_cropWindow[2], g_cropWindow[3]);
+	}
     return ;
 }
 
@@ -308,6 +317,7 @@ int main( int argc, const char** argv )
     ap.argString( "mode", "=string\aspecify a display device mode to use", &g_mode );
     ap.argFlag( "fb", "\aequivalent to --type=\"framebuffer\" --mode=\"rgb\"", &g_fb );
     ap.alias( "fb", "d" );
+	ap.argFloats( "crop", " x1 x2 y1 y2\aSpecify a crop window, values are in screen space.", &g_cropWindow, ArgParse::SEP_ARGV, 4);
     ap.argString( "config", "=string\aspecify a configuration file to load", &g_config );
     ap.argString( "base", "=string\aspecify a default base path", &g_base_path );
     ap.argString( "shaders", "=string\aspecify a default shaders searchpath", &g_shaders );
@@ -330,6 +340,13 @@ int main( int argc, const char** argv )
         std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
         exit( 1 );
     }
+
+	// Check that the number of arguments to crop are valid if specified.
+	if ( g_cropWindow.size() > 0 && g_cropWindow.size() != 4 )
+	{
+		std::cout << "Error: invalid number of arguments to -crop, expected 4, got " << g_cropWindow.size() << std::endl;
+		g_help = true;
+	}
 
     if ( g_help )
     {
