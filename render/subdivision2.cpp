@@ -969,7 +969,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 
         // Now we use the first face index to start our extraction
         TqInt nc, nr, c, r;
-        nc = nr = MAX(dicesize, dicesize);
+        nc = nr = dicesize;
         r = 0;
 
         CqLath* pLath, *pTemp;
