@@ -24,6 +24,10 @@
 */
 
 #include "mtable.h"
+#include "log.h"
+#include "aqsis.h"
+
+START_NAMESPACE( Aqsis )
 
 //------------------------------------------------------------------------------
 /**
@@ -92,21 +96,21 @@ const char* CqMessageTable::getError( int table, int error_id )
 
 	switch ( table )
 	{
-		case BASIC_ERROR_TABLE:
+		case CqLog::BASIC_ERROR_TABLE:
 		{
 			m_pTable = &m_Be;
 			m_pIt = &m_Be_i;
 			break;
 		}
 		
-		case RI_ERROR_TABLE:
+		case CqLog::RI_ERROR_TABLE:
 		{	
 			m_pTable = &m_Ri;
 			m_pIt = &m_Ri_i;
 			break;
 		}
 
-		case SHADER_ERROR_TABLE:
+		case CqLog::SHADER_ERROR_TABLE:
 		{	
 			m_pTable = &m_Sh;
 			m_pIt = &m_Sh_i;
@@ -143,19 +147,19 @@ void CqMessageTable::insert( int table, i_s::value_type data)
 {
 	switch ( table )
 	{
-		case BASIC_ERROR_TABLE:
+		case CqLog::BASIC_ERROR_TABLE:
 		{
 			m_Be.insert( data );
 			break;
 		}
 
-		case RI_ERROR_TABLE:
+		case CqLog::RI_ERROR_TABLE:
 		{	
 			m_Ri.insert( data );
 			break;
 		}
 
-		case SHADER_ERROR_TABLE:
+		case CqLog::SHADER_ERROR_TABLE:
 		{	
 			m_Sh.insert( data );
 			break;
@@ -163,3 +167,4 @@ void CqMessageTable::insert( int table, i_s::value_type data)
 	}
 }
   
+END_NAMESPACE( Aqsis )

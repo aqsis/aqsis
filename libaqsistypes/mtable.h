@@ -38,13 +38,9 @@
 
 #include <map>
 #include <string>
+#include "aqsis.h"
 
-
-#define BASIC_ERROR_TABLE 0
-#define RI_ERROR_TABLE 1
-#define SHADER_ERROR_TABLE 2
-
-#define getErrorMessage(table, error_id ) mTable.getError( table, error_id )
+START_NAMESPACE( Aqsis )
 
 typedef std::map< int, std::string > i_s;
 
@@ -91,5 +87,7 @@ class CqMessageTable
 		i_s::iterator m_Sh_i;
 
 };
+
+END_NAMESPACE( Aqsis )
 
 #endif

@@ -77,9 +77,9 @@ class CqLog	: public IqLog
 
 		const char* getError( int table, int error_id );
 
-//		enum {	BASIC_ERROR_TABLE = 0,
-//				RI_ERROR_TABLE,
-//				SHADER_ERROR_TABLE } m_ErrorTables;
+		enum {	BASIC_ERROR_TABLE = 0,
+				RI_ERROR_TABLE,
+				SHADER_ERROR_TABLE } m_ErrorTables;
 
 		enum {	UNKNOW_ERROR = 0,
 				RI_COLOR_SAMPLES_INVALID,
