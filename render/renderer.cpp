@@ -1070,12 +1070,8 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
             const CqString *poptDSOPath = QGetRenderContext()->optCurrent().GetStringOption( "searchpath","dsolibs" );
             pShader->SetDSOPath( poptDSOPath );
 
-            const TqInt* poptVerbose = QGetRenderContext() ->optCurrent().GetIntegerOption( "statistics", "verbose" );
             CqString strRealName( SLXFile.strRealName() );
-            if ( poptVerbose )
-            {
-                std::cerr << info << "Loading shader \"" << strName << "\" from file \"" << strRealName.c_str() << "\"" << std::endl;
-            }
+			std::cerr << info << "Loading shader \"" << strName << "\" from file \"" << strRealName.c_str() << "\"" << std::endl;
 
             pShader->SetstrName( strName );
             pShader->LoadProgram( SLXFile );

@@ -60,14 +60,13 @@ int g_endofframe = -1;
 bool g_nostandard = 0;
 bool g_help = 0;
 bool g_version = 0;
-bool g_verbose = 0;
 bool g_environment = 0;
 bool g_fb = 0;
 bool g_progress = 0;
 bool g_Progress = 0;
 bool g_rinfo = 0;
 bool g_no_color = 0;
-TqInt verbose = 1;
+int g_verbose = 1;
 
 // Define strings used by argparse
 ArgParse::apstring g_config = "";
@@ -296,7 +295,11 @@ int main( int argc, const char** argv )
     ap.argString( "progressformat", "\astring representing the format of the progress message", &g_strprogress );
     ap.argInt( "endofframe", "=integer\aequivalent to \"endofframe\" option", &g_endofframe );
     ap.argFlag( "nostandard", "\adisable declaration of standard RenderMan parameters", &g_nostandard );
-    ap.argFlag( "verbose", "\aoutput more information during rendering", &g_verbose );
+    ap.argInt( "verbose", "\acontrol the output of messages.\n"
+						   "\a0 = errors\n"
+						   "\a1 = warnings (default)\n"
+						   "\a2 = information\n"
+						   "\a3 = debug", &g_verbose );
     ap.alias( "verbose", "v" );
     ap.argFlag( "renderinfo", "\aPrint out infos about base rendering settings", &g_rinfo );
     ap.argFlag( "environment", "\aoutput environment information", &g_environment );
@@ -368,7 +371,11 @@ int main( int argc, const char** argv )
     	color_level = temp_color_level;
 	}
     std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
-    std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::INFO, std::cerr) );
+    Aqsis::log_level_t level = Aqsis::ERROR;
+	if( g_verbose > 0 )	level = Aqsis::WARNING;
+	if( g_verbose > 1 )	level = Aqsis::INFO;
+	if( g_verbose > 2 )	level = Aqsis::DEBUG;
+	std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(level, std::cerr) );
 #ifdef	AQSIS_SYSTEM_POSIX
     if( g_syslog )
         std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );
@@ -498,11 +505,6 @@ void RenderFile( FILE* file, std::string&  name )
     if ( g_rinfo )
     {
         RiOption( "statistics", "renderinfo", &g_rinfo, RI_NULL );
-    }
-
-    if( g_verbose )
-    {
-        RiOption( "statistics", "verbose", &g_rinfo, RI_NULL );
     }
 
     const char* popt[ 1 ];

@@ -5218,7 +5218,6 @@ RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
 	Validate_RiReadArchive
 
     CqRiFile	fileArchive( name, "archive" );
-    const TqInt* poptVerbose = QGetRenderContext() ->optCurrent().GetIntegerOption( "statistics", "verbose" );
 
     if ( fileArchive.IsValid() )
     {
@@ -5227,10 +5226,8 @@ RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback callback, PARAMETERLIST )
         FILE *file;
         if ( ( file = fopen( strRealName.c_str(), "rb" ) ) != NULL )
         {
-            if ( poptVerbose )
-            {
-                std::cerr << info << "RiReadArchive: Reading archive \"" << strRealName.c_str() << "\"" << std::endl;
-            }
+            std::cerr << info << "RiReadArchive: Reading archive \"" << strRealName.c_str() << "\"" << std::endl;
+
             CqRIBParserState currstate = librib::GetParserState();
             if (currstate.m_pParseCallbackInterface == NULL) currstate.m_pParseCallbackInterface = new librib2ri::Engine;
             librib::Parse( file, name, *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), callback );
