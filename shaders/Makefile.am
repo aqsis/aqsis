@@ -6,5 +6,5 @@ install-data-local:
 	$(mkinstalldirs) $(shaderdir)
 	$(INSTALL_DATA) $(srcdir)/*.h $(shaderdir)
 	$(INSTALL_DATA) $(srcdir)/*.sl $(shaderdir)
-	cd $(shaderdir); for file in $$(find . -name "*.sl"); do $(bindir)/aqsl $$file; done
+	PATH=$$PATH:$(bindir); cd $(shaderdir); for file in $$(find . -name "*.sl"); do $(bindir)/aqsl $$file; done
 
