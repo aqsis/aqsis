@@ -44,7 +44,7 @@
 #include	"symbols.h"
 #include	"iddmanager.h"
 #include	"irenderer.h"
-#include	"log.h"
+#include	"ilog.h"
 
 START_NAMESPACE( Aqsis )
 

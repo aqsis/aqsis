@@ -23,13 +23,14 @@ namespace std
 #include <cassert>
 
 #include	"parsenode.h"
+#include	"ilog.h"
 #include	"log.h"
 
 using namespace Aqsis;
 
 namespace
 {
-CqLog* pLogger();
+IqLog* pLogger();
 } // namespace
 
 namespace Aqsis
@@ -1733,7 +1734,7 @@ void ProcessShaderArguments( CqParseNode* pArgs )
 	}
 }
 
-static CqLog* g_ptheLog = NULL;
+static IqLog* g_ptheLog = NULL;
 
 void CreateLogger()
 {
@@ -1751,7 +1752,7 @@ void DeleteLogger()
 namespace
 {
 
-CqLog* pLogger()
+IqLog* pLogger()
 {
 	assert( NULL != g_ptheLog );
 	return( g_ptheLog );

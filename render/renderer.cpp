@@ -39,6 +39,7 @@
 #include	"rifile.h"
 #include	"texturemap.h"
 #include	"shadervm.h"
+#include	"log.h"
 
 
 START_NAMESPACE( Aqsis )
