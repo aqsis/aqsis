@@ -2390,8 +2390,11 @@ STD_SOIMPL CqShaderExecEnv::SO_solar( VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPAR
 	INIT_SOR
 	__fVarying = TqTrue;
 	FOR_EACHR
-	if ( res ) L() = VECTOR( Axis );
-	m_CurrentState.SetValue( i, res );
+	if ( res )
+	{
+		L() = VECTOR( Axis );
+		m_CurrentState.SetValue( i, TqTrue );
+	}
 	END_FORR
 	m_Illuminate++;
 }

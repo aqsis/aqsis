@@ -420,6 +420,7 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 	{
 		TqInt iLabelA = gcLabels++;
 		TqInt iLabelB = gcLabels++;
+		TqInt iLabelC = gcLabels++;
 
 		IqParseNode* pArg = pNode->pChild();
 		assert( pArg != 0 );
@@ -437,11 +438,12 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		OutputTreeNode( pArg, out );
 		if ( pIC2->fHasAxisAngle() ) out << "\tilluminance2" << std::endl;
 		else	out << "\tilluminance" << std::endl;
-		out << "\tS_JZ " << iLabelB << std::endl;	// exit loop if false
+		out << "\tS_JZ " << iLabelC << std::endl;	// skip processing of statement if light has no influence
 		out << "\tRS_PUSH" << std::endl;			// Push running state
 		out << "\tRS_GET" << std::endl;			// Get state
 		OutputTreeNode( pStmt, out );				// statement
 		out << "\tRS_POP" << std::endl;			// Pop the running state
+		out << ":" << iLabelC << std::endl;		// continuation label
 		out << "\tadvance_illuminance" << std::endl;
 		out << "\tjnz " << iLabelA << std::endl; // loop back jump
 		out << ":" << iLabelB << std::endl;		// completion label
