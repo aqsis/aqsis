@@ -9,34 +9,19 @@ Requirements:
 		MSVC++ 6.0
 		
 		bison		1.35-4 (http://sourceforge.net/projects/gnuwin32/)
-					Dependencies: gettext(libintl), libiconv, libintl
-					Get and unzip the binary archives to a suitable location.
-					Add the <install>\bin directory to your executable paths under tools/options.
+					Included in the win32libs project
 		flex		2.5.4a (http://sourceforge.net/projects/gnuwin32/)
-					Get and unzip the binary archives to a suitable location.
-					Add the <install>\bin directory to your executable paths under tools/options.
+					Included in the win32libs project
 
 
 	Libraries:
 
 		libtiff		3.5.7 (http://sourceforge.net/projects/gnuwin32/)
-					Download the 'lib' archive and install to a suitable location.
-					Add <install>\include to your include paths under tools/options.
-					Add <install>\lib to your library paths under tools/options.
-					Download the 'bin' archive and install to a suitable location.
-					Add <install>\bin to your PATH, or copy libtiff.dll to a location in your PATH.
+					Included in the win32libs project
 		libjpeg		6b (http://sourceforge.net/projects/gnuwin32/)
-					Download the 'lib' archive and install to a suitable location.
-					Add <install>\include to your include paths under tools/options.
-					Add <install>\lib to your library paths under tools/options.
-					Download the 'bin' archive and install to a suitable location.
-					Add <install>\bin to your PATH, or copy libjpeg.dll to a location in your PATH.
+					Included in the win32libs project
 		zlib		1.1.4 (http://sourceforge.net/projects/gnuwin32/)
-					Download the 'lib' archive and install to a suitable location.
-					Add <install>\include to your include paths under tools/options.
-					Add <install>\lib to your library paths under tools/options.
-					Download the 'bin' archive and install to a suitable location.
-					Add <install>\bin to your PATH, or copy zlib.dll to a location in your PATH.
+					Included in the win32libs project
 		log4cpp		0.3.4b (http://sourceforge.net/projects/log4cpp/)
 					Download the archive and install to a suitable location.
 					Load the <install>\log4cpp-0.3.4b\msvc6\msvc6.dsw workspace.

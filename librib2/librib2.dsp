@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\Object\Release\librib2"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\librib2" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRIB /D BUILD_LIBRIB=1 /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\librib2" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\..\win32libs\include" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRIB /D BUILD_LIBRIB=1 /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\Object\Debug\librib2"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\librib2" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /D "_DEBUG" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRIB /D BUILD_LIBRIB=1 /D "_MBCS" /D "_LIB" /D "WIN32" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\librib2" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\..\win32libs\include" /D "_DEBUG" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRIB /D BUILD_LIBRIB=1 /D "_MBCS" /D "_LIB" /D "WIN32" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /GZ /c
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
 # ADD RSC /l 0x809 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -88,7 +88,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\Object\Profile\librib2"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GR /GX /O2 /I "..\librib2" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRIB /D BUILD_LIBRIB=1 /FR /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\librib2" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /D "NDEBUG" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRIB /D BUILD_LIBRIB=1 /D "_MBCS" /D "_LIB" /D "WIN32" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\librib2" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\render" /I "..\..\win32libs\include" /D "NDEBUG" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRIB /D BUILD_LIBRIB=1 /D "_MBCS" /D "_LIB" /D "WIN32" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -127,7 +127,7 @@ IntDir=.\..\Object\Release\librib2
 InputPath=.\parser.yxx
 
 BuildCmds= \
-	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
+	..\..\win32libs\bin\bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
 
 "$(IntDir)\parser.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -143,7 +143,7 @@ IntDir=.\..\Object\Debug\librib2
 InputPath=.\parser.yxx
 
 BuildCmds= \
-	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
+	..\..\win32libs\bin\bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
 
 "$(IntDir)\parser.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -159,7 +159,7 @@ IntDir=.\..\Object\Profile\librib2
 InputPath=.\parser.yxx
 
 BuildCmds= \
-	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
+	..\..\win32libs\bin\bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
 
 "$(IntDir)\parser.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -182,7 +182,7 @@ IntDir=.\..\Object\Release\librib2
 InputPath=.\scanner.lxx
 
 "$(IntDir)\scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -o$(IntDir)\scanner.cpp $(InputPath)
+	..\..\win32libs\bin\flex -o$(IntDir)\scanner.cpp $(InputPath)
 
 # End Custom Build
 
@@ -193,7 +193,7 @@ IntDir=.\..\Object\Debug\librib2
 InputPath=.\scanner.lxx
 
 "$(IntDir)\scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -o$(IntDir)\scanner.cpp $(InputPath)
+	..\..\win32libs\bin\flex -o$(IntDir)\scanner.cpp $(InputPath)
 
 # End Custom Build
 
@@ -204,7 +204,7 @@ IntDir=.\..\Object\Profile\librib2
 InputPath=.\scanner.lxx
 
 "$(IntDir)\scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -o$(IntDir)\scanner.cpp $(InputPath)
+	..\..\win32libs\bin\flex -o$(IntDir)\scanner.cpp $(InputPath)
 
 # End Custom Build
 

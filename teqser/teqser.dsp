@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\Object\Release\ribber" /I "..\Object\Release\render" /I "..\Render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libargparse" /D "_CONSOLE" /D "_MBCS" /D "PLUGINS" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_TEQSER /D BUILD_TEQSER=1 /D "NDEBUG" /D "WIN32" /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\Object\Release\ribber" /I "..\Object\Release\render" /I "..\Render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libargparse" /I "..\..\win32libs\include" /D "_CONSOLE" /D "_MBCS" /D "PLUGINS" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_TEQSER /D BUILD_TEQSER=1 /D "NDEBUG" /D "WIN32" /FR /YX /FD /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -51,7 +51,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 libargparse.lib /nologo /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /libpath:"..\lib" /libpath:"..\bin"
+# ADD LINK32 libargparse.lib /nologo /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /libpath:"..\lib" /libpath:"..\bin" /libpath:"..\..\win32libs\lib"
 
 !ELSEIF  "$(CFG)" == "teqser - Win32 Debug"
 
@@ -67,7 +67,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\Object\Debug\ribber" /I "..\Object\Debug\render" /I "..\Render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libargparse" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "PLUGINS" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_TEQSER /D BUILD_TEQSER=1 /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\Object\Debug\ribber" /I "..\Object\Debug\render" /I "..\Render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libargparse" /I "..\..\win32libs\include" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "PLUGINS" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_TEQSER /D BUILD_TEQSER=1 /FR /YX /FD /GZ /c
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
 # ADD RSC /l 0x809 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -75,7 +75,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 libargparse.lib /nologo /subsystem:console /debug /machine:I386 /nodefaultlib:"libcd.lib" /pdbtype:sept /libpath:"..\lib\Debug" /libpath:"..\bin\Debug"
+# ADD LINK32 libargparse.lib /nologo /subsystem:console /debug /machine:I386 /nodefaultlib:"libcd.lib" /pdbtype:sept /libpath:"..\lib\Debug" /libpath:"..\bin\Debug" /libpath:"..\..\win32libs\lib"
 
 !ELSEIF  "$(CFG)" == "teqser - Win32 Profile"
 
@@ -92,7 +92,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GR /GX /O2 /I "..\Object\Release\ribber" /I "..\Object\Release\render" /I "..\Render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "PLUGINS" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_TEQSER /D BUILD_TEQSER=1 /FR /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\Object\Release\ribber" /I "..\Object\Release\render" /I "..\Render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libargparse" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "PLUGINS" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_TEQSER /D BUILD_TEQSER=1 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\Object\Release\ribber" /I "..\Object\Release\render" /I "..\Render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libargparse" /I "..\..\win32libs\include" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "PLUGINS" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_TEQSER /D BUILD_TEQSER=1 /FR /YX /FD /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -100,7 +100,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 libargparse.lib log4cpp.lib libz.lib librib2.lib librib2ri.lib libshadervm.lib libshaderexecenv.lib libddmsimple.lib libtiff.lib libaqsistypes.lib libaqsis.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /nodefaultlib:"libc.lib" /libpath:"..\Library\Release"
-# ADD LINK32 libargparse.lib /nologo /subsystem:console /profile /debug /machine:I386 /nodefaultlib:"libc.lib" /libpath:"..\lib\Profile" /libpath:"..\bin\Profile"
+# ADD LINK32 libargparse.lib /nologo /subsystem:console /profile /debug /machine:I386 /nodefaultlib:"libc.lib" /libpath:"..\lib\Profile" /libpath:"..\bin\Profile" /libpath:"..\..\win32libs\lib"
 
 !ENDIF 
 

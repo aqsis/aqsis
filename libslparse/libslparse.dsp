@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\Object\Release\libslparse"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libslparse" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libslparse" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\..\win32libs\include" /D "NDEBUG" /D "PLUGINS" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /FR /YX /FD /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\Object\Debug\libslparse"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\libslparse" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\libslparse" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\..\win32libs\include" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /FR /YX /FD /GZ /c
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
 # ADD RSC /l 0x809 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -88,7 +88,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\Object\Profile\libslparse"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GR /GX /O2 /I "..\libslparse" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBSLPARSE /D BUILD_LIBSLPARSE=1 /FR /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\libslparse" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GR /GX /Zi /O2 /I "..\libslparse" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\..\win32libs\include" /D "NDEBUG" /D "_MBCS" /D "_LIB" /D "WIN32" /D "AQSIS_DYNAMIC_LINK" /FR /YX /FD /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -135,7 +135,7 @@ IntDir=.\..\Object\Release\libslparse
 InputPath=.\parser.yxx
 
 BuildCmds= \
-	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
+	..\..\win32libs\bin\bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
 
 "$(IntDir)\parser.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -151,7 +151,7 @@ IntDir=.\..\Object\Debug\libslparse
 InputPath=.\parser.yxx
 
 BuildCmds= \
-	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
+	..\..\win32libs\bin\bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
 
 "$(IntDir)\parser.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -167,7 +167,7 @@ IntDir=.\..\Object\Profile\libslparse
 InputPath=.\parser.yxx
 
 BuildCmds= \
-	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
+	..\..\win32libs\bin\bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
 
 "$(IntDir)\parser.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
@@ -190,7 +190,7 @@ IntDir=.\..\Object\Release\libslparse
 InputPath=.\scanner.lxx
 
 "$(IntDir)\scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -o$(IntDir)\scanner.cpp $(InputPath)
+	..\..\win32libs\bin\flex -o$(IntDir)\scanner.cpp $(InputPath)
 
 # End Custom Build
 
@@ -201,7 +201,7 @@ IntDir=.\..\Object\Debug\libslparse
 InputPath=.\scanner.lxx
 
 "$(IntDir)\scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -o$(IntDir)\scanner.cpp $(InputPath)
+	..\..\win32libs\bin\flex -o$(IntDir)\scanner.cpp $(InputPath)
 
 # End Custom Build
 
@@ -212,7 +212,7 @@ IntDir=.\..\Object\Profile\libslparse
 InputPath=.\scanner.lxx
 
 "$(IntDir)\scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -o$(IntDir)\scanner.cpp $(InputPath)
+	..\..\win32libs\bin\flex -o$(IntDir)\scanner.cpp $(InputPath)
 
 # End Custom Build
 
