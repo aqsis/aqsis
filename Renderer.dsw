@@ -1,0 +1,641 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+###############################################################################
+
+Project: "All"=.\All\All.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name aqsis
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libslparse
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name librib2
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name librib2ri
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Shaders
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name slpp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name texer
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name filebuffer
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libaqsis
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libdd
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libddmsimple
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name shadowmap
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name framebuffer_glut
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name framebuffer_glut_z
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name aqslcomp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libcodegenvm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name librib2stream
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name teqser
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libddmsock
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libri2rib
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name gif2tif
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name jpg2tif
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ppm2tif
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name pcx2tif
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name tga2tif
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libslxargs
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name aqsltell
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libshaderexecenv
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libshadervm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name bake2tif
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name aqsl
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "Shaders"=.\Shaders\shaders.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name slpp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name aqslcomp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name aqsl
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "aqsis"=.\aqsis\aqsis.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libaqsis
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libargparse
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "aqsl"=.\aqsl\aqsl.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name aqslcomp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name slpp
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "aqslcomp"=.\aqsl\aqslcomp.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libslparse
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libcodegenvm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libargparse
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libaqsistypes
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "aqsltell"=.\aqsltell\aqsltell.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libslxargs
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libargparse
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libaqsis
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "bake2tif"=.\PLUGINS\bake2tif\bake2tif.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "doxygen"=.\doxygen.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "dsotest"=.\dsotest\dsotest.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name aqsis
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name aqsl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name aqslcomp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libshaderexecenv
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libshadervm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libslparse
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name slpp
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "filebuffer"=.\filebuffer\filebuffer.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libdd
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libddmsock
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "framebuffer_glut"=.\framebuffer_glut\framebuffer_glut.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libdd
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libddmsock
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "framebuffer_glut_z"=.\framebuffer_glut_z\framebuffer_glut_z.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libdd
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libddmsock
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "gif2tif"=.\plugins\gif2tif\gif2tif.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "jpg2tif"=.\plugins\jpg2tif\jpg2tif.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libaqsis"=.\render\libaqsis.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libshaderexecenv
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libshadervm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libddmsock
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name librib2ri
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name librib2
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libaqsistypes
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "libaqsistypes"=.\libaqsistypes\libaqsistypes.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libargparse"=.\libargparse\libargparse.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libcodegenvm"=.\libcodegenvm\libcodegenvm.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libdd"=.\libdd\libdd.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libddmsimple"=.\libddmsimple\libddmsimple.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libddmsock"=.\libddmsock\libddmsock.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libri2rib"=.\libri2rib\libri2rib.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "librib2"=.\librib2\librib2.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "librib2ri"=.\librib2ri\librib2ri.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "librib2stream"=.\librib2stream\librib2stream.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libshaderexecenv"=.\libshaderexecenv\libshaderexecenv.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libshadervm"=.\libshadervm\libshadervm.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libslparse"=.\libslparse\libslparse.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libslxargs"=.\libslxargs\libslxargs.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "pcx2tif"=.\plugins\pcx2tif\pcx2tif.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "ppm2tif"=.\plugins\ppm2tif\ppm2tif.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "shadowmap"=.\shadowmap\shadowmap.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libdd
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "slpp"=.\slpp\slpp.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "teqser"=.\teqser\teqser.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libaqsis
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libddmsimple
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libargparse
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "tga2tif"=.\plugins\tga2tif\tga2tif.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+
