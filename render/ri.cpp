@@ -2684,11 +2684,12 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
 		CqSurfacePointsPolygons* pPsPs = new CqSurfacePointsPolygons(pPointsClass, npolys, nverts, verts );
+		pPsPs->AddRef();
 		TqFloat time = QGetRenderContext()->Time();
 		// Transform the points into camera space for processing,
-		pPsPs->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPsPs->pTransform() ->matObjectToWorld(time) ),
-						  QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPsPs->pTransform() ->matObjectToWorld(time) ),
-						  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPsPs->pTransform() ->matObjectToWorld(time) ) );
+		pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time) ),
+								 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time) ),
+								 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time) ) );
 		CreateGPrim(pPsPs);
 	}
 	else
@@ -4223,6 +4224,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 						{
 							// Add a patch surface to the bucket queue
 							CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( pSubd2, pSubd2->pFacet( face ) );
+							pNew->AddRef();
 							TqFloat time = QGetRenderContext()->Time();
 							// Transform the points into camera space for processing,
 							pNew->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pNew->pTransform() ->matObjectToWorld(time) ),
