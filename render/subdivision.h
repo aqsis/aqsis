@@ -119,6 +119,97 @@ class CqWReference
 }
 ;
 
+#define _SmoothScalar_(A,B) \
+			CqParameterTyped<A,B>* pNCurrent = static_cast<CqParameterTyped<A,B>*>(pCurrent); \
+			CqParameterTyped<A,B>* pNTarget  = static_cast<CqParameterTyped<A,B>*>(pTarget); \
+			/* Q the average of the face points surrounding the vertex. */ \
+			A Q = A( 0.0f ); \
+			std::vector<CqWEdge*>::iterator iE; \
+			CqWFace* pF; \
+			TqInt cE = 0; \
+			for ( iE = m_apEdges.begin(); iE != m_apEdges.end(); iE++ ) \
+			{ \
+				if ( ( *iE ) ->pvHead() == this ) pF = ( *iE ) ->pfLeft(); \
+				else	pF = ( *iE ) ->pfRight(); \
+				if ( pF ) \
+				{ \
+					Q += *pNCurrent->pValue( pF->pvSubdivide() ->iVertex() ); \
+					cE++; \
+				} \
+			} \
+			Q *= ( 1.0f / ( cE * cE ) ); \
+			/* R average of the midpoints of the edges that share the old vertex. */ \
+			A R = A( 0.0f ); \
+			cE = 0; \
+			for ( iE = m_apEdges.begin(); iE != m_apEdges.end(); iE++ ) \
+			{ \
+				if ( ( *iE ) ->IsValid() ) \
+				{ \
+					if ( ( *iE ) ->pvHead() == this ) R += *pNCurrent->pValue( ( *iE ) ->pvTail() ->iVertex() ); \
+					else	R += *pNCurrent->pValue( ( *iE ) ->pvHead() ->iVertex() ); \
+					cE++; \
+				} \
+			} \
+			R *= ( 1.0f / ( cE * cE ) ); \
+			A S = *pNCurrent->pValue( iVertex() ) * ( ( cE - 2.0f ) / ( TqFloat ) cE ); \
+			if( pNTarget->Size() <= trgIndex ) \
+				pNTarget->SetSize( trgIndex+1 ); \
+			*pNTarget->pValue( trgIndex) = ( S + R + Q );
+
+#define _CreaseScalar_(A,B) \
+			CqParameterTyped<A,B>* pNCurrent = static_cast<CqParameterTyped<A,B>*>(pCurrent); \
+			CqParameterTyped<A,B>* pNTarget  = static_cast<CqParameterTyped<A,B>*>(pTarget); \
+			A P = A( 0.0f ); \
+			std::vector<CqWEdge*>::iterator iE; \
+			TqFloat S = 0.0; \
+			TqInt cS = 0; \
+			for ( iE = m_apEdges.begin(); iE != m_apEdges.end(); iE++ ) \
+			{ \
+				if ( ( *iE ) ->Sharpness() > 0 && ( *iE ) ->IsValid() ) \
+				{ \
+					if ( ( *iE ) ->pvHead() == this ) P += *pNCurrent->pValue( ( *iE ) ->pvTail() ->iVertex() ); \
+					else	P += *pNCurrent->pValue( ( *iE ) ->pvHead() ->iVertex() ); \
+					S += ( *iE ) ->Sharpness(); \
+					cS++; \
+				} \
+			} \
+			P += *pNCurrent->pValue( iVertex() ) * 6.0f; \
+			P /= 8.0f;				/* Crease point */ \
+			S /= ( TqFloat ) cS; \
+			if ( cS == 2 && S > 0.0f && S < 1.0f ) \
+			{ \
+				A P2; \
+				GetSmoothedScalar( pCurrent, pTarget,  trgIndex); \
+				P2 = *pNTarget->pValue( trgIndex ); \
+				P = ( P2 * ( 1.0f - S ) ) + ( P * S );	/* Linear blend for variable crease. */ \
+			} \
+			if( pNTarget->Size() <= trgIndex ) \
+				pNTarget->SetSize( trgIndex+1 ); \
+			*pNTarget->pValue( trgIndex) = P;
+
+#define	_BoundaryScalar_(A,B) \
+			CqParameterTyped<A,B>* pNCurrent = static_cast<CqParameterTyped<A,B>*>(pCurrent); \
+			CqParameterTyped<A,B>* pNTarget  = static_cast<CqParameterTyped<A,B>*>(pTarget); \
+			A P = A( 0.0f ); \
+			std::vector<CqWEdge*>::iterator iE; \
+			for ( iE = m_apEdges.begin(); iE != m_apEdges.end(); iE++ ) \
+				if ( ( *iE ) ->IsBoundary() ) \
+					if ( ( *iE ) ->pvHead() == this ) P += *pNCurrent->pValue( ( *iE ) ->pvTail() ->iVertex() ); \
+					else	P += *pNCurrent->pValue( ( *iE ) ->pvHead() ->iVertex() ); \
+			P += *pNCurrent->pValue( iVertex() ) * 6.0f; \
+			P /= 8.0f; \
+			if( pNTarget->Size() <= trgIndex ) \
+				pNTarget->SetSize( trgIndex+1 ); \
+			*pNTarget->pValue( trgIndex) = P;
+
+#define	_CornerScalar_(A,B) \
+			CqParameterTyped<A,B>* pNCurrent = static_cast<CqParameterTyped<A,B>*>(pCurrent); \
+			CqParameterTyped<A,B>* pNTarget  = static_cast<CqParameterTyped<A,B>*>(pTarget); \
+			A P = *pNCurrent->pValue( iVertex() ); \
+			if( pNTarget->Size() <= trgIndex ) \
+				pNTarget->SetSize( trgIndex+1 ); \
+			*pNTarget->pValue( trgIndex) = P;
+
 
 //----------------------------------------
 /** \class CqWVert
@@ -175,108 +266,33 @@ class CqWVert : public CqPoolable<CqWVert>
 		}
 		void	RemoveEdge( CqWEdge* pE );
 
-		/** Templatised function to perform the subdivision arithmetic on a paramter type.
+		/** Perform the subdivision arithmetic on a paramter type.
 		 * \param t Temp of the template type to overcome the VC++ problem with template functions.
 		 * \param F A pointer to a function to get indexed values of the appropriate type.
 		 * \param pSurf Pointer to the CqWSurf on which we are working. 
 		 */
-		template <class T>
-		T GetSmoothedScalar( T& t, T( CqSubdivider::*F ) ( CqPolygonPoints*, TqInt ), CqSubdivider* pSurf, CqPolygonPoints* pPoints )
-		{
-			// NOTE: Checks should have been made prior to this call to ensure it is neither
-			// a boundary point or a crease/corner point with sharp edges.
-
-			// Q the average of the face points surrounding the vertex.
-			T Q = T( 0.0f );
-			std::vector<CqWEdge*>::iterator iE;
-			CqWFace* pF;
-			TqInt cE = 0;
-
-			for ( iE = m_apEdges.begin(); iE != m_apEdges.end(); iE++ )
-			{
-				if ( ( *iE ) ->pvHead() == this ) pF = ( *iE ) ->pfLeft();
-				else	pF = ( *iE ) ->pfRight();
-				if ( pF )
-				{
-					Q += ( pSurf->*F ) ( pPoints, pF->pvSubdivide() ->iVertex() );
-					cE++;
-				}
-			}
-			Q *= ( 1.0f / ( cE * cE ) );
-
-			// R average of the midpoints of the edges that share the old vertex.
-			T R = T( 0.0f );
-			cE = 0;
-			for ( iE = m_apEdges.begin(); iE != m_apEdges.end(); iE++ )
-			{
-				if ( ( *iE ) ->IsValid() )
-				{
-					if ( ( *iE ) ->pvHead() == this ) R += ( pSurf->*F ) ( pPoints, ( *iE ) ->pvTail() ->iVertex() );
-					else	R += ( pSurf->*F ) ( pPoints, ( *iE ) ->pvHead() ->iVertex() );
-					cE++;
-				}
-			}
-			R *= ( 1.0f / ( cE * cE ) );
-
-			T S = ( pSurf->*F ) ( pPoints, iVertex() ) * ( ( cE - 2.0f ) / ( TqFloat ) cE );
-			return ( S + R + Q );
-		}
+		void GetSmoothedScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex );
 
 		/** Templatised function to perform the subdivision arithmetic on a paramter type.
 		 * \param t Temp of the template type to overcome the VC++ problem with template functions.
 		 * \param F A pointer to a function to get indexed values of the appropriate type.
 		 * \param pSurf Pointer to the CqWSurf on which we are working. 
 		 */
-		template <class T>
-		T GetCreaseScalar( T& t, T( CqSubdivider::*F ) ( CqPolygonPoints*, TqInt ), CqSubdivider* pSurf, CqPolygonPoints* pPoints )
-		{
-			T P = T( 0.0f );
-			std::vector<CqWEdge*>::iterator iE;
-			TqFloat S = 0.0;
-			TqInt cS = 0;
-
-			for ( iE = m_apEdges.begin(); iE != m_apEdges.end(); iE++ )
-			{
-				if ( ( *iE ) ->Sharpness() > 0 && ( *iE ) ->IsValid() )
-				{
-					if ( ( *iE ) ->pvHead() == this ) P += ( pSurf->*F ) ( pPoints, ( *iE ) ->pvTail() ->iVertex() );
-					else	P += ( pSurf->*F ) ( pPoints, ( *iE ) ->pvHead() ->iVertex() );
-					S += ( *iE ) ->Sharpness();
-					cS++;
-				}
-			}
-			P += ( pSurf->*F ) ( pPoints, iVertex() ) * 6.0f;
-			P /= 8.0f;				// Crease point
-
-			S /= ( TqFloat ) cS;
-			if ( cS == 2 && S > 0.0f && S < 1.0f )
-			{
-				T P2;
-				P2 = GetSmoothedScalar( P2, F, pSurf, pPoints );
-				P = ( P2 * ( 1.0f - S ) ) + ( P * S );	// Linear blend for variable crease.
-			}
-			return ( P );
-		}
+		void GetCreaseScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex );
 
 		/** Templatised function to perform the subdivision arithmetic on a paramter type.
 		 * \param t Temp of the template type to overcome the VC++ problem with template functions.
 		 * \param F A pointer to a function to get indexed values of the appropriate type.
 		 * \param pSurf Pointer to the CqWSurf on which we are working. 
 		 */
-		template <class T>
-		T GetBoundaryScalar( T& t, T( CqSubdivider::*F ) ( CqPolygonPoints*, TqInt ), CqSubdivider* pSurf, CqPolygonPoints* pPoints )
-		{
-			T P = T( 0.0f );
-			std::vector<CqWEdge*>::iterator iE;
-			for ( iE = m_apEdges.begin(); iE != m_apEdges.end(); iE++ )
-				if ( ( *iE ) ->IsBoundary() )
-					if ( ( *iE ) ->pvHead() == this ) P += ( pSurf->*F ) ( pPoints, ( *iE ) ->pvTail() ->iVertex() );
-					else	P += ( pSurf->*F ) ( pPoints, ( *iE ) ->pvHead() ->iVertex() );
+		void GetBoundaryScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex );
 
-			P += ( pSurf->*F ) ( pPoints, iVertex() ) * 6.0f;
-			P /= 8.0f;
-			return ( P );
-		}
+		/** Templatised function to perform the subdivision arithmetic on a paramter type.
+		 * \param t Temp of the template type to overcome the VC++ problem with template functions.
+		 * \param F A pointer to a function to get indexed values of the appropriate type.
+		 * \param pSurf Pointer to the CqWSurf on which we are working. 
+		 */
+		void GetCornerScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex );
 
 	private:
 		TqInt	m_iVertex;				///< Index of the vertex in the vertex list
@@ -291,6 +307,21 @@ class CqWEdge;
 /** \class CqWFace
  * Winged-Edge face structure.
  */
+
+#define	_SubdivideParameterFace_(A,B) \
+					CqParameterTyped<A, B>* pNCurrent = static_cast<CqParameterTyped<A, B>*>(pCurrent); \
+					CqParameterTyped<A, B>* pNTarget  = static_cast<CqParameterTyped<A, B>*>(pTarget); \
+					A val = 0.0f; \
+					for ( TqUint j = 0; j < m_apEdges.size(); j++ ) \
+					{ \
+						val += *pNCurrent->pValue(grE.pvHead() ->iVertex() ); \
+						grE.peNext(); \
+					} \
+					val /= static_cast<TqFloat>(m_apEdges.size()); \
+					if( pNTarget->Size() <= trgIndex ) \
+						pNTarget->SetSize( trgIndex+1 ); \
+					*pNTarget->pValue( trgIndex ) = val;
+
 
 class CqWFace : public CqPoolable<CqWFace>
 {
@@ -345,33 +376,48 @@ class CqWFace : public CqPoolable<CqWFace>
 		CqWVert*	CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pPoints, CqWVert* pV, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
 		                               TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os );
 
-		/** Templatised function to perform the subdivision arithmetic on a paramter type.
+		/** Perform the subdivision arithmetic on a paramter type.
 		 * \param t Temp of the template type to overcome the VC++ problem with template functions.
 		 * \param F A pointer to a function to get indexed values of the appropriate type.
 		 * \param pSurf Pointer to the CqWSurf on which we are working. 
 		 */
-		template <class T>
-		T	CreateSubdivideScalar( T& t, T( CqSubdivider::*F ) ( CqPolygonPoints*, TqInt ), CqSubdivider* pSurf, CqPolygonPoints* pPoints )
-		{
-			T P = T( 0.0f );
-
-			CqWReference grE( m_apEdges[ 0 ], this );
-
-			for ( TqUint j = 0; j < m_apEdges.size(); j++ )
-			{
-				P += ( pSurf->*F ) ( pPoints, grE.pvHead() ->iVertex() );
-				grE.peNext();
-			}
-			P /= ( TqFloat ) m_apEdges.size();
-
-			return ( P );
-		}
+		void CreateSubdivideScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex );
 
 	private:
 		std::vector<CqWEdge*> m_apEdges;	///< Array of shared edge indexes
 		CqWVert*	m_pvSubdivide;			///< Pointer to the calculated midpoint, set by CreateSubdividePoint.
 }
 ;
+
+#define _SubdivideParameterEdge_(A,B) \
+			CqParameterTyped<A, B>* pNCurrent = static_cast<CqParameterTyped<A, B>*>(pCurrent); \
+			CqParameterTyped<A, B>* pNTarget  = static_cast<CqParameterTyped<A, B>*>(pTarget); \
+			A val = *pNCurrent->pValue( pvHead() ->iVertex() ); \
+			val += *pNCurrent->pValue( pvTail() ->iVertex() ); \
+			/* Check for sharp edges. */ \
+			if ( IsBoundary() == TqTrue || m_Sharpness > 0 )  		/* Boundary check. */ \
+			{ \
+				if ( m_Sharpness < 1 && IsBoundary() == TqFalse )  	/* Infinitely sharp? */ \
+				{ \
+					A val2 = val; \
+					val *= 0.5; \
+					val2 += *pNCurrent->pValue( pfLeft() ->pvSubdivide() ->iVertex() ); \
+					val2 += *pNCurrent->pValue( pfRight() ->pvSubdivide() ->iVertex() ); \
+					val2 *= 0.25; \
+					val = ( val2 * ( 1.0f - m_Sharpness ) ) + ( val * m_Sharpness ); \
+				} \
+				else \
+					val *= 0.5f;						/* Sharp edges are just midpoint */ \
+			} \
+			else										/* Smooth. */ \
+			{ \
+				val += *pNCurrent->pValue( pfLeft() ->pvSubdivide() ->iVertex() ); \
+				val += *pNCurrent->pValue( pfRight() ->pvSubdivide() ->iVertex() ); \
+				val *= 0.25; \
+			} \
+			if( pNTarget->Size() <= trgIndex ) \
+				pNTarget->SetSize( trgIndex+1 ); \
+			*pNTarget->pValue( trgIndex ) = val
 
 
 //----------------------------------------
@@ -671,40 +717,12 @@ class CqWEdge : public CqPoolable<CqWEdge>
 			return ( m_pvSubdivide );
 		}
 
-		/** Templatised function to perform the subdivision arithmetic on a paramter type.
+		/** Perform the subdivision arithmetic on a paramter type.
 		 * \param t Temp of the template type to overcome the VC++ problem with template functions.
 		 * \param F A pointer to a function to get indexed values of the appropriate type.
 		 * \param pSurf Pointer to the CqWSurf on which we are working. 
 		 */
-		template <class T>
-		T	CreateSubdivideScalar( T& t, T( CqSubdivider::*F ) ( CqPolygonPoints*, TqInt ), CqSubdivider* pSurf, CqPolygonPoints* pPoints )
-		{
-			T P = ( pSurf->*F ) ( pPoints, pvHead() ->iVertex() );
-			P += ( pSurf->*F ) ( pPoints, pvTail() ->iVertex() );
-
-			// Check for sharp edges.
-			if ( IsBoundary() == TqTrue || m_Sharpness > 0 )  		// Boundary check.
-			{
-				if ( m_Sharpness < 1 && IsBoundary() == TqFalse )  	// Infinitely sharp?
-				{
-					T P2 = P;
-					P *= 0.5;
-					P2 += ( pSurf->*F ) ( pPoints, pfLeft() ->pvSubdivide() ->iVertex() );
-					P2 += ( pSurf->*F ) ( pPoints, pfRight() ->pvSubdivide() ->iVertex() );
-					P2 *= 0.25;
-					P = ( P2 * ( 1.0f - m_Sharpness ) ) + ( P * m_Sharpness );
-				}
-				else
-					P *= 0.5f;								// Sharp edges are just midpoint
-			}
-			else										// Smooth.
-			{
-				P += ( pSurf->*F ) ( pPoints, pfLeft() ->pvSubdivide() ->iVertex() );
-				P += ( pSurf->*F ) ( pPoints, pfRight() ->pvSubdivide() ->iVertex() );
-				P *= 0.25;
-			}
-			return ( P );
-		}
+		void CreateSubdivideScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex );
 
 	private:
 		CqWVert	*m_pvHead,  				///< Pointer to the head vertex.
@@ -839,42 +857,6 @@ class CqSubdivider
 		void	AddFace( CqWFace* pF )
 		{
 			m_apFaces.push_back( pF );
-		}
-
-		/** Get an indexed P value from the specified points storage class.
-		 */
-		CqVector3D	SubdP( CqPolygonPoints* pPoints, TqInt index )
-		{
-			assert( static_cast<TqUint>( index ) < pPoints->P().Size() );
-			return ( pPoints->P() [ index ] );
-		}
-		/** Get an indexed s value from the specified points storage class.
-		 */
-		TqFloat	Subds( CqPolygonPoints* pPoints, TqInt index )
-		{
-			assert( static_cast<TqUint>( index ) < pPoints->s()->Size() );
-			return ( (*pPoints->s())[ index ] );
-		}
-		/** Get an indexed t value from the specified points storage class.
-		 */
-		TqFloat	Subdt( CqPolygonPoints* pPoints, TqInt index )
-		{
-			assert( static_cast<TqUint>( index ) < pPoints->t()->Size() );
-			return ( (*pPoints->t())[ index ] );
-		}
-		/** Get an indexed Cs value from the specified points storage class.
-		 */
-		CqColor	SubdCs( CqPolygonPoints* pPoints, TqInt index )
-		{
-			assert( static_cast<TqUint>( index ) < pPoints->Cs()->Size() );
-			return ( (*pPoints->Cs())[ index ] );
-		}
-		/** Get an indexed Os value from the specified points storage class.
-		 */
-		CqColor	SubdOs( CqPolygonPoints* pPoints, TqInt index )
-		{
-			assert( static_cast<TqUint>( index ) < pPoints->Os()->Size() );
-			return ( (*pPoints->Os())[ index ] );
 		}
 
 		void	Subdivide();

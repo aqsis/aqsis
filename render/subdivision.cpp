@@ -92,37 +92,10 @@ CqWVert* CqWEdge::CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pP
 	TqUint index = pV->iVertex();
 	m_pvSubdivide = pV;
 
-	CqVector3D P = CreateSubdivideScalar( P, &CqSubdivider::SubdP, pSurf, pPoints );
-	if ( pPoints->P().Size() <= index ) pPoints->P().SetSize( index + 1 );
-	pPoints->P() [ index ] = P;
-
-	if ( uses_s && has_s )
-	{
-		TqFloat s = CreateSubdivideScalar( s, &CqSubdivider::Subds, pSurf, pPoints );
-		if ( pPoints->s()->Size() <= index ) pPoints->s()->SetSize( index + 1 );
-		(*pPoints->s())[ index ] = s;
-	}
-
-	if ( uses_t && has_t )
-	{
-		TqFloat t = CreateSubdivideScalar( t, &CqSubdivider::Subdt, pSurf, pPoints );
-		if ( pPoints->t()->Size() <= index ) pPoints->t()->SetSize( index + 1 );
-		(*pPoints->t())[ index ] = t;
-	}
-
-	if ( uses_Cs && has_Cs )
-	{
-		CqColor Cq = CreateSubdivideScalar( Cq, &CqSubdivider::SubdCs, pSurf, pPoints );
-		if ( pPoints->Cs()->Size() <= index ) pPoints->Cs()->SetSize( index + 1 );
-		(*pPoints->Cs())[ index ] = Cq;
-	}
-
-	if ( uses_Os && has_Os )
-	{
-		CqColor Os = CreateSubdivideScalar( Os, &CqSubdivider::SubdOs, pSurf, pPoints );
-		if ( pPoints->Os()->Size() <= index ) pPoints->Os()->SetSize( index + 1 );
-		(*pPoints->Os())[ index ] = Os;
-	}
+	CreateSubdivideScalar( &pPoints->P(), &pPoints->P(), index );
+	std::vector<CqParameter*>::iterator iUP;
+	for( iUP = pPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++ )
+		CreateSubdivideScalar( (*iUP), (*iUP), index );
 
 	return ( pV );
 }
@@ -197,37 +170,9 @@ CqWVert* CqWFace::CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pP
 	TqUint index = pV->iVertex();
 	m_pvSubdivide = pV;
 
-	CqVector3D P = CreateSubdivideScalar( P, &CqSubdivider::SubdP, pSurf, pPoints );
-	if ( pPoints->P().Size() <= index ) pPoints->P().SetSize( index + 1 );
-	pPoints->P() [ index ] = P;
-
-	if ( uses_s && has_s )
-	{
-		TqFloat s = CreateSubdivideScalar( s, &CqSubdivider::Subds, pSurf, pPoints );
-		if ( pPoints->s()->Size() <= index ) pPoints->s()->SetSize( index + 1 );
-		(*pPoints->s())[ index ] = s;
-	}
-
-	if ( uses_t && has_t )
-	{
-		TqFloat t = CreateSubdivideScalar( t, &CqSubdivider::Subdt, pSurf, pPoints );
-		if ( pPoints->t()->Size() <= index ) pPoints->t()->SetSize( index + 1 );
-		(*pPoints->t())[ index ] = t;
-	}
-
-	if ( uses_Cs && has_Cs )
-	{
-		CqColor Cq = CreateSubdivideScalar( Cq, &CqSubdivider::SubdCs, pSurf, pPoints );
-		if ( pPoints->Cs()->Size() <= index ) pPoints->Cs()->SetSize( index + 1 );
-		(*pPoints->Cs())[ index ] = Cq;
-	}
-
-	if ( uses_Os && has_Os )
-	{
-		CqColor Os = CreateSubdivideScalar( Os, &CqSubdivider::SubdOs, pSurf, pPoints );
-		if ( pPoints->Os()->Size() <= index ) pPoints->Os()->SetSize( index + 1 );
-		(*pPoints->Os())[ index ] = Os;
-	}
+	std::vector<CqParameter*>::iterator iUP;
+	for( iUP = pPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++ )
+		CreateSubdivideScalar( (*iUP), (*iUP), index );
 
 	return ( pV );
 }
@@ -700,39 +645,39 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 
 		if( USES( Uses(), EnvVars_P ) )
 		{
-			pGrid->P()->SetPoint( SubdP( pPoints, ivA ), ( ( vOff ) * cuv ) + uOff );
-			pGrid->P()->SetPoint( SubdP( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
-			pGrid->P()->SetPoint( SubdP( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
-			pGrid->P()->SetPoint( SubdP( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->P()->SetPoint( pPoints->P()[ ivA ], ( ( vOff ) * cuv ) + uOff );
+			pGrid->P()->SetPoint( pPoints->P()[ ivB ], ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->P()->SetPoint( pPoints->P()[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->P()->SetPoint( pPoints->P()[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 
 		if ( uses_s && has_s )
 		{
-			pGrid->s()->SetFloat( Subds( pPoints, ivA ), ( ( vOff ) * cuv ) + uOff );
-			pGrid->s()->SetFloat( Subds( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
-			pGrid->s()->SetFloat( Subds( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
-			pGrid->s()->SetFloat( Subds( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivA ], ( ( vOff ) * cuv ) + uOff );
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivB ], ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 		if ( uses_t && has_t )
 		{
-			pGrid->t()->SetFloat( Subdt( pPoints, ivA ), ( ( vOff ) * cuv ) + uOff );
-			pGrid->t()->SetFloat( Subdt( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
-			pGrid->t()->SetFloat( Subdt( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
-			pGrid->t()->SetFloat( Subdt( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivA ], ( ( vOff ) * cuv ) + uOff );
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivB ], ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 		if ( uses_Cs && has_Cs )
 		{
-			pGrid->Cs()->SetColor( SubdCs( pPoints, ivA ), ( ( vOff ) * cuv ) + uOff );
-			pGrid->Cs()->SetColor( SubdCs( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
-			pGrid->Cs()->SetColor( SubdCs( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
-			pGrid->Cs()->SetColor( SubdCs( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->Cs()->SetColor( (*pPoints->Cs())[ ivA ], ( ( vOff ) * cuv ) + uOff );
+			pGrid->Cs()->SetColor( (*pPoints->Cs())[ ivB ], ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->Cs()->SetColor( (*pPoints->Cs())[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->Cs()->SetColor( (*pPoints->Cs())[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 		if ( uses_Os && has_Os )
 		{
-			pGrid->Os()->SetColor( SubdOs( pPoints, ivA ), ( ( vOff ) * cuv ) + uOff );
-			pGrid->Os()->SetColor( SubdOs( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
-			pGrid->Os()->SetColor( SubdOs( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
-			pGrid->Os()->SetColor( SubdOs( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->Os()->SetColor( (*pPoints->Os())[ ivA ], ( ( vOff ) * cuv ) + uOff );
+			pGrid->Os()->SetColor( (*pPoints->Os())[ ivB ], ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->Os()->SetColor( (*pPoints->Os())[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->Os()->SetColor( (*pPoints->Os())[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 	}
 
@@ -748,29 +693,29 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 
 		if( USES( Uses(), EnvVars_P ) )
 		{
-			pGrid->P()->SetPoint( SubdP( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
-			pGrid->P()->SetPoint( SubdP( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->P()->SetPoint( pPoints->P()[ ivB ], ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->P()->SetPoint( pPoints->P()[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
 		}
 
 		if ( uses_s && has_s )
 		{
-			pGrid->s()->SetFloat( Subds( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
-			pGrid->s()->SetFloat( Subds( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivB ], ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
 		}
 		if ( uses_t && has_t )
 		{
-			pGrid->t()->SetFloat( Subdt( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
-			pGrid->t()->SetFloat( Subdt( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivB ], ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
 		}
 		if ( uses_Cs && has_Cs )
 		{
-			pGrid->Cs()->SetColor( SubdCs( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
-			pGrid->Cs()->SetColor( SubdCs( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->Cs()->SetColor( (*pPoints->Cs())[ ivB ], ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->Cs()->SetColor( (*pPoints->Cs())[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
 		}
 		if ( uses_Os && has_Os )
 		{
-			pGrid->Os()->SetColor( SubdOs( pPoints, ivB ), ( ( vOff ) * cuv ) + uOff + 1 );
-			pGrid->Os()->SetColor( SubdOs( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->Os()->SetColor( (*pPoints->Os())[ ivB ], ( ( vOff ) * cuv ) + uOff + 1 );
+			pGrid->Os()->SetColor( (*pPoints->Os())[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
 		}
 	}
 
@@ -786,29 +731,29 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 
 		if( USES( Uses(), EnvVars_P ) )
 		{
-			pGrid->P()->SetPoint( SubdP( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
-			pGrid->P()->SetPoint( SubdP( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->P()->SetPoint( pPoints->P()[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->P()->SetPoint( pPoints->P()[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 
 		if ( uses_s && has_s )
 		{
-			pGrid->s()->SetFloat( Subds( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
-			pGrid->s()->SetFloat( Subds( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 		if ( uses_t && has_t )
 		{
-			pGrid->t()->SetFloat( Subdt( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
-			pGrid->t()->SetFloat( Subdt( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 		if ( uses_Cs && has_Cs )
 		{
-			pGrid->Cs()->SetColor( SubdCs( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
-			pGrid->Cs()->SetColor( SubdCs( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->Cs()->SetColor( (*pPoints->Cs())[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->Cs()->SetColor( (*pPoints->Cs())[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 		if ( uses_Os && has_Os )
 		{
-			pGrid->Os()->SetColor( SubdOs( pPoints, ivC ), ( ( vOff + 1 ) * cuv ) + uOff + 1 );
-			pGrid->Os()->SetColor( SubdOs( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->Os()->SetColor( (*pPoints->Os())[ ivC ], ( ( vOff + 1 ) * cuv ) + uOff + 1 );
+			pGrid->Os()->SetColor( (*pPoints->Os())[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 		}
 	}
 
@@ -822,15 +767,15 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		TqInt ivD = rE.pvHead() ->iVertex();
 
 		if( USES( Uses(), EnvVars_P ) )
-			pGrid->P()->SetPoint( SubdP( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->P()->SetPoint( pPoints->P()[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 		if ( uses_s && has_s ) 
-			pGrid->s()->SetFloat( Subds( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 		if ( uses_t && has_t )
-			pGrid->t()->SetFloat( Subdt( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 		if ( uses_Cs && has_Cs )
-			pGrid->Cs()->SetColor( SubdCs( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->Cs()->SetColor( (*pPoints->Cs())[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 		if ( uses_Os && has_Os )
-			pGrid->Os()->SetColor( SubdOs( pPoints, ivD ), ( ( vOff + 1 ) * cuv ) + uOff );
+			pGrid->Os()->SetColor( (*pPoints->Os())[ ivD ], ( ( vOff + 1 ) * cuv ) + uOff );
 	}
 
 	vOff -= 1 << ( Level - 1 );
@@ -915,6 +860,8 @@ void CqWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t,
 	aVertices.resize( oldcVerts );
 
 	CqPolygonPoints* pPoints = m_pPoints;
+	CqPolygonPoints* pNewPoints = new CqPolygonPoints(*pPoints);
+	pPoints->ClonePrimitiveVariables(*pPoints);
 
 	// Smooth vertex points
 	TqInt iE, bE, sE, i;
@@ -935,11 +882,10 @@ void CqWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t,
 			// Check for smooth first (most commmon case, less likely to thrash the cache).
 			if ( sE <= 1 && bE == 0 )
 			{
-				aVertices[ i ].P = pV->GetSmoothedScalar( vecT, &CqSubdivider::SubdP, this, pPoints );
-				if ( uses_s && has_s ) aVertices[ i ].s = pV->GetSmoothedScalar( fT, &CqSubdivider::Subds, this, pPoints );
-				if ( uses_t && has_t ) aVertices[ i ].t = pV->GetSmoothedScalar( fT, &CqSubdivider::Subdt, this, pPoints );
-				if ( uses_Cs && has_Cs ) aVertices[ i ].Cq = pV->GetSmoothedScalar( colT, &CqSubdivider::SubdCs, this, pPoints );
-				if ( uses_Os && has_Os ) aVertices[ i ].Os = pV->GetSmoothedScalar( colT, &CqSubdivider::SubdOs, this, pPoints );
+				pV->GetSmoothedScalar( &pPoints->P(), &pNewPoints->P(), i );
+				std::vector<CqParameter*>::iterator iUP, iNUP;
+				for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
+					pV->GetSmoothedScalar( (*iUP), (*iNUP), i );
 			}
 			else
 			{
@@ -948,38 +894,34 @@ void CqWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t,
 				{
 					if ( sE == 2 )
 					{
-						aVertices[ i ].P = pV->GetCreaseScalar( vecT, &CqSubdivider::SubdP, this, pPoints );
-						if ( uses_s && has_s ) aVertices[ i ].s = pV->GetCreaseScalar( fT, &CqSubdivider::Subds, this, pPoints );
-						if ( uses_t && has_t ) aVertices[ i ].t = pV->GetCreaseScalar( fT, &CqSubdivider::Subdt, this, pPoints );
-						if ( uses_Cs && has_Cs ) aVertices[ i ].Cq = pV->GetCreaseScalar( colT, &CqSubdivider::SubdCs, this, pPoints );
-						if ( uses_Os && has_Os ) aVertices[ i ].Os = pV->GetCreaseScalar( colT, &CqSubdivider::SubdOs, this, pPoints );
+						pV->GetCreaseScalar( &pPoints->P(), &pNewPoints->P(), i );
+						std::vector<CqParameter*>::iterator iUP, iNUP;
+						for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
+							pV->GetCreaseScalar( (*iUP), (*iNUP), i );
 					}
 					else
 					{
-						aVertices[ i ].P = SubdP( pPoints, pV->iVertex() );
-						if ( uses_s && has_s ) aVertices[ i ].s = Subds( pPoints, pV->iVertex() );
-						if ( uses_t && has_t ) aVertices[ i ].t = Subdt( pPoints, pV->iVertex() );
-						if ( uses_Cs && has_Cs ) aVertices[ i ].Cq = SubdCs( pPoints, pV->iVertex() );
-						if ( uses_Os && has_Os ) aVertices[ i ].Os = SubdOs( pPoints, pV->iVertex() );
+						pV->GetCornerScalar( &pPoints->P(), &pNewPoints->P(), i );
+						std::vector<CqParameter*>::iterator iUP, iNUP;
+						for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
+							pV->GetCornerScalar( (*iUP), (*iNUP), i );
 					}
 				}
 				else
 				{
 					if ( m_bInterpolateBoundary && pV->cEdges() == 2 )      	// Boundary point with valence 2 is corner
 					{
-						aVertices[ i ].P = SubdP( pPoints, pV->iVertex() );
-						if ( uses_s && has_s ) aVertices[ i ].s = Subds( pPoints, pV->iVertex() );
-						if ( uses_t && has_t ) aVertices[ i ].t = Subdt( pPoints, pV->iVertex() );
-						if ( uses_Cs && has_Cs ) aVertices[ i ].Cq = SubdCs( pPoints, pV->iVertex() );
-						if ( uses_Os && has_Os ) aVertices[ i ].Os = SubdOs( pPoints, pV->iVertex() );
+						pV->GetCornerScalar( &pPoints->P(), &pNewPoints->P(), i );
+						std::vector<CqParameter*>::iterator iUP, iNUP;
+						for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
+							pV->GetCornerScalar( (*iUP), (*iNUP), i );
 					}
 					else				// Boundary points are crease points.
 					{
-						aVertices[ i ].P = pV->GetBoundaryScalar( vecT, &CqSubdivider::SubdP, this, pPoints );
-						if ( uses_s && has_s ) aVertices[ i ].s = pV->GetBoundaryScalar( fT, &CqSubdivider::Subds, this, pPoints );
-						if ( uses_t && has_t ) aVertices[ i ].t = pV->GetBoundaryScalar( fT, &CqSubdivider::Subdt, this, pPoints );
-						if ( uses_Cs && has_Cs ) aVertices[ i ].Cq = pV->GetBoundaryScalar( colT, &CqSubdivider::SubdCs, this, pPoints );
-						if ( uses_Os && has_Os ) aVertices[ i ].Os = pV->GetBoundaryScalar( colT, &CqSubdivider::SubdOs, this, pPoints );
+						pV->GetBoundaryScalar( &pPoints->P(), &pNewPoints->P(), i );
+						std::vector<CqParameter*>::iterator iUP, iNUP;
+						for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
+							pV->GetBoundaryScalar( (*iUP), (*iNUP), i );
 					}
 				}
 			}
@@ -987,14 +929,9 @@ void CqWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t,
 	}
 
 	// Copy the modified points back to the surface.
-	for ( i = 0; i < oldcVerts; i++ )
-	{
-		pPoints->P() [ pVert( i ) ->iVertex() ] = aVertices[ i ].P;
-		if ( uses_s && has_s )		(*pPoints->s())[ pVert( i ) ->iVertex() ] = aVertices[ i ].s;
-		if ( uses_t && has_t )		(*pPoints->t())[ pVert( i ) ->iVertex() ] = aVertices[ i ].t;
-		if ( uses_Cs && has_Cs )	(*pPoints->Cs())[ pVert( i ) ->iVertex() ] = aVertices[ i ].Cq;
-		if ( uses_Os && has_Os )	(*pPoints->Os())[ pVert( i ) ->iVertex() ] = aVertices[ i ].Os;
-	}
+	m_pPoints = pNewPoints;
+	m_pPoints->AddRef();
+	pPoints->Release();
 }
 
 #ifdef AQSIS_SYSTEM_MACOSX
@@ -1009,6 +946,7 @@ TqInt CqWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 {
 	TqInt cE;
 
+	_OutputMesh("A.RAW");
 	if ( !m_fSubdivided )
 	{
 		Subdivide();
@@ -1024,6 +962,7 @@ TqInt CqWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 			pNew->m_fDiceable = TqTrue;
 			pNew->m_EyeSplitCount = m_EyeSplitCount;
 			aSplits.push_back( pNew );
+			pNew->_OutputMesh("A.RAW");
 		}
 	}
 	else
@@ -1041,6 +980,7 @@ TqInt CqWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 			pNew->m_fDiceable = TqTrue;
 			pNew->m_EyeSplitCount = m_EyeSplitCount;
 			aSplits.push_back( pNew );
+			pNew->_OutputMesh("A.RAW");
 		}
 	}
 
@@ -1071,14 +1011,14 @@ void CqWSurf::_OutputMesh( char* pname )
 	for ( i = 0; i < cFaces(); i++ )
 	{
 		CqWReference ref( pFace( i ) ->pEdge( 0 ), pFace( i ) );
-		CqVector3D vecA = SubdP( m_pPoints, ref.pvHead() ->iVertex() );
+		CqVector3D vecA = m_pPoints->P()[ ref.pvHead() ->iVertex() ];
 		ref.peNext();
 		TqInt j = 1;
 		while ( j < pFace( i ) ->cEdges() )
 		{
 			CqVector3D	vecB, vecC;
-			vecB = SubdP( m_pPoints, ref.pvHead() ->iVertex() );
-			vecC = SubdP( m_pPoints, ref.pvTail() ->iVertex() );
+			vecB = m_pPoints->P()[ ref.pvHead() ->iVertex() ];
+			vecC = m_pPoints->P()[ ref.pvTail() ->iVertex() ];
 
 			fprintf( pf, "%f %f %f " , vecA.x(), vecA.y(), vecA.z() );
 			fprintf( pf, "%f %f %f " , vecB.x(), vecB.y(), vecB.z() );
@@ -1412,10 +1352,17 @@ CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
 	// Initialise the P() array to a sensible size first.
 	m_pPoints->P().SetSize( 0 );
 
-	if ( pSurf->pPoints() ->Cs()->Size() == 1 ) (*m_pPoints->Cs()) = (*pSurf->pPoints() ->Cs());
-	else	m_pPoints->Cs()->SetSize( 0 );
-	if ( pSurf->pPoints() ->Os()->Size() == 1 ) (*m_pPoints->Os()) = (*pSurf->pPoints() ->Os());
-	else	m_pPoints->Os()->SetSize( 0 );
+	if ( pSurf->pPoints()->bHasCs() ) 
+	{
+		m_pPoints->AddPrimitiveVariable(new CqParameterTypedVarying<CqColor, type_color, CqColor>("Cs") );
+		(*m_pPoints->Cs()) = (*pSurf->pPoints() ->Cs());
+	}
+
+	if ( pSurf->pPoints() ->bHasOs() ) 
+	{
+		m_pPoints->AddPrimitiveVariable(new CqParameterTypedVarying<CqColor, type_color, CqColor>("Os") );
+		(*m_pPoints->Os()) = (*pSurf->pPoints() ->Os());
+	}
 
 	// Add the main face by adding each edge, by adding each vertex.
 	CqWReference rEdge( pF->pEdge( 0 ), pF );
@@ -1640,8 +1587,8 @@ CqMicroPolyGridBase* CqWSurf::Dice()
 	TqBool has_Cs = bHasCs();
 	TqBool has_Os = bHasOs();
 
-	if ( uses_Cs && !has_Cs ) m_pPoints->Cs()->BilinearDice( cuv, cuv, pGrid->Cs() );
-	if ( uses_Os && !has_Os ) m_pPoints->Os()->BilinearDice( cuv, cuv, pGrid->Os() );
+	if ( uses_Cs && has_Cs ) m_pPoints->Cs()->BilinearDice( cuv, cuv, pGrid->Cs() );
+	if ( uses_Os && has_Os ) m_pPoints->Os()->BilinearDice( cuv, cuv, pGrid->Os() );
 
 	DiceSubdivide( m_DiceCount );
 
@@ -1877,6 +1824,8 @@ void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool u
 	for ( iTime = 0; iTime < cTimes(); iTime++ )
 	{
 		CqPolygonPoints* pPoints = GetMotionObject( Time( iTime ) );
+		CqPolygonPoints* pNewPoints = new CqPolygonPoints(*pPoints);
+		pPoints->ClonePrimitiveVariables(*pPoints);
 
 		// Smooth vertex points
 		TqInt iE, bE, sE, i;
@@ -1897,11 +1846,10 @@ void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool u
 				// Check for smooth first (most commmon case, less likely to thrash the cache).
 				if ( sE <= 1 && bE == 0 )
 				{
-					aVertices[ i ].P = pV->GetSmoothedScalar( vecT, &CqSubdivider::SubdP, this, pPoints );
-					if ( uses_s && has_s ) aVertices[ i ].s = pV->GetSmoothedScalar( fT, &CqSubdivider::Subds, this, pPoints );
-					if ( uses_t && has_t ) aVertices[ i ].t = pV->GetSmoothedScalar( fT, &CqSubdivider::Subdt, this, pPoints );
-					if ( uses_Cs && has_Cs ) aVertices[ i ].Cq = pV->GetSmoothedScalar( colT, &CqSubdivider::SubdCs, this, pPoints );
-					if ( uses_Os && has_Os ) aVertices[ i ].Os = pV->GetSmoothedScalar( colT, &CqSubdivider::SubdOs, this, pPoints );
+					pV->GetSmoothedScalar( &pPoints->P(), &pNewPoints->P(), i );
+					std::vector<CqParameter*>::iterator iUP, iNUP;
+					for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
+						pV->GetSmoothedScalar( (*iUP), (*iNUP), i );
 				}
 				else
 				{
@@ -1910,38 +1858,34 @@ void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool u
 					{
 						if ( sE == 2 )
 						{
-							aVertices[ i ].P = pV->GetCreaseScalar( vecT, &CqSubdivider::SubdP, this, pPoints );
-							if ( uses_s && has_s ) aVertices[ i ].s = pV->GetCreaseScalar( fT, &CqSubdivider::Subds, this, pPoints );
-							if ( uses_t && has_t ) aVertices[ i ].t = pV->GetCreaseScalar( fT, &CqSubdivider::Subdt, this, pPoints );
-							if ( uses_Cs && has_Cs ) aVertices[ i ].Cq = pV->GetCreaseScalar( colT, &CqSubdivider::SubdCs, this, pPoints );
-							if ( uses_Os && has_Os ) aVertices[ i ].Os = pV->GetCreaseScalar( colT, &CqSubdivider::SubdOs, this, pPoints );
+							pV->GetCreaseScalar( &pPoints->P(), &pNewPoints->P(), i );
+							std::vector<CqParameter*>::iterator iUP, iNUP;
+							for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
+								pV->GetCreaseScalar( (*iUP), (*iNUP), i );
 						}
 						else
 						{
-							aVertices[ i ].P = SubdP( pPoints, pV->iVertex() );
-							if ( uses_s && has_s ) aVertices[ i ].s = Subds( pPoints, pV->iVertex() );
-							if ( uses_t && has_t ) aVertices[ i ].t = Subdt( pPoints, pV->iVertex() );
-							if ( uses_Cs && has_Cs ) aVertices[ i ].Cq = SubdCs( pPoints, pV->iVertex() );
-							if ( uses_Os && has_Os ) aVertices[ i ].Os = SubdOs( pPoints, pV->iVertex() );
+							pV->GetCornerScalar( &pPoints->P(), &pNewPoints->P(), i );
+							std::vector<CqParameter*>::iterator iUP, iNUP;
+							for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
+								pV->GetCornerScalar( (*iUP), (*iNUP), i );
 						}
 					}
 					else
 					{
 						if ( pV->cEdges() == 2 )      	// Boundary point with valence 2 is corner
 						{
-							aVertices[ i ].P = SubdP( pPoints, pV->iVertex() );
-							if ( uses_s && has_s ) aVertices[ i ].s = Subds( pPoints, pV->iVertex() );
-							if ( uses_t && has_t ) aVertices[ i ].t = Subdt( pPoints, pV->iVertex() );
-							if ( uses_Cs && has_Cs ) aVertices[ i ].Cq = SubdCs( pPoints, pV->iVertex() );
-							if ( uses_Os && has_Os ) aVertices[ i ].Os = SubdOs( pPoints, pV->iVertex() );
+							pV->GetCornerScalar( &pPoints->P(), &pNewPoints->P(), i );
+							std::vector<CqParameter*>::iterator iUP, iNUP;
+							for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
+								pV->GetCornerScalar( (*iUP), (*iNUP), i );
 						}
 						else				// Boundary points are crease points.
 						{
-							aVertices[ i ].P = pV->GetBoundaryScalar( vecT, &CqSubdivider::SubdP, this, pPoints );
-							if ( uses_s && has_s ) aVertices[ i ].s = pV->GetBoundaryScalar( fT, &CqSubdivider::Subds, this, pPoints );
-							if ( uses_t && has_t ) aVertices[ i ].t = pV->GetBoundaryScalar( fT, &CqSubdivider::Subdt, this, pPoints );
-							if ( uses_Cs && has_Cs ) aVertices[ i ].Cq = pV->GetBoundaryScalar( colT, &CqSubdivider::SubdCs, this, pPoints );
-							if ( uses_Os && has_Os ) aVertices[ i ].Os = pV->GetBoundaryScalar( colT, &CqSubdivider::SubdOs, this, pPoints );
+							pV->GetBoundaryScalar( &pPoints->P(), &pNewPoints->P(), i );
+							std::vector<CqParameter*>::iterator iUP, iNUP;
+							for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
+								pV->GetBoundaryScalar( (*iUP), (*iNUP), i );
 						}
 					}
 				}
@@ -1949,14 +1893,8 @@ void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool u
 		}
 
 		// Copy the modified points back to the surface.
-		for ( i = 0; i < oldcVerts; i++ )
-		{
-			pPoints->P() [ pVert( i ) ->iVertex() ] = aVertices[ i ].P;
-			if ( uses_s && has_s )		(*pPoints->s())[ pVert( i ) ->iVertex() ] = aVertices[ i ].s;
-			if ( uses_t && has_t )		(*pPoints->t())[ pVert( i ) ->iVertex() ] = aVertices[ i ].t;
-			if ( uses_Cs && has_Cs )	(*pPoints->Cs())[ pVert( i ) ->iVertex() ] = aVertices[ i ].Cq;
-			if ( uses_Os && has_Os )	(*pPoints->Os())[ pVert( i ) ->iVertex() ] = aVertices[ i ].Os;
-		}
+//		m_pPoints = pNewPoints;
+//		pPoints->Release();
 	}
 }
 
@@ -2123,5 +2061,345 @@ CqWVert* CqMotionWSurf::GetpWVert( CqPolygonPoints* pPoints, const CqVector3D& V
 	}
 }
 
+
+/** Perform the subdivision arithmetic on a paramter type.
+ * \param t Temp of the template type to overcome the VC++ problem with template functions.
+ * \param F A pointer to a function to get indexed values of the appropriate type.
+ * \param pSurf Pointer to the CqWSurf on which we are working. 
+ */
+void CqWVert::GetSmoothedScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex )
+{
+	// NOTE: Checks should have been made prior to this call to ensure it is neither
+	// a boundary point or a crease/corner point with sharp edges.
+
+	switch( pCurrent->Type() )
+	{
+		case type_float:
+		{
+			_SmoothScalar_(TqFloat, TqFloat);
+		}
+		break;
+
+		case type_integer:
+		{
+			_SmoothScalar_(TqInt, TqFloat);
+		}
+		break;
+
+		case type_point:
+		case type_normal:
+		case type_vector:
+		{
+			_SmoothScalar_(CqVector3D, CqVector3D);
+		}
+		break;
+
+		case type_color:
+		{
+			_SmoothScalar_(CqColor, CqColor);
+		}
+		break;
+
+		case type_hpoint:
+		{
+			_SmoothScalar_(CqVector4D, CqVector3D);
+		}
+		break;
+
+//				case type_string:
+//				{
+//					_SmoothScalar_(CqString, CqString);
+//				}
+//				break;
+
+//				case type_matrix:
+//				{
+//					_SmoothScalar_(CqMatrix, CqMatrix);
+//				}
+		break;
+	}
+}
+
+/** Templatised function to perform the subdivision arithmetic on a paramter type.
+ * \param t Temp of the template type to overcome the VC++ problem with template functions.
+ * \param F A pointer to a function to get indexed values of the appropriate type.
+ * \param pSurf Pointer to the CqWSurf on which we are working. 
+ */
+void CqWVert::GetCreaseScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex )
+{
+	switch( pCurrent->Type() )
+	{
+		case type_float:
+		{
+			_CreaseScalar_(TqFloat, TqFloat);
+		}
+		break;
+
+		case type_integer:
+		{
+			_CreaseScalar_(TqInt, TqFloat);
+		}
+		break;
+
+		case type_point:
+		case type_normal:
+		case type_vector:
+		{
+			_CreaseScalar_(CqVector3D, CqVector3D);
+		}
+		break;
+
+		case type_color:
+		{
+			_CreaseScalar_(CqColor, CqColor);
+		}
+		break;
+
+		case type_hpoint:
+		{
+			_CreaseScalar_(CqVector4D, CqVector3D);
+		}
+		break;
+
+//				case type_string:
+//				{
+//					_CreaseScalar_(CqString, CqString);
+//				}
+//				break;
+
+//				case type_matrix:
+//				{
+//					_CreaseScalar_(CqMatrix, CqMatrix);
+//				}
+		break;
+	}
+}
+
+/** Templatised function to perform the subdivision arithmetic on a paramter type.
+ * \param t Temp of the template type to overcome the VC++ problem with template functions.
+ * \param F A pointer to a function to get indexed values of the appropriate type.
+ * \param pSurf Pointer to the CqWSurf on which we are working. 
+ */
+void CqWVert::GetBoundaryScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex )
+{
+	switch( pCurrent->Type() )
+	{
+		case type_float:
+		{
+			_BoundaryScalar_(TqFloat, TqFloat);
+		}
+		break;
+
+		case type_integer:
+		{
+			_BoundaryScalar_(TqInt, TqFloat);
+		}
+		break;
+
+		case type_point:
+		case type_normal:
+		case type_vector:
+		{
+			_BoundaryScalar_(CqVector3D, CqVector3D);
+		}
+		break;
+
+		case type_color:
+		{
+			_BoundaryScalar_(CqColor, CqColor);
+		}
+		break;
+
+		case type_hpoint:
+		{
+			_BoundaryScalar_(CqVector4D, CqVector3D);
+		}
+		break;
+
+//				case type_string:
+//				{
+//					_BoundaryScalar_(CqString, CqString);
+//				}
+//				break;
+
+//				case type_matrix:
+//				{
+//					_BoundaryScalar_(CqMatrix, CqMatrix);
+//				}
+		break;
+	}
+}
+
+
+/** Templatised function to perform the subdivision arithmetic on a paramter type.
+ * \param t Temp of the template type to overcome the VC++ problem with template functions.
+ * \param F A pointer to a function to get indexed values of the appropriate type.
+ * \param pSurf Pointer to the CqWSurf on which we are working. 
+ */
+void CqWVert::GetCornerScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex )
+{
+	switch( pCurrent->Type() )
+	{
+		case type_float:
+		{
+			_BoundaryScalar_(TqFloat, TqFloat);
+		}
+		break;
+
+		case type_integer:
+		{
+			_BoundaryScalar_(TqInt, TqFloat);
+		}
+		break;
+
+		case type_point:
+		case type_normal:
+		case type_vector:
+		{
+			_BoundaryScalar_(CqVector3D, CqVector3D);
+		}
+		break;
+
+		case type_color:
+		{
+			_BoundaryScalar_(CqColor, CqColor);
+		}
+		break;
+
+		case type_hpoint:
+		{
+			_BoundaryScalar_(CqVector4D, CqVector3D);
+		}
+		break;
+
+//				case type_string:
+//				{
+//					_BoundaryScalar_(CqString, CqString);
+//				}
+//				break;
+
+//				case type_matrix:
+//				{
+//					_BoundaryScalar_(CqMatrix, CqMatrix);
+//				}
+		break;
+	}
+}
+
+
+/** Perform the subdivision arithmetic on a paramter type.
+ * \param t Temp of the template type to overcome the VC++ problem with template functions.
+ * \param F A pointer to a function to get indexed values of the appropriate type.
+ * \param pSurf Pointer to the CqWSurf on which we are working. 
+ */
+void CqWFace::CreateSubdivideScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex )
+{
+	CqWReference grE( m_apEdges[ 0 ], this );
+
+	switch( pCurrent->Type() )
+	{
+		case type_float:
+		{
+			_SubdivideParameterFace_(TqFloat, TqFloat);
+		}
+		break;
+
+		case type_integer:
+		{
+			_SubdivideParameterFace_(TqInt, TqFloat);
+		}
+		break;
+
+		case type_point:
+		case type_normal:
+		case type_vector:
+		{
+			_SubdivideParameterFace_(CqVector3D, CqVector3D);
+		}
+		break;
+
+		case type_color:
+		{
+			_SubdivideParameterFace_(CqColor, CqColor);
+		}
+		break;
+
+		case type_hpoint:
+		{
+			_SubdivideParameterFace_(CqVector4D, CqVector3D);
+		}
+		break;
+
+//				case type_string:
+//				{
+//					_SubdivideParameterFace_(CqString, CqString);
+//				}
+//				break;
+
+//				case type_matrix:
+//				{
+//					_SubdivideParameterFace_(CqMatrix, CqMatrix);
+//				}
+		break;
+	}
+}
+
+
+
+
+/** Perform the subdivision arithmetic on a paramter type.
+ * \param t Temp of the template type to overcome the VC++ problem with template functions.
+ * \param F A pointer to a function to get indexed values of the appropriate type.
+ * \param pSurf Pointer to the CqWSurf on which we are working. 
+ */
+void CqWEdge::CreateSubdivideScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex )
+{
+	switch( pCurrent->Type() )
+	{
+		case type_float:
+		{
+			_SubdivideParameterEdge_(TqFloat, TqFloat);
+		}
+		break;
+
+		case type_integer:
+		{
+			_SubdivideParameterEdge_(TqInt, TqFloat);
+		}
+		break;
+
+		case type_point:
+		case type_normal:
+		case type_vector:
+		{
+			_SubdivideParameterEdge_(CqVector3D, CqVector3D);
+		}
+		break;
+
+		case type_color:
+		{
+			_SubdivideParameterEdge_(CqColor, CqColor);
+		}
+		break;
+
+		case type_hpoint:
+		{
+			_SubdivideParameterEdge_(CqVector4D, CqVector3D);
+		}
+		break;
+
+//				case type_string:
+//				{
+//					_SubdivideParameterEdge_(CqString, CqString);
+//				}
+//				break;
+
+//				case type_matrix:
+//				{
+//					_SubdivideParameterEdge_(CqMatrix, CqMatrix);
+//				}
+//				break;
+	}
+}
 
 END_NAMESPACE( Aqsis )
