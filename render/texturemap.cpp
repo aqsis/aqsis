@@ -1785,6 +1785,26 @@ void CqShadowMap::SampleMap( CqVector3D& vecPoint, CqVector3D& swidth, CqVector3
 {
 	if ( m_pImage != 0 )
 	{
+		TqFloat pswidth = 1.0f;
+		TqFloat ptwidth = 1.0f;
+
+		// Get parameters out of the map.
+		if( paramMap.find("width") != paramMap.end() )
+		{
+			paramMap["width"]->GetFloat( pswidth );
+			ptwidth = pswidth;
+		}
+		else
+		{
+			if( paramMap.find("swidth") != paramMap.end() )
+				paramMap["swidth"]->GetFloat( pswidth );
+			if( paramMap.find("twidth") != paramMap.end() )
+				paramMap["twidth"]->GetFloat( ptwidth );
+		}
+		
+		swidth *= pswidth;
+		twidth *= ptwidth;
+
 		CqVector3D	R1, R2, R3, R4;
 		R1 = vecPoint - ( swidth / 2.0f ) - ( twidth / 2.0f );
 		R2 = vecPoint + ( swidth / 2.0f ) - ( twidth / 2.0f );
@@ -1806,8 +1826,8 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
 
-	TqFloat sblur = 1.0f;
-	TqFloat tblur = 1.0f;
+	TqFloat sblur = 0.0f;
+	TqFloat tblur = 0.0f;
 	TqFloat samples = 0.0f;
 
 	// Get parameters out of the map.
@@ -1915,11 +1935,11 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 	// Calculate no. of samples.
 	TqInt nt, ns;
-	if( samples > 0 )
-	{
-		nt = ns = static_cast<TqInt>( sqrt( samples ) );
-	}
-	else
+//	if( samples > 0 )
+//	{
+//		nt = ns = static_cast<TqInt>( sqrt( samples ) );
+//	}
+//	else
 	{
 		if ( sres * tres * 4.0 < NumSamples )
 		{
