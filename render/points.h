@@ -55,18 +55,18 @@ class CqPointsKDTreeData : public IqKDTreeData<TqInt>
     class CqPointsKDTreeDataComparator
     {
     public:
-        CqPointsKDTreeDataComparator(const boost::shared_ptr<CqPoints>& pPoints, TqInt dimension) : m_pPointsSurface( pPoints ), m_Dim( dimension )
+        CqPointsKDTreeDataComparator(const CqPoints* pPoints, TqInt dimension) : m_pPointsSurface( pPoints ), m_Dim( dimension )
         {}
 
         bool operator()(TqInt a, TqInt b);
 
     private:
-	boost::shared_ptr<CqPoints>	m_pPointsSurface;
+	const CqPoints*	m_pPointsSurface;
         TqInt		m_Dim;
     };
 
 public:
-    CqPointsKDTreeData( const boost::shared_ptr<CqPoints>& pPoints ) : m_pPointsSurface( pPoints )
+    CqPointsKDTreeData( const CqPoints* pPoints ) : m_pPointsSurface( pPoints )
     {}
 
     virtual void SortElements(std::vector<TqInt>& aLeaves, TqInt dimension)
@@ -75,11 +75,11 @@ public:
     }
     virtual TqInt Dimensions() const	{return(3);}
 
-    void	SetpPoints( const boost::shared_ptr<CqPoints>& pPoints );
+    void	SetpPoints( const CqPoints* pPoints );
     void	FreePoints();
 
 private:
-    boost::shared_ptr<CqPoints>	m_pPointsSurface;
+    const CqPoints*	m_pPointsSurface;
 };
 
 
@@ -273,7 +273,7 @@ private:
     // make this private.
 
     CqPoints( const CqPoints& From ) : CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(From.pPoints()),
-	    m_KDTreeData( boost::shared_ptr<CqPoints>() ),
+	    m_KDTreeData( this ),
             m_KDTree( &m_KDTreeData )
     {
         *this = From;

@@ -46,7 +46,7 @@ DEFINE_STATIC_MEMORYPOOL( CqMovingMicroPolygonKeyPoints, 512 );
 
 #define NBR_SEGMENTS 6
 
-void CqPointsKDTreeData::SetpPoints( const boost::shared_ptr<CqPoints>& pPoints )
+void CqPointsKDTreeData::SetpPoints( const CqPoints* pPoints )
 {
     m_pPointsSurface = pPoints;
 }
@@ -67,7 +67,7 @@ bool CqPointsKDTreeData::CqPointsKDTreeDataComparator::operator()(TqInt a, TqInt
 
 CqPoints::CqPoints( TqInt nvertices, const boost::shared_ptr<CqPolygonPoints>& pPoints ) : CqMotionSpec<boost::shared_ptr<CqPolygonPoints> >(pPoints),
         m_nVertices(nvertices),
-        m_KDTreeData( boost::shared_ptr<CqPoints> () ),
+        m_KDTreeData( this ),
         m_KDTree(&m_KDTreeData),
         m_MaxWidth(0)
 {
@@ -91,10 +91,6 @@ CqPoints::CqPoints( TqInt nvertices, const boost::shared_ptr<CqPolygonPoints>& p
         else if( (*iUP)->strName() == "width" && (*iUP)->Type() == type_float && (*iUP)->Class() == class_varying )
             m_widthParamIndex = index;
 
-/// \note: Needed to move this to the InitialiseKDTree function, as the shared_from_this() 
-///			call is not valid in a constructor or so it seems.
-//    m_KDTreeData.SetpPoints( boost::static_pointer_cast<CqPoints>( shared_from_this() ) );
-
     STATS_INC( GPR_points );
 }
 
@@ -108,9 +104,7 @@ CqPoints&	CqPoints::operator=( const CqPoints& From )
     CqSurface::operator=( From );
     m_nVertices = From.m_nVertices;
 
-/// \note: Needed to move this to the InitialiseKDTree function, as the shared_from_this() 
-///			call is not valid in a constructor or so it seems.
-//	m_KDTreeData.SetpPoints( boost::static_pointer_cast<CqPoints>( shared_from_this() ) );
+    m_KDTreeData.SetpPoints( this );
 
     // Release the reference to our points.
     TqInt i;
@@ -400,8 +394,6 @@ TqInt CqPoints::CopySplit( std::vector<boost::shared_ptr<CqBasicSurface> >& aSpl
 
 void CqPoints::InitialiseKDTree()
 {
-    m_KDTreeData.SetpPoints( boost::static_pointer_cast<CqPoints>( shared_from_this() ) );
-
     m_KDTree.aLeaves().reserve( nVertices() );
     TqUint i;
     for( i = 0; i < nVertices(); i++ )
