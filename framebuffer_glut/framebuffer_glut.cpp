@@ -235,7 +235,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 				TqFloat quantize = 1;
 				// If we are displaying an FP image we will need to quantize ourselves.
 				if( g_BitsPerSample != 8 )
-					quantize = 256;
+					quantize = 255;
 
 				if ( g_SamplesPerElement >= 3 )
 				{
