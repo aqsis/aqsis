@@ -797,6 +797,22 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 					}
 					pSurface->AddPrimitiveVariable(pNewUP);
 				}
+				else if( (*iUP)->Class() == class_uniform )
+				{
+					// Copy any 'uniform' class primitive variables.
+					CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
+					pNewUP->SetSize( pSurface->cUniform() );
+					pNewUP->SetValue( (*iUP), 0, j );
+					pSurface->AddPrimitiveVariable(pNewUP);
+				}
+				else if( (*iUP)->Class() == class_constant )
+				{
+					// Copy any 'constant' class primitive variables.
+					CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
+					pNewUP->SetSize( 1 );
+					pNewUP->SetValue( (*iUP), 0, 0 );
+					pSurface->AddPrimitiveVariable(pNewUP);
+				}
 			}
 
 			// If the shaders need u/v or s/t and they are not specified, then we need to put them in as defaults.
@@ -1003,6 +1019,23 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 					iP = PatchCoord( i + 1, j + 1 );
 					pNewUP->SetValue( (*iUP), 3, iP );
 
+					pSurface->AddPrimitiveVariable(pNewUP);
+				}
+				else if( (*iUP)->Class() == class_uniform )
+				{
+					// Copy any 'uniform' class primitive variables.
+					CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
+					pNewUP->SetSize( pSurface->cUniform() );
+					pNewUP->SetValue( (*iUP), 0, j );
+					pSurface->AddPrimitiveVariable(pNewUP);
+				}
+				else if( (*iUP)->Class() == class_constant )
+				{
+					// Copy any 'constant' class primitive variables.
+					CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
+					pNewUP->SetSize( 1 );
+
+					pNewUP->SetValue( (*iUP), 0, 0 );
 					pSurface->AddPrimitiveVariable(pNewUP);
 				}
 			}
