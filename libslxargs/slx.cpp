@@ -657,7 +657,7 @@ static int GetSearchPathEntryAtIndex( int pathIdx )
 		if ( len == 1 && isalpha( *currentChar ) )
 			len += strcspn( currentChar + 2, ":" ) + 1;
 
-		if ( currentChar[len] == ':' ) 	// list elements separated by colons
+		if ( currentChar[len] == ':' || currentChar[len] == 0 ) 	// list elements separated by colons
 		{
 			listEntryIdx++;
 			if( listEntryIdx > pathIdx )
