@@ -43,10 +43,12 @@ CqTransform::CqTransform() : CqMotionSpec<SqTransformation>(SqTransformation()),
 /** Copy constructor.
  */
 
-#if 0
-CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<SqTransformation>( From ), m_IsMoving(TqFalse)
+CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<SqTransformation>( From )
 {
-    *this = From;
+	m_IsMoving = From.m_IsMoving;
+	m_StaticMatrix = From.m_StaticMatrix;
+	m_Handedness = From.m_Handedness;
+/*    *this = From;
 
 	// Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
 	// if the previous level has motion specification, the value will be interpolated.
@@ -63,8 +65,8 @@ CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<SqTransformat
 	ct.m_Handedness = handLast;
 	ct.m_matTransform = matOtoWLast;
 	SetDefaultObject( ct );
+*/
 }
-#endif
 
 
 //---------------------------------------------------------------------
@@ -144,11 +146,10 @@ CqTransform::~CqTransform()
 {
 }
 
-#if 0
 //---------------------------------------------------------------------
 /** Copy function.
  */
-
+#if 0
 CqTransform& CqTransform::operator=( const CqTransform& From )
 {
     CqMotionSpec<SqTransformation>::operator=( From );
@@ -160,7 +161,6 @@ CqTransform& CqTransform::operator=( const CqTransform& From )
     return ( *this );
 }
 #endif
-
 
 //---------------------------------------------------------------------
 /** Set the transformation at the specified time.

@@ -66,7 +66,7 @@ public:
     class SetCurrent {};
 
     CqTransform();
-    // CqTransform( const CqTransform& From );
+    CqTransform( const CqTransform& From );
     CqTransform( const CqTransformPtr& From );
     CqTransform( const CqTransformPtr& From, TqFloat time,
 	         const CqMatrix& matTrans, const Set& set );

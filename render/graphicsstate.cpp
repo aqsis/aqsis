@@ -87,7 +87,7 @@ CqFrameModeBlock::CqFrameModeBlock( const boost::shared_ptr<CqModeBlock>& pconPa
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
     ADDREF( m_pattrCurrent );
-    m_ptransCurrent = CqTransformPtr( new CqTransform( pconParent->m_ptransCurrent ) );
+	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
 }
 
 
@@ -149,7 +149,7 @@ CqAttributeModeBlock::CqAttributeModeBlock( const boost::shared_ptr<CqModeBlock>
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
     ADDREF( m_pattrCurrent );
-    m_ptransCurrent = CqTransformPtr( new CqTransform( pconParent->m_ptransCurrent ) );
+	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
 }
 
 
@@ -177,8 +177,7 @@ CqTransformModeBlock::CqTransformModeBlock( const boost::shared_ptr<CqModeBlock>
         m_pattrCurrent = new CqAttributes();
         ADDREF( m_pattrCurrent );
     }
-
-    m_ptransCurrent = CqTransformPtr( new CqTransform( pconParent->m_ptransCurrent ) );
+	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
 }
 
 
@@ -200,7 +199,7 @@ CqSolidModeBlock::CqSolidModeBlock( CqString& type, const boost::shared_ptr<CqMo
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
     ADDREF( m_pattrCurrent );
-    m_ptransCurrent = CqTransformPtr( new CqTransform( pconParent->m_ptransCurrent ) );
+	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
 
     // Create a new CSG tree node of the appropriate type.
     m_pCSGNode = CqCSGTreeNode::CreateNode( type );
@@ -242,7 +241,7 @@ CqObjectModeBlock::CqObjectModeBlock( const boost::shared_ptr<CqModeBlock>& pcon
     // Create new Attributes as they must be pushed/popped by the state change.
     m_pattrCurrent = new CqAttributes();
     ADDREF( m_pattrCurrent );
-    m_ptransCurrent = CqTransformPtr( new CqTransform( pconParent->m_ptransCurrent ) );
+	m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
 }
 
 
@@ -273,7 +272,7 @@ CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], const boost::sha
 
     if ( pconParent )
     {
-        m_ptransCurrent = CqTransformPtr( new CqTransform( pconParent->m_ptransCurrent ) );
+		m_ptransCurrent = CqTransformPtr( new CqTransform(*pconParent->m_ptransCurrent.get() ) );
         // Set the default 'new time slot' matrix to the current 0 time matrix, this
         // takes care of the case of moving from non-Motion to Motion.
         //m_ptransCurrent->SetDefaultObject( m_ptransCurrent->GetMotionObject( m_ptransCurrent->Time( 0 ) ) );

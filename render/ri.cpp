@@ -604,13 +604,14 @@ RtVoid	RiWorldBegin()
         }
     }
 
-    QGetRenderContext() ->BeginWorldModeBlock();
     // Set the world to camera transformation matrix to the current matrix.
     CqTransformPtr current( QGetRenderContext() ->ptransCurrent() );
-    QGetRenderContext() ->SetCameraTransform( current );
+	CqTransformPtr camera(new CqTransform());
+    QGetRenderContext() ->SetCameraTransform( camera );
 	// clear the camera transform to a single state, all camera motion is now transferred to the objects.
-	QGetRenderContext()->GetCameraTransform()->ResetTransform( QGetRenderContext()->GetCameraTransform()->matObjectToWorld( QGetRenderContext()->GetCameraTransform()->Time(0) ), 
+	QGetRenderContext()->GetCameraTransform()->ResetTransform( current->matObjectToWorld( current->Time(0) ), 
 															   current->GetHandedness(QGetRenderContext()->Time()) );
+    QGetRenderContext() ->BeginWorldModeBlock();
     // and then reset the current matrix to identity, ready for object transformations.
 	if ( current->cTimes() > 1 )
 	{
@@ -622,6 +623,7 @@ RtVoid	RiWorldBegin()
 		{
 			current->SetCurrentTransform( current->Time( i ), matOpenShutterInverse * current->matObjectToWorld( current->Time( i ) ) );
 		}
+		QGetRenderContext()->pconCurrent()->ptransSetCurrent(current);
 	}
 	else
 	{
@@ -2808,7 +2810,7 @@ RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, R
 
 
 //----------------------------------------------------------------------
-// RiTransformBegin
+// Rijjj
 // Push the current transformation state.
 //
 RtVoid	RiTransformBegin()
