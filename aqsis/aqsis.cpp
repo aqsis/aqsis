@@ -37,7 +37,7 @@ bool g_pause;
 #ifdef	_DEBUG
 int g_endofframe = 3;
 #else
-int g_endofframe = 0;
+int g_endofframe = -1;
 #endif
 bool g_nostandard = 0;
 bool g_help = 0;
@@ -213,6 +213,10 @@ RtVoid PreRender()
 		strcpy( mode, g_mode.c_str() );
 		RiDisplay( "+aqsis", type, mode, NULL );
 	}
+	else if ( g_endofframe >= 0 )
+	{
+		RiOption( "statistics", "endofframe", &g_endofframe, RI_NULL );
+	}
 	return ;
 }
 
@@ -370,8 +374,6 @@ void RenderFile( FILE* file, const char* name )
 
 	if ( !g_nostandard )
 		librib::StandardDeclarations( renderengine );
-
-	RiOption( "statistics", "endofframe", &g_endofframe, RI_NULL );
 
 	if ( g_verbose )
 	{
