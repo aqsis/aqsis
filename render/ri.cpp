@@ -2658,6 +2658,9 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 		MinY = MaxY = vecTemp.y();
 		MinZ = MaxZ = vecTemp.z();
 
+		// We need to take into account Orientation here.
+		TqInt O = QGetRenderContext()->pattrCurrent() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
+
 		TqUint iVert;
 		for ( iVert = 1; iVert < pPointsClass->P() ->Size(); iVert++ )
 		{
@@ -2697,14 +2700,22 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 			}
 			if ( iloop == 0 )
 			{
-				if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
-					polya.SwapDirection();
+				if( O == OrientationRH )
+					if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
+						polya.SwapDirection();
+				else
+					if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
+						polya.SwapDirection();
 				poly = polya;
 			}
 			else
 			{
-				if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
-					polya.SwapDirection();
+				if( O == OrientationRH )
+					if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
+						polya.SwapDirection();
+				else
+					if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
+						polya.SwapDirection();
 				poly.Combine( polya );
 			}
 		}
@@ -3061,6 +3072,9 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 		}
 	}
 
+	// We need to take into account Orientation here.
+	TqInt O = QGetRenderContext()->pattrCurrent() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
+
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, npolys, sumnVerts );
 	ADDREF( pPointsClass );
@@ -3123,14 +3137,22 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 
 				if ( iloop == 0 )
 				{
-					if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
-						polya.SwapDirection();
+					if( O == OrientationRH )
+						if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
+							polya.SwapDirection();
+					else
+						if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
+							polya.SwapDirection();
 					poly = polya;
 				}
 				else
 				{
-					if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
-						polya.SwapDirection();
+					if( O == OrientationRH )
+						if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
+							polya.SwapDirection();
+					else
+						if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
+							polya.SwapDirection();
 					poly.Combine( polya );
 				}
 			}

@@ -230,18 +230,20 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 
 		if ( pSurface->EyeSplitCount() > MaxEyeSplits )
 		{
+			//CqAttributeError( ErrorID_MaxEyeSplits, Severity_Normal, "Max eyesplits exceeded", pSurface->pAttributes(), TqTrue );
 			CqString objname( "unnamed" );
-			const CqString* pattrName = pSurface->pAttributes()->GetStringAttribute( "identifier", "name" );
+			const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
 			if ( pattrName != 0 ) objname = pattrName[ 0 ];
-			CqString warn = "Max eyesplits for object \"";
+			static CqString oldwarn = "";
+			CqString warn;
+			warn = "Max eyesplits for object \"";
 			warn += objname.c_str();
-			warn += "\" exceeded"; 
-		 	static CqString oldwarn = "";	
-			if (oldwarn != warn) {
-				QGetRenderContext() ->Logger() ->warn( warn);
+			warn += "\" exceeded";
+			if ( warn != oldwarn )
+			{
+				QGetRenderContext() ->Logger() ->warn( warn );
 				oldwarn = warn;
 			}
-			pSurface->Discard();
 		}
 		return ( TqFalse );
 	}
@@ -259,7 +261,7 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 		Bound.vecMin().x( Bound.vecMin().x() - C * sx );
 		Bound.vecMin().y( Bound.vecMin().y() - C * sy );
 		Bound.vecMax().x( Bound.vecMax().x() + C * sx );
-		Bound.vecMax().y( Bound.vecMax().y() + C * sy);
+		Bound.vecMax().y( Bound.vecMax().y() + C * sy );
 	}
 
 	// Convert the bounds to raster space.
@@ -295,7 +297,7 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 {
 	// Initially, the surface enters this method with zero references, so add one.
 	ADDREF( pSurface );
-	
+
 	// Count the number of total gprims
 	QGetRenderContext() ->Stats().IncTotalGPrims();
 
@@ -353,6 +355,8 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 			if ( YMinb < 0 ) YMinb = 0;
 			nBucket = ( YMinb * m_cXBuckets ) + XMinb;
 		}
+		if ( nBucket < iCurrentBucket() )
+			nBucket = iCurrentBucket();
 	}
 
 	assert( nBucket >= iCurrentBucket() );
@@ -360,6 +364,7 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 
 	// Release the reference acquired for the surface for this method.
 	RELEASEREF( pSurface );
+	return ;
 
 }
 
@@ -478,16 +483,16 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 	iBkt = ( iYBa * m_cXBuckets ) + iXBa;
 
 	// If the bucket is less than the current, see if it fits in the current bucket, this
-	// should allow for trimmed u-polys that lie on a bucket boundary, as is the case with 
+	// should allow for trimmed u-polys that lie on a bucket boundary, as is the case with
 	// bilinear patches with 3 points.
-	if( iBkt < iCurrentBucket() )
+	if ( iBkt < iCurrentBucket() )
 	{
 		CqVector2D BucketMin = Position( iCurrentBucket() );
 		CqVector2D BucketMax = BucketMin + Size( iCurrentBucket() );
 		if ( !( ( B.vecMin().x() > BucketMax.x() ) ||
-			    ( B.vecMin().y() > BucketMax.y() ) ||
-			    ( B.vecMax().x() < BucketMin.x() ) ||
-			    ( B.vecMax().y() < BucketMin.y() ) ) )
+		        ( B.vecMin().y() > BucketMax.y() ) ||
+		        ( B.vecMax().x() < BucketMin.x() ) ||
+		        ( B.vecMax().y() < BucketMin.y() ) ) )
 		{
 			iBkt = iCurrentBucket();
 		}
@@ -496,11 +501,11 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 		else
 		{
 			RELEASEREF( pmpgNew );
-			return;
+			return ;
 		}
 	}
 
-	assert( iBkt >= iCurrentBucket() ); 
+	assert( iBkt >= iCurrentBucket() );
 	if ( ( iBkt >= iCurrentBucket() ) && ( iBkt < ( m_cXBuckets * m_cYBuckets ) ) )
 	{
 		m_aBuckets[ iBkt ].AddMPG( pmpgNew );
@@ -680,7 +685,7 @@ void CqImageBuffer::RenderMPGs( TqInt iBucket, long xmin, long xmax, long ymin, 
 
 inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax )
 {
-	CqBucket& Bucket = m_aBuckets[ iBucket ];
+	CqBucket & Bucket = m_aBuckets[ iBucket ];
 	CqStats& theStats = QGetRenderContext() ->Stats();
 
 	const TqFloat* LodBounds = pMPG->pGrid() ->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
@@ -690,7 +695,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 	const TqFloat* dofdata = 0;
 	TqFloat sx = QGetRenderContext() ->GetDepthOfFieldScaleX();
 	TqFloat sy = QGetRenderContext() ->GetDepthOfFieldScaleY();
-		
+
 	if ( UsingDepthOfField )
 	{
 		dofdata = QGetRenderContext() ->GetDepthOfFieldData();
@@ -714,7 +719,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 		if ( UsingDepthOfField )
 		{
 			TqFloat C = MAX( CircleOfConfusion( dofdata, Bound.vecMin().z() ), CircleOfConfusion( dofdata, Bound.vecMax().z() ) );
-			
+
 			bminx -= C * sx;
 			bminy -= C * sy;
 			bmaxx += C * sx;
@@ -773,10 +778,10 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 		register long iY = sY;
 
 		TqFloat dc = 0.0f;
-		if( UsingDepthOfField )
+		if ( UsingDepthOfField )
 		{
 			TqFloat ad; // Average depth
-			
+
 			ad = pMPG->PointA().z() + pMPG->PointB().z() + pMPG->PointC().z() + pMPG->PointD().z();
 			ad /= 4;
 			dc = CircleOfConfusion( dofdata, ad );
@@ -816,14 +821,14 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 						const CqVector2D& vecP = pie2->SamplePoint( m, n );
 
 						CqVector2D samplelens;
-						if( UsingDepthOfField )
+						if ( UsingDepthOfField )
 						{
 							samplelens = pie2->SampleLens( m, n );
 							//std::cout << samplelens.x() << " " << samplelens.y() << std::endl;
 							samplelens.x( samplelens.x() * QGetRenderContext() ->GetDepthOfFieldScaleX() );
 							samplelens.y( samplelens.y() * QGetRenderContext() ->GetDepthOfFieldScaleX() );
 							//std::cout << samplelens.x() << " " << samplelens.y() << std::endl;
-							
+
 						}
 						theStats.IncSamples();
 
@@ -881,93 +886,93 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 
 inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt m, TqInt n, TqFloat D )
 {
-	SqImageSample	ImageVal( QGetRenderContext()->GetOutputDataTotalSize() );
+	SqImageSample	ImageVal( QGetRenderContext() ->GetOutputDataTotalSize() );
 	ImageVal.SetDepth( D );
 
-	std::valarray<TqFloat>	val( 0.0f, QGetRenderContext()->GetOutputDataTotalSize() );
-	
+	std::valarray<TqFloat>	val( 0.0f, QGetRenderContext() ->GetOutputDataTotalSize() );
+
 	TqBool Occludes = TqTrue;
-	val[0] = val[1] = val[2] = val[3] = val[4] = val[5] = 1.0f;
-	val[6] = D;
+	val[ 0 ] = val[ 1 ] = val[ 2 ] = val[ 3 ] = val[ 4 ] = val[ 5 ] = 1.0f;
+	val[ 6 ] = D;
 	// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
 	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
 	{
-		val[0] = pMPG->colColor().fRed();
-		val[1] = pMPG->colColor().fGreen();
-		val[2] = pMPG->colColor().fBlue();
+		val[ 0 ] = pMPG->colColor().fRed();
+		val[ 1 ] = pMPG->colColor().fGreen();
+		val[ 2 ] = pMPG->colColor().fBlue();
 	}
 	// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
 	if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Oi" ) )
 	{
-		val[3] = pMPG->colOpacity().fRed();
-		val[4] = pMPG->colOpacity().fGreen();
-		val[5] = pMPG->colOpacity().fBlue();
+		val[ 3 ] = pMPG->colOpacity().fRed();
+		val[ 4 ] = pMPG->colOpacity().fGreen();
+		val[ 5 ] = pMPG->colOpacity().fBlue();
 		Occludes = pMPG->colOpacity() >= gColWhite;
 	}
 
 	// Now store any other data types that have been registered.
-	std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext()->GetMapOfOutputDataEntries();
+	std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext() ->GetMapOfOutputDataEntries();
 	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
-	for( entry = DataMap.begin(); entry != DataMap.end(); entry++ )
-	{	
+	for ( entry = DataMap.begin(); entry != DataMap.end(); entry++ )
+	{
 		IqShaderData* pData;
-		if( ( pData = pMPG->pGrid()->FindStandardVar( entry->first.c_str() ) ) != NULL )
+		if ( ( pData = pMPG->pGrid() ->FindStandardVar( entry->first.c_str() ) ) != NULL )
 		{
-			switch( pData->Type() )
+			switch ( pData->Type() )
 			{
-				case type_float:
-				case type_integer:
-				{
-					TqFloat f;
-					pData->GetFloat( f, pMPG->GetIndex() );
-					val[ entry->second.m_Offset ] = f;
-					break;
-				}
-				case type_point:
-				case type_normal:
-				case type_vector:
-				case type_hpoint:
-				{
-					CqVector3D v;
-					pData->GetPoint( v, pMPG->GetIndex() );
-					val[ entry->second.m_Offset    ] = v.x();
-					val[ entry->second.m_Offset + 1] = v.y();
-					val[ entry->second.m_Offset + 2] = v.z();
-					break;
-				}
-				case type_color:
-				{
-					CqColor c;
-					pData->GetColor( c, pMPG->GetIndex() );
-					val[ entry->second.m_Offset    ] = c.fRed();
-					val[ entry->second.m_Offset + 1] = c.fGreen();
-					val[ entry->second.m_Offset + 2] = c.fBlue();
-					break;
-				}
-				case type_matrix:
-				{
-					CqMatrix m;
-					pData->GetMatrix( m, pMPG->GetIndex() );
-					TqFloat* pElements = m.pElements();
-					val[ entry->second.m_Offset     ] = pElements[0 ];
-					val[ entry->second.m_Offset + 1 ] = pElements[1 ];
-					val[ entry->second.m_Offset + 2 ] = pElements[2 ];
-					val[ entry->second.m_Offset + 3 ] = pElements[3 ];
-					val[ entry->second.m_Offset + 4 ] = pElements[4 ];
-					val[ entry->second.m_Offset + 5 ] = pElements[5 ];
-					val[ entry->second.m_Offset + 6 ] = pElements[6 ];
-					val[ entry->second.m_Offset + 7 ] = pElements[7 ];
-					val[ entry->second.m_Offset + 8 ] = pElements[8 ];
-					val[ entry->second.m_Offset + 9 ] = pElements[9 ];
-					val[ entry->second.m_Offset + 10] = pElements[10];
-					val[ entry->second.m_Offset + 11] = pElements[11];
-					val[ entry->second.m_Offset + 12] = pElements[12];
-					val[ entry->second.m_Offset + 13] = pElements[13];
-					val[ entry->second.m_Offset + 14] = pElements[14];
-					val[ entry->second.m_Offset + 15] = pElements[15];
-					break;
-				}
-				default:
+					case type_float:
+					case type_integer:
+					{
+						TqFloat f;
+						pData->GetFloat( f, pMPG->GetIndex() );
+						val[ entry->second.m_Offset ] = f;
+						break;
+					}
+					case type_point:
+					case type_normal:
+					case type_vector:
+					case type_hpoint:
+					{
+						CqVector3D v;
+						pData->GetPoint( v, pMPG->GetIndex() );
+						val[ entry->second.m_Offset ] = v.x();
+						val[ entry->second.m_Offset + 1 ] = v.y();
+						val[ entry->second.m_Offset + 2 ] = v.z();
+						break;
+					}
+					case type_color:
+					{
+						CqColor c;
+						pData->GetColor( c, pMPG->GetIndex() );
+						val[ entry->second.m_Offset ] = c.fRed();
+						val[ entry->second.m_Offset + 1 ] = c.fGreen();
+						val[ entry->second.m_Offset + 2 ] = c.fBlue();
+						break;
+					}
+					case type_matrix:
+					{
+						CqMatrix m;
+						pData->GetMatrix( m, pMPG->GetIndex() );
+						TqFloat* pElements = m.pElements();
+						val[ entry->second.m_Offset ] = pElements[ 0 ];
+						val[ entry->second.m_Offset + 1 ] = pElements[ 1 ];
+						val[ entry->second.m_Offset + 2 ] = pElements[ 2 ];
+						val[ entry->second.m_Offset + 3 ] = pElements[ 3 ];
+						val[ entry->second.m_Offset + 4 ] = pElements[ 4 ];
+						val[ entry->second.m_Offset + 5 ] = pElements[ 5 ];
+						val[ entry->second.m_Offset + 6 ] = pElements[ 6 ];
+						val[ entry->second.m_Offset + 7 ] = pElements[ 7 ];
+						val[ entry->second.m_Offset + 8 ] = pElements[ 8 ];
+						val[ entry->second.m_Offset + 9 ] = pElements[ 9 ];
+						val[ entry->second.m_Offset + 10 ] = pElements[ 10 ];
+						val[ entry->second.m_Offset + 11 ] = pElements[ 11 ];
+						val[ entry->second.m_Offset + 12 ] = pElements[ 12 ];
+						val[ entry->second.m_Offset + 13 ] = pElements[ 13 ];
+						val[ entry->second.m_Offset + 14 ] = pElements[ 14 ];
+						val[ entry->second.m_Offset + 15 ] = pElements[ 15 ];
+						break;
+					}
+					default:
 					// left blank to avoid compiler warnings about unhandled
 					//  types
 					break;
@@ -987,7 +992,7 @@ inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2
 		if ( i < c && p[ i ].Depth() == ImageVal.Depth() )
 		{
 			p[ i ].m_Data = ( p[ i ].m_Data + val ) * 0.5f;
-			return;
+			return ;
 		}
 	}
 
@@ -1009,7 +1014,7 @@ inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2
 	{
 		ImageVal.m_flags |= SqImageSample::Flag_Occludes;
 	}
-	if( pMPG->pGrid() ->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1 )
+	if ( pMPG->pGrid() ->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1 )
 	{
 		ImageVal.m_flags |= SqImageSample::Flag_Matte;
 	}
@@ -1102,12 +1107,12 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 						 * We need a way out of this forloop. So I unlink the primitive
 						 * and try with the next one
 						 * 
-						 */
+						 */ 
 						//CqAttributeError( ErrorID_OcclusionMaxEyeSplits, Severity_Normal, "Geometry gets culled too many times", pSurface->pAttributes(), TqTrue );
 						CqString objname( "unnamed" );
 						const CqString* pattrName = pSurface ->pAttributes() ->GetStringAttribute( "identifier", "name" );
 						if ( pattrName != 0 ) objname = pattrName[ 0 ];
-						QGetRenderContext() ->Logger() ->warn( "Primitive \"%s\" gets culled too many times", objname.c_str()  );
+						QGetRenderContext() ->Logger() ->warn( "Primitive \"%s\" gets culled too many times", objname.c_str() );
 
 						counter = 0;
 						pSurface->UnLink();
@@ -1150,9 +1155,17 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 			QGetRenderContext() ->Stats().SplitsTimer().Start();
 			TqInt cSplits = pSurface->Split( aSplits );
 			TqInt i;
-			for ( i = 0; i < cSplits; i++ )
+			TqBool bUseful = ( pSurface->EyeSplitCount() < MaxEyeSplits );
+			for ( i = 0; i < cSplits && bUseful; i++ )
+			{
 				PostSurface( aSplits[ i ] );
+			}
+
 			QGetRenderContext() ->Stats().SplitsTimer().Stop();
+			if ( !bUseful )
+			{
+				pSurface->UnLink();
+			}
 		}
 
 		pSurface->RenderComplete();
@@ -1300,7 +1313,7 @@ void CqImageBuffer::RenderImage()
 			Complete /= iBucket;
 			Complete = 100.0f / Complete;
 			QGetRenderContext() ->Stats().SetComplete( Complete );
-			( *pProgressHandler ) ( Complete, QGetRenderContext()->CurrentFrame() );
+			( *pProgressHandler ) ( Complete, QGetRenderContext() ->CurrentFrame() );
 		}
 
 
@@ -1312,7 +1325,7 @@ void CqImageBuffer::RenderImage()
 		}
 #ifdef WIN32
 		if ( !( iBucket % bucketmodulo ) )
-		SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );
+			SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );
 #endif
 #if defined(REQUIRED)
 		TqInt iB2, NumGrids = 0, NumPolys = 0;
@@ -1323,7 +1336,7 @@ void CqImageBuffer::RenderImage()
 		}
 #endif
 
-		m_aBuckets[iBucket].EmptyBucket();
+		m_aBuckets[ iBucket ].EmptyBucket();
 	}
 
 	ImageComplete();
@@ -1335,7 +1348,7 @@ void CqImageBuffer::RenderImage()
 
 	if ( pProgressHandler )
 	{
-		( *pProgressHandler ) ( 100.0f, QGetRenderContext()->CurrentFrame() );
+		( *pProgressHandler ) ( 100.0f, QGetRenderContext() ->CurrentFrame() );
 	}
 	m_fDone = TqTrue;
 }
