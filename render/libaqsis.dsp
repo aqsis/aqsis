@@ -209,6 +209,10 @@ SOURCE=.\polygon.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\procedural.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\quadrics.cpp
 # End Source File
 # Begin Source File
@@ -410,6 +414,10 @@ SOURCE=.\points.h
 # Begin Source File
 
 SOURCE=.\polygon.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\procedural.h
 # End Source File
 # Begin Source File
 
