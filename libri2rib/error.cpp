@@ -48,7 +48,7 @@ USING_NAMESPACE( libri2rib );
 RtVoid CqError::manage ()
 {
     RiLastError = m_Code;
-    std::cerr << Aqsis::error << m_Message1 << m_Message2 << m_Message3 << std::endl;
+    std::cerr << m_Message1 << m_Message2 << m_Message3 << std::endl;
     if ( m_Severity == RIE_SEVERE ) exit( EXIT_FAILURE );
 
     if ( m_ToRib == TqTrue )
