@@ -96,11 +96,6 @@ char *result =NULL;
    result = jpeg_open(jpgfile, tiffname);
    fclose(jpgfile);
    
-#ifndef AQSIS_SYSTEM_WIN32
-   free(tmp);
-#endif
-   
-
    return result;
 }
 

@@ -1,81 +1,191 @@
-#	Real syntax MAKEFILE for PP
-#
-#	Using Borland C++ V2.0 or Microsoft 'C' V6.00A and Logical Systems
-#	'MAKE'.  DON'T TRY THIS	WITH THE STOCK MICROSOFT V6.00 RELEASE, GET THE
-#	"MAINTENANCE" UPDATE FROM MICROSOFT!
-#
-#	Written		07/10/87 by Kirk Bailey
-#	Modified	5/3/91 by Kirk Bailey
-#
-#	"make"		Compile and link the preprocessor
-#
+# Makefile.in generated automatically by automake 1.4-p3 from Makefile.am
 
-# MACRO DEFINITIONS:
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+
+SHELL = /bin/sh
+
+srcdir = .
+top_srcdir = ..
+
+prefix = /usr/local/aqsis
+exec_prefix = ${prefix}
+
+bindir = ${exec_prefix}/bin
+sbindir = ${exec_prefix}/sbin
+libexecdir = ${exec_prefix}/libexec
+datadir = ${prefix}/share
+sysconfdir = ${prefix}/etc
+sharedstatedir = ${prefix}/com
+localstatedir = ${prefix}/var
+libdir = ${exec_prefix}/lib
+infodir = ${prefix}/info
+mandir = ${prefix}/man
+includedir = ${prefix}/include
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/aqsis
+pkglibdir = $(libdir)/aqsis
+pkgincludedir = $(includedir)/aqsis
+
+top_builddir = ..
+
+ACLOCAL = aclocal
+AUTOCONF = autoconf
+AUTOMAKE = automake
+AUTOHEADER = autoheader
+
+INSTALL = /usr/bin/install -c
+INSTALL_PROGRAM = ${INSTALL} $(AM_INSTALL_PROGRAM_FLAGS)
+INSTALL_DATA = ${INSTALL} -m 644
+INSTALL_SCRIPT = ${INSTALL}
+transform = s,x,x,
+
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+host_alias = @host_alias@
+host_triplet = i686-pc-cygwin
+AS = @AS@
+CC = gcc
+CXX = g++
+DLLTOOL = @DLLTOOL@
+ECHO = echo
+EXEEXT = .exe
+LEX = flex
+LIBTOOL = $(SHELL) $(top_builddir)/libtool
+LN_S = ln -s
+MAKEINFO = makeinfo
+OBJDUMP = @OBJDUMP@
+OBJEXT = o
+OPENGL_INC = /usr/local/include
+OPENGL_LIB = /usr/local/lib
+PACKAGE = aqsis
+RANLIB = ranlib
+STRIP = strip
+TIFF_INC = /usr/local/include
+TIFF_LIB = /usr/local/lib
+VERSION = 0.5.4001
+YACC = bison -y
+
+EXTRA_DIST = PP.DOC PP.H PP1.C PP2.C PP3.C PP4.C PP5.C PP6.C PP7.C PP8.C PPEXT.H slpp.dsp
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_CLEAN_FILES = 
+DIST_COMMON =  Makefile.am Makefile.in
+
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = tar
+GZIP_ENV = --best
+all: all-redirect
 .SUFFIXES:
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu slpp/Makefile
 
-.SUFFIXES: .c
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
-# ----------------------------------------------------------------------------
-# Configure compiler vendor by deleting the "rem" from the desired vendor.
-# Current choices: Microsoft C6.00A (MS), Borland C++ V2.0 (BORLAND)
-#	
-MS	=
-BORLAND	= rem
+tags: TAGS
+TAGS:
 
-# ----------------------------------------------------------------------------
-# Configure whether to include compiler debug support by removing the "rem"
-# from the desired selection: Include debug info (DBUG) or Production (PROD)
-#
-DBUG	= rem
-PROD	=
 
-# ----------------------------------------------------------------------------
-# This defines a list of all local header source files
-#
-HFILES	= pp.h ppext.h
+distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
 
-# ----------------------------------------------------------------------------
-# All the object files
-#
-OFILES	= pp1.obj pp2.obj pp3.obj pp4.obj pp5.obj pp6.obj pp7.obj pp8.obj
+subdir = slpp
 
-# ----------------------------------------------------------------------------
-# This rule says a .OBJ file should be created by using the C compiler on a .C
-# file.
-#
-.c.obj	:
-	$(BORLAND) $(DBUG) bcc -c -v -mc -w -w-pro -g1 -N $*.c
-	$(BORLAND) $(PROD) bcc -c -O -G -mc -w -w-pro -g1 $*.c
-	$(MS) $(DBUG) cl /c /Zi /Od /AC /W1 /WX $*.c
-	$(MS) $(PROD) cl /c /Ox /AC /W1 /WX /DMSC_OPT $*.c
+distdir: $(DISTFILES)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(top_distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	cd $(top_srcdir) \
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu slpp/Makefile
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+install-exec-am:
+install-exec: install-exec-am
 
-# ----------------------------------------------------------------------------
-# Link rule
-#
-pp.exe	: $(OFILES)
-	$(BORLAND) $(DBUG) tlink /v /c /x /Td c0c.obj $(OFILES),$*.exe,,cc.lib
-	$(BORLAND) $(PROD) tlink /c /x /Td c0c.obj $(OFILES),$*.exe,,cc.lib
-	$(MS) $(DBUG) link /CO /F /NOI /STACK:32768 $(OFILES),$*.exe;
-	$(MS) $(PROD) link /E /F /NOI /PACKC /STACK:32768 $(OFILES),$*.exe;
+install-data-am:
+install-data: install-data-am
 
-# ----------------------------------------------------------------------------
-# Source file dependencies for object files.
-# 
-pp1.obj	: $(HFILES)
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am:
+uninstall: uninstall-am
+all-am: Makefile
+all-redirect: all-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
+installdirs:
 
-pp2.obj	: $(HFILES)
 
-pp3.obj	: $(HFILES)
+mostlyclean-generic:
 
-pp4.obj	: $(HFILES)
+clean-generic:
 
-pp5.obj	: $(HFILES)
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
-pp6.obj	: $(HFILES)
+maintainer-clean-generic:
+mostlyclean-am:  mostlyclean-generic
 
-pp7.obj	: $(HFILES)
+mostlyclean: mostlyclean-am
 
-pp8.obj	: $(HFILES)
+clean-am:  clean-generic mostlyclean-am
 
-# End of PP makefile
+clean: clean-am
+
+distclean-am:  distclean-generic clean-am
+	-rm -f libtool
+
+distclean: distclean-am
+
+maintainer-clean-am:  maintainer-clean-generic distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+
+.PHONY: tags distdir info-am info dvi-am dvi check check-am \
+installcheck-am installcheck install-exec-am install-exec \
+install-data-am install-data install-am install uninstall-am uninstall \
+all-redirect all-am all installdirs mostlyclean-generic \
+distclean-generic clean-generic maintainer-clean-generic clean \
+mostlyclean distclean maintainer-clean
+
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:

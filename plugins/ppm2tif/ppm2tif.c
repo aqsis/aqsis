@@ -78,9 +78,6 @@ char *result =NULL;
 		/* SUCCESS */
 		result = tiffname;
    } 
-#ifndef AQSIS_SYSTEM_WIN32
-   free(tmp);
-#endif
    return result;
 }
 

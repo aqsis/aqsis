@@ -62,5 +62,10 @@ shaders/Makefile \
 shadowmap/Makefile \
 slpp/Makefile \
 teqser/Makefile \
+aqsltell/Makefile \
+plugins/Makefile \
+plugins/gif2tif/Makefile \
+plugins/jpg2tif/Makefile \
+plugins/ppm2tif/Makefile \
 Makefile )
 
