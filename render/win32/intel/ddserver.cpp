@@ -1,9 +1,11 @@
+#include	"aqsis.h"
 
 #include	<process.h>
 
 #include	"renderer.h"
 #include	"displaydriver.h"
 #include	"ddserver.h"
+#include	"imagebuffer.h"
 
 
 START_NAMESPACE(Aqsis)
@@ -15,7 +17,7 @@ static void AcceptConnections(void* pvServer);
 /** Constructor, takes a port no. and prepares the socket to accept clients.
  */
 
-CqDDServer::CqDDServer(TqInt port) : m_bHasQuit(TqFalse)
+CqDDServer::CqDDServer(TqInt port)
 {
 	Prepare(port);
 }
@@ -31,10 +33,7 @@ TqBool	CqDDServer::Prepare(TqInt port)
 	if(Open())
 		if(Bind(port))
 			if(Listen())
-			{
-				Accept();
 				return(TqTrue);
-			}
 	return(TqFalse);
 }
 
@@ -98,10 +97,30 @@ TqBool CqDDServer::Listen()
 /** Set ip the thread to wait for client connection requests.
  */
 
-void CqDDServer::Accept()
+TqBool CqDDServer::Accept(CqDDClient& dd)
 {
-	// Start the accept thread
-	m_AcceptThreadID=_beginthread(&AcceptConnections,0,this);
+	SOCKET c;
+
+	if((c=accept(Socket(),NULL,NULL))!=INVALID_SOCKET)
+	{
+		dd.SetSocket(c);
+		// Issue a format request so that we know what data to send to the client.
+		SqDDMessageBase msg;
+		SqDDMessageFormatResponse frmt;
+
+		msg.m_MessageID=MessageID_FormatQuery;
+		msg.m_MessageLength=sizeof(SqDDMessageBase);
+		dd.SendMsg(&msg);
+		dd.Receive(&frmt,sizeof(frmt));
+
+		// Confirm the message returned is as expected.
+		if(frmt.m_MessageID==MessageID_FormatResponse &&
+		   frmt.m_MessageLength==sizeof(frmt))
+			return(TqTrue);
+		else
+			dd.Close();
+	}
+	return(TqFalse);
 }
 
 
@@ -111,35 +130,7 @@ void CqDDServer::Accept()
 
 CqDDServer::~CqDDServer()
 {
-	for(std::vector<CqDDClient>::iterator i=m_aClients.begin(); i!=m_aClients.end(); i++)
-		i->Close();
-
 	Close();
-}
-
-
-//---------------------------------------------------------------------
-/** Send some data to all listening clients.
- * \param buffer Void pointer to the data to send.
- * \param len Integer length of the data in buffer.
- */
-
-void CqDDServer::SendData(void* buffer, TqInt len)
-{
-	std::vector<CqDDClient>::iterator i;
-	for(i=m_aClients.begin(); i!=m_aClients.end(); i++)
-		i->SendData(buffer,len);
-}
-
-
-//---------------------------------------------------------------------
-/** Send a preconstructed message structure to all clients.
- * \param pMsg Pointer to a SqDDMessageBase derive structure.
- */
-
-void CqDDServer::SendMessage(SqDDMessageBase* pMsg)
-{
-	SendData(pMsg,pMsg->m_MessageLength);
 }
 
 
@@ -151,46 +142,42 @@ void CqDDServer::SendMessage(SqDDMessageBase* pMsg)
 
 void CqDDClient::SendData(void* buffer, TqInt len)
 {
-	send(m_Socket,reinterpret_cast<char*>(buffer),len,0);
+	TqInt tot=0,need=len;
+	while(need>0)
+	{
+		TqInt n=send(m_Socket,reinterpret_cast<char*>(buffer)+tot,need,0);
+		need-=n;
+		tot+=n;
+	}
 }
 
 
 //---------------------------------------------------------------------
-/** Thread function, just sits listening to the port for connection requests.
- * Upon recieving a valid request the client socket is added to the list of clients.
+/** Send a preconstructed message structure to this client.
+ * \param pMsg Pointer to a SqDDMessageBase derive structure.
  */
 
-static void AcceptConnections(void* pvServer)
+void CqDDClient::SendMsg(SqDDMessageBase* pMsg)
 {
-	CqDDServer* pServer=reinterpret_cast<CqDDServer*>(pvServer);
-
-	if(pServer)
-	{
-		while(1)
-		{
-			// Check if the server has quit.
-			if(pServer->bHasQuit())
-			{
-				QGetRenderContext()->SignalDDThreadFinished();
-				_endthread();
-			}
-
-			SOCKET c;
-
-			if((c=accept(pServer->Socket(),NULL,NULL))==INVALID_SOCKET)
-			{
-				TqInt err=WSAGetLastError();
-			}
-			else
-			{
-				unsigned long argp=1;
-				// Set nonblocking.
-				ioctlsocket(c,FIONBIO,&argp);
-				pServer->AddClient(c);
-			}
-		}
-	}
+	SendData(pMsg,pMsg->m_MessageLength);
 }
 
+
+//---------------------------------------------------------------------
+/** Receive some data from the socket.
+ * \param buffer Void pointer to the storage area for the data.
+ * \param len Integer length of the data required.
+ */
+
+void CqDDClient::Receive(void* buffer, TqInt len)
+{
+	TqInt tot=0,need=len;
+	while(need>0)
+	{
+		TqInt n=recv(m_Socket,reinterpret_cast<char*>(buffer)+tot,need,0);
+		need-=n;
+		tot+=n;
+	}
+}
 
 END_NAMESPACE(Aqsis)

@@ -48,7 +48,10 @@
 #include	"shaders.h"
 #include	"renderer.h"
 #include	"symbols.h"
+
+#ifdef	AQSIS_SYSTEM_WIN32
 #include	"ddserver.h"
+#endif //	AQSIS_SYSTEM_WIN32
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -90,6 +93,7 @@ enum EqRenderMode
 	RenderMode_Shadows,
 	RenderMode_Reflection,
 };
+
 
 //----------------------------------------------------------------------
 /** \class  CqRenderer
@@ -169,13 +173,17 @@ class CqRenderer
 	// Function which can be overridden by the derived class.
 				virtual	void		Initialise();
 				virtual	void		RenderWorld();
+
+				virtual	void		AddDisplayDriver(const TqChar* name, const TqChar* type, const TqInt mode);
+				virtual	void		ClearDisplayDrivers();
 #ifdef AQSIS_SYSTEM_WIN32
-				virtual	void		LoadDisplayLibrary();
-#endif // AQSIS_SYSTEM_WIN32
-				virtual	void		SignalDDThreadFinished()
+				virtual	void		LoadDisplayLibrary(CqDDClient& dd);
+				virtual	CqDDServer&	DDServer()			{return(m_DDServer);}
+				virtual	std::vector<CqDDClient>& aDisplayDrivers()
 														{
-															m_semDDThreadFinished.Signal();
+															return(m_aDisplayDrivers);
 														}
+#endif // AQSIS_SYSTEM_WIN32
 				virtual	void		Quit();
 				virtual	void		UpdateStatus()		{}
 						/** Get the global statistics class.
@@ -247,14 +255,6 @@ class CqRenderer
 							 */
 				virtual std::vector<CqTransform*>&	TransformStack()	{return(m_TransformStack);}
 
-							/** Signal from the display driver to indicate that it has finished.
-							 *\param reason The reason for finishing. 
-							 */
-				virtual	void		SignalDisplayDriverFinished(TqInt reason)
-																{
-																	m_semDisplayDriverFinished.Signal();
-																}
-
 						/** Set the locally stored render time.
 						 * \param time System time value representing the seconds taken to render.
 						 */
@@ -265,12 +265,6 @@ class CqRenderer
 
 						void		PrintStats(TqInt level);
 
-
-
-
-			CqSemaphore		m_semDisplayDriverReady;		///< Semaphore used to check for safe startup of a display driver.
-			CqSemaphore		m_semDisplayDriverFinished;		///< Semaphore used to check for safe close down of a display driver.
-	
 	private:
 			void			RegisterShader(const char* strName, EqShaderType type, CqShader* pShader);
 			CqShaderRegister* FindShader(const char* strName, EqShaderType type);
@@ -282,12 +276,10 @@ class CqRenderer
 			CqAttributes	m_attrDefault;					///< Default attributes.
 			CqTransform		m_transDefault;					///< Default transformation.
 			CqImageBuffer*	m_pImageBuffer;					///< Pointer to the current image buffer.
+
+#ifdef  AQSIS_SYSTEM_WIN32
+			std::vector<CqDDClient>	m_aDisplayDrivers;		///< Array of requested display drivers.
 			CqDDServer		m_DDServer;
-			CqSemaphore		m_semDDClientReady;				///< Semaphore used to check for safe startup of a display client.
-			CqSemaphore		m_semDDThreadFinished;			///< Semaphore used to determine that the DD server accept thread has safely ended.
-			
-#ifdef AQSIS_SYSTEM_WIN32			
-			HANDLE			m_hDisplayThread;				///< Handle to the display driver thread.
 #endif // AQSIS_SYSTEM_WIN32
 
 			EqRenderMode	m_Mode;							

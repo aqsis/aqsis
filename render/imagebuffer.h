@@ -277,6 +277,7 @@ class _qShareC	CqImageBuffer
 	_qShareM			void	RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax);
 	_qShareM			void	RenderSurfaces(TqInt iBucket, long xmin, long xmax, long ymin, long ymax);
 	_qShareM			void	RenderImage();
+	_qShareM			void	PostBucket(TqInt iBucket);
 								/** Get comlpetion status of this rendered image.
 								 * \return bool indicating finished or not.
 								 */

@@ -46,7 +46,11 @@ struct SqDDMessageBase;
 class CqDDClient
 {
 	public:
-				CqDDClient(SOCKET c=INVALID_SOCKET) : m_Socket(c)
+				CqDDClient(const TqChar* name, const TqChar* type, TqInt mode) :
+							m_strName(name),
+							m_strType(type),
+							m_Mode(mode),
+							m_Socket(INVALID_SOCKET)
 							{}
 				~CqDDClient(){}
 
@@ -54,16 +58,33 @@ class CqDDClient
 				 */
 		void	Close()		{closesocket(m_Socket);}
 		void	SendData(void* buffer, TqInt len);
+		void	SendMsg(SqDDMessageBase* pMsg);
+		void	Receive(void* buffer, TqInt len);
 				/** Get a reference to the socket ID.
 				 */
+		void	SetSocket(SOCKET s)
+							{m_Socket=s;}
 		SOCKET&	Socket()	{return(m_Socket);}
 				/** Get a reference to the socket ID.
 				 */
 	const SOCKET& Socket() const	
 							{return(m_Socket);}
 
+		CqString&	strName()	{return(m_strName);}
+		void		SetstrName(const TqChar* name)
+								{m_strName=name;}
+		CqString&	strType()	{return(m_strType);}
+		void		SetstrType(const TqChar* type)
+								{m_strType=type;}
+		TqInt		Mode()		{return(m_Mode);}
+		void		SetstrMode(TqInt mode)
+								{m_Mode=mode;}
+
 	private:
-		SOCKET				m_Socket;			///< Socket ID of the client.
+		SOCKET		m_Socket;			///< Socket ID of the client.
+		CqString	m_strName;			///< Display name.
+		CqString	m_strType;			///< Display type.
+		TqInt		m_Mode;				///< Display mode.
 };
 
 
@@ -75,7 +96,7 @@ class CqDDClient
 class CqDDServer
 {
 	public:
-				CqDDServer() : m_Socket(INVALID_SOCKET), m_bHasQuit(TqFalse)
+				CqDDServer() : m_Socket(INVALID_SOCKET)
 							{}
 				CqDDServer(TqInt port);
 				~CqDDServer();
@@ -87,15 +108,7 @@ class CqDDServer
 		void	Close()		{closesocket(m_Socket);}
 		TqBool	Bind(TqInt port);
 		TqBool	Listen();
-		void	Accept();
-		void	SendMessage(SqDDMessageBase* pMsg);
-		void	SendData(void* buffer, TqInt len);
-				/** Add a new client socket to the list.
-				 */
-		void	AddClient(SOCKET& c)
-							{
-								m_aClients.push_back(c);
-							}
+		TqBool	Accept(CqDDClient& dd);
 				/** Get a reference to the socket ID.
 				 */
 		SOCKET&	Socket()	{return(m_Socket);}
@@ -104,19 +117,9 @@ class CqDDServer
 	const SOCKET& Socket() const	
 							{return(m_Socket);}
 
-				/** Determine whether the server has quit.
-				 */
-		TqBool	bHasQuit() const	
-							{return(m_bHasQuit);}
-				/** Indicate that the server has quit.
-				 */
-		void	Quit()		{m_bHasQuit=TqTrue;}
-
 	private:
-		std::vector<CqDDClient>	m_aClients;			///< Array of client sockets.
 		SOCKET					m_Socket;			///< Socket ID of the server.
 		unsigned long			m_AcceptThreadID;	///< Thread ID of the accept listener.
-		TqBool					m_bHasQuit;			///< Flag showing whether the server has quit.
 };
 
 

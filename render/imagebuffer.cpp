@@ -23,6 +23,8 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include	<strstream>
+
 #include	<math.h>
 
 #include	"aqsis.h"
@@ -33,6 +35,7 @@
 #include	"surface.h"
 #include	"shadervm.h"
 #include	"micropolygon.h"
+#include	"displaydriver.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -1191,10 +1194,115 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 		}
 	}
 	BucketComplete(iBucket);
+#ifdef	AQSIS_SYSTEM_WIN32
+	PostBucket(iBucket);
+#endif // AQSIS_SYSTEM_WIN32
+	
 	// Clear the MPG waiting array
 	m_aampgWaiting[iBucket].clear();
 }
 
+
+//----------------------------------------------------------------------
+/** Post the specified bucket to the dd clients via the dd server.
+ */
+
+#ifdef	AQSIS_SYSTEM_WIN32
+
+void CqImageBuffer::PostBucket(TqInt iBucket)
+{
+	// Copy the bucket to the display buffer.
+	CqVector2D	vPos=Position(iBucket);
+	CqVector2D	vSize=Size(iBucket);
+	TqInt		xmin=vPos.x();
+	TqInt		ymin=vPos.y();
+	TqInt		xmaxplus1=vPos.x()+vSize.x();
+	TqInt		ymaxplus1=vPos.y()+vSize.y();
+	TqInt		xsize=vSize.x();
+	TqInt		ysize=vSize.y();
+
+	// Check if this bucket is outside the crop window.
+	if(xmaxplus1<CropWindowXMin() ||
+	   ymaxplus1<CropWindowYMin() ||
+	   xmin>CropWindowXMax() ||
+	   ymin>CropWindowYMax())
+		return;
+
+	for(std::vector<CqDDClient>::iterator i=QGetRenderContext()->aDisplayDrivers().begin(); i!=QGetRenderContext()->aDisplayDrivers().end(); i++)
+	{
+		TqInt		samples=i->Mode()&ModeRGB?3:0;
+					samples+=i->Mode()&ModeA?1:0;
+					samples=i->Mode()&ModeZ?1:samples;
+		TqInt		elementsize=samples*sizeof(TqFloat);
+		TqInt		datalen=xsize*ysize*elementsize;
+
+		TqFloat*	pData=new TqFloat[xsize*ysize*samples];
+
+		TqInt		linelen=xsize*samples;
+
+		SqImageValue val;
+		TqInt y;
+		for(y=0; y<ysize; y++)
+		{
+			TqInt sy=y+ymin;
+			TqInt x;
+			for(x=0; x<xsize; x++)
+			{
+				TqInt sx=x+xmin;
+				TqInt isx=sx-CropWindowXMin();
+				TqInt isy=sy-CropWindowYMin();
+				if(isx<0 || isy<0 || isx>=iXRes() || isy>=iYRes())
+					continue;
+
+				TqInt so=(y*linelen)+(x*samples);
+				// If outputting a zfile, use the midpoint method.
+				/// \todo Should really be generalising this section to use specif Filter/Expose/Quantize functions.
+				if(i->Mode()&ModeZ)
+				{
+					CqImageElement* pie;
+					if(Pixel(sx,sy,iBucket,pie))
+					{
+						std::vector<SqImageValue>& aValues=pie->Values(0,0);
+			
+						TqFloat Depth;
+						if(aValues.size()<=1)
+							Depth=FLT_MAX;
+						else
+						{
+							TqFloat Diff=(aValues[1].m_Depth-aValues[0].m_Depth);
+							Depth=(Diff/2.0)+aValues[0].m_Depth;
+						}
+						
+						pData[so]=Depth;
+					}
+				}
+				else
+				{
+					FilterPixel(sx,sy,iBucket,val);
+					ExposePixel(val);
+					QuantizePixel(val);
+			
+					if(samples>=3)
+					{
+						pData[so+0]=val.m_colColor.fRed();
+						pData[so+1]=val.m_colColor.fGreen();
+						pData[so+2]=val.m_colColor.fBlue();
+						if(samples==4)
+							pData[so+3]=val.m_Coverage;
+					}
+					if(samples==1)
+							pData[so+0]=val.m_Coverage;
+				}
+			}
+		}
+		SqDDMessageData* pmsg=SqDDMessageData::Construct(xmin,xmaxplus1,ymin,ymaxplus1,elementsize,pData,datalen);
+		delete[](pData);
+		i->SendMsg(pmsg);
+		pmsg->Destroy();
+	}
+}
+
+#endif	//AQSIS_SYSTEM_WIN32
 
 //----------------------------------------------------------------------
 /** Render any waiting Surfaces
@@ -1235,8 +1343,6 @@ void CqImageBuffer::RenderImage()
 		if(m_fQuit)
 		{
 			m_fDone=TqTrue;
-			QGetRenderContext()->SignalDisplayDriverFinished(-1);
-
 			return;
 		}
 
@@ -1246,7 +1352,6 @@ void CqImageBuffer::RenderImage()
 	}
 
 	ImageComplete();
-	QGetRenderContext()->SignalDisplayDriverFinished(0);
 	m_fDone=TqTrue;
 }
 

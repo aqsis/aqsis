@@ -26,6 +26,7 @@
 #include	<strstream>
 
 #include	<time.h>
+#include	<process.h>
 
 #include	"aqsis.h"
 #include	"imagebuffer.h"
@@ -50,11 +51,10 @@ CqRenderer* pCurrRenderer=0;
 CqRenderer::CqRenderer() :
 	m_pImageBuffer(0),
 	m_Mode(RenderMode_Image),
-	m_fSaveGPrims(TqFalse),
-	m_DDServer(AQSIS_DD_PORT)
+	m_fSaveGPrims(TqFalse)
 {
 	m_pconCurrent=0;
-	//m_pImageBuffer=new	CqImageBuffer();
+	m_pImageBuffer=new	CqImageBuffer();
 
 	// Initialise the array of coordinate systems.
 	m_aCoordSystems.resize(CoordSystem_Last);
@@ -65,6 +65,10 @@ CqRenderer::CqRenderer() :
 	m_aCoordSystems[CoordSystem_Screen]	.m_strName="screen";
 	m_aCoordSystems[CoordSystem_NDC]	.m_strName="NDC";
 	m_aCoordSystems[CoordSystem_Raster]	.m_strName="raster";
+
+#ifdef	AQSIS_SYSTEM_WIN32
+	m_DDServer.Prepare(AQSIS_DD_PORT);
+#endif
 }
 
 //---------------------------------------------------------------------
@@ -87,10 +91,10 @@ CqRenderer::~CqRenderer()
 	}
 	FlushShaders();
 
+#ifdef	AQSIS_SYSTEM_WIN32
 	// Close down the Display Driver server.
-	m_DDServer.Quit();
 	m_DDServer.Close();
-	m_semDDThreadFinished.Wait();
+#endif // AQSIS_SYSTEM_WIN32
 }
 
 
@@ -557,12 +561,18 @@ void CqRenderer::RenderWorld()
 	CqBasicError(0,Severity_Normal,strMsg.c_str());
 
 	optCurrent().InitialiseCamera();
-	
+
 	pImage()->SetImage();
 	pImage()->InitialiseSurfaces(Scene());
-	pImage()->RenderImage();
 
-//	m_Status.SetState(State_Complete);
+#ifdef  AQSIS_SYSTEM_WIN32
+	// Load and initialise the display drivers.
+	std::vector<CqDDClient>::iterator i;
+	for(i=m_aDisplayDrivers.begin(); i!=m_aDisplayDrivers.end(); i++)
+		LoadDisplayLibrary(*i);
+#endif // AQSIS_SYSTEM_WIN32
+
+	pImage()->RenderImage();
 
 	// Calculate the time taken.
 	m_timeTaken=time(0)-m_timeTaken;
@@ -573,6 +583,12 @@ void CqRenderer::RenderWorld()
 		verbosity=poptEndofframe[0];
 
 	PrintStats(verbosity);
+
+#ifdef  AQSIS_SYSTEM_WIN32
+	SqDDMessageClose msg;
+	for(i=m_aDisplayDrivers.begin(); i!=m_aDisplayDrivers.end(); i++)
+		i->SendMsg(&msg);
+#endif // AQSIS_SYSTEM_WIN32
 }
 
 
@@ -649,12 +665,8 @@ void CqRenderer::Quit()
 {
 	if(m_pImageBuffer)
 	{
-		// As the image buffer to quit.
+		// Ask the image buffer to quit.
 		m_pImageBuffer->Quit();
-		// Is the image buffer still rendering?
-		if(!m_pImageBuffer->fDone())
-			// Wait for it to finish.
-			m_semDisplayDriverFinished.Wait();
 	}
 }
 
@@ -702,6 +714,7 @@ void CqRenderer::Initialise()
 	RiDeclare("shader","uniform string");
 	RiDeclare("archive","uniform string");
 	RiDeclare("texture","uniform string");
+	RiDeclare("display","uniform string");
 	RiDeclare("auto_shadows","uniform string");
 	RiDeclare("endofframe","uniform integer");
 	RiDeclare("sphere","uniform float");
@@ -814,31 +827,23 @@ CqMatrix	CqRenderer::matNSpaceToSpace(const char* strFrom, const char* strTo, co
 }
 
 
+#ifdef	AQSIS_SYSTEM_WIN32
+
 //----------------------------------------------------------------------
-/** Main routine for the display driver to run on.
+/** Load the display driver specified in the current setup.
  */
 
-#ifdef AQSIS_SYSTEM_WIN32
-
-DWORD WINAPI DisplayDriverThread(void* dummy)
+void CqRenderer::LoadDisplayLibrary(CqDDClient& dd)
 {
-	// Release any current display driver.
-	if(QGetRenderContext()->pImage()!=0)
-	{
-		QGetRenderContext()->pImage()->Release();
-		QGetRenderContext()->SetImage(0);
-	}
-
-	// Load the requested display library accroding to the specified mode in the RiDisplay command.
-	// Read driver location information out of the registry.
-	CqString strDriverFile("framebuffer.dll");
+	// Load the requested display library according to the specified mode in the RiDisplay command.
+	CqString strDriverFile("framebuffer.exe");
 
 	// Find the display driver in the map loaded from the ini file.
 	TqBool	bFound=TqFalse;
 	TqInt i;
 	for(i=0; i<gaDisplayMap.size(); i++)
 	{
-		if(QGetRenderContext()->optCurrent().strDisplayType().compare(gaDisplayMap[i].m_strName)==0)
+		if(dd.strType().compare(gaDisplayMap[i].m_strName)==0)
 		{
 			strDriverFile=gaDisplayMap[i].m_strLocation;
 			bFound=TqTrue;
@@ -849,54 +854,52 @@ DWORD WINAPI DisplayDriverThread(void* dummy)
 	if(!bFound)
 	{
 		CqString strErr("Cannot find display driver ");
-		strErr+=QGetRenderContext()->optCurrent().strDisplayType().c_str();
+		strErr+=dd.strType().c_str();
 		strErr+=" : defaulting to framebuffer";
 		//strErr.Format("Cannot find display driver %s : defaulting to framebuffer", QGetRenderContext()->optCurrent().strDisplayType().String());
 		CqBasicError(ErrorID_DisplayDriver,Severity_Normal,strErr.c_str());
 	}
 
-	HINSTANCE hImage=LoadLibrary(strDriverFile.c_str());
-	if(hImage!=NULL)
+	CqFile fileDriver(strDriverFile.c_str(), "display");
+	if(fileDriver.IsValid())
 	{
-		CqImageBuffer*(*pCreateImage)(const char*)=reinterpret_cast<CqImageBuffer*(*)(const char*)>(GetProcAddress(hImage, "CreateImage"));
-		if(pCreateImage!=0)
+		TqInt ProcHandle=_spawnl(_P_NOWAITO, fileDriver.strRealName().c_str(), strDriverFile.c_str() ,NULL);
+		if(ProcHandle>=0)
 		{
-			CqImageBuffer* pDisplay=(*pCreateImage)(QGetRenderContext()->optCurrent().strDisplayName().c_str());
-			QGetRenderContext()->SetImage(pDisplay);
+			// wait for a connection request from the client
+			if(m_DDServer.Accept(dd))
+			{
+				// Send a filename message
+				SqDDMessageFilename* pmsgfname=SqDDMessageFilename::Construct(dd.strName().c_str());
+				dd.SendMsg(pmsgfname);
+				pmsgfname->Destroy();
+
+				CqMatrix& matWorldToCamera=QGetRenderContext()->matSpaceToSpace("world","camera");
+				CqMatrix& matWorldToScreen=QGetRenderContext()->matSpaceToSpace("world","raster");
+
+				SqDDMessageNl msgnl(matWorldToCamera.pElements());
+				dd.SendMsg(&msgnl);
+
+				SqDDMessageNP msgnp(matWorldToScreen.pElements());
+				dd.SendMsg(&msgnp);
+				
+				// Send the open message..
+				TqInt SamplesPerElement=dd.Mode()&ModeRGB?3:0;
+					  SamplesPerElement+=dd.Mode()&ModeA?1:0;
+					  SamplesPerElement=dd.Mode()&ModeZ?1:SamplesPerElement;
+				SqDDMessageOpen msgopen(QGetRenderContext()->pImage()->iXRes(),
+										QGetRenderContext()->pImage()->iYRes(),
+										SamplesPerElement,
+										QGetRenderContext()->pImage()->CropWindowXMin(),
+										QGetRenderContext()->pImage()->CropWindowXMax(),
+										QGetRenderContext()->pImage()->CropWindowYMin(),
+										QGetRenderContext()->pImage()->CropWindowYMax());
+				dd.SendMsg(&msgopen);
+			}
 		}
-		void(*pMessageLoop)(void)=reinterpret_cast<void(*)(void)>(GetProcAddress(hImage, "MessageLoop"));
-		pCurrRenderer->m_semDisplayDriverReady.Signal();
-		if(pMessageLoop!=0)
-		{
-			(*pMessageLoop)();
-		}
+		else
+			CqBasicError(0,0,"Error loading display driver");
 	}
-	else
-	{
-		LPVOID lpMsgBuf;
-		FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL,GetLastError(),MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-			(LPTSTR) &lpMsgBuf,0,NULL );
-		// Display the string.
-		CqBasicError(ErrorID_System,Severity_Normal,(char*)lpMsgBuf);
-		// Free the buffer.
-		LocalFree(lpMsgBuf);
-		pCurrRenderer->m_semDisplayDriverReady.Signal();
-	}
-	return(0);
-}
-
-
-//----------------------------------------------------------------------
-/** Load the display driver specified in the current setup.
- */
-
-void CqRenderer::LoadDisplayLibrary()
-{
-	// Load the requested display library according to the specified mode in the RiDisplay command.
-	DWORD ThreadID;
-	m_hDisplayThread=CreateThread(NULL, 0, &DisplayDriverThread, 0, 0, &ThreadID);
-	m_semDisplayDriverReady.Wait();
 }
 
 #endif // AQSIS_SYSTEM_WIN32
@@ -1114,6 +1117,31 @@ CqShader* CqRenderer::CreateShader(const char* strName, EqShaderType type)
 			return(0);
 		}
 	}
+}
+
+
+
+//---------------------------------------------------------------------
+/** Add a new requested display driver to the list.
+ */
+
+void CqRenderer::AddDisplayDriver(const TqChar* name, const TqChar* type, const TqInt mode)
+{
+#ifdef  AQSIS_SYSTEM_WIN32
+	CqDDClient dd(name, type, mode);
+	m_aDisplayDrivers.push_back(dd);
+#endif // AQSIS_SYSTEM_WIN32
+}
+
+
+
+//---------------------------------------------------------------------
+/** Clear the list of requested display drivers.
+ */
+
+void CqRenderer::ClearDisplayDrivers()
+{
+	m_aDisplayDrivers.clear();
 }
 
 

@@ -660,18 +660,18 @@ RtVoid	RiDisplayV(const char *name, RtToken type, RtToken mode, PARAMETERLIST)
 	QGetRenderContext()->optCurrent().SetstrDisplayName(strName.c_str());
 	QGetRenderContext()->optCurrent().SetstrDisplayType(strType.c_str());
 	
+	// Append the display mode to the current setting.
 	RtInt eValue=0;
 	if(strstr(mode, RI_RGB)!=NULL)
-		eValue+=ModeRGB;
+		eValue|=ModeRGB;
 	if(strstr(mode, RI_A)!=NULL)
-		eValue+=ModeA;
+		eValue|=ModeA;
 	if(strstr(mode, RI_Z)!=NULL)
-		eValue+=ModeZ;
-	QGetRenderContext()->optCurrent().SetiDisplayMode(eValue);
+		eValue|=ModeZ;
+	QGetRenderContext()->optCurrent().SetiDisplayMode(QGetRenderContext()->optCurrent().iDisplayMode()|eValue);
 
-#ifdef AQSIS_SYSTEM_WIN32
-	QGetRenderContext()->LoadDisplayLibrary();
-#endif // AQSIS_SYSTEM_WIN32
+	// Add a display driver to the list of requested drivers.
+	QGetRenderContext()->AddDisplayDriver(name, type, eValue);
 
 	return(0);
 }

@@ -1172,13 +1172,12 @@ void CqShadowMap::LoadZFile()
 	// Load the shadowmap from a binary file.
 	if(m_strName!="")
 	{
-		CqFile fileShad(m_strName.c_str());
-		std::istream* pfile=fileShad;
-		if(pfile!=NULL)
+		std::ifstream file(m_strName.c_str(),std::ios::binary);
+		if(file!=NULL)
 		{
 			// Save a file type and version marker
 			char* strHeader=new char[strlen(ZFILE_HEADER)];
-			pfile->read(strHeader, strlen(ZFILE_HEADER));
+			file.read(strHeader, strlen(ZFILE_HEADER));
 			// Check validity of shadow map.
 			if(strncmp(strHeader,ZFILE_HEADER,strlen(ZFILE_HEADER))!=0)
 			{
@@ -1189,23 +1188,23 @@ void CqShadowMap::LoadZFile()
 			}
 
 			// Save the xres and yres.
-			pfile->read(reinterpret_cast<char* >(&m_XRes), sizeof(m_XRes));
-			pfile->read(reinterpret_cast<char* >(&m_YRes), sizeof(m_XRes));
+			file.read(reinterpret_cast<char* >(&m_XRes), sizeof(m_XRes));
+			file.read(reinterpret_cast<char* >(&m_YRes), sizeof(m_YRes));
 
 			// Save the transformation matrices.
-			pfile->read(reinterpret_cast<char*>(m_matWorldToCamera[0]),sizeof(m_matWorldToCamera[0][0])*4);
-			pfile->read(reinterpret_cast<char*>(m_matWorldToCamera[1]),sizeof(m_matWorldToCamera[0][0])*4);
-			pfile->read(reinterpret_cast<char*>(m_matWorldToCamera[2]),sizeof(m_matWorldToCamera[0][0])*4);
-			pfile->read(reinterpret_cast<char*>(m_matWorldToCamera[3]),sizeof(m_matWorldToCamera[0][0])*4);
+			file.read(reinterpret_cast<char*>(m_matWorldToCamera[0]),sizeof(m_matWorldToCamera[0][0])*4);
+			file.read(reinterpret_cast<char*>(m_matWorldToCamera[1]),sizeof(m_matWorldToCamera[0][0])*4);
+			file.read(reinterpret_cast<char*>(m_matWorldToCamera[2]),sizeof(m_matWorldToCamera[0][0])*4);
+			file.read(reinterpret_cast<char*>(m_matWorldToCamera[3]),sizeof(m_matWorldToCamera[0][0])*4);
 
-			pfile->read(reinterpret_cast<char*>(m_matWorldToScreen[0]),sizeof(m_matWorldToScreen[0][0])*4);
-			pfile->read(reinterpret_cast<char*>(m_matWorldToScreen[1]),sizeof(m_matWorldToScreen[0][0])*4);
-			pfile->read(reinterpret_cast<char*>(m_matWorldToScreen[2]),sizeof(m_matWorldToScreen[0][0])*4);
-			pfile->read(reinterpret_cast<char*>(m_matWorldToScreen[3]),sizeof(m_matWorldToScreen[0][0])*4);
+			file.read(reinterpret_cast<char*>(m_matWorldToScreen[0]),sizeof(m_matWorldToScreen[0][0])*4);
+			file.read(reinterpret_cast<char*>(m_matWorldToScreen[1]),sizeof(m_matWorldToScreen[0][0])*4);
+			file.read(reinterpret_cast<char*>(m_matWorldToScreen[2]),sizeof(m_matWorldToScreen[0][0])*4);
+			file.read(reinterpret_cast<char*>(m_matWorldToScreen[3]),sizeof(m_matWorldToScreen[0][0])*4);
 
 			// Now output the depth values
 			AllocateMap(m_XRes,m_YRes);
-			pfile->read(reinterpret_cast<char*>(m_apSegments[0]->pBufferData()),sizeof(float)*(m_XRes*m_YRes));
+			file.read(reinterpret_cast<char*>(m_apSegments[0]->pBufferData()),sizeof(TqFloat)*(m_XRes*m_YRes));
 
 			// Set the matrixes to general, not Identity as default.
 			m_matWorldToCamera.SetfIdentity(TqFalse);
@@ -1297,7 +1296,7 @@ void CqShadowMap::ReadMatrices()
 
 void WriteTileImage(TIFF* ptex, float *raster, unsigned long width, unsigned long length, unsigned long twidth, unsigned long tlength, int samples)
 { 
-	TIFFCreateDirectory(ptex);
+//	TIFFCreateDirectory(ptex);
 	TIFFSetField(ptex,TIFFTAG_IMAGEWIDTH, width);
 	TIFFSetField(ptex,TIFFTAG_IMAGELENGTH, length);
 	TIFFSetField(ptex,TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
