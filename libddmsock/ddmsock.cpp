@@ -594,6 +594,7 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 				SqDDMessageOpen msgopen( QGetRenderContext() ->pImage() ->iXRes(),
 				                         QGetRenderContext() ->pImage() ->iYRes(),
 				                         SamplesPerElement,
+										 8,	// Bits per sample.
 				                         QGetRenderContext() ->pImage() ->CropWindowXMin(),
 				                         QGetRenderContext() ->pImage() ->CropWindowXMax(),
 				                         QGetRenderContext() ->pImage() ->CropWindowYMin(),

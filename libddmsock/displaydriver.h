@@ -112,11 +112,12 @@ struct SqDDMessageOpen : public SqDDMessageBase
 {
 	SqDDMessageOpen()
 	{}
-	SqDDMessageOpen( TqInt xres, TqInt yres, TqInt samples, TqInt cwxmin, TqInt cwxmax, TqInt cwymin, TqInt cwymax ) :
+	SqDDMessageOpen( TqInt xres, TqInt yres, TqInt samples, TqInt bits, TqInt cwxmin, TqInt cwxmax, TqInt cwymin, TqInt cwymax ) :
 			SqDDMessageBase( MessageID_Open, sizeof( SqDDMessageOpen ) ),
 			m_XRes( xres ),
 			m_YRes( yres ),
 			m_SamplesPerElement( samples ),
+			m_BitsPerSample( bits ),
 			m_CropWindowXMin( cwxmin ),
 			m_CropWindowXMax( cwxmax ),
 			m_CropWindowYMin( cwymin ),
@@ -125,6 +126,7 @@ struct SqDDMessageOpen : public SqDDMessageBase
 	TqInt	m_XRes;
 	TqInt	m_YRes;
 	TqInt	m_SamplesPerElement;
+	TqInt	m_BitsPerSample;
 	TqInt	m_CropWindowXMin;
 	TqInt	m_CropWindowXMax;
 	TqInt	m_CropWindowYMin;
