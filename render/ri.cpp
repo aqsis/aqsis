@@ -4602,7 +4602,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 template <class T>
 RtVoid	CreateGPrim( T * pSurface )
 {
-	if ( QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "LevelOfDetailBounds" ) [ 1 ] < 0.0f )
+	if ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "LevelOfDetailBounds" ) [ 1 ] < 0.0f )
 	{
 		// Cull this geometry for LOD reasons
 		pSurface->Release();
