@@ -1444,7 +1444,9 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 		MaxEyeSplits=poptEyeSplits[0];
 	
 	// Render any waiting micro polygon grids.
+	QGetRenderContext()->Stats().RenderMPGsTimer().Start();
 	RenderMPGs(iBucket, xmin, xmax, ymin, ymax);
+	QGetRenderContext()->Stats().RenderMPGsTimer().Stop();
 
 	CqBucket& Bucket=m_aBuckets[iBucket];
 
@@ -1455,10 +1457,17 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 		if(m_fQuit)	return;
 
 		// Dice & shade the surface if it's small enough...
-		if(pSurface->Diceable())
+		QGetRenderContext()->Stats().DiceableTimer().Start();
+		TqBool fDiceable = pSurface->Diceable();
+		QGetRenderContext()->Stats().DiceableTimer().Stop();
+		if(fDiceable)
 		{
 			//Cull surface if it's hidden
-			if(OcclusionCullSurface(iBucket, pSurface))
+			
+//			QGetRenderContext()->Stats().OcclusionCullTimer().Start();
+			TqBool fCull = OcclusionCullSurface(iBucket, pSurface);
+//			QGetRenderContext()->Stats().OcclusionCullTimer().Stop();
+			if(fCull)
 			{
 				if (pSurface == Bucket.pTopSurface()) 
 					counter ++;
@@ -1482,7 +1491,10 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 
 
 			CqMicroPolyGridBase* pGrid;
-			if((pGrid=pSurface->Dice())!=0)
+			QGetRenderContext()->Stats().DicingTimer().Start();
+			pGrid = pSurface->Dice();
+			QGetRenderContext()->Stats().DicingTimer().Stop();
+			if(NULL != pGrid)
 			{
 				// Only shade if the ImageBuffer mode is at least RGB
 				if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
@@ -1499,22 +1511,27 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 			// Decrease the total gprim count since this gprim is replaced by other gprims
 			QGetRenderContext()->Stats().DecTotalGPrims();
 			// Split it
+			QGetRenderContext()->Stats().SplitsTimer().Start();
 			TqInt cSplits=pSurface->Split(aSplits);
 			TqInt i;
 			for(i=0; i<cSplits; i++)
 				PostSurface(aSplits[i]);
+			QGetRenderContext()->Stats().SplitsTimer().Stop();
 		}
 
 		pSurface->UnLink();
 		pSurface->Release();
 		pSurface=Bucket.pTopSurface();
 		// Render any waiting micro polygon grids.
+		QGetRenderContext()->Stats().RenderMPGsTimer().Start();
 		RenderMPGs(iBucket, xmin, xmax, ymin, ymax);
+		QGetRenderContext()->Stats().RenderMPGsTimer().Stop();
 	}
 	
 	// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
 	if(m_fQuit)	return;
 
+	QGetRenderContext()->Stats().OcclusionCullTimer().Start();
 	CqBucket::CombineElements();
 
 	Bucket.FilterBucket();
@@ -1523,6 +1540,7 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 	
 	BucketComplete(iBucket);
 	QGetRenderContext()->pDDmanager()->DisplayBucket(&m_aBuckets[iBucket]);
+	QGetRenderContext()->Stats().OcclusionCullTimer().Stop();
 }
 
 

@@ -19,6 +19,7 @@ CFG=libaqsistypes - Win32 Debug
 !MESSAGE 
 !MESSAGE "libaqsistypes - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "libaqsistypes - Win32 Debug" (based on "Win32 (x86) Static Library")
+!MESSAGE "libaqsistypes - Win32 Release with Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -74,12 +75,36 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
+!ELSEIF  "$(CFG)" == "libaqsistypes - Win32 Release with Debug"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "libaqsistypes___Win32_Release_with_Debug"
+# PROP BASE Intermediate_Dir "libaqsistypes___Win32_Release_with_Debug"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\Library\ReleaseWithDebug"
+# PROP Intermediate_Dir "..\Object\ReleaseWithDebug\libaqsistypes"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I ".\win32\intel" /I "..\libaqsistypes" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /Zi /O2 /I ".\win32\intel" /I "..\libaqsistypes" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /FR /YX /FD /c
+# ADD BASE RSC /l 0x809 /d "NDEBUG"
+# ADD RSC /l 0x809 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo
+# ADD LIB32 /nologo
+
 !ENDIF 
 
 # Begin Target
 
 # Name "libaqsistypes - Win32 Release"
 # Name "libaqsistypes - Win32 Debug"
+# Name "libaqsistypes - Win32 Release with Debug"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"

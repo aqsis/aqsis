@@ -19,6 +19,7 @@ CFG=All - Win32 Debug
 !MESSAGE 
 !MESSAGE "All - Win32 Release" (based on "Win32 (x86) Generic Project")
 !MESSAGE "All - Win32 Debug" (based on "Win32 (x86) Generic Project")
+!MESSAGE "All - Win32 Release with Debug" (based on "Win32 (x86) Generic Project")
 !MESSAGE 
 
 # Begin Project
@@ -36,8 +37,8 @@ MTL=midl.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
-# PROP Output_Dir "\projects\renderer\Install"
-# PROP Intermediate_Dir "\projects\renderer\Install"
+# PROP Output_Dir ""
+# PROP Intermediate_Dir ""
 # PROP Target_Dir ""
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
@@ -54,9 +55,27 @@ PostBuild_Cmds=REM call ..\prep_install.bat
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "Debug"
-# PROP Intermediate_Dir "Debug"
+# PROP Output_Dir ""
+# PROP Intermediate_Dir ""
 # PROP Target_Dir ""
+
+!ELSEIF  "$(CFG)" == "All - Win32 Release with Debug"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "All___Win32_Release_with_Debug"
+# PROP BASE Intermediate_Dir "All___Win32_Release_with_Debug"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir ""
+# PROP Intermediate_Dir ""
+# PROP Target_Dir ""
+# Begin Special Build Tool
+SOURCE="$(InputPath)"
+PostBuild_Desc=Preparing installation
+PostBuild_Cmds=REM call ..\prep_install.bat
+# End Special Build Tool
 
 !ENDIF 
 
@@ -64,5 +83,6 @@ PostBuild_Cmds=REM call ..\prep_install.bat
 
 # Name "All - Win32 Release"
 # Name "All - Win32 Debug"
+# Name "All - Win32 Release with Debug"
 # End Target
 # End Project

@@ -225,10 +225,10 @@ void CqMicroPolyGrid::Shade()
 
 	if(pshadDisplacement!=0)
 	{
-		QGetRenderContext()->Stats().StartDisplacementTimer();
+		QGetRenderContext()->Stats().DisplacementTimer().Start();
 		pshadDisplacement->Initialise(uGridRes(), vGridRes(), *this);
 		pshadDisplacement->Evaluate(*this);
-		QGetRenderContext()->Stats().StopDisplacementTimer();
+		QGetRenderContext()->Stats().DisplacementTimer().Stop();
 	}
 
 	// Now try and cull any hidden MPs if Sides==1
@@ -257,18 +257,18 @@ void CqMicroPolyGrid::Shade()
 	}
 
 	// Now shade the grid.
-	QGetRenderContext()->Stats().StartSurfaceTimer();
+	QGetRenderContext()->Stats().SurfaceTimer().Start();
 	pshadSurface->Initialise(uGridRes(), vGridRes(), *this);
 	pshadSurface->Evaluate(*this);
-	QGetRenderContext()->Stats().StopSurfaceTimer();
+	QGetRenderContext()->Stats().SurfaceTimer().Stop();
 
 	// Now perform atmosphere shading
 	if(pshadAtmosphere!=0)
 	{
-		QGetRenderContext()->Stats().StartAtmosphereTimer();
+		QGetRenderContext()->Stats().AtmosphereTimer().Start();
 		pshadAtmosphere->Initialise(uGridRes(), vGridRes(), *this);
 		pshadAtmosphere->Evaluate(*this);
-		QGetRenderContext()->Stats().StopAtmosphereTimer();
+		QGetRenderContext()->Stats().AtmosphereTimer().Stop();
 	}
 
 	// Delete unneeded variables so that we don't use up unnecessary memory
