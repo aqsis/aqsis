@@ -342,7 +342,7 @@ int main( int argc, const char** argv )
 #elif AQSIS_SYSTEM_MACOSX
     CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
     CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
-    const char *pathPtr = "/User/pgregory/aqsis/renderer/build"; //CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+    const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
 
 	g_rc_path = pathPtr;
 	g_shader_path = pathPtr;

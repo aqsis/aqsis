@@ -42,6 +42,10 @@
 #include	"unistd.h"
 #endif
 
+#if defined(AQSIS_SYSTEM_MACOSX)
+#include "Carbon/Carbon.h"
+#endif
+
 START_NAMESPACE( Aqsis )
 
 // Local Constants
@@ -194,7 +198,14 @@ TqInt CqTextureMap::Convert( CqString &strName )
 
     const CqString extension = strName.substr(strName.rfind(".")).substr(1);
 
-#if defined(AQSIS_SYSTEM_POSIX)
+#if defined(AQSIS_SYSTEM_MACOSX)
+    CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
+    const char *pathPtr = CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+
+    CqString plugin_path = pathPtr;
+    plugin_path.append( CqString("/" + extension + "2tif.dll") );
+#elif defined(AQSIS_SYSTEM_POSIX)
     CqString plugin_path = DEFAULT_PLUGIN_PATH "/lib" + extension + "2tif.so";
     // Check for lib<ext>2tif.so; it it is existing than let the converter to 
     // be called.
@@ -208,7 +219,7 @@ TqInt CqTextureMap::Convert( CqString &strName )
 		return 0; 
     }
 
-#elif	AQSIS_SYSTEM_WIN32
+#elif defined(AQSIS_SYSTEM_WIN32)
     char acPath[255];
 
     if ( GetModuleFileName( NULL, acPath, 256 ) != 0) 

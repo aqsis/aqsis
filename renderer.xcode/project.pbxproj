@@ -1272,6 +1272,43 @@
 			settings = {
 			};
 		};
+		714FE95F0763D029000391B7 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = Carbon.framework;
+			path = /System/Library/Frameworks/Carbon.framework;
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		714FE9720763D4C1000391B7 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = Carbon.framework;
+			path = /System/Library/Frameworks/Carbon.framework;
+			refType = 0;
+			sourceTree = "<absolute>";
+		};
+		714FE9730763D4C1000391B7 = {
+			fileRef = 714FE9720763D4C1000391B7;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		714FE9880763D789000391B7 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = random.cpp;
+			path = libaqsistypes/random.cpp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		714FE9890763D789000391B7 = {
+			fileRef = 714FE9880763D789000391B7;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
 		7153688906BEF79900BA5CC0 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -3460,6 +3497,7 @@
 				71AB55D306BB055C0074427F,
 				71AB55D406BB055C0074427F,
 				71AB55D506BB055C0074427F,
+				714FE9730763D4C1000391B7,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -6540,6 +6578,9 @@
 		};
 		71DE6C6D0691FA5900145266 = {
 			children = (
+				714FE9880763D789000391B7,
+				714FE9720763D4C1000391B7,
+				714FE95F0763D029000391B7,
 				715E335706F7A04200B7D425,
 				71536AE706BF00D900BA5CC0,
 				71536ADA06BF00C500BA5CC0,
@@ -6788,6 +6829,7 @@
 				7144F6900691FCB4007CCB15,
 				7144F6920691FCB4007CCB15,
 				7144F6990691FD43007CCB15,
+				714FE9890763D789000391B7,
 			);
 			isa = PBXSourcesBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
