@@ -110,6 +110,7 @@ bool g_cl_progress = 0;
 bool g_cl_Progress = 0;
 bool g_cl_rinfo = 0;
 bool g_cl_no_color = 0;
+bool g_cl_beep = 0;
 int g_cl_verbose = 1;
 ArgParse::apfloatvec g_cl_cropWindow;
 ArgParse::apstring g_cl_rc_path = "";
@@ -410,6 +411,7 @@ int main( int argc, const char** argv )
 		ap.argInts( "frames", " f1 f2\aSpecify a starting/ending frame to render (inclusive).", &g_cl_frames, ArgParse::SEP_ARGV, 2);
 		ap.argString( "frameslist", "=string\aSpecify a range of frames to render, ',' separated with '-' to indicate ranges.", &g_cl_framesList);
         ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
+        ap.argFlag( "beep", "\aBeep on completion of all ribs", &g_cl_beep );
         ap.alias( "nocolor", "nc" );
 #ifdef	AQSIS_SYSTEM_POSIX
         ap.argFlag( "syslog", "\aLog messages to syslog", &g_cl_syslog );
@@ -538,6 +540,11 @@ int main( int argc, const char** argv )
     }
 
     StopMemoryDebugging();
+
+	if(g_cl_beep)
+	{
+		std::cout << "\a" << std::ends;
+	}
 
     if(g_cl_pause)
     {
