@@ -12,33 +12,40 @@
 #pragma warning (disable : 4100)
 
 #include	"ri.h"
-#include	"arg.h"
+#include	"argparse.h"
 #include	"iribcompiler.h"
 
 void RenderFile(std::istream& file, const char* name);
 static void arg_filename(int argc, char**argv);
 
-int g_nowait;
+bool g_nowait;
 int g_cFiles=0;
 int g_Verbose=0;
 
 
-int main(int argc, char* argv[])
+int main(int argc, const char** argv)
 {
-    if (arg_parse(argc, argv,
-		"", "Usage: %s [options]", argv[0],
-		"", ARG_SUBR(arg_filename), "file(s) to render",
-		"-nowait", ARG_FLAG(&g_nowait), "don't wait for a keypress",
-		"-endofframe %d", &g_Verbose, "equivalent to \"endofframe\" option",  
-		0) < 0)
+	ArgParse ap;
+	ap.usageHeader(ArgParse::apstring("Usage: ") + argv[0] + " [options] files(s) to render");
+	ap.argFlag("nowait", "\adon't wait for a keypress", &g_nowait);
+	ap.argInt("endofframe", "=integer\aequivalent to \"endofframe\" option", &g_Verbose);
+	if (!ap.parse(argc-1, argv+1))
 	{
-		RiEnd();
+		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
 		exit(1);
 	}
 
-	if(g_cFiles==0)	// If no files specified, take input from stdin.
+	if(ap.leftovers().size()==0) // If no files specified, take input from stdin.
 	{
 		RenderFile(std::cin, "stdin");
+	}
+	else
+	{
+		for (ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++)
+		{
+			std::ifstream file(e->c_str());
+			RenderFile(file, e->c_str());
+		}
 	}
 
 	// Wait for a keypress
