@@ -22,6 +22,9 @@
  *  \author Lionel J. Lacour (intuition01@online.fr)
  */
 
+#ifdef	WIN32
+#include	<io.h>
+#endif
 #include "outstream.h"
 #include "errno.h"
 #include "string.h"

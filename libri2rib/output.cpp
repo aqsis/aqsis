@@ -34,6 +34,9 @@
 USING_NAMESPACE( libri2rib );
 
 #define PR(x,y)  printRequest(x,y)
+#ifdef	PI
+#undef	PI
+#endif
 #define PI(x)  printInteger(x)
 #define PF(x)  printFloat(x)
 #define PS(x)  printString(x)
