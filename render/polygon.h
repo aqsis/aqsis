@@ -584,9 +584,9 @@ class CqMotionSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 
 		// Overridden from CqBasicSurface
 		virtual	CqBound	Bound() const;
-		virtual	CqMicroPolyGridBase* Dice();
+		virtual	CqMicroPolyGridBase* Dice() { return(0); }
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
-		virtual TqBool	Diceable();
+		virtual TqBool	Diceable() { return( TqFalse ); }
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime )
 		{
