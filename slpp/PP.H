@@ -103,7 +103,7 @@
 
 #define	TARGET		T_TCX
 
-#if	((HOST == H_BSD) OR (HOST == H_UNIX) OR (HOST == H_XENIX))
+#if	((HOST == H_BSD) OR (HOST == H_UNIX) OR (HOST == H_XENIX) || (defined(WIN32)))
 #define	STDERR	stderr
 #else	/* ! (H_BSD OR H_UNIX OR H_XENIX) */
 #define	STDERR	stdout
