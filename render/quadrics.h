@@ -93,6 +93,11 @@ class CqQuadric : public CqSurface
 		 */
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal ) = 0;
 
+		/** Virtual function to indicate whether a particular quadric is able
+		 *  to generate normals itself.
+		 */
+		virtual TqBool		CanGenerateNormals() const	{ return( TqFalse ); }
+
 		CqQuadric&	operator=( const CqQuadric& From );
 
 	protected:
@@ -125,6 +130,7 @@ class CqSphere : public CqQuadric
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual TqBool		CanGenerateNormals() const	{ return( TqTrue ); }
 
 		CqSphere&	operator=( const CqSphere& From );
 
@@ -330,6 +336,7 @@ class CqDisk : public CqQuadric
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
+		virtual TqBool		CanGenerateNormals() const	{ return( TqTrue ); }
 
 		CqDisk&	operator=( const CqDisk& From );
 

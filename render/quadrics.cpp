@@ -70,7 +70,7 @@ CqQuadric&	CqQuadric::operator=( const CqQuadric& From )
 void	CqQuadric::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
 {
 	m_matTx *= matTx;
-	m_matITTx *= m_matITTx;
+	m_matITTx *= matITTx;
 }
 
 
@@ -107,7 +107,7 @@ CqMicroPolyGridBase* CqQuadric::Dice()
 		}
 	}
 
-	pGrid->SetNormals( TqFalse );
+	pGrid->SetNormals( CanGenerateNormals() );
 
 	return ( pGrid );
 }
@@ -349,7 +349,6 @@ CqVector3D CqSphere::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
 	CqVector3D	p( DicePoint( u, v ) );
 	Normal = p;
-	Normal.z( 0 );
 	Normal.Unit();
 	return ( p );
 }
@@ -492,12 +491,7 @@ CqVector3D CqCone::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqCone::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	CqVector3D	p( DicePoint( u, v ) );
-	Normal = p;
-	Normal.z( 0 );
-	Normal.Unit();
-
-	return ( p );
+	return( DicePoint( u, v ) );
 }
 
 
@@ -776,12 +770,7 @@ CqVector3D CqHyperboloid::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqHyperboloid::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	CqVector3D	p( DicePoint( u, v ) );
-	Normal = p;
-	Normal.z( 0 );
-	Normal.Unit();
-
-	return ( p );
+	return( DicePoint( u, v ) );
 }
 
 
@@ -933,12 +922,7 @@ CqVector3D CqParaboloid::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqParaboloid::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	CqVector3D	p( DicePoint( u, v ) );
-	Normal = p;
-	Normal.z( 0 );
-	Normal.Unit();
-
-	return ( p );
+	return( DicePoint( u, v ) );
 }
 
 
@@ -1077,12 +1061,7 @@ CqVector3D CqTorus::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqTorus::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	CqVector3D	p( DicePoint( u, v ) );
-	Normal = p;
-	Normal.z( 0 );
-	Normal.Unit();
-
-	return ( p );
+	return( DicePoint( u, v ) );
 }
 
 
@@ -1217,10 +1196,8 @@ CqVector3D CqDisk::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqDisk::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	CqVector3D	p( DicePoint( u, v ) );
 	Normal = CqVector3D( 0, 0, 1 );
-
-	return ( p );
+	return( DicePoint( u, v ) );
 }
 
 
