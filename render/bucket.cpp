@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright (C) 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.com
 //
@@ -328,6 +328,9 @@ void CqBucket::FilterBucket()
 	CqImagePixel * pie;
 	
 	std::valarray<TqFloat>* pDatas = new std::valarray<TqFloat>[ XSize() * YSize() ];
+	TqInt idata;
+	for( idata = XSize() * YSize() - 1; idata >= 0; idata-- )
+		pDatas[idata].resize( QGetRenderContext()->GetOutputDataTotalSize() );
 	TqFloat* pCoverages = new TqFloat[ XSize() * YSize() ];
 
 	TqInt xmax = static_cast<TqInt>( CEIL( ( XFWidth() - 1 ) * 0.5f ) );
