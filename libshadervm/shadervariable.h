@@ -485,7 +485,10 @@ class CqShaderVariableVarying : public CqShaderVariable
 
 		virtual	void	Initialise( const TqInt uGridRes, const TqInt vGridRes )
 		{
+			R Def;
+			if( m_aValue.size() > 0 )	Def = m_aValue[0];
 			m_aValue.resize( ( uGridRes + 1 ) * ( vGridRes + 1 ) );
+			SetValue( Def );
 		}
 
 		virtual	void		GetFloat(TqFloat &res, TqInt index=0) const		{assert(TqFalse); }
