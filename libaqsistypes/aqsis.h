@@ -30,9 +30,9 @@
 #include	"config.h"
 #else
 #ifdef	__GNUC__
-#ifndef AQSIS_SYSTEM_MACOSX
+#ifndef __APPLE__
 #error " If this is a POSIX system you should be sure to run configure"
-#endif /* AQSIS_SYSTEM_MACOSX */
+#endif /* __APPLE__ */
 #endif /* __GNUC__ */
 #endif /* HAVE_CONFIG_H */
 

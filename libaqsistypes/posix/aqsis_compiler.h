@@ -39,6 +39,13 @@
 #define	SOMAXCONN		128
 #endif
 
+
+/** If compiling on Apple platform, set the system identifier AQSIS_SYSTEM_MACOSX, MacOSX is basically Posix, but with some small differences.
+ */
+#ifdef __APPLE__
+#define AQSIS_SYSTEM_MACOSX 1
+#endif
+
 /** Define the compiler.
  */
 #define	AQSIS_COMPILER_GCC	1
