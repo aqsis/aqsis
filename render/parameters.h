@@ -49,10 +49,10 @@ class CqParameter
 		CqParameter( const CqParameter& From );
 		virtual	~CqParameter();
 
-		/** Pure virtual, create function.
+		/** Pure virtual, clone function, which only creates a new parameter with matching type, no data.
 		 * \return A pointer to a new parameter with the same type.
 		 */
-		virtual	CqParameter* Create(const char* Name, TqInt Count = 1 ) const = 0;
+		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const = 0;
 		/** Pure virtual, duplicate function.
 		 * \return A pointer to a new parameter with the same name and value.
 		 */
@@ -193,7 +193,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		// Overrridden from CqParameter
 
 
-		virtual	CqParameter* Create(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedVarying<T, I, SLT>( Name, Count ) );
 		}
@@ -333,7 +333,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 		virtual	~CqParameterTypedUniform()
 		{}
 
-		virtual	CqParameter* Create(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedUniform<T, I, SLT>( Name, Count ) );
 		}
@@ -446,7 +446,7 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 		virtual	~CqParameterTypedConstant()
 		{}
 
-		virtual	CqParameter* Create(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedConstant<T, I, SLT>( Name, Count ) );
 		}
@@ -547,7 +547,7 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 		virtual	~CqParameterTypedVertex()
 		{}
 
-		virtual	CqParameter* Create(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedVertex<T, I, SLT>( Name, Count ) );
 		}
@@ -591,7 +591,7 @@ class CqParameterTypedFaceVarying : public CqParameterTypedVarying<T, I, SLT>
 		virtual	~CqParameterTypedFaceVarying()
 		{}
 
-		virtual	CqParameter* Create(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedFaceVarying<T, I, SLT>( Name, Count ) );
 		}
@@ -640,7 +640,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		virtual	~CqParameterTypedVaryingArray()
 		{}
 
-		virtual	CqParameter* Create(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedVaryingArray<T, I, SLT>( Name, Count ) );
 		}
@@ -787,7 +787,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 		virtual	~CqParameterTypedUniformArray()
 	{}
 
-		virtual	CqParameter* Create(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedUniformArray<T, I, SLT>( Name, Count ) );
 		}
@@ -895,7 +895,7 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 		virtual	~CqParameterTypedConstantArray()
 	{}
 
-		virtual	CqParameter* Create(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedConstantArray<T, I, SLT>( Name, Count ) );
 		}
@@ -997,7 +997,7 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SL
 		virtual	~CqParameterTypedVertexArray()
 		{}
 
-		virtual	CqParameter* Create(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedVertexArray<T, I, SLT>( Name, Count ) );
 		}
@@ -1041,7 +1041,7 @@ class CqParameterTypedFaceVaryingArray : public CqParameterTypedVaryingArray<T, 
 		virtual	~CqParameterTypedFaceVaryingArray()
 		{}
 
-		virtual	CqParameter* Create(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedFaceVaryingArray<T, I, SLT>( Name, Count ) );
 		}

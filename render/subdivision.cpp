@@ -1443,7 +1443,7 @@ CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = pSurf->pPoints()->aUserParams().begin(); iUP != pSurf->pPoints()->aUserParams().end(); iUP++ )
 	{
-		CqParameter* pNewPV = (*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() );
+		CqParameter* pNewPV = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
 		pNewPV->Clear();
 		m_pPoints->AddPrimitiveVariable( pNewPV );
 	}

@@ -326,7 +326,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		std::vector<CqParameter*>::iterator iUP;
 		for( iUP = Surface().aUserParams().begin(); iUP != Surface().aUserParams().end(); iUP++ )
 		{
-			CqParameter* pNewUP = (*iUP)->Create( (*iUP)->strName().c_str(), (*iUP)->Count() );
+			CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
 			pNewUP->SetSize( pNew->cVarying() );
 
 			pNewUP->SetValue( (*iUP), 0, iUPA );
