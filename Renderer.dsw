@@ -98,6 +98,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name bake2tif
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name aqsl
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -143,6 +146,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name slpp
+    End Project Dependency
 }}}
 
 ###############################################################################

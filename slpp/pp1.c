@@ -382,13 +382,11 @@ main(argc,argv)
 	if(! ofile)
 		{
 		/* No output name given; use input name and modify it */
-//		strcpy (Outfile,Filestack[0]->f_name);
+		strcpy (Outfile,Filestack[0]->f_name);
 		/* terminate the file name before any extension */
-//		if((s = strrchr(Outfile,'.')) != NULL)
-//			*s = '\0';
-//		strcat(Outfile,".pp");
-		strcpy(Outfile,"stdout");
-		Output=stdout;
+		if((s = strrchr(Outfile,'.')) != NULL)
+			*s = '\0';
+		strcat(Outfile,".pp");
 		}
 	else
 		{

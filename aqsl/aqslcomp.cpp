@@ -124,40 +124,42 @@ int main( int argc, const char** argv )
 		for ( ArgParse::apstringvec::const_iterator undefine = g_undefines.begin(); undefine != g_undefines.end(); undefine++ )
 			strCommand << "-u " << undefine->c_str() << " ";
 
-		char ifile[L_tmpnam];
+		const char* _template = "slppXXXXXX";
+		char ifile[11];
 		for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
 		{
 			FILE *file = fopen( e->c_str(), "rb" );
 			if ( file != NULL )
 			{
 				fclose(file);
-				tmpnam( &ifile[0] );
-				// Redirect stdout to the temp file.
-				int oldstdout = 0;
+				strcpy( ifile, _template );
+				char* tempname;
 				#ifdef	AQSIS_SYSTEM_WIN32
-				if( _dup2( 1, oldstdout) == 0)
+				tempname = _mktemp( ifile );
 				#else
-				if( dup2( 1, oldstdout) == 0)
+				tempname = mktemp( ifile );
 				#endif //AQSIS_SYSTEM_WIN32
+				if( NULL != tempname )
 				{
-					freopen( ifile, "w", stdout );
 					std::stringstream strThisCommand;
 					strThisCommand << strCommand.str();
+					// Set the output filename.
+					strThisCommand << "-o " << tempname << " ";
 					strThisCommand << e->c_str() << std::ends;
 					system( strThisCommand.str().c_str() );
-					#ifdef	AQSIS_SYSTEM_WIN32
-					_dup2( oldstdout, 1 );
-					#else
-					dup2( oldstdout, 1 );
-					#endif //AQSIS_SYSTEM_WIN32
 
-					std::ifstream ppfile( ifile );
+					std::ifstream ppfile( tempname );
 					if ( Parse( ppfile, e->c_str(), std::cerr ) )
 						codegen.OutputTree( GetParseTree(), g_stroutname );
 
 					// Delete the temporary file.
 					ppfile.close();
-					remove(ifile);
+					remove(tempname);
+				}
+				else
+				{
+					std::cout << "Could not create temporary file for preprocessing." << std::endl;
+					exit( -1 );
 				}
 			}
 			else
