@@ -113,6 +113,7 @@ private:
 		TqInt		m_modeID;
 		TqInt		m_dataOffset;
 		TqInt		m_dataSize;
+		std::string m_customParamsArgs;
 	};
 
 	void	LoadDisplayLibrary( SqDisplayRequest& req );

@@ -97,12 +97,21 @@ using namespace Aqsis;
 
 START_NAMESPACE( Aqsis )
 
+enum EqDisplayTypes 
+{
+	Type_File = 0,
+	Type_Framebuffer,
+	Type_ZFile,
+	Type_ZFramebuffer,
+	Type_Shadowmap,
+};
+
+
 TqInt g_ImageWidth = 0;
 TqInt g_ImageHeight = 0;
 TqInt g_PixelsProcessed = 0;
 TqInt g_Channels = 0;
 TqInt g_offset = 0;
-TqInt g_Format = 1;
 TqInt g_ElementSize = 0;
 TqInt g_CWXmin, g_CWYmin;
 TqInt g_CWXmax, g_CWYmax;
@@ -111,10 +120,15 @@ TqFloat g_QuantizeOneVal = 0.0f;
 TqFloat g_QuantizeMinVal = 0.0f;
 TqFloat g_QuantizeMaxVal = 0.0f;
 TqFloat g_QuantizeDitherVal = 0.0f;
+TqFloat g_appliedQuantizeOneVal = 0.0f;
+TqFloat g_appliedQuantizeMinVal = 0.0f;
+TqFloat g_appliedQuantizeMaxVal = 0.0f;
+TqFloat g_appliedQuantizeDitherVal = 0.0f;
 uint16	g_Compression = COMPRESSION_NONE, g_Quality = 0;
 TqInt	g_BucketsPerCol, g_BucketsPerRow;
 TqInt	g_BucketWidthMax, g_BucketHeightMax;
 TqBool	g_RenderWholeFrame = TqFalse;
+TqInt	g_ImageType;
 
 unsigned char* g_byteData;
 float*	g_floatData;
@@ -129,6 +143,11 @@ ArgParse::apstring g_mode("rgba");
 ArgParse::apstring g_filename("output.tif");
 ArgParse::apstring g_hostname;
 ArgParse::apstring g_port;
+ArgParse::apstringvec g_paramNames;
+ArgParse::apintvec g_paramCounts;
+ArgParse::apintvec g_paramInts;
+ArgParse::apfloatvec g_paramFloats;
+ArgParse::apstringvec g_paramStrings;
 bool g_help = 0;
 
 /// Hides incompatibilities between sockets and WinSock
@@ -216,7 +235,7 @@ void WriteTIFF(const std::string& filename)
         TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
 
         // Write out an 8 bits per pixel integer image.
-        if ( g_Format == 1 /*DataFormat_Unsigned8*/ )
+        if ( g_appliedQuantizeOneVal == 255 )
         {
             TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
             TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
@@ -394,7 +413,7 @@ void BucketFunction()
 										value = CLAMP(value, g_QuantizeMinVal, g_QuantizeMaxVal) ;
 									}
 
-									if ( g_Format == 1 )
+									if ( g_appliedQuantizeOneVal == 255 )
 									{
 										if( NULL != g_byteData )
 										{
@@ -426,7 +445,7 @@ void BucketFunction()
 				exit(-1);
 			}
 
-			if(g_type.compare("framebuffer")==0)
+			if(g_ImageType == Type_Framebuffer || g_ImageType == Type_ZFramebuffer)
 			{
 				g_uiImageWidget->damage(1, xmin, ymin, xmaxp1-xmin, ymaxp1-ymin);
 				Fl::check();
@@ -439,7 +458,7 @@ void BucketFunction()
 		}
 		free(resp);
 	}
-	if(g_type.compare("file")==0)
+	if(g_ImageType == Type_File || g_ImageType == Type_ZFile)
 	{
 		WriteTIFF(g_filename);
 	}
@@ -472,7 +491,7 @@ void ProcessFormat()
 	// Extract the format attributes.
 	TiXmlHandle respHandle(&respDoc);
 	TiXmlHandle formatHandle = respHandle.FirstChildElement("aqsis:response").FirstChildElement("aqsis:format");
-	TiXmlElement* formatElement = respHandle.FirstChildElement("aqsis:response").FirstChildElement("aqsis:format").Element();
+	TiXmlElement* formatElement = formatHandle.Element();
 	if( formatElement )
 	{
 		TiXmlAttribute* pAttr = formatElement->FirstAttribute();
@@ -488,37 +507,13 @@ void ProcessFormat()
 		formatElement->QueryIntAttribute("bucketheightmax", &g_BucketHeightMax);
 		formatElement->QueryIntAttribute("elementsize", &g_ElementSize);
 
-		// Find the appropriate data if processing if using AOV.
-		if(g_mode.compare("rgb")!=0 && g_mode.compare("rgba")!=0 && g_mode.compare("z")!=0)
-		{
-			TiXmlElement* pdataList = formatHandle.FirstChildElement("aqsis:datalist").Element();
-			TiXmlNode* pChildNode = pdataList->FirstChild("aqsis:dataelement");
-			int offset = 0;
-			TqBool found = TqFalse;
-			while(pChildNode != 0)
-			{
-				TiXmlElement* pChildElement = pChildNode->ToElement();
-				if(pChildElement!=0)
-				{
-					const char* pname = pChildElement->Attribute("name");
-					int size;
-					pChildElement->QueryIntAttribute("size", &size);
-					if(pname!=0 && g_mode.compare(pname)==0)
-					{
-						found = TqTrue;
-						g_offset = offset;
-						g_Channels = size;
-						break;
-					}
-					offset += size;
-				}
-				pChildNode = pChildNode->NextSibling("aqsis:dataelement");
-			}
-			if(!found)
-				std::cout << "Could not find element " << g_mode.c_str() << std::endl;
-		}
+		// Find the appropriate data if using AOV.
+		std::string dataName("rgba");
+		if(g_mode.compare("rgb")!=0 && g_mode.compare("rgba")!=0 && g_mode.compare("a")!=0)
+			dataName = g_mode;
 		else
 		{
+			// Choose out of "rgb", "rgba", and "a"
 			if(g_mode.find("rgb")!=g_mode.npos)
 			{
 				g_Channels=3;
@@ -526,18 +521,64 @@ void ProcessFormat()
 					g_Channels=4;
 			}
 			else
-				g_Channels=1;
+			{
+				g_offset = 3;
+				g_Channels = 1;
+			}
 		}
+
+		TiXmlHandle dataListHandle = formatHandle.FirstChildElement("aqsis:datalist");
+		TiXmlElement* pdataelem = dataListHandle.FirstChildElement("aqsis:dataelement").Element();
+		int offset = 0;
+		TqBool found = TqFalse;
+		// Loop through available data, looking for the chosen data.
+		for( pdataelem; pdataelem; pdataelem=pdataelem->NextSiblingElement("aqsis:dataelement") )
+		{
+			const char* pname = pdataelem->Attribute("name");
+			int size;
+			pdataelem->QueryIntAttribute("size", &size);
+			if(pname!=0 && dataName.compare(pname)==0)
+			{
+				found = TqTrue;
+				g_offset = offset;
+				g_Channels = size;
+
+				// Read quantization data if specified to determine the output format.
+				TiXmlNode* pappliedquant_node = pdataelem->FirstChildElement("aqsis:appliedquant");
+				if( pappliedquant_node )
+				{
+					std::cout << "Found quantisation" << std::endl;
+					TiXmlElement* pappliedquant = pappliedquant_node->ToElement();
+
+					double temp;
+					pappliedquant->QueryDoubleAttribute("one", &temp);
+					g_appliedQuantizeOneVal = temp;
+					pappliedquant->QueryDoubleAttribute("min", &temp);
+					g_appliedQuantizeMinVal = temp;
+					pappliedquant->QueryDoubleAttribute("max", &temp);
+					g_appliedQuantizeMaxVal = temp;
+					pappliedquant->QueryDoubleAttribute("dither", &temp);
+					g_appliedQuantizeDitherVal = temp;
+
+					std::cout << g_appliedQuantizeOneVal << std::endl;
+				}
+
+				break;
+			}
+			offset += size;
+		}
+		if(!found)
+			std::cout << "Could not find element " << g_mode.c_str() << std::endl;
 
 		g_PixelsProcessed = 0;
 
-		if(g_Format==1)
+		if(g_appliedQuantizeOneVal == 255)
 		{
             g_byteData = new unsigned char[ g_ImageWidth * g_ImageHeight * g_Channels ];
 			memset(g_byteData, 0, g_ImageWidth * g_ImageHeight * g_Channels);
 
 			// If working as a framebuffer, initialise the display to a checkerboard to show alpha
-			if(g_type.compare("framebuffer")==0)
+			if(g_ImageType == Type_Framebuffer)
 			{
 				for (TqInt i = g_CWYmin; i < g_CWYmax; i ++) 
 				{
@@ -582,6 +623,11 @@ int main( int argc, char** argv )
     ap.argString( "name", "=string\athe name of the file to save", &g_filename );
     ap.argString( "hostname", "=string\ahostname of the machine to connect to", &g_hostname );
     ap.argString( "port", "=string\aport to connect to", &g_port );
+    ap.argStrings( "paramnames", "=string array\n\aarray of custom parameter names, separated with ','", &g_paramNames, ',' );
+    ap.argInts( "paramcounts", "=int array\acustom parameter counts. \n\aThree per parameter, number of ints, \n\anumber of floats and \n\anumber of strings, separated with ','", &g_paramCounts, ',' );
+    ap.argInts( "paramints", "=int array\acustom parameter integer values, separated with ','", &g_paramInts, ',' );
+    ap.argFloats( "paramfloats", "=float array\acustom parameter float values, separated with ','", &g_paramFloats, ',' );
+    ap.argStrings( "paramstrings", "=string array\acustom parameter string values, separated with ','", &g_paramStrings, ',' );
     ap.allowUnrecognizedOptions();
 
     if ( argc > 1 && !ap.parse( argc - 1, const_cast<const char**>(argv + 1) ) )
@@ -596,9 +642,72 @@ int main( int argc, char** argv )
         exit( 0 );
     }
 
+	// Determine the display type from the list that we support.
+	if(g_type.compare("file")==0 || g_type.compare("tiff")==0)
+		g_ImageType = Type_File;
+	else if(g_type.compare("framebuffer")==0)
+		g_ImageType = Type_Framebuffer;
+	else if(g_type.compare("zfile")==0)
+		g_ImageType = Type_ZFile;
+	else if(g_type.compare("zframebuffer")==0)
+		g_ImageType = Type_ZFramebuffer;
+	
 	// If rendering to a framebuffer, default to showing the whole frame and render to the clip window.
-	if(g_type.compare("framebuffer")==0)
+	if(g_ImageType == Type_Framebuffer)
 		g_RenderWholeFrame = TqTrue;
+
+	// Extract the recognised custom parameters
+	if( g_paramNames.size() > 0 )
+	{
+		// Must have three counts per parameter.
+		assert(g_paramCounts.size() >= g_paramNames.size()*3);
+
+		ArgParse::apstringvec::iterator i;
+		TqInt countsindex = 0;
+		TqInt intsindex = 0;
+		TqInt floatsindex = 0;
+		TqInt stringsindex = 0;
+		for(i = g_paramNames.begin(); i!=g_paramNames.end(); i++)
+		{
+			if( i->compare("quantize") == 0 )
+			{
+				assert( g_paramCounts[countsindex] == 0 && g_paramCounts[countsindex+1] == 4 && g_paramCounts[countsindex+2] == 0 );
+				g_QuantizeZeroVal = g_paramFloats[floatsindex];
+				g_QuantizeOneVal = g_paramFloats[floatsindex+1];
+				g_QuantizeMinVal = g_paramFloats[floatsindex+2];
+				g_QuantizeMaxVal = g_paramFloats[floatsindex+3];
+			}
+			else if( i->compare("dither") == 0 )
+			{
+				assert( g_paramCounts[countsindex] == 0 && g_paramCounts[countsindex+1] == 1 && g_paramCounts[countsindex+2] == 0 );
+				g_QuantizeDitherVal = g_paramFloats[floatsindex];
+			}
+			else if( i->compare("compression") == 0 )
+			{
+				assert( g_paramCounts[countsindex] == 0 && g_paramCounts[countsindex+1] == 0 && g_paramCounts[countsindex+2] == 1 );
+                ArgParse::apstring comp = g_paramStrings[stringsindex];
+				if ( comp.compare("none") == 0 )
+                    g_Compression = COMPRESSION_NONE;
+				else if ( comp.compare("lzw") == 0 )
+                    g_Compression = COMPRESSION_LZW;
+				else if ( comp.compare("deflate") == 0 )
+                    g_Compression = COMPRESSION_DEFLATE;
+				else if ( comp.compare("jpeg") == 0 )
+                    g_Compression = COMPRESSION_JPEG;
+				else if ( comp.compare("packbits") == 0 )
+                    g_Compression = COMPRESSION_PACKBITS;
+            }
+            else if( i->compare("quality") == 0 )
+            {
+				assert( g_paramCounts[countsindex] == 1 && g_paramCounts[countsindex+1] == 0 && g_paramCounts[countsindex+2] == 0 );
+                g_Quality = g_paramInts[intsindex];
+                g_Quality = CLAMP(g_Quality, 0, 100);
+			}
+			intsindex += g_paramCounts[countsindex++];
+			floatsindex += g_paramCounts[countsindex++];
+			stringsindex += g_paramCounts[countsindex++];
+		}
+	}
 
     /// Port is defined as the value passed into the -port= command line argument.
 	/// if that is empty, then the value stored in the environment variable AQSIS_DD_PORT,

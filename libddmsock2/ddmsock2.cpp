@@ -79,6 +79,8 @@ void sig_chld( int signo )
 
 #endif // AQSIS_SYSTEM_POSIX
 
+std::string PrepareCustomParameters( std::map<std::string, void*>& mapParams );
+
 /// Required function that implements Class Factory design pattern for DDManager libraries
 IqDDManager* CreateDisplayDriverManager()
 {
@@ -128,6 +130,7 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 	req.m_modeID = modeID;
 	req.m_dataOffset = dataOffset;
 	req.m_dataSize = dataSize;
+	req.m_customParamsArgs = PrepareCustomParameters(mapOfArguments);
 
 	m_displayRequests.push_back(req);
 
@@ -295,8 +298,9 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 	args.push_back(argstrings.back().c_str());
 	argstrings.push_back(CqString("-mode=") + CqString( req.m_mode ));
 	args.push_back(argstrings.back().c_str());
+	argstrings.push_back(req.m_customParamsArgs);
+	args.push_back(argstrings.back().c_str());
     args.push_back(NULL);
-
 
 #ifdef AQSIS_SYSTEM_WIN32
 
@@ -481,9 +485,16 @@ std::string CqDDManager::GetStringField( const std::string& s, int idx )
 }
 
 
-/*void SendUserParameters( std::map<std::string, void*>& mapParams, CqDDClient* client )
+std::string PrepareCustomParameters( std::map<std::string, void*>& mapParams )
 {
-    std::map<std::string, void*>::iterator param;
+    std::stringstream customParamArgs;
+	std::stringstream customParamNames;
+	std::stringstream customParamCounts;
+	std::stringstream customParamStrings;
+	std::stringstream customParamInts;
+	std::stringstream customParamFloats;
+
+	std::map<std::string, void*>::iterator param;
     for ( param = mapParams.begin(); param != mapParams.end(); param++ )
     {
         SqParameterDeclaration Decl;
@@ -494,7 +505,7 @@ std::string CqDDManager::GetStringField( const std::string& s, int idx )
         catch( XqException e )
         {
             std::cerr << error << e.strReason().c_str() << std::endl;
-            return;
+            return("");
         }
 
         // Check the parameter type is uniform, not valid for non-surface requests otherwise.
@@ -504,61 +515,121 @@ std::string CqDDManager::GetStringField( const std::string& s, int idx )
             continue;
         }
 
-        // Special case for strings, we need to build an array of strings to pass as we cannot pass pointers across processes.
-        if( Decl.m_Type == type_string )
+		if( param != mapParams.begin() )
+		{
+			customParamNames << ",";
+			customParamCounts << ",";
+		}
+
+		// Store the name
+		customParamNames << "\"" << Decl.m_strName << "\"";
+		TqInt i;
+		const char** strings;
+		const int* ints;
+		const float* floats;
+        switch ( Decl.m_Type )
         {
-            const char** strings = static_cast<const char**>( param->second );
-            TqInt i;
-            TqInt len = 0;
-            for( i = 0; i < Decl.m_Count; i++ )
-                len += strlen( strings[ i ] ) + 1;
-            char* data = new char[ len ];
-            memset( data, 0, len );
-            len = 0;
-            for( i = 0; i < Decl.m_Count; i++ )
-            {
-                strcpy( data + len, strings[ i ] );
-                len += strlen( strings[ i ] ) + 1;
-            }
+			case type_string:
+				customParamCounts << 0 << "," << 0 << "," << Decl.m_Count;
+				// If there are already some arguments of this type, then add a separating ','
+				if(!customParamStrings.str().empty())
+					customParamStrings << ",";
+				strings = static_cast<const char**>( param->second );
+				for( i = 0; i < Decl.m_Count; i++ )
+				{
+					customParamStrings << strings[i];
+					if( i+1 != Decl.m_Count )
+						customParamStrings << ",";
+				}
+				break;
 
-            SqDDMessageUserParam* pmsg = SqDDMessageUserParam::Construct(Decl.m_strName.c_str(), Decl.m_Type, Decl.m_Count, data, len );
-            client->SendMsg( pmsg );
-            pmsg->Destroy();
-            delete[]( data );
-        }
-        else
-        {
-            TqInt elementsize = 0;
-            switch ( Decl.m_Type )
-            {
-            case type_float:
-                elementsize = sizeof(TqFloat);
-                break;
+			case type_float:
+				customParamCounts << 0 << "," << Decl.m_Count << "," << 0;
+				// If there are already some arguments of this type, then add a separating ','
+				if(!customParamFloats.str().empty())
+					customParamFloats << ",";
+				floats = static_cast<float*>( param->second );
+				for( i = 0; i < Decl.m_Count; i++ )
+				{
+					customParamFloats << floats[i];
+					if( i+1 != Decl.m_Count )
+						customParamFloats << ",";
+				}
+				break;
 
-            case type_integer:
-                elementsize = sizeof(TqInt);
-                break;
+			case type_integer:
+				customParamCounts << Decl.m_Count << "," << 0 << "," << 0;
+				// If there are already some arguments of this type, then add a separating ','
+				if(!customParamInts.str().empty())
+					customParamInts << ",";
+				ints = static_cast<int*>( param->second );
+				for( i = 0; i < Decl.m_Count; i++ )
+				{
+					customParamInts << ints[i];
+					if( i+1 != Decl.m_Count )
+						customParamFloats << ",";
+				}
+				break;
 
-            case type_point:
-            case type_normal:
-            case type_vector:
-            case type_color:
-                elementsize = sizeof(TqFloat) * 3;
-                break;
+			case type_point:
+			case type_normal:
+			case type_vector:
+			case type_color:
+				customParamCounts << 0 << "," << Decl.m_Count << "," << 0;
+				// If there are already some arguments of this type, then add a separating ','
+				if(!customParamFloats.str().empty())
+					customParamFloats << ",";
+				floats = static_cast<float*>( param->second );
+				for( i = 0; i < Decl.m_Count * 3; i++ )
+				{
+					customParamFloats << floats[i];
+					if( i+1 != Decl.m_Count )
+						customParamFloats << ",";
+				}
+				break;
 
-            case type_hpoint:
-                elementsize = sizeof(TqFloat) * 4;
-                break;
+			case type_hpoint:
+				customParamCounts << 0 << "," << Decl.m_Count << "," << 0;
+				// If there are already some arguments of this type, then add a separating ','
+				if(!customParamFloats.str().empty())
+					customParamFloats << ",";
+				floats = static_cast<float*>( param->second );
+				for( i = 0; i < Decl.m_Count * 4; i++ )
+				{
+					customParamFloats << floats[i];
+					if( i+1 != Decl.m_Count )
+						customParamFloats << ",";
+				}
+				break;
 
-            case type_matrix:
-                elementsize = sizeof(TqFloat) * 16;
-                break;
-            }
-            SqDDMessageUserParam* pmsg = SqDDMessageUserParam::Construct(Decl.m_strName.c_str(), Decl.m_Type, Decl.m_Count, param->second, Decl.m_Count * elementsize );
-            client->SendMsg( pmsg );
-            pmsg->Destroy();
+			case type_matrix:
+				customParamCounts << 0 << "," << Decl.m_Count << "," << 0;
+				// If there are already some arguments of this type, then add a separating ','
+				if(!customParamFloats.str().empty())
+					customParamFloats << ",";
+				floats = static_cast<float*>( param->second );
+				for( i = 0; i < Decl.m_Count * 16; i++ )
+				{
+					customParamFloats << floats[i];
+					if( i+1 != Decl.m_Count )
+						customParamFloats << ",";
+				}
+				break;
         }
     }
+	if(mapParams.size() > 0 )
+	{
+		customParamArgs << "--paramnames=" << customParamNames.str().c_str() << " ";
+		customParamArgs << "--paramcounts=" << customParamCounts.str().c_str() << " ";
+		if( !customParamInts.str().empty() )
+			customParamArgs << "--paramints=" << customParamInts.str().c_str() << " ";
+		if( !customParamFloats.str().empty() )
+			customParamArgs << "--paramfloats=" << customParamFloats.str().c_str() << " ";
+		if( !customParamStrings.str().empty() )
+			customParamArgs << "--paramstrings=" << customParamStrings.str().c_str() << " ";
+	}
+
+	return(customParamArgs.str());
 }
-*/
+
 END_NAMESPACE( Aqsis )

@@ -249,8 +249,35 @@ void CqSender::operator()()
 
 			// Add the default "rgbaz" entry.
 			TiXmlElement* pdataelem = new TiXmlElement("aqsis:dataelement");
-			pdataelem->SetAttribute("name", "rgbaz");
-			pdataelem->SetAttribute("size", 5);
+			pdataelem->SetAttribute("name", "rgba");
+			pdataelem->SetAttribute("size", 4);
+			// Record the applied color quantization.
+	        const TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Color" );
+			if( pQuant )
+			{
+				TiXmlElement* pappliedquant = new TiXmlElement("aqsis:appliedquant");
+				pappliedquant->SetDoubleAttribute("one", pQuant[0]);
+				pappliedquant->SetDoubleAttribute("min", pQuant[1]);
+				pappliedquant->SetDoubleAttribute("max", pQuant[2]);
+				pappliedquant->SetDoubleAttribute("dither", pQuant[3]);
+				pdataelem->InsertEndChild(*pappliedquant);
+			}
+			datalist.InsertEndChild(*pdataelem);
+			// Add default depth entry
+			pdataelem = new TiXmlElement("aqsis:dataelement");
+			pdataelem->SetAttribute("name", "z");
+			pdataelem->SetAttribute("size", 1);
+			// Record the applied depth quantization.
+	        pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Depth" );
+			if( pQuant )
+			{
+				TiXmlElement* pappliedquant = new TiXmlElement("aqsis:appliedquant");
+				pappliedquant->SetDoubleAttribute("one", pQuant[0]);
+				pappliedquant->SetDoubleAttribute("min", pQuant[1]);
+				pappliedquant->SetDoubleAttribute("max", pQuant[2]);
+				pappliedquant->SetDoubleAttribute("dither", pQuant[3]);
+				pdataelem->InsertEndChild(*pappliedquant);
+			}
 			datalist.InsertEndChild(*pdataelem);
 
 			// Add entries for any AOV values specified.
@@ -263,6 +290,17 @@ void CqSender::operator()()
 				pdataelem->SetAttribute("name", iAOVEntry->first);
 				pdataelem->SetAttribute("size", iAOVEntry->second.m_NumSamples);
 				datasize += iAOVEntry->second.m_NumSamples;
+				// Record any applied quantization for this data type.
+				pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", iAOVEntry->first.c_str() );
+				if( pQuant )
+				{
+					TiXmlElement* pappliedquant = new TiXmlElement("aqsis:appliedquant");
+					pappliedquant->SetDoubleAttribute("one", pQuant[0]);
+					pappliedquant->SetDoubleAttribute("min", pQuant[1]);
+					pappliedquant->SetDoubleAttribute("max", pQuant[2]);
+					pappliedquant->SetDoubleAttribute("dither", pQuant[3]);
+					pdataelem->InsertEndChild(*pappliedquant);
+				}
 				datalist.InsertEndChild(*pdataelem);
 			}
 			format.SetAttribute("elementsize", ToString(datasize).c_str());
