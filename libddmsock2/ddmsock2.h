@@ -96,10 +96,22 @@ public:
 private:
     std::string	GetStringField( const std::string& s, int idx );
 
+	struct SqDisplayRequest
+	{
+		std::string m_name;
+		std::string m_type;
+		std::string m_mode;
+		TqInt		m_dataOffset;
+		TqInt		m_dataSize;
+	};
+
+	void	LoadDisplayLibrary( SqDisplayRequest& req );
+
 private:
 	CqBucketDiskStore	m_DiskStore;
 	CqDisplayListener	m_Listener;
 	std::map<TqInt, boost::condition*>	m_BucketRequestsWaiting;
+	std::vector<SqDisplayRequest>	m_displayRequests;
 }
 ;
 

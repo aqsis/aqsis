@@ -98,7 +98,7 @@ CqDisplayListener::~CqDisplayListener()
 void CqDisplayListener::Close()
 {
 	m_senderThreads.join_all();
-	m_listenerThread->join();
+	//m_listenerThread->join();
 	delete(m_listenerThread);
 
 #ifdef AQSIS_SYSTEM_WIN32
