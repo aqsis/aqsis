@@ -1726,12 +1726,6 @@ TqInt CqCubicCurvesGroup::Split(
     //  index of the current curve.
     for ( TqInt curveN = 0; curveN < m_ncurves; curveN++ )
     {
-        // the current vertex index within the current curve group
-        TqInt cvi = 0;
-
-        // the current varying index within the current curve group
-        TqInt cva = 0;
-
         // find the total number of piecewise cubic segments in the
         //  current curve, accounting for periodic curves
         TqInt npcSegs;
@@ -1760,15 +1754,11 @@ TqInt CqCubicCurvesGroup::Split(
         //  cubic curve segment within the current curve
         for ( TqInt pcN = 0; pcN < npcSegs; pcN++ )
         {
-            // find the index of the next segment, relative to
-            //  the current curve
-            /*
-            TqInt nextSegmentI = pcN + 1;
-            if (nextSegmentI == (npcSegs-1))
-            {
-                    nextSegmentI = 0;
-            }
-            */
+			// the current vertex index within the current curve group
+			TqInt cvi = 0;
+
+			// the current varying index within the current curve group
+			TqInt cva = 0;
 
             // each segment needs four vertex indexes, which we
             //  calculate here.  if the index goes beyond the
@@ -1888,7 +1878,7 @@ TqInt CqCubicCurvesGroup::Split(
 
 
 
-            vertexI += 4;
+            vertexI += vStep;
             varyingI++;
             nsplits++;
 

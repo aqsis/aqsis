@@ -3085,12 +3085,23 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
         {
             // set the default primitive variables
             pSurface->SetDefaultPrimitiveVariables();
-            TqFloat time = QGetRenderContext()->Time();
+			
+			TqFloat time = QGetRenderContext()->Time();
             // Transform the points into camera space for processing,
             pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
                                  QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
                                  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
-            CreateGPrim( pSurface );
+			
+			std::vector<CqBasicSurface*> aSplits;
+            pSurface->Split( aSplits );
+            std::vector<CqBasicSurface*>::iterator iSS;
+            for ( iSS = aSplits.begin(); iSS != aSplits.end(); iSS++ )
+            {
+                // Transform the points into camera space for processing,
+                ADDREF( (*iSS) );
+                CreateGPrim( static_cast<CqSurfacePatchBicubic*>( *iSS ) );
+                RELEASEREF( (*iSS) );
+            }
         }
         RELEASEREF( pSurface );
     }
