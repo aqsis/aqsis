@@ -170,17 +170,10 @@ TqInt CqTeapot::Split(std::vector<CqBasicSurface*>& aSplits)
 		 */
 		for (t=3;t>-1;t--) 
 		{
-			//pNew->CP(s,t)=CqVector4D(4,3,2,1);
-		pNew->CP(0,0)=CqVector4D(4,3,2,1);
-		pNew->CP(1,1)=CqVector4D(4,3,2,1);
-		pNew->CP(2,2)=CqVector4D(4,3,2,1);
-		pNew->CP(3,3)=CqVector4D(4,3,2,1);
-#if 1
 			pNew->CP(s,t)=CqVector4D( m_aptTeapot[m_Teapot[j + s*4+t]].x(),
 									m_aptTeapot[m_Teapot[j + s*4+t]].y(),
 									m_aptTeapot[m_Teapot[j + s*4+t]].z() - bottomheight,
 									1);
-#endif
 		}
 
 		pNew->Transform(m_matTx, m_matITTx, CqMatrix());
