@@ -5,7 +5,7 @@
  *	@brief	Implementation of trimcurce functionality.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/03/01 18:00:36 $
+ *	Last change date:	$Date: 2002/03/31 21:01:04 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -50,7 +50,7 @@ TqUint CqTrimCurve::FindSpan( TqFloat u ) const
 
 void CqTrimCurve::BasisFunctions( TqFloat u, TqUint span, std::vector<TqFloat>& BasisVals )
 {
-	register TqUint r, s, i;
+	register TqInt r, s, i;
 	register double omega;
 
 	BasisVals[ 0 ] = 1.0;
