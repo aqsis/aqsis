@@ -382,17 +382,21 @@ main(argc,argv)
 	if(! ofile)
 		{
 		/* No output name given; use input name and modify it */
-		strcpy (Outfile,Filestack[0]->f_name);
+//		strcpy (Outfile,Filestack[0]->f_name);
 		/* terminate the file name before any extension */
-		if((s = strrchr(Outfile,'.')) != NULL)
-			*s = '\0';
-		strcat(Outfile,".pp");
+//		if((s = strrchr(Outfile,'.')) != NULL)
+//			*s = '\0';
+//		strcat(Outfile,".pp");
+		strcpy(Outfile,"stdout");
+		Output=stdout;
 		}
-
-	if(strcmp(Outfile,Filestack[0]->f_name) == EQUAL)
-		fatal("Input and output filenames are the same: ",Outfile);
-	else if((Output = fopen(Outfile,"w")) == NULL)
-		fatal("Unable to create output file: ",Outfile);
+	else
+		{
+		if(strcmp(Outfile,Filestack[0]->f_name) == EQUAL)
+			fatal("Input and output filenames are the same: ",Outfile);
+		else if((Output = fopen(Outfile,"w")) == NULL)
+			fatal("Unable to create output file: ",Outfile);
+		}
 
 #if	HOST == H_CPM
 	/* Create a bigger than average buffer */
@@ -597,7 +601,7 @@ init()
 	Debug = FALSE;
 #endif	/* DEBUG */
 
-	Verbose = VERBOSE;		/* Set verbose state */
+	Verbose = FALSE;		/* Set verbose state */
 
 	Eflag = FALSE;			/* Say to abort on errors */
 	Lineopt = LINE_EXP;		/* Default to "long" #line form */
