@@ -124,7 +124,10 @@ void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 	}
 	else
 	{
-		m_StaticMatrix = matTrans;
+		if( m_IsMoving )
+			AddTimeSlot( time, matTrans );
+		else
+			m_StaticMatrix = matTrans;
 	}
 }
 

@@ -229,17 +229,11 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 
         if ( pSurface->EyeSplitCount() > MaxEyeSplits )
         {
-            //CqAttributeError( ErrorID_MaxEyeSplits, Severity_Normal, "Max eyesplits exceeded", pSurface->pAttributes(), TqTrue );
             CqString objname( "unnamed" );
             const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
             if ( pattrName != 0 ) objname = pattrName[ 0 ];
-            static CqString oldobj = "";
-            CqString curobj = objname.c_str();
-            if ( curobj != oldobj )
-            {
-                std::cerr << warning << "Max eyesplits for object \"" << curobj.c_str() << "\" exceeded" << std::endl;
-                oldobj = curobj;
-            }
+			std::cerr << warning << "Max eyesplits for object \"" << objname.c_str() << "\" exceeded" << std::endl;
+			return( TqTrue );
         }
         return ( TqFalse );
     }
@@ -901,8 +895,6 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
 
                         TqFloat t;
                         t = sampleData.m_Time;
-						if( time1 < 9.8 || time1 > 10.2)
-							std::cout << time1 << std::endl;
                         if( t < time0 || t > time1)
                             continue;
 
@@ -1158,9 +1150,6 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
     int counter = 0;
     int MaxEyeSplits = 10;
     TqBool bIsEmpty = IsCurrentBucketEmpty();
-    const TqInt* poptEyeSplits = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "eyesplits" );
-    if ( poptEyeSplits != 0 )
-        MaxEyeSplits = poptEyeSplits[ 0 ];
 
     // Render any waiting micro polygon grids.
     QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
@@ -1254,17 +1243,10 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
             QGetRenderContext() ->Stats().SplitsTimer().Start();
             TqInt cSplits = pSurface->Split( aSplits );
             TqInt i;
-            TqBool bUseful = ( pSurface->EyeSplitCount() < MaxEyeSplits );
-            for ( i = 0; i < cSplits && bUseful; i++ )
-            {
+            for ( i = 0; i < cSplits; i++ )
                 PostSurface( aSplits[ i ] );
-            }
 
             QGetRenderContext() ->Stats().SplitsTimer().Stop();
-            if ( !bUseful )
-            {
-                pSurface->UnLink();
-            }
         }
 
         pSurface->RenderComplete();

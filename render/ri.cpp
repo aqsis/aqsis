@@ -605,7 +605,7 @@ RtVoid	RiWorldBegin()
     // and then reset the current matrix to identity, ready for object transformations.
     TqInt i;
     for ( i = 0; i < QGetRenderContext() ->ptransWriteCurrent() ->cTimes(); i++ )
-        QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->ptransWriteCurrent() ->Time( i ), CqMatrix() );
+        QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->ptransCurrent() ->Time( i ), CqMatrix() );
 
     QGetRenderContext() ->optCurrent().InitialiseCamera();
     QGetRenderContext() ->pImage() ->SetImage();
@@ -1937,7 +1937,7 @@ RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
     // TODO: Report error.
     if ( pShader == 0 ) return ( 0 );
 
-    pShader->matCurrent() = QGetRenderContext() ->matCurrent();
+    pShader->matCurrent() = QGetRenderContext() ->ptransCurrent()->matObjectToWorld(QGetRenderContext()->Time());
     CqLightsource* pNew = new CqLightsource( pShader, RI_TRUE );
 
     // Execute the intiialisation code here, as we now have our shader context complete.

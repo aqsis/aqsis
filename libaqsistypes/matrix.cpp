@@ -1213,6 +1213,47 @@ std::ostream &operator<<( std::ostream &Stream, const CqMatrix &Matrix )
 }
 
 
+//----------------------------------------------------------------------
+/** Outputs a matrix to an output stream.
+ * \param Stream Stream to output the matrix to.
+ * \param Matrix The matrix to output.
+ * \return The new state of Stream.
+ */
+
+std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix )
+{
+    if ( !Matrix.fIdentity() )
+    {
+        Stream << "|" << Matrix.m_aaElement[ 0 ][ 0 ] <<
+        "," << Matrix.m_aaElement[ 0 ][ 1 ] <<
+        "," << Matrix.m_aaElement[ 0 ][ 2 ] <<
+        "," << Matrix.m_aaElement[ 0 ][ 3 ] << "|" << std::endl <<
+        "|" << Matrix.m_aaElement[ 1 ][ 0 ] <<
+        "," << Matrix.m_aaElement[ 1 ][ 1 ] <<
+        "," << Matrix.m_aaElement[ 1 ][ 2 ] <<
+        "," << Matrix.m_aaElement[ 1 ][ 3 ] << "|" << std::endl <<
+        "|" << Matrix.m_aaElement[ 2 ][ 0 ] <<
+        "," << Matrix.m_aaElement[ 2 ][ 1 ] <<
+        "," << Matrix.m_aaElement[ 2 ][ 2 ] <<
+        "," << Matrix.m_aaElement[ 2 ][ 3 ] << "|" << std::endl <<
+        "|" << Matrix.m_aaElement[ 3 ][ 0 ] <<
+        "," << Matrix.m_aaElement[ 3 ][ 1 ] <<
+        "," << Matrix.m_aaElement[ 3 ][ 2 ] <<
+        "," << Matrix.m_aaElement[ 3 ][ 3 ] << "|" << std::ends;
+    }
+    else
+    {
+        Stream <<
+        "|" << 1.0f << "," << 0.0f << "," << 0.0f << "," << 0.0f << "|" << std::endl <<
+        "|" << 0.0f << "," << 1.0f << "," << 0.0f << "," << 0.0f << "|" << std::endl <<
+        "|" << 0.0f << "," << 0.0f << "," << 1.0f << "," << 0.0f << "|" << std::endl <<
+        "|" << 0.0f << "," << 0.0f << "," << 0.0f << "," << 1.0f << "|" << std::ends;
+    }
+
+    return ( Stream );
+}
+
+
 //---------------------------------------------------------------------
 /** Scale each element by the specified value.
  * \param S The amount by which to scale the matrix elements.
