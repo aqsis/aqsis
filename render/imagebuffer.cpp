@@ -737,8 +737,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 			TqFloat ad; // Average depth
 			ad = pMPG->PointA().z() + pMPG->PointB().z() + pMPG->PointC().z() + pMPG->PointD().z();
 			ad /= 4;
-
-			TqFloat dc = CircleOfConfusion( DofParameters, ad );
+			dc = CircleOfConfusion( dofdata, ad );
 
 			CqVector4D dct( dc, dc, 0.0 );
 
