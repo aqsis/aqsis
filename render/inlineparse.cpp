@@ -23,8 +23,29 @@
  */
 #include "inlineparse.h"
 #include "exception.h"
+#include "parameters.h"
 
 USING_NAMESPACE( Aqsis );
+
+static TqUlong huniform = CqParameter::hash( "uniform" );
+static TqUlong hconstant = CqParameter::hash( "constant" );
+static TqUlong hvarying = CqParameter::hash( "varying" );
+static TqUlong hvertex = CqParameter::hash( "vertex" );
+static TqUlong hfacevarying = CqParameter::hash( "facevarying" );
+
+static TqUlong hfloat = CqParameter::hash( "float" );
+static TqUlong hpoint = CqParameter::hash( "point" );
+static TqUlong hhpoint = CqParameter::hash( "hpoint" );
+static TqUlong hvector = CqParameter::hash( "vector" );
+static TqUlong hnormal = CqParameter::hash( "normal" );
+static TqUlong hcolor = CqParameter::hash( "color" );
+static TqUlong hstring = CqParameter::hash( "string" );
+static TqUlong hmatrix = CqParameter::hash( "matrix" );
+static TqUlong hinteger = CqParameter::hash( "integer" );
+static TqUlong hint = CqParameter::hash( "int" );
+
+static TqUlong hleft = CqParameter::hash( "[" );
+static TqUlong hright = CqParameter::hash( "]" );
 
 void CqInlineParse::check_syntax ()
 {
@@ -182,28 +203,31 @@ void CqInlineParse::parse ( std::string &str )
 
 TqBool CqInlineParse::is_class ( const std::string &str )
 {
-    if ( ( str == "constant" ) ||
-            ( str == "uniform" ) ||
-            ( str == "varying" ) ||
-            ( str == "vertex" ) ||
-            ( str == "facevarying" ) )
+    TqUlong param = CqParameter::hash( str.c_str() );
+
+        if ( ( param == hconstant ) ||
+             ( param == huniform ) ||
+             ( param == hvarying ) ||
+             ( param == hvertex ) ||
+             ( param == hfacevarying ) )
         return TqTrue;
     return TqFalse;
 }
 
 TqBool CqInlineParse::is_type ( const std::string &str )
 {
-    if ( ( str == "float" ) ||
-            ( str == "point" ) ||
-            ( str == "vector" ) ||
-            ( str == "normal" ) ||
-            ( str == "color" ) ||
-            ( str == "string" ) ||
-            ( str == "matrix" ) ||
-            ( str == "hpoint" ) ||
-            ( str == "integer" ) ||
-            ( str == "int" ) )
-        return TqTrue;
+    TqUlong param = CqParameter::hash( str.c_str() );
+
+        if ( ( param == hfloat ) ||
+             ( param == hpoint ) ||
+             ( param == hvector ) ||
+             ( param == hnormal ) ||
+             ( param == hcolor ) ||
+             ( param == hstring ) ||
+             ( param == hmatrix ) ||
+             ( param == hhpoint ) ||
+             ( param == hinteger ) ||
+             ( param == hint ) ) return TqTrue;
     return TqFalse;
 }
 
@@ -218,34 +242,38 @@ TqBool CqInlineParse::is_int ( const std::string &str )
 
 EqVariableClass CqInlineParse::get_class ( const std::string &str )
 {
-    if ( str == "constant" ) return class_constant;
-    if ( str == "uniform" ) return class_uniform;
-    if ( str == "varying" ) return class_varying;
-    if ( str == "vertex" ) return class_vertex;
-    if ( str == "vertex" ) return class_vertex;
-    if ( str == "facevarying" ) return class_facevarying;
+         TqUlong param = CqParameter::hash( str.c_str() );
+
+        if ( param == hconstant ) return class_constant;
+        if ( param == huniform ) return class_uniform;
+        if ( param == hvarying ) return class_varying;
+        if ( param == hvertex ) return class_vertex;
+        if ( param == hfacevarying ) return class_facevarying;
     return ( class_constant );
 }
 
 EqVariableType CqInlineParse::get_type ( const std::string &str )
 {
-    if ( str == "float" ) return type_float;
-    if ( str == "point" ) return type_point;
-    if ( str == "vector" ) return type_vector;
-    if ( str == "normal" ) return type_normal;
-    if ( str == "color" ) return type_color;
-    if ( str == "string" ) return type_string;
-    if ( str == "matrix" ) return type_matrix;
-    if ( str == "hpoint" ) return type_hpoint;
-    if ( str == "integer" ) return type_integer;
-    if ( str == "int" ) return type_integer;
+        TqUlong param = CqParameter::hash( str.c_str() );
+
+        if ( param == hfloat ) return type_float;
+        if ( param == hpoint ) return type_point;
+        if ( param == hvector ) return type_vector;
+        if ( param == hnormal ) return type_normal;
+        if ( param == hcolor ) return type_color;
+        if ( param == hstring ) return type_string;
+        if ( param == hmatrix ) return type_matrix;
+        if ( param == hhpoint ) return type_hpoint;
+        if ( param == hinteger ) return type_integer;
+        if ( param == hint ) return type_integer;
+
     return ( type_float );
 }
 
 TqUint CqInlineParse::get_size ( const std::string &str )
 {
     TqUint i;
-    sscanf( str.c_str(), "%u", &i );
+        i = atoi( str.c_str() );
     return i;
 }
 

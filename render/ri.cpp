@@ -235,6 +235,8 @@ static TqUlong RIH_PZ = CqParameter::hash( RI_PZ );
 static TqUlong RIH_PW = CqParameter::hash( RI_PW );
 static TqUlong RIH_N = CqParameter::hash( RI_N );
 static TqUlong RIH_NP = CqParameter::hash( RI_NP );
+static TqUlong RIH_DEPTHFILTER = CqParameter::hash( "depthfilter" );
+static TqUlong RIH_JITTER = CqParameter::hash( "jitter" );
 
 RtInt	RiLastError = 0;
 
@@ -1585,9 +1587,10 @@ RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
             std::cerr << error << e.strReason().c_str() << std::endl;
             continue;
         }
-        if ( Decl.m_strName.compare( "depthfilter" ) == 0 )
+		TqUlong hash = CqParameter::hash(Decl.m_strName.c_str());
+		if ( hash == RIH_DEPTHFILTER )
             RiOption( "Hider", "depthfilter", ( RtToken ) values[ i ], NULL );
-        else if ( Decl.m_strName.compare( "jitter" ) == 0 )
+		else if ( hash == RIH_JITTER )
             RiOption( "Hider", "jitter", ( RtFloat* ) values[ i ], NULL );
     }
 
@@ -5339,20 +5342,21 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
     {
         RtToken	token = tokens[ i ];
         RtPointer	value = values[ i ];
+		TqUlong hash = CqParameter::hash(token);
 
         SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( token );
 
-        if ( Decl.m_strName.compare( RI_P ) == 0 && Decl.m_Class == class_vertex )
+		if ( (hash == RIH_P) && (Decl.m_Class == class_vertex ))
         {
             fP = RIL_P;
             pPoints = ( RtFloat* ) value;
         }
-        else if ( Decl.m_strName.compare( RI_PZ ) == 0 && Decl.m_Class == class_vertex )
+		else if ( (hash == RIH_PZ) && (Decl.m_Class == class_vertex ) )
         {
             fP = RIL_Pz;
             pPoints = ( RtFloat* ) value;
         }
-        else if ( Decl.m_strName.compare( RI_PW ) == 0 && Decl.m_Class == class_vertex )
+		else if ( (hash == RIH_PW) && (Decl.m_Class == class_vertex ) )
         {
             fP = RIL_Pw;
             pPoints = ( RtFloat* ) value;
