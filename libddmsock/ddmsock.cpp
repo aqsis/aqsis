@@ -571,7 +571,26 @@ void CqDDManager::InitialiseDisplayNameMap()
 {
 	// Read in the configuration file.
 	// Find the config file in the same place as the display drivers.
+#ifdef AQSIS_SYSTEM_MACOSX
+        CqString ddmsock_path("");
+	char* env = NULL;
+
+        env=getenv("AQSIS_BASE_PATH");
+        if (env == NULL) 
+        {
+                ddmsock_path="./";
+        }
+        else
+        {
+                ddmsock_path=env;
+                ddmsock_path.append("/");
+        }
+        ddmsock_path.append("ddmsock.ini");
+
+	CqString strConfigFile=ddmsock_path;
+#else
 	CqString strConfigFile="ddmsock.ini";
+#endif /* AQSIS_SYSTEM_MACOSX */
 
 	CqRiFile fileINI(strConfigFile.c_str(), "display");
 	if(fileINI.IsValid())
@@ -591,7 +610,20 @@ void CqDDManager::InitialiseDisplayNameMap()
 			   iStartD!=std::string::npos)
 			{
 				strName=strLine.substr(iStartN,iEndN);
+#ifdef AQSIS_SYSTEM_MACOSX
+                                if (env == NULL) 
+                                {
+                                        strDriverName="./";
+                                }
+                                else
+                                {
+                                        strDriverName=env;
+                                        strDriverName.append("/");
+                                }
+                                strDriverName.append(strLine.substr(iStartD,iEndD));
+#else
 				strDriverName=strLine.substr(iStartD,iEndD);
+#endif /* AQSIS_SYSTEM_MACOSX */
 				g_mapDisplayNames[strName]=strDriverName;
 			}
 		}
