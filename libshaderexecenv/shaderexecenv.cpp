@@ -259,8 +259,15 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Iq
 		const TqFloat* shutter = QGetRenderContextI()->GetFloatOption( "System", "Shutter" );
 		if( shutter )
 		{
-			// insert the open time, this one is already modified by shutter offset
-			m_apVariables[ EnvVars_time ]->SetFloat(  shutter[ 0 ] );
+			const TqFloat* shutteroffset = QGetRenderContextI()->GetFloatOption( "shutter", "offset" );
+			float offset = 0;
+			if( shutteroffset != 0 )
+			{
+				offset = *shutteroffset;
+			}
+
+			// insert the open time plus shutter offset
+			m_apVariables[ EnvVars_time ]->SetFloat(  shutter[ 0 ] + offset );
 		}
 	}
 }

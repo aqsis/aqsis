@@ -843,15 +843,8 @@ RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
         closetime = 1;
     }
 
-	const TqFloat* shutteroffset = QGetRenderContextI()->GetFloatOption( "shutter", "offset" );
-	float offset = 0;
-	if( shutteroffset != 0 )
-	{
-		offset = *shutteroffset;
-	}
-
-    QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 0 ] = opentime + offset;
-    QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 1 ] = closetime + offset;
+    QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 0 ] = opentime;
+    QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 1 ] = closetime;
 
     return ;
 }
