@@ -42,83 +42,83 @@
 
 START_NAMESPACE( Aqsis )
 
-#define	OpLSS_FF(a,Res,State)		OpLSS(temp_float,temp_float,a,Res,State)
-#define	OpLSS_PP(a,Res,State)		OpLSS(temp_point,temp_point,a,Res,State)
-#define	OpLSS_CC(a,Res,State)		OpLSS(temp_color,temp_color,a,Res,State)
+#define	OpLSS_FF(a,b,Res,State)		OpLSS(temp_float,temp_float,a,b,Res,State)
+#define	OpLSS_PP(a,b,Res,State)		OpLSS(temp_point,temp_point,a,b,Res,State)
+#define	OpLSS_CC(a,b,Res,State)		OpLSS(temp_color,temp_color,a,b,Res,State)
 
-#define	OpGRT_FF(a,Res,State)		OpGRT(temp_float,temp_float,a,Res,State)
-#define	OpGRT_PP(a,Res,State)		OpGRT(temp_point,temp_point,a,Res,State)
-#define	OpGRT_CC(a,Res,State)		OpGRT(temp_color,temp_color,a,Res,State)
+#define	OpGRT_FF(a,b,Res,State)		OpGRT(temp_float,temp_float,a,b,Res,State)
+#define	OpGRT_PP(a,b,Res,State)		OpGRT(temp_point,temp_point,a,b,Res,State)
+#define	OpGRT_CC(a,b,Res,State)		OpGRT(temp_color,temp_color,a,b,Res,State)
 
-#define	OpLE_FF(a,Res,State)		OpLE(temp_float,temp_float,a,Res,State)
-#define	OpLE_PP(a,Res,State)		OpLE(temp_point,temp_point,a,Res,State)
-#define	OpLE_CC(a,Res,State)		OpLE(temp_color,temp_color,a,Res,State)
+#define	OpLE_FF(a,b,Res,State)		OpLE(temp_float,temp_float,a,b,Res,State)
+#define	OpLE_PP(a,b,Res,State)		OpLE(temp_point,temp_point,a,b,Res,State)
+#define	OpLE_CC(a,b,Res,State)		OpLE(temp_color,temp_color,a,b,Res,State)
 
-#define	OpGE_FF(a,Res,State)		OpGE(temp_float,temp_float,a,Res,State)
-#define	OpGE_PP(a,Res,State)		OpGE(temp_point,temp_point,a,Res,State)
-#define	OpGE_CC(a,Res,State)		OpGE(temp_color,temp_color,a,Res,State)
+#define	OpGE_FF(a,b,Res,State)		OpGE(temp_float,temp_float,a,b,Res,State)
+#define	OpGE_PP(a,b,Res,State)		OpGE(temp_point,temp_point,a,b,Res,State)
+#define	OpGE_CC(a,b,Res,State)		OpGE(temp_color,temp_color,a,b,Res,State)
 
-#define	OpEQ_FF(a,Res,State)		OpEQ(temp_float,temp_float,a,Res,State)
-#define	OpEQ_PP(a,Res,State)		OpEQ(temp_point,temp_point,a,Res,State)
-#define	OpEQ_CC(a,Res,State)		OpEQ(temp_color,temp_color,a,Res,State)
-#define	OpEQ_SS(a,Res,State)		OpEQ(temp_string,temp_string,a,Res,State)
+#define	OpEQ_FF(a,b,Res,State)		OpEQ(temp_float,temp_float,a,b,Res,State)
+#define	OpEQ_PP(a,b,Res,State)		OpEQ(temp_point,temp_point,a,b,Res,State)
+#define	OpEQ_CC(a,b,Res,State)		OpEQ(temp_color,temp_color,a,b,Res,State)
+#define	OpEQ_SS(a,b,Res,State)		OpEQ(temp_string,temp_string,a,b,Res,State)
 
-#define	OpNE_FF(a,Res,State)		OpNE(temp_float,temp_float,a,Res,State)
-#define	OpNE_PP(a,Res,State)		OpNE(temp_point,temp_point,a,Res,State)
-#define	OpNE_CC(a,Res,State)		OpNE(temp_color,temp_color,a,Res,State)
-#define	OpNE_SS(a,Res,State)		OpNE(temp_string,temp_string,a,Res,State)
+#define	OpNE_FF(a,b,Res,State)		OpNE(temp_float,temp_float,a,b,Res,State)
+#define	OpNE_PP(a,b,Res,State)		OpNE(temp_point,temp_point,a,b,Res,State)
+#define	OpNE_CC(a,b,Res,State)		OpNE(temp_color,temp_color,a,b,Res,State)
+#define	OpNE_SS(a,b,Res,State)		OpNE(temp_string,temp_string,a,b,Res,State)
 
-#define	OpMUL_FF(a,Res,State)		OpMUL(temp_float,temp_float,a,Res,State)
-#define	OpDIV_FF(a,Res,State)		OpDIV(temp_float,temp_float,a,Res,State)
-#define	OpADD_FF(a,Res,State)		OpADD(temp_float,temp_float,a,Res,State)
-#define	OpSUB_FF(a,Res,State)		OpSUB(temp_float,temp_float,a,Res,State)
-#define	OpNEG_F(Res,State)			OpNEG(temp_float,Res,State)
+#define	OpMUL_FF(a,b,Res,State)		OpMUL(temp_float,temp_float,a,b,Res,State)
+#define	OpDIV_FF(a,b,Res,State)		OpDIV(temp_float,temp_float,a,b,Res,State)
+#define	OpADD_FF(a,b,Res,State)		OpADD(temp_float,temp_float,a,b,Res,State)
+#define	OpSUB_FF(a,b,Res,State)		OpSUB(temp_float,temp_float,a,b,Res,State)
+#define	OpNEG_F(a,Res,State)		OpNEG(temp_float,a,Res,State)
 
-#define	OpMUL_PP(a,Res,State)		OpMUL(temp_point,temp_point,a,Res,State)
-#define	OpDIV_PP(a,Res,State)		OpDIV(temp_point,temp_point,a,Res,State)
-#define	OpADD_PP(a,Res,State)		OpADD(temp_point,temp_point,a,Res,State)
-#define	OpSUB_PP(a,Res,State)		OpSUB(temp_point,temp_point,a,Res,State)
-#define	OpCRS_PP(a,Res,State)		OpCRS(temp_point,temp_point,a,Res,State)
-#define	OpDOT_PP(a,Res,State)		OpDOT(temp_point,temp_point,a,Res,State)
-#define	OpNEG_P(Res,State)			OpNEG(temp_point,Res,State)
+#define	OpMUL_PP(a,b,Res,State)		OpMUL(temp_point,temp_point,a,b,Res,State)
+#define	OpDIV_PP(a,b,Res,State)		OpDIV(temp_point,temp_point,a,b,Res,State)
+#define	OpADD_PP(a,b,Res,State)		OpADD(temp_point,temp_point,a,b,Res,State)
+#define	OpSUB_PP(a,b,Res,State)		OpSUB(temp_point,temp_point,a,b,Res,State)
+#define	OpCRS_PP(a,b,Res,State)		OpCRS(temp_point,temp_point,a,b,Res,State)
+#define	OpDOT_PP(a,b,Res,State)		OpDOT(temp_point,temp_point,a,b,Res,State)
+#define	OpNEG_P(a,Res,State)		OpNEG(temp_point,a,Res,State)
 
-#define	OpMUL_CC(a,Res,State)		OpMUL(temp_color,temp_color,a,Res,State)
-#define	OpDIV_CC(a,Res,State)		OpDIV(temp_color,temp_color,a,Res,State)
-#define	OpADD_CC(a,Res,State)		OpADD(temp_color,temp_color,a,Res,State)
-#define	OpSUB_CC(a,Res,State)		OpSUB(temp_color,temp_color,a,Res,State)
-#define	OpCRS_CC(a,Res,State)		OpCRS(temp_color,temp_color,a,Res,State)
-#define	OpDOT_CC(a,Res,State)		OpDOT(temp_color,temp_color,a,Res,State)
-#define	OpNEG_C(Res,State)			OpNEG(temp_color,Res,State)
+#define	OpMUL_CC(a,b,Res,State)		OpMUL(temp_color,temp_color,a,b,Res,State)
+#define	OpDIV_CC(a,b,Res,State)		OpDIV(temp_color,temp_color,a,b,Res,State)
+#define	OpADD_CC(a,b,Res,State)		OpADD(temp_color,temp_color,a,b,Res,State)
+#define	OpSUB_CC(a,b,Res,State)		OpSUB(temp_color,temp_color,a,b,Res,State)
+#define	OpCRS_CC(a,b,Res,State)		OpCRS(temp_color,temp_color,a,b,Res,State)
+#define	OpDOT_CC(a,b,Res,State)		OpDOT(temp_color,temp_color,a,b,Res,State)
+#define	OpNEG_C(a,Res,State)		OpNEG(temp_color,a,Res,State)
 
-#define	OpMUL_FP(a,Res,State)		OpMUL(temp_float,temp_point,a,Res,State)
-#define	OpDIV_FP(a,Res,State)		OpDIV(temp_float,temp_point,a,Res,State)
-#define	OpADD_FP(a,Res,State)		OpADD(temp_float,temp_point,a,Res,State)
-#define	OpSUB_FP(a,Res,State)		OpSUB(temp_float,temp_point,a,Res,State)
+#define	OpMUL_FP(a,b,Res,State)		OpMUL(temp_float,temp_point,a,b,Res,State)
+#define	OpDIV_FP(a,b,Res,State)		OpDIV(temp_float,temp_point,a,b,Res,State)
+#define	OpADD_FP(a,b,Res,State)		OpADD(temp_float,temp_point,a,b,Res,State)
+#define	OpSUB_FP(a,b,Res,State)		OpSUB(temp_float,temp_point,a,b,Res,State)
 
-#define	OpMUL_FC(a,Res,State)		OpMUL(temp_float,temp_color,a,Res,State)
-#define	OpDIV_FC(a,Res,State)		OpDIV(temp_float,temp_color,a,Res,State)
-#define	OpADD_FC(a,Res,State)		OpADD(temp_float,temp_color,a,Res,State)
-#define	OpSUB_FC(a,Res,State)		OpSUB(temp_float,temp_color,a,Res,State)
+#define	OpMUL_FC(a,b,Res,State)		OpMUL(temp_float,temp_color,a,b,Res,State)
+#define	OpDIV_FC(a,b,Res,State)		OpDIV(temp_float,temp_color,a,b,Res,State)
+#define	OpADD_FC(a,b,Res,State)		OpADD(temp_float,temp_color,a,b,Res,State)
+#define	OpSUB_FC(a,b,Res,State)		OpSUB(temp_float,temp_color,a,b,Res,State)
 
-#define	OpLAND_B(a,Res,State)		OpLAND(temp_bool,temp_bool,a,Res,State)
-#define	OpLOR_B(a,Res,State)		OpLOR(temp_bool,temp_bool,a,Res,State)
+#define	OpLAND_B(a,b,Res,State)		OpLAND(temp_bool,temp_bool,a,b,Res,State)
+#define	OpLOR_B(a,b,Res,State)		OpLOR(temp_bool,temp_bool,a,b,Res,State)
 
-#define	OpCAST_FC(Res,State)		OpCAST(temp_float,temp_color, Res,State)
-#define	OpCAST_FP(Res,State)		OpCAST(temp_float,temp_point, Res,State)
-#define	OpCAST_PC(Res,State)		OpCAST(temp_point,temp_color, Res,State)
-#define	OpCAST_CP(Res,State)		OpCAST(temp_color,temp_point, Res,State)
-#define	OpCAST_FM(Res,State)		OpCAST(temp_float,temp_matrix, Res,State)
+#define	OpCAST_FC(a,Res,State)		OpCAST(temp_float,temp_color, a,Res,State)
+#define	OpCAST_FP(a,Res,State)		OpCAST(temp_float,temp_point, a,Res,State)
+#define	OpCAST_PC(a,Res,State)		OpCAST(temp_point,temp_color, a,Res,State)
+#define	OpCAST_CP(a,Res,State)		OpCAST(temp_color,temp_point, a,Res,State)
+#define	OpCAST_FM(a,Res,State)		OpCAST(temp_float,temp_matrix, a,Res,State)
 
-#define	OpTRIPLE_C(a,b,c,State)		OpTRIPLE(temp_color,a,b,c,State)
-#define	OpTRIPLE_P(a,b,c,State)		OpTRIPLE(temp_point,a,b,c,State)
+#define	OpTRIPLE_C(r,a,b,c,State)	OpTRIPLE(temp_color,r,a,b,c,State)
+#define	OpTRIPLE_P(r,a,b,c,State)	OpTRIPLE(temp_point,r,a,b,c,State)
 
-#define	OpHEXTUPLE_M(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,State)	OpHEXTUPLE(temp_matrix,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,State)
+#define	OpHEXTUPLE_M(r,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,State)	OpHEXTUPLE(temp_matrix,r,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,State)
 
-#define	OpCOMP_C(index,Res,State)	OpCOMP(temp_color,index,Res,State)
-#define	OpCOMP_P(index,Res,State)	OpCOMP(temp_point,index,Res,State)
+#define	OpCOMP_C(a,index,Res,State)	OpCOMP(temp_color,a,index,Res,State)
+#define	OpCOMP_P(a,index,Res,State)	OpCOMP(temp_point,a,index,Res,State)
 
-#define	OpSETCOMP_C(index,a,State)	OpSETCOMP(temp_color,index,a,State)
-#define	OpSETCOMP_P(index,a,State)	OpSETCOMP(temp_point,index,a,State)
+#define	OpSETCOMP_C(r,index,a,State)	OpSETCOMP(temp_color,r,index,a,State)
+#define	OpSETCOMP_P(r,index,a,State)	OpSETCOMP(temp_point,r,index,a,State)
 
 //---------------------------------------------------------------------
 //
@@ -126,19 +126,22 @@ START_NAMESPACE( Aqsis )
 
 #define OpABRS(OP, NAME) \
 		template <class A, class B>	\
-		void	Op##NAME( A& a, B&b, CqVMStackEntry* pB, CqVMStackEntry& Res, CqBitVector& RunningState ) \
+		inline void	Op##NAME( A& a, B&b, CqVMStackEntry* pA, CqVMStackEntry* pB, CqVMStackEntry& Res, CqBitVector& RunningState ) \
 		{ \
 			A vA; \
 			B vB; \
+			A* pdA; \
+			B* pdB; \
+			TqInt i, ii; \
 			\
-			TqBool fAVar = Size() > 1; \
+			TqBool fAVar = pA->Size() > 1; \
 			TqBool fBVar = pB->Size() > 1; \
-			TqBool fADat = !fIsRef(); \
+			TqBool fADat = !pA->fIsRef(); \
 			TqBool fBDat = !pB->fIsRef(); \
 			\
 			if( !fADat ) \
 			{ \
-				CqVMStackEntryVarRef* pVRA = static_cast<CqVMStackEntryVarRef*>(this); \
+				CqVMStackEntryVarRef* pVRA = static_cast<CqVMStackEntryVarRef*>(pA); \
 				if( !fBDat ) \
 				{ \
 					CqVMStackEntryVarRef* pVRB = static_cast<CqVMStackEntryVarRef*>(pB); \
@@ -146,43 +149,41 @@ START_NAMESPACE( Aqsis )
 					if( fAVar && fBVar )\
 					{ \
 						/* Both are varying, must go accross all processing each element. */ \
-						TqInt i = Size() - 1; \
-						for ( ; i >= 0; i-- ) \
+						pVRA->m_pVarRef->GetValuePtr( pdA ); \
+						pVRB->m_pVarRef->GetValuePtr( pdB ); \
+						ii = pA->Size(); \
+						for ( i = 0; i < ii; i++ ) \
 						{ \
 							if ( RunningState.Value( i ) ) \
-							{ \
-								pVRA->m_pVarRef->GetValue( vA, i); \
-								pVRB->m_pVarRef->GetValue( vB, i); \
-								Res.SetValue( vA OP vB, i ); \
-							} \
+								Res.SetValue( (*pdA) OP (*pdB), i ); \
+							pdA++; \
+							pdB++; \
 						} \
 					} \
 					else if( !fBVar && fAVar) \
 					{ \
 						/* A is varying, can just get B's value once. */ \
-						TqInt i = Size() - 1; \
+						ii = pA->Size(); \
+						pVRA->m_pVarRef->GetValuePtr( pdA ); \
 						pVRB->m_pVarRef->GetValue( vB ); \
-						for ( ; i >= 0; i-- ) \
+						for ( i = 0; i < ii; i++ ) \
 						{ \
 							if ( RunningState.Value( i ) ) \
-							{ \
-								pVRA->m_pVarRef->GetValue( vA, i); \
-								Res.SetValue( vA OP vB, i ); \
-							} \
+								Res.SetValue( (*pdA) OP vB, i ); \
+							pdA++; \
 						} \
 					} \
 					else if( !fAVar && fBVar) \
 					{ \
 						/* B is varying, can just get A's value once. */ \
-						TqInt i = pB->Size() - 1; \
+						ii = pB->Size(); \
+						pVRB->m_pVarRef->GetValuePtr( pdB ); \
 						pVRA->m_pVarRef->GetValue( vA ); \
-						for ( ; i >= 0; i-- ) \
+						for ( i = 0; i < ii; i++ ) \
 						{ \
 							if ( RunningState.Value( i ) ) \
-							{ \
-								pVRB->m_pVarRef->GetValue( vB, i ); \
-								Res.SetValue( vA OP vB, i ); \
-							} \
+								Res.SetValue( vA OP (*pdB), i ); \
+							pdB++; \
 						} \
 					} \
 					else \
@@ -199,37 +200,37 @@ START_NAMESPACE( Aqsis )
 					if( fAVar && fBVar )\
 					{ \
 						/* Both are varying, must go accross all processing each element. */ \
-						TqInt i = Size() - 1; \
-						for ( ; i >= 0; i-- ) \
+						pVRA->m_pVarRef->GetValuePtr( pdA ); \
+						ii = pA->Size(); \
+						for ( i = 0; i < ii; i++ ) \
 						{ \
 							if ( RunningState.Value( i ) ) \
 							{ \
-								GetValue( vA, i); \
 								pB->m_aValues[ i ].GetValue( vB ); \
-								Res.SetValue( vA OP vB, i ); \
+								Res.SetValue( (*pdA) OP vB, i ); \
 							} \
+							pdA++; \
 						} \
 					} \
 					else if( !fBVar && fAVar) \
 					{ \
 						/* A is varying, can just get B's value once. */ \
-						TqInt i = Size() - 1; \
+						ii = pA->Size(); \
+						pVRA->m_pVarRef->GetValuePtr( pdA ); \
 						pB->m_Value.GetValue( vB ); \
-						for ( ; i >= 0; i-- ) \
+						for ( i = 0; i < ii; i++ ) \
 						{ \
 							if ( RunningState.Value( i ) ) \
-							{ \
-								GetValue( vA, i); \
-								Res.SetValue( vA OP vB, i ); \
-							} \
+								Res.SetValue( (*pdA) OP vB, i ); \
+							pdA++; \
 						} \
 					} \
 					else if( !fAVar && fBVar) \
 					{ \
 						/* B is varying, can just get A's value once. */ \
-						TqInt i = pB->Size() - 1; \
-						GetValue( vA ); \
-						for ( ; i >= 0; i-- ) \
+						ii = pB->Size(); \
+						pA->GetValue( vA ); \
+						for ( i = 0; i < ii; i++ ) \
 						{ \
 							if ( RunningState.Value( i ) ) \
 							{ \
@@ -241,7 +242,7 @@ START_NAMESPACE( Aqsis )
 					else \
 					{ \
 						/* Both are uniform, simple one shot case. */ \
-						GetValue( vA ); \
+						pA->GetValue( vA ); \
 						pB->m_Value.GetValue( vB ); \
 						Res.SetValue( vA OP vB ); \
 					} \
@@ -256,27 +257,28 @@ START_NAMESPACE( Aqsis )
 					if( fAVar && fBVar )\
 					{ \
 						/* Both are varying, must go accross all processing each element. */ \
-						TqInt i = Size() - 1; \
-						for ( ; i >= 0; i-- ) \
+						ii = pA->Size(); \
+						pVRB->m_pVarRef->GetValuePtr( pdB ); \
+						for ( i = 0; i < ii; i++ ) \
 						{ \
 							if ( RunningState.Value( i ) ) \
 							{ \
-								m_aValues[ i ].GetValue( vA ); \
-								pVRB->m_pVarRef->GetValue( vB, i); \
-								Res.SetValue( vA OP vB, i ); \
+								pA->GetValue( vA, i ); \
+								Res.SetValue( vA OP (*pdB), i ); \
 							} \
+							pdB++; \
 						} \
 					} \
 					else if( !fBVar && fAVar) \
 					{ \
 						/* A is varying, can just get B's value once. */ \
-						TqInt i = Size() - 1; \
+						ii = pA->Size(); \
 						pVRB->m_pVarRef->GetValue( vB ); \
-						for ( ; i >= 0; i-- ) \
+						for ( i = 0; i < ii; i++ ) \
 						{ \
 							if ( RunningState.Value( i ) ) \
 							{ \
-								m_aValues[ i ].GetValue( vA ); \
+								pA->GetValue( vA, i ); \
 								Res.SetValue( vA OP vB, i ); \
 							} \
 						} \
@@ -284,21 +286,20 @@ START_NAMESPACE( Aqsis )
 					else if( !fAVar && fBVar) \
 					{ \
 						/* B is varying, can just get A's value once. */ \
-						TqInt i = pB->Size() - 1; \
-						m_Value.GetValue( vA ); \
-						for ( ; i >= 0; i-- ) \
+						ii = pB->Size(); \
+						pVRB->m_pVarRef->GetValuePtr( pdB ); \
+						pA->GetValue( vA ); \
+						for ( i = 0; i < ii; i++ ) \
 						{ \
 							if ( RunningState.Value( i ) ) \
-							{ \
-								pVRB->m_pVarRef->GetValue( vB, i ); \
-								Res.SetValue( vA OP vB, i ); \
-							} \
+								Res.SetValue( vA OP (*pdB), i ); \
+							pdB++; \
 						} \
 					} \
 					else \
 					{ \
 						/* Both are uniform, simple one shot case. */ \
-						m_Value.GetValue( vA ); \
+						pA->GetValue( vA ); \
 						pVRB->m_pVarRef->GetValue( vB ); \
 						Res.SetValue( vA OP vB ); \
 					} \
@@ -309,12 +310,12 @@ START_NAMESPACE( Aqsis )
 					if( fAVar && fBVar )\
 					{ \
 						/* Both are varying, must go accross all processing each element. */ \
-						TqInt i = Size() - 1; \
-						for ( ; i >= 0; i-- ) \
+						ii = pA->Size(); \
+						for ( i = 0; i < ii; i++ ) \
 						{ \
 							if ( RunningState.Value( i ) ) \
 							{ \
-								m_aValues[ i ].GetValue( vA ); \
+								pA->GetValue( vA, i ); \
 								pB->m_aValues[ i ].GetValue( vB ); \
 								Res.SetValue( vA OP vB, i ); \
 							} \
@@ -323,13 +324,13 @@ START_NAMESPACE( Aqsis )
 					else if( !fBVar && fAVar) \
 					{ \
 						/* A is varying, can just get B's value once. */ \
-						TqInt i = Size() - 1; \
+						ii = pA->Size(); \
 						pB->m_Value.GetValue( vB ); \
-						for ( ; i >= 0; i-- ) \
+						for ( i = 0; i < ii; i++ ) \
 						{ \
 							if ( RunningState.Value( i ) ) \
 							{ \
-								m_aValues[ i ].GetValue( vA ); \
+								pA->GetValue( vA, i ); \
 								Res.SetValue( vA OP vB, i ); \
 							} \
 						} \
@@ -337,9 +338,9 @@ START_NAMESPACE( Aqsis )
 					else if( !fAVar && fBVar) \
 					{ \
 						/* B is varying, can just get A's value once. */ \
-						TqInt i = pB->Size() - 1; \
-						m_Value.GetValue( vA ); \
-						for ( ; i >= 0; i-- ) \
+						ii = pB->Size(); \
+						pA->GetValue( vA ); \
+						for ( i = 0; i < ii; i++ ) \
 						{ \
 							if ( RunningState.Value( i ) ) \
 							{ \
@@ -351,7 +352,7 @@ START_NAMESPACE( Aqsis )
 					else \
 					{ \
 						/* Both are uniform, simple one shot case. */ \
-						m_Value.GetValue( vA ); \
+						pA->m_Value.GetValue( vA ); \
 						pB->m_Value.GetValue( vB ); \
 						Res.SetValue( vA OP vB ); \
 					} \
@@ -747,6 +748,15 @@ class CqVMStackEntry : public IqShaderData
 			( m_Size == 1 )? m_Value.GetValue( m ) : m_aValues[ index ].GetValue( m );
 		}
 
+		virtual	void		GetFloatPtr(const TqFloat*& res) const			{ assert(TqFalse); }
+		virtual void		GetBoolPtr( const TqBool*& res ) const			{ assert(TqFalse); }
+		virtual	void		GetStringPtr(const CqString*& res) const		{ assert(TqFalse); }
+		virtual	void		GetPointPtr(const CqVector3D*& res) const		{ assert(TqFalse); }
+		virtual	void		GetVectorPtr(const CqVector3D*& res) const		{ assert(TqFalse); }
+		virtual	void		GetNormalPtr(const CqVector3D*& res) const		{ assert(TqFalse); }
+		virtual	void		GetColorPtr(const CqColor*& res) const			{ assert(TqFalse); }
+		virtual	void		GetMatrixPtr(const CqMatrix*& res) const		{ assert(TqFalse); }
+
 		// Value setters, overridden from IqShaderData
 		virtual void SetFloat( const TqFloat& f )
 		{
@@ -1087,416 +1097,6 @@ class CqVMStackEntry : public IqShaderData
 			return ( *this );
 		}
 
-		/** Templatised less than operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		OpABRS(<,LSS)
-		/** Templatised greater than operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		OpABRS(>,GRT)
-		/** Templatised less than or equal to operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		OpABRS(<=,LE)
-		/** Templatised greater than or equal to operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		OpABRS(>=,GE)
-		/** Templatised equality operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		OpABRS(==,EQ)
-		/** Templatised inequality operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		OpABRS(!=,NE)
-		/** Templatised multiplication operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		OpABRS(*,MUL)
-		/** Special case vector multiplication operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		void	OpMULV( CqVMStackEntry* pB, CqVMStackEntry& Res, CqBitVector& RunningState )
-		{
-			CqVector3D	vecA, vecB;
-
-			TqInt i = MAX( MAX( Size(), pB->Size() ), Res.Size() ) - 1;
-			TqBool __fVarying = i > 0;
-			for ( ; i >= 0; i-- )
-			{
-				if ( !__fVarying || RunningState.Value( i ) )
-				{
-				GetValue( vecA, i);
-					pB->GetValue( vecB, i);
-					Res.SetValue( CqVector3D( vecA.x() * vecB.x(),
-					                          vecA.y() * vecB.y(),
-					                          vecA.z() * vecB.z() ), i );
-				}
-			}
-		}
-		/** Templatised division operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		OpABRS(/,DIV)
-		/** Templatised addition operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		OpABRS(+,ADD)
-		/** Templatised subtraction operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param a The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		OpABRS(-,SUB)
-		/** Templatised dot operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 * \attention Should only ever be called with vector based operands.
-		 */
-		OpABRS(*,DOT)
-		/** Templatised cross product operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 * \attention Should only ever be called with vector based operands.
-		 */
-		OpABRS(%,CRS)
-		/** Templatised logical AND operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		OpABRS(&&,LAND)
-		/** Templatised logical OR operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		OpABRS(||,LOR)
-		/** Templatised negation operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		template <class A>
-		void	OpNEG( A& a, CqVMStackEntry& Res, CqBitVector& RunningState )
-		{
-			A vA;
-
-			TqInt i = MAX( Size(), Res.Size() ) - 1;
-			TqBool __fVarying = i > 0;
-			for ( ; i >= 0; i-- )
-				if ( !__fVarying || RunningState.Value( i ) )
-				{
-					GetValue( vA, i );
-					Res.SetValue( -vA, i );
-				}
-		}
-		/** Templatised cast operator, cast the current stack entry to the spcified type.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param a The type of the first operand, used to determine templateisation, needed by VC++..
-		 * \param b The type of the second operand, used to determine templateisation, needed by VC++..
-		 * \param Comp The stack entry to use as the second operand.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		template <class A, class B>
-		void	OpCAST( A& a, B& b, CqVMStackEntry& Res, CqBitVector& RunningState )
-		{
-			A vA;
-
-			TqInt i = MAX( Size(), Res.Size() ) - 1;
-			TqBool __fVarying = i > 0;
-			for ( ; i >= 0; i-- )
-				if ( !__fVarying || RunningState.Value( i ) )
-				{
-					GetValue( vA, i );
-					Res.SetValue( static_cast<B>( vA ), i );
-				}
-		}
-		/** Templatised cast three operands to a single triple type (vector/normal/color etc.) and store the result in this stack entry
-		 * \param z The type to combine the float values into.
-		 * \param a Float first operand 
-		 * \param b Float second operand 
-		 * \param c Float third operand 
-		 * \param RunningState The current SIMD state.
-		 */
-		template <class A>
-		void	OpTRIPLE( A&, CqVMStackEntry* pA, CqVMStackEntry* pB, CqVMStackEntry* pC, CqBitVector& RunningState )
-		{
-			TqFloat x,y,z;
-
-			TqInt i = MAX( MAX( pA->Size(), pB->Size() ), pC->Size() ) - 1;
-			TqBool __fVarying = i > 0;
-			for ( ; i >= 0; i-- )
-				if ( !__fVarying || RunningState.Value( i ) )
-				{
-					pA->GetValue( x, i );
-					pB->GetValue( y, i );
-					pC->GetValue( z, i );
-					SetValue( A( x, y, z ), i );
-				}
-		}
-		/** Templatised cast sixteen operands to a single matrix type and store the result in this stack entry
-		 * The parameters a-p are the float values to combine.
-		 * \param z The type to combine the float values into (currenlty only matrix supported).
-		 * \param RunningState The current SIMD state.
-		 */
-		template <class A>
-		void	OpHEXTUPLE( A& z, CqVMStackEntry* pA, CqVMStackEntry* pB, CqVMStackEntry* pC, CqVMStackEntry* pD,
-								  CqVMStackEntry* pE, CqVMStackEntry* pF, CqVMStackEntry* pG, CqVMStackEntry* pH,
-								  CqVMStackEntry* pI, CqVMStackEntry* pJ, CqVMStackEntry* pK, CqVMStackEntry* pL,
-								  CqVMStackEntry* pM, CqVMStackEntry* pN, CqVMStackEntry* pO, CqVMStackEntry* pP, CqBitVector& RunningState )
-		{
-			TqFloat a1,a2,a3,a4;
-			TqFloat b1,b2,b3,b4;
-			TqFloat c1,c2,c3,c4;
-			TqFloat d1,d2,d3,d4;
-			
-			TqInt ii1 = MAX( MAX( MAX( pA->Size(), pB->Size() ), pC->Size() ), pD->Size() );
-			TqInt ii2 = MAX( MAX( MAX( pE->Size(), pF->Size() ), pG->Size() ), pH->Size() );
-			TqInt ii3 = MAX( MAX( MAX( pI->Size(), pJ->Size() ), pK->Size() ), pL->Size() );
-			TqInt ii4 = MAX( MAX( MAX( pM->Size(), pN->Size() ), pO->Size() ), pP->Size() );
-			TqInt ii = MAX( MAX( MAX( ii1, ii2 ), ii3 ), ii4 );
-			TqBool __fVarying = ii > 0;
-			for ( ; ii >= 0; ii-- )
-			{
-				if ( !__fVarying || RunningState.Value( ii ) )
-				{
-					pA->GetValue( a1, ii );	pB->GetValue( a2, ii );	pC->GetValue( a3, ii );	pD->GetValue( a4, ii );
-					pE->GetValue( b1, ii );	pF->GetValue( b2, ii );	pG->GetValue( b3, ii );	pH->GetValue( b4, ii );
-					pI->GetValue( c1, ii );	pJ->GetValue( c2, ii );	pK->GetValue( c3, ii );	pL->GetValue( c4, ii );
-					pM->GetValue( d1, ii );	pN->GetValue( d2, ii );	pO->GetValue( d3, ii );	pP->GetValue( d4, ii );
-					A tt( a1, a2, a3, a4,
-					      b1, b2, b3, b4,
-					      c1, c2, c3, c4,
-					      d1, d2, d3, d4);
-					tt.SetfIdentity( TqFalse );
-					SetValue( tt, ii );
-				}
-			}
-		}
-		/** Templatised component access operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param z The type to cast this stackentry to.
-		 * \param index Integer index. 
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		template <class A>
-		void	OpCOMP( A& z, int index, CqVMStackEntry& Res, CqBitVector& RunningState )
-		{
-			A vA;
-			
-			TqInt i = MAX( Size(), Res.Size() ) - 1;
-			TqBool __fVarying = i > 0;
-			for ( ; i >= 0; i-- )
-			{
-				if ( !__fVarying || RunningState.Value( i ) )
-				{
-					GetValue( vA, i );
-					Res.SetValue( vA [ index ], i );
-				}
-			}
-		}
-		/** Templatised component access operator.
-		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
-		 * \param z The type to cast this stackentry to.
-		 * \param index Integer type stackentry index. 
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		template <class A>
-		void	OpCOMP( A& z, CqVMStackEntry* index, CqVMStackEntry& Res, CqBitVector& RunningState )
-		{
-			A vA;
-			TqFloat fi;
-
-			TqInt i = MAX( MAX( Size(), Res.Size() ), index->Size() ) - 1;
-			TqBool __fVarying = i > 0;
-			for ( ; i >= 0; i-- )
-			{
-				if ( !__fVarying || RunningState.Value( i ) )
-				{
-					GetValue( vA, i );
-					index->GetValue( fi, i );
-					Res.SetValue( vA [ static_cast<TqInt>( fi ) ], i );
-				}
-			}
-		}
-		/** Templatised component set operator.
-		 * \param z The type to cast this to.
-		 * \param index Integer index. 
-		 * \param a Float type stackentry to set the index to.
-		 * \param RunningState The current SIMD state.
-		 */
-		template <class A>
-		void	OpSETCOMP( A& z, int index, CqVMStackEntry* pA, CqBitVector& RunningState )
-		{
-			A vA;
-			TqFloat val;
-
-			TqInt i = MAX( Size(), pA->Size() ) - 1;
-			TqBool __fVarying = i > 0;
-			for ( ; i >= 0; i-- )
-			{
-				if ( !__fVarying || RunningState.Value( i ) )
-				{
-					GetValue( vA, i );
-					pA->GetValue( val, i );
-					vA [ index ] = val;
-					SetValue( vA, i );
-				}
-			}
-		}
-		/** Templatised component set operator.
-		 * \param z The type to cast this to.
-		 * \param index Integer type stackentry index. 
-		 * \param a Float type stackentry to set the index to.
-		 * \param RunningState The current SIMD state.
-		 */
-		template <class A>
-		void	OpSETCOMP( A& z, CqVMStackEntry* index, CqVMStackEntry* pA, CqBitVector& RunningState )
-		{
-			A vA;
-			TqFloat val, fi;
-
-			TqInt i = MAX( MAX( Size(), pA->Size() ), index->Size() ) - 1;
-			TqBool __fVarying = i > 0;
-			for ( ; i >= 0; i-- )
-			{
-				if ( !__fVarying || RunningState.Value( i ) )
-				{
-					GetValue( vA, i );
-					pA->GetValue( val, i );
-					index->GetValue( fi, i );
-					vA [ static_cast<TqInt>( fi ) ] = val;
-					SetValue( vA, i );
-				}
-			}
-		}
-
-		/** Special case matrix component access.
-		 * \param r Integer type stackentry row index.
-		 * \param c Integer type stackentry column index.
-		 * \param Res The stack entry to store the result in.
-		 * \param RunningState The current SIMD state.
-		 */
-		void	OpCOMPM( CqVMStackEntry* pR, CqVMStackEntry* pC, CqVMStackEntry& Res, CqBitVector& RunningState )
-		{
-			CqMatrix m;
-			TqFloat fr, fc;
-
-			TqInt i = MAX( Size(), Res.Size() ) - 1;
-			TqBool __fVarying = i > 0;
-			for ( ; i >= 0; i-- )
-				if ( !__fVarying || RunningState.Value( i ) )
-				{
-				GetValue( m, i );
-					pR->GetValue( fr, i );
-					pC->GetValue( fc, i );
-					Res.SetValue( m [ static_cast<TqInt>( fr ) ][ static_cast<TqInt>( fc ) ], i );
-				}
-		}
-
-		/** Special case matrix component access.
-		 * \param r Integer type stackentry row index.
-		 * \param c Integer type stackentry column index.
-		 * \param v Float type stackentry value to set index to.
-		 * \param RunningState The current SIMD state.
-		 */
-		void	OpSETCOMPM( CqVMStackEntry* pR, CqVMStackEntry* pC, CqVMStackEntry* pV, CqBitVector& RunningState )
-		{
-			CqMatrix m;
-			TqFloat fr, fc, val;
-
-			TqInt i = MAX( Size(), pV->Size() ) - 1;
-			TqBool __fVarying = i > 0;
-			for ( ; i >= 0; i-- )
-			{
-				if ( !__fVarying || RunningState.Value( i ) )
-				{
-				GetValue( m, i );
-					pR->GetValue( fr, i );
-					pC->GetValue( fc, i );
-					pV->GetValue( val, i );
-					m[ static_cast<TqInt>( fr ) ][ static_cast<TqInt>( fc ) ] = val;
-					SetValue( m, i );
-				}
-			}
-		}
-
-	private:
-
 		std::vector < CqVMStackData /*,CqVMStackEntryAllocator*/ > m_aValues;	///< Array of CqVMStackData storage stuctures.
 		CqVMStackData	m_Value;		///< Single value in the case of a uniforn stack entry.
 		TqUint	m_Size;			///< Size of the SIMD data.
@@ -1681,7 +1281,6 @@ class CqVMStackEntryVarRef : public CqVMStackEntry
 			m_pVarRef = pv;
 			return( *this );
 		}
-	protected:
 		IqShaderData*	m_pVarRef;		///< Pointer to a referenced variable if a variable stack entry.
 
 	friend class CqVMStackEntry;
@@ -1880,6 +1479,418 @@ class _qShareC CqShaderStack
 		TqUint	m_iTop;										///< Index of the top entry.
 }
 ;
+
+
+
+
+/** Templatised less than operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+OpABRS(<,LSS)
+/** Templatised greater than operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+OpABRS(>,GRT)
+/** Templatised less than or equal to operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+OpABRS(<=,LE)
+/** Templatised greater than or equal to operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+OpABRS(>=,GE)
+/** Templatised equality operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+OpABRS(==,EQ)
+/** Templatised inequality operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+OpABRS(!=,NE)
+/** Templatised multiplication operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+OpABRS(*,MUL)
+/** Special case vector multiplication operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+inline void	OpMULV( CqVMStackEntry* pA, CqVMStackEntry* pB, CqVMStackEntry& Res, CqBitVector& RunningState )
+{
+	CqVector3D	vecA, vecB;
+
+	TqInt i = MAX( MAX( pA->Size(), pB->Size() ), Res.Size() ) - 1;
+	TqBool __fVarying = i > 0;
+	for ( ; i >= 0; i-- )
+	{
+		if ( !__fVarying || RunningState.Value( i ) )
+		{
+			pA->GetValue( vecA, i);
+			pB->GetValue( vecB, i);
+			Res.SetValue( CqVector3D( vecA.x() * vecB.x(),
+					                  vecA.y() * vecB.y(),
+					                  vecA.z() * vecB.z() ), i );
+		}
+	}
+}
+/** Templatised division operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+OpABRS(/,DIV)
+/** Templatised addition operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+OpABRS(+,ADD)
+/** Templatised subtraction operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param a The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+OpABRS(-,SUB)
+/** Templatised dot operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ * \attention Should only ever be called with vector based operands.
+ */
+OpABRS(*,DOT)
+/** Templatised cross product operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ * \attention Should only ever be called with vector based operands.
+ */
+OpABRS(%,CRS)
+/** Templatised logical AND operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+OpABRS(&&,LAND)
+/** Templatised logical OR operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+OpABRS(||,LOR)
+/** Templatised negation operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+template <class A>
+inline void	OpNEG( A& a, CqVMStackEntry* pA, CqVMStackEntry& Res, CqBitVector& RunningState )
+{
+	A vA;
+
+	TqInt i = MAX( pA->Size(), Res.Size() ) - 1;
+	TqBool __fVarying = i > 0;
+	for ( ; i >= 0; i-- )
+		if ( !__fVarying || RunningState.Value( i ) )
+		{
+			pA->GetValue( vA, i );
+			Res.SetValue( -vA, i );
+		}
+}
+/** Templatised cast operator, cast the current stack entry to the spcified type.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param a The type of the first operand, used to determine templateisation, needed by VC++..
+ * \param b The type of the second operand, used to determine templateisation, needed by VC++..
+ * \param Comp The stack entry to use as the second operand.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+template <class A, class B>
+inline void	OpCAST( A& a, B& b, CqVMStackEntry* pA, CqVMStackEntry& Res, CqBitVector& RunningState )
+{
+	A vA;
+
+	TqInt i = MAX( pA->Size(), Res.Size() ) - 1;
+	TqBool __fVarying = i > 0;
+	for ( ; i >= 0; i-- )
+		if ( !__fVarying || RunningState.Value( i ) )
+		{
+			pA->GetValue( vA, i );
+			Res.SetValue( static_cast<B>( vA ), i );
+		}
+}
+/** Templatised cast three operands to a single triple type (vector/normal/color etc.) and store the result in this stack entry
+ * \param z The type to combine the float values into.
+ * \param a Float first operand 
+ * \param b Float second operand 
+ * \param c Float third operand 
+ * \param RunningState The current SIMD state.
+ */
+template <class A>
+inline void	OpTRIPLE( A&, CqVMStackEntry* pRes, CqVMStackEntry* pA, CqVMStackEntry* pB, CqVMStackEntry* pC, CqBitVector& RunningState )
+{
+	TqFloat x,y,z;
+
+	TqInt i = MAX( MAX( pA->Size(), pB->Size() ), pC->Size() ) - 1;
+	TqBool __fVarying = i > 0;
+	for ( ; i >= 0; i-- )
+		if ( !__fVarying || RunningState.Value( i ) )
+		{
+			pA->GetValue( x, i );
+			pB->GetValue( y, i );
+			pC->GetValue( z, i );
+			pRes->SetValue( A( x, y, z ), i );
+		}
+}
+/** Templatised cast sixteen operands to a single matrix type and store the result in this stack entry
+ * The parameters a-p are the float values to combine.
+ * \param z The type to combine the float values into (currenlty only matrix supported).
+ * \param RunningState The current SIMD state.
+ */
+template <class A>
+inline void	OpHEXTUPLE( A& z, CqVMStackEntry* pRes,
+						  CqVMStackEntry* pA, CqVMStackEntry* pB, CqVMStackEntry* pC, CqVMStackEntry* pD,
+						  CqVMStackEntry* pE, CqVMStackEntry* pF, CqVMStackEntry* pG, CqVMStackEntry* pH,
+						  CqVMStackEntry* pI, CqVMStackEntry* pJ, CqVMStackEntry* pK, CqVMStackEntry* pL,
+						  CqVMStackEntry* pM, CqVMStackEntry* pN, CqVMStackEntry* pO, CqVMStackEntry* pP, CqBitVector& RunningState )
+{
+	TqFloat a1,a2,a3,a4;
+	TqFloat b1,b2,b3,b4;
+	TqFloat c1,c2,c3,c4;
+	TqFloat d1,d2,d3,d4;
+	
+	TqInt ii1 = MAX( MAX( MAX( pA->Size(), pB->Size() ), pC->Size() ), pD->Size() );
+	TqInt ii2 = MAX( MAX( MAX( pE->Size(), pF->Size() ), pG->Size() ), pH->Size() );
+	TqInt ii3 = MAX( MAX( MAX( pI->Size(), pJ->Size() ), pK->Size() ), pL->Size() );
+	TqInt ii4 = MAX( MAX( MAX( pM->Size(), pN->Size() ), pO->Size() ), pP->Size() );
+	TqInt ii = MAX( MAX( MAX( ii1, ii2 ), ii3 ), ii4 );
+	TqBool __fVarying = ii > 0;
+	for ( ; ii >= 0; ii-- )
+	{
+		if ( !__fVarying || RunningState.Value( ii ) )
+		{
+			pA->GetValue( a1, ii );	pB->GetValue( a2, ii );	pC->GetValue( a3, ii );	pD->GetValue( a4, ii );
+			pE->GetValue( b1, ii );	pF->GetValue( b2, ii );	pG->GetValue( b3, ii );	pH->GetValue( b4, ii );
+			pI->GetValue( c1, ii );	pJ->GetValue( c2, ii );	pK->GetValue( c3, ii );	pL->GetValue( c4, ii );
+			pM->GetValue( d1, ii );	pN->GetValue( d2, ii );	pO->GetValue( d3, ii );	pP->GetValue( d4, ii );
+			A tt( a1, a2, a3, a4,
+				  b1, b2, b3, b4,
+				  c1, c2, c3, c4,
+				  d1, d2, d3, d4);
+			tt.SetfIdentity( TqFalse );
+			pRes->SetValue( tt, ii );
+		}
+	}
+}
+/** Templatised component access operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param z The type to cast this stackentry to.
+ * \param index Integer index. 
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+template <class A>
+inline void	OpCOMP( A& z, CqVMStackEntry* pA, int index, CqVMStackEntry& Res, CqBitVector& RunningState )
+{
+	A vA;
+	
+	TqInt i = MAX( pA->Size(), Res.Size() ) - 1;
+	TqBool __fVarying = i > 0;
+	for ( ; i >= 0; i-- )
+	{
+		if ( !__fVarying || RunningState.Value( i ) )
+		{
+			pA->GetValue( vA, i );
+			Res.SetValue( vA [ index ], i );
+		}
+	}
+}
+/** Templatised component access operator.
+ * The template classes decide the cast used, there must be an appropriate operator between the two types.
+ * \param z The type to cast this stackentry to.
+ * \param index Integer type stackentry index. 
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+template <class A>
+inline void	OpCOMP( A& z, CqVMStackEntry* pA, CqVMStackEntry* index, CqVMStackEntry& Res, CqBitVector& RunningState )
+{
+	A vA;
+	TqFloat fi;
+
+	TqInt i = MAX( MAX( pA->Size(), Res.Size() ), index->Size() ) - 1;
+	TqBool __fVarying = i > 0;
+	for ( ; i >= 0; i-- )
+	{
+		if ( !__fVarying || RunningState.Value( i ) )
+		{
+			pA->GetValue( vA, i );
+			index->GetValue( fi, i );
+			Res.SetValue( vA [ static_cast<TqInt>( fi ) ], i );
+		}
+	}
+}
+/** Templatised component set operator.
+ * \param z The type to cast this to.
+ * \param index Integer index. 
+ * \param a Float type stackentry to set the index to.
+ * \param RunningState The current SIMD state.
+ */
+template <class A>
+inline void	OpSETCOMP( A& z, CqVMStackEntry* pRes, int index, CqVMStackEntry* pA, CqBitVector& RunningState )
+{
+	A vA;
+	TqFloat val;
+
+	TqInt i = MAX( pRes->Size(), pA->Size() ) - 1;
+	TqBool __fVarying = i > 0;
+	for ( ; i >= 0; i-- )
+	{
+		if ( !__fVarying || RunningState.Value( i ) )
+		{
+			GetValue( vA, i );
+			pA->GetValue( val, i );
+			vA [ index ] = val;
+			pRes->SetValue( vA, i );
+		}
+	}
+}
+/** Templatised component set operator.
+ * \param z The type to cast this to.
+ * \param index Integer type stackentry index. 
+ * \param a Float type stackentry to set the index to.
+ * \param RunningState The current SIMD state.
+ */
+template <class A>
+inline void	OpSETCOMP( A& z, CqVMStackEntry* pRes, CqVMStackEntry* index, CqVMStackEntry* pA, CqBitVector& RunningState )
+{
+	A vA;
+	TqFloat val, fi;
+
+	TqInt i = MAX( MAX( Size(), pA->Size() ), index->Size() ) - 1;
+	TqBool __fVarying = i > 0;
+	for ( ; i >= 0; i-- )
+	{
+		if ( !__fVarying || RunningState.Value( i ) )
+		{
+			pRes->GetValue( vA, i );
+			pA->GetValue( val, i );
+			index->GetValue( fi, i );
+			vA [ static_cast<TqInt>( fi ) ] = val;
+			pRes->SetValue( vA, i );
+		}
+	}
+}
+
+/** Special case matrix component access.
+ * \param r Integer type stackentry row index.
+ * \param c Integer type stackentry column index.
+ * \param Res The stack entry to store the result in.
+ * \param RunningState The current SIMD state.
+ */
+inline void	OpCOMPM( CqVMStackEntry* pA, CqVMStackEntry* pR, CqVMStackEntry* pC, CqVMStackEntry& Res, CqBitVector& RunningState )
+{
+	CqMatrix m;
+	TqFloat fr, fc;
+
+	TqInt i = MAX( pA->Size(), Res.Size() ) - 1;
+	TqBool __fVarying = i > 0;
+	for ( ; i >= 0; i-- )
+		if ( !__fVarying || RunningState.Value( i ) )
+		{
+			pA->GetValue( m, i );
+			pR->GetValue( fr, i );
+			pC->GetValue( fc, i );
+			Res.SetValue( m [ static_cast<TqInt>( fr ) ][ static_cast<TqInt>( fc ) ], i );
+		}
+}
+
+/** Special case matrix component access.
+ * \param r Integer type stackentry row index.
+ * \param c Integer type stackentry column index.
+ * \param v Float type stackentry value to set index to.
+ * \param RunningState The current SIMD state.
+ */
+inline void	OpSETCOMPM( CqVMStackEntry* pA, CqVMStackEntry* pR, CqVMStackEntry* pC, CqVMStackEntry* pV, CqBitVector& RunningState )
+{
+	CqMatrix m;
+	TqFloat fr, fc, val;
+
+	TqInt i = MAX( pA->Size(), pV->Size() ) - 1;
+	TqBool __fVarying = i > 0;
+	for ( ; i >= 0; i-- )
+	{
+		if ( !__fVarying || RunningState.Value( i ) )
+		{
+			pA->GetValue( m, i );
+			pR->GetValue( fr, i );
+			pC->GetValue( fc, i );
+			pV->GetValue( val, i );
+			m[ static_cast<TqInt>( fr ) ][ static_cast<TqInt>( fc ) ] = val;
+			pA->SetValue( m, i );
+		}
+	}
+}
 
 
 //-----------------------------------------------------------------------

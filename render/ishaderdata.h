@@ -5,7 +5,7 @@
  *	@brief	Decares the interface to generic shader variables.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/05/09 07:14:09 $
+ *	Last change date:	$Date: 2002/07/19 06:27:08 $
  */
 //------------------------------------------------------------------------------
 
@@ -73,6 +73,7 @@ struct IqShaderData
 {
 		/// Virtual destructor so that derived classes get cleaned up properly.
 		virtual	~IqShaderData()	{}
+		
 		///	Get the data as a float..
 		virtual void GetFloat( TqFloat& res, TqInt index  = 0) const = 0;
 		///	Get the data as a boolean value..
@@ -89,6 +90,23 @@ struct IqShaderData
 		virtual void GetColor( CqColor& res, TqInt index = 0 ) const = 0;
 		///	Get the data as a matrix..
 		virtual void GetMatrix( CqMatrix& res, TqInt index = 0 ) const = 0;
+
+		///	Get a const pointer to the data as a float..
+		virtual void GetFloatPtr( const TqFloat*& res ) const = 0;
+		///	Get a const pointer to the data as a boolean value..
+		virtual void GetBoolPtr( const TqBool*& res ) const = 0;
+		///	Get a const pointer to the data as a string..
+		virtual void GetStringPtr( const CqString*& res ) const = 0;
+		///	Get a const pointer to the data as a point..
+		virtual void GetPointPtr( const CqVector3D*& res ) const = 0;
+		///	Get a const pointer to the data as a vector..
+		virtual void GetVectorPtr( const CqVector3D*& res ) const = 0;
+		///	Get a const pointer to the data as a normal..
+		virtual void GetNormalPtr( const CqVector3D*& res ) const = 0;
+		///	Get a const pointer to the data as a color..
+		virtual void GetColorPtr( const CqColor*& res ) const = 0;
+		///	Get a const pointer to the data as a matrix..
+		virtual void GetMatrixPtr( const CqMatrix*& res ) const = 0;
 
 		///	Set the value to the specified float.
 		virtual void SetFloat( const TqFloat& val ) = 0;
@@ -131,6 +149,13 @@ struct IqShaderData
 		void GetValue( CqVector3D& p, TqInt index = 0 ) const	{ GetPoint( p, index ); }
 		void GetValue( CqColor& c, TqInt index = 0 ) const		{ GetColor( c, index ); }
 		void GetValue( CqMatrix& m, TqInt index = 0 ) const		{ GetMatrix( m, index ); } 
+
+		void GetValuePtr( const TqFloat*& f ) const				{ GetFloatPtr( f ); }
+		void GetValuePtr( const TqBool*& b ) const				{ GetBoolPtr( b ); }
+		void GetValuePtr( const CqString*& s ) const			{ GetStringPtr( s ); }
+		void GetValuePtr( const CqVector3D*& p ) const			{ GetPointPtr( p ); }
+		void GetValuePtr( const CqColor*& c ) const				{ GetColorPtr( c ); }
+		void GetValuePtr( const CqMatrix*& m ) const			{ GetMatrixPtr( m ); } 
 
 		void SetValue( const TqFloat& f )		{ SetFloat( f ); }
 		void SetValue( const TqInt& i )			{ SetFloat( static_cast<TqFloat>( i ) ); }
