@@ -224,7 +224,7 @@ bool ArgParse::parse(int argc, const char** argv)
         // since it's a common abbreviation for stdin, and isn't
         // really meaningful as an option.
         if (( argv[i][0] != '-' || argv[i][1] == '\0' ) && 
-		    ( argeater && ( argeater->count > 0 || argeater->count == -1 ) ) ) {
+		    ( !argeater || ( argeater->count > 0 || argeater->count == -1 ) ) ) {
             if (argeater == NULL)
                 d->leftovers.push_back(argv[i]);
             else
