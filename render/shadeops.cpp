@@ -52,7 +52,7 @@ static	CqString	SO_sprintf( const char* str, int cParams, CqVMStackEntry** apPar
 	{
 		switch ( strTrans[ i ] )
 		{
-				case '%':      	// Insert variable.
+				case '%': 	// Insert variable.
 				{
 					i++;
 					switch ( strTrans[ i ] )
@@ -1117,8 +1117,13 @@ STD_SOIMPL CqShaderExecEnv::SO_area( POINTVAL p, DEFPARAMIMPL )
 	CHECKVARY( p )
 	CHECKVARY( Result )
 	FOR_EACHR
-	CqVector3D	vecR = ( SO_DuType<CqVector3D>( p, m_GridI, *this ) * du() ) % ( SO_DvType<CqVector3D>( p, m_GridI, *this ) * dv() );
-	Result.SetValue( i, vecR.Magnitude() );
+	CqVector3D	vecR;
+	if ( m_pSurface )
+	{
+		vecR = ( SO_DuType<CqVector3D>( p, m_GridI, *this ) * du() ) % ( SO_DvType<CqVector3D>( p, m_GridI, *this ) * dv() );
+		Result.SetValue( i, vecR.Magnitude() );
+	}
+
 	END_FORR
 }
 
@@ -1508,8 +1513,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFP
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		float fdu = du();
-		float fdv = dv();
+		float fdu = ( m_pSurface ) ? du() : 0.0;
+		float fdv = ( m_pSurface ) ? dv() : 0.0;
 		FOR_EACHR
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
@@ -1524,13 +1529,19 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFP
 			TqFloat dtdv = SO_DvType<TqFloat>( t(), m_GridI, *this );
 			twidth += fabs( dtdv * fdv );
 		}
+		else
+		{
+			swidth = 1.0 / pTMap->XRes();
+			twidth = 1.0 / pTMap->YRes();
+		}
 
 		swidth *= _pswidth;
 		twidth *= _ptwidth;
 
 		// Sample the texture.
 		std::valarray<float> val;
-		pTMap->SampleMIPMAP( s(), t(), swidth, twidth, _psblur, _ptblur, val );
+
+		pTMap->SampleMIPMAP( s(), t(), swidth, twidth, _psblur, _ptblur, val);
 
 		// Grab the appropriate channel.
 		float fchan = FLOAT( channel );
@@ -1558,8 +1569,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOA
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		float fdu = du();
-		float fdv = dv();
+		float fdu = ( m_pSurface ) ? du() : 0.0;
+		float fdv = ( m_pSurface ) ? dv() : 0.0;
 		FOR_EACHR
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
@@ -1574,13 +1585,20 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOA
 			TqFloat dtdv = SO_DvType<TqFloat>( t, m_GridI, *this );
 			twidth += fabs( dtdv * fdv );
 		}
+		else
+		{
+			swidth = 1.0 / pTMap->XRes();
+			twidth = 1.0 / pTMap->YRes();
+		}
 
 		swidth *= _pswidth;
 		twidth *= _ptwidth;
 
 		// Sample the texture.
 		std::valarray<float> val;
-		pTMap->SampleMIPMAP( s.Value( f, m_GridI ), t.Value( f, m_GridI ), swidth, twidth, _psblur, _ptblur, val );
+
+
+		pTMap->SampleMIPMAP( s.Value( f, m_GridI ), t.Value( f, m_GridI ), swidth, twidth, _psblur, _ptblur, val);
 
 		// Grab the appropriate channel.
 		float fchan = FLOAT( channel );
@@ -1637,8 +1655,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		float fdu = du();
-		float fdv = dv();
+		float fdu = ( m_pSurface ) ? du() : 0.0;
+		float fdv = ( m_pSurface ) ? dv() : 0.0;
 		FOR_EACHR
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
@@ -1653,13 +1671,20 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 			TqFloat dtdv = SO_DvType<TqFloat>( t(), m_GridI, *this );
 			twidth += fabs( dtdv * fdv );
 		}
+		else
+		{
+			swidth = 1.0 / pTMap->XRes();
+			twidth = 1.0 / pTMap->YRes();
+		}
 
 		swidth *= _pswidth;
 		twidth *= _ptwidth;
 
 		// Sample the texture.
 		std::valarray<float> val;
-		pTMap->SampleMIPMAP( s(), t(), swidth, twidth, _psblur, _ptblur, val );
+
+
+		pTMap->SampleMIPMAP( s(), t(), swidth, twidth, _psblur, _ptblur, val);
 
 		// Grab the appropriate channel.
 		float fchan = FLOAT( channel );
@@ -1687,8 +1712,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOA
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		float fdu = du();
-		float fdv = dv();
+		float fdu = ( m_pSurface ) ? du() : 0.0;
+		float fdv = ( m_pSurface ) ? dv() : 0.0;
 		FOR_EACHR
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
@@ -1703,13 +1728,20 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOA
 			TqFloat dtdv = SO_DvType<TqFloat>( t, m_GridI, *this );
 			twidth += fabs( dtdv * fdv );
 		}
+		else
+		{
+			swidth = 1.0 / pTMap->XRes();
+			twidth = 1.0 / pTMap->YRes();
+		}
 
 		swidth *= _pswidth;
 		twidth *= _ptwidth;
 
 		// Sample the texture.
 		std::valarray<float> val;
-		pTMap->SampleMIPMAP( s.Value( f, m_GridI ), t.Value( f, m_GridI ), swidth, twidth, _psblur, _ptblur, val );
+
+
+		pTMap->SampleMIPMAP( s.Value( f, m_GridI ), t.Value( f, m_GridI ), swidth, twidth, _psblur, _ptblur, val);
 
 		// Grab the appropriate channel.
 		float fchan = FLOAT( channel );
@@ -1775,8 +1807,8 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, 
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		float fdu = du();
-		float fdv = dv();
+		float fdu = ( m_pSurface ) ? du() : 0.0;
+		float fdv = ( m_pSurface ) ? dv() : 0.0;
 		FOR_EACHR
 		CqVector3D swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f )
@@ -1788,6 +1820,11 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, 
 		{
 			CqVector3D dRdv = SO_DvType<CqVector3D>( R, m_GridI, *this );
 			twidth = dRdv * fdv;
+		}
+		else
+		{
+			swidth = 1.0 / pTMap->XRes();
+			twidth = 1.0 / pTMap->YRes();
 		}
 
 		swidth *= _pswidth;
@@ -1870,8 +1907,8 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, 
 	__fVarying = TqTrue;
 	if ( pTMap != 0 && pTMap->IsValid() )
 	{
-		float fdu = du();
-		float fdv = dv();
+		float fdu = ( m_pSurface ) ? du() : 0.0;
+		float fdv = ( m_pSurface ) ? dv() : 0.0;
 		FOR_EACHR
 		CqVector3D swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f )
@@ -1883,6 +1920,11 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, 
 		{
 			CqVector3D dRdv = SO_DvType<CqVector3D>( R, m_GridI, *this );
 			twidth = dRdv * fdv;
+		}
+		else
+		{
+			swidth = 1.0 / pTMap->XRes();
+			twidth = 1.0 / pTMap->YRes();
 		}
 
 		swidth *= _pswidth;
@@ -2014,11 +2056,6 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 //----------------------------------------------------------------------
 // shadow(S,P,P,P,P)
 
-
-
-
-
-
 STD_SOIMPL CqShaderExecEnv::SO_shadow1( STRINGVAL name, FLOATVAL channel, POINTVAL P1, POINTVAL P2, POINTVAL P3, POINTVAL P4, DEFPARAMVARIMPL )
 {
 	GET_TEXTURE_PARAMS;
@@ -2043,11 +2080,6 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow1( STRINGVAL name, FLOATVAL channel, POINTV
 
 //----------------------------------------------------------------------
 // ambient()
-
-
-
-
-
 
 STD_SOIMPL CqShaderExecEnv::SO_ambient( DEFPARAMIMPL )
 {
@@ -3798,7 +3830,7 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 	{
 		if ( ( pV->Type() & Type_Mask ) == Type_Float && ( pV->Type() & Type_Array ) )
 		{
-			if ( pSMap )      // && pSMap->Type() == MapType_Shadow)
+			if ( pSMap ) // && pSMap->Type() == MapType_Shadow)
 			{
 
 				if ( paV->ArrayLength() == 16 )
@@ -3850,7 +3882,7 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 	{
 		if ( ( pV->Type() & Type_Mask ) == Type_Float && ( pV->Type() & Type_Array ) )
 		{
-			if ( pSMap )       // && pSMap->Type() == MapType_Shadow)
+			if ( pSMap )  // && pSMap->Type() == MapType_Shadow)
 			{
 
 				if ( paV->ArrayLength() == 16 )
@@ -3908,3 +3940,4 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 
 
 END_NAMESPACE( Aqsis )
+//---------------------------------------------------------------------

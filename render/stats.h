@@ -42,10 +42,10 @@ START_NAMESPACE( Aqsis )
 
 enum EqState
 {
-    State_Parsing,  		///< Parsing a RIB file.
-    State_Shadows,  		///< Processing shadows.
-    State_Rendering,  	///< Rendering image.
-    State_Complete,  		///< Rendering complete.
+    State_Parsing, 		///< Parsing a RIB file.
+    State_Shadows, 		///< Processing shadows.
+    State_Rendering, 	///< Rendering image.
+    State_Complete, 		///< Rendering complete.
 };
 
 
@@ -313,6 +313,12 @@ class CqStats
 		{
 			return ( m_timeDisplacement );
 		};
+		/** Get the Imager timer.
+		   	 */
+		CqStatTimer& ImagerTimer()
+		{
+			return ( m_timeImager );
+		};
 
 		/** Get the atmosphere timer.
 		*/
@@ -333,6 +339,12 @@ class CqStats
 		CqStatTimer& DicingTimer()
 		{
 			return ( m_timeDicing );
+		};
+		/** Get the texturesampling timer.
+		*/
+		CqStatTimer& TextureMapTimer()
+		{
+			return ( m_timeTM );
 		};
 		/** Get the render MPGs timer.
 		*/
@@ -366,6 +378,11 @@ class CqStats
 		{
 			return ( m_timeMakeEnv );
 		};
+		CqStatTimer& MakeFilterBucket()
+		{
+			return ( m_timeFB );
+		};
+
 		//@}
 
 		void PrintStats( TqInt level ) const;
@@ -409,6 +426,7 @@ class CqStats
 		TqBool m_frameTimerRunning;			///< True, if the frame timer was started and not yet stopped.
 
 		CqStatTimer m_timeSurface;				///< Time spent on surface shading.
+		CqStatTimer m_timeImager;			///< Time spent on imager shading.
 		CqStatTimer m_timeDisplacement;			///< Time spent on displacement shading.
 		CqStatTimer m_timeAtmosphere;			///< Time spent on volume shading (atmosphere).
 		CqStatTimer m_timeSplits;				///< Time spent on surface splitting.
@@ -416,9 +434,11 @@ class CqStats
 		CqStatTimer m_timeRenderMPGs;			///< Time spent on rendering MPGs.
 		CqStatTimer m_timeOcclusionCull;		///< Time spent on occlusion culling.
 		CqStatTimer m_timeDiceable;				///< Time spent on diceable checking.
+		CqStatTimer m_timeTM;				///< Time spent on SampleMipMap checking.
 		CqStatTimer m_timeMakeTexture;			///< Time spent on MakeTextureV call.
 		CqStatTimer m_timeMakeShadow;			///< Time spent on MakeShadowV call.
 		CqStatTimer m_timeMakeEnv;		    	///< Time spent on MakeCubeEnvironmenV call.
+		CqStatTimer m_timeFB;		    	    ///< Time spent on Filter the Bucket call.
 
 }
 ;

@@ -36,6 +36,12 @@
 
 START_NAMESPACE( Aqsis )
 
+CqQuadric::CqQuadric()
+{
+	m_uDiceSize = m_vDiceSize = 0;
+
+}
+
 
 //---------------------------------------------------------------------
 /** Assignment operator.
@@ -46,6 +52,8 @@ CqQuadric&	CqQuadric::operator=( const CqQuadric& From )
 	CqSurface::operator=( From );
 	m_matTx = From.m_matTx;
 	m_matITTx = From.m_matITTx;
+	m_uDiceSize = From.m_uDiceSize;
+	m_vDiceSize = From.m_vDiceSize;
 
 	return ( *this );
 }
@@ -94,7 +102,9 @@ CqMicroPolyGridBase* CqQuadric::Dice()
 			pGrid->Advance();
 		}
 	}
+
 	pGrid->SetNormals( TqFalse );
+
 	return ( pGrid );
 }
 
@@ -106,6 +116,7 @@ CqMicroPolyGridBase* CqQuadric::Dice()
 TqBool	CqQuadric::Diceable()
 {
 	TqInt gridsize;
+	TqBool result;
 
 	const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
 	TqInt m_XBucketSize = 16;
@@ -117,13 +128,37 @@ TqBool	CqQuadric::Diceable()
 		m_YBucketSize = poptBucketSize[ 1 ];
 	}
 	TqFloat ShadingRate = pAttributes() ->fEffectiveShadingRate();
+
+	// Don't go below a certain threshold since this will
+	// have the possibility to create gigantic number of quadrics objects
+	// otherwise.
+	ShadingRate = MAX( MINSHADINGRATE, ShadingRate );
+
 	if ( poptGridSize )
 		gridsize = poptGridSize[ 0 ];
 	else
-		gridsize = static_cast<TqInt>( m_XBucketSize * m_XBucketSize / ShadingRate );
-	EqtimateGridSize();
-	if ( ( TqFloat ) m_uDiceSize * ( TqFloat ) m_vDiceSize <= gridsize ) return ( TqTrue );
-	else	return ( TqFalse );
+		gridsize = m_XBucketSize * m_XBucketSize / ShadingRate;
+
+	if ( ( m_uDiceSize == 0 ) || ( m_vDiceSize == 0 ) )
+		EqtimateGridSize();
+
+	result = TqFalse;
+
+	// if the gridsize is not set the computation of gridsize assuming
+	// a minimum of 0.4 shadingrate
+	if ( ( TqFloat ) ( m_uDiceSize * m_vDiceSize ) <= gridsize )
+		return ( TqTrue );
+
+	// Prevent excessive dicing for disk primitives
+	const TqInt *pEyeSplit = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "eyesplits" );
+	TqInt EyeSplit = 2;
+	// By default I choose 3 level of dicing
+	if ( pEyeSplit ) EyeSplit = *pEyeSplit;
+	if ( m_EyeSplitCount > EyeSplit )
+		return TqTrue;
+
+	return result;
+
 }
 
 
@@ -168,19 +203,29 @@ void CqQuadric::EqtimateGridSize()
 	maxusize = sqrt( maxusize );
 	maxvsize = sqrt( maxvsize );
 
-	float rate = pAttributes() ->fEffectiveShadingRate();
+	TqFloat ShadingRate = pAttributes() ->fEffectiveShadingRate();
+
+	// a minimum of 0.4 shadingrate must be garantee otherwise
+	// gigantic number of grid will be created!!!
+	ShadingRate = MAX( MINSHADINGRATE, ShadingRate );
+
 	//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
 	//	{
 	//		const TqFloat* pattrShadowShadingRate=m_pAttributes->GetFloatAttribute("render","shadow_shadingrate");
 	//		if(pattrShadowShadingRate!=0)
 	//			rate=pattrShadowShadingRate[0];
 	//	}
+	TqInt us, vs;
 
-	TqInt us = MAX( 4, ROUND( ESTIMATEGRIDSIZE * maxusize / ( rate ) ) );
-	TqInt vs = MAX( 4, ROUND( ESTIMATEGRIDSIZE * maxvsize / ( rate ) ) );
+
+
+	us = CEIL( ESTIMATEGRIDSIZE * maxusize / ( ShadingRate ) );
+	vs = CEIL( ESTIMATEGRIDSIZE * maxvsize / ( ShadingRate ) );
+
 	// Make size a power of 2
 	us = 1 << ( TqInt ) ( log( us ) / log( 2 ) );
 	vs = 1 << ( TqInt ) ( log( vs ) / log( 2 ) );
+
 	m_uDiceSize = us;
 	m_vDiceSize = vs;
 }
@@ -277,33 +322,91 @@ CqBound	CqSphere::Bound() const
 
 TqInt CqSphere::Split( std::vector<CqBasicSurface*>& aSplits )
 {
-	// Create a NURBS patch
-	CqSurfaceNURBS * pNew = new CqSurfaceNURBS();
-	pNew->AddRef();
+	const TqInt * usesnurbs = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "usesnurbs" );
 
-	TqFloat phimin = ( m_ZMin > -m_Radius ) ? asin( m_ZMin / m_Radius ) : -( RI_PIO2 );
-	TqFloat phimax = ( m_ZMax < m_Radius ) ? asin( m_ZMax / m_Radius ) : ( RI_PIO2 );
+	if ( usesnurbs != NULL && ( *usesnurbs == 0 ) )
+	{
+		TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
+		TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 
-	CqSurfaceNURBS Curve;
-	CqVector3D vA( 0, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 );
-	Curve.Circle( vA, vB, vC, m_Radius, phimin, phimax );
-	pNew->SurfaceOfRevolution( Curve, vA, vC, RAD( m_ThetaMax ) );
+		CqSphere* pNew1 = new CqSphere( *this );
+		CqSphere* pNew2 = new CqSphere( *this );
 
-	pNew->Transform( m_matTx, m_matITTx, CqMatrix() );
+		pNew1->AddRef();
+		pNew2->AddRef();
+		if ( m_uDiceSize >= m_vDiceSize )
+		{
+			pNew1->m_ThetaMax = arccent;
+			pNew2->m_ThetaMin = arccent;
 
-	pNew->u() = u();
-	pNew->v() = v();
-	pNew->s() = s();
-	pNew->t() = t();
-	pNew->Cs() = Cs();
-	pNew->Os() = Os();
-	pNew->SetSurfaceParameters( *this );
-	pNew->m_fDiceable = TqTrue;
-	pNew->m_EyeSplitCount = m_EyeSplitCount;
+			// Subdivide the parameter values
+			pNew1->u().uSubdivide( &pNew2->u() );
+			pNew1->v().uSubdivide( &pNew2->v() );
+			pNew1->s().uSubdivide( &pNew2->s() );
+			pNew1->t().uSubdivide( &pNew2->t() );
+			pNew1->Cs().uSubdivide( &pNew2->Cs() );
+			pNew1->Os().uSubdivide( &pNew2->Os() );
+			pNew1->m_uDiceSize = m_uDiceSize / 2;
+			pNew2->m_uDiceSize = m_uDiceSize / 2;
+		}
+		else
+		{
+			pNew1->m_ZMax = zcent;
+			pNew2->m_ZMin = zcent;
 
-	aSplits.push_back( pNew );
+			// Subdivide the parameter values
+			pNew1->u().vSubdivide( &pNew2->u() );
+			pNew1->v().vSubdivide( &pNew2->v() );
+			pNew1->s().vSubdivide( &pNew2->s() );
+			pNew1->t().vSubdivide( &pNew2->t() );
+			pNew1->Cs().vSubdivide( &pNew2->Cs() );
+			pNew1->Os().vSubdivide( &pNew2->Os() );
+			pNew1->m_vDiceSize = m_vDiceSize / 2;
+			pNew2->m_vDiceSize = m_vDiceSize / 2;
+		}
+		pNew1->SetSurfaceParameters( *this );
+		pNew2->SetSurfaceParameters( *this );
+		pNew1->m_fDiceable = TqTrue;
+		pNew2->m_fDiceable = TqTrue;
+		pNew1->m_EyeSplitCount = m_EyeSplitCount + 1;
+		pNew2->m_EyeSplitCount = m_EyeSplitCount + 1;
 
-	return ( 1 );
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+		return ( 2 );
+
+	}
+	else
+	{
+		// Create a NURBS patch
+		CqSurfaceNURBS* pNew = new CqSurfaceNURBS();
+		pNew->AddRef();
+
+		TqFloat phimin = ( m_ZMin > -m_Radius ) ? asin( m_ZMin / m_Radius ) : -( RI_PIO2 );
+		TqFloat phimax = ( m_ZMax < m_Radius ) ? asin( m_ZMax / m_Radius ) : ( RI_PIO2 );
+
+		CqSurfaceNURBS Curve;
+		CqVector3D vA( 0, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 );
+		Curve.Circle( vA, vB, vC, m_Radius, phimin, phimax );
+		pNew->SurfaceOfRevolution( Curve, vA, vC, RAD( m_ThetaMax ) );
+
+		pNew->Transform( m_matTx, m_matITTx, CqMatrix() );
+
+		pNew->u() = u();
+		pNew->v() = v();
+		pNew->s() = s();
+		pNew->t() = t();
+		pNew->Cs() = Cs();
+		pNew->Os() = Os();
+		pNew->SetSurfaceParameters( *this );
+		pNew->m_fDiceable = TqTrue;
+		pNew->m_EyeSplitCount = m_EyeSplitCount;
+
+		aSplits.push_back( pNew );
+
+		return ( 1 );
+	}
 }
 
 
@@ -318,10 +421,10 @@ CqVector3D CqSphere::DicePoint( TqInt u, TqInt v )
 {
 	TqFloat phimin = ( m_ZMin > -m_Radius ) ? asin( m_ZMin / m_Radius ) : RAD( -90.0 );
 	TqFloat phimax = ( m_ZMax < m_Radius ) ? asin( m_ZMax / m_Radius ) : RAD( 90.0 );
-	TqFloat phi = phimin + ( v * ( phimax - phimin ) ) / m_vDiceSize;
+	TqFloat phi = phimin + ( ( TqFloat ) v * ( phimax - phimin ) ) / m_vDiceSize;
 
 	TqFloat cosphi = cos( phi );
-	TqFloat theta = RAD( m_ThetaMin + ( u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
 
 	return ( CqVector3D( ( m_Radius * cos( theta ) * cosphi ), ( m_Radius * sin( theta ) * cosphi ), ( m_Radius * sin( phi ) ) ) );
 }
@@ -338,8 +441,8 @@ CqVector3D CqSphere::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
 	CqVector3D	p( DicePoint( u, v ) );
 	Normal = p;
+	Normal.z( 0 );
 	Normal.Unit();
-
 	return ( p );
 }
 
@@ -421,30 +524,90 @@ CqBound	CqCone::Bound() const
 
 TqInt CqCone::Split( std::vector<CqBasicSurface*>& aSplits )
 {
-	// Create a NURBS patch
-	CqSurfaceNURBS * pNew = new CqSurfaceNURBS();
-	pNew->AddRef();
+	const TqInt * usesnurbs = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "usesnurbs" );
 
-	CqSurfaceNURBS Curve;
-	CqVector3D vA( m_Radius, 0, 0 ), vB( 0, 0, m_Height ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
-	Curve.LineSegment( vA, vB );
-	pNew->SurfaceOfRevolution( Curve, vC, vD, RAD( m_ThetaMax ) );
+	if ( usesnurbs != NULL && ( *usesnurbs == 0 ) )
+	{
 
-	pNew->Transform( m_matTx, m_matITTx, CqMatrix() );
+		TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
+		TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
+		//TqFloat rcent=m_RMax*sqrt(zcent/m_ZMax);
 
-	pNew->u() = u();
-	pNew->v() = v();
-	pNew->s() = s();
-	pNew->t() = t();
-	pNew->Cs() = Cs();
-	pNew->Os() = Os();
-	pNew->SetSurfaceParameters( *this );
-	pNew->m_fDiceable = TqTrue;
-	pNew->m_EyeSplitCount = m_EyeSplitCount;
+		CqCone* pNew1 = new CqCone( *this );
+		CqCone* pNew2 = new CqCone( *this );
+		pNew1->AddRef();
+		pNew2->AddRef();
+		if ( m_uDiceSize > m_vDiceSize )
+		{
+			pNew1->m_ThetaMax = arccent;
+			pNew2->m_ThetaMin = arccent;
 
-	aSplits.push_back( pNew );
+			// Subdivide the parameter values
+			pNew1->u().uSubdivide( &pNew2->u() );
+			pNew1->v().uSubdivide( &pNew2->v() );
+			pNew1->s().uSubdivide( &pNew2->s() );
+			pNew1->t().uSubdivide( &pNew2->t() );
+			pNew1->Cs().uSubdivide( &pNew2->Cs() );
+			pNew1->Os().uSubdivide( &pNew2->Os() );
+			pNew1->m_uDiceSize = m_uDiceSize / 2;
+			pNew2->m_uDiceSize = m_uDiceSize / 2;
+		}
+		else
+		{
+			pNew1->m_ZMax = zcent;
+			pNew2->m_ZMin = zcent;
 
-	return ( 1 );
+			// Subdivide the parameter values
+			pNew1->u().vSubdivide( &pNew2->u() );
+			pNew1->v().vSubdivide( &pNew2->v() );
+			pNew1->s().vSubdivide( &pNew2->s() );
+			pNew1->t().vSubdivide( &pNew2->t() );
+			pNew1->Cs().vSubdivide( &pNew2->Cs() );
+			pNew1->Os().vSubdivide( &pNew2->Os() );
+			pNew1->m_vDiceSize = m_vDiceSize / 2;
+			pNew2->m_vDiceSize = m_vDiceSize / 2;
+		}
+		pNew1->SetSurfaceParameters( *this );
+		pNew2->SetSurfaceParameters( *this );
+		pNew1->m_fDiceable = TqTrue;
+		pNew2->m_fDiceable = TqTrue;
+		pNew1->m_EyeSplitCount = m_EyeSplitCount + 1;
+		pNew2->m_EyeSplitCount = m_EyeSplitCount + 1;
+
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+		return ( 2 );
+
+	}
+	else
+	{
+
+		// Create a NURBS patch
+		CqSurfaceNURBS* pNew = new CqSurfaceNURBS();
+		pNew->AddRef();
+
+		CqSurfaceNURBS Curve;
+		CqVector3D vA( m_Radius, 0, 0 ), vB( 0, 0, m_Height ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
+		Curve.LineSegment( vA, vB );
+		pNew->SurfaceOfRevolution( Curve, vC, vD, RAD( m_ThetaMax ) );
+
+		pNew->Transform( m_matTx, m_matITTx, CqMatrix() );
+
+		pNew->u() = u();
+		pNew->v() = v();
+		pNew->s() = s();
+		pNew->t() = t();
+		pNew->Cs() = Cs();
+		pNew->Os() = Os();
+		pNew->SetSurfaceParameters( *this );
+		pNew->m_fDiceable = TqTrue;
+		pNew->m_EyeSplitCount = m_EyeSplitCount;
+
+		aSplits.push_back( pNew );
+
+		return ( 1 );
+	}
 }
 
 
@@ -457,9 +620,9 @@ TqInt CqCone::Split( std::vector<CqBasicSurface*>& aSplits )
 
 CqVector3D CqCone::DicePoint( TqInt u, TqInt v )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
 
-	TqFloat z = m_ZMin + ( v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
+	TqFloat z = m_ZMin + ( ( TqFloat ) v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
 	TqFloat r = m_Radius * ( 1.0 - z / m_Height );
 
 	return ( CqVector3D( r * cos( theta ), r * sin( theta ), z ) );
@@ -477,6 +640,7 @@ CqVector3D CqCone::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
 	CqVector3D	p( DicePoint( u, v ) );
 	Normal = p;
+	Normal.z( 0 );
 	Normal.Unit();
 
 	return ( p );
@@ -552,30 +716,90 @@ CqBound	CqCylinder::Bound() const
 
 TqInt CqCylinder::Split( std::vector<CqBasicSurface*>& aSplits )
 {
-	// Create a NURBS patch
-	CqSurfaceNURBS * pNew = new CqSurfaceNURBS();
-	pNew->AddRef();
+	const TqInt * usesnurbs = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "usesnurbs" );
 
-	CqSurfaceNURBS Curve;
-	CqVector3D vA( m_Radius, 0, m_ZMin ), vB( m_Radius, 0, m_ZMax ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
-	Curve.LineSegment( vA, vB );
-	pNew->SurfaceOfRevolution( Curve, vC, vD, RAD( m_ThetaMax ) );
+	if ( usesnurbs != NULL && ( *usesnurbs == 0 ) )
+	{
 
-	pNew->Transform( m_matTx, m_matITTx, CqMatrix() );
+		TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
+		TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
+		//TqFloat rcent=m_RMax*sqrt(zcent/m_ZMax);
 
-	pNew->u() = u();
-	pNew->v() = v();
-	pNew->s() = s();
-	pNew->t() = t();
-	pNew->Cs() = Cs();
-	pNew->Os() = Os();
-	pNew->SetSurfaceParameters( *this );
-	pNew->m_fDiceable = TqTrue;
-	pNew->m_EyeSplitCount = m_EyeSplitCount;
+		CqCylinder* pNew1 = new CqCylinder( *this );
+		CqCylinder* pNew2 = new CqCylinder( *this );
+		pNew1->AddRef();
+		pNew2->AddRef();
+		if ( m_uDiceSize > m_vDiceSize )
+		{
+			pNew1->m_ThetaMax = arccent;
+			pNew2->m_ThetaMin = arccent;
 
-	aSplits.push_back( pNew );
+			// Subdivide the parameter values
+			pNew1->u().uSubdivide( &pNew2->u() );
+			pNew1->v().uSubdivide( &pNew2->v() );
+			pNew1->s().uSubdivide( &pNew2->s() );
+			pNew1->t().uSubdivide( &pNew2->t() );
+			pNew1->Cs().uSubdivide( &pNew2->Cs() );
+			pNew1->Os().uSubdivide( &pNew2->Os() );
+			pNew1->m_uDiceSize = m_uDiceSize / 2;
+			pNew2->m_uDiceSize = m_uDiceSize / 2;
+		}
+		else
+		{
+			pNew1->m_ZMax = zcent;
+			pNew2->m_ZMin = zcent;
 
-	return ( 1 );
+			// Subdivide the parameter values
+			pNew1->u().vSubdivide( &pNew2->u() );
+			pNew1->v().vSubdivide( &pNew2->v() );
+			pNew1->s().vSubdivide( &pNew2->s() );
+			pNew1->t().vSubdivide( &pNew2->t() );
+			pNew1->Cs().vSubdivide( &pNew2->Cs() );
+			pNew1->Os().vSubdivide( &pNew2->Os() );
+			pNew1->m_vDiceSize = m_vDiceSize / 2;
+			pNew2->m_vDiceSize = m_vDiceSize / 2;
+		}
+		pNew1->SetSurfaceParameters( *this );
+		pNew2->SetSurfaceParameters( *this );
+		pNew1->m_fDiceable = TqTrue;
+		pNew2->m_fDiceable = TqTrue;
+		pNew1->m_EyeSplitCount = m_EyeSplitCount + 1;
+		pNew2->m_EyeSplitCount = m_EyeSplitCount + 1;
+
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+		return ( 2 );
+
+	}
+	else
+	{
+
+		// Create a NURBS patch
+		CqSurfaceNURBS* pNew = new CqSurfaceNURBS();
+		pNew->AddRef();
+
+		CqSurfaceNURBS Curve;
+		CqVector3D vA( m_Radius, 0, m_ZMin ), vB( m_Radius, 0, m_ZMax ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
+		Curve.LineSegment( vA, vB );
+		pNew->SurfaceOfRevolution( Curve, vC, vD, RAD( m_ThetaMax ) );
+
+		pNew->Transform( m_matTx, m_matITTx, CqMatrix() );
+
+		pNew->u() = u();
+		pNew->v() = v();
+		pNew->s() = s();
+		pNew->t() = t();
+		pNew->Cs() = Cs();
+		pNew->Os() = Os();
+		pNew->SetSurfaceParameters( *this );
+		pNew->m_fDiceable = TqTrue;
+		pNew->m_EyeSplitCount = m_EyeSplitCount;
+
+		aSplits.push_back( pNew );
+
+		return ( 1 );
+	}
 }
 
 
@@ -588,9 +812,9 @@ TqInt CqCylinder::Split( std::vector<CqBasicSurface*>& aSplits )
 
 CqVector3D CqCylinder::DicePoint( TqInt u, TqInt v )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( ( m_ThetaMax - m_ThetaMin ) * u ) / m_uDiceSize );
+	TqFloat theta = RAD( m_ThetaMin + ( ( m_ThetaMax - m_ThetaMin ) * ( TqFloat ) u ) / m_uDiceSize );
 
-	TqFloat vz = m_ZMin + ( v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
+	TqFloat vz = m_ZMin + ( ( TqFloat ) v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
 	return ( CqVector3D( m_Radius * cos( theta ), m_Radius * sin( theta ), vz ) );
 }
 
@@ -670,30 +894,89 @@ CqBound	CqHyperboloid::Bound() const
 
 TqInt CqHyperboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 {
-	// Create a NURBS patch
-	CqSurfaceNURBS * pNew = new CqSurfaceNURBS();
-	pNew->AddRef();
+	const TqInt * usesnurbs = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "usesnurbs" );
 
-	CqSurfaceNURBS Curve;
-	Curve.LineSegment( m_Point1, m_Point2 );
-	CqVector3D vA( 0, 0, 0 ), vB( 0, 0, 1 );
-	pNew->SurfaceOfRevolution( Curve, vA, vB, RAD( m_ThetaMax ) );
+	if ( usesnurbs != NULL && ( *usesnurbs == 0 ) )
+	{
 
-	pNew->Transform( m_matTx, m_matITTx, CqMatrix() );
+		TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
+		CqVector3D midpoint = ( m_Point1 + m_Point2 ) / 2.0;
 
-	pNew->u() = u();
-	pNew->v() = v();
-	pNew->s() = s();
-	pNew->t() = t();
-	pNew->Cs() = Cs();
-	pNew->Os() = Os();
-	pNew->SetSurfaceParameters( *this );
-	pNew->m_fDiceable = TqTrue;
-	pNew->m_EyeSplitCount = m_EyeSplitCount;
+		CqHyperboloid* pNew1 = new CqHyperboloid( *this );
+		CqHyperboloid* pNew2 = new CqHyperboloid( *this );
+		pNew1->AddRef();
+		pNew2->AddRef();
+		if ( m_uDiceSize > m_vDiceSize )
+		{
+			pNew1->m_ThetaMax = arccent;
+			pNew2->m_ThetaMin = arccent;
 
-	aSplits.push_back( pNew );
+			// Subdivide the parameter values
+			pNew1->u().uSubdivide( &pNew2->u() );
+			pNew1->v().uSubdivide( &pNew2->v() );
+			pNew1->s().uSubdivide( &pNew2->s() );
+			pNew1->t().uSubdivide( &pNew2->t() );
+			pNew1->Cs().uSubdivide( &pNew2->Cs() );
+			pNew1->Os().uSubdivide( &pNew2->Os() );
+			pNew1->m_uDiceSize = m_uDiceSize / 2;
+			pNew2->m_uDiceSize = m_uDiceSize / 2;
+		}
+		else
+		{
+			pNew1->m_Point2 = midpoint;
+			pNew2->m_Point1 = midpoint;
 
-	return ( 1 );
+			// Subdivide the parameter values
+			pNew1->u().vSubdivide( &pNew2->u() );
+			pNew1->v().vSubdivide( &pNew2->v() );
+			pNew1->s().vSubdivide( &pNew2->s() );
+			pNew1->t().vSubdivide( &pNew2->t() );
+			pNew1->Cs().vSubdivide( &pNew2->Cs() );
+			pNew1->Os().vSubdivide( &pNew2->Os() );
+			pNew1->m_vDiceSize = m_vDiceSize / 2;
+			pNew2->m_vDiceSize = m_vDiceSize / 2;
+		}
+		pNew1->SetSurfaceParameters( *this );
+		pNew2->SetSurfaceParameters( *this );
+		pNew1->m_fDiceable = TqTrue;
+		pNew2->m_fDiceable = TqTrue;
+		pNew1->m_EyeSplitCount = m_EyeSplitCount + 1;
+		pNew2->m_EyeSplitCount = m_EyeSplitCount + 1;
+
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+		return ( 2 );
+
+	}
+	else
+	{
+
+		// Create a NURBS patch
+		CqSurfaceNURBS* pNew = new CqSurfaceNURBS();
+		pNew->AddRef();
+
+		CqSurfaceNURBS Curve;
+		Curve.LineSegment( m_Point1, m_Point2 );
+		CqVector3D vA( 0, 0, 0 ), vB( 0, 0, 1 );
+		pNew->SurfaceOfRevolution( Curve, vA, vB, RAD( m_ThetaMax ) );
+
+		pNew->Transform( m_matTx, m_matITTx, CqMatrix() );
+
+		pNew->u() = u();
+		pNew->v() = v();
+		pNew->s() = s();
+		pNew->t() = t();
+		pNew->Cs() = Cs();
+		pNew->Os() = Os();
+		pNew->SetSurfaceParameters( *this );
+		pNew->m_fDiceable = TqTrue;
+		pNew->m_EyeSplitCount = m_EyeSplitCount;
+
+		aSplits.push_back( pNew );
+
+		return ( 1 );
+	}
 }
 
 
@@ -706,7 +989,7 @@ TqInt CqHyperboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 
 CqVector3D CqHyperboloid::DicePoint( TqInt u, TqInt v )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
 
 	CqVector3D p;
 	TqFloat vv = static_cast<TqFloat>( v ) / m_vDiceSize;
@@ -815,6 +1098,7 @@ TqInt CqParaboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
+
 		// Subdivide the parameter values
 		pNew1->u().uSubdivide( &pNew2->u() );
 		pNew1->v().uSubdivide( &pNew2->v() );
@@ -822,12 +1106,15 @@ TqInt CqParaboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().uSubdivide( &pNew2->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
+		pNew1->m_uDiceSize = m_uDiceSize / 2;
+		pNew2->m_uDiceSize = m_uDiceSize / 2;
 	}
 	else
 	{
 		pNew1->m_ZMax = zcent;
 		pNew1->m_RMax = rcent;
 		pNew2->m_ZMin = zcent;
+
 		// Subdivide the parameter values
 		pNew1->u().vSubdivide( &pNew2->u() );
 		pNew1->v().vSubdivide( &pNew2->v() );
@@ -835,13 +1122,15 @@ TqInt CqParaboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().vSubdivide( &pNew2->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
+		pNew1->m_vDiceSize = m_vDiceSize / 2;
+		pNew2->m_vDiceSize = m_vDiceSize / 2;
 	}
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
-	pNew1->m_EyeSplitCount = m_EyeSplitCount;
-	pNew2->m_EyeSplitCount = m_EyeSplitCount;
+	pNew1->m_EyeSplitCount = m_EyeSplitCount + 1;
+	pNew2->m_EyeSplitCount = m_EyeSplitCount + 1;
 
 	aSplits.push_back( pNew1 );
 	aSplits.push_back( pNew2 );
@@ -859,9 +1148,9 @@ TqInt CqParaboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 
 CqVector3D CqParaboloid::DicePoint( TqInt u, TqInt v )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( ( m_ThetaMax - m_ThetaMin ) * u ) / m_uDiceSize );
+	TqFloat theta = RAD( m_ThetaMin + ( ( m_ThetaMax - m_ThetaMin ) * ( TqFloat ) u ) / m_uDiceSize );
 
-	TqFloat z = m_ZMin + ( v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
+	TqFloat z = m_ZMin + ( ( TqFloat ) v * ( m_ZMax - m_ZMin ) ) / m_vDiceSize;
 	TqFloat r = m_RMax * sqrt( z / m_ZMax );
 	return ( CqVector3D( r * cos( theta ), r * sin( theta ), z ) );
 }
@@ -958,30 +1247,91 @@ CqBound	CqTorus::Bound() const
 
 TqInt CqTorus::Split( std::vector<CqBasicSurface*>& aSplits )
 {
-	// Create a NURBS patch
-	CqSurfaceNURBS * pNew = new CqSurfaceNURBS();
-	pNew->AddRef();
 
-	CqSurfaceNURBS Curve;
-	CqVector3D vA( m_MajorRadius, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 ), vD( 0, 0, 0 );
-	Curve.Circle( vA, vB, vC, m_MinorRadius, RAD( m_PhiMin ), RAD( m_PhiMax ) );
-	pNew->SurfaceOfRevolution( Curve, vD, vC, RAD( m_ThetaMax ) );
+	const TqInt * usesnurbs = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "usesnurbs" );
 
-	pNew->Transform( m_matTx, m_matITTx, CqMatrix() );
+	if ( usesnurbs != NULL && ( *usesnurbs == 0 ) )
+	{
+		TqFloat zcent = ( m_PhiMax + m_PhiMin ) * 0.5;
+		TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 
-	pNew->u() = u();
-	pNew->v() = v();
-	pNew->s() = s();
-	pNew->t() = t();
-	pNew->Cs() = Cs();
-	pNew->Os() = Os();
-	pNew->SetSurfaceParameters( *this );
-	pNew->m_fDiceable = TqTrue;
-	pNew->m_EyeSplitCount = m_EyeSplitCount;
+		CqTorus* pNew1 = new CqTorus( *this );
+		CqTorus* pNew2 = new CqTorus( *this );
+		pNew1->AddRef();
+		pNew2->AddRef();
+		if ( m_uDiceSize >= m_vDiceSize )
+		{
+			pNew1->m_ThetaMax = arccent;
+			pNew2->m_ThetaMin = arccent;
 
-	aSplits.push_back( pNew );
+			// Subdivide the parameter values
+			pNew1->u().uSubdivide( &pNew2->u() );
+			pNew1->v().uSubdivide( &pNew2->v() );
+			pNew1->s().uSubdivide( &pNew2->s() );
+			pNew1->t().uSubdivide( &pNew2->t() );
+			pNew1->Cs().uSubdivide( &pNew2->Cs() );
+			pNew1->Os().uSubdivide( &pNew2->Os() );
+			pNew1->m_uDiceSize = m_uDiceSize / 2;
+			pNew2->m_uDiceSize = m_uDiceSize / 2;
+		}
+		else
+		{
+			pNew1->m_PhiMax = zcent;
+			pNew2->m_PhiMin = zcent;
 
-	return ( 1 );
+			// Subdivide the parameter values
+			pNew1->u().vSubdivide( &pNew2->u() );
+			pNew1->v().vSubdivide( &pNew2->v() );
+			pNew1->s().vSubdivide( &pNew2->s() );
+			pNew1->t().vSubdivide( &pNew2->t() );
+			pNew1->Cs().vSubdivide( &pNew2->Cs() );
+			pNew1->Os().vSubdivide( &pNew2->Os() );
+			pNew1->m_vDiceSize = m_vDiceSize / 2;
+			pNew2->m_vDiceSize = m_vDiceSize / 2;
+		}
+		pNew1->SetSurfaceParameters( *this );
+		pNew2->SetSurfaceParameters( *this );
+		pNew1->m_fDiceable = TqTrue;
+		pNew2->m_fDiceable = TqTrue;
+		pNew1->m_EyeSplitCount = m_EyeSplitCount + 1;
+		pNew2->m_EyeSplitCount = m_EyeSplitCount + 1;
+
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+
+
+		return ( 2 );
+
+	}
+	else
+	{
+
+		// Create a NURBS patch
+		CqSurfaceNURBS* pNew = new CqSurfaceNURBS();
+		pNew->AddRef();
+
+		CqSurfaceNURBS Curve;
+		CqVector3D vA( m_MajorRadius, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 ), vD( 0, 0, 0 );
+		Curve.Circle( vA, vB, vC, m_MinorRadius, RAD( m_PhiMin ), RAD( m_PhiMax ) );
+		pNew->SurfaceOfRevolution( Curve, vD, vC, RAD( m_ThetaMax ) );
+
+		pNew->Transform( m_matTx, m_matITTx, CqMatrix() );
+
+		pNew->u() = u();
+		pNew->v() = v();
+		pNew->s() = s();
+		pNew->t() = t();
+		pNew->Cs() = Cs();
+		pNew->Os() = Os();
+		pNew->SetSurfaceParameters( *this );
+		pNew->m_fDiceable = TqTrue;
+		pNew->m_EyeSplitCount = m_EyeSplitCount;
+
+		aSplits.push_back( pNew );
+
+		return ( 1 );
+	}
 }
 
 
@@ -994,8 +1344,8 @@ TqInt CqTorus::Split( std::vector<CqBasicSurface*>& aSplits )
 
 CqVector3D CqTorus::DicePoint( TqInt u, TqInt v )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
-	TqFloat phi = RAD( m_PhiMin + ( v * ( m_PhiMax - m_PhiMin ) ) / m_vDiceSize );
+	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat phi = RAD( m_PhiMin + ( ( TqFloat ) v * ( m_PhiMax - m_PhiMin ) ) / m_vDiceSize );
 
 	TqFloat r = m_MinorRadius * cos( phi );
 	TqFloat z = m_MinorRadius * sin( phi );
@@ -1090,30 +1440,91 @@ CqBound	CqDisk::Bound() const
 
 TqInt CqDisk::Split( std::vector<CqBasicSurface*>& aSplits )
 {
-	// Create a NURBS patch
-	CqSurfaceNURBS * pNew = new CqSurfaceNURBS();
-	pNew->AddRef();
 
-	CqSurfaceNURBS Curve;
-	CqVector3D vA( m_MajorRadius, 0, m_Height ), vB( 0, 0, m_Height ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
-	Curve.LineSegment( vA, vB );
-	pNew->SurfaceOfRevolution( Curve, vC, vD, RAD( m_ThetaMax ) );
+	const TqInt * usesnurbs = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "usesnurbs" );
 
-	pNew->Transform( m_matTx, m_matITTx, CqMatrix() );
+	if ( usesnurbs != NULL && ( *usesnurbs == 0 ) )
+	{
+		TqFloat zcent = ( m_MajorRadius + m_MinorRadius ) * 0.5;
+		TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 
-	pNew->u() = u();
-	pNew->v() = v();
-	pNew->s() = s();
-	pNew->t() = t();
-	pNew->Cs() = Cs();
-	pNew->Os() = Os();
-	pNew->SetSurfaceParameters( *this );
-	pNew->m_fDiceable = TqTrue;
-	pNew->m_EyeSplitCount = m_EyeSplitCount;
+		CqDisk* pNew1 = new CqDisk( *this );
+		CqDisk* pNew2 = new CqDisk( *this );
+		pNew1->AddRef();
+		pNew2->AddRef();
+		if ( m_uDiceSize >= m_vDiceSize )
+		{
+			pNew1->m_ThetaMax = arccent;
+			pNew2->m_ThetaMin = arccent;
 
-	aSplits.push_back( pNew );
+			// Subdivide the parameter values
+			pNew1->u().uSubdivide( &pNew2->u() );
+			pNew1->v().uSubdivide( &pNew2->v() );
+			pNew1->s().uSubdivide( &pNew2->s() );
+			pNew1->t().uSubdivide( &pNew2->t() );
+			pNew1->Cs().uSubdivide( &pNew2->Cs() );
+			pNew1->Os().uSubdivide( &pNew2->Os() );
+			pNew1->m_uDiceSize = m_uDiceSize / 2;
+			pNew2->m_uDiceSize = m_uDiceSize / 2;
+		}
+		else
+		{
+			pNew1->m_MajorRadius = zcent;
+			pNew2->m_MinorRadius = zcent;
 
-	return ( 1 );
+			// Subdivide the parameter values
+			pNew1->u().vSubdivide( &pNew2->u() );
+			pNew1->v().vSubdivide( &pNew2->v() );
+			pNew1->s().vSubdivide( &pNew2->s() );
+			pNew1->t().vSubdivide( &pNew2->t() );
+			pNew1->Cs().vSubdivide( &pNew2->Cs() );
+			pNew1->Os().vSubdivide( &pNew2->Os() );
+			pNew1->m_vDiceSize = m_vDiceSize / 2;
+			pNew2->m_vDiceSize = m_vDiceSize / 2;
+		}
+		pNew1->SetSurfaceParameters( *this );
+		pNew2->SetSurfaceParameters( *this );
+		pNew1->m_fDiceable = TqTrue;
+		pNew2->m_fDiceable = TqTrue;
+		pNew1->m_EyeSplitCount = m_EyeSplitCount + 1;
+		pNew2->m_EyeSplitCount = m_EyeSplitCount + 1;
+
+		aSplits.push_back( pNew1 );
+		aSplits.push_back( pNew2 );
+
+
+
+		return ( 2 );
+
+	}
+	else
+	{
+
+		// Create a NURBS patch
+		CqSurfaceNURBS* pNew = new CqSurfaceNURBS();
+		pNew->AddRef();
+
+		CqSurfaceNURBS Curve;
+		CqVector3D vA( m_MajorRadius, 0, m_Height ), vB( 0, 0, m_Height ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
+		Curve.LineSegment( vA, vB );
+		pNew->SurfaceOfRevolution( Curve, vC, vD, RAD( m_ThetaMax ) );
+
+		pNew->Transform( m_matTx, m_matITTx, CqMatrix() );
+
+		pNew->u() = u();
+		pNew->v() = v();
+		pNew->s() = s();
+		pNew->t() = t();
+		pNew->Cs() = Cs();
+		pNew->Os() = Os();
+		pNew->SetSurfaceParameters( *this );
+		pNew->m_fDiceable = TqTrue;
+		pNew->m_EyeSplitCount = m_EyeSplitCount;
+
+		aSplits.push_back( pNew );
+
+		return ( 1 );
+	}
 }
 
 
@@ -1126,8 +1537,8 @@ TqInt CqDisk::Split( std::vector<CqBasicSurface*>& aSplits )
 
 CqVector3D CqDisk::DicePoint( TqInt u, TqInt v )
 {
-	TqFloat theta = RAD( m_ThetaMin + ( u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
-	TqFloat vv = m_MajorRadius - ( v * ( m_MajorRadius - m_MinorRadius ) ) / m_vDiceSize;
+	TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
+	TqFloat vv = m_MajorRadius - ( ( TqFloat ) v * ( m_MajorRadius - m_MinorRadius ) ) / m_vDiceSize;
 	return ( CqVector3D( vv * cos( theta ), vv * sin( theta ), m_Height ) );
 }
 
@@ -1146,6 +1557,54 @@ CqVector3D CqDisk::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 
 	return ( p );
 }
+//---------------------------------------------------------------------
+/** Determine whether the quadric is suitable for dicing.
+ */
 
+TqBool	CqDisk::Diceable()
+{
+	TqInt gridsize;
+	TqBool result;
+
+	const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
+	TqInt m_XBucketSize = 16;
+	TqInt m_YBucketSize = 16;
+	const TqInt* poptBucketSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "bucketsize" );
+	if ( poptBucketSize != 0 )
+	{
+		m_XBucketSize = poptBucketSize[ 0 ];
+		m_YBucketSize = poptBucketSize[ 1 ];
+	}
+	TqFloat ShadingRate = pAttributes() ->fEffectiveShadingRate();
+
+	// Don't go below a certain threshold since this will
+	// have the possibility to create gigantic number of quadrics objects
+	// otherwise.
+	ShadingRate = MAX( MINSHADINGRATE, ShadingRate );
+
+	if ( poptGridSize )
+		gridsize = poptGridSize[ 0 ];
+	else
+		gridsize = m_XBucketSize * m_XBucketSize / ShadingRate;
+
+	if ( ( m_uDiceSize == 0 ) && ( m_vDiceSize == 0 ) )
+		EqtimateGridSize();
+
+	result = TqFalse;
+
+	// if the gridsize is not set the computation of gridsize assuming
+	// a minimum of 0.4 shadingrate
+	if ( ( TqFloat ) ( m_uDiceSize * m_vDiceSize ) <= gridsize )
+		return ( TqTrue );
+
+	// Prevent excessive dicing for disk primitives
+	// Since breaking up the primitive and both axis U,V
+	// doesn't make sense I choose 1
+	if ( m_EyeSplitCount > 1 )
+		return TqTrue;
+
+	return result;
+
+}
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

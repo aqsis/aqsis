@@ -37,6 +37,8 @@
 #include	"color.h"
 #include	"exception.h"
 #include	"parameters.h"
+#include	"shadervm.h"
+
 
 #define  _qShareName CORE
 #include "share.h"
@@ -120,9 +122,9 @@ class CqSystemOption : public CqRefCount
  */
 enum EqDisplayMode
 {
-    ModeNone = 0x0000,  	///< Invalid.
-    ModeRGB = 0x0001,  		///< Red Green and Blue channels.
-    ModeA = 0x0002,  		///< Alpha channel.
+    ModeNone = 0x0000, 	///< Invalid.
+    ModeRGB = 0x0001, 		///< Red Green and Blue channels.
+    ModeA = 0x0002, 		///< Alpha channel.
     ModeZ = 0x0004		///< Depth channel.
 };
 
@@ -151,12 +153,13 @@ class CqDisplay
 				m_iDepthQuantizeMax( 255 ),
 				m_fDepthQuantizeDitherAmplitude( 0 ),
 				m_strDisplayType( "file" ),
-				m_strDisplayName( "ri.pic" ),
-				m_iDisplayMode( ModeRGB ),
-				m_cBackground( 0.0, 0.0, 0.0 )
+				m_strDisplayName( "aqsis.tif" ),
+				m_cBackground( 0.0, 0.0, 0.0 ),
+				m_iDisplayMode( ModeRGB )
 		{}
+
 		virtual	~CqDisplay()
-		{}
+		{ }
 
 		/** Get the pixel variance as a float.
 		 */
@@ -271,10 +274,15 @@ class CqDisplay
 		/** Set the name of the Imager shader.
 		 * \param strValue Character pointer to name of Imager shader.
 		 */
+		void	LoadImager( const char* strValue );
+		void DeleteImager();
 		void	SetstrImager( const char* strValue )
 		{
 			m_strImager = strValue;
+			LoadImager( strValue );
 		}
+		void SetValueImager( char *token, char *value );
+
 		/** Get the one value for the color quantisation.
 		 */
 		TqInt	iColorQuantizeOne() const
@@ -429,29 +437,37 @@ class CqDisplay
 		{
 			return m_cBackground;
 		}
+		void InitialiseColorImager( TqInt bx, TqInt by,
+		                            TqFloat x, TqFloat y,
+		                            CqColor *color, CqColor *opacity,
+		                            TqFloat *depth, TqFloat *coverage );
+		CqColor GetColorImager( TqFloat x, TqFloat y );
+		CqColor GetOpacityImager( TqFloat x, TqFloat y );
+		TqFloat GetAlphaImager( TqFloat x, TqFloat y );
 
 	private:
 		TqFloat	m_fPixelVariance;					///< Pixel variance (not used).
-		TqInt	m_PixelXSamples,  					///< Pixel samples in x.
+		TqFloat	m_PixelXSamples, 					///< Pixel samples in x.
 		m_PixelYSamples;					///< Pixel samples in y.
 		RtFilterFunc m_funcFilter;						///< Pointer to the pixel filter function.
-		TqFloat	m_fFilterXWidth,  					///< Pixel filter width in x.
+		TqFloat	m_fFilterXWidth, 					///< Pixel filter width in x.
 		m_fFilterYWidth;					///< Pixel filter width in y.
-		TqFloat	m_fExposureGain,  					///< Exposure gain value.
+		TqFloat	m_fExposureGain, 					///< Exposure gain value.
 		m_fExposureGamma;					///< Exposure gamma value.
 		CqString	m_strImager;						///< Name of the Imager shader.
-		TqInt	m_iColorQuantizeOne,  				///< Color quantisation one value.
-		m_iColorQuantizeMin,  				///< Color quantisation min value.
+		TqInt	m_iColorQuantizeOne, 				///< Color quantisation one value.
+		m_iColorQuantizeMin, 				///< Color quantisation min value.
 		m_iColorQuantizeMax;				///< Color quantisation max value.
 		TqFloat	m_fColorQuantizeDitherAmplitude;	///< Color quantisation dither amplitude.
-		TqInt	m_iDepthQuantizeOne,  				///< Depth quantisation one value.
-		m_iDepthQuantizeMin,  				///< Depth quantisation min value.
+		TqInt	m_iDepthQuantizeOne, 				///< Depth quantisation one value.
+		m_iDepthQuantizeMin, 				///< Depth quantisation min value.
 		m_iDepthQuantizeMax;				///< Depth quantisation max value.
 		TqFloat	m_fDepthQuantizeDitherAmplitude;	///< Depth quantisation dither amplitude.
 		CqString	m_strDisplayType;					///< Name of the display type to use.
 		CqString	m_strDisplayName;					///< Name of the display.
 		TqInt	m_iDisplayMode;						///< Display mode, from EqDisplayMode.
 		CqColor m_cBackground;                      ///< Background color for imager "background"
+
 }
 ;
 
@@ -462,7 +478,7 @@ class CqDisplay
  */
 enum EqProjection
 {
-    ProjectionOrthographic,  		///< Orthographic projection.
+    ProjectionOrthographic, 		///< Orthographic projection.
     ProjectionPerspective		///< Perspective projection.
 };
 
@@ -812,31 +828,31 @@ class CqCamera
 		}
 
 	private:
-		TqInt	m_iXResolution,  					///< X resolution of the raster plane.
+		TqInt	m_iXResolution, 					///< X resolution of the raster plane.
 		m_iYResolution;					///< Y resolution of the raster plane.
 		TqFloat	m_fPixelAspectRatio;			///< Pixel aspect ratio of the raster plane.
-		TqFloat	m_fCropWindowXMin,  				///< Crop window min x value as a fraction of the total x resolution.
-		m_fCropWindowXMax,  				///< Crop window max x value as a fraction of the total x resolution.
-		m_fCropWindowYMin,  				///< Crop window min y value as a fraction of the total y resolution.
+		TqFloat	m_fCropWindowXMin, 				///< Crop window min x value as a fraction of the total x resolution.
+		m_fCropWindowXMax, 				///< Crop window max x value as a fraction of the total x resolution.
+		m_fCropWindowYMin, 				///< Crop window min y value as a fraction of the total y resolution.
 		m_fCropWindowYMax;				///< Crop window max y value as a fraction of the total y resolution.
 		TqFloat	m_fFrameAspectRatio;			///< Frame aspect ratio.
-		TqFloat	m_fScreenWindowLeft,  			///< Screen window on the projection plane to be rendered.
-		m_fScreenWindowRight,  			///< Screen window on the projection plane to be rendered.
-		m_fScreenWindowTop,  				///< Screen window on the projection plane to be rendered.
+		TqFloat	m_fScreenWindowLeft, 			///< Screen window on the projection plane to be rendered.
+		m_fScreenWindowRight, 			///< Screen window on the projection plane to be rendered.
+		m_fScreenWindowTop, 				///< Screen window on the projection plane to be rendered.
 		m_fScreenWindowBottom;			///< Screen window on the projection plane to be rendered.
 		EqProjection m_eCameraProjection;			///< Projection mode, from EqProjection.
-		TqFloat	m_fClippingPlaneNear,  			///< Distance of the near clipping plane from the camera.
-		m_fClippingPlaneFar,  			///< Distance of the far clipping plane from the camera.
+		TqFloat	m_fClippingPlaneNear, 			///< Distance of the near clipping plane from the camera.
+		m_fClippingPlaneFar, 			///< Distance of the far clipping plane from the camera.
 		m_fClippingRange;				///< Calculated clipping range for quantisation.
-		TqFloat	m_ffStop,  						///< Camera lens fStop value.
-		m_fFocalLength,  					///< Camera lens focal length.
+		TqFloat	m_ffStop, 						///< Camera lens fStop value.
+		m_fFocalLength, 					///< Camera lens focal length.
 		m_fFocalDistance;				///< Camera lens focal distance.
-		TqFloat	m_fShutterOpen,  					///< Camera shutter open time.
+		TqFloat	m_fShutterOpen, 					///< Camera shutter open time.
 		m_fShutterClose;				///< Camera shutter close time.
 		TqFloat	m_fFOV;							///< Camera field of view.
 
-		TqBool	m_bFrameAspectRatioCalled,  		///< Indicate RiFrameAspectRatio has been called. Calculation of the screen geometry is reliant on which of these have been called.
-		m_bScreenWindowCalled,  			///< Indicate RiScreenWindow has been called. Calculation of the screen geometry is reliant on which of these have been called.
+		TqBool	m_bFrameAspectRatioCalled, 		///< Indicate RiFrameAspectRatio has been called. Calculation of the screen geometry is reliant on which of these have been called.
+		m_bScreenWindowCalled, 			///< Indicate RiScreenWindow has been called. Calculation of the screen geometry is reliant on which of these have been called.
 		m_bFormatCalled;				///< Indicate RiFormat has been called. Calculation of the screen geometry is reliant on which of these have been called.
 }
 ;

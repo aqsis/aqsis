@@ -635,12 +635,8 @@ RtVoid	RiImagerV( const char *name, PARAMETERLIST )
 			RtToken	token = tokens[ i ];
 			RtPointer	value = values[ i ];
 
-			if ( strstr( name, "background" ) && ( strstr( token, "background" ) || strstr( token, "bgcolor" ) ) )
-			{
-				/* Save the background color */
-				RtFloat * pBackground = ( RtFloat* ) value;
-				QGetRenderContext() ->optCurrent().SetBkColorImager( CqColor( pBackground ) );
-			}
+			QGetRenderContext() ->optCurrent().SetValueImager(
+			    token, static_cast<TqPchar>( value ) );
 		}
 	}
 	return ;

@@ -29,10 +29,12 @@
 #include	"options.h"
 #include	"renderer.h"
 #include	"imagebuffer.h"
-
+#include	"imagers.h"
 #include	"ri.h"
 
 START_NAMESPACE( Aqsis )
+
+static CqImagersource* pshadImager = NULL;
 
 //---------------------------------------------------------------------
 /** Copy constructor.
@@ -481,6 +483,128 @@ const CqColor* CqOptions::GetColorOption( const char* strName, const char* strPa
 	else
 		return ( 0 );
 }
+
+
+//---------------------------------------------------------------------
+/** Force the imager shader to be executed
+ * \param gx, gy the size of the bucket grid
+ * \param x, y its origin 
+ */
+void CqDisplay::InitialiseColorImager(TqInt gx, TqInt gy, 
+									  TqFloat x, TqFloat y,
+									  CqColor *color, CqColor *opacity,
+									  TqFloat *depth, TqFloat *coverage)
+{
+	// Each time with finished up a bucket; we will execute the imager shader
+	// on the gridsize about the same size as the bucket
+	if (pshadImager != NULL) 
+	{
+		pshadImager->Initialise(gx, gy, x, y, color, opacity, depth, coverage);
+	}
+}
+
+//---------------------------------------------------------------------
+/** Get a color from the imager shader.
+ * \param x The X in raster coordinate system.
+ * \param y The Y in raster coordiante system.
+ * \return Color  Black if not found.
+ * Right now it is returning the current background colour if found
+ */
+CqColor CqDisplay::GetColorImager(TqFloat x, TqFloat y)
+{
+	CqColor result = QGetRenderContext()->optCurrent().GetBkColorImager();
+
+	if (pshadImager != NULL)
+	{
+		// get the color from the current imager than
+		result = pshadImager->Color(x,y);	
+	}
+
+	return result;
+}
+
+//---------------------------------------------------------------------
+/** Get a color from the imager shader.
+ * \param x The X in raster coordinate system.
+ * \param y The Y in raster coordiante system.
+ * \return Color  Black if not found.
+ * Right now it is returning the current background colour if found
+ */
+TqFloat CqDisplay::GetAlphaImager(TqFloat x, TqFloat y)
+{
+	TqFloat result = 1.0;
+
+	if (pshadImager != NULL)
+	{
+		// get the color from the current imager than
+		result = pshadImager->Alpha(x,y);	
+	}
+
+	return result;
+}
+
+
+//---------------------------------------------------------------------
+/** Get an opacity from the imager shader.
+ * \param x The X in raster coordinate system.
+ * \param y The Y in raster coordiante system.
+ * \return Color  White right now
+ * Right now it is returning the current background colour if found
+ */
+
+CqColor CqDisplay::GetOpacityImager(TqFloat x, TqFloat y)
+{
+	CqColor result = gColWhite;
+
+	if (pshadImager != NULL)
+	{
+		// get the opacity from the current imager than
+		result = pshadImager->Opacity(x,y);	
+	}
+
+
+	return result;
+}
+
+//---------------------------------------------------------------------
+/** Load an Imager shader find it
+ * 
+ * \param strName the name of the shader like background.sl, 
+ * Right now it is doing nothing.
+ */
+void CqDisplay::LoadImager(const char* strName)
+{
+	DeleteImager();
+	TqFloat dummy = 0.0;
+	
+
+	CqShader* pShader=static_cast<CqShader*>(QGetRenderContext()->CreateShader(strName, Type_Imager));
+
+	if(pShader==0)	return;
+
+	pshadImager=new CqImagersource(pShader,RI_TRUE);
+	pshadImager->pShader()->PrepareDefArgs();
+	
+}
+
+void   CqDisplay::DeleteImager()
+{
+
+	if (pshadImager != NULL)
+	{
+		delete pshadImager; 
+		pshadImager = NULL;
+	}
+}
+void CqDisplay::SetValueImager(char *token, char *value)
+{
+	if (pshadImager != NULL) {
+		
+		pshadImager->pShader()->SetValue(token,value);
+	}
+
+}
+
 
 
 //---------------------------------------------------------------------

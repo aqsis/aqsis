@@ -601,9 +601,12 @@ void CqBucket::FilterBucket()
 {
 	CqImagePixel * pie;
 
+	QGetRenderContext()->Stats().MakeFilterBucket().Start();
 	CqColor* pCols = new CqColor[ XSize() * YSize() ];
 	CqColor* pOpacs = new CqColor[ XSize() * YSize() ];
 	TqFloat* pDepths = new TqFloat[ XSize() * YSize() ];
+	TqFloat* pCoverages=new TqFloat[XSize()*YSize()];
+	
 	TqInt xmax = static_cast<TqInt>( CEIL( ( XFWidth() - 1 ) * 0.5f ) );
 	TqInt ymax = static_cast<TqInt>( CEIL( ( YFWidth() - 1 ) * 0.5f ) );
 	TqFloat xfwo2 = XFWidth() * 0.5f;
@@ -613,8 +616,13 @@ void CqBucket::FilterBucket()
 	TqInt numperpixel = numsubpixels * numsubcells;
 	TqInt	xlen = XSize() + XFWidth();
 
+    TqInt SampleCount=0;
+    CqColor imager;
+
 	TqInt x, y;
 	TqInt i = 0;
+	TqFloat total = numsubpixels;
+
 	for ( y = YOrigin(); y < YOrigin() + YSize(); y++ )
 	{
 		TqFloat ycent = y + 0.5f;
@@ -625,7 +633,7 @@ void CqBucket::FilterBucket()
 			CqColor o = gColBlack;
 			TqFloat d = 0;
 			TqFloat gTot = 0.0;
-			TqInt SampleCount = 0;
+			SampleCount = 0;
 
 			TqInt fx, fy;
 			// Get the element at the upper left corner of the filter area.
@@ -667,18 +675,33 @@ void CqBucket::FilterBucket()
 			}
 			pCols[ i ] = c / gTot;
 			pOpacs[ i ] = o / gTot;
+
+			if (SampleCount> m_YPixelSamples * m_XPixelSamples)
+	            pCoverages[i] = 1.0;
+			else
+				pCoverages[i] = (TqFloat) SampleCount/ (TqFloat)( m_YPixelSamples * m_XPixelSamples);
+			// Init & Execute the imager shader
+			QGetRenderContext()->optCurrent().InitialiseColorImager(1, 1, 
+															x, y, 
+															&pCols[i], &pOpacs[i], 
+															&pDepths[i], &pCoverages[i]);
+
+			if (QGetRenderContext()->optCurrent().strImager() != "null") {
+				imager = QGetRenderContext()->optCurrent().GetColorImager( x , y ); 
+				// Normal case will be to poke the alpha from the image shader and 
+				// multiply imager color with it... but after investigation alpha is always 
+				// == 1 after a call to imager shader in 3delight and BMRT.
+				// Therefore I did not ask for alpha value and set directly the pCols[i]
+				// with imager value. see imagers.cpp 
+				pCols[i] = imager;
+				imager =  QGetRenderContext()->optCurrent().GetOpacityImager( x , y);
+				pOpacs[i] = imager;
+			}
+
 			if ( SampleCount > 0 )
 				pDepths[ i++ ] = d / SampleCount;
 			else
-			{
-				/*
-				 * Assign the standard background color from the "background" imager 
-				 * the background color is not merged with the edge of an object so
-				 * it could badly aliased.
-				 */
-				pCols[ i ] = QGetRenderContext() ->optCurrent().GetBkColorImager();
 				pDepths[ i++ ] = FLT_MAX;
-			}
 		}
 	}
 
@@ -699,6 +722,8 @@ void CqBucket::FilterBucket()
 	delete[] ( pCols );
 	delete[] ( pOpacs );
 	delete[] ( pDepths );
+	delete[](pCoverages);
+	QGetRenderContext()->Stats().MakeFilterBucket().Stop();
 }
 
 

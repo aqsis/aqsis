@@ -35,7 +35,9 @@
 START_NAMESPACE( Aqsis )
 
 
-#define	ESTIMATEGRIDSIZE	10
+#define	ESTIMATEGRIDSIZE    8
+#define MINSHADINGRATE		0.4
+
 
 //----------------------------------------------------------------------
 /** \class CqQuadric
@@ -45,6 +47,8 @@ START_NAMESPACE( Aqsis )
 class CqQuadric : public CqSurface
 {
 	public:
+
+		CqQuadric();
 		virtual	~CqQuadric()
 		{}
 
@@ -95,8 +99,6 @@ class CqQuadric : public CqSurface
 		CqMatrix	m_matTx;		///< Transformation matrix from object to camera.
 		CqMatrix	m_matITTx;		///< Inverse transpose transformation matrix, for transforming normals.
 
-		//			TqInt		m_uDiceSize;	///< Calculated dice size in u direction.
-		//			TqInt		m_vDiceSize;	///< Calculated dice size in v direction.
 }
 ;
 
@@ -330,6 +332,7 @@ class CqDisk : public CqQuadric
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
 
 		CqDisk&	operator=( const CqDisk& From );
+		TqBool	Diceable();         ////< Disk are diceable in 1 or 2 steps max
 
 	private:
 		TqFloat	m_Height;			///< Position on z axis.

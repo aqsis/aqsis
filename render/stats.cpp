@@ -95,15 +95,19 @@ void CqStats::InitialiseFrame()
 	m_frameTimerRunning = TqFalse;
 	m_timeSurface.Reset();
 	m_timeDisplacement.Reset();
+	m_timeImager.Reset();
 	m_timeAtmosphere.Reset();
 	m_timeSplits.Reset();
 	m_timeDicing.Reset();
 	m_timeRenderMPGs.Reset();
 	m_timeOcclusionCull.Reset();
 	m_timeDiceable.Reset();
+	m_timeTM.Reset();
 	m_timeMakeTexture.Reset();
 	m_timeMakeShadow.Reset();
 	m_timeMakeEnv.Reset();
+	m_timeFB.Reset();
+
 }
 
 /** Start the frame timer.
@@ -149,6 +153,7 @@ void CqStats::PrintStats( TqInt level ) const
 
 	TqFloat timeSurface = static_cast<TqFloat>( m_timeSurface.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeDisplacement = static_cast<TqFloat>( m_timeDisplacement.TimeTotal() ) / CLOCKS_PER_SEC;
+	TqFloat timeImager = static_cast<TqFloat>( m_timeImager.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeAtmosphere = static_cast<TqFloat>( m_timeAtmosphere.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeSplits = static_cast<TqFloat>( m_timeSplits.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeDicing = static_cast<TqFloat>( m_timeDicing.TimeTotal() ) / CLOCKS_PER_SEC;
@@ -158,12 +163,16 @@ void CqStats::PrintStats( TqInt level ) const
 	TqFloat timeMakeTexture = static_cast<TqFloat>( m_timeMakeTexture.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeMakeShadow = static_cast<TqFloat>( m_timeMakeShadow.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeMakeEnv = static_cast<TqFloat>( m_timeMakeEnv.TimeTotal() ) / CLOCKS_PER_SEC;
+	TqFloat timeTM = static_cast<TqFloat>( m_timeTM.TimeTotal() ) / CLOCKS_PER_SEC;
+	TqFloat timeFB = static_cast<TqFloat>( m_timeFB.TimeTotal() - m_timeImager.TimeTotal() ) / CLOCKS_PER_SEC;
 
 	MSG << "Total render time   : ";
 	TimeToString( MSG, m_timeTotal ) << std::endl;
 	MSG << "Last frame          : ";
 	TimeToString( MSG, m_timeTotalFrame ) << std::endl;
 
+	MSG << "Imager shading      : ";
+	TimeToString( MSG, timeImager ) << " (" << 100.0f * timeImager / m_timeTotalFrame << "%)" << std::endl;
 	MSG << "Surface shading     : ";
 	TimeToString( MSG, timeSurface ) << " (" << 100.0f * timeSurface / m_timeTotalFrame << "%)" << std::endl;
 	MSG << "Displacement shading: ";
@@ -221,6 +230,8 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "MakeTexture check: \t"; TimeToString( MSG, timeMakeTexture ) << " (" << 100.0f * timeMakeTexture / m_timeTotalFrame << "%)" << std::endl;
 		MSG << "MakeShadow  check: \t"; TimeToString( MSG, timeMakeShadow ) << " (" << 100.0f * timeMakeShadow / m_timeTotalFrame << "%)" << std::endl;
 		MSG << "MakeCubeEnv check: \t"; TimeToString( MSG, timeMakeEnv ) << " (" << 100.0f * timeMakeEnv / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "SampleTexture check:\t"; TimeToString( MSG, timeTM ) << " (" << 100.0f * timeTM / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "FilterBucket check:\t"; TimeToString( MSG, timeFB ) << " (" << 100.0f * timeFB / m_timeTotalFrame << "%)" << std::endl;
 
 	}
 	MSG << std::ends;
