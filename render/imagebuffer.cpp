@@ -1020,6 +1020,15 @@ void CqBucket::AddGPrim( CqBasicSurface* pGPrim )
 }
 
 
+//----------------------------------------------------------------------
+/** Clear any data on the bucket
+ */
+void CqBucket::EmptyBucket()
+{
+	m_aieImage.clear();
+	m_aFilterValues.clear();
+}
+
 
 //----------------------------------------------------------------------
 /** Destructor
@@ -1978,6 +1987,8 @@ void CqImageBuffer::RenderImage()
 	}
 
 	ImageComplete();
+
+	CqBucket::EmptyBucket();
 
 	CqOcclusionBox::DeleteHierarchy();
 	// Pass >100 through to progress to allow it to indicate completion.

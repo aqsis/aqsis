@@ -4213,6 +4213,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 				CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( pSubd2, pSubd2->pFacet( face ) );
 				QGetRenderContext() ->pImage() ->PostSurface( pNew );
 			}
+			pPointsClass->Release();
 		}
 		else
 		{	

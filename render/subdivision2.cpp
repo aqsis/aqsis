@@ -1053,46 +1053,84 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 		std::vector<TqInt>	aiVertices;
 
 		aiVertices.push_back( pPoint->VertexIndex() );
+		pPoint = pPoint->ccf();
+		aiVertices.push_back( pPoint->VertexIndex() );
+		pPoint = pPoint->cv()->ccf();
+		aiVertices.push_back( pPoint->VertexIndex() );
+		pPoint = pPoint->cv()->ccf();
+		aiVertices.push_back( pPoint->VertexIndex() );
+		pRow = pPoint = pRow->cf();
+		aiVertices.push_back( pPoint->VertexIndex() );
 		pPoint = pPoint->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
-		pRow = pPoint = pRow->ccf();
+		pRow = pPoint = pRow->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
-		pPoint = pPoint->ccf();
+		pPoint = pPoint->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
-		pPoint = pPoint->cv()->ccf();
+		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
-		pPoint = pPoint->cv()->ccf();
+		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
-		pRow = pPoint = pRow->cv()->ccf();
+		pPoint = pRow->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
-		pPoint = pPoint->ccf();
+		pPoint = pPoint->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
-		pPoint = pPoint->cv()->ccf();
+		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
-		pPoint = pPoint->cv()->ccf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		pPoint = pRow->cv()->ccf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		pPoint = pPoint->ccf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		pPoint = pPoint->cv()->ccf();
-		aiVertices.push_back( pPoint->VertexIndex() );
-		pPoint = pPoint->cv()->ccf();
+		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 
-		pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 0 ) );
-		pSurface->P() ->SetSize( pSurface->cVertex() );
-
-		TqInt i;
-		for( i = 0; i < 16; i++ )
+		std::vector<CqParameter*>::iterator iUP;
+		std::vector<CqParameter*>::iterator end = pTopology()->pPoints()->aUserParams().end();
+		for ( iUP = pTopology()->pPoints()->aUserParams().begin(); iUP != end; iUP++ )
 		{
-			CqVector3D vA = (*pTopology()->pPoints()->P())[ aiVertices[i] ];
-			( *pSurface->P() ) [i] = vA;
+			if ( ( *iUP ) ->Class() == class_varying )
+			{
+				// Copy any 'varying' class primitive variables.
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+				pNewUP->SetSize( pSurface->cVarying() );
+				pNewUP->SetValue( ( *iUP ), 0, aiVertices[5] );
+				pNewUP->SetValue( ( *iUP ), 1, aiVertices[6] );
+				pNewUP->SetValue( ( *iUP ), 2, aiVertices[9] );
+				pNewUP->SetValue( ( *iUP ), 3, aiVertices[10] );
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
+			else if ( ( *iUP ) ->Class() == class_vertex )
+			{
+				// Copy any 'vertex' class primitive variables.
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+				pNewUP->SetSize( pSurface->cVertex() );
+				TqInt i;
+				for( i = 0; i < pSurface->cVertex(); i++ )
+					pNewUP->SetValue( ( *iUP ), i, aiVertices[i] );
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
+			else if ( ( *iUP ) ->Class() == class_uniform )
+			{
+				// Copy any 'uniform' class primitive variables.
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+				pNewUP->SetSize( pSurface->cUniform() );
+				pNewUP->SetValue( ( *iUP ), 0, 0 );
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
+			else if ( ( *iUP ) ->Class() == class_constant )
+			{
+				// Copy any 'constant' class primitive variables.
+				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+				pNewUP->SetSize( 1 );
+				pNewUP->SetValue( ( *iUP ), 0, 0 );
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
 		}
+
+		// Need to get rid of any 'h' values added to the "P" variables during multiplication.
+		TqInt i;
+		for( i = 0; i < pSurface->cVertex(); i++ )
+			( *pSurface->P() ) [i] = static_cast<CqVector3D>( ( *pSurface->P() ) [i] );
 
 		CqMatrix matuBasis( RiBSplineBasis );
 		CqMatrix matvBasis( RiBSplineBasis );

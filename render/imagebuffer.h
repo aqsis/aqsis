@@ -352,6 +352,7 @@ class CqBucket : public IqBucket
 		void	FilterBucket();
 		void	ExposeBucket();
 		void	QuantizeBucket();
+		static	void	EmptyBucket();
 		
 		/** Add a GPRim to the list of deferred GPrims.
 		 */

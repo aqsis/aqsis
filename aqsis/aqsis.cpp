@@ -234,6 +234,8 @@ int main( int argc, const char** argv )
 	ap.argString( "textures", "=string\aspecify a default textures searchpath", &g_textures );
 	ap.argString( "displays", "=string\aspecify a default displays searchpath", &g_displays );
 
+	//_crtBreakAlloc = 845;
+
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
 	{
 		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
