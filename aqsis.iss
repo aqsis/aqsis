@@ -38,6 +38,7 @@ Source: Library\Release\aqsl.exe; DestDir: {app}; CopyMode: normal
 Source: Library\Release\aqsltell.exe; DestDir: {app}; CopyMode: normal
 Source: \Apps\GnuWin32\bin\libtiff.dll; DestDir: {app}; CopyMode: normal
 Source: \Apps\GnuWin32\bin\zlib.dll; DestDir: {app}; CopyMode: normal
+Source: \Apps\GnuWin32\bin\libjpeg.dll; DestDir: {app}; CopyMode: normal
 Source: \WINDOWS.000\System32\glut32.dll; DestDir: {app}; CopyMode: normal
 Source: shaders\*.sl; DestDir: {app}\shaders
 Source: shaders\*.slx; DestDir: {app}\shaders
