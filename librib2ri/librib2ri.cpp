@@ -55,8 +55,7 @@ RendermanInterface::RtVoid Engine::RiFrameEnd() { ::RiFrameEnd(); }
 RendermanInterface::RtFloat Engine::RiGaussianFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) { return ::RiGaussianFilter(x, y, xwidth, ywidth); }
 RendermanInterface::RtVoid Engine::RiGeneralPolygonV(RtInt nloops, RtInt nverts[], RtInt count, RtToken tokens[], RtPointer values[]) { ::RiGeneralPolygonV(nloops, nverts, count, tokens, values); }
 RendermanInterface::RtVoid Engine::RiGeometricApproximation(RtToken type, RtFloat value) { ::RiGeometricApproximation(type, value); }
-//RendermanInterface::RtVoid Engine::RiGeometry() { assert(0); }
-//RendermanInterface::RtVoid Engine::RiGeometryV() { assert(0); }
+RendermanInterface::RtVoid Engine::RiGeometryV(RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) { ::RiGeometryV( type, count, tokens, values); }
 RendermanInterface::RtVoid Engine::RiHiderV(RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) { ::RiHiderV(type, count, tokens, values); }
 RendermanInterface::RtVoid Engine::RiHyperboloidV(RtPoint point1, RtPoint point2, RtFloat thetamax,RtInt count, RtToken tokens[], RtPointer values[]) { ::RiHyperboloidV(point1, point2, thetamax, count, tokens, values); }
 RendermanInterface::RtVoid Engine::RiIdentity() { ::RiIdentity(); }

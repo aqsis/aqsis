@@ -80,8 +80,7 @@ public:
 	virtual	RtFloat RiGaussianFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) = 0;	
 	virtual	RtVoid	RiGeneralPolygonV(RtInt nloops, RtInt nverts[], RtInt count, RtToken tokens[], RtPointer values[]) = 0;	
 	virtual	RtVoid	RiGeometricApproximation(RtToken type, RtFloat value) = 0;	
-	//virtual	RtVoid	RiGeometry() = 0;	
-	//virtual	RtVoid	RiGeometryV() = 0;	
+	virtual	RtVoid	RiGeometryV(RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) = 0;	
 	virtual	RtVoid	RiHiderV(RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) = 0;	
 	virtual	RtVoid	RiHyperboloidV(RtPoint point1, RtPoint point2, RtFloat thetamax,RtInt count, RtToken tokens[], RtPointer values[]) = 0;	
 	virtual	RtVoid	RiIdentity() = 0;	
