@@ -175,7 +175,8 @@ CqWVert* CqWFace::CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pP
 
 	std::vector<CqParameter*>::iterator iUP;
 	for ( iUP = pPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++ )
-		CreateSubdivideScalar( ( *iUP ), ( *iUP ), index );
+		if ( ( *iUP ) ->Class() == class_vertex )
+			CreateSubdivideScalar( ( *iUP ), ( *iUP ), index );
 
 	return ( pV );
 }
@@ -1113,11 +1114,16 @@ TqInt CqWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 		for ( i = 0; i < cE; i++ )
 		{
 			CqBasicSurface* pNew = ExtractFace( i );
-			pNew->AddRef();
-			pNew->SetSurfaceParameters( *m_pPoints );
-			pNew->m_fDiceable = TqTrue;
-			pNew->m_EyeSplitCount = m_EyeSplitCount;
-			aSplits.push_back( pNew );
+			if( !static_cast<CqWSurf*>(pNew)->m_fInvalid )
+			{
+				pNew->AddRef();
+				pNew->SetSurfaceParameters( *m_pPoints );
+				pNew->m_fDiceable = TqTrue;
+				pNew->m_EyeSplitCount = m_EyeSplitCount;
+				aSplits.push_back( pNew );
+			}
+			else
+				delete(pNew);
 		}
 	}
 	else
@@ -1131,15 +1137,20 @@ TqInt CqWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 		for ( i = 0; i < cE; i++ )
 		{
 			CqBasicSurface* pNew = ExtractFace( i );
-			pNew->AddRef();
-			pNew->SetSurfaceParameters( *m_pPoints );
-			pNew->m_fDiceable = TqTrue;
-			pNew->m_EyeSplitCount = m_EyeSplitCount;
-			aSplits.push_back( pNew );
+			if( !static_cast<CqWSurf*>(pNew)->m_fInvalid )
+			{
+				pNew->AddRef();
+				pNew->SetSurfaceParameters( *m_pPoints );
+				pNew->m_fDiceable = TqTrue;
+				pNew->m_EyeSplitCount = m_EyeSplitCount;
+				aSplits.push_back( pNew );
+			}
+			else
+				delete(pNew);
 		}
 	}
 
-	return ( cE );
+	return ( aSplits.size() );
 }
 
 
@@ -1171,7 +1182,7 @@ void CqWSurf::_OutputMesh( char* pname )
 {
 	FILE * pf = fopen( pname, "w" );
 	TqInt i;
-	for ( i = 0; i < cFaces(); i++ )
+/*	for ( i = 0; i < cFaces(); i++ )
 	{
 		CqWReference ref( pFace( i ) ->pEdge( 0 ), pFace( i ) );
 		CqVector3D vecA = ( *m_pPoints->P() ) [ ref.pvHead() ->iVertex() ];
@@ -1190,6 +1201,11 @@ void CqWSurf::_OutputMesh( char* pname )
 			ref.peNext();
 			j++;
 		}
+	}*/
+	for( i = 0; i < m_pPoints->P()->Size(); i++)
+	{
+		CqVector3D vecA = ( *m_pPoints->P() ) [ i ];
+		fprintf( pf, "%f %f %f\n" , vecA.x(), vecA.y(), vecA.z() );
 	}
 	fclose( pf );
 }
@@ -1484,7 +1500,7 @@ void CqWReference::SetpeHeadHeadRight( CqWEdge* pe )
 /** Constructor
  */
 
-CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
+CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace ) : m_fInvalid(TqFalse)
 {
 	m_fSubdivided = pSurf->m_fSubdivided;
 
@@ -1521,6 +1537,11 @@ CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
 		CqWVert* pvB = TransferVert( pSurf, rEdge.pvTail() ->iVertex() );
 
 		apEdges[ i ] = AddEdge( pvA, pvB );
+		if( apEdges[ i ] == 0 )
+		{
+			m_fInvalid = TqTrue;
+			return;
+		}
 		apEdges[ i ] ->SetSharpness( rEdge.peCurrent() ->Sharpness() );
 
 		rEdge.peNext();
@@ -1554,6 +1575,11 @@ CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
 						CqWVert* pvB = TransferVert( pSurf, rEdge2.pvTail() ->iVertex() );
 
 						apEdges[ e ] = AddEdge( pvA, pvB );
+						if( apEdges[ e ] == 0 )
+						{
+							m_fInvalid = TqTrue;
+							return;
+						}
 						apEdges[ e ] ->SetSharpness( rEdge2.peCurrent() ->Sharpness() );
 
 						rEdge2.peNext();
@@ -1809,11 +1835,16 @@ TqInt CqMotionWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 		for ( i = 0; i < cE; i++ )
 		{
 			CqBasicSurface* pNew = ExtractFace( i );
-			pNew->AddRef();
-			pNew->SetSurfaceParameters( *GetMotionObject( Time( 0 ) ) );
-			pNew->m_fDiceable = TqTrue;
-			pNew->m_EyeSplitCount = m_EyeSplitCount;
-			aSplits.push_back( pNew );
+			if( !static_cast<CqMotionWSurf*>(pNew)->m_fInvalid )
+			{
+				pNew->AddRef();
+				pNew->SetSurfaceParameters( *GetMotionObject( Time( 0 ) ) );
+				pNew->m_fDiceable = TqTrue;
+				pNew->m_EyeSplitCount = m_EyeSplitCount;
+				aSplits.push_back( pNew );
+			}
+			else
+				delete(pNew);
 		}
 	}
 	else
@@ -1826,15 +1857,20 @@ TqInt CqMotionWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 		for ( i = 0; i < cE; i++ )
 		{
 			CqBasicSurface* pNew = ExtractFace( i );
-			pNew->AddRef();
-			pNew->SetSurfaceParameters( *GetMotionObject( Time( 0 ) ) );
-			pNew->m_fDiceable = TqTrue;
-			pNew->m_EyeSplitCount = m_EyeSplitCount;
-			aSplits.push_back( pNew );
+			if( !static_cast<CqMotionWSurf*>(pNew)->m_fInvalid )
+			{
+				pNew->AddRef();
+				pNew->SetSurfaceParameters( *GetMotionObject( Time( 0 ) ) );
+				pNew->m_fDiceable = TqTrue;
+				pNew->m_EyeSplitCount = m_EyeSplitCount;
+				aSplits.push_back( pNew );
+			}
+			else
+				delete(pNew);
 		}
 	}
 
-	return ( cE );
+	return ( aSplits.size() );
 }
 
 
@@ -2093,7 +2129,7 @@ void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts )
 /** Constructor
  */
 
-CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec<CqPolygonPoints*>( 0 )
+CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec<CqPolygonPoints*>( 0 ), m_fInvalid(TqFalse)
 {
 	m_fSubdivided = pSurf->m_fSubdivided;
 
@@ -2136,6 +2172,11 @@ CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec
 		CqWVert* pvB = TransferVert( pSurf, rEdge.pvTail() ->iVertex() );
 
 		apEdges[ i ] = AddEdge( pvA, pvB );
+		if(apEdges[ i ] == NULL)
+		{
+			m_fInvalid = TqTrue;
+			return;
+		}
 		apEdges[ i ] ->SetSharpness( rEdge.peCurrent() ->Sharpness() );
 
 		rEdge.peNext();
@@ -2169,6 +2210,11 @@ CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec
 						CqWVert* pvB = TransferVert( pSurf, rEdge2.pvTail() ->iVertex() );
 
 						apEdges[ e ] = AddEdge( pvA, pvB );
+						if(apEdges[ e ] == NULL)
+						{
+							m_fInvalid = TqTrue;
+							return;
+						}
 						apEdges[ e ] ->SetSharpness( rEdge2.peCurrent() ->Sharpness() );
 
 						rEdge2.peNext();
@@ -2580,13 +2626,19 @@ void CqWVert::GetCornerScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUi
 #define	_SubdivideParameterFace_(A,B) \
 					CqParameterTyped<A, B>* pNCurrent = static_cast<CqParameterTyped<A, B>*>(pCurrent); \
 					CqParameterTyped<A, B>* pNTarget  = static_cast<CqParameterTyped<A, B>*>(pTarget); \
-					CqParameterTypedVarying<A,type_float,  B>* pVNTarget  = static_cast<CqParameterTypedVarying<A, type_float, B>*>(pTarget); \
 					A val = A(0.0f); \
-					for ( TqUint j = 0; j < m_apEdges.size(); j++ ) \
+					if( pNCurrent->Class() == class_vertex || pNCurrent->Class() == class_varying ) \
 					{ \
-						assert( grE.pvHead()->iVertex() < pNCurrent->Size() ); \
-						val += *pNCurrent->pValue(grE.pvHead() ->iVertex() ); \
-						grE.peNext(); \
+						for ( TqUint j = 0; j < m_apEdges.size(); j++ ) \
+						{ \
+							assert( grE.pvHead()->iVertex() < pNCurrent->Size() ); \
+							val += *pNCurrent->pValue(grE.pvHead() ->iVertex() ); \
+							grE.peNext(); \
+						} \
+					} \
+					else \
+					{ \
+						val = *pNCurrent->pValue( 0 ); \
 					} \
 					val /= static_cast<TqFloat>(m_apEdges.size()); \
 					if( pNTarget->Size() <= trgIndex ) \
@@ -2608,6 +2660,20 @@ void CqWFace::CreateSubdivideScalar( CqParameter* pCurrent, CqParameter* pTarget
 			case type_float:
 			{
 				_SubdivideParameterFace_( TqFloat, TqFloat );
+				/*CqParameterTyped<TqFloat, TqFloat>* pNCurrent = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pCurrent); 
+				CqParameterTyped<TqFloat, TqFloat>* pNTarget  = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pTarget); 
+				CqParameterTypedVarying<TqFloat,type_float,  TqFloat>* pVNTarget  = static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>(pTarget); 
+				TqFloat val = 0.0f; 
+				for ( TqUint j = 0; j < m_apEdges.size(); j++ ) 
+				{ 
+					assert( grE.pvHead()->iVertex() < pNCurrent->Size() ); 
+					val += *pNCurrent->pValue(grE.pvHead() ->iVertex() ); 
+					grE.peNext(); 
+				} 
+				val /= static_cast<TqFloat>(m_apEdges.size()); 
+				if( pNTarget->Size() <= trgIndex ) 
+					pNTarget->SetSize( trgIndex+1 ); 
+				*pNTarget->pValue( trgIndex ) = val;*/
 			}
 			break;
 

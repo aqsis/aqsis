@@ -812,15 +812,16 @@ class CqWSurf : public CqSubdivider, public CqBasicSurface
 {
 	public:
 		CqWSurf() : CqSubdivider(), CqBasicSurface(),
-				m_pPoints( 0 )
+				m_pPoints( 0 ), m_fInvalid(TqFalse)
 		{}
 		CqWSurf( CqPolygonPoints* pVertices ) : CqSubdivider(), CqBasicSurface(),
-				m_pPoints( pVertices )
+				m_pPoints( pVertices ), m_fInvalid(TqFalse)
 		{}
 		CqWSurf( TqInt cExpectedVertices, TqInt cExpectedFaces, CqPolygonPoints* pVertices ) :
 				CqSubdivider( cExpectedVertices, cExpectedFaces ),
 				CqBasicSurface(),
-				m_pPoints( pVertices )
+				m_pPoints( pVertices ), 
+				m_fInvalid(TqFalse)
 		{}
 		CqWSurf( CqWSurf* pSurf, TqInt iFace );
 		virtual	~CqWSurf();
@@ -902,6 +903,7 @@ class CqWSurf : public CqSubdivider, public CqBasicSurface
 
 	protected:
 		CqPolygonPoints*	m_pPoints;			///> Pointer to the CqSurface class with the surface vertices on.
+		TqBool				m_fInvalid;			///> Mesh is invalid, discard it.
 }
 ;
 
@@ -1012,6 +1014,9 @@ class CqMotionWSurf : public CqSubdivider, public CqBasicSurface, public CqMotio
 			return ( A );
 		}
 		CqBasicSurface* ExtractFace( TqInt index );
+
+	protected:
+		TqBool				m_fInvalid;			///> Mesh is invalid, discard it.
 };
 
 
