@@ -6,8 +6,7 @@
  * RenderMan (R) is a registered trademark of Pixar.
  */
 
-surface
-constant ()
+surface constant ()
 {
   Oi = Os;
   Ci = Os * Cs;

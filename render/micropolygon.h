@@ -357,9 +357,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 public:
     CqMotionMicroPolyGrid() : CqMicroPolyGridBase(), CqMotionSpec<CqMicroPolyGridBase*>( 0 )
     {}
-    virtual	~CqMotionMicroPolyGrid()
-    {}
-
+    virtual	~CqMotionMicroPolyGrid();
     // Overrides from CqMicroPolyGridBase
 
 
@@ -674,14 +672,16 @@ public:
 class CqMicroPolygonMotion : public CqMicroPolygon
 {
 public:
-    CqMicroPolygonMotion() : CqMicroPolygon(), m_BoundReady( TqFalse )
+    CqMicroPolygonMotion() : CqMicroPolygon(), m_BoundReady( TqFalse ), m_pMotionGrid(0)
     { }
     virtual	~CqMicroPolygonMotion()
     {
         std::vector<CqMovingMicroPolygonKey*>::iterator	ikey;
         for ( ikey = m_Keys.begin(); ikey != m_Keys.end(); ikey++ )
             delete( ( *ikey ) );
-    }
+		if( m_pMotionGrid )
+			RELEASEREF(m_pMotionGrid);
+	}
 
 public:
     void	AppendKey( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD, TqFloat time );
@@ -717,6 +717,22 @@ public:
     {
         m_fTrimmed = TqTrue;
     }
+    /** Set up the pointer to the grid this micropoly came from.
+     * \param pGrid CqMicroPolyGrid pointer.
+     */
+    void	SetMotionGrid( CqMotionMicroPolyGrid* pGrid )
+    {
+        if ( m_pMotionGrid ) RELEASEREF( m_pMotionGrid );
+        m_pMotionGrid = pGrid;
+        ADDREF( m_pMotionGrid );
+    }
+    /** Get the pointer to the grid this micropoly came from.
+     * \return Pointer to the CqMicroPolyGrid.
+     */
+    CqMotionMicroPolyGrid* pMotionGrid() const
+    {
+        return ( m_pMotionGrid );
+    }
 private:
     CqBound	m_Bound;					///< Stored bound.
     CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
@@ -724,6 +740,7 @@ private:
     std::vector<TqFloat> m_Times;
     std::vector<CqMovingMicroPolygonKey*>	m_Keys;
     TqBool	m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
+	CqMotionMicroPolyGrid* m_pMotionGrid;
 
     CqMicroPolygonMotion( const CqMicroPolygonMotion& From )
     {}

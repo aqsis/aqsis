@@ -2449,7 +2449,7 @@ RtVoid	RiTransform( RtMatrix transform )
 	Validate_RiTransform
 
     CqMatrix matTrans( transform );
-    if ( matTrans.Determinant() < 0 )
+    if ( matTrans.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
         QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
 
     QGetRenderContext() ->ptransWriteCurrent() ->SetTransform( QGetRenderContext() ->Time(), CqMatrix( transform ) );
@@ -2471,7 +2471,7 @@ RtVoid	RiConcatTransform( RtMatrix transform )
 
     // Check if this transformation results in a change in orientation.
     CqMatrix matTrans( transform );
-    if ( matTrans.Determinant() < 0 )
+    if ( matTrans.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
         QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
 
     QGetRenderContext() ->ptransWriteCurrent() ->ConcatCurrentTransform( QGetRenderContext() ->Time(), CqMatrix( transform ) );
@@ -2502,7 +2502,7 @@ RtVoid	RiPerspective( RtFloat fov )
     CqMatrix	matP( 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, fov, fov, 0, 0, -fov, 0 );
 
     // Check if this transformation results in a change in orientation.
-    if ( matP.Determinant() < 0 )
+    if ( matP.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
         QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
 
     QGetRenderContext() ->ptransWriteCurrent() ->ConcatCurrentTransform( QGetRenderContext() ->Time(), matP );
@@ -2524,7 +2524,7 @@ RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
 
     CqMatrix	matTrans( CqVector3D( dx, dy, dz ) );
     // Check if this transformation results in a change in orientation.
-    if ( matTrans.Determinant() < 0 )
+    if ( matTrans.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
         QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
 
     QGetRenderContext() ->ptransWriteCurrent() ->ConcatCurrentTransform( QGetRenderContext() ->Time(), matTrans );
@@ -2546,7 +2546,7 @@ RtVoid	RiRotate( RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz )
 
     CqMatrix	matRot( RAD( angle ), CqVector4D( dx, dy, dz ) );
     // Check if this transformation results in a change in orientation.
-    if ( matRot.Determinant() < 0 )
+    if ( matRot.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
         QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
 
     QGetRenderContext() ->ptransWriteCurrent() ->ConcatCurrentTransform( QGetRenderContext() ->Time(), matRot );
@@ -2567,7 +2567,7 @@ RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 
     CqMatrix	matScale( sx, sy, sz );
     // Check if this transformation results in a change in orientation.
-    if ( matScale.Determinant() < 0 )
+    if ( matScale.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
         QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
 
     QGetRenderContext() ->ptransWriteCurrent() ->ConcatCurrentTransform( QGetRenderContext() ->Time(), matScale );

@@ -200,6 +200,11 @@ public:
     /// Advance the current frame time to the next specified time.
     virtual	void	AdvanceTime()
     {}
+    /// Get the current frame index if in a motion block.
+    virtual	TqInt	TimeIndex() const
+    {
+		return( 0 );
+	}
     /** Is this a motion block, should be overridden per derived class.
      * \return boolean indicating whether this is a motion block.
      */
@@ -738,6 +743,11 @@ public:
     {
         m_iTime++;
     }
+    /// Get the current frame index if in a motion block.
+    virtual	TqInt	TimeIndex() const
+    {
+		return( m_iTime );
+	}
     /** Indicate that this is a motion block.
      * \return boolean indicating whether this is a motion block.
      */

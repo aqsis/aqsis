@@ -779,6 +779,18 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 }
 
 
+CqMotionMicroPolyGrid::~CqMotionMicroPolyGrid()
+{
+	TqInt iTime;
+	for ( iTime = 0; iTime < cTimes(); iTime++ )
+	{
+		CqMicroPolyGrid* pg = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
+		if ( NULL != pg )
+			RELEASEREF( pg );
+    }
+}
+
+
 //---------------------------------------------------------------------
 /** Shade the primary grid.
  */
@@ -916,6 +928,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 
             CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion();
             pNew->SetGrid( pGridA );
+            pNew->SetMotionGrid( this );
             pNew->SetIndex( iIndex );
             for ( iTime = 0; iTime < cTimes(); iTime++ )
                 pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], Time( iTime ) );
@@ -926,13 +939,14 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
     RELEASEREF( pGridA );
 
     // Delete the donor motion grids, as their work is done.
-    for ( iTime = 1; iTime < cTimes(); iTime++ )
+/*    for ( iTime = 1; iTime < cTimes(); iTime++ )
     {
         CqMicroPolyGrid* pg = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
         if ( NULL != pg )
             RELEASEREF( pg );
     }
     //		delete( GetMotionObject( Time( iTime ) ) );
+*/
 }
 
 
@@ -1415,31 +1429,67 @@ TqBool CqMicroPolygonMotion::Sample( const CqVector2D& vecSample, TqFloat& D, Tq
 
         if ( pGrid() ->fTriangular() )
         {
-            CqVector3D vO;
-            pGrid() ->P() ->GetPoint( vO, 0 );
-            CqVector3D vA;
-            pGrid() ->P() ->GetPoint( vA, pGrid() ->uGridRes() );
-            CqVector3D vB;
-            pGrid() ->P() ->GetPoint( vB, pGrid() ->vGridRes() * ( pGrid() ->uGridRes() + 1 ) );
+			TqInt iIndex = 0;
+			TqFloat Fraction = 0.0f;
+			TqBool Exact = TqTrue;
 
-            TqBool clockwise;
-            CqVector3D E1 = vA - vO;
-            CqVector3D E2 = vB - vO;
-            if ( ( E1.x() * E2.y() - E1.y() * E2.x() ) >= 0 ) clockwise = TqTrue;
-            else	clockwise = TqFalse;
+			if ( time > m_Times.front() )
+			{
+				if ( time >= m_Times.back() )
+					iIndex = m_Times.size() - 1;
+				else
+				{
+					// Find the appropriate time span.
+					iIndex = 0;
+					while ( time >= m_Times[ iIndex + 1 ] )
+						iIndex += 1;
+					Fraction = ( time - m_Times[ iIndex ] ) / ( m_Times[ iIndex + 1 ] - m_Times[ iIndex ] );
+					Exact = ( m_Times[ iIndex ] == time );
+				}
+			}
+
+			CqMotionMicroPolyGrid* pG = pMotionGrid();
+			CqVector3D vO, vA, vB;
+			if ( Exact )
+			{
+				CqMicroPolyGrid * pGridA = static_cast<CqMicroPolyGrid*>( pG->GetMotionObject( iIndex ) );
+				pGridA->P()->GetPoint( vO, 0 );
+				pGridA->P()->GetPoint( vA, pGrid() ->uGridRes() );
+				pGridA->P()->GetPoint( vB, pGrid() ->vGridRes() * ( pGrid() ->uGridRes() + 1 ) );
+			}
+			else
+			{
+				TqFloat F1 = 1.0f - Fraction;
+				CqMicroPolyGrid * pGridA = static_cast<CqMicroPolyGrid*>( pG->GetMotionObject( iIndex ) );
+				CqMicroPolyGrid * pGridB = static_cast<CqMicroPolyGrid*>( pG->GetMotionObject( iIndex + 1) );
+				CqVector3D vO1, vA1, vB1;
+				CqVector3D vO2, vA2, vB2;
+				pGridA->P()->GetPoint( vO1, 0 );
+				pGridA->P()->GetPoint( vA1, pGrid() ->uGridRes() );
+				pGridA->P()->GetPoint( vB1, pGrid() ->vGridRes() * ( pGrid() ->uGridRes() + 1 ) );
+				pGridB->P()->GetPoint( vO2, 0 );
+				pGridB->P()->GetPoint( vA2, pGrid() ->uGridRes() );
+				pGridB->P()->GetPoint( vB2, pGrid() ->vGridRes() * ( pGrid() ->uGridRes() + 1 ) );
+				vO = ( F1 * vO1 ) + ( Fraction * vO2 );
+				vA = ( F1 * vA1 ) + ( Fraction * vA2 );
+				vB = ( F1 * vB1 ) + ( Fraction * vB2 );
+			}
+			TqBool clockwise;
+			CqVector3D E1 = vA - vO;
+			CqVector3D E2 = vB - vO;
+			if ( ( E1.x() * E2.y() - E1.y() * E2.x() ) >= 0 ) clockwise = TqTrue;
+			else	clockwise = TqFalse;
 
 
-            TqFloat Ax = vA.x();
-            TqFloat Ay = vA.y();
-            TqFloat Bx = vB.x();
-            TqFloat By = vB.y();
+			TqFloat Ax = vA.x();
+			TqFloat Ay = vA.y();
+			TqFloat Bx = vB.x();
+			TqFloat By = vB.y();
 
-            TqFloat v = ( Ay - By ) * vecSample.x() + ( Bx - Ax ) * vecSample.y() + ( Ax * By - Bx * Ay );
-            if ( ( ( clockwise ) && ( v <= 0 ) ) || ( ( !clockwise ) && ( v >= 0 ) ) )
-                return ( TqFalse );
-
+			TqFloat v = ( Ay - By ) * vecSample.x() + ( Bx - Ax ) * vecSample.y() + ( Ax * By - Bx * Ay );
+			if ( ( ( clockwise ) && ( v <= 0 ) ) || ( ( !clockwise ) && ( v >= 0 ) ) )
+				return ( TqFalse );
         }
-
         return ( TqTrue );
     }
     else
@@ -1514,9 +1564,9 @@ TqBool CqMicroPolygonMotion::fContains( const CqVector2D& vecP, TqFloat& Depth, 
         TqFloat r1, r2, r3, r4;
         TqFloat x = vecP.x(), y = vecP.y();
         TqFloat x0 = ( F1 * pMP1->m_Point0.x() ) + ( Fraction * pMP2->m_Point0.x() ),
-                     y0 = ( F1 * pMP1->m_Point0.y() ) + ( Fraction * pMP2->m_Point0.y() ),
-                          x1 = ( F1 * pMP1->m_Point1.x() ) + ( Fraction * pMP2->m_Point1.x() ),
-                               y1 = ( F1 * pMP1->m_Point1.y() ) + ( Fraction * pMP2->m_Point1.y() );
+                y0 = ( F1 * pMP1->m_Point0.y() ) + ( Fraction * pMP2->m_Point0.y() ),
+                x1 = ( F1 * pMP1->m_Point1.x() ) + ( Fraction * pMP2->m_Point1.x() ),
+                y1 = ( F1 * pMP1->m_Point1.y() ) + ( Fraction * pMP2->m_Point1.y() );
         TqFloat x0_hold = x0;
         TqFloat y0_hold = y0;
         if ( ( r1 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
