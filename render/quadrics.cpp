@@ -137,7 +137,7 @@ TqBool	CqQuadric::Diceable()
 	if ( poptGridSize )
 		gridsize = poptGridSize[ 0 ];
 	else
-		gridsize = m_XBucketSize * m_XBucketSize / ShadingRate;
+		gridsize = static_cast<TqInt>(m_XBucketSize * m_XBucketSize / ShadingRate);
 
 	if ( ( m_uDiceSize == 0 ) || ( m_vDiceSize == 0 ) )
 		EqtimateGridSize();
@@ -1585,7 +1585,7 @@ TqBool	CqDisk::Diceable()
 	if ( poptGridSize )
 		gridsize = poptGridSize[ 0 ];
 	else
-		gridsize = m_XBucketSize * m_XBucketSize / ShadingRate;
+		gridsize = static_cast<TqInt>(m_XBucketSize * m_XBucketSize / ShadingRate);
 
 	if ( ( m_uDiceSize == 0 ) && ( m_vDiceSize == 0 ) )
 		EqtimateGridSize();

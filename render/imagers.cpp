@@ -119,8 +119,8 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 		m_pShader->Evaluate( *this );
 	}
 
-	m_uYOrigin = y;
-	m_uXOrigin = x;
+	m_uYOrigin = static_cast<TqInt>(y);
+	m_uXOrigin = static_cast<TqInt>(x);
 	m_uGridRes = uGridRes;
 	m_vGridRes = vGridRes;
 	alpha().SetValue( 1.0 ); /* by default 3delight/bmrt set it to 1.0 */
@@ -137,7 +137,7 @@ CqColor CqImagersource::Color( TqFloat x, TqFloat y )
 {
 	CqColor result = gColBlack;
 
-	TqInt index = ( y - m_uYOrigin ) * ( m_uGridRes + 1 ) + x - m_uXOrigin;
+	TqInt index = static_cast<TqInt>(( y - m_uYOrigin ) * ( m_uGridRes + 1 ) + x - m_uXOrigin);
 
 	if ( Ci().Size() >= index )
 		result = Ci() [ index ];
@@ -154,7 +154,7 @@ CqColor CqImagersource::Opacity( TqFloat x, TqFloat y )
 {
 	CqColor result = gColWhite;
 
-	TqInt index = ( y - m_uYOrigin ) * ( m_uGridRes + 1 ) + x - m_uXOrigin;
+	TqInt index = static_cast<TqInt>(( y - m_uYOrigin ) * ( m_uGridRes + 1 ) + x - m_uXOrigin);
 
 	if ( Oi().Size() >= index )
 		result = Oi() [ index ];

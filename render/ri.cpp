@@ -2381,7 +2381,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 RtVoid	RiPointsGeneralPolygons( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], ... )
 {
 	va_list	pArgs;
-	va_start( pArgs, nverts );
+	va_start( pArgs, verts );
 
 	RtToken* pTokens;
 	RtPointer* pValues;
