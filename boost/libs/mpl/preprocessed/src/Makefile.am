@@ -26,6 +26,6 @@ template_arity.cpp \
 vector.cpp \
 vector_c.cpp
 
-##AM_CXXFLAGS = @K3D_CXXFLAGS@
-##AM_CPPFLAGS = @K3D_CPPFLAGS@
+##AM_CXXFLAGS = @AQSIS_CXXFLAGS@
+##AM_CPPFLAGS = @AQSIS_CPPFLAGS@
 

@@ -16,6 +16,6 @@ w32_regex_traits.cpp \
 wide_posix_api.cpp \
 winstances.cpp
 
-AM_CXXFLAGS = @K3D_CXXFLAGS@
-AM_CPPFLAGS = @K3D_CPPFLAGS@
+AM_CXXFLAGS = @AQSIS_CXXFLAGS@
+AM_CPPFLAGS = @AQSIS_CPPFLAGS@
 
