@@ -546,19 +546,11 @@ void CqRenderer::RenderWorld()
 	strMsg+=optCurrent().strDisplayName();
 	CqBasicError(0,Severity_Normal,strMsg.c_str());
 
-//	m_Status.SetState(State_Rendering);
-//	m_Status.SetComplete(0.0f);
-//	UpdateStatus();
-
 	optCurrent().InitialiseCamera();
 	
-	// Store the number of gprims in the scene, as they will be deleted as rendered.
-//	TqInt cGPrims=Scene().cGPrims();
-
 	pImage()->SetImage();
 	pImage()->InitialiseSurfaces(Scene());
 	pImage()->RenderImage();
-//	m_Status.SetState(State_Complete);
 
 	// Calculate the time taken.
 	m_timeTaken=time(0)-m_timeTaken;
@@ -569,10 +561,6 @@ void CqRenderer::RenderWorld()
 		verbosity=poptEndofframe[0];
 
 	PrintStats(verbosity);
-
-	#ifdef	_MEMMGR
-	m_dumpMemoryReport("report.dmp",true);
-	#endif
 }
 
 
