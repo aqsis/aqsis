@@ -1,6 +1,10 @@
 aqsis
 Makefile
 
+ddmsock.ini
+*.map
+*.tif
+
 .#*
 *.plg
 *.#*
