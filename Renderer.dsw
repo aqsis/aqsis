@@ -56,6 +56,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name shadowmap
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name teqser
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -356,6 +359,27 @@ Package=<5>
 
 Package=<4>
 {{{
+}}}
+
+###############################################################################
+
+Project: "teqser"=.\teqser\teqser.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libaqsis
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libaqsistypes
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libddmsimple
+    End Project Dependency
 }}}
 
 ###############################################################################
