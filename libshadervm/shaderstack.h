@@ -173,7 +173,9 @@ struct SqVMStackEntry
 	 */
 	void GetValue( TqFloat& res) const
 	{
-		if ( m_Type == StackEntryType_Int )
+		if ( m_Type == StackEntryType_Bool )
+		   	res = static_cast<TqFloat>(m_Value.m_bool);
+		else if ( m_Type == StackEntryType_Int )
 			res = static_cast<TqFloat>( m_Value.m_int );
 		else
 			res = m_Value.m_float;
@@ -182,7 +184,9 @@ struct SqVMStackEntry
 	 */
 	void GetValue( TqInt& res ) const
 	{
-		if ( m_Type == StackEntryType_Float )
+		if ( m_Type == StackEntryType_Bool )
+		   	res = static_cast<TqInt>(m_Value.m_bool);
+		else if ( m_Type == StackEntryType_Float )
 			res = static_cast<TqInt>( m_Value.m_float );
 		else
 		res = m_Value.m_int;
@@ -191,7 +195,11 @@ struct SqVMStackEntry
 	 */
 	void GetValue( bool& res) const
 	{
-		assert( m_Type == StackEntryType_Bool );
+		if ( m_Type == StackEntryType_Float )
+			res = static_cast<TqBool>( m_Value.m_float != 0.0 );
+		else if ( m_Type == StackEntryType_Int )
+			res = static_cast<TqBool>( m_Value.m_int != 0 );
+		else if ( m_Type == StackEntryType_Bool )
 		res = m_Value.m_bool;
 	}
 	/** Type checked cast to a 3D vector

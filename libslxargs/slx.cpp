@@ -356,7 +356,7 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
 						aCString = (char *)aCqString.c_str();
 						defaultValLength = strlen(aCString) + 1;
 						defaultValString = (char *)malloc(defaultValLength);
-						strcpy(defaultVal, aCString);
+						strcpy(defaultValString, aCString);
 						defaultVal = (char *)malloc(sizeof(char *));
 						memcpy(defaultVal, &defaultValString, sizeof(char *) );
 					}
@@ -687,9 +687,10 @@ static bool LoadShaderInfo (char *name)
         strcpy(shaderFileName, name);
         strcat(shaderFileName, RI_SHADER_EXTENSION);        
         
-        stringLength = strlen(currentShaderSearchPath) + strlen(shaderFileName) + 1;
+        stringLength = strlen(currentShaderSearchPath) + strlen(shaderFileName) + 2;
         currentShaderFilePath = (char *)malloc(stringLength);
         strcpy(currentShaderFilePath, currentShaderSearchPath);
+		strcat(currentShaderFilePath, "/");
         strcat(currentShaderFilePath, shaderFileName);
         
         // attempt to open the shader file

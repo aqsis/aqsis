@@ -62,7 +62,7 @@ bool g_version;
 void version( std::ostream& Stream )
 {
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-//	Stream << "aqsis version " << VERSION_STR << std::endl;
+	Stream << "aqsis version " << VERSION_STR << std::endl;
 #else
 	Stream << "aqsis version " << VERSION << std::endl;
 #endif
@@ -107,7 +107,19 @@ int main( int argc, const char** argv )
 	{
 		for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
 		{
-		    SLX_SetPath("./");
+			char shaderpath[1024];
+			strcpy(shaderpath, ".:");
+
+			char *ev;
+			
+			ev = getenv("AQSIS_BASE_PATH");
+			if (ev && *ev) 
+			{
+				strcat(shaderpath, ev);
+				strcat(shaderpath, "/shaders:&");
+			}
+
+			SLX_SetPath(shaderpath);
 
 			if (SLX_SetShader((char*)e->c_str()) == 0)
 			{
@@ -116,7 +128,7 @@ int main( int argc, const char** argv )
 				int i;
 				SLX_VISSYMDEF * symPtr;
 
-				std::cout << SLX_TypetoStr(SLX_GetType()) << " \"" << SLX_GetPath() << SLX_GetName() << "\"" << std::endl;
+				std::cout << SLX_TypetoStr(SLX_GetType()) << " \"" << SLX_GetPath() << "/" << SLX_GetName() << "\"" << std::endl;
 				nArgs = SLX_GetNArgs();
         
 				for (i=0; i<nArgs; i++)
@@ -185,6 +197,7 @@ int main( int argc, const char** argv )
 					{
 						printf("ERROR - null pointer to value");
 					}
+					std::cout << std::endl;
 				}
         
 				SLX_EndShader();
