@@ -4,7 +4,7 @@ AM_CPPFLAGS=@AQSIS_CPPFLAGS@
 AM_CFLAGS=@AQSIS_CFLAGS@
 
 
-lib_LTLIBRARIES = libppm2tif.la
+pkglib_LTLIBRARIES = libppm2tif.la
 
 libppm2tif_la_SOURCES = ppm2tif.c
 libppm2tif_la_LIBADD  = ../common/libcommon.la

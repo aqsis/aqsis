@@ -5,7 +5,7 @@ COMPILED_SHADERS = $(SHADERS:.sl=.slx)
 .sl.slx:
 	$(top_builddir)/aqsl/aqsl $< -o $@
 
-shadersdir = $(datadir)/shaders
+shadersdir = $(pkgdatadir)/shaders
 
 shaders_DATA = $(SHADER_INCLUDES) $(SHADERS) $(COMPILED_SHADERS)
 

@@ -4,7 +4,7 @@ AM_CPPFLAGS=@AQSIS_CPPFLAGS@
 AM_CFLAGS=@AQSIS_CFLAGS@
 
 
-lib_LTLIBRARIES = libbake2tif.la
+pkglib_LTLIBRARIES = libbake2tif.la
 
 libbake2tif_la_SOURCES = bake2tif.c
 libbake2tif_la_LIBADD  = ../common/libcommon.la

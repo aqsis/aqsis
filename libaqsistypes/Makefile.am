@@ -14,5 +14,5 @@ libaqsistypes_la_LIBADD = $(top_builddir)/libaqsistypes/posix/libplatform.la @LO
 libaqsistypes_la_LDFLAGS = -rpath $(libdir) 
 
 
-include_HEADERS = aqsis.h aqsis_types.h bitvector.h color.h exception.h file.h list.h matrix.h memorypool.h random.h sstring.h vector2d.h vector3d.h vector4d.h refcount.h
+pkginclude_HEADERS = aqsis.h aqsis_types.h bitvector.h color.h exception.h file.h list.h matrix.h memorypool.h random.h sstring.h vector2d.h vector3d.h vector4d.h refcount.h
 
