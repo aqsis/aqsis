@@ -11,6 +11,8 @@
 #
 # Author: Matthias Baas (baas@ira.uka.de)
 ######################################################################
+# $Id: mpanalyse.py,v 1.2 2004/05/29 16:07:26 mbaas Exp $
+######################################################################
 
 import sys, os, struct, getopt
 from cgtypes import *
