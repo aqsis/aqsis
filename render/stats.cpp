@@ -307,7 +307,7 @@ void CqStats::PrintStats( TqInt level ) const
 			<<							STATS_INT_GETI( GEO_crv_patch ) << " (" << _geo_crv_s_p_q << "%) into " << STATS_INT_GETI( GEO_crv_patch_created ) << " patches\n\t"
 			<< "Procedurals:\n"
 			<<					"\t\t" << STATS_INT_GETI( GEO_prc_created ) << " created\n\t"
-			<<					"\t" << STATS_INT_GETI( GEO_prc_split ) << " split (" << _geo_crv_s_q << "%)\n\t\t"
+			<<					"\t" << STATS_INT_GETI( GEO_prc_split ) << " split (" << _geo_prc_s_q << "%)\n\t\t"
 			<<							STATS_INT_GETI( GEO_prc_created_dl ) << " dynamic load,\n\t\t"
 			<<							STATS_INT_GETI( GEO_prc_created_dra ) << " dynamic read archive,\n\t\t"
 			<<							STATS_INT_GETI( GEO_prc_created_prp ) << " run program\n\t\t"

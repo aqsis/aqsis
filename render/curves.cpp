@@ -435,12 +435,12 @@ TqInt CqLinearCurveSegment::Split( std::vector<CqBasicSurface*>& aSplits )
 		case Split_Curve:
 		{
 			// split into smaller curves
-			TqInt cCurves = SplitToCurves( aSplits );
-			STATS_INC( GEO_crv_splits );
-			STATS_INC( GEO_crv_crv );
-			STATS_SETI( GEO_crv_crv_created, STATS_GETI( GEO_crv_crv_created ) + cCurves );
-				
-			return cCurves;
+				TqInt cCurves = SplitToCurves( aSplits );
+				STATS_INC( GEO_crv_splits );
+				STATS_INC( GEO_crv_crv );
+				STATS_SETI( GEO_crv_crv_created, STATS_GETI( GEO_crv_crv_created ) + cCurves );
+					
+				return cCurves;
 		}
 
 		default:
@@ -910,11 +910,25 @@ TqInt CqCubicCurveSegment::Split( std::vector<CqBasicSurface*>& aSplits )
 	switch( m_splitDecision )
 	{
 		case Split_Patch:
+			{
 			// split into a patch
-			return SplitToPatch( aSplits );
+				TqInt cPatches = SplitToPatch( aSplits );
+				STATS_INC( GEO_crv_splits );
+				STATS_INC( GEO_crv_patch );
+				STATS_SETI( GEO_crv_patch_created, STATS_GETI( GEO_crv_patch_created ) + cPatches );
+				
+				return cPatches;
+			}
 		case Split_Curve:
+			{
 			// split into smaller curves
-			return SplitToCurves( aSplits );
+				TqInt cCurves = SplitToCurves( aSplits );
+				STATS_INC( GEO_crv_splits );
+				STATS_INC( GEO_crv_crv );
+				STATS_SETI( GEO_crv_crv_created, STATS_GETI( GEO_crv_crv_created ) + cCurves );
+				
+				return cCurves;
+			}
 		default:
 			throw;
 	}
