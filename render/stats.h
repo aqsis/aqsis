@@ -50,6 +50,51 @@ enum EqState
 
 
 //----------------------------------------------------------------------
+/** \class CqStatTimer
+ * Class to handle timing of rendering processes as intervals.
+ */
+class CqStatTimer
+{
+	public:
+		CqStatTimer()	: m_timeStart(0), m_timeTotal(0), m_fStarted(TqFalse)
+						{}
+		~CqStatTimer()	{}
+
+		
+		/** Get the total time that ths timer has recorded.
+		 */
+		clock_t	TimeTotal() const	{return(m_timeTotal);}
+		
+		/** Start the timer, asserts that the timer has not already been started, nesting is not allowed.
+		 */
+		void	Start()	{
+							assert(!m_fStarted);
+							m_timeStart = clock();
+							m_fStarted = TqTrue;
+						}
+		
+		/** Stop the timer and update the total time for this timer. Asserts that the timer was actually running.
+		 */
+		void	Stop()	{
+							assert(m_fStarted);
+							m_timeTotal += clock()-m_timeStart;
+						}
+
+		/** Reset the total time for this timer, asserts that the timer is not running.
+		 */
+		void	Reset()	{
+							assert(!m_fStarted);
+							m_timeTotal = 0;
+						}
+
+	private:
+		clock_t		m_timeStart;		///< Time at which the current interval started.
+		clock_t		m_timeTotal;		///< Total time recorded by this timer.
+		TqBool		m_fStarted;			///< Flag indicating whether this timer is recording an interval.
+};
+
+
+//----------------------------------------------------------------------
 /** \class CqStats
    Class containing statistics information.
  
@@ -182,48 +227,40 @@ class CqStats
 			//@}
 
 
-      /// \name Timer methods
-      //@{
-      void    StartFrameTimer();
+			/// \name Timer methods
+			//@{
+			void    StartFrameTimer();
 			void    StopFrameTimer();
 
-          /** Start the surface timer.
-					    \see StopSurfaceTimer()
-		    	 */
-      void    StartSurfaceTimer() { m_dummytime = clock(); };
+          /** Get the surface timer.
+	    	 */
+			CqStatTimer& SurfaceTimer() { return(m_timeSurface); };
 
-          /** Stop the surface timer.
-					    The difference between the starting time and the current time is
-							added to the total surface shading time.
-					    \see StartSurfaceTimer()
-		    	 */
-			void    StopSurfaceTimer()  { m_timeSurface += clock()-m_dummytime; }
+          /** Get the displacement timer.
+	    	 */
+			CqStatTimer& DisplacementTimer() { return(m_timeDisplacement); };
 
-          /** Start the displacement timer.
-					    \see StopDisplacementTimer()
-		    	 */
-      void    StartDisplacementTimer() { m_dummytime = clock(); };
+          /** Get the atmosphere timer.
+	    	 */
+			CqStatTimer& AtmosphereTimer() { return(m_timeAtmosphere); };
 
-          /** Stop the displacement timer.
-					    The difference between the starting time and the current time is
-							added to the total displacement shading time.
-					    \see StartDisplacementTimer()
-		    	 */
-			void    StopDisplacementTimer()  { m_timeDisplacement += clock()-m_dummytime; }
+          /** Get the splits timer.
+	    	 */
+			CqStatTimer& SplitsTimer() { return(m_timeSplits); };
 
-          /** Start the atmosphere timer.
-					    \see StopAtmosphereTimer()
-		    	 */
-      void    StartAtmosphereTimer() { m_dummytime = clock(); };
-
-          /** Stop the atmosphere timer.
-					    The difference between the starting time and the current time is
-							added to the total atmosphere shading time.
-					    \see StartAtmosphereTimer()
-		    	 */
-			void    StopAtmosphereTimer()  { m_timeAtmosphere += clock()-m_dummytime; }
+          /** Get the dicing timer.
+	    	 */
+			CqStatTimer& DicingTimer() { return(m_timeDicing); };
+          /** Get the render MPGs timer.
+	    	 */
+			CqStatTimer& RenderMPGsTimer() { return(m_timeRenderMPGs); };
+          /** Get the occlusion culling timer.
+	    	 */
+			CqStatTimer& OcclusionCullTimer() { return(m_timeOcclusionCull); };
+          /** Get the diceable timer.
+	    	 */
+			CqStatTimer& DiceableTimer() { return(m_timeDiceable); };
 			//@}
-
 
 			void    PrintStats(TqInt level) const;
 
@@ -259,13 +296,18 @@ class CqStats
 			TqInt	m_cCulledGrids;					///< Count of culled micro poly grids.
 			TqInt	m_cCulledMPGs;					///< Count of culled micro polys.
 
-			time_t	m_timeTotal;				 ///< Total time spent on the entire animation.
-			time_t  m_timeTotalFrame;    ///< Time spent on processing one individual frame.
-			TqBool  m_frameTimerRunning; ///< True, if the frame timer was started and not yet stopped.
-			clock_t m_timeSurface;       ///< Time spent on surface shading.
-			clock_t m_timeDisplacement;  ///< Time spent on displacement shading.
-			clock_t m_timeAtmosphere;    ///< Time spent on volume shading (atmosphere).
-      clock_t m_dummytime;         ///< Variable that keeps starting times for surface, displacement and atmosphere timers.
+			time_t	m_timeTotal;					///< Total time spent on the entire animation.
+			time_t  m_timeTotalFrame;				///< Time spent on processing one individual frame.
+			TqBool  m_frameTimerRunning;			///< True, if the frame timer was started and not yet stopped.
+			
+			CqStatTimer m_timeSurface;				///< Time spent on surface shading.
+			CqStatTimer m_timeDisplacement;			///< Time spent on displacement shading.
+			CqStatTimer m_timeAtmosphere;			///< Time spent on volume shading (atmosphere).
+			CqStatTimer m_timeSplits;				///< Time spent on surface splitting.
+			CqStatTimer m_timeDicing;				///< Time spent on surface dicing.
+			CqStatTimer m_timeRenderMPGs;			///< Time spent on rendering MPGs.
+			CqStatTimer m_timeOcclusionCull;		///< Time spent on occlusion culling.
+			CqStatTimer m_timeDiceable;				///< Time spent on diceable checking.
 };
 
 

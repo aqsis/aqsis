@@ -1463,10 +1463,9 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 		if(fDiceable)
 		{
 			//Cull surface if it's hidden
-			
-//			QGetRenderContext()->Stats().OcclusionCullTimer().Start();
+			QGetRenderContext()->Stats().OcclusionCullTimer().Start();
 			TqBool fCull = OcclusionCullSurface(iBucket, pSurface);
-//			QGetRenderContext()->Stats().OcclusionCullTimer().Stop();
+			QGetRenderContext()->Stats().OcclusionCullTimer().Stop();
 			if(fCull)
 			{
 				if (pSurface == Bucket.pTopSurface()) 

@@ -90,10 +90,14 @@ void CqStats::InitialiseFrame()
 
 	m_timeTotalFrame         = 0;
 	m_frameTimerRunning      = TqFalse;
-	m_timeSurface            = 0;
-	m_timeDisplacement       = 0;
-	m_timeAtmosphere         = 0;
-	m_dummytime              = 0;
+	m_timeSurface.Reset();
+	m_timeDisplacement.Reset();
+	m_timeAtmosphere.Reset();
+	m_timeSplits.Reset();
+	m_timeDicing.Reset();
+	m_timeRenderMPGs.Reset();
+	m_timeOcclusionCull.Reset();
+	m_timeDiceable.Reset();
 }
 
 /** Start the frame timer.
@@ -138,9 +142,14 @@ void CqStats::PrintStats(TqInt level) const
 	{
 		std::strstream MSG;
 
-    TqFloat timeSurface      = static_cast<TqFloat>(m_timeSurface)/CLOCKS_PER_SEC;
-    TqFloat timeDisplacement = static_cast<TqFloat>(m_timeDisplacement)/CLOCKS_PER_SEC;
-    TqFloat timeAtmosphere   = static_cast<TqFloat>(m_timeAtmosphere)/CLOCKS_PER_SEC;
+    TqFloat timeSurface      = static_cast<TqFloat>(m_timeSurface.TimeTotal())/CLOCKS_PER_SEC;
+    TqFloat timeDisplacement = static_cast<TqFloat>(m_timeDisplacement.TimeTotal())/CLOCKS_PER_SEC;
+    TqFloat timeAtmosphere   = static_cast<TqFloat>(m_timeAtmosphere.TimeTotal())/CLOCKS_PER_SEC;
+    TqFloat timeSplits       = static_cast<TqFloat>(m_timeSplits.TimeTotal())/CLOCKS_PER_SEC;
+    TqFloat timeDicing       = static_cast<TqFloat>(m_timeDicing.TimeTotal())/CLOCKS_PER_SEC;
+    TqFloat timeRenderMPGs   = static_cast<TqFloat>(m_timeRenderMPGs.TimeTotal())/CLOCKS_PER_SEC;
+    TqFloat timeOcclusionCull= static_cast<TqFloat>(m_timeOcclusionCull.TimeTotal())/CLOCKS_PER_SEC;
+    TqFloat timeDiceable     = static_cast<TqFloat>(m_timeDiceable.TimeTotal())/CLOCKS_PER_SEC;
 
     MSG << "Total render time   : ";
 		TimeToString(MSG,m_timeTotal) << std::endl;
@@ -153,6 +162,16 @@ void CqStats::PrintStats(TqInt level) const
 		TimeToString(MSG,timeDisplacement) << " (" << 100.0f*timeDisplacement/m_timeTotalFrame << "%)" << std::endl;
     MSG << "Atmosphere shading  : ";
 		TimeToString(MSG,timeAtmosphere) << " (" << 100.0f*timeAtmosphere/m_timeTotalFrame << "%)" << std::endl;
+    MSG << "Splits              : ";
+		TimeToString(MSG,timeSplits) << " (" << 100.0f*timeSplits/m_timeTotalFrame << "%)" << std::endl;
+    MSG << "Dicing              : ";
+		TimeToString(MSG,timeDicing) << " (" << 100.0f*timeDicing/m_timeTotalFrame << "%)" << std::endl;
+    MSG << "Render MPGs         : ";
+		TimeToString(MSG,timeRenderMPGs) << " (" << 100.0f*timeRenderMPGs/m_timeTotalFrame << "%)" << std::endl;
+    MSG << "Occlusion Culling   : ";
+		TimeToString(MSG,timeOcclusionCull) << " (" << 100.0f*timeOcclusionCull/m_timeTotalFrame << "%)" << std::endl;
+    MSG << "Diceable check      : ";
+		TimeToString(MSG,timeDiceable) << " (" << 100.0f*timeDiceable/m_timeTotalFrame << "%)" << std::endl;
 		MSG << std::endl;
 
 		MSG << "GPrims: \t" << m_cGPrims << std::endl;
