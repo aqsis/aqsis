@@ -1,0 +1,17 @@
+Aqsis Rendering System README
+
+* The Aqsis Rendering System consists of a set of libraries and applications for creating high-quality computer imagery using the Pixar Renderman Interface.
+
+* Aqsis is licensed under the GNU GPL.  See the COPYING file for details.
+
+* Aqsis was originally written by Paul Gregory for use under Win32.  See the AUTHORS file for subsequent contributors.
+
+* As of this writing (June 2001) the Aqsis Posix build is partially complete: the render engine (libaqsis) functions normally, and the RIB-parsing libraries (librib2, librib2stream, and librib2ri) can be used to parse most RIB files.  The simple (libddmsimple) display-driver manager functions normally (sending all rendered output to a TIFF file).  An executable (aqsis) demonstrates how the libraries are integrated together to create a simple rendering application.  Shader parsing and compiling is NOT supported yet, so generated images are limited to unshaded colour "silhouettes".
+
+* The Aqsis Posix build uses GNU autotools to provide a standard build environment.  The Posix build has been tested under GNU/Linux running on Intel hardware, and the Cygwin environment, running under Win32 with Intel hardware.  See the INSTALL file for instructions on building Aqsis.
+
+* For assistance with all Aqsis-related issues, please refer to the Aqsis mailing list, <aqsis-development@lists.sourceforge.net>
+
+Happy Rendering!
+The Aqsis Team
+
