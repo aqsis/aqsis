@@ -24,11 +24,9 @@ Name: "custom"; Description: "Custom installation"; Flags: iscustom
 [Components]
 Name: "main"; Description: "Main Files"; Types: full compact
 Name: "bonus"; Description: "Shaders and .rib examples"; Types: full
-; Name: "GUI"; Description: "AqsisGUI"; Types: full compact
 Name: "ref"; Description: "Tests and reference images"; Types: full
 
 [Tasks]
-; Name: desktopicon; Description: Create a &desktop icon; GroupDescription: Additional icons:; Components: GUI
 Name: registry; Description: Setup Aqsis specific &environment variables; GroupDescription: Environment Variables:; MinVersion: 0,4.0.1381
 
 [Files]
@@ -63,20 +61,15 @@ Source: COPYING; DestDir: {app} ; Components: main
 Source: INSTALL; DestDir: {app} ; Components: main
 Source: AUTHORS; DestDir: {app} ; Components: main
 Source: README; DestDir: {app} ; Components: main
-Source: Library\Release\aqsltell.exe; DestDir: {app}    ; Components: main
 Source: ..\Testing\RegressionTests\reference\*.tif; DestDir: {app}\tests\reference; Components: ref
 Source: ..\Testing\RegressionTests\*.rib; DestDir: {app}\tests; Components: ref
 Source: ..\Testing\RegressionTests\simple_archive; DestDir: {app}\tests; Components: ref
 Source: ..\Testing\RegressionTests\*.pl; DestDir: {app}\tests; Components: ref
-; AqsisGUI related files.
-; Source: ..\GUI\Windows\VB\bin\AqsisGUI.exe; DestDir: {app}  ; Components: GUI
 
 
 [Icons]
 Name: {group}\Aqsis; Filename: {app}\aqsis.exe;
-;Name: {group}\AqsisGUI; Filename: {app}\AqsisGUI.exe;
 Name: {group}\Uninstall Aqsis; Filename: {uninstallexe}
-;Name: {userdesktop}\AqsisGUI; Filename: {app}\AqsisGUI.EXE; Tasks: desktopicon;
 
 
 [_ISTool]
