@@ -266,7 +266,7 @@ void CqMicroPolyGrid::Shade()
 	while ( ++i < GridSize() );
 
 	// Now try and cull any transparent MPs
-	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().Get_displaymode() & ModeZ )
+	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption("System", "DisplayMode")[0] & ModeZ )
 	{
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
 		TqInt i = 0;
@@ -292,7 +292,7 @@ void CqMicroPolyGrid::Shade()
 
 	// Now try and cull any true transparent MPs
 	cCulled = 0;
-	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().Get_displaymode() & ModeRGB )
+	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption("System", "DisplayMode")[0] & ModeRGB )
 	{
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
 		TqInt i = 0;
@@ -361,7 +361,7 @@ void CqMicroPolyGrid::Shade()
 	static CqRandom rand;
 
 	cCulled = 0;
-	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().Get_displaymode() & ModeRGB )
+	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption("System", "DisplayMode")[0] & ModeRGB )
 	{
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
 		TqInt i = 0;

@@ -80,10 +80,10 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 {
 	QGetRenderContext() ->Stats().ImagerTimer().Start();
 
-	TqInt mode = QGetRenderContext() ->optCurrent().Get_displaymode();
+	TqInt mode = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "DisplayMode")[0];
 	TqFloat components;
 	TqInt j, i;
-	TqFloat shuttertime = QGetRenderContext() ->optCurrent().Get_shutteropen();
+	TqFloat shuttertime = QGetRenderContext() ->optCurrent().GetFloatOption("System", "ShutterOpen")[0];
 
 	components = mode & ModeRGB ? 3 : 0;
 	components += mode & ModeA ? 1 : 0;

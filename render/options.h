@@ -140,21 +140,6 @@ enum EqProjection
 };
 
 
-#define	DEFINE_SYSTEM_OPTION(index, type, id, def)	\
-	type Get_##index() const \
-	{ \
-		static type __##index = ( def ); \
-		if( NULL == m_pParameters[ option_##index ] )	return( __##index ); \
-		return(*static_cast<CqParameterTyped<type>*>(m_pParameters[ option_##index ])->pValue()); \
-	} \
-	void Set_##index(const type##& value) \
-	{ \
-		if( NULL == m_pParameters[ option_##index ] ) \
-			m_pParameters[ option_##index ] = new CqParameterTypedUniform<type, id>(#index); \
-		*static_cast<CqParameterTyped<type>*>(m_pParameters[ option_##index ])->pValue() = value; \
-	}
-
-
 //----------------------------------------------------------------------
 /** \class CqOptions
  * Storage for the graphics state options.
@@ -163,120 +148,11 @@ enum EqProjection
 class CqOptions 
 {
 	public:
-		CqOptions() :
-			m_pErrorHandler( &RiErrorPrint ),
-			m_pProgressHandler( NULL ),
-			m_pPreRenderFunction( NULL ),
-			m_funcFilter( RiGaussianFilter ),
-			m_pshadImager( NULL)
-		{
-			TqInt i;
-			for( i = 0; i < option_last; i++)
-				m_pParameters[i] = NULL;
-		}
+		CqOptions();
 		CqOptions( const CqOptions& From );
 		~CqOptions();
 
 		CqOptions&	operator=( const CqOptions& From );
-
-		enum EqDisplayParameters
-		{
-			option_pixelvariance,
-			option_pixelsamplesx,
-			option_pixelsamplesy,
-			option_filterwidthx,
-			option_filterwidthy,
-			option_exposuregain,
-			option_exposuregamma,
-			option_imager,
-			option_colorquantizeone,
-			option_colorquantizemin,
-			option_colorquantizemax,
-			option_colorquantizeditheramplitude,
-			option_depthquantizeone,
-			option_depthquantizemin,
-			option_depthquantizemax,
-			option_depthquantizeditheramplitude,
-			option_displaytype,
-			option_displayname,
-			option_displaymode,
-
-			option_hider,
-			option_colorsamples,
-			option_relativedetail,
-
-			option_resolutionx,
-			option_resolutiony,
-			option_pixelaspectratio,
-			option_cropwindowminx,
-			option_cropwindowminy,
-			option_cropwindowmaxx,
-			option_cropwindowmaxy,
-			option_frameaspectratio,
-			option_screenwindowleft,
-			option_screenwindowright,
-			option_screenwindowtop,
-			option_screenwindowbottom,
-			option_cameraprojection,
-			option_clippingplanenear,
-			option_clippingplanefar,
-			option_fstop,
-			option_focallength,
-			option_focaldistance,
-			option_shutteropen,
-			option_shutterclose,
-			option_fov,
-
-			option_last
-		};
-
-
-		DEFINE_SYSTEM_OPTION(pixelvariance, TqFloat, type_float, 1.0f );
-		DEFINE_SYSTEM_OPTION(pixelsamplesx, TqInt, type_integer, 2 );
-		DEFINE_SYSTEM_OPTION(pixelsamplesy, TqInt, type_integer, 2 );
-		DEFINE_SYSTEM_OPTION(filterwidthx, TqFloat, type_float, 2.0f );
-		DEFINE_SYSTEM_OPTION(filterwidthy, TqFloat, type_float, 2.0f );
-		DEFINE_SYSTEM_OPTION(exposuregain, TqFloat, type_float, 1.0f );
-		DEFINE_SYSTEM_OPTION(exposuregamma, TqFloat, type_float, 1.0f );
-//		DEFINE_SYSTEM_OPTION(imager, CqString, type_string, "null" );
-		DEFINE_SYSTEM_OPTION(colorquantizeone, TqInt, type_integer, 255 );
-		DEFINE_SYSTEM_OPTION(colorquantizemin, TqInt, type_integer, 0 );
-		DEFINE_SYSTEM_OPTION(colorquantizemax, TqInt, type_integer, 2255 );
-		DEFINE_SYSTEM_OPTION(colorquantizeditheramplitude, TqFloat, type_float, 0.5f );
-		DEFINE_SYSTEM_OPTION(depthquantizeone, TqInt, type_integer, 0 );
-		DEFINE_SYSTEM_OPTION(depthquantizemin, TqInt, type_integer, 0 );
-		DEFINE_SYSTEM_OPTION(depthquantizemax, TqInt, type_integer, 255 );
-		DEFINE_SYSTEM_OPTION(depthquantizeditheramplitude, TqFloat, type_float, 0.0f );
-		DEFINE_SYSTEM_OPTION(displaytype, CqString, type_string, "file" );
-		DEFINE_SYSTEM_OPTION(displayname, CqString, type_string, "aqsis.tif" );
-		DEFINE_SYSTEM_OPTION(displaymode, TqInt, type_integer, ModeRGB );
-
-		DEFINE_SYSTEM_OPTION(hider,CqString, type_string, "hidden" );
-		DEFINE_SYSTEM_OPTION(colorsamples, TqInt, type_integer, 3 );
-		DEFINE_SYSTEM_OPTION(relativedetail, TqFloat, type_float, 1.0f );
-
-		DEFINE_SYSTEM_OPTION(resolutionx, TqInt, type_integer, 640 );
-		DEFINE_SYSTEM_OPTION(resolutiony, TqInt, type_integer, 480 );
-		DEFINE_SYSTEM_OPTION(pixelaspectratio, TqFloat, type_float, 1.0f );
-		DEFINE_SYSTEM_OPTION(cropwindowminx, TqFloat, type_float, 0.0f );
-		DEFINE_SYSTEM_OPTION(cropwindowminy, TqFloat, type_float, 0.0f );
-		DEFINE_SYSTEM_OPTION(cropwindowmaxx, TqFloat, type_float, 1.0f );
-		DEFINE_SYSTEM_OPTION(cropwindowmaxy, TqFloat, type_float, 1.0f );
-		DEFINE_SYSTEM_OPTION(frameaspectratio, TqFloat, type_float, 4.0f / 3.0f );
-		DEFINE_SYSTEM_OPTION(screenwindowleft, TqFloat, type_float, -( 4.0f / 3.0f ) );
-		DEFINE_SYSTEM_OPTION(screenwindowright, TqFloat, type_float, 4.0f / 3.0f );
-		DEFINE_SYSTEM_OPTION(screenwindowtop, TqFloat, type_float, 1.0f );
-		DEFINE_SYSTEM_OPTION(screenwindowbottom, TqFloat, type_float, -1.0f );
-		DEFINE_SYSTEM_OPTION(cameraprojection, TqInt, type_integer, ProjectionOrthographic );
-		DEFINE_SYSTEM_OPTION(clippingplanenear, TqFloat, type_float, FLT_EPSILON );
-		DEFINE_SYSTEM_OPTION(clippingplanefar, TqFloat, type_float, FLT_MAX );
-		DEFINE_SYSTEM_OPTION(fstop, TqFloat, type_float, , FLT_MAX );
-		DEFINE_SYSTEM_OPTION(focallength, TqFloat, type_float, , FLT_MAX );
-		DEFINE_SYSTEM_OPTION(focaldistance, TqFloat, type_float, FLT_MAX );
-		DEFINE_SYSTEM_OPTION(shutteropen, TqFloat, type_float, 0.0f );
-		DEFINE_SYSTEM_OPTION(shutterclose, TqFloat, type_float, 1.0f );
-		DEFINE_SYSTEM_OPTION(fov, TqFloat, type_float, 90.0f );
-
 
 		/** Add a named user option to the current state.
 		 * \param pOption A pointer to a new CqSystemOption class containing the initialised option.
@@ -290,7 +166,11 @@ class CqOptions
 		void	ClearOptions()
 		{
 			m_aOptions.clear();
+			InitialiseDefaultOptions();
 		}
+		/** Initialise default system options.
+		 */
+		void InitialiseDefaultOptions();
 		/** Get a read only pointer to a named user option.
 		 * \param strName Character pointer to the requested options name.
 		 * \return A pointer to the option, or 0 if not found. 
@@ -315,8 +195,9 @@ class CqOptions
 						return ( *i );
 					else
 					{
+						CqSystemOption* pNew = new CqSystemOption( *( *i ) );
 						( *i ) ->Release();
-						( *i ) = new CqSystemOption( *( *i ) );
+						( *i ) = pNew;
 						( *i ) ->AddRef();
 						return ( *i );
 					}
@@ -440,23 +321,23 @@ class CqOptions
 		}
 		/** Get the name of the Imager shader.
 		 */
-		CqString	Get_imager() const
-		{
-			if( NULL == m_pParameters[ option_imager ] )	return( "null" );
-			
-			return(*static_cast<CqParameterTyped<CqString>*>(m_pParameters[option_imager])->pValue());
-		}
+//		CqString	Get_imager() const
+//		{
+//			if( NULL == m_pParameters[ option_imager ] )	return( "null" );
+//			
+//			return(*static_cast<CqParameterTyped<CqString>*>(m_pParameters[option_imager])->pValue());
+//		}
 		/** Set the name of the Imager shader.
 		 * \param strValue Character pointer to name of Imager shader.
 		 */
-		void	Set_imager( const CqString& value )
-		{
-			if( NULL == m_pParameters[ option_imager ] ) 
-				m_pParameters[ option_imager ] = new CqParameterTypedUniform<CqString, type_string>("imager"); 
-			*static_cast<CqParameterTyped<CqString>*>(m_pParameters[ option_imager ])->pValue() = value; 
-			
-			LoadImager( value );
-		}
+//		void	Set_imager( const CqString& value )
+//		{
+//			if( NULL == m_pParameters[ option_imager ] ) 
+//				m_pParameters[ option_imager ] = new CqParameterTypedUniform<CqString, type_string>("imager"); 
+//			*static_cast<CqParameterTyped<CqString>*>(m_pParameters[ option_imager ])->pValue() = value; 
+//			
+//			LoadImager( value );
+//		}
 		void	LoadImager( const CqString& strValue );
 		void	DeleteImager();
 		void	SetValueImager( char *token, char *value );
@@ -483,7 +364,6 @@ class CqOptions
 		std::vector<CqSystemOption*>	m_aOptions;				///< Vector of user specified options.
 		TqFloat	m_fClippingRange;
 
-		CqParameter*	m_pParameters[option_last];
 		RtFilterFunc m_funcFilter;						///< Pointer to the pixel filter function.
 		CqImagersource* m_pshadImager;		///< Pointer to the imager shader.
 

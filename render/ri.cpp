@@ -327,29 +327,29 @@ RtVoid	RiWorldBegin()
 	if ( !QGetRenderContext() ->optCurrent().FrameAspectRatioCalled() )
 	{
 		// Derive the FAR from the resolution and pixel aspect ratio.
-		RtFloat PAR = QGetRenderContext() ->optCurrent().Get_pixelaspectratio();
-		RtFloat resH = QGetRenderContext() ->optCurrent().Get_resolutionx();
-		RtFloat resV = QGetRenderContext() ->optCurrent().Get_resolutiony();
-		QGetRenderContext() ->optCurrent().Set_frameaspectratio( ( resH * PAR ) / resV );
+		RtFloat PAR = QGetRenderContext() ->optCurrent().GetFloatOption("System", "PixelAspectRatio")[0];
+		RtFloat resH = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "XResolution")[0];
+		RtFloat resV = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "YResolution")[0];
+		QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "FrameAspectRatio")[0] =  ( resH * PAR ) / resV ;
 	}
 
 	if ( !QGetRenderContext() ->optCurrent().ScreenWindowCalled() )
 	{
-		RtFloat fFAR = QGetRenderContext() ->optCurrent().Get_frameaspectratio();
+		RtFloat fFAR = QGetRenderContext() ->optCurrent().GetFloatOption("System", "FrameAspectRatio")[0];
 
 		if ( fFAR >= 1.0 )
 		{
-			QGetRenderContext() ->optCurrent().Set_screenwindowleft( -fFAR );
-			QGetRenderContext() ->optCurrent().Set_screenwindowright( + fFAR );
-			QGetRenderContext() ->optCurrent().Set_screenwindowbottom( -1 );
-			QGetRenderContext() ->optCurrent().Set_screenwindowtop( + 1 );
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindowLeft")[0] =  -fFAR ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindowRight")[0] =  + fFAR ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindowBottom")[0] =  -1 ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindowTop")[0] =  + 1 ;
 		}
 		else
 		{
-			QGetRenderContext() ->optCurrent().Set_screenwindowleft( -1 );
-			QGetRenderContext() ->optCurrent().Set_screenwindowright( + 1 );
-			QGetRenderContext() ->optCurrent().Set_screenwindowbottom( -1.0 / fFAR );
-			QGetRenderContext() ->optCurrent().Set_screenwindowtop( + 1.0 / fFAR );
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindowLeft")[0] =  -1 ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindowRight")[0] =  + 1 ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindowBottom")[0] =  -1.0 / fFAR ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindowTop")[0] =  + 1.0 / fFAR ;
 		}
 	}
 
@@ -404,9 +404,9 @@ RtVoid	RiWorldEnd()
 //
 RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio )
 {
-	QGetRenderContext() ->optCurrent().Set_resolutionx( xresolution );
-	QGetRenderContext() ->optCurrent().Set_resolutiony( yresolution );
-	QGetRenderContext() ->optCurrent().Set_pixelaspectratio( ( pixelaspectratio < 0.0 ) ? 1.0 : pixelaspectratio );
+	QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "XResolution")[0] =  xresolution ;
+	QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "YResolution")[0] =  yresolution ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "PixelAspectRatio")[0] =  ( pixelaspectratio < 0.0 ) ? 1.0 : pixelaspectratio ;
 
 	// Inform the system that RiFormat has been called, as this takes priority.
 	QGetRenderContext() ->optCurrent().CallFormat();
@@ -421,7 +421,7 @@ RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio 
 //
 RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 {
-	QGetRenderContext() ->optCurrent().Set_frameaspectratio( frameratio );
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "FrameAspectRatio")[0] =  frameratio ;
 
 	// Inform the system that RiFrameAspectRatio has been called, as this takes priority.
 	QGetRenderContext() ->optCurrent().CallFrameAspectRatio();
@@ -437,10 +437,10 @@ RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 //
 RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top )
 {
-	QGetRenderContext() ->optCurrent().Set_screenwindowleft( left );
-	QGetRenderContext() ->optCurrent().Set_screenwindowright( right );
-	QGetRenderContext() ->optCurrent().Set_screenwindowbottom( bottom );
-	QGetRenderContext() ->optCurrent().Set_screenwindowtop( top );
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindowLeft")[0] =  left ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindowRight")[0] =  right ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindowBottom")[0] =  bottom ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindowTop")[0] =  top ;
 
 	// Inform the system that RiScreenWindow has been called, as this takes priority.
 	QGetRenderContext() ->optCurrent().CallScreenWindow();
@@ -456,10 +456,10 @@ RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top 
 //
 RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 {
-	QGetRenderContext() ->optCurrent().Set_cropwindowminx( left );
-	QGetRenderContext() ->optCurrent().Set_cropwindowmaxx( right );
-	QGetRenderContext() ->optCurrent().Set_cropwindowminy( top );
-	QGetRenderContext() ->optCurrent().Set_cropwindowmaxy( bottom );
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "CropWindowMinX")[0] =  left ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "CropWindowMaxX")[0] =  right ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "CropWindowMinY")[0] =  top ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "CropWindowMaxY")[0] =  bottom ;
 
 	return ;
 }
@@ -489,9 +489,9 @@ RtVoid	RiProjection( const char *name, ... )
 RtVoid	RiProjectionV( const char *name, PARAMETERLIST )
 {
 	if ( strcmp( name, RI_PERSPECTIVE ) == 0 )
-		QGetRenderContext() ->optCurrent().Set_cameraprojection( ProjectionPerspective );
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "CameraProjection")[0] =  ProjectionPerspective ;
 	else
-		QGetRenderContext() ->optCurrent().Set_cameraprojection( ProjectionOrthographic );
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "CameraProjection")[0] =  ProjectionOrthographic ;
 
 	RtInt i;
 	for ( i = 0; i < count; i++ )
@@ -500,7 +500,7 @@ RtVoid	RiProjectionV( const char *name, PARAMETERLIST )
 		RtPointer	value = values[ i ];
 
 		if ( strcmp( token, RI_FOV ) == 0 )
-			QGetRenderContext() ->optCurrent().Set_fov( *( reinterpret_cast<RtFloat*>( value ) ) );
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "FOV")[0] =  *( reinterpret_cast<RtFloat*>( value ) ) ;
 	}
 	// TODO: need to get the current transformation so that it can be added to the screen transformation.
 	QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), CqMatrix() );
@@ -515,8 +515,8 @@ RtVoid	RiProjectionV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 {
-	QGetRenderContext() ->optCurrent().Set_clippingplanenear( cnear );
-	QGetRenderContext() ->optCurrent().Set_clippingplanefar( cfar );
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ClippingPlaneNear")[0] =  cnear ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ClippingPlaneFar")[0] =  cfar ;
 
 	return ;
 }
@@ -528,9 +528,9 @@ RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 //
 RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance )
 {
-	QGetRenderContext() ->optCurrent().Set_fstop( fstop );
-	QGetRenderContext() ->optCurrent().Set_focallength( focallength );
-	QGetRenderContext() ->optCurrent().Set_focaldistance( focaldistance );
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "FStop")[0] =  fstop ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "FocalLength")[0] =  focallength ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "FocalDistance")[0] =  focaldistance ;
 
 	return ;
 }
@@ -542,8 +542,8 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 //
 RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 {
-	QGetRenderContext() ->optCurrent().Set_shutteropen( opentime );
-	QGetRenderContext() ->optCurrent().Set_shutterclose( closetime );
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ShutterOpen")[0] =  opentime ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ShutterClose")[0] =  closetime ;
 
 	return ;
 }
@@ -556,7 +556,7 @@ RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 //
 RtVoid	RiPixelVariance( RtFloat variance )
 {
-	QGetRenderContext() ->optCurrent().Set_pixelvariance( variance );
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "PixelVariance")[0] =  variance ;
 
 	return ;
 }
@@ -568,8 +568,8 @@ RtVoid	RiPixelVariance( RtFloat variance )
 //
 RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 {
-	QGetRenderContext() ->optCurrent().Set_pixelsamplesx( static_cast<TqInt>( xsamples ) );
-	QGetRenderContext() ->optCurrent().Set_pixelsamplesy( static_cast<TqInt>( ysamples ) );
+	QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "PixelSamplesX")[0] =  static_cast<TqInt>( xsamples ) ;
+	QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "PixelSamplesY")[0] =  static_cast<TqInt>( ysamples ) ;
 
 	return ;
 }
@@ -582,8 +582,8 @@ RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 {
 	QGetRenderContext() ->optCurrent().SetfuncFilter( function );
-	QGetRenderContext() ->optCurrent().Set_filterwidthx( xwidth );
-	QGetRenderContext() ->optCurrent().Set_filterwidthy( ywidth );
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("system", "FilterWidthX")[0] =  xwidth ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("system", "FilterWidthY")[0] =  ywidth ;
 
 	return ;
 }
@@ -595,8 +595,8 @@ RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 //
 RtVoid	RiExposure( RtFloat gain, RtFloat gamma )
 {
-	QGetRenderContext() ->optCurrent().Set_exposuregain( gain );
-	QGetRenderContext() ->optCurrent().Set_exposuregamma( gamma );
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ExposureGain")[0] =  gain ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ExposureGamma")[0] =  gamma ;
 
 	return ;
 }
@@ -629,7 +629,8 @@ RtVoid	RiImagerV( const char *name, PARAMETERLIST )
 
 	if ( strlen( name ) )
 	{
-		QGetRenderContext() ->optCurrent().Set_imager( name );
+		QGetRenderContext() ->optCurrent().GetStringOptionWrite("System", "Imager")[0] =  name ;
+		QGetRenderContext() ->optCurrent().LoadImager(name);
 		for ( i = 0; i < count; i++ )
 		{
 			RtToken	token = tokens[ i ];
@@ -651,17 +652,17 @@ RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat dither
 {
 	if ( strcmp( type, "rgba" ) == 0 )
 	{
-		QGetRenderContext() ->optCurrent().Set_colorquantizeone( one );
-		QGetRenderContext() ->optCurrent().Set_colorquantizemin( min );
-		QGetRenderContext() ->optCurrent().Set_colorquantizemax( max );
-		QGetRenderContext() ->optCurrent().Set_colorquantizeditheramplitude( ditheramplitude );
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "ColorQuantizeNne")[0] =  one ;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "ColorQuantizeMin")[0] =  min ;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "ColorQuantizeMax")[0] =  max ;
+		QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ColorQuantizeDitherAmplitude")[0] =  ditheramplitude ;
 	}
 	else
 	{
-		QGetRenderContext() ->optCurrent().Set_depthquantizeone( one );
-		QGetRenderContext() ->optCurrent().Set_depthquantizemin( min );
-		QGetRenderContext() ->optCurrent().Set_depthquantizemax( max );
-		QGetRenderContext() ->optCurrent().Set_depthquantizeditheramplitude( ditheramplitude );
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "DepthQuantizeOne")[0] =  one ;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "DepthQuantizeMin")[0] =  min ;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "DepthQuantizeMax")[0] =  max ;
+		QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "DepthQuantizeDitherAmplitude")[0] =  ditheramplitude ;
 	}
 
 	return ;
@@ -694,8 +695,8 @@ RtVoid	RiDisplayV( const char *name, RtToken type, RtToken mode, PARAMETERLIST )
 	CqString strName( name );
 	CqString strType( type );
 
-	QGetRenderContext() ->optCurrent().Set_displayname( strName.c_str() );
-	QGetRenderContext() ->optCurrent().Set_displaytype( strType.c_str() );
+	QGetRenderContext() ->optCurrent().GetStringOptionWrite("System", "DisplayName")[0] =  strName.c_str() ;
+	QGetRenderContext() ->optCurrent().GetStringOptionWrite("System", "DisplayType")[0] =  strType.c_str() ;
 
 	// Append the display mode to the current setting.
 	RtInt eValue = 0;
@@ -709,13 +710,14 @@ RtVoid	RiDisplayV( const char *name, RtToken type, RtToken mode, PARAMETERLIST )
 	// Check if the request is to add a display driver.
 	if ( strName[ 0 ] == '+' )
 	{
-		QGetRenderContext() ->optCurrent().Set_displaymode( QGetRenderContext() ->optCurrent().Get_displaymode() | eValue );
+		TqInt iMode = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "DisplayMode")[0] | eValue;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "DisplayMode")[0] = iMode;
 		strName = strName.substr( 1 );
 	}
 	else
 	{
 		QGetRenderContext() ->ClearDisplayRequests();
-		QGetRenderContext() ->optCurrent().Set_displaymode( eValue );
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "DisplayMode")[0] =  eValue ;
 	}
 	// Add a display driver to the list of requested drivers.
 	QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode );
@@ -1002,7 +1004,7 @@ RtVoid	RiHiderV( const char *name, PARAMETERLIST )
 {
 	if ( !strcmp( name, "hider" ) || !strcmp( name, "painter" ) )
 	{
-		QGetRenderContext() ->optCurrent().Set_hider( name );
+		QGetRenderContext() ->optCurrent().GetStringOptionWrite("System", "Hider")[0] =  name ;
 	}
 
 	return ;
