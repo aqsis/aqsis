@@ -1,3 +1,83 @@
+2002-02-19 20:32  pgregory
+
+	* prep_install.bat: Put display devices in the displays
+	subdirectory.
+
+2002-02-19 20:11  pgregory
+
+	* render/version.h: Update version no.
+
+2002-02-19 09:05  pgregory
+
+	* ribfiles/: subdiv1.rib, subdiv2.rib: Remove extraneous empty tag
+	fields.
+
+2002-02-18 16:17  dsward2
+
+	* MacAqsis_README.html: Added instruction for building from source
+	code.
+
+2002-02-18 08:16  pgregory
+
+	* render/motion.h: Fix bug with negative time values.
+
+2002-02-17 21:41  pgregory
+
+	* render/macosx/std/Makefile.am: Add relevant macos makefiles
+
+2002-02-17 21:37  pgregory
+
+	* releasearchive/Makefile.am, render/macosx/Makefile.am: Add
+	relevant macos makefiles
+
+2002-02-16 00:09  pgregory
+
+	* INSTALL, README: Add Windows install message, remove Posix status
+	report.
+
+2002-02-15 14:56  pgregory
+
+	* render/trimcurve.cpp: Fix bug where NURBS surfaces without trim
+	curves were being completely trimmed! This was due to the fact that
+	the trim check was based around the number of crossings being odd
+	for interior surfaces, and 0 is even!!
+
+2002-02-15 14:54  pgregory
+
+	* render/shadeops.cpp: Fix bug in illuminance/illuminate,
+	incorrectly put fabs() around the cone angle acos check, hopefully
+	have got it right this time!
+
+2002-02-15 01:49  pgregory
+
+	* render/imagebuffer.cpp: Fix bug in quantize, didn't quantize at
+	all if ditheramplitude was zero.
+
+2002-02-15 01:22  pgregory
+
+	* librib2/librib.cpp, render/micropolygon.cpp, render/shadeops.cpp:
+	Remove old texturedirectory code, superceded by trilinear
+	mipmapping.  Add support for attribute "trimcurve" "sense"
+
+2002-02-14 23:02  pgregory
+
+	* render/: trimcurve.cpp, trimcurve.h: Fix bug with multiple
+	trimming loops.
+
+2002-02-13 12:33  pgregory
+
+	* render/shadeops.cpp: Fix bug in illuminate, Cl was not getting
+	initialised in areas which aren't lit.
+
+2002-02-12 16:05  pgregory
+
+	* prep_install.bat: Update to include proper ddmsock.ini and
+	plugins.
+
+2002-02-12 15:43  pgregory
+
+	* ChangeLog: [no log message]
+
 2002-02-12 15:42  pgregory
 
 	* Makefile.am, configure.in, aqsl/Makefile.am, render/version.h,
@@ -10,8 +90,9 @@
 
 2002-02-12 13:31  pgregory
 
-	* releasearchive/releasearchive.dsp: Renamed old utility project
-	because Posix has problems with spaces.
+	* releasearchive/releasearchive.dsp, Release Archive/Release
+	Archive.dsp: Renamed old utility project because Posix has problems
+	with spaces.
 
 2002-02-12 12:18  pgregory
 
@@ -1078,11 +1159,16 @@
 	processing is done before responding. Means shadowmaps in
 	particular can be finished before RiMakeShadow is called.
 
+2001-10-11 12:47  pgregory
+
+	* Release Archive/Release Archive.dsp: Make sure spurious output
+	directories aren't created.
+
 2001-10-11 12:46  pgregory
 
-	* Renderer.dsw, prep_install.bat, all/All.dsp: Change All build to
-	just buid all and add a new project to generate the release
-	archive.
+	* Renderer.dsw, prep_install.bat, all/All.dsp, Release
+	Archive/Release Archive.dsp: Change All build to just buid all and
+	add a new project to generate the release archive.
 
 2001-10-11 12:32  pgregory
 
