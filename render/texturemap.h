@@ -299,7 +299,12 @@ class _qShareC CqTextureMap : public IqTextureMap
 		{
 			m_Quality = Quality;
 		}
-
+		
+		_qShareM CqMatrix& GetMatrix(TqInt which)
+		{
+				return ( m_matWorldToScreen );
+		}
+	
 		/** Get the image type.
 		 */
 		_qShareM	virtual	EqMapType	Type() const
@@ -381,6 +386,8 @@ class _qShareC CqTextureMap : public IqTextureMap
 		_qShareM static void WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );
 		_qShareM static void WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality );
 
+		
+		
 	protected:
 		static	std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loaded textures.
 		static  std::vector<CqString*>		m_ConvertString_Cache; ///< Static array of filename (after conversion)
@@ -404,6 +411,8 @@ class _qShareC CqTextureMap : public IqTextureMap
 		RtFilterFunc m_FilterFunc;       ///< Catmull-Rom, sinc, disk, ... pixelfilter
 		TqFloat m_swidth, m_twidth;   ///< for the pixel's filter
 		std::vector<CqTextureMapBuffer*>	m_apSegments;	///< Array of cache segments related to this image.
+
+		CqMatrix	m_matWorldToScreen;		///< Matrix to convert points from world space to screen space.
 
 		// Temporary values used during sampling.
 		std::valarray<TqFloat>		m_tempval1;
@@ -441,9 +450,18 @@ class _qShareC CqEnvironmentMap : public CqTextureMap
 		_qShareM	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
 		                                    TqFloat sblur, TqFloat tblur,
 		                                    std::valarray<TqFloat>& val );
+		
+		_qShareM CqMatrix& CqEnvironmentMap::GetMatrix(TqInt which)
+		{
+			
+				return ( m_matWorldToScreen );
+		}
+					
 
 	private:
 		void	Getst( CqVector3D& R, TqUlong fullwidth, TqUlong fulllength, TqFloat& s, TqFloat& t );
+		CqMatrix	m_matWorldToScreen;		///< Matrix to convert points from world space to screen space.
+
 };
 
 //----------------------------------------------------------------------
@@ -465,7 +483,7 @@ class _qShareC CqLatLongMap : public CqEnvironmentMap
 		{
 			return ( IsValid() ? MapType_LatLong : MapType_Invalid );
 		}
-
+        
 
 };
 
@@ -502,6 +520,8 @@ class _qShareC CqShadowMap : public CqTextureMap
 			return ( m_matWorldToScreen );
 		}
 
+		
+
 		_qShareM	void	AllocateMap( TqInt XRes, TqInt YRes );
 		_qShareM	TqFloat	Sample( const CqVector3D&	vecPoint );
 		_qShareM	void	SaveZFile();
@@ -514,6 +534,13 @@ class _qShareC CqShadowMap : public CqTextureMap
 
 
 		_qShareM	virtual	void	SampleMap( const CqVector3D& R1, const CqVector3D& R2, const CqVector3D& R3, const CqVector3D& R4, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val, TqFloat& depth );
+        _qShareM CqMatrix& CqShadowMap::GetMatrix(TqInt which)
+		{
+				if (which == 0) return m_matWorldToCamera;
+				else if (which == 1) return m_matWorldToScreen;
+				return ( m_matWorldToCamera );
+		}
+
 
 	private:
 		static	TqInt	m_rand_index;			///< Static random number table index.

@@ -4,8 +4,8 @@
  *	@author	Authors name
  *	@brief	Brief description of the file contents
  *
- *	Last change by:		$Author: dsward2 $
- *	Last change date:	$Date: 2002/05/18 22:58:58 $
+ *	Last change by:		$Author: pgregory $
+ *	Last change date:	$Date: 2002/10/23 21:13:30 $
  */
 //------------------------------------------------------------------------------
 
@@ -107,6 +107,7 @@ struct IqTextureMap
 	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
 		                                TqFloat sblur, TqFloat tblur,
 		                                std::valarray<TqFloat>& val ) = 0;
+	virtual CqMatrix&  GetMatrix(TqInt which)  =  0;
 
 };
 

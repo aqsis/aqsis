@@ -73,7 +73,7 @@ static void project( TqInt face );
 #define	edge52	36
 #define	edge53	40
 #define	edge54	48
-
+#define MEG1    1024*1024
 
 CqVector3D	cube[ max_no ];	// Stores the projection of the reflected beam onto the cube.
 TqInt	cube_no; 		// Stores the number of points making up the projection.
@@ -81,7 +81,7 @@ TqFloat	uv[ max_no ][ 2 ];	// Stores the values of this projection for a given f
 
 TqInt	CqShadowMap::m_rand_index = 0;
 TqFloat	CqShadowMap::m_aRand_no[ 256 ];
-TqBool  m_critical = TqFalse;
+static TqBool  m_critical = TqFalse;
 
 //---------------------------------------------------------------------
 /** Static array of cached texture maps.
@@ -102,8 +102,10 @@ static TqInt free_cnt = 0;
 
 TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt samples )
 {
+	TqChar warnings[ 400 ];
 	static TqInt limit = -1;
 	static TqInt report = 1;
+	static TqInt megs = 10; /* a number to hint it is abusing enough memory */
 	TqInt demand = width * height * samples;
 
 #ifdef ALLOCSEGMENTSTATUS
@@ -112,46 +114,44 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 	if ( limit == -1 )
 	{
 		const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
-		limit = 0;
+		limit = MEG1;
 		if ( poptMem )
 			limit = poptMem[ 0 ] * 1024;
 	}
 
+	TqInt more = QGetRenderContext() ->Stats().GetTextureMemory() + demand;
 
-	if ( limit > 0 )
+
+	if ( more > limit)
 	{
-		TqInt more = QGetRenderContext() ->Stats().GetTextureMemory() + demand;
 
 		// Critical level of memory will be reached;
 		// I'm better starting the cleanup cache memory buffer
-		if ( more > (int) (0.8 * (float) limit))
-			m_critical = TqTrue;
+		// We need to zap the cache we are exceeding the required texturememory demand
+		// For now, we will just warn the user the texturememory's demand will exceed the
+		// request number.
 
-		if ( more > limit)
-		{
-
-			// We need to zap the cache we are exceeding the required texturememory demand
-			// For now, we will just warn the user the texturememory's demand will exceed the
-			// request number.
-			TqChar warnings[ 400 ];
-
-			sprintf( warnings, "Exceeding the allocated texturememory by %d",
-			         more - limit );
-			if (report)
-				RiErrorPrint( 0, 1, warnings );
-			report = 0;
-            m_critical = TqTrue;
-		}
-
-
+		sprintf( warnings, "Exceeding the allocated texturememory by %d",
+			     more - limit );
+		if (report)
+			RiErrorPrint( 0, 1, warnings );
+		report = 0;
+		m_critical = TqTrue;
 	}
+
+#ifdef _DEBUG
+	if ( (more > MEG1) && ((more / (1024 * 1024) )> megs ) ) {
+		sprintf( warnings, "Texturememory is more than %d Megs", megs);
+		RiErrorPrint( 0, 1, warnings );
+		megs += 10;
+	}
+#endif
 	QGetRenderContext() ->Stats().IncTextureMemory( demand );
 
 	// just do a malloc since the texturemapping will set individual member of the allocated buffer
 	// a calloc is wastefull operation in this case.
 	return ( static_cast<TqPuchar>( malloc( demand ) ) );
 }
-
 //---------------------------------------------------------------------
 /** Static array of cached texture maps.
  */
@@ -672,7 +672,9 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 		}
 		else
 		{
-			if ( Type() == MapType_Shadow )
+			TqUlong sizef = TIFFScanlineSize(m_pImage);
+                        TqBool infloat = (Type() == MapType_Shadow) || (sizef == (m_SamplesPerPixel * sizeof( TqFloat ) * m_XRes ));
+			if ( infloat)
 				pTMB = new CqTextureMapBuffer( 0, 0, sizeof( TqFloat ) * m_XRes, m_YRes, m_SamplesPerPixel, directory );
 			else
 				pTMB = new CqTextureMapBuffer( 0, 0, m_XRes, m_YRes, m_SamplesPerPixel, directory );
@@ -684,7 +686,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 			for ( i = 0; i < m_YRes; i++ )
 			{
 				TIFFReadScanline( m_pImage, pdata, i );
-				if ( Type() == MapType_Shadow )
+				if ( infloat )
 					pdata += m_XRes * m_SamplesPerPixel * sizeof( TqFloat );
 				else
 					pdata += m_XRes * m_SamplesPerPixel;
@@ -990,33 +992,57 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 
 void CqTextureMap::CriticalMeasure()
 {
+const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
+#ifdef _DEBUG
 TqChar warnings[ 400 ];
-TqInt more, limit;
+#endif
+TqInt current, limit, now;
+std::vector<CqTextureMap*>::iterator i;
+std::vector<CqTextureMapBuffer*>::iterator j;
 
-	if (m_critical) 
+	limit = MEG1;
+	if ( poptMem )
+		limit = poptMem[ 0 ] * 1024;
+
+	now = QGetRenderContext() ->Stats().GetTextureMemory();
+
+	if (m_critical)  
 	{
 
-		more = QGetRenderContext() ->Stats().GetTextureMemory();
-
-		// Delete all the tile's memory associated with any texturemap objects
-		for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ ) {
-			for ( std::vector<CqTextureMapBuffer*>::iterator j = (*i)->m_apSegments.begin(); j != (*i)->m_apSegments.end(); j++ )
+		 /* Extreme case no more memory to play */
+		
+		/* It is time to delete some tile's memory associated with 
+                 * texturemap objects.
+		 *
+		 * In principle the oldest texturemaps are freed first 
+                 * (regardless of their current usage. Therefore this method 
+                 * could only be 
+                 * called at a place where the fact of release 
+                 * texturemapbuffer will not impact the subsequent 
+                 * GetBuffer() calls.
+		 *
+		 */
+		for (  i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ ) {
+			for (  j = (*i)->m_apSegments.begin(); j != (*i)->m_apSegments.end(); j++ )
 				(*j)->Release();
 			(*i)->m_apSegments.resize(0);
+			current = QGetRenderContext() ->Stats().GetTextureMemory();
+			if ((now-current) > (limit/4)) break;
 		}
-		
-
-		limit = QGetRenderContext() ->Stats().GetTextureMemory();
-		m_critical = TqFalse;
-
+	}
+	current = QGetRenderContext() ->Stats().GetTextureMemory();
+	
+	m_critical = TqFalse;
+	
 #ifdef _DEBUG
-		sprintf( warnings, "I was forced to zap the tile segment buffers for %dK",
-							(more - limit)/ 1024 );
+
+	sprintf( warnings, "I was forced to zap the tile segment buffers for %dK",
+								(now - current)/ 1024 );
+	if (now-current) 
 		RiErrorPrint( 0, 1, warnings );
 #endif
-	}
-}
 
+}
 void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<TqFloat>& val )
 {
 	// u/v is average of sample positions.
@@ -1135,6 +1161,11 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		/* cannot find anything than goodbye */
 		if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd ) 
 		{
+			TqChar warnings[ 400 ];
+
+			val = m_low_color;
+			sprintf( warnings, "Cannot find value for either pTMPB[a,b,c,d]");
+			RiErrorPrint( 0, 1, warnings );
 			return;
 		}
 
