@@ -1190,6 +1190,25 @@ void CqShaderVM::SO_bake_3n()
 	VARFUNC;
 	VOIDFUNC4( m_pEnv->SO_bake_3n );
 }
+
+void CqShaderVM::SO_external()
+{
+	AUTOFUNC;
+	SqDSOExternalCall *pCall = ReadNext().m_pExtCall;
+
+	RESULT(pCall->return_type, __fVarying?class_varying:class_uniform);
+
+	IqShaderData **arg_data = new IqShaderData*[pCall->arg_types.size()];
+	for (int x = 0 ; x < pCall->arg_types.size();x++){
+		arg_data[x] = POP;
+	};
+
+	m_pEnv->SO_external(pCall->method, pCall->initData, pResult, this, pCall->arg_types.size(),arg_data);
+	//delete[](arg_data);
+	
+	Push(pResult);
+}
+
 #ifdef AQSIS_SYSTEM_MACOSX
 #pragma CC_OPT_RESTORE
 #endif

@@ -110,6 +110,7 @@ enum EqParseNodeType
     ParseNode_Base = 0,
     ParseNode_Shader,
     ParseNode_FunctionCall,
+    ParseNode_UnresolvedCall,
     ParseNode_Variable,
     ParseNode_ArrayVariable,
     ParseNode_VariableAssign,
@@ -176,6 +177,15 @@ struct IqParseNodeShader
 
 
 struct IqParseNodeFunctionCall
+{
+	virtual	const char*	strName() const = 0;
+	virtual	const IqFuncDef* pFuncDef() const = 0;
+
+	const static EqParseNodeType m_ID;
+};
+
+
+struct IqParseNodeUnresolvedCall
 {
 	virtual	const char*	strName() const = 0;
 	virtual	const IqFuncDef* pFuncDef() const = 0;

@@ -5145,5 +5145,272 @@ STD_SOIMPL CqShaderExecEnv::SO_bake_3v( STRINGVAL name, FLOATVAL s, FLOATVAL t, 
 	END_UNIFORM_SECTION
 }
 
+
+// We manually decalr th
+STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPARAMVARIMPL)
+{
+	INIT_SO
+
+	CHECKVARY(Result);
+	for (int p=0;p<cParams;p++){
+		CHECKVARY(apParams[p]);
+	};
+
+	int dso_argc = cParams + 1; // dso_argv[0] is used for the return value
+	void **dso_argv = new (void*)[dso_argc] ;
+
+	// create storage for the returned value
+	switch(Result->Type()){
+
+		case type_float: 
+		 	dso_argv[0]=(void*) new TqFloat; break;
+		case type_point:
+		case type_color:
+		case type_triple:
+		case type_vector:
+		case type_normal: 
+			dso_argv[0]=(void*) new (TqFloat)[3]; break;
+		case type_string:
+			break;
+		case type_matrix:
+		case type_sixteentuple:
+			break;
+		case type_hpoint:
+		case type_bool:
+		default:
+			// Unhandled TYpe
+			break;
+	};
+
+	// Allocate space for the arguments
+	for(int p=1;p<=cParams;p++){
+
+		switch(apParams[p-1]->Type()){
+			case type_float:
+				dso_argv[p] = (void*) new TqFloat; break;
+			case type_point:
+			case type_triple: // This seems reasonable
+			case type_vector:
+			case type_normal:
+			case type_color:
+				dso_argv[p] = (void*) new TqFloat[3]; break;
+			case type_string:
+				break;
+			case type_matrix:
+			case type_sixteentuple:
+				break;
+			case type_hpoint:
+			case type_bool:
+			default: 
+				// Unhandled TYpe
+				break;
+		};
+	};
+
+
+	BEGIN_VARYING_SECTION
+
+	// Convert the arguments to the required format for the DSO
+	for(int p=1;p<=cParams;p++){
+
+		switch(apParams[p-1]->Type()){
+			case type_float:
+				apParams[p-1]->GetFloat(*((float*)dso_argv[p]),__iGrid);
+				break;
+			case type_point:{
+				CqVector3D v;
+				apParams[p-1]->GetPoint(v,__iGrid);
+				((float*) dso_argv[p])[0] = v[0];
+				((float*) dso_argv[p])[1] = v[1];
+				((float*) dso_argv[p])[2] = v[2];
+				}; break;
+			case type_triple: // This seems reasonable
+			case type_vector:{
+				CqVector3D v;
+				apParams[p-1]->GetVector(v,__iGrid);
+				((float*) dso_argv[p])[0] = v[0];
+				((float*) dso_argv[p])[1] = v[1];
+				((float*) dso_argv[p])[2] = v[2];
+				}; break;
+			case type_normal:{
+				CqVector3D v;
+				apParams[p-1]->GetNormal(v,__iGrid);
+				((float*) dso_argv[p])[0] = v[0];
+				((float*) dso_argv[p])[1] = v[1];
+				((float*) dso_argv[p])[2] = v[2];
+				}; break;
+			case type_color:{
+				CqColor c;
+				apParams[p-1]->GetColor(c,__iGrid);
+				((float*) dso_argv[p])[0] = c[0];
+				((float*) dso_argv[p])[1] = c[1];
+				((float*) dso_argv[p])[2] = c[2];
+				}; break;
+			case type_string:
+				break;
+			case type_matrix:
+			case type_sixteentuple:
+				break;
+			case type_hpoint:
+			case type_bool:
+			default: 
+				// Unhandled TYpe
+				break;
+		};
+	};
+
+	// Atlast, we call the shadeop method, looks rather dull after all this effort.
+	method(initData, dso_argc, dso_argv);
+
+	// Pass the returned value back to aqsis
+	switch(Result->Type()){
+
+		case type_float:{
+				TqFloat val= *((float*) (dso_argv[0]));
+ 				Result->SetFloat(val,__iGrid);
+			}; break;
+		case type_point:{
+				CqVector3D v;
+				v[0] = ((float*) dso_argv[0])[0];
+				v[1] = ((float*) dso_argv[0])[1];
+				v[2] = ((float*) dso_argv[0])[2];
+				Result->SetPoint(v,__iGrid);
+			}; break;
+		case type_triple: // This seems reasonable
+		case type_vector:{
+				CqVector3D v;
+				v[0] = ((float*) dso_argv[0])[0];
+				v[1] = ((float*) dso_argv[0])[1];
+				v[2] = ((float*) dso_argv[0])[2];
+				Result->SetVector(v,__iGrid);
+			}; break;
+		case type_normal:{
+				CqVector3D v;
+				v[0] = ((float*) dso_argv[0])[0];
+				v[1] = ((float*) dso_argv[0])[1];
+				v[2] = ((float*) dso_argv[0])[2];
+				Result->SetNormal(v,__iGrid);
+			}; break;
+		case type_color:{
+				CqVector3D c;
+				c[0] = ((float*) dso_argv[0])[0];
+				c[1] = ((float*) dso_argv[0])[1];
+				c[2] = ((float*) dso_argv[0])[2];
+				Result->SetColor(c,__iGrid);
+			}; break;
+		case type_string: // Need to look into these
+			break;
+		case type_matrix:
+		case type_sixteentuple:
+			break;
+		case type_hpoint:
+		case type_bool:
+		default:
+			// Unhandled TYpe
+			break;
+	};
+
+
+	// Set the values that were altered by the Shadeop
+	for(int p=1;p<=cParams;p++){
+		switch(apParams[p-1]->Type()){
+			case type_float:{
+				TqFloat val = *((float*)dso_argv[p]) ;
+				apParams[p-1]->SetFloat(val,__iGrid);
+				};break;
+			case type_point:{
+				CqVector3D v;
+				v[0] = ((float*) dso_argv[p])[0];
+				v[1] = ((float*) dso_argv[p])[1];
+				v[2] = ((float*) dso_argv[p])[2];
+				apParams[p-1]->SetPoint(v,__iGrid);
+				};break;
+			case type_triple: // This seems reasonable
+			case type_vector:{
+				CqVector3D v;
+				v[0] = ((float*) dso_argv[p])[0];
+				v[1] = ((float*) dso_argv[p])[1];
+				v[2] = ((float*) dso_argv[p])[2];
+				apParams[p-1]->SetVector(v,__iGrid);
+				};break;
+			case type_normal:{
+				CqVector3D v;
+				v[0] = ((float*) dso_argv[p])[0];
+				v[1] = ((float*) dso_argv[p])[1];
+				v[2] = ((float*) dso_argv[p])[2];
+				apParams[p-1]->SetNormal(v,__iGrid);
+				};break;
+			case type_color:{
+				CqVector3D c;
+				c[0] = ((float*) dso_argv[p])[0];
+				c[1] = ((float*) dso_argv[p])[1];
+				c[2] = ((float*) dso_argv[p])[2];
+				apParams[p-1]->SetColor(c,__iGrid);
+				};break;
+			case type_string: // Need to look into these
+				break;
+			case type_matrix:
+			case type_sixteentuple:
+				break;
+			case type_hpoint:
+			case type_bool:
+			default: 
+				// Unhandled TYpe
+				break;
+		};
+	};
+
+	END_VARYING_SECTION
+
+//	// Free up the storage allocated for the return type
+//	switch(Result->Type()){
+//
+//		case type_float: 
+//		 	delete (float*) dso_argv[0]; break;
+//		case type_point:
+//		case type_triple: // This seems reasonable
+//		case type_vector:
+//		case type_normal:
+//		case type_color:
+//			delete[] (float*) dso_argv[0];
+//		case type_string: // Need to look into these
+//			break;
+//		case type_matrix:
+//		case type_sixteentuple:
+//			break;
+//		case type_hpoint:
+//		case type_bool:
+//		default:
+//			// Unhandled TYpe
+//			break;
+//	};
+//
+//	// Free up the storage allocated for the args
+//	for(int p=1;p<=cParams;p++){
+//		switch(apParams[p-1]->Type()){
+//			case type_float:
+//				delete (float*) dso_argv[p]; break;
+//			case type_point:
+//			case type_triple:
+//			case type_vector:
+//			case type_normal:
+//			case type_color:
+//				delete[] (float*) dso_argv[p]; break;
+//			case type_string: // Need to look into these
+//				break;
+//			case type_matrix:
+//			case type_sixteentuple:
+//				break;
+//			case type_hpoint:
+//			case type_bool:
+//			default: 
+//				// Unhandled TYpe
+//				break;
+//		};
+//	};
+
+	delete dso_argv;
+}
+
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

@@ -29,6 +29,7 @@
 
 #include	<vector>
 
+#include	"log.h"
 #include	"aqsis.h"
 
 #include	"bitvector.h"
@@ -43,6 +44,7 @@
 #include	"shaderexecenv.h"
 #include	"shaderstack.h"
 #include	"shadervariable.h"
+#include 	"dsoshadeops.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -94,8 +96,9 @@ union UsProgramElement
 	void( CqShaderVM::*m_Command ) ();		///< Pointer to a function.
 	TqFloat	m_FloatVal;				///< Absolute float value.
 	CqString*	m_pString;			///< Absolute string value.
-	TqInt	m_iVariable;			///< Shader variable index.
+	TqInt	m_iVariable;				///< Shader variable index.
 	SqLabel	m_Label;				///< Program label.
+	SqDSOExternalCall *m_pExtCall	;		///< Call a DSO function
 };
 
 
@@ -385,12 +388,12 @@ static CqMatrix temp_matrix;
  * Main class handling the execution of a program in shader language bytecodes.
  */
 
-class _qShareC CqShaderVM : public CqShaderStack, public IqShader
+class _qShareC CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 {
 	public:
-		_qShareM CqShaderVM() : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
+		_qShareM CqShaderVM() : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue ), m_logger( NULL )
 		{}
-		_qShareM	CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
+		_qShareM	CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue ), m_logger( NULL )
 		{
 			*this = From;
 		}
@@ -470,7 +473,13 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		 */
 		CqShaderVM&	operator=( const CqShaderVM& From );
 
+		void SetLogger (CqLog *logger) 
+		{
+			m_logger = logger;
+		};
+
 	private:
+		CqLog	*m_logger;
 		TqInt	m_Uses;			///< Bit vector representing the system variables used by this shader.
 		CqMatrix	m_matCurrent;	///< Transformation matrix to world coordinates in effect at the time this shader was instantiated.
 		CqString	m_strName;		///< The name of this shader.
@@ -575,6 +584,16 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		{
 			UsProgramElement E;
 			E.m_iVariable = iVar;
+			pProgramArea->push_back( E );
+		}
+		/** Add an an external call descriptor to the program area
+		 * \param iVar Integer variable index to add, top bit indicates system variable.
+		 * \param pProgramArea Pointer to the program area, either init, or main code areas.
+		 */
+		void	AddDSOExternalCall( SqDSOExternalCall *pExtCall, std::vector<UsProgramElement>* pProgramArea )
+		{
+			UsProgramElement E;
+			E.m_pExtCall = pExtCall;
 			pProgramArea->push_back( E );
 		}
 
@@ -775,7 +794,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		void	SO_ftexture1();
 		void	SO_ftexture2();
 		void	SO_ftexture3();
-		void SO_textureinfo();
+		void	SO_textureinfo();
 		void	SO_ctexture1();
 		void	SO_ctexture2();
 		void	SO_ctexture3();
@@ -858,6 +877,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		void	SO_bake_3p();
 		void	SO_bake_3v();
 		void	SO_bake_3n();
+		void	SO_external();
 
 
 		static	SqOpCodeTrans	m_TransTable[];		///< Static opcode translation table.

@@ -358,6 +358,60 @@ class CqParseNodeFunctionCall : public CqParseNode, public IqParseNodeFunctionCa
 
 
 ///----------------------------------------------------------------------
+/// CqParseNodeUnresolvedCall
+/// Parsenode specifying an unresolved call., to be handled by a DSO.
+
+class CqParseNodeUnresolvedCall : public CqParseNode, public IqParseNodeUnresolvedCall
+{
+	public:
+		CqParseNodeUnresolvedCall( CqFuncDef& aFuncDef) :
+				CqParseNode()
+		{
+		  	m_aFuncDef = aFuncDef ;
+		}
+
+		virtual	~CqParseNodeUnresolvedCall()
+		{}
+
+		// Overridden from IqParseNodeUnresolvedCall
+
+		virtual	const char*	strName() const;
+		virtual	const IqFuncDef* pFuncDef() const;
+
+		// Overridden from IqParseNode
+		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
+		{
+			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeUnresolvedCall>( this, type ) ) != 0 ) return ( TqTrue );
+			return ( CqParseNode::GetInterface( type, pNode ) );
+		}
+		virtual	TqInt	NodeType() const
+		{
+			return ( IqParseNodeUnresolvedCall::m_ID );
+		}
+
+
+		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
+		virtual	TqBool	Optimise();
+		virtual	TqInt	ResType() const;
+		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
+		{
+			CqParseNodeUnresolvedCall * pNew = new CqParseNodeUnresolvedCall( *this );
+			if ( m_pChild ) pNew->m_pChild = m_pChild->Clone( pNew );
+			pNew->m_pParent = pParent;
+			return ( pNew );
+		}
+		CqFuncDef&	pFuncDef()
+		{
+			return ( m_aFuncDef );
+		}
+		//void	CheckArgCast( std::vector<TqInt>& aRes );
+		//void	ArgCast( TqInt iIndex );
+
+	protected:
+		CqFuncDef	m_aFuncDef;
+};
+
+///----------------------------------------------------------------------
 /// CqParseNodeVariable
 /// Parsenode specifying a variable access.
 

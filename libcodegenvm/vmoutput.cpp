@@ -39,6 +39,7 @@ START_NAMESPACE( Aqsis )
 
 void OutputLocalVariable( const IqVarDef* pVar, std::ostream& out, std::string strOutName );
 void OutputFunctionCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::ostream& out, std::string strOutName );
+void OutputUnresolvedCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::ostream& out, std::string strOutName );
 
 
 static char* gVariableTypeNames[] =
@@ -186,6 +187,7 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string st
 	TqUint i;
 	IqParseNodeShader* pS;
 	IqParseNodeFunctionCall* pFC;
+	IqParseNodeUnresolvedCall* pUC;
 	IqParseNodeVariable* pV;
 	IqParseNodeArrayVariable* pAV;
 	IqParseNodeVariableAssign* pVA;
@@ -276,6 +278,13 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string st
 		// If it is a builtin function, lets just check its standard variable usage.
 		if ( !pFunc->fLocal() )
 			gInternalFunctionUsage |= pFunc->InternalUsage();
+	}
+	else if ( pNode->GetInterface( ParseNode_UnresolvedCall, ( void** ) & pUC ) )
+	{
+		// Output the function name.
+		const IqFuncDef * pFunc = pUC->pFuncDef();
+		// TODO: Better handling of local functions.
+		OutputUnresolvedCall( pFunc, pNode->pChild(), out, strOutName );
 	}
 	else if ( pNode->GetInterface( ParseNode_Variable, ( void** ) & pV ) )
 	{
@@ -831,6 +840,44 @@ void OutputFunctionCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::o
 		OutputTreeNode( pFunc->pDef(), out, strOutName );
 		PopTransTable();
 	}
+}
+
+
+void OutputUnresolvedCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::ostream& out, std::string strOutName )
+{
+
+	// Output parameters in reverse order, so that the function can pop them as expected
+	if ( pArguments != 0 )
+	{
+		const IqParseNode * pArg = pArguments;
+		while ( pArg->pNextSibling() != 0 ) pArg = pArg->pNextSibling();
+		while ( pArg != 0 )
+		{
+			// Push the argument...
+			OutputTreeNode( pArg, out, strOutName );
+			pArg = pArg->pPrevSibling();
+		}
+	}
+
+	// If it is a variable length parameter function, output the number of
+	// additional parameters.
+	TqInt iAdd = 0;
+	if ( ( iAdd = pFunc->VariableLength() ) >= 0 )
+	{
+		const IqParseNode * pArg = pArguments;
+		while ( pArg )
+		{
+			iAdd--;
+			pArg = pArg->pNextSibling();
+		}
+		// Not happy about this!!
+		CqParseNodeFloatConst C( static_cast<TqFloat>( abs( iAdd ) ) );
+		OutputTreeNode( &C, out, strOutName );
+	}
+
+	//  Here I just dump out a string describing my external call requirements.
+	out << "\texternal \"" <<  pFunc->strName() << "\" \"" << CqParseNode::TypeIdentifier(pFunc->Type()) << "\" \"" << pFunc->strParams() << "\"" << std::endl;
+
 }
 
 

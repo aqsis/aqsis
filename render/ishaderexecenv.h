@@ -32,6 +32,7 @@
 #include	"matrix.h"
 #include	"sstring.h"
 #include	"bitvector.h"
+#include 	"shadeop.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -443,6 +444,7 @@ struct IqShaderExecEnv
 	virtual STD_SO	SO_bake_3p( STRINGVAL shader, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVAR) = 0;
 	virtual STD_SO	SO_bake_3n( STRINGVAL shader, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVAR) = 0;
 	virtual STD_SO	SO_bake_3v( STRINGVAL shader, FLOATVAL s, FLOATVAL t, FLOATVAL f, DEFVOIDPARAMVAR) = 0;
+	virtual STD_SO	SO_external(DSOMethod method, void *initData, DEFPARAMVAR) = 0;
 };
 
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to u.

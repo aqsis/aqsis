@@ -1,4 +1,4 @@
-// Aqsis
+// Aqsis 
 // Copyright © 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.com
@@ -547,6 +547,7 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		virtual STD_SO	SO_bake_3p( STRINGVAL name, FLOATVAL s, FLOATVAL t, POINTVAL f, DEFVOIDPARAMVAR );
 		virtual STD_SO	SO_bake_3v( STRINGVAL name, FLOATVAL s, FLOATVAL t, VECTORVAL f, DEFVOIDPARAMVAR );
 		virtual STD_SO	SO_bake_3n( STRINGVAL name, FLOATVAL s, FLOATVAL t, NORMALVAL f, DEFVOIDPARAMVAR );
+		virtual STD_SO	SO_external(DSOMethod method,void* initData, DEFPARAMVAR );
 };
 
 

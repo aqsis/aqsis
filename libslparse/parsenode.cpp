@@ -85,6 +85,7 @@ TqInt	CqParseNode::m_aAllTypes[ Type_Last - 1 ] =
 const EqParseNodeType IqParseNode::m_ID = ParseNode_Base;
 const EqParseNodeType IqParseNodeShader::m_ID = ParseNode_Shader;
 const EqParseNodeType IqParseNodeFunctionCall::m_ID = ParseNode_FunctionCall;
+const EqParseNodeType IqParseNodeUnresolvedCall::m_ID = ParseNode_UnresolvedCall;
 const EqParseNodeType IqParseNodeVariable::m_ID = ParseNode_Variable;
 const EqParseNodeType IqParseNodeArrayVariable::m_ID = ParseNode_ArrayVariable;
 const EqParseNodeType IqParseNodeVariableAssign::m_ID = ParseNode_VariableAssign;
@@ -217,6 +218,28 @@ const IqFuncDef* CqParseNodeFunctionCall::pFuncDef() const
 		return ( pFuncDef );
 	else
 		return ( 0 );
+}
+
+
+///---------------------------------------------------------------------
+/// CqParseNodeUnresolvedCall::ResType
+
+TqInt CqParseNodeUnresolvedCall::ResType() const
+{
+	// The return type of a function depends on its arguments.
+	return ( m_aFuncDef.Type() );
+}
+
+
+const char*	CqParseNodeUnresolvedCall::strName() const
+{
+	return ( m_aFuncDef.strName() );
+}
+
+
+const IqFuncDef* CqParseNodeUnresolvedCall::pFuncDef() const
+{
+	return ( &m_aFuncDef );
 }
 
 

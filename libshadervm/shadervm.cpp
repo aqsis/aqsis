@@ -30,6 +30,7 @@
 
 #include	<ctype.h>
 
+#include	"log.h"
 #include	"shadervm.h"
 #include	"symbols.h"
 #include	"version.h"
@@ -424,6 +425,7 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
         {"bake_3v", 0, &CqShaderVM::SO_bake_3v, 0, 0},
         {"bake_3p", 0, &CqShaderVM::SO_bake_3p, 0, 0},
 
+        {"external", 0, &CqShaderVM::SO_external, 1, type_invalid},
     };
 
 /*
@@ -443,6 +445,7 @@ static TqLong phash = 0;
 static TqLong vhash = 0;
 static TqLong uhash = 0;
 static TqLong ushash = 0;
+static TqLong ehash = 0;
 /*
  * Private hash key for the data types supported by the shaders
  */
@@ -769,6 +772,8 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	TqInt	array_count = 0;
 	TqLong  htoken, i;
 
+	IqLog *logger = QGetRenderContextI()->Logger();
+
  	// Initialise the private hash keys.
 	if (!dhash)
 		dhash = CqParameter::hash("Data");
@@ -786,6 +791,8 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 		shash = CqParameter::hash("segment");
 	if (!ushash)
 		ushash = CqParameter::hash("USES");
+	if (!ehash)
+		ehash = CqParameter::hash("external");
 
 	if (!itypes)
 	{
@@ -942,9 +949,106 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 					TqInt i;
 					for ( i = 0; i < m_cTransSize; i++ )
 					{
-						if (!m_TransTable[ i ].m_hash) 
+						if ( !m_TransTable[ i ].m_hash ) 
 						{
 							m_TransTable[ i ].m_hash = CqParameter::hash(m_TransTable[ i ].m_strName);
+						}
+
+						if ( ehash == htoken )
+						{
+							CqString strFunc, strRetType, strArgTypes ;
+							EqVariableType RetType;
+							std::list<EqVariableType> ArgTypes;
+
+							*pFile >> strFunc;
+							strFunc = strFunc.substr(1,strFunc.length() - 2);
+							std::list<SqDSOExternalCall*> *candidates = NULL;
+							m_itActiveDSOMap = m_ActiveDSOMap.find( strFunc );
+							if( m_itActiveDSOMap != m_ActiveDSOMap.end() )
+							{
+								candidates = ( *m_itActiveDSOMap ).second; 
+							}
+							else
+							{
+							  	candidates = getShadeOpMethods(&strFunc);
+								if( candidates == NULL )
+								{
+									logger->fatal("%s: No DSO found for extenral shadeop: %s\n", strName().c_str(), strFunc.c_str());
+									return ;
+								}
+								m_ActiveDSOMap[strFunc]=candidates;
+							};
+
+							// pick out the return type
+							*pFile >> strRetType;
+							m_itTypeIdMap = m_TypeIdMap.find( strRetType[1] );
+							if (m_itTypeIdMap != m_TypeIdMap.end())
+							{
+								RetType = (*m_itTypeIdMap).second;
+							} 
+							else 
+							{
+								//error, we dont know this return type
+								logger->fatal("%s: Invalid return type in call to external shadeop: %s: %s\n", strName().c_str(), strFunc.c_str(), strRetType.c_str());
+								return;
+							};
+
+							*pFile >> strArgTypes;
+							for ( int x=1; x < strArgTypes.length()-1; x++ )
+							{
+								EqVariableType type;
+								m_itTypeIdMap = m_TypeIdMap.find( strArgTypes[x] );
+								if ( m_itTypeIdMap != m_TypeIdMap.end() )
+								{
+									ArgTypes.push_back( ( *m_itTypeIdMap ).second );
+								}
+								else
+								{
+									// Error, unknown arg type
+									logger->fatal("%s: Invalid argument type in call to external shadeop: %s: %c\n", strName().c_str(), strFunc.c_str(), strArgTypes[x]);
+									return;
+								};
+
+							};  
+
+							//Now we need to find a good candidate.
+							std::list<SqDSOExternalCall*>::iterator candidate;
+							candidate = candidates->begin();
+							while (candidate !=candidates->end())
+							{
+								// Do we have a match
+								if ((*candidate)->return_type == RetType &&
+								    (*candidate)->arg_types == ArgTypes) break;
+								candidate++;
+							};
+							if(candidate == candidates->end())
+							{ 
+								logger->fatal("%s: No candidate found for call to external shadeop: %s", strName().c_str(), strFunc.c_str());
+								logger->info("%s: Perhaps you need some casts?\n", strName().c_str());
+								logger->info("%s: The following candidates are in you current DSO path:\n", strName().c_str());
+								candidate = candidates->begin();
+								while (candidate !=candidates->end())
+								{
+									CqString strProto = strPrototype(&strFunc, (*candidate));
+									logger->info("%s:\t%s\n", strName().c_str(), strProto.c_str());
+									candidate++;
+								};
+								return ; //ERROR
+							};
+
+							if(!(*candidate)->initialised )
+							{
+								// We have an initialiser we have not run yet
+								if((*candidate)->init){
+									(*candidate)->initData = 
+										 ((*candidate)->init)((int)((void*)this),NULL);
+								};
+								(*candidate)->initialised = true;
+							};
+							
+							AddCommand( &CqShaderVM::SO_external, pProgramArea );
+							AddDSOExternalCall( (*candidate),pProgramArea );
+							break;
 						}
 
 						if ( m_TransTable[ i ].m_hash == htoken)
@@ -963,6 +1067,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 
 							// Add this opcode to the program segment.
 							AddCommand( m_TransTable[ i ].m_pCommand, pProgramArea );
+
 							// Process this opcodes parameters.
 							TqInt p;
 							for ( p = 0; p < m_TransTable[ i ].m_cParams; p++ )

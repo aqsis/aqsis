@@ -7,7 +7,7 @@ libaqsis_la_SOURCES = iattributes.h attributes.cpp attributes.h bilinear.h bound
 libaqsis_la_LDFLAGS = -rpath $(libdir)
 #libaqsis_la_LIBADD = $(top_builddir)/librib2ri/librib2ri.la $(top_builddir)/librib2/librib2.la 
 
-include_HEADERS = ri.h
+include_HEADERS = ri.h shadeop.h
 
 if DEBUG
 AM_CXXFLAGS = -g -Wall

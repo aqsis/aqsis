@@ -91,6 +91,7 @@ void StandardDeclarations( RendermanInterface& CallbackInterface )
 	ParserDeclare( CallbackInterface, "archive", "uniform string" );
 	ParserDeclare( CallbackInterface, "texture", "uniform string" );
 	ParserDeclare( CallbackInterface, "display", "uniform string" );
+	ParserDeclare( CallbackInterface, "dsolibs", "uniform string" );
 	ParserDeclare( CallbackInterface, "auto_shadows", "uniform string" );
 	ParserDeclare( CallbackInterface, "endofframe", "uniform integer" );
 	ParserDeclare( CallbackInterface, "verbose", "uniform integer" );

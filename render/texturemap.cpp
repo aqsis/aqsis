@@ -235,7 +235,7 @@ TqInt CqTextureMap::Convert( CqString &strName )
 	TqInt lenght = 0;
 	TqChar library[ 1024 ];
 	TqChar function[ 1024 ];
-	char * ( *convert ) ( char * );
+	char * ( *convert ) ( const char * );
 	char *ext = NULL;
 	char *tiff = NULL;
 
@@ -282,10 +282,11 @@ TqInt CqTextureMap::Convert( CqString &strName )
 	sprintf( library, "%s/lib/lib%s.so", aqsis_home, function );
 #endif
 	CqConverter *plug = new CqConverter( "", library, function );
-	if ( ( convert = ( char * ( * ) ( char * s ) ) plug->Function() ) != NULL )
+	if ( ( convert = ( char * ( * ) (const  char * s ) ) plug->Function() ) != NULL )
 	{
 
-		if ( ( tiff = ( *convert ) ( ( char * ) strName.c_str() ) ) != NULL )
+		std::cout << "strName: " << strName.c_str() << std::endl;
+		if ( ( tiff = convert (  strName.c_str() ) ) != NULL )
 		{
 			strName = tiff;
 			result = 1; // success

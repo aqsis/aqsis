@@ -275,6 +275,39 @@ void CqParseNodeFunctionCall::ArgCast( TqInt iIndex )
 
 
 ///---------------------------------------------------------------------
+/// CqParseNodeUnresolvedCall::TypeCheck
+/// This is rather awkward, we will convert to whichever type we are asked
+/// to be, then later when the shader vm parses the .slx we can try and build
+/// a cast then, the same goes for the arguments.
+
+TqInt	CqParseNodeUnresolvedCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
+{
+	TqInt NewType = Type_Nil;
+
+	// TypeCheck the args, we don't know what types will be needed
+	// later, so there is little else we can do.
+	CqParseNode *pArg = m_pChild;
+	while (pArg != NULL)
+	{
+		CqParseNode *pNext = pArg->pNext();
+		pArg->TypeCheck( pAllTypes(), Type_Last - 1 );
+		pArg = pNext;
+	};
+
+	// If we have no type set yet we take the first type given as an option
+	if(m_aFuncDef.Type() == Type_Nil || !CheckOnly) 
+		m_aFuncDef = CqFuncDef( pTypes[0],
+					m_aFuncDef.strName(),
+					"unresolved",
+					m_aFuncDef.strParams(),
+					m_aFuncDef.pDef(),
+					m_aFuncDef.pArgs());
+
+	return m_aFuncDef.Type();
+}
+
+
+///---------------------------------------------------------------------
 /// CqParseNodeVariable::TypeCheck
 /// Do a type check based on suitable types requested, and add a cast in required.
 

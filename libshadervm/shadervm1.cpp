@@ -1037,7 +1037,6 @@ void CqShaderVM::SO_pow()
 	FUNC2( type_float, m_pEnv->SO_pow );
 }
 
-
 #ifdef AQSIS_SYSTEM_MACOSX
 #pragma CC_OPT_RESTORE
 #endif

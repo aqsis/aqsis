@@ -43,6 +43,18 @@ TqBool CqParseNodeFunctionCall::Optimise()
 
 
 ///---------------------------------------------------------------------
+/// CqParseNodeFunction:Call:Optimise
+/// Optimise a function definition, basically optimise the parameters.
+
+TqBool CqParseNodeUnresolvedCall::Optimise()
+{
+	CqParseNode::Optimise();
+
+	return ( TqFalse );
+}
+
+
+///---------------------------------------------------------------------
 /// CqParseNodeVariable::Optimise
 
 TqBool CqParseNodeVariable::Optimise()

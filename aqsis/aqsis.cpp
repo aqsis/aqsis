@@ -52,6 +52,7 @@ ArgParse::apstring g_archives = "";
 ArgParse::apstring g_textures = "";
 ArgParse::apstring g_displays = "";
 ArgParse::apstring g_base_path = "";
+ArgParse::apstring g_dso_libs = "";
 ArgParse::apstring g_type = "";
 ArgParse::apstring g_addtype = "";
 ArgParse::apstring g_mode = "rgba";
@@ -241,6 +242,7 @@ int main( int argc, const char** argv )
 	ap.argString( "archives", "=string\aspecify a default archives searchpath", &g_archives );
 	ap.argString( "textures", "=string\aspecify a default textures searchpath", &g_textures );
 	ap.argString( "displays", "=string\aspecify a default displays searchpath", &g_displays );
+	ap.argString( "dsolibs", "=string\aspecify default DSO libraries", &g_dso_libs );
 
 	//_crtBreakAlloc = 845;
 	
@@ -273,6 +275,7 @@ int main( int argc, const char** argv )
 		std::cout << "archives: " << g_archives.c_str() << std::endl;
 		std::cout << "textures: " << g_textures.c_str() << std::endl;
 		std::cout << "displays: " << g_displays.c_str() << std::endl;
+		std::cout << "dsolibs: " << g_dso_libs.c_str() << std::endl;
 	}
 
 	if ( ap.leftovers().size() == 0 )    // If no files specified, take input from stdin.
@@ -418,6 +421,13 @@ void GetOptions()
 			g_displays.append( "/displays" );
 		}
 	}
+
+	// if --displays is not specified, try and get a default dso libraries.
+	if ( g_dso_libs.compare( "" ) == 0 )
+	{
+		if ( ( env = getenv( "AQSIS_DSO_LIBS" ) ) != 0 )
+			g_dso_libs = env;
+	}
 }
 
 void RenderFile( FILE* file, const char* name )
@@ -445,8 +455,10 @@ void RenderFile( FILE* file, const char* name )
 	RiOption( "searchpath", "texture", &popt, RI_NULL );
 	popt[ 0 ] = g_displays.c_str();
 	RiOption( "searchpath", "display", &popt, RI_NULL );
-	librib::UpdateArchivePath( g_archives );
+	popt[ 0 ] = g_dso_libs.c_str();
+	RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
 
+	librib::UpdateArchivePath( g_archives );
 	RiProgressHandler( &PrintProgress );
 	RiPreRenderFunction( &PreRender );
 
