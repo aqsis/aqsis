@@ -3071,15 +3071,26 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
             }
             if ( iloop == 0 )
             {
+				/// \note: We need to check here if the orientation of the projected poly matches the
+				/// expected one, of not, we must swap the direction so that the triangulation routines can
+				/// correctly determine the inside/outside nature of points. However, if doing so breaks the
+				/// orientation as expected by the rest of the renderer, we need to flip the orientation
+				/// attribute as well so that normals are correctly calculated.
                 if( O == OrientationRH )
                 {
                     if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
+					{
+						QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
                         polya.SwapDirection();
+					}
                 }
                 else
                 {
                     if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
+					{
+						QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
                         polya.SwapDirection();
+					}
                 }
                 poly = polya;
             }
@@ -3554,15 +3565,28 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 
                 if ( iloop == 0 )
                 {
+					/// \note: We need to check here if the orientation of the projected poly matches the
+					/// expected one, of not, we must swap the direction so that the triangulation routines can
+					/// correctly determine the inside/outside nature of points. However, if doing so breaks the
+					/// orientation as expected by the rest of the renderer, we need to flip the orientation
+					/// attribute as well so that normals are correctly calculated.
                     if( O == OrientationRH )
                     {
                         if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_AntiClockwise )
+						{
+					        QGetRenderContext() ->pattrWriteCurrent()->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationLH;
+						    //QGetRenderContext() ->pattrWriteCurrent() ->SeteOrientation( QGetRenderContext() ->Time() );
                             polya.SwapDirection();
+						}
                     }
                     else
                     {
                         if ( polya.CalcOrientation() != CqPolygonGeneral2D::Orientation_Clockwise )
+						{
+					        QGetRenderContext() ->pattrWriteCurrent()->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationRH;
+						    //QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation( QGetRenderContext() ->Time() );
                             polya.SwapDirection();
+						}
                     }
                     poly = polya;
                 }
