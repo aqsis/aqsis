@@ -378,7 +378,6 @@ void CqPolygonGeneral2D::Triangulate( std::vector<TqInt>& aiList ) const
                                         iList[ iCurr ],
                                         iList[ iNext ],
                                         iList );
-			std::cout << iList[ iPrev ] << ", " << iList[ iCurr ] << ", " << iList[ iNext ] << " - " << CurrPos << std::endl;
             if ( ( CurrDeterm == Orientation() ) &&
                     ( CurrPos != 0 ) )
                 fDone = TqTrue;
