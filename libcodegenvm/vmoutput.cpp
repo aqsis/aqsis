@@ -25,7 +25,6 @@
 
 #include "aqsis.h"
 
-#include	<strstream>
 #ifndef AQSIS_SYSTEM_MACOSX
 #include	<sstream>
 #endif

@@ -25,8 +25,6 @@
 
 #include	"aqsis.h"
 
-#include	<strstream>
-
 #include	<time.h>
 
 #include	"imagebuffer.h"

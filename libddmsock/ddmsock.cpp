@@ -26,7 +26,6 @@
 
 #include	"aqsis.h"
 
-#include	<strstream>
 #include	<fstream>
 #include	<map>
 

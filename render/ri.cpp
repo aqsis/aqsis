@@ -27,7 +27,6 @@
 
 #include	<stdarg.h>
 #include	<math.h>
-#include	<strstream>
 #include	<list>
 
 #include	"imagebuffer.h"
@@ -3439,8 +3438,6 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 
 	return ;
 }
-
-#include <strstream>
 
 //----------------------------------------------------------------------
 // RiTrimCurve

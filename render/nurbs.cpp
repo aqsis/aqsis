@@ -26,8 +26,6 @@
 #include	"aqsis.h"
 
 #include	<math.h>
-#include	<strstream>
-
 #include	<stdio.h>
 
 #include	"nurbs.h"

@@ -25,7 +25,6 @@
 
 #ifndef RIB_BINARY_DECODER_H
 #define RIB_BINARY_DECODER_H
-#include <strstream>
 #include <string>
 #include <vector>
 #include <stdio.h>
