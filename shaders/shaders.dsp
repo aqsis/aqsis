@@ -50,7 +50,7 @@ MTL=midl.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\bin\Debug"
+# PROP Output_Dir "..\bin"
 # PROP Intermediate_Dir ""
 # PROP Target_Dir ""
 
@@ -99,13 +99,13 @@ InputName=ambientlight
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\ambientlight.sl
 InputName=ambientlight
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -148,13 +148,13 @@ InputName=background
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\background.sl
 InputName=background
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -197,13 +197,13 @@ InputName=cellnoisetest
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\cellnoisetest.sl
 InputName=cellnoisetest
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -246,13 +246,13 @@ InputName=constant
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\constant.sl
 InputName=constant
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -295,13 +295,13 @@ InputName=dented
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\dented.sl
 InputName=dented
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -344,13 +344,13 @@ InputName=depthcue
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\depthcue.sl
 InputName=depthcue
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -393,13 +393,13 @@ InputName=distantlight
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\distantlight.sl
 InputName=distantlight
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -442,13 +442,13 @@ InputName=fog
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\fog.sl
 InputName=fog
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -491,13 +491,13 @@ InputName=matte
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\matte.sl
 InputName=matte
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -540,13 +540,13 @@ InputName=metal
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\metal.sl
 InputName=metal
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -589,13 +589,13 @@ InputName=paintedplastic
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\paintedplastic.sl
 InputName=paintedplastic
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -638,13 +638,13 @@ InputName=plastic
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\plastic.sl
 InputName=plastic
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -687,13 +687,13 @@ InputName=pointlight
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\pointlight.sl
 InputName=pointlight
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -736,13 +736,13 @@ InputName=randgrid
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\randgrid.sl
 InputName=randgrid
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -785,13 +785,13 @@ InputName=shadowspot
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\shadowspot.sl
 InputName=shadowspot
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -834,13 +834,13 @@ InputName=shinymetal
 
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\shinymetal.sl
 InputName=shinymetal
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 
@@ -882,16 +882,15 @@ InputName=spotlight
 
 !ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
 
-# PROP Intermediate_Dir "..\Content"
 # Begin Custom Build - Compiling Shader $(InputPath)
 InputDir=.
-OutDir=.\..\bin\Debug
+OutDir=.\..\bin
 InputPath=.\spotlight.sl
 InputName=spotlight
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	$(OutDir)\aqsl $(InputPath) 
+	$(OutDir)\aqsl_d $(InputPath) 
 	
 # End Custom Build
 

@@ -1,25 +1,25 @@
 # Microsoft Developer Studio Project File - Name="aqsltell" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
-# ** NICHT BEARBEITEN **
+# ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Console Application" 0x0103
 
 CFG=aqsltell - Win32 Debug
-!MESSAGE Dies ist kein gültiges Makefile. Zum Erstellen dieses Projekts mit NMAKE
-!MESSAGE verwenden Sie den Befehl "Makefile exportieren" und führen Sie den Befehl
+!MESSAGE This is not a valid makefile. To build this project using NMAKE,
+!MESSAGE use the Export Makefile command and run
 !MESSAGE 
 !MESSAGE NMAKE /f "aqsltell.mak".
 !MESSAGE 
-!MESSAGE Sie können beim Ausführen von NMAKE eine Konfiguration angeben
-!MESSAGE durch Definieren des Makros CFG in der Befehlszeile. Zum Beispiel:
+!MESSAGE You can specify a configuration when running NMAKE
+!MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
 !MESSAGE NMAKE /f "aqsltell.mak" CFG="aqsltell - Win32 Debug"
 !MESSAGE 
-!MESSAGE Für die Konfiguration stehen zur Auswahl:
+!MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "aqsltell - Win32 Release" (basierend auf  "Win32 (x86) Console Application")
-!MESSAGE "aqsltell - Win32 Debug" (basierend auf  "Win32 (x86) Console Application")
-!MESSAGE "aqsltell - Win32 Profile" (basierend auf  "Win32 (x86) Console Application")
+!MESSAGE "aqsltell - Win32 Release" (based on "Win32 (x86) Console Application")
+!MESSAGE "aqsltell - Win32 Debug" (based on "Win32 (x86) Console Application")
+!MESSAGE "aqsltell - Win32 Profile" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
@@ -62,7 +62,7 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\bin\Debug"
+# PROP Output_Dir "..\bin"
 # PROP Intermediate_Dir "..\Object\Debug\aqsltell"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
@@ -75,7 +75,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 /nologo /subsystem:console /debug /machine:I386 /libpath:"..\lib\Debug" /libpath:"..\bin\Debug" /libpath:"..\..\win32libs\lib"
+# ADD LINK32 /nologo /subsystem:console /debug /machine:I386 /out:"..\bin/aqsltell_d.exe" /libpath:"..\lib\Debug" /libpath:"..\bin\Debug" /libpath:"..\..\win32libs\lib"
 
 !ELSEIF  "$(CFG)" == "aqsltell - Win32 Profile"
 

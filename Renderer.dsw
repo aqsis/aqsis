@@ -3,6 +3,48 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
+Project: "AdditionalDeveloperLibs"=.\ALL\AdditionalDeveloperLibs\AdditionalDeveloperLibs.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name libaqsistypes
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libargparse
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libdd
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libri2rib
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name librib2
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name librib2ri
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libshaderexecenv
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libshadervm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libslparse
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libslxargs
+    End Project Dependency
+}}}
+
+###############################################################################
+
 Project: "All"=.\All\All.dsp - Package Owner=<4>
 
 Package=<5>
@@ -182,6 +224,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libargparse
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libaqsistypes
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -273,13 +318,13 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name libaqsistypes
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name libdd
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name inline
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libaqsistypes
     End Project Dependency
 }}}
 
@@ -295,9 +340,6 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name libdd
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libddmsock
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libaqsistypes
@@ -318,9 +360,6 @@ Package=<4>
     Project_Dep_Name libdd
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name libddmsock
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name libaqsistypes
     End Project Dependency
 }}}
@@ -337,9 +376,6 @@ Package=<4>
 {{{
     Begin Project Dependency
     Project_Dep_Name libdd
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libddmsock
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libaqsistypes

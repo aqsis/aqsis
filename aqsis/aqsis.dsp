@@ -51,7 +51,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 libargparse.lib /nologo /subsystem:console /machine:I386 /libpath:"..\lib" /libpath:"..\bin" /libpath:"..\..\win32libs\lib"
+# ADD LINK32 /nologo /subsystem:console /machine:I386 /libpath:"..\lib" /libpath:"..\bin" /libpath:"..\..\win32libs\lib"
 # SUBTRACT LINK32 /nodefaultlib
 
 !ELSEIF  "$(CFG)" == "aqsis - Win32 Debug"
@@ -63,7 +63,7 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\bin\Debug"
+# PROP Output_Dir "..\bin"
 # PROP Intermediate_Dir "..\Object\Debug\aqsis"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
@@ -76,7 +76,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 libargparse.lib /nologo /subsystem:console /debug /machine:I386 /libpath:"..\lib\Debug" /libpath:"..\bin\Debug" /libpath:"..\..\win32libs\lib"
+# ADD LINK32 /nologo /subsystem:console /debug /machine:I386 /out:"..\bin/aqsis_d.exe" /libpath:"..\lib\Debug" /libpath:"..\bin\Debug" /libpath:"..\..\win32libs\lib"
 # SUBTRACT LINK32 /profile /nodefaultlib
 
 !ELSEIF  "$(CFG)" == "aqsis - Win32 Profile"
@@ -102,7 +102,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 libargparse.lib log4cpp.lib libshaderexecenv.lib libz.lib librib2.lib librib2ri.lib libaqsistypes.lib ws2_32.lib libtiff.lib libddmsock.lib libaqsis.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /libpath:"..\Library\Release"
-# ADD LINK32 libargparse.lib /nologo /subsystem:console /profile /debug /machine:I386 /libpath:"..\lib\Profile" /libpath:"..\bin\Profile" /libpath:"..\..\win32libs\lib"
+# ADD LINK32 /nologo /subsystem:console /profile /debug /machine:I386 /libpath:"..\lib\Profile" /libpath:"..\bin\Profile" /libpath:"..\..\win32libs\lib"
 # SUBTRACT LINK32 /nodefaultlib
 
 !ENDIF 

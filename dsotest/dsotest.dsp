@@ -41,6 +41,7 @@ RSC=rc.exe
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "..\dso"
 # PROP Intermediate_Dir "..\Object\Release\plugins\dsotest"
+# PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DSOTEST_EXPORTS" /YX /FD /c
 # ADD CPP /nologo /MT /W3 /GX /O2 /I "..\render" /I "..\..\win32libs\include" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DSOTEST_EXPORTS" /D "WIN32" /D "NO_SYSLOG" /YX /FD /c
@@ -53,7 +54,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /libpath:"..\..\win32libs\lib"
+# ADD LINK32 /nologo /dll /machine:I386 /libpath:"..\..\win32libs\lib"
 
 !ELSEIF  "$(CFG)" == "dsotest - Win32 Debug"
 
@@ -64,7 +65,7 @@ LINK32=link.exe
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir "..\dso\Debug"
+# PROP Output_Dir "..\dso"
 # PROP Intermediate_Dir "..\Object\Debug\plugins\dsotest"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
@@ -79,7 +80,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept /libpath:"..\..\win32libs\lib"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /debug /machine:I386 /out:"..\dso/dsotest_d.dll" /pdbtype:sept /libpath:"..\..\win32libs\lib"
 
 !ELSEIF  "$(CFG)" == "dsotest - Win32 Profile"
 
@@ -92,6 +93,7 @@ LINK32=link.exe
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "..\dso\Profile"
 # PROP Intermediate_Dir "..\Object\Profile\plugins\dsotest"
+# PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /I "..\render" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DSOTEST_EXPORTS" /YX /FD /c
 # ADD CPP /nologo /MT /W3 /GX /O2 /I "..\render" /I "..\..\win32libs\include" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "DSOTEST_EXPORTS" /D "WIN32" /D "NO_SYSLOG" /YX /FD /c
@@ -104,7 +106,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386 /libpath:"..\..\win32libs\lib"
+# ADD LINK32 /nologo /dll /machine:I386 /libpath:"..\..\win32libs\lib"
 
 !ENDIF 
 
@@ -133,7 +135,7 @@ InputName=bbox
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	..\bin\aqsl $(InputName).sl 
+	..\bin\aqsl.exe $(InputName).sl 
 	
 # End Custom Build
 
@@ -146,7 +148,7 @@ InputName=bbox
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	..\bin\Debug\aqsl $(InputName).sl 
+	..\bin\aqsl_d.exe $(InputName).sl 
 	
 # End Custom Build
 
@@ -159,7 +161,7 @@ InputName=bbox
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	..\bin\Profile\aqsl $(InputName).sl 
+	..\bin\Profile\aqsl.exe $(InputName).sl 
 	
 # End Custom Build
 

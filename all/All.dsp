@@ -1,25 +1,25 @@
 # Microsoft Developer Studio Project File - Name="All" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
-# ** NICHT BEARBEITEN **
+# ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Generic Project" 0x010a
 
-CFG=All - Win32 Debug
-!MESSAGE Dies ist kein gültiges Makefile. Zum Erstellen dieses Projekts mit NMAKE
-!MESSAGE verwenden Sie den Befehl "Makefile exportieren" und führen Sie den Befehl
+CFG=ALL - WIN32 PROFILE
+!MESSAGE This is not a valid makefile. To build this project using NMAKE,
+!MESSAGE use the Export Makefile command and run
 !MESSAGE 
 !MESSAGE NMAKE /f "All.mak".
 !MESSAGE 
-!MESSAGE Sie können beim Ausführen von NMAKE eine Konfiguration angeben
-!MESSAGE durch Definieren des Makros CFG in der Befehlszeile. Zum Beispiel:
+!MESSAGE You can specify a configuration when running NMAKE
+!MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "All.mak" CFG="All - Win32 Debug"
+!MESSAGE NMAKE /f "All.mak" CFG="ALL - WIN32 PROFILE"
 !MESSAGE 
-!MESSAGE Für die Konfiguration stehen zur Auswahl:
+!MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "All - Win32 Release" (basierend auf  "Win32 (x86) Generic Project")
-!MESSAGE "All - Win32 Debug" (basierend auf  "Win32 (x86) Generic Project")
-!MESSAGE "All - Win32 Profile" (basierend auf  "Win32 (x86) Generic Project")
+!MESSAGE "All - Win32 Release" (based on "Win32 (x86) Generic Project")
+!MESSAGE "All - Win32 Debug" (based on "Win32 (x86) Generic Project")
+!MESSAGE "All - Win32 Profile" (based on "Win32 (x86) Generic Project")
 !MESSAGE 
 
 # Begin Project
