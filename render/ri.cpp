@@ -4163,10 +4163,33 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 	}
 
 	// Process tags.
+	TqInt argcIndex = 0;
+	TqInt floatargIndex = 0;
+	TqInt intargIndex = 0;
 	for ( TqInt i = 0; i < ntags; i++ )
 	{
 		if ( strcmp( tags[ i ], "interpolateboundary" ) == 0 )
 			pSubdivider->InterpolateBoundary( TqTrue );
+		else if( strcmp( tags [ i ], "crease" ) == 0 )
+		{
+			TqInt iEdge = 0;
+			while( iEdge < nargs[ argcIndex ] - 1 )
+			{
+				if( intargs[ iEdge+intargIndex   ] < pSubdivision->cVerts() &&
+					intargs[ iEdge+intargIndex+1 ] < pSubdivision->cVerts() )
+				{
+					CqWEdge edge( pSubdivision->pVert( intargs[ iEdge+intargIndex   ] ), 
+								  pSubdivision->pVert( intargs[ iEdge+intargIndex+1 ] ) );
+					CqWEdge* pSharpEdge = NULL;
+					if( ( pSharpEdge = pSubdivision->FindEdge( &edge ) ) != NULL )
+						pSharpEdge->SetSharpness(RI_INFINITY);
+				}
+				iEdge++;
+			}
+		}
+
+		intargIndex += nargs[ argcIndex++ ];
+		floatargIndex += nargs[ argcIndex++ ];
 	}
 
 	return ;
