@@ -1013,7 +1013,7 @@ class CqWSurf : public CqSubdivider, public CqBasicSurface
 
 		virtual	TqBool	bHasN() const
 		{
-			return ( m_pPoints->N().Size() >= cVarying() );
+			return ( m_pPoints->bHasN() );
 		}
 		virtual	TqBool	bHasCs() const
 		{

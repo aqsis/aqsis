@@ -92,7 +92,7 @@ class CqSurfacePatchBicubic : public CqSurface
 		 */
 		const	CqVector4D& CP( TqInt iRow, TqInt iCol ) const
 		{
-			return ( P() [ ( iRow * 4 ) + iCol ] );
+			return ( (*P()) [ ( iRow * 4 ) + iCol ] );
 		}
 		/** Get a reference to the indexed control point.
 		 * \param iRow Integer row index.
@@ -101,7 +101,7 @@ class CqSurfacePatchBicubic : public CqSurface
 		 */
 		CqVector4D& CP( TqInt iRow, TqInt iCol )
 		{
-			return ( P() [ ( iRow * 4 ) + iCol ] );
+			return ( (*P()) [ ( iRow * 4 ) + iCol ] );
 		}
 		/** Get a reference to the basis matrix for the u direction.
 		 */
@@ -160,8 +160,6 @@ class _qShareC CqSurfacePatchBilinear : public CqSurface
 		CqSurfacePatchBilinear();
 		CqSurfacePatchBilinear( const CqSurfacePatchBilinear& From );
 		virtual	~CqSurfacePatchBilinear();
-
-		virtual	CqVector4D	EvaluateNormal( TqFloat s, TqFloat t ) const;
 
 		CqSurfacePatchBilinear& operator=( const CqSurfacePatchBilinear& From );
 

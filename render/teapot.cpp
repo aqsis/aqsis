@@ -437,9 +437,10 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
-	pSurface->P().SetSize( 13 * 10 );
+	pSurface->AddPrimitiveVariable(  new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>("P",0) );
+	pSurface->P()->SetSize( 13 * 10 );
 	for ( i = 0; i < 13*10; i++ )
-		pSurface->P() [ i ] = Patch01[ i ];
+		(*pSurface->P()) [ i ] = Patch01[ i ];
 	pSurface->SetDefaultPrimitiveVariables();
 	pSurface->SetSurfaceParameters( *this );
 
@@ -462,9 +463,10 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
         
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
-	pSurface->P().SetSize( 13 * 7 );
+	pSurface->AddPrimitiveVariable(  new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>("P",0) );
+	pSurface->P()->SetSize( 13 * 7 );
 	for ( i = 0; i < 13*7; i++ )
-		pSurface->P() [ i ] = Patch02[ i ] ;
+		(*pSurface->P()) [ i ] = Patch02[ i ] ;
 	pSurface->SetDefaultPrimitiveVariables();
 	pSurface->SetSurfaceParameters( *this );
 
@@ -485,9 +487,10 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
         
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
-	pSurface->P().SetSize( 4 * 7 );
+	pSurface->AddPrimitiveVariable(  new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>("P",0) );
+	pSurface->P()->SetSize( 4 * 7 );
 	for ( i = 0; i < 4*7; i++ )
-		pSurface->P() [ i ] = Patch03[ i ] ;
+		(*pSurface->P()) [ i ] = Patch03[ i ] ;
 	pSurface->SetDefaultPrimitiveVariables();
 	pSurface->SetSurfaceParameters( *this );
 
@@ -508,9 +511,10 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
         
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
-	pSurface->P().SetSize( 4 * 7 );
+	pSurface->AddPrimitiveVariable(  new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>("P",0) );
+	pSurface->P()->SetSize( 4 * 7 );
 	for ( i = 0; i < 4*7; i++ )
-		pSurface->P() [ i ] = Patch04[ i ] ;
+		(*pSurface->P()) [ i ] = Patch04[ i ] ;
 	pSurface->SetDefaultPrimitiveVariables();
 	pSurface->SetSurfaceParameters( *this );
 
@@ -531,9 +535,10 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
         
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
-	pSurface->P().SetSize( 4 * 7 );
+	pSurface->AddPrimitiveVariable(  new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>("P",0) );
+	pSurface->P()->SetSize( 4 * 7 );
 	for ( i = 0; i < 4*7; i++ )
-		pSurface->P() [ i ] = Patch05[ i ] ;
+		(*pSurface->P()) [ i ] = Patch05[ i ] ;
 	pSurface->SetDefaultPrimitiveVariables();
 	pSurface->SetSurfaceParameters( *this );
 
@@ -554,9 +559,10 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
         
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
-	pSurface->P().SetSize( 4 * 7 );
+	pSurface->AddPrimitiveVariable(  new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>("P",0) );
+	pSurface->P()->SetSize( 4 * 7 );
 	for ( i = 0; i < 4*7; i++ )
-		pSurface->P() [ i ] = Patch06[ i ] ;
+		(*pSurface->P()) [ i ] = Patch06[ i ] ;
 	pSurface->SetDefaultPrimitiveVariables();
 	pSurface->SetSurfaceParameters( *this );
 
@@ -580,16 +586,17 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
                 
 		// Fill in default values for all primitive variables not explicitly specified.
 		// Fill in primitive variables specified.
-		pSurface->P().SetSize( 13 * 4 );
+		pSurface->AddPrimitiveVariable(  new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>("P",0) );
+		pSurface->P()->SetSize( 13 * 4 );
 		for ( i = 0; i < 13*4; i++ )
 		{
 
 			if ( i < 13 )
-				pSurface->P() [ i ] = CqVector3D( 0.0, 0.0, 0.0 );
+				(*pSurface->P()) [ i ] = CqVector3D( 0.0, 0.0, 0.0 );
 			else if ( i < 39 )
-				pSurface->P() [ i ] = Patch01[ i - 13 ];
+				(*pSurface->P()) [ i ] = Patch01[ i - 13 ];
 			else
-				pSurface->P() [ i ] = Patch01[ i - 13 ] * 0.85;
+				(*pSurface->P()) [ i ] = Patch01[ i - 13 ] * 0.85;
 
 
 		}

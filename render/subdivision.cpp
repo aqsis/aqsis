@@ -92,7 +92,6 @@ CqWVert* CqWEdge::CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pP
 	TqUint index = pV->iVertex();
 	m_pvSubdivide = pV;
 
-	CreateSubdivideScalar( &pPoints->P(), &pPoints->P(), index );
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = pPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++ )
 	{
@@ -176,7 +175,6 @@ CqWVert* CqWFace::CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pP
 	TqUint index = pV->iVertex();
 	m_pvSubdivide = pV;
 
-	CreateSubdivideScalar( &pPoints->P(), &pPoints->P(), index );
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = pPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++ )
 		CreateSubdivideScalar( (*iUP), (*iUP), index );
@@ -223,7 +221,7 @@ CqWVert* CqSubdivider::FindVertex( CqPolygonPoints* pPoints, const CqVector4D& V
 
 	for ( std::vector<CqWVert*>::iterator i = m_apVerts.begin(); i != m_apVerts.end(); i++ )
 	{
-		if ( pPoints->P() [ ( *i ) ->iVertex() ] == V )
+		if ( (*pPoints->P()) [ ( *i ) ->iVertex() ] == V )
 			return ( *i );
 	}
 	return ( NULL );
@@ -720,10 +718,10 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 
 		if( USES( Uses(), EnvVars_P ) )
 		{
-			pGrid->P()->SetPoint( pPoints->P()[ ivA ], indexA );
-			pGrid->P()->SetPoint( pPoints->P()[ ivB ], indexB );
-			pGrid->P()->SetPoint( pPoints->P()[ ivC ], indexC );
-			pGrid->P()->SetPoint( pPoints->P()[ ivD ], indexD );
+			pGrid->P()->SetPoint( (*pPoints->P())[ ivA ], indexA );
+			pGrid->P()->SetPoint( (*pPoints->P())[ ivB ], indexB );
+			pGrid->P()->SetPoint( (*pPoints->P())[ ivC ], indexC );
+			pGrid->P()->SetPoint( (*pPoints->P())[ ivD ], indexD );
 		}
 
 		// Now lets store the diced user specified primitive variables.
@@ -771,8 +769,8 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 
 		if( USES( Uses(), EnvVars_P ) )
 		{
-			pGrid->P()->SetPoint( pPoints->P()[ ivB ], indexB );
-			pGrid->P()->SetPoint( pPoints->P()[ ivC ], indexC );
+			pGrid->P()->SetPoint( (*pPoints->P())[ ivB ], indexB );
+			pGrid->P()->SetPoint( (*pPoints->P())[ ivC ], indexC );
 		}
 
 		// Now lets store the diced user specified primitive variables.
@@ -814,8 +812,8 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 
 		if( USES( Uses(), EnvVars_P ) )
 		{
-			pGrid->P()->SetPoint( pPoints->P()[ ivC ], indexC );
-			pGrid->P()->SetPoint( pPoints->P()[ ivD ], indexD );
+			pGrid->P()->SetPoint( (*pPoints->P())[ ivC ], indexC );
+			pGrid->P()->SetPoint( (*pPoints->P())[ ivD ], indexD );
 		}
 
 		// Now lets store the diced user specified primitive variables.
@@ -854,7 +852,7 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		TqInt ivD = rE.pvHead() ->iVertex();
 
 		if( USES( Uses(), EnvVars_P ) )
-			pGrid->P()->SetPoint( pPoints->P()[ ivD ], indexD );
+			pGrid->P()->SetPoint( (*pPoints->P())[ ivD ], indexD );
 
 		// Now lets store the diced user specified primitive variables.
 		std::vector<CqParameter*>::iterator iUP;
@@ -974,7 +972,6 @@ void CqWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t,
 			// Check for smooth first (most commmon case, less likely to thrash the cache).
 			if ( sE <= 1 && bE == 0 )
 			{
-				pV->GetSmoothedScalar( &pPoints->P(), &pNewPoints->P(), i );
 				std::vector<CqParameter*>::iterator iUP, iNUP;
 				for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
 					if( (*iUP)->Class() == class_vertex )
@@ -987,7 +984,6 @@ void CqWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t,
 				{
 					if ( sE == 2 )
 					{
-						pV->GetCreaseScalar( &pPoints->P(), &pNewPoints->P(), i );
 						std::vector<CqParameter*>::iterator iUP, iNUP;
 						for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
 							if( (*iUP)->Class() == class_vertex )
@@ -995,7 +991,6 @@ void CqWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t,
 					}
 					else
 					{
-						pV->GetCornerScalar( &pPoints->P(), &pNewPoints->P(), i );
 						std::vector<CqParameter*>::iterator iUP, iNUP;
 						for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
 							if( (*iUP)->Class() == class_vertex )
@@ -1006,7 +1001,6 @@ void CqWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t,
 				{
 					if ( m_bInterpolateBoundary && pV->cEdges() == 2 )      	// Boundary point with valence 2 is corner
 					{
-						pV->GetCornerScalar( &pPoints->P(), &pNewPoints->P(), i );
 						std::vector<CqParameter*>::iterator iUP, iNUP;
 						for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
 							if( (*iUP)->Class() == class_vertex )
@@ -1014,7 +1008,6 @@ void CqWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t,
 					}
 					else				// Boundary points are crease points.
 					{
-						pV->GetBoundaryScalar( &pPoints->P(), &pNewPoints->P(), i );
 						std::vector<CqParameter*>::iterator iUP, iNUP;
 						for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
 							if( (*iUP)->Class() == class_vertex )
@@ -1063,7 +1056,9 @@ TqInt CqWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 	{
 		cE = m_apFaces[ 0 ] ->cEdges();
 
+		_OutputMesh( "subdiv1.raw" );
 		Subdivide();
+		_OutputMesh( "subdiv1.raw" );
 
 		int i;
 		for ( i = 0; i < cE; i++ )
@@ -1074,6 +1069,7 @@ TqInt CqWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 			pNew->m_fDiceable = TqTrue;
 			pNew->m_EyeSplitCount = m_EyeSplitCount;
 			aSplits.push_back( pNew );
+			pNew->_OutputMesh( "subdiv1.raw" );
 		}
 	}
 
@@ -1087,9 +1083,10 @@ TqInt CqWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 void CqWSurf::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
 {
 	// Tansform the control hull by the specified matrix.
+	if( NULL == m_pPoints->P() )	return;
 	TqUint i;
-	for ( i = 0; i < m_pPoints->P().Size(); i++ )
-		m_pPoints->P() [ i ] = matTx * m_pPoints->P() [ i ];
+	for ( i = 0; i < m_pPoints->P()->Size(); i++ )
+		(*m_pPoints->P()) [ i ] = matTx * (*m_pPoints->P()) [ i ];
 }
 
 
@@ -1104,14 +1101,14 @@ void CqWSurf::_OutputMesh( char* pname )
 	for ( i = 0; i < cFaces(); i++ )
 	{
 		CqWReference ref( pFace( i ) ->pEdge( 0 ), pFace( i ) );
-		CqVector3D vecA = m_pPoints->P()[ ref.pvHead() ->iVertex() ];
+		CqVector3D vecA = (*m_pPoints->P())[ ref.pvHead() ->iVertex() ];
 		ref.peNext();
 		TqInt j = 1;
 		while ( j < pFace( i ) ->cEdges() )
 		{
 			CqVector3D	vecB, vecC;
-			vecB = m_pPoints->P()[ ref.pvHead() ->iVertex() ];
-			vecC = m_pPoints->P()[ ref.pvTail() ->iVertex() ];
+			vecB = (*m_pPoints->P())[ ref.pvHead() ->iVertex() ];
+			vecC = (*m_pPoints->P())[ ref.pvTail() ->iVertex() ];
 
 			fprintf( pf, "%f %f %f " , vecA.x(), vecA.y(), vecA.z() );
 			fprintf( pf, "%f %f %f " , vecB.x(), vecB.y(), vecB.z() );
@@ -1442,13 +1439,14 @@ CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
 	TqInt i;
 	std::vector<CqWEdge*> apEdges;
 
-	// Initialise the P() array to a sensible size first.
-	m_pPoints->P().SetSize( 0 );
-
 	// If we have any APV's then make sure that we copy them.
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = pSurf->pPoints()->aUserParams().begin(); iUP != pSurf->pPoints()->aUserParams().end(); iUP++ )
-		m_pPoints->AddPrimitiveVariable( (*iUP)->Clone() );
+	{
+		CqParameter* pNewPV = (*iUP)->Clone();
+		pNewPV->Clear();
+		m_pPoints->AddPrimitiveVariable( pNewPV );
+	}
 
 	// Add the main face by adding each edge, by adding each vertex.
 	CqWReference rEdge( pF->pEdge( 0 ), pF );
@@ -1514,79 +1512,14 @@ CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
 CqWVert* CqWSurf::TransferVert( CqWSurf* pSurf, TqInt iVert, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
                                 TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os )
 {
-	CqWVert * pNew = GetpWVert( m_pPoints, pSurf->pPoints() ->P() [ iVert ] );
+	CqWVert * pNew = GetpWVert( m_pPoints, (*pSurf->pPoints() ->P()) [ iVert ] );
 	TqUint iV = pNew->iVertex();
-
-	if ( m_pPoints->P().Size() <= iV ) m_pPoints->P().SetSize( iV + 1 );
-	m_pPoints->P() [ iV ] = pSurf->pPoints() ->P() [ iVert ];
 
 	std::vector<CqParameter*>::iterator iUP, iTUP;
 	for( iUP = pSurf->pPoints()->aUserParams().begin(), iTUP = m_pPoints->aUserParams().begin(); iUP != pSurf->pPoints()->aUserParams().end(); iUP++, iTUP++ )
 	{
 		if ( (*iTUP)->Size() <= iV ) (*iTUP)->SetSize( iV + 1 );
-
-//		(*iTUP)->SetValue( (*iUP), iV, iVert );
-		switch( (*iUP)->Type() )
-		{
-			case type_float:
-			{
-				CqParameterTyped<TqFloat, TqFloat>* pNParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iUP));
-				CqParameterTyped<TqFloat, TqFloat>* pNTarget = static_cast<CqParameterTyped<TqFloat, TqFloat>*>((*iTUP));
-				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
-			}
-			break;
-
-			case type_integer:
-			{
-				CqParameterTyped<TqInt, TqFloat>* pNParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iUP));
-				CqParameterTyped<TqInt, TqFloat>* pNTarget = static_cast<CqParameterTyped<TqInt, TqFloat>*>((*iTUP));
-				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
-			}
-			break;
-
-			case type_point:
-			case type_vector:
-			case type_normal:
-			{
-				CqParameterTyped<CqVector3D, CqVector3D>* pNParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iUP));
-				CqParameterTyped<CqVector3D, CqVector3D>* pNTarget = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>((*iTUP));
-				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
-			}
-			break;
-
-			case type_hpoint:
-			{
-				CqParameterTyped<CqVector4D, CqVector3D>* pNParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iUP));
-				CqParameterTyped<CqVector4D, CqVector3D>* pNTarget = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>((*iTUP));
-				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
-			}
-			break;
-
-			case type_color:
-			{
-				CqParameterTyped<CqColor, CqColor>* pNParam = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iUP));
-				CqParameterTyped<CqColor, CqColor>* pNTarget = static_cast<CqParameterTyped<CqColor, CqColor>*>((*iTUP));
-				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
-			}
-			break;
-
-			case type_string:
-			{
-				CqParameterTyped<CqString, CqString>* pNParam = static_cast<CqParameterTyped<CqString, CqString>*>((*iUP));
-				CqParameterTyped<CqString, CqString>* pNTarget = static_cast<CqParameterTyped<CqString, CqString>*>((*iTUP));
-				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
-			}
-			break;
-
-			case type_matrix:
-			{
-				CqParameterTyped<CqMatrix, CqMatrix>* pNParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iUP));
-				CqParameterTyped<CqMatrix, CqMatrix>* pNTarget = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>((*iTUP));
-				*pNTarget->pValue( iV ) = *pNParam->pValue( iVert );
-			}
-			break;
-
-		}
+		(*iTUP)->SetValue( (*iUP), iV, iVert );
 	}
 
 	return ( pNew );
@@ -1604,7 +1537,7 @@ CqWVert* CqWSurf::GetpWVert( CqPolygonPoints* pPoints, const CqVector4D& V )
 		return ( pExist );
 	else
 	{
-		TqInt iV = pPoints->P().Size();
+		TqInt iV = pPoints->P()->Size();
 		CqWVert* pNew = new CqWVert( iV );
 		m_apVerts.push_back( pNew );
 		return ( pNew );
@@ -1623,9 +1556,9 @@ CqBound CqWSurf::Bound() const
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
 	CqVector3D	vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
 	TqUint i;
-	for ( i = 0; i < m_pPoints->P().Size(); i++ )
+	for ( i = 0; i < m_pPoints->P()->Size(); i++ )
 	{
-		CqVector3D	vecV = m_pPoints->P() [ i ];
+		CqVector3D	vecV = (*m_pPoints->P()) [ i ];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -1653,6 +1586,8 @@ CqBound CqWSurf::Bound() const
 
 TqBool CqWSurf::Diceable()
 {
+	assert( NULL != m_pPoints->P() );
+
 	if( !m_fSubdivided )	return( TqFalse );
 	
 	// Fail if not a quad patch
@@ -1663,10 +1598,10 @@ TqBool CqWSurf::Diceable()
 	const CqMatrix& matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
 
 	// Get the sides of the main quad (the first if everything goes according to plan.
-	CqVector3D vecA = m_pPoints->P() [ pFace( 0 ) ->pEdge( 0 ) ->pvHead() ->iVertex() ];
-	CqVector3D vecB = m_pPoints->P() [ pFace( 0 ) ->pEdge( 1 ) ->pvHead() ->iVertex() ];
-	CqVector3D vecC = m_pPoints->P() [ pFace( 0 ) ->pEdge( 2 ) ->pvHead() ->iVertex() ];
-	CqVector3D vecD = m_pPoints->P() [ pFace( 0 ) ->pEdge( 3 ) ->pvHead() ->iVertex() ];
+	CqVector3D vecA = (*m_pPoints->P()) [ pFace( 0 ) ->pEdge( 0 ) ->pvHead() ->iVertex() ];
+	CqVector3D vecB = (*m_pPoints->P()) [ pFace( 0 ) ->pEdge( 1 ) ->pvHead() ->iVertex() ];
+	CqVector3D vecC = (*m_pPoints->P()) [ pFace( 0 ) ->pEdge( 2 ) ->pvHead() ->iVertex() ];
+	CqVector3D vecD = (*m_pPoints->P()) [ pFace( 0 ) ->pEdge( 3 ) ->pvHead() ->iVertex() ];
 
 	vecA = matCtoR * vecA;
 	vecB = matCtoR * vecB;
@@ -1776,9 +1711,9 @@ CqBound	CqMotionWSurf::Bound() const
 	for ( i = 0; i < cTimes(); i++ )
 	{
 		TqUint j;
-		for ( j = 0; j < GetMotionObject( Time( i ) ) ->P().Size(); j++ )
+		for ( j = 0; j < GetMotionObject( Time( i ) ) ->P()->Size(); j++ )
 		{
-			CqVector3D	vecV = GetMotionObject( Time( i ) ) ->P() [ j ];
+			CqVector3D	vecV = (*GetMotionObject( Time( i ) ) ->P()) [ j ];
 			B.Encapsulate( vecV );
 		}
 	}
@@ -1855,10 +1790,10 @@ TqBool CqMotionWSurf::Diceable()
 
 	// Get the sides of the main quad (the first if everything goes according to plan.
 	CqPolygonPoints* pPoints = GetMotionObject( Time( 0 ) );
-	CqVector3D vecA = pPoints->P() [ pFace( 0 ) ->pEdge( 0 ) ->pvHead() ->iVertex() ];
-	CqVector3D vecB = pPoints->P() [ pFace( 0 ) ->pEdge( 1 ) ->pvHead() ->iVertex() ];
-	CqVector3D vecC = pPoints->P() [ pFace( 0 ) ->pEdge( 2 ) ->pvHead() ->iVertex() ];
-	CqVector3D vecD = pPoints->P() [ pFace( 0 ) ->pEdge( 3 ) ->pvHead() ->iVertex() ];
+	CqVector3D vecA = (*pPoints->P()) [ pFace( 0 ) ->pEdge( 0 ) ->pvHead() ->iVertex() ];
+	CqVector3D vecB = (*pPoints->P()) [ pFace( 0 ) ->pEdge( 1 ) ->pvHead() ->iVertex() ];
+	CqVector3D vecC = (*pPoints->P()) [ pFace( 0 ) ->pEdge( 2 ) ->pvHead() ->iVertex() ];
+	CqVector3D vecD = (*pPoints->P()) [ pFace( 0 ) ->pEdge( 3 ) ->pvHead() ->iVertex() ];
 
 	vecA = matCtoR * vecA;
 	vecB = matCtoR * vecB;
@@ -2013,7 +1948,6 @@ void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool u
 				// Check for smooth first (most commmon case, less likely to thrash the cache).
 				if ( sE <= 1 && bE == 0 )
 				{
-					pV->GetSmoothedScalar( &pPoints->P(), &pNewPoints->P(), i );
 					std::vector<CqParameter*>::iterator iUP, iNUP;
 					for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
 						pV->GetSmoothedScalar( (*iUP), (*iNUP), i );
@@ -2025,14 +1959,12 @@ void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool u
 					{
 						if ( sE == 2 )
 						{
-							pV->GetCreaseScalar( &pPoints->P(), &pNewPoints->P(), i );
 							std::vector<CqParameter*>::iterator iUP, iNUP;
 							for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
 								pV->GetCreaseScalar( (*iUP), (*iNUP), i );
 						}
 						else
 						{
-							pV->GetCornerScalar( &pPoints->P(), &pNewPoints->P(), i );
 							std::vector<CqParameter*>::iterator iUP, iNUP;
 							for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
 								pV->GetCornerScalar( (*iUP), (*iNUP), i );
@@ -2042,14 +1974,12 @@ void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool u
 					{
 						if ( pV->cEdges() == 2 )      	// Boundary point with valence 2 is corner
 						{
-							pV->GetCornerScalar( &pPoints->P(), &pNewPoints->P(), i );
 							std::vector<CqParameter*>::iterator iUP, iNUP;
 							for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
 								pV->GetCornerScalar( (*iUP), (*iNUP), i );
 						}
 						else				// Boundary points are crease points.
 						{
-							pV->GetBoundaryScalar( &pPoints->P(), &pNewPoints->P(), i );
 							std::vector<CqParameter*>::iterator iUP, iNUP;
 							for( iUP = pPoints->aUserParams().begin(), iNUP = pNewPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++, iNUP++ )
 								pV->GetBoundaryScalar( (*iUP), (*iNUP), i );
@@ -2084,13 +2014,6 @@ CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec
 		AddTimeSlot( pSurf->Time( i ), pPointsClass );
 
 		CqPolygonPoints* pSurfPoints = pSurf->GetMotionObject( pSurf->Time( i ) );
-
-		// Initialise the P() array to a sensible size first.
-		pPointsClass->P().SetSize( 0 );
-		if ( pSurfPoints->Cs()->Size() == 1 ) (*pPointsClass->Cs()) = (*pSurfPoints->Cs());
-		else	pPointsClass->Cs()->SetSize( 0 );
-		if ( pSurfPoints->Os()->Size() == 1 ) (*pPointsClass->Os()) = (*pSurfPoints->Os());
-		else	pPointsClass->Os()->SetSize( 0 );
 	}
 
 	TqInt lUses = pSurf->Uses();
@@ -2169,7 +2092,7 @@ CqWVert* CqMotionWSurf::TransferVert( CqMotionWSurf* pSurf, TqInt iVert, TqBool 
                                       TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os )
 {
 	// Check if the point exists, at time 0, if so it should be available at all times.
-	CqWVert * pNew = GetpWVert( GetMotionObject( Time( 0 ) ), pSurf->GetMotionObject( Time( 0 ) ) ->P() [ iVert ] );
+	CqWVert * pNew = GetpWVert( GetMotionObject( Time( 0 ) ), (*pSurf->GetMotionObject( Time( 0 ) ) ->P()) [ iVert ] );
 	TqUint iV = pNew->iVertex();
 
 	TqInt i;
@@ -2178,31 +2101,11 @@ CqWVert* CqMotionWSurf::TransferVert( CqMotionWSurf* pSurf, TqInt iVert, TqBool 
 		CqPolygonPoints* pMyPoints = GetMotionObject( i );
 		CqPolygonPoints* pSurfPoints = pSurf->GetMotionObject( i );
 
-		if ( pMyPoints->P().Size() <= iV ) pMyPoints->P().SetSize( iV + 1 );
-		pMyPoints->P() [ iV ] = pSurfPoints->P() [ iVert ];
-
-		if ( uses_s && has_s )
+		std::vector<CqParameter*>::iterator iUP, iTUP;
+		for( iUP = pSurfPoints->aUserParams().begin(), iTUP = pMyPoints->aUserParams().begin(); iUP != pSurfPoints->aUserParams().end(); iUP++, iTUP++ )
 		{
-			if ( pMyPoints->s()->Size() <= iV ) pMyPoints->s()->SetSize( iV + 1 );
-			(*pMyPoints->s())[ iV ] = (*pSurfPoints->s())[ iVert ];
-		}
-
-		if ( uses_t && has_t )
-		{
-			if ( pMyPoints->t()->Size() <= iV ) pMyPoints->t()->SetSize( iV + 1 );
-			(*pMyPoints->t())[ iV ] = (*pSurfPoints->t())[ iVert ];
-		}
-
-		if ( uses_Cs && has_Cs )
-		{
-			if ( pMyPoints->Cs()->Size() <= iV ) pMyPoints->Cs()->SetSize( iV + 1 );
-			(*pMyPoints->Cs())[ iV ] = (*pSurfPoints->Cs())[ iVert ];
-		}
-
-		if ( uses_Os && has_Os )
-		{
-			if ( pMyPoints->Os()->Size() <= iV ) pMyPoints->Os()->SetSize( iV + 1 );
-			(*pMyPoints->Os())[ iV ] = (*pSurfPoints->Os())[ iVert ];
+			if ( (*iTUP)->Size() <= iV ) (*iTUP)->SetSize( iV + 1 );
+			(*iTUP)->SetValue( (*iUP), iV, iVert );
 		}
 	}
 
@@ -2221,7 +2124,7 @@ CqWVert* CqMotionWSurf::GetpWVert( CqPolygonPoints* pPoints, const CqVector4D& V
 		return ( pExist );
 	else
 	{
-		TqInt iV = pPoints->P().Size();
+		TqInt iV = pPoints->P()->Size();
 		CqWVert* pNew = new CqWVert( iV );
 		m_apVerts.push_back( pNew );
 		return ( pNew );

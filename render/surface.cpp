@@ -171,9 +171,7 @@ TqInt CqBasicSurface::Uses() const
 /** Default constructor
  */
 
-CqSurface::CqSurface() : CqBasicSurface(),
-		m_P( "P" ),
-		m_N( "N" )
+CqSurface::CqSurface() : CqBasicSurface()
 {
 	// Nullify the standard primitive variables index table.
 	TqInt i;
@@ -185,9 +183,7 @@ CqSurface::CqSurface() : CqBasicSurface(),
 /** Copy constructor
  */
 
-CqSurface::CqSurface( const CqSurface& From ) :
-		m_P( "P" ),
-		m_N( "N" )
+CqSurface::CqSurface( const CqSurface& From )
 {
 	*this = From;
 }
@@ -213,11 +209,7 @@ CqSurface& CqSurface::operator=( const CqSurface& From )
 
 void CqSurface::ClonePrimitiveVariables( const CqSurface& From )
 {
-	// Copy primitive variables.
-	m_P = From.m_P;
-	m_N = From.m_N;
-
-	// Clone any user parameters.
+	// Clone any primitive variables.
 	m_aUserParams.clear();
 	std::vector<CqParameter*>::const_iterator iUP;
 	for( iUP = From.m_aUserParams.begin(); iUP != From.m_aUserParams.end(); iUP++ )
@@ -324,12 +316,12 @@ CqMicroPolyGridBase* CqSurface::Dice()
 	
 
 	if( NULL != pGrid->P() )
-		NaturalInterpolate( &P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
+		NaturalInterpolate( P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
 
 	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
 	if ( USES( lUses, EnvVars_N ) && ( NULL != pGrid->N() ) && bHasN() )
 	{
-		N().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->N() );
+		N()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->N() );
 		pGrid->SetbShadingNormals( TqTrue );
 	}
 

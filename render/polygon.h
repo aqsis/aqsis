@@ -203,11 +203,11 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 
 		virtual	const	CqVector4D& PolyP( TqInt i ) const
 		{
-			return ( P() [ i ] );
+			return ( (*P()) [ i ] );
 		}
 		virtual	const	CqVector3D& PolyN( TqInt i ) const
 		{
-			return ( N() [ i ] );
+			return ( (*N()) [ i ] );
 		}
 		virtual	const	CqColor& PolyCs( TqInt i ) const
 		{
@@ -269,7 +269,7 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 
 		virtual	TqInt	NumVertices() const
 		{
-			return ( P().Size() );
+			return ( cVertex() );
 		}
 
 		virtual	const IqAttributes*	pAttributes() const
@@ -362,7 +362,7 @@ class CqPolygonPoints : public CqSurface
 		 */
 		virtual	TqInt	NumVertices() const
 		{
-			return ( P().Size() );
+			return ( cVertex() );
 		}
 
 	protected:
@@ -451,11 +451,11 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 
 		virtual	const CqVector4D& PolyP( TqInt i ) const
 		{
-			return ( m_pPoints->P() [ m_aIndices[ i ] ] );
+			return ( (*m_pPoints->P()) [ m_aIndices[ i ] ] );
 		}
 		virtual	const CqVector3D& PolyN( TqInt i ) const
 		{
-			return ( m_pPoints->N() [ m_aIndices[ i ] ] );
+			return ( (*m_pPoints->N()) [ m_aIndices[ i ] ] );
 		}
 		virtual	const CqColor& PolyCs( TqInt i ) const
 		{
@@ -622,11 +622,11 @@ class CqMotionSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 
 		virtual	const CqVector4D& PolyP( TqInt i ) const
 		{
-			return ( GetMotionObject( Time( m_CurrTimeIndex ) ) ->P() [ m_aIndices[ i ] ] );
+			return ( (*GetMotionObject( Time( m_CurrTimeIndex ) ) ->P()) [ m_aIndices[ i ] ] );
 		}
 		virtual	const CqVector3D& PolyN( TqInt i ) const
 		{
-			return ( GetMotionObject( Time( m_CurrTimeIndex ) ) ->N() [ m_aIndices[ i ] ] );
+			return ( (*GetMotionObject( Time( m_CurrTimeIndex ) ) ->N()) [ m_aIndices[ i ] ] );
 		}
 		virtual	const CqColor& PolyCs( TqInt i ) const
 		{

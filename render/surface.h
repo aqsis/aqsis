@@ -233,15 +233,21 @@ class _qShareC CqSurface : public CqBasicSurface
 
 		/** Get a reference the to P default parameter.
 		 */
-		CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>& P()
+		CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>* P()
 		{
-			return ( m_P );
+			if( m_aiStdPrimitiveVars[ EnvVars_P ] >= 0 )
+				return( static_cast<CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_P ] ] ) );
+			else
+				return( NULL );
 		}
 		/** Get a reference the to N default parameter.
 		 */
-		CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>& N()
+		CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* N()
 		{
-			return ( m_N );
+			if( m_aiStdPrimitiveVars[ EnvVars_N ] >= 0 )
+				return( static_cast<CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_N ] ] ) );
+			else
+				return( NULL );
 		}
 		/** Get a reference the to Cq default parameter.
 		 */
@@ -300,15 +306,21 @@ class _qShareC CqSurface : public CqBasicSurface
 
 		/** Get a reference the to P default parameter.
 		 */
-		const	CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>& P() const
+		const	CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>* P() const
 		{
-			return ( m_P );
+			if( m_aiStdPrimitiveVars[ EnvVars_P ] >= 0 )
+				return( static_cast<const CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_P ] ] ) );
+			else
+				return( NULL );
 		}
 		/** Get a reference the to N default parameter.
 		 */
-		const	CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>& N() const
+		const	CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* N() const
 		{
-			return ( m_N );
+			if( m_aiStdPrimitiveVars[ EnvVars_N ] >= 0 )
+				return( static_cast<const CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_N ] ] ) );
+			else
+				return( NULL );
 		}
 		/** Get a reference the to Cq default parameter.
 		 */
@@ -369,7 +381,7 @@ class _qShareC CqSurface : public CqBasicSurface
 		 */
 		const	TqBool	bHasN() const
 		{
-			return ( m_N.Size() >= cVarying() );
+			return ( m_aiStdPrimitiveVars[ EnvVars_N ] >= 0 );
 		}
 		/** Determine whether this surface has per vertex colors.
 		 */
@@ -427,7 +439,17 @@ class _qShareC CqSurface : public CqBasicSurface
 		void AddPrimitiveVariable( CqParameter* pParam )
 		{
 			m_aUserParams.push_back( pParam );
-			if( pParam->strName() == "Cs" )
+			if( pParam->strName() == "P" )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_P ] );
+				m_aiStdPrimitiveVars[ EnvVars_P ] = m_aUserParams.size() - 1;
+			}
+			else if( pParam->strName() == "N" )
+			{
+				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_N ] );
+				m_aiStdPrimitiveVars[ EnvVars_N ] = m_aUserParams.size() - 1;
+			}
+			else if( pParam->strName() == "Cs" )
 			{
 				assert( -1 == m_aiStdPrimitiveVars[ EnvVars_Cs ] );
 				m_aiStdPrimitiveVars[ EnvVars_Cs ] = m_aUserParams.size() - 1;
@@ -510,12 +532,7 @@ class _qShareC CqSurface : public CqBasicSurface
 		virtual	CqMicroPolyGridBase* Dice();
 
 	protected:
-		// Default primitive variables
-		CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>	m_P;		///< Default parameter P.
-		CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>	m_N;		///< Default parameter N.
-
 		std::vector<CqParameter*>	m_aUserParams;						///< Storage for user defined paramter variables.
-
 		TqInt			m_aiStdPrimitiveVars[EnvVars_Last];		///< Quick lookup index into the primitive variables table for standard variables.
 }
 ;

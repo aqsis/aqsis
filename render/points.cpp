@@ -66,7 +66,7 @@ CqPoints::CqPoints(TqInt n, TqFloat *origins , TqFloat *sizes, TqFloat constantw
 		angle = 0.0;
 		pSurface->SetDefaultPrimitiveVariables();
 		pSurface->SetSurfaceParameters( *this );
-		pSurface->P().SetSize( NBR_SEGMENTS );
+		pSurface->P()->SetSize( NBR_SEGMENTS );
 		pSurface->Cs()->SetSize( NBR_SEGMENTS );
 		pSurface->Os()->SetSize( NBR_SEGMENTS );
 		pSurface->s()->SetSize( NBR_SEGMENTS );
@@ -91,7 +91,7 @@ CqPoints::CqPoints(TqInt n, TqFloat *origins , TqFloat *sizes, TqFloat constantw
 	
 			(*pSurface->s())[j] = 0.5 * cos(angle) + 0.5;
 			(*pSurface->t())[j] = 0.5 * sin(angle) + 0.5;
-			pSurface->P()[j] = CqVector3D(
+			(*pSurface->P())[j] = CqVector3D(
 					co + origins[3*i], 
 					si + origins[3*i+1], 
 					origins[3*i+2]);

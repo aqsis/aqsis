@@ -86,27 +86,8 @@ CqSurfacePatchBicubic& CqSurfacePatchBicubic::operator=( const CqSurfacePatchBic
 
 void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfacePatchBicubic* pNew2 )
 {
-	pNew1->P().SetSize( cVertex() );
-	pNew2->P().SetSize( cVertex() );
-
 	TqUint iv;
-	for( iv = 0; iv < 4; iv++ )
-	{
-		TqUint ivo = ( iv * 4 );
-		pNew1->P()[ ivo + 0 ] = static_cast<CqVector3D>( P()[ ivo + 0 ] );
-		pNew1->P()[ ivo + 1 ] = static_cast<CqVector3D>( ( P()[ ivo + 0 ] + P()[ ivo + 1 ] ) / 2.0f );
-		pNew1->P()[ ivo + 2 ] = static_cast<CqVector3D>( pNew1->P()[ ivo + 1 ] / 2.0f + ( P()[ ivo + 1 ] + P()[ ivo + 2 ] ) / 4.0f );
-
-		pNew2->P()[ ivo + 3 ] = static_cast<CqVector3D>( P()[ ivo + 3 ] );
-		pNew2->P()[ ivo + 2 ] = static_cast<CqVector3D>( ( P()[ ivo + 2 ] + P()[ ivo + 3 ] ) / 2.0f );
-		pNew2->P()[ ivo + 1 ] = static_cast<CqVector3D>( pNew2->P()[ ivo + 2 ] / 2.0f + ( P()[ ivo + 1 ] + P()[ ivo + 2 ] ) / 4.0f );
-
-		pNew1->P()[ ivo + 3 ] = static_cast<CqVector3D>( ( pNew1->P()[ ivo + 2] + pNew2->P()[ ivo + 1 ] ) / 2.0f );
-		pNew2->P()[ ivo + 0 ] = static_cast<CqVector3D>( pNew1->P()[ ivo + 3 ] );
-	}
-
-
-	// Now do the same for 'vertex' class primitive variables.
+	// Subdivide the 'vertex' class primitive variables.
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
@@ -302,16 +283,7 @@ void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 		}
 	}
 
-	// Subdivide the normals
-	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
-	{
-		pNew1->N().SetSize( cVertex() );
-		pNew2->N().SetSize( cVertex() );
-		// Subdivide the Normals.
-		pNew1->N() = N();
-		pNew1->N().uSubdivide( &pNew2->N() );
-	}
-
+	// Now subdivide the 'varying' class variables.
 	uSubdivideUserParameters( pNew1, pNew2 );
 }
 
@@ -322,25 +294,8 @@ void CqSurfacePatchBicubic::uSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 
 void CqSurfacePatchBicubic::vSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfacePatchBicubic* pNew2 )
 {
-	pNew1->P().SetSize( cVertex() );
-	pNew2->P().SetSize( cVertex() );
-
 	TqUint iu;
-	for( iu = 0; iu < 4; iu++ )
-	{
-		pNew1->P()[  0 + iu ] = static_cast<CqVector3D>( P()[ 0 + iu ] );
-		pNew1->P()[  4 + iu ] = static_cast<CqVector3D>( ( P()[ 0 + iu ] + P()[ 4 + iu ] ) / 2.0f );
-		pNew1->P()[  8 + iu ] = static_cast<CqVector3D>( pNew1->P()[ 4 + iu ] / 2.0f + ( P()[ 4 + iu ] + P()[ 8 + iu ] ) / 4.0f );
-
-		pNew2->P()[ 12 + iu ] = static_cast<CqVector3D>( P()[ 12 + iu ] );
-		pNew2->P()[  8 + iu ] = static_cast<CqVector3D>( ( P()[ 8 + iu ] + P()[ 12 + iu ] ) / 2.0f );
-		pNew2->P()[  4 + iu ] = static_cast<CqVector3D>( pNew2->P()[ 8 + iu ] / 2.0f + ( P()[ 4 + iu ] + P()[ 8 + iu ] ) / 4.0f );
-
-		pNew1->P()[ 12 + iu ] = static_cast<CqVector3D>( ( pNew1->P()[ 8 + iu ] + pNew2->P()[ 4 + iu ] ) / 2.0f );
-		pNew2->P()[  0 + iu ] = static_cast<CqVector3D>( pNew1->P()[ 12 + iu ] );
-	}
-
-	// Now do the same for 'vertex' class primitive variables.
+	// Subdivide the 'vertex' class primitive variables.
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
@@ -528,17 +483,7 @@ void CqSurfacePatchBicubic::vSubdivide( CqSurfacePatchBicubic* pNew1, CqSurfaceP
 		}
 	}
 
-
-	// Subdivide the normals
-	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
-	{
-		pNew1->N().SetSize( cVertex() );
-		pNew2->N().SetSize( cVertex() );
-		// Subdivide the Normals.
-		pNew1->N() = N();
-		pNew1->N().vSubdivide( &pNew2->N() );
-	}
-
+	// Subdivide the 'varying' class variables.
 	vSubdivideUserParameters( pNew1, pNew2 );
 }
 
@@ -555,7 +500,7 @@ CqBound CqSurfacePatchBicubic::Bound() const
 	TqInt i;
 	for ( i = 0; i < 16; i++ )
 	{
-		CqVector3D	vecV = P() [ i ];
+		CqVector3D	vecV = (*P()) [ i ];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -683,6 +628,7 @@ TqInt CqSurfacePatchBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 
 TqBool	CqSurfacePatchBicubic::Diceable()
 {
+	assert( NULL != P() );
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
 	if ( !m_fDiceable )
@@ -711,7 +657,7 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 	else
 		gridsize = static_cast<TqInt>( m_XBucketSize * m_XBucketSize / ShadingRate );
 	for ( i = 0; i < 16; i++ )
-		avecHull[ i ] = matCtoR * P() [ i ];
+		avecHull[ i ] = matCtoR * (*P()) [ i ];
 
 	// First check flatness, a curve which is too far off flat will
 	// produce unreliable results when the length is approximated below.
@@ -828,9 +774,10 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 void	CqSurfacePatchBicubic::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
 {
 	// Tansform the control hull by the specified matrix.
+	if( NULL == P() )	return;
 	TqInt i;
 	for ( i = 0; i < 16; i++ )
-		P() [ i ] = matTx * P() [ i ];
+		(*P()) [ i ] = matTx * (*P()) [ i ];
 }
 
 
@@ -862,48 +809,6 @@ CqSurfacePatchBilinear::~CqSurfacePatchBilinear()
 
 
 //---------------------------------------------------------------------
-/** Evaluate a bilinear spline patch normal at the specified intervals.
- */
-
-CqVector4D CqSurfacePatchBilinear::EvaluateNormal( TqFloat s, TqFloat t ) const
-{
-	CqVector3D vecNAB, vecNCD;
-	// Work out where the u points are first, then linear interpolate the v value.
-	if ( s <= 0.0 )
-	{
-		vecNAB = N() [ 0 ];
-		vecNCD = N() [ 2 ];
-	}
-	else
-	{
-		if ( s >= 1.0 )
-		{
-			vecNAB = N() [ 1 ];
-			vecNCD = N() [ 3 ];
-		}
-		else
-		{
-			vecNAB = ( N() [ 1 ] * s ) + ( N() [ 0 ] * ( 1.0 - s ) );
-			vecNCD = ( N() [ 3 ] * s ) + ( N() [ 2 ] * ( 1.0 - s ) );
-		}
-	}
-
-	CqVector3D vecN;
-	if ( t <= 0.0 )
-		vecN = vecNAB;
-	else
-	{
-		if ( t >= 1.0 )
-			vecN = vecNCD;
-		else
-			vecN = ( vecNCD * t ) + ( vecNAB * ( 1.0 - t ) );
-	}
-
-	return ( vecN );
-}
-
-
-//---------------------------------------------------------------------
 /** Assignment operator.
  */
 
@@ -921,8 +826,7 @@ CqSurfacePatchBilinear& CqSurfacePatchBilinear::operator=( const CqSurfacePatchB
 
 void CqSurfacePatchBilinear::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
 {
-	assert( P().Size() == 4 );
-	N().SetSize( 4 );
+	assert( NULL != P() && P()->Size() == 4 );
 
 	// Get the handedness of the coordinate system (at the time of creation) and
 	// the coordinate system specified, to check for normal flipping.
@@ -930,10 +834,10 @@ void CqSurfacePatchBilinear::GenerateGeometricNormals( TqInt uDiceSize, TqInt vD
 
 	// For each of the four points, calculate the normal as the cross product of its
 	// two vectors.
-	N() [ 0 ] = ( P() [ 1 ] - P() [ 0 ] ) % ( P() [ 2 ] - P() [ 0 ] );
-	N() [ 1 ] = ( P() [ 3 ] - P() [ 1 ] ) % ( P() [ 0 ] - P() [ 1 ] );
-	N() [ 2 ] = ( P() [ 0 ] - P() [ 2 ] ) % ( P() [ 3 ] - P() [ 2 ] );
-	N() [ 3 ] = ( P() [ 2 ] - P() [ 3 ] ) % ( P() [ 1 ] - P() [ 3 ] );
+	CqVector3D N1 = ( (*P()) [ 1 ] - (*P()) [ 0 ] ) % ( (*P()) [ 2 ] - (*P()) [ 0 ] );
+	CqVector3D N2 = ( (*P()) [ 3 ] - (*P()) [ 1 ] ) % ( (*P()) [ 0 ] - (*P()) [ 1 ] );
+	CqVector3D N3 = ( (*P()) [ 0 ] - (*P()) [ 2 ] ) % ( (*P()) [ 3 ] - (*P()) [ 2 ] );
+	CqVector3D N4 = ( (*P()) [ 2 ] - (*P()) [ 3 ] ) % ( (*P()) [ 1 ] - (*P()) [ 3 ] );
 
 	CqVector3D	N;
 	TqInt v, u;
@@ -941,10 +845,9 @@ void CqSurfacePatchBilinear::GenerateGeometricNormals( TqInt uDiceSize, TqInt vD
 	{
 		for ( u = 0; u <= uDiceSize; u++ )
 		{
-			TqInt igrid = ( v * ( uDiceSize + 1 ) ) + u;
-			N = EvaluateNormal( u, v );
+			N = BilinearEvaluate( N1, N2, N3, N4, u, v );
 			N = ( O == OrientationLH )? N : -N;
-			pNormals->SetNormal( N, igrid );
+			pNormals->SetNormal( N, ( v * ( uDiceSize + 1 ) ) + u );
 		}
 	}
 }
@@ -956,12 +859,7 @@ void CqSurfacePatchBilinear::GenerateGeometricNormals( TqInt uDiceSize, TqInt vD
 
 void CqSurfacePatchBilinear::uSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfacePatchBilinear* pNew2 )
 {
-	pNew1->P().SetSize( cVertex() );
-	pNew2->P().SetSize( cVertex() );
-	// Subdivide the vertices
-	pNew1->P() = P();
-	pNew1->P().uSubdivide( &pNew2->P() );
-
+	// Subdivide the 'vertex' class variables.
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
@@ -975,16 +873,7 @@ void CqSurfacePatchBilinear::uSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfac
 		}
 	}
 
-	// Subdivide the normals
-	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
-	{
-		pNew1->N().SetSize( cVertex() );
-		pNew2->N().SetSize( cVertex() );
-		// Subdivide the Normals.
-		pNew1->N() = N();
-		pNew1->N().uSubdivide( &pNew2->N() );
-	}
-
+	// Subdivide the 'varying' class variables.
 	uSubdivideUserParameters( pNew1, pNew2 );
 }
 
@@ -995,12 +884,7 @@ void CqSurfacePatchBilinear::uSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfac
 
 void CqSurfacePatchBilinear::vSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfacePatchBilinear* pNew2 )
 {
-	pNew1->P().SetSize( cVertex() );
-	pNew2->P().SetSize( cVertex() );
-	// Subdivide the vertices.
-	pNew1->P() = P();
-	pNew1->P().vSubdivide( &pNew2->P() );
-
+	// Subdivide the 'vertex' class variables.
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
@@ -1014,16 +898,7 @@ void CqSurfacePatchBilinear::vSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfac
 		}
 	}
 
-	// Subdivide the normals
-	if ( USES( Uses(), EnvVars_N ) && bHasN() ) 
-	{
-		pNew1->N().SetSize( cVertex() );
-		pNew2->N().SetSize( cVertex() );
-		// Subdivide the Normals.
-		pNew1->N() = N();
-		pNew1->N().vSubdivide( &pNew2->N() );
-	}
-
+	// Subdivide the 'varying' class variables.
 	vSubdivideUserParameters( pNew1, pNew2 );
 }
 
@@ -1034,13 +909,15 @@ void CqSurfacePatchBilinear::vSubdivide( CqSurfacePatchBilinear* pNew1, CqSurfac
 
 CqBound CqSurfacePatchBilinear::Bound() const
 {
+	assert( NULL != P() );
+
 	// Get the boundary in camera space.
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
 	CqVector3D	vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
 	TqInt i;
 	for ( i = 0; i < 4; i++ )
 	{
-		CqVector3D	vecV = P() [ i ];
+		CqVector3D	vecV = (*P()) [ i ];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -1118,6 +995,8 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 
 TqBool	CqSurfacePatchBilinear::Diceable()
 {
+	assert( NULL != P() );
+	
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
 	if ( !m_fDiceable )
@@ -1146,7 +1025,7 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 	else
 		gridsize = static_cast<TqInt>( m_XBucketSize * m_XBucketSize / ShadingRate );
 	for ( i = 0; i < 4; i++ )
-		avecHull[ i ] = matCtoR * P() [ i ];
+		avecHull[ i ] = matCtoR * (*P()) [ i ];
 
 	TqFloat uLen = 0;
 	TqFloat vLen = 0;
@@ -1196,11 +1075,12 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 void	CqSurfacePatchBilinear::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
 {
 	// Tansform the control hull by the specified matrix.
+	if( NULL == P() ) return;
 	TqInt i;
 	for ( i = 0; i < 4; i++ )
 	{
-		P() [ i ] = matTx * P() [ i ];
-		if ( N().Size() == 4 ) N() [ i ] = matITTx * N() [ i ];
+		(*P()) [ i ] = matTx * (*P()) [ i ];
+		if ( NULL != N() && N()->Size() == 4 ) (*N()) [ i ] = matITTx * (*N()) [ i ];
 	}
 }
 
@@ -1250,13 +1130,15 @@ CqSurfacePatchMeshBicubic& CqSurfacePatchMeshBicubic::operator=( const CqSurface
 
 CqBound CqSurfacePatchMeshBicubic::Bound() const
 {
+	assert( NULL != P() );
+
 	// Get the boundary in camera space.
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
 	CqVector3D	vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
 	TqUint i;
-	for ( i = 0; i < P().Size(); i++ )
+	for ( i = 0; i < P()->Size(); i++ )
 	{
-		CqVector3D	vecV = P() [ i ];
+		CqVector3D	vecV = (*P()) [ i ];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -1278,9 +1160,10 @@ CqBound CqSurfacePatchMeshBicubic::Bound() const
 void CqSurfacePatchMeshBicubic::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
 {
 	// Tansform the control hull by the specified matrix.
+	if( NULL == P() )	return;
 	TqUint i;
-	for ( i = 0; i < P().Size(); i++ )
-		P() [ i ] = matTx * P() [ i ];
+	for ( i = 0; i < P()->Size(); i++ )
+		(*P()) [ i ] = matTx * (*P()) [ i ];
 }
 
 
@@ -1311,7 +1194,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 	CqVector2D st3( pTC[4], pTC[5]);
 	CqVector2D st4( pTC[6], pTC[7]);
 
-	// Fill in the points
+	// Fill in the variables.
 	TqInt i;
 	for ( i = 0; i < m_vPatches; i++ )
 	{
@@ -1328,19 +1211,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 			pSurface->AddRef();
 			pSurface->SetSurfaceParameters( *this );
 
-			pSurface->P().SetSize( pSurface->cVertex() );
 			RtInt v;
-			for ( v = 0; v < 4; v++ )
-			{
-				iP = PatchCoord( vRow + v, uCol );
-				pSurface->P() [ ( v * 4 ) ] = P() [ iP ];
-				iP = PatchCoord( vRow + v, uCol + 1 );
-				pSurface->P() [ ( v * 4 ) + 1 ] = P() [ iP ];
-				iP = PatchCoord( vRow + v, uCol + 2 );
-				pSurface->P() [ ( v * 4 ) + 2 ] = P() [ iP ];
-				iP = PatchCoord( vRow + v, uCol + 3 );
-				pSurface->P() [ ( v * 4 ) + 3 ] = P() [ iP ];
-			}
 
 			TqInt iTa = PatchCorner( i, j );
 			TqInt iTb = PatchCorner( i, j + 1 );
@@ -1350,12 +1221,12 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 			TqFloat u0 = ( 1.0f / m_uPatches ) * j;
 			TqFloat u1 = ( 1.0f / m_uPatches ) * ( j + 1 );
 
-			// Copy any user specified primitive variables.
 			std::vector<CqParameter*>::iterator iUP;
 			for( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
 			{
 				if( (*iUP)->Class() == class_varying )
 				{
+					// Copy any 'varying' class primitive variables.
 					CqParameter* pNewUP = (*iUP)->Clone();
 					pNewUP->Clear();
 					pNewUP->SetSize( pSurface->cVarying() );
@@ -1368,6 +1239,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 				}
 				else if( (*iUP)->Class() == class_vertex )
 				{
+					// Copy any 'vertex' class primitive variables.
 					CqParameter* pNewUP = (*iUP)->Clone();
 					pNewUP->Clear();
 					pNewUP->SetSize( pSurface->cVertex() );
@@ -1481,13 +1353,15 @@ CqSurfacePatchMeshBilinear& CqSurfacePatchMeshBilinear::operator=( const CqSurfa
 
 CqBound CqSurfacePatchMeshBilinear::Bound() const
 {
+	assert( NULL != P() );
+
 	// Get the boundary in camera space.
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
 	CqVector3D	vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
 	TqUint i;
-	for ( i = 0; i < P().Size(); i++ )
+	for ( i = 0; i < P()->Size(); i++ )
 	{
-		CqVector3D	vecV = P() [ i ];
+		CqVector3D	vecV = (*P()) [ i ];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -1509,9 +1383,10 @@ CqBound CqSurfacePatchMeshBilinear::Bound() const
 void CqSurfacePatchMeshBilinear::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
 {
 	// Tansform the control hull by the specified matrix.
+	if( NULL == P() )	return;
 	TqUint i;
-	for ( i = 0; i < P().Size(); i++ )
-		P() [ i ] = matTx * P() [ i ];
+	for ( i = 0; i < P()->Size(); i++ )
+		(*P()) [ i ] = matTx * (*P()) [ i ];
 }
 
 
@@ -1537,7 +1412,7 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 	CqVector2D st4( pTC[6], pTC[7]);
 
 	TqInt i;
-	for ( i = 0; i < m_vPatches; i++ )      	// Fill in the points
+	for ( i = 0; i < m_vPatches; i++ )  
 	{
 		TqFloat v0 = ( 1.0f / m_vPatches ) * i;
 		TqFloat v1 = ( 1.0f / m_vPatches ) * ( i + 1 );
@@ -1547,18 +1422,6 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 			CqSurfacePatchBilinear*	pSurface = new CqSurfacePatchBilinear;
 			pSurface->AddRef();
 			pSurface->SetSurfaceParameters( *this );
-			pSurface->P().SetSize( 4 );
-
-			// Calculate the position in the point table for u taking into account
-			// periodic patches.
-			iP = PatchCoord( i, j );
-			pSurface->P() [ 0 ] = P() [ iP ];
-			iP = PatchCoord( i, j + 1 );
-			pSurface->P() [ 1 ] = P() [ iP ];
-			iP = PatchCoord( i + 1, j );
-			pSurface->P() [ 2 ] = P() [ iP ];
-			iP = PatchCoord( i + 1, j + 1 );
-			pSurface->P() [ 3 ] = P() [ iP ];
 
 			RtInt iTa = PatchCoord( i, j );
 			RtInt iTb = PatchCoord( i, j + 1 );
@@ -1568,12 +1431,13 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 			TqFloat u0 = ( 1.0f / m_uPatches ) * j;
 			TqFloat u1 = ( 1.0f / m_uPatches ) * ( j + 1 );
 
-			// Copy any user specified primitive variables.
+			// Copy any primitive variables.
 			std::vector<CqParameter*>::iterator iUP;
 			for( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
 			{
 				if( (*iUP)->Class() == class_varying )
 				{
+					// Copy any 'varying' class primitive variables.
 					CqParameter* pNewUP = (*iUP)->Clone();
 					pNewUP->Clear();
 					pNewUP->SetSize( pSurface->cVarying() );
@@ -1587,6 +1451,7 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 				}
 				else if( (*iUP)->Class() == class_vertex )
 				{
+					// Copy any 'vertex' class primitive variables.
 					CqParameter* pNewUP = (*iUP)->Clone();
 					pNewUP->Clear();
 					pNewUP->SetSize( pSurface->cVertex() );

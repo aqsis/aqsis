@@ -2196,15 +2196,15 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 		TqFloat	MinX, MaxX;
 		TqFloat	MinY, MaxY;
 		TqFloat	MinZ, MaxZ;
-		CqVector3D	vecTemp = pPointsClass->P() [ 0 ];
+		CqVector3D	vecTemp = (*pPointsClass->P()) [ 0 ];
 		MinX = MaxX = vecTemp.x();
 		MinY = MaxY = vecTemp.y();
 		MinZ = MaxZ = vecTemp.z();
 
 		TqUint iVert;
-		for ( iVert = 1; iVert < pPointsClass->P().Size(); iVert++ )
+		for ( iVert = 1; iVert < pPointsClass->P()->Size(); iVert++ )
 		{
-			vecTemp = pPointsClass->P() [ iVert ];
+			vecTemp = (*pPointsClass->P()) [ iVert ];
 			MinX = ( MinX < vecTemp.x() ) ? MinX : vecTemp.x();
 			MinY = ( MinY < vecTemp.y() ) ? MinY : vecTemp.y();
 			MinZ = ( MinZ < vecTemp.z() ) ? MinZ : vecTemp.z();
@@ -2235,7 +2235,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 			TqInt ivert;
 			for ( ivert = 0; ivert < nverts[ iloop ]; ivert++ )
 			{
-				assert( ipoint < pPointsClass->P().Size() );
+				assert( ipoint < pPointsClass->P()->Size() );
 				polya.aiVertices().push_back( ipoint++ );
 			}
 			if ( iloop == 0 )
@@ -2659,7 +2659,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 				TqFloat	MinX, MaxX;
 				TqFloat	MinY, MaxY;
 				TqFloat	MinZ, MaxZ;
-				CqVector3D	vecTemp = pPointsClass->P() [ verts[ igvert ] ];
+				CqVector3D	vecTemp = (*pPointsClass->P()) [ verts[ igvert ] ];
 				MinX = MaxX = vecTemp.x();
 				MinY = MaxY = vecTemp.y();
 				MinZ = MaxZ = vecTemp.z();
@@ -2670,10 +2670,10 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 				for ( ivert = 0; ivert < nverts[ igloop ]; ivert++, igvert++ )
 				{
 					ipoint = verts[ igvert ];
-					assert( ipoint < pPointsClass->P().Size() );
+					assert( ipoint < pPointsClass->P()->Size() );
 					polya.aiVertices().push_back( ipoint );
 
-					vecTemp = pPointsClass->P() [ verts[ igvert ] ];
+					vecTemp = (*pPointsClass->P()) [ verts[ igvert ] ];
 					MinX = ( MinX < vecTemp.x() ) ? MinX : vecTemp.x();
 					MinY = ( MinY < vecTemp.y() ) ? MinY : vecTemp.y();
 					MinZ = ( MinZ < vecTemp.z() ) ? MinZ : vecTemp.z();
@@ -4285,25 +4285,24 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 	// Fill in the position variable according to type.
 	if ( fP != RIL_NONE )
 	{
+		pSurface->AddPrimitiveVariable(  new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>("P",0) );
+		pSurface->P()->SetSize( pSurface->cVertex() );
 		TqInt i;
 		switch ( fP )
 		{
 				case RIL_P:
-				pSurface->P().SetSize( pSurface->cVertex() );
 				for ( i = 0; i < pSurface->cVertex(); i++ )
-					pSurface->P() [ i ] = CqVector3D( pPoints[ ( i * 3 ) ], pPoints[ ( i * 3 ) + 1 ], pPoints[ ( i * 3 ) + 2 ] );
+					(*pSurface->P()) [ i ] = CqVector3D( pPoints[ ( i * 3 ) ], pPoints[ ( i * 3 ) + 1 ], pPoints[ ( i * 3 ) + 2 ] );
 				break;
 
 				case RIL_Pz:
-				pSurface->P().SetSize( pSurface->cVertex() );
 				for ( i = 0; i < pSurface->cVertex(); i++ )
-					pSurface->P() [ i ] = CqVector3D( i % 1, FLOOR( i / 2 ), pPoints[ i ] );
+					(*pSurface->P()) [ i ] = CqVector3D( i % 1, FLOOR( i / 2 ), pPoints[ i ] );
 				break;
 
 				case RIL_Pw:
-				pSurface->P().SetSize( pSurface->cVertex() );
 				for ( i = 0; i < pSurface->cVertex(); i++ )
-					pSurface->P() [ i ] = CqVector4D( pPoints[ ( i * 4 ) ], pPoints[ ( i * 4 ) + 1 ], pPoints[ ( i * 4 ) + 2 ], pPoints[ ( i * 4 ) + 3 ] );
+					(*pSurface->P()) [ i ] = CqVector4D( pPoints[ ( i * 4 ) ], pPoints[ ( i * 4 ) + 1 ], pPoints[ ( i * 4 ) + 2 ], pPoints[ ( i * 4 ) + 3 ] );
 				break;
 		}
 	}
@@ -4312,19 +4311,19 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 	// Fill in the normal variable according to type.
 	if ( fN != RIL_NONE )
 	{
+		pSurface->AddPrimitiveVariable(  new CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>("N",0) );
+		pSurface->N()->SetSize( pSurface->cVarying() );
 		TqUint i;
 		switch ( fN )
 		{
 				case RIL_N:
-				pSurface->N().SetSize( pSurface->cVarying() );
 				for ( i = 0; i < pSurface->cVarying(); i++ )
-					pSurface->N() [ i ] = CqVector3D( pNormals[ ( i * 3 ) ], pNormals[ ( i * 3 ) + 1 ], pNormals[ ( i * 3 ) + 2 ] );
+					(*pSurface->N()) [ i ] = CqVector3D( pNormals[ ( i * 3 ) ], pNormals[ ( i * 3 ) + 1 ], pNormals[ ( i * 3 ) + 2 ] );
 				break;
 
 				case RIL_Np:
-				pSurface->N().SetSize( pSurface->cUniform() );
 				for ( i = 0; i < pSurface->cUniform(); i++ )
-					pSurface->N() [ i ] = CqVector3D( pNormals[ ( i * 3 ) ], pNormals[ ( i * 3 ) + 1 ], pNormals[ ( i * 3 ) + 2 ] );
+					(*pSurface->N()) [ i ] = CqVector3D( pNormals[ ( i * 3 ) ], pNormals[ ( i * 3 ) + 1 ], pNormals[ ( i * 3 ) + 2 ] );
 				break;
 		}
 	}

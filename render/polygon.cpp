@@ -244,22 +244,8 @@ CqMicroPolyGridBase* CqPolygonBase::Dice()
 
 TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 {
-	CqVector3D	vecA, vecB, vecC, vecD;
-	CqVector3D	vecNA, vecNB, vecNC, vecND;
+	CqVector3D	vecN;
 	TqInt indexA, indexB, indexC, indexD;
-
-	CqColor colSys = pAttributes() ->GetColorAttribute("System", "Color")[0];
-	CqColor opaSys = pAttributes() ->GetColorAttribute("System", "Opacity")[0];
-
-	TqBool	bhasN = bHasN();
-	TqBool	bhass = bHass();
-	TqBool	bhast = bHast();
-	TqBool	bhasu = bHasu();
-	TqBool	bhasv = bHasv();
-	TqBool	bhasCs = bHasCs();
-	TqBool	bhasOs = bHasOs();
-
-	TqInt iUses = PolyUses();
 
 	// We need to take into account Orientation here, even though most other
 	// primitives leave it up to the CalcNormals function on the MPGrid, because we
@@ -269,18 +255,12 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 	indexA = 0;
 	indexB = 1;
 
-	// Start by splitting the polygon into 4 point patches.
-	vecA = PolyP( indexA );
-	vecB = PolyP( indexB );
+	TqInt iUses = PolyUses();
 
 	// Get the normals, or calculate the facet normal if not specified.
-	if ( bhasN )
+	if ( !bHasN() )
 	{
-		vecNA = PolyN( indexA );
-		vecNB = PolyN( indexB );
-	}
-	else
-	{
+		CqVector3D vecA = PolyP( indexA );
 		// Find two suitable vectors, and produce a geometric normal to use.
 		TqInt i = 1;
 		CqVector3D	vecN0, vecN1;
@@ -299,49 +279,26 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 				break;
 			i++;
 		}
-		vecNA = vecN0 % vecN1;
-		vecNA = (O==OrientationLH)? vecNA : -vecNA;
-		vecNA.Unit();
-		vecNB = vecNC = vecND = vecNA;
+		vecN = vecN0 % vecN1;
+		vecN = (O==OrientationLH)? vecN : -vecN;
+		vecN.Unit();
 	}
 
+	// Start by splitting the polygon into 4 point patches.
+	// Get the normals, or calculate the facet normal if not specified.
 
 	TqInt cNew = 0;
 	TqInt i;
 	for ( i = 2; i < NumVertices(); i += 2 )
 	{
 		indexC = indexD = i;
-		vecC = vecD = PolyP( indexC );
 		if ( NumVertices() > i + 1 ) 
-		{
 			indexD = i + 1;
-			vecD = PolyP( indexD );
-		}
-
-		if ( bhasN )
-		{
-			vecNC = vecND = PolyN( indexC );
-			if ( NumVertices() > i + 1 ) 
-				vecND = PolyN( indexD );
-		}
-		else
-			vecNC = vecND = vecNA;
 
 		// Create bilinear patches
 		CqSurfacePatchBilinear* pNew = new CqSurfacePatchBilinear();
 		pNew->AddRef();
 		pNew->SetSurfaceParameters( Surface() );
-
-		pNew->P().SetSize( 4 ); 
-		pNew->N().SetSize( 4 );
-		pNew->P() [ 0 ] = vecA; 
-		pNew->P() [ 1 ] = vecB; 
-		pNew->P() [ 2 ] = vecD;	
-		pNew->P() [ 3 ] = vecC;
-		pNew->N() [ 0 ] = vecNA; 
-		pNew->N() [ 1 ] = vecNB; 
-		pNew->N() [ 2 ] = vecND; 
-		pNew->N() [ 3 ] = vecNC;
 
 		TqInt iUPA = PolyIndex(indexA);
 		TqInt iUPB = PolyIndex(indexB);
@@ -353,15 +310,91 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		for( iUP = Surface().aUserParams().begin(); iUP != Surface().aUserParams().end(); iUP++ )
 		{
 			CqParameter* pNewUP = (*iUP)->Clone();
-			pNewUP->Clear();
-			pNewUP->SetSize(4);
+			pNewUP->SetSize( pNew->cVarying() );
 
 			pNewUP->SetValue( (*iUP), 0, iUPA );
 			pNewUP->SetValue( (*iUP), 1, iUPB );
 			pNewUP->SetValue( (*iUP), 2, iUPD );
 			pNewUP->SetValue( (*iUP), 3, iUPC );
 
-			pNew->aUserParams().push_back(pNewUP);
+			pNew->AddPrimitiveVariable( pNewUP );
+		}
+
+		// If there are no smooth normals specified, then fill in the facet normal at each vertex.
+		if( !bHasN() && USES( iUses, EnvVars_N ) )
+		{
+			CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* pNewUP = new CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>("N",0);
+			pNewUP->SetSize( pNew->cVarying() );
+
+			pNewUP->pValue()[ 0 ] = vecN;
+			pNewUP->pValue()[ 1 ] = vecN;
+			pNewUP->pValue()[ 2 ] = vecN;
+			pNewUP->pValue()[ 3 ] = vecN;
+
+			pNew->AddPrimitiveVariable( pNewUP );
+		}
+
+		// If the shader needs s/t or u/v, and s/t is not specified, then at this point store the object space x,y coordinates.
+		if( USES( iUses, EnvVars_s ) || USES( iUses, EnvVars_t ) || USES( iUses, EnvVars_u ) || USES( iUses, EnvVars_v ) )
+		{
+			CqVector3D PA,PB,PC,PD;
+			CqMatrix& matCurrentToWorld = QGetRenderContext() ->matSpaceToSpace( "current", "object", CqMatrix(), Surface().pTransform()->matObjectToWorld() );
+			PA = matCurrentToWorld * PolyP( indexA );
+			PB = matCurrentToWorld * PolyP( indexB );
+			PC = matCurrentToWorld * PolyP( indexC );
+			PD = matCurrentToWorld * PolyP( indexD );
+			
+			if ( USES( iUses, EnvVars_s ) && !bHass() )
+			{
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s");
+				pNewUP->SetSize( pNew->cVarying() );
+
+				pNewUP->pValue()[ 0 ] = PA.x();
+				pNewUP->pValue()[ 1 ] = PB.x();
+				pNewUP->pValue()[ 2 ] = PD.x();
+				pNewUP->pValue()[ 3 ] = PC.x();
+
+				pNew->AddPrimitiveVariable( pNewUP );
+			}
+
+			if ( USES( iUses, EnvVars_t ) && !bHast() )
+			{
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t");
+				pNewUP->SetSize( pNew->cVarying() );
+
+				pNewUP->pValue()[ 0 ] = PA.y();
+				pNewUP->pValue()[ 1 ] = PB.y();
+				pNewUP->pValue()[ 2 ] = PD.y();
+				pNewUP->pValue()[ 3 ] = PC.y();
+
+				pNew->AddPrimitiveVariable( pNewUP );
+			}
+
+			if ( USES( iUses, EnvVars_u ) )
+			{
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u");
+				pNewUP->SetSize( pNew->cVarying() );
+
+				pNewUP->pValue()[ 0 ] = PA.x();
+				pNewUP->pValue()[ 1 ] = PB.x();
+				pNewUP->pValue()[ 2 ] = PD.x();
+				pNewUP->pValue()[ 3 ] = PC.x();
+
+				pNew->AddPrimitiveVariable( pNewUP );
+			}
+
+			if ( USES( iUses, EnvVars_v ) )
+			{
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v");
+				pNewUP->SetSize( pNew->cVarying() );
+
+				pNewUP->pValue()[ 0 ] = PA.y();
+				pNewUP->pValue()[ 1 ] = PB.y();
+				pNewUP->pValue()[ 2 ] = PD.y();
+				pNewUP->pValue()[ 3 ] = PC.y();
+
+				pNew->AddPrimitiveVariable( pNewUP );
+			}
 		}
 
 		aSplits.push_back( pNew );
@@ -369,8 +402,6 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 
 		// Move onto the next quad
 		indexB = indexD;
-		vecB = vecD;
-		vecNB = vecND;
 	}
 	return ( cNew );
 }
@@ -438,14 +469,20 @@ CqSurfacePolygon& CqSurfacePolygon::operator=( const CqSurfacePolygon& From )
 
 void	CqSurfacePolygon::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
 {
-	// Tansform the points by the specified matrix.
 	TqInt i;
-	for ( i = P().Size() - 1; i >= 0; i-- )
-		P() [ i ] = matTx * P() [ i ];
+	// Tansform the points by the specified matrix.
+	if( NULL != P() )
+	{
+		for ( i = P()->Size() - 1; i >= 0; i-- )
+			(*P()) [ i ] = matTx * (*P()) [ i ];
+	}
 
 	// Tansform the normals by the specified matrix.
-	for ( i = N().Size() - 1; i >= 0; i-- )
-		N() [ i ] = matITTx * N() [ i ];
+	if( NULL != N() )
+	{
+		for ( i = N()->Size() - 1; i >= 0; i-- )
+			(*N()) [ i ] = matITTx * (*N()) [ i ];
+	}
 }
 
 
@@ -456,6 +493,7 @@ void	CqSurfacePolygon::Transform( const CqMatrix& matTx, const CqMatrix& matITTx
 void CqSurfacePolygon::TransferDefaultSurfaceParameters()
 {
 	// If the shader needs s/t or u/v, and s/t is not specified, then at this point store the object space x,y coordinates.
+/*	if( NULL == P() )	return;
 	TqInt i;
 	TqInt iUses = PolyUses();
 	if ( USES( iUses, EnvVars_s ) && !bHass() )
@@ -463,7 +501,7 @@ void CqSurfacePolygon::TransferDefaultSurfaceParameters()
 		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
 		s()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			(*s())[ i ] = P() [ i ].x();
+			(*s())[ i ] = (*P()) [ i ].x();
 	}
 
 	if ( USES( iUses, EnvVars_t ) && !bHast() )
@@ -471,7 +509,7 @@ void CqSurfacePolygon::TransferDefaultSurfaceParameters()
 		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
 		t()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			(*t())[ i ] = P() [ i ].y();
+			(*t())[ i ] = (*P()) [ i ].y();
 	}
 
 	if ( USES( iUses, EnvVars_u ) )
@@ -479,7 +517,7 @@ void CqSurfacePolygon::TransferDefaultSurfaceParameters()
 		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
 		u()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			(*u())[ i ] = P() [ i ].x();
+			(*u())[ i ] = (*P()) [ i ].x();
 	}
 
 	if ( USES( iUses, EnvVars_v ) )
@@ -487,8 +525,8 @@ void CqSurfacePolygon::TransferDefaultSurfaceParameters()
 		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
 		v()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			(*v())[ i ] = P() [ i ].y();
-	}
+			(*v())[ i ] = (*P()) [ i ].y();
+	}*/
 }
 
 
@@ -537,12 +575,18 @@ void	CqPolygonPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx,
 
 	// Tansform the points by the specified matrix.
 	TqInt i;
-	for ( i = P().Size() - 1; i >= 0; i-- )
-		P() [ i ] = matTx * P() [ i ];
+	if( NULL != P() )
+	{
+		for ( i = P()->Size() - 1; i >= 0; i-- )
+			(*P()) [ i ] = matTx * (*P()) [ i ];
+	}
 
 	// Tansform the normals by the specified matrix.
-	for ( i = N().Size() - 1; i >= 0; i-- )
-		N() [ i ] = matITTx * N() [ i ];
+	if( NULL != N() )
+	{
+		for ( i = N()->Size() - 1; i >= 0; i-- )
+			(*N()) [ i ] = matITTx * (*N()) [ i ];
+	}
 
 	m_Transformed = TqTrue;
 }
@@ -555,6 +599,7 @@ void	CqPolygonPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx,
 void CqPolygonPoints::TransferDefaultSurfaceParameters()
 {
 	// If the shader needs s/t or u/v, and s/t is not specified, then at this point store the object space x,y coordinates.
+/*	if( NULL == P() )	return;
 	TqInt i;
 	TqInt iUses = Uses();
 	if ( USES( iUses, EnvVars_s ) && !bHass() )
@@ -562,7 +607,7 @@ void CqPolygonPoints::TransferDefaultSurfaceParameters()
 		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
 		s()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			(*s())[ i ] = P() [ i ].x();
+			(*s())[ i ] = (*P()) [ i ].x();
 	}
 
 	if ( USES( iUses, EnvVars_t ) && !bHast() )
@@ -570,7 +615,7 @@ void CqPolygonPoints::TransferDefaultSurfaceParameters()
 		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
 		t()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			(*t())[ i ] = P() [ i ].y();
+			(*t())[ i ] = (*P()) [ i ].y();
 	}
 
 	if ( USES( iUses, EnvVars_u ) )
@@ -578,7 +623,7 @@ void CqPolygonPoints::TransferDefaultSurfaceParameters()
 		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
 		u()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			(*u())[ i ] = P() [ i ].x();
+			(*u())[ i ] = (*P()) [ i ].x();
 	}
 
 	if ( USES( iUses, EnvVars_v ) )
@@ -586,8 +631,8 @@ void CqPolygonPoints::TransferDefaultSurfaceParameters()
 		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
 		v()->SetSize( NumVertices() );
 		for ( i = 0; i < NumVertices(); i++ )
-			(*v())[ i ] = P() [ i ].y();
-	}
+			(*v())[ i ] = (*P()) [ i ].y();
+	}*/
 }
 
 

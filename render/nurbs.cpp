@@ -104,9 +104,9 @@ TqInt CqSurfaceNURBS::operator==( const CqSurfaceNURBS& from )
 		return ( 0 );
 
 	TqInt i;
-	for ( i = P().Size() - 1; i >= 0; i-- )
+	for ( i = P()->Size() - 1; i >= 0; i-- )
 	{
-		if ( P() [ i ] != from.P() [ i ] )
+		if ( (*P()) [ i ] !=(*from.P()) [ i ] )
 			return ( 0 );
 	}
 
@@ -416,13 +416,13 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 	m_cuVerts = m_cuVerts + r;
 	m_auKnots.resize( m_cuVerts + m_uOrder );
 
-	std::vector<CqVector4D>	aCPHold( P().Size() );
+	std::vector<CqVector4D>	aCPHold( P()->Size() );
 	std::vector<TqFloat>	auHold( m_auKnots );
 
 	TqUint iCP;
-	for( iCP = 0; iCP < P().Size(); iCP++ )		aCPHold[ iCP ] = P()[ iCP ];
+	for( iCP = 0; iCP < P()->Size(); iCP++ )		aCPHold[ iCP ] = (*P())[ iCP ];
 
-	P().SetSize( m_cuVerts * m_cvVerts );
+	P()->SetSize( m_cuVerts * m_cvVerts );
 
 	// Load new knot vector
 	// Copy up to the insertion point.
@@ -444,9 +444,9 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 	{
 		// First copy the first set of control points up to the insertion point minus the degree
 		for ( i = 0; i <= k - p; i++ ) 
-			P()[ ( row * m_cuVerts ) + i ] = aCPHold[ ( row * n ) + i ];
+			(*P())[ ( row * m_cuVerts ) + i ] = aCPHold[ ( row * n ) + i ];
 		for ( i = k - s; i < static_cast<TqInt>( m_cuVerts ); i++ )
-			P()[ ( row * m_cuVerts ) + i + r ] = aCPHold[ ( row * n ) + i ];
+			(*P())[ ( row * m_cuVerts ) + i + r ] = aCPHold[ ( row * n ) + i ];
 		for ( i = 0; i <= p - s; i++ ) 
 			R[ i ] = aCPHold[ ( row * n ) + k - p + i ];
 
@@ -461,14 +461,14 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 				alpha = ( u - m_auKnots[ L + i ] ) / ( m_auKnots[ i + k + 1 ] - m_auKnots[ L + i ] );
 				R[ i ] = alpha * R[ i + 1 ] + ( 1.0 - alpha ) * R[ i ];
 			}
-			P()[ ( row * m_cuVerts ) + L ] = R[ 0 ];
+			(*P())[ ( row * m_cuVerts ) + L ] = R[ 0 ];
 			if ( p - j - s > 0 )
-				P()[ ( row * m_cuVerts ) + k + r - j - s ] = R[ p - j - s ];
+				(*P())[ ( row * m_cuVerts ) + k + r - j - s ] = R[ p - j - s ];
 		}
 
 		// Load remaining control points
 		for ( i = L + 1; i < k - s; i++ )
-			P()[ ( row * m_cuVerts ) + i ] = R[ i - L ];
+			(*P())[ ( row * m_cuVerts ) + i ] = R[ i - L ];
 	}
 
 	return ( r );
@@ -524,13 +524,13 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 	m_cvVerts = m_cvVerts + r;
 	m_avKnots.resize( m_cvVerts + m_vOrder );
 
-	std::vector<CqVector4D>	aCPHold( P().Size() );
+	std::vector<CqVector4D>	aCPHold( P()->Size() );
 	std::vector<TqFloat>	avHold( m_avKnots );
 
 	TqUint iCP;
-	for( iCP = 0; iCP < P().Size(); iCP++ )		aCPHold[ iCP ] = P()[ iCP ];
+	for( iCP = 0; iCP < P()->Size(); iCP++ )		aCPHold[ iCP ] = (*P())[ iCP ];
 
-	P().SetSize( m_cuVerts * m_cvVerts );
+	P()->SetSize( m_cuVerts * m_cvVerts );
 
 	// Load new knot vector
 	for ( i = 0;i <= k;i++ ) 
@@ -548,9 +548,9 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 	for ( col = 0; col < m_cuVerts; col++ )
 	{
 		for ( i = 0; i <= k - p; i++ ) 
-			P()[ ( i * m_cuVerts ) + col ] = aCPHold[ ( i * m_cuVerts ) + col ];
+			(*P())[ ( i * m_cuVerts ) + col ] = aCPHold[ ( i * m_cuVerts ) + col ];
 		for ( i = k - s; i < m; i++ )
-			P()[ ( ( i + r ) * m_cuVerts ) + col ] = aCPHold[ ( i * m_cuVerts ) + col ];
+			(*P())[ ( ( i + r ) * m_cuVerts ) + col ] = aCPHold[ ( i * m_cuVerts ) + col ];
 		for ( i = 0; i <= p - s; i++ ) 
 			R[ i ] = aCPHold[ ( ( k - p + i ) * m_cuVerts ) + col ];
 
@@ -565,14 +565,14 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 				alpha = ( v - m_avKnots[ L + i ] ) / ( m_avKnots[ i + k + 1 ] - m_avKnots[ L + i ] );
 				R[ i ] = alpha * R[ i + 1 ] + ( 1.0 - alpha ) * R[ i ];
 			}
-			P()[ ( L * m_cuVerts ) + col ] = R[ 0 ];
+			(*P())[ ( L * m_cuVerts ) + col ] = R[ 0 ];
 			if ( p - j - s > 0 )
-				P()[ ( ( k + r - j - s ) * m_cuVerts ) + col ] = R[ p - j - s ];
+				(*P())[ ( ( k + r - j - s ) * m_cuVerts ) + col ] = R[ p - j - s ];
 		}
 
 		// Load remaining control points
 		for ( i = L + 1; i < k - s; i++ )
-			P()[ ( i * m_cuVerts ) + col ] = R[ i - L ];
+			(*P())[ ( i * m_cuVerts ) + col ] = R[ i - L ];
 	}
 	return ( r );
 }
@@ -627,54 +627,6 @@ void CqSurfaceNURBS::RefineKnotU( const std::vector<TqFloat>& X )
 
 
 	// Now process all the 'vertex' class variables.
-	CqParameter* pHold = P().Clone();
-	P().SetSize( m_cuVerts * m_cvVerts );
-
-	// Copy the control points from the original
-	for ( row = 0; row < static_cast<TqInt>( m_cvVerts ); row++ )
-	{
-		// Copy the CPs up to the first insertion point minus the degree (this is the number of control points in that section).
-		TqUint rowoff = ( row * m_cuVerts );
-		for ( j = 0; j <= a - p ; j++ )		P().SetValue( pHold, rowoff + j, ( row * ( n + 1 ) ) + j );
-		// Copy the CPs beyond the second insertion point to the end.
-		for ( j = b - 1; j <= n; j++ )		P().SetValue( pHold, rowoff + j + r + 1, ( row * ( n + 1 ) ) + j );
-	}
-
-	for ( j = r; j >= 0; j-- )
-	{
-		while ( X[ j ] <= m_auKnots[ i ] && i > a )
-		{
-			for ( row = 0; row < static_cast<TqInt>( m_cvVerts ); row++ )
-				P().SetValue( pHold, ( row * m_cuVerts ) + k - p - 1, ( row * ( n + 1 ) ) + i - p - 1 );
-			--k;
-			--i;
-		}
-		
-		for ( row = 0; row < static_cast<TqInt>( m_cvVerts ); row++ )
-			P().SetValue( &P(), ( row * m_cuVerts ) + k - p - 1, ( row * m_cuVerts ) + k - p );
-
-		TqInt l;
-		for ( l = 1; l <= p ; l++ )
-		{
-			TqUint ind = k - p + l;
-			TqFloat alpha = m_auKnots[ k + l ] - X[ j ];
-			if ( alpha == 0.0 )
-			{
-				for ( row = 0; row < static_cast<TqInt>( m_cvVerts ); row++ )
-					P().SetValue( &P(), ( row * m_cuVerts ) + ind - 1 , ( row * m_cuVerts ) + ind );
-			}
-			else
-			{
-				alpha /= m_auKnots[ k + l ] - auHold[ i - p + l ];
-				for ( row = 0; row < static_cast<TqInt>( m_cvVerts ); row++ )
-					P()[ ( row * m_cuVerts ) + ind - 1 ] = alpha * P()[ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * P()[ ( row * m_cuVerts ) + ind ];
-			}
-		}
-		--k;
-	}
-	delete(pHold);
-
-
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
@@ -836,50 +788,6 @@ void CqSurfaceNURBS::RefineKnotV( const std::vector<TqFloat>& X )
 
 
 	// Now process all the 'vertex' class variables.
-	CqParameter* pHold = P().Clone();
-	P().SetSize( m_cuVerts * m_cvVerts );
-
-	for ( col = 0; col < static_cast<TqInt>( m_cuVerts ); col++ )
-	{
-		for ( j = 0; j <= a - p; j++ )	P().SetValue( pHold, ( j * m_cuVerts ) + col, ( j * m_cuVerts ) + col );
-		for ( j = b - 1; j <= n; j++ )	P().SetValue( pHold, ( ( j + r + 1 ) * m_cuVerts ) + col, ( j * m_cuVerts ) + col );
-	}
-
-
-	for ( j = r; j >= 0 ; j-- )
-	{
-		while ( X[ j ] <= m_avKnots[ i ] && i > a )
-		{
-			for ( col = 0; col < static_cast<TqInt>( m_cuVerts ); col++ )
-				P().SetValue( pHold, ( ( k - p - 1 ) * m_cuVerts ) + col, ( ( i - p - 1 ) * m_cuVerts ) + col );
-			--k;
-			--i;
-		}
-		for ( col = 0; col < static_cast<TqInt>( m_cuVerts ); col++ )
-			P().SetValue( &P(), ( ( k - p - 1 ) * m_cuVerts ) + col, ( ( k - p ) * m_cuVerts ) + col );
-
-		TqInt l;
-		for ( l = 1; l <= p; l++ )
-		{
-			TqUint ind = k - p + l;
-			TqFloat alpha = m_avKnots[ k + l ] - X[ j ];
-			if ( alpha == 0.0 )
-			{
-				for ( col = 0; col < static_cast<TqInt>( m_cuVerts ); col++ )
-					P().SetValue( &P(), ( ( ind - 1 ) * m_cuVerts ) + col, ( ind * m_cuVerts ) + col );
-			}
-			else
-			{
-				alpha /= m_avKnots[ k + l ] - avHold[ i - p + l ];
-				for ( col = 0; col < static_cast<TqInt>( m_cuVerts ); col++ )
-					P()[ ( ( ind - 1 ) * m_cuVerts ) + col ] = alpha * P()[ ( ( ind - 1 ) * m_cuVerts ) + col ] + ( 1.0 - alpha ) * P()[ ( ind * m_cuVerts ) + col ];
-			}
-		}
-		--k;
-	}
-	delete(pHold);
-
-
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
@@ -1005,11 +913,11 @@ void CqSurfaceNURBS::ClampU()
 	// Now trim unnecessary knots and control points
 	if ( n1 || n2 )
 	{
-		CqParameter* pPHold = P().Clone();
+		CqParameter* pPHold = P()->Clone();
 		std::vector<TqFloat> auHold(m_auKnots);
 		
 		m_auKnots.resize( m_auKnots.size() - n1 - n2 );
-		P().SetSize( ( m_cuVerts - n1 - n2 ) * m_cvVerts );
+		P()->SetSize( ( m_cuVerts - n1 - n2 ) * m_cvVerts );
 		
 		TqInt n = m_cuVerts;
 		m_cuVerts -= n1 + n2;
@@ -1023,7 +931,7 @@ void CqSurfaceNURBS::ClampU()
 		{
 			TqUint i;
 			for ( i = n1; i < n - n2; i++ )
-				P().SetValue( pPHold, ( row * m_cuVerts ) + i - n1, ( row * n ) + i );
+				P()->SetValue( pPHold, ( row * m_cuVerts ) + i - n1, ( row * n ) + i );
 		}
 		delete( pPHold );
 	}
@@ -1042,11 +950,11 @@ void CqSurfaceNURBS::ClampV()
 	// Now trim unnecessary knots and control points
 	if ( n1 || n2 )
 	{
-		CqParameter* pPHold = P().Clone();
+		CqParameter* pPHold = P()->Clone();
 		std::vector<TqFloat> avHold(m_avKnots);
 
 		m_avKnots.resize( m_avKnots.size() - n1 - n2 );
-		P().SetSize( ( m_cvVerts - n1 - n2 ) * m_cuVerts );
+		P()->SetSize( ( m_cvVerts - n1 - n2 ) * m_cuVerts );
 
 		m_cvVerts -= n1 + n2;
 
@@ -1059,7 +967,7 @@ void CqSurfaceNURBS::ClampV()
 		{
 			TqUint i;
 			for ( i = n1; i < m_cvVerts - n2; i++ )
-				P().SetValue( pPHold, ( ( i - n1 ) * m_cuVerts ) + col, ( i * m_cuVerts ) + col );
+				P()->SetValue( pPHold, ( ( i - n1 ) * m_cuVerts ) + col, ( i * m_cuVerts ) + col );
 		}
 		delete( pPHold );
 	}
@@ -1135,10 +1043,6 @@ void CqSurfaceNURBS::SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqB
 	// First half
 	nrbA.Init( m_uOrder, m_vOrder, ( dirflag ) ? SplitPoint + 1L : m_cuVerts, ( dirflag ) ? m_cvVerts : SplitPoint + 1L );
 	TqUint j;
-	for ( i = 0L; i < nrbA.m_cvVerts; i++ )
-		for ( j = 0L; j < nrbA.m_cuVerts; j++ )
-			nrbA.CP( j, i ) = CP( j, i );
-
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
@@ -1161,12 +1065,6 @@ void CqSurfaceNURBS::SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqB
 	// Second half
 	SplitPoint++;
 	nrbB.Init( m_uOrder, m_vOrder, ( dirflag ) ? m_cuVerts - SplitPoint : m_cuVerts, ( dirflag ) ? m_cvVerts : m_cvVerts - SplitPoint );
-	for ( i = 0L; i < nrbB.m_cvVerts; i++ )
-	{
-		for ( j = 0L; j < nrbB.m_cuVerts; j++ )
-			nrbB.CP( j, i ) = CP( ( dirflag ) ? j + SplitPoint : j, ( dirflag ) ? i : ( i + SplitPoint ) );
-	}
-
 	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
 		if( (*iUP)->Class() == class_vertex )
@@ -1205,13 +1103,6 @@ void CqSurfaceNURBS::uSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 
 	SplitNURBS( *pnrbA, *pnrbB, TqTrue );
 
-	// Subdivide the normals
-	if ( USES( Uses(), EnvVars_N ) ) 
-	{
-		pnrbA->N() = N();
-		pnrbA->N().uSubdivide( &pnrbB->N() );
-	}
-
 	uSubdivideUserParameters( pnrbA, pnrbB );
 }
 
@@ -1226,13 +1117,6 @@ void CqSurfaceNURBS::vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 	pnrbB = new CqSurfaceNURBS();
 
 	SplitNURBS( *pnrbA, *pnrbB, TqFalse );
-
-	// Subdivide the normals
-	if ( USES( Uses(), EnvVars_N ) ) 
-	{
-		pnrbA->N() = N();
-		pnrbA->N().vSubdivide( &pnrbB->N() );
-	}
 
 	vSubdivideUserParameters( pnrbA, pnrbB );
 }
@@ -1250,7 +1134,7 @@ CqBound CqSurfaceNURBS::Bound() const
 	TqUint i;
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
 	{
-		CqVector3D	vecV = P() [ i ];
+		CqVector3D	vecV = (*P()) [ i ];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -1353,6 +1237,8 @@ void CqSurfaceNURBS::DicePointsAndNormals( TqInt uDiceSize, TqInt vDiceSize, IqS
 {
 	// Get the handedness of the coordinate system (at the time of creation) and
 	// the coordinate system specified, to check for normal flipping.
+	assert( NULL != P() );
+
 	TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
 
 	CqVector3D	N;
@@ -1492,6 +1378,8 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 
 TqBool	CqSurfaceNURBS::Diceable()
 {
+	assert( NULL != P() );
+
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
 	if ( !m_fDiceable )
@@ -1521,7 +1409,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 		gridsize = static_cast<TqInt>( m_XBucketSize * m_XBucketSize / ShadingRate );
 
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
-		avecHull[ i ] = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), pTransform() ->matObjectToWorld() ) * P() [ i ];
+		avecHull[ i ] = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), pTransform() ->matObjectToWorld() ) * (*P()) [ i ];
 
 	// Now work out the longest continuous line in raster space for u and v.
 	TqFloat uLen = 0;
@@ -1639,13 +1527,13 @@ CqMicroPolyGridBase* CqSurfaceNURBS::Dice()
 			pGrid->SetbGeometricNormals( TqTrue );
 		}
 		else
-			NaturalInterpolate( &P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
+			NaturalInterpolate( P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
 	}
 
 	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
 	if ( USES( lUses, EnvVars_N ) && ( NULL != pGrid->N() ) && bHasN() )
 	{
-		N().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->N() );
+		N()->BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->N() );
 		pGrid->SetbShadingNormals( TqTrue );
 	}
 
@@ -1675,9 +1563,10 @@ CqMicroPolyGridBase* CqSurfaceNURBS::Dice()
 void	CqSurfaceNURBS::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
 {
 	// Tansform the control hull by the specified matrix.
+	if( NULL == P() )	return;
 	TqUint i;
-	for ( i = 0; i < P().Size(); i++ )
-		P() [ i ] = matTx * P() [ i ];
+	for ( i = 0; i < P()->Size(); i++ )
+		(*P()) [ i ] = matTx * (*P()) [ i ];
 }
 
 
@@ -1709,9 +1598,9 @@ TqInt	CqSurfaceNURBS::TrimDecimation( const CqTrimCurve& Curve )
 		u2 = vecCP.x();
 		v2 = vecCP.y();
 
-		CqVector3D vecP = Evaluate( u, v, &P() );
+		CqVector3D vecP = Evaluate( u, v, P() );
 		vecP = matCtoR * vecP;
-		CqVector3D vecP2 = Evaluate( u2, v2, &P() );
+		CqVector3D vecP2 = Evaluate( u2, v2, P() );
 		vecP2 = matCtoR * vecP2;
 
 		Len = ( vecP2 - vecP ).Magnitude();
@@ -1765,7 +1654,7 @@ void CqSurfaceNURBS::OutputMesh()
 				            * ( S[ s ]->m_auKnots[ S[ s ]->m_cuVerts ] - S[ s ]->m_auKnots[ S[ s ]->m_uOrder - 1 ] )
 				            + S[ s ]->m_auKnots[ S[ s ]->m_uOrder - 1 ];
 
-				aaPoints[ i ][ j ] = S[ s ]->Evaluate( u, v, &P() );
+				aaPoints[ i ][ j ] = S[ s ]->Evaluate( u, v, P() );
 			}
 		}
 
@@ -1817,8 +1706,8 @@ void CqSurfaceNURBS::Output( const char* name )
 	fprintf( fp, "%f %f ", 0.0f, 1.0f );
 
 	fputs( "\"Pw\" [", fp );
-	for ( i = 0; i < P().Size(); i++ )
-		fprintf( fp, "%f %f %f %f ", P() [ i ].x(), P() [ i ].y(), P() [ i ].z(), P() [ i ].h() );
+	for ( i = 0; i < P()->Size(); i++ )
+		fprintf( fp, "%f %f %f %f ", (*P()) [ i ].x(), (*P()) [ i ].y(), (*P()) [ i ].z(), (*P()) [ i ].h() );
 	fputs( "]\n", fp );
 
 	fclose( fp );
@@ -2065,19 +1954,8 @@ void CqSurfaceNURBS::SubdivideSegments(std::vector<CqSurfaceNURBS*>& S)
 			// Initialise it to the same orders as us, with the calculated control point densities.
 			S[iS]->Init( m_uOrder, m_vOrder, (uEnd+1)-uOffset, (vEnd+1)-vOffset );
 
-			// Copy the control points out of the our storage.
-			TqInt iPu, iPv;
-			for( iPv = 0; iPv <= vEnd-vOffset; iPv++ )
-			{
-				TqInt iPIndex = ( ( vOffset + iPv ) * m_cuVerts ) + uOffset;
-				for( iPu = 0; iPu <= uEnd-uOffset; iPu++ )
-				{
-					TqInt iSP = ( iPv * S[iS]->cuVerts() ) + iPu; 
-					S[iS]->P()[ iSP ] = P()[ iPIndex++ ];
-				}
-			}
-	
 			// Copy any 'vertex' class user primitive variables.
+			TqInt iPu, iPv;
 			std::vector<CqParameter*>::iterator iUP;
 			for( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
 			{
@@ -2113,7 +1991,7 @@ void CqSurfaceNURBS::SubdivideSegments(std::vector<CqSurfaceNURBS*>& S)
 		vOffset = vEnd + 1;
 	}
 
-	// Now setup any user variables on the segments.
+	// Now setup any 'varying' class variables on the segments.
 	TqInt irow, icol;
 	TqInt nuSegs = uSplits;
 	TqInt nvSegs = vSplits;
