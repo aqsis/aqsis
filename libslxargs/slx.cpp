@@ -93,6 +93,21 @@ static FILE * OpenCurrentShader()
 	if ( currentShaderFilePath != NULL )
 	{
 		shaderInputFile = fopen( currentShaderFilePath, "r" );
+		// Check that the version signature is somewhere in the start 100 bytes, it comes
+		// after the shader type, so not at a particular position, but should always be in
+		// the first 100 bytes.
+		if( NULL != shaderInputFile )
+		{
+			char sigbuf[100];
+			fread(sigbuf, sizeof(char), 100, shaderInputFile);
+			fseek(shaderInputFile, 0, SEEK_SET);
+			sigbuf[99] = '\0';
+			if( strstr(sigbuf, "AQSIS") == NULL )
+			{
+				fclose( shaderInputFile );
+				shaderInputFile = NULL;
+			}
+		}
 	}
 	return shaderInputFile;
 }
@@ -576,11 +591,19 @@ static int GetSearchPathListCount()
 
 		for ( listCharIdx = 0; listCharIdx < listCharCount; listCharIdx++ )
 		{
+			// Find the next search path in the spec.
+			unsigned int len = strcspn( currentChar, ":" );
+			// Check if it is really meant as a drive spec.
+			if ( len == 1 && isalpha( *currentChar ) )
+				len += strcspn( currentChar + 2, ":" ) + 1;
+
+			currentChar += len;
 			if ( *currentChar == ':' ) 	// list elements separated by colons
 			{
 				listElementCount++;
 			}
-			currentChar++;
+			currentChar += 1;
+			listCharIdx += len;
 		}
 	}
 
@@ -618,28 +641,28 @@ static int GetSearchPathEntryAtIndex( int pathIdx )
 	copyOutChar = currentShaderSearchPath;
 	*copyOutChar = 0x0;
 	listCharCount = strlen( shaderSearchPathList );
-	while ( doLoop == true )
+
+	currentChar = shaderSearchPathList;
+	for ( listCharIdx = 0; listCharIdx < listCharCount; listCharIdx++ )
 	{
-		if ( *currentChar == ':' ) 	// path list entries separated by colons
+		// Find the next search path in the spec.
+		unsigned int len = strcspn( currentChar, ":" );
+		// Check if it is really meant as a drive spec.
+		if ( len == 1 && isalpha( *currentChar ) )
+			len += strcspn( currentChar + 2, ":" ) + 1;
+
+		if ( currentChar[len] == ':' ) 	// list elements separated by colons
 		{
 			listEntryIdx++;
-			if ( listEntryIdx > pathIdx )
-				doLoop = false;
-		}
-		else
-		{
-			if ( pathIdx == listEntryIdx )
+			if( listEntryIdx > pathIdx )
 			{
-				entryFound = true;
-				*copyOutChar = *currentChar;
-				copyOutChar++;
-				*copyOutChar = 0x0;
+				strncpy( copyOutChar, currentChar, len );
+				copyOutChar[len] = '\0';
+				return( true );
 			}
 		}
-		currentChar++;
-		listCharIdx++;
-		if ( listCharIdx >= listCharCount )
-			doLoop = false;
+		currentChar += len + 1;
+		listCharIdx += len;
 	}
 
 	return entryFound;
@@ -690,9 +713,9 @@ static bool LoadShaderInfo ( char *name )
 		if ( strstr( name + strlen( name ) - strlen(RI_SHADER_EXTENSION), RI_SHADER_EXTENSION ) == NULL )
 			strcat( shaderFileName, RI_SHADER_EXTENSION );
 		
-		// If on Windows, and there is a drivespec at the start, then don't prepend the current dir.
+		// If on Windows, and it is an absolute path, then don't prepend the current dir.
 #ifdef	WIN32
-		if( shaderFileName[ 1 ] != ':' )
+		if( shaderFileName[ 1 ] != ':' && shaderFileName[ 0 ] != '\\' && shaderFileName[ 0 ] != '/' )
 		{
 #endif
 			stringLength = strlen( currentShaderSearchPath ) + strlen( shaderFileName ) + 2;
@@ -778,8 +801,8 @@ char *SLX_GetPath ( void )
 		SlxLastError = RIE_NOFILE;
 	}
 #ifdef	WIN32
-	// Return empty if shader specified is absolute under Windows, i.e. has a drivespec.
-	if( currentShader[ 1 ] == ':' )
+	// Return empty if shader specified is absolute under Windows.
+	if( currentShader[ 1 ] == ':' || currentShader[ 0 ] == '\\' || currentShader[ 0 ] == '/' )
 		return( "" );
 #endif
 	return currentShaderSearchPath;
