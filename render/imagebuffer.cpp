@@ -705,6 +705,8 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 
 	TqInt bound_max = pMPG->cSubBounds();
 	TqInt bound_max_1 = bound_max - 1;
+	TqInt sample_hits = 0;
+	TqInt shd_rate = pMPG->pGrid() ->pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
 	for ( TqInt bound_num = 0; bound_num < bound_max ; bound_num++ )
 	{
 		TqFloat time0;
@@ -864,6 +866,8 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 								STATS_INC( SPL_hits );
 								pMPG->MarkHit();
 
+								sample_hits++;
+
 								StoreSample( pMPG, pie2, m, n, D );
 							}
 						}
@@ -878,6 +882,12 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 				}
 				iX++;
 				pie2++;
+
+				// Now compute the % of samples that hit...
+				TqInt scount = iXSamples * iYSamples;
+				TqFloat max_hits = scount * shd_rate;
+
+				STATS_INC( MPG_sample_coverage0_125 + TqInt( 8 * ( sample_hits / max_hits ) ) );
 			}
 			iY++;
 		}

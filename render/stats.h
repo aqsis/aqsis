@@ -302,6 +302,16 @@ class CqStats
 					MPG_missed,
 					MPG_trimmed,
 
+						// Sample hit quote
+						MPG_sample_coverage0_125,
+						MPG_sample_coverage125_25,
+						MPG_sample_coverage25_375,
+						MPG_sample_coverage375_50,
+						MPG_sample_coverage50_625,
+						MPG_sample_coverage625_75,
+						MPG_sample_coverage75_875,
+						MPG_sample_coverage875_100,
+
 					//Pushes
 					MPG_pushed_forward,
 					MPG_pushed_down,
@@ -321,6 +331,8 @@ class CqStats
 
 					// Variables
 					SHD_var_created_total,
+					SHD_var_current,
+					SHD_var_peak,
 					
 					SHD_var_array,
 					SHD_var_array_current,
@@ -526,43 +538,16 @@ class CqStats
 					SPL_bound_hits,
 					SPL_hits,
 
+				// Parameters
+				PRM_created,
+				PRM_current,
+				PRM_peak,
+
 				_Last_int } EqIntIndex;
 
 
 		/// \name Increasing counters
 		//@{
-
-
-		/** Increase the shader variables allocated count by 1.
-		 */
-		void	IncVariablesAllocated()
-		{
-			m_cVariablesAllocated++;
-			m_cVariablesCurrent++;
-			m_cVariablesPeak = ( m_cVariablesCurrent > m_cVariablesPeak ) ? m_cVariablesCurrent : m_cVariablesPeak;
-		}
-		/** Increase the shader variables deallocated count by 1.
-		 */
-		void	IncVariablesDeallocated()
-		{
-			m_cVariablesDeallocated++;
-			m_cVariablesCurrent--;
-		}
-		/** Increase the surface parameters allocated count by 1.
-		 */
-		void	IncParametersAllocated()
-		{
-			m_cParametersAllocated++;
-			m_cParametersCurrent++;
-			m_cParametersPeak = ( m_cParametersCurrent > m_cParametersPeak ) ? m_cParametersCurrent : m_cParametersPeak;
-		}
-		/** Increase the surface parameters deallocated count by 1.
-		 */
-		void	IncParametersDeallocated()
-		{
-			m_cParametersDeallocated++;
-			m_cParametersCurrent--;
-		}
 
 		/** Increase the texture memory used.
 		 */
@@ -726,10 +711,6 @@ class CqStats
 		static TqFloat	 m_floatVars[ _Last_float ];		///< Float variables
 		static TqInt		m_intVars[ _Last_int ];			///< Int variables
 
-			TqInt	m_cVariablesAllocated;			///< Count of shader variables allocated.
-		TqInt	m_cVariablesDeallocated;		///< Count of shader variables deallocated.
-		TqInt	m_cVariablesCurrent;			///< Current count of variables allocated.
-		TqInt	m_cVariablesPeak;				///< Peak count of variables allocated.
 		TqInt	m_cParametersAllocated;			///< Count of surface parameters allocated.
 		TqInt	m_cParametersDeallocated;		///< Count of surface parameters deallocated.
 		TqInt	m_cParametersCurrent;			///< Current count of parameters allocated.

@@ -105,10 +105,6 @@ void CqStats::Initialise()
  */
 void CqStats::InitialiseFrame()
 {
-	m_cVariablesAllocated = 0;
-	m_cVariablesDeallocated = 0;
-	m_cVariablesCurrent = 0;
-	m_cVariablesPeak = 0;
 	m_cParametersAllocated = 0;
 	m_cParametersDeallocated = 0;
 	m_cParametersCurrent = 0;
@@ -433,7 +429,7 @@ void CqStats::PrintStats( TqInt level ) const
 			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_128 ) << "|"
 			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_256 ) << "|"
 			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_size_g256 ) << "|\n"
-			<< "\t|" << std::setw(5) << std::setiosflags( std::ios::right ) << _grd_4 << "%|" 
+			<< "\t|" << std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_4 << "%|" 
 			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_8 << "%|"
 			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_16 << "%|"
 			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_32 << "%|"
@@ -454,7 +450,7 @@ void CqStats::PrintStats( TqInt level ) const
 			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_128 ) << "|"
 			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_256 ) << "|"
 			<< std::setw(6) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << STATS_INT_GETI( GRD_shd_size_g256 ) << "|\n"
-			<< "\t|" << std::setw(5) << std::setiosflags( std::ios::right ) << _grd_shd_4 << "%|" 
+			<< "\t|" << std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_shd_4 << "%|" 
 			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_shd_8 << "%|"
 			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_shd_16 << "%|"
 			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _grd_shd_32 << "%|"
@@ -487,10 +483,42 @@ void CqStats::PrintStats( TqInt level ) const
 		TqFloat _mpg_p_a = 100.0f * _mpg_pushes_all / STATS_INT_GETI( MPG_allocated );
 		TqFloat _mpg_m_q = 100.0f * STATS_INT_GETI( MPG_missed ) /STATS_INT_GETI( MPG_allocated );
 
+		// Sample hit quote
+		TqInt _mpg_hits =	STATS_INT_GETI ( MPG_sample_coverage0_125 ) +
+							STATS_INT_GETI ( MPG_sample_coverage125_25 ) +
+							STATS_INT_GETI ( MPG_sample_coverage25_375 ) +
+							STATS_INT_GETI ( MPG_sample_coverage375_50 ) +
+							STATS_INT_GETI ( MPG_sample_coverage50_625 ) +
+							STATS_INT_GETI ( MPG_sample_coverage625_75 ) +
+							STATS_INT_GETI ( MPG_sample_coverage75_875 ) +
+							STATS_INT_GETI ( MPG_sample_coverage875_100 );
+
+		TqFloat	_mpg_1		=	100.0f * STATS_INT_GETI( MPG_sample_coverage0_125 ) / _mpg_hits;
+		TqFloat	_mpg_2		=	100.0f * STATS_INT_GETI( MPG_sample_coverage125_25 ) / _mpg_hits;
+		TqFloat	_mpg_3		=	100.0f * STATS_INT_GETI( MPG_sample_coverage25_375 ) / _mpg_hits;
+		TqFloat	_mpg_4		=	100.0f * STATS_INT_GETI( MPG_sample_coverage375_50 ) / _mpg_hits;
+		TqFloat	_mpg_5		=	100.0f * STATS_INT_GETI( MPG_sample_coverage50_625 ) / _mpg_hits;
+		TqFloat	_mpg_6		=	100.0f * STATS_INT_GETI( MPG_sample_coverage625_75 ) / _mpg_hits;
+		TqFloat	_mpg_7		=	100.0f * STATS_INT_GETI( MPG_sample_coverage75_875 ) / _mpg_hits;
+		TqFloat	_mpg_8		=	100.0f * STATS_INT_GETI( MPG_sample_coverage875_100 ) / _mpg_hits;
+
 		MSG << "Micropolygons:\n\t"
 			<< STATS_INT_GETI( MPG_allocated ) << " created (" << STATS_INT_GETI( MPG_culled ) << " culled)\n"
 			<< "\t" <<STATS_INT_GETI( MPG_peak ) << " peak, " << STATS_INT_GETI( MPG_trimmed ) << " trimmed, " << STATS_INT_GETI( MPG_missed ) << " missed (" << _mpg_m_q << "%)\n\t"
-			<< std::endl;
+			<< "\n\t% of sample hits:\n"
+			<< "\t+------+------+------+------+------+------+------+------+\n"
+			<< "\t|<=12,5|<=  25|<=37,5|<=  50|<=62,5|<= 75 |<=87,5|<= 100|\n"
+			<< "\t+------+------+------+------+------+------+------+------+\n\t|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _mpg_1 << "%|" 
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _mpg_2 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _mpg_3 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _mpg_4 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _mpg_5 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _mpg_6 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _mpg_7 << "%|"
+			<< std::setw(5) << std::setprecision( 1 )<< std::setiosflags( std::ios::right ) << _mpg_8 << "%|\n"
+			<< "\t+------+------+------+------+------+------+------+------+\n\n"
+		<< std::endl;
 		
 		/*
 			MPG Pushed
@@ -537,13 +565,14 @@ void CqStats::PrintStats( TqInt level ) const
 			Shading stats
 			-------------------------------------------------------------------
 		*/
-
-			TqFloat _shd_var_a = 100.0f * STATS_INT_GETI( SHD_var_array ) / STATS_INT_GETI( SHD_var_created_total );
-			TqFloat _shd_var_u = 100.0f * STATS_INT_GETI( SHD_var_uniform ) / STATS_INT_GETI( SHD_var_created_total );
-			TqFloat _shd_var_v = 100.0f * STATS_INT_GETI( SHD_var_varying ) / STATS_INT_GETI( SHD_var_created_total );
-		
+			TqInt _shd_var_all = STATS_INT_GETI( SHD_var_array ) + STATS_INT_GETI( SHD_var_uniform ) + STATS_INT_GETI( SHD_var_varying );
 			
+			TqFloat _shd_var_a = 100.0f * STATS_INT_GETI( SHD_var_array ) / _shd_var_all;
+			TqFloat _shd_var_u = 100.0f * STATS_INT_GETI( SHD_var_uniform ) / _shd_var_all;
+			TqFloat _shd_var_v = 100.0f * STATS_INT_GETI( SHD_var_varying ) / _shd_var_all;
 		
+			TqFloat _shd_var_c_q = 100.0f * STATS_INT_GETI( SHD_var_created_total ) / _shd_var_all;
+			
 
 			MSG << 	"Shading:\n\t"
 				<<					"Stack:\n\t\t"
@@ -552,7 +581,7 @@ void CqStats::PrintStats( TqInt level ) const
 				<<					STATS_INT_GETI( SHD_stk_pop ) << " pop, " << STATS_INT_GETI( SHD_stk_release ) << " release\n\t\t"
 				<<					STATS_INT_GETI( SHD_stk_dup ) << " dup, " << STATS_INT_GETI( SHD_stk_drop ) << " drop\n\n\t"
 				<<					"Variables:\n\t\t"
-				<<							STATS_INT_GETI( SHD_var_created_total )  << " created\n\n\t\t"
+				<<							_shd_var_all << " allocated, " << STATS_INT_GETI( SHD_var_created_total )  << " created (" << _shd_var_c_q << "%), " << STATS_INT_GETI( SHD_var_peak ) << " peak\n\n\t\t"
 				<<					"Arrays:\n\t\t"
 				<<					"\t" << STATS_INT_GETI( SHD_var_array ) << " created (" << _shd_var_a << "%), " << STATS_INT_GETI( SHD_var_array_peak ) << " peak\n\t\t"
 				<<					"\t" << STATS_INT_GETI( SHD_var_array_init ) << " initialized\n\n\t\t"
@@ -744,16 +773,13 @@ void CqStats::PrintStats( TqInt level ) const
 					if( STATS_INT_GETI( SHD_so_vtransform ) ) MSG << STATS_INT_GETI( SHD_so_vtransform ) << "\tvtransform\n\t\t"; 
 					MSG << std::endl;
 
-		MSG << "Attributes: \t";
-		MSG << ( TqInt ) Attribute_stack.size() << " created" << std::endl;
+		MSG << "Attributes:\n\t";
+		MSG << ( TqInt ) Attribute_stack.size() << " created\n" << std::endl;
 
-		MSG << "Transforms: \t";
-		MSG << QGetRenderContext() ->TransformStack().size() << " created" << std::endl;
+		MSG << "Transforms:\n\t";
+		MSG << QGetRenderContext() ->TransformStack().size() << " created\n" << std::endl;
 
-		MSG << "Variables: \t";
-		MSG << m_cVariablesAllocated << " created" << std::endl;
-
-		MSG << "Parameters: \t" << m_cParametersAllocated << " created" << std::endl;
+		MSG << "Parameters:\n\t" << STATS_INT_GETI( PRM_created ) << " created, " << STATS_INT_GETI( PRM_peak ) << " peak\n" << std::endl;
 
 	}/*
 	if ( level == 4 )

@@ -47,6 +47,13 @@ CqParameter::CqParameter( const char* strName, TqInt Count ) :
 	/// \note Had to remove this as paramters are now created as part of the Renderer construction, so the
 	///		  renderer context isn't ready yet.
 	//	QGetRenderContext() ->Stats().IncParametersAllocated();
+	
+	STATS_INC( PRM_created );
+	STATS_INC( PRM_current );
+	TqInt cPRM = STATS_GETI( PRM_current );
+	TqInt cPeak = STATS_GETI( PRM_peak );
+	
+	STATS_SETI( PRM_peak, cPRM > cPeak ? cPRM : cPeak );
 	m_hash = hash(strName);
 }
 
@@ -60,6 +67,12 @@ CqParameter::CqParameter( const CqParameter& From ) :
 	/// \note Had to remove this as paramters are now created as part of the Renderer construction, so the
 	///		  renderer context isn't ready yet.
 	//	QGetRenderContext() ->Stats().IncParametersAllocated();
+	STATS_INC( PRM_created );
+	STATS_INC( PRM_current );
+	TqInt cPRM = STATS_GETI( PRM_current );
+	TqInt cPeak = STATS_GETI( PRM_peak );
+	
+	STATS_SETI( PRM_peak, cPRM > cPeak ? cPRM : cPeak );
 }
 
 CqParameter::~CqParameter()
@@ -67,6 +80,7 @@ CqParameter::~CqParameter()
 	/// \note Had to remove this as paramters are now created as part of the Renderer construction, so the
 	///		  renderer context isn't ready yet.
 	//	QGetRenderContext() ->Stats().IncParametersDeallocated();
+	STATS_DEC( PRM_current );
 }
 
 
