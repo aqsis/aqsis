@@ -4961,6 +4961,7 @@ RtVoid	CreateGPrim( CqBasicSurface* pSurface )
 	}
 	else
 	{
+		pSurface->AddRef();
 		pSurface->PrepareTrimCurve();
 		QGetRenderContext() ->pImage() ->PostSurface( pSurface );
 		QGetRenderContext() ->Stats().IncGPrims();
