@@ -517,8 +517,8 @@ void CqBucket::ExposeBucket()
         TqFloat oneovergamma = 1.0f / exposegamma;
         TqFloat endx, endy;
         TqInt   nextx;
-        endy = RealHeight()-1;
-        endx = RealWidth()-1;
+        endy = RealHeight();
+        endx = RealWidth();
         nextx = RealWidth();
 
         for ( y = 0; y < endy; y++ )
