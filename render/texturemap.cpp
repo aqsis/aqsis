@@ -465,10 +465,17 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 	static int size = -1;
 	static CqTextureMap *previous = NULL;
 
+	QGetRenderContext() ->Stats().IncTextureMisses( 0 );
+
 	/* look if the last item return by this function was ok */
 	if ( size == m_TextureMap_Cache.size() )
 		if ( ( previous ) && ( previous->m_strName == strName ) )
+		{
+			QGetRenderContext() ->Stats().IncTextureHits( 0, 0 );
 			return previous;
+		}
+
+
 
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -479,6 +486,7 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 			{
 				previous = *i;
 				size = m_TextureMap_Cache.size();
+				QGetRenderContext() ->Stats().IncTextureHits( 1, 0 );
 				return ( *i );
 			}
 			else
@@ -499,6 +507,8 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 		pNew->Close();
 	}
 
+	previous = pNew;
+	size = m_TextureMap_Cache.size();
 	return ( pNew );
 }
 
@@ -513,10 +523,17 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 	static int size = -1;
 	static CqTextureMap *previous = NULL;
 
+	QGetRenderContext() ->Stats().IncTextureMisses( 1 );
+
 	/* look if the last item return by this function was ok */
 	if ( size == m_TextureMap_Cache.size() )
 		if ( ( previous ) && ( previous->m_strName == strName ) )
+		{
+			QGetRenderContext() ->Stats().IncTextureHits( 0, 1 );
 			return previous;
+		}
+
+
 
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -527,6 +544,7 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 			{
 				previous = *i;
 				size = m_TextureMap_Cache.size();
+				QGetRenderContext() ->Stats().IncTextureHits( 1, 1 );
 				return ( *i );
 			}
 			else
@@ -563,6 +581,9 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 		delete pNew;
 		pNew = NULL;
 	}
+
+	previous = pNew;
+	size = m_TextureMap_Cache.size();
 	return ( pNew );
 }
 
@@ -577,9 +598,15 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 	static int size = -1;
 	static CqTextureMap *previous = NULL;
 
+	QGetRenderContext() ->Stats().IncTextureMisses( 3 );
+
 	if ( size == m_TextureMap_Cache.size() )
 		if ( ( previous ) && ( previous->m_strName == strName ) )
+		{
+			QGetRenderContext() ->Stats().IncTextureHits( 0, 3 );
 			return previous;
+		}
+
 
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -590,6 +617,7 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 			{
 				previous = *i;
 				size = m_TextureMap_Cache.size();
+				QGetRenderContext() ->Stats().IncTextureHits( 1, 3 );
 				return ( *i );
 			}
 			else
@@ -616,6 +644,8 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 	else
 		pNew->ReadMatrices();
 
+	previous = pNew;
+	size = m_TextureMap_Cache.size();
 	return ( pNew );
 }
 //----------------------------------------------------------------------
@@ -627,10 +657,16 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 {
 	static int size = -1;
 	static CqTextureMap *previous = NULL;
+	QGetRenderContext() ->Stats().IncTextureMisses( 2 );
 
 	if ( size == m_TextureMap_Cache.size() )
 		if ( previous && ( previous->m_strName == strName ) )
+		{
+			QGetRenderContext() ->Stats().IncTextureHits( 0, 2 );
 			return previous;
+		}
+
+
 
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -641,6 +677,7 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 			{
 				previous = *i;
 				size = m_TextureMap_Cache.size();
+				QGetRenderContext() ->Stats().IncTextureHits( 1, 2 );
 				return ( *i );
 			}
 			else
@@ -666,6 +703,9 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 		CqBasicError( 0, Severity_Normal, strError.c_str() );
 		pNew->SetInvalid();
 	}
+
+	previous = pNew;
+	size = m_TextureMap_Cache.size();
 	return ( pNew );
 }
 
@@ -682,10 +722,17 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 	static CqString name = "";
 
 
+	QGetRenderContext() ->Stats().IncTextureMisses( 4 );
+
 	/* look if the last item return by this function was ok */
 	if ( ( size == m_apSegments.size() ) && previous && ( name == m_strName ) )
 		if ( previous->IsValid( s, t, directory ) )
+		{
+			QGetRenderContext() ->Stats().IncTextureHits( 0, 4 );
 			return previous;
+		}
+
+
 
 
 	// Search already cached segments first.
@@ -695,6 +742,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 			previous = ( *i );
 			name = m_strName;
 			size = m_apSegments.size();
+			QGetRenderContext() ->Stats().IncTextureHits( 1, 4 );
 			return ( *i );
 		}
 
@@ -764,6 +812,10 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 			m_apSegments.push_back( pTMB );
 		}
 	}
+
+	name = m_strName;
+	previous = pTMB;
+	size = m_TextureMap_Cache.size();
 	return ( pTMB );
 }
 
@@ -1095,12 +1147,15 @@ void CqTextureMap::CriticalMeasure()
 		for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 		{
 			for ( j = ( *i ) ->m_apSegments.begin(); j != ( *i ) ->m_apSegments.end(); j++ )
+			{
+				if ( *j == previous ) previous = NULL;
 				( *j ) ->Release();
+			}
 			( *i ) ->m_apSegments.resize( 0 );
 			current = QGetRenderContext() ->Stats().GetTextureMemory();
 			if ( ( now - current ) > ( limit / 4 ) ) break;
 		}
-		previous = NULL;
+
 	}
 	current = QGetRenderContext() ->Stats().GetTextureMemory();
 

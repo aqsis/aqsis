@@ -92,6 +92,8 @@ void CqStats::InitialiseFrame()
 	m_cMissedMPGs = 0;
 	m_cCulledMPGs = 0;
 	m_cTextureMemory = 0;
+	memset( m_cTextureMisses, '\0', sizeof( m_cTextureMisses ) );
+	memset( m_cTextureHits, '\0', sizeof( m_cTextureHits ) );
 	m_timeTotalFrame = 0;
 	m_frameTimerRunning = TqFalse;
 	m_timeSurface.Reset();
@@ -210,6 +212,46 @@ void CqStats::PrintStats( TqInt level ) const
 		TimeToString( MSG, timeDiceable ) << " (" << 100.0f * timeDiceable / m_timeTotalFrame << "%)" << std::endl;
 		MSG << "Textures            : " << m_cTextureMemory << " bytes used." << std::endl;
 
+		MSG << "Textures hits       : " << std::endl;
+		for ( TqInt i = 0; i < 5; i++ )
+		{
+			/* Only if we missed something */
+			if ( m_cTextureHits[ 0 ][ i ] )
+			{
+				switch ( i )
+				{
+						case 0: MSG << "\t\t\tMipMap   P(";
+						break;
+						case 1: MSG << "\t\t\tCube Env.P(";
+						break;
+						case 2: MSG << "\t\t\tLatLong  P(";
+						break;
+						case 3: MSG << "\t\t\tShadow   P(";
+						break;
+						case 4: MSG << "\t\t\tTiles    P(";
+						break;
+				}
+				MSG << 100.0f * ( ( float ) m_cTextureHits[ 0 ][ i ] / ( float ) ( m_cTextureHits[ 0 ][ i ] + m_cTextureMisses[ i ] ) ) << "%)" << " of " << m_cTextureMisses[ i ] << " tries" << std::endl;
+			}
+			if ( m_cTextureHits[ 1 ][ i ] )
+			{
+				switch ( i )
+				{
+						case 0: MSG << "\t\t\tMipMap   S(";
+						break;
+						case 1: MSG << "\t\t\tCube Env.S(";
+						break;
+						case 2: MSG << "\t\t\tLatLong  S(";
+						break;
+						case 3: MSG << "\t\t\tShadow   S(";
+						break;
+						case 4: MSG << "\t\t\tTiles    S(";
+						break;
+				}
+				MSG << 100.0f * ( ( float ) m_cTextureHits[ 1 ][ i ] / ( float ) ( m_cTextureHits[ 1 ][ i ] + m_cTextureMisses[ i ] ) ) << "%)" << std::endl;
+			}
+
+		}
 		MSG << std::endl;
 
 	}

@@ -58,7 +58,7 @@ class CqSurface;
 class CqMicroPolyGridBase
 {
 	public:
-		CqMicroPolyGridBase()
+		CqMicroPolyGridBase() : bCulled( TqFalse )
 		{}
 		virtual	~CqMicroPolyGridBase()
 		{}
@@ -78,6 +78,10 @@ class CqMicroPolyGridBase
 		/** Pure virtual, shade the grid.
 		 */
 		virtual	void	Shade() = 0;
+		/*
+		 * Delete all the variables per grid 
+		 */
+		virtual void DeleteVariables( TqBool all ) = 0;
 		/** Pure virtual, get the bound of the grid.
 		 * \return CqBound class representing the conservative boundary.
 		 */
@@ -90,8 +94,13 @@ class CqMicroPolyGridBase
 		virtual	const IqAttributes* pAttributes() const = 0;
 
 		virtual	CqCSGTreeNode* pCSGNode() const = 0;
+		TqBool vfCulled()
+		{
+			return bCulled;
+		}
 
-	private:
+	public:
+		TqBool bCulled; ///< Shader variable indicating whether the individual micropolys are culled.
 };
 
 
@@ -137,10 +146,13 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 
 		void	Initialise( TqInt cu, TqInt cv, CqSurface* pSurface );
 
+		void DeleteVariables( TqBool all );
+
 		// Overrides from CqMicroPolyGridBase
 		virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
 		virtual void	Project();
 		virtual	void	Shade();
+
 		virtual CqBound	Bound();
 		/** Get a pointer to the surface which this grid belongs.
 		 * \return Surface pointer, only valid during shading.
@@ -157,11 +169,6 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 		virtual	CqCSGTreeNode* pCSGNode() const
 		{
 			return ( m_pCSGNode );
-		}
-
-		TqBool	vfCulled() const
-		{
-			return ( m_vfCulled );
 		}
 
 		// Redirect acces via IqShaderExecEnv
@@ -286,7 +293,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 		CqCSGTreeNode* m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
 		IqShaderExecEnv* m_pShaderExecEnv;	///< Pointer to the shader execution environment for this grid.
 	protected:
-		TqBool	m_vfCulled;			///< Shader variable indicating whether the individual micropolys are culled.
+
 }
 ;
 
@@ -307,10 +314,13 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 		// Overrides from CqMicroPolyGridBase
 
 
-
 		virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
 		virtual void	Project();
 		virtual	void	Shade();
+		void DeleteVariables( TqBool all )
+		{}
+
+
 		virtual CqBound	Bound();
 		/** Get a pointer to the surface which this grid belongs.
 		 * Actually returns the surface pointer from the first timeslot.
@@ -532,7 +542,7 @@ class CqMicroPolygonStaticBase
  * Class which stores a single static micropolygon.
  */
 
-class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonStaticBase, public CqPoolable<CqMicroPolygonStatic, 500>
+class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonStaticBase , public CqPoolable<CqMicroPolygonStatic, 512>
 {
 	public:
 		CqMicroPolygonStatic() : CqMicroPolygonBase(), CqMicroPolygonStaticBase(), m_fTrimmed( TqFalse )
@@ -546,7 +556,6 @@ class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonSta
 		{}
 
 		// overrides from CqMicroPolygonBase
-
 
 
 		virtual	CqBound&	GetTotalBound( TqBool fForce = TqFalse );
@@ -608,6 +617,8 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 
 		void	ExpandBound( const CqMicroPolygonStaticBase& MP );
 		void	Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD, TqFloat time );
+		void DeleteVariables( TqBool all )
+		{}
 
 		// Overrides from CqMicroPolygonBase
 		virtual	CqBound&	GetTotalBound( TqBool fForce = TqFalse );
@@ -637,7 +648,7 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 		virtual	TqBool	Sample( CqVector2D& vecSample, TqFloat time, TqFloat& D );
 
 		// Overrides from CqMotionSpec
-		virtual	void	ClearMotionObject( CqMicroPolygonStaticBase& A ) const
+		void	ClearMotionObject( CqMicroPolygonStaticBase& A ) const
 		{}
 		/** Overridden from CqMotionSpec, does nothing.
 		 */
@@ -656,6 +667,7 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 			CqMicroPolygonStaticBase MP;
 			return ( MP.LinearInterpolate( Fraction, A, B ) );
 		}
+
 	private:
 		CqBound	m_Bound;		///< Stored bound.
 		CqBoundList	m_BoundList;	///< List of bounds to get a tighter fit.

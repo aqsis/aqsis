@@ -5,6 +5,9 @@
 #include "librib2ri.h"
 #include "aqsis.h"
 
+#if defined(AQSIS_SYSTEM_WIN32)
+#include <windows.h>
+#endif
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #include "version.h"
@@ -281,6 +284,29 @@ int main( int argc, const char** argv )
 
 #if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
 	_CrtDumpMemoryLeaks();
+#endif
+
+#if defined(AQSIS_SYSTEM_WIN32)
+	{
+		MEMORY_BASIC_INFORMATION mbi;
+		DWORD dwMemUsed = 0;
+		PVOID pvAddress = 0;
+		SYSTEM_INFO SystemInfo;
+
+		memset( &SystemInfo, 0, sizeof( SYSTEM_INFO ) );
+		GetSystemInfo(
+		    &SystemInfo  // system information
+		);
+		memset( &mbi, 0, sizeof( MEMORY_BASIC_INFORMATION ) );
+		while ( VirtualQuery( pvAddress, &mbi, sizeof( MEMORY_BASIC_INFORMATION ) ) == sizeof( MEMORY_BASIC_INFORMATION ) )
+		{
+			if ( mbi.State == MEM_COMMIT && mbi.Type == MEM_PRIVATE )
+				dwMemUsed += mbi.RegionSize;
+			pvAddress = ( ( BYTE* ) mbi.BaseAddress ) + mbi.RegionSize;
+		}
+		std::cout << "Peek Memory Used " << dwMemUsed << std::endl;
+
+	}
 #endif
 
 	return ( 0 );

@@ -42,10 +42,10 @@ START_NAMESPACE( Aqsis )
 
 enum EqState
 {
-    State_Parsing,  		///< Parsing a RIB file.
-    State_Shadows,  		///< Processing shadows.
-    State_Rendering,  	///< Rendering image.
-    State_Complete,  		///< Rendering complete.
+    State_Parsing,   		///< Parsing a RIB file.
+    State_Shadows,   		///< Processing shadows.
+    State_Rendering,   	///< Rendering image.
+    State_Complete,   		///< Rendering complete.
 };
 
 
@@ -295,6 +295,14 @@ class CqStats
 		{
 			m_cTextureMemory += n;
 		}
+		void IncTextureHits( TqInt primary, TqInt which )
+		{
+			m_cTextureHits[ primary ][ which ] ++;
+		}
+		void IncTextureMisses( TqInt which )
+		{
+			m_cTextureMisses[ which ] ++;
+		}
 
 		/** Get the texture memory used.
 		 */
@@ -450,6 +458,8 @@ class CqStats
 		TqInt	m_cCulledMPGs;					///< Count of culled micro polys.
 		TqInt	m_cMissedMPGs;				///< Count of missed MPGs.
 		TqInt m_cTextureMemory;     ///< Count of the memory used by texturemap.cpp
+		TqInt m_cTextureHits[ 2 ][ 5 ];     ///< Count of the hits encountered used by texturemap.cpp
+		TqInt m_cTextureMisses[ 5 ];     ///< Count of the hits encountered used by texturemap.cpp
 
 		time_t	m_timeTotal;					///< Total time spent on the entire animation.
 		time_t m_timeTotalFrame;				///< Time spent on processing one individual frame.

@@ -220,7 +220,7 @@ RtInt BuildParameterList( va_list pArgs, RtToken*& pTokens, RtPointer*& pValues 
 	RtPointer pValue;
 	aTokens.clear();
 	aValues.clear();
-	while ( pToken != 0 && pToken != RI_NULL )        	// While not RI_NULL
+	while ( pToken != 0 && pToken != RI_NULL )         	// While not RI_NULL
 	{
 		aTokens.push_back( pToken );
 		pValue = va_arg( pArgs, RtPointer );
@@ -2360,8 +2360,6 @@ RtVoid RiBlobby( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloa
 	RiBlobbyV( nleaf, ncodes, codes, nfloats, floats, nstrings, strings, count, pTokens, pValues );
 
 	return ;
-
-	return ;
 }
 
 //----------------------------------------------------------------------
@@ -2626,7 +2624,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 
 				pSurface->aIndices().resize( nverts[ poly ] );
 				RtInt i;
-				for ( i = 0; i < nverts[ poly ]; i++ )        	// Fill in the points
+				for ( i = 0; i < nverts[ poly ]; i++ )         	// Fill in the points
 				{
 					if ( verts[ iP ] >= cVerts )
 					{
@@ -2675,7 +2673,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 
 				pSurface->aIndices().resize( nverts[ poly ] );
 				RtInt i;
-				for ( i = 0; i < nverts[ poly ]; i++ )        	// Fill in the points
+				for ( i = 0; i < nverts[ poly ]; i++ )         	// Fill in the points
 				{
 					if ( verts[ iP ] >= cVerts )
 					{
@@ -4233,7 +4231,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			// Create a surface face
 			RtBoolean fValid = RI_TRUE;
 			RtInt i;
-			for ( i = 0; i < nvertices[ face ]; i++ )        	// Fill in the points
+			for ( i = 0; i < nvertices[ face ]; i++ )         	// Fill in the points
 			{
 				if ( vertices[ iP ] >= cVerts )
 				{

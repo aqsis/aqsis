@@ -44,6 +44,7 @@
 
 START_NAMESPACE( Aqsis )
 
+static TqInt bucketmodulo = -1;
 
 //----------------------------------------------------------------------
 /** Constructor
@@ -112,7 +113,7 @@ void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
 void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 {
 	TqFloat subcell_width = 1.0f / ( m_XSamples * m_YSamples );
-	CqRandom random;
+	static CqRandom random( 53 );
 	TqInt m = m_XSamples;
 	TqInt n = m_YSamples;
 
@@ -838,7 +839,7 @@ void CqBucket::ExposeBucket()
 
 void CqBucket::QuantizeBucket()
 {
-	CqRandom random;
+	static CqRandom random( 61 );
 
 	if ( QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 	{
@@ -1315,8 +1316,22 @@ void CqImageBuffer::AddMPG( CqMicroPolygonBase* pmpgNew )
 	TqInt iYBa = static_cast<TqInt>( B.vecMin().y() / ( m_YBucketSize ) );
 	TqInt iYBb = static_cast<TqInt>( B.vecMax().y() / ( m_YBucketSize ) );
 	// Now duplicate and link into any buckets it crosses.
-
 	TqInt iXB = iXBa, iYB = iYBa;
+
+	if ( ( iXBb < 0 ) || ( iYBb < 0 ) )
+	{
+		pmpgNew->Release();
+		return ;
+	}
+	if ( ( iXBa >= m_cXBuckets ) || ( iYBa >= m_cYBuckets ) )
+	{
+		pmpgNew->Release();
+		return ;
+	}
+
+	if ( iXBa < 0 ) iXB = iXBa = 0;
+	if ( iYBa < 0 ) iYB = iYBa = 0;
+
 	do
 	{
 		if ( iYB >= 0 && iYB < m_cYBuckets )
@@ -1687,8 +1702,12 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 				// Only shade in all cases since the Displacement could be called in the shadow map creation too.
 				pGrid->Shade();
 
-				pGrid->Project();
-				Bucket.AddGrid( pGrid );
+				if ( pGrid->vfCulled() == TqFalse )
+				{
+					// Only project micropolygon not culled
+					pGrid->Project();
+					Bucket.AddGrid( pGrid );
+				}
 			}
 		}
 		// The surface is not small enough, so split it...
@@ -1750,6 +1769,22 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 
 void CqImageBuffer::RenderImage()
 {
+
+	if ( bucketmodulo == -1 )
+	{
+		// Small change which allows full control of virtual memory on NT swapping
+		bucketmodulo = m_cXBuckets;
+		TqInt *poptModulo = ( TqInt * ) QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "bucketmodulo" );
+		if ( poptModulo != 0 )
+		{
+			bucketmodulo = poptModulo[ 0 ];
+			printf( "Number of Buckets per line %d\n", m_cXBuckets );
+		}
+		if ( bucketmodulo <= 0 ) bucketmodulo = m_cXBuckets;
+	}
+
+
+
 	// Render the surface at the front of the list.
 	m_fDone = TqFalse;
 
@@ -1803,7 +1838,7 @@ void CqImageBuffer::RenderImage()
 			return ;
 		}
 #ifdef WIN32
-		if ( !( iBucket % m_cXBuckets ) )
+		if ( !( iBucket % bucketmodulo ) )
 			SetProcessWorkingSetSize( GetCurrentProcess(), 0xffffffff, 0xffffffff );
 #endif
 

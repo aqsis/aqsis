@@ -37,7 +37,7 @@
 START_NAMESPACE( Aqsis )
 
 
-DEFINE_STATIC_MEMORYPOOL( CqMicroPolygonStatic, 500 );
+DEFINE_STATIC_MEMORYPOOL( CqMicroPolygonStatic, 512 );
 
 //---------------------------------------------------------------------
 /** Default constructor
@@ -48,8 +48,8 @@ CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(),
 		m_bGeometricNormals( TqFalse ),
 		m_pSurface( NULL ),
 		m_pCSGNode( NULL ),
-		m_pShaderExecEnv( NULL ),
-		m_vfCulled( TqFalse )
+		m_pShaderExecEnv( NULL )
+
 {
 	QGetRenderContext() ->Stats().IncGridsAllocated();
 }
@@ -85,8 +85,8 @@ CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) :
 		m_bShadingNormals( TqFalse ),
 		m_bGeometricNormals( TqFalse ),
 		m_pSurface( NULL ),
-		m_pShaderExecEnv( NULL ),
-		m_vfCulled( TqFalse )
+		m_pShaderExecEnv( NULL )
+
 {
 	QGetRenderContext() ->Stats().IncGridsAllocated();
 	// Initialise the shader execution environment
@@ -130,9 +130,8 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
 	if ( NULL != pshadAtmosphere ) pshadAtmosphere->Initialise( cu, cv, m_pShaderExecEnv );
 
 	// Initialise the local/public culled variable.
-	m_vfCulled = TqFalse;
-}
 
+}
 
 //---------------------------------------------------------------------
 /** Build the normals list for the micorpolygons in the grid.
@@ -312,8 +311,9 @@ void CqMicroPolyGrid::Shade()
 
 		if ( cCulled == gs )
 		{
-			m_vfCulled = TqTrue;
+			bCulled = TqTrue;
 			theStats.IncCulledGrids();
+			DeleteVariables( TqTrue );
 			return ;
 		}
 
@@ -335,8 +335,9 @@ void CqMicroPolyGrid::Shade()
 
 		if ( cCulled == gs )
 		{
-			m_vfCulled = TqTrue;
+			bCulled = TqTrue;
 			theStats.IncCulledGrids();
+			DeleteVariables( TqTrue );
 			return ;
 		}
 	}
@@ -364,8 +365,9 @@ void CqMicroPolyGrid::Shade()
 		// If the whole grid is culled don't bother going any further.
 		if ( cCulled == gs )
 		{
-			m_vfCulled = TqTrue;
+			bCulled = TqTrue;
 			theStats.IncCulledGrids();
+			DeleteVariables( TqTrue );
 			return ;
 		}
 
@@ -380,7 +382,6 @@ void CqMicroPolyGrid::Shade()
 	theStats.SurfaceTimer().Stop();
 
 	// Now try and cull any true transparent MPs (assigned by the shader code
-	static CqRandom rand;
 
 	cCulled = 0;
 	if ( USES( lUses, EnvVars_Os ) && QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
@@ -397,8 +398,9 @@ void CqMicroPolyGrid::Shade()
 
 		if ( cCulled == gs )
 		{
-			m_vfCulled = TqTrue;
+			bCulled = TqTrue;
 			theStats.IncCulledGrids();
+			DeleteVariables( TqTrue );
 			return ;
 		}
 	}
@@ -410,31 +412,53 @@ void CqMicroPolyGrid::Shade()
 		theStats.AtmosphereTimer().Stop();
 	}
 
-	// Delete unneeded variables so that we don't use up unnecessary memory
+	DeleteVariables( TqFalse );
+}
+
+//---------------------------------------------------------------------
+/**
+ * Delete unneeded variables so that we don't use up unnecessary memory
+ */
+void CqMicroPolyGrid::DeleteVariables( TqBool all )
+{
 	m_pShaderExecEnv->DeleteVariable( EnvVars_Cs );
 	m_pShaderExecEnv->DeleteVariable( EnvVars_Os );
-	//DeleteVariable( EnvVars_Ng );
+
 	m_pShaderExecEnv->DeleteVariable( EnvVars_du );
 	m_pShaderExecEnv->DeleteVariable( EnvVars_dv );
 	m_pShaderExecEnv->DeleteVariable( EnvVars_L );
 	m_pShaderExecEnv->DeleteVariable( EnvVars_Cl );
 	m_pShaderExecEnv->DeleteVariable( EnvVars_Ol );
-	//DeleteVariable(EnvVars_P);
 	m_pShaderExecEnv->DeleteVariable( EnvVars_dPdu );
 	m_pShaderExecEnv->DeleteVariable( EnvVars_dPdv );
-	//	DeleteVariable(EnvVars_N);
-	//	DeleteVariable(EnvVars_u);
-	//	DeleteVariable(EnvVars_v);
+
 	m_pShaderExecEnv->DeleteVariable( EnvVars_s );
 	m_pShaderExecEnv->DeleteVariable( EnvVars_t );
 	m_pShaderExecEnv->DeleteVariable( EnvVars_I );
-	//DeleteVariable(EnvVars_Ci);
-	//DeleteVariable(EnvVars_Oi);
+
 	m_pShaderExecEnv->DeleteVariable( EnvVars_Ps );
 	m_pShaderExecEnv->DeleteVariable( EnvVars_E );
 	m_pShaderExecEnv->DeleteVariable( EnvVars_ncomps );
 	m_pShaderExecEnv->DeleteVariable( EnvVars_time );
 	m_pShaderExecEnv->DeleteVariable( EnvVars_alpha );
+
+	if ( all == TqTrue )
+	{
+		m_pShaderExecEnv->DeleteVariable( EnvVars_N );
+		m_pShaderExecEnv->DeleteVariable( EnvVars_u );
+		m_pShaderExecEnv->DeleteVariable( EnvVars_v );
+		m_pShaderExecEnv->DeleteVariable( EnvVars_P );
+		m_pShaderExecEnv->DeleteVariable( EnvVars_Ng );
+		m_pShaderExecEnv->DeleteVariable( EnvVars_Ci );
+		m_pShaderExecEnv->DeleteVariable( EnvVars_Oi );
+
+
+
+	}
+
+	// we must delete the remaining information here!!
+
+
 }
 
 
@@ -527,9 +551,10 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 			TqInt iIndex = ( iv * ( cu + 1 ) ) + iu;
 
 			// If culled, ignore it
-			if ( m_vfCulled )
+			if ( bCulled )
 			{
 				theStats.IncCulledMPGs( 1 );
+				DeleteVariables( TqTrue );
 				continue;
 			}
 
@@ -616,6 +641,8 @@ void CqMotionMicroPolyGrid::Shade()
 {
 	CqMicroPolyGrid * pGrid = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) );
 	pGrid->Shade();
+
+
 }
 
 
@@ -667,6 +694,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 			if ( pGridA->vfCulled() )
 			{
 				QGetRenderContext() ->Stats().IncCulledMPGs( 1 );
+				pGridA->DeleteVariables( TqTrue );
 				continue;
 			}
 
