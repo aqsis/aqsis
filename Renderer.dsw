@@ -201,12 +201,6 @@ Package=<4>
     Project_Dep_Name libargparse
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name libshaderexecenv
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libshadervm
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name libaqsis
     End Project Dependency
 }}}

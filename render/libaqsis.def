@@ -517,3 +517,26 @@ EXPORTS
 	?warn@CqLog@Aqsis@@UAEXABVCqString@2@@Z
 	?warn@CqLog@Aqsis@@UAEXHH@Z
 	?xyYtorgb@CqColor@Aqsis@@QBE?AV12@XZ
+	
+	?parseShadeOpTableEntry@CqDSORepository@Aqsis@@MAEPAUSqDSOExternalCall@2@PAXPAUSqShadeOp@@@Z
+	?getShadeOpMethods@CqDSORepository@Aqsis@@MAEPAV?$list@PAUSqDSOExternalCall@Aqsis@@V?$allocator@PAUSqDSOExternalCall@Aqsis@@@std@@@std@@PAVCqString@2@@Z
+	?SetDSOPath@CqDSORepository@Aqsis@@UAEXPBVCqString@2@@Z
+	?DefaultSurface@CqShaderVM@Aqsis@@UAEXXZ
+	?DeleteTemporaryStorage@CqShaderVM@Aqsis@@UAEXPAUIqShaderData@2@@Z
+	?CreateTemporaryStorage@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@@Z
+	?CreateVariableArray@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@ABVCqString@2@H_N@Z
+	?Initialise@CqShaderVM@Aqsis@@UAEXHHPAUIqShaderExecEnv@2@@Z
+	?GetValue@CqShaderVM@Aqsis@@UAE_NPBDPAUIqShaderData@2@@Z
+	?FindArgument@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@ABVCqString@2@@Z
+	?SetArgument@CqShaderVM@Aqsis@@UAEXABVCqString@2@W4EqVariableType@2@0PAX@Z
+	?CreateVariable@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@ABVCqString@2@_N@Z
+	?SetArgument@CqShaderVM@Aqsis@@UAEXPAVCqParameter@2@PAUIqSurface@2@@Z
+	?GetShaderVarCount@CqShaderVM@Aqsis@@QAEHXZ
+	?ExecuteInit@CqShaderVM@Aqsis@@QAEXXZ
+	?LoadProgram@CqShaderVM@Aqsis@@QAEXPAV?$basic_istream@DU?$char_traits@D@std@@@std@@@Z
+	?m_samples@CqShaderStack@Aqsis@@1HA
+	?m_maxsamples@CqShaderStack@Aqsis@@1HA
+	?Statistics@CqShaderStack@Aqsis@@SAXXZ
+	?Execute@CqShaderVM@Aqsis@@QAEXPAUIqShaderExecEnv@2@@Z
+	??4CqShaderVM@Aqsis@@QAEAAV01@ABV01@@Z
+	?GetShaderVarAt@CqShaderVM@Aqsis@@QAEPAUIqShaderData@2@H@Z
