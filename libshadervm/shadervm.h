@@ -60,15 +60,13 @@ class CqShaderVM;
 struct SqOpCodeTrans
 {
 	char*	m_strName;					///< Name of the opcode.
-	void( CqShaderVM::*m_pCommand ) ();	//< Member pointer to the function.
+	TqLong	m_hash;						///< Hash key of the optcode.
+	void (CqShaderVM::*m_pCommand ) ();	//< Member pointer to the function.
 	TqInt	m_cParams;					///< Number of expected parameters.
-	TqInt m_aParamTypes[ 10 ];	///< Array of parameter types (up to ten, can be extended if required).
+	TqInt	m_aParamTypes[10];				///< Array of parameter types (up to ten, can be extended if required).
 }
 ;
 
-
-_qShareM	extern char*	gShaderTypeNames[];
-_qShareM	extern TqInt	gcShaderTypeNames;
 
 class CqShaderVM;
 union UsProgramElement;
@@ -81,7 +79,7 @@ union UsProgramElement;
 struct SqLabel
 {
 	UsProgramElement* m_pAddress;	///< The absolute address of the label.
-	TqInt	m_Offset;		///< The index offset fromt he start of the program.
+	TqInt	m_Offset;				///< The index offset fromt he start of the program.
 }
 ;
 
@@ -95,7 +93,7 @@ union UsProgramElement
 {
 	void( CqShaderVM::*m_Command ) ();		///< Pointer to a function.
 	TqFloat	m_FloatVal;				///< Absolute float value.
-	CqString*	m_pString;				///< Absolute string value.
+	CqString*	m_pString;			///< Absolute string value.
 	TqInt	m_iVariable;			///< Shader variable index.
 	SqLabel	m_Label;				///< Program label.
 };

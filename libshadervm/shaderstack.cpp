@@ -29,6 +29,33 @@
 
 START_NAMESPACE( Aqsis )
 
+std::vector<CqShaderVariableUniformFloat>	CqShaderStack::m_aUFPool;
+// Integer
+std::vector<CqShaderVariableUniformPoint>	CqShaderStack::m_aUPPool;
+std::vector<CqShaderVariableUniformString>	CqShaderStack::m_aUSPool;
+std::vector<CqShaderVariableUniformColor>	CqShaderStack::m_aUCPool;
+// Triple
+// hPoint
+std::vector<CqShaderVariableUniformNormal>	CqShaderStack::m_aUNPool;
+std::vector<CqShaderVariableUniformVector>	CqShaderStack::m_aUVPool;
+// Void
+std::vector<CqShaderVariableUniformMatrix>	CqShaderStack::m_aUMPool;
+// SixteenTuple
+
+std::vector<CqShaderVariableVaryingFloat>	CqShaderStack::m_aVFPool;
+// Integer
+std::vector<CqShaderVariableVaryingPoint>	CqShaderStack::m_aVPPool;
+std::vector<CqShaderVariableVaryingString>	CqShaderStack::m_aVSPool;
+std::vector<CqShaderVariableVaryingColor>	CqShaderStack::m_aVCPool;
+// Triple
+// hPoint
+std::vector<CqShaderVariableVaryingNormal>	CqShaderStack::m_aVNPool;
+std::vector<CqShaderVariableVaryingVector>	CqShaderStack::m_aVVPool;
+// Void
+std::vector<CqShaderVariableVaryingMatrix>	CqShaderStack::m_aVMPool;
+
+TqInt	CqShaderStack::m_iUPoolTops[ type_last ];
+TqInt	CqShaderStack::m_iVPoolTops[ type_last ];
 
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

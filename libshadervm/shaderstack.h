@@ -204,23 +204,23 @@ class _qShareC CqShaderStack
 	public:
 		_qShareM CqShaderStack() : m_iTop( 0 )
 		{
-			m_Stack.resize( 48 );
+			m_Stack.resize( type_last );
 
-			m_aUFPool.resize( 48 );
-			m_aUPPool.resize( 48 );
-			m_aUSPool.resize( 48 );
-			m_aUCPool.resize( 48 );
-			m_aUNPool.resize( 48 );
-			m_aUVPool.resize( 48 );
-			m_aUMPool.resize( 48 );
+			m_aUFPool.resize( type_last );
+			m_aUPPool.resize( type_last );
+			m_aUSPool.resize( type_last );
+			m_aUCPool.resize( type_last );
+			m_aUNPool.resize( type_last );
+			m_aUVPool.resize( type_last );
+			m_aUMPool.resize( type_last );
 
-			m_aVFPool.resize( 48 );
-			m_aVPPool.resize( 48 );
-			m_aVSPool.resize( 48 );
-			m_aVCPool.resize( 48 );
-			m_aVNPool.resize( 48 );
-			m_aVVPool.resize( 48 );
-			m_aVMPool.resize( 48 );
+			m_aVFPool.resize( type_last );
+			m_aVPPool.resize( type_last );
+			m_aVSPool.resize( type_last );
+			m_aVCPool.resize( type_last );
+			m_aVNPool.resize( type_last );
+			m_aVVPool.resize( type_last );
+			m_aVMPool.resize( type_last );
 
 			TqInt i;
 			for ( i = 0; i < type_last; i++ )
@@ -257,13 +257,13 @@ class _qShareC CqShaderStack
 					case type_point:
 					if ( _class == class_uniform )
 					{
-						if ( m_iUPoolTops[ type_point ] >= m_aUPPool.size() )
+						while ( m_iUPoolTops[ type_point ] >= m_aUPPool.size() )
 							m_aUPPool.resize( m_aUPPool.size() + 1 );
 						return ( &m_aUPPool[ m_iUPoolTops[ type_point ] ] );
 					}
 					else
 					{
-						if ( m_iVPoolTops[ type_point ] >= m_aVPPool.size() )
+						while ( m_iVPoolTops[ type_point ] >= m_aVPPool.size() )
 							m_aVPPool.resize( m_aVPPool.size() + 1 );
 						return ( &m_aVPPool[ m_iVPoolTops[ type_point ] ] );
 					}
@@ -271,13 +271,13 @@ class _qShareC CqShaderStack
 					case type_string:
 					if ( _class == class_uniform )
 					{
-						if ( m_iUPoolTops[ type_string ] >= m_aUSPool.size() )
+						while ( m_iUPoolTops[ type_string ] >= m_aUSPool.size() )
 							m_aUSPool.resize( m_aUSPool.size() + 1 );
 						return ( &m_aUSPool[ m_iUPoolTops[ type_string ] ] );
 					}
 					else
 					{
-						if ( m_iVPoolTops[ type_string ] >= m_aVSPool.size() )
+						while ( m_iVPoolTops[ type_string ] >= m_aVSPool.size() )
 							m_aVSPool.resize( m_aVSPool.size() + 1 );
 						return ( &m_aVSPool[ m_iVPoolTops[ type_string ] ] );
 					}
@@ -285,13 +285,13 @@ class _qShareC CqShaderStack
 					case type_color:
 					if ( _class == class_uniform )
 					{
-						if ( m_iUPoolTops[ type_color ] >= m_aUCPool.size() )
+						while ( m_iUPoolTops[ type_color ] >= m_aUCPool.size() )
 							m_aUCPool.resize( m_aUCPool.size() + 1 );
 						return ( &m_aUCPool[ m_iUPoolTops[ type_color ] ] );
 					}
 					else
 					{
-						if ( m_iVPoolTops[ type_color ] >= m_aVCPool.size() )
+						while ( m_iVPoolTops[ type_color ] >= m_aVCPool.size() )
 							m_aVCPool.resize( m_aVCPool.size() + 1 );
 						return ( &m_aVCPool[ m_iVPoolTops[ type_color ] ] );
 					}
@@ -299,13 +299,13 @@ class _qShareC CqShaderStack
 					case type_normal:
 					if ( _class == class_uniform )
 					{
-						if ( m_iUPoolTops[ type_normal ] >= m_aUNPool.size() )
+						while ( m_iUPoolTops[ type_normal ] >= m_aUNPool.size() )
 							m_aUNPool.resize( m_aUNPool.size() + 1 );
 						return ( &m_aUNPool[ m_iUPoolTops[ type_normal ] ] );
 					}
 					else
 					{
-						if ( m_iVPoolTops[ type_normal ] >= m_aVNPool.size() )
+						while ( m_iVPoolTops[ type_normal ] >= m_aVNPool.size() )
 							m_aVNPool.resize( m_aVNPool.size() + 1 );
 						return ( &m_aVNPool[ m_iVPoolTops[ type_normal ] ] );
 					}
@@ -313,13 +313,13 @@ class _qShareC CqShaderStack
 					case type_vector:
 					if ( _class == class_uniform )
 					{
-						if ( m_iUPoolTops[ type_vector ] >= m_aUVPool.size() )
+						while ( m_iUPoolTops[ type_vector ] >= m_aUVPool.size() )
 							m_aUVPool.resize( m_aUVPool.size() + 1 );
 						return ( &m_aUVPool[ m_iUPoolTops[ type_vector ] ] );
 					}
 					else
 					{
-						if ( m_iVPoolTops[ type_vector ] >= m_aVVPool.size() )
+						while ( m_iVPoolTops[ type_vector ] >= m_aVVPool.size() )
 							m_aVVPool.resize( m_aVVPool.size() + 1 );
 						return ( &m_aVVPool[ m_iVPoolTops[ type_vector ] ] );
 					}
@@ -327,30 +327,34 @@ class _qShareC CqShaderStack
 					case type_matrix:
 					if ( _class == class_uniform )
 					{
-						if ( m_iUPoolTops[ type_matrix ] >= m_aUMPool.size() )
+						while ( m_iUPoolTops[ type_matrix ] >= m_aUMPool.size() )
 							m_aUMPool.resize( m_aUMPool.size() + 1 );
 						return ( &m_aUMPool[ m_iUPoolTops[ type_matrix ] ] );
 					}
 					else
 					{
-						if ( m_iVPoolTops[ type_matrix ] >= m_aVMPool.size() )
+						while ( m_iVPoolTops[ type_matrix ] >= m_aVMPool.size() )
 							m_aVMPool.resize( m_aVMPool.size() + 1 );
 						return ( &m_aVMPool[ m_iVPoolTops[ type_matrix ] ] );
 					}
 
 					default:
-					if ( _class == class_uniform )
+					if ( type == type_float )
 					{
-						if ( m_iUPoolTops[ type_float ] >= m_aUFPool.size() )
-							m_aUFPool.resize( m_aUFPool.size() + 1 );
-						return ( &m_aUFPool[ m_iUPoolTops[ type_float ] ] );
+						if ( _class == class_uniform )
+						{
+							while ( m_iUPoolTops[ type_float ] >= m_aUFPool.size() )
+								m_aUFPool.resize( m_aUFPool.size() + 1 );
+							return ( &m_aUFPool[ m_iUPoolTops[ type_float ] ] );
+						}
+						else
+						{
+							while ( m_iVPoolTops[ type_float ] >= m_aVFPool.size() )
+								m_aVFPool.resize( m_aVFPool.size() + 1 );
+							return ( &m_aVFPool[ m_iVPoolTops[ type_float ] ] );
+						}
 					}
-					else
-					{
-						if ( m_iVPoolTops[ type_float ] >= m_aVFPool.size() )
-							m_aVFPool.resize( m_aVFPool.size() + 1 );
-						return ( &m_aVFPool[ m_iVPoolTops[ type_float ] ] );
-					}
+					return NULL;
 			}
 		}
 
@@ -359,7 +363,7 @@ class _qShareC CqShaderStack
 		 */
 		void	Push( IqShaderData* pv )
 		{
-			if ( m_iTop >= m_Stack.size() )
+			while ( m_iTop >= m_Stack.size() )
 				m_Stack.resize( m_Stack.size() + 1 );
 
 			m_Stack[ m_iTop++ ] = pv;
@@ -414,34 +418,34 @@ class _qShareC CqShaderStack
 		TqUint	m_iTop;										///< Index of the top entry.
 
 
-		std::vector<CqShaderVariableUniformFloat>	m_aUFPool;
+		static std::vector<CqShaderVariableUniformFloat>	m_aUFPool;
 		// Integer
-		std::vector<CqShaderVariableUniformPoint>	m_aUPPool;
-		std::vector<CqShaderVariableUniformString>	m_aUSPool;
-		std::vector<CqShaderVariableUniformColor>	m_aUCPool;
+		static std::vector<CqShaderVariableUniformPoint>	m_aUPPool;
+		static std::vector<CqShaderVariableUniformString>	m_aUSPool;
+		static std::vector<CqShaderVariableUniformColor>	m_aUCPool;
 		// Triple
 		// hPoint
-		std::vector<CqShaderVariableUniformNormal>	m_aUNPool;
-		std::vector<CqShaderVariableUniformVector>	m_aUVPool;
+		static std::vector<CqShaderVariableUniformNormal>	m_aUNPool;
+		static std::vector<CqShaderVariableUniformVector>	m_aUVPool;
 		// Void
-		std::vector<CqShaderVariableUniformMatrix>	m_aUMPool;
+		static std::vector<CqShaderVariableUniformMatrix>	m_aUMPool;
 		// SixteenTuple
 
-		std::vector<CqShaderVariableVaryingFloat>	m_aVFPool;
+		static std::vector<CqShaderVariableVaryingFloat>	m_aVFPool;
 		// Integer
-		std::vector<CqShaderVariableVaryingPoint>	m_aVPPool;
-		std::vector<CqShaderVariableVaryingString>	m_aVSPool;
-		std::vector<CqShaderVariableVaryingColor>	m_aVCPool;
+		static std::vector<CqShaderVariableVaryingPoint>	m_aVPPool;
+		static std::vector<CqShaderVariableVaryingString>	m_aVSPool;
+		static std::vector<CqShaderVariableVaryingColor>	m_aVCPool;
 		// Triple
 		// hPoint
-		std::vector<CqShaderVariableVaryingNormal>	m_aVNPool;
-		std::vector<CqShaderVariableVaryingVector>	m_aVVPool;
+		static std::vector<CqShaderVariableVaryingNormal>	m_aVNPool;
+		static std::vector<CqShaderVariableVaryingVector>	m_aVVPool;
 		// Void
-		std::vector<CqShaderVariableVaryingMatrix>	m_aVMPool;
+		static std::vector<CqShaderVariableVaryingMatrix>	m_aVMPool;
 		// SixteenTuple
 
-		TqInt	m_iUPoolTops[ type_last ];
-		TqInt	m_iVPoolTops[ type_last ];
+		static TqInt	m_iUPoolTops[ type_last ];
+		static TqInt	m_iVPoolTops[ type_last ];
 }
 ;
 

@@ -40,367 +40,409 @@
 
 START_NAMESPACE( Aqsis )
 
-char* gShaderTypeNames[] =
+/*
+ * Type, name and private hash key for the name
+ */
+static struct shader_types
+{
+	char *name;
+	EqShaderType type;
+	TqLong hash;
+}
+gShaderTypeNames[] =
     {
-        "surface",
-        "lightsource",
-        "volume",
-        "displacement",
-        "transformation",
-        "imager",
+        {"surface", Type_Surface, 0},
+        {"lightsource", Type_Lightsource, 0},
+        {"volume", Type_Volume, 0},
+        {"displacement", Type_Displacement, 0},
+        {"transformation", Type_Transformation, 0},
+        {"imager", Type_Imager, 0}
     };
-TqInt gcShaderTypeNames = sizeof( gShaderTypeNames ) / sizeof( gShaderTypeNames[ 0 ] );
+TqInt gcShaderTypeNames = sizeof( gShaderTypeNames ) / sizeof( struct shader_types); //gShaderTypeNames[ 0 ] );
 
 
+/* 
+ * Huge common shader routine definition translation table
+ * Name, hash key for the opcode name,
+ * Funtion pointer, N parameters, Parameters type, 
+ */
 SqOpCodeTrans CqShaderVM::m_TransTable[] =
     {
-        {"RS_PUSH", &CqShaderVM::SO_RS_PUSH, 0, },
-        {"RS_POP", &CqShaderVM::SO_RS_POP, 0, },
-        {"RS_GET", &CqShaderVM::SO_RS_GET, 0, },
-        {"RS_INVERSE", &CqShaderVM::SO_RS_INVERSE, 0, },
-        {"RS_JZ", &CqShaderVM::SO_RS_JZ, 1, {type_float}},
-        {"RS_JNZ", &CqShaderVM::SO_RS_JNZ, 1, {type_float}},
-        {"S_JZ", &CqShaderVM::SO_S_JZ, 1, {type_float}},
-        {"S_JNZ", &CqShaderVM::SO_S_JNZ, 1, {type_float}},
-        {"S_GET", &CqShaderVM::SO_S_GET, 0, },
-        {"S_CLEAR", &CqShaderVM::SO_S_CLEAR, 0, },
+        {"RS_PUSH", 0, &CqShaderVM::SO_RS_PUSH, 0, 0},
+        {"RS_POP", 0, &CqShaderVM::SO_RS_POP, 0, 0},
+        {"RS_GET", 0, &CqShaderVM::SO_RS_GET, 0, 0},
+        {"RS_INVERSE", 0, &CqShaderVM::SO_RS_INVERSE, 0, 0},
+        {"RS_JZ", 0, &CqShaderVM::SO_RS_JZ, 1, {type_float}},
+        {"RS_JNZ", 0, &CqShaderVM::SO_RS_JNZ, 1, {type_float}},
+        {"S_JZ", 0, &CqShaderVM::SO_S_JZ, 1, {type_float}},
+        {"S_JNZ", 0, &CqShaderVM::SO_S_JNZ, 1, {type_float}},
+        {"S_GET", 0, &CqShaderVM::SO_S_GET, 0, 0},
+        {"S_CLEAR", 0, &CqShaderVM::SO_S_CLEAR, 0, 0},
 
-        {"nop", &CqShaderVM::SO_nop, 0, },
-        {"dup", &CqShaderVM::SO_dup, 0, },
-        {"debug_break", &CqShaderVM::SO_debug_break, 0, },
-        {"drop", &CqShaderVM::SO_drop, 0, },
+        {"nop", 0, &CqShaderVM::SO_nop, 0, 0},
+        {"dup", 0, &CqShaderVM::SO_dup, 0, 0},
+        {"debug_break", 0, &CqShaderVM::SO_debug_break, 0, 0},
+        {"drop", 0, &CqShaderVM::SO_drop, 0, 0},
 
-        {"mergef", &CqShaderVM::SO_mergef, 0, },
-        {"merges", &CqShaderVM::SO_merges, 0, },
-        {"mergep", &CqShaderVM::SO_mergep, 0, },
-        {"mergen", &CqShaderVM::SO_mergep, 0, },
-        {"mergev", &CqShaderVM::SO_mergep, 0, },
-        {"mergec", &CqShaderVM::SO_mergec, 0, },
+        {"mergef", 0, &CqShaderVM::SO_mergef, 0, 0},
+        {"merges", 0, &CqShaderVM::SO_merges, 0, 0},
+        {"mergep", 0, &CqShaderVM::SO_mergep, 0, 0},
+        {"mergen", 0, &CqShaderVM::SO_mergep, 0, 0},
+        {"mergev", 0, &CqShaderVM::SO_mergep, 0, 0},
+        {"mergec", 0, &CqShaderVM::SO_mergec, 0, 0},
 
-        {"pushif", &CqShaderVM::SO_pushif, 1, {type_float}},
-        {"puship", &CqShaderVM::SO_puship, 3, {type_float, type_float, type_float}},
-        {"pushis", &CqShaderVM::SO_pushis, 1, {type_string}},
-        {"pushv", &CqShaderVM::SO_pushv, 1, {type_invalid}},
-        {"ipushv", &CqShaderVM::SO_ipushv, 1, {type_invalid}},
+        {"pushif", 0, &CqShaderVM::SO_pushif, 1, {type_float}},
+        {"puship", 0, &CqShaderVM::SO_puship, 3, {type_float, type_float, type_float}},
+        {"pushis", 0, &CqShaderVM::SO_pushis, 1, {type_string}},
+        {"pushv", 0, &CqShaderVM::SO_pushv, 1, {type_invalid}},
+        {"ipushv", 0, &CqShaderVM::SO_ipushv, 1, {type_invalid}},
 
-        {"pop", &CqShaderVM::SO_pop, 1, {type_invalid}},
-        {"ipop", &CqShaderVM::SO_ipop, 1, {type_invalid}},
+        {"pop", 0, &CqShaderVM::SO_pop, 1, {type_invalid}},
+        {"ipop", 0, &CqShaderVM::SO_ipop, 1, {type_invalid}},
 
-        {"setfc", &CqShaderVM::SO_setfc, 0, },
-        {"setfp", &CqShaderVM::SO_setfp, 0, },
-        {"setfn", &CqShaderVM::SO_setfp, 0, },
-        {"setfv", &CqShaderVM::SO_setfp, 0, },
-        {"setfm", &CqShaderVM::SO_setfm, 0, },
+        {"setfc", 0, &CqShaderVM::SO_setfc, 0, 0},
+        {"setfp", 0, &CqShaderVM::SO_setfp, 0, 0},
+        {"setfn", 0, &CqShaderVM::SO_setfp, 0, 0},
+        {"setfv", 0, &CqShaderVM::SO_setfp, 0, 0},
+        {"setfm", 0, &CqShaderVM::SO_setfm, 0, 0},
 
-        {"settc", &CqShaderVM::SO_settc, 0, },
-        {"settp", &CqShaderVM::SO_settp, 0, },
-        {"settn", &CqShaderVM::SO_settp, 0, },
-        {"settv", &CqShaderVM::SO_settp, 0, },
+        {"settc", 0, &CqShaderVM::SO_settc, 0, 0},
+        {"settp", 0, &CqShaderVM::SO_settp, 0, 0},
+        {"settn", 0, &CqShaderVM::SO_settp, 0, 0},
+        {"settv", 0, &CqShaderVM::SO_settp, 0, 0},
 
-        {"setpc", &CqShaderVM::SO_setpc, 0, },
-        {"setvc", &CqShaderVM::SO_setpc, 0, },
-        {"setnc", &CqShaderVM::SO_setpc, 0, },
+        {"setpc", 0, &CqShaderVM::SO_setpc, 0, 0},
+        {"setvc", 0, &CqShaderVM::SO_setpc, 0, 0},
+        {"setnc", 0, &CqShaderVM::SO_setpc, 0, 0},
 
-        {"setcp", &CqShaderVM::SO_setcp, 0, },
-        {"setcn", &CqShaderVM::SO_setcp, 0, },
-        {"setcv", &CqShaderVM::SO_setcp, 0, },
+        {"setcp", 0, &CqShaderVM::SO_setcp, 0, 0},
+        {"setcn", 0, &CqShaderVM::SO_setcp, 0, 0},
+        {"setcv", 0, &CqShaderVM::SO_setcp, 0, 0},
 
-        {"setwm", &CqShaderVM::SO_setwm, 0, },
+        {"setwm", 0, &CqShaderVM::SO_setwm, 0, 0},
 
-        {"jnz", &CqShaderVM::SO_jnz, 1, {type_float}},
-        {"jz", &CqShaderVM::SO_jz, 1, {type_float}},
-        {"jmp", &CqShaderVM::SO_jmp, 1, {type_float}},
+        {"jnz", 0, &CqShaderVM::SO_jnz, 1, {type_float}},
+        {"jz", 0, &CqShaderVM::SO_jz, 1, {type_float}},
+        {"jmp", 0, &CqShaderVM::SO_jmp, 1, {type_float}},
 
-        {"lsff", &CqShaderVM::SO_lsff, 0, },
-        {"lspp", &CqShaderVM::SO_lspp, 0, },
-        {"lshh", &CqShaderVM::SO_lspp, 0, },
-        {"lscc", &CqShaderVM::SO_lscc, 0, },
-        {"lsnn", &CqShaderVM::SO_lspp, 0, },
-        {"lsvv", &CqShaderVM::SO_lspp, 0, },
+        {"lsff", 0, &CqShaderVM::SO_lsff, 0, 0},
+        {"lspp", 0, &CqShaderVM::SO_lspp, 0, 0},
+        {"lshh", 0, &CqShaderVM::SO_lspp, 0, 0},
+        {"lscc", 0, &CqShaderVM::SO_lscc, 0, 0},
+        {"lsnn", 0, &CqShaderVM::SO_lspp, 0, 0},
+        {"lsvv", 0, &CqShaderVM::SO_lspp, 0, 0},
 
-        {"gtff", &CqShaderVM::SO_gtff, 0, },
-        {"gtpp", &CqShaderVM::SO_gtpp, 0, },
-        {"gthh", &CqShaderVM::SO_gtpp, 0, },
-        {"gtcc", &CqShaderVM::SO_gtcc, 0, },
-        {"gtnn", &CqShaderVM::SO_gtpp, 0, },
-        {"gtvv", &CqShaderVM::SO_gtpp, 0, },
+        {"gtff", 0, &CqShaderVM::SO_gtff, 0, 0},
+        {"gtpp", 0, &CqShaderVM::SO_gtpp, 0, 0},
+        {"gthh", 0, &CqShaderVM::SO_gtpp, 0, 0},
+        {"gtcc", 0, &CqShaderVM::SO_gtcc, 0, 0},
+        {"gtnn", 0, &CqShaderVM::SO_gtpp, 0, 0},
+        {"gtvv", 0, &CqShaderVM::SO_gtpp, 0, 0},
 
-        {"geff", &CqShaderVM::SO_geff, 0, },
-        {"gepp", &CqShaderVM::SO_gepp, 0, },
-        {"gehh", &CqShaderVM::SO_gepp, 0, },
-        {"gecc", &CqShaderVM::SO_gecc, 0, },
-        {"genn", &CqShaderVM::SO_gepp, 0, },
-        {"gevv", &CqShaderVM::SO_gepp, 0, },
+        {"geff", 0, &CqShaderVM::SO_geff, 0, 0},
+        {"gepp", 0, &CqShaderVM::SO_gepp, 0, 0},
+        {"gehh", 0, &CqShaderVM::SO_gepp, 0, 0},
+        {"gecc", 0, &CqShaderVM::SO_gecc, 0, 0},
+        {"genn", 0, &CqShaderVM::SO_gepp, 0, 0},
+        {"gevv", 0, &CqShaderVM::SO_gepp, 0, 0},
 
-        {"leff", &CqShaderVM::SO_leff, 0, },
-        {"lepp", &CqShaderVM::SO_lepp, 0, },
-        {"lehh", &CqShaderVM::SO_lepp, 0, },
-        {"lecc", &CqShaderVM::SO_lecc, 0, },
-        {"lenn", &CqShaderVM::SO_lepp, 0, },
-        {"levv", &CqShaderVM::SO_lepp, 0, },
+        {"leff", 0, &CqShaderVM::SO_leff, 0, 0},
+        {"lepp", 0, &CqShaderVM::SO_lepp, 0, 0},
+        {"lehh", 0, &CqShaderVM::SO_lepp, 0, 0},
+        {"lecc", 0, &CqShaderVM::SO_lecc, 0, 0},
+        {"lenn", 0, &CqShaderVM::SO_lepp, 0, 0},
+        {"levv", 0, &CqShaderVM::SO_lepp, 0, 0},
 
-        {"eqff", &CqShaderVM::SO_eqff, 0, },
-        {"eqpp", &CqShaderVM::SO_eqpp, 0, },
-        {"eqhh", &CqShaderVM::SO_eqpp, 0, },
-        {"eqcc", &CqShaderVM::SO_eqcc, 0, },
-        {"eqss", &CqShaderVM::SO_eqss, 0, },
-        {"eqnn", &CqShaderVM::SO_eqpp, 0, },
-        {"eqvv", &CqShaderVM::SO_eqpp, 0, },
+        {"eqff", 0, &CqShaderVM::SO_eqff, 0, 0},
+        {"eqpp", 0, &CqShaderVM::SO_eqpp, 0, 0},
+        {"eqhh", 0, &CqShaderVM::SO_eqpp, 0, 0},
+        {"eqcc", 0, &CqShaderVM::SO_eqcc, 0, 0},
+        {"eqss", 0, &CqShaderVM::SO_eqss, 0, 0},
+        {"eqnn", 0, &CqShaderVM::SO_eqpp, 0, 0},
+        {"eqvv", 0, &CqShaderVM::SO_eqpp, 0, 0},
 
-        {"neff", &CqShaderVM::SO_neff, 0, },
-        {"nepp", &CqShaderVM::SO_nepp, 0, },
-        {"nehh", &CqShaderVM::SO_nepp, 0, },
-        {"necc", &CqShaderVM::SO_necc, 0, },
-        {"ness", &CqShaderVM::SO_ness, 0, },
-        {"nenn", &CqShaderVM::SO_nepp, 0, },
-        {"nevv", &CqShaderVM::SO_nepp, 0, },
+        {"neff", 0, &CqShaderVM::SO_neff, 0, 0},
+        {"nepp", 0, &CqShaderVM::SO_nepp, 0, 0},
+        {"nehh", 0, &CqShaderVM::SO_nepp, 0, 0},
+        {"necc", 0, &CqShaderVM::SO_necc, 0, 0},
+        {"ness", 0, &CqShaderVM::SO_ness, 0, 0},
+        {"nenn", 0, &CqShaderVM::SO_nepp, 0, 0},
+        {"nevv", 0, &CqShaderVM::SO_nepp, 0, 0},
 
-        {"mulff", &CqShaderVM::SO_mulff, 0, },
-        {"divff", &CqShaderVM::SO_divff, 0, },
-        {"addff", &CqShaderVM::SO_addff, 0, },
-        {"subff", &CqShaderVM::SO_subff, 0, },
-        {"negf", &CqShaderVM::SO_negf, 0, },
+        {"mulff", 0, &CqShaderVM::SO_mulff, 0, 0},
+        {"divff", 0, &CqShaderVM::SO_divff, 0, 0},
+        {"addff", 0, &CqShaderVM::SO_addff, 0, 0},
+        {"subff", 0, &CqShaderVM::SO_subff, 0, 0},
+        {"negf", 0, &CqShaderVM::SO_negf, 0, 0},
 
-        {"mulpp", &CqShaderVM::SO_mulpp, 0, },
-        {"divpp", &CqShaderVM::SO_divpp, 0, },
-        {"addpp", &CqShaderVM::SO_addpp, 0, },
-        {"subpp", &CqShaderVM::SO_subpp, 0, },
-        {"crspp", &CqShaderVM::SO_crspp, 0, },
-        {"dotpp", &CqShaderVM::SO_dotpp, 0, },
-        {"negp", &CqShaderVM::SO_negp, 0, },
+        {"mulpp", 0, &CqShaderVM::SO_mulpp, 0, 0},
+        {"divpp", 0, &CqShaderVM::SO_divpp, 0, 0},
+        {"addpp", 0, &CqShaderVM::SO_addpp, 0, 0},
+        {"subpp", 0, &CqShaderVM::SO_subpp, 0, 0},
+        {"crspp", 0, &CqShaderVM::SO_crspp, 0, 0},
+        {"dotpp", 0, &CqShaderVM::SO_dotpp, 0, 0},
+        {"negp", 0, &CqShaderVM::SO_negp, 0, 0},
 
-        {"mulcc", &CqShaderVM::SO_mulcc, 0, },
-        {"divcc", &CqShaderVM::SO_divcc, 0, },
-        {"addcc", &CqShaderVM::SO_addcc, 0, },
-        {"subcc", &CqShaderVM::SO_subcc, 0, },
-        {"crscc", &CqShaderVM::SO_crscc, 0, },
-        {"dotcc", &CqShaderVM::SO_dotcc, 0, },
-        {"negc", &CqShaderVM::SO_negc, 0, },
+        {"mulcc", 0, &CqShaderVM::SO_mulcc, 0, 0},
+        {"divcc", 0, &CqShaderVM::SO_divcc, 0, 0},
+        {"addcc", 0, &CqShaderVM::SO_addcc, 0, 0},
+        {"subcc", 0, &CqShaderVM::SO_subcc, 0, 0},
+        {"crscc", 0, &CqShaderVM::SO_crscc, 0, 0},
+        {"dotcc", 0, &CqShaderVM::SO_dotcc, 0, 0},
+        {"negc", 0, &CqShaderVM::SO_negc, 0, 0},
 
-        {"mulfp", &CqShaderVM::SO_mulfp, 0, },
-        {"divfp", &CqShaderVM::SO_divfp, 0, },
-        {"addfp", &CqShaderVM::SO_addfp, 0, },
-        {"subfp", &CqShaderVM::SO_subfp, 0, },
+        {"mulfp", 0, &CqShaderVM::SO_mulfp, 0, 0},
+        {"divfp", 0, &CqShaderVM::SO_divfp, 0, 0},
+        {"addfp", 0, &CqShaderVM::SO_addfp, 0, 0},
+        {"subfp", 0, &CqShaderVM::SO_subfp, 0, 0},
 
-        {"mulfc", &CqShaderVM::SO_mulfc, 0, },
-        {"divfc", &CqShaderVM::SO_divfc, 0, },
-        {"addfc", &CqShaderVM::SO_addfc, 0, },
-        {"subfc", &CqShaderVM::SO_subfc, 0, },
+        {"mulfc", 0, &CqShaderVM::SO_mulfc, 0, 0},
+        {"divfc", 0, &CqShaderVM::SO_divfc, 0, 0},
+        {"addfc", 0, &CqShaderVM::SO_addfc, 0, 0},
+        {"subfc", 0, &CqShaderVM::SO_subfc, 0, 0},
 
-        {"mulmm", &CqShaderVM::SO_mulmm, 0, },
-        {"divmm", &CqShaderVM::SO_divmm, 0, },
+        {"mulmm", 0, &CqShaderVM::SO_mulmm, 0, 0},
+        {"divmm", 0, &CqShaderVM::SO_divmm, 0, 0},
 
-        {"land", &CqShaderVM::SO_land, 0, },
-        {"lor", &CqShaderVM::SO_lor, 0, },
+        {"land", 0, &CqShaderVM::SO_land, 0, 0},
+        {"lor", 0, &CqShaderVM::SO_lor, 0, 0},
 
-        {"radians", &CqShaderVM::SO_radians, 0, },
-        {"degrees", &CqShaderVM::SO_degrees, 0, },
-        {"sin", &CqShaderVM::SO_sin, 0, },
-        {"asin", &CqShaderVM::SO_asin, 0, },
-        {"cos", &CqShaderVM::SO_cos, 0, },
-        {"acos", &CqShaderVM::SO_acos, 0, },
-        {"tan", &CqShaderVM::SO_tan, 0, },
-        {"atan", &CqShaderVM::SO_atan, 0, },
-        {"atan2", &CqShaderVM::SO_atan2, 0, },
-        {"pow", &CqShaderVM::SO_pow, 0, },
-        {"exp", &CqShaderVM::SO_exp, 0, },
-        {"sqrt", &CqShaderVM::SO_sqrt, 0, },
-        {"log", &CqShaderVM::SO_log, 0, },
-        {"log2", &CqShaderVM::SO_log2, 0, },
-        {"mod", &CqShaderVM::SO_mod, 0, },
-        {"abs", &CqShaderVM::SO_abs, 0, },
-        {"sign", &CqShaderVM::SO_sign, 0, },
-        {"min", &CqShaderVM::SO_min, 0, },
-        {"max", &CqShaderVM::SO_max, 0, },
-        {"pmin", &CqShaderVM::SO_pmin, 0, },
-        {"pmax", &CqShaderVM::SO_pmax, 0, },
-        {"vmin", &CqShaderVM::SO_vmin, 0, },
-        {"vmax", &CqShaderVM::SO_vmax, 0, },
-        {"nmin", &CqShaderVM::SO_nmin, 0, },
-        {"nmax", &CqShaderVM::SO_nmax, 0, },
-        {"cmin", &CqShaderVM::SO_cmin, 0, },
-        {"cmax", &CqShaderVM::SO_cmax, 0, },
-        {"clamp", &CqShaderVM::SO_clamp, 0, },
-        {"pclamp", &CqShaderVM::SO_pclamp, 0, },
-        {"vclamp", &CqShaderVM::SO_pclamp, 0, },
-        {"nclamp", &CqShaderVM::SO_pclamp, 0, },
-        {"cclamp", &CqShaderVM::SO_cclamp, 0, },
-        {"floor", &CqShaderVM::SO_floor, 0, },
-        {"ceil", &CqShaderVM::SO_ceil, 0, },
-        {"round", &CqShaderVM::SO_round, 0, },
-        {"step", &CqShaderVM::SO_step, 0, },
-        {"smoothstep", &CqShaderVM::SO_smoothstep, 0, },
-        {"fspline", &CqShaderVM::SO_fspline, 0, },
-        {"cspline", &CqShaderVM::SO_cspline, 0, },
-        {"pspline", &CqShaderVM::SO_pspline, 0, },
-        {"vspline", &CqShaderVM::SO_pspline, 0, },
-        {"sfspline", &CqShaderVM::SO_sfspline, 0, },
-        {"scspline", &CqShaderVM::SO_scspline, 0, },
-        {"spspline", &CqShaderVM::SO_spspline, 0, },
-        {"svspline", &CqShaderVM::SO_spspline, 0, },
-        {"fDu", &CqShaderVM::SO_fDu, 0, },
-        {"fDv", &CqShaderVM::SO_fDv, 0, },
-        {"fDeriv", &CqShaderVM::SO_fDeriv, 0, },
-        {"cDu", &CqShaderVM::SO_cDu, 0, },
-        {"cDv", &CqShaderVM::SO_cDv, 0, },
-        {"cDeriv", &CqShaderVM::SO_cDeriv, 0, },
-        {"pDu", &CqShaderVM::SO_pDu, 0, },
-        {"pDv", &CqShaderVM::SO_pDv, 0, },
-        {"pDeriv", &CqShaderVM::SO_pDeriv, 0, },
-        {"hDu", &CqShaderVM::SO_pDu, 0, },
-        {"hDv", &CqShaderVM::SO_pDv, 0, },
-        {"hDeriv", &CqShaderVM::SO_pDeriv, 0, },
-        {"nDu", &CqShaderVM::SO_pDu, 0, },
-        {"nDv", &CqShaderVM::SO_pDv, 0, },
-        {"nDeriv", &CqShaderVM::SO_pDeriv, 0, },
-        {"vDu", &CqShaderVM::SO_pDu, 0, },
-        {"vDv", &CqShaderVM::SO_pDv, 0, },
-        {"vDeriv", &CqShaderVM::SO_pDeriv, 0, },
-        {"frandom", &CqShaderVM::SO_frandom, 0, },
-        {"crandom", &CqShaderVM::SO_crandom, 0, },
-        {"prandom", &CqShaderVM::SO_prandom, 0, },
-        {"noise1", &CqShaderVM::SO_noise1, 0, },
-        {"noise2", &CqShaderVM::SO_noise2, 0, },
-        {"noise3", &CqShaderVM::SO_noise3, 0, },
-        {"cnoise1", &CqShaderVM::SO_cnoise1, 0, },
-        {"cnoise2", &CqShaderVM::SO_cnoise2, 0, },
-        {"cnoise3", &CqShaderVM::SO_cnoise3, 0, },
-        {"pnoise1", &CqShaderVM::SO_pnoise1, 0, },
-        {"pnoise2", &CqShaderVM::SO_pnoise2, 0, },
-        {"pnoise3", &CqShaderVM::SO_pnoise3, 0, },
-        {"xcomp", &CqShaderVM::SO_xcomp, 0, },
-        {"ycomp", &CqShaderVM::SO_ycomp, 0, },
-        {"zcomp", &CqShaderVM::SO_zcomp, 0, },
-        {"setxcomp", &CqShaderVM::SO_setxcomp, 0, },
-        {"setycomp", &CqShaderVM::SO_setycomp, 0, },
-        {"setzcomp", &CqShaderVM::SO_setzcomp, 0, },
-        {"length", &CqShaderVM::SO_length, 0, },
-        {"distance", &CqShaderVM::SO_distance, 0, },
-        {"area", &CqShaderVM::SO_area, 0, },
-        {"normalize", &CqShaderVM::SO_normalize, 0, },
-        {"faceforward", &CqShaderVM::SO_faceforward, 0, },
-        {"reflect", &CqShaderVM::SO_reflect, 0, },
-        {"refract", &CqShaderVM::SO_refract, 0, },
-        {"fresnel", &CqShaderVM::SO_fresnel, 0, },
-        {"fresnel2", &CqShaderVM::SO_fresnel2, 0, },
-        {"transform2", &CqShaderVM::SO_transform2, 0, },
-        {"transform", &CqShaderVM::SO_transform, 0, },
-        {"transformm", &CqShaderVM::SO_transformm, 0, },
-        {"vtransform2", &CqShaderVM::SO_vtransform2, 0, },
-        {"vtransform", &CqShaderVM::SO_vtransform, 0, },
-        {"vtransformm", &CqShaderVM::SO_vtransformm, 0, },
-        {"ntransform2", &CqShaderVM::SO_ntransform2, 0, },
-        {"ntransform", &CqShaderVM::SO_ntransform, 0, },
-        {"ntransformm", &CqShaderVM::SO_ntransformm, 0, },
-        {"depth", &CqShaderVM::SO_depth, 0, },
-        {"calculatenormal", &CqShaderVM::SO_calculatenormal, 0, },
-        {"cmix", &CqShaderVM::SO_cmix, 0, },
-        {"fmix", &CqShaderVM::SO_fmix, 0, },
-        {"pmix", &CqShaderVM::SO_pmix, 0, },
-        {"vmix", &CqShaderVM::SO_vmix, 0, },
-        {"nmix", &CqShaderVM::SO_nmix, 0, },
-        {"comp", &CqShaderVM::SO_comp, 0, },
-        {"setcomp", &CqShaderVM::SO_setcomp, 0, },
-        {"ambient", &CqShaderVM::SO_ambient, 0, },
-        {"diffuse", &CqShaderVM::SO_diffuse, 0, },
-        {"specular", &CqShaderVM::SO_specular, 0, },
-        {"phong", &CqShaderVM::SO_phong, 0, },
-        {"trace", &CqShaderVM::SO_trace, 0, },
-        {"ftexture1", &CqShaderVM::SO_ftexture1, 0, },
-        {"ftexture2", &CqShaderVM::SO_ftexture2, 0, },
-        {"ftexture3", &CqShaderVM::SO_ftexture3, 0, },
-        {"ctexture1", &CqShaderVM::SO_ctexture1, 0, },
-        {"ctexture2", &CqShaderVM::SO_ctexture2, 0, },
-        {"ctexture3", &CqShaderVM::SO_ctexture3, 0, },
-        {"textureinfo", &CqShaderVM::SO_textureinfo, 1, {type_invalid}},
-        {"fenvironment2", &CqShaderVM::SO_fenvironment2, 0, },
-        {"fenvironment3", &CqShaderVM::SO_fenvironment3, 0, },
-        {"cenvironment2", &CqShaderVM::SO_cenvironment2, 0, },
-        {"cenvironment3", &CqShaderVM::SO_cenvironment3, 0, },
-        {"bump1", &CqShaderVM::SO_bump1, 0, },
-        {"bump2", &CqShaderVM::SO_bump2, 0, },
-        {"bump3", &CqShaderVM::SO_bump3, 0, },
-        {"shadow", &CqShaderVM::SO_shadow, 0, },
-        {"shadow2", &CqShaderVM::SO_shadow1, 0, },
-        {"illuminate", &CqShaderVM::SO_illuminate, 0, },
-        {"illuminate2", &CqShaderVM::SO_illuminate2, 0, },
-        {"illuminance", &CqShaderVM::SO_illuminance, 0, },
-        {"illuminance2", &CqShaderVM::SO_illuminance2, 0, },
-        {"init_illuminance", &CqShaderVM::SO_init_illuminance, 0, },
-        {"advance_illuminance", &CqShaderVM::SO_advance_illuminance, 0, },
-        {"solar", &CqShaderVM::SO_solar, 0, },
-        {"solar2", &CqShaderVM::SO_solar2, 0, },
-        {"printf", &CqShaderVM::SO_printf, 0, },
+        {"radians", 0, &CqShaderVM::SO_radians, 0, 0},
+        {"degrees", 0, &CqShaderVM::SO_degrees, 0, 0},
+        {"sin", 0, &CqShaderVM::SO_sin, 0, 0},
+        {"asin", 0, &CqShaderVM::SO_asin, 0, 0},
+        {"cos", 0, &CqShaderVM::SO_cos, 0, 0},
+        {"acos", 0, &CqShaderVM::SO_acos, 0, 0},
+        {"tan", 0, &CqShaderVM::SO_tan, 0, 0},
+        {"atan", 0, &CqShaderVM::SO_atan, 0, 0},
+        {"atan2", 0, &CqShaderVM::SO_atan2, 0, 0},
+        {"pow", 0, &CqShaderVM::SO_pow, 0, 0},
+        {"exp", 0, &CqShaderVM::SO_exp, 0, 0},
+        {"sqrt", 0, &CqShaderVM::SO_sqrt, 0, 0},
+        {"log", 0, &CqShaderVM::SO_log, 0, 0},
+        {"log2", 0, &CqShaderVM::SO_log2, 0, 0},
+        {"mod", 0, &CqShaderVM::SO_mod, 0, 0},
+        {"abs", 0, &CqShaderVM::SO_abs, 0, 0},
+        {"sign", 0, &CqShaderVM::SO_sign, 0, 0},
+        {"min", 0, &CqShaderVM::SO_min, 0, 0},
+        {"max", 0, &CqShaderVM::SO_max, 0, 0},
+        {"pmin", 0, &CqShaderVM::SO_pmin, 0, 0},
+        {"pmax", 0, &CqShaderVM::SO_pmax, 0, 0},
+        {"vmin", 0, &CqShaderVM::SO_vmin, 0, 0},
+        {"vmax", 0, &CqShaderVM::SO_vmax, 0, 0},
+        {"nmin", 0, &CqShaderVM::SO_nmin, 0, 0},
+        {"nmax", 0, &CqShaderVM::SO_nmax, 0, 0},
+        {"cmin", 0, &CqShaderVM::SO_cmin, 0, 0},
+        {"cmax", 0, &CqShaderVM::SO_cmax, 0, 0},
+        {"clamp", 0, &CqShaderVM::SO_clamp, 0, 0},
+        {"pclamp", 0, &CqShaderVM::SO_pclamp, 0, 0},
+        {"vclamp", 0, &CqShaderVM::SO_pclamp, 0, 0},
+        {"nclamp", 0, &CqShaderVM::SO_pclamp, 0, 0},
+        {"cclamp", 0, &CqShaderVM::SO_cclamp, 0, 0},
+        {"floor", 0, &CqShaderVM::SO_floor, 0, 0},
+        {"ceil", 0, &CqShaderVM::SO_ceil, 0, 0},
+        {"round", 0, &CqShaderVM::SO_round, 0, 0},
+        {"step", 0, &CqShaderVM::SO_step, 0, 0},
+        {"smoothstep", 0, &CqShaderVM::SO_smoothstep, 0, 0},
+        {"fspline", 0, &CqShaderVM::SO_fspline, 0, 0},
+        {"cspline", 0, &CqShaderVM::SO_cspline, 0, 0},
+        {"pspline", 0, &CqShaderVM::SO_pspline, 0, 0},
+        {"vspline", 0, &CqShaderVM::SO_pspline, 0, 0},
+        {"sfspline", 0, &CqShaderVM::SO_sfspline, 0, 0},
+        {"scspline", 0, &CqShaderVM::SO_scspline, 0, 0},
+        {"spspline", 0, &CqShaderVM::SO_spspline, 0, 0},
+        {"svspline", 0, &CqShaderVM::SO_spspline, 0, 0},
+        {"fDu", 0, &CqShaderVM::SO_fDu, 0, 0},
+        {"fDv", 0, &CqShaderVM::SO_fDv, 0, 0},
+        {"fDeriv", 0, &CqShaderVM::SO_fDeriv, 0, 0},
+        {"cDu", 0, &CqShaderVM::SO_cDu, 0, 0},
+        {"cDv", 0, &CqShaderVM::SO_cDv, 0, 0},
+        {"cDeriv", 0, &CqShaderVM::SO_cDeriv, 0, 0},
+        {"pDu", 0, &CqShaderVM::SO_pDu, 0, 0},
+        {"pDv", 0, &CqShaderVM::SO_pDv, 0, 0},
+        {"pDeriv", 0, &CqShaderVM::SO_pDeriv, 0, 0},
+        {"hDu", 0, &CqShaderVM::SO_pDu, 0, 0},
+        {"hDv", 0, &CqShaderVM::SO_pDv, 0, 0},
+        {"hDeriv", 0, &CqShaderVM::SO_pDeriv, 0, 0},
+        {"nDu", 0, &CqShaderVM::SO_pDu, 0, 0},
+        {"nDv", 0, &CqShaderVM::SO_pDv, 0, 0},
+        {"nDeriv", 0, &CqShaderVM::SO_pDeriv, 0, 0},
+        {"vDu", 0, &CqShaderVM::SO_pDu, 0, 0},
+        {"vDv", 0, &CqShaderVM::SO_pDv, 0, 0},
+        {"vDeriv", 0, &CqShaderVM::SO_pDeriv, 0, 0},
+        {"frandom", 0, &CqShaderVM::SO_frandom, 0, 0},
+        {"crandom", 0, &CqShaderVM::SO_crandom, 0, 0},
+        {"prandom", 0, &CqShaderVM::SO_prandom, 0, 0},
+        {"noise1", 0, &CqShaderVM::SO_noise1, 0, 0},
+        {"noise2", 0, &CqShaderVM::SO_noise2, 0, 0},
+        {"noise3", 0, &CqShaderVM::SO_noise3, 0, 0},
+        {"cnoise1", 0, &CqShaderVM::SO_cnoise1, 0, 0},
+        {"cnoise2", 0, &CqShaderVM::SO_cnoise2, 0, 0},
+        {"cnoise3", 0, &CqShaderVM::SO_cnoise3, 0, 0},
+        {"pnoise1", 0, &CqShaderVM::SO_pnoise1, 0, 0},
+        {"pnoise2", 0, &CqShaderVM::SO_pnoise2, 0, 0},
+        {"pnoise3", 0, &CqShaderVM::SO_pnoise3, 0, 0},
+        {"xcomp", 0, &CqShaderVM::SO_xcomp, 0, 0},
+        {"ycomp", 0, &CqShaderVM::SO_ycomp, 0, 0},
+        {"zcomp", 0, &CqShaderVM::SO_zcomp, 0, 0},
+        {"setxcomp", 0, &CqShaderVM::SO_setxcomp, 0, 0},
+        {"setycomp", 0, &CqShaderVM::SO_setycomp, 0, 0},
+        {"setzcomp", 0, &CqShaderVM::SO_setzcomp, 0, 0},
+        {"length", 0, &CqShaderVM::SO_length, 0, 0},
+        {"distance", 0, &CqShaderVM::SO_distance, 0, 0},
+        {"area", 0, &CqShaderVM::SO_area, 0, 0},
+        {"normalize", 0, &CqShaderVM::SO_normalize, 0, 0},
+        {"faceforward", 0, &CqShaderVM::SO_faceforward, 0, 0},
+        {"reflect", 0, &CqShaderVM::SO_reflect, 0, 0},
+        {"refract", 0, &CqShaderVM::SO_refract, 0, 0},
+        {"fresnel", 0, &CqShaderVM::SO_fresnel, 0, 0},
+        {"fresnel2", 0, &CqShaderVM::SO_fresnel2, 0, 0},
+        {"transform2", 0, &CqShaderVM::SO_transform2, 0, 0},
+        {"transform", 0, &CqShaderVM::SO_transform, 0, 0},
+        {"transformm", 0, &CqShaderVM::SO_transformm, 0, 0},
+        {"vtransform2", 0, &CqShaderVM::SO_vtransform2, 0, 0},
+        {"vtransform", 0, &CqShaderVM::SO_vtransform, 0, 0},
+        {"vtransformm", 0, &CqShaderVM::SO_vtransformm, 0, 0},
+        {"ntransform2", 0, &CqShaderVM::SO_ntransform2, 0, 0},
+        {"ntransform", 0, &CqShaderVM::SO_ntransform, 0, 0},
+        {"ntransformm", 0, &CqShaderVM::SO_ntransformm, 0, 0},
+        {"depth", 0, &CqShaderVM::SO_depth, 0, 0},
+        {"calculatenormal", 0, &CqShaderVM::SO_calculatenormal, 0, 0},
+        {"cmix", 0, &CqShaderVM::SO_cmix, 0, 0},
+        {"fmix", 0, &CqShaderVM::SO_fmix, 0, 0},
+        {"pmix", 0, &CqShaderVM::SO_pmix, 0, 0},
+        {"vmix", 0, &CqShaderVM::SO_vmix, 0, 0},
+        {"nmix", 0, &CqShaderVM::SO_nmix, 0, 0},
+        {"comp", 0, &CqShaderVM::SO_comp, 0, 0},
+        {"setcomp", 0, &CqShaderVM::SO_setcomp, 0, 0},
+        {"ambient", 0, &CqShaderVM::SO_ambient, 0, 0},
+        {"diffuse", 0, &CqShaderVM::SO_diffuse, 0, 0},
+        {"specular", 0, &CqShaderVM::SO_specular, 0, 0},
+        {"phong", 0, &CqShaderVM::SO_phong, 0, 0},
+        {"trace", 0, &CqShaderVM::SO_trace, 0, 0},
+        {"ftexture1", 0, &CqShaderVM::SO_ftexture1, 0, 0},
+        {"ftexture2", 0, &CqShaderVM::SO_ftexture2, 0, 0},
+        {"ftexture3", 0, &CqShaderVM::SO_ftexture3, 0, 0},
+        {"ctexture1", 0, &CqShaderVM::SO_ctexture1, 0, 0},
+        {"ctexture2", 0, &CqShaderVM::SO_ctexture2, 0, 0},
+        {"ctexture3", 0, &CqShaderVM::SO_ctexture3, 0, 0},
+        {"textureinfo", 0, &CqShaderVM::SO_textureinfo, 1, {type_invalid}},
+        {"fenvironment2", 0, &CqShaderVM::SO_fenvironment2, 0, 0},
+        {"fenvironment3", 0, &CqShaderVM::SO_fenvironment3, 0, 0},
+        {"cenvironment2", 0, &CqShaderVM::SO_cenvironment2, 0, 0},
+        {"cenvironment3", 0, &CqShaderVM::SO_cenvironment3, 0, 0},
+        {"bump1", 0, &CqShaderVM::SO_bump1, 0, 0},
+        {"bump2", 0, &CqShaderVM::SO_bump2, 0, 0},
+        {"bump3", 0, &CqShaderVM::SO_bump3, 0, 0},
+        {"shadow", 0, &CqShaderVM::SO_shadow, 0, 0},
+        {"shadow2", 0, &CqShaderVM::SO_shadow1, 0, 0},
+        {"illuminate", 0, &CqShaderVM::SO_illuminate, 0, 0},
+        {"illuminate2", 0, &CqShaderVM::SO_illuminate2, 0, 0},
+        {"illuminance", 0, &CqShaderVM::SO_illuminance, 0, 0},
+        {"illuminance2", 0, &CqShaderVM::SO_illuminance2, 0, 0},
+        {"init_illuminance", 0, &CqShaderVM::SO_init_illuminance, 0, 0},
+        {"advance_illuminance", 0, &CqShaderVM::SO_advance_illuminance, 0, 0},
+        {"solar", 0, &CqShaderVM::SO_solar, 0, 0},
+        {"solar2", 0, &CqShaderVM::SO_solar2, 0, 0},
+        {"printf", 0, &CqShaderVM::SO_printf, 0, 0},
 
-        {"fcellnoise1", &CqShaderVM::SO_fcellnoise1, 0, },
-        {"fcellnoise2", &CqShaderVM::SO_fcellnoise2, 0, },
-        {"fcellnoise3", &CqShaderVM::SO_fcellnoise3, 0, },
-        {"fcellnoise4", &CqShaderVM::SO_fcellnoise4, 0, },
-        {"ccellnoise1", &CqShaderVM::SO_ccellnoise1, 0, },
-        {"ccellnoise2", &CqShaderVM::SO_ccellnoise2, 0, },
-        {"ccellnoise3", &CqShaderVM::SO_ccellnoise3, 0, },
-        {"ccellnoise4", &CqShaderVM::SO_ccellnoise4, 0, },
-        {"pcellnoise1", &CqShaderVM::SO_pcellnoise1, 0, },
-        {"pcellnoise2", &CqShaderVM::SO_pcellnoise2, 0, },
-        {"pcellnoise3", &CqShaderVM::SO_pcellnoise3, 0, },
-        {"pcellnoise4", &CqShaderVM::SO_pcellnoise4, 0, },
+        {"fcellnoise1", 0, &CqShaderVM::SO_fcellnoise1, 0, 0},
+        {"fcellnoise2", 0, &CqShaderVM::SO_fcellnoise2, 0, 0},
+        {"fcellnoise3", 0, &CqShaderVM::SO_fcellnoise3, 0, 0},
+        {"fcellnoise4", 0, &CqShaderVM::SO_fcellnoise4, 0, 0},
+        {"ccellnoise1", 0, &CqShaderVM::SO_ccellnoise1, 0, 0},
+        {"ccellnoise2", 0, &CqShaderVM::SO_ccellnoise2, 0, 0},
+        {"ccellnoise3", 0, &CqShaderVM::SO_ccellnoise3, 0, 0},
+        {"ccellnoise4", 0, &CqShaderVM::SO_ccellnoise4, 0, 0},
+        {"pcellnoise1", 0, &CqShaderVM::SO_pcellnoise1, 0, 0},
+        {"pcellnoise2", 0, &CqShaderVM::SO_pcellnoise2, 0, 0},
+        {"pcellnoise3", 0, &CqShaderVM::SO_pcellnoise3, 0, 0},
+        {"pcellnoise4", 0, &CqShaderVM::SO_pcellnoise4, 0, 0},
 
-        {"fpnoise1", &CqShaderVM::SO_fpnoise1, 0, },
-        {"fpnoise2", &CqShaderVM::SO_fpnoise2, 0, },
-        {"fpnoise3", &CqShaderVM::SO_fpnoise3, 0, },
-        {"cpnoise1", &CqShaderVM::SO_cpnoise1, 0, },
-        {"cpnoise2", &CqShaderVM::SO_cpnoise2, 0, },
-        {"cpnoise3", &CqShaderVM::SO_cpnoise3, 0, },
-        {"ppnoise1", &CqShaderVM::SO_ppnoise1, 0, },
-        {"pnoise2", &CqShaderVM::SO_ppnoise2, 0, },
-        {"ppnoise3", &CqShaderVM::SO_ppnoise3, 0, },
+        {"fpnoise1", 0, &CqShaderVM::SO_fpnoise1, 0, 0},
+        {"fpnoise2", 0, &CqShaderVM::SO_fpnoise2, 0, 0},
+        {"fpnoise3", 0, &CqShaderVM::SO_fpnoise3, 0, 0},
+        {"cpnoise1", 0, &CqShaderVM::SO_cpnoise1, 0, 0},
+        {"cpnoise2", 0, &CqShaderVM::SO_cpnoise2, 0, 0},
+        {"cpnoise3", 0, &CqShaderVM::SO_cpnoise3, 0, 0},
+        {"ppnoise1", 0, &CqShaderVM::SO_ppnoise1, 0, 0},
+        {"pnoise2", 0, &CqShaderVM::SO_ppnoise2, 0, 0},
+        {"ppnoise3", 0, &CqShaderVM::SO_ppnoise3, 0, 0},
 
-        {"atmosphere", &CqShaderVM::SO_atmosphere, 1, {type_invalid}},
-        {"displacement", &CqShaderVM::SO_displacement, 1, {type_invalid}},
-        {"lightsource", &CqShaderVM::SO_lightsource, 1, {type_invalid}},
-        {"surface", &CqShaderVM::SO_surface, 1, {type_invalid}},
+        {"atmosphere", 0, &CqShaderVM::SO_atmosphere, 1, {type_invalid}},
+        {"displacement", 0, &CqShaderVM::SO_displacement, 1, {type_invalid}},
+        {"lightsource", 0, &CqShaderVM::SO_lightsource, 1, {type_invalid}},
+        {"surface", 0, &CqShaderVM::SO_surface, 1, {type_invalid}},
 
-        {"attribute", &CqShaderVM::SO_attribute, 1, {type_invalid}},
-        {"option", &CqShaderVM::SO_option, 1, {type_invalid}},
-        {"rendererinfo", &CqShaderVM::SO_rendererinfo, 1, {type_invalid}},
-        {"incident", &CqShaderVM::SO_incident, 1, {type_invalid}},
-        {"opposite", &CqShaderVM::SO_opposite, 1, {type_invalid}},
+        {"attribute", 0, &CqShaderVM::SO_attribute, 1, {type_invalid}},
+        {"option", 0, &CqShaderVM::SO_option, 1, {type_invalid}},
+        {"rendererinfo", 0, &CqShaderVM::SO_rendererinfo, 1, {type_invalid}},
+        {"incident", 0, &CqShaderVM::SO_incident, 1, {type_invalid}},
+        {"opposite", 0, &CqShaderVM::SO_opposite, 1, {type_invalid}},
 
-        {"ctransform", &CqShaderVM::SO_ctransform, 0, },
-        {"ctransform2", &CqShaderVM::SO_ctransform2, 0, },
+        {"ctransform", 0, &CqShaderVM::SO_ctransform, 0, 0},
+        {"ctransform2", 0, &CqShaderVM::SO_ctransform2, 0, 0},
 
-        {"ptlined", &CqShaderVM::SO_ptlined, 0, },
-        {"inversesqrt", &CqShaderVM::SO_inversesqrt, 0, },
-        {"concat", &CqShaderVM::SO_concat, 0, },
-        {"format", &CqShaderVM::SO_format, 0, },
-        {"match", &CqShaderVM::SO_match, 0, },
-        {"rotate", &CqShaderVM::SO_rotate, 0, },
-        {"filterstep", &CqShaderVM::SO_filterstep, 0, },
-        {"filterstep2", &CqShaderVM::SO_filterstep2, 0, },
-        {"specularbrdf", &CqShaderVM::SO_specularbrdf, 0, },
+        {"ptlined", 0, &CqShaderVM::SO_ptlined, 0, 0},
+        {"inversesqrt", 0, &CqShaderVM::SO_inversesqrt, 0, 0},
+        {"concat", 0, &CqShaderVM::SO_concat, 0, 0},
+        {"format", 0, &CqShaderVM::SO_format, 0, 0},
+        {"match", 0, &CqShaderVM::SO_match, 0, 0},
+        {"rotate", 0, &CqShaderVM::SO_rotate, 0, 0},
+        {"filterstep", 0, &CqShaderVM::SO_filterstep, 0, 0},
+        {"filterstep2", 0, &CqShaderVM::SO_filterstep2, 0, 0},
+        {"specularbrdf", 0, &CqShaderVM::SO_specularbrdf, 0, 0},
 
-        {"mcomp", &CqShaderVM::SO_mcomp, 0, },
-        {"setmcomp", &CqShaderVM::SO_setmcomp, 0, },
-        {"determinant", &CqShaderVM::SO_determinant, 0, },
-        {"mtranslate", &CqShaderVM::SO_mtranslate, 0, },
-        {"mrotate", &CqShaderVM::SO_mrotate, 0, },
-        {"mscale", &CqShaderVM::SO_mscale, 0, },
+        {"mcomp", 0, &CqShaderVM::SO_mcomp, 0, 0},
+        {"setmcomp", 0, &CqShaderVM::SO_setmcomp, 0, 0},
+        {"determinant", 0, &CqShaderVM::SO_determinant, 0, 0},
+        {"mtranslate", 0, &CqShaderVM::SO_mtranslate, 0, 0},
+        {"mrotate", 0, &CqShaderVM::SO_mrotate, 0, 0},
+        {"mscale", 0, &CqShaderVM::SO_mscale, 0, 0},
 
-        {"fsplinea", &CqShaderVM::SO_fsplinea, 0, },
-        {"csplinea", &CqShaderVM::SO_csplinea, 0, },
-        {"psplinea", &CqShaderVM::SO_psplinea, 0, },
-        {"vsplinea", &CqShaderVM::SO_psplinea, 0, },
-        {"sfsplinea", &CqShaderVM::SO_sfsplinea, 0, },
-        {"scsplinea", &CqShaderVM::SO_scsplinea, 0, },
-        {"spsplinea", &CqShaderVM::SO_spsplinea, 0, },
-        {"svsplinea", &CqShaderVM::SO_spsplinea, 0, },
+        {"fsplinea", 0, &CqShaderVM::SO_fsplinea, 0, 0},
+        {"csplinea", 0, &CqShaderVM::SO_csplinea, 0, 0},
+        {"psplinea", 0, &CqShaderVM::SO_psplinea, 0, 0},
+        {"vsplinea", 0, &CqShaderVM::SO_psplinea, 0, 0},
+        {"sfsplinea", 0, &CqShaderVM::SO_sfsplinea, 0, 0},
+        {"scsplinea", 0, &CqShaderVM::SO_scsplinea, 0, 0},
+        {"spsplinea", 0, &CqShaderVM::SO_spsplinea, 0, 0},
+        {"svsplinea", 0, &CqShaderVM::SO_spsplinea, 0, 0},
 
-        {"shadername", &CqShaderVM::SO_shadername, 0, },
-        {"shadername2", &CqShaderVM::SO_shadername2, 0, },
+        {"shadername", 0, &CqShaderVM::SO_shadername, 0, 0},
+        {"shadername2", 0, &CqShaderVM::SO_shadername2, 0, 0},
 
     };
+
+/*
+ * Its size
+ */
 TqInt CqShaderVM::m_cTransSize = sizeof( m_TransTable ) / sizeof( m_TransTable[ 0 ] );
 
+/*
+ * Private hash keys for "Data", "Init", "Code", "segment", "param", 
+ *          "varying", "uniform", "USES"
+ */
+static TqLong dhash = 0;
+static TqLong ihash = 0;
+static TqLong chash = 0;
+static TqLong shash = 0;
+static TqLong phash = 0;
+static TqLong vhash = 0;
+static TqLong uhash = 0;
+static TqLong ushash = 0;
+/*
+ * Private hash key for the data types supported by the shaders
+ */
+static TqLong *itypes = NULL;
+
+
+
+
+//---------------------------------------------------------------------
+/**
+ *  Function to create a local variable for a specific shader
+ */
 
 IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fParameter )
 {
@@ -511,7 +553,10 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 	return ( NULL );
 }
 
-
+//---------------------------------------------------------------------
+/**
+ *  Function to create a local variable array for a specific shader
+ */
 
 IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariableClass VarClass, const CqString& name, TqInt Count, TqBool fParameter )
 {
@@ -576,6 +621,10 @@ IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariabl
 	return ( pArray );
 }
 
+//---------------------------------------------------------------------
+/**
+ *  Function to create a very temporary variable array for a specific shader
+ */
 
 IqShaderData* CqShaderVM::CreateTemporaryStorage( EqVariableType type, EqVariableClass _class )
 {
@@ -584,11 +633,22 @@ IqShaderData* CqShaderVM::CreateTemporaryStorage( EqVariableType type, EqVariabl
 }
 
 
+//---------------------------------------------------------------------
+/**
+ *  Function to Delete the very temporary variable array for a specific shader
+ */
+
 void CqShaderVM::DeleteTemporaryStorage( IqShaderData* pData )
 {
 	delete( pData );
 }
 
+//---------------------------------------------------------------------
+/**
+ *  Routine to emulate the default Surface shader. 
+ *  TODO Still missing: Displacement, imager, volume, interior, exterior and 
+ *          light default shaders
+ */
 
 void CqShaderVM::DefaultSurface()
 {
@@ -635,6 +695,23 @@ void CqShaderVM::DefaultSurface()
 	LoadProgram(&defStream);
 }
 
+
+//---------------------------------------------------------------------
+/**
+ * Function to determine if not the character is ' '
+ */
+
+static TqBool notspace(char C)
+{
+	bool retval = TqTrue;
+
+	if ((C == 0x20) ||
+	        (( C >= 0x09 ) && (C <= 0x0D)))
+		retval = TqFalse;
+
+	return retval;
+}
+
 //---------------------------------------------------------------------
 /** Load a token from a compiled slx file.
 */
@@ -651,7 +728,7 @@ void CqShaderVM::GetToken( char* token, TqInt l, std::istream* pFile )
 		token[ 1 ] = '\0';
 		return ;	// Special case for labels.
 	}
-	while ( !isspace( c ) && i < l - 1 )
+	while ( notspace( c ) && i < l - 1 )
 	{
 		token[ i++ ] = c;
 		token[ i ] = '\0';
@@ -678,11 +755,40 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	std::vector<TqInt>	aLabels;
 	CqShaderExecEnv	StdEnv;
 	TqInt	array_count = 0;
+	TqLong  htoken, i;
+
+ 	// Initialise the private hash keys.
+	if (!dhash)
+		dhash = CqParameter::hash("Data");
+	if (!ihash)
+		ihash = CqParameter::hash("Init");
+	if (!chash)
+		chash = CqParameter::hash("Code");
+	if (!phash)
+		phash = CqParameter::hash("param");
+	if (!vhash)
+		vhash = CqParameter::hash("varying");
+	if (!uhash)
+		uhash = CqParameter::hash("uniform");
+	if (!shash)
+		shash = CqParameter::hash("segment");
+	if (!ushash)
+		ushash = CqParameter::hash("USES");
+
+	if (!itypes)
+	{
+		itypes = (TqLong *) malloc(gcVariableTypeNames * sizeof(TqLong));
+		for(i = 0; i<gcVariableTypeNames; i++)
+			itypes[i] = CqParameter::hash(gVariableTypeNames[i]);
+	}
+
 
 	TqBool fShaderSpec = TqFalse;
 	while ( !pFile->eof() )
 	{
 		GetToken( token, 255, pFile );
+
+		htoken = CqParameter::hash(token);
 
 		// Check for type and version information.
 		if ( !fShaderSpec )
@@ -690,28 +796,13 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 			TqInt i;
 			for ( i = 0; i < gcShaderTypeNames; i++ )
 			{
-				if ( strcmp( token, gShaderTypeNames[ i ] ) == 0 )
+				if (!gShaderTypeNames[i].hash)
 				{
-					// TODO: Should store the type so that it can be checked.
-
-					/* Begin changes to store shader type for libslxargs */
-					// Symbolic references for the tokens would be better than literal strings,
-					// but we will use literals for now.
-					// m_Type = Type_Unknown;
-					if(strcmp(token,"surface")==0)
-						m_Type = Type_Surface;
-					else if(strcmp(token,"lightsource")==0)
-						m_Type = Type_Lightsource;
-					else if(strcmp(token,"volume")==0)
-						m_Type = Type_Volume;
-					else if(strcmp(token,"displacement")==0)
-						m_Type = Type_Displacement;
-					else if(strcmp(token,"transformation")==0)
-						m_Type = Type_Transformation;
-					else if(strcmp(token,"imager")==0)
-						m_Type = Type_Imager;
-					/* End changes to store shader type for libslxargs */
-
+					gShaderTypeNames[i].hash = CqParameter::hash(gShaderTypeNames[i].name);
+				}
+				if ( gShaderTypeNames[i].hash == htoken )
+				{
+					m_Type = gShaderTypeNames[i].type;
 					fShaderSpec = TqTrue;
 					break;
 				}
@@ -736,24 +827,26 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 			//			}
 		}
 
-		if ( strcmp( token, "USES" ) == 0 )
+		if ( ushash == htoken) // == "USES"
 		{
 			( *pFile ) >> m_Uses;
 			continue;
 		}
 
-		if ( strcmp( token, "segment" ) == 0 )
+		if ( shash == htoken ) // == "segment"
 		{
 			GetToken( token, 255, pFile );
-			if ( strcmp( token, "Data" ) == 0 )
+			htoken = CqParameter::hash(token);
+
+			if ( dhash == htoken ) // == "Data"
 				Segment = Seg_Data;
-			else if ( strcmp( token, "Init" ) == 0 )
+			else if ( ihash == htoken) // == "Init"
 			{
 				Segment = Seg_Init;
 				pProgramArea = &m_ProgramInit;
 				aLabels.clear();
 			}
-			else if ( strcmp( token, "Code" ) == 0 )
+			else if (chash == htoken ) // == "Code"
 			{
 				Segment = Seg_Code;
 				pProgramArea = &m_Program;
@@ -773,23 +866,24 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 					VarClass = class_invalid;
 					while ( VarType == type_invalid )
 					{
-						if ( strcmp( token, "param" ) == 0 )
+						if ( phash == htoken) // == "param"
 							fParameter = TqTrue;
-						else if ( strcmp( token, "varying" ) == 0 )
+						else if ( vhash == htoken) // == "varying"
 							VarClass = class_varying;
-						else if ( strcmp( token, "uniform" ) == 0 )
+						else if ( uhash == htoken) // == "uniform"
 							VarClass = class_uniform;
 						else
 						{
 							TqInt itype = 0;
-							for(itype = 0; itype<type_last; itype++)
-								if ( strcmp( token, gVariableTypeNames[ itype ] ) == 0 )
+							for(itype = 0; itype<gcVariableTypeNames; itype++)
+								if (htoken == itypes[itype]) // == gVariableTypeNames[itype]
 								{
 									VarType = static_cast<EqVariableType>(itype);
 									break;
 								}
 						}
 						GetToken( token, 255, pFile );
+						htoken = CqParameter::hash(token);
 					}
 					// Check for array type variable.
 					if ( token[ strlen( token ) - 1 ] == ']' )
@@ -836,7 +930,12 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 					TqInt i;
 					for ( i = 0; i < m_cTransSize; i++ )
 					{
-						if ( strcmp( m_TransTable[ i ].m_strName, token ) == 0 )
+						if (!m_TransTable[ i ].m_hash) 
+						{
+							m_TransTable[ i ].m_hash = CqParameter::hash(m_TransTable[ i ].m_strName);
+						}
+
+						if ( m_TransTable[ i ].m_hash == htoken)
 						{
 							// If the opcodes command pointer is 0, just ignore this opcode.
 							if ( m_TransTable[ i ].m_pCommand == 0 )
@@ -908,7 +1007,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 		( *pFile ) >> std::ws;
 	}
 	// Now we need to complete any label jump statements.
-	TqUint i = 0;
+	i = 0;
 	while ( i < m_Program.size() )
 	{
 		UsProgramElement E = m_Program[ i++ ];
@@ -1242,12 +1341,20 @@ TqBool CqShaderVM::GetValue( const char* name, IqShaderData* res )
 	return ( TqFalse );
 }
 
+//---------------------------------------------------------------------
+/**
+ * Begin changes to add accessors for libslxargs 
+ */
 
-/* Begin changes to add accessors for libslxargs */
-int CqShaderVM::GetShaderVarCount()
+TqInt CqShaderVM::GetShaderVarCount()
 {
 	return m_LocalVars.size();
 }
+
+//---------------------------------------------------------------------
+/**
+ *
+ */
 
 IqShaderData * CqShaderVM::GetShaderVarAt(int varIndex)
 {
@@ -1262,8 +1369,6 @@ IqShaderData * CqShaderVM::GetShaderVarAt(int varIndex)
 	}
 	return result;
 }
-/* End changes to add accessors for libslxargs */
-
 
 
 void CqShaderVM::SO_nop()
