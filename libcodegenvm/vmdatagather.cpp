@@ -220,20 +220,32 @@ void CqCodeGenDataGather::Visit( IqParseNodeOperator& OP)
 	if ( pOperandB ) pOperandB->Accept( *this );
 }
 
-void CqCodeGenDataGather::Visit( IqParseNodeMathOp& )
+void CqCodeGenDataGather::Visit( IqParseNodeMathOp& OP )
 {
+	IqParseNodeOperator* pOp;
+	OP.GetInterface( ParseNode_Operator, ( void** ) & pOp );
+	Visit(*pOp);
 }
 
-void CqCodeGenDataGather::Visit( IqParseNodeRelationalOp& )
+void CqCodeGenDataGather::Visit( IqParseNodeRelationalOp& OP )
 {
+	IqParseNodeOperator* pOp;
+	OP.GetInterface( ParseNode_Operator, ( void** ) & pOp );
+	Visit(*pOp);
 }
 
-void CqCodeGenDataGather::Visit( IqParseNodeUnaryOp& )
+void CqCodeGenDataGather::Visit( IqParseNodeUnaryOp& OP )
 {
+	IqParseNodeOperator* pOp;
+	OP.GetInterface( ParseNode_Operator, ( void** ) & pOp );
+	Visit(*pOp);
 }
 
-void CqCodeGenDataGather::Visit( IqParseNodeLogicalOp& )
+void CqCodeGenDataGather::Visit( IqParseNodeLogicalOp& OP )
 {
+	IqParseNodeOperator* pOp;
+	OP.GetInterface( ParseNode_Operator, ( void** ) & pOp );
+	Visit(*pOp);
 }
 
 void CqCodeGenDataGather::Visit( IqParseNodeDiscardResult& DR)

@@ -251,6 +251,7 @@ class CqShaderStack
 		 */
 		void	PushV( IqShaderData* pv )
 		{
+			assert( NULL != pv );
 			while ( m_iTop >= m_Stack.size() )
 			{
 				TqInt n = m_Stack.size() + 1;
