@@ -15,6 +15,7 @@
 #include <stdarg.h>
 #include <strstream>
 #include <string>
+#include <stdio.h>
 #include "aqsis.h"
 #include "ri.h"
 #include "error.h"
