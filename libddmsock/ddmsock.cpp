@@ -270,7 +270,7 @@ CqDDClient::CqDDClient( const TqChar* name, const TqChar* type, const TqChar* mo
 		m_strType( type ),
 		m_strMode( mode )
 {
-		m_hMode = CqParameter::hash(mode);
+	m_hMode = CqParameter::hash( mode );
 }
 
 CqDDClient::~CqDDClient()
@@ -524,33 +524,33 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 
 
 
-TqBool CqDDManager::fDisplayNeeds(const TqChar* var)
+TqBool CqDDManager::fDisplayNeeds( const TqChar* var )
 {
-	static TqUlong rgb = CqParameter::hash("rgb");
-	static TqUlong rgba = CqParameter::hash("rgba");
-	static TqUlong Ci = CqParameter::hash("Ci");
-	static TqUlong Oi = CqParameter::hash("Oi");
+	static TqUlong rgb = CqParameter::hash( "rgb" );
+	static TqUlong rgba = CqParameter::hash( "rgba" );
+	static TqUlong Ci = CqParameter::hash( "Ci" );
+	static TqUlong Oi = CqParameter::hash( "Oi" );
 
-	TqUlong htoken = CqParameter::hash(var);
+	TqUlong htoken = CqParameter::hash( var );
 
 	std::vector<CqDDClient>::iterator i;
 	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
 	{
-		TqBool usage = ((i->hMode() == rgba) || (i->hMode() == rgb));
-		if ((htoken == Ci) && usage )
-			return(TqTrue);
-		else if ((htoken == Oi) && usage )
-			return(TqTrue);
-		else if ((i->hMode() == htoken))
-			return(TqTrue);
-		
+		TqBool usage = ( ( i->hMode() == rgba ) || ( i->hMode() == rgb ) );
+		if ( ( htoken == Ci ) && usage )
+			return ( TqTrue );
+		else if ( ( htoken == Oi ) && usage )
+			return ( TqTrue );
+		else if ( ( i->hMode() == htoken ) )
+			return ( TqTrue );
+
 	}
 	return ( TqFalse );
 }
 
 /**
   Load the requested display library according to the specified mode in the RiDisplay command.
-
+ 
 */
 void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 {
@@ -560,7 +560,7 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 	// strDriverFileAndArgs: Second part of the ddmsock.ini line (e.g. "mydriver.exe --foo")
 	CqString strDriverFileAndArgs = g_mapDisplayNames[ dd.strType() ];
 	// strDriverFile: Only the executable without arguments (e.g. "mydriver.exe")
-	CqString strDriverFile = GetStringField(strDriverFileAndArgs, 0);
+	CqString strDriverFile = GetStringField( strDriverFileAndArgs, 0 );
 
 	// Check-ins said temporary way to handle locating display drivers.
 	// Until finished provide a helpful message for folks instead of
@@ -568,7 +568,7 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 	if ( strDriverFile.empty() )
 	{
 		//CqBasicError( ErrorID_DisplayDriver, Severity_Normal, "Invalid display type. \"" + dd.strType + "\"" );
-		throw( CqString("Invalid display type \"") + dd.strType() + CqString("\"") );
+		throw( CqString( "Invalid display type \"" ) + dd.strType() + CqString( "\"" ) );
 	}
 
 	// Try to open the file to see if it's really there
@@ -577,33 +577,33 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 	if ( !fileDriver.IsValid() )
 	{
 		CqBasicError( 0, 0, ( "Error loading display driver [ " + strDriverFile + " ]" ).c_str() );
-		return;  /* and how is the error reported to the caller? */
+		return ;  /* and how is the error reported to the caller? */
 	}
 
 	CqString strDriverPathAndFile = fileDriver.strRealName();
 
 	char envBuffer[ 32 ];
 	const int maxargs = 20;
-	const char* args[maxargs];
-	std::string argstrings[maxargs];
+	const char* args[ maxargs ];
+	std::string argstrings[ maxargs ];
 	int i;
 
 	// Prepare an arry with the arguments
 	// (the first argument (the file name) begins at position 2 because
-	// the Windows version might have to call cmd.exe which will be 
+	// the Windows version might have to call cmd.exe which will be
 	// prepended to the argument list)
-	args[2] = strDriverFile.c_str();
-	args[3] = NULL;
-	args[maxargs-1] = NULL;
-	for(i=1; i<maxargs-3; i++)
+	args[ 2 ] = strDriverFile.c_str();
+	args[ 3 ] = NULL;
+	args[ maxargs - 1 ] = NULL;
+	for ( i = 1; i < maxargs - 3; i++ )
 	{
-		argstrings[i] = GetStringField(strDriverFileAndArgs,i);
-		if (argstrings[i].length()==0)
+		argstrings[ i ] = GetStringField( strDriverFileAndArgs, i );
+		if ( argstrings[ i ].length() == 0 )
 		{
-			args[i+2]=NULL;
+			args[ i + 2 ] = NULL;
 			break;
 		}
-		args[i+2]=argstrings[i].c_str();
+		args[ i + 2 ] = argstrings[ i ].c_str();
 	}
 
 
@@ -614,19 +614,19 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 	SetEnvironmentVariable( "AQSIS_DD_PORT", envBuffer );
 
 	// Spawn the driver (1st try)...
-	TqInt ProcHandle = _spawnv( _P_NOWAITO, strDriverPathAndFile.c_str(), &args[2]);
+	TqInt ProcHandle = _spawnv( _P_NOWAITO, strDriverPathAndFile.c_str(), &args[ 2 ] );
 	// If it didn't work try a second time via "cmd.exe"...
 	if ( ProcHandle < 0 )
 	{
-		args[0] = "cmd.exe";
-		args[1] = "/C";
-		args[2] = strDriverPathAndFile.c_str();
-		ProcHandle = _spawnvp( _P_NOWAITO, "cmd.exe", args);
+		args[ 0 ] = "cmd.exe";
+		args[ 1 ] = "/C";
+		args[ 2 ] = strDriverPathAndFile.c_str();
+		ProcHandle = _spawnvp( _P_NOWAITO, "cmd.exe", args );
 	}
 	if ( ProcHandle < 0 )
 	{
 		CqBasicError( 0, 0, "Error spawning display driver process" );
-		return; /* should that be a throw? */
+		return ; /* should that be a throw? */
 	}
 
 #else // AQSIS_SYSTEM_WIN32
@@ -640,14 +640,14 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 	if ( 0 == forkresult )
 	{
 		//execlp( strDriverPathAndFile.c_str(), strDriverFile.c_str(), NULL );
-		execvp( strDriverPathAndFile.c_str(), (char * const * ) (args + 2) );
+		execvp( strDriverPathAndFile.c_str(), ( char * const * ) ( args + 2 ) );
 		/* error checking? */
-		return;
+		return ;
 	}
 	else if ( -1 == forkresult )
 	{
 		CqBasicError( 0, 0, "Error forking display driver process" );
-		return; /* should that be a throw? */
+		return ; /* should that be a throw? */
 	}
 #endif // !AQSIS_SYSTEM_WIN32
 
@@ -693,7 +693,7 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 		SqDDMessageOpen msgopen( QGetRenderContext() ->pImage() ->iXRes(),
 		                         QGetRenderContext() ->pImage() ->iYRes(),
 		                         SamplesPerElement,
-		                         BitsPerSample, 	// Bits per sample.
+		                         BitsPerSample,  	// Bits per sample.
 		                         QGetRenderContext() ->pImage() ->CropWindowXMin(),
 		                         QGetRenderContext() ->pImage() ->CropWindowXMax(),
 		                         QGetRenderContext() ->pImage() ->CropWindowYMin(),
@@ -719,6 +719,7 @@ void CqDDManager::InitialiseDisplayNameMap()
 #else
 		ddmsock_path = ".";
 #endif
+
 	}
 	else
 	{
@@ -779,51 +780,51 @@ void CqDDManager::InitialiseDisplayNameMap()
 
 /**
   Return the substring with the given index.
-
+ 
   The string \a s is conceptually broken into substrings that are separated by blanks
   or tabs. A continuous sequence of blanks/tabs counts as one individual separator.
   The substring with number \a idx is returned (0-based). If \a idx is higher than the
   number of substrings then an empty string is returned.
-
+ 
   \param s Input string.
   \param idx Index (0-based)
   \return Sub string with given index
 */
-std::string CqDDManager::GetStringField(const std::string& s, int idx)
+std::string CqDDManager::GetStringField( const std::string& s, int idx )
 {
-	int z=1;   /* state variable  0=skip whitespace  1=skip chars  2=search end  3=end */
+	int z = 1;   /* state variable  0=skip whitespace  1=skip chars  2=search end  3=end */
 	std::string::const_iterator it;
 	std::string::size_type start = 0;
 	std::string::size_type end = 0;
 
-	for(it=s.begin(); it!=s.end(); it++)
+	for ( it = s.begin(); it != s.end(); it++ )
 	{
-		char c=*it;
+		char c = *it;
 
-		if (idx==0 && z<2)
+		if ( idx == 0 && z < 2 )
 		{
-			z=2;
-		}	
+			z = 2;
+		}
 
-		switch(z)
+		switch ( z )
 		{
-		case 0:	if (c!=' ' && c!='\t')
+				case 0: if ( c != ' ' && c != '\t' )
 				{
 					idx--;
-					end=start+1;
-					z=1;
+					end = start + 1;
+					z = 1;
 				}
-				if (idx>0) start++;
+				if ( idx > 0 ) start++;
 				break;
-		case 1:	if (c==' ' || c=='\t')
+				case 1: if ( c == ' ' || c == '\t' )
 				{
-					z=0;				
+					z = 0;
 				}
 				start++;
 				break;
-		case 2: if (c==' ' || c=='\t')
+				case 2: if ( c == ' ' || c == '\t' )
 				{
-					z=3;
+					z = 3;
 				}
 				else
 				{
@@ -832,11 +833,11 @@ std::string CqDDManager::GetStringField(const std::string& s, int idx)
 				break;
 		}
 	}
-	
-	if (idx==0)
-		return s.substr(start,end-start);
+
+	if ( idx == 0 )
+		return s.substr( start, end - start );
 	else
-		return std::string("");
+		return std::string( "" );
 
 }
 

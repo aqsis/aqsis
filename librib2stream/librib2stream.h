@@ -126,9 +126,9 @@ class Stream :
 		virtual	RtVoid	RiWorldBegin();
 		virtual	RtVoid	RiWorldEnd();
 
-		virtual RtFilterFunc	GetFilterFunction(RtToken type);
-		virtual RtBasis*		GetBasisMatrix(RtToken type);
-		virtual	RtFunc			GetProceduralFunction(RtToken type);
+		virtual RtFilterFunc	GetFilterFunction( RtToken type );
+		virtual RtBasis*	GetBasisMatrix( RtToken type );
+		virtual	RtFunc	GetProceduralFunction( RtToken type );
 
 	private:
 		std::ostream& m_Stream;

@@ -116,7 +116,7 @@ class CqDDClient
 		CqString	m_strName;			///< Display name.
 		CqString	m_strType;			///< Display type.
 		CqString	m_strMode;			///< Display mode.
-		TqUlong         m_hMode;
+		TqUlong m_hMode;
 }
 ;
 
@@ -185,13 +185,13 @@ class CqDDManager : public IqDDManager
 		virtual	TqInt	OpenDisplays();
 		virtual	TqInt	CloseDisplays();
 		virtual	TqInt	DisplayBucket( IqBucket* pBucket );
-		virtual TqBool	fDisplayNeeds( const TqChar* var);
+		virtual TqBool	fDisplayNeeds( const TqChar* var );
 
 		void	LoadDisplayLibrary( CqDDClient& dd );
 		void	InitialiseDisplayNameMap();
 
 	private:
-		std::string	GetStringField(const std::string& s, int idx);
+		std::string	GetStringField( const std::string& s, int idx );
 
 	private:
 		CqDDServer	m_DDServer;

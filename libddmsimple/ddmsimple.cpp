@@ -224,14 +224,14 @@ TqInt CqDDManagerSimple::DisplayBucket( IqBucket* pBucket )
 
 TqBool	CqDDManagerSimple::fDisplayNeeds( const TqChar* var )
 {
-	if(strcmp(var, "rgba") == 0)
-		return(TqTrue);
-	else if(strcmp(var, "rgb") == 0)
-		return(TqTrue);
-	else if(strcmp(var, "a") == 0)
-		return(TqTrue);
+	if ( strcmp( var, "rgba" ) == 0 )
+		return ( TqTrue );
+	else if ( strcmp( var, "rgb" ) == 0 )
+		return ( TqTrue );
+	else if ( strcmp( var, "a" ) == 0 )
+		return ( TqTrue );
 	else
-		return(TqFalse);
+		return ( TqFalse );
 }
 
 

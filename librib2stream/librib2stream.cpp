@@ -454,20 +454,20 @@ RendermanInterface::RtVoid Stream::RiWorldEnd()
 	m_Stream << "RiWorldEnd()" << std::endl;
 }
 
-RendermanInterface::RtFilterFunc Stream::GetFilterFunction(RtToken type)
+RendermanInterface::RtFilterFunc Stream::GetFilterFunction( RtToken type )
 {
 	m_Stream << "Filter: " << type << std::endl;
-	return(NULL);
+	return ( NULL );
 }
-RendermanInterface::RtBasis* Stream::GetBasisMatrix(RtToken type)
+RendermanInterface::RtBasis* Stream::GetBasisMatrix( RtToken type )
 {
 	m_Stream << "Filter: " << type << std::endl;
-	return(NULL);
+	return ( NULL );
 }
-RendermanInterface::RtFunc Stream::GetProceduralFunction(RtToken type)
+RendermanInterface::RtFunc Stream::GetProceduralFunction( RtToken type )
 {
 	m_Stream << "Filter: " << type << std::endl;
-	return(NULL);
+	return ( NULL );
 }
 
 }

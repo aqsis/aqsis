@@ -342,7 +342,7 @@ RendermanInterface::RtVoid Engine::RiQuantize( RtToken type, RtInt one, RtInt mi
 }
 RendermanInterface::RtVoid Engine::RiReadArchive( RtToken data, RtArchiveCallback callback )
 {
-	::RiReadArchive( data , callback);
+	::RiReadArchive( data , callback );
 }
 RendermanInterface::RtVoid Engine::RiRelativeDetail( RtFloat relativedetail )
 {
@@ -452,61 +452,61 @@ RendermanInterface::RtVoid Engine::RiWorldEnd()
 {
 	::RiWorldEnd();
 }
-RendermanInterface::RtFilterFunc Engine::GetFilterFunction(RtToken type)
+RendermanInterface::RtFilterFunc Engine::GetFilterFunction( RtToken type )
 {
-	if( strcmp( type, "box") == 0 )
-		return( &::RiBoxFilter );
-	else if( strcmp( type, "gaussian") == 0 )
-		return( &::RiGaussianFilter );
-	else if( strcmp( type, "triangle") == 0 )
-		return( &::RiTriangleFilter );
-	else if( strcmp( type, "catmull-rom") == 0 )
-		return( &::RiCatmullRomFilter );
-	else if( strcmp( type, "sinc") == 0 )
-		return( &::RiSincFilter );
-	else if( strcmp( type, "bessel") == 0 )
-		return( &::RiBesselFilter );
-	else if( strcmp( type, "disk") == 0 )
-		return( &::RiDiskFilter );
+	if ( strcmp( type, "box" ) == 0 )
+		return ( &::RiBoxFilter );
+	else if ( strcmp( type, "gaussian" ) == 0 )
+		return ( &::RiGaussianFilter );
+	else if ( strcmp( type, "triangle" ) == 0 )
+		return ( &::RiTriangleFilter );
+	else if ( strcmp( type, "catmull-rom" ) == 0 )
+		return ( &::RiCatmullRomFilter );
+	else if ( strcmp( type, "sinc" ) == 0 )
+		return ( &::RiSincFilter );
+	else if ( strcmp( type, "bessel" ) == 0 )
+		return ( &::RiBesselFilter );
+	else if ( strcmp( type, "disk" ) == 0 )
+		return ( &::RiDiskFilter );
 
-	return(NULL);
+	return ( NULL );
 }
-RendermanInterface::RtBasis* Engine::GetBasisMatrix(RtToken type)
+RendermanInterface::RtBasis* Engine::GetBasisMatrix( RtToken type )
 {
-	if( strcmp( type, "bezier") == 0 )
-		return( &::RiBezierBasis );
-	else if( strcmp( type, "b-spline") == 0 )
-		return( &::RiBSplineBasis );
-	else if( strcmp( type, "catmull-rom") == 0 )
-		return( &::RiCatmullRomBasis );
-	else if( strcmp( type, "hermite") == 0 )
-		return( &::RiHermiteBasis );
-	else if( strcmp( type, "power") == 0 )
-		return( &::RiPowerBasis );
+	if ( strcmp( type, "bezier" ) == 0 )
+		return ( &::RiBezierBasis );
+	else if ( strcmp( type, "b-spline" ) == 0 )
+		return ( &::RiBSplineBasis );
+	else if ( strcmp( type, "catmull-rom" ) == 0 )
+		return ( &::RiCatmullRomBasis );
+	else if ( strcmp( type, "hermite" ) == 0 )
+		return ( &::RiHermiteBasis );
+	else if ( strcmp( type, "power" ) == 0 )
+		return ( &::RiPowerBasis );
 
-	return(NULL);
+	return ( NULL );
 }
-RendermanInterface::RtFunc Engine::GetProceduralFunction(RtToken type)
+RendermanInterface::RtFunc Engine::GetProceduralFunction( RtToken type )
 {
-	if( strcmp( type, "DelayedReadArchive") == 0 )
-		return( (void (*)(void ) )&::RiProcDelayedReadArchive );
-	else if( strcmp( type, "RunProgram") == 0 )
-		return( (void (*)(void ) )&::RiProcRunProgram );
-	else if( strcmp( type, "DynamicLoad") == 0 )
-		return( (void (*)(void ) )&::RiProcDynamicLoad );
-	else if( strcmp( type, "RiProcFree") == 0 )
-		return( (void (*)(void ) )&::RiProcFree );
+	if ( strcmp( type, "DelayedReadArchive" ) == 0 )
+		return ( ( void ( * ) ( void ) ) &::RiProcDelayedReadArchive );
+	else if ( strcmp( type, "RunProgram" ) == 0 )
+		return ( ( void ( * ) ( void ) ) &::RiProcRunProgram );
+	else if ( strcmp( type, "DynamicLoad" ) == 0 )
+		return ( ( void ( * ) ( void ) ) &::RiProcDynamicLoad );
+	else if ( strcmp( type, "RiProcFree" ) == 0 )
+		return ( ( void ( * ) ( void ) ) &::RiProcFree );
 
-	return(NULL);
+	return ( NULL );
 }
 
 
 RendermanInterface* CreateRIBEngine()
 {
-	return( new Engine() );
+	return ( new Engine() );
 }
 
-void DestroyRIBEngine(RendermanInterface* engine)
+void DestroyRIBEngine( RendermanInterface* engine )
 {
 	delete( engine );
 }

@@ -149,23 +149,24 @@ class RendermanInterface
 		virtual	RtVoid	RiWorldBegin() = 0;
 		virtual	RtVoid	RiWorldEnd() = 0;
 
-		virtual RtFilterFunc	GetFilterFunction(RtToken type) = 0;
-		virtual RtBasis*		GetBasisMatrix(RtToken type) = 0;
-		virtual	RtFunc			GetProceduralFunction(RtToken type) = 0;
+		virtual RtFilterFunc	GetFilterFunction( RtToken type ) = 0;
+		virtual RtBasis*	GetBasisMatrix( RtToken type ) = 0;
+		virtual	RtFunc	GetProceduralFunction( RtToken type ) = 0;
 };
 
 
 /// Initializes the parser and callback object with a set of standard declarations
-extern "C" {
-void StandardDeclarations( RendermanInterface& CallbackInterface );
+extern "C"
+{
+	void StandardDeclarations( RendermanInterface & CallbackInterface );
 
-/// Parses an input stream, using the supplied callback object and sending error data to the supplied output stream
-bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream, RtArchiveCallback callback);
-/// Resets the state of the parser, clearing any symbol tables, etc.
-void ResetParser();
-//
-/// Setup the defaut setting for the archive searchpath, automatically updated when an appropriate RiOption is seen.
-void UpdateArchivePath( std::string strPath );
+	/// Parses an input stream, using the supplied callback object and sending error data to the supplied output stream
+	bool Parse( FILE * InputStream, const std::string StreamName, RendermanInterface & CallbackInterface, std::ostream & ErrorStream, RtArchiveCallback callback );
+	/// Resets the state of the parser, clearing any symbol tables, etc.
+	void ResetParser();
+	//
+	/// Setup the defaut setting for the archive searchpath, automatically updated when an appropriate RiOption is seen.
+	void UpdateArchivePath( std::string strPath );
 }
 
 }

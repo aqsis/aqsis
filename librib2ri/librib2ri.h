@@ -125,16 +125,16 @@ class Engine :
 		virtual	RtVoid	RiWorldBegin();
 		virtual	RtVoid	RiWorldEnd();
 
-		virtual RtFilterFunc	GetFilterFunction(RtToken type);
-		virtual RtBasis*		GetBasisMatrix(RtToken type);
-		virtual	RtFunc			GetProceduralFunction(RtToken type);
-	};
+		virtual RtFilterFunc	GetFilterFunction( RtToken type );
+		virtual RtBasis*	GetBasisMatrix( RtToken type );
+		virtual	RtFunc	GetProceduralFunction( RtToken type );
+};
 
-	extern "C"
-	{
-		librib::RendermanInterface* CreateRIBEngine();
-		void DestroyRIBEngine(librib::RendermanInterface*);
-	}
+extern "C"
+{
+	librib::RendermanInterface* CreateRIBEngine();
+	void DestroyRIBEngine( librib::RendermanInterface* );
+}
 }
 ; // namespace librib2ri
 

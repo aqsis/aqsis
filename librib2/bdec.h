@@ -79,7 +79,8 @@ class CqRibBinaryDecoder
 		TqBool eof_flag;
 		TqBool fail_flag;
 
-		CqRibBinaryDecoder( CqRibBinaryDecoder const & ) {}
+		CqRibBinaryDecoder( CqRibBinaryDecoder const & )
+		{}
 		CqRibBinaryDecoder const &operator=( CqRibBinaryDecoder const & )
 		{
 			return * this;

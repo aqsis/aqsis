@@ -45,12 +45,12 @@ START_NAMESPACE( Aqsis )
 
 std::string* FindTemporaryVariable( std::string strName, std::deque<std::map<std::string, std::string> >& Stack );
 IqVarDef* pTranslatedVariable( SqVarRef& Ref, std::vector<std::vector<SqVarRefTranslator> >& Stack );
-void  CreateTranslationTable( IqParseNode* pParam, IqParseNode* pArg, std::vector<std::vector<SqVarRefTranslator> >& Stack );
+void CreateTranslationTable( IqParseNode* pParam, IqParseNode* pArg, std::vector<std::vector<SqVarRefTranslator> >& Stack );
 void CreateTempMap( IqParseNode* pParam, IqParseNode* pArg, std::deque<std::map<std::string, std::string> >& Stack,
-														   std::vector<std::vector<SqVarRefTranslator> >& Trans, std::map<std::string, IqVarDef*>& TempVars );
+                    std::vector<std::vector<SqVarRefTranslator> >& Trans, std::map<std::string, IqVarDef*>& TempVars );
 
 
-void CqCodeGenOutput::Visit( IqParseNode& N)
+void CqCodeGenOutput::Visit( IqParseNode& N )
 {
 	IqParseNode * pNext = N.pChild();
 	while ( pNext )
@@ -60,9 +60,9 @@ void CqCodeGenOutput::Visit( IqParseNode& N)
 	}
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeShader& S)
+void CqCodeGenOutput::Visit( IqParseNodeShader& S )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	S.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	// Create a new file for this shader
@@ -105,15 +105,15 @@ void CqCodeGenOutput::Visit( IqParseNodeShader& S)
 
 	// Output temporary variables.
 	std::map<std::string, IqVarDef*>::iterator iTemp;
-	for(iTemp = TempVars().begin(); iTemp!=TempVars().end(); iTemp++)
+	for ( iTemp = TempVars().begin(); iTemp != TempVars().end(); iTemp++ )
 	{
-		IqVarDef* pVar = (*iTemp).second;;
+		IqVarDef* pVar = ( *iTemp ).second;;
 		m_slxFile << StorageSpec( pVar->Type() ).c_str() << " "
 		<< gVariableTypeNames[ pVar->Type() & Type_Mask ] << " "
-		<< (*iTemp).first;
+		<< ( *iTemp ).first;
 		if ( pVar->Type() & Type_Array )
 			m_slxFile << "[" << pVar->ArrayLength() << "]";
-	
+
 		m_slxFile << std::endl;
 	}
 
@@ -122,20 +122,20 @@ void CqCodeGenOutput::Visit( IqParseNodeShader& S)
 	{
 		IqVarDef* pVar = &gLocalVars[ i ];
 		if ( pVar->Type() & Type_Param && pVar->pInitialiser() != 0 )
-			pVar->pInitialiser()->Accept( *this );
+			pVar->pInitialiser() ->Accept( *this );
 	}
 
 	m_slxFile << std::endl << std::endl << "segment Code" << std::endl;
 	IqParseNode* pCode = pNode->pChild();
 	// Output the code tree.
-	if( pCode )	pCode->Accept( *this );
-	/// \note There is another child here, it is the list of arguments, but they don't need to be 
+	if ( pCode ) pCode->Accept( *this );
+	/// \note There is another child here, it is the list of arguments, but they don't need to be
 	/// output as part of the code segment.
 
 	m_slxFile.close();
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeFunctionCall& FC)
+void CqCodeGenOutput::Visit( IqParseNodeFunctionCall& FC )
 {
 	// Output the function name.
 	IqFuncDef * pFunc = FC.pFuncDef();
@@ -181,7 +181,7 @@ void CqCodeGenOutput::Visit( IqParseNodeFunctionCall& FC)
 		// Output arguments and pop the parameters off the stack.
 		if ( pArguments != 0 && pFunc->pArgs() != 0 && pFunc->pDef() != 0 )
 		{
-			CreateTempMap( pFunc->pArgs()->pChild(), pArguments, m_StackVarMap, m_saTransTable, TempVars() );
+			CreateTempMap( pFunc->pArgs() ->pChild(), pArguments, m_StackVarMap, m_saTransTable, TempVars() );
 
 			IqParseNode * pParam = pFunc->pArgs() ->pChild();
 			IqParseNode* pArg = pArguments;
@@ -201,17 +201,17 @@ void CqCodeGenOutput::Visit( IqParseNodeFunctionCall& FC)
 			}
 		}
 		// Output the function body.
-		if( NULL != pFunc->pDef() )
+		if ( NULL != pFunc->pDef() )
 		{
-			CreateTranslationTable( pFunc->pArgs()->pChild(), pArguments, m_saTransTable );
-			pFunc->pDef()->Accept( *this );
+			CreateTranslationTable( pFunc->pArgs() ->pChild(), pArguments, m_saTransTable );
+			pFunc->pDef() ->Accept( *this );
 			m_saTransTable.erase( m_saTransTable.end() - 1 );
 		}
 		m_StackVarMap.pop_back( );
 	}
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeUnresolvedCall& UFC)
+void CqCodeGenOutput::Visit( IqParseNodeUnresolvedCall& UFC )
 {
 	// Output the function name.
 	IqFuncDef * pFunc = UFC.pFuncDef();
@@ -250,12 +250,12 @@ void CqCodeGenOutput::Visit( IqParseNodeUnresolvedCall& UFC)
 	}
 
 	//  Here I just dump out a string describing my external call requirements.
-	m_slxFile << "\texternal \"" <<  pFunc->strName() << "\" \"" << CqParseNode::TypeIdentifier(pFunc->Type()) << "\" \"" << pFunc->strParams() << "\"" << std::endl;
+	m_slxFile << "\texternal \"" << pFunc->strName() << "\" \"" << CqParseNode::TypeIdentifier( pFunc->Type() ) << "\" \"" << pFunc->strParams() << "\"" << std::endl;
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeVariable& V)
+void CqCodeGenOutput::Visit( IqParseNodeVariable& V )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	V.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	IqParseNodeVariable* pVN;
@@ -269,22 +269,22 @@ void CqCodeGenOutput::Visit( IqParseNodeVariable& V)
 	{
 		pVD->IncUseCount();
 		std::string* strTempName;
-		if( ( strTempName = FindTemporaryVariable(pVD->strName(), m_StackVarMap) ) != NULL )
+		if ( ( strTempName = FindTemporaryVariable( pVD->strName(), m_StackVarMap ) ) != NULL )
 			m_slxFile << strTempName->c_str() << std::endl;
 		else
 			m_slxFile << pVD->strName() << std::endl;
 	}
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeArrayVariable& AV)
+void CqCodeGenOutput::Visit( IqParseNodeArrayVariable& AV )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	AV.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	IqParseNodeVariable* pVN;
 	AV.GetInterface( ParseNode_Variable, ( void** ) & pVN );
 
-	pNode->pChild()->Accept( *this );
+	pNode->pChild() ->Accept( *this );
 	m_slxFile << "\tipushv ";
 
 	SqVarRef temp( pVN->VarRef() );
@@ -293,24 +293,24 @@ void CqCodeGenOutput::Visit( IqParseNodeArrayVariable& AV)
 	{
 		pVD->IncUseCount();
 		std::string* strTempName;
-		if( ( strTempName = FindTemporaryVariable(pVD->strName(), m_StackVarMap) ) != NULL )
+		if ( ( strTempName = FindTemporaryVariable( pVD->strName(), m_StackVarMap ) ) != NULL )
 			m_slxFile << strTempName->c_str() << std::endl;
 		else
 			m_slxFile << pVD->strName() << std::endl;
 	}
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeVariableAssign& VA)
+void CqCodeGenOutput::Visit( IqParseNodeVariableAssign& VA )
 {
 	// Output the assignment expression
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	VA.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	IqParseNodeVariable* pVN;
 	VA.GetInterface( ParseNode_Variable, ( void** ) & pVN );
 
 	IqParseNode * pExpr = pNode->pChild();
-	if ( pExpr != 0 ) 
+	if ( pExpr != 0 )
 		pExpr->Accept( *this );
 
 	// Output a dup so that the result remains on the stack.
@@ -325,17 +325,17 @@ void CqCodeGenOutput::Visit( IqParseNodeVariableAssign& VA)
 	{
 		pVD->IncUseCount();
 		std::string* strTempName;
-		if( ( strTempName = FindTemporaryVariable(pVD->strName(), m_StackVarMap) ) != NULL )
+		if ( ( strTempName = FindTemporaryVariable( pVD->strName(), m_StackVarMap ) ) != NULL )
 			m_slxFile << strTempName->c_str() << std::endl;
 		else
 			m_slxFile << pVD->strName() << std::endl;
 	}
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeArrayVariableAssign& AVA)
+void CqCodeGenOutput::Visit( IqParseNodeArrayVariableAssign& AVA )
 {
 	// Output the assignment expression
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	AVA.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	IqParseNodeVariable* pVN;
@@ -363,16 +363,16 @@ void CqCodeGenOutput::Visit( IqParseNodeArrayVariableAssign& AVA)
 	{
 		pVD->IncUseCount();
 		std::string* strTempName;
-		if( ( strTempName = FindTemporaryVariable(pVD->strName(), m_StackVarMap) ) != NULL )
+		if ( ( strTempName = FindTemporaryVariable( pVD->strName(), m_StackVarMap ) ) != NULL )
 			m_slxFile << strTempName->c_str() << std::endl;
 		else
 			m_slxFile << pVD->strName() << std::endl;
 	}
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeOperator& OP)
+void CqCodeGenOutput::Visit( IqParseNodeOperator& OP )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	OP.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	IqParseNode* pOperandA = pNode->pChild();
@@ -394,37 +394,37 @@ void CqCodeGenOutput::Visit( IqParseNodeOperator& OP)
 	m_slxFile << std::endl;
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeMathOp& OP)
+void CqCodeGenOutput::Visit( IqParseNodeMathOp& OP )
 {
-	IqParseNodeOperator* pOp;
+	IqParseNodeOperator * pOp;
 	OP.GetInterface( ParseNode_Operator, ( void** ) & pOp );
-	Visit(*pOp);
+	Visit( *pOp );
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeRelationalOp& OP)
+void CqCodeGenOutput::Visit( IqParseNodeRelationalOp& OP )
 {
-	IqParseNodeOperator* pOp;
+	IqParseNodeOperator * pOp;
 	OP.GetInterface( ParseNode_Operator, ( void** ) & pOp );
-	Visit(*pOp);
+	Visit( *pOp );
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeUnaryOp& OP)
+void CqCodeGenOutput::Visit( IqParseNodeUnaryOp& OP )
 {
-	IqParseNodeOperator* pOp;
+	IqParseNodeOperator * pOp;
 	OP.GetInterface( ParseNode_Operator, ( void** ) & pOp );
-	Visit(*pOp);
+	Visit( *pOp );
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeLogicalOp& OP)
+void CqCodeGenOutput::Visit( IqParseNodeLogicalOp& OP )
 {
-	IqParseNodeOperator* pOp;
+	IqParseNodeOperator * pOp;
 	OP.GetInterface( ParseNode_Operator, ( void** ) & pOp );
-	Visit(*pOp);
+	Visit( *pOp );
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeDiscardResult& DR)
+void CqCodeGenOutput::Visit( IqParseNodeDiscardResult& DR )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	DR.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	IqParseNode * pNext = pNode->pChild();
@@ -436,19 +436,19 @@ void CqCodeGenOutput::Visit( IqParseNodeDiscardResult& DR)
 	m_slxFile << "\tdrop" << std::endl;
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeConstantFloat& F)
+void CqCodeGenOutput::Visit( IqParseNodeConstantFloat& F )
 {
 	m_slxFile << "\tpushif " << F.Value() << std::endl;
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeConstantString& S)
+void CqCodeGenOutput::Visit( IqParseNodeConstantString& S )
 {
 	m_slxFile << "\tpushis \"" << S.strValue() << "\"" << std::endl;
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeWhileConstruct& WC)
+void CqCodeGenOutput::Visit( IqParseNodeWhileConstruct& WC )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	WC.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	TqInt iLabelA = m_gcLabels++;
@@ -475,9 +475,9 @@ void CqCodeGenOutput::Visit( IqParseNodeWhileConstruct& WC)
 	m_slxFile << ":" << iLabelB << std::endl;		// completion label
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeIlluminateConstruct& IC)
+void CqCodeGenOutput::Visit( IqParseNodeIlluminateConstruct& IC )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	IC.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	TqInt iLabelA = m_gcLabels++;
@@ -490,8 +490,8 @@ void CqCodeGenOutput::Visit( IqParseNodeIlluminateConstruct& IC)
 	m_slxFile << ":" << iLabelA << std::endl;		// loop back label
 	m_slxFile << "\tS_CLEAR" << std::endl;			// clear current state
 	pArg->Accept( *this );
-	if ( IC.fHasAxisAngle() )	m_slxFile << "\tilluminate2" << std::endl;
-	else						m_slxFile << "\tilluminate" << std::endl;
+	if ( IC.fHasAxisAngle() ) m_slxFile << "\tilluminate2" << std::endl;
+	else	m_slxFile << "\tilluminate" << std::endl;
 	m_slxFile << "\tS_JZ " << iLabelB << std::endl;	// exit loop if false
 	m_slxFile << "\tRS_PUSH" << std::endl;			// Push running state
 	m_slxFile << "\tRS_GET" << std::endl;			// Get state
@@ -501,9 +501,9 @@ void CqCodeGenOutput::Visit( IqParseNodeIlluminateConstruct& IC)
 	m_slxFile << ":" << iLabelB << std::endl;		// completion label
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeIlluminanceConstruct& IC)
+void CqCodeGenOutput::Visit( IqParseNodeIlluminanceConstruct& IC )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	IC.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	TqInt iLabelA = m_gcLabels++;
@@ -524,9 +524,9 @@ void CqCodeGenOutput::Visit( IqParseNodeIlluminanceConstruct& IC)
 	m_slxFile << ":" << iLabelA << std::endl;		// loop back label
 	m_slxFile << "\tS_CLEAR" << std::endl;			// clear current state
 	pArg->Accept( *this );
-	if ( IC.fHasAxisAngle() ) 
+	if ( IC.fHasAxisAngle() )
 		m_slxFile << "\tilluminance2" << std::endl;
-	else						 
+	else
 		m_slxFile << "\tilluminance" << std::endl;
 	m_slxFile << "\tS_JZ " << iLabelC << std::endl;	// skip processing of statement if light has no influence
 	m_slxFile << "\tRS_PUSH" << std::endl;			// Push running state
@@ -539,16 +539,16 @@ void CqCodeGenOutput::Visit( IqParseNodeIlluminanceConstruct& IC)
 	m_slxFile << ":" << iLabelB << std::endl;		// completion label
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeSolarConstruct& SC)
+void CqCodeGenOutput::Visit( IqParseNodeSolarConstruct& SC )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	SC.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	TqInt iLabelA = m_gcLabels++;
 	TqInt iLabelB = m_gcLabels++;
-	if( SC.fHasAxisAngle() )
+	if ( SC.fHasAxisAngle() )
 	{
-		IqParseNode* pArg = pNode->pChild();
+		IqParseNode * pArg = pNode->pChild();
 		assert( pArg != 0 );
 		IqParseNode* pStmt = pArg->pNextSibling();
 		//assert(pStmt!=0);
@@ -581,9 +581,9 @@ void CqCodeGenOutput::Visit( IqParseNodeSolarConstruct& SC)
 	}
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeConditional& C)
+void CqCodeGenOutput::Visit( IqParseNodeConditional& C )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	C.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	TqInt iLabelA = m_gcLabels++;
@@ -619,9 +619,9 @@ void CqCodeGenOutput::Visit( IqParseNodeConditional& C)
 	m_slxFile << "\tRS_POP" << std::endl;			// pop running state
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeConditionalExpression& CE)
+void CqCodeGenOutput::Visit( IqParseNodeConditionalExpression& CE )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	CE.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	IqParseNode * pArg = pNode->pChild();
@@ -639,9 +639,9 @@ void CqCodeGenOutput::Visit( IqParseNodeConditionalExpression& CE)
 	m_slxFile << "\tmerge" << pstrTType << std::endl;
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeTypeCast& TC)
+void CqCodeGenOutput::Visit( IqParseNodeTypeCast& TC )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	TC.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	IqParseNode * pOperand = pNode->pChild();
@@ -652,7 +652,7 @@ void CqCodeGenOutput::Visit( IqParseNodeTypeCast& TC)
 	// No need to output a cast for the triple or h types.
 	pOperand->Accept( *this );
 	if ( !( ( typeA == Type_Point || typeA == Type_Normal || typeA == Type_Vector ) &&
-		    ( typeB == Type_Point || typeB == Type_Normal || typeB == Type_Vector ) ) )
+	        ( typeB == Type_Point || typeB == Type_Normal || typeB == Type_Vector ) ) )
 	{
 		char * pstrToType = gVariableTypeIdentifiers[ TC.CastTo() & Type_Mask ];
 		char* pstrFromType = gVariableTypeIdentifiers[ pOperand->ResType() & Type_Mask ];
@@ -660,9 +660,9 @@ void CqCodeGenOutput::Visit( IqParseNodeTypeCast& TC)
 	}
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeTriple& T)
+void CqCodeGenOutput::Visit( IqParseNodeTriple& T )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	T.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	IqParseNode * pA = pNode->pChild();
@@ -678,9 +678,9 @@ void CqCodeGenOutput::Visit( IqParseNodeTriple& T)
 	pA->Accept( *this );
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeSixteenTuple& ST)
+void CqCodeGenOutput::Visit( IqParseNodeSixteenTuple& ST )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	ST.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	IqParseNode * p00 = pNode->pChild();	assert( p00 != 0 );
@@ -721,9 +721,9 @@ void CqCodeGenOutput::Visit( IqParseNodeSixteenTuple& ST)
 	p33->Accept( *this );
 }
 
-void CqCodeGenOutput::Visit( IqParseNodeMessagePassingFunction& MPF)
+void CqCodeGenOutput::Visit( IqParseNodeMessagePassingFunction& MPF )
 {
-	IqParseNode* pNode;
+	IqParseNode * pNode;
 	MPF.GetInterface( ParseNode_Base, ( void** ) & pNode );
 
 	IqParseNode * pExpr = pNode->pChild();
@@ -733,41 +733,41 @@ void CqCodeGenOutput::Visit( IqParseNodeMessagePassingFunction& MPF)
 	CqString strCommType( "surface" );
 	switch ( MPF.CommType() )
 	{
-		case CommTypeAtmosphere:
-		strCommType = "atmosphere";
-		break;
+			case CommTypeAtmosphere:
+			strCommType = "atmosphere";
+			break;
 
-		case CommTypeDisplacement:
-		strCommType = "displacement";
-		break;
+			case CommTypeDisplacement:
+			strCommType = "displacement";
+			break;
 
-		case CommTypeLightsource:
-		strCommType = "lightsource";
-		break;
+			case CommTypeLightsource:
+			strCommType = "lightsource";
+			break;
 
-		case CommTypeAttribute:
-		strCommType = "attribute";
-		break;
+			case CommTypeAttribute:
+			strCommType = "attribute";
+			break;
 
-		case CommTypeOption:
-		strCommType = "option";
-		break;
+			case CommTypeOption:
+			strCommType = "option";
+			break;
 
-		case CommTypeRendererInfo:
-		strCommType = "rendererinfo";
-		break;
+			case CommTypeRendererInfo:
+			strCommType = "rendererinfo";
+			break;
 
-		case CommTypeIncident:
-		strCommType = "incident";
-		break;
+			case CommTypeIncident:
+			strCommType = "incident";
+			break;
 
-		case CommTypeOpposite:
-		strCommType = "opposite";
-		break;
+			case CommTypeOpposite:
+			strCommType = "opposite";
+			break;
 
-		case CommTypeTextureInfo:
-		strCommType = "textureinfo";
-		break;
+			case CommTypeTextureInfo:
+			strCommType = "textureinfo";
+			break;
 
 	}
 	// Output the comm function.

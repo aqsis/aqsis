@@ -3,7 +3,7 @@
 #include "libribtypes.h"
 #include "parser.h"
 
-extern int yylex(YYSTYPE*);
+extern int yylex( YYSTYPE* );
 namespace librib
 {
 extern CqRibBinaryDecoder* BinaryDecoder;
@@ -34,7 +34,7 @@ int main( int argc, char* argv[] )
 {
 	YYSTYPE data;
 	librib::BinaryDecoder = new librib::CqRibBinaryDecoder( stdin );
-	while ( yylex(&data) )
+	while ( yylex( &data ) )
 	{}
 
 	delete( librib::BinaryDecoder );

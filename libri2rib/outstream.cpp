@@ -85,7 +85,7 @@ void CqStreamGzip::openFile( const char *name )
 
 void CqStreamGzip::openFile( int fdesc )
 {
-	gzf = gzdopen( dup(fdesc), "wb" );
+	gzf = gzdopen( dup( fdesc ), "wb" );
 	if ( gzf == NULL )
 	{
 		char c[ 100 ];
@@ -144,7 +144,7 @@ void CqStreamFDesc::openFile( const char *name )
 
 void CqStreamFDesc::openFile ( int fdesc )
 {
-	fstr = fdopen ( dup(fdesc), "wb" );
+	fstr = fdopen ( dup( fdesc ), "wb" );
 	if ( fstr == NULL )
 	{
 		char c[ 100 ];
