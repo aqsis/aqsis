@@ -7,5 +7,5 @@ librib2stream_la_LDFLAGS = -rpath $(libdir)
 
 include_HEADERS = librib2stream.h
 
-INCLUDES = -I$(top_srcdir)/librib2
+INCLUDES = -I$(top_srcdir)/librib2 -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I$(top_srcdir)/libri2rib
 

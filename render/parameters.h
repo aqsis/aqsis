@@ -125,12 +125,12 @@ class CqParameter
 			{
 				TqInt length = strlen( strName ); /* < 2^18, or carry can overflow */
 				/* ints are assumed to be 32 bits */
-				TqUshort *sbuf;
+				const char  *sbuf;
 				TqUint hi, lo, hicarry, locarry;
 				TqInt len, remain, i;
 
 
-				sbuf = ( TqUshort * ) strName;
+				sbuf = strName;
 				len = 2 * ( length / 4 );   /* make sure it's even */
 				remain = length % 4;    /* add odd bytes below */
 
@@ -138,8 +138,8 @@ class CqParameter
 				lo = ( retval << 16 ) >> 16;
 				for ( i = 0; i < len; i += 2 )
 				{
-					hi += sbuf[ i ];
-					lo += sbuf[ i + 1 ];
+					hi += sbuf[ 2 * i ] + sbuf[ 2 * i + 1 ] * 256;
+					lo += sbuf[ 2 * (i+1) ] + 256 *  sbuf[ 2 * (i+1) + 1 ];
 				}
 				if ( remain >= 1 ) hi += strName[ 2 * len ] * 0x100;
 				if ( remain >= 2 ) hi += strName[ 2 * len + 1 ];
