@@ -1000,17 +1000,37 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, TqInt iParam,
 	if ( USES( lUses, EnvVars_P ) )
 		pGrid->P() ->SetPoint( ( *pTopology()->pPoints()->P() ) [ iParam ], iData );
 
-	if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && pTopology()->pPoints()->bHass() )
-		pGrid->s() ->SetFloat( ( *pTopology()->pPoints()->s() ) [ iParam ], iData );
+	if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) )
+	{
+		if( pTopology()->pPoints()->bHass() )
+			pGrid->s() ->SetFloat( ( *pTopology()->pPoints()->s() ) [ iParam ], iData );
+		else
+			pGrid->s() ->SetFloat( ( *pTopology()->pPoints()->P() ) [ iParam ].x(), iData );
+	}
 
-	if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && pTopology()->pPoints()->bHast() )
-		pGrid->t() ->SetFloat( ( *pTopology()->pPoints()->t() ) [ iParam ], iData );
+	if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) )
+	{
+		if( pTopology()->pPoints()->bHast() )
+			pGrid->t() ->SetFloat( ( *pTopology()->pPoints()->t() ) [ iParam ], iData );
+		else
+			pGrid->t() ->SetFloat( ( *pTopology()->pPoints()->P() ) [ iParam ].y(), iData );
+	}
 
-	if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && pTopology()->pPoints()->bHasu() )
-		pGrid->u() ->SetFloat( ( *pTopology()->pPoints()->u() ) [ iParam ], iData );
+	if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) )
+	{
+		if( pTopology()->pPoints()->bHasu() )
+			pGrid->u() ->SetFloat( ( *pTopology()->pPoints()->u() ) [ iParam ], iData );
+		else
+			pGrid->u() ->SetFloat( ( *pTopology()->pPoints()->P() ) [ iParam ].y(), iData );
+	}
 
-	if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && pTopology()->pPoints()->bHasv() )
-		pGrid->v() ->SetFloat( ( *pTopology()->pPoints()->v() ) [ iParam ], iData );
+	if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) )
+	{
+		if( pTopology()->pPoints()->bHasv() )
+			pGrid->v() ->SetFloat( ( *pTopology()->pPoints()->v() ) [ iParam ], iData );
+		else
+			pGrid->v() ->SetFloat( ( *pTopology()->pPoints()->P() ) [ iParam ].y(), iData );
+	}
 
 	// Now lets store the diced user specified primitive variables.
 	std::vector<CqParameter*>::iterator iUP;
@@ -1132,6 +1152,74 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 		CqMatrix matuBasis( RiBSplineBasis );
 		CqMatrix matvBasis( RiBSplineBasis );
 		pSurface->ConvertToBezierBasis( matuBasis, matvBasis );
+
+		TqInt iUses = Uses();
+
+		// If the shader needs s/t or u/v, and s/t is not specified, then at this point store the object space x,y coordinates.
+		if ( USES( iUses, EnvVars_s ) || USES( iUses, EnvVars_t ) || USES( iUses, EnvVars_u ) || USES( iUses, EnvVars_v ) )
+		{
+			CqVector3D PA, PB, PC, PD;
+			CqMatrix matID;
+			const CqMatrix& matCurrentToWorld = QGetRenderContext() ->matSpaceToSpace( "current", "object", matID, pTopology()->pPoints()->pTransform() ->matObjectToWorld() );
+			PA = matCurrentToWorld * pSurface->P() ->pValue() [ 0 ];
+			PB = matCurrentToWorld * pSurface->P() ->pValue() [ 3 ];
+			PC = matCurrentToWorld * pSurface->P() ->pValue() [ 15 ];
+			PD = matCurrentToWorld * pSurface->P() ->pValue() [ 12 ];
+
+			if ( USES( iUses, EnvVars_s ) && !pTopology()->pPoints()->bHass() )
+			{
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" );
+				pNewUP->SetSize( pSurface->cVarying() );
+
+				pNewUP->pValue() [ 0 ] = PA.x();
+				pNewUP->pValue() [ 1 ] = PB.x();
+				pNewUP->pValue() [ 2 ] = PD.x();
+				pNewUP->pValue() [ 3 ] = PC.x();
+
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
+
+			if ( USES( iUses, EnvVars_t ) && !pTopology()->pPoints()->bHast() )
+			{
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" );
+				pNewUP->SetSize( pSurface->cVarying() );
+
+				pNewUP->pValue() [ 0 ] = PA.y();
+				pNewUP->pValue() [ 1 ] = PB.y();
+				pNewUP->pValue() [ 2 ] = PD.y();
+				pNewUP->pValue() [ 3 ] = PC.y();
+
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
+
+			if ( USES( iUses, EnvVars_u ) && !pTopology()->pPoints()->bHasu() )
+			{
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "u" );
+				pNewUP->SetSize( pSurface->cVarying() );
+
+				pNewUP->pValue() [ 0 ] = PA.x();
+				pNewUP->pValue() [ 1 ] = PB.x();
+				pNewUP->pValue() [ 2 ] = PD.x();
+				pNewUP->pValue() [ 3 ] = PC.x();
+
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
+
+			if ( USES( iUses, EnvVars_v ) && !pTopology()->pPoints()->bHasv() )
+			{
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "v" );
+				pNewUP->SetSize( pSurface->cVarying() );
+
+				pNewUP->pValue() [ 0 ] = PA.y();
+				pNewUP->pValue() [ 1 ] = PB.y();
+				pNewUP->pValue() [ 2 ] = PD.y();
+				pNewUP->pValue() [ 3 ] = PC.y();
+
+				pSurface->AddPrimitiveVariable( pNewUP );
+			}
+
+		}
+
 
 		aSplits.push_back(pSurface);
 	}
