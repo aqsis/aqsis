@@ -26,6 +26,12 @@
 #ifndef AQSIS_H_INCLUDED
 #define AQSIS_H_INCLUDED 1
 
+#ifdef HAVE_CONFIG_H
+#include	"config.h"
+#else
+#warn	" If this is a POSIX system you should be sure to run configure"
+#endif
+
 #include	<assert.h>
 
 #include	"aqsis_types.h"
