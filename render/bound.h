@@ -50,8 +50,6 @@ public:
         {
             m_vecMin.x( pBounds[ 0 ] );	m_vecMin.y( pBounds[ 2 ] );	m_vecMin.z( pBounds[ 4 ] );
             m_vecMax.x( pBounds[ 1 ] );	m_vecMax.y( pBounds[ 3 ] );	m_vecMax.z( pBounds[ 5 ] );
-
-			m_vecCross = m_vecMax - m_vecMin;
         }
     }
 
@@ -59,16 +57,12 @@ public:
     {
         m_vecMin.x( XMin );	m_vecMin.y( YMin );	m_vecMin.z( ZMin );
         m_vecMax.x( XMax );	m_vecMax.y( YMax );	m_vecMax.z( ZMax );
-
-		m_vecCross = m_vecMax - m_vecMin;
     }
 
     CqBound( const CqVector3D& vecMin, const CqVector3D& vecMax )
     {
         m_vecMin = vecMin;
         m_vecMax = vecMax;
-
-		m_vecCross = m_vecMax - m_vecMin;
     }
 
     CqBound( const CqBound& From );
@@ -95,14 +89,9 @@ public:
         return ( m_vecMax );
     }
 
-	const	CqVector3D& vecCross() const
+	CqVector3D vecCross() const
 	{
-		return	( m_vecCross );
-	}
-
-	CqVector3D&	vecCross()
-	{
-		return	( m_vecCross );
+		return( m_vecMax - m_vecMin );
 	}
 
 	TqFloat	Volume() const
@@ -112,7 +101,7 @@ public:
 
 	TqFloat Volume2() const
 	{
-		return m_vecCross.Magnitude2();
+		return( vecCross().Magnitude2() );
 	}
 
     CqBound&	operator=( const CqBound& From );
