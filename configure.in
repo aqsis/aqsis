@@ -96,12 +96,31 @@ fi
 
 dnl TIFF library
 saveCFLAGS=$CFLAGS
-HAVE_LIBTIFF
+saveLIBS=$LIBS
+HAVE_LIBTIFF_ARGS
 CFLAGS=$TIFF_INC
+LIBS=$TIFF_FLAGS
 AC_CHECK_HEADER(tiff.h)
+AC_CHECK_LIB(m, pow)
+AC_CHECK_LIB(tiff, TIFFOpen)
 CFLAGS=$saveCFLAGS
-if test ! "$ac_cv_header_tiff_h" ; then
-        AC_MSG_ERROR([*** Cannot find tiff.h, please ensure you have libtiff installed ***]);
+LIBS=$saveLIBS
+if test ! "$ac_cv_header_tiff_h" || test ! "ac_cv_lib_tiff_TIFFOpen" ; then
+        AC_MSG_ERROR([*** Please ensure you have libtiff libraries and headers installed ***]);
+fi
+
+dnl ZLIB library
+saveCFLAGS=$CFLAGS
+saveLIBS=$LIBS
+HAVE_LIBZ_ARGS
+CFLAGS=$ZLIB_INC
+LIBS=$ZLIB_FLAGS
+AC_CHECK_HEADER(zlib.h)
+AC_CHECK_LIB(z,gzopen)
+CFLAGS=$saveCFLAGS
+LIBS=$saveLIBS
+if test ! "$ac_cv_header_zlib_h" || test ! "ac_cv_lib_z_gzopen" ; then
+        AC_MSG_ERROR([*** Please ensure you have zlib libraries and headers  installed ***]);
 fi
 
 CPPFLAGS="-DBASE_PATH=\\\"\"$datadir\\\"\" -DCONFIG_PATH=\\\"\"$sysconfdir\\\"\""
