@@ -373,10 +373,14 @@ void CqMicroPolyGrid::Split(CqImageBuffer* pImage, TqInt iBucket, long xmin, lon
 			TqBool fTrimmed = TqFalse;
 			if(pAttributes()->pTrimLoops()!=0)
 			{
-				TqBool fTrimA = pAttributes()->pTrimLoops()->TrimPoint(CqVector2D(u()[iIndex     ],v()[iIndex     ]));
-				TqBool fTrimB = pAttributes()->pTrimLoops()->TrimPoint(CqVector2D(u()[iIndex+1   ],v()[iIndex+1   ]));
-				TqBool fTrimC = pAttributes()->pTrimLoops()->TrimPoint(CqVector2D(u()[iIndex+cu+2],v()[iIndex+cu+2]));
-				TqBool fTrimD = pAttributes()->pTrimLoops()->TrimPoint(CqVector2D(u()[iIndex+cu+2],v()[iIndex+cu+2]));
+				CqVector2D vecT(u()[iIndex],v()[iIndex]);
+				TqBool fTrimA = pAttributes()->pTrimLoops()->TrimPoint(vecT);
+				vecT=CqVector2D(u()[iIndex+1],v()[iIndex+1]);
+				TqBool fTrimB = pAttributes()->pTrimLoops()->TrimPoint(vecT);
+				vecT=CqVector2D(u()[iIndex+cu+2],v()[iIndex+cu+2]);
+				TqBool fTrimC = pAttributes()->pTrimLoops()->TrimPoint(vecT);
+				vecT=CqVector2D(u()[iIndex+cu+1],v()[iIndex+cu+1]);
+				TqBool fTrimD = pAttributes()->pTrimLoops()->TrimPoint(vecT);
 
 				// If al points are trimmed discard the MPG
 				if(fTrimA && fTrimB && fTrimC && fTrimD)
