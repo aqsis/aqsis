@@ -2122,6 +2122,26 @@ RtVoid	RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep)
 	CqMatrix u;
 	CqMatrix v;
 
+	// A good parser will use the Ri*Basis pointers so a quick comparison
+	//   can be done.
+	//if ( ubasis same as before )
+	//{
+	//	// Save off the newly given basis.
+	//
+	//	// Calculate the (inverse Bezier Basis) * (given basis), but do
+	//	//   a quick check for RiPowerBasis since that is an identity
+	//	//   matrix requiring no math.
+	//	if ( ubasis!=RiPowerBasis )
+	//	{
+	//	}
+	//	else
+	//	{
+	//	}
+	//
+	// Do the above again for vbasis.
+	// Save off (InvBezier * VBasis) and (Transpose(InvBezier*UBasis)).
+	//}
+
 	RtInt i;
 	for(i=0; i<4; i++)
 	{
