@@ -34,6 +34,8 @@
 #ifndef MTABLE_H_INCLUDED
 #define MTABLE_H_INCLUDED 1
 
+#pragma warning (disable : 4786)
+
 #include <map>
 #include <string>
 
