@@ -88,7 +88,7 @@ InputName=ambientlight
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -121,7 +121,7 @@ InputName=borg_metal
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -154,7 +154,40 @@ InputName=brickbump
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
+	aqsl $(InputPath) 
+	
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\bumpy.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\bumpy.sl
+InputName=bumpy
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
 	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\bumpy.sl
+InputName=bumpy
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -187,7 +220,7 @@ InputName=cellnoisetest
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -220,7 +253,7 @@ InputName=constant
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -253,7 +286,7 @@ InputName=dented
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -286,7 +319,7 @@ InputName=depthcue
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -319,7 +352,7 @@ InputName=distantlight
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -352,7 +385,7 @@ InputName=dpbluemarble
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -385,7 +418,7 @@ InputName=fog
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -418,7 +451,7 @@ InputName=matte
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -451,7 +484,7 @@ InputName=metal
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -484,7 +517,7 @@ InputName=paintedplastic
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -517,7 +550,7 @@ InputName=plastic
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -550,7 +583,7 @@ InputName=pointlight
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -583,7 +616,7 @@ InputName=randgrid
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -616,7 +649,7 @@ InputName=shadowspot
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -649,7 +682,7 @@ InputName=shinymetal
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -682,7 +715,7 @@ InputName=show_st
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -715,7 +748,7 @@ InputName=spacetest
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -750,7 +783,7 @@ InputName=spotlight
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -783,7 +816,7 @@ InputName=uvtest
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
@@ -816,7 +849,7 @@ InputName=wavy
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	aqsl $(InputPath) 
 	
 # End Custom Build
 
