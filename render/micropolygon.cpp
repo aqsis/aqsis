@@ -204,14 +204,28 @@ void CqMicroPolyGrid::CalcNormals()
 			igrid++;
 			// If we are at the last row, last row normal to the same.
 			if ( iv == vr - 1 )
-				pNg->SetNormal( vecN, ( vr * ( ur + 1 ) ) + iu );
+			{
+				CqVector3D vecNm1, vecNm2;
+				pNg->GetNormal( vecNm1, ( ( vr - 1 ) * ( ur + 1 ) ) + iu ); 
+				pNg->GetNormal( vecNm2, ( ( vr - 2 ) * ( ur + 1 ) ) + iu );
+				CqVector3D vecNN = ( vecNm1 - vecNm2 ) + vecN;
+				pNg->SetNormal( vecNN, ( vr * ( ur + 1 ) ) + iu );
+			}
 		}
 		// Set the last one on the row to the same.
-		pNg->SetNormal( vecN, igrid );
+		CqVector3D vecNm1, vecNm2;
+		pNg->GetNormal( vecNm1, igrid - 1 ); 
+		pNg->GetNormal( vecNm2, igrid - 2 );
+		CqVector3D vecNN = ( vecNm1 - vecNm2 ) + vecN;
+		pNg->SetNormal( vecNN, igrid );
 		igrid++;
 	}
 	// Set the very last corner value to the last normal calculated.
-	pNg->SetNormal( vecN, ( vr + 1 ) * ( ur + 1 ) - 1 );
+	CqVector3D vecNm1, vecNm2;
+	pNg->GetNormal( vecNm1, ( vr - 1 ) * ( ur - 1 ) - 1 ); 
+	pNg->GetNormal( vecNm2, ( vr - 2 ) * ( ur - 2 ) - 1 );
+	CqVector3D vecNN = ( vecNm1 - vecNm2 ) + vecN;
+	pNg->SetNormal( vecNN, ( vr + 1 ) * ( ur + 1 ) - 1 );
 }
 
 
