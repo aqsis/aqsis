@@ -126,17 +126,36 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
         //ADDREF( pNew );
         pNew->SetSurfaceParameters( Surface() );
 
-        // Get the indices for varying variables.
-        TqInt iUPA = PolyIndex( indexA );
-        TqInt iUPB = PolyIndex( indexB );
-        TqInt iUPC = PolyIndex( indexC );
-        TqInt iUPD = PolyIndex( indexD );
+        TqInt iUPA, iUPB, iUPC, iUPD;
+        TqInt iUPAf, iUPBf, iUPCf, iUPDf;
+		if( O == OrientationLH )
+		{
+			// Get the indices for varying variables.
+			iUPA = PolyIndex( indexA );
+			iUPB = PolyIndex( indexB );
+			iUPC = PolyIndex( indexC );
+			iUPD = PolyIndex( indexD );
 
-        // Get the indices for facevarying variables.
-        TqInt iUPAf = FaceVaryingIndex( indexA );
-        TqInt iUPBf = FaceVaryingIndex( indexB );
-        TqInt iUPCf = FaceVaryingIndex( indexC );
-        TqInt iUPDf = FaceVaryingIndex( indexD );
+			// Get the indices for facevarying variables.
+			iUPAf = FaceVaryingIndex( indexA );
+			iUPBf = FaceVaryingIndex( indexB );
+			iUPCf = FaceVaryingIndex( indexC );
+			iUPDf = FaceVaryingIndex( indexD );
+		}
+		else
+		{
+			// Get the indices for varying variables.
+			iUPA = PolyIndex( indexB );
+			iUPB = PolyIndex( indexA );
+			iUPC = PolyIndex( indexD );
+			iUPD = PolyIndex( indexC );
+
+			// Get the indices for facevarying variables.
+			iUPAf = FaceVaryingIndex( indexB );
+			iUPBf = FaceVaryingIndex( indexA );
+			iUPCf = FaceVaryingIndex( indexD );
+			iUPDf = FaceVaryingIndex( indexC );
+		}
 
         // Copy any user specified primitive variables.
         std::vector<CqParameter*>::iterator iUP;
