@@ -3,3 +3,6 @@ Makefile
 *.plg
 *.#*
 *~
+
+ri.inl
+ri_cache.inl
