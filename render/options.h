@@ -151,6 +151,9 @@ class CqDisplay
 										m_iColorQuantizeMax(255),
 										m_fColorQuantizeDitherAmplitude(0.5),
 										m_iDepthQuantizeOne(0),
+										m_iDepthQuantizeMin(0),
+										m_iDepthQuantizeMax(255),
+										m_fDepthQuantizeDitherAmplitude(0),
 										m_strDisplayType("file"),
 										m_strDisplayName("ri.pic"),
 										m_iDisplayMode(ModeRGB)	{}
