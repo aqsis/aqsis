@@ -25,3 +25,4 @@ test: check test-clean test-shaders
 
 .PHONY: test-clean test-shaders test
 
+EXTRA_DIST = aqsis.dsp 

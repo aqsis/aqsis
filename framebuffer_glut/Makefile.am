@@ -13,3 +13,4 @@ INCLUDES = -I$(top_srcdir)/libdd -I$(top_srcdir)/libddmsock -I$(top_srcdir)/liba
 
 LDFLAGS = @LDFLAGS@ -L@OPENGL_LIB@
 
+EXTRA_DIST = framebuffer_glut.dsp 

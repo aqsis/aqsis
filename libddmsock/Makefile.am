@@ -10,3 +10,4 @@ endif
 
 INCLUDES = -I$(top_srcdir)/render -I$(top_srcdir)/libddmsock -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix 
 
+EXTRA_DIST = libddmsock.dsp 
