@@ -78,14 +78,14 @@ extern TqInt gDefLightUses;
 #define	BEGIN_VARYING_SECTION	FOR_EACH
 #define	END_VARYING_SECTION		END_FOR
 
-#define	GETFLOAT(Val)		TqFloat _##Val; (Val)->GetFloat(_##Val,__iGrid)
-#define	GETPOINT(Val)		CqVector3D _##Val; (Val)->GetPoint(_##Val,__iGrid)
-#define	GETVECTOR(Val)		CqVector3D _##Val; (Val)->GetVector(_##Val,__iGrid)
-#define	GETNORMAL(Val)		CqVector3D _##Val; (Val)->GetNormal(_##Val,__iGrid)
-#define	GETCOLOR(Val)		CqColor _##Val; (Val)->GetColor(_##Val,__iGrid)
-#define	GETSTRING(Val)		CqString _##Val; (Val)->GetString(_##Val,__iGrid)
-#define	GETBOOLEAN(Val)		TqBool _##Val; (Val)->GetBool(_##Val,__iGrid)
-#define	GETMATRIX(Val)		CqMatrix _##Val; (Val)->GetMatrix(_##Val,__iGrid)
+#define	GETFLOAT(Val)		TqFloat _aq_##Val; (Val)->GetFloat(_aq_##Val,__iGrid)
+#define	GETPOINT(Val)		CqVector3D _aq_##Val; (Val)->GetPoint(_aq_##Val,__iGrid)
+#define	GETVECTOR(Val)		CqVector3D _aq_##Val; (Val)->GetVector(_aq_##Val,__iGrid)
+#define	GETNORMAL(Val)		CqVector3D _aq_##Val; (Val)->GetNormal(_aq_##Val,__iGrid)
+#define	GETCOLOR(Val)		CqColor _aq_##Val; (Val)->GetColor(_aq_##Val,__iGrid)
+#define	GETSTRING(Val)		CqString _aq_##Val; (Val)->GetString(_aq_##Val,__iGrid)
+#define	GETBOOLEAN(Val)		TqBool _aq_##Val; (Val)->GetBool(_aq_##Val,__iGrid)
+#define	GETMATRIX(Val)		CqMatrix _aq_##Val; (Val)->GetMatrix(_aq_##Val,__iGrid)
 
 #define	SETFLOAT(Val, v)	(Val)->SetFloat(v,__iGrid)
 #define	SETPOINT(Val, v)	(Val)->SetPoint(v,__iGrid)
@@ -96,14 +96,14 @@ extern TqInt gDefLightUses;
 #define	SETBOOLEAN(Val, v)	(Val)->SetBool(v,__iGrid)
 #define	SETMATRIX(Val, v)	(Val)->SetMatrix(v,__iGrid)
 
-#define	FLOAT(Val)			_##Val
-#define	POINT(Val)			_##Val
-#define	VECTOR(Val)			_##Val
-#define	NORMAL(Val)			_##Val
-#define	COLOR(Val)			_##Val
-#define	STRING(Val)			_##Val
-#define	BOOLEAN(Val)		_##Val
-#define	MATRIX(Val)			_##Val
+#define	FLOAT(Val)			_aq_##Val
+#define	POINT(Val)			_aq_##Val
+#define	VECTOR(Val)			_aq_##Val
+#define	NORMAL(Val)			_aq_##Val
+#define	COLOR(Val)			_aq_##Val
+#define	STRING(Val)			_aq_##Val
+#define	BOOLEAN(Val)		_aq_##Val
+#define	MATRIX(Val)			_aq_##Val
 
 #define	DEFPARAMIMPL		IqShaderData* Result, IqShader* pShader
 #define	DEFVOIDPARAMIMPL	IqShader* pShader
