@@ -102,6 +102,8 @@ private:
 		DspyImageDataMethod			m_DataMethod;
 		DspyImageCloseMethod		m_CloseMethod;
 		DspyImageDelayCloseMethod	m_DelayCloseMethod;
+		unsigned char  *m_DataRow;    // A row of bucket's data
+		unsigned char  *m_DataBucket; // A bucket's data
 	};
 
 	void	LoadDisplayLibrary( SqDisplayRequest& req );
