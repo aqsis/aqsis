@@ -1,0 +1,15 @@
+*.zip
+*.proj
+.#*
+*.ncb
+*.opt
+*~
+*.dep
+*.mak
+*.positions
+*.dll
+*.exe
+*.exp
+*.pdb
+*.ilk
+*.lib
