@@ -75,8 +75,8 @@ CqRenderer::CqRenderer() :
         m_pImageBuffer( 0 ),
         m_Mode( RenderMode_Image ),
         m_fSaveGPrims( TqFalse ),
-        m_OutputDataOffset(7),		// Cs, Os, z
-        m_OutputDataTotalSize(7),	// Cs, Os, z
+        m_OutputDataOffset(8),		// Cs, Os, z, coverage
+        m_OutputDataTotalSize(8),	// Cs, Os, z, coverage
         m_FrameNo( 0 ),
 		m_bObjectOpen(TqFalse),
         m_pErrorHandler( &RiErrorPrint ),
@@ -116,7 +116,7 @@ CqRenderer::CqRenderer() :
     m_aCoordSystems[ CoordSystem_Raster ].m_hash = CqParameter::hash( "raster" );
 
     m_pDDManager = CreateDisplayDriverManager();
-    m_pDDManager->Initialise();
+    m_pDDManager->Initialise(this);
 
     m_pRaytracer = CreateRaytracer();
     m_pRaytracer->Initialise();
@@ -521,6 +521,13 @@ TqFloat	CqRenderer::Time() const
         return ( QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 0 ] );
 }
 
+
+TqInt CqRenderer::bucketCount()
+{
+	return(pImage()->cXBuckets() * pImage()->cYBuckets() );
+}
+
+
 //----------------------------------------------------------------------
 /** Advance the current shutter time, only valid within motion blocks.
  */
@@ -610,7 +617,7 @@ void CqRenderer::RenderWorld()
     if ( pImage() == 0 )
         SetImage( new CqImageBuffer );
 
-    m_pDDManager->OpenDisplays();
+    m_pDDManager->OpenDisplays(this);
 
     pImage() ->RenderImage();
 
@@ -647,8 +654,8 @@ void CqRenderer::Initialise()
 
     // Clear the output data entries
     m_OutputDataEntries.clear();
-    m_OutputDataOffset = 7;		// Cs, Os, z
-    m_OutputDataTotalSize = 7;	// Cs, Os, z
+    m_OutputDataOffset = 8;		// Cs, Os, z, coverage
+    m_OutputDataTotalSize = 8;	// Cs, Os, z, coverage
 }
 
 
@@ -1330,6 +1337,33 @@ TqInt CqRenderer::OutputDataSamples( const char* name )
             return( entry->second.m_NumSamples );
     }
     return( 0 );
+}
+
+
+TqInt CqRenderer::GetOutputDataInfo( std::string& description, std::vector<TqInt>& counts )
+{
+	TqInt count = 4;
+	TqInt datasize = 3 + 3 + 1 + 1;
+	counts.clear();
+	counts.push_back(3);	// "Cs"
+	counts.push_back(3);	// "Os"
+	counts.push_back(1);	// "depth"
+	counts.push_back(1);	// "coverage"
+	description = "Cs/Os/depth/coverage/";
+
+    std::map<std::string, SqOutputDataEntry>::iterator entry = m_OutputDataEntries.begin( );
+    while( entry != m_OutputDataEntries.end() )
+	{	
+		// Append the entry to the description string, and the counts array
+        counts.push_back( entry->second.m_NumSamples );
+		description.append(entry->first);
+		description.append("/");
+		count++;
+		datasize += entry->second.m_NumSamples;
+		entry++;
+	}
+
+    return( datasize );
 }
 
 

@@ -189,6 +189,10 @@ SOURCE=.\micropolygon.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\mpdump.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\nurbs.cpp
 # End Source File
 # Begin Source File
@@ -402,6 +406,10 @@ SOURCE=.\micropolygon.h
 # Begin Source File
 
 SOURCE=.\motion.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\mpdump.h
 # End Source File
 # Begin Source File
 

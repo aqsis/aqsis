@@ -318,7 +318,7 @@ void CqImagePixel::Clear()
 
 void CqImagePixel::Combine()
 {
-    m_Coverage = 0;
+    TqFloat coverage = 0;
     TqInt depthfilter = 0;
 
     const CqString* pstrDepthFilter = QGetRenderContext() ->optCurrent().GetStringOption( "Hider", "depthfilter" );
@@ -402,7 +402,7 @@ void CqImagePixel::Combine()
 
         if ( samplehit )
         {
-            m_Coverage += 1;
+            coverage += 1.0f;
             samplecount++;
         }
 
@@ -442,7 +442,7 @@ void CqImagePixel::Combine()
     }
 
     if ( samplecount )
-        m_Coverage /= numsamples;
+        SetCoverage(coverage /= numsamples);
 }
 
 //----------------------------------------------------------------------

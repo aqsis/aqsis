@@ -70,7 +70,7 @@ class CqCSGTreeNode;
 
 struct SqImageSample
 {
-    SqImageSample( TqInt NumData = 7 )
+    SqImageSample( TqInt NumData = 8 )
     {
         m_Data.resize( NumData );
     }
@@ -116,19 +116,24 @@ struct SqImageSample
         m_Data[6] = d;
     }
 
+    TqFloat Coverage() const
+    {
+        return( m_Data[7] );
+    }
+
+    void SetCoverage( TqFloat d )
+    {
+        assert( m_Data.size() >= 8 );
+        m_Data[7] = d;
+    }
+
     TqInt DataSize() const
     {
         return( m_Data.size() );
     }
 
-    void SetDataSize( TqInt NumData )
-    {
-        m_Data.resize( NumData );
-    }
-
     TqInt m_flags;
     std::valarray<TqFloat>	m_Data;
-    TqFloat	m_Coverage;
     boost::shared_ptr<CqCSGTreeNode>	m_pCSGNode;	///< Pointer to the CSG node this sample is part of, NULL if not part of a solid.
 }
 ;
@@ -180,11 +185,11 @@ public:
      */
     TqFloat	Coverage()
     {
-        return ( m_Coverage );
+        return ( m_Data.Coverage() );
     }
     void	SetCoverage( TqFloat c )
     {
-        m_Coverage = c;
+        m_Data.SetCoverage( c );
     }
     /** Get the averaged color of this pixel
      * \return A color representing the averaged color at this pixel.
@@ -319,7 +324,6 @@ private:
     std::vector<std::vector<SqImageSample> > m_aValues;	///< Vector of vectors of sample point data.
     std::vector<SqSampleData> m_Samples;	///< A Vector of samples. Holds position, time, dof offset etc for each sample.
     SqImageSample	m_Data;
-    TqFloat	m_Coverage;						///< The approximate coverage, just the ratio of sample hits to misses.
     TqFloat m_MaxDepth;						///< The maximum depth of any sample in this pixel. used for occlusion culling
     TqFloat m_MinDepth;						///< The minimum depth of any sample in this pixel. used for occlusion culling
     TqInt m_OcclusionBoxId;					///< The CqOcclusionBox that covers this pixel

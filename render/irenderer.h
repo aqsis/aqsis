@@ -5,7 +5,7 @@
  *	@brief	Declare the common interface structure for a Renderer core class.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2004/03/23 22:26:55 $
+ *	Last change date:	$Date: 2004/06/08 18:30:33 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___irenderer_Loaded___
@@ -69,6 +69,7 @@ struct IqRenderer
     virtual TqInt	RegisterOutputData( const char* name ) = 0;
     virtual TqInt	OutputDataIndex( const char* name ) = 0;
     virtual TqInt	OutputDataSamples( const char* name ) = 0;
+	virtual	TqInt	GetOutputDataInfo( std::string& description, std::vector<TqInt>& counts ) = 0;
 
     virtual	void	SetCurrentFrame( TqInt FrameNo ) = 0;
     virtual	TqInt	CurrentFrame() const = 0;
@@ -76,6 +77,8 @@ struct IqRenderer
 	virtual	CqObjectInstance*	pCurrentObject() = 0;
 
     virtual	TqFloat	Time() const = 0;
+
+	virtual	TqInt	bucketCount() = 0;
 };
 
 IqRenderer* QGetRenderContextI();

@@ -45,7 +45,7 @@ IqDDManager* CreateDisplayDriverManager()
 /** Initialise the device manager.
  */
 
-TqInt CqDDManagerSimple::Initialise()
+TqInt CqDDManagerSimple::Initialise(IqRenderer* renderer)
 {
     return ( 0 );
 }
@@ -68,7 +68,7 @@ TqInt CqDDManagerSimple::ClearDisplays()
     return ( 0 );
 }
 
-TqInt CqDDManagerSimple::OpenDisplays()
+TqInt CqDDManagerSimple::OpenDisplays(IqRenderer* renderer)
 {
     std::vector<SqDDevice>::iterator i;
     for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )

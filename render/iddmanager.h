@@ -28,12 +28,14 @@
 #define IDDMANAGER_H_INCLUDED 1
 
 #include	"aqsis.h"
+#include	"color.h"
 #include	<map>
 
 
 START_NAMESPACE( Aqsis )
 
 struct SqImageSample;
+struct IqRenderer;
 class CqParameter;
 
 struct IqBucket
@@ -95,7 +97,7 @@ struct IqDDManager
 	{}
     /** Initialise the device manager.
      */
-    virtual	TqInt	Initialise() = 0;
+    virtual	TqInt	Initialise(IqRenderer*) = 0;
     /** Shutdown the device manager.
      */
     virtual	TqInt	Shutdown() = 0;
@@ -107,7 +109,7 @@ struct IqDDManager
     virtual	TqInt	ClearDisplays() = 0;
     /** Open all displays in the managers list.
      */
-    virtual	TqInt	OpenDisplays() = 0;
+    virtual	TqInt	OpenDisplays(IqRenderer*) = 0;
     /** Close all displays in the managers list, rendering is finished.
      */
     virtual	TqInt	CloseDisplays() = 0;

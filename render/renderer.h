@@ -129,6 +129,7 @@ public:
 
     virtual	TqFloat	Time() const;
     virtual	void	AdvanceTime();
+	virtual	TqInt	bucketCount();
 
     /** Set a pointer to the current context.
      * Primarily for Procedural objects
@@ -343,6 +344,7 @@ public:
     TqInt	RegisterOutputData( const char* name );
     TqInt	OutputDataIndex( const char* name );
     TqInt	OutputDataSamples( const char* name );
+	TqInt	GetOutputDataInfo( std::string& description, std::vector<TqInt>& counts );
     std::map<std::string, SqOutputDataEntry>& GetMapOfOutputDataEntries()
     {
         return( m_OutputDataEntries );
