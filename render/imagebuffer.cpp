@@ -1199,7 +1199,8 @@ void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt
 	{
 		// If depth is exactly the same as previous sample, chances are we've
 		// hit a MPG grid line.
-		if ( sample != end && (*sample).Depth() == ImageVal.Depth() )
+		// \note: Cannot do this if there is CSG involved, as all samples must be taken and kept the same.
+		if ( sample != end && (*sample).Depth() == ImageVal.Depth() && !(*sample).m_pCSGNode )
 		{
 			(*sample).m_Data = ( (*sample).m_Data + val ) * 0.5f;
 			return;

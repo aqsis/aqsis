@@ -285,8 +285,9 @@ void CqBucket::InitialiseFilterValues()
 
 void CqBucket::CombineElements()
 {
+	TqInt __i = 0;
     std::vector<CqImagePixel>::iterator end = m_aieImage.end();
-    for ( std::vector<CqImagePixel>::iterator i = m_aieImage.begin(); i != end ; i++ )
+    for ( std::vector<CqImagePixel>::iterator i = m_aieImage.begin(); i != end ; i++, __i++ )
         i->Combine();
 }
 
