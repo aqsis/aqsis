@@ -255,10 +255,10 @@ class _qShareC CqSurface : public CqBasicSurface
 
 		/** Get a reference the to P default parameter.
 		 */
-		CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>* P()
+		CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>* P()
 		{
 			if( m_aiStdPrimitiveVars[ EnvVars_P ] >= 0 )
-				return( static_cast<CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_P ] ] ) );
+				return( static_cast<CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>*>(m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_P ] ] ) );
 			else
 				return( NULL );
 		}
