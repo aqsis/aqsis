@@ -345,7 +345,18 @@ void CqMicroPolyGrid::Shade()
 
     for ( i = gsmin1; i >= 0; i-- )
     {
-        pI->SetVector( pP[ i ], i );
+		TqInt proj = QGetRenderContext()->GetIntegerOption( "System", "Projection" ) [ 0 ];
+		switch ( proj )
+		{
+		    case	ProjectionOrthographic:
+				pI->SetVector( CqVector3D(0,0,1), i );
+				break;
+		    
+			case	ProjectionPerspective:
+			default:
+				pI->SetVector( pP[ i ], i );
+				break;
+		}
 
         if ( bdpu )
         {
