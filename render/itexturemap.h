@@ -4,8 +4,8 @@
  *	@author	Authors name
  *	@brief	Brief description of the file contents
  *
- *	Last change by:		$Author: mw_matti $
- *	Last change date:	$Date: 2003/08/06 09:47:24 $
+ *	Last change by:		$Author: pgregory $
+ *	Last change date:	$Date: 2003/12/28 18:26:21 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -82,46 +82,46 @@ enum EqTexFormat
 
 struct IqTextureMap
 {
-	virtual	~IqTextureMap()
-	{}
+    virtual	~IqTextureMap()
+    {}
 
-	/** Get the horizontal resolution of this image.
-	 */
-	virtual TqUint	XRes() const = 0;
-	/** Get the vertical resolution of this image.
-	 */
-	virtual TqUint	YRes() const = 0;
-	/** Get the number of samples per pixel.
-	 */
-	virtual TqInt	SamplesPerPixel() const = 0;
-	/** Get the storage format of this image.
-	 */
-	virtual	EqTexFormat	Format() const = 0;
-	/** Get the image type.
-	 */
-	virtual	EqMapType	Type() const = 0;
-	/** Open this image ready for reading.
-	 */
-	virtual	void	Open() = 0;
-	/** Close this image file.
-	 */
-	virtual	void	Close() = 0;
-	/** Determine if this image file is valid, i.e. has been found and opened successfully.
-	 */
-	virtual bool	IsValid() const = 0;
+    /** Get the horizontal resolution of this image.
+     */
+    virtual TqUint	XRes() const = 0;
+    /** Get the vertical resolution of this image.
+     */
+    virtual TqUint	YRes() const = 0;
+    /** Get the number of samples per pixel.
+     */
+    virtual TqInt	SamplesPerPixel() const = 0;
+    /** Get the storage format of this image.
+     */
+    virtual	EqTexFormat	Format() const = 0;
+    /** Get the image type.
+     */
+    virtual	EqMapType	Type() const = 0;
+    /** Open this image ready for reading.
+     */
+    virtual	void	Open() = 0;
+    /** Close this image file.
+     */
+    virtual	void	Close() = 0;
+    /** Determine if this image file is valid, i.e. has been found and opened successfully.
+     */
+    virtual bool	IsValid() const = 0;
 
-	virtual void	PrepareSampleOptions(std::map<std::string, IqShaderData*>& paramMap ) = 0;
+    virtual void	PrepareSampleOptions(std::map<std::string, IqShaderData*>& paramMap ) = 0;
 
-	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val) = 0;
-	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
-	                           std::valarray<TqFloat>& val ) = 0;
-	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
-	                        std::valarray<TqFloat>& val, TqInt index = 0, TqFloat* average_depth = NULL, TqFloat* shadow_depth = NULL ) = 0;
-	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-	                        std::valarray<TqFloat>& val, TqInt index = 0, TqFloat* average_depth = NULL, TqFloat* shadow_depth = NULL ) = 0;
-	virtual CqMatrix& GetMatrix( TqInt which, TqInt index = 0 ) = 0;
+    virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val) = 0;
+    virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
+                            std::valarray<TqFloat>& val ) = 0;
+    virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth,
+                            std::valarray<TqFloat>& val, TqInt index = 0, TqFloat* average_depth = NULL, TqFloat* shadow_depth = NULL ) = 0;
+    virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
+                            std::valarray<TqFloat>& val, TqInt index = 0, TqFloat* average_depth = NULL, TqFloat* shadow_depth = NULL ) = 0;
+    virtual CqMatrix& GetMatrix( TqInt which, TqInt index = 0 ) = 0;
 
-	virtual	TqInt	NumPages() const = 0;
+    virtual	TqInt	NumPages() const = 0;
 };
 
 

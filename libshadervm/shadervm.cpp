@@ -51,9 +51,9 @@ START_NAMESPACE( Aqsis )
  */
 static struct shader_types
 {
-	char *name;
-	EqShaderType type;
-	TqUlong hash;
+    char *name;
+    EqShaderType type;
+    TqUlong hash;
 }
 gShaderTypeNames[] =
     {
@@ -67,7 +67,7 @@ gShaderTypeNames[] =
 TqInt gcShaderTypeNames = sizeof( gShaderTypeNames ) / sizeof( struct shader_types); //gShaderTypeNames[ 0 ] );
 
 
-/* 
+/*
  * Huge common shader routine definition translation table
  * Name, hash key for the opcode name,
  * Funtion pointer, N parameters, Parameters type, 
@@ -433,7 +433,7 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
 
         {"external", 0, &CqShaderVM::SO_external, 1, {type_invalid}},
 
-		{"occlusion", 0, &CqShaderVM::SO_occlusion, 0, {0}},
+        {"occlusion", 0, &CqShaderVM::SO_occlusion, 0, {0}},
     };
 
 /*
@@ -470,127 +470,127 @@ static TqUlong *itypes = NULL;
 
 IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fParameter, TqBool fOutput )
 {
-	// Create a VM specific shader variable, which implements the IqShaderData interface,
-	// based on the type and class specified.
-	switch ( Type )
-	{
-			case type_bool:    /* abviously they are missing here */
-			case type_integer:
-			case type_float:
-			{
-				switch ( Class )
-				{
-						case class_varying:
-						return ( new CqShaderVariableVaryingFloat( name.c_str(), fParameter ) );
-						case class_uniform:
-						return ( new CqShaderVariableUniformFloat( name.c_str(), fParameter ) );
-						default: // Clear up compiler warnings
-						break;
-				}
-				assert( TqFalse );	// If we get here, something is wrong with the request.
-				return ( NULL );
-			}
+    // Create a VM specific shader variable, which implements the IqShaderData interface,
+    // based on the type and class specified.
+    switch ( Type )
+    {
+    case type_bool:    /* abviously they are missing here */
+    case type_integer:
+    case type_float:
+        {
+            switch ( Class )
+            {
+            case class_varying:
+                return ( new CqShaderVariableVaryingFloat( name.c_str(), fParameter ) );
+            case class_uniform:
+                return ( new CqShaderVariableUniformFloat( name.c_str(), fParameter ) );
+            default: // Clear up compiler warnings
+                break;
+            }
+            assert( TqFalse );	// If we get here, something is wrong with the request.
+            return ( NULL );
+        }
 
-			case type_point:
-			{
-				switch ( Class )
-				{
-						case class_varying:
-						return ( new CqShaderVariableVaryingPoint( name.c_str(), fParameter ) );
-						case class_uniform:
-						return ( new CqShaderVariableUniformPoint( name.c_str(), fParameter ) );
-						default: // Clear up compiler warnings
-						break;
-				}
-				assert( TqFalse );	// If we get here, something is wrong with the request.
-				return ( NULL );
-			}
+    case type_point:
+        {
+            switch ( Class )
+            {
+            case class_varying:
+                return ( new CqShaderVariableVaryingPoint( name.c_str(), fParameter ) );
+            case class_uniform:
+                return ( new CqShaderVariableUniformPoint( name.c_str(), fParameter ) );
+            default: // Clear up compiler warnings
+                break;
+            }
+            assert( TqFalse );	// If we get here, something is wrong with the request.
+            return ( NULL );
+        }
 
-			case type_normal:
-			{
-				switch ( Class )
-				{
-						case class_varying:
-						return ( new CqShaderVariableVaryingNormal( name.c_str(), fParameter ) );
-						case class_uniform:
-						return ( new CqShaderVariableUniformNormal( name.c_str(), fParameter ) );
-						default: // Clear up compiler warnings
-						break;
-				}
-				assert( TqFalse );	// If we get here, something is wrong with the request.
-				return ( NULL );
-			}
+    case type_normal:
+        {
+            switch ( Class )
+            {
+            case class_varying:
+                return ( new CqShaderVariableVaryingNormal( name.c_str(), fParameter ) );
+            case class_uniform:
+                return ( new CqShaderVariableUniformNormal( name.c_str(), fParameter ) );
+            default: // Clear up compiler warnings
+                break;
+            }
+            assert( TqFalse );	// If we get here, something is wrong with the request.
+            return ( NULL );
+        }
 
-			case type_vector:
-			{
-				switch ( Class )
-				{
-						case class_varying:
-						return ( new CqShaderVariableVaryingVector( name.c_str(), fParameter ) );
-						case class_uniform:
-						return ( new CqShaderVariableUniformVector( name.c_str(), fParameter ) );
-						default: // Clear up compiler warnings
-						break;
-				}
-				assert( TqFalse );	// If we get here, something is wrong with the request.
-				return ( NULL );
-			}
+    case type_vector:
+        {
+            switch ( Class )
+            {
+            case class_varying:
+                return ( new CqShaderVariableVaryingVector( name.c_str(), fParameter ) );
+            case class_uniform:
+                return ( new CqShaderVariableUniformVector( name.c_str(), fParameter ) );
+            default: // Clear up compiler warnings
+                break;
+            }
+            assert( TqFalse );	// If we get here, something is wrong with the request.
+            return ( NULL );
+        }
 
-			case type_string:
-			{
-				switch ( Class )
-				{
-						case class_varying:
-						return ( new CqShaderVariableVaryingString( name.c_str(), fParameter ) );
-						case class_uniform:
-						return ( new CqShaderVariableUniformString( name.c_str(), fParameter ) );
-						default: // Clear up compiler warnings
-						break;
-				}
-				assert( TqFalse );	// If we get here, something is wrong with the request.
-				return ( NULL );
-			}
+    case type_string:
+        {
+            switch ( Class )
+            {
+            case class_varying:
+                return ( new CqShaderVariableVaryingString( name.c_str(), fParameter ) );
+            case class_uniform:
+                return ( new CqShaderVariableUniformString( name.c_str(), fParameter ) );
+            default: // Clear up compiler warnings
+                break;
+            }
+            assert( TqFalse );	// If we get here, something is wrong with the request.
+            return ( NULL );
+        }
 
-			case type_color:
-			{
-				switch ( Class )
-				{
-						case class_varying:
-						return ( new CqShaderVariableVaryingColor( name.c_str(), fParameter ) );
-						case class_uniform:
-						return ( new CqShaderVariableUniformColor( name.c_str(), fParameter ) );
-						default: // Clear up compiler warnings
-						break;
-				}
-				assert( TqFalse );	// If we get here, something is wrong with the request.
-				return ( NULL );
-			}
+    case type_color:
+        {
+            switch ( Class )
+            {
+            case class_varying:
+                return ( new CqShaderVariableVaryingColor( name.c_str(), fParameter ) );
+            case class_uniform:
+                return ( new CqShaderVariableUniformColor( name.c_str(), fParameter ) );
+            default: // Clear up compiler warnings
+                break;
+            }
+            assert( TqFalse );	// If we get here, something is wrong with the request.
+            return ( NULL );
+        }
 
-			case type_triple:
-			case type_hpoint:
-			case type_void:
-			assert( TqFalse );	// We don't support triples in the engine as variables.
-			return ( NULL );
+    case type_triple:
+    case type_hpoint:
+    case type_void:
+        assert( TqFalse );	// We don't support triples in the engine as variables.
+        return ( NULL );
 
-			case type_matrix:
-			{
-				switch ( Class )
-				{
-						case class_varying:
-						return ( new CqShaderVariableVaryingMatrix( name.c_str(), fParameter ) );
-						case class_uniform:
-						return ( new CqShaderVariableUniformMatrix( name.c_str(), fParameter ) );
-						default: // Clear up compiler warnings
-						break;
-				}
-				assert( TqFalse );	// If we get here, something is wrong with the request.
-				return ( NULL );
-			}
-			default: // Clear up compiler warnings
-			break;
-	}
-	assert( TqFalse );	// If we get here, something is wrong with the request.
-	return ( NULL );
+    case type_matrix:
+        {
+            switch ( Class )
+            {
+            case class_varying:
+                return ( new CqShaderVariableVaryingMatrix( name.c_str(), fParameter ) );
+            case class_uniform:
+                return ( new CqShaderVariableUniformMatrix( name.c_str(), fParameter ) );
+            default: // Clear up compiler warnings
+                break;
+            }
+            assert( TqFalse );	// If we get here, something is wrong with the request.
+            return ( NULL );
+        }
+    default: // Clear up compiler warnings
+        break;
+    }
+    assert( TqFalse );	// If we get here, something is wrong with the request.
+    return ( NULL );
 }
 
 //---------------------------------------------------------------------
@@ -600,67 +600,67 @@ IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass C
 
 IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariableClass VarClass, const CqString& name, TqInt Count, TqBool fParameter, TqBool fOutput )
 {
-	IqShaderData * pVar = 0;
-	switch ( VarType )
-	{
-			case type_float:
-			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVaryingFloat( name.c_str(), fParameter );
-			else
-				pVar = new CqShaderVariableUniformFloat( name.c_str(), fParameter );
-			break;
+    IqShaderData * pVar = 0;
+    switch ( VarType )
+    {
+    case type_float:
+        if ( VarClass == class_varying )
+            pVar = new CqShaderVariableVaryingFloat( name.c_str(), fParameter );
+        else
+            pVar = new CqShaderVariableUniformFloat( name.c_str(), fParameter );
+        break;
 
-			case type_point:
-			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVaryingPoint( name.c_str(), fParameter );
-			else
-				pVar = new CqShaderVariableUniformPoint( name.c_str(), fParameter );
-			break;
+    case type_point:
+        if ( VarClass == class_varying )
+            pVar = new CqShaderVariableVaryingPoint( name.c_str(), fParameter );
+        else
+            pVar = new CqShaderVariableUniformPoint( name.c_str(), fParameter );
+        break;
 
-			case type_normal:
-			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVaryingNormal( name.c_str(), fParameter );
-			else
-				pVar = new CqShaderVariableUniformNormal( name.c_str(), fParameter );
-			break;
+    case type_normal:
+        if ( VarClass == class_varying )
+            pVar = new CqShaderVariableVaryingNormal( name.c_str(), fParameter );
+        else
+            pVar = new CqShaderVariableUniformNormal( name.c_str(), fParameter );
+        break;
 
-			case type_vector:
-			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVaryingVector( name.c_str(), fParameter );
-			else
-				pVar = new CqShaderVariableUniformVector( name.c_str(), fParameter );
-			break;
+    case type_vector:
+        if ( VarClass == class_varying )
+            pVar = new CqShaderVariableVaryingVector( name.c_str(), fParameter );
+        else
+            pVar = new CqShaderVariableUniformVector( name.c_str(), fParameter );
+        break;
 
-			case type_color:
-			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVaryingColor( name.c_str(), fParameter );
-			else
-				pVar = new CqShaderVariableUniformColor( name.c_str(), fParameter );
-			break;
+    case type_color:
+        if ( VarClass == class_varying )
+            pVar = new CqShaderVariableVaryingColor( name.c_str(), fParameter );
+        else
+            pVar = new CqShaderVariableUniformColor( name.c_str(), fParameter );
+        break;
 
-			case type_string:
-			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVaryingString( name.c_str(), fParameter );
-			else
-				pVar = new CqShaderVariableUniformString( name.c_str(), fParameter );
-			break;
+    case type_string:
+        if ( VarClass == class_varying )
+            pVar = new CqShaderVariableVaryingString( name.c_str(), fParameter );
+        else
+            pVar = new CqShaderVariableUniformString( name.c_str(), fParameter );
+        break;
 
-			case type_matrix:
-			if ( VarClass == class_varying )
-				pVar = new CqShaderVariableVaryingMatrix( name.c_str(), fParameter );
-			else
-				pVar = new CqShaderVariableUniformMatrix( name.c_str(), fParameter );
-			break;
-			default: // Clear up the warnings
-			break;
-	}
-	CqShaderVariableArray* pArray = new CqShaderVariableArray( name.c_str(), Count, fParameter );
-	pArray->aVariables() [ 0 ] = pVar;
-	TqInt i;
-	for ( i = 1; i < Count; i++ )
-		pArray->aVariables() [ i ] = pVar->Clone();
+    case type_matrix:
+        if ( VarClass == class_varying )
+            pVar = new CqShaderVariableVaryingMatrix( name.c_str(), fParameter );
+        else
+            pVar = new CqShaderVariableUniformMatrix( name.c_str(), fParameter );
+        break;
+    default: // Clear up the warnings
+        break;
+    }
+    CqShaderVariableArray* pArray = new CqShaderVariableArray( name.c_str(), Count, fParameter );
+    pArray->aVariables() [ 0 ] = pVar;
+    TqInt i;
+    for ( i = 1; i < Count; i++ )
+        pArray->aVariables() [ i ] = pVar->Clone();
 
-	return ( pArray );
+    return ( pArray );
 }
 
 //---------------------------------------------------------------------
@@ -670,8 +670,8 @@ IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariabl
 
 IqShaderData* CqShaderVM::CreateTemporaryStorage( EqVariableType type, EqVariableClass _class )
 {
-	static CqString strName( "__temporary__" );
-	return ( CreateVariable( type, _class, strName ) );
+    static CqString strName( "__temporary__" );
+    return ( CreateVariable( type, _class, strName ) );
 }
 
 
@@ -682,7 +682,7 @@ IqShaderData* CqShaderVM::CreateTemporaryStorage( EqVariableType type, EqVariabl
 
 void CqShaderVM::DeleteTemporaryStorage( IqShaderData* pData )
 {
-	delete( pData );
+    delete( pData );
 }
 
 //---------------------------------------------------------------------
@@ -694,52 +694,52 @@ void CqShaderVM::DeleteTemporaryStorage( IqShaderData* pData )
 
 void CqShaderVM::DefaultSurface()
 {
-	char	pDefSurfaceShader[] = " \
-	                           surface \
-	                           segment Data \
-	                           USES 460803 \
-	                           param uniform  float Kd \
-	                           param uniform  float Ka \
-	                           varying  float d \
-	                           segment Init \
-	                           pushif 0.8 \
-	                           pop Kd \
-	                           pushif 0.2 \
-	                           pop Ka \
-	                           segment Code \
-	                           pushv N \
-	                           normalize \
-	                           pushv I \
-	                           normalize \
-	                           dotpp \
-	                           pop d \
-	                           pushv d \
-	                           pushv d \
-	                           pushv Kd \
-	                           mulff \
-	                           mulff \
-	                           pushv Ka \
-	                           addff \
-	                           setfc \
-	                           pushv Cs \
-	                           mulcc \
-	                           pop Ci \
-	                           pushv Os \
-	                           pop Oi \
-	                           pushv Oi \
-	                           pushv Ci \
-	                           mulcc \
-	                           pop Ci \
-	                           ";
+    char	pDefSurfaceShader[] = " \
+                               surface \
+                               segment Data \
+                               USES 460803 \
+                               param uniform  float Kd \
+                               param uniform  float Ka \
+                               varying  float d \
+                               segment Init \
+                               pushif 0.8 \
+                               pop Kd \
+                               pushif 0.2 \
+                               pop Ka \
+                               segment Code \
+                               pushv N \
+                               normalize \
+                               pushv I \
+                               normalize \
+                               dotpp \
+                               pop d \
+                               pushv d \
+                               pushv d \
+                               pushv Kd \
+                               mulff \
+                               mulff \
+                               pushv Ka \
+                               addff \
+                               setfc \
+                               pushv Cs \
+                               mulcc \
+                               pop Ci \
+                               pushv Os \
+                               pop Oi \
+                               pushv Oi \
+                               pushv Ci \
+                               mulcc \
+                               pop Ci \
+                               ";
 
 #ifndef AQSIS_SYSTEM_MACOSX
-	std::stringstream defStream(pDefSurfaceShader);
+    std::stringstream defStream(pDefSurfaceShader);
 #else
-	std::strstream defStream;
-        defStream  << pDefSurfaceShader << std::ends;
+    std::strstream defStream;
+    defStream  << pDefSurfaceShader << std::ends;
 #endif
 
-	LoadProgram(&defStream);
+    LoadProgram(&defStream);
 }
 
 
@@ -750,13 +750,13 @@ void CqShaderVM::DefaultSurface()
 
 static TqBool notspace(char C)
 {
-	bool retval = TqTrue;
+    bool retval = TqTrue;
 
-	if ((C == 0x20) ||
-	        (( C >= 0x09 ) && (C <= 0x0D)))
-		retval = TqFalse;
+    if ((C == 0x20) ||
+            (( C >= 0x09 ) && (C <= 0x0D)))
+        retval = TqFalse;
 
-	return retval;
+    return retval;
 }
 
 //---------------------------------------------------------------------
@@ -765,22 +765,22 @@ static TqBool notspace(char C)
 
 void CqShaderVM::GetToken( char* token, TqInt l, std::istream* pFile )
 {
-	char c;
-	TqInt i = 0;
-	( *pFile ) >> std::ws;
-	c = pFile->get();
-	if ( c == ':' && i == 0 )
-	{
-		token[ 0 ] = c;
-		token[ 1 ] = '\0';
-		return ;	// Special case for labels.
-	}
-	while ( notspace( c ) && i < l - 1 )
-	{
-		token[ i++ ] = c;
-		token[ i ] = '\0';
-		c = pFile->get();
-	}
+    char c;
+    TqInt i = 0;
+    ( *pFile ) >> std::ws;
+    c = pFile->get();
+    if ( c == ':' && i == 0 )
+    {
+        token[ 0 ] = c;
+        token[ 1 ] = '\0';
+        return ;	// Special case for labels.
+    }
+    while ( notspace( c ) && i < l - 1 )
+    {
+        token[ i++ ] = c;
+        token[ i ] = '\0';
+        c = pFile->get();
+    }
 }
 
 
@@ -790,446 +790,446 @@ void CqShaderVM::GetToken( char* token, TqInt l, std::istream* pFile )
 
 void CqShaderVM::LoadProgram( std::istream* pFile )
 {
-	enum EqSegment
-	{
-	    Seg_Data = 0,
-	    Seg_Init,
-	    Seg_Code,
-	};
-	char token[ 255 ];
-	EqSegment	Segment = Seg_Data;
-	std::vector<UsProgramElement>*	pProgramArea = NULL;
-	std::vector<TqInt>	aLabels;
-	CqShaderExecEnv	*StdEnv = new CqShaderExecEnv;
-	ADDREF( StdEnv );
-	TqInt	array_count = 0;
-	TqUlong  htoken, i;
+    enum EqSegment
+    {
+        Seg_Data = 0,
+        Seg_Init,
+        Seg_Code,
+    };
+    char token[ 255 ];
+    EqSegment	Segment = Seg_Data;
+    std::vector<UsProgramElement>*	pProgramArea = NULL;
+    std::vector<TqInt>	aLabels;
+    CqShaderExecEnv	*StdEnv = new CqShaderExecEnv;
+    ADDREF( StdEnv );
+    TqInt	array_count = 0;
+    TqUlong  htoken, i;
 
- 	// Initialise the private hash keys.
-	if (!dhash)
-		dhash = CqParameter::hash("Data");
-	if (!ihash)
-		ihash = CqParameter::hash("Init");
-	if (!chash)
-		chash = CqParameter::hash("Code");
-	if (!phash)
-		phash = CqParameter::hash("param");
-	if (!vhash)
-		vhash = CqParameter::hash("varying");
-	if (!uhash)
-		uhash = CqParameter::hash("uniform");
-	if (!shash)
-		shash = CqParameter::hash("segment");
-	if (!ushash)
-		ushash = CqParameter::hash("USES");
-	if (!ehash)
-		ehash = CqParameter::hash("external");
-	if (!ohash)
-		ohash = CqParameter::hash("output");
+    // Initialise the private hash keys.
+    if (!dhash)
+        dhash = CqParameter::hash("Data");
+    if (!ihash)
+        ihash = CqParameter::hash("Init");
+    if (!chash)
+        chash = CqParameter::hash("Code");
+    if (!phash)
+        phash = CqParameter::hash("param");
+    if (!vhash)
+        vhash = CqParameter::hash("varying");
+    if (!uhash)
+        uhash = CqParameter::hash("uniform");
+    if (!shash)
+        shash = CqParameter::hash("segment");
+    if (!ushash)
+        ushash = CqParameter::hash("USES");
+    if (!ehash)
+        ehash = CqParameter::hash("external");
+    if (!ohash)
+        ohash = CqParameter::hash("output");
 
-	if (!itypes)
-	{
-		itypes = (TqUlong *) malloc(gcVariableTypeNames * sizeof(TqUlong));
-		for(i = 0; i<gcVariableTypeNames; i++)
-			itypes[i] = CqParameter::hash(gVariableTypeNames[i]);
-	}
+    if (!itypes)
+    {
+        itypes = (TqUlong *) malloc(gcVariableTypeNames * sizeof(TqUlong));
+        for(i = 0; i<gcVariableTypeNames; i++)
+            itypes[i] = CqParameter::hash(gVariableTypeNames[i]);
+    }
 
 
-	TqBool fShaderSpec = TqFalse;
-	while ( !pFile->eof() )
-	{
-		GetToken( token, 255, pFile );
+    TqBool fShaderSpec = TqFalse;
+    while ( !pFile->eof() )
+    {
+        GetToken( token, 255, pFile );
 
-		htoken = CqParameter::hash(token);
+        htoken = CqParameter::hash(token);
 
-		// Check for type and version information.
-		if ( !fShaderSpec )
-		{
-			TqInt i;
-			for ( i = 0; i < gcShaderTypeNames; i++ )
-			{
-				if (!gShaderTypeNames[i].hash)
-				{
-					gShaderTypeNames[i].hash = CqParameter::hash(gShaderTypeNames[i].name);
-				}
-				if ( gShaderTypeNames[i].hash == htoken )
-				{
-					m_Type = gShaderTypeNames[i].type;
-					fShaderSpec = TqTrue;
-					break;
-				}
-			}
-			if ( fShaderSpec ) continue;
-		}
+        // Check for type and version information.
+        if ( !fShaderSpec )
+        {
+            TqInt i;
+            for ( i = 0; i < gcShaderTypeNames; i++ )
+            {
+                if (!gShaderTypeNames[i].hash)
+                {
+                    gShaderTypeNames[i].hash = CqParameter::hash(gShaderTypeNames[i].name);
+                }
+                if ( gShaderTypeNames[i].hash == htoken )
+                {
+                    m_Type = gShaderTypeNames[i].type;
+                    fShaderSpec = TqTrue;
+                    break;
+                }
+            }
+            if ( fShaderSpec ) continue;
+        }
 
-		if ( strcmp( token, "AQSIS_V" ) == 0 )
-		{
-			GetToken( token, 255, pFile );
+        if ( strcmp( token, "AQSIS_V" ) == 0 )
+        {
+            GetToken( token, 255, pFile );
 
-			continue;
+            continue;
 
-			// Get the version information.
-			//			CqString strVersion(token);
-			//			TqInt vMaj, vMin, build;
-			//			GET_VERSION_FROM_STRING(vMaj,vMin,build);
-			//			if(CHECK_NEWER_VERSION(vMaj,vMin,build))
-			//			{
-			//				CqBasicError(0,Severity_Fatal,"SLX built by more recent version of Aqsis");
-			//				return;
-			//			}
-		}
+            // Get the version information.
+            //			CqString strVersion(token);
+            //			TqInt vMaj, vMin, build;
+            //			GET_VERSION_FROM_STRING(vMaj,vMin,build);
+            //			if(CHECK_NEWER_VERSION(vMaj,vMin,build))
+            //			{
+            //				CqBasicError(0,Severity_Fatal,"SLX built by more recent version of Aqsis");
+            //				return;
+            //			}
+        }
 
-		if ( ushash == htoken) // == "USES"
-		{
-			( *pFile ) >> m_Uses;
-			continue;
-		}
+        if ( ushash == htoken) // == "USES"
+        {
+            ( *pFile ) >> m_Uses;
+            continue;
+        }
 
-		if ( shash == htoken ) // == "segment"
-		{
-			GetToken( token, 255, pFile );
-			htoken = CqParameter::hash(token);
+        if ( shash == htoken ) // == "segment"
+        {
+            GetToken( token, 255, pFile );
+            htoken = CqParameter::hash(token);
 
-			if ( dhash == htoken ) // == "Data"
-				Segment = Seg_Data;
-			else if ( ihash == htoken) // == "Init"
-			{
-				Segment = Seg_Init;
-				pProgramArea = &m_ProgramInit;
-				aLabels.clear();
-			}
-			else if (chash == htoken ) // == "Code"
-			{
-				Segment = Seg_Code;
-				pProgramArea = &m_Program;
-				aLabels.clear();
-			}
-		}
-		else
-		{
-			EqVariableType VarType = type_invalid;
-			EqVariableClass VarClass = class_varying;
-			TqBool			fVarArray = TqFalse;
-			TqBool			fParameter = TqFalse;
-			TqBool			fOutput = TqFalse;
-			switch ( Segment )
-			{
-					case Seg_Data:
-					VarType = type_invalid;
-					VarClass = class_invalid;
-					while ( VarType == type_invalid )
-					{
-						if ( ohash == htoken) // == "output"
-							fOutput = TqTrue;
-						else if ( phash == htoken) // == "param"
-							fParameter = TqTrue;
-						else if ( vhash == htoken) // == "varying"
-							VarClass = class_varying;
-						else if ( uhash == htoken) // == "uniform"
-							VarClass = class_uniform;
-						else
-						{
-							TqInt itype = 0;
-							for(itype = 0; itype<gcVariableTypeNames; itype++)
-								if (htoken == itypes[itype]) // == gVariableTypeNames[itype]
-								{
-									VarType = static_cast<EqVariableType>(itype);
-									break;
-								}
-						}
-						GetToken( token, 255, pFile );
-						htoken = CqParameter::hash(token);
-					}
-					// Check for array type variable.
-					if ( token[ strlen( token ) - 1 ] == ']' )
-					{
-						unsigned int i = 0;
-						while ( i < strlen( token ) && token[ i ] != '[' ) i++;
-						if ( i == strlen( token ) )
-						{
-							//CqBasicError( 0, Severity_Fatal, "Invalid variable specification in slx file" );
-							std::cerr << critical << "Invalid variable specification in slx file" << std::endl;
-							RELEASEREF( StdEnv );
-							return ;
-						}
-						token[ strlen( token ) - 1 ] = '\0';
-						token[ i ] = '\0';
-						i++;
-						array_count = atoi( &token[ i ] );
-						fVarArray = TqTrue;
-					}
-					// Check if there is a valid variable specifier
-					if ( VarType == type_invalid ||
-					        VarClass == class_invalid )
-						continue;
+            if ( dhash == htoken ) // == "Data"
+                Segment = Seg_Data;
+            else if ( ihash == htoken) // == "Init"
+            {
+                Segment = Seg_Init;
+                pProgramArea = &m_ProgramInit;
+                aLabels.clear();
+            }
+            else if (chash == htoken ) // == "Code"
+            {
+                Segment = Seg_Code;
+                pProgramArea = &m_Program;
+                aLabels.clear();
+            }
+        }
+        else
+        {
+            EqVariableType VarType = type_invalid;
+            EqVariableClass VarClass = class_varying;
+            TqBool			fVarArray = TqFalse;
+            TqBool			fParameter = TqFalse;
+            TqBool			fOutput = TqFalse;
+            switch ( Segment )
+            {
+            case Seg_Data:
+                VarType = type_invalid;
+                VarClass = class_invalid;
+                while ( VarType == type_invalid )
+                {
+                    if ( ohash == htoken) // == "output"
+                        fOutput = TqTrue;
+                    else if ( phash == htoken) // == "param"
+                        fParameter = TqTrue;
+                    else if ( vhash == htoken) // == "varying"
+                        VarClass = class_varying;
+                    else if ( uhash == htoken) // == "uniform"
+                        VarClass = class_uniform;
+                    else
+                    {
+                        TqInt itype = 0;
+                        for(itype = 0; itype<gcVariableTypeNames; itype++)
+                            if (htoken == itypes[itype]) // == gVariableTypeNames[itype]
+                            {
+                                VarType = static_cast<EqVariableType>(itype);
+                                break;
+                            }
+                    }
+                    GetToken( token, 255, pFile );
+                    htoken = CqParameter::hash(token);
+                }
+                // Check for array type variable.
+                if ( token[ strlen( token ) - 1 ] == ']' )
+                {
+                    unsigned int i = 0;
+                    while ( i < strlen( token ) && token[ i ] != '[' ) i++;
+                    if ( i == strlen( token ) )
+                    {
+                        //CqBasicError( 0, Severity_Fatal, "Invalid variable specification in slx file" );
+                        std::cerr << critical << "Invalid variable specification in slx file" << std::endl;
+                        RELEASEREF( StdEnv );
+                        return ;
+                    }
+                    token[ strlen( token ) - 1 ] = '\0';
+                    token[ i ] = '\0';
+                    i++;
+                    array_count = atoi( &token[ i ] );
+                    fVarArray = TqTrue;
+                }
+                // Check if there is a valid variable specifier
+                if ( VarType == type_invalid ||
+                        VarClass == class_invalid )
+                    continue;
 
-					if ( fVarArray )
-						AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count, fParameter, fOutput ) );
-					else
-						AddLocalVariable( CreateVariable( VarType, VarClass, token, fParameter, fOutput ) );
-					break;
+                if ( fVarArray )
+                    AddLocalVariable( CreateVariableArray( VarType, VarClass, token, array_count, fParameter, fOutput ) );
+                else
+                    AddLocalVariable( CreateVariable( VarType, VarClass, token, fParameter, fOutput ) );
+                break;
 
-					case Seg_Init:
-					case Seg_Code:
-					// Check if it is a label
-					if ( strcmp( token, ":" ) == 0 )
-					{
-						( *pFile ) >> std::ws;
-						TqFloat f;
-						( *pFile ) >> f;
-						if ( aLabels.size() < ( f + 1 ) )
-							aLabels.resize( static_cast<TqInt>( f ) + 1 );
-						aLabels[ static_cast<TqInt>( f ) ] = pProgramArea->size();
-						AddCommand( &CqShaderVM::SO_nop, pProgramArea );
-						break;
-					}
-					// Find the opcode in the translation table.
-					TqInt i;
-					for ( i = 0; i < m_cTransSize; i++ )
-					{
-						if ( !m_TransTable[ i ].m_hash ) 
-						{
-							m_TransTable[ i ].m_hash = CqParameter::hash(m_TransTable[ i ].m_strName);
-						}
+            case Seg_Init:
+            case Seg_Code:
+                // Check if it is a label
+                if ( strcmp( token, ":" ) == 0 )
+                {
+                    ( *pFile ) >> std::ws;
+                    TqFloat f;
+                    ( *pFile ) >> f;
+                    if ( aLabels.size() < ( f + 1 ) )
+                        aLabels.resize( static_cast<TqInt>( f ) + 1 );
+                    aLabels[ static_cast<TqInt>( f ) ] = pProgramArea->size();
+                    AddCommand( &CqShaderVM::SO_nop, pProgramArea );
+                    break;
+                }
+                // Find the opcode in the translation table.
+                TqInt i;
+                for ( i = 0; i < m_cTransSize; i++ )
+                {
+                    if ( !m_TransTable[ i ].m_hash )
+                    {
+                        m_TransTable[ i ].m_hash = CqParameter::hash(m_TransTable[ i ].m_strName);
+                    }
 
-						if ( ehash == htoken )
-						{
-							CqString strFunc, strRetType, strArgTypes ;
-							EqVariableType RetType;
-							std::list<EqVariableType> ArgTypes;
-							bool error = false; // Error in DSO resolution
+                    if ( ehash == htoken )
+                    {
+                        CqString strFunc, strRetType, strArgTypes ;
+                        EqVariableType RetType;
+                        std::list<EqVariableType> ArgTypes;
+                        bool error = false; // Error in DSO resolution
 
-							*pFile >> strFunc;
-							strFunc = strFunc.substr(1,strFunc.length() - 2);
-							std::list<SqDSOExternalCall*> *candidates = NULL;
-							m_itActiveDSOMap = m_ActiveDSOMap.find( strFunc );
-							if( m_itActiveDSOMap != m_ActiveDSOMap.end() )
-							{
-								candidates = ( *m_itActiveDSOMap ).second; 
-							}
-							else
-							{
-							  	candidates = getShadeOpMethods(&strFunc);
-								if( candidates == NULL )
-								{
-									RELEASEREF( StdEnv );
-									std::cerr << critical << "\"" << strName().c_str() << "\": No DSO found for external shadeop: \"" << strFunc.c_str() << "\"" << std::endl;
-									exit(1);
-								}
-								m_ActiveDSOMap[strFunc]=candidates;
-							};
+                        *pFile >> strFunc;
+                        strFunc = strFunc.substr(1,strFunc.length() - 2);
+                        std::list<SqDSOExternalCall*> *candidates = NULL;
+                        m_itActiveDSOMap = m_ActiveDSOMap.find( strFunc );
+                        if( m_itActiveDSOMap != m_ActiveDSOMap.end() )
+                        {
+                            candidates = ( *m_itActiveDSOMap ).second;
+                        }
+                        else
+                        {
+                            candidates = getShadeOpMethods(&strFunc);
+                            if( candidates == NULL )
+                            {
+                                RELEASEREF( StdEnv );
+                                std::cerr << critical << "\"" << strName().c_str() << "\": No DSO found for external shadeop: \"" << strFunc.c_str() << "\"" << std::endl;
+                                exit(1);
+                            }
+                            m_ActiveDSOMap[strFunc]=candidates;
+                        };
 
-							// pick out the return type
-							*pFile >> strRetType;
-							m_itTypeIdMap = m_TypeIdMap.find( strRetType[1] );
-							if (m_itTypeIdMap != m_TypeIdMap.end())
-							{
-								RetType = (*m_itTypeIdMap).second;
-							} 
-							else 
-							{
-								//error, we dont know this return type
-								RELEASEREF( StdEnv );
-								std::cerr << critical << "\"" << strName().c_str() << "\": Invalid return type in call to external shadeop: \"" << strFunc.c_str() << "\" : \"" << strRetType.c_str() << "\"" << std::endl;
-								exit(1);
-							};
+                        // pick out the return type
+                        *pFile >> strRetType;
+                        m_itTypeIdMap = m_TypeIdMap.find( strRetType[1] );
+                        if (m_itTypeIdMap != m_TypeIdMap.end())
+                        {
+                            RetType = (*m_itTypeIdMap).second;
+                        }
+                        else
+                        {
+                            //error, we dont know this return type
+                            RELEASEREF( StdEnv );
+                            std::cerr << critical << "\"" << strName().c_str() << "\": Invalid return type in call to external shadeop: \"" << strFunc.c_str() << "\" : \"" << strRetType.c_str() << "\"" << std::endl;
+                            exit(1);
+                        };
 
-							*pFile >> strArgTypes;
-							for ( TqUint x=1; x < strArgTypes.length()-1; x++ )
-							{
-								m_itTypeIdMap = m_TypeIdMap.find( strArgTypes[x] );
-								if ( m_itTypeIdMap != m_TypeIdMap.end() )
-								{
-									ArgTypes.push_back( ( *m_itTypeIdMap ).second );
-								}
-								else
-								{
-									// Error, unknown arg type
-									RELEASEREF( StdEnv );
-									std::cerr << critical << "\"" << strName().c_str() << "\": Invalid argument type in call to external shadeop: \"" << strFunc.c_str() << "\" : \"" << strArgTypes[x] << "\"" << std::endl;
-									exit(1);
-								};
+                        *pFile >> strArgTypes;
+                        for ( TqUint x=1; x < strArgTypes.length()-1; x++ )
+                        {
+                            m_itTypeIdMap = m_TypeIdMap.find( strArgTypes[x] );
+                            if ( m_itTypeIdMap != m_TypeIdMap.end() )
+                            {
+                                ArgTypes.push_back( ( *m_itTypeIdMap ).second );
+                            }
+                            else
+                            {
+                                // Error, unknown arg type
+                                RELEASEREF( StdEnv );
+                                std::cerr << critical << "\"" << strName().c_str() << "\": Invalid argument type in call to external shadeop: \"" << strFunc.c_str() << "\" : \"" << strArgTypes[x] << "\"" << std::endl;
+                                exit(1);
+                            };
 
-							};  
+                        };
 
-							//Now we need to find a good candidate.
-							std::list<SqDSOExternalCall*>::iterator candidate;
-							candidate = candidates->begin();
-							while (candidate !=candidates->end())
-							{
-								// Do we have a match
-								if ((*candidate)->return_type == RetType &&
-								    (*candidate)->arg_types == ArgTypes) break;
-								candidate++;
-							};
+                        //Now we need to find a good candidate.
+                        std::list<SqDSOExternalCall*>::iterator candidate;
+                        candidate = candidates->begin();
+                        while (candidate !=candidates->end())
+                        {
+                            // Do we have a match
+                            if ((*candidate)->return_type == RetType &&
+                                                    (*candidate)->arg_types == ArgTypes) break;
+                            candidate++;
+                        };
 
-							// If we are looking for a void return type but have not
-							// found an exact match, we will take the first match with
-							// suitable arguments and force the return value to be
-							// discarded.
-							bool forcedrop = false;
-							if(candidate == candidates->end() && RetType == type_void) 
-							{ 
-								candidate = candidates->begin();
-								while (candidate !=candidates->end())
-								{
-									// Do we have a match
-									if ( (*candidate)->arg_types == ArgTypes)
-									{
-										CqString strProto = strPrototype(&strFunc, (*candidate));
-										std::cerr << info << "\"" << strName().c_str() << "\": Using non-void DSO shadeop:  \"" << strProto.c_str() << "\"" <<
-															 "\"" << strName().c_str() << "\": In place of requested void shadeop: \"" << strFunc.c_str() << "\"" <<
-															 "\"" << strName().c_str() << "\": If this is not the operation you intended you should force the correct shadeop in your shader source." << std::endl;
-										forcedrop = true;
-								       		break;
-									};
-									candidate++;
-								};
-							}
+                        // If we are looking for a void return type but have not
+                        // found an exact match, we will take the first match with
+                        // suitable arguments and force the return value to be
+                        // discarded.
+                        bool forcedrop = false;
+                        if(candidate == candidates->end() && RetType == type_void)
+                        {
+                            candidate = candidates->begin();
+                            while (candidate !=candidates->end())
+                            {
+                                // Do we have a match
+                                if ( (*candidate)->arg_types == ArgTypes)
+                                {
+                                    CqString strProto = strPrototype(&strFunc, (*candidate));
+                                    std::cerr << info << "\"" << strName().c_str() << "\": Using non-void DSO shadeop:  \"" << strProto.c_str() << "\"" <<
+                                    "\"" << strName().c_str() << "\": In place of requested void shadeop: \"" << strFunc.c_str() << "\"" <<
+                                    "\"" << strName().c_str() << "\": If this is not the operation you intended you should force the correct shadeop in your shader source." << std::endl;
+                                    forcedrop = true;
+                                    break;
+                                };
+                                candidate++;
+                            };
+                        }
 
-							if(candidate == candidates->end())
-							{ 
-								std::cerr << critical << "\"" << strName().c_str() << "\": No candidate found for call to external shadeop: \"" << strFunc.c_str() <<
-														 "\"" << strName().c_str() << "\": Perhaps you need some casts?" <<
-														 "\"" << strName().c_str() << "\": The following candidates are in you current DSO path:" << std::endl;
-								candidate = candidates->begin();
-								while (candidate !=candidates->end())
-								{
-									CqString strProto = strPrototype(&strFunc, (*candidate));
-									std::cerr << info << "\"" << strName().c_str() << "\": \t" << strProto.c_str() << std::endl;
-									candidate++;
-								};
-								RELEASEREF( StdEnv );
-								exit(1);
-							};
+                        if(candidate == candidates->end())
+                        {
+                            std::cerr << critical << "\"" << strName().c_str() << "\": No candidate found for call to external shadeop: \"" << strFunc.c_str() <<
+                            "\"" << strName().c_str() << "\": Perhaps you need some casts?" <<
+                            "\"" << strName().c_str() << "\": The following candidates are in you current DSO path:" << std::endl;
+                            candidate = candidates->begin();
+                            while (candidate !=candidates->end())
+                            {
+                                CqString strProto = strPrototype(&strFunc, (*candidate));
+                                std::cerr << info << "\"" << strName().c_str() << "\": \t" << strProto.c_str() << std::endl;
+                                candidate++;
+                            };
+                            RELEASEREF( StdEnv );
+                            exit(1);
+                        };
 
-							if(!(*candidate)->initialised )
-							{
-								// We have an initialiser we have not run yet
-								if((*candidate)->init){
-									(*candidate)->initData = 
-										 ((*candidate)->init)((int)((void*)this),NULL);
-								};
-								(*candidate)->initialised = true;
-							};
-							
-							AddCommand( &CqShaderVM::SO_external, pProgramArea );
-							AddDSOExternalCall( (*candidate),pProgramArea );
+                        if(!(*candidate)->initialised )
+                        {
+                            // We have an initialiser we have not run yet
+                            if((*candidate)->init){
+                                (*candidate)->initData =
+                                    ((*candidate)->init)((int)((void*)this),NULL);
+                            };
+                            (*candidate)->initialised = true;
+                        };
 
-							if( forcedrop )
-								AddCommand( &CqShaderVM::SO_drop, pProgramArea );
+                        AddCommand( &CqShaderVM::SO_external, pProgramArea );
+                        AddDSOExternalCall( (*candidate),pProgramArea );
 
-							break;
-						}
+                        if( forcedrop )
+                            AddCommand( &CqShaderVM::SO_drop, pProgramArea );
 
-						if ( m_TransTable[ i ].m_hash == htoken)
-						{
-							// If the opcodes command pointer is 0, just ignore this opcode.
-							if ( m_TransTable[ i ].m_pCommand == 0 )
-								break;
+                        break;
+                    }
 
-							// If this is an 'illuminate' or 'solar' statement, then we can safely say this
-							// is not an ambient light.
-							if( &CqShaderVM::SO_illuminate == m_TransTable[ i ].m_pCommand ||
-							        &CqShaderVM::SO_illuminate2 == m_TransTable[ i ].m_pCommand ||
-							        &CqShaderVM::SO_solar == m_TransTable[ i ].m_pCommand ||
-							        &CqShaderVM::SO_solar2 == m_TransTable[ i ].m_pCommand )
-								m_fAmbient = TqFalse;
+                    if ( m_TransTable[ i ].m_hash == htoken)
+                    {
+                        // If the opcodes command pointer is 0, just ignore this opcode.
+                        if ( m_TransTable[ i ].m_pCommand == 0 )
+                            break;
 
-							// Add this opcode to the program segment.
-							AddCommand( m_TransTable[ i ].m_pCommand, pProgramArea );
+                        // If this is an 'illuminate' or 'solar' statement, then we can safely say this
+                        // is not an ambient light.
+                        if( &CqShaderVM::SO_illuminate == m_TransTable[ i ].m_pCommand ||
+                                &CqShaderVM::SO_illuminate2 == m_TransTable[ i ].m_pCommand ||
+                                &CqShaderVM::SO_solar == m_TransTable[ i ].m_pCommand ||
+                                &CqShaderVM::SO_solar2 == m_TransTable[ i ].m_pCommand )
+                            m_fAmbient = TqFalse;
 
-							// Process this opcodes parameters.
-							TqInt p;
-							for ( p = 0; p < m_TransTable[ i ].m_cParams; p++ )
-							{
-								if ( m_TransTable[ i ].m_aParamTypes[ p ] == type_invalid )
-								{
-									GetToken( token, 255, pFile );
-									TqInt iVar;
-									if ( ( iVar = FindLocalVarIndex( token ) ) >= 0 )
-										AddVariable( iVar, pProgramArea );
-									else if ( ( iVar = StdEnv->FindStandardVarIndex( token ) ) >= 0 )
-										AddVariable( iVar | 0x8000, pProgramArea );
-									else
-										// TODO: Report error.
-										AddVariable( 0, pProgramArea );
-								}
-								else
-								{
-									switch ( m_TransTable[ i ].m_aParamTypes[ p ] )
-									{
-											case type_float:
-											( *pFile ) >> std::ws;
-											TqFloat f;
-											( *pFile ) >> f;
-											AddFloat( f, pProgramArea );
-											break;
+                        // Add this opcode to the program segment.
+                        AddCommand( m_TransTable[ i ].m_pCommand, pProgramArea );
 
-											case type_string:
-											( *pFile ) >> std::ws;
-											char c;
-											CqString s( "" );
-											pFile->get();
-											while ( ( c = pFile->get() ) != '"' )
-												s += c;
-											AddString( s.c_str(), pProgramArea );
-											break;
-									}
-								}
-							}
-							break;
-						}
-					}
-					// If we have not found the opcode, throw an error.
-					if ( i == m_cTransSize )
-					{
-						CqString strErr( "Invalid opcode found : " );
-						strErr += token;
-						std::cerr << critical << strErr.c_str() << std::endl;
-						RELEASEREF( StdEnv );
-						return ;
-					}
-					break;
-			}
-		}
-		( *pFile ) >> std::ws;
-	}
-	// Now we need to complete any label jump statements.
-	i = 0;
-	while ( i < m_Program.size() )
-	{
-		UsProgramElement E = m_Program[ i++ ];
-		if ( E.m_Command == &CqShaderVM::SO_jnz ||
-		        E.m_Command == &CqShaderVM::SO_jmp ||
-		        E.m_Command == &CqShaderVM::SO_jz ||
-		        E.m_Command == &CqShaderVM::SO_RS_JZ ||
-		        E.m_Command == &CqShaderVM::SO_RS_JNZ ||
-		        E.m_Command == &CqShaderVM::SO_S_JZ ||
-		        E.m_Command == &CqShaderVM::SO_S_JNZ )
-		{
-			SqLabel lab;
-			lab.m_Offset = aLabels[ static_cast<unsigned int>( m_Program[ i ].m_FloatVal ) ];
-			lab.m_pAddress = &m_Program[ lab.m_Offset ];
-			m_Program[ i ].m_Label = lab;
-			i++;
-		}
-		else
-		{
-			// Find the command so that we can skip the parameters
-			TqInt j;
-			for ( j = 0; j < m_cTransSize; j++ )
-			{
-				if ( m_TransTable[ j ].m_pCommand == E.m_Command )
-				{
-					i += m_TransTable[ j ].m_cParams;
-					break;
-				}
-			}
-		}
-	}
+                        // Process this opcodes parameters.
+                        TqInt p;
+                        for ( p = 0; p < m_TransTable[ i ].m_cParams; p++ )
+                        {
+                            if ( m_TransTable[ i ].m_aParamTypes[ p ] == type_invalid )
+                            {
+                                GetToken( token, 255, pFile );
+                                TqInt iVar;
+                                if ( ( iVar = FindLocalVarIndex( token ) ) >= 0 )
+                                    AddVariable( iVar, pProgramArea );
+                                else if ( ( iVar = StdEnv->FindStandardVarIndex( token ) ) >= 0 )
+                                    AddVariable( iVar | 0x8000, pProgramArea );
+                                else
+                                    // TODO: Report error.
+                                    AddVariable( 0, pProgramArea );
+                            }
+                            else
+                            {
+                                switch ( m_TransTable[ i ].m_aParamTypes[ p ] )
+                                {
+                                case type_float:
+                                    ( *pFile ) >> std::ws;
+                                    TqFloat f;
+                                    ( *pFile ) >> f;
+                                    AddFloat( f, pProgramArea );
+                                    break;
 
-	RELEASEREF( StdEnv );
+                                case type_string:
+                                    ( *pFile ) >> std::ws;
+                                    char c;
+                                    CqString s( "" );
+                                    pFile->get();
+                                    while ( ( c = pFile->get() ) != '"' )
+                                        s += c;
+                                    AddString( s.c_str(), pProgramArea );
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+                // If we have not found the opcode, throw an error.
+                if ( i == m_cTransSize )
+                {
+                    CqString strErr( "Invalid opcode found : " );
+                    strErr += token;
+                    std::cerr << critical << strErr.c_str() << std::endl;
+                    RELEASEREF( StdEnv );
+                    return ;
+                }
+                break;
+            }
+        }
+        ( *pFile ) >> std::ws;
+    }
+    // Now we need to complete any label jump statements.
+    i = 0;
+    while ( i < m_Program.size() )
+    {
+        UsProgramElement E = m_Program[ i++ ];
+        if ( E.m_Command == &CqShaderVM::SO_jnz ||
+                E.m_Command == &CqShaderVM::SO_jmp ||
+                E.m_Command == &CqShaderVM::SO_jz ||
+                E.m_Command == &CqShaderVM::SO_RS_JZ ||
+                E.m_Command == &CqShaderVM::SO_RS_JNZ ||
+                E.m_Command == &CqShaderVM::SO_S_JZ ||
+                E.m_Command == &CqShaderVM::SO_S_JNZ )
+        {
+            SqLabel lab;
+            lab.m_Offset = aLabels[ static_cast<unsigned int>( m_Program[ i ].m_FloatVal ) ];
+            lab.m_pAddress = &m_Program[ lab.m_Offset ];
+            m_Program[ i ].m_Label = lab;
+            i++;
+        }
+        else
+        {
+            // Find the command so that we can skip the parameters
+            TqInt j;
+            for ( j = 0; j < m_cTransSize; j++ )
+            {
+                if ( m_TransTable[ j ].m_pCommand == E.m_Command )
+                {
+                    i += m_TransTable[ j ].m_cParams;
+                    break;
+                }
+            }
+        }
+    }
+
+    RELEASEREF( StdEnv );
 }
 
 
@@ -1239,17 +1239,17 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 
 void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShaderExecEnv* pEnv )
 {
-	m_pEnv = pEnv;
-	// Initialise local variables.
-	TqInt i;
-	for ( i = m_LocalVars.size() - 1; i >= 0; i-- )
-		m_LocalVars[ i ] ->Initialise( uGridRes, vGridRes );
+    m_pEnv = pEnv;
+    // Initialise local variables.
+    TqInt i;
+    for ( i = m_LocalVars.size() - 1; i >= 0; i-- )
+        m_LocalVars[ i ] ->Initialise( uGridRes, vGridRes );
 
-	m_uGridRes = uGridRes;
-	m_vGridRes = vGridRes;
+    m_uGridRes = uGridRes;
+    m_vGridRes = vGridRes;
 
-	// Reset the program counter.
-	m_PC = 0;
+    // Reset the program counter.
+    m_PC = 0;
 }
 
 
@@ -1259,26 +1259,26 @@ void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShade
 
 CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 {
-	m_Uses = From.m_Uses;
-	m_matCurrent = From.m_matCurrent;
-	m_strName = From.m_strName;
-	m_fAmbient = From.m_fAmbient;
+    m_Uses = From.m_Uses;
+    m_matCurrent = From.m_matCurrent;
+    m_strName = From.m_strName;
+    m_fAmbient = From.m_fAmbient;
 
-	// Copy the local variables...
-	std::vector<IqShaderData*>::const_iterator i;
-	for ( i = From.m_LocalVars.begin(); i != From.m_LocalVars.end(); i++ )
-		m_LocalVars.push_back( ( *i ) ->Clone() );
+    // Copy the local variables...
+    std::vector<IqShaderData*>::const_iterator i;
+    for ( i = From.m_LocalVars.begin(); i != From.m_LocalVars.end(); i++ )
+        m_LocalVars.push_back( ( *i ) ->Clone() );
 
-	// Copy the intialisation program.
-	std::vector<UsProgramElement>::const_iterator p;
-	for ( p = From.m_ProgramInit.begin(); p != From.m_ProgramInit.end(); p++ )
-		m_ProgramInit.push_back( *p );
+    // Copy the intialisation program.
+    std::vector<UsProgramElement>::const_iterator p;
+    for ( p = From.m_ProgramInit.begin(); p != From.m_ProgramInit.end(); p++ )
+        m_ProgramInit.push_back( *p );
 
-	// Copy the main program.
-	for ( p = From.m_Program.begin(); p != From.m_Program.end(); p++ )
-		m_Program.push_back( *p );
+    // Copy the main program.
+    for ( p = From.m_Program.begin(); p != From.m_Program.end(); p++ )
+        m_Program.push_back( *p );
 
-	return ( *this );
+    return ( *this );
 }
 
 
@@ -1288,28 +1288,28 @@ CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 
 void CqShaderVM::Execute( IqShaderExecEnv* pEnv )
 {
-	// Check if there is anything to execute.
-	if ( m_Program.size() <= 0 )
-		return ;
+    // Check if there is anything to execute.
+    if ( m_Program.size() <= 0 )
+        return ;
 
-	m_pEnv = pEnv;
+    m_pEnv = pEnv;
 
-	pEnv->InvalidateIlluminanceCache();
+    pEnv->InvalidateIlluminanceCache();
 
-	// Execute the main program.
-	m_PC = &m_Program[ 0 ];
-	m_PO = 0;
-	m_PE = m_Program.size();
-	UsProgramElement* pE;
+    // Execute the main program.
+    m_PC = &m_Program[ 0 ];
+    m_PO = 0;
+    m_PE = m_Program.size();
+    UsProgramElement* pE;
 
-	while ( !fDone() )
-	{
-		pE = &ReadNext();
-		( this->*pE->m_Command ) ();
-	}
-	// Check that the stack is empty.
-	assert( m_iTop == 0 );
-	m_Stack.clear();
+    while ( !fDone() )
+    {
+        pE = &ReadNext();
+        ( this->*pE->m_Command ) ();
+    }
+    // Check that the stack is empty.
+    assert( m_iTop == 0 );
+    m_Stack.clear();
 }
 
 
@@ -1319,36 +1319,36 @@ void CqShaderVM::Execute( IqShaderExecEnv* pEnv )
 
 void CqShaderVM::ExecuteInit()
 {
-	// Check if there is anything to execute.
-	if ( m_ProgramInit.size() <= 0 )
-		return ;
+    // Check if there is anything to execute.
+    if ( m_ProgramInit.size() <= 0 )
+        return ;
 
-	// Fake an environment
-	IqShaderExecEnv* pOldEnv = m_pEnv;
+    // Fake an environment
+    IqShaderExecEnv* pOldEnv = m_pEnv;
 
-	CqShaderExecEnv* Env = new CqShaderExecEnv;
-	ADDREF( Env );
-	Env->Initialise( 1, 1, 0, this, m_Uses );
-	Initialise( 1, 1, Env );
+    CqShaderExecEnv* Env = new CqShaderExecEnv;
+    ADDREF( Env );
+    Env->Initialise( 1, 1, 0, this, m_Uses );
+    Initialise( 1, 1, Env );
 
-	// Execute the init program.
-	m_PC = &m_ProgramInit[ 0 ];
-	m_PO = 0;
-	m_PE = m_ProgramInit.size();
-	UsProgramElement* pE;
+    // Execute the init program.
+    m_PC = &m_ProgramInit[ 0 ];
+    m_PO = 0;
+    m_PE = m_ProgramInit.size();
+    UsProgramElement* pE;
 
-	while ( !fDone() )
-	{
-		pE = &ReadNext();
-		( this->*pE->m_Command ) ();
-	}
-	// Check that the stack is empty.
-	assert( m_iTop == 0 );
-	m_Stack.clear();
+    while ( !fDone() )
+    {
+        pE = &ReadNext();
+        ( this->*pE->m_Command ) ();
+    }
+    // Check that the stack is empty.
+    assert( m_iTop == 0 );
+    m_Stack.clear();
 
-	m_pEnv = pOldEnv;
+    m_pEnv = pOldEnv;
 
-	RELEASEREF( Env );
+    RELEASEREF( Env );
 }
 
 
@@ -1358,145 +1358,145 @@ void CqShaderVM::ExecuteInit()
 
 void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, const CqString& strSpace, void* pval )
 {
-	// Find the relevant variable.
-	TqInt i = FindLocalVarIndex( strName.c_str() );
-	if ( i >= 0 )
-	{
-		int index = 0, count = 1, arrayindex = 0;
-		IqShaderData* pArray = 0;
+    // Find the relevant variable.
+    TqInt i = FindLocalVarIndex( strName.c_str() );
+    if ( i >= 0 )
+    {
+        int index = 0, count = 1, arrayindex = 0;
+        IqShaderData* pArray = 0;
 
-		if ( m_LocalVars[ i ] ->ArrayLength() > 0 )
-		{
-			pArray = m_LocalVars[ i ];
-			count = pArray->ArrayLength();
-		}
+        if ( m_LocalVars[ i ] ->ArrayLength() > 0 )
+        {
+            pArray = m_LocalVars[ i ];
+            count = pArray->ArrayLength();
+        }
 
-		// Ensure that the type passed matches what the variable expects.
-		if( m_LocalVars[ i ] ->Type() == type )
-		{
-			while ( count-- > 0 )
-			{
-				IqShaderData* pVMVal = CreateTemporaryStorage(type, class_uniform);
-				switch ( m_LocalVars[ i ] ->Type() )
-				{
-						case	type_float:
-						{
-							pVMVal->SetFloat(reinterpret_cast<TqFloat*>( pval ) [ index++ ] );
-						}
-						break;
+        // Ensure that the type passed matches what the variable expects.
+        if( m_LocalVars[ i ] ->Type() == type )
+        {
+            while ( count-- > 0 )
+            {
+                IqShaderData* pVMVal = CreateTemporaryStorage(type, class_uniform);
+                switch ( m_LocalVars[ i ] ->Type() )
+                {
+                case	type_float:
+                    {
+                        pVMVal->SetFloat(reinterpret_cast<TqFloat*>( pval ) [ index++ ] );
+                    }
+                    break;
 
-						case	type_point:
-						{
-							TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-							pVMVal->SetPoint( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
-							index += 3;
-						}
-						break;
+                case	type_point:
+                    {
+                        TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+                        pVMVal->SetPoint( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
+                        index += 3;
+                    }
+                    break;
 
-						case	type_normal:
-						{
-							TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-							pVMVal->SetNormal( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
-							index += 3;
-						}
-						break;
+                case	type_normal:
+                    {
+                        TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+                        pVMVal->SetNormal( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
+                        index += 3;
+                    }
+                    break;
 
-						case	type_vector:
-						{
-							TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-							pVMVal->SetVector( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
-							index += 3;
-						}
-						break;
+                case	type_vector:
+                    {
+                        TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+                        pVMVal->SetVector( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
+                        index += 3;
+                    }
+                    break;
 
-						case	type_color:
-						{
-							TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-							pVMVal->SetColor( CqColor( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
-							index += 3;
-						}
-						break;
+                case	type_color:
+                    {
+                        TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+                        pVMVal->SetColor( CqColor( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
+                        index += 3;
+                    }
+                    break;
 
-						case	type_matrix:
-						{
-							TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-							pVMVal->SetMatrix( CqMatrix( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ], pvecval[ index + 3 ],
-														 pvecval[ index + 4 ], pvecval[ index + 5 ], pvecval[ index + 6 ], pvecval[ index + 7 ],
-														 pvecval[ index + 8 ], pvecval[ index + 9 ], pvecval[ index + 10 ], pvecval[ index + 11 ],
-														 pvecval[ index + 12 ], pvecval[ index + 13 ], pvecval[ index + 14 ], pvecval[ index + 15 ] ) );
-							index += 16;
-						}
-						break;
+                case	type_matrix:
+                    {
+                        TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+                        pVMVal->SetMatrix( CqMatrix( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ], pvecval[ index + 3 ],
+                                                     pvecval[ index + 4 ], pvecval[ index + 5 ], pvecval[ index + 6 ], pvecval[ index + 7 ],
+                                                     pvecval[ index + 8 ], pvecval[ index + 9 ], pvecval[ index + 10 ], pvecval[ index + 11 ],
+                                                     pvecval[ index + 12 ], pvecval[ index + 13 ], pvecval[ index + 14 ], pvecval[ index + 15 ] ) );
+                        index += 16;
+                    }
+                    break;
 
-						case	type_string:
-						{
-							pVMVal->SetString( reinterpret_cast<char**>( pval ) [ index++ ] );
-						}
-						break;
+                case	type_string:
+                    {
+                        pVMVal->SetString( reinterpret_cast<char**>( pval ) [ index++ ] );
+                    }
+                    break;
 
-						default: // Clear up warnings
-						break;
-				}
+                default: // Clear up warnings
+                    break;
+                }
 
-				CqMatrix matObjectToWorld = matCurrent();
-				if( NULL != m_pEnv )
-					matObjectToWorld = m_pEnv->pTransform()->matObjectToWorld();
+                CqMatrix matObjectToWorld = matCurrent();
+                if( NULL != m_pEnv )
+                    matObjectToWorld = m_pEnv->pTransform()->matObjectToWorld();
 
-				// If it is a color or a point, ensure it is the correct 'space'
-				if ( m_LocalVars[ i ] ->Type() == type_point || m_LocalVars[ i ] ->Type() == type_hpoint )
-				{
-					CqString _strSpace( "shader" );
-					if ( strSpace.compare( "" ) != 0 )
-						_strSpace = strSpace;
-					CqVector3D p;
-					pVMVal->GetPoint( p, 0 );
-					pVMVal->SetPoint( QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
-				}
-				else if ( m_LocalVars[ i ] ->Type() == type_normal )
-				{
-					CqString _strSpace( "shader" );
-					if ( strSpace.compare( "" ) != 0 )
-						_strSpace = strSpace;
-					CqVector3D p;
-					pVMVal->GetNormal( p, 0 );
-					pVMVal->SetNormal( QGetRenderContextI() ->matNSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
-				}
-				else if ( m_LocalVars[ i ] ->Type() == type_vector )
-				{
-					CqString _strSpace( "shader" );
-					if ( strSpace.compare( "" ) != 0 )
-						_strSpace = strSpace;
-					CqVector3D p;
-					pVMVal->GetVector( p, 0 );
-					pVMVal->SetVector( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
-				}
-				else if ( m_LocalVars[ i ] ->Type() == type_matrix )
-				{
-					CqString _strSpace( "shader" );
-					if ( strSpace.compare( "" ) != 0 )
-						_strSpace = strSpace;
-					CqMatrix m;
-					pVMVal->GetMatrix( m, 0 );
-					pVMVal->SetMatrix( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * m );
-				}
+                // If it is a color or a point, ensure it is the correct 'space'
+                if ( m_LocalVars[ i ] ->Type() == type_point || m_LocalVars[ i ] ->Type() == type_hpoint )
+                {
+                    CqString _strSpace( "shader" );
+                    if ( strSpace.compare( "" ) != 0 )
+                        _strSpace = strSpace;
+                    CqVector3D p;
+                    pVMVal->GetPoint( p, 0 );
+                    pVMVal->SetPoint( QGetRenderContextI() ->matSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
+                }
+                else if ( m_LocalVars[ i ] ->Type() == type_normal )
+                {
+                    CqString _strSpace( "shader" );
+                    if ( strSpace.compare( "" ) != 0 )
+                        _strSpace = strSpace;
+                    CqVector3D p;
+                    pVMVal->GetNormal( p, 0 );
+                    pVMVal->SetNormal( QGetRenderContextI() ->matNSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
+                }
+                else if ( m_LocalVars[ i ] ->Type() == type_vector )
+                {
+                    CqString _strSpace( "shader" );
+                    if ( strSpace.compare( "" ) != 0 )
+                        _strSpace = strSpace;
+                    CqVector3D p;
+                    pVMVal->GetVector( p, 0 );
+                    pVMVal->SetVector( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * p );
+                }
+                else if ( m_LocalVars[ i ] ->Type() == type_matrix )
+                {
+                    CqString _strSpace( "shader" );
+                    if ( strSpace.compare( "" ) != 0 )
+                        _strSpace = strSpace;
+                    CqMatrix m;
+                    pVMVal->GetMatrix( m, 0 );
+                    pVMVal->SetMatrix( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * m );
+                }
 
-				if ( pArray )
-					pArray->ArrayEntry( arrayindex++ ) ->SetValueFromVariable( pVMVal );
-				else
-					m_LocalVars[ i ] ->SetValueFromVariable( pVMVal );
+                if ( pArray )
+                    pArray->ArrayEntry( arrayindex++ ) ->SetValueFromVariable( pVMVal );
+                else
+                    m_LocalVars[ i ] ->SetValueFromVariable( pVMVal );
 
-				DeleteTemporaryStorage(pVMVal);
-			}
-		}
-		else
-		{
-			std::cerr << warning << "Type mismatch in shader \"" << m_strName.c_str() << "\"" << std::endl;
-		}
-	}
-	else
-	{
-		std::cerr << warning << "Unknown parameter \"" << strName.c_str() << "\" in shader \"" << m_strName.c_str() << "\"" << std::endl;
-	}
+                DeleteTemporaryStorage(pVMVal);
+            }
+        }
+        else
+        {
+            std::cerr << warning << "Type mismatch in shader \"" << m_strName.c_str() << "\"" << std::endl;
+        }
+    }
+    else
+    {
+        std::cerr << warning << "Unknown parameter \"" << strName.c_str() << "\" in shader \"" << m_strName.c_str() << "\"" << std::endl;
+    }
 }
 
 
@@ -1506,14 +1506,14 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 
 void CqShaderVM::SetArgument( CqParameter* pParam, IqSurface* pSurface )
 {
-	// Find the relevant variable.
-	TqInt i = FindLocalVarIndex( pParam->strName().c_str() );
-	if ( i >= 0 )
-	{
-		/// \todo: Find out how to handle arrays.
-		IqShaderData* pVar = m_LocalVars[ i ];
-		pParam->Dice(m_uGridRes,m_vGridRes,pVar,pSurface);
-	}
+    // Find the relevant variable.
+    TqInt i = FindLocalVarIndex( pParam->strName().c_str() );
+    if ( i >= 0 )
+    {
+        /// \todo: Find out how to handle arrays.
+        IqShaderData* pVar = m_LocalVars[ i ];
+        pParam->Dice(m_uGridRes,m_vGridRes,pVar,pSurface);
+    }
 }
 
 
@@ -1523,12 +1523,12 @@ void CqShaderVM::SetArgument( CqParameter* pParam, IqSurface* pSurface )
 
 IqShaderData* CqShaderVM::FindArgument( const CqString& name )
 {
-	// Find the relevant variable.
-	TqInt i = FindLocalVarIndex( name.c_str() );
-	if ( i >= 0 )
-		return( m_LocalVars[ i ] );
-	else
-		return( NULL );
+    // Find the relevant variable.
+    TqInt i = FindLocalVarIndex( name.c_str() );
+    if ( i >= 0 )
+        return( m_LocalVars[ i ] );
+    else
+        return( NULL );
 }
 
 
@@ -1538,14 +1538,14 @@ IqShaderData* CqShaderVM::FindArgument( const CqString& name )
 
 TqBool CqShaderVM::GetValue( const char* name, IqShaderData* res )
 {
-	// Find the relevant variable.
-	TqInt i = FindLocalVarIndex( name );
-	if ( i >= 0 )
-	{
-		res->SetValueFromVariable( m_LocalVars[ i ]);
-		return ( TqTrue );
-	}
-	return ( TqFalse );
+    // Find the relevant variable.
+    TqInt i = FindLocalVarIndex( name );
+    if ( i >= 0 )
+    {
+        res->SetValueFromVariable( m_LocalVars[ i ]);
+        return ( TqTrue );
+    }
+    return ( TqFalse );
 }
 
 //---------------------------------------------------------------------
@@ -1555,7 +1555,7 @@ TqBool CqShaderVM::GetValue( const char* name, IqShaderData* res )
 
 TqInt CqShaderVM::GetShaderVarCount()
 {
-	return m_LocalVars.size();
+    return m_LocalVars.size();
 }
 
 //---------------------------------------------------------------------
@@ -1565,16 +1565,16 @@ TqInt CqShaderVM::GetShaderVarCount()
 
 IqShaderData * CqShaderVM::GetShaderVarAt(TqInt varIndex)
 {
-	IqShaderData * result;
-	result = NULL;
-	if (varIndex >= 0)
-	{
-		if ((TqUint) varIndex < m_LocalVars.size())
-		{
-			result = m_LocalVars[varIndex];
-		}
-	}
-	return result;
+    IqShaderData * result;
+    result = NULL;
+    if (varIndex >= 0)
+    {
+        if ((TqUint) varIndex < m_LocalVars.size())
+        {
+            result = m_LocalVars[varIndex];
+        }
+    }
+    return result;
 }
 
 
@@ -1585,83 +1585,83 @@ IqShaderData * CqShaderVM::GetShaderVarAt(TqInt varIndex)
 
 void CqShaderVM::ShutdownShaderEngine()
 {
-	// Free any temporary variables in the buckets.
-	while( !m_UFPool.empty() )
-	{
-		delete(m_UFPool.front());
-		m_UFPool.pop_front();
-	}
-	while( !m_VFPool.empty() )
-	{
-		delete(m_VFPool.front());
-		m_VFPool.pop_front();
-	}
+    // Free any temporary variables in the buckets.
+    while( !m_UFPool.empty() )
+    {
+        delete(m_UFPool.front());
+        m_UFPool.pop_front();
+    }
+    while( !m_VFPool.empty() )
+    {
+        delete(m_VFPool.front());
+        m_VFPool.pop_front();
+    }
 
-	while( !m_UPPool.empty() )
-	{
-		delete(m_UPPool.front());
-		m_UPPool.pop_front();
-	}
-	while( !m_VPPool.empty() )
-	{
-		delete(m_VPPool.front());
-		m_VPPool.pop_front();
-	}
+    while( !m_UPPool.empty() )
+    {
+        delete(m_UPPool.front());
+        m_UPPool.pop_front();
+    }
+    while( !m_VPPool.empty() )
+    {
+        delete(m_VPPool.front());
+        m_VPPool.pop_front();
+    }
 
-	while( !m_USPool.empty() )
-	{
-		delete(m_USPool.front());
-		m_USPool.pop_front();
-	}
-	while( !m_VSPool.empty() )
-	{
-		delete(m_VSPool.front());
-		m_VSPool.pop_front();
-	}
+    while( !m_USPool.empty() )
+    {
+        delete(m_USPool.front());
+        m_USPool.pop_front();
+    }
+    while( !m_VSPool.empty() )
+    {
+        delete(m_VSPool.front());
+        m_VSPool.pop_front();
+    }
 
-	while( !m_UCPool.empty() )
-	{
-		delete(m_UCPool.front());
-		m_UCPool.pop_front();
-	}
-	while( !m_VCPool.empty() )
-	{
-		delete(m_VCPool.front());
-		m_VCPool.pop_front();
-	}
+    while( !m_UCPool.empty() )
+    {
+        delete(m_UCPool.front());
+        m_UCPool.pop_front();
+    }
+    while( !m_VCPool.empty() )
+    {
+        delete(m_VCPool.front());
+        m_VCPool.pop_front();
+    }
 
-	while( !m_UNPool.empty() )
-	{
-		delete(m_UNPool.front());
-		m_UNPool.pop_front();
-	}
-	while( !m_VNPool.empty() )
-	{
-		delete(m_VNPool.front());
-		m_VNPool.pop_front();
-	}
+    while( !m_UNPool.empty() )
+    {
+        delete(m_UNPool.front());
+        m_UNPool.pop_front();
+    }
+    while( !m_VNPool.empty() )
+    {
+        delete(m_VNPool.front());
+        m_VNPool.pop_front();
+    }
 
-	while( !m_UVPool.empty() )
-	{
-		delete(m_UVPool.front());
-		m_UVPool.pop_front();
-	}
-	while( !m_VVPool.empty() )
-	{
-		delete(m_VVPool.front());
-		m_VVPool.pop_front();
-	}
+    while( !m_UVPool.empty() )
+    {
+        delete(m_UVPool.front());
+        m_UVPool.pop_front();
+    }
+    while( !m_VVPool.empty() )
+    {
+        delete(m_VVPool.front());
+        m_VVPool.pop_front();
+    }
 
-	while( !m_UMPool.empty() )
-	{
-		delete(m_UMPool.front());
-		m_UMPool.pop_front();
-	}
-	while( !m_VMPool.empty() )
-	{
-		delete(m_VMPool.front());
-		m_VMPool.pop_front();
-	}
+    while( !m_UMPool.empty() )
+    {
+        delete(m_UMPool.front());
+        m_UMPool.pop_front();
+    }
+    while( !m_VMPool.empty() )
+    {
+        delete(m_VMPool.front());
+        m_VMPool.pop_front();
+    }
 }
 
 

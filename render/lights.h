@@ -51,166 +51,166 @@ START_NAMESPACE( Aqsis )
 
 class CqLightsource : public CqListEntry<CqLightsource>, public IqLightsource, public CqRefCount
 {
-	public:
-		CqLightsource( IqShader* pShader, TqBool fActive = TqTrue );
-		virtual	~CqLightsource();
+public:
+    CqLightsource( IqShader* pShader, TqBool fActive = TqTrue );
+    virtual	~CqLightsource();
 
 #ifdef _DEBUG
-		CqString className() const { return CqString("CqLightsource"); }
+    CqString className() const { return CqString("CqLightsource"); }
 #endif
 
-		/** Get a pointer to the associated lightsource shader.
-		 * \return a pointer to a IqShader derived class.
-		 */
-		virtual IqShader*	pShader()
-		{
-			return ( m_pShader );
-		}
-		/** Initialise the shader execution environment.
-		 * \param uGridRes Integer grid size, not used.
-		 * \param vGridRes Integer grid size, not used.
-		 */
-		virtual void	Initialise( TqInt uGridRes, TqInt vGridRes );
-		//			void		GenerateShadowMap(const char* strShadowName);
-		/** Evaluate the shader.
-		 * \param pPs the point being lit.
-		 */
-		virtual void	Evaluate( IqShaderData* pPs, IqShaderData* pNs )
-		{
-			Ps() ->SetValueFromVariable( pPs );
-			Ns() ->SetValueFromVariable( pNs );
-			m_pShader->Evaluate( m_pShaderExecEnv );
-		}
-		/** Get a pointer to the attributes associated with this lightsource.
-		 * \return a CqAttributes pointer.
-		 */
-		virtual IqAttributes*	pAttributes() const
-		{
-			return ( m_pAttributes );
-		}
+    /** Get a pointer to the associated lightsource shader.
+     * \return a pointer to a IqShader derived class.
+     */
+    virtual IqShader*	pShader()
+    {
+        return ( m_pShader );
+    }
+    /** Initialise the shader execution environment.
+     * \param uGridRes Integer grid size, not used.
+     * \param vGridRes Integer grid size, not used.
+     */
+    virtual void	Initialise( TqInt uGridRes, TqInt vGridRes );
+    //			void		GenerateShadowMap(const char* strShadowName);
+    /** Evaluate the shader.
+     * \param pPs the point being lit.
+     */
+    virtual void	Evaluate( IqShaderData* pPs, IqShaderData* pNs )
+    {
+        Ps() ->SetValueFromVariable( pPs );
+        Ns() ->SetValueFromVariable( pNs );
+        m_pShader->Evaluate( m_pShaderExecEnv );
+    }
+    /** Get a pointer to the attributes associated with this lightsource.
+     * \return a CqAttributes pointer.
+     */
+    virtual IqAttributes*	pAttributes() const
+    {
+        return ( m_pAttributes );
+    }
 
-		// Redirect acces via IqShaderExecEnv
-		virtual	TqInt	uGridRes() const
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->uGridRes() );
-		}
-		virtual	TqInt	vGridRes() const
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->vGridRes() );
-		}
-		virtual	TqInt	GridSize() const
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->GridSize() );
-		}
-		virtual	const CqMatrix&	matObjectToWorld() const
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->matObjectToWorld() );
-		}
-		virtual	IqShaderData* Cs()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Cs() );
-		}
-		virtual	IqShaderData* Os()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Os() );
-		}
-		virtual	IqShaderData* Ng()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ng() );
-		}
-		virtual	IqShaderData* du()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->du() );
-		}
-		virtual	IqShaderData* dv()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dv() );
-		}
-		virtual	IqShaderData* L()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->L() );
-		}
-		virtual	IqShaderData* Cl()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Cl() );
-		}
-		virtual IqShaderData* Ol()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ol() );
-		}
-		virtual IqShaderData* P()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->P() );
-		}
-		virtual IqShaderData* dPdu()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dPdu() );
-		}
-		virtual IqShaderData* dPdv()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dPdv() );
-		}
-		virtual IqShaderData* N()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->N() );
-		}
-		virtual IqShaderData* u()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->u() );
-		}
-		virtual IqShaderData* v()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->v() );
-		}
-		virtual IqShaderData* s()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->s() );
-		}
-		virtual IqShaderData* t()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->t() );
-		}
-		virtual IqShaderData* I()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->I() );
-		}
-		virtual IqShaderData* Ci()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ci() );
-		}
-		virtual IqShaderData* Oi()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Oi() );
-		}
-		virtual IqShaderData* Ps()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ps() );
-		}
-		virtual IqShaderData* E()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->E() );
-		}
-		virtual IqShaderData* ncomps()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->ncomps() );
-		}
-		virtual IqShaderData* time()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->time() );
-		}
-		virtual IqShaderData* alpha()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->alpha() );
-		}
-		virtual IqShaderData* Ns()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ns() );
-		}
+    // Redirect acces via IqShaderExecEnv
+    virtual	TqInt	uGridRes() const
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->uGridRes() );
+    }
+    virtual	TqInt	vGridRes() const
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->vGridRes() );
+    }
+    virtual	TqInt	GridSize() const
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->GridSize() );
+    }
+    virtual	const CqMatrix&	matObjectToWorld() const
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->matObjectToWorld() );
+    }
+    virtual	IqShaderData* Cs()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Cs() );
+    }
+    virtual	IqShaderData* Os()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Os() );
+    }
+    virtual	IqShaderData* Ng()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ng() );
+    }
+    virtual	IqShaderData* du()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->du() );
+    }
+    virtual	IqShaderData* dv()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dv() );
+    }
+    virtual	IqShaderData* L()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->L() );
+    }
+    virtual	IqShaderData* Cl()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Cl() );
+    }
+    virtual IqShaderData* Ol()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ol() );
+    }
+    virtual IqShaderData* P()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->P() );
+    }
+    virtual IqShaderData* dPdu()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dPdu() );
+    }
+    virtual IqShaderData* dPdv()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dPdv() );
+    }
+    virtual IqShaderData* N()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->N() );
+    }
+    virtual IqShaderData* u()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->u() );
+    }
+    virtual IqShaderData* v()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->v() );
+    }
+    virtual IqShaderData* s()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->s() );
+    }
+    virtual IqShaderData* t()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->t() );
+    }
+    virtual IqShaderData* I()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->I() );
+    }
+    virtual IqShaderData* Ci()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ci() );
+    }
+    virtual IqShaderData* Oi()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Oi() );
+    }
+    virtual IqShaderData* Ps()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ps() );
+    }
+    virtual IqShaderData* E()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->E() );
+    }
+    virtual IqShaderData* ncomps()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->ncomps() );
+    }
+    virtual IqShaderData* time()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->time() );
+    }
+    virtual IqShaderData* alpha()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->alpha() );
+    }
+    virtual IqShaderData* Ns()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ns() );
+    }
 
-	private:
-		IqShader*	m_pShader;				///< Pointer to the associated shader.
-		CqAttributes*	m_pAttributes;			///< Pointer to the associated attributes.
-		IqShaderExecEnv*	m_pShaderExecEnv;	///< Pointer to the shader execution environment.
+private:
+    IqShader*	m_pShader;				///< Pointer to the associated shader.
+    CqAttributes*	m_pAttributes;			///< Pointer to the associated attributes.
+    IqShaderExecEnv*	m_pShaderExecEnv;	///< Pointer to the shader execution environment.
 }
 ;
 

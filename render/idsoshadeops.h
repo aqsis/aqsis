@@ -37,17 +37,17 @@
 
 START_NAMESPACE( Aqsis )
 
-// This is used as the datablock for SO_external within UsProgramElement 
+// This is used as the datablock for SO_external within UsProgramElement
 // Additionally it cotains the init and shutdown funnction pointers, it
 // is basically a parsed SHADEOP_TABLE entry
 struct SqDSOExternalCall {
-  DSOMethod method;
-  DSOInit init;
-  DSOShutdown shutdown;
-  enum EqVariableType return_type;
-  std::list<EqVariableType> arg_types;
-  void *initData;
-  bool initialised;
+    DSOMethod method;
+    DSOInit init;
+    DSOShutdown shutdown;
+    enum EqVariableType return_type;
+    std::list<EqVariableType> arg_types;
+    void *initData;
+    bool initialised;
 };
 
 /** Interface to the repostiory of dynamic shader operations*/
@@ -56,11 +56,11 @@ struct IqDSORepository{
     virtual void SetDSOPath(const CqString*) = 0;
     virtual ~IqDSORepository(){};
 
-  private:
-    virtual std::list<SqDSOExternalCall*>* getShadeOpMethods(CqString*) = 0; 
+private:
+    virtual std::list<SqDSOExternalCall*>* getShadeOpMethods(CqString*) = 0;
 
     // Parse a single DSO SHADEOP_TABLE entry
-    virtual SqDSOExternalCall* parseShadeOpTableEntry(void*, SqShadeOp*) = 0; 
+    virtual SqDSOExternalCall* parseShadeOpTableEntry(void*, SqShadeOp*) = 0;
 };
 
 END_NAMESPACE( Aqsis )

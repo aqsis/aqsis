@@ -44,13 +44,13 @@ TqBool CqCSGTreeNode::m_bCSGRequired = TqFalse;
  */
 CqCSGTreeNode::~CqCSGTreeNode()
 {
-	CqCSGTreeNode * pChild = m_lChildren.pFirst();
-	while ( pChild )
-	{
-		CqCSGTreeNode * pNext = pChild->pNext();
-		RELEASEREF( pChild );
-		pChild = pNext;
-	}
+    CqCSGTreeNode * pChild = m_lChildren.pFirst();
+    while ( pChild )
+    {
+        CqCSGTreeNode * pNext = pChild->pNext();
+        RELEASEREF( pChild );
+        pChild = pNext;
+    }
 }
 
 
@@ -67,25 +67,25 @@ CqCSGTreeNode::~CqCSGTreeNode()
 CqCSGTreeNode* CqCSGTreeNode::CreateNode( CqString& type )
 {
     SetRequired(TqTrue);
-	if ( type == "primitive" )
-		return ( new CqCSGNodePrimitive );
-	else if ( type == "union" )
-		return ( new CqCSGNodeUnion );
-	else if ( type == "intersection" )
-		return ( new CqCSGNodeIntersection );
-	else if ( type == "difference" )
-		return ( new CqCSGNodeDifference );
-	else
-		return ( NULL );
+    if ( type == "primitive" )
+        return ( new CqCSGNodePrimitive );
+    else if ( type == "union" )
+        return ( new CqCSGNodeUnion );
+    else if ( type == "intersection" )
+        return ( new CqCSGNodeIntersection );
+    else if ( type == "difference" )
+        return ( new CqCSGNodeDifference );
+    else
+        return ( NULL );
 }
 
 
-/** 
+/**
  * Get the state of the flag indicating if CSG processing is required at all.
  */
 TqBool CqCSGTreeNode::IsRequired()
 {
-	return m_bCSGRequired;
+    return m_bCSGRequired;
 }
 
 /**
@@ -93,7 +93,7 @@ TqBool CqCSGTreeNode::IsRequired()
  */
 void CqCSGTreeNode::SetRequired(TqBool value)
 {
-	m_bCSGRequired = value;
+    m_bCSGRequired = value;
 }
 
 
@@ -108,15 +108,15 @@ void CqCSGTreeNode::SetRequired(TqBool value)
  */
 TqInt CqCSGTreeNode::isChild( const CqCSGTreeNode* pNode )
 {
-	TqInt iChild = 0;
-	CqCSGTreeNode* pChild = lChildren().pFirst();
-	while ( pChild )
-	{
-		if ( pChild == pNode ) return ( iChild );
-		pChild = pChild->pNext();
-		iChild++;
-	}
-	return ( -1 );
+    TqInt iChild = 0;
+    CqCSGTreeNode* pChild = lChildren().pFirst();
+    while ( pChild )
+    {
+        if ( pChild == pNode ) return ( iChild );
+        pChild = pChild->pNext();
+        iChild++;
+    }
+    return ( -1 );
 }
 
 
@@ -129,14 +129,14 @@ TqInt CqCSGTreeNode::isChild( const CqCSGTreeNode* pNode )
  */
 TqInt CqCSGTreeNode::cChildren()
 {
-	TqInt c = 0;
-	CqCSGTreeNode* pChild = lChildren().pFirst();
-	while ( pChild )
-	{
-		c++;
-		pChild = pChild->pNext();
-	}
-	return ( c );
+    TqInt c = 0;
+    CqCSGTreeNode* pChild = lChildren().pFirst();
+    while ( pChild )
+    {
+        c++;
+        pChild = pChild->pNext();
+    }
+    return ( c );
 }
 
 
@@ -150,12 +150,12 @@ TqInt CqCSGTreeNode::cChildren()
  */
 void CqCSGTreeNode::ProcessTree( std::vector<SqImageSample>& samples )
 {
-	// Follow the tree back up to the top, then process the list from there
-	CqCSGTreeNode * pTop = this;
-	while ( NULL != pTop->pParent() )
-		pTop = pTop->pParent();
+    // Follow the tree back up to the top, then process the list from there
+    CqCSGTreeNode * pTop = this;
+    while ( NULL != pTop->pParent() )
+        pTop = pTop->pParent();
 
-	pTop->ProcessSampleList( samples );
+    pTop->ProcessSampleList( samples );
 }
 
 
@@ -170,72 +170,72 @@ void CqCSGTreeNode::ProcessTree( std::vector<SqImageSample>& samples )
  */
 void CqCSGTreeNode::ProcessSampleList( std::vector<SqImageSample>& samples )
 {
-	// First process any children nodes.
-	// Process all nodes depth first.
-	CqCSGTreeNode * pChild = lChildren().pFirst();
-	while ( NULL != pChild )
-	{
-		// If the node is a primitive, no need to process it.
-		// In fact as the primitive, just nulls out its owned samples
-		// this would break the CSG code.
-		if ( pChild->NodeType() != CSGNodeType_Primitive )
-			pChild->ProcessSampleList( samples );
-		pChild = pChild->pNext();
-	}
+    // First process any children nodes.
+    // Process all nodes depth first.
+    CqCSGTreeNode * pChild = lChildren().pFirst();
+    while ( NULL != pChild )
+    {
+        // If the node is a primitive, no need to process it.
+        // In fact as the primitive, just nulls out its owned samples
+        // this would break the CSG code.
+        if ( pChild->NodeType() != CSGNodeType_Primitive )
+            pChild->ProcessSampleList( samples );
+        pChild = pChild->pNext();
+    }
 
-	std::vector<TqBool> abChildState( cChildren() );
-	std::vector<TqInt> aChildIndex( samples.size() );
-	TqInt iChild;
-	for ( iChild = 0; iChild < cChildren(); iChild++ ) abChildState[ iChild ] = TqFalse;
+    std::vector<TqBool> abChildState( cChildren() );
+    std::vector<TqInt> aChildIndex( samples.size() );
+    TqInt iChild;
+    for ( iChild = 0; iChild < cChildren(); iChild++ ) abChildState[ iChild ] = TqFalse;
 
-	// Find out if the camera is starting inside a solid. This is the case if you
-	// see an odd number of walls for that solid when looking out.
-	std::vector<SqImageSample>::iterator i;
-	TqInt j = 0;
-	for ( i = samples.begin(); i != samples.end(); ++i, ++j )
-	{
-		if ( ( aChildIndex[j] = isChild( i->m_pCSGNode ) ) >= 0 )
-			abChildState[ aChildIndex[j] ] = !abChildState[ aChildIndex[j] ];
-	}
+    // Find out if the camera is starting inside a solid. This is the case if you
+    // see an odd number of walls for that solid when looking out.
+    std::vector<SqImageSample>::iterator i;
+    TqInt j = 0;
+    for ( i = samples.begin(); i != samples.end(); ++i, ++j )
+    {
+        if ( ( aChildIndex[j] = isChild( i->m_pCSGNode ) ) >= 0 )
+            abChildState[ aChildIndex[j] ] = !abChildState[ aChildIndex[j] ];
+    }
 
-	// Now get the initial state
-	TqBool bCurrentI = EvaluateState( abChildState );
+    // Now get the initial state
+    TqBool bCurrentI = EvaluateState( abChildState );
 
-	// Now go through samples, clearing any where the state doesn't change, and
-	// promoting any where it does to this node.
-	for ( i = samples.begin(), j = 0; i != samples.end(); ++j )
-	{
-		// Find out if sample is in out children nodes, if so are we entering or leaving.
-		if ( aChildIndex[j] >= 0 )
-			abChildState[ aChildIndex[j] ] = !abChildState[ aChildIndex[j] ];
-		else
-		{
-			i++;
-			continue;
-		}
+    // Now go through samples, clearing any where the state doesn't change, and
+    // promoting any where it does to this node.
+    for ( i = samples.begin(), j = 0; i != samples.end(); ++j )
+    {
+        // Find out if sample is in out children nodes, if so are we entering or leaving.
+        if ( aChildIndex[j] >= 0 )
+            abChildState[ aChildIndex[j] ] = !abChildState[ aChildIndex[j] ];
+        else
+        {
+            i++;
+            continue;
+        }
 
-		// Work out the new state
-		TqBool bNewI = EvaluateState( abChildState );
+        // Work out the new state
+        TqBool bNewI = EvaluateState( abChildState );
 
-		// If it hasn't changed, remove the sample.
-		if ( bNewI == bCurrentI )
-			i = samples.erase( i );
-		else
-			// Otherwise promote it to this node unless we are a the top.
-		{
-			bCurrentI = bNewI;
-			CqCSGTreeNode* poldnode = i->m_pCSGNode;
-			if ( NULL != this->pParent() )
-			{
-				i->m_pCSGNode = this;
-				ADDREF( this );
-			}
-			else
-				i->m_pCSGNode = NULL;
-			RELEASEREF( poldnode );
-			i++;
-		}
-	}
+        // If it hasn't changed, remove the sample.
+        if ( bNewI == bCurrentI )
+            i = samples.erase( i );
+        else
+            // Otherwise promote it to this node unless we are a the top.
+        {
+            bCurrentI = bNewI;
+            CqCSGTreeNode* poldnode = i->m_pCSGNode;
+            if ( NULL != this->pParent() )
+            {
+                i->m_pCSGNode = this;
+                ADDREF( this );
+            }
+            else
+                i->m_pCSGNode = NULL;
+            RELEASEREF( poldnode );
+            i++;
+        }
+    }
 }
 
 
@@ -249,16 +249,16 @@ void CqCSGTreeNode::ProcessSampleList( std::vector<SqImageSample>& samples )
  */
 void CqCSGNodePrimitive::ProcessSampleList( std::vector<SqImageSample>& samples )
 {
-	// Now go through samples, clearing samples related to this node.
-	std::vector<SqImageSample>::iterator i;
-	for ( i = samples.begin(); i != samples.end(); i++ )
-	{
-		if ( i->m_pCSGNode == this )
-		{
-			i->m_pCSGNode = NULL;
-			RELEASEREF( this );
-		}
-	}
+    // Now go through samples, clearing samples related to this node.
+    std::vector<SqImageSample>::iterator i;
+    for ( i = samples.begin(); i != samples.end(); i++ )
+    {
+        if ( i->m_pCSGNode == this )
+        {
+            i->m_pCSGNode = NULL;
+            RELEASEREF( this );
+        }
+    }
 }
 
 
@@ -276,14 +276,14 @@ void CqCSGNodePrimitive::ProcessSampleList( std::vector<SqImageSample>& samples 
  */
 TqBool CqCSGNodeUnion::EvaluateState( std::vector<TqBool>& abChildStates )
 {
-	// Work out the new state
-	std::vector<TqBool>::iterator iChildState;
-	for ( iChildState = abChildStates.begin(); iChildState != abChildStates.end(); iChildState++ )
-	{
-		if ( *iChildState )
-			return ( TqTrue );
-	}
-	return ( TqFalse );
+    // Work out the new state
+    std::vector<TqBool>::iterator iChildState;
+    for ( iChildState = abChildStates.begin(); iChildState != abChildStates.end(); iChildState++ )
+    {
+        if ( *iChildState )
+            return ( TqTrue );
+    }
+    return ( TqFalse );
 }
 
 
@@ -301,14 +301,14 @@ TqBool CqCSGNodeUnion::EvaluateState( std::vector<TqBool>& abChildStates )
  */
 TqBool CqCSGNodeIntersection::EvaluateState( std::vector<TqBool>& abChildStates )
 {
-	// Work out the new state
-	std::vector<TqBool>::iterator iChildState;
-	for ( iChildState = abChildStates.begin(); iChildState != abChildStates.end(); iChildState++ )
-	{
-		if ( !( *iChildState ) )
-			return ( TqFalse );
-	}
-	return ( TqTrue );
+    // Work out the new state
+    std::vector<TqBool>::iterator iChildState;
+    for ( iChildState = abChildStates.begin(); iChildState != abChildStates.end(); iChildState++ )
+    {
+        if ( !( *iChildState ) )
+            return ( TqFalse );
+    }
+    return ( TqTrue );
 }
 
 
@@ -326,20 +326,20 @@ TqBool CqCSGNodeIntersection::EvaluateState( std::vector<TqBool>& abChildStates 
  */
 TqBool CqCSGNodeDifference::EvaluateState( std::vector<TqBool>& abChildStates )
 {
-	// Work out the new state
-	if ( abChildStates[ 0 ] )
-	{
-		std::vector<TqBool>::iterator iChildState;
-		iChildState = abChildStates.begin();
-		iChildState++;
-		for ( ; iChildState != abChildStates.end(); iChildState++ )
-		{
-			if ( *iChildState )
-				return ( TqFalse );
-		}
-		return ( TqTrue );
-	}
-	return ( TqFalse );
+    // Work out the new state
+    if ( abChildStates[ 0 ] )
+    {
+        std::vector<TqBool>::iterator iChildState;
+        iChildState = abChildStates.begin();
+        iChildState++;
+        for ( ; iChildState != abChildStates.end(); iChildState++ )
+        {
+            if ( *iChildState )
+                return ( TqFalse );
+        }
+        return ( TqTrue );
+    }
+    return ( TqFalse );
 }
 
 

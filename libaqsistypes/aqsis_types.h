@@ -94,27 +94,27 @@ typedef	bool	TqBool;
 /// Determine the lowest set bit in an unsigned value.
 inline TqUint LOWEST_BIT( TqUint x )
 {
-	return ( x & ( ( ~x ) + 1 ) );
+    return ( x & ( ( ~x ) + 1 ) );
 }
 
 /// Determine if the given value is a power of two.
 inline TqBool IS_POW2( TqUint x )
 {
-	return ( x != 0 && x == LOWEST_BIT( x ) );
+    return ( x != 0 && x == LOWEST_BIT( x ) );
 }
 
 /// Calculate the next highest power of two minus 1 from the given value.
 inline TqUint CEIL_POW2_MINUS1( TqUint x )
 {
-	for ( TqUint i = 1; i; i <<= 1 )
-		x |= x >> i;
-	return ( x );
+    for ( TqUint i = 1; i; i <<= 1 )
+        x |= x >> i;
+    return ( x );
 }
 
 /// Calculate the next highest power of two from the given value.
 inline TqUint CEIL_POW2( TqUint x )
 {
-	return ( CEIL_POW2_MINUS1( x - 1 ) + 1 );
+    return ( CEIL_POW2_MINUS1( x - 1 ) + 1 );
 }
 
 

@@ -48,95 +48,95 @@ START_NAMESPACE( Aqsis )
 
 class CqPolygonGeneral2D
 {
-	public:
-		CqPolygonGeneral2D() :
-				m_Orientation( Orientation_Unknown )
-		{
-			STATS_INC( GPR_poly );		
-		}
-		CqPolygonGeneral2D( const CqPolygonGeneral2D& From );
-		~CqPolygonGeneral2D()
-		{
-			if ( m_pVertices )
-				RELEASEREF( m_pVertices );
-		}
+public:
+    CqPolygonGeneral2D() :
+            m_Orientation( Orientation_Unknown )
+    {
+        STATS_INC( GPR_poly );
+    }
+    CqPolygonGeneral2D( const CqPolygonGeneral2D& From );
+    ~CqPolygonGeneral2D()
+    {
+        if ( m_pVertices )
+            RELEASEREF( m_pVertices );
+    }
 
-		std::vector<TqInt>&	aiVertices()
-		{
-			return ( m_aiVertices );
-		}
-		TqInt	cVertices() const
-		{
-			return ( m_aiVertices.size() );
-		}
-		TqInt	Orientation() const
-		{
-			return ( m_Orientation );
-		}
-		TqInt	Axis() const
-		{
-			return ( m_Axis );
-		}
-		void	SetAxis( TqInt axis )
-		{
-			m_Axis = axis;
-		}
-		void	SetpVertices( CqSurface* pVertices )
-		{
-			m_pVertices = pVertices;
-			ADDREF( pVertices );
-		}
+    std::vector<TqInt>&	aiVertices()
+    {
+        return ( m_aiVertices );
+    }
+    TqInt	cVertices() const
+    {
+        return ( m_aiVertices.size() );
+    }
+    TqInt	Orientation() const
+    {
+        return ( m_Orientation );
+    }
+    TqInt	Axis() const
+    {
+        return ( m_Axis );
+    }
+    void	SetAxis( TqInt axis )
+    {
+        m_Axis = axis;
+    }
+    void	SetpVertices( CqSurface* pVertices )
+    {
+        m_pVertices = pVertices;
+        ADDREF( pVertices );
+    }
 
-		void	SwapDirection();
-		TqInt	CalcOrientation();
-		TqInt	CalcDeterminant( TqInt i1, TqInt i2, TqInt i3 ) const;
-		TqBool	NoneInside( TqInt P1, TqInt P2, TqInt P3, std::vector<TqInt>& iList ) const;
-		void	EliminateDuplicatePoints();
+    void	SwapDirection();
+    TqInt	CalcOrientation();
+    TqInt	CalcDeterminant( TqInt i1, TqInt i2, TqInt i3 ) const;
+    TqBool	NoneInside( TqInt P1, TqInt P2, TqInt P3, std::vector<TqInt>& iList ) const;
+    void	EliminateDuplicatePoints();
 
-		TqBool	Contains( CqPolygonGeneral2D& polyCheck );
-		void	Combine( CqPolygonGeneral2D& polyFrom );
-		void	Triangulate( std::vector<TqInt>& aiList ) const;
+    TqBool	Contains( CqPolygonGeneral2D& polyCheck );
+    void	Combine( CqPolygonGeneral2D& polyFrom );
+    void	Triangulate( std::vector<TqInt>& aiList ) const;
 
-		CqVector2D	operator[] ( TqInt index ) const
-		{
-			switch ( m_Axis )
-			{
-					case Axis_XY:
-					return ( CqVector2D( m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].x(),
-					                     m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].y() ) );
+    CqVector2D	operator[] ( TqInt index ) const
+    {
+        switch ( m_Axis )
+        {
+        case Axis_XY:
+            return ( CqVector2D( m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].x(),
+                                 m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].y() ) );
 
-					case Axis_XZ:
-					return ( CqVector2D( m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].x(),
-					                     m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].z() ) );
+        case Axis_XZ:
+            return ( CqVector2D( m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].x(),
+                                 m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].z() ) );
 
-					case Axis_YZ:
-					return ( CqVector2D( m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].y(),
-					                     m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].z() ) );
-			}
-			return ( CqVector2D( 0, 0 ) );
-		}
-		CqPolygonGeneral2D& operator=( const CqPolygonGeneral2D& From );
+        case Axis_YZ:
+            return ( CqVector2D( m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].y(),
+                                 m_pVertices->P()->pValue( m_aiVertices[ index ] )[0].z() ) );
+        }
+        return ( CqVector2D( 0, 0 ) );
+    }
+    CqPolygonGeneral2D& operator=( const CqPolygonGeneral2D& From );
 
-		enum	EssOrientation
-		{
-		    Orientation_Unknown,
+    enum	EssOrientation
+    {
+        Orientation_Unknown,
 
-		    Orientation_Clockwise,
-		    Orientation_AntiClockwise,
-	};
-		enum	EssAxis
-		{
-		    Axis_Unknown,
+        Orientation_Clockwise,
+        Orientation_AntiClockwise,
+    };
+    enum	EssAxis
+    {
+        Axis_Unknown,
 
-		    Axis_XY,
-		    Axis_XZ,
-		    Axis_YZ,
-	};
-	private:
-		std::vector<TqInt>	m_aiVertices;
-		TqInt	m_Orientation;
-		TqInt	m_Axis;
-		CqSurface*	m_pVertices;
+        Axis_XY,
+        Axis_XZ,
+        Axis_YZ,
+    };
+private:
+    std::vector<TqInt>	m_aiVertices;
+    TqInt	m_Orientation;
+    TqInt	m_Axis;
+    CqSurface*	m_pVertices;
 };
 
 

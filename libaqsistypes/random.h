@@ -90,102 +90,102 @@ START_NAMESPACE( Aqsis )
 
 class CqRandom
 {
-	public:
-		CqRandom()
-		{
-			Reseed( rand() );
-		}
-		CqRandom( unsigned int Seed )
-		{
-			Reseed( Seed );
-		}
+public:
+    CqRandom()
+    {
+        Reseed( rand() );
+    }
+    CqRandom( unsigned int Seed )
+    {
+        Reseed( Seed );
+    }
 
-		/** Get a random integer in the range (0 <= value < 2^32).
-		 */
-		unsigned int RandomInt()
-		{
-			if ( --m_left == 0 ) NextState();
+    /** Get a random integer in the range (0 <= value < 2^32).
+     */
+    unsigned int RandomInt()
+    {
+        if ( --m_left == 0 ) NextState();
 
-			unsigned long y = *m_next++;
-			y ^= ( y >> 11 );
-			y ^= ( y << 7 ) & 0x9d2c5680UL;
-			y ^= ( y << 15 ) & 0xefc60000UL;
-			y ^= ( y >> 18 );
-			return y;
-		}
+        unsigned long y = *m_next++;
+        y ^= ( y >> 11 );
+        y ^= ( y << 7 ) & 0x9d2c5680UL;
+        y ^= ( y << 15 ) & 0xefc60000UL;
+        y ^= ( y >> 18 );
+        return y;
+    }
 
-		/** Get a random integer in the specified range (0 <= value < Range).
-		 * \param Range Integer max value.
-		 */
-		unsigned int RandomInt( unsigned int Range )
-		{
-			double n = RandomFloat( Range );
-			return ( unsigned int ) n;
-		}
+    /** Get a random integer in the specified range (0 <= value < Range).
+     * \param Range Integer max value.
+     */
+    unsigned int RandomInt( unsigned int Range )
+    {
+        double n = RandomFloat( Range );
+        return ( unsigned int ) n;
+    }
 
-		/** Get a random float (0.0 <= value < 1.0).
-		 */
-		TqFloat	RandomFloat()
-		{
-			return static_cast<TqFloat>( ( double ) RandomInt() * ( 1.0 / 4294967296.0 ) );
-		}
+    /** Get a random float (0.0 <= value < 1.0).
+     */
+    TqFloat	RandomFloat()
+    {
+        return static_cast<TqFloat>( ( double ) RandomInt() * ( 1.0 / 4294967296.0 ) );
+    }
 
-		/** Get a random float in the specified range (0 <= value < Range).
-		 * \param Range The max value for the range.
-		 */
-		TqFloat	RandomFloat( TqFloat Range )
-		{
-			return ( RandomFloat() * Range );
-		}
+    /** Get a random float in the specified range (0 <= value < Range).
+     * \param Range The max value for the range.
+     */
+    TqFloat	RandomFloat( TqFloat Range )
+    {
+        return ( RandomFloat() * Range );
+    }
 
-		/** Apply a new seed value to the random number generator.
-		 */
-		void	Reseed( unsigned int Seed )
-		{
-			m_state[ 0 ] = Seed & 0xffffffffUL;
-			for ( int j = 1; j < N; j++ )
-			{
-				m_state[ j ] = ( 1812433253UL * ( m_state[ j - 1 ] ^ ( m_state[ j - 1 ] >> 30 ) ) + j );
-				m_state[ j ] &= 0xffffffffUL;  /* for >32 bit machines */
-			}
-			m_left = 1;
-			m_initf = 1;
-		}
+    /** Apply a new seed value to the random number generator.
+     */
+    void	Reseed( unsigned int Seed )
+    {
+        m_state[ 0 ] = Seed & 0xffffffffUL;
+        for ( int j = 1; j < N; j++ )
+        {
+            m_state[ j ] = ( 1812433253UL * ( m_state[ j - 1 ] ^ ( m_state[ j - 1 ] >> 30 ) ) + j );
+            m_state[ j ] &= 0xffffffffUL;  /* for >32 bit machines */
+        }
+        m_left = 1;
+        m_initf = 1;
+    }
 
-	protected:
-		enum {
-		    N = 624,
-		    M = 397
-	};
+protected:
+    enum {
+        N = 624,
+        M = 397
+    };
 
-		unsigned long m_state[ N ];
-		int m_left;
-		int m_initf;
-		unsigned long* m_next;
+    unsigned long m_state[ N ];
+    int m_left;
+    int m_initf;
+    unsigned long* m_next;
 
 #define MT_MATRIX_A	0x9908b0dfUL
 #define MT_UMASK	0x80000000UL
 #define MT_LMASK	0x7fffffffUL
 #define MT_TWIST(u,v)	((((u) & MT_UMASK | (v) & MT_LMASK) >> 1) ^ ((v)&1UL ? MT_MATRIX_A : 0UL))
 
-		void	NextState()
-		{
-			m_left = N;
-			m_next = m_state;
+    void	NextState()
+    {
+        m_left = N;
+        m_next = m_state;
 
-			unsigned long* p = m_state;
+        unsigned long* p = m_state;
 
-			int j;
-			for ( j = N - M + 1; --j; p++ )
-			{
-				*p = p[ M ] ^ MT_TWIST( p[ 0 ], p[ 1 ] );
-			}
-			for ( j = M; --j; p++ )
-			{
-				*p = p[ M - N ] ^ MT_TWIST( p[ 0 ], p[ 1 ] );
-			}
-			*p = p[ M - N ] & MT_TWIST( p[ 0 ], m_state[ 0 ] );
-		}
+        int j;
+        for ( j = N - M + 1; --j; p++ )
+        {
+            *p = p[ M ] ^ MT_TWIST( p[ 0 ], p[ 1 ] );
+        }
+        for ( j = M; --j; p++ )
+        {
+            *p = p[ M - N ] ^ MT_TWIST( p[ 0 ], p[ 1 ] );
+        }
+        *p = p[ M - N ] & MT_TWIST( p[ 0 ], m_state[ 0 ] );
+    }
 };
 
 //-----------------------------------------------------------------------

@@ -36,9 +36,9 @@
  */
 
 CqCriticalSection::CqCriticalSection() :
-		m_hMutex( CreateMutex( NULL, FALSE, NULL ) )
+        m_hMutex( CreateMutex( NULL, FALSE, NULL ) )
 {
-	assert( m_hMutex != NULL );
+    assert( m_hMutex != NULL );
 }
 
 
@@ -48,7 +48,7 @@ CqCriticalSection::CqCriticalSection() :
 
 CqCriticalSection::~CqCriticalSection()
 {
-	CloseHandle( m_hMutex );
+    CloseHandle( m_hMutex );
 }
 
 
@@ -57,26 +57,26 @@ CqCriticalSection::~CqCriticalSection()
  */
 
 CqEnterCriticalSection::CqEnterCriticalSection( CqCriticalSection* pCriticalSection ) :
-		m_pCriticalSection( pCriticalSection )
+        m_pCriticalSection( pCriticalSection )
 {
-	while ( true )
-	{
-		DWORD dwReason = MsgWaitForMultipleObjects( 1, &( m_pCriticalSection->m_hMutex ),
-		                 FALSE, INFINITE, QS_SENDMESSAGE );
-		if ( dwReason == WAIT_OBJECT_0 )
-		{
-			return ;
-		}
-		else
-		{
-			assert( dwReason == ( WAIT_OBJECT_0 + 1 ) );
+    while ( true )
+    {
+        DWORD dwReason = MsgWaitForMultipleObjects( 1, &( m_pCriticalSection->m_hMutex ),
+                         FALSE, INFINITE, QS_SENDMESSAGE );
+        if ( dwReason == WAIT_OBJECT_0 )
+        {
+            return ;
+        }
+        else
+        {
+            assert( dwReason == ( WAIT_OBJECT_0 + 1 ) );
 
-			// There are sent messages waiting call PeekMessage so they can be delivered
-			// PeekMessage causes a yield to occur according to the MSDN docs.
-			MSG msg;
-			PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE );
-		}
-	}
+            // There are sent messages waiting call PeekMessage so they can be delivered
+            // PeekMessage causes a yield to occur according to the MSDN docs.
+            MSG msg;
+            PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE );
+        }
+    }
 }
 
 
@@ -86,5 +86,5 @@ CqEnterCriticalSection::CqEnterCriticalSection( CqCriticalSection* pCriticalSect
 
 CqEnterCriticalSection::~CqEnterCriticalSection()
 {
-	ReleaseMutex( m_pCriticalSection->m_hMutex );
+    ReleaseMutex( m_pCriticalSection->m_hMutex );
 }

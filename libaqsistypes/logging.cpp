@@ -33,13 +33,13 @@ namespace detail
 
 int log_level_index()
 {
-	static int index = std::ios::xalloc();
-	return index;
+    static int index = std::ios::xalloc();
+    return index;
 }
 
 long& log_level(std::ostream& Stream)
 {
-	return Stream.iword(log_level_index());
+    return Stream.iword(log_level_index());
 }
 
 } // namespace detail
@@ -50,285 +50,305 @@ START_NAMESPACE( Aqsis )
 
 std::ostream& critical(std::ostream& Stream)
 {
-	detail::log_level(Stream) = CRITICAL;
-	return Stream;
+    detail::log_level(Stream) = CRITICAL;
+    return Stream;
 }
 
 std::ostream& error(std::ostream& Stream)
 {
-	detail::log_level(Stream) = ERROR;
-	return Stream;
+    detail::log_level(Stream) = ERROR;
+    return Stream;
 }
 
 std::ostream& warning(std::ostream& Stream)
 {
-	detail::log_level(Stream) = WARNING;
-	return Stream;
+    detail::log_level(Stream) = WARNING;
+    return Stream;
 }
 
 std::ostream& info(std::ostream& Stream)
 {
-	detail::log_level(Stream) = INFO;
-	return Stream;
+    detail::log_level(Stream) = INFO;
+    return Stream;
 }
 
 std::ostream& debug(std::ostream& Stream)
 {
-	detail::log_level(Stream) = DEBUG;
-	return Stream;
+    detail::log_level(Stream) = DEBUG;
+    return Stream;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // timestamp_buf
 
 timestamp_buf::timestamp_buf(std::ostream& Stream) :
-	m_stream(Stream),
-	m_streambuf(Stream.rdbuf()),
-	m_start_new_line(true)
+        m_stream(Stream),
+        m_streambuf(Stream.rdbuf()),
+        m_start_new_line(true)
 {
-	setp(0, 0);
-	m_stream.rdbuf(this);
+    setp(0, 0);
+    m_stream.rdbuf(this);
 }
 
 timestamp_buf::~timestamp_buf()
 {
-	m_stream.rdbuf(m_streambuf);
+    m_stream.rdbuf(m_streambuf);
 }
 
 int timestamp_buf::overflow(int c)
 {
-	if(c == EOF)
-		return 0;
+    if(c == EOF)
+        return 0;
 
-	if(m_start_new_line)
-		{
-			m_start_new_line = false;
+    if(m_start_new_line)
+    {
+        m_start_new_line = false;
 
-			std::vector<char> buffer(256, '\0');
-			time_t current_time = time(0);
-			buffer.resize(strftime(&buffer[0], buffer.size(), "%m/%d/%Y %H:%M:%S ", localtime(&current_time)));
+        std::vector<char> buffer(256, '\0');
+        time_t current_time = time(0);
+        buffer.resize(strftime(&buffer[0], buffer.size(), "%m/%d/%Y %H:%M:%S ", localtime(&current_time)));
 
-			if(m_streambuf->sputn(&buffer[0], buffer.size()) != buffer.size())
-				return EOF;
-		}
-		
-	if(c == '\n')
-		m_start_new_line = true;
-	
-	int rc = m_streambuf->sputc(c);
+        if(m_streambuf->sputn(&buffer[0], buffer.size()) != buffer.size())
+            return EOF;
+    }
 
-	return rc;
+    if(c == '\n')
+        m_start_new_line = true;
+
+    int rc = m_streambuf->sputc(c);
+
+    return rc;
 }
 
 int timestamp_buf::sync()
 {
+    #ifdef	AQSIS_SYSTEM_WIN32
+	m_streambuf->pubsync();
+	#else
 	m_streambuf->sync();
-	return 0;
+	#endif
+    return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // show_level_buf
 
 show_level_buf::show_level_buf(std::ostream& Stream) :
-	m_stream(Stream),
-	m_streambuf(Stream.rdbuf()),
-	m_start_new_line(true)
+        m_stream(Stream),
+        m_streambuf(Stream.rdbuf()),
+        m_start_new_line(true)
 {
-	setp(0, 0);
-	m_stream.rdbuf(this);
+    setp(0, 0);
+    m_stream.rdbuf(this);
 }
 
 show_level_buf::~show_level_buf()
 {
-	m_stream.rdbuf(m_streambuf);
+    m_stream.rdbuf(m_streambuf);
 }
 
 int show_level_buf::overflow(int c)
 {
-	if(c == EOF)
-		return 0;
+    if(c == EOF)
+        return 0;
 
-	if(m_start_new_line)
-		{
-			m_start_new_line = false;
+    if(m_start_new_line)
+    {
+        m_start_new_line = false;
 
-			std::string buffer;	
-			switch(detail::log_level(m_stream))
-				{
-					case CRITICAL:
-						buffer = "CRITICAL: ";
-						break;
-					case ERROR:
-						buffer = "ERROR: ";
-						break;
-					case WARNING:
-						buffer = "WARNING: ";
-						break;
-					case INFO:
-						buffer = "INFO: ";
-						break;
-					case DEBUG:
-						buffer = "DEBUG: ";
-						break;
-				}
+        std::string buffer;
+        switch(detail::log_level(m_stream))
+        {
+        case CRITICAL:
+            buffer = "CRITICAL: ";
+            break;
+        case ERROR:
+            buffer = "ERROR: ";
+            break;
+        case WARNING:
+            buffer = "WARNING: ";
+            break;
+        case INFO:
+            buffer = "INFO: ";
+            break;
+        case DEBUG:
+            buffer = "DEBUG: ";
+            break;
+        }
 
-			if(m_streambuf->sputn(buffer.c_str(), buffer.size()) != buffer.size())
-				return EOF;
-		}
-		
-	if(c == '\n')
-		m_start_new_line = true;
-	
-	int rc = m_streambuf->sputc(c);
+        if(m_streambuf->sputn(buffer.c_str(), buffer.size()) != buffer.size())
+            return EOF;
+    }
 
-	return rc;
+    if(c == '\n')
+        m_start_new_line = true;
+
+    int rc = m_streambuf->sputc(c);
+
+    return rc;
 }
 
 int show_level_buf::sync()
 {
-	m_streambuf->sync();
-	return 0;
+	#ifdef	AQSIS_SYSTEM_WIN32
+	m_streambuf->pubsync();
+	#else
+    m_streambuf->sync();
+	#endif
+    return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // reset_level_buf
 
 reset_level_buf::reset_level_buf(std::ostream& Stream) :
-	m_stream(Stream),
-	m_streambuf(Stream.rdbuf())
+        m_stream(Stream),
+        m_streambuf(Stream.rdbuf())
 {
-	setp(0, 0);
-	m_stream.rdbuf(this);
+    setp(0, 0);
+    m_stream.rdbuf(this);
 }
 
 reset_level_buf::~reset_level_buf()
 {
-	m_stream.rdbuf(m_streambuf);
+    m_stream.rdbuf(m_streambuf);
 }
 
 int reset_level_buf::overflow(int c)
 {
-	if(c == '\n')
-		detail::log_level(m_stream) = 0;
-	
-	return m_streambuf->sputc(c);
+    if(c == '\n')
+        detail::log_level(m_stream) = 0;
+
+    return m_streambuf->sputc(c);
 }
 
 int reset_level_buf::sync()
 {
-	m_streambuf->sync();
-	return 0;
+	#ifdef	AQSIS_SYSTEM_WIN32
+	m_streambuf->pubsync();
+	#else
+    m_streambuf->sync();
+	#endif
+    return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // filter_by_level_buf
 
 filter_by_level_buf::filter_by_level_buf(const log_level_t MinimumLevel, std::ostream& Stream) :
-	m_stream(Stream),
-	m_streambuf(Stream.rdbuf()),
-	m_minimum_level(MinimumLevel)
+        m_stream(Stream),
+        m_streambuf(Stream.rdbuf()),
+        m_minimum_level(MinimumLevel)
 {
-	setp(0, 0);
-	m_stream.rdbuf(this);
+    setp(0, 0);
+    m_stream.rdbuf(this);
 }
 
 filter_by_level_buf::~filter_by_level_buf()
 {
-	m_stream.rdbuf(m_streambuf);
+    m_stream.rdbuf(m_streambuf);
 }
 
 int filter_by_level_buf::overflow(int c)
 {
-	if(detail::log_level(m_stream) <= m_minimum_level)
-		return m_streambuf->sputc(c);
-		
-	return c;
+    if(detail::log_level(m_stream) <= m_minimum_level)
+        return m_streambuf->sputc(c);
+
+    return c;
 }
 
 int filter_by_level_buf::sync()
 {
-	m_streambuf->sync();
-	return 0;
+	#ifdef	AQSIS_SYSTEM_WIN32
+	m_streambuf->pubsync();
+	#else
+    m_streambuf->sync();
+	#endif
+    return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // fold_duplicates_buf
 
 fold_duplicates_buf::fold_duplicates_buf(std::ostream& Stream) :
-	m_stream(Stream),
-	m_streambuf(Stream.rdbuf()),
-	m_duplicate_count(0)
+        m_stream(Stream),
+        m_streambuf(Stream.rdbuf()),
+        m_duplicate_count(0)
 {
-	setp(0, 0);
-	m_stream.rdbuf(this);
+    setp(0, 0);
+    m_stream.rdbuf(this);
 }
 
 fold_duplicates_buf::~fold_duplicates_buf()
 {
-	// Flush any leftover output ...
-	print_duplicates();
+    // Flush any leftover output ...
+    print_duplicates();
 
-	if(m_buffer.size())
-		m_streambuf->sputn(m_buffer.c_str(), m_buffer.size());
+    if(m_buffer.size())
+        m_streambuf->sputn(m_buffer.c_str(), m_buffer.size());
 
-	m_stream.rdbuf(m_streambuf);
+    m_stream.rdbuf(m_streambuf);
 }
 
 bool fold_duplicates_buf::print_duplicates()
 {
-	if(m_duplicate_count)
-		{
-			std::ostringstream buffer;
-			buffer << "Last message repeated " << m_duplicate_count << " time";
-			if(m_duplicate_count > 1)
-				buffer << "s";
-			buffer << "\n";
+    if(m_duplicate_count)
+    {
+        std::ostringstream buffer;
+        buffer << "Last message repeated " << m_duplicate_count << " time";
+        if(m_duplicate_count > 1)
+            buffer << "s";
+        buffer << "\n";
 
-			const std::string message(buffer.str());
+        const std::string message(buffer.str());
 
-			if(m_streambuf->sputn(message.c_str(), message.size()) != message.size())
-				return false;
+        if(m_streambuf->sputn(message.c_str(), message.size()) != message.size())
+            return false;
 
-			m_duplicate_count = 0;
-		}
+        m_duplicate_count = 0;
+    }
 
-	return true;
+    return true;
 }
 
 int fold_duplicates_buf::overflow(int c)
 {
-	if(c == EOF)
-		return 0;
+    if(c == EOF)
+        return 0;
 
-	m_buffer += c;
-		
-	if(c == '\n')
-		{
-			if(m_buffer == m_last_buffer)
-				{
-					m_duplicate_count++;
-				}
-			else
-				{
-					if(!print_duplicates())
-						return EOF;
+    m_buffer += c;
 
-					if(m_streambuf->sputn(m_buffer.c_str(), m_buffer.size()) != m_buffer.size())
-						return EOF;
-						
-					m_last_buffer = m_buffer;
-				}
+    if(c == '\n')
+    {
+        if(m_buffer == m_last_buffer)
+        {
+            m_duplicate_count++;
+        }
+        else
+        {
+            if(!print_duplicates())
+                return EOF;
 
-			m_buffer.erase();
-		}
-	
-	return c;
+            if(m_streambuf->sputn(m_buffer.c_str(), m_buffer.size()) != m_buffer.size())
+                return EOF;
+
+            m_last_buffer = m_buffer;
+        }
+
+        m_buffer.erase();
+    }
+
+    return c;
 }
 
 int fold_duplicates_buf::sync()
 {
-	m_streambuf->sync();
-	return 0;
+	#ifdef	AQSIS_SYSTEM_WIN32
+	m_streambuf->pubsync();
+	#else
+    m_streambuf->sync();
+	#endif
+    return 0;
 }
 
 #ifndef	NO_SYSLOG
@@ -336,67 +356,67 @@ int fold_duplicates_buf::sync()
 // syslog_buf
 
 syslog_buf::syslog_buf(std::ostream& Stream) :
-	m_stream(Stream),
-	m_streambuf(Stream.rdbuf())
+        m_stream(Stream),
+        m_streambuf(Stream.rdbuf())
 {
-	setp(0, 0);
-	m_stream.rdbuf(this);
+    setp(0, 0);
+    m_stream.rdbuf(this);
 }
 
 syslog_buf::~syslog_buf()
 {
-	// Flush any leftover data ...
-	if(!m_buffer.empty())
-		write_to_system_log(m_buffer);
+    // Flush any leftover data ...
+    if(!m_buffer.empty())
+        write_to_system_log(m_buffer);
 
-	m_stream.rdbuf(m_streambuf);
+    m_stream.rdbuf(m_streambuf);
 }
 
 int syslog_buf::overflow(int c)
 {
-	if(c == EOF)
-		return 0;
+    if(c == EOF)
+        return 0;
 
-	m_buffer += c;
-	if(c == '\n')
-		{
-			write_to_system_log(m_buffer.substr(0, m_buffer.size()-1));
-			m_buffer.erase();
-		}
-	
-	return m_streambuf->sputc(c);
+    m_buffer += c;
+    if(c == '\n')
+    {
+        write_to_system_log(m_buffer.substr(0, m_buffer.size()-1));
+        m_buffer.erase();
+    }
+
+    return m_streambuf->sputc(c);
 }
 
 int syslog_buf::sync()
 {
-	m_streambuf->sync();
-	return 0;
+    m_streambuf->sync();
+    return 0;
 }
 
 void syslog_buf::write_to_system_log(const std::string& Message)
 {
-	int priority = LOG_INFO;
+    int priority = LOG_INFO;
 
-	switch(detail::log_level(m_stream))
-		{
-			case CRITICAL:
-				priority = LOG_CRIT;
-				break;
-			case ERROR:
-				priority = LOG_ERR;
-				break;
-			case WARNING:
-				priority = LOG_WARNING;
-				break;
-			case INFO:
-				priority = LOG_INFO;
-				break;
-			case DEBUG:
-				priority = LOG_DEBUG;
-				break;
-		}
-		
-	syslog(LOG_USER | priority, "%s", Message.c_str());
+    switch(detail::log_level(m_stream))
+    {
+    case CRITICAL:
+        priority = LOG_CRIT;
+        break;
+    case ERROR:
+        priority = LOG_ERR;
+        break;
+    case WARNING:
+        priority = LOG_WARNING;
+        break;
+    case INFO:
+        priority = LOG_INFO;
+        break;
+    case DEBUG:
+        priority = LOG_DEBUG;
+        break;
+    }
+
+    syslog(LOG_USER | priority, "%s", Message.c_str());
 }
 
 #endif //NO_SYSLOG

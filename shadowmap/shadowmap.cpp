@@ -58,19 +58,19 @@ void SaveAsShadowMap();
 
 int main( int argc, char* argv[] )
 {
-	int port = -1;
-	char *portStr = getenv( "AQSIS_DD_PORT" );
+    int port = -1;
+    char *portStr = getenv( "AQSIS_DD_PORT" );
 
-	if ( portStr != NULL )
-	{
-		port = atoi( portStr );
-	}
+    if ( portStr != NULL )
+    {
+        port = atoi( portStr );
+    }
 
-	if ( DDInitialise( NULL, port ) == 0 )
-	{
-		DDProcessMessages();
-	}
-	return 0;
+    if ( DDInitialise( NULL, port ) == 0 )
+    {
+        DDProcessMessages();
+    }
+    return 0;
 }
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
@@ -94,259 +94,259 @@ TqFloat	matWorldToScreen[ 4 ][ 4 ];
 
 TqInt Query( SOCKET s, SqDDMessageBase* pMsgB )
 {
-	switch ( pMsgB->m_MessageID )
-	{
-			case MessageID_FormatQuery:
-			{
-				if ( DDSendMsg( s, &frmt ) <= 0 )
-					return ( -1 );
-			}
-			break;
-	}
-	return ( 0 );
+    switch ( pMsgB->m_MessageID )
+    {
+    case MessageID_FormatQuery:
+        {
+            if ( DDSendMsg( s, &frmt ) <= 0 )
+                return ( -1 );
+        }
+        break;
+    }
+    return ( 0 );
 }
 
 TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 {
-	SqDDMessageOpen * pMsg = static_cast<SqDDMessageOpen*>( pMsgB );
+    SqDDMessageOpen * pMsg = static_cast<SqDDMessageOpen*>( pMsgB );
 
-	XRes = ( pMsg->m_CropWindowXMax - pMsg->m_CropWindowXMin );
-	YRes = ( pMsg->m_CropWindowYMax - pMsg->m_CropWindowYMin );
-	CWXMin = pMsg->m_CropWindowXMin;
-	CWYMin = pMsg->m_CropWindowYMin;
-	g_Channels = pMsg->m_Channels;
+    XRes = ( pMsg->m_CropWindowXMax - pMsg->m_CropWindowXMin );
+    YRes = ( pMsg->m_CropWindowYMax - pMsg->m_CropWindowYMin );
+    CWXMin = pMsg->m_CropWindowXMin;
+    CWYMin = pMsg->m_CropWindowYMin;
+    g_Channels = pMsg->m_Channels;
 
-	if ( g_Channels > 1 ) return ( -1 );
+    if ( g_Channels > 1 ) return ( -1 );
 
-	// Create a buffer big enough to hold a row of buckets.
-	pData = new TqFloat[ XRes * YRes ];
-	return ( 0 );
+    // Create a buffer big enough to hold a row of buckets.
+    pData = new TqFloat[ XRes * YRes ];
+    return ( 0 );
 }
 
 
 TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 {
-	SqDDMessageData * pMsg = static_cast<SqDDMessageData*>( pMsgB );
+    SqDDMessageData * pMsg = static_cast<SqDDMessageData*>( pMsgB );
 
-	TqInt	linelen = XRes * g_Channels;
-	char* pBucket = reinterpret_cast<char*>( &pMsg->m_Data );
+    TqInt	linelen = XRes * g_Channels;
+    char* pBucket = reinterpret_cast<char*>( &pMsg->m_Data );
 
-	TqInt y;
-	for ( y = pMsg->m_YMin; y < pMsg->m_YMaxPlus1; y++ )
-	{
-		TqInt x;
-		for ( x = pMsg->m_XMin; x < pMsg->m_XMaxPlus1; x++ )
-		{
-			if ( x >= 0 && y >= 0 && x < XRes && y < YRes )
-			{
-				TqInt so = ( y * linelen ) + ( x * g_Channels );
+    TqInt y;
+    for ( y = pMsg->m_YMin; y < pMsg->m_YMaxPlus1; y++ )
+    {
+        TqInt x;
+        for ( x = pMsg->m_XMin; x < pMsg->m_XMaxPlus1; x++ )
+        {
+            if ( x >= 0 && y >= 0 && x < XRes && y < YRes )
+            {
+                TqInt so = ( y * linelen ) + ( x * g_Channels );
 
-				TqInt i = 0;
-				while ( i < g_Channels )
-				{
-					pData[ so++ ] = reinterpret_cast<TqFloat*>( pBucket ) [ i ];
-					i++;
-				}
-			}
-			pBucket += pMsg->m_ElementSize;
-		}
-	}
-	return ( 0 );
+                TqInt i = 0;
+                while ( i < g_Channels )
+                {
+                    pData[ so++ ] = reinterpret_cast<TqFloat*>( pBucket ) [ i ];
+                    i++;
+                }
+            }
+            pBucket += pMsg->m_ElementSize;
+        }
+    }
+    return ( 0 );
 }
 
 
 TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 {
-	// Save the shadowmap to a binary file.
-	if ( strFilename != "" )
-	{
-		if( strType.compare( "shadow" ) == 0 )
-		{
-			SaveAsShadowMap();
-		}
-		else
-		{
-			std::ofstream ofile( strFilename.c_str(), std::ios::out | std::ios::binary );
-			if ( ofile.is_open() )
-			{
-				// Save a file type and version marker
-				ofile << ZFILE_HEADER;
+    // Save the shadowmap to a binary file.
+    if ( strFilename != "" )
+    {
+        if( strType.compare( "shadow" ) == 0 )
+        {
+            SaveAsShadowMap();
+        }
+        else
+        {
+            std::ofstream ofile( strFilename.c_str(), std::ios::out | std::ios::binary );
+            if ( ofile.is_open() )
+            {
+                // Save a file type and version marker
+                ofile << ZFILE_HEADER;
 
-				// Save the xres and yres.
-				ofile.write( reinterpret_cast<char* >( &XRes ), sizeof( XRes ) );
-				ofile.write( reinterpret_cast<char* >( &YRes ), sizeof( XRes ) );
+                // Save the xres and yres.
+                ofile.write( reinterpret_cast<char* >( &XRes ), sizeof( XRes ) );
+                ofile.write( reinterpret_cast<char* >( &YRes ), sizeof( XRes ) );
 
-				// Save the transformation matrices.
-				ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 0 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-				ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 1 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-				ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 2 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-				ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 3 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+                // Save the transformation matrices.
+                ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 0 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+                ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 1 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+                ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 2 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+                ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 3 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
 
-				ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 0 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-				ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 1 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-				ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 2 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-				ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 3 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+                ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 0 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+                ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 1 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+                ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 2 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+                ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 3 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
 
-				// Now output the depth values
-				ofile.write( reinterpret_cast<char*>( pData ), sizeof( TqFloat ) * ( XRes * YRes ) );
-				ofile.close();
-			}
-		}
-	}
-	if ( DDSendMsg( s, &closeack ) <= 0 )
-		return ( -1 );
-	else
-		return ( 1 );
+                // Now output the depth values
+                ofile.write( reinterpret_cast<char*>( pData ), sizeof( TqFloat ) * ( XRes * YRes ) );
+                ofile.close();
+            }
+        }
+    }
+    if ( DDSendMsg( s, &closeack ) <= 0 )
+        return ( -1 );
+    else
+        return ( 1 );
 }
 
 
 TqInt Abandon( SOCKET s, SqDDMessageBase* pMsgB )
 {
-	return ( 1 );
+    return ( 1 );
 }
 
 
 void SaveAsShadowMap()
 {
-	TqChar version[ 80 ];
-	TqInt twidth = 32;
-	TqInt tlength = 32;
+    TqChar version[ 80 ];
+    TqInt twidth = 32;
+    TqInt tlength = 32;
 
-	const char* mode = (g_append)? "a" : "w";
+    const char* mode = (g_append)? "a" : "w";
 
-	// Save the shadowmap to a binary file.
-	if ( strFilename.compare( "" ) != 0 )
-	{
-		TIFF * pshadow = TIFFOpen( strFilename.c_str(), mode );
-		TIFFCreateDirectory( pshadow );
+    // Save the shadowmap to a binary file.
+    if ( strFilename.compare( "" ) != 0 )
+    {
+        TIFF * pshadow = TIFFOpen( strFilename.c_str(), mode );
+        TIFFCreateDirectory( pshadow );
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-		sprintf( version, "%s %s", STRNAME, VERSION_STR );
+        sprintf( version, "%s %s", STRNAME, VERSION_STR );
 #else
-		sprintf( version, "%s %s", STRNAME, VERSION );
+        sprintf( version, "%s %s", STRNAME, VERSION );
 #endif
-		TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
-		TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, matWorldToCamera );
-		TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, matWorldToScreen );
-		TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
-		TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
+        TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
+        TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, matWorldToCamera );
+        TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, matWorldToScreen );
+        TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
+        TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
 
-		// Write the floating point image to the directory.
-		TqFloat *depths = ( TqFloat * ) pData;
+        // Write the floating point image to the directory.
+        TqFloat *depths = ( TqFloat * ) pData;
 
 	#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-		sprintf( version, "%s %s", STRNAME, VERSION_STR );
+        sprintf( version, "%s %s", STRNAME, VERSION_STR );
 	#else
-		sprintf( version, "%s %s", STRNAME, VERSION );
+        sprintf( version, "%s %s", STRNAME, VERSION );
 	#endif
-		TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
-		TIFFSetField( pshadow, TIFFTAG_IMAGEWIDTH, XRes );
-		TIFFSetField( pshadow, TIFFTAG_IMAGELENGTH, YRes );
-		TIFFSetField( pshadow, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
-		TIFFSetField( pshadow, TIFFTAG_BITSPERSAMPLE, 32 );
-		TIFFSetField( pshadow, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
-		TIFFSetField( pshadow, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
-		TIFFSetField( pshadow, TIFFTAG_TILEWIDTH, twidth );
-		TIFFSetField( pshadow, TIFFTAG_TILELENGTH, tlength );
-		TIFFSetField( pshadow, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
-		TIFFSetField( pshadow, TIFFTAG_COMPRESSION, g_Compression );
+        TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
+        TIFFSetField( pshadow, TIFFTAG_IMAGEWIDTH, XRes );
+        TIFFSetField( pshadow, TIFFTAG_IMAGELENGTH, YRes );
+        TIFFSetField( pshadow, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
+        TIFFSetField( pshadow, TIFFTAG_BITSPERSAMPLE, 32 );
+        TIFFSetField( pshadow, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
+        TIFFSetField( pshadow, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
+        TIFFSetField( pshadow, TIFFTAG_TILEWIDTH, twidth );
+        TIFFSetField( pshadow, TIFFTAG_TILELENGTH, tlength );
+        TIFFSetField( pshadow, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
+        TIFFSetField( pshadow, TIFFTAG_COMPRESSION, g_Compression );
 
 
-		TqInt tsize = twidth * tlength;
-		TqInt tperrow = ( XRes + twidth - 1 ) / twidth;
-		TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * g_Channels * sizeof( TqFloat ) ) );
+        TqInt tsize = twidth * tlength;
+        TqInt tperrow = ( XRes + twidth - 1 ) / twidth;
+        TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * g_Channels * sizeof( TqFloat ) ) );
 
-		if ( ptile != NULL )
-		{
-			TqInt ctiles = tperrow * ( ( YRes + tlength - 1 ) / tlength );
-			TqInt itile;
-			for ( itile = 0; itile < ctiles; itile++ )
-			{
-				TqInt x = ( itile % tperrow ) * twidth;
-				TqInt y = ( itile / tperrow ) * tlength;
-				TqFloat* ptdata = pData + ( ( y * XRes ) + x ) * g_Channels;
-				// Clear the tile to black.
-				memset( ptile, 0, tsize * g_Channels * sizeof( TqFloat ) );
-				for ( TqUlong i = 0; i < tlength; i++ )
-				{
-					for ( TqUlong j = 0; j < twidth; j++ )
-					{
-						if ( ( x + j ) < XRes && ( y + i ) < YRes )
-						{
-							TqInt ii;
-							for ( ii = 0; ii < g_Channels; ii++ )
-								ptile[ ( i * twidth * g_Channels ) + ( ( ( j * g_Channels ) + ii ) ) ] = ptdata[ ( ( j * g_Channels ) + ii ) ];
-						}
-					}
-					ptdata += ( XRes * g_Channels );
-				}
-				TIFFWriteTile( pshadow, ptile, x, y, 0, 0 );
-			}
-			TIFFWriteDirectory( pshadow );
+        if ( ptile != NULL )
+        {
+            TqInt ctiles = tperrow * ( ( YRes + tlength - 1 ) / tlength );
+            TqInt itile;
+            for ( itile = 0; itile < ctiles; itile++ )
+            {
+                TqInt x = ( itile % tperrow ) * twidth;
+                TqInt y = ( itile / tperrow ) * tlength;
+                TqFloat* ptdata = pData + ( ( y * XRes ) + x ) * g_Channels;
+                // Clear the tile to black.
+                memset( ptile, 0, tsize * g_Channels * sizeof( TqFloat ) );
+                for ( TqUlong i = 0; i < tlength; i++ )
+                {
+                    for ( TqUlong j = 0; j < twidth; j++ )
+                    {
+                        if ( ( x + j ) < XRes && ( y + i ) < YRes )
+                        {
+                            TqInt ii;
+                            for ( ii = 0; ii < g_Channels; ii++ )
+                                ptile[ ( i * twidth * g_Channels ) + ( ( ( j * g_Channels ) + ii ) ) ] = ptdata[ ( ( j * g_Channels ) + ii ) ];
+                        }
+                    }
+                    ptdata += ( XRes * g_Channels );
+                }
+                TIFFWriteTile( pshadow, ptile, x, y, 0, 0 );
+            }
+            TIFFWriteDirectory( pshadow );
 
-		}
+        }
 
-		TIFFClose( pshadow );
-	}
+        TIFFClose( pshadow );
+    }
 }
 
 
 TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
 {
-	switch ( pMsgB->m_MessageID )
-	{
-			case MessageID_Filename:
-			{
-				SqDDMessageFilename * pMsg = static_cast<SqDDMessageFilename*>( pMsgB );
-				strFilename = pMsg->m_String;
-			}
-			break;
+    switch ( pMsgB->m_MessageID )
+    {
+    case MessageID_Filename:
+        {
+            SqDDMessageFilename * pMsg = static_cast<SqDDMessageFilename*>( pMsgB );
+            strFilename = pMsg->m_String;
+        }
+        break;
 
-			case MessageID_DisplayType:
-			{
-				SqDDMessageDisplayType * pMsg = static_cast<SqDDMessageDisplayType*>( pMsgB );
-				strType = pMsg->m_String;
-			}
-			break;
+    case MessageID_DisplayType:
+        {
+            SqDDMessageDisplayType * pMsg = static_cast<SqDDMessageDisplayType*>( pMsgB );
+            strType = pMsg->m_String;
+        }
+        break;
 
-			case MessageID_Nl:
-			{
-				SqDDMessageNl* pMsg = static_cast<SqDDMessageNl*>( pMsgB );
-				memcpy( matWorldToCamera, pMsg->m_Matrix, sizeof( matWorldToCamera ) );
-			}
-			break;
+    case MessageID_Nl:
+        {
+            SqDDMessageNl* pMsg = static_cast<SqDDMessageNl*>( pMsgB );
+            memcpy( matWorldToCamera, pMsg->m_Matrix, sizeof( matWorldToCamera ) );
+        }
+        break;
 
-			case MessageID_NP:
-			{
-				SqDDMessageNP* pMsg = static_cast<SqDDMessageNP*>( pMsgB );
-				memcpy( matWorldToScreen, pMsg->m_Matrix, sizeof( matWorldToScreen ) );
-			}
-			break;
+    case MessageID_NP:
+        {
+            SqDDMessageNP* pMsg = static_cast<SqDDMessageNP*>( pMsgB );
+            memcpy( matWorldToScreen, pMsg->m_Matrix, sizeof( matWorldToScreen ) );
+        }
+        break;
 
-			case MessageID_UserParam:
-			{
-				SqDDMessageUserParam * pMsg = static_cast<SqDDMessageUserParam*>( pMsgB );
-				// Check if we understand the parameter.
-				if( strncmp( pMsg->m_NameAndData, "append", pMsg->m_NameLength ) == 0 )
-				{
-					g_append = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
-				}
-				else if( strncmp( pMsg->m_NameAndData, "compression", pMsg->m_NameLength ) == 0 )
-				{
-					const char* pvalue = reinterpret_cast<const char*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
-					if ( strstr( pvalue, "none" ) != 0 )
-						g_Compression = COMPRESSION_NONE;
-					else if ( strstr( pvalue, "lzw" ) != 0 )
-						g_Compression = COMPRESSION_LZW;
-					else if ( strstr( pvalue, "deflate" ) != 0 )
-						g_Compression = COMPRESSION_DEFLATE;
-					else if ( strstr( pvalue, "jpeg" ) != 0 )
-						g_Compression = COMPRESSION_JPEG;
-					else if ( strstr( pvalue, "packbits" ) != 0 )
-						g_Compression = COMPRESSION_PACKBITS;
-				}
-			}
-			break;
-	}
-	return ( 0 );
+    case MessageID_UserParam:
+        {
+            SqDDMessageUserParam * pMsg = static_cast<SqDDMessageUserParam*>( pMsgB );
+            // Check if we understand the parameter.
+            if( strncmp( pMsg->m_NameAndData, "append", pMsg->m_NameLength ) == 0 )
+            {
+                g_append = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+            }
+            else if( strncmp( pMsg->m_NameAndData, "compression", pMsg->m_NameLength ) == 0 )
+            {
+                const char* pvalue = reinterpret_cast<const char*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+                if ( strstr( pvalue, "none" ) != 0 )
+                    g_Compression = COMPRESSION_NONE;
+                else if ( strstr( pvalue, "lzw" ) != 0 )
+                    g_Compression = COMPRESSION_LZW;
+                else if ( strstr( pvalue, "deflate" ) != 0 )
+                    g_Compression = COMPRESSION_DEFLATE;
+                else if ( strstr( pvalue, "jpeg" ) != 0 )
+                    g_Compression = COMPRESSION_JPEG;
+                else if ( strstr( pvalue, "packbits" ) != 0 )
+                    g_Compression = COMPRESSION_PACKBITS;
+            }
+        }
+        break;
+    }
+    return ( 0 );
 }

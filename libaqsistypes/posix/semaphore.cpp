@@ -35,7 +35,7 @@
 /// CqSemaphore::CqSemaphore
 
 CqSemaphore::CqSemaphore() :
-		m_pNativeSemaphore( 0 )
+        m_pNativeSemaphore( 0 )
 {}
 
 
@@ -62,7 +62,7 @@ CqSemaphore::~CqSemaphore()
 void
 CqSemaphore::Signal()
 {
-	std::cout << "CqSemaphore::Signal() not implemented under Posix!!!" << std::endl;	// Not implemented for POSIX, yet!!!
+    std::cout << "CqSemaphore::Signal() not implemented under Posix!!!" << std::endl;	// Not implemented for POSIX, yet!!!
 }
 
 
@@ -77,7 +77,7 @@ CqSemaphore::Signal()
 void
 CqSemaphore::Wait()
 {
-	std::cout << "CqSemaphore::Wait() not implemented under Posix!!!" << std::endl;	// Not implemented for POSIX, yet!!!
+    std::cout << "CqSemaphore::Wait() not implemented under Posix!!!" << std::endl;	// Not implemented for POSIX, yet!!!
 }
 
 

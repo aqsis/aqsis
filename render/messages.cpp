@@ -48,11 +48,11 @@ char* gstrMessageType[ MessageType_Last ] =
 
 CqReportedErrors::~CqReportedErrors()
 {
-	// We know that items are only ever added to our list via SetReported,
-	// so need to be deleted here.
-	for ( std::vector<CqBasicError*>::iterator i = m_aReportedErrors.begin(); i != m_aReportedErrors.end(); i++ )
-		if ( ( *i ) != 0 )
-			delete( *i );
+    // We know that items are only ever added to our list via SetReported,
+    // so need to be deleted here.
+    for ( std::vector<CqBasicError*>::iterator i = m_aReportedErrors.begin(); i != m_aReportedErrors.end(); i++ )
+        if ( ( *i ) != 0 )
+            delete( *i );
 }
 
 
@@ -63,7 +63,7 @@ CqReportedErrors::~CqReportedErrors()
 
 void CqReportedErrors::SetReported( CqBasicError* pError )
 {
-	m_aReportedErrors.push_back( pError );
+    m_aReportedErrors.push_back( pError );
 }
 
 
@@ -74,10 +74,10 @@ void CqReportedErrors::SetReported( CqBasicError* pError )
 
 TqBool CqReportedErrors::CheckReport( CqBasicError* pError )
 {
-	for ( std::vector<CqBasicError*>::iterator i = m_aReportedErrors.begin(); i != m_aReportedErrors.end(); i++ )
-		if ( ( *i ) ->CheckReport( pError ) )
-			return ( false );
-	return ( true );
+    for ( std::vector<CqBasicError*>::iterator i = m_aReportedErrors.begin(); i != m_aReportedErrors.end(); i++ )
+        if ( ( *i ) ->CheckReport( pError ) )
+            return ( false );
+    return ( true );
 }
 
 
@@ -87,9 +87,9 @@ TqBool CqReportedErrors::CheckReport( CqBasicError* pError )
 
 void CqReportedErrors::ClearReported()
 {
-	for ( std::vector<CqBasicError*>::iterator i = m_aReportedErrors.begin(); i != m_aReportedErrors.end(); i++ )
-		delete( ( *i ) );
-	m_aReportedErrors.clear();
+    for ( std::vector<CqBasicError*>::iterator i = m_aReportedErrors.begin(); i != m_aReportedErrors.end(); i++ )
+        delete( ( *i ) );
+    m_aReportedErrors.clear();
 }
 
 
@@ -102,14 +102,14 @@ void CqReportedErrors::ClearReported()
  */
 
 CqBasicError::CqBasicError( TqInt code, TqInt severity, const char* message, TqBool onceper ) :
-		m_Code( code )
+        m_Code( code )
 {
-	if ( gReportedErrors.CheckReport( this ) )
-	{
-		( *QGetRenderContext() ->optCurrent().pErrorHandler() ) ( code, severity, message );
-		if ( onceper )
-			gReportedErrors.SetReported( new CqBasicError( *this ) );
-	}
+    if ( gReportedErrors.CheckReport( this ) )
+    {
+        ( *QGetRenderContext() ->optCurrent().pErrorHandler() ) ( code, severity, message );
+        if ( onceper )
+            gReportedErrors.SetReported( new CqBasicError( *this ) );
+    }
 }
 
 //---------------------------------------------------------------------
@@ -121,23 +121,23 @@ CqBasicError::CqBasicError( TqInt code, TqInt severity, const char* message, TqB
  * \param onceper Flag indicating the message should only be show once.
  */
 CqAttributeError::CqAttributeError( TqInt code, TqInt severity, const char* message, const IqAttributes* pAttributes, TqBool onceper ) :
-		CqBasicError( code ),
-		m_pAttributes( pAttributes )
+        CqBasicError( code ),
+        m_pAttributes( pAttributes )
 {
-	if ( gReportedErrors.CheckReport( this ) )
-	{
-		// TODO: This needs tidying up.
-		CqString strMessage;
-		const CqString* pattrName = pAttributes->GetStringAttribute( "identifier", "name" );
-		CqString strName( "<unnamed>" );
-		if ( pattrName != 0 ) strName = pattrName[ 0 ];
-		strMessage = message;
-		strMessage += " : ";
-		strMessage += strName;
-		( *QGetRenderContext() ->optCurrent().pErrorHandler() ) ( code, severity, ( char* ) strMessage.c_str() );
-		if ( onceper )
-			gReportedErrors.SetReported( new CqAttributeError( *this ) );
-	}
+    if ( gReportedErrors.CheckReport( this ) )
+    {
+        // TODO: This needs tidying up.
+        CqString strMessage;
+        const CqString* pattrName = pAttributes->GetStringAttribute( "identifier", "name" );
+        CqString strName( "<unnamed>" );
+        if ( pattrName != 0 ) strName = pattrName[ 0 ];
+        strMessage = message;
+        strMessage += " : ";
+        strMessage += strName;
+        ( *QGetRenderContext() ->optCurrent().pErrorHandler() ) ( code, severity, ( char* ) strMessage.c_str() );
+        if ( onceper )
+            gReportedErrors.SetReported( new CqAttributeError( *this ) );
+    }
 }
 
 

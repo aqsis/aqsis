@@ -59,7 +59,7 @@ class ArgParseInternalData;	// hide implementation details
  * make things line up in columns.
  */
 
-/* 
+/*
  * Rationale for some design decisions:
  *
  * Things which need to be modified are passed as pointers, not as
@@ -100,8 +100,8 @@ public:
     // it can become multiple elements in the array by being split
     // on the given character.  (e. g. "--foo one,two")
     enum {
-	SEP_NONE = -1,
-	SEP_ARGV = -2
+        SEP_NONE = -1,
+        SEP_ARGV = -2
     };
 
     ArgParse();
@@ -123,20 +123,20 @@ public:
     // "--foo" will set *value to true.  If allow_negation is true,
     // then "--nofoo" will set *value to false.
     void argFlag(apstring name, apstring usage,
-		 apflag* value, bool allow_negation = true);
+                 apflag* value, bool allow_negation = true);
 
     void argInt(apstring name, apstring usage, apint* value);
     void argInts(apstring name, apstring usage,
-		 apintvec* values, int separator = SEP_NONE);
+                 apintvec* values, int separator = SEP_NONE);
 
     void argFloat(apstring name, apstring usage, apfloat* value);
     void argFloats(apstring name, apstring usage,
-		   apfloatvec* values, int separator = SEP_NONE);
+                   apfloatvec* values, int separator = SEP_NONE);
 
     void argString(apstring name, apstring usage, apstring* value);
     void argStrings(apstring name, apstring usage,
-		    apstringvec* values, int separator = SEP_NONE);
-    
+                    apstringvec* values, int separator = SEP_NONE);
+
     // Makes "aliasname" work just like "realname".  Note that
     // "realname" can be a negated flag name (if the flag allows
     // negation), so you can make "--fooless" mean "--nofoo", for

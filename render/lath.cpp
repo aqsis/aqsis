@@ -41,8 +41,8 @@ DEFINE_STATIC_MEMORYPOOL( CqLath, 512 );
  */
 CqLath* CqLath::cf() const
 {
-	// Inherent in the data structure.
-	return(m_pClockwiseFacet);
+    // Inherent in the data structure.
+    return(m_pClockwiseFacet);
 }
 
 
@@ -56,8 +56,8 @@ CqLath* CqLath::cf() const
  */
 CqLath* CqLath::cv() const
 {
-	// Inherent in the data strucure.
-	return(m_pClockwiseVertex);
+    // Inherent in the data strucure.
+    return(m_pClockwiseVertex);
 }
 
 
@@ -71,12 +71,12 @@ CqLath* CqLath::cv() const
  */
 CqLath* CqLath::ec() const
 {
-	// If the associated edge is boundary there is no companion.
-	assert(NULL != cf());
-	if(NULL != cv())
-		return(cv()->cf());
-	else
-		return(NULL);
+    // If the associated edge is boundary there is no companion.
+    assert(NULL != cf());
+    if(NULL != cv())
+        return(cv()->cf());
+    else
+        return(NULL);
 }
 
 //------------------------------------------------------------------------------
@@ -91,17 +91,17 @@ CqLath* CqLath::ec() const
  */
 CqLath* CqLath::ccf() const
 {
-	// If the associated edge is boundary, we will need to search backwards.
-	if(NULL != ec() && NULL != ec()->cv())
-		return(ec()->cv());
-	else
-	{
-		CqLath* pLdash=cf();
-		while(this != pLdash->cf() && NULL != pLdash->cf())
-			pLdash=pLdash->cf();
-		assert(this == pLdash->cf());
-		return(pLdash);
-	}
+    // If the associated edge is boundary, we will need to search backwards.
+    if(NULL != ec() && NULL != ec()->cv())
+        return(ec()->cv());
+    else
+    {
+        CqLath* pLdash=cf();
+        while(this != pLdash->cf() && NULL != pLdash->cf())
+            pLdash=pLdash->cf();
+        assert(this == pLdash->cf());
+        return(pLdash);
+    }
 }
 
 
@@ -115,12 +115,12 @@ CqLath* CqLath::ccf() const
  */
 CqLath* CqLath::ccv() const
 {
-	// If the associated edge is boundary, we will need to search backwards.
-	assert(NULL != cf());
-	if(NULL != cf()->ec())
-		return(cf()->ec());
-	else
-		return(NULL);
+    // If the associated edge is boundary, we will need to search backwards.
+    assert(NULL != cf());
+    if(NULL != cf()->ec())
+        return(cf()->ec());
+    else
+        return(NULL);
 }
 
 
@@ -132,16 +132,16 @@ CqLath* CqLath::ccv() const
  *
  *	@return	Pointer to an array of lath pointers.
  */
-void CqLath::Qef(std::vector<CqLath*>& Result) 
+void CqLath::Qef(std::vector<CqLath*>& Result)
 {
-	Result.clear();
-	// Laths representing the two faces bounding an edge are given by L and L->ec(). If edge
-	// is a boundary, only L is passed back.
-	CqLath *pTmpLath = this;
-	Result.push_back(pTmpLath);
+    Result.clear();
+    // Laths representing the two faces bounding an edge are given by L and L->ec(). If edge
+    // is a boundary, only L is passed back.
+    CqLath *pTmpLath = this;
+    Result.push_back(pTmpLath);
 
-	if(NULL != ec())
-		Result.push_back(ec());
+    if(NULL != ec())
+        Result.push_back(ec());
 }
 
 
@@ -152,14 +152,14 @@ void CqLath::Qef(std::vector<CqLath*>& Result)
  *
  *	@return	Pointer to an array of lath pointers.
  */
-void CqLath::Qev(std::vector<CqLath*>& Result) 
+void CqLath::Qev(std::vector<CqLath*>& Result)
 {
-	Result.clear();
-	// Laths representing the two vertices of the associated edge are given by
-	// L and L->ccf(). Note we use cf here because itis guarunteed, whereas ec is not.
-	CqLath *pTmpLath = this;
-	Result.push_back(pTmpLath);
-	Result.push_back(ccf());
+    Result.clear();
+    // Laths representing the two vertices of the associated edge are given by
+    // L and L->ccf(). Note we use cf here because itis guarunteed, whereas ec is not.
+    CqLath *pTmpLath = this;
+    Result.push_back(pTmpLath);
+    Result.push_back(ccf());
 }
 
 
@@ -170,21 +170,21 @@ void CqLath::Qev(std::vector<CqLath*>& Result)
  *
  *	@return	Pointer to an array of lath pointers.
  */
-void CqLath::Qfe(std::vector<CqLath*>& Result) 
+void CqLath::Qfe(std::vector<CqLath*>& Result)
 {
-	Result.clear();
-	// Laths representing the edges of the associated facet are obtained by following
-	// clockwise links around the face.
-	CqLath *pTmpLath = this;
-	Result.push_back(pTmpLath);
+    Result.clear();
+    // Laths representing the edges of the associated facet are obtained by following
+    // clockwise links around the face.
+    CqLath *pTmpLath = this;
+    Result.push_back(pTmpLath);
 
-	CqLath* pNext = cf();
-	while(this != pNext)
-	{
-		assert(NULL != pNext);
-		Result.push_back(pNext);
-		pNext = pNext->cf();
-	}
+    CqLath* pNext = cf();
+    while(this != pNext)
+    {
+        assert(NULL != pNext);
+        Result.push_back(pNext);
+        pNext = pNext->cf();
+    }
 }
 
 
@@ -196,41 +196,41 @@ void CqLath::Qfe(std::vector<CqLath*>& Result)
  *
  *	@return	Pointer to an array of lath pointers.
  */
-void CqLath::Qve(std::vector<CqLath*>& Result) 
+void CqLath::Qve(std::vector<CqLath*>& Result)
 {
-	Result.clear();
-	// Laths representing the edges that radiate from the associated vertex are obtained by 
-	// following the clockwise vertex links around the vertex. 
-	CqLath *pTmpLath = this;
-	Result.push_back(pTmpLath);
+    Result.clear();
+    // Laths representing the edges that radiate from the associated vertex are obtained by
+    // following the clockwise vertex links around the vertex.
+    CqLath *pTmpLath = this;
+    Result.push_back(pTmpLath);
 
-	CqLath* pNext = cv();
-	CqLath* pLast = this;
-	while(NULL != pNext && this != pNext)
-	{
-		Result.push_back(pNext);
-		pLast = pNext;
-		pNext = pNext->cv();
-	}
+    CqLath* pNext = cv();
+    CqLath* pLast = this;
+    while(NULL != pNext && this != pNext)
+    {
+        Result.push_back(pNext);
+        pLast = pNext;
+        pNext = pNext->cv();
+    }
 
-	// If we hit a boundary, add the ec of this boundary edge and start again going backwards.
-	// @warning Adding ccf for the boundary edge means that the lath represents a different vertex.
-	if(NULL == pNext)
-	{
-		pLast = this;
-		pNext = ccv();
-		// We know we are going to hit a boundary in this direction as well so we can just look for that
-		// case as a terminator.
-		while(NULL != pNext)
-		{
-			assert( pNext != this );
-			Result.push_back(pNext);
-			pLast = pNext;
-			pNext = pNext->ccv();
-		}
-		// We have hit the boundary going the other way, so add the ccf of this boundary edge.
-		Result.push_back(pLast->cf());
-	}
+    // If we hit a boundary, add the ec of this boundary edge and start again going backwards.
+    // @warning Adding ccf for the boundary edge means that the lath represents a different vertex.
+    if(NULL == pNext)
+    {
+        pLast = this;
+        pNext = ccv();
+        // We know we are going to hit a boundary in this direction as well so we can just look for that
+        // case as a terminator.
+        while(NULL != pNext)
+        {
+            assert( pNext != this );
+            Result.push_back(pNext);
+            pLast = pNext;
+            pNext = pNext->ccv();
+        }
+        // We have hit the boundary going the other way, so add the ccf of this boundary edge.
+        Result.push_back(pLast->cf());
+    }
 }
 
 
@@ -244,7 +244,7 @@ void CqLath::Qve(std::vector<CqLath*>& Result)
  */
 void CqLath::Qfv(std::vector<CqLath*>& Result)
 {
-	Qfe(Result);
+    Qfe(Result);
 }
 
 
@@ -258,17 +258,17 @@ void CqLath::Qfv(std::vector<CqLath*>& Result)
  */
 void CqLath::Qvv(std::vector<CqLath*>& Result)
 {
-	Qve(Result);
+    Qve(Result);
 
-	// We can get the laths for the vertices surrounding a vertex by getting the cf() for each
-	// lath in Qev. Note we must check first if the lath in Qve represents the same vertex as this
-	// as if there is a boundary case, the lath on the clockwise boundary will already point to the 
-	// opposite vertex.
-	for(std::vector<CqLath*>::iterator iLath = Result.begin(); iLath!=Result.end(); iLath++)
-	{
-		if((*iLath)->VertexIndex() == VertexIndex())
-			(*iLath) = (*iLath)->ccf();
-	}
+    // We can get the laths for the vertices surrounding a vertex by getting the cf() for each
+    // lath in Qev. Note we must check first if the lath in Qve represents the same vertex as this
+    // as if there is a boundary case, the lath on the clockwise boundary will already point to the
+    // opposite vertex.
+    for(std::vector<CqLath*>::iterator iLath = Result.begin(); iLath!=Result.end(); iLath++)
+    {
+        if((*iLath)->VertexIndex() == VertexIndex())
+            (*iLath) = (*iLath)->ccf();
+    }
 }
 
 
@@ -282,32 +282,32 @@ void CqLath::Qvv(std::vector<CqLath*>& Result)
  */
 void CqLath::Qvf(std::vector<CqLath*>& Result)
 {
-	Result.clear();
+    Result.clear();
 
-	// Laths representing the edges that radiate from the associated vertex are obtained by 
-	// following the clockwise vertex links around the vertex. 
-	CqLath *pTmpLath = this;
-	Result.push_back(pTmpLath);
+    // Laths representing the edges that radiate from the associated vertex are obtained by
+    // following the clockwise vertex links around the vertex.
+    CqLath *pTmpLath = this;
+    Result.push_back(pTmpLath);
 
-	CqLath* pNext = cv();
-	while(NULL != pNext && this != pNext)
-	{
-		Result.push_back(pNext);
-		pNext = pNext->cv();
-	}
+    CqLath* pNext = cv();
+    while(NULL != pNext && this != pNext)
+    {
+        Result.push_back(pNext);
+        pNext = pNext->cv();
+    }
 
-	// If we hit a boundary, start again going backwards.
-	if(NULL == pNext)
-	{
-		pNext = ccv();
-		// We know we are going to hit a boundary in this direction as well so we can just look for that
-		// case as a terminator.
-		while(NULL != pNext)
-		{
-			Result.push_back(pNext);
-			pNext = pNext->ccv();
-		}
-	}
+    // If we hit a boundary, start again going backwards.
+    if(NULL == pNext)
+    {
+        pNext = ccv();
+        // We know we are going to hit a boundary in this direction as well so we can just look for that
+        // case as a terminator.
+        while(NULL != pNext)
+        {
+            Result.push_back(pNext);
+            pNext = pNext->ccv();
+        }
+    }
 }
 
 
@@ -321,22 +321,22 @@ void CqLath::Qvf(std::vector<CqLath*>& Result)
  */
 void CqLath::Qee(std::vector<CqLath*>& Result)
 {
-	Result.clear();
-	std::vector<CqLath*> ResQve1;
-	Qve(ResQve1);
-	std::vector<CqLath*> ResQve2;
-	ccf()->Qve(ResQve2);
+    Result.clear();
+    std::vector<CqLath*> ResQve1;
+    Qve(ResQve1);
+    std::vector<CqLath*> ResQve2;
+    ccf()->Qve(ResQve2);
 
-	// The laths representing the edges radiating from the two vertices of the edge this lath represents
-	// can be implemented by taking the union of Qve for this and cf() and removing the duplicate cf() if
-	// it exists.
-	Result.insert(Result.end(), ResQve1.begin(), ResQve1.end());
+    // The laths representing the edges radiating from the two vertices of the edge this lath represents
+    // can be implemented by taking the union of Qve for this and cf() and removing the duplicate cf() if
+    // it exists.
+    Result.insert(Result.end(), ResQve1.begin(), ResQve1.end());
 
-	for(std::vector<CqLath*>::iterator iLath = ResQve2.begin(); iLath!=ResQve2.end(); iLath++)
-	{
-		if(ec() != (*iLath) && this != (*iLath))
-			Result.push_back((*iLath));
-	}
+    for(std::vector<CqLath*>::iterator iLath = ResQve2.begin(); iLath!=ResQve2.end(); iLath++)
+    {
+        if(ec() != (*iLath) && this != (*iLath))
+            Result.push_back((*iLath));
+    }
 }
 
 
@@ -350,36 +350,36 @@ void CqLath::Qee(std::vector<CqLath*>& Result)
  */
 void CqLath::Qff(std::vector<CqLath*>& Result)
 {
-	Result.clear();
-	std::vector<CqLath*> ResQfe;
-	Qfe(ResQfe);
+    Result.clear();
+    std::vector<CqLath*> ResQfe;
+    Qfe(ResQfe);
 
-	// The laths representing the edges radiating from the two vertices of the edge this lath represents
-	// can be implemented by taking the union of Qve for this and cf() and removing the duplicate ec() if
-	// it exists.
-	for(std::vector<CqLath*>::iterator iLath = ResQfe.begin(); iLath!=ResQfe.end(); iLath++)
-	{
-		std::vector<CqLath*> ResQev;
-		(*iLath)->Qve(ResQev);
-		for(std::vector<CqLath*>::iterator iEdge = ResQev.begin(); iEdge!=ResQev.end(); iEdge++)
-		{
-			CqLath* pNew = (*iEdge);
-			// Search for the new candidate by traversing the cf lists for all laths currrently in the
-			// result list.
-			TqBool fValid = TqTrue;
-			for(std::vector<CqLath*>::iterator iCurr = Result.begin(); iCurr!=Result.end(); iCurr++)
-			{
-				CqLath* pVisited =(*iCurr);
-				CqLath* pStart = pVisited;
-				do
-				{
-					if(pVisited == pNew)	fValid=TqFalse;
-					pVisited = pVisited->cf();
-				}while(pVisited != pStart);
-			}
-			if(fValid)	Result.push_back(pNew);
-		}
-	}
+    // The laths representing the edges radiating from the two vertices of the edge this lath represents
+    // can be implemented by taking the union of Qve for this and cf() and removing the duplicate ec() if
+    // it exists.
+    for(std::vector<CqLath*>::iterator iLath = ResQfe.begin(); iLath!=ResQfe.end(); iLath++)
+    {
+        std::vector<CqLath*> ResQev;
+        (*iLath)->Qve(ResQev);
+        for(std::vector<CqLath*>::iterator iEdge = ResQev.begin(); iEdge!=ResQev.end(); iEdge++)
+        {
+            CqLath* pNew = (*iEdge);
+            // Search for the new candidate by traversing the cf lists for all laths currrently in the
+            // result list.
+            TqBool fValid = TqTrue;
+            for(std::vector<CqLath*>::iterator iCurr = Result.begin(); iCurr!=Result.end(); iCurr++)
+            {
+                CqLath* pVisited =(*iCurr);
+                CqLath* pStart = pVisited;
+                do
+                {
+                    if(pVisited == pNew)	fValid=TqFalse;
+                    pVisited = pVisited->cf();
+                }while(pVisited != pStart);
+            }
+            if(fValid)	Result.push_back(pNew);
+        }
+    }
 }
 
 
@@ -393,18 +393,18 @@ void CqLath::Qff(std::vector<CqLath*>& Result)
  */
 TqInt CqLath::cQfv() const
 {
-	// Laths representing the edges of the associated facet are obtained by following
-	// clockwise links around the face.
-	TqInt c = 1;	// Start with this one.
+    // Laths representing the edges of the associated facet are obtained by following
+    // clockwise links around the face.
+    TqInt c = 1;	// Start with this one.
 
-	CqLath* pNext = cf();
-	while(this != pNext)
-	{
-		assert(NULL != pNext);
-		c++;
-		pNext = pNext->cf();
-	}
-	return( c );
+    CqLath* pNext = cf();
+    while(this != pNext)
+    {
+        assert(NULL != pNext);
+        c++;
+        pNext = pNext->cf();
+    }
+    return( c );
 }
 
 
@@ -418,37 +418,37 @@ TqInt CqLath::cQfv() const
  */
 TqInt CqLath::cQvv() const
 {
-	TqInt c = 1; // Start with this
-	// Laths representing the edges that radiate from the associated vertex are obtained by 
-	// following the clockwise vertex links around the vertex. 
-	CqLath* pNext = cv();
-	const CqLath* pLast = this;
-	while(NULL != pNext && this != pNext)
-	{
-		c++;
-		pLast = pNext;
-		pNext = pNext->cv();
-	}
+    TqInt c = 1; // Start with this
+    // Laths representing the edges that radiate from the associated vertex are obtained by
+    // following the clockwise vertex links around the vertex.
+    CqLath* pNext = cv();
+    const CqLath* pLast = this;
+    while(NULL != pNext && this != pNext)
+    {
+        c++;
+        pLast = pNext;
+        pNext = pNext->cv();
+    }
 
-	// If we hit a boundary, add the ec of this boundary edge and start again going backwards.
-	// @warning Adding ccf for the boundary edge means that the lath represents a different vertex.
-	if(NULL == pNext)
-	{
-		pLast = this;
-		pNext = ccv();
-		// We know we are going to hit a boundary in this direction as well so we can just look for that
-		// case as a terminator.
-		while(NULL != pNext)
-		{
-			assert( pNext != this );
-			c++;
-			pLast = pNext;
-			pNext = pNext->ccv();
-		}
-		// We have hit the boundary going the other way, so add the ccf of this boundary edge.
-		c++;
-	}
-	return( c );
+    // If we hit a boundary, add the ec of this boundary edge and start again going backwards.
+    // @warning Adding ccf for the boundary edge means that the lath represents a different vertex.
+    if(NULL == pNext)
+    {
+        pLast = this;
+        pNext = ccv();
+        // We know we are going to hit a boundary in this direction as well so we can just look for that
+        // case as a terminator.
+        while(NULL != pNext)
+        {
+            assert( pNext != this );
+            c++;
+            pLast = pNext;
+            pNext = pNext->ccv();
+        }
+        // We have hit the boundary going the other way, so add the ccf of this boundary edge.
+        c++;
+    }
+    return( c );
 }
 
 

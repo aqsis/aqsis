@@ -43,26 +43,26 @@ START_NAMESPACE( Aqsis )
 */
 std::list<CqString*> CqFile::Glob ( const CqString& strFileGlob )
 {
-	_finddata_t c_file;
-	long hFile;
-	const char *pt = strFileGlob.c_str();
+    _finddata_t c_file;
+    long hFile;
+    const char *pt = strFileGlob.c_str();
 
-	std::list<CqString*> result;
-	if ( ( hFile = _findfirst( pt, &c_file ) ) != -1L )
-	{
-		/* we found something here; then we list
-		* all of them with the directory first
-		*/
-		CqString strFile( c_file.name );
-		result.push_front( &strFile );
-		while ( _findnext( hFile, &c_file ) == 0 )
-		{
-			result.push_front( new CqString( c_file.name ) );
-		}
-		_findclose( hFile );
-	}
+    std::list<CqString*> result;
+    if ( ( hFile = _findfirst( pt, &c_file ) ) != -1L )
+    {
+        /* we found something here; then we list
+        * all of them with the directory first
+        */
+        CqString strFile( c_file.name );
+        result.push_front( &strFile );
+        while ( _findnext( hFile, &c_file ) == 0 )
+        {
+            result.push_front( new CqString( c_file.name ) );
+        }
+        _findclose( hFile );
+    }
 
-	return result ;
+    return result ;
 }
 
 
@@ -78,111 +78,111 @@ std::list<CqString*> CqFile::Glob ( const CqString& strFileGlob )
 
 CqString CqFile::GetSystemSetting( const CqString& strAsset )
 {
-	char * env;
-	char* base_path = ".";
-	CqString result( "" );
+    char * env;
+    char* base_path = ".";
+    CqString result( "" );
 
-	if ( ( env = getenv( "AQSIS_BASE_PATH" ) ) != NULL )
-		base_path = env;
+    if ( ( env = getenv( "AQSIS_BASE_PATH" ) ) != NULL )
+        base_path = env;
 
 
-	if ( strAsset.compare( "base" ) == 0 )
-	{
-		result = base_path;
-	}
-	else if ( strAsset.compare( "config" ) == 0 )
-	{
-		if ( ( env = getenv( "AQSIS_CONFIG" ) ) != NULL )
-			result = env;
-		else
-		{
-			result = base_path;
-			result.append( "/.aqsisrc" );
-		}
+    if ( strAsset.compare( "base" ) == 0 )
+    {
+        result = base_path;
+    }
+    else if ( strAsset.compare( "config" ) == 0 )
+    {
+        if ( ( env = getenv( "AQSIS_CONFIG" ) ) != NULL )
+            result = env;
+        else
+        {
+            result = base_path;
+            result.append( "/.aqsisrc" );
+        }
 
-		std::ifstream cfgfile( result.c_str() );
-		if ( !cfgfile.is_open() )
-			if ( ( env = getenv( "HOME" ) ) != NULL )
-			{
-				result = env;
-				result.append( "/.aqsisrc" );
-				std::ifstream cfgfile( result.c_str() );
-				if ( !cfgfile.is_open() )
-				{
-					result = ".aqsisrc";
-				}
-			}
-	}
-	else if ( strAsset.compare( "shaders" ) == 0 )
-	{
-		if ( ( env = getenv( "AQSIS_SHADERS_PATH" ) ) != 0 )
-			result = env;
-		else
-		{
-			result = base_path;
-			result.append( "/shaders" );
-		}
-	}
-	else if ( strAsset.compare( "archives" ) == 0 )
-	{
-		if ( ( env = getenv( "AQSIS_ARCHIVES_PATH" ) ) != 0 )
-			result = env;
-		else
-		{
-			result = base_path;
-			result.append( "/archives" );
-		}
-	}
-	else if ( strAsset.compare( "textures" ) == 0 )
-	{
-		if ( ( env = getenv( "AQSIS_TEXTURES_PATH" ) ) != 0 )
-			result = env;
-		else
-		{
-			result = base_path;
-			result.append( "/textures" );
-		}
-	}
-	else if ( strAsset.compare( "displays" ) == 0 )
-	{
-		if ( ( env = getenv( "AQSIS_DISPLAYS_PATH" ) ) != 0 )
-			result = env;
-		else
-		{
-			result = base_path;
-			result.append( "/displays" );
-		}
-	}
-	else if ( strAsset.compare( "dsolibs" ) == 0 )
-	{
-		if ( ( env = getenv( "AQSIS_DSO_LIBS" ) ) != 0 )
-			result = env;
-		else
-		{
-			result = base_path;
-			result.append( "/dso" );
-		}
-	}
+        std::ifstream cfgfile( result.c_str() );
+        if ( !cfgfile.is_open() )
+            if ( ( env = getenv( "HOME" ) ) != NULL )
+            {
+                result = env;
+                result.append( "/.aqsisrc" );
+                std::ifstream cfgfile( result.c_str() );
+                if ( !cfgfile.is_open() )
+                {
+                    result = ".aqsisrc";
+                }
+            }
+    }
+    else if ( strAsset.compare( "shaders" ) == 0 )
+    {
+        if ( ( env = getenv( "AQSIS_SHADERS_PATH" ) ) != 0 )
+            result = env;
+        else
+        {
+            result = base_path;
+            result.append( "/shaders" );
+        }
+    }
+    else if ( strAsset.compare( "archives" ) == 0 )
+    {
+        if ( ( env = getenv( "AQSIS_ARCHIVES_PATH" ) ) != 0 )
+            result = env;
+        else
+        {
+            result = base_path;
+            result.append( "/archives" );
+        }
+    }
+    else if ( strAsset.compare( "textures" ) == 0 )
+    {
+        if ( ( env = getenv( "AQSIS_TEXTURES_PATH" ) ) != 0 )
+            result = env;
+        else
+        {
+            result = base_path;
+            result.append( "/textures" );
+        }
+    }
+    else if ( strAsset.compare( "displays" ) == 0 )
+    {
+        if ( ( env = getenv( "AQSIS_DISPLAYS_PATH" ) ) != 0 )
+            result = env;
+        else
+        {
+            result = base_path;
+            result.append( "/displays" );
+        }
+    }
+    else if ( strAsset.compare( "dsolibs" ) == 0 )
+    {
+        if ( ( env = getenv( "AQSIS_DSO_LIBS" ) ) != 0 )
+            result = env;
+        else
+        {
+            result = base_path;
+            result.append( "/dso" );
+        }
+    }
 
-	return ( result );
+    return ( result );
 }
 
 
 CqString CqFile::FixupPath(CqString& strPath)
 {
-	if( strPath.find("//",0,2) == 0 )
-	{
-		if(strPath[3] == '/')
-		{
-			CqString strNewPath(strPath.substr(2,1));
-			strNewPath.append(":/");
-			strNewPath.append(strPath.substr(4));
-			//std::cout << strNewPath.c_str() << std::endl;
-			return(strNewPath);
-		}
-	}
+    if( strPath.find("//",0,2) == 0 )
+    {
+        if(strPath[3] == '/')
+        {
+            CqString strNewPath(strPath.substr(2,1));
+            strNewPath.append(":/");
+            strNewPath.append(strPath.substr(4));
+            //std::cout << strNewPath.c_str() << std::endl;
+            return(strNewPath);
+        }
+    }
 
-	return( strPath );
+    return( strPath );
 }
 
 

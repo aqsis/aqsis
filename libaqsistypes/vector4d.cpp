@@ -37,7 +37,7 @@ START_NAMESPACE( Aqsis )
 
 CqVector4D::CqVector4D( const CqVector3D &From )
 {
-	*this = From;
+    *this = From;
 }
 
 //---------------------------------------------------------------------
@@ -46,10 +46,10 @@ CqVector4D::CqVector4D( const CqVector3D &From )
 
 TqFloat CqVector4D::Magnitude2() const
 {
-	if ( m_h == 1.0 )
-		return ( ( m_x * m_x ) + ( m_y * m_y ) + ( m_z * m_z ) );
-	else
-		return ( ( ( m_x * m_x ) + ( m_y * m_y ) + ( m_z * m_z ) ) / ( m_h * m_h ) );
+    if ( m_h == 1.0 )
+        return ( ( m_x * m_x ) + ( m_y * m_y ) + ( m_z * m_z ) );
+    else
+        return ( ( ( m_x * m_x ) + ( m_y * m_y ) + ( m_z * m_z ) ) / ( m_h * m_h ) );
 }
 
 //---------------------------------------------------------------------
@@ -58,7 +58,7 @@ TqFloat CqVector4D::Magnitude2() const
 
 TqFloat CqVector4D::Magnitude() const
 {
-	return ( sqrt( Magnitude2() ) );
+    return ( sqrt( Magnitude2() ) );
 }
 
 
@@ -68,13 +68,13 @@ TqFloat CqVector4D::Magnitude() const
 
 CqVector4D &CqVector4D::operator+=( const CqVector4D &From )
 {
-	TqFloat Hom = m_h / From.m_h;
+    TqFloat Hom = m_h / From.m_h;
 
-	m_x += From.m_x * Hom;
-	m_y += From.m_y * Hom;
-	m_z += From.m_z * Hom;
+    m_x += From.m_x * Hom;
+    m_y += From.m_y * Hom;
+    m_z += From.m_z * Hom;
 
-	return ( *this );
+    return ( *this );
 }
 
 
@@ -85,13 +85,13 @@ CqVector4D &CqVector4D::operator+=( const CqVector4D &From )
 
 CqVector4D &CqVector4D::operator-=( const CqVector4D &From )
 {
-	TqFloat Hom = m_h / From.m_h;
+    TqFloat Hom = m_h / From.m_h;
 
-	m_x -= From.m_x * Hom;
-	m_y -= From.m_y * Hom;
-	m_z -= From.m_z * Hom;
+    m_x -= From.m_x * Hom;
+    m_y -= From.m_y * Hom;
+    m_z -= From.m_z * Hom;
 
-	return ( *this );
+    return ( *this );
 }
 
 //---------------------------------------------------------------------
@@ -100,15 +100,15 @@ CqVector4D &CqVector4D::operator-=( const CqVector4D &From )
 
 TqFloat operator*( const CqVector4D &a, const CqVector4D &From )
 {
-	CqVector4D	A( a );
-	CqVector4D	B( From );
+    CqVector4D	A( a );
+    CqVector4D	B( From );
 
-	A.Homogenize();
-	B.Homogenize();
+    A.Homogenize();
+    B.Homogenize();
 
-	return ( ( A.m_x * B.m_x ) +
-	         ( A.m_y * B.m_y ) +
-	         ( A.m_z * B.m_z ) );
+    return ( ( A.m_x * B.m_x ) +
+             ( A.m_y * B.m_y ) +
+             ( A.m_z * B.m_z ) );
 }
 
 
@@ -118,9 +118,9 @@ TqFloat operator*( const CqVector4D &a, const CqVector4D &From )
 
 CqVector4D operator%( const CqVector4D &a, const CqVector4D &From )
 {
-	CqVector4D Temp( a );
-	Temp %= From;
-	return ( Temp );
+    CqVector4D Temp( a );
+    Temp %= From;
+    return ( Temp );
 }
 
 
@@ -130,17 +130,17 @@ CqVector4D operator%( const CqVector4D &a, const CqVector4D &From )
 
 CqVector4D &CqVector4D::operator%=( const CqVector4D &From )
 {
-	CqVector4D	A( *this );
-	CqVector4D	B( From );
+    CqVector4D	A( *this );
+    CqVector4D	B( From );
 
-	A.Homogenize();
-	B.Homogenize();
+    A.Homogenize();
+    B.Homogenize();
 
-	m_x = ( A.m_y * B.m_z ) - ( A.m_z * B.m_y );
-	m_y = ( A.m_z * B.m_x ) - ( A.m_x * B.m_z );
-	m_z = ( A.m_x * B.m_y ) - ( A.m_y * B.m_x );
+    m_x = ( A.m_y * B.m_z ) - ( A.m_z * B.m_y );
+    m_y = ( A.m_z * B.m_x ) - ( A.m_x * B.m_z );
+    m_z = ( A.m_x * B.m_y ) - ( A.m_y * B.m_x );
 
-	return ( *this );
+    return ( *this );
 }
 
 
@@ -150,12 +150,12 @@ CqVector4D &CqVector4D::operator%=( const CqVector4D &From )
 
 CqVector4D &CqVector4D::operator=( const CqVector3D &From )
 {
-	m_x = From.x();
-	m_y = From.y();
-	m_z = From.z();
-	m_h = 1.0;
+    m_x = From.x();
+    m_y = From.y();
+    m_z = From.z();
+    m_h = 1.0;
 
-	return ( *this );
+    return ( *this );
 }
 
 
@@ -165,9 +165,9 @@ CqVector4D &CqVector4D::operator=( const CqVector3D &From )
 
 CqVector4D &CqVector4D::operator*=( const TqFloat Scale )
 {
-	m_h /= Scale;
+    m_h /= Scale;
 
-	return ( *this );
+    return ( *this );
 }
 
 
@@ -178,9 +178,9 @@ CqVector4D &CqVector4D::operator*=( const TqFloat Scale )
 
 CqVector4D &CqVector4D::operator/=( const TqFloat Scale )
 {
-	m_h *= Scale;
+    m_h *= Scale;
 
-	return ( *this );
+    return ( *this );
 }
 
 
@@ -190,11 +190,11 @@ CqVector4D &CqVector4D::operator/=( const TqFloat Scale )
 
 TqBool CqVector4D::operator==( const CqVector4D &Cmp ) const
 {
-	TqFloat Hom = m_h / Cmp.m_h;
+    TqFloat Hom = m_h / Cmp.m_h;
 
-	return ( ( m_x == ( Cmp.m_x * Hom ) ) &&
-	         ( m_y == ( Cmp.m_y * Hom ) ) &&
-	         ( m_z == ( Cmp.m_z * Hom ) ) );
+    return ( ( m_x == ( Cmp.m_x * Hom ) ) &&
+             ( m_y == ( Cmp.m_y * Hom ) ) &&
+             ( m_z == ( Cmp.m_z * Hom ) ) );
 }
 
 
@@ -204,7 +204,7 @@ TqBool CqVector4D::operator==( const CqVector4D &Cmp ) const
 
 TqBool CqVector4D::operator!=( const CqVector4D &Cmp ) const
 {
-	return ( !( *this == Cmp ) );
+    return ( !( *this == Cmp ) );
 }
 
 
@@ -214,11 +214,11 @@ TqBool CqVector4D::operator!=( const CqVector4D &Cmp ) const
 
 TqBool CqVector4D::operator>=( const CqVector4D &Cmp ) const
 {
-	TqFloat Hom = m_h / Cmp.m_h;
+    TqFloat Hom = m_h / Cmp.m_h;
 
-	return ( ( m_x >= ( Cmp.m_x * Hom ) ) &&
-	         ( m_y >= ( Cmp.m_y * Hom ) ) &&
-	         ( m_z >= ( Cmp.m_z * Hom ) ) );
+    return ( ( m_x >= ( Cmp.m_x * Hom ) ) &&
+             ( m_y >= ( Cmp.m_y * Hom ) ) &&
+             ( m_z >= ( Cmp.m_z * Hom ) ) );
 }
 
 
@@ -228,11 +228,11 @@ TqBool CqVector4D::operator>=( const CqVector4D &Cmp ) const
 
 TqBool CqVector4D::operator<=( const CqVector4D &Cmp ) const
 {
-	TqFloat Hom = m_h / Cmp.m_h;
+    TqFloat Hom = m_h / Cmp.m_h;
 
-	return ( ( m_x <= ( Cmp.m_x * Hom ) ) &&
-	         ( m_y <= ( Cmp.m_y * Hom ) ) &&
-	         ( m_z <= ( Cmp.m_z * Hom ) ) );
+    return ( ( m_x <= ( Cmp.m_x * Hom ) ) &&
+             ( m_y <= ( Cmp.m_y * Hom ) ) &&
+             ( m_z <= ( Cmp.m_z * Hom ) ) );
 }
 
 
@@ -242,11 +242,11 @@ TqBool CqVector4D::operator<=( const CqVector4D &Cmp ) const
 
 TqBool CqVector4D::operator>( const CqVector4D &Cmp ) const
 {
-	TqFloat Hom = m_h / Cmp.m_h;
+    TqFloat Hom = m_h / Cmp.m_h;
 
-	return ( ( m_x > ( Cmp.m_x * Hom ) ) &&
-	         ( m_y > ( Cmp.m_y * Hom ) ) &&
-	         ( m_z > ( Cmp.m_z * Hom ) ) );
+    return ( ( m_x > ( Cmp.m_x * Hom ) ) &&
+             ( m_y > ( Cmp.m_y * Hom ) ) &&
+             ( m_z > ( Cmp.m_z * Hom ) ) );
 }
 
 
@@ -256,11 +256,11 @@ TqBool CqVector4D::operator>( const CqVector4D &Cmp ) const
 
 TqBool CqVector4D::operator<( const CqVector4D &Cmp ) const
 {
-	TqFloat Hom = m_h / Cmp.m_h;
+    TqFloat Hom = m_h / Cmp.m_h;
 
-	return ( ( m_x < ( Cmp.m_x * Hom ) ) &&
-	         ( m_y < ( Cmp.m_y * Hom ) ) &&
-	         ( m_z < ( Cmp.m_z * Hom ) ) );
+    return ( ( m_x < ( Cmp.m_x * Hom ) ) &&
+             ( m_y < ( Cmp.m_y * Hom ) ) &&
+             ( m_z < ( Cmp.m_z * Hom ) ) );
 }
 
 
@@ -273,8 +273,8 @@ TqBool CqVector4D::operator<( const CqVector4D &Cmp ) const
 
 std::ostream &operator<<( std::ostream &Stream, CqVector4D &Vector )
 {
-	Stream << Vector.m_x << "," << Vector.m_y << "," << Vector.m_z << "," << Vector.m_h;
-	return ( Stream );
+    Stream << Vector.m_x << "," << Vector.m_y << "," << Vector.m_z << "," << Vector.m_h;
+    return ( Stream );
 }
 
 

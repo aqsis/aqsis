@@ -31,38 +31,38 @@ typedef void *PtDspyImageHandle;
 
 typedef struct
 {
-	PtDspyUnsigned32 width;
-	PtDspyUnsigned32 height;
-	PtDspyFloat32 aspectRatio;
+    PtDspyUnsigned32 width;
+    PtDspyUnsigned32 height;
+    PtDspyFloat32 aspectRatio;
 } PtDspySizeInfo;
 
 typedef struct
 {
-  PtDspyUnsigned8 overwrite;
-  PtDspyUnsigned8 interactive;
+    PtDspyUnsigned8 overwrite;
+    PtDspyUnsigned8 interactive;
 } PtDspyOverwriteInfo;
 
 typedef enum
 {
-	PkSizeQuery,
-	PkOverwriteQuery,
-	PkNextDataQuery,
-	PkRedrawQuery,
-        PkRenderingStartQuery,
-        PkSupportsCheckpointing
+    PkSizeQuery,
+    PkOverwriteQuery,
+    PkNextDataQuery,
+    PkRedrawQuery,
+    PkRenderingStartQuery,
+    PkSupportsCheckpointing
 } PtDspyQueryType;
 
 typedef struct uparam {
-	RtToken		name;
-	char		vtype, vcount;
-	RtPointer	value;
-	int		nbytes;
+    RtToken		name;
+    char		vtype, vcount;
+    RtPointer	value;
+    int		nbytes;
 } UserParameter;
 
 typedef struct
 {
-   char *name;
-   unsigned type;
+    char *name;
+    unsigned type;
 } PtDspyDevFormat;
 
 #define PkDspyFlagsWantsScanLineOrder 1
@@ -70,19 +70,19 @@ typedef struct
 #define PkDspyFlagsWantsNullEmptyBuckets 4
 typedef struct
 {
-	int flags;
+    int flags;
 } PtFlagStuff;
 
 typedef enum
 {
-	PkDspyErrorNone = 0,
-	PkDspyErrorNoMemory,
-	PkDspyErrorUnsupported,
-	PkDspyErrorBadParams,
-	PkDspyErrorNoResource,
-	PkDspyErrorUndefined
+    PkDspyErrorNone = 0,
+    PkDspyErrorNoMemory,
+    PkDspyErrorUnsupported,
+    PkDspyErrorBadParams,
+    PkDspyErrorNoResource,
+    PkDspyErrorUndefined
 } PtDspyError;
-	
+
 
 typedef PtDspyError (*DspyImageOpenMethod)(PtDspyImageHandle*,const char*,const char*,int,int,int,const UserParameter*,int,PtDspyDevFormat*,PtFlagStuff*);
 typedef PtDspyError (*DspyImageQueryMethod)(PtDspyImageHandle,PtDspyQueryType,size_t,void*);

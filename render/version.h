@@ -23,7 +23,7 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-//? Is .h included already? 
+//? Is .h included already?
 #ifndef VERSION_H_INCLUDED
 #define VERSION_H_INCLUDED 1
 

@@ -46,48 +46,48 @@ TqBool ParseSucceeded = true;
 
 TqBool Parse( std::istream& InputStream, const CqString StreamName, std::ostream& ErrorStream )
 {
-	ParseInputStream = &InputStream;
-	ParseStreamName = StreamName;
-	ParseErrorStream = &ErrorStream;
-	ParseLineNumber = 1;
-	ParseSucceeded = true;
+    ParseInputStream = &InputStream;
+    ParseStreamName = StreamName;
+    ParseErrorStream = &ErrorStream;
+    ParseLineNumber = 1;
+    ParseSucceeded = true;
 
-	InitStandardNamespace();
+    InitStandardNamespace();
 
-	try
-	{
-		yyparse();
-		TypeCheck();
-	}
-	catch(CqString error)
-	{
-		( *ParseErrorStream ) << error.c_str() << std::endl;
-		( *ParseErrorStream ) << "ERROR: Shader not compiled" << std::endl;
-		ParseSucceeded = false;
-		return( false );
-	}
-	Optimise();
+    try
+    {
+        yyparse();
+        TypeCheck();
+    }
+    catch(CqString error)
+    {
+        ( *ParseErrorStream ) << error.c_str() << std::endl;
+        ( *ParseErrorStream ) << "ERROR: Shader not compiled" << std::endl;
+        ParseSucceeded = false;
+        return( false );
+    }
+    Optimise();
 
-	std::vector<CqVarDef>::iterator iv;
-	for ( iv = gLocalVars.begin(); iv != gLocalVars.end(); iv++ )
-		if ( iv->pDefValue() ) iv->pDefValue() ->Optimise();
+    std::vector<CqVarDef>::iterator iv;
+    for ( iv = gLocalVars.begin(); iv != gLocalVars.end(); iv++ )
+        if ( iv->pDefValue() ) iv->pDefValue() ->Optimise();
 
-	return ParseSucceeded;
+    return ParseSucceeded;
 }
 
 void ResetParser()
 {
-	ParseInputStream = &std::cin;
-	ParseStreamName = "stdin";
-	ParseErrorStream = &std::cerr;
-	ParseLineNumber = 1;
-	ParseSucceeded = true;
+    ParseInputStream = &std::cin;
+    ParseStreamName = "stdin";
+    ParseErrorStream = &std::cerr;
+    ParseLineNumber = 1;
+    ParseSucceeded = true;
 }
 
 
 IqParseNode* GetParseTree()
 {
-	return ( ParseTreePointer );
+    return ( ParseTreePointer );
 }
 
 END_NAMESPACE( Aqsis )

@@ -45,22 +45,22 @@ START_NAMESPACE( Aqsis )
 
 struct SqDDevice
 {
-	SqDDevice()
-	{}
-	SqDDevice( const TqChar* name, const TqChar* type, const TqChar* mode ) :
-			m_strName( name ),
-			m_strType( type ),
-			m_strMode( mode ),
-			m_pData( 0 )
-	{}
+    SqDDevice()
+    {}
+    SqDDevice( const TqChar* name, const TqChar* type, const TqChar* mode ) :
+            m_strName( name ),
+            m_strType( type ),
+            m_strMode( mode ),
+            m_pData( 0 )
+    {}
 
-	CqString	m_strName;
-	CqString	m_strType;
-	CqString	m_strMode;
-	unsigned char*	m_pData;
-	TqInt	m_XRes;
-	TqInt	m_YRes;
-	TqInt	m_SamplesPerElement;
+    CqString	m_strName;
+    CqString	m_strType;
+    CqString	m_strMode;
+    unsigned char*	m_pData;
+    TqInt	m_XRes;
+    TqInt	m_YRes;
+    TqInt	m_SamplesPerElement;
 };
 
 
@@ -71,31 +71,31 @@ struct SqDDevice
 
 class CqDDManagerSimple : public IqDDManager
 {
-	public:
-		CqDDManagerSimple()
-		{}
-		virtual ~CqDDManagerSimple()
-		{}
+public:
+    CqDDManagerSimple()
+    {}
+    virtual ~CqDDManagerSimple()
+    {}
 
-		// Overridden from IqDDManager
+    // Overridden from IqDDManager
 
 
 
-		virtual	TqInt	Initialise();
-		virtual	TqInt	Shutdown();
-		virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments );
-		virtual	TqInt	ClearDisplays();
-		virtual	TqInt	OpenDisplays();
-		virtual	TqInt	CloseDisplays();
-		virtual	TqInt	DisplayBucket( IqBucket* pBucket );
-		virtual	TqBool	fDisplayNeeds( const TqChar* var );
-		virtual	TqInt	Uses()
-		{
-			return( EnvVars_Ci | EnvVars_Oi );
-		}
-	
-	private:
-		std::vector<SqDDevice>	m_aDisplayRequests;		///< Array of requested display drivers.
+    virtual	TqInt	Initialise();
+    virtual	TqInt	Shutdown();
+    virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments );
+    virtual	TqInt	ClearDisplays();
+    virtual	TqInt	OpenDisplays();
+    virtual	TqInt	CloseDisplays();
+    virtual	TqInt	DisplayBucket( IqBucket* pBucket );
+    virtual	TqBool	fDisplayNeeds( const TqChar* var );
+    virtual	TqInt	Uses()
+    {
+        return( EnvVars_Ci | EnvVars_Oi );
+    }
+
+private:
+    std::vector<SqDDevice>	m_aDisplayRequests;		///< Array of requested display drivers.
 }
 ;
 

@@ -36,16 +36,16 @@ START_NAMESPACE( Aqsis )
  */
 
 CqImagersource::CqImagersource( IqShader* pShader, TqBool fActive ) :
-		m_pShader( pShader ),
-		m_pAttributes( NULL ),
-		m_pShaderExecEnv( NULL )
+        m_pShader( pShader ),
+        m_pAttributes( NULL ),
+        m_pShaderExecEnv( NULL )
 {
 
-	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
-	ADDREF( m_pAttributes );
+    m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
+    ADDREF( m_pAttributes );
 
-	m_pShaderExecEnv = new CqShaderExecEnv;
-	ADDREF( m_pShaderExecEnv );
+    m_pShaderExecEnv = new CqShaderExecEnv;
+    ADDREF( m_pShaderExecEnv );
 
 }
 
@@ -56,15 +56,15 @@ CqImagersource::CqImagersource( IqShader* pShader, TqBool fActive ) :
 
 CqImagersource::~CqImagersource()
 {
-	if ( m_pAttributes )
-		RELEASEREF( m_pAttributes );
-	m_pAttributes = 0;
+    if ( m_pAttributes )
+        RELEASEREF( m_pAttributes );
+    m_pAttributes = 0;
 
-	/// \note This should delete through the interface that created it.
-	if ( NULL != m_pShaderExecEnv ) {
-		RELEASEREF( m_pShaderExecEnv );
-		m_pShaderExecEnv = NULL;
-	}
+    /// \note This should delete through the interface that created it.
+    if ( NULL != m_pShaderExecEnv ) {
+        RELEASEREF( m_pShaderExecEnv );
+        m_pShaderExecEnv = NULL;
+    }
 }
 
 //---------------------------------------------------------------------
@@ -81,67 +81,67 @@ CqImagersource::~CqImagersource()
  */
 void CqImagersource::Initialise( IqBucket* pBucket )
 {
-	QGetRenderContext() ->Stats().ImagerTimer().Start();
+    QGetRenderContext() ->Stats().ImagerTimer().Start();
 
-	TqInt uGridRes = pBucket->Width();
-	TqInt vGridRes = pBucket->Height();
-	TqInt x = pBucket->XOrigin();
-	TqInt y = pBucket->YOrigin();
+    TqInt uGridRes = pBucket->Width();
+    TqInt vGridRes = pBucket->Height();
+    TqInt x = pBucket->XOrigin();
+    TqInt y = pBucket->YOrigin();
 
-	m_uYOrigin = static_cast<TqInt>( y );
-	m_uXOrigin = static_cast<TqInt>( x );
-	m_uGridRes = uGridRes;
-	m_vGridRes = vGridRes;
+    m_uYOrigin = static_cast<TqInt>( y );
+    m_uXOrigin = static_cast<TqInt>( x );
+    m_uGridRes = uGridRes;
+    m_vGridRes = vGridRes;
 
-	TqInt mode = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ];
-	TqFloat components;
-	TqInt j, i;
-	TqFloat shuttertime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
+    TqInt mode = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ];
+    TqFloat components;
+    TqInt j, i;
+    TqFloat shuttertime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
 
-	components = mode & ModeRGB ? 3 : 0;
-	components += mode & ModeA ? 1 : 0;
-	components = mode & ModeZ ? 1 : components;
+    components = mode & ModeRGB ? 3 : 0;
+    components += mode & ModeA ? 1 : 0;
+    components = mode & ModeZ ? 1 : components;
 
-	TqInt Uses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi | ( 1 << EnvVars_ncomps ) | ( 1 << EnvVars_time ) | ( 1 << EnvVars_alpha ) );
+    TqInt Uses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi | ( 1 << EnvVars_ncomps ) | ( 1 << EnvVars_time ) | ( 1 << EnvVars_alpha ) );
 
-	m_pShaderExecEnv->Initialise( uGridRes, vGridRes, 0, m_pShader, Uses );
+    m_pShaderExecEnv->Initialise( uGridRes, vGridRes, 0, m_pShader, Uses );
 
-	// Initialise the geometric parameters in the shader exec env.
+    // Initialise the geometric parameters in the shader exec env.
 
-	P() ->Initialise( uGridRes, vGridRes );
-	Ci() ->Initialise( uGridRes, vGridRes );
-	Oi() ->Initialise( uGridRes, vGridRes );
-	alpha() ->Initialise( uGridRes, vGridRes );
+    P() ->Initialise( uGridRes, vGridRes );
+    Ci() ->Initialise( uGridRes, vGridRes );
+    Oi() ->Initialise( uGridRes, vGridRes );
+    alpha() ->Initialise( uGridRes, vGridRes );
 
-	//TODO dtime is not initialised yet
-	//dtime().Initialise(uGridRes, vGridRes, i);
+    //TODO dtime is not initialised yet
+    //dtime().Initialise(uGridRes, vGridRes, i);
 
-	ncomps() ->SetFloat( components );
-	time() ->SetFloat( shuttertime );
+    ncomps() ->SetFloat( components );
+    time() ->SetFloat( shuttertime );
 
 
-	m_pShader->Initialise( uGridRes, vGridRes, m_pShaderExecEnv );
-	for ( j = 0; j < vGridRes; j++ )
-	{
-		for ( i = 0; i < uGridRes; i++ )
-		{
-			TqInt off = j * ( uGridRes + 1 ) + i;
-			P() ->SetPoint( CqVector3D( x + i, y + j, 0.0 ), off );
-			Ci() ->SetColor( pBucket->Color( x + i, y + j ), off );
-			CqColor opa = pBucket->Opacity( x + i, y + j );
-			Oi() ->SetColor( opa, off );
-			TqFloat avopa = ( opa.fRed() + opa.fGreen() + opa.fBlue() ) /3.0f;
-			alpha() ->SetFloat( pBucket->Coverage( x + i, y + j ) * avopa, off );
-		}
-	}
-	// Execute the Shader VM
-	if ( m_pShader )
-	{
-		m_pShader->Evaluate( m_pShaderExecEnv );
-		alpha() ->SetFloat( 1.0f ); /* by default 3delight/bmrt set it to 1.0 */
-	}
+    m_pShader->Initialise( uGridRes, vGridRes, m_pShaderExecEnv );
+    for ( j = 0; j < vGridRes; j++ )
+    {
+        for ( i = 0; i < uGridRes; i++ )
+        {
+            TqInt off = j * ( uGridRes + 1 ) + i;
+            P() ->SetPoint( CqVector3D( x + i, y + j, 0.0 ), off );
+            Ci() ->SetColor( pBucket->Color( x + i, y + j ), off );
+            CqColor opa = pBucket->Opacity( x + i, y + j );
+            Oi() ->SetColor( opa, off );
+            TqFloat avopa = ( opa.fRed() + opa.fGreen() + opa.fBlue() ) /3.0f;
+            alpha() ->SetFloat( pBucket->Coverage( x + i, y + j ) * avopa, off );
+        }
+    }
+    // Execute the Shader VM
+    if ( m_pShader )
+    {
+        m_pShader->Evaluate( m_pShaderExecEnv );
+        alpha() ->SetFloat( 1.0f ); /* by default 3delight/bmrt set it to 1.0 */
+    }
 
-	QGetRenderContext() ->Stats().ImagerTimer().Stop();
+    QGetRenderContext() ->Stats().ImagerTimer().Stop();
 }
 
 //---------------------------------------------------------------------
@@ -151,14 +151,14 @@ void CqImagersource::Initialise( IqBucket* pBucket )
  */
 CqColor CqImagersource::Color( TqFloat x, TqFloat y )
 {
-	CqColor result = gColBlack;
+    CqColor result = gColBlack;
 
-	TqInt index = static_cast<TqInt>( ( y - m_uYOrigin ) * ( m_uGridRes + 1 ) + x - m_uXOrigin );
+    TqInt index = static_cast<TqInt>( ( y - m_uYOrigin ) * ( m_uGridRes + 1 ) + x - m_uXOrigin );
 
-	if ( (TqInt)Ci() ->Size() >= index )
-		Ci() ->GetColor( result, index );
+    if ( (TqInt)Ci() ->Size() >= index )
+        Ci() ->GetColor( result, index );
 
-	return result;
+    return result;
 }
 
 //---------------------------------------------------------------------
@@ -168,14 +168,14 @@ CqColor CqImagersource::Color( TqFloat x, TqFloat y )
  */
 CqColor CqImagersource::Opacity( TqFloat x, TqFloat y )
 {
-	CqColor result = gColWhite;
+    CqColor result = gColWhite;
 
-	TqInt index = static_cast<TqInt>( ( y - m_uYOrigin ) * ( m_uGridRes + 1 ) + x - m_uXOrigin );
+    TqInt index = static_cast<TqInt>( ( y - m_uYOrigin ) * ( m_uGridRes + 1 ) + x - m_uXOrigin );
 
-	if ((TqInt) Oi() ->Size() >= index )
-		Oi() ->GetColor( result, index );
+    if ((TqInt) Oi() ->Size() >= index )
+        Oi() ->GetColor( result, index );
 
-	return result;
+    return result;
 }
 
 //---------------------------------------------------------------------
@@ -186,11 +186,11 @@ CqColor CqImagersource::Opacity( TqFloat x, TqFloat y )
  */
 TqFloat CqImagersource::Alpha( TqFloat x, TqFloat y )
 {
-	TqFloat result;
+    TqFloat result;
 
-	alpha() ->GetFloat( result );
+    alpha() ->GetFloat( result );
 
-	return result;
+    return result;
 }
 
 

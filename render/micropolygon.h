@@ -57,43 +57,43 @@ class CqSurface;
 
 class CqMicroPolyGridBase : public CqRefCount
 {
-	public:
-		CqMicroPolyGridBase() : m_fCulled( TqFalse )
-		{}
-		virtual	~CqMicroPolyGridBase()
-		{}
+public:
+    CqMicroPolyGridBase() : m_fCulled( TqFalse )
+    {}
+    virtual	~CqMicroPolyGridBase()
+    {}
 
-		/** Pure virtual function, splits the grid into micropolys.
-		 * \param pImage Pointer to the image buffer being rendered.
-		 * \param xmin The minimum x pixel, taking into account clipping etc.
-		 * \param xmax The maximum x pixel, taking into account clipping etc.
-		 * \param ymin The minimum y pixel, taking into account clipping etc.
-		 * \param ymax The maximum y pixel, taking into account clipping etc.
-		 */
-		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax ) = 0;
-		/** Pure virtual, shade the grid.
-		 */
-		virtual	void	Shade() = 0;
-		virtual	void	TransferOutputVariables() = 0;
-		/*
-		 * Delete all the variables per grid 
-		 */
-		virtual void DeleteVariables( TqBool all ) = 0;
-		/** Pure virtual, get a pointer to the surface this grid belongs.
-		 * \return Pointer to surface, only valid during grid shading.
-		 */
-		virtual CqSurface*	pSurface() const = 0;
+    /** Pure virtual function, splits the grid into micropolys.
+     * \param pImage Pointer to the image buffer being rendered.
+     * \param xmin The minimum x pixel, taking into account clipping etc.
+     * \param xmax The maximum x pixel, taking into account clipping etc.
+     * \param ymin The minimum y pixel, taking into account clipping etc.
+     * \param ymax The maximum y pixel, taking into account clipping etc.
+     */
+    virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax ) = 0;
+    /** Pure virtual, shade the grid.
+     */
+    virtual	void	Shade() = 0;
+    virtual	void	TransferOutputVariables() = 0;
+    /*
+     * Delete all the variables per grid 
+     */
+    virtual void DeleteVariables( TqBool all ) = 0;
+    /** Pure virtual, get a pointer to the surface this grid belongs.
+     * \return Pointer to surface, only valid during grid shading.
+     */
+    virtual CqSurface*	pSurface() const = 0;
 
-		virtual	const IqAttributes* pAttributes() const = 0;
+    virtual	const IqAttributes* pAttributes() const = 0;
 
-		virtual	CqCSGTreeNode* pCSGNode() const = 0;
-		TqBool vfCulled()
-		{
-			return m_fCulled;
-		}
+    virtual	CqCSGTreeNode* pCSGNode() const = 0;
+    TqBool vfCulled()
+    {
+        return m_fCulled;
+    }
 
-	public:
-		TqBool m_fCulled; ///< Boolean indicating the entire grid is culled.
+public:
+    TqBool m_fCulled; ///< Boolean indicating the entire grid is culled.
 };
 
 
@@ -104,244 +104,244 @@ class CqMicroPolyGridBase : public CqRefCount
 
 class CqMicroPolyGrid : public CqMicroPolyGridBase
 {
-	public:
-		CqMicroPolyGrid();
-		CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface );
-		virtual	~CqMicroPolyGrid();
+public:
+    CqMicroPolyGrid();
+    CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface );
+    virtual	~CqMicroPolyGrid();
 
 #ifdef _DEBUG
-		CqString className() const { return CqString("CqMicroPolyGrid"); }
+    CqString className() const { return CqString("CqMicroPolyGrid"); }
 #endif
 
-		void	CalcNormals();
-		/** Set the shading normals flag, indicating this grid has shading (N) normals already specified.
-		 * \param f The new state of the flag.
-		 */
-		void	SetbShadingNormals( TqBool f )
-		{
-			m_bShadingNormals = f;
-		}
-		/** Set the geometric normals flag, indicating this grid has geometric (Ng) normals already specified.
-		 * \param f The new state of the flag.
-		 */
-		void	SetbGeometricNormals( TqBool f )
-		{
-			m_bGeometricNormals = f;
-		}
-		/** Query whether shading (N) normals have been filled in by the surface at dice time.
-		 */
-		TqBool bShadingNormals() const
-		{
-			return ( m_bShadingNormals );
-		}
-		/** Query whether geometric (Ng) normals have been filled in by the surface at dice time.
-		 */
-		TqBool bGeometricNormals() const
-		{
-			return ( m_bGeometricNormals );
-		}
-		/** Query whether this grid is being rendered as a triangle.
-		 */
-		TqBool fTriangular() const
-		{
-			return ( m_fTriangular );
-		}
-		/** Set this grid as being rendered as a triangle or not.
-		 */
-		void SetfTriangular( TqBool fTriangular )
-		{
-			m_fTriangular = fTriangular;
-		}
+    void	CalcNormals();
+    /** Set the shading normals flag, indicating this grid has shading (N) normals already specified.
+     * \param f The new state of the flag.
+     */
+    void	SetbShadingNormals( TqBool f )
+    {
+        m_bShadingNormals = f;
+    }
+    /** Set the geometric normals flag, indicating this grid has geometric (Ng) normals already specified.
+     * \param f The new state of the flag.
+     */
+    void	SetbGeometricNormals( TqBool f )
+    {
+        m_bGeometricNormals = f;
+    }
+    /** Query whether shading (N) normals have been filled in by the surface at dice time.
+     */
+    TqBool bShadingNormals() const
+    {
+        return ( m_bShadingNormals );
+    }
+    /** Query whether geometric (Ng) normals have been filled in by the surface at dice time.
+     */
+    TqBool bGeometricNormals() const
+    {
+        return ( m_bGeometricNormals );
+    }
+    /** Query whether this grid is being rendered as a triangle.
+     */
+    TqBool fTriangular() const
+    {
+        return ( m_fTriangular );
+    }
+    /** Set this grid as being rendered as a triangle or not.
+     */
+    void SetfTriangular( TqBool fTriangular )
+    {
+        m_fTriangular = fTriangular;
+    }
 
-		/** Get a reference to the bitvector representing the culled status of each u-poly in this grid.
-		 */
-		CqBitVector& CulledPolys()
-		{
-			return ( m_CulledPolys );
-		}
-		/** Get a reference to the bitvector representing the culled status of each u-poly in this grid.
-		 */
-		const CqBitVector& CulledPolys() const
-		{
-			return ( m_CulledPolys );
-		}
+    /** Get a reference to the bitvector representing the culled status of each u-poly in this grid.
+     */
+    CqBitVector& CulledPolys()
+    {
+        return ( m_CulledPolys );
+    }
+    /** Get a reference to the bitvector representing the culled status of each u-poly in this grid.
+     */
+    const CqBitVector& CulledPolys() const
+    {
+        return ( m_CulledPolys );
+    }
 
-		void	Initialise( TqInt cu, TqInt cv, CqSurface* pSurface );
+    void	Initialise( TqInt cu, TqInt cv, CqSurface* pSurface );
 
-		void DeleteVariables( TqBool all );
+    void DeleteVariables( TqBool all );
 
-		// Overrides from CqMicroPolyGridBase
-		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
-		virtual	void	Shade();
-		virtual	void	TransferOutputVariables();
+    // Overrides from CqMicroPolyGridBase
+    virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
+    virtual	void	Shade();
+    virtual	void	TransferOutputVariables();
 
-		/** Get a pointer to the surface which this grid belongs.
-		 * \return Surface pointer, only valid during shading.
-		 */
-		virtual CqSurface*	pSurface() const
-		{
-			return ( m_pSurface );
-		}
-		virtual	const IqAttributes* pAttributes() const
-		{
-			assert( NULL != m_pShaderExecEnv );
-			return ( m_pShaderExecEnv->pAttributes() );
-		}
-		virtual	CqCSGTreeNode* pCSGNode() const
-		{
-			return ( m_pCSGNode );
-		}
+    /** Get a pointer to the surface which this grid belongs.
+     * \return Surface pointer, only valid during shading.
+     */
+    virtual CqSurface*	pSurface() const
+    {
+        return ( m_pSurface );
+    }
+    virtual	const IqAttributes* pAttributes() const
+    {
+        assert( NULL != m_pShaderExecEnv );
+        return ( m_pShaderExecEnv->pAttributes() );
+    }
+    virtual	CqCSGTreeNode* pCSGNode() const
+    {
+        return ( m_pCSGNode );
+    }
 
-		// Redirect acces via IqShaderExecEnv
-		virtual	TqInt	uGridRes() const
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->uGridRes() );
-		}
-		virtual	TqInt	vGridRes() const
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->vGridRes() );
-		}
-		virtual	TqInt	GridSize() const
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->GridSize() );
-		}
-		virtual	const CqMatrix&	matObjectToWorld() const
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->matObjectToWorld() );
-		}
-		virtual	IqShaderData* Cs()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Cs() );
-		}
-		virtual	IqShaderData* Os()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Os() );
-		}
-		virtual	IqShaderData* Ng()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ng() );
-		}
-		virtual	IqShaderData* du()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->du() );
-		}
-		virtual	IqShaderData* dv()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dv() );
-		}
-		virtual	IqShaderData* L()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->L() );
-		}
-		virtual	IqShaderData* Cl()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Cl() );
-		}
-		virtual IqShaderData* Ol()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ol() );
-		}
-		virtual IqShaderData* P()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->P() );
-		}
-		virtual IqShaderData* dPdu()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dPdu() );
-		}
-		virtual IqShaderData* dPdv()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dPdv() );
-		}
-		virtual IqShaderData* N()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->N() );
-		}
-		virtual IqShaderData* u()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->u() );
-		}
-		virtual IqShaderData* v()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->v() );
-		}
-		virtual IqShaderData* s()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->s() );
-		}
-		virtual IqShaderData* t()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->t() );
-		}
-		virtual IqShaderData* I()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->I() );
-		}
-		virtual IqShaderData* Ci()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ci() );
-		}
-		virtual IqShaderData* Oi()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Oi() );
-		}
-		virtual IqShaderData* Ps()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ps() );
-		}
-		virtual IqShaderData* E()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->E() );
-		}
-		virtual IqShaderData* ncomps()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->ncomps() );
-		}
-		virtual IqShaderData* time()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->time() );
-		}
-		virtual IqShaderData* alpha()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->alpha() );
-		}
-		virtual IqShaderData* Ns()
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ns() );
-		}
-		virtual IqShaderData* pVar(TqInt index)
-		{
-			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->pVar(index) );
-		}
-		virtual	IqShaderData* FindStandardVar( const char* pname )
-		{
-			IqShaderData* pVar = NULL;
-			if( ( pVar = m_pShaderExecEnv->FindStandardVar( pname ) ) == NULL )
-			{
-				std::vector<IqShaderData*>::iterator outputVar;
-				for( outputVar = m_apShaderOutputVariables.begin(); outputVar != m_apShaderOutputVariables.end(); outputVar++ )
-				{
-					if( (*outputVar)->strName() == pname )	
-					{
-						pVar = (*outputVar);
-						break;
-					}
-				}
-			}
-			return( pVar );
-		}
-		
+    // Redirect acces via IqShaderExecEnv
+    virtual	TqInt	uGridRes() const
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->uGridRes() );
+    }
+    virtual	TqInt	vGridRes() const
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->vGridRes() );
+    }
+    virtual	TqInt	GridSize() const
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->GridSize() );
+    }
+    virtual	const CqMatrix&	matObjectToWorld() const
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->matObjectToWorld() );
+    }
+    virtual	IqShaderData* Cs()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Cs() );
+    }
+    virtual	IqShaderData* Os()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Os() );
+    }
+    virtual	IqShaderData* Ng()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ng() );
+    }
+    virtual	IqShaderData* du()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->du() );
+    }
+    virtual	IqShaderData* dv()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dv() );
+    }
+    virtual	IqShaderData* L()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->L() );
+    }
+    virtual	IqShaderData* Cl()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Cl() );
+    }
+    virtual IqShaderData* Ol()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ol() );
+    }
+    virtual IqShaderData* P()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->P() );
+    }
+    virtual IqShaderData* dPdu()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dPdu() );
+    }
+    virtual IqShaderData* dPdv()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dPdv() );
+    }
+    virtual IqShaderData* N()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->N() );
+    }
+    virtual IqShaderData* u()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->u() );
+    }
+    virtual IqShaderData* v()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->v() );
+    }
+    virtual IqShaderData* s()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->s() );
+    }
+    virtual IqShaderData* t()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->t() );
+    }
+    virtual IqShaderData* I()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->I() );
+    }
+    virtual IqShaderData* Ci()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ci() );
+    }
+    virtual IqShaderData* Oi()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Oi() );
+    }
+    virtual IqShaderData* Ps()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ps() );
+    }
+    virtual IqShaderData* E()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->E() );
+    }
+    virtual IqShaderData* ncomps()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->ncomps() );
+    }
+    virtual IqShaderData* time()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->time() );
+    }
+    virtual IqShaderData* alpha()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->alpha() );
+    }
+    virtual IqShaderData* Ns()
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ns() );
+    }
+    virtual IqShaderData* pVar(TqInt index)
+    {
+        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->pVar(index) );
+    }
+    virtual	IqShaderData* FindStandardVar( const char* pname )
+    {
+        IqShaderData* pVar = NULL;
+        if( ( pVar = m_pShaderExecEnv->FindStandardVar( pname ) ) == NULL )
+        {
+            std::vector<IqShaderData*>::iterator outputVar;
+            for( outputVar = m_apShaderOutputVariables.begin(); outputVar != m_apShaderOutputVariables.end(); outputVar++ )
+            {
+                if( (*outputVar)->strName() == pname )
+                {
+                    pVar = (*outputVar);
+                    break;
+                }
+            }
+        }
+        return( pVar );
+    }
 
-	private:
-		TqBool	m_bShadingNormals;		///< Flag indicating shading normals have been filled in and don't need to be calculated during shading.
-		TqBool	m_bGeometricNormals;	///< Flag indicating geometric normals have been filled in and don't need to be calculated during shading.
-		CqSurface* m_pSurface;	///< Pointer to the attributes for this grid.
-		CqCSGTreeNode* m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
-		IqShaderExecEnv* m_pShaderExecEnv;	///< Pointer to the shader execution environment for this grid.
-		TqBool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
-		CqBitVector	m_CulledPolys;		///< Bitvector indicating whether the individual micro polygons are culled.
-		std::vector<IqShaderData*>	m_apShaderOutputVariables;	///< Vector of pointers to shader output variables.
-	protected:
+
+private:
+    TqBool	m_bShadingNormals;		///< Flag indicating shading normals have been filled in and don't need to be calculated during shading.
+    TqBool	m_bGeometricNormals;	///< Flag indicating geometric normals have been filled in and don't need to be calculated during shading.
+    CqSurface* m_pSurface;	///< Pointer to the attributes for this grid.
+    CqCSGTreeNode* m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
+    IqShaderExecEnv* m_pShaderExecEnv;	///< Pointer to the shader execution environment for this grid.
+    TqBool	m_fTriangular;			///< Flag indicating that this grid should be rendered as a triangular grid with a phantom fourth corner.
+    CqBitVector	m_CulledPolys;		///< Bitvector indicating whether the individual micro polygons are culled.
+    std::vector<IqShaderData*>	m_apShaderOutputVariables;	///< Vector of pointers to shader output variables.
+protected:
 
 }
 ;
@@ -354,57 +354,57 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase
 
 class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<CqMicroPolyGridBase*>
 {
-	public:
-		CqMotionMicroPolyGrid() : CqMicroPolyGridBase(), CqMotionSpec<CqMicroPolyGridBase*>( 0 )
-		{}
-		virtual	~CqMotionMicroPolyGrid()
-		{}
+public:
+    CqMotionMicroPolyGrid() : CqMicroPolyGridBase(), CqMotionSpec<CqMicroPolyGridBase*>( 0 )
+    {}
+    virtual	~CqMotionMicroPolyGrid()
+    {}
 
-		// Overrides from CqMicroPolyGridBase
-
-
-		virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
-		virtual	void	Shade();
-		virtual	void	TransferOutputVariables();
-		void DeleteVariables( TqBool all )
-		{}
+    // Overrides from CqMicroPolyGridBase
 
 
-		/** Get a pointer to the surface which this grid belongs.
-		 * Actually returns the surface pointer from the first timeslot.
-		 * \return Surface pointer, only valid during shading.
-		 */
-		virtual CqSurface*	pSurface() const
-		{
-			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pSurface() );
-		}
+    virtual	void	Split( CqImageBuffer* pImage, long xmin, long xmax, long ymin, long ymax );
+    virtual	void	Shade();
+    virtual	void	TransferOutputVariables();
+    void DeleteVariables( TqBool all )
+    {}
 
-		virtual const IqAttributes* pAttributes() const
-		{
-			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pAttributes() );
-		}
 
-		virtual CqCSGTreeNode* pCSGNode() const
-		{
-			return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pCSGNode() );
-		}
+    /** Get a pointer to the surface which this grid belongs.
+     * Actually returns the surface pointer from the first timeslot.
+     * \return Surface pointer, only valid during shading.
+     */
+    virtual CqSurface*	pSurface() const
+    {
+        return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pSurface() );
+    }
 
-		virtual	void	ClearMotionObject( CqMicroPolyGridBase*& A ) const
-			{}
-		/** Overridden from CqMotionSpec, does nothing.
-		 */
-		virtual	CqMicroPolyGridBase* ConcatMotionObjects( CqMicroPolyGridBase* const & A, CqMicroPolyGridBase* const & B ) const
-		{
-			return ( B );
-		}
-		/** Overridden from CqMotionSpec, does nothing.
-		 */
-		virtual	CqMicroPolyGridBase* LinearInterpolateMotionObjects( TqFloat Fraction, CqMicroPolyGridBase* const & A, CqMicroPolyGridBase* const & B ) const
-		{
-			return ( A );
-		}
+    virtual const IqAttributes* pAttributes() const
+    {
+        return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pAttributes() );
+    }
 
-	private:
+    virtual CqCSGTreeNode* pCSGNode() const
+    {
+        return ( static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) ) ->pCSGNode() );
+    }
+
+    virtual	void	ClearMotionObject( CqMicroPolyGridBase*& A ) const
+        {}
+    /** Overridden from CqMotionSpec, does nothing.
+     */
+    virtual	CqMicroPolyGridBase* ConcatMotionObjects( CqMicroPolyGridBase* const & A, CqMicroPolyGridBase* const & B ) const
+    {
+        return ( B );
+    }
+    /** Overridden from CqMotionSpec, does nothing.
+     */
+    virtual	CqMicroPolyGridBase* LinearInterpolateMotionObjects( TqFloat Fraction, CqMicroPolyGridBase* const & A, CqMicroPolyGridBase* const & B ) const
+    {
+        return ( A );
+    }
+
+private:
 };
 
 
@@ -415,219 +415,219 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 
 class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 {
-	public:
-		CqMicroPolygon();
-		virtual	~CqMicroPolygon();
+public:
+    CqMicroPolygon();
+    virtual	~CqMicroPolygon();
 #ifdef _DEBUG
-		CqString className() const { return CqString("CqMicroPolygon"); }
+    CqString className() const { return CqString("CqMicroPolygon"); }
 #endif
-		/** Assigment operator, copies contents of donor micropoly while safely deleting old contents.
-		 * \param From Donor micropoly.
-		 */
-		CqMicroPolygon& operator=( const CqMicroPolygon& From )
-		{
-			if ( m_pGrid != NULL ) RELEASEREF( m_pGrid );
-			m_pGrid = From.m_pGrid;
-			ADDREF( m_pGrid );
-			m_Index = From.m_Index;
-			m_IndexCode = From.m_IndexCode;
-			m_BoundCode = From.m_BoundCode;
-			m_Flags = From.m_Flags;
+    /** Assigment operator, copies contents of donor micropoly while safely deleting old contents.
+     * \param From Donor micropoly.
+     */
+    CqMicroPolygon& operator=( const CqMicroPolygon& From )
+    {
+        if ( m_pGrid != NULL ) RELEASEREF( m_pGrid );
+        m_pGrid = From.m_pGrid;
+        ADDREF( m_pGrid );
+        m_Index = From.m_Index;
+        m_IndexCode = From.m_IndexCode;
+        m_BoundCode = From.m_BoundCode;
+        m_Flags = From.m_Flags;
 
-			return ( *this );
-		}
+        return ( *this );
+    }
 
-	private:
-		enum EqMicroPolyFlags
-		{
-		    MicroPolyFlags_Trimmed	= 0x0001,
-		    MicroPolyFlags_Hit	= 0x0002,
-		    MicroPolyFlags_PushedForward	= 0x0004,
-	};
+private:
+    enum EqMicroPolyFlags
+    {
+        MicroPolyFlags_Trimmed	= 0x0001,
+        MicroPolyFlags_Hit	= 0x0002,
+        MicroPolyFlags_PushedForward	= 0x0004,
+    };
 
-	public:
-		/** Set up the pointer to the grid this micropoly came from.
-		 * \param pGrid CqMicroPolyGrid pointer.
-		 */
-		void	SetGrid( CqMicroPolyGrid* pGrid )
-		{
-			if ( m_pGrid ) RELEASEREF( m_pGrid );
-			m_pGrid = pGrid;
-			ADDREF( m_pGrid );
-		}
-		/** Get the pointer to the grid this micropoly came from.
-		 * \return Pointer to the CqMicroPolyGrid.
-		 */
-		CqMicroPolyGrid* pGrid() const
-		{
-			return ( m_pGrid );
-		}
-		/** Get the index into the grid of this MPG
-		 */
-		TqInt GetIndex() const
-		{
-			return( m_Index );
-		}
-		/** Set the index within the donor grid.
-		 * \param Index Integer grid index.
-		 */
-		void	SetIndex( TqInt Index )
-		{
-			assert( m_pGrid != 0 && m_pGrid->GridSize() > Index );
-			m_Index = Index;
-		}
-		/** Release this micropolys reference to the donor grid.
-		 */
-		void	Detatch()
-		{
-			if ( m_pGrid != 0 )
-			{
-				RELEASEREF( m_pGrid );
-				m_pGrid = 0;
-			}
-		}
-		/** Get the color of this micropoly.
-		 * \return CqColor reference.
-		 */
-		const	CqColor	colColor() const
-		{
-			CqColor colRes;
-			m_pGrid->Ci() ->GetColor( colRes, m_Index );
-			return ( colRes );
-		}
-		/** Get the opacity of this micropoly.
-		 * \return CqColor reference.
-		 */
-		const	CqColor	colOpacity() const
-		{
-			CqColor colRes;
-			m_pGrid->Oi() ->GetColor( colRes, m_Index );
-			return ( colRes );
-		}
-
-
-		// Overridables
-		/** Get the bound of the micropoly.
-		 * \param fForce Flag indicating do not get the stored bound, but recalculate it.
-		 * \return CqBound representing the conservative bound.
-		 */
-		virtual	CqBound	GetTotalBound( TqBool fForce = TqFalse );
-		/** Get the bound of the micropoly.
-		 * \return CqBound representing the conservative bound.
-		 */
-		virtual const CqBound	GetTotalBound() const
-		{
-			return ( GetTotalBound() );
-		}
-		virtual	TqInt	cSubBounds()
-		{
-			return ( 1 );
-		}
-		virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time )
-		{
-			time = 0.0f;
-			return ( GetTotalBound() );
-		}
-
-		/** Check if the sample point is within the micropoly.
-		 * \param vecSample 2D sample point.
-		 * \param time The frame time at which to check.
-		 * \param D storage to put the depth at the sample point if success.
-		 * \return Boolean success.
-		 */
-		virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
-
-		/** Query if the micropolygon has been successfully hit by a pixel sample.
-		 */
-		TqBool IsHit() const
-		{
-			return ( ( m_Flags & MicroPolyFlags_Hit ) != 0 );
-		}
-		/** Set the flag to state that the MPG has eben hit by a sample point.
-		 */
-		void MarkHit()
-		{
-			m_Flags |= MicroPolyFlags_Hit;
-		}
-		/** Get the flag indicating if the micropoly has already beed pushed forward to the next bucket.
-		 */
-		TqBool	IsPushedForward() const
-		{
-			return ( ( m_Flags & MicroPolyFlags_PushedForward ) != 0 );
-		}
-		/** Set the flag indicating if the micropoly has already beed pushed forward to the next bucket.
-		 */
-		void	MarkPushedForward()
-		{
-			m_Flags |= MicroPolyFlags_PushedForward;
-		}
-		virtual void	MarkTrimmed()
-		{
-			m_Flags |= MicroPolyFlags_Trimmed;
-		}
-		virtual TqBool	IsTrimmed() const
-		{
-			return ( ( m_Flags & MicroPolyFlags_Trimmed ) != 0 );
-		}
+public:
+    /** Set up the pointer to the grid this micropoly came from.
+     * \param pGrid CqMicroPolyGrid pointer.
+     */
+    void	SetGrid( CqMicroPolyGrid* pGrid )
+    {
+        if ( m_pGrid ) RELEASEREF( m_pGrid );
+        m_pGrid = pGrid;
+        ADDREF( m_pGrid );
+    }
+    /** Get the pointer to the grid this micropoly came from.
+     * \return Pointer to the CqMicroPolyGrid.
+     */
+    CqMicroPolyGrid* pGrid() const
+    {
+        return ( m_pGrid );
+    }
+    /** Get the index into the grid of this MPG
+     */
+    TqInt GetIndex() const
+    {
+        return( m_Index );
+    }
+    /** Set the index within the donor grid.
+     * \param Index Integer grid index.
+     */
+    void	SetIndex( TqInt Index )
+    {
+        assert( m_pGrid != 0 && m_pGrid->GridSize() > Index );
+        m_Index = Index;
+    }
+    /** Release this micropolys reference to the donor grid.
+     */
+    void	Detatch()
+    {
+        if ( m_pGrid != 0 )
+        {
+            RELEASEREF( m_pGrid );
+            m_pGrid = 0;
+        }
+    }
+    /** Get the color of this micropoly.
+     * \return CqColor reference.
+     */
+    const	CqColor	colColor() const
+    {
+        CqColor colRes;
+        m_pGrid->Ci() ->GetColor( colRes, m_Index );
+        return ( colRes );
+    }
+    /** Get the opacity of this micropoly.
+     * \return CqColor reference.
+     */
+    const	CqColor	colOpacity() const
+    {
+        CqColor colRes;
+        m_pGrid->Oi() ->GetColor( colRes, m_Index );
+        return ( colRes );
+    }
 
 
-		virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
-		void	Initialise();
-		CqVector2D ReverseBilinear( const CqVector2D& v );
+    // Overridables
+    /** Get the bound of the micropoly.
+     * \param fForce Flag indicating do not get the stored bound, but recalculate it.
+     * \return CqBound representing the conservative bound.
+     */
+    virtual	CqBound	GetTotalBound( TqBool fForce = TqFalse );
+    /** Get the bound of the micropoly.
+     * \return CqBound representing the conservative bound.
+     */
+    virtual const CqBound	GetTotalBound() const
+    {
+        return ( GetTotalBound() );
+    }
+    virtual	TqInt	cSubBounds()
+    {
+        return ( 1 );
+    }
+    virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time )
+    {
+        time = 0.0f;
+        return ( GetTotalBound() );
+    }
 
-		virtual const CqVector3D& PointA() const
-		{
-			CqVector3D * pP;
-			m_pGrid->P() ->GetPointPtr( pP );
-			return ( pP[ GetCodedIndex( m_IndexCode, 0 ) ] );
-		}
-		virtual const CqVector3D& PointB() const
-		{
-			CqVector3D * pP;
-			m_pGrid->P() ->GetPointPtr( pP );
-			return ( pP[ GetCodedIndex( m_IndexCode, 1 ) ] );
-		}
-		virtual const CqVector3D& PointC() const
-		{
-			CqVector3D * pP;
-			m_pGrid->P() ->GetPointPtr( pP );
-			return ( pP[ GetCodedIndex( m_IndexCode, 2 ) ] );
-		}
-		virtual const CqVector3D& PointD() const
-		{
-			CqVector3D * pP;
-			m_pGrid->P() ->GetPointPtr( pP );
-			return ( pP[ GetCodedIndex( m_IndexCode, 3 ) ] );
-		}
-		virtual const TqBool IsDegenerate() const
-		{
-			return ( ( m_IndexCode & 0x8000000 ) != 0 );
-		}
+    /** Check if the sample point is within the micropoly.
+     * \param vecSample 2D sample point.
+     * \param time The frame time at which to check.
+     * \param D storage to put the depth at the sample point if success.
+     * \return Boolean success.
+     */
+    virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
 
-	protected:
-		TqInt GetCodedIndex( TqShort code, TqShort shift ) const
-		{
-			switch ( ( ( code >> ( shift << 1 ) ) & 0x3 ) )
-			{
-					case 1:
-					return ( m_Index + 1 );
-					case 2:
-					return ( m_Index + m_pGrid->uGridRes() + 2 );
-					case 3:
-					return ( m_Index + m_pGrid->uGridRes() + 1 );
-					default:
-					return ( m_Index );
-			}
-		}
-		TqLong	m_IndexCode;
-		TqLong	m_BoundCode;
-		CqMicroPolyGrid*	m_pGrid;		///< Pointer to the donor grid.
-		TqInt	m_Index;		///< Index within the donor grid.
+    /** Query if the micropolygon has been successfully hit by a pixel sample.
+     */
+    TqBool IsHit() const
+    {
+        return ( ( m_Flags & MicroPolyFlags_Hit ) != 0 );
+    }
+    /** Set the flag to state that the MPG has eben hit by a sample point.
+     */
+    void MarkHit()
+    {
+        m_Flags |= MicroPolyFlags_Hit;
+    }
+    /** Get the flag indicating if the micropoly has already beed pushed forward to the next bucket.
+     */
+    TqBool	IsPushedForward() const
+    {
+        return ( ( m_Flags & MicroPolyFlags_PushedForward ) != 0 );
+    }
+    /** Set the flag indicating if the micropoly has already beed pushed forward to the next bucket.
+     */
+    void	MarkPushedForward()
+    {
+        m_Flags |= MicroPolyFlags_PushedForward;
+    }
+    virtual void	MarkTrimmed()
+    {
+        m_Flags |= MicroPolyFlags_Trimmed;
+    }
+    virtual TqBool	IsTrimmed() const
+    {
+        return ( ( m_Flags & MicroPolyFlags_Trimmed ) != 0 );
+    }
 
-		TqShort	m_Flags;		///< Bitvector of general flags, using EqMicroPolyFlags as bitmasks.
-	private:
-		CqMicroPolygon( const CqMicroPolygon& From )
-	{}
+
+    virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
+    void	Initialise();
+    CqVector2D ReverseBilinear( const CqVector2D& v );
+
+    virtual const CqVector3D& PointA() const
+    {
+        CqVector3D * pP;
+        m_pGrid->P() ->GetPointPtr( pP );
+        return ( pP[ GetCodedIndex( m_IndexCode, 0 ) ] );
+    }
+    virtual const CqVector3D& PointB() const
+    {
+        CqVector3D * pP;
+        m_pGrid->P() ->GetPointPtr( pP );
+        return ( pP[ GetCodedIndex( m_IndexCode, 1 ) ] );
+    }
+    virtual const CqVector3D& PointC() const
+    {
+        CqVector3D * pP;
+        m_pGrid->P() ->GetPointPtr( pP );
+        return ( pP[ GetCodedIndex( m_IndexCode, 2 ) ] );
+    }
+    virtual const CqVector3D& PointD() const
+    {
+        CqVector3D * pP;
+        m_pGrid->P() ->GetPointPtr( pP );
+        return ( pP[ GetCodedIndex( m_IndexCode, 3 ) ] );
+    }
+    virtual const TqBool IsDegenerate() const
+    {
+        return ( ( m_IndexCode & 0x8000000 ) != 0 );
+    }
+
+protected:
+    TqInt GetCodedIndex( TqShort code, TqShort shift ) const
+    {
+        switch ( ( ( code >> ( shift << 1 ) ) & 0x3 ) )
+        {
+        case 1:
+            return ( m_Index + 1 );
+        case 2:
+            return ( m_Index + m_pGrid->uGridRes() + 2 );
+        case 3:
+            return ( m_Index + m_pGrid->uGridRes() + 1 );
+        default:
+            return ( m_Index );
+        }
+    }
+    TqLong	m_IndexCode;
+    TqLong	m_BoundCode;
+    CqMicroPolyGrid*	m_pGrid;		///< Pointer to the donor grid.
+    TqInt	m_Index;		///< Index within the donor grid.
+
+    TqShort	m_Flags;		///< Bitvector of general flags, using EqMicroPolyFlags as bitmasks.
+private:
+    CqMicroPolygon( const CqMicroPolygon& From )
+{}
 }
 ;
 
@@ -639,29 +639,29 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 
 class CqMovingMicroPolygonKey : public CqPoolable<CqMovingMicroPolygonKey, 512>
 {
-	public:
-		CqMovingMicroPolygonKey()
-		{}
-		CqMovingMicroPolygonKey( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD )
-		{
-			Initialise( vA, vB, vC, vD );
-		}
-		~CqMovingMicroPolygonKey()
-		{}
+public:
+    CqMovingMicroPolygonKey()
+    {}
+    CqMovingMicroPolygonKey( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD )
+    {
+        Initialise( vA, vB, vC, vD );
+    }
+    ~CqMovingMicroPolygonKey()
+    {}
 
-	public:
-		TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
+public:
+    TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
 
-		CqBound	GetTotalBound() const;
-		void	Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD );
-		CqVector2D ReverseBilinear( const CqVector2D& v );
+    CqBound	GetTotalBound() const;
+    void	Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD );
+    CqVector2D ReverseBilinear( const CqVector2D& v );
 
-		CqVector3D	m_Point0;
-		CqVector3D	m_Point1;
-		CqVector3D	m_Point2;
-		CqVector3D	m_Point3;
-		CqVector3D	m_N;			///< The normal to the micropoly.
-		TqFloat	m_D;				///< Distance of the plane from the origin, used for calculating sample depth.
+    CqVector3D	m_Point0;
+    CqVector3D	m_Point1;
+    CqVector3D	m_Point2;
+    CqVector3D	m_Point3;
+    CqVector3D	m_N;			///< The normal to the micropoly.
+    TqFloat	m_D;				///< Distance of the plane from the origin, used for calculating sample depth.
 }
 ;
 
@@ -673,60 +673,60 @@ class CqMovingMicroPolygonKey : public CqPoolable<CqMovingMicroPolygonKey, 512>
 
 class CqMicroPolygonMotion : public CqMicroPolygon
 {
-	public:
-		CqMicroPolygonMotion() : CqMicroPolygon(), m_BoundReady( TqFalse )
-		{ }
-		virtual	~CqMicroPolygonMotion()
-		{
-			std::vector<CqMovingMicroPolygonKey*>::iterator	ikey;
-			for ( ikey = m_Keys.begin(); ikey != m_Keys.end(); ikey++ )
-				delete( ( *ikey ) );
-		}
+public:
+    CqMicroPolygonMotion() : CqMicroPolygon(), m_BoundReady( TqFalse )
+    { }
+    virtual	~CqMicroPolygonMotion()
+    {
+        std::vector<CqMovingMicroPolygonKey*>::iterator	ikey;
+        for ( ikey = m_Keys.begin(); ikey != m_Keys.end(); ikey++ )
+            delete( ( *ikey ) );
+    }
 
-	public:
-		void	AppendKey( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD, TqFloat time );
-		void	DeleteVariables( TqBool all )
-	{}
+public:
+    void	AppendKey( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD, TqFloat time );
+    void	DeleteVariables( TqBool all )
+{}
 
-		// Overrides from CqMicroPolygon
-		virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
-		virtual	CqBound	GetTotalBound( TqBool fForce = TqFalse );
-		virtual const CqBound	GetTotalBound() const
-		{
-			return ( m_Bound );
-		}
-		virtual	TqInt	cSubBounds()
-		{
-			if ( !m_BoundReady )
-				BuildBoundList();
-			return ( m_BoundList.Size() );
-		}
-		virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time )
-		{
-			if ( !m_BoundReady )
-				BuildBoundList();
-			assert( iIndex < m_BoundList.Size() );
-			time = m_BoundList.GetTime( iIndex );
-			return ( m_BoundList.GetBound( iIndex ) );
-		}
-		virtual void	BuildBoundList();
+    // Overrides from CqMicroPolygon
+    virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
+    virtual	CqBound	GetTotalBound( TqBool fForce = TqFalse );
+    virtual const CqBound	GetTotalBound() const
+    {
+        return ( m_Bound );
+    }
+    virtual	TqInt	cSubBounds()
+    {
+        if ( !m_BoundReady )
+            BuildBoundList();
+        return ( m_BoundList.Size() );
+    }
+    virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time )
+    {
+        if ( !m_BoundReady )
+            BuildBoundList();
+        assert( iIndex < m_BoundList.Size() );
+        time = m_BoundList.GetTime( iIndex );
+        return ( m_BoundList.GetBound( iIndex ) );
+    }
+    virtual void	BuildBoundList();
 
-		virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
+    virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
 
-		virtual void	MarkTrimmed()
-		{
-			m_fTrimmed = TqTrue;
-		}
-	private:
-		CqBound	m_Bound;					///< Stored bound.
-		CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
-		TqBool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
-		std::vector<TqFloat> m_Times;
-		std::vector<CqMovingMicroPolygonKey*>	m_Keys;
-		TqBool	m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
+    virtual void	MarkTrimmed()
+    {
+        m_fTrimmed = TqTrue;
+    }
+private:
+    CqBound	m_Bound;					///< Stored bound.
+    CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
+    TqBool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
+    std::vector<TqFloat> m_Times;
+    std::vector<CqMovingMicroPolygonKey*>	m_Keys;
+    TqBool	m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
 
-		CqMicroPolygonMotion( const CqMicroPolygonMotion& From )
-		{}
+    CqMicroPolygonMotion( const CqMicroPolygonMotion& From )
+    {}
 }
 ;
 

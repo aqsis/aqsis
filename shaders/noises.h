@@ -4,7 +4,7 @@
 * Author: Larry Gritz (gritzl@acm.org), though they're obvious to any
 *         experience shader writer.
 *
-* $Revision: 1.2 $    $Date: 2002/03/01 18:00:39 $
+* $Revision: 1.3 $    $Date: 2003/12/28 18:26:24 $
 *
 ************************************************************************/
 
@@ -58,18 +58,18 @@
 float fBm ( point p; float filtwidth;
             uniform float maxoctaves, lacunarity, gain )
 {
-	uniform float i;
-	uniform float amp = 1;
-	varying point pp = p;
-	varying float sum = 0, fw = filtwidth;
+    uniform float i;
+    uniform float amp = 1;
+    varying point pp = p;
+    varying float sum = 0, fw = filtwidth;
 
-	for ( i = 0; i < maxoctaves && fw < 1.0; i += 1 )
-	{
+    for ( i = 0; i < maxoctaves && fw < 1.0; i += 1 )
+    {
 #pragma nolint
-		sum += amp * filteredsnoise ( pp, fw );
-		amp *= gain; pp *= lacunarity; fw *= lacunarity;
-	}
-	return sum;
+        sum += amp * filteredsnoise ( pp, fw );
+        amp *= gain; pp *= lacunarity; fw *= lacunarity;
+    }
+    return sum;
 }
 
 
@@ -85,18 +85,18 @@ vector
 vfBm ( point p; float filtwidth;
        uniform float maxoctaves, lacunarity, gain )
 {
-	uniform float i;
-	uniform float amp = 1;
-	varying point pp = p;
-	varying vector sum = 0;
-	varying float fw = filtwidth;
+    uniform float i;
+    uniform float amp = 1;
+    varying point pp = p;
+    varying vector sum = 0;
+    varying float fw = filtwidth;
 
-	for ( i = 0; i < maxoctaves && fw < 1.0; i += 1 )
-	{
-		sum += amp * filteredvsnoise ( pp, fw );
-		amp *= gain; pp *= lacunarity; fw *= lacunarity;
-	}
-	return sum;
+    for ( i = 0; i < maxoctaves && fw < 1.0; i += 1 )
+    {
+        sum += amp * filteredvsnoise ( pp, fw );
+        amp *= gain; pp *= lacunarity; fw *= lacunarity;
+    }
+    return sum;
 }
 
 
@@ -115,19 +115,19 @@ float
 VLfBm ( point p; float filtwidth;
         uniform float maxoctaves, lacunarity, gain, scale )
 {
-	uniform float i;
-	uniform float amp = 1;
-	varying point pp = p;
-	varying float sum = 0;
-	varying float fw = filtwidth;
+    uniform float i;
+    uniform float amp = 1;
+    varying point pp = p;
+    varying float sum = 0;
+    varying float fw = filtwidth;
 
-	for ( i = 0; i < maxoctaves && fw < 1.0; i += 1 )
-	{
+    for ( i = 0; i < maxoctaves && fw < 1.0; i += 1 )
+    {
 #pragma nolint
-		sum += amp * filteredVLNoise ( pp, fw, scale );
-		amp *= gain; pp *= lacunarity; fw *= lacunarity;
-	}
-	return sum;
+        sum += amp * filteredVLNoise ( pp, fw, scale );
+        amp *= gain; pp *= lacunarity; fw *= lacunarity;
+    }
+    return sum;
 }
 
 
@@ -143,18 +143,18 @@ VLfBm ( point p; float filtwidth;
 float turbulence ( point p; float filtwidth;
                    uniform float maxoctaves, lacunarity, gain )
 {
-	uniform float i;
-	uniform float amp = 1;
-	varying point pp = p;
-	varying float sum = 0, fw = filtwidth;
+    uniform float i;
+    uniform float amp = 1;
+    varying point pp = p;
+    varying float sum = 0, fw = filtwidth;
 
-	for ( i = 0; i < maxoctaves && fw < 1.0; i += 1 )
-	{
+    for ( i = 0; i < maxoctaves && fw < 1.0; i += 1 )
+    {
 #pragma nolint
-		sum += amp * abs( filteredsnoise ( pp, fw ) );
-		amp *= gain; pp *= lacunarity; fw *= lacunarity;
-	}
-	return sum;
+        sum += amp * abs( filteredsnoise ( pp, fw ) );
+        amp *= gain; pp *= lacunarity; fw *= lacunarity;
+    }
+    return sum;
 }
 
 

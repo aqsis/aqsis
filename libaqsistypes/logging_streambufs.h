@@ -32,20 +32,20 @@ START_NAMESPACE( Aqsis )
 
 /// When attached to an output stream, prefixes every line of output with a timestamp
 class timestamp_buf :
-	public std::streambuf
+            public std::streambuf
 {
 public:
-	timestamp_buf(std::ostream& Stream);
-	~timestamp_buf();
+    timestamp_buf(std::ostream& Stream);
+    ~timestamp_buf();
 
 protected:
-	int overflow(int);
-	int sync();
+    int overflow(int);
+    int sync();
 
 private:
-	std::ostream& m_stream;
-	std::streambuf* const m_streambuf;
-	bool m_start_new_line;
+    std::ostream& m_stream;
+    std::streambuf* const m_streambuf;
+    bool m_start_new_line;
 };
 
 ///////////////////////////////////////////////////////////
@@ -53,20 +53,20 @@ private:
 
 /// When attached to an output stream, prefixes every line of output with its log-level (if any)
 class show_level_buf :
-	public std::streambuf
+            public std::streambuf
 {
 public:
-	show_level_buf(std::ostream& Stream);
-	~show_level_buf();
+    show_level_buf(std::ostream& Stream);
+    ~show_level_buf();
 
 protected:
-	int overflow(int);
-	int sync();
+    int overflow(int);
+    int sync();
 
 private:
-	std::ostream& m_stream;
-	std::streambuf* const m_streambuf;
-	bool m_start_new_line;
+    std::ostream& m_stream;
+    std::streambuf* const m_streambuf;
+    bool m_start_new_line;
 };
 
 ///////////////////////////////////////////////////////////
@@ -74,24 +74,24 @@ private:
 
 /// When attached to an output stream, replaces duplicate lines of output with a message indicating the number of duplicates
 class fold_duplicates_buf :
-	public std::streambuf
+            public std::streambuf
 {
 public:
-	fold_duplicates_buf(std::ostream& Stream);
-	~fold_duplicates_buf();
+    fold_duplicates_buf(std::ostream& Stream);
+    ~fold_duplicates_buf();
 
 protected:
-	int overflow(int);
-	int sync();
+    int overflow(int);
+    int sync();
 
 private:
-	bool print_duplicates();
+    bool print_duplicates();
 
-	std::ostream& m_stream;
-	std::streambuf* const m_streambuf;
-	std::string m_buffer;
-	std::string m_last_buffer;
-	unsigned long m_duplicate_count;
+    std::ostream& m_stream;
+    std::streambuf* const m_streambuf;
+    std::string m_buffer;
+    std::string m_last_buffer;
+    unsigned long m_duplicate_count;
 };
 
 ///////////////////////////////////////////////////////////
@@ -99,19 +99,19 @@ private:
 
 /// When attached to an output stream, resets the log level to "unknown" after every line of output
 class reset_level_buf :
-	public std::streambuf
+            public std::streambuf
 {
 public:
-	reset_level_buf(std::ostream& Stream);
-	~reset_level_buf();
+    reset_level_buf(std::ostream& Stream);
+    ~reset_level_buf();
 
 protected:
-	int overflow(int);
-	int sync();
+    int overflow(int);
+    int sync();
 
 private:
-	std::ostream& m_stream;
-	std::streambuf* const m_streambuf;
+    std::ostream& m_stream;
+    std::streambuf* const m_streambuf;
 };
 
 ///////////////////////////////////////////////////////////
@@ -120,29 +120,29 @@ private:
 /// Enumerates available log levels
 typedef enum
 {
-	CRITICAL = 1,
-	ERROR = 2,
-	WARNING = 3,
-	INFO = 4,
-	DEBUG = 5
+    CRITICAL = 1,
+    ERROR = 2,
+    WARNING = 3,
+    INFO = 4,
+    DEBUG = 5
 } log_level_t;
 
 /// When attached to an output stream, filters-out messages below the given level
 class filter_by_level_buf :
-	public std::streambuf
+            public std::streambuf
 {
 public:
-	filter_by_level_buf(const log_level_t MinimumLevel, std::ostream& Stream);
-	~filter_by_level_buf();
+    filter_by_level_buf(const log_level_t MinimumLevel, std::ostream& Stream);
+    ~filter_by_level_buf();
 
 protected:
-	int overflow(int);
-	int sync();
+    int overflow(int);
+    int sync();
 
 private:
-	std::ostream& m_stream;
-	std::streambuf* const m_streambuf;
-	const log_level_t m_minimum_level;
+    std::ostream& m_stream;
+    std::streambuf* const m_streambuf;
+    const log_level_t m_minimum_level;
 };
 
 ///////////////////////////////////////////////////////////
@@ -150,22 +150,22 @@ private:
 
 /// When attached to an output stream, copies output to the system log
 class syslog_buf :
-	public std::streambuf
+            public std::streambuf
 {
 public:
-	syslog_buf(std::ostream& Stream);
-	~syslog_buf();
+    syslog_buf(std::ostream& Stream);
+    ~syslog_buf();
 
 protected:
-	int overflow(int);
-	int sync();
+    int overflow(int);
+    int sync();
 
 private:
-	void write_to_system_log(const std::string& Message);
+    void write_to_system_log(const std::string& Message);
 
-	std::ostream& m_stream;
-	std::streambuf* const m_streambuf;
-	std::string m_buffer;
+    std::ostream& m_stream;
+    std::streambuf* const m_streambuf;
+    std::string m_buffer;
 };
 
 //-----------------------------------------------------------------------

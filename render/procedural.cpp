@@ -63,7 +63,7 @@ START_NAMESPACE( Aqsis )
  */
 CqProcedural::CqProcedural() : CqSurface()
 {
-	STATS_INC( GEO_prc_created );
+    STATS_INC( GEO_prc_created );
 }
 
 /**
@@ -71,15 +71,15 @@ CqProcedural::CqProcedural() : CqSurface()
  */
 CqProcedural::CqProcedural(RtPointer data, CqBound &B, RtProcSubdivFunc subfunc, RtProcFreeFunc freefunc ) : CqSurface()
 {
-	m_pData = data;
-	m_Bound = B;	
-	m_pSubdivFunc = subfunc;
-	m_pFreeFunc = freefunc;
+    m_pData = data;
+    m_Bound = B;
+    m_pSubdivFunc = subfunc;
+    m_pFreeFunc = freefunc;
 
-	m_pconStored = QGetRenderContext()->pconCurrent();
-	ADDREF( m_pconStored );
+    m_pconStored = QGetRenderContext()->pconCurrent();
+    ADDREF( m_pconStored );
 
-	STATS_INC( GEO_prc_created );
+    STATS_INC( GEO_prc_created );
 }
 
 
@@ -87,27 +87,27 @@ CqProcedural::CqProcedural(RtPointer data, CqBound &B, RtProcSubdivFunc subfunc,
 
 TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
 {
-	// Store current context, set current context to the stored one
-	CqModeBlock *pconSave = QGetRenderContext()->pconCurrent( m_pconStored );
+    // Store current context, set current context to the stored one
+    CqModeBlock *pconSave = QGetRenderContext()->pconCurrent( m_pconStored );
 
-	CqBound bound = m_Bound;
-	bound.Transform(QGetRenderContext()->matSpaceToSpace("camera", "raster"));
-	float detail = ( bound.vecMax().x() - bound.vecMin().x() ) * ( bound.vecMax().y() - bound.vecMin().y() );
-	//std::cout << "detail: " << detail << std::endl;
+    CqBound bound = m_Bound;
+    bound.Transform(QGetRenderContext()->matSpaceToSpace("camera", "raster"));
+    float detail = ( bound.vecMax().x() - bound.vecMin().x() ) * ( bound.vecMax().y() - bound.vecMin().y() );
+    //std::cout << "detail: " << detail << std::endl;
 
-	// Call the procedural secific Split()
-	RiAttributeBegin();
+    // Call the procedural secific Split()
+    RiAttributeBegin();
 
-	m_pSubdivFunc(m_pData, detail);
+    m_pSubdivFunc(m_pData, detail);
 
-	RiAttributeEnd();
+    RiAttributeEnd();
 
-	// restore saved context
-	QGetRenderContext()->pconCurrent( pconSave );
+    // restore saved context
+    QGetRenderContext()->pconCurrent( pconSave );
 
-	STATS_INC( GEO_prc_split );
+    STATS_INC( GEO_prc_split );
 
-	return 0;
+    return 0;
 }
 
 
@@ -115,9 +115,9 @@ TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
 /** Transform the quadric primitive by the specified matrix.
  */
 
- void    CqProcedural::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime )
+void    CqProcedural::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime )
 {
-	m_Bound.Transform( matTx );
+    m_Bound.Transform( matTx );
 }
 
 
@@ -125,9 +125,9 @@ TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
  * CqProcedural destructor.
  */
 CqProcedural::~CqProcedural()
-{ 
-	RELEASEREF( m_pconStored );
-	if( m_pFreeFunc ) m_pFreeFunc( m_pData );
+{
+    RELEASEREF( m_pconStored );
+    if( m_pFreeFunc ) m_pFreeFunc( m_pData );
 }
 
 
@@ -136,92 +136,92 @@ CqProcedural::~CqProcedural()
 //
 extern "C" RtVoid	RiProcFree( RtPointer data )
 {
-	free(data);
+    free(data);
 }
 
 
-class CqRiProceduralPlugin : CqPluginBase 
+class CqRiProceduralPlugin : CqPluginBase
 {
-	private:
-	void *( *m_ppvfcts ) ( char * );
-	void ( *m_pvfctpvf ) ( void *, float );
-	void ( *m_pvfctpv ) ( void * );
-	void *m_ppriv;
-	void *m_handle;
-	bool m_bIsValid;
-	CqString m_Error;
+private:
+    void *( *m_ppvfcts ) ( char * );
+    void ( *m_pvfctpvf ) ( void *, float );
+    void ( *m_pvfctpv ) ( void * );
+    void *m_ppriv;
+    void *m_handle;
+    bool m_bIsValid;
+    CqString m_Error;
 
-	public:
-	CqRiProceduralPlugin( CqString& strDSOName )
-	{
-		CqString strConver("ConvertParameters");
-		CqString strSubdivide("Subdivide");
-		CqString strFree("Free");
+public:
+    CqRiProceduralPlugin( CqString& strDSOName )
+    {
+        CqString strConver("ConvertParameters");
+        CqString strSubdivide("Subdivide");
+        CqString strFree("Free");
 
-        	CqRiFile        fileDSO( strDSOName.c_str(), "procedure" );
-		m_bIsValid = false ;
+        CqRiFile        fileDSO( strDSOName.c_str(), "procedure" );
+        m_bIsValid = false ;
 
-	        if ( !fileDSO.IsValid() )
-		{
-			m_Error = CqString( "Cannot find Procedural DSO for \"" )
-			 + strDSOName 
-			 + CqString ("\" in current searchpath");
+        if ( !fileDSO.IsValid() )
+        {
+            m_Error = CqString( "Cannot find Procedural DSO for \"" )
+                      + strDSOName
+                      + CqString ("\" in current searchpath");
 
-			return;
-		}
+            return;
+        }
 
-		CqString strRealName( fileDSO.strRealName() );
-		fileDSO.Close();
-		void *handle = DLOpen( &strRealName );
-	
-		if ( ( m_ppvfcts = ( void * ( * ) ( char * ) ) DLSym(handle, &strConver) ) == NULL )
-		{
-			m_Error = DLError();
-			return;
-		}
+        CqString strRealName( fileDSO.strRealName() );
+        fileDSO.Close();
+        void *handle = DLOpen( &strRealName );
 
-		if ( ( m_pvfctpvf = ( void ( * ) ( void *, float ) ) DLSym(handle, &strSubdivide) ) == NULL )
-		{
-			m_Error = DLError();
-			return;
-		}
+        if ( ( m_ppvfcts = ( void * ( * ) ( char * ) ) DLSym(handle, &strConver) ) == NULL )
+        {
+            m_Error = DLError();
+            return;
+        }
 
-		if ( ( m_pvfctpv = ( void ( * ) ( void * ) ) DLSym(handle, &strFree) ) == NULL )
-		{
-			m_Error = DLError();
-			return;
-		}
+        if ( ( m_pvfctpvf = ( void ( * ) ( void *, float ) ) DLSym(handle, &strSubdivide) ) == NULL )
+        {
+            m_Error = DLError();
+            return;
+        }
 
-		m_bIsValid = true ;
-	};
-	
-	void ConvertParameters(char* opdata)
-	{
-		if( m_bIsValid )
-			m_ppriv = ( *m_ppvfcts ) ( opdata );
-	};
+        if ( ( m_pvfctpv = ( void ( * ) ( void * ) ) DLSym(handle, &strFree) ) == NULL )
+        {
+            m_Error = DLError();
+            return;
+        }
 
-	void Subdivide( float detail )
-	{
-		if( m_bIsValid )
-			( *m_pvfctpvf ) ( m_ppriv, detail );
-	};
+        m_bIsValid = true ;
+    };
 
-	void Free()
-	{
-		if( m_bIsValid )
-			( *m_pvfctpv ) ( m_ppriv );
-	};
+    void ConvertParameters(char* opdata)
+    {
+        if( m_bIsValid )
+            m_ppriv = ( *m_ppvfcts ) ( opdata );
+    };
 
-	bool IsValid(void)
-	{
-		return m_bIsValid;
-	};
+    void Subdivide( float detail )
+    {
+        if( m_bIsValid )
+            ( *m_pvfctpvf ) ( m_ppriv, detail );
+    };
 
-	const CqString Error()
-	{
-		return m_Error;
-	};
+    void Free()
+    {
+        if( m_bIsValid )
+            ( *m_pvfctpv ) ( m_ppriv );
+    };
+
+    bool IsValid(void)
+    {
+        return m_bIsValid;
+    };
+
+    const CqString Error()
+    {
+        return m_Error;
+    };
 };
 
 // We don't want to DLClose until we are finished rendering, since any RiProcedurals
@@ -233,23 +233,23 @@ static std::list<CqRiProceduralPlugin*> ActiveProcDLList;
 //
 extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 {
-	CqString dsoname = CqString( (( char** ) data)[0] ) + CqString(SHARED_LIBRARY_SUFFIX);
-	CqRiProceduralPlugin *plugin = new CqRiProceduralPlugin( dsoname );
-	
-	if( !plugin->IsValid() )
-	{
-		std::cerr << error << "Problem loading Procedural DSO: [" << plugin->Error().c_str() << "]" << std::endl;
-		return;
-	}
+    CqString dsoname = CqString( (( char** ) data)[0] ) + CqString(SHARED_LIBRARY_SUFFIX);
+    CqRiProceduralPlugin *plugin = new CqRiProceduralPlugin( dsoname );
 
-	plugin->ConvertParameters( (( char** ) data)[1] );
-	plugin->Subdivide( detail );
-	plugin->Free();
+    if( !plugin->IsValid() )
+    {
+        std::cerr << error << "Problem loading Procedural DSO: [" << plugin->Error().c_str() << "]" << std::endl;
+        return;
+    }
 
-	ActiveProcDLList.push_back( plugin ); 
+    plugin->ConvertParameters( (( char** ) data)[1] );
+    plugin->Subdivide( detail );
+    plugin->Free();
 
-	STATS_INC( GEO_prc_created_dl );
-} 
+    ActiveProcDLList.push_back( plugin );
+
+    STATS_INC( GEO_prc_created_dl );
+}
 
 
 
@@ -258,8 +258,8 @@ extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 //
 extern "C" RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
 {
-	RiReadArchive( (RtToken) ((char**) data)[0], NULL );
-	STATS_INC( GEO_prc_created_dra );
+    RiReadArchive( (RtToken) ((char**) data)[0], NULL );
+    STATS_INC( GEO_prc_created_dra );
 }
 
 
@@ -270,123 +270,123 @@ extern "C" RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
  * like a text file. 
  */
 
-// TODO: This is far from ideal, we need to parse directly from the popene'd 
+// TODO: This is far from ideal, we need to parse directly from the popene'd
 // process.
 
 #ifndef	AQSIS_SYSTEM_WIN32
 
 class CqRiProceduralRunProgram
 {
-	public:
-	int fd_out[2]; // aqsis -> servant 
-	int fd_in[2]; // servant -> aqsis
-	pid_t pid;
-	FILE *out, *in;
+public:
+    int fd_out[2]; // aqsis -> servant
+    int fd_in[2]; // servant -> aqsis
+    pid_t pid;
+    FILE *out, *in;
 };
 
 static std::map<std::string, CqRiProceduralRunProgram*> ActiveProcRP;
 
 extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 {
-	std::map<std::string, CqRiProceduralRunProgram*>::iterator it;
+    std::map<std::string, CqRiProceduralRunProgram*>::iterator it;
 
-	it = ActiveProcRP.find(CqString( ((char**)data)[0] )) ;
-	if( it == ActiveProcRP.end() )
-	{
-		// We don't have an active RunProgram for the specifed
-		// program. We need to try and fork a new one
-		CqRiProceduralRunProgram *run_proc = new CqRiProceduralRunProgram;
-		pipe( run_proc->fd_in ) ;
-		pipe( run_proc->fd_out ) ;
+    it = ActiveProcRP.find(CqString( ((char**)data)[0] )) ;
+    if( it == ActiveProcRP.end() )
+    {
+        // We don't have an active RunProgram for the specifed
+        // program. We need to try and fork a new one
+        CqRiProceduralRunProgram *run_proc = new CqRiProceduralRunProgram;
+        pipe( run_proc->fd_in ) ;
+        pipe( run_proc->fd_out ) ;
 
-		run_proc->pid = fork() ;
+        run_proc->pid = fork() ;
 
-		if (run_proc->pid < 0)
-		{
-			// problem forking
-			return;
-		}
-	       	else if( run_proc->pid != 0 ) 
-		{
-			// main process
-			// fix up the filehandles.
+        if (run_proc->pid < 0)
+        {
+            // problem forking
+            return;
+        }
+        else if( run_proc->pid != 0 )
+        {
+            // main process
+            // fix up the filehandles.
 
-			close(run_proc->fd_out[0]); // we write to fd_out[1]
-			close(run_proc->fd_in[1]);  // we read from fd_in[0]
+            close(run_proc->fd_out[0]); // we write to fd_out[1]
+            close(run_proc->fd_in[1]);  // we read from fd_in[0]
 
-			run_proc->out = fdopen(dup(run_proc->fd_out[1]), "wb");
-//			setvbuf(run_proc->out, NULL, _IONBF, 0);
-			run_proc->in = fdopen(dup(run_proc->fd_in[0]), "rb");
-//			setvbuf(run_proc->in, NULL, _IONBF, 0);
+            run_proc->out = fdopen(dup(run_proc->fd_out[1]), "wb");
+            //			setvbuf(run_proc->out, NULL, _IONBF, 0);
+            run_proc->in = fdopen(dup(run_proc->fd_in[0]), "rb");
+            //			setvbuf(run_proc->in, NULL, _IONBF, 0);
 
-			ActiveProcRP[std::string(((char**)data)[0])] = run_proc;
-			it = ActiveProcRP.find(std::string(((char**)data)[0])); 
-		}
-		else 
-		{
-			// Split up the RunProgram program name string
-			int arg_count = 1;
-			char *arg_values[32];
-			arg_values[0] = ((char**)data)[0] ;
-			char *i = arg_values[0];
-			for( ; *i != '\0' ; i++ )
-			{
-				if( *i == ' ' )
-				{
-					arg_count++ ;
-					*i = '\0' ;
-					arg_values[arg_count - 1] = i + 1 ;
-				} 
-			};
-			arg_values[arg_count] = NULL;
+            ActiveProcRP[std::string(((char**)data)[0])] = run_proc;
+            it = ActiveProcRP.find(std::string(((char**)data)[0]));
+        }
+        else
+        {
+            // Split up the RunProgram program name string
+            int arg_count = 1;
+            char *arg_values[32];
+            arg_values[0] = ((char**)data)[0] ;
+            char *i = arg_values[0];
+            for( ; *i != '\0' ; i++ )
+            {
+                if( *i == ' ' )
+                {
+                    arg_count++ ;
+                    *i = '\0' ;
+                    arg_values[arg_count - 1] = i + 1 ;
+                }
+            };
+            arg_values[arg_count] = NULL;
 
-			// fix up the filehandles.
+            // fix up the filehandles.
 
-			close(run_proc->fd_out[1]);
-			close(run_proc->fd_in[0]);
+            close(run_proc->fd_out[1]);
+            close(run_proc->fd_in[0]);
 
-			close( STDIN_FILENO );
-			dup( run_proc->fd_out[0] );
-//			setvbuf( stdin, NULL, _IONBF, 0 );
-			close( STDOUT_FILENO );
-			dup( run_proc->fd_in[1] );
-//			setvbuf( stdout, NULL, _IONBF, 0 );
+            close( STDIN_FILENO );
+            dup( run_proc->fd_out[0] );
+            //			setvbuf( stdin, NULL, _IONBF, 0 );
+            close( STDOUT_FILENO );
+            dup( run_proc->fd_in[1] );
+            //			setvbuf( stdout, NULL, _IONBF, 0 );
 
-			// We should use the procedurals searchpath here
-			execvp( arg_values[0], arg_values );
-		 };
-	};
+            // We should use the procedurals searchpath here
+            execvp( arg_values[0], arg_values );
+        };
+    };
 
-	FILE *fileout = (it->second)->out;
-	// Write out detail and data to the process
-	fprintf( fileout, "%g %s\n", detail, ((char**)data)[1] );
-	fflush( fileout );
-	// should check for a SIGPIPE here incase the RunProgram died.
-	 
-	// This is not pretty, gzopen attempts to read a gzip header
-	//from the stream, if we try and do this before we have sent
-	//the request the we get deadlock, so we have to create the decoder
-	//after the request, we use a buffer size of one to prevent any 
-	//potential blocking.
-	CqRibBinaryDecoder *decoder;
-	FILE *filein = (it->second)->in;
-	decoder = new CqRibBinaryDecoder( filein, 1);
+    FILE *fileout = (it->second)->out;
+    // Write out detail and data to the process
+    fprintf( fileout, "%g %s\n", detail, ((char**)data)[1] );
+    fflush( fileout );
+    // should check for a SIGPIPE here incase the RunProgram died.
 
-	// Parse the resulting block of RIB.
-	CqString strRealName( ((char**)data)[0] );
-	CqRIBParserState currstate = librib::GetParserState();
+    // This is not pretty, gzopen attempts to read a gzip header
+    //from the stream, if we try and do this before we have sent
+    //the request the we get deadlock, so we have to create the decoder
+    //after the request, we use a buffer size of one to prevent any
+    //potential blocking.
+    CqRibBinaryDecoder *decoder;
+    FILE *filein = (it->second)->in;
+    decoder = new CqRibBinaryDecoder( filein, 1);
 
-	if( currstate.m_pParseCallbackInterface == NULL ) currstate.m_pParseCallbackInterface = new librib2ri::Engine;
+    // Parse the resulting block of RIB.
+    CqString strRealName( ((char**)data)[0] );
+    CqRIBParserState currstate = librib::GetParserState();
 
-	librib::ParseOpenStream( decoder, strRealName.c_str(), *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), (RtArchiveCallback) RI_NULL );
+    if( currstate.m_pParseCallbackInterface == NULL ) currstate.m_pParseCallbackInterface = new librib2ri::Engine;
 
-	librib::SetParserState( currstate );
+    librib::ParseOpenStream( decoder, strRealName.c_str(), *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), (RtArchiveCallback) RI_NULL );
 
-	delete( decoder );
+    librib::SetParserState( currstate );
 
-	STATS_INC( GEO_prc_created_prp );
+    delete( decoder );
 
-	return;
+    STATS_INC( GEO_prc_created_prp );
+
+    return;
 }
 
 #else
@@ -396,9 +396,9 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 class CqRiProceduralRunProgram
 {
-	public:
-	HANDLE hChildStdinWrDup;
-	HANDLE hChildStdoutRdDup;
+public:
+    HANDLE hChildStdinWrDup;
+    HANDLE hChildStdoutRdDup;
 };
 
 static std::map<std::string, CqRiProceduralRunProgram*> ActiveProcRP;
@@ -406,98 +406,98 @@ static std::map<std::string, CqRiProceduralRunProgram*> ActiveProcRP;
 
 extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 {
-	HANDLE hChildStdinRd, hChildStdinWr, hChildStdoutRd, hChildStdoutWr;
-	PROCESS_INFORMATION piProcInfo; 
-	STARTUPINFO siStartInfo;
-	BOOL bFuncRetn = FALSE; 
+    HANDLE hChildStdinRd, hChildStdinWr, hChildStdoutRd, hChildStdoutWr;
+    PROCESS_INFORMATION piProcInfo;
+    STARTUPINFO siStartInfo;
+    BOOL bFuncRetn = FALSE;
 
-	std::map<std::string, CqRiProceduralRunProgram*>::iterator it;
+    std::map<std::string, CqRiProceduralRunProgram*>::iterator it;
 
-	it = ActiveProcRP.find(CqString( ((char**)data)[0] )) ;
-	if( it == ActiveProcRP.end() )
-	{
-		// We don't have an active RunProgram for the specifed
-		// program. We need to try and fork a new one
-		CqRiProceduralRunProgram *run_proc = new CqRiProceduralRunProgram;
+    it = ActiveProcRP.find(CqString( ((char**)data)[0] )) ;
+    if( it == ActiveProcRP.end() )
+    {
+        // We don't have an active RunProgram for the specifed
+        // program. We need to try and fork a new one
+        CqRiProceduralRunProgram *run_proc = new CqRiProceduralRunProgram;
 
-		ActiveProcRP[std::string(((char**)data)[0])] = run_proc;
-		it = ActiveProcRP.find(std::string(((char**)data)[0])); 
+        ActiveProcRP[std::string(((char**)data)[0])] = run_proc;
+        it = ActiveProcRP.find(std::string(((char**)data)[0]));
 
-	// Create a pipe for the child process's STDOUT. 
+        // Create a pipe for the child process's STDOUT.
 
-		if (! CreatePipe(&hChildStdoutRd, &hChildStdoutWr, NULL, 0) ||
-			! CreatePipe(&hChildStdinRd,  &hChildStdinWr,  NULL, 0)) 
-		{
-			std::cerr << error << "RiProcRunProgram: Stdout pipe creation failed" << std::endl;
-			return;
-		}
+        if (! CreatePipe(&hChildStdoutRd, &hChildStdoutWr, NULL, 0) ||
+                ! CreatePipe(&hChildStdinRd,  &hChildStdinWr,  NULL, 0))
+        {
+            std::cerr << error << "RiProcRunProgram: Stdout pipe creation failed" << std::endl;
+            return;
+        }
 
-		SetHandleInformation(hChildStdoutWr, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
-		SetHandleInformation(hChildStdinRd,  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+        SetHandleInformation(hChildStdoutWr, HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
+        SetHandleInformation(hChildStdinRd,  HANDLE_FLAG_INHERIT, HANDLE_FLAG_INHERIT);
 
-		ZeroMemory( &siStartInfo, sizeof(STARTUPINFO) );
-		siStartInfo.cb = sizeof(STARTUPINFO); 
-		siStartInfo.hStdOutput = hChildStdoutWr;
-		siStartInfo.hStdInput = hChildStdinRd;
-		siStartInfo.dwFlags = STARTF_USESTDHANDLES;
-		ZeroMemory( &piProcInfo, sizeof(PROCESS_INFORMATION) );
-	
-// Create the child process. 
-    
-		bFuncRetn = CreateProcess(NULL, 
-									((char**)data)[0],       // command line 
-									NULL,          // process security attributes 
-									NULL,          // primary thread security attributes 
-									TRUE,          // handles are inherited 
-									0,             // creation flags 
-									NULL,          // use parent's environment 
-									NULL,          // use parent's current directory 
-									&siStartInfo,  // STARTUPINFO pointer 
-									&piProcInfo);  // receives PROCESS_INFORMATION 
-   
-		if (bFuncRetn == 0) 
-		{
-			std::cerr << error << "RiProcRunProgram: CreateProcess failed" << std::endl;
-			return;
-		} 
+        ZeroMemory( &siStartInfo, sizeof(STARTUPINFO) );
+        siStartInfo.cb = sizeof(STARTUPINFO);
+        siStartInfo.hStdOutput = hChildStdoutWr;
+        siStartInfo.hStdInput = hChildStdinRd;
+        siStartInfo.dwFlags = STARTF_USESTDHANDLES;
+        ZeroMemory( &piProcInfo, sizeof(PROCESS_INFORMATION) );
 
-		CloseHandle(piProcInfo.hProcess);
-		CloseHandle(piProcInfo.hThread);
+        // Create the child process.
 
-		CloseHandle(hChildStdoutWr);
-		CloseHandle(hChildStdinRd);
+        bFuncRetn = CreateProcess(NULL,
+                                  ((char**)data)[0],       // command line
+                                  NULL,          // process security attributes
+                                  NULL,          // primary thread security attributes
+                                  TRUE,          // handles are inherited
+                                  0,             // creation flags
+                                  NULL,          // use parent's environment
+                                  NULL,          // use parent's current directory
+                                  &siStartInfo,  // STARTUPINFO pointer
+                                  &piProcInfo);  // receives PROCESS_INFORMATION
 
-		// Store the handles.
-		(it->second)->hChildStdinWrDup = hChildStdinWr;
-		(it->second)->hChildStdoutRdDup = hChildStdoutRd;
-	}
+        if (bFuncRetn == 0)
+        {
+            std::cerr << error << "RiProcRunProgram: CreateProcess failed" << std::endl;
+            return;
+        }
 
-	int fd_hChildStdinWrDup = _open_osfhandle((long)(it->second)->hChildStdinWrDup, 0);
-	FILE *fileout = _fdopen( fd_hChildStdinWrDup, "w");
-	// Write out detail and data to the process
-	fprintf( fileout, "%g %s\n", detail, ((char**)data)[1] );
-	fflush( fileout );
+        CloseHandle(piProcInfo.hProcess);
+        CloseHandle(piProcInfo.hThread);
 
-	CqRibBinaryDecoder *decoder;
-	int fd_hChildStdoutRdDup = _open_osfhandle((long)(it->second)->hChildStdoutRdDup, O_RDONLY);
-	FILE *filein = _fdopen( fd_hChildStdoutRdDup, "r" );
-	decoder = new CqRibBinaryDecoder( filein, 1);
+        CloseHandle(hChildStdoutWr);
+        CloseHandle(hChildStdinRd);
 
-	// Parse the resulting block of RIB.
-	CqString strRealName( ((char**)data)[0] );
-	CqRIBParserState currstate = librib::GetParserState();
+        // Store the handles.
+        (it->second)->hChildStdinWrDup = hChildStdinWr;
+        (it->second)->hChildStdoutRdDup = hChildStdoutRd;
+    }
 
-	if( currstate.m_pParseCallbackInterface == NULL ) currstate.m_pParseCallbackInterface = new librib2ri::Engine;
+    int fd_hChildStdinWrDup = _open_osfhandle((long)(it->second)->hChildStdinWrDup, 0);
+    FILE *fileout = _fdopen( fd_hChildStdinWrDup, "w");
+    // Write out detail and data to the process
+    fprintf( fileout, "%g %s\n", detail, ((char**)data)[1] );
+    fflush( fileout );
 
-	librib::ParseOpenStream( decoder, strRealName.c_str(), *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), (RtArchiveCallback) RI_NULL );
+    CqRibBinaryDecoder *decoder;
+    int fd_hChildStdoutRdDup = _open_osfhandle((long)(it->second)->hChildStdoutRdDup, O_RDONLY);
+    FILE *filein = _fdopen( fd_hChildStdoutRdDup, "r" );
+    decoder = new CqRibBinaryDecoder( filein, 1);
 
-	librib::SetParserState( currstate );
+    // Parse the resulting block of RIB.
+    CqString strRealName( ((char**)data)[0] );
+    CqRIBParserState currstate = librib::GetParserState();
 
-	delete( decoder );
+    if( currstate.m_pParseCallbackInterface == NULL ) currstate.m_pParseCallbackInterface = new librib2ri::Engine;
 
-	STATS_INC( GEO_prc_created_prp );
+    librib::ParseOpenStream( decoder, strRealName.c_str(), *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), (RtArchiveCallback) RI_NULL );
 
-	return;
+    librib::SetParserState( currstate );
+
+    delete( decoder );
+
+    STATS_INC( GEO_prc_created_prp );
+
+    return;
 }
 
 

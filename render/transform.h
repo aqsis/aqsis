@@ -47,82 +47,82 @@ START_NAMESPACE( Aqsis )
 
 class CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount, public IqTransform
 {
-	public:
-		CqTransform();
-		CqTransform( const CqTransform& From );
-		virtual	~CqTransform();
+public:
+    CqTransform();
+    CqTransform( const CqTransform& From );
+    virtual	~CqTransform();
 
 #ifdef _DEBUG
-		CqString className() const { return CqString("CqTransform"); }
+    CqString className() const { return CqString("CqTransform"); }
 #endif
 
-		/** Get a writable copy of this, if the reference count is greater than 1
-		 * create a new copy and retirn that.
-		 */
-		CqTransform* Write()
-		{
-			// We are about to write to this attribute,so clone if references exist.
-			if ( RefCount() > 1 )
-			{
-				CqTransform * pWrite = Clone();
-				ADDREF( pWrite );
-				RELEASEREF( this );
-				return ( pWrite );
-			}
-			else
-				return ( this );
-		}
+    /** Get a writable copy of this, if the reference count is greater than 1
+     * create a new copy and retirn that.
+     */
+    CqTransform* Write()
+    {
+        // We are about to write to this attribute,so clone if references exist.
+        if ( RefCount() > 1 )
+        {
+            CqTransform * pWrite = Clone();
+            ADDREF( pWrite );
+            RELEASEREF( this );
+            return ( pWrite );
+        }
+        else
+            return ( this );
+    }
 
-		virtual	CqTransform& operator=( const CqTransform& From );
+    virtual	CqTransform& operator=( const CqTransform& From );
 
-		/** Get a duplicate of this transform.
-		 */
-		CqTransform*	Clone() const
-		{
-			return ( new CqTransform( *this ) );
-		}
+    /** Get a duplicate of this transform.
+     */
+    CqTransform*	Clone() const
+    {
+        return ( new CqTransform( *this ) );
+    }
 
-		virtual	void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
-		virtual	void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
+    virtual	void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
+    virtual	void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
 
-		virtual	const CqMatrix&	matObjectToWorld( TqFloat time = 0.0f ) const;
+    virtual	const CqMatrix&	matObjectToWorld( TqFloat time = 0.0f ) const;
 
-		virtual	TqFloat	Time( TqInt index ) const
-		{
-			return( CqMotionSpec<CqMatrix>::Time( index ) );
-		}
-		virtual	TqInt	cTimes() const
-		{
-			return( CqMotionSpec<CqMatrix>::cTimes() );
-		}
+    virtual	TqFloat	Time( TqInt index ) const
+    {
+        return( CqMotionSpec<CqMatrix>::Time( index ) );
+    }
+    virtual	TqInt	cTimes() const
+    {
+        return( CqMotionSpec<CqMatrix>::cTimes() );
+    }
 
 #ifndef _DEBUG
-		virtual	void	Release()
-		{
-			CqRefCount::Release();
-		}
-		virtual	void	AddRef()
-		{
-			CqRefCount::AddRef();
-		}
+    virtual	void	Release()
+    {
+        CqRefCount::Release();
+    }
+    virtual	void	AddRef()
+    {
+        CqRefCount::AddRef();
+    }
 #else
-		virtual void AddRef(const TqChar* file, TqInt line) 
-		{
-			CqRefCount::AddRef(file, line);
-		}
-		virtual void Release(const TqChar* file, TqInt line)
-		{
-			CqRefCount::Release(file, line);
-		}
+    virtual void AddRef(const TqChar* file, TqInt line)
+    {
+        CqRefCount::AddRef(file, line);
+    }
+    virtual void Release(const TqChar* file, TqInt line)
+    {
+        CqRefCount::Release(file, line);
+    }
 #endif
 
-		virtual	void	ClearMotionObject( CqMatrix& A ) const;
-		virtual	CqMatrix	ConcatMotionObjects( const CqMatrix& A, const CqMatrix& B ) const;
-		virtual	CqMatrix	LinearInterpolateMotionObjects( TqFloat Fraction, const CqMatrix& A, const CqMatrix& B ) const;
+    virtual	void	ClearMotionObject( CqMatrix& A ) const;
+    virtual	CqMatrix	ConcatMotionObjects( const CqMatrix& A, const CqMatrix& B ) const;
+    virtual	CqMatrix	LinearInterpolateMotionObjects( TqFloat Fraction, const CqMatrix& A, const CqMatrix& B ) const;
 
-	private:
-		TqInt	m_cReferences;		///< Number of references to this transform.
-		TqInt	m_StackIndex;		///< Index in the transform stack of this transform.
+private:
+    TqInt	m_cReferences;		///< Number of references to this transform.
+    TqInt	m_StackIndex;		///< Index in the transform stack of this transform.
 }
 ;
 

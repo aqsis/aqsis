@@ -37,7 +37,7 @@ namespace Aqsis
 struct IqRenderer;
 IqRenderer* QGetRenderContextI()
 {
-	return ( 0 );
+    return ( 0 );
 }
 void gStats_IncI( TqInt index )
 {
@@ -47,14 +47,14 @@ void gStats_DecI( TqInt index )
 }
 TqInt gStats_getI( TqInt index )
 {
-	return( 0 );
+    return( 0 );
 }
 void gStats_setI( TqInt index, TqInt value )
 {
 }
 TqFloat gStats_getF( TqInt index )
 {
-	return( 0.0f );
+    return( 0.0f );
 }
 void gStats_setF( TqInt index, TqFloat value )
 {

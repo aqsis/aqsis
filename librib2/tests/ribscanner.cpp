@@ -32,12 +32,12 @@ RtBasis	RiPowerBasis	= {{ 1, 0, 0, 0},
 
 int main( int argc, char* argv[] )
 {
-	YYSTYPE data;
-	librib::BinaryDecoder = new librib::CqRibBinaryDecoder( stdin );
-	while ( yylex( &data ) )
-	{}
+    YYSTYPE data;
+    librib::BinaryDecoder = new librib::CqRibBinaryDecoder( stdin );
+    while ( yylex( &data ) )
+    {}
 
-	delete( librib::BinaryDecoder );
-	return 0;
+    delete( librib::BinaryDecoder );
+    return 0;
 }
 

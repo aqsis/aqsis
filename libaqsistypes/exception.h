@@ -40,26 +40,26 @@ START_NAMESPACE( Aqsis )
 
 class XqException
 {
-	public:
-		/** Default constructor.
-		 * \param pcharReason Pointer to a string associated with the error which caused the exception.
-		 */
-		XqException( const char* pcharReason = 0 ) :
-				m_strReason( pcharReason )
-		{}
-		virtual	~XqException()
-		{}
+public:
+    /** Default constructor.
+     * \param pcharReason Pointer to a string associated with the error which caused the exception.
+     */
+    XqException( const char* pcharReason = 0 ) :
+            m_strReason( pcharReason )
+    {}
+    virtual	~XqException()
+    {}
 
-		/** Get a reference to the error message.
-		 * \return a constant string reference.
-		 */
-		const CqString&	strReason()
-		{
-			return ( m_strReason );
-		}
+    /** Get a reference to the error message.
+     * \return a constant string reference.
+     */
+    const CqString&	strReason()
+    {
+        return ( m_strReason );
+    }
 
-	private:
-		CqString	m_strReason;	///< The message associated with this exception.
+private:
+    CqString	m_strReason;	///< The message associated with this exception.
 }
 ;
 

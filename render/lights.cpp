@@ -36,20 +36,20 @@ CqList<CqLightsource>	Lightsource_stack;
  */
 
 CqLightsource::CqLightsource( IqShader* pShader, TqBool fActive ) :
-		m_pShader( pShader ),
-		m_pAttributes( NULL ),
-		m_pShaderExecEnv( NULL )
+        m_pShader( pShader ),
+        m_pAttributes( NULL ),
+        m_pShaderExecEnv( NULL )
 {
-	// Set a reference with the current attributes.
-	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
-	ADDREF( m_pAttributes );
+    // Set a reference with the current attributes.
+    m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
+    ADDREF( m_pAttributes );
 
-	// Link into the lightsource stack.
-	Lightsource_stack.LinkFirst( this );
-	// Add a reference from the stack.
-	ADDREF( this );
-	m_pShaderExecEnv = new CqShaderExecEnv;
-	ADDREF( m_pShaderExecEnv );
+    // Link into the lightsource stack.
+    Lightsource_stack.LinkFirst( this );
+    // Add a reference from the stack.
+    ADDREF( this );
+    m_pShaderExecEnv = new CqShaderExecEnv;
+    ADDREF( m_pShaderExecEnv );
 }
 
 
@@ -59,16 +59,16 @@ CqLightsource::CqLightsource( IqShader* pShader, TqBool fActive ) :
 
 CqLightsource::~CqLightsource()
 {
-	// Release our reference on the current attributes.
-	if ( m_pAttributes )
-		RELEASEREF( m_pAttributes );
-	m_pAttributes = 0;
+    // Release our reference on the current attributes.
+    if ( m_pAttributes )
+        RELEASEREF( m_pAttributes );
+    m_pAttributes = 0;
 
-	// Delete the shader execution environment..
-	if ( m_pShaderExecEnv ) {
-		RELEASEREF( m_pShaderExecEnv );
-	}
-	m_pShaderExecEnv = 0;
+    // Delete the shader execution environment..
+    if ( m_pShaderExecEnv ) {
+        RELEASEREF( m_pShaderExecEnv );
+    }
+    m_pShaderExecEnv = 0;
 }
 
 
@@ -79,28 +79,28 @@ CqLightsource::~CqLightsource()
  */
 void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
 {
-	TqInt Uses = gDefLightUses;
-	if ( m_pShader )
-	{
-		Uses |= m_pShader->Uses();
-		m_pShaderExecEnv->Initialise( uGridRes, vGridRes, 0, m_pShader, Uses );
-	}
+    TqInt Uses = gDefLightUses;
+    if ( m_pShader )
+    {
+        Uses |= m_pShader->Uses();
+        m_pShaderExecEnv->Initialise( uGridRes, vGridRes, 0, m_pShader, Uses );
+    }
 
-	if ( m_pShader )
-		m_pShader->Initialise( uGridRes, vGridRes, m_pShaderExecEnv );
+    if ( m_pShader )
+        m_pShader->Initialise( uGridRes, vGridRes, m_pShaderExecEnv );
 
-	if ( USES( Uses, EnvVars_L ) )	L() ->Initialise( uGridRes, vGridRes );
-	if ( USES( Uses, EnvVars_Cl ) )	Cl() ->Initialise( uGridRes, vGridRes );
+    if ( USES( Uses, EnvVars_L ) )	L() ->Initialise( uGridRes, vGridRes );
+    if ( USES( Uses, EnvVars_Cl ) )	Cl() ->Initialise( uGridRes, vGridRes );
 
-	// Initialise the geometric parameters in the shader exec env.
-	if ( USES( Uses, EnvVars_P ) )	P() ->SetPoint( QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->matCurrent() ) * CqVector3D( 0.0f, 0.0f, 0.0f ) );
-	if ( USES( Uses, EnvVars_u ) )	u() ->SetFloat( 0.0f );
-	if ( USES( Uses, EnvVars_v ) )	v() ->SetFloat( 0.0f );
-	if ( USES( Uses, EnvVars_du ) )	du() ->SetFloat( 0.0f );
-	if ( USES( Uses, EnvVars_du ) )	dv() ->SetFloat( 0.0f );
-	if ( USES( Uses, EnvVars_s ) )	s() ->SetFloat( 0.0f );
-	if ( USES( Uses, EnvVars_t ) )	t() ->SetFloat( 0.0f );
-	if ( USES( Uses, EnvVars_N ) )	N() ->SetNormal( CqVector3D( 0.0f, 0.0f, 0.0f ) );
+    // Initialise the geometric parameters in the shader exec env.
+    if ( USES( Uses, EnvVars_P ) )	P() ->SetPoint( QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->matCurrent() ) * CqVector3D( 0.0f, 0.0f, 0.0f ) );
+    if ( USES( Uses, EnvVars_u ) )	u() ->SetFloat( 0.0f );
+    if ( USES( Uses, EnvVars_v ) )	v() ->SetFloat( 0.0f );
+    if ( USES( Uses, EnvVars_du ) )	du() ->SetFloat( 0.0f );
+    if ( USES( Uses, EnvVars_du ) )	dv() ->SetFloat( 0.0f );
+    if ( USES( Uses, EnvVars_s ) )	s() ->SetFloat( 0.0f );
+    if ( USES( Uses, EnvVars_t ) )	t() ->SetFloat( 0.0f );
+    if ( USES( Uses, EnvVars_N ) )	N() ->SetNormal( CqVector3D( 0.0f, 0.0f, 0.0f ) );
 }
 
 

@@ -33,15 +33,15 @@
 
 class CqSemaphore
 {
-	public:
-		CqSemaphore();
-		~CqSemaphore();
+public:
+    CqSemaphore();
+    ~CqSemaphore();
 
-		void Signal();
-		void Wait();
+    void Signal();
+    void Wait();
 
-	protected:
-		void* m_pNativeSemaphore;	///< Pointer to the system specific semaphore implementation.
+protected:
+    void* m_pNativeSemaphore;	///< Pointer to the system specific semaphore implementation.
 }
 ;
 

@@ -74,25 +74,25 @@ TqInt Abandon( SOCKET s, SqDDMessageBase* pMsg );
 /// Main loop,, just cycle handling any recieved messages.
 int main( int argc, char* argv[] )
 {
-	int port = -1;
-	char *portStr = getenv( "AQSIS_DD_PORT" );
+    int port = -1;
+    char *portStr = getenv( "AQSIS_DD_PORT" );
 
-	if ( portStr != NULL )
-	{
-		port = atoi( portStr );
-	}
+    if ( portStr != NULL )
+    {
+        port = atoi( portStr );
+    }
 
-	if ( DDInitialise( NULL, port ) == 0 )
-	{
-		DDProcessMessages();
-	}
-	else
-	{
-		std::cerr << "ERROR: Could not open communications channel to Aqsis" << std::endl;
-		return 1;
-	}
+    if ( DDInitialise( NULL, port ) == 0 )
+    {
+        DDProcessMessages();
+    }
+    else
+    {
+        std::cerr << "ERROR: Could not open communications channel to Aqsis" << std::endl;
+        return 1;
+    }
 
-	return 0;
+    return 0;
 }
 
 
@@ -117,235 +117,235 @@ std::string	strFilename( "output.tif" );
 
 TqInt Query( SOCKET s, SqDDMessageBase* pMsgB )
 {
-	switch ( pMsgB->m_MessageID )
-	{
-			case MessageID_FormatQuery:
-			{
-				SqDDMessageFormatQuery* pMsg = static_cast<SqDDMessageFormatQuery*>(pMsgB);
-				g_Format = pMsg->m_Formats[0];
-				frmt.m_DataFormat = g_Format;
-				if ( DDSendMsg( s, &frmt ) <= 0 )
-					return ( -1 );
-				// Create a buffer big enough to hold a row of buckets.
-				pByteData = NULL;
-				pFloatData = NULL;
-				if ( g_Format == DataFormat_Unsigned8 )
-					pByteData = new unsigned char[ XRes * YRes * g_Channels ];
-				else
-					pFloatData = new float[ XRes * YRes * g_Channels ];
-			}
-			break;
-	}
-	return ( 0 );
+    switch ( pMsgB->m_MessageID )
+    {
+    case MessageID_FormatQuery:
+        {
+            SqDDMessageFormatQuery* pMsg = static_cast<SqDDMessageFormatQuery*>(pMsgB);
+            g_Format = pMsg->m_Formats[0];
+            frmt.m_DataFormat = g_Format;
+            if ( DDSendMsg( s, &frmt ) <= 0 )
+                return ( -1 );
+            // Create a buffer big enough to hold a row of buckets.
+            pByteData = NULL;
+            pFloatData = NULL;
+            if ( g_Format == DataFormat_Unsigned8 )
+                pByteData = new unsigned char[ XRes * YRes * g_Channels ];
+            else
+                pFloatData = new float[ XRes * YRes * g_Channels ];
+        }
+        break;
+    }
+    return ( 0 );
 }
 
 TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 {
-	SqDDMessageOpen * pMsg = static_cast<SqDDMessageOpen*>( pMsgB );
+    SqDDMessageOpen * pMsg = static_cast<SqDDMessageOpen*>( pMsgB );
 
-	XRes = ( pMsg->m_CropWindowXMax - pMsg->m_CropWindowXMin );
-	YRes = ( pMsg->m_CropWindowYMax - pMsg->m_CropWindowYMin );
-	g_Channels = pMsg->m_Channels;
-//	BitsPerSample = pMsg->m_BitsPerSample;
+    XRes = ( pMsg->m_CropWindowXMax - pMsg->m_CropWindowXMin );
+    YRes = ( pMsg->m_CropWindowYMax - pMsg->m_CropWindowYMin );
+    g_Channels = pMsg->m_Channels;
+    //	BitsPerSample = pMsg->m_BitsPerSample;
 
-	g_CWXmin = pMsg->m_CropWindowXMin;
-	g_CWYmin = pMsg->m_CropWindowYMin;
-	g_CWXmax = pMsg->m_CropWindowXMax;
-	g_CWYmax = pMsg->m_CropWindowYMax;
+    g_CWXmin = pMsg->m_CropWindowXMin;
+    g_CWYmin = pMsg->m_CropWindowYMin;
+    g_CWXmax = pMsg->m_CropWindowXMax;
+    g_CWYmax = pMsg->m_CropWindowYMax;
 
-	return ( 0 );
+    return ( 0 );
 }
 
 
 TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 {
-	SqDDMessageData * pMsg = static_cast<SqDDMessageData*>( pMsgB );
+    SqDDMessageData * pMsg = static_cast<SqDDMessageData*>( pMsgB );
 
-	TqInt	linelen = XRes * g_Channels;
-	char* pBucket = reinterpret_cast<char*>( &pMsg->m_Data );
+    TqInt	linelen = XRes * g_Channels;
+    char* pBucket = reinterpret_cast<char*>( &pMsg->m_Data );
 
-	SqDDMessageData * const message = static_cast<SqDDMessageData*>( pMsgB );
+    SqDDMessageData * const message = static_cast<SqDDMessageData*>( pMsgB );
 
-	// CHeck if the beck is not at all within the crop window.
-	if ( message->m_XMin > g_CWXmax || message->m_XMaxPlus1 < g_CWXmin ||
-	     message->m_YMin > g_CWYmax || message->m_YMaxPlus1 < g_CWYmin )
-		return ( 0 );
+    // CHeck if the beck is not at all within the crop window.
+    if ( message->m_XMin > g_CWXmax || message->m_XMaxPlus1 < g_CWXmin ||
+            message->m_YMin > g_CWYmax || message->m_YMaxPlus1 < g_CWYmin )
+        return ( 0 );
 
-	TqInt y;
-	for ( y = pMsg->m_YMin - g_CWYmin; y < pMsg->m_YMaxPlus1 - g_CWYmin; y++ )
-	{
-		TqInt x;
-		for ( x = pMsg->m_XMin - g_CWXmin; x < pMsg->m_XMaxPlus1 - g_CWXmin; x++ )
-		{
-			if ( x >= 0 && y >= 0 && x < XRes && y < YRes )
-			{
-				TqInt so = ( y * linelen ) + ( x * g_Channels );
+    TqInt y;
+    for ( y = pMsg->m_YMin - g_CWYmin; y < pMsg->m_YMaxPlus1 - g_CWYmin; y++ )
+    {
+        TqInt x;
+        for ( x = pMsg->m_XMin - g_CWXmin; x < pMsg->m_XMaxPlus1 - g_CWXmin; x++ )
+        {
+            if ( x >= 0 && y >= 0 && x < XRes && y < YRes )
+            {
+                TqInt so = ( y * linelen ) + ( x * g_Channels );
 
-				TqInt i = 0;
-				while ( i < g_Channels )
-				{
-					TqFloat value = reinterpret_cast<TqFloat*>( pBucket ) [ i ];
+                TqInt i = 0;
+                while ( i < g_Channels )
+                {
+                    TqFloat value = reinterpret_cast<TqFloat*>( pBucket ) [ i ];
 
-					if( !( quantize_zeroval == 0.0f &&
-						   quantize_oneval  == 0.0f &&
-						   quantize_minval  == 0.0f &&
-						   quantize_maxval  == 0.0f ) )
-					{
-						value = ROUND(quantize_zeroval + value * (quantize_oneval - quantize_zeroval) + dither_val );
-						value = CLAMP(value, quantize_minval, quantize_maxval) ;
-					}
+                    if( !( quantize_zeroval == 0.0f &&
+                            quantize_oneval  == 0.0f &&
+                            quantize_minval  == 0.0f &&
+                            quantize_maxval  == 0.0f ) )
+                    {
+                        value = ROUND(quantize_zeroval + value * (quantize_oneval - quantize_zeroval) + dither_val );
+                        value = CLAMP(value, quantize_minval, quantize_maxval) ;
+                    }
 
-					if( NULL != pByteData )
-					{
-						if ( g_Format == DataFormat_Unsigned8 )
-							pByteData[ so ] = static_cast<char>( value );
-						else
-							pFloatData[ so ] = value;
-					}
-					so++;
-					i++;
-				}
-			}
-			pBucket += pMsg->m_ElementSize;
-		}
-	}
-	return ( 0 );
+                    if( NULL != pByteData )
+                    {
+                        if ( g_Format == DataFormat_Unsigned8 )
+                            pByteData[ so ] = static_cast<char>( value );
+                        else
+                            pFloatData[ so ] = value;
+                    }
+                    so++;
+                    i++;
+                }
+            }
+            pBucket += pMsg->m_ElementSize;
+        }
+    }
+    return ( 0 );
 }
 
 
 TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 {
-	uint16 photometric = PHOTOMETRIC_RGB;
-	uint16 config = PLANARCONFIG_CONTIG;
-	SqDDMessageClose *pClose = ( SqDDMessageClose * ) pMsgB;
+    uint16 photometric = PHOTOMETRIC_RGB;
+    uint16 config = PLANARCONFIG_CONTIG;
+    SqDDMessageClose *pClose = ( SqDDMessageClose * ) pMsgB;
 
-	pOut = TIFFOpen( strFilename.c_str(), "w" );
+    pOut = TIFFOpen( strFilename.c_str(), "w" );
 
-	if ( pOut )
-	{
-		// Write the image to a tiff file.
-		char version[ 80 ];
+    if ( pOut )
+    {
+        // Write the image to a tiff file.
+        char version[ 80 ];
 
-		int ExtraSamplesTypes[ 1 ] = {EXTRASAMPLE_ASSOCALPHA};
+        int ExtraSamplesTypes[ 1 ] = {EXTRASAMPLE_ASSOCALPHA};
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-		sprintf( version, "%s %s", STRNAME, VERSION_STR );
+        sprintf( version, "%s %s", STRNAME, VERSION_STR );
 #else
-		sprintf( version, "%s %s", STRNAME, VERSION );
+        sprintf( version, "%s %s", STRNAME, VERSION );
 #endif
 
-		bool use_logluv = false;
+        bool use_logluv = false;
 
-		// Set common tags
-		TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( uint32 ) version );
-		TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) XRes );
-		TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) YRes );
-		TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
-		TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
+        // Set common tags
+        TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( uint32 ) version );
+        TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) XRes );
+        TIFFSetField( pOut, TIFFTAG_IMAGELENGTH, ( uint32 ) YRes );
+        TIFFSetField( pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
+        TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
 
-		// Write out an 8 bits per pixel integer image.
-		if ( g_Format == DataFormat_Unsigned8 )
-		{
-			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
-			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
-			TIFFSetField( pOut, TIFFTAG_COMPRESSION, compression );
-			if ( compression == COMPRESSION_JPEG )
-				TIFFSetField( pOut, TIFFTAG_JPEGQUALITY, quality );
-			//if (description != "")
-			//TIFFSetField(TIFFTAG_IMAGEDESCRIPTION, description);
-			TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, photometric );
-			TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
+        // Write out an 8 bits per pixel integer image.
+        if ( g_Format == DataFormat_Unsigned8 )
+        {
+            TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
+            TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
+            TIFFSetField( pOut, TIFFTAG_COMPRESSION, compression );
+            if ( compression == COMPRESSION_JPEG )
+                TIFFSetField( pOut, TIFFTAG_JPEGQUALITY, quality );
+            //if (description != "")
+            //TIFFSetField(TIFFTAG_IMAGEDESCRIPTION, description);
+            TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, photometric );
+            TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
 
-			if ( g_Channels == 4 )
-				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
+            if ( g_Channels == 4 )
+                TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
 
-			// Set the position tages in case we aer dealing with a cropped image.
-			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
-			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
+            // Set the position tages in case we aer dealing with a cropped image.
+            TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
+            TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
 
-			TqInt	linelen = XRes * g_Channels;
-			TqInt row;
-			for ( row = 0; row < YRes; row++ )
-			{
-				if ( TIFFWriteScanline( pOut, pByteData + ( row * linelen ), row, 0 ) < 0 )
-					break;
-			}
-			TIFFClose( pOut );
-		}
-		else
-		{
-			// Write out a floating point image.
-			TIFFSetField( pOut, TIFFTAG_STONITS, ( double ) 1.0 );
+            TqInt	linelen = XRes * g_Channels;
+            TqInt row;
+            for ( row = 0; row < YRes; row++ )
+            {
+                if ( TIFFWriteScanline( pOut, pByteData + ( row * linelen ), row, 0 ) < 0 )
+                    break;
+            }
+            TIFFClose( pOut );
+        }
+        else
+        {
+            // Write out a floating point image.
+            TIFFSetField( pOut, TIFFTAG_STONITS, ( double ) 1.0 );
 
-			//			if(/* user wants logluv compression*/)
-			//			{
-			//				if(/* user wants to save the alpha channel */)
-			//				{
-			//					warn("SGI LogLuv encoding does not allow an alpha channel"
-			//							" - using uncompressed IEEEFP instead");
-			//				}
-			//				else
-			//				{
-			//					use_logluv = true;
-			//				}
-			//
-			//				if(/* user wants LZW compression*/)
-			//				{
-			//					warn("LZW compression is not available with SGI LogLuv encoding\n");
-			//				}
-			//			}
+            //			if(/* user wants logluv compression*/)
+            //			{
+            //				if(/* user wants to save the alpha channel */)
+            //				{
+            //					warn("SGI LogLuv encoding does not allow an alpha channel"
+            //							" - using uncompressed IEEEFP instead");
+            //				}
+            //				else
+            //				{
+            //					use_logluv = true;
+            //				}
+            //
+            //				if(/* user wants LZW compression*/)
+            //				{
+            //					warn("LZW compression is not available with SGI LogLuv encoding\n");
+            //				}
+            //			}
 
-			if ( use_logluv )
-			{
-				/* use SGI LogLuv compression */
-				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
-				TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
-				TIFFSetField( pOut, TIFFTAG_COMPRESSION, COMPRESSION_SGILOG );
-				TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_LOGLUV );
-				TIFFSetField( pOut, TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT_FLOAT );
-			}
-			else
-			{
-				/* use uncompressed IEEEFP pixels */
-				TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
-				TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
-				TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
-				TIFFSetField( pOut, TIFFTAG_COMPRESSION, compression );
-			}
+            if ( use_logluv )
+            {
+                /* use SGI LogLuv compression */
+                TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_INT );
+                TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 16 );
+                TIFFSetField( pOut, TIFFTAG_COMPRESSION, COMPRESSION_SGILOG );
+                TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_LOGLUV );
+                TIFFSetField( pOut, TIFFTAG_SGILOGDATAFMT, SGILOGDATAFMT_FLOAT );
+            }
+            else
+            {
+                /* use uncompressed IEEEFP pixels */
+                TIFFSetField( pOut, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
+                TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 32 );
+                TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
+                TIFFSetField( pOut, TIFFTAG_COMPRESSION, compression );
+            }
 
-			TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
+            TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
 
-			if ( g_Channels == 4 )
-				TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
-			// Set the position tages in case we aer dealing with a cropped image.
-			TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
-			TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
-			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
+            if ( g_Channels == 4 )
+                TIFFSetField( pOut, TIFFTAG_EXTRASAMPLES, 1, ExtraSamplesTypes );
+            // Set the position tages in case we aer dealing with a cropped image.
+            TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
+            TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
+            TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
 
-			TqInt	linelen = XRes * g_Channels;
-			TqInt row = 0;
-			for ( row = 0; row < YRes; row++ )
-			{
-				if ( TIFFWriteScanline( pOut, pFloatData + ( row * linelen ), row, 0 ) < 0 )
-					break;
-			}
-			TIFFClose( pOut );
-		}
-	}
+            TqInt	linelen = XRes * g_Channels;
+            TqInt row = 0;
+            for ( row = 0; row < YRes; row++ )
+            {
+                if ( TIFFWriteScanline( pOut, pFloatData + ( row * linelen ), row, 0 ) < 0 )
+                    break;
+            }
+            TIFFClose( pOut );
+        }
+    }
 
-	delete[] ( pByteData );
-	delete[] ( pFloatData );
+    delete[] ( pByteData );
+    delete[] ( pFloatData );
 
-	if ( DDSendMsg( s, &closeack ) <= 0 )
-		return ( -1 );
-	else
-		return ( 1 );
+    if ( DDSendMsg( s, &closeack ) <= 0 )
+        return ( -1 );
+    else
+        return ( 1 );
 }
 
 
 TqInt Abandon( SOCKET s, SqDDMessageBase* pMsgB )
 {
-	return ( 1 );
+    return ( 1 );
 }
 
 
@@ -353,49 +353,49 @@ TqInt Abandon( SOCKET s, SqDDMessageBase* pMsgB )
  */
 TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
 {
-	switch ( pMsgB->m_MessageID )
-	{
-			case MessageID_Filename:
-			{
-				SqDDMessageFilename * pMsg = static_cast<SqDDMessageFilename*>( pMsgB );
-				strFilename = pMsg->m_String;
-			}
-			break;
+    switch ( pMsgB->m_MessageID )
+    {
+    case MessageID_Filename:
+        {
+            SqDDMessageFilename * pMsg = static_cast<SqDDMessageFilename*>( pMsgB );
+            strFilename = pMsg->m_String;
+        }
+        break;
 
-			case MessageID_UserParam:
-			{
-				SqDDMessageUserParam * pMsg = static_cast<SqDDMessageUserParam*>( pMsgB );
-				// Check if we understand the parameter.
-				if( strncmp( pMsg->m_NameAndData, "compression", pMsg->m_NameLength ) == 0 )
-				{
-					const char* pvalue = reinterpret_cast<const char*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
-					if ( strstr( pvalue, "none" ) != 0 )
-						compression = COMPRESSION_NONE;
-					else if ( strstr( pvalue, "lzw" ) != 0 )
-						compression = COMPRESSION_LZW;
-					else if ( strstr( pvalue, "deflate" ) != 0 )
-						compression = COMPRESSION_DEFLATE;
-					else if ( strstr( pvalue, "jpeg" ) != 0 )
-						compression = COMPRESSION_JPEG;
-					else if ( strstr( pvalue, "packbits" ) != 0 )
-						compression = COMPRESSION_PACKBITS;
-				}
-				else if( strncmp( pMsg->m_NameAndData, "quality", pMsg->m_NameLength ) == 0 )
-				{
-					quality = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
-					if ( quality < 0 )		quality = 0;
-					if ( quality > 100 )	quality = 100;
-				}
-				else if( strncmp( pMsg->m_NameAndData, "quantize", pMsg->m_NameLength ) == 0 )
-				{
-					TqFloat* quantize = reinterpret_cast<TqFloat*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
-					quantize_zeroval = quantize[0];
-					quantize_oneval  = quantize[1];
-					quantize_minval  = quantize[2];
-					quantize_maxval  = quantize[3];
-				}
-			}
-			break;
-	}
-	return ( 0 );
+    case MessageID_UserParam:
+        {
+            SqDDMessageUserParam * pMsg = static_cast<SqDDMessageUserParam*>( pMsgB );
+            // Check if we understand the parameter.
+            if( strncmp( pMsg->m_NameAndData, "compression", pMsg->m_NameLength ) == 0 )
+            {
+                const char* pvalue = reinterpret_cast<const char*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+                if ( strstr( pvalue, "none" ) != 0 )
+                    compression = COMPRESSION_NONE;
+                else if ( strstr( pvalue, "lzw" ) != 0 )
+                    compression = COMPRESSION_LZW;
+                else if ( strstr( pvalue, "deflate" ) != 0 )
+                    compression = COMPRESSION_DEFLATE;
+                else if ( strstr( pvalue, "jpeg" ) != 0 )
+                    compression = COMPRESSION_JPEG;
+                else if ( strstr( pvalue, "packbits" ) != 0 )
+                    compression = COMPRESSION_PACKBITS;
+            }
+            else if( strncmp( pMsg->m_NameAndData, "quality", pMsg->m_NameLength ) == 0 )
+            {
+                quality = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+                if ( quality < 0 )		quality = 0;
+                if ( quality > 100 )	quality = 100;
+            }
+            else if( strncmp( pMsg->m_NameAndData, "quantize", pMsg->m_NameLength ) == 0 )
+            {
+                TqFloat* quantize = reinterpret_cast<TqFloat*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+                quantize_zeroval = quantize[0];
+                quantize_oneval  = quantize[1];
+                quantize_minval  = quantize[2];
+                quantize_maxval  = quantize[3];
+            }
+        }
+        break;
+    }
+    return ( 0 );
 }

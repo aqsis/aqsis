@@ -326,20 +326,20 @@ std::vector<CqFuncDef>	gLocalFuncs;
  */
 
 CqFuncDef::CqFuncDef( TqInt Type, const char* strName, const char* strVMName, const char* strParams, CqParseNode* pDef, CqParseNode* pArgs ) :
-		m_Type( Type ),
-		m_strName( strName ),
-		m_strVMName( strVMName ),
-		m_strParamTypes( strParams ),
-		m_fLocal( TqTrue ),
-		m_pDef( pDef ),
-		m_pArgs( pArgs ),
-		m_fVarying( TqFalse )
+        m_Type( Type ),
+        m_strName( strName ),
+        m_strVMName( strVMName ),
+        m_strParamTypes( strParams ),
+        m_fLocal( TqTrue ),
+        m_pDef( pDef ),
+        m_pArgs( pArgs ),
+        m_fVarying( TqFalse )
 {
-	// Build the type array.
-	TypeArray();
+    // Build the type array.
+    TypeArray();
 
-	if ( m_pDef )
-		m_pDef->Optimise();
+    if ( m_pDef )
+        m_pDef->Optimise();
 }
 
 
@@ -349,34 +349,34 @@ CqFuncDef::CqFuncDef( TqInt Type, const char* strName, const char* strVMName, co
 
 TqBool CqFuncDef::FindFunction( const char* strName, std::vector<SqFuncRef>& Refs )
 {
-	SqFuncRef ref;
-	// Clear any existing indexes.
-	Refs.clear();
+    SqFuncRef ref;
+    // Clear any existing indexes.
+    Refs.clear();
 
-	// Search the standard definitions first.
-	TqUint i;
-	for ( i = 0; i < gcStandardFuncs; i++ )
-	{
-		if ( gStandardFuncs[ i ].m_strName == strName )
-		{
-			ref.m_Type = FuncTypeStandard;
-			ref.m_Index = i;
-			Refs.push_back( ref );
-		}
-	}
+    // Search the standard definitions first.
+    TqUint i;
+    for ( i = 0; i < gcStandardFuncs; i++ )
+    {
+        if ( gStandardFuncs[ i ].m_strName == strName )
+        {
+            ref.m_Type = FuncTypeStandard;
+            ref.m_Index = i;
+            Refs.push_back( ref );
+        }
+    }
 
-	// Search the local definitions next.
-	for ( i = 0; i < gLocalFuncs.size(); i++ )
-	{
-		if ( gLocalFuncs[ i ].m_strName == strName )
-		{
-			ref.m_Type = FuncTypeLocal;
-			ref.m_Index = i;
-			Refs.push_back( ref );
-		}
-	}
-	if ( !Refs.empty() ) return ( TqTrue );
-	else	return ( TqFalse );
+    // Search the local definitions next.
+    for ( i = 0; i < gLocalFuncs.size(); i++ )
+    {
+        if ( gLocalFuncs[ i ].m_strName == strName )
+        {
+            ref.m_Type = FuncTypeLocal;
+            ref.m_Index = i;
+            Refs.push_back( ref );
+        }
+    }
+    if ( !Refs.empty() ) return ( TqTrue );
+    else	return ( TqFalse );
 }
 
 
@@ -386,8 +386,8 @@ TqBool CqFuncDef::FindFunction( const char* strName, std::vector<SqFuncRef>& Ref
 
 TqInt CqFuncDef::AddFunction( CqFuncDef& Def )
 {
-	gLocalFuncs.push_back( Def );
-	return ( gLocalFuncs.size() - 1 );
+    gLocalFuncs.push_back( Def );
+    return ( gLocalFuncs.size() - 1 );
 }
 
 
@@ -397,89 +397,89 @@ TqInt CqFuncDef::AddFunction( CqFuncDef& Def )
 
 int CqFuncDef::TypeArray()
 {
-	// Go through the type string parsing the types.
-	unsigned int j = 0, cvars = 0;
+    // Go through the type string parsing the types.
+    unsigned int j = 0, cvars = 0;
 
-	while ( j < m_strParamTypes.size() )
-	{
-		TqInt type = Type_Nil;
-		int ctype = m_strParamTypes[ j++ ];
-		switch ( tolower( ctype ) )
-		{
-				case '@':
-				break;
-				case 'f':
-				type = ( ( type & ( ~Type_Mask ) ) | Type_Float );
-				break;
-				case 'i':
-				type = ( ( type & ( ~Type_Mask ) ) | Type_Integer );
-				break;
-				case 'p':
-				type = ( ( type & ( ~Type_Mask ) ) | Type_Point );
-				break;
-				case 's':
-				type = ( ( type & ( ~Type_Mask ) ) | Type_String );
-				break;
-				case 'c':
-				type = ( ( type & ( ~Type_Mask ) ) | Type_Color );
-				break;
-				case 't':
-				type = ( ( type & ( ~Type_Mask ) ) | Type_Triple );
-				break;
-				case 'h':
-				type = ( ( type & ( ~Type_Mask ) ) | Type_hPoint );
-				break;
-				case 'n':
-				type = ( ( type & ( ~Type_Mask ) ) | Type_Normal );
-				break;
-				case 'v':
-				type = ( ( type & ( ~Type_Mask ) ) | Type_Vector );
-				break;
-				case 'x':
-				type = ( ( type & ( ~Type_Mask ) ) | Type_Void );
-				break;
-				case 'm':
-				type = ( ( type & ( ~Type_Mask ) ) | Type_Matrix );
-				break;
-				case 'w':
-				type = ( ( type & ( ~Type_Mask ) ) | Type_HexTuple );
-				break;
-				case '[':
-				type = ( type | Type_Array );
-				break;
-				case ']':
-				break;
-				case '*':
-				m_fVarying = TqTrue;
-				break;
-		}
-		if ( isupper( ctype ) )
-			type = ( type | Type_Variable );
+    while ( j < m_strParamTypes.size() )
+    {
+        TqInt type = Type_Nil;
+        int ctype = m_strParamTypes[ j++ ];
+        switch ( tolower( ctype ) )
+        {
+        case '@':
+            break;
+        case 'f':
+            type = ( ( type & ( ~Type_Mask ) ) | Type_Float );
+            break;
+        case 'i':
+            type = ( ( type & ( ~Type_Mask ) ) | Type_Integer );
+            break;
+        case 'p':
+            type = ( ( type & ( ~Type_Mask ) ) | Type_Point );
+            break;
+        case 's':
+            type = ( ( type & ( ~Type_Mask ) ) | Type_String );
+            break;
+        case 'c':
+            type = ( ( type & ( ~Type_Mask ) ) | Type_Color );
+            break;
+        case 't':
+            type = ( ( type & ( ~Type_Mask ) ) | Type_Triple );
+            break;
+        case 'h':
+            type = ( ( type & ( ~Type_Mask ) ) | Type_hPoint );
+            break;
+        case 'n':
+            type = ( ( type & ( ~Type_Mask ) ) | Type_Normal );
+            break;
+        case 'v':
+            type = ( ( type & ( ~Type_Mask ) ) | Type_Vector );
+            break;
+        case 'x':
+            type = ( ( type & ( ~Type_Mask ) ) | Type_Void );
+            break;
+        case 'm':
+            type = ( ( type & ( ~Type_Mask ) ) | Type_Matrix );
+            break;
+        case 'w':
+            type = ( ( type & ( ~Type_Mask ) ) | Type_HexTuple );
+            break;
+        case '[':
+            type = ( type | Type_Array );
+            break;
+        case ']':
+            break;
+        case '*':
+            m_fVarying = TqTrue;
+            break;
+        }
+        if ( isupper( ctype ) )
+            type = ( type | Type_Variable );
 
-		if ( ( type & Type_Mask ) != Type_Nil )
-		{
-			m_aTypeSpec.push_back( type );
-			cvars++;
-		}
-	}
-	return ( cvars );
+        if ( ( type & Type_Mask ) != Type_Nil )
+        {
+            m_aTypeSpec.push_back( type );
+            cvars++;
+        }
+    }
+    return ( cvars );
 }
 
 
 const IqParseNode* CqFuncDef::pArgs() const
 {
-	return ( m_pArgs );
+    return ( m_pArgs );
 }
 
 
 const IqParseNode* CqFuncDef::pDef() const
 {
-	return ( m_pDef );
+    return ( m_pDef );
 }
 
 IqParseNode* CqFuncDef::pDef()
 {
-	return ( m_pDef );
+    return ( m_pDef );
 }
 
 
@@ -489,13 +489,13 @@ IqParseNode* CqFuncDef::pDef()
 
 CqFuncDef* CqFuncDef::GetFunctionPtr( const SqFuncRef& Ref )
 {
-	if ( Ref.m_Type == FuncTypeStandard && Ref.m_Index < gcStandardFuncs )
-		return ( &gStandardFuncs[ Ref.m_Index ] );
+    if ( Ref.m_Type == FuncTypeStandard && Ref.m_Index < gcStandardFuncs )
+        return ( &gStandardFuncs[ Ref.m_Index ] );
 
-	if ( Ref.m_Type == FuncTypeLocal && Ref.m_Index < gLocalFuncs.size() )
-		return ( &gLocalFuncs[ Ref.m_Index ] );
+    if ( Ref.m_Type == FuncTypeLocal && Ref.m_Index < gLocalFuncs.size() )
+        return ( &gLocalFuncs[ Ref.m_Index ] );
 
-	return ( 0 );
+    return ( 0 );
 }
 
 
@@ -505,7 +505,7 @@ CqFuncDef* CqFuncDef::GetFunctionPtr( const SqFuncRef& Ref )
 
 IqFuncDef* IqFuncDef::GetFunctionPtr( const SqFuncRef& Ref )
 {
-	return ( CqFuncDef::GetFunctionPtr( Ref ) );
+    return ( CqFuncDef::GetFunctionPtr( Ref ) );
 }
 
 

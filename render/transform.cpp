@@ -38,17 +38,17 @@ START_NAMESPACE( Aqsis )
 
 CqTransform::CqTransform() : CqMotionSpec<CqMatrix>( CqMatrix() ), m_cReferences( 0 ), m_StackIndex( 0 )
 {
-	if ( QGetRenderContext() != 0 )
-	{
-		QGetRenderContext() ->TransformStack().push_back( this );
-		m_StackIndex = QGetRenderContext() ->TransformStack().size() - 1;
-	}
-	// Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
-	// if the previous level has motion specification, the value will be interpolated.
-	CqMatrix matOtoWLast;
-	if ( m_StackIndex > 0 )
-		matOtoWLast = QGetRenderContext() ->TransformStack() [ m_StackIndex - 1 ] ->matObjectToWorld();
-	SetDefaultObject( matOtoWLast );
+    if ( QGetRenderContext() != 0 )
+    {
+        QGetRenderContext() ->TransformStack().push_back( this );
+        m_StackIndex = QGetRenderContext() ->TransformStack().size() - 1;
+    }
+    // Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
+    // if the previous level has motion specification, the value will be interpolated.
+    CqMatrix matOtoWLast;
+    if ( m_StackIndex > 0 )
+        matOtoWLast = QGetRenderContext() ->TransformStack() [ m_StackIndex - 1 ] ->matObjectToWorld();
+    SetDefaultObject( matOtoWLast );
 }
 
 
@@ -58,18 +58,18 @@ CqTransform::CqTransform() : CqMotionSpec<CqMatrix>( CqMatrix() ), m_cReferences
 
 CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<CqMatrix>( From ), m_cReferences( 0 ), m_StackIndex( -1 )
 {
-	*this = From;
+    *this = From;
 
-	// Register ourself with the global transform stack.
-	QGetRenderContext() ->TransformStack().push_back( this );
-	m_StackIndex = QGetRenderContext() ->TransformStack().size() - 1;
+    // Register ourself with the global transform stack.
+    QGetRenderContext() ->TransformStack().push_back( this );
+    m_StackIndex = QGetRenderContext() ->TransformStack().size() - 1;
 
-	// Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
-	// if the previous level has motion specification, the value will be interpolated.
-	CqMatrix matOtoWLast;
-	if ( m_StackIndex > 0 )
-		matOtoWLast = QGetRenderContext() ->TransformStack() [ m_StackIndex - 1 ] ->matObjectToWorld();
-	SetDefaultObject( matOtoWLast );
+    // Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
+    // if the previous level has motion specification, the value will be interpolated.
+    CqMatrix matOtoWLast;
+    if ( m_StackIndex > 0 )
+        matOtoWLast = QGetRenderContext() ->TransformStack() [ m_StackIndex - 1 ] ->matObjectToWorld();
+    SetDefaultObject( matOtoWLast );
 }
 
 
@@ -79,21 +79,21 @@ CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<CqMatrix>( Fr
 
 CqTransform::~CqTransform()
 {
-	assert( RefCount() == 0 );
+    assert( RefCount() == 0 );
 
-	if ( m_StackIndex >= 0 && m_StackIndex < static_cast<TqInt>( QGetRenderContext() ->TransformStack().size() ) )
-	{
-		// Remove ourself from the stack
-		std::vector<CqTransform*>::iterator p = QGetRenderContext() ->TransformStack().begin();
-		p += m_StackIndex;
-		std::vector<CqTransform*>::iterator p2 = p;
-		while ( p2 != QGetRenderContext() ->TransformStack().end() )
-		{
-			( *p2 ) ->m_StackIndex--;
-			p2++;
-		}
-		QGetRenderContext() ->TransformStack().erase( p );
-	}
+    if ( m_StackIndex >= 0 && m_StackIndex < static_cast<TqInt>( QGetRenderContext() ->TransformStack().size() ) )
+    {
+        // Remove ourself from the stack
+        std::vector<CqTransform*>::iterator p = QGetRenderContext() ->TransformStack().begin();
+        p += m_StackIndex;
+        std::vector<CqTransform*>::iterator p2 = p;
+        while ( p2 != QGetRenderContext() ->TransformStack().end() )
+        {
+            ( *p2 ) ->m_StackIndex--;
+            p2++;
+        }
+        QGetRenderContext() ->TransformStack().erase( p );
+    }
 }
 
 //---------------------------------------------------------------------
@@ -102,9 +102,9 @@ CqTransform::~CqTransform()
 
 CqTransform& CqTransform::operator=( const CqTransform& From )
 {
-	CqMotionSpec<CqMatrix>::operator=( From );
+    CqMotionSpec<CqMatrix>::operator=( From );
 
-	return ( *this );
+    return ( *this );
 }
 
 
@@ -114,7 +114,7 @@ CqTransform& CqTransform::operator=( const CqTransform& From )
 
 void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 {
-	AddTimeSlot( time, matTrans );
+    AddTimeSlot( time, matTrans );
 }
 
 
@@ -124,12 +124,12 @@ void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 
 void CqTransform::ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 {
-	// If we are actually in a motion block, concatenate this transform with the existing one at that time slot,
-	// else apply this transform at all time slots.
-	if ( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
-		ConcatTimeSlot( time, matTrans );
-	else
-		ConcatAllTimeSlots( matTrans );
+    // If we are actually in a motion block, concatenate this transform with the existing one at that time slot,
+    // else apply this transform at all time slots.
+    if ( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
+        ConcatTimeSlot( time, matTrans );
+    else
+        ConcatAllTimeSlots( matTrans );
 }
 
 
@@ -139,7 +139,7 @@ void CqTransform::ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans
 
 const CqMatrix& CqTransform::matObjectToWorld( TqFloat time ) const
 {
-	return ( GetMotionObject( time ) );
+    return ( GetMotionObject( time ) );
 }
 
 
@@ -148,17 +148,17 @@ const CqMatrix& CqTransform::matObjectToWorld( TqFloat time ) const
 // Overrides from CqMotionSpec reequired for any object subject to motion specification.
 
 void CqTransform::ClearMotionObject( CqMatrix& A ) const
-	{}
+    {}
 
 CqMatrix CqTransform::ConcatMotionObjects( const CqMatrix& A, const CqMatrix& B ) const
 {
-	return ( A * B );
+    return ( A * B );
 }
 
 CqMatrix CqTransform::LinearInterpolateMotionObjects( TqFloat Fraction, const CqMatrix& A, const CqMatrix& B ) const
 {
-	// TODO: Should we do anything with this???
-	return ( A );
+    // TODO: Should we do anything with this???
+    return ( A );
 }
 
 

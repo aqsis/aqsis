@@ -41,12 +41,12 @@ CqList<CqCSGTreeNode>	CqModeBlock::m_lCSGTrees;
  */
 
 CqModeBlock::CqModeBlock( CqModeBlock* pconParent, EqModeBlock modetype ) :
-		m_pattrCurrent( 0 ),
-		m_ptransCurrent( 0 ),
-		m_pconParent( pconParent ),
-		m_modetype( modetype)
+        m_pattrCurrent( 0 ),
+        m_ptransCurrent( 0 ),
+        m_pconParent( pconParent ),
+        m_modetype( modetype)
 {
-	if( m_pconParent ) ADDREF( m_pconParent );
+    if( m_pconParent ) ADDREF( m_pconParent );
 }
 
 //---------------------------------------------------------------------
@@ -55,7 +55,7 @@ CqModeBlock::CqModeBlock( CqModeBlock* pconParent, EqModeBlock modetype ) :
 
 CqModeBlock::~CqModeBlock()
 {
-	if( m_pconParent ) RELEASEREF( m_pconParent );
+    if( m_pconParent ) RELEASEREF( m_pconParent );
 }
 
 
@@ -65,15 +65,15 @@ CqModeBlock::~CqModeBlock()
 
 CqMainModeBlock::CqMainModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent, MainModeBlock )
 {
-	// Copy the current graphics state.
-	if ( pconParent != 0 )
-		m_optCurrent = pconParent->optCurrent();
+    // Copy the current graphics state.
+    if ( pconParent != 0 )
+        m_optCurrent = pconParent->optCurrent();
 
-	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = new CqAttributes();
-	ADDREF( m_pattrCurrent );
-	m_ptransCurrent = new CqTransform();
-	ADDREF( m_ptransCurrent );
+    // Create new Attributes as they must be pushed/popped by the state change.
+    m_pattrCurrent = new CqAttributes();
+    ADDREF( m_pattrCurrent );
+    m_ptransCurrent = new CqTransform();
+    ADDREF( m_ptransCurrent );
 }
 
 
@@ -83,8 +83,8 @@ CqMainModeBlock::CqMainModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconP
 
 CqMainModeBlock::~CqMainModeBlock()
 {
-	RELEASEREF( m_pattrCurrent );
-	RELEASEREF( m_ptransCurrent );
+    RELEASEREF( m_pattrCurrent );
+    RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -94,11 +94,11 @@ CqMainModeBlock::~CqMainModeBlock()
 
 CqFrameModeBlock::CqFrameModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent , FrameModeBlock), m_optCurrent(pconParent->optCurrent())
 {
-	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
-	ADDREF( m_pattrCurrent );
-	m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-	ADDREF( m_ptransCurrent );
+    // Create new Attributes as they must be pushed/popped by the state change.
+    m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
+    ADDREF( m_pattrCurrent );
+    m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
+    ADDREF( m_ptransCurrent );
 }
 
 
@@ -108,8 +108,8 @@ CqFrameModeBlock::CqFrameModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pco
 
 CqFrameModeBlock::~CqFrameModeBlock()
 {
-	RELEASEREF( m_pattrCurrent );
-	RELEASEREF( m_ptransCurrent );
+    RELEASEREF( m_pattrCurrent );
+    RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -119,11 +119,11 @@ CqFrameModeBlock::~CqFrameModeBlock()
 
 CqWorldModeBlock::CqWorldModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent, WorldModeBlock )
 {
-	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
-	ADDREF( m_pattrCurrent );
-	m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-	ADDREF( m_ptransCurrent );
+    // Create new Attributes as they must be pushed/popped by the state change.
+    m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
+    ADDREF( m_pattrCurrent );
+    m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
+    ADDREF( m_ptransCurrent );
 }
 
 
@@ -133,13 +133,13 @@ CqWorldModeBlock::CqWorldModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pco
 
 CqWorldModeBlock::~CqWorldModeBlock()
 {
-	// Delete any context lights
-	std::vector<CqLightsource*>::iterator i;
-	for ( i = m_apWorldLights.begin(); i != m_apWorldLights.end(); i++ )
-		RELEASEREF( ( *i ) );
+    // Delete any context lights
+    std::vector<CqLightsource*>::iterator i;
+    for ( i = m_apWorldLights.begin(); i != m_apWorldLights.end(); i++ )
+        RELEASEREF( ( *i ) );
 
-	RELEASEREF( m_pattrCurrent );
-	RELEASEREF( m_ptransCurrent );
+    RELEASEREF( m_pattrCurrent );
+    RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -149,9 +149,9 @@ CqWorldModeBlock::~CqWorldModeBlock()
 
 void CqWorldModeBlock::AddContextLightSource( CqLightsource* pLS )
 {
-	// Add the light to the context stack and reference it.
-	m_apWorldLights.push_back( pLS );
-	ADDREF( pLS );
+    // Add the light to the context stack and reference it.
+    m_apWorldLights.push_back( pLS );
+    ADDREF( pLS );
 }
 
 //---------------------------------------------------------------------
@@ -160,11 +160,11 @@ void CqWorldModeBlock::AddContextLightSource( CqLightsource* pLS )
 
 CqAttributeModeBlock::CqAttributeModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent, AttributeModeBlock )
 {
-	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
-	ADDREF( m_pattrCurrent );
-	m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-	ADDREF( m_ptransCurrent );
+    // Create new Attributes as they must be pushed/popped by the state change.
+    m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
+    ADDREF( m_pattrCurrent );
+    m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
+    ADDREF( m_ptransCurrent );
 }
 
 
@@ -174,8 +174,8 @@ CqAttributeModeBlock::CqAttributeModeBlock( CqModeBlock* pconParent ) : CqModeBl
 
 CqAttributeModeBlock::~CqAttributeModeBlock()
 {
-	RELEASEREF( m_pattrCurrent );
-	RELEASEREF( m_ptransCurrent );
+    RELEASEREF( m_pattrCurrent );
+    RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -185,17 +185,17 @@ CqAttributeModeBlock::~CqAttributeModeBlock()
 
 CqTransformModeBlock::CqTransformModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent, TransformModeBlock )
 {
-	// Copy the parents attributes, as this state change doesn't save attributes.
-	if ( pconParent != 0 )
-		m_pattrCurrent = pconParent->m_pattrCurrent;
-	else
-	{
-		m_pattrCurrent = new CqAttributes();
-		ADDREF( m_pattrCurrent );
-	}
+    // Copy the parents attributes, as this state change doesn't save attributes.
+    if ( pconParent != 0 )
+        m_pattrCurrent = pconParent->m_pattrCurrent;
+    else
+    {
+        m_pattrCurrent = new CqAttributes();
+        ADDREF( m_pattrCurrent );
+    }
 
-	m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-	ADDREF( m_ptransCurrent );
+    m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
+    ADDREF( m_ptransCurrent );
 }
 
 
@@ -205,11 +205,11 @@ CqTransformModeBlock::CqTransformModeBlock( CqModeBlock* pconParent ) : CqModeBl
 
 CqTransformModeBlock::~CqTransformModeBlock()
 {
-	if ( m_ptransCurrent != NULL)
-	{
-		RELEASEREF( m_ptransCurrent );
-		m_ptransCurrent = NULL;
-	}
+    if ( m_ptransCurrent != NULL)
+    {
+        RELEASEREF( m_ptransCurrent );
+        m_ptransCurrent = NULL;
+    }
 }
 
 
@@ -219,34 +219,34 @@ CqTransformModeBlock::~CqTransformModeBlock()
 
 CqSolidModeBlock::CqSolidModeBlock( CqString& type, CqModeBlock* pconParent ) : CqModeBlock( pconParent, CsgModeBlock )
 {
-	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
-	ADDREF( m_pattrCurrent );
-	m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-	ADDREF( m_ptransCurrent );
+    // Create new Attributes as they must be pushed/popped by the state change.
+    m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
+    ADDREF( m_pattrCurrent );
+    m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
+    ADDREF( m_ptransCurrent );
 
-	// Create a new CSG tree node of the appropriate type.
-	m_pCSGNode = CqCSGTreeNode::CreateNode( type );
-	ADDREF( m_pCSGNode );
+    // Create a new CSG tree node of the appropriate type.
+    m_pCSGNode = CqCSGTreeNode::CreateNode( type );
+    ADDREF( m_pCSGNode );
 
-	if ( pconParent && pconParent->isSolid() )
-	{
-		CqSolidModeBlock * pParentSolid = static_cast<CqSolidModeBlock*>( pconParent );
-		// Check if we are linking under a Primitive node, if so warn, and link at the top.
-		if ( pParentSolid->pCSGNode() ->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive )
-		{
-			CqString objname( "unnamed" );
-			const CqString* pattrName = m_pattrCurrent->GetStringAttribute( "identifier", "name" );
-			if ( pattrName != 0 ) objname = pattrName[ 0 ];
-			std::cerr << warning << "Cannot add solid block under 'Primitive' \"" << objname.c_str() << "\" solid block" << std::endl;
+    if ( pconParent && pconParent->isSolid() )
+    {
+        CqSolidModeBlock * pParentSolid = static_cast<CqSolidModeBlock*>( pconParent );
+        // Check if we are linking under a Primitive node, if so warn, and link at the top.
+        if ( pParentSolid->pCSGNode() ->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive )
+        {
+            CqString objname( "unnamed" );
+            const CqString* pattrName = m_pattrCurrent->GetStringAttribute( "identifier", "name" );
+            if ( pattrName != 0 ) objname = pattrName[ 0 ];
+            std::cerr << warning << "Cannot add solid block under 'Primitive' \"" << objname.c_str() << "\" solid block" << std::endl;
 
-			m_lCSGTrees.LinkLast( m_pCSGNode );
-		}
-		else
-			pParentSolid->pCSGNode() ->AddChild( m_pCSGNode );
-	}
-	else
-		m_lCSGTrees.LinkLast( m_pCSGNode );
+            m_lCSGTrees.LinkLast( m_pCSGNode );
+        }
+        else
+            pParentSolid->pCSGNode() ->AddChild( m_pCSGNode );
+    }
+    else
+        m_lCSGTrees.LinkLast( m_pCSGNode );
 }
 
 
@@ -256,9 +256,9 @@ CqSolidModeBlock::CqSolidModeBlock( CqString& type, CqModeBlock* pconParent ) : 
 
 CqSolidModeBlock::~CqSolidModeBlock()
 {
-	RELEASEREF( m_pattrCurrent );
-	RELEASEREF( m_ptransCurrent );
-	//	if(m_pCSGNode)	m_pCSGNode->Release();
+    RELEASEREF( m_pattrCurrent );
+    RELEASEREF( m_ptransCurrent );
+    //	if(m_pCSGNode)	m_pCSGNode->Release();
 }
 
 
@@ -268,11 +268,11 @@ CqSolidModeBlock::~CqSolidModeBlock()
 
 CqObjectModeBlock::CqObjectModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent, ObjectModeBlock )
 {
-	// Create new Attributes as they must be pushed/popped by the state change.
-	m_pattrCurrent = new CqAttributes();
-	ADDREF( m_pattrCurrent );
-	m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-	ADDREF( m_ptransCurrent );
+    // Create new Attributes as they must be pushed/popped by the state change.
+    m_pattrCurrent = new CqAttributes();
+    ADDREF( m_pattrCurrent );
+    m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
+    ADDREF( m_ptransCurrent );
 }
 
 
@@ -282,8 +282,8 @@ CqObjectModeBlock::CqObjectModeBlock( CqModeBlock* pconParent ) : CqModeBlock( p
 
 CqObjectModeBlock::~CqObjectModeBlock()
 {
-	RELEASEREF( m_pattrCurrent );
-	RELEASEREF( m_ptransCurrent );
+    RELEASEREF( m_pattrCurrent );
+    RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -293,35 +293,35 @@ CqObjectModeBlock::~CqObjectModeBlock()
 
 CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], CqModeBlock* pconParent ) : CqModeBlock( pconParent, MotionModeBlock ), m_pDeformingSurface( NULL )
 {
-	// Copy the parents attributes, as this state change doesn't save attributes.
-	if ( pconParent != 0 )
-		m_pattrCurrent = pconParent->m_pattrCurrent;
-	else
-	{
-		m_pattrCurrent = new CqAttributes();
-		ADDREF( m_pattrCurrent );
-	}
+    // Copy the parents attributes, as this state change doesn't save attributes.
+    if ( pconParent != 0 )
+        m_pattrCurrent = pconParent->m_pattrCurrent;
+    else
+    {
+        m_pattrCurrent = new CqAttributes();
+        ADDREF( m_pattrCurrent );
+    }
 
-	if ( pconParent != 0 )
-	{
-		m_ptransCurrent = pconParent->m_ptransCurrent;
-		// Set the default 'new time slot' matrix to the current 0 time matrix, this
-		// takes care of the case of moving from non-Motion to Motion.
-		m_ptransCurrent->SetDefaultObject( m_ptransCurrent->GetMotionObject( m_ptransCurrent->Time( 0 ) ) );
-	}
-	else
-	{
-		m_ptransCurrent = new CqTransform();
-		ADDREF( m_ptransCurrent );
-	}
+    if ( pconParent != 0 )
+    {
+        m_ptransCurrent = pconParent->m_ptransCurrent;
+        // Set the default 'new time slot' matrix to the current 0 time matrix, this
+        // takes care of the case of moving from non-Motion to Motion.
+        m_ptransCurrent->SetDefaultObject( m_ptransCurrent->GetMotionObject( m_ptransCurrent->Time( 0 ) ) );
+    }
+    else
+    {
+        m_ptransCurrent = new CqTransform();
+        ADDREF( m_ptransCurrent );
+    }
 
 
-	// Store the array of times.
-	TqInt i;
-	for ( i = 0; i < N; i++ )
-		m_aTimes.push_back( times[ i ] );
+    // Store the array of times.
+    TqInt i;
+    for ( i = 0; i < N; i++ )
+        m_aTimes.push_back( times[ i ] );
 
-	m_iTime = 0;
+    m_iTime = 0;
 }
 
 
@@ -337,25 +337,25 @@ CqMotionModeBlock::~CqMotionModeBlock()
  */
 void CqMotionModeBlock::EndMotionModeBlock()
 {
-	if( NULL != m_pDeformingSurface )
-	{
-		QGetRenderContext() ->pImage() ->PostSurface( m_pDeformingSurface );
-		STATS_INC( GPR_created );
-		RELEASEREF( m_pDeformingSurface );
-	}
+    if( NULL != m_pDeformingSurface )
+    {
+        QGetRenderContext() ->pImage() ->PostSurface( m_pDeformingSurface );
+        STATS_INC( GPR_created );
+        RELEASEREF( m_pDeformingSurface );
+    }
 }
 
 /** Set the CqDeformingSurface, if generating a deformation motion blur sequence.
  */
 void CqMotionModeBlock::SetDeformingSurface( CqDeformingSurface* pDeformingSurface)
 {
-	m_pDeformingSurface = pDeformingSurface;
-	ADDREF( pDeformingSurface );
+    m_pDeformingSurface = pDeformingSurface;
+    ADDREF( pDeformingSurface );
 }
 
 void CqModeBlock::logInvalidNesting() const
 {
-	std::cerr << critical << "Invalid context nesting" << std::endl;
+    std::cerr << critical << "Invalid context nesting" << std::endl;
 }
 
 

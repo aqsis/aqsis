@@ -75,129 +75,129 @@ IqRenderer* QGetRenderContextI();
 
 TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt samples, TqBool fProt )
 {
-	static TqInt limit = -1;
-	static TqInt report = 1;
-	static TqInt megs = 10; /* a number to hint it is abusing enough memory */
-	TqInt demand = width * height * ElemSize();
+    static TqInt limit = -1;
+    static TqInt report = 1;
+    static TqInt megs = 10; /* a number to hint it is abusing enough memory */
+    TqInt demand = width * height * ElemSize();
 
 #ifdef ALLOCSEGMENTSTATUS
-	alloc_cnt ++;
+    alloc_cnt ++;
 #endif
-	if ( limit == -1 )
-	{
-		const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
-		limit = MEG1;
-		if ( poptMem )
-			limit = poptMem[ 0 ] * 1024;
-	}
+    if ( limit == -1 )
+    {
+        const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
+        limit = MEG1;
+        if ( poptMem )
+            limit = poptMem[ 0 ] * 1024;
+    }
 
-	TqInt more = QGetRenderContext() ->Stats().GetTextureMemory() + demand;
+    TqInt more = QGetRenderContext() ->Stats().GetTextureMemory() + demand;
 
 
-	if ( ( more > limit ) && !fProt )
-	{
+    if ( ( more > limit ) && !fProt )
+    {
 
-		// Critical level of memory will be reached;
-		// I'm better starting the cleanup cache memory buffer
-		// We need to zap the cache we are exceeding the required texturememory demand
-		// For now, we will just warn the user the texturememory's demand will exceed the
-		// request number.
+        // Critical level of memory will be reached;
+        // I'm better starting the cleanup cache memory buffer
+        // We need to zap the cache we are exceeding the required texturememory demand
+        // For now, we will just warn the user the texturememory's demand will exceed the
+        // request number.
 
-		//sprintf( warnings, "Exceeding the allocated texturememory by %d",
-		//         more - limit );
-		if ( report )
-		{
-			std::cerr << warning << "Exceeding allocated texture memory by " << more - limit << std::endl;
-		}
-		
-		report = 0;
-		m_critical = TqTrue;
-	}
+        //sprintf( warnings, "Exceeding the allocated texturememory by %d",
+        //         more - limit );
+        if ( report )
+        {
+            std::cerr << warning << "Exceeding allocated texture memory by " << more - limit << std::endl;
+        }
+
+        report = 0;
+        m_critical = TqTrue;
+    }
 
 #ifdef _DEBUG
-	if ( ( more > MEG1 ) && ( ( more / ( 1024 * 1024 ) ) > megs ) )
-	{
-		std::cerr << debug << "Texturememory is more than " << megs << " megs" << std::endl;
-		megs += 10;
-	}
+    if ( ( more > MEG1 ) && ( ( more / ( 1024 * 1024 ) ) > megs ) )
+    {
+        std::cerr << debug << "Texturememory is more than " << megs << " megs" << std::endl;
+        megs += 10;
+    }
 #endif
-	QGetRenderContext() ->Stats().IncTextureMemory( demand );
+    QGetRenderContext() ->Stats().IncTextureMemory( demand );
 
-	// just do a malloc since the texturemapping will set individual member of the allocated buffer
-	// a calloc is wastefull operation in this case.
-	return ( static_cast<TqPuchar>( malloc( demand ) ) );
+    // just do a malloc since the texturemapping will set individual member of the allocated buffer
+    // a calloc is wastefull operation in this case.
+    return ( static_cast<TqPuchar>( malloc( demand ) ) );
 }
 //--------------------------------------------------------------------------
 /** Support for plugins mainly converter from any bitmap format to .tif file.
  */
 TqInt CqTextureMap::Convert( CqString &strName )
 {
-	TqInt result = 0;
-	TqInt lenght = 0;
-	TqChar library[ 1024 ];
-	TqChar function[ 1024 ];
-	char * ( *convert ) ( const char * );
-	char *ext = NULL;
-	char *tiff = NULL;
+    TqInt result = 0;
+    TqInt lenght = 0;
+    TqChar library[ 1024 ];
+    TqChar function[ 1024 ];
+    char * ( *convert ) ( const char * );
+    char *ext = NULL;
+    char *tiff = NULL;
 
-	convert = NULL;
+    convert = NULL;
 
-	char *aqsis_home = getenv( "AQSIS_BASE_PATH" );
+    char *aqsis_home = getenv( "AQSIS_BASE_PATH" );
 
-	if ( aqsis_home == NULL )
+    if ( aqsis_home == NULL )
 #if defined(AQSIS_SYSTEM_POSIX) && !defined(AQSIS_SYSTEM_MACOSX)
-		aqsis_home = BASE_PATH;
+        aqsis_home = BASE_PATH;
 #else
-		aqsis_home = ".";
+        aqsis_home = ".";
 #endif
 
-	ext = ( TqPchar ) strName.c_str();
-	if ( ext && *ext )
-		lenght = strlen( ext );
+    ext = ( TqPchar ) strName.c_str();
+    if ( ext && *ext )
+        lenght = strlen( ext );
 
-	if ( lenght > 4 )
-	{
+    if ( lenght > 4 )
+    {
 
-		/* find the extension in the string
-		 * than try to match which extension goes with which dll 
-		 **/
-		ext = strstr( &ext[ lenght - 5 ], "." );
-		if ( ext == NULL ) return 0;
-		ext++;
-	}
-	else
-	{
-		return 0;
-	}
+        /* find the extension in the string
+         * than try to match which extension goes with which dll 
+         **/
+        ext = strstr( &ext[ lenght - 5 ], "." );
+        if ( ext == NULL ) return 0;
+        ext++;
+    }
+    else
+    {
+        return 0;
+    }
 
-	sprintf( function, "%s2tif", ext );
+    sprintf( function, "%s2tif", ext );
 #ifdef AQSIS_SYSTEM_WIN32
-	/*********************************/
-	/* Get the dynamic library on NT */
-	/*********************************/
-	sprintf( library, "%s\\procedures\\%s.dll", aqsis_home, function );
+    /*********************************/
+    /* Get the dynamic library on NT */
+    /*********************************/
+    sprintf( library, "%s\\procedures\\%s.dll", aqsis_home, function );
 #else
-	/***********************************/
-	/* Get the shared library on UNIX  */
-	/***********************************/
-	sprintf( library, "%s/lib/lib%s.so", aqsis_home, function );
+    /***********************************/
+    /* Get the shared library on UNIX  */
+    /***********************************/
+    sprintf( library, "%s/lib/lib%s.so", aqsis_home, function );
 #endif
-	CqConverter *plug = new CqConverter( "", library, function );
-	if ( ( convert = ( char * ( * ) (const  char * s ) ) plug->Function() ) != NULL )
-	{
+    CqConverter *plug = new CqConverter( "", library, function );
+    if ( ( convert = ( char * ( * ) (const  char * s ) ) plug->Function() ) != NULL )
+    {
 
 #ifdef DEBUG
-		std::cout << "strName: " << strName.c_str() << std::endl;
+        std::cout << "strName: " << strName.c_str() << std::endl;
 #endif
-		if ( ( tiff = convert (  strName.c_str() ) ) != NULL )
-		{
-			strName = tiff;
-			result = 1; // success
-		}
-		plug->Close();
-	}
-	delete plug;
-	return result;
+        if ( ( tiff = convert (  strName.c_str() ) ) != NULL )
+        {
+            strName = tiff;
+            result = 1; // success
+        }
+        plug->Close();
+    }
+    delete plug;
+    return result;
 }
 
 
@@ -212,58 +212,58 @@ TqInt CqTextureMap::Convert( CqString &strName )
 
 void CqTextureMap::CriticalMeasure()
 {
-	const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
-	TqInt current, limit, now;
-	std::vector<CqTextureMap*>::iterator i;
-	std::list<CqTextureMapBuffer*>::iterator j;
+    const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
+    TqInt current, limit, now;
+    std::vector<CqTextureMap*>::iterator i;
+    std::list<CqTextureMapBuffer*>::iterator j;
 
-	limit = MEG1;
-	if ( poptMem )
-		limit = poptMem[ 0 ] * 1024;
+    limit = MEG1;
+    if ( poptMem )
+        limit = poptMem[ 0 ] * 1024;
 
-	now = QGetRenderContext() ->Stats().GetTextureMemory();
+    now = QGetRenderContext() ->Stats().GetTextureMemory();
 
-	if ( m_critical )
-	{
+    if ( m_critical )
+    {
 
-		/* Extreme case no more memory to play */
+        /* Extreme case no more memory to play */
 
-		/* It is time to delete some tile's memory associated with
-		               * texturemap objects.
-		 *
-		 * In principle the oldest texturemaps are freed first 
-		               * (regardless of their current usage. Therefore this method 
-		               * could only be 
-		               * called at a place where the fact of release 
-		               * texturemapbuffer will not impact the subsequent 
-		               * GetBuffer() calls.
-		 *
-		 */
-		for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
-		{
-			for ( j = ( *i ) ->m_apSegments.begin(); j != ( *i ) ->m_apSegments.end(); j++ )
-			{
-				// Only release if not protected.
-				if ( !( *j ) ->fProtected() )
-					( *j ) ->Release();
-			}
-			( *i ) ->m_apSegments.resize( 0 );
-			current = QGetRenderContext() ->Stats().GetTextureMemory();
-			if ( ( now - current ) > ( limit / 4 ) ) break;
-		}
+        /* It is time to delete some tile's memory associated with
+                       * texturemap objects.
+         *
+         * In principle the oldest texturemaps are freed first 
+                       * (regardless of their current usage. Therefore this method 
+                       * could only be 
+                       * called at a place where the fact of release 
+                       * texturemapbuffer will not impact the subsequent 
+                       * GetBuffer() calls.
+         *
+         */
+        for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+        {
+            for ( j = ( *i ) ->m_apSegments.begin(); j != ( *i ) ->m_apSegments.end(); j++ )
+            {
+                // Only release if not protected.
+                if ( !( *j ) ->fProtected() )
+                    ( *j ) ->Release();
+            }
+            ( *i ) ->m_apSegments.resize( 0 );
+            current = QGetRenderContext() ->Stats().GetTextureMemory();
+            if ( ( now - current ) > ( limit / 4 ) ) break;
+        }
 
-	}
-	current = QGetRenderContext() ->Stats().GetTextureMemory();
+    }
+    current = QGetRenderContext() ->Stats().GetTextureMemory();
 
-	m_critical = TqFalse;
+    m_critical = TqFalse;
 
 #ifdef _DEBUG
 
-	if ( now - current )
-	{
-		///! \todo Review this debug message
-		std::cerr << info << "I was forced to zap the tile segment buffers for " << (int)( now - current ) / 1024 << "K" << std::endl;
-	}
+    if ( now - current )
+    {
+        ///! \todo Review this debug message
+        std::cerr << info << "I was forced to zap the tile segment buffers for " << (int)( now - current ) / 1024 << "K" << std::endl;
+    }
 #endif
 
 }
@@ -276,8 +276,8 @@ void CqTextureMap::CriticalMeasure()
 void CqTextureMap::Close()
 {
 
-	if ( m_pImage != 0 ) TIFFClose( m_pImage );
-	m_pImage = 0;
+    if ( m_pImage != 0 ) TIFFClose( m_pImage );
+    m_pImage = 0;
 
 }
 
@@ -286,51 +286,51 @@ void CqTextureMap::Close()
 
 TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 {
-	if ( m_pImage != 0 )
-	{
-		// Check if the format is normal scanline, otherwise we are unable to MIPMAP it yet.
-		uint32 tsx;
-		TqInt ret = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
-		if( ret )
-		{
-		   std::cerr << error << "Cannot MIPMAP a tiled image \"" << m_strName.c_str() << "\"" << std::endl;
-			return( TqFalse );
-		}
-		// Read the whole image into a buffer.
-		CqTextureMapBuffer * pBuffer = GetBuffer( 0, 0, 0, fProtectBuffers );
+    if ( m_pImage != 0 )
+    {
+        // Check if the format is normal scanline, otherwise we are unable to MIPMAP it yet.
+        uint32 tsx;
+        TqInt ret = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
+        if( ret )
+        {
+            std::cerr << error << "Cannot MIPMAP a tiled image \"" << m_strName.c_str() << "\"" << std::endl;
+            return( TqFalse );
+        }
+        // Read the whole image into a buffer.
+        CqTextureMapBuffer * pBuffer = GetBuffer( 0, 0, 0, fProtectBuffers );
 
-		TqInt m_xres = m_XRes;
-		TqInt m_yres = m_YRes;
-		TqInt directory = 0;
+        TqInt m_xres = m_XRes;
+        TqInt m_yres = m_YRes;
+        TqInt directory = 0;
 
-		do
-		{
-			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, m_xres, m_yres, directory, fProtectBuffers );
+        do
+        {
+            CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, m_xres, m_yres, directory, fProtectBuffers );
 
-			if ( pTMB->pVoidBufferData() != NULL )
-			{
-				for ( TqInt y = 0; y < m_yres; y++ )
-				{
-					//unsigned char accum[ 4 ];
-					std::vector<TqFloat> accum;
-					for ( TqInt x = 0; x < m_xres; x++ )
-					{
-						ImageFilterVal( pBuffer, x, y, directory, accum );
-						for ( TqInt sample = 0; sample < m_SamplesPerPixel; sample++ )
-							pTMB->SetValue( x, y, sample, accum[ sample ] );
-					}
-				}
-				m_apSegments.push_back( pTMB );
-			}
+            if ( pTMB->pVoidBufferData() != NULL )
+            {
+                for ( TqInt y = 0; y < m_yres; y++ )
+                {
+                    //unsigned char accum[ 4 ];
+                    std::vector<TqFloat> accum;
+                    for ( TqInt x = 0; x < m_xres; x++ )
+                    {
+                        ImageFilterVal( pBuffer, x, y, directory, accum );
+                        for ( TqInt sample = 0; sample < m_SamplesPerPixel; sample++ )
+                            pTMB->SetValue( x, y, sample, accum[ sample ] );
+                    }
+                }
+                m_apSegments.push_back( pTMB );
+            }
 
-			m_xres /= 2;
-			m_yres /= 2;
-			directory++;
+            m_xres /= 2;
+            m_yres /= 2;
+            directory++;
 
-		}
-		while ( ( m_xres > 2 ) && ( m_yres > 2 ) ) ;
-	}
-	return( TqTrue );
+        }
+        while ( ( m_xres > 2 ) && ( m_yres > 2 ) ) ;
+    }
+    return( TqTrue );
 }
 
 
@@ -340,43 +340,43 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
  */
 CqTextureMap::~CqTextureMap()
 {
-	// Search for it in the cache and remove the reference.
-	std::vector<CqTextureMap*>::iterator i;
+    // Search for it in the cache and remove the reference.
+    std::vector<CqTextureMap*>::iterator i;
 
-	for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
-	{
-		if ( ( *i ) == this )
-		{
-			m_TextureMap_Cache.erase( i );
-			break;
-		}
-	}
+    for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+    {
+        if ( ( *i ) == this )
+        {
+            m_TextureMap_Cache.erase( i );
+            break;
+        }
+    }
 
-	std::vector<CqString*>::iterator j;
-	for ( j = m_ConvertString_Cache.begin(); j != m_ConvertString_Cache.end(); j++ )
-	{
-		if ( *j )
-		{
-			unlink( ( *j ) ->c_str() );
-			delete( *j );
-		}
-	}
+    std::vector<CqString*>::iterator j;
+    for ( j = m_ConvertString_Cache.begin(); j != m_ConvertString_Cache.end(); j++ )
+    {
+        if ( *j )
+        {
+            unlink( ( *j ) ->c_str() );
+            delete( *j );
+        }
+    }
 
-	m_ConvertString_Cache.resize( 0 );
+    m_ConvertString_Cache.resize( 0 );
 
-	// Delete any held cache buffer segments.
-	std::list<CqTextureMapBuffer*>::iterator s;
-	for ( s = m_apSegments.begin(); s != m_apSegments.end(); s++ )
-		delete( *s );
+    // Delete any held cache buffer segments.
+    std::list<CqTextureMapBuffer*>::iterator s;
+    for ( s = m_apSegments.begin(); s != m_apSegments.end(); s++ )
+        delete( *s );
 
-	m_apSegments.resize( 0 );
+    m_apSegments.resize( 0 );
 
 
 #ifdef ALLOCSEGMENTSTATUS
-	{
-		// We count each allocation/free at the end they should match
-		std::cerr << "alloc/free " << alloc_cnt << " " << free_cnt << " - Memory usage " << QGetRenderContext() ->Stats().GetTextureMemory() << std::endl;
-	}
+    {
+        // We count each allocation/free at the end they should match
+        std::cerr << "alloc/free " << alloc_cnt << " " << free_cnt << " - Memory usage " << QGetRenderContext() ->Stats().GetTextureMemory() << std::endl;
+    }
 #endif
 }
 
@@ -385,13 +385,13 @@ CqTextureMap::~CqTextureMap()
  */
 void	CqTextureMapBuffer::FreeSegment( TqPuchar pBufferData, TqUlong width, TqUlong height, TqInt samples )
 {
-	TqInt demand = ( width * height * samples );
+    TqInt demand = ( width * height * samples );
 #ifdef ALLOCSEGMENTSTATUS
-	free_cnt ++;
+    free_cnt ++;
 #endif
 
-	QGetRenderContext() ->Stats().IncTextureMemory( -demand );
-	free( pBufferData );
+    QGetRenderContext() ->Stats().IncTextureMemory( -demand );
+    free( pBufferData );
 
 }
 
@@ -405,249 +405,249 @@ void	CqTextureMapBuffer::FreeSegment( TqPuchar pBufferData, TqUlong width, TqUlo
 
 CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory, TqBool fProt )
 {
-	QGetRenderContext() ->Stats().IncTextureMisses( 4 );
+    QGetRenderContext() ->Stats().IncTextureMisses( 4 );
 
-	if ( m_apSegments.size() > 0 && m_apSegments.front() ->IsValid( s, t, directory ) )
-	{
-		QGetRenderContext() ->Stats().IncTextureHits( 1, 4 );
-		return( m_apSegments.front() );
-	}
+    if ( m_apSegments.size() > 0 && m_apSegments.front() ->IsValid( s, t, directory ) )
+    {
+        QGetRenderContext() ->Stats().IncTextureHits( 1, 4 );
+        return( m_apSegments.front() );
+    }
 
-	// Search already cached segments first.
-	for ( std::list<CqTextureMapBuffer*>::iterator i = m_apSegments.begin(); i != m_apSegments.end(); i++ )
-	{
-		if ( ( *i ) ->IsValid( s, t, directory ) )
-		{
-			QGetRenderContext() ->Stats().IncTextureHits( 1, 4 );
-			// Move this segment to the top of the list, so that next time it is found first. This
-			// allows us to take advantage of likely spatial coherence during shading.
-			CqTextureMapBuffer* pbuffer = *i;
-			m_apSegments.erase(i);
-			m_apSegments.push_front(pbuffer);
-			return ( pbuffer );
-		}
-	}
+    // Search already cached segments first.
+    for ( std::list<CqTextureMapBuffer*>::iterator i = m_apSegments.begin(); i != m_apSegments.end(); i++ )
+    {
+        if ( ( *i ) ->IsValid( s, t, directory ) )
+        {
+            QGetRenderContext() ->Stats().IncTextureHits( 1, 4 );
+            // Move this segment to the top of the list, so that next time it is found first. This
+            // allows us to take advantage of likely spatial coherence during shading.
+            CqTextureMapBuffer* pbuffer = *i;
+            m_apSegments.erase(i);
+            m_apSegments.push_front(pbuffer);
+            return ( pbuffer );
+        }
+    }
 
-	// If we got here, segment is not currently loaded, so load the correct segement and store it in the cache.
-	CqTextureMapBuffer* pTMB = 0;
+    // If we got here, segment is not currently loaded, so load the correct segement and store it in the cache.
+    CqTextureMapBuffer* pTMB = 0;
 
-	if ( !m_pImage )
-	{
-		CqRiFile	fileImage( m_strName.c_str(), "texture" );
-		if ( !fileImage.IsValid() )
-		{
-			std::cerr << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
-			return pTMB;
-		}
-		CqString strRealName( fileImage.strRealName() );
-		fileImage.Close();
+    if ( !m_pImage )
+    {
+        CqRiFile	fileImage( m_strName.c_str(), "texture" );
+        if ( !fileImage.IsValid() )
+        {
+            std::cerr << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
+            return pTMB;
+        }
+        CqString strRealName( fileImage.strRealName() );
+        fileImage.Close();
 
-		// Now open it as a tiff file.
-		m_pImage = TIFFOpen( strRealName.c_str(), "r" );
-	}
+        // Now open it as a tiff file.
+        m_pImage = TIFFOpen( strRealName.c_str(), "r" );
+    }
 
-	if ( m_pImage )
-	{
-		uint32 tsx, tsy;
-		TqInt ret = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
-		TIFFGetField( m_pImage, TIFFTAG_TILELENGTH, &tsy );
-		// If a tiled image, read the appropriate tile.
-		if ( ret )
-		{
-			// Work out the coordinates of this tile.
-			TqUlong ox = ( s / tsx ) * tsx;
-			TqUlong oy = ( t / tsy ) * tsy;
-			pTMB = CreateBuffer( ox, oy, tsx, tsy, directory, fProt );
+    if ( m_pImage )
+    {
+        uint32 tsx, tsy;
+        TqInt ret = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
+        TIFFGetField( m_pImage, TIFFTAG_TILELENGTH, &tsy );
+        // If a tiled image, read the appropriate tile.
+        if ( ret )
+        {
+            // Work out the coordinates of this tile.
+            TqUlong ox = ( s / tsx ) * tsx;
+            TqUlong oy = ( t / tsy ) * tsy;
+            pTMB = CreateBuffer( ox, oy, tsx, tsy, directory, fProt );
 
-			TIFFSetDirectory( m_pImage, directory );
+            TIFFSetDirectory( m_pImage, directory );
 
-			void* pData = pTMB->pVoidBufferData();
-			TIFFReadTile( m_pImage, pData, s, t, 0, 0 );
-			// Put this segment on the top of the list, so that next time it is found first. This
-			// allows us to take advantage of likely spatial coherence during shading.
-			m_apSegments.push_front( pTMB );
-		}
-		else
-		{
-			// Create a storage buffer
-			pTMB = CreateBuffer( 0, 0, m_XRes, m_YRes, directory, TqTrue );
+            void* pData = pTMB->pVoidBufferData();
+            TIFFReadTile( m_pImage, pData, s, t, 0, 0 );
+            // Put this segment on the top of the list, so that next time it is found first. This
+            // allows us to take advantage of likely spatial coherence during shading.
+            m_apSegments.push_front( pTMB );
+        }
+        else
+        {
+            // Create a storage buffer
+            pTMB = CreateBuffer( 0, 0, m_XRes, m_YRes, directory, TqTrue );
 
-			TIFFSetDirectory( m_pImage, directory );
-			void* pdata = pTMB->pVoidBufferData();
-			TqUint i;
-			for ( i = 0; i < m_YRes; i++ )
-			{
-				TIFFReadScanline( m_pImage, pdata, i );
-				pdata = reinterpret_cast<void*>( reinterpret_cast<char*>( pdata ) + m_XRes * pTMB->ElemSize() );
-			}
-			// Put this segment on the top of the list, so that next time it is found first. This
-			// allows us to take advantage of likely spatial coherence during shading.
-			m_apSegments.push_front( pTMB );
-		}
-	}
-	return ( pTMB );
+            TIFFSetDirectory( m_pImage, directory );
+            void* pdata = pTMB->pVoidBufferData();
+            TqUint i;
+            for ( i = 0; i < m_YRes; i++ )
+            {
+                TIFFReadScanline( m_pImage, pdata, i );
+                pdata = reinterpret_cast<void*>( reinterpret_cast<char*>( pdata ) + m_XRes * pTMB->ElemSize() );
+            }
+            // Put this segment on the top of the list, so that next time it is found first. This
+            // allows us to take advantage of likely spatial coherence during shading.
+            m_apSegments.push_front( pTMB );
+        }
+    }
+    return ( pTMB );
 }
 
 void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, std::valarray<TqFloat>& val )
 {
-	// u/v is average of sample positions.
-	TqFloat u = ( ( u2 - u1 ) * 0.5f ) + u1;
-	TqFloat v = ( ( v2 - v1 ) * 0.5f ) + v1;
+    // u/v is average of sample positions.
+    TqFloat u = ( ( u2 - u1 ) * 0.5f ) + u1;
+    TqFloat v = ( ( v2 - v1 ) * 0.5f ) + v1;
 
-	// Calculate the appropriate mipmap level from the area subtended by the sample.
-	TqFloat UVArea = ( u2 - u1 ) * ( v2 - v1 );
-	TqFloat d = sqrt( fabs( UVArea ) );
+    // Calculate the appropriate mipmap level from the area subtended by the sample.
+    TqFloat UVArea = ( u2 - u1 ) * ( v2 - v1 );
+    TqFloat d = sqrt( fabs( UVArea ) );
 
-	// Find out which two layers the of the pyramid d lies between.
-	d = CLAMP( d, 0.0, 1.0 );
-	// Adjust u and v for the pyramid level.
-	TqUint idu = FLOOR( d * m_XRes );
-	TqUint idv = FLOOR( d * m_YRes );
-	TqUint id = 0;
-	TqBool singlelevel = ( ( idu == 0 ) || ( idu >= ( m_XRes / 2 ) ) || ( idv == 0 ) || ( idv >= ( m_YRes / 2 ) ) );
-	TqInt umapsize, vmapsize;
-	for ( umapsize = m_XRes, vmapsize = m_YRes; idu > 1 && idv > 1; idu >>= 1, umapsize >>= 1, idv >>= 1, vmapsize >>= 1, id++ );
+    // Find out which two layers the of the pyramid d lies between.
+    d = CLAMP( d, 0.0, 1.0 );
+    // Adjust u and v for the pyramid level.
+    TqUint idu = FLOOR( d * m_XRes );
+    TqUint idv = FLOOR( d * m_YRes );
+    TqUint id = 0;
+    TqBool singlelevel = ( ( idu == 0 ) || ( idu >= ( m_XRes / 2 ) ) || ( idv == 0 ) || ( idv >= ( m_YRes / 2 ) ) );
+    TqInt umapsize, vmapsize;
+    for ( umapsize = m_XRes, vmapsize = m_YRes; idu > 1 && idv > 1; idu >>= 1, umapsize >>= 1, idv >>= 1, vmapsize >>= 1, id++ );
 
-	TqUint iu = FLOOR( u * umapsize );
-	TqFloat ru = u * umapsize - iu;
-	TqUint iu_n = iu + 1;
-	iu = iu % umapsize;		/// \todo This is wrap mode periodic.
-	iu_n = iu_n % umapsize;	/// \todo This is wrap mode periodic.
+    TqUint iu = FLOOR( u * umapsize );
+    TqFloat ru = u * umapsize - iu;
+    TqUint iu_n = iu + 1;
+    iu = iu % umapsize;		/// \todo This is wrap mode periodic.
+    iu_n = iu_n % umapsize;	/// \todo This is wrap mode periodic.
 
-	TqUint iv = FLOOR( v * vmapsize );
-	TqFloat rv = v * vmapsize - iv;
-	TqUint iv_n = iv + 1;
-	iv = iv % vmapsize;		/// \todo This is wrap mode periodic.
-	iv_n = iv_n % vmapsize;	/// \todo This is wrap mode periodic.
-
-
-	// Read in the relevant texture tiles.
-	CqTextureMapBuffer* pTMBa = GetBuffer( iu, iv, id );		// Val00
-	CqTextureMapBuffer* pTMBb = pTMBa;
-	if ( iv != iv_n )
-	{
-		pTMBb = GetBuffer( iu, iv_n, id );	// Val01
-	}
-
-	CqTextureMapBuffer* pTMBc = pTMBa;
-	if ( iu_n != iu )
-	{
-		pTMBc = GetBuffer( iu_n, iv, id );	// Val10
-	}
-	CqTextureMapBuffer* pTMBd = NULL;
-	if ( iv == iv_n ) pTMBd = pTMBc;
-	else if ( iu == iu_n ) pTMBd = pTMBb;
-	else
-		pTMBd = GetBuffer( iu_n, iv_n, id );	// Val11
-
-	TqInt c;
-	/* cannot find anything than goodbye */
-	if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
-	{
-		for ( c = 0; c < m_SamplesPerPixel; c++ )
-			val[ c ] = 1.0f;
-
-		std::cerr << error << "Cannot find value for either pTMPB[a,b,c,d]" << std::endl;
-		return ;
-	}
-
-	// Store the sample positions forl later use if need be.
-	TqUint iu_c = iu;
-	TqUint iv_c = iv;
-
-	// Bilinear intepolate the values at the corners of the sample.
-	iu -= pTMBa->sOrigin();
-	iu_n -= pTMBc->sOrigin();
-	iv -= pTMBa->tOrigin();
-	iv_n -= pTMBb->tOrigin();
-
-	for ( c = 0; c < m_SamplesPerPixel; c++ )
-	{
-		TqFloat Val00 = pTMBa->GetValue( iu, iv, c );
-		TqFloat Val01 = pTMBb->GetValue( iu, iv_n, c );
-		TqFloat Val10 = pTMBc->GetValue( iu_n, iv, c );
-		TqFloat Val11 = pTMBd->GetValue( iu_n, iv_n, c );
-		TqFloat bot = Val00 + ( ru * ( Val10 - Val00 ) );
-		TqFloat top = Val01 + ( ru * ( Val11 - Val01 ) );
-		m_low_color[ c ] = bot + ( rv * ( top - bot ) );
-	}
+    TqUint iv = FLOOR( v * vmapsize );
+    TqFloat rv = v * vmapsize - iv;
+    TqUint iv_n = iv + 1;
+    iv = iv % vmapsize;		/// \todo This is wrap mode periodic.
+    iv_n = iv_n % vmapsize;	/// \todo This is wrap mode periodic.
 
 
-	if ( singlelevel )
-	{
-		val = m_low_color;
-	}
-	else
-	{
-		umapsize >>= 1;
-		vmapsize >>= 1;
+    // Read in the relevant texture tiles.
+    CqTextureMapBuffer* pTMBa = GetBuffer( iu, iv, id );		// Val00
+    CqTextureMapBuffer* pTMBb = pTMBa;
+    if ( iv != iv_n )
+    {
+        pTMBb = GetBuffer( iu, iv_n, id );	// Val01
+    }
 
-		ru = ( ru + ( iu_c % 2 ) ) / 2;
-		iu = iu_c >> 1;
-		iu_n = iu + 1;
-		iu = iu % umapsize;		/// \todo This is wrap mode periodic.
-		iu_n = iu_n % umapsize;	/// \todo This is wrap mode periodic.
+    CqTextureMapBuffer* pTMBc = pTMBa;
+    if ( iu_n != iu )
+    {
+        pTMBc = GetBuffer( iu_n, iv, id );	// Val10
+    }
+    CqTextureMapBuffer* pTMBd = NULL;
+    if ( iv == iv_n ) pTMBd = pTMBc;
+    else if ( iu == iu_n ) pTMBd = pTMBb;
+    else
+        pTMBd = GetBuffer( iu_n, iv_n, id );	// Val11
 
-		rv = ( rv + ( iv_c % 2 ) ) / 2;
-		iv = iv_c >> 1;
-		iv_n = iv + 1;
-		iv = iv % vmapsize;		/// \todo This is wrap mode periodic.
-		iv_n = iv_n % vmapsize;	/// \todo This is wrap mode periodic.
+    TqInt c;
+    /* cannot find anything than goodbye */
+    if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
+    {
+        for ( c = 0; c < m_SamplesPerPixel; c++ )
+            val[ c ] = 1.0f;
 
-		// Read in the relevant texture tiles.
-		CqTextureMapBuffer* pTMBa = GetBuffer( iu, iv, id + 1 );		// Val00
-		CqTextureMapBuffer* pTMBb = pTMBa;
-		if ( iv != iv_n )
-		{
-			pTMBb = GetBuffer( iu, iv_n, id + 1 );	// Val01
-		}
+        std::cerr << error << "Cannot find value for either pTMPB[a,b,c,d]" << std::endl;
+        return ;
+    }
 
-		CqTextureMapBuffer* pTMBc = pTMBa;
-		if ( iu_n != iu )
-		{
-			pTMBc = GetBuffer( iu_n, iv, id + 1 );	// Val10
-		}
-		CqTextureMapBuffer* pTMBd = NULL;
-		if ( iv == iv_n ) pTMBd = pTMBc;
-		else if ( iu == iu_n ) pTMBd = pTMBb;
-		else
-			pTMBd = GetBuffer( iu_n, iv_n, id + 1 );	// Val11
+    // Store the sample positions forl later use if need be.
+    TqUint iu_c = iu;
+    TqUint iv_c = iv;
 
-		/* cannot find anything than goodbye */
-		if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
-		{
-			val = m_low_color;
-			std::cerr << error << "Cannot find value for either pTMPB[a,b,c,d]" << std::endl;
-			return ;
-		}
+    // Bilinear intepolate the values at the corners of the sample.
+    iu -= pTMBa->sOrigin();
+    iu_n -= pTMBc->sOrigin();
+    iv -= pTMBa->tOrigin();
+    iv_n -= pTMBb->tOrigin();
 
-		// Bilinear intepolate the values at the corners of the sample.
-		iu -= pTMBa->sOrigin();
-		iu_n -= pTMBc->sOrigin();
-		iv -= pTMBa->tOrigin();
-		iv_n -= pTMBb->tOrigin();
-
-		TqInt c;
-		for ( c = 0; c < m_SamplesPerPixel; c++ )
-		{
-			TqFloat Val00 = pTMBa->GetValue( iu, iv, c );
-			TqFloat Val01 = pTMBb->GetValue( iu, iv_n, c );
-			TqFloat Val10 = pTMBc->GetValue( iu_n, iv, c );
-			TqFloat Val11 = pTMBd->GetValue( iu_n, iv_n, c );
-			TqFloat bot = Val00 + ( ru * ( Val10 - Val00 ) );
-			TqFloat top = Val01 + ( ru * ( Val11 - Val01 ) );
-			m_high_color[ c ] = bot + ( rv * ( top - bot ) );
-		}
-
-		// Linearly interpolate between low_color and high_color by dinterp.
-
-		TqFloat dinterp = ( (idv > 1)? umapsize * d : vmapsize * d ) - 1;
-		for ( c = 0; c < m_SamplesPerPixel; c++ )
-			val[ c ] = m_low_color[ c ] + dinterp * ( m_high_color[ c ] - m_low_color[ c ] );
+    for ( c = 0; c < m_SamplesPerPixel; c++ )
+    {
+        TqFloat Val00 = pTMBa->GetValue( iu, iv, c );
+        TqFloat Val01 = pTMBb->GetValue( iu, iv_n, c );
+        TqFloat Val10 = pTMBc->GetValue( iu_n, iv, c );
+        TqFloat Val11 = pTMBd->GetValue( iu_n, iv_n, c );
+        TqFloat bot = Val00 + ( ru * ( Val10 - Val00 ) );
+        TqFloat top = Val01 + ( ru * ( Val11 - Val01 ) );
+        m_low_color[ c ] = bot + ( rv * ( top - bot ) );
+    }
 
 
+    if ( singlelevel )
+    {
+        val = m_low_color;
+    }
+    else
+    {
+        umapsize >>= 1;
+        vmapsize >>= 1;
 
-	}
+        ru = ( ru + ( iu_c % 2 ) ) / 2;
+        iu = iu_c >> 1;
+        iu_n = iu + 1;
+        iu = iu % umapsize;		/// \todo This is wrap mode periodic.
+        iu_n = iu_n % umapsize;	/// \todo This is wrap mode periodic.
+
+        rv = ( rv + ( iv_c % 2 ) ) / 2;
+        iv = iv_c >> 1;
+        iv_n = iv + 1;
+        iv = iv % vmapsize;		/// \todo This is wrap mode periodic.
+        iv_n = iv_n % vmapsize;	/// \todo This is wrap mode periodic.
+
+        // Read in the relevant texture tiles.
+        CqTextureMapBuffer* pTMBa = GetBuffer( iu, iv, id + 1 );		// Val00
+        CqTextureMapBuffer* pTMBb = pTMBa;
+        if ( iv != iv_n )
+        {
+            pTMBb = GetBuffer( iu, iv_n, id + 1 );	// Val01
+        }
+
+        CqTextureMapBuffer* pTMBc = pTMBa;
+        if ( iu_n != iu )
+        {
+            pTMBc = GetBuffer( iu_n, iv, id + 1 );	// Val10
+        }
+        CqTextureMapBuffer* pTMBd = NULL;
+        if ( iv == iv_n ) pTMBd = pTMBc;
+        else if ( iu == iu_n ) pTMBd = pTMBb;
+        else
+            pTMBd = GetBuffer( iu_n, iv_n, id + 1 );	// Val11
+
+        /* cannot find anything than goodbye */
+        if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
+        {
+            val = m_low_color;
+            std::cerr << error << "Cannot find value for either pTMPB[a,b,c,d]" << std::endl;
+            return ;
+        }
+
+        // Bilinear intepolate the values at the corners of the sample.
+        iu -= pTMBa->sOrigin();
+        iu_n -= pTMBc->sOrigin();
+        iv -= pTMBa->tOrigin();
+        iv_n -= pTMBb->tOrigin();
+
+        TqInt c;
+        for ( c = 0; c < m_SamplesPerPixel; c++ )
+        {
+            TqFloat Val00 = pTMBa->GetValue( iu, iv, c );
+            TqFloat Val01 = pTMBb->GetValue( iu, iv_n, c );
+            TqFloat Val10 = pTMBc->GetValue( iu_n, iv, c );
+            TqFloat Val11 = pTMBd->GetValue( iu_n, iv_n, c );
+            TqFloat bot = Val00 + ( ru * ( Val10 - Val00 ) );
+            TqFloat top = Val01 + ( ru * ( Val11 - Val01 ) );
+            m_high_color[ c ] = bot + ( rv * ( top - bot ) );
+        }
+
+        // Linearly interpolate between low_color and high_color by dinterp.
+
+        TqFloat dinterp = ( (idv > 1)? umapsize * d : vmapsize * d ) - 1;
+        for ( c = 0; c < m_SamplesPerPixel; c++ )
+            val[ c ] = m_low_color[ c ] + dinterp * ( m_high_color[ c ] - m_low_color[ c ] );
+
+
+
+    }
 
 }
 
@@ -658,55 +658,55 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 
 CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 {
-	static int size = -1;
-	static CqTextureMap *previous = NULL;
+    static int size = -1;
+    static CqTextureMap *previous = NULL;
 
-	QGetRenderContext() ->Stats().IncTextureMisses( 0 );
+    QGetRenderContext() ->Stats().IncTextureMisses( 0 );
 
-	/* look if the last item return by this function was ok */
-	if ( size == static_cast<int>( m_TextureMap_Cache.size() ) )
-		if ( ( previous ) && ( previous->m_strName == strName ) )
-		{
-			QGetRenderContext() ->Stats().IncTextureHits( 0, 0 );
-			return previous;
-		}
+    /* look if the last item return by this function was ok */
+    if ( size == static_cast<int>( m_TextureMap_Cache.size() ) )
+        if ( ( previous ) && ( previous->m_strName == strName ) )
+        {
+            QGetRenderContext() ->Stats().IncTextureHits( 0, 0 );
+            return previous;
+        }
 
 
 
-	// First search the texture map cache
-	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
-	{
-		if ( ( *i ) ->m_strName == strName )
-		{
-			if ( ( *i ) ->Type() == MapType_Texture )
-			{
-				previous = *i;
-				size = m_TextureMap_Cache.size();
-				QGetRenderContext() ->Stats().IncTextureHits( 1, 0 );
-				return ( *i );
-			}
-			else
-			{
-				return ( NULL );
-			}
-		}
-	}
-	// If we got here, it doesn't exist yet, so we must create and load it.
-	CqTextureMap* pNew = new CqTextureMap( strName );
-	pNew->Open();
+    // First search the texture map cache
+    for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+    {
+        if ( ( *i ) ->m_strName == strName )
+        {
+            if ( ( *i ) ->Type() == MapType_Texture )
+            {
+                previous = *i;
+                size = m_TextureMap_Cache.size();
+                QGetRenderContext() ->Stats().IncTextureHits( 1, 0 );
+                return ( *i );
+            }
+            else
+            {
+                return ( NULL );
+            }
+        }
+    }
+    // If we got here, it doesn't exist yet, so we must create and load it.
+    CqTextureMap* pNew = new CqTextureMap( strName );
+    pNew->Open();
 
-	// Ensure that it is in the correct format
-	if ( pNew->Format() != TexFormat_MIPMAP )
-	{
-		if( !pNew->CreateMIPMAP( TqTrue ) )
-			pNew->SetInvalid();
-		pNew->Close();
-	}
+    // Ensure that it is in the correct format
+    if ( pNew->Format() != TexFormat_MIPMAP )
+    {
+        if( !pNew->CreateMIPMAP( TqTrue ) )
+            pNew->SetInvalid();
+        pNew->Close();
+    }
 
-	m_TextureMap_Cache.push_back( pNew );
-	previous = pNew;
-	size = m_TextureMap_Cache.size();
-	return ( pNew );
+    m_TextureMap_Cache.push_back( pNew );
+    previous = pNew;
+    size = m_TextureMap_Cache.size();
+    return ( pNew );
 }
 
 
@@ -718,68 +718,68 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
  **/
 void CqTextureMap::Interpreted( TqPchar mode )
 {
-	const char* filter = "", *smode = "", *tmode = "";
-	const char* sep = ", \t";
+    const char* filter = "", *smode = "", *tmode = "";
+    const char* sep = ", \t";
 
-	// Take a copy of the string before processing it.
-	char* string = new char[strlen(mode)+1];
-	strcpy( string, mode );
+    // Take a copy of the string before processing it.
+    char* string = new char[strlen(mode)+1];
+    strcpy( string, mode );
 
-	const char* token;
-	token = strtok( string, sep );
-	if( NULL != token )
-	{
-		smode = token;
-		token = strtok( NULL, sep );
-		if( NULL != token )
-		{
-			tmode = token;
-			token = strtok( NULL, sep );
-			if( NULL != token )
-			{
-				filter = token;
-				token = strtok( NULL, sep );
-				if( NULL != token )
-				{
-					m_swidth = atof( token );
-					token = strtok( NULL, sep );
-					if( NULL != token )
-					{
-						m_twidth = atof( token );
-						token = strtok( NULL, sep );
-					}
-				}
-			}
-		}
-	}
+    const char* token;
+    token = strtok( string, sep );
+    if( NULL != token )
+    {
+        smode = token;
+        token = strtok( NULL, sep );
+        if( NULL != token )
+        {
+            tmode = token;
+            token = strtok( NULL, sep );
+            if( NULL != token )
+            {
+                filter = token;
+                token = strtok( NULL, sep );
+                if( NULL != token )
+                {
+                    m_swidth = atof( token );
+                    token = strtok( NULL, sep );
+                    if( NULL != token )
+                    {
+                        m_twidth = atof( token );
+                        token = strtok( NULL, sep );
+                    }
+                }
+            }
+        }
+    }
 
-	//sscanf( mode, "%s %s %s %f %f", smode, tmode, filter, &m_swidth, &m_twidth );
+    //sscanf( mode, "%s %s %s %f %f", smode, tmode, filter, &m_swidth, &m_twidth );
 
-	m_FilterFunc = RiBoxFilter;
-	if ( strcmp( filter, "gaussian" ) == 0 ) m_FilterFunc = RiGaussianFilter;
-	if ( strcmp( filter, "box" ) == 0 ) m_FilterFunc = RiBoxFilter;
-	if ( strcmp( filter, "triangle" ) == 0 ) m_FilterFunc = RiTriangleFilter;
-	if ( strcmp( filter, "catmull-rom" ) == 0 ) m_FilterFunc = RiCatmullRomFilter;
-	if ( strcmp( filter, "sinc" ) == 0 ) m_FilterFunc = RiSincFilter;
-	if ( strcmp( filter, "disk" ) == 0 ) m_FilterFunc = RiDiskFilter;
-	if ( strcmp( filter, "bessel" ) == 0 ) m_FilterFunc = RiBesselFilter;
+    m_FilterFunc = RiBoxFilter;
+    if ( strcmp( filter, "gaussian" ) == 0 ) m_FilterFunc = RiGaussianFilter;
+    if ( strcmp( filter, "box" ) == 0 ) m_FilterFunc = RiBoxFilter;
+    if ( strcmp( filter, "triangle" ) == 0 ) m_FilterFunc = RiTriangleFilter;
+    if ( strcmp( filter, "catmull-rom" ) == 0 ) m_FilterFunc = RiCatmullRomFilter;
+    if ( strcmp( filter, "sinc" ) == 0 ) m_FilterFunc = RiSincFilter;
+    if ( strcmp( filter, "disk" ) == 0 ) m_FilterFunc = RiDiskFilter;
+    if ( strcmp( filter, "bessel" ) == 0 ) m_FilterFunc = RiBesselFilter;
 
-	m_smode = m_tmode = WrapMode_Clamp;
-	if ( strcmp( smode, RI_PERIODIC ) == 0 )
-		m_smode = WrapMode_Periodic;
-	else if ( strcmp( smode, RI_CLAMP ) == 0 )
-		m_smode = WrapMode_Clamp;
-	else if ( strcmp( smode, RI_BLACK ) == 0 )
-		m_smode = WrapMode_Black;
+    m_smode = m_tmode = WrapMode_Clamp;
+    if ( strcmp( smode, RI_PERIODIC ) == 0 )
+        m_smode = WrapMode_Periodic;
+    else if ( strcmp( smode, RI_CLAMP ) == 0 )
+        m_smode = WrapMode_Clamp;
+    else if ( strcmp( smode, RI_BLACK ) == 0 )
+        m_smode = WrapMode_Black;
 
-	if ( strcmp( tmode, RI_PERIODIC ) == 0 )
-		m_tmode = WrapMode_Periodic;
-	else if ( strcmp( tmode, RI_CLAMP ) == 0 )
-		m_tmode = WrapMode_Clamp;
-	else if ( strcmp( tmode, RI_BLACK ) == 0 )
-		m_tmode = WrapMode_Black;
+    if ( strcmp( tmode, RI_PERIODIC ) == 0 )
+        m_tmode = WrapMode_Periodic;
+    else if ( strcmp( tmode, RI_CLAMP ) == 0 )
+        m_tmode = WrapMode_Clamp;
+    else if ( strcmp( tmode, RI_BLACK ) == 0 )
+        m_tmode = WrapMode_Black;
 
-	delete[](string);
+    delete[](string);
 }
 
 //----------------------------------------------------------------------
@@ -793,53 +793,53 @@ void CqTextureMap::Interpreted( TqPchar mode )
   **/
 void CqTextureMap::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt directory, std::vector<TqFloat>& accum )
 {
-	RtFilterFunc pFilter = m_FilterFunc;
+    RtFilterFunc pFilter = m_FilterFunc;
 
-	TqInt ydelta = ( 1 << directory );
-	TqInt xdelta = ( 1 << directory );
-	TqFloat div = 0.0;
-	TqFloat mul;
-	TqInt isample;
+    TqInt ydelta = ( 1 << directory );
+    TqInt xdelta = ( 1 << directory );
+    TqFloat div = 0.0;
+    TqFloat mul;
+    TqInt isample;
 
-	// Clear the accumulator
-	accum.assign( SamplesPerPixel(), 0.0f );
+    // Clear the accumulator
+    accum.assign( SamplesPerPixel(), 0.0f );
 
-	if ( directory )
-	{
-		TqInt i, j;
-		for ( j = 0; j < ydelta; j++ )
-		{
-			for ( i = 0; i < xdelta; i++ )
-			{
-				/* find the filter value */
-				TqFloat xfilt = i - directory;
-				TqFloat yfilt = j - directory;
-				mul = ( *pFilter ) ( xfilt, yfilt, xdelta, ydelta );
+    if ( directory )
+    {
+        TqInt i, j;
+        for ( j = 0; j < ydelta; j++ )
+        {
+            for ( i = 0; i < xdelta; i++ )
+            {
+                /* find the filter value */
+                TqFloat xfilt = i - directory;
+                TqFloat yfilt = j - directory;
+                mul = ( *pFilter ) ( xfilt, yfilt, xdelta, ydelta );
 
-				/* find the value in the original image */
-				TqInt ypos = ( ( y * ydelta ) + j );
-				TqInt xpos = ( ( x * xdelta ) + i );
+                /* find the value in the original image */
+                TqInt ypos = ( ( y * ydelta ) + j );
+                TqInt xpos = ( ( x * xdelta ) + i );
 
-				/* ponderate the value */
-				for ( isample = 0; isample < SamplesPerPixel(); isample++ )
-					accum[ isample ] += ( pData->GetValue( xpos, ypos, isample ) ) * mul;
+                /* ponderate the value */
+                for ( isample = 0; isample < SamplesPerPixel(); isample++ )
+                    accum[ isample ] += ( pData->GetValue( xpos, ypos, isample ) ) * mul;
 
-				/* accumulate the ponderation factor */
-				div += mul;
-			}
-		}
+                /* accumulate the ponderation factor */
+                div += mul;
+            }
+        }
 
-		/* use the accumulated ponderation factor */
-		for ( isample = 0; isample < SamplesPerPixel(); isample++ )
-			accum[ isample ] /= static_cast<TqFloat>( div );
-	}
-	else
-	{
-		/* copy the byte don't bother much */
-		for ( isample = 0; isample < SamplesPerPixel(); isample++ )
-			accum[ isample ] = ( pData->GetValue( x, ( m_YRes - y - 1 ), isample ) );
+        /* use the accumulated ponderation factor */
+        for ( isample = 0; isample < SamplesPerPixel(); isample++ )
+            accum[ isample ] /= static_cast<TqFloat>( div );
+    }
+    else
+    {
+        /* copy the byte don't bother much */
+        for ( isample = 0; isample < SamplesPerPixel(); isample++ )
+            accum[ isample ] = ( pData->GetValue( x, ( m_YRes - y - 1 ), isample ) );
 
-	}
+    }
 }
 
 //---------------------------------------------------------------------
@@ -847,258 +847,258 @@ void CqTextureMap::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, 
  */
 void CqTextureMap::Open()
 {
-	TqInt wasconverted = 0;
+    TqInt wasconverted = 0;
 
-	m_IsValid = TqFalse;
-
-
-	// Find the file required.
-	CqRiFile	fileImage( m_strName.c_str(), "texture" );
-	if ( !fileImage.IsValid() )
-	{
-		std::cerr << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
-		return ;
-	}
-	CqString strRealName( fileImage.strRealName() );
-	fileImage.Close();
-
-	// Now try to converted first to tif file
-	wasconverted = Convert( strRealName );
-	if ( wasconverted )
-	{
-		CqString * strnew = new CqString( strRealName );
-		m_ConvertString_Cache.push_back( strnew );
-	}
-
-	// Now open it as a tiff file.
-	m_pImage = TIFFOpen( strRealName.c_str(), "r" );
-	if ( m_pImage )
-	{
-		TqPchar pFormat = 0;
-		TqPchar pModes = 0;
-
-		TIFFGetField( m_pImage, TIFFTAG_IMAGEWIDTH, &m_XRes );
-		TIFFGetField( m_pImage, TIFFTAG_IMAGELENGTH, &m_YRes );
-
-		uint16 planarconfig;
-		TIFFGetField( m_pImage, TIFFTAG_PLANARCONFIG, &planarconfig );
-		m_PlanarConfig = planarconfig;
-		uint16 samplesperpixel;
-		TIFFGetField( m_pImage, TIFFTAG_SAMPLESPERPIXEL, &samplesperpixel );
-		m_SamplesPerPixel = samplesperpixel;
-		uint16 sampleformat;
-		TIFFGetField( m_pImage, TIFFTAG_SAMPLEFORMAT, &sampleformat );
-		m_SampleFormat = sampleformat;
-
-		TIFFGetField( m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &pFormat );
-		TIFFGetField( m_pImage, TIFFTAG_PIXAR_WRAPMODES, &pModes );
-
-		// Resize the temporary storage values to the new depth.
-		m_tempval1.resize( m_SamplesPerPixel );
-		m_tempval2.resize( m_SamplesPerPixel );
-		m_tempval3.resize( m_SamplesPerPixel );
-		m_tempval4.resize( m_SamplesPerPixel );
-		m_low_color.resize( m_SamplesPerPixel );
-		m_high_color.resize( m_SamplesPerPixel );
-
-		/* Aqsis supports a slighty different scheme for MipMap tiff file;
-		 * its filtering is kept as a string in 
-		 * Texture Wrap Modes: "periodic periodic box 1.000000 1.000000"
-		 * where AIR, 3Delight, BMRT, RDC use very basic texture wrap mode description eg.
-		 * Texture Wrap Modes: "black,black"
-		 * therefore I initialized the value for filtering to be black, black, box, 1.0, 1.0
-		 * 
-		 */
-		if ( pModes )
-		{
-			Interpreted( pModes );
-		}
-		uint32 tsx;
-
-		/* First tests; is it stored using tiles ? */
-		TqInt bMipMap = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
-		bMipMap &= TIFFGetField( m_pImage, TIFFTAG_TILELENGTH, &tsx );
-		
-		/* Second test; is it containing enough directories for us */
-		TqInt min = MIN(m_XRes, m_YRes );
-		TqInt directory = (TqInt)  log((double) min)/log((double) 2.0);
-		bMipMap &= TIFFSetDirectory(m_pImage, directory - 1);
+    m_IsValid = TqFalse;
 
 
-		TIFFSetDirectory(m_pImage, 0 );
+    // Find the file required.
+    CqRiFile	fileImage( m_strName.c_str(), "texture" );
+    if ( !fileImage.IsValid() )
+    {
+        std::cerr << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
+        return ;
+    }
+    CqString strRealName( fileImage.strRealName() );
+    fileImage.Close();
+
+    // Now try to converted first to tif file
+    wasconverted = Convert( strRealName );
+    if ( wasconverted )
+    {
+        CqString * strnew = new CqString( strRealName );
+        m_ConvertString_Cache.push_back( strnew );
+    }
+
+    // Now open it as a tiff file.
+    m_pImage = TIFFOpen( strRealName.c_str(), "r" );
+    if ( m_pImage )
+    {
+        TqPchar pFormat = 0;
+        TqPchar pModes = 0;
+
+        TIFFGetField( m_pImage, TIFFTAG_IMAGEWIDTH, &m_XRes );
+        TIFFGetField( m_pImage, TIFFTAG_IMAGELENGTH, &m_YRes );
+
+        uint16 planarconfig;
+        TIFFGetField( m_pImage, TIFFTAG_PLANARCONFIG, &planarconfig );
+        m_PlanarConfig = planarconfig;
+        uint16 samplesperpixel;
+        TIFFGetField( m_pImage, TIFFTAG_SAMPLESPERPIXEL, &samplesperpixel );
+        m_SamplesPerPixel = samplesperpixel;
+        uint16 sampleformat;
+        TIFFGetField( m_pImage, TIFFTAG_SAMPLEFORMAT, &sampleformat );
+        m_SampleFormat = sampleformat;
+
+        TIFFGetField( m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &pFormat );
+        TIFFGetField( m_pImage, TIFFTAG_PIXAR_WRAPMODES, &pModes );
+
+        // Resize the temporary storage values to the new depth.
+        m_tempval1.resize( m_SamplesPerPixel );
+        m_tempval2.resize( m_SamplesPerPixel );
+        m_tempval3.resize( m_SamplesPerPixel );
+        m_tempval4.resize( m_SamplesPerPixel );
+        m_low_color.resize( m_SamplesPerPixel );
+        m_high_color.resize( m_SamplesPerPixel );
+
+        /* Aqsis supports a slighty different scheme for MipMap tiff file;
+         * its filtering is kept as a string in 
+         * Texture Wrap Modes: "periodic periodic box 1.000000 1.000000"
+         * where AIR, 3Delight, BMRT, RDC use very basic texture wrap mode description eg.
+         * Texture Wrap Modes: "black,black"
+         * therefore I initialized the value for filtering to be black, black, box, 1.0, 1.0
+         * 
+         */
+        if ( pModes )
+        {
+            Interpreted( pModes );
+        }
+        uint32 tsx;
+
+        /* First tests; is it stored using tiles ? */
+        TqInt bMipMap = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
+        bMipMap &= TIFFGetField( m_pImage, TIFFTAG_TILELENGTH, &tsx );
+
+        /* Second test; is it containing enough directories for us */
+        TqInt min = MIN(m_XRes, m_YRes );
+        TqInt directory = (TqInt)  log((double) min)/log((double) 2.0);
+        bMipMap &= TIFFSetDirectory(m_pImage, directory - 1);
 
 
-		/* Support for 3delight, AIR, BMRT, RDC, PIXIE MipMap files.
-		 * Aqsis is not bound to have exact multiples of 2 on height, lenght.
-		 * The Format of 3Delight, AIR, BMRT and RDC is more "Plain Texture"/MipMap.
-		 * What is preventing us to load their files was the format description file as 
-		 * MipMap differ from our format description not the way they store their information.
-		 * A better way is to ask the direct question if if the image is stored as MipMap via
-		 * TIFFTAG_TILEWIDTH, TIFFTAG_TILELENGTH and checking if the texture contains enough 
-		 * directory/pages.
-		 */
-		
-		if ( bMipMap )
-		{
-			m_Format = TexFormat_MIPMAP;
-			m_IsValid = TqTrue;
-		}
-		else
-		{
-			m_Format = TexFormat_Plain;
-			m_IsValid = TqTrue;
-		}
-	}
+        TIFFSetDirectory(m_pImage, 0 );
+
+
+        /* Support for 3delight, AIR, BMRT, RDC, PIXIE MipMap files.
+         * Aqsis is not bound to have exact multiples of 2 on height, lenght.
+         * The Format of 3Delight, AIR, BMRT and RDC is more "Plain Texture"/MipMap.
+         * What is preventing us to load their files was the format description file as 
+         * MipMap differ from our format description not the way they store their information.
+         * A better way is to ask the direct question if if the image is stored as MipMap via
+         * TIFFTAG_TILEWIDTH, TIFFTAG_TILELENGTH and checking if the texture contains enough 
+         * directory/pages.
+         */
+
+        if ( bMipMap )
+        {
+            m_Format = TexFormat_MIPMAP;
+            m_IsValid = TqTrue;
+        }
+        else
+        {
+            m_Format = TexFormat_Plain;
+            m_IsValid = TqTrue;
+        }
+    }
 
 }
 
 
 void CqTextureMap::PrepareSampleOptions( std::map<std::string, IqShaderData*>& paramMap )
 {
-	m_sblur = 0.0f;
-	m_tblur = 0.0f;
-	m_pswidth = 1.0f;
-	m_ptwidth = 1.0f;
-	m_samples = 0.0f;
+    m_sblur = 0.0f;
+    m_tblur = 0.0f;
+    m_pswidth = 1.0f;
+    m_ptwidth = 1.0f;
+    m_samples = 0.0f;
 
-	// Get parameters out of the map.
-	if ( paramMap.size() != 0 )
-	{
-		if ( paramMap.find( "width" ) != paramMap.end() )
-		{
-			paramMap[ "width" ] ->GetFloat( m_pswidth );
-			m_ptwidth = m_pswidth;
-		}
-		else
-		{
-			if ( paramMap.find( "swidth" ) != paramMap.end() )
-				paramMap[ "swidth" ] ->GetFloat( m_pswidth );
-			if ( paramMap.find( "twidth" ) != paramMap.end() )
-				paramMap[ "twidth" ] ->GetFloat( m_ptwidth );
-		}
-		if ( paramMap.find( "blur" ) != paramMap.end() )
-		{
-			paramMap[ "blur" ] ->GetFloat( m_sblur );
-			m_tblur = m_sblur;
-		}
-		else
-		{
-			if ( paramMap.find( "sblur" ) != paramMap.end() )
-				paramMap[ "sblur" ] ->GetFloat( m_sblur );
-			if ( paramMap.find( "tblur" ) != paramMap.end() )
-				paramMap[ "tblur" ] ->GetFloat( m_tblur );
-		}
-		if ( paramMap.find( "samples" ) != paramMap.end() )
-			paramMap[ "samples" ] ->GetFloat( m_samples );
-	}
+    // Get parameters out of the map.
+    if ( paramMap.size() != 0 )
+    {
+        if ( paramMap.find( "width" ) != paramMap.end() )
+        {
+            paramMap[ "width" ] ->GetFloat( m_pswidth );
+            m_ptwidth = m_pswidth;
+        }
+        else
+        {
+            if ( paramMap.find( "swidth" ) != paramMap.end() )
+                paramMap[ "swidth" ] ->GetFloat( m_pswidth );
+            if ( paramMap.find( "twidth" ) != paramMap.end() )
+                paramMap[ "twidth" ] ->GetFloat( m_ptwidth );
+        }
+        if ( paramMap.find( "blur" ) != paramMap.end() )
+        {
+            paramMap[ "blur" ] ->GetFloat( m_sblur );
+            m_tblur = m_sblur;
+        }
+        else
+        {
+            if ( paramMap.find( "sblur" ) != paramMap.end() )
+                paramMap[ "sblur" ] ->GetFloat( m_sblur );
+            if ( paramMap.find( "tblur" ) != paramMap.end() )
+                paramMap[ "tblur" ] ->GetFloat( m_tblur );
+        }
+        if ( paramMap.find( "samples" ) != paramMap.end() )
+            paramMap[ "samples" ] ->GetFloat( m_samples );
+    }
 }
 
 
 void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val )
 {
-	// Check the memory and make sure we don't abuse it
-	CriticalMeasure();
+    // Check the memory and make sure we don't abuse it
+    CriticalMeasure();
 
-	if ( !IsValid() ) return ;
+    if ( !IsValid() ) return ;
 
-	swidth *= m_pswidth;
-	twidth *= m_ptwidth;
+    swidth *= m_pswidth;
+    twidth *= m_ptwidth;
 
-	// T(s2,t2)-T(s2,t1)-T(s1,t2)+T(s1,t1)
-	val.resize( m_SamplesPerPixel );
-	val = 0.0f;
+    // T(s2,t2)-T(s2,t1)-T(s1,t2)+T(s1,t1)
+    val.resize( m_SamplesPerPixel );
+    val = 0.0f;
 
-	TqFloat ss1 = s1 - swidth - ( m_sblur * 0.5f );
-	TqFloat tt1 = t1 - twidth - ( m_tblur * 0.5f );
-	TqFloat ss2 = s1 + swidth + ( m_sblur * 0.5f );
-	TqFloat tt2 = t1 + twidth + ( m_tblur * 0.5f );
+    TqFloat ss1 = s1 - swidth - ( m_sblur * 0.5f );
+    TqFloat tt1 = t1 - twidth - ( m_tblur * 0.5f );
+    TqFloat ss2 = s1 + swidth + ( m_sblur * 0.5f );
+    TqFloat tt2 = t1 + twidth + ( m_tblur * 0.5f );
 
-	m_tempval1 = 0.0f;
-	m_tempval2 = 0.0f;
-	m_tempval3 = 0.0f;
-	m_tempval4 = 0.0f;
-
-
-	if ( m_smode == WrapMode_Periodic )
-	{
-		ss1 = fmod( ss1, 1.0f );
-		if ( ss1 < 0 ) ss1 += 1.0f;
-		ss2 = fmod( ss2, 1.0f );
-		if ( ss2 < 0 ) ss2 += 1.0f;
-	}
-	if ( m_tmode == WrapMode_Periodic )
-	{
-		tt1 = fmod( tt1, 1.0f );
-		if ( tt1 < 0 ) tt1 += 1.0f;
-		tt2 = fmod( tt2, 1.0f );
-		if ( tt2 < 0 ) tt2 += 1.0f;
-	}
-
-	if ( m_smode == WrapMode_Black )
-	{
-		if ( ( ss1 < 0.0f ) ||
-		        ( ss2 < 0.0f ) ||
-		        ( ss2 > 1.0f ) ||
-		        ( ss1 > 1.0f ) ) return ;
-	}
-	if ( m_tmode == WrapMode_Black )
-	{
-		if ( ( tt1 < 0.0f ) ||
-		        ( tt2 < 0.0f ) ||
-		        ( tt2 > 1.0f ) ||
-		        ( tt1 > 1.0f ) ) return ;
-	}
-
-	if ( m_smode == WrapMode_Clamp || Type() == MapType_Environment )
-	{
-		ss1 = CLAMP( ss1, 0.0f, 1.0f );
-		ss2 = CLAMP( ss2, 0.0f, 1.0f );
-	}
-	if ( m_tmode == WrapMode_Clamp || Type() == MapType_Environment )
-	{
-		tt1 = CLAMP( tt1, 0.0f, 1.0f );
-		tt2 = CLAMP( tt2, 0.0f, 1.0f );
-	}
-
-	// If no boundaries are crossed, just do a single sample (the most common case)
-	if ( ( ss1 < ss2 ) && ( tt1 < tt2 ) )
-	{
-		GetSample( ss1, tt1, ss2, tt2, val );
-	}
-	// If it crosses only the s boundary, we need to get two samples.
-	else if ( ( ss1 > ss2 ) && ( tt1 < tt2 ) )
-	{
-		GetSample( 0, tt1, ss2, tt2, m_tempval1 );
-		GetSample( ss1, tt1, 1.0f, tt2, m_tempval2 );
-		val = ( m_tempval1 + m_tempval2 );
-		val *= 0.5f;
-
-	}
-	// If it crosses only the t boundary, we need to get two samples.
-	else if ( ( ss1 < ss2 ) && ( tt1 > tt2 ) )
-	{
-		GetSample( ss1, 0, ss2, tt2, m_tempval1 );
-		GetSample( ss1, tt1, ss2, 1.0f, m_tempval2 );
-		val = ( m_tempval1 + m_tempval2 );
-		val *= 0.5f;
-
-	}
-	// If it crosses the s and t boundary, we need to get four samples.
-	else
-	{
-		GetSample( 0, 0, ss2, tt2, m_tempval1 );
-		GetSample( ss1, 0, 1.0f, tt2, m_tempval2 );
-		GetSample( 0, tt1, ss2, 1.0f, m_tempval3 );
-		GetSample( ss1, tt1, 1.0f, 1.0f, m_tempval4 );
-		val = ( m_tempval1 + m_tempval2 + m_tempval3 + m_tempval4 );
-		val *= 0.25f;
-	}
+    m_tempval1 = 0.0f;
+    m_tempval2 = 0.0f;
+    m_tempval3 = 0.0f;
+    m_tempval4 = 0.0f;
 
 
-	// Clamp the result
-	//      TqInt i;
-	//	for ( i = 0; i < m_SamplesPerPixel; i++ )
-	//		val[ i ] = CLAMP( val[ i ], 0.0f, 1.0f );
+    if ( m_smode == WrapMode_Periodic )
+    {
+        ss1 = fmod( ss1, 1.0f );
+        if ( ss1 < 0 ) ss1 += 1.0f;
+        ss2 = fmod( ss2, 1.0f );
+        if ( ss2 < 0 ) ss2 += 1.0f;
+    }
+    if ( m_tmode == WrapMode_Periodic )
+    {
+        tt1 = fmod( tt1, 1.0f );
+        if ( tt1 < 0 ) tt1 += 1.0f;
+        tt2 = fmod( tt2, 1.0f );
+        if ( tt2 < 0 ) tt2 += 1.0f;
+    }
+
+    if ( m_smode == WrapMode_Black )
+    {
+        if ( ( ss1 < 0.0f ) ||
+                ( ss2 < 0.0f ) ||
+                ( ss2 > 1.0f ) ||
+                ( ss1 > 1.0f ) ) return ;
+    }
+    if ( m_tmode == WrapMode_Black )
+    {
+        if ( ( tt1 < 0.0f ) ||
+                ( tt2 < 0.0f ) ||
+                ( tt2 > 1.0f ) ||
+                ( tt1 > 1.0f ) ) return ;
+    }
+
+    if ( m_smode == WrapMode_Clamp || Type() == MapType_Environment )
+    {
+        ss1 = CLAMP( ss1, 0.0f, 1.0f );
+        ss2 = CLAMP( ss2, 0.0f, 1.0f );
+    }
+    if ( m_tmode == WrapMode_Clamp || Type() == MapType_Environment )
+    {
+        tt1 = CLAMP( tt1, 0.0f, 1.0f );
+        tt2 = CLAMP( tt2, 0.0f, 1.0f );
+    }
+
+    // If no boundaries are crossed, just do a single sample (the most common case)
+    if ( ( ss1 < ss2 ) && ( tt1 < tt2 ) )
+    {
+        GetSample( ss1, tt1, ss2, tt2, val );
+    }
+    // If it crosses only the s boundary, we need to get two samples.
+    else if ( ( ss1 > ss2 ) && ( tt1 < tt2 ) )
+    {
+        GetSample( 0, tt1, ss2, tt2, m_tempval1 );
+        GetSample( ss1, tt1, 1.0f, tt2, m_tempval2 );
+        val = ( m_tempval1 + m_tempval2 );
+        val *= 0.5f;
+
+    }
+    // If it crosses only the t boundary, we need to get two samples.
+    else if ( ( ss1 < ss2 ) && ( tt1 > tt2 ) )
+    {
+        GetSample( ss1, 0, ss2, tt2, m_tempval1 );
+        GetSample( ss1, tt1, ss2, 1.0f, m_tempval2 );
+        val = ( m_tempval1 + m_tempval2 );
+        val *= 0.5f;
+
+    }
+    // If it crosses the s and t boundary, we need to get four samples.
+    else
+    {
+        GetSample( 0, 0, ss2, tt2, m_tempval1 );
+        GetSample( ss1, 0, 1.0f, tt2, m_tempval2 );
+        GetSample( 0, tt1, ss2, 1.0f, m_tempval3 );
+        GetSample( ss1, tt1, 1.0f, 1.0f, m_tempval4 );
+        val = ( m_tempval1 + m_tempval2 + m_tempval3 + m_tempval4 );
+        val *= 0.25f;
+    }
+
+
+    // Clamp the result
+    //      TqInt i;
+    //	for ( i = 0; i < m_SamplesPerPixel; i++ )
+    //		val[ i ] = CLAMP( val[ i ], 0.0f, 1.0f );
 }
 
 
@@ -1109,19 +1109,19 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
                               std::valarray<TqFloat>& val )
 {
-	// Work out the width and height
-	TqFloat ss1, tt1, ss2, tt2;
-	ss1 = MIN( MIN( MIN( s1, s2 ), s3 ), s4 );
-	tt1 = MIN( MIN( MIN( t1, t2 ), t3 ), t4 );
-	ss2 = MAX( MAX( MAX( s1, s2 ), s3 ), s4 );
-	tt2 = MAX( MAX( MAX( t1, t2 ), t3 ), t4 );
+    // Work out the width and height
+    TqFloat ss1, tt1, ss2, tt2;
+    ss1 = MIN( MIN( MIN( s1, s2 ), s3 ), s4 );
+    tt1 = MIN( MIN( MIN( t1, t2 ), t3 ), t4 );
+    ss2 = MAX( MAX( MAX( s1, s2 ), s3 ), s4 );
+    tt2 = MAX( MAX( MAX( t1, t2 ), t3 ), t4 );
 
-	TqFloat swidth = ss2 - ss1;
-	TqFloat twidth = tt2 - tt1;
-	ss1 = ss1 + ( swidth * 0.5f );
-	tt1 = tt1 + ( twidth * 0.5f );
+    TqFloat swidth = ss2 - ss1;
+    TqFloat twidth = tt2 - tt1;
+    ss1 = ss1 + ( swidth * 0.5f );
+    tt1 = tt1 + ( twidth * 0.5f );
 
-	SampleMap( ss1, tt1, swidth, twidth, val );
+    SampleMap( ss1, tt1, swidth, twidth, val );
 }
 
 
@@ -1133,32 +1133,32 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, Tq
 
 void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
-	TqChar version[ 80 ];
-	TIFFCreateDirectory( ptex );
+    TqChar version[ 80 ];
+    TIFFCreateDirectory( ptex );
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-	sprintf( version, "%s %s", STRNAME, VERSION_STR );
+    sprintf( version, "%s %s", STRNAME, VERSION_STR );
 #else
-	sprintf( version, "%s %s", STRNAME, VERSION );
+    sprintf( version, "%s %s", STRNAME, VERSION );
 #endif
-	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
-	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
-	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
-	TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
-	TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
-	TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
-	TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
-	TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
-	TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression );
-	TIFFSetField( ptex, TIFFTAG_ROWSPERSTRIP, 1 );
+    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
+    TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
+    TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
+    TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
+    TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
+    TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
+    TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
+    TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
+    TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression );
+    TIFFSetField( ptex, TIFFTAG_ROWSPERSTRIP, 1 );
 
-	unsigned char *pdata = raster;
-	for ( TqUlong i = 0; i < length; i++ )
-	{
-		TIFFWriteScanline( ptex, pdata, i );
-		pdata += ( width * samples );
-	}
-	TIFFWriteDirectory( ptex );
+    unsigned char *pdata = raster;
+    for ( TqUlong i = 0; i < length; i++ )
+    {
+        TIFFWriteScanline( ptex, pdata, i );
+        pdata += ( width * samples );
+    }
+    TIFFWriteDirectory( ptex );
 }
 
 //----------------------------------------------------------------------
@@ -1168,33 +1168,33 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlo
 
 void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
-	TqChar version[ 80 ];
-	TIFFCreateDirectory( ptex );
+    TqChar version[ 80 ];
+    TIFFCreateDirectory( ptex );
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-	sprintf( version, "%s %s", STRNAME, VERSION_STR );
+    sprintf( version, "%s %s", STRNAME, VERSION_STR );
 #else
-	sprintf( version, "%s %s", STRNAME, VERSION );
+    sprintf( version, "%s %s", STRNAME, VERSION );
 #endif
-	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
-	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
-	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
-	TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
-	TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 32 );
-	TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
-	TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
-	TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
-	TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression ); /* COMPRESSION_DEFLATE */
-	TIFFSetField( ptex, TIFFTAG_ROWSPERSTRIP, 1 );
-	TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
+    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
+    TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
+    TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
+    TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
+    TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 32 );
+    TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
+    TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
+    TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
+    TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression ); /* COMPRESSION_DEFLATE */
+    TIFFSetField( ptex, TIFFTAG_ROWSPERSTRIP, 1 );
+    TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 
-	TqFloat *pdata = raster;
-	for ( TqUlong i = 0; i < length; i++ )
-	{
-		TIFFWriteScanline( ptex, pdata, i );
-		pdata += ( width * samples );
-	}
-	TIFFWriteDirectory( ptex );
+    TqFloat *pdata = raster;
+    for ( TqUlong i = 0; i < length; i++ )
+    {
+        TIFFWriteScanline( ptex, pdata, i );
+        pdata += ( width * samples );
+    }
+    TIFFWriteDirectory( ptex );
 }
 
 
@@ -1205,20 +1205,20 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlo
 
 void CqTextureMap::WriteImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqInt compression, TqInt quality )
 {
-	switch ( pBuffer->BufferType() )
-	{
-			case BufferType_RGBA:
-			{
-				WriteImage( ptex, static_cast<TqPuchar>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), compression, quality );
-				break;
-			}
+    switch ( pBuffer->BufferType() )
+    {
+    case BufferType_RGBA:
+        {
+            WriteImage( ptex, static_cast<TqPuchar>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), compression, quality );
+            break;
+        }
 
-			case BufferType_Float:
-			{
-				WriteImage( ptex, static_cast<TqFloat*>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), compression, quality );
-				break;
-			}
-	}
+    case BufferType_Float:
+        {
+            WriteImage( ptex, static_cast<TqFloat*>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), compression, quality );
+            break;
+        }
+    }
 }
 
 //----------------------------------------------------------------------
@@ -1228,20 +1228,20 @@ void CqTextureMap::WriteImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqInt co
 
 void CqTextureMap::WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUlong twidth, TqUlong theight, TqInt compression, TqInt quality )
 {
-	switch ( pBuffer->BufferType() )
-	{
-			case BufferType_RGBA:
-			{
-				WriteTileImage( ptex, static_cast<TqPuchar>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), twidth, theight, pBuffer->Samples(), compression, quality );
-				break;
-			}
+    switch ( pBuffer->BufferType() )
+    {
+    case BufferType_RGBA:
+        {
+            WriteTileImage( ptex, static_cast<TqPuchar>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), twidth, theight, pBuffer->Samples(), compression, quality );
+            break;
+        }
 
-			case BufferType_Float:
-			{
-				WriteTileImage( ptex, static_cast<TqFloat*>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), twidth, theight, pBuffer->Samples(), compression, quality );
-				break;
-			}
-	}
+    case BufferType_Float:
+        {
+            WriteTileImage( ptex, static_cast<TqFloat*>( pBuffer->pVoidBufferData() ), pBuffer->Width(), pBuffer->Height(), twidth, theight, pBuffer->Samples(), compression, quality );
+            break;
+        }
+    }
 }
 
 
@@ -1252,59 +1252,59 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUl
 
 void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
-	//TIFFCreateDirectory(ptex);
-	TqChar version[ 80 ];
+    //TIFFCreateDirectory(ptex);
+    TqChar version[ 80 ];
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-	sprintf( version, "%s %s", STRNAME, VERSION_STR );
+    sprintf( version, "%s %s", STRNAME, VERSION_STR );
 #else
-	sprintf( version, "%s %s", STRNAME, VERSION );
+    sprintf( version, "%s %s", STRNAME, VERSION );
 #endif
-	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
-	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
-	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
-	TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
-	TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 32 );
-	TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
-	TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
-	TIFFSetField( ptex, TIFFTAG_TILEWIDTH, twidth );
-	TIFFSetField( ptex, TIFFTAG_TILELENGTH, tlength );
-	TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
-	TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression );
+    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
+    TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
+    TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
+    TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
+    TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 32 );
+    TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
+    TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
+    TIFFSetField( ptex, TIFFTAG_TILEWIDTH, twidth );
+    TIFFSetField( ptex, TIFFTAG_TILELENGTH, tlength );
+    TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
+    TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression );
 
 
-	TqInt tsize = twidth * tlength;
-	TqInt tperrow = ( width + twidth - 1 ) / twidth;
-	TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * samples * sizeof( TqFloat ) ) );
+    TqInt tsize = twidth * tlength;
+    TqInt tperrow = ( width + twidth - 1 ) / twidth;
+    TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * samples * sizeof( TqFloat ) ) );
 
-	if ( ptile != NULL )
-	{
-		TqInt ctiles = tperrow * ( ( length + tlength - 1 ) / tlength );
-		TqInt itile;
-		for ( itile = 0; itile < ctiles; itile++ )
-		{
-			TqInt x = ( itile % tperrow ) * twidth;
-			TqInt y = ( itile / tperrow ) * tlength;
-			TqFloat* ptdata = raster + ( ( y * width ) + x ) * samples;
-			// Clear the tile to black.
-			memset( ptile, 0, tsize * samples * sizeof( TqFloat ) );
-			for ( TqUlong i = 0; i < tlength; i++ )
-			{
-				for ( TqUlong j = 0; j < twidth; j++ )
-				{
-					if ( ( x + j ) < width && ( y + i ) < length )
-					{
-						TqInt ii;
-						for ( ii = 0; ii < samples; ii++ )
-							ptile[ ( i * twidth * samples ) + ( ( ( j * samples ) + ii ) ) ] = ptdata[ ( ( j * samples ) + ii ) ];
-					}
-				}
-				ptdata += ( width * samples );
-			}
-			TIFFWriteTile( ptex, ptile, x, y, 0, 0 );
-		}
-		TIFFWriteDirectory( ptex );
+    if ( ptile != NULL )
+    {
+        TqInt ctiles = tperrow * ( ( length + tlength - 1 ) / tlength );
+        TqInt itile;
+        for ( itile = 0; itile < ctiles; itile++ )
+        {
+            TqInt x = ( itile % tperrow ) * twidth;
+            TqInt y = ( itile / tperrow ) * tlength;
+            TqFloat* ptdata = raster + ( ( y * width ) + x ) * samples;
+            // Clear the tile to black.
+            memset( ptile, 0, tsize * samples * sizeof( TqFloat ) );
+            for ( TqUlong i = 0; i < tlength; i++ )
+            {
+                for ( TqUlong j = 0; j < twidth; j++ )
+                {
+                    if ( ( x + j ) < width && ( y + i ) < length )
+                    {
+                        TqInt ii;
+                        for ( ii = 0; ii < samples; ii++ )
+                            ptile[ ( i * twidth * samples ) + ( ( ( j * samples ) + ii ) ) ] = ptdata[ ( ( j * samples ) + ii ) ];
+                    }
+                }
+                ptdata += ( width * samples );
+            }
+            TIFFWriteTile( ptex, ptile, x, y, 0, 0 );
+        }
+        TIFFWriteDirectory( ptex );
 
-	}
+    }
 }
 
 //----------------------------------------------------------------------
@@ -1314,57 +1314,57 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
 
 void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
-	TqChar version[ 80 ];
+    TqChar version[ 80 ];
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-	sprintf( version, "%s %s", STRNAME, VERSION_STR );
+    sprintf( version, "%s %s", STRNAME, VERSION_STR );
 #else
-	sprintf( version, "%s %s", STRNAME, VERSION );
+    sprintf( version, "%s %s", STRNAME, VERSION );
 #endif
-	TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
-	TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
-	TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
-	TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
-	TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
-	TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
-	TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
-	TIFFSetField( ptex, TIFFTAG_TILEWIDTH, twidth );
-	TIFFSetField( ptex, TIFFTAG_TILELENGTH, tlength );
-	TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
-	TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression );
-	TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
+    TIFFSetField( ptex, TIFFTAG_SOFTWARE, ( uint32 ) version );
+    TIFFSetField( ptex, TIFFTAG_IMAGEWIDTH, width );
+    TIFFSetField( ptex, TIFFTAG_IMAGELENGTH, length );
+    TIFFSetField( ptex, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
+    TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
+    TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
+    TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
+    TIFFSetField( ptex, TIFFTAG_TILEWIDTH, twidth );
+    TIFFSetField( ptex, TIFFTAG_TILELENGTH, tlength );
+    TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
+    TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression );
+    TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 
-	TqInt tsize = twidth * tlength;
-	TqInt tperrow = ( width + twidth - 1 ) / twidth;
-	TqPuchar ptile = static_cast<TqPuchar>( _TIFFmalloc( tsize * samples ) );
+    TqInt tsize = twidth * tlength;
+    TqInt tperrow = ( width + twidth - 1 ) / twidth;
+    TqPuchar ptile = static_cast<TqPuchar>( _TIFFmalloc( tsize * samples ) );
 
-	if ( ptile != NULL )
-	{
-		TqInt ctiles = tperrow * ( ( length + tlength - 1 ) / tlength );
-		TqInt itile;
-		for ( itile = 0; itile < ctiles; itile++ )
-		{
-			TqInt x = ( itile % tperrow ) * twidth;
-			TqInt y = ( itile / tperrow ) * tlength;
-			TqPuchar ptdata = raster + ( ( y * width ) + x ) * samples;
-			// Clear the tile to black.
-			memset( ptile, 0, tsize * samples );
-			for ( TqUlong i = 0; i < tlength; i++ )
-			{
-				for ( TqUlong j = 0; j < twidth; j++ )
-				{
-					if ( ( x + j ) < width && ( y + i ) < length )
-					{
-						TqInt ii;
-						for ( ii = 0; ii < samples; ii++ )
-							ptile[ ( i * twidth * samples ) + ( ( ( j * samples ) + ii ) ) ] = ptdata[ ( ( j * samples ) + ii ) ];
-					}
-				}
-				ptdata += ( width * samples );
-			}
-			TIFFWriteTile( ptex, ptile, x, y, 0, 0 );
-		}
-		TIFFWriteDirectory( ptex );
-	}
+    if ( ptile != NULL )
+    {
+        TqInt ctiles = tperrow * ( ( length + tlength - 1 ) / tlength );
+        TqInt itile;
+        for ( itile = 0; itile < ctiles; itile++ )
+        {
+            TqInt x = ( itile % tperrow ) * twidth;
+            TqInt y = ( itile / tperrow ) * tlength;
+            TqPuchar ptdata = raster + ( ( y * width ) + x ) * samples;
+            // Clear the tile to black.
+            memset( ptile, 0, tsize * samples );
+            for ( TqUlong i = 0; i < tlength; i++ )
+            {
+                for ( TqUlong j = 0; j < twidth; j++ )
+                {
+                    if ( ( x + j ) < width && ( y + i ) < length )
+                    {
+                        TqInt ii;
+                        for ( ii = 0; ii < samples; ii++ )
+                            ptile[ ( i * twidth * samples ) + ( ( ( j * samples ) + ii ) ) ] = ptdata[ ( ( j * samples ) + ii ) ];
+                    }
+                }
+                ptdata += ( width * samples );
+            }
+            TIFFWriteTile( ptex, ptile, x, y, 0, 0 );
+        }
+        TIFFWriteDirectory( ptex );
+    }
 }
 
 

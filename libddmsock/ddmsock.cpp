@@ -68,12 +68,12 @@ START_NAMESPACE( Aqsis )
 /// Handle cleanup of child processes
 void sig_chld( int signo )
 {
-	pid_t pid;
-	int stat;
+    pid_t pid;
+    int stat;
 
-	while ( ( pid = waitpid( -1, &stat, WNOHANG ) ) > 0 );
+    while ( ( pid = waitpid( -1, &stat, WNOHANG ) ) > 0 );
 
-	return ;
+    return ;
 }
 
 #endif // AQSIS_SYSTEM_POSIX
@@ -81,7 +81,7 @@ void sig_chld( int signo )
 /// Required function that implements Class Factory design pattern for DDManager libraries
 IqDDManager* CreateDisplayDriverManager()
 {
-	return new CqDDManager;
+    return new CqDDManager;
 }
 
 void SendUserParameters( std::map<std::string, void*>& mapParams, CqDDClient* client );
@@ -93,7 +93,7 @@ void SendUserParameters( std::map<std::string, void*>& mapParams, CqDDClient* cl
  */
 
 CqDDServer::CqDDServer() :
-		m_Socket( INVALID_SOCKET )
+        m_Socket( INVALID_SOCKET )
 {}
 
 //---------------------------------------------------------------------
@@ -102,7 +102,7 @@ CqDDServer::CqDDServer() :
 
 CqDDServer::CqDDServer( TqInt port )
 {
-	Prepare( port );
+    Prepare( port );
 }
 
 
@@ -112,7 +112,7 @@ CqDDServer::CqDDServer( TqInt port )
 
 CqDDServer::~CqDDServer()
 {
-	Close();
+    Close();
 }
 
 //---------------------------------------------------------------------
@@ -122,16 +122,16 @@ CqDDServer::~CqDDServer()
 void CqDDServer::Close()
 {
 #ifdef AQSIS_SYSTEM_WIN32
-	int x = 1;
-	setsockopt( m_Socket, SOL_SOCKET, SO_DONTLINGER, reinterpret_cast<const char*>( &x ), sizeof( x ) );
-	shutdown( m_Socket, SD_BOTH );
-	closesocket( m_Socket );
+    int x = 1;
+    setsockopt( m_Socket, SOL_SOCKET, SO_DONTLINGER, reinterpret_cast<const char*>( &x ), sizeof( x ) );
+    shutdown( m_Socket, SD_BOTH );
+    closesocket( m_Socket );
 #else // AQSIS_SYSTEM_WIN32
-	shutdown( m_Socket, SD_BOTH );
-	close( m_Socket );
+    shutdown( m_Socket, SD_BOTH );
+    close( m_Socket );
 #endif // !AQSIS_SYSTEM_WIN32
 
-	m_Socket = INVALID_SOCKET;
+    m_Socket = INVALID_SOCKET;
 }
 
 
@@ -142,11 +142,11 @@ void CqDDServer::Close()
 
 TqBool	CqDDServer::Prepare( TqInt port )
 {
-	if ( Open() )
-		if ( Bind( port ) )
-			if ( Listen() )
-				return ( TqTrue );
-	return ( TqFalse );
+    if ( Open() )
+        if ( Bind( port ) )
+            if ( Listen() )
+                return ( TqTrue );
+    return ( TqFalse );
 }
 
 
@@ -156,25 +156,25 @@ TqBool	CqDDServer::Prepare( TqInt port )
 
 TqBool CqDDServer::Open()
 {
-	m_Socket = socket( AF_INET, SOCK_STREAM, 0 );
+    m_Socket = socket( AF_INET, SOCK_STREAM, 0 );
 
-	if ( m_Socket == INVALID_SOCKET )
-	{
+    if ( m_Socket == INVALID_SOCKET )
+    {
 #ifdef AQSIS_SYSTEM_WIN32
-		TqInt err = WSAGetLastError();
+        TqInt err = WSAGetLastError();
 #endif // AQSIS_SYSTEM_WIN32
-		std::cerr << error << "Error opening DD server socket" << std::endl;
-		return ( TqFalse );
-	}
+        std::cerr << error << "Error opening DD server socket" << std::endl;
+        return ( TqFalse );
+    }
 
-	TqInt x = 1;
-	setsockopt( m_Socket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>( &x ), sizeof( x ) );
+    TqInt x = 1;
+    setsockopt( m_Socket, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>( &x ), sizeof( x ) );
 
 #ifdef AQSIS_SYSTEM_WIN32
-	BOOL Ret = SetHandleInformation( ( HANDLE ) m_Socket, HANDLE_FLAG_INHERIT, 0 );
+    BOOL Ret = SetHandleInformation( ( HANDLE ) m_Socket, HANDLE_FLAG_INHERIT, 0 );
 #endif // AQSIS_SYSTEM_WIN32
 
-	return ( TqTrue );
+    return ( TqTrue );
 }
 
 
@@ -184,34 +184,34 @@ TqBool CqDDServer::Open()
 
 TqBool CqDDServer::Bind( TqInt port )
 {
-	SOCKADDR_IN saTemp;
-	memset( &saTemp, 0, sizeof( saTemp ) );
-	saTemp.sin_family = AF_INET;
-	saTemp.sin_port = htons( port );
-	saTemp.sin_addr.s_addr = INADDR_ANY;
+    SOCKADDR_IN saTemp;
+    memset( &saTemp, 0, sizeof( saTemp ) );
+    saTemp.sin_family = AF_INET;
+    saTemp.sin_port = htons( port );
+    saTemp.sin_addr.s_addr = INADDR_ANY;
 
-	while ( bind( m_Socket, ( PSOCKADDR ) & saTemp, sizeof( saTemp ) ) == SOCKET_ERROR )
-	{
+    while ( bind( m_Socket, ( PSOCKADDR ) & saTemp, sizeof( saTemp ) ) == SOCKET_ERROR )
+    {
 #ifdef AQSIS_SYSTEM_WIN32
-		TqInt iE = WSAGetLastError();
-		if ( errno == WSAEADDRINUSE )
+        TqInt iE = WSAGetLastError();
+        if ( errno == WSAEADDRINUSE )
 #else // AQSIS_SYSTEM_WIN32
-		if ( errno == EADDRINUSE )
+        if ( errno == EADDRINUSE )
 #endif // AQSIS_SYSTEM_WIN32
-		{
-			port++;
-			saTemp.sin_port = htons( port );
-			continue;
-		}
-		else
-		{
-			std::cerr << error << "Error binding to DD socket" << std::endl;
-			Close();
-			return ( TqFalse );
-		}
-	}
-	m_Port = port;
-	return ( TqTrue );
+        {
+            port++;
+            saTemp.sin_port = htons( port );
+            continue;
+        }
+        else
+        {
+            std::cerr << error << "Error binding to DD socket" << std::endl;
+            Close();
+            return ( TqFalse );
+        }
+    }
+    m_Port = port;
+    return ( TqTrue );
 }
 
 
@@ -221,13 +221,13 @@ TqBool CqDDServer::Bind( TqInt port )
 
 TqBool CqDDServer::Listen()
 {
-	if ( listen( m_Socket, SOMAXCONN ) == SOCKET_ERROR )
-	{
-		std::cerr << error << "Error listening to DD socket" << std::endl;
-		Close();
-		return ( TqFalse );
-	}
-	return ( TqTrue );
+    if ( listen( m_Socket, SOMAXCONN ) == SOCKET_ERROR )
+    {
+        std::cerr << error << "Error listening to DD socket" << std::endl;
+        Close();
+        return ( TqFalse );
+    }
+    return ( TqTrue );
 }
 
 
@@ -237,29 +237,29 @@ TqBool CqDDServer::Listen()
 
 TqBool CqDDServer::Accept( CqDDClient& dd )
 {
-	SOCKET c;
+    SOCKET c;
 
-	if ( ( c = accept( Socket(), NULL, NULL ) ) != INVALID_SOCKET )
-	{
-		dd.SetSocket( c );
-		return( TqTrue );
-	}
-	return ( TqFalse );
+    if ( ( c = accept( Socket(), NULL, NULL ) ) != INVALID_SOCKET )
+    {
+        dd.SetSocket( c );
+        return( TqTrue );
+    }
+    return ( TqFalse );
 }
 
 //////////////////////////// CqDDClient ///////////////////////////////
 
 
 CqDDClient::CqDDClient( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize ) :
-		m_Socket( INVALID_SOCKET ),
-		m_strName( name ),
-		m_strType( type ),
-		m_strMode( mode ),
-		m_modeID( modeID ),
-		m_dataOffset( dataOffset ),
-		m_dataSize( dataSize )
+        m_Socket( INVALID_SOCKET ),
+        m_strName( name ),
+        m_strType( type ),
+        m_strMode( mode ),
+        m_modeID( modeID ),
+        m_dataOffset( dataOffset ),
+        m_dataSize( dataSize )
 {
-	m_hMode = CqParameter::hash( mode );
+    m_hMode = CqParameter::hash( mode );
 }
 
 CqDDClient::~CqDDClient()
@@ -272,16 +272,16 @@ CqDDClient::~CqDDClient()
 void CqDDClient::Close()
 {
 #ifdef AQSIS_SYSTEM_WIN32
-	int x = 1;
-	setsockopt( m_Socket, SOL_SOCKET, SO_DONTLINGER, reinterpret_cast<const char*>( &x ), sizeof( x ) );
-	shutdown( m_Socket, SD_BOTH );
-	closesocket( m_Socket );
+    int x = 1;
+    setsockopt( m_Socket, SOL_SOCKET, SO_DONTLINGER, reinterpret_cast<const char*>( &x ), sizeof( x ) );
+    shutdown( m_Socket, SD_BOTH );
+    closesocket( m_Socket );
 #else // AQSIS_SYSTEM_WIN32
-	shutdown( m_Socket, SD_BOTH );
-	close( m_Socket );
+    shutdown( m_Socket, SD_BOTH );
+    close( m_Socket );
 #endif // !AQSIS_SYSTEM_WIN32
 
-	m_Socket = INVALID_SOCKET;
+    m_Socket = INVALID_SOCKET;
 }
 
 
@@ -294,16 +294,16 @@ void CqDDClient::Close()
 
 void CqDDClient::SendData( void* buffer, TqInt len )
 {
-	if ( m_Socket == INVALID_SOCKET )
-		return ;
+    if ( m_Socket == INVALID_SOCKET )
+        return ;
 
-	TqInt tot = 0, need = len;
-	while ( need > 0 )
-	{
-		TqInt n = send( m_Socket, reinterpret_cast<char*>( buffer ) + tot, need, 0 );
-		need -= n;
-		tot += n;
-	}
+    TqInt tot = 0, need = len;
+    while ( need > 0 )
+    {
+        TqInt n = send( m_Socket, reinterpret_cast<char*>( buffer ) + tot, need, 0 );
+        need -= n;
+        tot += n;
+    }
 }
 
 
@@ -314,7 +314,7 @@ void CqDDClient::SendData( void* buffer, TqInt len )
 
 void CqDDClient::SendMsg( SqDDMessageBase* pMsg )
 {
-	SendData( pMsg, pMsg->m_MessageLength );
+    SendData( pMsg, pMsg->m_MessageLength );
 }
 
 
@@ -326,13 +326,13 @@ void CqDDClient::SendMsg( SqDDMessageBase* pMsg )
 
 void CqDDClient::Receive( void* buffer, TqInt len )
 {
-	TqInt tot = 0, need = len;
-	while ( need > 0 )
-	{
-		TqInt n = recv( m_Socket, reinterpret_cast<char*>( buffer ) + tot, need, 0 );
-		need -= n;
-		tot += n;
-	}
+    TqInt tot = 0, need = len;
+    while ( need > 0 )
+    {
+        TqInt n = recv( m_Socket, reinterpret_cast<char*>( buffer ) + tot, need, 0 );
+        need -= n;
+        tot += n;
+    }
 }
 
 
@@ -345,280 +345,280 @@ TqBool	g_fDisplayMapInitialised = false;
 CqDDManager::CqDDManager()
 {
 #ifdef AQSIS_SYSTEM_WIN32
-	WSADATA data;
-	WSAStartup( MAKEWORD( 2, 0 ), &data );
+    WSADATA data;
+    WSAStartup( MAKEWORD( 2, 0 ), &data );
 #endif // AQSIS_SYSTEM_WIN32
 }
 
 CqDDManager::~CqDDManager()
 {
 #ifdef AQSIS_SYSTEM_WIN32
-	WSACleanup();
+    WSACleanup();
 #endif // AQSIS_SYSTEM_WIN32
 }
 
 TqInt CqDDManager::Initialise()
 {
-	if ( !m_DDServer.Prepare( AQSIS_DD_PORT ) )
-		return ( -1 );
-	else
-		return ( 0 );
+    if ( !m_DDServer.Prepare( AQSIS_DD_PORT ) )
+        return ( -1 );
+    else
+        return ( 0 );
 }
 
 TqInt CqDDManager::Shutdown()
 {
-	std::vector<CqDDClient>::iterator i;
-	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
-		i->Close();
-	m_DDServer.Close();
-	g_mapDisplayNames.clear();
-	g_fDisplayMapInitialised = false;
-	return ( 0 );
+    std::vector<CqDDClient>::iterator i;
+    for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+        i->Close();
+    m_DDServer.Close();
+    g_mapDisplayNames.clear();
+    g_fDisplayMapInitialised = false;
+    return ( 0 );
 }
 
 TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments )
 {
-	CqDDClient New( name, type, mode, modeID, dataOffset, dataSize );
-	TqInt error = 0;
-	m_aDisplayRequests.push_back( New );
-	try
-	{
-		LoadDisplayLibrary( m_aDisplayRequests.back(), mapOfArguments );
-	}
-	catch( CqString str )
-	{
-		std::cerr << error << str.c_str() << std::endl;
-		error = 1;
-		m_aDisplayRequests.pop_back();
-	}
-	return ( error );
+    CqDDClient New( name, type, mode, modeID, dataOffset, dataSize );
+    TqInt error = 0;
+    m_aDisplayRequests.push_back( New );
+    try
+    {
+        LoadDisplayLibrary( m_aDisplayRequests.back(), mapOfArguments );
+    }
+    catch( CqString str )
+    {
+        std::cerr << error << str.c_str() << std::endl;
+        error = 1;
+        m_aDisplayRequests.pop_back();
+    }
+    return ( error );
 }
 
 TqInt CqDDManager::ClearDisplays()
 {
-	SqDDMessageAbandon msg;
+    SqDDMessageAbandon msg;
 
-	std::vector<CqDDClient>::iterator i;
+    std::vector<CqDDClient>::iterator i;
 
-	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
-	{
-		if ( i->Socket() != INVALID_SOCKET )
-			i->SendMsg( &msg );
-	}
-	m_aDisplayRequests.clear();
-	return ( 0 );
+    for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+    {
+        if ( i->Socket() != INVALID_SOCKET )
+            i->SendMsg( &msg );
+    }
+    m_aDisplayRequests.clear();
+    return ( 0 );
 }
 
 TqInt CqDDManager::OpenDisplays()
 {
-	std::vector<CqDDClient>::iterator i;
-	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
-	{
-		CqDDClient& dd = *i;
-		CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera" );
-		CqMatrix matWorldToScreen = QGetRenderContext() ->matSpaceToSpace( "world", "screen" );
+    std::vector<CqDDClient>::iterator i;
+    for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+    {
+        CqDDClient& dd = *i;
+        CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera" );
+        CqMatrix matWorldToScreen = QGetRenderContext() ->matSpaceToSpace( "world", "screen" );
 
-		if ( matWorldToCamera.fIdentity() ) matWorldToCamera.Identity();
-		if ( matWorldToScreen.fIdentity() ) matWorldToScreen.Identity();
+        if ( matWorldToCamera.fIdentity() ) matWorldToCamera.Identity();
+        if ( matWorldToScreen.fIdentity() ) matWorldToScreen.Identity();
 
-		SqDDMessageNl msgnl( matWorldToCamera.pElements() );
-		dd.SendMsg( &msgnl );
+        SqDDMessageNl msgnl( matWorldToCamera.pElements() );
+        dd.SendMsg( &msgnl );
 
-		SqDDMessageNP msgnp( matWorldToScreen.pElements() );
-		dd.SendMsg( &msgnp );
+        SqDDMessageNP msgnp( matWorldToScreen.pElements() );
+        dd.SendMsg( &msgnp );
 
-		// Send the open message..
-		TqInt SamplesPerElement = dd.GetdataSize();
-		TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "Quantize", "Color" );
-		TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
-		TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
-		TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
-		TqBool FloatOutput = ( one == 0 && min == 0 && max == 0 );
-		SqDDMessageOpen msgopen( QGetRenderContext() ->pImage() ->iXRes(),
-		                         QGetRenderContext() ->pImage() ->iYRes(),
-		                         SamplesPerElement,
-		                         //BitsPerSample,  	// Bits per sample.
-		                         QGetRenderContext() ->pImage() ->CropWindowXMin(),
-		                         QGetRenderContext() ->pImage() ->CropWindowXMax(),
-		                         QGetRenderContext() ->pImage() ->CropWindowYMin(),
-		                         QGetRenderContext() ->pImage() ->CropWindowYMax() );
-		dd.SendMsg( &msgopen );
+        // Send the open message..
+        TqInt SamplesPerElement = dd.GetdataSize();
+        TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "Quantize", "Color" );
+        TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
+        TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
+        TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
+        TqBool FloatOutput = ( one == 0 && min == 0 && max == 0 );
+        SqDDMessageOpen msgopen( QGetRenderContext() ->pImage() ->iXRes(),
+                                 QGetRenderContext() ->pImage() ->iYRes(),
+                                 SamplesPerElement,
+                                 //BitsPerSample,  	// Bits per sample.
+                                 QGetRenderContext() ->pImage() ->CropWindowXMin(),
+                                 QGetRenderContext() ->pImage() ->CropWindowXMax(),
+                                 QGetRenderContext() ->pImage() ->CropWindowYMin(),
+                                 QGetRenderContext() ->pImage() ->CropWindowYMax() );
+        dd.SendMsg( &msgopen );
 
-		// Issue a format request so that we know what data to send to the client.
-		TqInt formats[2];
-		if( FloatOutput )
-		{
-			formats[0] = DataFormat_Float32;
-			formats[1] = DataFormat_Unsigned8;
-		}
-		else
-		{
-			formats[0] = DataFormat_Unsigned8;
-			formats[1] = DataFormat_Float32;
-		}
-		SqDDMessageFormatQuery* msg = SqDDMessageFormatQuery::Construct( 2, formats );
-		SqDDMessageFormatResponse frmt;
+        // Issue a format request so that we know what data to send to the client.
+        TqInt formats[2];
+        if( FloatOutput )
+        {
+            formats[0] = DataFormat_Float32;
+            formats[1] = DataFormat_Unsigned8;
+        }
+        else
+        {
+            formats[0] = DataFormat_Unsigned8;
+            formats[1] = DataFormat_Float32;
+        }
+        SqDDMessageFormatQuery* msg = SqDDMessageFormatQuery::Construct( 2, formats );
+        SqDDMessageFormatResponse frmt;
 
-		dd.SendMsg( msg );
-		dd.Receive( &frmt, sizeof( frmt ) );
-		msg->Destroy();
+        dd.SendMsg( msg );
+        dd.Receive( &frmt, sizeof( frmt ) );
+        msg->Destroy();
 
-		// Confirm the message returned is as expected.
-		if ( frmt.m_MessageID != MessageID_FormatResponse ||
-		     frmt.m_MessageLength != sizeof( frmt ) )
-			dd.Close();
-	}
+        // Confirm the message returned is as expected.
+        if ( frmt.m_MessageID != MessageID_FormatResponse ||
+                frmt.m_MessageLength != sizeof( frmt ) )
+            dd.Close();
+    }
 
-	return ( 0 );
+    return ( 0 );
 }
 
 TqInt CqDDManager::CloseDisplays()
 {
-	SqDDMessageClose msg;
-	SqDDMessageCloseAcknowledge ack;
+    SqDDMessageClose msg;
+    SqDDMessageCloseAcknowledge ack;
 
-	std::vector<CqDDClient>::iterator i;
+    std::vector<CqDDClient>::iterator i;
 
-	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
-	{
-		if ( i->Socket() != INVALID_SOCKET )
-		{
-			i->SendMsg( &msg );
-			i->Receive( &ack, sizeof( ack ) );
+    for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+    {
+        if ( i->Socket() != INVALID_SOCKET )
+        {
+            i->SendMsg( &msg );
+            i->Receive( &ack, sizeof( ack ) );
 
-			// Confirm the message returned is as expected.
-			if ( ack.m_MessageID == MessageID_CloseAcknowledge &&
-			        ack.m_MessageLength == sizeof( ack ) )
-				continue;
-			else
-			{
-				std::cerr << error << "Failed to close display device" << std::endl;
-			}
-		}
-	}
-	return ( 0 );
+            // Confirm the message returned is as expected.
+            if ( ack.m_MessageID == MessageID_CloseAcknowledge &&
+                    ack.m_MessageLength == sizeof( ack ) )
+                continue;
+            else
+            {
+                std::cerr << error << "Failed to close display device" << std::endl;
+            }
+        }
+    }
+    return ( 0 );
 }
 
 TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 {
-	// Copy the bucket to the display buffer.
-	TqInt	xmin = pBucket->XOrigin();
-	TqInt	ymin = pBucket->YOrigin();
-	TqInt	xsize = pBucket->Width();
-	TqInt	ysize = pBucket->Height();
-	TqInt	xmaxplus1 = xmin + xsize;
-	TqInt	ymaxplus1 = ymin + ysize;
+    // Copy the bucket to the display buffer.
+    TqInt	xmin = pBucket->XOrigin();
+    TqInt	ymin = pBucket->YOrigin();
+    TqInt	xsize = pBucket->Width();
+    TqInt	ysize = pBucket->Height();
+    TqInt	xmaxplus1 = xmin + xsize;
+    TqInt	ymaxplus1 = ymin + ysize;
 
-	for ( std::vector<CqDDClient>::iterator i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
-	{
-		TqInt mode = i->GetmodeID();
-		TqInt samples = i->GetdataSize();
+    for ( std::vector<CqDDClient>::iterator i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+    {
+        TqInt mode = i->GetmodeID();
+        TqInt samples = i->GetdataSize();
 
-		TqInt	elementsize = samples * sizeof( TqFloat );
-		TqInt	datalen = xsize * ysize * elementsize;
+        TqInt	elementsize = samples * sizeof( TqFloat );
+        TqInt	datalen = xsize * ysize * elementsize;
 
-		TqFloat*	pData = new TqFloat[ xsize * ysize * samples ];
+        TqFloat*	pData = new TqFloat[ xsize * ysize * samples ];
 
-		TqInt	linelen = xsize * samples;
+        TqInt	linelen = xsize * samples;
 
-		TqInt y;
-		for ( y = 0; y < ysize; y++ )
-		{
-			TqInt sy = y + ymin;
-			TqInt x;
-			for ( x = 0; x < xsize; x++ )
-			{
-				TqInt sx = x + xmin;
-				TqInt so = ( y * linelen ) + ( x * samples );
-				// If outputting a zfile, use the midpoint method.
-				/// \todo Should really be generalising this section to use specif Filter/Expose/Quantize functions.
-				if ( mode & ModeZ )
-				{
-					pData[ so ] = pBucket->Depth( sx, sy );
-				}
-				else
-				{
-					if ( mode & ModeRGB )
-					{
-						const TqFloat* pSamples = pBucket->Data( sx, sy );
-						pData[ so + 0 ] = pSamples[0];
-						pData[ so + 1 ] = pSamples[1];
-						pData[ so + 2 ] = pSamples[2];
-						if ( mode & ModeA )
-						{
-							TqFloat a = ( pSamples[3] + pSamples[4] + pSamples[5] ) / 3.0f;
-							pData[ so + 3 ] = a * pBucket->Coverage( sx, sy );
-						}
-					}
-					else if ( mode & ModeA )
-					{
-						const TqFloat* pSamples = pBucket->Data( sx, sy );
-						TqFloat a = ( pSamples[3] + pSamples[4] + pSamples[5] ) / 3.0f;
-						pData[ so + 0 ] = a * pBucket->Coverage( sx, sy );
-					}
-					else
-					{
-						// If not any of the standard modes, then check for AOV.
-						TqInt ioffset = i->GetdataOffset();
-						if( i->GetdataSize() != 0 )
-						{
-							const TqFloat* pSamples = pBucket->Data( sx, sy );
-							TqInt idata;
-							for( idata = 0; idata < i->GetdataSize(); idata++ )
-								pData[ so + idata ] = pSamples[ ioffset + idata ];
-						}
-					}
-				}
-			}
-		}
-		SqDDMessageData* pmsg = SqDDMessageData::Construct( xmin, xmaxplus1, ymin, ymaxplus1, elementsize, pData, datalen );
-		delete[] ( pData );
-		i->SendMsg( pmsg );
-		pmsg->Destroy();
-	}
-	return ( 0 );
+        TqInt y;
+        for ( y = 0; y < ysize; y++ )
+        {
+            TqInt sy = y + ymin;
+            TqInt x;
+            for ( x = 0; x < xsize; x++ )
+            {
+                TqInt sx = x + xmin;
+                TqInt so = ( y * linelen ) + ( x * samples );
+                // If outputting a zfile, use the midpoint method.
+                /// \todo Should really be generalising this section to use specif Filter/Expose/Quantize functions.
+                if ( mode & ModeZ )
+                {
+                    pData[ so ] = pBucket->Depth( sx, sy );
+                }
+                else
+                {
+                    if ( mode & ModeRGB )
+                    {
+                        const TqFloat* pSamples = pBucket->Data( sx, sy );
+                        pData[ so + 0 ] = pSamples[0];
+                        pData[ so + 1 ] = pSamples[1];
+                        pData[ so + 2 ] = pSamples[2];
+                        if ( mode & ModeA )
+                        {
+                            TqFloat a = ( pSamples[3] + pSamples[4] + pSamples[5] ) / 3.0f;
+                            pData[ so + 3 ] = a * pBucket->Coverage( sx, sy );
+                        }
+                    }
+                    else if ( mode & ModeA )
+                    {
+                        const TqFloat* pSamples = pBucket->Data( sx, sy );
+                        TqFloat a = ( pSamples[3] + pSamples[4] + pSamples[5] ) / 3.0f;
+                        pData[ so + 0 ] = a * pBucket->Coverage( sx, sy );
+                    }
+                    else
+                    {
+                        // If not any of the standard modes, then check for AOV.
+                        TqInt ioffset = i->GetdataOffset();
+                        if( i->GetdataSize() != 0 )
+                        {
+                            const TqFloat* pSamples = pBucket->Data( sx, sy );
+                            TqInt idata;
+                            for( idata = 0; idata < i->GetdataSize(); idata++ )
+                                pData[ so + idata ] = pSamples[ ioffset + idata ];
+                        }
+                    }
+                }
+            }
+        }
+        SqDDMessageData* pmsg = SqDDMessageData::Construct( xmin, xmaxplus1, ymin, ymaxplus1, elementsize, pData, datalen );
+        delete[] ( pData );
+        i->SendMsg( pmsg );
+        pmsg->Destroy();
+    }
+    return ( 0 );
 }
 
 
 
 TqBool CqDDManager::fDisplayNeeds( const TqChar* var )
 {
-	static TqUlong rgb = CqParameter::hash( "rgb" );
-	static TqUlong rgba = CqParameter::hash( "rgba" );
-	static TqUlong Ci = CqParameter::hash( "Ci" );
-	static TqUlong Oi = CqParameter::hash( "Oi" );
+    static TqUlong rgb = CqParameter::hash( "rgb" );
+    static TqUlong rgba = CqParameter::hash( "rgba" );
+    static TqUlong Ci = CqParameter::hash( "Ci" );
+    static TqUlong Oi = CqParameter::hash( "Oi" );
 
-	TqUlong htoken = CqParameter::hash( var );
+    TqUlong htoken = CqParameter::hash( var );
 
-	std::vector<CqDDClient>::iterator i;
-	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
-	{
-		TqBool usage = ( ( i->hMode() == rgba ) || ( i->hMode() == rgb ) );
-		if ( ( htoken == Ci ) && usage )
-			return ( TqTrue );
-		else if ( ( htoken == Oi ) && usage )
-			return ( TqTrue );
-		else if ( ( i->hMode() == htoken ) )
-			return ( TqTrue );
-	}
-	return ( TqFalse );
+    std::vector<CqDDClient>::iterator i;
+    for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+    {
+        TqBool usage = ( ( i->hMode() == rgba ) || ( i->hMode() == rgb ) );
+        if ( ( htoken == Ci ) && usage )
+            return ( TqTrue );
+        else if ( ( htoken == Oi ) && usage )
+            return ( TqTrue );
+        else if ( ( i->hMode() == htoken ) )
+            return ( TqTrue );
+    }
+    return ( TqFalse );
 }
 
 
 TqInt CqDDManager::Uses()
 {
-	TqInt Uses = 0;
-	std::vector<CqDDClient>::iterator i;
-	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
-	{
-		TqInt ivar;
-		for( ivar = 0; ivar < EnvVars_Last; ivar++ )
-		{
-			if( i->hMode() == gVariableTokens[ ivar ] )
-				Uses |= 1 << ivar;
-		}
-	}
-	return ( Uses );
+    TqInt Uses = 0;
+    std::vector<CqDDClient>::iterator i;
+    for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+    {
+        TqInt ivar;
+        for( ivar = 0; ivar < EnvVars_Last; ivar++ )
+        {
+            if( i->hMode() == gVariableTokens[ ivar ] )
+                Uses |= 1 << ivar;
+        }
+    }
+    return ( Uses );
 }
 
 /**
@@ -627,192 +627,192 @@ TqInt CqDDManager::Uses()
 */
 void CqDDManager::LoadDisplayLibrary( CqDDClient& dd, std::map<std::string, void*>& mapParams )
 {
-	if ( !g_fDisplayMapInitialised )
-		InitialiseDisplayNameMap();
+    if ( !g_fDisplayMapInitialised )
+        InitialiseDisplayNameMap();
 
-	// strDriverFileAndArgs: Second part of the ddmsock.ini line (e.g. "mydriver.exe --foo")
-	CqString strDriverFileAndArgs = g_mapDisplayNames[ dd.strType() ];
-	// strDriverFile: Only the executable without arguments (e.g. "mydriver.exe")
-	CqString strDriverFile = GetStringField( strDriverFileAndArgs, 0 );
+    // strDriverFileAndArgs: Second part of the ddmsock.ini line (e.g. "mydriver.exe --foo")
+    CqString strDriverFileAndArgs = g_mapDisplayNames[ dd.strType() ];
+    // strDriverFile: Only the executable without arguments (e.g. "mydriver.exe")
+    CqString strDriverFile = GetStringField( strDriverFileAndArgs, 0 );
 
-	// Check-ins said temporary way to handle locating display drivers.
-	// Until finished provide a helpful message for folks instead of
-	//    trapping.
-	if ( strDriverFile.empty() )
-	{
-		//CqBasicError( ErrorID_DisplayDriver, Severity_Normal, "Invalid display type. \"" + dd.strType + "\"" );
-		throw( CqString( "Invalid display type \"" ) + dd.strType() + CqString( "\"" ) );
-	}
+    // Check-ins said temporary way to handle locating display drivers.
+    // Until finished provide a helpful message for folks instead of
+    //    trapping.
+    if ( strDriverFile.empty() )
+    {
+        //CqBasicError( ErrorID_DisplayDriver, Severity_Normal, "Invalid display type. \"" + dd.strType + "\"" );
+        throw( CqString( "Invalid display type \"" ) + dd.strType() + CqString( "\"" ) );
+    }
 
-	// Try to open the file to see if it's really there
-	CqRiFile fileDriver( strDriverFile.c_str(), "display" );
+    // Try to open the file to see if it's really there
+    CqRiFile fileDriver( strDriverFile.c_str(), "display" );
 
-	if ( !fileDriver.IsValid() )
-	{
-		//CqBasicError( 0, 0, ( "Error loading display driver [ " + strDriverFile + " ]" ).c_str() );
-		throw( CqString( "Error loading display driver [ " ) + strDriverFile + CqString( " ]" ) );
-	}
+    if ( !fileDriver.IsValid() )
+    {
+        //CqBasicError( 0, 0, ( "Error loading display driver [ " + strDriverFile + " ]" ).c_str() );
+        throw( CqString( "Error loading display driver [ " ) + strDriverFile + CqString( " ]" ) );
+    }
 
-	CqString strDriverPathAndFile = fileDriver.strRealName();
+    CqString strDriverPathAndFile = fileDriver.strRealName();
 
-	const int maxargs = 20;
-	const char* args[ maxargs ];
-	std::string argstrings[ maxargs ];
-	int i;
+    const int maxargs = 20;
+    const char* args[ maxargs ];
+    std::string argstrings[ maxargs ];
+    int i;
 
-	// Prepare an arry with the arguments
-	// (the first argument (the file name) begins at position 2 because
-	// the Windows version might have to call cmd.exe which will be
-	// prepended to the argument list)
-	args[ 2 ] = strDriverFile.c_str();
-	args[ 3 ] = NULL;
-	args[ maxargs - 1 ] = NULL;
-	for ( i = 1; i < maxargs - 3; i++ )
-	{
-		argstrings[ i ] = GetStringField( strDriverFileAndArgs, i );
-		if ( argstrings[ i ].length() == 0 )
-		{
-			args[ i + 2 ] = NULL;
-			break;
-		}
-		args[ i + 2 ] = argstrings[ i ].c_str();
-	}
+    // Prepare an arry with the arguments
+    // (the first argument (the file name) begins at position 2 because
+    // the Windows version might have to call cmd.exe which will be
+    // prepended to the argument list)
+    args[ 2 ] = strDriverFile.c_str();
+    args[ 3 ] = NULL;
+    args[ maxargs - 1 ] = NULL;
+    for ( i = 1; i < maxargs - 3; i++ )
+    {
+        argstrings[ i ] = GetStringField( strDriverFileAndArgs, i );
+        if ( argstrings[ i ].length() == 0 )
+        {
+            args[ i + 2 ] = NULL;
+            break;
+        }
+        args[ i + 2 ] = argstrings[ i ].c_str();
+    }
 
 
 #ifdef AQSIS_SYSTEM_WIN32
 
-	// Set the AQSIS_DD_PORT environment variable
-	SetEnvironmentVariable( "AQSIS_DD_PORT", ToString(m_DDServer.getPort()).c_str() );
+    // Set the AQSIS_DD_PORT environment variable
+    SetEnvironmentVariable( "AQSIS_DD_PORT", ToString(m_DDServer.getPort()).c_str() );
 
-	// Spawn the driver (1st try)...
-	TqInt ProcHandle = _spawnv( _P_NOWAITO, strDriverPathAndFile.c_str(), &args[ 2 ] );
-	// If it didn't work try a second time via "cmd.exe"...
-	if ( ProcHandle < 0 )
-	{
-		args[ 0 ] = "cmd.exe";
-		args[ 1 ] = "/C";
-		args[ 2 ] = strDriverPathAndFile.c_str();
-		ProcHandle = _spawnvp( _P_NOWAITO, "cmd.exe", args );
-	}
-	if ( ProcHandle < 0 )
-	{
-		//CqBasicError( 0, 0, "Error spawning display driver process" );
-		throw( CqString( "Error spawning display driver process" ) );
-	}
+    // Spawn the driver (1st try)...
+    TqInt ProcHandle = _spawnv( _P_NOWAITO, strDriverPathAndFile.c_str(), &args[ 2 ] );
+    // If it didn't work try a second time via "cmd.exe"...
+    if ( ProcHandle < 0 )
+    {
+        args[ 0 ] = "cmd.exe";
+        args[ 1 ] = "/C";
+        args[ 2 ] = strDriverPathAndFile.c_str();
+        ProcHandle = _spawnvp( _P_NOWAITO, "cmd.exe", args );
+    }
+    if ( ProcHandle < 0 )
+    {
+        //CqBasicError( 0, 0, "Error spawning display driver process" );
+        throw( CqString( "Error spawning display driver process" ) );
+    }
 
 #else // AQSIS_SYSTEM_WIN32
 
-	// Set the AQSIS_DD_PORT environment variable
-	putenv( const_cast<char*>(("AQSIS_DD_PORT=" + ToString(m_DDServer.getPort())).c_str()));
-	signal( SIGCHLD, sig_chld );
-	// Spawn the driver
-	const int forkresult = fork();
-	// Start the driver in the child process
-	if ( 0 == forkresult )
-	{
-		//execlp( strDriverPathAndFile.c_str(), strDriverFile.c_str(), NULL );
-		execvp( strDriverPathAndFile.c_str(), ( char * const * ) ( args + 2 ) );
-		/* error checking? */
-		return ;
-	}
-	else if ( -1 == forkresult )
-	{
-		//CqBasicError( 0, 0, "Error forking display driver process" );
-		throw( CqString( "Error forking display driver process" ) );
-	}
+    // Set the AQSIS_DD_PORT environment variable
+    putenv( const_cast<char*>(("AQSIS_DD_PORT=" + ToString(m_DDServer.getPort())).c_str()));
+    signal( SIGCHLD, sig_chld );
+    // Spawn the driver
+    const int forkresult = fork();
+    // Start the driver in the child process
+    if ( 0 == forkresult )
+    {
+        //execlp( strDriverPathAndFile.c_str(), strDriverFile.c_str(), NULL );
+        execvp( strDriverPathAndFile.c_str(), ( char * const * ) ( args + 2 ) );
+        /* error checking? */
+        return ;
+    }
+    else if ( -1 == forkresult )
+    {
+        //CqBasicError( 0, 0, "Error forking display driver process" );
+        throw( CqString( "Error forking display driver process" ) );
+    }
 #endif // !AQSIS_SYSTEM_WIN32
 
-	// wait for a connection request from the client
-	if ( m_DDServer.Accept( dd ) )
-	{
-		// Send a filename message
-		SqDDMessageFilename * pmsgfname = SqDDMessageFilename::Construct( dd.strName().c_str() );
-		dd.SendMsg( pmsgfname );
-		pmsgfname->Destroy();
-		// Send a display type message
-		SqDDMessageDisplayType * pmsgdtype = SqDDMessageDisplayType::Construct( dd.strType().c_str() );
-		dd.SendMsg( pmsgdtype );
-		pmsgdtype->Destroy();
-		
-		SendUserParameters( mapParams, &dd );
-	}
+    // wait for a connection request from the client
+    if ( m_DDServer.Accept( dd ) )
+    {
+        // Send a filename message
+        SqDDMessageFilename * pmsgfname = SqDDMessageFilename::Construct( dd.strName().c_str() );
+        dd.SendMsg( pmsgfname );
+        pmsgfname->Destroy();
+        // Send a display type message
+        SqDDMessageDisplayType * pmsgdtype = SqDDMessageDisplayType::Construct( dd.strType().c_str() );
+        dd.SendMsg( pmsgdtype );
+        pmsgdtype->Destroy();
+
+        SendUserParameters( mapParams, &dd );
+    }
 }
 
 
 
 void CqDDManager::InitialiseDisplayNameMap()
 {
-	// Read in the configuration file.
-	// Find the config file in the same place as the display drivers.
+    // Read in the configuration file.
+    // Find the config file in the same place as the display drivers.
 #ifdef AQSIS_SYSTEM_POSIX
-	CqString ddmsock_path( "" );
-	char* env = NULL;
+    CqString ddmsock_path( "" );
+    char* env = NULL;
 
-	env = getenv( "AQSIS_CONFIG_PATH" );
-	if ( env == NULL )
-	{
+    env = getenv( "AQSIS_CONFIG_PATH" );
+    if ( env == NULL )
+    {
 #ifndef AQSIS_SYSTEM_MACOSX
-		ddmsock_path = CONFIG_PATH;
+        ddmsock_path = CONFIG_PATH;
 #else
-		ddmsock_path = ".";
+        ddmsock_path = ".";
 #endif
 
-	}
-	else
-	{
-		ddmsock_path = env;
-	}
+    }
+    else
+    {
+        ddmsock_path = env;
+    }
 
-	ddmsock_path.append( "/" );
+    ddmsock_path.append( "/" );
 
-	ddmsock_path.append( "ddmsock.ini" );
+    ddmsock_path.append( "ddmsock.ini" );
 
-	CqString strConfigFile = ddmsock_path;
+    CqString strConfigFile = ddmsock_path;
 #else
-	CqString strConfigFile = "ddmsock.ini";
+    CqString strConfigFile = "ddmsock.ini";
 #endif /* AQSIS_SYSTEM_POSIX */
 
-	CqRiFile fileINI( strConfigFile.c_str(), "display" );
-	if ( fileINI.IsValid() )
-	{
-		// On each line, read the first string, then the second and store them in the map.
-		std::string strLine;
-		std::istream& strmINI = static_cast<std::istream&>( fileINI );
+    CqRiFile fileINI( strConfigFile.c_str(), "display" );
+    if ( fileINI.IsValid() )
+    {
+        // On each line, read the first string, then the second and store them in the map.
+        std::string strLine;
+        std::istream& strmINI = static_cast<std::istream&>( fileINI );
 
-		while ( std::getline( strmINI, strLine ) )
-		{
-			std::string strName, strDriverName;
-			std::string::size_type iStartN = strLine.find_first_not_of( '\t' );
-			std::string::size_type iEndN = strLine.find_first_of( '\t', iStartN );
-			std::string::size_type iStartD = strLine.find_first_not_of( '\t', iEndN );
-			std::string::size_type iEndD = strLine.find_first_of( '\t', iStartD );
-			if ( iStartN != std::string::npos && iEndN != std::string::npos &&
-			        iStartD != std::string::npos )
-			{
-				strName = strLine.substr( iStartN, iEndN );
+        while ( std::getline( strmINI, strLine ) )
+        {
+            std::string strName, strDriverName;
+            std::string::size_type iStartN = strLine.find_first_not_of( '\t' );
+            std::string::size_type iEndN = strLine.find_first_of( '\t', iStartN );
+            std::string::size_type iStartD = strLine.find_first_not_of( '\t', iEndN );
+            std::string::size_type iEndD = strLine.find_first_of( '\t', iStartD );
+            if ( iStartN != std::string::npos && iEndN != std::string::npos &&
+                    iStartD != std::string::npos )
+            {
+                strName = strLine.substr( iStartN, iEndN );
 #ifdef AQSIS_SYSTEM_MACOSX
-				if ( env == NULL )
-				{
-					strDriverName = "./";
-				}
-				else
-				{
-					strDriverName = env;
-					strDriverName.append( "/" );
-				}
-				strDriverName.append( strLine.substr( iStartD, iEndD ) );
+                if ( env == NULL )
+                {
+                    strDriverName = "./";
+                }
+                else
+                {
+                    strDriverName = env;
+                    strDriverName.append( "/" );
+                }
+                strDriverName.append( strLine.substr( iStartD, iEndD ) );
 #else
-				strDriverName = strLine.substr( iStartD, iEndD );
+                strDriverName = strLine.substr( iStartD, iEndD );
 #endif /* AQSIS_SYSTEM_MACOSX */
-				g_mapDisplayNames[ strName ] = strDriverName;
-			}
-		}
-		g_fDisplayMapInitialised = true;
-	}
-	else
-	{
-		std::cerr << error << "Could not find ddmsock.ini file." << std::endl;
-	}
+                g_mapDisplayNames[ strName ] = strDriverName;
+            }
+        }
+        g_fDisplayMapInitialised = true;
+    }
+    else
+    {
+        std::cerr << error << "Could not find ddmsock.ini file." << std::endl;
+    }
 }
 
 /**
@@ -829,134 +829,134 @@ void CqDDManager::InitialiseDisplayNameMap()
 */
 std::string CqDDManager::GetStringField( const std::string& s, int idx )
 {
-	int z = 1;   /* state variable  0=skip whitespace  1=skip chars  2=search end  3=end */
-	std::string::const_iterator it;
-	std::string::size_type start = 0;
-	std::string::size_type end = 0;
+    int z = 1;   /* state variable  0=skip whitespace  1=skip chars  2=search end  3=end */
+    std::string::const_iterator it;
+    std::string::size_type start = 0;
+    std::string::size_type end = 0;
 
-	for ( it = s.begin(); it != s.end(); it++ )
-	{
-		char c = *it;
+    for ( it = s.begin(); it != s.end(); it++ )
+    {
+        char c = *it;
 
-		if ( idx == 0 && z < 2 )
-		{
-			z = 2;
-		}
+        if ( idx == 0 && z < 2 )
+        {
+            z = 2;
+        }
 
-		switch ( z )
-		{
-				case 0: if ( c != ' ' && c != '\t' )
-				{
-					idx--;
-					end = start + 1;
-					z = 1;
-				}
-				if ( idx > 0 ) start++;
-				break;
-				case 1: if ( c == ' ' || c == '\t' )
-				{
-					z = 0;
-				}
-				start++;
-				break;
-				case 2: if ( c == ' ' || c == '\t' )
-				{
-					z = 3;
-				}
-				else
-				{
-					end++;
-				}
-				break;
-		}
-	}
+        switch ( z )
+        {
+        case 0: if ( c != ' ' && c != '\t' )
+            {
+                idx--;
+                end = start + 1;
+                z = 1;
+            }
+            if ( idx > 0 ) start++;
+            break;
+        case 1: if ( c == ' ' || c == '\t' )
+            {
+                z = 0;
+            }
+            start++;
+            break;
+        case 2: if ( c == ' ' || c == '\t' )
+            {
+                z = 3;
+            }
+            else
+            {
+                end++;
+            }
+            break;
+        }
+    }
 
-	if ( idx == 0 )
-		return s.substr( start, end - start );
-	else
-		return std::string( "" );
+    if ( idx == 0 )
+        return s.substr( start, end - start );
+    else
+        return std::string( "" );
 
 }
 
 
 void SendUserParameters( std::map<std::string, void*>& mapParams, CqDDClient* client )
 {
-	std::map<std::string, void*>::iterator param;
-	for ( param = mapParams.begin(); param != mapParams.end(); param++ )
-	{
-		SqParameterDeclaration Decl;
-		try
-		{
-			Decl = QGetRenderContext() ->FindParameterDecl( param->first.c_str() );
-		}
-		catch( XqException e )
-		{
-			std::cerr << error << e.strReason().c_str() << std::endl;
-			return;
-		}
+    std::map<std::string, void*>::iterator param;
+    for ( param = mapParams.begin(); param != mapParams.end(); param++ )
+    {
+        SqParameterDeclaration Decl;
+        try
+        {
+            Decl = QGetRenderContext() ->FindParameterDecl( param->first.c_str() );
+        }
+        catch( XqException e )
+        {
+            std::cerr << error << e.strReason().c_str() << std::endl;
+            return;
+        }
 
-		// Check the parameter type is uniform, not valid for non-surface requests otherwise.
-		if( Decl.m_Class != class_uniform )
-		{
-			assert( TqFalse );
-			continue;
-		}
+        // Check the parameter type is uniform, not valid for non-surface requests otherwise.
+        if( Decl.m_Class != class_uniform )
+        {
+            assert( TqFalse );
+            continue;
+        }
 
-		// Special case for strings, we need to build an array of strings to pass as we cannot pass pointers across processes.
-		if( Decl.m_Type == type_string )
-		{
-			const char** strings = static_cast<const char**>( param->second );
-			TqInt i;
-			TqInt len = 0;
-			for( i = 0; i < Decl.m_Count; i++ )
-				len += strlen( strings[ i ] ) + 1;
-			char* data = new char[ len ];
-			memset( data, 0, len );
-			len = 0;
-			for( i = 0; i < Decl.m_Count; i++ )
-			{
-				strcpy( data + len, strings[ i ] );
-				len += strlen( strings[ i ] ) + 1;
-			}
+        // Special case for strings, we need to build an array of strings to pass as we cannot pass pointers across processes.
+        if( Decl.m_Type == type_string )
+        {
+            const char** strings = static_cast<const char**>( param->second );
+            TqInt i;
+            TqInt len = 0;
+            for( i = 0; i < Decl.m_Count; i++ )
+                len += strlen( strings[ i ] ) + 1;
+            char* data = new char[ len ];
+            memset( data, 0, len );
+            len = 0;
+            for( i = 0; i < Decl.m_Count; i++ )
+            {
+                strcpy( data + len, strings[ i ] );
+                len += strlen( strings[ i ] ) + 1;
+            }
 
-			SqDDMessageUserParam* pmsg = SqDDMessageUserParam::Construct(Decl.m_strName.c_str(), Decl.m_Type, Decl.m_Count, data, len );
-			client->SendMsg( pmsg );
-			pmsg->Destroy();
-			delete[]( data );
-		}
-		else
-		{
-			TqInt elementsize = 0;
-			switch ( Decl.m_Type )
-			{
-					case type_float:
-						elementsize = sizeof(TqFloat);
-					break;
+            SqDDMessageUserParam* pmsg = SqDDMessageUserParam::Construct(Decl.m_strName.c_str(), Decl.m_Type, Decl.m_Count, data, len );
+            client->SendMsg( pmsg );
+            pmsg->Destroy();
+            delete[]( data );
+        }
+        else
+        {
+            TqInt elementsize = 0;
+            switch ( Decl.m_Type )
+            {
+            case type_float:
+                elementsize = sizeof(TqFloat);
+                break;
 
-					case type_integer:
-						elementsize = sizeof(TqInt);
-					break;
+            case type_integer:
+                elementsize = sizeof(TqInt);
+                break;
 
-					case type_point:
-					case type_normal:
-					case type_vector:
-					case type_color:
-						elementsize = sizeof(TqFloat) * 3;
-					break;
+            case type_point:
+            case type_normal:
+            case type_vector:
+            case type_color:
+                elementsize = sizeof(TqFloat) * 3;
+                break;
 
-					case type_hpoint:
-						elementsize = sizeof(TqFloat) * 4;
-					break;
+            case type_hpoint:
+                elementsize = sizeof(TqFloat) * 4;
+                break;
 
-					case type_matrix:
-						elementsize = sizeof(TqFloat) * 16;
-					break;
-			}
-			SqDDMessageUserParam* pmsg = SqDDMessageUserParam::Construct(Decl.m_strName.c_str(), Decl.m_Type, Decl.m_Count, param->second, Decl.m_Count * elementsize );
-			client->SendMsg( pmsg );
-			pmsg->Destroy();
-		}
-	}
+            case type_matrix:
+                elementsize = sizeof(TqFloat) * 16;
+                break;
+            }
+            SqDDMessageUserParam* pmsg = SqDDMessageUserParam::Construct(Decl.m_strName.c_str(), Decl.m_Type, Decl.m_Count, param->second, Decl.m_Count * elementsize );
+            client->SendMsg( pmsg );
+            pmsg->Destroy();
+        }
+    }
 }
 
 

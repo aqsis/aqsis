@@ -42,14 +42,14 @@
 #endif
 
 struct SqShadeOp {
-	char *m_opspec;
-	char *m_init;
-	char *m_shutdown;
+    char *m_opspec;
+    char *m_init;
+    char *m_shutdown;
 } ;
 
 typedef struct _STRING_DESC {
-	char *s;
-	int bufflen;
+    char *s;
+    int bufflen;
 } STRING_DESC;
 
 // Some of the DSO's out there seem to use this

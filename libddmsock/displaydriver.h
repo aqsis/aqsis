@@ -62,8 +62,8 @@ enum EqDDMessageIDs
     MessageID_Nl,
     MessageID_NP,
     MessageID_DisplayType,
-	MessageID_Abandon,
-	MessageID_UserParam,
+    MessageID_Abandon,
+    MessageID_UserParam,
 
 
     MessageID_FormatResponse = 0x8001,
@@ -77,14 +77,14 @@ enum EqDDMessageIDs
 
 struct SqDDMessageBase
 {
-	SqDDMessageBase()
-	{}
-	SqDDMessageBase( TqInt ID, TqInt len ) :
-			m_MessageID( ID ),
-			m_MessageLength( len )
-	{}
-	TqInt	m_MessageID;
-	TqInt	m_MessageLength;
+    SqDDMessageBase()
+    {}
+    SqDDMessageBase( TqInt ID, TqInt len ) :
+            m_MessageID( ID ),
+            m_MessageLength( len )
+    {}
+    TqInt	m_MessageID;
+    TqInt	m_MessageLength;
 };
 
 
@@ -95,28 +95,28 @@ struct SqDDMessageBase
 
 struct SqDDMessageFormatQuery : public SqDDMessageBase
 {
-	// Specific message data
-	TqInt	m_FormatCount;
-	TqInt	m_Formats[ 1 ];
+    // Specific message data
+    TqInt	m_FormatCount;
+    TqInt	m_Formats[ 1 ];
 
-	static SqDDMessageFormatQuery*	Construct( TqInt formatcount, TqInt* formats );
-	void	Destroy()
-	{
-		free( this );
-	}
+    static SqDDMessageFormatQuery*	Construct( TqInt formatcount, TqInt* formats );
+    void	Destroy()
+    {
+        free( this );
+    }
 };
 
 
 inline SqDDMessageFormatQuery* SqDDMessageFormatQuery::Construct( TqInt formatcount, TqInt* formats )
 {
-	TqInt len = sizeof(TqInt) * formatcount;
-	SqDDMessageFormatQuery * pMessage = reinterpret_cast<SqDDMessageFormatQuery*>( malloc( sizeof( SqDDMessageFormatQuery ) - sizeof( TqInt ) + len ) );
-	pMessage->m_MessageID = MessageID_FormatQuery;
-	pMessage->m_FormatCount = formatcount;
-	pMessage->m_MessageLength = sizeof( SqDDMessageFormatQuery ) - sizeof( TqInt ) + len;
-	memcpy( &pMessage->m_Formats, formats, len );
+    TqInt len = sizeof(TqInt) * formatcount;
+    SqDDMessageFormatQuery * pMessage = reinterpret_cast<SqDDMessageFormatQuery*>( malloc( sizeof( SqDDMessageFormatQuery ) - sizeof( TqInt ) + len ) );
+    pMessage->m_MessageID = MessageID_FormatQuery;
+    pMessage->m_FormatCount = formatcount;
+    pMessage->m_MessageLength = sizeof( SqDDMessageFormatQuery ) - sizeof( TqInt ) + len;
+    memcpy( &pMessage->m_Formats, formats, len );
 
-	return ( pMessage );
+    return ( pMessage );
 }
 
 
@@ -127,13 +127,13 @@ inline SqDDMessageFormatQuery* SqDDMessageFormatQuery::Construct( TqInt formatco
 
 struct SqDDMessageFormatResponse : public SqDDMessageBase
 {
-	SqDDMessageFormatResponse()
-	{}
-	SqDDMessageFormatResponse( TqInt DF ) :
-			SqDDMessageBase( MessageID_FormatResponse, sizeof( SqDDMessageFormatResponse ) ),
-			m_DataFormat( DF )
-	{}
-	TqInt	m_DataFormat;	///< The format to send the data, from EqDDDataFormat
+    SqDDMessageFormatResponse()
+    {}
+    SqDDMessageFormatResponse( TqInt DF ) :
+            SqDDMessageBase( MessageID_FormatResponse, sizeof( SqDDMessageFormatResponse ) ),
+            m_DataFormat( DF )
+    {}
+    TqInt	m_DataFormat;	///< The format to send the data, from EqDDDataFormat
 }
 ;
 
@@ -145,26 +145,26 @@ struct SqDDMessageFormatResponse : public SqDDMessageBase
 
 struct SqDDMessageOpen : public SqDDMessageBase
 {
-	SqDDMessageOpen()
-	{}
-	SqDDMessageOpen( TqInt xres, TqInt yres, TqInt channels, TqInt cwxmin, TqInt cwxmax, TqInt cwymin, TqInt cwymax ) :
-			SqDDMessageBase( MessageID_Open, sizeof( SqDDMessageOpen ) ),
-			m_XRes( xres ),
-			m_YRes( yres ),
-			m_Channels( channels ),
-			m_CropWindowXMin( cwxmin ),
-			m_CropWindowXMax( cwxmax ),
-			m_CropWindowYMin( cwymin ),
-			m_CropWindowYMax( cwymax )
-	{}
-	TqInt	m_XRes;
-	TqInt	m_YRes;
-	TqInt	m_Channels;
-	TqInt	m_NotUsed;
-	TqInt	m_CropWindowXMin;
-	TqInt	m_CropWindowXMax;
-	TqInt	m_CropWindowYMin;
-	TqInt	m_CropWindowYMax;
+    SqDDMessageOpen()
+    {}
+    SqDDMessageOpen( TqInt xres, TqInt yres, TqInt channels, TqInt cwxmin, TqInt cwxmax, TqInt cwymin, TqInt cwymax ) :
+            SqDDMessageBase( MessageID_Open, sizeof( SqDDMessageOpen ) ),
+            m_XRes( xres ),
+            m_YRes( yres ),
+            m_Channels( channels ),
+            m_CropWindowXMin( cwxmin ),
+            m_CropWindowXMax( cwxmax ),
+            m_CropWindowYMin( cwymin ),
+            m_CropWindowYMax( cwymax )
+    {}
+    TqInt	m_XRes;
+    TqInt	m_YRes;
+    TqInt	m_Channels;
+    TqInt	m_NotUsed;
+    TqInt	m_CropWindowXMin;
+    TqInt	m_CropWindowXMax;
+    TqInt	m_CropWindowYMin;
+    TqInt	m_CropWindowYMax;
 };
 
 
@@ -175,9 +175,9 @@ struct SqDDMessageOpen : public SqDDMessageBase
 
 struct SqDDMessageClose : public SqDDMessageBase
 {
-	SqDDMessageClose() :
-			SqDDMessageBase( MessageID_Close, sizeof( SqDDMessageClose ) )
-	{}
+    SqDDMessageClose() :
+            SqDDMessageBase( MessageID_Close, sizeof( SqDDMessageClose ) )
+    {}
 }
 ;
 
@@ -189,9 +189,9 @@ struct SqDDMessageClose : public SqDDMessageBase
 
 struct SqDDMessageAbandon : public SqDDMessageBase
 {
-	SqDDMessageAbandon() :
-			SqDDMessageBase( MessageID_Abandon, sizeof( SqDDMessageAbandon ) )
-	{}
+    SqDDMessageAbandon() :
+            SqDDMessageBase( MessageID_Abandon, sizeof( SqDDMessageAbandon ) )
+    {}
 }
 ;
 
@@ -203,9 +203,9 @@ struct SqDDMessageAbandon : public SqDDMessageBase
 
 struct SqDDMessageCloseAcknowledge : public SqDDMessageBase
 {
-	SqDDMessageCloseAcknowledge() :
-			SqDDMessageBase( MessageID_CloseAcknowledge, sizeof( SqDDMessageCloseAcknowledge ) )
-	{}
+    SqDDMessageCloseAcknowledge() :
+            SqDDMessageBase( MessageID_CloseAcknowledge, sizeof( SqDDMessageCloseAcknowledge ) )
+    {}
 }
 ;
 
@@ -217,27 +217,27 @@ struct SqDDMessageCloseAcknowledge : public SqDDMessageBase
 
 struct SqDDMessageString : public SqDDMessageBase
 {
-	// Specific message data
-	TqInt	m_StringLength;
-	TqChar	m_String[ 1 ];
+    // Specific message data
+    TqInt	m_StringLength;
+    TqChar	m_String[ 1 ];
 
-	static SqDDMessageString*	Construct( const TqChar* string, TqInt ID = MessageID_String );
-	void	Destroy()
-	{
-		free( this );
-	}
+    static SqDDMessageString*	Construct( const TqChar* string, TqInt ID = MessageID_String );
+    void	Destroy()
+    {
+        free( this );
+    }
 };
 
 
 inline SqDDMessageString* SqDDMessageString::Construct( const TqChar* string, TqInt ID )
 {
-	SqDDMessageString * pMessage = reinterpret_cast<SqDDMessageString*>( malloc( sizeof( SqDDMessageString ) + strlen( string ) ) );
-	pMessage->m_MessageID = ID;
-	pMessage->m_StringLength = strlen( string );
-	pMessage->m_MessageLength = sizeof( SqDDMessageString ) + pMessage->m_StringLength;
-	memcpy( pMessage->m_String, string, pMessage->m_StringLength + 1 );
+    SqDDMessageString * pMessage = reinterpret_cast<SqDDMessageString*>( malloc( sizeof( SqDDMessageString ) + strlen( string ) ) );
+    pMessage->m_MessageID = ID;
+    pMessage->m_StringLength = strlen( string );
+    pMessage->m_MessageLength = sizeof( SqDDMessageString ) + pMessage->m_StringLength;
+    memcpy( pMessage->m_String, string, pMessage->m_StringLength + 1 );
 
-	return ( pMessage );
+    return ( pMessage );
 }
 
 
@@ -248,12 +248,12 @@ inline SqDDMessageString* SqDDMessageString::Construct( const TqChar* string, Tq
 
 struct SqDDMessageFilename : public SqDDMessageString
 {
-	static SqDDMessageFilename*	Construct( const TqChar* string );
+    static SqDDMessageFilename*	Construct( const TqChar* string );
 };
 
 inline SqDDMessageFilename* SqDDMessageFilename::Construct( const TqChar* name )
 {
-	return ( static_cast<SqDDMessageFilename*>( SqDDMessageString::Construct( name, MessageID_Filename ) ) );
+    return ( static_cast<SqDDMessageFilename*>( SqDDMessageString::Construct( name, MessageID_Filename ) ) );
 }
 
 
@@ -264,12 +264,12 @@ inline SqDDMessageFilename* SqDDMessageFilename::Construct( const TqChar* name )
 
 struct SqDDMessageDisplayType : public SqDDMessageString
 {
-	static SqDDMessageDisplayType*	Construct( const TqChar* string );
+    static SqDDMessageDisplayType*	Construct( const TqChar* string );
 };
 
 inline SqDDMessageDisplayType* SqDDMessageDisplayType::Construct( const TqChar* name )
 {
-	return ( static_cast<SqDDMessageDisplayType*>( SqDDMessageString::Construct( name, MessageID_DisplayType ) ) );
+    return ( static_cast<SqDDMessageDisplayType*>( SqDDMessageString::Construct( name, MessageID_DisplayType ) ) );
 }
 
 
@@ -280,38 +280,38 @@ inline SqDDMessageDisplayType* SqDDMessageDisplayType::Construct( const TqChar* 
 
 struct SqDDMessageData : public SqDDMessageBase
 {
-	// Specific message data
-	TqInt	m_XMin;
-	TqInt	m_XMaxPlus1;
-	TqInt	m_YMin;
-	TqInt	m_YMaxPlus1;
-	TqInt	m_ElementSize;
+    // Specific message data
+    TqInt	m_XMin;
+    TqInt	m_XMaxPlus1;
+    TqInt	m_YMin;
+    TqInt	m_YMaxPlus1;
+    TqInt	m_ElementSize;
 
-	TqInt	m_DataLength;
-	TqLong	m_Data[ 1 ];
+    TqInt	m_DataLength;
+    TqLong	m_Data[ 1 ];
 
-	static SqDDMessageData*	Construct( TqInt xmin, TqInt xmaxplus1, TqInt ymin, TqInt ymaxplus1, TqInt esz, const void* data, TqInt len );
-	void	Destroy()
-	{
-		free( this );
-	}
+    static SqDDMessageData*	Construct( TqInt xmin, TqInt xmaxplus1, TqInt ymin, TqInt ymaxplus1, TqInt esz, const void* data, TqInt len );
+    void	Destroy()
+    {
+        free( this );
+    }
 };
 
 
 inline SqDDMessageData* SqDDMessageData::Construct( TqInt xmin, TqInt xmaxplus1, TqInt ymin, TqInt ymaxplus1, TqInt esz, const void* data, TqInt len )
 {
-	SqDDMessageData * pMessage = reinterpret_cast<SqDDMessageData*>( malloc( sizeof( SqDDMessageData ) - sizeof( TqLong ) + len ) );
-	pMessage->m_MessageID = MessageID_Data;
-	pMessage->m_XMin = xmin;
-	pMessage->m_XMaxPlus1 = xmaxplus1;
-	pMessage->m_YMin = ymin;
-	pMessage->m_YMaxPlus1 = ymaxplus1;
-	pMessage->m_ElementSize = esz;
-	pMessage->m_DataLength = len;
-	pMessage->m_MessageLength = sizeof( SqDDMessageData ) - sizeof( TqLong ) + len;
-	memcpy( &pMessage->m_Data, data, len );
+    SqDDMessageData * pMessage = reinterpret_cast<SqDDMessageData*>( malloc( sizeof( SqDDMessageData ) - sizeof( TqLong ) + len ) );
+    pMessage->m_MessageID = MessageID_Data;
+    pMessage->m_XMin = xmin;
+    pMessage->m_XMaxPlus1 = xmaxplus1;
+    pMessage->m_YMin = ymin;
+    pMessage->m_YMaxPlus1 = ymaxplus1;
+    pMessage->m_ElementSize = esz;
+    pMessage->m_DataLength = len;
+    pMessage->m_MessageLength = sizeof( SqDDMessageData ) - sizeof( TqLong ) + len;
+    memcpy( &pMessage->m_Data, data, len );
 
-	return ( pMessage );
+    return ( pMessage );
 }
 
 
@@ -322,13 +322,13 @@ inline SqDDMessageData* SqDDMessageData::Construct( TqInt xmin, TqInt xmaxplus1,
 
 struct SqDDMessageMatrix : public SqDDMessageBase
 {
-	SqDDMessageMatrix( TqInt ID, TqFloat* mat ) :
-			SqDDMessageBase( ID, sizeof( SqDDMessageMatrix ) )
-	{
-		memcpy( m_Matrix, mat, sizeof( m_Matrix ) );
-	}
+    SqDDMessageMatrix( TqInt ID, TqFloat* mat ) :
+            SqDDMessageBase( ID, sizeof( SqDDMessageMatrix ) )
+    {
+        memcpy( m_Matrix, mat, sizeof( m_Matrix ) );
+    }
 
-	TqFloat	m_Matrix[ 4 ][ 4 ];
+    TqFloat	m_Matrix[ 4 ][ 4 ];
 };
 
 
@@ -339,9 +339,9 @@ struct SqDDMessageMatrix : public SqDDMessageBase
 
 struct SqDDMessageNl : public SqDDMessageMatrix
 {
-	SqDDMessageNl( TqFloat* mat ) :
-			SqDDMessageMatrix( MessageID_Nl, mat )
-	{}
+    SqDDMessageNl( TqFloat* mat ) :
+            SqDDMessageMatrix( MessageID_Nl, mat )
+    {}
 }
 ;
 
@@ -353,9 +353,9 @@ struct SqDDMessageNl : public SqDDMessageMatrix
 
 struct SqDDMessageNP : public SqDDMessageMatrix
 {
-	SqDDMessageNP( TqFloat* mat ) :
-			SqDDMessageMatrix( MessageID_NP, mat )
-	{}
+    SqDDMessageNP( TqFloat* mat ) :
+            SqDDMessageMatrix( MessageID_NP, mat )
+    {}
 }
 ;
 
@@ -367,34 +367,34 @@ struct SqDDMessageNP : public SqDDMessageMatrix
 
 struct SqDDMessageUserParam : public SqDDMessageBase
 {
-	// Specific message data
-	TqInt	m_DataType;
-	TqInt	m_NameLength;
-	TqInt	m_DataLength;
-	TqInt	m_DataCount;
-	TqChar	m_NameAndData[ 1 ];
+    // Specific message data
+    TqInt	m_DataType;
+    TqInt	m_NameLength;
+    TqInt	m_DataLength;
+    TqInt	m_DataCount;
+    TqChar	m_NameAndData[ 1 ];
 
-	static SqDDMessageUserParam*	Construct( const TqChar* name, TqInt type, TqInt count, const void* data, TqInt dataLength, TqInt ID = MessageID_UserParam );
-	void	Destroy()
-	{
-		free( this );
-	}
+    static SqDDMessageUserParam*	Construct( const TqChar* name, TqInt type, TqInt count, const void* data, TqInt dataLength, TqInt ID = MessageID_UserParam );
+    void	Destroy()
+    {
+        free( this );
+    }
 };
 
 
 inline SqDDMessageUserParam* SqDDMessageUserParam::Construct( const TqChar* name, TqInt type, TqInt count, const void* data, TqInt dataLength, TqInt ID )
 {
-	SqDDMessageUserParam * pMessage = reinterpret_cast<SqDDMessageUserParam*>( malloc( sizeof( SqDDMessageUserParam ) + strlen( name ) + dataLength ) );
-	pMessage->m_MessageID = ID;
-	pMessage->m_NameLength = strlen( name );
-	pMessage->m_DataLength = dataLength;
-	pMessage->m_DataType = type;
-	pMessage->m_DataCount = count;
-	pMessage->m_MessageLength = sizeof( SqDDMessageUserParam ) + pMessage->m_NameLength + pMessage->m_DataLength;
-	memcpy( pMessage->m_NameAndData, name, pMessage->m_NameLength + 1 );
-	memcpy( pMessage->m_NameAndData + pMessage->m_NameLength + 1, static_cast<const char*>(data), pMessage->m_DataLength );
+    SqDDMessageUserParam * pMessage = reinterpret_cast<SqDDMessageUserParam*>( malloc( sizeof( SqDDMessageUserParam ) + strlen( name ) + dataLength ) );
+    pMessage->m_MessageID = ID;
+    pMessage->m_NameLength = strlen( name );
+    pMessage->m_DataLength = dataLength;
+    pMessage->m_DataType = type;
+    pMessage->m_DataCount = count;
+    pMessage->m_MessageLength = sizeof( SqDDMessageUserParam ) + pMessage->m_NameLength + pMessage->m_DataLength;
+    memcpy( pMessage->m_NameAndData, name, pMessage->m_NameLength + 1 );
+    memcpy( pMessage->m_NameAndData + pMessage->m_NameLength + 1, static_cast<const char*>(data), pMessage->m_DataLength );
 
-	return ( pMessage );
+    return ( pMessage );
 }
 
 

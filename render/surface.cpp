@@ -39,40 +39,40 @@ TqFloat CqBasicSurface::m_fGridSize = sqrt(256.0);
  */
 
 CqBasicSurface::CqBasicSurface() : CqListEntry<CqBasicSurface>(), m_fDiceable( TqTrue ), m_fDiscard( TqFalse ), m_EyeSplitCount( 0 ),
-		m_pAttributes( 0 ), m_pTransform( 0 ), m_SplitDir( SplitDir_U ), m_pCSGNode( NULL )
+        m_pAttributes( 0 ), m_pTransform( 0 ), m_SplitDir( SplitDir_U ), m_pCSGNode( NULL )
 {
-	// Set a refernce with the current attributes.
-	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
-	ADDREF( m_pAttributes );
+    // Set a refernce with the current attributes.
+    m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
+    ADDREF( m_pAttributes );
 
-	m_pTransform = const_cast<CqTransform*>( QGetRenderContext() ->ptransCurrent() );
-	ADDREF( m_pTransform );
+    m_pTransform = const_cast<CqTransform*>( QGetRenderContext() ->ptransCurrent() );
+    ADDREF( m_pTransform );
 
-	m_CachedBound = TqFalse;
+    m_CachedBound = TqFalse;
 
-	// If the current context is a solid node, and is a 'primitive', attatch this surface to the node.
-	if ( QGetRenderContext() ->pconCurrent() ->isSolid() )
-	{
-		CqModeBlock * pSolid = QGetRenderContext() ->pconCurrent();
-		if ( pSolid->pCSGNode() ->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive )
-		{
-			m_pCSGNode = pSolid->pCSGNode();
-			ADDREF( m_pCSGNode );
-		}
-		else
-		{
-			CqString objname( "unnamed" );
-			const CqString* pattrName = m_pAttributes->GetStringAttribute( "identifier", "name" );
-			if ( pattrName != 0 ) objname = pattrName[ 0 ];
-			std::cerr << warning << "Primitive \"" << objname.c_str() << "\" defined when not in 'Primitive' solid block" << std::endl;
-		}
-	}
+    // If the current context is a solid node, and is a 'primitive', attatch this surface to the node.
+    if ( QGetRenderContext() ->pconCurrent() ->isSolid() )
+    {
+        CqModeBlock * pSolid = QGetRenderContext() ->pconCurrent();
+        if ( pSolid->pCSGNode() ->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive )
+        {
+            m_pCSGNode = pSolid->pCSGNode();
+            ADDREF( m_pCSGNode );
+        }
+        else
+        {
+            CqString objname( "unnamed" );
+            const CqString* pattrName = m_pAttributes->GetStringAttribute( "identifier", "name" );
+            if ( pattrName != 0 ) objname = pattrName[ 0 ];
+            std::cerr << warning << "Primitive \"" << objname.c_str() << "\" defined when not in 'Primitive' solid block" << std::endl;
+        }
+    }
 
-	STATS_INC( GPR_allocated );
-	STATS_INC( GPR_current );
-	TqInt cGprim = STATS_GETI( GPR_current );
-	TqInt cPeak = STATS_GETI( GPR_peak );
-	STATS_SETI( GPR_peak, cGprim > cPeak ? cGprim : cPeak );
+    STATS_INC( GPR_allocated );
+    STATS_INC( GPR_current );
+    TqInt cGprim = STATS_GETI( GPR_current );
+    TqInt cPeak = STATS_GETI( GPR_peak );
+    STATS_SETI( GPR_peak, cGprim > cPeak ? cGprim : cPeak );
 }
 
 
@@ -82,23 +82,23 @@ CqBasicSurface::CqBasicSurface() : CqListEntry<CqBasicSurface>(), m_fDiceable( T
 
 CqBasicSurface::CqBasicSurface( const CqBasicSurface& From ) : m_fDiceable( TqTrue ), m_SplitDir( SplitDir_U )
 {
-	*this = From;
+    *this = From;
 
-	// Set a reference with the donors attributes.
-	m_pAttributes = From.m_pAttributes;
-	ADDREF( m_pAttributes );
+    // Set a reference with the donors attributes.
+    m_pAttributes = From.m_pAttributes;
+    ADDREF( m_pAttributes );
 
-	m_pTransform = From.m_pTransform;
-	ADDREF( m_pTransform );
+    m_pTransform = From.m_pTransform;
+    ADDREF( m_pTransform );
 
-	m_CachedBound = From.m_CachedBound;
-	m_Bound = From.m_Bound;
+    m_CachedBound = From.m_CachedBound;
+    m_Bound = From.m_Bound;
 
-	STATS_INC( GPR_allocated );
-	STATS_INC( GPR_current );
-	TqInt cGprim = STATS_GETI( GPR_current );
-	TqInt cPeak = STATS_GETI( GPR_peak );
-	STATS_SETI( GPR_peak, cGprim > cPeak ? cGprim : cPeak );
+    STATS_INC( GPR_allocated );
+    STATS_INC( GPR_current );
+    TqInt cGprim = STATS_GETI( GPR_current );
+    TqInt cPeak = STATS_GETI( GPR_peak );
+    STATS_SETI( GPR_peak, cGprim > cPeak ? cGprim : cPeak );
 }
 
 
@@ -108,13 +108,13 @@ CqBasicSurface::CqBasicSurface( const CqBasicSurface& From ) : m_fDiceable( TqTr
 
 CqBasicSurface& CqBasicSurface::operator=( const CqBasicSurface& From )
 {
-	m_fDiceable = From.m_fDiceable;
-	m_EyeSplitCount = From.m_EyeSplitCount;
-	m_fDiscard = From.m_fDiscard;
+    m_fDiceable = From.m_fDiceable;
+    m_EyeSplitCount = From.m_EyeSplitCount;
+    m_fDiscard = From.m_fDiscard;
 
-	SetSurfaceParameters( From );
+    SetSurfaceParameters( From );
 
-	return ( *this );
+    return ( *this );
 }
 
 
@@ -124,20 +124,20 @@ CqBasicSurface& CqBasicSurface::operator=( const CqBasicSurface& From )
 
 void CqBasicSurface::SetSurfaceParameters( const CqBasicSurface& From )
 {
-	// If we already have attributes, unreference them now as we don't need them anymore.
-	if ( m_pAttributes ) RELEASEREF( m_pAttributes );
-	if ( m_pTransform ) RELEASEREF( m_pTransform );
-	if ( m_pCSGNode ) RELEASEREF( m_pCSGNode );
+    // If we already have attributes, unreference them now as we don't need them anymore.
+    if ( m_pAttributes ) RELEASEREF( m_pAttributes );
+    if ( m_pTransform ) RELEASEREF( m_pTransform );
+    if ( m_pCSGNode ) RELEASEREF( m_pCSGNode );
 
-	// Now store and reference our new attributes.
-	m_pAttributes = From.m_pAttributes;
-	ADDREF( m_pAttributes );
+    // Now store and reference our new attributes.
+    m_pAttributes = From.m_pAttributes;
+    ADDREF( m_pAttributes );
 
-	m_pTransform = From.m_pTransform;
-	ADDREF( m_pTransform );
+    m_pTransform = From.m_pTransform;
+    ADDREF( m_pTransform );
 
-	m_pCSGNode = From.m_pCSGNode;
-	if ( m_pCSGNode ) ADDREF( m_pCSGNode );
+    m_pCSGNode = From.m_pCSGNode;
+    if ( m_pCSGNode ) ADDREF( m_pCSGNode );
 }
 
 
@@ -148,11 +148,11 @@ void CqBasicSurface::SetSurfaceParameters( const CqBasicSurface& From )
 
 CqString CqBasicSurface::strName() const
 {
-	const CqString * pattrLightName = pAttributes() ->GetStringAttribute( "identifier", "name" );
-	CqString strName( "not named" );
-	if ( pattrLightName != 0 ) strName = pattrLightName[ 0 ];
+    const CqString * pattrLightName = pAttributes() ->GetStringAttribute( "identifier", "name" );
+    CqString strName( "not named" );
+    if ( pattrLightName != 0 ) strName = pattrLightName[ 0 ];
 
-	return ( strName );
+    return ( strName );
 }
 
 
@@ -162,26 +162,26 @@ CqString CqBasicSurface::strName() const
 
 TqInt CqBasicSurface::Uses() const
 {
-	TqInt Uses = gDefUses | QGetRenderContext()->pDDmanager()->Uses();
-	IqShader* pshadSurface = pAttributes() ->pshadSurface();
-	IqShader* pshadDisplacement = pAttributes() ->pshadDisplacement();
-	IqShader* pshadAtmosphere = pAttributes() ->pshadAtmosphere();
+    TqInt Uses = gDefUses | QGetRenderContext()->pDDmanager()->Uses();
+    IqShader* pshadSurface = pAttributes() ->pshadSurface();
+    IqShader* pshadDisplacement = pAttributes() ->pshadDisplacement();
+    IqShader* pshadAtmosphere = pAttributes() ->pshadAtmosphere();
 
-	if ( NULL == pshadSurface && NULL == pshadDisplacement && NULL == pshadAtmosphere )
-		return ( 0 );
+    if ( NULL == pshadSurface && NULL == pshadDisplacement && NULL == pshadAtmosphere )
+        return ( 0 );
 
-	if ( pshadSurface ) Uses |= pshadSurface->Uses();
-	if ( pshadDisplacement ) Uses |= pshadDisplacement->Uses();
-	if ( pshadAtmosphere ) Uses |= pshadAtmosphere->Uses();
+    if ( pshadSurface ) Uses |= pshadSurface->Uses();
+    if ( pshadDisplacement ) Uses |= pshadDisplacement->Uses();
+    if ( pshadAtmosphere ) Uses |= pshadAtmosphere->Uses();
 
-	// Just a quick check, if it uses dPdu/dPdv must also use du/dv
-	if ( USES( Uses, EnvVars_dPdu ) ) Uses |= ( 1 << EnvVars_du );
-	if ( USES( Uses, EnvVars_dPdv ) ) Uses |= ( 1 << EnvVars_dv );
-	// Just a quick check, if it uses du/dv must also use u/v
-	if ( USES( Uses, EnvVars_du ) ) Uses |= ( 1 << EnvVars_u );
-	if ( USES( Uses, EnvVars_dv ) ) Uses |= ( 1 << EnvVars_v );
+    // Just a quick check, if it uses dPdu/dPdv must also use du/dv
+    if ( USES( Uses, EnvVars_dPdu ) ) Uses |= ( 1 << EnvVars_du );
+    if ( USES( Uses, EnvVars_dPdv ) ) Uses |= ( 1 << EnvVars_dv );
+    // Just a quick check, if it uses du/dv must also use u/v
+    if ( USES( Uses, EnvVars_du ) ) Uses |= ( 1 << EnvVars_u );
+    if ( USES( Uses, EnvVars_dv ) ) Uses |= ( 1 << EnvVars_v );
 
-	return ( Uses );
+    return ( Uses );
 }
 
 
@@ -191,25 +191,25 @@ TqInt CqBasicSurface::Uses() const
 
 CqBound	CqBasicSurface::AdjustBoundForTransformationMotion( const CqBound& B ) const
 {
-	CqBound Bm( B );
+    CqBound Bm( B );
 
-	if( pTransform()->cTimes() > 1 )
-	{
-		CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pTransform()->matObjectToWorld( pTransform()->Time( 0 ) ) );
-		CqBound B0( B );
-		B0.Transform( matCameraToObject0 );
-		
-		TqInt i;
-		for( i = 1; i < pTransform()->cTimes(); i++ )
-		{
-			CqBound Btx( B0 );
-			CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pTransform()->matObjectToWorld( pTransform()->Time( i ) ) );
-			Btx.Transform( matObjectToCameraT );
-			Bm.Encapsulate( Btx );
-		}
-	}
+    if( pTransform()->cTimes() > 1 )
+    {
+        CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pTransform()->matObjectToWorld( pTransform()->Time( 0 ) ) );
+        CqBound B0( B );
+        B0.Transform( matCameraToObject0 );
 
-	return ( Bm );
+        TqInt i;
+        for( i = 1; i < pTransform()->cTimes(); i++ )
+        {
+            CqBound Btx( B0 );
+            CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pTransform()->matObjectToWorld( pTransform()->Time( i ) ) );
+            Btx.Transform( matObjectToCameraT );
+            Bm.Encapsulate( Btx );
+        }
+    }
+
+    return ( Bm );
 }
 
 
@@ -219,10 +219,10 @@ CqBound	CqBasicSurface::AdjustBoundForTransformationMotion( const CqBound& B ) c
 
 CqSurface::CqSurface() : CqBasicSurface()
 {
-	// Nullify the standard primitive variables index table.
-	TqInt i;
-	for ( i = 0; i < EnvVars_Last; i++ )
-		m_aiStdPrimitiveVars[ i ] = -1;
+    // Nullify the standard primitive variables index table.
+    TqInt i;
+    for ( i = 0; i < EnvVars_Last; i++ )
+        m_aiStdPrimitiveVars[ i ] = -1;
 }
 
 //---------------------------------------------------------------------
@@ -231,7 +231,7 @@ CqSurface::CqSurface() : CqBasicSurface()
 
 CqSurface::CqSurface( const CqSurface& From )
 {
-	*this = From;
+    *this = From;
 }
 
 
@@ -241,12 +241,12 @@ CqSurface::CqSurface( const CqSurface& From )
 
 CqSurface& CqSurface::operator=( const CqSurface& From )
 {
-	CqBasicSurface::operator=( From );
-	// Nullify the standard primitive variables index table.
-	TqInt i;
-	for ( i = 0; i < EnvVars_Last; i++ )
-		m_aiStdPrimitiveVars[ i ] = -1;
-	return ( *this );
+    CqBasicSurface::operator=( From );
+    // Nullify the standard primitive variables index table.
+    TqInt i;
+    for ( i = 0; i < EnvVars_Last; i++ )
+        m_aiStdPrimitiveVars[ i ] = -1;
+    return ( *this );
 }
 
 //---------------------------------------------------------------------
@@ -255,17 +255,17 @@ CqSurface& CqSurface::operator=( const CqSurface& From )
 
 void CqSurface::ClonePrimitiveVariables( const CqSurface& From )
 {
-	// Clone any primitive variables.
-	m_aUserParams.clear();
-	std::vector<CqParameter*>::const_iterator iUP;
-	std::vector<CqParameter*>::const_iterator end = From.m_aUserParams.end() ;
-	for ( iUP = From.m_aUserParams.begin(); iUP != end; iUP++ )
-		AddPrimitiveVariable( ( *iUP ) ->Clone() );
+    // Clone any primitive variables.
+    m_aUserParams.clear();
+    std::vector<CqParameter*>::const_iterator iUP;
+    std::vector<CqParameter*>::const_iterator end = From.m_aUserParams.end() ;
+    for ( iUP = From.m_aUserParams.begin(); iUP != end; iUP++ )
+        AddPrimitiveVariable( ( *iUP ) ->Clone() );
 
-	// Copy the standard primitive variables index table.
-	TqInt i;
-	for ( i = 0; i < EnvVars_Last; i++ )
-		m_aiStdPrimitiveVars[ i ] = From.m_aiStdPrimitiveVars[ i ];
+    // Copy the standard primitive variables index table.
+    TqInt i;
+    for ( i = 0; i < EnvVars_Last; i++ )
+        m_aiStdPrimitiveVars[ i ] = From.m_aiStdPrimitiveVars[ i ];
 }
 
 //---------------------------------------------------------------------
@@ -275,188 +275,188 @@ void CqSurface::ClonePrimitiveVariables( const CqSurface& From )
 
 void CqSurface::SetDefaultPrimitiveVariables( TqBool bUseDef_st )
 {
-	TqInt bUses = Uses();
+    TqInt bUses = Uses();
 
-	// Set default values for all of our parameters
+    // Set default values for all of our parameters
 
-	// s and t default to four values, if the particular surface type requires different it is up
-	// to the surface to override or change this after the fact.
-	if ( USES( bUses, EnvVars_s ) && bUseDef_st && !bHass() )
-	{
-		AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" ) );
-		s() ->SetSize( 4 );
-		TqInt i;
-		for ( i = 0; i < 4; i++ )
-			s() ->pValue() [ i ] = m_pAttributes->GetFloatAttribute( "System", "TextureCoordinates" ) [ i * 2 ];
-	}
+    // s and t default to four values, if the particular surface type requires different it is up
+    // to the surface to override or change this after the fact.
+    if ( USES( bUses, EnvVars_s ) && bUseDef_st && !bHasVar(EnvVars_s) )
+    {
+        AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" ) );
+        s() ->SetSize( 4 );
+        TqInt i;
+        for ( i = 0; i < 4; i++ )
+            s() ->pValue() [ i ] = m_pAttributes->GetFloatAttribute( "System", "TextureCoordinates" ) [ i * 2 ];
+    }
 
-	if ( USES( bUses, EnvVars_t ) && bUseDef_st && !bHast())
-	{
-		AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" ) );
-		t() ->SetSize( 4 );
-		TqInt i;
-		for ( i = 0; i < 4; i++ )
-			t() ->pValue() [ i ] = m_pAttributes->GetFloatAttribute( "System", "TextureCoordinates" ) [ ( i * 2 ) + 1 ];
-	}
+    if ( USES( bUses, EnvVars_t ) && bUseDef_st && !bHasVar(EnvVars_t))
+    {
+        AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" ) );
+        t() ->SetSize( 4 );
+        TqInt i;
+        for ( i = 0; i < 4; i++ )
+            t() ->pValue() [ i ] = m_pAttributes->GetFloatAttribute( "System", "TextureCoordinates" ) [ ( i * 2 ) + 1 ];
+    }
 
-	if ( USES( bUses, EnvVars_u ) )
-	{
-		AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "u" ) );
-		u() ->SetSize( 4 );
-		u() ->pValue() [ 0 ] = u() ->pValue() [ 2 ] = 0.0;
-		u() ->pValue() [ 1 ] = u() ->pValue() [ 3 ] = 1.0;
-	}
+    if ( USES( bUses, EnvVars_u ) )
+    {
+        AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "u" ) );
+        u() ->SetSize( 4 );
+        u() ->pValue() [ 0 ] = u() ->pValue() [ 2 ] = 0.0;
+        u() ->pValue() [ 1 ] = u() ->pValue() [ 3 ] = 1.0;
+    }
 
-	if ( USES( bUses, EnvVars_v ) )
-	{
-		AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "v" ) );
-		v() ->SetSize( 4 );
-		v() ->pValue() [ 0 ] = v() ->pValue() [ 1 ] = 0.0;
-		v() ->pValue() [ 2 ] = v() ->pValue() [ 3 ] = 1.0;
-	}
+    if ( USES( bUses, EnvVars_v ) )
+    {
+        AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "v" ) );
+        v() ->SetSize( 4 );
+        v() ->pValue() [ 0 ] = v() ->pValue() [ 1 ] = 0.0;
+        v() ->pValue() [ 2 ] = v() ->pValue() [ 3 ] = 1.0;
+    }
 }
 
 
 void CqSurface::NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u )
 {
-	switch ( pParam->Type() )
-	{
-			case type_float:
-			{
-				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
-				CqParameterTyped<TqFloat, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam1 );
-				CqParameterTyped<TqFloat, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
+    switch ( pParam->Type() )
+    {
+    case type_float:
+        {
+            CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
+            CqParameterTyped<TqFloat, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam1 );
+            CqParameterTyped<TqFloat, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam2 );
+            TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+            break;
+        }
 
-			case type_integer:
-			{
-				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
-				CqParameterTyped<TqInt, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam1 );
-				CqParameterTyped<TqInt, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
+    case type_integer:
+        {
+            CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
+            CqParameterTyped<TqInt, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam1 );
+            CqParameterTyped<TqInt, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam2 );
+            TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+            break;
+        }
 
-			case type_point:
-			case type_vector:
-			case type_normal:
-			{
-				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
-				CqParameterTyped<CqVector3D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam1 );
-				CqParameterTyped<CqVector3D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
+    case type_point:
+    case type_vector:
+    case type_normal:
+        {
+            CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
+            CqParameterTyped<CqVector3D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam1 );
+            CqParameterTyped<CqVector3D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam2 );
+            TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+            break;
+        }
 
-			case type_hpoint:
-			{
-				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
-				CqParameterTyped<CqVector4D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam1 );
-				CqParameterTyped<CqVector4D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
+    case type_hpoint:
+        {
+            CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
+            CqParameterTyped<CqVector4D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam1 );
+            CqParameterTyped<CqVector4D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam2 );
+            TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+            break;
+        }
 
 
-			case type_color:
-			{
-				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
-				CqParameterTyped<CqColor, CqColor>* pTResult1 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam1 );
-				CqParameterTyped<CqColor, CqColor>* pTResult2 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
+    case type_color:
+        {
+            CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
+            CqParameterTyped<CqColor, CqColor>* pTResult1 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam1 );
+            CqParameterTyped<CqColor, CqColor>* pTResult2 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam2 );
+            TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+            break;
+        }
 
-			case type_string:
-			{
-				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
-				CqParameterTyped<CqString, CqString>* pTResult1 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam1 );
-				CqParameterTyped<CqString, CqString>* pTResult2 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
+    case type_string:
+        {
+            CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
+            CqParameterTyped<CqString, CqString>* pTResult1 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam1 );
+            CqParameterTyped<CqString, CqString>* pTResult2 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam2 );
+            TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+            break;
+        }
 
-			case type_matrix:
-			{
-				CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
-				CqParameterTyped<CqMatrix, CqMatrix>* pTResult1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam1 );
-				CqParameterTyped<CqMatrix, CqMatrix>* pTResult2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam2 );
-				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-				break;
-			}
-			
-			default:
-			{
-				// blank to avoid compiler warnings about unhandled cases
-				break;
-			}
-	}
+    case type_matrix:
+        {
+            CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
+            CqParameterTyped<CqMatrix, CqMatrix>* pTResult1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam1 );
+            CqParameterTyped<CqMatrix, CqMatrix>* pTResult2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam2 );
+            TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+            break;
+        }
+
+    default:
+        {
+            // blank to avoid compiler warnings about unhandled cases
+            break;
+        }
+    }
 }
 
 
 void CqSurface::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
 {
-	switch ( pParameter->Type() )
-	{
-			case type_float:
-			{
-				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
+    switch ( pParameter->Type() )
+    {
+    case type_float:
+        {
+            CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParameter );
+            TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+            break;
+        }
 
-			case type_integer:
-			{
-				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
+    case type_integer:
+        {
+            CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParameter );
+            TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+            break;
+        }
 
-			case type_point:
-			case type_vector:
-			case type_normal:
-			{
-				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
+    case type_point:
+    case type_vector:
+    case type_normal:
+        {
+            CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParameter );
+            TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+            break;
+        }
 
-			case type_hpoint:
-			{
-				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
+    case type_hpoint:
+        {
+            CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParameter );
+            TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+            break;
+        }
 
-			case type_color:
-			{
-				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
+    case type_color:
+        {
+            CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParameter );
+            TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+            break;
+        }
 
-			case type_string:
-			{
-				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
+    case type_string:
+        {
+            CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParameter );
+            TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+            break;
+        }
 
-			case type_matrix:
-			{
-				CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParameter );
-				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-				break;
-			}
+    case type_matrix:
+        {
+            CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParameter );
+            TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+            break;
+        }
 
-			default:
-			{
-				// left blank to avoid compiler warnings about unhandled types
-				break;
-			}
-	}
+    default:
+        {
+            // left blank to avoid compiler warnings about unhandled types
+            break;
+        }
+    }
 }
 
 
@@ -467,154 +467,154 @@ void CqSurface::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDi
 
 CqMicroPolyGridBase* CqSurface::Dice()
 {
-	PreDice( m_uDiceSize, m_vDiceSize );
+    PreDice( m_uDiceSize, m_vDiceSize );
 
-	// Create a new CqMicorPolyGrid for this patch
-	CqMicroPolyGrid * pGrid = new CqMicroPolyGrid( m_uDiceSize, m_vDiceSize, this );
+    // Create a new CqMicorPolyGrid for this patch
+    CqMicroPolyGrid * pGrid = new CqMicroPolyGrid( m_uDiceSize, m_vDiceSize, this );
 
-	TqInt lUses = Uses();
+    TqInt lUses = Uses();
 
-	// Allow the surface to fill in as much as possible on the grid in one go for speed.
-	TqInt lDone = DiceAll( pGrid );
+    // Allow the surface to fill in as much as possible on the grid in one go for speed.
+    TqInt lDone = DiceAll( pGrid );
 
-	// Dice the primitive variables.
+    // Dice the primitive variables.
 
-	// Special cases for s and t if "st" exists, it should override s and t.
-	CqParameter* pParam;
-	if( ( pParam = FindUserParam("st") ) != NULL )
-	{
-		if ( !isDONE( lDone, EnvVars_s ) && USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) )
-			pParam ->DiceOne( m_uDiceSize, m_vDiceSize, pGrid->s(), this, 0 );
-		if ( !isDONE( lDone, EnvVars_t ) && USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) )
-			pParam ->DiceOne( m_uDiceSize, m_vDiceSize, pGrid->t(), this, 1 );
-		DONE( lDone, EnvVars_s);
-		DONE( lDone, EnvVars_t);
-	}
+    // Special cases for s and t if "st" exists, it should override s and t.
+    CqParameter* pParam;
+    if( ( pParam = FindUserParam("st") ) != NULL )
+    {
+        if ( !isDONE( lDone, EnvVars_s ) && USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) )
+            pParam ->DiceOne( m_uDiceSize, m_vDiceSize, pGrid->s(), this, 0 );
+        if ( !isDONE( lDone, EnvVars_t ) && USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) )
+            pParam ->DiceOne( m_uDiceSize, m_vDiceSize, pGrid->t(), this, 1 );
+        DONE( lDone, EnvVars_s);
+        DONE( lDone, EnvVars_t);
+    }
 
-	// Loop over all the variables checking if they have been specified in the scene, and
-	// if they are needed by the shaders, and id the grid can accept them.
-	// If all the tests pass, dice them into the grid based on their type.
-	TqInt varID;
-	for( varID = EnvVars_Cs; varID != EnvVars_Last; varID++ )
-	{
-		if ( !isDONE( lDone, varID ) && USES( lUses, varID ) && ( NULL != pGrid->pVar(varID) ) )
-		{
-			// Check if Cs has been specified by the user.
-			if ( bHasVar(varID) )
-			{
-				if( pVar(varID)->Class() == class_vertex || pVar(varID)->Class() == class_facevarying )
-					// "vertex" and "facevarying" need to be dealt with by the surface as they are diced using the 
-					// natural subdivision algorithms for that particular surface.
-					NaturalDice( pVar(varID), m_uDiceSize, m_vDiceSize, pGrid->pVar(varID) );
-				else
-					// "varying" are just bilinearly interpolated, so can be handled by the primitive variable.
-					pVar(varID) ->Dice( m_uDiceSize, m_vDiceSize, pGrid->pVar(varID), this );
-					
-				// Mark this as done, so that the special case default handlers later don't need to worry about it.
-				DONE(lDone, varID);	
-			}
-		}
-	}
-	
-	// Special case handlers for primitive variables that have defaults.
-	if ( !isDONE( lDone, EnvVars_Cs ) && USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) )
-	{
-		if ( NULL != pAttributes() ->GetColorAttribute( "System", "Color" ) )
-			pGrid->Cs() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
-		else
-			pGrid->Cs() ->SetColor( CqColor( 1, 1, 1 ) );
-	}
+    // Loop over all the variables checking if they have been specified in the scene, and
+    // if they are needed by the shaders, and id the grid can accept them.
+    // If all the tests pass, dice them into the grid based on their type.
+    TqInt varID;
+    for( varID = EnvVars_Cs; varID != EnvVars_Last; varID++ )
+    {
+        if ( !isDONE( lDone, varID ) && USES( lUses, varID ) && ( NULL != pGrid->pVar(varID) ) )
+        {
+            // Check if Cs has been specified by the user.
+            if ( bHasVar(varID) )
+            {
+                if( pVar(varID)->Class() == class_vertex || pVar(varID)->Class() == class_facevarying )
+                    // "vertex" and "facevarying" need to be dealt with by the surface as they are diced using the
+                    // natural subdivision algorithms for that particular surface.
+                    NaturalDice( pVar(varID), m_uDiceSize, m_vDiceSize, pGrid->pVar(varID) );
+                else
+                    // "varying" are just bilinearly interpolated, so can be handled by the primitive variable.
+                    pVar(varID) ->Dice( m_uDiceSize, m_vDiceSize, pGrid->pVar(varID), this );
 
-	if ( !isDONE( lDone, EnvVars_Os ) && USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) )
-	{
-		if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
-			pGrid->Os() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
-		else
-			pGrid->Os() ->SetColor( CqColor( 1, 1, 1 ) );
-	}
+                // Mark this as done, so that the special case default handlers later don't need to worry about it.
+                DONE(lDone, varID);
+            }
+        }
+    }
 
-	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
-	if ( isDONE( lDone, EnvVars_N ) )
-		pGrid->SetbShadingNormals( TqTrue );
+    // Special case handlers for primitive variables that have defaults.
+    if ( !isDONE( lDone, EnvVars_Cs ) && USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->Cs() ) )
+    {
+        if ( NULL != pAttributes() ->GetColorAttribute( "System", "Color" ) )
+            pGrid->Cs() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
+        else
+            pGrid->Cs() ->SetColor( CqColor( 1, 1, 1 ) );
+    }
 
-	if ( !isDONE( lDone, EnvVars_Ng ) && CanGenerateNormals() && USES( lUses, EnvVars_Ng ) )
-	{
-		GenerateGeometricNormals( m_uDiceSize, m_vDiceSize, pGrid->Ng() );
-		pGrid->SetbGeometricNormals( TqTrue );
-	}
+    if ( !isDONE( lDone, EnvVars_Os ) && USES( lUses, EnvVars_Os ) && ( NULL != pGrid->Os() ) )
+    {
+        if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
+            pGrid->Os() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
+        else
+            pGrid->Os() ->SetColor( CqColor( 1, 1, 1 ) );
+    }
 
-	// Now we need to dice the user specified parameters as appropriate.
-	std::vector<CqParameter*>::iterator iUP;
-	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
-	for ( iUP = m_aUserParams.begin(); iUP != end ; iUP++ )
-	{
-		if ( NULL != pGrid->pAttributes() ->pshadSurface() )
-			pGrid->pAttributes() ->pshadSurface() ->SetArgument( ( *iUP ), this );
+    // If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
+    if ( isDONE( lDone, EnvVars_N ) )
+        pGrid->SetbShadingNormals( TqTrue );
 
-		if ( NULL != pGrid->pAttributes() ->pshadDisplacement() )
-			pGrid->pAttributes() ->pshadDisplacement() ->SetArgument( ( *iUP ), this );
+    if ( !isDONE( lDone, EnvVars_Ng ) && CanGenerateNormals() && USES( lUses, EnvVars_Ng ) )
+    {
+        GenerateGeometricNormals( m_uDiceSize, m_vDiceSize, pGrid->Ng() );
+        pGrid->SetbGeometricNormals( TqTrue );
+    }
 
-		if ( NULL != pGrid->pAttributes() ->pshadAtmosphere() )
-			pGrid->pAttributes() ->pshadAtmosphere() ->SetArgument( ( *iUP ), this );
-	}
+    // Now we need to dice the user specified parameters as appropriate.
+    std::vector<CqParameter*>::iterator iUP;
+    std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+    for ( iUP = m_aUserParams.begin(); iUP != end ; iUP++ )
+    {
+        if ( NULL != pGrid->pAttributes() ->pshadSurface() )
+            pGrid->pAttributes() ->pshadSurface() ->SetArgument( ( *iUP ), this );
 
-	PostDice( pGrid );
+        if ( NULL != pGrid->pAttributes() ->pshadDisplacement() )
+            pGrid->pAttributes() ->pshadDisplacement() ->SetArgument( ( *iUP ), this );
 
-	return ( pGrid );
+        if ( NULL != pGrid->pAttributes() ->pshadAtmosphere() )
+            pGrid->pAttributes() ->pshadAtmosphere() ->SetArgument( ( *iUP ), this );
+    }
+
+    PostDice( pGrid );
+
+    return ( pGrid );
 }
 
 
 TqInt CqSurface::Split( std::vector<CqBasicSurface*>& aSplits )
 {
-	TqInt cSplits = PreSubdivide( aSplits, m_SplitDir == SplitDir_U );
+    TqInt cSplits = PreSubdivide( aSplits, m_SplitDir == SplitDir_U );
 
-	assert( aSplits.size() == 2 );
+    assert( aSplits.size() == 2 );
 
-	aSplits[ 0 ] ->SetSurfaceParameters( *this );
-	aSplits[ 0 ] ->SetSplitDir( ( SplitDir() == SplitDir_U ) ? SplitDir_V : SplitDir_U );
-	aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
-	aSplits[ 0 ] ->m_fDiceable = TqTrue;
-	//ADDREF( aSplits[ 0 ] );
+    aSplits[ 0 ] ->SetSurfaceParameters( *this );
+    aSplits[ 0 ] ->SetSplitDir( ( SplitDir() == SplitDir_U ) ? SplitDir_V : SplitDir_U );
+    aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
+    aSplits[ 0 ] ->m_fDiceable = TqTrue;
+    //ADDREF( aSplits[ 0 ] );
 
-	aSplits[ 1 ] ->SetSurfaceParameters( *this );
-	aSplits[ 1 ] ->SetSplitDir( ( SplitDir() == SplitDir_U ) ? SplitDir_V : SplitDir_U );
-	aSplits[ 1 ] ->SetEyeSplitCount( EyeSplitCount() );
-	aSplits[ 1 ] ->m_fDiceable = TqTrue;
-	//ADDREF( aSplits[ 1 ] );
+    aSplits[ 1 ] ->SetSurfaceParameters( *this );
+    aSplits[ 1 ] ->SetSplitDir( ( SplitDir() == SplitDir_U ) ? SplitDir_V : SplitDir_U );
+    aSplits[ 1 ] ->SetEyeSplitCount( EyeSplitCount() );
+    aSplits[ 1 ] ->m_fDiceable = TqTrue;
+    //ADDREF( aSplits[ 1 ] );
 
-	// Iterate through any use parameters subdividing and storing the second value in the target surface.
-	std::vector<CqParameter*>::iterator iUP;
-	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
-	TqBool direction = SplitDir() == SplitDir_U;
+    // Iterate through any use parameters subdividing and storing the second value in the target surface.
+    std::vector<CqParameter*>::iterator iUP;
+    std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+    TqBool direction = SplitDir() == SplitDir_U;
 
-	for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
-	{
-		CqParameter* pNewA = ( *iUP ) ->Clone();
-		CqParameter* pNewB = ( *iUP ) ->Clone();
-		( *iUP ) ->Subdivide( pNewA, pNewB, direction , this );
-		static_cast<CqSurface*>( aSplits[ 0 ] ) ->AddPrimitiveVariable( pNewA );
-		static_cast<CqSurface*>( aSplits[ 1 ] ) ->AddPrimitiveVariable( pNewB );
-	}
+    for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
+    {
+        CqParameter* pNewA = ( *iUP ) ->Clone();
+        CqParameter* pNewB = ( *iUP ) ->Clone();
+        ( *iUP ) ->Subdivide( pNewA, pNewB, direction , this );
+        static_cast<CqSurface*>( aSplits[ 0 ] ) ->AddPrimitiveVariable( pNewA );
+        static_cast<CqSurface*>( aSplits[ 1 ] ) ->AddPrimitiveVariable( pNewB );
+    }
 
-	if ( !m_fDiceable )
-	{
-		std::vector<CqBasicSurface*> aSplits0;
-		std::vector<CqBasicSurface*> aSplits1;
+    if ( !m_fDiceable )
+    {
+        std::vector<CqBasicSurface*> aSplits0;
+        std::vector<CqBasicSurface*> aSplits1;
 
-		cSplits = aSplits[ 0 ] ->Split( aSplits0 );
-		cSplits += aSplits[ 1 ] ->Split( aSplits1 );
-		// Release the old ones.
-		delete( aSplits[ 0 ] );
-		delete( aSplits[ 1 ] );
+        cSplits = aSplits[ 0 ] ->Split( aSplits0 );
+        cSplits += aSplits[ 1 ] ->Split( aSplits1 );
+        // Release the old ones.
+        delete( aSplits[ 0 ] );
+        delete( aSplits[ 1 ] );
 
-		aSplits.clear();
-		aSplits.swap( aSplits0 );
-		aSplits.insert( aSplits.end(), aSplits1.begin(), aSplits1.end() );
-	}
+        aSplits.clear();
+        aSplits.swap( aSplits0 );
+        aSplits.insert( aSplits.end(), aSplits1.begin(), aSplits1.end() );
+    }
 
-	PostSubdivide( aSplits );
+    PostSubdivide( aSplits );
 
-	return ( aSplits.size() );
+    return ( aSplits.size() );
 }
 
 
@@ -624,17 +624,17 @@ TqInt CqSurface::Split( std::vector<CqBasicSurface*>& aSplits )
 
 void CqSurface::uSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 {
-	// Iterate through any use parameters subdividing and storing the second value in the target surface.
-	std::vector<CqParameter*>::iterator iUP;
-	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
-	for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
-	{
-		CqParameter* pNewA = ( *iUP ) ->Clone();
-		CqParameter* pNewB = ( *iUP ) ->Clone();
-		( *iUP ) ->Subdivide( pNewA, pNewB, TqTrue, this );
-		pA->AddPrimitiveVariable( pNewA );
-		pB->AddPrimitiveVariable( pNewB );
-	}
+    // Iterate through any use parameters subdividing and storing the second value in the target surface.
+    std::vector<CqParameter*>::iterator iUP;
+    std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+    for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
+    {
+        CqParameter* pNewA = ( *iUP ) ->Clone();
+        CqParameter* pNewB = ( *iUP ) ->Clone();
+        ( *iUP ) ->Subdivide( pNewA, pNewB, TqTrue, this );
+        pA->AddPrimitiveVariable( pNewA );
+        pB->AddPrimitiveVariable( pNewB );
+    }
 }
 
 
@@ -644,17 +644,17 @@ void CqSurface::uSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 
 void CqSurface::vSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 {
-	// Iterate through any use parameters subdividing and storing the second value in the target surface.
-	std::vector<CqParameter*>::iterator iUP;
-	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
-	for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
-	{
-		CqParameter* pNewA = ( *iUP ) ->Clone();
-		CqParameter* pNewB = ( *iUP ) ->Clone();
-		( *iUP ) ->Subdivide( pNewA, pNewB, TqFalse, this );
-		pA->AddPrimitiveVariable( pNewA );
-		pB->AddPrimitiveVariable( pNewB );
-	}
+    // Iterate through any use parameters subdividing and storing the second value in the target surface.
+    std::vector<CqParameter*>::iterator iUP;
+    std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+    for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
+    {
+        CqParameter* pNewA = ( *iUP ) ->Clone();
+        CqParameter* pNewB = ( *iUP ) ->Clone();
+        ( *iUP ) ->Subdivide( pNewA, pNewB, TqFalse, this );
+        pA->AddPrimitiveVariable( pNewA );
+        pB->AddPrimitiveVariable( pNewB );
+    }
 }
 
 
@@ -664,42 +664,42 @@ void CqSurface::vSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 
 void	CqSurface::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime )
 {
-	// Tansform the control hull by the specified matrix.
-	std::vector<CqParameter*>::iterator iUP;
-	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
-	for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
-	{
-		TqInt i;
+    // Tansform the control hull by the specified matrix.
+    std::vector<CqParameter*>::iterator iUP;
+    std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+    for ( iUP = m_aUserParams.begin(); iUP != end; iUP++ )
+    {
+        TqInt i;
 
-		if ( ( *iUP ) ->Type() == type_point )
-		{
-			CqParameterTyped<CqVector3D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-			TqInt size = ( *iUP ) ->Size();
-			for ( i = 0; i < size; i++ )
-				pTPV->pValue() [ i ] = matTx * pTPV->pValue() [ i ];
-		}
-		else if ( ( *iUP ) ->Type() == type_normal )
-		{
-			CqParameterTyped<CqVector3D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-			TqInt size = ( *iUP ) ->Size();
-			for ( i = 0; i < size; i++ )
-				pTPV->pValue() [ i ] = matITTx * pTPV->pValue() [ i ];
-		}
-		if ( ( *iUP ) ->Type() == type_vector )
-		{
-			CqParameterTyped<CqVector3D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-			TqInt size = ( *iUP ) ->Size();
-			for ( i = 0; i < size; i++ )
-				pTPV->pValue() [ i ] = matRTx * pTPV->pValue() [ i ];
-		}
-		if ( ( *iUP ) ->Type() == type_hpoint )
-		{
-			CqParameterTyped<CqVector4D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
-			TqInt size = ( *iUP ) ->Size();
-			for ( i = 0; i < size; i++ )
-				pTPV->pValue() [ i ] = matTx * pTPV->pValue() [ i ];
-		}
-	}
+        if ( ( *iUP ) ->Type() == type_point )
+        {
+            CqParameterTyped<CqVector3D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
+            TqInt size = ( *iUP ) ->Size();
+            for ( i = 0; i < size; i++ )
+                pTPV->pValue() [ i ] = matTx * pTPV->pValue() [ i ];
+        }
+        else if ( ( *iUP ) ->Type() == type_normal )
+        {
+            CqParameterTyped<CqVector3D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
+            TqInt size = ( *iUP ) ->Size();
+            for ( i = 0; i < size; i++ )
+                pTPV->pValue() [ i ] = matITTx * pTPV->pValue() [ i ];
+        }
+        if ( ( *iUP ) ->Type() == type_vector )
+        {
+            CqParameterTyped<CqVector3D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
+            TqInt size = ( *iUP ) ->Size();
+            for ( i = 0; i < size; i++ )
+                pTPV->pValue() [ i ] = matRTx * pTPV->pValue() [ i ];
+        }
+        if ( ( *iUP ) ->Type() == type_hpoint )
+        {
+            CqParameterTyped<CqVector4D, CqVector3D>* pTPV = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
+            TqInt size = ( *iUP ) ->Size();
+            for ( i = 0; i < size; i++ )
+                pTPV->pValue() [ i ] = matTx * pTPV->pValue() [ i ];
+        }
+    }
 }
 
 
@@ -708,15 +708,15 @@ void	CqSurface::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const
  */
 CqParameter* CqSurface::FindUserParam( const char* name ) const
 {
-	CqString strName( name );
-	std::vector<CqParameter*>::const_iterator iUP;
-	std::vector<CqParameter*>::const_iterator end = m_aUserParams.end();
-	for ( iUP = m_aUserParams.begin(); iUP != end ; iUP++ )
-	{
-		if( ( *iUP )->strName() == strName )
-			return( *iUP );
-	}
-	return( NULL );
+    CqString strName( name );
+    std::vector<CqParameter*>::const_iterator iUP;
+    std::vector<CqParameter*>::const_iterator end = m_aUserParams.end();
+    for ( iUP = m_aUserParams.begin(); iUP != end ; iUP++ )
+    {
+        if( ( *iUP )->strName() == strName )
+            return( *iUP );
+    }
+    return( NULL );
 }
 
 

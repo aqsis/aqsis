@@ -70,66 +70,66 @@ class CqCSGTreeNode;
 
 struct SqImageSample
 {
-	SqImageSample( TqInt NumData = 7 )
-	{
-		m_Data.resize( NumData );
-	}
-	enum {
-	    Flag_Occludes = 0x0001,
-	    Flag_Matte = 0x0002
-	};
+    SqImageSample( TqInt NumData = 7 )
+    {
+        m_Data.resize( NumData );
+    }
+    enum {
+        Flag_Occludes = 0x0001,
+        Flag_Matte = 0x0002
+    };
 
-	CqColor Cs() const
-	{
-		return( CqColor( m_Data[0], m_Data[1], m_Data[2] ) );
-	}
+    CqColor Cs() const
+    {
+        return( CqColor( m_Data[0], m_Data[1], m_Data[2] ) );
+    }
 
-	void SetCs( const CqColor& col )
-	{
-		assert( m_Data.size() >= 3 );
-		m_Data[0] = col.fRed();
-		m_Data[1] = col.fGreen();
-		m_Data[2] = col.fBlue();
-	}
+    void SetCs( const CqColor& col )
+    {
+        assert( m_Data.size() >= 3 );
+        m_Data[0] = col.fRed();
+        m_Data[1] = col.fGreen();
+        m_Data[2] = col.fBlue();
+    }
 
-	CqColor Os() const
-	{
-		return( CqColor( m_Data[3], m_Data[4], m_Data[5] ) );
-	}
+    CqColor Os() const
+    {
+        return( CqColor( m_Data[3], m_Data[4], m_Data[5] ) );
+    }
 
-	void SetOs( const CqColor& col )
-	{
-		assert( m_Data.size() >= 6 );
-		m_Data[3] = col.fRed();
-		m_Data[4] = col.fGreen();
-		m_Data[5] = col.fBlue();
-	}
+    void SetOs( const CqColor& col )
+    {
+        assert( m_Data.size() >= 6 );
+        m_Data[3] = col.fRed();
+        m_Data[4] = col.fGreen();
+        m_Data[5] = col.fBlue();
+    }
 
-	TqFloat Depth() const
-	{
-		return( m_Data[6] );
-	}
+    TqFloat Depth() const
+    {
+        return( m_Data[6] );
+    }
 
-	void SetDepth( TqFloat d )
-	{
-		assert( m_Data.size() >= 7 );
-		m_Data[6] = d;
-	}
+    void SetDepth( TqFloat d )
+    {
+        assert( m_Data.size() >= 7 );
+        m_Data[6] = d;
+    }
 
-	TqInt DataSize() const
-	{
-		return( m_Data.size() );
-	}
+    TqInt DataSize() const
+    {
+        return( m_Data.size() );
+    }
 
-	void SetDataSize( TqInt NumData )
-	{
-		m_Data.resize( NumData );
-	}
+    void SetDataSize( TqInt NumData )
+    {
+        m_Data.resize( NumData );
+    }
 
-	TqInt m_flags;
-	std::valarray<TqFloat>	m_Data;
-	TqFloat	m_Coverage;
-	CqCSGTreeNode*	m_pCSGNode;	///< Pointer to the CSG node this sample is part of, NULL if not part of a solid.
+    TqInt m_flags;
+    std::valarray<TqFloat>	m_Data;
+    TqFloat	m_Coverage;
+    CqCSGTreeNode*	m_pCSGNode;	///< Pointer to the CSG node this sample is part of, NULL if not part of a solid.
 }
 ;
 
@@ -137,13 +137,13 @@ struct SqImageSample
  */
 struct SqSampleData
 {
-		CqVector2D	m_Position;				///< Sample position.
-		CqVector2D	m_DofOffset;			///< Dof lens offset.
-		TqInt		m_DofOffsetXQuad;		///< Cached info to hold which quadrant the Dof lens offset falls in.
-		TqInt		m_DofOffsetYQuad;
-		TqInt		m_SubCellIndex;		///< Subcell index.
-		TqFloat		m_Time;				///< Float sample time.
-		TqFloat		m_DetailLevel;		///< Float level-of-detail sample.
+    CqVector2D	m_Position;				///< Sample position.
+    CqVector2D	m_DofOffset;			///< Dof lens offset.
+    TqInt		m_DofOffsetXQuad;		///< Cached info to hold which quadrant the Dof lens offset falls in.
+    TqInt		m_DofOffsetYQuad;
+    TqInt		m_SubCellIndex;		///< Subcell index.
+    TqFloat		m_Time;				///< Float sample time.
+    TqFloat		m_DetailLevel;		///< Float level-of-detail sample.
 };
 
 //-----------------------------------------------------------------------
@@ -152,178 +152,178 @@ struct SqSampleData
 
 class CqImagePixel
 {
-	public:
-		CqImagePixel();
-		CqImagePixel( const CqImagePixel& ieFrom );
-		virtual	~CqImagePixel();
+public:
+    CqImagePixel();
+    CqImagePixel( const CqImagePixel& ieFrom );
+    virtual	~CqImagePixel();
 
-		/** Get the number of horizontal samples in this pixel
-		 * \return The number of samples as an integer.
-		 */
-		TqInt	XSamples() const
-		{
-			return ( m_XSamples );
-		}
-		/** Get the number of vertical samples in this pixel
-		 * \return The number of samples as an integer.
-		 */
-		TqInt	YSamples() const
-		{
-			return ( m_YSamples );
-		}
-		void	AllocateSamples( TqInt XSamples, TqInt YSamples );
-		void	InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBool fJitter = TqTrue );
-		void	OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples);
-	
-		/** Get the approximate coverage of this pixel.
-		 * \return Float fraction of the pixel covered.
-		 */
-		TqFloat	Coverage()
-		{
-			return ( m_Coverage );
-		}
-		void	SetCoverage( TqFloat c )
-		{
-			m_Coverage = c;
-		}
-		/** Get the averaged color of this pixel
-		 * \return A color representing the averaged color at this pixel.
-		 * \attention Only call this after already calling FilterBucket().
-		 */
-		CqColor	Color()
-		{
-			return ( m_Data.Cs() );
-		}
-		void	SetColor(const CqColor& col)
-		{
-			m_Data.SetCs( col );
-		}
-		/** Get the averaged opacity of this pixel
-		 * \return A color representing the averaged opacity at this pixel.
-		 * \attention Only call this after already calling FilterBucket().
-		 */
-		CqColor	Opacity()
-		{
-			return ( m_Data.Os() );
-		}
-		void	SetOpacity(const CqColor& col)
-		{
-			m_Data.SetOs( col );
-		}
-		/** Get the averaged depth of this pixel
-		 * \return A float representing the averaged depth at this pixel.
-		 * \attention Only call this after already calling FilterBucket().
-		 */
-		TqFloat	Depth()
-		{
-			return ( m_Data.Depth() );
-		}
-		void	SetDepth( TqFloat d )
-		{
-			m_Data.SetDepth( d );
-		}
-		/** Get a pointer to the sample data
-		 * \return A constant pointer to the sample data.
-		 */
-		const TqFloat*	Data()
-		{
-			return ( &m_Data.m_Data[0] );
-		}
-		SqImageSample&	GetPixelSample()
-		{
-			return ( m_Data );
-		}
-		/** Get a count of data
-		 * \return A count of the samples on this pixel.
-		 */
-		TqInt	DataSize()
-		{
-			return ( m_Data.m_Data.size() );
-		}
-		/** Get the maximum depth of this pixel
-		 * \return A float representing the maximum depth at this pixel.
-		 */
-		TqFloat	MaxDepth()
-		{
-			return ( m_MaxDepth );
-		}
-		void	SetMaxDepth( TqFloat d )
-		{
-			m_MaxDepth = d;
-		}
-		/** Get the minimum depth of this pixel
-		 * \return A float representing the minimum depth at this pixel.
-		 */
-		TqFloat	MinDepth()
-		{
-			return ( m_MinDepth );
-		}
-		void	SetMinDepth( TqFloat d )
-		{
-			m_MinDepth = d;
-		}
-		/** Get the id of the occlusion box that covers this pixel
-		 * \return The covering occlusion box's id.
-		 */
-		TqInt	OcclusionBoxId()
-		{
-			return ( m_OcclusionBoxId );
-		}
-		void	SetOcclusionBoxId( TqInt id )
-		{
-			m_OcclusionBoxId = id;
-		}
-		/** Mark this pixel as needing its min and max Z  values recalculating
-		*/
-		void	MarkForZUpdate()
-		{
-			m_NeedsZUpdate = true;
-		}
-		bool	NeedsZUpdating()
-		{
-			return m_NeedsZUpdate;
-		}
-		/** Scan through all the samples to find the min and max z values
-		*/
-		void	UpdateZValues();
+    /** Get the number of horizontal samples in this pixel
+     * \return The number of samples as an integer.
+     */
+    TqInt	XSamples() const
+    {
+        return ( m_XSamples );
+    }
+    /** Get the number of vertical samples in this pixel
+     * \return The number of samples as an integer.
+     */
+    TqInt	YSamples() const
+    {
+        return ( m_YSamples );
+    }
+    void	AllocateSamples( TqInt XSamples, TqInt YSamples );
+    void	InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBool fJitter = TqTrue );
+    void	OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples);
 
-		/** Clear all sample information from this pixel.
-		 */
-		void	Clear();
-		/** Get a reference to the array of values for the specified sample.
-		 * \param m The horizontal index of the required sample point.
-		 * \param n The vertical index of the required sample point.
-		 * \return A Reference to a vector of SqImageSample data.
-		 */
-		std::vector<SqImageSample>&	Values( TqInt m, TqInt n )
-		{
-			assert( m < m_XSamples );
-			assert( n < m_YSamples );
-			return ( m_aValues[ n * m_XSamples + m ] );
-		}
-		void	Combine();
+    /** Get the approximate coverage of this pixel.
+     * \return Float fraction of the pixel covered.
+     */
+    TqFloat	Coverage()
+    {
+        return ( m_Coverage );
+    }
+    void	SetCoverage( TqFloat c )
+    {
+        m_Coverage = c;
+    }
+    /** Get the averaged color of this pixel
+     * \return A color representing the averaged color at this pixel.
+     * \attention Only call this after already calling FilterBucket().
+     */
+    CqColor	Color()
+    {
+        return ( m_Data.Cs() );
+    }
+    void	SetColor(const CqColor& col)
+    {
+        m_Data.SetCs( col );
+    }
+    /** Get the averaged opacity of this pixel
+     * \return A color representing the averaged opacity at this pixel.
+     * \attention Only call this after already calling FilterBucket().
+     */
+    CqColor	Opacity()
+    {
+        return ( m_Data.Os() );
+    }
+    void	SetOpacity(const CqColor& col)
+    {
+        m_Data.SetOs( col );
+    }
+    /** Get the averaged depth of this pixel
+     * \return A float representing the averaged depth at this pixel.
+     * \attention Only call this after already calling FilterBucket().
+     */
+    TqFloat	Depth()
+    {
+        return ( m_Data.Depth() );
+    }
+    void	SetDepth( TqFloat d )
+    {
+        m_Data.SetDepth( d );
+    }
+    /** Get a pointer to the sample data
+     * \return A constant pointer to the sample data.
+     */
+    const TqFloat*	Data()
+    {
+        return ( &m_Data.m_Data[0] );
+    }
+    SqImageSample&	GetPixelSample()
+    {
+        return ( m_Data );
+    }
+    /** Get a count of data
+     * \return A count of the samples on this pixel.
+     */
+    TqInt	DataSize()
+    {
+        return ( m_Data.m_Data.size() );
+    }
+    /** Get the maximum depth of this pixel
+     * \return A float representing the maximum depth at this pixel.
+     */
+    TqFloat	MaxDepth()
+    {
+        return ( m_MaxDepth );
+    }
+    void	SetMaxDepth( TqFloat d )
+    {
+        m_MaxDepth = d;
+    }
+    /** Get the minimum depth of this pixel
+     * \return A float representing the minimum depth at this pixel.
+     */
+    TqFloat	MinDepth()
+    {
+        return ( m_MinDepth );
+    }
+    void	SetMinDepth( TqFloat d )
+    {
+        m_MinDepth = d;
+    }
+    /** Get the id of the occlusion box that covers this pixel
+     * \return The covering occlusion box's id.
+     */
+    TqInt	OcclusionBoxId()
+    {
+        return ( m_OcclusionBoxId );
+    }
+    void	SetOcclusionBoxId( TqInt id )
+    {
+        m_OcclusionBoxId = id;
+    }
+    /** Mark this pixel as needing its min and max Z  values recalculating
+    */
+    void	MarkForZUpdate()
+    {
+        m_NeedsZUpdate = true;
+    }
+    bool	NeedsZUpdating()
+    {
+        return m_NeedsZUpdate;
+    }
+    /** Scan through all the samples to find the min and max z values
+    */
+    void	UpdateZValues();
 
-		/** Get the sample data for the specified sample index.
-		 * \param The index of the required sample point.
-		 * \return A reference to the sample data.
-		 */
-		const SqSampleData& SampleData( TqInt index )
-		{
-			assert( index < m_XSamples*m_YSamples );
-			return ( m_Samples[index] );
-		}
+    /** Clear all sample information from this pixel.
+     */
+    void	Clear();
+    /** Get a reference to the array of values for the specified sample.
+     * \param m The horizontal index of the required sample point.
+     * \param n The vertical index of the required sample point.
+     * \return A Reference to a vector of SqImageSample data.
+     */
+    std::vector<SqImageSample>&	Values( TqInt m, TqInt n )
+    {
+        assert( m < m_XSamples );
+        assert( n < m_YSamples );
+        return ( m_aValues[ n * m_XSamples + m ] );
+    }
+    void	Combine();
 
-	private:
-		TqInt	m_XSamples;						///< The number of samples in the horizontal direction.
-		TqInt	m_YSamples;						///< The number of samples in the vertical direction.
-		std::vector<std::vector<SqImageSample> > m_aValues;	///< Vector of vectors of sample point data.
-		std::vector<SqSampleData> m_Samples;	///< A Vector of samples. Holds position, time, dof offset etc for each sample.
-		SqImageSample	m_Data;
-		TqFloat	m_Coverage;						///< The approximate coverage, just the ratio of sample hits to misses.
-		TqFloat m_MaxDepth;						///< The maximum depth of any sample in this pixel. used for occlusion culling
-		TqFloat m_MinDepth;						///< The minimum depth of any sample in this pixel. used for occlusion culling
-		TqInt m_OcclusionBoxId;					///< The CqOcclusionBox that covers this pixel
-		TqBool m_NeedsZUpdate;					///< Whether or not the min/max depth values are up to date.
+    /** Get the sample data for the specified sample index.
+     * \param The index of the required sample point.
+     * \return A reference to the sample data.
+     */
+    const SqSampleData& SampleData( TqInt index )
+    {
+        assert( index < m_XSamples*m_YSamples );
+        return ( m_Samples[index] );
+    }
+
+private:
+    TqInt	m_XSamples;						///< The number of samples in the horizontal direction.
+    TqInt	m_YSamples;						///< The number of samples in the vertical direction.
+    std::vector<std::vector<SqImageSample> > m_aValues;	///< Vector of vectors of sample point data.
+    std::vector<SqSampleData> m_Samples;	///< A Vector of samples. Holds position, time, dof offset etc for each sample.
+    SqImageSample	m_Data;
+    TqFloat	m_Coverage;						///< The approximate coverage, just the ratio of sample hits to misses.
+    TqFloat m_MaxDepth;						///< The maximum depth of any sample in this pixel. used for occlusion culling
+    TqFloat m_MinDepth;						///< The minimum depth of any sample in this pixel. used for occlusion culling
+    TqInt m_OcclusionBoxId;					///< The CqOcclusionBox that covers this pixel
+    TqBool m_NeedsZUpdate;					///< Whether or not the min/max depth values are up to date.
 }
 ;
 

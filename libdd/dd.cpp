@@ -87,19 +87,19 @@ static void CloseSocket( SOCKET& Socket );
 
 TqInt DDReceiveSome( TqInt s, void* buffer, TqInt len )
 {
-	TqInt tot = 0, need = len;
-	while ( need > 0 )
-	{
-		TqInt n;
-		if ( ( n = recv( s, reinterpret_cast<char*>( buffer ) + tot, need, 0 ) ) >0 )
-		{
-			need -= n;
-			tot += n;
-		}
-		else
-			return ( n );
-	}
-	return ( tot );
+    TqInt tot = 0, need = len;
+    while ( need > 0 )
+    {
+        TqInt n;
+        if ( ( n = recv( s, reinterpret_cast<char*>( buffer ) + tot, need, 0 ) ) >0 )
+        {
+            need -= n;
+            tot += n;
+        }
+        else
+            return ( n );
+    }
+    return ( tot );
 }
 
 
@@ -109,30 +109,30 @@ TqInt DDReceiveSome( TqInt s, void* buffer, TqInt len )
 
 TqInt DDReceiveMsg( TqInt s, SqDDMessageBase*& pMsg )
 {
-	SqDDMessageBase msghdr;
-	TqInt ret;
+    SqDDMessageBase msghdr;
+    TqInt ret;
 
-	pMsg = 0;
-	if ( ( ret = DDReceiveSome( s, &msghdr, sizeof( msghdr ) ) ) > 0 )
-	{
-		// Allocate space for the message.
-		char * msgbuffer = new char[ msghdr.m_MessageLength ];
-		// Copy the header.
-		memcpy( msgbuffer, &msghdr, ret );
-		pMsg = reinterpret_cast<SqDDMessageBase*>( msgbuffer );
+    pMsg = 0;
+    if ( ( ret = DDReceiveSome( s, &msghdr, sizeof( msghdr ) ) ) > 0 )
+    {
+        // Allocate space for the message.
+        char * msgbuffer = new char[ msghdr.m_MessageLength ];
+        // Copy the header.
+        memcpy( msgbuffer, &msghdr, ret );
+        pMsg = reinterpret_cast<SqDDMessageBase*>( msgbuffer );
 
-		if ( ret < msghdr.m_MessageLength )
-		{
-			if ( ( ret = DDReceiveSome( s, msgbuffer + ret, msghdr.m_MessageLength - ret ) ) <= 0 )
-			{
-				delete[] ( msgbuffer );
-				pMsg = 0;
-				return ( ret );
-			}
-		}
-		return ( msghdr.m_MessageLength );
-	}
-	return ( ret );
+        if ( ret < msghdr.m_MessageLength )
+        {
+            if ( ( ret = DDReceiveSome( s, msgbuffer + ret, msghdr.m_MessageLength - ret ) ) <= 0 )
+            {
+                delete[] ( msgbuffer );
+                pMsg = 0;
+                return ( ret );
+            }
+        }
+        return ( msghdr.m_MessageLength );
+    }
+    return ( ret );
 }
 
 
@@ -143,19 +143,19 @@ TqInt DDReceiveMsg( TqInt s, SqDDMessageBase*& pMsg )
 
 TqInt DDSendSome( TqInt s, void* buffer, TqInt len )
 {
-	TqInt tot = 0, need = len;
-	while ( need > 0 )
-	{
-		TqInt n;
-		if ( ( n = send( s, reinterpret_cast<char*>( buffer ) + tot, need, 0 ) ) >0 )
-		{
-			need -= n;
-			tot += n;
-		}
-		else
-			return ( n );
-	}
-	return ( tot );
+    TqInt tot = 0, need = len;
+    while ( need > 0 )
+    {
+        TqInt n;
+        if ( ( n = send( s, reinterpret_cast<char*>( buffer ) + tot, need, 0 ) ) >0 )
+        {
+            need -= n;
+            tot += n;
+        }
+        else
+            return ( n );
+    }
+    return ( tot );
 }
 
 
@@ -165,7 +165,7 @@ TqInt DDSendSome( TqInt s, void* buffer, TqInt len )
 
 TqInt DDSendMsg( TqInt s, SqDDMessageBase* pMsg )
 {
-	return ( DDSendSome( s, pMsg, pMsg->m_MessageLength ) );
+    return ( DDSendSome( s, pMsg, pMsg->m_MessageLength ) );
 }
 
 
@@ -178,50 +178,50 @@ static SOCKET g_Socket = INVALID_SOCKET;
 TqInt DDInitialise( const TqChar* phostname, TqInt port )
 {
 #ifdef AQSIS_SYSTEM_WIN32
-	WSADATA wsaData;
-	WSAStartup( MAKEWORD( 2, 0 ), &wsaData );
+    WSADATA wsaData;
+    WSAStartup( MAKEWORD( 2, 0 ), &wsaData );
 #endif // AQSIS_SYSTEM_WIN32
 
-	// Open a socket.
-	g_Socket = socket( AF_INET, SOCK_STREAM, 0 );
-	if ( g_Socket != INVALID_SOCKET )
-	{
-		// If no host name specified, use the local machine.
-		char hostName[ 255 ];
-		if ( phostname != NULL )
-			strcpy( hostName, phostname );
-		else
-			gethostname( hostName, 255 );
+    // Open a socket.
+    g_Socket = socket( AF_INET, SOCK_STREAM, 0 );
+    if ( g_Socket != INVALID_SOCKET )
+    {
+        // If no host name specified, use the local machine.
+        char hostName[ 255 ];
+        if ( phostname != NULL )
+            strcpy( hostName, phostname );
+        else
+            gethostname( hostName, 255 );
 
-		hostent* pHost;
+        hostent* pHost;
 #ifdef AQSIS_SYSTEM_MACOSX
-		// Remove this conditional section and use gethostbyname() if Apple ever
-		// fixes the problem of resolving localhost without a connection to a DNS server
-		pHost = gethostent();	// assumes localhost defined first in /etc/hosts
+        // Remove this conditional section and use gethostbyname() if Apple ever
+        // fixes the problem of resolving localhost without a connection to a DNS server
+        pHost = gethostent();	// assumes localhost defined first in /etc/hosts
 #else
-		pHost = gethostbyname( hostName );
+        pHost = gethostbyname( hostName );
 #endif /* AQSIS_SYSTEM_MACOSX */
 
-		SOCKADDR_IN saTemp;
-		memset( &saTemp, 0, sizeof( saTemp ) );
-		saTemp.sin_family = AF_INET;
-		if ( port < 0 )
-			saTemp.sin_port = htons( 27747 );
-		else
-			saTemp.sin_port = htons( port );
+        SOCKADDR_IN saTemp;
+        memset( &saTemp, 0, sizeof( saTemp ) );
+        saTemp.sin_family = AF_INET;
+        if ( port < 0 )
+            saTemp.sin_port = htons( 27747 );
+        else
+            saTemp.sin_port = htons( port );
 
-		memcpy( &saTemp.sin_addr, pHost->h_addr, pHost->h_length );
-		TqInt conret;
-		if ( ( conret = connect( g_Socket, ( PSOCKADDR ) & saTemp, sizeof( saTemp ) ) ) != SOCKET_ERROR )
-			return ( 0 );
-		else
-		{
-			CloseSocket( g_Socket );
-			return ( -1 );
-		}
-	}
-	else
-		return ( -1 );
+        memcpy( &saTemp.sin_addr, pHost->h_addr, pHost->h_length );
+        TqInt conret;
+        if ( ( conret = connect( g_Socket, ( PSOCKADDR ) & saTemp, sizeof( saTemp ) ) ) != SOCKET_ERROR )
+            return ( 0 );
+        else
+        {
+            CloseSocket( g_Socket );
+            return ( -1 );
+        }
+    }
+    else
+        return ( -1 );
 }
 
 //----------------------------------------------------------------------
@@ -230,84 +230,84 @@ TqInt DDInitialise( const TqChar* phostname, TqInt port )
 
 bool DDProcessMessage()
 {
-	SqDDMessageBase * message = 0;
-	const TqInt length = DDReceiveMsg( g_Socket, message );
-	if ( 0 == length )
-	{
-		// Connection closed gracefully by server ...
-		CloseSocket( g_Socket );
-		return false;
-	}
-	else if ( length < 0 )
-	{
-		std::cerr << "Error reading from socket" << std::endl;
-		CloseSocket( g_Socket );
-		return false;
-	}
+    SqDDMessageBase * message = 0;
+    const TqInt length = DDReceiveMsg( g_Socket, message );
+    if ( 0 == length )
+    {
+        // Connection closed gracefully by server ...
+        CloseSocket( g_Socket );
+        return false;
+    }
+    else if ( length < 0 )
+    {
+        std::cerr << "Error reading from socket" << std::endl;
+        CloseSocket( g_Socket );
+        return false;
+    }
 
-	// Make sure our message gets deallocated ...
-	std::auto_ptr<SqDDMessageBase> messagestorage( message );
+    // Make sure our message gets deallocated ...
+    std::auto_ptr<SqDDMessageBase> messagestorage( message );
 
-	switch ( message->m_MessageID )
-	{
-			case MessageID_FormatQuery:
-			{
-				if ( 0 != Query( g_Socket, message ) )
-				{
-					CloseSocket( g_Socket );
-					return false;
-				}
-			}
-			break;
+    switch ( message->m_MessageID )
+    {
+    case MessageID_FormatQuery:
+        {
+            if ( 0 != Query( g_Socket, message ) )
+            {
+                CloseSocket( g_Socket );
+                return false;
+            }
+        }
+        break;
 
-			case MessageID_Open:
-			{
-				if ( 0 != Open( g_Socket, message ) )
-				{
-					CloseSocket( g_Socket );
-					return false;
-				}
-			}
-			break;
+    case MessageID_Open:
+        {
+            if ( 0 != Open( g_Socket, message ) )
+            {
+                CloseSocket( g_Socket );
+                return false;
+            }
+        }
+        break;
 
-			case MessageID_Data:
-			{
-				if ( 0 != Data( g_Socket, message ) )
-				{
-					CloseSocket( g_Socket );
-					return false;
-				}
-			}
-			break;
+    case MessageID_Data:
+        {
+            if ( 0 != Data( g_Socket, message ) )
+            {
+                CloseSocket( g_Socket );
+                return false;
+            }
+        }
+        break;
 
-			case MessageID_Close:
-			{
-				if ( 0 != Close( g_Socket, message ) )
-				{
-					CloseSocket( g_Socket );
+    case MessageID_Close:
+        {
+            if ( 0 != Close( g_Socket, message ) )
+            {
+                CloseSocket( g_Socket );
 
 #ifdef DD_EXIT_AT_CLOSE
-					// Define DD_EXIT_AT_CLOSE for display device exit when rendering done
-					exit( 0 );
+                // Define DD_EXIT_AT_CLOSE for display device exit when rendering done
+                exit( 0 );
 #endif
 
-					return false;
-				}
-			}
-			break;
+                return false;
+            }
+        }
+        break;
 
-			default:
-			{
-				if ( 0 != HandleMessage( g_Socket, message ) )
-				{
-					CloseSocket( g_Socket );
-					return false;
-				}
-			}
-			break;
-	}
+    default:
+        {
+            if ( 0 != HandleMessage( g_Socket, message ) )
+            {
+                CloseSocket( g_Socket );
+                return false;
+            }
+        }
+        break;
+    }
 
-	return true;
+    return true;
 }
 
 //----------------------------------------------------------------------
@@ -317,21 +317,21 @@ bool DDProcessMessage()
 
 bool DDProcessMessageAsync( const TqUint TimeoutSeconds, const TqUint TimeoutMicroSeconds )
 {
-	// Check to see if we have anything waiting ...
-	fd_set files;
-	FD_ZERO( &files );
-	FD_SET( g_Socket, &files );
+    // Check to see if we have anything waiting ...
+    fd_set files;
+    FD_ZERO( &files );
+    FD_SET( g_Socket, &files );
 
-	timeval timeout;
-	timeout.tv_sec = TimeoutSeconds;
-	timeout.tv_usec = TimeoutMicroSeconds;
+    timeval timeout;
+    timeout.tv_sec = TimeoutSeconds;
+    timeout.tv_usec = TimeoutMicroSeconds;
 
-	const int ready = select( g_Socket + 1, &files, 0, 0, &timeout );
-	if ( 0 == ready )
-		return true;
+    const int ready = select( g_Socket + 1, &files, 0, 0, &timeout );
+    if ( 0 == ready )
+        return true;
 
-	// We've got data waiting, so process it normally ...
-	return DDProcessMessage();
+    // We've got data waiting, so process it normally ...
+    return DDProcessMessage();
 }
 
 //----------------------------------------------------------------------
@@ -340,101 +340,101 @@ bool DDProcessMessageAsync( const TqUint TimeoutSeconds, const TqUint TimeoutMic
 
 TqInt DDProcessMessages()
 {
-	while ( 1 )
-	{
-		SqDDMessageBase * pMsg;
-		TqInt len;
-		TqInt ret;
-		if ( ( len = DDReceiveMsg( g_Socket, pMsg ) ) > 0 )
-		{
-			switch ( pMsg->m_MessageID )
-			{
-					case MessageID_FormatQuery:
-					{
-						if ( ( ret = Query( g_Socket, pMsg ) ) != 0 )
-						{
-							CloseSocket( g_Socket );
-							return ( ret );
-						}
-					}
-					break;
+    while ( 1 )
+    {
+        SqDDMessageBase * pMsg;
+        TqInt len;
+        TqInt ret;
+        if ( ( len = DDReceiveMsg( g_Socket, pMsg ) ) > 0 )
+        {
+            switch ( pMsg->m_MessageID )
+            {
+            case MessageID_FormatQuery:
+                {
+                    if ( ( ret = Query( g_Socket, pMsg ) ) != 0 )
+                    {
+                        CloseSocket( g_Socket );
+                        return ( ret );
+                    }
+                }
+                break;
 
-					case MessageID_Open:
-					{
-						if ( ( ret = Open( g_Socket, pMsg ) ) != 0 )
-						{
-							CloseSocket( g_Socket );
-							return ( ret );
-						}
-					}
-					break;
+            case MessageID_Open:
+                {
+                    if ( ( ret = Open( g_Socket, pMsg ) ) != 0 )
+                    {
+                        CloseSocket( g_Socket );
+                        return ( ret );
+                    }
+                }
+                break;
 
-					case MessageID_Data:
-					{
-						if ( ( ret = Data( g_Socket, pMsg ) ) != 0 )
-						{
-							CloseSocket( g_Socket );
-							return ( ret );
-						}
-					}
-					break;
+            case MessageID_Data:
+                {
+                    if ( ( ret = Data( g_Socket, pMsg ) ) != 0 )
+                    {
+                        CloseSocket( g_Socket );
+                        return ( ret );
+                    }
+                }
+                break;
 
-					case MessageID_Close:
-					{
-						if ( ( ret = Close( g_Socket, pMsg ) ) != 0 )
-						{
-							CloseSocket( g_Socket );
-
-#ifdef DD_EXIT_AT_CLOSE
-							// Define DD_EXIT_AT_CLOSE for display device exit when rendering done
-							exit( 0 );
-#endif
-
-							return ( ret );
-						}
-					}
-					break;
-
-					case MessageID_Abandon:
-					{
-						if ( ( ret = Abandon( g_Socket, pMsg ) ) != 0 )
-						{
-							CloseSocket( g_Socket );
+            case MessageID_Close:
+                {
+                    if ( ( ret = Close( g_Socket, pMsg ) ) != 0 )
+                    {
+                        CloseSocket( g_Socket );
 
 #ifdef DD_EXIT_AT_CLOSE
-							// Define DD_EXIT_AT_CLOSE for display device exit when rendering done
-							exit( 0 );
+                        // Define DD_EXIT_AT_CLOSE for display device exit when rendering done
+                        exit( 0 );
 #endif
 
-							return ( ret );
-						}
-					}
-					break;
+                        return ( ret );
+                    }
+                }
+                break;
 
-					default:
-					{
-						if ( ( ret = HandleMessage( g_Socket, pMsg ) ) != 0 )
-						{
-							CloseSocket( g_Socket );
-							return ( ret );
-						}
-					}
-			}
-			delete[] ( pMsg );
-		}
-		else if ( len == 0 )
-		{
-			// Connection closed gracefully by server.
-			CloseSocket( g_Socket );
-			return ( 0 );
-		}
-		else
-		{
-			std::cerr << "Error reading from socket" << std::endl;
-			CloseSocket( g_Socket );
-			return ( -1 );
-		}
-	}
+            case MessageID_Abandon:
+                {
+                    if ( ( ret = Abandon( g_Socket, pMsg ) ) != 0 )
+                    {
+                        CloseSocket( g_Socket );
+
+#ifdef DD_EXIT_AT_CLOSE
+                        // Define DD_EXIT_AT_CLOSE for display device exit when rendering done
+                        exit( 0 );
+#endif
+
+                        return ( ret );
+                    }
+                }
+                break;
+
+            default:
+                {
+                    if ( ( ret = HandleMessage( g_Socket, pMsg ) ) != 0 )
+                    {
+                        CloseSocket( g_Socket );
+                        return ( ret );
+                    }
+                }
+            }
+            delete[] ( pMsg );
+        }
+        else if ( len == 0 )
+        {
+            // Connection closed gracefully by server.
+            CloseSocket( g_Socket );
+            return ( 0 );
+        }
+        else
+        {
+            std::cerr << "Error reading from socket" << std::endl;
+            CloseSocket( g_Socket );
+            return ( -1 );
+        }
+    }
 }
 
 /** Close the given socket.
@@ -442,19 +442,19 @@ TqInt DDProcessMessages()
 static void CloseSocket( SOCKET& Socket )
 {
 #ifdef AQSIS_SYSTEM_WIN32
-	int x = 1;
-	LINGER ling;
-	ling.l_onoff = 1;
-	ling.l_linger = 10;
-	setsockopt( Socket, SOL_SOCKET, SO_LINGER, reinterpret_cast<const char*>( &ling ), sizeof( ling ) );
-	shutdown( Socket, SD_BOTH );
-	closesocket( Socket );
+    int x = 1;
+    LINGER ling;
+    ling.l_onoff = 1;
+    ling.l_linger = 10;
+    setsockopt( Socket, SOL_SOCKET, SO_LINGER, reinterpret_cast<const char*>( &ling ), sizeof( ling ) );
+    shutdown( Socket, SD_BOTH );
+    closesocket( Socket );
 #else // AQSIS_SYSTEM_WIN32
-	shutdown( Socket, SD_BOTH );
-	close( Socket );
+    shutdown( Socket, SD_BOTH );
+    close( Socket );
 #endif // !AQSIS_SYSTEM_WIN32
 
-	Socket = INVALID_SOCKET;
+    Socket = INVALID_SOCKET;
 }
 
 

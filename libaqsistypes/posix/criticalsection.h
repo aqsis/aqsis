@@ -32,14 +32,14 @@
  */
 class CqCriticalSection
 {
-		friend class CqEnterCriticalSection;
+    friend class CqEnterCriticalSection;
 
-	public:
-		CqCriticalSection();
-		~CqCriticalSection();
+public:
+    CqCriticalSection();
+    ~CqCriticalSection();
 
-	private:
-		void* m_hMutex;		///< A pointer to the mutex. Use a void* so that clients don't have to include system specific headers.h
+private:
+    void* m_hMutex;		///< A pointer to the mutex. Use a void* so that clients don't have to include system specific headers.h
 }
 ;
 
@@ -52,12 +52,12 @@ class CqCriticalSection
 
 class CqEnterCriticalSection
 {
-	public:
-		CqEnterCriticalSection( CqCriticalSection* pObject );
-		~CqEnterCriticalSection();
+public:
+    CqEnterCriticalSection( CqCriticalSection* pObject );
+    ~CqEnterCriticalSection();
 
-	private:
-		CqCriticalSection* m_pCriticalSection;	///< a pointer to the criticial section class.
+private:
+    CqCriticalSection* m_pCriticalSection;	///< a pointer to the criticial section class.
 }
 ;
 

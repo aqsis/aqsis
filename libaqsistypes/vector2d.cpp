@@ -37,7 +37,7 @@ START_NAMESPACE( Aqsis )
  */
 
 CqVector2D::CqVector2D( const CqVector3D &From )
-		: m_x( From.x() ), m_y( From.y() )
+        : m_x( From.x() ), m_y( From.y() )
 {}
 
 //---------------------------------------------------------------------
@@ -46,10 +46,10 @@ CqVector2D::CqVector2D( const CqVector3D &From )
 
 CqVector2D &CqVector2D::operator=( const CqVector3D &From )
 {
-	m_x = From.x();
-	m_y = From.y();
+    m_x = From.x();
+    m_y = From.y();
 
-	return ( *this );
+    return ( *this );
 }
 
 
@@ -59,18 +59,18 @@ CqVector2D &CqVector2D::operator=( const CqVector3D &From )
 
 CqVector2D &CqVector2D::operator=( const CqVector4D &From )
 {
-	if ( From.h() != 1.0 )
-	{
-		m_x = From.x() / From.h();
-		m_y = From.y() / From.h();
-	}
-	else
-	{
-		m_x = From.x();
-		m_y = From.y();
-	}
+    if ( From.h() != 1.0 )
+    {
+        m_x = From.x() / From.h();
+        m_y = From.y() / From.h();
+    }
+    else
+    {
+        m_x = From.x();
+        m_y = From.y();
+    }
 
-	return ( *this );
+    return ( *this );
 }
 
 //----------------------------------------------------------------------
@@ -82,8 +82,8 @@ CqVector2D &CqVector2D::operator=( const CqVector4D &From )
 
 std::ostream &operator<<( std::ostream &Stream, CqVector2D &Vector )
 {
-	Stream << Vector.m_x << "," << Vector.m_y;
-	return ( Stream );
+    Stream << Vector.m_x << "," << Vector.m_y;
+    return ( Stream );
 }
 
 

@@ -33,7 +33,7 @@
  */
 
 CqSemaphore::CqSemaphore() :
-		m_pNativeSemaphore( CreateSemaphore( NULL, 0, 32767, NULL ) )
+        m_pNativeSemaphore( CreateSemaphore( NULL, 0, 32767, NULL ) )
 {}
 
 
@@ -43,7 +43,7 @@ CqSemaphore::CqSemaphore() :
 
 CqSemaphore::~CqSemaphore()
 {
-	CloseHandle( m_pNativeSemaphore );
+    CloseHandle( m_pNativeSemaphore );
 }
 
 
@@ -54,7 +54,7 @@ CqSemaphore::~CqSemaphore()
 void
 CqSemaphore::Signal()
 {
-	ReleaseSemaphore( m_pNativeSemaphore, 1, NULL );
+    ReleaseSemaphore( m_pNativeSemaphore, 1, NULL );
 }
 
 
@@ -65,6 +65,6 @@ CqSemaphore::Signal()
 void
 CqSemaphore::Wait()
 {
-	WaitForSingleObject( m_pNativeSemaphore, INFINITE );
+    WaitForSingleObject( m_pNativeSemaphore, INFINITE );
 }
 

@@ -56,466 +56,466 @@ class	CqLightsource;
 
 class CqAttributes : public CqRefCount, public IqAttributes
 {
-	public:
-		CqAttributes();
-		CqAttributes( const CqAttributes& From );
-		virtual	~CqAttributes();
+public:
+    CqAttributes();
+    CqAttributes( const CqAttributes& From );
+    virtual	~CqAttributes();
 
-		/** Get a pointer to this attribute state suitable for writing.
-		 * I the external references count is greater than 1, then create a copy on the stack and return that.
-		 * \return a pointer to these attribute safe to write into.
-		 */
-		CqAttributes* Write()
-		{
-			// We are about to write to this attribute,so clone if references exist.
-			if ( RefCount() > 1 )
-			{
-				CqAttributes * pWrite = Clone();
-				ADDREF( pWrite );
-				RELEASEREF( this );
-				return ( pWrite );
-			}
-			else
-				return ( this );
-		}
+    /** Get a pointer to this attribute state suitable for writing.
+     * I the external references count is greater than 1, then create a copy on the stack and return that.
+     * \return a pointer to these attribute safe to write into.
+     */
+    CqAttributes* Write()
+    {
+        // We are about to write to this attribute,so clone if references exist.
+        if ( RefCount() > 1 )
+        {
+            CqAttributes * pWrite = Clone();
+            ADDREF( pWrite );
+            RELEASEREF( this );
+            return ( pWrite );
+        }
+        else
+            return ( this );
+    }
 
-		CqAttributes& operator=( const CqAttributes& From );
+    CqAttributes& operator=( const CqAttributes& From );
 
-		/** Add a new user defined attribute.
-		 * \param pAttribute a pointer to the new user defined attribute.
-		 */
-		void	AddAttribute( CqNamedParameterList* pAttribute )
-		{
-			m_aAttributes.Add( pAttribute );
-		}
-		/** Get a pointer to a named user defined attribute.
-		 * \param strName the name of the attribute to retrieve.
-		 * \return a pointer to the attribute or 0 if not found.
-		 */
-		const	CqNamedParameterList* pAttribute( const char* strName ) const
-		{
-			return ( m_aAttributes.Find( strName ) );
-		}
-		/** Get a pointer to a named user defined attribute suitable for writing.
-		 * If the attribute has more than 1 external reference, create a duplicate an return that.
-		 * \attention If the attribute does not exist in the list, one will automatically be created and added.
-		 * \param strName the name of the attribute to retrieve.
-		 * \return a pointer to the attribute.
-		 */
-		CqNamedParameterList* pAttributeWrite( const char* strName )
-		{
-			CqNamedParameterList * pAttr = m_aAttributes.Find( strName );
-			if ( NULL != pAttr )
-			{
-				if ( pAttr->RefCount() == 1 )
-					return ( pAttr );
-				else
-				{
-					CqNamedParameterList* pNew = new CqNamedParameterList( *pAttr );
-					m_aAttributes.Remove( pAttr );
-					m_aAttributes.Add( pNew );
-					return ( pNew );
-				}
-			}
-			CqNamedParameterList* pNew = new CqNamedParameterList( strName );
-			m_aAttributes.Add( pNew );
-			return ( pNew );
-		}
+    /** Add a new user defined attribute.
+     * \param pAttribute a pointer to the new user defined attribute.
+     */
+    void	AddAttribute( CqNamedParameterList* pAttribute )
+    {
+        m_aAttributes.Add( pAttribute );
+    }
+    /** Get a pointer to a named user defined attribute.
+     * \param strName the name of the attribute to retrieve.
+     * \return a pointer to the attribute or 0 if not found.
+     */
+    const	CqNamedParameterList* pAttribute( const char* strName ) const
+    {
+        return ( m_aAttributes.Find( strName ) );
+    }
+    /** Get a pointer to a named user defined attribute suitable for writing.
+     * If the attribute has more than 1 external reference, create a duplicate an return that.
+     * \attention If the attribute does not exist in the list, one will automatically be created and added.
+     * \param strName the name of the attribute to retrieve.
+     * \return a pointer to the attribute.
+     */
+    CqNamedParameterList* pAttributeWrite( const char* strName )
+    {
+        CqNamedParameterList * pAttr = m_aAttributes.Find( strName );
+        if ( NULL != pAttr )
+        {
+            if ( pAttr->RefCount() == 1 )
+                return ( pAttr );
+            else
+            {
+                CqNamedParameterList* pNew = new CqNamedParameterList( *pAttr );
+                m_aAttributes.Remove( pAttr );
+                m_aAttributes.Add( pNew );
+                return ( pNew );
+            }
+        }
+        CqNamedParameterList* pNew = new CqNamedParameterList( strName );
+        m_aAttributes.Add( pNew );
+        return ( pNew );
+    }
 
-		/** Add a lightsource to the current available list.
-		 * \param pL a pointer to the new lightsource.
-		 */
-		void	AddLightsource( CqLightsource* pL )
-		{
-			// Check if the ligthsource is already active
-			std::vector<CqLightsource*>::iterator end = m_apLightsources.end();
-			for ( std::vector<CqLightsource*>::iterator i = m_apLightsources.begin(); i != end; i++ )
-			{
-				if ( ( *i ) == pL )
-					return ;
-			}
-			m_apLightsources.push_back( pL );
-		}
-		/** Remove a lightsource from the current available list.
-		 * \param pL a pointer to the lightsource to remove.
-		 */
-		void	RemoveLightsource( CqLightsource* pL )
-		{
-			// Check if the ligthsource is in the active list.
-			std::vector<CqLightsource*>::iterator end = m_apLightsources.end();
-			for ( std::vector<CqLightsource*>::iterator i = m_apLightsources.begin(); i != end; i++ )
-			{
-				if ( *i == pL )
-				{
-					m_apLightsources.erase( i );
-					return ;
-				}
-			}
-		}
-		/** Get a reference to the lightsource list.
-		 * \return a reference to the vector of lightsource pointers.
-		 */
-		virtual const	std::vector<CqLightsource*>&	apLights() const
-		{
-			return ( m_apLightsources );
-		}
+    /** Add a lightsource to the current available list.
+     * \param pL a pointer to the new lightsource.
+     */
+    void	AddLightsource( CqLightsource* pL )
+    {
+        // Check if the ligthsource is already active
+        std::vector<CqLightsource*>::iterator end = m_apLightsources.end();
+        for ( std::vector<CqLightsource*>::iterator i = m_apLightsources.begin(); i != end; i++ )
+        {
+            if ( ( *i ) == pL )
+                return ;
+        }
+        m_apLightsources.push_back( pL );
+    }
+    /** Remove a lightsource from the current available list.
+     * \param pL a pointer to the lightsource to remove.
+     */
+    void	RemoveLightsource( CqLightsource* pL )
+    {
+        // Check if the ligthsource is in the active list.
+        std::vector<CqLightsource*>::iterator end = m_apLightsources.end();
+        for ( std::vector<CqLightsource*>::iterator i = m_apLightsources.begin(); i != end; i++ )
+        {
+            if ( *i == pL )
+            {
+                m_apLightsources.erase( i );
+                return ;
+            }
+        }
+    }
+    /** Get a reference to the lightsource list.
+     * \return a reference to the vector of lightsource pointers.
+     */
+    virtual const	std::vector<CqLightsource*>&	apLights() const
+    {
+        return ( m_apLightsources );
+    }
 
-		/** Flip the orientation in which primitives are described between left and right handed.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 */
-		void	FlipeOrientation( TqFloat time = 0.0f )
-		{
-			TqInt co = GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
-			GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = ( co == OrientationLH ) ? OrientationRH : OrientationLH;
-		}
+    /** Flip the orientation in which primitives are described between left and right handed.
+     * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
+     */
+    void	FlipeOrientation( TqFloat time = 0.0f )
+    {
+        TqInt co = GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
+        GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = ( co == OrientationLH ) ? OrientationRH : OrientationLH;
+    }
 
-		/** Flip the orientation of the coordinate system between left and right handed.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 */
-		void	FlipeCoordsysOrientation( TqFloat time = 0.0f )
-		{
-			TqInt co = GetIntegerAttribute( "System", "Orientation" ) [ 1 ];
-			GetIntegerAttributeWrite( "System", "Orientation" ) [ 1 ] = ( co == OrientationLH ) ? OrientationRH : OrientationLH;
-		}
+    /** Flip the orientation of the coordinate system between left and right handed.
+     * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
+     */
+    void	FlipeCoordsysOrientation( TqFloat time = 0.0f )
+    {
+        TqInt co = GetIntegerAttribute( "System", "Orientation" ) [ 1 ];
+        GetIntegerAttributeWrite( "System", "Orientation" ) [ 1 ] = ( co == OrientationLH ) ? OrientationRH : OrientationLH;
+    }
 
-		virtual IqShader*	pshadDisplacement( TqFloat time = 0.0f ) const
-		{
-			return ( m_pshadDisplacement );
-		}
-		virtual void	SetpshadDisplacement( IqShader* pshadDisplacement, TqFloat time = 0.0f )
-		{
-			m_pshadDisplacement = pshadDisplacement;
-		}
-		virtual IqShader*	pshadAreaLightSource( TqFloat time = 0.0f ) const
-		{
-			return ( m_pshadAreaLightSource );
-		}
-		virtual void	SetpshadAreaLightSource( IqShader* pshadAreaLightSource, TqFloat time = 0.0f )
-		{
-			m_pshadAreaLightSource = pshadAreaLightSource;
-		}
-		virtual IqShader*	pshadSurface( TqFloat time = 0.0f ) const
-		{
-			return ( m_pshadSurface );
-		}
-		virtual void	SetpshadSurface( IqShader* pshadSurface, TqFloat time = 0.0f )
-		{
-			m_pshadSurface = pshadSurface;
-		}
-		virtual IqShader*	pshadAtmosphere( TqFloat time = 0.0f ) const
-		{
-			return ( m_pshadAtmosphere );
-		}
-		virtual void	SetpshadAtmosphere( IqShader* pshadAtmosphere, TqFloat time = 0.0f )
-		{
-			m_pshadAtmosphere = pshadAtmosphere;
-		}
-		virtual IqShader*	pshadExteriorVolume( TqFloat time = 0.0f ) const
-		{
-			return ( m_pshadExteriorVolume );
-		}
-		virtual void	SetpshadExteriorVolume( IqShader* pshadExteriorVolume, TqFloat time = 0.0f )
-		{
-			m_pshadExteriorVolume = pshadExteriorVolume;
-		}
-		virtual IqShader*	pshadAreaInteriorVolume( TqFloat time = 0.0f ) const
-		{
-			return ( m_pshadInteriorVolume );
-		}
-		virtual void	SetpshadInteriorVolume( IqShader* pshadInteriorVolume, TqFloat time = 0.0f )
-		{
-			m_pshadInteriorVolume = pshadInteriorVolume;
-		}
+    virtual IqShader*	pshadDisplacement( TqFloat time = 0.0f ) const
+    {
+        return ( m_pshadDisplacement );
+    }
+    virtual void	SetpshadDisplacement( IqShader* pshadDisplacement, TqFloat time = 0.0f )
+    {
+        m_pshadDisplacement = pshadDisplacement;
+    }
+    virtual IqShader*	pshadAreaLightSource( TqFloat time = 0.0f ) const
+    {
+        return ( m_pshadAreaLightSource );
+    }
+    virtual void	SetpshadAreaLightSource( IqShader* pshadAreaLightSource, TqFloat time = 0.0f )
+    {
+        m_pshadAreaLightSource = pshadAreaLightSource;
+    }
+    virtual IqShader*	pshadSurface( TqFloat time = 0.0f ) const
+    {
+        return ( m_pshadSurface );
+    }
+    virtual void	SetpshadSurface( IqShader* pshadSurface, TqFloat time = 0.0f )
+    {
+        m_pshadSurface = pshadSurface;
+    }
+    virtual IqShader*	pshadAtmosphere( TqFloat time = 0.0f ) const
+    {
+        return ( m_pshadAtmosphere );
+    }
+    virtual void	SetpshadAtmosphere( IqShader* pshadAtmosphere, TqFloat time = 0.0f )
+    {
+        m_pshadAtmosphere = pshadAtmosphere;
+    }
+    virtual IqShader*	pshadExteriorVolume( TqFloat time = 0.0f ) const
+    {
+        return ( m_pshadExteriorVolume );
+    }
+    virtual void	SetpshadExteriorVolume( IqShader* pshadExteriorVolume, TqFloat time = 0.0f )
+    {
+        m_pshadExteriorVolume = pshadExteriorVolume;
+    }
+    virtual IqShader*	pshadAreaInteriorVolume( TqFloat time = 0.0f ) const
+    {
+        return ( m_pshadInteriorVolume );
+    }
+    virtual void	SetpshadInteriorVolume( IqShader* pshadInteriorVolume, TqFloat time = 0.0f )
+    {
+        m_pshadInteriorVolume = pshadInteriorVolume;
+    }
 
-		/** Get the array of trim curve loops.
-		 *	\return A pointer to the trim loops array object.
-		 */
-		const CqTrimLoopArray& TrimLoops() const
-		{
-			return ( m_TrimLoops );
-		}
-		/** Get the array of trim curve loops.
-		 *	\return A pointer to the trim loops array object.
-		 */
-		CqTrimLoopArray& TrimLoops()
-		{
-			return ( m_TrimLoops );
-		}
+    /** Get the array of trim curve loops.
+     *	\return A pointer to the trim loops array object.
+     */
+    const CqTrimLoopArray& TrimLoops() const
+    {
+        return ( m_TrimLoops );
+    }
+    /** Get the array of trim curve loops.
+     *	\return A pointer to the trim loops array object.
+     */
+    CqTrimLoopArray& TrimLoops()
+    {
+        return ( m_TrimLoops );
+    }
 
-		/** Clone the entire attribute state.
-		 * \return a pointer to the new attribute state.
-		 */
-		CqAttributes*	Clone() const
-		{
-			return ( new CqAttributes( *this ) );
-		}
+    /** Clone the entire attribute state.
+     * \return a pointer to the new attribute state.
+     */
+    CqAttributes*	Clone() const
+    {
+        return ( new CqAttributes( *this ) );
+    }
 
-		const	CqParameter* pParameter( const char* strName, const char* strParam ) const;
-		CqParameter* pParameterWrite( const char* strName, const char* strParam );
+    const	CqParameter* pParameter( const char* strName, const char* strParam ) const;
+    CqParameter* pParameterWrite( const char* strName, const char* strParam );
 
-		virtual const	TqFloat*	GetFloatAttribute( const char* strName, const char* strParam ) const;
-		virtual const	TqInt*	GetIntegerAttribute( const char* strName, const char* strParam ) const;
-		virtual const	CqString* GetStringAttribute( const char* strName, const char* strParam ) const;
-		virtual const	CqVector3D*	GetPointAttribute( const char* strName, const char* strParam ) const;
-		virtual const	CqVector3D*	GetVectorAttribute( const char* strName, const char* strParam ) const;
-		virtual const	CqVector3D*	GetNormalAttribute( const char* strName, const char* strParam ) const;
-		virtual const	CqColor*	GetColorAttribute( const char* strName, const char* strParam ) const;
-		virtual const	CqMatrix*	GetMatrixAttribute( const char* strName, const char* strParam ) const;
+    virtual const	TqFloat*	GetFloatAttribute( const char* strName, const char* strParam ) const;
+    virtual const	TqInt*	GetIntegerAttribute( const char* strName, const char* strParam ) const;
+    virtual const	CqString* GetStringAttribute( const char* strName, const char* strParam ) const;
+    virtual const	CqVector3D*	GetPointAttribute( const char* strName, const char* strParam ) const;
+    virtual const	CqVector3D*	GetVectorAttribute( const char* strName, const char* strParam ) const;
+    virtual const	CqVector3D*	GetNormalAttribute( const char* strName, const char* strParam ) const;
+    virtual const	CqColor*	GetColorAttribute( const char* strName, const char* strParam ) const;
+    virtual const	CqMatrix*	GetMatrixAttribute( const char* strName, const char* strParam ) const;
 
-		virtual TqFloat*	GetFloatAttributeWrite( const char* strName, const char* strParam );
-		virtual TqInt*	GetIntegerAttributeWrite( const char* strName, const char* strParam );
-		virtual CqString* GetStringAttributeWrite( const char* strName, const char* strParam );
-		virtual CqVector3D*	GetPointAttributeWrite( const char* strName, const char* strParam );
-		virtual CqVector3D*	GetVectorAttributeWrite( const char* strName, const char* strParam );
-		virtual CqVector3D*	GetNormalAttributeWrite( const char* strName, const char* strParam );
-		virtual CqColor*	GetColorAttributeWrite( const char* strName, const char* strParam );
-		virtual CqMatrix*	GetMatrixAttributeWrite( const char* strName, const char* strParam );
+    virtual TqFloat*	GetFloatAttributeWrite( const char* strName, const char* strParam );
+    virtual TqInt*	GetIntegerAttributeWrite( const char* strName, const char* strParam );
+    virtual CqString* GetStringAttributeWrite( const char* strName, const char* strParam );
+    virtual CqVector3D*	GetPointAttributeWrite( const char* strName, const char* strParam );
+    virtual CqVector3D*	GetVectorAttributeWrite( const char* strName, const char* strParam );
+    virtual CqVector3D*	GetNormalAttributeWrite( const char* strName, const char* strParam );
+    virtual CqColor*	GetColorAttributeWrite( const char* strName, const char* strParam );
+    virtual CqMatrix*	GetMatrixAttributeWrite( const char* strName, const char* strParam );
 
-		virtual	TqInt	cLights() const
-		{
-			return ( apLights().size() );
-		}
-		virtual	IqLightsource*	pLight( TqInt index );
+    virtual	TqInt	cLights() const
+    {
+        return ( apLights().size() );
+    }
+    virtual	IqLightsource*	pLight( TqInt index );
 
 #ifndef _DEBUG
-		virtual	void	Release()
-		{
-			CqRefCount::Release();
-		}
-		virtual	void	AddRef()
-		{
-			CqRefCount::AddRef();
-		}
+    virtual	void	Release()
+    {
+        CqRefCount::Release();
+    }
+    virtual	void	AddRef()
+    {
+        CqRefCount::AddRef();
+    }
 #else
-		virtual void AddRef(const TqChar* file, TqInt line)
-		{
-			CqRefCount::AddRef(file, line);
-		}
-		virtual void Release(const TqChar* file, TqInt line)
-		{
-			CqRefCount::Release(file, line);
-		}
-		CqString className() const { return CqString("CqAttributes"); }
+    virtual void AddRef(const TqChar* file, TqInt line)
+    {
+        CqRefCount::AddRef(file, line);
+    }
+    virtual void Release(const TqChar* file, TqInt line)
+    {
+        CqRefCount::Release(file, line);
+    }
+    CqString className() const { return CqString("CqAttributes"); }
 #endif
 
-	private:
+private:
 #ifndef REQUIRED
-		class CqHashTable
-		{
-            		private:
-				static const TqInt tableSize;
+    class CqHashTable
+    {
+    private:
+        static const TqInt tableSize;
 
-			public:
-				CqHashTable()
-				{
-					m_aLists.resize( tableSize );
-				}
-				virtual	~CqHashTable()
-				{
-					// Release all the system options we have a handle on.
-					std::vector<std::list<CqNamedParameterList*> >::iterator i;
-					for ( i = m_aLists.begin(); i != m_aLists.end(); i++ )
-					{
-						std::list<CqNamedParameterList*>::iterator i2;
-						for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
-							RELEASEREF( (*i2) );
-							//( *i2 ) ->Release();
-					}
-				}
+    public:
+        CqHashTable()
+        {
+            m_aLists.resize( tableSize );
+        }
+        virtual	~CqHashTable()
+        {
+            // Release all the system options we have a handle on.
+            std::vector<std::list<CqNamedParameterList*> >::iterator i;
+            for ( i = m_aLists.begin(); i != m_aLists.end(); i++ )
+            {
+                std::list<CqNamedParameterList*>::iterator i2;
+                for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
+                    RELEASEREF( (*i2) );
+                //( *i2 ) ->Release();
+            }
+        }
 
-				const CqNamedParameterList*	Find( const TqChar* pname ) const
-				{
-					TqUlong hash = CqParameter::hash(pname);
-					TqInt i = _hash( hash);
+        const CqNamedParameterList*	Find( const TqChar* pname ) const
+        {
+            TqUlong hash = CqParameter::hash(pname);
+            TqInt i = _hash( hash);
 
-					if ( m_aLists[ i ].empty() )
-						return ( 0 );
-
-
-					std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
-					if ( iEntry == m_aLists[ i ].end() )
-						return ( *iEntry );
-					else
-					{
-						while ( iEntry != m_aLists[ i ].end() )
-						{
-							if ( ( *iEntry ) ->hash() == hash )
-								return ( *iEntry );
-							iEntry++;
-						}
-					}
-
-					return ( 0 );
-				}
-
-				CqNamedParameterList*	Find( const TqChar* pname )
-				{
-					TqUlong hash = CqParameter::hash(pname);
-					TqInt i = _hash( hash);
-
-					if ( m_aLists[ i ].empty() )
-						return ( 0 );
+            if ( m_aLists[ i ].empty() )
+                return ( 0 );
 
 
-					std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
-					if ( iEntry == m_aLists[ i ].end() )
-						return ( *iEntry );
-					else
-					{
-						while ( iEntry != m_aLists[ i ].end() )
-						{
-							if ( ( *iEntry ) ->hash() == hash )
-								return ( *iEntry );
-							iEntry++;
-						}
-					}
+            std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
+            if ( iEntry == m_aLists[ i ].end() )
+                return ( *iEntry );
+            else
+            {
+                while ( iEntry != m_aLists[ i ].end() )
+                {
+                    if ( ( *iEntry ) ->hash() == hash )
+                        return ( *iEntry );
+                    iEntry++;
+                }
+            }
 
-					return ( 0 );
-				}
+            return ( 0 );
+        }
 
-				void Add( CqNamedParameterList* pOption )
-				{
-					TqUlong hash = CqParameter::hash(pOption->strName().c_str());
-					TqInt i = _hash( hash);
-					m_aLists[ i ].push_back( pOption );
-					ADDREF( pOption );
-				}
+        CqNamedParameterList*	Find( const TqChar* pname )
+        {
+            TqUlong hash = CqParameter::hash(pname);
+            TqInt i = _hash( hash);
 
-				void Remove( CqNamedParameterList* pOption )
-				{
-					TqUlong hash = CqParameter::hash(pOption->strName().c_str());
-					TqInt i = _hash( hash);
+            if ( m_aLists[ i ].empty() )
+                return ( 0 );
 
-					std::list<CqNamedParameterList*>::iterator iEntry = m_aLists[ i ].begin();
-					while ( iEntry != m_aLists[ i ].end() )
-					{
-						if ( ( *iEntry ) == pOption )
-						{
-							//pOption->Release();
-							RELEASEREF( pOption );
-							m_aLists[ i ].remove( *iEntry );
-							return ;
-						}
-						iEntry++;
-					}
-				}
 
-				CqHashTable& operator=( const CqHashTable& From )
-				{
-					std::vector<std::list<CqNamedParameterList*> >::const_iterator i;
-					for ( i = From.m_aLists.begin(); i != From.m_aLists.end(); i++ )
-					{
-						std::list<CqNamedParameterList*>::const_iterator i2;
-						for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
-							Add( *i2 );
-					}
-					return ( *this );
-				}
+            std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
+            if ( iEntry == m_aLists[ i ].end() )
+                return ( *iEntry );
+            else
+            {
+                while ( iEntry != m_aLists[ i ].end() )
+                {
+                    if ( ( *iEntry ) ->hash() == hash )
+                        return ( *iEntry );
+                    iEntry++;
+                }
+            }
 
-			private:
-				TqInt _hash( TqUlong h ) const
-				{
-					return (h % tableSize);
-				}
-				TqInt _hash( const TqChar* string ) const
-				{
-					assert ( string != 0 && string[ 0 ] != 0 );
+            return ( 0 );
+        }
 
-					TqUlong h = CqParameter::hash( string );
-					return ( (TqUlong) h % tableSize ); // remainder
-				}
+        void Add( CqNamedParameterList* pOption )
+        {
+            TqUlong hash = CqParameter::hash(pOption->strName().c_str());
+            TqInt i = _hash( hash);
+            m_aLists[ i ].push_back( pOption );
+            ADDREF( pOption );
+        }
 
-				std::vector<std::list<CqNamedParameterList*> >	m_aLists;
-		};
+        void Remove( CqNamedParameterList* pOption )
+        {
+            TqUlong hash = CqParameter::hash(pOption->strName().c_str());
+            TqInt i = _hash( hash);
+
+            std::list<CqNamedParameterList*>::iterator iEntry = m_aLists[ i ].begin();
+            while ( iEntry != m_aLists[ i ].end() )
+            {
+                if ( ( *iEntry ) == pOption )
+                {
+                    //pOption->Release();
+                    RELEASEREF( pOption );
+                    m_aLists[ i ].remove( *iEntry );
+                    return ;
+                }
+                iEntry++;
+            }
+        }
+
+        CqHashTable& operator=( const CqHashTable& From )
+        {
+            std::vector<std::list<CqNamedParameterList*> >::const_iterator i;
+            for ( i = From.m_aLists.begin(); i != From.m_aLists.end(); i++ )
+            {
+                std::list<CqNamedParameterList*>::const_iterator i2;
+                for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
+                    Add( *i2 );
+            }
+            return ( *this );
+        }
+
+    private:
+        TqInt _hash( TqUlong h ) const
+        {
+            return (h % tableSize);
+        }
+        TqInt _hash( const TqChar* string ) const
+        {
+            assert ( string != 0 && string[ 0 ] != 0 );
+
+            TqUlong h = CqParameter::hash( string );
+            return ( (TqUlong) h % tableSize ); // remainder
+        }
+
+        std::vector<std::list<CqNamedParameterList*> >	m_aLists;
+    };
 #else
-		class CqHashTable
-		{
-			private:
-				static const TqInt tableSize;
+    class CqHashTable
+    {
+    private:
+        static const TqInt tableSize;
 
-				typedef	std::map<std::string, CqNamedParameterList*, std::less<std::string> > plist_type;
-				typedef	plist_type::value_type	value_type;
-				typedef	plist_type::iterator plist_iterator;
-				typedef	plist_type::const_iterator plist_const_iterator;
+        typedef	std::map<std::string, CqNamedParameterList*, std::less<std::string> > plist_type;
+        typedef	plist_type::value_type	value_type;
+        typedef	plist_type::iterator plist_iterator;
+        typedef	plist_type::const_iterator plist_const_iterator;
 
-			public:
-				CqHashTable()
-				{}
-				virtual	~CqHashTable()
-				{
-					plist_iterator it = m_ParameterLists.begin();
-					while( it != m_ParameterLists.end() )
-					{
-						RELEASEREF( (*it).second );
-						++it;
-					}
-				}
+    public:
+        CqHashTable()
+        {}
+        virtual	~CqHashTable()
+        {
+            plist_iterator it = m_ParameterLists.begin();
+            while( it != m_ParameterLists.end() )
+            {
+                RELEASEREF( (*it).second );
+                ++it;
+            }
+        }
 
-				const CqNamedParameterList*	Find( const TqChar* pname ) const
-				{
-					std::string strName( pname );
-					plist_const_iterator it = m_ParameterLists.find( strName );
-					if( it != m_ParameterLists.end() )
-						return ( it->second );
-					else
-						return ( NULL );
-				}
+        const CqNamedParameterList*	Find( const TqChar* pname ) const
+        {
+            std::string strName( pname );
+            plist_const_iterator it = m_ParameterLists.find( strName );
+            if( it != m_ParameterLists.end() )
+                return ( it->second );
+            else
+                return ( NULL );
+        }
 
-				CqNamedParameterList*	Find( const TqChar* pname )
-				{
-					std::string strName( pname );
-					plist_iterator it = m_ParameterLists.find( strName );
-					if( it != m_ParameterLists.end() )
-						return ( it->second );
-					else
-						return ( NULL );
-				}
+        CqNamedParameterList*	Find( const TqChar* pname )
+        {
+            std::string strName( pname );
+            plist_iterator it = m_ParameterLists.find( strName );
+            if( it != m_ParameterLists.end() )
+                return ( it->second );
+            else
+                return ( NULL );
+        }
 
-				void Add( CqNamedParameterList* pOption )
-				{
-					m_ParameterLists.insert(value_type(pOption->strName(), pOption) );
-					ADDREF( pOption );
-				}
+        void Add( CqNamedParameterList* pOption )
+        {
+            m_ParameterLists.insert(value_type(pOption->strName(), pOption) );
+            ADDREF( pOption );
+        }
 
-				void Remove( CqNamedParameterList* pOption )
-				{
-					plist_iterator it = m_ParameterLists.find( pOption->strName() );
-					if( it != m_ParameterLists.end() )
-					{
-						RELEASEREF( (*it).second );
-						m_ParameterLists.erase(it);
-					}
-				}
+        void Remove( CqNamedParameterList* pOption )
+        {
+            plist_iterator it = m_ParameterLists.find( pOption->strName() );
+            if( it != m_ParameterLists.end() )
+            {
+                RELEASEREF( (*it).second );
+                m_ParameterLists.erase(it);
+            }
+        }
 
-				CqHashTable& operator=( const CqHashTable& From )
-				{
-					plist_const_iterator it = From.m_ParameterLists.begin();
-					while( it != From.m_ParameterLists.end() )
-					{
-						Add( (*it).second );
-						++it;
-					}
-					return ( *this );
-				}
+        CqHashTable& operator=( const CqHashTable& From )
+        {
+            plist_const_iterator it = From.m_ParameterLists.begin();
+            while( it != From.m_ParameterLists.end() )
+            {
+                Add( (*it).second );
+                ++it;
+            }
+            return ( *this );
+        }
 
-			private:
-				plist_type	m_ParameterLists;
-		};
+    private:
+        plist_type	m_ParameterLists;
+    };
 #endif
 
-		CqHashTable	m_aAttributes;						///< a vector of user defined attribute pointers.
+    CqHashTable	m_aAttributes;						///< a vector of user defined attribute pointers.
 
-		IqShader*	m_pshadDisplacement;				///< a pointer to the current displacement shader.
-		IqShader*	m_pshadAreaLightSource;				///< a pointer to the current area ligthsource shader.
-		IqShader*	m_pshadSurface;						///< a pointer to the current surface shader.
-		IqShader*	m_pshadAtmosphere;					///< a pointer to the current atmosphere shader.
-		IqShader*	m_pshadInteriorVolume;				///< a pointer to the current interior shader.
-		IqShader*	m_pshadExteriorVolume;				///< a pointer to the current exterior shader.
+    IqShader*	m_pshadDisplacement;				///< a pointer to the current displacement shader.
+    IqShader*	m_pshadAreaLightSource;				///< a pointer to the current area ligthsource shader.
+    IqShader*	m_pshadSurface;						///< a pointer to the current surface shader.
+    IqShader*	m_pshadAtmosphere;					///< a pointer to the current atmosphere shader.
+    IqShader*	m_pshadInteriorVolume;				///< a pointer to the current interior shader.
+    IqShader*	m_pshadExteriorVolume;				///< a pointer to the current exterior shader.
 
-		CqTrimLoopArray m_TrimLoops;					///< the array of closed trimcurve loops.
-		std::vector<CqLightsource*> m_apLightsources;	///< a vector of currently available lightsources.
+    CqTrimLoopArray m_TrimLoops;					///< the array of closed trimcurve loops.
+    std::vector<CqLightsource*> m_apLightsources;	///< a vector of currently available lightsources.
 
-		TqInt	m_StackIndex;							///< the index of this attribute state in the global stack, used for destroying when last reference is removed.
+    TqInt	m_StackIndex;							///< the index of this attribute state in the global stack, used for destroying when last reference is removed.
 }
 ;
 

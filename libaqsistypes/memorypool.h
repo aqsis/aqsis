@@ -47,78 +47,78 @@ START_NAMESPACE( Aqsis )
 template <class T, long S = MEMORYPOOL_DEFAULTBLOCKSIZE>
 class CqMemoryPool
 {
-	public:
-		CqMemoryPool() : m_pHead( 0 )
-		{}
-		virtual	~CqMemoryPool()
-		{
-			// Delete any remaining objects.
-			// Note if this happens and anyone is pointing to the
-			// allocated objects, you're in trouble.
+public:
+    CqMemoryPool() : m_pHead( 0 )
+    {}
+    virtual	~CqMemoryPool()
+    {
+        // Delete any remaining objects.
+        // Note if this happens and anyone is pointing to the
+        // allocated objects, you're in trouble.
 
-		}
+    }
 
-		/** Allocate a block from the pool.
-		 * \param size The requested size of the block, should be sizeof T, if not something is wrong.
-		 * \return void* pointer to memory block.
-		 */
-		void*	Alloc( size_t size )
-		{
+    /** Allocate a block from the pool.
+     * \param size The requested size of the block, should be sizeof T, if not something is wrong.
+     * \return void* pointer to memory block.
+     */
+    void*	Alloc( size_t size )
+    {
 
-			// send requests of the "wrong" size to ::operator new();
-			if ( size != sizeof( T ) )
-				return ::operator new( size );
+        // send requests of the "wrong" size to ::operator new();
+        if ( size != sizeof( T ) )
+            return ::operator new( size );
 
-			T* p = m_pHead;    // Point to the first free block.
+        T* p = m_pHead;    // Point to the first free block.
 
-			// if p is valid, just move the list head to the
-			// next element in the free list
-			if ( p ) m_pHead = p->m_pNext;
-			else
-			{
-				// The free list is empty. Allocate a block of memory
-				// big enough hold S objects
-				T* newBlock = static_cast<T*>( ::operator new( S*sizeof( T ) ) );
+        // if p is valid, just move the list head to the
+        // next element in the free list
+        if ( p ) m_pHead = p->m_pNext;
+        else
+        {
+            // The free list is empty. Allocate a block of memory
+            // big enough hold S objects
+            T* newBlock = static_cast<T*>( ::operator new( S*sizeof( T ) ) );
 
-				// form a new free list by linking the memory chunks
-				// together; skip the zeroth element, because you'll
-				// return that to the caller of operator new
-				for ( int i = 1; i < S - 1; ++i )
-					newBlock[ i ].m_pNext = &newBlock[ i + 1 ];
+            // form a new free list by linking the memory chunks
+            // together; skip the zeroth element, because you'll
+            // return that to the caller of operator new
+            for ( int i = 1; i < S - 1; ++i )
+                newBlock[ i ].m_pNext = &newBlock[ i + 1 ];
 
-				// terminate the linked list with a null pointer
-				newBlock[ S - 1 ].m_pNext = 0;
+            // terminate the linked list with a null pointer
+            newBlock[ S - 1 ].m_pNext = 0;
 
-				// set p to front of list, headOfFreeList to
-				// chunk immediately following
-				p = newBlock;
-				m_pHead = &newBlock[ 1 ];
-			}
-			return ( p );
-		}
+            // set p to front of list, headOfFreeList to
+            // chunk immediately following
+            p = newBlock;
+            m_pHead = &newBlock[ 1 ];
+        }
+        return ( p );
+    }
 
-		/** Deallocate a block from the pool.
-		 * \param p Pointer to the block, should be in a valid pool, if not something is wrong.
-		 * \param size The requested size of the block, should be sizeof T, if not something is wrong.
-		 */
-		void	DeAlloc( void* p, size_t size )
-		{
-			if ( p == 0 ) return ;
+    /** Deallocate a block from the pool.
+     * \param p Pointer to the block, should be in a valid pool, if not something is wrong.
+     * \param size The requested size of the block, should be sizeof T, if not something is wrong.
+     */
+    void	DeAlloc( void* p, size_t size )
+    {
+        if ( p == 0 ) return ;
 
-			if ( size != sizeof( T ) )
-			{
-				::operator delete( p );
-				return;
-			}
+        if ( size != sizeof( T ) )
+        {
+            ::operator delete( p );
+            return;
+        }
 
-			T *carcass = static_cast<T*>( p );
+        T *carcass = static_cast<T*>( p );
 
-			carcass->m_pNext = m_pHead;
-			m_pHead = carcass;
-		}
+        carcass->m_pNext = m_pHead;
+        m_pHead = carcass;
+    }
 
-	private:
-		T*	m_pHead;		///< Pointer to the first free block in the pool.
+private:
+    T*	m_pHead;		///< Pointer to the first free block in the pool.
 }
 ;
 
@@ -131,29 +131,29 @@ class CqMemoryPool
 template <class T, long S = MEMORYPOOL_DEFAULTBLOCKSIZE>
 class CqPoolable
 {
-	public:
-		CqPoolable() : m_pNext( 0 )
-		{}
-		~CqPoolable()
-		{}
+public:
+    CqPoolable() : m_pNext( 0 )
+    {}
+    ~CqPoolable()
+    {}
 
-		/** Overridden operator new to allocate micropolys from a pool.
-		 */
-		void* operator new( size_t size )
-		{
-			return( m_thePool.Alloc( size ) );
-		}
+    /** Overridden operator new to allocate micropolys from a pool.
+     */
+    void* operator new( size_t size )
+    {
+        return( m_thePool.Alloc( size ) );
+    }
 
-		/** Overridden operator delete to allocate micropolys from a pool.
-		 */
-		void operator delete( void* p )
-		{
-			m_thePool.DeAlloc( p, sizeof( T ) );
-		}
+    /** Overridden operator delete to allocate micropolys from a pool.
+     */
+    void operator delete( void* p )
+    {
+        m_thePool.DeAlloc( p, sizeof( T ) );
+    }
 
-		T*	m_pNext;	///< Pointer to the next object.
+    T*	m_pNext;	///< Pointer to the next object.
 
-		static	CqMemoryPool<T, S>	m_thePool;	///< Static pool to allocated micropolys from.
+    static	CqMemoryPool<T, S>	m_thePool;	///< Static pool to allocated micropolys from.
 }
 ;
 
