@@ -681,21 +681,34 @@ static bool LoadShaderInfo ( char *name )
 	}
 	while ( doLoop == true )
 	{
-		// Check if .slx appears in filename
-		if ( strstr( name , RI_SHADER_EXTENSION ) == NULL )
-		{		
-			// Build a full file path description
-			stringLength = strlen( name ) + sizeof( RI_SHADER_EXTENSION ) + 1;
-			shaderFileName = ( char * ) malloc( stringLength );
-			strcpy( shaderFileName, name );
+		// Build a full file path description
+		stringLength = strlen( name ) + sizeof( RI_SHADER_EXTENSION ) + 1;
+		shaderFileName = ( char * ) malloc( stringLength );
+		strcpy( shaderFileName, name );
+
+		// Check if RI_SHADER_EXTENSION is at the very end of the name
+		if ( strstr( name + strlen( name ) - strlen(RI_SHADER_EXTENSION), RI_SHADER_EXTENSION ) == NULL )
 			strcat( shaderFileName, RI_SHADER_EXTENSION );
-		}
 		
-		stringLength = strlen( currentShaderSearchPath ) + strlen( shaderFileName ) + 2;
-		currentShaderFilePath = ( char * ) malloc( stringLength );
-		strcpy( currentShaderFilePath, currentShaderSearchPath );
-		strcat( currentShaderFilePath, "/" );
-		strcat( currentShaderFilePath, shaderFileName );
+		// If on Windows, and there is a drivespec at the start, then don't prepend the current dir.
+#ifdef	WIN32
+		if( shaderFileName[ 1 ] != ':' )
+		{
+#endif
+			stringLength = strlen( currentShaderSearchPath ) + strlen( shaderFileName ) + 2;
+			currentShaderFilePath = ( char * ) malloc( stringLength );
+			strcpy( currentShaderFilePath, currentShaderSearchPath );
+			strcat( currentShaderFilePath, "/" );
+			strcat( currentShaderFilePath, shaderFileName );
+#ifdef	WIN32
+		}
+		else
+		{
+			stringLength = strlen( shaderFileName ) + 1;
+			currentShaderFilePath = ( char * ) malloc( stringLength );
+			strcpy( currentShaderFilePath, shaderFileName );
+		}
+#endif
 
 		// attempt to open the shader file
 		shaderInputFile = OpenCurrentShader();
@@ -764,6 +777,11 @@ char *SLX_GetPath ( void )
 	{
 		SlxLastError = RIE_NOFILE;
 	}
+#ifdef	WIN32
+	// Return empty if shader specified is absolute under Windows, i.e. has a drivespec.
+	if( currentShader[ 1 ] == ':' )
+		return( "" );
+#endif
 	return currentShaderSearchPath;
 }
 
@@ -807,8 +825,8 @@ int SLX_SetShader ( char *name )
 	{
 		stringLength = strlen( name ) + 1;
 
-		// Append .slx if not given already
-		if ( strstr( name , RI_SHADER_EXTENSION ) == NULL )
+		// Append RI_SHADER_EXTENSION if not given already
+		if ( strstr( name + strlen( name ) - strlen(RI_SHADER_EXTENSION), RI_SHADER_EXTENSION ) == NULL )
 		{		
 			// Create new string with .slx
 			stringLength = strlen( name ) + sizeof( RI_SHADER_EXTENSION ) + 1;
