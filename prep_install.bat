@@ -7,11 +7,12 @@ mkdir ..\binary-archive\examples
 
 cd ..\binary-archive
 
-copy ..\library\release\cribber.exe .
+copy ..\library\release\aqsis.exe .
 copy ..\library\release\filebuffer.exe .
 copy ..\library\release\framebuffer.exe .
 copy ..\library\release\shadowmap.exe .
-copy ..\library\release\slcomp.exe .
+copy ..\library\release\aqsl.exe .
+copy ..\library\release\aqslcomp.exe .
 copy ..\library\release\slpp.exe .
 copy ..\library\release\texer.exe .
 

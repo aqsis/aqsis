@@ -32,7 +32,7 @@ void compile_file(const char* sl_file)
 	FILE* hPipeWrite;
 
 	std::strstream slppcommand;
-	slppcommand << "slpp.exe -c6 " << sl_file << std::ends;
+	slppcommand << "slpp.exe -d PI=3.141592654 -d AQSIS -c6 " << sl_file << std::ends;
 	hPipeRead=_popen(slppcommand.str(),"r");
 	hPipeWrite=_popen("aqslcomp.exe","w");
 

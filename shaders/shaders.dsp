@@ -65,14 +65,101 @@ MTL=midl.exe
 # Begin Source File
 
 SOURCE=.\borg_metal.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\borg_metal.sl
+InputName=borg_metal
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\borg_metal.sl
+InputName=borg_metal
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\brickbump.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\brickbump.sl
+InputName=brickbump
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\brickbump.sl
+InputName=brickbump
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\cellnoisetest.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\cellnoisetest.sl
+InputName=cellnoisetest
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\cellnoisetest.sl
+InputName=cellnoisetest
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -87,7 +174,7 @@ InputName=constant
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -100,7 +187,7 @@ InputName=constant
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -110,6 +197,35 @@ InputName=constant
 # Begin Source File
 
 SOURCE=.\dented.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\dented.sl
+InputName=dented
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\dented.sl
+InputName=dented
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -124,7 +240,7 @@ InputName=depthcue
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -137,7 +253,7 @@ InputName=depthcue
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -157,7 +273,7 @@ InputName=distantlight
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -170,7 +286,7 @@ InputName=distantlight
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -180,6 +296,35 @@ InputName=distantlight
 # Begin Source File
 
 SOURCE=.\dpbluemarble.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\dpbluemarble.sl
+InputName=dpbluemarble
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\dpbluemarble.sl
+InputName=dpbluemarble
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -194,7 +339,7 @@ InputName=fog
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -207,7 +352,7 @@ InputName=fog
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -227,7 +372,7 @@ InputName=matte
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -240,7 +385,7 @@ InputName=matte
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -260,7 +405,7 @@ InputName=metal
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -273,7 +418,7 @@ InputName=metal
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -293,7 +438,7 @@ InputName=paintedplastic
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -306,7 +451,7 @@ InputName=paintedplastic
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -326,7 +471,7 @@ InputName=plastic
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -339,7 +484,7 @@ InputName=plastic
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -359,7 +504,7 @@ InputName=pointlight
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -372,7 +517,7 @@ InputName=pointlight
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -382,22 +527,167 @@ InputName=pointlight
 # Begin Source File
 
 SOURCE=.\randgrid.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\randgrid.sl
+InputName=randgrid
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\randgrid.sl
+InputName=randgrid
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\shadowspot.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\shadowspot.sl
+InputName=shadowspot
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\shadowspot.sl
+InputName=shadowspot
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\shinymetal.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\shinymetal.sl
+InputName=shinymetal
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\shinymetal.sl
+InputName=shinymetal
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\show_st.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\show_st.sl
+InputName=show_st
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\show_st.sl
+InputName=show_st
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\spacetest.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\spacetest.sl
+InputName=spacetest
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\spacetest.sl
+InputName=spacetest
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -413,7 +703,7 @@ InputName=spotlight
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -427,7 +717,7 @@ InputName=spotlight
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	slcomp $(InputName).sl 
+	aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -437,10 +727,68 @@ InputName=spotlight
 # Begin Source File
 
 SOURCE=.\uvtest.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\uvtest.sl
+InputName=uvtest
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\uvtest.sl
+InputName=uvtest
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\wavy.sl
+
+!IF  "$(CFG)" == "Shaders - Win32 Release"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\wavy.sl
+InputName=wavy
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Shaders - Win32 Debug"
+
+# Begin Custom Build - Compiling Shader $(InputPath)
+InputDir=.
+InputPath=.\wavy.sl
+InputName=wavy
+
+"$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	cd $(InputDir) 
+	aqsl $(InputName).sl 
+	
+# End Custom Build
+
+!ENDIF 
+
 # End Source File
 # End Group
 # End Target
