@@ -2,8 +2,8 @@
 
 Name: aqsis
 
-Version: 0.9.1_%{rel}
-#Version: 0.9.1
+Version: 0.9.2_%{rel}
+#Version: 0.9.2
 
 Release: %{distro}
 Summary: RenderMan(tm)-compatible renderer
