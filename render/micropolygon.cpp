@@ -673,7 +673,6 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
 	}
 	m_TriangleSplitLine.AddTimeSlot(pSurface()->pTransform()->Time( 0 ), sl ); 
 
-    QGetRenderContext() ->Stats().MakeProject().Stop();
 
 
     TqInt cu = uGridRes();
@@ -780,6 +779,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
     }
 
     RELEASEREF( this );
+    QGetRenderContext() ->Stats().MakeProject().Stop();
 }
 
 
@@ -983,7 +983,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 /** Default constructor
  */
 
-CqMicroPolygon::CqMicroPolygon() : m_pGrid( 0 ), m_Flags( 0 )
+CqMicroPolygon::CqMicroPolygon() : m_pGrid( 0 ), m_Flags( 0 ), m_pHitTestCache( 0 )
 {
     STATS_INC( MPG_allocated );
     STATS_INC( MPG_current );
@@ -1100,7 +1100,7 @@ void CqMicroPolygon::Initialise()
 
 TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
 {
-    // Check against each line of the quad, if outside any then point is outside MPG, therefore early exit.
+ /*   // Check against each line of the quad, if outside any then point is outside MPG, therefore early exit.
     const CqVector3D& pA = PointA();
     const CqVector3D& pB = PointB();
     TqFloat x = vecP.x(), y = vecP.y();
@@ -1132,8 +1132,60 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
     Depth = ( D - ( vecN.x() * vecP.x() ) - ( vecN.y() * vecP.y() ) ) / vecN.z();
 
     return ( TqTrue );
+*/
+
+	TqFloat x = vecP.x(), y = vecP.y();
+	int e = m_pHitTestCache->m_LastFailedEdge;
+	for(int i=0; i<4; ++i)
+	{
+		if( y * m_pHitTestCache->m_YMultiplier[e] -
+			x * m_pHitTestCache->m_XMultiplier[e] +
+			m_pHitTestCache->m_Constant[e] <= 0.0)
+		{
+			m_pHitTestCache->m_LastFailedEdge = e;
+			return TqFalse;
+		}
+		e = (e+1) & 3;
+	}
+
+	Depth = ( m_pHitTestCache->m_D - ( m_pHitTestCache->m_VecN.x() * vecP.x() ) -
+			( m_pHitTestCache->m_VecN.y() * vecP.y() ) ) * m_pHitTestCache->m_OneOverVecNZ;
+
+	return TqTrue;
 }
 
+void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache)
+{
+	m_pHitTestCache = cache;
+	const CqVector3D points[4] = { PointB(), PointC(), PointD(), PointA() } ;
+
+	int j = 3;
+	for(int i=0; i<4; ++i)
+	{
+		cache->m_YMultiplier[i] = points[i].x() - points[j].x();
+		cache->m_XMultiplier[i] = points[i].y() - points[j].y();
+		cache->m_Constant[i] = (points[j].x() * points[i].y()) - (points[i].x() * points[j].y());
+		j = i;
+	}
+
+	// if the mpg is degenerate then we repeat edge c=>a so we still have four edges.
+	if(IsDegenerate())
+	{
+		for(int i=2; i<4; ++i)
+		{
+			cache->m_YMultiplier[i] = points[3].x() - points[1].x();
+			cache->m_XMultiplier[i] = points[3].y() - points[1].y();
+			cache->m_Constant[i] = (points[1].x() * points[3].y()) - (points[3].x() * points[1].y());
+		}
+	}
+
+	cache->m_VecN = (points[3] - points[0]) % (points[1] - points[0]);
+	cache->m_VecN.Unit();
+	cache->m_D = cache->m_VecN * points[3];
+	cache->m_OneOverVecNZ = 1.0 / cache->m_VecN.z();
+
+	cache->m_LastFailedEdge = 0;
+}
 
 CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
 {

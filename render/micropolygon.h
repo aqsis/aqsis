@@ -365,6 +365,27 @@ public:
 private:
 };
 
+//----------------------------------------------------------------------
+/** \struct CqHitTestCache
+ * struct holding data used during the point in poly test.
+ */
+
+struct CqHitTestCache
+{
+	// these 3 are used in calculating the interpolated depth value
+	CqVector3D m_VecN;
+	TqFloat m_OneOverVecNZ;
+	TqFloat m_D;
+
+	// these 3 hold values used in doing the edge tests. 1 of each for each edge.
+	TqFloat m_YMultiplier[4];
+	TqFloat m_XMultiplier[4];
+	TqFloat m_Constant[4];
+
+	// this holds the index of the last edge that failed an edge test, chances
+	// are it will fail on the next sample as well, so we test this edge first.
+	TqInt	m_LastFailedEdge;
+};
 
 //----------------------------------------------------------------------
 /** \class CqMicroPolygon
@@ -530,7 +551,8 @@ public:
 
 
     virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
-    void	Initialise();
+	void	CacheHitTestValues(CqHitTestCache* cache);
+	void	Initialise();
     CqVector2D ReverseBilinear( const CqVector2D& v );
 
     virtual const CqVector3D& PointA() const
@@ -583,6 +605,8 @@ protected:
     TqInt	m_Index;		///< Index within the donor grid.
 
     TqShort	m_Flags;		///< Bitvector of general flags, using EqMicroPolyFlags as bitmasks.
+
+	CqHitTestCache* m_pHitTestCache; // struct to hold cached values used in the point-in-poly test
 private:
     CqMicroPolygon( const CqMicroPolygon& From )
 {}
