@@ -42,6 +42,8 @@ static std::stack<YY_BUFFER_STATE> BufferStack;
 static std::stack<std::string> StreamNameStack;
 static std::stack<unsigned int> LineNumberStack;
 
+#define YY_DECL int yylex( YYSTYPE *lvalp )
+
 static int scannerinput(char* Buffer, int MaxSize);
 std::string FindArchive(const std::string strFilename);
 #undef YY_INPUT
@@ -89,9 +91,9 @@ array_end		\]
 {eol}							{ ParseLineNumber++; }
 {whitespace}			{  }
 
-<params>{integer}		{ yylval.itype = atoi(yytext); return INTEGER_TOKEN; }
-<params>{float}			{ yylval.ftype = atof(yytext); return FLOAT_TOKEN; }
-<params>{string}		{ std::string temp(yytext); yylval.stype = new char[temp.size()-1]; strcpy(yylval.stype, temp.substr(1, temp.size()-2).c_str()); return STRING_TOKEN; }
+<params>{integer}		{ lvalp->itype = atoi(yytext); return INTEGER_TOKEN; }
+<params>{float}			{ lvalp->ftype = atof(yytext); return FLOAT_TOKEN; }
+<params>{string}		{ std::string temp(yytext); lvalp->stype = new char[temp.size()-1]; strcpy(lvalp->stype, temp.substr(1, temp.size()-2).c_str()); return STRING_TOKEN; }
 <INITIAL>{integer}		{ return INVALID_VALUE; }
 <INITIAL>{float}		{ return INVALID_VALUE; }
 <INITIAL>{string}		{ return INVALID_VALUE; }

@@ -49,6 +49,8 @@ bool fRecovering = false;
 
 %}
 
+%pure_parser
+
 %union
 {
 	int itype;
@@ -63,9 +65,10 @@ bool fRecovering = false;
 	TokenValuePairs* atvtype;
 }
 
+
 %{
 
-extern int yylex();
+extern int yylex( YYSTYPE* );
 
 static void yyerror(const std::string Message);
 
