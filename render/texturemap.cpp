@@ -884,12 +884,16 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 	if ( m_smode == WrapMode_Periodic )
 	{
 		ss1 = fmod( ss1, 1.0f );
+		if( ss1 < 0 )	ss1 += 1.0f;
 		ss2 = fmod( ss2, 1.0f );
+		if( ss2 < 0 )	ss2 += 1.0f;
 	}
 	if ( m_tmode == WrapMode_Periodic )
 	{
 		tt1 = fmod( tt1, 1.0f );
+		if( tt1 < 0 )	tt1 += 1.0f;
 		tt2 = fmod( tt2, 1.0f );
+		if( tt2 < 0 )	tt2 += 1.0f;
 	}
 
 	if ( m_smode == WrapMode_Black )
