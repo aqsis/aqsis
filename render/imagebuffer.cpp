@@ -243,6 +243,8 @@ void CqImagePixel::Combine()
 			m_Depth /= samplecount;
 			m_Coverage /= samplecount;
 		}
+	else
+		m_Depth=FLT_MAX;
 }
 
 
