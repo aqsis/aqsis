@@ -45,10 +45,10 @@ public:
     virtual	RtVoid	RiDisplacementV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] );
     virtual	RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[] );
     virtual	RtVoid	RiEnd();
-    virtual	RtVoid	RiErrorAbort( RtInt code, RtInt severity, const char* message );
+    virtual	RtVoid	RiErrorAbort( RtInt code, RtInt severity, char* message );
     //virtual	RtVoid	RiErrorHandler(RtErrorFunc handler);
-    virtual	RtVoid	RiErrorIgnore( RtInt code, RtInt severity, const char* message );
-    virtual	RtVoid	RiErrorPrint( RtInt code, RtInt severity, const char* message );
+    virtual	RtVoid	RiErrorIgnore( RtInt code, RtInt severity, char* message );
+    virtual	RtVoid	RiErrorPrint( RtInt code, RtInt severity, char* message );
     virtual	RtVoid	RiExposure( RtFloat gain, RtFloat gamma );
     virtual	RtVoid	RiExteriorV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] );
     virtual	RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio );

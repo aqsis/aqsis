@@ -193,13 +193,13 @@ int main( int argc, const char** argv )
         }
 
         printf( "CubeFace Environment %s %s %s %s %s %s ----> %s \n\t\"fov\"= %4.1f\n\t\"filter\"= %s \n\t\"swidth\"= %4.1f\n\t\"twidth\"= %4.1f\n\t\"compression\" = %s\n",
-                ( char* ) ap.leftovers() [ 0 ].c_str(),
-                ( char* ) ap.leftovers() [ 1 ].c_str(),
-                ( char* ) ap.leftovers() [ 2 ].c_str(),
-                ( char* ) ap.leftovers() [ 3 ].c_str(),
-                ( char* ) ap.leftovers() [ 4 ].c_str(),
-                ( char* ) ap.leftovers() [ 5 ].c_str(),
-                ( char* ) ap.leftovers() [ 6 ].c_str(),
+		const_cast<char*>(ap.leftovers() [ 0 ].c_str()),
+		const_cast<char*>(ap.leftovers() [ 1 ].c_str()),
+		const_cast<char*>(ap.leftovers() [ 2 ].c_str()),
+		const_cast<char*>(ap.leftovers() [ 3 ].c_str()),
+		const_cast<char*>(ap.leftovers() [ 4 ].c_str()),
+		const_cast<char*>(ap.leftovers() [ 5 ].c_str()),
+		const_cast<char*>(ap.leftovers() [ 6 ].c_str()),
                 g_fov,
                 g_filter.c_str(),
                 g_swidth,
@@ -207,10 +207,23 @@ int main( int argc, const char** argv )
                 ( char* ) g_compress.c_str()
               );
 
-        RiMakeCubeFaceEnvironment( ap.leftovers() [ 0 ].c_str(), ap.leftovers() [ 1 ].c_str(), ap.leftovers() [ 2 ].c_str(),
-                                   ap.leftovers() [ 3 ].c_str(), ap.leftovers() [ 4 ].c_str(), ap.leftovers() [ 5 ].c_str(), ap.leftovers() [ 6 ].c_str(),
-                                   g_fov,
-                                   filterfunc, ( float ) g_swidth, ( float ) g_twidth, "compression", &compression, "quality", &quality, RI_NULL );
+        RiMakeCubeFaceEnvironment(
+		const_cast<char*>(ap.leftovers() [ 0 ].c_str()),
+		const_cast<char*>(ap.leftovers() [ 1 ].c_str()),
+		const_cast<char*>(ap.leftovers() [ 2 ].c_str()),
+		const_cast<char*>(ap.leftovers() [ 3 ].c_str()),
+		const_cast<char*>(ap.leftovers() [ 4 ].c_str()),
+		const_cast<char*>(ap.leftovers() [ 5 ].c_str()),
+		const_cast<char*>(ap.leftovers() [ 6 ].c_str()),
+                g_fov,
+                filterfunc,
+		( float ) g_swidth,
+		( float ) g_twidth,
+		"compression",
+		&compression,
+		"quality",
+		&quality,
+		RI_NULL );
     }
     else if ( g_shadow )
     {

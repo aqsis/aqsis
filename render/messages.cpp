@@ -106,7 +106,7 @@ CqBasicError::CqBasicError( TqInt code, TqInt severity, const char* message, TqB
 {
     if ( gReportedErrors.CheckReport( this ) )
     {
-        ( *QGetRenderContext() ->optCurrent().pErrorHandler() ) ( code, severity, message );
+        ( *QGetRenderContext() ->optCurrent().pErrorHandler() ) ( code, severity, const_cast<char*>(message) );
         if ( onceper )
             gReportedErrors.SetReported( new CqBasicError( *this ) );
     }

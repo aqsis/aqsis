@@ -132,16 +132,16 @@ RendermanInterface::RtVoid Stream::RiEnd()
 {
     m_Stream << "RiEnd()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiErrorAbort( RtInt code, RtInt severity, const char* message )
+RendermanInterface::RtVoid Stream::RiErrorAbort( RtInt code, RtInt severity, char* message )
 {
     m_Stream << "RiErrorAbort()" << std::endl;
 }
 //RendermanInterface::RtVoid Stream::RiErrorHandler(RtErrorFunc handler) { m_Stream << "RiErrorHandler()" << std::endl; }
-RendermanInterface::RtVoid Stream::RiErrorIgnore( RtInt code, RtInt severity, const char* message )
+RendermanInterface::RtVoid Stream::RiErrorIgnore( RtInt code, RtInt severity, char* message )
 {
     m_Stream << "RiErrorIgnore()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiErrorPrint( RtInt code, RtInt severity, const char* message )
+RendermanInterface::RtVoid Stream::RiErrorPrint( RtInt code, RtInt severity, char* message )
 {
     m_Stream << "RiErrorPrint()" << std::endl;
 }
