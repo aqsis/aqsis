@@ -158,8 +158,10 @@ public:
 
 private:
     TqFloat	m_Radius;		///< Radius.
-    TqFloat	m_ZMin;			///< Min value on z axis.
-    TqFloat	m_ZMax;			///< Max value on z axis.
+//    TqFloat	m_ZMin;			///< Min value on z axis.
+//    TqFloat	m_ZMax;			///< Max value on z axis.
+	TqFloat	m_PhiMin;		///< Min angle about x axis.
+	TqFloat	m_PhiMax;		///< Max angle about x axis.
     TqFloat	m_ThetaMin;		///< Min angle about z axis.
     TqFloat	m_ThetaMax;		///< Max angle about z axis.
 }

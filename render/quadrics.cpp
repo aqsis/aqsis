@@ -365,15 +365,16 @@ TqUlong CqQuadric::EstimateGridSize()
 
 CqSphere::CqSphere( TqFloat radius, TqFloat zmin, TqFloat zmax, TqFloat thetamin, TqFloat thetamax ) :
         m_Radius( radius ),
-        m_ZMin( zmin ),
-        m_ZMax( zmax ),
         m_ThetaMin( thetamin ),
         m_ThetaMax( thetamax )
 {
     // Sanity check the values, while ensuring we keep the same signs.
 	TqFloat frad = fabs(m_Radius);
-    if( fabs(m_ZMin) > frad )	m_ZMin = frad*(m_ZMin<0)?-1:1;
-    if( fabs(m_ZMax) > frad )	m_ZMax = frad*(m_ZMax<0)?-1:1;
+    if( fabs(zmin) > frad )	zmin = frad*(zmin<0)?-1:1;
+    if( fabs(zmin) > frad )	zmin = frad*(zmin<0)?-1:1;
+
+    m_PhiMin = asin( zmin / m_Radius );
+    m_PhiMax = asin( zmax / m_Radius );
 }
 
 
@@ -385,8 +386,8 @@ CqSphere&	CqSphere::operator=( const CqSphere& From )
 {
     CqQuadric::operator=( From );
     m_Radius = From.m_Radius;
-    m_ZMin = From.m_ZMin;
-    m_ZMax = From.m_ZMax;
+    m_PhiMin = From.m_PhiMin;
+    m_PhiMax = From.m_PhiMax;
     m_ThetaMin = From.m_ThetaMin;
     m_ThetaMax = From.m_ThetaMax;
 
@@ -399,12 +400,9 @@ CqSphere&	CqSphere::operator=( const CqSphere& From )
 
 CqBound	CqSphere::Bound() const
 {
-    TqFloat phimin = asin( m_ZMin / m_Radius );
-    TqFloat phimax = asin( m_ZMax / m_Radius );
-
     std::vector<CqVector3D> curve;
     CqVector3D vA( 0, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 );
-    Circle( vA, vB, vC, m_Radius, phimin, phimax, curve );
+    Circle( vA, vB, vC, m_Radius, m_PhiMin, m_PhiMax, curve );
 
     CqMatrix matRot( RAD ( m_ThetaMin ), vC );
     for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
@@ -423,7 +421,7 @@ CqBound	CqSphere::Bound() const
 
 TqInt CqSphere::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits, TqBool u )
 {
-    TqFloat zcent = ( m_ZMin + m_ZMax ) * 0.5;
+    TqFloat phicent = ( m_PhiMin + m_PhiMax ) * 0.5;
     TqFloat arccent = ( m_ThetaMin + m_ThetaMax ) * 0.5;
 
     boost::shared_ptr<CqSphere> pNew1( new CqSphere( *this ) );
@@ -436,8 +434,8 @@ TqInt CqSphere::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& a
     }
     else
     {
-        pNew1->m_ZMax = zcent;
-        pNew2->m_ZMin = zcent;
+        pNew1->m_PhiMax = phicent;
+        pNew2->m_PhiMin = phicent;
     }
 
     aSplits.push_back( pNew1 );
@@ -456,9 +454,7 @@ TqInt CqSphere::PreSubdivide( std::vector<boost::shared_ptr<CqBasicSurface> >& a
 
 CqVector3D CqSphere::DicePoint( TqInt u, TqInt v )
 {
-    TqFloat phimin = asin( m_ZMin / m_Radius );
-    TqFloat phimax = asin( m_ZMax / m_Radius );
-    TqFloat phi = phimin + ( ( TqFloat ) v * ( phimax - phimin ) ) / m_vDiceSize;
+    TqFloat phi = m_PhiMin + ( ( TqFloat ) v * ( m_PhiMax - m_PhiMin ) ) / m_vDiceSize;
 
     TqFloat cosphi = cos( phi );
     TqFloat theta = RAD( m_ThetaMin + ( ( TqFloat ) u * ( m_ThetaMax - m_ThetaMin ) ) / m_uDiceSize );
