@@ -384,7 +384,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 				pNew->AddPrimitiveVariable( pNewUP );
 			}
 
-			if ( USES( iUses, EnvVars_u ) )
+			if ( USES( iUses, EnvVars_u ) && !bHasu() )
 			{
 				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "u" );
 				pNewUP->SetSize( pNew->cVarying() );
@@ -397,7 +397,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 				pNew->AddPrimitiveVariable( pNewUP );
 			}
 
-			if ( USES( iUses, EnvVars_v ) )
+			if ( USES( iUses, EnvVars_v ) && !bHasv() )
 			{
 				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "v" );
 				pNewUP->SetSize( pNew->cVarying() );

@@ -293,7 +293,7 @@ void CqMicroPolyGrid::Shade()
 	{
 		IqShaderData * pSDP = P();
 		for ( i = GridSize() - 1; i >= 0; i-- )
-			dPdv() ->SetVector( SO_DvType<CqVector3D>( P(), i, m_pShaderExecEnv, Defvec ), i );
+			dPdv() ->SetVector( SO_DvType<CqVector3D>( pSDP, i, m_pShaderExecEnv, Defvec ), i );
 	}
 
 	// Now try and cull any transparent MPs
