@@ -82,15 +82,16 @@ using namespace Aqsis;
 #include "tinyxml.h"
 #include "base64.h"
 #include "xmlmessages.h"
+#include "argparse.h"
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #include	<version.h>
 #endif
 
-namespace
-{
+#include "display.h"
 
-std::string g_Filename( "output.tif" );
+START_NAMESPACE( Aqsis )
+
 TqInt g_ImageWidth = 0;
 TqInt g_ImageHeight = 0;
 TqInt g_PixelsProcessed = 0;
@@ -110,6 +111,17 @@ TqInt	g_BucketsPerCol, g_BucketsPerRow;
 
 unsigned char* g_byteData;
 float*	g_floatData;
+
+Fl_Window *g_theWindow;
+Fl_FrameBuffer_Widget *g_uiImageWidget;
+Fl_RGB_Image* g_uiImage;
+
+// Command line arguments 
+ArgParse::apstring g_type = "";
+ArgParse::apstring g_filename = "cloutput.tif";
+ArgParse::apstring g_hostname = "localhost";
+ArgParse::apstring g_port = "277472";
+bool g_help = 0;
 
 /// Hides incompatibilities between sockets and WinSock
 void InitializeSockets()
@@ -277,12 +289,8 @@ void WriteTIFF(const std::string& filename)
             TIFFClose( pOut );
         }
     }
-
-    delete[] ( g_byteData );
-    delete[] ( g_floatData );
 }
 
-} // namespace
 
 SOCKET g_Socket;
 
@@ -384,6 +392,12 @@ void BucketFunction()
 				std::cerr << "Error: Invalid response from Aqsis1" << std::endl;
 				exit(-1);
 			}
+
+			if(g_type.compare("framebuffer")==0)
+			{
+				g_uiImageWidget->damage(1, xmin, ymin, xmaxp1-xmin, ymaxp1-ymin);
+				Fl::check();
+			}
 		}
 		else
 		{
@@ -391,7 +405,11 @@ void BucketFunction()
 			exit(-1);
 		}
 	}
-	WriteTIFF(g_Filename);
+	if(g_type.compare("file")==0)
+	{
+		WriteTIFF(g_filename);
+	}
+
 	CloseSocket(g_Socket);
 }
 
@@ -437,7 +455,28 @@ void ProcessFormat()
 		g_Channels = 3;
 
         if ( g_Format == 1 )
+		{
             g_byteData = new unsigned char[ g_ImageWidth * g_ImageHeight * g_Channels ];
+			for (TqInt i = 0; i < g_ImageHeight; i ++) 
+			{
+				for (TqInt j=0; j < g_ImageWidth; j++)
+				{
+					int     t       = 0;
+					unsigned char d = 255;
+
+					if ( ( (g_ImageHeight - 1 - i) & 31 ) < 16 ) t ^= 1;
+					if ( ( j & 31 ) < 16 ) t ^= 1;
+
+					if ( t )
+					{
+						d      = 128;
+					}
+					g_byteData[3 * (i*g_ImageWidth + j) ] = d;
+					g_byteData[3 * (i*g_ImageWidth + j) + 1] = d;
+					g_byteData[3 * (i*g_ImageWidth + j) + 2] = d;
+				}
+			}
+		}
         else
             g_floatData = new float[ g_ImageWidth * g_ImageHeight * g_Channels ];
 	}
@@ -447,8 +486,33 @@ void ProcessFormat()
 	}
 }
 
+
+END_NAMESPACE( Aqsis )
+
 int main( int argc, char** argv )
 {
+    ArgParse ap;
+    ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options]" );
+    ap.argFlag( "help", "\aprint this help and exit", &g_help );
+    ap.argString( "type", "=string\adefine the type of display", &g_type );
+    ap.argString( "name", "=string\athe name of the file to save", &g_filename );
+    ap.argString( "hostname", "=string\ahostname of the machine to connect to", &g_hostname );
+    ap.argString( "port", "=string\aport to connect to", &g_port );
+    ap.allowUnrecognizedOptions();
+
+    if ( argc > 1 && !ap.parse( argc - 1, const_cast<const char**>(argv + 1) ) )
+    {
+        std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
+        exit( 1 );
+    }
+
+    if ( g_help )
+    {
+        std::cout << ap.usagemsg();
+        exit( 0 );
+    }
+	std::cout << g_filename << std::endl;
+
     // Connect to Aqsis ...
     const char* port_string = getenv( "AQSIS_DD_PORT" );
     //int port = port_string ? atoi(port_string) : -1;
@@ -486,10 +550,28 @@ int main( int argc, char** argv )
 	// Request and process image format information.
 	ProcessFormat();
 
+	if(g_type.compare("framebuffer")==0)
+	{
+		g_theWindow = new Fl_Window(g_ImageWidth,g_ImageHeight);
+		g_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, g_ImageWidth, g_ImageHeight, g_byteData);
+		g_theWindow->resizable(g_uiImageWidget);
+		g_theWindow->end();
+		g_theWindow->show(argc, argv);
+	}
+
 	// Create a thread to request buckets from Aqsis
 	boost::thread thrd(&BucketFunction);
+
+	if(g_type.compare("framebuffer")==0)
+	{
+		// Open and run the window.
+		Fl::run();
+	}
+
 	thrd.join();
-	std::cin.ignore(std::cin.rdbuf()->in_avail() + 1);
+
+	delete[] ( g_byteData );
+	delete[] ( g_floatData );
 
     return 0;
 }

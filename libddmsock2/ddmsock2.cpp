@@ -266,27 +266,30 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
     CqString strDriverPathAndFile = fileDriver.strRealName();
 
 	const int maxargs = 20;
-    const char* args[ maxargs ];
-    std::string argstrings[ maxargs ];
-    int i;
+    std::vector<const char*> args;
+    std::vector<std::string> argstrings;
 
     // Prepare an arry with the arguments
     // (the first argument (the file name) begins at position 2 because
     // the Windows version might have to call cmd.exe which will be
     // prepended to the argument list)
-    args[ 2 ] = strDriverFile.c_str();
-    args[ 3 ] = NULL;
-    args[ maxargs - 1 ] = NULL;
-    for ( i = 1; i < maxargs - 3; i++ )
+    args.push_back("cmd.exe");
+	args.push_back("/C");
+	args.push_back(strDriverFile.c_str());
+	TqInt i=1;
+    while(1)
     {
-        argstrings[ i ] = GetStringField( strDriverFileAndArgs, i );
-        if ( argstrings[ i ].length() == 0 )
-        {
-            args[ i + 2 ] = NULL;
+        argstrings.push_back(GetStringField( strDriverFileAndArgs, i ));
+        if( argstrings.back().length() == 0 )
             break;
-        }
-        args[ i + 2 ] = argstrings[ i ].c_str();
+        args.push_back(argstrings.back().c_str());
     }
+	// Send the name argument.
+	argstrings.push_back(CqString("-name=")+req.m_name);
+	args.push_back(argstrings.back().c_str());
+	argstrings.push_back(CqString("-type=")+req.m_type);
+	args.push_back(argstrings.back().c_str());
+    args.push_back(NULL);
 
 
 #ifdef AQSIS_SYSTEM_WIN32
@@ -295,14 +298,12 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 //    SetEnvironmentVariable( "AQSIS_DD_PORT", ToString(m_DDServer.getPort()).c_str() );
 
     // Spawn the driver (1st try)...
-    TqInt ProcHandle = _spawnv( _P_NOWAITO, strDriverPathAndFile.c_str(), &args[ 2 ] );
+    TqInt ProcHandle = _spawnv( _P_NOWAITO, strDriverPathAndFile.c_str(), &args[2] );
     // If it didn't work try a second time via "cmd.exe"...
     if ( ProcHandle < 0 )
     {
-        args[ 0 ] = "cmd.exe";
-        args[ 1 ] = "/C";
-        args[ 2 ] = strDriverPathAndFile.c_str();
-        ProcHandle = _spawnvp( _P_NOWAITO, "cmd.exe", args );
+        args[2] = strDriverPathAndFile.c_str();
+        ProcHandle = _spawnvp( _P_NOWAITO, "cmd.exe", &args[0] );
     }
     if ( ProcHandle < 0 )
     {
@@ -322,7 +323,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
     if ( 0 == forkresult )
     {
         //execlp( strDriverPathAndFile.c_str(), strDriverFile.c_str(), NULL );
-        execvp( strDriverPathAndFile.c_str(), ( char * const * ) ( args + 2 ) );
+        execvp( strDriverPathAndFile.c_str(), ( char * const * ) ( &args[ 2 ] ) );
         /* error checking? */
         return ;
     }
