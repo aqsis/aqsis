@@ -210,7 +210,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiProjection(m_name, m_count, m_tokens, m_values);
+		RiProjectionV(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -390,7 +390,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiImager(m_name, m_count, m_tokens, m_values);
+		RiImagerV(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -459,7 +459,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiDisplay(m_name, m_type, m_mode, m_count, m_tokens, m_values);
+		RiDisplayV(m_name, m_type, m_mode, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -492,7 +492,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiHider(m_name, m_count, m_tokens, m_values);
+		RiHiderV(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -579,7 +579,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiOption(m_name, m_count, m_tokens, m_values);
+		RiOptionV(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -719,7 +719,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiLightSource(m_name, m_count, m_tokens, m_values);
+		RiLightSourceV(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -750,7 +750,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiAreaLightSource(m_name, m_count, m_tokens, m_values);
+		RiAreaLightSourceV(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -802,7 +802,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiSurface(m_name, m_count, m_tokens, m_values);
+		RiSurfaceV(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -833,7 +833,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiAtmosphere(m_name, m_count, m_tokens, m_values);
+		RiAtmosphereV(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -864,7 +864,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiInterior(m_name, m_count, m_tokens, m_values);
+		RiInteriorV(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -895,7 +895,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiExterior(m_name, m_count, m_tokens, m_values);
+		RiExteriorV(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1323,7 +1323,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiDeformation(m_name, m_count, m_tokens, m_values);
+		RiDeformationV(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1354,7 +1354,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiDisplacement(m_name, m_count, m_tokens, m_values);
+		RiDisplacementV(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1481,7 +1481,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiAttribute(m_name, m_count, m_tokens, m_values);
+		RiAttributeV(m_name, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1512,7 +1512,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiPolygon(m_nvertices, m_count, m_tokens, m_values);
+		RiPolygonV(m_nvertices, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1556,7 +1556,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiGeneralPolygon(m_nloops, m_nverts, m_count, m_tokens, m_values);
+		RiGeneralPolygonV(m_nloops, m_nverts, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1621,7 +1621,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiPointsPolygons(m_npolys, m_nverts, m_verts, m_count, m_tokens, m_values);
+		RiPointsPolygonsV(m_npolys, m_nverts, m_verts, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1700,7 +1700,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiPointsGeneralPolygons(m_npolys, m_nloops, m_nverts, m_verts, m_count, m_tokens, m_values);
+		RiPointsGeneralPolygonsV(m_npolys, m_nloops, m_nverts, m_verts, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1770,7 +1770,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiPatch(m_type, m_count, m_tokens, m_values);
+		RiPatchV(m_type, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1846,7 +1846,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiPatchMesh(m_type, m_nu, m_uwrap, m_nv, m_vwrap, m_count, m_tokens, m_values);
+		RiPatchMeshV(m_type, m_nu, m_uwrap, m_nv, m_vwrap, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -1904,7 +1904,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiNuPatch(m_nu, m_uorder, m_uknot, m_umin, m_umax, m_nv, m_vorder, m_vknot, m_vmin, m_vmax, m_count, m_tokens, m_values);
+		RiNuPatchV(m_nu, m_uorder, m_uknot, m_umin, m_umax, m_nv, m_vorder, m_vknot, m_vmin, m_vmax, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2062,7 +2062,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiSphere(m_radius, m_zmin, m_zmax, m_thetamax, m_count, m_tokens, m_values);
+		RiSphereV(m_radius, m_zmin, m_zmax, m_thetamax, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2098,7 +2098,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiCone(m_height, m_radius, m_thetamax, m_count, m_tokens, m_values);
+		RiConeV(m_height, m_radius, m_thetamax, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2134,7 +2134,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiCylinder(m_radius, m_zmin, m_zmax, m_thetamax, m_count, m_tokens, m_values);
+		RiCylinderV(m_radius, m_zmin, m_zmax, m_thetamax, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2174,7 +2174,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiHyperboloid(m_point1, m_point2, m_thetamax, m_count, m_tokens, m_values);
+		RiHyperboloidV(m_point1, m_point2, m_thetamax, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2210,7 +2210,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiParaboloid(m_rmax, m_zmin, m_zmax, m_thetamax, m_count, m_tokens, m_values);
+		RiParaboloidV(m_rmax, m_zmin, m_zmax, m_thetamax, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2246,7 +2246,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiDisk(m_height, m_radius, m_thetamax, m_count, m_tokens, m_values);
+		RiDiskV(m_height, m_radius, m_thetamax, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2283,7 +2283,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiTorus(m_majorrad, m_minorrad, m_phimin, m_phimax, m_thetamax, m_count, m_tokens, m_values);
+		RiTorusV(m_majorrad, m_minorrad, m_phimin, m_phimax, m_thetamax, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2348,7 +2348,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiGeometry(m_type, m_count, m_tokens, m_values);
+		RiGeometryV(m_type, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2531,7 +2531,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiMakeTexture(m_imagefile, m_texturefile, m_swrap, m_twrap, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
+		RiMakeTextureV(m_imagefile, m_texturefile, m_swrap, m_twrap, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2583,7 +2583,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiMakeBump(m_imagefile, m_bumpfile, m_swrap, m_twrap, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
+		RiMakeBumpV(m_imagefile, m_bumpfile, m_swrap, m_twrap, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2627,7 +2627,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiMakeLatLongEnvironment(m_imagefile, m_reflfile, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
+		RiMakeLatLongEnvironmentV(m_imagefile, m_reflfile, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2690,7 +2690,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiMakeCubeFaceEnvironment(m_px, m_nx, m_py, m_ny, m_pz, m_nz, m_reflfile, m_fov, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
+		RiMakeCubeFaceEnvironmentV(m_px, m_nx, m_py, m_ny, m_pz, m_nz, m_reflfile, m_fov, m_filterfunc, m_swidth, m_twidth, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2735,7 +2735,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiMakeShadow(m_picfile, m_shadowfile, m_count, m_tokens, m_values);
+		RiMakeShadowV(m_picfile, m_shadowfile, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2784,7 +2784,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiMakeOcclusion(m_npics, m_picfiles, m_shadowfile, m_count, m_tokens, m_values);
+		RiMakeOcclusionV(m_npics, m_picfiles, m_shadowfile, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2919,7 +2919,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiBlobby(m_nleaf, m_ncode, m_code, m_nflt, m_flt, m_nstr, m_str, m_count, m_tokens, m_values);
+		RiBlobbyV(m_nleaf, m_ncode, m_code, m_nflt, m_flt, m_nstr, m_str, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -2956,7 +2956,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiPoints(m_npoints, m_count, m_tokens, m_values);
+		RiPointsV(m_npoints, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -3030,7 +3030,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiCurves(m_type, m_ncurves, m_nvertices, m_wrap, m_count, m_tokens, m_values);
+		RiCurvesV(m_type, m_ncurves, m_nvertices, m_wrap, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -3151,7 +3151,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiSubdivisionMesh(m_scheme, m_nfaces, m_nvertices, m_vertices, m_ntags, m_tags, m_nargs, m_intargs, m_floatargs, m_count, m_tokens, m_values);
+		RiSubdivisionMeshV(m_scheme, m_nfaces, m_nvertices, m_vertices, m_ntags, m_tags, m_nargs, m_intargs, m_floatargs, m_count, m_tokens, m_values);
 	}
 
 private:
@@ -3191,7 +3191,7 @@ public:
 	}
 	virtual void ReCall()
 	{
-		RiReadArchive(m_name, m_callback, m_count, m_tokens, m_values);
+		RiReadArchiveV(m_name, m_callback, m_count, m_tokens, m_values);
 	}
 
 private:

@@ -106,7 +106,7 @@ class RiCacheBase
 
 							RtToken newtoken = new char[strlen(token)];
 							strcpy(newtoken, token);
-							m_tokens[i] = token;
+							m_tokens[i] = newtoken;
 						
 							SqParameterDeclaration Decl = QGetRenderContext()->FindParameterDecl( token );
 

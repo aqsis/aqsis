@@ -24,7 +24,11 @@
 			<xsl:text>public:&#xa;</xsl:text>
 			<xsl:call-template name="Constructor"/>
 			<xsl:call-template name="Destructor"/>
-			<xsl:value-of select="concat('&#x9;virtual void ReCall()&#xa;&#x9;{&#xa;&#x9;&#x9;', @name, '(')"/>
+			<xsl:value-of select="concat('&#x9;virtual void ReCall()&#xa;&#x9;{&#xa;&#x9;&#x9;', @name)"/>
+			<xsl:if test="Arguments/Argument[last()]/@type = 'PARAMETERLIST'">
+				<xsl:text>V</xsl:text>
+			</xsl:if>
+			<xsl:text>(</xsl:text>
 			<xsl:apply-templates select="Arguments/Argument" mode="recall_args"/>
 			<xsl:text>);&#xa;</xsl:text>
 			<xsl:text>&#x9;}&#xa;</xsl:text>
