@@ -134,6 +134,19 @@ class _qShareC	CqImageElement
 														assert(n<m_XSamples);
 														return(m_avecSamples[n*m_XSamples+m]);
 													}
+								/** Get the filter weight index of the appropriate subcell.
+								 * Subcell dimensions are inverted subpixel dimensions, producing a square subcell matrix.
+								 * \param m The horizontal index of the required sample point.
+								 * \param n The vertical index of the required sample point.
+								 * \return The integer index of the subcell.
+								 *  The position is in pixels and fractions thereof indexed from 0,0 at the top left of the image.
+								 */
+	_qShareM	TqInt			SubCellIndex(TqInt m, TqInt n)
+													{
+														assert(m<m_XSamples);
+														assert(n<m_XSamples);
+														return(m_aSubCellIndex[n*m_XSamples+m]);
+													}
 								/** Get the frame time associated with the specified sample.
 								 * \param m The horizontal index of the required sample point.
 								 * \param n The vertical index of the required sample point.
@@ -154,6 +167,7 @@ class _qShareC	CqImageElement
 			TqInt				m_YSamples;						///< The number of samples in the vertical direction.
 			std::vector<std::vector<SqImageValue> > m_aValues;	///< Vector of vectors of sample point data.
 			std::vector<CqVector2D>	 m_avecSamples;				///< Vector of sample positions.
+			std::vector<TqInt>	 m_aSubCellIndex;				///< Vector of subcell indices.
 			std::vector<TqFloat> m_aTimes;						///< A vector of float sample times for the sample points.
 			TqFloat				m_Coverage;						///< The approximate coverage, just the ratio of sample hits to misses.
 			CqColor				m_colColor;						///< The averaged color of this pixel.
@@ -189,6 +203,8 @@ class CqBucket : public IqBucket
 		virtual	TqInt	YOrigin() const	{return(m_YOrigin);}
 		virtual	TqInt	XFWidth() const	{return(m_XFWidth);}
 		virtual	TqInt	YFWidth() const	{return(m_YFWidth);}
+		virtual	TqInt	XPixelSamples() const	{return(m_XPixelSamples);}
+		virtual	TqInt	YPixelSamples() const	{return(m_YPixelSamples);}
 
 		virtual	CqColor Color(TqInt iXPos, TqInt iYPos);
 		virtual	TqFloat Coverage(TqInt iXPos, TqInt iYPos);
@@ -237,6 +253,8 @@ class CqBucket : public IqBucket
 	static	TqInt	m_YSize;
 	static	TqInt	m_XFWidth;
 	static	TqInt	m_YFWidth;
+	static	TqInt	m_XPixelSamples;
+	static	TqInt	m_YPixelSamples;
 	static	TqInt	m_XOrigin;
 	static	TqInt	m_YOrigin;
 	static	std::vector<CqImageElement>	m_aieImage;

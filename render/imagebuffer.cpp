@@ -89,6 +89,7 @@ void CqImageElement::AllocateSamples(TqInt XSamples, TqInt YSamples)
 	{
 		m_aValues.resize(m_XSamples*m_YSamples);
 		m_avecSamples.resize(m_XSamples*m_YSamples);
+		m_aSubCellIndex.resize(m_XSamples*m_YSamples);
 		m_aTimes.resize(m_XSamples*m_YSamples);
 	}
 }
@@ -129,8 +130,8 @@ void CqImageElement::InitialiseSamples(CqVector2D& vecPixel, TqBool fJitter)
 		{
 			for (j = 0; j < m; j++) 
 			{
-				m_avecSamples[i*m + j].x(j*n*subcell_width + i*subcell_width + random.RandomFloat(subcell_width));
-				m_avecSamples[i*m + j].y(i*m*subcell_width + j*subcell_width + random.RandomFloat(subcell_width));
+				m_avecSamples[i*m + j].x(i);
+				m_avecSamples[i*m + j].y(j);
 			}
 		}
 
@@ -139,9 +140,9 @@ void CqImageElement::InitialiseSamples(CqVector2D& vecPixel, TqBool fJitter)
 		{
 			for (j = 0; j < m; j++) 
 			{
-				double t;
-				int k;
-
+				TqFloat t;
+				TqInt k;
+				
 				k = random.RandomInt(n - 1 - i) + i;
 				t = m_avecSamples[i*m + j].y();
 				m_avecSamples[i*m + j].y(m_avecSamples[i*m + k].y());
@@ -154,21 +155,35 @@ void CqImageElement::InitialiseSamples(CqVector2D& vecPixel, TqBool fJitter)
 		{
 			for (j = 0; j < n; j++) 
 			{
-				double t;
-				int k;
+				TqFloat t;
+				TqInt k;
 
 				k = random.RandomInt(n - 1 - j) + j;
 				t = m_avecSamples[j*m + i].x();
 				m_avecSamples[j*m + i].x(m_avecSamples[k*m + i].x());
 				m_avecSamples[k*m + i].x(t);
+
 			}
 		}
+
+		
+		TqFloat subpixelheight=1.0f/m_YSamples;
+		TqFloat subpixelwidth=1.0f/m_XSamples;
 
 		// finally add in the pixel offset
 		for (i = 0; i < n; i++) 
 		{
-			for (j = 0; j < m; j++) 
+			TqFloat sy=i*subpixelheight;
+			for (j = 0; j < m; j++)
+			{ 
+				TqFloat sx=j*subpixelwidth;
+				TqFloat xindex=m_avecSamples[i*m + j].x();
+				TqFloat yindex=m_avecSamples[i*m + j].y();
+				m_avecSamples[i*m + j].x(xindex*subcell_width + (subcell_width*0.5f) + sx);
+				m_avecSamples[i*m + j].y(yindex*subcell_width + (subcell_width*0.5f) + sy);
 				m_avecSamples[i*m + j]+=vecPixel;
+				m_aSubCellIndex[i*m+j]=(yindex*m_YSamples)+xindex;
+			}
 		}
 	}
 
@@ -225,20 +240,9 @@ void CqImageElement::Combine()
 					col=(vals[i].m_colColor)+(col*(colWhite-vals[i].m_colOpacity));
 				col.Clamp();
 				vals[0].m_colColor=col;
-				col_total+=col;
-				depth_total+=vals[i].m_Depth;
-				cov++;
 			}
 		}
 	}
-	// Store the totals in the image element ready for filtering.
-	TqFloat smul=1.0f/(m_XSamples*m_YSamples);
-	col_total*=smul;
-	m_colColor=col_total;
-	depth_total*=smul;
-	m_Depth=depth_total;
-	cov*=smul;
-	m_Coverage=cov;
 }
 
 
@@ -252,6 +256,8 @@ TqInt	CqBucket::m_XFWidth;
 TqInt	CqBucket::m_YFWidth;
 TqInt	CqBucket::m_XOrigin;
 TqInt	CqBucket::m_YOrigin;
+TqInt	CqBucket::m_XPixelSamples;
+TqInt	CqBucket::m_YPixelSamples;
 std::vector<CqImageElement>	CqBucket::m_aieImage;
 std::vector<TqFloat> CqBucket::m_aFilterValues;
 
@@ -269,8 +275,8 @@ TqBool CqBucket::ImageElement(TqInt iXPos, TqInt iYPos, CqImageElement*& pie)
 	iXPos-=m_XOrigin;
 	iYPos-=m_YOrigin;
 
-	int fxo2=static_cast<int>(m_XFWidth*0.5f);
-	int fyo2=static_cast<int>(m_YFWidth*0.5f);
+	TqInt fxo2=ceil((m_XFWidth-1)*0.5f);
+	TqInt fyo2=ceil((m_YFWidth-1)*0.5f);
 	
 	// Check within renderable range
 	if(iXPos>=-fxo2 && iXPos<=m_XSize+fxo2 &&
@@ -309,6 +315,8 @@ void CqBucket::InitialiseBucket(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt
 	m_YSize=ysize;
 	m_XFWidth=xfwidth;
 	m_YFWidth=yfwidth;
+	m_XPixelSamples=xsamples;
+	m_YPixelSamples=ysamples;
 	// Allocate the image element storage for a single bucket
 	m_aieImage.resize((xsize+xfwidth)*(ysize+yfwidth));
 
@@ -337,21 +345,61 @@ void CqBucket::InitialiseFilterValues()
 	// Allocate and fill in the filter values array for each pixel.
 	RtFilterFunc pFilter;
 	pFilter=QGetRenderContext()->optCurrent().funcFilter();
-	TqInt NumFilterValues=((m_YFWidth+1)*(m_XFWidth+1));//*(m_PixelXSamples*m_PixelYSamples);
-	m_aFilterValues.resize(NumFilterValues);
-	TqFloat* pFilterValues=&m_aFilterValues[0];
-	TqInt fy=-m_YFWidth*0.5f;
-	while(fy<=m_YFWidth*0.5f)
-	{
-		TqInt fx=-m_XFWidth*0.5f;
-		while(fx<=m_YFWidth*0.5f)
-		{
-			TqFloat g=(*pFilter)(fx, fy, m_XFWidth, m_YFWidth);
-			*pFilterValues++=g;
 
-			fx++;
+	TqFloat xmax=ceil((m_XFWidth-1)*0.5f);
+	TqFloat ymax=ceil((m_YFWidth-1)*0.5f);
+	TqFloat xfwo2=m_XFWidth*0.5f;
+	TqFloat yfwo2=m_YFWidth*0.5f;
+	TqFloat xfw=m_XFWidth;
+	TqFloat yfw=m_YFWidth;
+	TqInt numsubpixels=(m_XPixelSamples*m_YPixelSamples);
+	TqInt numsubcells=numsubpixels;
+	TqFloat subcellwidth=1.0f/numsubcells;
+	TqFloat subcellcentre=subcellwidth*0.5f;
+	TqInt numperpixel=numsubpixels*numsubcells;
+	TqInt numvalues=((xfw+1)*(yfw+1))*(numperpixel);
+	
+	m_aFilterValues.resize(numvalues);
+
+	// Go over every pixel touched by the filter
+	TqInt px,py;
+	for(py=-ymax; py<=ymax; py++)
+	{
+		for(px=-xmax; px<=xmax; px++)
+		{
+			// Get the index of the pixel in the array.
+			TqInt index=(((py+ymax)*xfw)+(px+xmax))*numperpixel;
+			TqFloat pfx=px-0.5f;
+			TqFloat pfy=py-0.5f;
+			// Go over every subpixel in the pixel.
+			TqInt sx,sy;
+			for(sy=0; sy<m_YPixelSamples; sy++)
+			{
+				for(sx=0; sx<m_XPixelSamples; sx++)
+				{
+					// Get the index of the subpixel in the array
+					TqInt sindex=index+(((sy*m_XPixelSamples)+sx)*numsubcells);
+					TqFloat sfx=static_cast<TqFloat>(sx)/m_XPixelSamples;
+					TqFloat sfy=static_cast<TqFloat>(sy)/m_YPixelSamples;
+					// Go over each subcell in the subpixel
+					TqInt cx,cy;
+					for(cy=0; cy<m_XPixelSamples; cy++)
+					{
+						for(cx=0; cx<m_YPixelSamples; cx++)
+						{
+							// Get the index of the subpixel in the array
+							TqInt cindex=sindex+((cy*m_YPixelSamples)+cx);
+							TqFloat fx=(cx*subcellwidth)+sfx+pfx+subcellcentre;
+							TqFloat fy=(cy*subcellwidth)+sfy+pfy+subcellcentre;
+							TqFloat w=0.0f;
+							if(fx>=-xfwo2 && fy>=-yfwo2 && fx<=xfwo2 && fy<=yfwo2)
+								w=(*pFilter)(fx,fy,m_XFWidth,m_YFWidth);
+							m_aFilterValues[cindex]=w;
+						}
+					}
+				}
+			}
 		}
-		fy++;
 	}
 }
 
@@ -427,32 +475,55 @@ void CqBucket::FilterBucket()
 	CqImageElement* pie;
 
 	CqColor* pCols=new CqColor[XSize()*YSize()];
-	TqFloat xmax=XFWidth()*0.5f;
-	TqFloat ymax=YFWidth()*0.5f;
+	TqInt xmax=ceil((XFWidth()-1)*0.5f);
+	TqInt ymax=ceil((YFWidth()-1)*0.5f);
+	TqFloat xfwo2=XFWidth()*0.5f;
+	TqFloat yfwo2=YFWidth()*0.5f;
+	TqInt numsubpixels=(m_XPixelSamples*m_YPixelSamples);
+	TqInt numsubcells=numsubpixels;
+	TqFloat subcellwidth=1.0f/numsubcells;
+	TqInt numperpixel=numsubpixels*numsubcells;
 	TqInt	xlen=XSize()+XFWidth();
 
 	TqInt x,y;
 	TqInt i=0;
 	for(y=YOrigin(); y<YOrigin()+YSize(); y++)
 	{
+		TqFloat ycent=y+0.5f;
 		for(x=XOrigin(); x<XOrigin()+XSize(); x++)
 		{
+			TqFloat xcent=x+0.5f;
 			CqColor c(0,0,0);
 			TqFloat gTot=0.0;
-			TqInt fy=static_cast<TqInt>(-ymax);
-			TqFloat* pFilterValues=&m_aFilterValues[0];
+			
+			TqInt fx,fy;
 			// Get the element at the upper left corner of the filter area.
-			ImageElement(x-static_cast<TqInt>(xmax), y-static_cast<TqInt>(ymax), pie);
-			while(fy<=ymax)
+			ImageElement(x-xmax, y-ymax, pie);
+			for(fy=-ymax; fy<=ymax; fy++)
 			{
 				CqImageElement* pie2=pie;
-				TqInt fx=static_cast<TqInt>(-xmax);
-				while(fx<=xmax)
+				for(fx=-xmax; fx<=xmax; fx++)
 				{
-					TqFloat g=*pFilterValues++;
-					c+=pie2->Color()*g;
-					gTot+=g;
-					fx++;
+					TqInt index=(((fy+ymax)*XFWidth())+(fx+xmax))*numperpixel;
+					// Now go over each subsample within the pixel
+					TqInt sx,sy;
+					for(sy=0; sy<m_YPixelSamples; sy++)
+					{
+						for(sx=0; sx<m_XPixelSamples; sx++)
+						{
+							TqInt sindex=index+(((sy*m_XPixelSamples)+sx)*numsubcells);
+							CqVector2D vecS=pie2->SamplePoint(sx,sy);
+							vecS-=CqVector2D(xcent,ycent);
+							if(vecS.x()>=-xfwo2 && vecS.y()>=-yfwo2 && vecS.x()<=xfwo2 && vecS.y()<=yfwo2)
+							{
+								TqInt cindex=sindex+pie2->SubCellIndex(sx,sy);
+								TqFloat g=m_aFilterValues[cindex];
+								gTot+=g;
+								if(pie2->Values(sx,sy).size()>0)
+									c+=pie2->Values(sx,sy)[0].m_colColor*g;
+							}	
+						}
+					}
 					pie2++;
 				}
 				pie+=xlen;
