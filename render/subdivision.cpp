@@ -1417,10 +1417,6 @@ CqMicroPolyGridBase* CqSubdivisionPatch::Dice()
 
 	TqInt iFace=0;
 	StoreDice(m_DiceCount, iFace, 0, 0, cuv+1, pGrid, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os);
-	// Only shade if the ImageBuffer mode is at least RGB
-	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
-		pGrid->Shade();
-
 	return(pGrid);
 }
 

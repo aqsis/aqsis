@@ -503,67 +503,10 @@ void CqRenderer::RenderWorld()
 	// Store the time at start.
 	m_timeTaken=time(0);
 
-	// If there are in shadow castign lightsources, process them first.
-/*	const CqString* pattrAutoShadows=optCurrent().GetStringOption("render","auto_shadows");
-	if(pattrAutoShadows!=0 && pattrAutoShadows[0].compare("on"))
-	{
-		m_Status.SetState(State_Shadows);
-		m_Status.SetComplete(0.0f);
-		UpdateStatus();
-		EqRenderMode OldMode=m_Mode;
-		m_Mode=RenderMode_Shadows;
-		CqLightsource* pL=Lightsource_stack.pFirst();
-		while(pL!=NULL)
-		{
-			const CqString* pattrShadows=pL->pAttributes()->GetStringAttribute("light","shadows");
-			if(pattrShadows!=0 && pattrShadows[0].compare("on"))
-			{
-				const CqString* pattrLightName=pL->pAttributes()->GetStringAttribute("identifier","name");
-				CqString strOut("Generating shadow map for lightsource - ");
-				CqString strName("unnamed light");
-				if(pattrLightName!=0)	strName=pattrLightName[0];
-
-				strOut+=strName;
-
-				CqString strShadowMapName;
-				const CqString* pattrShadowMapName=pL->pAttributes()->GetStringAttribute("light","shadowmapname");
-				if(pattrShadowMapName==0)
-				{
-					if(pattrLightName==0)
-					{
-						// No shadowmapname and no name so can't generate shadows for this light.
-						CqString strErr("Must specify shadowmapname - ");
-						strErr+=strName;
-						CqBasicError(ErrorID_NoShadowName,Severity_Normal,strErr.c_str());
-						pL=pL->pNext();
-						continue;
-					}
-					else
-					{
-						strShadowMapName=pattrLightName[0];
-						strShadowMapName+=".map";
-					}
-				}
-				else
-					strShadowMapName=pattrShadowMapName[0];
-
-				CqBasicError(0,Severity_Normal,strOut.c_str());
-				pL->GenerateShadowMap(strShadowMapName.c_str());
-			}
-			pL=pL->pNext();
-		}
-		m_Mode=OldMode;
-	}
-*/
 	// Print to the defined output what we are rendering.
 	CqString strMsg("Rendering - ");
 	strMsg+=optCurrent().strDisplayName();
 	CqBasicError(0,Severity_Normal,strMsg.c_str());
-
-	optCurrent().InitialiseCamera();
-
-	pImage()->SetImage();
-	pImage()->InitialiseSurfaces(Scene());
 
 #ifdef  AQSIS_SYSTEM_WIN32
 	// Load and initialise the display drivers.
@@ -601,7 +544,7 @@ void CqRenderer::PrintStats(TqInt level)
 	if(level>0)
 	{
 		std::strstream MSG;
-		TqInt cGPrims=Scene().cGPrims();		
+		TqInt cGPrims=0;		
 
 		TqFloat h=m_timeTaken/(60*60);
 		TqFloat m=(m_timeTaken/60)-(h*60);

@@ -37,7 +37,6 @@
 #include	"renderer.h"
 #include	"ri.h"
 #include	"sstring.h"
-#include	"scene.h"
 #include	"surface.h"
 #include	"color.h"
 #include	"vector2d.h"
@@ -187,7 +186,6 @@ class _qShareC	CqImageBuffer
 												m_DisplayMode(ModeRGB),
 												m_CurrBucket(0),
 												m_pieImage(0),
-												m_aScene(0),
 												m_aSurfaces(0)
 												{}
 	_qShareM	virtual			~CqImageBuffer();
@@ -267,12 +265,9 @@ class _qShareC	CqImageBuffer
 	_qShareM			void	ExposePixel(SqImageValue& Pixel);
 	_qShareM			void	QuantizePixel(SqImageValue& Pixel);
 
-	_qShareM			void	AddSurfacePointer(CqBasicSurface* pSurface);
 	_qShareM			void	PostSurface(CqBasicSurface* pSurface);
 	_qShareM			TqBool	CullSurface(CqBound& Bound, CqBasicSurface* pSurface);
-	_qShareM			void	InitialiseSurfaces(CqScene& Scene);
 	_qShareM			void	AddMPG(CqMicroPolygonBase* pmpgNew);
-	_qShareM			void	AddGrid(CqMicroPolyGridBase* pgridNew);
 	_qShareM			void	RenderMPGs(TqInt iBucket, long xmin, long xmax, long ymin, long ymax);
 	_qShareM			void	RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax);
 	_qShareM			void	RenderSurfaces(TqInt iBucket, long xmin, long xmax, long ymin, long ymax);
@@ -319,7 +314,6 @@ class _qShareC	CqImageBuffer
 			CqImageElement*	m_pieImage;				///< Array of image element classes repesenting the pixels of the current bucket.
 			std::vector<std::vector<CqMicroPolygonBase*> >	m_aampgWaiting;		///< Vector of vectors of waiting micropolygons in each bucket
 			std::vector<std::vector<CqMicroPolyGridBase*> >	m_aagridWaiting;	///< Vector of vectors of waiting micropolygrids in each bucket
-			std::vector<CqBasicSurface*>*	m_aScene;							///< Vector of lists of scene surfaces for each bucket.
 			CqList<CqBasicSurface>*	m_aSurfaces;		///< Vector of lists of split surfaces for each bucket.
 			std::vector<std::vector<TqFloat> >	m_aaFilterValues;	///< Vector of vector of filter weights precalculated fro each jittered sample point in each pixel.
 };

@@ -1302,10 +1302,6 @@ CqMicroPolyGridBase* CqSurfaceNURBS::Dice()
 			pGrid->Advance();
 		}
 	}
-	// Only shade if the ImageBuffer mode is at least RGB
-	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
-		pGrid->Shade();
-
 	return(pGrid);
 }
 

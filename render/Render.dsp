@@ -25,7 +25,7 @@ CFG=Render - Win32 Debug
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName "Render"
 # PROP Scc_LocalPath "."
-CPP=xicl6.exe
+CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
@@ -51,7 +51,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=xilink6.exe
+LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386
 # ADD LINK32 wsock32.lib kernel32.lib user32.lib gdi32.lib libtiff_i.lib zlib.lib winmm.lib /nologo /subsystem:windows /dll /map /debug /machine:I386 /nodefaultlib:"LIBCM" /nodefaultlib:"libc" /libpath:"..\Library\Release" /fixed:no
 # SUBTRACT LINK32 /pdb:none
@@ -84,7 +84,7 @@ PostBuild_Cmds=copy ..\aqsis.ini ..\library\release
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=xilink6.exe
+LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 wsock32.lib kernel32.lib user32.lib gdi32.lib libtiff_i.lib zlib.lib winmm.lib /nologo /subsystem:windows /dll /profile /map /debug /machine:I386 /nodefaultlib:"LIBCMTD" /nodefaultlib:"libcd" /libpath:"..\Library\Debug"
 # Begin Special Build Tool
@@ -290,19 +290,6 @@ SOURCE=.\Renderer.cpp
 # Begin Source File
 
 SOURCE=.\ri.cpp
-
-!IF  "$(CFG)" == "Render - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "Render - Win32 Debug"
-
-# ADD CPP /Od
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
-SOURCE=.\scene.cpp
 
 !IF  "$(CFG)" == "Render - Win32 Release"
 
@@ -578,10 +565,6 @@ SOURCE=.\Renderer.h
 # Begin Source File
 
 SOURCE=.\ri.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\scene.h
 # End Source File
 # Begin Source File
 

@@ -44,7 +44,6 @@
 #include	"vector2d.h"
 #include	"semaphore.h"
 #include	"messages.h"
-#include	"scene.h"
 #include	"shaders.h"
 #include	"renderer.h"
 #include	"symbols.h"
@@ -154,10 +153,6 @@ class CqRenderer
 						 */
 				virtual	void		SetImage(CqImageBuffer* pImage)
 															{m_pImageBuffer=pImage;}
-						/** Get a pointer to the current scene storage.
-						 * \return A CqScene pointer.
-						 */
-				virtual	CqScene&	Scene()					{return(m_Scene);}
 	// Handle various coordinate system transformation requirements.
 				virtual	CqMatrix	matSpaceToSpace			(const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld=CqMatrix(), const CqMatrix& matObjectToWorld=CqMatrix());
 				virtual	CqMatrix	matVSpaceToSpace		(const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld=CqMatrix(), const CqMatrix& matObjectToWorld=CqMatrix());
@@ -283,7 +278,6 @@ class CqRenderer
 #endif // AQSIS_SYSTEM_WIN32
 
 			EqRenderMode	m_Mode;							
-			CqScene			m_Scene;						///< The global scene storage.
 			CqList<CqShaderRegister> m_Shaders;				///< List of registered shaders.
 			TqBool			m_fSaveGPrims;
 			std::vector<CqTransform*>	m_TransformStack;	///< The global transformation stack.

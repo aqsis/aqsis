@@ -233,10 +233,6 @@ CqMicroPolyGridBase* CqPolygonBase::Dice()
 				pGrid->Advance();
 			}
 		}
-		// Only shade if the ImageBuffer mode is at least RGB
-		if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
-			pGrid->Shade();
-
 		pGrid->Split(QGetRenderContext()->pImage());
 	}*/
 }

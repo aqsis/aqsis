@@ -378,6 +378,17 @@ void CqMotionMicroPolyGrid::Project()
 
 
 //---------------------------------------------------------------------
+/** Shade the primary grid.
+ */
+
+void CqMotionMicroPolyGrid::Shade()
+{
+	CqMicroPolyGrid* pGrid=static_cast<CqMicroPolyGrid*>(GetMotionObject(Time(0)));
+	pGrid->Shade();
+}
+
+
+//---------------------------------------------------------------------
 /** Bound all grids in their current space, usually raster.
  */
 
@@ -604,10 +615,7 @@ CqBound CqMicroPolygonStaticBase::Bound() const
 TqBool CqMicroPolygonStatic::Sample(CqVector2D& vecSample, TqFloat time, TqFloat& D)
 {
 	if(fContains(vecSample, D))
-	{
-		QGetRenderContext()->Stats().cSampleHits()++;
 		return(TqTrue);
-	}
 	else
 		return(TqFalse);
 }

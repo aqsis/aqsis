@@ -112,7 +112,7 @@ void InitialiseINIData()
 
 			// Get the value for the next key
 			char strValue[255];
-			GetPrivateProfileString("DISPLAY_DRIVERS", pEnt, "framebuffer.dll", strValue, 255, strINIFile);
+			GetPrivateProfileString("DISPLAY_DRIVERS", pEnt, "framebuffer.exe", strValue, 255, strINIFile);
 			gaDisplayMap.push_back(SqDisplayMapEntry(pEnt, strValue));
 
 			pEnt+=entLen+1;

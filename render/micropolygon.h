@@ -71,6 +71,9 @@ class CqMicroPolyGridBase
 					/** Pure virtual, project the grid into raster space.
 					 */
 	virtual void	Project()=0;
+					/** Pure virtual, shade the grid.
+					 */
+	virtual	void	Shade()=0;
 					/** Pure virtual, get the bound of the grid.
 					 * \return CqBound class representing the conservative boundary.
 					 */
@@ -100,7 +103,6 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqShaderExecEnv
 					 * \param f The new state of the flag.
 					 */
 			void	SetNormals(TqBool f)	{m_fNormals=f;}
-			void	Shade();
 			void	Initialise(TqInt cu, TqInt cv, CqSurface* pSurface);
 			
 					/** Increase the count of references to this grid.
@@ -119,6 +121,7 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqShaderExecEnv
 	// Overrides from CqMicroPolyGridBase
 	virtual	void	Split(CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax);
 	virtual void	Project();
+	virtual	void	Shade();
 	virtual CqBound	Bound();
 					/** Get a pointer to the surface which this grid belongs.
 					 * \return Surface pointer, only valid during shading.
@@ -145,6 +148,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 	// Overrides from CqMicroPolyGridBase
 	virtual	void	Split(CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax);
 	virtual void	Project();
+	virtual	void	Shade();
 	virtual CqBound	Bound();
 					/** Get a pointer to the surface which this grid belongs.
 					 * Actually returns the surface pointer from the first timeslot.

@@ -30,7 +30,6 @@
 #include	"imagebuffer.h"
 #include	"lights.h"
 #include	"renderer.h"
-#include	"scene.h"
 #include	"patch.h"
 #include	"polygon.h"
 #include	"nurbs.h"
@@ -232,8 +231,6 @@ RtVoid	RiBegin(RtToken name)
 	QGetRenderContext()->Initialise();
 	QGetRenderContext()->CreateMainContext();
 	QGetRenderContext()->ptransWriteCurrent()->SetCurrentTransform(QGetRenderContext()->Time(),CqMatrix());
-	// Clear the scene objects.
-	QGetRenderContext()->Scene().ClearScene();
 	// Clear the lightsources stack.
 	CqLightsource* pL=Lightsource_stack.pFirst();
 	while(pL)
@@ -252,13 +249,19 @@ RtVoid	RiBegin(RtToken name)
 	char strDrive[10];
 	char strPath[255];
 	char strShaderPath[255];
+	char strDisplayPath[255];
 	GetModuleFileName(NULL, strExe, 255);
 	_splitpath(strExe,strDrive,strPath,NULL,NULL);
 	_makepath(strShaderPath,strDrive,strPath,"shaders","");
+	_makepath(strDisplayPath,strDrive,strPath,"","");
 
 	char* strShaderOpt="shader";
 	char* pValue=strShaderPath;
 	RiOption("searchpath", (RtPointer)strShaderOpt, (RtPointer)&pValue, NULL);
+
+	char* strDisplayOpt="display";
+	pValue=strDisplayPath;
+	RiOption("searchpath", (RtPointer)strDisplayOpt, (RtPointer)&pValue, NULL);
 #endif // AQSIS_SYSTEM_WIN32
 
 	return(0);
@@ -312,8 +315,6 @@ RtVoid	RiFrameBegin(RtInt number)
 RtVoid	RiFrameEnd()
 {
 	QGetRenderContext()->DeleteFrameContext();
-	// Delete the scene
-	QGetRenderContext()->Scene().ClearScene();
 
 	return(0);
 }
@@ -360,6 +361,9 @@ RtVoid	RiWorldBegin()
 	QGetRenderContext()->SetmatCamera(QGetRenderContext()->matCurrent(QGetRenderContext()->Time()));
 	// and then reset the current matrix to identity, ready for object transformations.
 	QGetRenderContext()->ptransWriteCurrent()->SetCurrentTransform(QGetRenderContext()->Time(),CqMatrix());
+
+	QGetRenderContext()->optCurrent().InitialiseCamera();
+	QGetRenderContext()->pImage()->SetImage();
 
 	return(0);
 }
@@ -2009,7 +2013,7 @@ RtVoid	RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERL
 					iP++;
 				}
 				if(fValid)
-					QGetRenderContext()->Scene().AddSurface(pSurface);
+					QGetRenderContext()->pImage()->PostSurface(pSurface);
 			}
 		}
 		else
@@ -2065,7 +2069,7 @@ RtVoid	RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERL
 						pSurface->AddTimeSlot(time,apPoints[i]);
 						apPoints[i]->Reference();
 					}
-					QGetRenderContext()->Scene().AddSurface(pSurface);
+					QGetRenderContext()->pImage()->PostSurface(pSurface);
 				}
 			}
 		}
@@ -2285,7 +2289,7 @@ RtVoid	RiNuPatchV(RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat
 		pSurface->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
 							QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
 							QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
-		QGetRenderContext()->Scene().AddSurface(pSurface);
+		QGetRenderContext()->pImage()->PostSurface(pSurface);
 	}
 	else
 		delete(pSurface);
@@ -3040,7 +3044,7 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 			apEdges.clear();
 			iPStart=iP;
 		}
-		QGetRenderContext()->Scene().AddSurface(pSubdivision);
+		QGetRenderContext()->pImage()->PostSurface(pSubdivision);
 	}
 	else
 		delete(pSubdivision);
@@ -3244,7 +3248,7 @@ RtVoid	CreateGPrim(T* pSurface)
 							QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
 							QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
 
-		QGetRenderContext()->Scene().AddSurface(pSurface);
+		QGetRenderContext()->pImage()->PostSurface(pSurface);
 	}
 	else
 	{
@@ -3268,7 +3272,7 @@ RtVoid	CreateGPrim(T* pSurface)
 		pSurface->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
 							QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
 							QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
-		QGetRenderContext()->Scene().AddSurface(pMotionSurface);
+		QGetRenderContext()->pImage()->PostSurface(pMotionSurface);
 	}
 
 	return(0);

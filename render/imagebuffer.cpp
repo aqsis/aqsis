@@ -37,6 +37,8 @@
 #include	"micropolygon.h"
 #include	"displaydriver.h"
 
+#include	<map>
+
 START_NAMESPACE(Aqsis)
 
 
@@ -395,7 +397,6 @@ void	CqImageBuffer::SetImage()
 	m_aampgWaiting.resize(m_cXBuckets*m_cYBuckets);
 	m_aagridWaiting.resize(m_cXBuckets*m_cYBuckets);
 	m_aSurfaces=new CqList<CqBasicSurface>[m_cXBuckets*m_cYBuckets];
-	m_aScene=new std::vector<CqBasicSurface*>[m_cXBuckets*m_cYBuckets];
 	ClearBucket();
 
 	// Allocate and fill in the filter values array for each pixel.
@@ -496,13 +497,11 @@ void	CqImageBuffer::DeleteImage()
 {
 	delete[](m_pieImage);
 	delete[](m_aSurfaces);
-	delete[](m_aScene);
 
 	m_pieImage=0;
 	m_aSurfaces=0;
 	m_aampgWaiting.clear();
 	m_aagridWaiting.clear();
-	m_aScene=0;
 
 	m_aaFilterValues.clear();
 
@@ -732,57 +731,6 @@ TqBool CqImageBuffer::CullSurface(CqBound& Bound, CqBasicSurface* pSurface)
 
 
 //----------------------------------------------------------------------
-/** Add a pointer to the a top level scene surface to the list, in the correct bucket.
- * \param  pSurface A pointer to a CqBasicSurface derived class, surface should at this point be in camera space.
- */
-
-void CqImageBuffer::AddSurfacePointer(CqBasicSurface* pSurface)
-{
-	// Bound the primitive in camera space taking into account any motion specification.
-	CqBound Bound(pSurface->Bound());
-
-	// Take into account the displacement bound extension.
-	TqFloat db=0;
-	CqString strCoordinateSystem("object");
-	const TqFloat* pattrDisplacementBound=pSurface->pAttributes()->GetFloatAttribute("displacementbound", "sphere");
-	const CqString* pattrCoordinateSystem=pSurface->pAttributes()->GetStringAttribute("displacementbound", "coordinatesystem");
-	if(pattrDisplacementBound!=0)	db=pattrDisplacementBound[0];
-	if(pattrCoordinateSystem!=0)	strCoordinateSystem=pattrCoordinateSystem[0];
-
-	// Do a quick check if there is a Displacement shader specified, but no displacement bound.
-	// This will not catch the case where a surface shader does displacement, but helps anyway.
-	if(pattrDisplacementBound==0 && pSurface->pAttributes()->pshadDisplacement()!=0)
-		CqAttributeError(WarningID_NoDisplacementBound, Severity_Normal,"Using displacement shader without specifying displacementbound option, may cause rendering problems", pSurface->pAttributes(), TqTrue);
-
-	CqVector3D	vecDB(db,0,0);
-	vecDB=QGetRenderContext()->matVSpaceToSpace(strCoordinateSystem.c_str(),"camera",pSurface->pAttributes()->pshadSurface()->matCurrent(),pSurface->pTransform()->matObjectToWorld())*vecDB;
-	db=vecDB.Magnitude();
-
-	Bound.vecMax()+=db;
-	Bound.vecMin()-=db;
-	
-	// Check if the surface can be culled. (also converts Bound to raster space).
-	if(CullSurface(Bound,pSurface))
-		return;
-
-	// Find out which bucket(s) the surface belongs to.
-	TqInt XMinb,YMinb;
-	TqInt iBucket=Bucket(static_cast<TqInt>(Bound.vecMin().x()), static_cast<TqInt>(Bound.vecMin().y()),XMinb,YMinb);
-	
-	if(XMinb>=m_cXBuckets || YMinb>=m_cYBuckets)	return;
-	
-	if(XMinb<0 || YMinb<0)
-	{
-		if(XMinb<0)	XMinb=0;
-		if(YMinb<0)	YMinb=0;
-		iBucket=(YMinb*m_cXBuckets)+XMinb;
-	}
-	assert(iBucket>=m_CurrBucket);
-	m_aScene[iBucket].push_back(pSurface);
-}
-
-
-//----------------------------------------------------------------------
 /** Add a new surface to the front of the list of waiting ones.
  * \param pSurface A pointer to a CqBasicSurface derived class, surface should at this point be in camera space.
  */
@@ -830,40 +778,6 @@ void CqImageBuffer::PostSurface(CqBasicSurface* pSurface)
 	}
 	assert(iBucket>=m_CurrBucket);
 	m_aSurfaces[iBucket].LinkFirst(pSurface);
-}
-
-
-//----------------------------------------------------------------------
-/** Add a new shaded grid to the front of the list of waiting ones.
- * \param pGrid A pointer to a CqMicroPolyGridBase derived class.
- */
-
-void CqImageBuffer::AddGrid(CqMicroPolyGridBase* pGrid)
-{
-	// Bound the primitive in its current space (camera) space taking into account any motion specification.
-	CqBound Bound(pGrid->Bound());
-
-	Bound.vecMin().x(Bound.vecMin().x()-m_FilterXWidth/2);
-	Bound.vecMin().y(Bound.vecMin().y()-m_FilterYWidth/2);
-	Bound.vecMax().x(Bound.vecMax().x()+m_FilterXWidth/2);
-	Bound.vecMax().y(Bound.vecMax().y()+m_FilterYWidth/2);
-
-	// Find out which bucket(s) the surface belongs to.
-	TqInt XMinb,YMinb;
-	if(Bound.vecMin().x()<0)	Bound.vecMin().x(0.0f);
-	if(Bound.vecMin().y()<0)	Bound.vecMin().y(0.0f);
-	TqInt iBucket=Bucket(static_cast<TqInt>(Bound.vecMin().x()), static_cast<TqInt>(Bound.vecMin().y()),XMinb,YMinb);
-
-	if(XMinb>=m_cXBuckets || YMinb>=m_cYBuckets)	return;
-	
-	if(XMinb<0 || YMinb<0)
-	{
-		if(XMinb<0)	XMinb=0;
-		if(YMinb<0)	YMinb=0;
-		iBucket=(YMinb*m_cXBuckets)+XMinb;
-	}
-	assert(iBucket>=m_CurrBucket);
-	m_aagridWaiting[iBucket].push_back(pGrid);
 }
 
 
@@ -960,7 +874,6 @@ void CqImageBuffer::RenderMPGs(TqInt iBucket, long xmin, long xmax, long ymin, l
 }
 
 
-
 //----------------------------------------------------------------------
 /** Render a particular micopolygon.
  * \param pMPG Pointer to the micrpolygon to process.
@@ -1028,13 +941,14 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 			int end_n=(iY==eY)?en:iYSamples;
 			int start_m=(iX==initX)?im:0;
 			int end_m=(iX==eX)?em:iXSamples;
-			for(; n<end_n; n++)
+			TqBool brkVert=TqFalse;
+			for(; n<end_n && !brkVert; n++)
 			{
-				for(m=start_m; m<end_m; m++)
+				TqBool brkHoriz=TqFalse;
+				for(m=start_m; m<end_m && !brkHoriz; m++)
 				{
-					QGetRenderContext()->Stats().cSamples()++;
 					CqVector2D vecP(pie->SamplePoint(m,n));
-
+					QGetRenderContext()->Stats().cSamples()++;
 					if(Bound.Contains2D(vecP))
 					{
 						QGetRenderContext()->Stats().cSampleBoundHits()++;
@@ -1042,6 +956,7 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 						TqFloat t=pie->SampleTime(m,n);
 						if(pMPG->Sample(vecP,t,ImageVal.m_Depth))
 						{									
+							QGetRenderContext()->Stats().cSampleHits()++;
 							std::vector<SqImageValue>& aValues=pie->Values(m,n);
 							int i=0;
 							int c=aValues.size();
@@ -1061,6 +976,13 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 							ImageVal.m_colOpacity=pMPG->colOpacity();
 							aValues.insert(aValues.begin()+i,ImageVal);
 						}
+					}
+					else
+					{
+						if(vecP.x()>Bound.vecMax().x())
+							brkHoriz=TqTrue;
+						if(vecP.y()>Bound.vecMax().y())
+							brkVert=TqTrue;
 					}
 				}
 			}
@@ -1096,9 +1018,12 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 			CqMicroPolyGridBase* pGrid;
 			if((pGrid=pSurface->Dice())!=0)
 			{
-				//pGrid->Split(this,iBucket,xmin,xmax,ymin,ymax);
+				// Only shade if the ImageBuffer mode is at least RGB
+				if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
+					pGrid->Shade();
+
 				pGrid->Project();
-				AddGrid(pGrid);
+				m_aagridWaiting[m_CurrBucket].push_back(pGrid);
 			}
 		}
      	else if(!pSurface->fDiscard())
@@ -1112,71 +1037,6 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 
 		delete(pSurface);
 		pSurface=m_aSurfaces[iBucket].pFirst();
-		// Render any waiting micro polygon grids.
-		RenderMPGs(iBucket, xmin, xmax, ymin, ymax);
-	}
-
-
-	// Render the first top level scene surface.
-	TqInt iSurface;
-	for(iSurface=0; iSurface<m_aScene[iBucket].size(); iSurface++)
-	{
-		// The surfaces in the scene store are in world coordinates, so take a copy and convert it.
-		CqBasicSurface* pTopSurface;
-		pTopSurface=m_aScene[iBucket][iSurface];
-
-		if(pTopSurface->Diceable())
-		{
-			CqMicroPolyGridBase* pGrid;
-			if((pGrid=pTopSurface->Dice())!=0)
-			{
-				//pGrid->Split(this,iBucket,xmin,xmax,ymin,ymax);
-				pGrid->Project();
-				AddGrid(pGrid);
-			}
-		}
-		else if(!pTopSurface->fDiscard())
-		{
-			std::vector<CqBasicSurface*> aSplits;
-			TqInt cSplits=pTopSurface->Split(aSplits);
-			TqInt i;
-			for(i=0; i<cSplits; i++)
-				PostSurface(aSplits[i]);
-		}
-
-		
-		delete(pTopSurface);
-
-		// Now render any split surfaces generated.
-		CqBasicSurface* pSurface=m_aSurfaces[iBucket].pFirst();
-		while(pSurface!=0)
-		{
-			if(m_fQuit)	return;
-
-			if(pSurface->Diceable())
-			{
-				CqMicroPolyGridBase* pGrid;
-				if((pGrid=pSurface->Dice())!=0)
-				{
-					//pGrid->Split(this,iBucket,xmin,xmax,ymin,ymax);
-					pGrid->Project();
-					AddGrid(pGrid);
-				}
-			}
-			else if(!pSurface->fDiscard())
-			{
-				std::vector<CqBasicSurface*> aSplits;
-				TqInt cSplits=pSurface->Split(aSplits);
-				TqInt i;
-				for(i=0; i<cSplits; i++)
-					PostSurface(aSplits[i]);
-			}
-
-			delete(pSurface);
-			pSurface=m_aSurfaces[iBucket].pFirst();
-			// Render any waiting micro polygon grids.
-			RenderMPGs(iBucket, xmin, xmax, ymin, ymax);
-		}
 		// Render any waiting micro polygon grids.
 		RenderMPGs(iBucket, xmin, xmax, ymin, ymax);
 	}
@@ -1364,29 +1224,6 @@ void CqImageBuffer::Quit()
 {
 	m_fQuit=TqTrue;
 }
-
-
-//----------------------------------------------------------------------
-/** Initialise the main surface list from the entities stored in a CqScene object.
- * \param Scene CqScene class containing all the GPrims to render.
- */
-
-void CqImageBuffer::InitialiseSurfaces(CqScene& Scene)
-{
-	// Clear the surfaces first.
-	TqInt i;
-	for(i=0; i<m_cXBuckets*m_cYBuckets; i++)
-		m_aScene[i].clear();
-	// Add every surface to the image buffer, allocating them to the correct bucket
-	CqBasicSurface* pSurface=Scene.lSurfaces().pFirst();
-	while(pSurface)
-	{
-		AddSurfacePointer(pSurface);
-		pSurface->Reset();
-		pSurface=pSurface->pNext();
-	}
-}
-
 
 
 //---------------------------------------------------------------------
