@@ -117,6 +117,10 @@ SOURCE=.\imagers.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\lath.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\lights.cpp
 # End Source File
 # Begin Source File
@@ -186,6 +190,10 @@ SOURCE=.\stats.cpp
 # Begin Source File
 
 SOURCE=.\subdivision.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\subdivision2.cpp
 # End Source File
 # Begin Source File
 
@@ -297,6 +305,10 @@ SOURCE=.\itransform.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\lath.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\lights.h
 # End Source File
 # Begin Source File
@@ -378,6 +390,10 @@ SOURCE=.\stats.h
 # Begin Source File
 
 SOURCE=.\subdivision.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\subdivision2.h
 # End Source File
 # Begin Source File
 

@@ -45,11 +45,13 @@
 #include	"trimcurve.h"
 #include	"genpoly.h"
 #include	"points.h"
-#include        "curves.h"
+#include	"curves.h"
 #include	"rifile.h"
 #include	"librib2ri.h"
-#include        "plugins.h"
+#include	"plugins.h"
 #include	"shadervm.h"
+
+#include	"subdivision2.h"
 
 #ifndef    AQSIS_SYSTEM_WIN32
 #include        "unistd.h"
@@ -4166,6 +4168,45 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		}
 	}
 
+	// Create experimental version
+	if(strcmp(scheme, "experimental")==0)
+	{
+		CqSubdivision2 subd2;
+		subd2.Prepare(cVerts);
+
+		TqInt i;
+		for ( i = 0; i < count; i++ )
+		{
+			RtToken	token = tokens[ i ];
+			RtPointer	value = values[ i ];
+			if ( strcmp( token, RI_P ) == 0 )
+			{
+				RtFloat* pPoints = ( RtFloat* ) value;
+				TqInt iVert;
+				for( iVert = 0; iVert < cVerts; iVert++ )
+				{
+					CqVector3D vA(pPoints[iVert*3], pPoints[iVert*3+1], pPoints[iVert*3+2]);
+					subd2.SetVertex(iVert,vA);
+				}
+				break;
+			}
+		}
+
+		RtInt	iP = 0;
+		for ( face = 0; face < nfaces; face++ )
+		{
+			subd2.AddFacet(nvertices[ face ], &vertices[ iP ]);
+			iP+=nvertices[ face ];
+		}
+		subd2.Finalise();
+		subd2.OutputInfo("test.sds");
+		subd2.SubdivideFace(0);
+		subd2.SubdivideFace(1);
+		subd2.SubdivideFace(2);
+		subd2.SubdivideFace(3);
+		subd2.OutputMesh("test.raw");
+		TqInt cV = subd2.cVertices();
+	}
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, nfaces );
 	pPointsClass->AddRef();
