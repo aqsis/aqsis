@@ -1307,16 +1307,6 @@ CqBound CqWSurf::Bound() const
 }
 
 
-// Round x up to the nearest power of 2.
-
-static unsigned upto2 (unsigned x)
-{
-    // if x is already a power of 2, great!  Return it.
-    if ((x & (x - 1)) == 0)
-	return x;
-    return 1 << (int)(logb ((double)x) + 1);
-}
-
 //---------------------------------------------------------------------
 /** Determine whether the patch can be diced based on its screen size, if so work
  * out how many subdivisions to perform to get a MP grid and store it.
@@ -1365,7 +1355,7 @@ TqBool CqSubdivisionPatch::Diceable()
 	else			
 	{
 		m_DiceCount=l;
-		m_DiceCount=upto2(m_DiceCount);
+		m_DiceCount=CEIL_POW2(m_DiceCount);
 		m_DiceCount=(m_DiceCount==16)?4:(m_DiceCount==8)?3:(m_DiceCount==4)?2:(m_DiceCount==2)?1:0;
 		return(TqTrue);
 	}

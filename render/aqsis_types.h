@@ -58,4 +58,28 @@ typedef	bool			TqBool;
 #define RAD(a)				((a)/(180.0f/RI_PI))
 #define DEG(a)				(((a)/180.0f)*RI_PI)
 
+
+inline TqUint LOWEST_BIT(TqUint x)
+{
+	return(x & ((~x)+1));
+}
+
+inline TqBool IS_POW2(TqUint x)
+{
+	return(x != 0 && x == LOWEST_BIT(x));
+}
+
+inline TqUint CEIL_POW2_MINUS1(TqUint x)
+{
+	for(TqUint i=1; i; i <<= 1)
+		x |= x >> i;
+	return(x);
+}
+
+inline TqUint CEIL_POW2(TqUint x)
+{
+	return(CEIL_POW2_MINUS1(x)+1);
+}
+
+
 #endif	// AQSIS_TYPES_INCLUDED
