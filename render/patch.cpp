@@ -1184,8 +1184,8 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 			RtInt uCol = j * uStep;
 			CqSurfacePatchBicubic*	pSurface = new CqSurfacePatchBicubic();
 			pSurface->AddRef();
-			pSurface->SetDefaultPrimitiveVariables();
 			pSurface->SetSurfaceParameters( *this );
+			pSurface->SetDefaultPrimitiveVariables();
 			pSurface->P().SetSize( pSurface->cVertex() );
 			RtInt v;
 			for ( v = 0; v < 4; v++ )
