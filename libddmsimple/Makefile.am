@@ -6,9 +6,9 @@ libddmsimple_la_SOURCES = ddmsimple.cpp ddmsimple.h
 libddmsimple_la_LDFLAGS = -rpath $(libdir)
 
 if DEBUG
-CXXFLAGS = -g -Wall
+AM_CXXFLAGS = -g -Wall
 else
-CXXFLAGS =
+AM_CXXFLAGS =
 endif
 
 INCLUDES = -I$(top_srcdir)/render -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I@TIFF_INC@

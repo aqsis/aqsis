@@ -308,7 +308,10 @@ class CqVMStackEntry
 															return((*pVar)[Index]);
 														}
 														else
-															return(static_cast<T&>((Size()==1)?m_Value:m_aValues[Index]));
+	{
+		if(Size()==1)	return(static_cast<T&>(m_Value));
+		else		return(static_cast<T&>(m_aValues[Index]));
+	}
 													}
 							/** Set the value of the stack entry by index.
 							 * \param Index The integer index into the SIMD value array.
@@ -323,7 +326,10 @@ class CqVMStackEntry
 															(*pVar)[Index]=val;
 														}
 														else
-															(Size()==1)?m_Value=val:m_aValues[Index]=val;
+	{
+		if(Size()==1)	m_Value=val;
+		else		m_aValues[Index]=val;
+	}
 													}
 
 							/** Determine whether the value is varying or uniform.

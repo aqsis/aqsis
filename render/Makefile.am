@@ -9,9 +9,9 @@ libaqsis_la_LDFLAGS = -rpath $(libdir)
 include_HEADERS = ri.h
 
 if DEBUG
-CXXFLAGS = -g -Wall
+AM_CXXFLAGS = -g -Wall
 else
-CXXFLAGS =
+AM_CXXFLAGS =
 endif
 
 INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix

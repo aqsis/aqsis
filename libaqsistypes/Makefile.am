@@ -11,9 +11,9 @@ libaqsistypes_la_LDFLAGS = -rpath $(libdir)
 include_HEADERS = aqsis.h aqsis_types.h bitvector.h color.h exception.h file.h list.h matrix.h memorypool.h random.h sstring.h vector2d.h vector3d.h vector4d.h refcount.h
 
 if DEBUG
-CXXFLAGS = -g -Wall
+AM_CXXFLAGS = -g -Wall
 else
-CXXFLAGS =
+AM_CXXFLAGS =
 endif
 
 INCLUDES = -I$(srcdir)/posix

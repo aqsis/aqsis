@@ -4,9 +4,9 @@ libplatform_la_SOURCES = aqsis_compiler.h criticalsection.h semaphore.cpp semaph
 libplatform_la_LDFLAGS = -rpath $(libdir) -static
 
 if DEBUG
-CXXFLAGS = -g -Wall
+AM_CXXFLAGS = -g -Wall
 else
-CXXFLAGS =
+AM_CXXFLAGS =
 endif
 
 INCLUDES = -I$(top_srcdir)/libaqsistypes 

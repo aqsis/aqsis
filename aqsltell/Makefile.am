@@ -4,9 +4,9 @@ aqsltell_SOURCES = aqsltell.c
 aqsltell_LDADD = 
 
 if DEBUG
-CXXFLAGS = -g -Wall
+AM_CXXFLAGS = -g -Wall
 else
-CXXFLAGS =
+AM_CXXFLAGS =
 endif
 
 INCLUDES = 

@@ -7,9 +7,9 @@ libtga2tif_la_LIBADD = ../common/libcommon.la
 libtga2tif_la_LDFLAGS = -rpath $(libdir)
 
 if DEBUG
-CXXFLAGS = -g -Wall
+AM_CXXFLAGS = -g -Wall
 else
-CXXFLAGS =
+AM_CXXFLAGS =
 endif
 
 INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I@TIFF_INC@
