@@ -41,8 +41,9 @@ AqLayout::~AqLayout()
 std::string AqLayout::format( const LoggingEvent& event )
 {
 	std::ostringstream message;
-
-	message << event.message << std::endl;
+	const std::string& priorityName = Priority::getPriorityName( event.priority );
+	
+	message << priorityName << ": " << event.message << std::endl;
 
 	return message.str();
 }
