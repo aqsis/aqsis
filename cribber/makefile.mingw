@@ -1,0 +1,19 @@
+CC = gcc
+CXX = g++
+
+CPPFLAGS = -I. -I ../Render/win32_mingw/intel -I../Render -I../Object/Release/Render -I../libarg 
+CXXFLAGS = -finline-functions
+
+LDFLAGS := -L../Render -L../libarg
+
+
+CRIBBER_NAME = cribber.exe
+
+
+SRC = cribber.cpp
+OBJ = $(SRC:%.cpp=%.o)
+
+LIB = -lrender -larg
+
+$(CRIBBER_NAME): $(OBJ)
+	$(CXX) -o $@ $(CXXFLAGS) $(LDFLAGS) $(OBJ) $(LIB)
