@@ -207,7 +207,26 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 	g_CWYmax = message->m_CropWindowYMax;
 
 	g_Image = new GLubyte[ g_ImageWidth * g_ImageHeight * 3 ];
-	memset( g_Image, 128, g_ImageWidth * g_ImageHeight * 3 );
+	//memset( g_Image, 128, g_ImageWidth * g_ImageHeight * 3 );
+	for (TqInt i = 0; i < g_ImageHeight; i ++) {
+		for (TqInt j=0; j < g_ImageWidth; j++)
+		{
+			int     t       = 0;
+			GLubyte d = 255;
+			
+			if ( ( i & 31 ) < 16 ) t ^= 1;
+			if ( ( j & 31 ) < 16 ) t ^= 1;
+			
+			if ( t )
+			{
+				d      = 128;
+			}
+			g_Image[3 * (i*g_ImageWidth + j) ] = d;
+			g_Image[3 * (i*g_ImageWidth + j) + 1] = d;
+			g_Image[3 * (i*g_ImageWidth + j) + 2] = d;
+		}
+	}
+
 
 	//	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 	glutInitDisplayMode( GLUT_SINGLE | GLUT_RGBA );
@@ -216,6 +235,9 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 
 	return ( 0 );
 }
+
+#define INT_MULT(a,b,t) ( (t) = (a) * (b) + 0x80, ( ( ( (t)>>8 ) + (t) )>>8 ) )
+#define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
 
 TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 {
@@ -238,6 +260,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 				const TqInt so = ( ( g_ImageHeight - y - 1 ) * linelength ) + ( x * 3 );
 
 				TqFloat value0, value1, value2;
+				TqFloat alpha = 255.0f;
 				if ( g_SamplesPerElement >= 3 )
 				{
 					value0 = reinterpret_cast<TqFloat*>( bucket ) [ 0 ];
@@ -251,6 +274,9 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 					value2 = reinterpret_cast<TqFloat*>( bucket ) [ 0 ];
 				}
 
+				if (g_SamplesPerElement > 3 ) 
+					alpha = (reinterpret_cast<TqFloat*>( bucket ) [ 3 ]);
+
 				if( !( quantize_zeroval == 0.0f &&
 					   quantize_oneval  == 0.0f &&
 					   quantize_minval  == 0.0f &&
@@ -262,6 +288,8 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 					value1 = CLAMP(value1, quantize_minval, quantize_maxval) ;
 					value2 = ROUND(quantize_zeroval + value2 * (quantize_oneval - quantize_zeroval) + dither_val );
 					value2 = CLAMP(value2, quantize_minval, quantize_maxval) ;
+					alpha  = ROUND(quantize_zeroval + alpha * (quantize_oneval - quantize_zeroval) + dither_val );
+					alpha  = CLAMP(alpha, quantize_minval, quantize_maxval) ;
 				}
 				else if ( g_BitsPerSample != 8 )
 				{
@@ -269,11 +297,20 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 					value0 *= 255;
 					value1 *= 255;
 					value2 *= 255;
+					alpha  *= 255;
 				}
 
-				g_Image[ so + 0 ] = static_cast<char>( value0 );
-				g_Image[ so + 1 ] = static_cast<char>( value1 );
-				g_Image[ so + 2 ] = static_cast<char>( value2 );
+				// C’ = INT_PRELERP( A’, B’, b, t )
+				TqInt t;
+				if( alpha > 0 ) 
+				{
+					int A = INT_PRELERP( g_Image[ so + 0 ], value0, alpha, t );
+					int B = INT_PRELERP( g_Image[ so + 1 ], value1, alpha, t );
+					int C = INT_PRELERP( g_Image[ so + 2 ], value2, alpha, t );
+					g_Image[ so + 0 ] = CLAMP( A, 0, 255 );
+					g_Image[ so + 1 ] = CLAMP( B, 0, 255 );
+					g_Image[ so + 2 ] = CLAMP( C, 0, 255 );
+				}
 			}
 			bucket += message->m_ElementSize;
 		}
