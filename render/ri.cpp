@@ -1180,7 +1180,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 				if ( Decl.m_strName == "" )
 					QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_UNKNOWN_SYMBOL );
 				else
-					CqBasicError( ErrorID_InvalidType, Severity_Normal, "Options can only be uniform" );
+					QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_ONLY_UNIFORM_OPTIONS );
 				return ;
 			}
 		}
@@ -1637,7 +1637,7 @@ RtVoid	RiShadingInterpolation( RtToken type )
 		if ( strcmp( type, RI_SMOOTH ) == 0 )
 			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingSmooth;
 		else
-			CqBasicError( ErrorID_InvalidData, Severity_Normal, "Invald shading interpolation" );
+			QGetRenderContext() ->Logger()->error( CqLog::RI_ERROR_TABLE, CqLog::RI_INVALID_SHADING_INTERPOLATION );
 
 	QGetRenderContext() ->AdvanceTime();
 	return ;
@@ -2160,7 +2160,7 @@ RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 				if ( Decl.m_strName == "" )
 					QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_UNKNOWN_SYMBOL );
 				else
-					CqBasicError( ErrorID_InvalidType, Severity_Normal, "Attributes can only be uniform" );
+					QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_ONLY_UNIFORM_ATTRIBUTES );
 				return ;
 			}
 		}
@@ -2260,7 +2260,7 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 			CreateGPrim( pSurface );
 		else
 		{
-			CqBasicError( ErrorID_InvalidData, Severity_Normal, "Degenerate polygon found" );
+			QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_DEGENRATE_POLYGON );
 			pSurface->Release();
 		}
 	}
@@ -3444,17 +3444,17 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 		pFree = new CqConverter( "", dsoname, "Subdivide" );
 
 		if ( ( pvfcts = ( void * ( * ) ( char * ) ) pConvertParameters->Function() ) == NULL )
-			CqBasicError( 0, Severity_Normal, pConvertParameters->ErrorLog() );
+			QGetRenderContext() ->Logger()->error( pConvertParameters->ErrorLog() );
 		else
 			priv = ( *pvfcts ) ( opdata );
 
 		if ( ( vfctpvf = ( void ( * ) ( void *, float ) ) pSubdivide->Function() ) == NULL )
-			CqBasicError( 0, Severity_Normal, pSubdivide->ErrorLog() );
+			QGetRenderContext() ->Logger()->error( pSubdivide->ErrorLog() );
 		else
 			( *vfctpvf ) ( priv, 1.0 );
 
 		if ( ( vfctpv = ( void ( * ) ( void * ) ) pFree->Function() ) == NULL )
-			CqBasicError( 0, Severity_Normal, pFree->ErrorLog() );
+			QGetRenderContext() ->Logger()->error( pFree->ErrorLog() );
 		else
 			( *vfctpv ) ( priv );
 
@@ -3935,7 +3935,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char 
 
 		if ( !fValid )
 		{
-			CqBasicError( ErrorID_InvalidData, Severity_Normal, "RiMakeCubeFaceEnvironment : Images not the same size" );
+			QGetRenderContext() ->Logger()->error( CqLog::RI_ERROR_TABLE, CqLog::RI_MAKE_CUBE_ENV_WRONG_SIZE );
 			return ;
 		}
 
@@ -4233,7 +4233,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			}
 			else
 			{
-				CqBasicError( ErrorID_NonmanifoldSubdivision, Severity_Fatal, "Subdivision Mesh contains non-manifold data" );
+				QGetRenderContext() ->Logger()->error( CqLog::RI_ERROR_TABLE, CqLog::RI_SDS_NONMANIFOLD );
 				// Invalid mesh, delete it.
 				pPointsClass->Release();
 				pSubd2->Release();
@@ -4738,7 +4738,7 @@ static void ProcessCompression( TqInt * compression, TqInt * quality, TqInt coun
 RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 {
 
-	CqBasicError( 0, Severity_Normal, "RiProcDynamicLoad()" );
+	QGetRenderContext() ->Logger()->error( "RiProcDynamicLoad()" );
 }
 
 
@@ -4748,7 +4748,7 @@ RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
 {
 
-	CqBasicError( 0, Severity_Normal, "RiProcDelayedReadArchive()" );
+	QGetRenderContext() ->Logger()->error( "RiProcDelayedReadArchive()" );
 
 }
 
@@ -4759,7 +4759,7 @@ RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
 RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 {
 
-	CqBasicError( 0, Severity_Normal, "RiProcRunProgram()" );
+	QGetRenderContext() ->Logger()->error( "RiProcRunProgram()" );
 }
 
 RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
