@@ -369,9 +369,6 @@ TqBool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqBasicSurfa
 
     TqInt nBuckets = m_cXBuckets * m_cYBuckets;
 
-    if ( pSurface->pCSGNode() )
-        return ( TqFalse );
-
     if ( CqOcclusionBox::CanCull( &RasterBound ) )
     {
         // pSurface is behind everying in this bucket but it may be
@@ -692,6 +689,12 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
         m_CurrentMpgSampleInfo.m_Occludes = TqTrue;
     }
 
+	CqHitTestCache hitTestCache;
+	TqBool cachedHitData = TqFalse;
+
+	// this is true if the mpg shouldn't be occlusion culled.
+	TqBool mustDraw = ( DisplayMode() & ModeZ ) || pMPG->pGrid()->pCSGNode();
+
     for ( TqInt bound_num = 0; bound_num < bound_max ; bound_num++ )
     {
         TqFloat time0;
@@ -704,6 +707,8 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
         TqFloat bmaxx = Bound.vecMax().x();
         TqFloat bminy = Bound.vecMin().y();
         TqFloat bmaxy = Bound.vecMax().y();
+		TqFloat bminz = Bound.vecMin().z();
+		TqFloat bmaxz = Bound.vecMax().z();
 
         // these values are the bound of the mpg not including dof extension.
         // the values above (bminx etc) *do* include dof.
@@ -834,113 +839,123 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
 
             while ( iX < eX )
             {
-                if(iX < mpg_sX)
-                    quadX = -1;
-                else if(iX > mpg_eX)
-                    quadX = 1;
-                else
-                    quadX = 0;
+				// only bother sampling if the mpg is not occluded in this pixel.
+				if(mustDraw || bminz <= pie2->MaxDepth())
+				{
+					if(!cachedHitData)
+					{
+						pMPG->CacheHitTestValues(&hitTestCache);
+						cachedHitData = TqTrue;
+					}
 
-                // Now sample the micropolygon at several subsample positions
-                // within the pixel. The subsample indices range from (start_m, n)
-                // to (end_m-1, end_n-1).
-                register int m, n;
-                n = ( iY == sY ) ? in : 0;
-                int end_n = ( iY == ( eY - 1 ) ) ? en : iYSamples;
-                int start_m = ( iX == sX ) ? im : 0;
-                int end_m = ( iX == ( eX - 1 ) ) ? em : iXSamples;
-                int index_start = n*iXSamples + start_m;
-                for ( ; n < end_n; n++ )
-                {
-                    int index = index_start;
-                    for ( m = start_m; m < end_m; m++ )
-                    {
-                        const SqSampleData& sampleData = pie2->SampleData( index );
-                        const CqVector2D& vecP = sampleData.m_Position;
+					if(iX < mpg_sX)
+						quadX = -1;
+					else if(iX > mpg_eX)
+						quadX = 1;
+					else
+						quadX = 0;
 
-						CqStats::IncI( CqStats::SPL_count );
+					// Now sample the micropolygon at several subsample positions
+					// within the pixel. The subsample indices range from (start_m, n)
+					// to (end_m-1, end_n-1).
+					register int m, n;
+					n = ( iY == sY ) ? in : 0;
+					int end_n = ( iY == ( eY - 1 ) ) ? en : iYSamples;
+					int start_m = ( iX == sX ) ? im : 0;
+					int end_m = ( iX == ( eX - 1 ) ) ? em : iXSamples;
+					int index_start = n*iXSamples + start_m;
+					for ( ; n < end_n; n++ )
+					{
+						int index = index_start;
+						for ( m = start_m; m < end_m; m++ )
+						{
+							const SqSampleData& sampleData = pie2->SampleData( index );
+							const CqVector2D& vecP = sampleData.m_Position;
 
-                        index++;
+							CqStats::IncI( CqStats::SPL_count );
 
-                        TqFloat t;
-                        t = sampleData.m_Time;
-                        if( t < time0 || t > time1)
-                            continue;
+							index++;
 
-                        TqFloat vecX;
-                        TqFloat vecY;
-                        if ( UsingDepthOfField )
-                        {
-                            // check if the offset is pointing away from the mpg.
-                            if(	(sampleData.m_DofOffsetXQuad == quadX) ||
-                                    (sampleData.m_DofOffsetYQuad == quadY) )
-                            {
-                                continue;
-                            }
-                            else
-                            {
-                                CqStats::IncI( CqStats::SPL_bound_hits );
-                                // check if the displaced sample will fall outside the mpg
-                                // if outside in x dimension, don't bother transforming y
-                                vecX = vecP.x() + coc.x()*sampleData.m_DofOffset.x();
-                                if(mpgbminx > vecX || mpgbmaxx < vecX)
-                                {
-                                    continue;
-                                }
-                                else
-                                {
-                                    vecY = vecP.y() + coc.y()*sampleData.m_DofOffset.y();
-                                    if(mpgbminy > vecY || mpgbmaxy < vecY)
-                                        continue;
-                                }
-                            }
-                        }
+							TqFloat t;
+							t = sampleData.m_Time;
+							if( t < time0 || t > time1)
+								continue;
 
-                        // Check to see if the sample is within the sample's level of detail
-                        if ( UsingLevelOfDetail)
-                        {
-                            TqFloat LevelOfDetail = sampleData.m_DetailLevel;
-                            if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
-                            {
-                                continue;
-                            }
-                        }
+							TqFloat vecX;
+							TqFloat vecY;
+							if ( UsingDepthOfField )
+							{
+								// check if the offset is pointing away from the mpg.
+								if(	(sampleData.m_DofOffsetXQuad == quadX) ||
+										(sampleData.m_DofOffsetYQuad == quadY) )
+								{
+									continue;
+								}
+								else
+								{
+									CqStats::IncI( CqStats::SPL_bound_hits );
+									// check if the displaced sample will fall outside the mpg
+									// if outside in x dimension, don't bother transforming y
+									vecX = vecP.x() + coc.x()*sampleData.m_DofOffset.x();
+									if(mpgbminx > vecX || mpgbmaxx < vecX)
+									{
+										continue;
+									}
+									else
+									{
+										vecY = vecP.y() + coc.y()*sampleData.m_DofOffset.y();
+										if(mpgbminy > vecY || mpgbmaxy < vecY)
+											continue;
+									}
+								}
+							}
 
-                        if ( !UsingDepthOfField ) // already checked this if we're using dof.
-                        {
-                            if(!Bound.Contains2D( vecP ))
-                                continue;
-                        }
+							// Check to see if the sample is within the sample's level of detail
+							if ( UsingLevelOfDetail)
+							{
+								TqFloat LevelOfDetail = sampleData.m_DetailLevel;
+								if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
+								{
+									continue;
+								}
+							}
 
-                        CqStats::IncI( CqStats::SPL_bound_hits );
+							if ( !UsingDepthOfField ) // already checked this if we're using dof.
+							{
+								if(!Bound.Contains2D( vecP ))
+									continue;
+							}
+
+							CqStats::IncI( CqStats::SPL_bound_hits );
 
 
-                        // Now check if the subsample hits the micropoly
-                        TqBool SampleHit;
-                        TqFloat D;
+							// Now check if the subsample hits the micropoly
+							TqBool SampleHit;
+							TqFloat D;
 
-                        if( UsingDepthOfField )
-                        {
-                            CqVector2D vecPDof(vecX, vecY);
-                            SampleHit = pMPG->Sample( vecPDof, D, t );
-                        }
-                        else
-                        {
-                            SampleHit = pMPG->Sample( vecP, D, t );
-                        }
+							if( UsingDepthOfField )
+							{
+								CqVector2D vecPDof(vecX, vecY);
+								SampleHit = pMPG->Sample( vecPDof, D, t );
+							}
+							else
+							{
+								SampleHit = pMPG->Sample( vecP, D, t );
+							}
 
-                        if ( SampleHit )
-                        {
-                            CqStats::IncI( CqStats::SPL_hits );
-                            pMPG->MarkHit();
+							if ( SampleHit )
+							{
+								CqStats::IncI( CqStats::SPL_hits );
+								pMPG->MarkHit();
 
-                            sample_hits++;
+								sample_hits++;
 
-                            StoreSample( pMPG, pie2, m, n, D );
-                        }
-                    }
-                    index_start += iXSamples;
-                }
+								StoreSample( pMPG, pie2, m, n, D );
+							}
+						}
+						index_start += iXSamples;
+					}
+				}
                 iX++;
                 pie2++;
 
@@ -1146,7 +1161,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
         if ( fDiceable )
         {
             //Cull surface if it's hidden
-            if ( !( DisplayMode() & ModeZ ) )
+            if ( !( DisplayMode() & ModeZ ) && !pSurface->pCSGNode() )
             {
                 QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
                 TqBool fCull = TqFalse;

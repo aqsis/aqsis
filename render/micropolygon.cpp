@@ -983,7 +983,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
 /** Default constructor
  */
 
-CqMicroPolygon::CqMicroPolygon() : m_pGrid( 0 ), m_Flags( 0 )
+CqMicroPolygon::CqMicroPolygon() : m_pGrid( 0 ), m_Flags( 0 ), m_pHitTestCache( 0 )
 {
     STATS_INC( MPG_allocated );
     STATS_INC( MPG_current );
@@ -1100,15 +1100,15 @@ void CqMicroPolygon::Initialise()
 
 TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
 {
-    // Check against each line of the quad, if outside any then point is outside MPG, therefore early exit.
+/*    // Check against each line of the quad, if outside any then point is outside MPG, therefore early exit.
     const CqVector3D& pA = PointA();
     const CqVector3D& pB = PointB();
     TqFloat x = vecP.x(), y = vecP.y();
     TqFloat x0 = pA.x(), y0 = pA.y(), x1 = pB.x(), y1 = pB.y();
-    if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
+    if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
     const CqVector3D& pC = PointC();
     x0 = x1; y0 = y1; x1 = pC.x(); y1 = pC.y();
-    if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
+    if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
 
     // Check for degeneracy.
     if ( !( IsDegenerate() ) )
@@ -1132,8 +1132,90 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
     Depth = ( D - ( vecN.x() * vecP.x() ) - ( vecN.y() * vecP.y() ) ) / vecN.z();
 
     return ( TqTrue );
+*/
+
+	// AGG - optimised version of above.
+	TqFloat x = vecP.x(), y = vecP.y();
+
+	// start with the edge that failed last time to get the most benefit
+	// from an early exit.
+	int e = m_pHitTestCache->m_LastFailedEdge;
+	for(int i=0; i<4; ++i)
+	{
+		// test which side of the edge the sample point lies.
+		// the first two edges are tested with <= and the second two with <
+		// this is so every sample point lies on exactly one side of the edge,
+		// ie if it is exactly coincident with the edge it can't be on both
+		// or neither sides.
+		if(e & 2)
+		{
+			if( (( y - m_pHitTestCache->m_Y[e]) * m_pHitTestCache->m_YMultiplier[e] ) -
+					(( x - m_pHitTestCache->m_X[e]) * m_pHitTestCache->m_XMultiplier[e] ) < 0)
+			{
+				m_pHitTestCache->m_LastFailedEdge = e;
+				return TqFalse;
+			}
+		}
+		else
+		{
+			if( (( y - m_pHitTestCache->m_Y[e]) * m_pHitTestCache->m_YMultiplier[e] ) -
+					(( x - m_pHitTestCache->m_X[e]) * m_pHitTestCache->m_XMultiplier[e] ) <= 0)
+			{
+				m_pHitTestCache->m_LastFailedEdge = e;
+				return TqFalse;
+			}
+		}
+
+		// move to next edge, wrapping to zero at four.
+		e = (e+1) & 3;
+	}
+
+	Depth = ( m_pHitTestCache->m_D - ( m_pHitTestCache->m_VecN.x() * vecP.x() ) -
+			( m_pHitTestCache->m_VecN.y() * vecP.y() ) ) * m_pHitTestCache->m_OneOverVecNZ;
+
+	return TqTrue;
 }
 
+//---------------------------------------------------------------------
+/** Cache some values needed for the point in poly test.
+ * This must be called prior to calling fContains() on a mpg.
+ */
+
+void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache)
+{
+	m_pHitTestCache = cache;
+	const CqVector3D points[4] = { PointB(), PointC(), PointD(), PointA() } ;
+
+	int j = 3;
+	for(int i=0; i<4; ++i)
+	{
+		cache->m_YMultiplier[i] = points[i].x() - points[j].x();
+		cache->m_XMultiplier[i] = points[i].y() - points[j].y();
+		cache->m_X[i] = points[j].x();
+		cache->m_Y[i] = points[j].y();
+		j = i;
+	}
+
+	// if the mpg is degenerate then we repeat edge c=>a so we still have four
+	// edges (it makes the test in fContains() simpler).
+	if(IsDegenerate())
+	{
+		for(int i=2; i<4; ++i)
+		{
+			cache->m_YMultiplier[i] = points[3].x() - points[1].x();
+			cache->m_XMultiplier[i] = points[3].y() - points[1].y();
+			cache->m_X[i] = points[1].x();
+			cache->m_Y[i] = points[1].y();
+		}
+	}
+
+	cache->m_VecN = (points[3] - points[0]) % (points[1] - points[0]);
+	cache->m_VecN.Unit();
+	cache->m_D = cache->m_VecN * points[3];
+	cache->m_OneOverVecNZ = 1.0 / cache->m_VecN.z();
+
+	cache->m_LastFailedEdge = 0;
+}
 
 CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
 {
@@ -1536,12 +1618,12 @@ TqBool CqMicroPolygonMotion::fContains( const CqVector2D& vecP, TqFloat& Depth, 
                 y1 = ( F1 * pMP1->m_Point1.y() ) + ( Fraction * pMP2->m_Point1.y() );
         TqFloat x0_hold = x0;
         TqFloat y0_hold = y0;
-        if ( ( r1 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
+        if ( ( r1 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
         x0 = x1;
         y0 = y1;
         x1 = ( F1 * pMP1->m_Point2.x() ) + ( Fraction * pMP2->m_Point2.x() );
         y1 = ( F1 * pMP1->m_Point2.y() ) + ( Fraction * pMP2->m_Point2.y() );
-        if ( ( r2 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
+        if ( ( r2 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
         x0 = x1;
         y0 = y1;
         x1 = ( F1 * pMP1->m_Point3.x() ) + ( Fraction * pMP2->m_Point3.x() );
