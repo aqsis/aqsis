@@ -91,3 +91,4 @@ class CqMessageTable
 END_NAMESPACE( Aqsis )
 
 #endif
+

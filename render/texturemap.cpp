@@ -38,7 +38,7 @@
 
 #include	"renderer.h"
 #ifdef		PLUGINS
-#include	"plugins.h"
+#include	"converter.h"
 #endif
 
 #ifndef		AQSIS_SYSTEM_WIN32
@@ -281,7 +281,7 @@ TqInt CqTextureMap::Convert( CqString &strName )
 	/***********************************/
 	sprintf( library, "%s/lib/lib%s.so", aqsis_home, function );
 #endif
-	CqPlugins *plug = new CqPlugins( "", library, function );
+	CqConverter *plug = new CqConverter( "", library, function );
 	if ( ( convert = ( char * ( * ) ( char * s ) ) plug->Function() ) != NULL )
 	{
 

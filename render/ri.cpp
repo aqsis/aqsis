@@ -49,7 +49,7 @@
 #include	"curves.h"
 #include	"rifile.h"
 #include	"librib2ri.h"
-#include	"plugins.h"
+#include	"converter.h"
 #include	"shadervm.h"
 
 #include	"subdivision2.h"
@@ -3500,9 +3500,10 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 	else if ( refineproc == RiProcDynamicLoad )
 	{
 
-		CqPlugins * pConvertParameters;
-		CqPlugins *pFree;
-		CqPlugins *pSubdivide;
+		// TODO: We need a custom class for handling RiProcDunamicLoad
+		CqConverter * pConvertParameters;
+		CqConverter *pFree;
+		CqConverter *pSubdivide;
 		void *( *pvfcts ) ( char * );
 		void ( *vfctpvf ) ( void *, float );
 		void ( *vfctpv ) ( void * );
@@ -3529,9 +3530,9 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 		// or hopefully relies on the fact the dll/.so is local to this .rib file
 		// later it should use the "searchpath" "procedure" standard options
 
-		pConvertParameters = new CqPlugins( "", dsoname, "ConvertParameters" );
-		pSubdivide = new CqPlugins( "", dsoname, "Free" );
-		pFree = new CqPlugins( "", dsoname, "Subdivide" );
+		pConvertParameters = new CqConverter( "", dsoname, "ConvertParameters" );
+		pSubdivide = new CqConverter( "", dsoname, "Free" );
+		pFree = new CqConverter( "", dsoname, "Subdivide" );
 
 		if ( ( pvfcts = ( void * ( * ) ( char * ) ) pConvertParameters->Function() ) == NULL )
 			CqBasicError( 0, Severity_Normal, pConvertParameters->ErrorLog() );

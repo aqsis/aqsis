@@ -934,7 +934,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 		{
 			m_aValues.resize( From.m_aValues.size() );
 			TqInt i2 = 0;
-			for ( std::vector<T>::iterator i = From.m_aValues.being(); i != From.m_aValues.end(); i++, i2++ )
+			for (typename  std::vector<T>::iterator i = From.m_aValues.begin(); i != From.m_aValues.end(); i++, i2++ )
 				m_aValues[ i2 ] = ( *i );
 			return ( *this );
 		}
@@ -1040,7 +1040,7 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 		{
 			m_aValues.resize( From.m_aValues.size() );
 			TqInt i2 = 0;
-			for ( std::vector<T>::iterator i = From.m_aValues.being(); i != From.m_aValues.end(); i++, i2++ )
+			for ( typename std::vector<T>::iterator i = From.m_aValues.being(); i != From.m_aValues.end(); i++, i2++ )
 				m_aValues[ i2 ] = ( *i );
 			return ( *this );
 		}

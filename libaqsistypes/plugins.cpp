@@ -19,7 +19,7 @@
 
 
 /** \file
-		\brief Implements CqPlugins plugin loader/deloader for textures/riprocedural/shared objects for shaders
+		\brief Implements CqPluginBase plugin loader/deloader for textures/riprocedural/shared objects for shaders
 		\author Michel Joron (joron@sympatico.ca)
 */
 
@@ -70,7 +70,7 @@ START_NAMESPACE( Aqsis )
  * and POSIX etc.
  */
 void *
-CqPlugins::DLOpen(CqString *library)
+CqPluginBase::DLOpen(CqString *library)
 {
   	void *handle = NULL;
 
@@ -89,11 +89,12 @@ CqPlugins::DLOpen(CqString *library)
 #endif
 
 #endif
+	if (handle) m_activeHandles.push_back(handle);
 	return handle;
 }
 
 void *
-CqPlugins::DLSym(void *handle, CqString *symbol )
+CqPluginBase::DLSym(void *handle, CqString *symbol )
 {
 	void *location = NULL;
 
@@ -121,7 +122,7 @@ CqPlugins::DLSym(void *handle, CqString *symbol )
 }
 
 void
-CqPlugins::DLClose(void *handle)
+CqPluginBase::DLClose(void *handle)
 {
 #ifdef	PLUGINS
 	if ( handle )
@@ -141,129 +142,51 @@ CqPlugins::DLClose(void *handle)
 		dlclose( handle );
 #endif
 	};
+	m_activeHandles.remove(handle);
 #endif
 }
 
-//---------------------------------------------------------------------
-/** Constructor.
- * Set up the search path, library (.dll, .dso, .so) name, and function name
- */
-CqPlugins::CqPlugins( char *searchpath, char *library, char *function )
+CqPluginBase::~CqPluginBase()
 {
-	errorlog = "" ;
-	dynamicsearch = searchpath ;
-	dynamiclibrary =  library ;
-#if   defined (AQSIS_SYSTEM_WIN32)
-	dynamicfunction =  function ;
-#elif defined (AQSIS_SYSTEM_MACOSX) 
-	// For Mac OS X, define MACOSX_NO_LIBDL if libdl not installed
-#ifndef MACOSX_NO_LIBDL
-	dynamicfunction = "_" + function ;
-#endif
-#else
-	dynamicfunction = function ;
-#endif
-	handle = NULL;
-}
+	std::list<void*>::iterator i_handle;
 
-//---------------------------------------------------------------------
-/** Main function to call!
- * return the function pointer based on the construction information 
- * if possible otherwise it returns NULL;
- * If the return value is NULL you could call ErrorLog() to get a string
- * explaining why it failed earlier.
- */
-void *CqPlugins::Function()
+	if (!m_activeHandles.empty())
+		for (i_handle=m_activeHandles.begin() ; i_handle != m_activeHandles.end() ; i_handle++)
+			DLClose(*i_handle);
+};
+
+
+const CqString
+CqPluginBase::DLError(void)
 {
-	void * function_pt = NULL;
-
+	CqString errorlog;
 #ifdef	PLUGINS
-	if ( !handle )
-		handle = ( void* ) DLOpen ( &dynamiclibrary ) ;
-
-	if ( handle )
-	{
-		function_pt = ( void * ) DLSym(handle, &dynamicfunction );
-		if ( function_pt == NULL )
-		{
 #ifdef AQSIS_SYSTEM_WIN32
-			LPVOID lpMsgBuf;
-			FormatMessage(
-			    FORMAT_MESSAGE_ALLOCATE_BUFFER |
-			    FORMAT_MESSAGE_FROM_SYSTEM |
-			    FORMAT_MESSAGE_IGNORE_INSERTS,
-			    NULL,
-			    GetLastError(),
-			    MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),  // Default language
-			    ( LPTSTR ) & lpMsgBuf,
-			    0,
-			    NULL
-			);
-			// Process any inserts in lpMsgBuf.
-			// ...
-			// Display the string.
-			errorlog = dynamicfunction + "(): " + (CqString) ( LPCTSTR ) lpMsgBuf ;
+	LPVOID lpMsgBuf;
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM |
+		FORMAT_MESSAGE_IGNORE_INSERTS,
+		NULL,
+		GetLastError(),
+		MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),  // Default language
+		( LPTSTR ) & lpMsgBuf,
+		0,
+		NULL
+	);
+	// Process any inserts in lpMsgBuf.
+	// ...
+	// Display the string.
+	errorlog = (CqString) ( LPCTSTR ) lpMsgBuf ;
 
-			// Free the buffer.
-			LocalFree( lpMsgBuf );
+	// Free the buffer.
+ 	LocalFree( lpMsgBuf );
 #else
-			errorlog = dynamicfunction + "(): " +  dlerror() ;
+        errorlog = dlerror() ;
 #endif
-		}
-	}
-	else
-	{
-#ifdef AQSIS_SYSTEM_WIN32
-		LPVOID lpMsgBuf;
-		FormatMessage(
-		    FORMAT_MESSAGE_ALLOCATE_BUFFER |
-		    FORMAT_MESSAGE_FROM_SYSTEM |
-		    FORMAT_MESSAGE_IGNORE_INSERTS,
-		    NULL,
-		    GetLastError(),
-		    MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ),  // Default language
-		    ( LPTSTR ) & lpMsgBuf,
-		    0,
-		    NULL
-		);
-		// Process any inserts in lpMsgBuf.
-		// ...
-		// Display the string.
-		errorlog = dynamiclibrary + (CqString) ( LPCTSTR ) lpMsgBuf ;
 
-		// Free the buffer.
-		LocalFree( lpMsgBuf );
-#else
-		errorlog =  dynamiclibrary + "  " + dlerror();
 #endif
-	};
-
-#endif //PLUGINS
-
-	return function_pt;
-}
-
-//---------------------------------------------------------------------
-/** Return the current log in case of error occurred in Function();
- *  the string comes from the OS.
- */
-const char * CqPlugins::ErrorLog()
-{
-	return errorlog.c_str();
-}
-//---------------------------------------------------------------------
-/** Close and unload the .dll, .dso, .so
- */
-void CqPlugins::Close()
-{
-
-#ifdef	PLUGINS
-	if ( handle )
-		DLClose( handle );
-
-	handle = NULL;
-#endif //PLUGINS
-
+	return errorlog;
 }
 
 END_NAMESPACE( Aqsis )
