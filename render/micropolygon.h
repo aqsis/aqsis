@@ -47,6 +47,7 @@ START_NAMESPACE(Aqsis)
 class CqVector3D;
 class CqImageBuffer;
 class CqSurface;
+class CqAttributes;
 
 //----------------------------------------------------------------------
 /** \class CqMicroPolyGridBase
@@ -82,6 +83,8 @@ class CqMicroPolyGridBase
 					 * \return Pointer to surface, only valid during grid shading.
 					 */
 	virtual CqSurface*	pSurface() const=0;
+
+	virtual	CqAttributes* pAttributes() const=0;
 	private:
 };
 
@@ -127,10 +130,12 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqShaderExecEnv
 					 * \return Surface pointer, only valid during shading.
 					 */
 	virtual CqSurface*	pSurface() const	{return(CqShaderExecEnv::pSurface());}
+	virtual	CqAttributes* pAttributes() const	{return(m_pAttributes);}
 
 	private:
 			TqBool	m_fNormals;			///< Flag indicating normals have been filled in and don't need to be calculated during shading.
 			TqInt	m_cReferences;		///< Count of references to this grid.
+			CqAttributes* m_pAttributes;	///< Pointer to the attributes for this grid.
 };
 
 
@@ -155,6 +160,8 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 					 * \return Surface pointer, only valid during shading.
 					 */
 	virtual CqSurface*	pSurface() const	{return(static_cast<CqMicroPolyGrid*>(GetMotionObject(Time(0)))->pSurface());}
+
+	virtual CqAttributes* pAttributes() const	{return(static_cast<CqMicroPolyGrid*>(GetMotionObject(Time(0)))->pAttributes());}
 
 	virtual		void		ClearMotionObject(CqMicroPolyGridBase*& A) const	{}
 					/** Overridden from CqMotionSpec, does nothing.
@@ -307,6 +314,7 @@ class CqMicroPolygonStaticBase
 			void	Initialise(const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD);
 			TqBool	fContains(const CqVector2D& vecP, TqFloat& Depth);
 			CqMicroPolygonStaticBase&	LinearInterpolate(TqFloat Fraction, const CqMicroPolygonStaticBase& MPA, const CqMicroPolygonStaticBase& MPB);
+			CqVector2D ReverseBilinear(CqVector2D& v);
 
 	protected:
 			CqVector3D	m_vecPoints[4];		///< Array of 4 3D vectors representing the micropoly.
@@ -323,10 +331,12 @@ class CqMicroPolygonStaticBase
 class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonStaticBase, public CqPoolable<CqMicroPolygonStatic>
 {
 	public:
-					CqMicroPolygonStatic() : CqMicroPolygonBase(), CqMicroPolygonStaticBase()
+					CqMicroPolygonStatic() : CqMicroPolygonBase(), CqMicroPolygonStaticBase(), m_fTrimmed(TqFalse)
 										{}
 					CqMicroPolygonStatic(const CqMicroPolygonStatic& From) : CqMicroPolygonBase(From), CqMicroPolygonStaticBase(From)
-										{}
+										{
+											m_fTrimmed = From.m_fTrimmed;
+										}
 
 					/** Overridden operator new to allocate micropolys from a pool.
 					 */
@@ -351,12 +361,16 @@ class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonSta
 					 * \return CqBound representing the conservative bound.
 					 */
 	virtual const CqBound&	Bound() const	{return(m_Bound);}
+
+	virtual void		MarkTrimmed()		{m_fTrimmed = TqTrue;}
+
 	virtual CqBoundList& BoundList();
 	virtual	TqBool	Sample(CqVector2D& vecSample, TqFloat time, TqFloat& D);
 	
 	private:
 			CqBound		m_Bound;		///< Stored bound.
 			CqBoundList	m_BoundList;	///< Bound as a (single element) list
+			TqBool		m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
 	
 	static	CqMemoryPool<CqMicroPolygonStatic>	m_thePool;	///< Static pool to allocated micropolys from.
 };

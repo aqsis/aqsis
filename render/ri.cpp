@@ -41,6 +41,7 @@
 #include	"shaders.h"
 #include	"texturemap.h"
 #include	"messages.h"
+#include	"trimcurve.h"
 
 #include	"ri.h"
 
@@ -2491,13 +2492,61 @@ RtVoid	RiNuPatchV(RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat
 }
 
 
+#include <strstream>
+
 //----------------------------------------------------------------------
 // RiTrimCurve
 // Specify curves which are used to trim NURBS surfaces.
 //
 RtVoid	RiTrimCurve(RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[])
 {
-	CqBasicError(0,Severity_Normal,"RiTrimCurve not supported");
+	// Clear the current loop array.
+	delete(QGetRenderContext()->pattrWriteCurrent()->pTrimLoops());
+
+	// Build an array of curves per specified loop.
+	TqInt in=0;
+	TqInt iorder=0;
+	TqInt iknot=0;
+	TqInt ivert=0;
+	TqInt iloop;
+
+	CqTrimLoopArray* pTrimLoops = new CqTrimLoopArray();
+	for(iloop=0; iloop<nloops; iloop++)
+	{
+		CqTrimLoop Loop;
+		TqInt icurve;
+		for(icurve=0; icurve<ncurves[iloop]; icurve++)
+		{
+			// Create a NURBS patch
+			CqTrimCurve Curve;
+			TqInt o=order[iorder++];
+			TqInt cverts=n[in++];
+			Curve.Init(o, cverts);
+
+			// Copy the knot vectors.
+			RtInt i;
+			for(i=0; i<o+cverts; i++)	Curve.aKnots()[i]=knot[iknot++];
+
+			// Copy the vertices from the u,v,w arrays.
+			CqVector4D vec(0,0,0,1);
+			for(i=0; i<cverts; i++)
+			{
+				vec.x(u[ivert  ]);
+				vec.y(v[ivert  ]);
+				vec.z(0.0f      );
+				vec.h(w[ivert++]);
+				Curve.CP(i)=vec;
+			}
+			Loop.aCurves().push_back(Curve);
+			std::strstream name;
+			name << "Curve" << icurve << "-" << iloop << ".crv" << std::ends;
+			Curve.Output(name.str());
+		}
+		pTrimLoops->aLoops().push_back(Loop);
+	}
+	QGetRenderContext()->pattrWriteCurrent()->SetpTrimLoops(pTrimLoops);
+	pTrimLoops->Prepare();
+
 	return(0);
 }
 

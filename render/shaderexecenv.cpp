@@ -65,7 +65,7 @@ char*		CqShaderExecEnv::m_apVariableNames[EnvVars_Last]=
 
 
 // TODO: See if we can reduce these default requires further!
-TqInt	gDefUses=(1<<EnvVars_P)|(1<<EnvVars_I)|(1<<EnvVars_N)|(1<<EnvVars_Ng)|(1<<EnvVars_L)|(1<<EnvVars_Cl)|(1<<EnvVars_Ci)|(1<<EnvVars_Oi);
+TqInt	gDefUses=(1<<EnvVars_P)|(1<<EnvVars_I)|(1<<EnvVars_N)|(1<<EnvVars_Ng)|(1<<EnvVars_L)|(1<<EnvVars_Cl)|(1<<EnvVars_Ci)|(1<<EnvVars_Oi)|(1<<EnvVars_u)|(1<<EnvVars_v);
 TqInt	gDefLightUses=(1<<EnvVars_P)|(1<<EnvVars_L)|(1<<EnvVars_Ps);
 
 //----------------------------------------------------------------------

@@ -53,6 +53,7 @@ enum EqOrientation
 
 class CqLightsource;
 class CqShader;
+class CqTrimLoopArray;
 
 //-----------------------------------------------------------------------
 /**
@@ -240,9 +241,11 @@ class CqGeometricAttributes
 													m_eOrientation(OrientationLH),
 													m_eCoordsysOrientation(OrientationLH),
 													m_iNumberOfSides(2),
-													m_pshadDisplacement(0)
+													m_pshadDisplacement(0),
+													m_pTrimLoops(0)
 													{}
-	virtual				~CqGeometricAttributes()	{}
+						CqGeometricAttributes(CqGeometricAttributes& From);
+	virtual				~CqGeometricAttributes();
 
 			
 						/** Get the current geometric bound.
@@ -410,7 +413,16 @@ class CqGeometricAttributes
 						 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
 						 */
 			void		SetpshadDisplacement(CqShader* pshadDisplacement,TqFloat time=0.0f)
-												{m_pshadDisplacement=pshadDisplacement;}
+													{m_pshadDisplacement=pshadDisplacement;}
+						/** Get the array of trim curve loops.
+						 *	\return A pointer to the trim loops array object.
+						 */
+			CqTrimLoopArray* pTrimLoops() const		{return(m_pTrimLoops);}
+						/** Set the array of trim curve loops.
+						 *	\param A pointer to the trim loops array object.
+						 */
+			void		SetpTrimLoops(CqTrimLoopArray* pTrimLoops)			
+													{m_pTrimLoops=pTrimLoops;}
 
 	protected:
 			CqBound		m_Bound;							///< the bound used for any associated primitives.
@@ -428,6 +440,7 @@ class CqGeometricAttributes
 			EqOrientation	m_eCoordsysOrientation;			///< the orientation of the current coordinate system.
 			TqInt		m_iNumberOfSides;					///< the number of visible sides associated primitives have.
 			CqShader*	m_pshadDisplacement;				///< a pointer to the current displacement shader.
+			CqTrimLoopArray* m_pTrimLoops;					///< the array of closed trimcurve loops.
 };
 
 

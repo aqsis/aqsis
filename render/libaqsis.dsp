@@ -211,6 +211,10 @@ SOURCE=.\texturemap.cpp
 
 SOURCE=.\transform.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\trimcurve.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -358,6 +362,10 @@ SOURCE=.\texturemap.h
 # Begin Source File
 
 SOURCE=.\transform.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\trimcurve.h
 # End Source File
 # Begin Source File
 

@@ -32,6 +32,7 @@
 #include	"surface.h"
 #include	"lights.h"
 #include	"shaders.h"
+#include	"trimcurve.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -43,7 +44,7 @@ CqMemoryPool<CqMicroPolygonStatic>	CqMicroPolygonStatic::m_thePool;
 /** Default constructor
  */
 
-CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(), m_fNormals(TqFalse), m_cReferences(0)
+CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(), m_fNormals(TqFalse), m_cReferences(0), m_pAttributes(0)
 {
 	QGetRenderContext()->Stats().IncGridsAllocated();
 }
@@ -57,13 +58,17 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
 {
 	assert(m_cReferences==0);
 	QGetRenderContext()->Stats().IncGridsDeallocated();
+	
+	// Release the reference to the attributes.
+	if(m_pAttributes!=0)	m_pAttributes->UnReference();
+	m_pAttributes=0;
 }
 
 //---------------------------------------------------------------------
 /** Constructor
  */
 
-CqMicroPolyGrid::CqMicroPolyGrid(TqInt cu, TqInt cv, CqSurface* pSurface) : m_fNormals(TqFalse), m_cReferences(0)
+CqMicroPolyGrid::CqMicroPolyGrid(TqInt cu, TqInt cv, CqSurface* pSurface) : m_fNormals(TqFalse), m_cReferences(0), m_pAttributes(0)
 {
 	QGetRenderContext()->Stats().IncGridsAllocated();
 	// Initialise the shader execution environment
@@ -83,7 +88,11 @@ void CqMicroPolyGrid::Initialise(TqInt cu, TqInt cv, CqSurface* pSurface)
 	// Initialise the shader execution environment
 	TqInt lUses=-1;
 	if(pSurface)	
+	{
 		lUses=pSurface->Uses();
+		m_pAttributes=const_cast<CqAttributes*>(pSurface->pAttributes());
+		m_pAttributes->Reference();
+	}
 
 	CqShaderExecEnv::Initialise(cu,cv,pSurface,lUses);
 
@@ -275,8 +284,8 @@ void CqMicroPolyGrid::Shade()
 	DeleteVariable(EnvVars_dPdu);
 	DeleteVariable(EnvVars_dPdv);
 	DeleteVariable(EnvVars_N);
-	DeleteVariable(EnvVars_u);
-	DeleteVariable(EnvVars_v);
+//	DeleteVariable(EnvVars_u);
+//	DeleteVariable(EnvVars_v);
 	DeleteVariable(EnvVars_s);
 	DeleteVariable(EnvVars_t);
 	DeleteVariable(EnvVars_I);
@@ -351,16 +360,41 @@ void CqMicroPolyGrid::Split(CqImageBuffer* pImage, TqInt iBucket, long xmin, lon
 		TqInt iu;
 		for(iu=0; iu<cu; iu++)
 		{
+			TqInt iIndex=GridI();
+
 			// If culled, ignore it
  			if(m_vfCulled)
 			{
 				Advance();
 				continue;
 			}
+
+			// If the MPG is trimmed then don't add it.
+			TqBool fTrimmed = TqFalse;
+			if(pAttributes()->pTrimLoops()!=0)
+			{
+				TqBool fTrimA = pAttributes()->pTrimLoops()->TrimPoint(CqVector2D(u()[iIndex     ],v()[iIndex     ]));
+				TqBool fTrimB = pAttributes()->pTrimLoops()->TrimPoint(CqVector2D(u()[iIndex+1   ],v()[iIndex+1   ]));
+				TqBool fTrimC = pAttributes()->pTrimLoops()->TrimPoint(CqVector2D(u()[iIndex+cu+2],v()[iIndex+cu+2]));
+				TqBool fTrimD = pAttributes()->pTrimLoops()->TrimPoint(CqVector2D(u()[iIndex+cu+2],v()[iIndex+cu+2]));
+
+				// If al points are trimmed discard the MPG
+				if(fTrimA && fTrimB && fTrimC && fTrimD)
+				{
+					Advance();
+					continue;
+				}
+
+				// If any points are trimmed mark the MPG as needing to be trim checked.
+				//fTrimmed = fTrimA || fTrimB || fTrimC || fTrimD;
+				if(fTrimA || fTrimB || fTrimC || fTrimD)
+					fTrimmed = TqTrue;
+			}
+			
 			CqMicroPolygonStatic *pNew=new CqMicroPolygonStatic();
 			pNew->SetGrid(this);
-			TqInt iIndex=GridI();
 			pNew->SetIndex(iIndex);
+			if(fTrimmed)	pNew->MarkTrimmed();
 			pNew->Initialise(P()[iIndex], P()[iIndex+1], P()[iIndex+cu+2], P()[iIndex+cu+1]);
 			pNew->Bound(TqTrue);
 			pImage->AddMPG(pNew);
@@ -594,6 +628,53 @@ CqMicroPolygonStaticBase& CqMicroPolygonStaticBase::LinearInterpolate(TqFloat Fr
 	return(*this);
 }
 
+
+CqVector2D CqMicroPolygonStaticBase::ReverseBilinear(CqVector2D& v)
+{
+    CqVector2D kA,kB,kC,kD;
+
+	kA = CqVector2D(m_vecPoints[0]);
+	kB = CqVector2D(m_vecPoints[1]) - kA;
+	kC = CqVector2D(m_vecPoints[3]) - kA;
+	kD = CqVector2D(m_vecPoints[2]) + kA - CqVector2D(m_vecPoints[1]) - CqVector2D(m_vecPoints[3]);
+
+    TqFloat fBCdet = kB.x()*kC.y() - kB.y()*kC.x();
+    TqFloat fCDdet = kC.y()*kD.x() - kC.x()*kD.y();
+
+	CqVector2D kDiff = kA - v;
+    TqFloat fABdet = kDiff.y()*kB.x()-kDiff.x()*kB.y();
+    TqFloat fADdet = kDiff.y()*kD.x()-kDiff.x()*kD.y();     
+	TqFloat fA = fCDdet;
+    TqFloat fB = fADdet + fBCdet;
+    TqFloat fC = fABdet;     
+	CqVector2D kResult;     
+	
+	if(fabs(fA) >= 1.0e-6)
+    {
+        // t-equation is quadratic
+        TqFloat fDiscr = sqrt(fabs(fB*fB-4.0f*fA*fC));
+        kResult.y((-fB + fDiscr)/(2.0f*fA));
+        if(kResult.y() < 0.0f || kResult.y() > 1.0f )
+        {
+            kResult.y((-fB - fDiscr)/(2.0f*fA));
+            if(kResult.y() < 0.0f || kResult.y() > 1.0f)
+            {
+                // point p not inside quadrilateral, return invalid result
+                return(CqVector2D(-1.0f,-1.0f));
+            }
+        }
+    }
+    else
+    {
+        // t-equation is linear
+        kResult.y(-fC/fB);
+    }     
+	kResult.x(-(kDiff.x() + kResult.y() * kC.x())/(kB.x() + kResult.y() * kD.x()));     
+	
+	return(kResult);
+}
+
+
 //---------------------------------------------------------------------
 /** Calculate the 2D boundary of this micropolygon,
  */
@@ -629,7 +710,24 @@ CqBound CqMicroPolygonStaticBase::Bound() const
 TqBool CqMicroPolygonStatic::Sample(CqVector2D& vecSample, TqFloat time, TqFloat& D)
 {
 	if(fContains(vecSample, D))
+	{
+		// Now check if it is trimmed.
+		if(m_fTrimmed)
+		{
+			CqVector2D vecUV = ReverseBilinear(vecSample);
+
+			CqVector2D uvA(pGrid()->u()[m_Index],pGrid()->v()[m_Index]);
+			CqVector2D uvB(pGrid()->u()[m_Index+1],pGrid()->v()[m_Index+1]);
+			CqVector2D uvC(pGrid()->u()[m_Index+pGrid()->uGridRes()+1],pGrid()->v()[m_Index+pGrid()->uGridRes()+1]);
+			CqVector2D uvD(pGrid()->u()[m_Index+pGrid()->uGridRes()+2],pGrid()->v()[m_Index+pGrid()->uGridRes()+2]);
+
+			CqVector2D vR = BilinearEvaluate(uvA,uvB,uvC,uvD,vecUV.x(),vecUV.y());
+
+			if(pGrid()->pAttributes()->pTrimLoops()->TrimPoint(vR))
+				return(TqFalse);
+		}
 		return(TqTrue);
+	}
 	else
 		return(TqFalse);
 }

@@ -28,6 +28,7 @@
 #include	"attributes.h"
 #include	"renderer.h"
 #include	"shaders.h"
+#include	"trimcurve.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -60,6 +61,38 @@ CqShadingAttributes::CqShadingAttributes() :
 	// Use a default surface shader in case one isn't specified.
 	SetpshadSurface(&StandardSurface);
 }
+
+
+//---------------------------------------------------------------------
+/** Copy constructor.
+ */
+CqGeometricAttributes::CqGeometricAttributes(CqGeometricAttributes& From) :	
+							m_Bound(From.m_Bound),
+							m_fDetailRangeMinVisible(From.m_fDetailRangeMinVisible),
+							m_fDetailRangeLowerTransition(From.m_fDetailRangeLowerTransition),
+							m_fDetailRangeUpperTransition(From.m_fDetailRangeUpperTransition),
+							m_fDetailRangeMaxVisible(From.m_fDetailRangeMaxVisible),
+							m_matuBasis(From.m_matuBasis),
+							m_matvBasis(From.m_matvBasis),
+							m_uSteps(From.m_uSteps),
+							m_vSteps(From.m_vSteps),
+							m_eOrientation(From.m_eOrientation),
+							m_eCoordsysOrientation(From.m_eCoordsysOrientation),
+							m_iNumberOfSides(From.m_iNumberOfSides),
+							m_pshadDisplacement(From.m_pshadDisplacement)
+{
+	m_pTrimLoops=new CqTrimLoopArray(*From.m_pTrimLoops);
+}
+
+
+//---------------------------------------------------------------------
+/** Destructor.
+ */
+CqGeometricAttributes::~CqGeometricAttributes()	
+{
+	delete(m_pTrimLoops);
+}
+
 
 
 //---------------------------------------------------------------------
