@@ -292,6 +292,21 @@ public:
     {
         return( m_pTransCamera );
     }
+    /** Set the initial object transformation, this transform takes into account motion imparted by the camera.
+	 *  This is used when resetting the object transform in prepareation for a RiTransform.
+     * \param ptrans A pointer to the transformation object which represents the initial object space transform.
+     */
+    virtual	void	SetDefObjTransform( const CqTransformPtr& ptrans )
+    {
+        m_pTransDefObj = ptrans;
+    }
+    /** Get initial object transformation.
+     * \return A pointer to the transformation object which represents the initial object space transform.
+     */
+    virtual	CqTransformPtr	GetDefObjTransform( )
+    {
+        return( m_pTransDefObj );
+    }
 
 	/** Set the lens data associated with depth of field effects.
      * \param fstop The f-stop of the lens.
@@ -450,6 +465,16 @@ public:
 		return( m_pRaytracer );
 	}
 
+	TqBool	IsWorldBegin() const
+	{
+		return(m_fWorldBegin);
+	}
+
+	void SetWorldBegin(TqBool begin = TqTrue)
+	{
+		m_fWorldBegin = begin;
+	}
+
 private:
 	boost::shared_ptr<CqModeBlock>	m_pconCurrent;					///< Pointer to the current context.
     CqStats	m_Stats;						///< Global statistics.
@@ -466,6 +491,8 @@ private:
     
     TqBool	m_fSaveGPrims;
     CqTransformPtr	m_pTransCamera;					///< The camera transform.
+	CqTransformPtr	m_pTransDefObj;				///< The initial transformation for objects.
+	TqBool			m_fWorldBegin;
     std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
 
     TqFloat			m_DofMultiplier;

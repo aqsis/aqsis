@@ -95,6 +95,8 @@ CqRenderer::CqRenderer() :
     ADDREF( m_pAttrDefault );
     m_pTransDefault = CqTransformPtr( new CqTransform );
     m_pTransCamera  = CqTransformPtr( new CqTransform );
+	m_pTransDefObj  = CqTransformPtr( new CqTransform );
+	m_fWorldBegin = TqFalse;
 
     // Initialise the array of coordinate systems.
     m_aCoordSystems.resize( CoordSystem_Last );
