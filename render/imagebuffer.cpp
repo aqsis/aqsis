@@ -389,8 +389,9 @@ TqBool CqImageBuffer::OcclusionCullSurface( TqInt iBucket, CqBasicSurface* pSurf
 		// bucket to the right
 		TqInt nextBucket = iBucket + 1;
 		CqVector2D pos = Position( nextBucket );
-		if ( ( nextBucket < nBuckets ) &&
-		        ( RasterBound.vecMax().x() >= pos.x() ) )
+		if ( ( nextBucket != iBucket ) && 
+			 ( nextBucket < nBuckets ) &&
+		     ( RasterBound.vecMax().x() >= pos.x() ) )
 		{
 			// Here, pSurface is unlinked from the list in the
 			//  current bucket, and then added to the list in
@@ -414,8 +415,9 @@ TqBool CqImageBuffer::OcclusionCullSurface( TqInt iBucket, CqBasicSurface* pSurf
 		pos.x( RasterBound.vecMin().x() );
 		nextBucket = Bucket( static_cast<TqInt>( pos.x() ), static_cast<TqInt>( pos.y() ) );
 
-		if ( ( nextBucket < nBuckets ) &&
-		        ( RasterBound.vecMax().y() >= pos.y() ) )
+		if ( ( nextBucket != iBucket ) &&
+			 ( nextBucket < nBuckets ) &&
+		     ( RasterBound.vecMax().y() >= pos.y() ) )
 		{
 			// See above for comments... - Jonathan Merritt.
 			pSurface->UnLink();
@@ -1360,7 +1362,6 @@ void CqImageBuffer::RenderImage()
 		if ( poptModulo != 0 )
 		{
 			bucketmodulo = poptModulo[ 0 ];
-			std::cout << "Number of Buckets per line " << m_cXBuckets << "\n";
 		}
 		if ( bucketmodulo <= 0 ) bucketmodulo = m_cXBuckets;
 	}
