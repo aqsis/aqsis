@@ -88,11 +88,12 @@ TqInt DDReceiveMsg(TqInt s, SqDDMessageBase*& pMsg)
 			{
 				delete[](msgbuffer);
 				pMsg=0;
-				return(-1);
+				return(ret);
 			}
 		}
+		return(msghdr.m_MessageLength);
 	}
-	return(msghdr.m_MessageLength);
+	return(ret);
 }
 
 
