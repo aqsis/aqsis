@@ -79,6 +79,7 @@ class _qShareC CqMatrix
 								 * \param f Bool indicating whether or not this matrix should be considered identity irespective of its contents.
 								 */
 		_qShareM	void		SetfIdentity(TqBool f)	{m_fIdentity=f;}
+		_qShareM	TqBool		fIdentity()const		{return(m_fIdentity);}
 		_qShareM	void		Scale(const TqFloat S);
 		_qShareM	void		Scale(const TqFloat xs, const TqFloat ys, const TqFloat zs);
 		_qShareM	void		Rotate(const TqFloat Angle, const CqVector3D Axis);
