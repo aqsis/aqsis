@@ -168,13 +168,13 @@ void CqCSGTreeNode::ProcessSampleList( std::vector<SqImageSample>& samples )
     // First process any children nodes.
     // Process all nodes depth first.
     std::list<boost::weak_ptr<CqCSGTreeNode> >::const_iterator
-	ii = lChildren().begin(), ie = lChildren().end();
+    ii = lChildren().begin(), ie = lChildren().end();
     for (; ii != ie; ++ii)
     {
         // If the node is a primitive, no need to process it.
         // In fact as the primitive, just nulls out its owned samples
         // this would break the CSG code.
-	boost::shared_ptr<CqCSGTreeNode> pChild = ii->lock();
+        boost::shared_ptr<CqCSGTreeNode> pChild = ii->lock();
         if ( pChild.get() && pChild->NodeType() != CSGNodeType_Primitive )
             pChild->ProcessSampleList( samples );
     }
@@ -184,6 +184,9 @@ void CqCSGTreeNode::ProcessSampleList( std::vector<SqImageSample>& samples )
     TqInt iChild;
     for ( iChild = 0; iChild < cChildren(); iChild++ ) abChildState[ iChild ] = TqFalse;
 
+    // Now get the initial state
+    TqBool bCurrentI = TqFalse; 
+
     // Find out if the camera is starting inside a solid. This is the case if you
     // see an odd number of walls for that solid when looking out.
     std::vector<SqImageSample>::iterator i;
@@ -191,14 +194,17 @@ void CqCSGTreeNode::ProcessSampleList( std::vector<SqImageSample>& samples )
     for ( i = samples.begin(); i != samples.end(); ++i, ++j )
     {
         if ( ( aChildIndex[j] = isChild( i->m_pCSGNode.get() ) ) >= 0 )
-	{
-            abChildState[ aChildIndex[j] ] = !abChildState[ aChildIndex[j] ];
-	}
+        {
+            if ( ((i->m_pCSGNode.get())->NodeType() == CSGNodeType_Primitive ) &&
+                 ((i->m_pCSGNode.get())->NodeType() == CSGNodeType_Union ) ) 
+            {
+                abChildState[ aChildIndex[j] ] = !abChildState[ aChildIndex[j] ];
+            }
+        }
     }
 
-    // Now get the initial state
-    TqBool bCurrentI = EvaluateState( abChildState );
-
+    bCurrentI = EvaluateState( abChildState );
+   
     // Now go through samples, clearing any where the state doesn't change, and
     // promoting any where it does to this node.
     for ( i = samples.begin(), j = 0; i != samples.end(); ++j )
@@ -227,14 +233,13 @@ void CqCSGTreeNode::ProcessSampleList( std::vector<SqImageSample>& samples )
                 i->m_pCSGNode = shared_from_this();
             }
             else
-	    {
+            {
                 i->m_pCSGNode = boost::shared_ptr<CqCSGTreeNode>();
-	    }
+            }
             i++;
         }
     }
 }
-
 
 //------------------------------------------------------------------------------
 /**

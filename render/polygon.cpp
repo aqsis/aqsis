@@ -123,10 +123,34 @@ TqInt CqPolygonBase::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSp
             indexD = i + 1;
 
         // Create bilinear patches
-	boost::shared_ptr<CqSurfacePatchBilinear> pNew( new CqSurfacePatchBilinear() );
+		boost::shared_ptr<CqSurfacePatchBilinear> pNew( new CqSurfacePatchBilinear() );
         //ADDREF( pNew );
         pNew->SetSurfaceParameters( Surface() );
 
+/* Comment this out for now as it breaks Bug948827 in a strange way, needs more investigation */
+/*        if ( indexC == indexD )
+		{
+			// Calculate which point in the triangle produces an angle with it's neighbours that is closest to 90 degrees.
+			// Placing the phantom point opposite this point will ensure the best orientation of the final grids, reducing
+			// shading artefacts.
+			CqVector3D pointA = PolyP(indexA);
+			CqVector3D pointB = PolyP(indexB);
+			CqVector3D pointC = PolyP(indexC);
+			TqFloat aA = 1.5707f - acosf((pointB - pointA).Unit()*(pointC - pointA).Unit());
+			TqFloat aB = 1.5707f - acosf((pointA - pointB).Unit()*(pointC - pointB).Unit());
+			TqFloat aC = 1.5707f - acosf((pointA - pointC).Unit()*(pointB - pointC).Unit());
+			TqInt cycle = 0;
+			if( aB < aA && aB < aC )		cycle = 1;
+			else if( aC < aA && aC < aB)	cycle = 2;
+			for(; cycle>0; --cycle)
+			{
+				TqInt temp = indexA;
+				indexA = indexB;
+				indexB = indexC;
+				indexC = indexD = temp;
+			}
+		}
+*/
         TqInt iUPA, iUPB, iUPC, iUPD;
         TqInt iUPAf, iUPBf, iUPCf, iUPDf;
 		// Get the indices for varying variables.

@@ -1438,7 +1438,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
         // The surface is not small enough, so split it...
         else if ( !pSurface->fDiscard() )
         {
-	    Bucket.popSurface();
+            Bucket.popSurface();
 
             // Decrease the total gprim count since this gprim is replaced by other gprims
             STATS_DEC( GPR_created_total );
@@ -1452,6 +1452,11 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
                 PostSurface( aSplits[ i ] );
 
             QGetRenderContext() ->Stats().SplitsTimer().Stop();
+        } else if ( pSurface == Bucket.pTopSurface() ) 
+        {
+             // Make sure we will break the while() 
+             //   e.g.  !fDiceable  &&  pSurface->fDiscard()
+             Bucket.popSurface();
         }
 
         pSurface = Bucket.pTopSurface();

@@ -143,7 +143,7 @@ public:
 		TqFloat mag2 = Magnitude2();
         return ( mag2<=0.0f? 0.0f : sqrt( mag2 ) );
     }
-    void	Unit()
+    CqVector3D&	Unit()
     {
         TqFloat Mag = Magnitude();
 		if( Mag > 0.0f )
@@ -152,6 +152,7 @@ public:
 			m_y /= Mag;
 			m_z /= Mag;
 		}
+		return(*this);
     }
 
     CqVector3D& operator= ( const CqVector4D &From );
