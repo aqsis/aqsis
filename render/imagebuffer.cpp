@@ -264,6 +264,34 @@ void CqImagePixel::Combine()
 		{
 			samples->begin() ->m_colColor = samplecolor;
 			samples->begin() ->m_colOpacity = sampleopacity;
+
+			const CqString* pstrDepthFilter = QGetRenderContext() ->optCurrent().GetStringOption("Hider", "depthfilter");
+			if( NULL != pstrDepthFilter )
+			{
+				if( !pstrDepthFilter[0].compare("midpoint") )
+				{
+					// Use midpoint for depth
+					if( samples->size() > 1 )
+						(*samples)[0].m_Depth = ( (*samples)[0].m_Depth + (*samples)[1].m_Depth ) * 0.5f;
+					else
+						(*samples)[0].m_Depth = FLT_MAX;
+				}
+				else if( !pstrDepthFilter[0].compare("max") )
+				{
+					(*samples)[0].m_Depth = samples->back().m_Depth;
+				}
+				else if( !pstrDepthFilter[0].compare("average") )
+				{
+					std::vector<SqImageSample>::iterator sample;
+					TqFloat totDepth = 0.0f;
+					for( sample = samples->begin(); sample != samples->end(); sample++ )
+						totDepth += sample->m_Depth;
+					totDepth /= samples->size();
+
+					(*samples)[0].m_Depth = totDepth;
+				}
+				// Default to "min"
+			}
 		}
 	}
 
@@ -1477,8 +1505,8 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 									{
 										int j = 0;
 										// Find first opaque sample
-										while ( j < c && aValues[ j ].m_colOpacity != gColWhite ) j++;
-										if ( j < c && aValues[ j ].m_Depth == Bucket.MaxDepth() && aValues[ j ].m_colOpacity == gColWhite )
+										while ( j < c /*&& aValues[ j ].m_colOpacity != gColWhite */) j++;
+										if ( j < c && aValues[ j ].m_Depth == Bucket.MaxDepth()/* && aValues[ j ].m_colOpacity == gColWhite*/ )
 										{
 											if ( aValues[ j ].m_Depth > ImageVal.m_Depth )
 											{
@@ -1495,12 +1523,12 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 								if ( NULL != ImageVal.m_pCSGNode ) ImageVal.m_pCSGNode->AddRef();
 
 								// Truncate sample list if opaque.
-								if ( ( colMPGOpacity == gColWhite ) && ( pMPG->pGrid() ->pCSGNode() == NULL ) )
-								{
-									aValues.erase( aValues.begin() + i, aValues.end() );
-									aValues.push_back( ImageVal );
-								}
-								else
+//								if ( ( colMPGOpacity == gColWhite ) && ( pMPG->pGrid() ->pCSGNode() == NULL ) )
+//								{
+//									aValues.erase( aValues.begin() + i, aValues.end() );
+//									aValues.push_back( ImageVal );
+//								}
+//								else
 									aValues.insert( aValues.begin() + i, ImageVal );
 							}
 						}

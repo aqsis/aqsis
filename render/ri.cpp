@@ -1024,9 +1024,19 @@ RtVoid	RiHider( const char *name, ... )
 //
 RtVoid	RiHiderV( const char *name, PARAMETERLIST )
 {
-	if ( !strcmp( name, "hider" ) || !strcmp( name, "painter" ) )
+	if ( !strcmp( name, "hidden" ) || !strcmp( name, "painter" ) )
 	{
 		QGetRenderContext() ->optCurrent().GetStringOptionWrite("System", "Hider")[0] =  name ;
+	}
+
+	// Check options.
+	TqInt i;
+	for( i=0; i<count; i++ )
+	{
+		if( !strcmp( tokens[i], "depthfilter" ) )
+			RiOption( "Hider", "depthfilter", (RtToken)values[i], NULL );
+		else if( !strcmp( tokens[i], "jitter" ) )
+			RiOption( "Hider", "jitter", (RtFloat*)values[i], NULL );
 	}
 
 	return ;
