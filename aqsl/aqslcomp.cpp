@@ -30,9 +30,11 @@
 #include	<fstream>
 #include	<sstream>
 
+#ifdef	AQSIS_SYSTEM_WIN32
 #include	"io.h"
-//#include	"stdlib.h"
-//#include	"stdio.h"
+#else
+#include	"unistd.h"
+#endif //AQSIS_SYSTEM_WIN32
 
 #include	"libslparse.h"
 #include	"icodegen.h"
@@ -132,14 +134,22 @@ int main( int argc, const char** argv )
 				tmpnam( &ifile[0] );
 				// Redirect stdout to the temp file.
 				int oldstdout = 0;
+				#ifdef	AQSIS_SYSTEM_WIN32
 				if( _dup2( 1, oldstdout) == 0)
+				#else
+				if( dup2( 1, oldstdout) == 0)
+				#endif //AQSIS_SYSTEM_WIN32
 				{
 					freopen( ifile, "w", stdout );
 					std::stringstream strThisCommand;
 					strThisCommand << strCommand.str();
 					strThisCommand << e->c_str() << std::ends;
 					system( strThisCommand.str().c_str() );
+					#ifdef	AQSIS_SYSTEM_WIN32
 					_dup2( oldstdout, 1 );
+					#else
+					dup2( oldstdout, 1 );
+					#endif //AQSIS_SYSTEM_WIN32
 
 					std::ifstream ppfile( ifile );
 					if ( Parse( ppfile, e->c_str(), std::cerr ) )
