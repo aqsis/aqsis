@@ -39,9 +39,22 @@ AC_ARG_ENABLE(profile,
 esac],
 [profile=false])
 if test x$profile = xtrue ; then
+
   DEBUG_FLAGS="-g -Wall -pg -ftest-coverage -fprofile-arcs" 
-  OPT_FLAGS="-O0"
-  LDFLAGS="-lc_p"
+  
+  dnl NOTE: Many systems do not have libc compiled with profiling.  We
+  dnl       should add a test for this library before including it in
+  dnl       the libs, otherwise configure fails with some strange
+  dnl       warning about the compiler not being able to produce
+  dnl       executables!!!
+  #LDFLAGS="-lc_p"
+  
+  dnl Default to O2 optimisations for profiling.  It typically makes sense to
+  dnl profile optimised rather than non-optimised code, because the results
+  dnl can be different, and the end-user normally runs optimised code.
+  OPT_FLAGS="-O2"
+
+  LD_FLAGS="-pg"
 fi
 
 AM_CONDITIONAL(PROFILE, test x$profile = xtrue)
@@ -66,8 +79,14 @@ fi
 AM_CONDITIONAL(PLUGINS, test x$plugins = xtrue)
 AC_SUBST(PLUGIN_FLAGS)
 
-
+dnl Note: AC_PROG_CXX sets the variable CXXFLAGS if it has not already been
+dnl       set.  In Aqsis, we seem to be using AQSIS_CXXFLAGS in place of
+dnl       this variable, so we'll unset it here.  This prevents -g -O2
+dnl       being added to *every* compile.
+CXXFLAGS=""
+CFLAGS=""
 AC_PROG_CXX
+
 AM_ENABLE_SHARED
 AC_DISABLE_STATIC
 LT_AC_PROG_SED
