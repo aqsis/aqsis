@@ -166,7 +166,7 @@ TqInt CqDDManagerSimple::DisplayBucket(IqBucket* pBucket)
 			if(strstr(i->m_strMode.c_str(), RI_Z)!=NULL)
 				mode|=ModeZ;
 
-			SqImageValue val;
+			SqImageSample val;
 			TqInt y;
 			for(y=0; y<ysize; y++)
 			{

@@ -331,7 +331,7 @@ TqInt CqDDManager::DisplayBucket(IqBucket* pBucket)
 
 		TqInt		linelen=xsize*samples;
 
-		SqImageValue val;
+		SqImageSample val;
 		TqInt y;
 		for(y=0; y<ysize; y++)
 		{
