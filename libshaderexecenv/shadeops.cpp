@@ -1886,7 +1886,7 @@ STD_SOIMPL CqShaderExecEnv::SO_depth( POINTVAL p, DEFPARAMIMPL )
 	TqFloat d = POINT( p ).z();
 	d = ( d - QGetRenderContextI() ->GetFloatOption( "System", "Clipping" ) [ 0 ] ) /
 	    ( QGetRenderContextI() ->GetFloatOption( "System", "Clipping" ) [ 1 ] - QGetRenderContextI() ->GetFloatOption( "System", "Clipping" ) [ 0 ] );
-	SETNORMAL( Result, d );
+	SETFLOAT( Result, d );
 	END_VARYING_SECTION
 }
 
