@@ -233,9 +233,9 @@ class CqRenderer : public IqRenderer
 				msg.Severity() << " : ";
 			std::cout << msg.strMessage().c_str() << std::endl;
 		}
-		virtual	CqLog&	Logger()
+		virtual	IqLog*	Logger()
 		{
-			return( m_theLog );
+			return( &m_theLog );
 		}
 		// Contect change callbacks
 		virtual	SqParameterDeclaration FindParameterDecl( const char* strDecl );

@@ -413,18 +413,18 @@ void CqStats::PrintInfo() const
 	else
 		gs = 256;
 
-	QGetRenderContext() ->Logger().info( "Image settings:" );
-	QGetRenderContext() ->Logger().info( "	Resolution: %d %d", resX, resY );
-	QGetRenderContext() ->Logger().info( "	PixelAspectRatio: %d", pratio );
-	QGetRenderContext() ->Logger().info( "	Exposure:" );
-	QGetRenderContext() ->Logger().info( "		Gain: %d", gain );
-	QGetRenderContext() ->Logger().info( "		Gamma: %d", gamma );
-	QGetRenderContext() ->Logger().info( "Shading:" );
-	QGetRenderContext() ->Logger().info( "	Bucket size: [ %d %d ]", bX, bY );
-	QGetRenderContext() ->Logger().info( "	Gridsize: %d", gs );
-	QGetRenderContext() ->Logger().info( "Anti-aliasing settings: " );
-	QGetRenderContext() ->Logger().info( "	PixelSamples: %d %d", psX, psY );
-	QGetRenderContext() ->Logger().info( "	FilterWidth: %d %d", fX, fY );
+	QGetRenderContext() ->Logger()->info( "Image settings:" );
+	QGetRenderContext() ->Logger()->info( "	Resolution: %d %d", resX, resY );
+	QGetRenderContext() ->Logger()->info( "	PixelAspectRatio: %d", pratio );
+	QGetRenderContext() ->Logger()->info( "	Exposure:" );
+	QGetRenderContext() ->Logger()->info( "		Gain: %d", gain );
+	QGetRenderContext() ->Logger()->info( "		Gamma: %d", gamma );
+	QGetRenderContext() ->Logger()->info( "Shading:" );
+	QGetRenderContext() ->Logger()->info( "	Bucket size: [ %d %d ]", bX, bY );
+	QGetRenderContext() ->Logger()->info( "	Gridsize: %d", gs );
+	QGetRenderContext() ->Logger()->info( "Anti-aliasing settings: " );
+	QGetRenderContext() ->Logger()->info( "	PixelSamples: %d %d", psX, psY );
+	QGetRenderContext() ->Logger()->info( "	FilterWidth: %d %d", fX, fY );
 
 }
 

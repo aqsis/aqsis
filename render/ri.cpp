@@ -1106,7 +1106,7 @@ RtVoid	RiHiderV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, CqLog::RI_COLOR_SAMPLES_INVALID ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, CqLog::RI_COLOR_SAMPLES_INVALID ) );
 	return ;
 }
 
@@ -1121,7 +1121,7 @@ RtVoid	RiRelativeDetail( RtFloat relativedetail )
 	{
 		CqBasicError(
 		    ErrorID_InvalidData, Severity_Normal,
-		    QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 2 )
+		    QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 2 )
 		);
 	}
 	else
@@ -1181,7 +1181,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 			else
 			{
 				if ( Decl.m_strName == "" )
-					CqBasicError( ErrorID_UnknownSymbol, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 3 ) );
+					CqBasicError( ErrorID_UnknownSymbol, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 3 ) );
 				else
 					CqBasicError( ErrorID_InvalidType, Severity_Normal, "Options can only be uniform" );
 				return ;
@@ -1455,7 +1455,7 @@ RtLightHandle	RiAreaLightSource( const char *name, ... )
 //
 RtLightHandle	RiAreaLightSourceV( const char *name, PARAMETERLIST )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 4 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 4 ) );
 	return ( RiLightSourceV( name, count, tokens, values ) );
 }
 
@@ -1575,7 +1575,7 @@ RtVoid	RiAtmosphereV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiInterior( const char *name, ... )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 5 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 5 ) );
 	return ;
 }
 
@@ -1586,7 +1586,7 @@ RtVoid	RiInterior( const char *name, ... )
 //
 RtVoid	RiInteriorV( const char *name, PARAMETERLIST )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 5 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 5 ) );
 	return ;
 }
 
@@ -1597,7 +1597,7 @@ RtVoid	RiInteriorV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiExterior( const char *name, ... )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 6 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 6 ) );
 	return ;
 }
 
@@ -1608,7 +1608,7 @@ RtVoid	RiExterior( const char *name, ... )
 //
 RtVoid	RiExteriorV( const char *name, PARAMETERLIST )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 6 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 6 ) );
 	return ;
 }
 
@@ -1701,7 +1701,7 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 	{
 		CqBasicError(
 		    ErrorID_InvalidData, Severity_Normal,
-		    QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 7 )
+		    QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 7 )
 		);
 		return ;
 	}
@@ -1747,7 +1747,7 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 //
 RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 8 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 8 ) );
 	return ;
 }
 
@@ -1877,7 +1877,7 @@ RtVoid	RiPerspective( RtFloat f )
 {
 	if ( f <= 0 )
 	{
-		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 9 ) );
+		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 9 ) );
 		return ;
 	}
 
@@ -1984,7 +1984,7 @@ RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
 //
 RtVoid	RiDeformation( const char *name, ... )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 10 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 10 ) );
 	return ;
 }
 
@@ -1995,7 +1995,7 @@ RtVoid	RiDeformation( const char *name, ... )
 //
 RtVoid	RiDeformationV( const char *name, PARAMETERLIST )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 10 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 10 ) );
 	return ;
 }
 
@@ -2082,7 +2082,7 @@ RtVoid	RiCoordSysTransform( RtToken space )
 //
 RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[] )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 11 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 11 ) );
 	return ( 0 );
 }
 
@@ -2163,7 +2163,7 @@ RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 			else
 			{
 				if ( Decl.m_strName == "" )
-					CqBasicError( ErrorID_UnknownSymbol, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 3 ) );
+					CqBasicError( ErrorID_UnknownSymbol, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 3 ) );
 				else
 					CqBasicError( ErrorID_InvalidType, Severity_Normal, "Attributes can only be uniform" );
 				return ;
@@ -2413,7 +2413,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFlo
                   RtInt nstrings, RtString strings[], PARAMETERLIST )
 {
 
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 12 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 12 ) );
 
 
 	return ;
@@ -2515,7 +2515,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 		// the wrap mode was neither "periodic" nor "nonperiodic"
 		CqBasicError(
 		    0, Severity_Normal,
-		    QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 13 )
+		    QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 13 )
 		);
 	}
 
@@ -2562,7 +2562,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 		// the type of curve was neither "linear" nor "cubic"
 		CqBasicError(
 		    0, Severity_Normal,
-		    QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 14 )
+		    QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 14 )
 		);
 	}
 }
@@ -3415,7 +3415,7 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 
 	if ( refineproc == RiProcDelayedReadArchive )
 	{
-		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 15 ) );
+		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 15 ) );
 		printf( "ReadArchive %s\n", ( const char * ) data );
 		RiReadArchive( ( char* ) data, NULL, NULL );
 
@@ -3423,7 +3423,7 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 	else if ( refineproc == RiProcRunProgram )
 	{
 
-		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 16 ) );
+		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 16 ) );
 
 
 		/* Your program must writes its output to a pipe. Open this
@@ -3486,7 +3486,7 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 		char opdata[ 4096 ];
 
 
-		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 17 ) );
+		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 17 ) );
 
 		// take the first filename is saved to be the name of the .dll/.so
 		// the reset is passed as such to ConvertParameters function later on
@@ -3537,7 +3537,7 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 	}
 	else
 	{
-		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 18 ) );
+		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 18 ) );
 	}
 
 
@@ -3609,7 +3609,7 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 	}
 	else
 	{
-		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 19 ) );
+		CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 19 ) );
 	}
 
 	return ;
@@ -3646,7 +3646,7 @@ RtVoid	RiSolidEnd()
 //
 RtObjectHandle	RiObjectBegin()
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 20 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 20 ) );
 	QGetRenderContext() ->BeginObjectModeBlock();
 
 	return ( 0 );
@@ -3671,7 +3671,7 @@ RtVoid	RiObjectEnd()
 //
 RtVoid	RiObjectInstance( RtObjectHandle handle )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 21 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 21 ) );
 	return ;
 }
 
@@ -3833,7 +3833,7 @@ RtVoid	RiMakeTextureV( const char * pic, const char * tex, RtToken swrap, RtToke
 //
 RtVoid	RiMakeBump( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 22 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 22 ) );
 	return ;
 }
 
@@ -3844,7 +3844,7 @@ RtVoid	RiMakeBump( const char * imagefile, const char * bumpfile, RtToken swrap,
 //
 RtVoid	RiMakeBumpV( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
-	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger().getError( CqLog::RI_ERROR_TABLE, 22 ) );
+	CqBasicError( 0, Severity_Normal, QGetRenderContext() ->Logger()->getError( CqLog::RI_ERROR_TABLE, 22 ) );
 	return ;
 }
 
