@@ -923,56 +923,61 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 	{
 		for( irow = 0; irow < nuSegs; irow++ )
 		{
-			TqInt iPatch = ( icol * nuSegs ) + irow;
+			/// \note: We swap here due to the way the patches in the array are constructed.
+			TqInt iPatch = ( irow * nvSegs ) + icol;
+			TqInt iA = ( icol * ( nuSegs + 1 ) ) + irow;
+			TqInt iB = ( icol * ( nuSegs + 1 ) ) + irow + 1;
+			TqInt iC = ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow;
+			TqInt iD = ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1;
 			
 			if( USES( lUses, EnvVars_N ) && bHasN() )
 			{
-				S[ iPatch ]->N()[ 0 ] = N()[ ( icol * ( nuSegs + 1 ) ) + irow  ];
-				S[ iPatch ]->N()[ 1 ] = N()[ ( icol * ( nuSegs + 1 ) ) + irow + 1 ];
-				S[ iPatch ]->N()[ 2 ] = N()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  ];
-				S[ iPatch ]->N()[ 3 ] = N()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 ];
+				S[ iPatch ]->N()[ 0 ] = N()[ iA ];
+				S[ iPatch ]->N()[ 1 ] = N()[ iB ];
+				S[ iPatch ]->N()[ 2 ] = N()[ iC ];
+				S[ iPatch ]->N()[ 3 ] = N()[ iD ];
 			}
 
 			if( USES( lUses, EnvVars_u ) && bHasu() )
 			{
-				S[ iPatch ]->u()[ 0 ] = u()[ ( icol * ( nuSegs + 1 ) ) + irow  ];
-				S[ iPatch ]->u()[ 1 ] = u()[ ( icol * ( nuSegs + 1 ) ) + irow + 1 ];
-				S[ iPatch ]->u()[ 2 ] = u()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  ];
-				S[ iPatch ]->u()[ 3 ] = u()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 ];
+				S[ iPatch ]->u()[ 0 ] = u()[ iA ];
+				S[ iPatch ]->u()[ 1 ] = u()[ iB ];
+				S[ iPatch ]->u()[ 2 ] = u()[ iC ];
+				S[ iPatch ]->u()[ 3 ] = u()[ iD ];
 			}
 
 			if( USES( lUses, EnvVars_v ) && bHasv() )
 			{
-				S[ iPatch ]->v()[ 0 ] = v()[ ( icol * ( nuSegs + 1 ) ) + irow  ];
-				S[ iPatch ]->v()[ 1 ] = v()[ ( icol * ( nuSegs + 1 ) ) + irow + 1 ];
-				S[ iPatch ]->v()[ 2 ] = v()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  ];
-				S[ iPatch ]->v()[ 3 ] = v()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 ];
+				S[ iPatch ]->v()[ 0 ] = v()[ iA ];
+				S[ iPatch ]->v()[ 1 ] = v()[ iB ];
+				S[ iPatch ]->v()[ 2 ] = v()[ iC ];
+				S[ iPatch ]->v()[ 3 ] = v()[ iD ];
 			}
 
 			if( USES( lUses, EnvVars_s ) && bHass() )
 			{
-				S[ iPatch ]->s()[ 0 ] = s()[ ( icol * ( nuSegs + 1 ) ) + irow  ];
-				S[ iPatch ]->s()[ 1 ] = s()[ ( icol * ( nuSegs + 1 ) ) + irow + 1 ];
-				S[ iPatch ]->s()[ 2 ] = s()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  ];
-				S[ iPatch ]->s()[ 3 ] = s()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 ];
+				S[ iPatch ]->s()[ 0 ] = s()[ iA ];
+				S[ iPatch ]->s()[ 1 ] = s()[ iB ];
+				S[ iPatch ]->s()[ 2 ] = s()[ iC ];
+				S[ iPatch ]->s()[ 3 ] = s()[ iD ];
 			}
 
 			if( USES( lUses, EnvVars_t ) && bHast() )
 			{
-				S[ iPatch ]->t()[ 0 ] = t()[ ( icol * ( nuSegs + 1 ) ) + irow  ];
-				S[ iPatch ]->t()[ 1 ] = t()[ ( icol * ( nuSegs + 1 ) ) + irow + 1 ];
-				S[ iPatch ]->t()[ 2 ] = t()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  ];
-				S[ iPatch ]->t()[ 3 ] = t()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 ];
+				S[ iPatch ]->t()[ 0 ] = t()[ iA ];
+				S[ iPatch ]->t()[ 1 ] = t()[ iB ];
+				S[ iPatch ]->t()[ 2 ] = t()[ iC ];
+				S[ iPatch ]->t()[ 3 ] = t()[ iD ];
 			}
 
 			if( USES( lUses, EnvVars_Cs ) )
 			{
 				if( bHasCs() )
 				{
-					S[ iPatch ]->Cs()[ 0 ] = Cs()[ ( icol * ( nuSegs + 1 ) ) + irow  ];
-					S[ iPatch ]->Cs()[ 1 ] = Cs()[ ( icol * ( nuSegs + 1 ) ) + irow + 1 ];
-					S[ iPatch ]->Cs()[ 2 ] = Cs()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  ];
-					S[ iPatch ]->Cs()[ 3 ] = Cs()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 ];
+					S[ iPatch ]->Cs()[ 0 ] = Cs()[ iA ];
+					S[ iPatch ]->Cs()[ 1 ] = Cs()[ iB ];
+					S[ iPatch ]->Cs()[ 2 ] = Cs()[ iC ];
+					S[ iPatch ]->Cs()[ 3 ] = Cs()[ iD ];
 				}
 				else
 					S[ iPatch ]->Cs() = Cs();
@@ -982,10 +987,10 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 			{
 				if( bHasOs() )
 				{
-					S[ iPatch ]->Os()[ 0 ] = Os()[ ( icol * ( nuSegs + 1 ) ) + irow  ];
-					S[ iPatch ]->Os()[ 1 ] = Os()[ ( icol * ( nuSegs + 1 ) ) + irow + 1 ];
-					S[ iPatch ]->Os()[ 2 ] = Os()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  ];
-					S[ iPatch ]->Os()[ 3 ] = Os()[ ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 ];
+					S[ iPatch ]->Os()[ 0 ] = Os()[ iA ];
+					S[ iPatch ]->Os()[ 1 ] = Os()[ iB ];
+					S[ iPatch ]->Os()[ 2 ] = Os()[ iC ];
+					S[ iPatch ]->Os()[ 3 ] = Os()[ iD ];
 				}
 				else
 					S[ iPatch ]->Os() = Os();
@@ -1001,10 +1006,10 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 						CqParameterTyped<TqFloat, TqFloat>* pUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( (*iUP) );
 						CqParameterTyped<TqFloat, TqFloat>* pNUPV = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pUPV->Clone() );
 						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( ( icol * ( nuSegs + 1 ) ) + irow  );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( ( icol * ( nuSegs + 1 ) ) + irow + 1 );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 );
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
 						S[ iPatch ]->aUserParams().push_back( pNUPV );
 					}
 					break;
@@ -1014,10 +1019,10 @@ void CqSurfaceNURBS::Decompose( std::vector<CqSurfaceNURBS*>& S )
 						CqParameterTyped<CqColor, CqColor>* pUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( (*iUP) );
 						CqParameterTyped<CqColor, CqColor>* pNUPV = static_cast<CqParameterTyped<CqColor, CqColor>*>( pUPV->Clone() );
 						pNUPV->SetSize(4);
-						*pNUPV->pValue( 0 ) = *pUPV->pValue( ( icol * ( nuSegs + 1 ) ) + irow  );
-						*pNUPV->pValue( 1 ) = *pUPV->pValue( ( icol * ( nuSegs + 1 ) ) + irow + 1 );
-						*pNUPV->pValue( 2 ) = *pUPV->pValue( ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow  );
-						*pNUPV->pValue( 3 ) = *pUPV->pValue( ( ( icol + 1 ) * ( nuSegs + 1 ) ) + irow + 1 );
+						*pNUPV->pValue( 0 ) = *pUPV->pValue( iA );
+						*pNUPV->pValue( 1 ) = *pUPV->pValue( iB );
+						*pNUPV->pValue( 2 ) = *pUPV->pValue( iC );
+						*pNUPV->pValue( 3 ) = *pUPV->pValue( iD );
 						S[ iPatch ]->aUserParams().push_back( pNUPV );
 					}
 					break;
