@@ -781,7 +781,8 @@ CqLinearCurvesGroup::CqLinearCurvesGroup(
         //  because the cVarying equations don't work; also add up the total
         //  number of vertices
         m_nTotalVerts = 0;
-        for (TqInt i=0; i < m_ncurves; i++) 
+        TqInt i;
+		for (i=0; i < m_ncurves; i++) 
         {
                 m_nTotalVerts += nvertices[i];
                 if ((nvertices[i] <= 2) && m_periodic)
@@ -798,7 +799,7 @@ CqLinearCurvesGroup::CqLinearCurvesGroup(
         // copy the array of numbers of vertices
         m_nvertices.clear();
         m_nvertices.reserve(m_ncurves);
-        for (TqInt i=0; i < m_ncurves; i++)
+        for (i=0; i < m_ncurves; i++)
         {
                 m_nvertices.push_back(nvertices[i]);
         }
@@ -1061,7 +1062,8 @@ CqCubicCurvesGroup::CqCubicCurvesGroup(
         
         // add up the total number of vertices
         m_nTotalVerts = 0;
-        for (TqInt i=0; i < ncurves; i++) 
+		TqInt i;
+        for (i=0; i < ncurves; i++) 
         {
                 m_nTotalVerts += nvertices[i];
         }
@@ -1069,7 +1071,7 @@ CqCubicCurvesGroup::CqCubicCurvesGroup(
         // copy the array of numbers of vertices
         m_nvertices.clear();
         m_nvertices.reserve(m_ncurves);
-        for (TqInt i=0; i < m_ncurves; i++)
+        for (i=0; i < m_ncurves; i++)
         {
                 m_nvertices.push_back(nvertices[i]);
         }
@@ -1293,7 +1295,8 @@ TqInt CqCubicCurvesGroup::Split(
                                         );
                                         pNewUP->SetSize(pSeg->cVertex());
                                         
-                                        for (TqInt i=0; i < 4; i++)                                        {
+                                        for (TqInt i=0; i < 4; i++)
+                                        {
                                                 pNewUP->SetValue(
                                                         (*iUP), i, vi[i]
                                                 );
