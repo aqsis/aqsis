@@ -1023,30 +1023,33 @@ void CqMicroPolygon::Initialise()
 TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const
 {
 	// Check against each line of the quad, if outside any then point is outside MPG, therefore early exit.
-	TqFloat r1, r2, r3, r4;
+	const CqVector3D& pA = PointA();
+	const CqVector3D& pB = PointB();
 	TqFloat x = vecP.x(), y = vecP.y();
-	TqFloat x0 = PointA().x(), y0 = PointA().y(), x1 = PointB().x(), y1 = PointB().y();
-	if ( ( r1 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
-	x0 = x1; y0 = y1; x1 = PointC().x(); y1 = PointC().y();
-	if ( ( r2 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
+	TqFloat x0 = pA.x(), y0 = pA.y(), x1 = pB.x(), y1 = pB.y();
+	if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
+	const CqVector3D& pC = PointC();
+	x0 = x1; y0 = y1; x1 = pC.x(); y1 = pC.y();
+	if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) <= 0 ) return ( TqFalse );
 
 	// Check for degeneracy.
 	if ( !( IsDegenerate() ) )
 	{
-		x0 = x1; y0 = y1; x1 = PointD().x(); y1 = PointD().y();
-		if ( ( r3 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
-		x0 = x1; y0 = y1; x1 = PointA().x(); y1 = PointA().y();
-		if ( ( r4 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
+		const CqVector3D& pD = PointD();
+		x0 = x1; y0 = y1; x1 = pD.x(); y1 = pD.y();
+		if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
+		x0 = x1; y0 = y1; x1 = pA.x(); y1 = pA.y();
+		if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
 	}
 	else
 	{
-		x0 = x1; y0 = y1; x1 = PointA().x(); y1 = PointA().y();
-		if ( ( r3 = ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
+		x0 = x1; y0 = y1; x1 = pA.x(); y1 = pA.y();
+		if ( ( ( y - y0 ) * ( x1 - x0 ) - ( x - x0 ) * ( y1 - y0 ) ) < 0 ) return ( TqFalse );
 	}
 
-	CqVector3D vecN = ( PointA() - PointB() ) % ( PointC() - PointB() );
+	CqVector3D vecN = ( pA - pB ) % ( pC - pB );
 	vecN.Unit();
-	TqFloat D = vecN * PointA();
+	TqFloat D = vecN * pA;
 
 	Depth = ( D - ( vecN.x() * vecP.x() ) - ( vecN.y() * vecP.y() ) ) / vecN.z();
 
