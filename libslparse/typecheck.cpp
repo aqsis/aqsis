@@ -817,6 +817,11 @@ TqInt CqParseNodeCommFunction::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 
 TqInt	CqParseNodeQCond::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
 {
+	// Ensure that the conditional expression is type checked.
+	CqParseNode * pCondExp = m_pChild;
+	assert( pCondExp != 0 );
+	pCondExp->TypeCheck( pAllTypes(), Type_Last - 1, CheckOnly );
+
 	// Check if both expressions match type.
 	CqParseNode * pTrue = m_pChild->pNext();
 	assert( pTrue != 0 );
