@@ -61,6 +61,7 @@ enum EqDDMessageIDs
     MessageID_Filename,
     MessageID_Nl,
     MessageID_NP,
+    MessageID_DisplayType,
 
 
     MessageID_FormatResponse = 0x8001,
@@ -209,6 +210,22 @@ struct SqDDMessageFilename : public SqDDMessageString
 inline SqDDMessageFilename* SqDDMessageFilename::Construct( const TqChar* name )
 {
 	return ( static_cast<SqDDMessageFilename*>( SqDDMessageString::Construct( name, MessageID_Filename ) ) );
+}
+
+
+//---------------------------------------------------------------------
+/** \struct SqDDMessageDisplayType
+ * Message containing display type name information.
+ */
+
+struct SqDDMessageDisplayType : public SqDDMessageString
+{
+	static SqDDMessageDisplayType*	Construct( const TqChar* string );
+};
+
+inline SqDDMessageDisplayType* SqDDMessageDisplayType::Construct( const TqChar* name )
+{
+	return ( static_cast<SqDDMessageDisplayType*>( SqDDMessageString::Construct( name, MessageID_DisplayType ) ) );
 }
 
 

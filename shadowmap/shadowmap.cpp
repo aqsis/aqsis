@@ -38,10 +38,12 @@ typedef int SOCKET;
 
 #endif
 
+#include	"ri.h"
 #include	"displaydriver.h"
 #include	"dd.h"
 #include	"tiffio.h"
 #include	"sstring.h"
+#include	"texturemap.h"
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #include	"version.h"
@@ -52,6 +54,7 @@ using namespace Aqsis;
 SqDDMessageFormatResponse frmt( 2 );
 SqDDMessageCloseAcknowledge closeack;
 
+void SaveAsShadowMap();
 
 int main( int argc, char* argv[] )
 {
@@ -83,6 +86,7 @@ TqFloat* pData;
 TIFF*	pOut;
 TqInt	CWXMin, CWYMin;
 std::string	strFilename( "output.tif" );
+std::string	strType( "zfile" );
 TqFloat	matWorldToCamera[ 4 ][ 4 ];
 TqFloat	matWorldToScreen[ 4 ][ 4 ];
 
@@ -154,36 +158,126 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 	// Save the shadowmap to a binary file.
 	if ( strFilename != "" )
 	{
-		std::ofstream ofile( strFilename.c_str(), std::ios::out | std::ios::binary );
-		if ( ofile.is_open() )
+		if( strType.compare( "shadow" ) == 0 )
 		{
-			// Save a file type and version marker
-			ofile << ZFILE_HEADER;
+			SaveAsShadowMap();
+		}
+		else
+		{
+			std::ofstream ofile( strFilename.c_str(), std::ios::out | std::ios::binary );
+			if ( ofile.is_open() )
+			{
+				// Save a file type and version marker
+				ofile << ZFILE_HEADER;
 
-			// Save the xres and yres.
-			ofile.write( reinterpret_cast<char* >( &XRes ), sizeof( XRes ) );
-			ofile.write( reinterpret_cast<char* >( &YRes ), sizeof( XRes ) );
+				// Save the xres and yres.
+				ofile.write( reinterpret_cast<char* >( &XRes ), sizeof( XRes ) );
+				ofile.write( reinterpret_cast<char* >( &YRes ), sizeof( XRes ) );
 
-			// Save the transformation matrices.
-			ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 0 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 1 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 2 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 3 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+				// Save the transformation matrices.
+				ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 0 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+				ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 1 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+				ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 2 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+				ofile.write( reinterpret_cast<char*>( matWorldToCamera[ 3 ] ), sizeof( matWorldToCamera[ 0 ][ 0 ] ) * 4 );
 
-			ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 0 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 1 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 2 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
-			ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 3 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+				ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 0 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+				ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 1 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+				ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 2 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+				ofile.write( reinterpret_cast<char*>( matWorldToScreen[ 3 ] ), sizeof( matWorldToScreen[ 0 ][ 0 ] ) * 4 );
 
-			// Now output the depth values
-			ofile.write( reinterpret_cast<char*>( pData ), sizeof( TqFloat ) * ( XRes * YRes ) );
-			ofile.close();
+				// Now output the depth values
+				ofile.write( reinterpret_cast<char*>( pData ), sizeof( TqFloat ) * ( XRes * YRes ) );
+				ofile.close();
+			}
 		}
 	}
 	if ( DDSendMsg( s, &closeack ) <= 0 )
 		return ( -1 );
 	else
 		return ( 1 );
+}
+
+
+void SaveAsShadowMap()
+{
+	TqChar version[ 80 ];
+	TqInt twidth = 32;
+	TqInt tlength = 32;
+
+	// Save the shadowmap to a binary file.
+	if ( strFilename.compare( "" ) != 0 )
+	{
+		TIFF * pshadow = TIFFOpen( strFilename.c_str(), "w" );
+		TIFFCreateDirectory( pshadow );
+
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+		sprintf( version, "%s %s", STRNAME, VERSION_STR );
+#else
+		sprintf( version, "%s %s", STRNAME, VERSION );
+#endif
+		TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
+		TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, matWorldToCamera );
+		TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, matWorldToScreen );
+		TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
+		TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
+
+		// Write the floating point image to the directory.
+		TqFloat *depths = ( TqFloat * ) pData;
+
+	#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+		sprintf( version, "%s %s", STRNAME, VERSION_STR );
+	#else
+		sprintf( version, "%s %s", STRNAME, VERSION );
+	#endif
+		TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
+		TIFFSetField( pshadow, TIFFTAG_IMAGEWIDTH, XRes );
+		TIFFSetField( pshadow, TIFFTAG_IMAGELENGTH, YRes );
+		TIFFSetField( pshadow, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
+		TIFFSetField( pshadow, TIFFTAG_BITSPERSAMPLE, 32 );
+		TIFFSetField( pshadow, TIFFTAG_SAMPLESPERPIXEL, SamplesPerElement );
+		TIFFSetField( pshadow, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
+		TIFFSetField( pshadow, TIFFTAG_TILEWIDTH, twidth );
+		TIFFSetField( pshadow, TIFFTAG_TILELENGTH, tlength );
+		TIFFSetField( pshadow, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
+		//TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression );
+
+
+		TqInt tsize = twidth * tlength;
+		TqInt tperrow = ( XRes + twidth - 1 ) / twidth;
+		TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * SamplesPerElement * sizeof( TqFloat ) ) );
+
+		if ( ptile != NULL )
+		{
+			TqInt ctiles = tperrow * ( ( YRes + tlength - 1 ) / tlength );
+			TqInt itile;
+			for ( itile = 0; itile < ctiles; itile++ )
+			{
+				TqInt x = ( itile % tperrow ) * twidth;
+				TqInt y = ( itile / tperrow ) * tlength;
+				TqFloat* ptdata = pData + ( ( y * XRes ) + x ) * SamplesPerElement;
+				// Clear the tile to black.
+				memset( ptile, 0, tsize * SamplesPerElement * sizeof( TqFloat ) );
+				for ( TqUlong i = 0; i < tlength; i++ )
+				{
+					for ( TqUlong j = 0; j < twidth; j++ )
+					{
+						if ( ( x + j ) < XRes && ( y + i ) < YRes )
+						{
+							TqInt ii;
+							for ( ii = 0; ii < SamplesPerElement; ii++ )
+								ptile[ ( i * twidth * SamplesPerElement ) + ( ( ( j * SamplesPerElement ) + ii ) ) ] = ptdata[ ( ( j * SamplesPerElement ) + ii ) ];
+						}
+					}
+					ptdata += ( XRes * SamplesPerElement );
+				}
+				TIFFWriteTile( pshadow, ptile, x, y, 0, 0 );
+			}
+			TIFFWriteDirectory( pshadow );
+
+		}
+
+		TIFFClose( pshadow );
+	}
 }
 
 
@@ -195,6 +289,13 @@ TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
 			{
 				SqDDMessageFilename * pMsg = static_cast<SqDDMessageFilename*>( pMsgB );
 				strFilename = pMsg->m_String;
+			}
+			break;
+
+			case MessageID_DisplayType:
+			{
+				SqDDMessageDisplayType * pMsg = static_cast<SqDDMessageDisplayType*>( pMsgB );
+				strType = pMsg->m_String;
 			}
 			break;
 

@@ -563,6 +563,11 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 				dd.SendMsg( pmsgfname );
 				pmsgfname->Destroy();
 
+				// Send a display type message
+				SqDDMessageDisplayType * pmsgdtype = SqDDMessageDisplayType::Construct( dd.strType().c_str() );
+				dd.SendMsg( pmsgdtype );
+				pmsgdtype->Destroy();
+
 				CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera" );
 				CqMatrix matWorldToScreen = QGetRenderContext() ->matSpaceToSpace( "world", "screen" );
 

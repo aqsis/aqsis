@@ -4203,7 +4203,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
 		// Create experimental version
-		if(strcmp(scheme, "experimental")==0)
+		if(strcmp(scheme, "catmull-clark")==0)
 		{
 			// Transform the points into camera space for processing,
 			pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
@@ -4239,7 +4239,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 				pSubd2->Release();
 			}
 		}
-		else
+		else if(strcmp(scheme, "old-cc")==0)
 		{	
 			if ( QGetRenderContext() ->ptransCurrent() ->cTimes() <= 1 )
 			{
@@ -4387,6 +4387,11 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 				intargIndex += nargs[ argcIndex++ ];
 				floatargIndex += nargs[ argcIndex++ ];
 			}
+		}
+		else
+		{
+			CqBasicError( 99, Severity_Fatal, "Subdivision Mesh contains non-manifold data" );
+			pPointsClass->Release();
 		}
 	}
 
