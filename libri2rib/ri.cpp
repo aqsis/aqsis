@@ -860,7 +860,7 @@ RtVoid RiTransformBegin (void)
     }
 }
 
-RtVoid RiTranformEnd (void)
+RtVoid RiTransformEnd (void)
 {
  
     try {   context.current().RiTranformEnd();
