@@ -144,16 +144,48 @@ struct SqVMStackEntry
 	// Cast to the various types
 							/** Type checked cast to a float
 							 */
-	operator TqFloat&()		{assert(m_Type==StackEntryType_Float);	return(m_float);}
+	operator TqFloat&()		{
+		if (m_Type == StackEntryType_Int) {
+			m_float = (float) m_int;
+			
+		}
+		
+		return(m_float);
+	}
 							/** Type checked cast to an integer
 							 */
-	operator TqInt&()		{assert(m_Type==StackEntryType_Int);	return(m_int);}
+	operator TqInt&()		{
+		if (m_Type == StackEntryType_Float) {
+			m_int = (int) m_float;
+			
+		}
+		return(m_int);
+	}
 							/** Type checked cast to a boolean
 							 */
 	operator bool&()		{assert(m_Type==StackEntryType_Bool);	return(m_bool);}
 							/** Type checked cast to a 3D vector
 							 */
-	operator CqVector3D&()	{assert(m_Type==StackEntryType_Point);	return(m_Point);}
+								
+	operator CqVector3D&()	{
+			
+		          
+		if (m_Type == StackEntryType_Float) {
+			m_Point = CqVector3D(m_float, m_float, m_float);
+			
+		}
+		if (m_Type == StackEntryType_Int) {
+			m_Point = CqVector3D((float) m_int, (float) m_int, (float) m_int);
+			
+		}
+		if (m_Type == StackEntryType_Bool) {
+			m_Point = CqVector3D((float) m_bool, (float) m_bool, (float) m_bool);
+			
+		}
+		
+		return(m_Point);
+	}
+
 							/** Type checked cast to a 4D vector.
 							 */
 	operator CqVector4D&()	{assert(m_Type==StackEntryType_HPoint);	return(m_HPoint);}
@@ -997,7 +1029,8 @@ class _qShareC CqShaderStack
 						 */
 				CqVMStackEntry& Pop(TqBool& f)	
 								{
-									CqVMStackEntry& val=m_Stack[--m_iTop];
+					                if (m_iTop) m_iTop--;
+									CqVMStackEntry& val=m_Stack[m_iTop];
 									f=val.Size()>1||f;
 									return(val);
 								}
@@ -1010,6 +1043,7 @@ class _qShareC CqShaderStack
 						/** Drop the top stack entry.
 						 */
 				void	Drop()	{
+                                                            if(m_iTop)
 									m_iTop--;
 								}
 	protected:
