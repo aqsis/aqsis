@@ -4950,7 +4950,7 @@ STD_SOIMPL CqShaderExecEnv::SO_textureinfo( STRINGVAL name, STRINGVAL dataname, 
 
 // SIGGRAPH 2002; Larry G. Bake functions
 
-const int batchsize = 8; // elements to buffer before writing
+const int batchsize = 10240; // elements to buffer before writing
 // Make sure we're thread-safe on those file writes
 
 class BakingChannel
