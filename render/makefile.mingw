@@ -3,6 +3,8 @@ CXX = g++
 
 CPPFLAGS = -g -I. -I ./win32_mingw/intel -I../Object/Release/Render
 
+OBJECTDIR = ../object/debug/render/
+
 DLLTOOL = dlltool
 DLLWRAP = dllwrap
 
@@ -17,29 +19,28 @@ DLLWRAP_FLAGS = --no-export-all-symbols --output-def $(RENDER_EXP_DEF) \
 
 # Must define BUILDING_DLL when building the DLL. Otherwise import/exports 
 # will not work correctly. See dllclass.h for more info.
-DLL_CFLAGS = -D_ssBUILDING=CORE -DCORE=1
+DLL_CFLAGS = -D_qBUILDING=CORE -DCORE=1
 # The default entry point defined by dllwrap; the default user callback
 # is DllMain, and there is stub in dllinit.c. 
 DLL_LDFLAGS = -I. -I./win32_mingw/intel
 # any extra libraries that your DLL may depend on.
 DLL_LDLIBS = -lstdc++ -lm -ltiff
 
-SRC = attributes.cpp bitvector.cpp bound.cpp cellnoise.cpp colour.cpp context.cpp file.cpp \
+SRC = attributes.cpp bitvector.cpp bound.cpp cellnoise.cpp color.cpp context.cpp file.cpp \
 	  imagebuffer.cpp lights.cpp matrix.cpp messages.cpp micropolygon.cpp noise.cpp nurbs.cpp \
 	  options.cpp patch.cpp polygon.cpp quadrics.cpp render.cpp renderer.cpp scene.cpp shadeops.cpp \
 	  shaderexecenv.cpp shaders.cpp shaderstack.cpp shadervariable.cpp shadervm.cpp spline.cpp \
-	  ssnew.cpp sstring.cpp stats.cpp subdivision.cpp surface.cpp symbols.cpp transform.cpp \
-	  vector2d.cpp vector3d.cpp vector4d.cpp ri.cpp ribcompiler.cpp texturemap.cpp \
-	  win32_mingw/intel/semaphore.cpp win32_mingw/intel/criticalsection.cpp \
-	  ../Object/Release/Render/scanner.cpp ../Object/Release/Render/parser.cpp
-OBJ = $(SRC:%.cpp=%.o)
+	  sstring.cpp stats.cpp subdivision.cpp surface.cpp symbols.cpp transform.cpp \
+	  vector2d.cpp vector3d.cpp vector4d.cpp ri.cpp texturemap.cpp parameters.cpp \
+	  win32_mingw/intel/semaphore.cpp win32_mingw/intel/criticalsection.cpp
+OBJ = $(SRC:%.cpp=$(OBJECTDIR)%.o)
 
 
 $(RENDER_NAME) $(RENDER_EXP_DEF) $(RENDER_EXP_LIB) : $(OBJ)
 	$(DLLWRAP) $(DLLWRAP_FLAGS) -o $(RENDER_NAME) \
 	$(OBJ) $(DLL_LDFLAGS) $(DLL_LDLIBS)
 
-.cpp.o:
+$(OBJECTDIR)%.o : %.cpp
 	$(CXX) -c $(DLL_CFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o $@ $<
 .c.o:
 	$(CC) -c $(DLL_CFLAGS) $(CPPFLAGS) $(CFLAGS) -o $@ $<
