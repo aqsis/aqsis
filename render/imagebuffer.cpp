@@ -405,6 +405,10 @@ TqBool CqImageBuffer::OcclusionCullSurface( CqBasicSurface* pSurface )
 			pSurface->UnLink();
 			Bucket( nextBucket, CurrentBucketRow() ).AddGPrim( pSurface );
 			RELEASEREF( pSurface );
+			STATS_INC( GPR_culled );
+			CqString objname( "unnamed" );
+			const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
+			std::cerr << info << "GPrim: \"" << pattrName->c_str() << "\" occlusion culled" << std::endl;
 			return TqTrue;
 		}
 
@@ -423,6 +427,10 @@ TqBool CqImageBuffer::OcclusionCullSurface( CqBasicSurface* pSurface )
 			pSurface->UnLink();
 			Bucket( nextBucketX, nextBucket ).AddGPrim( pSurface );
 			RELEASEREF( pSurface );
+			STATS_INC( GPR_culled );
+			CqString objname( "unnamed" );
+			const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
+			std::cerr << info << "GPrim: \"" << pattrName->c_str() << "\" occlusion culled" << std::endl;
 			return TqTrue;
 		}
 
@@ -430,10 +438,15 @@ TqBool CqImageBuffer::OcclusionCullSurface( CqBasicSurface* pSurface )
 		pSurface->UnLink();
 		RELEASEREF( pSurface );
 		STATS_INC( GPR_culled );
+		CqString objname( "unnamed" );
+		const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
+		std::cerr << info << "GPrim: \"" << pattrName->c_str() << "\" occlusion culled" << std::endl;
 		return TqTrue;
 	}
 	else
+	{
 		return TqFalse;
+	}
 }
 
 

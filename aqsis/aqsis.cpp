@@ -344,9 +344,11 @@ int main( int argc, const char** argv )
 		std::cout << "procedurals: " << g_procedurals.c_str() << std::endl;
 	}
 
+	std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(std::cerr) );
 	std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(std::cerr) );
 	std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(std::cerr) );
 	std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
+	std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::WARNING, std::cerr) );
 #ifdef	AQSIS_SYSTEM_POSIX
 	if( g_syslog )
 		std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );

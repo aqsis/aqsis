@@ -186,6 +186,8 @@ EXPORTS
 	??0show_level_buf@Aqsis@@QAE@AAV?$basic_ostream@DU?$char_traits@D@std@@@std@@@Z
 	??0fold_duplicates_buf@Aqsis@@QAE@AAV?$basic_ostream@DU?$char_traits@D@std@@@std@@@Z
 	??0timestamp_buf@Aqsis@@QAE@AAV?$basic_ostream@DU?$char_traits@D@std@@@std@@@Z
+	??0reset_level_buf@Aqsis@@QAE@AAV?$basic_ostream@DU?$char_traits@D@std@@@std@@@Z
+	??0filter_by_level_buf@Aqsis@@QAE@W4log_level_t@1@AAV?$basic_ostream@DU?$char_traits@D@std@@@std@@@Z
 	
 	?parseShadeOpTableEntry@CqDSORepository@Aqsis@@MAEPAUSqDSOExternalCall@2@PAXPAUSqShadeOp@@@Z
 	?getShadeOpMethods@CqDSORepository@Aqsis@@MAEPAV?$list@PAUSqDSOExternalCall@Aqsis@@V?$allocator@PAUSqDSOExternalCall@Aqsis@@@std@@@std@@PAVCqString@2@@Z
