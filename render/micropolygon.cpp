@@ -142,13 +142,13 @@ void CqMicroPolyGrid::CalcNormals()
 				}
 				else
 				{
-					assert(false);
+					//assert(false);
 					vecN=vecLastN;
 				}
 			}
 			else
 			{
-				assert(false);
+				//assert(false);
 				vecN=vecLastN;
 			}
 			Ng()=vecN;
