@@ -149,9 +149,16 @@ void CqStats::StopFrameTimer()
 
 void CqStats::PrintStats( TqInt level ) const
 {
+	/*! Levels
+		Minimum := 0
+		Normal  := 1
+		Verbose := 2
+		Max		:= 3
+	*/
 
 	std::strstream MSG;
 
+	
 	TqFloat timeSurface = static_cast<TqFloat>( m_timeSurface.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeDisplacement = static_cast<TqFloat>( m_timeDisplacement.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeImager = static_cast<TqFloat>( m_timeImager.TimeTotal() ) / CLOCKS_PER_SEC;
@@ -167,33 +174,67 @@ void CqStats::PrintStats( TqInt level ) const
 	TqFloat timeTM = static_cast<TqFloat>( m_timeTM.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeFB = static_cast<TqFloat>( m_timeFB.TimeTotal() - m_timeImager.TimeTotal() ) / CLOCKS_PER_SEC;
 
+	//! level >= 0 
 	MSG << "Total render time   : ";
 	TimeToString( MSG, m_timeTotal ) << std::endl;
 	MSG << "Last frame          : ";
 	TimeToString( MSG, m_timeTotalFrame ) << std::endl;
 
-	MSG << "Imager shading      : ";
-	TimeToString( MSG, timeImager ) << " (" << 100.0f * timeImager / m_timeTotalFrame << "%)" << std::endl;
-	MSG << "Surface shading     : ";
-	TimeToString( MSG, timeSurface ) << " (" << 100.0f * timeSurface / m_timeTotalFrame << "%)" << std::endl;
-	MSG << "Displacement shading: ";
-	TimeToString( MSG, timeDisplacement ) << " (" << 100.0f * timeDisplacement / m_timeTotalFrame << "%)" << std::endl;
-	MSG << "Atmosphere shading  : ";
-	TimeToString( MSG, timeAtmosphere ) << " (" << 100.0f * timeAtmosphere / m_timeTotalFrame << "%)" << std::endl;
-	MSG << "Splits              : ";
-	TimeToString( MSG, timeSplits ) << " (" << 100.0f * timeSplits / m_timeTotalFrame << "%)" << std::endl;
-	MSG << "Dicing              : ";
-	TimeToString( MSG, timeDicing ) << " (" << 100.0f * timeDicing / m_timeTotalFrame << "%)" << std::endl;
-	MSG << "Render MPGs         : ";
-	TimeToString( MSG, timeRenderMPGs ) << " (" << 100.0f * timeRenderMPGs / m_timeTotalFrame << "%)" << std::endl;
-	MSG << "Occlusion Culling   : ";
-	TimeToString( MSG, timeOcclusionCull ) << " (" << 100.0f * timeOcclusionCull / m_timeTotalFrame << "%)" << std::endl;
-	MSG << "Diceable check      : ";
-	TimeToString( MSG, timeDiceable ) << " (" << 100.0f * timeDiceable / m_timeTotalFrame << "%)" << std::endl;
-	MSG << "Textures            : " << m_cTextureMemory << " bytes used." << std::endl;
-	MSG << std::endl;
+	if ( level >= 1 )
+	{
+		MSG << "Imager shading      : ";
+		TimeToString( MSG, timeImager ) << " (" << 100.0f * timeImager / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "Surface shading     : ";
+		TimeToString( MSG, timeSurface ) << " (" << 100.0f * timeSurface / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "Displacement shading: ";
+		TimeToString( MSG, timeDisplacement ) << " (" << 100.0f * timeDisplacement / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "Atmosphere shading  : ";
+		TimeToString( MSG, timeAtmosphere ) << " (" << 100.0f * timeAtmosphere / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "Splits              : ";
+		TimeToString( MSG, timeSplits ) << " (" << 100.0f * timeSplits / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "Dicing              : ";
+		TimeToString( MSG, timeDicing ) << " (" << 100.0f * timeDicing / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "Render MPGs         : ";
+		TimeToString( MSG, timeRenderMPGs ) << " (" << 100.0f * timeRenderMPGs / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "Occlusion Culling   : ";
+		TimeToString( MSG, timeOcclusionCull ) << " (" << 100.0f * timeOcclusionCull / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "Diceable check      : ";
+		TimeToString( MSG, timeDiceable ) << " (" << 100.0f * timeDiceable / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "Textures            : " << m_cTextureMemory << " bytes used." << std::endl;
+		MSG << std::endl;
+	}
 
-	if ( level > 0 )
+	//! Most important informations
+	if ( level == 2 )
+	{
+		MSG << "GPrims: \t" << m_cGPrims << std::endl;
+		MSG << "Total GPrims:\t" << m_cTotalGPrims << " (" << m_cCulledGPrims << " culled)"<< std::endl;
+
+		MSG << "Grids:    \t" << m_cGridsAllocated << " created" << std::endl;
+
+		MSG << "Micropolygons: \t" << m_cMPGsAllocated << " created" << " (" << m_cCulledMPGs << " culled)" << std::endl;
+
+		MSG << "Sampling: \t" << m_cSamples << " samples" << std::endl;
+
+		MSG << "Attributes: \t";
+		MSG << ( TqInt ) Attribute_stack.size() << " created" << std::endl;
+
+		MSG << "Transforms: \t";
+		MSG << QGetRenderContext() ->TransformStack().size() << " created" << std::endl;
+
+		MSG << "Variables: \t";
+		MSG << m_cVariablesAllocated << " created" << std::endl;
+
+		MSG << "Parameters: \t" << m_cParametersAllocated << " created" << std::endl;
+		MSG << "MakeTexture check: \t"; TimeToString( MSG, timeMakeTexture ) << " (" << 100.0f * timeMakeTexture / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "MakeShadow  check: \t"; TimeToString( MSG, timeMakeShadow ) << " (" << 100.0f * timeMakeShadow / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "MakeCubeEnv check: \t"; TimeToString( MSG, timeMakeEnv ) << " (" << 100.0f * timeMakeEnv / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "SampleTexture check:\t"; TimeToString( MSG, timeTM ) << " (" << 100.0f * timeTM / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "FilterBucket check:\t"; TimeToString( MSG, timeFB ) << " (" << 100.0f * timeFB / m_timeTotalFrame << "%)" << std::endl;
+
+	}
+
+	if ( level == 3 )
 	{
 		MSG << "GPrims: \t" << m_cGPrims << std::endl;
 		MSG << "Total GPrims:\t" << m_cTotalGPrims << " (" << m_cCulledGPrims << " culled)" << std::endl;
@@ -239,6 +280,7 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "FilterBucket check:\t"; TimeToString( MSG, timeFB ) << " (" << 100.0f * timeFB / m_timeTotalFrame << "%)" << std::endl;
 
 	}
+
 	MSG << std::ends;
 
 	CqString strMSG( MSG.str() );
