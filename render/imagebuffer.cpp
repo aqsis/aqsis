@@ -115,6 +115,7 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 	TqFloat subcell_width = 1.0f / ( m_XSamples * m_YSamples );
 	TqInt m = m_XSamples;
 	TqInt n = m_YSamples;
+	
 
 	// Initiliaze the random with a value based on the X,Y coordinate
 	CqRandom random(  vecPixel.Magnitude()  );
@@ -143,8 +144,9 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 		{
 			for ( j = 0; j < m; j++ )
 			{
-				m_avecSamples[ i * m + j ].x( i );
-				m_avecSamples[ i * m + j ].y( j );
+				TqInt which = i * m + j;
+				m_avecSamples[which].x( i );
+				m_avecSamples[which].y( j );
 			}
 		}
 
@@ -190,21 +192,23 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 			for ( j = 0; j < m; j++ )
 			{
 				TqFloat sx = j * subpixelwidth;
-				TqFloat xindex = m_avecSamples[ i * m + j ].x();
-				TqFloat yindex = m_avecSamples[ i * m + j ].y();
-				m_avecSamples[ i * m + j ].x( xindex * subcell_width + ( subcell_width * 0.5f ) + sx );
-				m_avecSamples[ i * m + j ].y( yindex * subcell_width + ( subcell_width * 0.5f ) + sy );
-				m_avecSamples[ i * m + j ] += vecPixel;
-				m_aSubCellIndex[ i * m + j ] = static_cast<TqInt>( ( yindex * m_YSamples ) + xindex );
+				TqInt which = i * m + j;
+				TqFloat xindex = m_avecSamples[ which ].x();
+				TqFloat yindex = m_avecSamples[ which ].y();
+				m_avecSamples[ which ].x( xindex * subcell_width + ( subcell_width * 0.5f ) + sx );
+				m_avecSamples[ which ].y( yindex * subcell_width + ( subcell_width * 0.5f ) + sy );
+				m_avecSamples[ which ] += vecPixel;
+				m_aSubCellIndex[ which ] = static_cast<TqInt>( ( yindex * m_YSamples ) + xindex );
 			}
 		}
 	}
 
 	// Fill in the sample times for motion blur.
 	TqFloat time = 0;
-	TqFloat dtime = 1.0f / ( ( m_XSamples * m_YSamples ) );
+	TqInt nSamples = m_XSamples*m_YSamples;
+	TqFloat dtime = 1.0f / nSamples;
 	TqInt i;
-	for ( i = 0; i < m_XSamples*m_YSamples; i++ )
+	for ( i = 0; i < nSamples; i++ )
 	{
 		m_aTimes[ i ] = time + random.RandomFloat( dtime );
 		time += dtime;
@@ -212,8 +216,8 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 
 	// Fill in the sample detail levels for LOD.
 	TqFloat lod = 0;
-	TqFloat dlod = 1.0f / ( ( m_XSamples * m_YSamples ) );
-	for ( i = 0; i < m_XSamples*m_YSamples; i++ )
+	TqFloat dlod = 1.0f / nSamples;
+	for ( i = 0; i < nSamples; i++ )
 	{
 		m_aDetailLevels[ i ] = lod + random.RandomFloat( dlod );
 		lod += dlod;
@@ -260,13 +264,17 @@ void CqImagePixel::Combine()
 
 	TqUint samplecount = 0;
 	TqUint numsamples = XSamples() * YSamples();
-	for ( std::vector<std::vector<SqImageSample> >::iterator samples = m_aValues.begin(); samples != m_aValues.end(); samples++ )
+	std::vector<std::vector<SqImageSample> >::iterator end = m_aValues.end();
+	for ( std::vector<std::vector<SqImageSample> >::iterator samples = m_aValues.begin(); samples != end; samples++ )
 	{
 		// Find out if any of the samples are in a CSG tree.
+		std::vector<SqImageSample>::iterator iend = samples->end();
+			
 		while ( 1 )
 		{
 			TqBool bProcessed = TqFalse;
-			for ( std::vector<SqImageSample>::iterator isample = samples->begin(); isample != samples->end(); isample++ )
+
+			for ( std::vector<SqImageSample>::iterator isample = samples->begin(); isample != iend; isample++ )
 			{
 				if ( NULL != isample->m_pCSGNode )
 				{
@@ -282,6 +290,7 @@ void CqImagePixel::Combine()
 		CqColor samplecolor = gColBlack;
 		CqColor sampleopacity = gColBlack;
 		TqBool samplehit = TqFalse;
+
 		for ( std::vector<SqImageSample>::reverse_iterator sample = samples->rbegin(); sample != samples->rend(); sample++ )
 		{
 			if ( sample->m_flags & SqImageSample::Flag_Matte )
@@ -1398,17 +1407,18 @@ void CqImageBuffer::RenderMPGs( TqInt iBucket, long xmin, long xmax, long ymin, 
 	// First of all split any grids in this bucket waiting to be processed.
 	if ( !m_aBuckets[ iBucket ].aGrids().empty() )
 	{
-		for ( std::vector<CqMicroPolyGridBase*>::iterator i = m_aBuckets[ iBucket ].aGrids().begin(); i != m_aBuckets[ iBucket ].aGrids().end(); i++ )
+		std::vector<CqMicroPolyGridBase*>::iterator j = m_aBuckets[ iBucket ].aGrids().end();
+
+		for ( std::vector<CqMicroPolyGridBase*>::iterator i = m_aBuckets[ iBucket ].aGrids().begin(); i != j; i++ )
 			( *i ) ->Split( this, iBucket, xmin, xmax, ymin, ymax );
 	}
 	m_aBuckets[ iBucket ].aGrids().clear();
 
-	// Render any waiting MPGs
-	static	CqVector2D	vecP;
-
 	if ( m_aBuckets[ iBucket ].aMPGs().empty() ) return ;
 
-	for ( std::vector<CqMicroPolygonBase*>::iterator i = m_aBuckets[ iBucket ].aMPGs().begin(); i != m_aBuckets[ iBucket ].aMPGs().end(); i++ )
+	// Render any waiting MPGs
+	std::vector<CqMicroPolygonBase*>::iterator j = m_aBuckets[ iBucket ].aMPGs().end();
+	for ( std::vector<CqMicroPolygonBase*>::iterator i = m_aBuckets[ iBucket ].aMPGs().begin(); i != j; i++ )
 	{
 		RenderMicroPoly( *i, iBucket, xmin, xmax, ymin, ymax );
 		( *i ) ->Release();
@@ -1443,12 +1453,14 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 
 	TqBool IsMatte = ( TqBool ) ( pMPG->pGrid() ->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1 );
 
-	for ( TqInt bound_num = 0; bound_num < pMPG->cSubBounds(); bound_num++ )
+	TqInt bound_max = pMPG->cSubBounds();
+	TqInt bound_max_1 = bound_max - 1;
+	for ( TqInt bound_num = 0; bound_num < bound_max ; bound_num++ )
 	{
 		TqFloat time0;
 		CqBound& Bound = pMPG->SubBound( bound_num, time0 );
 		TqFloat time1 = 1.0f;
-		if ( bound_num != pMPG->cSubBounds() - 1 )
+		if ( bound_num != bound_max_1 )
 			pMPG->SubBound( bound_num + 1, time1 );
 
 		TqFloat bminx = Bound.vecMin().x();
@@ -1458,7 +1470,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 
 		if ( bmaxx < xmin || bmaxy < ymin || bminx > xmax || bminy > ymax )
 		{
-			if ( bound_num == pMPG->cSubBounds() - 1 )
+			if ( bound_num == bound_max_1)
 			{
 				// last bound so we can delete the mpg
 				theStats.IncCulledMPGs();
@@ -1472,7 +1484,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 		if ( Bound.vecMin().z() > ClippingFar() ||
 		        Bound.vecMax().z() < ClippingNear() )
 		{
-			if ( bound_num == pMPG->cSubBounds() - 1 )
+			if ( bound_num == bound_max_1 )
 			{
 				// last bound so we can delete the mpg
 				theStats.IncCulledMPGs();
@@ -1811,7 +1823,8 @@ void CqImageBuffer::RenderImage()
 	CqOcclusionBox::CreateHierarchy( m_XBucketSize, m_YBucketSize, m_FilterXWidth, m_FilterYWidth );
 
 	TqInt iBucket;
-	for ( iBucket = 0; iBucket < m_cXBuckets*m_cYBuckets; iBucket++ )
+	TqInt nBuckets = m_cXBuckets*m_cYBuckets;
+	for ( iBucket = 0; iBucket < nBuckets; iBucket++ )
 	{
 		SetiCurrentBucket( iBucket );
 		// Prepare the bucket.
