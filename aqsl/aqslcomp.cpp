@@ -32,11 +32,19 @@
 #include	"libslparse.h"
 #include	"vmoutput.h"
 
+#ifdef	AQSIS_SYSTEM_WIN32
+#include	"version.h"
+#endif
+
 using namespace Aqsis;
 
 int main(int argc, char* argv[])
 {
+	#ifdef	AQSIS_SYSTEM_WIN32
+	std::cout << argv[0] << " V" << VERSION_STR << std::endl;
+	#else
 	std::cout << argv[0] << " V" << VERSION << std::endl;
+	#endif
 
 	if(argc != 1)
 		{
