@@ -286,20 +286,20 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 	TqInt i=1;
     while(1)
     {
-        argstrings.push_back(GetStringField( strDriverFileAndArgs, i ));
-        if( argstrings.back().length() == 0 )
-            break;
+        CqString strArg = GetStringField( strDriverFileAndArgs, i );
+		if( strArg.empty() )
+			break;
+		argstrings.push_back(strArg);
         args.push_back(argstrings.back().c_str());
     }
 	// Send the name argument.
-	argstrings.push_back(CqString("-name=") + CqString( req.m_name ));
-	args.push_back(argstrings.back().c_str());
-	argstrings.push_back(CqString("-type=") + CqString( req.m_type ));
-	args.push_back(argstrings.back().c_str());
-	argstrings.push_back(CqString("-mode=") + CqString( req.m_mode ));
-	args.push_back(argstrings.back().c_str());
-	argstrings.push_back(req.m_customParamsArgs);
-	args.push_back(argstrings.back().c_str());
+	CqString nameArg = CqString("-name=") + req.m_name;
+	args.push_back(nameArg.c_str());
+	CqString typeArg = CqString("-type=") + req.m_type;
+	args.push_back(typeArg.c_str());
+	CqString modeArg = CqString("-mode=") + req.m_mode;
+	args.push_back(modeArg.c_str());
+	args.push_back(req.m_customParamsArgs.c_str());
     args.push_back(NULL);
 
 #ifdef AQSIS_SYSTEM_WIN32
