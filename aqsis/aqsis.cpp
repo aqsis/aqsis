@@ -28,7 +28,11 @@
 
 #include <stdio.h>
 
+#define __MESSAGE_TABLE
+#include "mtable.h"
+#undef __MESSAGE_TABLE
 
+CqMessageTable mTable; // Create the message table
 
 
 void RenderFile( FILE* file, const char* name );
@@ -212,6 +216,7 @@ RtVoid PreRender()
 
 int main( int argc, const char** argv )
 {
+
 	ArgParse ap;
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] files(s) to render" );
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
@@ -235,7 +240,7 @@ int main( int argc, const char** argv )
 	ap.argString( "displays", "=string\aspecify a default displays searchpath", &g_displays );
 
 	//_crtBreakAlloc = 845;
-
+	
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
 	{
 		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
