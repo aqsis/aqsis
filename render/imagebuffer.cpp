@@ -747,16 +747,21 @@ void CqBucket::QuantizeBucket()
  */
 void CqBucket::AddGPrim(CqBasicSurface* pGPrim)
 {
-	CqBasicSurface* surf = m_aGPrims.pFirst();
-	while( surf != 0 )
+	if(pGPrim->fCachedBound())
 	{
-		if( surf->GetCachedRasterBound().vecMin().z() > pGPrim->GetCachedRasterBound().vecMin().z() )
+		CqBasicSurface* surf = m_aGPrims.pFirst();
+		while( surf != 0 )
 		{
-			pGPrim->LinkBefore( surf );
-			return;
+			if( surf->fCachedBound() )
+			{
+				if( surf->GetCachedRasterBound().vecMin().z() > pGPrim->GetCachedRasterBound().vecMin().z() )
+				{
+					pGPrim->LinkBefore( surf );
+					return;
+				}
+			}			
+			surf = surf->pNext();
 		}
-		
-		surf = surf->pNext();
 	}
 	m_aGPrims.LinkLast(pGPrim);
 }

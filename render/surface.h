@@ -151,6 +151,11 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>
 									return m_Bound;
 								}
 
+			TqBool		fCachedBound() const
+								{
+									return(m_CachedBound);
+								}
+
 			CqBasicSurface&	operator=(const CqBasicSurface& From);
 
 			TqBool		m_fDiceable;		///< Flag to indicate that this GPrim is diceable.
