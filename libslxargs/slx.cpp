@@ -604,7 +604,7 @@ static int GetSearchPathListCount()
 				len += strcspn( currentChar + 2, ":" ) + 1;
 
 			currentChar += len;
-			if ( *currentChar == ':' ) 	// list elements separated by colons
+			if ( *currentChar == ':' || *currentChar == 0 ) 	// list elements separated by colons
 			{
 				listElementCount++;
 			}
