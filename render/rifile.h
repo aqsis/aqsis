@@ -78,6 +78,16 @@ class CqRiFile : public CqFile
 				//										std::cout << "\t" << SearchPath.c_str() << std::endl;
 			}
 			CqFile::Open( strFilename, SearchPath.c_str(), mode );
+			// If the file was not found, then try the "resource" searchpath.
+			if( !IsValid() )
+			{
+				// if not found there, search in the specified option searchpath.
+				const CqString * poptResource = QGetRenderContext() ->optCurrent().GetStringOption( "searchpath", "resource" );
+				if ( poptResource != 0 )
+					SearchPath = poptResource[ 0 ];
+
+				CqFile::Open( strFilename, SearchPath.c_str(), mode );
+			}
 		}
 
 };
