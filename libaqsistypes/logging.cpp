@@ -16,6 +16,8 @@
 // License along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+#include "aqsis.h"
+
 #include "logging.h"
 #include "logging_streambufs.h"
 
@@ -267,24 +269,24 @@ int color_level_buf::overflow(int c)
 			switch(detail::log_level(m_stream))
 				{
 					case CRITICAL:
-						buffer = "\e[1;31m";
+						buffer = "\033[1;31m";
 						break;
 					case ERROR:
-						buffer = "\e[1;31m";
+						buffer = "\033[1;31m";
 						break;
 					case WARNING:
-						buffer = "\e[1;33m";
+						buffer = "\033[1;33m";
 						break;
 					case INFO:
-						buffer = "\e[0m";
+						buffer = "\033[0m";
 						break;
 					case DEBUG:
-						buffer = "\e[1;32m";
+						buffer = "\033[1;32m";
 						break;
 					default:
-						buffer = "\e[0m";
+						buffer = "\033[0m";
+						break;
 				}
-
 			if(static_cast<size_t>(m_streambuf->sputn(buffer.c_str(), buffer.size())) != buffer.size())
 				return EOF;
 		}
@@ -293,7 +295,7 @@ int color_level_buf::overflow(int c)
 		{
 			m_start_new_line = true;
 			
-			const std::string buffer = "\e[0m";
+			const std::string buffer = "\033[0m";
 			if(static_cast<size_t>(m_streambuf->sputn(buffer.c_str(), buffer.size())) != buffer.size())
 				return EOF;
 		}
@@ -517,6 +519,130 @@ void syslog_buf::write_to_system_log(const std::string& Message)
 }
 
 #endif //NO_SYSLOG
+
+#ifdef	AQSIS_SYSTEM_WIN32
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// ansi_buf
+
+ansi_buf::ansi_buf(std::ostream& Stream) :
+	m_stream(Stream),
+	m_streambuf(Stream.rdbuf()),
+	m_processing_ansi(0)
+{
+	setp(0, 0);
+	m_stream.rdbuf(this);
+	m_sbh = GetStdHandle(STD_ERROR_HANDLE);
+	GetConsoleScreenBufferInfo(m_sbh, &m_csbInfo);
+	m_attributes = m_csbInfo.wAttributes;
+}
+
+ansi_buf::~ansi_buf()
+{
+	m_stream.rdbuf(m_streambuf);
+}
+
+int ansi_buf::overflow(int c)
+{
+	if(c == EOF)
+		return 0;
+
+	if(m_processing_ansi == 1)
+	{
+		if( c == '[' )	// Code terminator
+		{
+			m_code = "";
+			m_attributes = 0;
+			m_processing_ansi = 2;
+			return(0);
+		}
+		else
+			m_processing_ansi = 0;
+	}
+
+	if(m_processing_ansi == 2)
+	{
+		if( c == ';' )	// Code terminator
+		{
+			process_code();
+			m_code = "";
+			return(0);
+		}
+		else if( c == 'm' )
+		{
+			m_processing_ansi = false;
+			process_code();
+			set_attributes();
+			return(0);
+		}
+		else 
+		{
+			m_code.append(reinterpret_cast<char*>(&c), 1);
+			return(0);
+		}
+	}
+
+	if(c == '\033')
+	{
+		m_processing_ansi = 1;
+		m_code = "";
+		return(0);
+	}
+		
+	return m_streambuf->sputc(c);
+}
+
+
+void ansi_buf::process_code()
+{
+	if(m_code.compare( "0" ) == 0)
+		m_attributes = m_csbInfo.wAttributes;
+	else if(m_code.compare( "1" ) == 0)
+		m_attributes |= FOREGROUND_INTENSITY;
+	else if(m_code.compare( "31" ) == 0)
+		m_attributes |= FOREGROUND_RED;
+	else if(m_code.compare( "32" ) == 0)
+		m_attributes |= FOREGROUND_GREEN;
+	else if(m_code.compare( "33" ) == 0)
+		m_attributes |= FOREGROUND_RED|FOREGROUND_GREEN;
+	else if(m_code.compare( "34" ) == 0)
+		m_attributes |= FOREGROUND_BLUE;
+	else if(m_code.compare( "35" ) == 0)
+		m_attributes |= FOREGROUND_BLUE|FOREGROUND_RED;
+	else if(m_code.compare( "36" ) == 0)
+		m_attributes |= FOREGROUND_GREEN|FOREGROUND_BLUE;
+	else if(m_code.compare( "37" ) == 0)
+		m_attributes |= FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_BLUE;
+	else if(m_code.compare( "41" ) == 0)
+		m_attributes |= BACKGROUND_RED;
+	else if(m_code.compare( "42" ) == 0)
+		m_attributes |= BACKGROUND_GREEN;
+	else if(m_code.compare( "43" ) == 0)
+		m_attributes |= BACKGROUND_RED|BACKGROUND_GREEN;
+	else if(m_code.compare( "44" ) == 0)
+		m_attributes |= BACKGROUND_BLUE;
+	else if(m_code.compare( "45" ) == 0)
+		m_attributes |= BACKGROUND_BLUE|BACKGROUND_RED;
+	else if(m_code.compare( "46" ) == 0)
+		m_attributes |= BACKGROUND_GREEN|BACKGROUND_BLUE;
+	else if(m_code.compare( "47" ) == 0)
+		m_attributes |= BACKGROUND_RED|BACKGROUND_GREEN|BACKGROUND_BLUE;
+}
+
+
+void ansi_buf::set_attributes()
+{
+	SetConsoleTextAttribute(m_sbh, m_attributes);
+}
+
+int ansi_buf::sync()
+{
+	m_streambuf->pubsync();
+	return 0;
+}
+
+#endif
+
 
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

@@ -355,17 +355,18 @@ int main( int argc, const char** argv )
         std::cout << "procedurals: " << g_procedurals.c_str() << std::endl;
     }
 
+#ifdef	AQSIS_SYSTEM_WIN32
+	std::auto_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(std::cerr) );
+#endif
     std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(std::cerr) );
     std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(std::cerr) );
     std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(std::cerr) );
-#ifdef	AQSIS_SYSTEM_POSIX
     std::auto_ptr<std::streambuf> color_level;
     if(!g_no_color)
 	{
 		std::auto_ptr<std::streambuf> temp_color_level( new Aqsis::color_level_buf(std::cerr) );
     	color_level = temp_color_level;
 	}
-#endif
     std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
     std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::INFO, std::cerr) );
 #ifdef	AQSIS_SYSTEM_POSIX

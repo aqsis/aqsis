@@ -436,7 +436,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
     // Fill in default values for all primitive variables not explicitly specified.
     // Fill in primitive variables specified.
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 0 ) );
+    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
     pSurface->P() ->SetSize( 13 * 10 );
     for ( i = 0; i < 13*10; i++ )
         pSurface->P()->pValue( i )[0] = Patch01[ i ];
@@ -461,7 +461,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
     // Fill in default values for all primitive variables not explicitly specified.
     // Fill in primitive variables specified.
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 0 ) );
+    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
     pSurface->P() ->SetSize( 13 * 7 );
     for ( i = 0; i < 13*7; i++ )
         pSurface->P()->pValue( i )[0] = Patch02[ i ] ;
@@ -484,7 +484,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
     // Fill in default values for all primitive variables not explicitly specified.
     // Fill in primitive variables specified.
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 0 ) );
+    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
     pSurface->P() ->SetSize( 4 * 7 );
     for ( i = 0; i < 4*7; i++ )
         pSurface->P()->pValue( i )[0] = Patch03[ i ] ;
@@ -507,7 +507,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
     // Fill in default values for all primitive variables not explicitly specified.
     // Fill in primitive variables specified.
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 0 ) );
+    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
     pSurface->P() ->SetSize( 4 * 7 );
     for ( i = 0; i < 4*7; i++ )
         pSurface->P()->pValue( i )[0] = Patch04[ i ] ;
@@ -530,7 +530,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
     // Fill in default values for all primitive variables not explicitly specified.
     // Fill in primitive variables specified.
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 0 ) );
+    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
     pSurface->P() ->SetSize( 4 * 7 );
     for ( i = 0; i < 4*7; i++ )
         pSurface->P()->pValue( i )[0] = Patch05[ i ] ;
@@ -553,7 +553,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
     // Fill in default values for all primitive variables not explicitly specified.
     // Fill in primitive variables specified.
-    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 0 ) );
+    pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
     pSurface->P() ->SetSize( 4 * 7 );
     for ( i = 0; i < 4*7; i++ )
         pSurface->P()->pValue( i )[0] = Patch06[ i ] ;
@@ -579,7 +579,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
         // Fill in default values for all primitive variables not explicitly specified.
         // Fill in primitive variables specified.
-        pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 0 ) );
+        pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
         pSurface->P() ->SetSize( 13 * 4 );
         for ( i = 0; i < 13*4; i++ )
         {

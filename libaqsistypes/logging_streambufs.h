@@ -25,6 +25,13 @@
 
 #include "aqsis.h"
 
+#ifdef	AQSIS_SYSTEM_WIN32
+#include <windows.h>
+#ifdef	ERROR
+#undef	ERROR
+#endif
+#endif
+
 START_NAMESPACE( Aqsis )
 
 ///////////////////////////////////////////////////////////
@@ -211,6 +218,38 @@ private:
     std::streambuf* const m_streambuf;
     std::string m_buffer;
 };
+
+#ifdef	AQSIS_SYSTEM_WIN32
+
+///////////////////////////////////////////////////////////
+// ansi_buf
+
+/// Scans the stream for ANSI control sequences and emulates the behaviour under Windows
+class ansi_buf :
+	public std::streambuf
+{
+public:
+	ansi_buf(std::ostream& Stream);
+	~ansi_buf();
+
+protected:
+	int overflow(int);
+	int sync();
+
+private:
+	void process_code();
+	void set_attributes();
+	
+	std::ostream& m_stream;
+	std::streambuf* const m_streambuf;
+	int m_processing_ansi;
+	WORD m_attributes;
+	std::string m_code;
+	HANDLE	m_sbh;
+	CONSOLE_SCREEN_BUFFER_INFO	m_csbInfo;
+};
+
+#endif
 
 //-----------------------------------------------------------------------
 
