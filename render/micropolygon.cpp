@@ -1297,11 +1297,25 @@ void CqMicroPolygon::CacheHitTestValuesDof(CqHitTestCache* cache, const CqVector
 CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
 {
     CqVector2D kA, kB, kC, kD;
+    CqVector2D kResult;
+	TqBool flip = TqFalse;
 
     kA = CqVector2D( PointA() );
-    kB = CqVector2D( PointB() ) - kA;
-    kC = CqVector2D( PointD() ) - kA;
-    kD = CqVector2D( PointC() ) + kA - CqVector2D( PointB() ) - CqVector2D( PointD() );
+    kB = CqVector2D( PointB() );
+    kC = CqVector2D( PointD() );
+    kD = CqVector2D( PointC() );
+
+	if(fabs(kB.x() - kA.x()) < fabs(kC.x() - kA.x()) )
+	{
+		CqVector2D temp = kC;
+		kC = kB;
+		kB = temp;
+		//flip = TqTrue;
+	}
+
+    kD += kA - kB - kC;
+    kB -= kA;
+    kC -= kA;
 
     TqFloat fBCdet = kB.x() * kC.y() - kB.y() * kC.x();
     TqFloat fCDdet = kC.y() * kD.x() - kC.x() * kD.y();
@@ -1312,7 +1326,6 @@ CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
     TqFloat fA = fCDdet;
     TqFloat fB = fADdet + fBCdet;
     TqFloat fC = fABdet;
-    CqVector2D kResult;
 
     if ( fabs( fA ) >= 1.0e-6 )
     {
@@ -1335,6 +1348,12 @@ CqVector2D CqMicroPolygon::ReverseBilinear( const CqVector2D& v )
         kResult.y( -fC / fB );
     }
     kResult.x( -( kDiff.x() + kResult.y() * kC.x() ) / ( kB.x() + kResult.y() * kD.x() ) );
+	if(flip)
+	{
+		TqFloat temp = kResult.x();
+		kResult.x(kResult.y());
+		kResult.y(temp);
+	}
 
     return ( kResult );
 }

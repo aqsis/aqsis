@@ -5,7 +5,7 @@
  *	@brief	Implementation of trimcurce functionality.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2004/07/27 22:48:06 $
+ *	Last change date:	$Date: 2004/07/29 17:11:05 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -126,8 +126,8 @@ void CqTrimLoop::Prepare( CqSurface* pSurface )
 
         for ( iPoint = 0; iPoint < cPoints; iPoint++ )
         {
-            //	CqVector2D v(iCurve->Evaluate(u));
-            //	std::cout << v.x() << "," << v.y() << std::endl;
+            // CqVector2D v(iCurve->Evaluate(u));
+            // std::cout << v.x() << "," << v.y() << std::endl;
             m_aCurvePoints.push_back( iCurve->Evaluate( u ) );
             u += du;
         }
