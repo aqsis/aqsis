@@ -281,7 +281,7 @@ int main( int argc, const char** argv )
 	ap.argString( "progressformat", "\astring representing the format of the progress message", &g_strprogress );
 	ap.argInt( "endofframe", "=integer\aequivalent to \"endofframe\" option", &g_endofframe );
 	ap.argFlag( "nostandard", "\adisables declaration of standard RenderMan parameter types", &g_nostandard );
-	ap.argFlag( "verbose", "\aoutpur more information during rendering", &g_verbose );
+	ap.argFlag( "verbose", "\aoutput more information during rendering", &g_verbose );
 	ap.alias( "verbose", "v" );
 	ap.argFlag( "renderinfo", "\aPrint out infos about base rendering settings", &g_rinfo );
 	ap.argFlag( "environment", "\aoutput environment information", &g_environment );
