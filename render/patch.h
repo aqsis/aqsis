@@ -239,7 +239,6 @@ class _qShareC CqSurfacePatchBilinear : public CqSurface
 
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual	TqInt	PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
-		virtual void	PostSubdivide(std::vector<CqBasicSurface*>& aSplits);
 		virtual void	PostDice(CqMicroPolyGrid * pGrid)
 		{
 			if(m_fHasPhantomFourthVertex)
@@ -250,7 +249,6 @@ class _qShareC CqSurfacePatchBilinear : public CqSurface
 			return ( TqTrue );
 		}
 		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
-		virtual void AddPrimitiveVariable( CqParameter* pParam );
 
 	protected:
 		TqBool	m_fHasPhantomFourthVertex;

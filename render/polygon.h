@@ -142,6 +142,8 @@ class CqPolygonBase
 		{
 			return ( Surface().Uses() );
 		}
+
+		void CreatePhantomData(CqParameter* pParam);
 };
 
 

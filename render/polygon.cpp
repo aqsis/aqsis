@@ -241,6 +241,10 @@ CqMicroPolyGridBase* CqPolygonBase::Dice()
 
 //---------------------------------------------------------------------
 /** Split the polygon into bilinear patches.
+ *  This split has a special way of dealing with triangles. To avoid the problem of grids with degenerate micro polygons
+ *  ( micro polygons with two points the same. ) we treat a triangle as a parallelogram, by extending the fourth point out.
+ *  Then everything on the left side of the vector between points 1 and 2 ( on the same side as point 0 ) is rendered, 
+ *  everything on the right (the same side as point 3) is not.
  */
 
 TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
@@ -321,6 +325,8 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 				pNewUP->SetValue( ( *iUP ), 1, iUPB );
 				pNewUP->SetValue( ( *iUP ), 2, iUPD );
 				pNewUP->SetValue( ( *iUP ), 3, iUPC );
+				if(indexC == indexD)
+					CreatePhantomData( pNewUP );
 			}
 			else if ( pNewUP->Class() == class_uniform )
 			{
@@ -336,11 +342,8 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 			pNew->AddPrimitiveVariable( pNewUP );
 		}
 
-		if(indexC == indexD)
-		{
-			*pNew->P()->pValue(3) = (pNew->P()->pValue(1)[0] - pNew->P()->pValue(0)[0]) + pNew->P()->pValue(2)[0];
-			pNew->SetfHasPhantomFourthVertex(TqTrue);
-		}
+		// If this is a triangle, then mark the patch as a special case. See function header comment for more details.
+		if(indexC == indexD)	pNew->SetfHasPhantomFourthVertex(TqTrue);
 
 		// If there are no smooth normals specified, then fill in the facet normal at each vertex.
 		if ( !bHasN() && USES( iUses, EnvVars_N ) )
@@ -430,6 +433,69 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 	return ( cNew );
 }
 
+
+//---------------------------------------------------------------------
+/** Generate phanton data to 'stretch' the triangle patch into a parallelogram.
+ */
+
+void CqPolygonBase::CreatePhantomData(CqParameter* pParam)
+{
+	assert(pParam->Class() == class_varying || pParam->Class() == class_vertex);
+	
+	switch(pParam->Type())
+	{
+		case type_point:
+		case type_vector:
+		case type_normal:
+		{
+			CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(pParam);
+			pTParam->pValue(3)[0] = ( pTParam->pValue(1)[0] - pTParam->pValue(0)[0] ) + pTParam->pValue(2)[0];
+			break;
+		}
+
+		case type_hpoint:
+		{
+			CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pParam);
+			pTParam->pValue(3)[0] = ( pTParam->pValue(1)[0] - pTParam->pValue(0)[0] ) + pTParam->pValue(2)[0];
+			break;
+		}
+
+		case type_float:
+		{
+			CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pParam);
+			pTParam->pValue(3)[0] = ( pTParam->pValue(1)[0] - pTParam->pValue(0)[0] ) + pTParam->pValue(2)[0];
+			break;
+		}
+
+		case type_integer:
+		{
+			CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>(pParam);
+			pTParam->pValue(3)[0] = ( pTParam->pValue(1)[0] - pTParam->pValue(0)[0] ) + pTParam->pValue(2)[0];
+			break;
+		}
+
+		case type_color:
+		{
+			CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>(pParam);
+			pTParam->pValue(3)[0] = ( pTParam->pValue(1)[0] - pTParam->pValue(0)[0] ) + pTParam->pValue(2)[0];
+			break;
+		}
+
+		case type_matrix:
+		{
+			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(pParam);
+			pTParam->pValue(3)[0] = ( pTParam->pValue(1)[0] - pTParam->pValue(0)[0] ) + pTParam->pValue(2)[0];
+			break;
+		}
+
+		case type_string:
+		{
+			CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>(pParam);
+			pTParam->pValue(3)[0] = ( pTParam->pValue(1)[0] - pTParam->pValue(0)[0] ) + pTParam->pValue(2)[0];
+			break;
+		}
+	}
+}
 
 //---------------------------------------------------------------------
 /** Default constructor.

@@ -658,20 +658,6 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 
 
 
-//---------------------------------------------------------------------
-/** Perform post split operations.
- */
-
-void CqSurfacePatchBilinear::PostSubdivide(std::vector<CqBasicSurface*>& aSplits)
-{
-	if(aSplits.size() == 4)
-	{
-		delete(aSplits.back());
-		aSplits.pop_back();
-	}
-}
-
-
 TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 {
 	aSplits.push_back( new CqSurfacePatchBilinear );
@@ -742,32 +728,6 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 		static_cast<CqSurfacePatchBilinear*>( aSplits[ 1 ] ) ->m_fHasPhantomFourthVertex = TqFalse;
 
 		return ( 2 );
-	}
-}
-
-
-//---------------------------------------------------------------------
-/**
- * Adds a primitive variable to the list of user parameters.  This method
- * caches the indexes of the "__internal_u" and "__internal_v" parameters within
- * the array of user parameters for later access.
- *
- * @param pParam        Pointer to the parameter to add.
- */
-void CqSurfacePatchBilinear::AddPrimitiveVariable( CqParameter* pParam )
-{
-	// add the primitive variable using the superclass method
-	CqSurface::AddPrimitiveVariable( pParam );
-
-	TqLong hash = CqParameter::hash("__internal_u");
-
-	// trap the indexes of "width" and "constantwidth" parameters
-	if ( pParam->hash() == hash )
-		m_iInternalu = m_aUserParams.size() - 1;
-	else {
-		hash = CqParameter::hash("__internal_v");
-		if ( pParam->hash() == hash )
-			m_iInternalv = m_aUserParams.size() - 1;
 	}
 }
 
