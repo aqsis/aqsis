@@ -227,8 +227,6 @@ void CqMicroPolyGrid::CalcNormals()
 				vecN = vecFailsafeN;
 			}
 
-			std::cout << "N: " << vecN << " FSN: " << vecFailsafeN << std::endl;
-
 			pNg->SetNormal( vecN, igrid );
 			igrid++;
 			// If we are at the last row, last row normal to the same.
