@@ -382,9 +382,12 @@ RtVoid	RiWorldBegin()
 
 	QGetRenderContext() ->CreateWorldContext();
 	// Set the world to camera transformation matrix to the current matrix.
-	QGetRenderContext() ->SetmatCamera( QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ) );
+	//QGetRenderContext() ->SetmatCamera( QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ) );
+	QGetRenderContext() ->SetmatCamera( QGetRenderContext() ->ptransCurrent() );
 	// and then reset the current matrix to identity, ready for object transformations.
-	QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), CqMatrix() );
+	TqInt i;
+	for(i = 0; i < QGetRenderContext() ->ptransWriteCurrent()->cTimes(); i++)
+		QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->ptransWriteCurrent() ->Time(i), CqMatrix() );
 
 	QGetRenderContext() ->optCurrent().InitialiseCamera();
 	QGetRenderContext() ->pImage() ->SetImage();
@@ -1768,7 +1771,7 @@ RtVoid	RiIdentity()
 	// We get the camera matrix and see if that is going to alter the default orientation, note
 	// that this should still work if we get a call to identity before the WorldBegin, as then the
 	// camera transform will be identity, and the behaviour will be correct.
-	if ( QGetRenderContext() ->matWorldToCamera().Determinant() < 0 )
+	if ( QGetRenderContext() ->matSpaceToSpace("world", "camera").Determinant() < 0 )
 	{
 		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[1] = OrientationRH;
 		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[0] = OrientationRH;
@@ -2650,9 +2653,9 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 				pPointsClass2->ClonePrimitiveVariables( *pPointsClass );
 
 				// Transform the points into camera space for processing,
-				pPointsClass2->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ) ),
-				                          QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ) ),
-				                          QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ) ) );
+				pPointsClass2->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ),
+				                          QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ),
+				                          QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ) );
 				apPoints.push_back( pPointsClass2 );
 			}
 			pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
@@ -4198,9 +4201,9 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 				pPointsClass2->ClonePrimitiveVariables( *pPointsClass );
 
 				// Transform the points into camera space for processing,
-				pPointsClass2->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ) ),
-				                          QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ) ),
-				                          QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ) ) );
+				pPointsClass2->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ),
+				                          QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ),
+				                          QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ) );
 				apPoints.push_back( pPointsClass2 );
 			}
 			pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
@@ -4698,9 +4701,9 @@ RtVoid	CreateGPrim( T* pSurface )
 			pMotionSurface->AddTimeSlot( time, pTimeSurface );
 
 			// Transform the points into camera space for processing,
-			pTimeSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pTimeSurface->pTransform() ->matObjectToWorld( time ) ),
-			                         QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pTimeSurface->pTransform() ->matObjectToWorld( time ) ),
-			                         QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pTimeSurface->pTransform() ->matObjectToWorld( time ) ) );
+			pTimeSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pTimeSurface->pTransform() ->matObjectToWorld( time ), time ),
+			                         QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pTimeSurface->pTransform() ->matObjectToWorld( time ), time ),
+			                         QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pTimeSurface->pTransform() ->matObjectToWorld( time ), time ) );
 		}
 		// Transform the points into camera space for processing,
 		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld() ),

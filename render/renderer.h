@@ -161,9 +161,9 @@ class CqRenderer : public IqRenderer
 		}
 
 		// Handle various coordinate system transformation requirements.
-		virtual	CqMatrix	matSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix() );
-		virtual	CqMatrix	matVSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix() );
-		virtual	CqMatrix	matNSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix() );
+		virtual	CqMatrix	matSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix(), TqFloat time = 0.0f );
+		virtual	CqMatrix	matVSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix(), TqFloat time = 0.0f );
+		virtual	CqMatrix	matNSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix(), TqFloat time = 0.0f );
 
 		virtual	const	TqFloat*	GetFloatOption( const char* strName, const char* strParam ) const;
 		virtual	const	TqInt*	GetIntegerOption( const char* strName, const char* strParam ) const;
@@ -252,13 +252,6 @@ class CqRenderer : public IqRenderer
 				delete( m_Shaders.pFirst() );
 		}
 
-		/** Get a reference to the current transformation matrix.
-		 * \return A reference to a CqMatrix.
-		 */
-		virtual	CqMatrix&	matWorldToCamera()
-		{
-			return ( m_aCoordSystems[ CoordSystem_Camera ].m_matWorldTo );
-		}
 		/** Set the world to screen matrix.
 		 * \param mat The new matrix to use as the world to screen transformation.
 		 */
@@ -283,12 +276,13 @@ class CqRenderer : public IqRenderer
 		/** Set the world to camera matrix.
 		 * \param mat The new matrix to use as the world to camera transformation.
 		 */
-		virtual	void	SetmatCamera( const CqMatrix& mat )
+		virtual	void	SetmatCamera( const CqTransform* ptrans )
 		{
-			m_aCoordSystems[ CoordSystem_Camera ] .m_matWorldTo =
-			    m_aCoordSystems[ CoordSystem_Current ].m_matWorldTo = mat;
-			m_aCoordSystems[ CoordSystem_Camera ] .m_matToWorld =
-			    m_aCoordSystems[ CoordSystem_Current ].m_matToWorld = mat.Inverse();
+			m_transCamera = *ptrans;
+			//m_aCoordSystems[ CoordSystem_Camera ] .m_matWorldTo =
+		    //m_aCoordSystems[ CoordSystem_Current ].m_matWorldTo = ptrans->GetMotionObjectInterpolated(0);
+			//m_aCoordSystems[ CoordSystem_Camera ] .m_matToWorld =
+		    //m_aCoordSystems[ CoordSystem_Current ].m_matToWorld = ptrans->GetMotionObjectInterpolated(0).Inverse();
 		}
 		/** Get the current transformation stack.
 		 * \return A reference to a vector of CqTransform class pointers.
@@ -324,6 +318,7 @@ class CqRenderer : public IqRenderer
 		CqList<CqShaderRegister> m_Shaders;				///< List of registered shaders.
 		TqBool	m_fSaveGPrims;
 		std::vector<CqTransform*>	m_TransformStack;	///< The global transformation stack.
+		CqTransform		m_transCamera;					///< The camera transform.
 		std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
 
 	public:

@@ -64,8 +64,8 @@ CqRenderer::CqRenderer() :
 	// Initialise the array of coordinate systems.
 	m_aCoordSystems.resize( CoordSystem_Last );
 
-	m_aCoordSystems[ CoordSystem_Camera ]	.m_strName = "camera";
-	m_aCoordSystems[ CoordSystem_Current ].m_strName = "current";
+	m_aCoordSystems[ CoordSystem_Camera ]	.m_strName = "__camera__";
+	m_aCoordSystems[ CoordSystem_Current ].m_strName = "__current__";
 	m_aCoordSystems[ CoordSystem_World ]	.m_strName = "world";
 	m_aCoordSystems[ CoordSystem_Screen ]	.m_strName = "screen";
 	m_aCoordSystems[ CoordSystem_NDC ]	.m_strName = "NDC";
@@ -554,10 +554,6 @@ void CqRenderer::Initialise()
 	ClearSymbolTable();
 	FlushShaders();
 
-	// Initialise the matrices for this camera according to the
-	// status of the camera attributes.
-	optCurrent().InitialiseCamera();
-
 	// Truncate the array of named coordinate systems to just the standard ones.
 	m_aCoordSystems.resize( CoordSystem_Last );
 }
@@ -567,21 +563,26 @@ void CqRenderer::Initialise()
 /** Get the matrix to convert between the specified coordinate systems.
  */
 
-CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld )
+CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time )
 {
+	TqInt i;
 	CqMatrix	matResult, matA, matB;
 	// Get the two component matrices.
 	// First check for special cases.
 	if ( strcmp( strFrom, "object" ) == 0 ) matA = matObjectToWorld;
 	else if ( strcmp( strFrom, "shader" ) == 0 ) matA = matShaderToWorld;
+	else if ( (strcmp( strFrom, "camera" ) == 0) || (strcmp( strFrom, "current" ) == 0) ) 
+		matA = m_transCamera.GetMotionObjectInterpolated(time).Inverse();
+	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
+		if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+
 	if ( strcmp( strTo, "object" ) == 0 ) matB = matObjectToWorld.Inverse();
 	else if ( strcmp( strTo, "shader" ) == 0 ) matB = matShaderToWorld.Inverse();
-	TqInt i;
-	for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-	{
-		if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+	else if ( (strcmp( strTo, "camera" ) == 0) || (strcmp( strTo, "current" ) == 0) ) 
+		matB = m_transCamera.GetMotionObjectInterpolated(time);
+	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
 		if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
-	}
+
 	matResult = matB * matA;
 
 	return ( matResult );
@@ -592,21 +593,26 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 /** Get the matrix to convert vectors between the specified coordinate systems.
  */
 
-CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld )
+CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time )
 {
+	TqInt i;
 	CqMatrix	matResult, matA, matB;
 	// Get the two component matrices.
 	// First check for special cases.
 	if ( strcmp( strFrom, "object" ) == 0 ) matA = matObjectToWorld;
 	else if ( strcmp( strFrom, "shader" ) == 0 ) matA = matShaderToWorld;
+	else if ( (strcmp( strFrom, "camera" ) == 0) || (strcmp( strFrom, "current" ) == 0) ) 
+		matA = m_transCamera.GetMotionObjectInterpolated(time).Inverse();
+	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
+		if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+
 	if ( strcmp( strTo, "object" ) == 0 ) matB = matObjectToWorld.Inverse();
 	else if ( strcmp( strTo, "shader" ) == 0 ) matB = matShaderToWorld.Inverse();
-	TqInt i;
-	for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-	{
-		if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+	else if ( (strcmp( strTo, "camera" ) == 0) || (strcmp( strTo, "current" ) == 0) ) 
+		matB = m_transCamera.GetMotionObjectInterpolated(time);
+	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
 		if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
-	}
+
 	matResult = matB * matA;
 
 	matResult[ 3 ][ 0 ] = matResult[ 3 ][ 1 ] = matResult[ 3 ][ 2 ] = matResult[ 0 ][ 3 ] = matResult[ 1 ][ 3 ] = matResult[ 2 ][ 3 ] = 0.0;
@@ -620,21 +626,26 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
 /** Get the matrix to convert normals between the specified coordinate systems.
  */
 
-CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld )
+CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time )
 {
+	TqInt i;
 	CqMatrix	matResult, matA, matB;
 	// Get the two component matrices.
 	// First check for special cases.
 	if ( strcmp( strFrom, "object" ) == 0 ) matA = matObjectToWorld;
 	else if ( strcmp( strFrom, "shader" ) == 0 ) matA = matShaderToWorld;
+	else if ( (strcmp( strFrom, "camera" ) == 0) || (strcmp( strFrom, "current" ) == 0) ) 
+		matA = m_transCamera.GetMotionObjectInterpolated(time).Inverse();
+	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
+		if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+
 	if ( strcmp( strTo, "object" ) == 0 ) matB = matObjectToWorld.Inverse();
 	else if ( strcmp( strTo, "shader" ) == 0 ) matB = matShaderToWorld.Inverse();
-	TqInt i;
-	for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-	{
-		if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+	else if ( (strcmp( strTo, "camera" ) == 0) || (strcmp( strTo, "current" ) == 0) ) 
+		matB = m_transCamera.GetMotionObjectInterpolated(time);
+	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
 		if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
-	}
+
 	matResult = matB * matA;
 
 	matResult[ 3 ][ 0 ] = matResult[ 3 ][ 1 ] = matResult[ 3 ][ 2 ] = matResult[ 0 ][ 3 ] = matResult[ 1 ][ 3 ] = matResult[ 2 ][ 3 ] = 0.0;

@@ -159,7 +159,7 @@ void CqOptions::InitialiseCamera()
 				break;
 			}
 	}
-	CqMatrix matWorldToCamera( QGetRenderContext() ->matWorldToCamera() );
+	CqMatrix matWorldToCamera( QGetRenderContext() ->matSpaceToSpace("world", "camera") );
 	QGetRenderContext() ->SetmatScreen( matCameraToScreen * matWorldToCamera );
 	QGetRenderContext() ->SetmatNDC( matScreenToNDC * matCameraToScreen * matWorldToCamera );
 	QGetRenderContext() ->SetmatRaster( matNDCToRaster * matScreenToNDC * matCameraToScreen * matWorldToCamera );
