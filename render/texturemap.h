@@ -128,7 +128,10 @@ public:
     {
 
         return (
-                   s >= m_sOrigin && t >= m_tOrigin && s < m_sOrigin + m_Width && t < m_tOrigin + m_Height &&
+                   (s >= m_sOrigin) &&
+                   (t >= m_tOrigin) &&
+                   (s < m_sOrigin + m_Width) &&
+                   (t < m_tOrigin + m_Height) &&
                    directory == m_Directory );
     }
 
@@ -527,6 +530,8 @@ public:
     {}
 
     virtual	void	GetSample( TqFloat ss1, TqFloat tt1, TqFloat ss2, TqFloat tt2, std::valarray<TqFloat>& val );
+    virtual	void	GetSampleSgle( TqFloat ss1, TqFloat tt1, TqFloat ss2, TqFloat tt2, std::valarray<TqFloat>& val );
+    virtual	void	GetSampleTri( TqFloat ss1, TqFloat tt1, TqFloat ss2, TqFloat tt2, std::valarray<TqFloat>& val );
 
     virtual	TqInt	NumPages() const	{ return(1); }
 
@@ -535,7 +540,7 @@ public:
     static	CqTextureMap* GetShadowMap( const CqString& strName );
     static	CqTextureMap* GetLatLongMap( const CqString& strName );
 
-    void	ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt directory, std::vector<TqFloat>& accum );
+    void	ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, TqInt directory, TqInt m_xres, TqInt m_yres, std::vector<TqFloat>& accum );
 
     void Interpreted( TqPchar mode );
 
@@ -564,6 +569,8 @@ public:
 
 TIFF*	pImage()			{ return( m_pImage ); }
     const TIFF*	pImage() const	{ return( m_pImage ); }
+
+    TqBool BiLinear (TqFloat u, TqFloat v, TqInt umapsize, TqInt vmapsize, TqInt id, std::valarray<TqFloat >	&m_color);
 
 protected:
     static	std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loaded textures.
@@ -606,6 +613,11 @@ protected:
     std::valarray<TqFloat>	m_tempval4;
     std::valarray<TqFloat>	m_low_color;
     std::valarray<TqFloat>	m_high_color;
+
+    // in hope to correlate all the microgrids together keep track
+    // of the last (non-zero) directory (id, idx) so later we could
+    // re-use the same level of mipmap.
+    TqInt    m_Directory;
 }
 ;
 
