@@ -33,45 +33,6 @@
 
 START_NAMESPACE( Aqsis )
 
-char* gVariableTypeNames[] =
-    {
-        "invalid",
-        "float",
-        "integer",
-        "point",
-        "string",
-        "color",
-        "triple",
-        "hpoint",
-        "normal",
-        "vector",
-        "void",
-        "matrix",
-        "sixteentuple",
-    };
-TqInt gcVariableTypeNames = sizeof( gVariableTypeNames ) / sizeof( gVariableTypeNames[ 0 ] );
-
-char* gVariableStorageNames[] =
-    {
-        "invalid",
-		"constant",
-        "uniform",
-        "varying",
-        "vertex",
-		"facevarying",
-    };
-TqInt gcVariableStorageNames = sizeof( gVariableStorageNames ) / sizeof( gVariableStorageNames[ 0 ] );
-
-
-
-TqFloat		CqShaderVariable::m_DefFloat = 0.0f;
-CqString	CqShaderVariable::m_DefString = CqString("");
-CqVector3D	CqShaderVariable::m_DefPoint = CqVector3D(0.0f,0.0f,0.0f);
-CqVector3D	CqShaderVariable::m_DefVector = CqVector3D(0.0f,0.0f,0.0f);
-CqVector3D	CqShaderVariable::m_DefNormal = CqVector3D(0.0f,0.0f,0.0f);
-CqColor		CqShaderVariable::m_DefColor = CqColor(0.0f,0.0f,0.0f);
-CqMatrix	CqShaderVariable::m_DefMatrix = CqMatrix();
-
 
 CqShaderVariable::CqShaderVariable()
 {

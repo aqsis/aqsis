@@ -44,15 +44,6 @@
 START_NAMESPACE( Aqsis )
 
 
-_qShareM	extern char*	gVariableStorageNames[];
-_qShareM	extern TqInt	gcVariableStorageNames;
-_qShareM	extern char*	gVariableTypeNames[];
-_qShareM	extern TqInt	gcVariableTypeNames;
-
-_qShare	std::ostream &operator<<( std::ostream &Stream, EqVariableType t );
-
-
-
 //----------------------------------------------------------------------
 /** \class CqShaderVariable
  * Abstract base class from which all shaders variables must be defined.
@@ -88,14 +79,6 @@ class CqShaderVariable : public IqShaderData
 
 	protected:
 		CqString	m_strName;		///< Name of this variable.
-
-static	TqFloat		m_DefFloat;
-static	CqString	m_DefString;
-static	CqVector3D	m_DefPoint;
-static	CqVector3D	m_DefVector;
-static	CqVector3D	m_DefNormal;
-static	CqColor		m_DefColor;
-static	CqMatrix	m_DefMatrix;
 };
 
 
