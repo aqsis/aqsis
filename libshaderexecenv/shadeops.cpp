@@ -2778,12 +2778,10 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 		swidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
 		twidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
 
-		paramMap[ "sblur" ] -> SetFloat( 0.05f );
-
 		GETPOINT( P );
 		if( type == "soft_m" )
 		{
-			TqFloat maxblur = 10, sblur = 1, tblur = 1, fadeto = 0.5;
+			TqFloat maxblur = 10, sblur = 1, tblur = 1, fadeto = 0.0;
 
 			// Get Max blur
 			if ( ( paramMap.size() != 0 ) )
@@ -2802,7 +2800,7 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 			// Check if 2 maps
 			if( pMap->NumPages() < 2 || pMap->NumPages() > 2 )
 			{
-				QGetRenderContextI() ->Logger() ->error( "LDB SoftShadows need 2 maps" );
+				QGetRenderContextI() ->Logger() ->error( "SoftShadows need 2 maps" );
 				
 				// Return 0
 				BEGIN_VARYING_SECTION

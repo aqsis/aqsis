@@ -38,6 +38,8 @@
 
 START_NAMESPACE( Aqsis )
 
+TqFloat	 CqStats::m_floatVars[ CqStats::_Last_float ];		///< Float variables
+TqInt	 CqStats::m_intVars[ CqStats::_Last_int ];			///< Int variables
 
 /**
    Initialise every variable.
@@ -73,9 +75,6 @@ void CqStats::InitialiseFrame()
 	m_cMPGsDeallocated = 0;
 	m_cMPGsCurrent	= 0;
 	m_cMPGsPeak = 0;
-	m_cMPGsPushedForward = 0;
-	m_cMPGsPushedDown = 0;
-	m_cMPGsPushedFarDown = 0;
 	m_cSamples = 0;
 	m_cSampleBoundHits = 0;
 	m_cSampleHits = 0;
@@ -284,17 +283,83 @@ void CqStats::PrintStats( TqInt level ) const
 
 	}
 	//! Most important informations
-	if ( level == 2 )
+	if ( level == 2 || level == 3 )
 	{
 		MSG << "GPrims: \t" << m_cGPrims << std::endl;
 		MSG << "Total GPrims:\t" << m_cTotalGPrims << " (" << m_cCulledGPrims << " culled)" << std::endl;
 
 		MSG << "Grids:    \t" << m_cGridsAllocated << " created" << std::endl;
 
-		MSG << "Micropolygons: \t" << m_cMPGsAllocated << " created" << " (" << m_cCulledMPGs << " culled)" << std::endl;
-		MSG << "               \t" << m_cMPGsPushedForward << " pushed forward, " << m_cMPGsPushedDown << " pushed down, " << m_cMPGsPushedFarDown << " pushed far down" << std::endl;
+		/* MPGS */
+		/*   Micropolygons:
+				3237314 created
+				1299501 current (406094 KB), 1644602 peak (513938 KB)
+				1644720 allocated (513975 KB), 345219 free
+				91.8 KB overhead (0+0+0+11748 blocks)
+				2729915 aov store current (447876 KB), 3421917 peak (561408 KB)
+				Hit rate: 7.23% (233951 of 3237314) (2511975 not sampled)
+				Pushes: 497130 forward (15.36%), 1167240 down (36.06%)
+						7669 far down (0.24%) (current 2246 KB, peak 2246 KB)
+				Hittest success rate: 9.51% (1917871 of 20169901 samples)
+		*/
 
-		MSG << "Sampling: \t" << m_cSamples << " samples" << std::endl;
+		/*
+			-------------------------------------------------------------------
+			MPG stats
+		*/
+
+		TqInt _mpg_pushes_all = STATS_INT_GETI( MPG_pushed_forward ) + STATS_INT_GETI( MPG_pushed_down ) +
+			STATS_INT_GETI( MPG_pushed_far_down );
+
+		TqFloat _mpg_p_f =  100.0f * STATS_INT_GETI( MPG_pushed_forward ) / _mpg_pushes_all;
+		TqFloat _mpg_p_d = 100.0f * STATS_INT_GETI( MPG_pushed_down ) / _mpg_pushes_all;
+		TqFloat _mpg_p_fd = 100.0f * STATS_INT_GETI( MPG_pushed_far_down ) / _mpg_pushes_all;
+		TqFloat _mpg_p_a = 100.0f * _mpg_pushes_all /STATS_INT_GETI( MPG_allocated );
+
+		MSG << "Micropolygons:\n\t"
+			<< STATS_INT_GETI( MPG_allocated ) << " created (" << STATS_INT_GETI( MPG_culled ) << " culled)\n"
+			<< "\tPeak: " << STATS_INT_GETI( MPG_peak ) << "\n\t"
+			<< STATS_INT_GETI( MPG_allocated ) - STATS_INT_GETI( MPG_deallocated ) << " remaining\n"		
+			<< std::endl;
+		
+		/*
+			MPG Pushed
+		*/
+		MSG << "\tPushes:\t" << _mpg_pushes_all << " MPGs pushed ("		<< _mpg_p_a			<< "%)\n\t\t" 
+							 << STATS_INT_GETI( MPG_pushed_forward )	<< " forward ("		<< _mpg_p_f	 << "%), "
+							 << STATS_INT_GETI( MPG_pushed_down )		<< " down, ("		<< _mpg_p_d	 << "%),\n\t\t"
+							 << STATS_INT_GETI( MPG_pushed_far_down )	<< " far down ("	<< _mpg_p_fd << "%)\n"
+							 << std::endl;
+
+		/*
+			MPG stats - End
+			-------------------------------------------------------------------
+		*/
+
+
+
+		/*
+			-------------------------------------------------------------------
+			Sampling
+		*/
+
+		TqFloat _spl_b_h = 100.0f * STATS_INT_GETI( SPL_bound_hits ) / STATS_INT_GETI( SPL_count );
+		TqFloat _spl_h = 100.0f * STATS_INT_GETI( SPL_hits ) / STATS_INT_GETI( SPL_count );
+
+		TqInt _spl_px = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
+		TqInt _spl_py = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
+
+		MSG << "Sampling:\n"
+							<< "\tSamples per Pixel: " << _spl_px * _spl_py << " (" << _spl_px << " " << _spl_py << ")\n\t"
+							<< STATS_INT_GETI( SPL_count ) << " samples" << std::endl;
+		MSG					<< "\tHits: " << STATS_INT_GETI( SPL_hits ) << " (" << _spl_h << "%), "
+							<< STATS_INT_GETI( SPL_bound_hits ) << " (" << _spl_b_h << "%)\n"
+							<< std::endl;
+		
+		/*
+			Sampling - End
+			-------------------------------------------------------------------
+		*/
 
 		MSG << "Attributes: \t";
 		MSG << ( TqInt ) Attribute_stack.size() << " created" << std::endl;
@@ -307,8 +372,8 @@ void CqStats::PrintStats( TqInt level ) const
 
 		MSG << "Parameters: \t" << m_cParametersAllocated << " created" << std::endl;
 
-	}
-	if ( level == 3 )
+	}/*
+	if ( level == 4 )
 	{
 		MSG << "GPrims: \t" << m_cGPrims << std::endl;
 		MSG << "Total GPrims:\t" << m_cTotalGPrims << " (" << m_cCulledGPrims << " culled)" << std::endl;
@@ -348,7 +413,7 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "Parameters: \t" << m_cParametersAllocated << " created / ";
 		MSG << m_cParametersAllocated - m_cParametersDeallocated << " remaining (5 expected) / ";
 		MSG << m_cParametersPeak << " peak" << std::endl;
-	}
+	}*/
 
 
 	MSG << std::ends;

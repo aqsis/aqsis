@@ -35,6 +35,15 @@
 
 START_NAMESPACE( Aqsis )
 
+#define STATS_INC( index )	CqStats::IncI( CqStats::##index )
+#define STATS_DEC( index )	CqStats::DecI( CqStats::##index )
+#define	STATS_GETI( index )	CqStats::getI( CqStats::##index )
+#define	STATS_SETI( index , value )	CqStats::setI( CqStats::##index , value )
+#define	STATS_GETF( index )	CqStats::getF( CqStats::##index )
+#define	STATS_SETF( index , value )	CqStats::setF( CqStats::##index , value )
+#define STATS_INT_GETI( index )	getI( index )
+#define STATS_INT_GETF( index )	getF( index )
+
 //----------------------------------------------------------------------
 /** \enum EqState
  * Current process identifiers.
@@ -172,60 +181,67 @@ class CqStats
 			m_Complete = complete;
 		}
 
+		static void IncI( const TqInt index )
+		{
+			m_intVars[ index ]++;
+		}
+
+		static void DecI( const TqInt index )
+		{
+			m_intVars[ index ]--;
+		}
+
+		static void setI( const TqInt index, const TqInt value )
+		{
+			m_intVars[ index ] = value;
+		}
+
+		static TqInt getI( const TqInt index )
+		{
+			return m_intVars[ index ];
+		}
+
+		static void setF( const TqInt index, const TqFloat value )
+		{
+			m_intVars[ index ] = value;
+		}
+
+		static TqFloat getF( const TqInt index )
+		{
+			return m_floatVars[ index ];
+		}
+
+		enum {	_First_float,
+				_Last_float } EqFloatIndex;
+		enum {	_First_int,
+				
+				// MPG stats
+
+					//(De)Allocs
+					MPG_allocated,
+					MPG_deallocated,
+					MPG_current,
+					MPG_peak,
+					MPG_culled,
+
+					//Pushes
+					MPG_pushed_forward,
+					MPG_pushed_down,
+					MPG_pushed_far_down,
+
+				// Sampling stats
+
+					SPL_count,
+					SPL_bound_hits,
+					SPL_hits,
+
+				_Last_int } EqIntIndex;
+
+
 		/// \name Increasing counters
 		//@{
 
-		/** Increase the micropolygons allocated count by 1.
-		 */
-		void	IncMPGsAllocated()
-		{
-			m_cMPGsAllocated++;
-			m_cMPGsCurrent++;
-			m_cMPGsPeak = ( m_cMPGsCurrent > m_cMPGsPeak ) ? m_cMPGsCurrent : m_cMPGsPeak;
-		}
-		/** Increase the micropolygons deallocated count by 1.
-		 */
-		void	IncMPGsDeallocated()
-		{
-			m_cMPGsDeallocated++;
-			m_cMPGsCurrent--;
-		}
-		/** Increase the number of micropolygons pushed forward.
-		 */
-		void	IncMPGsPushedForward()
-		{
-			m_cMPGsPushedForward++;
-		}
-		/** Increase the number of micropolygons pushed down.
-		 */
-		void	IncMPGsPushedDown()
-		{
-			m_cMPGsPushedDown++;
-		}
-		/** Increase the number of micropolygons pushed down more than 1 row.
-		 */
-		void	IncMPGsPushedFarDown()
-		{
-			m_cMPGsPushedFarDown++;
-		}
-		/** Increase the sample count by 1.
-		 */
-		void	IncSamples()
-		{
-			m_cSamples++;
-		}
-		/** Increase the sample bound hit count by 1.
-		 */
-		void	IncSampleBoundHits()
-		{
-			m_cSampleBoundHits++;
-		}
-		/** Increase the sample hit count by 1.
-		 */
-		void	IncSampleHits()
-		{
-			m_cSampleHits++;
-		}
+
 		/** Increase the shader variables allocated count by 1.
 		 */
 		void	IncVariablesAllocated()
@@ -306,14 +322,6 @@ class CqStats
 		void	IncCulledGrids()
 		{
 			m_cCulledGrids++;
-		}
-		/** Increase the culled micropoly count by n.
-		    This counter should only be increased if the according grid
-				was \em not culled.
-		 */
-		void	IncCulledMPGs( TqInt n = 1 )
-		{
-			m_cCulledMPGs += n;
 		}
 		/** Increase the missed MPG count by 1.
 		 */
@@ -505,7 +513,10 @@ class CqStats
 
 	private:
 		EqState	m_State;						///< Current process identifier.
-		TqFloat	m_Complete;						///< Current percentage comlpete.
+		TqFloat	m_Complete;						///< Current percentage complete.
+
+		static TqFloat	 m_floatVars[ _Last_float ];		///< Float variables
+		static TqInt		m_intVars[ _Last_int ];			///< Int variables
 
 		TqInt	m_cMPGsAllocated;				///< Count of micropolygons allocated.
 		TqInt	m_cMPGsDeallocated;				///< Count of microplygons dallocated.

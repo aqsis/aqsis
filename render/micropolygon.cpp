@@ -912,7 +912,11 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 
 CqMicroPolygon::CqMicroPolygon() : m_pGrid( 0 ), m_Flags( 0 )
 {
-	QGetRenderContext() ->Stats().IncMPGsAllocated();
+	STATS_INC( MPG_allocated );
+	STATS_INC( MPG_current );
+	TqInt cMPG = STATS_GETI( MPG_current );
+	TqInt cPeak = STATS_GETI( MPG_peak );
+	STATS_SETI( MPG_peak, cMPG > cPeak ? cMPG : cPeak );
 }
 
 
@@ -923,7 +927,8 @@ CqMicroPolygon::CqMicroPolygon() : m_pGrid( 0 ), m_Flags( 0 )
 CqMicroPolygon::~CqMicroPolygon()
 {
 	if ( m_pGrid ) RELEASEREF( m_pGrid );
-	QGetRenderContext() ->Stats().IncMPGsDeallocated();
+	STATS_INC( MPG_deallocated );
+	STATS_DEC( MPG_current );
 	if ( IsHit() )
 		QGetRenderContext() ->Stats().IncMissedMPGs();
 }

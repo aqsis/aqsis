@@ -607,7 +607,7 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt CurrBucketIndex )
 		m_aBuckets[ NextBucketDown ].AddMPG( pmpg );
 		// See if it needs to be pushed further down (extreme Motion Blur)
 		if ( PushMPGDown( pmpg, NextBucketDown ) )
-			QGetRenderContext() ->Stats().IncMPGsPushedFarDown();
+			STATS_INC( MPG_pushed_far_down );
 		return ( TqTrue );
 	}
 	return ( TqFalse );
@@ -646,8 +646,10 @@ void CqImageBuffer::RenderMPGs( TqInt iBucket, long xmin, long xmax, long ymin, 
 			for ( std::vector<CqMicroPolygon*>::iterator impg = m_aBuckets[ iBucket ].aMPGs().begin(); impg != lastmpg; impg++ )
 			{
 				RenderMicroPoly( *impg, iBucket, xmin, xmax, ymin, ymax );
-				if ( PushMPGDown( ( *impg ), iBucket ) ) QGetRenderContext() ->Stats().IncMPGsPushedDown();
-				if ( PushMPGForward( ( *impg ) ) ) QGetRenderContext() ->Stats().IncMPGsPushedForward();
+				if ( PushMPGDown( ( *impg ), iBucket ) )
+					STATS_INC( MPG_pushed_down );
+				if ( PushMPGForward( ( *impg ) ) )
+					STATS_INC( MPG_pushed_forward );
 				RELEASEREF( ( *impg ) );
 			}
 			m_aBuckets[ iBucket ].aMPGs().clear();
@@ -662,8 +664,8 @@ void CqImageBuffer::RenderMPGs( TqInt iBucket, long xmin, long xmax, long ymin, 
 	for ( std::vector<CqMicroPolygon*>::iterator impg = m_aBuckets[ iBucket ].aMPGs().begin(); impg != lastmpg; impg++ )
 	{
 		RenderMicroPoly( *impg, iBucket, xmin, xmax, ymin, ymax );
-		if ( PushMPGDown( ( *impg ), iBucket ) ) QGetRenderContext() ->Stats().IncMPGsPushedDown();
-		if ( PushMPGForward( ( *impg ) ) ) QGetRenderContext() ->Stats().IncMPGsPushedForward();
+		if ( PushMPGDown( ( *impg ), iBucket ) ) STATS_INC( MPG_pushed_down );
+		if ( PushMPGForward( ( *impg ) ) ) STATS_INC( MPG_pushed_forward );
 		RELEASEREF( ( *impg ) );
 	}
 	m_aBuckets[ iBucket ].aMPGs().clear();
@@ -731,7 +733,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 			if ( bound_num == bound_max_1 )
 			{
 				// last bound so we can delete the mpg
-				theStats.IncCulledMPGs();
+				STATS_INC( MPG_culled );
 				return ;
 			}
 			else
@@ -745,7 +747,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 			if ( bound_num == bound_max_1 )
 			{
 				// last bound so we can delete the mpg
-				theStats.IncCulledMPGs();
+				STATS_INC( MPG_culled );
 				return ;
 			}
 			else
@@ -830,13 +832,13 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 							//std::cout << samplelens.x() << " " << samplelens.y() << std::endl;
 
 						}
-						theStats.IncSamples();
+						STATS_INC( SPL_count );
 
 						TqFloat t = pie2->SampleTime( m, n );
 						// First, check if the subsample point lies within the micropoly bound
 						if ( t >= time0 && t <= time1 && Bound.Contains2D( vecP ) )
 						{
-							theStats.IncSampleBoundHits();
+							STATS_INC( SPL_bound_hits );
 
 							// Check to see if the sample is within the sample's level of detail
 							if ( UsingLevelOfDetail )
@@ -859,7 +861,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 
 							if ( SampleHit )
 							{
-								theStats.IncSampleHits();
+								STATS_INC( SPL_hits );
 								pMPG->MarkHit();
 
 								StoreSample( pMPG, pie2, m, n, D );
