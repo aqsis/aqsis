@@ -163,8 +163,6 @@ enum EqVariableType
 	Usage_Shift=8,
 };
 
-_qShareM	extern char*	gVariableTypeIdentifiers[];
-_qShareM	extern TqInt	gcVariableTypeIdentifiers;
 _qShareM	extern char*	gVariableStorageNames[];
 _qShareM	extern TqInt	gcVariableStorageNames;
 _qShareM	extern char*	gVariableUsageNames[];

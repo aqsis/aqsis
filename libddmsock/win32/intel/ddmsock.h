@@ -130,7 +130,10 @@ class CqDDServer
 class CqDDManager : public IqDDManager
 {
 	public:
-				CqDDManager()	{}
+				CqDDManager()	{
+									WSADATA data;
+									WSAStartup(MAKEWORD(2,0),&data);
+								}
 				~CqDDManager()	{}
 
 	// Overridden from IqDDManager

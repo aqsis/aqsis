@@ -15,6 +15,7 @@
 #include	"aqsis.h"
 
 #include	"sstring.h"
+#include	"shadervariable.h"
 
 START_NAMESPACE(Aqsis)
 

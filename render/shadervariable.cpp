@@ -68,25 +68,6 @@ char* gVariableUsageNames[]=
 };
 TqInt gcVariableUsageNames=sizeof(gVariableUsageNames)/sizeof(gVariableUsageNames[0]);
 
-char* gVariableTypeIdentifiers[]=
-{
-	"@",
-	"f",
-	"i",
-	"p",
-	"s",
-	"c",
-	"t",
-	"h",
-	"n",
-	"v",
-	"x",
-	"m",
-	"w",
-};
-TqInt gcVariableTypeIdentifiers=sizeof(gVariableTypeIdentifiers)/sizeof(gVariableTypeIdentifiers[0]);
-
-
 CqShaderVariable::CqShaderVariable() 	
 {
 	QGetRenderContext()->Stats().cVariablesAllocated()++;

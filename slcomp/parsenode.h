@@ -15,11 +15,7 @@
 
 #include	"aqsis.h"
 
-#include	"list.h"
 #include	"sstring.h"
-#include	"vector3D.h"
-#include	"color.h"
-#include	"shaders.h"
 #include	"vardef.h"
 #include	"funcdef.h"
 

@@ -22,6 +22,16 @@
 		\brief Define method of exporting symbols from a shared library.
 */
 
+#ifndef	AQSIS_DYNAMIC_LINK
+
+#define  _qShare
+#define	_qShareC
+#define	_qShareM
+
+#undef _qShareName
+
+#else // AQSIS_DYNAMIC_LINK
+
 #define _qExportM __declspec(dllexport)
 #define _qImportM __declspec(dllimport)
 
@@ -53,7 +63,6 @@
 
 #undef _qShareName
 
-#ifdef	__cplusplus
-#endif
+#endif	// AQSIS_DYNAMIC_LINK
 
 //-----------------------------------------------------------------------

@@ -135,6 +135,8 @@ class CqFuncDef
 
 extern std::vector<CqFuncDef>	gLocalFuncs;
 extern TqInt					gInternalFunctionUsage;
+extern char*					gVariableTypeIdentifiers[];
+extern TqInt					gcVariableTypeIdentifiers;
 
 //-----------------------------------------------------------------------
 

@@ -15,6 +15,25 @@ START_NAMESPACE(Aqsis)
 ///---------------------------------------------------------------------
 /// Global array of standard function definitions
 
+char* gVariableTypeIdentifiers[]=
+{
+	"@",
+	"f",
+	"i",
+	"p",
+	"s",
+	"c",
+	"t",
+	"h",
+	"n",
+	"v",
+	"x",
+	"m",
+	"w",
+};
+TqInt gcVariableTypeIdentifiers=sizeof(gVariableTypeIdentifiers)/sizeof(gVariableTypeIdentifiers[0]);
+
+
 CqFuncDef	gStandardFuncs[]={
 			CqFuncDef(Type_Float, "operator*", "mulff", "ff"),
 			CqFuncDef(Type_Float, "operator/", "divff", "ff"),

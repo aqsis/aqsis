@@ -56,6 +56,7 @@ TqInt CqParseNode::m_fInBlock=0;
 TqInt	CqParseNode::m_DebugOutTab=0;
 #endif
 
+
 ///---------------------------------------------------------------------
 /// operator<<
 /// Test output of a parse tree to a specified output stream.
