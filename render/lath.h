@@ -28,6 +28,7 @@
 #define	LATH_H_LOADED
 
 #include	"aqsis.h"
+#include	"memorypool.h"
 #include	<vector>
 
 START_NAMESPACE( Aqsis )
@@ -39,14 +40,19 @@ START_NAMESPACE( Aqsis )
  *	Holds information about mesh neighbourhoods allowing easy data aextraction about mesh topology.
  */
 
-class CqLath
+class CqLath : public CqPoolable<CqLath, 512>
 {
 public:
 	///	Constructor.
-	CqLath();
+	CqLath()	 : m_pClockwiseVertex(NULL), m_pClockwiseFacet(NULL), m_VertexIndex(0),
+				   m_pParentFacet(NULL), m_pChildVertex(NULL), m_pMidVertex(NULL), m_pFaceVertex(NULL)
+				   {}
+	CqLath( TqInt iV ) : m_pClockwiseVertex(NULL), m_pClockwiseFacet(NULL), m_VertexIndex( iV ),
+				   m_pParentFacet(NULL), m_pChildVertex(NULL), m_pMidVertex(NULL), m_pFaceVertex(NULL)
+				   {}
 
 	///	Destructor.
-	virtual ~CqLath();
+	~CqLath()	{}
 
 	/// Get a pointer to the lath representing the facet that this one was created from.
 	CqLath*	pParentFacet() const		{return(m_pParentFacet);}
@@ -94,14 +100,14 @@ public:
 	void Qev(std::vector<CqLath*>&);
 	void Qfe(std::vector<CqLath*>&);
 	void Qve(std::vector<CqLath*>&);
-
 	void Qfv(std::vector<CqLath*>&);
 	void Qvv(std::vector<CqLath*>&);
 	void Qvf(std::vector<CqLath*>&);
 	void Qee(std::vector<CqLath*>&);
 	void Qff(std::vector<CqLath*>&);
 
-	TqInt	ID() const	{return(m_ID);}
+	TqInt cQfv() const;
+	TqInt cQvv() const;
 
 private:
 	///	Declared private to prevent copying.
@@ -119,10 +125,6 @@ private:
 	CqLath*	m_pFaceVertex;		///< Pointer to the point that represents the midpoint of this face at the next level.
 
 	TqInt	m_VertexIndex;
-
-	// Debug only information.
-	static	TqInt	m_nextID;	///< Next ID for allocated LATH
-	TqInt	m_ID;				///< ID for current lath.
 };
 
 END_NAMESPACE( Aqsis )

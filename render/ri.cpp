@@ -4220,12 +4220,14 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			}
 			pSubd2->Finalise();
 
+			pSubd2->AddRef();
 			for ( face = 0; face < nfaces; face++ )
 			{
 				// Add a patch surface to the bucket queue
 				CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( pSubd2, pSubd2->pFacet( face ) );
 				QGetRenderContext() ->pImage() ->PostSurface( pNew );
 			}
+			pSubd2->Release();
 			pPointsClass->Release();
 		}
 		else

@@ -29,29 +29,7 @@
 
 START_NAMESPACE( Aqsis )
 
-TqInt CqLath::m_nextID = 0;
-
-//------------------------------------------------------------------------------
-/**
- *	Constructor.
- */
-
-CqLath::CqLath() : m_pClockwiseVertex(NULL), m_pClockwiseFacet(NULL), m_VertexIndex(0),
-				   m_pParentFacet(NULL), m_pChildVertex(NULL), m_pMidVertex(NULL), m_pFaceVertex(NULL)
-{
-	m_ID = m_nextID++;
-}
-
-
-//------------------------------------------------------------------------------
-/**
- *	Destructor.
- */
-
-CqLath::~CqLath()
-{
-}
-
+DEFINE_STATIC_MEMORYPOOL( CqLath, 512 );
 
 //------------------------------------------------------------------------------
 /**
@@ -259,7 +237,7 @@ void CqLath::Qve(std::vector<CqLath*>& Result)
 //------------------------------------------------------------------------------
 /**
  *	Get the vertices surrounding a facet.
- *	Get a list of laths representing the vertices which make up the facet thid
+ *	Get a list of laths representing the vertices which make up the facet this
  *	lath represents.
  *
  *	@return	Pointer to an array of lath pointers.
@@ -403,5 +381,79 @@ void CqLath::Qff(std::vector<CqLath*>& Result)
 		}
 	}
 }
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Get the number of vertices surrounding a facet.
+ *	Get a count of laths representing the vertices which make up the facet this
+ *	lath represents.
+ *
+ *	@return	Count of laths.
+ */
+TqInt CqLath::cQfv() const
+{
+	// Laths representing the edges of the associated facet are obtained by following
+	// clockwise links around the face.
+	const CqLath *pTmpLath = this;
+	TqInt c = 1;	// Start with this one.
+
+	CqLath* pNext = cf();
+	while(this != pNext)
+	{
+		assert(NULL != pNext);
+		c++;
+		pNext = pNext->cf();
+	}
+	return( c );
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Get the number of vertices emanating from this vertex.
+ *	Get a count of laths representing the vertices emanating from the vertex
+ *	this lath represents.
+ *
+ *	@return	Count of laths.
+ */
+TqInt CqLath::cQvv() const
+{
+	TqInt c = 1; // Start with this
+	// Laths representing the edges that radiate from the associated vertex are obtained by 
+	// following the clockwise vertex links around the vertex. 
+	const CqLath *pTmpLath = this;
+
+	CqLath* pNext = cv();
+	const CqLath* pLast = this;
+	while(NULL != pNext && this != pNext)
+	{
+		c++;
+		pLast = pNext;
+		pNext = pNext->cv();
+	}
+
+	// If we hit a boundary, add the ec of this boundary edge and start again going backwards.
+	// @warning Adding ccf for the boundary edge means that the lath represents a different vertex.
+	if(NULL == pNext)
+	{
+		pLast = this;
+		pNext = ccv();
+		// We know we are going to hit a boundary in this direction as well so we can just look for that
+		// case as a terminator.
+		while(NULL != pNext)
+		{
+			assert( pNext != this );
+			c++;
+			pLast = pNext;
+			pNext = pNext->ccv();
+		}
+		// We have hit the boundary going the other way, so add the ccf of this boundary edge.
+		c++;
+	}
+	return( c );
+}
+
+
 
 END_NAMESPACE( Aqsis )

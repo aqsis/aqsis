@@ -595,18 +595,14 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 	for( i = 0; i < n; i++ )
 	{
 		// For each facet, create 4 laths and join them in the order of the facet
-		CqLath* pLathA = new CqLath();
+		CqLath* pLathA = apFaceLaths[i].pA = new CqLath( aVertices[i] );
 		m_apLaths.push_back(pLathA);
-		CqLath* pLathB = new CqLath();
+		CqLath* pLathB = apFaceLaths[i].pB = new CqLath( aVertices[(modulo((i+1),n))+n] );
 		m_apLaths.push_back(pLathB);
-		CqLath* pLathC = new CqLath();
+		CqLath* pLathC = apFaceLaths[i].pC = new CqLath( aVertices[2*n] );
 		m_apLaths.push_back(pLathC);
-		CqLath* pLathD = new CqLath();
+		CqLath* pLathD = apFaceLaths[i].pD = new CqLath( aVertices[i+n] );
 		m_apLaths.push_back(pLathD);
-		pLathA->SetVertexIndex(aVertices[i]);
-		pLathB->SetVertexIndex(aVertices[(modulo((i+1),n))+n]);
-		pLathC->SetVertexIndex(aVertices[2*n]);
-		pLathD->SetVertexIndex(aVertices[i+n]);
 		pLathA->SetpClockwiseFacet(pLathB);
 		pLathB->SetpClockwiseFacet(pLathC);
 		pLathC->SetpClockwiseFacet(pLathD);
@@ -615,11 +611,6 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 		pLathB->SetpParentFacet(pFace);
 		pLathC->SetpParentFacet(pFace);
 		pLathD->SetpParentFacet(pFace);
-
-		apFaceLaths[i].pA = pLathA;
-		apFaceLaths[i].pB = pLathB;
-		apFaceLaths[i].pC = pLathC;
-		apFaceLaths[i].pD = pLathD;
 
 		// Fill in the vertex references table for these vertices.
 		m_aapVertices[pLathA->VertexIndex()].push_back(pLathA);
@@ -651,15 +642,12 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 		}
 		
 		// For this edge of the original face, set a ponter to the new midpoint lath, so that we can
-		// use it when subdividing neighbour facets, do the same for the lath representing the edge in the
-		// other direction if not a boundary.
+		// use it when subdividing neighbour facets.
 		aQfv[i]->SetpMidVertex(pLathD);
-		if( NULL != aQfv[i]->ec() )	
-			aQfv[i]->ec()->SetpMidVertex(pLathD);
 
 		// Store a lath reference for the facet.
-		apSubFaces.push_back(pLathA);
-		m_apFacets.push_back(pLathA);
+		apSubFaces.push_back( pLathA );
+		m_apFacets.push_back( pLathA );
 	}
 
 	// Now connect up the laths we have created.
@@ -819,6 +807,12 @@ CqBound	CqSurfaceSubdivisionPatch::Bound() const
 
 	return(B);
 }
+
+
+/** Dice the patch this primitive represents. 
+ * Subdivide recursively the appropriate number of times, then extract the information into 
+ * a MPG structure.
+ */
 
 CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 {
@@ -1034,64 +1028,14 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, TqInt iParam,
 }
 
 
+static TqInt cPatches = 0;
 TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 {
 	assert( NULL != pTopology() );
 	assert( NULL != pTopology()->pPoints() );
 	assert( NULL != pFace() );
 
-	// If the patch is a quad with each corner having valence 4, and no special features, 
-	// we can just create a B-Spline patch.
-	TqBool fCanUsePatch = TqFalse;
-	
-	std::vector<CqLath*> aQff, aQfv;
-	pFace()->Qfv(aQfv);
-	if( aQfv.size() == 4 )
-	{
-		fCanUsePatch = TqTrue;
-		std::vector<CqLath*>::iterator iFV;
-		for( iFV = aQfv.begin(); iFV!=aQfv.end(); iFV++ )
-		{
-			// Check if all vertices are valence 4.
-			std::vector<CqLath*> aQvv;
-			(*iFV)->Qvv( aQvv );
-			if( aQvv.size() != 4 )
-			{
-				fCanUsePatch = TqFalse;
-				break;
-			}
-
-			// Check if no internal boundaries.
-			CqLath* pEnd = (*iFV)->cv();
-			while( NULL != pEnd && (*iFV) != pEnd )
-				pEnd = pEnd->cv();
-			if( NULL == pEnd )
-			{
-				fCanUsePatch = TqFalse;
-				break;
-			}
-		}
-
-		if( fCanUsePatch )
-		{
-			pFace()->Qff(aQff);
-			if( aQff.size() == 9 )
-			{
-				std::vector<CqLath*>::iterator iFF;
-				for( iFF = aQff.begin(); iFF!=aQff.end(); iFF++ )
-				{
-					(*iFF)->Qfv( aQfv );
-					if( aQfv.size() != 4 )
-					{
-						fCanUsePatch = TqFalse;
-						break;
-					}
-				}
-			}
-		}
-	}
-	
-	if( fCanUsePatch )
+	if( pTopology()->CanUsePatch( pFace() ) )
 	{
 		// Create a surface patch
 		CqSurfacePatchBicubic * pSurface = new CqSurfacePatchBicubic();
@@ -1219,6 +1163,10 @@ TqBool CqSurfaceSubdivisionPatch::Diceable()
 	if ( !m_fDiceable )
 		return ( TqFalse );
 
+	// If we can use a patch, don't dice, as dicing a patch is much quicker.
+	if( pTopology()->CanUsePatch( pFace() ) )
+		return(TqFalse);
+
 	// Get the laths that reference the vertices of this face
 	std::vector<CqLath*> aQfv;
 	pFace()->Qfv(aQfv);
@@ -1280,5 +1228,49 @@ TqBool CqSurfaceSubdivisionPatch::Diceable()
 	return ( TqTrue );
 }
 
+/**
+ * Determine if the topology surrounding the specified face is suitable for
+ * conversion to a bicubic patch.
+ */
+
+TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
+{
+	// If the patch is a quad with each corner having valence 4, and no special features, 
+	// we can just create a B-Spline patch.
+	if( pFace->cQfv() != 4 )
+		return( TqFalse );
+
+	std::vector<CqLath*> aQff, aQfv;
+	pFace->Qfv(aQfv);
+	std::vector<CqLath*>::iterator iFV;
+	for( iFV = aQfv.begin(); iFV!=aQfv.end(); iFV++ )
+	{
+		// Check if all vertices are valence 4.
+		if( (*iFV)->cQvv() != 4 )
+			return( TqFalse );
+
+		// Check if no internal boundaries.
+		CqLath* pEnd = (*iFV)->cv();
+		while( (*iFV) != pEnd )
+		{
+			if( NULL == pEnd )
+				return( TqFalse );
+			pEnd = pEnd->cv();
+		}
+	}
+
+	pFace->Qff(aQff);
+	if( aQff.size() != 9 )
+		return( TqFalse );
+
+	std::vector<CqLath*>::iterator iFF;
+	for( iFF = aQff.begin(); iFF!=aQff.end(); iFF++ )
+	{
+		if( (*iFF)->cQfv() != 4 )
+			return( TqFalse );
+	}
+
+	return( TqTrue );
+}
 
 END_NAMESPACE( Aqsis )

@@ -73,6 +73,7 @@ public:
 	CqLath*		AddFacet(TqInt cVerts, TqInt* pIndices);
 	void		Finalise();
 	void		SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFaces);
+	TqBool		CanUsePatch( CqLath* pFace );
 
 	TqInt		AddVertex(CqLath* pVertex);
 	template<class TypeA, class TypeB>
