@@ -152,11 +152,13 @@ void CqOptions::InitialiseCamera()
 
 	CqMatrix dofm = QGetRenderContext() ->matVSpaceToSpace( "camera", "screen" );
 
-	CqVector3D	dofs( 1, 1, 0 );
+	CqVector3D	dofe( 1, 1, -1 );
+	CqVector3D	dofc( 0, 0, -1 );
 
-	dofs = /*matNDCToRaster */ dofm *  dofs;
+	dofe = /*matNDCToRaster */ dofm *  dofe;
+	dofc = /*matNDCToRaster */ dofm *  dofc;
 
-	QGetRenderContext() ->SetDepthOfFieldScale( dofs.x(), dofs.y() );
+	QGetRenderContext() ->SetDepthOfFieldScale( fabs(dofe.x()-dofc.x()), fabs(dofe.y()-dofc.y()) );
 
 	CqVector3D	vecf( 0, 0, 7 );
 	CqVector3D	vecn( 0, 0, -2 );

@@ -215,14 +215,31 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 
 
 		// Fill in the sample times for motion blur, detail levels for LOD and DoF.
-		
-		TqFloat time = 0;
+
 		TqInt nSamples = m_XSamples*m_YSamples;
+
+		TqFloat time = 0;
 		TqFloat dtime = 1.0f / nSamples;
+
 		TqFloat lod = 0;
 		TqFloat dlod = dtime;
-		TqFloat r, theta; // DoF related stuff
-		TqFloat dx, dy; // DoF sample postions
+
+		TqFloat r = 0, theta = 0;
+		TqFloat dr = dtime;
+		TqFloat dtheta = 2 * PI * dtime;
+
+		// We have to be a little more careful to pick DoF samples because we must
+		// sample them in polar coordinates to ensure uniform coverage.
+
+		for ( i = 0; i < nSamples; i++ )
+		{
+			// Pick a lens position randomly in polar coordinates
+
+			m_aDoFSamples[i].x( sqrt( r + random.RandomFloat(dr) ) );
+			m_aDoFSamples[i].y( theta + random.RandomFloat( dtheta ) );
+			r += dr;
+			theta += dtheta;
+		}
 
 		for ( i = 0; i < nSamples; i++ )
 		{
@@ -231,19 +248,24 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 			t = ( closetime - opentime ) * t + opentime;
 			m_aTimes[ i ] = t;
 			time += dtime;
+
 			m_aDetailLevels[ i ] = lod + random.RandomFloat( dlod );
 			lod += dlod;
 
-			r = random.RandomFloat();
-			theta = random.RandomFloat( 2 * PI );
+			// For DoF samples, shuffle in both coordinates, then convert from polar
+			// back to cartesian
 
-			r = sqrt(r);
-			dx = r * sin(theta);
-			dy = r * cos(theta);
+			TqInt j = random.RandomInt( nSamples - 1 - i ) + i;
+			TqInt k = random.RandomInt( nSamples - 1 - i ) + i;
 
-			m_aDoFSamples[ i ].x( dx );
-			m_aDoFSamples[ i ].y( dy );
+			r     = m_aDoFSamples[ j ].x();
+			theta = m_aDoFSamples[ k ].y();
 
+			m_aDoFSamples[ j ].x( m_aDoFSamples[ i ].x() );
+			m_aDoFSamples[ k ].y( m_aDoFSamples[ i ].y() );
+
+			m_aDoFSamples[ i ].x( r * sin(theta) );
+			m_aDoFSamples[ i ].y( r * cos(theta) );
 		}
 
 	}
