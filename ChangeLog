@@ -1,3 +1,308 @@
+2001-10-13 20:37  tshead
+
+	* ribfiles/: anim.rib, bucket_test.rib, cellnoise.rib,
+	colpervertex_test.rib, cone.rib, coordsys_test.rib, cylinder.rib,
+	disp1.rib, disp_test.rib, dof.rib, env_test.rib, eyeplanetest.rib,
+	mblur.rib, mblur2a.rib, mblur2b.rib, mod_st2_test.rib,
+	mod_st_test.rib, noshadows.rib, nurbs.rib, orient_test.rib,
+	periodic_test.rib, persptest.rib, persptrans.rib, poly_test.rib,
+	quads_test.rib, shadtest.rib, simple.rib, skewtest.rib,
+	softshadow.rib, space_test.rib, sphere.rib, std_st_test.rib,
+	subdiv1.rib, subdiv2.rib, teapot.rib, test.rib, tmap_test.rib,
+	torus.rib, transmb_test.rib, uv_test.rib, vase.rib, vase_shad1.rib,
+	vase_shad2.rib: * Updated RIB files to use file *and* framebuffer
+	devices
+
+2001-10-13 20:36  tshead
+
+	* aqsis/aqsis.cpp: * Updated percent complete to use standard
+	library
+
+2001-10-13 00:57  pgregory
+
+	* aqsis/aqsis.cpp, render/imagebuffer.cpp, render/options.cpp,
+	render/options.h, render/ri.cpp, render/ri.h: Implement a progress
+	reporting mechanism and use it in aqsis to print to the console.
+
+2001-10-11 23:54  pgregory
+
+	* Renderer.dsw: Update dependencies to include glut framebuffers in
+	the All project.
+
+2001-10-11 23:52  pgregory
+
+	* filebuffer/filebuffer.cpp,
+	framebuffer/win32/intel/framebuffer.cpp,
+	framebuffer_glut/framebuffer_glut.cpp,
+	framebuffer_glut_z/framebuffer_glut_z.cpp, libddmsock/ddmsock.cpp,
+	libddmsock/displaydriver.h, shadowmap/shadowmap.cpp: Implement
+	close response for sockets based display driver, makes sure all
+	processing is done before responding. Means shadowmaps in
+	particular can be finished before RiMakeShadow is called.
+
+2001-10-11 12:47  pgregory
+
+	* Release Archive/Release Archive.dsp: Make sure spurious output
+	directories aren't created.
+
+2001-10-11 12:46  pgregory
+
+	* Renderer.dsw, prep_install.bat, all/All.dsp, Release
+	Archive/Release Archive.dsp: Change All build to just buid all and
+	add a new project to generate the release archive.
+
+2001-10-11 12:32  pgregory
+
+	* texer/: .cvsignore, Makefile.am, texer.cpp, texer.dsp: Removed,
+	renamed to teqser
+
+2001-10-10 21:38  tshead
+
+	* Makefile.am, configure.in, render/rifile.h, teqser/.cvsignore,
+	teqser/Makefile.am, teqser/teqser.cpp: * Fixed delimiter problem in
+	generated ddmsock.ini file * Posix build fixes for teqser
+
+2001-10-10 13:37  pgregory
+
+	* Makefile.am, Renderer.dsw, teqser/Makefile.am, teqser/teqser.cpp,
+	teqser/teqser.dsp: Changed texer --> teqser and (hopefully) enabled
+	building under Posix.
+
+2001-10-10 13:20  pgregory
+
+	* aqsis/aqsis.cpp: Only outputs config file warning if verbose is
+	on, as config file is only an option.
+
+2001-10-10 08:23  tshead
+
+	* Makefile.am: * Makefiles generate platform-specific ddmsock.ini
+
+2001-10-10 07:03  tshead
+
+	* libdd/dd.cpp: * Added <sys/time.h> header
+
+2001-10-09 21:18  pgregory
+
+	* ribfiles/softshadow.rib: Changed to use "blur" paramater to use
+	Andy Gill's soft shadows mode.
+
+2001-10-09 21:16  pgregory
+
+	* shaders/shadowspot.sl: Added blur parameter to emable Andy Gill's
+	soft shadow modification.
+
+2001-10-09 21:15  pgregory
+
+	* render/texturemap.cpp: Enable Andy Gill's soft shadow mode if
+	blur is provided non zero.
+
+2001-10-09 17:44  billybobjimboy
+
+	* render/: texturemap.cpp, texturemap.h: added support for soft
+	shadows
+
+2001-10-09 13:23  pgregory
+
+	* ribfiles/softshadow.rib: Test soft shadows using the "width"
+	specifier.
+
+2001-10-09 13:12  pgregory
+
+	* render/shadeops.cpp, shaders/shadowspot.sl: Fix problems with
+	shadow width specification.
+
+2001-10-04 17:27  pgregory
+
+	* render/: imagebuffer.cpp, micropolygon.cpp, texturemap.cpp: Redo
+	the old method of depth map output.  Reenable occlusion culling.
+
+2001-10-04 17:26  pgregory
+
+	* render/options.h: Initialise depth quantization settings
+	properly.
+
+2001-10-02 22:35  pgregory
+
+	* render/: texturemap.cpp, texturemap.h: Changes to shadowmap code
+	to handle new depth maps in range 0-1
+
+2001-10-02 22:29  pgregory
+
+	* render/imagebuffer.cpp: Various changes to z buffering to make
+	sure z values are stored 0-1
+
+2001-10-02 22:29  pgregory
+
+	* libddmsock/libddmsock.dsp: Add displaydriver.h
+
+2001-10-02 22:26  pgregory
+
+	* render/micropolygon.cpp: Remove hybrid camera/raster space stuff.
+
+2001-10-02 22:23  pgregory
+
+	* render/options.cpp: Change projection matrix calculation to map z
+	depth into the range 0-1
+
+2001-10-02 22:22  pgregory
+
+	* Renderer.dsw: Update dependencies.
+
+2001-10-02 22:16  pgregory
+
+	* render/ri.cpp: Fix the setting of display mode to only append if
+	appending a display driver, overwrite otherwise.
+
+2001-09-26 20:59  tshead
+
+	* aclocal.m4, configure.in, aqsis/Makefile.am, aqsl/Makefile.am,
+	filebuffer/Makefile.am, framebuffer_glut/Makefile.am,
+	framebuffer_glut_z/Makefile.am, libaqsistypes/Makefile.am,
+	libaqsistypes/posix/Makefile.am, libcodegenvm/Makefile.am,
+	libdd/Makefile.am, libddmsimple/Makefile.am,
+	libddmsock/Makefile.am, librib2/Makefile.am,
+	librib2/tests/Makefile.am, librib2ri/Makefile.am,
+	librib2stream/Makefile.am, libslparse/Makefile.am,
+	render/Makefile.am, shadowmap/Makefile.am: * Added debug build
+	support to configure/makefiles - default build is w/o debugging,
+	use --enable-debug to turn debugging on
+
+2001-09-19 18:25  pgregory
+
+	* libaqsistypes/matrix.h: Add member function to find out if matrix
+	is identity.
+
+2001-09-19 18:23  pgregory
+
+	* libddmsock/ddmsock.cpp: Fix so that identity matrix is written
+	properly.
+
+2001-09-14 20:00  pgregory
+
+	* render/imagebuffer.cpp: Fix depth map filtering, shadows should
+	work properly now.  Fix opacity/alpha blending, transparent
+	surfaces should work properly now.
+
+2001-09-12 08:42  pgregory
+
+	* Renderer.dsw: Add framebuffer_glut and framebuffer_glut_z and
+	update dependencies.
+
+2001-09-12 08:40  pgregory
+
+	* framebuffer_glut_z/framebuffer_glut_z.cpp: Minor fixes for Win32
+
+2001-09-11 22:27  tshead
+
+	* shadowmap/: .cvsignore, Makefile.am, shadowmap.cpp: * Posix
+	shadowmap path submitted by  Giuseppe Zompatori
+
+2001-09-11 22:25  tshead
+
+	* Makefile.am, configure.in, framebuffer_glut_z/.cvsignore,
+	framebuffer_glut_z/Makefile.am,
+	framebuffer_glut_z/framebuffer_glut_z.cpp: * Created specialized
+	framebuffer for viewing depthmaps
+
+2001-09-11 14:47  pgregory
+
+	* Renderer.dsw: Change libddmsock project.
+
+2001-09-10 03:18  tshead
+
+	* framebuffer_glut/framebuffer_glut.cpp: * Fixed
+	coordinate-transform issue with glScissor() * Restored the call to
+	glClear() in display() ... try resizing the window to see why :) *
+	Got rid of no-longer-necessary visibility callback
+
+2001-09-09 22:58  pgregory
+
+	* framebuffer_glut/framebuffer_glut.cpp: Implement Kelly Brock's
+	suggestions to speed up the rendering of the framebuffer, Added 'q'
+	as a close key as per Giusseppe Zompatori's suggestion.
+
+2001-09-08 21:22  tshead
+
+	* README: * Updated README to reflect recent changes
+
+2001-09-08 20:59  tshead
+
+	* framebuffer_glut/framebuffer_glut.cpp, libdd/dd.cpp, libdd/dd.h:
+	* Added DDProcessMessage() and DDProcessMessageAsync() to libdd *
+	Modified framebuffer_glut to use DDProcessMessageAsync() so we can
+	finally watch our images grow :)
+
+2001-09-08 11:11  pgregory
+
+	* Renderer.dsw: Add glut framebuffer project.
+
+2001-09-08 11:08  pgregory
+
+	* framebuffer_glut/: framebuffer_glut.cpp, framebuffer_glut.dsp:
+	Port to windows.
+
+2001-09-08 10:00  tshead
+
+	* framebuffer_glut/framebuffer_glut.cpp, libdd/dd.cpp,
+	libddmsock/ddmsock.cpp: * Fixed problem with aqsis_framebuffer_glut
+	not letting-go of sockets (which prevented more than one from
+	running at a time) * Fixed problem with idle function in
+	aqsis_framebuffer_glut wasting CPU cycles
+
+2001-09-08 04:22  tshead
+
+	* framebuffer_glut/framebuffer_glut.cpp: * Code cleanup
+
+2001-09-08 04:04  tshead
+
+	* Makefile.am, configure.in, aqsis/Makefile.am,
+	framebuffer_glut/.cvsignore, framebuffer_glut/Makefile.am,
+	framebuffer_glut/framebuffer_glut.cpp, libddmsock/ddmsock.cpp: *
+	Created framebuffer_glut, a libddmsocket-based device driver that
+	uses the GLUT library for portable graphics / windowing.
+
+2001-09-08 00:03  pgregory
+
+	* Renderer.dsw, libddmsock/libddmsock.dsp: Update to new Posix
+	compliant ddmsock setup.
+
+2001-09-07 16:52  tshead
+
+	* Makefile.am, aqsis/Makefile.am, filebuffer/.cvsignore,
+	filebuffer/Makefile.am, filebuffer/filebuffer.cpp,
+	libdd/Makefile.am, libdd/dd.cpp, libdd/dd.h,
+	libddmsock/Makefile.am, libddmsock/ddmsock.cpp,
+	libddmsock/ddmsock.h, libddmsock/displaydriver.h,
+	libddmsock/libddmsock.dsp, libddmsock/posix/.cvsignore,
+	libddmsock/posix/Makefile.am, libddmsock/posix/ddmsock.cpp,
+	libddmsock/posix/ddmsock.h, libddmsock/win32/.cvsignore,
+	libddmsock/win32/Makefile.am, libddmsock/win32/intel/.cvsignore,
+	libddmsock/win32/intel/Makefile.am,
+	libddmsock/win32/intel/ddmsock.cpp,
+	libddmsock/win32/intel/ddmsock.h,
+	libddmsock/win32/intel/libddmsock.dsp, shaders/bumpy.sl: * Ported
+	libddm, libddmsock, and filebuffer to Posix * Unified libddmsock
+	codebase for Win32/Posix, using conditional compilation
+
+2001-09-07 03:00  tshead
+
+	* render/: renderer.h, shadervariable.h: * Replaced calls to
+	std::string::data() with std::string::c_str(), eliminating garbage
+	in output messages
+
+2001-09-06 23:18  pgregory
+
+	* render/: imagebuffer.cpp, surface.h: Fix the reporting of chached
+	bound problems when a primitive crosses the eye plane.
+
+2001-09-05 00:19  pgregory
+
+	* prep_install.bat: Remove aqsis.ini, add ddmsock.ini
+
+2001-09-05 00:07  pgregory
+
+	* ChangeLog: [no log message]
+
 2001-09-04 23:58  pgregory
 
 	* ribfiles/Makefile.am: Remove autoshadows test files
@@ -197,10 +502,7 @@
 
 2001-06-16 14:11  pgregory
 
-	* slcomp/.cvsignore, slcomp/Makefile.am, slcomp/Test.sl,
-	slcomp/slcomp.cpp, slcomp/slcomp.dsp, Renderer.dsw, aqsl/aqsl.cpp,
-	aqsl/aqsl.dsp, aqsl/aqsl_win.cpp, cribber/.cvsignore,
-	cribber/Makefile.am, cribber/cribber.cpp, cribber/cribber.dsp:
+	* Renderer.dsw, aqsl/aqsl.cpp, aqsl/aqsl.dsp, aqsl/aqsl_win.cpp:
 	Remove cribber and slcomp projects, update aqsl to avoid naming
 	probkems with automake.
 
@@ -396,32 +698,10 @@
 
 	* Makefile.am, configure.in, all/.cvsignore, all/Makefile.am,
 	aqsis/Makefile.am, aqsl/Makefile.am, aqsl/test.sl,
-	aqsl/tests/Makefile.am, content/Content.dsp, content/vase.rib,
-	content/vase_shad1.rib, content/vase_shad2.rib,
-	content/Test/DPProctext.h, content/Test/Image1.tif,
-	content/Test/autoshadows.rib, content/Test/autoshadtest.rib,
-	content/Test/brickbump.sl, content/Test/bucket_test.rib,
-	content/Test/cellnoise.rib, content/Test/cellnoisetest.sl,
-	content/Test/colpervertex_test.rib, content/Test/coordsys_test.rib,
-	content/Test/disp_test.rib, content/Test/env_test.rib,
-	content/Test/eyeplanetest.rib, content/Test/mod_st2_test.rib,
-	content/Test/mod_st_test.rib, content/Test/noises.h,
-	content/Test/noshadows.rib, content/Test/nx.tif,
-	content/Test/ny.tif, content/Test/nz.tif,
-	content/Test/orient_test.rib, content/Test/patterns.h,
-	content/Test/periodic_test.rib, content/Test/persptest.rib,
-	content/Test/persptrans.rib, content/Test/poly_test.rib,
-	content/Test/px.tif, content/Test/py.tif, content/Test/pz.tif,
-	content/Test/quads_test.rib, content/Test/shadtest.rib,
-	content/Test/show_st.sl, content/Test/space_test.rib,
-	content/Test/spacetest.sl, content/Test/std_st_test.rib,
-	content/Test/test.bat, content/Test/test.rib,
-	content/Test/testincl.rib, content/Test/tmap_test.rib,
-	content/Test/transmb_test.rib, content/Test/uv_test.rib,
-	content/Test/uvtest.sl, cribber/.cvsignore, cribber/Makefile.am,
-	filebuffer/.cvsignore, framebuffer/.cvsignore,
-	framebuffer/Makefile.am, framebuffer/win32/.cvsignore,
-	framebuffer/win32/Makefile.am, framebuffer/win32/intel/.cvsignore,
+	aqsl/tests/Makefile.am, filebuffer/.cvsignore,
+	framebuffer/.cvsignore, framebuffer/Makefile.am,
+	framebuffer/win32/.cvsignore, framebuffer/win32/Makefile.am,
+	framebuffer/win32/intel/.cvsignore,
 	framebuffer/win32/intel/Makefile.am, images/.cvsignore,
 	images/Image1.tif, images/Makefile.am, images/nx.tif,
 	images/ny.tif, images/nz.tif, images/px.tif, images/py.tif,
@@ -429,29 +709,19 @@
 	libaqsistypes/win32/.cvsignore,
 	libaqsistypes/win32/intel/.cvsignore, libcodegenvm/Makefile.am,
 	libdd/.cvsignore, libddmsimple/Makefile.am, libddmsock/Makefile.am,
-	libddmsock/posix/intel/.cvsignore,
-	libddmsock/posix/intel/Makefile.am,
-	libddmsock/posix/intel/ddmsock.cpp,
-	libddmsock/posix/intel/ddmsock.h, libddmsock/win32/.cvsignore,
-	libddmsock/win32/intel/.cvsignore, librib2/Makefile.am,
-	librib2/tests/Makefile.am, librib2/tests/anim.rib,
-	librib2/tests/cone.rib, librib2/tests/cylinder.rib,
-	librib2/tests/disp1.rib, librib2/tests/dof.rib,
-	librib2/tests/mblur.rib, librib2/tests/mblur2a.rib,
-	librib2/tests/mblur2b.rib, librib2/tests/nurbs.rib,
-	librib2/tests/ribrenderer.cpp, librib2/tests/simple.rib,
-	librib2/tests/simple_archive, librib2/tests/sphere.rib,
-	librib2/tests/subdiv1.rib, librib2/tests/subdiv2.rib,
-	librib2/tests/teapot.rib, librib2/tests/torus.rib,
-	librib2ri/Makefile.am, librib2stream/Makefile.am,
-	libslparse/Makefile.am, render/Makefile.am,
-	render/posix/.cvsignore, render/posix/Makefile.am,
-	render/posix/intel/.cvsignore, render/posix/intel/Makefile.am,
-	render/posix/intel/aqsis_compiler.h,
-	render/posix/intel/criticalsection.h,
-	render/posix/intel/semaphore.cpp, render/posix/intel/semaphore.h,
-	render/posix/intel/share.h, render/posix/intel/specific.h,
-	ribfiles/anim.rib, ribfiles/autoshadows.rib,
+	libddmsock/win32/.cvsignore, libddmsock/win32/intel/.cvsignore,
+	librib2/Makefile.am, librib2/tests/Makefile.am,
+	librib2/tests/anim.rib, librib2/tests/cone.rib,
+	librib2/tests/cylinder.rib, librib2/tests/disp1.rib,
+	librib2/tests/dof.rib, librib2/tests/mblur.rib,
+	librib2/tests/mblur2a.rib, librib2/tests/mblur2b.rib,
+	librib2/tests/nurbs.rib, librib2/tests/ribrenderer.cpp,
+	librib2/tests/simple.rib, librib2/tests/simple_archive,
+	librib2/tests/sphere.rib, librib2/tests/subdiv1.rib,
+	librib2/tests/subdiv2.rib, librib2/tests/teapot.rib,
+	librib2/tests/torus.rib, librib2ri/Makefile.am,
+	librib2stream/Makefile.am, libslparse/Makefile.am,
+	render/Makefile.am, ribfiles/anim.rib, ribfiles/autoshadows.rib,
 	ribfiles/autoshadtest.rib, ribfiles/bucket_test.rib,
 	ribfiles/cellnoise.rib, ribfiles/colpervertex_test.rib,
 	ribfiles/cone.rib, ribfiles/coordsys_test.rib,
@@ -474,17 +744,11 @@
 	shaders/borg_metal.sl, shaders/dented.sl, shaders/dpbluemarble.sl,
 	shaders/noises.h, shaders/patterns.h, shaders/randgrid.sl,
 	shaders/shadowspot.sl, shaders/shinymetal.sl, shaders/wavy.sl,
-	shaders/additional/DPProctext.h, shaders/additional/borg_metal.sl,
-	shaders/additional/dented.sl, shaders/additional/dpbluemarble.sl,
-	shaders/additional/noises.h, shaders/additional/patterns.h,
-	shaders/additional/randgrid.sl, shaders/additional/shadowspot.sl,
-	shaders/additional/shinymetal.sl, shadowmap/.cvsignore,
-	slcomp/.cvsignore, slcomp/Makefile.am, slpp/.cvsignore,
-	slpp/Makefile.am, texer/.cvsignore, texer/Makefile.am: * Posix
-	build madness! * Moved content data, e.g. shaders, sample RIB
-	files, and images into shaders, ribfiles, and images directories,
-	respectively * Moved render tests out of librib2 and into aqsis *
-	General code cleanup
+	shadowmap/.cvsignore, slpp/.cvsignore, slpp/Makefile.am,
+	texer/.cvsignore, texer/Makefile.am: * Posix build madness! * Moved
+	content data, e.g. shaders, sample RIB files, and images into
+	shaders, ribfiles, and images directories, respectively * Moved
+	render tests out of librib2 and into aqsis * General code cleanup
 
 2001-06-07 17:24  pgregory
 
@@ -526,11 +790,6 @@
 
 2001-06-06 16:26  pgregory
 
-	* slcomp/slcomp.dsp: Fix linking in release mode, was still linking
-	with libaqsis etc.
-
-2001-06-06 16:26  pgregory
-
 	* Renderer.dsw: Remove librib.
 
 2001-06-06 16:26  pgregory
@@ -550,26 +809,18 @@
 	libslparse/Makefile.am: Update Posix makefile to be able to produce
 	a complete source distribution with Windows support.
 
-2001-06-06 11:05  pgregory
-
-	* cribber/makefile.mingw, librib/.cvsignore, librib/Makefile.am,
-	librib/bison.cc, librib/bison.h, librib/flexskel.cc,
-	librib/flexskel.h, librib/iribcompiler.h, librib/librib.dsp,
-	librib/parser.y, librib/ribcompiler.cpp, librib/ribcompiler.h,
-	librib/scanner.l: Removed.
-
 2001-06-06 10:03  tshead
 
 	* bootstrap, configure.in, aqsl/.cvsignore, aqsl/aqsl,
-	aqsl/tests/Makefile.am, content/Test/show_st.sl,
-	librib2/tests/.cvsignore, librib2/tests/Makefile.am,
-	librib2/tests/anim.rib, librib2/tests/disp1.rib,
-	librib2/tests/dof.rib, librib2/tests/mblur2a.rib,
-	librib2/tests/mblur2b.rib, librib2/tests/test_001.in,
-	librib2/tests/test_002.in, librib2/tests/test_003.in,
-	librib2/tests/test_004.in, shaders/wavy.sl: * Posix build cleanup *
-	Added new RIB test files * Added new shader * Simplified librib2
-	implementation of "test" target
+	aqsl/tests/Makefile.am, librib2/tests/.cvsignore,
+	librib2/tests/Makefile.am, librib2/tests/anim.rib,
+	librib2/tests/disp1.rib, librib2/tests/dof.rib,
+	librib2/tests/mblur2a.rib, librib2/tests/mblur2b.rib,
+	librib2/tests/test_001.in, librib2/tests/test_002.in,
+	librib2/tests/test_003.in, librib2/tests/test_004.in,
+	shaders/wavy.sl: * Posix build cleanup * Added new RIB test files *
+	Added new shader * Simplified librib2 implementation of "test"
+	target
 
 2001-06-06 01:35  tshead
 
@@ -609,11 +860,11 @@
 
 2001-06-05 19:41  tburge
 
-	* librib/parser.y, librib/scanner.l, librib2ri/librib2ri.cpp,
-	librib2ri/librib2ri.h, librib2stream/librib2stream.cpp,
-	librib2stream/librib2stream.h, librib2/librib.h, librib2/parser.y,
-	librib2/scanner.l, render/ri.cpp, render/ri.h: Added stub functions
-	for RiDiskFilter and RiBesselFilter.
+	* librib2ri/librib2ri.cpp, librib2ri/librib2ri.h,
+	librib2stream/librib2stream.cpp, librib2stream/librib2stream.h,
+	librib2/librib.h, librib2/parser.y, librib2/scanner.l,
+	render/ri.cpp, render/ri.h: Added stub functions for RiDiskFilter
+	and RiBesselFilter.
 
 2001-06-05 18:41  tburge
 
@@ -630,15 +881,10 @@
 	* prep_install.bat: Rename storage directory to avoifd name clash
 	with standard Posix file 'Install'.
 
-2001-06-03 22:47  pgregory
-
-	* slcomp/Test.sl: Add testing for multiple shaders per .sl file.
-
 2001-06-03 22:42  pgregory
 
-	* libcodegenvm/vmoutput.cpp, libcodegenvm/vmoutput.h,
-	slcomp/slcomp.cpp: Fix so that shader .slx files are named after
-	the shader name itself, not the filename.
+	* libcodegenvm/: vmoutput.cpp, vmoutput.h: Fix so that shader .slx
+	files are named after the shader name itself, not the filename.
 
 2001-06-02 11:30  pgregory
 
@@ -647,9 +893,8 @@
 
 2001-06-02 10:41  pgregory
 
-	* libcodegenvm/libcodegenvm.dsp, libcodegenvm/vmoutput.cpp,
-	slcomp/slcomp.cpp, slcomp/slcomp.dsp: Minor changes, now outputs
-	version properly, and names the .slx file better.
+	* libcodegenvm/: libcodegenvm.dsp, vmoutput.cpp: Minor changes, now
+	outputs version properly, and names the .slx file better.
 
 2001-06-02 10:38  pgregory
 
@@ -675,18 +920,6 @@
 	* libcodegenvm/: libcodegenvm.dsp, vmoutput.cpp, vmoutput.h: New
 	library handles output of parse tree from libslparse into a format
 	suitable for the Aqsis shader VM.
-
-2001-06-02 10:18  pgregory
-
-	* slcomp/: Test.sl, slcomp.cpp, slcomp.dsp: Split functionality
-	into separate libraries, libslparse and libcodegenvm.
-
-2001-06-02 10:18  pgregory
-
-	* slcomp/: bison.cc, bison.h, error.h, flexskel.cc, flexskel.h,
-	funcdef.cpp, funcdef.h, optimise.cpp, parsenode.cpp, parsenode.h,
-	parser.y, scanner.l, typecheck.cpp, vardef.cpp, vardef.h: Moved
-	into separate libraries, libslparse and libcodegenvm
 
 2001-05-31 12:07  mbaas
 
@@ -754,20 +987,6 @@
 	and RenderDotC give their noise functions a certain statistical
 	property, so maybe cellnoise is skewed a bit to the center too.
 
-2001-05-24 02:17  tburge
-
-	* content/Test/: cellnoise.rib, cellnoisetest.sl: Adding a test. 
-	If anyone gets a chance let me know if you think the distribution
-	of resulting colors is more centered on BMRT and maybe PRMan than
-	my cellnoise function.	PRMan and RenderDotC give their noise
-	functions a certain statistical property, so maybe cellnoise is
-	too.
-
-2001-05-23 00:30  tburge
-
-	* content/Test/test.bat: Removed @echo off since I keep doing that,
-	hopefully no one minds.
-
 2001-05-22 23:07  pgregory
 
 	* librib2/: parser.y, scanner.l: Reintroduce mode switch to allow
@@ -790,8 +1009,7 @@
 
 2001-05-22 16:09  pgregory
 
-	* Renderer.dsw, cribber/cribber.cpp, cribber/cribber.dsp: Make
-	cribber use the new librib2 library.
+	* Renderer.dsw: Make cribber use the new librib2 library.
 
 2001-05-22 16:03  pgregory
 
@@ -833,9 +1051,8 @@
 
 2001-05-22 01:49  pgregory
 
-	* content/Test/uv_test.rib, librib2/scanner.l: Minor fix to get
-	working under Win32. use std:: namespace for ifstream, and include
-	assert.h
+	* librib2/scanner.l: Minor fix to get working under Win32. use
+	std:: namespace for ifstream, and include assert.h
 
 2001-05-22 00:29  tshead
 
@@ -844,10 +1061,10 @@
 2001-05-22 00:28  tshead
 
 	* ChangeLog, Makefile.am, aclocal.m4, configure.in,
-	aqsis/Makefile.am, aqsis/aqsis.cpp, file/Makefile.am,
-	libaqsistypes/.cvsignore, libaqsistypes/Makefile.am,
-	libaqsistypes/color.cpp, libaqsistypes/vector4d.cpp,
-	libaqsistypes/posix/.cvsignore, libaqsistypes/posix/Makefile.am,
+	aqsis/Makefile.am, aqsis/aqsis.cpp, libaqsistypes/.cvsignore,
+	libaqsistypes/Makefile.am, libaqsistypes/color.cpp,
+	libaqsistypes/vector4d.cpp, libaqsistypes/posix/.cvsignore,
+	libaqsistypes/posix/Makefile.am,
 	libaqsistypes/posix/aqsis_compiler.h,
 	libaqsistypes/posix/criticalsection.h,
 	libaqsistypes/posix/semaphore.cpp, libaqsistypes/posix/semaphore.h,
@@ -890,23 +1107,13 @@
 
 2001-05-21 22:13  tburge
 
-	* render/ri.cpp, render/ri.h, librib/parser.y: Added commented out
-	RiGeometry.  If no one minds would like to add teapot so that PRMan
-	test RIBs will work.
-
-2001-05-21 17:58  tburge
-
-	* content/Test/test.bat: Removed -nowait from test.bat since
-	cribber now uses -pause.
+	* render/: ri.cpp, ri.h: Added commented out RiGeometry.  If no one
+	minds would like to add teapot so that PRMan test RIBs will work.
 
 2001-05-21 12:30  pgregory
 
 	* render/: imagebuffer.cpp, imagebuffer.h: Updated filtering code
 	to filter at the subppixel level.
-
-2001-05-20 22:36  tburge
-
-	* content/Test/persptrans.rib: Add perspective transformation test.
 
 2001-05-20 22:23  tburge
 
@@ -923,19 +1130,9 @@
 	* libaqsistypes/matrix.cpp, libaqsistypes/matrix.h, render/ri.cpp:
 	Added Skew support.
 
-2001-05-18 20:58  pgregory
-
-	* file/: .cvsignore, Makefile.am, file.cpp, file.dsp, file.h:
-	Removed, deprecated.
-
 2001-05-18 20:48  pgregory
 
-	* render/: makefile.mingw, win32_mingw/intel/aqsis_compiler.h,
-	win32_mingw/intel/criticalsection.cpp,
-	win32_mingw/intel/criticalsection.h,
-	win32_mingw/intel/perftimer.cpp, win32_mingw/intel/perftimer.h,
-	win32_mingw/intel/semaphore.cpp, win32_mingw/intel/semaphore.h,
-	win32_mingw/intel/share.h: Removed MinGW support.
+	* render/makefile.mingw: Removed MinGW support.
 
 2001-05-18 20:47  pgregory
 
@@ -959,24 +1156,19 @@
 
 2001-05-18 20:30  pgregory
 
-	* Renderer.dsw, cribber/cribber.dsp, filebuffer/filebuffer.dsp,
+	* Renderer.dsw, filebuffer/filebuffer.dsp,
 	framebuffer/win32/intel/framebuffer.dsp, libdd/libdd.dsp,
 	libddmsimple/libddmsimple.dsp,
-	libddmsock/win32/intel/libddmsock.dsp, librib/librib.dsp,
-	render/libaqsis.dsp, shadowmap/shadowmap.dsp, slcomp/slcomp.dsp,
-	texer/texer.dsp, render/aqsis.h, render/aqsis_types.h,
-	render/bitvector.cpp, render/bitvector.h, render/color.cpp,
-	render/color.h, render/exception.h, render/file.cpp, render/file.h,
-	render/list.h, render/matrix.cpp, render/matrix.h,
-	render/memorypool.h, render/random.h, render/sstring.cpp,
-	render/sstring.h, render/vector2d.cpp, render/vector2d.h,
-	render/vector3d.cpp, render/vector3d.h, render/vector4d.cpp,
-	render/vector4d.h, render/win32/intel/aqsis_compiler.h,
-	render/win32/intel/criticalsection.cpp,
-	render/win32/intel/criticalsection.h,
-	render/win32/intel/semaphore.cpp, render/win32/intel/semaphore.h,
-	render/win32/intel/share.h: Move non-rendering functionality out to
-	libaqsistypes.
+	libddmsock/win32/intel/libddmsock.dsp, render/libaqsis.dsp,
+	shadowmap/shadowmap.dsp, texer/texer.dsp, render/aqsis.h,
+	render/aqsis_types.h, render/bitvector.cpp, render/bitvector.h,
+	render/color.cpp, render/color.h, render/exception.h,
+	render/file.cpp, render/file.h, render/list.h, render/matrix.cpp,
+	render/matrix.h, render/memorypool.h, render/random.h,
+	render/sstring.cpp, render/sstring.h, render/vector2d.cpp,
+	render/vector2d.h, render/vector3d.cpp, render/vector3d.h,
+	render/vector4d.cpp, render/vector4d.h: Move non-rendering
+	functionality out to libaqsistypes.
 
 2001-05-18 19:33  pgregory
 
@@ -985,11 +1177,6 @@
 	CqFile now takes an optional searchpath string as a ';' separated
 	list of pathspecs. CqRiFile derives from CqFile and provides the
 	ability to fetch the searchpath from the Ri options.
-
-2001-05-18 00:22  pgregory
-
-	* cribber/cribber.cpp: Change the -nowait option to -pause and make
-	cribber exit immediately by default.
 
 2001-05-17 18:08  pgregory
 
@@ -1002,9 +1189,8 @@
 
 2001-05-17 11:50  pgregory
 
-	* slcomp/slcomp.dsp, Renderer.dsw,
-	framebuffer/win32/intel/framebuffer.dsp: Update dependencies and
-	link options.
+	* Renderer.dsw, framebuffer/win32/intel/framebuffer.dsp: Update
+	dependencies and link options.
 
 2001-05-16 23:45  pgregory
 
@@ -1028,14 +1214,12 @@
 
 2001-05-15 23:13  pgregory
 
-	* Renderer.dsw, prep_install.bat, cribber/cribber.dsp,
-	libddmsimple/libddmsimple.dsp, libddmsock/win32/intel/ddmsock.h,
-	render/render.cpp, render/renderer.cpp, render/shadervariable.cpp,
-	render/shadervariable.h, render/win32/intel/share.h,
-	slcomp/funcdef.cpp, slcomp/funcdef.h, slcomp/parsenode.cpp,
-	slcomp/parsenode.h, slcomp/slcomp.dsp, slcomp/vardef.h,
-	texer/texer.dsp, render/libaqsis.dsp: Changed the build to make the
-	main renderer library a static library 'libaqsis'.
+	* Renderer.dsw, prep_install.bat, libddmsimple/libddmsimple.dsp,
+	libddmsock/win32/intel/ddmsock.h, render/render.cpp,
+	render/renderer.cpp, render/shadervariable.cpp,
+	render/shadervariable.h, texer/texer.dsp, render/libaqsis.dsp:
+	Changed the build to make the main renderer library a static
+	library 'libaqsis'.
 
 2001-05-15 23:10  pgregory
 
@@ -1078,10 +1262,7 @@
 	libddmsimple/ddmsimple.cpp, libddmsimple/ddmsimple.h,
 	libddmsock/.cvsignore, libddmsock/Makefile.am,
 	libddmsock/displaydriver.h, libddmsock/posix/.cvsignore,
-	libddmsock/posix/Makefile.am, libddmsock/posix/intel/.cvsignore,
-	libddmsock/posix/intel/Makefile.am,
-	libddmsock/posix/intel/ddmsock.cpp,
-	libddmsock/posix/intel/ddmsock.h, render/Makefile.am,
+	libddmsock/posix/Makefile.am, render/Makefile.am,
 	render/iddmanager.h, render/renderer.cpp: * Posix build update *
 	Modified libaqsis to instantiate ddmanager objects using Class
 	Factory design pattern
@@ -1135,12 +1316,6 @@
 
 	* render/displaydriver.h: Removed, moved into libddmsock
 
-2001-05-11 01:00  pgregory
-
-	* cribber/cribber.dsp: Next step in display device change, devices
-	are now controlled by a manager which is exposed via an interface
-	for flexibility.
-
 2001-05-11 00:58  pgregory
 
 	* libddmsock/: displaydriver.h, win32/intel/ddmsock.cpp,
@@ -1153,16 +1328,11 @@
 
 2001-05-11 00:55  pgregory
 
-	* render/renderer.cpp, Renderer.dsw, file/file.cpp,
-	render/Render.dsp, render/imagebuffer.cpp, render/imagebuffer.h,
-	render/renderer.h, render/ri.cpp: Next step in display device
-	change, devices are now controlled by a manager which is exposed
-	via an interface for flexibility.
-
-2001-05-11 00:45  pgregory
-
-	* render/win32/intel/: ddserver.cpp, ddserver.h: Removed, now in
-	libddmsock
+	* render/renderer.cpp, Renderer.dsw, render/Render.dsp,
+	render/imagebuffer.cpp, render/imagebuffer.h, render/renderer.h,
+	render/ri.cpp: Next step in display device change, devices are now
+	controlled by a manager which is exposed via an interface for
+	flexibility.
 
 2001-05-11 00:44  pgregory
 
@@ -1170,11 +1340,10 @@
 
 2001-05-10 20:05  tshead
 
-	* aqsis/Makefile.am, file/Makefile.am, render/Makefile.am,
-	render/renderer.cpp, render/shadervm.h,
-	render/posix/intel/Makefile.am: * Applied patches from Patrick
-	Mauritz enabling Automake Makefiles to perform builds outside of
-	the source directories * Posix code cleanup
+	* aqsis/Makefile.am, render/Makefile.am, render/renderer.cpp,
+	render/shadervm.h: * Applied patches from Patrick Mauritz enabling
+	Automake Makefiles to perform builds outside of the source
+	directories * Posix code cleanup
 
 2001-05-09 23:00  pgregory
 
@@ -1211,19 +1380,10 @@
 	need to bound grids, they are placed in the same bucket as the
 	GPrim they come from.
 
-2001-05-08 19:42  pgregory
-
-	* cribber/cribber.dsp: Change to using the new libargparse
-
 2001-05-08 18:05  pgregory
 
 	* render/: vector2d.cpp, vector2d.h, vector3d.cpp, vector3d.h,
 	vector4d.cpp, vector4d.h: Make Unit functions inline.
-
-2001-05-08 18:04  pgregory
-
-	* slcomp/slcomp.cpp: Added default header, and reordered includes
-	to get rid of warnings.
 
 2001-05-08 18:04  pgregory
 
@@ -1243,11 +1403,6 @@
 
 	* framebuffer/win32/intel/: framebuffer.cpp, framebuffer.dsp:
 	Remove precompiled header support.
-
-2001-05-08 18:01  pgregory
-
-	* cribber/: cribber.cpp, cribber.dsp: Use the new libargparse from
-	Patrick.
 
 2001-05-08 18:00  pgregory
 
@@ -1277,10 +1432,9 @@
 
 	* aqsis.ini, render/displaydriver.h, render/imagebuffer.cpp,
 	render/imagebuffer.h, render/renderer.cpp, render/renderer.h,
-	render/ri.cpp, render/texturemap.cpp,
-	render/win32/intel/ddserver.cpp, render/win32/intel/ddserver.h,
-	shadowmap/shadowmap.cpp, shadowmap/shadowmap.dsp: Implement first
-	attempt at new sockets based display driver interface.
+	render/ri.cpp, render/texturemap.cpp, shadowmap/shadowmap.cpp,
+	shadowmap/shadowmap.dsp: Implement first attempt at new sockets
+	based display driver interface.
 
 2001-05-08 00:41  pgregory
 
@@ -1323,8 +1477,8 @@
 2001-05-03 17:57  pgregory
 
 	* render/: renderer.h, renderer.cpp, Render.dsp, render.cpp,
-	displaydriver.h, win32/intel/ddserver.cpp, win32/intel/ddserver.h:
-	Implement first attempt at new display driver method.
+	displaydriver.h: Implement first attempt at new display driver
+	method.
 
 2001-05-03 17:50  pgregory
 
@@ -1341,13 +1495,12 @@
 
 2001-05-02 19:35  tshead
 
-	* file/file.cpp, render/polygon.h, render/render.cpp,
-	render/renderer.cpp, render/renderer.h, render/ri.cpp,
-	render/shadeops.cpp, render/shadervm.h, render/texturemap.h,
-	render/posix/intel/aqsis_compiler.h, slcomp/slcomp.cpp,
-	texer/texer.cpp: * Updated conditional processing code to use
-	AQSIS_SYSTEM_WIN32 instead of WIN32 * Defined AQSIS_SYSTEM_POSIX
-	and AQSIS_COMPILER_GCC in the Posix build
+	* render/polygon.h, render/render.cpp, render/renderer.cpp,
+	render/renderer.h, render/ri.cpp, render/shadeops.cpp,
+	render/shadervm.h, render/texturemap.h, texer/texer.cpp: * Updated
+	conditional processing code to use AQSIS_SYSTEM_WIN32 instead of
+	WIN32 * Defined AQSIS_SYSTEM_POSIX and AQSIS_COMPILER_GCC in the
+	Posix build
 
 2001-05-02 17:39  pgregory
 
@@ -1373,35 +1526,19 @@
 
 	* .cvsignore, AUTHORS, ChangeLog, Makefile.am, NEWS, README,
 	aclocal.m4, bootstrap, configure.in, aqsis/.cvsignore,
-	aqsis/Makefile.am, aqsis/aqsis.cpp, file/.cvsignore,
-	file/Makefile.am, librib/.cvsignore, librib/Makefile.am,
-	render/.cvsignore, render/Makefile.am, render/posix/.cvsignore,
-	render/posix/Makefile.am, render/posix/intel/.cvsignore,
-	render/posix/intel/Makefile.am,
-	render/posix/intel/aqsis_compiler.h,
-	render/posix/intel/criticalsection.h,
-	render/posix/intel/semaphore.cpp, render/posix/intel/semaphore.h,
-	render/posix/intel/share.h, render/posix/intel/specific.h: *
-	Initial GNU/Linux build
+	aqsis/Makefile.am, aqsis/aqsis.cpp, render/.cvsignore,
+	render/Makefile.am: * Initial GNU/Linux build
 
 2001-05-02 01:32  tshead
 
-	* file/file.cpp, file/file.h, render/attributes.cpp,
-	render/attributes.h, render/imagebuffer.cpp, render/imagebuffer.h,
-	render/lights.cpp, render/list.h, render/messages.cpp,
-	render/micropolygon.h, render/noise.h, render/options.h,
-	render/parameters.h, render/polygon.h, render/random.h,
-	render/render.cpp, render/renderer.cpp, render/renderer.h,
-	render/ri.cpp, render/shadeops.cpp, render/shaderexecenv.h,
-	render/shaders.cpp, render/shaderstack.h, render/shadervariable.h,
-	render/shadervm.cpp, render/shadervm.h, render/spline.h,
-	render/sstring.cpp, render/subdivision.cpp, render/subdivision.h,
-	render/surface.cpp, render/texturemap.cpp, render/texturemap.h: *
-	Initial GNU/Linux build
-
-2001-05-02 00:02  pgregory
-
-	* content/Test/transmb_test.rib: Reenable motion blur testing.
+	* render/: attributes.cpp, attributes.h, imagebuffer.cpp,
+	imagebuffer.h, lights.cpp, list.h, messages.cpp, micropolygon.h,
+	noise.h, options.h, parameters.h, polygon.h, random.h, render.cpp,
+	renderer.cpp, renderer.h, ri.cpp, shadeops.cpp, shaderexecenv.h,
+	shaders.cpp, shaderstack.h, shadervariable.h, shadervm.cpp,
+	shadervm.h, spline.h, sstring.cpp, subdivision.cpp, subdivision.h,
+	surface.cpp, texturemap.cpp, texturemap.h: * Initial GNU/Linux
+	build
 
 2001-05-02 00:01  pgregory
 
@@ -1455,21 +1592,17 @@
 
 2001-04-30 00:43  pgregory
 
-	* cribber/cribber.cpp, cribber/cribber.dsp, file/file.cpp,
-	file/file.dsp, file/file.h, framebuffer/framebuffer.cpp,
-	framebuffer/framebuffer.dsp, framebuffer/framebuffer.h,
-	librib/iribcompiler.h, librib/librib.dsp, librib/parser.y,
-	librib/ribcompiler.cpp, librib/ribcompiler.h, librib/scanner.l,
-	render/Render.dsp, render/attributes.cpp, render/attributes.h,
-	render/bilinear.h, render/bitvector.h, render/bound.h,
-	render/cellnoise.h, render/color.h, render/context.h,
-	render/exception.h, render/file.cpp, render/file.h,
-	render/globals.h, render/imagebuffer.cpp, render/imagebuffer.h,
-	render/irenderer.h, render/lights.cpp, render/lights.h,
-	render/list.h, render/matrix.h, render/memorypool.h,
-	render/messages.cpp, render/messages.h, render/micropolygon.cpp,
-	render/micropolygon.h, render/motion.h, render/noise.h,
-	render/nommgr.h, render/nurbs.cpp, render/nurbs.h,
+	* framebuffer/framebuffer.cpp, framebuffer/framebuffer.dsp,
+	framebuffer/framebuffer.h, render/Render.dsp,
+	render/attributes.cpp, render/attributes.h, render/bilinear.h,
+	render/bitvector.h, render/bound.h, render/cellnoise.h,
+	render/color.h, render/context.h, render/exception.h,
+	render/file.cpp, render/file.h, render/globals.h,
+	render/imagebuffer.cpp, render/imagebuffer.h, render/irenderer.h,
+	render/lights.cpp, render/lights.h, render/list.h, render/matrix.h,
+	render/memorypool.h, render/messages.cpp, render/messages.h,
+	render/micropolygon.cpp, render/micropolygon.h, render/motion.h,
+	render/noise.h, render/nommgr.h, render/nurbs.cpp, render/nurbs.h,
 	render/options.cpp, render/parameters.h, render/patch.cpp,
 	render/patch.h, render/polygon.cpp, render/polygon.h,
 	render/quadrics.cpp, render/quadrics.h, render/random.h,
@@ -1482,91 +1615,24 @@
 	render/subdivision.cpp, render/surface.cpp, render/surface.h,
 	render/symbols.h, render/texturemap.cpp, render/texturemap.h,
 	render/transform.cpp, render/transform.h, render/vector2d.h,
-	render/vector3d.h, render/vector4d.h,
-	render/win32/intel/aqsis_compiler.h,
-	render/win32/intel/criticalsection.cpp,
-	render/win32/intel/specific.h,
-	render/win32_mingw/intel/aqsis_compiler.h,
-	render/win32_mingw/intel/criticalsection.cpp,
-	render/win32_mingw/intel/specific.h, shadowmap/shadowmap.dsp,
-	shadowmap/shadowmap.h, slcomp/funcdef.h, slcomp/parsenode.h,
-	slcomp/slcomp.dsp, slcomp/vardef.h, slpp/slpp.dsp, texer/texer.dsp:
-	Removed "specific.h" functionality now in "aqsis_compiler.h". 
-	Removed the external reliance on CqRenderer and therefore the need
-	for IqRenderer. RiBegin now creates a render context.  Added two
-	global functions QSetRenderContext to set the current render
-	context, and QGetRenderContext, which is just pCurrentRenderer
-	under a more appropriate name.	Moved shader creation functionality
-	onto the renderer.
-
-2001-04-28 23:16  pgregory
-
-	* render/: win32/intel/aqsis_compiler.h,
-	win32_mingw/intel/aqsis_compiler.h: Added system and compiler
-	defines
+	render/vector3d.h, render/vector4d.h, shadowmap/shadowmap.dsp,
+	shadowmap/shadowmap.h, slpp/slpp.dsp, texer/texer.dsp: Removed
+	"specific.h" functionality now in "aqsis_compiler.h".  Removed the
+	external reliance on CqRenderer and therefore the need for
+	IqRenderer. RiBegin now creates a render context.  Added two global
+	functions QSetRenderContext to set the current render context, and
+	QGetRenderContext, which is just pCurrentRenderer under a more
+	appropriate name.  Moved shader creation functionality onto the
+	renderer.
 
 2001-04-27 22:33  pgregory
 
-	* render/makefile.mingw, cribber/makefile.mingw: Initial check in.
+	* render/makefile.mingw: Initial check in.
 
 2001-04-27 22:08  pgregory
 
 	* BUILD, Doxyfile, License.txt, Readme.txt, Renderer.dsw,
 	aqsis.ini, prep_install.bat, ribber.cfg: Initial check in.
-
-2001-04-27 21:39  pgregory
-
-	* content/Test/: std_st_test.rib, test.bat, test.rib, testincl.rib,
-	tmap_test.rib, transmb_test.rib, uvtest.sl, uv_test.rib: Initial
-	revision
-
-2001-04-27 21:39  pgregory
-
-	* content/Test/: std_st_test.rib, test.bat, test.rib, testincl.rib,
-	tmap_test.rib, transmb_test.rib, uvtest.sl, uv_test.rib: Initial
-	check in.
-
-2001-04-27 21:36  pgregory
-
-	* content/Test/: nz.tif, orient_test.rib, patterns.h,
-	periodic_test.rib, persptest.rib, poly_test.rib, px.tif, py.tif,
-	pz.tif, quads_test.rib, shadtest.rib, show_st.sl, space_test.rib,
-	spacetest.sl: Initial revision
-
-2001-04-27 21:36  pgregory
-
-	* content/Test/: nz.tif, orient_test.rib, patterns.h,
-	periodic_test.rib, persptest.rib, poly_test.rib, px.tif, py.tif,
-	pz.tif, quads_test.rib, shadtest.rib, show_st.sl, space_test.rib,
-	spacetest.sl: Initial check in.
-
-2001-04-27 21:33  pgregory
-
-	* content/Test/: Image1.tif, mod_st2_test.rib, mod_st_test.rib,
-	noises.h, noshadows.rib, nx.tif, ny.tif: Initial revision
-
-2001-04-27 21:33  pgregory
-
-	* content/Test/: Image1.tif, mod_st2_test.rib, mod_st_test.rib,
-	noises.h, noshadows.rib, nx.tif, ny.tif: Initial check in.
-
-2001-04-27 21:27  pgregory
-
-	* content/: Content.dsp, vase.rib, vase_shad1.rib, vase_shad2.rib,
-	Test/autoshadows.rib, Test/autoshadtest.rib, Test/brickbump.sl,
-	Test/DPProctext.h, Test/bucket_test.rib,
-	Test/colpervertex_test.rib, Test/coordsys_test.rib,
-	Test/disp_test.rib, Test/env_test.rib, Test/eyeplanetest.rib:
-	Initial revision
-
-2001-04-27 21:27  pgregory
-
-	* content/: Content.dsp, vase.rib, vase_shad1.rib, vase_shad2.rib,
-	Test/autoshadows.rib, Test/autoshadtest.rib, Test/brickbump.sl,
-	Test/DPProctext.h, Test/bucket_test.rib,
-	Test/colpervertex_test.rib, Test/coordsys_test.rib,
-	Test/disp_test.rib, Test/env_test.rib, Test/eyeplanetest.rib:
-	Initial check in.
 
 2001-04-27 21:23  pgregory
 
@@ -1576,23 +1642,15 @@
 
 	* texer/: texer.cpp, texer.dsp: Initial check in.
 
-2001-04-27 21:17  pgregory
+2001-04-27 21:18  pgregory
 
-	* slcomp/parser.y, slcomp/scanner.l, slcomp/slcomp.cpp,
-	slcomp/slcomp.dsp, slcomp/Test.sl, slcomp/typecheck.cpp,
-	slcomp/vardef.cpp, slcomp/vardef.h, slpp/MAKEFILE, slpp/PP.DOC,
-	slpp/PP.H, slpp/PP1.C, slpp/PP2.C, slpp/PP3.C, slpp/PP4.C,
-	slpp/PP5.C, slpp/PP6.C, slpp/PP7.C, slpp/PP8.C, slpp/PPEXT.H,
-	slpp/slpp.dsp: Initial revision
+	* slpp/: MAKEFILE, PP.DOC, PP.H, PP1.C, PP2.C, PP3.C, PP4.C, PP5.C,
+	PP6.C, PP7.C, PP8.C, PPEXT.H, slpp.dsp: Initial revision
 
-2001-04-27 21:17  pgregory
+2001-04-27 21:18  pgregory
 
-	* slcomp/parser.y, slcomp/scanner.l, slcomp/slcomp.cpp,
-	slcomp/slcomp.dsp, slcomp/Test.sl, slcomp/typecheck.cpp,
-	slcomp/vardef.cpp, slcomp/vardef.h, slpp/MAKEFILE, slpp/PP.DOC,
-	slpp/PP.H, slpp/PP1.C, slpp/PP2.C, slpp/PP3.C, slpp/PP4.C,
-	slpp/PP5.C, slpp/PP6.C, slpp/PP7.C, slpp/PP8.C, slpp/PPEXT.H,
-	slpp/slpp.dsp: Initial check in.
+	* slpp/: MAKEFILE, PP.DOC, PP.H, PP1.C, PP2.C, PP3.C, PP4.C, PP5.C,
+	PP6.C, PP7.C, PP8.C, PPEXT.H, slpp.dsp: Initial check in.
 
 2001-04-27 21:14  pgregory
 
@@ -1600,16 +1658,8 @@
 	shaders/distantlight.sl, shaders/fog.sl, shaders/matte.sl,
 	shaders/metal.sl, shaders/paintedplastic.sl, shaders/plastic.sl,
 	shaders/pointlight.sl, shaders/shaders.dsp, shaders/spotlight.sl,
-	shaders/additional/borg_metal.sl, shaders/additional/DPProctext.h,
-	shaders/additional/dented.sl, shaders/additional/dpbluemarble.sl,
-	shaders/additional/noises.h, shaders/additional/patterns.h,
-	shaders/additional/randgrid.sl, shaders/additional/shadowspot.sl,
-	shaders/additional/shinymetal.sl, shadowmap/shadowmap.cpp,
-	shadowmap/shadowmap.dsp, shadowmap/shadowmap.h, slcomp/bison.cc,
-	slcomp/bison.h, slcomp/error.h, slcomp/flexskel.cc,
-	slcomp/flexskel.h, slcomp/funcdef.cpp, slcomp/funcdef.h,
-	slcomp/optimise.cpp, slcomp/parsenode.cpp, slcomp/parsenode.h:
-	Initial revision
+	shadowmap/shadowmap.cpp, shadowmap/shadowmap.dsp,
+	shadowmap/shadowmap.h: Initial revision
 
 2001-04-27 21:14  pgregory
 
@@ -1617,44 +1667,22 @@
 	shaders/distantlight.sl, shaders/fog.sl, shaders/matte.sl,
 	shaders/metal.sl, shaders/paintedplastic.sl, shaders/plastic.sl,
 	shaders/pointlight.sl, shaders/shaders.dsp, shaders/spotlight.sl,
-	shaders/additional/borg_metal.sl, shaders/additional/DPProctext.h,
-	shaders/additional/dented.sl, shaders/additional/dpbluemarble.sl,
-	shaders/additional/noises.h, shaders/additional/patterns.h,
-	shaders/additional/randgrid.sl, shaders/additional/shadowspot.sl,
-	shaders/additional/shinymetal.sl, shadowmap/shadowmap.cpp,
-	shadowmap/shadowmap.dsp, shadowmap/shadowmap.h, slcomp/bison.cc,
-	slcomp/bison.h, slcomp/error.h, slcomp/flexskel.cc,
-	slcomp/flexskel.h, slcomp/funcdef.cpp, slcomp/funcdef.h,
-	slcomp/optimise.cpp, slcomp/parsenode.cpp, slcomp/parsenode.h:
-	Initial check in.
+	shadowmap/shadowmap.cpp, shadowmap/shadowmap.dsp,
+	shadowmap/shadowmap.h: Initial check in.
 
 2001-04-27 21:00  pgregory
 
 	* render/: subdivision.cpp, subdivision.h, surface.cpp, surface.h,
 	symbols.cpp, symbols.h, texturemap.cpp, texturemap.h,
 	transform.cpp, transform.h, vector2d.cpp, vector2d.h, vector3d.cpp,
-	vector3d.h, vector4d.cpp, vector4d.h, version.h,
-	win32_mingw/intel/aqsis_compiler.h,
-	win32_mingw/intel/criticalsection.cpp,
-	win32_mingw/intel/criticalsection.h,
-	win32_mingw/intel/perftimer.cpp, win32_mingw/intel/perftimer.h,
-	win32_mingw/intel/semaphore.cpp, win32_mingw/intel/semaphore.h,
-	win32_mingw/intel/share.h, win32_mingw/intel/specific.h: Initial
-	revision
+	vector3d.h, vector4d.cpp, vector4d.h, version.h: Initial revision
 
 2001-04-27 21:00  pgregory
 
 	* render/: subdivision.cpp, subdivision.h, surface.cpp, surface.h,
 	symbols.cpp, symbols.h, texturemap.cpp, texturemap.h,
 	transform.cpp, transform.h, vector2d.cpp, vector2d.h, vector3d.cpp,
-	vector3d.h, vector4d.cpp, vector4d.h, version.h,
-	win32_mingw/intel/aqsis_compiler.h,
-	win32_mingw/intel/criticalsection.cpp,
-	win32_mingw/intel/criticalsection.h,
-	win32_mingw/intel/perftimer.cpp, win32_mingw/intel/perftimer.h,
-	win32_mingw/intel/semaphore.cpp, win32_mingw/intel/semaphore.h,
-	win32_mingw/intel/share.h, win32_mingw/intel/specific.h: Initial
-	check in.
+	vector3d.h, vector4d.cpp, vector4d.h, version.h: Initial check in.
 
 2001-04-27 20:57  pgregory
 
@@ -1710,47 +1738,21 @@
 	irenderer.h, lights.cpp, lights.h, list.h, matrix.cpp: Initial
 	check in.
 
-2001-04-27 20:41  pgregory
+2001-04-27 20:39  pgregory
 
-	* framebuffer/framebuffer.cpp, framebuffer/framebuffer.dsp,
-	framebuffer/framebuffer.h, framebuffer/framebuffer.rc,
-	framebuffer/ico00001.ico, framebuffer/icon1.ico,
-	framebuffer/readme.txt, framebuffer/resource.h, librib/bison.cc,
-	librib/bison.h, librib/flexskel.cc, librib/flexskel.h,
-	librib/iribcompiler.h, librib/librib.dsp, librib/parser.y,
-	librib/ribcompiler.cpp, librib/ribcompiler.h, librib/scanner.l:
-	Initial revision
+	* all/All.dsp, framebuffer/framebuffer.cpp,
+	framebuffer/framebuffer.dsp, framebuffer/framebuffer.h,
+	framebuffer/framebuffer.rc, framebuffer/ico00001.ico,
+	framebuffer/icon1.ico, framebuffer/readme.txt,
+	framebuffer/resource.h: Initial revision
 
-2001-04-27 20:41  pgregory
+2001-04-27 20:39  pgregory
 
-	* framebuffer/framebuffer.cpp, framebuffer/framebuffer.dsp,
-	framebuffer/framebuffer.h, framebuffer/framebuffer.rc,
-	framebuffer/ico00001.ico, framebuffer/icon1.ico,
-	framebuffer/readme.txt, framebuffer/resource.h, librib/bison.cc,
-	librib/bison.h, librib/flexskel.cc, librib/flexskel.h,
-	librib/iribcompiler.h, librib/librib.dsp, librib/parser.y,
-	librib/ribcompiler.cpp, librib/ribcompiler.h, librib/scanner.l:
-	Initial check in.
-
-2001-04-27 20:37  pgregory
-
-	* render/win32/intel/aqsis_compiler.h,
-	render/win32/intel/criticalsection.cpp,
-	render/win32/intel/criticalsection.h,
-	render/win32/intel/semaphore.cpp, render/win32/intel/semaphore.h,
-	render/win32/intel/share.h, render/win32/intel/specific.h,
-	all/All.dsp, cribber/cribber.cpp, cribber/cribber.dsp,
-	file/file.cpp, file/file.dsp, file/file.h: Initial revision
-
-2001-04-27 20:37  pgregory
-
-	* render/win32/intel/aqsis_compiler.h,
-	render/win32/intel/criticalsection.cpp,
-	render/win32/intel/criticalsection.h,
-	render/win32/intel/semaphore.cpp, render/win32/intel/semaphore.h,
-	render/win32/intel/share.h, render/win32/intel/specific.h,
-	all/All.dsp, cribber/cribber.cpp, cribber/cribber.dsp,
-	file/file.cpp, file/file.dsp, file/file.h: Initial check in.
+	* all/All.dsp, framebuffer/framebuffer.cpp,
+	framebuffer/framebuffer.dsp, framebuffer/framebuffer.h,
+	framebuffer/framebuffer.rc, framebuffer/ico00001.ico,
+	framebuffer/icon1.ico, framebuffer/readme.txt,
+	framebuffer/resource.h: Initial check in.
 
 2001-04-17 15:45  pgregory
 
