@@ -410,6 +410,7 @@ RtVoid	RiFrameBegin( RtInt number )
 	QGetRenderContext() ->Stats().StartFrameTimer();
 
 	QGetRenderContext() ->BeginFrameModeBlock();
+	QGetRenderContext() ->SetCurrentFrame( number );
 	CqCSGTreeNode::SetRequired( TqFalse );
 	return ;
 }

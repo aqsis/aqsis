@@ -314,7 +314,7 @@ extern	"C"
 
 	// Specific to Aqsis
 
-	typedef	RtVoid	( *RtProgressFunc ) ( RtFloat PercentComplete );
+	typedef	RtVoid	( *RtProgressFunc ) ( RtFloat PercentComplete, RtInt FrameNo );
 
 	RtBoolean	BasisFromName( RtBasis * b, const char * strName );
 	RtVoid	RiProgressHandler( RtProgressFunc handler );

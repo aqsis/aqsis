@@ -69,7 +69,8 @@ CqRenderer::CqRenderer() :
 		m_Mode( RenderMode_Image ),
 		m_fSaveGPrims( TqFalse ),
 		m_OutputDataOffset(7),		// Cs, Os, z
-		m_OutputDataTotalSize(7)	// Cs, Os, z
+		m_OutputDataTotalSize(7),	// Cs, Os, z
+		m_FrameNo( 0 )
 {
 	m_pconCurrent = 0;
 	m_pImageBuffer = new	CqImageBuffer();

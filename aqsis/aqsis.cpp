@@ -76,7 +76,7 @@ ArgParse::apstring g_procedurals = "";
 ArgParse::apstring g_type = "";
 ArgParse::apstring g_addtype = "";
 ArgParse::apstring g_mode = "rgba";
-ArgParse::apstring g_strprogress = "Done Computing %p%% [ %s secs / %S left ]";
+ArgParse::apstring g_strprogress = "Frame (%f) %p%% complete [ %s secs / %S left ]";
 
 /** Function to print out the version to a std::ostream
  */
@@ -93,7 +93,7 @@ void version( std::ostream& Stream )
 /** Function to print the progress of the render.
 	Used as the callback function to a RiProgressHandler call.
  */
-RtVoid PrintProgress( RtFloat percent )
+RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 {
 	if ( ( g_progress == 0 ) && ( g_Progress == 0 ) )
 		return ;
@@ -197,6 +197,10 @@ RtVoid PrintProgress( RtFloat percent )
 
 					case 'T':
 					strOutput << std::setprecision( 0 ) << ( TqInt ) total_hrsleft << ":" << ( TqInt ) sub_minsleft << ":" << ( TqInt ) sub_secsleft;
+					break;
+
+					case 'f':
+					strOutput << std::setprecision( 0 ) << ( TqInt ) FrameNo;
 					break;
 
 					case '%':

@@ -371,6 +371,15 @@ class CqRenderer : public IqRenderer
 			return( m_OutputDataTotalSize );
 		}
 
+	virtual	void	SetCurrentFrame( TqInt FrameNo )
+		{
+			m_FrameNo = FrameNo;
+		}
+	virtual	TqInt	CurrentFrame() const
+		{
+			return( m_FrameNo );
+		}
+
 	private:
 		CqModeBlock*	m_pconCurrent;					///< Pointer to the current context.
 		CqStats	m_Stats;						///< Global statistics.
@@ -400,6 +409,7 @@ class CqRenderer : public IqRenderer
 		TqInt	m_OutputDataTotalSize;
 
 		CqOptions *m_pOptDefault;	///< Pointer to default options.
+		TqInt	m_FrameNo;
 	public:
 		std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.
 }

@@ -1295,7 +1295,7 @@ void CqImageBuffer::RenderImage()
 			Complete /= iBucket;
 			Complete = 100.0f / Complete;
 			QGetRenderContext() ->Stats().SetComplete( Complete );
-			( *pProgressHandler ) ( Complete );
+			( *pProgressHandler ) ( Complete, QGetRenderContext()->CurrentFrame() );
 		}
 
 
@@ -1330,7 +1330,7 @@ void CqImageBuffer::RenderImage()
 
 	if ( pProgressHandler )
 	{
-		( *pProgressHandler ) ( 100.0f );
+		( *pProgressHandler ) ( 100.0f, QGetRenderContext()->CurrentFrame() );
 	}
 	m_fDone = TqTrue;
 }
