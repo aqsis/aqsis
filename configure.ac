@@ -147,6 +147,20 @@ if test ! "$ac_cv_header_zlib_h" || test ! "ac_cv_lib_z_gzopen" ; then
         AC_MSG_ERROR([*** Please ensure you have zlib libraries and headers  installed ***]);
 fi
 
+dnl JPEG library
+saveCFLAGS=$CFLAGS
+saveLIBS=$LIBS
+HAVE_LIBJPEG_ARGS
+CFLAGS=$JPEG_INC
+LIBS=$JPEG_FLAGS
+AC_CHECK_HEADER(jpeglib.h)
+AC_CHECK_LIB(jpeg, jpeg_read_header)
+CFLAGS=$saveCFLAGS
+LIBS=$saveLIBS
+if test ! "$ac_cv_header_jpeglib_h" || test ! "ac_cv_lib_jpeg_jpeg_read_header" ; then
+        AC_MSG_ERROR([*** Please ensure you have libjpeg libraries and headers installed ***]);
+fi
+
 dnl See if we have xsltproc for rebuilding the ri.inl and ri_cache.inl
 AC_CHECK_PROG(have_xsltproc, xsltproc, yes, no)
 if test x$have_xsltproc = "xno" ; then
