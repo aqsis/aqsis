@@ -79,6 +79,9 @@ class RiCacheBase
 							delete[](m_tokens[i]);
 							delete[](m_values[i]);
 						}
+						
+						delete[] m_tokens;
+						delete[] m_values;
 					}
 
 		virtual void ReCall()=0;
@@ -104,7 +107,7 @@ class RiCacheBase
 							RtToken	token = tokens[ i ];
 							RtPointer	value = values[ i ];
 
-							RtToken newtoken = new char[strlen(token)];
+							RtToken newtoken = new char[strlen(token) + 1];
 							strcpy(newtoken, token);
 							m_tokens[i] = newtoken;
 						
