@@ -40,5 +40,5 @@ TIFF* ptex=TIFFOpen(filename,"w");
 		 pdata+=(width*samples);
 	}
 	TIFFWriteDirectory(ptex);
-
+	TIFFClose(ptex);
 }
