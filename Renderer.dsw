@@ -16,10 +16,22 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name Content
+    Project_Dep_Name aqsis
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name librib
+    Project_Dep_Name aqsl
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libaqsistypes
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libslparse
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name librib2
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name librib2ri
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name Shaders
@@ -50,9 +62,6 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name shadowmap
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name aqsl
     End Project Dependency
 }}}
 
@@ -387,6 +396,9 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libddmsimple
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libaqsistypes
     End Project Dependency
 }}}
 
