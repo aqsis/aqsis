@@ -370,7 +370,7 @@ TqInt	CqParseNodeVariableArray::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Ch
 {
     // Check if the child can be made into a float.
     TqInt aType = Type_Float;
-    if ( m_pChild->TypeCheck( &aType, 1, CheckOnly ) == Type_Nil )
+    if ( m_pChild && m_pChild->TypeCheck( &aType, 1, CheckOnly ) == Type_Nil )
     {
         TqInt	IndexType = ( m_pChild->ResType() & Type_Mask );
         CqString strErr( strFileName() );
