@@ -23,14 +23,16 @@
 		\author Timothy M. Shead (tshead@k-3d.com)
 */
 
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "aqsis.h"
 
 #ifdef AQSIS_SYSTEM_WIN32
 
-#include	<winsock2.h>
+#include <winsock2.h>
 #include <locale>
 #include <direct.h>
 
@@ -80,6 +82,7 @@ typedef int SOCKET;
 static std::string	g_Filename( "output.tif" );
 static TqInt g_ImageWidth = 0;
 static TqInt g_ImageHeight = 0;
+static TqInt g_PixelsProcessed = 0;
 static TqInt g_Channels = 0;
 static TqInt g_Format = 0;
 static int g_Window = 0;
@@ -96,6 +99,14 @@ typedef void (text_callback)(const std::string&);
 static std::string g_text_prompt;
 static std::string g_text_input;
 static text_callback* g_text_ok_callback = 0;
+
+const std::string get_window_title()
+{
+	std::ostringstream buffer;
+	buffer << g_Filename << ": " << std::fixed << std::setprecision(1) << 100.0 * static_cast<double>(g_PixelsProcessed) / static_cast<double>(g_ImageWidth * g_ImageHeight) << "% complete";
+	
+	return buffer.str();
+}
 
 const std::string get_current_working_directory()
 {
@@ -360,6 +371,8 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 
 	g_ImageWidth = ( message->m_CropWindowXMax - message->m_CropWindowXMin );
 	g_ImageHeight = ( message->m_CropWindowYMax - message->m_CropWindowYMin );
+	g_PixelsProcessed = 0;
+
 	g_Channels = message->m_Channels;
 
 	g_CWXmin = message->m_CropWindowXMin;
@@ -392,7 +405,7 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 	//	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGBA);
 	glutInitDisplayMode( GLUT_SINGLE | GLUT_RGBA );
 	glutInitWindowSize( g_ImageWidth, g_ImageHeight );
-	g_Window = glutCreateWindow( g_Filename.c_str() );
+	g_Window = glutCreateWindow( get_window_title().c_str() );
 
 	return ( 0 );
 }
@@ -487,6 +500,9 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 	glEnable( GL_SCISSOR_TEST );
 	glScissor( BucketX, BucketY, BucketW, BucketH );
 	display();
+
+	g_PixelsProcessed += (BucketW * BucketH);
+	glutSetWindowTitle(get_window_title().c_str());
 
 	return ( 0 );
 }
