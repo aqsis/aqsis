@@ -395,6 +395,7 @@ class CqShaderExecEnv
 			CqBitVector				m_CurrentState;			///< SIMD execution state bit vector accumulator.
 			CqBitVector				m_RunningState;			///< SIMD running execution state bit vector.
 			std::stack<CqBitVector>	m_stkState;				///< Stack of execution state bit vectors.
+			TqInt					m_LocalIndex;			///< Local cached variable index to speed repeated access to the same local variable.
 	
 	protected:
 			CqShaderVariableVarying<Type_Float,TqInt>	m_vfCulled;	///< Shader variable indicating whether the individual micropolys are culled.

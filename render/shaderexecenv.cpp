@@ -72,7 +72,7 @@ TqInt	gDefLightUses=(1<<EnvVars_P)|(1<<EnvVars_L)|(1<<EnvVars_Ps);
 /** Constructor.
  */
 
-CqShaderExecEnv::CqShaderExecEnv() : m_li(0), m_Illuminate(0), m_pSurface(0), m_vfCulled("__culled")
+CqShaderExecEnv::CqShaderExecEnv() : m_LocalIndex(0), m_li(0), m_Illuminate(0), m_pSurface(0), m_vfCulled("__culled")
 {
 	m_apVariables.resize(EnvVars_Last);
 	TqInt i;
@@ -102,6 +102,7 @@ void CqShaderExecEnv::Initialise(const TqInt uGridRes, const TqInt vGridRes, CqS
 	m_vGridRes=vGridRes;
 	m_GridSize=(uGridRes+1)*(vGridRes+1);
 	m_GridI=0;
+	m_LocalIndex = 0;
 
 	// Store a pointer to the surface definition.
 	m_pSurface=pSurface;

@@ -462,9 +462,9 @@ static CqMatrix temp_matrix;
 class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 {
 	public:
-	_qShareM 	CqShaderVM() : CqShaderStack(), m_PC(0)
+	_qShareM 	CqShaderVM() : CqShaderStack(), m_PC(0), m_LocalIndex(0)
 								{}
-	_qShareM	CqShaderVM(const CqShaderVM& From) : CqShader(), m_PC(0)
+	_qShareM	CqShaderVM(const CqShaderVM& From) : CqShader(), m_PC(0), m_LocalIndex(0)
 								{
 									*this=From;
 								}
@@ -496,6 +496,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 			CqShaderVM&	operator=(const CqShaderVM& From);
 
 	private:
+		                TqInt               m_LocalIndex;                   ///<  Local Index to speed up
 				CqShaderExecEnv*	m_pEnv;							///< Pointer to the current excution environment.
 				std::vector<CqShaderVariable*>	m_LocalVars;		///< Array of local variables.
 				std::vector<UsProgramElement>	m_ProgramInit;		///< Bytecodes of the intialisation program.
@@ -533,8 +534,9 @@ class _qShareC CqShaderVM : public CqShaderStack, public CqShader
 									 */
 				TqInt				FindLocalVarIndex(const char* strName)
 												{
-													for(TqUint i=0; i<m_LocalVars.size(); i++)
-														if(m_LocalVars[i]->strName().compare(strName)==0)	return(i);
+					                                if ((m_LocalIndex < m_LocalVars.size()) && (m_LocalVars[m_LocalIndex]->strName().compare(strName)==0))	return(m_LocalIndex);
+													for(m_LocalIndex=0; m_LocalIndex<m_LocalVars.size(); m_LocalIndex++)
+														if(m_LocalVars[m_LocalIndex]->strName().compare(strName)==0)	return(m_LocalIndex);
 													return(-1);
 												}
 				void				GetToken(char* token, TqInt l, std::istream* pFile);
