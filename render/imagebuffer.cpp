@@ -1587,8 +1587,14 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 
 		register long iY = sY;
 
-		CqColor colMPGColor = pMPG->colColor();
-		CqColor colMPGOpacity = pMPG->colOpacity();
+		CqColor colMPGColor( 1.0f,1.0f,1.0f );
+		CqColor colMPGOpacity( 1.0f,1.0f,1.0f );
+		// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
+		if( QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Oi" ) )
+			colMPGColor = pMPG->colColor();
+		// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
+		if( QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Oi" ) )
+			colMPGOpacity = pMPG->colOpacity();
 
 		while ( iY < eY )
 		{
@@ -1809,6 +1815,8 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 					pGrid->Project();
 					Bucket.AddGrid( pGrid );
 				}
+				else
+					delete( pGrid );
 			}
 		}
 		// The surface is not small enough, so split it...

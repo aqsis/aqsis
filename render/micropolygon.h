@@ -58,7 +58,7 @@ class CqSurface;
 class CqMicroPolyGridBase
 {
 	public:
-		CqMicroPolyGridBase() : bCulled( TqFalse )
+		CqMicroPolyGridBase() : m_fCulled( TqFalse )
 		{}
 		virtual	~CqMicroPolyGridBase()
 		{}
@@ -96,11 +96,11 @@ class CqMicroPolyGridBase
 		virtual	CqCSGTreeNode* pCSGNode() const = 0;
 		TqBool vfCulled()
 		{
-			return bCulled;
+			return m_fCulled;
 		}
 
 	public:
-		TqBool bCulled; ///< Shader variable indicating whether the individual micropolys are culled.
+		TqBool m_fCulled; ///< Shader variable indicating whether the individual micropolys are culled.
 };
 
 

@@ -511,6 +511,30 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 }
 
 
+TqBool CqDDManager::fDisplayNeeds(const TqChar* var)
+{
+	static std::string strRGB("rgb");
+	static std::string strRGBA("rgba");
+	static std::string strCi("Ci");
+	static std::string strOi("Oi");
+
+	std::vector<CqDDClient>::iterator i;
+	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+	{
+		// First check for "rgb"
+		if( ( strCi.compare( var ) == 0 ) && ( i->strMode().find( strRGB ) != i->strMode().npos ) )
+			return( TqTrue );
+		// and "rgba"
+		if( ( strOi.compare( var ) == 0 ) && ( i->strMode().find( strRGBA ) != i->strMode().npos ) )
+			return( TqTrue );
+
+		if( i->strMode().compare( var ) == 0 )
+			return( TqTrue );
+	}
+	return ( TqFalse );
+}
+
+
 void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 {
 	if ( !g_fDisplayMapInitialised )

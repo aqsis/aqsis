@@ -179,6 +179,7 @@ class CqDDManager : public IqDDManager
 		virtual	TqInt	OpenDisplays();
 		virtual	TqInt	CloseDisplays();
 		virtual	TqInt	DisplayBucket( IqBucket* pBucket );
+		virtual TqBool	fDisplayNeeds( const TqChar* var);
 
 		void	LoadDisplayLibrary( CqDDClient& dd );
 		void	InitialiseDisplayNameMap();

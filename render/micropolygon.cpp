@@ -62,6 +62,8 @@ CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(),
 
 CqMicroPolyGrid::~CqMicroPolyGrid()
 {
+	assert( RefCount() <= 0 );
+
 	QGetRenderContext() ->Stats().IncGridsDeallocated();
 
 	// Release the reference to the attributes.
@@ -318,7 +320,7 @@ void CqMicroPolyGrid::Shade()
 
 		if ( cCulled == gs )
 		{
-			bCulled = TqTrue;
+			m_fCulled = TqTrue;
 			theStats.IncCulledGrids();
 			DeleteVariables( TqTrue );
 			return ;
@@ -343,7 +345,7 @@ void CqMicroPolyGrid::Shade()
 
 		if ( cCulled == gs )
 		{
-			bCulled = TqTrue;
+			m_fCulled = TqTrue;
 			theStats.IncCulledGrids();
 			DeleteVariables( TqTrue );
 			return ;
@@ -373,7 +375,7 @@ void CqMicroPolyGrid::Shade()
 		// If the whole grid is culled don't bother going any further.
 		if ( cCulled == gs )
 		{
-			bCulled = TqTrue;
+			m_fCulled = TqTrue;
 			theStats.IncCulledGrids();
 			DeleteVariables( TqTrue );
 			return ;
@@ -406,7 +408,7 @@ void CqMicroPolyGrid::Shade()
 
 		if ( cCulled == gs )
 		{
-			bCulled = TqTrue;
+			m_fCulled = TqTrue;
 			theStats.IncCulledGrids();
 			DeleteVariables( TqTrue );
 			return ;
@@ -429,44 +431,57 @@ void CqMicroPolyGrid::Shade()
  */
 void CqMicroPolyGrid::DeleteVariables( TqBool all )
 {
-	m_pShaderExecEnv->DeleteVariable( EnvVars_Cs );
-	m_pShaderExecEnv->DeleteVariable( EnvVars_Os );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Cs" ) || all )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_Cs );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Os" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_Os );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "du" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_du );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "dv" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_dv );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "L" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_L );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Cl" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_Cl );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Ol" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_Ol );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "dPdu" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_dPdu );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "dPdv" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_dPdv );
 
-	m_pShaderExecEnv->DeleteVariable( EnvVars_du );
-	m_pShaderExecEnv->DeleteVariable( EnvVars_dv );
-	m_pShaderExecEnv->DeleteVariable( EnvVars_L );
-	m_pShaderExecEnv->DeleteVariable( EnvVars_Cl );
-	m_pShaderExecEnv->DeleteVariable( EnvVars_Ol );
-	m_pShaderExecEnv->DeleteVariable( EnvVars_dPdu );
-	m_pShaderExecEnv->DeleteVariable( EnvVars_dPdv );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "s" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_s );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "t" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_t );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "I" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_I );
 
-	m_pShaderExecEnv->DeleteVariable( EnvVars_s );
-	m_pShaderExecEnv->DeleteVariable( EnvVars_t );
-	m_pShaderExecEnv->DeleteVariable( EnvVars_I );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Ps" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_Ps );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "E" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_E );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "ncomps" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_ncomps );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "time" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_time );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "alpha" ) || all  )
+		m_pShaderExecEnv->DeleteVariable( EnvVars_alpha );
 
-	m_pShaderExecEnv->DeleteVariable( EnvVars_Ps );
-	m_pShaderExecEnv->DeleteVariable( EnvVars_E );
-	m_pShaderExecEnv->DeleteVariable( EnvVars_ncomps );
-	m_pShaderExecEnv->DeleteVariable( EnvVars_time );
-	m_pShaderExecEnv->DeleteVariable( EnvVars_alpha );
-
-	if ( all == TqTrue )
-	{
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "N" ) || all  )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_N );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "u" ) || all  )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_u );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "v" ) || all  )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_v );
+	if( all  )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_P );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Ng" ) || all  )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ng );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Ci" ) || all  )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Ci );
+	if( !QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Oi" ) || all  )
 		m_pShaderExecEnv->DeleteVariable( EnvVars_Oi );
-
-
-
-	}
-
-	// we must delete the remaining information here!!
-
-
 }
 
 
@@ -560,14 +575,6 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 		for ( iu = 0; iu < cu; iu++ )
 		{
 			TqInt iIndex = ( iv * ( cu + 1 ) ) + iu;
-
-			// If culled, ignore it
-			if ( bCulled )
-			{
-				theStats.IncCulledMPGs( 1 );
-				DeleteVariables( TqTrue );
-				continue;
-			}
 
 			// If the MPG is trimmed then don't add it.
 			TqBool fTrimmed = TqFalse;
