@@ -794,8 +794,7 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
 		oldkey[1] = matResult;
 		matResult[ 3 ][ 0 ] = matResult[ 3 ][ 1 ] = matResult[ 3 ][ 2 ] = matResult[ 0 ][ 3 ] = matResult[ 1 ][ 3 ] = matResult[ 2 ][ 3 ] = 0.0;
 		matResult[ 3 ][ 3 ] = 1.0;
-		matResult.Inverse();
-		matResult.Transpose();
+		matResult = matResult.Inverse().Transpose();
 		oldresult[1] = matResult;
 
 	} else
