@@ -989,7 +989,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
             apSubFace2.clear();
             std::vector<CqLath*>::iterator iSF;
             for( iSF = apSubFace1.begin(); iSF != apSubFace1.end(); iSF++ )
-            {
+			{
                 // Subdivide this face, storing the resulting new face indices.
                 std::vector<CqLath*> apSubFaceTemp;
                 pTopology()->SubdivideFace( (*iSF), apSubFaceTemp );
@@ -1303,7 +1303,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<boost::shared_ptr<CqBasicSur
         aiVertices.push_back( pPoint->VertexIndex() );
         aiFVertices.push_back( pPoint->FaceVertexIndex() );
         // 0,3
-        pPoint = pPoint->cv()->ccf();
+       pPoint = pPoint->cv()->ccf();
         aiVertices.push_back( pPoint->VertexIndex() );
         aiFVertices.push_back( pPoint->FaceVertexIndex() );
         // 1,0
@@ -1587,10 +1587,14 @@ TqBool CqSurfaceSubdivisionPatch::Diceable()
         return ( TqFalse );
     }
 
-    TqFloat gs = 16.0f;
+
+	// because splitting to a bicubic patch is so much faster than dicing by
+	// recursive subdivision, the grid size is made smaller than usual to give
+	// us more chance to break regular parts off as a patch.
+    TqFloat gs = 8.0f;
     const TqFloat* poptGridSize = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "SqrtGridSize" );
     if( poptGridSize )
-        gs = poptGridSize[0];
+        gs = poptGridSize[0] / 2.0f;
 
     if ( m_uDiceSize > gs) return TqFalse;
     if ( m_vDiceSize > gs) return TqFalse;
@@ -1619,10 +1623,16 @@ TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
         if( (*iFV)->cQvv() != 4 )
             return( TqFalse );
 
-        // Check if all vertices smooth.
-        if( EdgeSharpness((*iFV)) != 0.0f ||
-                CornerSharpness((*iFV)) != 0.0f )
-            return( TqFalse );
+        // Check if all edges incident on the face vertices are smooth.
+        std::vector<CqLath*> aQve;
+        (*iFV)->Qve(aQve);
+        std::vector<CqLath*>::iterator iVE;
+        for( iVE = aQve.begin(); iVE!=aQve.end(); iVE++ )
+        {
+            if( EdgeSharpness((*iVE)) != 0.0f ||
+                    CornerSharpness((*iVE)) != 0.0f )
+                return( TqFalse );
+        }
 
         // Check if no internal boundaries.
         CqLath* pEnd = (*iFV)->cv();
@@ -1644,17 +1654,6 @@ TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
     {
         if( (*iFF)->cQfv() != 4 )
             return( TqFalse );
-
-        std::vector<CqLath*> aQfv;
-        (*iFF)->Qfv(aQfv);
-        std::vector<CqLath*>::iterator iFV;
-        for( iFV = aQfv.begin(); iFV!=aQfv.end(); iFV++ )
-        {
-            // Check if all vertices smooth.
-            if( EdgeSharpness((*iFV)) != 0.0f ||
-                    CornerSharpness((*iFV)) != 0.0f )
-                return( TqFalse );
-        }
     }
 
     // Finally check if the "facevarying" indexes match, as patches can't have
