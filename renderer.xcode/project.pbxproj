@@ -13,20 +13,6 @@
 			refType = 0;
 			sourceTree = "<absolute>";
 		};
-		7102315606AD068D0066ED4D = {
-			isa = PBXFileReference;
-			lastKnownFileType = "compiled.mach-o.dylib";
-			name = libtiff.dylib;
-			path = /sw/lib/libtiff.dylib;
-			refType = 0;
-			sourceTree = "<absolute>";
-		};
-		7102315706AD068D0066ED4D = {
-			fileRef = 7102315606AD068D0066ED4D;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		710231A806AEF0B50066ED4D = {
 			buildActionMask = 2147483647;
 			files = (
@@ -350,7 +336,6 @@
 			buildPhases = (
 			);
 			buildSettings = {
-				OPTIMIZATION_CFLAGS = "";
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				OTHER_REZFLAGS = "";
@@ -403,7 +388,7 @@
 		};
 		712AE08806B5833300285781 = {
 			isa = PBXTargetDependency;
-			target = 715FC1C206AEFFA20052FAB7;
+			target = 71AB553706BAE8A10074427F;
 			targetProxy = 712AE08706B5833300285781;
 		};
 		712AE08906B5833300285781 = {
@@ -1485,6 +1470,7 @@
 				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
 				GCC_WARN_UNKNOWN_PRAGMAS = NO;
 				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_SEARCH_PATHS = /Users/pgregory/aqsis/renderer/build;
 				LIBRARY_STYLE = STATIC;
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
@@ -1695,6 +1681,11 @@
 				WARNING_CFLAGS = "-Wmost";
 			};
 			dependencies = (
+				71AB551C06BAC97E0074427F,
+				71AB551E06BAC97E0074427F,
+				71AB552006BAC97E0074427F,
+				71AB552206BAC97E0074427F,
+				71AB552406BAC97E0074427F,
 			);
 			isa = PBXNativeTarget;
 			name = aqsl;
@@ -1728,195 +1719,14 @@
 		715FC19806AEFC890052FAB7 = {
 			buildActionMask = 2147483647;
 			files = (
-				715FC1A206AEFCAE0052FAB7,
-				715FC1A306AEFCAE0052FAB7,
-				715FC1A406AEFCAE0052FAB7,
-				715FC1A506AEFCAE0052FAB7,
-				715FC1A106AEFCAE0052FAB7,
+				71AB55F406BB05BB0074427F,
+				71AB55F506BB05BB0074427F,
+				71AB55F606BB05BB0074427F,
+				71AB55F206BB05BB0074427F,
+				71AB55F306BB05BB0074427F,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
-		};
-		715FC19C06AEFCAE0052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libaqsistypes.a;
-			path = build/libaqsistypes.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC19D06AEFCAE0052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libargparse.a;
-			path = build/libargparse.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC19E06AEFCAE0052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libcodegenvm.a;
-			path = build/libcodegenvm.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC19F06AEFCAE0052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libslparse.a;
-			path = build/libslparse.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC1A006AEFCAE0052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libslpp.a;
-			path = build/libslpp.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC1A106AEFCAE0052FAB7 = {
-			fileRef = 715FC19C06AEFCAE0052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC1A206AEFCAE0052FAB7 = {
-			fileRef = 715FC19D06AEFCAE0052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC1A306AEFCAE0052FAB7 = {
-			fileRef = 715FC19E06AEFCAE0052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC1A406AEFCAE0052FAB7 = {
-			fileRef = 715FC19F06AEFCAE0052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC1A506AEFCAE0052FAB7 = {
-			fileRef = 715FC1A006AEFCAE0052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC1BD06AEFFA20052FAB7 = {
-			buildActionMask = 2147483647;
-			files = (
-				715FC1CB06AEFFDE0052FAB7,
-			);
-			isa = PBXHeadersBuildPhase;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		715FC1BE06AEFFA20052FAB7 = {
-			buildActionMask = 2147483647;
-			files = (
-			);
-			isa = PBXResourcesBuildPhase;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		715FC1BF06AEFFA20052FAB7 = {
-			buildActionMask = 2147483647;
-			files = (
-				715FC1CA06AEFFDE0052FAB7,
-				715FC1CC06AEFFDE0052FAB7,
-			);
-			isa = PBXSourcesBuildPhase;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		715FC1C006AEFFA20052FAB7 = {
-			buildActionMask = 2147483647;
-			files = (
-			);
-			isa = PBXRezBuildPhase;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		715FC1C106AEFFA20052FAB7 = {
-			buildActionMask = 2147483647;
-			files = (
-				715FC1DB06AF1CD20052FAB7,
-			);
-			isa = PBXFrameworksBuildPhase;
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		715FC1C206AEFFA20052FAB7 = {
-			buildPhases = (
-				715FC1BD06AEFFA20052FAB7,
-				715FC1BE06AEFFA20052FAB7,
-				715FC1BF06AEFFA20052FAB7,
-				715FC1C006AEFFA20052FAB7,
-				715FC1C106AEFFA20052FAB7,
-			);
-			buildRules = (
-			);
-			buildSettings = {
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
-				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
-				GCC_WARN_UNKNOWN_PRAGMAS = NO;
-				INFOPLIST_FILE = "display-Info.plist";
-				INSTALL_PATH = /usr/local/aqsis/displays;
-				LIBRARY_SEARCH_PATHS = "/sw/lib /usr/local/lib";
-				OTHER_CFLAGS = "";
-				OTHER_LDFLAGS = "-framework Carbon -lfltk";
-				OTHER_REZFLAGS = "";
-				PRODUCT_NAME = display;
-				REZ_EXECUTABLE = NO;
-				SECTORDER_FLAGS = "";
-				WARNING_CFLAGS = "-Wmost";
-			};
-			dependencies = (
-				715FC30406B06A030052FAB7,
-			);
-			isa = PBXNativeTarget;
-			name = display;
-			productName = display;
-			productReference = 715FC1C306AEFFA20052FAB7;
-			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
-<plist version=\"1.0\">
-<dict>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
-	<key>CFBundleExecutable</key>
-	<string>display</string>
-	<key>CFBundleGetInfoString</key>
-	<string></string>
-	<key>CFBundleIconFile</key>
-	<string></string>
-	<key>CFBundleIdentifier</key>
-	<string>com.MySoftwareCompany.display</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string></string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
-	<key>CFBundleVersion</key>
-	<string>1.0.0d1</string>
-	<key>CSResourcesFileMapped</key>
-	<string>yes</string>
-</dict>
-</plist>
-";
-			productType = "com.apple.product-type.bundle";
-		};
-		715FC1C306AEFFA20052FAB7 = {
-			explicitFileType = wrapper.cfbundle;
-			includeInIndex = 0;
-			isa = PBXFileReference;
-			path = display.bundle;
-			refType = 3;
-			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		715FC1C406AEFFA20052FAB7 = {
 			isa = PBXFileReference;
@@ -1953,74 +1763,14 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		715FC1CA06AEFFDE0052FAB7 = {
-			fileRef = 715FC1C706AEFFDE0052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC1CB06AEFFDE0052FAB7 = {
-			fileRef = 715FC1C806AEFFDE0052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC1CC06AEFFDE0052FAB7 = {
-			fileRef = 715FC1C906AEFFDE0052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC1DA06AF1CD20052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libtiff.a;
-			path = /sw/lib/libtiff.a;
-			refType = 0;
-			sourceTree = "<absolute>";
-		};
-		715FC1DB06AF1CD20052FAB7 = {
-			fileRef = 715FC1DA06AF1CD20052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		715FC26506B03E190052FAB7 = {
 			buildActionMask = 2147483647;
 			files = (
-				715FC26B06B03E2E0052FAB7,
-				715FC26C06B03E2E0052FAB7,
+				71AB55E506BB058E0074427F,
+				71AB55E606BB058E0074427F,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
-		};
-		715FC26906B03E2E0052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = "compiled.mach-o.dylib";
-			name = libaqsis.dylib;
-			path = build/libaqsis.dylib;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC26A06B03E2E0052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libargparse.a;
-			path = build/libargparse.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC26B06B03E2E0052FAB7 = {
-			fileRef = 715FC26906B03E2E0052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC26C06B03E2E0052FAB7 = {
-			fileRef = 715FC26A06B03E2E0052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		715FC2AF06B069060052FAB7 = {
 			buildActionMask = 2147483647;
@@ -2194,84 +1944,14 @@
 		715FC2D606B069AF0052FAB7 = {
 			buildActionMask = 2147483647;
 			files = (
-				715FC2E006B069C90052FAB7,
-				715FC2E306B069C90052FAB7,
-				715FC2E206B069C90052FAB7,
-				715FC2E106B069C90052FAB7,
-				715FC2DF06B069C90052FAB7,
+				71AB566706BD93750074427F,
+				71AB566B06BD93750074427F,
+				71AB566906BD93750074427F,
+				71AB566A06BD93750074427F,
+				71AB566806BD93750074427F,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
-		};
-		715FC2DA06B069C90052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libaqsistypes.a;
-			path = build/libaqsistypes.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC2DB06B069C90052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libargparse.a;
-			path = build/libargparse.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC2DC06B069C90052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libshaderexecenv.a;
-			path = build/libshaderexecenv.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC2DD06B069C90052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libshadervm.a;
-			path = build/libshadervm.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC2DE06B069C90052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libslxargs.a;
-			path = build/libslxargs.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC2DF06B069C90052FAB7 = {
-			fileRef = 715FC2DA06B069C90052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC2E006B069C90052FAB7 = {
-			fileRef = 715FC2DB06B069C90052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC2E106B069C90052FAB7 = {
-			fileRef = 715FC2DC06B069C90052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC2E206B069C90052FAB7 = {
-			fileRef = 715FC2DD06B069C90052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC2E306B069C90052FAB7 = {
-			fileRef = 715FC2DE06B069C90052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		715FC2F006B069E90052FAB7 = {
 			containerPortal = 71DE6C710691FA5900145266;
@@ -2332,18 +2012,6 @@
 			isa = PBXTargetDependency;
 			target = 715FC2B106B069060052FAB7;
 			targetProxy = 715FC2F806B069E90052FAB7;
-		};
-		715FC30306B06A030052FAB7 = {
-			containerPortal = 71DE6C710691FA5900145266;
-			isa = PBXContainerItemProxy;
-			proxyType = 1;
-			remoteGlobalIDString = 71DE6C8C0691FB0700145266;
-			remoteInfo = libaqsistypes;
-		};
-		715FC30406B06A030052FAB7 = {
-			isa = PBXTargetDependency;
-			target = 71DE6C8C0691FB0700145266;
-			targetProxy = 715FC30306B06A030052FAB7;
 		};
 		715FC32D06B06C760052FAB7 = {
 			buildPhases = (
@@ -2937,39 +2605,11 @@
 		715FC3DA06B071930052FAB7 = {
 			buildActionMask = 2147483647;
 			files = (
-				715FC3E006B071BA0052FAB7,
-				715FC3E106B071BA0052FAB7,
+				71AB561506BB05FE0074427F,
+				71AB561606BB05FE0074427F,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
-		};
-		715FC3DE06B071BA0052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = "compiled.mach-o.dylib";
-			name = libaqsis.dylib;
-			path = build/libaqsis.dylib;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC3DF06B071BA0052FAB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libargparse.a;
-			path = build/libargparse.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC3E006B071BA0052FAB7 = {
-			fileRef = 715FC3DE06B071BA0052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC3E106B071BA0052FAB7 = {
-			fileRef = 715FC3DF06B071BA0052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 		715FC3EF06B071EB0052FAB7 = {
 			containerPortal = 71DE6C710691FA5900145266;
@@ -3010,127 +2650,367 @@
 		7190520E06AC88FE000D9934 = {
 			buildActionMask = 2147483647;
 			files = (
-				7190521C06AC89B7000D9934,
-				7190522C06AC89DB000D9934,
-				7190522D06AC89DB000D9934,
-				7190522E06AC89DB000D9934,
-				7190522F06AC89DB000D9934,
-				7190523006AC89DB000D9934,
-				7190523106AC89DB000D9934,
-				7190522B06AC89DB000D9934,
-				7102315706AD068D0066ED4D,
+				71AB562206BB0B3C0074427F,
+				71AB55CF06BB055C0074427F,
+				71AB55D006BB055C0074427F,
+				71AB55D106BB055C0074427F,
+				71AB55D206BB055C0074427F,
+				71AB55D306BB055C0074427F,
+				71AB55D406BB055C0074427F,
+				71AB55D506BB055C0074427F,
 			);
 			isa = PBXFrameworksBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		7190521B06AC89B7000D9934 = {
+		71AB551B06BAC97E0074427F = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 71DE6C7A0691FA7400145266;
+			remoteInfo = libargparse;
+		};
+		71AB551C06BAC97E0074427F = {
+			isa = PBXTargetDependency;
+			target = 71DE6C7A0691FA7400145266;
+			targetProxy = 71AB551B06BAC97E0074427F;
+		};
+		71AB551D06BAC97E0074427F = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 71DE6C8C0691FB0700145266;
+			remoteInfo = libaqsistypes;
+		};
+		71AB551E06BAC97E0074427F = {
+			isa = PBXTargetDependency;
+			target = 71DE6C8C0691FB0700145266;
+			targetProxy = 71AB551D06BAC97E0074427F;
+		};
+		71AB551F06BAC97E0074427F = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 710231AA06AEF0B50066ED4D;
+			remoteInfo = libslparse;
+		};
+		71AB552006BAC97E0074427F = {
+			isa = PBXTargetDependency;
+			target = 710231AA06AEF0B50066ED4D;
+			targetProxy = 71AB551F06BAC97E0074427F;
+		};
+		71AB552106BAC97E0074427F = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 715FC13906AEFA670052FAB7;
+			remoteInfo = libcodegenvm;
+		};
+		71AB552206BAC97E0074427F = {
+			isa = PBXTargetDependency;
+			target = 715FC13906AEFA670052FAB7;
+			targetProxy = 71AB552106BAC97E0074427F;
+		};
+		71AB552306BAC97E0074427F = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 715FC15906AEFAF40052FAB7;
+			remoteInfo = libslpp;
+		};
+		71AB552406BAC97E0074427F = {
+			isa = PBXTargetDependency;
+			target = 715FC15906AEFAF40052FAB7;
+			targetProxy = 71AB552306BAC97E0074427F;
+		};
+		71AB553206BAE8A10074427F = {
+			buildActionMask = 2147483647;
+			files = (
+				71AB553F06BAE8CE0074427F,
+			);
+			isa = PBXHeadersBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		71AB553306BAE8A10074427F = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXResourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		71AB553406BAE8A10074427F = {
+			buildActionMask = 2147483647;
+			files = (
+				71AB553E06BAE8CE0074427F,
+				71AB554006BAE8CE0074427F,
+			);
+			isa = PBXSourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		71AB553506BAE8A10074427F = {
+			buildActionMask = 2147483647;
+			files = (
+			);
+			isa = PBXRezBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		71AB553606BAE8A10074427F = {
+			buildActionMask = 2147483647;
+			files = (
+				71AB562B06BB0D0B0074427F,
+			);
+			isa = PBXFrameworksBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		71AB553706BAE8A10074427F = {
+			buildPhases = (
+				71AB553206BAE8A10074427F,
+				71AB553306BAE8A10074427F,
+				71AB553406BAE8A10074427F,
+				71AB553506BAE8A10074427F,
+				71AB553606BAE8A10074427F,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Carbon.framework/Headers/Carbon.h";
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
+				GCC_WARN_UNKNOWN_PRAGMAS = NO;
+				INFOPLIST_FILE = "display-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
+				LIBRARY_SEARCH_PATHS = "/sw/lib /usr/local/lib";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "-framework Carbon -lfltk";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = display;
+				REZ_EXECUTABLE = NO;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost";
+			};
+			dependencies = (
+			);
+			isa = PBXNativeTarget;
+			name = display;
+			productName = display;
+			productReference = 71AB553806BAE8A10074427F;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>display</string>
+	<key>CFBundleGetInfoString</key>
+	<string></string>
+	<key>CFBundleIconFile</key>
+	<string></string>
+	<key>CFBundleIdentifier</key>
+	<string>com.MySoftwareCompany.display</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string></string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0.0d1</string>
+	<key>CSResourcesFileMapped</key>
+	<string>yes</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.bundle";
+		};
+		71AB553806BAE8A10074427F = {
+			explicitFileType = wrapper.cfbundle;
+			includeInIndex = 0;
 			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libargparse.a;
-			path = build/libargparse.a;
+			path = display.bundle;
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		71AB553B06BAE8CE0074427F = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = display.cpp;
+			path = display/display.cpp;
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		7190521C06AC89B7000D9934 = {
-			fileRef = 7190521B06AC89B7000D9934;
+		71AB553C06BAE8CE0074427F = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = display.h;
+			path = display/display.h;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		71AB553D06BAE8CE0074427F = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.c;
+			name = displayhelpers.c;
+			path = display/displayhelpers.c;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		71AB553E06BAE8CE0074427F = {
+			fileRef = 71AB553B06BAE8CE0074427F;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		7190522406AC89DB000D9934 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libaqsistypes.a;
-			path = build/libaqsistypes.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		7190522506AC89DB000D9934 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libddmanager.a;
-			path = build/libddmanager.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		7190522606AC89DB000D9934 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libraytrace.a;
-			path = build/libraytrace.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		7190522706AC89DB000D9934 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = librib2.a;
-			path = build/librib2.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		7190522806AC89DB000D9934 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = librib2ri.a;
-			path = build/librib2ri.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		7190522906AC89DB000D9934 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libshaderexecenv.a;
-			path = build/libshaderexecenv.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		7190522A06AC89DB000D9934 = {
-			isa = PBXFileReference;
-			lastKnownFileType = archive.ar;
-			name = libshadervm.a;
-			path = build/libshadervm.a;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		7190522B06AC89DB000D9934 = {
-			fileRef = 7190522406AC89DB000D9934;
+		71AB553F06BAE8CE0074427F = {
+			fileRef = 71AB553C06BAE8CE0074427F;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		7190522C06AC89DB000D9934 = {
-			fileRef = 7190522506AC89DB000D9934;
+		71AB554006BAE8CE0074427F = {
+			fileRef = 71AB553D06BAE8CE0074427F;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		7190522D06AC89DB000D9934 = {
-			fileRef = 7190522606AC89DB000D9934;
+		71AB55CF06BB055C0074427F = {
+			fileRef = 71DE6C8D0691FB0700145266;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		7190522E06AC89DB000D9934 = {
-			fileRef = 7190522706AC89DB000D9934;
+		71AB55D006BB055C0074427F = {
+			fileRef = 7144F7130692113B007CCB15;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		7190522F06AC89DB000D9934 = {
-			fileRef = 7190522806AC89DB000D9934;
+		71AB55D106BB055C0074427F = {
+			fileRef = 7144F815069222D2007CCB15;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		7190523006AC89DB000D9934 = {
-			fileRef = 7190522906AC89DB000D9934;
+		71AB55D206BB055C0074427F = {
+			fileRef = 71DCE0210696079000CDDB8A;
 			isa = PBXBuildFile;
 			settings = {
 			};
 		};
-		7190523106AC89DB000D9934 = {
-			fileRef = 7190522A06AC89DB000D9934;
+		71AB55D306BB055C0074427F = {
+			fileRef = 71DCE050069608B100CDDB8A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB55D406BB055C0074427F = {
+			fileRef = 71DCE0690696098500CDDB8A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB55D506BB055C0074427F = {
+			fileRef = 71DCE0DD06AC48DF00CDDB8A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB55E506BB058E0074427F = {
+			fileRef = 71DE6C7B0691FA7400145266;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB55E606BB058E0074427F = {
+			fileRef = 71DCDD1C069292A400CDDB8A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB55F206BB05BB0074427F = {
+			fileRef = 71DE6C7B0691FA7400145266;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB55F306BB05BB0074427F = {
+			fileRef = 71DE6C8D0691FB0700145266;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB55F406BB05BB0074427F = {
+			fileRef = 710231AB06AEF0B50066ED4D;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB55F506BB05BB0074427F = {
+			fileRef = 715FC13A06AEFA670052FAB7;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB55F606BB05BB0074427F = {
+			fileRef = 715FC15A06AEFAF40052FAB7;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB561506BB05FE0074427F = {
+			fileRef = 71DE6C7B0691FA7400145266;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB561606BB05FE0074427F = {
+			fileRef = 71DCDD1C069292A400CDDB8A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB562206BB0B3C0074427F = {
+			fileRef = 7102313B06ACFE560066ED4D;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB562B06BB0D0B0074427F = {
+			fileRef = 7102313B06ACFE560066ED4D;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB566706BD93750074427F = {
+			fileRef = 71DE6C7B0691FA7400145266;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB566806BD93750074427F = {
+			fileRef = 71DE6C8D0691FB0700145266;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB566906BD93750074427F = {
+			fileRef = 71DCE0210696079000CDDB8A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB566A06BD93750074427F = {
+			fileRef = 71DCE050069608B100CDDB8A;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		71AB566B06BD93750074427F = {
+			fileRef = 715FC2B206B069060052FAB7;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -6110,8 +5990,9 @@
 		};
 		71DE6C6D0691FA5900145266 = {
 			children = (
-				715FC3DE06B071BA0052FAB7,
-				715FC3DF06B071BA0052FAB7,
+				71AB553B06BAE8CE0074427F,
+				71AB553C06BAE8CE0074427F,
+				71AB553D06BAE8CE0074427F,
 				715FC3CF06B071870052FAB7,
 				715FC37F06B070CB0052FAB7,
 				715FC38006B070CB0052FAB7,
@@ -6135,26 +6016,13 @@
 				715FC39206B070CB0052FAB7,
 				715FC39306B070CB0052FAB7,
 				715FC39406B070CB0052FAB7,
-				715FC2DA06B069C90052FAB7,
-				715FC2DB06B069C90052FAB7,
-				715FC2DC06B069C90052FAB7,
-				715FC2DD06B069C90052FAB7,
-				715FC2DE06B069C90052FAB7,
 				715FC2CE06B0699D0052FAB7,
 				715FC2B506B069330052FAB7,
 				715FC2B606B069330052FAB7,
 				715FC2B706B069330052FAB7,
-				715FC26906B03E2E0052FAB7,
-				715FC26A06B03E2E0052FAB7,
-				715FC1DA06AF1CD20052FAB7,
 				715FC1C706AEFFDE0052FAB7,
 				715FC1C806AEFFDE0052FAB7,
 				715FC1C906AEFFDE0052FAB7,
-				715FC19C06AEFCAE0052FAB7,
-				715FC19D06AEFCAE0052FAB7,
-				715FC19E06AEFCAE0052FAB7,
-				715FC19F06AEFCAE0052FAB7,
-				715FC1A006AEFCAE0052FAB7,
 				715FC18F06AEFC7D0052FAB7,
 				715FC15D06AEFB260052FAB7,
 				715FC15E06AEFB260052FAB7,
@@ -6188,16 +6056,7 @@
 				710231C506AEF18E0066ED4D,
 				710231C606AEF18E0066ED4D,
 				710231C706AEF18E0066ED4D,
-				7102315606AD068D0066ED4D,
 				7102313B06ACFE560066ED4D,
-				7190522406AC89DB000D9934,
-				7190522506AC89DB000D9934,
-				7190522606AC89DB000D9934,
-				7190522706AC89DB000D9934,
-				7190522806AC89DB000D9934,
-				7190522906AC89DB000D9934,
-				7190522A06AC89DB000D9934,
-				7190521B06AC89B7000D9934,
 				71DCE0E206AC495100CDDB8A,
 				71DCE0E306AC495100CDDB8A,
 				71DCE0E406AC495100CDDB8A,
@@ -6428,8 +6287,7 @@
 			);
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
-				GCC_OPTIMIZATION_LEVEL = s;
-				GCC_PREPROCESSOR_DEFINITIONS = "AQSIS_SYSTEM_MACOSX PLUGINS BASE_PATH=\"\\\"/Users/pgregory/aqsis/renderer/build\\\"\" CONFIG_PATH=\"\\\"/Users/pgregory/aqsis/renderer/build\\\"\" $(value)";
+				GCC_PREPROCESSOR_DEFINITIONS = "PLUGINS CONFIG_PATH=\\\"$(TARGET_BUILD_DIR)\\\" BASE_PATH=\\\"$(TARGET_BUILD_DIR)\\\" $(value)";
 				HEADER_SEARCH_PATHS = "render librib2 boost libshaderexecenv libshadervm /sw/include $(value)";
 			};
 			isa = PBXBuildStyle;
@@ -6440,7 +6298,7 @@
 			);
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
-				GCC_PREPROCESSOR_DEFINITIONS = "PLUGINS CONFIG_PATH=\\\"/usr/local/aqsis/displays\\\" BASE_PATH=\\\"/usr/local/aqsis\\\"";
+				GCC_PREPROCESSOR_DEFINITIONS = "PLUGINS CONFIG_PATH=\\\"/usr/local/aqsis/displays\\\" BASE_PATH=\\\"/usr/local/aqsis\\\" $(value)";
 				HEADER_SEARCH_PATHS = "render librib2 boost libshaderexecenv libshadervm /sw/include $(value)";
 			};
 			isa = PBXBuildStyle;
@@ -6475,12 +6333,12 @@
 				715FC13906AEFA670052FAB7,
 				715FC15906AEFAF40052FAB7,
 				715FC18806AEFC620052FAB7,
-				715FC1C206AEFFA20052FAB7,
 				715FC2B106B069060052FAB7,
 				715FC2C706B069810052FAB7,
 				715FC32D06B06C760052FAB7,
 				715FC37B06B070910052FAB7,
 				715FC3CA06B0712D0052FAB7,
+				71AB553706BAE8A10074427F,
 			);
 		};
 		71DE6C780691FA7400145266 = {
@@ -6551,11 +6409,11 @@
 				715FC13A06AEFA670052FAB7,
 				715FC15A06AEFAF40052FAB7,
 				715FC18906AEFC620052FAB7,
-				715FC1C306AEFFA20052FAB7,
 				715FC2B206B069060052FAB7,
 				715FC2C806B069810052FAB7,
 				715FC37C06B070910052FAB7,
 				715FC3CB06B0712D0052FAB7,
+				71AB553806BAE8A10074427F,
 			);
 			isa = PBXGroup;
 			name = Products;

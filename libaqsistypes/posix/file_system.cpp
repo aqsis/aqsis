@@ -32,7 +32,9 @@
 #include	"aqsis.h"
 
 #include	"file.h"
+#ifndef	AQSIS_SYSTEM_MACOSX
 #include	"config.h"
+#endif	// AQSIS_SYSTEM_MACOSX
 
 START_NAMESPACE( Aqsis )
 

@@ -8,6 +8,8 @@ extern "C" int isatty(int);
 #pragma warning(disable : 4102)
 #endif
 
+#include "aqsis.h"
+
 #include <fstream>
 #include <stack>
 #include <string>
