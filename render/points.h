@@ -281,6 +281,54 @@ class CqMotionMicroPolyGridPoints : public CqMotionMicroPolyGrid
 	virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
 };
 
+//----------------------------------------------------------------------
+/** \class CqMicroPolygonPoints
+ * Specialised micropolygon class for points.
+ */
+
+class CqMicroPolygonPoints : public CqMicroPolygon
+{
+	public:
+		CqMicroPolygonPoints() : CqMicroPolygon()	{}
+		virtual	~CqMicroPolygonPoints()	{}
+
+	public:
+		void Initialise( TqFloat radius )
+		{
+			m_radius = radius;
+		}
+		virtual	CqBound			GetTotalBound( TqBool fForce = TqFalse )
+		{
+			CqVector3D Pmin, Pmax; 
+			pGrid()->P()->GetPoint(Pmin, m_Index);
+			Pmax = Pmin;
+			Pmin.x( Pmin.x() - m_radius );
+			Pmin.y( Pmin.y() - m_radius );
+			Pmax.x( Pmax.x() + m_radius );
+			Pmax.y( Pmax.y() + m_radius );
+			return( CqBound( Pmin, Pmax ) );
+		}
+		virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time )
+		{
+			CqVector3D P; 
+			pGrid()->P()->GetPoint(P, m_Index);
+			if( (CqVector2D( P.x(), P.y() ) - vecSample).Magnitude() < m_radius )
+			{
+				D = P.z();
+				return( TqTrue );
+			}
+			return( TqFalse );
+		}
+
+
+	private:
+		CqMicroPolygonPoints( const CqMicroPolygonPoints& From )	{}
+
+		TqFloat	m_radius;
+}
+;
+
+
 //-----------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )

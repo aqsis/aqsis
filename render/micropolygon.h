@@ -521,31 +521,31 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 		void	Initialise();
 		CqVector2D ReverseBilinear( const CqVector2D& v );
 
-		const CqVector3D& PointA() const
+		virtual const CqVector3D& PointA() const
 		{
 			CqVector3D* pP;
 			m_pGrid->P()->GetPointPtr( pP );
 			return( pP[ GetCodedIndex( m_IndexCode, 0 ) ] );
 		}
-		const CqVector3D& PointB() const
+		virtual const CqVector3D& PointB() const
 		{
 			CqVector3D* pP;
 			m_pGrid->P()->GetPointPtr( pP );
 			return( pP[ GetCodedIndex( m_IndexCode, 1 ) ] );
 		}
-		const CqVector3D& PointC() const
+		virtual const CqVector3D& PointC() const
 		{
 			CqVector3D* pP;
 			m_pGrid->P()->GetPointPtr( pP );
 			return( pP[ GetCodedIndex( m_IndexCode, 2 ) ] );
 		}
-		const CqVector3D& PointD() const
+		virtual const CqVector3D& PointD() const
 		{
 			CqVector3D* pP;
 			m_pGrid->P()->GetPointPtr( pP );
 			return( pP[ GetCodedIndex( m_IndexCode, 3 ) ] );
 		}
-		const TqBool IsDegenerate() const
+		virtual const TqBool IsDegenerate() const
 		{
 			return( ( m_IndexCode & 0x8000 ) != 0 );
 		}

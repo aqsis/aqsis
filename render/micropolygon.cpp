@@ -1296,7 +1296,7 @@ TqBool CqMicroPolygonMotion::Sample( const CqVector2D& vecSample, TqFloat& D, Tq
 
 void CqMicroPolygonMotion::AppendKey( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD, TqFloat time )
 {
-	assert( time > m_Times.back() );
+//	assert( time >= m_Times.back() );
 
 	// Add a new planeset at the specified time.
 	CqMovingMicroPolygonKey* pMP = new CqMovingMicroPolygonKey( vA, vB, vC, vD );
