@@ -472,7 +472,7 @@ CqBound	CqSurfacePointsPolygons::Bound() const
         for( PointIndex = m_pPoints->P()->Size()-1; PointIndex >= 0; PointIndex-- )
             B.Encapsulate( (CqVector3D)m_pPoints->P()->pValue()[PointIndex] );
     }
-    return(B);
+    return(AdjustBoundForTransformationMotion( B ));
 }
 
 TqInt CqSurfacePointsPolygons::Split( std::vector<boost::shared_ptr<CqBasicSurface> >& aSplits )
