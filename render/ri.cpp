@@ -4151,6 +4151,12 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 					else if ( strcmp( tags [ i ], "crease" ) == 0 )
 					{
 						TqFloat creaseSharpness = floatargs[ floatargIndex ];
+						// convert pixars 0->infinity crease values to our 0->1
+						if( creaseSharpness > 5.0f )
+							creaseSharpness = 5.0f;
+						creaseSharpness /= 5.0f;
+						// bend the curve so values behave more like pixars algorithm
+						creaseSharpness = pow(creaseSharpness, 0.2);
 						TqInt iEdge = 0;
 						while ( iEdge < nargs[ argcIndex ] - 1 )
 						{
@@ -4166,8 +4172,8 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 								{
 									if( ( NULL != (*iOpp)->ec() ) && (*iOpp)->ec()->VertexIndex() == intargs[ iEdge + intargIndex + 1 ] )
 									{
-										pSubd2->AddSharpEdge( (*iOpp), RI_INFINITY );
-										pSubd2->AddSharpEdge( (*iOpp)->ec(), RI_INFINITY );
+										pSubd2->AddSharpEdge( (*iOpp), creaseSharpness );
+										pSubd2->AddSharpEdge( (*iOpp)->ec(), creaseSharpness );
 										break;
 									}
 								}

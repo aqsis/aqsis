@@ -667,10 +667,14 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 		aQfv[i]->SetpMidVertex(pLathD);
 
 		// Transfer sharpness information
-		if( EdgeSharpness( aQfv[ i ] ) > 0.0f )
-			AddSharpEdge( pLathA, EdgeSharpness( aQfv[ i ] ) );
-		if( EdgeSharpness( aQfv[ modulo( (i+1),n ) ] ) > 0.0f )
-			AddSharpEdge( pLathB, EdgeSharpness( aQfv[ modulo( (i+1),n ) ] ) );
+		float sharpness = EdgeSharpness( aQfv[ i ] );
+		if( sharpness > 0.0f )
+			AddSharpEdge( pLathA, sharpness * sharpness );
+
+		sharpness = EdgeSharpness( aQfv[ modulo( (i+1),n ) ] );
+		if( sharpness > 0.0f )
+			AddSharpEdge( pLathB, sharpness * sharpness );
+
 		if( CornerSharpness( aQfv[ i ] ) > 0.0f )
 			AddSharpCorner( pLathA, CornerSharpness( aQfv[ i ] ) );
 

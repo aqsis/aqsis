@@ -61,7 +61,7 @@ public:
 	TqInt	cLaths() const		{return(m_apLaths.size());}
 	/// Get the number of faces representing this topology.
 	TqInt	cVertices() const	{return(m_aapVertices.size());}
-	
+
 	/// Get a refrence to the array of autoatically generated laths.
 	const std::vector<CqLath*>& apLaths() const	
 								{return(m_apLaths);}
@@ -184,88 +184,114 @@ public:
 								std::vector<CqLath*> aQve;
 								pVertex->Qve( aQve );
 
+								CqLath* hardEdge1 = NULL;
+								CqLath* hardEdge2 = NULL;
+								CqLath* hardEdge3 = NULL;
 								TqInt se = 0;
 								std::vector<CqLath*>::iterator iEdge;
 								for( iEdge = aQve.begin(); iEdge != aQve.end(); iEdge++ )
-									if( EdgeSharpness( (*iEdge) ) > 0.0f )	se++;
-
-								if( se <= 1 )
 								{
-									// Smooth
-									// Vertex point is...
-									//    Q     2R     S(n-3)
-									//   --- + ---- + --------
-									//    n      n        n
-									// 
-									// Q = Average of face points surrounding old vertex
-									// R = average of midpoints of edges surrounding old vertex
-									// S = old vertex
-									// n = number of edges sharing the old vertex.
-
-									n = aQve.size();
-
-									// Get the face points of the surrounding faces
-									std::vector<CqLath*> aQvf;
-									pVertex->Qvf( aQvf );
-									std::vector<CqLath*>::iterator iF;
-									for( iF = aQvf.begin(); iF != aQvf.end(); iF++ )
+									float h = EdgeSharpness( (*iEdge) );
+									if( hardEdge1 == NULL || h > EdgeSharpness(hardEdge1) )
 									{
-										std::vector<CqLath*> aQfv;
-										(*iF)->Qfv(aQfv);
-										std::vector<CqLath*>::iterator iV;
-										TypeA Val = TypeA(0.0f);
-										for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
-											Val += pParam->pValue( (*iV)->VertexIndex() )[0];
-										Val /= static_cast<TqFloat>( aQfv.size() );
-										Q += Val;
+										hardEdge3 = hardEdge2;
+										hardEdge2 = hardEdge1;
+										hardEdge1 = *iEdge;
 									}
-									Q /= aQvf.size();
-									Q /= n;
-									
-									// Get the midpoints of the surrounding edges
-									TypeA A = pParam->pValue( pVertex->VertexIndex() )[0];
-									TypeA B = TypeA(0.0f);
-									std::vector<CqLath*>::iterator iE;
-									for( iE = aQve.begin(); iE != aQve.end(); iE++ )
+									else if( hardEdge2 == NULL || h > EdgeSharpness(hardEdge2) )
 									{
-										B = pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
-										R += (A+B)/2.0f;
+										hardEdge3 = hardEdge2;
+										hardEdge2 = *iEdge;
 									}
-									R *= 2.0f;
-									R /= n;
-									R /= n;
+									else if( hardEdge3 == NULL || h > EdgeSharpness(hardEdge3) )
+									{
+										hardEdge3 = *iEdge;
+									}
+
+									if( h > 0.0f )
+									{
+										se++;
+								//		printf("h = %f\n", h);
+									}
+								}
+
+								TypeA softPos;
+								TypeA semiSharpPos;
+								TypeA sharpPos;
+								// Smooth
+								// Vertex point is...
+								//    Q     2R     S(n-3)
+								//   --- + ---- + --------
+								//    n      n        n
+								//
+								// Q = Average of face points surrounding old vertex
+								// R = average of midpoints of edges surrounding old vertex
+								// S = old vertex
+								// n = number of edges sharing the old vertex.
+
+								n = aQve.size();
+
+								// Get the face points of the surrounding faces
+								std::vector<CqLath*> aQvf;
+								pVertex->Qvf( aQvf );
+								std::vector<CqLath*>::iterator iF;
+								for( iF = aQvf.begin(); iF != aQvf.end(); iF++ )
+								{
+									std::vector<CqLath*> aQfv;
+									(*iF)->Qfv(aQfv);
+									std::vector<CqLath*>::iterator iV;
+									TypeA Val = TypeA(0.0f);
+									for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
+										Val += pParam->pValue( (*iV)->VertexIndex() )[0];
+									Val /= static_cast<TqFloat>( aQfv.size() );
+									Q += Val;
+								}
+								Q /= aQvf.size();
+								Q /= n;
+
+								// Get the midpoints of the surrounding edges
+								TypeA A = pParam->pValue( pVertex->VertexIndex() )[0];
+								TypeA B = TypeA(0.0f);
+								std::vector<CqLath*>::iterator iE;
+								for( iE = aQve.begin(); iE != aQve.end(); iE++ )
+								{
+									B = pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
+									R += (A+B)/2.0f;
+								}
+								R *= 2.0f;
+								R /= n;
+								R /= n;
+
+								// Get the current vertex;
+								S = pParam->pValue( pVertex->VertexIndex() )[0];
+								S *= static_cast<TqFloat>(n-3);
+								S /= n;
+
+								//pParam->pValue( iIndex )[0] = Q+R+S;
+								softPos = Q+R+S;
+
+								if( se >= 2 )
+								{
+									// Crease
+									// Get the midpoints of the surrounding 2 hardest edges
+									R = pParam->pValue(hardEdge1->ccf()->VertexIndex() )[0];
+									R = R + pParam->pValue(hardEdge2->ccf()->VertexIndex() )[0];
 
 									// Get the current vertex;
 									S = pParam->pValue( pVertex->VertexIndex() )[0];
-									S *= static_cast<TqFloat>(n-3);
-									S /= n;
-									
-									pParam->pValue( iIndex )[0] = Q+R+S;
+									semiSharpPos =  ( R + ( S * 6.0f ) ) / 8.0f;
 								}
-								else
-								{
-									if( se == 2 )
-									{
-										// Crease 
-										// Get the midpoints of the surrounding edges
-										TypeA A = pParam->pValue( pVertex->VertexIndex() )[0];
-										TypeA B = TypeA(0.0f);
-										std::vector<CqLath*>::iterator iE;
-										for( iE = aQve.begin(); iE != aQve.end(); iE++ )
-										{
-											if( EdgeSharpness( (*iE) ) > 0.0f )
-												R += pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
-										}
-										// Get the current vertex;
-										S = pParam->pValue( pVertex->VertexIndex() )[0];
-										pParam->pValue( iIndex )[0] = ( R + ( S * 6.0f ) ) / 8.0f;
-									}
-									else
-									{
-										// Corner
-										pParam->pValue( iIndex )[0] = pParam->pValue( pVertex->VertexIndex() )[0];
-									}
-								}
+
+								sharpPos = pParam->pValue( pVertex->VertexIndex() )[0];
+
+								// Blend the three values together weighted by the sharpness values.
+								TypeA Pos;
+								float h2 = hardEdge2 != NULL ? EdgeSharpness(hardEdge2) : 0.0f;
+								float h3 = hardEdge3 != NULL ? EdgeSharpness(hardEdge3) : 0.0f;
+								Pos = (1.0f - h2)*softPos;
+								Pos = Pos + (h2 - h3)*semiSharpPos;
+								Pos = Pos + h3*sharpPos;
+								pParam->pValue( iIndex )[0] = Pos;
 							}
 						}
 					}
@@ -284,7 +310,7 @@ public:
 
 					if(pParam->Class() == class_vertex)
 					{
-						if( NULL != pEdge->ec() && ( EdgeSharpness( pEdge ) == 0.0f ) )
+						if( NULL != pEdge->ec() )
 						{
 							// Edge point is the average of the centrepoint of the original edge and the
 							// average of the two new face points of the adjacent faces.
@@ -306,8 +332,10 @@ public:
 
 							A = pParam->pValue( pEdge->VertexIndex() )[0];
 							B = pParam->pValue( pEdge->ccf()->VertexIndex() )[0];
-							A = (A+B)/2.0f;
-							A = (A+C)/2.0f;
+
+							float h = EdgeSharpness( pEdge );
+							A = ((1.0f+h)*(A+B)) / 2.0f;
+							A = (A + (1.0f-h)*C) / 2.0f;
 						}
 						else
 						{
