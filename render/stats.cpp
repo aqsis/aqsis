@@ -87,7 +87,6 @@ TqInt	 CqStats::m_intVars[ CqStats::_Last_int ];			///< Int variables
  */
 void CqStats::Initialise()
 {
-    m_State = State_Parsing;
     m_Complete = 0.0f;
     //	m_timeTotal = 0;
     InitialiseFrame();

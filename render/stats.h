@@ -55,20 +55,6 @@ extern void gStats_setF( TqInt index, TqFloat value );
 #define STATS_INT_GETF( index )	getF( index )
 
 //----------------------------------------------------------------------
-/** \enum EqState
- * Current process identifiers.
- */
-
-enum EqState
-{
-    State_Parsing,    		///< Parsing a RIB file.
-    State_Shadows,    		///< Processing shadows.
-    State_Rendering,    	///< Rendering image.
-    State_Complete,    		///< Rendering complete.
-};
-
-
-//----------------------------------------------------------------------
 /** \class CqStatTimer
  * Class to handle timing of rendering processes as intervals.
  */
@@ -164,19 +150,6 @@ public:
 
     void Initialise();
     void InitialiseFrame();
-
-    /** Get the process identifier.
-     */
-    EqState	State() const
-    {
-        return ( m_State );
-    }
-    /** Set the current process.
-     */
-    void	SetState( const EqState State )
-    {
-        m_State = State;
-    }
 
     /** Get the percentage complete.
      */
@@ -724,7 +697,6 @@ private:
     std::ostream& TimeToString( std::ostream& os, TqFloat t, TqFloat tot ) const;
 
 private:
-    EqState	m_State;						///< Current process identifier.
     TqFloat	m_Complete;						///< Current percentage complete.
 
     static TqFloat	 m_floatVars[ _Last_float ];		///< Float variables
