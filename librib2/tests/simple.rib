@@ -1,10 +1,14 @@
 ##RenderMan RIB-Structure 1.0
 version 3.03
 
-Display "simple.tif" "file" "rgba"
+Display "simple.tif" "file" "rgb"
 Format 320 240 1
+Option "statistics" "endofframe" [1]
 
 WorldBegin
+
+Surface "constant"
+
 Color 1 1 1
 Polygon "P" [1 .5 .5 .5 -.5 .5 -.5 -.5 .5 -.5 .5 .5]
 
