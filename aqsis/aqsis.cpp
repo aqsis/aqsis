@@ -29,7 +29,9 @@
 #include "bdec.h"
 #include "parserstate.h"
 
+#ifdef AQSIS_SYSTEM_WIN32
 #include <io.h>
+#endif // AQSIS_SYSTEM_WIN32
 #include <fcntl.h>
 
 #include <iostream>
@@ -334,11 +336,20 @@ RtVoid PreWorld()
 		int hpipe[2];
 		FILE *readPipe, *writePipe;
 
+#ifdef AQSIS_SYSTEM_WIN32
 		if( _pipe( hpipe, i->length(), _O_TEXT) != -1 ) 
+#else
+		if( pipe( hpipe) != -1 ) 
+#endif
 		{
 			// Feed the string contents into the pipe so that the parser can read them out the other end.
+#ifdef AQSIS_SYSTEM_WIN32
 			readPipe = _fdopen(hpipe[0],"r");
 			writePipe = _fdopen(hpipe[1],"w");
+#else
+			readPipe = fdopen(hpipe[0],"r");
+			writePipe = fdopen(hpipe[1],"w");
+#endif
 
 			fwrite(i->c_str(),1,i->length(),writePipe);
 			fflush(writePipe);
