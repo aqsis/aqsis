@@ -18,11 +18,11 @@ CLEANFILES = ddmsock2.ini
 
 devicelocal = $(top_builddir)/libddmsock2/ddmsock2.ini
 
-ddmsock2.ini:
+ddmsock2.ini: Makefile.am
 	cat /dev/null > $(devicelocal)
-	echo "file	@bindir@/filebuffer@EXEEXT@" >> $(devicelocal)
-	echo "tiff	@bindir@/filebuffer@EXEEXT@" >> $(devicelocal)
-	echo "framebuffer	@bindir@/aqsis_framebuffer_glut@EXEEXT@" >> $(devicelocal)	
-	echo "zframebuffer	@bindir@/aqsis_framebuffer_glut_z@EXEEXT@" >> $(devicelocal)
-	echo "zfile	@bindir@/shadowmap@EXEEXT@" >> $(devicelocal)
-	echo "shadow	@bindir@/shadowmap@EXEEXT@" >> $(devicelocal)
+	echo "file	@bindir@/aqsis_display@EXEEXT@" >> $(devicelocal)
+	echo "tiff	@bindir@/aqsis_display@EXEEXT@" >> $(devicelocal)
+	echo "framebuffer	@bindir@/aqsis_display@EXEEXT@" >> $(devicelocal)	
+	echo "zframebuffer	@bindir@/aqsis_display@EXEEXT@" >> $(devicelocal)
+	echo "zfile	@bindir@/aqsis_display@EXEEXT@" >> $(devicelocal)
+	echo "shadow	@bindir@/aqsis_display@EXEEXT@" >> $(devicelocal)
