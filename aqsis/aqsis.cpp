@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include "ri.h"
 #include "librib.h"
 #include "librib2ri.h"
@@ -17,6 +19,9 @@
 #include <vector>
 
 #include <stdio.h>
+
+
+
 
 void RenderFile( FILE* file, const char* name );
 void GetOptions();
@@ -57,8 +62,25 @@ void version( std::ostream& Stream )
  */
 RtVoid PrintProgress( RtFloat percent )
 {
-	std::cout << std::setw( 6 ) << std::setfill( ' ' ) << std::setprecision( 4 ) << percent << "% Complete\r" << std::flush;
-	return ;
+static long tick=0;
+long now;
+    
+	if (tick == 0) 
+        {
+		time(&tick);
+	}
+
+        time(&now);
+	RtFloat second = (RtFloat) 1000.0 * 
+                         ((RtFloat)(now - tick) / (float)CLOCKS_PER_SEC);
+	
+
+        
+	std::cout << "Done computing "<< 
+		std::setw(6) << std::setfill( ' ' ) << std::setprecision(4)<< 
+		percent << "% [" << 
+		std::setprecision(0)<< second << "s]     \r" << 
+		std::flush;
 }
 
 
