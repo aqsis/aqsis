@@ -4614,7 +4614,7 @@ static void ProcessCompression( TqInt * compression, TqInt * quality, TqInt coun
 //
 RtVoid	RiProcFree( RtPointer data )
 {
-	// Do nothing in here at the moment
+	free(data);
 }
 
 
@@ -4762,6 +4762,7 @@ RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
 		if ( ( file = fopen( strRealName.c_str(), "rb" ) ) != NULL )
 		{
 			CqRIBParserState currstate = librib::GetParserState();
+			if (currstate.m_pParseCallbackInterface == NULL) currstate.m_pParseCallbackInterface = new librib2ri::Engine;
 			librib::Parse( file, name, *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream) );
 			librib::SetParserState( currstate );
 		}

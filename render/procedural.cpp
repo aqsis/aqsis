@@ -84,6 +84,7 @@ TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
 CqProcedural::~CqProcedural()
 { 
 	m_pconStored->Release();
+	if( m_pFreeFunc ) m_pFreeFunc( m_pData );
 }
 
 
