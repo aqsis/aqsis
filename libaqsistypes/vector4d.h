@@ -27,6 +27,8 @@
 #ifndef VECTOR4D_H_INCLUDED
 #define VECTOR4D_H_INCLUDED 1
 
+#include	<iostream>
+
 #include	"aqsis.h"
 
 #define		_qShareName	CORE
@@ -204,6 +206,7 @@ class _qShareC CqVector4D
 
 		_qShareM	friend TqFloat	operator*( const CqVector4D& a, const CqVector4D& b );
 		_qShareM	friend CqVector4D	operator%( const CqVector4D& a, const CqVector4D& b );	// X product
+		_qShare		friend std::ostream &operator<<( std::ostream &Stream, CqVector4D &Vector );
 
 	protected:
 		TqFloat	m_x;	///< X component.

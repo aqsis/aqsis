@@ -27,6 +27,8 @@
 #ifndef VECTOR2D_H_INCLUDED
 #define VECTOR2D_H_INCLUDED 1
 
+#include	<iostream>
+
 #include	<math.h>
 
 #include	"aqsis.h"
@@ -249,6 +251,7 @@ class _qShareC CqVector2D
 		{
 			return ( a.m_x * b.m_x + a.m_y * b.m_y );
 		} // Dot product
+		_qShare		friend std::ostream &operator<<( std::ostream &Stream, CqVector2D &Vector );
 
 	protected:
 		TqFloat	m_x;		///< X component.

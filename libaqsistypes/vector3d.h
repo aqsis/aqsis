@@ -27,6 +27,8 @@
 #ifndef VECTOR3D_H_INCLUDED
 #define VECTOR3D_H_INCLUDED 1
 
+#include	<iostream>
+
 #include	"aqsis.h"
 
 #include	"vector2d.h"
@@ -296,6 +298,7 @@ class _qShareC CqVector3D
 			return ( a.m_x * b.m_x + a.m_y * b.m_y + a.m_z * b.m_z );
 		} // Dot product
 		_qShareM	friend CqVector3D	operator%( const CqVector3D& a, const CqVector3D& b );	// X product
+		_qShare		friend std::ostream &operator<<( std::ostream &Stream, CqVector3D &Vector );
 
 	protected:
 		TqFloat	m_x;	///< X component.

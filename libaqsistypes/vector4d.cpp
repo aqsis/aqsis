@@ -264,6 +264,20 @@ TqBool CqVector4D::operator<( const CqVector4D &Cmp ) const
 }
 
 
+//----------------------------------------------------------------------
+/** Outputs a vector to an output stream.
+ * \param Stream Stream to output the matrix to.
+ * \param Vector The vector to output.
+ * \return The new state of Stream.
+ */
+
+std::ostream &operator<<( std::ostream &Stream, CqVector4D &Vector )
+{
+	Stream << Vector.m_x << "," << Vector.m_y << "," << Vector.m_z << "," << Vector.m_h;
+	return ( Stream );
+}
+
+
 //---------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )

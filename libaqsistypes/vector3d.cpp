@@ -115,6 +115,20 @@ CqVector3D &CqVector3D::operator=( const CqColor &From )
 }
 
 
+//----------------------------------------------------------------------
+/** Outputs a vector to an output stream.
+ * \param Stream Stream to output the matrix to.
+ * \param Vector The vector to output.
+ * \return The new state of Stream.
+ */
+
+std::ostream &operator<<( std::ostream &Stream, CqVector3D &Vector )
+{
+	Stream << Vector.m_x << "," << Vector.m_y << "," << Vector.m_z;
+	return ( Stream );
+}
+
+
 //---------------------------------------------------------------------
 
 END_NAMESPACE( Aqsis )
