@@ -14,7 +14,6 @@ all/Makefile \
 aqsis/Makefile \
 aqsl/Makefile \
 aqsl/tests/Makefile \
-cribber/Makefile \
 filebuffer/Makefile \
 framebuffer/Makefile \
 framebuffer/win32/Makefile \
@@ -40,7 +39,6 @@ render/Makefile \
 ribfiles/Makefile \
 shaders/Makefile \
 shadowmap/Makefile \
-slcomp/Makefile \
 slpp/Makefile \
 texer/Makefile \
 Makefile )
