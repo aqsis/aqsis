@@ -29,6 +29,7 @@
 
 #include	<stack>
 #include	<vector>
+#include	<deque>
 
 #include	"aqsis.h"
 
@@ -302,30 +303,30 @@ class _qShareC CqShaderStack
 		TqUint	m_iTop;										///< Index of the top entry.
 
 
-		static std::vector<CqShaderVariableUniformFloat>	m_aUFPool;
+		static std::deque<CqShaderVariableUniformFloat>		m_aUFPool;
 		// Integer
-		static std::vector<CqShaderVariableUniformPoint>	m_aUPPool;
-		static std::vector<CqShaderVariableUniformString>	m_aUSPool;
-		static std::vector<CqShaderVariableUniformColor>	m_aUCPool;
+		static std::deque<CqShaderVariableUniformPoint>		m_aUPPool;
+		static std::deque<CqShaderVariableUniformString>	m_aUSPool;
+		static std::deque<CqShaderVariableUniformColor>		m_aUCPool;
 		// Triple
 		// hPoint
-		static std::vector<CqShaderVariableUniformNormal>	m_aUNPool;
-		static std::vector<CqShaderVariableUniformVector>	m_aUVPool;
+		static std::deque<CqShaderVariableUniformNormal>	m_aUNPool;
+		static std::deque<CqShaderVariableUniformVector>	m_aUVPool;
 		// Void
-		static std::vector<CqShaderVariableUniformMatrix>	m_aUMPool;
+		static std::deque<CqShaderVariableUniformMatrix>	m_aUMPool;
 		// SixteenTuple
 
-		static std::vector<CqShaderVariableVaryingFloat>	m_aVFPool;
+		static std::deque<CqShaderVariableVaryingFloat>		m_aVFPool;
 		// Integer
-		static std::vector<CqShaderVariableVaryingPoint>	m_aVPPool;
-		static std::vector<CqShaderVariableVaryingString>	m_aVSPool;
-		static std::vector<CqShaderVariableVaryingColor>	m_aVCPool;
+		static std::deque<CqShaderVariableVaryingPoint>		m_aVPPool;
+		static std::deque<CqShaderVariableVaryingString>	m_aVSPool;
+		static std::deque<CqShaderVariableVaryingColor>		m_aVCPool;
 		// Triple
 		// hPoint
-		static std::vector<CqShaderVariableVaryingNormal>	m_aVNPool;
-		static std::vector<CqShaderVariableVaryingVector>	m_aVVPool;
+		static std::deque<CqShaderVariableVaryingNormal>	m_aVNPool;
+		static std::deque<CqShaderVariableVaryingVector>	m_aVVPool;
 		// Void
-		static std::vector<CqShaderVariableVaryingMatrix>	m_aVMPool;
+		static std::deque<CqShaderVariableVaryingMatrix>	m_aVMPool;
 		// SixteenTuple
 
 		static TqInt	m_iUPoolTops[ type_last ];
