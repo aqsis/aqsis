@@ -186,9 +186,9 @@ _qExport PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 _qExport PtDspyError DspyImageData(PtDspyImageHandle image,
 								   int xmin,
-								   int xmax,
+								   int xmaxplus1,
 								   int ymin,
-								   int ymax,
+								   int ymaxplus1,
 								   int entrysize,
 								   const unsigned char *data);
  

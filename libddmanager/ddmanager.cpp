@@ -107,10 +107,10 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
         TqInt	xmaxplus1 = xmin + pBucket->Width();
         TqInt	ymaxplus1 = ymin + pBucket->Height();
 
-		char* data = reinterpret_cast<char*>(malloc(i->m_elementSize * pBucket->Width() * pBucket->Height()));
+		unsigned char* data = reinterpret_cast<unsigned char*>(malloc(i->m_elementSize * pBucket->Width() * pBucket->Height()));
 
         SqImageSample val( QGetRenderContext()->GetOutputDataTotalSize() );
-		char* pdata = data;
+		unsigned char* pdata = data;
         TqInt y;
         for ( y = ymin; y < ymaxplus1; y++ )
         {
@@ -148,6 +148,11 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 				}
             }
         }
+		// Now that the bucket data has been constructed, send it to the display.
+		if(i->m_DataMethod )
+		{
+			PtDspyError err = (i->m_DataMethod)(i->m_imageHandle, xmin, xmaxplus1, ymin, ymaxplus1, i->m_elementSize, data);
+		}
 
 		free(data);
     }
@@ -330,6 +335,11 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 
 void CqDDManager::CloseDisplayLibrary( SqDisplayRequest& req )
 {
+	if( NULL != req.m_CloseMethod )
+	{
+		// Call the DspyImageOpen method on the display to initialise things.
+		PtDspyError err = (*req.m_CloseMethod)(req.m_imageHandle);
+	}
 }
 
 void CqDDManager::InitialiseDisplayNameMap()

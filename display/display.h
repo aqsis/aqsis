@@ -73,10 +73,13 @@ enum EqDisplayTypes
 struct SqDisplayInstance
 {
 	SqDisplayInstance() :
+		m_filename(0),
 		m_width(0),
 		m_height(0),
 		m_iFormatCount(0),
 		m_format(PkDspyUnsigned8),
+		m_entrySize(0),
+		m_lineLength(0),
 		m_QuantizeZeroVal(0.0f),
 		m_QuantizeOneVal(0.0f),
 		m_QuantizeMinVal(0.0f),
@@ -91,10 +94,13 @@ struct SqDisplayInstance
 		m_uiImageWidget(0),
 		m_uiImage(0)
 	{}
+	char*		m_filename;
 	TqInt		m_width;
 	TqInt		m_height;
 	TqInt		m_iFormatCount;
 	TqInt		m_format;
+	TqInt		m_entrySize;
+	TqInt		m_lineLength;
 	TqFloat		m_QuantizeZeroVal;
 	TqFloat		m_QuantizeOneVal;
 	TqFloat		m_QuantizeMinVal;

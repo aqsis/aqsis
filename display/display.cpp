@@ -252,11 +252,10 @@ void WriteTIFF(const std::string& filename, SqDisplayInstance* image)
             //TIFFSetField( pOut, TIFFTAG_XPOSITION, ( float ) g_CWXmin );
             //TIFFSetField( pOut, TIFFTAG_YPOSITION, ( float ) g_CWYmin );
 
-            TqInt	linelen = image->m_width * image->m_iFormatCount;
             TqInt row;
             for ( row = 0; row < image->m_height; row++ )
             {
-                if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<char*>(image->m_data) + ( row * linelen )), row, 0 ) < 0 )
+                if ( TIFFWriteScanline( pOut, reinterpret_cast<void*>(reinterpret_cast<char*>(image->m_data) + ( row * image->m_lineLength )), row, 0 ) < 0 )
                     break;
             }
             TIFFClose( pOut );
@@ -581,6 +580,9 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 		*image = pImage;
 
+		pImage->m_filename = new char[strlen(filename)+1];
+		strcpy(pImage->m_filename, filename);
+
 		// Scan the formats table to see what the widest channel format specified is.
 		TqInt widestFormat = PkDspySigned8;
 		TqInt i;
@@ -596,6 +598,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		if(pImage->m_imageType == Type_Framebuffer)
 		{
 			pImage->m_data = new unsigned char[ pImage->m_width * pImage->m_height * pImage->m_iFormatCount ];
+			pImage->m_entrySize = pImage->m_iFormatCount * sizeof(char);
 
 			// Initialise the display to a checkerboard to show alpha
 			for (TqInt i = 0; i < pImage->m_height; i ++) 
@@ -617,6 +620,7 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 					reinterpret_cast<unsigned char*>(pImage->m_data)[pImage->m_iFormatCount * (i*pImage->m_width + j) + 2] = d;
 				}
 			}
+			widestFormat = PkDspyUnsigned8;
 		}
         else
 		{
@@ -624,20 +628,26 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 			if(widestFormat == PkDspyUnsigned8)
 			{
 				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(unsigned char));
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(char);
 			}
 			else if(widestFormat == PkDspyUnsigned16)
 			{
 				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(unsigned short));
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(short);
 			}
 			else if(widestFormat == PkDspyUnsigned32)
 			{
 				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(unsigned long));
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(long);
 			}
 			else if(widestFormat == PkDspyFloat32)
 			{
 				pImage->m_data = malloc( pImage->m_width * pImage->m_height * pImage->m_iFormatCount * sizeof(float));
+				pImage->m_entrySize = pImage->m_iFormatCount * sizeof(float);
 			}
 		}
+		pImage->m_lineLength = pImage->m_entrySize * pImage->m_width;
+		pImage->m_format = widestFormat;
 
 		PtDspyDevFormat outFormat[] = 
 		{
@@ -648,7 +658,11 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 		};
 		PtDspyError err;
 		if( ( err = DspyReorderFormatting(iFormatCount, format, MIN(iFormatCount,4), outFormat) ) != PkDspyErrorNone )
+		{
+			*image = 0;
+			delete(pImage);
 			return(err);
+		}
 	}
 	else
 		return(PkDspyErrorNoMemory);
@@ -659,14 +673,102 @@ PtDspyError DspyImageOpen(PtDspyImageHandle * image,
 
 PtDspyError DspyImageData(PtDspyImageHandle image,
 								   int xmin,
-								   int xmax,
+								   int xmaxplus1,
 								   int ymin,
-								   int ymax,
+								   int ymaxplus1,
 								   int entrysize,
 								   const unsigned char *data)
 {
-	
+	SqDisplayInstance* pImage;
+	pImage = reinterpret_cast<SqDisplayInstance*>(image);
+
+	const unsigned char* pdatarow = data;
+	TqInt bucketlinelen = entrysize * (xmaxplus1 - xmin);
+
+	if( data && xmin >= 0 && ymin >= 0 && xmaxplus1 <= pImage->m_width && ymaxplus1 <= pImage->m_height )
+	{
+		TqInt y;
+		for ( y = ymin; y < ymaxplus1; y++ )
+		{
+			// Copy a whole row at a time, as we know it is being sent in the proper format and order.
+			TqInt so = ( y * pImage->m_lineLength ) + ( xmin * pImage->m_entrySize );
+			memcpy(reinterpret_cast<char*>(pImage->m_data)+so, reinterpret_cast<const void*>(pdatarow), bucketlinelen);
+			pdatarow += bucketlinelen;
+		}
+	}	
 
 	return(PkDspyErrorNone);	
 }
 
+
+PtDspyError DspyImageClose(PtDspyImageHandle image)
+{
+	SqDisplayInstance* pImage;
+	pImage = reinterpret_cast<SqDisplayInstance*>(image);
+	
+	// Write the image to disk
+	if( pImage->m_imageType == Type_File || 
+		pImage->m_imageType == Type_ZFile || 
+		pImage->m_imageType == Type_Shadowmap )
+		WriteTIFF( pImage->m_filename, pImage);
+
+	// Delete the image structure.
+	free(pImage->m_data);
+	delete[](pImage->m_filename);
+	delete(pImage);
+
+	return(PkDspyErrorNone);	
+}
+
+
+PtDspyError DspyImageQuery(PtDspyImageHandle image,
+									PtDspyQueryType type,
+									int size,
+									void *data)
+{
+	SqDisplayInstance* pImage;
+	pImage = reinterpret_cast<SqDisplayInstance*>(image);
+
+    PtDspyOverwriteInfo overwriteInfo;
+    PtDspySizeInfo sizeInfo;
+
+	if(size <= 0 || !data)
+		return PkDspyErrorBadParams;
+
+	switch (type)
+	{
+		case PkOverwriteQuery:
+			if (size > sizeof(overwriteInfo))
+				size = sizeof(overwriteInfo);
+			overwriteInfo.overwrite = 1;
+			overwriteInfo.interactive = 0;
+			memcpy(data, &overwriteInfo, size);
+			break;
+		case PkSizeQuery:
+			if (size > sizeof(sizeInfo))
+				size = sizeof(sizeInfo);
+			if(pImage)
+			{
+				if(!pImage->m_width || !pImage->m_height)
+				{
+					pImage->m_width = 640;
+					pImage->m_height = 480;
+				}
+				sizeInfo.width = pImage->m_width;
+				sizeInfo.height = pImage->m_height;
+				sizeInfo.aspectRatio = 1.0f;
+			}
+			else
+			{
+				sizeInfo.width = 640;
+				sizeInfo.height = 480;
+				sizeInfo.aspectRatio = 1.0f;
+			}
+			memcpy(data, &sizeInfo, size);
+			break;
+		default:
+			return PkDspyErrorUnsupported;
+    }
+
+	return(PkDspyErrorNone);	
+}
