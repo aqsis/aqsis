@@ -299,6 +299,14 @@ class CqSurfaceNURBS : public CqSurface
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual TqBool	Diceable();
 
+		/** Determine whether the passed surface is valid to be used as a 
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
+
 		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
 
 		/** Get the number of uniform variables for a NURBS surface.

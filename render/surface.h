@@ -91,7 +91,9 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		virtual TqBool	Diceable() = 0;
 
 		virtual	void	Reset()
-	{}
+		{}
+
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf ) = 0;
 
 		virtual CqString	strName() const;
 		virtual	TqInt	Uses() const;
@@ -775,6 +777,14 @@ class CqMotionSurface : public CqBasicSurface, public CqMotionSpec<T>
 			for ( i = 1; i < cTimes(); i++ )
 				GetMotionObject( Time( i ) ) ->CopySplitInfo( *GetMotionObject( Time( 0 ) ) );
 			return ( f );
+		}
+
+		/** Determine whether the passed surface is valid to be used as a 
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
 		}
 
 		/** Transform all GPrims by the specified transformation matrices.

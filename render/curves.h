@@ -85,6 +85,15 @@ class CqCurve : public CqSurface
 		{
 			return TqFalse;
 		}
+
+		/** Determine whether the passed surface is valid to be used as a 
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
+
 		/** Returns a normal to the curve. */
 		TqBool GetNormal( TqInt index, CqVector3D& normal ) const
 		{

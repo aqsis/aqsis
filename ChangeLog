@@ -1,4 +1,196 @@
+2003-05-02  pgregory
+	* aqsis.spec 1.2:
+		Removed reference to ribber.cfg
+
+	* Renderer.dsw 1.68:
+	* aqsis/aqsis.dsp 1.23:
+	* aqsltell/aqsltell.dsp 1.15:
+	* libslxargs/slx.cpp 1.22:
+	* render/libaqsis.dsp 1.51:
+		Revert to using the individual .lib files for aqsltell, as
+		switching to libaqsis.dll seems to have broken it.
+
+	* dsotest/Makefile.am 1.1:
+		Added to allow the .dsp file to be delivered with the source archive.
+		Needs to be updated to make the POSIX build work.
+
+	* Makefile.am 1.40:
+	* configure.in 1.67:
+	* ribber.cfg 1.6:
+		Removed, waaaay out of date, hasn't been used for a long time.
+
+	* Makefile.am 1.41:
+	* prep_install.bat 1.20:
+		Remove ribber.cfg and prep_install.bat, not used anymore.
+
+2003-05-02  minty
+	* libaqsistypes/ilog.h 1.8:
+	* libaqsistypes/log.cpp 1.10:
+	* libshadervm/dsoshadeops.cpp 1.11:
+	* libslparse/libslparse.cpp 1.6:
+	* libslparse/parser.yxx 1.6:
+		Fix for log instance issues in aqsltell and libslparse
+		Added new CreateLogger/DeleteLogger to the log code
+
+2003-05-02  mw_matti
+	* render/renderer.cpp 1.59:
+	* render/renderer.h 1.34:
+	* render/ri.cpp 1.173:
+		First DoF step
+
+2003-05-01  pgregory
+	* libslparse/parser.yxx 1.5:
+		Increase parser stack size - Michel Joron.
+
+	* aqsl/aqslcomp.dsp 1.15:
+		Use log4cppD.lib in debug version.
+
+	* Renderer.dsw 1.66:
+	* Renderer.dsw 1.67:
+	* all/All.dsp 1.6:
+	* all/All.dsp 1.7:
+	* aqsis/aqsis.dsp 1.21:
+	* aqsis/aqsis.dsp 1.22:
+	* aqsl/aqsl.dsp 1.10:
+	* aqsl/aqsl.dsp 1.11:
+	* aqsl/aqslcomp.dsp 1.13:
+	* aqsl/aqslcomp.dsp 1.14:
+	* aqsltell/aqsltell.dsp 1.13:
+	* aqsltell/aqsltell.dsp 1.14:
+	* doxygen.dsp 1.4:
+	* doxygen.dsp 1.5:
+	* dsotest/dsotest.dsp 1.2:
+	* dsotest/dsotest.dsp 1.3:
+	* filebuffer/filebuffer.dsp 1.12:
+	* filebuffer/filebuffer.dsp 1.13:
+	* framebuffer_glut/framebuffer_glut.dsp 1.10:
+	* framebuffer_glut/framebuffer_glut.dsp 1.11:
+	* framebuffer_glut_z/framebuffer_glut_z.dsp 1.10:
+	* framebuffer_glut_z/framebuffer_glut_z.dsp 1.11:
+	* libaqsistypes/libaqsistypes.dsp 1.21:
+	* libaqsistypes/libaqsistypes.dsp 1.22:
+	* libargparse/libargparse.dsp 1.3:
+	* libargparse/libargparse.dsp 1.4:
+	* libcodegenvm/libcodegenvm.dsp 1.11:
+	* libcodegenvm/libcodegenvm.dsp 1.12:
+	* libdd/libdd.dsp 1.11:
+	* libdd/libdd.dsp 1.12:
+	* libddmsimple/libddmsimple.dsp 1.12:
+	* libddmsimple/libddmsimple.dsp 1.13:
+	* libddmsock/libddmsock.dsp 1.12:
+	* libddmsock/libddmsock.dsp 1.13:
+	* libri2rib/libri2rib.dsp 1.11:
+	* libri2rib/libri2rib.dsp 1.12:
+	* librib2/librib2.dsp 1.15:
+	* librib2/librib2.dsp 1.16:
+	* librib2ri/librib2ri.dsp 1.10:
+	* librib2ri/librib2ri.dsp 1.9:
+	* librib2stream/librib2stream.dsp 1.10:
+	* librib2stream/librib2stream.dsp 1.11:
+	* libshaderexecenv/libshaderexecenv.dsp 1.6:
+	* libshaderexecenv/libshaderexecenv.dsp 1.7:
+	* libshadervm/libshadervm.dsp 1.10:
+	* libshadervm/libshadervm.dsp 1.9:
+	* libslparse/libslparse.dsp 1.12:
+	* libslparse/libslparse.dsp 1.13:
+	* libslxargs/libslxargs.dsp 1.10:
+	* libslxargs/libslxargs.dsp 1.9:
+	* plugins/bake2tif/bake2tif.dsp 1.5:
+	* plugins/bake2tif/bake2tif.dsp 1.6:
+	* plugins/gif2tif/gif2tif.dsp 1.10:
+	* plugins/gif2tif/gif2tif.dsp 1.11:
+	* plugins/jpg2tif/jpg2tif.dsp 1.11:
+	* plugins/jpg2tif/jpg2tif.dsp 1.12:
+	* plugins/pcx2tif/pcx2tif.dsp 1.10:
+	* plugins/pcx2tif/pcx2tif.dsp 1.11:
+	* plugins/ppm2tif/ppm2tif.dsp 1.10:
+	* plugins/ppm2tif/ppm2tif.dsp 1.11:
+	* plugins/tga2tif/tga2tif.dsp 1.8:
+	* plugins/tga2tif/tga2tif.dsp 1.9:
+	* releasearchive/releasearchive.dsp 1.2:
+	* releasearchive/releasearchive.dsp 1.3:
+	* render/libaqsis.dsp 1.49:
+	* render/libaqsis.dsp 1.50:
+	* shaders/shaders.dsp 1.10:
+	* shaders/shaders.dsp 1.9:
+	* shadowmap/shadowmap.dsp 1.15:
+	* shadowmap/shadowmap.dsp 1.16:
+	* slpp/slpp.dsp 1.10:
+	* slpp/slpp.dsp 1.9:
+	* teqser/teqser.dsp 1.15:
+	* teqser/teqser.dsp 1.16:
+		Removed, readding using binary to avoid problems when building
+		source archive on POSIX.
+
+	* render/Makefile.am 1.39:
+		Add libaqsis.def to the source release.
+
+2003-04-30  pgregory
+	* configure.in 1.65:
+	* render/version.h 1.25:
+		Update version [nightly]
+
+	* render/points.cpp 1.15:
+	* render/points.h 1.9:
+	* render/ri.cpp 1.172:
+		Fix motion blurred RiPoints primitive.
+
+	* aqsis/aqsis.dsp 1.20:
+	* aqsl/aqslcomp.dsp 1.12:
+	* aqsltell/aqsltell.dsp 1.12:
+	* filebuffer/filebuffer.dsp 1.11:
+	* framebuffer_glut/framebuffer_glut.dsp 1.9:
+	* framebuffer_glut_z/framebuffer_glut_z.dsp 1.9:
+	* libaqsistypes/libaqsistypes.dsp 1.20:
+	* libcodegenvm/libcodegenvm.dsp 1.10:
+	* libdd/libdd.dsp 1.10:
+	* libddmsimple/libddmsimple.dsp 1.11:
+	* libddmsock/libddmsock.dsp 1.11:
+	* libri2rib/libri2rib.dsp 1.10:
+	* librib2/librib2.dsp 1.14:
+	* librib2ri/librib2ri.dsp 1.8:
+	* librib2stream/librib2stream.dsp 1.9:
+	* libshaderexecenv/libshaderexecenv.dsp 1.5:
+	* libshadervm/libshadervm.dsp 1.8:
+	* libslparse/libslparse.dsp 1.11:
+	* libslxargs/libslxargs.dsp 1.8:
+	* plugins/bake2tif/bake2tif.dsp 1.4:
+	* plugins/gif2tif/gif2tif.dsp 1.9:
+	* plugins/jpg2tif/jpg2tif.dsp 1.10:
+	* plugins/pcx2tif/pcx2tif.dsp 1.9:
+	* plugins/ppm2tif/ppm2tif.dsp 1.9:
+	* plugins/tga2tif/tga2tif.dsp 1.7:
+	* render/libaqsis.dsp 1.48:
+	* shadowmap/shadowmap.dsp 1.14:
+	* slpp/slpp.dsp 1.8:
+	* teqser/teqser.dsp 1.14:
+		Add PLUGINS define
+
+	* libaqsistypes/win32/intel/Makefile.am 1.2:
+		Added win32/intel/file_system.cpp to EXTRA_DIST
+
+	* configure.in 1.66:
+	* render/version.h 1.26:
+		Fix
+
+2003-04-29  pgregory
+	* libcodegenvm/vmdatagather.cpp 1.4:
+	* libshadervm/shaderstack.h 1.24:
+	* render/libaqsis.dsp 1.47:
+		Add an assert on PushV to ensure the variable pointer being pushed isn't NULL.
+		Add pass thorugh calls on the data gathering visitor functions for operators to ensure that variable usage is gathered within operators.
+		Link debug version of libaqsis.dll against debug version of log4cpp lib.
+
+	* render/micropolygon.cpp 1.68:
+	* render/micropolygon.h 1.30:
+	* render/points.cpp 1.14:
+	* render/points.h 1.8:
+		Fix handling of static RiPoints primitives.
+
 2003-04-28  pgregory
+	* AUTHORS 1.10:
+		Add Tristan, sorry it too so long, getting forgetful.
+
 	* Makefile.am 1.39:
 	* configure.in 1.64:
 	* libaqsistypes/Makefile.am 1.15:
@@ -8,6 +200,11 @@
 	* librib2stream/librib2stream.h 1.10:
 	* render/Makefile.am 1.38:
 		Fix some problems preventing a distcheck release build.
+
+	* librib2/tests/ribprinter.cpp 1.5:
+	* librib2stream/librib2stream.cpp 1.15:
+	* librib2stream/librib2stream.h 1.11:
+		Some small changes to get distcheck to work.
 
 2003-04-27  minty
 	* aqsis/aqsis.cpp 1.58:

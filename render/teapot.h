@@ -62,6 +62,15 @@ class CqTeapot : public CqSurface
 		{}
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
+
+		/** Determine whether the passed surface is valid to be used as a 
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
+
 		virtual	TqUint	cUniform() const
 		{
 			return ( 1 );

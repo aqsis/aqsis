@@ -2467,21 +2467,14 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 	// read in the parameter list
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
-		std::vector<CqPolygonPoints*>	apPoints;
 		// Transform the points into camera space for processing,
+		// This needs to be done before initialising the KDTree as the tree must be formulated in 'current' (camera) space.
 		pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
 				                 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
 				                 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
 
-
 		pSurface = new CqPoints( nvertices, pPointsClass );
 		pSurface->AddRef();
-//		CreateGPrim( pSurface );
-		// Transform the points into camera space for processing,
-		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld() ),
-							 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld() ),
-							 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld() ) );
-
 		// Initialise the KDTree for the points to contain all.
 		pSurface->InitialiseKDTree();
 		pSurface->InitialiseMaxWidth();
@@ -4730,14 +4723,50 @@ RtVoid	CreateGPrim( T * pSurface )
 		return ;
 	}
 
-	// Transform the points into camera space for processing,
-	pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld() ),
-		                 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld() ),
-		                 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld() ) );
+	// If in a motion block, confirm that the current deformation surface can accept the passed one as a keyframe.
+	if( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
+	{
+		TqFloat time = QGetRenderContext()->Time();
+		// Transform the points into camera space for processing,
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
+							 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
+							 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
+		pSurface->PrepareTrimCurve();
 
-	pSurface->PrepareTrimCurve();
-	QGetRenderContext() ->pImage() ->PostSurface( pSurface );
-	QGetRenderContext() ->Stats().IncGPrims();
+		CqMotionModeBlock* pMMB = static_cast<CqMotionModeBlock*>(QGetRenderContext() ->pconCurrent());
+
+		CqBasicSurface* pMS;
+		// If this is the first frame, then generate the appropriate CqMotionSurface and fill in the first frame.
+		// Then cache the pointer on the motion block.
+		if( ( pMS = pMMB->GetMotionSurface() ) == NULL )
+		{
+			CqMotionSurface<T*>* pNewMS = new CqMotionSurface<T*>( pSurface );
+			pSurface->AddRef();
+			pNewMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
+			pNewMS->AddRef();
+			pMMB->SetMotionSurface( pNewMS );
+			QGetRenderContext() ->pImage() ->PostSurface( pNewMS );
+			QGetRenderContext() ->Stats().IncGPrims();
+		}
+		else
+		{
+			CqMotionSurface<T*>* pCurrMS = static_cast<CqMotionSurface<T*>*>( pMS );
+			pSurface->AddRef();
+			pCurrMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
+		}
+		QGetRenderContext() ->AdvanceTime();
+	}
+	else
+	{
+		// Transform the points into camera space for processing,
+		pSurface->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld() ),
+							 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld() ),
+							 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld() ) );
+
+		pSurface->PrepareTrimCurve();
+		QGetRenderContext() ->pImage() ->PostSurface( pSurface );
+		QGetRenderContext() ->Stats().IncGPrims();
+	}
 
 	return ;
 }

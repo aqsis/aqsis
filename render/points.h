@@ -126,6 +126,14 @@ class CqPoints : public CqSurface, public CqMotionSpec<CqPolygonPoints*>
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual TqBool	Diceable();
 
+		/** Determine whether the passed surface is valid to be used as a 
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
+
 		virtual	CqBound	Bound() const;
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 

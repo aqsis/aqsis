@@ -41,6 +41,7 @@
 START_NAMESPACE( Aqsis )
 
 class CqLightsource;
+class CqBasicSurface;
 
 //----------------------------------------------------------------------
 /** Abstract base class to handle the current context of the renderer,
@@ -713,10 +714,23 @@ class CqMotionModeBlock : public CqModeBlock
 		{
 			return ( TqTrue );
 		}
+		/** Get the CqMotionSurface, if generating a deformation motion blur sequence.
+		 */
+		virtual CqBasicSurface* GetMotionSurface() const
+		{
+			return( m_pMotionSurface );
+		}
+		/** Set the CqMotionSurface, if generating a deformation motion blur sequence.
+		 */
+		virtual void SetMotionSurface( CqBasicSurface* pMotionSurface)
+		{
+			m_pMotionSurface = pMotionSurface;
+		}
 
 	private:
 		TqUint	m_iTime;		///< The index of the current frame time.
 		std::vector<TqFloat>	m_aTimes;		///< An array of specified frame times.
+		CqBasicSurface*			m_pMotionSurface; 
 }
 ;
 

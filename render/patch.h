@@ -148,6 +148,14 @@ class CqSurfacePatchBicubic : public CqSurface
 		virtual	CqBound	Bound() const;
 		virtual TqBool	Diceable();
 
+		/** Determine whether the passed surface is valid to be used as a 
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
+
 		virtual	TqUint	cUniform() const
 		{
 			return ( 1 );
@@ -203,6 +211,14 @@ class CqSurfacePatchBilinear : public CqSurface
 		void	GenNormals();
 		virtual	CqBound	Bound() const;
 		virtual TqBool	Diceable();
+
+		/** Determine whether the passed surface is valid to be used as a 
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
 
 		virtual	TqUint	cUniform() const
 		{
@@ -279,6 +295,14 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 		virtual TqBool	Diceable()
 		{
 			return ( TqFalse );
+		}
+
+		/** Determine whether the passed surface is valid to be used as a 
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
 		}
 
 		virtual	TqUint	cUniform() const
@@ -358,6 +382,14 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 		virtual TqBool	Diceable()
 		{
 			return ( TqFalse );
+		}
+
+		/** Determine whether the passed surface is valid to be used as a 
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
 		}
 
 		virtual	TqUint	cUniform() const

@@ -453,6 +453,14 @@ class CqSurfaceSubdivisionPatch : public CqBasicSurface
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual TqBool	Diceable();
 
+		/** Determine whether the passed surface is valid to be used as a 
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
+
 		void StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoints* pPoints, TqInt iParam, TqInt iData );
 
 	private:

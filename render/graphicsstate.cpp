@@ -276,7 +276,7 @@ CqObjectModeBlock::~CqObjectModeBlock()
 /** Default constructor.
  */
 
-CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], CqModeBlock* pconParent ) : CqModeBlock( pconParent )
+CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], CqModeBlock* pconParent ) : CqModeBlock( pconParent ), m_pMotionSurface( NULL )
 {
 	// Copy the parents attributes, as this state change doesn't save attributes.
 	if ( pconParent != 0 )

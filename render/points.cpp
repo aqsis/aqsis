@@ -305,7 +305,7 @@ TqBool	CqPoints::Diceable()
 
 
 //---------------------------------------------------------------------
-/** Get the geometric bound of this GPrim.
+/** Get the geometric bound of this GPrim in 'current' space.
  */
 
 CqBound	CqPoints::Bound() const
@@ -380,15 +380,16 @@ void CqPoints::InitialiseMaxWidth()
 	const CqParameterTypedConstant<TqFloat, type_float, TqFloat>* pConstantWidthParam = constantwidth( );
 
 	TqInt iu;
-	TqInt iTime, tTime = pTransform()->cTimes();
+	TqInt tTime = pTransform()->cTimes();
 
-	register TqInt i;
 	TqInt gsmin1;
 	gsmin1 = cu - 1;
 
 	CqVector3D Point0 = matObjectToCamera * CqVector3D(0,0,0);
 
-	TqFloat i_radius = pConstantWidthParam->pValue( 0 )[ 0 ];
+	TqFloat i_radius = 1.0f;
+	if( NULL != pConstantWidthParam )
+		i_radius = pConstantWidthParam->pValue( 0 )[ 0 ];
 	for ( iu = 0; iu < cu; iu++ )
 	{
 		TqFloat radius;
@@ -478,7 +479,9 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 			pNew->SetIndex( iu );
 
 			TqFloat radius;
-			TqFloat i_radius = pConstantWidthParam->pValue( 0 )[ 0 ];
+			TqFloat i_radius = 1.0f;
+			if( NULL != pConstantWidthParam )
+				pConstantWidthParam->pValue( 0 )[ 0 ];
 			// Find out if the "width" parameter was specified.
 			CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pWidthParam = pPoints->width( 0 );
 
@@ -529,8 +532,8 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 	{
 		iTime = 0;
 		CqMatrix matWorldToObjectT = QGetRenderContext() ->matSpaceToSpace( "world", "object", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
-		CqMatrix amatObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
-		CqMatrix amatNObjectToCameraT = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
+		CqMatrix matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
+		CqMatrix matNObjectToCameraT = QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
 
 		for ( iu = 0; iu < cu; iu++ )
 		{
@@ -542,7 +545,9 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 			Point = matCameraToRaster * Point;
 			Point.z( ztemp );
 
-			TqFloat radius = pConstantWidthParam->pValue( 0 )[ 0 ];
+			TqFloat radius = 1.0f;
+			if( NULL != pConstantWidthParam )
+				pConstantWidthParam->pValue( 0 )[ 0 ];
 			// Find out if the "width" parameter was specified.
 			CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pWidthParam = pPoints->width( 0 );
 
@@ -552,13 +557,13 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 			// first, create a horizontal vector in camera space which is
 			//  the length of the current width in current space
 			CqVector3D horiz( 1, 0, 0 );
-			horiz = amatNObjectToCameraT[ 0 ] * horiz;
+			horiz = matNObjectToCameraT * horiz;
 			horiz *= radius / horiz.Magnitude();
 
 			// Get the current point in object space.
 			CqVector3D pt_delta = pt + horiz;
-			pt = amatObjectToCameraT[ 0 ] * pt;
-			pt_delta = amatObjectToCameraT[ 0 ] * pt_delta;
+			pt = matObjectToCameraT * pt;
+			pt_delta = matObjectToCameraT * pt_delta;
 
 			// finally, find the difference between the two points in
 			//  the new space - this is the transformed width
@@ -638,7 +643,9 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, l
 			pGridT->P() ->GetPointPtr( pP );
 			CqVector3D Point = pP[ iu ];
 
-			TqFloat radius = pConstantWidthParam->pValue( 0 )[ 0 ];
+			TqFloat radius = 1.0f;
+			if( NULL != pConstantWidthParam )
+				pConstantWidthParam->pValue( 0 )[ 0 ];
 			// Find out if the "width" parameter was specified.
 			CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pWidthParam = pPoints->width( 0 );
 

@@ -170,6 +170,14 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 			return ( CqPolygonBase::Split( aSplits ) );
 		}
 
+		/** Determine whether the passed surface is valid to be used as a 
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
+
 		virtual	TqUint	cUniform() const
 		{
 			return ( 1 );
@@ -334,6 +342,15 @@ class CqPolygonPoints : public CqSurface
 		{
 			return ( TqFalse );
 		}
+
+		/** Determine whether the passed surface is valid to be used as a 
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
+
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 );
 
 		virtual	TqUint	cUniform() const
@@ -411,6 +428,14 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 			return ( CqPolygonBase::Split( aSplits ) );
 		}
 		virtual TqBool	Diceable()	{ return(false); }
+
+		/** Determine whether the passed surface is valid to be used as a 
+		 *  frame in motion blur for this surface.
+		 */
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
 
 		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
 		{
