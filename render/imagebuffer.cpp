@@ -1318,11 +1318,11 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 								// Update max depth values
 								if(pMPG->colOpacity() == gColWhite)
 								{
-								//	if(c==0)
+									if(c==0)
 									{
 										Bucket.DecMaxDepthCount();
 									}
-								/*	else 
+									else 
 									{
 										int j=0;
 										// Find first opaque sample
@@ -1334,7 +1334,7 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 												Bucket.DecMaxDepthCount();
 											}
 										}
-									}*/
+									}
 								}
 									
 								ImageVal.m_colColor=pMPG->colColor();

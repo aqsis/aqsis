@@ -652,7 +652,6 @@ CqBound& CqMicroPolygonStatic::Bound(TqBool fForce)
 CqBoundList& CqMicroPolygonStatic::BoundList()
 {
 	m_BoundList.Clear();
-	//m_Bound=CqMicroPolygonStaticBase::Bound();
 	
 	CqBound* bound = new CqBound( m_Bound );
 	m_BoundList.Add(bound, 0.0);
@@ -685,7 +684,6 @@ CqBound& CqMicroPolygonMotion::Bound(TqBool fForce)
  */
 CqBoundList& CqMicroPolygonMotion::BoundList()
 {
-	//CqBoundList* boundlist = new CqBoundList;
 	m_BoundList.Clear();
 	
 	CqBound start = GetMotionObject(Time(0)).Bound();
