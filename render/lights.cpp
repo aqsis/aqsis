@@ -84,14 +84,14 @@ void CqLightsource::Initialise(TqInt uGridRes, TqInt vGridRes)
 	Cl().Initialise(uGridRes, vGridRes, GridI());
 
 	// Initialise the geometric parameters in the shader exec env.
-	P()=QGetRenderContext()->matSpaceToSpace("shader", "current", m_pShader->matCurrent())*CqVector3D(0.0f,0.0f,0.0f);
-	if(USES(Uses,EnvVars_u))	u()=0.0f;
-	if(USES(Uses,EnvVars_v))	v()=0.0f;
-	if(USES(Uses,EnvVars_du))	du()=0.0f;
-	if(USES(Uses,EnvVars_du))	dv()=0.0f;
-	if(USES(Uses,EnvVars_s))	s()=0.0f;
-	if(USES(Uses,EnvVars_t))	t()=0.0f;
-	if(USES(Uses,EnvVars_N))	N()=CqVector3D(0.0f,0.0f,0.0f);
+	P().SetValue(QGetRenderContext()->matSpaceToSpace("shader", "current", m_pShader->matCurrent())*CqVector3D(0.0f,0.0f,0.0f));
+	if(USES(Uses,EnvVars_u))	u().SetValue(0.0f);
+	if(USES(Uses,EnvVars_v))	v().SetValue(0.0f);
+	if(USES(Uses,EnvVars_du))	du().SetValue(0.0f);
+	if(USES(Uses,EnvVars_du))	dv().SetValue(0.0f);
+	if(USES(Uses,EnvVars_s))	s().SetValue(0.0f);
+	if(USES(Uses,EnvVars_t))	t().SetValue(0.0f);
+	if(USES(Uses,EnvVars_N))	N().SetValue(CqVector3D(0.0f,0.0f,0.0f));
 }
 
 

@@ -2305,12 +2305,25 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminate(POINTVAL P, VECTORVAL Axis, FLOATVAL A
 {
 	TqBool res=TqTrue;
 	if(m_Illuminate>0)	res=TqFalse;
-	// TODO: Check light cone, and exclude points outside.
 	INIT_SOR
 	__fVarying=TqTrue;
 	FOR_EACHR
-		if(res)	L()=Ps()-POINT(P);
-		m_CurrentState.SetValue(i,res);
+		if(res)
+		{
+			L()=Ps() - POINT(P);
+			// Check if its within the cone.
+			if(FLOAT(Angle)!=-1)
+			{
+				CqVector3D nL=L();	nL.Unit();
+				TqFloat cosangle=nL*VECTOR(Axis);
+				if(acos(cosangle)>FLOAT(Angle))
+					m_CurrentState.SetValue(i,TqFalse);
+				else
+					m_CurrentState.SetValue(i,TqTrue);
+			}
+			else
+				m_CurrentState.SetValue(i,TqTrue);
+		}
 	END_FORR
 	m_Illuminate++;
 }
