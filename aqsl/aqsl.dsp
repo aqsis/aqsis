@@ -84,9 +84,8 @@ SOURCE=.\aqsl.bat
 # Begin Custom Build - Copying $(InputPath) to $(OutDir)
 OutDir=.\..\Library\Release
 InputPath=.\aqsl.bat
-InputName=aqsl
 
-"$(OutDir)\$(InputName)" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+"$(OutDir)\$(InputPath)" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	copy /Y $(InputPath) $(OutDir)
 
 # End Custom Build
@@ -97,9 +96,8 @@ InputName=aqsl
 # Begin Custom Build - Copying $(InputPath) to $(OutDir)
 OutDir=.\..\Library\Debug
 InputPath=.\aqsl.bat
-InputName=aqsl
 
-"$(OutDir)\$(InputName)" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+"$(OutDir)\$(InputPath)" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	copy /Y $(InputPath) $(OutDir)
 
 # End Custom Build
@@ -111,9 +109,8 @@ InputName=aqsl
 # Begin Custom Build - Copying $(InputPath) to $(OutDir)
 OutDir=.\..\Library\Profile
 InputPath=.\aqsl.bat
-InputName=aqsl
 
-"$(OutDir)\$(InputName)" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+"$(OutDir)\$(InputPath)" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	copy /Y $(InputPath) $(OutDir)
 
 # End Custom Build
