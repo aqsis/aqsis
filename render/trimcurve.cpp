@@ -5,7 +5,7 @@
  *	@brief	Implementation of trimcurce functionality.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/01/29 17:39:34 $
+ *	Last change date:	$Date: 2002/02/14 23:02:06 $
  */
 //------------------------------------------------------------------------------
 
@@ -134,7 +134,7 @@ void CqTrimLoop::Prepare(CqSurface* pSurface)
 }
 
 
-const TqBool	CqTrimLoop::TrimPoint(const CqVector2D& v) const
+const TqInt	CqTrimLoop::TrimPoint(const CqVector2D& v) const
 {
 	TqFloat x=v.x();
 	TqFloat y=v.y();
@@ -145,9 +145,9 @@ const TqBool	CqTrimLoop::TrimPoint(const CqVector2D& v) const
 			 ((m_aCurvePoints[j].y() <= y) && (y < m_aCurvePoints[i].y()))) &&
 			  (x < (m_aCurvePoints[j].x() - m_aCurvePoints[i].x()) * (y - m_aCurvePoints[i].y()) / 
 				(m_aCurvePoints[j].y() - m_aCurvePoints[i].y()) + m_aCurvePoints[i].x()))
-			c = !c;
+			c++;
 	}
-	return(c==0); 
+	return(c); 
 }
 
 
@@ -162,13 +162,13 @@ void CqTrimLoopArray::Prepare(CqSurface* pSurface)
 
 const TqBool	CqTrimLoopArray::TrimPoint(const CqVector2D& v) const
 {
-	TqBool	fTrim=false;
+	TqInt	cCrosses=0;
 
 	std::vector<CqTrimLoop>::const_iterator iLoop;
 	for(iLoop=m_aLoops.begin(); iLoop!=m_aLoops.end(); iLoop++)
-		fTrim=fTrim || iLoop->TrimPoint(v);
+		cCrosses += iLoop->TrimPoint(v);
 	
-	return(fTrim); 
+	return(!(cCrosses & 1)); 
 }
 
 

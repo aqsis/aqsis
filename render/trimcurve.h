@@ -5,7 +5,7 @@
  *	@brief	NURB based trim cureve class.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/01/31 16:20:26 $
+ *	Last change date:	$Date: 2002/02/14 23:02:06 $
  */
 //------------------------------------------------------------------------------
 
@@ -101,7 +101,7 @@ class CqTrimLoop
 				std::vector<CqTrimCurve>& aCurves()	{return(m_aCurves);}
 
 				void		Prepare(CqSurface* pSurface);
-		const	TqBool		TrimPoint(const CqVector2D& v) const;
+		const	TqInt		TrimPoint(const CqVector2D& v) const;
 
 	private:
 				std::vector<CqTrimCurve>	m_aCurves;
