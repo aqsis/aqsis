@@ -305,7 +305,7 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     TqFloat			aTqFloat;
                     RtFloat			aRtFloat;
                     slxType = SLX_TYPE_SCALAR;
-                    aTqFloat = (*static_cast<CqShaderVariableUniform<Type_Float,TqFloat>*>(shaderVar));
+                    aTqFloat = static_cast<TqFloat>((*static_cast<CqShaderVariableUniform<Type_Float,TqFloat>*>(shaderVar)));
                     aRtFloat = aTqFloat;
                     defaultValLength = sizeof(RtFloat);
                     defaultVal = (char *)malloc(defaultValLength);
@@ -853,8 +853,9 @@ SLX_VISSYMDEF *SLX_GetArgByName (char *name)
  */
 SLX_VISSYMDEF *SLX_GetArrayArgElement(SLX_VISSYMDEF *array, int index)
 {
-    // Not yet implemented
+	// Not yet implemented
     SlxLastError = RIE_NOERROR;
+	return(NULL);
 }
 
 
