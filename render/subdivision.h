@@ -33,6 +33,7 @@
 #include "vector3d.h"
 #include "surface.h"
 #include "polygon.h"
+#include "shadervariable.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -40,6 +41,7 @@
 START_NAMESPACE(Aqsis)
 
 
+class CqSubdivider;
 class CqWSurf;
 class CqWEdge;
 class CqWFace;
@@ -154,7 +156,7 @@ class CqWVert
 					 * \param pSurf Pointer to the CqWSurf on which we are working. 
 					 */
 		template<class T>
-		T GetSmoothedScalar(T& t, T(CqWSurf::*F)(TqInt i), CqWSurf* pSurf)
+		T GetSmoothedScalar(T& t, T(CqSubdivider::*F)(CqPolygonPoints*,TqInt), CqSubdivider* pSurf, CqPolygonPoints* pPoints)
 		{
 			// NOTE: Checks should have been made prior to this call to ensure it is neither
 			// a boundary point or a crease/corner point with sharp edges.
@@ -171,7 +173,7 @@ class CqWVert
 				else						pF=(*iE)->pfRight();
 				if(pF)
 				{
-					Q+=(pSurf->*F)(pF->pvSubdivide()->iVertex());	
+					Q+=(pSurf->*F)(pPoints,pF->pvSubdivide()->iVertex());	
 					cE++;
 				}
 			}
@@ -184,14 +186,14 @@ class CqWVert
 			{
 				if((*iE)->IsValid())
 				{
-					if((*iE)->pvHead()==this)	R+=(pSurf->*F)((*iE)->pvTail()->iVertex());
-					else						R+=(pSurf->*F)((*iE)->pvHead()->iVertex());
+					if((*iE)->pvHead()==this)	R+=(pSurf->*F)(pPoints,(*iE)->pvTail()->iVertex());
+					else						R+=(pSurf->*F)(pPoints,(*iE)->pvHead()->iVertex());
 					cE++;
 				}
 			}
 			R*=(1.0f/(cE*cE));
 
-			T S=(pSurf->*F)(iVertex())*((cE-2.0f)/(TqFloat)cE);
+			T S=(pSurf->*F)(pPoints,iVertex())*((cE-2.0f)/(TqFloat)cE);
 			return(S+R+Q);
 		}
 		
@@ -201,7 +203,7 @@ class CqWVert
 					 * \param pSurf Pointer to the CqWSurf on which we are working. 
 					 */
 		template<class T>
-		T GetCreaseScalar(T& t, T(CqWSurf::*F)(TqInt i), CqWSurf* pSurf)
+		T GetCreaseScalar(T& t, T(CqSubdivider::*F)(CqPolygonPoints*,TqInt), CqSubdivider* pSurf, CqPolygonPoints* pPoints)
 		{
 			T P=T(0.0f);
 			std::vector<CqWEdge*>::iterator iE;
@@ -212,20 +214,20 @@ class CqWVert
 			{
 				if((*iE)->Sharpness()>0 && (*iE)->IsValid())
 				{
-					if((*iE)->pvHead()==this)	P+=(pSurf->*F)((*iE)->pvTail()->iVertex());
-					else						P+=(pSurf->*F)((*iE)->pvHead()->iVertex());
+					if((*iE)->pvHead()==this)	P+=(pSurf->*F)(pPoints,(*iE)->pvTail()->iVertex());
+					else						P+=(pSurf->*F)(pPoints,(*iE)->pvHead()->iVertex());
 					S+=(*iE)->Sharpness();
 					cS++;
 				}
 			}
-			P+=(pSurf->*F)(iVertex())*6.0f;
+			P+=(pSurf->*F)(pPoints,iVertex())*6.0f;
 			P/=8.0f;				// Crease point
 
 			S/=(TqFloat)cS;
 			if(cS==2 && S>0.0f && S<1.0f)
 			{
 				T P2;
-				P2 = GetSmoothedScalar(P2,F,pSurf);
+				P2 = GetSmoothedScalar(P2,F,pSurf,pPoints);
 				P=(P2*(1.0f-S))+(P*S);	// Linear blend for variable crease.
 			}
 			return(P);
@@ -237,16 +239,16 @@ class CqWVert
 					 * \param pSurf Pointer to the CqWSurf on which we are working. 
 					 */
 		template<class T>
-		T GetBoundaryScalar(T& t, T(CqWSurf::*F)(TqInt i), CqWSurf* pSurf)
+		T GetBoundaryScalar(T& t, T(CqSubdivider::*F)(CqPolygonPoints*,TqInt), CqSubdivider* pSurf, CqPolygonPoints* pPoints)
 		{
 			T P=T(0.0f);
 			std::vector<CqWEdge*>::iterator iE;
 			for(iE=m_apEdges.begin(); iE!=m_apEdges.end(); iE++)
 				if((*iE)->IsBoundary())
-					if((*iE)->pvHead()==this)	P+=(pSurf->*F)((*iE)->pvTail()->iVertex());
-					else						P+=(pSurf->*F)((*iE)->pvHead()->iVertex());
+					if((*iE)->pvHead()==this)	P+=(pSurf->*F)(pPoints,(*iE)->pvTail()->iVertex());
+					else						P+=(pSurf->*F)(pPoints,(*iE)->pvHead()->iVertex());
 			
-			P+=(pSurf->*F)(iVertex())*6.0f;
+			P+=(pSurf->*F)(pPoints,iVertex())*6.0f;
 			P/=8.0f;
 			return(P);
 		}
@@ -289,8 +291,8 @@ class CqWFace
 					 */
 		CqWVert*	pvSubdivide()	{return(m_pvSubdivide);}
 
-		CqWVert*	CreateSubdividePoint(CqWSurf* pSurf, TqUint index, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-																	  TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
+		CqWVert*	CreateSubdividePoint(CqSubdivider* pSurf, CqPolygonPoints* pPoints, CqWVert* pV, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
+													 	TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
 
 					/** Templatised function to perform the subdivision arithmetic on a paramter type.
 					 * \param t Temp of the template type to overcome the VC++ problem with template functions.
@@ -298,7 +300,7 @@ class CqWFace
 					 * \param pSurf Pointer to the CqWSurf on which we are working. 
 					 */
 		template<class T>
-		T			CreateSubdivideScalar(T& t, T(CqWSurf::*F)(TqInt i), CqWSurf* pSurf)
+		T			CreateSubdivideScalar(T& t, T(CqSubdivider::*F)(CqPolygonPoints*,TqInt), CqSubdivider* pSurf, CqPolygonPoints* pPoints)
 					{
 						T P=T(0.0f);
 						
@@ -306,7 +308,7 @@ class CqWFace
 
 						for(TqUint j=0; j<m_apEdges.size(); j++)
 						{
-							P+=(pSurf->*F)(grE.pvHead()->iVertex());
+							P+=(pSurf->*F)(pPoints,grE.pvHead()->iVertex());
 							grE.peNext();
 						}
 						P/=(TqFloat)m_apEdges.size();
@@ -509,9 +511,9 @@ class CqWEdge
 		
 		TqBool		IsBoundary();
 		TqBool		IsValid();
-		CqWVert*	CreateSubdividePoint(CqWSurf* pSurf, TqUint index, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-																	  TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
-		void		Subdivide(CqWSurf* pSurf);
+		CqWVert*	CreateSubdividePoint(CqSubdivider* pSurf, CqPolygonPoints* pPoints, CqWVert* pV, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
+														TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
+		void		Subdivide(CqSubdivider* pSurf);
 					/** Get a pointer to the calculated midpoint of this edge.
 					 * \return A CqWVert pointer.
 					 * \attention Must have called CreateSubdividePoint first.
@@ -524,10 +526,10 @@ class CqWEdge
 					 * \param pSurf Pointer to the CqWSurf on which we are working. 
 					 */
 		template<class T>
-		T			CreateSubdivideScalar(T& t, T(CqWSurf::*F)(TqInt i), CqWSurf* pSurf)
+		T			CreateSubdivideScalar(T& t, T(CqSubdivider::*F)(CqPolygonPoints*,TqInt), CqSubdivider* pSurf, CqPolygonPoints* pPoints)
 					{
-						T P=(pSurf->*F)(pvHead()->iVertex());
-						P+=(pSurf->*F)(pvTail()->iVertex());
+						T P=(pSurf->*F)(pPoints,pvHead()->iVertex());
+						P+=(pSurf->*F)(pPoints,pvTail()->iVertex());
 						
 						// Check for sharp edges.
 						if(IsBoundary()==TqTrue|| m_Sharpness>0)		// Boundary check.
@@ -536,8 +538,8 @@ class CqWEdge
 							{
 								T P2=P;
 								P*=0.5;
-								P2+=(pSurf->*F)(pfLeft()->pvSubdivide()->iVertex());
-								P2+=(pSurf->*F)(pfRight()->pvSubdivide()->iVertex());
+								P2+=(pSurf->*F)(pPoints,pfLeft()->pvSubdivide()->iVertex());
+								P2+=(pSurf->*F)(pPoints,pfRight()->pvSubdivide()->iVertex());
 								P2*=0.25;
 								P=(P2*(1.0f-m_Sharpness))+(P*m_Sharpness);
 							}
@@ -546,8 +548,8 @@ class CqWEdge
 						} 
 						else										// Smooth.
 						{
-							P+=(pSurf->*F)(pfLeft()->pvSubdivide()->iVertex());
-							P+=(pSurf->*F)(pfRight()->pvSubdivide()->iVertex());
+							P+=(pSurf->*F)(pPoints,pfLeft()->pvSubdivide()->iVertex());
+							P+=(pSurf->*F)(pPoints,pfRight()->pvSubdivide()->iVertex());
 							P*=0.25;
 						}
 						return(P);
@@ -572,207 +574,173 @@ class CqWEdge
 };
 
 
+
 //----------------------------------------
-/** \class CqWSurf
- * Subdivision surface GPrim.
+/** \class CqSubdivider
+ * Base class with core subdivision functionality.
  */
 
-class CqWSurf : public CqBasicSurface
+class CqSubdivider
 {
-	protected:
-					CqWSurf() :	CqBasicSurface(),
-								m_pVertices(0)
-										{}
 	public:
-					CqWSurf(CqPolygonPoints* pVertices)	: CqBasicSurface(),
-													  m_pVertices(pVertices)
+					CqSubdivider() :
+								m_fSubdivided(false)
 										{}
-					CqWSurf(TqInt cExpectedVertices, TqInt cExpectedFaces, CqPolygonPoints* pVertices)	: CqBasicSurface(),
-																			  m_cExpectedVertices(cExpectedVertices),
-																			  m_cExpectedFaces(cExpectedFaces),
-																			  m_pVertices(pVertices)
+					CqSubdivider(TqInt cExpectedVertices, TqInt cExpectedFaces) :
+								m_cExpectedVertices(cExpectedVertices),
+								m_cExpectedFaces(cExpectedFaces),
+								m_fSubdivided(false)
 										{}
-	virtual			~CqWSurf();
-
-	// Overridden from CqBasicSurface
-	virtual	CqBound		Bound() const;
-						/** Should never be called.
-						 */
-	virtual	CqMicroPolyGridBase* Dice()		{return(0);}
-	virtual	TqInt		Split(std::vector<CqBasicSurface*>& aSplits);
-						/** Should never be called.
-						 */
-	virtual TqBool		Diceable()		{return(TqFalse);}
-	virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
-	virtual	TqUint		cUniform() const{return(m_cExpectedFaces);}
-	virtual	TqUint		cVarying() const{return(m_cExpectedVertices);}
-	virtual	TqUint		cVertex() const	{return(m_cExpectedVertices);}
+	virtual			~CqSubdivider();
 
 						/** Get a pointer to the indexed vertex in the list.
 						 * \param iV Integer index.
 						 * \return A CqWVert pointer.
 						 */
-	virtual CqWVert*	pVert(TqInt iV)	{return(m_apVerts[iV]);}
+			CqWVert*	pVert(TqInt iV)	{return(m_apVerts[iV]);}
 						/** Get a pointer to the indexed edge in the list.
 						 * \param iV Integer index.
 						 * \return A CqWEdge pointer.
 						 */
-	virtual CqWEdge*	pEdge(TqInt iE)	{return(m_apEdges[iE]);}
+			CqWEdge*	pEdge(TqInt iE)	{return(m_apEdges[iE]);}
 						/** Get a pointer to the indexed face in the list.
 						 * \param iV Integer index.
 						 * \return A CqWFace pointer.
 						 */
-	virtual	CqWFace*	pFace(TqInt iF)	{return(m_apFaces[iF]);}
+			CqWFace*	pFace(TqInt iF)	{return(m_apFaces[iF]);}
 						/** Get a pointer to the indexed vertex in the list.
 						 * \param iV Integer index.
 						 * \return A CqWVert pointer.
 						 */
-	virtual const CqWVert*	pVert(TqInt iV) const	{return(m_apVerts[iV]);}
+			const CqWVert*	pVert(TqInt iV) const	{return(m_apVerts[iV]);}
 						/** Get a pointer to the indexed edge in the list.
 						 * \param iV Integer index.
 						 * \return A CqWEdge pointer.
 						 */
-	virtual const CqWEdge*	pEdge(TqInt iE)	const	{return(m_apEdges[iE]);}
+			const CqWEdge*	pEdge(TqInt iE)	const	{return(m_apEdges[iE]);}
 						/** Get a pointer to the indexed face in the list.
 						 * \param iV Integer index.
 						 * \return A CqWFace pointer.
 						 */
-	virtual	const CqWFace*	pFace(TqInt iF)	const	{return(m_apFaces[iF]);}
+			const CqWFace*	pFace(TqInt iF)	const	{return(m_apFaces[iF]);}
 						/** Get the count of edges in this surface.
 						 */
-	virtual TqInt		cEdges() const	{return(m_apEdges.size());}
+			TqInt		cEdges() const	{return(m_apEdges.size());}
 						/** Get the count of faces in this surface.
 						 */
-	virtual TqInt		cFaces() const	{return(m_apFaces.size());}
+			TqInt		cFaces() const	{return(m_apFaces.size());}
 						/** Get the count of vertices in this surface.
 						 */
-	virtual TqInt		cVerts() const	{return(m_apVerts.size());}
+			TqInt		cVerts() const	{return(m_apVerts.size());}
 		
-	virtual	CqWEdge*	FindEdge(CqWEdge* pE);
-	virtual	CqWVert*	FindVertex(const CqVector3D& V);
+			CqWEdge*	FindEdge(CqWEdge* pE);
+			CqWVert*	FindVertex(CqPolygonPoints* pPoints, const CqVector3D& V);
 
-	virtual	CqWEdge*	AddEdge(CqWVert* pA, CqWVert* pB);
+			CqWEdge*	AddEdge(CqWVert* pA, CqWVert* pB);
 						/** Add an edge to the list.
 						 * \param pE Pointer to a CqWEdge to add.
 						 */
-	virtual	void		AddEdge(CqWEdge* pE)	{m_apEdges.push_back(pE);}
-	virtual	CqWVert*	AddVert(const CqVector3D& V);
+			void		AddEdge(CqWEdge* pE)	{m_apEdges.push_back(pE);}
 						/** Add a vertex to the list.
 						 * \param pV Pointer to a CqWVert to add.
 						 */
-	virtual	void		AddVert(CqWVert* pV)	{m_apVerts.push_back(pV);}
-	virtual	CqWFace*	AddFace(CqWEdge** pE, TqInt cE);
+			void		AddVert(CqWVert* pV)	{m_apVerts.push_back(pV);}
+			CqWFace*	AddFace(CqWEdge** pE, TqInt cE);
 						/** Add a face to the list.
 						 * \param pF Pointer to a CqWFace to add.
 						 */
-	virtual	void		AddFace(CqWFace* pF)	{m_apFaces.push_back(pF);}
+			void		AddFace(CqWFace* pF)	{m_apFaces.push_back(pF);}
 
-	virtual	void		Subdivide();
-						/** Perform subdivision to a specified level.
-						 * \param Count Integer number of times to subdivide.
+						/** Get an indexed P value from the specified points storage class.
 						 */
-	virtual	void		Subdivide(TqInt Count)
+			CqVector3D	SubdP(CqPolygonPoints* pPoints, TqInt index)
+												{
+													assert(index<pPoints->P().Size());
+													return(pPoints->P()[index]);
+												}
+						/** Get an indexed s value from the specified points storage class.
+						 */
+			TqFloat		Subds(CqPolygonPoints* pPoints, TqInt index)
+												{
+													assert(index<pPoints->s().Size());
+													return(pPoints->s()[index]);
+												}
+						/** Get an indexed t value from the specified points storage class.
+						 */
+			TqFloat		Subdt(CqPolygonPoints* pPoints, TqInt index)
+												{
+													assert(index<pPoints->t().Size());
+													return(pPoints->t()[index]);
+												}
+						/** Get an indexed Cs value from the specified points storage class.
+						 */
+			CqColor		SubdCs(CqPolygonPoints* pPoints, TqInt index)
+												{
+													assert(index<pPoints->Cs().Size());
+													return(pPoints->Cs()[index]);
+												}
+						/** Get an indexed Os value from the specified points storage class.
+						 */
+			CqColor		SubdOs(CqPolygonPoints* pPoints, TqInt index)
+												{
+													assert(index<pPoints->Os().Size());
+													return(pPoints->Os()[index]);
+												}
+
+			void		Subdivide();
+
+			void		Subdivide(TqInt count)	{
+													while(count-->0)	Subdivide();
+												}												
+
+
+			void		DiceSubdivide();
+							/** Subdivide this patch to a specified level.
+							 * \param Count Integer subdivision count.
+							 */
+			void		DiceSubdivide(TqInt Count)
 										{
-											while(Count-->0)	Subdivide();
+											while(Count-->0)	DiceSubdivide();
 										}
-			void		SmoothVertexPoints(TqInt cOldVerts, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-															TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
-	virtual	void		_OutputMesh(char* pname);
+							/** Set the dice level required to achieve the appropriate shading rate.
+							 * \param c Integer dice count.
+							 */
+			void		SetDiceCount(TqInt c)
+										{
+											m_DiceCount=c;
+										}
+			void		StoreDice(TqInt Level, TqInt& iFace, CqPolygonPoints* pPoints, 
+									TqInt uOff, TqInt vOff, TqInt cuv, CqMicroPolyGrid* pGrid,
+									TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
+									TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
 
+	virtual	TqInt		Uses() const=0;
 
-						/** Get indexed vertex.
-						 * \param i Integer index.
-						 */
-			CqVector3D	SubdP(TqInt i)		{return(P()[i]);}
-						/** Get indexed texture s coordinate.
-						 * \param i Integer index.
-						 */
-			TqFloat		Subds(TqInt i)		{return(s()[i]);}
-						/** Get indexed texture t coordinate.
-						 * \param i Integer index.
-						 */
-			TqFloat		Subdt(TqInt i)		{return(t()[i]);}
-						/** Get indexed color.
-						 * \param i Integer index.
-						 */
-			CqColor	SubdCs(TqInt i)		{return(Cs()[i]);}
-						/** Get indexed opacity.
-						 * \param i Integer index.
-						 */
-			CqColor	SubdOs(TqInt i)		{return(Os()[i]);}
-
-	// Passthrough functions to the CqSurface containing the vertices.
-						/** Get a reference the to P default parameter.
-						 */
-			CqParameterTypedVarying<CqVector4D, Type_hPoint>& P()	{return(m_pVertices->P());}
-						/** Get a reference the to N default parameter.
-						 */
-			CqParameterTypedVarying<CqVector3D, Type_Normal>& N()	{return(m_pVertices->N());}
-						/** Get a reference the to Cq default parameter.
-						 */
-			CqParameterTypedVarying<CqColor, Type_Color>& Cs()		{return(m_pVertices->Cs());}
-						/** Get a reference the to Os default parameter.
-						 */
-			CqParameterTypedVarying<CqColor, Type_Color>& Os()		{return(m_pVertices->Os());}
-						/** Get a reference the to s default parameter.
-						 */
-			CqParameterTypedVarying<TqFloat, Type_Float>& s()		{return(m_pVertices->s());}
-						/** Get a reference the to t default parameter.
-						 */
-			CqParameterTypedVarying<TqFloat, Type_Float>& t()		{return(m_pVertices->t());}
-						/** Get a reference the to u default parameter.
-						 */
-			CqParameterTypedVarying<TqFloat, Type_Float>& u()		{return(m_pVertices->u());}
-						/** Get a reference the to v default parameter.
-						 */
-			CqParameterTypedVarying<TqFloat, Type_Float>& v()		{return(m_pVertices->v());}
-
-						/** Get a reference the to P default parameter.
-						 */
-	const	CqParameterTypedVarying<CqVector4D, Type_hPoint>& P() const	{return(m_pVertices->P());}
-						/** Get a reference the to N default parameter.
-						 */
-	const	CqParameterTypedVarying<CqVector3D, Type_Normal>& N() const	{return(m_pVertices->N());}
-						/** Get a reference the to Cq default parameter.
-						 */
-	const	CqParameterTypedVarying<CqColor, Type_Color>& Cs() const	{return(m_pVertices->Cs());}
-						/** Get a reference the to Os default parameter.
-						 */
-	const	CqParameterTypedVarying<CqColor, Type_Color>& Os() const	{return(m_pVertices->Os());}
-						/** Get a reference the to s default parameter.
-						 */
-	const	CqParameterTypedVarying<TqFloat, Type_Float>& s() const		{return(m_pVertices->s());}
-						/** Get a reference the to t default parameter.
-						 */
-	const	CqParameterTypedVarying<TqFloat, Type_Float>& t() const		{return(m_pVertices->t());}
-						/** Get a reference the to u default parameter.
-						 */
-	const	CqParameterTypedVarying<TqFloat, Type_Float>& u() const		{return(m_pVertices->u());}
-						/** Get a reference the to v default parameter.
-						 */
-	const	CqParameterTypedVarying<TqFloat, Type_Float>& v() const		{return(m_pVertices->v());}
+	virtual	void		CreateFacePoints(TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os)=0;
+	virtual	void		CreateEdgePoints(TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os)=0;
+	virtual	void		SmoothVertexPoints(TqInt cOldVerts, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os)=0;
 
 						/** Determine whether this surface has per vertex normals.
 						 */
-	const	TqBool		bHasN() const									{return(m_pVertices->bHasN());}
+	virtual	TqBool		bHasN() const=0;
 						/** Determine whether this surface has per vertex colors.
 						 */
-	const	TqBool		bHasCs() const									{return(m_pVertices->bHasCs());}
+	virtual	TqBool		bHasCs() const=0;
 						/** Determine whether this surface has per vertex opacities.
 						 */
-	const	TqBool		bHasOs() const									{return(m_pVertices->bHasOs());}
+	virtual	TqBool		bHasOs() const=0;
 						/** Determine whether this surface has per vertex s cordinates.
 						 */
-	const	TqBool		bHass() const									{return(m_pVertices->bHass());}
+	virtual	TqBool		bHass() const=0;
 						/** Determine whether this surface has per vertex t coordinates.
 						 */
-	const	TqBool		bHast() const									{return(m_pVertices->bHast());}
+	virtual	TqBool		bHast() const=0;
 						/** Determine whether this surface has per vertex u coordinates.
 						 */
-	const	TqBool		bHasu() const									{return(m_pVertices->bHasu());}
+	virtual	TqBool		bHasu() const=0;
 						/** Determine whether this surface has per vertex v coordinates.
 						 */
-	const	TqBool		bHasv() const									{return(m_pVertices->bHasv());}
+	virtual	TqBool		bHasv() const=0;
 
 	protected:
 		std::vector<CqWVert*>	m_apVerts;				///< Array of pointers to winged edge vertex structures. 
@@ -780,52 +748,130 @@ class CqWSurf : public CqBasicSurface
 		std::vector<CqWFace*>	m_apFaces;				///< Array of pointers to winged edge face structures. 
 		TqInt					m_cExpectedVertices;	///< Number of vertices to be filled in.
 		TqInt					m_cExpectedFaces;		///< Number of faces to be filled in.
-		CqPolygonPoints*		m_pVertices;			///> Pointer to the CqSurface class with the surface vertices on.
+		TqInt					m_DiceCount;	///< Integer subdivision count to achieve the appropriate shading rate.
+		TqBool					m_fSubdivided;
 };
 
 
-class CqMicroPolyGridBase;
-class CqMicroPolyGrid;
 
 //----------------------------------------
-/** \class CqSubdivisionPatch
- * Class which deals with a single subdivision patch.
+/** \class CqWSurf
+ * Subdivision surface GPrim.
  */
 
-class CqSubdivisionPatch : public CqWSurf
+class CqWSurf : public CqSubdivider, public CqBasicSurface
 {
 	public:
-				CqSubdivisionPatch(CqWSurf* pSurf, TqInt iFace);
-	virtual		~CqSubdivisionPatch()	{}
+					CqWSurf() :	CqSubdivider(), CqBasicSurface(),
+								m_pPoints(0)
+										{}
+					CqWSurf(CqPolygonPoints* pVertices)	: CqSubdivider(), CqBasicSurface(),
+								m_pPoints(pVertices)
+										{}
+					CqWSurf(TqInt cExpectedVertices, TqInt cExpectedFaces, CqPolygonPoints* pVertices)	: 
+								CqSubdivider(cExpectedVertices, cExpectedFaces),
+								CqBasicSurface(),
+								m_pPoints(pVertices)
+										{}
+					CqWSurf(CqWSurf* pSurf, TqInt iFace);
+	virtual			~CqWSurf();
 
-		virtual	CqMicroPolyGridBase* Dice();
-		virtual	TqInt		Split(std::vector<CqBasicSurface*>& aSplits);
-		virtual TqBool		Diceable();
+			CqPolygonPoints* pPoints()	{return(m_pPoints);}
+			void		_OutputMesh(char* pname);
+			CqWVert*	TransferVert(CqWSurf* pSurf, TqInt iVert, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
+								 TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
+			CqWVert*	GetpWVert(CqPolygonPoints* pPoints, const CqVector3D& V);
 
-				void		DiceSubdivide();
-							/** Subdivide this patch to a specified level.
-							 * \param Count Integer subdivision count.
-							 */
-				void		DiceSubdivide(TqInt Count)
+	// Overridden from CqBasicSurface
+	virtual	CqBound		Bound() const;
+	virtual	CqMicroPolyGridBase* Dice();
+	virtual	TqInt		Split(std::vector<CqBasicSurface*>& aSplits);
+	virtual TqBool		Diceable();
+	virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
+	virtual	TqUint		cUniform() const{return(m_cExpectedFaces);}
+	virtual	TqUint		cVarying() const{return(m_cExpectedVertices);}
+	virtual	TqUint		cVertex() const	{return(m_cExpectedVertices);}
+
+	// Overridden from CqSubdivider
+	virtual TqInt		Uses() const	{return(CqBasicSurface::Uses());}
+	
+	virtual	void		CreateFacePoints(TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
+	virtual	void		CreateEdgePoints(TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
+	virtual	void		SmoothVertexPoints(TqInt cOldVerts, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
+
+	virtual	TqBool		bHasN() const									{return(m_pPoints->N().Size()>=cVertex());}
+	virtual	TqBool		bHasCs() const									{return(m_pPoints->Cs().Size()>=cVertex());}
+	virtual	TqBool		bHasOs() const									{return(m_pPoints->Os().Size()>=cVertex());}
+	virtual	TqBool		bHass() const									{return(m_pPoints->s().Size()>=cVertex());}
+	virtual	TqBool		bHast() const									{return(m_pPoints->t().Size()>=cVertex());}
+	virtual	TqBool		bHasu() const									{return(m_pPoints->u().Size()>=cVertex());}
+	virtual	TqBool		bHasv() const									{return(m_pPoints->v().Size()>=cVertex());}
+
+	protected:
+		CqPolygonPoints*		m_pPoints;			///> Pointer to the CqSurface class with the surface vertices on.
+};
+
+
+//----------------------------------------
+/** \class CqMotionWSurf
+ * Motion blurrable subdivision surface GPrim.
+ */
+
+class CqMotionWSurf : public CqSubdivider, public CqBasicSurface, public CqMotionSpec<CqPolygonPoints*>
+{
+	public:
+					CqMotionWSurf() :	
+								CqMotionSpec<CqPolygonPoints*>(0),
+								CqSubdivider()
+										{}
+					CqMotionWSurf(CqPolygonPoints* pVertices)	:
+								CqMotionSpec<CqPolygonPoints*>(pVertices),
+								CqSubdivider()
+										{}
+					CqMotionWSurf(TqInt cExpectedVertices, TqInt cExpectedFaces, CqPolygonPoints* pVertices)	: 
+								CqSubdivider(cExpectedVertices, cExpectedFaces),
+								CqMotionSpec<CqPolygonPoints*>(pVertices)
+										{}
+					CqMotionWSurf(CqMotionWSurf* pSurf, TqInt iFace);
+	virtual			~CqMotionWSurf()	{}
+
+			CqWVert*	TransferVert(CqMotionWSurf* pSurf, TqInt iVert, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
+									 TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
+			CqWVert*	GetpWVert(CqPolygonPoints* pPoints, const CqVector3D& V);
+
+	// Overridden from CqBasicSurface
+	virtual	CqBound		Bound() const;
+	virtual	TqInt		Split(std::vector<CqBasicSurface*>& aSplits);
+	virtual	CqMicroPolyGridBase* Dice();
+	virtual TqBool		Diceable();
+	virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx)
 										{
-											while(Count-->0)	DiceSubdivide();
+											TqInt i;
+											for(i=0; i<cTimes(); i++)
+												GetMotionObject(Time(i))->Transform(matTx,matITTx,matRTx);
 										}
-							/** Set the dice level required to achieve the appropriate shading rate.
-							 * \param c Integer dice count.
-							 */
-				void		SetDiceCount(TqInt c)
-										{
-											m_DiceCount=c;
-										}
-				void		StoreDice(TqInt Level, TqInt& iFace, TqInt uOff, TqInt vOff, TqInt cuv, CqMicroPolyGrid* pGrid,
-																 TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-																 TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
-				CqWVert*	AddVert(CqWSurf* pSurf, TqInt iVert, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-																 TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
+	virtual	TqUint		cUniform() const{return(m_cExpectedFaces);}
+	virtual	TqUint		cVarying() const{return(m_cExpectedVertices);}
+	virtual	TqUint		cVertex() const	{return(m_cExpectedVertices);}
 
-	virtual	void		_OutputMesh(FILE* pf, TqInt Subd, char* name, unsigned int col);
-	private:
-		TqInt	m_DiceCount;	///< Integer subdivision count to achieve the appropriate shading rate.
+	// Overridden from CqSubdivider
+	virtual	TqInt		Uses() const			{return(CqBasicSurface::Uses());}
+	virtual	void		CreateFacePoints(TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
+	virtual	void		CreateEdgePoints(TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
+	virtual	void		SmoothVertexPoints(TqInt cOldVerts, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os);
+
+	virtual	TqBool		bHasN() const			{return(GetMotionObject(Time(0))->bHasN());}
+	virtual	TqBool		bHasCs() const			{return(GetMotionObject(Time(0))->bHasCs());}
+	virtual	TqBool		bHasOs() const			{return(GetMotionObject(Time(0))->bHasOs());}
+	virtual	TqBool		bHass() const			{return(GetMotionObject(Time(0))->bHass());}
+	virtual	TqBool		bHast() const			{return(GetMotionObject(Time(0))->bHast());}
+	virtual	TqBool		bHasu() const			{return(GetMotionObject(Time(0))->bHasu());}
+	virtual	TqBool		bHasv() const			{return(GetMotionObject(Time(0))->bHasv());}
+
+	// Overridden from CqMotionSpec
+	virtual	void		ClearMotionObject(CqPolygonPoints*& A) const	{};
+	virtual	CqPolygonPoints* ConcatMotionObjects(CqPolygonPoints* const & A, CqPolygonPoints* const & B) const	{return(A);}
+	virtual	CqPolygonPoints* LinearInterpolateMotionObjects(TqFloat Fraction, CqPolygonPoints* const & A, CqPolygonPoints* const & B) const {return(A);}
 };
 
 

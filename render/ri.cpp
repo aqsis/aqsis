@@ -3158,22 +3158,57 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass=new CqPolygonPoints(cVerts);
 
-	// Create the subdivision structure class.
-	CqWSurf* pSubdivision=new CqWSurf(cVerts,nfaces,pPointsClass);
-	
+	CqWSurf* pSubdivision;
+	CqMotionWSurf* pMotionSubdivision;
+	CqSubdivider* pSubdivider;
+	const CqAttributes* pAttr;
+
+	std::vector<CqPolygonPoints*>	apPoints;
 	// Process any specified primitive variables
-	pPointsClass->SetDefaultPrimitiveVariables(); 
+	pPointsClass->SetDefaultPrimitiveVariables(RI_FALSE); 
 	if(ProcessPrimitiveVariables(pPointsClass,count,tokens,values))
 	{
-		// Transform the points into camera space for processing,
-		pPointsClass->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()),
-								QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()),
-								QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()));
-		
+		// Check if s/t, u/v are needed and not specified, and if so get them from the object space points.
+		pPointsClass->TransferDefaultSurfaceParameters();
+
+		if(QGetRenderContext()->ptransCurrent()->cTimes()<=1)
+		{
+			// Transform the points into camera space for processing,
+			pPointsClass->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()),
+									QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()),
+									QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()));
+
+			// Create the subdivision structure class.
+			pSubdivider=pSubdivision=new CqWSurf(cVerts,nfaces,pPointsClass);
+			pAttr=pSubdivision->pAttributes();
+		}
+		else
+		{
+			// Create the subdivision structure class.
+			pSubdivider=pMotionSubdivision=new CqMotionWSurf(cVerts,nfaces,pPointsClass);
+			pAttr=pMotionSubdivision->pAttributes();
+
+			TqInt i;
+			apPoints.push_back(pPointsClass);
+			for(i=1; i<QGetRenderContext()->ptransCurrent()->cTimes(); i++)
+			{
+				RtFloat time=QGetRenderContext()->ptransCurrent()->Time(i);
+				CqPolygonPoints* pPointsClass2=new CqPolygonPoints(*pPointsClass);
+
+				// Transform the points into camera space for processing,
+				pPointsClass2->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pPointsClass2->pTransform()->matObjectToWorld(time)),
+							 			 QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pPointsClass2->pTransform()->matObjectToWorld(time)),
+										 QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pPointsClass2->pTransform()->matObjectToWorld(time)));
+				apPoints.push_back(pPointsClass2);
+			}
+			pPointsClass->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()),
+							 		QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()),
+									QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()));
+		}		
 		// Intitialise the vertices of the hull
 		int i;
 		for(i=0; i<cVerts; i++)
-			pSubdivision->AddVert(new CqWVert(i));
+			pSubdivider->AddVert(new CqWVert(i));
 		
 		// Add the faces to the hull.
 		std::vector<CqWEdge*> apEdges;
@@ -3195,20 +3230,20 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 
 				if(i<nvertices[face]-1)
 				{
-					CqWEdge* pE=pSubdivision->AddEdge(pSubdivision->pVert(vertices[iP]),pSubdivision->pVert(vertices[iP+1]));
+					CqWEdge* pE=pSubdivider->AddEdge(pSubdivider->pVert(vertices[iP]),pSubdivider->pVert(vertices[iP+1]));
 					if(pE==NULL)
 					{
-						delete(pSubdivision);
+						delete(pSubdivider);
 						return(0);
 					}
 					apEdges.push_back(pE);
 				}
 				else
 				{
-					CqWEdge* pE=pSubdivision->AddEdge(pSubdivision->pVert(vertices[iP]),pSubdivision->pVert(vertices[iPStart]));
+					CqWEdge* pE=pSubdivider->AddEdge(pSubdivider->pVert(vertices[iP]),pSubdivider->pVert(vertices[iPStart]));
 					if(pE==NULL)
 					{
-						delete(pSubdivision);
+						delete(pSubdivider);
 						return(0);
 					}
 					apEdges.push_back(pE);
@@ -3218,21 +3253,37 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 			if(fValid)
 			{
 				// If NULL returned, an error was encountered.
-				if(pSubdivision->AddFace(&apEdges[0],nvertices[face])==0)
+				if(pSubdivider->AddFace(&apEdges[0],nvertices[face])==0)
 				{
-					delete(pSubdivision);
+					delete(pSubdivider);
 					return(0);
 				}
 			}
 			apEdges.clear();
 			iPStart=iP;
 		}
+
+		// Set up points references according to motion details.
 		pPointsClass->Reference();
-		QGetRenderContext()->pImage()->PostSurface(pSubdivision);
-		QGetRenderContext()->Stats().IncGPrims();
+		if(QGetRenderContext()->ptransCurrent()->cTimes()>1)
+		{
+			pMotionSubdivision->AddTimeSlot(QGetRenderContext()->ptransCurrent()->Time(0),pPointsClass);
+
+			for(i=1; i<QGetRenderContext()->ptransCurrent()->cTimes(); i++)
+			{
+				RtFloat time=QGetRenderContext()->ptransCurrent()->Time(i);
+				pMotionSubdivision->AddTimeSlot(time,apPoints[i]);
+				apPoints[i]->Reference();
+			}
+			QGetRenderContext()->pImage()->PostSurface(pMotionSubdivision);
+			QGetRenderContext()->Stats().IncGPrims();
+		}		
+		else
+		{
+			QGetRenderContext()->pImage()->PostSurface(pSubdivision);
+			QGetRenderContext()->Stats().IncGPrims();
+		}
 	}
-	else
-		delete(pSubdivision);
 
 	return(0);
 }
