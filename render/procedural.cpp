@@ -45,7 +45,6 @@
 #include "bdec.h"
 #include "libribtypes.h"
 #include "parserstate.h"
-#include "share.h"
 
 #ifdef AQSIS_SYSTEM_WIN32
 #include <io.h>

@@ -28,8 +28,6 @@
 #include	"file.h"
 #include	"logging.h"
 
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 //---------------------------------------------------------------------
