@@ -39,8 +39,6 @@
 
 START_NAMESPACE( Aqsis )
 
-long CountMemUsage();
-
 
 //---------------------------------------------------------------------
 /** Constructor.

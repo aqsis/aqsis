@@ -24,8 +24,6 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
-#include	<windows.h>
-
 #include	<math.h>
 
 #include	"aqsis.h"
@@ -37,27 +35,6 @@
 #include	"ri.h"
 
 START_NAMESPACE( Aqsis )
-
-
-#ifdef	_DEBUG
-
-inline long CountMemUsage()
-{
-	MEMORY_BASIC_INFORMATION mbi;
-	DWORD      dwMemUsed = 0;
-	PVOID      pvAddress = 0;
-
-	memset(&mbi, 0, sizeof(MEMORY_BASIC_INFORMATION));
-	while(VirtualQuery(pvAddress, &mbi, sizeof(MEMORY_BASIC_INFORMATION)) == sizeof(MEMORY_BASIC_INFORMATION))
-	{
-		if(mbi.State == MEM_COMMIT && mbi.Type == MEM_PRIVATE)
-			dwMemUsed += mbi.RegionSize;
-		pvAddress = ((BYTE*)mbi.BaseAddress) + mbi.RegionSize;
-	} 
-	return dwMemUsed;
-}
-
-#endif // _DEBUG
 
 
 static TqBool IntersectLine( CqVector3D& P1, CqVector3D& T1, CqVector3D& P2, CqVector3D& T2, CqVector3D& P );

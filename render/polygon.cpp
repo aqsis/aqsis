@@ -30,7 +30,7 @@
 
 START_NAMESPACE( Aqsis )
 
-#include	<windows.h>
+/*#include	<windows.h>
 inline long CountMemUsage()
 {
 	MEMORY_BASIC_INFORMATION mbi;
@@ -45,7 +45,7 @@ inline long CountMemUsage()
 		pvAddress = ((BYTE*)mbi.BaseAddress) + mbi.RegionSize;
 	} 
 	return dwMemUsed;
-}
+}*/
 
 
 //---------------------------------------------------------------------
