@@ -394,6 +394,23 @@ class CqStats
 		{
 			return ( m_timeFB );
 		};
+		CqStatTimer& MakeDisplayBucket()
+		{
+			return ( m_timeDB );
+		};
+		CqStatTimer& MakeCombine()
+		{
+			return ( m_timeCombine );
+		};
+		CqStatTimer& MakeParse()
+		{
+			return ( m_timeParse );
+		};
+		CqStatTimer& MakeProject()
+		{
+			return ( m_timeProject );
+		};
+
 
 		//@}
 
@@ -452,6 +469,10 @@ class CqStats
 		CqStatTimer m_timeMakeShadow;			///< Time spent on MakeShadowV call.
 		CqStatTimer m_timeMakeEnv;		    	///< Time spent on MakeCubeEnvironmenV call.
 		CqStatTimer m_timeFB;		    	    ///< Time spent on Filter the Bucket call.
+		CqStatTimer m_timeDB;		    	    ///< Time spent on sending the Bucket information to the display.
+		CqStatTimer m_timeCombine;		    ///< Time spent on combining the bucket subpixels
+		CqStatTimer m_timeParse;		    ///< Time spent on sending the parsing RIB file or Ri Calls
+		CqStatTimer m_timeProject;		    ///< Time spent on sending the Project grids to raster space
 
 }
 ;

@@ -47,6 +47,7 @@ CqLightsource::CqLightsource( IqShader* pShader, TqBool fActive ) :
 
 	// Link into the lightsource stack.
 	Lightsource_stack.LinkFirst( this );
+	m_pShaderExecEnv = new CqShaderExecEnv;
 }
 
 
@@ -82,11 +83,6 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
 	if ( m_pShader )
 	{
 		Uses |= m_pShader->Uses();
-
-		if ( m_pShaderExecEnv )
-			delete( m_pShaderExecEnv );
-	
-		m_pShaderExecEnv = new CqShaderExecEnv;
 		m_pShaderExecEnv->Initialise( uGridRes, vGridRes, 0, m_pShader, Uses );
 	}
 

@@ -19,7 +19,7 @@
 
 
 /** \file
-		\brief Implements RiPoints primitives.
+		\brief Implements CqPoints primitives using regular polygon (first try).
 		\author M. Joron (joron@sympatico.ca)
 */ 
 
@@ -35,7 +35,7 @@
 
 #include	"ri.h"
 
-#include    "polygon.h"
+#include        "polygon.h"
 
 START_NAMESPACE( Aqsis )
 

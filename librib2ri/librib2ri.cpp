@@ -324,7 +324,9 @@ RendermanInterface::RtVoid Engine::RiPolygonV( RtInt nvertices, RtInt count, RtT
 {
 	::RiPolygonV( nvertices, count, tokens, values );
 }
-//RendermanInterface::RtVoid Engine::RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc) { ::RiProcedural(data, bound, refineproc, freeproc); }
+RendermanInterface::RtVoid Engine::RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc) { 
+	::RiProcedural(data, bound, (RtProcSubdivFunc) refineproc, (RtProcFreeFunc) freeproc); 
+}
 RendermanInterface::RtVoid Engine::RiProjectionV( const char * name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
 	::RiProjectionV( name, count, tokens, values );
@@ -441,6 +443,7 @@ RendermanInterface::RtVoid Engine::RiWorldEnd()
 {
 	::RiWorldEnd();
 }
+
 
 }
 ; // namespace librib2ri

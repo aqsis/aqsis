@@ -43,6 +43,9 @@ CqImagersource::CqImagersource( IqShader* pShader, TqBool fActive ) :
 
 	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
 	m_pAttributes->AddRef();
+	
+	m_pShaderExecEnv = new CqShaderExecEnv;
+
 }
 
 
@@ -91,11 +94,6 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 
 	TqInt Uses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi | ( 1 << EnvVars_ncomps ) | ( 1 << EnvVars_time ) | ( 1 << EnvVars_alpha ) );
 
-	/// \note This should delete through the interface that created it.
-	if( NULL != m_pShaderExecEnv )	
-		delete( m_pShaderExecEnv );
-
-	m_pShaderExecEnv = new CqShaderExecEnv;
 	m_pShaderExecEnv->Initialise( uGridRes, vGridRes, 0, m_pShader, Uses );
 
 	// Initialise the geometric parameters in the shader exec env.

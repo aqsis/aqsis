@@ -601,7 +601,7 @@ void CqBucket::FilterBucket()
 {
 	CqImagePixel * pie;
 
-	QGetRenderContext()->Stats().MakeFilterBucket().Start();
+
 	CqColor* pCols = new CqColor[ XSize() * YSize() ];
 	CqColor* pOpacs = new CqColor[ XSize() * YSize() ];
 	TqFloat* pDepths = new TqFloat[ XSize() * YSize() ];
@@ -728,7 +728,7 @@ void CqBucket::FilterBucket()
 	delete[] ( pOpacs );
 	delete[] ( pDepths );
 	delete[](pCoverages);
-	QGetRenderContext()->Stats().MakeFilterBucket().Stop();
+	
 }
 
 
@@ -1629,14 +1629,22 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 	// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
 	if ( m_fQuit ) return ;
 
+	QGetRenderContext()->Stats().MakeCombine().Start();
 	CqBucket::CombineElements();
+	QGetRenderContext()->Stats().MakeCombine().Stop();
+
+	QGetRenderContext()->Stats().MakeFilterBucket().Start();
 
 	Bucket.FilterBucket();
 	Bucket.ExposeBucket();
 	Bucket.QuantizeBucket();
+        
+        QGetRenderContext()->Stats().MakeFilterBucket().Stop();
 
 	BucketComplete( iBucket );
+	QGetRenderContext() ->Stats().MakeDisplayBucket().Start();
 	QGetRenderContext() ->pDDmanager() ->DisplayBucket( &m_aBuckets[ iBucket ] );
+	QGetRenderContext() ->Stats().MakeDisplayBucket().Stop();
 }
 
 

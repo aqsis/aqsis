@@ -90,6 +90,8 @@ CqMicroPolyGrid::CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface ) :
 {
 	QGetRenderContext() ->Stats().IncGridsAllocated();
 	// Initialise the shader execution environment
+	
+	m_pShaderExecEnv = new CqShaderExecEnv;
 	Initialise( cu, cv, pSurface );
 }
 
@@ -116,10 +118,7 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
 	}
 
 	/// \note This should delete through the interface that created it.
-	if( NULL != m_pShaderExecEnv )	
-		delete( m_pShaderExecEnv );
 
-	m_pShaderExecEnv = new CqShaderExecEnv;
 	m_pShaderExecEnv->Initialise( cu, cv, pSurface, pSurface->pAttributes()->pshadSurface(), lUses );
 
 	// Initialise the local/public culled variable.
@@ -436,7 +435,7 @@ void CqMicroPolyGrid::Project()
 {
 	if( NULL == P() )
 		return;
-	
+	QGetRenderContext() ->Stats().MakeProject().Start();
 	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
 	// Transform the whole grid to hybrid camera/raster space
 	TqInt i = 0;
@@ -450,6 +449,7 @@ void CqMicroPolyGrid::Project()
 		P()->SetPoint( vecP, i );
 	}
 	while ( ++i < GridSize() );
+        QGetRenderContext() ->Stats().MakeProject().Stop();
 }
 
 
@@ -576,6 +576,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 
 void CqMotionMicroPolyGrid::Project()
 {
+        QGetRenderContext() ->Stats().MakeProject().Start();
 	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
 	// Transform all grids to hybrid camera/raster space
 	TqInt iTime;
@@ -584,6 +585,7 @@ void CqMotionMicroPolyGrid::Project()
 		CqMicroPolyGrid* pGrid = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
 		pGrid->Project();
 	}
+        QGetRenderContext() ->Stats().MakeProject().Stop();
 }
 
 

@@ -20,7 +20,7 @@
 
 
 /** \file
-		\brief Implements RiPoints 
+		\brief Implements CqPoints using small regular polygon (first try) This is more or less an experimentation with the parser. Later a micropolygon grid will be used to be more efficient to shade/render.
 		\author M. Joron (joron@sympatico.ca)
 */ 
 /*    References:
@@ -100,8 +100,8 @@ CqPoints::CqPoints(TqInt n, TqFloat *origins , TqFloat *sizes, TqFloat constantw
 		}
 		for (j=0; j<NBR_SEGMENTS; j++)
 		{
-			pSurface->Cs() [ j ] = m_pAttributes->GetColorAttribute("system", "Color")[0];
-			pSurface->Os() [ j ] = m_pAttributes->GetColorAttribute("system", "Opacity")[0];
+			pSurface->Cs() [ j ] = m_pAttributes->GetColorAttribute("System", "Color")[0]; //m_pAttributes->colColor();
+			pSurface->Os() [ j ] = m_pAttributes->GetColorAttribute("System", "Opacity")[0];//m_pAttributes->colOpacity();
 		}
 		
         m_pPolygons[i]  = pSurface;

@@ -108,6 +108,10 @@ void CqStats::InitialiseFrame()
 	m_timeMakeShadow.Reset();
 	m_timeMakeEnv.Reset();
 	m_timeFB.Reset();
+	m_timeDB.Reset();
+	m_timeParse.Reset();
+	m_timeProject.Reset();
+	m_timeCombine.Reset();
 
 }
 
@@ -173,6 +177,10 @@ void CqStats::PrintStats( TqInt level ) const
 	TqFloat timeMakeEnv = static_cast<TqFloat>( m_timeMakeEnv.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeTM = static_cast<TqFloat>( m_timeTM.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeFB = static_cast<TqFloat>( m_timeFB.TimeTotal() - m_timeImager.TimeTotal() ) / CLOCKS_PER_SEC;
+	TqFloat timeDB = static_cast<TqFloat>( m_timeDB.TimeTotal()) / CLOCKS_PER_SEC;
+	TqFloat timeParse = static_cast<TqFloat>( m_timeParse.TimeTotal()) / CLOCKS_PER_SEC;
+	TqFloat timeProject = static_cast<TqFloat>( m_timeProject.TimeTotal()) / CLOCKS_PER_SEC;
+	TqFloat timeCombine = static_cast<TqFloat>( m_timeCombine.TimeTotal()) / CLOCKS_PER_SEC;
 
 	//! level >= 0 
 	MSG << "Total render time   : ";
@@ -180,7 +188,7 @@ void CqStats::PrintStats( TqInt level ) const
 	MSG << "Last frame          : ";
 	TimeToString( MSG, m_timeTotalFrame ) << std::endl;
 
-	if ( level >= 1 )
+	if (level >= 1)
 	{
 		MSG << "Imager shading      : ";
 		TimeToString( MSG, timeImager ) << " (" << 100.0f * timeImager / m_timeTotalFrame << "%)" << std::endl;
@@ -201,11 +209,12 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "Diceable check      : ";
 		TimeToString( MSG, timeDiceable ) << " (" << 100.0f * timeDiceable / m_timeTotalFrame << "%)" << std::endl;
 		MSG << "Textures            : " << m_cTextureMemory << " bytes used." << std::endl;
-		MSG << std::endl;
-	}
 
+		MSG << std::endl;
+
+	} 
 	//! Most important informations
-	if ( level == 2 )
+	if (level == 2)
 	{
 		MSG << "GPrims: \t" << m_cGPrims << std::endl;
 		MSG << "Total GPrims:\t" << m_cTotalGPrims << " (" << m_cCulledGPrims << " culled)"<< std::endl;
@@ -232,9 +241,8 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "SampleTexture check:\t"; TimeToString( MSG, timeTM ) << " (" << 100.0f * timeTM / m_timeTotalFrame << "%)" << std::endl;
 		MSG << "FilterBucket check:\t"; TimeToString( MSG, timeFB ) << " (" << 100.0f * timeFB / m_timeTotalFrame << "%)" << std::endl;
 
-	}
-
-	if ( level == 3 )
+	} 
+	if (level == 3)
 	{
 		MSG << "GPrims: \t" << m_cGPrims << std::endl;
 		MSG << "Total GPrims:\t" << m_cTotalGPrims << " (" << m_cCulledGPrims << " culled)" << std::endl;
@@ -277,10 +285,13 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "MakeShadow  check: \t"; TimeToString( MSG, timeMakeShadow ) << " (" << 100.0f * timeMakeShadow / m_timeTotalFrame << "%)" << std::endl;
 		MSG << "MakeCubeEnv check: \t"; TimeToString( MSG, timeMakeEnv ) << " (" << 100.0f * timeMakeEnv / m_timeTotalFrame << "%)" << std::endl;
 		MSG << "SampleTexture check:\t"; TimeToString( MSG, timeTM ) << " (" << 100.0f * timeTM / m_timeTotalFrame << "%)" << std::endl;
-		MSG << "FilterBucket check:\t"; TimeToString( MSG, timeFB ) << " (" << 100.0f * timeFB / m_timeTotalFrame << "%)" << std::endl;
-
+		MSG << "Combine check:\t"; TimeToString( MSG, timeCombine ) << " (" << 100.0f * timeCombine / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "DisplayBucket check:\t"; TimeToString( MSG, timeDB ) << " (" << 100.0f * timeDB / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "Parsing check:\t"; TimeToString( MSG, timeParse ) << " (" << 100.0f * timeParse / m_timeTotalFrame << "%)" << std::endl;
+		MSG << "Project check:\t"; TimeToString( MSG, timeProject ) << " (" << 100.0f * timeProject / m_timeTotalFrame << "%)" << std::endl;
 	}
-
+		
+	
 	MSG << std::ends;
 
 	CqString strMSG( MSG.str() );

@@ -429,8 +429,11 @@ static CqVector3D Patch07[ 13*2 ] = { /*u=13 v=2 */
 CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 {
 	int i;
+	TqInt lUses;
 	CqSurfacePatchMeshBicubic* pSurface = new CqSurfacePatchMeshBicubic( 13, 10, RI_TRUE, RI_TRUE );
+	lUses = pSurface->Uses();
 	pSurface->AddRef();
+        
 
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
@@ -452,7 +455,9 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 	this->pPatchMeshBicubic[ 0 ] = pSurface;
 
 	pSurface = new CqSurfacePatchMeshBicubic( 13, 7, RI_TRUE, RI_TRUE );
+	lUses = pSurface->Uses();
 	pSurface->AddRef();
+        
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
 	pSurface->P().SetSize( 13 * 7 );
@@ -471,7 +476,9 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 	this->pPatchMeshBicubic[ 1 ] = pSurface;
 
 	pSurface = new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE );
+	lUses = pSurface->Uses();
 	pSurface->AddRef();
+        
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
 	pSurface->P().SetSize( 4 * 7 );
@@ -490,7 +497,9 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 	this->pPatchMeshBicubic[ 2 ] = pSurface;
 
 	pSurface = new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE );
+	lUses = pSurface->Uses();
 	pSurface->AddRef();
+        
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
 	pSurface->P().SetSize( 4 * 7 );
@@ -509,7 +518,9 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 	this->pPatchMeshBicubic[ 3 ] = pSurface;
 
 	pSurface = new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE );
+	lUses = pSurface->Uses();
 	pSurface->AddRef();
+        
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
 	pSurface->P().SetSize( 4 * 7 );
@@ -528,7 +539,9 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 	this->pPatchMeshBicubic[ 4 ] = pSurface;
 
 	pSurface = new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE );
+	lUses = pSurface->Uses();
 	pSurface->AddRef();
+        
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
 	pSurface->P().SetSize( 4 * 7 );
@@ -550,7 +563,9 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 	if ( m_CrowBase )
 	{
 		pSurface = new CqSurfacePatchMeshBicubic( 13, 4, RI_TRUE, RI_TRUE );
+		lUses = pSurface->Uses();
 		pSurface->AddRef();
+                
 		// Fill in default values for all primitive variables not explicitly specified.
 		// Fill in primitive variables specified.
 		pSurface->P().SetSize( 13 * 4 );

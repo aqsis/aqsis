@@ -121,7 +121,7 @@ class RendermanInterface
 		virtual	RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiPolygonV( RtInt nvertices, RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
-		//	virtual	RtVoid	RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc) = 0;
+		virtual	RtVoid	RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc) = 0;
 		virtual	RtVoid	RiProjectionV( const char * name, RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude ) = 0;
 		virtual	RtVoid	RiRelativeDetail( RtFloat relativedetail ) = 0;
@@ -151,6 +151,7 @@ class RendermanInterface
 		virtual	RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[] ) = 0;
 		virtual	RtVoid	RiWorldBegin() = 0;
 		virtual	RtVoid	RiWorldEnd() = 0;
+		
 };
 
 }
@@ -165,5 +166,11 @@ extern "C" RtFloat RiDiskFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat y
 extern "C" RtFloat RiGaussianFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
 extern "C" RtFloat RiSincFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
 extern "C" RtFloat RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth );
+
+typedef	librib::RendermanInterface::RtVoid RtVoid;
+typedef	librib::RendermanInterface::RtPointer RtPointer;
+extern "C" RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail );
+extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail );
+extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail );
 
 #endif // LIBRIB_H

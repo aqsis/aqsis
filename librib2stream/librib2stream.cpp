@@ -301,6 +301,12 @@ RendermanInterface::RtVoid Stream::RiPixelVariance( RtFloat variance )
 {
 	m_Stream << "RiPixelVariance()" << std::endl;
 }
+
+RendermanInterface::RtVoid Stream::RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc)
+{
+	m_Stream << "RiProcedural()" << std::endl;
+}
+
 RendermanInterface::RtVoid Stream::RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap,
 						   RtInt n, RtToken tokens[], RtPointer values[])
 {
@@ -322,7 +328,7 @@ RendermanInterface::RtVoid Stream::RiPolygonV( RtInt nvertices, RtInt count, RtT
 {
 	m_Stream << "RiPolygonV(" << nvertices << ", " << count << ")" << std::endl;
 }
-//	RtVoid Stream::RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc) { m_Stream << "RiProcedural()" << std::endl; }
+
 RendermanInterface::RtVoid Stream::RiProjectionV( const char * name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
 	m_Stream << "RiProjectionV()" << std::endl;

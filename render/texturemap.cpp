@@ -36,6 +36,7 @@
 #include	"version.h"
 
 #include	"renderer.h"
+#include	"plugins.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -83,6 +84,7 @@ TqFloat	CqShadowMap::m_aRand_no[ 256 ];
  */
 
 std::vector<CqTextureMap*>	CqTextureMap::m_TextureMap_Cache;
+std::vector<CqString*>      CqTextureMap::m_ConvertString_Cache;
 
 #undef ALLOCSEGMENTSTATUS
 
@@ -174,6 +176,19 @@ CqTextureMap::~CqTextureMap()
 			break;
 		}
 	}
+
+        std::vector<CqString*>::iterator j;
+	for ( j = m_ConvertString_Cache.begin(); j != m_ConvertString_Cache.end(); j++ )
+	{
+		if (j) 
+		{
+			unlink((*j)->c_str() );
+			delete( *j );
+		}
+	}
+   
+	m_ConvertString_Cache.resize(0);
+
 	// Delete any held cache buffer segments.
 	std::vector<CqTextureMapBuffer*>::iterator s;
 	for ( s = m_apSegments.begin(); s != m_apSegments.end(); s++ )
@@ -193,13 +208,6 @@ CqTextureMap::~CqTextureMap()
 #endif
 }
 
-#ifndef AQSIS_SYSTEM_WIN32
-#ifndef AQSIS_SYSTEM_MACOSX
-#ifndef AQSIS_SYSTEM_BEOS
-#include <dlfcn.h>                /* dlopen() */
-#endif
-#endif
-#endif
 
 //--------------------------------------------------------------------------
 /** Support for plugins mainly converter from any bitmap format to .tif file.
@@ -209,13 +217,14 @@ TqInt CqTextureMap::Convert( CqString &strName )
 {
 	TqInt result = 0;
 	TqInt lenght = 0;
-
-	void *handle = NULL;
-	TqPchar ( *function_pt ) ( TqPchar ) = NULL;
-	TqChar dynamiclibrary[ 1024 ];
-	TqChar dynamicfunction[ 1024 ];
-	char *convert = NULL;
+    TqChar library[ 1024 ];
+	TqChar function[ 1024 ];
+	char * (*convert)(char *);
 	char *ext = NULL;
+	char *tiff = NULL;
+
+	convert = NULL;
+
 	char *aqsis_home = getenv( "AQSIS_BASE_PATH" );
 
 	if ( aqsis_home == NULL ) return 0;
@@ -239,70 +248,30 @@ TqInt CqTextureMap::Convert( CqString &strName )
 		return 0;
 	}
 
-	sprintf( dynamicfunction, "%s2tif", ext );
-
-
+	sprintf( function, "%s2tif", ext );
 #ifdef AQSIS_SYSTEM_WIN32
-
 	/*********************************/
 	/* Get the dynamic library on NT */
 	/*********************************/
-	sprintf( dynamiclibrary, "%s\\procedures\\%s.dll", aqsis_home, dynamicfunction );
-
-	/* dll was never loaded before */
-	if ( !handle )
-		handle = LoadLibrary( dynamiclibrary );
-	if ( handle )
-	{
-		function_pt = ( TqPchar ( * ) ( TqPchar ) ) GetProcAddress( ( HINSTANCE ) handle, dynamicfunction );
-	}
-#elif defined(AQSIS_SYSTEM_MACOSX)
-	// We probably need an interface for CFPlugins here
-	// But for now, we will not implement plugins
-	function_pt = NULL;
-#elif defined(AQSIS_SYSTEM_BEOS)
-	// We probably need an interface for CFPlugins here
-	// But for now, we will not implement plugins
-	function_pt = NULL;
+	sprintf( library, "%s\\procedures\\%s.dll", aqsis_home, function );
 #else
-
 	/***********************************/
 	/* Get the shared library on UNIX  */
 	/***********************************/
-	sprintf( dynamiclibrary, "%s/lib/lib%s.so", aqsis_home, dynamicfunction );
-
-	/* so was never loaded before */
-	if ( !handle )
-		handle = dlopen( dynamiclibrary, RTLD_LAZY );
-	if ( handle )
-	{
-		function_pt = ( TqPchar ( * ) ( TqPchar ) ) dlsym( handle, dynamicfunction );
-	}
-
+	sprintf( library, "%s/lib/lib%s.so", aqsis_home, function );
 #endif
-
-	if ( function_pt )
+    CqPlugins *plug = new CqPlugins("", library, function);
+	if (( convert =  (char * (*) (char *s)) plug->Function() ) != NULL)
 	{
-		convert = ( TqPchar ) ( *function_pt ) ( ( TqPchar ) strName.c_str() );
-		if ( convert )
+		
+		if ( (tiff = (*convert)((char *) strName.c_str() )) != NULL)
 		{
-			strName = convert;
+			strName = tiff;
 			result = 1; // success
 		}
-
-#ifdef AQSIS_SYSTEM_WIN32
-
-		FreeLibrary( ( HINSTANCE ) handle );
-#elif defined(AQSIS_SYSTEM_MACOSX)
-		// Do nothing for now
-#elif defined(AQSIS_SYSTEM_BEOS)
-		// Do nothing for now
-#else
-		dlclose( handle );
-#endif
-
+        plug->Close();
 	}
-
+	delete plug;
 	return result;
 }
 
@@ -333,6 +302,11 @@ void CqTextureMap::Open()
 
 	// Now try to converted first to tif file
 	wasconverted = Convert( strRealName );
+	if (wasconverted)
+	{
+            CqString *strnew = new CqString(strRealName);
+            m_ConvertString_Cache.push_back( strnew );
+        }
 
 	// Now open it as a tiff file.
 	m_pImage = TIFFOpen( strRealName.c_str(), "r" );
@@ -513,7 +487,7 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 	m_TextureMap_Cache.push_back( pNew );
 	pNew->Open();
 
-	TqPchar ptexfmt;
+	TqPchar ptexfmt= 0;
 
 	// Invalid if the m_pImage is not there or it is not cube or latlong env. map file
 	if ( pNew->m_pImage == 0 ||
@@ -526,10 +500,11 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 		pNew->SetInvalid();
 		delete pNew;
 		pNew = NULL;
+		
 	}
 
 	// remove from the list a LatLong env. map since in shadeops.cpp we will cope with it.
-	if ( strcmp( ptexfmt, LATLONG_HEADER ) == 0 )
+	if ( ptexfmt && strcmp( ptexfmt, LATLONG_HEADER ) == 0 )
 	{
 		pNew->SetInvalid();
 		delete pNew;
@@ -1867,13 +1842,10 @@ void CqShadowMap::SaveShadowMap( const CqString& strShadowName )
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, matWorldToScreen );
 			TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
 			TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
-			TIFFSetField(pshadow,TIFFTAG_COMPRESSION, m_compression );
-			//if (m_compression == COMPRESSION_JPEG)
-			//	TIFFSetField(pshadow,TIFFTAG_JPEGQUALITY, m_quality);
 
 			// Write the floating point image to the directory.
 			TqFloat *depths = ( TqFloat * ) m_apSegments[ 0 ] ->pBufferData();
-			WriteTileImage( pshadow, depths, XRes(), YRes(), 32, 32, 1, m_compression, m_quality );
+			WriteTileImage( pshadow, depths, XRes(), YRes(), 32, 32, 1, m_Compression, m_Quality );
 			TIFFClose( pshadow );
 		}
 	}
@@ -1935,8 +1907,8 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
 	TIFFSetField( ptex, TIFFTAG_TILEWIDTH, twidth );
 	TIFFSetField( ptex, TIFFTAG_TILELENGTH, tlength );
 	TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
-
 	TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression );
+
 
 	TqInt tsize = twidth * tlength;
 	TqInt tperrow = ( width + twidth - 1 ) / twidth;
@@ -1966,7 +1938,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
 				}
 				ptdata += ( width * samples );
 			}
-			TIFFWriteTile( ptex, ptile, x, y, 0, 0 );
+			TIFFWriteTile( ptex, ptile, x, y, 0, 0);
 		}
 		TIFFWriteDirectory( ptex );
 
@@ -1996,13 +1968,9 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlo
 	TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, samples );
 	TIFFSetField( ptex, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
 	TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
-	TIFFSetField( ptex, TIFFTAG_COMPRESSION, COMPRESSION_PACKBITS ); /* COMPRESSION_DEFLATE */
+	TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression ); /* COMPRESSION_DEFLATE */
 	TIFFSetField( ptex, TIFFTAG_ROWSPERSTRIP, 1 );
 	TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
-
-	TIFFSetField( ptex,TIFFTAG_COMPRESSION, compression );
-	//if (compression == COMPRESSION_JPEG)
-	//	TIFFGetField( ptex, TIFFTAG_JPEGQUALITY, quality );
 
 	TqFloat *pdata = raster;
 	for ( TqUlong i = 0; i < length; i++ )
@@ -2017,7 +1985,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlo
  * as unsigned char values
  */
 
-void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
+void CqTextureMap::WriteTileImage( TIFF* ptex, unsigned char *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality )
 {
 	TqChar version[ 80 ];
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
@@ -2035,10 +2003,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, T
 	TIFFSetField( ptex, TIFFTAG_TILEWIDTH, twidth );
 	TIFFSetField( ptex, TIFFTAG_TILELENGTH, tlength );
 	TIFFSetField( ptex, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_UINT );
-
-	//if (compression != COMPRESSION_NONE)
 	TIFFSetField( ptex, TIFFTAG_COMPRESSION, compression );
-
 	TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 
 	TqInt tsize = twidth * tlength;
@@ -2080,7 +2045,8 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, T
  * as unsigned char values
  */
 
-void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
+
+void CqTextureMap::WriteImage( TIFF* ptex, unsigned char *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality )
 {
 	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );
