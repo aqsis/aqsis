@@ -1,4 +1,4 @@
-MAINDIRS = all images libargparse libaqsistypes libcodegenvm libdd libddmsimple libddmsock filebuffer librib2 librib2ri librib2stream libslparse libshadervm libshaderexecenv render ribfiles shadowmap slpp aqsl shaders libri2rib libslxargs teqser aqsis aqsltell 
+MAINDIRS = all images libargparse libaqsistypes libcodegenvm libdd libddmsimple libddmsock filebuffer librib2 librib2ri librib2stream libslparse libshadervm libshaderexecenv render ribfiles shadowmap slpp aqsl shaders libri2rib libslxargs teqser aqsis aqsltell dsotest
 
 if OPENGL
 GLUTDIRS = framebuffer_glut framebuffer_glut_z
@@ -14,7 +14,7 @@ endif
 
 SUBDIRS = $(MAINDIRS) $(GLUTDIRS) $(PLUGINSDIRS)
 
-EXTRA_DIST = Doxyfile Renderer.dsw bootstrap prep_install.bat ribber.cfg ddmsock.ini 
+EXTRA_DIST = Doxyfile Renderer.dsw bootstrap prep_install.bat ribber.cfg ddmsock.ini doxygen.dsp
 
 .PHONY: test
 test:

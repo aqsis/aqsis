@@ -132,5 +132,6 @@ libslxargs/Makefile \
 libshadervm/Makefile \
 libshaderexecenv/Makefile \
 libargparse/Makefile \
+dsotest/Makefile \
 Makefile )
 
