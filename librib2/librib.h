@@ -179,4 +179,11 @@ extern "C" RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail );
 extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail );
 extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail );
 
+typedef	librib::RendermanInterface::RtBasis RtBasis;
+extern "C" RtBasis RiBezierBasis;
+extern "C" RtBasis RiBSplineBasis;
+extern "C" RtBasis RiCatmullRomBasis;
+extern "C" RtBasis RiHermiteBasis;
+extern "C" RtBasis RiPowerBasis;
+
 #endif // LIBRIB_H
