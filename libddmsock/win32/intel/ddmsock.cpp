@@ -258,7 +258,7 @@ TqInt CqDDManager::DisplayBucket(IqBucket* pBucket)
 		TqInt		elementsize=samples*sizeof(TqFloat);
 		TqInt		datalen=xsize*ysize*elementsize;
 
-		TqFloat*	pData=new TqFloat[xsize*ysize*samples];f
+		TqFloat*	pData=new TqFloat[xsize*ysize*samples];
 
 		TqInt		linelen=xsize*samples;
 

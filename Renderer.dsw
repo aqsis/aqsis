@@ -80,6 +80,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name libddmsock
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -163,6 +166,10 @@ Project: "filebuffer"=.\filebuffer\filebuffer.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    filebuffer
+    .\filebuffer
+    end source code control
 }}}
 
 Package=<4>
@@ -197,6 +204,10 @@ Project: "libdd"=.\libdd\libdd.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    libdd
+    .\libdd
+    end source code control
 }}}
 
 Package=<4>
@@ -209,6 +220,10 @@ Project: "libddmsock"=.\libddmsock\win32\intel\libddmsock.dsp - Package Owner=<4
 
 Package=<5>
 {{{
+    begin source code control
+    libddmsock
+    .\libddmsock
+    end source code control
 }}}
 
 Package=<4>
