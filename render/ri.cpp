@@ -2124,7 +2124,7 @@ RtVoid	RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep)
 
 	// A good parser will use the Ri*Basis pointers so a quick comparison
 	//   can be done.
-	//if ( ubasis same as before )
+	//if ( ubasis not same as before )
 	//{
 	//	// Save off the newly given basis.
 	//

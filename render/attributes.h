@@ -419,7 +419,9 @@ class CqGeometricAttributes
 						m_fDetailRangeUpperTransition,		///< the detail range upper transition distance. 
 						m_fDetailRangeMaxVisible;			///< the detail range maximum visible distance.
 			CqMatrix	m_matuBasis,						///< the basis matrix for the u direction.
-						m_matvBasis;						///< the basis matrix for the v direction.
+						m_matvBasis,						///< the basis matrix for the v direction.
+						m_matInvBezvBasis,					///< the inverse Bezier * m_matvBasis.
+						m_matTransInvBezuBasis;				///< the transpose of inverse bezier * m_matuBasis.
 			TqInt		m_uSteps,							///< the steps to advance the evaluation window in the u direction. 
 						m_vSteps;							///< the steps to advance the evaluation window in the v direction.
 			EqOrientation m_eOrientation;					///< the orientation associated primitives are described in.
