@@ -172,6 +172,7 @@ RtVoid PrintProgress( RtFloat percent )
 	while ( strOutput.pcount() < 79 )
 		strOutput << " ";
 	std::cout << std::string( strOutput.str(), strOutput.pcount() ).c_str() << "\r";
+	strOutput.freeze(false);
 	std:: cout << std::flush;
 }
 

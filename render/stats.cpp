@@ -341,6 +341,7 @@ void CqStats::PrintStats( TqInt level ) const
 	MSG << std::ends;
 
 	CqString strMSG( MSG.str() );
+	MSG.freeze(false);
 	CqBasicError( 0, Severity_Normal, strMSG.c_str() );
 }
 

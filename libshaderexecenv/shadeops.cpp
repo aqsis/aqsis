@@ -2773,7 +2773,8 @@ STD_SOIMPL CqShaderExecEnv::SO_ambient( DEFPARAMIMPL )
 				// Now Combine the color of all ambient lightsources.
 				GETCOLOR( Result );
 				CqColor colCl;
-				lp->Cl() ->GetColor( colCl, __iGrid );
+				if(NULL != lp->Cl())
+					lp->Cl() ->GetColor( colCl, __iGrid );
 				SETCOLOR( Result, COLOR( Result ) + colCl );
 
 				END_VARYING_SECTION
