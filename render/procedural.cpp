@@ -157,9 +157,9 @@ class CqRiProceduralPlugin : CqPluginBase
 
 	        if ( !fileDSO.IsValid() )
 		{
-			m_Error = CqString( "Cannot find Procedural DSO for " )
+			m_Error = CqString( "Cannot find Procedural DSO for \"" )
 			 + strDSOName 
-			 + CqString (" in current searchpath");
+			 + CqString ("\" in current searchpath");
 
 			return;
 		}
@@ -423,7 +423,7 @@ BOOL CreateChildProcess( char* command)
    
 	if (bFuncRetn == 0) 
 	{
-		QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram - CreateProcess failed" );
+		QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram: CreateProcess failed" );
 		return 0;
 	} 
 	else 
@@ -478,7 +478,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 		if (! CreatePipe(&hChildStdoutRd, &hChildStdoutWr, &saAttr, 0)) 
 		{
-			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram - Stdout pipe creation failed" );
+			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram: Stdout pipe creation failed" );
 			return;
 		}
 
@@ -486,7 +486,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 		if (! SetStdHandle(STD_OUTPUT_HANDLE, hChildStdoutWr)) 
 		{
-			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram - Redirecting STDOUT failed" );
+			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram: Redirecting STDOUT failed" );
 			return;
 		}
 
@@ -499,7 +499,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 								   DUPLICATE_SAME_ACCESS);
 		if( !fSuccess )
 		{
-			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram - DuplicateHandle failed" );
+			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram: DuplicateHandle failed" );
 			return;
 		}
 		CloseHandle(hChildStdoutRd);
@@ -520,7 +520,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 		if (! CreatePipe(&hChildStdinRd, &hChildStdinWr, &saAttr, 0)) 
 		{
-			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram - Stdin pipe creation failed" );
+			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram: Stdin pipe creation failed" );
 			return;
 		} 
 
@@ -528,7 +528,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 		if (! SetStdHandle(STD_INPUT_HANDLE, hChildStdinRd)) 
 		{
-			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram - Redirecting Stdin failed" );
+			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram: Redirecting Stdin failed" );
 			return; 
 		}
 
@@ -540,7 +540,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 								   DUPLICATE_SAME_ACCESS); 
 		if (! fSuccess) 
 		{
-			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram - DuplicateHandle failed" );
+			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram: DuplicateHandle failed" );
 			return; 
 		}
 
@@ -552,7 +552,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		fSuccess = CreateChildProcess(((char**)data)[0]);
 		if (! fSuccess) 
 		{
-			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram - Create process failed" );
+			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram: Create process failed" );
 			return; 
 		}
 
@@ -560,13 +560,13 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 
 		if (! SetStdHandle(STD_INPUT_HANDLE, hSaveStdin)) 
 		{
-			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram - Re-redirecting Stdin failed" );
+			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram: Re-redirecting Stdin failed" );
 			return; 
 		}
 
 		if (! SetStdHandle(STD_OUTPUT_HANDLE, hSaveStdout)) 
 		{
-			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram - Re-redirecting Stdout failed" );
+			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram: Re-redirecting Stdout failed" );
 			return; 
 		}
 		// Store the handles.
