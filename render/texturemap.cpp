@@ -1031,10 +1031,18 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 		if( paramMap.find("twidth") != paramMap.end() )
 			paramMap["twidth"]->GetFloat( ptwidth );
 	}
-	if( paramMap.find("sblur") != paramMap.end() )
-		paramMap["sblur"]->GetFloat( sblur );
-	if( paramMap.find("tblur") != paramMap.end() )
-		paramMap["tblur"]->GetFloat( tblur );
+	if( paramMap.find("blur") != paramMap.end() )
+	{
+		paramMap["blur"]->GetFloat( sblur );
+		tblur = sblur;
+	}
+	else
+	{
+		if( paramMap.find("sblur") != paramMap.end() )
+			paramMap["sblur"]->GetFloat( sblur );
+		if( paramMap.find("tblur") != paramMap.end() )
+			paramMap["tblur"]->GetFloat( tblur );
+	}
 	
 	swidth *= pswidth;
 	twidth *= ptwidth;
@@ -1831,10 +1839,18 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	TqFloat samples = 0.0f;
 
 	// Get parameters out of the map.
-	if( paramMap.find("sblur") != paramMap.end() )
-		paramMap["sblur"]->GetFloat( sblur );
-	if( paramMap.find("tblur") != paramMap.end() )
-		paramMap["tblur"]->GetFloat( tblur );
+	if( paramMap.find("blur") != paramMap.end() )
+	{
+		paramMap["blur"]->GetFloat( sblur );
+		tblur = sblur;
+	}
+	else
+	{
+		if( paramMap.find("sblur") != paramMap.end() )
+			paramMap["sblur"]->GetFloat( sblur );
+		if( paramMap.find("tblur") != paramMap.end() )
+			paramMap["tblur"]->GetFloat( tblur );
+	}
 	if( paramMap.find("samples") != paramMap.end() )
 		paramMap["samples"]->GetFloat( samples );
 
