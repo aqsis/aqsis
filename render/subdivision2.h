@@ -85,57 +85,102 @@ public:
 					
 					if(pParam->Class() == class_vertex)
 					{
-						// Vertex point is...
-						//    Q     2R     S(n-3)
-						//   --- + ---- + --------
-						//    n      n        n
-						// 
-						// Q = Average of face points surrounding old vertex
-						// R = average of midpoints of edges surrounding old vertex
-						// S = old vertex
-						// n = number of edges sharing the old vertex.
-
-						std::vector<CqLath*> aQve;
-						pVertex->Qve( aQve );
-						n = aQve.size();
-
-						// Get the face points of the surrounding faces
-						std::vector<CqLath*> aQvf;
-						pVertex->Qvf( aQvf );
-						std::vector<CqLath*>::iterator iF;
-						for( iF = aQvf.begin(); iF != aQvf.end(); iF++ )
+						// Determine if we have a boundary vertex.
+						if( ( NULL != pVertex->cv() ) && ( NULL != pVertex->ccv() ) )
 						{
-							std::vector<CqLath*> aQfv;
-							(*iF)->Qfv(aQfv);
-							std::vector<CqLath*>::iterator iV;
-							TypeA Val = TypeA(0.0f);
-							for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
-								Val += pParam->pValue( (*iV)->VertexIndex() )[0];
-							Val /= static_cast<TqFloat>( aQfv.size() );
-							Q += Val;
-						}
-						Q /= aQvf.size();
-						Q /= n;
-						
-						// Get the midpoints of the surrounding edges
-						TypeA A = pParam->pValue( pVertex->VertexIndex() )[0];
-						TypeA B = TypeA(0.0f);
-						std::vector<CqLath*>::iterator iE;
-						for( iE = aQve.begin(); iE != aQve.end(); iE++ )
-						{
-							B = pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
-							R += (A+B)/2.0f;
-						}
-						R *= 2.0f;
-						R /= n;
-						R /= n;
+							// Smooth
+							// Vertex point is...
+							//    Q     2R     S(n-3)
+							//   --- + ---- + --------
+							//    n      n        n
+							// 
+							// Q = Average of face points surrounding old vertex
+							// R = average of midpoints of edges surrounding old vertex
+							// S = old vertex
+							// n = number of edges sharing the old vertex.
 
-						// Get the current vertex;
-						S = pParam->pValue( pVertex->VertexIndex() )[0];
-						S *= static_cast<TqFloat>(n-3);
-						S /= n;
-						
-						pParam->pValue( iIndex )[0] = Q+R+S;
+							std::vector<CqLath*> aQve;
+							pVertex->Qve( aQve );
+							n = aQve.size();
+
+							// Get the face points of the surrounding faces
+							std::vector<CqLath*> aQvf;
+							pVertex->Qvf( aQvf );
+							std::vector<CqLath*>::iterator iF;
+							for( iF = aQvf.begin(); iF != aQvf.end(); iF++ )
+							{
+								std::vector<CqLath*> aQfv;
+								(*iF)->Qfv(aQfv);
+								std::vector<CqLath*>::iterator iV;
+								TypeA Val = TypeA(0.0f);
+								for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
+									Val += pParam->pValue( (*iV)->VertexIndex() )[0];
+								Val /= static_cast<TqFloat>( aQfv.size() );
+								Q += Val;
+							}
+							Q /= aQvf.size();
+							Q /= n;
+							
+							// Get the midpoints of the surrounding edges
+							TypeA A = pParam->pValue( pVertex->VertexIndex() )[0];
+							TypeA B = TypeA(0.0f);
+							std::vector<CqLath*>::iterator iE;
+							for( iE = aQve.begin(); iE != aQve.end(); iE++ )
+							{
+								B = pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
+								R += (A+B)/2.0f;
+							}
+							R *= 2.0f;
+							R /= n;
+							R /= n;
+
+							// Get the current vertex;
+							S = pParam->pValue( pVertex->VertexIndex() )[0];
+							S *= static_cast<TqFloat>(n-3);
+							S /= n;
+							
+							pParam->pValue( iIndex )[0] = Q+R+S;
+						}
+						else
+						{
+							// The vertex is on a boundary.
+							std::vector<CqLath*> apQve;
+							pVertex->Qve(apQve);							
+							// Is the valence == 2 ?
+							if( apQve.size() == 2 )
+							{
+								// Yes, boundary with valence 2 is corner.
+								pParam->pValue( iIndex )[0] = pParam->pValue( pVertex->VertexIndex() )[0];
+							}
+							else
+							{
+								// No, boundary is average of two adjacent boundary edges, and original point.
+								// Get the midpoints of the adjacent boundary edges
+								std::vector<CqLath*> aQve;
+								pVertex->Qve( aQve );
+
+								TypeA A = pParam->pValue( pVertex->VertexIndex() )[0];
+								TypeA B = TypeA(0.0f);
+								TqInt cBoundaryEdges = 0;
+								std::vector<CqLath*>::iterator iE;
+								for( iE = aQve.begin(); iE != aQve.end(); iE++ )
+								{
+									// Only consider the boundary edges.
+									if( NULL == (*iE)->ec() )
+									{
+										B = pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
+										R += (A+B)/2.0f;
+										cBoundaryEdges++;
+									}
+								}
+								assert( cBoundaryEdges == 2 );
+								R *= 0.5f;
+								
+								// Get the current vertex;
+								S = pParam->pValue( pVertex->VertexIndex() )[0];
+								pParam->pValue( iIndex )[0] = ( R+S ) * 0.5f;;
+							}
+						}
 					}
 					else
 					{
@@ -149,8 +194,8 @@ public:
 					TypeA A = TypeA(0.0f);
 					TypeA B = TypeA(0.0f);
 					TypeA C = TypeA(0.0f);
-					
-					if(pParam->Class() == class_vertex)
+
+					if(pParam->Class() == class_vertex && ( NULL != pEdge->ec() ) )
 					{
 						// Edge point is the average of the centrepoint of the original edge and the
 						// average of the two new face points of the adjacent faces.
@@ -199,7 +244,7 @@ public:
 				}
 
 	void		OutputMesh(const char* fname, std::vector<CqLath*>* paFaces = 0);
-	void		OutputInfo(const char* fname);
+	void		OutputInfo(const char* fname, std::vector<CqLath*>* paFaces = 0);
 private:
 	///	Declared private to prevent copying.
 	CqSubdivision2(const CqSubdivision2&);

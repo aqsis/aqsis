@@ -633,8 +633,21 @@ void CqSubdivision2::SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFac
 		do
 		{
 			pNextV->SetpChildVertex(pLathA);
-			pNextV = pNextV->pClockwiseVertex();
+			pNextV = pNextV->cv();
 		}while( pNextV && pNextV != aQfv[i]);
+		// Make sure that if we have hit a boundary, we go backwards from the start point until we hit the boundary that
+		// way as well.
+		if(NULL == pNextV)
+		{
+			pNextV = aQfv[i]->ccv();
+			// We know we are going to hit a boundary in this direction as well so we can just look for that
+			// case as a terminator.
+			while(NULL != pNextV)
+			{
+				pNextV->SetpChildVertex(pLathA);
+				pNextV = pNextV->ccv();
+			}
+		}
 		
 		// For this edge of the original face, set a ponter to the new midpoint lath, so that we can
 		// use it when subdividing neighbour facets, do the same for the lath representing the edge in the
@@ -719,8 +732,10 @@ void CqSubdivision2::OutputMesh(const char* fname, std::vector<CqLath*>* paFaces
 			(*paFaces)[i]->Qfv(aQfv);
 			TqInt j;
 			file << "f ";
-			for( j = 0; j < aQfv.size(); j++ )
-				file << aQfv[j]->VertexIndex()+1 << " ";
+			//for( j = 0; j < aQfv.size(); j++ )
+				file << aQfv[0]->VertexIndex()+1 << " ";
+				file << aQfv[0]->cf()->VertexIndex()+1 << " ";
+				file << aQfv[0]->ccf()->VertexIndex()+1 << " ";
 			file << std::endl;
 		}
 	}
@@ -729,25 +744,29 @@ void CqSubdivision2::OutputMesh(const char* fname, std::vector<CqLath*>* paFaces
 }
 
 
-void CqSubdivision2::OutputInfo(const char* fname)
+void CqSubdivision2::OutputInfo(const char* fname, std::vector<CqLath*>* paFaces)
 {
 	std::ofstream file(fname);
 	std::vector<CqLath*> aQfv;
 
-	for(TqInt i = 0; i < cLaths(); i++)
+	std::vector<CqLath*>* paLaths = paFaces;
+	
+	if( NULL == paLaths )
+		paLaths = &m_apFacets;
+	
+	for(TqInt i = 0; i < paLaths->size(); i++)
 	{
-		CqLath* pL = apLaths()[i];
-		file << i << " - " << 
-			(char)(pL->ID()+'A') << " - "	<<
+		CqLath* pL = (*paLaths)[i];
+		file << i << " - 0x" << pL << " - "	<<
 			pL->VertexIndex() << " - (cf) ";
 		if( pL->cf() )
-			file << (char)(pL->cf()->ID()+'A');
+			file << "0x" << pL->cf();
 		else
 			file << "***";
 		file << " - (cv) ";
 		
 		if(pL->cv())
-			file << (char)(pL->cv()->ID()+'A');
+			file << "0x" << pL->cv();
 		else
 			file << "***";
 			
@@ -861,7 +880,8 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 	while( r <= nr )
 	{
 		pLath = pTemp->cf();
-		pTemp = pLath->ccv();
+		if( r < nr )
+			pTemp = pLath->ccv();
 
 		// Get data from pLath
 		TqInt ivA = pLath->VertexIndex();
