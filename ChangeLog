@@ -1,3 +1,44 @@
+2002-12-14  pgregory
+	* render/version.h 1.18:
+		Update version number for release.
+
+	* Makefile.am 1.36:
+	* configure.in 1.51:
+	* render/surface.cpp 1.34:
+	* shaders/Makefile.am 1.8:
+		Small changes to get a clean 'distcheck' build under RH8.0
+
+2002-12-13  pgregory
+	* render/renderer.cpp 1.47:
+	* render/renderer.h 1.24:
+		Coordinate system name lookup optimisations.
+		        - Michel Joron
+
+2002-12-11  pgregory
+	* configure.in 1.50:
+	* render/plugins.cpp 1.6:
+	* render/texturemap.cpp 1.59:
+		Make it so that if plugins are disabled, the dl library is not
+		linked, and the functions which use it are complied out to
+		nothing.
+
+	* render/attributes.cpp 1.24:
+	* render/nurbs.cpp 1.57:
+	* render/ri.cpp 1.122:
+	* render/surface.cpp 1.33:
+		Optimise the calculation and caching of the square of the shading rate, used during dice checks.
+		        - Michel Joron
+
+2002-12-09  pgregory
+	* render/nurbs.cpp 1.56:
+	* render/patch.cpp 1.49:
+	* render/quadrics.cpp 1.41:
+	* render/ri.cpp 1.121:
+	* render/surface.cpp 1.32:
+	* render/surface.h 1.33:
+		Optimise the use of the gridsize option, precalculate and cache a version of it.
+		        - Michel Joron
+
 2002-12-08  pgregory
 	* render/imagebuffer.cpp 1.81:
 	* render/nurbs.cpp 1.55:
