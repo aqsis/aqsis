@@ -89,7 +89,7 @@ void CqASCII::printEOL()
 
 void CqASCII::printArray ( RtInt n, RtInt *p )
 {
-    if( n > 0 )
+//    if( n > 0 )
     {
         OUT << "[ ";
         for ( RtInt i = 0; i < n; i++ )
@@ -102,7 +102,7 @@ void CqASCII::printArray ( RtInt n, RtInt *p )
 
 void CqASCII::printArray ( RtInt n, RtFloat *p )
 {
-    if( n > 0 )
+//    if( n > 0 )
     {
         OUT << "[ ";
         for ( RtInt i = 0; i < n; i++ )
@@ -116,7 +116,7 @@ void CqASCII::printArray ( RtInt n, RtFloat *p )
 
 void CqASCII::printArray ( RtInt n, RtToken *p )
 {
-    if( n > 0 )
+//    if( n > 0 )
     {
         OUT << "[ ";
         for ( RtInt i = 0; i < n; i++ )
