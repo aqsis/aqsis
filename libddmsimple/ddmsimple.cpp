@@ -34,6 +34,11 @@
 
 START_NAMESPACE(Aqsis)
 
+/// Required function that implements Class Factory design pattern for DDManager libraries
+IqDDManager* CreateDisplayDriverManager()
+{
+	return new CqDDManagerSimple;
+}
 
 //---------------------------------------------------------------------
 /** Initialise the device manager.

@@ -7,5 +7,5 @@ libaqsis_la_INCLUDES = aqsis.h aqsis_types.h attributes.h bilinear.h bison.h bit
 libaqsis_la_LIBADD = posix/intel/libplatform.la
 
 CXXFLAGS = -g -Wall
-INCLUDES = -I./posix/intel
+INCLUDES = -I./posix/intel -I$(top_srcdir)/libddmsimple -I$(top_srcdir)/libddmsock/posix/intel
 

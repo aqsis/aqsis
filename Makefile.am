@@ -1,2 +1,2 @@
-SUBDIRS = render file aqsis 
+SUBDIRS = render file librib libddmsimple libddmsock aqsis 
 

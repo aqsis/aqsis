@@ -265,3 +265,4 @@ struct SqDDMessageNP : public SqDDMessageMatrix
 END_NAMESPACE(Aqsis)
 
 #endif // DISPLAYDRIVER_H_INCLUDED
+

@@ -85,3 +85,4 @@ class CqDDManagerSimple : public IqDDManager
 END_NAMESPACE(Aqsis)
 
 #endif	// DDSERVER_H_INCLUDED
+

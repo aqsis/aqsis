@@ -101,3 +101,4 @@ struct IqDDManager
 END_NAMESPACE(Aqsis)
 
 #endif	// IDDMANAGER_H_INCLUDED
+

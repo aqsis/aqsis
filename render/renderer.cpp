@@ -45,9 +45,11 @@
 #ifdef	AQSIS_SYSTEM_WIN32
 #include	"ddmsock.h"
 #include	"ddmsimple.h"
-#endif //	AQSIS_SYSTEM_WIN32
+#endif // AQSIS_SYSTEM_WIN32
 
 START_NAMESPACE(Aqsis)
+
+extern IqDDManager* CreateDisplayDriverManager();
 
 CqRenderer* pCurrRenderer=0;
 
@@ -74,9 +76,11 @@ CqRenderer::CqRenderer() :
 	m_aCoordSystems[CoordSystem_Raster]	.m_strName="raster";
 
 #ifdef	AQSIS_SYSTEM_WIN32
-	m_pDDManager=new CqDDManager;
+	m_pDDManager = new CqDDManager;
+#else // AQSIS_SYSTEM_WIN32
+	m_pDDManager = CreateDisplayDriverManager(); 
+#endif // !AQSIS_SYSTEM_WIN32
 	m_pDDManager->Initialise();
-#endif
 }
 
 //---------------------------------------------------------------------
