@@ -611,6 +611,9 @@ RtVoid	RiWorldBegin()
     QGetRenderContext() ->BeginWorldModeBlock();
     // Set the world to camera transformation matrix to the current matrix.
     QGetRenderContext() ->SetCameraTransform( QGetRenderContext() ->ptransCurrent() );
+	// clear the camera transform to a single state, all camera motion is now transferred to the objects.
+	QGetRenderContext()->GetCameraTransform()->ResetTransform( QGetRenderContext()->GetCameraTransform()->matObjectToWorld( QGetRenderContext()->GetCameraTransform()->Time(0) ), 
+															   QGetRenderContext()->ptransCurrent()->GetHandedness(QGetRenderContext()->Time()) );
     // and then reset the current matrix to identity, ready for object transformations.
     if(QGetRenderContext() ->ptransWriteCurrent() ->cTimes() > 1)
 	{
@@ -622,10 +625,7 @@ RtVoid	RiWorldBegin()
 			QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->ptransCurrent() ->Time( i ), matOpenShutterInverse * QGetRenderContext() ->ptransCurrent() ->matObjectToWorld( QGetRenderContext() ->ptransCurrent() ->Time( i ) ) );
 	}
 	else
-		QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), CqMatrix() );
-	// Clear the camera transform to a single state, all camera motion is now transferred to the objects.
-	QGetRenderContext()->GetCameraTransform()->ResetTransform( QGetRenderContext()->GetCameraTransform()->matObjectToWorld( QGetRenderContext()->GetCameraTransform()->Time(0) ), 
-															   QGetRenderContext()->ptransCurrent()->GetHandedness(QGetRenderContext()->Time()) );
+		QGetRenderContext() ->ptransWriteCurrent() ->SetTransform( QGetRenderContext() ->Time(), CqMatrix() );
 
     QGetRenderContext() ->optCurrent().InitialiseCamera();
     QGetRenderContext() ->pImage() ->SetImage();
@@ -2513,7 +2513,7 @@ RtVoid	RiTranslate( RtFloat dx, RtFloat dy, RtFloat dz )
 //    if ( matTrans.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
 //        QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
 
-    QGetRenderContext() ->ptransWriteCurrent() ->ConcatCurrentTransform( QGetRenderContext() ->Time(), matTrans );
+	QGetRenderContext() ->ptransWriteCurrent() ->ConcatCurrentTransform( QGetRenderContext() ->Time(), matTrans );
     QGetRenderContext() ->AdvanceTime();
 
     return ;
@@ -2556,7 +2556,7 @@ RtVoid	RiScale( RtFloat sx, RtFloat sy, RtFloat sz )
 //    if ( matScale.Determinant() < 0 && ( QGetRenderContext()->pconCurrent()->Type() != Motion || QGetRenderContext()->pconCurrent()->TimeIndex() == 0 ) )
 //        QGetRenderContext() ->pattrWriteCurrent() ->FlipeCoordsysOrientation( QGetRenderContext() ->Time() );
 
-    QGetRenderContext() ->ptransWriteCurrent() ->ConcatCurrentTransform( QGetRenderContext() ->Time(), matScale );
+	QGetRenderContext() ->ptransWriteCurrent() ->ConcatCurrentTransform( QGetRenderContext() ->Time(), matScale );
     QGetRenderContext() ->AdvanceTime();
     return ;
 }
