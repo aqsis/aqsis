@@ -225,6 +225,10 @@ SOURCE=.\genpoly.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\iattributes.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\iddmanager.h
 # End Source File
 # Begin Source File
