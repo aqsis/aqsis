@@ -516,14 +516,14 @@ TqInt	CqParseNodeOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
 TqInt	CqParseNodeRelOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
 {
     TqInt RelType;
-    RelType = CqParseNodeOp::TypeCheck( pTypes, Count, CheckOnly );  
+    RelType = CqParseNodeOp::TypeCheck( pAllTypes(), Type_Last - 1, CheckOnly );  
 
     if( RelType == Type_Nil)
     	return( RelType );
 
     // See if float is a requested type.
     TqInt NewType;
-    if ( ( NewType = FindCast( Type_Float, &RelType, 1 ) ) != Type_Nil )
+    if ( ( NewType = FindCast( Type_Float, pTypes, Count ) ) != Type_Nil )
     {
         if ( NewType == Type_Float ) return ( Type_Float );
         else
