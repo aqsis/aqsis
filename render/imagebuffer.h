@@ -361,12 +361,24 @@ class CqBucket : public IqBucket
 		 */
 		void	AddMPG( CqMicroPolygonBase* pmpgNew )
 		{
+#ifdef _DEBUG
+			std::vector<CqMicroPolygonBase*>::iterator end = m_ampgWaiting.end();
+			for (std::vector<CqMicroPolygonBase*>::iterator i = m_ampgWaiting.begin(); i != end; i++)
+				if ((*i) == pmpgNew) 
+					return; // assert() here!
+#endif
 			m_ampgWaiting.push_back( pmpgNew );
 		}
 		/** Add a Micropoly grid to the list of deferred grids.
 		 */
 		void	AddGrid( CqMicroPolyGridBase* pgridNew )
 		{
+#ifdef _DEBUG
+			std::vector<CqMicroPolyGridBase*>::iterator end = m_agridWaiting.end();
+			for (std::vector<CqMicroPolyGridBase*>::iterator i = m_agridWaiting.begin(); i != end; i++)
+				if ((*i) == pgridNew) 
+					return; // assert() here!
+#endif
 			m_agridWaiting.push_back( pgridNew );
 		}
 		/** Get a pointer to the top GPrim in the list of deferred GPrims.
@@ -626,6 +638,7 @@ class _qShareC	CqImageBuffer
 		}
 		_qShareM	virtual	void	ImageComplete()
 		{}
+		_qShareM	virtual	TqBool	IsEmpty(TqInt iBucket );
 
 	private:
 		TqBool	m_fQuit;			///< Set by system if a quit has been requested.

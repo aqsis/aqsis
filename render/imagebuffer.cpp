@@ -1000,6 +1000,11 @@ void CqBucket::AddGPrim( CqBasicSurface* pGPrim )
 		CqBasicSurface * surf = m_aGPrims.pFirst();
 		while ( surf != 0 )
 		{
+			if (surf == pGPrim)
+			{
+				return;
+			}
+
 			if ( surf->fCachedBound() )
 			{
 				if ( surf->GetCachedRasterBound().vecMin().z() > pGPrim->GetCachedRasterBound().vecMin().z() )
@@ -1250,7 +1255,7 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 	if ( pattrDispclacementBound != 0 ) db = pattrDispclacementBound[ 0 ];
 	if ( pattrCoordinateSystem != 0 ) strCoordinateSystem = pattrCoordinateSystem[ 0 ];
 
-	if ( db != 0.0f )
+	//if ( db != 0.0f )
 	{
 		CqVector3D	vecDB( db, 0, 0 );
 		CqMatrix matShaderToWorld;
@@ -1276,13 +1281,14 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 	// bucket index from it as the projection of the bound would cross the camera plane and therefore give a false
 	// result, so just put it back in the current bucket for further splitting.
 	TqInt iBucket = iCurrentBucket();
+	TqInt nBucket = iBucket;
 	if ( !pSurface->IsUndiceable() )
 	{
 		// Find out which bucket(s) the surface belongs to.
 		TqInt XMinb, YMinb;
 		if ( Bound.vecMin().x() < 0 ) Bound.vecMin().x( 0.0f );
 		if ( Bound.vecMin().y() < 0 ) Bound.vecMin().y( 0.0f );
-		iBucket = Bucket( static_cast<TqInt>( Bound.vecMin().x() ), static_cast<TqInt>( Bound.vecMin().y() ), XMinb, YMinb );
+		nBucket = Bucket( static_cast<TqInt>( Bound.vecMin().x() ), static_cast<TqInt>( Bound.vecMin().y() ), XMinb, YMinb );
 
 		if ( XMinb >= m_cXBuckets || YMinb >= m_cYBuckets ) return ;
 
@@ -1290,11 +1296,11 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 		{
 			if ( XMinb < 0 ) XMinb = 0;
 			if ( YMinb < 0 ) YMinb = 0;
-			iBucket = ( YMinb * m_cXBuckets ) + XMinb;
+			nBucket = ( YMinb * m_cXBuckets ) + XMinb;
 		}
 	}
 
-	m_aBuckets[ iBucket ].AddGPrim( pSurface );
+	m_aBuckets[ nBucket ].AddGPrim( pSurface );
 
 }
 
@@ -1709,6 +1715,7 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 {
 	int counter = 0;
 	int MaxEyeSplits = 10;
+	TqBool bIsEmpty = IsEmpty(iBucket);
 	const TqInt* poptEyeSplits = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "eyesplits" );
 	if ( poptEyeSplits != 0 )
 		MaxEyeSplits = poptEyeSplits[ 0 ];
@@ -1740,7 +1747,8 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 			{
 				QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
 				TqBool fCull = TqFalse;
-				fCull = OcclusionCullSurface( iBucket, pSurface );
+				if (!bIsEmpty)
+					fCull = OcclusionCullSurface( iBucket, pSurface );
 				QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
 				if ( fCull )
 				{
@@ -1809,7 +1817,8 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
 		// Update our occlusion hierarchy after each grid that gets drawn.
-        CqOcclusionBox::Update();
+		if (!bIsEmpty)
+			CqOcclusionBox::Update();
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
 	}
 
@@ -1834,7 +1843,27 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 	QGetRenderContext() ->Stats().MakeDisplayBucket().Stop();
 }
 
+//----------------------------------------------------------------------
+/** Return if a certain bucket is completely empty.
+ 
+    True or False.
 
+     It is empty only when this bucket doesn't contain any surface, 
+	 micropolygon or grids.
+ */
+TqBool CqImageBuffer::IsEmpty(TqInt which)
+{
+	TqBool retval = TqFalse;
+
+	CqBucket& Bucket = m_aBuckets[ which ];
+
+	if ((!Bucket.pTopSurface())	&& 
+		Bucket.aGrids().empty() && 
+		Bucket.aMPGs().empty() ) 
+		retval = TqTrue;
+
+	return retval;
+}
 //----------------------------------------------------------------------
 /** Render any waiting Surfaces
  
@@ -1876,8 +1905,10 @@ void CqImageBuffer::RenderImage()
 	RtProgressFunc pProgressHandler = NULL;
 	pProgressHandler = QGetRenderContext() ->optCurrent().pProgressHandler();
 
+	
 	for ( iBucket = 0; iBucket < nBuckets; iBucket++ )
 	{
+		TqBool bIsEmpty = IsEmpty(iBucket);
 	    QGetRenderContext() ->Stats().Others().Start();
 		SetiCurrentBucket( iBucket );
 		// Prepare the bucket.
@@ -1885,7 +1916,8 @@ void CqImageBuffer::RenderImage()
 		CqVector2D bSize = Size( iBucket );
 		// Warning Jitter must be True is all cases; the InitialiseBucket when it is not in jittering mode
 		// doesn't initialise correctly so later we have problem in the FilterBucket()
-		CqBucket::InitialiseBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), m_FilterXWidth, m_FilterYWidth, m_PixelXSamples, m_PixelYSamples, TqTrue);
+		// It is crucial !IsEmpty set the jitter here when something is present in this bucket.
+		CqBucket::InitialiseBucket( static_cast<TqInt>( bPos.x() ), static_cast<TqInt>( bPos.y() ), static_cast<TqInt>( bSize.x() ), static_cast<TqInt>( bSize.y() ), m_FilterXWidth, m_FilterYWidth, m_PixelXSamples, m_PixelYSamples, !bIsEmpty);
 		CqBucket::InitialiseFilterValues();
 
 		// Set up some bounds for the bucket.
@@ -1907,7 +1939,8 @@ void CqImageBuffer::RenderImage()
 		QGetRenderContext() ->Stats().Others().Stop();
 
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
-		CqOcclusionBox::SetupHierarchy( &m_aBuckets[ iBucket ], xmin, ymin, xmax, ymax );
+		if (!bIsEmpty)
+			CqOcclusionBox::SetupHierarchy( &m_aBuckets[ iBucket ], xmin, ymin, xmax, ymax );
 
 		QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
 	
