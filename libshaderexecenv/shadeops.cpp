@@ -1809,24 +1809,31 @@ STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL fromspace, STRINGVAL tospace
 
 	INIT_SO
 
-	if ( NULL == QGetRenderContextI() )
-		return ;
-
 	assert( pShader != 0 );
 
 	CHECKVARY( p )
 	CHECKVARY( Result )
 
-	BEGIN_UNIFORM_SECTION
-	GETSTRING( fromspace );
-	GETSTRING( tospace );
-	const CqMatrix& mat = QGetRenderContextI() ->matSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
-	END_UNIFORM_SECTION
+	if ( NULL != QGetRenderContextI() )
+	{
+		BEGIN_UNIFORM_SECTION
+		GETSTRING( fromspace );
+		GETSTRING( tospace );
+		const CqMatrix& mat = QGetRenderContextI() ->matSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+		END_UNIFORM_SECTION
 
-	BEGIN_VARYING_SECTION
-	GETPOINT( p );
-	SETPOINT( Result, mat * POINT( p ) );
-	END_VARYING_SECTION
+		BEGIN_VARYING_SECTION
+		GETPOINT( p );
+		SETPOINT( Result, mat * POINT( p ) );
+		END_VARYING_SECTION
+	}
+	else
+	{
+		BEGIN_VARYING_SECTION
+		GETPOINT( p );
+		SETPOINT( Result, POINT( p ) );
+		END_VARYING_SECTION
+	}	
 }
 
 
@@ -1838,23 +1845,30 @@ STD_SOIMPL CqShaderExecEnv::SO_transform( STRINGVAL tospace, POINTVAL p, DEFPARA
 
 	INIT_SO
 
-	if ( NULL == QGetRenderContextI() )
-		return ;
-
 	assert( pShader != 0 );
 
 	CHECKVARY( p )
 	CHECKVARY( Result )
 
-	BEGIN_UNIFORM_SECTION
-	GETSTRING( tospace );
-	const CqMatrix& mat = QGetRenderContextI() ->matSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
-	END_UNIFORM_SECTION
+	if ( NULL != QGetRenderContextI() )
+	{
+		BEGIN_UNIFORM_SECTION
+		GETSTRING( tospace );
+		const CqMatrix& mat = QGetRenderContextI() ->matSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+		END_UNIFORM_SECTION
 
-	BEGIN_VARYING_SECTION
-	GETPOINT( p );
-	SETPOINT( Result, mat * POINT( p ) );
-	END_VARYING_SECTION
+		BEGIN_VARYING_SECTION
+		GETPOINT( p );
+		SETPOINT( Result, mat * POINT( p ) );
+		END_VARYING_SECTION
+	}
+	else
+	{
+		BEGIN_VARYING_SECTION
+		GETPOINT( p );
+		SETPOINT( Result, POINT( p ) );
+		END_VARYING_SECTION
+	}
 }
 
 
@@ -1887,24 +1901,31 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL fromspace, STRINGVAL tospac
 
 	INIT_SO
 
-	if ( NULL == QGetRenderContextI() )
-		return ;
-
 	assert( pShader != 0 );
 
 	CHECKVARY( p )
 	CHECKVARY( Result )
 
-	BEGIN_UNIFORM_SECTION
-	GETSTRING( fromspace );
-	GETSTRING( tospace );
-	const CqMatrix& mat = QGetRenderContextI() ->matVSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
-	END_UNIFORM_SECTION
+	if ( NULL != QGetRenderContextI() )
+	{
+		BEGIN_UNIFORM_SECTION
+		GETSTRING( fromspace );
+		GETSTRING( tospace );
+		const CqMatrix& mat = QGetRenderContextI() ->matVSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+		END_UNIFORM_SECTION
 
-	BEGIN_VARYING_SECTION
-	GETVECTOR( p );
-	SETVECTOR( Result, mat * VECTOR( p ) );
-	END_VARYING_SECTION
+		BEGIN_VARYING_SECTION
+		GETVECTOR( p );
+		SETVECTOR( Result, mat * VECTOR( p ) );
+		END_VARYING_SECTION
+	}
+	else
+	{
+		BEGIN_VARYING_SECTION
+		GETVECTOR( p );
+		SETVECTOR( Result, VECTOR( p ) );
+		END_VARYING_SECTION
+	}
 }
 
 
@@ -1916,23 +1937,30 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransform( STRINGVAL tospace, VECTORVAL p, DEFPA
 
 	INIT_SO
 
-	if ( NULL == QGetRenderContextI() )
-		return ;
-
 	assert( pShader != 0 );
 
 	CHECKVARY( p )
 	CHECKVARY( Result )
 
-	BEGIN_UNIFORM_SECTION
-	GETSTRING( tospace );
-	const CqMatrix& mat = QGetRenderContextI() ->matVSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
-	END_UNIFORM_SECTION
+	if ( NULL != QGetRenderContextI() )
+	{
+		BEGIN_UNIFORM_SECTION
+		GETSTRING( tospace );
+		const CqMatrix& mat = QGetRenderContextI() ->matVSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+		END_UNIFORM_SECTION
 
-	BEGIN_VARYING_SECTION
-	GETVECTOR( p );
-	SETVECTOR( Result, mat * VECTOR( p ) );
-	END_VARYING_SECTION
+		BEGIN_VARYING_SECTION
+		GETVECTOR( p );
+		SETVECTOR( Result, mat * VECTOR( p ) );
+		END_VARYING_SECTION
+	}
+	else
+	{
+		BEGIN_VARYING_SECTION
+		GETVECTOR( p );
+		SETVECTOR( Result, VECTOR( p ) );
+		END_VARYING_SECTION
+	}
 }
 
 
@@ -1965,24 +1993,31 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL fromspace, STRINGVAL tospac
 
 	INIT_SO
 
-	if ( NULL == QGetRenderContextI() )
-		return ;
-
 	assert( pShader != 0 );
 
 	CHECKVARY( p )
 	CHECKVARY( Result )
 
-	BEGIN_UNIFORM_SECTION
-	GETSTRING( fromspace );
-	GETSTRING( tospace );
-	const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
-	BEGIN_UNIFORM_SECTION
+	if ( NULL != QGetRenderContextI() )
+	{
+		BEGIN_UNIFORM_SECTION
+		GETSTRING( fromspace );
+		GETSTRING( tospace );
+		const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( STRING( fromspace ).c_str(), STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+		BEGIN_UNIFORM_SECTION
 
-	BEGIN_VARYING_SECTION
-	GETNORMAL( p );
-	SETNORMAL( Result, mat * NORMAL( p ) );
-	END_VARYING_SECTION
+		BEGIN_VARYING_SECTION
+		GETNORMAL( p );
+		SETNORMAL( Result, mat * NORMAL( p ) );
+		END_VARYING_SECTION
+	}
+	else
+	{
+		BEGIN_VARYING_SECTION
+		GETNORMAL( p );
+		SETNORMAL( Result, NORMAL( p ) );
+		END_VARYING_SECTION
+	}
 }
 
 
@@ -1994,23 +2029,30 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransform( STRINGVAL tospace, NORMALVAL p, DEFPA
 
 	INIT_SO
 
-	if ( NULL == QGetRenderContextI() )
-		return ;
-
 	assert( pShader != 0 );
 
 	CHECKVARY( p )
 	CHECKVARY( Result )
 
-	BEGIN_UNIFORM_SECTION
-	GETSTRING( tospace );
-	const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
-	BEGIN_UNIFORM_SECTION
+	if ( NULL != QGetRenderContextI() )
+	{
+		BEGIN_UNIFORM_SECTION
+		GETSTRING( tospace );
+		const CqMatrix& mat = QGetRenderContextI() ->matNSpaceToSpace( "current", STRING( tospace ).c_str(), pShader->matCurrent(), matObjectToWorld() );
+		BEGIN_UNIFORM_SECTION
 
-	BEGIN_VARYING_SECTION
-	GETNORMAL( p );
-	SETNORMAL( Result, mat * NORMAL( p ) );
-	END_VARYING_SECTION
+		BEGIN_VARYING_SECTION
+		GETNORMAL( p );
+		SETNORMAL( Result, mat * NORMAL( p ) );
+		END_VARYING_SECTION
+	}
+	else
+	{
+		BEGIN_VARYING_SECTION
+		GETNORMAL( p );
+		SETNORMAL( Result, NORMAL( p ) );
+		END_VARYING_SECTION
+	}
 }
 
 
