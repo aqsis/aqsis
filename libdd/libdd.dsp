@@ -19,7 +19,6 @@ CFG=libdd - Win32 Debug
 !MESSAGE 
 !MESSAGE "libdd - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "libdd - Win32 Debug" (based on "Win32 (x86) Static Library")
-!MESSAGE "libdd - Win32 Release with Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -75,36 +74,12 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ELSEIF  "$(CFG)" == "libdd - Win32 Release with Debug"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "libdd___Win32_Release_with_Debug"
-# PROP BASE Intermediate_Dir "libdd___Win32_Release_with_Debug"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\ReleaseWithDebug"
-# PROP Intermediate_Dir "..\Object\ReleaseWithDebug\libdd"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libddmsock" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FR /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /Zi /O2 /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libddmsock" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FR /YX /FD /c
-# ADD BASE RSC /l 0x809 /d "NDEBUG"
-# ADD RSC /l 0x809 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
-
 !ENDIF 
 
 # Begin Target
 
 # Name "libdd - Win32 Release"
 # Name "libdd - Win32 Debug"
-# Name "libdd - Win32 Release with Debug"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"

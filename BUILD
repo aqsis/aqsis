@@ -23,14 +23,20 @@ Requirements:
 					Download the 'lib' archive and install to a suitable location.
 					Add <install>\include to your include paths under tools/options.
 					Add <install>\lib to your library paths under tools/options.
+					Download the 'bin' archive and install to a suitable location.
+					Add <install>\bin to your PATH, or copy libtiff.dll to a location in your PATH.
 		libjpeg		6b (http://sourceforge.net/projects/gnuwin32/)
 					Download the 'lib' archive and install to a suitable location.
 					Add <install>\include to your include paths under tools/options.
 					Add <install>\lib to your library paths under tools/options.
+					Download the 'bin' archive and install to a suitable location.
+					Add <install>\bin to your PATH, or copy libjpeg.dll to a location in your PATH.
 		zlib		1.1.4 (http://sourceforge.net/projects/gnuwin32/)
 					Download the 'lib' archive and install to a suitable location.
 					Add <install>\include to your include paths under tools/options.
 					Add <install>\lib to your library paths under tools/options.
+					Download the 'bin' archive and install to a suitable location.
+					Add <install>\bin to your PATH, or copy zlib.dll to a location in your PATH.
 		libargparse	0.1 (http://sourceforge.net/projects/aqsis/)
 					Download the archive and install to a suitable location.
 					Load the .dsp file into MSVC++ 6.0 and build all.

@@ -19,7 +19,6 @@ CFG=librib2 - Win32 Debug
 !MESSAGE 
 !MESSAGE "librib2 - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "librib2 - Win32 Debug" (based on "Win32 (x86) Static Library")
-!MESSAGE "librib2 - Win32 Release with Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -75,36 +74,12 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
-!ELSEIF  "$(CFG)" == "librib2 - Win32 Release with Debug"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 0
-# PROP BASE Output_Dir "librib2___Win32_Release_with_Debug"
-# PROP BASE Intermediate_Dir "librib2___Win32_Release_with_Debug"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 0
-# PROP Output_Dir "..\Library\ReleaseWithDebug"
-# PROP Intermediate_Dir "..\Object\ReleaseWithDebug\librib2"
-# PROP Target_Dir ""
-# ADD BASE CPP /nologo /MD /W3 /GX /O2 /I "..\librib2" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FR /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /Zi /O2 /I "..\librib2" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /FR /YX /FD /c
-# ADD BASE RSC /l 0x809 /d "NDEBUG"
-# ADD RSC /l 0x809 /d "NDEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LIB32=link.exe -lib
-# ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
-
 !ENDIF 
 
 # Begin Target
 
 # Name "librib2 - Win32 Release"
 # Name "librib2 - Win32 Debug"
-# Name "librib2 - Win32 Release with Debug"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
@@ -132,7 +107,7 @@ BuildCmds= \
 "$(IntDir)\parser.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
 
-"$(IntDir)\parser.cpp.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+"$(IntDir)\parser.hpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
 # End Custom Build
 
@@ -148,23 +123,7 @@ BuildCmds= \
 "$(IntDir)\parser.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
 
-"$(IntDir)\parser.cpp.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "librib2 - Win32 Release with Debug"
-
-# Begin Custom Build - Building Parser from $(InputPath)
-IntDir=.\..\Object\ReleaseWithDebug\librib2
-InputPath=.\parser.y
-
-BuildCmds= \
-	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
-
-"$(IntDir)\parser.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(IntDir)\parser.cpp.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+"$(IntDir)\parser.hpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
    $(BuildCmds)
 # End Custom Build
 
@@ -190,17 +149,6 @@ InputPath=.\scanner.l
 
 # Begin Custom Build - Building Lexical Scanner from $(InputPath)
 IntDir=.\..\Object\Debug\librib2
-InputPath=.\scanner.l
-
-"$(IntDir)\scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	flex -o$(IntDir)\scanner.cpp $(InputPath)
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "librib2 - Win32 Release with Debug"
-
-# Begin Custom Build - Building Lexical Scanner from $(InputPath)
-IntDir=.\..\Object\ReleaseWithDebug\librib2
 InputPath=.\scanner.l
 
 "$(IntDir)\scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
@@ -244,22 +192,18 @@ SOURCE=..\Object\Release\librib2\parser.cpp
 
 # PROP Exclude_From_Build 1
 
-!ELSEIF  "$(CFG)" == "librib2 - Win32 Release with Debug"
-
 !ENDIF 
 
 # End Source File
 # Begin Source File
 
-SOURCE=..\Object\Release\librib2\parser.cpp.h
+SOURCE=..\Object\Release\librib2\parser.hpp
 
 !IF  "$(CFG)" == "librib2 - Win32 Release"
 
 !ELSEIF  "$(CFG)" == "librib2 - Win32 Debug"
 
 # PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "librib2 - Win32 Release with Debug"
 
 !ENDIF 
 
@@ -273,8 +217,6 @@ SOURCE=..\Object\Release\librib2\scanner.cpp
 !ELSEIF  "$(CFG)" == "librib2 - Win32 Debug"
 
 # PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "librib2 - Win32 Release with Debug"
 
 !ENDIF 
 
@@ -293,28 +235,18 @@ SOURCE=..\Object\Debug\librib2\parser.cpp
 
 !ELSEIF  "$(CFG)" == "librib2 - Win32 Debug"
 
-!ELSEIF  "$(CFG)" == "librib2 - Win32 Release with Debug"
-
-# PROP BASE Exclude_From_Build 1
-# PROP Exclude_From_Build 1
-
 !ENDIF 
 
 # End Source File
 # Begin Source File
 
-SOURCE=..\Object\Debug\librib2\parser.cpp.h
+SOURCE=..\Object\Debug\librib2\parser.hpp
 
 !IF  "$(CFG)" == "librib2 - Win32 Release"
 
 # PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "librib2 - Win32 Debug"
-
-!ELSEIF  "$(CFG)" == "librib2 - Win32 Release with Debug"
-
-# PROP BASE Exclude_From_Build 1
-# PROP Exclude_From_Build 1
 
 !ENDIF 
 
@@ -328,11 +260,6 @@ SOURCE=..\Object\Debug\librib2\scanner.cpp
 # PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "librib2 - Win32 Debug"
-
-!ELSEIF  "$(CFG)" == "librib2 - Win32 Release with Debug"
-
-# PROP BASE Exclude_From_Build 1
-# PROP Exclude_From_Build 1
 
 !ENDIF 
 
