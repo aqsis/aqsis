@@ -3160,6 +3160,9 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
     Result->SetColor( gColBlack );
 
     __fVarying = TqTrue;
+	IqShaderData* __nondiffuse = NULL;
+	__nondiffuse = pShader->CreateTemporaryStorage( type_float, class_varying );
+
     // SO_init_illuminance returns TRUE if there are any non ambient ligthsources available.
     if ( SO_init_illuminance() )
     {
@@ -3167,20 +3170,17 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
         do
         {
             // Get the "__nondiffuse" setting from the current lightsource, if specified.
-            IqShaderData* __nondiffuse = NULL;
             TqFloat	__nondiffuse_val;
             if ( m_li < m_pAttributes ->cLights() )
                 pLightsource = m_pAttributes ->pLight( m_li ) ->pShader();
             if ( pLightsource )
             {
-                __nondiffuse = pShader->CreateTemporaryStorage( type_float, class_varying );
                 pLightsource->GetValue( "__nondiffuse", __nondiffuse );
                 /// \note: This is OK here, outside the BEGIN_VARYING_SECTION as, varying in terms of lightsources
                 /// is not valid.
                 if( NULL != __nondiffuse )
                 {
                     __nondiffuse->GetFloat( __nondiffuse_val, 0 );
-					pShader->DeleteTemporaryStorage( __nondiffuse );
                     if( __nondiffuse_val != 0.0f )
                         continue;
                 }
@@ -3215,6 +3215,7 @@ STD_SOIMPL CqShaderExecEnv::SO_diffuse( NORMALVAL N, DEFPARAMIMPL )
         }
         while ( SO_advance_illuminance() );
     }
+	pShader->DeleteTemporaryStorage( __nondiffuse );
     pShader->DeleteTemporaryStorage( pDefAngle );
 }
 
@@ -3241,6 +3242,9 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
     Result->SetColor( gColBlack );
     __fVarying = TqTrue;
 
+	IqShaderData* __nonspecular = NULL;
+	__nonspecular = pShader->CreateTemporaryStorage( type_float, class_varying );
+
     // SO_init_illuminance returns TRUE if there are any non ambient ligthsources available.
     if ( SO_init_illuminance() )
     {
@@ -3248,20 +3252,17 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
         do
         {
             // Get the "__nonspecular" setting from the current lightsource, if specified.
-            IqShaderData* __nonspecular = NULL;
             TqFloat	__nonspecular_val;
             if ( m_li < m_pAttributes ->cLights() )
                 pLightsource = m_pAttributes ->pLight( m_li ) ->pShader();
             if ( pLightsource )
             {
-                __nonspecular = pShader->CreateTemporaryStorage( type_float, class_varying );
                 pLightsource->GetValue( "__nonspecular", __nonspecular );
                 /// \note: This is OK here, outside the BEGIN_VARYING_SECTION as, varying in terms of lightsources
                 /// is not valid.
                 if( NULL != __nonspecular )
                 {
                     __nonspecular->GetFloat( __nonspecular_val, 0 );
-					pShader->DeleteTemporaryStorage( __nonspecular );
                     if( __nonspecular_val != 0.0f )
                         continue;
                 }
@@ -3294,12 +3295,10 @@ STD_SOIMPL CqShaderExecEnv::SO_specular( NORMALVAL N, VECTORVAL V, FLOATVAL roug
             END_VARYING_SECTION
             PopState();
             // SO_advance_illuminance returns TRUE if there are any more non ambient lightsources.
-
-            if( NULL != __nonspecular )
-                pShader->DeleteTemporaryStorage( __nonspecular );
         }
         while ( SO_advance_illuminance() );
     }
+	pShader->DeleteTemporaryStorage( __nonspecular );
     pShader->DeleteTemporaryStorage( pDefAngle );
 }
 
