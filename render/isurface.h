@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/08/07 17:14:32 $
+ *	Last change date:	$Date: 2002/08/19 15:37:47 $
  */
 //------------------------------------------------------------------------------
 #ifndef	___isurface_Loaded___
@@ -58,6 +58,10 @@ struct IqSurface
 	 * \return A pointer to a CqTransform class.
 	 */
 	virtual const	IqTransform* pTransform() const = 0;
+	/** Interpolate the specified value using the natural interpolation method for the surface.
+	 *  Fills in the given shader data with the resulting data.
+	 */
+	virtual void	NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData) = 0;
 };
 
 

@@ -232,7 +232,34 @@ class CqSurfaceNURBS : public CqSurface
 		TqUint	FindSpanV( TqFloat v ) const;
 		void	BasisFunctions( TqFloat u, TqUint span, std::vector<TqFloat>& aKnots, TqInt k, std::vector<TqFloat>& BasisVals );
 		void	DersBasisFunctions( TqFloat u, TqUint i, std::vector<TqFloat>& U, TqInt k, TqInt n, std::vector<std::vector<TqFloat> >& ders );
-		CqVector4D	Evaluate( TqFloat u, TqFloat v );
+		
+		template<class T, class SLT>
+		T	Evaluate( TqFloat u, TqFloat v, CqParameterTyped<T,SLT>* pParam )
+		{
+			std::vector<TqFloat> Nu( m_uOrder );
+			std::vector<TqFloat> Nv( m_vOrder );
+
+			/* Evaluate non-uniform basis functions (and derivatives) */
+
+			TqUint uspan = FindSpanU( u );
+			BasisFunctions( u, uspan, m_auKnots, m_uOrder, Nu );
+			TqUint vspan = FindSpanV( v );
+			BasisFunctions( v, vspan, m_avKnots, m_vOrder, Nv );
+			TqUint uind = uspan - uDegree();
+
+			T S = T();
+			TqUint l, k;
+			for( l = 0; l <= vDegree(); l++)
+			{
+				T temp = T();
+				TqUint vind = vspan - vDegree() + l;
+				for( k = 0; k <= uDegree(); k++ )
+					temp = temp + Nu[ k ] * ( *pParam->pValue( ( vind * m_cuVerts) + uind + k ) );
+				S = S + Nv[ l ] * temp;
+			}
+			return(S);
+		}
+
 		CqVector4D	EvaluateNormal( TqFloat u, TqFloat v );
 		void	SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqBool dirflag );
 		void	SubdivideSegments(std::vector<CqSurfaceNURBS*>& Array);
@@ -348,6 +375,12 @@ class CqSurfaceNURBS : public CqSurface
 		TqBool	m_fPatchMesh;	///< Flag indicating this is an unsubdivided mesh.
 }
 ;
+
+
+//---------------------------------------------------------------------
+/** Evaluate the nurbs surface at parameter values u,v.
+ */
+
 
 
 //-----------------------------------------------------------------------

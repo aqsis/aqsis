@@ -116,7 +116,7 @@ class CqShader : public IqShader
 		}
 		virtual	void	SetArgument( const CqString& name, EqVariableType type, const CqString& space, void* val )
 		{}
-		virtual	void	SetArgument( CqParameter* pParam )
+		virtual	void	SetArgument( CqParameter* pParam, IqSurface* pSurface )
 		{}
 		virtual	IqShaderData*	FindArgument( const CqString& name )
 		{

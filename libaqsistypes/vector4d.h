@@ -46,7 +46,7 @@ class CqVector3D;
 class _qShareC CqVector4D
 {
 	public:
-		_qShareM	CqVector4D()
+		_qShareM	CqVector4D() : m_x(0.0f), m_y(0.0f), m_z(0.0f), m_h(1.0f)
 		{}
 		_qShareM	CqVector4D( TqFloat x, TqFloat y, TqFloat z, TqFloat h = 1.0f ) : m_x( x ), m_y( y ), m_z( z ), m_h( h )
 		{}

@@ -34,6 +34,7 @@
 #include	"sstring.h"
 
 #include	"irenderer.h"
+#include	"isurface.h"
 #include	"shadervariable.h"
 
 START_NAMESPACE( Aqsis )
@@ -1150,7 +1151,7 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 /** Set the instance variables on this shader, used for varying variables which will be set from a parameter in the surface.
  */
 
-void CqShaderVM::SetArgument( CqParameter* pParam )
+void CqShaderVM::SetArgument( CqParameter* pParam, IqSurface* pSurface )
 {
 	// Find the relevant variable.
 	TqInt i = FindLocalVarIndex( pParam->strName().c_str() );
@@ -1158,7 +1159,10 @@ void CqShaderVM::SetArgument( CqParameter* pParam )
 	{
 		/// \todo: Find out how to handle arrays.
 		IqShaderData* pVar = m_LocalVars[ i ];
-		pParam->BilinearDice(m_uGridRes,m_vGridRes,pVar);
+		if(pParam->Class() == class_varying )
+			pParam->BilinearDice(m_uGridRes,m_vGridRes,pVar);
+		else if(pParam->Class() == class_vertex )
+			pSurface->NaturalInterpolate( pParam, m_uGridRes,m_vGridRes,pVar );
 	}
 }
 

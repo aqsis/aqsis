@@ -2920,6 +2920,11 @@ RtVoid	RiNuPatch( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat
 RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax,
                    RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, PARAMETERLIST )
 {
+//	static cNURBS = 0;
+
+//	cNURBS++;
+//	if(!( cNURBS > 70 && cNURBS < 100 ) )	return;
+
 	// Create a NURBS patch
 	CqSurfaceNURBS * pSurface = new CqSurfaceNURBS();
 	pSurface->SetfPatchMesh();

@@ -93,6 +93,11 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		virtual CqString	strName() const;
 		virtual	TqInt	Uses() const;
 
+		/** Interpolate the specified value using the natural interpolation method for the surface.
+		 *  Fills in the given shader data with the resulting data.
+		 */
+		virtual void NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData) {}
+
 		/** Get a pointer to the attributes state associated with this GPrim.
 		 * \return A pointer to a CqAttributes class.
 		 */

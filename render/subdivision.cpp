@@ -1686,13 +1686,13 @@ CqMicroPolyGridBase* CqWSurf::Dice()
 	{
 		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
 		if( NULL != pGrid->pAttributes()->pshadSurface() )
-			pGrid->pAttributes()->pshadSurface()->SetArgument( (*iUP) );
+			pGrid->pAttributes()->pshadSurface()->SetArgument( (*iUP), this );
 
 		if( NULL != pGrid->pAttributes()->pshadDisplacement() )
-			pGrid->pAttributes()->pshadDisplacement()->SetArgument( (*iUP) );
+			pGrid->pAttributes()->pshadDisplacement()->SetArgument( (*iUP), this );
 
 		if( NULL != pGrid->pAttributes()->pshadAtmosphere() )
-			pGrid->pAttributes()->pshadAtmosphere()->SetArgument( (*iUP) );
+			pGrid->pAttributes()->pshadAtmosphere()->SetArgument( (*iUP), this );
 	}
 
 	return ( pGrid );

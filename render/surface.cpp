@@ -341,13 +341,13 @@ CqMicroPolyGridBase* CqSurface::Dice()
 	{
 		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
 		if( NULL != pGrid->pAttributes()->pshadSurface() )
-			pGrid->pAttributes()->pshadSurface()->SetArgument( (*iUP) );
+			pGrid->pAttributes()->pshadSurface()->SetArgument( (*iUP), this );
 
 		if( NULL != pGrid->pAttributes()->pshadDisplacement() )
-			pGrid->pAttributes()->pshadDisplacement()->SetArgument( (*iUP) );
+			pGrid->pAttributes()->pshadDisplacement()->SetArgument( (*iUP), this );
 
 		if( NULL != pGrid->pAttributes()->pshadAtmosphere() )
-			pGrid->pAttributes()->pshadAtmosphere()->SetArgument( (*iUP) );
+			pGrid->pAttributes()->pshadAtmosphere()->SetArgument( (*iUP), this );
 	}
 
 	return ( pGrid );
@@ -365,11 +365,16 @@ void CqSurface::uSubdivideUserParameters( CqSurface* pA, CqSurface* pB )
 	std::vector<CqParameter*>::iterator iUP;
 	for( iUP = m_aUserParams.begin(); iUP != m_aUserParams.end(); iUP++ )
 	{
-		CqParameter* pNewA = (*iUP)->Clone();
-		CqParameter* pNewB = (*iUP)->Clone();
-		pNewA->uSubdivide( pNewB );
-		pA->AddPrimitiveVariable( pNewA );
-		pB->AddPrimitiveVariable( pNewB );
+		// We can only do this common linear subdivide if it is varying, vertex must be handled by the surface,
+		// as it needs to be done using surface specific natural interpolation.
+		if( (*iUP)->Class() == class_varying )
+		{
+			CqParameter* pNewA = (*iUP)->Clone();
+			CqParameter* pNewB = (*iUP)->Clone();
+			pNewA->uSubdivide( pNewB );
+			pA->AddPrimitiveVariable( pNewA );
+			pB->AddPrimitiveVariable( pNewB );
+		}
 	}
 }
 

@@ -309,39 +309,6 @@ void CqSurfaceNURBS::DersBasisFunctions( TqFloat u, TqUint i, std::vector<TqFloa
 /** Evaluate the nurbs surface at parameter values u,v.
  */
 
-CqVector4D	CqSurfaceNURBS::Evaluate( TqFloat u, TqFloat v )
-{
-	std::vector<TqFloat> Nu( m_uOrder );
-	std::vector<TqFloat> Nv( m_vOrder );
-
-	CqVector4D r( 0, 0, 0, 0 );
-
-	/* Evaluate non-uniform basis functions (and derivatives) */
-
-	TqUint uspan = FindSpanU( u );
-	BasisFunctions( u, uspan, m_auKnots, m_uOrder, Nu );
-	TqUint vspan = FindSpanV( v );
-	BasisFunctions( v, vspan, m_avKnots, m_vOrder, Nv );
-	TqUint uind = uspan - uDegree();
-
-	CqVector4D S(0.0f, 0.0f, 0.0f, 1.0f);
-	TqUint l, k;
-	for( l = 0; l <= vDegree(); l++)
-	{
-		CqVector4D temp(0.0f, 0.0f, 0.0f, 1.0f);
-		TqUint vind = vspan - vDegree() + l;
-		for( k = 0; k <= uDegree(); k++ )
-			temp = temp + Nu[ k ] * CP( uind + k, vind );
-		S = S + Nv[ l ] * temp;
-	}
-	return(S);
-}
-
-
-//---------------------------------------------------------------------
-/** Evaluate the nurbs surface at parameter values u,v.
- */
-
 CqVector4D	CqSurfaceNURBS::EvaluateNormal( TqFloat u, TqFloat v )
 {
 	CqVector4D N;
@@ -1470,7 +1437,59 @@ void CqSurfaceNURBS::NaturalInterpolate(CqParameter* pParameter, TqInt uDiceSize
 						 * ( m_auKnots[ m_cuVerts ] - m_auKnots[ m_uOrder - 1 ] )
 						 + m_auKnots[ m_uOrder - 1 ];
 
-			pData->SetPoint( static_cast<CqVector3D>( Evaluate( su, sv ) ), igrid );
+			switch( pParameter->Type() )
+			{
+				case type_float:
+				{
+					CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pParameter);
+					pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+					break;
+				}
+
+				case type_integer:
+				{
+					CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>(pParameter);
+					pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+					break;
+				}
+
+				case type_point:
+				case type_normal:
+				case type_vector:
+				{
+					CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(pParameter);
+					pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+					break;
+				}
+
+				case type_hpoint:
+				{
+					CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pParameter);
+					pData->SetValue( static_cast<CqVector3D>( Evaluate( su, sv, pTParam ) ), igrid );
+					break;
+				}
+
+				case type_color:
+				{
+					CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>(pParameter);
+					pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+					break;
+				}
+
+				case type_string:
+				{
+					CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>(pParameter);
+					pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+					break;
+				}
+
+				case type_matrix:
+				{
+					CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(pParameter);
+					pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+					break;
+				}
+			}
 		}
 	}
 }
@@ -1753,9 +1772,9 @@ TqInt	CqSurfaceNURBS::TrimDecimation( const CqTrimCurve& Curve )
 		u2 = vecCP.x();
 		v2 = vecCP.y();
 
-		CqVector3D vecP = Evaluate( u, v );
+		CqVector3D vecP = Evaluate( u, v, &P() );
 		vecP = matCtoR * vecP;
-		CqVector3D vecP2 = Evaluate( u2, v2 );
+		CqVector3D vecP2 = Evaluate( u2, v2, &P() );
 		vecP2 = matCtoR * vecP2;
 
 		Len = ( vecP2 - vecP ).Magnitude();
@@ -1810,7 +1829,7 @@ void CqSurfaceNURBS::OutputMesh()
 				            * ( S[ s ]->m_auKnots[ S[ s ]->m_cuVerts ] - S[ s ]->m_auKnots[ S[ s ]->m_uOrder - 1 ] )
 				            + S[ s ]->m_auKnots[ S[ s ]->m_uOrder - 1 ];
 
-				aaPoints[ i ][ j ] = S[ s ]->Evaluate( u, v );
+				aaPoints[ i ][ j ] = S[ s ]->Evaluate( u, v, &P() );
 			}
 		}
 
