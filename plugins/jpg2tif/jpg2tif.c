@@ -96,8 +96,6 @@ _qShareM char *jpg2tif( char *in )
 
 	jpgfile = fopen( in, "rb" );
 	result = jpeg_open( jpgfile, tiffname );
-	fclose( jpgfile );
-
 
 	return result;
 }

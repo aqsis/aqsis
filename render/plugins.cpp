@@ -63,27 +63,109 @@ extern "C"
 
 START_NAMESPACE( Aqsis )
 
+
+//---------------------------------------------------------------------
+/** dlfunc wrappers
+ * These function abstract dlopen,dlsym and dlclose for win32, OS-X, BeOS 
+ * and POSIX etc.
+ */
+void *
+CqPlugins::DLOpen(CqString *library)
+{
+  	void *handle = NULL;
+
+#ifdef	PLUGINS
+#ifdef AQSIS_SYSTEM_WIN32 
+	handle = ( void* ) LoadLibrary( library->c_str() );
+#elif defined (AQSIS_SYSTEM_MACOSX) 
+#  ifndef MACOSX_NO_LIBDL
+	handle = ( void * ) dlopen( library->c_str(), RTLD_NOW | RTLD_GLOBAL );
+#  endif
+#elif defined (AQSIS_SYSTEM_BEOS)
+		// We probably need an interface for CFPlugins here
+		// But for now, we will not implement plugins
+#else  
+	handle = ( void * ) dlopen( library->c_str(), RTLD_LAZY );
+#endif
+
+#endif
+	return handle;
+}
+
+void *
+CqPlugins::DLSym(void *handle, CqString *symbol )
+{
+	void *location = NULL;
+
+#ifdef	PLUGINS
+	if ( handle )
+	{
+
+#if   defined (AQSIS_SYSTEM_WIN32) //Win32 LoadProc support
+		location = ( void * ) GetProcAddress( ( HINSTANCE ) handle, symbol->c_str() );
+#elif defined (AQSIS_SYSTEM_MACOSX) 
+#  ifndef MACOSX_NO_LIBDL
+		location = ( void * ) dlsym( handle, symbol->c_str() );
+#  endif
+#elif defined (AQSIS_SYSTEM_BEOS)
+		// We probably need an interface for CFPlugins here
+		// But for now, we will not implement plugins
+#else
+		//this is the same as MacOS-X but we might aswell keep the same seperation for the moment
+		location = ( void * ) dlsym( handle, symbol->c_str() );
+#endif
+	};
+
+#endif
+	return location;
+}
+
+void
+CqPlugins::DLClose(void *handle)
+{
+#ifdef	PLUGINS
+	if ( handle )
+	{
+
+#if   defined (AQSIS_SYSTEM_WIN32) //Win32 LoadProc support
+		FreeLibrary( ( HINSTANCE ) handle );
+#elif defined (AQSIS_SYSTEM_MACOSX) 
+#  ifndef MACOSX_NO_LIBDL
+		dlclose( handle );
+#  endif
+#elif defined (AQSIS_SYSTEM_BEOS)
+		// We probably need an interface for CFPlugins here
+		// But for now, we will not implement plugins
+#else
+		//this is the same as MacOS-X but we might aswell keep the same seperation for the moment
+		dlclose( handle );
+#endif
+	};
+#endif
+}
+
 //---------------------------------------------------------------------
 /** Constructor.
  * Set up the search path, library (.dll, .dso, .so) name, and function name
  */
 CqPlugins::CqPlugins( char *searchpath, char *library, char *function )
 {
-	strcpy( errorlog, "" );
-	strcpy( dynamicsearch, searchpath );
-	strcpy( dynamiclibrary, library );
-#ifdef AQSIS_SYSTEM_WIN32
-	strcpy( dynamicfunction, function );
-#elif defined(AQSIS_SYSTEM_MACOSX) 
+	errorlog = "" ;
+	dynamicsearch = searchpath ;
+	dynamiclibrary =  library ;
+#if   defined (AQSIS_SYSTEM_WIN32)
+	dynamicfunction =  function ;
+#elif defined (AQSIS_SYSTEM_MACOSX) 
 	// For Mac OS X, define MACOSX_NO_LIBDL if libdl not installed
 #ifndef MACOSX_NO_LIBDL
-	sprintf( dynamicfunction, "_%s", function );
+	dynamicfunction = "_" + function ;
 #endif
 #else
-	strcpy( dynamicfunction, function );
+	dynamicfunction = function ;
 #endif
 	handle = NULL;
 }
+
 //---------------------------------------------------------------------
 /** Main function to call!
  * return the function pointer based on the construction information 
@@ -96,15 +178,15 @@ void *CqPlugins::Function()
 	void * function_pt = NULL;
 
 #ifdef	PLUGINS
-#ifdef AQSIS_SYSTEM_WIN32
-	/* dll was never loaded before */
 	if ( !handle )
-		handle = ( void* ) LoadLibrary( dynamiclibrary );
+		handle = ( void* ) DLOpen ( &dynamiclibrary ) ;
+
 	if ( handle )
 	{
-		function_pt = ( void * ) GetProcAddress( ( HINSTANCE ) handle, dynamicfunction );
+		function_pt = ( void * ) DLSym(handle, &dynamicfunction );
 		if ( function_pt == NULL )
 		{
+#ifdef AQSIS_SYSTEM_WIN32
 			LPVOID lpMsgBuf;
 			FormatMessage(
 			    FORMAT_MESSAGE_ALLOCATE_BUFFER |
@@ -120,15 +202,18 @@ void *CqPlugins::Function()
 			// Process any inserts in lpMsgBuf.
 			// ...
 			// Display the string.
-			sprintf( errorlog, "%s(): %s", dynamicfunction, ( LPCTSTR ) lpMsgBuf );
+			errorlog = dynamicfunction + "(): " + (CqString) ( LPCTSTR ) lpMsgBuf ;
 
 			// Free the buffer.
 			LocalFree( lpMsgBuf );
-
+#else
+			errorlog = dynamicfunction + "(): " +  dlerror() ;
+#endif
 		}
 	}
 	else
 	{
+#ifdef AQSIS_SYSTEM_WIN32
 		LPVOID lpMsgBuf;
 		FormatMessage(
 		    FORMAT_MESSAGE_ALLOCATE_BUFFER |
@@ -144,57 +229,17 @@ void *CqPlugins::Function()
 		// Process any inserts in lpMsgBuf.
 		// ...
 		// Display the string.
-		sprintf( errorlog, "%s: %s", dynamiclibrary, ( LPCTSTR ) lpMsgBuf );
+		errorlog = dynamiclibrary + (CqString) ( LPCTSTR ) lpMsgBuf ;
 
 		// Free the buffer.
 		LocalFree( lpMsgBuf );
-
-	}
-#elif defined(AQSIS_SYSTEM_MACOSX)
-	// We probably need an interface for CFPlugins here
-	// But for now, we will not implement plugins
-	// For Mac OS X, define MACOSX_NO_LIBDL if libdl not installed
-#ifndef MACOSX_NO_LIBDL
-	handle = ( void * ) dlopen( dynamiclibrary, RTLD_NOW | RTLD_GLOBAL );
-	if ( !handle )
-	{
-		sprintf( errorlog, "%s: %s", dynamiclibrary, dlerror() );
-	}
-	else
-	{
-		function_pt = ( void * ) dlsym( handle, dynamicfunction );
-		if ( !function_pt )
-		{
-			sprintf( errorlog, "%s(): %s", dynamicfunction, dlerror() );
-		}
-	}
-#endif
-#elif defined(AQSIS_SYSTEM_BEOS)
-	// We probably need an interface for CFPlugins here
-	// But for now, we will not implement plugins
-	function_pt = NULL;
 #else
-
-	/* so was never loaded before */
-	if ( !handle )
-	{
-		handle = dlopen( dynamiclibrary, RTLD_LAZY );
-	}
-	if ( !handle )
-	{
-		sprintf( errorlog, "%s: %s", dynamiclibrary, dlerror() );
-	}
-	else
-	{
-		function_pt = ( void * ) dlsym( handle, dynamicfunction );
-		if ( !function_pt )
-		{
-			sprintf( errorlog, "%s(): %s", dynamicfunction, dlerror() );
-		}
-	}
-
+		errorlog =  dynamiclibrary + "  " + dlerror();
 #endif
+	};
+
 #endif //PLUGINS
+
 	return function_pt;
 }
 
@@ -202,9 +247,9 @@ void *CqPlugins::Function()
 /** Return the current log in case of error occurred in Function();
  *  the string comes from the OS.
  */
-char * CqPlugins::ErrorLog()
+const char * CqPlugins::ErrorLog()
 {
-	return errorlog;
+	return errorlog.c_str();
 }
 //---------------------------------------------------------------------
 /** Close and unload the .dll, .dso, .so
@@ -213,22 +258,9 @@ void CqPlugins::Close()
 {
 
 #ifdef	PLUGINS
-#ifdef AQSIS_SYSTEM_WIN32
+	if ( handle )
+		DLClose( handle );
 
-	if ( handle )
-		FreeLibrary( ( HINSTANCE ) handle );
-#elif defined(AQSIS_SYSTEM_MACOSX) 
-	// For Mac OS X, define MACOSX_NO_LIBDL if libdl not installed
-#ifndef MACOSX_NO_LIBDL
-	if ( handle )
-		dlclose( handle );
-#endif
-#elif defined(AQSIS_SYSTEM_BEOS)
-	// Do nothing for now
-#else
-	if ( handle )
-		dlclose( handle );
-#endif
 	handle = NULL;
 #endif //PLUGINS
 
