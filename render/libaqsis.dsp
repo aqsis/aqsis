@@ -546,7 +546,9 @@ USERDEP__API_X="apicache.xsl"	"apiheader.xsl"
 InputPath=.\api.xml
 
 BuildCmds= \
+	echo Building cache inline file \
 	..\..\win32libs\bin\xsltproc -o ri_cache.inl apicache.xsl api.xml \
+	echo Building API header inline file \
 	..\..\win32libs\bin\xsltproc -o ri.inl apiheader.xsl api.xml \
 	
 
@@ -564,7 +566,9 @@ USERDEP__API_X="apicache.xsl"	"apiheader.xsl"
 InputPath=.\api.xml
 
 BuildCmds= \
+	echo Building cache inline file \
 	..\..\win32libs\bin\xsltproc -o ri_cache.inl apicache.xsl api.xml \
+	echo Building API header inline file \
 	..\..\win32libs\bin\xsltproc -o ri.inl apiheader.xsl api.xml \
 	
 

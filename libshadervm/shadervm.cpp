@@ -862,14 +862,14 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
             continue;
 
             // Get the version information.
-            //			CqString strVersion(token);
-            //			TqInt vMaj, vMin, build;
-            //			GET_VERSION_FROM_STRING(vMaj,vMin,build);
-            //			if(CHECK_NEWER_VERSION(vMaj,vMin,build))
-            //			{
-            //				CqBasicError(0,Severity_Fatal,"SLX built by more recent version of Aqsis");
-            //				return;
-            //			}
+            CqString strVersion(token);
+            //TqInt vMaj, vMin, build;
+            //GET_VERSION_FROM_STRING(vMaj,vMin,build);
+            //if(CHECK_NEWER_VERSION(vMaj,vMin,build))
+            //{
+			//	CqBasicError(0,Severity_Fatal,"SLX built by more recent version of Aqsis");
+			//	return;
+            //}
         }
 
         if ( ushash == htoken) // == "USES"

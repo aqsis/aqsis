@@ -533,15 +533,63 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
     assert( NULL != Var );
 
     R Retu, Retv;
-	float u,v;
+    TqInt uRes = ps->uGridRes();
+    TqInt vRes = ps->vGridRes();
+    TqInt GridX = i % ( uRes + 1 );
+    TqInt GridY = ( i / ( uRes + 1 ) );
 
-	Retu = SO_DuType(Var, i, ps, Retu);
-	Retv = SO_DvType(Var, i, ps, Retv);
-	u = SO_DuType(den, i, ps, u);
-	v = SO_DvType(den, i, ps, v);
-	Retu/=u;
-	Retv/=v;
-	return(Retu+Retv);
+    R val1, val2;
+    TqFloat u1 = 1.0f, u2 = 0.0f, v1 = 1.0f, v2 = 0.0f;
+
+    // Calculate deriviative in u
+    if ( GridX < uRes )
+    {
+        Var->GetValue( val1, i + 1 );
+        Var->GetValue( val2, i );
+        if ( NULL != den )
+		{
+            den->GetValue( u1, i + 1 );
+            den->GetValue( u2, i );
+		}
+        Retu = ( val1 - val2 ) / ( u1 - u2 );
+    }
+    else
+    {
+        Var->GetValue( val1, i );
+        Var->GetValue( val2, i - 1 );
+        if ( NULL != den )
+		{
+            den->GetValue( u1, i );
+            den->GetValue( u2, i - 1 );
+		}
+        Retu = ( val2 - val1 ) / ( u2 - u1 );
+    }
+
+    // Calculate deriviative in v
+    if ( GridY < vRes )
+    {
+        Var->GetValue( val1, i + uRes + 1 );
+        Var->GetValue( val2, i );
+        if ( NULL != den )
+		{
+            den->GetValue( v1, i + uRes + 1 );
+            den->GetValue( v2, i );
+		}
+        Retv = ( val1 - val2 ) / ( v1 - v2 );
+    }
+    else
+    {
+        Var->GetValue( val1, i );
+        Var->GetValue( val2, i - ( uRes - 1 ) );
+        if ( NULL != den )
+		{
+            den->GetValue( v1, i );
+            den->GetValue( v2, i - ( uRes - 1 ) );
+		}
+        Retv = ( val2 - val1 ) / ( v2 - v1 );
+    }
+
+    return ( Retu + Retv );
 }
 
 
