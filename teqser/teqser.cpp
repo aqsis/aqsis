@@ -68,6 +68,8 @@ int main(int argc, const char** argv)
 		exit(1);
 	}
 
+	RiBegin("teqser");
+
 	if(g_envcube)
 	{
 		if(ap.leftovers().size()!=7)	
@@ -95,5 +97,7 @@ int main(int argc, const char** argv)
 					 " smode \"" << g_swrap.c_str() << "\" tmode \"" << g_twrap.c_str() << "\"" << std::endl;
 		RiMakeTexture((char*)ap.leftovers()[0].c_str(),(char*)ap.leftovers()[1].c_str(),(char*)g_swrap.c_str(),(char*)g_twrap.c_str(),RiBoxFilter,0,0);
 	}
+
+	RiEnd();
 	return(0);
 }
