@@ -1013,8 +1013,8 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 
 	if ( !IsValid() ) return ;
 
-	TqFloat sblur = 1.0f;
-	TqFloat tblur = 1.0f;
+	TqFloat sblur = 0.0f;
+	TqFloat tblur = 0.0f;
 	TqFloat pswidth = 1.0f;
 	TqFloat ptwidth = 1.0f;
 
@@ -1935,11 +1935,11 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 	// Calculate no. of samples.
 	TqInt nt, ns;
-//	if( samples > 0 )
-//	{
-//		nt = ns = static_cast<TqInt>( sqrt( samples ) );
-//	}
-//	else
+	if( samples > 0 )
+	{
+		nt = ns = static_cast<TqInt>( sqrt( samples ) );
+	}
+	else
 	{
 		if ( sres * tres * 4.0 < NumSamples )
 		{
