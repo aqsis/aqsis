@@ -145,8 +145,7 @@ class CqCSGNodePrimitive : public CqCSGTreeNode
 		{
 			return ( CSGNodeType_Primitive );
 		}
-		virtual	void	ProcessSampleList( std::vector<SqImageSample>& samples )
-		{}
+		virtual	void	ProcessSampleList( std::vector<SqImageSample>& samples );
 		virtual	TqBool	EvaluateState( std::vector<TqBool>& abChildStates )
 		{
 			return ( TqTrue );

@@ -157,7 +157,11 @@ void CqCSGTreeNode::ProcessSampleList( std::vector<SqImageSample>& samples )
 	CqCSGTreeNode * pChild = lChildren().pFirst();
 	while ( NULL != pChild )
 	{
-		pChild->ProcessSampleList( samples );
+		// If the node is a primitive, no need to process it.
+		// In fact as the primitive, just nulls out its owned samples
+		// this would break the CSG code.
+		if(pChild->NodeType() != CSGNodeType_Primitive)
+			pChild->ProcessSampleList( samples );
 		pChild = pChild->pNext();
 	}
 
@@ -204,6 +208,29 @@ void CqCSGTreeNode::ProcessSampleList( std::vector<SqImageSample>& samples )
 				i->m_pCSGNode = NULL;
 			poldnode->Release();
 			i++;
+		}
+	}
+}
+
+
+//------------------------------------------------------------------------------
+/**
+ *	Pass the sample list through the CSG node.
+ *  For a primitive, we should just nullify all csg node pointers for samples in this node.
+ *	\note This should only be called if the Primitive node is the top level parent.
+ *
+ *	@param	samples	Array of samples to process.
+ */
+void CqCSGNodePrimitive::ProcessSampleList( std::vector<SqImageSample>& samples )
+{
+	// Now go through samples, clearing samples related to this node.
+	std::vector<SqImageSample>::iterator i;
+	for ( i = samples.begin(); i != samples.end(); i++)
+	{
+		if( i->m_pCSGNode == this)
+		{
+			i->m_pCSGNode = NULL;
+			Release();
 		}
 	}
 }
