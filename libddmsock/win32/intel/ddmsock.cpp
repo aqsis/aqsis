@@ -399,7 +399,7 @@ void CqDDManager::LoadDisplayLibrary(CqDDClient& dd)
 				pmsgfname->Destroy();
 
 				CqMatrix& matWorldToCamera=QGetRenderContext()->matSpaceToSpace("world","camera");
-				CqMatrix& matWorldToScreen=QGetRenderContext()->matSpaceToSpace("world","raster");
+				CqMatrix& matWorldToScreen=QGetRenderContext()->matSpaceToSpace("world","screen");
 
 				SqDDMessageNl msgnl(matWorldToCamera.pElements());
 				dd.SendMsg(&msgnl);
