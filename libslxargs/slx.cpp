@@ -274,7 +274,7 @@ static RtInt AllocateShaderArgsArray(int varCount, SLX_VISSYMDEF ** newArray)
 static void AddShaderVar(CqShaderVM * pShader, int i, 
         SLX_VISSYMDEF * theArgsArray, int *theNArgs)
 {
-    CqShaderVariable * shaderVar;
+    IqShaderVariable * shaderVar;
     EqVariableType	theType;
 	EqVariableClass theClass;
     SLX_TYPE		slxType;
@@ -307,7 +307,9 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     TqFloat			aTqFloat;
                     RtFloat			aRtFloat;
                     slxType = SLX_TYPE_SCALAR;
-                    aTqFloat = static_cast<TqFloat>((*static_cast<CqShaderVariableUniform<type_float,TqFloat>*>(shaderVar)));
+                    CqVMStackEntry SE1;
+					shaderVar->GetValue( 0, SE1);
+					SE1.Value( aTqFloat );
                     aRtFloat = aTqFloat;
                     defaultValLength = sizeof(RtFloat);
                     defaultVal = (char *)malloc(defaultValLength);
@@ -324,7 +326,9 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     CqString		aCqString;
                     char *			aCString;
                     slxType = SLX_TYPE_STRING;
-                    aCqString = (*static_cast<CqShaderVariableUniform<type_string,CqString>*>(shaderVar));
+                    CqVMStackEntry SE1;
+					shaderVar->GetValue( 0, SE1);
+					SE1.Value( aCqString );
                     aCString = (char *)aCqString.c_str();
                     defaultValLength = strlen(aCString) + 1;
                     defaultVal = (char *)malloc(defaultValLength);
@@ -341,7 +345,9 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     CqVector3D		aCqVector3D;
                     RtPoint			aRtPoint;
                     slxType = SLX_TYPE_POINT;
-                    aCqVector3D = (*static_cast<CqShaderVariableUniform<type_point,CqVector3D>*>(shaderVar));
+                    CqVMStackEntry SE1;
+					shaderVar->GetValue( 0, SE1);
+					SE1.Value( aCqVector3D );
                     aRtPoint[0] = aCqVector3D[0];
                     aRtPoint[1] = aCqVector3D[1];
                     aRtPoint[2] = aCqVector3D[2];
@@ -364,7 +370,9 @@ static void AddShaderVar(CqShaderVM * pShader, int i,
                     CqColor			aCqColor;
                     RtColor			aRtColor;
                     slxType = SLX_TYPE_COLOR;
-                    aCqColor = (*static_cast<CqShaderVariableUniform<type_color,CqColor>*>(shaderVar));
+                    CqVMStackEntry SE1;
+					shaderVar->GetValue( 0, SE1);
+					SE1.Value( aCqColor );
                     aRtColor[0] = aCqColor.fRed();
                     aRtColor[1] = aCqColor.fGreen();
                     aRtColor[2] = aCqColor.fBlue();
