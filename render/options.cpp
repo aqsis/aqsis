@@ -214,7 +214,8 @@ CqOptions::CqOptions()  :	m_strHider("Hidden"),
 							m_iColorSamples(3),
 							m_fRelativeDetail(1.0),
 							m_pErrorHandler(&RiErrorPrint),
-							m_pProgressHandler(NULL)
+							m_pProgressHandler(NULL),
+							m_pPreRenderFunction(NULL)
 {
 }
 
@@ -259,6 +260,7 @@ CqOptions& CqOptions::operator=(const CqOptions& From)
 	m_fRelativeDetail=From.m_fRelativeDetail;
 	m_pErrorHandler=From.m_pErrorHandler;
 	m_pProgressHandler=From.m_pProgressHandler;
+	m_pPreRenderFunction=From.m_pPreRenderFunction;
 
 	// Copy the system options.
 	m_aOptions.resize(From.m_aOptions.size());

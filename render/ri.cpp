@@ -368,6 +368,10 @@ RtVoid	RiWorldBegin()
 
 RtVoid	RiWorldEnd()
 {
+	// Call any specified pre render function.
+	if(QGetRenderContext()->optCurrent().pPreRenderFunction()!=NULL)
+		(*QGetRenderContext()->optCurrent().pPreRenderFunction())();
+	
 	// Render the world
 	QGetRenderContext()->RenderWorld();
 	QGetRenderContext()->DeleteWorldContext();
@@ -3622,13 +3626,31 @@ RtBoolean	BasisFromName(RtBasis& b, const char* strName)
 
 
 //----------------------------------------------------------------------
-// RiProgressHandler
-// Set the function used to report progress.
-//
+/** Set the function used to report progress.
+
+	\param	handler	Pointer to the new function to use.
+ */
+
 RtVoid	RiProgressHandler(RtProgressFunc handler)
 {
 	QGetRenderContext()->optCurrent().SetpProgressHandler(handler);
 	return(0);
+}
+
+
+//----------------------------------------------------------------------
+/** Set the function called just prior to rendering, after the world is complete.
+
+	\param	function	Pointer to the new function to use.
+
+	\return	Pointer to the old function.
+ */
+
+RtFunc	RiPreRenderFunction(RtFunc function)
+{
+	RtFunc pOldPreRenderFunction = QGetRenderContext()->optCurrent().pPreRenderFunction();
+	QGetRenderContext()->optCurrent().SetpPreRenderFunction(function);
+	return(pOldPreRenderFunction);
 }
 
 

@@ -286,6 +286,7 @@ typedef	RtVoid		(*RtProgressFunc)(RtFloat PercentComplete);
 
 _qShare	RtBoolean		BasisFromName(RtBasis& b, const char* strName);
 _qShare RtVoid			RiProgressHandler(RtProgressFunc handler);
+_qShare	RtFunc			RiPreRenderFunction(RtFunc function);
 
 #ifdef	__cplusplus
 }

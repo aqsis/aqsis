@@ -36,6 +36,9 @@ ArgParse::apstring g_archives="";
 ArgParse::apstring g_textures="";
 ArgParse::apstring g_displays="";
 ArgParse::apstring g_base_path="";
+ArgParse::apstring g_type="";
+ArgParse::apstring g_addtype="";
+ArgParse::apstring g_mode="rgba";
 
 void version(std::ostream& Stream)
 {
@@ -47,11 +50,38 @@ void version(std::ostream& Stream)
 }
 
 
+/** Function to print the progress of the render.
+	Used as the callback function to a RiProgressHandler call.
+ */
 RtVoid PrintProgress(RtFloat percent)
 {
 	std::cout << std::setw(6) << std::setfill(' ') << std::setprecision(4) << percent << "% Complete\r" << std::flush;
 	return(0);
 }
+
+
+/** Function to setup specific options needed after world loading but before rendering.
+	Used as the callback function to a RiPreRenderFunction call.
+ */
+RtVoid PreRender()
+{
+	if(g_type.compare("")!=0)
+	{
+		char type[256],mode[256];
+		strcpy(type,g_type.c_str());
+		strcpy(mode,g_mode.c_str());
+		RiDisplay("aqsis",type,mode,NULL);
+	}
+	else if(g_addtype.compare("")!=0)
+	{
+		char type[256],mode[256];
+		strcpy(type,g_addtype.c_str());
+		strcpy(mode,g_mode.c_str());
+		RiDisplay("+aqsis",type,mode,NULL);
+	}
+	return(0);
+}
+
 
 int main(int argc, const char** argv)
 {
@@ -63,6 +93,9 @@ int main(int argc, const char** argv)
 	ap.argInt("endofframe", "=integer\aequivalent to \"endofframe\" option", &g_endofframe);
 	ap.argFlag("nostandard", "\adisables declaration of standard RenderMan parameter types", &g_nostandard);
 	ap.argFlag("verbose", "\aoutput environment information", &g_verbose);
+	ap.argString("type", "=string\aspecify a display device type to use", &g_type);
+	ap.argString("addtype", "=string\aspecify a display device type to add", &g_addtype);
+	ap.argString("mode", "=string\aspecify a display device mode to use", &g_mode);
 	ap.argString("config", "=string\aspecify a configuration file to load", &g_config);
 	ap.argString("base", "=string\aspecify a default base path", &g_base_path);
 	ap.argString("shaders", "=string\aspecify a default shaders searchpath", &g_shaders);
@@ -222,6 +255,7 @@ void RenderFile(std::istream& file, const char* name)
 	RiOption("searchpath", "display", &popt,RI_NULL);
 
 	RiProgressHandler(&PrintProgress);
+	RiPreRenderFunction(&PreRender);
 
 	if(g_config.compare(""))
 	{
