@@ -95,6 +95,14 @@ SOURCE=.\shadervariable.cpp
 
 SOURCE=.\shadervm.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\shadervm1.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\shadervm2.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 

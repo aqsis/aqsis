@@ -41,6 +41,8 @@
 #include	"bitvector.h"
 #include	"shadervariable.h"
 
+
+
 START_NAMESPACE( Aqsis )
 
 #define	OpLSS_FF(a,b,Res,State)		OpLSS(temp_float,temp_float,temp_float,a,b,Res,State)
@@ -204,23 +206,24 @@ class _qShareC CqShaderStack
 	public:
 		_qShareM CqShaderStack() : m_iTop( 0 )
 		{
-			m_Stack.resize( type_last );
+			TqInt n = MAX(m_maxsamples, m_samples);
+			m_Stack.resize( n );
 
-			m_aUFPool.resize( type_last );
-			m_aUPPool.resize( type_last );
-			m_aUSPool.resize( type_last );
-			m_aUCPool.resize( type_last );
-			m_aUNPool.resize( type_last );
-			m_aUVPool.resize( type_last );
-			m_aUMPool.resize( type_last );
+			m_aUFPool.resize( n );
+			m_aUPPool.resize( n );
+			m_aUSPool.resize( n );
+			m_aUCPool.resize( n );
+			m_aUNPool.resize( n );
+			m_aUVPool.resize( n );
+			m_aUMPool.resize( n );
 
-			m_aVFPool.resize( type_last );
-			m_aVPPool.resize( type_last );
-			m_aVSPool.resize( type_last );
-			m_aVCPool.resize( type_last );
-			m_aVNPool.resize( type_last );
-			m_aVVPool.resize( type_last );
-			m_aVMPool.resize( type_last );
+			m_aVFPool.resize( n );
+			m_aVPPool.resize( n );
+			m_aVSPool.resize( n );
+			m_aVCPool.resize( n );
+			m_aVNPool.resize( n );
+			m_aVVPool.resize( n );
+			m_aVMPool.resize( n );
 
 			TqInt i;
 			for ( i = 0; i < type_last; i++ )
@@ -230,6 +233,7 @@ class _qShareC CqShaderStack
 		}
 		virtual _qShareM ~CqShaderStack()
 		{
+		
 			m_Stack.clear();
 
 			m_aUFPool.clear();
@@ -247,172 +251,52 @@ class _qShareC CqShaderStack
 			m_aVNPool.clear();
 			m_aVVPool.clear();
 			m_aVMPool.clear();
+
+			Statistics();
+			
 		}
 
 
-		IqShaderData* GetNextTemp( EqVariableType type, EqVariableClass _class )
-		{
-			switch ( type )
-			{
-					case type_point:
-					if ( _class == class_uniform )
-					{
-						while ( m_iUPoolTops[ type_point ] >= m_aUPPool.size() )
-							m_aUPPool.resize( m_aUPPool.size() + 1 );
-						return ( &m_aUPPool[ m_iUPoolTops[ type_point ] ] );
-					}
-					else
-					{
-						while ( m_iVPoolTops[ type_point ] >= m_aVPPool.size() )
-							m_aVPPool.resize( m_aVPPool.size() + 1 );
-						return ( &m_aVPPool[ m_iVPoolTops[ type_point ] ] );
-					}
-
-					case type_string:
-					if ( _class == class_uniform )
-					{
-						while ( m_iUPoolTops[ type_string ] >= m_aUSPool.size() )
-							m_aUSPool.resize( m_aUSPool.size() + 1 );
-						return ( &m_aUSPool[ m_iUPoolTops[ type_string ] ] );
-					}
-					else
-					{
-						while ( m_iVPoolTops[ type_string ] >= m_aVSPool.size() )
-							m_aVSPool.resize( m_aVSPool.size() + 1 );
-						return ( &m_aVSPool[ m_iVPoolTops[ type_string ] ] );
-					}
-
-					case type_color:
-					if ( _class == class_uniform )
-					{
-						while ( m_iUPoolTops[ type_color ] >= m_aUCPool.size() )
-							m_aUCPool.resize( m_aUCPool.size() + 1 );
-						return ( &m_aUCPool[ m_iUPoolTops[ type_color ] ] );
-					}
-					else
-					{
-						while ( m_iVPoolTops[ type_color ] >= m_aVCPool.size() )
-							m_aVCPool.resize( m_aVCPool.size() + 1 );
-						return ( &m_aVCPool[ m_iVPoolTops[ type_color ] ] );
-					}
-
-					case type_normal:
-					if ( _class == class_uniform )
-					{
-						while ( m_iUPoolTops[ type_normal ] >= m_aUNPool.size() )
-							m_aUNPool.resize( m_aUNPool.size() + 1 );
-						return ( &m_aUNPool[ m_iUPoolTops[ type_normal ] ] );
-					}
-					else
-					{
-						while ( m_iVPoolTops[ type_normal ] >= m_aVNPool.size() )
-							m_aVNPool.resize( m_aVNPool.size() + 1 );
-						return ( &m_aVNPool[ m_iVPoolTops[ type_normal ] ] );
-					}
-
-					case type_vector:
-					if ( _class == class_uniform )
-					{
-						while ( m_iUPoolTops[ type_vector ] >= m_aUVPool.size() )
-							m_aUVPool.resize( m_aUVPool.size() + 1 );
-						return ( &m_aUVPool[ m_iUPoolTops[ type_vector ] ] );
-					}
-					else
-					{
-						while ( m_iVPoolTops[ type_vector ] >= m_aVVPool.size() )
-							m_aVVPool.resize( m_aVVPool.size() + 1 );
-						return ( &m_aVVPool[ m_iVPoolTops[ type_vector ] ] );
-					}
-
-					case type_matrix:
-					if ( _class == class_uniform )
-					{
-						while ( m_iUPoolTops[ type_matrix ] >= m_aUMPool.size() )
-							m_aUMPool.resize( m_aUMPool.size() + 1 );
-						return ( &m_aUMPool[ m_iUPoolTops[ type_matrix ] ] );
-					}
-					else
-					{
-						while ( m_iVPoolTops[ type_matrix ] >= m_aVMPool.size() )
-							m_aVMPool.resize( m_aVMPool.size() + 1 );
-						return ( &m_aVMPool[ m_iVPoolTops[ type_matrix ] ] );
-					}
-
-					default:
-					if ( type == type_float )
-					{
-						if ( _class == class_uniform )
-						{
-							while ( m_iUPoolTops[ type_float ] >= m_aUFPool.size() )
-								m_aUFPool.resize( m_aUFPool.size() + 1 );
-							return ( &m_aUFPool[ m_iUPoolTops[ type_float ] ] );
-						}
-						else
-						{
-							while ( m_iVPoolTops[ type_float ] >= m_aVFPool.size() )
-								m_aVFPool.resize( m_aVFPool.size() + 1 );
-							return ( &m_aVFPool[ m_iVPoolTops[ type_float ] ] );
-						}
-					}
-					return NULL;
-			}
-		}
+		IqShaderData* GetNextTemp( EqVariableType type, EqVariableClass _class );
 
 
+		//----------------------------------------------------------------------
 		/** Push a new shader variable reference onto the stack.
 		 */
-		void	Push( IqShaderData* pv )
-		{
-			while ( m_iTop >= m_Stack.size() )
-				m_Stack.resize( m_Stack.size() + 1 );
+		void	Push( IqShaderData* pv );
 
-			m_Stack[ m_iTop++ ] = pv;
-			if ( pv->Class() == class_uniform )
-				m_iUPoolTops[ pv->Type() ] ++;
-			else
-				m_iVPoolTops[ pv->Type() ] ++;
-		}
+		//----------------------------------------------------------------------
 		/** Pop the top stack entry.
 		 * \param f Boolean value to update if this is varying. If not varying, leaves f unaltered.
 		 * \return Reference to the top stack entry.
 		 */
-		IqShaderData* Pop( TqBool& f )
-		{
-			if ( m_iTop ) m_iTop--;
-			IqShaderData* pVal = m_Stack[ m_iTop ];
+		IqShaderData* Pop( TqBool& f );
 
-			f = pVal->Size() > 1 || f;
-
-			if ( pVal->Class() == class_uniform )
-			{
-				m_iUPoolTops[ pVal->Type() ] --;
-				assert( m_iUPoolTops[ pVal->Type() ] >= 0 );
-			}
-			else
-			{
-				m_iVPoolTops[ pVal->Type() ] --;
-				assert( m_iVPoolTops[ pVal->Type() ] >= 0 );
-			}
-
-			return ( pVal );
-		}
+		//----------------------------------------------------------------------
 		/** Duplicate the top stack entry.
 		 */
-		void	Dup()
-		{
-			TqInt iTop = m_iTop-1;
+		void	Dup();
 
-			IqShaderData* s = GetNextTemp( m_Stack[ iTop ] ->Type(), m_Stack[ iTop ] ->Class() );
-			s->SetValueFromVariable( m_Stack[ iTop ] );
-			Push( s );
-		}
 		/** Drop the top stack entry.
 		 */
-		void	Drop()
+		void	Drop();
+
+		/**
+		 * Print the max number of depth if compiled for it.
+		 */
+		static void Statistics();
+
+		
+		/** set the more efficient number of samples per type of variable at run-time.
+		 */
+		static void	SetSamples(TqInt n)
 		{
-			TqBool f = TqFalse;
-			Pop( f );
+			m_samples = n;
+			
 		}
+
+		
+
 	protected:
 		std::vector<IqShaderData*>	m_Stack;
 		TqUint	m_iTop;										///< Index of the top entry.
@@ -446,6 +330,9 @@ class _qShareC CqShaderStack
 
 		static TqInt	m_iUPoolTops[ type_last ];
 		static TqInt	m_iVPoolTops[ type_last ];
+
+		static TqInt    m_samples; // by default == 18 see shaderstack.cpp
+		static TqInt    m_maxsamples;
 }
 ;
 
