@@ -127,6 +127,7 @@ ArgParse::apstring g_cl_mode = "rgba";
 ArgParse::apstring g_cl_strprogress = "Frame (%f) %p%% complete [ %s secs / %S left ]";
 ArgParse::apstring g_cl_framesList = "";
 ArgParse::apintvec g_cl_frames;
+ArgParse::apintvec g_cl_res;
 
 #ifdef	AQSIS_SYSTEM_POSIX
 bool g_cl_syslog = 0;
@@ -275,7 +276,7 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 }
 
 
-/** Function to setup specific options needed after world loading but before rendering.
+/** Function to setup specific options needed after options are complete but before the world is created.
 	Used as the callback function to a RiPreWorldFunction call.
  */
 #ifdef	AQSIS_SYSTEM_BEOS
@@ -308,7 +309,14 @@ RtVoid PreWorld()
     {
         RiCropWindow(g_cl_cropWindow[0], g_cl_cropWindow[1], g_cl_cropWindow[2], g_cl_cropWindow[3]);
     }
-    return ;
+
+   	// Pass in specified resolution.
+	if(g_cl_res.size() == 2)
+	{
+		RiFormat(g_cl_res[0], g_cl_res[1], 1.0f);
+	}
+
+	return ;
 }
 
 
@@ -400,6 +408,15 @@ int main( int argc, const char** argv )
         ap.argFlag( "fb", "\aSame as --type=\"framebuffer\" --mode=\"rgb\"", &g_cl_fb );
         ap.alias( "fb", "d" );
         ap.argFloats( "crop", " x1 x2 y1 y2\aSpecify a crop window, values are in screen space.", &g_cl_cropWindow, ArgParse::SEP_ARGV, 4);
+		ap.argInts( "frames", " f1 f2\aSpecify a starting/ending frame to render (inclusive).", &g_cl_frames, ArgParse::SEP_ARGV, 2);
+		ap.argString( "frameslist", "=string\aSpecify a range of frames to render, ',' separated with '-' to indicate ranges.", &g_cl_framesList);
+        ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
+        ap.argFlag( "beep", "\aBeep on completion of all ribs", &g_cl_beep );
+        ap.alias( "nocolor", "nc" );
+		ap.argInts( "res", " x y\aSpecify the resolution of the render.", &g_cl_res, ArgParse::SEP_ARGV, 2);
+#ifdef	AQSIS_SYSTEM_POSIX
+        ap.argFlag( "syslog", "\aLog messages to syslog", &g_cl_syslog );
+#endif	// AQSIS_SYSTEM_POSIX
         ap.argString( "rc", "=string\aOverride the default RIB configuration file [" + g_rc_path + "]", &g_cl_rc_path );
         ap.argString( "shaders", "=string\aOverride the default shader searchpath(s) [" + g_shader_path + "]", &g_cl_shader_path );
         ap.argString( "archives", "=string\aOverride the default archive searchpath(s) [" + g_archive_path + "]", &g_cl_archive_path );
@@ -408,14 +425,6 @@ int main( int argc, const char** argv )
         ap.argString( "dsolibs", "=string\aOverride the default dso searchpath(s) [" + g_dso_path + "]", &g_cl_dso_path );
         ap.argString( "procedurals", "=string\aOverride the default procedural searchpath(s) [" + g_procedural_path + "]", &g_cl_procedural_path );
         ap.argString( "plugins", "=string\aOverride the default plugin searchpath(s) [" + g_plugin_path + "]", &g_cl_plugin_path );
-		ap.argInts( "frames", " f1 f2\aSpecify a starting/ending frame to render (inclusive).", &g_cl_frames, ArgParse::SEP_ARGV, 2);
-		ap.argString( "frameslist", "=string\aSpecify a range of frames to render, ',' separated with '-' to indicate ranges.", &g_cl_framesList);
-        ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
-        ap.argFlag( "beep", "\aBeep on completion of all ribs", &g_cl_beep );
-        ap.alias( "nocolor", "nc" );
-#ifdef	AQSIS_SYSTEM_POSIX
-        ap.argFlag( "syslog", "\aLog messages to syslog", &g_cl_syslog );
-#endif	// AQSIS_SYSTEM_POSIX
         ap.allowUnrecognizedOptions();
 
         //_crtBreakAlloc = 1305;
