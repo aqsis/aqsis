@@ -133,7 +133,7 @@ int main( int argc, char** argv )
 
 	if ( -1 == DDInitialise( NULL, port ) )
 	{
-		std::cerr << "Unable to open socket" << std::endl;
+		std::cerr << "ERROR: Could not open communications channel to Aqsis" << std::endl;
 		return 1;
 	}
 

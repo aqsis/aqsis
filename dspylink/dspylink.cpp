@@ -129,6 +129,12 @@ int main( int argc, char* argv[] )
 	{
 		DDProcessMessages();
 	}
+	else
+	{
+		std::cerr << "ERROR: Could not open communications channel to Aqsis" << std::endl;
+		return 1;
+	}
+
 	return 0;
 }
 
