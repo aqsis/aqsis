@@ -246,14 +246,14 @@ public:
 
     virtual	TqBool	isSolid()
     {
-        return ( ( NULL != pconParent() ) ? pconParent() ->isSolid() : TqFalse );
+        return ( ( pconParent() ) ? pconParent() ->isSolid() : TqFalse );
     }
     /** Get a pointer to the CSG tree node related to this context.
      * \return an options reference.
      */
     virtual	CqCSGTreeNode*	pCSGNode()
     {
-        return ( ( NULL != pconParent() ) ? pconParent() ->pCSGNode() : NULL );
+        return ( ( pconParent() ) ? pconParent() ->pCSGNode() : NULL );
     }
 
     /** Log invalid context nesting

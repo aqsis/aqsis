@@ -314,7 +314,7 @@ TqBool	ValidateState(int count, ... )
     va_start( pArgs, count );
 
 	int currentState = Outside;
-	if(  QGetRenderContext() != NULL && QGetRenderContext()->pconCurrent() != NULL )
+	if(  QGetRenderContext() != NULL && QGetRenderContext()->pconCurrent() )
 		currentState = QGetRenderContext()->pconCurrent()->Type();
 
 	int i;
@@ -335,7 +335,7 @@ TqBool	ValidateState(int count, ... )
 const char*	GetStateAsString()
 {
 	int currentState = Outside;
-	if( QGetRenderContext()->pconCurrent() != NULL )
+	if( QGetRenderContext()->pconCurrent() )
 		currentState = QGetRenderContext()->pconCurrent()->Type();
 	switch( currentState )
 	{

@@ -180,7 +180,7 @@ CqAttributeModeBlock::~CqAttributeModeBlock()
 CqTransformModeBlock::CqTransformModeBlock( const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Transform )
 {
     // Copy the parents attributes, as this state change doesn't save attributes.
-    if ( pconParent != 0 )
+    if ( pconParent )
         m_pattrCurrent = pconParent->m_pattrCurrent;
     else
     {
@@ -288,7 +288,7 @@ CqObjectModeBlock::~CqObjectModeBlock()
 CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], const boost::shared_ptr<CqModeBlock>& pconParent ) : CqModeBlock( pconParent, Motion ), m_pDeformingSurface( NULL )
 {
     // Copy the parents attributes, as this state change doesn't save attributes.
-    if ( pconParent != 0 )
+    if ( pconParent )
         m_pattrCurrent = pconParent->m_pattrCurrent;
     else
     {
@@ -296,7 +296,7 @@ CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], const boost::sha
         ADDREF( m_pattrCurrent );
     }
 
-    if ( pconParent != 0 )
+    if ( pconParent )
     {
         m_ptransCurrent = pconParent->m_ptransCurrent;
         // Set the default 'new time slot' matrix to the current 0 time matrix, this

@@ -297,7 +297,7 @@ public:
 
     virtual	TqInt	GridSize() const
     {
-        assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->uGridRes() );
+        assert( m_pShaderExecEnv ); return ( m_pShaderExecEnv->uGridRes() );
     }
 };
 
