@@ -33,141 +33,28 @@ DEFINE_STATIC_MEMORYPOOL( CqLath, 512 );
 
 //------------------------------------------------------------------------------
 /**
- *	Get the next lath clockwise around the facet.
- *	Get a pointer to the next lath in a clockwise direction around the
- *	associated facet. This information is inherent in the data structures.
- *
- *	@return	Pointer to the lath.
- */
-CqLath* CqLath::cf() const
-{
-    // Inherent in the data structure.
-    return(m_pClockwiseFacet);
-}
-
-
-//------------------------------------------------------------------------------
-/**
- *	Get the next lath clockwise about the vertex.
- *	Get a pointer to the next lath in a clockwise direction about the
- *	associated vertex. This information is inherent in the data structure.
- *
- *	@return	Pointer to the lath.
- */
-CqLath* CqLath::cv() const
-{
-    // Inherent in the data strucure.
-    return(m_pClockwiseVertex);
-}
-
-
-//------------------------------------------------------------------------------
-/**
- *	Get the edge companion lath.
- *	Get a pointer to the lath which represents the same edge but in the
- *	opposite direction, i.e. refers to the opposite vertex.
- *
- *	@return	Pointer to the lath.
- */
-CqLath* CqLath::ec() const
-{
-    // If the associated edge is boundary there is no companion.
-    assert(NULL != cf());
-    if(NULL != cv())
-        return(cv()->cf());
-    else
-        return(NULL);
-}
-
-//------------------------------------------------------------------------------
-/**
  *	Get the lath counter clockwise about the facet.
  *	Get a pointer to the next lath in a counter clockwise direction about the
- *	associated facet. This function is constant in all cases excepth where the
- *	associated edge is a boundary edge, in which case it is linear in the
- *	number of edges in the associated facet.
- *
+ *	associated facet, where the associated edge is a boundary edge.
  *	@return	Pointer to the lath.
  */
-CqLath* CqLath::ccf() const
+CqLath* CqLath::ccfBoundary() const
 {
-    // If the associated edge is boundary, we will need to search backwards.
-    if(NULL != ec() && NULL != ec()->cv())
-        return(ec()->cv());
-    else
-    {
-        CqLath* pLdash=cf();
-		while(1)
-		{
-			CqLath* temp = pLdash->cf(); 
-			if(this == temp || NULL == temp)
-				break;
-			pLdash=temp;
-		}
+// The associated edge is boundary, we will need to search backwards.
+	CqLath* pLdash=cf();
+	while(1)
+	{
+		CqLath* temp = pLdash->cf();
+		if(this == temp || NULL == temp)
+			break;
+		pLdash=temp;
+	}
 //        while(this != pLdash->cf() && NULL != pLdash->cf())
 //            pLdash=pLdash->cf();
-        assert(this == pLdash->cf());
-        return(pLdash);
-    }
+	assert(this == pLdash->cf());
+	return(pLdash);
 }
 
-
-//------------------------------------------------------------------------------
-/**
- *	Get the lath counter clockwise about the vertex.
- *	Get a pointer to the next lath in a counter clockwise direction about the
- *	associated vertex. This function is constant in all cases.
- *
- *	@return	Pointer to the lath.
- */
-CqLath* CqLath::ccv() const
-{
-    // If the associated edge is boundary, we will need to search backwards.
-    assert(NULL != cf());
-    if(NULL != cf()->ec())
-        return(cf()->ec());
-    else
-        return(NULL);
-}
-
-
-//------------------------------------------------------------------------------
-/**
- *	Get the faces surrounding an edge.
- *	Get a list of laths representing the faces surrounding an edge, will
- *	return just one if the edge is a boundary.
- *
- *	@return	Pointer to an array of lath pointers.
- */
-void CqLath::Qef(std::vector<CqLath*>& Result)
-{
-    Result.resize(NULL != ec()? 2 : 1);
-    // Laths representing the two faces bounding an edge are given by L and L->ec(). If edge
-    // is a boundary, only L is passed back.
-    CqLath *pTmpLath = this;
-    Result[0] = pTmpLath;
-
-    if(NULL != ec())
-        Result[1] = ec();
-}
-
-
-//------------------------------------------------------------------------------
-/**
- *	Get the vertices surounding an edge.
- *	Get a list of laths representing the vertices making up an edge.
- *
- *	@return	Pointer to an array of lath pointers.
- */
-void CqLath::Qev(std::vector<CqLath*>& Result)
-{
-    Result.resize(2);
-    // Laths representing the two vertices of the associated edge are given by
-    // L and L->ccf(). Note we use cf here because itis guarunteed, whereas ec is not.
-    CqLath *pTmpLath = this;
-    Result[0] = pTmpLath;
-    Result[1] = ccf();
-}
 
 
 //------------------------------------------------------------------------------
@@ -252,19 +139,6 @@ void CqLath::Qve(std::vector<CqLath*>& Result)
     }
 }
 
-
-//------------------------------------------------------------------------------
-/**
- *	Get the vertices surrounding a facet.
- *	Get a list of laths representing the vertices which make up the facet this
- *	lath represents.
- *
- *	@return	Pointer to an array of lath pointers.
- */
-void CqLath::Qfv(std::vector<CqLath*>& Result)
-{
-    Qfe(Result);
-}
 
 
 //------------------------------------------------------------------------------
