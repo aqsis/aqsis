@@ -37,6 +37,7 @@
 #include	"symbols.h"
 #include	"bilinear.h"
 #include	"quadrics.h"
+#include	"teapot.h"
 #include	"shaders.h"
 #include	"texturemap.h"
 #include	"messages.h"
@@ -2709,12 +2710,11 @@ RtVoid	RiGeometry(RtToken type, ...)
 //
 RtVoid	RiGeometryV(RtToken type, PARAMETERLIST)
 {
-	// Create something
-	//CqTeapot* pSurface=new CqTeapot();
-	//pSurface->SetDefaultPrimitiveVariables();
-	//ProcessPrimitiveVariables(pSurface,count,tokens,values);
+	CqTeapot* pTeapot=new CqTeapot(false);
+	pTeapot->SetDefaultPrimitiveVariables();
+	ProcessPrimitiveVariables(pTeapot,count,tokens,values);
 
-	//CreateGPrim(pSurface);
+	CreateGPrim(pTeapot);
 
 	return(0);
 }
