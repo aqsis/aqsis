@@ -265,14 +265,16 @@ void CqSender::operator()()
 
 			// Check if the bucket is available.
 			CqBucketDiskStore::SqBucketDiskStoreRecord* precord;
+			boost::mutex::scoped_lock lk(m_pManager->StoreAccess());
 			while((precord = m_pManager->getDiskStore().RetrieveBucketIndex(index)) == NULL)
 			{
+				lk.unlock();
 				// Register an interest in the bucket with the manager.
 				boost::mutex monitor;
 				boost::mutex::scoped_lock lk(monitor);
 				m_pManager->BucketReadyCondition(index)->wait(lk);
+				lk.lock();
 			}
-			precord = m_pManager->getDiskStore().RetrieveBucketIndex(index);
 			// Construct a response
 			TiXmlDocument doc;
 			TiXmlElement root("aqsis:response");

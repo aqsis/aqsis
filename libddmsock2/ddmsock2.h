@@ -92,6 +92,10 @@ public:
 					m_BucketRequestsWaiting[index] = new boost::condition();
 				return(m_BucketRequestsWaiting[index]);
 			}
+	boost::mutex& StoreAccess()
+			{
+				return(m_StoreAccess);
+			}
 
 private:
     std::string	GetStringField( const std::string& s, int idx );
@@ -112,6 +116,7 @@ private:
 	CqDisplayListener	m_Listener;
 	std::map<TqInt, boost::condition*>	m_BucketRequestsWaiting;
 	std::vector<SqDisplayRequest>	m_displayRequests;
+	boost::mutex		m_StoreAccess;
 }
 ;
 

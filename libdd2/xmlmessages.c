@@ -58,15 +58,24 @@ typedef sockaddr* PSOCKADDR;
 
 char* receiveXMLMessage(int socket)
 {
-	unsigned long msgLen;
+	unsigned long msgLen = 0xABCDEFAB;
 	unsigned long tot = 0, left;
 	char* req = 0;
 	int n;
+	int err;
 
 	n = recv(socket, (char*)&msgLen, sizeof(unsigned long), 0);
 	// If recv returns 0, then the socket has been closed.
 	if(n == 0)
 		return(0);
+	else if( n == SOCKET_ERROR)
+	{
+#ifdef	_WIN32
+		err = WSAGetLastError();
+		fprintf(stderr, "receiveXMLMessage : %X\n", err);
+#endif	// _WIN32
+		return(0);
+	}
 
 	msgLen = ntohl(msgLen);
 	left = msgLen;
@@ -74,6 +83,14 @@ char* receiveXMLMessage(int socket)
 	while(left > 0)
 	{
 		n = recv(socket, &req[tot], left, 0);
+		if( n == SOCKET_ERROR)
+		{
+#ifdef	_WIN32
+			err = WSAGetLastError();
+			fprintf(stderr, "receiveXMLMessage : %X\n", err);
+#endif	// _WIN32
+			return(0);
+		}
 		tot += n;
 		left -= n;
 	}
@@ -90,8 +107,26 @@ char* receiveXMLMessage(int socket)
  */
 void sendXMLMessage(int socket, const char* msg)
 {
+	int n;
+	int err;
 	unsigned long len = strlen(msg);
 	unsigned long msgLen = htonl(len);
-	send(socket, (const char*)&msgLen, sizeof(unsigned long), 0);
-	send(socket, msg, len, 0 );
+	n = send(socket, (const char*)&msgLen, sizeof(unsigned long), 0);
+	if( n == SOCKET_ERROR)
+	{
+#ifdef	_WIN32
+		err = WSAGetLastError();
+		fprintf(stderr, "senXMLMessage : %X\n", err);
+#endif	// _WIN32
+		return;
+	}
+	n = send(socket, msg, len, 0 );
+	if( n == SOCKET_ERROR)
+	{
+#ifdef	_WIN32
+		err = WSAGetLastError();
+		fprintf(stderr, "sendXMLMessage : %X\n", err);
+#endif	// _WIN32
+		return;
+	}
 }
