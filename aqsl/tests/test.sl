@@ -17,9 +17,10 @@ float TestFunc(float param, param2; point PP;)
 	float test=1;
 
 	if(param==0)
-		return(-test);
+		test = -test;
 	else
-		return(test);
+		test = test;
+	return(test);
 }
 
 
@@ -32,8 +33,8 @@ matrix MatrixFunc(float mx[16])
 }
 
 
-volume
-TestVolume(	
+surface
+TestSurface(	
 	uniform float Ka = 1;
 	uniform float Kd = .5;
 	uniform float Ks = .5;
@@ -52,9 +53,9 @@ TestVolume(
 	matrix m2 = 1;
 	matrix m3 = matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 
-//	matrix "world" m1;
-//	matrix m2 = matrix "shader" 1;
-//	matrix m3 = matrix "world" (1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
+	matrix "world" m1;
+	matrix m2 = matrix "shader" 1;
+	matrix m3 = matrix "world" (1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 
 	// Test function calls.
 	f2=cos(Kd);
@@ -99,8 +100,8 @@ TestVolume(
 	Du(vv);
 	p=Du(P); 
 	p=Dv(P); 
-//	c=Du(Ci); 
-//	c=Dv(Ci); 
+	c=Du(Ci); 
+	c=Dv(Ci); 
 	f2=Deriv(f3,f2); 
 	p=Deriv(P,f2); 
 	c=Deriv(Ci,f2); 
@@ -147,15 +148,15 @@ TestVolume(
 	f1=environment("environment.tif", P,P,p,p,"swidth",1,"twidth",1);
 
 	// Test bump functions
-//	p=bump("bump.tif",N, dPdu,dPdv);
-//	p=bump("bump.tif"[2],N, dPdu,dPdv);
-//	p=bump("bump.tif",N, dPdu,dPdv, "swidth",1,"twidth",1);
-//	p=bump("bump.tif",N, dPdu,dPdv, s,t);
-//	p=bump("bump.tif"[2],N, dPdu,dPdv, s,t);
-//	p=bump("bump.tif",N, dPdu,dPdv, s,t,0,0,0,0,0,0);
-//	p=bump("bump.tif"[1],N, dPdu,dPdv, s,t,0,0,0,0,0,0);
-//	p=bump("bump.tif",N, dPdu,dPdv, s,t, "swidth",1,"twidth",1);
-//	p=bump("bump.tif",N, dPdu,dPdv, s,t,0,0,0,0,0,0,"swidth",1,"twidth",1);
+	p=bump("bump.tif",N, dPdu,dPdv);
+	p=bump("bump.tif"[2],N, dPdu,dPdv);
+	p=bump("bump.tif",N, dPdu,dPdv, "swidth",1,"twidth",1);
+	p=bump("bump.tif",N, dPdu,dPdv, s,t);
+	p=bump("bump.tif"[2],N, dPdu,dPdv, s,t);
+	p=bump("bump.tif",N, dPdu,dPdv, s,t,0,0,0,0,0,0);
+	p=bump("bump.tif"[1],N, dPdu,dPdv, s,t,0,0,0,0,0,0);
+	p=bump("bump.tif",N, dPdu,dPdv, s,t, "swidth",1,"twidth",1);
+	p=bump("bump.tif",N, dPdu,dPdv, s,t,0,0,0,0,0,0,"swidth",1,"twidth",1);
 
 	f1=filterstep(1,0.5,"width",0.1);
 	f1=filterstep(1,0.5,1.5,"width",0.1);
@@ -168,7 +169,7 @@ TestVolume(
 	matrix m4=MatrixFunc(af);
 
 	attribute("name",f1);
-//	f1=(f1==0)?p2:f1;
+	f1=(f1==0)?f2:f1;
 
 	illuminate(P)
 	{
@@ -189,10 +190,17 @@ TestVolume(
 	{
 		printf("%p",P);
 	}
+
+	// Test duplicate function and variable name handling.
+	float printf = 0;
+	printf("%f\n", printf);
+
+	point VoidFunc = point(0,1,0);
+	printf("%p\n", VoidFunc);
 }
 
-volume
-TestSurface(	
+/*volume
+TestVolume(	
 	uniform float Ka = 1;
 	uniform float Kd = .5;
 	uniform float Ks = .5;
@@ -204,3 +212,4 @@ TestSurface(
 	Oi=Os;
 	Ci*=Os;
 }
+*/
