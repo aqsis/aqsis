@@ -126,125 +126,20 @@ START_NAMESPACE( Aqsis )
 
 #define OpABRS(OP, NAME) \
 		template <class A, class B>	\
-		void	Op##NAME( A& a, B&b, CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState ) \
+		void	Op##NAME( A& a, B&b, CqVMStackEntry* pB, CqVMStackEntry& Res, CqBitVector& RunningState ) \
 		{ \
 			A vA; \
 			B vB; \
- \
-			if( NULL == m_pVarRef && NULL == Comp.m_pVarRef ) \
+			\
+			TqInt i = MAX( MAX( Size(), pB->Size() ), Res.Size() ) - 1; \
+			TqBool __fVarying = i > 0; \
+			for ( ; i >= 0; i-- ) \
 			{ \
-				TqBool fAVar = Size() > 1; \
-				TqBool fBVar = Comp.Size() > 1; \
-				TqBool fRVar = Res.Size() > 1; \
- \
-				if( !fAVar && !fBVar ) \
+				if ( !__fVarying || RunningState.Value( i ) ) \
 				{ \
-					/* Mode 1, both uniform */ \
-					m_Value.GetValue(vA); \
-					Comp.m_Value.GetValue(vB); \
-					Res.m_Value = vA OP vB; \
-				} \
-				else if( fAVar && !fBVar ) \
-				{ \
-					/* Mode 2, A varying, B uniform. */ \
-					TqInt i = Size() - 1; \
-					Comp.m_Value.GetValue(vB); \
-					for( ; i >= 0; i-- ) \
-					{ \
-						if( RunningState.Value( i ) ) \
-						{ \
-							m_aValues[ i ].GetValue(vA); \
-							Res.m_aValues[ i ] = vA OP vB; \
-						} \
-					} \
-				} \
-				else if( !fAVar && fBVar ) \
-				{ \
-					/* Mode 3, A uniform, B varying. */ \
-					TqInt i = Comp.Size() - 1; \
-					m_Value.GetValue(vA); \
-					for( ; i >= 0; i-- ) \
-					{ \
-						if( RunningState.Value( i ) ) \
-						{ \
-							Comp.m_aValues[ i ].GetValue(vB); \
-							Res.m_aValues[ i ] = vA OP vB; \
-						} \
-					} \
-				} \
-				else \
-				{ \
-					/* Mode 4, A varying, B uniform. */ \
-					TqInt i = Size() - 1; \
-					for( ; i >= 0; i-- ) \
-					{ \
-						if( RunningState.Value( i ) ) \
-						{ \
-							m_aValues[ i ].GetValue(vA); \
-							Comp.m_aValues[ i ].GetValue(vB); \
-							Res.m_aValues[ i ] = vA OP vB; \
-						} \
-					} \
-				} \
-			} \
-			else \
-			{ \
-				TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1; \
-				TqBool __fVarying = i > 0; \
-				\
-				if( NULL != m_pVarRef ) \
-				{ \
-					if( NULL != Comp.m_pVarRef ) \
-					{ \
-						for ( ; i >= 0; i-- ) \
-						{ \
-							if ( !__fVarying || RunningState.Value( i ) ) \
-							{ \
-								m_pVarRef->GetValue( vA, i ); \
-								Comp.m_pVarRef->GetValue( vB, i ); \
-								Res.SetValue( vA OP vB, i ); \
-							} \
-						} \
-					}\
-					else \
-					{ \
-						for ( ; i >= 0; i-- ) \
-						{ \
-							if ( !__fVarying || RunningState.Value( i ) ) \
-							{ \
-								m_pVarRef->GetValue( vA, i ); \
-								Comp.GetValue( vB, i ); \
-								Res.SetValue( vA OP vB, i ); \
-							} \
-						} \
-					} \
-				} \
-				else \
-				{ \
-					if( NULL != Comp.m_pVarRef ) \
-					{ \
-						for ( ; i >= 0; i-- ) \
-						{ \
-							if ( !__fVarying || RunningState.Value( i ) ) \
-							{ \
-								GetValue( vA, i ); \
-								Comp.m_pVarRef->GetValue( vB, i ); \
-								Res.SetValue( vA OP vB, i ); \
-							} \
-						} \
-					}\
-					else \
-					{ \
-						for ( ; i >= 0; i-- ) \
-						{ \
-							if ( !__fVarying || RunningState.Value( i ) ) \
-							{ \
-								GetValue( vA, i ); \
-								Comp.GetValue( vB, i ); \
-								Res.SetValue( vA OP vB, i ); \
-							} \
-						} \
-					} \
+					GetValue( vA, i); \
+					pB->GetValue( vB, i); \
+					Res.SetValue( vA OP vB, i ); \
 				} \
 			} \
 		} 
@@ -265,35 +160,35 @@ enum EqStackEntryType
     StackEntryType_Matrix, 	///< Matrix.
 };
 
-struct SqVMStackEntry
+struct CqVMStackData
 {
-	SqVMStackEntry( TqFloat f = 0 )
+	CqVMStackData( TqFloat f = 0 )
 	{
 		*this = f;
 	}
-	SqVMStackEntry( const CqVector3D& v )
+	CqVMStackData( const CqVector3D& v )
 	{
 		*this = v;
 	}
-	SqVMStackEntry( const CqColor& c )
+	CqVMStackData( const CqColor& c )
 	{
 		*this = c;
 	}
-	SqVMStackEntry( const char* s )
+	CqVMStackData( const char* s )
 	{
 		m_Value.m_str = NULL;
 		*this = s;
 	}
-	SqVMStackEntry( const CqString& s )
+	CqVMStackData( const CqString& s )
 	{
 		m_Value.m_str = NULL;
 		*this = s;
 	}
-	SqVMStackEntry( const CqMatrix& m )
+	CqVMStackData( const CqMatrix& m )
 	{
 		*this = m;
 	}
-	~SqVMStackEntry()
+	~CqVMStackData()
 	{
 		if(	m_Type == StackEntryType_String )
 			delete[]( m_Value.m_str );
@@ -479,7 +374,7 @@ struct SqVMStackEntry
 
 	/** Assignment from a float
 	 */
-	SqVMStackEntry& operator=( TqFloat f )
+	CqVMStackData& operator=( TqFloat f )
 	{
 		m_Value.m_float = f; 
 		m_Type = StackEntryType_Float; 
@@ -487,7 +382,7 @@ struct SqVMStackEntry
 	}
 	/** Assignment from an integer
 	 */
-	SqVMStackEntry& operator=( TqInt i )
+	CqVMStackData& operator=( TqInt i )
 	{
 		m_Value.m_int = i; 
 		m_Type = StackEntryType_Int; 
@@ -495,7 +390,7 @@ struct SqVMStackEntry
 	}
 	/** Assignment from a boolean
 	 */
-	SqVMStackEntry& operator=( bool b )
+	CqVMStackData& operator=( bool b )
 	{
 		m_Value.m_bool = b; 
 		m_Type = StackEntryType_Bool; 
@@ -503,7 +398,7 @@ struct SqVMStackEntry
 	}
 	/** Assignment from a 4D vector
 	 */
-	SqVMStackEntry& operator=( const CqVector4D& v )
+	CqVMStackData& operator=( const CqVector4D& v )
 	{
 		m_Value.m_hpoint[0] = v.x();
 		m_Value.m_hpoint[1] = v.y();
@@ -514,7 +409,7 @@ struct SqVMStackEntry
 	}
 	/** Assignment from a 3D vector
 	 */
-	SqVMStackEntry& operator=( const CqVector3D& v )
+	CqVMStackData& operator=( const CqVector3D& v )
 	{
 		m_Value.m_point[0] = v.x();
 		m_Value.m_point[1] = v.y();
@@ -524,7 +419,7 @@ struct SqVMStackEntry
 	}
 	/** Assignment from a color
 	 */
-	SqVMStackEntry& operator=( const CqColor& c )
+	CqVMStackData& operator=( const CqColor& c )
 	{
 		m_Value.m_color[0] = c.fRed();
 		m_Value.m_color[1] = c.fGreen();
@@ -534,7 +429,7 @@ struct SqVMStackEntry
 	}
 	/** Assignment from a char pointer (string)
 	 */
-	SqVMStackEntry& operator=( const char* s )
+	CqVMStackData& operator=( const char* s )
 	{
 		if( m_Type == StackEntryType_String && m_Value.m_str != NULL )
 			delete[]( m_Value.m_str );
@@ -545,7 +440,7 @@ struct SqVMStackEntry
 	}
 	/** Assignment from a string
 	 */
-	SqVMStackEntry& operator=( const CqString& s )
+	CqVMStackData& operator=( const CqString& s )
 	{
 		if( m_Type == StackEntryType_String && m_Value.m_str != NULL )
 			delete[]( m_Value.m_str );
@@ -556,7 +451,7 @@ struct SqVMStackEntry
 	}
 	/** Assignment from a matrix
 	 */
-	SqVMStackEntry& operator=( const CqMatrix& m )
+	CqVMStackData& operator=( const CqMatrix& m )
 	{
 		m_Value.m_matrix[0 ] = m[0][0];
 		m_Value.m_matrix[1 ] = m[0][1];
@@ -601,46 +496,40 @@ class CqVMStackEntry : public IqShaderData
 	virtual	~CqVMStackEntry()
 		{}
 
+		virtual TqBool	fIsRef()	{return(TqFalse);}
+
 		// Value access functions overridden from IqShaderData
 		virtual void GetFloat( TqFloat& f, TqInt index = 0 ) const
 		{
-			if( m_pVarRef != NULL )	m_pVarRef->GetFloat( f, index );
-			else					( m_Size == 1 )? m_Value.GetValue( f ) : m_aValues[ index ].GetValue( f );
+			( m_Size == 1 )? m_Value.GetValue( f ) : m_aValues[ index ].GetValue( f );
 		}
 		virtual void GetBool( TqBool& b, TqInt index = 0 ) const
 		{
-			if( m_pVarRef != NULL )	assert( false );
-			else					( m_Size == 1 )? m_Value.GetValue( b ) : m_aValues[ index ].GetValue( b );
+			( m_Size == 1 )? m_Value.GetValue( b ) : m_aValues[ index ].GetValue( b );
 		}
 		virtual void GetString( CqString& s, TqInt index = 0 ) const
 		{
-			if( m_pVarRef != NULL )	m_pVarRef->GetString( s, index );
-			else					( m_Size == 1 )? m_Value.GetValue( s ) : m_aValues[ index ].GetValue( s );
+			( m_Size == 1 )? m_Value.GetValue( s ) : m_aValues[ index ].GetValue( s );
 		}
 		virtual void GetPoint( CqVector3D& p, TqInt index = 0 ) const
 		{
-			if( m_pVarRef != NULL )	m_pVarRef->GetPoint( p, index );
-			else					( m_Size == 1 )? m_Value.GetValue( p ) : m_aValues[ index ].GetValue( p );
+			( m_Size == 1 )? m_Value.GetValue( p ) : m_aValues[ index ].GetValue( p );
 		}
 		virtual void GetVector( CqVector3D& v, TqInt index = 0 ) const
 		{
-			if( m_pVarRef != NULL )	m_pVarRef->GetVector( v, index );
-			else					( m_Size == 1 )? m_Value.GetValue( v ) : m_aValues[ index ].GetValue( v );
+			( m_Size == 1 )? m_Value.GetValue( v ) : m_aValues[ index ].GetValue( v );
 		}
 		virtual void GetNormal( CqVector3D& n, TqInt index = 0 ) const
 		{
-			if( m_pVarRef != NULL )	m_pVarRef->GetNormal( n, index );
-			else					( m_Size == 1 )? m_Value.GetValue( n ) : m_aValues[ index ].GetValue( n );
+			( m_Size == 1 )? m_Value.GetValue( n ) : m_aValues[ index ].GetValue( n );
 		}
 		virtual void GetColor( CqColor& c, TqInt index = 0 ) const
 		{
-			if( m_pVarRef != NULL )	m_pVarRef->GetColor( c, index );
-			else					( m_Size == 1 )? m_Value.GetValue( c ) : m_aValues[ index ].GetValue( c );
+			( m_Size == 1 )? m_Value.GetValue( c ) : m_aValues[ index ].GetValue( c );
 		}
 		virtual void GetMatrix( CqMatrix& m, TqInt index = 0 ) const
 		{
-			if( m_pVarRef != NULL )	m_pVarRef->GetMatrix( m, index );
-			else					( m_Size == 1 )? m_Value.GetValue( m ) : m_aValues[ index ].GetValue( m );
+			( m_Size == 1 )? m_Value.GetValue( m ) : m_aValues[ index ].GetValue( m );
 		}
 
 		// Value setters, overridden from IqShaderData
@@ -681,43 +570,35 @@ class CqVMStackEntry : public IqShaderData
 		// Value setters, overridden from IqShaderData
 		virtual void SetFloat( const TqFloat& f, TqInt index )
 		{
-			if( m_pVarRef != NULL )	m_pVarRef->SetFloat( f, index );
-			else					( m_Size == 1 )? m_Value = f : m_aValues[index] = f;
+			( m_Size == 1 )? m_Value = f : m_aValues[index] = f;
 		}
 		virtual void SetBool( const TqBool& b, TqInt index )
 		{
-			if( m_pVarRef != NULL )	assert( false );
-			else					( m_Size == 1 )? m_Value = b : m_aValues[index] = b;
+			( m_Size == 1 )? m_Value = b : m_aValues[index] = b;
 		}
 		virtual void SetString( const CqString& s, TqInt index )
 		{
-			if( m_pVarRef != NULL )	m_pVarRef->SetString( s, index );
-			else					( m_Size == 1 )? m_Value = s : m_aValues[index] = s;
+			( m_Size == 1 )? m_Value = s : m_aValues[index] = s;
 		}
 		virtual void SetPoint( const CqVector3D& p, TqInt index )
 		{
-			if( m_pVarRef != NULL )	m_pVarRef->SetPoint( p, index );
-			else					( m_Size == 1 )? m_Value = p : m_aValues[index] = p;
+			( m_Size == 1 )? m_Value = p : m_aValues[index] = p;
 		}
 		virtual void SetVector( const CqVector3D& v, TqInt index )
 		{
-			if( m_pVarRef != NULL )	m_pVarRef->SetVector( v, index );
-			else					( m_Size == 1 )? m_Value = v : m_aValues[index] = v;
+			( m_Size == 1 )? m_Value = v : m_aValues[index] = v;
 		}
 		virtual void SetNormal( const CqVector3D& n, TqInt index )
 		{
-			if( m_pVarRef != NULL )	m_pVarRef->SetNormal( n, index );
-			else					( m_Size == 1 )? m_Value = n : m_aValues[index] = n;
+			( m_Size == 1 )? m_Value = n : m_aValues[index] = n;
 		}
 		virtual void SetColor( const CqColor& c, TqInt index )
 		{
-			if( m_pVarRef != NULL )	m_pVarRef->SetColor( c, index );
-			else					( m_Size == 1 )? m_Value = c : m_aValues[index] = c;
+			( m_Size == 1 )? m_Value = c : m_aValues[index] = c;
 		}
 		virtual void SetMatrix( const CqMatrix& m, TqInt index )
 		{
-			if( m_pVarRef != NULL )	m_pVarRef->SetMatrix( m, index );
-			else					( m_Size == 1 )? m_Value = m : m_aValues[index] = m;
+			( m_Size == 1 )? m_Value = m : m_aValues[index] = m;
 		}
 
 
@@ -862,27 +743,26 @@ class CqVMStackEntry : public IqShaderData
 
 		virtual	EqVariableClass	Class() const
 		{
-			if( m_pVarRef != NULL )	return( m_pVarRef->Class() );
-			else					return( ( m_Size == 1 )? class_uniform : class_varying );
+			return( ( m_Size == 1 )? class_uniform : class_varying );
 		}
 
 		virtual	EqVariableType	Type() const
 		{
-			if( m_pVarRef != NULL )	return( m_pVarRef->Type() );
-			else					return( static_cast<EqVariableType>( ( m_Size == 1 )? m_Value.m_Type : m_aValues[0].m_Type ) );
+			return( static_cast<EqVariableType>( ( m_Size == 1 )? m_Value.m_Type : m_aValues[0].m_Type ) );
 		}
 
-		virtual TqUint	Size() const;
+		virtual TqUint	Size() const
+		{
+			return( m_Size );
+		}
 
 		virtual TqInt	ArrayLength() const		
 		{
-			if( m_pVarRef != NULL )	return( m_pVarRef->ArrayLength() );
-			else					return( 0 );
+			return( 0 );
 		}
 		virtual IqShaderData*	ArrayEntry(TqInt i)
 		{
-			if( m_pVarRef != NULL )	return( m_pVarRef->ArrayEntry(i) );
-			else					return( this ); 
+			return( this ); 
 		}
 		
 
@@ -890,22 +770,16 @@ class CqVMStackEntry : public IqShaderData
 		 */
 		CqVMStackEntry&	operator=( const CqVMStackEntry& e )
 		{
-			if ( e.m_pVarRef != 0 )
-				m_pVarRef = e.m_pVarRef;
+			m_Size = e.Size();
+			if ( Size() == 1 )
+				m_Value = e.m_Value;
 			else
 			{
-				m_pVarRef = 0;
-				m_Size = e.Size();
-				if ( Size() == 1 )
-					m_Value = e.m_Value;
-				else
-				{
-					if(m_aValues.size() < m_Size )
-						m_aValues.resize( m_Size );
-					TqInt i;
-					for ( i = Size() - 1; i >= 0; i-- )
-						m_aValues[ i ] = e.m_aValues[ i ];
-				}
+				if(m_aValues.size() < m_Size )
+					m_aValues.resize( m_Size );
+				TqInt i;
+				for ( i = Size() - 1; i >= 0; i-- )
+					m_aValues[ i ] = e.m_aValues[ i ];
 			}
 			return ( *this );
 		}
@@ -914,7 +788,6 @@ class CqVMStackEntry : public IqShaderData
 		 */
 		CqVMStackEntry&	operator=( TqFloat f )
 		{
-			m_pVarRef = 0;
 			TqInt i;
 			if ( Size() == 1 ) m_Value = f;
 			else
@@ -926,7 +799,6 @@ class CqVMStackEntry : public IqShaderData
 		 */
 		CqVMStackEntry&	operator=( TqInt v )
 		{
-			m_pVarRef = 0;
 			TqInt i;
 			if ( Size() == 1 ) m_Value = v;
 			else
@@ -938,7 +810,6 @@ class CqVMStackEntry : public IqShaderData
 		 */
 		CqVMStackEntry&	operator=( TqBool b )
 		{
-			m_pVarRef = 0;
 			TqInt i;
 			if ( Size() == 1 ) m_Value = b;
 			else
@@ -950,7 +821,6 @@ class CqVMStackEntry : public IqShaderData
 		 */
 		CqVMStackEntry&	operator=( const CqVector3D& v )
 		{
-			m_pVarRef = 0;
 			TqInt i;
 			if ( Size() == 1 ) m_Value = v;
 			else
@@ -962,7 +832,6 @@ class CqVMStackEntry : public IqShaderData
 		 */
 		CqVMStackEntry&	operator=( const CqColor& c )
 		{
-			m_pVarRef = 0;
 			TqInt i;
 			if ( Size() == 1 ) m_Value = c;
 			else
@@ -974,7 +843,6 @@ class CqVMStackEntry : public IqShaderData
 		 */
 		CqVMStackEntry&	operator=( const char* s )
 		{
-			m_pVarRef = 0;
 			TqInt i;
 			if ( Size() == 1 ) m_Value = s;
 			else
@@ -986,7 +854,6 @@ class CqVMStackEntry : public IqShaderData
 		 */
 		CqVMStackEntry&	operator=( const CqString& s )
 		{
-			m_pVarRef = 0;
 			TqInt i;
 			if ( Size() == 1 ) m_Value = s;
 			else
@@ -998,14 +865,12 @@ class CqVMStackEntry : public IqShaderData
 		 */
 		CqVMStackEntry&	operator=( const CqMatrix& m )
 		{
-			m_pVarRef = 0;
 			TqInt i;
 			if ( Size() == 1 ) m_Value = m;
 			else
 				for ( i = Size() - 1; i >= 0; i-- ) m_aValues[ i ] = m;
 			return ( *this );
 		}
-		CqVMStackEntry&	operator=( IqShaderData* pv );
 
 		/** Templatised less than operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -1076,21 +941,23 @@ class CqVMStackEntry : public IqShaderData
 		 * \param Res The stack entry to store the result in.
 		 * \param RunningState The current SIMD state.
 		 */
-		void	OpMULV( CqVMStackEntry& Comp, CqVMStackEntry& Res, CqBitVector& RunningState )
+		void	OpMULV( CqVMStackEntry* pB, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
 			CqVector3D	vecA, vecB;
 
-			TqInt i = MAX( MAX( Size(), Comp.Size() ), Res.Size() ) - 1;
+			TqInt i = MAX( MAX( Size(), pB->Size() ), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
+			{
 				if ( !__fVarying || RunningState.Value( i ) )
 				{
 				GetValue( vecA, i);
-					Comp.GetValue( vecB, i);
+					pB->GetValue( vecB, i);
 					Res.SetValue( CqVector3D( vecA.x() * vecB.x(),
 					                          vecA.y() * vecB.y(),
 					                          vecA.z() * vecB.z() ), i );
 				}
+			}
 		}
 		/** Templatised division operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -1175,7 +1042,7 @@ class CqVMStackEntry : public IqShaderData
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
 				{
-				GetValue( vA, i );
+					GetValue( vA, i );
 					Res.SetValue( -vA, i );
 				}
 		}
@@ -1197,7 +1064,7 @@ class CqVMStackEntry : public IqShaderData
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
 				{
-				GetValue( vA, i );
+					GetValue( vA, i );
 					Res.SetValue( static_cast<B>( vA ), i );
 				}
 		}
@@ -1209,18 +1076,18 @@ class CqVMStackEntry : public IqShaderData
 		 * \param RunningState The current SIMD state.
 		 */
 		template <class A>
-		void	OpTRIPLE( A&, CqVMStackEntry& a, CqVMStackEntry& b, CqVMStackEntry& c, CqBitVector& RunningState )
+		void	OpTRIPLE( A&, CqVMStackEntry* pA, CqVMStackEntry* pB, CqVMStackEntry* pC, CqBitVector& RunningState )
 		{
 			TqFloat x,y,z;
 
-			TqInt i = MAX( MAX( a.Size(), b.Size() ), c.Size() ) - 1;
+			TqInt i = MAX( MAX( pA->Size(), pB->Size() ), pC->Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 				if ( !__fVarying || RunningState.Value( i ) )
 				{
-					a.GetValue( x, i );
-					b.GetValue( y, i );
-					c.GetValue( z, i );
+					pA->GetValue( x, i );
+					pB->GetValue( y, i );
+					pC->GetValue( z, i );
 					SetValue( A( x, y, z ), i );
 				}
 		}
@@ -1230,26 +1097,30 @@ class CqVMStackEntry : public IqShaderData
 		 * \param RunningState The current SIMD state.
 		 */
 		template <class A>
-		void	OpHEXTUPLE( A& z, CqVMStackEntry& a, CqVMStackEntry& b, CqVMStackEntry& c, CqVMStackEntry& d,
-		                 CqVMStackEntry& e, CqVMStackEntry& f, CqVMStackEntry& g, CqVMStackEntry& h,
-		                 CqVMStackEntry& i, CqVMStackEntry& j, CqVMStackEntry& k, CqVMStackEntry& l,
-		                 CqVMStackEntry& m, CqVMStackEntry& n, CqVMStackEntry& o, CqVMStackEntry& p, CqBitVector& RunningState )
+		void	OpHEXTUPLE( A& z, CqVMStackEntry* pA, CqVMStackEntry* pB, CqVMStackEntry* pC, CqVMStackEntry* pD,
+								  CqVMStackEntry* pE, CqVMStackEntry* pF, CqVMStackEntry* pG, CqVMStackEntry* pH,
+								  CqVMStackEntry* pI, CqVMStackEntry* pJ, CqVMStackEntry* pK, CqVMStackEntry* pL,
+								  CqVMStackEntry* pM, CqVMStackEntry* pN, CqVMStackEntry* pO, CqVMStackEntry* pP, CqBitVector& RunningState )
 		{
 			TqFloat a1,a2,a3,a4;
 			TqFloat b1,b2,b3,b4;
 			TqFloat c1,c2,c3,c4;
 			TqFloat d1,d2,d3,d4;
 			
-			TqInt ii = MAX( MAX( a.Size(), b.Size() ), c.Size() ) - 1;
+			TqInt ii1 = MAX( MAX( MAX( pA->Size(), pB->Size() ), pC->Size() ), pD->Size() );
+			TqInt ii2 = MAX( MAX( MAX( pE->Size(), pF->Size() ), pG->Size() ), pH->Size() );
+			TqInt ii3 = MAX( MAX( MAX( pI->Size(), pJ->Size() ), pK->Size() ), pL->Size() );
+			TqInt ii4 = MAX( MAX( MAX( pM->Size(), pN->Size() ), pO->Size() ), pP->Size() );
+			TqInt ii = MAX( MAX( MAX( ii1, ii2 ), ii3 ), ii4 );
 			TqBool __fVarying = ii > 0;
 			for ( ; ii >= 0; ii-- )
 			{
 				if ( !__fVarying || RunningState.Value( ii ) )
 				{
-					a.GetValue( a1, ii );	b.GetValue( a2, ii );	c.GetValue( a3, ii );	d.GetValue( a4, ii );
-					e.GetValue( b1, ii );	f.GetValue( b2, ii );	g.GetValue( b3, ii );	h.GetValue( b4, ii );
-					i.GetValue( c1, ii );	j.GetValue( c2, ii );	k.GetValue( c3, ii );	l.GetValue( c4, ii );
-					m.GetValue( d1, ii );	n.GetValue( d2, ii );	o.GetValue( d3, ii );	p.GetValue( d4, ii );
+					pA->GetValue( a1, ii );	pB->GetValue( a2, ii );	pC->GetValue( a3, ii );	pD->GetValue( a4, ii );
+					pE->GetValue( b1, ii );	pF->GetValue( b2, ii );	pG->GetValue( b3, ii );	pH->GetValue( b4, ii );
+					pI->GetValue( c1, ii );	pJ->GetValue( c2, ii );	pK->GetValue( c3, ii );	pL->GetValue( c4, ii );
+					pM->GetValue( d1, ii );	pN->GetValue( d2, ii );	pO->GetValue( d3, ii );	pP->GetValue( d4, ii );
 					A tt( a1, a2, a3, a4,
 					      b1, b2, b3, b4,
 					      c1, c2, c3, c4,
@@ -1274,11 +1145,13 @@ class CqVMStackEntry : public IqShaderData
 			TqInt i = MAX( Size(), Res.Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
+			{
 				if ( !__fVarying || RunningState.Value( i ) )
 				{
-				GetValue( vA, i );
+					GetValue( vA, i );
 					Res.SetValue( vA [ index ], i );
 				}
+			}
 		}
 		/** Templatised component access operator.
 		 * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -1288,20 +1161,22 @@ class CqVMStackEntry : public IqShaderData
 		 * \param RunningState The current SIMD state.
 		 */
 		template <class A>
-		void	OpCOMP( A& z, CqVMStackEntry& index, CqVMStackEntry& Res, CqBitVector& RunningState )
+		void	OpCOMP( A& z, CqVMStackEntry* index, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
 			A vA;
 			TqFloat fi;
 
-			TqInt i = MAX( MAX( Size(), Res.Size() ), index.Size() ) - 1;
+			TqInt i = MAX( MAX( Size(), Res.Size() ), index->Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
+			{
 				if ( !__fVarying || RunningState.Value( i ) )
 				{
-				GetValue( vA, i );
-					index.GetValue( fi, i );
+					GetValue( vA, i );
+					index->GetValue( fi, i );
 					Res.SetValue( vA [ static_cast<TqInt>( fi ) ], i );
 				}
+			}
 		}
 		/** Templatised component set operator.
 		 * \param z The type to cast this to.
@@ -1310,19 +1185,19 @@ class CqVMStackEntry : public IqShaderData
 		 * \param RunningState The current SIMD state.
 		 */
 		template <class A>
-		void	OpSETCOMP( A& z, int index, CqVMStackEntry& a, CqBitVector& RunningState )
+		void	OpSETCOMP( A& z, int index, CqVMStackEntry* pA, CqBitVector& RunningState )
 		{
 			A vA;
 			TqFloat val;
 
-			TqInt i = MAX( Size(), a.Size() ) - 1;
+			TqInt i = MAX( Size(), pA->Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 			{
 				if ( !__fVarying || RunningState.Value( i ) )
 				{
-				GetValue( vA, i );
-					a.GetValue( val, i );
+					GetValue( vA, i );
+					pA->GetValue( val, i );
 					vA [ index ] = val;
 					SetValue( vA, i );
 				}
@@ -1335,20 +1210,20 @@ class CqVMStackEntry : public IqShaderData
 		 * \param RunningState The current SIMD state.
 		 */
 		template <class A>
-		void	OpSETCOMP( A& z, CqVMStackEntry& index, CqVMStackEntry& a, CqBitVector& RunningState )
+		void	OpSETCOMP( A& z, CqVMStackEntry* index, CqVMStackEntry* pA, CqBitVector& RunningState )
 		{
 			A vA;
 			TqFloat val, fi;
 
-			TqInt i = MAX( MAX( Size(), a.Size() ), index.Size() ) - 1;
+			TqInt i = MAX( MAX( Size(), pA->Size() ), index->Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 			{
 				if ( !__fVarying || RunningState.Value( i ) )
 				{
-				GetValue( vA, i );
-					a.GetValue( val, i );
-					index.GetValue( fi, i );
+					GetValue( vA, i );
+					pA->GetValue( val, i );
+					index->GetValue( fi, i );
 					vA [ static_cast<TqInt>( fi ) ] = val;
 					SetValue( vA, i );
 				}
@@ -1361,7 +1236,7 @@ class CqVMStackEntry : public IqShaderData
 		 * \param Res The stack entry to store the result in.
 		 * \param RunningState The current SIMD state.
 		 */
-		void	OpCOMPM( CqVMStackEntry& r, CqVMStackEntry& c, CqVMStackEntry& Res, CqBitVector& RunningState )
+		void	OpCOMPM( CqVMStackEntry* pR, CqVMStackEntry* pC, CqVMStackEntry& Res, CqBitVector& RunningState )
 		{
 			CqMatrix m;
 			TqFloat fr, fc;
@@ -1372,8 +1247,8 @@ class CqVMStackEntry : public IqShaderData
 				if ( !__fVarying || RunningState.Value( i ) )
 				{
 				GetValue( m, i );
-					r.GetValue( fr, i );
-					c.GetValue( fc, i );
+					pR->GetValue( fr, i );
+					pC->GetValue( fc, i );
 					Res.SetValue( m [ static_cast<TqInt>( fr ) ][ static_cast<TqInt>( fc ) ], i );
 				}
 		}
@@ -1384,21 +1259,21 @@ class CqVMStackEntry : public IqShaderData
 		 * \param v Float type stackentry value to set index to.
 		 * \param RunningState The current SIMD state.
 		 */
-		void	OpSETCOMPM( CqVMStackEntry& r, CqVMStackEntry& c, CqVMStackEntry& v, CqBitVector& RunningState )
+		void	OpSETCOMPM( CqVMStackEntry* pR, CqVMStackEntry* pC, CqVMStackEntry* pV, CqBitVector& RunningState )
 		{
 			CqMatrix m;
 			TqFloat fr, fc, val;
 
-			TqInt i = MAX( Size(), v.Size() ) - 1;
+			TqInt i = MAX( Size(), pV->Size() ) - 1;
 			TqBool __fVarying = i > 0;
 			for ( ; i >= 0; i-- )
 			{
 				if ( !__fVarying || RunningState.Value( i ) )
 				{
 				GetValue( m, i );
-					r.GetValue( fr, i );
-					c.GetValue( fc, i );
-					v.GetValue( val, i );
+					pR->GetValue( fr, i );
+					pC->GetValue( fc, i );
+					pV->GetValue( val, i );
 					m[ static_cast<TqInt>( fr ) ][ static_cast<TqInt>( fc ) ] = val;
 					SetValue( m, i );
 				}
@@ -1407,12 +1282,192 @@ class CqVMStackEntry : public IqShaderData
 
 	private:
 
-		std::vector < SqVMStackEntry /*,CqVMStackEntryAllocator*/ > m_aValues;	///< Array of SqVMStackEntry storage stuctures.
-		SqVMStackEntry	m_Value;		///< Single value in the case of a uniforn stack entry.
-		IqShaderData*	m_pVarRef;		///< Pointer to a referenced variable if a variable stack entry.
+		std::vector < CqVMStackData /*,CqVMStackEntryAllocator*/ > m_aValues;	///< Array of CqVMStackData storage stuctures.
+		CqVMStackData	m_Value;		///< Single value in the case of a uniforn stack entry.
 		TqUint	m_Size;			///< Size of the SIMD data.
 
 	static	CqString m_strName;
+}
+;
+
+
+class CqVMStackEntryVarRef : public CqVMStackEntry
+{
+	public:
+		CqVMStackEntryVarRef() : m_pVarRef(0)	{}
+	virtual	~CqVMStackEntryVarRef()
+		{}
+
+		virtual TqBool	fIsRef()	{return(TqTrue);}
+
+		// Value access functions overridden from IqShaderData
+		virtual void GetFloat( TqFloat& f, TqInt index = 0 ) const
+		{
+			assert( NULL != m_pVarRef );
+			m_pVarRef->GetFloat( f, index );
+		}
+		virtual void GetBool( TqBool& b, TqInt index = 0 ) const
+		{
+			assert( false );
+		}
+		virtual void GetString( CqString& s, TqInt index = 0 ) const
+		{
+			assert( NULL != m_pVarRef );
+			m_pVarRef->GetString( s, index );
+		}
+		virtual void GetPoint( CqVector3D& p, TqInt index = 0 ) const
+		{
+			assert( NULL != m_pVarRef );
+			m_pVarRef->GetPoint( p, index );
+		}
+		virtual void GetVector( CqVector3D& v, TqInt index = 0 ) const
+		{
+			assert( NULL != m_pVarRef );
+			m_pVarRef->GetVector( v, index );
+		}
+		virtual void GetNormal( CqVector3D& n, TqInt index = 0 ) const
+		{
+			assert( NULL != m_pVarRef );
+			m_pVarRef->GetNormal( n, index );
+		}
+		virtual void GetColor( CqColor& c, TqInt index = 0 ) const
+		{
+			assert( NULL != m_pVarRef );
+			m_pVarRef->GetColor( c, index );
+		}
+		virtual void GetMatrix( CqMatrix& m, TqInt index = 0 ) const
+		{
+			assert( NULL != m_pVarRef );
+			m_pVarRef->GetMatrix( m, index );
+		}
+
+		// Value setters, overridden from IqShaderData
+		virtual void SetFloat( const TqFloat& f )
+		{
+			assert( false );
+		}
+		virtual void SetBool( const TqBool& b )
+		{
+			assert( false );
+		}
+		virtual void SetString( const CqString& s )
+		{
+			assert( false );
+		}
+		virtual void SetPoint( const CqVector3D& p )
+		{
+			assert( false );
+		}
+		virtual void SetVector( const CqVector3D& v )
+		{
+			assert( false );
+		}
+		virtual void SetNormal( const CqVector3D& n )
+		{
+			assert( false );
+		}
+		virtual void SetColor( const CqColor& c )
+		{
+			assert( false );
+		}
+		virtual void SetMatrix( const CqMatrix& m )
+		{
+			assert( false );
+		}
+
+
+		// Value setters, overridden from IqShaderData
+		virtual void SetFloat( const TqFloat& f, TqInt index )
+		{
+			assert( NULL != m_pVarRef );
+			m_pVarRef->SetFloat( f, index );
+		}
+		virtual void SetBool( const TqBool& b, TqInt index )
+		{
+			assert( false );
+		}
+		virtual void SetString( const CqString& s, TqInt index )
+		{
+			assert( NULL != m_pVarRef );
+			m_pVarRef->SetString( s, index );
+		}
+		virtual void SetPoint( const CqVector3D& p, TqInt index )
+		{
+			assert( NULL != m_pVarRef );
+			m_pVarRef->SetPoint( p, index );
+		}
+		virtual void SetVector( const CqVector3D& v, TqInt index )
+		{
+			assert( NULL != m_pVarRef );
+			m_pVarRef->SetVector( v, index );
+		}
+		virtual void SetNormal( const CqVector3D& n, TqInt index )
+		{
+			assert( NULL != m_pVarRef );
+			m_pVarRef->SetNormal( n, index );
+		}
+		virtual void SetColor( const CqColor& c, TqInt index )
+		{
+			assert( NULL != m_pVarRef );
+			m_pVarRef->SetColor( c, index );
+		}
+		virtual void SetMatrix( const CqMatrix& m, TqInt index )
+		{
+			assert( NULL != m_pVarRef );
+			m_pVarRef->SetMatrix( m, index );
+		}
+
+		virtual	IqShaderData* Clone() const
+		{
+			return( new CqVMStackEntryVarRef( *this ) );
+		}
+
+
+		virtual	EqVariableClass	Class() const
+		{
+			assert( NULL != m_pVarRef );
+			return( m_pVarRef->Class() );
+		}
+
+		virtual	EqVariableType	Type() const
+		{
+			assert( NULL != m_pVarRef );
+			return( m_pVarRef->Type() );
+		}
+
+		virtual TqUint	Size() const
+		{
+			assert( NULL != m_pVarRef );
+			return( m_pVarRef->Size() );
+		}
+
+		virtual TqInt	ArrayLength() const		
+		{
+			assert( NULL != m_pVarRef );
+			return( m_pVarRef->ArrayLength() );
+		}
+		virtual IqShaderData*	ArrayEntry(TqInt i)
+		{
+			assert( NULL != m_pVarRef );
+			return( m_pVarRef->ArrayEntry(i) );
+		}
+		
+
+		/** Assigment operator.
+		 */
+		CqVMStackEntryVarRef&	operator=( const CqVMStackEntryVarRef& e )
+		{
+			m_pVarRef = e.m_pVarRef;
+			return ( *this );
+		}
+
+		CqVMStackEntry&	operator=( IqShaderData* pv )
+		{
+			m_pVarRef = pv;
+			return( *this );
+		}
+	private:
+		IqShaderData*	m_pVarRef;		///< Pointer to a referenced variable if a variable stack entry.
 }
 ;
 
@@ -1426,30 +1481,54 @@ class CqVMStackEntry : public IqShaderData
 class _qShareC CqShaderStack
 {
 	public:
-		_qShareM CqShaderStack() : m_iTop( 0 )
+		_qShareM CqShaderStack() : m_iTop( 0 ), m_iEntriesTop( 0 ), m_iRefsTop( 0 )
 		{
 			m_Stack.resize( 48 );
+			m_EntriesPool.resize( 48 );
+			m_RefsPool.resize( 48 );
 		}
 		virtual _qShareM ~CqShaderStack()
 		{
 			m_Stack.clear();
+			m_EntriesPool.clear();
+			m_RefsPool.clear();
+		}
+
+		void Push( CqVMStackEntry* pEntry)
+		{
+			if ( m_iTop >= m_Stack.size() )
+				m_Stack.resize( m_Stack.size() + 1 );
+
+			m_Stack[ m_iTop++ ] = pEntry;
 		}
 
 		/** Get a reference to the next item on the stack to be pushed.
 		 */
 		CqVMStackEntry& GetPush()
 		{
-			if ( m_iTop >= m_Stack.size() )
-				m_Stack.resize( m_Stack.size() + 1 );
+			if ( m_iEntriesTop >= m_EntriesPool.size() )
+				m_EntriesPool.resize( m_EntriesPool.size() + 1 );
 
-			return ( m_Stack[ m_iTop++ ] );
+			return ( m_EntriesPool[ m_iEntriesTop++ ] );
+		}
+
+		/** Get a reference to the next item on the stack to be pushed.
+		 */
+		CqVMStackEntryVarRef& GetRefPush()
+		{
+			if ( m_iRefsTop >= m_RefsPool.size() )
+				m_RefsPool.resize( m_RefsPool.size() + 1 );
+
+			return ( m_RefsPool[ m_iRefsTop++ ] );
 		}
 
 		/** Push a new stack entry onto the stack.
 		 */
 		void	Push( const CqVMStackEntry& E )
 		{
-			GetPush() = E;
+			CqVMStackEntry & s = GetPush();
+			s = E;
+			Push( &s );
 		}
 		/** Push a new float onto the stack.
 		 */
@@ -1458,6 +1537,7 @@ class _qShareC CqShaderStack
 			CqVMStackEntry & s = GetPush();
 			s.Initialise( 0, 0 );
 			s = f;
+			Push( &s );
 		}
 		/** Push a new boolean onto the stack.
 		 */
@@ -1466,6 +1546,7 @@ class _qShareC CqShaderStack
 			CqVMStackEntry & s = GetPush();
 			s.Initialise( 0, 0 );
 			s = b;
+			Push( &s );
 		}
 		/** Push a new 3D vector onto the stack.
 		 */
@@ -1474,6 +1555,7 @@ class _qShareC CqShaderStack
 			CqVMStackEntry & s = GetPush();
 			s.Initialise( 0, 0 );
 			s = v;
+			Push( &s );
 		}
 		/** Push a new color onto the stack, passed as 3 floats.
 		 */
@@ -1482,6 +1564,7 @@ class _qShareC CqShaderStack
 			CqVMStackEntry & s = GetPush();
 			s.Initialise( 0, 0 );
 			s = CqColor( r, g, b );
+			Push( &s );
 		}
 		/** Push a new color onto the stack.
 		 */
@@ -1490,6 +1573,7 @@ class _qShareC CqShaderStack
 			CqVMStackEntry & s = GetPush();
 			s.Initialise( 0, 0 );
 			s = c;
+			Push( &s );
 		}
 		/** Push a new string onto the stack.
 		 */
@@ -1498,6 +1582,7 @@ class _qShareC CqShaderStack
 			CqVMStackEntry & s = GetPush();
 			s.Initialise( 0, 0 );
 			s = str;
+			Push( &s );
 		}
 		/** Push a new string, passed as a character onto the stack.
 		 */
@@ -1506,6 +1591,7 @@ class _qShareC CqShaderStack
 			CqVMStackEntry & s = GetPush();
 			s.Initialise( 0, 0 );
 			s = ps;
+			Push( &s );
 		}
 		/** Push a new matrix onto the stack.
 		 */
@@ -1514,42 +1600,67 @@ class _qShareC CqShaderStack
 			CqVMStackEntry & s = GetPush();
 			s.Initialise( 0, 0 );
 			s = mat;
+			Push( &s );
 		}
 		/** Push a new shader variable reference onto the stack.
 		 */
 		void	Push( IqShaderData* pv )
 		{
-			CqVMStackEntry & s = GetPush();
+			CqVMStackEntryVarRef & s = GetRefPush();
 			s = pv;
+			Push( &s );
 		}
 		/** Pop the top stack entry.
 		 * \param f Boolean value to update if this is varying. If not varying, leaves f unaltered.
 		 * \return Reference to the top stack entry.
 		 */
-		CqVMStackEntry& Pop( TqBool& f )
+		CqVMStackEntry* Pop( TqBool& f )
 		{
 			if ( m_iTop ) m_iTop--;
-			CqVMStackEntry& val = m_Stack[ m_iTop ];
-			f = val.Size() > 1 || f;
-			return ( val );
+			CqVMStackEntry* pVal = m_Stack[ m_iTop ];
+			
+			if ( !pVal->fIsRef() && m_iEntriesTop ) m_iEntriesTop--;
+			if ( pVal->fIsRef() && m_iRefsTop ) m_iRefsTop--;
+
+			f = pVal->Size() > 1 || f;
+			return ( pVal );
 		}
 		/** Duplicate the top stack entry.
 		 */
 		void	Dup()
 		{
 			TqInt iTop = m_iTop;
-			GetPush() = m_Stack[ iTop ];
+			
+			if( m_Stack[ iTop ]->fIsRef() )
+			{
+				CqVMStackEntryVarRef & s = GetRefPush();
+				CqVMStackEntryVarRef* pTop = static_cast<CqVMStackEntryVarRef*>(m_Stack[ iTop ]);
+				s = *pTop;
+				Push( &s );
+			}
+			else
+			{
+				CqVMStackEntry & s = GetPush();
+				s = *(m_Stack[ iTop ]);
+				Push( &s );
+			}
 		}
 		/** Drop the top stack entry.
 		 */
 		void	Drop()
 		{
-			if ( m_iTop )
-				m_iTop--;
+			if ( m_iTop )			m_iTop--;
+			CqVMStackEntry* pVal = m_Stack[ m_iTop ];
+			if ( !pVal->fIsRef() && m_iEntriesTop ) m_iEntriesTop--;
+			if ( pVal->fIsRef() && m_iRefsTop ) m_iRefsTop--;
 		}
 	protected:
-		std::vector<CqVMStackEntry>	m_Stack;		///< Array of stacke entries.
-		TqUint	m_iTop;			///< Index of the top entry.
+		std::vector<CqVMStackEntry>			m_EntriesPool;	///< Array of stacke entries.
+		TqUint	m_iEntriesTop;
+		std::vector<CqVMStackEntryVarRef>	m_RefsPool;		///< Array of stacke entries.
+		TqUint	m_iRefsTop;
+		std::vector<CqVMStackEntry*>		m_Stack;
+		TqUint	m_iTop;										///< Index of the top entry.
 }
 ;
 

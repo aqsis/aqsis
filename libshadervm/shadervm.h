@@ -109,7 +109,7 @@ union UsProgramElement
 // Macros used in the VM shadeops
 //
 
-#define	POPV(A)			CqVMStackEntry& A=Pop(__fVarying)
+#define	POPV(A)			CqVMStackEntry* A=Pop(__fVarying)
 #define	POP				Pop(__fVarying)
 #define	RESULT			CqVMStackEntry& Result=__fVarying?gVaryingResult:gUniformResult;
 
@@ -121,25 +121,25 @@ union UsProgramElement
 						Push(Result);
 #define	FUNC1(Func)		POPV(ValA); \
 						RESULT; \
-						Func(&ValA,&Result,this); \
+						Func(ValA,&Result,this); \
 						Push(Result);
 #define	FUNC2(Func)		POPV(ValA); \
 						POPV(ValB); \
 						RESULT; \
-						Func(&ValA,&ValB,&Result,this); \
+						Func(ValA,ValB,&Result,this); \
 						Push(Result);
 #define	FUNC3(Func)		POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						RESULT; \
-						Func(&ValA,&ValB,&ValC,&Result,this); \
+						Func(ValA,ValB,ValC,&Result,this); \
 						Push(Result);
 #define	FUNC4(Func)		POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						POPV(ValD); \
 						RESULT; \
-						Func(&ValA,&ValB,&ValC,&ValD,&Result,this); \
+						Func(ValA,ValB,ValC,ValD,&Result,this); \
 						Push(Result);
 #define	FUNC5(Func)		POPV(ValA); \
 						POPV(ValB); \
@@ -147,7 +147,7 @@ union UsProgramElement
 						POPV(ValD); \
 						POPV(ValE); \
 						RESULT; \
-						Func(&ValA,&ValB,&ValC,&ValD,&ValE,&Result,this); \
+						Func(ValA,ValB,ValC,ValD,ValE,&Result,this); \
 						Push(Result);
 #define	FUNC7(Func)		POPV(ValA); \
 						POPV(ValB); \
@@ -157,32 +157,32 @@ union UsProgramElement
 						POPV(ValF); \
 						POPV(ValG); \
 						RESULT; \
-						Func(&ValA,&ValB,&ValC,&ValD,&ValE,&ValF,&ValG,&Result,this); \
+						Func(ValA,ValB,ValC,ValD,ValE,ValF,ValG,&Result,this); \
 						Push(Result);
 #define FUNC1PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						/* Read all the additional values. */ \
 						TqFloat fc; \
-						count.GetFloat( fc ); \
+						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=&POP; \
+						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT; \
-						Func(&a,&Result,this, cParams, aParams); \
+						Func(a,&Result,this, cParams, aParams); \
 						Push(Result);
 #define FUNC2PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						POPV(b);		/* second value */ \
 						/* Read all the additional values. */ \
 						TqFloat fc; \
-						count.GetFloat( fc ); \
+						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=&POP; \
+						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT; \
-						Func(&a,&b,&Result,this, cParams, aParams); \
+						Func(a,b,&Result,this, cParams, aParams); \
 						Push(Result);
 #define FUNC3PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
@@ -190,37 +190,37 @@ union UsProgramElement
 						POPV(c);		/* third value */ \
 						/* Read all the additional values. */ \
 						TqFloat fc; \
-						count.GetFloat( fc ); \
+						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=&POP; \
+						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT; \
-						Func(&a,&b,&c,&Result,this, cParams, aParams); \
+						Func(a,b,c,&Result,this, cParams, aParams); \
 						Push(Result);
 
 
 #define	VOIDFUNC(Func)	Func(this);
 #define	VOIDFUNC1(Func)	POPV(ValA); \
-						Func(&ValA,this);
+						Func(ValA,this);
 #define	VOIDFUNC2(Func)	POPV(ValA); \
 						POPV(ValB); \
-						Func(&ValA,&ValB,this);
+						Func(ValA,ValB,this);
 #define	VOIDFUNC3(Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
-						Func(&ValA,&ValB,&ValC,this);
+						Func(ValA,ValB,ValC,this);
 #define	VOIDFUNC4(Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						POPV(ValD); \
-						Func(&ValA,&ValB,&ValC,&ValD,this);
+						Func(ValA,ValB,ValC,ValD,this);
 #define	VOIDFUNC5(Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						POPV(ValD); \
 						POPV(ValE); \
-						Func(&ValA,&ValB,&ValC,&ValD,&ValE,this);
+						Func(ValA,ValB,ValC,ValD,ValE,this);
 #define	VOIDFUNC7(Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
@@ -228,17 +228,17 @@ union UsProgramElement
 						POPV(ValE); \
 						POPV(ValF); \
 						POPV(ValG); \
-						Func(&ValA,&ValB,&ValC,&ValD,&ValE,&ValF,&ValG,this);
+						Func(ValA,ValB,ValC,ValD,ValE,ValF,ValG,this);
 #define VOIDFUNC1PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						/* Read all the additional values. */ \
 						TqFloat fc; \
-						count.GetFloat( fc ); \
+						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=&POP; \
-						Func(&a,this, cParams, aParams);
+						while(iP!=cParams)	aParams[iP++]=POP; \
+						Func(a,this, cParams, aParams);
 
 #define	SPLINE(func)	POPV(count);	\
 						POPV(value); \
@@ -247,15 +247,18 @@ union UsProgramElement
 						POPV(valc);	\
 						POPV(vald);	\
 						TqFloat fc; \
-						count.GetFloat( fc ); \
+						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ) + 4; \
 						IqShaderData** apSplinePoints=new IqShaderData*[cParams]; \
-						apSplinePoints[0]=&vala; apSplinePoints[1]=&valb; apSplinePoints[2]=&valc; apSplinePoints[3]=&vald; \
+						apSplinePoints[0]=vala; \
+						apSplinePoints[1]=valb; \
+						apSplinePoints[2]=valc; \
+						apSplinePoints[3]=vald; \
 						TqInt iSP; \
 						for(iSP=4; iSP<cParams; iSP++) \
-							apSplinePoints[iSP]=&POP; \
+							apSplinePoints[iSP]=POP; \
 						RESULT; \
-						func(&value,&Result,this,cParams,apSplinePoints); \
+						func(value,&Result,this,cParams,apSplinePoints); \
 						Push(Result);
 
 #define	SSPLINE(func)	POPV(count); \
@@ -266,41 +269,44 @@ union UsProgramElement
 						POPV(valc);	\
 						POPV(vald);	\
 						TqFloat fc; \
-						count.GetFloat( fc ); \
+						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ) + 4; \
 						IqShaderData** apSplinePoints=new IqShaderData*[cParams]; \
-						apSplinePoints[0]=&vala; apSplinePoints[1]=&valb; apSplinePoints[2]=&valc; apSplinePoints[3]=&vald; \
+						apSplinePoints[0]=vala; \
+						apSplinePoints[1]=valb; \
+						apSplinePoints[2]=valc; \
+						apSplinePoints[3]=vald; \
 						TqInt iSP; \
 						for(iSP=4; iSP<cParams; iSP++) \
-							apSplinePoints[iSP]=&POP; \
+							apSplinePoints[iSP]=POP; \
 						RESULT; \
-						func(&basis,&value,&Result,this,cParams,apSplinePoints); \
+						func(basis,value,&Result,this,cParams,apSplinePoints); \
 						Push(Result);
 
 #define	TEXTURE(func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
 						TqFloat fc; \
-						count.GetFloat( fc ); \
+						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=&POP; \
+						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT; \
-						func(&name,&channel,&Result,this,cParams,aParams); \
+						func(name,channel,&Result,this,cParams,aParams); \
 						Push(Result);
 #define	TEXTURE1(func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
 						POPV(R); /* point */\
 						TqFloat fc; \
-						count.GetFloat( fc ); \
+						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=&POP; \
+						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT; \
-						func(&name,&channel,&R,&Result,this, cParams, aParams); \
+						func(name,channel,R,&Result,this, cParams, aParams); \
 						Push(Result);
 #define	TEXTURE2(func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
@@ -308,13 +314,13 @@ union UsProgramElement
 						POPV(s); /* s */\
 						POPV(t); /* t */\
 						TqFloat fc; \
-						count.GetFloat( fc ); \
+						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=&POP; \
+						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT; \
-						func(&name,&channel,&s,&t,&Result,this, cParams, aParams); \
+						func(name,channel,s,t,&Result,this, cParams, aParams); \
 						Push(Result);
 #define	TEXTURE4(func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
@@ -324,13 +330,13 @@ union UsProgramElement
 						POPV(R3); /* R3 */\
 						POPV(R4); /* R4 */\
 						TqFloat fc; \
-						count.GetFloat( fc ); \
+						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=&POP; \
+						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT; \
-						func(&name,&channel,&R1,&R2,&R3,&R4,&Result,this,cParams,aParams); \
+						func(name,channel,R1,R2,R3,R4,&Result,this,cParams,aParams); \
 						Push(Result);
 #define	TEXTURE8(func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
@@ -344,20 +350,20 @@ union UsProgramElement
 						POPV(s4); /* s4 */\
 						POPV(t4); /* t4 */\
 						TqFloat fc; \
-						count.GetFloat( fc ); \
+						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
-						while(iP!=cParams)	aParams[iP++]=&POP; \
+						while(iP!=cParams)	aParams[iP++]=POP; \
 						RESULT; \
-						func(&name,&channel,&s1,&t1,&s2,&t2,&s3,&t3,&s4,&t4,&Result,this,cParams,aParams); \
+						func(name,channel,s1,t1,s2,t2,s3,t3,s4,t4,&Result,this,cParams,aParams); \
 						Push(Result);
 
 #define	TRIPLE(T)		POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						RESULT; \
-						Result.OpTRIPLE_C(ValA,ValB,ValC); \
+						Result.OpTRIPLE_C(*ValA,*ValB,*ValC); \
 						Push(Result);
 
 //static TqFloat temp_float;

@@ -1245,7 +1245,7 @@ void CqShaderVM::SO_ipushv()
 	for ( i = 0; i < ext; i++ )
 	{
 		TqFloat _aq_A;
-		A.GetFloat( _aq_A, i );
+		A->GetFloat( _aq_A, i );
 		Result.SetValueFromVariable( pVar->ArrayEntry( static_cast<unsigned int>( _aq_A ) ), i );
 	}
 	Push( Result );
@@ -1256,12 +1256,14 @@ void CqShaderVM::SO_pop()
 	AUTOFUNC;
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
-	TqInt ext = m_pEnv->GridSize();
+	TqInt ext = MAX( m_pEnv->GridSize(), pV->Size() );
+	TqBool fVarying = ext > 1;
 	TqInt i;
+	CqBitVector& RS = m_pEnv->RunningState();
 	for ( i = 0; i < ext; i++ )
 	{
-		if(m_pEnv->RunningState().Value( i ))
-			pV->SetValueFromVariable( &Val, i );
+		if(!fVarying || RS.Value( i ))
+			pV->SetValueFromVariable( Val, i );
 	}
 }
 
@@ -1280,16 +1282,18 @@ void CqShaderVM::SO_ipop()
 	POPV( A );
 	POPV( Val );
 	//TqInt ext=__fVarying?m_pEnv->GridSize():1;
-	TqInt ext = m_pEnv->GridSize();
+	TqInt ext = MAX( m_pEnv->GridSize(), pV->Size() );
+	TqBool fVarying = ext > 1;
 	TqInt i;
+	CqBitVector& RS = m_pEnv->RunningState();
 	for ( i = 0; i < ext; i++ )
 	{
-		if ( m_pEnv->RunningState().Value( i ) )
+		if ( !fVarying || RS.Value( i ) )
 		{
 			TqFloat fIndex;
-			A.GetFloat( fIndex, i );
+			A->GetFloat( fIndex, i );
 			TqInt index = static_cast<unsigned int>( fIndex );
-			( *pVA ) [ index ] ->SetValueFromVariable( &Val, i );
+			( *pVA ) [ index ] ->SetValueFromVariable( Val, i );
 		}
 	}
 }
@@ -1307,9 +1311,9 @@ void CqShaderVM::SO_mergef()
 	{
 		TqBool _aq_A;
 		TqFloat _aq_T, _aq_F;
-		A.GetBool( _aq_A, i );
-		T.GetFloat( _aq_T, i );
-		F.GetFloat( _aq_F, i );
+		A->GetBool( _aq_A, i );
+		T->GetFloat( _aq_T, i );
+		F->GetFloat( _aq_F, i );
 		if ( _aq_A ) Result.SetValue( _aq_T, i );
 		else	Result.SetValue( _aq_F, i );
 	}
@@ -1329,9 +1333,9 @@ void CqShaderVM::SO_merges()
 	{
 		TqBool _aq_A;
 		CqString _aq_T, _aq_F;
-		A.GetBool( _aq_A, i );
-		T.GetString( _aq_T, i );
-		F.GetString( _aq_F, i );
+		A->GetBool( _aq_A, i );
+		T->GetString( _aq_T, i );
+		F->GetString( _aq_F, i );
 		if ( _aq_A ) Result.SetValue( _aq_T, i );
 		else	Result.SetValue( _aq_F, i );
 	}
@@ -1351,9 +1355,9 @@ void CqShaderVM::SO_mergep()
 	{
 		TqBool _aq_A;
 		CqVector3D _aq_T, _aq_F;
-		A.GetBool( _aq_A, i );
-		T.GetPoint( _aq_T, i );
-		F.GetPoint( _aq_F, i );
+		A->GetBool( _aq_A, i );
+		T->GetPoint( _aq_T, i );
+		F->GetPoint( _aq_F, i );
 		if ( _aq_A ) Result.SetValue( _aq_T, i );
 		else	Result.SetValue( _aq_F, i );
 	}
@@ -1373,9 +1377,9 @@ void CqShaderVM::SO_mergec()
 	{
 		TqBool _aq_A;
 		CqColor _aq_T, _aq_F;
-		A.GetBool( _aq_A, i );
-		T.GetColor( _aq_T, i );
-		F.GetColor( _aq_F, i );
+		A->GetBool( _aq_A, i );
+		T->GetColor( _aq_T, i );
+		F->GetColor( _aq_F, i );
 		if ( _aq_A ) Result.SetValue( _aq_T, i );
 		else	Result.SetValue( _aq_F, i );
 	}
@@ -1387,7 +1391,7 @@ void CqShaderVM::SO_setfc()
 	AUTOFUNC;
 	POPV( A );
 	RESULT;
-	A.OpCAST_FC( Result, m_pEnv->RunningState() );
+	A->OpCAST_FC( Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1396,7 +1400,7 @@ void CqShaderVM::SO_setfp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT;
-	A.OpCAST_FP( Result, m_pEnv->RunningState() );
+	A->OpCAST_FP( Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1406,7 +1410,7 @@ void CqShaderVM::SO_setfm()
 	AUTOFUNC;
 	POPV( A );
 	RESULT;
-	A.OpCAST_FM( Result, m_pEnv->RunningState() );
+	A->OpCAST_FM( Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1437,7 +1441,7 @@ void CqShaderVM::SO_setpc()
 	AUTOFUNC;
 	POPV( A );
 	RESULT;
-	A.OpCAST_PC( Result, m_pEnv->RunningState() );
+	A->OpCAST_PC( Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1446,7 +1450,7 @@ void CqShaderVM::SO_setcp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT;
-	A.OpCAST_CP( Result, m_pEnv->RunningState() );
+	A->OpCAST_CP( Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1505,12 +1509,13 @@ void CqShaderVM::SO_S_GET()
 	AUTOFUNC;
 	POPV( A );
 	TqInt i;
+	CqBitVector& RS = m_pEnv->RunningState();
 	for ( i = m_pEnv->GridSize() - 1; i >= 0; i-- )
 	{
-		if ( m_pEnv->RunningState().Value( i ) )
+		if ( RS.Value( i ) )
 		{
 			TqBool _aq_A;
-			A.GetBool( _aq_A, i );
+			A->GetBool( _aq_A, i );
 			m_pEnv->CurrentState().SetValue( i, _aq_A );
 		}
 	}
@@ -1560,14 +1565,14 @@ void CqShaderVM::SO_jnz()
 {
 	SqLabel lab = ReadNext().m_Label;
 	AUTOFUNC;
-	CqVMStackEntry f = POP;
+	CqVMStackEntry* f = POP;
 	TqInt __iGrid = 0;
 	do
 	{
 		if ( !__fVarying || m_pEnv->RunningState().Value( __iGrid ) )
 		{
 			TqBool _f;
-			f.GetBool( _f, __iGrid );
+			f->GetBool( _f, __iGrid );
 			if ( !_f ) return ;
 		}
 	}
@@ -1580,14 +1585,14 @@ void CqShaderVM::SO_jz()
 {
 	SqLabel lab = ReadNext().m_Label;
 	AUTOFUNC;
-	CqVMStackEntry f = POP;
+	CqVMStackEntry* f = POP;
 	TqInt __iGrid = 0;
 	do
 	{
 		if ( !__fVarying || m_pEnv->RunningState().Value( __iGrid ) )
 		{
 			TqBool _f;
-			f.GetBool( _f, __iGrid );
+			f->GetBool( _f, __iGrid );
 			if ( _f ) return ;
 		}
 	}
@@ -1609,7 +1614,7 @@ void CqShaderVM::SO_lsff()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpLSS_FF( B, Result, m_pEnv->RunningState() );
+	A->OpLSS_FF( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1619,7 +1624,7 @@ void CqShaderVM::SO_lspp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpLSS_PP( B, Result, m_pEnv->RunningState() );
+	A->OpLSS_PP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1629,7 +1634,7 @@ void CqShaderVM::SO_lscc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpLSS_CC( B, Result, m_pEnv->RunningState() );
+	A->OpLSS_CC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1639,7 +1644,7 @@ void CqShaderVM::SO_gtff()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpGRT_FF( B, Result, m_pEnv->RunningState() );
+	A->OpGRT_FF( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1649,7 +1654,7 @@ void CqShaderVM::SO_gtpp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpGRT_PP( B, Result, m_pEnv->RunningState() );
+	A->OpGRT_PP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1659,7 +1664,7 @@ void CqShaderVM::SO_gtcc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpGRT_CC( B, Result, m_pEnv->RunningState() );
+	A->OpGRT_CC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1669,7 +1674,7 @@ void CqShaderVM::SO_geff()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpGE_FF( B, Result, m_pEnv->RunningState() );
+	A->OpGE_FF( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1679,7 +1684,7 @@ void CqShaderVM::SO_gepp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpGE_PP( B, Result, m_pEnv->RunningState() );
+	A->OpGE_PP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1689,7 +1694,7 @@ void CqShaderVM::SO_gecc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpGE_CC( B, Result, m_pEnv->RunningState() );
+	A->OpGE_CC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1699,7 +1704,7 @@ void CqShaderVM::SO_leff()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpLE_FF( B, Result, m_pEnv->RunningState() );
+	A->OpLE_FF( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1709,7 +1714,7 @@ void CqShaderVM::SO_lepp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpLE_PP( B, Result, m_pEnv->RunningState() );
+	A->OpLE_PP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1719,7 +1724,7 @@ void CqShaderVM::SO_lecc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpLE_CC( B, Result, m_pEnv->RunningState() );
+	A->OpLE_CC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1729,7 +1734,7 @@ void CqShaderVM::SO_eqff()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpEQ_FF( B, Result, m_pEnv->RunningState() );
+	A->OpEQ_FF( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1739,7 +1744,7 @@ void CqShaderVM::SO_eqpp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpEQ_PP( B, Result, m_pEnv->RunningState() );
+	A->OpEQ_PP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1749,7 +1754,7 @@ void CqShaderVM::SO_eqcc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpEQ_CC( B, Result, m_pEnv->RunningState() );
+	A->OpEQ_CC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1759,7 +1764,7 @@ void CqShaderVM::SO_eqss()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpEQ_SS( B, Result, m_pEnv->RunningState() );
+	A->OpEQ_SS( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1769,7 +1774,7 @@ void CqShaderVM::SO_neff()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpNE_FF( B, Result, m_pEnv->RunningState() );
+	A->OpNE_FF( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1779,7 +1784,7 @@ void CqShaderVM::SO_nepp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpNE_PP( B, Result, m_pEnv->RunningState() );
+	A->OpNE_PP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1789,7 +1794,7 @@ void CqShaderVM::SO_necc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpNE_CC( B, Result, m_pEnv->RunningState() );
+	A->OpNE_CC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1799,7 +1804,7 @@ void CqShaderVM::SO_ness()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpNE_SS( B, Result, m_pEnv->RunningState() );
+	A->OpNE_SS( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1809,7 +1814,7 @@ void CqShaderVM::SO_mulff()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpMUL_FF( B, Result, m_pEnv->RunningState() );
+	A->OpMUL_FF( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1819,7 +1824,7 @@ void CqShaderVM::SO_divff()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpDIV_FF( B, Result, m_pEnv->RunningState() );
+	A->OpDIV_FF( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1829,7 +1834,7 @@ void CqShaderVM::SO_addff()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpADD_FF( B, Result, m_pEnv->RunningState() );
+	A->OpADD_FF( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1839,7 +1844,7 @@ void CqShaderVM::SO_subff()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpSUB_FF( B, Result, m_pEnv->RunningState() );
+	A->OpSUB_FF( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1848,7 +1853,7 @@ void CqShaderVM::SO_negf()
 	AUTOFUNC;
 	POPV( A );
 	RESULT;
-	A.OpNEG_F( Result, m_pEnv->RunningState() );
+	A->OpNEG_F( Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1858,7 +1863,7 @@ void CqShaderVM::SO_mulpp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpMULV( B, Result, m_pEnv->RunningState() );
+	A->OpMULV( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1868,7 +1873,7 @@ void CqShaderVM::SO_divpp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpDIV_PP( B, Result, m_pEnv->RunningState() );
+	A->OpDIV_PP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1878,16 +1883,17 @@ void CqShaderVM::SO_addpp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpADD_PP( B, Result, m_pEnv->RunningState() );
+	A->OpADD_PP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
 void CqShaderVM::SO_subpp()
 {
-	AUTOFUNC; POPV( A );
+	AUTOFUNC; 
+	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpSUB_PP( B, Result, m_pEnv->RunningState() );
+	A->OpSUB_PP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1897,7 +1903,7 @@ void CqShaderVM::SO_crspp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpCRS_PP( B, Result, m_pEnv->RunningState() );
+	A->OpCRS_PP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1907,7 +1913,7 @@ void CqShaderVM::SO_dotpp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpDOT_PP( B, Result, m_pEnv->RunningState() );
+	A->OpDOT_PP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1916,7 +1922,7 @@ void CqShaderVM::SO_negp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT;
-	A.OpNEG_P( Result, m_pEnv->RunningState() );
+	A->OpNEG_P( Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1926,7 +1932,7 @@ void CqShaderVM::SO_mulcc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpMUL_CC( B, Result, m_pEnv->RunningState() );
+	A->OpMUL_CC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1936,7 +1942,7 @@ void CqShaderVM::SO_divcc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpDIV_CC( B, Result, m_pEnv->RunningState() );
+	A->OpDIV_CC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1946,7 +1952,7 @@ void CqShaderVM::SO_addcc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpADD_CC( B, Result, m_pEnv->RunningState() );
+	A->OpADD_CC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1956,7 +1962,7 @@ void CqShaderVM::SO_subcc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpSUB_CC( B, Result, m_pEnv->RunningState() );
+	A->OpSUB_CC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1966,16 +1972,17 @@ void CqShaderVM::SO_crscc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpCRS_CC( B, Result, m_pEnv->RunningState() );
+	A->OpCRS_CC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
 void CqShaderVM::SO_dotcc()
 {
-	AUTOFUNC; POPV( A );
+	AUTOFUNC; 
+	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpDOT_CC( B, Result, m_pEnv->RunningState() );
+	A->OpDOT_CC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1984,7 +1991,7 @@ void CqShaderVM::SO_negc()
 	AUTOFUNC;
 	POPV( A );
 	RESULT;
-	A.OpNEG_C( Result, m_pEnv->RunningState() );
+	A->OpNEG_C( Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -1994,7 +2001,7 @@ void CqShaderVM::SO_mulfp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpMUL_FP( B, Result, m_pEnv->RunningState() );
+	A->OpMUL_FP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -2004,7 +2011,7 @@ void CqShaderVM::SO_divfp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpDIV_FP( B, Result, m_pEnv->RunningState() );
+	A->OpDIV_FP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -2014,7 +2021,7 @@ void CqShaderVM::SO_addfp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpADD_FP( B, Result, m_pEnv->RunningState() );
+	A->OpADD_FP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -2024,7 +2031,7 @@ void CqShaderVM::SO_subfp()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpSUB_FP( B, Result, m_pEnv->RunningState() );
+	A->OpSUB_FP( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -2034,7 +2041,7 @@ void CqShaderVM::SO_mulfc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpMUL_FC( B, Result, m_pEnv->RunningState() );
+	A->OpMUL_FC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -2044,7 +2051,7 @@ void CqShaderVM::SO_divfc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpDIV_FC( B, Result, m_pEnv->RunningState() );
+	A->OpDIV_FC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -2054,7 +2061,7 @@ void CqShaderVM::SO_addfc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpADD_FC( B, Result, m_pEnv->RunningState() );
+	A->OpADD_FC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -2064,7 +2071,7 @@ void CqShaderVM::SO_subfc()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpSUB_FC( B, Result, m_pEnv->RunningState() );
+	A->OpSUB_FC( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -2084,7 +2091,7 @@ void CqShaderVM::SO_land()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpLAND_B( B, Result, m_pEnv->RunningState() );
+	A->OpLAND_B( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -2094,7 +2101,7 @@ void CqShaderVM::SO_lor()
 	POPV( A );
 	POPV( B );
 	RESULT;
-	A.OpLOR_B( B, Result, m_pEnv->RunningState() );
+	A->OpLOR_B( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -2493,7 +2500,7 @@ void CqShaderVM::SO_xcomp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT;
-	A.OpCOMP_P( 0, Result, m_pEnv->RunningState() );
+	A->OpCOMP_P( 0, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -2502,7 +2509,7 @@ void CqShaderVM::SO_ycomp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT;
-	A.OpCOMP_P( 1, Result, m_pEnv->RunningState() );
+	A->OpCOMP_P( 1, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -2511,7 +2518,7 @@ void CqShaderVM::SO_zcomp()
 	AUTOFUNC;
 	POPV( A );
 	RESULT;
-	A.OpCOMP_P( 2, Result, m_pEnv->RunningState() );
+	A->OpCOMP_P( 2, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -2658,7 +2665,8 @@ void CqShaderVM::SO_comp()
 	AUTOFUNC;
 	POPV( A );
 	POPV( B );
-	RESULT; A.OpCOMP_C( B, Result, m_pEnv->RunningState() );
+	RESULT; 
+	A->OpCOMP_C( B, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 
@@ -2835,7 +2843,7 @@ void CqShaderVM::SO_init_illuminance()
 	VARFUNC;
 	POPV( A );
 	m_pEnv->InvalidateIlluminanceCache();
-	m_pEnv->ValidateIlluminanceCache( &A, this );
+	m_pEnv->ValidateIlluminanceCache( A, this );
 	Push( m_pEnv->SO_init_illuminance() );
 }
 
@@ -2881,7 +2889,7 @@ void CqShaderVM::SO_atmosphere()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_atmosphere( &Val, pV, &Result );
+	m_pEnv->SO_atmosphere( Val, pV, &Result );
 	Push( Result );
 }
 
@@ -2891,7 +2899,7 @@ void CqShaderVM::SO_displacement()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_displacement( &Val, pV, &Result );
+	m_pEnv->SO_displacement( Val, pV, &Result );
 	Push( Result );
 }
 
@@ -2901,7 +2909,7 @@ void CqShaderVM::SO_lightsource()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_lightsource( &Val, pV, &Result );
+	m_pEnv->SO_lightsource( Val, pV, &Result );
 	Push( Result );
 }
 
@@ -2911,7 +2919,7 @@ void CqShaderVM::SO_surface()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_surface( &Val, pV, &Result );
+	m_pEnv->SO_surface( Val, pV, &Result );
 	Push( Result );
 }
 
@@ -2921,7 +2929,7 @@ void CqShaderVM::SO_attribute()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_attribute( &Val, pV, &Result );
+	m_pEnv->SO_attribute( Val, pV, &Result );
 	Push( Result );
 }
 
@@ -2931,7 +2939,7 @@ void CqShaderVM::SO_option()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_option( &Val, pV, &Result );
+	m_pEnv->SO_option( Val, pV, &Result );
 	Push( Result );
 }
 
@@ -2941,7 +2949,7 @@ void CqShaderVM::SO_rendererinfo()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_rendererinfo( &Val, pV, &Result );
+	m_pEnv->SO_rendererinfo( Val, pV, &Result );
 	Push( Result );
 }
 
@@ -2953,7 +2961,7 @@ void CqShaderVM::SO_textureinfo()
 	POPV( Val );
 	POPV( DataInfo );
 	RESULT;
-	m_pEnv->SO_textureinfo( &Val, &DataInfo, pV, &Result );
+	m_pEnv->SO_textureinfo( Val, DataInfo, pV, &Result );
 	Push( Result );
 }
 
@@ -2963,7 +2971,7 @@ void CqShaderVM::SO_incident()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_incident( &Val, pV, &Result );
+	m_pEnv->SO_incident( Val, pV, &Result );
 	Push( Result );
 }
 
@@ -2973,7 +2981,7 @@ void CqShaderVM::SO_opposite()
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
 	RESULT;
-	m_pEnv->SO_opposite( &Val, pV, &Result );
+	m_pEnv->SO_opposite( Val, pV, &Result );
 	Push( Result );
 }
 
@@ -3195,7 +3203,7 @@ void CqShaderVM::SO_mcomp()
 	POPV( B );
 	POPV( C );
 	RESULT;
-	A.OpCOMPM( B, C, Result, m_pEnv->RunningState() );
+	A->OpCOMPM( B, C, Result, m_pEnv->RunningState() );
 	Push( Result );
 }
 

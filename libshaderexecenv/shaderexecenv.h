@@ -65,9 +65,10 @@ extern TqInt gDefLightUses;
 						TqInt __iGrid; /* Integer index used to track progress through the varying data */
 #define	CHECKVARY(A)	__fVarying=(A)->Class()==class_varying||__fVarying;
 #define	FOR_EACH		__iGrid = 0; \
+						CqBitVector& RS = RunningState(); \
 						do \
 						{ \
-							if(!__fVarying || RunningState().Value( __iGrid ) ) \
+							if(!__fVarying || RS.Value( __iGrid ) ) \
 							{
 #define	END_FOR				} \
 						}while( ( ++__iGrid < GridSize() ) && __fVarying);

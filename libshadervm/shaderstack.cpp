@@ -39,22 +39,6 @@ CqVMStackEntry::CqVMStackEntry( TqInt size )
 		m_aValues.resize( 512 );
 
 	m_Size = size;
-	m_pVarRef = 0;
-}
-
-
-CqVMStackEntry&	CqVMStackEntry::operator=( IqShaderData* pv )
-{
-	//pv->GetValue(*this);
-	m_pVarRef = pv;
-	return ( *this );
-}
-
-
-TqUint CqVMStackEntry::Size() const
-{
-	if ( m_pVarRef != 0 ) return ( m_pVarRef->Size() );
-	else	return ( m_Size );
 }
 
 
