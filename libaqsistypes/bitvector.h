@@ -34,7 +34,9 @@ START_NAMESPACE( Aqsis )
 typedef unsigned char	bit;
 
 /// Define the number of bits in a char
+#ifndef CHAR_BIT
 #define	CHAR_BIT	8
+#endif
 
 //----------------------------------------------------------------------
 /**
