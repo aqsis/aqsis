@@ -88,13 +88,13 @@ private:
     };
 
 public:
-    virtual void SetDSOPath(const CqString*);
+    virtual void SetDSOPath(const char*);
     CqString strPrototype(CqString*, SqDSOExternalCall*);
 
     CqDSORepository(CqString *searchpath): CqPluginBase()
     {
         BuildTypeMaps();
-        SetDSOPath(searchpath);
+        SetDSOPath(searchpath->c_str());
     };
 
     CqDSORepository(): CqPluginBase()

@@ -111,6 +111,7 @@ extern "C"
     extern char *SLX_TypetoStr ( SLX_TYPE type );
     extern char *SLX_StortoStr ( SLX_STORAGE storage );
     extern char *SLX_DetailtoStr ( SLX_DETAIL detail );
+    extern void SLX_SetDSOPath ( char * path );
 
 #ifdef __cplusplus
 }

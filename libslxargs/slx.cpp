@@ -56,6 +56,7 @@ using namespace Aqsis;
 RtInt SlxLastError;
 
 static char *shaderSearchPathList = NULL;
+static char *DSOPath = NULL;
 
 static char *currentShaderSearchPath = NULL;
 static char *currentShader = NULL;
@@ -667,6 +668,7 @@ static RtInt GetCurrentShaderInfo( char * name, char * filePath )
     if ( SLXFile.IsValid() )
     {
         CqShaderVM * pShader = new CqShaderVM();
+        pShader->SetDSOPath( DSOPath );
         pShader->LoadProgram( SLXFile );
         pShader->SetstrName( filePath );
         pShader->ExecuteInit();
@@ -867,7 +869,7 @@ static bool LoadShaderInfo ( char *name )
         strcpy( shaderFileName, name );
 
         // Check if RI_SHADER_EXTENSION is at the very end of the name
-        if ( strlen(name) < strlen(RI_SHADER_EXTENSION) &&
+        if ( strlen(name) < strlen(RI_SHADER_EXTENSION) ||
 			 strstr( name + strlen( name ) - strlen(RI_SHADER_EXTENSION), RI_SHADER_EXTENSION ) == NULL )
             strcat( shaderFileName, RI_SHADER_EXTENSION );
 
@@ -939,6 +941,37 @@ void SLX_SetPath ( char *path )
 
 
 /*
+ * Set search path for DSO libs.
+ */
+void SLX_SetDSOPath ( char *path )
+{
+    int pathLength;
+
+    pathLength = 0;
+
+    SlxLastError = RIE_NOERROR;
+    if ( DSOPath != NULL )
+    {
+        free( DSOPath );
+        DSOPath = NULL;
+    }
+    if ( path != NULL )
+    {
+        pathLength = strlen( path );
+        DSOPath = ( char * ) malloc( pathLength + 1 );
+        if ( DSOPath != NULL )
+        {
+            strcpy( DSOPath, path );
+        }
+        else
+        {
+            SlxLastError = RIE_NOMEM;
+        }
+    }
+}
+
+
+/*
  * Return the type of the current shader, enumerated in SLX_TYPE.
  */
 char *SLX_GetPath ( void )
@@ -992,7 +1025,7 @@ int SLX_SetShader ( char *name )
         stringLength = strlen( name ) + 1;
 
         // Append RI_SHADER_EXTENSION if not given already
-        if ( strlen(name) < strlen(RI_SHADER_EXTENSION) &&
+        if ( strlen(name) < strlen(RI_SHADER_EXTENSION) ||
 			 strstr( name + strlen( name ) - strlen(RI_SHADER_EXTENSION), RI_SHADER_EXTENSION ) == NULL )
         {
             // Create new string with .slx

@@ -84,21 +84,22 @@ CqDSORepository::strPrototype(CqString *strFuncName, SqDSOExternalCall *pExtCall
  ** There is a distinction in that we would like to handle directories here which CqFile doesnt
  */
 void
-CqDSORepository::SetDSOPath(const CqString* pPath)
+CqDSORepository::SetDSOPath(const char* pathStr)
 {
+    if ( pathStr == NULL ) return;
+
+	CqString Path(pathStr);
     CqString::size_type iLeft = 0;
     CqString::size_type iRight = iLeft ;
 
-    if ( pPath == NULL ) return;
-
     // Split the string up into the components of the path;
-    while(iRight <= pPath->length())
+    while(iRight <= Path.length())
     {
-        if (    ( *pPath)[iRight] == ';' ||  // completed a path element with ';'
-                ( ( *pPath)[iRight] == ':' && ( iRight - iLeft ) > 1) || // completed a path element ':'
-                ( iRight+1 > pPath->length() && iLeft != iRight) ) // hit end of list
+        if (    Path[iRight] == ';' ||  // completed a path element with ';'
+                ( Path[iRight] == ':' && ( iRight - iLeft ) > 1) || // completed a path element ':'
+                ( iRight+1 > Path.length() && iLeft != iRight) ) // hit end of list
         {
-            CqString *element = new CqString(pPath->substr(iLeft,iRight - iLeft));
+            CqString *element = new CqString(Path.substr(iLeft,iRight - iLeft));
             // Here, if element points to a directory, we can add each library in the
             // named directory which is not already in the path list
 
@@ -125,8 +126,8 @@ CqDSORepository::SetDSOPath(const CqString* pPath)
                 delete(element);
         }
 
-        if (    ( *pPath)[iRight] == ';' ||  // completed a path element with ';'
-                ( ( *pPath)[iRight] == ':' && ( iRight - iLeft ) > 1) ) // completed a path element ':'
+        if (    Path[iRight] == ';' ||  // completed a path element with ';'
+                ( Path[iRight] == ':' && ( iRight - iLeft ) > 1) ) // completed a path element ':'
             iLeft = iRight + 1  ;
         iRight ++ ;
     };

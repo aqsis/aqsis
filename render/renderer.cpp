@@ -1133,7 +1133,7 @@ boost::shared_ptr<IqShader> CqRenderer::CreateShader(
                 std::cerr << info << "DSO lib path set to \"" << poptDSOPath->c_str() 
                           << "\"" << std::endl;
 
-                pShader->SetDSOPath( poptDSOPath );
+                pShader->SetDSOPath( poptDSOPath->c_str() );
 
                 CqString strRealName( SLXFile.strRealName() );
                 std::cerr << info << "Loading shader \"" << strName 

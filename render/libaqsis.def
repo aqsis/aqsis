@@ -173,7 +173,6 @@ EXPORTS
 	
 	?parseShadeOpTableEntry@CqDSORepository@Aqsis@@MAEPAUSqDSOExternalCall@2@PAXPAUSqShadeOp@@@Z
 	?getShadeOpMethods@CqDSORepository@Aqsis@@MAEPAV?$list@PAUSqDSOExternalCall@Aqsis@@V?$allocator@PAUSqDSOExternalCall@Aqsis@@@std@@@std@@PAVCqString@2@@Z
-	?SetDSOPath@CqDSORepository@Aqsis@@UAEXPBVCqString@2@@Z
 	?DefaultSurface@CqShaderVM@Aqsis@@UAEXXZ
 	?DeleteTemporaryStorage@CqShaderVM@Aqsis@@UAEXPAUIqShaderData@2@@Z
 	?CreateTemporaryStorage@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@@Z
