@@ -1,6 +1,11 @@
+%{!?rel:    %define rel    %(date +%Y%m%d%H%M)}
+
 Name: aqsis
-Version: 0.9.1
-Release: cvs
+
+Version: 0.9.1_%{rel}
+#Version: 0.9.1
+
+Release: %{distro}
 Summary: RenderMan(tm)-compatible renderer
 License: GPL
 Group: Applications/Graphics
