@@ -114,7 +114,7 @@ inline TqUint CEIL_POW2_MINUS1( TqUint x )
 /// Calculate the next highest power of two from the given value.
 inline TqUint CEIL_POW2( TqUint x )
 {
-	return ( CEIL_POW2_MINUS1( x ) + 1 );
+	return ( CEIL_POW2_MINUS1( x - 1 ) + 1 );
 }
 
 
