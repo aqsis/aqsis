@@ -55,8 +55,7 @@ RendermanInterface::RtVoid Stream::RiFrameEnd() { m_Stream << "RiFrameEnd()" << 
 RendermanInterface::RtFloat Stream::RiGaussianFilter(RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth) { m_Stream << "RiGaussianFilter()" << std::endl; return 0; }
 RendermanInterface::RtVoid Stream::RiGeneralPolygonV(RtInt nloops, RtInt nverts[], RtInt count, RtToken tokens[], RtPointer values[]) { m_Stream << "RiGeneralPolygonV()" << std::endl; }
 RendermanInterface::RtVoid Stream::RiGeometricApproximation(RtToken type, RtFloat value) { m_Stream << "RiGeometricApproximation()" << std::endl; }
-//RendermanInterface::RtVoid Stream::RiGeometry() { m_Stream << "RiGeometry()" << std::endl; }
-//RendermanInterface::RtVoid Stream::RiGeometryV() { m_Stream << "RiGeometryV()" << std::endl; }
+RendermanInterface::RtVoid Stream::RiGeometryV(RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) { m_Stream << "RiGeometryV()" << std::endl; }
 RendermanInterface::RtVoid Stream::RiHiderV(RtToken type, RtInt count, RtToken tokens[], RtPointer values[]) { m_Stream << "RiHiderV()" << std::endl; }
 RendermanInterface::RtVoid Stream::RiHyperboloidV(RtPoint point1, RtPoint point2, RtFloat thetamax,RtInt count, RtToken tokens[], RtPointer values[]) { m_Stream << "RiHyperboloidV()" << std::endl; }
 RendermanInterface::RtVoid Stream::RiIdentity() { m_Stream << "RiIdentity()" << std::endl; }
