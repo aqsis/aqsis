@@ -124,20 +124,20 @@ void GetOptions()
 		if((env=getenv("AQSIS_CONFIG"))!=NULL)
 			g_config=env;
 		else
-			if((env=getenv("HOME"))!=NULL)
-			{
-				g_config=env;
-				g_config.append("/.aqsisrc");
-				std::ifstream cfgfile(g_config.c_str());
-				if(!cfgfile.is_open())
+			g_config=g_base_path;
+			g_config.append("/.aqsisrc");
+			std::ifstream cfgfile(g_config.c_str());
+			if(!cfgfile.is_open())
+				if((env=getenv("HOME"))!=NULL)
 				{
-					g_config="/etc/.aqsisrc";
+					g_config=env;
+					g_config.append("/.aqsisrc");
+					std::ifstream cfgfile(g_config.c_str());
+					if(!cfgfile.is_open())
+					{
+						g_config="/etc/.aqsisrc";
+					}
 				}
-			}
-			else
-			{
-				std::cout << "Warning:  Should have AQSIS_BASE_PATH, AQSIS_CONFIG or HOME set." << std::endl;
-			}
 	}
 
 		// if --shaders is not specified, try and get a default shaders searchpath.
@@ -217,10 +217,9 @@ void RenderFile(std::istream& file, const char* name)
 		else
 		{
 			std::cout << "Warning: Config file not found in" << std::endl <<
-						 "%AQSIS_BASE_PATH%/.aqsisrc" << std::endl << 
 						 "%AQSIS_CONFIG%" << std::endl <<
-						 "%HOME%/.aqsisrc" << std::endl <<
 						 "%AQSIS_BASE_PATH%/.aqsisrc" << std::endl << 
+						 "%HOME%/.aqsisrc" << std::endl <<
 						 "/etc/.aqsisrc" << std::endl;
 		}
 	}
