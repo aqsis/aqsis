@@ -7,6 +7,10 @@ Project: "All"=.\All\All.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    All
+    .\all
+    end source code control
 }}}
 
 Package=<4>
@@ -21,9 +25,6 @@ Package=<4>
     Project_Dep_Name file
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name framebuffer
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name librib
     End Project Dependency
     Begin Project Dependency
@@ -31,9 +32,6 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name Shaders
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name shadowmap
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name slcomp
@@ -52,6 +50,10 @@ Project: "Content"=.\Content\Content.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    Content
+    .\content
+    end source code control
 }}}
 
 Package=<4>
@@ -70,6 +72,10 @@ Project: "Render"=.\Render\Render.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    Render
+    .\render
+    end source code control
 }}}
 
 Package=<4>
@@ -82,6 +88,10 @@ Project: "Shaders"=.\Shaders\shaders.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    Shaders
+    .
+    end source code control
 }}}
 
 Package=<4>
@@ -100,6 +110,10 @@ Project: "cribber"=.\cribber\cribber.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    cribber
+    .\cribber
+    end source code control
 }}}
 
 Package=<4>
@@ -108,13 +122,16 @@ Package=<4>
     Project_Dep_Name file
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name framebuffer
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name librib
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name Render
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name filebuffer
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name framebuffer
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name shadowmap
@@ -127,6 +144,10 @@ Project: "file"=.\file\file.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    file
+    .\file
+    end source code control
 }}}
 
 Package=<4>
@@ -138,7 +159,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "framebuffer"=.\framebuffer\framebuffer.dsp - Package Owner=<4>
+Project: "filebuffer"=.\filebuffer\filebuffer.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -147,8 +168,32 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name Render
+    Project_Dep_Name libdd
     End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "framebuffer"=.\framebuffer\win32\intel\framebuffer.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libdd"=.\libdd\libdd.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
 }}}
 
 ###############################################################################
@@ -157,6 +202,10 @@ Project: "librib"=.\librib\librib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    librib
+    .
+    end source code control
 }}}
 
 Package=<4>
@@ -172,12 +221,16 @@ Project: "shadowmap"=.\shadowmap\shadowmap.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    shadowmap
+    .\shadowmap
+    end source code control
 }}}
 
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name Render
+    Project_Dep_Name libdd
     End Project Dependency
 }}}
 
@@ -187,6 +240,10 @@ Project: "slcomp"=.\slcomp\slcomp.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    slcomp
+    .
+    end source code control
 }}}
 
 Package=<4>
@@ -205,6 +262,10 @@ Project: "slpp"=.\slpp\slpp.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    slpp
+    .\slpp
+    end source code control
 }}}
 
 Package=<4>
@@ -217,6 +278,10 @@ Project: "texer"=.\texer\texer.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    texer
+    .\texer
+    end source code control
 }}}
 
 Package=<4>
