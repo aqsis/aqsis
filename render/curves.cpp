@@ -1983,6 +1983,8 @@ void CqCubicCurvesGroup::Transform(
             nvarying = nsegments + 1;
         }
 
+		TqInt nextCurveVertexIndex = vertexI + m_nvertices[ curveN ];
+
         // now we process all the widths for the current curve
         for ( TqInt ccwidth = 0; ccwidth < nvarying; ccwidth++ )
         {
@@ -2016,7 +2018,7 @@ void CqCubicCurvesGroup::Transform(
             ++widthI;
             vertexI += vStep;
         }
-
+        vertexI = nextCurveVertexIndex;
     }
 
     // finally, we want to call the base class transform
