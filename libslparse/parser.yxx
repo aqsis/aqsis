@@ -1,6 +1,6 @@
 /* -------------- declaration section -------------- */
 
-%expect 22
+%expect 23
 
 %{
 #ifdef	WIN32
@@ -1671,12 +1671,8 @@ texture_type
 	;
 
 texture_filename
-	:	SYMBOL				{	
-								$$=new CqParseNodeVariable($1.VarRef);	
-								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
-							}
-	|	STRING_LITERAL		{	
-								$$=new CqParseNodeStringConst($1->c_str());	
+	:	primary				{	
+								$$=$1;	
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
 	;
