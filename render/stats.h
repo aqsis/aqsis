@@ -42,12 +42,12 @@ extern void gStats_setI( TqInt index, TqInt value );
 extern TqFloat gStats_getF( TqInt index );
 extern void gStats_setF( TqInt index, TqFloat value );
 
-#define STATS_INC( index )				gStats_IncI( CqStats::##index )
-#define STATS_DEC( index )				gStats_DecI( CqStats::##index )
-#define	STATS_GETI( index )				gStats_getI( CqStats::##index )
-#define	STATS_SETI( index , value )		gStats_setI( CqStats::##index , value )
-#define	STATS_GETF( index )				gStats_getF( CqStats::##index )
-#define	STATS_SETF( index , value )		gStats_setF( CqStats::##index , value )
+#define STATS_INC( index )				gStats_IncI( CqStats::index )
+#define STATS_DEC( index )				gStats_DecI( CqStats::index )
+#define	STATS_GETI( index )				gStats_getI( CqStats::index )
+#define	STATS_SETI( index , value )		gStats_setI( CqStats::index , value )
+#define	STATS_GETF( index )				gStats_getF( CqStats::index )
+#define	STATS_SETF( index , value )		gStats_setF( CqStats::index , value )
 
 
 // Internal stuff.
