@@ -95,7 +95,13 @@ RtVoid PrintProgress( RtFloat percent )
 	time( &now );
 
 	// Calculate the various values for putting in the string.
+#ifdef	AQSIS_SYSTEM_POSIX
+	TqFloat total_secs = ( RtFloat ) 1000000.0f * ( ( RtFloat ) ( now - tick ) / ( float ) CLOCKS_PER_SEC );
+#elif AQSIS_SYSTEM_MACOSX
+	TqFloat total_secs = ( RtFloat ) 100.0f * ( ( RtFloat ) ( now - tick ) / ( float ) CLOCKS_PER_SEC );
+#else
 	TqFloat total_secs = ( RtFloat ) 1000.0f * ( ( RtFloat ) ( now - tick ) / ( float ) CLOCKS_PER_SEC );
+#endif
 	TqFloat total_mins = total_secs / 60.0f;
 	TqFloat total_hrs = total_mins / 60.0f;
 	TqFloat sub_secs = total_secs - ( ( TqInt ) total_mins * 60.0f );
