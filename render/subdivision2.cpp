@@ -924,12 +924,15 @@ CqBound	CqSurfaceSubdivisionPatch::Bound() const
 
 CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 {
-    assert( NULL != pTopology() );
+	// Dice rate table			  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16
+    static TqInt aDiceSizes[] = { 0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4 };
+	assert( NULL != pTopology() );
     assert( NULL != pTopology()->pPoints() );
     assert( NULL != pFace() );
 
     TqInt dicesize = MAX(m_uDiceSize, m_vDiceSize);
-    TqInt sdcount = ( dicesize == 16 ) ? 4 : ( dicesize == 8 ) ? 3 : ( dicesize == 4 ) ? 2 : ( dicesize == 2 ) ? 1 : 0;
+    
+	TqInt sdcount = aDiceSizes[ dicesize ];
     dicesize = 1 << sdcount;
     TqInt lUses = Uses();
 
@@ -1499,7 +1502,7 @@ TqBool CqSurfaceSubdivisionPatch::Diceable()
     uLen = ( Vec1.Magnitude2() > Vec2.Magnitude2() ) ? Vec1.Magnitude2() : Vec2.Magnitude2();
 
     Vec1 = avecHull[ 3 ] - avecHull[ 0 ];
-    Vec2 = avecHull[ 1 ] - avecHull[ 1 ];
+    Vec2 = avecHull[ 2 ] - avecHull[ 1 ];
     vLen = ( Vec1.Magnitude2() > Vec2.Magnitude2() ) ? Vec1.Magnitude2() : Vec2.Magnitude2();
 
     uLen = sqrt( uLen / ShadingRate);
