@@ -276,7 +276,11 @@ public:
     void	RenderSurfaces( long xmin, long xmax, long ymin, long ymax );
     void	RenderImage();
     void	StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D );
-    /** Get completion status of this rendered image.
+	void	StoreExtraData( CqMicroPolygon* pMPG, std::valarray<TqFloat>& val);
+
+
+
+	/** Get completion status of this rendered image.
      * \return bool indicating finished or not.
      */
     TqBool	fDone() const
@@ -328,13 +332,26 @@ private:
     {
         CqColor		m_Colour;
         CqColor		m_Opacity;
-        TqBool		m_IsMatte;
-        TqBool		m_Occludes;
-		TqBool		m_IsCullable;
+        TqBool		m_Occludes;		// whether the opacity is full.
+		TqBool		m_IsOpaque;		// whether the mpg can use the faster StoreOpaqueSample routine that assumes a few things.
     };
     SqMpgSampleInfo m_CurrentMpgSampleInfo;
-};
 
+	// This struct holds info about a grid that can be cached and used for all its mpgs.
+	struct SqGridInfo
+	{
+		TqFloat			m_ShadingRate;
+		TqFloat			m_ShutterOpenTime;
+		TqFloat			m_ShutterCloseTime;
+		TqBool			m_IsMatte;
+		TqBool			m_IsCullable;
+		TqBool			m_UsesDataMap;
+		const TqFloat*	m_LodBounds;
+	};
+	SqGridInfo m_CurrentGridInfo;
+
+	void CacheGridInfo( CqMicroPolyGridBase* pGrid );
+};
 
 //-----------------------------------------------------------------------
 

@@ -587,15 +587,34 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 }
 
 
+/** Cache some info about the given grid so it can be referenced by multiple mpgs.
+
+ * \param pGrid grid to cache info of.
+ */
+void CqImageBuffer::CacheGridInfo(CqMicroPolyGridBase* pGrid)
+{
+    m_CurrentGridInfo.m_IsMatte = pGrid->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1;
+
+	// this is true if the mpgs can safely be occlusion culled.
+	m_CurrentGridInfo.m_IsCullable = !( DisplayMode() & ModeZ ) && !(pGrid->pCSGNode());
+
+	m_CurrentGridInfo.m_UsesDataMap = !(QGetRenderContext() ->GetMapOfOutputDataEntries().empty());
+
+    m_CurrentGridInfo.m_ShadingRate = pGrid->pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
+	m_CurrentGridInfo.m_ShutterOpenTime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
+	m_CurrentGridInfo.m_ShutterCloseTime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 1 ];
+
+	m_CurrentGridInfo.m_LodBounds = pGrid->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
+}
 
 //----------------------------------------------------------------------
 /** Render any waiting MPGs.
- 
+
     All micro polygon grids in the specified bucket are bust into
     individual micro polygons which are assigned to their appropriate
     bucket. Then RenderMicroPoly() is called for each micro polygon in
     the current bucket.
- 
+
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
@@ -604,45 +623,56 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt Col, TqInt Row )
 
 void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
 {
-    // First of all split any grids in this bucket waiting to be processed.
+    // Render any waiting MPGs
+    std::vector<CqMicroPolygon*>::iterator lastmpg = CurrentBucket().aMPGs().end();
+	CqMicroPolyGridBase* pPrevGrid = NULL;
+	for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
+    {
+		CqMicroPolygon* pMpg = *impg;
+
+		if(pMpg->pGrid() != pPrevGrid)
+		{
+			pPrevGrid = pMpg->pGrid();
+			CacheGridInfo(pPrevGrid);
+		}
+
+        RenderMicroPoly( pMpg, xmin, xmax, ymin, ymax );
+        if ( PushMPGDown( ( pMpg ), CurrentBucketCol(), CurrentBucketRow() ) )
+            STATS_INC( MPG_pushed_down );
+        if ( PushMPGForward( ( pMpg ), CurrentBucketCol(), CurrentBucketRow() ) )
+            STATS_INC( MPG_pushed_forward );
+        RELEASEREF( ( pMpg ) );
+    }
+    CurrentBucket().aMPGs().clear();
+
+   // Split any grids in this bucket waiting to be processed.
     if ( !CurrentBucket().aGrids().empty() )
     {
         std::vector<CqMicroPolyGridBase*>::iterator lastgrid = CurrentBucket().aGrids().end();
 
         for ( std::vector<CqMicroPolyGridBase*>::iterator igrid = CurrentBucket().aGrids().begin(); igrid != lastgrid; igrid++ )
         {
-            ( *igrid ) ->Split( this, xmin, xmax, ymin, ymax );
+			CqMicroPolyGridBase* pGrid = *igrid;
+            pGrid->Split( this, xmin, xmax, ymin, ymax );
+
+			CacheGridInfo(pGrid);
 
             // Render any waiting MPGs
             std::vector<CqMicroPolygon*>::iterator lastmpg = CurrentBucket().aMPGs().end();
             for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
             {
-                RenderMicroPoly( *impg, xmin, xmax, ymin, ymax );
-                if ( PushMPGDown( ( *impg ), CurrentBucketCol(), CurrentBucketRow() ) )
+				CqMicroPolygon* pMpg = *impg;
+                RenderMicroPoly( pMpg, xmin, xmax, ymin, ymax );
+                if ( PushMPGDown( ( pMpg ), CurrentBucketCol(), CurrentBucketRow() ) )
                     STATS_INC( MPG_pushed_down );
-                if ( PushMPGForward( ( *impg ), CurrentBucketCol(), CurrentBucketRow() ) )
+                if ( PushMPGForward( ( pMpg ), CurrentBucketCol(), CurrentBucketRow() ) )
                     STATS_INC( MPG_pushed_forward );
-                RELEASEREF( ( *impg ) );
+                RELEASEREF( ( pMpg ) );
             }
             CurrentBucket().aMPGs().clear();
         }
+	    CurrentBucket().aGrids().clear();
     }
-    CurrentBucket().aGrids().clear();
-
-    if ( CurrentBucket().aMPGs().empty() ) return ;
-
-    // Render any waiting MPGs
-    std::vector<CqMicroPolygon*>::iterator lastmpg = CurrentBucket().aMPGs().end();
-    for ( std::vector<CqMicroPolygon*>::iterator impg = CurrentBucket().aMPGs().begin(); impg != lastmpg; impg++ )
-    {
-        RenderMicroPoly( *impg, xmin, xmax, ymin, ymax );
-        if ( PushMPGDown( ( *impg ), CurrentBucketCol(), CurrentBucketRow() ) )
-            STATS_INC( MPG_pushed_down );
-        if ( PushMPGForward( ( *impg ), CurrentBucketCol(), CurrentBucketRow() ) )
-            STATS_INC( MPG_pushed_forward );
-        RELEASEREF( ( *impg ) );
-    }
-    CurrentBucket().aMPGs().clear();
 }
 
 
@@ -672,7 +702,6 @@ void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax,
 	}
 
     // fill in sample info for this mpg so we don't have to keep fetching it for each sample.
-    m_CurrentMpgSampleInfo.m_IsMatte = pMPG->pGrid() ->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1;
     // Must check if colour is needed, as if not, the variable will have been deleted from the grid.
     if ( QGetRenderContext() ->pDDmanager() ->fDisplayNeeds( "Ci" ) )
     {
@@ -695,8 +724,13 @@ void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax,
         m_CurrentMpgSampleInfo.m_Occludes = TqTrue;
     }
 
-	// this is true if the mpg can safely be occlusion culled.
-	m_CurrentMpgSampleInfo.m_IsCullable = !( DisplayMode() & ModeZ ) && !(pMPG->pGrid()->pCSGNode());
+	// use the single imagesample rather than the list if possible.
+	// transparent, matte or csg samples, or if we need more than the first depth
+	// value have to use the (slower) list.
+	m_CurrentMpgSampleInfo.m_IsOpaque = m_CurrentMpgSampleInfo.m_Occludes &&
+										!pMPG->pGrid()->pCSGNode() &&
+										!( DisplayMode() & ModeZ ) &&
+										!m_CurrentGridInfo.m_IsMatte;
 
     TqBool UsingDof = QGetRenderContext() ->UsingDepthOfField();
 	TqBool IsMoving = pMPG->IsMoving();
@@ -719,22 +753,22 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
     CqBucket & Bucket = CurrentBucket();
     CqStats& theStats = QGetRenderContext() ->Stats();
 
-    const TqFloat* LodBounds = pMPG->pGrid() ->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
+    const TqFloat* LodBounds = m_CurrentGridInfo.m_LodBounds;
     TqBool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
 
     TqInt sample_hits = 0;
-    TqFloat shd_rate = pMPG->pGrid() ->pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
+    TqFloat shd_rate = m_CurrentGridInfo.m_ShadingRate;
 
 	CqHitTestCache hitTestCache;
 	TqBool cachedHitData = TqFalse;
 
-	TqBool mustDraw = !m_CurrentMpgSampleInfo.m_IsCullable;
+	TqBool mustDraw = !m_CurrentGridInfo.m_IsCullable;
 
 	TqInt iXSamples = PixelXSamples();
     TqInt iYSamples = PixelYSamples();
 
-	TqFloat opentime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 0 ];
-	TqFloat closetime = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Shutter" ) [ 1 ];
+	TqFloat opentime = m_CurrentGridInfo.m_ShutterOpenTime;
+	TqFloat closetime = m_CurrentGridInfo.m_ShutterCloseTime;
 	TqFloat timePerSample;
 	if(IsMoving)
 	{
@@ -760,7 +794,7 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 			if ( bound_numMB != bound_maxMB_1 )
 				pMPG->SubBound( bound_numMB + 1, time1 );
 			else
-				time1 = QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 1 ];
+				time1 = closetime;//QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 1 ];
 
 			indexT0 = static_cast<TqInt>(FLOOR((time0 - opentime) * timePerSample));
 			indexT1 = static_cast<TqInt>(CEIL((time1 - opentime) * timePerSample));
@@ -978,16 +1012,16 @@ void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax
     CqBucket & Bucket = CurrentBucket();
     CqStats& theStats = QGetRenderContext() ->Stats();
 
-    const TqFloat* LodBounds = pMPG->pGrid() ->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
+    const TqFloat* LodBounds = m_CurrentGridInfo.m_LodBounds;
     TqBool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
 
     TqInt sample_hits = 0;
-    TqFloat shd_rate = pMPG->pGrid() ->pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
+    TqFloat shd_rate = m_CurrentGridInfo.m_ShadingRate;
 
 	CqHitTestCache hitTestCache;
 	TqBool cachedHitData = TqFalse;
 
-	TqBool mustDraw = !m_CurrentMpgSampleInfo.m_IsCullable;
+	TqBool mustDraw = !m_CurrentGridInfo.m_IsCullable;
 
     CqBound Bound = pMPG->GetTotalBound();
 
@@ -1100,15 +1134,11 @@ void CqImageBuffer::RenderMPG_Static( CqMicroPolygon* pMPG, long xmin, long xmax
 }
 
 
+
 void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt index, TqFloat D )
 {
     TqBool Occludes = m_CurrentMpgSampleInfo.m_Occludes;
-
-	// use the single imagesample rather than the list if possible.
-	// transparent, matte or csg samples, or if we need more than the first depth
-	// value have to use the (slower) list.
-	TqBool opaque = Occludes && !pMPG->pGrid()->pCSGNode() &&
-					!( DisplayMode() & ModeZ ) && !m_CurrentMpgSampleInfo.m_IsMatte;
+	TqBool opaque =  m_CurrentMpgSampleInfo.m_IsOpaque;
 
 	SqImageSample& currentOpaqueSample = pie2->OpaqueValues(index);
 	static SqImageSample localImageVal( QGetRenderContext() ->GetOutputDataTotalSize() );
@@ -1138,7 +1168,7 @@ void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt
 				break;
 
 			if(((*sample).m_flags & SqImageSample::Flag_Occludes) &&
-				!(*sample).m_pCSGNode && m_CurrentMpgSampleInfo.m_IsCullable)
+				!(*sample).m_pCSGNode && m_CurrentGridInfo.m_IsCullable)
 				return;
 
 			++sample;
@@ -1159,10 +1189,64 @@ void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt
     val[ 5 ] = m_CurrentMpgSampleInfo.m_Opacity.fBlue();
     val[ 6 ] = D;
 
-
     // Now store any other data types that have been registered.
+	if(m_CurrentGridInfo.m_UsesDataMap)
+	{
+		StoreExtraData(pMPG, val);
+	}
+
+	if(!opaque)
+	{
+		// If depth is exactly the same as previous sample, chances are we've
+		// hit a MPG grid line.
+		if ( sample != end && (*sample).Depth() == ImageVal.Depth() )
+		{
+			(*sample).m_Data = ( (*sample).m_Data + val ) * 0.5f;
+			return;
+		}
+	}
+
+    // Update max depth values
+    if ( !( DisplayMode() & ModeZ ) && Occludes )
+    {
+        CqOcclusionBox::MarkForUpdate( pie2->OcclusionBoxId() );
+        pie2->MarkForZUpdate();
+    }
+
+    ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
+
+    ImageVal.m_flags = 0;
+    if ( Occludes )
+    {
+        ImageVal.m_flags |= SqImageSample::Flag_Occludes;
+    }
+    if( m_CurrentGridInfo.m_IsMatte )
+    {
+        ImageVal.m_flags |= SqImageSample::Flag_Matte;
+    }
+
+	if(!opaque)
+	{
+		aValues.insert( sample, ImageVal );
+
+		// mark this pixel as using the visible point list.
+		pie2->SetUsesSampleList();
+	}
+	else
+	{
+		// increment the sample count if we havn't already.
+		if(!(ImageVal.m_flags & SqImageSample::Flag_Valid))
+			pie2->IncOpaqueSampleCount();
+
+		// mark this sample as having been written into.
+		ImageVal.m_flags |= SqImageSample::Flag_Valid;
+	}
+}
+
+void CqImageBuffer::StoreExtraData( CqMicroPolygon* pMPG, std::valarray<TqFloat>& val)
+{
     std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext() ->GetMapOfOutputDataEntries();
-    std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
+	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
     for ( entry = DataMap.begin(); entry != DataMap.end(); ++entry )
     {
         IqShaderData* pData;
@@ -1229,81 +1313,33 @@ void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt
             }
         }
     }
-
-
-	if(!opaque)
-	{
-		// If depth is exactly the same as previous sample, chances are we've
-		// hit a MPG grid line.
-		if ( sample != end && (*sample).Depth() == ImageVal.Depth() )
-		{
-			(*sample).m_Data = ( (*sample).m_Data + val ) * 0.5f;
-			return;
-		}
-	}
-
-    // Update max depth values
-    if ( !( DisplayMode() & ModeZ ) && Occludes )
-    {
-        CqOcclusionBox::MarkForUpdate( pie2->OcclusionBoxId() );
-        pie2->MarkForZUpdate();
-    }
-
-    ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
-
-    ImageVal.m_flags = 0;
-    if ( Occludes )
-    {
-        ImageVal.m_flags |= SqImageSample::Flag_Occludes;
-    }
-    if( m_CurrentMpgSampleInfo.m_IsMatte )
-    {
-        ImageVal.m_flags |= SqImageSample::Flag_Matte;
-    }
-
-	if(!opaque)
-	{
-		aValues.insert( sample, ImageVal );
-
-		// mark this pixel as using the visible point list.
-		pie2->SetUsesSampleList();
-	}
-	else
-	{
-		// increment the sample count if we havn't already.
-		if(!(ImageVal.m_flags & SqImageSample::Flag_Valid))
-			pie2->IncOpaqueSampleCount();
-			
-		// mark this sample as having been written into.
-		ImageVal.m_flags |= SqImageSample::Flag_Valid;
-	}
 }
 
 //----------------------------------------------------------------------
 /** Render any waiting Surfaces
- 
+
     This method loops through all the gprims stored in the specified bucket
     and checks if the gprim can be diced and turned into a grid of micro
-    polygons or if it is still too large and has to be split (this check 
+    polygons or if it is still too large and has to be split (this check
     is done in CqBasicSurface::Diceable()).
- 
+
     The dicing is done by the gprim in CqBasicSurface::Dice(). After that
     the entire grid is shaded by calling CqMicroPolyGridBase::Shade().
-    The shaded grid is then stored in the current bucket and will eventually 
+    The shaded grid is then stored in the current bucket and will eventually
     be further processed by RenderMPGs().
- 
+
     If the gprim could not yet be diced, it is split into a number of
     smaller gprims (CqBasicSurface::Split()) which are again assigned to
     buckets (this doesn't necessarily have to be the current one again)
     by calling PostSurface() (just as if it were regular gprims).
- 
+
     Finally, when all the gprims are diced and the resulting micro polygons
     are rendered, the individual subpixel samples are combined into one
     pixel color and opacity which is then exposed and quantized.
     After that the method BucketComplete() and IqDDManager::DisplayBucket()
     is called which can be used to display the bucket inside a window or
     save it to disk.
- 
+
  * \param xmin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
  * \param xmax Integer maximum extend of the image part being rendered, takes into account buckets and clipping.
  * \param ymin Integer minimum extend of the image part being rendered, takes into account buckets and clipping.
