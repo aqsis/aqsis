@@ -45,7 +45,7 @@ bool g_help = 0;
 bool g_version = 0;
 bool g_verbose = 0;
 bool g_fb = 0;
-bool g_b = 0;
+bool g_d = 0;
 bool g_progress = 0;
 ArgParse::apstring g_config = "";
 ArgParse::apstring g_shaders = "";
@@ -187,7 +187,7 @@ RtVoid PreRender( ... )
 RtVoid PreRender()
 #endif
 {
-	if ( g_fb || g_b )
+	if ( g_fb || g_d )
 	{
 		char * type = "framebuffer", *mode = "rgba";
 		RiDisplay( "aqsis", type, mode, NULL );
@@ -226,7 +226,7 @@ int main( int argc, const char** argv )
 	ap.argString( "addtype", "=string\aspecify a display device type to add", &g_addtype );
 	ap.argString( "mode", "=string\aspecify a display device mode to use", &g_mode );
 	ap.argFlag( "fb", "\aequivalent to --type=\"framebuffer\" --mode=\"rgba\"", &g_fb );
-	ap.argFlag( "b", "\aequivalent to -fb", &g_b );
+	ap.argFlag( "d", "\aequivalent to -fb", &g_d );
 	ap.argString( "config", "=string\aspecify a configuration file to load", &g_config );
 	ap.argString( "base", "=string\aspecify a default base path", &g_base_path );
 	ap.argString( "shaders", "=string\aspecify a default shaders searchpath", &g_shaders );
