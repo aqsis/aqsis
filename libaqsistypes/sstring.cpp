@@ -102,7 +102,7 @@ CqString CqString::ExpandEscapes() const
  * \return A string in which escape characters are translated.
  */
 
-CqString CqString::TranslateEqcapes() const
+CqString CqString::TranslateEscapes() const
 {
 	CqString	strResult;
 	const TqChar*	str = c_str();

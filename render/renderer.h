@@ -180,7 +180,7 @@ class CqRenderer : public IqRenderer
 
 		virtual	void	PrintString( const char* str )
 		{
-			PrintMessage( SqMessage( 0, 0, str ) );
+			std::cout << str;
 		}
 
 		virtual	IqTextureMap* GetTextureMap( const CqString& strFileName );

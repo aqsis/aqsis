@@ -72,7 +72,7 @@ class _qShareC CqString : public CqStringBase
 		// Format a string printf style.
 		_qShareM	CqString&	Format( const TqChar* Format, ... );
 		_qShareM	CqString	ExpandEscapes() const;
-		_qShareM	CqString	TranslateEqcapes() const;
+		_qShareM	CqString	TranslateEscapes() const;
 
 		// Concatenation functions not provided by std::string
 		_qShareM	CqString&	operator+=( const CqString& str );

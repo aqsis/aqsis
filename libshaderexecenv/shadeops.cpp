@@ -51,7 +51,8 @@ IqRenderer* QGetRenderContextI();
 static	CqString	SO_sprintf( const char* str, int cParams, IqShaderData** apParams, int varyingindex )
 {
 	CqString strRes( "" );
-	CqString strTrans = str; //str.TranslateEqcapes();
+	CqString strTrans = str;
+	strTrans = strTrans.TranslateEscapes();
 
 	TqUint i = 0;
 	TqUint ivar = 0;
