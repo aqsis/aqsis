@@ -7,10 +7,6 @@ Project: "All"=.\All\All.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    All
-    .\all
-    end source code control
 }}}
 
 Package=<4>
@@ -50,10 +46,6 @@ Project: "Content"=.\Content\Content.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    Content
-    .\content
-    end source code control
 }}}
 
 Package=<4>
@@ -72,10 +64,6 @@ Project: "Render"=.\Render\Render.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    Render
-    .\render
-    end source code control
 }}}
 
 Package=<4>
@@ -88,10 +76,6 @@ Project: "Shaders"=.\Shaders\shaders.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    Shaders
-    .
-    end source code control
 }}}
 
 Package=<4>
@@ -110,10 +94,6 @@ Project: "cribber"=.\cribber\cribber.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    cribber
-    .\cribber
-    end source code control
 }}}
 
 Package=<4>
@@ -144,10 +124,6 @@ Project: "file"=.\file\file.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    file
-    .\file
-    end source code control
 }}}
 
 Package=<4>
@@ -182,6 +158,9 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name libdd
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -202,10 +181,6 @@ Project: "librib"=.\librib\librib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    librib
-    .
-    end source code control
 }}}
 
 Package=<4>
@@ -221,10 +196,6 @@ Project: "shadowmap"=.\shadowmap\shadowmap.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    shadowmap
-    .\shadowmap
-    end source code control
 }}}
 
 Package=<4>
@@ -240,10 +211,6 @@ Project: "slcomp"=.\slcomp\slcomp.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    slcomp
-    .
-    end source code control
 }}}
 
 Package=<4>
@@ -262,10 +229,6 @@ Project: "slpp"=.\slpp\slpp.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    slpp
-    .\slpp
-    end source code control
 }}}
 
 Package=<4>
@@ -278,10 +241,6 @@ Project: "texer"=.\texer\texer.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    texer
-    .\texer
-    end source code control
 }}}
 
 Package=<4>

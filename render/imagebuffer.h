@@ -145,17 +145,80 @@ class _qShareC	CqImageElement
 													}
 
 
-	_qShareM	CqImageElement&	operator=(const CqImageElement& ieFrom);
+//	_qShareM	CqImageElement&	operator=(const CqImageElement& ieFrom);
 
 	private:
-			TqInt				m_XSamples;			///< The number of samples in the horizontal direction.
-			TqInt				m_YSamples;			///< The number of samples in the vertical direction.
-			std::vector<SqImageValue>* m_aValues;	///< Pointer to an array of vectors or sample point data.
-			CqVector2D*			m_avecSamples;		///< Pointer to an array of sample positions.
-			std::vector<TqFloat> m_aTimes;			///< A vector of float sample times for the sample points.
-			TqFloat				m_Coverage;			///< The approximate coverage, just the ratio of sample hits to misses.
-			CqColor			m_colColor;		///< The averaged color of this pixel.
-			TqFloat				m_Depth;			///< The averaged depth of this pixel.
+			TqInt				m_XSamples;						///< The number of samples in the horizontal direction.
+			TqInt				m_YSamples;						///< The number of samples in the vertical direction.
+			std::vector<std::vector<SqImageValue> > m_aValues;	///< Vector of vectors of sample point data.
+			std::vector<CqVector2D>	 m_avecSamples;				///< Vector of sample positions.
+			std::vector<TqFloat> m_aTimes;						///< A vector of float sample times for the sample points.
+			TqFloat				m_Coverage;						///< The approximate coverage, just the ratio of sample hits to misses.
+			CqColor				m_colColor;						///< The averaged color of this pixel.
+			TqFloat				m_Depth;						///< The averaged depth of this pixel.
+};
+
+//-----------------------------------------------------------------------
+/** Class holding data about a particular bucket.
+ */
+
+class CqBucket
+{
+	public:
+					CqBucket()	{}
+					CqBucket( const CqBucket& From)
+								{
+									*this=From;
+								}
+					~CqBucket()	{}
+
+					CqBucket& operator=(const CqBucket& From)
+								{
+									m_ampgWaiting=From.m_ampgWaiting;
+									m_agridWaiting=From.m_agridWaiting;
+
+									return(*this);
+								}
+				
+				TqInt	XSize() const	{return(m_XSize);}
+				TqInt	YSize() const	{return(m_YSize);}
+				TqInt	XOrigin() const	{return(m_XOrigin);}
+				TqInt	YOrigin() const	{return(m_YOrigin);}
+				TqInt	XFWidth() const	{return(m_XFWidth);}
+				TqInt	YFWidth() const	{return(m_YFWidth);}
+
+		static	void	InitialiseBucket(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqInt xfwidth, TqInt yfwidth, TqInt xsamples, TqInt ysamples, TqBool fJitter=TqTrue);
+		static	void	Clear();
+		static	TqBool	ImageElement(TqInt iXPos, TqInt iYPos, CqImageElement*& pie);
+		static	void	CombineElements();
+				void		AddGPrim(CqBasicSurface* pGPrim)
+								{
+									m_aGPrims.LinkFirst(pGPrim);
+								}
+				void		AddMPG(CqMicroPolygonBase* pmpgNew)
+								{
+									m_ampgWaiting.push_back(pmpgNew);
+								}
+				void		AddGrid(CqMicroPolyGridBase* pgridNew)
+								{
+									m_agridWaiting.push_back(pgridNew);
+								}
+				CqBasicSurface* pTopSurface()				{return(m_aGPrims.pFirst());}
+				std::vector<CqMicroPolygonBase*>& aMPGs()	{return(m_ampgWaiting);}
+				std::vector<CqMicroPolyGridBase*>& aGrids()	{return(m_agridWaiting);}
+
+	private:
+	static	TqInt	m_XSize;
+	static	TqInt	m_YSize;
+	static	TqInt	m_XFWidth;
+	static	TqInt	m_YFWidth;
+	static	TqInt	m_XOrigin;
+	static	TqInt	m_YOrigin;
+	static	std::vector<CqImageElement>	m_aieImage;
+
+			std::vector<CqMicroPolygonBase*> m_ampgWaiting;			///< Vector of vectors of waiting micropolygons in this bucket
+			std::vector<CqMicroPolyGridBase*> m_agridWaiting;		///< Vector of vectors of waiting micropolygrids in this bucket
+			CqList<CqBasicSurface>	m_aGPrims;						///< Vector of lists of split surfaces for this bucket.
 };
 
 
@@ -183,10 +246,7 @@ class _qShareC	CqImageBuffer
 												m_CropWindowYMin(0),
 												m_CropWindowXMax(0),
 												m_CropWindowYMax(0),
-												m_DisplayMode(ModeRGB),
-												m_CurrBucket(0),
-												m_pieImage(0),
-												m_aSurfaces(0)
+												m_DisplayMode(ModeRGB)
 												{}
 	_qShareM	virtual			~CqImageBuffer();
 
@@ -256,7 +316,6 @@ class _qShareC	CqImageBuffer
 								 */
 	_qShareM			TqInt	DisplayMode() const		{return(m_DisplayMode);}
 
-	_qShareM			void	ClearBucket();
 	_qShareM			void	DeleteImage();
 	_qShareM			void	SaveImage(const char* strName);
 
@@ -279,8 +338,6 @@ class _qShareC	CqImageBuffer
 	_qShareM			TqBool	fDone() const		{return(m_fDone);}
 
 	_qShareM	virtual	void	SetImage();
-	_qShareM	virtual	void	AllocateSamples();
-	_qShareM	virtual	void	InitialiseSamples(TqInt iBucket);
 	_qShareM	virtual	void	Quit();
 	_qShareM	virtual	void	Release();
 
@@ -309,13 +366,8 @@ class _qShareC	CqImageBuffer
 			TqInt				m_CropWindowYMax;	///< Integer maximum vertical pixel to render.
 			TqInt				m_DisplayMode;		///< Integer display mode, a member of the enum Mode.
 
-			TqInt				m_CurrBucket;		///< Running currently being processed buckt index.
-
-			CqImageElement*	m_pieImage;				///< Array of image element classes repesenting the pixels of the current bucket.
-			std::vector<std::vector<CqMicroPolygonBase*> >	m_aampgWaiting;		///< Vector of vectors of waiting micropolygons in each bucket
-			std::vector<std::vector<CqMicroPolyGridBase*> >	m_aagridWaiting;	///< Vector of vectors of waiting micropolygrids in each bucket
-			CqList<CqBasicSurface>*	m_aSurfaces;		///< Vector of lists of split surfaces for each bucket.
 			std::vector<std::vector<TqFloat> >	m_aaFilterValues;	///< Vector of vector of filter weights precalculated fro each jittered sample point in each pixel.
+			std::vector<CqBucket>	m_aBuckets;
 };
 
 

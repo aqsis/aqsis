@@ -344,12 +344,11 @@ class _qShareC CqEnvironmentMap : public CqTextureMap
  * Shadow map, derives from texture map.
  */
 
-class _qShareC CqShadowMap : public CqTextureMap, public CqImageBuffer
+class _qShareC CqShadowMap : public CqTextureMap
 {
 	public:
 	_qShareM 		CqShadowMap(const char* strName)	:
-									CqTextureMap(strName),
-									CqImageBuffer()
+									CqTextureMap(strName)
 									{}
 	_qShareM	virtual	~CqShadowMap()	{}
 	
@@ -362,20 +361,12 @@ class _qShareC CqShadowMap : public CqTextureMap, public CqImageBuffer
 							 */
 	_qShareM	CqMatrix&	matWorldToScreen()		{return(m_matWorldToScreen);}
 
-	_qShareM	TqInt		XRes() const			{return(m_XRes);}
-	_qShareM	TqInt		YRes() const			{return(m_YRes);}
-		
 	_qShareM	void		AllocateMap(TqInt XRes, TqInt YRes);
 	_qShareM	TqFloat		Sample(const CqVector3D&	vecPoint);
 	_qShareM	void		SaveZFile();
 	_qShareM	void		LoadZFile();
 	_qShareM	void		SaveShadowMap(const char* strShadowName);
 	_qShareM	void		ReadMatrices();
-
-	// Overrides from CqImageBuffer
-	_qShareM	virtual	void	SetImage();
-	_qShareM	virtual	void	BucketComplete(TqInt iBucket);
-	_qShareM	virtual	void	ImageComplete();
 
 	_qShareM	virtual	void	SampleMap(const CqVector3D& R, const CqVector3D& swidth, const CqVector3D& twidth, float sblur, float tblur, float& val);
 	_qShareM	virtual	void	SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqVector3D& R3,const CqVector3D& R4, float sblur, float tblur, float& val);

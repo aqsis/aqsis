@@ -674,8 +674,13 @@ RtVoid	RiDisplayV(const char *name, RtToken type, RtToken mode, PARAMETERLIST)
 		eValue|=ModeZ;
 	QGetRenderContext()->optCurrent().SetiDisplayMode(QGetRenderContext()->optCurrent().iDisplayMode()|eValue);
 
+	// Check if the request is to add a display driver.
+	if(strName[0]=='+')
+		strName=strName.substr(1);
+	else
+		QGetRenderContext()->ClearDisplayDrivers();
 	// Add a display driver to the list of requested drivers.
-	QGetRenderContext()->AddDisplayDriver(name, type, eValue);
+	QGetRenderContext()->AddDisplayDriver(strName.c_str(), strType.c_str(), eValue);
 
 	return(0);
 }

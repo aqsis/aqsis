@@ -155,6 +155,8 @@ class CqList
 					 * \return Pointer to the first entry in the list, after the head place holder.
 					 */
 	virtual T*		pFirst()			{	
+											if(m_Head.pNext()==&m_Tail)
+												return(0);
 											return(static_cast<T*>(m_Head.pNext()));
 										}
 

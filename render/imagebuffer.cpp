@@ -49,8 +49,8 @@ START_NAMESPACE(Aqsis)
 CqImageElement::CqImageElement() : 
 				m_XSamples(0),
 				m_YSamples(0),
-				m_aValues(0), 
-				m_avecSamples(0),
+//				m_aValues(0), 
+//				m_avecSamples(0),
 				m_colColor(0,0,0)
 {
 }
@@ -62,8 +62,6 @@ CqImageElement::CqImageElement() :
 
 CqImageElement::~CqImageElement()
 {
-	delete[](m_aValues);
-	delete[](m_avecSamples);
 }
 
 
@@ -85,18 +83,13 @@ CqImageElement::CqImageElement(const CqImageElement& ieFrom) : m_aValues(0), m_a
 
 void CqImageElement::AllocateSamples(TqInt XSamples, TqInt YSamples)
 {
-	delete[](m_aValues);
-	delete[](m_avecSamples);
-	m_aValues=0;
-	m_avecSamples=0;
-
 	m_XSamples=XSamples;
 	m_YSamples=YSamples;
 
 	if(XSamples>0 && YSamples>0)
 	{
-		m_aValues=new std::vector<SqImageValue>[m_XSamples*m_YSamples];
-		m_avecSamples=new CqVector2D[m_XSamples*m_YSamples];
+		m_aValues.resize(m_XSamples*m_YSamples);
+		m_avecSamples.resize(m_XSamples*m_YSamples);
 		m_aTimes.resize(m_XSamples*m_YSamples);
 	}
 }
@@ -193,37 +186,6 @@ void CqImageElement::InitialiseSamples(CqVector2D& vecPixel, TqBool fJitter)
 
 
 //----------------------------------------------------------------------
-/** Copy function.
- */
-
-CqImageElement& CqImageElement::operator=(const CqImageElement& ieFrom)
-{
-	if(ieFrom.m_XSamples*ieFrom.m_YSamples != m_XSamples*m_YSamples)
-	{
-		// Delete any existing arrays.
-		delete[](m_aValues);
-		delete[](m_avecSamples);
-
-		// Now allocate new arrays
-		m_aValues=new std::vector<SqImageValue>[ieFrom.m_XSamples*ieFrom.m_YSamples];
-		m_avecSamples=new CqVector2D[ieFrom.m_XSamples*ieFrom.m_YSamples];
-	}
-	m_XSamples=ieFrom.m_XSamples;
-	m_YSamples=ieFrom.m_YSamples;
-
-	TqInt i;
-	for(i=(m_XSamples*m_YSamples)-1; i>=0; i--)
-	{
-		m_aValues[i]=ieFrom.m_aValues[i];
-		m_avecSamples[i]=ieFrom.m_avecSamples[i];
-	}
-
-	m_colColor=ieFrom.m_colColor;
-	return(*this);	
-}
-
-
-//----------------------------------------------------------------------
 /** Clear the relevant data from the image element preparing it for the next usage.
  */
 
@@ -278,6 +240,98 @@ void CqImageElement::Combine()
 	m_Depth=depth_total;
 	cov*=smul;
 	m_Coverage=cov;
+}
+
+
+//----------------------------------------------------------------------
+/** Static data on CqBucket
+ */ 
+
+TqInt	CqBucket::m_XSize;
+TqInt	CqBucket::m_YSize;
+TqInt	CqBucket::m_XFWidth;
+TqInt	CqBucket::m_YFWidth;
+TqInt	CqBucket::m_XOrigin;
+TqInt	CqBucket::m_YOrigin;
+std::vector<CqImageElement>	CqBucket::m_aieImage;
+
+//----------------------------------------------------------------------
+/** Get a reference to pixel data.
+ * \param iXPos Integer pixel coordinate.
+ * \param iYPos Integer pixel coordinate.
+ * \param iBucket Integer bucket index.
+ * \param pie Pointer to CqImageElement to fill in.
+ * \return Boolean indicating success, could fail if the specified pixel is not within the specified bucket.
+ */
+
+TqBool CqBucket::ImageElement(TqInt iXPos, TqInt iYPos, CqImageElement*& pie)
+{
+	iXPos-=m_XOrigin;
+	iYPos-=m_YOrigin;
+
+	int fxo2=static_cast<int>(m_XFWidth*0.5f);
+	int fyo2=static_cast<int>(m_YFWidth*0.5f);
+	
+	// Check within renderable range
+	if(iXPos>=-fxo2 && iXPos<=m_XSize+fxo2 &&
+	   iYPos>=-fyo2 && iYPos<=m_YSize+fyo2)
+	{
+		TqInt i=((iYPos+fyo2)*(m_XSize+m_XFWidth))+(iXPos+fxo2);
+		pie=&m_aieImage[i];
+		return(TqTrue);
+	}
+	else
+		return(TqFalse);
+}
+
+
+//----------------------------------------------------------------------
+/** Clear the image data storage area.
+ */
+
+void CqBucket::Clear()
+{
+	// Call the clear function on each element in the bucket.
+	for(std::vector<CqImageElement>::iterator iElement=m_aieImage.begin(); iElement!=m_aieImage.end(); iElement++)
+		iElement->Clear();
+}
+
+
+//----------------------------------------------------------------------
+/** Initialise the static image storage area.
+ */
+
+void CqBucket::InitialiseBucket(TqInt xorigin, TqInt yorigin, TqInt xsize, TqInt ysize, TqInt xfwidth, TqInt yfwidth, TqInt xsamples, TqInt ysamples, TqBool fJitter)
+{
+	m_XOrigin=xorigin;
+	m_YOrigin=yorigin;
+	m_XSize=xsize;
+	m_YSize=ysize;
+	m_XFWidth=xfwidth;
+	m_YFWidth=yfwidth;
+	// Allocate the image element storage for a single bucket
+	m_aieImage.resize((xsize+xfwidth)*(ysize*yfwidth));
+
+	// Initialise the samples for this bucket.
+	TqInt i;
+	for(i=0; i<(m_YSize+m_YFWidth); i++)
+	{
+		TqInt j;
+		for(j=0; j<(m_XSize+m_XFWidth); j++)
+		{
+			CqVector2D bPos2(m_XOrigin,m_YOrigin);
+			bPos2+=CqVector2D((j-m_XFWidth/2),(i-m_YFWidth/2));
+			m_aieImage[(i*(m_XSize+m_XFWidth))+j].AllocateSamples(xsamples,ysamples);
+			m_aieImage[(i*(m_XSize+m_XFWidth))+j].InitialiseSamples(bPos2,fJitter);
+		}
+	}
+}
+
+
+void CqBucket::CombineElements()
+{
+	for(std::vector<CqImageElement>::iterator i=m_aieImage.begin(); i!=m_aieImage.end(); i++)
+		i->Combine();
 }
 
 
@@ -387,23 +441,12 @@ void	CqImageBuffer::SetImage()
 	m_FilterYWidth=static_cast<TqInt>(QGetRenderContext()->optCurrent().fFilterYWidth());
 	m_DisplayMode=QGetRenderContext()->optCurrent().iDisplayMode();
 
-	// Allocate the image element storage for a single bucket
-	m_pieImage=new CqImageElement[(m_XBucketSize+m_FilterXWidth)*(m_YBucketSize+m_FilterYWidth)];
-
-	AllocateSamples();
-	InitialiseSamples(0);
-
-	// Allocate the array of surface and micropolygrid lists for all buckets
-	m_aampgWaiting.resize(m_cXBuckets*m_cYBuckets);
-	m_aagridWaiting.resize(m_cXBuckets*m_cYBuckets);
-	m_aSurfaces=new CqList<CqBasicSurface>[m_cXBuckets*m_cYBuckets];
-	ClearBucket();
+	m_aBuckets.resize(m_cXBuckets*m_cYBuckets);
 
 	// Allocate and fill in the filter values array for each pixel.
 	RtFilterFunc pFilter;
 	pFilter=QGetRenderContext()->optCurrent().funcFilter();
 	m_aaFilterValues.resize(m_XBucketSize*m_YBucketSize);
-	CqImageElement* pie;
 	TqInt NumFilterValues=((m_FilterYWidth+1)*(m_FilterXWidth+1));//*(m_PixelXSamples*m_PixelYSamples);
 	TqInt y;
 	for(y=0; y<m_YBucketSize; y++)
@@ -411,7 +454,6 @@ void	CqImageBuffer::SetImage()
 		TqInt x;
 		for(x=0; x<m_XBucketSize; x++)
 		{
-			Pixel(x,y,0,pie);
 			// Allocate enough entries
 			m_aaFilterValues[(y*m_XBucketSize)+x].resize(NumFilterValues);
 			TqFloat* pFilterValues=&m_aaFilterValues[(y*m_XBucketSize)+x][0];
@@ -430,62 +472,6 @@ void	CqImageBuffer::SetImage()
 			}
 		}
 	}
-
-	// Clear state ready for render
-	m_CurrBucket=0;
-}
-
-
-//----------------------------------------------------------------------
-/** Allocate the storage for the pixel samples in the bucket, should be called only once.
- */
-
-void CqImageBuffer::AllocateSamples()
-{
-	TqInt i;
-	for(i=0; i<(m_XBucketSize+m_FilterXWidth)*(m_YBucketSize+m_FilterYWidth); i++)
-	{
-		m_pieImage[i].AllocateSamples(m_PixelXSamples,m_PixelYSamples);
-	}
-}
-
-
-//----------------------------------------------------------------------
-/** Initialise the sample information for the specified bucket.
- * \param iBucket Integer bucket index.
- */
-
-void CqImageBuffer::InitialiseSamples(TqInt iBucket)
-{
-	TqBool fJitter=(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB);
-
-	CqVector2D	bPos=Position(iBucket);
-	TqInt i;
-	for(i=0; i<(m_YBucketSize+m_FilterYWidth); i++)
-	{
-		TqInt j;
-		for(j=0; j<(m_XBucketSize+m_FilterXWidth); j++)
-		{
-			CqVector2D bPos2(bPos);
-			bPos2+=CqVector2D((j-m_FilterXWidth/2),(i-m_FilterYWidth/2));
-			m_pieImage[(i*(m_XBucketSize+m_FilterXWidth))+j].InitialiseSamples(bPos2,fJitter);
-		}
-	}
-}
-
-//----------------------------------------------------------------------
-/** Reset the image buffer to default values.
- */
-
-void	CqImageBuffer::ClearBucket()
-{
-	// Call the clear function on each element in the bucket.
-	if(m_pieImage!=0)
-	{
-		TqInt iElement;
-		for(iElement=0; iElement<(m_XBucketSize+m_FilterXWidth)*(m_YBucketSize+m_FilterYWidth); iElement++)
-			m_pieImage[iElement].Clear();
-	}
 }
 
 
@@ -495,16 +481,6 @@ void	CqImageBuffer::ClearBucket()
 
 void	CqImageBuffer::DeleteImage()
 {
-	delete[](m_pieImage);
-	delete[](m_aSurfaces);
-
-	m_pieImage=0;
-	m_aSurfaces=0;
-	m_aampgWaiting.clear();
-	m_aagridWaiting.clear();
-
-	m_aaFilterValues.clear();
-
 	m_iXRes=0;
 	m_iYRes=0;
 }
@@ -521,39 +497,6 @@ void	CqImageBuffer::Release()
 
 
 //----------------------------------------------------------------------
-/** Get a reference to pixel data.
- * \param iXPos Integer pixel coordinate.
- * \param iYPos Integer pixel coordinate.
- * \param iBucket Integer bucket index.
- * \param pie Pointer to CqImageElement to fill in.
- * \return Boolean indicating success, could fail if the specified pixel is not within the specified bucket.
- */
-
-TqBool CqImageBuffer::Pixel(TqInt iXPos, TqInt iYPos, TqInt iBucket, CqImageElement*& pie)
-{
-	TqInt iYBucket=iBucket/m_cXBuckets;
-	TqInt iXBucket=iBucket%m_cXBuckets;
-	
-	iXPos-=(iXBucket*m_XBucketSize);
-	iYPos-=(iYBucket*m_YBucketSize);
-
-	int fyo2=static_cast<int>(m_FilterYWidth*0.5f);
-	int fxo2=static_cast<int>(m_FilterXWidth*0.5f);
-	
-	// Check within renderable range
-	if(iXPos>=-fxo2 && iXPos<=m_XBucketSize+fxo2 &&
-	   iYPos>=-fyo2 && iYPos<=m_YBucketSize+fyo2)
-	{
-		TqInt i=((iYPos+fyo2)*(m_XBucketSize+m_FilterXWidth))+(iXPos+fxo2);
-		pie=&m_pieImage[i];
-		return(TqTrue);
-	}
-	else
-		return(TqFalse);
-}
-
-
-//----------------------------------------------------------------------
 /** Get the value of the specified pixel using the current filter function.
  * \param iXPos Integer pixel coordinate.
  * \param iYPos Integer pixel coordinate.
@@ -563,17 +506,16 @@ TqBool CqImageBuffer::Pixel(TqInt iXPos, TqInt iYPos, TqInt iBucket, CqImageElem
 
 void CqImageBuffer::FilterPixel(TqInt X, TqInt Y, TqInt iBucket, SqImageValue& Val)
 {
-	TqInt iYBucket=iBucket/m_cXBuckets;
-	TqInt iXBucket=iBucket-(iYBucket*m_cXBuckets);
-	
 	CqImageElement* pie;
-	if(!Pixel(X-(m_FilterXWidth/2),Y-(m_FilterYWidth/2),iBucket,pie))
+	CqBucket& Bucket=m_aBuckets[iBucket];
+	
+	if(!Bucket.ImageElement(X-(m_FilterXWidth/2),Y-(m_FilterYWidth/2),pie))
 	{
 		CqBasicError(ErrorID_InvalidPixel,Severity_Fatal,"Invalid Pixel filter request");
 		return;
 	}
 
-	TqFloat* pFilterValues=&m_aaFilterValues[((Y%m_YBucketSize)*m_XBucketSize)+(X%m_XBucketSize)][0];
+	TqFloat* pFilterValues=&m_aaFilterValues[((Y%Bucket.YSize())*Bucket.XSize())+(X%Bucket.XSize())][0];
 
 	CqColor c(0,0,0);
 	TqFloat d=0.0f;
@@ -596,7 +538,7 @@ void CqImageBuffer::FilterPixel(TqInt X, TqInt Y, TqInt iBucket, SqImageValue& V
 			pie2++;
 			fx++;
 		}
-		pie+=(m_XBucketSize+m_FilterXWidth);
+		pie+=(Bucket.XSize()+Bucket.XFWidth());
 		fy++;
 	}
 
@@ -776,8 +718,7 @@ void CqImageBuffer::PostSurface(CqBasicSurface* pSurface)
 		if(YMinb<0)	YMinb=0;
 		iBucket=(YMinb*m_cXBuckets)+XMinb;
 	}
-	assert(iBucket>=m_CurrBucket);
-	m_aSurfaces[iBucket].LinkFirst(pSurface);
+	m_aBuckets[iBucket].AddGPrim(pSurface);
 }
 
 
@@ -808,8 +749,6 @@ void CqImageBuffer::AddMPG(CqMicroPolygonBase* pmpgNew)
 	TqInt iYBa=static_cast<TqInt>(B.vecMin().y()/(m_YBucketSize));
 	TqInt iYBb=static_cast<TqInt>(B.vecMax().y()/(m_YBucketSize));
 	// Now duplicate and link into any buckets it crosses.
-	// Check if bucket has already been rendered, error situation.
-	assert((iYBa*m_cXBuckets)+iXBa>=m_CurrBucket);
 
 	TqInt iXB=iXBa,iYB=iYBa;
 	do
@@ -821,7 +760,7 @@ void CqImageBuffer::AddMPG(CqMicroPolygonBase* pmpgNew)
 			{
 				if(iXB>=0 && iXB<m_cXBuckets)
 				{
-					m_aampgWaiting[(iYB*m_cXBuckets)+iXB].push_back(pmpgNew);
+					m_aBuckets[(iYB*m_cXBuckets)+iXB].AddMPG(pmpgNew);
 					pmpgNew->AddRef();
 				}
 				iXB+=1;
@@ -844,33 +783,31 @@ void CqImageBuffer::AddMPG(CqMicroPolygonBase* pmpgNew)
 void CqImageBuffer::RenderMPGs(TqInt iBucket, long xmin, long xmax, long ymin, long ymax)
 {
 	// First of all split any grids in this bucket waiting to be processed.
-	if(!m_aagridWaiting[iBucket].empty())
+	if(!m_aBuckets[iBucket].aGrids().empty())
 	{
-		for(std::vector<CqMicroPolyGridBase*>::iterator i=m_aagridWaiting[iBucket].begin(); i!=m_aagridWaiting[iBucket].end(); i++)
+		for(std::vector<CqMicroPolyGridBase*>::iterator i=m_aBuckets[iBucket].aGrids().begin(); i!=m_aBuckets[iBucket].aGrids().end(); i++)
 			(*i)->Split(this,iBucket,xmin,xmax,ymin,ymax);
 	}
-	m_aagridWaiting[iBucket].clear();
+	m_aBuckets[iBucket].aGrids().clear();
 
 	// Render any waiting MPGs
 	static	CqColor	colWhite(1,1,1);
 	static	CqVector2D	vecP;
 	
-	if(m_aampgWaiting[iBucket].empty())	return;
+	if(m_aBuckets[iBucket].aMPGs().empty())	return;
 
 	TqFloat farplane=QGetRenderContext()->optCurrent().fClippingPlaneFar();
 	TqFloat nearplane=QGetRenderContext()->optCurrent().fClippingPlaneNear();
 	
 	register long iY=ymin;
 
-	TqInt i;
-	for(i=m_aampgWaiting[iBucket].size()-1; i>=0; i--)
+	for(std::vector<CqMicroPolygonBase*>::iterator i=m_aBuckets[iBucket].aMPGs().begin(); i!=m_aBuckets[iBucket].aMPGs().end(); i++)
 	{
-		CqMicroPolygonBase* pMPG=m_aampgWaiting[iBucket][i];
-		RenderMicroPoly(pMPG,iBucket,xmin,xmax,ymin,ymax);
-		pMPG->Release();
+		RenderMicroPoly(*i,iBucket,xmin,xmax,ymin,ymax);
+		(*i)->Release();
 	}
 
-	m_aampgWaiting[iBucket].clear();
+	m_aBuckets[iBucket].aMPGs().clear();
 }
 
 
@@ -887,6 +824,8 @@ void CqImageBuffer::RenderMPGs(TqInt iBucket, long xmin, long xmax, long ymin, l
 inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax)
 {
 	static	SqImageValue	ImageVal;
+
+	CqBucket& Bucket=m_aBuckets[iBucket];
 
 	// Bound the microplygon in hybrid camera/raster space
 	CqBound Bound(pMPG->Bound());
@@ -932,7 +871,7 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 	{
 		register long iX=initX;
 
-		bool valid=Pixel(iX,iY,iBucket,pie);
+		bool valid=Bucket.ImageElement(iX,iY,pie);
 
 		while(iX<=eX)
 		{
@@ -1007,8 +946,10 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 	// Render any waiting micro polygon grids.
 	RenderMPGs(iBucket, xmin, xmax, ymin, ymax);
 
+	CqBucket& Bucket=m_aBuckets[iBucket];
+
 	// Render any waiting subsurfaces.
-	CqBasicSurface* pSurface=m_aSurfaces[iBucket].pFirst();
+	CqBasicSurface* pSurface=Bucket.pTopSurface();
 	while(pSurface!=0)
 	{
 		if(m_fQuit)	return;
@@ -1023,7 +964,7 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 					pGrid->Shade();
 
 				pGrid->Project();
-				m_aagridWaiting[m_CurrBucket].push_back(pGrid);
+				Bucket.AddGrid(pGrid);
 			}
 		}
      	else if(!pSurface->fDiscard())
@@ -1036,7 +977,7 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 		}
 
 		delete(pSurface);
-		pSurface=m_aSurfaces[iBucket].pFirst();
+		pSurface=Bucket.pTopSurface();
 		// Render any waiting micro polygon grids.
 		RenderMPGs(iBucket, xmin, xmax, ymin, ymax);
 	}
@@ -1044,22 +985,12 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 	// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
 	if(m_fQuit)	return;
 	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
-	{
-		CqImageElement* ie=m_pieImage;
-		TqInt i;
-		for(i=0; i<(m_XBucketSize+m_FilterXWidth)*(m_YBucketSize+m_FilterYWidth); i++)
-		{
-			ie->Combine();
-			ie++;
-		}
-	}
+		CqBucket::CombineElements();
+
 	BucketComplete(iBucket);
 #ifdef	AQSIS_SYSTEM_WIN32
 	PostBucket(iBucket);
 #endif // AQSIS_SYSTEM_WIN32
-	
-	// Clear the MPG waiting array
-	m_aampgWaiting[iBucket].clear();
 }
 
 
@@ -1071,15 +1002,15 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 
 void CqImageBuffer::PostBucket(TqInt iBucket)
 {
+	CqBucket& Bucket=m_aBuckets[iBucket];
+	
 	// Copy the bucket to the display buffer.
-	CqVector2D	vPos=Position(iBucket);
-	CqVector2D	vSize=Size(iBucket);
-	TqInt		xmin=vPos.x();
-	TqInt		ymin=vPos.y();
-	TqInt		xmaxplus1=vPos.x()+vSize.x();
-	TqInt		ymaxplus1=vPos.y()+vSize.y();
-	TqInt		xsize=vSize.x();
-	TqInt		ysize=vSize.y();
+	TqInt		xmin=Bucket.XOrigin();
+	TqInt		ymin=Bucket.YOrigin();
+	TqInt		xsize=Bucket.XSize();
+	TqInt		ysize=Bucket.YSize();
+	TqInt		xmaxplus1=xmin+xsize;
+	TqInt		ymaxplus1=ymin+ysize;
 
 	// Check if this bucket is outside the crop window.
 	if(xmaxplus1<CropWindowXMin() ||
@@ -1120,7 +1051,7 @@ void CqImageBuffer::PostBucket(TqInt iBucket)
 				if(i->Mode()&ModeZ)
 				{
 					CqImageElement* pie;
-					if(Pixel(sx,sy,iBucket,pie))
+					if(Bucket.ImageElement(sx,sy,pie))
 					{
 						std::vector<SqImageValue>& aValues=pie->Values(0,0);
 			
@@ -1176,9 +1107,17 @@ void CqImageBuffer::RenderImage()
 	TqInt iBucket;
 	for(iBucket=0; iBucket<m_cXBuckets*m_cYBuckets; iBucket++)
 	{
+		// Prepare the bucket.
+		CqBucket::Clear();
+		CqVector2D bPos=Position(iBucket);
+		CqVector2D bSize=Size(iBucket);
+		CqBucket::InitialiseBucket(bPos.x(), bPos.y(), bSize.x(), bSize.y(), m_FilterXWidth, m_FilterYWidth, m_PixelXSamples, m_PixelYSamples);
+
+		CqBucket& Bucket=m_aBuckets[iBucket];
+
 		// Set up some bounds for the bucket.
-		CqVector2D vecMin=Position(iBucket);
-		CqVector2D vecMax=Size(iBucket)+vecMin;
+		CqVector2D vecMin=bPos;
+		CqVector2D vecMax=bPos+bSize;
 		vecMin-=CqVector2D(m_FilterXWidth/2,m_FilterYWidth/2);
 		vecMax+=CqVector2D(m_FilterXWidth/2,m_FilterYWidth/2);
 
@@ -1193,7 +1132,6 @@ void CqImageBuffer::RenderImage()
 		if(ymax>CropWindowYMax()+m_FilterYWidth/2)	ymax=CropWindowYMax()+m_FilterYWidth/2;
 
 		// Inform the status class how far we have got, and update UI.
-		m_CurrBucket=iBucket;
 		float Complete=(m_cXBuckets*m_cYBuckets);
 		Complete/=iBucket;
 		Complete=100.0f/Complete;
@@ -1205,10 +1143,6 @@ void CqImageBuffer::RenderImage()
 			m_fDone=TqTrue;
 			return;
 		}
-
-		// Rejitter the sample locations to avoid bucket level interference patterns.
-		InitialiseSamples(iBucket+1);
-		ClearBucket();
 	}
 
 	ImageComplete();
