@@ -154,7 +154,11 @@ static void CloseSocket( SOCKET& Socket )
     ling.l_linger = 10;
     setsockopt( Socket, SOL_SOCKET, SO_LINGER, reinterpret_cast<const char*>( &ling ), sizeof( ling ) );
     shutdown( Socket, SHUT_RDWR );
-    close( Socket );
+#ifndef	AQSIS_SYSTEM_WIN32
+	close( Socket );
+#else	// AQSIS_SYSTEM_WIN32
+	closesocket( Socket );
+#endif	// AQSIS_SYSTEM_WIN32
 
     Socket = INVALID_SOCKET;
 }
