@@ -3,6 +3,8 @@ if not exist ..\binary-archive mkdir ..\binary-archive
 if not exist ..\binary-archive\shaders mkdir ..\binary-archive\shaders
 if not exist ..\binary-archive\docs mkdir ..\binary-archive\docs
 if not exist ..\binary-archive\examples mkdir ..\binary-archive\examples
+if not exist ..\binary-archive\lib mkdir ..\binary-archive\lib
+if not exist ..\binary-archive\include mkdir ..\binary-archive\include
 
 erase /f /s /q ..\binary-archive\*.*
 
@@ -37,6 +39,13 @@ copy ..\..\License.txt .
 
 cd ..\examples
 copy ..\..\ribfiles\*.rib .
+
+cd ..\lib
+copy ..\..\library\release\libri2rib.lib .
+
+cd ..\include
+copy ..\..\render\ri.h .
+copy ..\..\libaqsistypes\win32\intel\share.h .
 
 cd ..\..\
 erase /f /q Aqsis_Win32.zip
