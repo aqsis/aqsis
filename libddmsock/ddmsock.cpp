@@ -30,7 +30,27 @@
 #include	<fstream>
 #include	<map>
 
+#ifdef AQSIS_SYSTEM_WIN32
+
 #include	<process.h>
+
+#else // AQSIS_SYSTEM_WIN32
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+static const int INVALID_SOCKET = -1;
+static const int SD_BOTH = 2;
+static const int SOCKET_ERROR = -1;
+
+typedef sockaddr_in SOCKADDR_IN;
+typedef sockaddr* PSOCKADDR;
+
+#endif // !AQSIS_SYSTEM_WIN32
 
 #include	"renderer.h"
 #include	"render.h"
@@ -49,6 +69,15 @@ IqDDManager* CreateDisplayDriverManager()
 }
 
 //---------------------------------------------------------------------
+/** Default constructor.
+ */
+
+CqDDServer::CqDDServer() :
+	m_Socket(INVALID_SOCKET)
+{
+}
+
+//---------------------------------------------------------------------
 /** Constructor, takes a port no. and prepares the socket to accept clients.
  */
 
@@ -59,15 +88,29 @@ CqDDServer::CqDDServer(TqInt port)
 
 
 //---------------------------------------------------------------------
+/** Destructor, close all connected client sockets.
+ */
+
+CqDDServer::~CqDDServer()
+{
+	Close();
+}
+
+//---------------------------------------------------------------------
 /** Close the servers socket, waiting for any connectsion acticity to finish first,
  */
 
 void CqDDServer::Close()
 {
+#ifdef AQSIS_SYSTEM_WIN32
 	int x=1;
 	setsockopt(m_Socket,SOL_SOCKET,SO_DONTLINGER,reinterpret_cast<const char*>(&x),sizeof(x));
 	shutdown(m_Socket,SD_BOTH);
 	closesocket( m_Socket );
+#else // AQSIS_SYSTEM_WIN32	
+	close(m_Socket);
+#endif // !AQSIS_SYSTEM_WIN32
+	
 	m_Socket = INVALID_SOCKET;							
 }
 
@@ -97,14 +140,20 @@ TqBool CqDDServer::Open()
 
 	if(m_Socket==INVALID_SOCKET)
 	{
+#ifdef AQSIS_SYSTEM_WIN32
 		TqInt err=WSAGetLastError();
+#endif // AQSIS_SYSTEM_WIN32
 		CqBasicError(0,0,"Error opening DD server socket");
 		return(TqFalse);
 	}
 
 	TqInt x=1;
 	setsockopt(m_Socket,SOL_SOCKET,SO_REUSEADDR,reinterpret_cast<const char*>(&x),sizeof(x));
+	
+#ifdef AQSIS_SYSTEM_WIN32	
 	BOOL Ret=SetHandleInformation((HANDLE)m_Socket, HANDLE_FLAG_INHERIT, 0);
+#endif // AQSIS_SYSTEM_WIN32
+
 	return(TqTrue);
 }
 
@@ -121,11 +170,15 @@ TqBool CqDDServer::Bind(TqInt port)
 	saTemp.sin_port=htons(port);
 	saTemp.sin_addr.s_addr=INADDR_ANY;
 
-	if(bind(m_Socket,(PSOCKADDR)&saTemp,sizeof(saTemp))==SOCKET_ERROR)
+	if(bind(m_Socket,(PSOCKADDR)&saTemp,sizeof(saTemp)) == SOCKET_ERROR)
 	{
+#ifdef AQSIS_SYSTEM_WIN32
 		TqInt iE=WSAGetLastError();
+#endif // AQSIS_SYSTEM_WIN32
+
 		CqBasicError(0,0,"Error binding to DD socket");
 		Close();
+		
 		return(TqFalse);
 	}
 	return(TqTrue);
@@ -179,16 +232,17 @@ TqBool CqDDServer::Accept(CqDDClient& dd)
 	return(TqFalse);
 }
 
-
-//---------------------------------------------------------------------
-/** Destructor, close all connected client sockets.
- */
-
-CqDDServer::~CqDDServer()
+CqDDClient::CqDDClient(const TqChar* name, const TqChar* type, const TqChar* mode) :
+	m_Socket(INVALID_SOCKET),
+	m_strName(name),
+	m_strType(type),
+	m_strMode(mode)
 {
-	Close();
 }
 
+CqDDClient::~CqDDClient()
+{
+}
 
 
 //---------------------------------------------------------------------
@@ -196,10 +250,16 @@ CqDDServer::~CqDDServer()
  */
 void CqDDClient::Close()		
 {
+#ifdef AQSIS_SYSTEM_WIN32
 	int x=1;
 	setsockopt(m_Socket,SOL_SOCKET,SO_DONTLINGER,reinterpret_cast<const char*>(&x),sizeof(x));
 	shutdown(m_Socket,SD_BOTH);
 	closesocket(m_Socket);
+#else // AQSIS_SYSTEM_WIN32
+	close(m_Socket);
+#endif // !AQSIS_SYSTEM_WIN32
+
+	m_Socket = INVALID_SOCKET;
 }
 
 
@@ -257,6 +317,21 @@ void CqDDClient::Receive(void* buffer, TqInt len)
 std::map<std::string, std::string>	g_mapDisplayNames;
 TqBool								g_fDisplayMapInitialised=false;
 
+CqDDManager::CqDDManager()
+{
+#ifdef AQSIS_SYSTEM_WIN32
+	WSADATA data;
+	WSAStartup(MAKEWORD(2,0),&data);
+#endif // AQSIS_SYSTEM_WIN32
+}
+
+CqDDManager::~CqDDManager()
+{
+#ifdef AQSIS_SYSTEM_WIN32
+	WSACleanup();
+#endif // AQSIS_SYSTEM_WIN32
+}
+
 TqInt CqDDManager::Initialise()
 {
 	if(!m_DDServer.Prepare(AQSIS_DD_PORT))
@@ -273,7 +348,6 @@ TqInt CqDDManager::Shutdown()
 	m_DDServer.Close();
 	return(0);
 }
-
 
 TqInt CqDDManager::AddDisplay(const TqChar* name, const TqChar* type, const TqChar* mode)
 {
@@ -389,16 +463,31 @@ void CqDDManager::LoadDisplayLibrary(CqDDClient& dd)
     //    trapping.  
     if (strDriverFile.empty())
     {
-        CqBasicError(ErrorID_DisplayDriver,Severity_Normal,
-            "Add/copy ddmsock.ini file into path.  Defaulting to \"framebuffer.exe\".");
+        CqBasicError(ErrorID_DisplayDriver,Severity_Normal, "Add/copy ddmsock.ini file into path.  Defaulting to \"framebuffer.exe\".");
         strDriverFile = "framebuffer.exe";
     }
 
 	CqRiFile fileDriver(strDriverFile.c_str(), "display");
 	if(fileDriver.IsValid())
-	{
-		TqInt ProcHandle=_spawnl(_P_NOWAITO, fileDriver.strRealName().c_str(), strDriverFile.c_str() ,NULL);
-		if(ProcHandle>=0)
+	{	
+#ifdef AQSIS_SYSTEM_WIN32
+		const TqInt ProcHandle = _spawnl(_P_NOWAITO, fileDriver.strRealName().c_str(), strDriverFile.c_str() ,NULL);
+		if(ProcHandle < 0)
+		{
+			CqBasicError(0,0,"Error spawning display driver process");
+		}
+#else // AQSIS_SYSTEM_WIN32
+		const int forkresult = fork();
+		if(0 == forkresult)
+			{
+				execlp(fileDriver.strRealName().c_str(), strDriverFile.c_str(), NULL);
+			}
+		else if(-1 == forkresult)
+			{
+				CqBasicError(0, 0, "Error forking display driver process");
+			}
+#endif // !AQSIS_SYSTEM_WIN32
+		else
 		{
 			// wait for a connection request from the client
 			if(m_DDServer.Accept(dd))
@@ -408,8 +497,8 @@ void CqDDManager::LoadDisplayLibrary(CqDDClient& dd)
 				dd.SendMsg(pmsgfname);
 				pmsgfname->Destroy();
 
-				CqMatrix& matWorldToCamera=QGetRenderContext()->matSpaceToSpace("world","camera");
-				CqMatrix& matWorldToScreen=QGetRenderContext()->matSpaceToSpace("world","screen");
+				CqMatrix matWorldToCamera=QGetRenderContext()->matSpaceToSpace("world","camera");
+				CqMatrix matWorldToScreen=QGetRenderContext()->matSpaceToSpace("world","screen");
 
 				SqDDMessageNl msgnl(matWorldToCamera.pElements());
 				dd.SendMsg(&msgnl);
@@ -438,11 +527,11 @@ void CqDDManager::LoadDisplayLibrary(CqDDClient& dd)
 				dd.SendMsg(&msgopen);
 			}
 		}
-		else
-			CqBasicError(0,0,"Error loading display driver");
 	}
 	else
+	{
 		CqBasicError(0,0,"Error loading display driver");
+	}
 }
 
 
@@ -462,10 +551,10 @@ void CqDDManager::InitialiseDisplayNameMap()
 		while(std::getline(strmINI,strLine))
 		{
 			std::string strName,strDriverName;
-			TqInt iStartN=strLine.find_first_not_of('\t');
-			TqInt iEndN=strLine.find_first_of('\t',iStartN);
-			TqInt iStartD=strLine.find_first_not_of('\t',iEndN);
-			TqInt iEndD=strLine.find_first_of('\t',iStartD);
+			std::string::size_type iStartN=strLine.find_first_not_of('\t');
+			std::string::size_type iEndN=strLine.find_first_of('\t',iStartN);
+			std::string::size_type iStartD=strLine.find_first_not_of('\t',iEndN);
+			std::string::size_type iEndD=strLine.find_first_of('\t',iStartD);
 			if(iStartN!=std::string::npos && iEndN!=std::string::npos &&
 			   iStartD!=std::string::npos)
 			{

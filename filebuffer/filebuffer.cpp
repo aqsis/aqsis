@@ -27,7 +27,15 @@
 
 #include	"aqsis.h"
 
+#ifdef AQSIS_SYSTEM_WIN32
+
 #include	<process.h>
+
+#else // AQSIS_SYSTEM_WIN32
+
+typedef int SOCKET;
+
+#endif // !AQSIS_SYSTEM_WIN32
 
 #include	"displaydriver.h"
 #include	"dd.h"

@@ -46,3 +46,4 @@ TqInt DDProcessMessages();
 END_NAMESPACE(Aqsis)
 
 #endif // DD_H_INCLUDED
+

@@ -15,3 +15,4 @@ bumpy(
 	P += amp * normalize(N);
 	N = calculatenormal(P);
 }
+

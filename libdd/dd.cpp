@@ -28,7 +28,29 @@
 
 #include	"aqsis.h"
 
+#ifdef AQSIS_SYSTEM_WIN32
+
 #include	<winsock2.h>
+
+#else // AQSIS_SYSTEM_WIN32
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+
+typedef int SOCKET;
+typedef sockaddr_in SOCKADDR_IN;
+typedef sockaddr* PSOCKADDR;
+
+static const int INVALID_SOCKET = -1;
+static const int SOCKET_ERROR = -1;
+
+#endif // !AQSIS_SYSTEM_WIN32
+
 #include	<stdio.h>
 #include	"displaydriver.h"
 
@@ -140,8 +162,10 @@ SOCKET s;
 
 TqInt DDInitialise(const TqChar* phostname, TqInt port)
 {
+#ifdef AQSIS_SYSTEM_WIN32
 	WSADATA wsaData;
 	WSAStartup(MAKEWORD(2,0),&wsaData);
+#endif // AQSIS_SYSTEM_WIN32
 
 	// Open a socket.
 	s=socket(AF_INET,SOCK_STREAM,0);
@@ -153,7 +177,7 @@ TqInt DDInitialise(const TqChar* phostname, TqInt port)
 			strcpy(hostName,phostname);
 		else
 			gethostname(hostName,255);
-		
+
 		hostent* pHost;
 		pHost=gethostbyname(hostName);
 
@@ -171,7 +195,11 @@ TqInt DDInitialise(const TqChar* phostname, TqInt port)
 			return(0);
 		else
 		{
+#ifdef AQSIS_SYSTEM_WIN32
 			closesocket(s);
+#else // AQSIS_SYSTEM_WIN32
+			close(s);
+#endif // !AQSIS_SYSTEM_WIN32
 			return(-1);
 		}
 	}
@@ -264,6 +292,7 @@ TqInt DDProcessMessages()
 
 static void CloseSocket(SOCKET s)
 {
+#ifdef AQSIS_SYSTEM_WIN32
 	int x=1;
 	LINGER ling;
 	ling.l_onoff=1;
@@ -271,6 +300,9 @@ static void CloseSocket(SOCKET s)
 	setsockopt(s,SOL_SOCKET,SO_LINGER,reinterpret_cast<const char*>(&ling),sizeof(ling));
 	shutdown(s,SD_BOTH);
 	closesocket(s);
+#else // AQSIS_SYSTEM_WIN32
+	close(s);
+#endif // !AQSIS_SYSTEM_WIN32
 }
 
 

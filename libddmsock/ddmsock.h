@@ -28,7 +28,16 @@
 #define DDSERVER_H_INCLUDED 1
 
 #include	<vector>
+
+#ifdef AQSIS_SYSTEM_WIN32
+
 #include	<winsock2.h>
+
+#else // AQSIS_SYSTEM_WIN32
+
+typedef int SOCKET;
+
+#endif // !AQSIS_SYSTEM_WIN32
 
 #include	"aqsis.h"
 
@@ -46,13 +55,8 @@ struct SqDDMessageBase;
 class CqDDClient
 {
 	public:
-				CqDDClient(const TqChar* name, const TqChar* type, const TqChar* mode) :
-							m_strName(name),
-							m_strType(type),
-							m_strMode(mode),
-							m_Socket(INVALID_SOCKET)
-							{}
-				~CqDDClient(){}
+				CqDDClient(const TqChar* name, const TqChar* type, const TqChar* mode);
+				~CqDDClient();
 
 				/** Close the socket this client is associated with.
 				 */
@@ -62,13 +66,11 @@ class CqDDClient
 		void	Receive(void* buffer, TqInt len);
 				/** Get a reference to the socket ID.
 				 */
-		void	SetSocket(SOCKET s)
-							{m_Socket=s;}
-		SOCKET&	Socket()	{return(m_Socket);}
+		void	SetSocket(SOCKET s) { m_Socket = s; }
+		SOCKET& Socket() { return(m_Socket); }
 				/** Get a reference to the socket ID.
 				 */
-	const SOCKET& Socket() const	
-							{return(m_Socket);}
+	const SOCKET& Socket() const	{ return(m_Socket); }
 
 		CqString&	strName()	{return(m_strName);}
 		void		SetstrName(const TqChar* name)
@@ -96,8 +98,7 @@ class CqDDClient
 class CqDDServer
 {
 	public:
-				CqDDServer() : m_Socket(INVALID_SOCKET)
-							{}
+				CqDDServer();
 				CqDDServer(TqInt port);
 				~CqDDServer();
 
@@ -130,25 +131,20 @@ class CqDDServer
 class CqDDManager : public IqDDManager
 {
 	public:
-				CqDDManager()	{
-									WSADATA data;
-									WSAStartup(MAKEWORD(2,0),&data);
-								}
-				~CqDDManager()	{
-									WSACleanup();
-								}
+		CqDDManager();
+		virtual ~CqDDManager();
 
-	// Overridden from IqDDManager
-	virtual	TqInt	Initialise();
-	virtual	TqInt	Shutdown();
-	virtual	TqInt	AddDisplay(const TqChar* name, const TqChar* type, const TqChar* mode);
-	virtual	TqInt	ClearDisplays();
-	virtual	TqInt	OpenDisplays();
-	virtual	TqInt	CloseDisplays();
-	virtual	TqInt	DisplayBucket(IqBucket* pBucket);
+		// Overridden from IqDDManager
+		virtual	TqInt	Initialise();
+		virtual	TqInt	Shutdown();
+		virtual	TqInt	AddDisplay(const TqChar* name, const TqChar* type, const TqChar* mode);
+		virtual	TqInt	ClearDisplays();
+		virtual	TqInt	OpenDisplays();
+		virtual	TqInt	CloseDisplays();
+		virtual	TqInt	DisplayBucket(IqBucket* pBucket);
 
-			void	LoadDisplayLibrary(CqDDClient& dd);
-			void	InitialiseDisplayNameMap();
+		void	LoadDisplayLibrary(CqDDClient& dd);
+		void	InitialiseDisplayNameMap();
 
 	private:
 		CqDDServer	m_DDServer;

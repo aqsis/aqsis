@@ -1,3 +1,7 @@
-SUBDIRS = posix win32
-EXTRA_DIST = displaydriver.h
+noinst_LTLIBRARIES = libddmsock.la
+
+libddmsock_la_SOURCES = ddmsock.cpp ddmsock.h
+
+CXXFLAGS = -g -Wall
+INCLUDES = -I$(top_srcdir)/render -I$(top_srcdir)/libddmsock -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix 
 
