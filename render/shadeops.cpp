@@ -2271,15 +2271,10 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminance(POINTVAL P, VECTORVAL Axis, FLOATVAL 
 			L()[i]=-(lp->L()[i]);
 			Cl()[i]=lp->Cl()[i];
 			// Check if its within the cone.
-			if(FLOAT(Angle)!=-1)
-			{
-				CqVector3D nL=L();	nL.Unit();
-				TqFloat cosangle=nL*VECTOR(Axis);
-				if(acos(cosangle)>FLOAT(Angle))
-					m_CurrentState.SetValue(i,TqFalse);
-				else
-					m_CurrentState.SetValue(i,TqTrue);
-			}
+			CqVector3D nL=L();	nL.Unit();
+			TqFloat cosangle=nL*VECTOR(Axis);
+			if(acos(fabs(cosangle))>FLOAT(Angle))
+				m_CurrentState.SetValue(i,TqFalse);
 			else
 				m_CurrentState.SetValue(i,TqTrue);
 		END_FORR		
@@ -2312,15 +2307,10 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminate(POINTVAL P, VECTORVAL Axis, FLOATVAL A
 		{
 			L()=Ps() - POINT(P);
 			// Check if its within the cone.
-			if(FLOAT(Angle)!=-1)
-			{
-				CqVector3D nL=L();	nL.Unit();
-				TqFloat cosangle=nL*VECTOR(Axis);
-				if(acos(cosangle)>FLOAT(Angle))
-					m_CurrentState.SetValue(i,TqFalse);
-				else
-					m_CurrentState.SetValue(i,TqTrue);
-			}
+			CqVector3D nL=L();	nL.Unit();
+			TqFloat cosangle=nL*VECTOR(Axis);
+			if(acos(fabs(cosangle))>FLOAT(Angle))
+				m_CurrentState.SetValue(i,TqFalse);
 			else
 				m_CurrentState.SetValue(i,TqTrue);
 		}
