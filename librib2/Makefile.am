@@ -4,9 +4,9 @@ EXTRA_DIST = parser.y scanner.l librib2.dsp
 
 lib_LTLIBRARIES =  librib2.la
 
-librib2_la_SOURCES = scanner.cpp parser.cpp librib.cpp librib.h libribtypes.h
+librib2_la_SOURCES = librib.cpp librib.h libribtypes.h parser.cpp parser.cpp.h scanner.cpp
 
-pkginclude_HEADERS = librib.h
+include_HEADERS = librib.h
 
 parser.cpp parser.cpp.h : $(srcdir)/parser.y $(srcdir)/libribtypes.h
 	bison --defines -oparser.cpp $(srcdir)/parser.y

@@ -1,4 +1,4 @@
-SUBDIRS = all cribber filebuffer framebuffer images libaqsistypes libcodegenvm libdd libddmsimple libddmsock librib2 librib2ri librib2stream libslparse render ribfiles shaders shadowmap slcomp slpp texer aqsl aqsis
+SUBDIRS = all cribber filebuffer framebuffer images libaqsistypes libcodegenvm libdd libddmsimple libddmsock librib2 librib2ri librib2stream libslparse render ribfiles shadowmap slcomp slpp texer aqsl shaders aqsis
  
 EXTRA_DIST = Doxyfile License.txt Renderer.dsw aqsis.ini bootstrap prep_install.bat ribber.cfg 
 

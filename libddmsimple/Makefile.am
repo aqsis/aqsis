@@ -1,6 +1,6 @@
 EXTRA_DIST = libddmsimple.dsp
 
-noinst_LTLIBRARIES = libddmsimple.la
+lib_LTLIBRARIES = libddmsimple.la
 
 libddmsimple_la_SOURCES = ddmsimple.cpp ddmsimple.h 
 
