@@ -23,7 +23,7 @@ if test x$debug = xtrue ; then
 else
   AC_DEFINE(NDEBUG,[],"Disable C99 asserts.")
   DEBUG_FLAGS="" 
-  OPT_FLAGS=""
+  OPT_FLAGS="-O2"
 fi
   
 AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
