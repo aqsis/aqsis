@@ -1,4 +1,3 @@
-LIBRARY	libaqsis
 DESCRIPTION	"Main Aqsis rendering library"
 EXPORTS
 	Parse

@@ -110,6 +110,8 @@ public:
 
     TqInt cQfv() const;
     TqInt cQvv() const;
+    TqInt cQve() const;
+    TqInt cQvf() const;
 
     TqBool isBoundaryFacet()
     {
