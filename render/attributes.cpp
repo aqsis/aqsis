@@ -76,6 +76,21 @@ const TqInt CqAttributes::CqHashTable::tableSize = 127;
  *  Creates a new CqParameter derived class, initialises it to the given default value and 
  *  adds it to the default attributes member.
  */
+#define	ADD_SYSTEM_ATTR6(name, type, sltype, id, def0, def1, def2, def3, def4, def5) \
+	CqParameterTypedUniformArray<type,id, sltype>* p##name = new CqParameterTypedUniformArray<type,id, sltype>(#name,8); \
+	p##name->pValue()[0] = ( def0 ); \
+	p##name->pValue()[1] = ( def1 ); \
+	p##name->pValue()[2] = ( def2 ); \
+	p##name->pValue()[3] = ( def3 ); \
+	p##name->pValue()[4] = ( def4 ); \
+	p##name->pValue()[5] = ( def5 ); \
+	pdefattrs->AddParameter(p##name);
+
+
+/** A macro to take care of adding a system attribute given a name.
+ *  Creates a new CqParameter derived class, initialises it to the given default value and 
+ *  adds it to the default attributes member.
+ */
 #define	ADD_SYSTEM_ATTR8(name, type, sltype, id, def0, def1, def2, def3, def4, def5, def6, def7) \
 	CqParameterTypedUniformArray<type,id, sltype>* p##name = new CqParameterTypedUniformArray<type,id, sltype>(#name,8); \
 	p##name->pValue()[0] = ( def0 ); \
@@ -103,7 +118,7 @@ CqAttributes::CqAttributes() :
 	Attribute_stack.push_back( this );
 	m_StackIndex = Attribute_stack.size() - 1;
 
-	CqSystemOption* pdefattrs = new CqSystemOption( "System" );
+	CqNamedParameterList* pdefattrs = new CqNamedParameterList( "System" );
 
 	ADD_SYSTEM_ATTR( Color, CqColor, CqColor, type_color, CqColor( 1.0f, 1.0f, 1.0f ) );		// the current color attribute.
 	ADD_SYSTEM_ATTR( Opacity, CqColor, CqColor, type_color, CqColor( 1.0f, 1.0f, 1.0f ) );	// the current opacity attribute.
@@ -207,11 +222,11 @@ CqAttributes& CqAttributes::operator=( const CqAttributes& From )
 
 const CqParameter* CqAttributes::pParameter( const char* strName, const char* strParam ) const
 {
-	const CqSystemOption * pOpt;
-	if ( ( pOpt = pAttribute( strName ) ) != 0 )
+	const CqNamedParameterList* pList;
+	if ( ( pList = pAttribute( strName ) ) != 0 )
 	{
 		const CqParameter * pParam;
-		if ( ( pParam = pOpt->pParameter( strParam ) ) != 0 )
+		if ( ( pParam = pList->pParameter( strParam ) ) != 0 )
 			return ( pParam );
 	}
 	return ( 0 );
@@ -227,11 +242,11 @@ const CqParameter* CqAttributes::pParameter( const char* strName, const char* st
 
 CqParameter* CqAttributes::pParameterWrite( const char* strName, const char* strParam )
 {
-	CqSystemOption * pOpt;
-	if ( ( pOpt = pAttributeWrite( strName ) ) != 0 )
+	CqNamedParameterList* pList;
+	if ( ( pList = pAttributeWrite( strName ) ) != 0 )
 	{
 		CqParameter * pParam;
-		if ( ( pParam = pOpt->pParameter( strParam ) ) != 0 )
+		if ( ( pParam = pList->pParameter( strParam ) ) != 0 )
 			return ( pParam );
 	}
 	return ( 0 );

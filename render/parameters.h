@@ -33,6 +33,7 @@
 
 #include	"ishaderdata.h"
 #include	"bilinear.h"
+#include	"refcount.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -1206,6 +1207,77 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 		}
 	}
 }
+
+
+//----------------------------------------------------------------------
+/** \class CqNamedParameterList
+ * Renderman option/attribute class, has a name and a number of parameter name/value pairs.
+ */
+
+class CqNamedParameterList : public CqRefCount
+{
+	public:
+		CqNamedParameterList( const char* strName ) : m_strName( strName )
+		{}
+		CqNamedParameterList( const CqNamedParameterList& From );
+		~CqNamedParameterList()
+		{
+			for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
+				delete( ( *i ) );
+		}
+
+		/** Get a refernece to the option name.
+		 * \return A constant CqString reference.
+		 */
+		const	CqString&	strName() const
+		{
+			return ( m_strName );
+		}
+
+		/** Add a new name/value pair to this option/attribute.
+		 * \param pParameter Pointer to a CqParameter containing the name/value pair.
+		 */
+		void	AddParameter( const CqParameter* pParameter )
+		{
+			// Look to see if one already exists
+			for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
+			{
+				if ( ( *i ) ->strName().compare( pParameter->strName() ) == 0 )
+				{
+					delete( *i );
+					( *i ) = const_cast<CqParameter*>( pParameter );
+					return ;
+				}
+			}
+			// If not append it.
+			m_aParameters.push_back( const_cast<CqParameter*>( pParameter ) );
+		}
+		/** Get a read only pointer to a named parameter.
+		 * \param strName Character pointer pointing to zero terminated parameter name.
+		 * \return A pointer to a CqParameter or 0 if not found.
+		 */
+		const	CqParameter* pParameter( const char* strName ) const
+		{
+			for ( std::vector<CqParameter*>::const_iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
+				if ( ( *i ) ->strName().compare( strName ) == 0 ) return ( *i );
+			return ( 0 );
+		}
+		/** Get a pointer to a named parameter.
+		 * \param strName Character pointer pointing to zero terminated parameter name.
+		 * \return A pointer to a CqParameter or 0 if not found.
+		 */
+		CqParameter* pParameter( const char* strName )
+		{
+			for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
+				if ( ( *i ) ->strName().compare( strName ) == 0 ) return ( *i );
+			return ( 0 );
+		}
+	private:
+		CqString	m_strName;			///< The name of this parameter list.
+		std::vector<CqParameter*>	m_aParameters;		///< A vector of name/value parameters.
+}
+;
+
 
 
 _qShareM	extern CqParameter* ( *gVariableCreateFuncsConstant[] ) ( const char* strName, TqInt Count );

@@ -50,78 +50,78 @@ class CqLightsource;
  * stores information about the current scoping and previous contexts.
  */
 
-class CqContext
+class CqModeBlock
 {
 	public:
 		/** Default constructor
 		 * \param pconParent a pointer to the previous context.
 		 */
-		CqContext( CqContext* pconParent = 0 );
-		virtual	~CqContext()
+		CqModeBlock( CqModeBlock* pconParent = 0 );
+		virtual	~CqModeBlock()
 		{}
 
-		virtual	CqContext*	CreateMainContext();
-		virtual	CqContext*	CreateFrameContext();
-		virtual	CqContext*	CreateWorldContext();
-		virtual	CqContext*	CreateAttributeContext();
-		virtual	CqContext*	CreateTransformContext();
-		virtual	CqContext*	CreateSolidContext( CqString& type );
-		virtual	CqContext*	CreateObjectContext();
-		virtual	CqContext*	CreateMotionContext( TqInt N, TqFloat times[] );
+		virtual	CqModeBlock*	BeginMainModeBlock();
+		virtual	CqModeBlock*	BeginFrameModeBlock();
+		virtual	CqModeBlock*	BeginWorldModeBlock();
+		virtual	CqModeBlock*	BeginAttributeModeBlock();
+		virtual	CqModeBlock*	BeginTransformModeBlock();
+		virtual	CqModeBlock*	BeginSolidModeBlock( CqString& type );
+		virtual	CqModeBlock*	BeginObjectModeBlock();
+		virtual	CqModeBlock*	BeginMotionModeBlock( TqInt N, TqFloat times[] );
 
 		/** Delete the main context, overridable per derived class.
 		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
 		 */
-		virtual	void	DeleteMainContext()
+		virtual	void	EndMainModeBlock()
 		{
 			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 		}
 		/** Delete the main context, overridable per derived class.
 		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
 		 */
-		virtual	void	DeleteFrameContext()
+		virtual	void	EndFrameModeBlock()
 		{
 			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 		}
 		/** Delete the main context, overridable per derived class.
 		 * \warning If caled at this level it is an error, as only the appropriate context can delete itself.
 		 */
-		virtual	void	DeleteWorldContext()
+		virtual	void	EndWorldModeBlock()
 		{
 			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 		}
 		/** Delete the main context, overridable per derived class.
 		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
 		 */
-		virtual	void	DeleteAttributeContext()
+		virtual	void	EndAttributeModeBlock()
 		{
 			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 		}
 		/** Delete the main context, overridable per derived class.
 		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
 		 */
-		virtual	void	DeleteTransformContext()
+		virtual	void	EndTransformModeBlock()
 		{
 			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 		}
 		/** Delete the main context, overridable per derived class.
 		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
 		 */
-		virtual	void	DeleteSolidContext()
+		virtual	void	EndSolidModeBlock()
 		{
 			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 		}
 		/** Delete the main context, overridable per derived class.
 		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
 		 */
-		virtual	void	DeleteObjectContext()
+		virtual	void	EndObjectModeBlock()
 		{
 			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 		}
 		/** Delete the main context, overridable per derived class.
 		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
 		 */
-		virtual	void	DeleteMotionContext()
+		virtual	void	EndMotionModeBlock()
 		{
 			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 		}
@@ -178,7 +178,7 @@ class CqContext
 		/** Get a pointer to the previuos context.
 		 * \return a context pointer.
 		 */
-		CqContext*	pconParent()
+		CqModeBlock*	pconParent()
 		{
 			return ( m_pconParent );
 		}
@@ -214,7 +214,7 @@ class CqContext
 		CqAttributes* m_pattrCurrent;		///< The current attributes.
 		CqTransform* m_ptransCurrent;		///< The current transformation.
 	private:
-		CqContext*	m_pconParent;			///< The previous context.
+		CqModeBlock*	m_pconParent;			///< The previous context.
 }
 ;
 
@@ -223,16 +223,16 @@ class CqContext
 /** Define the context that exists between calls to RiBegin/RiEnd.
  */
 
-class CqMainContext : public CqContext
+class CqMainModeBlock : public CqModeBlock
 {
 	public:
-		CqMainContext( CqContext* pconParent = 0 );
-		virtual	~CqMainContext();
+		CqMainModeBlock( CqModeBlock* pconParent = 0 );
+		virtual	~CqMainModeBlock();
 
 		/** Create a main context.
 		 * \warning It is an error to call this within a main context block.
 		 */
-		virtual	CqContext*	CreateMainContext()
+		virtual	CqModeBlock*	BeginMainModeBlock()
 		{
 			return ( 0 );
 		}		// Error
@@ -240,7 +240,7 @@ class CqMainContext : public CqContext
 		/** Delete the main context.
 		 * \attention This is the only valid context deletion from within this block.
 		 */
-		virtual	void	DeleteMainContext()
+		virtual	void	EndMainModeBlock()
 		{
 			delete( this );
 		}
@@ -263,30 +263,30 @@ class CqMainContext : public CqContext
 /** Define the context that exists between calls to RiFrameBegin/RiFrameEnd.
  */
 
-class CqFrameContext : public CqContext
+class CqFrameModeBlock : public CqModeBlock
 {
 	public:
-		CqFrameContext( CqContext* pconParent = 0 );
-		virtual	~CqFrameContext();
+		CqFrameModeBlock( CqModeBlock* pconParent = 0 );
+		virtual	~CqFrameModeBlock();
 
 		/** Create a main context.
 		 * \warning It is an error to call this within a frame context.
 		 */
-		virtual	CqContext*	CreateMainContext()
+		virtual	CqModeBlock*	BeginMainModeBlock()
 		{
 			return ( 0 );
 		}	// Error
 		/** Create a frame context.
 		 * \warning It is an error to call this within a frame context.
 		 */
-		virtual	CqContext*	CreateFrameContext()
+		virtual	CqModeBlock*	BeginFrameModeBlock()
 		{
 			return ( 0 );
 		}	// Error
 		/** Create a solid context.
 		 * \warning It is an error to call this within a frame context.
 		 */
-		virtual	CqContext*	CreateSolidContext( CqString& type )
+		virtual	CqModeBlock*	BeginSolidModeBlock( CqString& type )
 		{
 			return ( 0 );
 		}	// Error
@@ -294,7 +294,7 @@ class CqFrameContext : public CqContext
 		/** Delete the frame context.
 		 * \attention This is the only valid context deletion from within this block.
 		 */
-		virtual	void	DeleteFrameContext()
+		virtual	void	EndFrameModeBlock()
 		{
 			delete( this );
 		}
@@ -317,30 +317,30 @@ class CqFrameContext : public CqContext
 /** Define the context that exists between calls to RiWorldBegin/RiWorldEnd.
  */
 
-class CqWorldContext : public CqContext
+class CqWorldModeBlock : public CqModeBlock
 {
 	public:
-		CqWorldContext( CqContext* pconParent = 0 );
-		virtual	~CqWorldContext();
+		CqWorldModeBlock( CqModeBlock* pconParent = 0 );
+		virtual	~CqWorldModeBlock();
 
 		/** Create a main context.
 		 * \warning It is an error to call this within a world context.
 		 */
-		virtual	CqContext*	CreateMainContext()
+		virtual	CqModeBlock*	BeginMainModeBlock()
 		{
 			return ( 0 );
 		}	// Error
 		/** Create a frame context.
 		 * \warning It is an error to call this within a world context.
 		 */
-		virtual	CqContext*	CreateFrameContext()
+		virtual	CqModeBlock*	BeginFrameModeBlock()
 		{
 			return ( 0 );
 		}	// Error
 		/** Create a world context.
 		 * \warning It is an error to call this within a world context.
 		 */
-		virtual	CqContext*	CreateWorldContext()
+		virtual	CqModeBlock*	BeginWorldModeBlock()
 		{
 			return ( 0 );
 		}	// Error
@@ -348,7 +348,7 @@ class CqWorldContext : public CqContext
 		/** Delete the world context.
 		 * \attention This is the only valid context deletion from within this block.
 		 */
-		virtual	void	DeleteWorldContext()
+		virtual	void	EndWorldModeBlock()
 		{
 			delete( this );
 		}
@@ -375,30 +375,30 @@ class CqWorldContext : public CqContext
 /** Define the context that exists between calls to RiAttributeBegin/RiAttributeEnd.
  */
 
-class CqAttributeContext : public CqContext
+class CqAttributeModeBlock : public CqModeBlock
 {
 	public:
-		CqAttributeContext( CqContext* pconParent = 0 );
-		virtual	~CqAttributeContext();
+		CqAttributeModeBlock( CqModeBlock* pconParent = 0 );
+		virtual	~CqAttributeModeBlock();
 
 		/** Create a main context.
 		 * \warning It is an error to call this within a attribute context.
 		 */
-		virtual	CqContext*	CreateMainContext()
+		virtual	CqModeBlock*	BeginMainModeBlock()
 		{
 			return ( 0 );
 		}	// Error
 		/** Create a frame context.
 		 * \warning It is an error to call this within a attribute context.
 		 */
-		virtual	CqContext*	CreateFrameContext()
+		virtual	CqModeBlock*	BeginFrameModeBlock()
 		{
 			return ( 0 );
 		}	// Error
 		/** Create a world context.
 		 * \warning It is an error to call this within a attribute context.
 		 */
-		virtual	CqContext*	CreateWorldContext()
+		virtual	CqModeBlock*	BeginWorldModeBlock()
 		{
 			return ( 0 );
 		}	// Error
@@ -406,7 +406,7 @@ class CqAttributeContext : public CqContext
 		/** Delete the attribute context.
 		 * \attention This is the only valid context deletion from within this block.
 		 */
-		virtual	void	DeleteAttributeContext()
+		virtual	void	EndAttributeModeBlock()
 		{
 			delete( this );
 		}
@@ -427,30 +427,30 @@ class CqAttributeContext : public CqContext
 /** Define the context that exists between calls to RiTransformBegin/RiTransformEnd.
  */
 
-class CqTransformContext : public CqContext
+class CqTransformModeBlock : public CqModeBlock
 {
 	public:
-		CqTransformContext( CqContext* pconParent = 0 );
-		virtual	~CqTransformContext();
+		CqTransformModeBlock( CqModeBlock* pconParent = 0 );
+		virtual	~CqTransformModeBlock();
 
 		/** Create a main context.
 		 * \warning It is an error to call this within a transform context.
 		 */
-		virtual	CqContext*	CreateMainContext()
+		virtual	CqModeBlock*	BeginMainModeBlock()
 		{
 			return ( 0 );
 		}	// Error
 		/** Create a frame context.
 		 * \warning It is an error to call this within a transform context.
 		 */
-		virtual	CqContext*	CreateFrameContext()
+		virtual	CqModeBlock*	BeginFrameModeBlock()
 		{
 			return ( 0 );
 		}	// Error
 		/** Create a world context.
 		 * \warning It is an error to call this within a transform context.
 		 */
-		virtual	CqContext*	CreateWorldContext()
+		virtual	CqModeBlock*	BeginWorldModeBlock()
 		{
 			return ( 0 );
 		}	// Error
@@ -458,7 +458,7 @@ class CqTransformContext : public CqContext
 		/** Delete the transform context.
 		 * \attention This is the only valid context deletion from within this block.
 		 */
-		virtual	void	DeleteTransformContext()
+		virtual	void	EndTransformModeBlock()
 		{
 			delete( this );
 		}
@@ -479,30 +479,30 @@ class CqTransformContext : public CqContext
 /** Define the context that exists between calls to RiSolidBegin/RiSolidEnd.
  */
 
-class CqSolidContext : public CqContext
+class CqSolidModeBlock : public CqModeBlock
 {
 	public:
-		CqSolidContext( CqString& type, CqContext* pconParent = 0 );
-		virtual	~CqSolidContext();
+		CqSolidModeBlock( CqString& type, CqModeBlock* pconParent = 0 );
+		virtual	~CqSolidModeBlock();
 
 		/** Create a main context.
 		 * \warning It is an error to call this within a solid context.
 		 */
-		virtual	CqContext*	CreateMainContext()
+		virtual	CqModeBlock*	BeginMainModeBlock()
 		{
 			return ( 0 );
 		}	// Error
 		/** Create a frame context.
 		 * \warning It is an error to call this within a solid context.
 		 */
-		virtual	CqContext*	CreateFrameContext()
+		virtual	CqModeBlock*	BeginFrameModeBlock()
 		{
 			return ( 0 );
 		}	// Error
 		/** Create a world context.
 		 * \warning It is an error to call this within a solid context.
 		 */
-		virtual	CqContext*	CreateWorldContext()
+		virtual	CqModeBlock*	BeginWorldModeBlock()
 		{
 			return ( 0 );
 		}	// Error
@@ -510,7 +510,7 @@ class CqSolidContext : public CqContext
 		/** Delete the solid context.
 		 * \attention This is the only valid context deletion from within this block.
 		 */
-		virtual	void	DeleteSolidContext()
+		virtual	void	EndSolidModeBlock()
 		{
 			delete( this );
 		}
@@ -543,30 +543,30 @@ class CqSolidContext : public CqContext
 /** Define the context that exists between calls to RiObjectBegin/RiObjectEnd.
  */
 
-class CqObjectContext : public CqContext
+class CqObjectModeBlock : public CqModeBlock
 {
 	public:
-		CqObjectContext( CqContext* pconParent = 0 );
-		virtual	~CqObjectContext();
+		CqObjectModeBlock( CqModeBlock* pconParent = 0 );
+		virtual	~CqObjectModeBlock();
 
 		/** Create a main context.
 		 * \warning It is an error to call this within an object context.
 		 */
-		virtual	CqContext*	CreateMainContext()
+		virtual	CqModeBlock*	BeginMainModeBlock()
 		{
 			return ( 0 );
 		}		// Error
 		/** Create a frame context.
 		 * \warning It is an error to call this within an object context.
 		 */
-		virtual	CqContext*	CreateFrameContext()
+		virtual	CqModeBlock*	BeginFrameModeBlock()
 		{
 			return ( 0 );
 		}		// Error
 		/** Create a world context.
 		 * \warning It is an error to call this within an object context.
 		 */
-		virtual	CqContext*	CreateWorldContext()
+		virtual	CqModeBlock*	BeginWorldModeBlock()
 		{
 			return ( 0 );
 		}		// Error
@@ -574,7 +574,7 @@ class CqObjectContext : public CqContext
 		/** Delete the object context.
 		 * \attention This is the only valid context deletion from within this block.
 		 */
-		virtual	void	DeleteObjectContext()
+		virtual	void	EndObjectModeBlock()
 		{
 			delete( this );
 		}
@@ -609,65 +609,65 @@ class CqObjectContext : public CqContext
 /** Define the context that exists between calls to RiMotionBegin/RiMotionEnd.
  */
 
-class CqMotionContext : public CqContext
+class CqMotionModeBlock : public CqModeBlock
 {
 	public:
-		CqMotionContext( TqInt N, TqFloat times[], CqContext* pconParent = 0 );
-		virtual	~CqMotionContext();
+		CqMotionModeBlock( TqInt N, TqFloat times[], CqModeBlock* pconParent = 0 );
+		virtual	~CqMotionModeBlock();
 
 		/** Create a main context.
 		 * \warning It is an error to call this within a motion context.
 		 */
-		virtual	CqContext*	CreateMainContext()
+		virtual	CqModeBlock*	BeginMainModeBlock()
 		{
 			return ( 0 );
 		}		// Error
 		/** Create a frame context.
 		 * \warning It is an error to call this within a motion context.
 		 */
-		virtual	CqContext*	CreateFrameContext()
+		virtual	CqModeBlock*	BeginFrameModeBlock()
 		{
 			return ( 0 );
 		}		// Error
 		/** Create a world context.
 		 * \warning It is an error to call this within a motion context.
 		 */
-		virtual	CqContext*	CreateWorldContext()
+		virtual	CqModeBlock*	BeginWorldModeBlock()
 		{
 			return ( 0 );
 		}		// Error
 		/** Create a attribute context.
 		 * \warning It is an error to call this within a motion context.
 		 */
-		virtual	CqContext*	CreateAttributeContext()
+		virtual	CqModeBlock*	BeginAttributeModeBlock()
 		{
 			return ( 0 );
 		}	// Error
 		/** Create a transform context.
 		 * \warning It is an error to call this within a motion context.
 		 */
-		virtual	CqContext*	CreateTransformContext()
+		virtual	CqModeBlock*	BeginTransformModeBlock()
 		{
 			return ( 0 );
 		}	// Error
 		/** Create a solid context.
 		 * \warning It is an error to call this within a motion context.
 		 */
-		virtual	CqContext*	CreateSolidContext( CqString& type )
+		virtual	CqModeBlock*	BeginSolidModeBlock( CqString& type )
 		{
 			return ( 0 );
 		}		// Error
 		/** Create a object context.
 		 * \warning It is an error to call this within a motion context.
 		 */
-		virtual	CqContext*	CreateObjectContext()
+		virtual	CqModeBlock*	BeginObjectModeBlock()
 		{
 			return ( 0 );
 		}		// Error
 		/** Create a motion context.
 		 * \warning It is an error to call this within a motion context.
 		 */
-		virtual	CqContext*	CreateMotionContext( TqInt N, TqFloat times[] )
+		virtual	CqModeBlock*	BeginMotionModeBlock( TqInt N, TqFloat times[] )
 		{
 			return ( 0 );
 		}		// Error
@@ -675,7 +675,7 @@ class CqMotionContext : public CqContext
 		/** Delete the object context.
 		 * \attention This is the only valid context deletion from within this block.
 		 */
-		virtual	void	DeleteMotionContext()
+		virtual	void	EndMotionModeBlock()
 		{
 			delete( this );
 		}
@@ -728,9 +728,9 @@ class CqMotionContext : public CqContext
  * \return a pointer to the new context.
  */
 
-inline CqContext* CqContext::CreateMainContext()
+inline CqModeBlock* CqModeBlock::BeginMainModeBlock()
 {
-	return ( new CqMainContext( this ) );
+	return ( new CqMainModeBlock( this ) );
 }
 
 
@@ -739,9 +739,9 @@ inline CqContext* CqContext::CreateMainContext()
  * \return a pointer to the new context.
  */
 
-inline CqContext* CqContext::CreateFrameContext()
+inline CqModeBlock* CqModeBlock::BeginFrameModeBlock()
 {
-	return ( new CqFrameContext( this ) );
+	return ( new CqFrameModeBlock( this ) );
 }
 
 
@@ -750,9 +750,9 @@ inline CqContext* CqContext::CreateFrameContext()
  * \return a pointer to the new context.
  */
 
-inline CqContext* CqContext::CreateWorldContext()
+inline CqModeBlock* CqModeBlock::BeginWorldModeBlock()
 {
-	return ( new CqWorldContext( this ) );
+	return ( new CqWorldModeBlock( this ) );
 }
 
 
@@ -761,9 +761,9 @@ inline CqContext* CqContext::CreateWorldContext()
  * \return a pointer to the new context.
  */
 
-inline CqContext* CqContext::CreateAttributeContext()
+inline CqModeBlock* CqModeBlock::BeginAttributeModeBlock()
 {
-	return ( new CqAttributeContext( this ) );
+	return ( new CqAttributeModeBlock( this ) );
 }
 
 
@@ -772,9 +772,9 @@ inline CqContext* CqContext::CreateAttributeContext()
  * \return a pointer to the new context.
  */
 
-inline CqContext* CqContext::CreateTransformContext()
+inline CqModeBlock* CqModeBlock::BeginTransformModeBlock()
 {
-	return ( new CqTransformContext( this ) );
+	return ( new CqTransformModeBlock( this ) );
 }
 
 
@@ -783,9 +783,9 @@ inline CqContext* CqContext::CreateTransformContext()
  * \return a pointer to the new context.
  */
 
-inline CqContext* CqContext::CreateSolidContext( CqString& type )
+inline CqModeBlock* CqModeBlock::BeginSolidModeBlock( CqString& type )
 {
-	return ( new CqSolidContext( type, this ) );
+	return ( new CqSolidModeBlock( type, this ) );
 }
 
 
@@ -794,9 +794,9 @@ inline CqContext* CqContext::CreateSolidContext( CqString& type )
  * \return a pointer to the new context.
  */
 
-inline CqContext* CqContext::CreateObjectContext()
+inline CqModeBlock* CqModeBlock::BeginObjectModeBlock()
 {
-	return ( new CqObjectContext( this ) );
+	return ( new CqObjectModeBlock( this ) );
 }
 
 
@@ -805,9 +805,9 @@ inline CqContext* CqContext::CreateObjectContext()
  * \return a pointer to the new context.
  */
 
-inline CqContext* CqContext::CreateMotionContext( TqInt N, TqFloat times[] )
+inline CqModeBlock* CqModeBlock::BeginMotionModeBlock( TqInt N, TqFloat times[] )
 {
-	return ( new CqMotionContext( N, times, this ) );
+	return ( new CqMotionModeBlock( N, times, this ) );
 }
 
 //-----------------------------------------------------------------------

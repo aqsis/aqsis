@@ -36,22 +36,6 @@ START_NAMESPACE( Aqsis )
 
 
 //---------------------------------------------------------------------
-/** Copy constructor.
- */
-
-CqSystemOption::CqSystemOption( const CqSystemOption& From ) :
-		m_strName( From.m_strName )
-{
-	TqInt i = From.m_aParameters.size();
-	while ( i-- > 0 )
-	{
-		m_aParameters.push_back( From.m_aParameters[ i ] ->Clone() );
-	}
-}
-
-
-
-//---------------------------------------------------------------------
 /** Initialise the matrices for this camera according to the status of the camera attributes.
  */
 
@@ -279,7 +263,7 @@ CqOptions& CqOptions::operator=( const CqOptions& From )
 
 void CqOptions::InitialiseDefaultOptions()
 {
-	CqSystemOption * pdefopts = new CqSystemOption( "System" );
+	CqNamedParameterList* pdefopts = new CqNamedParameterList( "System" );
 
 	ADD_SYSTEM_PARAM( PixelVariance, TqFloat, TqFloat, type_float, 1.0f );
 	ADD_SYSTEM_PARAM2( PixelSamples, TqInt, TqFloat, type_integer, 2, 2 );
@@ -327,11 +311,11 @@ void CqOptions::InitialiseDefaultOptions()
 
 const CqParameter* CqOptions::pParameter( const char* strName, const char* strParam ) const
 {
-	const CqSystemOption * pOpt;
-	if ( ( pOpt = pOption( strName ) ) != 0 )
+	const CqNamedParameterList* pList;
+	if ( ( pList = pOption( strName ) ) != 0 )
 	{
 		const CqParameter * pParam;
-		if ( ( pParam = pOpt->pParameter( strParam ) ) != 0 )
+		if ( ( pParam = pList->pParameter( strParam ) ) != 0 )
 			return ( pParam );
 	}
 	return ( 0 );
@@ -347,11 +331,11 @@ const CqParameter* CqOptions::pParameter( const char* strName, const char* strPa
 
 CqParameter* CqOptions::pParameterWrite( const char* strName, const char* strParam )
 {
-	CqSystemOption * pOpt;
-	if ( ( pOpt = pOptionWrite( strName ) ) != 0 )
+	CqNamedParameterList* pList;
+	if ( ( pList = pOptionWrite( strName ) ) != 0 )
 	{
 		CqParameter * pParam;
-		if ( ( pParam = pOpt->pParameter( strParam ) ) != 0 )
+		if ( ( pParam = pList->pParameter( strParam ) ) != 0 )
 			return ( pParam );
 	}
 	return ( 0 );

@@ -255,7 +255,7 @@ RtVoid	RiBegin( RtToken name )
 	QSetRenderContext( new CqRenderer );
 
 	QGetRenderContext() ->Initialise();
-	QGetRenderContext() ->CreateMainContext();
+	QGetRenderContext() ->BeginMainModeBlock();
 	QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), CqMatrix() );
 	QGetRenderContext() ->SetmatCamera( QGetRenderContext() ->ptransCurrent() );
 	// Clear the lightsources stack.
@@ -287,7 +287,7 @@ RtVoid	RiBegin( RtToken name )
 //
 RtVoid	RiEnd()
 {
-	QGetRenderContext() ->DeleteMainContext();
+	QGetRenderContext() ->EndMainModeBlock();
 
 	// Flush the image cache.
 	CqTextureMap::FlushCache();
@@ -323,7 +323,7 @@ RtVoid	RiFrameBegin( RtInt number )
 	// not FrameEnd (and usually there's not much between WorldEnd and FrameEnd).
 	QGetRenderContext() ->Stats().StartFrameTimer();
 
-	QGetRenderContext() ->CreateFrameContext();
+	QGetRenderContext() ->BeginFrameModeBlock();
 	return ;
 }
 
@@ -334,7 +334,7 @@ RtVoid	RiFrameBegin( RtInt number )
 //
 RtVoid	RiFrameEnd()
 {
-	QGetRenderContext() ->DeleteFrameContext();
+	QGetRenderContext() ->EndFrameModeBlock();
 
 	return ;
 }
@@ -381,7 +381,7 @@ RtVoid	RiWorldBegin()
 		}
 	}
 
-	QGetRenderContext() ->CreateWorldContext();
+	QGetRenderContext() ->BeginWorldModeBlock();
 	// Set the world to camera transformation matrix to the current matrix.
 	//QGetRenderContext() ->SetmatCamera( QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ) );
 	QGetRenderContext() ->SetmatCamera( QGetRenderContext() ->ptransCurrent() );
@@ -415,7 +415,7 @@ RtVoid	RiWorldEnd()
 	QGetRenderContext() ->RenderWorld();
 
 	// Delete the world context
-	QGetRenderContext() ->DeleteWorldContext();
+	QGetRenderContext() ->EndWorldModeBlock();
 
 	// Stop the frame timer
 	QGetRenderContext() ->Stats().StopFrameTimer();
@@ -1115,7 +1115,7 @@ RtVoid	RiOption( const char *name, ... )
 RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 {
 	// Find the parameter on the current options.
-	CqSystemOption * pOpt = QGetRenderContext() ->optCurrent().pOptionWrite( name );
+	CqNamedParameterList* pOpt = QGetRenderContext() ->optCurrent().pOptionWrite( name );
 
 	RtInt i;
 	for ( i = 0; i < count; i++ )
@@ -1265,7 +1265,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiAttributeBegin()
 {
-	QGetRenderContext() ->CreateAttributeContext();
+	QGetRenderContext() ->BeginAttributeModeBlock();
 
 	return ;
 }
@@ -1277,7 +1277,7 @@ RtVoid	RiAttributeBegin()
 //
 RtVoid	RiAttributeEnd()
 {
-	QGetRenderContext() ->DeleteAttributeContext();
+	QGetRenderContext() ->EndAttributeModeBlock();
 
 	return ;
 }
@@ -1622,7 +1622,7 @@ RtVoid	RiMatte( RtBoolean onoff )
 //
 RtVoid	RiBound( RtBound bound )
 {
-	QGetRenderContext() ->pattrWriteCurrent() ->SetBound( CqBound( bound ) );
+	// TODO: Need to add a "Bound" attribute here, and fill it in.
 	QGetRenderContext() ->AdvanceTime();
 
 	return ;
@@ -2051,7 +2051,7 @@ RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, R
 //
 RtVoid	RiTransformBegin()
 {
-	QGetRenderContext() ->CreateTransformContext();
+	QGetRenderContext() ->BeginTransformModeBlock();
 
 	return ;
 }
@@ -2063,7 +2063,7 @@ RtVoid	RiTransformBegin()
 //
 RtVoid	RiTransformEnd()
 {
-	QGetRenderContext() ->DeleteTransformContext();
+	QGetRenderContext() ->EndTransformModeBlock();
 
 	return ;
 }
@@ -2093,7 +2093,7 @@ RtVoid	RiAttribute( const char *name, ... )
 RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 {
 	// Find the parameter on the current options.
-	CqSystemOption * pAttr = QGetRenderContext() ->pattrWriteCurrent() ->pAttributeWrite( name );
+	CqNamedParameterList* pAttr = QGetRenderContext() ->pattrWriteCurrent() ->pAttributeWrite( name );
 
 	RtInt i;
 	for ( i = 0; i < count; i++ )
@@ -3609,7 +3609,7 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 RtVoid	RiSolidBegin( RtToken type )
 {
 	CqString strType( type );
-	QGetRenderContext() ->CreateSolidContext( strType );
+	QGetRenderContext() ->BeginSolidModeBlock( strType );
 
 	return ;
 }
@@ -3621,7 +3621,7 @@ RtVoid	RiSolidBegin( RtToken type )
 //
 RtVoid	RiSolidEnd()
 {
-	QGetRenderContext() ->DeleteSolidContext();
+	QGetRenderContext() ->EndSolidModeBlock();
 
 	return ;
 }
@@ -3634,7 +3634,7 @@ RtVoid	RiSolidEnd()
 RtObjectHandle	RiObjectBegin()
 {
 	CqBasicError( 0, Severity_Normal, "RiObjectBegin, instances not supported" );
-	QGetRenderContext() ->CreateObjectContext();
+	QGetRenderContext() ->BeginObjectModeBlock();
 
 	return ( 0 );
 }
@@ -3646,7 +3646,7 @@ RtObjectHandle	RiObjectBegin()
 //
 RtVoid	RiObjectEnd()
 {
-	QGetRenderContext() ->DeleteObjectContext();
+	QGetRenderContext() ->EndObjectModeBlock();
 
 	return ;
 }
@@ -3690,7 +3690,7 @@ RtVoid	RiMotionBegin( RtInt N, ... )
 //
 RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] )
 {
-	QGetRenderContext() ->CreateMotionContext( N, times );
+	QGetRenderContext() ->BeginMotionModeBlock( N, times );
 
 	return ;
 }
@@ -3702,7 +3702,7 @@ RtVoid	RiMotionBeginV( RtInt N, RtFloat times[] )
 //
 RtVoid	RiMotionEnd()
 {
-	QGetRenderContext() ->DeleteMotionContext();
+	QGetRenderContext() ->EndMotionModeBlock();
 
 	return ;
 }

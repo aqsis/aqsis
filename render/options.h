@@ -48,76 +48,6 @@ START_NAMESPACE( Aqsis )
 class CqImagersource;
 
 //----------------------------------------------------------------------
-/** \class CqSystemOption
- * Renderman option/attribute class, has a name and a number of parameter name/value pairs.
- */
-
-class CqSystemOption : public CqRefCount
-{
-	public:
-		CqSystemOption( const char* strName ) : m_strName( strName )
-		{}
-		CqSystemOption( const CqSystemOption& From );
-		~CqSystemOption()
-		{
-			for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
-				delete( ( *i ) );
-		}
-
-		/** Get a refernece to the option name.
-		 * \return A constant CqString reference.
-		 */
-		const	CqString&	strName() const
-		{
-			return ( m_strName );
-		}
-
-		/** Add a new name/value pair to this option/attribute.
-		 * \param pParameter Pointer to a CqParameter containing the name/value pair.
-		 */
-		void	AddParameter( const CqParameter* pParameter )
-		{
-			// Look to see if one already exists
-			for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
-			{
-				if ( ( *i ) ->strName().compare( pParameter->strName() ) == 0 )
-				{
-					delete( *i );
-					( *i ) = const_cast<CqParameter*>( pParameter );
-					return ;
-				}
-			}
-			// If not append it.
-			m_aParameters.push_back( const_cast<CqParameter*>( pParameter ) );
-		}
-		/** Get a read only pointer to a named parameter.
-		 * \param strName Character pointer pointing to zero terminated parameter name.
-		 * \return A pointer to a CqParameter or 0 if not found.
-		 */
-		const	CqParameter* pParameter( const char* strName ) const
-		{
-			for ( std::vector<CqParameter*>::const_iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
-				if ( ( *i ) ->strName().compare( strName ) == 0 ) return ( *i );
-			return ( 0 );
-		}
-		/** Get a pointer to a named parameter.
-		 * \param strName Character pointer pointing to zero terminated parameter name.
-		 * \return A pointer to a CqParameter or 0 if not found.
-		 */
-		CqParameter* pParameter( const char* strName )
-		{
-			for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
-				if ( ( *i ) ->strName().compare( strName ) == 0 ) return ( *i );
-			return ( 0 );
-		}
-	private:
-		CqString	m_strName;			///< The name of this option/attribute.
-		std::vector<CqParameter*>	m_aParameters;		///< A vector of name/value parameters.
-}
-;
-
-
-//----------------------------------------------------------------------
 /** \enum EqDisplayMode
  */
 enum EqDisplayMode
@@ -155,9 +85,9 @@ class CqOptions
 		CqOptions&	operator=( const CqOptions& From );
 
 		/** Add a named user option to the current state.
-		 * \param pOption A pointer to a new CqSystemOption class containing the initialised option.
+		 * \param pOption A pointer to a new CqNamedParameterList class containing the initialised option.
 		 */
-		void	AddOption( CqSystemOption* pOption )
+		void	AddOption( CqNamedParameterList* pOption )
 		{
 			m_aOptions.push_back( pOption );
 		}
@@ -175,9 +105,9 @@ class CqOptions
 		 * \param strName Character pointer to the requested options name.
 		 * \return A pointer to the option, or 0 if not found. 
 		 */
-		const	CqSystemOption* pOption( const char* strName ) const
+		const	CqNamedParameterList* pOption( const char* strName ) const
 		{
-			for ( std::vector<CqSystemOption*>::const_iterator i = m_aOptions.begin(); i != m_aOptions.end(); i++ )
+			for ( std::vector<CqNamedParameterList*>::const_iterator i = m_aOptions.begin(); i != m_aOptions.end(); i++ )
 				if ( ( *i ) ->strName().compare( strName ) == 0 ) return ( *i );
 			return ( 0 );
 		}
@@ -185,9 +115,9 @@ class CqOptions
 		 * \param strName Character pointer to the requested options name.
 		 * \return A pointer to the option, or 0 if not found. 
 		 */
-		CqSystemOption* pOptionWrite( const char* strName )
+		CqNamedParameterList* pOptionWrite( const char* strName )
 		{
-			for ( std::vector<CqSystemOption*>::iterator i = m_aOptions.begin(); i != m_aOptions.end(); i++ )
+			for ( std::vector<CqNamedParameterList*>::iterator i = m_aOptions.begin(); i != m_aOptions.end(); i++ )
 			{
 				if ( ( *i ) ->strName().compare( strName ) == 0 )
 				{
@@ -195,7 +125,7 @@ class CqOptions
 						return ( *i );
 					else
 					{
-						CqSystemOption* pNew = new CqSystemOption( *( *i ) );
+						CqNamedParameterList* pNew = new CqNamedParameterList( *( *i ) );
 						( *i ) ->Release();
 						( *i ) = pNew;
 						( *i ) ->AddRef();
@@ -203,7 +133,7 @@ class CqOptions
 					}
 				}
 			}
-			m_aOptions.push_back( new CqSystemOption( strName ) );
+			m_aOptions.push_back( new CqNamedParameterList( strName ) );
 			m_aOptions.back() ->AddRef();
 			return ( m_aOptions.back() );
 		}
@@ -361,7 +291,7 @@ class CqOptions
 		RtProgressFunc	m_pProgressHandler;		///< A pointer to the progress hadling function.
 		RtFunc	m_pPreRenderFunction;	///< A pointer to the function called just prior to rendering.
 
-		std::vector<CqSystemOption*>	m_aOptions;				///< Vector of user specified options.
+		std::vector<CqNamedParameterList*>	m_aOptions;	///< Vector of user specified options.
 
 		RtFilterFunc m_funcFilter;						///< Pointer to the pixel filter function.
 		CqImagersource* m_pshadImager;		///< Pointer to the imager shader.

@@ -86,21 +86,17 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		/** Add a new user defined attribute.
 		 * \param pAttribute a pointer to the new user defined attribute.
 		 */
-		_qShareM	void	AddAttribute( CqSystemOption* pAttribute )
+		_qShareM	void	AddAttribute( CqNamedParameterList* pAttribute )
 		{
 			m_aAttributes.Add( pAttribute );
-			//m_aAttributes.push_back( pAttribute );
 		}
 		/** Get a pointer to a named user defined attribute.
 		 * \param strName the name of the attribute to retrieve.
 		 * \return a pointer to the attribute or 0 if not found.
 		 */
-		const	CqSystemOption* pAttribute( const char* strName ) const
+		const	CqNamedParameterList* pAttribute( const char* strName ) const
 		{
 			return ( m_aAttributes.Find( strName ) );
-			//for ( std::vector<CqSystemOption*>::const_iterator i = m_aAttributes.begin(); i != m_aAttributes.end(); i++ )
-			//	if ( ( *i ) ->strName().compare( strName ) == 0 ) return ( *i );
-			//return ( 0 );
 		}
 		/** Get a pointer to a named user defined attribute suitable for writing.
 		 * If the attribute has more than 1 external reference, create a duplicate an return that.
@@ -108,41 +104,23 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		 * \param strName the name of the attribute to retrieve.
 		 * \return a pointer to the attribute.
 		 */
-		CqSystemOption* pAttributeWrite( const char* strName )
+		CqNamedParameterList* pAttributeWrite( const char* strName )
 		{
-			CqSystemOption * pAttr = m_aAttributes.Find( strName );
+			CqNamedParameterList* pAttr = m_aAttributes.Find( strName );
 			if ( NULL != pAttr )
 			{
 				if ( pAttr->RefCount() == 1 )
 					return ( pAttr );
 				else
 				{
-					CqSystemOption* pNew = new CqSystemOption( *pAttr );
+					CqNamedParameterList* pNew = new CqNamedParameterList( *pAttr );
 					m_aAttributes.Remove( pAttr );
 					m_aAttributes.Add( pNew );
 					pNew->AddRef();
 					return ( pNew );
 				}
 			}
-			/*			for ( std::vector<CqSystemOption*>::iterator i = m_aAttributes.begin(); i != m_aAttributes.end(); i++ )
-						{
-							if ( ( *i ) ->strName().compare( strName ) == 0 )
-							{
-								if ( ( *i ) ->RefCount() == 1 )
-									return ( *i );
-								else
-								{
-									( *i ) ->Release();
-									( *i ) = new CqSystemOption( *( *i ) );
-									( *i ) ->AddRef();
-									return ( *i );
-								}
-							}
-						}*/ 
-			//m_aAttributes.push_back( new CqSystemOption( strName ) );
-			//m_aAttributes.back() ->AddRef();
-			//return ( m_aAttributes.back() );
-			CqSystemOption* pNew = new CqSystemOption( strName );
+			CqNamedParameterList* pNew = new CqNamedParameterList( strName );
 			m_aAttributes.Add( pNew );
 			return ( pNew );
 		}
@@ -181,23 +159,6 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		virtual const	std::vector<CqLightsource*>&	apLights() const
 		{
 			return ( m_apLightsources );
-		}
-
-		/** Get the current geometric bound.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 * \return a reference to the bound.
-		 */
-		const	CqBound&	Bound( TqFloat time = 0.0f ) const
-		{
-			return ( m_Bound );
-		}
-		/** Set the current geometric bound.
-		 * \param bndValue the new geometric bound of any primitives.
-		 * \param time the frame time to get the values in the case of a motion blurred attribute. (not used).
-		 */
-		void	SetBound( const CqBound& bndValue, TqFloat time = 0.0f )
-		{
-			m_Bound = bndValue;
 		}
 
 		/** Flip the orientation in which primitives are described between left and right handed.
@@ -340,23 +301,23 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 				virtual	~CqHashTable()
 				{
 					// Release all the system options we have a handle on.
-					std::vector<std::list<CqSystemOption*> >::iterator i;
+					std::vector<std::list<CqNamedParameterList*> >::iterator i;
 					for ( i = m_aLists.begin(); i != m_aLists.end(); i++ )
 					{
-						std::list<CqSystemOption*>::iterator i2;
+						std::list<CqNamedParameterList*>::iterator i2;
 						for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
 							( *i2 ) ->Release();
 					}
 				}
 
-				const CqSystemOption*	Find( const TqChar* pname ) const
+				const CqNamedParameterList*	Find( const TqChar* pname ) const
 				{
 					TqInt i = _hash( pname );
 
 					if ( m_aLists[ i ].empty() )
 						return ( 0 );
 
-					std::list<CqSystemOption*>::const_iterator iEntry = m_aLists[ i ].begin();
+					std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
 					if ( iEntry == m_aLists[ i ].end() )
 						return ( *iEntry );
 					else
@@ -372,14 +333,14 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 					return ( 0 );
 				}
 
-				CqSystemOption*	Find( const TqChar* pname )
+				CqNamedParameterList*	Find( const TqChar* pname )
 				{
 					TqInt i = _hash( pname );
 
 					if ( m_aLists[ i ].empty() )
 						return ( 0 );
 
-					std::list<CqSystemOption*>::const_iterator iEntry = m_aLists[ i ].begin();
+					std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
 					if ( iEntry == m_aLists[ i ].end() )
 						return ( *iEntry );
 					else
@@ -395,18 +356,18 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 					return ( 0 );
 				}
 
-				void Add( CqSystemOption* pOption )
+				void Add( CqNamedParameterList* pOption )
 				{
 					TqInt i = _hash( pOption->strName().c_str() );
 					m_aLists[ i ].push_back( pOption );
 					pOption->AddRef();
 				}
 
-				void Remove( CqSystemOption* pOption )
+				void Remove( CqNamedParameterList* pOption )
 				{
 					TqInt i = _hash( pOption->strName().c_str() );
 
-					std::list<CqSystemOption*>::iterator iEntry = m_aLists[ i ].begin();
+					std::list<CqNamedParameterList*>::iterator iEntry = m_aLists[ i ].begin();
 					while ( iEntry != m_aLists[ i ].end() )
 					{
 						if ( ( *iEntry ) == pOption )
@@ -421,10 +382,10 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 
 				CqHashTable& operator=( const CqHashTable& From )
 				{
-					std::vector<std::list<CqSystemOption*> >::const_iterator i;
+					std::vector<std::list<CqNamedParameterList*> >::const_iterator i;
 					for ( i = From.m_aLists.begin(); i != From.m_aLists.end(); i++ )
 					{
-						std::list<CqSystemOption*>::const_iterator i2;
+						std::list<CqNamedParameterList*>::const_iterator i2;
 						for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
 							Add( *i2 );
 					}
@@ -443,21 +404,22 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 					return ( h % tableSize ); // remainder
 				}
 
-				std::vector<std::list<CqSystemOption*> >	m_aLists;
+				std::vector<std::list<CqNamedParameterList*> >	m_aLists;
 		};
 
-		CqHashTable	m_aAttributes;					///< a vector of user defined attribute pointers.
+		CqHashTable	m_aAttributes;						///< a vector of user defined attribute pointers.
 
-		CqBound	m_Bound;							///< the bound used for any associated primitives.
 		IqShader*	m_pshadDisplacement;				///< a pointer to the current displacement shader.
-		CqTrimLoopArray m_TrimLoops;					///< the array of closed trimcurve loops.
-		TqInt	m_StackIndex;							///< the index of this attribute state in the global stack, used for destroying when last reference is removed.
-		std::vector<CqLightsource*> m_apLightsources;	///< a vector of currently available lightsources.
 		IqShader*	m_pshadAreaLightSource;				///< a pointer to the current area ligthsource shader.
 		IqShader*	m_pshadSurface;						///< a pointer to the current surface shader.
 		IqShader*	m_pshadAtmosphere;					///< a pointer to the current atmosphere shader.
 		IqShader*	m_pshadInteriorVolume;				///< a pointer to the current interior shader.
 		IqShader*	m_pshadExteriorVolume;				///< a pointer to the current exterior shader.
+
+		CqTrimLoopArray m_TrimLoops;					///< the array of closed trimcurve loops.
+		std::vector<CqLightsource*> m_apLightsources;	///< a vector of currently available lightsources.
+
+		TqInt	m_StackIndex;							///< the index of this attribute state in the global stack, used for destroying when last reference is removed.
 }
 ;
 

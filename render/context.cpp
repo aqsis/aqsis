@@ -32,14 +32,14 @@
 START_NAMESPACE( Aqsis )
 
 
-CqList<CqCSGTreeNode>	CqContext::m_lCSGTrees;
+CqList<CqCSGTreeNode>	CqModeBlock::m_lCSGTrees;
 
 
 //---------------------------------------------------------------------
 /** Default constructor.
  */
 
-CqContext::CqContext( CqContext* pconParent ) :
+CqModeBlock::CqModeBlock( CqModeBlock* pconParent ) :
 		m_pattrCurrent( 0 ),
 		m_ptransCurrent( 0 ),
 		m_pconParent( pconParent )
@@ -50,7 +50,7 @@ CqContext::CqContext( CqContext* pconParent ) :
 /** Default constructor.
  */
 
-CqMainContext::CqMainContext( CqContext* pconParent ) : CqContext( pconParent )
+CqMainModeBlock::CqMainModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent )
 {
 	// Copy the current graphics state.
 	if ( pconParent != 0 )
@@ -68,7 +68,7 @@ CqMainContext::CqMainContext( CqContext* pconParent ) : CqContext( pconParent )
 /** Destructor.
  */
 
-CqMainContext::~CqMainContext()
+CqMainModeBlock::~CqMainModeBlock()
 {
 	m_pattrCurrent->Release();
 	m_ptransCurrent->Release();
@@ -79,7 +79,7 @@ CqMainContext::~CqMainContext()
 /** Default constructor.
  */
 
-CqFrameContext::CqFrameContext( CqContext* pconParent ) : CqContext( pconParent )
+CqFrameModeBlock::CqFrameModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent )
 {
 	// Copy the current graphics state.
 	m_optCurrent = pconParent->optCurrent();
@@ -96,7 +96,7 @@ CqFrameContext::CqFrameContext( CqContext* pconParent ) : CqContext( pconParent 
 /** Destructor.
  */
 
-CqFrameContext::~CqFrameContext()
+CqFrameModeBlock::~CqFrameModeBlock()
 {
 	m_pattrCurrent->Release();
 	m_ptransCurrent->Release();
@@ -107,7 +107,7 @@ CqFrameContext::~CqFrameContext()
 /** Default constructor.
  */
 
-CqWorldContext::CqWorldContext( CqContext* pconParent ) : CqContext( pconParent )
+CqWorldModeBlock::CqWorldModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent )
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
@@ -121,7 +121,7 @@ CqWorldContext::CqWorldContext( CqContext* pconParent ) : CqContext( pconParent 
 /** Destructor.
  */
 
-CqWorldContext::~CqWorldContext()
+CqWorldModeBlock::~CqWorldModeBlock()
 {
 	// Delete any context lights
 	std::vector<CqLightsource*>::iterator i;
@@ -137,7 +137,7 @@ CqWorldContext::~CqWorldContext()
 /** Default constructor.
  */
 
-CqAttributeContext::CqAttributeContext( CqContext* pconParent ) : CqContext( pconParent )
+CqAttributeModeBlock::CqAttributeModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent )
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
@@ -151,7 +151,7 @@ CqAttributeContext::CqAttributeContext( CqContext* pconParent ) : CqContext( pco
 /** Destructor.
  */
 
-CqAttributeContext::~CqAttributeContext()
+CqAttributeModeBlock::~CqAttributeModeBlock()
 {
 	m_pattrCurrent->Release();
 	m_ptransCurrent->Release();
@@ -162,7 +162,7 @@ CqAttributeContext::~CqAttributeContext()
 /** Default constructor.
  */
 
-CqTransformContext::CqTransformContext( CqContext* pconParent ) : CqContext( pconParent )
+CqTransformModeBlock::CqTransformModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent )
 {
 	// Copy the parents attributes, as this state change doesn't save attributes.
 	if ( pconParent != 0 )
@@ -179,7 +179,7 @@ CqTransformContext::CqTransformContext( CqContext* pconParent ) : CqContext( pco
 /** Destructor.
  */
 
-CqTransformContext::~CqTransformContext()
+CqTransformModeBlock::~CqTransformModeBlock()
 {}
 
 
@@ -187,7 +187,7 @@ CqTransformContext::~CqTransformContext()
 /** Default constructor.
  */
 
-CqSolidContext::CqSolidContext( CqString& type, CqContext* pconParent ) : CqContext( pconParent )
+CqSolidModeBlock::CqSolidModeBlock( CqString& type, CqModeBlock* pconParent ) : CqModeBlock( pconParent )
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
@@ -201,7 +201,7 @@ CqSolidContext::CqSolidContext( CqString& type, CqContext* pconParent ) : CqCont
 
 	if ( pconParent && pconParent->isSolid() )
 	{
-		CqSolidContext * pParentSolid = static_cast<CqSolidContext*>( pconParent );
+		CqSolidModeBlock * pParentSolid = static_cast<CqSolidModeBlock*>( pconParent );
 		// Check if we are linking under a Primitive node, if so warn, and link at the top.
 		if ( pParentSolid->pCSGNode() ->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive )
 		{
@@ -220,7 +220,7 @@ CqSolidContext::CqSolidContext( CqString& type, CqContext* pconParent ) : CqCont
 /** Destructor.
  */
 
-CqSolidContext::~CqSolidContext()
+CqSolidModeBlock::~CqSolidModeBlock()
 {
 	m_pattrCurrent->Release();
 	m_ptransCurrent->Release();
@@ -232,7 +232,7 @@ CqSolidContext::~CqSolidContext()
 /** Default constructor.
  */
 
-CqObjectContext::CqObjectContext( CqContext* pconParent ) : CqContext( pconParent )
+CqObjectModeBlock::CqObjectModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconParent )
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent = new CqAttributes();
@@ -246,7 +246,7 @@ CqObjectContext::CqObjectContext( CqContext* pconParent ) : CqContext( pconParen
 /** Destructor.
  */
 
-CqObjectContext::~CqObjectContext()
+CqObjectModeBlock::~CqObjectModeBlock()
 {
 	m_pattrCurrent->Release();
 	m_ptransCurrent->Release();
@@ -257,7 +257,7 @@ CqObjectContext::~CqObjectContext()
 /** Default constructor.
  */
 
-CqMotionContext::CqMotionContext( TqInt N, TqFloat times[], CqContext* pconParent ) : CqContext( pconParent )
+CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], CqModeBlock* pconParent ) : CqModeBlock( pconParent )
 {
 	// Copy the parents attributes, as this state change doesn't save attributes.
 	if ( pconParent != 0 )
@@ -289,7 +289,7 @@ CqMotionContext::CqMotionContext( TqInt N, TqFloat times[], CqContext* pconParen
 /** Destructor.
  */
 
-CqMotionContext::~CqMotionContext()
+CqMotionModeBlock::~CqMotionModeBlock()
 {}
 
 

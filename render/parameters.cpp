@@ -253,5 +253,20 @@ CqParameter* ( *gVariableCreateFuncsFaceVaryingArray[] ) ( const char* strName, 
     };
 
 
+//---------------------------------------------------------------------
+/** Copy constructor.
+ */
+
+CqNamedParameterList::CqNamedParameterList( const CqNamedParameterList& From ) :
+		m_strName( From.m_strName )
+{
+	TqInt i = From.m_aParameters.size();
+	while ( i-- > 0 )
+	{
+		m_aParameters.push_back( From.m_aParameters[ i ] ->Clone() );
+	}
+}
+
+
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

@@ -52,7 +52,7 @@ CqBasicSurface::CqBasicSurface() : CqListEntry<CqBasicSurface>(), m_fDiceable( T
 	// If the current context is a solid node, and is a 'primitive', attatch this surface to the node.
 	if ( QGetRenderContext() ->pconCurrent() ->isSolid() )
 	{
-		CqContext * pSolid = QGetRenderContext() ->pconCurrent();
+		CqModeBlock * pSolid = QGetRenderContext() ->pconCurrent();
 		if ( pSolid->pCSGNode() ->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive )
 		{
 			m_pCSGNode = pSolid->pCSGNode();

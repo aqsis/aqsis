@@ -44,6 +44,8 @@ START_NAMESPACE( Aqsis )
 
 extern IqDDManager* CreateDisplayDriverManager();
 
+static CqShaderRegister * pOShaderRegister = NULL;
+
 CqRenderer* pCurrRenderer = 0;
 
 
@@ -84,7 +86,7 @@ CqRenderer::~CqRenderer()
 	// Delete the current context, should be main, unless render has been aborted.
 	while ( m_pconCurrent != 0 )
 	{
-		CqContext * pconParent = m_pconCurrent->pconParent();
+		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		delete( m_pconCurrent );
 		m_pconCurrent = pconParent;
 	}
@@ -105,11 +107,11 @@ CqRenderer::~CqRenderer()
  * context created.  If first, create with this as the parent.
  */
 
-CqContext*	CqRenderer::CreateMainContext()
+CqModeBlock*	CqRenderer::BeginMainModeBlock()
 {
 	if ( m_pconCurrent == 0 )
 	{
-		m_pconCurrent = new CqMainContext();
+		m_pconCurrent = new CqMainModeBlock();
 		return ( m_pconCurrent );
 	}
 	else
@@ -123,11 +125,11 @@ CqContext*	CqRenderer::CreateMainContext()
  * with it so I don't need to worry.
  */
 
-CqContext*	CqRenderer::CreateFrameContext()
+CqModeBlock*	CqRenderer::BeginFrameModeBlock()
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconNew = m_pconCurrent->CreateFrameContext();
+		CqModeBlock * pconNew = m_pconCurrent->BeginFrameModeBlock();
 		if ( pconNew != 0 )
 		{
 			m_pconCurrent = pconNew;
@@ -146,11 +148,11 @@ CqContext*	CqRenderer::CreateFrameContext()
  * with invalid calls.
  */
 
-CqContext*	CqRenderer::CreateWorldContext()
+CqModeBlock*	CqRenderer::BeginWorldModeBlock()
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconNew = m_pconCurrent->CreateWorldContext();
+		CqModeBlock * pconNew = m_pconCurrent->BeginWorldModeBlock();
 		if ( pconNew != 0 )
 		{
 			m_pconCurrent = pconNew;
@@ -168,11 +170,11 @@ CqContext*	CqRenderer::CreateWorldContext()
 /** Create a new attribute context.
  */
 
-CqContext*	CqRenderer::CreateAttributeContext()
+CqModeBlock*	CqRenderer::BeginAttributeModeBlock()
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconNew = m_pconCurrent->CreateAttributeContext();
+		CqModeBlock * pconNew = m_pconCurrent->BeginAttributeModeBlock();
 		if ( pconNew != 0 )
 		{
 			m_pconCurrent = pconNew;
@@ -191,11 +193,11 @@ CqContext*	CqRenderer::CreateAttributeContext()
 /** Create a new transform context.
  */
 
-CqContext*	CqRenderer::CreateTransformContext()
+CqModeBlock*	CqRenderer::BeginTransformModeBlock()
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconNew = m_pconCurrent->CreateTransformContext();
+		CqModeBlock * pconNew = m_pconCurrent->BeginTransformModeBlock();
 		if ( pconNew != 0 )
 		{
 			m_pconCurrent = pconNew;
@@ -214,11 +216,11 @@ CqContext*	CqRenderer::CreateTransformContext()
 /** Create a new solid context.
  */
 
-CqContext*	CqRenderer::CreateSolidContext( CqString& type )
+CqModeBlock*	CqRenderer::BeginSolidModeBlock( CqString& type )
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconNew = m_pconCurrent->CreateSolidContext( type );
+		CqModeBlock * pconNew = m_pconCurrent->BeginSolidModeBlock( type );
 		if ( pconNew != 0 )
 		{
 			m_pconCurrent = pconNew;
@@ -237,11 +239,11 @@ CqContext*	CqRenderer::CreateSolidContext( CqString& type )
 /** Create a new object context.
  */
 
-CqContext*	CqRenderer::CreateObjectContext()
+CqModeBlock*	CqRenderer::BeginObjectModeBlock()
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconNew = m_pconCurrent->CreateObjectContext();
+		CqModeBlock * pconNew = m_pconCurrent->BeginObjectModeBlock();
 		if ( pconNew != 0 )
 		{
 			m_pconCurrent = pconNew;
@@ -260,11 +262,11 @@ CqContext*	CqRenderer::CreateObjectContext()
 /** Create a new motion context.
  */
 
-CqContext*	CqRenderer::CreateMotionContext( TqInt N, TqFloat times[] )
+CqModeBlock*	CqRenderer::BeginMotionModeBlock( TqInt N, TqFloat times[] )
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconNew = m_pconCurrent->CreateMotionContext( N, times );
+		CqModeBlock * pconNew = m_pconCurrent->BeginMotionModeBlock( N, times );
 		if ( pconNew != 0 )
 		{
 			m_pconCurrent = pconNew;
@@ -282,12 +284,12 @@ CqContext*	CqRenderer::CreateMotionContext( TqInt N, TqFloat times[] )
 /** Delete the current context presuming it is a main context.
  */
 
-void	CqRenderer::DeleteMainContext()
+void	CqRenderer::EndMainModeBlock()
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconParent = m_pconCurrent->pconParent();
-		m_pconCurrent->DeleteMainContext();
+		CqModeBlock * pconParent = m_pconCurrent->pconParent();
+		m_pconCurrent->EndMainModeBlock();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -297,12 +299,12 @@ void	CqRenderer::DeleteMainContext()
 /** Delete the current context presuming it is a frame context.
  */
 
-void	CqRenderer::DeleteFrameContext()
+void	CqRenderer::EndFrameModeBlock()
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconParent = m_pconCurrent->pconParent();
-		m_pconCurrent->DeleteFrameContext();
+		CqModeBlock * pconParent = m_pconCurrent->pconParent();
+		m_pconCurrent->EndFrameModeBlock();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -312,12 +314,12 @@ void	CqRenderer::DeleteFrameContext()
 /** Delete the current context presuming it is a world context.
  */
 
-void	CqRenderer::DeleteWorldContext()
+void	CqRenderer::EndWorldModeBlock()
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconParent = m_pconCurrent->pconParent();
-		m_pconCurrent->DeleteWorldContext();
+		CqModeBlock * pconParent = m_pconCurrent->pconParent();
+		m_pconCurrent->EndWorldModeBlock();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -327,12 +329,12 @@ void	CqRenderer::DeleteWorldContext()
 /** Delete the current context presuming it is a attribute context.
  */
 
-void	CqRenderer::DeleteAttributeContext()
+void	CqRenderer::EndAttributeModeBlock()
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconParent = m_pconCurrent->pconParent();
-		m_pconCurrent->DeleteAttributeContext();
+		CqModeBlock * pconParent = m_pconCurrent->pconParent();
+		m_pconCurrent->EndAttributeModeBlock();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -342,14 +344,14 @@ void	CqRenderer::DeleteAttributeContext()
 /** Delete the current context presuming it is a transform context.
  */
 
-void	CqRenderer::DeleteTransformContext()
+void	CqRenderer::EndTransformModeBlock()
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconParent = m_pconCurrent->pconParent();
+		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		// Copy the current state of the attributes UP the stack as a TransformBegin/End doesn't store them
 		pconParent->m_pattrCurrent = m_pconCurrent->m_pattrCurrent;
-		m_pconCurrent->DeleteTransformContext();
+		m_pconCurrent->EndTransformModeBlock();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -359,12 +361,12 @@ void	CqRenderer::DeleteTransformContext()
 /** Delete the current context presuming it is a solid context.
  */
 
-void	CqRenderer::DeleteSolidContext()
+void	CqRenderer::EndSolidModeBlock()
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconParent = m_pconCurrent->pconParent();
-		m_pconCurrent->DeleteSolidContext();
+		CqModeBlock * pconParent = m_pconCurrent->pconParent();
+		m_pconCurrent->EndSolidModeBlock();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -374,12 +376,12 @@ void	CqRenderer::DeleteSolidContext()
 /** Delete the current context presuming it is a object context.
  */
 
-void	CqRenderer::DeleteObjectContext()
+void	CqRenderer::EndObjectModeBlock()
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconParent = m_pconCurrent->pconParent();
-		m_pconCurrent->DeleteObjectContext();
+		CqModeBlock * pconParent = m_pconCurrent->pconParent();
+		m_pconCurrent->EndObjectModeBlock();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -389,15 +391,15 @@ void	CqRenderer::DeleteObjectContext()
 /** Delete the current context presuming it is a motion context.
  */
 
-void	CqRenderer::DeleteMotionContext()
+void	CqRenderer::EndMotionModeBlock()
 {
 	if ( m_pconCurrent != 0 )
 	{
-		CqContext * pconParent = m_pconCurrent->pconParent();
+		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		// Copy the current state of the attributes UP the stack as a TransformBegin/End doesn't store them
 		pconParent->m_pattrCurrent = m_pconCurrent->m_pattrCurrent;
 		pconParent->m_ptransCurrent = m_pconCurrent->m_ptransCurrent;
-		m_pconCurrent->DeleteMotionContext();
+		m_pconCurrent->EndMotionModeBlock();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -898,10 +900,16 @@ CqShaderRegister* CqRenderer::FindShader( const char* strName, EqShaderType type
 {
 	// Search the register list.
 	CqShaderRegister * pShaderRegister = m_Shaders.pFirst();
+
+
+
 	while ( pShaderRegister )
 	{
 		if ( pShaderRegister->strName() == strName && pShaderRegister->Type() == type )
+		{
+			pOShaderRegister = pShaderRegister ;
 			return ( pShaderRegister );
+		}
 
 		pShaderRegister = pShaderRegister->pNext();
 	}
@@ -916,7 +924,12 @@ CqShaderRegister* CqRenderer::FindShader( const char* strName, EqShaderType type
 
 IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 {
-	CqShaderRegister * pReg = FindShader( strName, type );
+	CqShaderRegister * pReg = NULL;
+
+	if ( pOShaderRegister && pOShaderRegister->strName() == strName && pOShaderRegister->Type() == type )
+		pReg = pOShaderRegister;
+	else
+		pReg = FindShader( strName, type );
 	if ( pReg != 0 )
 	{
 		IqShader * pShader = pReg->Create();

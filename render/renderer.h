@@ -105,23 +105,23 @@ class CqRenderer : public IqRenderer
 		CqRenderer();
 		virtual	~CqRenderer();
 
-		virtual	CqContext*	CreateMainContext();
-		virtual	CqContext*	CreateFrameContext();
-		virtual	CqContext*	CreateWorldContext();
-		virtual	CqContext*	CreateAttributeContext();
-		virtual	CqContext*	CreateTransformContext();
-		virtual	CqContext*	CreateSolidContext( CqString& type );
-		virtual	CqContext*	CreateObjectContext();
-		virtual	CqContext*	CreateMotionContext( TqInt N, TqFloat times[] );
+		virtual	CqModeBlock*	BeginMainModeBlock();
+		virtual	CqModeBlock*	BeginFrameModeBlock();
+		virtual	CqModeBlock*	BeginWorldModeBlock();
+		virtual	CqModeBlock*	BeginAttributeModeBlock();
+		virtual	CqModeBlock*	BeginTransformModeBlock();
+		virtual	CqModeBlock*	BeginSolidModeBlock( CqString& type );
+		virtual	CqModeBlock*	BeginObjectModeBlock();
+		virtual	CqModeBlock*	BeginMotionModeBlock( TqInt N, TqFloat times[] );
 
-		virtual	void	DeleteMainContext();
-		virtual	void	DeleteFrameContext();
-		virtual	void	DeleteWorldContext();
-		virtual	void	DeleteAttributeContext();
-		virtual	void	DeleteTransformContext();
-		virtual	void	DeleteSolidContext();
-		virtual	void	DeleteObjectContext();
-		virtual	void	DeleteMotionContext();
+		virtual	void	EndMainModeBlock();
+		virtual	void	EndFrameModeBlock();
+		virtual	void	EndWorldModeBlock();
+		virtual	void	EndAttributeModeBlock();
+		virtual	void	EndTransformModeBlock();
+		virtual	void	EndSolidModeBlock();
+		virtual	void	EndObjectModeBlock();
+		virtual	void	EndMotionModeBlock();
 
 		virtual	CqOptions&	optCurrent() const;
 		virtual	const CqAttributes*	pattrCurrent();
@@ -133,16 +133,16 @@ class CqRenderer : public IqRenderer
 		virtual	void	AdvanceTime();
 
 		/** Get a pointer to the current context.
-		 * \return Pointer to a CqContext derived class.
+		 * \return Pointer to a CqModeBlock derived class.
 		 */
-		virtual	CqContext*	pconCurrent()
+		virtual	CqModeBlock*	pconCurrent()
 		{
 			return ( m_pconCurrent );
 		}
 		/** Get a erad only pointer to the current context.
-		 * \return Pointer to a CqContext derived class.
+		 * \return Pointer to a CqModeBlock derived class.
 		 */
-		virtual const	CqContext*	pconCurrent() const
+		virtual const	CqModeBlock*	pconCurrent() const
 		{
 			return ( m_pconCurrent );
 		}
@@ -306,7 +306,7 @@ class CqRenderer : public IqRenderer
 		//						void		PrintStats(TqInt level);
 
 	private:
-		CqContext*	m_pconCurrent;					///< Pointer to the current context.
+		CqModeBlock*	m_pconCurrent;					///< Pointer to the current context.
 		CqStats	m_Stats;						///< Global statistics.
 		CqAttributes	m_attrDefault;					///< Default attributes.
 		CqTransform	m_transDefault;					///< Default transformation.
