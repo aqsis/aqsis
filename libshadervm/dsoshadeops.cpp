@@ -20,7 +20,7 @@
 
 #include	"aqsis.h"
 #include	"sstring.h"
-#include	"log.h"
+#include	"ilog.h"
 #include	"irenderer.h"
 #include	"ishaderdata.h"
 #include	"dsoshadeops.h"
