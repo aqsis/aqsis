@@ -40,7 +40,6 @@ class CqContext
 		std::list<CqOutput *> m_lContextHandle;
 		CqOutput *m_Active;
 
-		SqOptions::EqFileOpenType m_FileOpenType;
 		TqBool m_PipeHandleSet;
 		int m_PipeHandle;
 

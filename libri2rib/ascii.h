@@ -48,10 +48,10 @@ class CqASCII : public CqOutput
 		void print ( const char *c );
 
 	public:
-		CqASCII( SqOptions::EqFileOpenType fot, const char *name, int fdesc,
+		CqASCII( const char *name, int fdesc,
 		         SqOptions::EqCompression comp,
 		         SqOptions::EqIndentation i, TqInt isize )
-				: CqOutput( fot, name, fdesc, comp, i, isize )
+				: CqOutput( name, fdesc, comp, i, isize )
 		{}
 		~CqASCII()
 		{}

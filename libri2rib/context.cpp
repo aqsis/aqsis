@@ -31,7 +31,6 @@ USING_NAMESPACE( libri2rib )
 
 
 CqContext::CqContext() :
-		m_FileOpenType ( SqOptions::FileOpenType_ByName ),
 		m_PipeHandleSet ( TqFalse ),
 		m_PipeHandle ( 1 ),
 		m_OutputType( SqOptions::OutputType_Ascii ),
@@ -47,7 +46,6 @@ void CqContext::addContext( RtToken name )
 {
 	if ( name == NULL )
 	{
-		m_FileOpenType = SqOptions::FileOpenType_ByFileDescriptor;
 		if ( m_PipeHandleSet == TqFalse )
 			m_PipeHandle = 1;
 	}
@@ -55,12 +53,12 @@ void CqContext::addContext( RtToken name )
 	switch ( m_OutputType )
 	{
 			case SqOptions::OutputType_Ascii:
-			m_Active = new CqASCII ( m_FileOpenType , name, m_PipeHandle,
+			m_Active = new CqASCII ( name, m_PipeHandle,
 			                         m_Compression,
 			                         m_Indentation, m_IndentSize );
 			break;
 			case SqOptions::OutputType_Binary:
-			m_Active = new CqBinary ( m_FileOpenType , name, m_PipeHandle,
+			m_Active = new CqBinary ( name, m_PipeHandle,
 			                          m_Compression,
 			                          m_Indentation, m_IndentSize );
 			break;
@@ -124,7 +122,6 @@ void CqContext::removeCurrent()
 // RI2RIB_Output
 //                      Type            "Ascii" | "Binary"             "Ascii"
 //                      Compression      "None" | "Gzip"               "None"
-//                      FileOpenType     "Name" | "FileDescriptor"     "Name"
 //                      PipeHandle           integer                        1  (Standard output)
 //
 // RI2RIB_Indentation
@@ -170,20 +167,6 @@ void CqContext::parseOutputType( RtInt n, RtToken tokens[], RtPointer params[] )
 					               "\"", TqFalse );
 				}
 
-			}
-			else if ( strcmp ( tokens[ i ], "FileOpenType" ) == 0 )
-			{
-				if ( strcmp ( ( ( char ** ) params[ i ] ) [ 0 ], "Name" ) == 0 )
-					m_FileOpenType = SqOptions::FileOpenType_ByName;
-				else if ( strcmp ( ( ( char ** ) params[ i ] ) [ 0 ] , "FileDescriptor" ) == 0 )
-					m_FileOpenType = SqOptions::FileOpenType_ByFileDescriptor;
-				else
-				{
-					throw CqError ( RIE_CONSISTENCY, RIE_WARNING,
-					                "RiOption: Unrecognised FileOpenType parameter \"",
-					                ( ( char ** ) params[ i ] ) [ 0 ],
-					                "\"", TqFalse );
-				}
 			}
 			else if ( strcmp ( tokens[ i ], "PipeHandle" ) == 0 )
 			{

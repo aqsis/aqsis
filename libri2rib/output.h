@@ -129,7 +129,7 @@ class CqOutput
 		{}
 
 	public:
-		CqOutput( SqOptions::EqFileOpenType, const char *, int fdesc,
+		CqOutput( const char *, int fdesc,
 		          SqOptions::EqCompression,
 		          SqOptions::EqIndentation, TqInt isize );
 		virtual ~CqOutput();

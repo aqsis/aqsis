@@ -45,7 +45,7 @@ USING_NAMESPACE( libri2rib );
 
 
 
-CqOutput::CqOutput( SqOptions::EqFileOpenType fot, const char *name, int fdesc,
+CqOutput::CqOutput( const char *name, int fdesc,
                     SqOptions::EqCompression comp,
                     SqOptions::EqIndentation i, TqInt isize )
 		:
@@ -66,14 +66,13 @@ CqOutput::CqOutput( SqOptions::EqFileOpenType fot, const char *name, int fdesc,
 			break;
 	}
 
-	switch ( fot )
+	if ( name != RI_NULL )
 	{
-			case SqOptions::FileOpenType_ByName:
-			out->openFile( name );
-			break;
-			case SqOptions::FileOpenType_ByFileDescriptor:
-			out->openFile( fdesc );
-			break;
+		out->openFile( name );
+	}
+	else
+	{
+		out->openFile( fdesc );
 	}
 
 	SqSteps a = {RI_BEZIERSTEP, RI_BEZIERSTEP};

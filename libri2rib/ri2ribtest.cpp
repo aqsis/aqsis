@@ -12,7 +12,6 @@
 /* RI2RIB_Output                                                                                 */
 /*                      Type            "Ascii" | "Binary"             "Ascii"                   */
 /*                      Compression      "None" | "Gzip"               "None"                    */
-/*                      FileOpenType     "Name" | "FileDescriptor"     "Name"                    */
 /*                      PipeHandle           integer                        1  (Standard output) */
 /*                                                                                               */
 /* RI2RIB_Indentation                                                                            */
@@ -29,7 +28,6 @@ char *ri2rib_tab = "Tab";
 char *ri2rib_none = "None";
 char *ri2rib_gzip = "Gzip";
 
-char *ri2rib_file_descriptor = "FileDescriptor";
 
 RtFloat newFilter ( RtFloat a, RtFloat b, RtFloat c, RtFloat d )
 {
@@ -335,16 +333,12 @@ void file_descriptor_test()
 	RiEnd();
 
 	RiOption( "RI2RIB_Output",
-	          ( RtToken ) "FileOpenType", ( RtPointer ) & ri2rib_file_descriptor, RI_NULL );
-	RiOption( "RI2RIB_Output",
 	          ( RtToken ) "PipeHandle", ( RtPointer ) & out, RI_NULL );
 	RiBegin( RI_NULL );
 	RiArchiveRecord( RI_COMMENT, "File descriptor = 1 test\n" );
 	RiEnd();
 
 
-	RiOption( "RI2RIB_Output",
-	          ( RtToken ) "FileOpenType", ( RtPointer ) & ri2rib_file_descriptor, RI_NULL );
 	RiOption( "RI2RIB_Output",
 	          ( RtToken ) "PipeHandle", ( RtPointer ) & err, RI_NULL );
 	RiBegin( RI_NULL );
