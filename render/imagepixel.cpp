@@ -172,9 +172,12 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 				TqInt k;
 
 				k = random.RandomInt( n - 1 - i ) + i;
-				t = m_avecSamples[ i * m + j ].y();
-				m_avecSamples[ i * m + j ].y( m_avecSamples[ i * m + k ].y() );
-				m_avecSamples[ i * m + k ].y( t );
+				TqInt i1 = i * m + j;
+				TqInt i2 = k * m + j;
+				assert( i1 < m_avecSamples.size() && i2 < m_avecSamples.size() );
+				t = m_avecSamples[ i1 ].y();
+				m_avecSamples[ i1 ].y( m_avecSamples[ i2 ].y() );
+				m_avecSamples[ i2 ].y( t );
 			}
 		}
 
@@ -187,9 +190,12 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 				TqInt k;
 
 				k = random.RandomInt( n - 1 - j ) + j;
-				t = m_avecSamples[ j * m + i ].x();
-				m_avecSamples[ j * m + i ].x( m_avecSamples[ k * m + i ].x() );
-				m_avecSamples[ k * m + i ].x( t );
+				TqInt i1 = j * m + i;
+				TqInt i2 = k * m + i;
+				assert( i1 < m_avecSamples.size() && i2 < m_avecSamples.size() );
+				t = m_avecSamples[ i1 ].x();
+				m_avecSamples[ i1 ].x( m_avecSamples[ i2 ].x() );
+				m_avecSamples[ i2 ].x( t );
 
 			}
 		}
