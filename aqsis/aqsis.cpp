@@ -149,6 +149,7 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 	}
 
 	std::ostrstream strOutput;
+	strOutput.setf( std::ios::fixed );
 	while ( 1 )
 	{
 		TqUint itag;
@@ -166,7 +167,7 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 			switch ( strProgress[ itag + 1 ] )
 			{
 					case 'p':
-					strOutput << std::setw( 5 ) << std::setfill( ' ' ) << std::setprecision( 4 ) << percent;
+					strOutput << std::setw( 6 ) << std::setfill( ' ' ) << std::setprecision( 2 ) << percent;
 					break;
 
 					case 's':
