@@ -37,16 +37,18 @@ class CqVarDef : public IqVarDef
 				m_strName( "" ),
 				m_pDefValue( 0 ),
 				m_UseCount( 0 ),
-				m_ArrayLength( 0 )
+				m_ArrayLength( 0 ),
+				m_ReadOnly(0)
 		{}
 		CqVarDef( const CqVarDef& from );
-		CqVarDef( TqInt Type, const char* strName, TqInt Length = 0 ) :
+		CqVarDef( TqInt Type, const char* strName, TqInt Length = 0, TqInt ReadOnly = 0 ) :
 				m_Type( Type ),
 				m_fExtern( TqFalse ),
 				m_strName( strName ),
 				m_pDefValue( 0 ),
 				m_UseCount( 0 ),
-				m_ArrayLength( Length )
+				m_ArrayLength( Length ),
+				m_ReadOnly(ReadOnly)
 		{}
 		virtual ~CqVarDef();
 
@@ -112,6 +114,10 @@ class CqVarDef : public IqVarDef
 			m_fExtern = f;
 			m_vrExtern = vrExtern;
 		}
+		TqBool ReadOnly( EqShaderType type )
+		{
+			return( ( m_ReadOnly & (1<<type) ) != 0 );
+		}
 
 		static	TqBool	FindVariable( const char* strName, SqVarRef& Ref );
 		static	CqVarDef*	GetVariablePtr( const SqVarRef& Ref );
@@ -125,7 +131,7 @@ class CqVarDef : public IqVarDef
 		CqParseNode*	m_pDefValue;
 		TqInt	m_UseCount;
 		TqInt	m_ArrayLength;
-
+		TqInt	m_ReadOnly;
 };
 
 extern std::vector<CqVarDef>	gLocalVars;

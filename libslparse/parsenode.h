@@ -22,11 +22,15 @@
 
 START_NAMESPACE( Aqsis )
 
+extern char* gShaderTypeNames[];
+extern TqInt gcShaderTypeNames;
+
 ///----------------------------------------------------------------------
 /** \class CqParseNode
  * Abstract base class from which all parse nodes are define.
  */
 
+class CqParseNodeShader;
 class CqParseNode : public CqListEntry<CqParseNode>, public IqParseNode
 {
 	public:
@@ -201,6 +205,8 @@ class CqParseNode : public CqListEntry<CqParseNode>, public IqParseNode
 			return ( m_fVarying );
 		}
 
+		CqParseNodeShader* pShaderNode();
+
 		static	char*	TypeIdentifier( int Type );
 		static	TqInt	TypeFromIdentifier( char Id );
 		static	char*	TypeName( int Type );
@@ -233,12 +239,12 @@ class CqParseNodeShader : public CqParseNode, public IqParseNodeShader
 		CqParseNodeShader( const CqParseNodeShader& from ) :
 				CqParseNode( from ),
 				m_strName( from.m_strName ),
-				m_strShaderType( from.m_strShaderType )
+				m_ShaderType( from.m_ShaderType )
 		{}
-		CqParseNodeShader( const char* strName = "", const char* strType = "surface" ) :
+		CqParseNodeShader( const char* strName = "", const EqShaderType Type = Type_Surface ) :
 				CqParseNode(),
 				m_strName( strName ),
-				m_strShaderType( strType )
+				m_ShaderType( Type )
 		{}
 		virtual	~CqParseNodeShader()
 		{}
@@ -253,9 +259,14 @@ class CqParseNodeShader : public CqParseNode, public IqParseNodeShader
 		}
 		virtual	const char*	strShaderType() const
 		{
-			return ( m_strShaderType.c_str() );
+			assert( m_ShaderType < gcShaderTypeNames );
+			return ( gShaderTypeNames[ m_ShaderType ] );
 		}
-
+		virtual	const EqShaderType ShaderType() const
+		{
+			return( m_ShaderType );
+		}
+	
 		// Overridden from IqParseNode
 		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
 		{
@@ -277,7 +288,7 @@ class CqParseNodeShader : public CqParseNode, public IqParseNodeShader
 		}
 	protected:
 		CqString	m_strName;
-		CqString	m_strShaderType;
+		EqShaderType m_ShaderType;
 };
 
 

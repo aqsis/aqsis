@@ -11,9 +11,6 @@
 
 START_NAMESPACE( Aqsis )
 
-extern std::ostream* ParseErrorStream;
-
-
 ///---------------------------------------------------------------------
 /// CqParseNodeFunctionCall::TypeCheck
 /// Do a type check based on suitable types requested, and add a cast if required.
@@ -69,7 +66,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 	if ( m_aFuncRef.size() == 0 )
 	{
 		strErr += "Arguments to function not valid : ";
-		( *ParseErrorStream ) << strErr.c_str() << std::endl;
+		throw( strErr );
 		return ( Type_Nil );
 	}
 
@@ -112,7 +109,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 		if ( ArgType == Type_Nil && !fVarLen )
 		{
 			strErr += strErrDesc;
-			( *ParseErrorStream ) << strErr.c_str() << std::endl;
+			throw( strErr );
 			return ( Type_Nil );
 		}
 		else if ( ArgType != Type_Nil )
@@ -191,7 +188,7 @@ TqInt	CqParseNodeFunctionCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 	}
 
 	strErr += strErrDesc;
-	( *ParseErrorStream ) << strErr.c_str() << std::endl;
+	throw( strErr );
 	return ( Type_Nil );
 }
 
@@ -305,7 +302,7 @@ TqInt	CqParseNodeVariable::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOn
 		strErr += "Cannot convert from type ";
 		strErr += CqParseNode::TypeName( MyType );
 		strErr += " to any of the required types";
-		( *ParseErrorStream ) << strErr.c_str() << std::endl;
+		throw( strErr );
 		return ( Type_Nil );
 	}
 	return ( NewType );
@@ -329,7 +326,7 @@ TqInt	CqParseNodeVariableArray::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Ch
 		strErr += " : ";
 		strErr += "Array index must be float type : ";
 		strErr += CqParseNode::TypeName( IndexType );
-		( *ParseErrorStream ) << strErr.c_str() << std::endl;
+		throw( strErr );
 		return ( Type_Nil );
 	}
 
@@ -341,8 +338,28 @@ TqInt	CqParseNodeVariableArray::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Ch
 /// CqParseNodeAssign::TypeCheck
 /// Do a type check based on suitable types requested, and add a cast in required.
 
+extern EqShaderType gShaderType;
+
 TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
 {
+	// First check if the assign is to a read only variable.
+	if( CqVarDef::GetVariablePtr( m_VarRef ) && 
+		pShaderNode() &&
+		CqVarDef::GetVariablePtr( m_VarRef )->ReadOnly( pShaderNode()->ShaderType() ) )
+	{
+		CqString strErr( strFileName() );
+		strErr += " : ";
+		strErr += LineNo();
+		strErr += " : ";
+		strErr += "Cannot access read only variable '";
+		strErr += CqVarDef::GetVariablePtr( m_VarRef )->strName();
+		strErr += "' in shader type '";
+		strErr += gShaderTypeNames[ pShaderNode()->ShaderType() ];
+		strErr += "'";
+		throw( strErr );
+		return ( Type_Nil );
+	}
+	
 	TqInt	MyType = ( ResType() & Type_Mask );
 	// Type check the assignment expression first.
 	CqParseNode* pExpr = m_pChild;
@@ -370,7 +387,7 @@ TqInt	CqParseNodeAssign::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly
 		strErr += "Cannot convert from type ";
 		strErr += CqParseNode::TypeName( MyType );
 		strErr += " to any of the required types";
-		( *ParseErrorStream ) << strErr.c_str() << std::endl;
+		throw( strErr );
 		return ( Type_Nil );
 	}
 	return ( NewType );
@@ -394,7 +411,7 @@ TqInt	CqParseNodeAssignArray::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Chec
 		strErr += " : ";
 		strErr += "Array index must be float type : ";
 		strErr += CqParseNode::TypeName( IndexType );
-		( *ParseErrorStream ) << strErr.c_str() << std::endl;
+		throw( strErr );
 		return ( Type_Nil );
 	}
 
@@ -438,7 +455,7 @@ TqInt	CqParseNodeOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
 		strErr += LineNo();
 		strErr += " : ";
 		strErr += "Cannot find a suitable cast for the operands.";
-		( *ParseErrorStream ) << strErr.c_str() << std::endl;
+		throw( strErr );
 		return ( Type_Nil );
 	}
 
@@ -478,7 +495,7 @@ TqInt	CqParseNodeRelOp::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly 
 		strErr += LineNo();
 		strErr += " : ";
 		strErr += "Relative operators only return float.";
-		( *ParseErrorStream ) << strErr.c_str() << std::endl;
+		throw( strErr );
 		return ( Type_Nil );
 	}
 
@@ -556,7 +573,7 @@ TqInt	CqParseNodeMathOpDot::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckO
 		strErr += LineNo();
 		strErr += " : ";
 		strErr += "Cannot find a suitable cast for the operands.";
-		( *ParseErrorStream ) << strErr.c_str() << std::endl;
+		throw( strErr );
 		return ( Type_Nil );
 	}
 
@@ -596,7 +613,7 @@ TqInt CqParseNodeConst::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly 
 		strErr += "Cannot convert from type ";
 		strErr += CqParseNode::TypeName( MyType );
 		strErr += " to any of the required types";
-		( *ParseErrorStream ) << strErr.c_str() << std::endl;
+		throw( strErr );
 		return ( Type_Nil );
 	}
 	return ( NewType );
@@ -631,7 +648,7 @@ TqInt	CqParseNodeCast::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly )
 		strErr += "Cannot convert from type ";
 		strErr += CqParseNode::TypeName( NewType );
 		strErr += " to any of the required types";
-		( *ParseErrorStream ) << strErr.c_str() << std::endl;
+		throw( strErr );
 		return ( Type_Nil );
 	}
 	else
@@ -680,7 +697,7 @@ TqInt	CqParseNodeTriple::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly
 		strErr += "Cannot convert from type ";
 		strErr += CqParseNode::TypeName( NewType );
 		strErr += " to any of the required types";
-		( *ParseErrorStream ) << strErr.c_str() << std::endl;
+		throw( strErr );
 		return ( Type_Nil );
 	}
 	return ( NewType );
@@ -720,7 +737,7 @@ TqInt	CqParseNodeHexTuple::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOn
 		strErr += "Cannot convert from type ";
 		strErr += CqParseNode::TypeName( NewType );
 		strErr += " to any of the required types";
-		( *ParseErrorStream ) << strErr.c_str() << std::endl;
+		throw( strErr );
 		return ( Type_Nil );
 	}
 	return ( NewType );
@@ -754,7 +771,7 @@ TqInt CqParseNodeCommFunction::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Che
 		strErr += "Cannot convert from type ";
 		strErr += CqParseNode::TypeName( MyType );
 		strErr += " to any of the required types";
-		( *ParseErrorStream ) << strErr.c_str() << std::endl;
+		throw( strErr );
 		return ( Type_Nil );
 	}
 	return ( NewType );
@@ -799,7 +816,7 @@ TqInt	CqParseNodeQCond::TypeCheck( TqInt* pTypes, TqInt Count, TqBool CheckOnly 
 		strErr += LineNo();
 		strErr += " : ";
 		strErr += "Cannot find a suitable cast for the expressions.";
-		( *ParseErrorStream ) << strErr.c_str() << std::endl;
+		throw( strErr );
 		return ( Type_Nil );
 	}
 

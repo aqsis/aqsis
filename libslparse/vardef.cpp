@@ -15,31 +15,39 @@ START_NAMESPACE( Aqsis )
 ///---------------------------------------------------------------------
 /// Global array of standard variable definitions
 
+#define SU	(1<<Type_Surface)
+#define LS	(1<<Type_Lightsource)
+#define VO	(1<<Type_Volume)
+#define DI	(1<<Type_Displacement)
+#define IM	(1<<Type_Imager)
+#define TR	(1<<Type_Transformation)
+
+
 CqVarDef	gStandardVars[] = {
-                               CqVarDef( Type_VaryingColor, "Cs" ),
-                               CqVarDef( Type_VaryingColor, "Os" ),
-                               CqVarDef( Type_VaryingPoint, "Ng" ),
-                               CqVarDef( Type_UniformFloat, "du" ),
-                               CqVarDef( Type_UniformFloat, "dv" ),
-                               CqVarDef( Type_VaryingPoint, "L" ),
-                               CqVarDef( Type_VaryingColor, "Cl" ),
-                               CqVarDef( Type_VaryingColor, "Ol" ),
-                               CqVarDef( Type_VaryingPoint, "P" ),
-                               CqVarDef( Type_VaryingPoint, "dPdu" ),
-                               CqVarDef( Type_VaryingPoint, "dPdv" ),
-                               CqVarDef( Type_VaryingPoint, "N" ),
-                               CqVarDef( Type_VaryingFloat, "u" ),
-                               CqVarDef( Type_VaryingFloat, "v" ),
-                               CqVarDef( Type_VaryingFloat, "s" ),
-                               CqVarDef( Type_VaryingFloat, "t" ),
-                               CqVarDef( Type_VaryingPoint, "I" ),
-                               CqVarDef( Type_VaryingColor, "Ci" ),
-                               CqVarDef( Type_VaryingColor, "Oi" ),
-                               CqVarDef( Type_VaryingPoint, "Ps" ),
-                               CqVarDef( Type_UniformPoint, "E" ),
-                               CqVarDef( Type_UniformFloat, "ncomps" ),
-                               CqVarDef( Type_UniformFloat, "time" ),
-                               CqVarDef( Type_UniformFloat, "alpha" ),
+                               CqVarDef( Type_VaryingColor, "Cs", 0,	   LS|VO|DI|IM ),
+                               CqVarDef( Type_VaryingColor, "Os", 0,	   LS|VO|DI|IM ),
+                               CqVarDef( Type_VaryingPoint, "Ng", 0,	SU|LS|VO|DI|IM ),
+                               CqVarDef( Type_UniformFloat, "du", 0,	SU|LS|VO|DI|IM ),
+                               CqVarDef( Type_UniformFloat, "dv", 0,	SU|LS|VO|DI|IM ),
+                               CqVarDef( Type_VaryingPoint, "L", 0,		SU|LS|VO|DI|IM ),
+                               CqVarDef( Type_VaryingColor, "Cl",0,		SU|   VO|DI|IM ),
+                               CqVarDef( Type_VaryingColor, "Ol",0,		SU|   VO|DI|IM ),
+                               CqVarDef( Type_VaryingPoint, "P",0,		   LS|VO|   IM ),
+                               CqVarDef( Type_VaryingPoint, "dPdu",0,	SU|LS|VO|DI|IM ),
+                               CqVarDef( Type_VaryingPoint, "dPdv",0,	SU|LS|VO|DI|IM ),
+                               CqVarDef( Type_VaryingPoint, "N",0,		      VO|   IM ),
+                               CqVarDef( Type_VaryingFloat, "u",0,		SU|LS|VO|DI|IM ),
+                               CqVarDef( Type_VaryingFloat, "v",0,		SU|LS|VO|DI|IM ),
+                               CqVarDef( Type_VaryingFloat, "s",0,		      VO|   IM ),
+                               CqVarDef( Type_VaryingFloat, "t",0,		      VO|   IM ),
+                               CqVarDef( Type_VaryingPoint, "I",0,		SU|LS|VO|DI|IM ),
+                               CqVarDef( Type_VaryingColor, "Ci",0,		   LS|   DI    ),
+                               CqVarDef( Type_VaryingColor, "Oi",0,		   LS|   DI    ),
+                               CqVarDef( Type_VaryingPoint, "Ps",0,		SU|LS|VO|DI|IM ),
+                               CqVarDef( Type_UniformPoint, "E",0,		SU|LS|VO|DI|IM ),
+                               CqVarDef( Type_UniformFloat, "ncomps",0,	SU|LS|VO|DI|IM ),
+                               CqVarDef( Type_UniformFloat, "time",0,	SU|LS|VO|DI|IM ),
+                               CqVarDef( Type_UniformFloat, "alpha",0,	SU|LS|VO|DI|IM ),
                            };
 TqInt	gcStandardVars = sizeof( gStandardVars ) / sizeof( gStandardVars[ 0 ] );
 
@@ -79,6 +87,7 @@ CqVarDef& CqVarDef::operator=( const CqVarDef& from )
 	m_fExtern = from.m_fExtern;
 	m_vrExtern = from.m_vrExtern;
 	m_ArrayLength = from.m_ArrayLength;
+	m_ReadOnly = from.m_ReadOnly;
 	if ( from.m_pDefValue )
 		m_pDefValue = from.m_pDefValue->Clone( 0 );
 	else

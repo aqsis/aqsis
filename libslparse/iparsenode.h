@@ -169,6 +169,7 @@ struct IqParseNodeShader
 {
 	virtual	const char*	strName() const = 0;
 	virtual	const char*	strShaderType() const = 0;
+	virtual	const EqShaderType ShaderType() const = 0;
 
 	const static EqParseNodeType m_ID;
 };

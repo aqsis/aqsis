@@ -32,6 +32,17 @@ static char* gVariableTypeNames[] =
     };
 static TqInt gcVariableTypeNames = sizeof( gVariableTypeNames ) / sizeof( gVariableTypeNames[ 0 ] );
 
+char* gShaderTypeNames[] =
+    {
+        "surface",
+        "lightsource",
+        "volume",
+        "displacement",
+        "transformation",
+        "imager",
+    };
+TqInt gcShaderTypeNames = sizeof( gShaderTypeNames ) / sizeof( gShaderTypeNames[ 0 ] );
+
 
 //---------------------------------------------------------------------
 // Static data on CqParseNode
@@ -96,6 +107,20 @@ const EqParseNodeType IqParseNodeTypeCast::m_ID = ParseNode_TypeCast;
 const EqParseNodeType IqParseNodeTriple::m_ID = ParseNode_Triple;
 const EqParseNodeType IqParseNodeSixteenTuple::m_ID = ParseNode_SixteenTuple;
 const EqParseNodeType IqParseNodeMessagePassingFunction::m_ID = ParseNode_MessagePassingFunction;
+
+
+///---------------------------------------------------------------------
+/** Find the shader node, to aid in identifying the shader type.
+ */
+
+CqParseNodeShader* CqParseNode::pShaderNode()
+{
+	// Search up in the hierarchy.
+	CqParseNode* pShader = this;
+	while( ( NULL != pShader ) && ( pShader->NodeType() != IqParseNodeShader::m_ID ) )
+		pShader = pShader->m_pParent;
+	return( static_cast<CqParseNodeShader*>( pShader ) );
+}
 
 
 ///---------------------------------------------------------------------

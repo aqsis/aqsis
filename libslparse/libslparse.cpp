@@ -54,8 +54,18 @@ TqBool Parse( std::istream& InputStream, const CqString StreamName, std::ostream
 
 	InitStandardNamespace();
 
-	yyparse();
-	TypeCheck();
+	try
+	{
+		yyparse();
+		TypeCheck();
+	}
+	catch(CqString error)
+	{
+		( *ParseErrorStream ) << error.c_str() << std::endl;
+		( *ParseErrorStream ) << "ERROR: Shader not compiled" << std::endl;
+		ParseSucceeded = false;
+		return( false );
+	}
 	Optimise();
 
 	std::vector<CqVarDef>::iterator iv;
