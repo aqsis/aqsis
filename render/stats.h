@@ -213,7 +213,7 @@ class CqStats
 
 		static void setF( const TqInt index, const TqFloat value )
 		{
-			m_intVars[ index ] = value;
+			m_floatVars[ index ] = value;
 		}
 
 		static TqFloat getF( const TqInt index )
@@ -341,6 +341,11 @@ class CqStats
 					MPG_pushed_forward,
 					MPG_pushed_down,
 					MPG_pushed_far_down,
+
+					// Size
+					MPG_average_area,
+					MPG_min_area,
+					MPG_max_area,
 
 				// Shading stats
 

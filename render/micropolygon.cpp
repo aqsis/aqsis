@@ -755,6 +755,21 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 				pNew->GetTotalBound( TqTrue );
 				pImage->AddMPG( pNew );
 			}
+
+			// Calculate MPG area
+			TqFloat area = 0.0f;
+			area += ( aaPtimes[ 0 ][ iIndex ].x() * aaPtimes[ 0 ][iIndex + 1 ].y() ) - ( aaPtimes[ 0 ][ iIndex ].y() * aaPtimes[ 0 ][ iIndex + 1 ].x() );
+			area += ( aaPtimes[ 0 ][ iIndex + 1].x() * aaPtimes[ 0 ][iIndex + cu + 2 ].y() ) - ( aaPtimes[ 0 ][ iIndex + 1].y() * aaPtimes[ 0 ][ iIndex + cu + 2 ].x() );
+			area += ( aaPtimes[ 0 ][ iIndex + cu + 2].x() * aaPtimes[ 0 ][iIndex + cu + 1 ].y() ) - ( aaPtimes[ 0 ][ iIndex + cu + 2 ].y() * aaPtimes[ 0 ][ iIndex + cu + 1 ].x() );
+			area += ( aaPtimes[ 0 ][ iIndex + cu + 1].x() * aaPtimes[ 0 ][iIndex ].y() ) - ( aaPtimes[ 0 ][ iIndex + cu + 1 ].y() * aaPtimes[ 0 ][ iIndex ].x() );
+			area *= 0.5f;
+			area = fabs(area);
+			
+			STATS_SETF( MPG_average_area, STATS_GETF( MPG_average_area ) + area );
+			if( area < STATS_GETF( MPG_min_area ) )
+				STATS_SETF( MPG_min_area, area );
+			if( area > STATS_GETF( MPG_max_area ) )
+				STATS_SETF( MPG_max_area, area );
 		}
 	}
 
