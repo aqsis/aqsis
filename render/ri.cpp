@@ -389,6 +389,9 @@ RtVoid	RiWorldEnd()
 	if ( QGetRenderContext() ->optCurrent().pPreRenderFunction() != NULL )
 		( *QGetRenderContext() ->optCurrent().pPreRenderFunction() ) ();
 
+        // Stop the parsing counter
+	QGetRenderContext() ->Stats().MakeParse().Stop();
+
 	// Render the world
 	QGetRenderContext() ->RenderWorld();
 
