@@ -4,7 +4,7 @@
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
 
-CFG=libri2rib - Win32 Debug
+CFG=libri2rib - Win32 Debug_Static_MT
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
@@ -13,13 +13,15 @@ CFG=libri2rib - Win32 Debug
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "libri2rib.mak" CFG="libri2rib - Win32 Debug"
+!MESSAGE NMAKE /f "libri2rib.mak" CFG="libri2rib - Win32 Debug_Static_MT"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
 !MESSAGE "libri2rib - Win32 Release" (based on "Win32 (x86) Static Library")
 !MESSAGE "libri2rib - Win32 Debug" (based on "Win32 (x86) Static Library")
 !MESSAGE "libri2rib - Win32 Profile" (based on "Win32 (x86) Static Library")
+!MESSAGE "libri2rib - Win32 Release_Static_MT" (based on "Win32 (x86) Static Library")
+!MESSAGE "libri2rib - Win32 Debug_Static_MT" (based on "Win32 (x86) Static Library")
 !MESSAGE 
 
 # Begin Project
@@ -73,7 +75,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Debug\libri2ribd.lib"
 
 !ELSEIF  "$(CFG)" == "libri2rib - Win32 Profile"
 
@@ -98,6 +100,52 @@ LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
 # ADD LIB32 /nologo
 
+!ELSEIF  "$(CFG)" == "libri2rib - Win32 Release_Static_MT"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "libri2rib___Win32_Release_Static_MT"
+# PROP BASE Intermediate_Dir "libri2rib___Win32_Release_Static_MT"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "..\lib"
+# PROP Intermediate_Dir "..\Object\Release\libri2rib"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /GR /GX /O2 /I "..\renderer" /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\..\win32libs\include" /D "_MBCS" /D "_LIB" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRI2RIB /D BUILD_LIBRI2RIB=1 /D "NDEBUG" /D "PLUGINS" /D "WIN32" /D "NO_SYSLOG" /FR /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GR /GX /O2 /I "..\renderer" /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\..\win32libs\include" /D "_MBCS" /D "_LIB" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRI2RIB /D BUILD_LIBRI2RIB=1 /D "NDEBUG" /D "PLUGINS" /D "WIN32" /D "NO_SYSLOG" /FR /YX /FD /c
+# ADD BASE RSC /l 0x809 /d "NDEBUG"
+# ADD RSC /l 0x809 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\libri2rib_SMT.lib"
+
+!ELSEIF  "$(CFG)" == "libri2rib - Win32 Debug_Static_MT"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 1
+# PROP BASE Output_Dir "libri2rib___Win32_Debug_Static_MT"
+# PROP BASE Intermediate_Dir "libri2rib___Win32_Debug_Static_MT"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 1
+# PROP Output_Dir "..\lib\Debug"
+# PROP Intermediate_Dir "..\Object\Debug\libri2rib"
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\..\win32libs\include" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRI2RIB /D BUILD_LIBRI2RIB=1 /D "WIN32" /D "NO_SYSLOG" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GR /GX /ZI /Od /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\..\win32libs\include" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRI2RIB /D BUILD_LIBRI2RIB=1 /D "WIN32" /D "NO_SYSLOG" /FR /YX /FD /GZ /c
+# ADD BASE RSC /l 0x809 /d "_DEBUG"
+# ADD RSC /l 0x809 /d "_DEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LIB32=link.exe -lib
+# ADD BASE LIB32 /nologo
+# ADD LIB32 /nologo /out:"..\lib\Debug\libri2rib_SMTd.lib"
+
 !ENDIF 
 
 # Begin Target
@@ -105,6 +153,8 @@ LIB32=link.exe -lib
 # Name "libri2rib - Win32 Release"
 # Name "libri2rib - Win32 Debug"
 # Name "libri2rib - Win32 Profile"
+# Name "libri2rib - Win32 Release_Static_MT"
+# Name "libri2rib - Win32 Debug_Static_MT"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
