@@ -5,6 +5,7 @@ if not exist ..\binary-archive\docs mkdir ..\binary-archive\docs
 if not exist ..\binary-archive\examples mkdir ..\binary-archive\examples
 if not exist ..\binary-archive\lib mkdir ..\binary-archive\lib
 if not exist ..\binary-archive\include mkdir ..\binary-archive\include
+if not exist ..\binary-archive\procedures mkdir ..\binary-archive\procedures
 
 erase /f /s /q ..\binary-archive\*.*
 
@@ -19,7 +20,17 @@ copy ..\library\release\aqsl.exe .
 copy ..\library\release\aqslcomp.exe .
 copy ..\library\release\slpp.exe .
 copy ..\library\release\teqser.exe .
-copy ..\library\release\ddmsock.ini .
+copy ..\ddmsock.ini .
+
+cd procedures
+
+copy ..\..\library\release\gif2tif.dll .
+copy ..\..\library\release\jpg2tif.dll .
+copy ..\..\library\release\pcx2tif.dll .
+copy ..\..\library\release\ppm2tif.dll .
+copy ..\..\library\release\tga2tif.dll .
+
+cd ..
 
 copy \Libraries\tiff-v3.5.7\libtiff\libtiff.dll .
 
