@@ -2118,7 +2118,9 @@ RtVoid	RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep)
 			v.SetElement(i,j,vbasis[i][j]);
 		}
 	}
-
+	u.SetfIdentity(TqFalse);
+	v.SetfIdentity(TqFalse);
+ 
 	QGetRenderContext()->pattrWriteCurrent()->SetmatuBasis(u,QGetRenderContext()->Time());
 	QGetRenderContext()->pattrWriteCurrent()->SetmatvBasis(v,QGetRenderContext()->Time());
 	QGetRenderContext()->pattrWriteCurrent()->SetuSteps(ustep,QGetRenderContext()->Time());
@@ -3283,15 +3285,15 @@ RtVoid	CreateGPrim(T* pSurface)
 RtBoolean	BasisFromName(RtBasis& b, const char* strName)
 {
 	RtBasis* pVals=0;
-	if(strName=="bezier")
+	if(!strcmp(strName,"bezier"))
 		pVals=&RiBezierBasis;
-	else if(strName=="bspline")
+	else if(!strcmp(strName,"bspline"))
 		pVals=&RiBSplineBasis;
-	else if(strName=="catmull-rom")
+	else if(!strcmp(strName,"catmull-rom"))
 		pVals=&RiCatmullRomBasis;
-	else if(strName=="hermite")
+	else if(!strcmp(strName,"hermite"))
 		pVals=&RiHermiteBasis;
-	else if(strName=="power")
+	else if(!strcmp(strName,"power"))
 		pVals=&RiPowerBasis;
 
 	if(pVals)
