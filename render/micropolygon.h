@@ -336,21 +336,6 @@ class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonSta
 											m_fTrimmed = From.m_fTrimmed;
 										}
 
-					/** Overridden operator new to allocate micropolys from a pool.
-					 */
-					void* operator new(size_t size)
-										{
-											return(m_thePool.Alloc(size));
-										}
-
-					/** Overridden operator delete to allocate micropolys from a pool.
-					 */
-					void operator delete(void* p)
-										{
-											m_thePool.DeAlloc(p,sizeof(CqMicroPolygonStatic));
-										}
-//	private:
-	// Private destructor, as destruction should be via Release()
 	virtual			~CqMicroPolygonStatic()	{}
 
 	// overrides from CqMicroPolygonBase
@@ -373,8 +358,6 @@ class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonSta
 	private:
 			CqBound		m_Bound;		///< Stored bound.
 			TqBool		m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
-	
-	static	CqMemoryPool<CqMicroPolygonStatic>	m_thePool;	///< Static pool to allocated micropolys from.
 };
 
 

@@ -37,8 +37,7 @@
 START_NAMESPACE(Aqsis)
 
 
-CqMemoryPool<CqMicroPolygonStatic>	CqMicroPolygonStatic::m_thePool;
-
+DEFINE_STATIC_MEMORYPOOL(CqMicroPolygonStatic);
 
 //---------------------------------------------------------------------
 /** Default constructor

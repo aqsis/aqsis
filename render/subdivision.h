@@ -34,6 +34,7 @@
 #include "surface.h"
 #include "polygon.h"
 #include "shadervariable.h"
+#include "memorypool.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -285,6 +286,16 @@ class CqWFace
 					 */
 		void		AddEdge(CqWEdge* pE)		
 									{m_apEdges.push_back(pE);}
+					/** Common case, add four edges at once,
+					 */
+		void		SetQuad(CqWEdge* pE0,CqWEdge* pE1,CqWEdge* pE2,CqWEdge* pE3)	
+									{
+										m_apEdges.resize(4);
+										m_apEdges[0]=pE0;
+										m_apEdges[1]=pE1;
+										m_apEdges[2]=pE2;
+										m_apEdges[3]=pE3;
+									}
 					/** Get a pointer to the calculated midpoint of this face.
 					 * \return CqWVert pointer.
 					 * \attention Must have called CreateSubdividePoint first.
@@ -327,7 +338,7 @@ class CqWFace
  * Winged-Edge edge structure.
  */
 
-class CqWEdge
+class CqWEdge : public CqPoolable<CqWEdge>
 {
 	public:
 					CqWEdge() :

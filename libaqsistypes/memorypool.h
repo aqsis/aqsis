@@ -135,9 +135,31 @@ class CqPoolable
 					CqPoolable() : m_pNext(0)	{}
 					~CqPoolable()				{}
 	
+					/** Overridden operator new to allocate micropolys from a pool.
+					 */
+					void* operator new(size_t size)
+										{
+											return(m_thePool.Alloc(size));
+										}
+
+					/** Overridden operator delete to allocate micropolys from a pool.
+					 */
+					void operator delete(void* p)
+										{
+											m_thePool.DeAlloc(p,sizeof(T));
+										}
 	
 			T*	m_pNext;	///< Pointer to the next object.
+
+	static	CqMemoryPool<T>		m_thePool;	///< Static pool to allocated micropolys from.
 };
+
+
+//-----------------------------------------------------------------------
+/** Define the static memory pool for a poolable class.
+ */
+
+#define	DEFINE_STATIC_MEMORYPOOL(A)	CqMemoryPool<A>	A::m_thePool
 
 
 //-----------------------------------------------------------------------

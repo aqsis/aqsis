@@ -34,6 +34,7 @@
 
 START_NAMESPACE(Aqsis)
 
+DEFINE_STATIC_MEMORYPOOL(CqWEdge);
 
 //---------------------------------------------------------------------
 /** Remove an edge reference from the array.
@@ -462,10 +463,11 @@ void CqSubdivider::Subdivide()
 			CqWFace* pfNew=new CqWFace;	
 			
 			// Add the edges and set the edge facet references.
-			pfNew->AddEdge(grE.peHeadHalf());				grE.SetpfHeadLeft(pfNew);
-			pfNew->AddEdge(aEdges[j]);						aEdges[j]->SetpfRight(pfNew);
-			pfNew->AddEdge(peI2);							peI2->SetpfLeft(pfNew);			
-			pfNew->AddEdge(grE2.peTailHalf());				grE2.SetpfTailLeft(pfNew);
+			pfNew->SetQuad(grE.peHeadHalf(), aEdges[j], peI2, grE2.peTailHalf());
+			grE.SetpfHeadLeft(pfNew);
+			aEdges[j]->SetpfRight(pfNew);
+			peI2->SetpfLeft(pfNew);			
+			grE2.SetpfTailLeft(pfNew);
 			// Set up wing data for the edges.
 			grE.SetpeHeadTailLeft(aEdges[j]);				grE.SetpeHeadHeadLeft(grE2.peTailHalf());
 			aEdges[j]->SetpeTailRight(grE.peHeadHalf());	aEdges[j]->SetpeHeadRight(peI2);
@@ -586,10 +588,11 @@ void CqSubdivider::DiceSubdivide()
 		peI2=aEdges[pFace(i)->cEdges()-1];
 		pfNew=new CqWFace;
 		// Add the edges and set the edge facet references.
-		pfNew->AddEdge(grE.peHeadHalf());				grE.SetpfHeadLeft(pfNew);
-		pfNew->AddEdge(peI1);							peI1->SetpfRight(pfNew);
-		pfNew->AddEdge(peI2);							peI2->SetpfLeft(pfNew);			
-		pfNew->AddEdge(grE2.peTailHalf());				grE2.SetpfTailLeft(pfNew);
+		pfNew->SetQuad(grE.peHeadHalf(), peI1, peI2, grE2.peTailHalf());				
+		grE.SetpfHeadLeft(pfNew);
+		peI1->SetpfRight(pfNew);
+		peI2->SetpfLeft(pfNew);			
+		grE2.SetpfTailLeft(pfNew);
 		// Set up wing data for the edges.
 		grE.SetpeHeadTailLeft(peI1);					grE.SetpeHeadHeadLeft(grE2.peTailHalf());
 		peI1->SetpeTailRight(grE.peHeadHalf());			peI1->SetpeHeadRight(peI2);
@@ -605,10 +608,11 @@ void CqSubdivider::DiceSubdivide()
 		peI2=aEdges[0];
 		pfNew=new CqWFace;
 		// Add the edges and set the edge facet references.
-		pfNew->AddEdge(grE2.peTailHalf());				grE2.SetpfTailLeft(pfNew);
-		pfNew->AddEdge(grE.peHeadHalf());				grE.SetpfHeadLeft(pfNew);
-		pfNew->AddEdge(peI1);							peI1->SetpfRight(pfNew);			
-		pfNew->AddEdge(peI2);							peI2->SetpfLeft(pfNew);
+		pfNew->SetQuad(grE2.peTailHalf(), grE.peHeadHalf(), peI1, peI2);
+		grE2.SetpfTailLeft(pfNew);
+		grE.SetpfHeadLeft(pfNew);
+		peI1->SetpfRight(pfNew);			
+		peI2->SetpfLeft(pfNew);
 		// Set up wing data for the edges.
 		grE.SetpeHeadTailLeft(peI1);					grE.SetpeHeadHeadLeft(grE2.peTailHalf());
 		peI1->SetpeTailRight(grE.peHeadHalf());			peI1->SetpeHeadRight(peI2);
@@ -624,10 +628,11 @@ void CqSubdivider::DiceSubdivide()
 		peI2=aEdges[1];
 		pfNew=new CqWFace;
 		// Add the edges and set the edge facet references.
-		pfNew->AddEdge(peI2);							peI2->SetpfLeft(pfNew);
-		pfNew->AddEdge(grE2.peTailHalf());				grE2.SetpfTailLeft(pfNew);
-		pfNew->AddEdge(grE.peHeadHalf());				grE.SetpfHeadLeft(pfNew);
-		pfNew->AddEdge(peI1);							peI1->SetpfRight(pfNew);			
+		pfNew->SetQuad(peI2, grE2.peTailHalf(), grE.peHeadHalf(), peI1);
+		peI2->SetpfLeft(pfNew);
+		grE2.SetpfTailLeft(pfNew);
+		grE.SetpfHeadLeft(pfNew);
+		peI1->SetpfRight(pfNew);			
 		// Set up wing data for the edges.
 		grE.SetpeHeadTailLeft(peI1);					grE.SetpeHeadHeadLeft(grE2.peTailHalf());
 		peI1->SetpeTailRight(grE.peHeadHalf());			peI1->SetpeHeadRight(peI2);
@@ -643,10 +648,11 @@ void CqSubdivider::DiceSubdivide()
 		peI2=aEdges[2];
 		pfNew=new CqWFace;
 		// Add the edges and set the edge facet references.
-		pfNew->AddEdge(peI1);							peI1->SetpfRight(pfNew);			
-		pfNew->AddEdge(peI2);							peI2->SetpfLeft(pfNew);
-		pfNew->AddEdge(grE2.peTailHalf());				grE2.SetpfTailLeft(pfNew);
-		pfNew->AddEdge(grE.peHeadHalf());				grE.SetpfHeadLeft(pfNew);
+		pfNew->SetQuad(peI1, peI2, grE2.peTailHalf(), grE.peHeadHalf());
+		peI1->SetpfRight(pfNew);			
+		peI2->SetpfLeft(pfNew);
+		grE2.SetpfTailLeft(pfNew);
+		grE.SetpfHeadLeft(pfNew);
 		// Set up wing data for the edges.
 		grE.SetpeHeadTailLeft(peI1);					grE.SetpeHeadHeadLeft(grE2.peTailHalf());
 		peI1->SetpeTailRight(grE.peHeadHalf());			peI1->SetpeHeadRight(peI2);
