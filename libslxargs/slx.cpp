@@ -829,7 +829,7 @@ int SLX_SetShader ( char *name )
 		if ( strstr( name + strlen( name ) - strlen(RI_SHADER_EXTENSION), RI_SHADER_EXTENSION ) == NULL )
 		{		
 			// Create new string with .slx
-			stringLength = strlen( name ) + sizeof( RI_SHADER_EXTENSION ) + 1;
+			stringLength = strlen( name ) + strlen( RI_SHADER_EXTENSION ) + 1;
 			currentShader = ( char * ) malloc( stringLength );
 			strcpy( currentShader, name );
 			strcat( currentShader, RI_SHADER_EXTENSION );
