@@ -1622,7 +1622,7 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 	CqVector3D	vecR1m, vecR2m, vecR3m, vecR4m;
 
 	// Add in the bias at this point in camera coordinates.
-	TqFloat bias = 0.225f;
+	TqFloat bias = 0.0f;
 	const TqFloat* poptBias = QGetRenderContextI() ->GetFloatOption( "shadow", "bias0" );
 	if ( poptBias != 0 )
 		bias = poptBias[ 0 ];
