@@ -110,7 +110,7 @@ class CqDSORepository: public IqDSORepository, private CqPluginBase{
     virtual ~CqDSORepository()
     {
       // We should call shutdown for all init'd functions
-      for(m_itActiveDSOMap = m_ActiveDSOMap.begin(); m_itActiveDSOMap!=m_ActiveDSOMap.end(); m_itActiveDSOMap++){
+      while( ( m_itActiveDSOMap = m_ActiveDSOMap.begin() ) != m_ActiveDSOMap.end()){
 
 		std::list<SqDSOExternalCall *> *list = (*m_itActiveDSOMap).second;
 
