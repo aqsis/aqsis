@@ -240,8 +240,10 @@ void CqTextureMap::Open()
 
 void CqTextureMap::Close()
 {
+	
 	if(m_pImage!=0)	TIFFClose(m_pImage);
 	m_pImage=0;
+	
 }
 
 
@@ -370,6 +372,21 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer(unsigned long s, unsigned long t, in
 	// If we got here, segment is not currently loaded, so load the correct segement and store it in the cache.
 	CqTextureMapBuffer* pTMB=0;
 
+	if(!m_pImage){
+		CqRiFile	fileImage(m_strName.c_str(),"texture");
+		if(!fileImage.IsValid())
+		{
+			CqString strErr("Cannot open texture file : ");
+			strErr+=m_strName;
+			CqBasicError(1,Severity_Fatal,strErr.c_str());
+			return pTMB;
+		}
+		CqString strRealName(fileImage.strRealName());
+		fileImage.Close();
+
+		// Now open it as a tiff file.
+		m_pImage=TIFFOpen(strRealName.c_str(),"r");
+	}
 	if(m_pImage)
 	{
 		uint32 tsx,tsy;
@@ -474,11 +491,11 @@ void CqTextureMap::CreateSATMap()
 	}
 }
 
-
 void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, float sblur, float tblur, 
 								std::valarray<float>& val, int directory)
 {
 	// T(s2,t2)-T(s2,t1)-T(s1,t2)+T(s1,t1)
+	int i;
 
 	if(!IsValid())	return;
 
@@ -551,6 +568,7 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, 
 	if((ss1<ss2) && (tt1<tt2))
 	{
 		GetSample(ss1,tt1,ss2,tt2,val,fss,ftt,directory);
+		
 	}
 	// If it crosses only the s boundary, we need to get two samples.
 	else if((ss1>ss2) && (tt1<tt2))
@@ -559,6 +577,7 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, 
 		GetSample(ss1,tt1,m_XRes-1,tt2,val2,fss,ftt,directory);
 		val=(val1+val2);
 		val*=0.5f;
+		
 	}
 	// If it crosses only the t boundary, we need to get two samples.
 	else if((ss1<ss2) && (tt1>tt2))
@@ -567,6 +586,7 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, 
 		GetSample(ss1,tt1,ss2,m_YRes-1,val2,fss,ftt,directory);
 		val=(val1+val2);
 		val*=0.5f;
+		
 	}
 	// If it crosses the s and t boundary, we need to get four samples.
 	else
@@ -577,7 +597,19 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, 
 		GetSample(ss1,tt1,m_XRes-1,m_YRes-1,val4,fss,ftt,directory);
 		val=(val1+val2+val3+val4);
 		val*=0.25f;
+		
 	}
+
+    
+	// Clamp and smoothstep() the result 
+	for (i=0; i< m_SamplesPerPixel; i++) {
+		if   (val[i] > 1.0)
+			val[i] = 1.0; 
+		else if (val[i] < 0.0)
+			val[i] = 0.0;
+		else  val[i]=val[i]*val[i]*(3.0-2.0*val[i]);
+	}
+
 }
 
 
@@ -1364,7 +1396,7 @@ void CqShadowMap::ReadMatrices()
 
 void WriteTileImage(TIFF* ptex, float *raster, unsigned long width, unsigned long length, unsigned long twidth, unsigned long tlength, int samples)
 { 
-//	TIFFCreateDirectory(ptex);
+	//TIFFCreateDirectory(ptex);
 	char version[80];
 #ifdef  AQSIS_SYSTEM_WIN32
 	sprintf(version, "%s %s",STRNAME, VERSION_STR);

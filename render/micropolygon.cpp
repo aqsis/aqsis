@@ -39,9 +39,6 @@ START_NAMESPACE(Aqsis)
 
 DEFINE_STATIC_MEMORYPOOL(CqMicroPolygonStatic);
 
-static CqColor colBlack(0,0,0);
-static CqColor colWhite(1,1,1);
-
 //---------------------------------------------------------------------
 /** Default constructor
  */
@@ -208,11 +205,8 @@ void CqMicroPolyGrid::Shade()
 		dv()=adv+bdv;
 	}
 	
-	static CqColor colBlack(0,0,0);
-	static CqColor colWhite(1,1,1);
-
-	if(USES(lUses,EnvVars_Ci))	Ci().SetValue(colBlack);
-	if(USES(lUses,EnvVars_Oi))	Oi().SetValue(colWhite);
+	if(USES(lUses,EnvVars_Ci))	Ci().SetValue(gColBlack);
+	if(USES(lUses,EnvVars_Oi))	Oi().SetValue(gColWhite);
 	if(!m_fNormals)	N().SetValue(Ng());	// If normals are no explicitly specified, they default to the geometric normal.
 
 	// Setup varying variables.
@@ -233,7 +227,7 @@ void CqMicroPolyGrid::Shade()
 		do {
 			CqColor opacity = Os();
 						
-			if ((opacity != colWhite) )
+			if ((opacity != gColWhite) )
 				cCulled ++;
                         else break;
 		} while (Advance() );
@@ -257,7 +251,7 @@ void CqMicroPolyGrid::Shade()
 		do {
 			CqColor opacity = Os();
 						
-			if ((opacity == colBlack) )
+			if ((opacity == gColBlack) )
 				cCulled ++;
                         else break;
 		} while (Advance() );
@@ -319,7 +313,7 @@ void CqMicroPolyGrid::Shade()
 		do {
 			CqColor opacity = Os();
 						
-			if ((opacity == colBlack) )
+			if ((opacity == gColBlack) )
 				cCulled ++;
                         else break;
 		} while (Advance() );

@@ -220,9 +220,7 @@ void CqImagePixel::Clear()
 
 void CqImagePixel::Combine()
 {
-	static CqColor white(1, 1, 1);
-
-	m_colColor = CqColor(0, 0, 0);
+	m_colColor = gColBlack;
 	m_Depth = 0;
 	m_Coverage = 0;
 	
@@ -230,13 +228,13 @@ void CqImagePixel::Combine()
 	TqUint numsamples = XSamples()*YSamples();
 	for(std::vector<std::vector<SqImageSample> >::iterator samples = m_aValues.begin(); samples != m_aValues.end(); samples++)
 	{
-		CqColor samplecolor(0,0,0);
-		CqColor sampleopacity(0,0,0);
+		CqColor samplecolor = gColBlack;
+		CqColor sampleopacity = gColBlack;
 		TqBool samplehit=TqFalse;
 		for(std::vector<SqImageSample>::reverse_iterator sample = samples->rbegin(); sample != samples->rend(); sample++)
 		{
-			samplecolor = (samplecolor * (white - sample->m_colOpacity)) + sample->m_colColor;
-			sampleopacity = ((white - sampleopacity) * sample->m_colOpacity) + sampleopacity;
+			samplecolor = (samplecolor * (gColWhite - sample->m_colOpacity)) + sample->m_colColor;
+			sampleopacity = ((gColWhite - sampleopacity) * sample->m_colOpacity) + sampleopacity;
 			samplehit=TqTrue;
 		}
 
@@ -609,8 +607,8 @@ void CqBucket::FilterBucket()
 		for(x=XOrigin(); x<XOrigin()+XSize(); x++)
 		{
 			TqFloat xcent=x+0.5f;
-			CqColor c(0,0,0);
-			CqColor o(0,0,0);
+			CqColor c = gColBlack;
+			CqColor o = gColBlack;
 			TqFloat d=0;
 			TqFloat gTot=0.0;
 			TqInt SampleCount=0;
@@ -736,7 +734,7 @@ void CqBucket::ExposeBucket()
 
 void CqBucket::QuantizeBucket()
 {
-	static CqRandom random;
+	CqRandom random;
 
 	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
 	{
@@ -951,7 +949,9 @@ void	CqImageBuffer::SetImage()
 	m_aBuckets.resize(m_cXBuckets*m_cYBuckets);
 
 	
-	TqBool	fJitter = (QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)!=0;
+	TqBool	fJitter = (
+               ((QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)!=0) &&
+               (QGetRenderContext()->optCurrent().strHider() != "painter") );
 
 	CqBucket::InitialiseBucket(0,0,m_XBucketSize,m_YBucketSize,m_FilterXWidth,m_FilterYWidth,m_PixelXSamples,m_PixelXSamples,fJitter);
 	CqBucket::InitialiseFilterValues();
@@ -1133,7 +1133,7 @@ TqBool CqImageBuffer::OcclusionCullSurface(TqInt iBucket, CqBasicSurface* pSurfa
 		TqInt nextBucket = iBucket+1;
 		CqVector2D pos = Position(nextBucket);
 		if( (nextBucket < m_cXBuckets * m_cYBuckets) && 
-			( RasterBound.vecMax().x() > pos.x() ) )
+			( RasterBound.vecMax().x() >= pos.x() ) )
 		{
 			pSurface->UnLink();
 			m_aBuckets[nextBucket].AddGPrim(pSurface);
@@ -1148,7 +1148,7 @@ TqBool CqImageBuffer::OcclusionCullSurface(TqInt iBucket, CqBasicSurface* pSurfa
 		nextBucket = Bucket( pos.x(), pos.y() );
 		
 		if( (nextBucket < m_cXBuckets * m_cYBuckets) &&
-			(RasterBound.vecMax().y() > pos.y() ) )
+			(RasterBound.vecMax().y() >= pos.y() ) )
 {		
 			pSurface->UnLink();
 			m_aBuckets[nextBucket].AddGPrim(pSurface);
@@ -1247,7 +1247,6 @@ void CqImageBuffer::RenderMPGs(TqInt iBucket, long xmin, long xmax, long ymin, l
 	m_aBuckets[iBucket].aGrids().clear();
 
 	// Render any waiting MPGs
-	static	CqColor	colWhite(1,1,1);
 	static	CqVector2D	vecP;
 	
 	if(m_aBuckets[iBucket].aMPGs().empty())	return;
