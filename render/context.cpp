@@ -198,10 +198,18 @@ CqSolidContext::CqSolidContext( CqString& type, CqContext* pconParent ) : CqCont
 	// Create a new CSG tree node of the appropriate type.
 	m_pCSGNode = CqCSGTreeNode::CreateNode( type );
 	m_pCSGNode->AddRef();
+
 	if ( pconParent && pconParent->isSolid() )
 	{
 		CqSolidContext * pParentSolid = static_cast<CqSolidContext*>( pconParent );
-		pParentSolid->pCSGNode() ->AddChild( m_pCSGNode );
+		// Check if we are linking under a Primitive node, if so warn, and link at the top.
+		if(pParentSolid->pCSGNode()->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive)
+		{
+			CqAttributeError(RIE_BADSOLID, Severity_Normal, "Cannot add solid block under 'Primitive' solid block", m_pattrCurrent, TqTrue);
+			m_lCSGTrees.LinkLast( m_pCSGNode );
+		}
+		else
+			pParentSolid->pCSGNode() ->AddChild( m_pCSGNode );
 	}
 	else
 		m_lCSGTrees.LinkLast( m_pCSGNode );

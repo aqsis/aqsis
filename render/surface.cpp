@@ -58,6 +58,8 @@ CqBasicSurface::CqBasicSurface() : CqListEntry<CqBasicSurface>(), m_fDiceable( T
 			m_pCSGNode = pSolid->pCSGNode();
 			m_pCSGNode->AddRef();
 		}
+		else
+			CqAttributeError(RIE_BADSOLID, Severity_Normal, "Primitive defined when not in 'Primitive' solid block", m_pAttributes, TqTrue);
 	}
 }
 
