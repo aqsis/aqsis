@@ -762,7 +762,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
                 pNew->SetIndex( iIndex );
                 if ( fTrimmed ) pNew->MarkTrimmed();
                 pNew->Initialise();
-                pNew->GetTotalBound( TqTrue );
+                pNew->CalculateTotalBound();
                 pImage->AddMPG( pNew );
             }
 
@@ -1191,7 +1191,7 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
  * This must be called prior to calling fContains() on a mpg.
  */
 
-void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points)
+inline void CqMicroPolygon::CacheHitTestValues(CqHitTestCache* cache, CqVector3D* points)
 {
 	m_pHitTestCache = cache;
 
@@ -1381,96 +1381,88 @@ TqBool CqMicroPolygon::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat 
 /** Calculate the 2D boundary of this micropolygon,
  */
 
-CqBound CqMicroPolygon::GetTotalBound( TqBool fForce )
+void CqMicroPolygon::CalculateTotalBound()
 {
     CqVector3D * pP;
     m_pGrid->pVar(EnvVars_P) ->GetPointPtr( pP );
-    if ( fForce )
-    {
-        // Calculate the boundary, and store the indexes in the cache.
-        const CqVector3D& B = pP[ m_Index + 1 ];
-        const CqVector3D& C = pP[ m_Index + m_pGrid->uGridRes() + 2 ];
-        const CqVector3D& D = pP[ m_Index + m_pGrid->uGridRes() + 1 ];
 
-        TqShort BCMinX = 0;
-        TqShort BCMaxX = 0;
-        TqShort BCMinY = 0;
-        TqShort BCMaxY = 0;
-        TqShort BCMinZ = 0;
-        TqShort BCMaxZ = 0;
-        m_BoundCode = 0xe4;
-        TqInt TempIndexTable[ 4 ] = {	GetCodedIndex( m_BoundCode, 0 ),
-                                      GetCodedIndex( m_BoundCode, 1 ),
-                                      GetCodedIndex( m_BoundCode, 2 ),
-                                      GetCodedIndex( m_BoundCode, 3 ) };
-        if ( B.x() < pP[ TempIndexTable[ BCMinX ] ].x() ) BCMinX = 1;
-        if ( B.x() > pP[ TempIndexTable[ BCMaxX ] ].x() ) BCMaxX = 1;
-        if ( B.y() < pP[ TempIndexTable[ BCMinY ] ].y() ) BCMinY = 1;
-        if ( B.y() > pP[ TempIndexTable[ BCMaxY ] ].y() ) BCMaxY = 1;
-        if ( B.z() < pP[ TempIndexTable[ BCMinZ ] ].z() ) BCMinZ = 1;
-        if ( B.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() ) BCMaxZ = 1;
+	// Calculate the boundary, and store the indexes in the cache.
+	const CqVector3D& B = pP[ m_Index + 1 ];
+	const CqVector3D& C = pP[ m_Index + m_pGrid->uGridRes() + 2 ];
+	const CqVector3D& D = pP[ m_Index + m_pGrid->uGridRes() + 1 ];
 
-        if ( C.x() < pP[ TempIndexTable[ BCMinX ] ].x() ) BCMinX = 2;
-        if ( C.x() > pP[ TempIndexTable[ BCMaxX ] ].x() ) BCMaxX = 2;
-        if ( C.y() < pP[ TempIndexTable[ BCMinY ] ].y() ) BCMinY = 2;
-        if ( C.y() > pP[ TempIndexTable[ BCMaxY ] ].y() ) BCMaxY = 2;
-        if ( C.z() < pP[ TempIndexTable[ BCMinZ ] ].z() ) BCMinZ = 2;
-        if ( C.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() ) BCMaxZ = 2;
+	TqShort BCMinX = 0;
+	TqShort BCMaxX = 0;
+	TqShort BCMinY = 0;
+	TqShort BCMaxY = 0;
+	TqShort BCMinZ = 0;
+	TqShort BCMaxZ = 0;
+	m_BoundCode = 0xe4;
+	TqInt TempIndexTable[ 4 ] = {	GetCodedIndex( m_BoundCode, 0 ),
+								GetCodedIndex( m_BoundCode, 1 ),
+								GetCodedIndex( m_BoundCode, 2 ),
+								GetCodedIndex( m_BoundCode, 3 ) };
+	if ( B.x() < pP[ TempIndexTable[ BCMinX ] ].x() ) BCMinX = 1;
+	if ( B.x() > pP[ TempIndexTable[ BCMaxX ] ].x() ) BCMaxX = 1;
+	if ( B.y() < pP[ TempIndexTable[ BCMinY ] ].y() ) BCMinY = 1;
+	if ( B.y() > pP[ TempIndexTable[ BCMaxY ] ].y() ) BCMaxY = 1;
+	if ( B.z() < pP[ TempIndexTable[ BCMinZ ] ].z() ) BCMinZ = 1;
+	if ( B.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() ) BCMaxZ = 1;
 
-        if ( !IsDegenerate() )
-        {
-            if ( D.x() < pP[ TempIndexTable[ BCMinX ] ].x() ) BCMinX = 3;
-            if ( D.x() > pP[ TempIndexTable[ BCMaxX ] ].x() ) BCMaxX = 3;
-            if ( D.y() < pP[ TempIndexTable[ BCMinY ] ].y() ) BCMinY = 3;
-            if ( D.y() > pP[ TempIndexTable[ BCMaxY ] ].y() ) BCMaxY = 3;
-            if ( D.z() < pP[ TempIndexTable[ BCMinZ ] ].z() ) BCMinZ = 3;
-            if ( D.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() ) BCMaxZ = 3;
-        }
-        m_BoundCode = ( ( BCMinX & 0x3 ) |
-                        ( ( BCMinY & 0x3 ) << 2 ) |
-                        ( ( BCMinZ & 0x3 ) << 4 ) |
-                        ( ( BCMaxX & 0x3 ) << 6 ) |
-                        ( ( BCMaxY & 0x3 ) << 8 ) |
-                        ( ( BCMaxZ & 0x3 ) << 10 ) );
-    }
-    CqBound B( pP[ GetCodedIndex( m_BoundCode, 0 ) ].x(), pP[ GetCodedIndex( m_BoundCode, 1 ) ].y(), pP[ GetCodedIndex( m_BoundCode, 2 ) ].z(),
+	if ( C.x() < pP[ TempIndexTable[ BCMinX ] ].x() ) BCMinX = 2;
+	if ( C.x() > pP[ TempIndexTable[ BCMaxX ] ].x() ) BCMaxX = 2;
+	if ( C.y() < pP[ TempIndexTable[ BCMinY ] ].y() ) BCMinY = 2;
+	if ( C.y() > pP[ TempIndexTable[ BCMaxY ] ].y() ) BCMaxY = 2;
+	if ( C.z() < pP[ TempIndexTable[ BCMinZ ] ].z() ) BCMinZ = 2;
+	if ( C.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() ) BCMaxZ = 2;
+
+	if ( !IsDegenerate() )
+	{
+		if ( D.x() < pP[ TempIndexTable[ BCMinX ] ].x() ) BCMinX = 3;
+		if ( D.x() > pP[ TempIndexTable[ BCMaxX ] ].x() ) BCMaxX = 3;
+		if ( D.y() < pP[ TempIndexTable[ BCMinY ] ].y() ) BCMinY = 3;
+		if ( D.y() > pP[ TempIndexTable[ BCMaxY ] ].y() ) BCMaxY = 3;
+		if ( D.z() < pP[ TempIndexTable[ BCMinZ ] ].z() ) BCMinZ = 3;
+		if ( D.z() > pP[ TempIndexTable[ BCMaxZ ] ].z() ) BCMaxZ = 3;
+	}
+	m_BoundCode = ( ( BCMinX & 0x3 ) |
+					( ( BCMinY & 0x3 ) << 2 ) |
+					( ( BCMinZ & 0x3 ) << 4 ) |
+					( ( BCMaxX & 0x3 ) << 6 ) |
+					( ( BCMaxY & 0x3 ) << 8 ) |
+					( ( BCMaxZ & 0x3 ) << 10 ) );
+
+    m_Bound = CqBound( pP[ GetCodedIndex( m_BoundCode, 0 ) ].x(), pP[ GetCodedIndex( m_BoundCode, 1 ) ].y(), pP[ GetCodedIndex( m_BoundCode, 2 ) ].z(),
                pP[ GetCodedIndex( m_BoundCode, 3 ) ].x(), pP[ GetCodedIndex( m_BoundCode, 4 ) ].y(), pP[ GetCodedIndex( m_BoundCode, 5 ) ].z() );
 
     // Adjust for DOF
     if ( QGetRenderContext() ->UsingDepthOfField() )
     {
-        const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( B.vecMin().z() );
-        const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( B.vecMax().z() );
+        const CqVector2D minZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMin().z() );
+        const CqVector2D maxZCoc = QGetRenderContext()->GetCircleOfConfusion( m_Bound.vecMax().z() );
         TqFloat cocX = MAX( minZCoc.x(), maxZCoc.x() );
         TqFloat cocY = MAX( minZCoc.y(), maxZCoc.y() );
 
-        B.vecMin().x( B.vecMin().x() - cocX );
-        B.vecMin().y( B.vecMin().y() - cocY );
-        B.vecMax().x( B.vecMax().x() + cocX );
-        B.vecMax().y( B.vecMax().y() + cocY );
+        m_Bound.vecMin().x( m_Bound.vecMin().x() - cocX );
+        m_Bound.vecMin().y( m_Bound.vecMin().y() - cocY );
+        m_Bound.vecMax().x( m_Bound.vecMax().x() + cocX );
+        m_Bound.vecMax().y( m_Bound.vecMax().y() + cocY );
     }
-
-    return ( B );
 }
 
 
 //---------------------------------------------------------------------
 /** Calculate the 2D boundary of this micropolygon,
- * \param fForce Boolean flag to force the recalculation of the cached bound.
  */
 
-CqBound CqMicroPolygonMotion::GetTotalBound( TqBool fForce )
+void CqMicroPolygonMotion::CalculateTotalBound()
 {
-    if ( fForce )
-    {
-        assert( NULL != m_Keys[ 0 ] );
+	assert( NULL != m_Keys[ 0 ] );
 
-        m_Bound = m_Keys[ 0 ] ->GetTotalBound();
-        std::vector<CqMovingMicroPolygonKey*>::iterator i;
-        for ( i = m_Keys.begin(); i != m_Keys.end(); i++ )
-            m_Bound.Encapsulate( ( *i ) ->GetTotalBound() );
-    }
-    return ( m_Bound );
+	m_Bound = m_Keys[ 0 ] ->GetTotalBound();
+	std::vector<CqMovingMicroPolygonKey*>::iterator i;
+	for ( i = m_Keys.begin(); i != m_Keys.end(); i++ )
+		m_Bound.Encapsulate( ( *i ) ->GetTotalBound() );
 }
 
 //---------------------------------------------------------------------

@@ -485,17 +485,23 @@ public:
         return ( colRes );
     }
 
+    /** Calculate the bound of the micropoly.
+	 */
+	virtual void CalculateTotalBound();
 
     // Overridables
     /** Get the bound of the micropoly.
-     * \param fForce Flag indicating do not get the stored bound, but recalculate it.
      * \return CqBound representing the conservative bound.
      */
-    virtual	CqBound	GetTotalBound( TqBool fForce = TqFalse );
+    virtual	CqBound GetTotalBound()
+	{
+		return m_Bound;
+	}
+
     /** Get the bound of the micropoly.
      * \return CqBound representing the conservative bound.
      */
-    virtual const CqBound	GetTotalBound() const
+    virtual const CqBound GetTotalBound() const
     {
         return ( GetTotalBound() );
     }
@@ -503,7 +509,7 @@ public:
     {
         return ( 1 );
     }
-    virtual	CqBound	SubBound( TqInt iIndex, TqFloat& time )
+    virtual	CqBound SubBound( TqInt iIndex, TqFloat& time )
     {
         time = 0.0f;
         return ( GetTotalBound() );
@@ -607,6 +613,8 @@ protected:
         }
     }
     TqLong	m_IndexCode;
+    CqBound	m_Bound;					///< Stored bound.
+
     TqLong	m_BoundCode;
     CqMicroPolyGridBase*	m_pGrid;		///< Pointer to the donor grid.
     TqInt	m_Index;		///< Index within the donor grid.
@@ -682,7 +690,8 @@ public:
 
     // Overrides from CqMicroPolygon
     virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time ) const;
-    virtual	CqBound	GetTotalBound( TqBool fForce = TqFalse );
+	virtual void CalculateTotalBound();
+	virtual	CqBound	GetTotalBound() { return m_Bound; }
     virtual const CqBound	GetTotalBound() const
     {
         return ( m_Bound );
@@ -716,7 +725,6 @@ public:
 	}
 
 private:
-    CqBound	m_Bound;					///< Stored bound.
     CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
     TqBool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
     std::vector<TqFloat> m_Times;
