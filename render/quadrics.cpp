@@ -102,7 +102,13 @@ CqMicroPolyGridBase* CqQuadric::Dice()
 		{
 			P = DicePoint( u, v, N );
 			pGrid->P() = m_matTx * P;
-			pGrid->Ng() = m_matITTx * N;
+			if(CanGenerateNormals())
+			{
+				EqOrientation CSO = pAttributes() ->eCoordsysOrientation();
+				EqOrientation O = pAttributes() ->eOrientation();
+				N = ( CSO == O ) ? N : -N;
+				pGrid->Ng() = m_matITTx * N;
+			}
 			pGrid->Advance();
 		}
 	}
@@ -399,7 +405,7 @@ CqBound	CqCone::Bound() const
 	CqMatrix matRot( RAD ( m_ThetaMin ), vD );
 	for( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
 		*i = matRot*(*i);
-	CqBound	B( RevolveForBound(curve, vC, vD, RAD( m_ThetaMax - m_ThetaMax) ) );
+	CqBound	B( RevolveForBound(curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin) ) );
 	B.Transform( m_matTx );
 	
 	return( B );
@@ -1102,7 +1108,7 @@ CqDisk&	CqDisk::operator=( const CqDisk& From )
 CqBound	CqDisk::Bound() const
 {
 	std::vector<CqVector3D> curve;
-	CqVector3D vA( m_MajorRadius, 0, m_Height ), vB( 0, 0, m_Height ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
+	CqVector3D vA( m_MajorRadius, 0, m_Height ), vB( m_MinorRadius, 0, m_Height ), vC( 0, 0, 0 ), vD( 0, 0, 1 );
 	curve.push_back( vA );
 	curve.push_back( vB );
 	CqMatrix matRot( RAD ( m_ThetaMin ), vD );
@@ -1196,7 +1202,7 @@ CqVector3D CqDisk::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqDisk::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	Normal = CqVector3D( 0, 0, 1 );
+	Normal = CqVector3D( 0, 0, m_ThetaMax>0?1:-1 );
 	return( DicePoint( u, v ) );
 }
 
