@@ -35,12 +35,22 @@
 
 START_NAMESPACE( Aqsis )
 
-#define STATS_INC( index )	CqStats::IncI( CqStats::##index )
-#define STATS_DEC( index )	CqStats::DecI( CqStats::##index )
-#define	STATS_GETI( index )	CqStats::getI( CqStats::##index )
-#define	STATS_SETI( index , value )	CqStats::setI( CqStats::##index , value )
-#define	STATS_GETF( index )	CqStats::getF( CqStats::##index )
-#define	STATS_SETF( index , value )	CqStats::setF( CqStats::##index , value )
+extern void gStats_IncI( TqInt index );
+extern void gStats_DecI( TqInt index );
+extern TqInt gStats_getI( TqInt index );
+extern void gStats_setI( TqInt index, TqInt value );
+extern TqFloat gStats_getF( TqInt index );
+extern void gStats_setF( TqInt index, TqFloat value );
+
+#define STATS_INC( index )				gStats_IncI( CqStats::##index )
+#define STATS_DEC( index )				gStats_DecI( CqStats::##index )
+#define	STATS_GETI( index )				gStats_getI( CqStats::##index )
+#define	STATS_SETI( index , value )		gStats_setI( CqStats::##index , value )
+#define	STATS_GETF( index )				gStats_getF( CqStats::##index )
+#define	STATS_SETF( index , value )		gStats_setF( CqStats::##index , value )
+
+
+// Internal stuff.
 #define STATS_INT_GETI( index )	getI( index )
 #define STATS_INT_GETF( index )	getF( index )
 

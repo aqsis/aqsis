@@ -29,6 +29,9 @@
  * Define a dummy render context function, needed by the shader VM, if any initialisation code need the
  * render core, it will fail.
  */
+
+typedef	int TqInt;
+typedef float TqFloat;
 namespace Aqsis
 {
 struct IqRenderer;
@@ -36,4 +39,25 @@ IqRenderer* QGetRenderContextI()
 {
 	return ( 0 );
 }
+void gStats_IncI( TqInt index )
+{
+}
+void gStats_DecI( TqInt index )
+{
+}
+TqInt gStats_getI( TqInt index )
+{
+	return( 0 );
+}
+void gStats_setI( TqInt index, TqInt value )
+{
+}
+TqFloat gStats_getF( TqInt index )
+{
+	return( 0.0f );
+}
+void gStats_setF( TqInt index, TqFloat value )
+{
+}
+
 }

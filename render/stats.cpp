@@ -39,6 +39,39 @@
 
 START_NAMESPACE( Aqsis )
 
+// Global accessor functions, defined like this so that other projects using libshadervm can
+// simply provide empty implementations and not have to link to libaqsis.
+void gStats_IncI( TqInt index )
+{
+	CqStats::IncI( index );
+}
+
+void gStats_DecI( TqInt index )
+{
+	CqStats::DecI( index );
+}
+
+TqInt gStats_getI( TqInt index )
+{
+	return( CqStats::getI( index ) );
+}
+
+void gStats_setI( TqInt index, TqInt value )
+{
+	CqStats::setI( index, value );
+}
+
+TqFloat gStats_getF( TqInt index )
+{
+	return( CqStats::getF( index ) );
+}
+
+void gStats_setF( TqInt index, TqFloat value )
+{
+	CqStats::setF( index, value );
+}
+
+
 TqFloat	 CqStats::m_floatVars[ CqStats::_Last_float ];		///< Float variables
 TqInt	 CqStats::m_intVars[ CqStats::_Last_int ];			///< Int variables
 
