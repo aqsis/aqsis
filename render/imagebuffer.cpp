@@ -723,7 +723,7 @@ void CqBucket::QuantizeBucket()
 	}
 	else
 	{
-		double ditheramplitude=QGetRenderContext()->optCurrent().fDepthQuantizeDitherAmplitude();
+/*		double ditheramplitude=QGetRenderContext()->optCurrent().fDepthQuantizeDitherAmplitude();
 		if(ditheramplitude==0)	return;
 		TqInt one=QGetRenderContext()->optCurrent().iDepthQuantizeOne();
 		TqInt min=QGetRenderContext()->optCurrent().iDepthQuantizeMin();
@@ -744,7 +744,7 @@ void CqBucket::QuantizeBucket()
 				pie2++;
 			}
 			pie+=XSize()+XFWidth();
-		}
+		}*/
 	}
 }
 
@@ -890,7 +890,10 @@ void	CqImageBuffer::SetImage()
 
 	m_aBuckets.resize(m_cXBuckets*m_cYBuckets);
 
-	CqBucket::InitialiseBucket(0,0,m_XBucketSize,m_YBucketSize,m_FilterXWidth,m_FilterYWidth,m_PixelXSamples,m_PixelXSamples);
+	
+	TqBool	fJitter = (QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)!=0;
+
+	CqBucket::InitialiseBucket(0,0,m_XBucketSize,m_YBucketSize,m_FilterXWidth,m_FilterYWidth,m_PixelXSamples,m_PixelXSamples,fJitter);
 	CqBucket::InitialiseFilterValues();
 }
 
@@ -960,8 +963,8 @@ TqBool CqImageBuffer::CullSurface(CqBound& Bound, CqBasicSurface* pSurface)
 		return(TqFalse);
 	}
 
-	TqFloat minz = Bound.vecMin().z();
-	TqFloat maxz = Bound.vecMax().z();
+//	TqFloat minz = Bound.vecMin().z();
+//	TqFloat maxz = Bound.vecMax().z();
 
 	// Convert the bounds to raster space.
 	Bound.Transform(QGetRenderContext()->matSpaceToSpace("camera","raster"));
@@ -978,8 +981,8 @@ TqBool CqImageBuffer::CullSurface(CqBound& Bound, CqBasicSurface* pSurface)
 		return(TqTrue);
 
 	// Restore Z-Values to camera space.
-	Bound.vecMin().z(minz);
-	Bound.vecMax().z(maxz);
+//	Bound.vecMin().z(minz);
+//	Bound.vecMax().z(maxz);
 
 	// Cache the Bound.
 	pSurface->CacheRasterBound(Bound);
@@ -1236,8 +1239,9 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 		}
 
 		// If the micropolygon is outside the hither-yon range, cull it.
-		if(Bound.vecMin().z()>QGetRenderContext()->optCurrent().fClippingPlaneFar() ||
-		   Bound.vecMax().z()<QGetRenderContext()->optCurrent().fClippingPlaneNear())
+//		if(Bound.vecMin().z()>QGetRenderContext()->optCurrent().fClippingPlaneFar() ||
+//		   Bound.vecMax().z()<QGetRenderContext()->optCurrent().fClippingPlaneNear())
+		if(Bound.vecMin().z()>1.0f || Bound.vecMax().z()<0.0f)
 		{
 			if(bound_num == BoundList.Size() - 1)
 			{
@@ -1428,11 +1432,11 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 		if(pSurface->Diceable())
 		{
 			//Cull surface if it's hidden
-			if(OcclusionCullSurface(iBucket, pSurface))
-			{
-				pSurface=Bucket.pTopSurface();
-				continue;
-			}
+//			if(OcclusionCullSurface(iBucket, pSurface))
+//			{
+//				pSurface=Bucket.pTopSurface();
+//				continue;
+//			}
 
 			CqMicroPolyGridBase* pGrid;
 			if((pGrid=pSurface->Dice())!=0)
