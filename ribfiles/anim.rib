@@ -18,7 +18,7 @@ LightSource "distantlight" 2 "to" [0 0 -1]
 TransformEnd
 
 FrameBegin 0
-Display "anim00.tif" "file" "rgb"
+Display "anim00.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -33,7 +33,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 1
-Display "anim01.tif" "file" "rgb"
+Display "anim01.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -48,7 +48,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 2
-Display "anim02.tif" "file" "rgb"
+Display "anim02.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -63,7 +63,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 3
-Display "anim03.tif" "file" "rgb"
+Display "anim03.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -78,7 +78,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 4
-Display "anim04.tif" "file" "rgb"
+Display "anim04.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -93,7 +93,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 5
-Display "anim05.tif" "file" "rgb"
+Display "anim05.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -108,7 +108,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 6
-Display "anim06.tif" "file" "rgb"
+Display "anim06.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -123,7 +123,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 7
-Display "anim07.tif" "file" "rgb"
+Display "anim07.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -138,7 +138,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 8
-Display "anim08.tif" "file" "rgb"
+Display "anim08.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -153,7 +153,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 9
-Display "anim09.tif" "file" "rgb"
+Display "anim09.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -168,7 +168,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 10
-Display "anim10.tif" "file" "rgb"
+Display "anim10.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -183,7 +183,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 11
-Display "anim11.tif" "file" "rgb"
+Display "anim11.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -198,7 +198,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 12
-Display "anim12.tif" "file" "rgb"
+Display "anim12.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -213,7 +213,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 13
-Display "anim13.tif" "file" "rgb"
+Display "anim13.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -228,7 +228,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 14
-Display "anim14.tif" "file" "rgb"
+Display "anim14.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -243,7 +243,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 15
-Display "anim15.tif" "file" "rgb"
+Display "anim15.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -258,7 +258,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 16
-Display "anim16.tif" "file" "rgb"
+Display "anim16.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -273,7 +273,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 17
-Display "anim17.tif" "file" "rgb"
+Display "anim17.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -288,7 +288,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 18
-Display "anim18.tif" "file" "rgb"
+Display "anim18.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -303,7 +303,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 19
-Display "anim19.tif" "file" "rgb"
+Display "anim19.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -318,7 +318,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 20
-Display "anim20.tif" "file" "rgb"
+Display "anim20.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -333,7 +333,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 21
-Display "anim21.tif" "file" "rgb"
+Display "anim21.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -348,7 +348,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 22
-Display "anim22.tif" "file" "rgb"
+Display "anim22.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -363,7 +363,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 23
-Display "anim23.tif" "file" "rgb"
+Display "anim23.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -378,7 +378,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 24
-Display "anim24.tif" "file" "rgb"
+Display "anim24.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -393,7 +393,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 25
-Display "anim25.tif" "file" "rgb"
+Display "anim25.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -408,7 +408,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 26
-Display "anim26.tif" "file" "rgb"
+Display "anim26.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -423,7 +423,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 27
-Display "anim27.tif" "file" "rgb"
+Display "anim27.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -438,7 +438,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 28
-Display "anim28.tif" "file" "rgb"
+Display "anim28.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -453,7 +453,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 29
-Display "anim29.tif" "file" "rgb"
+Display "anim29.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -468,7 +468,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 30
-Display "anim30.tif" "file" "rgb"
+Display "anim30.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -483,7 +483,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 31
-Display "anim31.tif" "file" "rgb"
+Display "anim31.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -498,7 +498,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 32
-Display "anim32.tif" "file" "rgb"
+Display "anim32.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -513,7 +513,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 33
-Display "anim33.tif" "file" "rgb"
+Display "anim33.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -528,7 +528,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 34
-Display "anim34.tif" "file" "rgb"
+Display "anim34.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -543,7 +543,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 35
-Display "anim35.tif" "file" "rgb"
+Display "anim35.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -558,7 +558,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 36
-Display "anim36.tif" "file" "rgb"
+Display "anim36.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -573,7 +573,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 37
-Display "anim37.tif" "file" "rgb"
+Display "anim37.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -588,7 +588,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 38
-Display "anim38.tif" "file" "rgb"
+Display "anim38.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -603,7 +603,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 39
-Display "anim39.tif" "file" "rgb"
+Display "anim39.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -618,7 +618,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 40
-Display "anim40.tif" "file" "rgb"
+Display "anim40.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -633,7 +633,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 41
-Display "anim41.tif" "file" "rgb"
+Display "anim41.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -648,7 +648,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 42
-Display "anim42.tif" "file" "rgb"
+Display "anim42.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -663,7 +663,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 43
-Display "anim43.tif" "file" "rgb"
+Display "anim43.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -678,7 +678,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 44
-Display "anim44.tif" "file" "rgb"
+Display "anim44.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -693,7 +693,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 45
-Display "anim45.tif" "file" "rgb"
+Display "anim45.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -708,7 +708,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 46
-Display "anim46.tif" "file" "rgb"
+Display "anim46.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -723,7 +723,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 47
-Display "anim47.tif" "file" "rgb"
+Display "anim47.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -738,7 +738,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 48
-Display "anim48.tif" "file" "rgb"
+Display "anim48.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface
@@ -753,7 +753,7 @@ AttributeEnd
 WorldEnd
 FrameEnd
 FrameBegin 49
-Display "anim49.tif" "file" "rgb"
+Display "anim49.tif" "file" "rgba"
 
 WorldBegin
 # Default-Surface

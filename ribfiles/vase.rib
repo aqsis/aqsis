@@ -6,7 +6,9 @@
 Option "searchpath" "shader" ["./:&"]
 Option "searchpath" "texture" ["./:&"]
 
-Display "vase.tif" "framebuffer" "rgb"
+Display "vase.tif" "file" "rgba"
+Display "+vase.tif" "framebuffer" "rgba"
+
 Format 256 192 1
 #Format 512 384 1
 PixelSamples 2 2

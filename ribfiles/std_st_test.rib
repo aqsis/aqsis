@@ -1,5 +1,6 @@
 version 3.03
 Display "std_st_test.tif" "file" "rgba"
+Display "+std_st_test.tif" "framebuffer" "rgba"
 Format 200 150 1
 ShadingRate 2
 

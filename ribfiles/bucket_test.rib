@@ -2,7 +2,8 @@ version 3.03
 ShadingRate 2
 PixelSamples 1 1
 Format 200 150 -1
-Display "bucket_test.tif" "file" "rgb"
+Display "bucket_test.tif" "file" "rgba"
+Display "+bucket_test.tif" "framebuffer" "rgba"
 
 Projection "perspective" "fov" 20
 Rotate -90 1 0 0

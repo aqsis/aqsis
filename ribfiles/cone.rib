@@ -5,7 +5,9 @@ ShadingRate 1.0
 Option "statistics" "endofframe" [1]
 
 FrameBegin 0
-Display "cone.tif" "framebuffer" "rgb"
+
+Display "cone.tif" "file" "rgba"
+Display "+cone.tif" "framebuffer" "rgba"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [36.0]

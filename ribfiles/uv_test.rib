@@ -1,5 +1,6 @@
 version 3.03
 Display "uv_test.tif" "file" "rgba"
+Display "+uv_test.tif" "framebuffer" "rgba"
 Format 640 480 1
 ShadingRate 2
 PixelSamples 2 2

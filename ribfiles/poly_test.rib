@@ -1,5 +1,8 @@
 version 3.03
+
 Display "poly_test.tif" "file" "rgba"
+Display "+poly_test.tif" "framebuffer" "rgba"
+
 Format 200 150 1
 ShadingRate 2
 

@@ -1,5 +1,7 @@
 version 3.03
 Display "colpervertex_test.tif" "file" "rgba"
+Display "+colpervertex_test.tif" "framebuffer" "rgba"
+
 Format 200 150 1
 ShadingRate 2
 

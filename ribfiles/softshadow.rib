@@ -6,6 +6,7 @@ Option "shadow" "bias" [0.3]
 
 # Output Z data only
 Display "shadow.z" "zfile" "z"
+Display "+shadow.z" "framebufferz" "z"
 
 Clipping 0.0001 10
 
@@ -37,6 +38,7 @@ MakeShadow "shadow.z" "shadow.map"
 #
 #
 Display "shadtest.tif" "file" "rgba"
+Display "+shadtest.tif" "framebuffer" "rgba"
 Format 200 150 1
 
 PixelSamples 2 2

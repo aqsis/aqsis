@@ -2,6 +2,8 @@
 version 3.03
 
 Display "simple.tif" "file" "rgba"
+Display "+simple.tif" "framebuffer" "rgba"
+
 Format 320 240 1
 Option "statistics" "endofframe" [1]
 

@@ -3,6 +3,8 @@ version 3.03
 Option "limits" "eyesplits" [10]
 
 Display "noshadows.tif" "file" "rgba"
+Display "+noshadows.tif" "framebuffer" "rgba"
+
 Format 200 150 1
 
 ShadingRate 1

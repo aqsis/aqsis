@@ -5,7 +5,8 @@ ShadingRate 1.0
 Option "statistics" "endofframe" [1]
 
 FrameBegin 0
-Display "teapot.tif" "framebuffer" "rgb"
+Display "teapot.tif" "file" "rgba"
+Display "+teapot.tif" "framebuffer" "rgba"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [36.0]

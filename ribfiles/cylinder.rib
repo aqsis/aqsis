@@ -5,7 +5,9 @@ ShadingRate 1.0
 Option "statistics" "endofframe" [1]
 
 FrameBegin 0
-Display "cylinder.tif" "framebuffer" "rgb"
+
+Display "cylinder.tif" "file" "rgba"
+Display "+cylinder.tif" "framebuffer" "rgba"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [36.0]

@@ -5,7 +5,9 @@ ShadingRate 1.0
 Option "statistics" "endofframe" [1]
 
 FrameBegin 0
-Display "nurbs.tif" "framebuffer" "rgb"
+
+Display "nurbs.tif" "file" "rgba"
+Display "+nurbs.tif" "framebuffer" "rgba"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [30.0]

@@ -1,4 +1,6 @@
 Display "persptest.tif" "file" "rgba"
+Display "+persptest.tif" "framebuffer" "rgba"
+
 ScreenWindow -1 2 -1 1
 Format 200 150 1
 Projection "perspective" "fov" [ 90 ]

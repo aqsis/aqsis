@@ -7,7 +7,9 @@ ShadingRate 1.0
 Option "statistics" "endofframe" [1]
 
 FrameBegin 2
-Display "mblur2a.tif" "framebuffer" "rgb"
+
+Display "mblur2a.tif" "file" "rgba"
+Display "+mblur2a.tif" "framebuffer" "rgba"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [45.0]

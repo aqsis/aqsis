@@ -5,7 +5,8 @@ ShadingRate 1.0
 Option "statistics" "endofframe" [1]
 
 FrameBegin 0
-Display "sphere.tif" "framebuffer" "rgb"
+Display "sphere.tif" "file" "rgba"
+Display "+sphere.tif" "framebuffer" "rgba"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [36.0]

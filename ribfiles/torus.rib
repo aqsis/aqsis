@@ -5,7 +5,9 @@ ShadingRate 1.0
 Option "statistics" "endofframe" [1]
 
 FrameBegin 0
-Display "torus.tif" "framebuffer" "rgb"
+
+Display "torus.tif" "file" "rgba"
+Display "+torus.tif" "framebuffer" "rgba"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [36.0]

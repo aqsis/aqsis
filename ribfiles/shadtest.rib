@@ -4,6 +4,7 @@ Option "limits" "eyesplits" [10]
 
 # Output Z data only
 Display "shadow.z" "zfile" "z"
+Display "+shadow.z" "zframebuffer" "z"
 
 Clipping 0.0001 10
 
@@ -40,7 +41,10 @@ MakeShadow "shadow.z" "shadow.map"
 # Now render the scene using the shadow map just calculated.
 #
 #
+
 Display "shadtest.tif" "file" "rgba"
+Display "+shadtest.tif" "framebuffer" "rgba"
+
 Format 200 150 1
 
 PixelSamples 2 2

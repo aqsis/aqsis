@@ -7,7 +7,9 @@ PixelFilter "gaussian" 2 2
 DepthOfField 1 100 970
 
 FrameBegin 0
-Display "dof.tif" "framebuffer" "rgb"
+
+Display "dof.tif" "file" "rgba"
+Display "+dof.tif" "framebuffer" "rgba"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [45.0]

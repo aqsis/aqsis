@@ -6,7 +6,9 @@ PixelFilter "gaussian" 2 2
 Option "statistics" "endofframe" [1]
 
 FrameBegin 0
-Display "mblur.tif" "framebuffer" "rgb"
+
+Display "mblur.tif" "file" "rgba"
+Display "+mblur.tif" "framebuffer" "rgba"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [35.0]

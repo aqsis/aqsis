@@ -1,5 +1,6 @@
 version 3.03
-Display "test.tif" "framebuffer" "rgba"
+Display "test.tif" "file" "rgba"
+Display "+test.tif" "framebuffer" "rgba"
 Format 200 150 1
 ShadingRate 2
 PixelSamples 1 1

@@ -4,7 +4,8 @@ PixelSamples 1 1
 ShadingRate 1.0
 
 FrameBegin 0
-Display "subdiv2.tif" "framebuffer" "rgb"
+Display "subdiv2.tif" "file" "rgba"
+Display "+subdiv2.tif" "framebuffer" "rgba"
 
 # Camera name: "Kamera01"
 Projection "perspective" "fov" [18.0]

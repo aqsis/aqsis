@@ -1,5 +1,6 @@
 version 3.03
-Display "tmap_test.tif" "file" "rgb"
+Display "tmap_test.tif" "file" "rgba"
+Display "+tmap_test.tif" "framebuffer" "rgba"
 Format 400 300 1
 PixelSamples 2 2
 PixelFilter "gaussian" 2 2

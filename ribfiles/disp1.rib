@@ -6,7 +6,9 @@ ShadingRate 1.0
 #Attribute "render" "truedisplacement" [1]
 
 FrameBegin 0
-Display "disp1.tif" "framebuffer" "rgba"
+
+Display "disp1.tif" "file" "rgba"
+Display "+disp1.tif" "framebuffer" "rgba"
 
 # Kameraname: "Kamera01"
 Projection "perspective" "fov" [39.5978]

@@ -1,5 +1,6 @@
 version 3.03
-Display "transmb_test.tif" "framebuffer" "rgb"
+Display "transmb_test.tif" "file" "rgba"
+Display "+transmb_test.tif" "framebuffer" "rgba"
 Format 200 150 1
 PixelSamples 4 4
 PixelFilter "gaussian" 3 3
