@@ -20,10 +20,11 @@ if test x$debug = xtrue ; then
   AC_DEFINE(_DEBUG,[],"Enable additional debug code.")
   DEBUG_FLAGS="-g -Wall" 
   OPT_FLAGS="-O0"
+  dnl clear default flags
+  CXXFLAGS=""
+  CFLAGS=""
 else
   AC_DEFINE(NDEBUG,[],"Disable C99 asserts.")
-  DEBUG_FLAGS="" 
-  OPT_FLAGS="-O2"
 fi
   
 AM_CONDITIONAL(DEBUG, test x$debug = xtrue)
@@ -55,6 +56,10 @@ if test x$profile = xtrue ; then
   OPT_FLAGS="-O2"
 
   LD_FLAGS="-pg"
+
+  dnl Clear default flags.
+  CXXFLAGS=""
+  CFLAGS=""
 fi
 
 AM_CONDITIONAL(PROFILE, test x$profile = xtrue)
@@ -79,14 +84,7 @@ fi
 AM_CONDITIONAL(PLUGINS, test x$plugins = xtrue)
 AC_SUBST(PLUGIN_FLAGS)
 
-dnl Note: AC_PROG_CXX sets the variable CXXFLAGS if it has not already been
-dnl       set.  In Aqsis, we seem to be using AQSIS_CXXFLAGS in place of
-dnl       this variable, so we'll unset it here.  This prevents -g -O2
-dnl       being added to *every* compile.
-CXXFLAGS=""
-CFLAGS=""
 AC_PROG_CXX
-
 AM_ENABLE_SHARED
 AC_DISABLE_STATIC
 LT_AC_PROG_SED
