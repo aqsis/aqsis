@@ -43,11 +43,11 @@ START_NAMESPACE( Aqsis )
  *  provides functions to build topology data structures from unstructured meshes.
  */
 
-class CqSubdivision2 : public CqRefCount
+class CqSubdivision2 : public CqRefCount, public CqMotionSpec<CqPolygonPoints*>
 {
 public:
 	///	Constructor.
-	CqSubdivision2( CqPolygonPoints* pPoints );
+	CqSubdivision2( CqPolygonPoints* pPoints = NULL );
 
 	///	Destructor.
 	virtual ~CqSubdivision2();
@@ -67,7 +67,10 @@ public:
 								{return(m_apLaths);}
 
 	/// Get pointer to the vertex storage class
-	CqPolygonPoints* pPoints() const	{return(m_pPoints);}
+	CqPolygonPoints* pPoints( TqInt TimeIndex = 0 ) const	
+	{
+		return(GetMotionObject( Time( TimeIndex ) ));
+	}
 
 	void		Prepare(TqInt cVerts);
 	CqLath*		AddFacet(TqInt cVerts, TqInt* pIndices);
@@ -248,6 +251,20 @@ public:
 					pParam->pValue( iIndex )[0] = Val;
 				}
 
+		// Overrides from CqMotionSpec
+		virtual	void	ClearMotionObject( CqPolygonPoints*& A ) const
+			{}
+		;
+		virtual	CqPolygonPoints* ConcatMotionObjects( CqPolygonPoints* const & A, CqPolygonPoints* const & B ) const
+		{
+			return ( A );
+		}
+		virtual	CqPolygonPoints* LinearInterpolateMotionObjects( TqFloat Fraction, CqPolygonPoints* const & A, CqPolygonPoints* const & B ) const
+		{
+			return ( A );
+		}
+
+
 	void		OutputMesh(const char* fname, std::vector<CqLath*>* paFaces = 0);
 	void		OutputInfo(const char* fname, std::vector<CqLath*>* paFaces = 0);
 private:
@@ -262,9 +279,6 @@ private:
 	std::vector<std::vector<CqLath*> >	m_aapVertices;
 	/// Array of lath pointers, one for each lath generated.
 	std::vector<CqLath*>				m_apLaths;
-
-	/// Pointer to the class which holds vertex information for the structure.
-	CqPolygonPoints*					m_pPoints;
 
 	/// Flag indicating whether the topology structures have been finalised.
 	TqBool							m_fFinalised;
@@ -342,7 +356,7 @@ class CqSurfaceSubdivisionPatch : public CqBasicSurface
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 		virtual TqBool	Diceable();
 
-		void StoreDice( CqMicroPolyGrid* pGrid, TqInt iParam, TqInt iData );
+		void StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoints* pPoints, TqInt iParam, TqInt iData );
 
 	private:
 		CqSubdivision2*	m_pTopology;

@@ -4210,12 +4210,48 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		// Create experimental version
 		if(strcmp(scheme, "catmull-clark")==0)
 		{
-			// Transform the points into camera space for processing,
-			pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
-									 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
-									 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
+			CqSubdivision2* pSubd2;
 
-			CqSubdivision2* pSubd2 = new CqSubdivision2(pPointsClass);
+			if ( QGetRenderContext() ->ptransCurrent() ->cTimes() <= 1 )
+			{
+				// Transform the points into camera space for processing,
+				pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
+										 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
+										 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
+
+				pSubd2 = new CqSubdivision2(pPointsClass);
+			}
+			else
+			{
+				TqInt i;
+				apPoints.push_back( pPointsClass );
+				for ( i = 1; i < QGetRenderContext() ->ptransCurrent() ->cTimes(); i++ )
+				{
+					RtFloat time = QGetRenderContext() ->ptransCurrent() ->Time( i );
+					CqPolygonPoints* pPointsClass2 = new CqPolygonPoints( *pPointsClass );
+					// Clone the primitive variables.
+					pPointsClass2->ClonePrimitiveVariables( *pPointsClass );
+
+					// Transform the points into camera space for processing,
+					pPointsClass2->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ),
+											  QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ),
+											  QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass2->pTransform() ->matObjectToWorld( time ), time ) );
+					apPoints.push_back( pPointsClass2 );
+				}
+				pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
+										 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
+										 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
+			
+				pSubd2 = new CqSubdivision2();
+				
+				for ( i = 0; i < QGetRenderContext() ->ptransCurrent() ->cTimes(); i++ )
+				{
+					RtFloat time = QGetRenderContext() ->ptransCurrent() ->Time( i );
+					pSubd2->AddTimeSlot( time, apPoints[ i ] );
+					apPoints[ i ] ->AddRef();
+				}
+			}
+
 			pSubd2->Prepare(cVerts);
 
 			RtInt	iP = 0;

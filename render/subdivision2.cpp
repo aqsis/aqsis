@@ -31,17 +31,21 @@
 
 START_NAMESPACE( Aqsis )
 
+
 //------------------------------------------------------------------------------
 /**
  *	Constructor.
  */
 
-CqSubdivision2::CqSubdivision2( CqPolygonPoints* pPoints ) : m_fFinalised(TqFalse)
+CqSubdivision2::CqSubdivision2( CqPolygonPoints* pPoints ) : m_fFinalised(TqFalse),
+	CqMotionSpec<CqPolygonPoints*>(pPoints)
 {
-	assert(NULL != pPoints);
-	// Store the reference to our points.
-	m_pPoints = pPoints;
-	m_pPoints->AddRef();
+	if( pPoints )
+	{
+		// Store the reference to our points.
+		pPoints->AddRef();
+		AddTimeSlot( 0, pPoints );
+	}
 }
 
 
@@ -52,13 +56,14 @@ CqSubdivision2::CqSubdivision2( CqPolygonPoints* pPoints ) : m_fFinalised(TqFals
 
 CqSubdivision2::~CqSubdivision2()
 {
-	assert(NULL != m_pPoints);
 	// Delete the array of laths generated during the facet adding phase.
 	for(std::vector<CqLath*>::const_iterator iLath=apLaths().begin(); iLath!=apLaths().end(); iLath++)
 		if(*iLath)	delete(*iLath);
 
 	// Release the reference to our points.
-	m_pPoints->Release();
+	TqInt i;
+	for ( i = 0; i < cTimes(); i++ )
+		GetMotionObject( Time( i ) ) ->Release();
 }
 
 
@@ -126,65 +131,70 @@ TqInt CqSubdivision2::AddVertex(CqLath* pVertex)
 	TqInt iIndex;
 
 	std::vector<CqParameter*>::iterator iUP;
-	for ( iUP = pPoints()->aUserParams().begin(); iUP != pPoints()->aUserParams().end(); iUP++ )
+	TqInt iTime;
+
+	for( iTime = 0; iTime < cTimes(); iTime++ )
 	{
-		iIndex = ( *iUP )->Size();
-		( *iUP )->SetSize( iIndex+1 );
-
-		switch ( ( *iUP )->Type() )
+		for( iUP = pPoints( iTime )->aUserParams().begin(); iUP != pPoints( iTime )->aUserParams().end(); iUP++ )
 		{
-				case type_float:
-				{
-					CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
-					CreateVertex( pParam, pVertex, iIndex );
-				}
-				break;
+			iIndex = ( *iUP )->Size();
+			( *iUP )->SetSize( iIndex+1 );
 
-				case type_integer:
-				{
-					CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
-					CreateVertex( pParam, pVertex, iIndex );
-				}
-				break;
+			switch ( ( *iUP )->Type() )
+			{
+					case type_float:
+					{
+						CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
+						CreateVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_point:
-				case type_normal:
-				case type_vector:
-				{
-					CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-					CreateVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_integer:
+					{
+						CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
+						CreateVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_color:
-				{
-					CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
-					CreateVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_point:
+					case type_normal:
+					case type_vector:
+					{
+						CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
+						CreateVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_hpoint:
-				{
-					CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
-					CreateVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_color:
+					{
+						CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
+						CreateVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_string:
-				{
-					//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
-					//CreateVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_hpoint:
+					{
+						CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
+						CreateVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_matrix:
-				{
-					//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
-					//CreateVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_string:
+					{
+						//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
+						//CreateVertex( pParam, pVertex, iIndex );
+					}
+					break;
+
+					case type_matrix:
+					{
+						//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
+						//CreateVertex( pParam, pVertex, iIndex );
+					}
+					break;
+			}
+
 		}
-
 	}
 
 	// Resize the vertex lath 
@@ -207,65 +217,70 @@ TqInt CqSubdivision2::AddEdgeVertex(CqLath* pVertex)
 	TqInt iIndex;
 
 	std::vector<CqParameter*>::iterator iUP;
-	for ( iUP = pPoints()->aUserParams().begin(); iUP != pPoints()->aUserParams().end(); iUP++ )
+	TqInt iTime;
+
+	for( iTime = 0; iTime < cTimes(); iTime ++ )
 	{
-		iIndex = ( *iUP )->Size();
-		( *iUP )->SetSize( iIndex+1 );
-
-		switch ( ( *iUP )->Type() )
+		for ( iUP = pPoints( iTime )->aUserParams().begin(); iUP != pPoints( iTime )->aUserParams().end(); iUP++ )
 		{
-				case type_float:
-				{
-					CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
-					CreateEdgeVertex( pParam, pVertex, iIndex );
-				}
-				break;
+			iIndex = ( *iUP )->Size();
+			( *iUP )->SetSize( iIndex+1 );
 
-				case type_integer:
-				{
-					CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
-					CreateEdgeVertex( pParam, pVertex, iIndex );
-				}
-				break;
+			switch ( ( *iUP )->Type() )
+			{
+					case type_float:
+					{
+						CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
+						CreateEdgeVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_point:
-				case type_normal:
-				case type_vector:
-				{
-					CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-					CreateEdgeVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_integer:
+					{
+						CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
+						CreateEdgeVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_color:
-				{
-					CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
-					CreateEdgeVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_point:
+					case type_normal:
+					case type_vector:
+					{
+						CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
+						CreateEdgeVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_hpoint:
-				{
-					CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
-					CreateEdgeVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_color:
+					{
+						CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
+						CreateEdgeVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_string:
-				{
-					//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
-					//CreateEdgeVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_hpoint:
+					{
+						CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
+						CreateEdgeVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_matrix:
-				{
-					//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
-					//CreateEdgeVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_string:
+					{
+						//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
+						//CreateEdgeVertex( pParam, pVertex, iIndex );
+					}
+					break;
+
+					case type_matrix:
+					{
+						//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
+						//CreateEdgeVertex( pParam, pVertex, iIndex );
+					}
+					break;
+			}
+
 		}
-
 	}
 
 	// Resize the vertex lath 
@@ -288,65 +303,70 @@ TqInt CqSubdivision2::AddFaceVertex(CqLath* pVertex)
 	TqInt iIndex;
 
 	std::vector<CqParameter*>::iterator iUP;
-	for ( iUP = pPoints()->aUserParams().begin(); iUP != pPoints()->aUserParams().end(); iUP++ )
+	TqInt iTime;
+
+	for( iTime = 0; iTime < cTimes(); iTime++ )
 	{
-		iIndex = ( *iUP )->Size();
-		( *iUP )->SetSize( iIndex+1 );
-
-		switch ( ( *iUP )->Type() )
+		for ( iUP = pPoints( iTime )->aUserParams().begin(); iUP != pPoints( iTime )->aUserParams().end(); iUP++ )
 		{
-				case type_float:
-				{
-					CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
-					CreateFaceVertex( pParam, pVertex, iIndex );
-				}
-				break;
+			iIndex = ( *iUP )->Size();
+			( *iUP )->SetSize( iIndex+1 );
 
-				case type_integer:
-				{
-					CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
-					CreateFaceVertex( pParam, pVertex, iIndex );
-				}
-				break;
+			switch ( ( *iUP )->Type() )
+			{
+					case type_float:
+					{
+						CqParameterTyped<TqFloat, TqFloat>* pParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( ( *iUP ) );
+						CreateFaceVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_point:
-				case type_normal:
-				case type_vector:
-				{
-					CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
-					CreateFaceVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_integer:
+					{
+						CqParameterTyped<TqInt, TqFloat>* pParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
+						CreateFaceVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_color:
-				{
-					CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
-					CreateFaceVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_point:
+					case type_normal:
+					case type_vector:
+					{
+						CqParameterTyped<CqVector3D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( ( *iUP ) );
+						CreateFaceVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_hpoint:
-				{
-					CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
-					CreateFaceVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_color:
+					{
+						CqParameterTyped<CqColor, CqColor>* pParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( ( *iUP ) );
+						CreateFaceVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_string:
-				{
-					//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
-					//CreateFaceVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_hpoint:
+					{
+						CqParameterTyped<CqVector4D, CqVector3D>* pParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( ( *iUP ) );
+						CreateFaceVertex( pParam, pVertex, iIndex );
+					}
+					break;
 
-				case type_matrix:
-				{
-					//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
-					//CreateFaceVertex( pParam, pVertex, iIndex );
-				}
-				break;
+					case type_string:
+					{
+						//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
+						//CreateFaceVertex( pParam, pVertex, iIndex );
+					}
+					break;
+
+					case type_matrix:
+					{
+						//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
+						//CreateFaceVertex( pParam, pVertex, iIndex );
+					}
+					break;
+			}
+
 		}
-
 	}
 
 	// Resize the vertex lath 
@@ -803,7 +823,11 @@ CqBound	CqSurfaceSubdivisionPatch::Bound() const
 		// Now get the vertices, and form the bound.
 		std::vector<CqLath*>::iterator iQfv;
 		for( iQfv = aQfv.begin(); iQfv != aQfv.end(); iQfv++ )
-			B.Encapsulate(pTopology()->pPoints()->P()->pValue((*iQfv)->VertexIndex())[0]);
+		{
+			TqInt iTime;
+			for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
+				B.Encapsulate(pTopology()->pPoints( iTime )->P()->pValue((*iQfv)->VertexIndex())[0]);
+		}
 	}
 
 	return(B);
@@ -824,108 +848,126 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 	TqInt dicesize = MAX(m_uDiceSize, m_vDiceSize);
 	TqInt sdcount = ( dicesize == 16 ) ? 4 : ( dicesize == 8 ) ? 3 : ( dicesize == 4 ) ? 2 : ( dicesize == 2 ) ? 1 : 1;
 	dicesize = 1 << sdcount;
+	TqInt lUses = Uses();
 
-	CqMicroPolyGrid* pGrid = new CqMicroPolyGrid( dicesize, dicesize, pTopology()->pPoints() );
+	std::vector<CqMicroPolyGrid*> apGrids;
 
-	TqInt isd;
-	std::vector<CqLath*> apSubFace1, apSubFace2;
-	apSubFace1.push_back(pFace());
-	for( isd = 0; isd < sdcount; isd++ )
+	TqInt iTime;
+	for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
 	{
-		apSubFace2.clear();
-		std::vector<CqLath*>::iterator iSF;
-		for( iSF = apSubFace1.begin(); iSF != apSubFace1.end(); iSF++ )
+		CqMicroPolyGrid* pGrid = new CqMicroPolyGrid( dicesize, dicesize, pTopology()->pPoints() );
+
+		CqPolygonPoints* pMotionPoints = pTopology()->pPoints( iTime );
+
+		TqInt isd;
+		std::vector<CqLath*> apSubFace1, apSubFace2;
+		apSubFace1.push_back(pFace());
+		for( isd = 0; isd < sdcount; isd++ )
 		{
-			// Subdivide this face, storing the resulting new face indices.
-			std::vector<CqLath*> apSubFaceTemp;
-			pTopology()->SubdivideFace( (*iSF), apSubFaceTemp );
-			// Now combine these into the new face indices for this subdivision level.
-			apSubFace2.insert(apSubFace2.end(), apSubFaceTemp.begin(), apSubFaceTemp.end());
+			apSubFace2.clear();
+			std::vector<CqLath*>::iterator iSF;
+			for( iSF = apSubFace1.begin(); iSF != apSubFace1.end(); iSF++ )
+			{
+				// Subdivide this face, storing the resulting new face indices.
+				std::vector<CqLath*> apSubFaceTemp;
+				pTopology()->SubdivideFace( (*iSF), apSubFaceTemp );
+				// Now combine these into the new face indices for this subdivision level.
+				apSubFace2.insert(apSubFace2.end(), apSubFaceTemp.begin(), apSubFaceTemp.end());
+			}
+			// Now swap the new level's indices for the old before repeating at the next level, if appropriate.
+			apSubFace1.swap(apSubFace2);
 		}
-		// Now swap the new level's indices for the old before repeating at the next level, if appropriate.
-		apSubFace1.swap(apSubFace2);
-	}
 
-	// Now we use the first face index to start our extraction
-	TqInt nc, nr, c, r;
-	nc = nr = MAX(m_uDiceSize, m_vDiceSize);
-	r = 0;
+		// Now we use the first face index to start our extraction
+		TqInt nc, nr, c, r;
+		nc = nr = MAX(m_uDiceSize, m_vDiceSize);
+		r = 0;
 
-	CqLath* pLath, *pTemp;
-	pLath = apSubFace1[0];
-	pTemp = pLath;
-
-	// Get data from pLath
-	TqInt ivA = pLath->VertexIndex();
-	TqInt indexA = 0;
-	
-	StoreDice( pGrid, ivA, indexA );
-
-	indexA++;		
-	pLath = pLath->ccf();
-	c = 0;
-	while( c < nc )
-	{
-		TqInt ivA = pLath->VertexIndex();
-		StoreDice( pGrid, ivA, indexA );
-
-		if( c < ( nc - 1 ) )	
-			pLath = pLath->cv()->ccf();
-		
-		indexA++;
-		c++;
-	}
-	r++;
-
-	while( r <= nr )
-	{
-		pLath = pTemp->cf();
-		if( r < nr )
-			pTemp = pLath->ccv();
+		CqLath* pLath, *pTemp;
+		pLath = apSubFace1[0];
+		pTemp = pLath;
 
 		// Get data from pLath
 		TqInt ivA = pLath->VertexIndex();
-		TqInt indexA = ( r * ( nc + 1 ) );
-		StoreDice( pGrid, ivA, indexA );
+		TqInt indexA = 0;
+		
+		StoreDice( pGrid, pMotionPoints, ivA, indexA );
 
 		indexA++;		
-		pLath = pLath->cf();
+		pLath = pLath->ccf();
 		c = 0;
 		while( c < nc )
 		{
 			TqInt ivA = pLath->VertexIndex();
-			StoreDice( pGrid, ivA, indexA );
+			StoreDice( pGrid, pMotionPoints, ivA, indexA );
 
 			if( c < ( nc - 1 ) )	
-				pLath = pLath->ccv()->cf();
+				pLath = pLath->cv()->ccf();
 			
 			indexA++;
 			c++;
 		}
-
 		r++;
+
+		while( r <= nr )
+		{
+			pLath = pTemp->cf();
+			if( r < nr )
+				pTemp = pLath->ccv();
+
+			// Get data from pLath
+			TqInt ivA = pLath->VertexIndex();
+			TqInt indexA = ( r * ( nc + 1 ) );
+			StoreDice( pGrid, pMotionPoints, ivA, indexA );
+
+			indexA++;		
+			pLath = pLath->cf();
+			c = 0;
+			while( c < nc )
+			{
+				TqInt ivA = pLath->VertexIndex();
+				StoreDice( pGrid, pMotionPoints, ivA, indexA );
+
+				if( c < ( nc - 1 ) )	
+					pLath = pLath->ccv()->cf();
+				
+				indexA++;
+				c++;
+			}
+
+			r++;
+		}
+
+
+		// If the color and opacity are not defined, use the system values.
+		if ( USES( lUses, EnvVars_Cs ) && !pTopology()->pPoints()->bHasCs() )
+		{
+			if ( NULL != pAttributes() ->GetColorAttribute( "System", "Color" ) )
+				pGrid->Cs() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
+			else
+				pGrid->Cs() ->SetColor( CqColor( 1, 1, 1 ) );
+		}
+
+		if ( USES( lUses, EnvVars_Os ) && !pTopology()->pPoints()->bHasOs() )
+		{
+			if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
+				pGrid->Os() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
+			else
+				pGrid->Os() ->SetColor( CqColor( 1, 1, 1 ) );
+		}
+		apGrids.push_back( pGrid );
 	}
 
-	TqInt lUses = Uses();
-
-	// If the color and opacity are not defined, use the system values.
-	if ( USES( lUses, EnvVars_Cs ) && !pTopology()->pPoints()->bHasCs() )
+	if( apGrids.size() == 1 )
+		return( apGrids[ 0 ] );
+	else
 	{
-		if ( NULL != pAttributes() ->GetColorAttribute( "System", "Color" ) )
-			pGrid->Cs() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Color" ) [ 0 ] );
-		else
-			pGrid->Cs() ->SetColor( CqColor( 1, 1, 1 ) );
+		CqMotionMicroPolyGrid * pGrid = new CqMotionMicroPolyGrid;
+		TqInt i;
+		for ( i = 0; i < pTopology()->cTimes(); i++ )
+			pGrid->AddTimeSlot( pTopology()->Time( i ), apGrids[ i ] );
+		return( pGrid );
 	}
-
-	if ( USES( lUses, EnvVars_Os ) && !pTopology()->pPoints()->bHasOs() )
-	{
-		if ( NULL != pAttributes() ->GetColorAttribute( "System", "Opacity" ) )
-			pGrid->Os() ->SetColor( pAttributes() ->GetColorAttribute( "System", "Opacity" ) [ 0 ] );
-		else
-			pGrid->Os() ->SetColor( CqColor( 1, 1, 1 ) );
-	}
-
-	return( pGrid );
 }
 
 
@@ -938,103 +980,103 @@ static void StoreDiceAPVar( IqShader* pShader, CqParameter* pParam, TqUint ivA, 
 	{
 		switch ( pParam->Type() )
 		{
-				case type_float:
-				{
-					CqParameterTyped<TqFloat, TqFloat>* pNParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
-					pArg->SetValue( *pNParam->pValue( ivA ), indexA );
-				}
-				break;
+			case type_float:
+			{
+				CqParameterTyped<TqFloat, TqFloat>* pNParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
+				pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+			}
+			break;
 
-				case type_integer:
-				{
-					CqParameterTyped<TqInt, TqFloat>* pNParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
-					pArg->SetValue( *pNParam->pValue( ivA ), indexA );
-				}
-				break;
+			case type_integer:
+			{
+				CqParameterTyped<TqInt, TqFloat>* pNParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
+				pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+			}
+			break;
 
-				case type_point:
-				case type_vector:
-				case type_normal:
-				{
-					CqParameterTyped<CqVector3D, CqVector3D>* pNParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
-					pArg->SetValue( *pNParam->pValue( ivA ), indexA );
-				}
-				break;
+			case type_point:
+			case type_vector:
+			case type_normal:
+			{
+				CqParameterTyped<CqVector3D, CqVector3D>* pNParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
+				pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+			}
+			break;
 
-				case type_hpoint:
-				{
-					CqParameterTyped<CqVector4D, CqVector3D>* pNParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
-					pArg->SetValue( *pNParam->pValue( ivA ), indexA );
-				}
-				break;
+			case type_hpoint:
+			{
+				CqParameterTyped<CqVector4D, CqVector3D>* pNParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
+				pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+			}
+			break;
 
-				case type_string:
-				{
-					CqParameterTyped<CqString, CqString>* pNParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
-					pArg->SetValue( *pNParam->pValue( ivA ), indexA );
-				}
-				break;
+			case type_string:
+			{
+				CqParameterTyped<CqString, CqString>* pNParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
+				pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+			}
+			break;
 
-				case type_color:
-				{
-					CqParameterTyped<CqColor, CqColor>* pNParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
-					pArg->SetValue( *pNParam->pValue( ivA ), indexA );
-				}
-				break;
+			case type_color:
+			{
+				CqParameterTyped<CqColor, CqColor>* pNParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
+				pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+			}
+			break;
 
-				case type_matrix:
-				{
-					CqParameterTyped<CqMatrix, CqMatrix>* pNParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
-					pArg->SetValue( *pNParam->pValue( ivA ), indexA );
-				}
-				break;
+			case type_matrix:
+			{
+				CqParameterTyped<CqMatrix, CqMatrix>* pNParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
+				pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+			}
+			break;
 		}
 	}
 }
 
 
-void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, TqInt iParam, TqInt iData )
+void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoints* pPoints, TqInt iParam, TqInt iData )
 {
 	TqInt lUses = Uses();
 	
 	if ( USES( lUses, EnvVars_P ) )
-		pGrid->P() ->SetPoint( ( *pTopology()->pPoints()->P() ) [ iParam ], iData );
+		pGrid->P() ->SetPoint( ( *pPoints->P() ) [ iParam ], iData );
 
 	if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) )
 	{
-		if( pTopology()->pPoints()->bHass() )
-			pGrid->s() ->SetFloat( ( *pTopology()->pPoints()->s() ) [ iParam ], iData );
+		if( pPoints->bHass() )
+			pGrid->s() ->SetFloat( ( *pPoints->s() ) [ iParam ], iData );
 		else
-			pGrid->s() ->SetFloat( ( *pTopology()->pPoints()->P() ) [ iParam ].x(), iData );
+			pGrid->s() ->SetFloat( ( *pPoints->P() ) [ iParam ].x(), iData );
 	}
 
 	if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) )
 	{
-		if( pTopology()->pPoints()->bHast() )
-			pGrid->t() ->SetFloat( ( *pTopology()->pPoints()->t() ) [ iParam ], iData );
+		if( pPoints->bHast() )
+			pGrid->t() ->SetFloat( ( *pPoints->t() ) [ iParam ], iData );
 		else
-			pGrid->t() ->SetFloat( ( *pTopology()->pPoints()->P() ) [ iParam ].y(), iData );
+			pGrid->t() ->SetFloat( ( *pPoints->P() ) [ iParam ].y(), iData );
 	}
 
 	if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) )
 	{
-		if( pTopology()->pPoints()->bHasu() )
-			pGrid->u() ->SetFloat( ( *pTopology()->pPoints()->u() ) [ iParam ], iData );
+		if( pPoints->bHasu() )
+			pGrid->u() ->SetFloat( ( *pPoints->u() ) [ iParam ], iData );
 		else
-			pGrid->u() ->SetFloat( ( *pTopology()->pPoints()->P() ) [ iParam ].y(), iData );
+			pGrid->u() ->SetFloat( ( *pPoints->P() ) [ iParam ].x(), iData );
 	}
 
 	if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) )
 	{
-		if( pTopology()->pPoints()->bHasv() )
-			pGrid->v() ->SetFloat( ( *pTopology()->pPoints()->v() ) [ iParam ], iData );
+		if( pPoints->bHasv() )
+			pGrid->v() ->SetFloat( ( *pPoints->v() ) [ iParam ], iData );
 		else
-			pGrid->v() ->SetFloat( ( *pTopology()->pPoints()->P() ) [ iParam ].y(), iData );
+			pGrid->v() ->SetFloat( ( *pPoints->P() ) [ iParam ].y(), iData );
 	}
 
 	// Now lets store the diced user specified primitive variables.
 	std::vector<CqParameter*>::iterator iUP;
-	for ( iUP = pTopology()->pPoints()->aUserParams().begin(); iUP != pTopology()->pPoints()->aUserParams().end(); iUP++ )
+	for ( iUP = pPoints->aUserParams().begin(); iUP != pPoints->aUserParams().end(); iUP++ )
 	{
 		/// \todo: Must transform point/vector/normal/matrix parameter variables from 'object' space to current before setting.
 		if ( NULL != pGrid->pAttributes() ->pshadSurface() )
@@ -1058,12 +1100,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	if( pTopology()->CanUsePatch( pFace() ) )
 	{
-		// Create a surface patch
-		CqSurfacePatchBicubic * pSurface = new CqSurfacePatchBicubic();
-		pSurface->AddRef();
-		// Fill in default values for all primitive variables not explicitly specified.
-		pSurface->SetSurfaceParameters( *pTopology()->pPoints() );
-
+		// Find the point indices for the 16 patch vertices.
 		CqLath* pPoint = pFace()->cv()->cv()->cf()->cf();
 		CqLath* pRow = pPoint;
 
@@ -1101,127 +1138,150 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 		pPoint = pPoint->ccv()->cf();
 		aiVertices.push_back( pPoint->VertexIndex() );
 
-		std::vector<CqParameter*>::iterator iUP;
-		std::vector<CqParameter*>::iterator end = pTopology()->pPoints()->aUserParams().end();
-		for ( iUP = pTopology()->pPoints()->aUserParams().begin(); iUP != end; iUP++ )
+		std::vector< CqSurfacePatchBicubic* > apSurfaces;
+
+		TqInt iTime;
+
+		for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
 		{
-			if ( ( *iUP ) ->Class() == class_varying )
+			// Create a surface patch
+			CqSurfacePatchBicubic * pSurface = new CqSurfacePatchBicubic();
+			pSurface->AddRef();
+			// Fill in default values for all primitive variables not explicitly specified.
+			pSurface->SetSurfaceParameters( *pTopology()->pPoints( iTime ) );
+
+			std::vector<CqParameter*>::iterator iUP;
+			std::vector<CqParameter*>::iterator end = pTopology()->pPoints( iTime)->aUserParams().end();
+			for ( iUP = pTopology()->pPoints( iTime )->aUserParams().begin(); iUP != end; iUP++ )
 			{
-				// Copy any 'varying' class primitive variables.
-				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
-				pNewUP->SetSize( pSurface->cVarying() );
-				pNewUP->SetValue( ( *iUP ), 0, aiVertices[5] );
-				pNewUP->SetValue( ( *iUP ), 1, aiVertices[6] );
-				pNewUP->SetValue( ( *iUP ), 2, aiVertices[9] );
-				pNewUP->SetValue( ( *iUP ), 3, aiVertices[10] );
-				pSurface->AddPrimitiveVariable( pNewUP );
+				if ( ( *iUP ) ->Class() == class_varying )
+				{
+					// Copy any 'varying' class primitive variables.
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+					pNewUP->SetSize( pSurface->cVarying() );
+					pNewUP->SetValue( ( *iUP ), 0, aiVertices[5] );
+					pNewUP->SetValue( ( *iUP ), 1, aiVertices[6] );
+					pNewUP->SetValue( ( *iUP ), 2, aiVertices[9] );
+					pNewUP->SetValue( ( *iUP ), 3, aiVertices[10] );
+					pSurface->AddPrimitiveVariable( pNewUP );
+				}
+				else if ( ( *iUP ) ->Class() == class_vertex )
+				{
+					// Copy any 'vertex' class primitive variables.
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+					pNewUP->SetSize( pSurface->cVertex() );
+					TqInt i;
+					for( i = 0; i < pSurface->cVertex(); i++ )
+						pNewUP->SetValue( ( *iUP ), i, aiVertices[i] );
+					pSurface->AddPrimitiveVariable( pNewUP );
+				}
+				else if ( ( *iUP ) ->Class() == class_uniform )
+				{
+					// Copy any 'uniform' class primitive variables.
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+					pNewUP->SetSize( pSurface->cUniform() );
+					pNewUP->SetValue( ( *iUP ), 0, 0 );
+					pSurface->AddPrimitiveVariable( pNewUP );
+				}
+				else if ( ( *iUP ) ->Class() == class_constant )
+				{
+					// Copy any 'constant' class primitive variables.
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+					pNewUP->SetSize( 1 );
+					pNewUP->SetValue( ( *iUP ), 0, 0 );
+					pSurface->AddPrimitiveVariable( pNewUP );
+				}
 			}
-			else if ( ( *iUP ) ->Class() == class_vertex )
+
+			// Need to get rid of any 'h' values added to the "P" variables during multiplication.
+			TqInt i;
+			for( i = 0; i < pSurface->cVertex(); i++ )
+				( *pSurface->P() ) [i] = static_cast<CqVector3D>( ( *pSurface->P() ) [i] );
+
+			CqMatrix matuBasis( RiBSplineBasis );
+			CqMatrix matvBasis( RiBSplineBasis );
+			pSurface->ConvertToBezierBasis( matuBasis, matvBasis );
+
+			TqInt iUses = Uses();
+
+			// If the shader needs s/t or u/v, and s/t is not specified, then at this point store the object space x,y coordinates.
+			if ( USES( iUses, EnvVars_s ) || USES( iUses, EnvVars_t ) || USES( iUses, EnvVars_u ) || USES( iUses, EnvVars_v ) )
 			{
-				// Copy any 'vertex' class primitive variables.
-				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
-				pNewUP->SetSize( pSurface->cVertex() );
-				TqInt i;
-				for( i = 0; i < pSurface->cVertex(); i++ )
-					pNewUP->SetValue( ( *iUP ), i, aiVertices[i] );
-				pSurface->AddPrimitiveVariable( pNewUP );
+				CqVector3D PA, PB, PC, PD;
+				CqMatrix matID;
+				const CqMatrix& matCurrentToWorld = QGetRenderContext() ->matSpaceToSpace( "current", "object", matID, pTopology()->pPoints()->pTransform() ->matObjectToWorld() );
+				PA = matCurrentToWorld * pSurface->P() ->pValue() [ 0 ];
+				PB = matCurrentToWorld * pSurface->P() ->pValue() [ 3 ];
+				PC = matCurrentToWorld * pSurface->P() ->pValue() [ 15 ];
+				PD = matCurrentToWorld * pSurface->P() ->pValue() [ 12 ];
+
+				if ( USES( iUses, EnvVars_s ) && !pTopology()->pPoints()->bHass() )
+				{
+					CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" );
+					pNewUP->SetSize( pSurface->cVarying() );
+
+					pNewUP->pValue() [ 0 ] = PA.x();
+					pNewUP->pValue() [ 1 ] = PB.x();
+					pNewUP->pValue() [ 2 ] = PD.x();
+					pNewUP->pValue() [ 3 ] = PC.x();
+
+					pSurface->AddPrimitiveVariable( pNewUP );
+				}
+
+				if ( USES( iUses, EnvVars_t ) && !pTopology()->pPoints()->bHast() )
+				{
+					CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" );
+					pNewUP->SetSize( pSurface->cVarying() );
+
+					pNewUP->pValue() [ 0 ] = PA.y();
+					pNewUP->pValue() [ 1 ] = PB.y();
+					pNewUP->pValue() [ 2 ] = PD.y();
+					pNewUP->pValue() [ 3 ] = PC.y();
+
+					pSurface->AddPrimitiveVariable( pNewUP );
+				}
+
+				if ( USES( iUses, EnvVars_u ) && !pTopology()->pPoints()->bHasu() )
+				{
+					CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "u" );
+					pNewUP->SetSize( pSurface->cVarying() );
+
+					pNewUP->pValue() [ 0 ] = PA.x();
+					pNewUP->pValue() [ 1 ] = PB.x();
+					pNewUP->pValue() [ 2 ] = PD.x();
+					pNewUP->pValue() [ 3 ] = PC.x();
+
+					pSurface->AddPrimitiveVariable( pNewUP );
+				}
+
+				if ( USES( iUses, EnvVars_v ) && !pTopology()->pPoints()->bHasv() )
+				{
+					CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "v" );
+					pNewUP->SetSize( pSurface->cVarying() );
+
+					pNewUP->pValue() [ 0 ] = PA.y();
+					pNewUP->pValue() [ 1 ] = PB.y();
+					pNewUP->pValue() [ 2 ] = PD.y();
+					pNewUP->pValue() [ 3 ] = PC.y();
+
+					pSurface->AddPrimitiveVariable( pNewUP );
+				}
 			}
-			else if ( ( *iUP ) ->Class() == class_uniform )
-			{
-				// Copy any 'uniform' class primitive variables.
-				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
-				pNewUP->SetSize( pSurface->cUniform() );
-				pNewUP->SetValue( ( *iUP ), 0, 0 );
-				pSurface->AddPrimitiveVariable( pNewUP );
-			}
-			else if ( ( *iUP ) ->Class() == class_constant )
-			{
-				// Copy any 'constant' class primitive variables.
-				CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
-				pNewUP->SetSize( 1 );
-				pNewUP->SetValue( ( *iUP ), 0, 0 );
-				pSurface->AddPrimitiveVariable( pNewUP );
-			}
+			apSurfaces.push_back( pSurface );
 		}
-
-		// Need to get rid of any 'h' values added to the "P" variables during multiplication.
-		TqInt i;
-		for( i = 0; i < pSurface->cVertex(); i++ )
-			( *pSurface->P() ) [i] = static_cast<CqVector3D>( ( *pSurface->P() ) [i] );
-
-		CqMatrix matuBasis( RiBSplineBasis );
-		CqMatrix matvBasis( RiBSplineBasis );
-		pSurface->ConvertToBezierBasis( matuBasis, matvBasis );
-
-		TqInt iUses = Uses();
-
-		// If the shader needs s/t or u/v, and s/t is not specified, then at this point store the object space x,y coordinates.
-		if ( USES( iUses, EnvVars_s ) || USES( iUses, EnvVars_t ) || USES( iUses, EnvVars_u ) || USES( iUses, EnvVars_v ) )
+	
+		if( apSurfaces.size() == 1 )
+			aSplits.push_back(apSurfaces[ 0 ]);
+		else
 		{
-			CqVector3D PA, PB, PC, PD;
-			CqMatrix matID;
-			const CqMatrix& matCurrentToWorld = QGetRenderContext() ->matSpaceToSpace( "current", "object", matID, pTopology()->pPoints()->pTransform() ->matObjectToWorld() );
-			PA = matCurrentToWorld * pSurface->P() ->pValue() [ 0 ];
-			PB = matCurrentToWorld * pSurface->P() ->pValue() [ 3 ];
-			PC = matCurrentToWorld * pSurface->P() ->pValue() [ 15 ];
-			PD = matCurrentToWorld * pSurface->P() ->pValue() [ 12 ];
-
-			if ( USES( iUses, EnvVars_s ) && !pTopology()->pPoints()->bHass() )
+			CqMotionSurface<CqSurfacePatchBicubic*>* pMotionSurface = new CqMotionSurface<CqSurfacePatchBicubic*>( 0 );
+			for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
 			{
-				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" );
-				pNewUP->SetSize( pSurface->cVarying() );
-
-				pNewUP->pValue() [ 0 ] = PA.x();
-				pNewUP->pValue() [ 1 ] = PB.x();
-				pNewUP->pValue() [ 2 ] = PD.x();
-				pNewUP->pValue() [ 3 ] = PC.x();
-
-				pSurface->AddPrimitiveVariable( pNewUP );
+				RtFloat time = pTopology()->Time( iTime );
+				pMotionSurface->AddTimeSlot( time, apSurfaces[ iTime ] );
 			}
-
-			if ( USES( iUses, EnvVars_t ) && !pTopology()->pPoints()->bHast() )
-			{
-				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" );
-				pNewUP->SetSize( pSurface->cVarying() );
-
-				pNewUP->pValue() [ 0 ] = PA.y();
-				pNewUP->pValue() [ 1 ] = PB.y();
-				pNewUP->pValue() [ 2 ] = PD.y();
-				pNewUP->pValue() [ 3 ] = PC.y();
-
-				pSurface->AddPrimitiveVariable( pNewUP );
-			}
-
-			if ( USES( iUses, EnvVars_u ) && !pTopology()->pPoints()->bHasu() )
-			{
-				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "u" );
-				pNewUP->SetSize( pSurface->cVarying() );
-
-				pNewUP->pValue() [ 0 ] = PA.x();
-				pNewUP->pValue() [ 1 ] = PB.x();
-				pNewUP->pValue() [ 2 ] = PD.x();
-				pNewUP->pValue() [ 3 ] = PC.x();
-
-				pSurface->AddPrimitiveVariable( pNewUP );
-			}
-
-			if ( USES( iUses, EnvVars_v ) && !pTopology()->pPoints()->bHasv() )
-			{
-				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "v" );
-				pNewUP->SetSize( pSurface->cVarying() );
-
-				pNewUP->pValue() [ 0 ] = PA.y();
-				pNewUP->pValue() [ 1 ] = PB.y();
-				pNewUP->pValue() [ 2 ] = PD.y();
-				pNewUP->pValue() [ 3 ] = PC.y();
-
-				pSurface->AddPrimitiveVariable( pNewUP );
-			}
-
+			aSplits.push_back(pMotionSurface);
 		}
-
-
-		aSplits.push_back(pSurface);
 	}
 	else
 	{
