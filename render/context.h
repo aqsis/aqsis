@@ -361,10 +361,7 @@ class CqWorldModeBlock : public CqModeBlock
 			return ( pconParent() ->optCurrent() );
 		}
 
-		virtual	void	AddContextLightSource( CqLightsource* pLS )
-		{
-			m_apWorldLights.push_back( pLS );
-		}
+		virtual	void	AddContextLightSource( CqLightsource* pLS );
 
 	private:
 		std::vector<CqLightsource*>	m_apWorldLights;

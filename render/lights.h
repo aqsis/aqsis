@@ -52,7 +52,7 @@ START_NAMESPACE( Aqsis )
  * Abstract base class from which all lightsources are derived.
  */
 
-class CqLightsource : public CqListEntry<CqLightsource>, public IqLightsource
+class CqLightsource : public CqListEntry<CqLightsource>, public IqLightsource, public CqRefCount
 {
 	public:
 		CqLightsource( IqShader* pShader, TqBool fActive = TqTrue );

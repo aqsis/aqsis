@@ -126,12 +126,23 @@ CqWorldModeBlock::~CqWorldModeBlock()
 	// Delete any context lights
 	std::vector<CqLightsource*>::iterator i;
 	for ( i = m_apWorldLights.begin(); i != m_apWorldLights.end(); i++ )
-		delete( *i );
+		( *i )->Release();
 
 	m_pattrCurrent->Release();
 	m_ptransCurrent->Release();
 }
 
+
+//---------------------------------------------------------------------
+/** Hold a reference to the specified lightsource in this context.
+ */
+
+void CqWorldModeBlock::AddContextLightSource( CqLightsource* pLS )
+{
+	// Add the light to the context stack and reference it.
+	m_apWorldLights.push_back( pLS );
+	pLS->AddRef();
+}
 
 //---------------------------------------------------------------------
 /** Default constructor.

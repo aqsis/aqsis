@@ -266,7 +266,9 @@ RtVoid	RiBegin( RtToken name )
 	CqLightsource* pL = Lightsource_stack.pFirst();
 	while ( pL )
 	{
-		delete( pL );
+		// Unlink from the stack, and release the stacks reference to the light.
+		pL->UnLink();
+		pL->Release();
 		pL = Lightsource_stack.pFirst();
 	}
 
@@ -300,7 +302,9 @@ RtVoid	RiEnd()
 	CqLightsource* pL = Lightsource_stack.pFirst();
 	while ( pL )
 	{
-		delete( pL );
+		// Unlink from the stack, and release the stacks reference to the light.
+		pL->UnLink();
+		pL->Release();
 		pL = Lightsource_stack.pFirst();
 	}
 

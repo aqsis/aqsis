@@ -46,6 +46,8 @@ CqLightsource::CqLightsource( IqShader* pShader, TqBool fActive ) :
 
 	// Link into the lightsource stack.
 	Lightsource_stack.LinkFirst( this );
+	// Add a reference from the stack.
+	AddRef();
 	m_pShaderExecEnv = new CqShaderExecEnv;
 }
 
@@ -65,9 +67,6 @@ CqLightsource::~CqLightsource()
 	if ( m_pShaderExecEnv )
 		delete( m_pShaderExecEnv );
 	m_pShaderExecEnv = 0;
-
-	// Unlink from the stack.
-	UnLink();
 }
 
 
