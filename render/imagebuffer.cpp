@@ -234,15 +234,12 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 			CqString objname( "unnamed" );
 			const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
 			if ( pattrName != 0 ) objname = pattrName[ 0 ];
-			static CqString oldwarn = "";
-			CqString warn;
-			warn = "Max eyesplits for object \"";
-			warn += objname.c_str();
-			warn += "\" exceeded";
-			if ( warn != oldwarn )
+			static CqString oldobj = "";
+			CqString curobj = objname.c_str();
+			if ( curobj != oldobj )
 			{
-				QGetRenderContext() ->Logger() ->warn( warn );
-				oldwarn = warn;
+				QGetRenderContext() ->Logger() ->warn( "Max eyesplits for object \"%s\" exceeded", curobj.c_str() );
+				oldobj = curobj;
 			}
 		}
 		return ( TqFalse );
