@@ -250,6 +250,19 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Iq
         if ( m_apVariables[ i ] && USES( Uses, i ) )
             m_apVariables[ i ] ->Initialise( uGridRes, vGridRes );
     }
+
+	if( USES( Uses, EnvVars_time ) )
+	{
+		// First try setting this to the shutter open time
+		// @todo: Think about an algorithm which distributes samples in time
+
+		const TqFloat* shutter = QGetRenderContextI()->GetFloatOption( "System", "Shutter" );
+		if( shutter )
+		{
+			// insert the open time, this one is already modified by shutter offset
+			m_apVariables[ EnvVars_time ]->SetFloat(  shutter[ 0 ] );
+		}
+	}
 }
 
 IqShaderData* CqShaderExecEnv::FindStandardVar( const char* pname )

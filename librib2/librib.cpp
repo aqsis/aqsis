@@ -113,6 +113,7 @@ extern "C" const char* StandardParameters[][2] =
             {"auto_shadows", "uniform string" },
             {"endofframe", "uniform integer" },
             {"verbose", "uniform integer" },
+			{"offset", "uniform float"},
             {"renderinfo", "uniform integer" },
             {"sphere", "uniform float" },
             {"coordinatesystem", "uniform string" },
