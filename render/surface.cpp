@@ -172,7 +172,7 @@ TqInt CqBasicSurface::Uses() const
 /** Adjust the bound of the quadric taking into account transformation motion blur.
  */
 
-CqBound	CqBasicSurface::AdjustBoundForTransformationMotion( CqBound& B ) const
+CqBound	CqBasicSurface::AdjustBoundForTransformationMotion( const CqBound& B ) const
 {
 	CqBound Bm( B );
 

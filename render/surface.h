@@ -224,7 +224,7 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		{
 			return ( m_CachedBound );
 		}
-		CqBound	AdjustBoundForTransformationMotion( CqBound& B ) const;
+		CqBound	AdjustBoundForTransformationMotion( const CqBound& B ) const;
 
 		CqBasicSurface&	operator=( const CqBasicSurface& From );
 
