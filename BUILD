@@ -28,18 +28,6 @@ Requirements:
 						nmake -f Makefile.nt
 					Add the install directory to your include paths under tools/options.
 					Add the install directory to your library paths under tools/options.
-		libarg		1.0-1 or later	(http://www.cs.cmu.edu/~ph/859E/src/libarg/)
-					In arg.c change bcopy to memcpy and swap the first two arguments.
-					Create a new win32 library project and add arg.c, expr.c, expr.h, simple.c and arg.h.
-					Add M_PI=3.1416 to the preprocessor definitions.
-					Change the output directory to be the same for both release and debug.
-					Change the output library name to libarg.lib for the release build and libargd.lib for the debug.
-					Change the project settings/C\C++/Code Generation/Use runtime library to Debug Multithreaded DLL 
-						for the debug version.
-					Change the project settings/C\C++/Code Generation/Use runtime library to Multithreaded DLL for 
-						the release version.
-					Add the output directory to your include paths under tools/options.
-					Add the output directory to your library paths under tools/options.
 
 
 	Load the Renderer.dsw workspace from the Aqsis/Renderer directory, select the All project and build all.
