@@ -1244,7 +1244,11 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
 
     QGetRenderContext() ->Stats().MakeFilterBucket().Start();
 
-    TqBool fImager = ( QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) [ 0 ] != "null" );
+    TqBool fImager = TqFalse;
+    const CqString* systemOptions;
+    if( ( systemOptions = QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) ) != 0 )
+    	if( systemOptions[ 0 ].compare("null") != 0 )
+		fImager = TqTrue;
 
     if (fImager)
         bIsEmpty = TqFalse;

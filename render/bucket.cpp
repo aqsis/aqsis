@@ -366,7 +366,11 @@ void CqBucket::FilterBucket(TqBool empty)
     TqInt x, y;
     TqInt i = 0;
 
-    TqBool fImager = ( QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) [ 0 ] != "null" );
+    TqBool fImager = TqFalse;
+    const CqString* systemOptions;
+    if( ( systemOptions = QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) ) != 0 )
+    	if( systemOptions[ 0 ].compare("null") != 0 )
+		fImager = TqTrue;
 
     TqInt endy = YOrigin() + Height();
     TqInt endx = XOrigin() + Width();
