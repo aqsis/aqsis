@@ -133,7 +133,7 @@ InputName=bbox
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	..\bin\aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -146,7 +146,7 @@ InputName=bbox
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	..\bin\Debug\aqsl $(InputName).sl 
 	
 # End Custom Build
 
@@ -159,7 +159,7 @@ InputName=bbox
 
 "$(InputDir)\$(InputName).slx" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	cd $(InputDir) 
-	aqsl $(InputName).sl 
+	..\bin\Profile\aqsl $(InputName).sl 
 	
 # End Custom Build
 
