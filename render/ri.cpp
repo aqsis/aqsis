@@ -605,6 +605,7 @@ RtVoid	RiWorldBegin()
     }
 
     // Set the world to camera transformation matrix to the current matrix.
+
     CqTransformPtr current( QGetRenderContext() ->ptransCurrent() );
 	CqTransformPtr camera(new CqTransform());
     QGetRenderContext() ->SetCameraTransform( camera );

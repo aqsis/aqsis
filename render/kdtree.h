@@ -41,7 +41,7 @@ START_NAMESPACE( Aqsis )
  */
 
 template<class T>
-struct IqKDTreeData : public CqRefCount
+struct IqKDTreeData
 {
     /** Function to sort the elements in the given array, in ascending order based on the specified dimension index.
      */
