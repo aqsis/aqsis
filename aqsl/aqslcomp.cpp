@@ -127,7 +127,10 @@ int main( int argc, const char** argv )
         std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(std::cerr) );
         std::auto_ptr<std::streambuf> color_level;
         if(!g_cl_no_color)
-		color_level.reset( new Aqsis::color_level_buf(std::cerr) );
+        {
+            std::auto_ptr<std::streambuf> temp_color_level( new Aqsis::color_level_buf(std::cerr) );
+            color_level = temp_color_level;
+        }
         std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
         std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(Aqsis::DEBUG, std::cerr) );
 #ifdef	AQSIS_SYSTEM_POSIX
