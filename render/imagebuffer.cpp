@@ -302,11 +302,15 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
     if ( pattrDispclacementBound != 0 ) db = pattrDispclacementBound[ 0 ];
     if ( pattrCoordinateSystem != 0 ) strCoordinateSystem = pattrCoordinateSystem[ 0 ];
 
-    //if ( db != 0.0f )
+    if ( db != 0.0f )
     {
         CqVector3D	vecDB( db, 0, 0 );
         CqMatrix matShaderToWorld;
-        if ( NULL != pSurface->pAttributes() ->pshadSurface() )
+		// Default "shader" space to the displacement shader, unless there isn't one, in which
+		// case use the surface shader.
+        if ( NULL != pSurface->pAttributes() ->pshadDisplacement() )
+            matShaderToWorld = pSurface->pAttributes() ->pshadDisplacement() ->matCurrent();
+        else if ( NULL != pSurface->pAttributes() ->pshadSurface() )
             matShaderToWorld = pSurface->pAttributes() ->pshadSurface() ->matCurrent();
         vecDB = QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", matShaderToWorld, pSurface->pTransform() ->matObjectToWorld() ) * vecDB;
         db = vecDB.Magnitude();
