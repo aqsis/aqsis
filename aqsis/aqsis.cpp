@@ -79,12 +79,25 @@ long now;
                          ((RtFloat)(now - tick) / (float)CLOCKS_PER_SEC);
 	
 
-        
-	std::cout << "Done computing "<< 
+    RtInt timeleft = (((RtFloat) 100 / percent) * second) - second;    
+	if(!(timeleft == 0))
+	{
+		std::cout << "Done computing "<< 
 		std::setw(6) << std::setfill( ' ' ) << std::setprecision(4)<< 
 		percent << "% [" << 
-		std::setprecision(0)<< second << "s]     \r" << 
+		std::setprecision(0) << second 
+		<< "s/ left: " << timeleft << "s" << "]     \r" << 
 		std::flush;
+	}else{
+		//If no time left clear the line
+		std::cout << "Done computing "<< 
+		std::setw(6) << std::setfill( ' ' ) << std::setprecision(4)<< 
+		percent << "% [" << 
+		std::setprecision(0) << second <<
+		"s]" << "                                            \r" <<
+		std::flush;
+	}
+	
 }
 
 
