@@ -33,8 +33,8 @@
 
 #define	VERMAJOR 0
 #define	VERMINOR 9
-#define	BUILD 2
-#define	VERSION_STR	"0.9.2"
+#define	BUILD 3
+#define	VERSION_STR	"0.9.3"
 
 #define GET_VERSION_FROM_STRING(a,b,c) TqInt __s=0,__e; \
 			__s+=strVersion.find_first_of("0123456789",__s);	__e=strVersion.find_first_of(".",__s); \
