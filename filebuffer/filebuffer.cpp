@@ -128,6 +128,8 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 	g_CWYmax = pMsg->m_CropWindowYMax;
 
 	// Create a buffer big enough to hold a row of buckets.
+	pByteData = NULL;
+	pFloatData = NULL;
 	if(BitsPerSample == 8)
 		pByteData = new unsigned char[ XRes * YRes * SamplesPerElement ];
 	else
@@ -300,6 +302,10 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 			TIFFClose( pOut );
 		}
 	}
+
+	delete[](pByteData);
+	delete[](pFloatData);
+
 	if ( DDSendMsg( s, &closeack ) <= 0 )
 		return ( -1 );
 	else
