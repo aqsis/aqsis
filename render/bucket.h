@@ -142,7 +142,7 @@ class CqBucket : public IqBucket
 			std::vector<CqMicroPolygonBase*>::iterator end = m_ampgWaiting.end();
 			for (std::vector<CqMicroPolygonBase*>::iterator i = m_ampgWaiting.begin(); i != end; i++)
 				if ((*i) == pmpgNew) 
-					return; // assert() here!
+					assert( TqFalse );
 #endif
 			m_ampgWaiting.push_back( pmpgNew );
 		}
@@ -154,7 +154,7 @@ class CqBucket : public IqBucket
 			std::vector<CqMicroPolyGridBase*>::iterator end = m_agridWaiting.end();
 			for (std::vector<CqMicroPolyGridBase*>::iterator i = m_agridWaiting.begin(); i != end; i++)
 				if ((*i) == pgridNew) 
-					return; // assert() here!
+					assert( TqFalse );
 #endif
 			m_agridWaiting.push_back( pgridNew );
 		}
