@@ -4031,38 +4031,39 @@ RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char 
 		TqInt xRes = tpx.XRes();
 		TqInt yRes = tpx.YRes();
 
+		TqInt numsamples = tpx.SamplesPerPixel();
 		// Number of mip map levels.
 		int log2 = MIN( xRes, yRes );
 		log2 = ( int ) ( log( log2 ) / log( 2.0 ) );
 
 		for ( ii = 0; ii < log2; ii++ )
 		{
-
-			TqUchar* pImage = new TqUchar[ ( xRes * 3 ) * ( yRes * 2 ) * tpx.SamplesPerPixel() * sizeof( TqUchar ) ];
-			TqInt linelen = ( xRes * 3 ) * tpx.SamplesPerPixel() * sizeof( TqUchar );
-			TqInt viewlinelen = xRes * tpx.SamplesPerPixel() * sizeof( TqUchar );
-
-			TqInt view = 0;
+			CqTextureMapBuffer* pLevelBuffer = tpx.CreateBuffer(0,0,xRes * 3, yRes * 2, numsamples);
+			TqInt view;
 			for ( view = 0; view < 6; view++ )
 			{
+				// Get the buffer for the approriate cube side at this level.
 				CqTextureMapBuffer* pBuffer = Images[ view ] ->GetBuffer( 0, 0, ii );
+				// Work out where in the combined image it goes.
 				TqInt xoff = view % 3;
-				xoff *= viewlinelen;
+				xoff *= xRes;
 				TqInt yoff = view / 3;
-				yoff *= yRes * linelen;
-				TqUchar* ptr = pImage + xoff + yoff;
-				TqInt line;
+				yoff *= yRes;
+				TqInt line, col, sample;
 				for ( line = 0; line < yRes; line++ )
 				{
-					memcpy( ptr, ( pBuffer->pBufferData() + ( line * viewlinelen ) ), viewlinelen );
-					ptr += linelen;
+					for ( col = 0; col < xRes; col++ )
+					{
+						for ( sample = 0; sample < numsamples; sample++ )
+							pLevelBuffer->SetValue( col + xoff, line + yoff, sample, pBuffer->GetValue( col, line, sample) );
+					}
 				}
 			}
 
 			TIFFCreateDirectory( ptex );
 			TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
 			TIFFSetField( ptex, TIFFTAG_PIXAR_TEXTUREFORMAT, CUBEENVMAP_HEADER );
-			tpx.WriteTileImage( ptex, pImage, ( xRes * 3 ), ( yRes * 2 ), 64, 64, tpx.SamplesPerPixel(), tpx.Compression(), tpx.Quality() );
+			tpx.WriteTileImage( ptex, pLevelBuffer, 64, 64, tpx.Compression(), tpx.Quality() );
 			xRes /= 2;
 			yRes /= 2;
 		}

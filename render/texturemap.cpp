@@ -2144,13 +2144,13 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, CqTextureMapBuffer* pBuffer, TqUl
 	{
 		case BufferType_RGBA:
 		{
-			WriteTileImage( ptex, static_cast<TqPuchar>(pBuffer->pVoidBufferData()), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), twidth, theight, compression, quality );
+			WriteTileImage( ptex, static_cast<TqPuchar>(pBuffer->pVoidBufferData()), pBuffer->Width(), pBuffer->Height(), twidth, theight, pBuffer->Samples(), compression, quality );
 			break;
 		}
 
 		case BufferType_Float:
 		{
-			WriteTileImage( ptex, static_cast<TqFloat*>(pBuffer->pVoidBufferData()), pBuffer->Width(), pBuffer->Height(), pBuffer->Samples(), twidth, theight, compression, quality );
+			WriteTileImage( ptex, static_cast<TqFloat*>(pBuffer->pVoidBufferData()), pBuffer->Width(), pBuffer->Height(), twidth, theight, pBuffer->Samples(), compression, quality );
 			break;
 		}
 	}
