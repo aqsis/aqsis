@@ -5402,7 +5402,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
     // Fill in the position variable according to type.
     if ( fP != RIL_NONE )
     {
-        pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 0 ) );
+        pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 1 ) );
         pSurface->P() ->SetSize( pSurface->cVertex() );
         TqInt i;
         switch ( fP )

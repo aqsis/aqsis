@@ -48,7 +48,9 @@ CqParameter::CqParameter( const char* strName, TqInt Count ) :
     ///		  renderer context isn't ready yet.
     //	QGetRenderContext() ->Stats().IncParametersAllocated();
 
-    STATS_INC( PRM_created );
+	assert( Count >= 1 );
+    
+	STATS_INC( PRM_created );
     STATS_INC( PRM_current );
     TqInt cPRM = STATS_GETI( PRM_current );
     TqInt cPeak = STATS_GETI( PRM_peak );

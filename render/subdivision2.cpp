@@ -980,7 +980,6 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
         TqInt ivA = pLath->VertexIndex();
         TqInt iFVA = pLath->FaceVertexIndex();
         TqInt indexA = 0;
-
         StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
 
         indexA++;
@@ -989,6 +988,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
         while( c < nc )
         {
             TqInt ivA = pLath->VertexIndex();
+	        TqInt iFVA = pLath->FaceVertexIndex();
             StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
 
             if( c < ( nc - 1 ) )
@@ -1007,6 +1007,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
 
             // Get data from pLath
             TqInt ivA = pLath->VertexIndex();
+	        TqInt iFVA = pLath->FaceVertexIndex();
             TqInt indexA = ( r * ( nc + 1 ) );
             StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
 
@@ -1016,6 +1017,7 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
             while( c < nc )
             {
                 TqInt ivA = pLath->VertexIndex();
+		        TqInt iFVA = pLath->FaceVertexIndex();
                 StoreDice( pGrid, pMotionPoints, ivA, iFVA, indexA );
 
                 if( c < ( nc - 1 ) )
@@ -1185,25 +1187,32 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoin
     CqParameter* pParam;
     if( ( pParam = pPoints->FindUserParam("st") ) != NULL )
     {
+		TqInt index = iParam;
+		if( pParam->Class() == class_facevarying )
+			index = iFVParam;
 		CqParameterTyped<TqFloat, TqFloat>* pSTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pParam);
-        if ( !isDONE( lDone, EnvVars_s ) && USES( lUses, EnvVars_s ) && ( NULL != pGrid->pVar(EnvVars_s) ) )
-            pGrid->pVar( EnvVars_s )->SetFloat( pSTParam->pValue( iParam )[0], iData);
-        if ( !isDONE( lDone, EnvVars_t ) && USES( lUses, EnvVars_t ) && ( NULL != pGrid->pVar(EnvVars_t) ) )
-            pGrid->pVar( EnvVars_t )->SetFloat( pSTParam->pValue( iParam )[1], iData);
+        if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->pVar(EnvVars_s) ) )
+            pGrid->pVar( EnvVars_s )->SetFloat( pSTParam->pValue( index )[0], iData);
+        if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->pVar(EnvVars_t) ) )
+            pGrid->pVar( EnvVars_t )->SetFloat( pSTParam->pValue( index )[1], iData);
         DONE( lDone, EnvVars_s);
         DONE( lDone, EnvVars_t);
     }
 
-    if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->pVar(EnvVars_s) ) && !isDONE(lDone, EnvVars_s ) )
+    if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->pVar(EnvVars_s) ) && ( pPoints->bHasVar(EnvVars_s) ) && !isDONE(lDone, EnvVars_s ) )
     {
-        if( pPoints->bHasVar(EnvVars_s) )
+        if( pPoints->s()->Class() == class_varying || pPoints->s()->Class() == class_vertex )
             pGrid->pVar(EnvVars_s) ->SetFloat( pPoints->s()->pValue( iParam )[0], iData );
+        else if( pPoints->s()->Class() == class_facevarying )
+            pGrid->pVar(EnvVars_s) ->SetFloat( pPoints->s()->pValue( iFVParam )[0], iData );
     }
 
-    if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->pVar(EnvVars_t) ) && !isDONE(lDone, EnvVars_t ) )
+    if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->pVar(EnvVars_t) ) && ( pPoints->bHasVar(EnvVars_t) ) && !isDONE(lDone, EnvVars_t ) )
     {
-        if( pPoints->bHasVar(EnvVars_t) )
+        if( pPoints->t()->Class() == class_varying || pPoints->t()->Class() == class_vertex )
             pGrid->pVar(EnvVars_t) ->SetFloat( pPoints->t()->pValue( iParam )[0], iData );
+        else if( pPoints->t()->Class() == class_facevarying )
+            pGrid->pVar(EnvVars_t) ->SetFloat( pPoints->t()->pValue( iFVParam )[0], iData );
     }
 
     if ( USES( lUses, EnvVars_Cs ) && ( NULL != pGrid->pVar(EnvVars_Cs) ) && ( pPoints->bHasVar(EnvVars_Cs) ) )
