@@ -1,0 +1,1193 @@
+<?xml version="1.0" ?>
+<RiAPI>
+	<Procedures>
+		<Procedure name="RiDeclare" return="RtToken">
+			<Arguments>
+				<Argument name="name" type="RtString"/>
+				<Argument name="declaration" type="RtString"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiBegin" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiEnd" return="RtVoid">
+			<NoCache/>
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiFrameBegin" return="RtVoid">
+			<Arguments>
+				<Argument name="number" type="RtInt"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiFrameEnd" return="RtVoid">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiWorldBegin" return="RtVoid">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiWorldEnd" return="RtVoid">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiFormat" return="RtVoid">
+			<Arguments>
+				<Argument name="xresolution" type="RtInt"/>
+				<Argument name="yresolution" type="RtInt"/>
+				<Argument name="pixelaspectratio" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiFrameAspectRatio" return="RtVoid">
+			<Arguments>
+				<Argument name="frameratio" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiScreenWindow" return="RtVoid">
+			<Arguments>
+				<Argument name="left" type="RtFloat"/>
+				<Argument name="right" type="RtFloat"/>
+				<Argument name="bottom" type="RtFloat"/>
+				<Argument name="top" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiCropWindow" return="RtVoid">
+			<Arguments>
+				<Argument name="left" type="RtFloat"/>
+				<Argument name="right" type="RtFloat"/>
+				<Argument name="top" type="RtFloat"/>
+				<Argument name="bottom" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiProjection" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiProjectionV" return="RtVoid">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiClipping" return="RtVoid">
+			<Arguments>
+				<Argument name="cnear" type="RtFloat"/>
+				<Argument name="cfar" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiDepthOfField" return="RtVoid">
+			<Arguments>
+				<Argument name="fstop" type="RtFloat"/>
+				<Argument name="focallength" type="RtFloat"/>
+				<Argument name="focaldistance" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiShutter" return="RtVoid">
+			<Arguments>
+				<Argument name="opentime" type="RtFloat"/>
+				<Argument name="closetime" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPixelVariance" return="RtVoid">
+			<Arguments>
+				<Argument name="variance" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPixelSamples" return="RtVoid">
+			<Arguments>
+				<Argument name="xsamples" type="RtFloat"/>
+				<Argument name="ysamples" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPixelFilter" return="RtVoid">
+			<Arguments>
+				<Argument name="function" type="RtFilterFunc"/>
+				<Argument name="xwidth" type="RtFloat"/>
+				<Argument name="ywidth" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiExposure" return="RtVoid">
+			<Arguments>
+				<Argument name="gain" type="RtFloat"/>
+				<Argument name="gamma" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiImager" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiImagerV" return="RtVoid">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiQuantize" return="RtVoid">
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="one" type="RtInt"/>
+				<Argument name="min" type="RtInt"/>
+				<Argument name="max" type="RtInt"/>
+				<Argument name="ditheramplitude" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiDisplay" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="mode" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiDisplayV" return="RtVoid">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="mode" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiGaussianFilter" return="RtFloat">
+			<NoCache/>
+			<Arguments>
+				<Argument name="x" type="RtFloat"/>
+				<Argument name="y" type="RtFloat"/>
+				<Argument name="xwidth" type="RtFloat"/>
+				<Argument name="ywidth" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiBoxFilter" return="RtFloat">
+			<NoCache/>
+			<Arguments>
+				<Argument name="x" type="RtFloat"/>
+				<Argument name="y" type="RtFloat"/>
+				<Argument name="xwidth" type="RtFloat"/>
+				<Argument name="ywidth" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiTriangleFilter" return="RtFloat">
+			<NoCache/>
+			<Arguments>
+				<Argument name="x" type="RtFloat"/>
+				<Argument name="y" type="RtFloat"/>
+				<Argument name="xwidth" type="RtFloat"/>
+				<Argument name="ywidth" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiCatmullRomFilter" return="RtFloat">
+			<NoCache/>
+			<Arguments>
+				<Argument name="x" type="RtFloat"/>
+				<Argument name="y" type="RtFloat"/>
+				<Argument name="xwidth" type="RtFloat"/>
+				<Argument name="ywidth" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiSincFilter" return="RtFloat">
+			<NoCache/>
+			<Arguments>
+				<Argument name="x" type="RtFloat"/>
+				<Argument name="y" type="RtFloat"/>
+				<Argument name="xwidth" type="RtFloat"/>
+				<Argument name="ywidth" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiDiskFilter" return="RtFloat">
+			<NoCache/>
+			<Arguments>
+				<Argument name="x" type="RtFloat"/>
+				<Argument name="y" type="RtFloat"/>
+				<Argument name="xwidth" type="RtFloat"/>
+				<Argument name="ywidth" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiBesselFilter" return="RtFloat">
+			<NoCache/>
+			<Arguments>
+				<Argument name="x" type="RtFloat"/>
+				<Argument name="y" type="RtFloat"/>
+				<Argument name="xwidth" type="RtFloat"/>
+				<Argument name="ywidth" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiHider" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiHiderV" return="RtVoid">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiColorSamples" return="RtVoid">
+			<Arguments>
+				<Argument name="N" type="RtInt"/>
+				<Argument name="nRGB" type="RtFloatArray"/>
+				<Argument name="RGBn" type="RtFloatArray"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiRelativeDetail" return="RtVoid">
+			<Arguments>
+				<Argument name="relativedetail" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiOption" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiOptionV" return="RtVoid">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiAttributeBegin" return="RtVoid">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiAttributeEnd" return="RtVoid">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiColor" return="RtVoid">
+			<Arguments>
+				<Argument name="Cq" type="RtColor"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiOpacity" return="RtVoid">
+			<Arguments>
+				<Argument name="Os" type="RtColor"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiTextureCoordinates" return="RtVoid">
+			<Arguments>
+				<Argument name="s1" type="RtFloat"/>
+				<Argument name="t1" type="RtFloat"/>
+				<Argument name="s2" type="RtFloat"/>
+				<Argument name="t2" type="RtFloat"/>
+				<Argument name="s3" type="RtFloat"/>
+				<Argument name="t3" type="RtFloat"/>
+				<Argument name="s4" type="RtFloat"/>
+				<Argument name="t4" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiLightSource" return="RtLightHandle">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiLightSourceV" return="RtLightHandle">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiAreaLightSource" return="RtLightHandle">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiAreaLightSourceV" return="RtLightHandle">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiIlluminate" return="RtVoid">
+			<Arguments>
+				<Argument name="light" type="RtLightHandle"/>
+				<Argument name="onoff" type="RtBoolean"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiSurface" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiSurfaceV" return="RtVoid">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiAtmosphere" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiAtmosphereV" return="RtVoid">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiInterior" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiInteriorV" return="RtVoid">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiExterior" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiExteriorV" return="RtVoid">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiShadingRate" return="RtVoid">
+			<Arguments>
+				<Argument name="size" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiShadingInterpolation" return="RtVoid">
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMatte" return="RtVoid">
+			<Arguments>
+				<Argument name="onoff" type="RtBoolean"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiBound" return="RtVoid">
+			<Arguments>
+				<Argument name="bound" type="RtBound"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiDetail" return="RtVoid">
+			<Arguments>
+				<Argument name="bound" type="RtBound"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiDetailRange" return="RtVoid">
+			<Arguments>
+				<Argument name="offlow" type="RtFloat"/>
+				<Argument name="onlow" type="RtFloat"/>
+				<Argument name="onhigh" type="RtFloat"/>
+				<Argument name="offhigh" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiGeometricApproximation" return="RtVoid">
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="value" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiOrientation" return="RtVoid">
+			<Arguments>
+				<Argument name="orientation" type="RtToken"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiReverseOrientation" return="RtVoid">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiSides" return="RtVoid">
+			<Arguments>
+				<Argument name="nsides" type="RtInt"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiIdentity" return="RtVoid">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiTransform" return="RtVoid">
+			<Arguments>
+				<Argument name="transform" type="RtMatrix"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiConcatTransform" return="RtVoid">
+			<Arguments>
+				<Argument name="transform" type="RtMatrix"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPerspective" return="RtVoid">
+			<Arguments>
+				<Argument name="fov" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiTranslate" return="RtVoid">
+			<Arguments>
+				<Argument name="dx" type="RtFloat"/>
+				<Argument name="dy" type="RtFloat"/>
+				<Argument name="dz" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiRotate" return="RtVoid">
+			<Arguments>
+				<Argument name="angle" type="RtFloat"/>
+				<Argument name="dx" type="RtFloat"/>
+				<Argument name="dy" type="RtFloat"/>
+				<Argument name="dz" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiScale" return="RtVoid">
+			<Arguments>
+				<Argument name="sx" type="RtFloat"/>
+				<Argument name="sy" type="RtFloat"/>
+				<Argument name="sz" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiSkew" return="RtVoid">
+			<Arguments>
+				<Argument name="angle" type="RtFloat"/>
+				<Argument name="dx1" type="RtFloat"/>
+				<Argument name="dy1" type="RtFloat"/>
+				<Argument name="dz1" type="RtFloat"/>
+				<Argument name="dx2" type="RtFloat"/>
+				<Argument name="dy2" type="RtFloat"/>
+				<Argument name="dz2" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiDeformation" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiDeformationV" return="RtVoid">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiDisplacement" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiDisplacementV" return="RtVoid">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiCoordinateSystem" return="RtVoid">
+			<Arguments>
+				<Argument name="space" type="RtToken"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiTransformPoints" return="RtPoint*">
+			<Arguments>
+				<Argument name="fromspace" type="RtToken"/>
+				<Argument name="tospace" type="RtToken"/>
+				<Argument name="npoints" type="RtInt"/>
+				<Argument name="points" type="RtPointArray"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiTransformBegin" return="RtVoid">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiTransformEnd" return="RtVoid">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiAttribute" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiAttributeV" return="RtVoid">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPolygon" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="nvertices" type="RtInt"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPolygonV" return="RtVoid">
+			<Arguments>
+				<Argument name="nvertices" type="RtInt"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiGeneralPolygon" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="nloops" type="RtInt"/>
+				<Argument name="nverts" type="RtIntArray"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiGeneralPolygonV" return="RtVoid">
+			<Arguments>
+				<Argument name="nloops" type="RtInt"/>
+				<Argument name="nverts" type="RtIntArray"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPointsPolygons" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="npolys" type="RtInt"/>
+				<Argument name="nverts" type="RtIntArray"/>
+				<Argument name="verts" type="RtIntArray"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPointsPolygonsV" return="RtVoid">
+			<Arguments>
+				<Argument name="npolys" type="RtInt"/>
+				<Argument name="nverts" type="RtIntArray"/>
+				<Argument name="verts" type="RtIntArray"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPointsGeneralPolygons" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="npolys" type="RtInt"/>
+				<Argument name="nloops" type="RtIntArray"/>
+				<Argument name="nverts" type="RtIntArray"/>
+				<Argument name="verts" type="RtIntArray"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPointsGeneralPolygonsV" return="RtVoid">
+			<Arguments>
+				<Argument name="npolys" type="RtInt"/>
+				<Argument name="nloops" type="RtIntArray"/>
+				<Argument name="nverts" type="RtIntArray"/>
+				<Argument name="verts" type="RtIntArray"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiBasis" return="RtVoid">
+			<Arguments>
+				<Argument name="ubasis" type="RtBasis"/>
+				<Argument name="ustep" type="RtInt"/>
+				<Argument name="vbasis" type="RtBasis"/>
+				<Argument name="vstep" type="RtInt"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPatch" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPatchV" return="RtVoid">
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPatchMesh" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="nu" type="RtInt"/>
+				<Argument name="uwrap" type="RtToken"/>
+				<Argument name="nv" type="RtInt"/>
+				<Argument name="vwrap" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPatchMeshV" return="RtVoid">
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="nu" type="RtInt"/>
+				<Argument name="uwrap" type="RtToken"/>
+				<Argument name="nv" type="RtInt"/>
+				<Argument name="vwrap" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiNuPatch" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="nu" type="RtInt"/>
+				<Argument name="uorder" type="RtInt"/>
+				<Argument name="uknot" type="RtFloatArray"/>
+				<Argument name="umin" type="RtFloat"/>
+				<Argument name="umax" type="RtFloat"/>
+				<Argument name="nv" type="RtInt"/>
+				<Argument name="vorder" type="RtInt"/>
+				<Argument name="vknot" type="RtFloatArray"/>
+				<Argument name="vmin" type="RtFloat"/>
+				<Argument name="vmax" type="RtFloat"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiNuPatchV" return="RtVoid">
+			<Arguments>
+				<Argument name="nu" type="RtInt"/>
+				<Argument name="uorder" type="RtInt"/>
+				<Argument name="uknot" type="RtFloatArray"/>
+				<Argument name="umin" type="RtFloat"/>
+				<Argument name="umax" type="RtFloat"/>
+				<Argument name="nv" type="RtInt"/>
+				<Argument name="vorder" type="RtInt"/>
+				<Argument name="vknot" type="RtFloatArray"/>
+				<Argument name="vmin" type="RtFloat"/>
+				<Argument name="vmax" type="RtFloat"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiTrimCurve" return="RtVoid">
+			<Arguments>
+				<Argument name="nloops" type="RtInt"/>
+				<Argument name="ncurves" type="RtIntArray"/>
+				<Argument name="order" type="RtIntArray"/>
+				<Argument name="knot" type="RtFloatArray"/>
+				<Argument name="min" type="RtFloatArray"/>
+				<Argument name="max" type="RtFloatArray"/>
+				<Argument name="n" type="RtIntArray"/>
+				<Argument name="u" type="RtFloatArray"/>
+				<Argument name="v" type="RtFloatArray"/>
+				<Argument name="w" type="RtFloatArray"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiSphere" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="radius" type="RtFloat"/>
+				<Argument name="zmin" type="RtFloat"/>
+				<Argument name="zmax" type="RtFloat"/>
+				<Argument name="thetamax" type="RtFloat"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiSphereV" return="RtVoid">
+			<Arguments>
+				<Argument name="radius" type="RtFloat"/>
+				<Argument name="zmin" type="RtFloat"/>
+				<Argument name="zmax" type="RtFloat"/>
+				<Argument name="thetamax" type="RtFloat"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiCone" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="height" type="RtFloat"/>
+				<Argument name="radius" type="RtFloat"/>
+				<Argument name="thetamax" type="RtFloat"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiConeV" return="RtVoid">
+			<Arguments>
+				<Argument name="height" type="RtFloat"/>
+				<Argument name="radius" type="RtFloat"/>
+				<Argument name="thetamax" type="RtFloat"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiCylinder" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="radius" type="RtFloat"/>
+				<Argument name="zmin" type="RtFloat"/>
+				<Argument name="zmax" type="RtFloat"/>
+				<Argument name="thetamax" type="RtFloat"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiCylinderV" return="RtVoid">
+			<Arguments>
+				<Argument name="radius" type="RtFloat"/>
+				<Argument name="zmin" type="RtFloat"/>
+				<Argument name="zmax" type="RtFloat"/>
+				<Argument name="thetamax" type="RtFloat"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiHyperboloid" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="point1" type="RtPoint"/>
+				<Argument name="point2" type="RtPoint"/>
+				<Argument name="thetamax" type="RtFloat"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiHyperboloidV" return="RtVoid">
+			<Arguments>
+				<Argument name="point1" type="RtPoint"/>
+				<Argument name="point2" type="RtPoint"/>
+				<Argument name="thetamax" type="RtFloat"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiParaboloid" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="rmax" type="RtFloat"/>
+				<Argument name="zmin" type="RtFloat"/>
+				<Argument name="zmax" type="RtFloat"/>
+				<Argument name="thetamax" type="RtFloat"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiParaboloidV" return="RtVoid">
+			<Arguments>
+				<Argument name="rmax" type="RtFloat"/>
+				<Argument name="zmin" type="RtFloat"/>
+				<Argument name="zmax" type="RtFloat"/>
+				<Argument name="thetamax" type="RtFloat"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiDisk" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="height" type="RtFloat"/>
+				<Argument name="radius" type="RtFloat"/>
+				<Argument name="thetamax" type="RtFloat"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiDiskV" return="RtVoid">
+			<Arguments>
+				<Argument name="height" type="RtFloat"/>
+				<Argument name="radius" type="RtFloat"/>
+				<Argument name="thetamax" type="RtFloat"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiTorus" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="majorrad" type="RtFloat"/>
+				<Argument name="minorrad" type="RtFloat"/>
+				<Argument name="phimin" type="RtFloat"/>
+				<Argument name="phimax" type="RtFloat"/>
+				<Argument name="thetamax" type="RtFloat"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiTorusV" return="RtVoid">
+			<Arguments>
+				<Argument name="majorrad" type="RtFloat"/>
+				<Argument name="minorrad" type="RtFloat"/>
+				<Argument name="phimin" type="RtFloat"/>
+				<Argument name="phimax" type="RtFloat"/>
+				<Argument name="thetamax" type="RtFloat"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiProcedural" return="RtVoid">
+			<Arguments>
+				<Argument name="data" type="RtPointer"/>
+				<Argument name="bound" type="RtBound"/>
+				<Argument name="refineproc" type="RtProcSubdivFunc"/>
+				<Argument name="freeproc" type="RtProcFreeFunc"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiGeometry" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiGeometryV" return="RtVoid">
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiSolidBegin" return="RtVoid">
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiSolidEnd" return="RtVoid">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiObjectBegin" return="RtObjectHandle">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiObjectEnd" return="RtVoid">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiObjectInstance" return="RtVoid">
+			<Arguments>
+				<Argument name="handle" type="RtObjectHandle"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMotionBegin" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="N" type="RtInt"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMotionBeginV" return="RtVoid">
+			<Arguments>
+				<Argument name="N" type="RtInt"/>
+				<Argument name="times" type="RtFloatArray"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMotionEnd" return="RtVoid">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiMakeTexture" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="imagefile" type="RtString"/>
+				<Argument name="texturefile" type="RtString"/>
+				<Argument name="swrap" type="RtToken"/>
+				<Argument name="twrap" type="RtToken"/>
+				<Argument name="filterfunc" type="RtFilterFunc"/>
+				<Argument name="swidth" type="RtFloat"/>
+				<Argument name="twidth" type="RtFloat"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMakeTextureV" return="RtVoid">
+			<Arguments>
+				<Argument name="imagefile" type="RtString"/>
+				<Argument name="texturefile" type="RtString"/>
+				<Argument name="swrap" type="RtToken"/>
+				<Argument name="twrap" type="RtToken"/>
+				<Argument name="filterfunc" type="RtFilterFunc"/>
+				<Argument name="swidth" type="RtFloat"/>
+				<Argument name="twidth" type="RtFloat"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMakeBump" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="imagefile" type="RtString"/>
+				<Argument name="bumpfile" type="RtString"/>
+				<Argument name="swrap" type="RtToken"/>
+				<Argument name="twrap" type="RtToken"/>
+				<Argument name="filterfunc" type="RtFilterFunc"/>
+				<Argument name="swidth" type="RtFloat"/>
+				<Argument name="twidth" type="RtFloat"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMakeBumpV" return="RtVoid">
+			<Arguments>
+				<Argument name="imagefile" type="RtString"/>
+				<Argument name="bumpfile" type="RtString"/>
+				<Argument name="swrap" type="RtToken"/>
+				<Argument name="twrap" type="RtToken"/>
+				<Argument name="filterfunc" type="RtFilterFunc"/>
+				<Argument name="swidth" type="RtFloat"/>
+				<Argument name="twidth" type="RtFloat"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMakeLatLongEnvironment" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="imagefile" type="RtString"/>
+				<Argument name="reflfile" type="RtString"/>
+				<Argument name="filterfunc" type="RtFilterFunc"/>
+				<Argument name="swidth" type="RtFloat"/>
+				<Argument name="twidth" type="RtFloat"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMakeLatLongEnvironmentV" return="RtVoid">
+			<Arguments>
+				<Argument name="imagefile" type="RtString"/>
+				<Argument name="reflfile" type="RtString"/>
+				<Argument name="filterfunc" type="RtFilterFunc"/>
+				<Argument name="swidth" type="RtFloat"/>
+				<Argument name="twidth" type="RtFloat"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMakeCubeFaceEnvironment" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="px" type="RtString"/>
+				<Argument name="nx" type="RtString"/>
+				<Argument name="py" type="RtString"/>
+				<Argument name="ny" type="RtString"/>
+				<Argument name="pz" type="RtString"/>
+				<Argument name="nz" type="RtString"/>
+				<Argument name="reflfile" type="RtString"/>
+				<Argument name="fov" type="RtFloat"/>
+				<Argument name="filterfunc" type="RtFilterFunc"/>
+				<Argument name="swidth" type="RtFloat"/>
+				<Argument name="twidth" type="RtFloat"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMakeCubeFaceEnvironmentV" return="RtVoid">
+			<Arguments>
+				<Argument name="px" type="RtString"/>
+				<Argument name="nx" type="RtString"/>
+				<Argument name="py" type="RtString"/>
+				<Argument name="ny" type="RtString"/>
+				<Argument name="pz" type="RtString"/>
+				<Argument name="nz" type="RtString"/>
+				<Argument name="reflfile" type="RtString"/>
+				<Argument name="fov" type="RtFloat"/>
+				<Argument name="filterfunc" type="RtFilterFunc"/>
+				<Argument name="swidth" type="RtFloat"/>
+				<Argument name="twidth" type="RtFloat"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMakeShadow" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="picfile" type="RtString"/>
+				<Argument name="shadowfile" type="RtString"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMakeShadowV" return="RtVoid">
+			<Arguments>
+				<Argument name="picfile" type="RtString"/>
+				<Argument name="shadowfile" type="RtString"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMakeOcclusion" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="npics" type="RtInt"/>
+				<Argument name="picfiles" type="RtStringArray"/>
+				<Argument name="shadowfile" type="RtString"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiMakeOcclusionV" return="RtVoid">
+			<Arguments>
+				<Argument name="npics" type="RtInt"/>
+				<Argument name="picfiles" type="RtStringArray"/>
+				<Argument name="shadowfile" type="RtString"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiErrorHandler" return="RtVoid">
+			<Arguments>
+				<Argument name="handler" type="RtErrorFunc"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiErrorIgnore" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="code" type="RtInt"/>
+				<Argument name="severity" type="RtInt"/>
+				<Argument name="message" type="RtString"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiErrorPrint" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="code" type="RtInt"/>
+				<Argument name="severity" type="RtInt"/>
+				<Argument name="message" type="RtString"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiErrorAbort" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="code" type="RtInt"/>
+				<Argument name="severity" type="RtInt"/>
+				<Argument name="message" type="RtString"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiArchiveRecord" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="" type="char *"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiGetContext" return="RtContextHandle">
+			<Arguments/>
+		</Procedure>
+		<Procedure name="RiContext" return="RtVoid">
+			<Arguments>
+				<Argument name="handle" type="RtContextHandle"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiClippingPlane" return="RtVoid">
+			<Arguments>
+				<Argument name="x" type="RtFloat"/>
+				<Argument name="y" type="RtFloat"/>
+				<Argument name="z" type="RtFloat"/>
+				<Argument name="nx" type="RtFloat"/>
+				<Argument name="ny" type="RtFloat"/>
+				<Argument name="nz" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiCoordSysTransform" return="RtVoid">
+			<Arguments>
+				<Argument name="space" type="RtToken"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiBlobby" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="nleaf" type="RtInt"/>
+				<Argument name="ncode" type="RtInt"/>
+				<Argument name="code" type="RtIntArray"/>
+				<Argument name="nflt" type="RtInt"/>
+				<Argument name="flt" type="RtFloatArray"/>
+				<Argument name="nstr" type="RtInt"/>
+				<Argument name="str" type="RtTokenArray"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiBlobbyV" return="RtVoid">
+			<Arguments>
+				<Argument name="nleaf" type="RtInt"/>
+				<Argument name="ncode" type="RtInt"/>
+				<Argument name="code" type="RtIntArray"/>
+				<Argument name="nflt" type="RtInt"/>
+				<Argument name="flt" type="RtFloatArray"/>
+				<Argument name="nstr" type="RtInt"/>
+				<Argument name="str" type="RtTokenArray"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPoints" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="npoints" type="RtInt"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiPointsV" return="RtVoid">
+			<Arguments>
+				<Argument name="npoints" type="RtInt"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiCurves" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="ncurves" type="RtInt"/>
+				<Argument name="nvertices" type="RtIntArray"/>
+				<Argument name="wrap" type="RtToken"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiCurvesV" return="RtVoid">
+			<Arguments>
+				<Argument name="type" type="RtToken"/>
+				<Argument name="ncurves" type="RtInt"/>
+				<Argument name="nvertices" type="RtIntArray"/>
+				<Argument name="wrap" type="RtToken"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiSubdivisionMesh" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="scheme" type="RtToken"/>
+				<Argument name="nfaces" type="RtInt"/>
+				<Argument name="nvertices" type="RtIntArray"/>
+				<Argument name="vertices" type="RtIntArray"/>
+				<Argument name="ntags" type="RtInt"/>
+				<Argument name="tags" type="RtTokenArray"/>
+				<Argument name="nargs" type="RtIntArray"/>
+				<Argument name="intargs" type="RtIntArray"/>
+				<Argument name="floatargs" type="RtFloatArray"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiSubdivisionMeshV" return="RtVoid">
+			<Arguments>
+				<Argument name="scheme" type="RtToken"/>
+				<Argument name="nfaces" type="RtInt"/>
+				<Argument name="nvertices" type="RtIntArray"/>
+				<Argument name="vertices" type="RtIntArray"/>
+				<Argument name="ntags" type="RtInt"/>
+				<Argument name="tags" type="RtTokenArray"/>
+				<Argument name="nargs" type="RtIntArray"/>
+				<Argument name="intargs" type="RtIntArray"/>
+				<Argument name="floatargs" type="RtFloatArray"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiReadArchive" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="callback" type="RtArchiveCallback"/>
+				<Argument name="..." type=""/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiReadArchiveV" return="RtVoid">
+			<Arguments>
+				<Argument name="name" type="RtToken"/>
+				<Argument name="callback" type="RtArchiveCallback"/>
+				<Argument name="plist" type="PARAMETERLIST"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiProcFree" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="data" type="RtPointer"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiProcDelayedReadArchive" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="data" type="RtPointer"/>
+				<Argument name="detail" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiProcRunProgram" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="data" type="RtPointer"/>
+				<Argument name="detail" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+		<Procedure name="RiProcDynamicLoad" return="RtVoid">
+			<NoCache/>
+			<Arguments>
+				<Argument name="data" type="RtPointer"/>
+				<Argument name="detail" type="RtFloat"/>
+			</Arguments>
+		</Procedure>
+	</Procedures>
+</RiAPI>
+
