@@ -412,7 +412,7 @@ CqLath* CqSubdivision2::AddFacet(TqInt cVerts, TqInt* pIndices)
  *	be joined in a complete loop, so care must be taken when traversing the
  *	topology to ensure that all facets are processed.
  */
-void CqSubdivision2::Finalise()
+TqBool CqSubdivision2::Finalise()
 {
 	for(std::vector<std::vector<CqLath*> >::const_iterator ivert=m_aapVertices.begin(); ivert!=m_aapVertices.end(); ivert++)
 	{
@@ -494,11 +494,12 @@ void CqSubdivision2::Finalise()
 		// If we have not visited all the laths referencing this vertex, then we have a non-manifold situation.
 		if(cVisited < cLaths)
 		{
-			return;
+			return( TqFalse );
 		}
 	}
 	
 	m_fFinalised = TqTrue;
+	return( TqTrue );
 }
 
 

@@ -4219,17 +4219,25 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 				pSubd2->AddFacet(nvertices[ face ], &vertices[ iP ]);
 				iP+=nvertices[ face ];
 			}
-			pSubd2->Finalise();
-
-			pSubd2->AddRef();
-			for ( face = 0; face < nfaces; face++ )
+			if( pSubd2->Finalise() )
 			{
-				// Add a patch surface to the bucket queue
-				CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( pSubd2, pSubd2->pFacet( face ) );
-				QGetRenderContext() ->pImage() ->PostSurface( pNew );
+				pSubd2->AddRef();
+				for ( face = 0; face < nfaces; face++ )
+				{
+					// Add a patch surface to the bucket queue
+					CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( pSubd2, pSubd2->pFacet( face ) );
+					QGetRenderContext() ->pImage() ->PostSurface( pNew );
+				}
+				pSubd2->Release();
+				pPointsClass->Release();
 			}
-			pSubd2->Release();
-			pPointsClass->Release();
+			else
+			{
+				CqBasicError( ErrorID_NonmanifoldSubdivision, Severity_Fatal, "Subdivision Mesh contains non-manifold data" );
+				// Invalid mesh, delete it.
+				pPointsClass->Release();
+				pSubd2->Release();
+			}
 		}
 		else
 		{	

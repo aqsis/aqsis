@@ -71,7 +71,7 @@ public:
 
 	void		Prepare(TqInt cVerts);
 	CqLath*		AddFacet(TqInt cVerts, TqInt* pIndices);
-	void		Finalise();
+	TqBool		Finalise();
 	void		SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFaces);
 	TqBool		CanUsePatch( CqLath* pFace );
 
