@@ -395,7 +395,6 @@ TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
             else if( strncmp( pMsg->m_NameAndData, "quality", pMsg->m_NameLength ) == 0 )
             {
                 quality = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
-                if ( quality < 0 )		quality = 0;
                 if ( quality > 100 )	quality = 100;
             }
             else if( strncmp( pMsg->m_NameAndData, "quantize", pMsg->m_NameLength ) == 0 )

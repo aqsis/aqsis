@@ -222,10 +222,6 @@ SOURCE=.\color.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\intel\criticalsection.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\file.cpp
 # End Source File
 # Begin Source File
@@ -251,10 +247,6 @@ SOURCE=.\plugins.cpp
 # Begin Source File
 
 SOURCE=.\refcount.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\win32\intel\semaphore.cpp
 # End Source File
 # Begin Source File
 
