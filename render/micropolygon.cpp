@@ -212,6 +212,7 @@ void CqMicroPolyGrid::Shade()
 	if( NULL == P() || NULL == I() )	return;
 	
 	static CqVector3D	vecE( 0, 0, 0 );
+	static CqVector3D	Defvec( 0, 0, 0 );
 
 	IqShader* pshadSurface = pSurface() ->pAttributes() ->pshadSurface();
 	IqShader* pshadDisplacement = pSurface() ->pAttributes() ->pshadDisplacement();
@@ -264,8 +265,8 @@ void CqMicroPolyGrid::Shade()
 		CqVector3D vecTemp;
 		P()->GetPoint( vecTemp, i );
 		I()->SetVector( vecTemp, i );
-		if ( USES( lUses, EnvVars_dPdu ) ) dPdu()->SetVector( SO_DuType<CqVector3D>( P(), i, m_pShaderExecEnv ), i );
-		if ( USES( lUses, EnvVars_dPdv ) ) dPdv()->SetVector( SO_DvType<CqVector3D>( P(), i, m_pShaderExecEnv ), i );
+		if ( USES( lUses, EnvVars_dPdu ) ) dPdu()->SetVector( SO_DuType<CqVector3D>( P(), i, m_pShaderExecEnv, Defvec ), i );
+		if ( USES( lUses, EnvVars_dPdv ) ) dPdv()->SetVector( SO_DvType<CqVector3D>( P(), i, m_pShaderExecEnv, Defvec ), i );
 	}
 	while ( ++i < GridSize() );
 

@@ -568,7 +568,7 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to u.
  */
 template <class R>
-R SO_DuType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps )
+R SO_DuType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
 {
 	R Ret;
 	TqInt uRes = ps->uGridRes();
@@ -576,6 +576,8 @@ R SO_DuType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps )
 	
 	TqFloat fdu;
 	ps->du()->GetFloat( fdu );
+
+	if(fdu == 0)	return(Def);
 	
 	R v1,v2;
 	if ( GridX < uRes )
@@ -597,7 +599,7 @@ R SO_DuType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps )
 /** Templatised derivative function. Calculates the derivative of the provided stack entry with respect to v.
  */
 template <class R>
-R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps )
+R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
 {
 	R Ret;
 	TqInt uRes = ps->uGridRes();
@@ -606,6 +608,8 @@ R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps )
 
 	TqFloat fdv;
 	ps->dv()->GetFloat( fdv );
+
+	if(fdv == 0)	return(Def);
 
 	R v1,v2;
 	if ( GridY < vRes )

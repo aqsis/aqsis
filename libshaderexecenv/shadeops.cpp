@@ -986,26 +986,28 @@ STD_SOIMPL	CqShaderExecEnv::SO_spspline( STRINGVAL basis, FLOATVAL value, DEFPAR
 
 STD_SOIMPL	CqShaderExecEnv::SO_fDu( FLOATVAL p, DEFPARAMIMPL )
 {
+	TqFloat Deffloat = 0.0f;
 	INIT_SO
 
 	CHECKVARY( p )
 	CHECKVARY( Result )
 
 	BEGIN_VARYING_SECTION
-	SETFLOAT( Result, SO_DuType<TqFloat>( p, __iGrid, this ) );
+	SETFLOAT( Result, SO_DuType<TqFloat>( p, __iGrid, this, Deffloat ) );
 	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_fDv( FLOATVAL p, DEFPARAMIMPL )
 {
+	TqFloat Deffloat = 0.0f;
 	INIT_SO
 
 	CHECKVARY( p )
 	CHECKVARY( Result )
 
 	BEGIN_VARYING_SECTION
-	SETFLOAT( Result, SO_DvType<TqFloat>( p, __iGrid, this ) );
+	SETFLOAT( Result, SO_DvType<TqFloat>( p, __iGrid, this, Deffloat ) );
 	END_VARYING_SECTION
 }
 
@@ -1026,26 +1028,28 @@ STD_SOIMPL	CqShaderExecEnv::SO_fDeriv( FLOATVAL p, FLOATVAL den, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_cDu( COLORVAL p, DEFPARAMIMPL )
 {
+	CqColor Defcol(0.0f,0.0f,0.0f);
 	INIT_SO
 
 	CHECKVARY( p )
 	CHECKVARY( Result )
 
 	BEGIN_VARYING_SECTION
-	SETCOLOR( Result, SO_DuType<CqColor>( p, __iGrid, this ) );
+	SETCOLOR( Result, SO_DuType<CqColor>( p, __iGrid, this, Defcol ) );
 	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_cDv( COLORVAL p, DEFPARAMIMPL )
 {
+	CqColor Defcol(0.0f,0.0f,0.0f);
 	INIT_SO
 
 	CHECKVARY( p )
 	CHECKVARY( Result )
 
 	BEGIN_VARYING_SECTION
-	SETCOLOR( Result, SO_DvType<CqColor>( p, __iGrid, this ) );
+	SETCOLOR( Result, SO_DvType<CqColor>( p, __iGrid, this, Defcol ) );
 	END_VARYING_SECTION
 }
 
@@ -1066,26 +1070,28 @@ STD_SOIMPL	CqShaderExecEnv::SO_cDeriv( COLORVAL p, FLOATVAL den, DEFPARAMIMPL )
 
 STD_SOIMPL	CqShaderExecEnv::SO_pDu( POINTVAL p, DEFPARAMIMPL )
 {
+	CqVector3D Defvec(0.0f, 0.0f, 0.0f);
 	INIT_SO
 
 	CHECKVARY( p )
 	CHECKVARY( Result )
 
 	BEGIN_VARYING_SECTION
-	SETPOINT( Result, SO_DuType<CqVector3D>( p, __iGrid, this ) );
+	SETPOINT( Result, SO_DuType<CqVector3D>( p, __iGrid, this, Defvec ) );
 	END_VARYING_SECTION
 }
 
 
 STD_SOIMPL	CqShaderExecEnv::SO_pDv( POINTVAL p, DEFPARAMIMPL )
 {
+	CqVector3D Defvec(0.0f, 0.0f, 0.0f);
 	INIT_SO
 
 	CHECKVARY( p )
 	CHECKVARY( Result )
 
 	BEGIN_VARYING_SECTION
-	SETPOINT( Result, SO_DvType<CqVector3D>( p, __iGrid, this ) );
+	SETPOINT( Result, SO_DvType<CqVector3D>( p, __iGrid, this, Defvec ) );
 	END_VARYING_SECTION
 }
 
@@ -1438,6 +1444,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_distance( POINTVAL P1, POINTVAL P2, DEFPARAMIMPL 
 // area(P)
 STD_SOIMPL CqShaderExecEnv::SO_area( POINTVAL p, DEFPARAMIMPL )
 {
+	CqVector3D Defvec(0.0f, 0.0f, 0.0f);
 	INIT_SO
 
 	CqVector3D	vecR;
@@ -1451,8 +1458,8 @@ STD_SOIMPL CqShaderExecEnv::SO_area( POINTVAL p, DEFPARAMIMPL )
 		TqFloat fdu, fdv;
 		du()->GetFloat( fdu, __iGrid );
 		dv()->GetFloat( fdv, __iGrid );
-		vecR = ( SO_DuType<CqVector3D>( p, __iGrid, this ) * fdu ) % 
-			   ( SO_DvType<CqVector3D>( p, __iGrid, this ) * fdv );
+		vecR = ( SO_DuType<CqVector3D>( p, __iGrid, this, Defvec ) * fdu ) % 
+			   ( SO_DvType<CqVector3D>( p, __iGrid, this, Defvec ) * fdv );
 		SETFLOAT( Result, vecR.Magnitude() );
 	}
 
@@ -1853,6 +1860,7 @@ STD_SOIMPL CqShaderExecEnv::SO_depth( POINTVAL p, DEFPARAMIMPL )
 // calculatenormal(P)
 STD_SOIMPL CqShaderExecEnv::SO_calculatenormal( POINTVAL p, DEFPARAMIMPL )
 {
+	CqVector3D Defvec(0.0f, 0.0f, 0.0f);
 	INIT_SO
 
 	// Find out if the orientation is inverted.
@@ -1864,8 +1872,8 @@ STD_SOIMPL CqShaderExecEnv::SO_calculatenormal( POINTVAL p, DEFPARAMIMPL )
 	CHECKVARY( Result )
 
 	BEGIN_VARYING_SECTION
-	CqVector3D	dPdu = SO_DuType<CqVector3D>( p, __iGrid, this );
-	CqVector3D	dPdv = SO_DvType<CqVector3D>( p, __iGrid, this );
+	CqVector3D	dPdu = SO_DuType<CqVector3D>( p, __iGrid, this, Defvec );
+	CqVector3D	dPdv = SO_DvType<CqVector3D>( p, __iGrid, this, Defvec );
 	CqVector3D	N = dPdu % dPdv;
 	N.Unit();
 	N *= neg;
@@ -1964,6 +1972,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_nmix( NORMALVAL n0, NORMALVAL n1, FLOATVAL value,
 // texture(S)
 STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFPARAMVARIMPL )
 {
+	TqFloat Deffloat = 0.0f;
 	INIT_SO
 
 	if( NULL == QGetRenderContextI() )
@@ -1990,14 +1999,14 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFP
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
 		{
-			TqFloat dsdu = SO_DuType<TqFloat>( s(), __iGrid, this );
+			TqFloat dsdu = SO_DuType<TqFloat>( s(), __iGrid, this, Deffloat );
 			swidth = fabs( dsdu * fdu );
-			TqFloat dtdu = SO_DuType<TqFloat>( t(), __iGrid, this );
+			TqFloat dtdu = SO_DuType<TqFloat>( t(), __iGrid, this, Deffloat );
 			twidth = fabs( dtdu * fdu );
 
-			TqFloat dsdv = SO_DvType<TqFloat>( s(), __iGrid, this );
+			TqFloat dsdv = SO_DvType<TqFloat>( s(), __iGrid, this, Deffloat );
 			swidth += fabs( dsdv * fdv );
-			TqFloat dtdv = SO_DvType<TqFloat>( t(), __iGrid, this );
+			TqFloat dtdv = SO_DvType<TqFloat>( t(), __iGrid, this, Deffloat );
 			twidth += fabs( dtdv * fdv );
 		}
 		else
@@ -2037,6 +2046,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture1( STRINGVAL name, FLOATVAL channel, DEFP
 // texture(S,F,F)
 STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVARIMPL )
 {
+	TqFloat Deffloat = 0.0f;
 	INIT_SO
 
 	if( NULL == QGetRenderContextI() )
@@ -2063,14 +2073,14 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture2( STRINGVAL name, FLOATVAL channel, FLOA
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
 		{
-			TqFloat dsdu = SO_DuType<TqFloat>( s, __iGrid, this );
+			TqFloat dsdu = SO_DuType<TqFloat>( s, __iGrid, this, Deffloat );
 			swidth = fabs( dsdu * fdu );
-			TqFloat dtdu = SO_DuType<TqFloat>( t, __iGrid, this );
+			TqFloat dtdu = SO_DuType<TqFloat>( t, __iGrid, this, Deffloat );
 			twidth = fabs( dtdu * fdu );
 
-			TqFloat dsdv = SO_DvType<TqFloat>( s, __iGrid, this );
+			TqFloat dsdv = SO_DvType<TqFloat>( s, __iGrid, this, Deffloat );
 			swidth += fabs( dsdv * fdv );
-			TqFloat dtdv = SO_DvType<TqFloat>( t, __iGrid, this );
+			TqFloat dtdv = SO_DvType<TqFloat>( t, __iGrid, this, Deffloat );
 			twidth += fabs( dtdv * fdv );
 		}
 		else
@@ -2158,6 +2168,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ftexture3( STRINGVAL name, FLOATVAL channel, FLOA
 // texture(S)
 STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFPARAMVARIMPL )
 {
+	TqFloat Deffloat = 0.0f;
 	INIT_SO
 
 	if( NULL == QGetRenderContextI() )
@@ -2184,14 +2195,14 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
 		{
-			TqFloat dsdu = SO_DuType<TqFloat>( s(), __iGrid, this );
+			TqFloat dsdu = SO_DuType<TqFloat>( s(), __iGrid, this, Deffloat );
 			swidth = fabs( dsdu * fdu );
-			TqFloat dsdv = SO_DvType<TqFloat>( s(), __iGrid, this );
+			TqFloat dsdv = SO_DvType<TqFloat>( s(), __iGrid, this, Deffloat );
 			swidth += fabs( dsdv * fdv );
 
-			TqFloat dtdu = SO_DuType<TqFloat>( t(), __iGrid, this );
+			TqFloat dtdu = SO_DuType<TqFloat>( t(), __iGrid, this, Deffloat );
 			twidth = fabs( dtdu * fdu );
-			TqFloat dtdv = SO_DvType<TqFloat>( t(), __iGrid, this );
+			TqFloat dtdv = SO_DvType<TqFloat>( t(), __iGrid, this, Deffloat );
 			twidth += fabs( dtdv * fdv );
 		}
 		else
@@ -2231,6 +2242,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture1( STRINGVAL name, FLOATVAL channel, DEFP
 // texture(S,F,F)
 STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOATVAL s, FLOATVAL t, DEFPARAMVARIMPL )
 {
+	TqFloat Deffloat = 0.0f;
 	INIT_SO
 
 	if( NULL == QGetRenderContextI() )
@@ -2257,14 +2269,14 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture2( STRINGVAL name, FLOATVAL channel, FLOA
 		TqFloat swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f && fdv != 0.0f )
 		{
-			TqFloat dsdu = SO_DuType<TqFloat>( s, __iGrid, this );
+			TqFloat dsdu = SO_DuType<TqFloat>( s, __iGrid, this, Deffloat );
 			swidth = fabs( dsdu * fdu );
-			TqFloat dsdv = SO_DvType<TqFloat>( s, __iGrid, this );
+			TqFloat dsdv = SO_DvType<TqFloat>( s, __iGrid, this, Deffloat );
 			swidth += fabs( dsdv * fdv );
 
-			TqFloat dtdu = SO_DuType<TqFloat>( t, __iGrid, this );
+			TqFloat dtdu = SO_DuType<TqFloat>( t, __iGrid, this, Deffloat );
 			twidth = fabs( dtdu * fdu );
-			TqFloat dtdv = SO_DvType<TqFloat>( t, __iGrid, this );
+			TqFloat dtdv = SO_DvType<TqFloat>( t, __iGrid, this, Deffloat );
 			twidth += fabs( dtdv * fdv );
 		}
 		else
@@ -2353,6 +2365,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ctexture3( STRINGVAL name, FLOATVAL channel, FLOA
 // environment(S,P)
 STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, VECTORVAL R, DEFPARAMVARIMPL )
 {
+	CqVector3D Defvec(0.0f, 0.0f, 0.0f);
 	INIT_SO
 
 	if( NULL == QGetRenderContextI() )
@@ -2385,12 +2398,12 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment2( STRINGVAL name, FLOATVAL channel, 
 		CqVector3D swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f )
 		{
-			CqVector3D dRdu = SO_DuType<CqVector3D>( R, __iGrid, this );
+			CqVector3D dRdu = SO_DuType<CqVector3D>( R, __iGrid, this, Defvec );
 			swidth = dRdu * fdu;
 		}
 		if ( fdv != 0.0f )
 		{
-			CqVector3D dRdv = SO_DvType<CqVector3D>( R, __iGrid, this );
+			CqVector3D dRdv = SO_DvType<CqVector3D>( R, __iGrid, this, Defvec );
 			twidth = dRdv * fdv;
 		}
 		else
@@ -2479,6 +2492,7 @@ STD_SOIMPL CqShaderExecEnv::SO_fenvironment3( STRINGVAL name, FLOATVAL channel, 
 // environment(S,P)
 STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, VECTORVAL R, DEFPARAMVARIMPL )
 {
+	CqVector3D Defvec(0.0f, 0.0f, 0.0f);
 	INIT_SO
 
 	if( NULL == QGetRenderContextI() )
@@ -2510,12 +2524,12 @@ STD_SOIMPL CqShaderExecEnv::SO_cenvironment2( STRINGVAL name, FLOATVAL channel, 
 		CqVector3D swidth = 0.0f, twidth = 0.0f;
 		if ( fdu != 0.0f )
 		{
-			CqVector3D dRdu = SO_DuType<CqVector3D>( R, __iGrid, this );
+			CqVector3D dRdu = SO_DuType<CqVector3D>( R, __iGrid, this, Defvec );
 			swidth = dRdu * fdu;
 		}
 		if ( fdv != 0.0f )
 		{
-			CqVector3D dRdv = SO_DvType<CqVector3D>( R, __iGrid, this );
+			CqVector3D dRdv = SO_DvType<CqVector3D>( R, __iGrid, this, Defvec );
 			twidth = dRdv * fdv;
 		}
 		else
@@ -4118,6 +4132,7 @@ STD_SOIMPL CqShaderExecEnv::SO_rotate( VECTORVAL Q, FLOATVAL angle, POINTVAL P0,
 // filterstep(edge,s1)
 STD_SOIMPL CqShaderExecEnv::SO_filterstep( FLOATVAL edge, FLOATVAL s1, DEFPARAMVARIMPL )
 {
+	TqFloat Deffloat = 0.0f;
 	INIT_SO
 
 	GET_FILTER_PARAMS;
@@ -4135,8 +4150,8 @@ STD_SOIMPL CqShaderExecEnv::SO_filterstep( FLOATVAL edge, FLOATVAL s1, DEFPARAMV
 	BEGIN_VARYING_SECTION
 	GETFLOAT( s1 );
 	GETFLOAT( edge );
-	TqFloat dsdu = SO_DuType<TqFloat>( s1, __iGrid, this );
-	TqFloat dsdv = SO_DvType<TqFloat>( s1, __iGrid, this );
+	TqFloat dsdu = SO_DuType<TqFloat>( s1, __iGrid, this, Deffloat );
+	TqFloat dsdv = SO_DvType<TqFloat>( s1, __iGrid, this, Deffloat );
 
 	TqFloat w = fabs( dsdu * fdu * dsdv * fdv );
 	w *= _pswidth;
