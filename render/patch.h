@@ -304,6 +304,18 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 			return ( 1 );
 		}
 
+		virtual CqVector3D	SurfaceParametersAtVertex(TqInt index)
+		{
+			CqVector3D	vec(0,0,0);
+			TqFloat u = static_cast<TqFloat>(index % m_nu);
+			u /= (m_nu-1);
+			TqFloat v = static_cast<TqFloat>(index / m_nu);
+			v /= (m_nv-1);
+			vec.x(u);
+			vec.y(v);
+			return(vec);
+		}
+
 	protected:
 
 		TqInt	m_uPatches,  			///< Number of patches in u.
@@ -368,6 +380,18 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 		{
 			/// \todo Must work out what this value should be.
 			return ( 1 );
+		}
+
+		virtual CqVector3D	SurfaceParametersAtVertex(TqInt index)
+		{
+			CqVector3D	vec(0,0,0);
+			TqFloat u = static_cast<TqFloat>(index % m_nu);
+			u /= (m_nu-1);
+			TqFloat v = static_cast<TqFloat>(index / m_nu);
+			v /= (m_nv-1);
+			vec.x(u);
+			vec.y(v);
+			return(vec);
 		}
 
 	protected:

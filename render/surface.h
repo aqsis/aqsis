@@ -107,6 +107,14 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		virtual void	NaturalSubdivide(CqParameter* pParam,CqParameter* pParam1, CqParameter* pParam2, TqBool u) {}
 		virtual void	PostSubdivide() {}
 
+		/** Get the surface paramter values for the given vertex index. Used when constructing a surface
+		 * using "Pz" point specification.
+		 */
+		virtual CqVector3D	SurfaceParametersAtVertex(TqInt index)
+		{
+			return(CqVector3D(0,0,0));
+		}
+
 		/** Get a pointer to the attributes state associated with this GPrim.
 		 * \return A pointer to a CqAttributes class.
 		 */

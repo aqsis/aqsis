@@ -2989,7 +2989,16 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 		pSurface->SetDefaultPrimitiveVariables();
 		// Fill in primitive variables specified.
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
-			CreateGPrim( pSurface );
+		{
+			std::vector<CqBasicSurface*> aSplits;
+			pSurface->Split(aSplits);
+			std::vector<CqBasicSurface*>::iterator iSS;
+			for( iSS = aSplits.begin(); iSS != aSplits.end(); iSS++ )
+			{
+				static_cast<CqSurfacePatchBicubic*>(*iSS)->ConvertToBezierBasis();
+				CreateGPrim( static_cast<CqSurfacePatchBicubic*>(*iSS) );
+			}
+		}
 		else
 			pSurface->Release();
 	}
@@ -4418,7 +4427,11 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 
 				case RIL_Pz:
 				for ( i = 0; i < pSurface->cVertex(); i++ )
-					(*pSurface->P()) [ i ] = CqVector3D( i % 1, FLOOR( i / 2 ), pPoints[ i ] );
+				{	
+					CqVector3D vecP = pSurface->SurfaceParametersAtVertex(i);
+					vecP.z(pPoints[ i ]);
+					(*pSurface->P()) [ i ] = vecP;
+				}
 				break;
 
 				case RIL_Pw:
