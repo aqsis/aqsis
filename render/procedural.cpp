@@ -405,6 +405,7 @@ class CqRiProceduralRunProgram
 public:
     HANDLE hChildStdinWrDup;
     HANDLE hChildStdoutRdDup;
+	bool m_valid;
 };
 
 static std::map<std::string, CqRiProceduralRunProgram*> ActiveProcRP;
@@ -425,6 +426,8 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
         // We don't have an active RunProgram for the specifed
         // program. We need to try and fork a new one
         CqRiProceduralRunProgram *run_proc = new CqRiProceduralRunProgram;
+		// Proc is invalid until fully resolved.
+		run_proc->m_valid = TqFalse;
 
         ActiveProcRP[std::string(((char**)data)[0])] = run_proc;
         it = ActiveProcRP.find(std::string(((char**)data)[0]));
@@ -476,7 +479,15 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
         // Store the handles.
         (it->second)->hChildStdinWrDup = hChildStdinWr;
         (it->second)->hChildStdoutRdDup = hChildStdoutRd;
+
+		// Proc seems to be valid.
+		run_proc->m_valid = TqTrue;
     }
+	else
+	{
+		if( !(it->second)->m_valid )
+			return;
+	}
 
     int fd_hChildStdinWrDup = _open_osfhandle((long)(it->second)->hChildStdinWrDup, 0);
     FILE *fileout = _fdopen( fd_hChildStdinWrDup, "w");
