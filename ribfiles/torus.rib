@@ -1,6 +1,6 @@
 Orientation "lh"
 Format 320 240 1
-PixelSamples 1 1
+PixelSamples 2 2
 ShadingRate 1.0
 Option "statistics" "endofframe" [1]
 Option "searchpath" "shader" ["../shaders:&"]
@@ -43,6 +43,7 @@ TransformEnd
 # Object "Torus"
 AttributeBegin
 Color 0.823529 0.4313726 0.933333
+Opacity 0.5 0.5 0.5
 ConcatTransform [1.0 0.0 0.0 0  0.0 1.0 0.0 0  0.0 0.0 1.0 0  0.0 0.0 0.0 1]
 Torus 85.0 15.0 0 360 360
 AttributeEnd
