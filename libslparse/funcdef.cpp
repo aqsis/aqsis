@@ -266,7 +266,7 @@ CqFuncDef	gStandardFuncs[]={
 			CqFuncDef(Type_String,"concat",	"concat",	"ss*"),
 			CqFuncDef(Type_String,"format",	"format",	"s*"),
 			CqFuncDef(Type_Float,"match",	"match",	"ss"),
-			CqFuncDef(Type_Float,"rotate",	"rotate",	"pfpp"),
+			CqFuncDef(Type_Point,"rotate",	"rotate",	"pfpp"),
 			CqFuncDef(Type_Float,"filterstep",	"filterstep2",	"fff*"),
 			CqFuncDef(Type_Float,"filterstep",	"filterstep",	"ff*"),
 			CqFuncDef(Type_Color,"specularbrdf",	"specularbrdf",	"vnvf"),
