@@ -690,7 +690,7 @@ private:
      */
     void	AddString( const char* s, std::vector<UsProgramElement>* pProgramArea )
     {
-        CqString * ps = new CqString( s );
+        CqString * ps = new CqString( s );	// MGC: MEMLEAK , cleanup missing
         UsProgramElement E;
         E.m_pString = ps;
         pProgramArea->push_back( E );
