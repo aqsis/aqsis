@@ -205,7 +205,7 @@ CqSolidContext::CqSolidContext( CqString& type, CqContext* pconParent ) : CqCont
 		// Check if we are linking under a Primitive node, if so warn, and link at the top.
 		if(pParentSolid->pCSGNode()->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive)
 		{
-			CqAttributeError(RIE_BADSOLID, Severity_Normal, "Cannot add solid block under 'Primitive' solid block", m_pattrCurrent, TqTrue);
+			CqAttributeError error(RIE_BADSOLID, Severity_Normal, "Cannot add solid block under 'Primitive' solid block", m_pattrCurrent, TqTrue);
 			m_lCSGTrees.LinkLast( m_pCSGNode );
 		}
 		else
