@@ -1,8 +1,9 @@
 EXTRA_DIST = scanner.cxx parser.cxx parser.h libslparse.dsp
 #Must disable optimisation here, because it takes far too much memory.
-AM_CXXFLAGS=@AQSIS_CXXFLAGS@ 
+CXXFLAGS=
+AM_CXXFLAGS=-O0
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@
-AM_CFLAGS=@AQSIS_CFLAGS@ 
+AM_CFLAGS=-O0
 
 
 lib_LTLIBRARIES =  libslparse.la
