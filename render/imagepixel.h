@@ -202,7 +202,8 @@ public:
     }
     void	AllocateSamples( TqInt XSamples, TqInt YSamples );
     void	InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBool fJitter = TqTrue );
-    void	OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples)
+    void	ShuffleSamples( );
+	void	OffsetSamples(CqVector2D& vecPixel, std::vector<CqVector2D>& vecSamples)
 	{
 		// add in the pixel offset
 		const TqInt numSamples = m_XSamples * m_YSamples;

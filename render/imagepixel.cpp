@@ -292,6 +292,35 @@ void CqImagePixel::InitialiseSamples( std::vector<CqVector2D>& vecSamples, TqBoo
 
 
 //----------------------------------------------------------------------
+/** Shuffle the sample data to avoid repeating patterns in the sampling.
+ */
+
+void CqImagePixel::ShuffleSamples( )
+{
+	TqInt numSamples = m_XSamples * m_YSamples;
+
+	// Shuffle the DoF offset indices.
+	TqInt which = 0;
+	std::vector<CqVector2D> tmpDofOffsets(numSamples);
+
+	// Store the DoF offsets in the canonical order to ensure that
+	// assumptions made about ordering during sampling still hold.
+	TqInt i;
+	for( i = 0; i < numSamples; ++i)
+	{
+		tmpDofOffsets[i] = m_Samples[m_DofOffsetIndices[i]].m_DofOffset;
+		m_DofOffsetIndices[i] = i;
+	}
+
+	// we now shuffle the dof offsets but remember which one went where.
+	std::random_shuffle(m_DofOffsetIndices.begin(), m_DofOffsetIndices.end());
+	for( i = 0; i < numSamples; ++i)
+	{
+		m_Samples[m_DofOffsetIndices[i]].m_DofOffset = tmpDofOffsets[i];
+	}
+}
+
+//----------------------------------------------------------------------
 /** Clear the relevant data from the image element preparing it for the next usage.
  */
 

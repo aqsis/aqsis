@@ -110,6 +110,7 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
                 m_aieImage[which].Clear();
                 m_aieImage[which].AllocateSamples( m_PixelXSamples, m_PixelYSamples );
                 m_aieImage[which].InitialiseSamples( m_aSamplePositions[which], fJitter );
+				m_aieImage[which].ShuffleSamples();
 
                 which++;
             }
@@ -118,7 +119,7 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
 
 	//:TODO: AGG, sort out sample shuffling.
 	// now shuffle the pixels around and add in the pixel offset to the position.
-//	std::random_shuffle(m_aImageIndex.begin(), m_aImageIndex.end());
+	std::random_shuffle(m_aieImage.begin(), m_aieImage.end());
 
 	TqInt which = 0;
 	TqInt numPixels = m_RealWidth*m_RealHeight;
