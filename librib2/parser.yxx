@@ -346,9 +346,9 @@ complete_request
 					// RISpec 3.2 isn't very clear, not sure if stripping the '#'s is right or not
 					if( $1[0] == '#' && $1[1] == '#' ) // Structure comment
 					{
-						pArchiveCallback(RI_STRUCTURE, "%s", &( $1[2]) ); 
+						pArchiveCallback("structure", "%s", &( $1[2]) ); 
 					} else {  // User Data Record comment
-						pArchiveCallback(RI_COMMENT, "%s", &( $1[1]) ); 
+						pArchiveCallback("comment", "%s", &( $1[1]) ); 
 					};
 				};
 				DiscardStringValue($1);
