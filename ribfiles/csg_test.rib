@@ -1,0 +1,74 @@
+Orientation "lh"
+Format 320 240 1
+PixelSamples 1 1
+ShadingRate 1.0
+Option "statistics" "endofframe" [1]
+Option "searchpath" "shader" ["../shaders:&"] 
+FrameBegin 0
+Display "csg_test.tif" "file" "rgba"
+Display "+csg_test.tif" "framebuffer" "rgba"
+
+# Camera name: "Kamera01"
+Projection "perspective" "fov" [36.0]
+Translate 0 0 40
+Rotate -35 1 0 0
+Rotate 35 0 1 0
+
+WorldBegin
+# Default-Surface
+Surface "matte"
+
+TransformBegin
+Translate 10 10 -20
+LightSource "pointlight" 2 "intensity" [150]
+TransformEnd
+
+TransformBegin
+Translate -10 10 -20
+LightSource "pointlight" 3 "intensity" [150]
+TransformEnd
+
+SolidBegin "difference"
+	Rotate 90 1 0 0
+	SolidBegin "primitive"
+		AttributeBegin
+		Color 0.560784 0.878431 0.341176
+		Sphere 10.0 -10.0 10.0 360
+		AttributeEnd
+	SolidEnd
+
+	SolidBegin "union"
+	Rotate 90.0 1 0 0
+	SolidBegin "primitive"
+		AttributeBegin
+		Color 1 0 0
+		Cylinder 5.0 -20 20 360
+		Disk -20 5 360
+		Disk 20 5 360
+		AttributeEnd
+	SolidEnd
+	SolidBegin "primitive"
+		AttributeBegin
+		Rotate 90.0 0 1 0
+		Color 1 1 0
+		Cylinder 5.0 -20 20 360
+		Disk -20 5 360
+		Disk 20 5 360
+		AttributeEnd
+	SolidEnd
+	SolidBegin "primitive"
+		AttributeBegin
+		Rotate 90.0 1 0 0
+		Color 0 0 1
+		Cylinder 5.0 -20 20 360
+		Disk -20 5 360
+		Disk 20 5 360
+		AttributeEnd
+	SolidEnd
+	SolidEnd
+
+SolidEnd
+
+WorldEnd
+FrameEnd
+
