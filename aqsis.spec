@@ -28,7 +28,7 @@ A RenderMan(tm)-compatible renderer
 #./bootstrap
 export CFLAGS="-O2" 
 export CXXFLAGS="-O29" 
-%configure
+./configure $features
 
 make
 #make check
