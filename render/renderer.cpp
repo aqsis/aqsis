@@ -39,6 +39,7 @@
 #include	"texturemap.h"
 #include	"shadervm.h"
 
+
 START_NAMESPACE( Aqsis )
 
 extern IqDDManager* CreateDisplayDriverManager();
@@ -49,6 +50,14 @@ CqRenderer* pCurrRenderer = 0;
 
 
 CqOptions	goptDefault;					///< Default options.
+
+static TqUlong ohash = 0; //< == "object"
+static TqUlong shash = 0; //< == "shader"
+static TqUlong chash = 0; //< == "camera"
+static TqUlong cuhash = 0; //< == "current"
+
+static CqMatrix oldkey[2];  //< to eliminate Inverse(), Transpose() matrix ops.
+static CqMatrix oldresult[2];
 
 //---------------------------------------------------------------------
 /** Default constructor for the main renderer class. Initialises current state.
@@ -65,15 +74,29 @@ CqRenderer::CqRenderer() :
 	// Initialise the array of coordinate systems.
 	m_aCoordSystems.resize( CoordSystem_Last );
 
-	m_aCoordSystems[ CoordSystem_Camera ]	.m_strName = "__camera__";
+	m_aCoordSystems[ CoordSystem_Camera ].m_strName = "__camera__";
 	m_aCoordSystems[ CoordSystem_Current ].m_strName = "__current__";
-	m_aCoordSystems[ CoordSystem_World ]	.m_strName = "world";
-	m_aCoordSystems[ CoordSystem_Screen ]	.m_strName = "screen";
-	m_aCoordSystems[ CoordSystem_NDC ]	.m_strName = "NDC";
-	m_aCoordSystems[ CoordSystem_Raster ]	.m_strName = "raster";
+	m_aCoordSystems[ CoordSystem_World ].m_strName = "world";
+	m_aCoordSystems[ CoordSystem_Screen ].m_strName = "screen";
+	m_aCoordSystems[ CoordSystem_NDC ].m_strName = "NDC";
+	m_aCoordSystems[ CoordSystem_Raster ].m_strName = "raster";
+
+	m_aCoordSystems[ CoordSystem_Camera ].m_hash = CqParameter::hash( "__camera__" );
+	m_aCoordSystems[ CoordSystem_Current ].m_hash = CqParameter::hash( "__current__" );
+	m_aCoordSystems[ CoordSystem_World ].m_hash = CqParameter::hash( "world" );
+	m_aCoordSystems[ CoordSystem_Screen ].m_hash = CqParameter::hash( "screen" );
+	m_aCoordSystems[ CoordSystem_NDC ].m_hash = CqParameter::hash( "NDC" );
+	m_aCoordSystems[ CoordSystem_Raster ].m_hash = CqParameter::hash( "raster" );
 
 	m_pDDManager = CreateDisplayDriverManager();
 	m_pDDManager->Initialise();
+
+	// Get the hash keys for object, shader, camera keywords.
+	if ( ohash == 0 ) ohash = CqParameter::hash( "object" );
+	if ( shash == 0 ) shash = CqParameter::hash( "shader" );
+	if ( chash == 0 ) chash = CqParameter::hash( "camera" );
+	if ( cuhash == 0 ) cuhash = CqParameter::hash( "current" );
+
 }
 
 //---------------------------------------------------------------------
@@ -564,30 +587,43 @@ void CqRenderer::Initialise()
 /** Get the matrix to convert between the specified coordinate systems.
  */
 
+
 CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time )
 {
-	TqInt i;
 	CqMatrix	matResult, matA, matB;
+	TqUlong fhash, thash;
+
+
+	// Get the hash keys for From,To spaces
+	fhash = CqParameter::hash( strFrom );
+	thash = CqParameter::hash( strTo );
+
 	// Get the two component matrices.
 	// First check for special cases.
-	if ( strcmp( strFrom, "object" ) == 0 ) matA = matObjectToWorld;
-	else if ( strcmp( strFrom, "shader" ) == 0 ) matA = matShaderToWorld;
-	else if ( ( strcmp( strFrom, "camera" ) == 0 ) || ( strcmp( strFrom, "current" ) == 0 ) )
+	if ( fhash == ohash ) matA = matObjectToWorld;
+	else if ( fhash == shash ) matA = matShaderToWorld;
+	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
 		matA = m_transCamera.GetMotionObjectInterpolated( time ).Inverse();
-	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-			if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+	else
+	{
+		WhichMatToWorld( matA, fhash );
+	}
 
-	if ( strcmp( strTo, "object" ) == 0 ) matB = matObjectToWorld.Inverse();
-	else if ( strcmp( strTo, "shader" ) == 0 ) matB = matShaderToWorld.Inverse();
-	else if ( ( strcmp( strTo, "camera" ) == 0 ) || ( strcmp( strTo, "current" ) == 0 ) )
+
+	if ( thash == ohash ) matB = matObjectToWorld.Inverse();
+	else if ( thash == shash ) matB = matShaderToWorld.Inverse();
+	else if ( ( thash == chash ) || ( thash == cuhash ) )
 		matB = m_transCamera.GetMotionObjectInterpolated( time );
-	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-			if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
+	else
+	{
+		WhichMatWorldTo( matB, thash );
+	}
 
 	matResult = matB * matA;
 
 	return ( matResult );
 }
+
 
 
 //----------------------------------------------------------------------
@@ -596,29 +632,49 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 
 CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time )
 {
-	TqInt i;
 	CqMatrix	matResult, matA, matB;
+
+	TqUlong fhash, thash;
+
+	// Get the hash keys for From,To spaces
+	fhash = CqParameter::hash( strFrom );
+	thash = CqParameter::hash( strTo );
+
 	// Get the two component matrices.
 	// First check for special cases.
-	if ( strcmp( strFrom, "object" ) == 0 ) matA = matObjectToWorld;
-	else if ( strcmp( strFrom, "shader" ) == 0 ) matA = matShaderToWorld;
-	else if ( ( strcmp( strFrom, "camera" ) == 0 ) || ( strcmp( strFrom, "current" ) == 0 ) )
+	if ( fhash == ohash ) matA = matObjectToWorld;
+	else if ( fhash == shash ) matA = matShaderToWorld;
+	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
 		matA = m_transCamera.GetMotionObjectInterpolated( time ).Inverse();
-	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-			if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+	else
+	{
+		WhichMatToWorld ( matA, fhash );
+	}
 
-	if ( strcmp( strTo, "object" ) == 0 ) matB = matObjectToWorld.Inverse();
-	else if ( strcmp( strTo, "shader" ) == 0 ) matB = matShaderToWorld.Inverse();
-	else if ( ( strcmp( strTo, "camera" ) == 0 ) || ( strcmp( strTo, "current" ) == 0 ) )
+	if ( thash == ohash ) matB = matObjectToWorld.Inverse();
+	else if ( thash == shash ) matB = matShaderToWorld.Inverse();
+	else if ( ( thash == chash ) || ( thash == cuhash ) )
 		matB = m_transCamera.GetMotionObjectInterpolated( time );
-	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-			if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
+	else
+	{
+		WhichMatWorldTo ( matB, thash );
+	}
 
 	matResult = matB * matA;
 
-	matResult[ 3 ][ 0 ] = matResult[ 3 ][ 1 ] = matResult[ 3 ][ 2 ] = matResult[ 0 ][ 3 ] = matResult[ 1 ][ 3 ] = matResult[ 2 ][ 3 ] = 0.0;
-	matResult[ 3 ][ 3 ] = 1.0;
+	
 
+	if (memcmp((void *) oldkey[0].pElements(), (void *) matResult.pElements(), sizeof(TqFloat) * 16) != 0)
+	{
+		oldkey[0] = matResult;
+		matResult[ 3 ][ 0 ] = matResult[ 3 ][ 1 ] = matResult[ 3 ][ 2 ] = matResult[ 0 ][ 3 ] = matResult[ 1 ][ 3 ] = matResult[ 2 ][ 3 ] = 0.0;
+		matResult[ 3 ][ 3 ] = 1.0;
+		oldresult[0] = matResult;
+
+	} else
+	{
+		return oldresult[0];
+	}
 	return ( matResult );
 }
 
@@ -629,30 +685,49 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
 
 CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld, TqFloat time )
 {
-	TqInt i;
 	CqMatrix	matResult, matA, matB;
+	
+	TqUlong fhash, thash;
+
+	// Get the hash keys for From,To spaces
+	fhash = CqParameter::hash( strFrom );
+	thash = CqParameter::hash( strTo );
+
 	// Get the two component matrices.
 	// First check for special cases.
-	if ( strcmp( strFrom, "object" ) == 0 ) matA = matObjectToWorld;
-	else if ( strcmp( strFrom, "shader" ) == 0 ) matA = matShaderToWorld;
-	else if ( ( strcmp( strFrom, "camera" ) == 0 ) || ( strcmp( strFrom, "current" ) == 0 ) )
+	if ( fhash == ohash ) matA = matObjectToWorld;
+	else if ( fhash == shash ) matA = matShaderToWorld;
+	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
 		matA = m_transCamera.GetMotionObjectInterpolated( time ).Inverse();
-	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-			if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+	else
+	{
+		WhichMatToWorld ( matA, fhash );
+	}
 
-	if ( strcmp( strTo, "object" ) == 0 ) matB = matObjectToWorld.Inverse();
-	else if ( strcmp( strTo, "shader" ) == 0 ) matB = matShaderToWorld.Inverse();
-	else if ( ( strcmp( strTo, "camera" ) == 0 ) || ( strcmp( strTo, "current" ) == 0 ) )
+	if ( thash == ohash ) matB = matObjectToWorld.Inverse();
+	else if ( thash == shash ) matB = matShaderToWorld.Inverse();
+	else if ( ( thash == chash ) || ( thash == cuhash ) )
 		matB = m_transCamera.GetMotionObjectInterpolated( time );
-	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-			if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
+	else
+	{
+		WhichMatWorldTo ( matB, thash );
+	}
+
 
 	matResult = matB * matA;
+	if (memcmp((void *) oldkey[1].pElements(), (void *) matResult.pElements(), sizeof(TqFloat) * 16) != 0)
+	{
+		oldkey[1] = matResult;
+		matResult[ 3 ][ 0 ] = matResult[ 3 ][ 1 ] = matResult[ 3 ][ 2 ] = matResult[ 0 ][ 3 ] = matResult[ 1 ][ 3 ] = matResult[ 2 ][ 3 ] = 0.0;
+		matResult[ 3 ][ 3 ] = 1.0;
+		matResult.Inverse();
+		matResult.Transpose();
+		oldresult[1] = matResult;
 
-	matResult[ 3 ][ 0 ] = matResult[ 3 ][ 1 ] = matResult[ 3 ][ 2 ] = matResult[ 0 ][ 3 ] = matResult[ 1 ][ 3 ] = matResult[ 2 ][ 3 ] = 0.0;
-	matResult[ 3 ][ 3 ] = 1.0;
-	matResult.Inverse();
-	matResult.Transpose();
+	} else
+	{
+		return oldresult[1];
+	}
 
 	return ( matResult );
 }
@@ -721,8 +796,7 @@ TqBool	CqRenderer::SetCoordSystem( const char* strName, const CqMatrix& matToWor
 	TqLong hash = CqParameter::hash( strName );
 	for ( TqUint i = 0; i < m_aCoordSystems.size(); i++ )
 	{
-		TqLong hash2 = CqParameter::hash( m_aCoordSystems[ i ].m_strName.c_str() );
-		if ( hash2 == hash )
+		if ( m_aCoordSystems[ i ].m_hash == hash )
 		{
 			m_aCoordSystems[ i ].m_matToWorld = matToWorld;
 			m_aCoordSystems[ i ].m_matWorldTo = matToWorld.Inverse();
@@ -1043,6 +1117,65 @@ TqBool	CqRenderer::GetBasisMatrix( CqMatrix& matBasis, const CqString& name )
 	}
 	else
 		return ( TqFalse );
+}
+
+//---------------------------------------------------------------------
+/** Which matrix will be used in ToWorld
+ */
+void CqRenderer::WhichMatToWorld( CqMatrix &matA, TqUlong thash )
+{
+	static TqInt awhich = 0;
+	TqInt tmp = awhich;
+
+
+	for ( ; awhich >= 0; awhich-- )
+	{
+		if ( m_aCoordSystems[ awhich ].m_hash == thash )
+		{
+			matA = m_aCoordSystems[ awhich ].m_matToWorld;
+			return ;
+		}
+	}
+
+	TqInt size = m_aCoordSystems.size() - 1;
+	for ( awhich = size; awhich > tmp; awhich-- )
+	{
+		if ( m_aCoordSystems[ awhich ].m_hash == thash )
+		{
+			matA = m_aCoordSystems[ awhich ].m_matToWorld;
+			break;
+		}
+	}
+}
+
+//---------------------------------------------------------------------
+/** Which matrix will be used in WorldTo
+ */
+
+void CqRenderer::WhichMatWorldTo( CqMatrix &matB, TqUlong thash )
+{
+	static TqInt bwhich = 0;
+	TqInt tmp = bwhich;
+
+
+	for ( ; bwhich >= 0; bwhich-- )
+	{
+		if ( m_aCoordSystems[ bwhich ].m_hash == thash )
+		{
+			matB = m_aCoordSystems[ bwhich ].m_matWorldTo;
+			return ;
+		}
+	}
+
+	TqInt size = m_aCoordSystems.size() - 1;
+	for ( bwhich = size; bwhich > tmp; bwhich-- )
+	{
+		if ( m_aCoordSystems[ bwhich ].m_hash == thash )
+		{
+			matB = m_aCoordSystems[ bwhich ].m_matWorldTo;
+			break;
+		}
+	}
 }
 
 //---------------------------------------------------------------------

@@ -58,13 +58,14 @@ struct SqCoordSys
 			m_matWorldTo( matWorldTo ),
 			m_matToWorld( matToWorld ),
 			m_strName( strName )
-	{}
+	{ m_hash = CqParameter::hash((char *) strName);}
 	SqCoordSys()
 	{}
 
 	CqMatrix	m_matWorldTo;
 	CqMatrix	m_matToWorld;
 	CqString	m_strName;
+	TqUlong         m_hash;
 };
 
 enum EqCoordSystems
@@ -321,6 +322,8 @@ class CqRenderer : public IqRenderer
 		CqTransform	m_transCamera;					///< The camera transform.
 		std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
 
+		void WhichMatWorldTo(CqMatrix &a, TqUlong thash);
+		void WhichMatToWorld(CqMatrix &b, TqUlong thash);
 	public:
 		std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.
 }
