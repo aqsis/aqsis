@@ -85,7 +85,7 @@ std::vector<CqTextureMap*>	CqTextureMap::m_TextureMap_Cache;
 float* CqTextureMapBuffer::AllocSegment(unsigned long width, unsigned long height, int samples)
 {
 	// TODO: Implement proper global cache handling.
-	return(static_cast<float*>(malloc((width*height)*samples*sizeof(float))));
+	return(static_cast<float*>(calloc((width*height)*samples, sizeof(float))));
 }
 
 
@@ -153,7 +153,7 @@ void CqTextureMap::Open()
 		TIFFGetField(m_pImage, TIFFTAG_IMAGELENGTH, &m_YRes);
 		TIFFGetField(m_pImage, TIFFTAG_PLANARCONFIG, &m_PlanarConfig);
 		TIFFGetField(m_pImage, TIFFTAG_SAMPLESPERPIXEL, &m_SamplesPerPixel);
-		TIFFGetField(m_pImage, TIFFTAG_IMAGEDESCRIPTION, &pFormat);
+		TIFFGetField(m_pImage,  TIFFTAG_PIXAR_TEXTUREFORMAT, &pFormat);
 
 		if(pFormat && strcmp(pFormat, SATMAP_HEADER)==0 ||
 		   pFormat && strcmp(pFormat, CUBEENVMAP_HEADER)==0)
@@ -370,9 +370,9 @@ void CqTextureMap::CreateSATMap()
 			{
 				for(uint32 y=0; y<m_YRes; y++)
 				{
-					float raccum=0;
-					float gaccum=0;
-					float baccum=0;
+					float accum[3];
+					accum[0] = accum[1] = accum[2] = 0.0f;
+					
 					for(uint32 x=0; x<m_XRes; x++)
 					{
 						uint32 val=pImage[((m_YRes-y-1)*m_XRes)+x];
@@ -380,26 +380,27 @@ void CqTextureMap::CreateSATMap()
 						float r=TIFFGetR(val);
 						float g=TIFFGetG(val);
 						float b=TIFFGetB(val);
-
+                                                TqInt sample;
 						r/=255.0;
 						g/=255.0;
 						b/=255.0;
 
-						raccum+=r;
-						gaccum+=g;
-						baccum+=b;
+						accum[0]+=r;
+						accum[1]+=g;
+						accum[2]+=b;
 
 						if(y==0)
 						{
-							TqInt sample;
-							for(sample=0; sample<m_SamplesPerPixel; sample++)
-								pSATMap[(x*m_SamplesPerPixel)+sample]=raccum;
+							for(sample=0; sample<m_SamplesPerPixel; sample++) {
+								pSATMap[(x*m_SamplesPerPixel)+sample]=accum[sample];
+							}
 						}
 						else
 						{
-							TqInt sample;
-							for(sample=0; sample>m_SamplesPerPixel; sample++)
-								pSATMap[(y*rowlen)+(x*m_SamplesPerPixel)+sample]=raccum+pSATMap[((y-1)*rowlen)+(x*m_SamplesPerPixel)+sample];
+							for(sample=0; sample<m_SamplesPerPixel; sample++) {
+								pSATMap[(y*rowlen)+(x*m_SamplesPerPixel)+sample]=accum[sample]+pSATMap[((y-1)*rowlen)+(x*m_SamplesPerPixel)+sample];
+								
+							}
 						}
 					}		
 				}
@@ -432,6 +433,19 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, 
 	bool fss=ss2-ss1==0;
 	bool ftt=tt2-tt1==0;
 
+	std::valarray<float> val1;
+	std::valarray<float> val2;
+	std::valarray<float> val3;
+	std::valarray<float> val4;
+	val1.resize(m_SamplesPerPixel);
+	val2.resize(m_SamplesPerPixel);
+	val3.resize(m_SamplesPerPixel);
+	val4.resize(m_SamplesPerPixel);
+	val1 = 0.0f;
+	val2 = 0.0f;
+	val3 = 0.0f;
+	val4 = 0.0f;
+
 	// TODO: This is effectively 'clamp' mode, should implement this as modes, and set the mode as clamp in the env map.
 	if(Type()==MapType_Environment)
 	{
@@ -460,10 +474,6 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, 
 	// If it crosses only the s boundary, we need to get two samples.
 	else if((ss1>ss2) && (tt1<tt2))
 	{
-		std::valarray<float> val1, val2;
-		val1.resize(m_SamplesPerPixel);
-		val2.resize(m_SamplesPerPixel);
-
 		GetSample(0,tt1,ss2,tt2,val1,fss, ftt, directory);
 		GetSample(ss1,tt1,m_XRes-1,tt2,val2,fss,ftt,directory);
 		val=(val1+val2);
@@ -472,10 +482,6 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, 
 	// If it crosses only the t boundary, we need to get two samples.
 	else if((ss1<ss2) && (tt1>tt2))
 	{
-		std::valarray<float> val1, val2;
-		val1.resize(m_SamplesPerPixel);
-		val2.resize(m_SamplesPerPixel);
-
 		GetSample(ss1,0,ss2,tt2,val1,fss,ftt,directory);
 		GetSample(ss1,tt1,ss2,m_YRes-1,val2,fss,ftt,directory);
 		val=(val1+val2);
@@ -484,12 +490,6 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, 
 	// If it crosses the s and t boundary, we need to get four samples.
 	else
 	{
-		std::valarray<float> val1, val2, val3, val4;
-		val1.resize(m_SamplesPerPixel);
-		val2.resize(m_SamplesPerPixel);
-		val3.resize(m_SamplesPerPixel);
-		val4.resize(m_SamplesPerPixel);
-
 		GetSample(0,0,ss2,tt2,val1,fss,ftt,directory);
 		GetSample(ss1,0,m_XRes-1,tt2,val2,fss,ftt,directory);
 		GetSample(0,tt1,ss2,m_YRes-1,val3,fss,ftt,directory);
