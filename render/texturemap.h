@@ -85,28 +85,7 @@ class _qShareC CqTextureMapBuffer
 				m_Samples( 0 ),
 				m_Directory( 0 )
 		{}
-
-		/** Constructor taking buffer information.
-		 * \param xorigin Integer origin within the texture map.
-		 * \param yorigin Integer origin within the texture map.
-		 * \param width Width of the buffer segment.
-		 * \param height Height of the buffer segment.
-		 * \param samples Number of samples per pixel.
-		 * \param directory The directory within the TIFF image map, used for multi image formats, i.e. cubeface environment map.
-		 */
-		_qShareM	CqTextureMapBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt samples, TqInt directory = 0 ) :
-				m_pBufferData( 0 ),
-				m_sOrigin( xorigin ),
-				m_tOrigin( yorigin ),
-				m_Width( width ),
-				m_Height( height ),
-				m_Samples( samples ),
-				m_Directory( directory )
-		{
-
-			m_pBufferData = AllocSegment( width, height, samples );
-		}
-		_qShareM	~CqTextureMapBuffer()
+		_qShareM virtual	~CqTextureMapBuffer()
 		{
 			Release();
 		}
@@ -159,6 +138,26 @@ class _qShareC CqTextureMapBuffer
 		{
 			return ( m_pBufferData );
 		}
+		/** Get a pointer to the data for this buffer segment.
+		 */
+		_qShareM	void*	pVoidBufferData()
+		{
+			return ( m_pBufferData );
+		}
+		/** Get the size of a single element
+		 */
+		_qShareM	virtual TqInt	ElemSize()
+		{
+			return( m_Samples * sizeof(TqUchar) );
+		}
+		/** Get the float value at the specified pixel/element (0.0 --> 1.0)
+		 */
+		_qShareM virtual TqFloat	GetValue(TqInt x, TqInt y, TqInt sample)
+		{
+			TqInt iv = y * ( m_Width * ElemSize() );
+			TqInt iu = x * ElemSize();
+			return ( m_pBufferData[ iv + iu + sample ] / 255.0f );
+		}
 		/** Get the origin of this buffer segment.
 		 */
 		_qShareM	TqUlong sOrigin() const
@@ -196,7 +195,7 @@ class _qShareC CqTextureMapBuffer
 
 
 
-	private:
+	protected:
 		TqPuchar	m_pBufferData;	///< Pointer to the image data.
 		TqUlong	m_sOrigin;		///< Horizontal segment origin.
 		TqUlong	m_tOrigin;		///< Vertical segment origin.
@@ -208,6 +207,34 @@ class _qShareC CqTextureMapBuffer
 
 }
 ;
+
+
+//----------------------------------------------------------------------
+/** \class CqTextureMapBuffer
+ * Class referencing a buffer in the image map cache. 
+ */
+
+class _qShareC CqShadowMapBuffer : public CqTextureMapBuffer
+{
+	public:
+		_qShareM	CqShadowMapBuffer() : CqTextureMapBuffer()
+		{}
+		_qShareM virtual	~CqShadowMapBuffer()
+		{}
+
+		_qShareM virtual TqFloat	GetValue(TqInt x, TqInt y, TqInt sample)
+		{
+			TqInt iv = y * ( m_Width * ElemSize() );
+			TqInt iu = x * ElemSize();
+			return ( *(reinterpret_cast<TqFloat*>(&m_pBufferData[ iv + iu + sample ])) );
+		}
+		_qShareM	virtual TqInt	ElemSize()
+		{
+			return( m_Samples * sizeof(TqFloat) );
+		}
+}
+;
+
 
 //----------------------------------------------------------------------
 /** \class CqTextureMap
@@ -343,6 +370,12 @@ class _qShareC CqTextureMap : public IqTextureMap
 		 */
 		_qShareM	virtual	CqTextureMapBuffer*	GetBuffer( TqUlong s, TqUlong t, TqInt directory = 0 );
 		void	CreateMIPMAP();
+		_qShareM	virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt samples, TqInt directory = 0 )
+		{
+			CqTextureMapBuffer* pRes = new CqTextureMapBuffer();
+			pRes->Init( xorigin, yorigin, width, height, samples, directory );
+			return( pRes );
+		}
 
 		_qShareM	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
 		_qShareM	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
@@ -525,6 +558,13 @@ class _qShareC CqShadowMap : public CqTextureMap
 		_qShareM	void	LoadZFile();
 		_qShareM	void	SaveShadowMap( const CqString& strShadowName );
 		_qShareM	void	ReadMatrices();
+
+		_qShareM	virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt samples, TqInt directory = 0 )
+		{
+			CqTextureMapBuffer* pRes = new CqShadowMapBuffer();
+			pRes->Init( xorigin, yorigin, width, height, samples, directory );
+			return( pRes );
+		}
 
 		_qShareM	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );
 		_qShareM	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, std::valarray<TqFloat>& val, std::map<std::string, IqShaderData*>& paramMap );

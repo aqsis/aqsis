@@ -110,7 +110,7 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 	static TqInt limit = -1;
 	static TqInt report = 1;
 	static TqInt megs = 10; /* a number to hint it is abusing enough memory */
-	TqInt demand = width * height * samples;
+	TqInt demand = width * height * ElemSize();
 
 #ifdef ALLOCSEGMENTSTATUS
 	alloc_cnt ++;
@@ -726,8 +726,8 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 	static TqInt size = -1;
 	static CqString name = "";
 
-
 	QGetRenderContext() ->Stats().IncTextureMisses( 4 );
+
 
 	/* look if the last item return by this function was ok */
 	if ( ( size == m_apSegments.size() ) && previous && ( name == m_strName ) )
@@ -782,37 +782,25 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 			// Work out the coordinates of this tile.
 			TqUlong ox = ( s / tsx ) * tsx;
 			TqUlong oy = ( t / tsy ) * tsy;
-			if ( Type() == MapType_Shadow )
-				pTMB = new CqTextureMapBuffer( ox, oy, tsx, tsy, sizeof( TqFloat ) * m_SamplesPerPixel, directory );
-			else
-				pTMB = new CqTextureMapBuffer( ox, oy, tsx, tsy, m_SamplesPerPixel, directory );
+			pTMB = CreateBuffer( ox, oy, tsx, tsy, m_SamplesPerPixel, directory );
 
 			TIFFSetDirectory( m_pImage, directory );
 
-			TqPuchar pData = pTMB->pBufferData();
+			void* pData = pTMB->pVoidBufferData();
 			TIFFReadTile( m_pImage, pData, s, t, 0, 0 );
 			m_apSegments.push_back( pTMB );
 		}
 		else
 		{
-			TqUlong sizef = TIFFScanlineSize( m_pImage );
-			TqBool infloat = ( Type() == MapType_Shadow ) || ( sizef == ( m_SamplesPerPixel * sizeof( TqFloat ) * m_XRes ) );
-			if ( infloat )
-				pTMB = new CqTextureMapBuffer( 0, 0, sizeof( TqFloat ) * m_XRes, m_YRes, m_SamplesPerPixel, directory );
-			else
-				pTMB = new CqTextureMapBuffer( 0, 0, m_XRes, m_YRes, m_SamplesPerPixel, directory );
-
+			pTMB = CreateBuffer( 0, 0, m_XRes, m_YRes, m_SamplesPerPixel, directory );
 
 			TIFFSetDirectory( m_pImage, directory );
-			TqPuchar pdata = pTMB->pBufferData();
+			void* pdata = pTMB->pVoidBufferData();
 			TqUint i;
 			for ( i = 0; i < m_YRes; i++ )
 			{
 				TIFFReadScanline( m_pImage, pdata, i );
-				if ( infloat )
-					pdata += m_XRes * m_SamplesPerPixel * sizeof( TqFloat );
-				else
-					pdata += m_XRes * m_SamplesPerPixel;
+				pdata = reinterpret_cast<void*>(reinterpret_cast<char*>( pdata ) + m_XRes * pTMB->ElemSize() );
 			}
 			m_apSegments.push_back( pTMB );
 		}
@@ -957,13 +945,14 @@ void CqTextureMap::CreateMIPMAP()
 		do
 		{
 
-			CqTextureMapBuffer* pTMB = new CqTextureMapBuffer();
-			pTMB->Init( 0, 0, m_xres, m_yres, m_SamplesPerPixel, directory );
+			//CqTextureMapBuffer* pTMB = new CqTextureMapBuffer();
+			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, m_xres, m_yres, m_SamplesPerPixel, directory );
+			//pTMB->Init( 0, 0, m_xres, m_yres, m_SamplesPerPixel, directory );
 
 			if ( pTMB->pBufferData() != NULL )
 			{
 				TqPuchar pMIPMAP = pTMB->pBufferData();
-				long rowlen = m_xres * m_SamplesPerPixel;
+				long rowlen = m_xres * pTMB->ElemSize();
 
 				if ( pImage != NULL )
 				{
@@ -1267,20 +1256,9 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 	if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
 	{
 		TqChar warnings[ 400 ];
-		TqPuchar mapa = NULL;
-		if (pTMBa)
-			mapa = pTMBa->pBufferData();
-		else if (pTMBb)
-			mapa = pTMBb->pBufferData();
-		else if (pTMBc)
-			mapa = pTMBb->pBufferData();
-		else if (pTMBd)
-			mapa = pTMBb->pBufferData();
 		for ( c = 0; c < m_SamplesPerPixel; c++ )
-			if (mapa)
-				val[c] = mapa[c]/255.0;
-			else
-				val[c] = 1.0;
+			val[c] = 1.0f;
+
 		sprintf( warnings, "Cannot find value for either pTMPB[a,b,c,d]" );
 		RiErrorPrint( 0, 1, warnings );
 		return ;
@@ -1299,23 +1277,12 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 	iv -= pTMBa->tOrigin();
 	iv_n -= pTMBb->tOrigin();
 
-	TqPuchar mapa = pTMBa->pBufferData();
-	TqPuchar mapb = pTMBb->pBufferData();
-	TqPuchar mapc = pTMBc->pBufferData();
-	TqPuchar mapd = pTMBd->pBufferData();
-
-	iu *= m_SamplesPerPixel;
-	iu_n *= m_SamplesPerPixel;
-	iv *= rowlen;
-	iv_n *= rowlen;
-
-	
 	for ( c = 0; c < m_SamplesPerPixel; c++ )
 	{
-		TqFloat Val00 = ( mapa[ iv + iu + c ] / 255.0 );
-		TqFloat Val01 = ( mapb[ iv_n + iu + c ] / 255.0 );
-		TqFloat Val10 = ( mapc[ iv + iu_n + c ] / 255.0 );
-		TqFloat Val11 = ( mapd[ iv_n + iu_n + c ] / 255.0 );
+		TqFloat Val00 = pTMBa->GetValue(iu,iv,c);
+		TqFloat Val01 = pTMBb->GetValue(iu,iv_n,c);
+		TqFloat Val10 = pTMBc->GetValue(iu_n,iv,c);
+		TqFloat Val11 = pTMBd->GetValue(iu_n,iv_n,c);
 		TqFloat bot = Val00 + ( ru * ( Val10 - Val00 ) );
 		TqFloat top = Val01 + ( ru * ( Val11 - Val01 ) );
 		m_low_color[ c ] = bot + ( rv * ( top - bot ) );
@@ -1382,23 +1349,13 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		iv -= pTMBa->tOrigin();
 		iv_n -= pTMBb->tOrigin();
 
-		TqPuchar mapa = pTMBa->pBufferData();
-		TqPuchar mapb = pTMBb->pBufferData();
-		TqPuchar mapc = pTMBc->pBufferData();
-		TqPuchar mapd = pTMBd->pBufferData();
-
-		iu *= m_SamplesPerPixel;
-		iu_n *= m_SamplesPerPixel;
-		iv *= rowlen;
-		iv_n *= rowlen;
-
 		TqInt c;
 		for ( c = 0; c < m_SamplesPerPixel; c++ )
 		{
-			TqFloat Val00 = ( mapa[ iv + iu + c ] / 255.0 );
-			TqFloat Val01 = ( mapb[ iv_n + iu + c ] / 255.0 );
-			TqFloat Val10 = ( mapc[ iv + iu_n + c ] / 255.0 );
-			TqFloat Val11 = ( mapd[ iv_n + iu_n + c ] / 255.0 );
+			TqFloat Val00 = pTMBa->GetValue(iu,iv,c);
+			TqFloat Val01 = pTMBb->GetValue(iu,iv_n,c);
+			TqFloat Val10 = pTMBc->GetValue(iu_n,iv,c);
+			TqFloat Val11 = pTMBd->GetValue(iu_n,iv_n,c);
 			TqFloat bot = Val00 + ( ru * ( Val10 - Val00 ) );
 			TqFloat top = Val01 + ( ru * ( Val11 - Val01 ) );
 			m_high_color[ c ] = bot + ( rv * ( top - bot ) );
@@ -2006,10 +1963,8 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 					iv -= pTMBa->tOrigin();
 					TqInt rowlen = pTMBa->Width();
 					TqFloat *depths = ( TqFloat * ) pTMBa->pBufferData();
-					if ( z > depths[ ( iv * rowlen ) + iu ] )
-					{
+					if ( z > pTMBa->GetValue(iu, iv, 0) )
 						inshadow += 1;
-					}
 				}
 			}
 			t = t + dt;
@@ -2035,7 +1990,7 @@ void CqShadowMap::AllocateMap( TqInt XRes, TqInt YRes )
 
 	m_XRes = XRes;
 	m_YRes = YRes;
-	m_apSegments.push_back( new	CqTextureMapBuffer( 0, 0, sizeof( TqFloat ) * m_XRes, m_YRes, 1 ) );
+	m_apSegments.push_back( CreateBuffer( 0, 0, m_XRes, m_YRes, 1 ) );
 
 	TqInt i;
 	for ( i = 0; i < 256; i++ )
