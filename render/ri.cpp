@@ -4205,14 +4205,14 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 					iP+=nvertices[ face ];
 				}
 				subd2.Finalise();
-				subd2.SubdivideFace(0);
-				subd2.SubdivideFace(1);
-				subd2.SubdivideFace(2);
-				subd2.SubdivideFace(3);
+				subd2.SubdivideFace(subd2.pFacet(0));
+				subd2.SubdivideFace(subd2.pFacet(1));
+				subd2.SubdivideFace(subd2.pFacet(2));
+				subd2.SubdivideFace(subd2.pFacet(3));
 				TqInt tot2 = subd2.cFacets();
 				TqInt i;
 				for(i = 4; i < tot2; i++)
-					subd2.SubdivideFace(i);
+					subd2.SubdivideFace(subd2.pFacet(i));
 				subd2.OutputMesh("test.obj");
 				subd2.OutputInfo("test2.sds");
 			}

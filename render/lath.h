@@ -58,6 +58,8 @@ public:
 	CqLath*	pChildVertex() const		{return(m_pChildVertex);}
 	/// Get a pointer to the lath representing the midpoint vertex of this edge at the next level.
 	CqLath*	pMidVertex() const			{return(m_pMidVertex);}
+	/// Get a pointer to the lath representing the midpoint vertex of this face at the next level.
+	CqLath*	pFaceVertex() const			{return(m_pFaceVertex);}
 
 	/// Get the index of the vertex this lath references.
 	TqInt	VertexIndex() const	{return(m_VertexIndex);}
@@ -76,6 +78,8 @@ public:
 											{m_pChildVertex=pLath;}
 	/// Set the pointer to the lath representing the midpoint vertex of this edge at the next level.
 	void		SetpMidVertex(CqLath* pLath)	{m_pMidVertex=pLath;}
+	/// Set the pointer to the lath representing the midpoint vertex of this face at the next level.
+	void		SetpFaceVertex(CqLath* pLath)	{m_pFaceVertex=pLath;}
 
 	/// Set the index of the vertex this lath refers to.
 	void		SetVertexIndex(TqInt iV)	{m_VertexIndex=iV;}
@@ -115,7 +119,8 @@ private:
 	// Hierarchical subdivision data
 	CqLath* m_pParentFacet;		///< Pointer to the facet that was subdivided to produce this one.
 	CqLath* m_pChildVertex;		///< Pointer to the child point that represents this point at the next level.
-	CqLath*	m_pMidVertex;		///< Poniter to the point that represents the midpoint of this edge at the next level.
+	CqLath*	m_pMidVertex;		///< Pointer to the point that represents the midpoint of this edge at the next level.
+	CqLath*	m_pFaceVertex;		///< Pointer to the point that represents the midpoint of this face at the next level.
 
 	TqInt	m_VertexIndex;
 

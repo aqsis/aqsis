@@ -72,27 +72,104 @@ public:
 	void		Prepare(TqInt cVerts);
 	CqLath*		AddFacet(TqInt cVerts, TqInt* pIndices);
 	void		Finalise();
-	void		SubdivideFace(TqInt iF);
+	void		SubdivideFace(CqLath* pFace);
 
 	TqInt		AddVertex(CqLath* pVertex);
 	template<class TypeA, class TypeB>
 	void		CreateVertex(CqParameterTyped<TypeA, TypeB>* pParam, CqLath* pVertex, TqInt iIndex)
 				{
-					pParam->SetValue( pParam, iIndex, pVertex->VertexIndex() );
+					TypeA S = TypeA(0.0f);
+					TypeA Q = TypeA(0.0f);
+					TypeA R = TypeA(0.0f);
+					TqInt n;
+					// Vertex point is...
+					//    Q     2R     S(n-3)
+					//   --- + ---- + --------
+					//    n      n        n
+					// 
+					// Q = Average of face points surrounding old vertex
+					// R = average of midpoints of edges surrounding old vertex
+					// S = old vertex
+					// n = number of edges sharing the old vertex.
+
+					std::vector<CqLath*> aQve;
+					pVertex->Qve( aQve );
+					n = aQve.size();
+
+					// Get the face points of the surrounding faces
+					std::vector<CqLath*> aQvf;
+					pVertex->Qvf( aQvf );
+					std::vector<CqLath*>::iterator iF;
+					for( iF = aQvf.begin(); iF != aQvf.end(); iF++ )
+					{
+						std::vector<CqLath*> aQfv;
+						(*iF)->Qfv(aQfv);
+						std::vector<CqLath*>::iterator iV;
+						TypeA Val = TypeA(0.0f);
+						for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
+							Val += pParam->pValue( (*iV)->VertexIndex() )[0];
+						Val /= static_cast<TqFloat>( aQfv.size() );
+						Q += Val;
+					}
+					Q /= aQvf.size();
+					Q /= n;
+					
+					// Get the midpoints of the surrounding edges
+					TypeA A = pParam->pValue( pVertex->VertexIndex() )[0];
+					TypeA B = TypeA(0.0f);
+					std::vector<CqLath*>::iterator iE;
+					for( iE = aQve.begin(); iE != aQve.end(); iE++ )
+					{
+						B = pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
+						R += (A+B)/2.0f;
+					}
+					R *= 2.0f;
+					R /= n;
+					R /= n;
+
+					// Get the current vertex;
+					S = pParam->pValue( pVertex->VertexIndex() )[0];
+					S *= static_cast<TqFloat>(n-3);
+					S /= n;
+					
+					pParam->pValue( iIndex )[0] = Q+R+S;
 				}
 	TqInt		AddEdgeVertex(CqLath* pEdge);
 	template<class TypeA, class TypeB>
 	void		CreateEdgeVertex(CqParameterTyped<TypeA, TypeB>* pParam, CqLath* pEdge, TqInt iIndex)
 				{
-					TypeA A,B;
+					TypeA A = TypeA(0.0f);
+					TypeA B = TypeA(0.0f);
+					TypeA C = TypeA(0.0f);
+					// Edge point is the average of the centrepoint of the original edge and the
+					// average of the two new face points of the adjacent faces.
+					std::vector<CqLath*> aQef;
+					pEdge->Qef( aQef );
+					std::vector<CqLath*>::iterator iF;
+					for( iF = aQef.begin(); iF != aQef.end(); iF++ )
+					{
+						std::vector<CqLath*> aQfv;
+						(*iF)->Qfv(aQfv);
+						std::vector<CqLath*>::iterator iV;
+						TypeA Val = TypeA(0.0f);
+						for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
+							Val += pParam->pValue( (*iV)->VertexIndex() )[0];
+						Val/=static_cast<TqFloat>( aQfv.size() );
+						C += Val;
+					}
+					C /= static_cast<TqFloat>(aQef.size());
+
 					A = pParam->pValue( pEdge->VertexIndex() )[0];
 					B = pParam->pValue( pEdge->ccf()->VertexIndex() )[0];
-					pParam->pValue( iIndex )[0] = (A+B)/2.0f;
+					A = (A+B)/2.0f;
+					A = (A+C)/2.0f;
+					pParam->pValue( iIndex )[0] = A;
 				}
 	TqInt		AddFaceVertex(CqLath* pFace);
 	template<class TypeA, class TypeB>
 	void		CreateFaceVertex(CqParameterTyped<TypeA, TypeB>* pParam, CqLath* pFace, TqInt iIndex)
 				{
+					// Face point is just the average of the original faces vertices.
 					std::vector<CqLath*> aQfv;
 					pFace->Qfv(aQfv);
 					std::vector<CqLath*>::iterator iV;

@@ -171,15 +171,15 @@ TqInt CqSubdivision2::AddVertex(CqLath* pVertex)
 
 				case type_string:
 				{
-					CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
-					CreateVertex( pParam, pVertex, iIndex );
+					//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
+					//CreateVertex( pParam, pVertex, iIndex );
 				}
 				break;
 
 				case type_matrix:
 				{
-					CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
-					CreateVertex( pParam, pVertex, iIndex );
+					//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
+					//CreateVertex( pParam, pVertex, iIndex );
 				}
 				break;
 		}
@@ -252,8 +252,8 @@ TqInt CqSubdivision2::AddEdgeVertex(CqLath* pVertex)
 
 				case type_string:
 				{
-					CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
-					CreateEdgeVertex( pParam, pVertex, iIndex );
+					//CqParameterTyped<CqString, CqString>* pParam = static_cast<CqParameterTyped<CqString, CqString>*>( ( *iUP ) );
+					//CreateEdgeVertex( pParam, pVertex, iIndex );
 				}
 				break;
 
@@ -506,60 +506,69 @@ struct SqFaceLathList {
 	CqLath* pA, *pB, *pC, *pD;
 };
 
-void CqSubdivision2::SubdivideFace(TqInt iF)
+void CqSubdivision2::SubdivideFace(CqLath* pFace)
 {
-	assert(iF < cFacets());
+	assert(NULL != pFace);
+
+	// If this has already beed subdivided then skip it.
+	if( NULL != pFace->pFaceVertex() )
+		return;
+
+	// First make sure that the appropriate neighbour facets have been subdivided if this is >0 level face.
+	if( NULL != pFace->pParentFacet() )
+	{
+		std::vector<CqLath*> aQff;
+		pFace->pParentFacet()->Qff( aQff );
+		std::vector<CqLath*>::iterator iF;
+		for( iF = aQff.begin(); iF != aQff.end(); iF++ )
+			SubdivideFace(*iF);
+	}
 
 	std::vector<CqLath*> aQfv;
 	std::vector<TqInt> aVertices;
 
-	pFacet(iF)->Qfv(aQfv);
+	pFace->Qfv(aQfv);
 	TqInt n = aQfv.size();
 
 	aVertices.resize((2*n)+1);
 
 	// First of all setup the points.
 	TqInt i;
-	for(i = 0; i < n; i++)
-	{
-		TqInt iVert;
-		// Create new vertices for the original points.
-		if( NULL == aQfv[i]->pChildVertex() )
-		{
-			// Create a new vertex for the next level
-			iVert = AddVertex(aQfv[i]);
-		}
-		else
-		{
-			// There is already a next level vertex for this, so just setup a lath to it.
-			iVert = aQfv[i]->pChildVertex()->VertexIndex();
-		}
 
-		// Store the index, for later lath creation
-		aVertices[i] = iVert;
-	}
+	// Create new point for the face midpoint.
+	TqInt iVert = AddFaceVertex(pFace);
 
+	// Create new points for the edge midpoints.
 	for(i = 0; i < n; i++)
 	{
 		TqInt iVert;
 		// Create new vertices for the edge mid points.
 		if( NULL == aQfv[i]->pMidVertex() )
-		{
 			// Create new vertex for the edge midpoint.
 			iVert = AddEdgeVertex(aQfv[i]);
-		}
 		else
-		{
 			// There is already a next level vertex for this, so just setup a lath to it.
 			iVert = aQfv[i]->pMidVertex()->VertexIndex();
-		}
 
 		// Store the index, for later lath creation
 		aVertices[i+n] = iVert;
 	}
 
-	// Create new vertex for the facepoint.
-	TqInt iVert = AddFaceVertex(pFacet(iF));
+	// Create new points for the existing vertices
+	for(i = 0; i < n; i++)
+	{
+		TqInt iVert;
+		// Create new vertices for the original points.
+		if( NULL == aQfv[i]->pChildVertex() )
+			// Create a new vertex for the next level
+			iVert = AddVertex(aQfv[i]);
+		else
+			// There is already a next level vertex for this, so just setup a lath to it.
+			iVert = aQfv[i]->pChildVertex()->VertexIndex();
+
+		// Store the index, for later lath creation
+		aVertices[i] = iVert;
+	}
 
 	// Store the index, for later lath creation
 	aVertices[2*n] = iVert;
@@ -587,6 +596,10 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 		pLathB->SetpClockwiseFacet(pLathC);
 		pLathC->SetpClockwiseFacet(pLathD);
 		pLathD->SetpClockwiseFacet(pLathA);
+		pLathA->SetpParentFacet(pFace);
+		pLathB->SetpParentFacet(pFace);
+		pLathC->SetpParentFacet(pFace);
+		pLathD->SetpParentFacet(pFace);
 
 		apFaceLaths[i].pA = pLathA;
 		apFaceLaths[i].pB = pLathB;
@@ -624,6 +637,8 @@ void CqSubdivision2::SubdivideFace(TqInt iF)
 	// vertex connections we can.
 	for( i = 0; i < n; i++ )
 	{
+		// Set the facet point reference for all laths representing this facet.
+		aQfv[i]->SetpFaceVertex(apFaceLaths[0].pC);
 		// Connect midpoints clockwise vertex pointers.
 		apFaceLaths[((i+1)%n)].pD->SetpClockwiseVertex( apFaceLaths[i].pB );
 		// Connect all laths around the new face point.
