@@ -3826,7 +3826,6 @@ RtVoid	RiMakeTextureV( const char * pic, const char * tex, RtToken swrap, RtToke
 			// Write the floating point image to the directory.
 			CqTextureMapBuffer* pBuffer = Source.GetBuffer( 0, 0, i );
 			if ( !pBuffer ) break;
-			//Source.WriteTileImage( ptex, pBuffer->pVoidBufferData(), Source.XRes() / ( 1 << i ), Source.YRes() / ( 1 << i ), 64, 64, Source.SamplesPerPixel(), Source.Compression(), Source.Quality() );
 			Source.WriteTileImage( ptex, pBuffer, 64, 64, Source.Compression(), Source.Quality() );
 		}
 		TIFFClose( ptex );
@@ -3941,7 +3940,6 @@ RtVoid	RiMakeLatLongEnvironmentV( const char * pic, const char * tex, RtFilterFu
 			// Write the floating point image to the directory.
 			CqTextureMapBuffer* pBuffer = Source.GetBuffer( 0, 0, i );
 			if ( !pBuffer ) break;
-			//Source.WriteTileImage( ptex, pBuffer->pVoidBufferData(), Source.XRes() / ( 1 << i ), Source.YRes() / ( 1 << i ), 64, 64, Source.SamplesPerPixel(), Source.Compression(), Source.Quality() );
 			Source.WriteTileImage( ptex, pBuffer, 64, 64, Source.Compression(), Source.Quality() );
 		}
 		TIFFClose( ptex );
