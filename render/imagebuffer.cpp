@@ -1847,12 +1847,9 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 
 	QGetRenderContext() ->Stats().MakeFilterBucket().Start();
 	
-	if ( !bIsEmpty )
-	{
-		Bucket.FilterBucket();
-		Bucket.ExposeBucket();
-		Bucket.QuantizeBucket();
-	}
+	Bucket.FilterBucket();
+	Bucket.ExposeBucket();
+	Bucket.QuantizeBucket();
 
 	QGetRenderContext() ->Stats().MakeFilterBucket().Stop();
 
