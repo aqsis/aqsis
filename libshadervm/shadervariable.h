@@ -545,8 +545,10 @@ class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, 
 								TqInt i;
 								if( pFrom->Size() > 1 )
 								{
+									TqFloat* pData;
+									pFrom->GetFloatPtr( pData );
 									for(i = 0; i < Size(); i++)
-										pFrom->GetFloat( m_aValue[i], i );
+										m_aValue[ i ] = pData [ i ];
 								}
 								else
 								{
@@ -591,8 +593,10 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 								TqInt i;
 								if( pFrom->Size() > 1 )
 								{
+									CqString* pData;
+									pFrom->GetStringPtr( pData );
 									for(i = 0; i < Size(); i++)
-										pFrom->GetString( m_aValue[ i ], i );
+										m_aValue[ i ] = pData [ i ];
 								}
 								else
 								{
@@ -639,8 +643,10 @@ class CqShaderVariableVaryingPoint : public CqShaderVariableVarying<type_point, 
 								TqInt i;
 								if( pFrom->Size() > 1 )
 								{
+									CqVector3D* pData;
+									pFrom->GetPointPtr( pData );
 									for(i = 0; i < Size(); i++)
-										pFrom->GetPoint( m_aValue[ i ], i );
+										m_aValue[ i ] = pData [ i ];
 								}
 								else
 								{
@@ -686,8 +692,10 @@ class CqShaderVariableVaryingVector : public CqShaderVariableVarying<type_vector
 								TqInt i;
 								if( pFrom->Size() > 1 )
 								{
+									CqVector3D* pData;
+									pFrom->GetVectorPtr( pData );
 									for(i = 0; i < Size(); i++)
-										pFrom->GetVector( m_aValue[ i ], i );
+										m_aValue[ i ] = pData [ i ];
 								}
 								else
 								{
@@ -733,8 +741,10 @@ class CqShaderVariableVaryingNormal : public CqShaderVariableVarying<type_normal
 								TqInt i;
 								if( pFrom->Size() > 1 )
 								{
+									CqVector3D* pData;
+									pFrom->GetNormalPtr( pData );
 									for(i = 0; i < Size(); i++)
-										pFrom->GetNormal( m_aValue[ i ], i );
+										m_aValue[ i ] = pData [ i ];
 								}
 								else
 								{
@@ -771,8 +781,10 @@ class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, 
 								TqInt i;
 								if( pFrom->Size() > 1 )
 								{
+									CqColor* pData;
+									pFrom->GetColorPtr( pData );
 									for(i = 0; i < Size(); i++)
-										pFrom->GetColor( m_aValue[ i ], i );
+										m_aValue[ i ] = pData [ i ];
 								}
 								else
 								{
@@ -810,8 +822,10 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 								TqInt i;
 								if( pFrom->Size() > 1 )
 								{
+									CqMatrix* pData;
+									pFrom->GetMatrixPtr( pData );
 									for(i = 0; i < Size(); i++)
-										pFrom->GetMatrix( m_aValue[ i ], i );
+										m_aValue[ i ] = pData [ i ];
 								}
 								else
 								{

@@ -106,6 +106,7 @@ extern TqInt gDefLightUses;
 #define	BOOLEAN(Val)		_aq_##Val
 #define	MATRIX(Val)			_aq_##Val
 
+
 #define	DEFPARAMIMPL		IqShaderData* Result, IqShader* pShader
 #define	DEFVOIDPARAMIMPL	IqShader* pShader
 #define DEFPARAMVARIMPL		DEFPARAMIMPL, int cParams, IqShaderData** apParams
