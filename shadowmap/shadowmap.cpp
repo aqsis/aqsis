@@ -198,6 +198,12 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 }
 
 
+TqInt Abandon( SOCKET s, SqDDMessageBase* pMsgB )
+{
+	return ( 1 );
+}
+
+
 void SaveAsShadowMap()
 {
 	TqChar version[ 80 ];

@@ -85,6 +85,8 @@ IqDDManager* CreateDisplayDriverManager()
 	return new CqDDManager;
 }
 
+void SendUserParameters( std::map<std::string, void*>& mapParams, CqDDClient* client );
+
 //////////////////////////// CqDDServer ///////////////////////////////
 
 //---------------------------------------------------------------------
@@ -390,19 +392,26 @@ TqInt CqDDManager::Shutdown()
 	return ( 0 );
 }
 
-TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality, TqInt modeID, TqInt dataOffset, TqInt dataSize )
+TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments )
 {
-	m_aDisplayRequests.push_back( CqDDClient( name, type, mode, modeID, dataOffset, dataSize ) );
-	m_aDisplayCompression.push_back( compression );
-	m_aDisplayQuality.push_back( quality );
+	CqDDClient New( name, type, mode, modeID, dataOffset, dataSize );
+	m_aDisplayRequests.push_back( New );
+	LoadDisplayLibrary( m_aDisplayRequests.back(), mapOfArguments );
 	return ( 0 );
 }
 
 TqInt CqDDManager::ClearDisplays()
 {
+	SqDDMessageAbandon msg;
+
+	std::vector<CqDDClient>::iterator i;
+
+	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+	{
+		if ( i->Socket() != INVALID_SOCKET )
+			i->SendMsg( &msg );
+	}
 	m_aDisplayRequests.clear();
-	m_aDisplayCompression.clear();
-	m_aDisplayQuality.clear();
 	return ( 0 );
 }
 
@@ -410,7 +419,38 @@ TqInt CqDDManager::OpenDisplays()
 {
 	std::vector<CqDDClient>::iterator i;
 	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
-		LoadDisplayLibrary( *i );
+	{
+		CqDDClient& dd = *i;
+		CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera" );
+		CqMatrix matWorldToScreen = QGetRenderContext() ->matSpaceToSpace( "world", "screen" );
+
+		if ( matWorldToCamera.fIdentity() ) matWorldToCamera.Identity();
+		if ( matWorldToScreen.fIdentity() ) matWorldToScreen.Identity();
+
+		SqDDMessageNl msgnl( matWorldToCamera.pElements() );
+		dd.SendMsg( &msgnl );
+
+		SqDDMessageNP msgnp( matWorldToScreen.pElements() );
+		dd.SendMsg( &msgnp );
+
+		// Send the open message..
+		TqInt SamplesPerElement = dd.GetdataSize();
+		TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "Quantize", "Color" );
+		TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
+		TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
+		TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
+		TqInt BitsPerSample = ( one == 0 && min == 0 && max == 0 ) ? 32 : 8;
+		SqDDMessageOpen msgopen( QGetRenderContext() ->pImage() ->iXRes(),
+		                         QGetRenderContext() ->pImage() ->iYRes(),
+		                         SamplesPerElement,
+		                         BitsPerSample,  	// Bits per sample.
+		                         QGetRenderContext() ->pImage() ->CropWindowXMin(),
+		                         QGetRenderContext() ->pImage() ->CropWindowXMax(),
+		                         QGetRenderContext() ->pImage() ->CropWindowYMin(),
+		                         QGetRenderContext() ->pImage() ->CropWindowYMax() );
+		dd.SendMsg( &msgopen );
+	}
+
 	return ( 0 );
 }
 
@@ -420,19 +460,11 @@ TqInt CqDDManager::CloseDisplays()
 	SqDDMessageCloseAcknowledge ack;
 
 	std::vector<CqDDClient>::iterator i;
-	std::vector<TqInt>::iterator j;
-	std::vector<TqInt>::iterator k;
 
-	i = m_aDisplayRequests.begin();
-	j = m_aDisplayCompression.begin();
-	k = m_aDisplayQuality.begin();
-
-	for ( ; i != m_aDisplayRequests.end(); i++, j++, k++ )
+	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
 	{
 		if ( i->Socket() != INVALID_SOCKET )
 		{
-			msg.m_Compression = *j;
-			msg.m_Quality = *k;
 			i->SendMsg( &msg );
 			i->Receive( &ack, sizeof( ack ) );
 
@@ -573,7 +605,7 @@ TqInt CqDDManager::Uses()
   Load the requested display library according to the specified mode in the RiDisplay command.
  
 */
-void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
+void CqDDManager::LoadDisplayLibrary( CqDDClient& dd, std::map<std::string, void*>& mapParams )
 {
 	if ( !g_fDisplayMapInitialised )
 		InitialiseDisplayNameMap();
@@ -683,37 +715,11 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 		SqDDMessageDisplayType * pmsgdtype = SqDDMessageDisplayType::Construct( dd.strType().c_str() );
 		dd.SendMsg( pmsgdtype );
 		pmsgdtype->Destroy();
-
-		CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera" );
-		CqMatrix matWorldToScreen = QGetRenderContext() ->matSpaceToSpace( "world", "screen" );
-
-		if ( matWorldToCamera.fIdentity() ) matWorldToCamera.Identity();
-		if ( matWorldToScreen.fIdentity() ) matWorldToScreen.Identity();
-
-		SqDDMessageNl msgnl( matWorldToCamera.pElements() );
-		dd.SendMsg( &msgnl );
-
-		SqDDMessageNP msgnp( matWorldToScreen.pElements() );
-		dd.SendMsg( &msgnp );
-
-		// Send the open message..
-		TqInt SamplesPerElement = dd.GetdataSize();
-		TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "Quantize", "Color" );
-		TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
-		TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
-		TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
-		TqInt BitsPerSample = ( one == 0 && min == 0 && max == 0 ) ? 32 : 8;
-		SqDDMessageOpen msgopen( QGetRenderContext() ->pImage() ->iXRes(),
-		                         QGetRenderContext() ->pImage() ->iYRes(),
-		                         SamplesPerElement,
-		                         BitsPerSample,  	// Bits per sample.
-		                         QGetRenderContext() ->pImage() ->CropWindowXMin(),
-		                         QGetRenderContext() ->pImage() ->CropWindowXMax(),
-		                         QGetRenderContext() ->pImage() ->CropWindowYMin(),
-		                         QGetRenderContext() ->pImage() ->CropWindowYMax() );
-		dd.SendMsg( &msgopen );
+		
+		SendUserParameters( mapParams, &dd );
 	}
 }
+
 
 
 void CqDDManager::InitialiseDisplayNameMap()
@@ -853,6 +859,79 @@ std::string CqDDManager::GetStringField( const std::string& s, int idx )
 		return std::string( "" );
 
 }
+
+
+void SendUserParameters( std::map<std::string, void*>& mapParams, CqDDClient* client )
+{
+	std::map<std::string, void*>::iterator param;
+	for ( param = mapParams.begin(); param != mapParams.end(); param++ )
+	{
+		SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( param->first.c_str() );
+
+		// Check the parameter type is uniform, not valid for non-surface requests otherwise.
+		if( Decl.m_Class != class_uniform )
+		{
+			assert( TqFalse );
+			continue;
+		}
+
+		// Special case for strings, we need to build an array of strings to pass as we cannot pass pointers across processes.
+		if( Decl.m_Type == type_string )
+		{
+			const char** strings = static_cast<const char**>( param->second );
+			TqInt i;
+			TqInt len = 0;
+			for( i = 0; i < Decl.m_Count; i++ )
+				len += strlen( strings[ i ] ) + 1;
+			char* data = new char[ len ];
+			memset( data, 0, len );
+			len = 0;
+			for( i = 0; i < Decl.m_Count; i++ )
+			{
+				strcpy( data + len, strings[ i ] );
+				len += strlen( strings[ i ] ) + 1;
+			}
+
+			SqDDMessageUserParam* pmsg = SqDDMessageUserParam::Construct(Decl.m_strName.c_str(), Decl.m_Type, Decl.m_Count, data, len );
+			client->SendMsg( pmsg );
+			pmsg->Destroy();
+			delete[]( data );
+		}
+		else
+		{
+			TqInt elementsize = 0;
+			switch ( Decl.m_Type )
+			{
+					case type_float:
+						elementsize = sizeof(TqFloat);
+					break;
+
+					case type_integer:
+						elementsize = sizeof(TqInt);
+					break;
+
+					case type_point:
+					case type_normal:
+					case type_vector:
+					case type_color:
+						elementsize = sizeof(TqFloat) * 3;
+					break;
+
+					case type_hpoint:
+						elementsize = sizeof(TqFloat) * 4;
+					break;
+
+					case type_matrix:
+						elementsize = sizeof(TqFloat) * 16;
+					break;
+			}
+			SqDDMessageUserParam* pmsg = SqDDMessageUserParam::Construct(Decl.m_strName.c_str(), Decl.m_Type, Decl.m_Count, param->second, Decl.m_Count * elementsize );
+			client->SendMsg( pmsg );
+			pmsg->Destroy();
+		}
+	}
+}
+
 
 
 END_NAMESPACE( Aqsis )

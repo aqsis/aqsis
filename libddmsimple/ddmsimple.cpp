@@ -56,11 +56,9 @@ TqInt CqDDManagerSimple::Shutdown()
 }
 
 
-TqInt CqDDManagerSimple::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality, TqInt modeID, TqInt dataOffset, TqInt dataSize )
+TqInt CqDDManagerSimple::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments )
 {
 	m_aDisplayRequests.push_back( SqDDevice( name, type, mode ) );
-	m_aDisplayQuality.push_back( quality );
-	m_aDisplayCompression.push_back( compression );
 	return ( 0 );
 }
 
@@ -98,19 +96,13 @@ TqInt CqDDManagerSimple::OpenDisplays()
 TqInt CqDDManagerSimple::CloseDisplays()
 {
 	std::vector<SqDDevice>::iterator i;
-	std::vector<TqInt>::iterator j;
-	std::vector<TqInt>::iterator k;
 
 	i = m_aDisplayRequests.begin();
-	j = m_aDisplayCompression.begin();
-	k = m_aDisplayQuality.begin();
 
-	for ( ; i != m_aDisplayRequests.end(); i++, j++, k++ )
+	for ( ; i != m_aDisplayRequests.end(); i++ )
 	{
 		uint16 photometric = PHOTOMETRIC_RGB;
 		uint16 config = PLANARCONFIG_CONTIG;
-		uint16 compression = *j;
-		uint16 quality = *k;
 
 		TIFF* pOut = TIFFOpen( i->m_strName.c_str(), "w" );
 
@@ -126,9 +118,9 @@ TqInt CqDDManagerSimple::CloseDisplays()
 			TIFFSetField( pOut, TIFFTAG_SAMPLESPERPIXEL, i->m_SamplesPerElement );
 			TIFFSetField( pOut, TIFFTAG_BITSPERSAMPLE, 8 );
 			TIFFSetField( pOut, TIFFTAG_PLANARCONFIG, config );
-			TIFFSetField( pOut, TIFFTAG_COMPRESSION, compression );
-			if ( compression == COMPRESSION_JPEG )
-				TIFFSetField( pOut, TIFFTAG_JPEGQUALITY, quality );
+			//TIFFSetField( pOut, TIFFTAG_COMPRESSION, compression );
+			//if ( compression == COMPRESSION_JPEG )
+				//TIFFSetField( pOut, TIFFTAG_JPEGQUALITY, quality );
 			TIFFSetField( pOut, TIFFTAG_PHOTOMETRIC, photometric );
 			TIFFSetField( pOut, TIFFTAG_ROWSPERSTRIP, TIFFDefaultStripSize( pOut, 0 ) );
 

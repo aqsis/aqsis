@@ -872,7 +872,6 @@ RtVoid	RiDisplay( const char *name, RtToken type, RtToken mode, ... )
 //
 RtVoid	RiDisplayV( const char *name, RtToken type, RtToken mode, PARAMETERLIST )
 {
-	TqInt compression, quality;
 	CqString strName( name );
 	CqString strType( type );
 
@@ -910,8 +909,11 @@ RtVoid	RiDisplayV( const char *name, RtToken type, RtToken mode, PARAMETERLIST )
 		dataSize = QGetRenderContext()->OutputDataSamples( mode );
 	}
 
-	// Check if the request is to use different tiff's compression
-	ProcessCompression( &compression, &quality, count, tokens, values );
+	// Gather the additional arguments into a map to pass through to the manager.
+	std::map<std::string, void*> mapOfArguments;
+	TqInt i;
+	for( i = 0; i < count; i++ )
+		mapOfArguments[ tokens[ i ] ] = values[ i ];
 
 	// Check if the request is to add a display driver.
 	if ( strName[ 0 ] == '+' )
@@ -926,7 +928,7 @@ RtVoid	RiDisplayV( const char *name, RtToken type, RtToken mode, PARAMETERLIST )
 		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = eValue ;
 	}
 	// Add a display driver to the list of requested drivers.
-	QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode, compression, quality, eValue, dataOffset, dataSize );
+	QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode, eValue, dataOffset, dataSize, mapOfArguments );
 
 	return ;
 }
@@ -5091,5 +5093,3 @@ static void ProcessCompression( TqInt * compression, TqInt * quality, TqInt coun
 		}
 	}
 }
-
-

@@ -62,6 +62,8 @@ enum EqDDMessageIDs
     MessageID_Nl,
     MessageID_NP,
     MessageID_DisplayType,
+	MessageID_Abandon,
+	MessageID_UserParam,
 
 
     MessageID_FormatResponse = 0x8001,
@@ -145,9 +147,20 @@ struct SqDDMessageClose : public SqDDMessageBase
 	SqDDMessageClose() :
 			SqDDMessageBase( MessageID_Close, sizeof( SqDDMessageClose ) )
 	{}
-	TqInt m_Compression;
-	TqInt m_Quality;
-	//TqChar m_Description[80];
+}
+;
+
+
+//---------------------------------------------------------------------
+/** \struct SqDDMessageAbandon
+ * Message requesting the display device abandon its connection.
+ */
+
+struct SqDDMessageAbandon : public SqDDMessageBase
+{
+	SqDDMessageAbandon() :
+			SqDDMessageBase( MessageID_Abandon, sizeof( SqDDMessageAbandon ) )
+	{}
 }
 ;
 
@@ -314,6 +327,44 @@ struct SqDDMessageNP : public SqDDMessageMatrix
 	{}
 }
 ;
+
+
+//---------------------------------------------------------------------
+/** \struct SqDDMessageUserParam
+ * Message delivering a user parameter.
+ */
+
+struct SqDDMessageUserParam : public SqDDMessageBase
+{
+	// Specific message data
+	TqInt	m_DataType;
+	TqInt	m_NameLength;
+	TqInt	m_DataLength;
+	TqInt	m_DataCount;
+	TqChar	m_NameAndData[ 1 ];
+
+	static SqDDMessageUserParam*	Construct( const TqChar* name, TqInt type, TqInt count, const void* data, TqInt dataLength, TqInt ID = MessageID_UserParam );
+	void	Destroy()
+	{
+		free( this );
+	}
+};
+
+
+inline SqDDMessageUserParam* SqDDMessageUserParam::Construct( const TqChar* name, TqInt type, TqInt count, const void* data, TqInt dataLength, TqInt ID )
+{
+	SqDDMessageUserParam * pMessage = reinterpret_cast<SqDDMessageUserParam*>( malloc( sizeof( SqDDMessageUserParam ) + strlen( name ) + dataLength ) );
+	pMessage->m_MessageID = ID;
+	pMessage->m_NameLength = strlen( name );
+	pMessage->m_DataLength = dataLength;
+	pMessage->m_DataType = type;
+	pMessage->m_DataCount = count;
+	pMessage->m_MessageLength = sizeof( SqDDMessageUserParam ) + pMessage->m_NameLength + pMessage->m_DataLength;
+	memcpy( pMessage->m_NameAndData, name, pMessage->m_NameLength + 1 );
+	memcpy( pMessage->m_NameAndData + pMessage->m_NameLength + 1, static_cast<const char*>(data), pMessage->m_DataLength );
+
+	return ( pMessage );
+}
 
 
 //---------------------------------------------------------------------

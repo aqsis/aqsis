@@ -280,6 +280,11 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 		return ( 1 );
 }
 
+TqInt Abandon( SOCKET s, SqDDMessageBase* pMsgB )
+{
+	return ( 1 );
+}
+
 TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
 {
 	switch ( pMsgB->m_MessageID )

@@ -28,11 +28,13 @@
 #define IDDMANAGER_H_INCLUDED 1
 
 #include	"aqsis.h"
+#include	<map>
 
 
 START_NAMESPACE( Aqsis )
 
 struct SqImageSample;
+class CqParameter;
 
 struct IqBucket
 {
@@ -97,7 +99,7 @@ struct IqDDManager
 	virtual	TqInt	Shutdown() = 0;
 	/** Add a display request to the managers list.
 	 */
-	virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality, TqInt modeID, TqInt dataOffset, TqInt dataSize ) = 0;
+	virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments ) = 0;
 	/** Clear all display requests from the managers list.
 	 */
 	virtual	TqInt	ClearDisplays() = 0;

@@ -1091,9 +1091,9 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 /** Add a new requested display driver to the list.
  */
 
-void CqRenderer::AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality, TqInt modeID, TqInt dataOffset, TqInt dataSize )
+void CqRenderer::AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*>& mapOfArguments )
 {
-	m_pDDManager->AddDisplay( name, type, mode, compression, quality, modeID, dataOffset, dataSize );
+	m_pDDManager->AddDisplay( name, type, mode, modeID, dataOffset, dataSize, mapOfArguments );
 }
 
 

@@ -213,7 +213,7 @@ class CqRenderer : public IqRenderer
 		virtual	void	Initialise();
 		virtual	void	RenderWorld();
 
-		virtual	void	AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality, TqInt modeID, TqInt dataOffset, TqInt dataSize );
+		virtual	void	AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*>& mapOfArguments );
 		virtual	void	ClearDisplayRequests();
 		virtual	IqDDManager*	pDDmanager()
 		{

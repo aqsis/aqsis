@@ -66,6 +66,9 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsg );
 /** Handle a close message from the manager.
  */
 TqInt Close( SOCKET s, SqDDMessageBase* pMsg );
+/** Handle an abandon message from the manager.
+ */
+TqInt Abandon( SOCKET s, SqDDMessageBase* pMsg );
 
 
 /// Main loop,, just cycle handling any recieved messages.
@@ -94,6 +97,7 @@ float*	pFloatData;
 TIFF*	pOut;
 TqInt	g_CWXmin, g_CWYmin;
 TqInt	g_CWXmax, g_CWYmax;
+uint16	compression = COMPRESSION_NONE, quality = 0;
 
 
 /// Storage for the output file name.
@@ -183,11 +187,7 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 {
 	uint16 photometric = PHOTOMETRIC_RGB;
 	uint16 config = PLANARCONFIG_CONTIG;
-	uint16 compression, quality;
 	SqDDMessageClose *pClose = ( SqDDMessageClose * ) pMsgB;
-	compression = pClose->m_Compression;
-	quality = pClose->m_Quality;
-	//description = pClose->m_Description;
 
 	pOut = TIFFOpen( strFilename.c_str(), "w" );
 
@@ -313,6 +313,12 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 }
 
 
+TqInt Abandon( SOCKET s, SqDDMessageBase* pMsgB )
+{
+	return ( 1 );
+}
+
+
 /** Handle a general message from the manager.
  */
 TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
@@ -323,6 +329,33 @@ TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
 			{
 				SqDDMessageFilename * pMsg = static_cast<SqDDMessageFilename*>( pMsgB );
 				strFilename = pMsg->m_String;
+			}
+			break;
+
+			case MessageID_UserParam:
+			{
+				SqDDMessageUserParam * pMsg = static_cast<SqDDMessageUserParam*>( pMsgB );
+				// Check if we understand the parameter.
+				if( strncmp( pMsg->m_NameAndData, "compression", pMsg->m_NameLength ) == 0 )
+				{
+					const char* pvalue = reinterpret_cast<const char*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+					if ( strstr( pvalue, "none" ) != 0 )
+						compression = COMPRESSION_NONE;
+					else if ( strstr( pvalue, "lzw" ) != 0 )
+						compression = COMPRESSION_LZW;
+					else if ( strstr( pvalue, "deflate" ) != 0 )
+						compression = COMPRESSION_DEFLATE;
+					else if ( strstr( pvalue, "jpeg" ) != 0 )
+						compression = COMPRESSION_JPEG;
+					else if ( strstr( pvalue, "packbits" ) != 0 )
+						compression = COMPRESSION_PACKBITS;
+				}
+				else if( strncmp( pMsg->m_NameAndData, "quality", pMsg->m_NameLength ) == 0 )
+				{
+					quality = *reinterpret_cast<TqInt*>( &pMsg->m_NameAndData[ pMsg->m_NameLength + 1 ] );
+					if ( quality < 0 )		quality = 0;
+					if ( quality > 100 )	quality = 100;
+				}
 			}
 			break;
 	}

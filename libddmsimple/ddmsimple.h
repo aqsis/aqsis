@@ -83,7 +83,7 @@ class CqDDManagerSimple : public IqDDManager
 
 		virtual	TqInt	Initialise();
 		virtual	TqInt	Shutdown();
-		virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality, TqInt modeID, TqInt dataOffset, TqInt dataSize );
+		virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize, std::map<std::string, void*> mapOfArguments );
 		virtual	TqInt	ClearDisplays();
 		virtual	TqInt	OpenDisplays();
 		virtual	TqInt	CloseDisplays();
@@ -96,8 +96,6 @@ class CqDDManagerSimple : public IqDDManager
 	
 	private:
 		std::vector<SqDDevice>	m_aDisplayRequests;		///< Array of requested display drivers.
-		std::vector<TqInt>	m_aDisplayCompression;
-		std::vector<TqInt>	m_aDisplayQuality;
 }
 ;
 

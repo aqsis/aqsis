@@ -71,6 +71,9 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsg );
 /** External function to handle a close message, must be provided by linking application.
  */
 TqInt Close( SOCKET s, SqDDMessageBase* pMsg );
+/** External function to handle an abandon message, must be provided by linking application.
+ */
+TqInt Abandon( SOCKET s, SqDDMessageBase* pMsg );
 /** External function to handle a general message, must be provided by linking application.
  */
 TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsg );
@@ -380,6 +383,22 @@ TqInt DDProcessMessages()
 					case MessageID_Close:
 					{
 						if ( ( ret = Close( g_Socket, pMsg ) ) != 0 )
+						{
+							CloseSocket( g_Socket );
+
+#ifdef DD_EXIT_AT_CLOSE
+							// Define DD_EXIT_AT_CLOSE for display device exit when rendering done
+							exit( 0 );
+#endif
+
+							return ( ret );
+						}
+					}
+					break;
+
+					case MessageID_Abandon:
+					{
+						if ( ( ret = Abandon( g_Socket, pMsg ) ) != 0 )
 						{
 							CloseSocket( g_Socket );
 
