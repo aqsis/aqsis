@@ -1307,6 +1307,7 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 		}
 	}
 
+	assert( nBucket >= iCurrentBucket() ); 
 	m_aBuckets[ nBucket ].AddGPrim( pSurface );
 
 }
@@ -1780,7 +1781,6 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 					continue;
 				}
 			}
-
 
 			CqMicroPolyGridBase* pGrid;
 			QGetRenderContext() ->Stats().DicingTimer().Start();

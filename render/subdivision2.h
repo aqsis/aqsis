@@ -72,7 +72,7 @@ public:
 	void		Prepare(TqInt cVerts);
 	CqLath*		AddFacet(TqInt cVerts, TqInt* pIndices);
 	void		Finalise();
-	void		SubdivideFace(CqLath* pFace);
+	void		SubdivideFace(CqLath* pFace, std::vector<CqLath*>& apSubFaces);
 
 	TqInt		AddVertex(CqLath* pVertex);
 	template<class TypeA, class TypeB>
@@ -180,7 +180,7 @@ public:
 					pParam->pValue( iIndex )[0] = Val;
 				}
 
-	void		OutputMesh(const char* fname);
+	void		OutputMesh(const char* fname, std::vector<CqLath*>* paFaces = 0);
 	void		OutputInfo(const char* fname);
 private:
 	///	Declared private to prevent copying.
@@ -207,13 +207,13 @@ private:
 class CqSurfaceSubdivisionPatch : public CqBasicSurface
 {
 	public:
-		CqSurfaceSubdivisionPatch(CqSubdivision2* pTopology, TqInt iFace)
+		CqSurfaceSubdivisionPatch(CqSubdivision2* pTopology, CqLath* pFace)
 		{
 			assert(NULL != pTopology);
 			// Reference the topology class
 			pTopology->AddRef();
 			m_pTopology = pTopology;
-			m_iFace = iFace;
+			m_pFace = pFace;
 		}
 
 		virtual	~CqSurfaceSubdivisionPatch()
@@ -223,9 +223,62 @@ class CqSurfaceSubdivisionPatch : public CqBasicSurface
 			m_pTopology->Release();
 		}
 
+		/** Get the pointer to the subdivision surface hull that this patch is part of.
+		 */
+		CqSubdivision2*	pTopology() const
+		{
+			return( m_pTopology );
+		}
+
+		/** Get the index of the face on the hull that this patch refers to.
+		 */
+		CqLath*	pFace() const
+		{
+			return( m_pFace );
+		}
+
+		virtual	const IqAttributes*	pAttributes() const
+		{
+			return ( pTopology()->pPoints()->pAttributes() );
+		}
+		virtual	const IqTransform*	pTransform() const
+		{
+			return ( pTopology()->pPoints()->pTransform() );
+		}
+		// Required implementations from IqSurface
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
+		{
+			pTopology()->pPoints()->Transform( matTx, matITTx, matRTx );
+		}
+		// NOTE: These should never be called.
+		virtual	TqUint	cUniform() const
+		{
+			return ( 0 );
+		}
+		virtual	TqUint	cVarying() const
+		{
+			return ( 0 );
+		}
+		virtual	TqUint	cVertex() const
+		{
+			return ( 0 );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			return ( 0 );
+		}
+
+		// Implementations required by CqBasicSurface
+		virtual	CqBound	Bound() const;
+		virtual	CqMicroPolyGridBase* Dice();
+		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
+		virtual TqBool	Diceable();
+
+		void StoreDice( CqMicroPolyGrid* pGrid, TqInt iParam, TqInt iData );
+
 	private:
 		CqSubdivision2*	m_pTopology;
-		TqInt			m_iFace;
+		CqLath*			m_pFace;
 };
 
 END_NAMESPACE( Aqsis )

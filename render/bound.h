@@ -47,7 +47,7 @@ START_NAMESPACE( Aqsis )
 class CqBound
 {
 	public:
-		CqBound( TqFloat* pBounds = 0 )
+		CqBound( TqFloat* pBounds )
 		{
 			if ( pBounds )
 			{
@@ -55,7 +55,7 @@ class CqBound
 				m_vecMax.x( pBounds[ 3 ] );	m_vecMax.y( pBounds[ 4 ] );	m_vecMax.z( pBounds[ 5 ] );
 			}
 		}
-		CqBound( TqFloat XMin, TqFloat YMin, TqFloat ZMin, TqFloat XMax, TqFloat YMax, TqFloat ZMax )
+		CqBound( TqFloat XMin = FLT_MAX, TqFloat YMin = FLT_MAX, TqFloat ZMin = FLT_MAX, TqFloat XMax = -FLT_MAX, TqFloat YMax = -FLT_MAX, TqFloat ZMax = -FLT_MAX )
 		{
 			m_vecMin.x( XMin );	m_vecMin.y( YMin );	m_vecMin.z( ZMin );
 			m_vecMax.x( XMax );	m_vecMax.y( YMax );	m_vecMax.z( ZMax );
