@@ -18,6 +18,10 @@ EXTRA_DIST = test_001.in test_002.in test_003.in test_004.in cone.rib cylinder.r
 test-clean:
 	rm -f *.tif
 	rm -f *.z
+	rm -f *.slx
+
+test-shaders:
+	for file in $$(find $(top_srcdir)/shaders -name "*.sl"); do $(top_builddir)/aqsl/aqsl $$file; done	
 
 test-scripts:
 	chmod a+x test_001
@@ -25,10 +29,10 @@ test-scripts:
 	chmod a+x test_003
 	chmod a+x test_004	
 
-test: check test-clean test-scripts
+test: check test-clean test-shaders test-scripts
 	$(SHELL) test_001
 	$(SHELL) test_002
 	$(SHELL) test_003
 	$(SHELL) test_004
 
-.PHONY: test-clean test-scripts test
+.PHONY: test-clean test-shaders test-scripts test
