@@ -21,19 +21,18 @@ AC_DEFUN([HAVE_OPENGL],
   ])
 ])
 
-dnl HAVE_GLUT
+dnl WITH_GLUT
 dnl
 AC_DEFUN([HAVE_GLUT],
 [
-	AC_CACHE_CHECK([for glut library], have_glut,
-	[
-	AC_ARG_WITH(glut_lib,[  --with-glut=ARG compile with glut library [default=yes]],
-						[if test "withval" != no; then
-							COMPILE_WITH_GLUT=yes
-						else
-							COMPILE_WITH_GLUT=no
-						fi])
-	AC_SUBST(COMPILE_WITH_GLUT)
-	])
+	AC_ARG_ENABLE(glut,[  --enable-glut             compile with glut library [default= yes]],
+							[case "${enableval}" in
+								true) glut=true;;
+								false) glut=false;;
+								yes) glut=true;;
+								no) glut=false;;
+								*) AC_MSG_ERROR(bad value ${enableval} for --enable-glut);;
+							esac],
+							[glut=true])
+	AM_CONDITIONAL(GLUT, test x$glut = xtrue)
 ])
-
