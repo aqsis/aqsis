@@ -1,5 +1,5 @@
 AC_INIT()
-AM_INIT_AUTOMAKE(aqsis,0.6.5)
+AM_INIT_AUTOMAKE(aqsis,0.6.6)
 AC_PREFIX_DEFAULT(/usr/local/aqsis)
 
 AC_DEFINE(STRNAME,"Aqsis")
