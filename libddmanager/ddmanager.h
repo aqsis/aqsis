@@ -84,7 +84,7 @@ private:
 		TqInt		m_modeID;
 		TqInt		m_AOVOffset;
 		TqInt		m_AOVSize;
-		std::string m_customParamsArgs;
+		std::vector<UserParameter> m_customParams;
 		CqSimplePlugin m_DspyPlugin;
 		void*		m_DriverHandle;
 		PtDspyImageHandle m_imageHandle;
@@ -93,6 +93,11 @@ private:
 		std::vector<TqInt>			m_dataOffsets;
 		std::vector<std::string>	m_AOVnames;
 		TqInt		m_elementSize;
+		TqFloat		m_QuantizeZeroVal;
+		TqFloat		m_QuantizeOneVal;
+		TqFloat		m_QuantizeMinVal;
+		TqFloat		m_QuantizeMaxVal;
+		TqFloat		m_QuantizeDitherVal;
 		DspyImageOpenMethod			m_OpenMethod;
 		DspyImageQueryMethod		m_QueryMethod;
 		DspyImageDataMethod			m_DataMethod;
@@ -102,6 +107,7 @@ private:
 
 	void	LoadDisplayLibrary( SqDisplayRequest& req );
 	void	CloseDisplayLibrary( SqDisplayRequest& req );
+	void	PrepareCustomParameters( std::map<std::string, void*>& mapParams, SqDisplayRequest& req );
 
     std::vector<SqDisplayRequest>	m_displayRequests;		///< Array of requested display drivers.
 	TqBool	m_fDisplayMapInitialised;

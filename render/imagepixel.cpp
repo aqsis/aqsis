@@ -88,7 +88,10 @@ void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
         if ( XSamples > 0 && YSamples > 0 )
         {
             m_aValues.resize( numSamples );
-			m_OpaqueValues.resize( numSamples );
+			// Initialise the OpaqueSampleEntries to the correct depth for the data we are
+			// rendering, including any AOV data.
+			SqImageSample def( QGetRenderContext() ->GetOutputDataTotalSize() );
+			m_OpaqueValues.resize( numSamples, def );
             m_Samples.resize( numSamples );
 			m_DofOffsetIndices.resize( numSamples );
         }

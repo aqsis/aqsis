@@ -80,11 +80,6 @@ struct SqDisplayInstance
 		m_format(PkDspyUnsigned8),
 		m_entrySize(0),
 		m_lineLength(0),
-		m_QuantizeZeroVal(0.0f),
-		m_QuantizeOneVal(0.0f),
-		m_QuantizeMinVal(0.0f),
-		m_QuantizeMaxVal(0.0f),
-		m_QuantizeDitherVal(0.0f),
 		m_compression(COMPRESSION_NONE), m_quality(0),
 		m_RenderWholeFrame(TqFalse),
 		m_imageType(Type_File),
@@ -101,11 +96,6 @@ struct SqDisplayInstance
 	TqInt		m_format;
 	TqInt		m_entrySize;
 	TqInt		m_lineLength;
-	TqFloat		m_QuantizeZeroVal;
-	TqFloat		m_QuantizeOneVal;
-	TqFloat		m_QuantizeMinVal;
-	TqFloat		m_QuantizeMaxVal;
-	TqFloat		m_QuantizeDitherVal;
 	uint16		m_compression, m_quality;
 	TqBool		m_RenderWholeFrame;
 	TqInt		m_imageType;

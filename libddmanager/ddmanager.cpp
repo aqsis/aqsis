@@ -32,11 +32,10 @@
 #include	"imagebuffer.h"
 #include	"shaderexecenv.h"
 #include	"logging.h"
+#include	"ndspy.h"
 
 START_NAMESPACE( Aqsis )
 
-
-std::string PrepareCustomParameters( std::map<std::string, void*>& mapParams );
 
 /// Required function that implements Class Factory design pattern for DDManager libraries
 IqDDManager* CreateDisplayDriverManager()
@@ -66,7 +65,15 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 	req.m_AOVSize = dataSize;
 	req.m_modeHash = CqString::hash( mode );
 	req.m_modeID = modeID;
-	req.m_customParamsArgs = PrepareCustomParameters(mapOfArguments);
+	req.m_QuantizeZeroVal = 0.0f;
+	req.m_QuantizeOneVal = 0.0f;
+	req.m_QuantizeMinVal = 0.0f;
+	req.m_QuantizeMaxVal = 0.0f;
+	req.m_QuantizeDitherVal = 0.0f;
+	
+	// Create the array of UserParameter structures for all the unrecognised extra parameters,
+	// while extracting information for the recognised ones.
+	PrepareCustomParameters(mapOfArguments, req);
 
 	m_displayRequests.push_back(req);
 
@@ -75,6 +82,18 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 
 TqInt CqDDManager::ClearDisplays()
 {
+	// Free any user parameter data specified on the display requests.
+	std::vector<SqDisplayRequest>::iterator i;
+	for(i = m_displayRequests.begin(); i!=m_displayRequests.end(); i++)
+	{
+		std::vector<UserParameter>::iterator iup;
+		for(iup = i->m_customParams.begin(); iup != i->m_customParams.end(); iup++ )
+		{
+			free(iup->name);
+			free(iup->value);
+		}			
+	}
+	
 	m_displayRequests.clear();
     return ( 0 );
 }
@@ -109,9 +128,11 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
         TqInt	xmaxplus1 = xmin + pBucket->Width();
         TqInt	ymaxplus1 = ymin + pBucket->Height();
 
+		// Allocate enough space to put the whole bucket data into.
 		unsigned char* data = reinterpret_cast<unsigned char*>(malloc(i->m_elementSize * pBucket->Width() * pBucket->Height()));
 
         SqImageSample val( QGetRenderContext()->GetOutputDataTotalSize() );
+		// Fill in the bucket data for each channel in each element, honoring the requested order and formats.
 		unsigned char* pdata = data;
         TqInt y;
         for ( y = ymin; y < ymaxplus1; y++ )
@@ -124,25 +145,36 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 				for(iformat = i->m_formats.begin(); iformat != i->m_formats.end(); iformat++)
 				{
 					const TqFloat* pSamples = pBucket->Data( x, y );
+					TqFloat value = pSamples[i->m_dataOffsets[index]];
+					// If special quantization instructions have been given for this display, do it now.
+					if( !( i->m_QuantizeZeroVal == 0.0f &&
+						   i->m_QuantizeOneVal  == 0.0f &&
+						   i->m_QuantizeMinVal  == 0.0f &&
+						   i->m_QuantizeMaxVal  == 0.0f ) )
+					{
+						value = ROUND(i->m_QuantizeZeroVal + value * (i->m_QuantizeOneVal - i->m_QuantizeZeroVal) + i->m_QuantizeDitherVal );
+						value = CLAMP(value, i->m_QuantizeMinVal, i->m_QuantizeMaxVal) ;
+					}
+
 					switch(iformat->type)
 					{
 						case PkDspyFloat32:
-							reinterpret_cast<float*>(pdata)[0] = pSamples[i->m_dataOffsets[index]];
+							reinterpret_cast<float*>(pdata)[0] = value;
 							pdata += sizeof(float);
 							break;
 						case PkDspyUnsigned32:
 						case PkDspySigned32:
-							reinterpret_cast<long*>(pdata)[0] = pSamples[i->m_dataOffsets[index]];
+							reinterpret_cast<long*>(pdata)[0] = value;
 							pdata += sizeof(long);
 							break;
 						case PkDspyUnsigned16:
 						case PkDspySigned16:
-							reinterpret_cast<short*>(pdata)[0] = pSamples[i->m_dataOffsets[index]];
+							reinterpret_cast<short*>(pdata)[0] = value;
 							pdata += sizeof(short);
 							break;
 						case PkDspyUnsigned8:
 						case PkDspySigned8:
-							reinterpret_cast<char*>(pdata)[0] = pSamples[i->m_dataOffsets[index]];
+							reinterpret_cast<char*>(pdata)[0] = value;
 							pdata += sizeof(char);
 							break;
 					}
@@ -285,6 +317,8 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 			TqInt type;
 			type = QGetRenderContext()->OutputDataType(req.m_mode.c_str());
 			// Generate a suitable name for the channels.
+			// We use <variable name>.<channel indec>.<component name>
+			// where <component name> is r,g,b for color, x,y,z for point, otherwise nothing.
 			std::string baseName = req.m_mode;
 			std::string componentNames = "";
 			switch(type)
@@ -321,7 +355,14 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 		}
         
 		// Call the DspyImageOpen method on the display to initialise things.
-		PtDspyError err = (*req.m_OpenMethod)(&req.m_imageHandle, req.m_type.c_str(), req.m_name.c_str(), QGetRenderContext() ->pImage() ->iXRes(), QGetRenderContext() ->pImage() ->iYRes(), 0, NULL, req.m_formats.size(), &req.m_formats[0], &req.m_flags);
+		PtDspyError err = (*req.m_OpenMethod)(&req.m_imageHandle, 
+											  req.m_type.c_str(), req.m_name.c_str(), 
+											  QGetRenderContext() ->pImage() ->iXRes(), 
+											  QGetRenderContext() ->pImage() ->iYRes(), 
+											  req.m_customParams.size(), 
+											  &req.m_customParams[0], 
+											  req.m_formats.size(), &req.m_formats[0], 
+											  &req.m_flags);
 
 		// Now scan the returned format list to make sure that we pass the data in the order the display wants it.
 		std::vector<PtDspyDevFormat>::iterator i;
@@ -534,151 +575,121 @@ std::string CqDDManager::GetStringField( const std::string& s, int idx )
 }
 
 
-std::string PrepareCustomParameters( std::map<std::string, void*>& mapParams )
+void CqDDManager::PrepareCustomParameters( std::map<std::string, void*>& mapParams, SqDisplayRequest& req )
 {
-    std::stringstream customParamArgs;
-	std::stringstream customParamNames;
-	std::stringstream customParamCounts;
-	std::stringstream customParamStrings;
-	std::stringstream customParamInts;
-	std::stringstream customParamFloats;
-
+	// Scan the map of extra parameters
 	std::map<std::string, void*>::iterator param;
     for ( param = mapParams.begin(); param != mapParams.end(); param++ )
     {
-        SqParameterDeclaration Decl;
-        try
-        {
-            Decl = QGetRenderContext() ->FindParameterDecl( param->first.c_str() );
-        }
-        catch( XqException e )
-        {
-            std::cerr << error << e.strReason().c_str() << std::endl;
-            return("");
-        }
-
-        // Check the parameter type is uniform, not valid for non-surface requests otherwise.
-        if( Decl.m_Class != class_uniform )
-        {
-            assert( TqFalse );
-            continue;
-        }
-
-		if( param != mapParams.begin() )
+		// First check if it is one of the recognised parameters that the renderer should handle.
+		if(param->first.compare("quantize")==0)
 		{
-			customParamNames << ",";
-			customParamCounts << ",";
+			// Extract the quantization information and store it with the display request.
+			const RtFloat* floats = static_cast<float*>( param->second );
+			req.m_QuantizeZeroVal = floats[0];
+			req.m_QuantizeOneVal = floats[1];
+			req.m_QuantizeMinVal = floats[2];
+			req.m_QuantizeMaxVal = floats[3];
 		}
+		else if(param->first.compare("dither")==0)
+		{
+			// Extract the quantization information and store it with the display request.
+			const RtFloat* floats = static_cast<float*>( param->second );
+			req.m_QuantizeDitherVal = floats[0];
+		}
+		else
+		{
+			// Otherwise, construct a UserParameter structure and fill in the details.
+			SqParameterDeclaration Decl;
+			try
+			{
+				Decl = QGetRenderContext() ->FindParameterDecl( param->first.c_str() );
+			}
+			catch( XqException e )
+			{
+				std::cerr << error << e.strReason().c_str() << std::endl;
+				return;
+			}
 
-		// Store the name
-		customParamNames << "\"" << Decl.m_strName << "\"";
-		TqInt i;
-		const char** strings;
-		const int* ints;
-		const float* floats;
-        switch ( Decl.m_Type )
-        {
-			case type_string:
-				customParamCounts << 0 << "," << 0 << "," << Decl.m_Count;
-				// If there are already some arguments of this type, then add a separating ','
-				if(!customParamStrings.str().empty())
-					customParamStrings << ",";
-				strings = static_cast<const char**>( param->second );
-				for( i = 0; i < Decl.m_Count; i++ )
+			// Check the parameter type is uniform, not valid for non-surface requests otherwise.
+			if( Decl.m_Class != class_uniform )
+			{
+				assert( TqFalse );
+				continue;
+			}
+
+			UserParameter parameter;
+			parameter.name = 0;
+			parameter.value = 0;
+			parameter.vtype = 0;
+			parameter.vcount = 0;
+			parameter.nbytes = 0;
+
+			// Store the name
+			char* pname = reinterpret_cast<char*>(malloc(Decl.m_strName.size()+1));
+			strcpy(pname, Decl.m_strName.c_str());
+			parameter.name = pname;
+
+			TqInt i;
+			switch ( Decl.m_Type )
+			{
+				case type_string:
 				{
-					customParamStrings << strings[i];
-					if( i+1 != Decl.m_Count )
-						customParamStrings << ",";
+					// Allocate enough space for the string pointers, and the strings, in one big block,
+					// makes it easy to deallocate later.
+					const char** strings = static_cast<const char**>( param->second );
+					TqInt totallen = Decl.m_Count * sizeof(char*);
+					for( i = 0; i < Decl.m_Count; i++ )
+						totallen += (strlen(strings[i])+1) * sizeof(char);
+					char** pstringptrs = reinterpret_cast<char**>(malloc(totallen));
+					char* pstrings = reinterpret_cast<char*>(&pstringptrs[Decl.m_Count]);
+					for( i = 0; i < Decl.m_Count; i++ )
+					{
+						// Copy each string to the end of the block.
+						strcpy(pstrings, strings[i]);
+						pstringptrs[i] = pstrings;
+						pstrings += strlen(strings[i])+1;
+					}
+					parameter.value = reinterpret_cast<RtPointer>(pstringptrs);
+					parameter.vtype = 's';
+					parameter.vcount = Decl.m_Count;
+					parameter.nbytes = totallen;
 				}
 				break;
 
-			case type_float:
-				customParamCounts << 0 << "," << Decl.m_Count << "," << 0;
-				// If there are already some arguments of this type, then add a separating ','
-				if(!customParamFloats.str().empty())
-					customParamFloats << ",";
-				floats = static_cast<float*>( param->second );
-				for( i = 0; i < Decl.m_Count; i++ )
+				case type_float:
 				{
-					customParamFloats << floats[i];
-					if( i+1 != Decl.m_Count )
-						customParamFloats << ",";
+					// Allocate space for all the floats.
+					TqInt totallen = Decl.m_Count * sizeof(RtFloat);
+					RtFloat* pfloats = reinterpret_cast<RtFloat*>(malloc(totallen));
+					const RtFloat* floats = static_cast<RtFloat*>( param->second );
+					// Then just copy the whole lot in one go.
+					memcpy(pfloats, floats, totallen);
+					parameter.value = reinterpret_cast<RtPointer>(pfloats);
+					parameter.vtype = 'f';
+					parameter.vcount = Decl.m_Count;
+					parameter.nbytes = totallen;
 				}
 				break;
 
-			case type_integer:
-				customParamCounts << Decl.m_Count << "," << 0 << "," << 0;
-				// If there are already some arguments of this type, then add a separating ','
-				if(!customParamInts.str().empty())
-					customParamInts << ",";
-				ints = static_cast<int*>( param->second );
-				for( i = 0; i < Decl.m_Count; i++ )
+				case type_integer:
 				{
-					customParamInts << ints[i];
-					if( i+1 != Decl.m_Count )
-						customParamFloats << ",";
+					// Allocate space for all the ints.
+					TqInt totallen = Decl.m_Count * sizeof(RtInt);
+					RtInt* pints = reinterpret_cast<RtInt*>(malloc(totallen));
+					const RtInt* ints = static_cast<RtInt*>( param->second );
+					// Then just copy the whole lot in one go.
+					memcpy(pints, ints, totallen);
+					parameter.value = reinterpret_cast<RtPointer>(pints);
+					parameter.vtype = 'i';
+					parameter.vcount = Decl.m_Count;
+					parameter.nbytes = totallen;
 				}
 				break;
-
-			case type_point:
-			case type_normal:
-			case type_vector:
-			case type_color:
-				customParamCounts << 0 << "," << Decl.m_Count << "," << 0;
-				// If there are already some arguments of this type, then add a separating ','
-				if(!customParamFloats.str().empty())
-					customParamFloats << ",";
-				floats = static_cast<float*>( param->second );
-				for( i = 0; i < Decl.m_Count * 3; i++ )
-				{
-					customParamFloats << floats[i];
-					if( i+1 != Decl.m_Count )
-						customParamFloats << ",";
-				}
-				break;
-
-			case type_hpoint:
-				customParamCounts << 0 << "," << Decl.m_Count << "," << 0;
-				// If there are already some arguments of this type, then add a separating ','
-				if(!customParamFloats.str().empty())
-					customParamFloats << ",";
-				floats = static_cast<float*>( param->second );
-				for( i = 0; i < Decl.m_Count * 4; i++ )
-				{
-					customParamFloats << floats[i];
-					if( i+1 != Decl.m_Count )
-						customParamFloats << ",";
-				}
-				break;
-
-			case type_matrix:
-				customParamCounts << 0 << "," << Decl.m_Count << "," << 0;
-				// If there are already some arguments of this type, then add a separating ','
-				if(!customParamFloats.str().empty())
-					customParamFloats << ",";
-				floats = static_cast<float*>( param->second );
-				for( i = 0; i < Decl.m_Count * 16; i++ )
-				{
-					customParamFloats << floats[i];
-					if( i+1 != Decl.m_Count )
-						customParamFloats << ",";
-				}
-				break;
-        }
+			}
+			req.m_customParams.push_back(parameter);
+		}
     }
-	if(mapParams.size() > 0 )
-	{
-		customParamArgs << "--paramnames=" << customParamNames.str().c_str() << " ";
-		customParamArgs << "--paramcounts=" << customParamCounts.str().c_str() << " ";
-		if( !customParamInts.str().empty() )
-			customParamArgs << "--paramints=" << customParamInts.str().c_str() << " ";
-		if( !customParamFloats.str().empty() )
-			customParamArgs << "--paramfloats=" << customParamFloats.str().c_str() << " ";
-		if( !customParamStrings.str().empty() )
-			customParamArgs << "--paramstrings=" << customParamStrings.str().c_str() << " ";
-	}
-
-	return(customParamArgs.str());
 }
 
 
