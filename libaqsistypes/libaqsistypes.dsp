@@ -246,6 +246,10 @@ SOURCE=.\plugins.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\random.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\refcount.cpp
 # End Source File
 # Begin Source File
