@@ -340,7 +340,7 @@ request : complete_request
 			{
 				// This is used to mark the end of a RunProgram chunk
 				// TODO: limit this to within a RunProgram only
-				if( !strcmp( $1, "#\377" ))
+				if( !strncmp( yyvsp[0].stype, "#\377", strlen("#\377")))
 				{
 					DiscardStringValue($1);
 					ExpectRequest(); 
