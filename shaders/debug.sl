@@ -8,7 +8,7 @@
 surface
 debug ()
 {
-  color c = color(random(),random(),random());
+  uniform color c = color(random(),random(),random());
   Oi = Os;
   Ci = Os * c;
 }
