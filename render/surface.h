@@ -68,6 +68,10 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 			m_pTransform = 0;
 		}
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqBasicSurface"); }
+#endif
+
 		enum EqSplitDir
 		{
 		    SplitDir_U,

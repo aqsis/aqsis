@@ -55,6 +55,10 @@ class CqLightsource : public CqListEntry<CqLightsource>, public IqLightsource, p
 		CqLightsource( IqShader* pShader, TqBool fActive = TqTrue );
 		virtual	~CqLightsource();
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqLightsource"); }
+#endif
+
 		/** Get a pointer to the associated lightsource shader.
 		 * \return a pointer to a IqShader derived class.
 		 */

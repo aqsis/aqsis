@@ -49,6 +49,9 @@ struct IqKDTreeData : public CqRefCount
 	/** Return the number of dimensions in the tree data.
 	 */
 	virtual TqInt Dimensions() const = 0;
+#ifdef _DEBUG
+	CqString className() const { return CqString("IqKDTreeData"); }
+#endif
 };
 
 

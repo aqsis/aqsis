@@ -67,6 +67,10 @@ class CqModeBlock : public CqRefCount
 		virtual	CqModeBlock*	BeginObjectModeBlock();
 		virtual	CqModeBlock*	BeginMotionModeBlock( TqInt N, TqFloat times[] );
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqModeBlock"); }
+#endif
+
 		/** Delete the main context, overridable per derived class.
 		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
 		 */

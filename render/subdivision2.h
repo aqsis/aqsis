@@ -52,6 +52,10 @@ public:
 	///	Destructor.
 	virtual ~CqSubdivision2();
 
+#ifdef _DEBUG
+	CqString className() const { return CqString("CqSubdivision2"); }
+#endif
+
 	CqLath* pFacet(TqInt iIndex);
 	CqLath* pVertex(TqInt iIndex);
 

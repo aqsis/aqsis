@@ -295,6 +295,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 		{
 			CqRefCount::Release(file, line);
 		}
+		CqString className() const { return CqString("CqAttributes"); }
 #endif
 
 	private:

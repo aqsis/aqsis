@@ -55,6 +55,10 @@ class CqCSGTreeNode : public CqRefCount, public CqListEntry<CqCSGTreeNode>
 		{}
 		virtual	~CqCSGTreeNode();
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqGSGTreeNode"); }
+#endif
+
 		/** Enumeration of known CSG operation types.
 		 */
 		enum EqCSGNodeType

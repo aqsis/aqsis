@@ -55,7 +55,7 @@ class CqSurface;
  * Base class from which all MicroPolyGrids are derived.
  */
 
-class CqMicroPolyGridBase
+class CqMicroPolyGridBase : public CqRefCount
 {
 	public:
 		CqMicroPolyGridBase() : m_fCulled( TqFalse )
@@ -103,12 +103,16 @@ class CqMicroPolyGridBase
  * Class which stores a grid of micropolygons.
  */
 
-class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
+class CqMicroPolyGrid : public CqMicroPolyGridBase
 {
 	public:
 		CqMicroPolyGrid();
 		CqMicroPolyGrid( TqInt cu, TqInt cv, CqSurface* pSurface );
 		virtual	~CqMicroPolyGrid();
+
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqMicroPolyGrid"); }
+#endif
 
 		void	CalcNormals();
 		/** Set the shading normals flag, indicating this grid has shading (N) normals already specified.
@@ -407,6 +411,9 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 	public:
 		CqMicroPolygon();
 		virtual	~CqMicroPolygon();
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqMicroPolygon"); }
+#endif
 		/** Assigment operator, copies contents of donor micropoly while safely deleting old contents.
 		 * \param From Donor micropoly.
 		 */
