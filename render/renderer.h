@@ -96,7 +96,6 @@ enum EqRenderMode
 
 class CqRenderer;
 extern CqRenderer* pCurrRenderer;
-extern CqOptions	goptDefault;					///< Default options.
 
 class CqRenderer : public IqRenderer
 {
@@ -296,7 +295,7 @@ class CqRenderer : public IqRenderer
 		 */
 		virtual	void	SetmatCamera( const CqTransform* ptrans )
 		{
-			m_transCamera = *ptrans;
+			(*m_pTransCamera) = *ptrans;
 			//m_aCoordSystems[ CoordSystem_Camera ] .m_matWorldTo =
 			//m_aCoordSystems[ CoordSystem_Current ].m_matWorldTo = ptrans->GetMotionObjectInterpolated(0);
 			//m_aCoordSystems[ CoordSystem_Camera ] .m_matToWorld =
@@ -385,8 +384,8 @@ class CqRenderer : public IqRenderer
 	private:
 		CqModeBlock*	m_pconCurrent;					///< Pointer to the current context.
 		CqStats	m_Stats;						///< Global statistics.
-		CqAttributes	m_attrDefault;					///< Default attributes.
-		CqTransform	m_transDefault;					///< Default transformation.
+		CqAttributes*	m_pAttrDefault;					///< Default attributes.
+		CqTransform*	m_pTransDefault;				///< Default transformation.
 		CqImageBuffer*	m_pImageBuffer;					///< Pointer to the current image buffer.
 
 		IqDDManager*	m_pDDManager;
@@ -395,7 +394,7 @@ class CqRenderer : public IqRenderer
 		CqList<CqShaderRegister> m_Shaders;				///< List of registered shaders.
 		TqBool	m_fSaveGPrims;
 		std::vector<CqTransform*>	m_TransformStack;	///< The global transformation stack.
-		CqTransform	m_transCamera;					///< The camera transform.
+		CqTransform*	m_pTransCamera;					///< The camera transform.
 		std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
 
 		TqFloat m_depthOfFieldData[4];	///< DoF data
@@ -409,6 +408,8 @@ class CqRenderer : public IqRenderer
 		std::map<std::string, SqOutputDataEntry>	m_OutputDataEntries;
 		TqInt	m_OutputDataOffset;
 		TqInt	m_OutputDataTotalSize;
+
+		CqOptions *m_pOptDefault;	///< Pointer to default options.
 	public:
 		std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.
 }

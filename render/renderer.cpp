@@ -51,8 +51,6 @@ static CqShaderRegister * pOShaderRegister = NULL;
 CqRenderer* pCurrRenderer = 0;
 
 
-CqOptions	goptDefault;					///< Default options.
-
 static TqUlong ohash = 0; //< == "object"
 static TqUlong shash = 0; //< == "shader"
 static TqUlong chash = 0; //< == "camera"
@@ -74,6 +72,17 @@ CqRenderer::CqRenderer() :
 {
 	m_pconCurrent = 0;
 	m_pImageBuffer = new	CqImageBuffer();
+
+	// Initialize the default options
+	m_pOptDefault = new CqOptions();
+
+	// Initialize the default attributes, transform and camera transform
+	m_pAttrDefault  = new CqAttributes;
+	m_pTransDefault = new CqTransform;
+	m_pTransCamera  = new CqTransform;
+	ADDREF( m_pAttrDefault );
+	ADDREF( m_pTransDefault );
+	ADDREF( m_pTransCamera );
 
 	// Initialise the array of coordinate systems.
 	m_aCoordSystems.resize( CoordSystem_Last );
@@ -143,6 +152,30 @@ CqRenderer::~CqRenderer()
 	// Delete log & message table
 	delete m_theLog;
 	delete m_theTable;
+
+	// Delete the default options
+	if ( m_pOptDefault )
+	{
+		delete m_pOptDefault;
+		m_pOptDefault = NULL;
+	}
+
+	// Delete the default attributes, transform and camera transform
+	if ( m_pAttrDefault )
+	{
+		RELEASEREF( m_pAttrDefault );
+		m_pAttrDefault = NULL;
+	}
+	if ( m_pTransDefault )
+	{
+		RELEASEREF( m_pTransDefault );
+		m_pTransDefault = NULL;
+	}
+	if ( m_pTransCamera )
+	{
+		RELEASEREF( m_pTransCamera );
+		m_pTransCamera = NULL;
+	}
 
 #ifdef _DEBUG
 	// Print information about any un-released CqRefCount objects
@@ -504,7 +537,10 @@ CqOptions& CqRenderer::optCurrent() const
 	if ( m_pconCurrent != 0 )
 		return ( m_pconCurrent->optCurrent() );
 	else
-		return ( goptDefault );
+	{
+		assert( m_pOptDefault != NULL );
+		return ( *m_pOptDefault );
+	}
 }
 
 
@@ -517,7 +553,7 @@ const CqAttributes* CqRenderer::pattrCurrent()
 	if ( m_pconCurrent != 0 )
 		return ( m_pconCurrent->pattrCurrent() );
 	else
-		return ( &m_attrDefault );
+		return ( m_pAttrDefault );
 }
 
 
@@ -530,7 +566,7 @@ CqAttributes* CqRenderer::pattrWriteCurrent()
 	if ( m_pconCurrent != 0 )
 		return ( m_pconCurrent->pattrWriteCurrent() );
 	else
-		return ( &m_attrDefault );
+		return ( m_pAttrDefault );
 }
 
 
@@ -543,7 +579,7 @@ const CqTransform* CqRenderer::ptransCurrent()
 	if ( m_pconCurrent != 0 )
 		return ( m_pconCurrent->ptransCurrent() );
 	else
-		return ( &m_transDefault );
+		return ( m_pTransDefault );
 }
 
 
@@ -556,7 +592,7 @@ CqTransform* CqRenderer::ptransWriteCurrent()
 	if ( m_pconCurrent != 0 )
 		return ( m_pconCurrent->ptransWriteCurrent() );
 	else
-		return ( &m_transDefault );
+		return ( m_pTransDefault );
 }
 
 
@@ -632,7 +668,7 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 	if ( fhash == ohash ) matA = matObjectToWorld;
 	else if ( fhash == shash ) matA = matShaderToWorld;
 	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
-		matA = m_transCamera.GetMotionObjectInterpolated( time ).Inverse();
+		matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
 	else
 	{
 		WhichMatToWorld( matA, fhash );
@@ -642,7 +678,7 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 	if ( thash == ohash ) matB = matObjectToWorld.Inverse();
 	else if ( thash == shash ) matB = matShaderToWorld.Inverse();
 	else if ( ( thash == chash ) || ( thash == cuhash ) )
-		matB = m_transCamera.GetMotionObjectInterpolated( time );
+		matB = m_pTransCamera->GetMotionObjectInterpolated( time );
 	else
 	{
 		WhichMatWorldTo( matB, thash );
@@ -674,7 +710,7 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
 	if ( fhash == ohash ) matA = matObjectToWorld;
 	else if ( fhash == shash ) matA = matShaderToWorld;
 	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
-		matA = m_transCamera.GetMotionObjectInterpolated( time ).Inverse();
+		matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
 	else
 	{
 		WhichMatToWorld ( matA, fhash );
@@ -683,7 +719,7 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
 	if ( thash == ohash ) matB = matObjectToWorld.Inverse();
 	else if ( thash == shash ) matB = matShaderToWorld.Inverse();
 	else if ( ( thash == chash ) || ( thash == cuhash ) )
-		matB = m_transCamera.GetMotionObjectInterpolated( time );
+		matB = m_pTransCamera->GetMotionObjectInterpolated( time );
 	else
 	{
 		WhichMatWorldTo ( matB, thash );
@@ -727,7 +763,7 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
 	if ( fhash == ohash ) matA = matObjectToWorld;
 	else if ( fhash == shash ) matA = matShaderToWorld;
 	else if ( ( fhash == chash ) || ( fhash == cuhash ) )
-		matA = m_transCamera.GetMotionObjectInterpolated( time ).Inverse();
+		matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
 	else
 	{
 		WhichMatToWorld ( matA, fhash );
@@ -736,7 +772,7 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
 	if ( thash == ohash ) matB = matObjectToWorld.Inverse();
 	else if ( thash == shash ) matB = matShaderToWorld.Inverse();
 	else if ( ( thash == chash ) || ( thash == cuhash ) )
-		matB = m_transCamera.GetMotionObjectInterpolated( time );
+		matB = m_pTransCamera->GetMotionObjectInterpolated( time );
 	else
 	{
 		WhichMatWorldTo ( matB, thash );
