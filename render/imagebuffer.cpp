@@ -1525,6 +1525,12 @@ void CqImageBuffer::RenderImage()
 		Complete=100.0f/Complete;
 		QGetRenderContext()->Stats().SetComplete(Complete);
 
+		RtProgressFunc pProgressHandler;
+		if((pProgressHandler=QGetRenderContext()->optCurrent().pProgressHandler())!=0)
+		{
+			(*pProgressHandler)(Complete);
+		}
+
 		RenderSurfaces(iBucket,xmin,xmax,ymin,ymax);
 		if(m_fQuit)
 		{

@@ -3560,5 +3560,16 @@ RtBoolean	BasisFromName(RtBasis& b, const char* strName)
 }
 
 
+//----------------------------------------------------------------------
+// RiProgressHandler
+// Set the function used to report progress.
+//
+RtVoid	RiProgressHandler(RtProgressFunc handler)
+{
+	QGetRenderContext()->optCurrent().SetpProgressHandler(handler);
+	return(0);
+}
+
+
 //---------------------------------------------------------------------
  

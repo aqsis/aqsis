@@ -696,6 +696,15 @@ class CqOptions : public CqDisplay, public CqCamera
 			void		SetpErrorHandler(RtErrorFunc perrorhandler)
 											{m_pErrorHandler=perrorhandler;}
 			
+						/** Get a pointer to the progress handler function.
+						 */
+			RtProgressFunc	pProgressHandler()	{return(m_pProgressHandler);}
+						/** Set the progress handler function to use.
+						 * \param pprogresshandler A pointer to a function which conforms to RtProgressFunc.
+						 */
+			void		SetpProgressHandler(RtProgressFunc pprogresshandler)
+											{m_pProgressHandler=pprogresshandler;}
+			
 	const	TqFloat*	GetFloatOption(const char* strName, const char* strParam) const;
 	const	TqInt*		GetIntegerOption(const char* strName, const char* strParam) const;
 	const	CqString* GetStringOption(const char* strName, const char* strParam) const;
@@ -713,6 +722,7 @@ class CqOptions : public CqDisplay, public CqCamera
 			TqInt							m_iColorSamples;		///< The number of samples per color value.
 			TqFloat							m_fRelativeDetail;		///< The relative detail setting.
 			RtErrorFunc						m_pErrorHandler;		///< A pointer to the error hadling function.
+			RtProgressFunc					m_pProgressHandler;		///< A pointer to the progress hadling function.
 			std::vector<CqSystemOption*>	m_aOptions;				///< Vector of user specified options.
 };
 

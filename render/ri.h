@@ -279,7 +279,13 @@ _qShare	RtVoid			RiSubdivisionMesh(RtToken scheme, RtInt nfaces, RtInt nvertices
 _qShare	RtVoid			RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], PARAMETERLIST);
 
 
+
+// Specific to Aqsis
+
+typedef	RtVoid		(*RtProgressFunc)(RtFloat PercentComplete);
+
 _qShare	RtBoolean		BasisFromName(RtBasis& b, const char* strName);
+_qShare RtVoid			RiProgressHandler(RtProgressFunc handler);
 
 #ifdef	__cplusplus
 }

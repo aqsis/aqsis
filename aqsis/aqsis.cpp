@@ -11,6 +11,7 @@
 #include <argparse.h>
 
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -39,6 +40,13 @@ void version(std::ostream& Stream)
 #else
 	Stream << "aqsis version " << VERSION << std::endl;
 #endif
+}
+
+
+RtVoid PrintProgress(RtFloat percent)
+{
+	printf("%3.2f%% Complete\r",percent);
+	return(0);
 }
 
 int main(int argc, const char** argv)
@@ -208,6 +216,8 @@ void RenderFile(std::istream& file, const char* name)
 	RiOption("searchpath", "texture", &popt,RI_NULL);
 	popt[0]=g_displays.c_str();
 	RiOption("searchpath", "display", &popt,RI_NULL);
+
+	RiProgressHandler(&PrintProgress);
 
 	if(g_config.compare(""))
 	{

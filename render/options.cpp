@@ -213,7 +213,8 @@ void CqCamera::InitialiseCamera()
 CqOptions::CqOptions()  :	m_strHider("Hidden"),
 							m_iColorSamples(3),
 							m_fRelativeDetail(1.0),
-							m_pErrorHandler(&RiErrorPrint)
+							m_pErrorHandler(&RiErrorPrint),
+							m_pProgressHandler(NULL)
 {
 }
 
@@ -257,6 +258,7 @@ CqOptions& CqOptions::operator=(const CqOptions& From)
 	m_iColorSamples=From.m_iColorSamples;
 	m_fRelativeDetail=From.m_fRelativeDetail;
 	m_pErrorHandler=From.m_pErrorHandler;
+	m_pProgressHandler=From.m_pProgressHandler;
 
 	// Copy the system options.
 	m_aOptions.resize(From.m_aOptions.size());
