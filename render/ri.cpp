@@ -1,5 +1,5 @@
 // Aqsis
-// Copyright © 1997 - 2001, Paul C. Gregory
+// Copyright 1997 - 2001, Paul C. Gregory
 //
 // Contact: pgregory@aqsis.com
 //

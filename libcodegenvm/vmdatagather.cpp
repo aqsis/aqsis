@@ -133,7 +133,8 @@ void CqCodeGenDataGather::Visit( IqParseNodeVariable& V)
 	IqParseNodeVariable* pVN;
 	V.GetInterface( ParseNode_Variable, ( void** ) & pVN );
 
-	IqVarDef* pVD = pTranslatedVariable( pVN->VarRef(), m_saTransTable );
+	SqVarRef temp( pVN->VarRef() );
+	IqVarDef* pVD = pTranslatedVariable( temp, m_saTransTable );
 	if ( pVD )
 		pVD->IncUseCount();
 }
@@ -148,7 +149,8 @@ void CqCodeGenDataGather::Visit( IqParseNodeArrayVariable& AV)
 
 	pNode->pChild()->Accept( *this );
 
-	IqVarDef* pVD = pTranslatedVariable( pVN->VarRef(), m_saTransTable );
+	SqVarRef temp( pVN->VarRef() );
+	IqVarDef* pVD = pTranslatedVariable( temp, m_saTransTable );
 	if ( pVD )
 		pVD->IncUseCount();
 }
@@ -165,7 +167,8 @@ void CqCodeGenDataGather::Visit( IqParseNodeVariableAssign& VA)
 	if ( pExpr != 0 ) 
 		pExpr->Accept( *this );
 
-	IqVarDef* pVD = pTranslatedVariable( pVN->VarRef(), m_saTransTable );
+	SqVarRef temp( pVN->VarRef() );
+	IqVarDef* pVD = pTranslatedVariable( temp, m_saTransTable );
 	if ( pVD )
 		pVD->IncUseCount();
 }
@@ -189,7 +192,8 @@ void CqCodeGenDataGather::Visit( IqParseNodeArrayVariableAssign& AVA)
 	IqParseNode * pIndex = pExpr->pNextSibling();
 	pIndex->Accept( *this );
 
-	IqVarDef* pVD = pTranslatedVariable( pVN->VarRef(), m_saTransTable );
+	SqVarRef temp( pVN->VarRef() );
+	IqVarDef* pVD = pTranslatedVariable( temp, m_saTransTable );
 	if ( pVD )
 		pVD->IncUseCount();
 }

@@ -262,7 +262,8 @@ void CqCodeGenOutput::Visit( IqParseNodeVariable& V)
 
 	m_slxFile << "\tpushv ";
 
-	IqVarDef* pVD = pTranslatedVariable( pVN->VarRef(), m_saTransTable );
+	SqVarRef temp( pVN->VarRef() );
+	IqVarDef* pVD = pTranslatedVariable( temp, m_saTransTable );
 	if ( pVD )
 	{
 		pVD->IncUseCount();
@@ -285,7 +286,8 @@ void CqCodeGenOutput::Visit( IqParseNodeArrayVariable& AV)
 	pNode->pChild()->Accept( *this );
 	m_slxFile << "\tipushv ";
 
-	IqVarDef* pVD = pTranslatedVariable( pVN->VarRef(), m_saTransTable );
+	SqVarRef temp( pVN->VarRef() );
+	IqVarDef* pVD = pTranslatedVariable( temp, m_saTransTable );
 	if ( pVD )
 	{
 		pVD->IncUseCount();
@@ -316,7 +318,8 @@ void CqCodeGenOutput::Visit( IqParseNodeVariableAssign& VA)
 	m_slxFile << "\tpop ";
 
 	// Output a pop for this variable.
-	IqVarDef* pVD = pTranslatedVariable( pVN->VarRef(), m_saTransTable );
+	SqVarRef temp( pVN->VarRef() );
+	IqVarDef* pVD = pTranslatedVariable( temp, m_saTransTable );
 	if ( pVD )
 	{
 		pVD->IncUseCount();
@@ -353,7 +356,8 @@ void CqCodeGenOutput::Visit( IqParseNodeArrayVariableAssign& AVA)
 	m_slxFile << "\tipop ";
 
 	// Output a pop for this variable.
-	IqVarDef* pVD = pTranslatedVariable( pVN->VarRef(), m_saTransTable );
+	SqVarRef temp( pVN->VarRef() );
+	IqVarDef* pVD = pTranslatedVariable( temp, m_saTransTable );
 	if ( pVD )
 	{
 		pVD->IncUseCount();
@@ -766,7 +770,8 @@ void CqCodeGenOutput::Visit( IqParseNodeMessagePassingFunction& MPF)
 
 	}
 	// Output the comm function.
-	IqVarDef* pVD = pTranslatedVariable( MPF.VarRef(), m_saTransTable );
+	SqVarRef temp( MPF.VarRef() );
+	IqVarDef* pVD = pTranslatedVariable( temp, m_saTransTable );
 	if ( pVD )
 	{
 		pVD->IncUseCount();

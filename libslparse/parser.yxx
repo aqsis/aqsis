@@ -1653,7 +1653,7 @@ void TypeCheck()
 		if(gLocalFuncs[i].pDef()!=0)
 		{
 //			TqInt RetType=gLocalFuncs[i].Type();
-			gLocalFuncs[i].pDef()->TypeCheck(CqParseNode::pAllTypes(), Type_Last-1);
+			gLocalFuncs[i].pDefNode()->TypeCheck(CqParseNode::pAllTypes(), Type_Last-1);
 		}
 	}
 
@@ -1669,7 +1669,7 @@ void Optimise()
 	for(i=0; i<gLocalFuncs.size(); i++)
 	{
 		if(gLocalFuncs[i].pDef()!=0)
-			gLocalFuncs[i].pDef()->Optimise();
+			gLocalFuncs[i].pDefNode()->Optimise();
 	}
 
 	if(ParseTreePointer)

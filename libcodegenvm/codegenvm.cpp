@@ -135,7 +135,8 @@ void CreateTempMap( IqParseNode* pParam, IqParseNode* pArg, std::deque<std::map<
 			strTempName << "_" << Stack.size() << "$" << pLocalVar->strName();
 			Stack.back()[pLocalVar->strName()] = std::string(strTempName.str());
 
-			IqVarDef* pVD = pTranslatedVariable( pLocalVar->VarRef(), Trans );
+			SqVarRef temp( pLocalVar->VarRef() );
+			IqVarDef* pVD = pTranslatedVariable( temp, Trans );
 			
 			SssTempVar tv;
 			tv.m_Name = strTempName.str();
