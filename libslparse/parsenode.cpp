@@ -221,6 +221,16 @@ const IqFuncDef* CqParseNodeFunctionCall::pFuncDef() const
 }
 
 
+IqFuncDef* CqParseNodeFunctionCall::pFuncDef()
+{
+	CqFuncDef * pFuncDef = CqFuncDef::GetFunctionPtr( m_aFuncRef[ 0 ] );
+	if ( pFuncDef != 0 )
+		return ( pFuncDef );
+	else
+		return ( 0 );
+}
+
+
 ///---------------------------------------------------------------------
 /// CqParseNodeUnresolvedCall::ResType
 
@@ -238,6 +248,11 @@ const char*	CqParseNodeUnresolvedCall::strName() const
 
 
 const IqFuncDef* CqParseNodeUnresolvedCall::pFuncDef() const
+{
+	return ( &m_aFuncDef );
+}
+
+IqFuncDef* CqParseNodeUnresolvedCall::pFuncDef()
 {
 	return ( &m_aFuncDef );
 }

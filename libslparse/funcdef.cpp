@@ -474,6 +474,11 @@ const IqParseNode* CqFuncDef::pDef() const
 	return ( m_pDef );
 }
 
+IqParseNode* CqFuncDef::pDef()
+{
+	return ( m_pDef );
+}
+
 
 ///---------------------------------------------------------------------
 /** Return a temporary pointer to a function definition..

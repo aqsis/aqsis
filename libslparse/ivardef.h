@@ -225,6 +225,7 @@ struct SqVarRef
 struct IqVarDef
 {
 	virtual	const IqParseNode*	pInitialiser() const = 0;
+	virtual	IqParseNode*	pInitialiser() = 0;
 	virtual	TqInt	Type() const = 0;
 	virtual const char*	strName() const = 0;
 	virtual	void	IncUseCount() = 0;

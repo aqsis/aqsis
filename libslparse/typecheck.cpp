@@ -300,7 +300,7 @@ TqInt	CqParseNodeUnresolvedCall::TypeCheck( TqInt* pTypes, TqInt Count, TqBool C
 					m_aFuncDef.strName(),
 					"unresolved",
 					m_aFuncDef.strParams(),
-					m_aFuncDef.pDef(),
+					m_aFuncDef.pDefNode(),
 					m_aFuncDef.pArgs());
 
 	return m_aFuncDef.Type();

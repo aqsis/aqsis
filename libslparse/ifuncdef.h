@@ -65,6 +65,7 @@ struct IqFuncDef
 	virtual	const char*	strVMName() const = 0;
 	virtual	const char*	strParams() const = 0;
 	virtual	const IqParseNode* pArgs() const = 0;
+	virtual	IqParseNode* pDef() = 0;
 	virtual	const IqParseNode* pDef() const = 0;
 	virtual	TqBool	fVarying() const = 0;
 	virtual	TqInt	VariableLength() const = 0;

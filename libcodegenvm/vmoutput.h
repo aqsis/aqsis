@@ -28,6 +28,8 @@
 #define VMOUTPUT_H_INCLUDED 1
 
 #include	<vector>
+#include	<deque>
+#include	<map>
 
 #include	"aqsis.h"
 
@@ -35,34 +37,74 @@
 #include	"ivardef.h"
 #include	"ifuncdef.h"
 #include	"icodegen.h"
+#include	"vmdatagather.h"
 
 START_NAMESPACE( Aqsis )
 
 
 #define	VM_SHADER_EXTENSION	".slx"
 
-class CqCodeGenVM : private IqCodeGen 
+class CqCodeGenOutput : public IqParseNodeVisitor
 {
-	protected:
-	void OutputLocalVariable( const IqVarDef*, std::ostream&, std::string );
-	void OutputFunctionCall( const IqFuncDef*, IqParseNode*, std::ostream&, std::string );
-	void OutputUnresolvedCall( const IqFuncDef*, IqParseNode*, std::ostream&, std::string );
-	const char* MathOpName( TqInt );
-	CqString StorageSpec( TqInt );
-	virtual std::vector<SqVarRefTranslator>* PopTransTable();
-	virtual void PushTransTable( std::vector<SqVarRefTranslator>* );
-	virtual IqVarDef* pTranslatedVariable( SqVarRef& );
-
-	std::vector<std::vector<SqVarRefTranslator>*> m_saTransTable;
-	TqInt m_gcLabels;
-	TqUint m_gInternalFunctionUsage;
-
 	public:
-	CqCodeGenVM() : m_gcLabels(0), m_gInternalFunctionUsage(0) {};
-	virtual void OutputTree( const IqParseNode*, std::string);
-	virtual void OutputTreeNode( const IqParseNode*, std::ostream&, std::string);
+	CqCodeGenOutput( CqCodeGenDataGather* pDataGather ) : m_pDataGather( pDataGather ), m_gcLabels( 0 )
+	{}
 
+	virtual	void Visit( IqParseNode& );
+	virtual	void Visit( IqParseNodeShader& );
+	virtual	void Visit( IqParseNodeFunctionCall& );
+	virtual	void Visit( IqParseNodeUnresolvedCall& );
+	virtual	void Visit( IqParseNodeVariable& );
+	virtual	void Visit( IqParseNodeArrayVariable& );
+	virtual	void Visit( IqParseNodeVariableAssign& );
+	virtual	void Visit( IqParseNodeArrayVariableAssign& );
+	virtual	void Visit( IqParseNodeOperator& );
+	virtual	void Visit( IqParseNodeMathOp& );
+	virtual	void Visit( IqParseNodeRelationalOp& );
+	virtual	void Visit( IqParseNodeUnaryOp& );
+	virtual	void Visit( IqParseNodeLogicalOp& );
+	virtual	void Visit( IqParseNodeDiscardResult& );
+	virtual	void Visit( IqParseNodeConstantFloat& );
+	virtual	void Visit( IqParseNodeConstantString& );
+	virtual	void Visit( IqParseNodeWhileConstruct& );
+	virtual	void Visit( IqParseNodeIlluminateConstruct& );
+	virtual	void Visit( IqParseNodeIlluminanceConstruct& );
+	virtual	void Visit( IqParseNodeSolarConstruct& );
+	virtual	void Visit( IqParseNodeConditional& );
+	virtual	void Visit( IqParseNodeConditionalExpression& );
+	virtual	void Visit( IqParseNodeTypeCast& );
+	virtual	void Visit( IqParseNodeTriple& );
+	virtual	void Visit( IqParseNodeSixteenTuple& );
+	virtual	void Visit( IqParseNodeMessagePassingFunction& );
+
+	CqString& strOutName()
+	{
+		return(m_strOutName);
+	}
+	const CqString& strOutName() const
+	{
+		return(m_strOutName);
+	}
+	std::vector<SssTempVar>& TempVars()
+	{
+		assert( NULL != m_pDataGather );
+		return( m_pDataGather->TempVars() );
+	}
+
+	static void OutputLocalVariable( const IqVarDef*, std::ostream&, std::string );
+	static CqString StorageSpec( TqInt );
+	const char* MathOpName( TqInt );
+
+	private:
+	CqString	m_strOutName;
+	TqInt		m_gcLabels;
+	CqCodeGenDataGather*	m_pDataGather;
+	std::ofstream	m_slxFile;
+
+	std::vector<std::vector<SqVarRefTranslator> > m_saTransTable;
+	std::deque<std::map<std::string, std::string> >	m_StackVarMap;
 };
+
 
 //-----------------------------------------------------------------------
 

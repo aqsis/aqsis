@@ -92,6 +92,9 @@ class CqParseNode : public CqListEntry<CqParseNode>, public IqParseNode
 		{
 			return ( IqParseNode::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(*this); }
+
+
 
 		CqParseNode* pFirstChild() const
 		{
@@ -277,6 +280,7 @@ class CqParseNodeShader : public CqParseNode, public IqParseNodeShader
 		{
 			return ( IqParseNodeShader::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeShader&>(*this)); }
 
 
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
@@ -322,6 +326,7 @@ class CqParseNodeFunctionCall : public CqParseNode, public IqParseNodeFunctionCa
 
 		virtual	const char*	strName() const;
 		virtual	const IqFuncDef* pFuncDef() const;
+		virtual	IqFuncDef* pFuncDef();
 
 		// Overridden from IqParseNode
 		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
@@ -333,6 +338,7 @@ class CqParseNodeFunctionCall : public CqParseNode, public IqParseNodeFunctionCa
 		{
 			return ( IqParseNodeFunctionCall::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeFunctionCall&>(*this)); }
 
 
 		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
@@ -377,6 +383,7 @@ class CqParseNodeUnresolvedCall : public CqParseNode, public IqParseNodeUnresolv
 
 		virtual	const char*	strName() const;
 		virtual	const IqFuncDef* pFuncDef() const;
+		virtual	IqFuncDef* pFuncDef();
 
 		// Overridden from IqParseNode
 		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
@@ -388,6 +395,7 @@ class CqParseNodeUnresolvedCall : public CqParseNode, public IqParseNodeUnresolv
 		{
 			return ( IqParseNodeUnresolvedCall::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeUnresolvedCall&>(*this)); }
 
 
 		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
@@ -400,7 +408,7 @@ class CqParseNodeUnresolvedCall : public CqParseNode, public IqParseNodeUnresolv
 			pNew->m_pParent = pParent;
 			return ( pNew );
 		}
-		CqFuncDef&	pFuncDef()
+		CqFuncDef&	pFuncDefInt()
 		{
 			return ( m_aFuncDef );
 		}
@@ -460,6 +468,7 @@ class CqParseNodeVariable : public CqParseNode, public IqParseNodeVariable
 		{
 			return ( IqParseNodeVariable::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeVariable&>(*this)); }
 
 
 
@@ -519,6 +528,7 @@ class CqParseNodeVariableArray : public CqParseNodeVariable, public IqParseNodeA
 		{
 			return ( IqParseNodeArrayVariable::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeArrayVariable&>(*this)); }
 
 
 		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
@@ -572,6 +582,7 @@ class CqParseNodeAssign : public CqParseNodeVariable, public IqParseNodeVariable
 		{
 			return ( IqParseNodeVariableAssign::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeVariableAssign&>(*this)); }
 
 
 
@@ -641,6 +652,8 @@ class CqParseNodeAssignArray : public CqParseNodeAssign, public IqParseNodeArray
 		{
 			return ( IqParseNodeArrayVariableAssign::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeArrayVariableAssign&>(*this)); }
+
 
 
 		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
@@ -680,6 +693,7 @@ class CqParseNodeOp : public CqParseNode, public IqParseNodeOperator
 			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeOperator>( this, type ) ) != 0 ) return ( TqTrue );
 			return ( CqParseNode::GetInterface( type, pNode ) );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeOperator&>(*this)); }
 
 		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
 };
@@ -725,6 +739,9 @@ class CqParseNodeMathOp : public CqParseNodeOp, public IqParseNodeMathOp
 		{
 			return ( IqParseNodeMathOp::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeMathOp&>(*this)); }
+
+
 
 		virtual	TqInt	ResType() const;
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
@@ -796,12 +813,14 @@ class CqParseNodeRelOp : public CqParseNodeOp, public IqParseNodeRelationalOp
 		{
 			return ( IqParseNodeRelationalOp::m_ID );
 		}
-
-
 		virtual	TqInt	ResType() const
 		{
 			return ( Type_Float );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeRelationalOp&>(*this)); }
+
+
+
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
 		{
 			CqParseNodeRelOp * pNew = new CqParseNodeRelOp( *this );
@@ -852,6 +871,7 @@ class CqParseNodeUnaryOp : public CqParseNodeOp, public IqParseNodeUnaryOp
 		{
 			return ( IqParseNodeUnaryOp::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeUnaryOp&>(*this)); }
 
 
 		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
@@ -904,12 +924,14 @@ class CqParseNodeLogicalOp : public CqParseNodeOp, public IqParseNodeLogicalOp
 		{
 			return ( IqParseNodeLogicalOp::m_ID );
 		}
-
-
 		virtual	TqInt	ResType() const
 		{
 			return ( Type_Float );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeLogicalOp&>(*this)); }
+
+
+
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
 		{
 			CqParseNodeLogicalOp * pNew = new CqParseNodeLogicalOp( *this );
@@ -952,6 +974,7 @@ class CqParseNodeDrop : public CqParseNode, public IqParseNodeDiscardResult
 		{
 			return ( IqParseNodeDiscardResult::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeDiscardResult&>(*this)); }
 
 
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
@@ -1023,12 +1046,13 @@ class CqParseNodeFloatConst : public CqParseNodeConst, public IqParseNodeConstan
 		{
 			return ( IqParseNodeConstantFloat::m_ID );
 		}
-
-
 		virtual	TqInt	ResType() const
 		{
 			return ( Type_Float );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeConstantFloat&>(*this)); }
+
+
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
 		{
 			CqParseNodeFloatConst * pNew = new CqParseNodeFloatConst( *this );
@@ -1078,12 +1102,14 @@ class CqParseNodeStringConst : public CqParseNodeConst, public IqParseNodeConsta
 		{
 			return ( IqParseNodeConstantString::m_ID );
 		}
-
-
 		virtual	TqInt	ResType() const
 		{
 			return ( Type_String );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeConstantString&>(*this)); }
+
+
+
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
 		{
 			CqParseNodeStringConst * pNew = new CqParseNodeStringConst( *this );
@@ -1126,6 +1152,7 @@ class CqParseNodeWhileConstruct : public CqParseNode, public IqParseNodeWhileCon
 		{
 			return ( IqParseNodeWhileConstruct::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeWhileConstruct&>(*this)); }
 
 
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
@@ -1176,6 +1203,7 @@ class CqParseNodeIlluminateConstruct : public CqParseNode, public IqParseNodeIll
 		{
 			return ( IqParseNodeIlluminateConstruct::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeIlluminateConstruct&>(*this)); }
 
 
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
@@ -1227,6 +1255,7 @@ class CqParseNodeIlluminanceConstruct : public CqParseNode, public IqParseNodeIl
 		{
 			return ( IqParseNodeIlluminanceConstruct::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeIlluminanceConstruct&>(*this)); }
 
 
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
@@ -1278,6 +1307,7 @@ class CqParseNodeSolarConstruct : public CqParseNode, public IqParseNodeSolarCon
 		{
 			return ( IqParseNodeSolarConstruct::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeSolarConstruct&>(*this)); }
 
 
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
@@ -1323,6 +1353,7 @@ class CqParseNodeConditional : public CqParseNode, public IqParseNodeConditional
 		{
 			return ( IqParseNodeConditional::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeConditional&>(*this)); }
 
 
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
@@ -1385,6 +1416,7 @@ class CqParseNodeQCond : public CqParseNode, public IqParseNodeConditionalExpres
 		{
 			return ( IqParseNodeConditionalExpression::m_ID );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeConditionalExpression&>(*this)); }
 
 
 		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
@@ -1438,12 +1470,14 @@ class CqParseNodeCast : public CqParseNode, public IqParseNodeTypeCast
 		{
 			return ( IqParseNodeTypeCast::m_ID );
 		}
-
-
 		virtual	TqInt	ResType() const
 		{
 			return ( m_tTo );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeTypeCast&>(*this)); }
+
+
+
 		virtual	TqBool	Optimise();
 		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
@@ -1487,13 +1521,14 @@ class CqParseNodeTriple : public CqParseNode, public IqParseNodeTriple
 		{
 			return ( IqParseNodeTriple::m_ID );
 		}
-
-
-		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
 		virtual	TqInt	ResType() const
 		{
 			return ( Type_Triple );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeTriple&>(*this)); }
+
+
+		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
 		{
 			CqParseNodeTriple * pNew = new CqParseNodeTriple( *this );
@@ -1535,13 +1570,14 @@ class CqParseNodeHexTuple : public CqParseNode, public IqParseNodeSixteenTuple
 		{
 			return ( IqParseNodeSixteenTuple::m_ID );
 		}
-
-
-		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
 		virtual	TqInt	ResType() const
 		{
 			return ( Type_HexTuple );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeSixteenTuple&>(*this)); }
+
+
+		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
 		{
 			CqParseNodeHexTuple * pNew = new CqParseNodeHexTuple( *this );
@@ -1609,12 +1645,13 @@ class CqParseNodeCommFunction : public CqParseNode, public IqParseNodeMessagePas
 		{
 			return ( IqParseNodeMessagePassingFunction::m_ID );
 		}
-
-
 		virtual	TqInt	ResType() const
 		{
 			return ( Type_Float );
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(static_cast<IqParseNodeMessagePassingFunction&>(*this)); }
+
+
 		virtual	TqInt	TypeCheck( TqInt* pTypes, TqInt Count = 1, TqBool CheckOnly = TqFalse );
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
 		{
@@ -1664,6 +1701,9 @@ class CqParseNodeDeclaration : public CqParseNode
 		{
 			m_Type = Type;
 		}
+		virtual	void	Accept( IqParseNodeVisitor &V)	{ V.Visit(*this); }
+
+
 
 		virtual	CqParseNode*	Clone( CqParseNode* pParent = 0 )
 		{

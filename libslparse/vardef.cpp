@@ -102,6 +102,11 @@ const IqParseNode* CqVarDef::pInitialiser() const
 	return ( m_pDefValue );
 }
 
+IqParseNode* CqVarDef::pInitialiser()
+{
+	return ( m_pDefValue );
+}
+
 
 ///---------------------------------------------------------------------
 /// CqVarDef::FindFunction

@@ -71,8 +71,7 @@ static const char* const gVariableTypeNames[] =
 class IqCodeGen 
 {
 	public:
-	virtual void OutputTree( const IqParseNode* pNode, std::string strOutName = "" ) = 0;
-	virtual void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string strOutName = "" ) = 0;
+	virtual void OutputTree( IqParseNode* pNode, std::string strOutName = "" ) = 0;
 };
 
 //-----------------------------------------------------------------------

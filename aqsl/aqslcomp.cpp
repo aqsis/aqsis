@@ -31,6 +31,7 @@
 
 #include	"libslparse.h"
 #include	"icodegen.h"
+#include	"codegenvm.h"
 #include	"vmoutput.h"
 #include	"argparse.h"
 

@@ -87,6 +87,7 @@ class CqFuncDef : public IqFuncDef
 		}
 		virtual	const IqParseNode* pArgs() const;
 		virtual	const IqParseNode* pDef() const;
+		virtual	IqParseNode* pDef();
 		virtual	TqBool	fVarying() const
 		{
 			return ( m_fVarying );
@@ -106,7 +107,7 @@ class CqFuncDef : public IqFuncDef
 		{
 			return ( m_pArgs );
 		}
-		CqParseNode*	pDef()
+		CqParseNode*	pDefNode()
 		{
 			return ( m_pDef );
 		}

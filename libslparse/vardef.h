@@ -54,6 +54,7 @@ class CqVarDef : public IqVarDef
 
 		// Overridden from IqVarDef
 		virtual const IqParseNode*	pInitialiser() const;
+		virtual IqParseNode*	pInitialiser();
 		virtual	TqInt	Type() const
 		{
 			return ( m_Type );
