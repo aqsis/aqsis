@@ -4,8 +4,8 @@
  *	@author	Matthäus G. Chajdas
  *	@brief	Declare the interface structure for the log class.
  *
- *	Last change by:		$Author: mw_matti $
- *	Last change date:	$Date: 2003/03/22 11:00:54 $
+ *	Last change by:		$Author: minty $
+ *	Last change date:	$Date: 2003/05/02 11:55:43 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___ilog_Loaded___
@@ -95,6 +95,10 @@ struct IqLog
 		virtual const char* getError( int table, int error_id ) = 0;
 
 };
+
+//-------------------------------- Utility functions prototypes
+IqLog* CreateLogger( void );
+void DeleteLogger( IqLog* );
 
 //-----------------------------------------------------------------------
 

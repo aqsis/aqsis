@@ -1739,15 +1739,15 @@ void ProcessShaderArguments( CqParseNode* pArgs )
 
 static IqLog* g_ptheLog = NULL;
 
-void CreateLogger()
+void SLCreateLogger()
 {
 	delete( g_ptheLog );
-	g_ptheLog = new CqLog;
+	g_ptheLog = CreateLogger();
 }
 
-void DeleteLogger()
+void SLDeleteLogger()
 {
-	delete( g_ptheLog );
+	DeleteLogger( g_ptheLog );
 }
 
 } // End Namespace

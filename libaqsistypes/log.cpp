@@ -334,4 +334,15 @@ void CqLog::debug( const CqString &string )
 	log2(log4cpp::Priority::DEBUG, string.c_str());
 }
 
+//-------------------------------- Utility functions
+IqLog* CreateLogger()
+{
+	return( new CqLog );
+}
+
+void DeleteLogger(IqLog *log)
+{
+	delete( log );
+}
+
 END_NAMESPACE( Aqsis )

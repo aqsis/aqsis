@@ -32,6 +32,7 @@
 
 START_NAMESPACE( Aqsis )
 
+static  IqLog *pLogger = NULL;
 //---------------------------------------------------------------------
 /** This does replicate effort from CqFile and at present doesnt handle NT either 
  ** There is a distinction in that we would like to handle directories here which CqFile doesnt
@@ -142,7 +143,16 @@ CqDSORepository::SetDSOPath(const CqString* pPath)
 std::list<SqDSOExternalCall*>*
 CqDSORepository::getShadeOpMethods(CqString* pShadeOpName)
 {
-	IqLog *logger = QGetRenderContextI()->Logger();
+	if( !pLogger )
+	{
+		if( QGetRenderContextI() ) 
+		{
+			pLogger = QGetRenderContextI()->Logger();
+		}else{
+			pLogger = CreateLogger();
+		};
+	};
+
 	CqString strTableSymbol = *pShadeOpName + "_shadeops" ;
 
 	std::list<SqDSOExternalCall*>* oplist = new (std::list<SqDSOExternalCall*>);
@@ -178,7 +188,7 @@ CqDSORepository::getShadeOpMethods(CqString* pShadeOpName)
 		else 
 		{
 			CqString strError = DLError();
-			logger->error("DLOpen: %s\n" , strError.c_str() );
+			pLogger->error("DLOpen: %s\n" , strError.c_str() );
 		};
 	};
 	return ( oplist->empty() ? NULL : oplist );
@@ -193,7 +203,15 @@ CqDSORepository::getShadeOpMethods(CqString* pShadeOpName)
 SqDSOExternalCall*
 CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 	
-  	IqLog *logger = QGetRenderContextI()->Logger();
+	if( !pLogger )
+	{
+		if( QGetRenderContextI() ) 
+		{
+			pLogger = QGetRenderContextI()->Logger();
+		}else{
+			pLogger = CreateLogger();
+		};
+	};
 	TqInt length = strlen(pShadeOpEntry->m_opspec)+1;
 	char temp[1024];
 	strncpy(temp, pShadeOpEntry->m_opspec,length);
@@ -215,7 +233,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 	// ERROR if we cant find this types name;
 	if (m_itTypeNameMap == m_TypeNameMap.end())
 	{
-	  	logger->warn( "Discarding DSO Table entry due to unsupported return type: %s\n" , strRetType.c_str() );
+	  	pLogger->warn( "Discarding DSO Table entry due to unsupported return type: %s\n" , strRetType.c_str() );
 		return NULL;
 	}
 	EqVariableType rettype = (*m_itTypeNameMap).second;
@@ -229,7 +247,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 	DSOMethod method = (DSOMethod) DLSym (handle,&s);
 	if(method == NULL) 
 	{
-	  	logger->warn( "Discarding DSO Table entry due to unknown symbol for method: %s\n" , strMethodName.c_str());
+	  	pLogger->warn( "Discarding DSO Table entry due to unknown symbol for method: %s\n" , strMethodName.c_str());
 	 	return NULL;
 	};
 	
@@ -250,7 +268,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 		// ERROR if we cant find this arguments type name;
 		if (m_itTypeNameMap == m_TypeNameMap.end())
 		{
-	  		logger->warn( "Discarding DSO Table entry due to unsupported argument type: %s\n", strArgType.c_str());
+	  		pLogger->warn( "Discarding DSO Table entry due to unsupported argument type: %s\n", strArgType.c_str());
 			return NULL;
 		}; 
 		arglist.push_back((*m_itTypeNameMap).second);
@@ -265,7 +283,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 		initfunc = (DSOInit) DLSym(handle,&strInit);
 		if (initfunc == NULL)
 		{
-	  		logger->warn( "Discarding DSO Table entry due to unknown symbol for init: %s\n" , strInit.c_str()); 
+	  		pLogger->warn( "Discarding DSO Table entry due to unknown symbol for init: %s\n" , strInit.c_str()); 
 			return NULL; // ERROR ;
 		};
 	} 
@@ -278,7 +296,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 		shutdownfunc = (DSOShutdown) DLSym(handle,&strShutdown);
 		if (shutdownfunc == NULL)
 		{
- 			logger->warn( "Discarding DSO Table entry due to unknown symbol for shutdown: %s\n" , strShutdown.c_str()); 
+ 			pLogger->warn( "Discarding DSO Table entry due to unknown symbol for shutdown: %s\n" , strShutdown.c_str()); 
 			return NULL; // ERROR ;
 		};
 	};
