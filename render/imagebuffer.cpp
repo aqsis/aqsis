@@ -1530,7 +1530,6 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 	// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
 	if(m_fQuit)	return;
 
-	QGetRenderContext()->Stats().OcclusionCullTimer().Start();
 	CqBucket::CombineElements();
 
 	Bucket.FilterBucket();
@@ -1539,7 +1538,6 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 	
 	BucketComplete(iBucket);
 	QGetRenderContext()->pDDmanager()->DisplayBucket(&m_aBuckets[iBucket]);
-	QGetRenderContext()->Stats().OcclusionCullTimer().Stop();
 }
 
 
