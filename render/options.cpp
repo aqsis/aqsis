@@ -309,7 +309,7 @@ void CqOptions::InitialiseDefaultOptions()
 	ADD_SYSTEM_PARAM4(ScreenWindow, TqFloat, type_float, -( 4.0f / 3.0f ), ( 4.0f / 3.0f ), 1.0f, -1.0f );
 	ADD_SYSTEM_PARAM(Projection, TqInt, type_integer, ProjectionOrthographic );
 	ADD_SYSTEM_PARAM2(Clipping, TqFloat, type_float, FLT_EPSILON, FLT_MAX );
-	ADD_SYSTEM_PARAM3(DepthOfField, TqFloat, type_float, , FLT_MAX, FLT_MAX, FLT_MAX );
+	ADD_SYSTEM_PARAM3(DepthOfField, TqFloat, type_float, FLT_MAX, FLT_MAX, FLT_MAX );
 	ADD_SYSTEM_PARAM2(Shutter, TqFloat, type_float, 0.0f, 1.0f );
 	ADD_SYSTEM_PARAM(FOV, TqFloat, type_float, 90.0f );
 
