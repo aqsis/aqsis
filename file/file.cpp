@@ -11,7 +11,7 @@
 #include	"renderer.h"
 #include	"sstring.h"
 
-#ifdef WIN32
+#ifdef AQSIS_SYSTEM_WIN32
 
 HINSTANCE	hInst;
 
@@ -33,7 +33,7 @@ BOOL APIENTRY DllMain( HINSTANCE hModule,
 	return TRUE;
 }
 
-#endif // WIN32
+#endif // AQSIS_SYSTEM_WIN32
 
 extern "C"
 _qShareM Aqsis::CqImageBuffer* CreateImage(const char* strName)

@@ -1,8 +1,8 @@
 // comptest.cpp : Defines the entry point for the console application.
 //
-#ifdef	WIN32
+#ifdef	AQSIS_SYSTEM_WIN32
 	#include	<windows.h>
-#endif
+#endif // AQSIS_SYSTEM_WIN32
 
 #include	<iostream>
 #include	<fstream>

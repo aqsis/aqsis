@@ -21,11 +21,21 @@
 /** \file
 		\brief Compiler specific options and settings.
 		\author Paul C. Gregory (pgregory@aqsis.com)
+		\author Timothy M. Shead (tshead@k-3d.com)
 */
 
 //? Is .h included already?
 #ifndef AQSIS_COMPILER_H_INCLUDED
 #define AQSIS_COMPILER_H_INCLUDED 1
+
+/** Define the system being compiled on.
+ */
+#define	AQSIS_SYSTEM_POSIX	1
+
+/** Define the compiler.
+ */
+#define	AQSIS_COMPILER_GCC	1
+
 
 #ifdef  NO_NAMESPACES
 #define START_NAMESPACE(x)	/* start disabled namespace x */

@@ -49,9 +49,9 @@ START_NAMESPACE(Aqsis)
 
 #ifdef AQSIS_SYSTEM_WIN32
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
-#else // WIN32
+#else // AQSIS_SYSTEM_WIN32
 #define ZFILE_HEADER "Aqsis ZFile" VERSION
-#endif // !WIN32
+#endif // !AQSIS_SYSTEM_WIN32
 
 #define	CUBEENVMAP_HEADER	"Aqsis CubeFace Environment"
 #define	SHADOWMAP_HEADER	"Aqsis Shadow Map"

@@ -213,9 +213,9 @@ class CqPolygonPoints : public CqSurface
 		// NOTE: These should never be called.
 #ifdef AQSIS_COMPILER_MSVC6
 		virtual	CqBound		Bound() const		{static CqBound bTemp; return(bTemp);}
-#else // WIN32
+#else // AQSIS_COMPILER_MSVC6
 		virtual	CqBound		Bound() const		{ return CqBound(); }
-#endif // !WIN32
+#endif // !AQSIS_COMPILER_MSVC6
 
 		virtual	CqMicroPolyGridBase* Dice()			{return(0);}
 		virtual	TqInt		Split(std::vector<CqBasicSurface*>& aSplits)

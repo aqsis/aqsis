@@ -458,7 +458,7 @@ static CqMatrix temp_matrix;
 // Eliminates "defined but not used" warnings in gcc 2.96
 static TqFloat& temp_float_reference = temp_float;
 static bool& temp_bool_reference = temp_bool;
-#endif // !WIN32
+#endif // !AQSIS_SYSTEM_WIN32
 
 //----------------------------------------------------------------------
 /** \class CqShaderVM

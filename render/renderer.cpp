@@ -892,7 +892,7 @@ void CqRenderer::LoadDisplayLibrary()
 	m_semDisplayDriverReady.Wait();
 }
 
-#endif // WIN32
+#endif // AQSIS_SYSTEM_WIN32
 
 //----------------------------------------------------------------------
 /** Store the named coordinate system in the array of named coordinate systems, overwrite any existing

@@ -30,7 +30,7 @@
 
 #ifdef	AQSIS_SYSTEM_WIN32
 #include	<windows.h>
-#endif
+#endif // AQSIS_SYSTEM_WIN32
 
 #include	<vector>
 #include	<iostream>
@@ -170,7 +170,7 @@ class CqRenderer
 				virtual	void		RenderWorld();
 #ifdef AQSIS_SYSTEM_WIN32
 				virtual	void		LoadDisplayLibrary();
-#endif // WIN32
+#endif // AQSIS_SYSTEM_WIN32
 				virtual	void		Quit();
 				virtual	void		UpdateStatus()		{}
 						/** Get the global statistics class.
@@ -280,7 +280,7 @@ class CqRenderer
 			
 #ifdef AQSIS_SYSTEM_WIN32			
 			HANDLE			m_hDisplayThread;				///< Handle to the display driver thread.
-#endif // WIN32
+#endif // AQSIS_SYSTEM_WIN32
 
 			EqRenderMode	m_Mode;							
 			CqScene			m_Scene;						///< The global scene storage.

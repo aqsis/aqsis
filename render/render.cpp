@@ -29,7 +29,7 @@
 #include	<windows.h>
 #include	<io.h>
 #include	<fcntl.h>
-#endif // WIN32
+#endif // AQSIS_SYSTEM_WIN32
 
 #include	"sstring.h"
 #include	"render.h"
@@ -119,7 +119,7 @@ void InitialiseINIData()
 	}
 }
 
-#endif // WIN32
+#endif // AQSIS_SYSTEM_WIN32
 
 
 START_NAMESPACE(Aqsis)

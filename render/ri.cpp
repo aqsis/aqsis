@@ -259,7 +259,7 @@ RtVoid	RiBegin(RtToken name)
 	char* strShaderOpt="shader";
 	char* pValue=strShaderPath;
 	RiOption("searchpath", (RtPointer)strShaderOpt, (RtPointer)&pValue, NULL);
-#endif // WIN32
+#endif // AQSIS_SYSTEM_WIN32
 
 	return(0);
 }
@@ -671,7 +671,7 @@ RtVoid	RiDisplayV(const char *name, RtToken type, RtToken mode, PARAMETERLIST)
 
 #ifdef AQSIS_SYSTEM_WIN32
 	QGetRenderContext()->LoadDisplayLibrary();
-#endif // WIN32
+#endif // AQSIS_SYSTEM_WIN32
 
 	return(0);
 }

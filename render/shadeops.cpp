@@ -2870,9 +2870,9 @@ STD_SOIMPL CqShaderExecEnv::SO_rendererinfo(STRINGVAL name, CqShaderVariable* pV
 		{
 #ifdef AQSIS_SYSTEM_WIN32
 			se=VERSION_STR;
-#else // WIN32
+#else // AQSIS_SYSTEM_WIN32
 			se = VERSION;
-#endif // !WIN32
+#endif // !AQSIS_SYSTEM_WIN32
 			pV->SetValue(se);
 			Ret=1.0f;
 		}

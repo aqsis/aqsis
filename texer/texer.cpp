@@ -4,9 +4,9 @@
 #include	<conio.h>
 #include	<stdio.h>
 
-#ifdef	WIN32
+#ifdef	AQSIS_SYSTEM_WIN32
 #pragma warning (disable : 4100)
-#endif
+#endif // AQSIS_SYSTEM_WIN32
 
 #include	"aqsis.h"
 #include	"version.h"
