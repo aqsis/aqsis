@@ -30,6 +30,7 @@
 #ifdef AQSIS_SYSTEM_WIN32
 
 #include	<process.h>
+#include	<version.h>
 
 #else // AQSIS_SYSTEM_WIN32
 
@@ -142,9 +143,16 @@ TqInt Close(SOCKET s,SqDDMessageBase* pMsgB)
 	if(pOut)
 	{
 		// Write the image to a tiff file.
+		char version[80];
 		
 		int ExtraSamplesTypes[1]={EXTRASAMPLE_ASSOCALPHA};
 		
+#ifdef  AQSIS_SYSTEM_WIN32
+	sprintf(version, "%s %s",STRNAME, VERSION_STR);
+#else
+	sprintf(version, "%s %s",STRNAME, VERSION);
+#endif
+		TIFFSetField(pOut,TIFFTAG_SOFTWARE, (uint32)version);
 		TIFFSetField(pOut, TIFFTAG_IMAGEWIDTH, (uint32)XRes);
 		TIFFSetField(pOut, TIFFTAG_IMAGELENGTH, (uint32)YRes);
 		TIFFSetField(pOut, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
