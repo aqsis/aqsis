@@ -88,7 +88,8 @@ class _qShareC CqTextureMapBuffer
 				m_Width( 0 ),
 				m_Height( 0 ),
 				m_Samples( 0 ),
-				m_Directory( 0 )
+				m_Directory( 0 ),
+				m_fProtected( TqFalse )
 		{}
 		_qShareM virtual	~CqTextureMapBuffer()
 		{
@@ -103,7 +104,7 @@ class _qShareC CqTextureMapBuffer
 		 * \param samples Number of samples per pixel.
 		 * \param directory The directory within the TIFF image map, used for multi image formats, i.e. cubeface environment map.
 		 */
-		_qShareM	void	Init( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt samples, TqInt directory = 0 )
+		_qShareM	void	Init( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt samples, TqInt directory = 0, TqBool fProt = TqFalse )
 		{
 			Release();
 			m_sOrigin = xorigin;
@@ -112,8 +113,9 @@ class _qShareC CqTextureMapBuffer
 			m_Height = height;
 			m_Samples = samples;
 			m_Directory = directory;
+			m_fProtected = fProt;
 
-			m_pBufferData = AllocSegment( width, height, samples );
+			m_pBufferData = AllocSegment( width, height, samples, m_fProtected );
 		}
 		/** Release this reference to the cache.
 		 */
@@ -214,9 +216,21 @@ class _qShareC CqTextureMapBuffer
 		{
 			return ( m_Samples );
 		}
+		/** Get the status of the protected flag
+		 */
+		_qShareM	TqBool	fProtected() const
+		{
+			return( m_fProtected );
+		}
+		/** Set this buffer as protected or not.
+		 */
+		_qShareM	void	SetfProtected( TqBool fProt = TqTrue )
+		{
+			m_fProtected = fProt;
+		}
 
 
-		_qShareM TqPuchar AllocSegment( TqUlong width, TqUlong height, TqInt samples );
+		_qShareM TqPuchar AllocSegment( TqUlong width, TqUlong height, TqInt samples, TqBool fProt = TqFalse );
 		_qShareM void	FreeSegment( TqPuchar pBufferData, TqUlong width, TqUlong height, TqInt samples );
 
 	protected:
@@ -227,7 +241,7 @@ class _qShareC CqTextureMapBuffer
 		TqUlong	m_Height;		///< Height of segment.
 		TqInt	m_Samples;		///< Number of samples per pixel.
 		TqInt	m_Directory;	///< TIFF directory index. Used for multi image textures, i.e. cubeface environment.
-
+		TqBool	m_fProtected;	///< Flag indicating if this buffer is protected from being automatically delted by the cache.
 
 }
 ;
@@ -328,8 +342,8 @@ class _qShareC CqTextureMap : public IqTextureMap
 				m_strName( strName ),
 				m_pImage( 0 ),
 				m_IsValid( TqTrue ),
-				m_smode( WrapMode_Clamp ),
-				m_tmode( WrapMode_Clamp ),
+				m_smode( WrapMode_Black ),
+				m_tmode( WrapMode_Black ),
 				m_FilterFunc( RiBoxFilter ),
 				m_swidth( 1.0 ), m_twidth( 1.0 ),
 				m_Compression( COMPRESSION_NONE ),
@@ -442,9 +456,9 @@ class _qShareC CqTextureMap : public IqTextureMap
 		 * \param t Vertical sample position.
 		 * \param directory TIFF directory index.
 		 */
-		_qShareM	virtual	CqTextureMapBuffer*	GetBuffer( TqUlong s, TqUlong t, TqInt directory = 0 );
-		void	CreateMIPMAP();
-		_qShareM	virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt directory = 0 )
+		_qShareM	virtual	CqTextureMapBuffer*	GetBuffer( TqUlong s, TqUlong t, TqInt directory = 0, TqBool fProt = TqFalse );
+		void	CreateMIPMAP( TqBool fProtectBuffers = TqFalse );
+		_qShareM	virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt directory = 0, TqBool fProt = TqFalse )
 		{
 			CqTextureMapBuffer* pRes;
 			switch( m_SampleFormat )
@@ -458,7 +472,7 @@ class _qShareC CqTextureMap : public IqTextureMap
 					pRes = new CqTextureMapBuffer();
 					break;
 			}
-			pRes->Init( xorigin, yorigin, width, height, m_SamplesPerPixel, directory );
+			pRes->Init( xorigin, yorigin, width, height, m_SamplesPerPixel, directory, fProt );
 			return( pRes );
 		}
 
@@ -647,10 +661,10 @@ class _qShareC CqShadowMap : public CqTextureMap
 		_qShareM	void	SaveShadowMap( const CqString& strShadowName );
 		_qShareM	void	ReadMatrices();
 
-		_qShareM	virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt directory = 0 )
+		_qShareM	virtual	CqTextureMapBuffer* CreateBuffer( TqUlong xorigin, TqUlong yorigin, TqUlong width, TqUlong height, TqInt directory = 0, TqBool fProt = TqFalse )
 		{
 			CqTextureMapBuffer* pRes = new CqShadowMapBuffer();
-			pRes->Init( xorigin, yorigin, width, height, m_SamplesPerPixel, directory );
+			pRes->Init( xorigin, yorigin, width, height, m_SamplesPerPixel, directory, fProt );
 			return( pRes );
 		}
 

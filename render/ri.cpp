@@ -3759,7 +3759,7 @@ RtVoid	RiMakeTextureV( const char * pic, const char * tex, RtToken swrap, RtToke
 
 	QGetRenderContext() ->Stats().MakeTextureTimer().Start();
 	// Get the wrap modes first.
-	enum EqWrapMode smode = WrapMode_Clamp;
+	enum EqWrapMode smode = WrapMode_Black;
 	if ( strcmp( swrap, RI_PERIODIC ) == 0 )
 		smode = WrapMode_Periodic;
 	else if ( strcmp( swrap, RI_CLAMP ) == 0 )
@@ -3767,7 +3767,7 @@ RtVoid	RiMakeTextureV( const char * pic, const char * tex, RtToken swrap, RtToke
 	else if ( strcmp( swrap, RI_BLACK ) == 0 )
 		smode = WrapMode_Black;
 
-	enum EqWrapMode tmode = WrapMode_Clamp;
+	enum EqWrapMode tmode = WrapMode_Black;
 	if ( strcmp( twrap, RI_PERIODIC ) == 0 )
 		tmode = WrapMode_Periodic;
 	else if ( strcmp( twrap, RI_CLAMP ) == 0 )

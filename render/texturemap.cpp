@@ -76,7 +76,7 @@ static void project( TqInt face );
 #define	edge52	36
 #define	edge53	40
 #define	edge54	48
-#define MEG1    1024*1024
+#define MEG1    8192*1024
 
 CqVector3D	cube[ max_no ];	// Stores the projection of the reflected beam onto the cube.
 TqInt	cube_no; 		// Stores the number of points making up the projection.
@@ -104,7 +104,7 @@ static TqInt free_cnt = 0;
 /** Allocate a cache segment to hold the specified image tile.
  */
 
-TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt samples )
+TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt samples, TqBool fProt )
 {
 	TqChar warnings[ 400 ];
 	static TqInt limit = -1;
@@ -126,7 +126,7 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 	TqInt more = QGetRenderContext() ->Stats().GetTextureMemory() + demand;
 
 
-	if ( more > limit )
+	if ( ( more > limit ) && !fProt )
 	{
 
 		// Critical level of memory will be reached;
@@ -506,7 +506,69 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 	// Ensure that it is in the correct format
 	if ( pNew->Format() != TexFormat_MIPMAP )
 	{
-		pNew->CreateMIPMAP();
+		pNew->CreateMIPMAP( TqTrue );
+
+#if 0
+		TqFloat swidth = pNew->m_swidth;
+		TqFloat twidth = pNew->m_twidth;
+
+		enum EqWrapMode smode = pNew->m_smode;
+		char* swrap, *twrap;
+		if ( smode == WrapMode_Periodic)
+			swrap = RI_PERIODIC;
+		else if ( smode == WrapMode_Clamp )
+			swrap = RI_CLAMP;
+		else if ( smode == WrapMode_Black )
+			swrap = RI_BLACK;
+
+		enum EqWrapMode tmode = pNew->m_tmode;
+		if ( tmode == WrapMode_Periodic)
+			twrap = RI_PERIODIC;
+		else if ( tmode == WrapMode_Clamp )
+			twrap = RI_CLAMP;
+		else if ( tmode == WrapMode_Black )
+			twrap = RI_BLACK;
+
+		char modes[ 1024 ];
+		sprintf( modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth );
+		if ( pNew->m_FilterFunc == RiGaussianFilter )
+			sprintf( modes, "%s %s %s %f %f", swrap, twrap, "gaussian", swidth, twidth );
+		if ( pNew->m_FilterFunc == RiBoxFilter )
+			sprintf( modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth );
+		if ( pNew->m_FilterFunc == RiTriangleFilter )
+			sprintf( modes, "%s %s %s %f %f", swrap, twrap, "triangle", swidth, twidth );
+		if ( pNew->m_FilterFunc == RiCatmullRomFilter )
+			sprintf( modes, "%s %s %s %f %f", swrap, twrap, "catmull-rom", swidth, twidth );
+		if ( pNew->m_FilterFunc == RiSincFilter )
+			sprintf( modes, "%s %s %s %f %f", swrap, twrap, "sinc", swidth, twidth );
+		if ( pNew->m_FilterFunc == RiDiskFilter )
+			sprintf( modes, "%s %s %s %f %f", swrap, twrap, "disk", swidth, twidth );
+		if ( pNew->m_FilterFunc == RiBesselFilter )
+			sprintf( modes, "%s %s %s %f %f", swrap, twrap, "bessel", swidth, twidth );
+
+		TIFF* ptex = TIFFOpen( "test.tex", "w" );
+
+		TIFFCreateDirectory( ptex );
+		TIFFSetField( ptex, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB );
+		TIFFSetField( ptex, TIFFTAG_PIXAR_TEXTUREFORMAT, MIPMAP_HEADER );
+		TIFFSetField( ptex, TIFFTAG_PIXAR_WRAPMODES, modes );
+		TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, pNew->SamplesPerPixel() );
+		TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
+		TIFFSetField( ptex, TIFFTAG_COMPRESSION, pNew->Compression() ); /* COMPRESSION_DEFLATE */
+		int log2 = MIN( pNew->XRes(), pNew->YRes() );
+		log2 = ( int ) ( log( log2 ) / log( 2.0 ) );
+
+
+		for ( int i = 0; i < log2; i ++ )
+		{
+			// Write the floating point image to the directory.
+			CqTextureMapBuffer* pBuffer = pNew->GetBuffer( 0, 0, i );
+			if ( !pBuffer ) break;
+			pNew->WriteTileImage( ptex, pBuffer, 64, 64, pNew->Compression(), pNew->Quality() );
+		}
+		TIFFClose( ptex );
+#endif
+
 		pNew->Close();
 	}
 
@@ -719,7 +781,7 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
  * already cached.
  */
 
-CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory )
+CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory, TqBool fProt )
 {
 	static TqInt size = -1;
 	static CqString name = "";
@@ -780,7 +842,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 			// Work out the coordinates of this tile.
 			TqUlong ox = ( s / tsx ) * tsx;
 			TqUlong oy = ( t / tsy ) * tsy;
-			pTMB = CreateBuffer( ox, oy, tsx, tsy, directory );
+			pTMB = CreateBuffer( ox, oy, tsx, tsy, directory, fProt );
 
 			TIFFSetDirectory( m_pImage, directory );
 
@@ -790,7 +852,8 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 		}
 		else
 		{
-			pTMB = CreateBuffer( 0, 0, m_XRes, m_YRes, directory );
+			// Create a storage buffer
+			pTMB = CreateBuffer( 0, 0, m_XRes, m_YRes, directory, TqTrue );
 
 			TIFFSetDirectory( m_pImage, directory );
 			void* pdata = pTMB->pVoidBufferData();
@@ -910,12 +973,12 @@ void CqTextureMap::ImageFilterVal( CqTextureMapBuffer* pData, TqInt x, TqInt y, 
 
 
 
-void CqTextureMap::CreateMIPMAP()
+void CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 {
 	if ( m_pImage != 0 )
 	{
 		// Read the whole image into a buffer.
-		CqTextureMapBuffer* pBuffer = GetBuffer(0,0,0);
+		CqTextureMapBuffer* pBuffer = GetBuffer(0,0,0, fProtectBuffers);
 
 		TqInt m_xres = m_XRes;
 		TqInt m_yres = m_YRes;
@@ -923,7 +986,7 @@ void CqTextureMap::CreateMIPMAP()
 
 		do
 		{
-			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, m_xres, m_yres, directory );
+			CqTextureMapBuffer* pTMB = CreateBuffer( 0, 0, m_xres, m_yres, directory, fProtectBuffers );
 
 			if ( pTMB->pVoidBufferData() != NULL )
 			{
@@ -1085,8 +1148,8 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 
 
 	// Clamp the result
-	for ( i = 0; i < m_SamplesPerPixel; i++ )
-		val[ i ] = CLAMP( val[ i ], 0.0f, 1.0f );
+//	for ( i = 0; i < m_SamplesPerPixel; i++ )
+//		val[ i ] = CLAMP( val[ i ], 0.0f, 1.0f );
 }
 //----------------------------------------------------------------------
 /** this is used for remove any memory exceed the command Option "limits" "texturememory"
@@ -1134,7 +1197,10 @@ void CqTextureMap::CriticalMeasure()
 			for ( j = ( *i ) ->m_apSegments.begin(); j != ( *i ) ->m_apSegments.end(); j++ )
 			{
 				if ( *j == previous ) previous = NULL;
-				( *j ) ->Release();
+				
+				// Only release if not protected.
+				if( !( *j )->fProtected() )
+					( *j ) ->Release();
 			}
 			( *i ) ->m_apSegments.resize( 0 );
 			current = QGetRenderContext() ->Stats().GetTextureMemory();
