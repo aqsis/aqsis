@@ -438,6 +438,31 @@ class CqStats
 			return ( m_timeOthers );
 		};
 
+		TqInt GetCurrentMPGsAllocated() const
+		{
+			return ( m_cMPGsCurrent );
+		}
+		TqInt GetMPGsAllocated() const
+		{
+			return ( m_cMPGsAllocated );
+		}
+		TqInt GetMPGsDeallocated() const
+		{
+			return ( m_cMPGsDeallocated );
+		}
+
+		TqInt GetCurrentGridsAllocated() const
+		{
+			return ( m_cGridsCurrent );
+		}
+		TqInt GetGridsAllocated() const
+		{
+			return ( m_cGridsAllocated );
+		}
+		TqInt GetGridsDeallocated() const
+		{
+			return ( m_cGridsDeallocated );
+		}
 
 		//@}
 
