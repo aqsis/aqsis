@@ -26,6 +26,11 @@
 #include "logging_streambufs.h"
 #include "ri.h"
 #include "version.h"
+#include "bdec.h"
+#include "parserstate.h"
+
+#include <io.h>
+#include <fcntl.h>
 
 #include <iostream>
 #include <iomanip>
@@ -95,23 +100,23 @@ std::string g_plugin_path;
 void RenderFile( FILE* file, std::string& name );
 
 // Command-line arguments
-bool g_cl_pause;
+ArgParse::apflag g_cl_pause;
 // Set verbose stats if in debug mode
 #ifdef	_DEBUG
-int g_cl_endofframe = 3;
+ArgParse::apint g_cl_endofframe = 3;
 #else
-int g_cl_endofframe = -1;
+ArgParse::apint g_cl_endofframe = -1;
 #endif
-bool g_cl_nostandard = 0;
-bool g_cl_help = 0;
-bool g_cl_version = 0;
-bool g_cl_fb = 0;
-bool g_cl_progress = 0;
-bool g_cl_Progress = 0;
-bool g_cl_rinfo = 0;
-bool g_cl_no_color = 0;
-bool g_cl_beep = 0;
-int g_cl_verbose = 1;
+ArgParse::apflag g_cl_nostandard = 0;
+ArgParse::apflag g_cl_help = 0;
+ArgParse::apflag g_cl_version = 0;
+ArgParse::apflag g_cl_fb = 0;
+ArgParse::apflag g_cl_progress = 0;
+ArgParse::apflag g_cl_Progress = 0;
+ArgParse::apflag g_cl_rinfo = 0;
+ArgParse::apflag g_cl_no_color = 0;
+ArgParse::apflag g_cl_beep = 0;
+ArgParse::apint g_cl_verbose = 1;
 ArgParse::apfloatvec g_cl_cropWindow;
 ArgParse::apstring g_cl_rc_path = "";
 ArgParse::apstring g_cl_shader_path = "";
@@ -128,9 +133,10 @@ ArgParse::apstring g_cl_strprogress = "Frame (%f) %p%% complete [ %s secs / %S l
 ArgParse::apstring g_cl_framesList = "";
 ArgParse::apintvec g_cl_frames;
 ArgParse::apintvec g_cl_res;
+ArgParse::apstringvec g_cl_options;
 
 #ifdef	AQSIS_SYSTEM_POSIX
-bool g_cl_syslog = 0;
+ArgParse::apflag g_cl_syslog = 0;
 #endif	// AQSIS_SYSTEM_POSIX
 
 /// Function to print the progress of the render.  Used as the callback function to a RiProgressHandler call.
@@ -316,6 +322,45 @@ RtVoid PreWorld()
 		RiFormat(g_cl_res[0], g_cl_res[1], 1.0f);
 	}
 
+	for( ArgParse::apstringvec::iterator i = g_cl_options.begin(); i != g_cl_options.end(); ++i )
+	{
+		// This is not pretty, gzopen attempts to read a gzip header
+		//from the stream, if we try and do this before we have sent
+		//the request the we get deadlock, so we have to create the decoder
+		//after the request, we use a buffer size of one to prevent any
+		//potential blocking.
+		librib::CqRibBinaryDecoder *decoder;
+
+		int hpipe[2];
+		FILE *readPipe, *writePipe;
+
+		if( _pipe( hpipe, i->length(), _O_TEXT) != -1 ) 
+		{
+			// Feed the string contents into the pipe so that the parser can read them out the other end.
+			readPipe = _fdopen(hpipe[0],"r");
+			writePipe = _fdopen(hpipe[1],"w");
+
+			fwrite(i->c_str(),1,i->length(),writePipe);
+			fflush(writePipe);
+			fclose(writePipe);
+
+			decoder = new librib::CqRibBinaryDecoder( readPipe, 16384);
+
+			// Parse the resulting block of RIB.
+			librib::CqRIBParserState currstate = librib::GetParserState();
+
+			if( currstate.m_pParseCallbackInterface == NULL ) currstate.m_pParseCallbackInterface = new librib2ri::Engine;
+
+			librib::ParseOpenStream( decoder, "aqsis command line option", *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), (RtArchiveCallback) RI_NULL );
+
+			librib::SetParserState( currstate );
+
+			delete( decoder );
+
+			fclose(readPipe);
+		}
+	}
+
 	return ;
 }
 
@@ -414,6 +459,7 @@ int main( int argc, const char** argv )
         ap.argFlag( "beep", "\aBeep on completion of all ribs", &g_cl_beep );
         ap.alias( "nocolor", "nc" );
 		ap.argInts( "res", " x y\aSpecify the resolution of the render.", &g_cl_res, ArgParse::SEP_ARGV, 2);
+		ap.argStrings( "option", "=string\aA valid RIB Option string, can be specified multiple times.", &g_cl_options);
 #ifdef	AQSIS_SYSTEM_POSIX
         ap.argFlag( "syslog", "\aLog messages to syslog", &g_cl_syslog );
 #endif	// AQSIS_SYSTEM_POSIX

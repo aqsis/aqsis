@@ -192,3 +192,10 @@ EXPORTS
 	?CreateVariable@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@ABVCqString@2@_N3@Z
 	?CreateVariableArray@CqShaderVM@Aqsis@@UAEPAUIqShaderData@2@W4EqVariableType@2@W4EqVariableClass@2@ABVCqString@2@H_N3@Z
 	?info@Aqsis@@YAAAV?$basic_ostream@DU?$char_traits@D@std@@@std@@AAV23@@Z
+	??1CqRibBinaryDecoder@librib@@QAE@XZ
+	??0CqRibBinaryDecoder@librib@@QAE@PAU_iobuf@@H@Z
+	?SetParserState@librib@@YAXAAVCqRIBParserState@1@@Z
+	??0Engine@librib2ri@@QAE@XZ
+	?GetParserState@librib@@YA?AVCqRIBParserState@1@XZ
+	??0CqRibBinaryDecoder@librib@@QAE@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@H@Z
+	ParseOpenStream
