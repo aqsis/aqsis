@@ -101,13 +101,13 @@ SOURCE=.\parsenode.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\parser.y
+SOURCE=.\parser.yxx
 
 !IF  "$(CFG)" == "libslparse - Win32 Release"
 
 # Begin Custom Build - Building Parser from $(InputPath)
 IntDir=.\..\Object\Release\libslparse
-InputPath=.\parser.y
+InputPath=.\parser.yxx
 
 BuildCmds= \
 	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
@@ -123,7 +123,7 @@ BuildCmds= \
 
 # Begin Custom Build - Building Parser from $(InputPath)
 IntDir=.\..\Object\Debug\libslparse
-InputPath=.\parser.y
+InputPath=.\parser.yxx
 
 BuildCmds= \
 	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
@@ -140,13 +140,13 @@ BuildCmds= \
 # End Source File
 # Begin Source File
 
-SOURCE=.\scanner.l
+SOURCE=.\scanner.lxx
 
 !IF  "$(CFG)" == "libslparse - Win32 Release"
 
 # Begin Custom Build - Building Lexical Scanner from $(InputPath)
 IntDir=.\..\Object\Release\libslparse
-InputPath=.\scanner.l
+InputPath=.\scanner.lxx
 
 "$(IntDir)\scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	flex -o$(IntDir)\scanner.cpp $(InputPath)
@@ -157,7 +157,7 @@ InputPath=.\scanner.l
 
 # Begin Custom Build - Building Lexical Scanner from $(InputPath)
 IntDir=.\..\Object\Debug\libslparse
-InputPath=.\scanner.l
+InputPath=.\scanner.lxx
 
 "$(IntDir)\scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	flex -o$(IntDir)\scanner.cpp $(InputPath)

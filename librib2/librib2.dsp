@@ -93,13 +93,13 @@ SOURCE=.\librib.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\parser.y
+SOURCE=.\parser.yxx
 
 !IF  "$(CFG)" == "librib2 - Win32 Release"
 
 # Begin Custom Build - Building Parser from $(InputPath)
 IntDir=.\..\Object\Release\librib2
-InputPath=.\parser.y
+InputPath=.\parser.yxx
 
 BuildCmds= \
 	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
@@ -115,7 +115,7 @@ BuildCmds= \
 
 # Begin Custom Build - Building Parser from $(InputPath)
 IntDir=.\..\Object\Debug\librib2
-InputPath=.\parser.y
+InputPath=.\parser.yxx
 
 BuildCmds= \
 	bison --no-lines --defines -o$(IntDir)\parser.cpp $(InputPath)
@@ -132,13 +132,13 @@ BuildCmds= \
 # End Source File
 # Begin Source File
 
-SOURCE=.\scanner.l
+SOURCE=.\scanner.lxx
 
 !IF  "$(CFG)" == "librib2 - Win32 Release"
 
 # Begin Custom Build - Building Lexical Scanner from $(InputPath)
 IntDir=.\..\Object\Release\librib2
-InputPath=.\scanner.l
+InputPath=.\scanner.lxx
 
 "$(IntDir)\scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	flex -o$(IntDir)\scanner.cpp $(InputPath)
@@ -149,7 +149,7 @@ InputPath=.\scanner.l
 
 # Begin Custom Build - Building Lexical Scanner from $(InputPath)
 IntDir=.\..\Object\Debug\librib2
-InputPath=.\scanner.l
+InputPath=.\scanner.lxx
 
 "$(IntDir)\scanner.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	flex -o$(IntDir)\scanner.cpp $(InputPath)
