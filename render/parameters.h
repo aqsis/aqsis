@@ -1316,6 +1316,10 @@ class CqNamedParameterList : public CqRefCount
 				delete( ( *i ) );
 		}
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqNamedParameterList"); }
+#endif
+
 		/** Get a refernece to the option name.
 		 * \return A constant CqString reference.
 		 */

@@ -1473,7 +1473,7 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 			S[ i ] ->m_fDiceable = TqTrue;
 			S[ i ] ->m_SplitDir = m_SplitDir;
 			S[ i ] ->m_EyeSplitCount = m_EyeSplitCount;
-			ADDREF( S[ i ] );
+			//ADDREF( S[ i ] );
 			aSplits.push_back( S[ i ] );
 		}
 		return ( i );
@@ -1510,8 +1510,8 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 	pNew2->m_SplitDir = m_SplitDir;
 	pNew1->m_EyeSplitCount = m_EyeSplitCount;
 	pNew2->m_EyeSplitCount = m_EyeSplitCount;
-	ADDREF( pNew1 );
-	ADDREF( pNew2 );
+	//ADDREF( pNew1 );
+	//ADDREF( pNew2 );
 	pNew1->SetfPatchMesh( TqFalse );
 	pNew2->SetfPatchMesh( TqFalse );
 

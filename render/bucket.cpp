@@ -469,6 +469,7 @@ void CqBucket::FilterBucket()
 
 	delete[] ( pDatas );
 	delete[] ( pCoverages );
+
 }
 
 

@@ -55,6 +55,10 @@ class CqSurfaceNURBS : public CqSurface
 
 		void	Torus();
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqSurfaceNURBS"); }
+#endif
+
 		/** Get the order of the NURBS surface in the u direction.
 		 */
 		TqUint	uOrder() const

@@ -377,8 +377,18 @@ TqBool CqImageBuffer::OcclusionCullSurface( TqInt iBucket, CqBasicSurface* pSurf
 		if ( ( nextBucket < nBuckets ) &&
 		        ( RasterBound.vecMax().x() >= pos.x() ) )
 		{
+			// Here, pSurface is unlinked from the list in the
+			//  current bucket, and then added to the list in
+			//  the next bucket.  When pSurface is added to the
+			//  next bucket, it gets a new reference (with
+			//  ADDREF()), so its original bucket reference
+			//  needs to be removed.  However, this original
+			//  reference must be removed *after* the new one
+			//  has been added to stop the surface from being
+			//  deleted. - Jonathan Merritt.
 			pSurface->UnLink();
 			m_aBuckets[ nextBucket ].AddGPrim( pSurface );
+			RELEASEREF( pSurface );
 			return TqTrue;
 		}
 
@@ -392,8 +402,10 @@ TqBool CqImageBuffer::OcclusionCullSurface( TqInt iBucket, CqBasicSurface* pSurf
 		if ( ( nextBucket < nBuckets ) &&
 		        ( RasterBound.vecMax().y() >= pos.y() ) )
 		{
+			// See above for comments... - Jonathan Merritt.
 			pSurface->UnLink();
 			m_aBuckets[ nextBucket ].AddGPrim( pSurface );
+			RELEASEREF( pSurface );
 			return TqTrue;
 		}
 
@@ -1286,6 +1298,8 @@ void CqImageBuffer::RenderImage()
 			NumPolys += m_aBuckets[ iB2 ].aMPGs().size();
 		}
 #endif
+
+		m_aBuckets[iBucket].EmptyBucket();
 	}
 
 	ImageComplete();

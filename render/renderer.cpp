@@ -146,7 +146,7 @@ CqRenderer::~CqRenderer()
 
 #ifdef _DEBUG
 	// Print information about any un-released CqRefCount objects
-	report_refcounts();
+	//report_refcounts();
 #endif
 
 }

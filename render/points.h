@@ -107,6 +107,10 @@ class CqPoints : public CqSurface, public CqMotionSpec<CqPolygonPoints*>
 				RELEASEREF( GetMotionObject( Time( i ) ) );
 		}
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqPoints"); }
+#endif
+
 		virtual	TqUint	cUniform() const
 		{
 			return ( 1 );

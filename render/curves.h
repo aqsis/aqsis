@@ -53,6 +53,9 @@ class CqCurve : public CqSurface
 		virtual	CqBound	Bound() const;
 		CqCurve& operator=( const CqCurve& from );
 		virtual void SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue );
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqCurve"); }
+#endif
 		//--------------------------------------------------- Protected Methods
 	protected:
 		TqFloat GetGridLength() const;
@@ -265,6 +268,9 @@ class CqLinearCurveSegment : public CqCurve
 		TqInt SplitToPatch( std::vector<CqBasicSurface*>& aSplits );
 		//---------------------------------------------- Inlined Public Methods
 	public:
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqLinearCurveSegment"); }
+#endif
 		/** Returns the number of facevarying class parameters. */
 		virtual	TqUint	cFaceVarying() const
 		{
@@ -344,6 +350,9 @@ class CqCubicCurveSegment : public CqCurve
 		void ConvertToBezierBasis( CqMatrix& matBasis );
 		//---------------------------------------------- Inlined Public Methods
 	public:
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqCubicCurveSegment"); }
+#endif
 		/** Returns the number of facevarying class parameters. */
 		virtual	TqUint	cFaceVarying() const
 		{
@@ -433,6 +442,9 @@ class CqCurvesGroup : public CqCurve
 		CqCurvesGroup( const CqCurvesGroup& from );
 		virtual ~CqCurvesGroup();
 		CqCurvesGroup& operator=( const CqCurvesGroup& from );
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqCurvesGroup"); }
+#endif
 		//--------------------------------------------------- Protected Members
 	protected:
 		TqInt m_ncurves;       ///< Number of curves in the group.
@@ -469,6 +481,9 @@ class CqLinearCurvesGroup : public CqCurvesGroup
 		);
 		//---------------------------------------------- Inlined Public Methods
 	public:
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqLinearCurvesGroup"); }
+#endif
 		/** Returns the number of facevarying class parameters. */
 		virtual	TqUint cFaceVarying() const
 		{
@@ -524,6 +539,9 @@ class CqCubicCurvesGroup : public CqCurvesGroup
 		);
 		//---------------------------------------------- Inlined Public Methods
 	public:
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqCubicCurvesGroup"); }
+#endif
 		/** Returns the number of facevarying class parameters. */
 		virtual	TqUint cFaceVarying() const
 		{

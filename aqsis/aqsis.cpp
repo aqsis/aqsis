@@ -8,6 +8,7 @@
 #include "librib2ri.h"
 #include "aqsis.h"
 #include "file.h"
+#include "refcount.h"
 
 #if defined(AQSIS_SYSTEM_WIN32)
 #include <windows.h>
@@ -366,6 +367,10 @@ int main( int argc, const char** argv )
 		std::cout << "Peek Memory Used " << dwMemUsed << std::endl;
 
 	}
+#endif
+
+#ifdef _DEBUG
+	report_refcounts();
 #endif
 
 	return ( 0 );

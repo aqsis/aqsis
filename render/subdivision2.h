@@ -430,6 +430,10 @@ class CqSurfaceSubdivisionPatch : public CqBasicSurface
 			RELEASEREF( m_pTopology );
 		}
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqSurfaceSubdivisionPatch"); }
+#endif
+
 		/** Get the pointer to the subdivision surface hull that this patch is part of.
 		 */
 		CqSubdivision2*	pTopology() const
@@ -515,6 +519,10 @@ class CqSurfaceSubdivisionMesh : public CqSurface
 		{
 			RELEASEREF( m_pTopology );
 		}
+
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqSurfaceSubdivisionMesh"); }
+#endif
 
 		/** Get the gemoetric bound of this GPrim.
 		 */

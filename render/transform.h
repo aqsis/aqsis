@@ -52,6 +52,10 @@ class CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount, public IqT
 		CqTransform( const CqTransform& From );
 		virtual	~CqTransform();
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqTransform"); }
+#endif
+
 		/** Get a writable copy of this, if the reference count is greater than 1
 		 * create a new copy and retirn that.
 		 */

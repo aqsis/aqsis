@@ -2552,6 +2552,7 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 								 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
 								 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 			CreateGPrim( pSurface );
+			RELEASEREF( pSurface );
 		}
 		else
 		{
@@ -2873,10 +2874,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 								 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 			CreateGPrim( pSurface );
 		}
-		else
-		{
-			RELEASEREF( pSurface );
-		}
+		RELEASEREF( pSurface );
 	}
 	else if ( strcmp( type, RI_LINEAR ) == 0 )
 	{
@@ -2897,10 +2895,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 								 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 			CreateGPrim( pSurface );
 		}
-		else
-		{
-			RELEASEREF( pSurface );
-		}
+		RELEASEREF( pSurface );
 	}
 	else
 	{
@@ -2963,9 +2958,9 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 								 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time) ),
 								 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time) ) );
 		CreateGPrim(pPsPs);
+		RELEASEREF( pPsPs );
 	}
-	else
-		RELEASEREF( pPointsClass );
+	RELEASEREF( pPointsClass );
 
 	return ;
 }
@@ -3206,8 +3201,7 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 
 			CreateGPrim( pSurface );
 		}
-		else
-			RELEASEREF( pSurface );
+		RELEASEREF( pSurface );
 	}
 	else if ( strcmp( type, RI_BILINEAR ) == 0 )
 	{
@@ -3226,8 +3220,7 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 								 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 			CreateGPrim( pSurface );
 		}
-		else
-			RELEASEREF( pSurface );
+		RELEASEREF( pSurface );
 	}
 	return ;
 }
@@ -3285,10 +3278,10 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 								   QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
 								   QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 				CreateGPrim( static_cast<CqSurfacePatchBicubic*>( *iSS ) );
+				RELEASEREF( (*iSS) );
 			}
 		}
-		else
-			RELEASEREF( pSurface );
+		RELEASEREF( pSurface );
 	}
 	else if ( strcmp( type, RI_BILINEAR ) == 0 )
 	{
@@ -3310,8 +3303,7 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 								 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 			CreateGPrim( pSurface );
 		}
-		else
-			RELEASEREF( pSurface );
+		RELEASEREF( pSurface );
 	}
 	return ;
 }
@@ -3377,8 +3369,7 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 							 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 		CreateGPrim( pSurface );
 	}
-	else
-		RELEASEREF( pSurface );
+	RELEASEREF( pSurface );
 
 	return ;
 }
@@ -3470,6 +3461,7 @@ RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
 						 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
 						 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 	CreateGPrim( pSurface );
+	RELEASEREF( pSurface );
 
 	return ;
 }
@@ -3510,6 +3502,7 @@ RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 						 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
 						 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 	CreateGPrim( pSurface );
+	RELEASEREF( pSurface );
 
 	return ;
 }
@@ -3550,6 +3543,7 @@ RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 						 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
 						 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 	CreateGPrim( pSurface );
+	RELEASEREF( pSurface );
 
 	return ;
 }
@@ -3592,6 +3586,7 @@ RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMET
 						 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
 						 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 	CreateGPrim( pSurface );
+	RELEASEREF( pSurface );
 
 	return ;
 }
@@ -3632,6 +3627,7 @@ RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 						 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
 						 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 	CreateGPrim( pSurface );
+	RELEASEREF( pSurface );
 
 	return ;
 }
@@ -3673,6 +3669,7 @@ RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 						 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 
 	CreateGPrim( pSurface );
+	RELEASEREF( pSurface );
 
 	return ;
 }
@@ -3713,6 +3710,7 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 						 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
 
 	CreateGPrim( pSurface );
+	RELEASEREF( pSurface );
 
 	return ;
 }
@@ -4389,7 +4387,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, nfaces );
-	ADDREF( pPointsClass );
+	//ADDREF( pPointsClass );
 
 	std::vector<CqPolygonPoints*>	apPoints;
 	// Process any specified primitive variables
@@ -4488,6 +4486,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 				CqSurfaceSubdivisionMesh* pMesh = new CqSurfaceSubdivisionMesh(pSubd2, nfaces );
 				ADDREF( pMesh );
 				CreateGPrim(pMesh);
+				RELEASEREF( pMesh );
 			}
 			else
 			{

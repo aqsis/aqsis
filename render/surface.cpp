@@ -532,13 +532,13 @@ TqInt CqSurface::Split( std::vector<CqBasicSurface*>& aSplits )
 	aSplits[ 0 ] ->SetSplitDir( ( SplitDir() == SplitDir_U ) ? SplitDir_V : SplitDir_U );
 	aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
 	aSplits[ 0 ] ->m_fDiceable = TqTrue;
-	ADDREF( aSplits[ 0 ] );
+	//ADDREF( aSplits[ 0 ] );
 
 	aSplits[ 1 ] ->SetSurfaceParameters( *this );
 	aSplits[ 1 ] ->SetSplitDir( ( SplitDir() == SplitDir_U ) ? SplitDir_V : SplitDir_U );
 	aSplits[ 1 ] ->SetEyeSplitCount( EyeSplitCount() );
 	aSplits[ 1 ] ->m_fDiceable = TqTrue;
-	ADDREF( aSplits[ 1 ] );
+	//ADDREF( aSplits[ 1 ] );
 
 	// Iterate through any use parameters subdividing and storing the second value in the target surface.
 	std::vector<CqParameter*>::iterator iUP;

@@ -50,6 +50,10 @@ class CqSurfacePatchBicubic : public CqSurface
 		CqSurfacePatchBicubic( const CqSurfacePatchBicubic& From );
 		virtual	~CqSurfacePatchBicubic();
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqSurfacePatchBicubic"); }
+#endif
+		
 		template <class T, class SLT>
 		void	TypedNaturalDice( TqFloat uSize, TqFloat vSize, CqParameterTyped<T, SLT>* pParam, IqShaderData* pData )
 		{
@@ -196,6 +200,10 @@ class CqSurfacePatchBilinear : public CqSurface
 		CqSurfacePatchBilinear( const CqSurfacePatchBilinear& From );
 		virtual	~CqSurfacePatchBilinear();
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqSurfacePatchBilinear"); }
+#endif
+
 		CqSurfacePatchBilinear& operator=( const CqSurfacePatchBilinear& From );
 
 		void	SetfHasPhantomFourthVertex(TqBool fHasPhantomFourthVertex)
@@ -280,6 +288,10 @@ class CqSurfacePatchMeshBicubic : public CqSurface
 		}
 		CqSurfacePatchMeshBicubic( const CqSurfacePatchMeshBicubic& From );
 		virtual	~CqSurfacePatchMeshBicubic();
+
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqSurfacePatchMeshBicubic"); }
+#endif
 
 		CqSurfacePatchMeshBicubic& operator=( const CqSurfacePatchMeshBicubic& From );
 
@@ -370,6 +382,10 @@ class CqSurfacePatchMeshBilinear : public CqSurface
 
 		virtual	void	SetDefaultPrimitiveVariables( TqBool bUseDef_st = TqTrue )
 		{}
+
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqSurfacePatchMeshBilinear"); }
+#endif
 
 		CqSurfacePatchMeshBilinear& operator=( const CqSurfacePatchMeshBilinear& From );
 

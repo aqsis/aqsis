@@ -453,11 +453,11 @@ TqInt CqLinearCurveSegment::SplitToCurves(
 
 	aSplits[ 0 ] ->SetSurfaceParameters( *this );
 	aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
-	ADDREF( aSplits[ 0 ] );
+	//ADDREF( aSplits[ 0 ] );
 
 	aSplits[ 1 ] ->SetSurfaceParameters( *this );
 	aSplits[ 1 ] ->SetEyeSplitCount( EyeSplitCount() );
-	ADDREF( aSplits[ 1 ] );
+	//ADDREF( aSplits[ 1 ] );
 
 	// Iterate through any user parameters, subdividing and storing
 	//  the second value in the target surface.
@@ -533,7 +533,7 @@ TqInt CqLinearCurveSegment::SplitToPatch(
 	// next, we create the bilinear patch
 	CqSurfacePatchBilinear *pPatch = new CqSurfacePatchBilinear();
 	pPatch->SetSurfaceParameters( *this );
-	ADDREF( pPatch );
+	//ADDREF( pPatch );
 	pPatch->SetDefaultPrimitiveVariables();
 
 	// set the points on the patch
@@ -925,11 +925,11 @@ TqInt CqCubicCurveSegment::SplitToCurves(
 
 	aSplits[ 0 ] ->SetSurfaceParameters( *this );
 	aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
-	ADDREF( aSplits[ 0 ] );
+	//ADDREF( aSplits[ 0 ] );
 
 	aSplits[ 1 ] ->SetSurfaceParameters( *this );
 	aSplits[ 1 ] ->SetEyeSplitCount( EyeSplitCount() );
-	ADDREF( aSplits[ 1 ] );
+	//ADDREF( aSplits[ 1 ] );
 
 	// Iterate through any user parameters, subdividing and storing
 	//  the second value in the target surface.
@@ -1032,7 +1032,7 @@ TqInt CqCubicCurveSegment::SplitToPatch(
 	// next, we create the bilinear patch
 	CqSurfacePatchBicubic *pPatch = new CqSurfacePatchBicubic();
 	pPatch->SetSurfaceParameters( *this );
-	ADDREF( pPatch );
+	//ADDREF( pPatch );
 	pPatch->SetDefaultPrimitiveVariables();
 
 	// set the points on the patch
@@ -1414,7 +1414,7 @@ TqInt CqLinearCurvesGroup::Split( std::vector<CqBasicSurface*>& aSplits )
 			//  curve segment
 			CqLinearCurveSegment *pSeg =
 			    new CqLinearCurveSegment();
-			ADDREF( pSeg );
+			//ADDREF( pSeg );
 			pSeg->SetSurfaceParameters( *this );
 
 			// set the value of "v"
@@ -1789,7 +1789,7 @@ TqInt CqCubicCurvesGroup::Split(
 			//  curve segment
 			CqCubicCurveSegment *pSeg =
 			    new CqCubicCurveSegment();
-			ADDREF( pSeg );
+			//ADDREF( pSeg );
 			pSeg->SetSurfaceParameters( *this );
 
 			// set the value of "v"

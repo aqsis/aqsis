@@ -157,6 +157,10 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		CqSurfacePolygon( const CqSurfacePolygon& From );
 		virtual	~CqSurfacePolygon();
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqSurfacePolygon"); }
+#endif
+
 		CqSurfacePolygon& operator=( const CqSurfacePolygon& From );
 		TqBool	CheckDegenerate() const;
 
@@ -316,6 +320,10 @@ class CqPolygonPoints : public CqSurface
 			assert( RefCount() == 0 );
 		}
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqPolygonPoints"); }
+#endif
+
 		// Overridden from CqSurface.
 		// NOTE: These should never be called.
 #ifdef AQSIS_COMPILER_MSVC6
@@ -412,6 +420,10 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		{
 			return ( m_aIndices );
 		}
+
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqSurfacePointsPolygon"); }
+#endif
 
 		// Overridden from CqBasicSurface
 		virtual CqMicroPolyGridBase* Dice()
@@ -590,6 +602,7 @@ class CqSurfacePointsPolygons : public CqSurface
 			m_NumPolys(NumPolys),
 			m_pPoints( pPoints )
 		{
+			ADDREF( m_pPoints );
 			m_PointCounts.resize( NumPolys );
 			TqInt i,vindex=0;
 			for( i = 0; i < NumPolys; i++ )
@@ -601,7 +614,9 @@ class CqSurfacePointsPolygons : public CqSurface
 			}
 		}
 		virtual	~CqSurfacePointsPolygons()
-		{}
+		{
+			RELEASEREF( m_pPoints );
+		}
 
 		/** Get the gemoetric bound of this GPrim.
 		 */

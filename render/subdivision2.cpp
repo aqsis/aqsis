@@ -1189,7 +1189,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 		{
 			// Create a surface patch
 			CqSurfacePatchBicubic * pSurface = new CqSurfacePatchBicubic();
-			ADDREF( pSurface );
+			//ADDREF( pSurface );
 			// Fill in default values for all primitive variables not explicitly specified.
 			pSurface->SetSurfaceParameters( *pTopology()->pPoints( iTime ) );
 
@@ -1514,7 +1514,7 @@ TqInt CqSurfaceSubdivisionMesh::Split( std::vector<CqBasicSurface*>& aSplits )
 			{
 				// Add a patch surface to the bucket queue
 				CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( m_pTopology, m_pTopology->pFacet( face ) );
-				ADDREF( pNew );
+				//ADDREF( pNew );
 				aSplits.push_back( pNew );
 				CreatedPolys++;
 			}
