@@ -17,5 +17,7 @@ else
 AM_CXXFLAGS =
 endif
 
+#Must disable optimisation here, because it takes far too much memory.
+CXXFLAGS = @CXXFLAGS@ -O0
 INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix 
 
