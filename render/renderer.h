@@ -39,7 +39,7 @@
 #include	"stats.h"
 #include	"vector2d.h"
 #include	"semaphore.h"
-//#include	"messages.h"
+
 #include	"shaders.h"
 #include	"symbols.h"
 #include	"iddmanager.h"
@@ -48,6 +48,7 @@
 START_NAMESPACE( Aqsis )
 
 class CqImageBuffer;
+class CqObjectInstance;
 
 struct SqCoordSys
 {
@@ -368,6 +369,21 @@ public:
         return( m_FrameNo );
     }
 
+	virtual	CqObjectInstance*	pCurrentObject()
+	{
+		if( m_bObjectOpen )
+			return(m_ObjectInstances.back());
+		else
+			return(0);
+	}
+
+	virtual CqObjectInstance* OpenNewObjectInstance();
+	virtual void InstantiateObject( CqObjectInstance* handle );  
+	virtual	void CloseObjectInstance()
+	{
+		m_bObjectOpen = TqFalse;
+	}
+
 private:
     CqModeBlock*	m_pconCurrent;					///< Pointer to the current context.
     CqStats	m_Stats;						///< Global statistics.
@@ -398,6 +414,8 @@ private:
 
     CqOptions *m_pOptDefault;	///< Pointer to default options.
     TqInt	m_FrameNo;
+	std::vector<CqObjectInstance*>	m_ObjectInstances;
+	TqBool	m_bObjectOpen;
 
 public:
     std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.

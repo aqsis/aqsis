@@ -85,6 +85,12 @@ static RendermanInterface::RtLightHandle LookupLightHandle(const RendermanInterf
 static void DeclareLightHandleString(const RendermanInterface::RtString ID, const RendermanInterface::RtLightHandle Handle);
 static RendermanInterface::RtLightHandle LookupLightHandleString(const RendermanInterface::RtString ID);
 
+static void DeclareObjectHandle(const RendermanInterface::RtInt ID, const RendermanInterface::RtObjectHandle Handle);
+static RendermanInterface::RtObjectHandle LookupObjectHandle(const RendermanInterface::RtInt ID);
+
+static void DeclareObjectHandleString(const RendermanInterface::RtString ID, const RendermanInterface::RtObjectHandle Handle);
+static RendermanInterface::RtObjectHandle LookupObjectHandleString(const RendermanInterface::RtString ID);
+
 static ParameterType DeclareParameterType(const std::string& Name, const std::string& Type);
 static ParameterType LookupParameterType(const std::string& Name);
 
@@ -1064,15 +1070,31 @@ complete_request
 			{ ParseCallbackInterface->RiSolidEnd(); }
 	|	objectbegin integer
 			{
-				// TODO: Record information about handle.
-				ParseCallbackInterface->RiObjectBegin();
+				DeclareObjectHandle($2, ParseCallbackInterface->RiObjectBegin());
+			}
+	|	objectbegin string
+			{
+				DeclareObjectHandleString($2, ParseCallbackInterface->RiObjectBegin());
+				DiscardStringValue($2);
 			}
 	|	objectend
 			{ ParseCallbackInterface->RiObjectEnd(); }
 	|	objectinstance integer
 			{
-				// TODO: Find object pointer from handle.
-				ParseCallbackInterface->RiObjectInstance(0);
+				RendermanInterface::RtObjectHandle handle = LookupObjectHandle($2);
+				if(handle)
+					ParseCallbackInterface->RiObjectInstance(handle);
+				else
+					yyerror("Undeclared Object");
+			}
+	|	objectinstance string
+			{
+				RendermanInterface::RtObjectHandle handle = LookupObjectHandleString($2);
+				if(handle)
+					ParseCallbackInterface->RiObjectInstance(handle);
+				else
+					yyerror("Undeclared Object");
+				DiscardStringValue($2);
 			}
 	|	motionbegin scalar_array
 			{
@@ -1775,6 +1797,14 @@ typedef std::map<std::string, RendermanInterface::RtLightHandle> LightStringHand
 typedef LightStringHandleMap::iterator LightStringHandleIterator;
 static LightStringHandleMap LightMapString;
 
+typedef std::map<RendermanInterface::RtInt, RendermanInterface::RtObjectHandle> ObjectHandleMap;
+typedef ObjectHandleMap::iterator ObjectHandleIterator;
+static ObjectHandleMap ObjectMap;
+
+typedef std::map<std::string, RendermanInterface::RtObjectHandle> ObjectStringHandleMap;
+typedef ObjectStringHandleMap::iterator ObjectStringHandleIterator;
+static ObjectStringHandleMap ObjectMapString;
+
 static void DeclareLightHandle(const RendermanInterface::RtInt ID, const RendermanInterface::RtLightHandle Handle)
 {
 	if(0 == Handle)
@@ -1818,6 +1848,52 @@ static RendermanInterface::RtLightHandle LookupLightHandleString(const Renderman
 		}
 		
 	return LightMapString[ID];
+}
+
+
+static void DeclareObjectHandle(const RendermanInterface::RtInt ID, const RendermanInterface::RtObjectHandle Handle)
+{
+	if(0 == Handle)
+		{
+			yyerror("NULL Object Handle");
+			return;
+		}
+
+	ObjectMap[ID] = Handle;
+}
+
+static RendermanInterface::RtObjectHandle LookupObjectHandle(const RendermanInterface::RtInt ID)
+{
+	if(ObjectMap.find(ID) == ObjectMap.end())
+		{
+			yyerror("Undeclared Object ID");
+			return 0;
+		}
+		
+	return ObjectMap[ID];
+}
+
+
+static void DeclareObjectHandleString(const RendermanInterface::RtString ID, const RendermanInterface::RtObjectHandle Handle)
+{
+	if(0 == Handle)
+		{
+			yyerror("NULL Object Handle");
+			return;
+		}
+
+	ObjectMapString[ID] = Handle;
+}
+
+static RendermanInterface::RtObjectHandle LookupObjectHandleString(const RendermanInterface::RtString ID)
+{
+	if(ObjectMapString.find(ID) == ObjectMapString.end())
+		{
+			yyerror("Undeclared Object name");
+			return 0;
+		}
+		
+	return ObjectMapString[ID];
 }
 
 typedef std::map<std::string, ParameterType> ParameterTypeMap;

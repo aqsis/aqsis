@@ -28,8 +28,9 @@
 #define RI_CACHE_H_INCLUDED 1
 
 #include	"aqsis.h"
-#include	"renderer.h"
+#include	"symbols.h"
 #include	"ri.h"
+#include	"renderer.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -79,6 +80,8 @@ class RiCacheBase
 							delete[](m_values[i]);
 						}
 					}
+
+		virtual void ReCall()=0;
 
 	protected:
 	virtual	void	CachePlist(RtInt count, RtToken tokens[], RtPointer values[], 
@@ -183,6 +186,7 @@ class RiCacheBase
 				copyvalue[j] = value[j];
 			return((RtPointer)value);
 		}
+
 
 		RtInt		m_count;
 		RtToken*	m_tokens;

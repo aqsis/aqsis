@@ -41,6 +41,7 @@
 #include	"shadervm.h"
 #include	"inlineparse.h"
 #include	"tiffio.h"
+#include	"objectinstance.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -75,7 +76,8 @@ CqRenderer::CqRenderer() :
         m_fSaveGPrims( TqFalse ),
         m_OutputDataOffset(7),		// Cs, Os, z
         m_OutputDataTotalSize(7),	// Cs, Os, z
-        m_FrameNo( 0 )
+        m_FrameNo( 0 ),
+		m_bObjectOpen(TqFalse)
 {
     m_pconCurrent = 0;
     m_pImageBuffer = new	CqImageBuffer();
@@ -180,6 +182,12 @@ CqRenderer::~CqRenderer()
 	CqMicroPolygon::Flush();
 	CqMovingMicroPolygonKeyPoints::Flush();
 	CqLath::Flush();
+
+	// Clear the ObjectInstance buffer
+	std::vector<CqObjectInstance*>::iterator i;
+	for(i=m_ObjectInstances.begin(); i!=m_ObjectInstances.end(); i++)
+		delete((*i));
+	m_ObjectInstances.clear();
 
 #ifdef _DEBUG
     // Print information about any un-released CqRefCount objects
@@ -1328,6 +1336,25 @@ TqInt CqRenderer::OutputDataSamples( const char* name )
             return( entry->second.m_NumSamples );
     }
     return( 0 );
+}
+
+
+CqObjectInstance* CqRenderer::OpenNewObjectInstance()
+{
+	assert( !m_bObjectOpen );
+	m_bObjectOpen = TqTrue;
+	CqObjectInstance* pNew = new CqObjectInstance;
+	m_ObjectInstances.push_back(pNew);
+
+	return( pNew );
+}
+
+
+void CqRenderer::InstantiateObject( CqObjectInstance* handle )
+{
+	// Ensure that the object passed in is valid.
+	if( std::find(m_ObjectInstances.begin(), m_ObjectInstances.end(), handle ) != m_ObjectInstances.end() )
+		handle->RecallInstance();
 }
 
 

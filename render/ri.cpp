@@ -41,7 +41,7 @@
 #include	"teapot.h"
 #include	"shaders.h"
 #include	"texturemap.h"
-//#include	"messages.h"
+#include	"objectinstance.h"
 #include	"trimcurve.h"
 #include	"genpoly.h"
 #include	"points.h"
@@ -3626,6 +3626,13 @@ RtVoid	RiSphere( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, .
 //
 RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
+	if( QGetRenderContext()->pCurrentObject() )
+	{
+		QGetRenderContext()->pCurrentObject()->AddCacheCommand(
+			new RiSphereCache( radius, zmin, zmax, thetamax, count, tokens, values ) );
+		return;
+	}
+
     CqLogRangeCheckCallback rc;
 
     rc.set( "sphere zmin" );
@@ -4043,10 +4050,11 @@ RtVoid	RiSolidEnd()
 //
 RtObjectHandle	RiObjectBegin()
 {
-    std::cerr << warning << "RiObjectBegin not supported" << std::endl;
+    //std::cerr << warning << "RiObjectBegin not supported" << std::endl;
     QGetRenderContext() ->BeginObjectModeBlock();
+	RtObjectHandle ObjectHandle = static_cast<RtObjectHandle>(QGetRenderContext() ->OpenNewObjectInstance());
 
-    return ( 0 );
+    return ( ObjectHandle );
 }
 
 
@@ -4057,6 +4065,7 @@ RtObjectHandle	RiObjectBegin()
 RtVoid	RiObjectEnd()
 {
     QGetRenderContext() ->EndObjectModeBlock();
+	QGetRenderContext() ->CloseObjectInstance();
 
     return ;
 }
@@ -4068,7 +4077,8 @@ RtVoid	RiObjectEnd()
 //
 RtVoid	RiObjectInstance( RtObjectHandle handle )
 {
-    std::cerr << warning << "RiObjectInstance not supported" << std::endl;
+    //std::cerr << warning << "RiObjectInstance not supported" << std::endl;
+	QGetRenderContext() ->InstantiateObject( reinterpret_cast<CqObjectInstance*>( handle ) );
     return ;
 }
 

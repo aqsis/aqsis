@@ -5,17 +5,19 @@
  *	@brief	Declare the common interface structure for a Renderer core class.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/12/28 18:26:21 $
+ *	Last change date:	$Date: 2004/01/26 23:40:20 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___irenderer_Loaded___
 #define	___irenderer_Loaded___
 
 #include	"matrix.h"
+#include	"symbols.h"
 
 START_NAMESPACE( Aqsis )
 
 struct IqTextureMap;
+class CqObjectInstance;
 
 struct IqRenderer
 {
@@ -70,6 +72,8 @@ struct IqRenderer
 
     virtual	void	SetCurrentFrame( TqInt FrameNo ) = 0;
     virtual	TqInt	CurrentFrame() const = 0;
+
+	virtual	CqObjectInstance*	pCurrentObject() = 0;
 };
 
 IqRenderer* QGetRenderContextI();
