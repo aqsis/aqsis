@@ -326,8 +326,6 @@ plugins/pcx2tif/Makefile \
 plugins/ppm2tif/Makefile \
 plugins/tga2tif/Makefile \
 render/Makefile \
-render/macosx/Makefile \
-render/macosx/std/Makefile \
 ribfiles/Makefile \
 shaders/Makefile \
 slpp/Makefile \
