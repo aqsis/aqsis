@@ -8,7 +8,7 @@ Requirements:
 
 		MSVC++ 6.0
 		
-		bison		1.35-1 (http://sourceforge.net/projects/gnuwin32/)
+		bison		1.35-2 (http://sourceforge.net/projects/gnuwin32/)
 					Dependencies: gettext(libintl), libiconv
 					Get and unzip the binary archives to a suitable location.
 					Add the <install>\bin directory to your executable paths under tools/options.
