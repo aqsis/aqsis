@@ -28,6 +28,7 @@
 
 #include "aqsis.h"
 
+
 #ifdef AQSIS_SYSTEM_WIN32
 
 #include	<winsock2.h>
@@ -51,6 +52,7 @@ static const int SOCKET_ERROR = -1;
 
 #endif // !AQSIS_SYSTEM_WIN32
 
+#include <tiffio.h>
 #include "displaydriver.h"
 #include "dd.h"
 
@@ -82,6 +84,47 @@ static TqFloat	quantize_oneval  = 0.0f;
 static TqFloat	quantize_minval  = 0.0f;
 static TqFloat	quantize_maxval  = 0.0f;
 static TqFloat dither_val       = 0.0f;
+
+bool write_tiff(const std::string& filename, const std::string& description)
+{
+	TIFF* const file = TIFFOpen(filename.c_str(), "w");
+	if(!file)
+		return false;
+
+	TIFFSetField(file, TIFFTAG_IMAGEWIDTH, g_ImageWidth);
+	TIFFSetField(file, TIFFTAG_IMAGELENGTH, g_ImageHeight);
+	TIFFSetField(file, TIFFTAG_BITSPERSAMPLE, 8);
+	TIFFSetField(file, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
+	TIFFSetField(file, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+	TIFFSetField(file, TIFFTAG_SAMPLESPERPIXEL, 3);
+	TIFFSetField(file, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+	TIFFSetField(file, TIFFTAG_ROWSPERSTRIP, 1);
+	TIFFSetField(file, TIFFTAG_IMAGEDESCRIPTION, description.c_str());
+
+	GLubyte* p = g_Image;
+	for(int i = g_ImageHeight - 1; i >= 0; i--)
+		{
+			if(TIFFWriteScanline(file, p, i, 0) < 0)
+				{
+					TIFFClose(file);
+					return false;
+				}
+			p += g_ImageWidth * sizeof(GLubyte) * 3;
+		}
+		
+	TIFFClose(file);
+	return true;
+}
+
+void menu(int value)
+{
+	switch (value)
+		{
+			case 1:
+				write_tiff(g_Filename, "Aqsis rendered image");
+				break;
+		}
+}
 
 void display( void )
 {
@@ -153,6 +196,11 @@ int main( int argc, char** argv )
 	glutDisplayFunc( display );
 	glutReshapeFunc( reshape );
 	glutKeyboardFunc( keyboard );
+	
+	glutCreateMenu(menu);
+	glutAddMenuEntry("Write TIFF file", 1);
+	glutAttachMenu(GLUT_RIGHT_BUTTON);
+	
 	glutIdleFunc( idle );
 
 	// Setup GL context.

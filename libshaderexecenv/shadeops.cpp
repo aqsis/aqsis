@@ -2761,7 +2761,7 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVA
 		twidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
 
 		GETPOINT( P );
-		if( ( paramMap.size() != 0 ) && ( paramMap.find( "type" ) != paramMap.end() ) || true )
+		if( ( paramMap.size() != 0 ) && ( paramMap.find( "type" ) != paramMap.end() ) )
 		{
 			CqString type;
 			paramMap[ "type" ] ->GetString( type );
