@@ -487,8 +487,8 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		virtual STD_SO	SO_bump3( STRINGVAL name, FLOATVAL channel, FLOATVAL s1, FLOATVAL t1, FLOATVAL s2, FLOATVAL t2, FLOATVAL s3, FLOATVAL t3, FLOATVAL s4, FLOATVAL t4, DEFPARAMVAR );
 		virtual STD_SO	SO_shadow( STRINGVAL name, FLOATVAL channel, POINTVAL P, DEFPARAMVAR );
 		virtual STD_SO	SO_shadow1( STRINGVAL name, FLOATVAL channel, POINTVAL P1, POINTVAL P2, POINTVAL P3, POINTVAL P4, DEFPARAMVAR );
-		virtual STD_SO	SO_illuminance( POINTVAL P, FLOATVAL nsamples, DEFVOIDPARAM );
-		virtual STD_SO	SO_illuminance( POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, FLOATVAL nsamples, DEFVOIDPARAM );
+		virtual STD_SO	SO_illuminance( STRINGVAL Category, POINTVAL P, DEFVOIDPARAM );
+		virtual STD_SO	SO_illuminance( STRINGVAL Category, POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAM );
 		virtual STD_SO	SO_illuminate( POINTVAL P, VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAM );
 		virtual STD_SO	SO_illuminate( POINTVAL P, DEFVOIDPARAM );
 		virtual STD_SO	SO_solar( VECTORVAL Axis, FLOATVAL Angle, DEFVOIDPARAM );
