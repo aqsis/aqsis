@@ -642,10 +642,126 @@ class CqVMStackEntry : public IqShaderData
 
 		virtual	void	SetValueFromVariable( IqShaderData* pVal, TqInt index )
 		{
+			switch( pVal->Type() )	
+			{
+				case type_float:
+				{
+					TqFloat f;
+					pVal->GetFloat( f, index );
+					SetFloat( f, index );
+				}
+				break;
+				
+				case type_point:
+				{
+					CqVector3D p;
+					pVal->GetPoint( p, index );
+					SetPoint( p, index );
+				}
+				break;
+
+				case type_normal:
+				{
+					CqVector3D n;
+					pVal->GetNormal( n, index );
+					SetNormal( n, index );
+				}
+				break;
+
+				case type_vector:
+				{
+					CqVector3D v;
+					pVal->GetVector( v, index );
+					SetVector( v, index );
+				}
+				break;
+
+				case type_string:
+				{
+					CqString s;
+					pVal->GetString( s, index );
+					SetString( s, index );
+				}
+				break;
+
+				case type_color:
+				{
+					CqColor c;
+					pVal->GetColor( c, index );
+					SetColor( c, index );
+				}
+				break;
+
+				case type_matrix:
+				{
+					CqMatrix m;
+					pVal->GetMatrix( m, index );
+					SetMatrix( m, index );
+				}
+				break;
+			}
 		}
 
 		virtual	void	SetValueFromVariable( IqShaderData* pVal )
 		{
+			switch( pVal->Type() )	
+			{
+				case type_float:
+				{
+					TqFloat f;
+					pVal->GetFloat( f );
+					SetFloat( f );
+				}
+				break;
+				
+				case type_point:
+				{
+					CqVector3D p;
+					pVal->GetPoint( p );
+					SetPoint( p );
+				}
+				break;
+
+				case type_normal:
+				{
+					CqVector3D n;
+					pVal->GetNormal( n );
+					SetNormal( n );
+				}
+				break;
+
+				case type_vector:
+				{
+					CqVector3D v;
+					pVal->GetVector( v );
+					SetVector( v );
+				}
+				break;
+
+				case type_string:
+				{
+					CqString s;
+					pVal->GetString( s );
+					SetString( s );
+				}
+				break;
+
+				case type_color:
+				{
+					CqColor c;
+					pVal->GetColor( c );
+					SetColor( c );
+				}
+				break;
+
+				case type_matrix:
+				{
+					CqMatrix m;
+					pVal->GetMatrix( m );
+					SetMatrix( m );
+				}
+				break;
+			}
 		}
 
 		virtual	EqVariableClass	Class() const

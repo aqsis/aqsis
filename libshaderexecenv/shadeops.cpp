@@ -3489,7 +3489,7 @@ STD_SOIMPL CqShaderExecEnv::SO_option( STRINGVAL name, IqShaderData* pV, DEFPARA
 			{
 				pV->ArrayEntry( 0 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetIntegerOption("System", "Resolution")[0] ) );
 				pV->ArrayEntry( 1 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetIntegerOption("System", "Resolution")[1] ) );
-				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "PixelAspectRatio")[0] ) );
+				pV->ArrayEntry( 2 ) ->SetFloat( static_cast<TqFloat>( QGetRenderContextI() ->GetFloatOption("System", "PixelAspectRatio")[2] ) );
 				Ret = 1.0f;
 			}
 		}
