@@ -52,6 +52,9 @@ class _qShareC CqMatrix
 		_qShareM				CqMatrix(const TqFloat xs, const TqFloat ys, const TqFloat zs); // Scaled ID
 		_qShareM				CqMatrix(const CqVector3D& Trans); // Translated
 		_qShareM				CqMatrix(const TqFloat Angle, const CqVector3D Axis); // Rotation2
+		_qShareM				CqMatrix(const TqFloat angle, 
+										  const TqFloat dx1, const TqFloat dy1, const TqFloat dz1,
+										  const TqFloat dx2, const TqFloat dy2, const TqFloat dz2 ); // Skew
 		_qShareM				CqMatrix(const CqMatrix &From);
 								/** Individual element constructor.
 								 * Takes 16 floats for the elements of the matrix.
@@ -84,6 +87,9 @@ class _qShareC CqMatrix
 		_qShareM	void		ShearX(const TqFloat yh, const TqFloat zh);
 		_qShareM	void		ShearY(const TqFloat xh, const TqFloat zh);
 		_qShareM	void		ShearZ(const TqFloat xh, const TqFloat yh);
+		_qShareM	void		Skew(const TqFloat angle,
+									const TqFloat dx1, const TqFloat dy1, const TqFloat dz1,
+									const TqFloat dx2, const TqFloat dy2, const TqFloat dz2 );
 		_qShareM	void		Normalise();
 
 								/** Get the element at the specified row and column index.

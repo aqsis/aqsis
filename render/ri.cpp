@@ -1589,7 +1589,12 @@ RtVoid	RiScale(RtFloat sx, RtFloat sy, RtFloat sz)
 RtVoid	RiSkew(RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
 					   RtFloat dx2, RtFloat dy2, RtFloat dz2)
 {
-	CqBasicError(0,Severity_Normal,"RiSkew not supported");
+	CqMatrix	matSkew(RAD(angle), dx1,dy1,dz1, dx2,dy2,dz2 );
+
+	// This transformation can not change orientation.
+
+	QGetRenderContext()->ptransWriteCurrent()->ConcatCurrentTransform(QGetRenderContext()->Time(),matSkew);
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 

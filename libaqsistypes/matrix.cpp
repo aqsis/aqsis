@@ -90,6 +90,63 @@ CqMatrix::CqMatrix(const TqFloat Angle, const CqVector3D Axis)
 
 
 //---------------------------------------------------------------------
+/** Skew matrix constructor
+ * \param Angle	
+ * \param dx1, dy1, dz1
+ * \param dx2, dy2, dz2
+ *
+ * For now base this on what Larry Gritz posted a while back.
+ * There are some more optimizations that can be done.
+ */
+#define	PI		3.14159265359f
+CqMatrix::CqMatrix(const TqFloat angle, 
+				   const TqFloat dx1, const TqFloat dy1, const TqFloat dz1,
+				   const TqFloat dx2, const TqFloat dy2, const TqFloat dz2 )
+{
+	// Normalize the two vectors, and construct a third perpendicular
+	CqVector3D d1(dx1,dy1,dz1), d2(dx2,dy2,dz2);
+	d1.Unit();
+	d2.Unit();
+
+    // Assumes angle already changed to radians.
+
+	TqFloat d1d2dot = d1 * d2;
+    TqFloat axisangle = acosf(d1d2dot);
+    if (angle >= axisangle || angle <= (axisangle-PI)) {
+        // Skewed past the axes -- issue error, then just use identity matrix.
+		// No access to CqBasicError from here, so this will have to be down
+		//   in RiSkew.  That would duplicate the above math calculations
+		//   unless they were passed to this constructor which would be odd
+		//   looking:
+       	// CqBasicError(0,Severity_Normal,"RiSkew angle invalid.");
+		Identity();
+    }
+	else
+	{
+	    CqVector3D right = d1 % d2;
+
+		right.Unit();
+
+	    // 1) Rotate to a space where the skew operation is in a major plane.
+		// 2) Bend the y axis towards the z axis causing a skew.  
+		// 3) Rotate back.
+		CqMatrix Rot( right[0], d1[0], d2[0],  0,
+					  right[1], d1[1], d2[1],  0,
+					  right[2], d1[2], d2[2],  0,
+					         0,     0,     0,  1 );
+		TqFloat par = d1d2dot;               // Amount of d1 parallel to d2
+		TqFloat perp = sqrtf(1 - par*par);   // Amount perpendicular
+		TqFloat s = tanf (angle + acosf(perp)) * perp - par;
+		CqMatrix Skw( 1, 0, 0, 0, 
+					  0, 1, s, 0,
+					  0, 0, 1, 0,
+					  0, 0, 0, 1 );
+		// Note the Inverse of a rotation matrix is it's Transpose.
+		*this = Rot.Transpose() * Skw * Rot; 
+	}
+}
+
+//---------------------------------------------------------------------
 /** Copy constructor.
  */
 
@@ -298,6 +355,22 @@ void CqMatrix::ShearZ(const TqFloat xh, const TqFloat yh)
 	Shear.m_aaElement[2][1]=yh;
 
 	this->PreMultiply(Shear);
+}
+
+//---------------------------------------------------------------------
+/** Skew matrix 
+ * \param xs X scale factor.
+ * \param ys Y scale factor.
+ * \param zs Z scale factor.
+ */
+
+void CqMatrix::Skew(const TqFloat angle, 
+					const TqFloat dx1, const TqFloat dy1, const TqFloat dz1,
+					const TqFloat dx2, const TqFloat dy2, const TqFloat dz2 )
+{
+	CqMatrix Skew(angle,dx1,dy1,dz1,dx2,dy2,dz2);
+	
+	this->PreMultiply(Skew);
 }
 
 //---------------------------------------------------------------------
