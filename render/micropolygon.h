@@ -149,6 +149,19 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 			m_fTriangular = fTriangular;
 		}
 
+		/** Get a reference to the bitvector representing the culled status of each u-poly in this grid.
+		 */
+		CqBitVector& CulledPolys()
+		{
+			return( m_CulledPolys );
+		}
+		/** Get a reference to the bitvector representing the culled status of each u-poly in this grid.
+		 */
+		const CqBitVector& CulledPolys() const
+		{
+			return( m_CulledPolys );
+		}
+
 		void	Initialise( TqInt cu, TqInt cv, CqSurface* pSurface );
 
 		void DeleteVariables( TqBool all );

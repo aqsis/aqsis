@@ -696,19 +696,18 @@ class CqSurface : public CqBasicSurface
 
 
 //----------------------------------------------------------------------
-/** \class CqMotionSurface
+/** \class CqDeformingSurface
  * Templatised class containing a series of motion stages of a specific surface type for motion blurring.
  */
 
-template <class T>
-class CqMotionSurface : public CqBasicSurface, public CqMotionSpec<T>
+class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<CqBasicSurface*>
 {
 	public:
-		CqMotionSurface( const T& a ) : CqBasicSurface(), CqMotionSpec<T>( a )
+		CqDeformingSurface( CqBasicSurface* const& a ) : CqBasicSurface(), CqMotionSpec<CqBasicSurface*>( a )
 		{}
-		CqMotionSurface( const CqMotionSurface<T>& From ) : CqBasicSurface( From ), CqMotionSpec<T>( From )
+		CqDeformingSurface( const CqDeformingSurface& From ) : CqBasicSurface( From ), CqMotionSpec<CqBasicSurface*>( From )
 		{}
-		virtual	~CqMotionSurface()
+		virtual	~CqDeformingSurface()
 		{
 			TqInt i;
 			for ( i = 0; i < cTimes(); i++ )
@@ -740,7 +739,7 @@ class CqMotionSurface : public CqBasicSurface, public CqMotionSpec<T>
 			}
 			return ( pGrid );
 		}
-		/** Split this GPrim, creating a series of CqMotionSurfaces with all times in.
+		/** Split this GPrim, creating a series of CqDeformingSurface with all times in.
 		 */
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits )
 		{
@@ -754,13 +753,13 @@ class CqMotionSurface : public CqBasicSurface, public CqMotionSpec<T>
 			// Now build motion surfaces from the splits and pass them back.
 			for ( i = 0; i < cSplits; i++ )
 			{
-				CqMotionSurface<T>* pNewMotion = new CqMotionSurface<T>( 0 );
+				CqDeformingSurface* pNewMotion = new CqDeformingSurface( 0 );
 				pNewMotion->AddRef();
 				pNewMotion->m_fDiceable = TqTrue;
 				pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
 				TqInt j;
 				for ( j = 0; j < cTimes(); j++ )
-					pNewMotion->AddTimeSlot( Time( j ), reinterpret_cast<T>( aaMotionSplits[ j ][ i ] ) );
+					pNewMotion->AddTimeSlot( Time( j ), aaMotionSplits[ j ][ i ] );
 				aSplits.push_back( pNewMotion );
 			}
 			return ( cSplits );
@@ -845,14 +844,14 @@ class CqMotionSurface : public CqBasicSurface, public CqMotionSpec<T>
 		}
 
 		// Overrides from CqMotionSpec
-		virtual	void	ClearMotionObject( T& A ) const
+		virtual	void	ClearMotionObject( CqBasicSurface*& A ) const
 			{}
 		;
-		virtual	T	ConcatMotionObjects( const T& A, const T& B ) const
+		virtual	CqBasicSurface*	ConcatMotionObjects( CqBasicSurface* const& A, CqBasicSurface* const& B ) const
 		{
 			return ( A );
 		}
-		virtual	T	LinearInterpolateMotionObjects( TqFloat Fraction, const T& A, const T& B ) const
+		virtual	CqBasicSurface*	LinearInterpolateMotionObjects( TqFloat Fraction, CqBasicSurface* const& A, CqBasicSurface* const& B ) const
 		{
 			return ( A );
 		}

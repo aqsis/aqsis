@@ -72,8 +72,7 @@ using namespace Aqsis;
 
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
 static void ProcessCompression( TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values );
-template <class T>
-RtVoid	CreateGPrim( T* pSurface );
+RtVoid	CreateGPrim( CqBasicSurface* pSurface );
 void SetShaderArgument( IqShader* pShader, const char* name, TqPchar val );
 
 
@@ -2630,8 +2629,11 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 	// Process any specified primitive variables
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
+		CqSurfacePointsPolygons* pPsPs = new CqSurfacePointsPolygons(pPointsClass, npolys, nverts, verts );
+		CreateGPrim(pPsPs);
+
 		// Transform the points into "current" space,
-		pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
+/*		pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
 			                     QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ),
 			                     QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
 
@@ -2661,7 +2663,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 				QGetRenderContext() ->pImage() ->PostSurface( pSurface );
 		}
 		QGetRenderContext() ->Stats().IncGPrims();
-		pPointsClass->Release();
+		pPointsClass->Release();*/
 	}
 	else
 		pPointsClass->Release();
@@ -4713,8 +4715,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 // CreateGPrin
 // Create and register a GPrim according to the current attributes/transform
 //
-template <class T>
-RtVoid	CreateGPrim( T * pSurface )
+RtVoid	CreateGPrim( CqBasicSurface* pSurface )
 {
 	if ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "LevelOfDetailBounds" ) [ 1 ] < 0.0f )
 	{
@@ -4735,24 +4736,21 @@ RtVoid	CreateGPrim( T * pSurface )
 
 		CqMotionModeBlock* pMMB = static_cast<CqMotionModeBlock*>(QGetRenderContext() ->pconCurrent());
 
-		CqBasicSurface* pMS;
-		// If this is the first frame, then generate the appropriate CqMotionSurface and fill in the first frame.
+		CqDeformingSurface* pMS;
+		// If this is the first frame, then generate the appropriate CqDeformingSurface and fill in the first frame.
 		// Then cache the pointer on the motion block.
-		if( ( pMS = pMMB->GetMotionSurface() ) == NULL )
+		if( ( pMS = pMMB->GetDeformingSurface() ) == NULL )
 		{
-			CqMotionSurface<T*>* pNewMS = new CqMotionSurface<T*>( pSurface );
+			CqDeformingSurface* pNewMS = new CqDeformingSurface( pSurface );
 			pSurface->AddRef();
 			pNewMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
 			pNewMS->AddRef();
-			pMMB->SetMotionSurface( pNewMS );
-			QGetRenderContext() ->pImage() ->PostSurface( pNewMS );
-			QGetRenderContext() ->Stats().IncGPrims();
+			pMMB->SetDeformingSurface( pNewMS );
 		}
 		else
 		{
-			CqMotionSurface<T*>* pCurrMS = static_cast<CqMotionSurface<T*>*>( pMS );
 			pSurface->AddRef();
-			pCurrMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
+			pMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
 		}
 		QGetRenderContext() ->AdvanceTime();
 	}

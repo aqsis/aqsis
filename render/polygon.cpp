@@ -424,55 +424,49 @@ void	CqPolygonPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx,
 }
 
 
-
-//---------------------------------------------------------------------
-/** Get the bound of this GPrim.
- */
-
-CqBound	CqMotionSurfacePointsPolygon::Bound() const
+CqBound	CqSurfacePointsPolygons::Bound() const
 {
-	CqMotionSurfacePointsPolygon * pthis = const_cast<CqMotionSurfacePointsPolygon*>( this );
-	CqBound B( FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX );
-	TqInt i;
-	for ( i = 0; i < cTimes(); i++ )
+	CqBound B;
+	if( NULL != m_pPoints && NULL != m_pPoints->P() ) 
 	{
-		pthis->m_CurrTimeIndex = i;
-		B.Encapsulate( CqPolygonBase::Bound() );
+		TqInt PointIndex;
+		for( PointIndex = m_pPoints->P()->Size()-1; PointIndex >= 0; PointIndex-- )
+			B.Encapsulate( m_pPoints->P()->pValue()[PointIndex] );
 	}
-	return ( AdjustBoundForTransformationMotion( B ) );
+	return(B);
 }
 
-
-
-//---------------------------------------------------------------------
-/** Split this GPrim into smaller GPrims.
- */
-
-TqInt CqMotionSurfacePointsPolygon::Split( std::vector<CqBasicSurface*>& aSplits )
+TqInt CqSurfacePointsPolygons::Split( std::vector<CqBasicSurface*>& aSplits )
 {
-	std::vector<std::vector<CqBasicSurface*> > aaMotionSplits;
-	aaMotionSplits.resize( cTimes() );
-	TqInt cSplits = 0;
-	TqInt i;
-	for ( i = 0; i < cTimes(); i++ )
+	TqInt	CreatedPolys = 0;
+	TqInt	iP = 0, poly;
+	for ( poly = 0; poly < m_NumPolys; poly++ )
 	{
-		m_CurrTimeIndex = i;
-		cSplits = CqPolygonBase::Split( aaMotionSplits[ i ] );
-	}
+		// Create a surface polygon
+		CqSurfacePointsPolygon*	pSurface = new CqSurfacePointsPolygon( m_pPoints, poly );
+		pSurface->AddRef();
+		RtBoolean fValid = RI_TRUE;
 
-	// Now build motion surfaces from the splits and pass them back.
-	for ( i = 0; i < cSplits; i++ )
-	{
-		CqMotionSurface<CqBasicSurface*>* pNewMotion = new CqMotionSurface<CqBasicSurface*>( 0 );
-		pNewMotion->AddRef();
-		pNewMotion->m_fDiceable = TqTrue;
-		pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
-		TqInt j;
-		for ( j = 0; j < cTimes(); j++ )
-			pNewMotion->AddTimeSlot( Time( j ), aaMotionSplits[ j ][ i ] );
-		aSplits.push_back( pNewMotion );
+		pSurface->aIndices().resize( m_PointCounts[ poly ] );
+		RtInt i;
+		for ( i = 0; i < m_PointCounts[ poly ]; i++ )          	// Fill in the points
+		{
+			if ( m_PointIndices[ iP ] >= m_pPoints->P()->Size() )
+			{
+				fValid = RI_FALSE;
+				CqAttributeError( 1, Severity_Normal, "Invalid PointsPolygon index", pSurface->pAttributes() );
+				break;
+			}
+			pSurface->aIndices() [ i ] = m_PointIndices[ iP ];
+			iP++;
+		}
+		if ( fValid )
+		{
+			aSplits.push_back( pSurface );
+			CreatedPolys++;
+		}
 	}
-	return ( cSplits );
+	return( CreatedPolys );
 }
 
 

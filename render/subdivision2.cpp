@@ -1288,7 +1288,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 			aSplits.push_back(apSurfaces[ 0 ]);
 		else
 		{
-			CqMotionSurface<CqSurfacePatchBicubic*>* pMotionSurface = new CqMotionSurface<CqSurfacePatchBicubic*>( 0 );
+			CqDeformingSurface* pMotionSurface = new CqDeformingSurface( 0 );
 			for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
 			{
 				RtFloat time = pTopology()->Time( iTime );

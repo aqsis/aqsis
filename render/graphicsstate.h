@@ -42,6 +42,7 @@ START_NAMESPACE( Aqsis )
 
 class CqLightsource;
 class CqBasicSurface;
+class CqDeformingSurface;
 
 //----------------------------------------------------------------------
 /** Abstract base class to handle the current context of the renderer,
@@ -680,9 +681,7 @@ class CqMotionModeBlock : public CqModeBlock
 		/** Delete the object context.
 		 * \attention This is the only valid context deletion from within this block.
 		 */
-		virtual	void	EndMotionModeBlock()
-		{
-		}
+		virtual	void	EndMotionModeBlock();
 
 		/** Get a reference to the options at the parent context, as motion context doesn't store options.
 		 * \return an options reference.
@@ -714,23 +713,20 @@ class CqMotionModeBlock : public CqModeBlock
 		{
 			return ( TqTrue );
 		}
-		/** Get the CqMotionSurface, if generating a deformation motion blur sequence.
+		/** Get the CqDeformingSurface, if generating a deformation motion blur sequence.
 		 */
-		virtual CqBasicSurface* GetMotionSurface() const
+		virtual CqDeformingSurface* GetDeformingSurface() const
 		{
-			return( m_pMotionSurface );
+			return( m_pDeformingSurface );
 		}
-		/** Set the CqMotionSurface, if generating a deformation motion blur sequence.
+		/** Set the CqDeformingSurface, if generating a deformation motion blur sequence.
 		 */
-		virtual void SetMotionSurface( CqBasicSurface* pMotionSurface)
-		{
-			m_pMotionSurface = pMotionSurface;
-		}
+		virtual void SetDeformingSurface( CqDeformingSurface* pMotionSurface);
 
 	private:
 		TqUint	m_iTime;		///< The index of the current frame time.
 		std::vector<TqFloat>	m_aTimes;		///< An array of specified frame times.
-		CqBasicSurface*			m_pMotionSurface; 
+		CqDeformingSurface*		m_pDeformingSurface; 
 }
 ;
 

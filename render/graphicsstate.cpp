@@ -28,6 +28,7 @@
 #include "graphicsstate.h"
 #include "lights.h"
 #include "csgtree.h"
+#include "renderer.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -276,7 +277,7 @@ CqObjectModeBlock::~CqObjectModeBlock()
 /** Default constructor.
  */
 
-CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], CqModeBlock* pconParent ) : CqModeBlock( pconParent ), m_pMotionSurface( NULL )
+CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], CqModeBlock* pconParent ) : CqModeBlock( pconParent ), m_pDeformingSurface( NULL )
 {
 	// Copy the parents attributes, as this state change doesn't save attributes.
 	if ( pconParent != 0 )
@@ -310,6 +311,27 @@ CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], CqModeBlock* pco
 
 CqMotionModeBlock::~CqMotionModeBlock()
 {}
+
+/** Delete the object context.
+ * \attention This is the only valid context deletion from within this block.
+ */
+void CqMotionModeBlock::EndMotionModeBlock()
+{
+	if( NULL != m_pDeformingSurface )
+	{
+		QGetRenderContext() ->pImage() ->PostSurface( m_pDeformingSurface );
+		QGetRenderContext() ->Stats().IncGPrims();
+		m_pDeformingSurface->Release();
+	}
+}
+
+/** Set the CqDeformingSurface, if generating a deformation motion blur sequence.
+ */
+void CqMotionModeBlock::SetDeformingSurface( CqDeformingSurface* pDeformingSurface)
+{
+	m_pDeformingSurface = pDeformingSurface;
+	pDeformingSurface->AddRef();
+}
 
 
 END_NAMESPACE( Aqsis )

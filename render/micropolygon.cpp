@@ -584,8 +584,8 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 	QGetRenderContext() ->Stats().MakeProject().Start();
 	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
 	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( 0 ) ) );
-	// Transform the whole grid to hybrid camera/raster space
 
+	// Transform the whole grid to hybrid camera/raster space
 	CqVector3D* pP;
 	P() ->GetPointPtr( pP );
 
@@ -735,8 +735,6 @@ void CqMotionMicroPolyGrid::Shade()
 {
 	CqMicroPolyGrid * pGrid = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( 0 ) ) );
 	pGrid->Shade();
-
-
 }
 
 
@@ -759,7 +757,50 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 	TqInt cv = pGridA->vGridRes();
 	TqInt iTime;
 
+	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
+
 	pGridA->AddRef();
+
+	// Get an array of P's for all time positions.
+	std::vector<std::vector<CqVector3D> > aaPtimes;
+	aaPtimes.resize( cTimes() );
+
+	TqInt tTime = cTimes();
+	CqMatrix matObjectToCameraT;
+	register TqInt i;
+	TqInt gsmin1;
+	gsmin1 = pGridA->GridSize() - 1;
+
+	for( iTime = 0; iTime < tTime; iTime++ )
+	{
+		matObjectToCameraT = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld( pSurface()->pTransform()->Time( iTime ) ) );
+		aaPtimes[ iTime ].resize( gsmin1 + 1 );
+
+		// Transform the whole grid to hybrid camera/raster space
+		CqMicroPolyGrid* pg = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
+		CqVector3D* pP;
+		pg->P() ->GetPointPtr( pP );
+
+		for ( i = gsmin1; i >= 0; i-- )
+		{
+			CqVector3D Point( pP[ i ] );
+
+			// Make sure to retain camera space 'z' coordinate.
+			TqFloat zdepth = Point.z();
+			aaPtimes[ iTime ][ i ] = matCameraToRaster * Point;
+			aaPtimes[ iTime ][ i ].z( zdepth );
+			pP[ i ] = aaPtimes[ iTime ][ i ];
+		}
+	}
+
+	// Get the required trim curve sense, if specified, defaults to "inside".
+	const CqString* pattrTrimSense = pAttributes() ->GetStringAttribute( "trimcurve", "sense" );
+	CqString strTrimSense( "inside" );
+	if ( pattrTrimSense != 0 ) strTrimSense = pattrTrimSense[ 0 ];
+	TqBool bOutside = strTrimSense == "outside";
+
+	// Determine whether we need to bother with trimming or not.
+	TqBool bCanBeTrimmed = pSurface() ->bCanBeTrimmed() && NULL != pGridA->u() && NULL != pGridA->v();
 
 	TqInt iv;
 	for ( iv = 0; iv < cv; iv++ )
@@ -767,31 +808,56 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 		TqInt iu;
 		for ( iu = 0; iu < cu; iu++ )
 		{
-			// If culled, ignore it
-			if ( pGridA->vfCulled() )
+			TqInt iIndex = ( iv * ( cu + 1 ) ) + iu;
+
+			// If culled don't bother.
+			if ( pGridA->CulledPolys().Value( iIndex ) )
 			{
-				QGetRenderContext() ->Stats().IncCulledMPGs( 1 );
-				pGridA->DeleteVariables( TqTrue );
+				//theStats.IncCulledMPGs();
 				continue;
+			}
+
+			// If the MPG is trimmed then don't add it.
+			TqBool fTrimmed = TqFalse;
+			if ( bCanBeTrimmed )
+			{
+				TqFloat fu, fv;
+				pGridA->u() ->GetFloat( fu, iIndex );
+				pGridA->v() ->GetFloat( fv, iIndex );
+				TqBool fTrimA = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
+				pGridA->u() ->GetFloat( fu, iIndex + 1 );
+				pGridA->v() ->GetFloat( fv, iIndex + 1 );
+				TqBool fTrimB = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
+				pGridA->u() ->GetFloat( fu, iIndex + cu + 2 );
+				pGridA->v() ->GetFloat( fv, iIndex + cu + 2 );
+				TqBool fTrimC = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
+				pGridA->u() ->GetFloat( fu, iIndex + cu + 1 );
+				pGridA->v() ->GetFloat( fv, iIndex + cu + 1 );
+				TqBool fTrimD = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
+
+				if ( bOutside )
+				{
+					fTrimA = !fTrimA;
+					fTrimB = !fTrimB;
+					fTrimC = !fTrimC;
+					fTrimD = !fTrimD;
+				}
+
+				// If al points are trimmed discard the MPG
+				if ( fTrimA && fTrimB && fTrimC && fTrimD )
+					continue;
+
+				// If any points are trimmed mark the MPG as needing to be trim checked.
+				//fTrimmed = fTrimA || fTrimB || fTrimC || fTrimD;
+				if ( fTrimA || fTrimB || fTrimC || fTrimD )
+					fTrimmed = TqTrue;
 			}
 
 			CqMicroPolygonMotion *pNew = new CqMicroPolygonMotion();
 			pNew->SetGrid( pGridA );
-			TqInt iIndex = ( iv * ( cu + 1 ) ) + iu;
 			pNew->SetIndex( iIndex );
 			for ( iTime = 0; iTime < cTimes(); iTime++ )
-			{
-				CqMicroPolyGrid* pGridT = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
-				IqShaderData* pP = pGridT->P();
-				CqVector3D vec1, vec2, vec3, vec4;
-				pP->GetPoint( vec1, iIndex );
-				pP->GetPoint( vec2, iIndex + 1 );
-				pP->GetPoint( vec3, iIndex + cu + 2 );
-				pP->GetPoint( vec4, iIndex + cu + 1 );
-				pNew->AppendKey( vec1, vec2, vec3, vec4, Time( iTime ) );
-			}
-			pNew->GetTotalBound( TqTrue );
-
+				pNew->AppendKey( aaPtimes[ iTime ][ iIndex ], aaPtimes[ iTime ][ iIndex + 1 ], aaPtimes[ iTime ][ iIndex + cu + 2 ], aaPtimes[ iTime ][ iIndex + cu + 1 ], Time( iTime ) );
 			pImage->AddMPG( pNew );
 		}
 	}

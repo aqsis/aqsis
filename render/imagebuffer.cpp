@@ -453,6 +453,11 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 
 TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg )
 {
+	// Should always mark as pushed forward even if not. As this is an idicator
+	// that the attempt has been made, used by the PushDown function. If this wasn't set
+	// then the mpg would be pushed down again when the next row is hit.
+	pmpg->MarkPushedForward();
+
 	TqInt CurrBucketIndex = iCurrentBucket();
 
 	// Check if there is anywhere to push forward to.
@@ -470,27 +475,22 @@ TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg )
 	BucketMin -= FilterWidth;
 	BucketMax += FilterWidth;
 
-	TqInt NumBounds = pmpg->cSubBounds();
-	TqInt BoundIndex;
-	for(BoundIndex = 0; BoundIndex<NumBounds; BoundIndex++)
-	{
-		TqFloat btime;
-		CqBound	B( pmpg->SubBound( BoundIndex, btime) );
+	CqBound	B( pmpg->GetTotalBound() );
 
-		const CqVector3D& vMin = B.vecMin();
-		const CqVector3D& vMax = B.vecMax();
-		if( ( vMin.x() > BucketMax.x() ) ||
-			( vMin.y() > BucketMax.y() ) ||
-			( vMax.x() < BucketMin.x() ) ||
-			( vMax.y() < BucketMin.y() ) )
-			continue;
-		else
-		{
-			pmpg->AddRef();
-			m_aBuckets[ NextBucketForward ].AddMPG( pmpg );
-			pmpg->MarkPushedForward();
-			return( TqTrue );
-		}
+	const CqVector3D& vMin = B.vecMin();
+	const CqVector3D& vMax = B.vecMax();
+	if( ( vMin.x() > BucketMax.x() ) ||
+		( vMin.y() > BucketMax.y() ) ||
+		( vMax.x() < BucketMin.x() ) ||
+		( vMax.y() < BucketMin.y() ) )
+	{
+		return(TqFalse);
+	}
+	else
+	{
+		pmpg->AddRef();
+		m_aBuckets[ NextBucketForward ].AddMPG( pmpg );
+		return( TqTrue );
 	}
 	return( TqFalse );
 }
@@ -521,28 +521,25 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt CurrBucketIndex )
 	BucketMin -= FilterWidth;
 	BucketMax += FilterWidth;
 
-	TqInt NumBounds = pmpg->cSubBounds();
-	TqInt BoundIndex;
-	for(BoundIndex = 0; BoundIndex<NumBounds; BoundIndex++)
-	{
-		TqFloat btime;
-		CqBound	B( pmpg->SubBound( BoundIndex, btime) );
+	CqBound	B( pmpg->GetTotalBound( ) );
 
-		const CqVector3D& vMin = B.vecMin();
-		const CqVector3D& vMax = B.vecMax();
-		if( ( vMin.x() > BucketMax.x() ) ||
-			( vMin.y() > BucketMax.y() ) ||
-			( vMax.x() < BucketMin.x() ) ||
-			( vMax.y() < BucketMin.y() ) )
-			continue;
-		{
-			pmpg->AddRef();
-			m_aBuckets[ NextBucketDown ].AddMPG( pmpg );
-			// See if it needs to be pushed further down (extreme Motion Blur)
-			if( PushMPGDown( pmpg, NextBucketDown ) )
-				QGetRenderContext()->Stats().IncMPGsPushedFarDown();
-			return( TqTrue );
-		}
+	const CqVector3D& vMin = B.vecMin();
+	const CqVector3D& vMax = B.vecMax();
+	if( ( vMin.x() > BucketMax.x() ) ||
+		( vMin.y() > BucketMax.y() ) ||
+		( vMax.x() < BucketMin.x() ) ||
+		( vMax.y() < BucketMin.y() ) )
+	{
+		return(TqFalse);
+	}
+	else
+	{
+		pmpg->AddRef();
+		m_aBuckets[ NextBucketDown ].AddMPG( pmpg );
+		// See if it needs to be pushed further down (extreme Motion Blur)
+		if( PushMPGDown( pmpg, NextBucketDown ) )
+			QGetRenderContext()->Stats().IncMPGsPushedFarDown();
+		return( TqTrue );
 	}
 	return( TqFalse );
 }
