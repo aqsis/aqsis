@@ -110,6 +110,10 @@ class CqQuadric : public CqSurface
 		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
 		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqQuadric"); }
+#endif
+
 	protected:
 		CqMatrix	m_matTx;		///< Transformation matrix from object to camera.
 		CqMatrix	m_matITTx;		///< Inverse transpose transformation matrix, for transforming normals.
@@ -148,6 +152,10 @@ class CqSphere : public CqQuadric
 
 		CqSphere&	operator=( const CqSphere& From );
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqSphere"); }
+#endif
+
 	private:
 		TqFloat	m_Radius;		///< Radius.
 		TqFloat	m_ZMin;			///< Min value on z axis.
@@ -182,6 +190,10 @@ class CqCone : public CqQuadric
 		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 
 		CqCone&	operator=( const CqCone& From );
+
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqCone"); }
+#endif
 
 	private:
 		TqFloat	m_Height;		///< Height..
@@ -223,6 +235,10 @@ class CqCylinder : public CqQuadric
 
 		CqCylinder&	operator=( const CqCylinder& From );
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqCylinder"); }
+#endif
+
 	private:
 		TqFloat	m_Radius;		///< Radius
 		TqFloat	m_ZMin;			///< Min value on zaxis.
@@ -259,6 +275,10 @@ class CqHyperboloid : public CqQuadric
 
 		CqHyperboloid&	operator=( const CqHyperboloid& From );
 
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqHyperboloid"); }
+#endif
+
 	private:
 		CqVector3D	m_Point1;		///< Start point of line to revolve.
 		CqVector3D	m_Point2;		///< End point of line to revolve.
@@ -292,6 +312,10 @@ class CqParaboloid : public CqQuadric
 		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 
 		CqParaboloid&	operator=( const CqParaboloid& From );
+
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqParaboloid"); }
+#endif
 
 	private:
 		TqFloat	m_RMax;			///< Radius at zmax.
@@ -327,6 +351,10 @@ class CqTorus : public CqQuadric
 		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 
 		CqTorus&	operator=( const CqTorus& From );
+
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqTorus"); }
+#endif
 
 	private:
 		TqFloat	m_MajorRadius;	///< Major radius.
@@ -367,6 +395,10 @@ class CqDisk : public CqQuadric
 		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 
 		CqDisk&	operator=( const CqDisk& From );
+
+#ifdef _DEBUG
+		CqString className() const { return CqString("CqDisk"); }
+#endif
 
 	private:
 		TqFloat	m_Height;			///< Position on z axis.

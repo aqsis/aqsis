@@ -344,7 +344,7 @@ RtVoid	RiBegin( RtToken name )
 	{
 		// Unlink from the stack, and release the stacks reference to the light.
 		pL->UnLink();
-		pL->Release();
+		RELEASEREF( pL );
 		pL = Lightsource_stack.pFirst();
 	}
 
@@ -380,7 +380,7 @@ RtVoid	RiEnd()
 	{
 		// Unlink from the stack, and release the stacks reference to the light.
 		pL->UnLink();
-		pL->Release();
+		RELEASEREF( pL );
 		pL = Lightsource_stack.pFirst();
 	}
 
@@ -2539,7 +2539,7 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 {
 	// Create a new polygon surface primitive.
 	CqSurfacePolygon * pSurface = new CqSurfacePolygon( nvertices );
-	pSurface->AddRef();
+	ADDREF( pSurface );
 
 	// Process any specified primitive variables.
 	if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
@@ -2556,11 +2556,11 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 		else
 		{
 			QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_DEGENRATE_POLYGON );
-			pSurface->Release();
+			RELEASEREF( pSurface );
 		}
 	}
 	else
-		pSurface->Release();
+		RELEASEREF( pSurface );
 
 	return ;
 }
@@ -2737,7 +2737,7 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 {
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass = new CqPolygonPoints( nvertices, 1 );
-	pPointsClass->AddRef();
+	ADDREF( pPointsClass );
 
 	// Create a new points storage class
 	CqPoints* pSurface;
@@ -2752,7 +2752,7 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 				                 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld() ) );
 
 		pSurface = new CqPoints( nvertices, pPointsClass );
-		pSurface->AddRef();
+		ADDREF( pSurface );
 		// Initialise the KDTree for the points to contain all.
 		pSurface->InitialiseKDTree();
 		pSurface->InitialiseMaxWidth();
@@ -2760,8 +2760,8 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 		if ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "LevelOfDetailBounds" ) [ 1 ] < 0.0f )
 		{
 			// Cull this geometry for LOD reasons
-			pSurface->Release();
-			pPointsClass->Release();
+			RELEASEREF( pSurface );
+			RELEASEREF( pPointsClass );
 			return ;
 		}
 
@@ -2779,14 +2779,14 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 			{
 				CqDeformingPointsSurface* pNewMS = new CqDeformingPointsSurface( pSurface );
 				pNewMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
-				pSurface->AddRef();
+				ADDREF( pSurface );
 				
 				pMMB->SetDeformingSurface( pNewMS );
 			}
 			else
 			{
 				pMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
-				pSurface->AddRef();
+				ADDREF( pSurface );
 			}
 			QGetRenderContext() ->AdvanceTime();
 		}
@@ -2796,12 +2796,12 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 			QGetRenderContext() ->Stats().IncGPrims();
 		}
 	
-		pPointsClass->Release();
-		pSurface->Release();
+		RELEASEREF( pPointsClass );
+		RELEASEREF( pSurface );
 	}
 	else
 	{
-		pPointsClass->Release();
+		RELEASEREF( pPointsClass );
 	}
 
 	return ;
@@ -2860,7 +2860,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 		// create a new group of cubic curves
 		CqCubicCurvesGroup * pSurface =
 		    new CqCubicCurvesGroup( ncurves, nvertices, periodic );
-		pSurface->AddRef();
+		ADDREF( pSurface );
 		// read in the parameter list
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 		{
@@ -2875,7 +2875,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 		}
 		else
 		{
-			pSurface->Release();
+			RELEASEREF( pSurface );
 		}
 	}
 	else if ( strcmp( type, RI_LINEAR ) == 0 )
@@ -2884,7 +2884,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 		CqLinearCurvesGroup * pSurface =
 		    new CqLinearCurvesGroup( ncurves, nvertices, periodic );
 
-		pSurface->AddRef();
+		ADDREF( pSurface );
 		// read in the parameter list
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 		{
@@ -2899,7 +2899,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 		}
 		else
 		{
-			pSurface->Release();
+			RELEASEREF( pSurface );
 		}
 	}
 	else
@@ -2951,12 +2951,12 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, npolys );
-	pPointsClass->AddRef();
+	ADDREF( pPointsClass );
 	// Process any specified primitive variables
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
 		CqSurfacePointsPolygons* pPsPs = new CqSurfacePointsPolygons(pPointsClass, npolys, nverts, verts );
-		pPsPs->AddRef();
+		ADDREF( pPsPs );
 		TqFloat time = QGetRenderContext()->Time();
 		// Transform the points into camera space for processing,
 		pPointsClass->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pPointsClass->pTransform() ->matObjectToWorld(time) ),
@@ -2965,7 +2965,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 		CreateGPrim(pPsPs);
 	}
 	else
-		pPointsClass->Release();
+		RELEASEREF( pPointsClass );
 
 	return ;
 }
@@ -3019,7 +3019,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, npolys );
-	pPointsClass->AddRef();
+	ADDREF( pPointsClass );
 	// Process any specified primitive variables
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
@@ -3096,7 +3096,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			poly.Triangulate( aiTriangles );
 
 		}
-		pPointsClass->Release();
+		RELEASEREF( pPointsClass );
 
 		// Build an array of point counts (always 3 each).
 		ctris = aiTriangles.size() / 3;
@@ -3188,7 +3188,7 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 	{
 		// Create a surface patch
 		CqSurfacePatchBicubic * pSurface = new CqSurfacePatchBicubic();
-		pSurface->AddRef();
+		ADDREF( pSurface );
 		// Fill in primitive variables specified.
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 		{
@@ -3207,13 +3207,13 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 			CreateGPrim( pSurface );
 		}
 		else
-			pSurface->Release();
+			RELEASEREF( pSurface );
 	}
 	else if ( strcmp( type, RI_BILINEAR ) == 0 )
 	{
 		// Create a surface patch
 		CqSurfacePatchBilinear * pSurface = new CqSurfacePatchBilinear();
-		pSurface->AddRef();
+		ADDREF( pSurface );
 		// Fill in primitive variables specified.
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 		{
@@ -3227,7 +3227,7 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 			CreateGPrim( pSurface );
 		}
 		else
-			pSurface->Release();
+			RELEASEREF( pSurface );
 	}
 	return ;
 }
@@ -3264,7 +3264,7 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 		TqBool	vPeriodic = ( strcmp( vwrap, RI_PERIODIC ) == 0 ) ? TqTrue : TqFalse;
 
 		CqSurfacePatchMeshBicubic* pSurface = new CqSurfacePatchMeshBicubic( nu, nv, uPeriodic, vPeriodic );
-		pSurface->AddRef();
+		ADDREF( pSurface );
 		// Fill in primitive variables specified.
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 		{
@@ -3280,7 +3280,7 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 				static_cast<CqSurfacePatchBicubic*>( *iSS ) ->ConvertToBezierBasis( matuBasis, matvBasis );
 				TqFloat time = QGetRenderContext()->Time();
 				// Transform the points into camera space for processing,
-				(*iSS)->AddRef();
+				ADDREF( (*iSS) );
 				(*iSS)->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
 								   QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ),
 								   QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pSurface->pTransform() ->matObjectToWorld(time) ) );
@@ -3288,7 +3288,7 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 			}
 		}
 		else
-			pSurface->Release();
+			RELEASEREF( pSurface );
 	}
 	else if ( strcmp( type, RI_BILINEAR ) == 0 )
 	{
@@ -3297,7 +3297,7 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 		TqBool	vPeriodic = ( strcmp( vwrap, RI_PERIODIC ) == 0 ) ? TqTrue : TqFalse;
 
 		CqSurfacePatchMeshBilinear* pSurface = new CqSurfacePatchMeshBilinear( nu, nv, uPeriodic, vPeriodic );
-		pSurface->AddRef();
+		ADDREF( pSurface );
 		// Fill in primitive variables specified.
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 		{
@@ -3311,7 +3311,7 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 			CreateGPrim( pSurface );
 		}
 		else
-			pSurface->Release();
+			RELEASEREF( pSurface );
 	}
 	return ;
 }
@@ -3350,7 +3350,7 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 	// Create a NURBS patch
 	CqSurfaceNURBS * pSurface = new CqSurfaceNURBS();
 	pSurface->SetfPatchMesh();
-	pSurface->AddRef();
+	ADDREF( pSurface );
 	pSurface->Init( uorder, vorder, nu, nv );
 
 	pSurface->Setumin( umin );
@@ -3378,7 +3378,7 @@ RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloa
 		CreateGPrim( pSurface );
 	}
 	else
-		pSurface->Release();
+		RELEASEREF( pSurface );
 
 	return ;
 }
@@ -3460,7 +3460,7 @@ RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, 
 {
 	// Create a sphere
 	CqSphere * pSurface = new CqSphere( radius, zmin, zmax, 0, thetamax );
-	pSurface->AddRef();
+	ADDREF( pSurface );
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
 	pSurface->SetDefaultPrimitiveVariables();
 
@@ -3500,7 +3500,7 @@ RtVoid	RiConeV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 {
 	// Create a cone
 	CqCone * pSurface = new CqCone( height, radius, 0, thetamax, 0, height );
-	pSurface->AddRef();
+	ADDREF( pSurface );
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
 	pSurface->SetDefaultPrimitiveVariables();
 
@@ -3540,7 +3540,7 @@ RtVoid	RiCylinderV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 {
 	// Create a cylinder
 	CqCylinder * pSurface = new CqCylinder( radius, zmin, zmax, 0, thetamax );
-	pSurface->AddRef();
+	ADDREF( pSurface );
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
 	pSurface->SetDefaultPrimitiveVariables();
 
@@ -3582,7 +3582,7 @@ RtVoid	RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat thetamax, PARAMET
 	CqVector3D v0( point1[ 0 ], point1[ 1 ], point1[ 2 ] );
 	CqVector3D v1( point2[ 0 ], point2[ 1 ], point2[ 2 ] );
 	CqHyperboloid* pSurface = new CqHyperboloid( v0, v1, 0, thetamax );
-	pSurface->AddRef();
+	ADDREF( pSurface );
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
 	pSurface->SetDefaultPrimitiveVariables();
 
@@ -3622,7 +3622,7 @@ RtVoid	RiParaboloidV( RtFloat rmax, RtFloat zmin, RtFloat zmax, RtFloat thetamax
 {
 	// Create a paraboloid
 	CqParaboloid * pSurface = new CqParaboloid( rmax, zmin, zmax, 0, thetamax );
-	pSurface->AddRef();
+	ADDREF( pSurface );
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
 	pSurface->SetDefaultPrimitiveVariables();
 
@@ -3662,7 +3662,7 @@ RtVoid	RiDiskV( RtFloat height, RtFloat radius, RtFloat thetamax, PARAMETERLIST 
 {
 	// Create a disk
 	CqDisk * pSurface = new CqDisk( height, 0, radius, 0, thetamax );
-	pSurface->AddRef();
+	ADDREF( pSurface );
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
 	pSurface->SetDefaultPrimitiveVariables();
 
@@ -3702,7 +3702,7 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 {
 	// Create a torus
 	CqTorus * pSurface = new CqTorus( majorrad, minorrad, phimin, phimax, 0, thetamax );
-	pSurface->AddRef();
+	ADDREF( pSurface );
 	ProcessPrimitiveVariables( pSurface, count, tokens, values );
 	pSurface->SetDefaultPrimitiveVariables();
 
@@ -3732,7 +3732,7 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 	// the instances of CqProcedural so that FreeProc gets called on the final Release();
 	
 	CqProcedural *pProc = new CqProcedural(data, B, refineproc, freeproc );
-	pProc->AddRef();
+	ADDREF( pProc );
 	CreateGPrim( pProc );
 
 	return ;
@@ -3768,7 +3768,7 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 
 		// Create a standard teapot
 		CqTeapot * pSurface = new CqTeapot( true ); // add a bottom if true/false otherwise
-		pSurface->AddRef();
+		ADDREF( pSurface );
 
 		pSurface->SetSurfaceParameters( *pSurface );
 		ProcessPrimitiveVariables( pSurface, count, tokens, values );
@@ -3795,13 +3795,13 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 
 			CreateGPrim( ( CqSurfacePatchMeshBicubic* ) pMesh );
 		}
-		pSurface->Release();
+		RELEASEREF( pSurface );
 	}
 	else if ( strcmp( type, "sphere" ) == 0 )
 	{
 		// Create a sphere
 		CqSphere * pSurface = new CqSphere( 1, -1, 1, 0, 360.0 );
-		pSurface->AddRef();
+		ADDREF( pSurface );
 		ProcessPrimitiveVariables( pSurface, count, tokens, values );
 		pSurface->SetDefaultPrimitiveVariables();
 
@@ -4389,7 +4389,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, nfaces );
-	pPointsClass->AddRef();
+	ADDREF( pPointsClass );
 
 	std::vector<CqPolygonPoints*>	apPoints;
 	// Process any specified primitive variables
@@ -4486,15 +4486,15 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 				}
 
 				CqSurfaceSubdivisionMesh* pMesh = new CqSurfaceSubdivisionMesh(pSubd2, nfaces );
-				pMesh->AddRef();
+				ADDREF( pMesh );
 				CreateGPrim(pMesh);
 			}
 			else
 			{
 				QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_SDS_NONMANIFOLD );
 				// Invalid mesh, delete it.
-				pPointsClass->Release();
-				pSubd2->Release();
+				RELEASEREF( pPointsClass );
+				RELEASEREF( pSubd2 );
 			}
 		}
 	}
@@ -5087,7 +5087,7 @@ RtVoid	CreateGPrim( CqBasicSurface* pSurface )
 	if ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "LevelOfDetailBounds" ) [ 1 ] < 0.0f )
 	{
 		// Cull this geometry for LOD reasons
-		pSurface->Release();
+		RELEASEREF( pSurface );
 		return ;
 	}
 
@@ -5104,25 +5104,25 @@ RtVoid	CreateGPrim( CqBasicSurface* pSurface )
 		if( ( pMS = pMMB->GetDeformingSurface() ) == NULL )
 		{
 			CqDeformingSurface* pNewMS = new CqDeformingSurface( pSurface );
-			pSurface->AddRef();
+			ADDREF( pSurface );
 			pNewMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
-			pNewMS->AddRef();
+			ADDREF( pNewMS );
 			pMMB->SetDeformingSurface( pNewMS );
 		}
 		else
 		{
-			pSurface->AddRef();
+			ADDREF( pSurface );
 			pMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
 		}
 		QGetRenderContext() ->AdvanceTime();
 	}
 	else
 	{
-		pSurface->AddRef();
+		ADDREF( pSurface );
 		pSurface->PrepareTrimCurve();
 		QGetRenderContext() ->pImage() ->PostSurface( pSurface );
 		QGetRenderContext() ->Stats().IncGPrims();
-		pSurface->Release();
+		RELEASEREF( pSurface );
 	}
 
 	return ;

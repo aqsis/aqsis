@@ -71,8 +71,8 @@ class CqAttributes : public CqRefCount, public IqAttributes
 			if ( RefCount() > 1 )
 			{
 				CqAttributes * pWrite = Clone();
-				pWrite->AddRef();
-				Release();
+				ADDREF( pWrite );
+				RELEASEREF( this );
 				return ( pWrite );
 			}
 			else
@@ -277,6 +277,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 		}
 		virtual	IqLightsource*	pLight( TqInt index );
 
+#ifndef _DEBUG
 		virtual	void	Release()
 		{
 			CqRefCount::Release();
@@ -285,6 +286,16 @@ class CqAttributes : public CqRefCount, public IqAttributes
 		{
 			CqRefCount::AddRef();
 		}
+#else
+		virtual void AddRef(const TqChar* file, TqInt line)
+		{
+			CqRefCount::AddRef(file, line);
+		}
+		virtual void Release(const TqChar* file, TqInt line)
+		{
+			CqRefCount::Release(file, line);
+		}
+#endif
 
 	private:
 		class CqHashTable
@@ -305,7 +316,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 					plist_iterator it = m_ParameterLists.begin();
 					while( it != m_ParameterLists.end() )
 					{
-						(*it).second->Release();
+						RELEASEREF( (*it).second );
 						++it;
 					}
 				}
@@ -333,7 +344,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 				void Add( CqNamedParameterList* pOption )
 				{
 					m_ParameterLists.insert(value_type(pOption->strName(), pOption) );
-					pOption->AddRef();
+					ADDREF( pOption );
 				}
 
 				void Remove( CqNamedParameterList* pOption )
@@ -341,7 +352,7 @@ class CqAttributes : public CqRefCount, public IqAttributes
 					plist_iterator it = m_ParameterLists.find( pOption->strName() );
 					if( it != m_ParameterLists.end() )
 					{
-						(*it).second->Release();
+						RELEASEREF( (*it).second );
 						m_ParameterLists.erase(it);
 					}
 				}

@@ -412,9 +412,9 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 		 */
 		CqMicroPolygon& operator=( const CqMicroPolygon& From )
 		{
-			if ( m_pGrid != NULL ) m_pGrid->Release();
+			if ( m_pGrid != NULL ) RELEASEREF( m_pGrid );
 			m_pGrid = From.m_pGrid;
-			m_pGrid->AddRef();
+			ADDREF( m_pGrid );
 			m_Index = From.m_Index;
 			m_IndexCode = From.m_IndexCode;
 			m_BoundCode = From.m_BoundCode;
@@ -437,9 +437,9 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 		 */
 		void	SetGrid( CqMicroPolyGrid* pGrid )
 		{
-			if ( m_pGrid ) m_pGrid->Release();
+			if ( m_pGrid ) RELEASEREF( m_pGrid );
 			m_pGrid = pGrid;
-			m_pGrid->AddRef();
+			ADDREF( m_pGrid );
 		}
 		/** Get the pointer to the grid this micropoly came from.
 		 * \return Pointer to the CqMicroPolyGrid.
@@ -468,7 +468,7 @@ class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 		{
 			if ( m_pGrid != 0 )
 			{
-				m_pGrid->Release();
+				RELEASEREF( m_pGrid );
 				m_pGrid = 0;
 			}
 		}

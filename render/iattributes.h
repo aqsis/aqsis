@@ -4,8 +4,8 @@
  *	@author	Paul Gregory
  *	@brief	Declare the interface class for common attributes access.
  *
- *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/10/31 11:51:12 $
+ *	Last change by:		$Author: jpgrad $
+ *	Last change date:	$Date: 2003/06/12 01:58:58 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -163,8 +163,13 @@ struct IqAttributes
 
 	virtual	TqInt	cLights() const	= 0;
 	virtual	IqLightsource*	pLight( TqInt index ) = 0;
+#ifndef _DEBUG
 	virtual	void	AddRef() = 0;
 	virtual	void	Release() = 0;
+#else
+	virtual void AddRef(const TqChar* file, TqInt line) = 0;
+	virtual void Release(const TqChar* file, TqInt line) = 0;
+#endif
 };
 
 

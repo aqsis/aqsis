@@ -259,7 +259,6 @@ class CqImageBuffer
 		virtual	void	Quit();
 		virtual	void	Release();
 
-
 		// Callbacks to overridden image buffer class to allow display/processing etc.
 		virtual	void	BucketComplete( TqInt iBucket )
 		{

@@ -662,7 +662,7 @@ TqInt CqSurfacePatchBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 		aSplits[ i ] ->SetSplitDir( direction ? SplitDir_V : SplitDir_U );
 		aSplits[ i ] ->SetEyeSplitCount( EyeSplitCount() );
 		aSplits[ i ] ->m_fDiceable = TqTrue;
-		aSplits[ i ] ->AddRef();
+		ADDREF( aSplits[ i ] );
 	}
 
 	// Iterate through any use parameters subdividing and storing the second value in the target surface.
@@ -829,7 +829,7 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 			// uCol is the coordinate column of the mesh.
 			RtInt uCol = j * uStep;
 			CqSurfacePatchBicubic*	pSurface = new CqSurfacePatchBicubic();
-			pSurface->AddRef();
+			ADDREF( pSurface );
 			pSurface->SetSurfaceParameters( *this );
 
 			RtInt v;
@@ -1043,7 +1043,7 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 		for ( j = 0; j < m_uPatches; j++ )
 		{
 			CqSurfacePatchBilinear*	pSurface = new CqSurfacePatchBilinear;
-			pSurface->AddRef();
+			ADDREF( pSurface );
 			pSurface->SetSurfaceParameters( *this );
 
 			RtInt iTa = PatchCoord( i, j );

@@ -128,15 +128,15 @@ class CqOptions
 					else
 					{
 						CqNamedParameterList* pNew = new CqNamedParameterList( *( *i ) );
-						( *i ) ->Release();
+						RELEASEREF( ( *i ) );
 						( *i ) = pNew;
-						( *i ) ->AddRef();
+						ADDREF( ( *i ) );
 						return ( *i );
 					}
 				}
 			}
 			m_aOptions.push_back( new CqNamedParameterList( strName ) );
-			m_aOptions.back() ->AddRef();
+			ADDREF( m_aOptions.back() );
 			return ( m_aOptions.back() );
 		}
 		const	CqParameter* pParameter( const char* strName, const char* strParam ) const;

@@ -42,7 +42,7 @@ CqImagersource::CqImagersource( IqShader* pShader, TqBool fActive ) :
 {
 
 	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
-	m_pAttributes->AddRef();
+	ADDREF( m_pAttributes );
 
 	m_pShaderExecEnv = new CqShaderExecEnv;
 
@@ -56,7 +56,7 @@ CqImagersource::CqImagersource( IqShader* pShader, TqBool fActive ) :
 CqImagersource::~CqImagersource()
 {
 	if ( m_pAttributes )
-		m_pAttributes->Release();
+		RELEASEREF( m_pAttributes );
 	m_pAttributes = 0;
 
 	/// \note This should delete through the interface that created it.

@@ -42,7 +42,7 @@ CqSubdivision2::CqSubdivision2( CqPolygonPoints* pPoints ) :  CqMotionSpec<CqPol
 	if( pPoints )
 	{
 		// Store the reference to our points.
-		pPoints->AddRef();
+		ADDREF( pPoints );
 		AddTimeSlot( 0, pPoints );
 	}
 }
@@ -62,7 +62,7 @@ CqSubdivision2::~CqSubdivision2()
 	// Release the reference to our points.
 	TqInt i;
 	for ( i = 0; i < cTimes(); i++ )
-		GetMotionObject( Time( i ) ) ->Release();
+		RELEASEREF( GetMotionObject( Time( i ) ) );
 }
 
 
@@ -1189,7 +1189,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 		{
 			// Create a surface patch
 			CqSurfacePatchBicubic * pSurface = new CqSurfacePatchBicubic();
-			pSurface->AddRef();
+			ADDREF( pSurface );
 			// Fill in default values for all primitive variables not explicitly specified.
 			pSurface->SetSurfaceParameters( *pTopology()->pPoints( iTime ) );
 
@@ -1503,7 +1503,7 @@ TqInt CqSurfaceSubdivisionMesh::Split( std::vector<CqBasicSurface*>& aSplits )
 	TqInt	CreatedPolys = 0;
 	TqInt	face;
 	// Guard
-	AddRef();
+	ADDREF( this );
 	for ( face = 0; face < m_NumFaces; face++ )
 	{
 		// Don't add faces which are on the boundary, unless "interpolateboundary" is specified.
@@ -1514,14 +1514,14 @@ TqInt CqSurfaceSubdivisionMesh::Split( std::vector<CqBasicSurface*>& aSplits )
 			{
 				// Add a patch surface to the bucket queue
 				CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( m_pTopology, m_pTopology->pFacet( face ) );
-				pNew->AddRef();
+				ADDREF( pNew );
 				aSplits.push_back( pNew );
 				CreatedPolys++;
 			}
 		}
 	}
 	// !Guard
-	Release();
+	RELEASEREF( this );
 	return( CreatedPolys );
 }
 

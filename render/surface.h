@@ -59,12 +59,12 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		{
 			// Release our reference on the current attributes.
 			if ( m_pAttributes )
-				m_pAttributes->Release();
+				RELEASEREF( m_pAttributes );
 			m_pAttributes = 0;
 			if ( m_pTransform )
-				m_pTransform->Release();
+				RELEASEREF( m_pTransform );
 			if ( m_pCSGNode )
-				m_pCSGNode->Release();
+				RELEASEREF( m_pCSGNode );
 			m_pTransform = 0;
 		}
 
@@ -118,7 +118,7 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		virtual void	RenderComplete()
 		{
 			UnLink();
-			Release();
+			RELEASEREF( this );
 		}
 		/** Prepare the trim curve once the surface has been completed.
 		 */
@@ -680,7 +680,7 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<CqBasicSur
 		{
 			TqInt i;
 			for ( i = 0; i < cTimes(); i++ )
-				GetMotionObject( Time( i ) ) ->Release();
+				RELEASEREF( GetMotionObject( Time( i ) ) );
 		}
 
 		/** Get combnied bound for all times
@@ -732,7 +732,7 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<CqBasicSur
 			for ( i = 0; i < cSplits; i++ )
 			{
 				CqDeformingSurface* pNewMotion = new CqDeformingSurface( 0 );
-				pNewMotion->AddRef();
+				ADDREF( pNewMotion );
 				pNewMotion->m_fDiceable = TqTrue;
 				pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
 				TqInt j;

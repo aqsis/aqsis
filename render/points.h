@@ -104,7 +104,7 @@ class CqPoints : public CqSurface, public CqMotionSpec<CqPolygonPoints*>
 			// Release the reference to our points.
 			TqInt i;
 			for ( i = 0; i < cTimes(); i++ )
-				GetMotionObject( Time( i ) ) ->Release();
+				RELEASEREF( GetMotionObject( Time( i ) ) );
 		}
 
 		virtual	TqUint	cUniform() const
@@ -506,7 +506,7 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 			for ( i = 0; i < cSplits; i++ )
 			{
 				CqDeformingPointsSurface* pNewMotion = new CqDeformingPointsSurface( 0 );
-				pNewMotion->AddRef();
+				ADDREF( pNewMotion );
 				pNewMotion->m_fDiceable = TqTrue;
 				pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
 				TqInt j;

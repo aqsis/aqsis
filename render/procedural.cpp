@@ -53,7 +53,7 @@ CqProcedural::CqProcedural(RtPointer data, CqBound &B, RtProcSubdivFunc subfunc,
 	m_pFreeFunc = freefunc;
 
 	m_pconStored = QGetRenderContext()->pconCurrent();
-	m_pconStored->AddRef();
+	ADDREF( m_pconStored );
 }
 
 
@@ -97,7 +97,7 @@ TqInt CqProcedural::Split( std::vector<CqBasicSurface*>& aSplits )
  */
 CqProcedural::~CqProcedural()
 { 
-	m_pconStored->Release();
+	RELEASEREF( m_pconStored );
 	if( m_pFreeFunc ) m_pFreeFunc( m_pData );
 }
 

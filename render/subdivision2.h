@@ -418,7 +418,7 @@ class CqSurfaceSubdivisionPatch : public CqBasicSurface
 		{
 			assert(NULL != pTopology);
 			// Reference the topology class
-			pTopology->AddRef();
+			ADDREF( pTopology );
 			m_pTopology = pTopology;
 			m_pFace = pFace;
 		}
@@ -427,7 +427,7 @@ class CqSurfaceSubdivisionPatch : public CqBasicSurface
 		{
 			assert(NULL != m_pTopology);
 			// Unreference the subdivision topology class
-			m_pTopology->Release();
+			RELEASEREF( m_pTopology );
 		}
 
 		/** Get the pointer to the subdivision surface hull that this patch is part of.
@@ -509,11 +509,11 @@ class CqSurfaceSubdivisionMesh : public CqSurface
 			m_pTopology( pTopology )
 		{
 			assert( NULL != m_pTopology );
-			m_pTopology->AddRef();
+			ADDREF( m_pTopology );
 		}
 		virtual	~CqSurfaceSubdivisionMesh()
 		{
-			m_pTopology->Release();
+			RELEASEREF( m_pTopology );
 		}
 
 		/** Get the gemoetric bound of this GPrim.

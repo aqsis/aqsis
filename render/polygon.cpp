@@ -123,7 +123,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 
 		// Create bilinear patches
 		CqSurfacePatchBilinear* pNew = new CqSurfacePatchBilinear();
-		pNew->AddRef();
+		ADDREF( pNew );
 		pNew->SetSurfaceParameters( Surface() );
 
 		TqInt iUPA = PolyIndex( indexA );
@@ -404,8 +404,8 @@ CqSurfacePointsPolygon& CqSurfacePointsPolygon::operator=( const CqSurfacePoints
 	CqPolygonPoints*	pOldPoints = m_pPoints;
 	m_pPoints = From.m_pPoints;
 	m_Index = From.m_Index;
-	m_pPoints->AddRef();
-	if ( pOldPoints ) pOldPoints->Release();
+	ADDREF( m_pPoints );
+	if ( pOldPoints ) RELEASEREF( pOldPoints );
 
 	return ( *this );
 }
@@ -447,7 +447,7 @@ TqInt CqSurfacePointsPolygons::Split( std::vector<CqBasicSurface*>& aSplits )
 	{
 		// Create a surface polygon
 		CqSurfacePointsPolygon*	pSurface = new CqSurfacePointsPolygon( m_pPoints, poly );
-		pSurface->AddRef();
+		ADDREF( pSurface );
 		RtBoolean fValid = RI_TRUE;
 
 		pSurface->aIndices().resize( m_PointCounts[ poly ] );

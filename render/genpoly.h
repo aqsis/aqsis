@@ -56,7 +56,7 @@ class CqPolygonGeneral2D
 		~CqPolygonGeneral2D()
 		{
 			if ( m_pVertices )
-				m_pVertices->Release();
+				RELEASEREF( m_pVertices );
 		}
 
 		std::vector<TqInt>&	aiVertices()
@@ -82,7 +82,7 @@ class CqPolygonGeneral2D
 		void	SetpVertices( CqSurface* pVertices )
 		{
 			m_pVertices = pVertices;
-			pVertices->AddRef();
+			ADDREF( pVertices );
 		}
 
 		void	SwapDirection();

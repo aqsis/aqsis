@@ -69,11 +69,11 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
 	QGetRenderContext() ->Stats().IncGridsDeallocated();
 
 	// Release the reference to the attributes.
-	if ( m_pSurface != 0 ) m_pSurface->Release();
+	if ( m_pSurface != 0 ) RELEASEREF( m_pSurface );
 	m_pSurface = 0;
 
 	// Release the reference to the CSG node.
-	if ( m_pCSGNode != 0 ) m_pCSGNode->Release();
+	if ( m_pCSGNode != 0 ) RELEASEREF( m_pCSGNode );
 	m_pCSGNode = 0;
 
 	// Delete.
@@ -123,10 +123,10 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
 	{
 		lUses = pSurface->Uses();
 		m_pSurface = pSurface;
-		m_pSurface->AddRef();
+		ADDREF( m_pSurface );
 
 		m_pCSGNode = pSurface->pCSGNode();
-		if ( m_pCSGNode ) m_pCSGNode->AddRef();
+		if ( m_pCSGNode ) ADDREF( m_pCSGNode );
 	}
 	lUses |= QGetRenderContext()->pDDmanager()->Uses();
 
@@ -661,7 +661,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 	// Determine whether we need to bother with trimming or not.
 	TqBool bCanBeTrimmed = pSurface() ->bCanBeTrimmed() && NULL != u() && NULL != v();
 
-	AddRef();
+	ADDREF( this );
 
 	TqInt iv;
 	for ( iv = 0; iv < cv; iv++ )
@@ -737,7 +737,7 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 		}
 	}
 
-	Release();
+	RELEASEREF( this );
 }
 
 
@@ -783,7 +783,7 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 
 	CqMatrix matCameraToRaster = QGetRenderContext() ->matSpaceToSpace( "camera", "raster" );
 
-	pGridA->AddRef();
+	ADDREF( pGridA );
 
 	// Get an array of P's for all time positions.
 	std::vector<std::vector<CqVector3D> > aaPtimes;
@@ -886,14 +886,14 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 		}
 	}
 
-	pGridA->Release();
+	RELEASEREF( pGridA );
 
 	// Delete the donor motion grids, as their work is done.
 	for ( iTime = 1; iTime < cTimes(); iTime++ )
 	{
 		CqMicroPolyGrid* pg = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
 		if ( NULL != pg )
-			pg->Release();
+			RELEASEREF( pg );
 	}
 	//		delete( GetMotionObject( Time( iTime ) ) );
 }
@@ -915,7 +915,7 @@ CqMicroPolygon::CqMicroPolygon() : m_pGrid( 0 ), m_Flags( 0 )
 
 CqMicroPolygon::~CqMicroPolygon()
 {
-	if ( m_pGrid ) m_pGrid->Release();
+	if ( m_pGrid ) RELEASEREF( m_pGrid );
 	QGetRenderContext() ->Stats().IncMPGsDeallocated();
 	if ( IsHit() )
 		QGetRenderContext() ->Stats().IncMissedMPGs();

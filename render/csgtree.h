@@ -78,10 +78,10 @@ class CqCSGTreeNode : public CqRefCount, public CqListEntry<CqCSGTreeNode>
 		{
 			pChild->UnLink();
 			lChildren().LinkLast( pChild );
-			pChild->AddRef();
-			if ( pChild->m_pParent ) pChild->m_pParent->Release();
+			ADDREF(pChild);
+			if ( pChild->m_pParent ) RELEASEREF( pChild->m_pParent );
 			pChild->m_pParent = this;
-			AddRef();
+			ADDREF( this );
 		}
 		virtual	TqInt	isChild( const CqCSGTreeNode* pNode );
 		/** Get the pointer to the parent CSG node for this node.

@@ -187,7 +187,6 @@ void	CqImageBuffer::DeleteImage()
 //----------------------------------------------------------------------
 /** This is called by the renderer to inform an image buffer it is no longer needed.
  */
-
 void	CqImageBuffer::Release()
 {
 	delete( this );
@@ -316,7 +315,7 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 	if ( CullSurface( Bound, pSurface ) )
 	{
 		pSurface->UnLink();
-		pSurface->Release();
+		RELEASEREF( pSurface );
 		QGetRenderContext() ->Stats().IncCulledGPrims();
 		return ;
 	}
@@ -400,7 +399,7 @@ TqBool CqImageBuffer::OcclusionCullSurface( TqInt iBucket, CqBasicSurface* pSurf
 
 		// Bound covers no more buckets
 		pSurface->UnLink();
-		pSurface->Release();
+		RELEASEREF( pSurface );
 		QGetRenderContext() ->Stats().IncCulledGPrims();
 		return TqTrue;
 	}
@@ -418,12 +417,12 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 {
 	// Quick check for outside crop window.
 	CqBound	B( pmpgNew->GetTotalBound() );
-	pmpgNew->AddRef();
+	ADDREF( pmpgNew );
 
 	if ( B.vecMax().x() < m_CropWindowXMin - m_FilterXWidth / 2 || B.vecMax().y() < m_CropWindowYMin - m_FilterYWidth / 2 ||
 	        B.vecMin().x() > m_CropWindowXMax + m_FilterXWidth / 2 || B.vecMin().y() > m_CropWindowYMax + m_FilterYWidth / 2 )
 	{
-		pmpgNew->Release();
+		RELEASEREF( pmpgNew );
 		return ;
 	}
 
@@ -443,7 +442,7 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 	if ( ( iXBb < 0 ) || ( iYBb < 0 ) ||
 	        ( iXBa >= m_cXBuckets ) || ( iYBa >= m_cYBuckets ) )
 	{
-		pmpgNew->Release();
+		RELEASEREF( pmpgNew );
 		return ;
 	}
 
@@ -462,16 +461,25 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 			    ( B.vecMin().y() > BucketMax.y() ) ||
 			    ( B.vecMax().x() < BucketMin.x() ) ||
 			    ( B.vecMax().y() < BucketMin.y() ) ) )
+		{
 			iBkt = iCurrentBucket();
+		}
+		// I'm not sure if this should be here.  I've added it because I kept
+		// hitting the assert() below.  Jonathan Merritt, 20030612.
+		else
+		{
+			RELEASEREF( pmpgNew );
+			return;
+		}
 	}
 
 	assert( iBkt >= iCurrentBucket() ); 
 	if ( ( iBkt >= iCurrentBucket() ) && ( iBkt < ( m_cXBuckets * m_cYBuckets ) ) )
 	{
 		m_aBuckets[ iBkt ].AddMPG( pmpgNew );
-		pmpgNew->AddRef();
+		ADDREF( pmpgNew );
 	}
-	pmpgNew->Release();
+	RELEASEREF( pmpgNew );
 }
 
 
@@ -517,7 +525,7 @@ TqBool CqImageBuffer::PushMPGForward( CqMicroPolygon* pmpg )
 	}
 	else
 	{
-		pmpg->AddRef();
+		ADDREF( pmpg );
 		m_aBuckets[ NextBucketForward ].AddMPG( pmpg );
 		return ( TqTrue );
 	}
@@ -563,7 +571,7 @@ TqBool CqImageBuffer::PushMPGDown( CqMicroPolygon* pmpg, TqInt CurrBucketIndex )
 	}
 	else
 	{
-		pmpg->AddRef();
+		ADDREF( pmpg );
 		m_aBuckets[ NextBucketDown ].AddMPG( pmpg );
 		// See if it needs to be pushed further down (extreme Motion Blur)
 		if ( PushMPGDown( pmpg, NextBucketDown ) )
@@ -608,7 +616,7 @@ void CqImageBuffer::RenderMPGs( TqInt iBucket, long xmin, long xmax, long ymin, 
 				RenderMicroPoly( *impg, iBucket, xmin, xmax, ymin, ymax );
 				if ( PushMPGDown( ( *impg ), iBucket ) ) QGetRenderContext() ->Stats().IncMPGsPushedDown();
 				if ( PushMPGForward( ( *impg ) ) ) QGetRenderContext() ->Stats().IncMPGsPushedForward();
-				( *impg ) ->Release();
+				RELEASEREF( ( *impg ) );
 			}
 			m_aBuckets[ iBucket ].aMPGs().clear();
 		}
@@ -624,7 +632,7 @@ void CqImageBuffer::RenderMPGs( TqInt iBucket, long xmin, long xmax, long ymin, 
 		RenderMicroPoly( *impg, iBucket, xmin, xmax, ymin, ymax );
 		if ( PushMPGDown( ( *impg ), iBucket ) ) QGetRenderContext() ->Stats().IncMPGsPushedDown();
 		if ( PushMPGForward( ( *impg ) ) ) QGetRenderContext() ->Stats().IncMPGsPushedForward();
-		( *impg ) ->Release();
+		RELEASEREF( ( *impg ) );
 	}
 	m_aBuckets[ iBucket ].aMPGs().clear();
 }
@@ -963,7 +971,7 @@ inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2
 	// Store the sample information.
 	ImageVal.m_Data = val;
 	ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
-	if ( NULL != ImageVal.m_pCSGNode ) ImageVal.m_pCSGNode->AddRef();
+	if ( NULL != ImageVal.m_pCSGNode ) ADDREF( ImageVal.m_pCSGNode );
 
 	ImageVal.m_flags = 0;
 	if ( Occludes )

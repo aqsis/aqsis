@@ -45,7 +45,7 @@ CqModeBlock::CqModeBlock( CqModeBlock* pconParent ) :
 		m_ptransCurrent( 0 ),
 		m_pconParent( pconParent )
 {
-	if( m_pconParent ) m_pconParent->AddRef();
+	if( m_pconParent ) ADDREF( m_pconParent );
 }
 
 //---------------------------------------------------------------------
@@ -54,7 +54,7 @@ CqModeBlock::CqModeBlock( CqModeBlock* pconParent ) :
 
 CqModeBlock::~CqModeBlock()
 {
-	if( m_pconParent ) m_pconParent->Release();
+	if( m_pconParent ) RELEASEREF( m_pconParent );
 }
 
 
@@ -70,9 +70,9 @@ CqMainModeBlock::CqMainModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconP
 
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent = new CqAttributes();
-	m_pattrCurrent->AddRef();
+	ADDREF( m_pattrCurrent );
 	m_ptransCurrent = new CqTransform();
-	m_ptransCurrent->AddRef();
+	ADDREF( m_ptransCurrent );
 }
 
 
@@ -82,8 +82,8 @@ CqMainModeBlock::CqMainModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pconP
 
 CqMainModeBlock::~CqMainModeBlock()
 {
-	m_pattrCurrent->Release();
-	m_ptransCurrent->Release();
+	RELEASEREF( m_pattrCurrent );
+	RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -95,9 +95,9 @@ CqFrameModeBlock::CqFrameModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pco
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
-	m_pattrCurrent->AddRef();
+	ADDREF( m_pattrCurrent );
 	m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-	m_ptransCurrent->AddRef();
+	ADDREF( m_ptransCurrent );
 }
 
 
@@ -107,8 +107,8 @@ CqFrameModeBlock::CqFrameModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pco
 
 CqFrameModeBlock::~CqFrameModeBlock()
 {
-	m_pattrCurrent->Release();
-	m_ptransCurrent->Release();
+	RELEASEREF( m_pattrCurrent );
+	RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -120,9 +120,9 @@ CqWorldModeBlock::CqWorldModeBlock( CqModeBlock* pconParent ) : CqModeBlock( pco
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
-	m_pattrCurrent->AddRef();
+	ADDREF( m_pattrCurrent );
 	m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-	m_ptransCurrent->AddRef();
+	ADDREF( m_ptransCurrent );
 }
 
 
@@ -135,10 +135,10 @@ CqWorldModeBlock::~CqWorldModeBlock()
 	// Delete any context lights
 	std::vector<CqLightsource*>::iterator i;
 	for ( i = m_apWorldLights.begin(); i != m_apWorldLights.end(); i++ )
-		( *i )->Release();
+		RELEASEREF( ( *i ) );
 
-	m_pattrCurrent->Release();
-	m_ptransCurrent->Release();
+	RELEASEREF( m_pattrCurrent );
+	RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -150,7 +150,7 @@ void CqWorldModeBlock::AddContextLightSource( CqLightsource* pLS )
 {
 	// Add the light to the context stack and reference it.
 	m_apWorldLights.push_back( pLS );
-	pLS->AddRef();
+	ADDREF( pLS );
 }
 
 //---------------------------------------------------------------------
@@ -161,9 +161,9 @@ CqAttributeModeBlock::CqAttributeModeBlock( CqModeBlock* pconParent ) : CqModeBl
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
-	m_pattrCurrent->AddRef();
+	ADDREF( m_pattrCurrent );
 	m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-	m_ptransCurrent->AddRef();
+	ADDREF( m_ptransCurrent );
 }
 
 
@@ -173,8 +173,8 @@ CqAttributeModeBlock::CqAttributeModeBlock( CqModeBlock* pconParent ) : CqModeBl
 
 CqAttributeModeBlock::~CqAttributeModeBlock()
 {
-	m_pattrCurrent->Release();
-	m_ptransCurrent->Release();
+	RELEASEREF( m_pattrCurrent );
+	RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -191,7 +191,7 @@ CqTransformModeBlock::CqTransformModeBlock( CqModeBlock* pconParent ) : CqModeBl
 		m_pattrCurrent = new CqAttributes();
 
 	m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-	m_ptransCurrent->AddRef();
+	ADDREF( m_ptransCurrent );
 }
 
 
@@ -211,13 +211,13 @@ CqSolidModeBlock::CqSolidModeBlock( CqString& type, CqModeBlock* pconParent ) : 
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent = new CqAttributes( *pconParent->m_pattrCurrent );
-	m_pattrCurrent->AddRef();
+	ADDREF( m_pattrCurrent );
 	m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-	m_ptransCurrent->AddRef();
+	ADDREF( m_ptransCurrent );
 
 	// Create a new CSG tree node of the appropriate type.
 	m_pCSGNode = CqCSGTreeNode::CreateNode( type );
-	m_pCSGNode->AddRef();
+	ADDREF( m_pCSGNode );
 
 	if ( pconParent && pconParent->isSolid() )
 	{
@@ -242,8 +242,8 @@ CqSolidModeBlock::CqSolidModeBlock( CqString& type, CqModeBlock* pconParent ) : 
 
 CqSolidModeBlock::~CqSolidModeBlock()
 {
-	m_pattrCurrent->Release();
-	m_ptransCurrent->Release();
+	RELEASEREF( m_pattrCurrent );
+	RELEASEREF( m_ptransCurrent );
 	//	if(m_pCSGNode)	m_pCSGNode->Release();
 }
 
@@ -256,9 +256,9 @@ CqObjectModeBlock::CqObjectModeBlock( CqModeBlock* pconParent ) : CqModeBlock( p
 {
 	// Create new Attributes as they must be pushed/popped by the state change.
 	m_pattrCurrent = new CqAttributes();
-	m_pattrCurrent->AddRef();
+	ADDREF( m_pattrCurrent );
 	m_ptransCurrent = new CqTransform( *pconParent->m_ptransCurrent );
-	m_ptransCurrent->AddRef();
+	ADDREF( m_ptransCurrent );
 }
 
 
@@ -268,8 +268,8 @@ CqObjectModeBlock::CqObjectModeBlock( CqModeBlock* pconParent ) : CqModeBlock( p
 
 CqObjectModeBlock::~CqObjectModeBlock()
 {
-	m_pattrCurrent->Release();
-	m_ptransCurrent->Release();
+	RELEASEREF( m_pattrCurrent );
+	RELEASEREF( m_ptransCurrent );
 }
 
 
@@ -321,7 +321,7 @@ void CqMotionModeBlock::EndMotionModeBlock()
 	{
 		QGetRenderContext() ->pImage() ->PostSurface( m_pDeformingSurface );
 		QGetRenderContext() ->Stats().IncGPrims();
-		m_pDeformingSurface->Release();
+		RELEASEREF( m_pDeformingSurface );
 	}
 }
 
@@ -330,7 +330,7 @@ void CqMotionModeBlock::EndMotionModeBlock()
 void CqMotionModeBlock::SetDeformingSurface( CqDeformingSurface* pDeformingSurface)
 {
 	m_pDeformingSurface = pDeformingSurface;
-	pDeformingSurface->AddRef();
+	ADDREF( pDeformingSurface );
 }
 
 

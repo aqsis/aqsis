@@ -42,12 +42,12 @@ CqLightsource::CqLightsource( IqShader* pShader, TqBool fActive ) :
 {
 	// Set a reference with the current attributes.
 	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
-	m_pAttributes->AddRef();
+	ADDREF( m_pAttributes );
 
 	// Link into the lightsource stack.
 	Lightsource_stack.LinkFirst( this );
 	// Add a reference from the stack.
-	AddRef();
+	ADDREF( this );
 	m_pShaderExecEnv = new CqShaderExecEnv;
 }
 
@@ -60,7 +60,7 @@ CqLightsource::~CqLightsource()
 {
 	// Release our reference on the current attributes.
 	if ( m_pAttributes )
-		m_pAttributes->Release();
+		RELEASEREF( m_pAttributes );
 	m_pAttributes = 0;
 
 	// Delete the shader execution environment..

@@ -61,8 +61,8 @@ class CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount, public IqT
 			if ( RefCount() > 1 )
 			{
 				CqTransform * pWrite = Clone();
-				pWrite->AddRef();
-				Release();
+				ADDREF( pWrite );
+				RELEASEREF( this );
 				return ( pWrite );
 			}
 			else
@@ -92,6 +92,7 @@ class CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount, public IqT
 			return( CqMotionSpec<CqMatrix>::cTimes() );
 		}
 
+#ifndef _DEBUG
 		virtual	void	Release()
 		{
 			CqRefCount::Release();
@@ -100,6 +101,16 @@ class CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount, public IqT
 		{
 			CqRefCount::AddRef();
 		}
+#else
+		virtual void AddRef(const TqChar* file, TqInt line) 
+		{
+			CqRefCount::AddRef(file, line);
+		}
+		virtual void Release(const TqChar* file, TqInt line)
+		{
+			CqRefCount::Release(file, line);
+		}
+#endif
 
 		virtual	void	ClearMotionObject( CqMatrix& A ) const;
 		virtual	CqMatrix	ConcatMotionObjects( const CqMatrix& A, const CqMatrix& B ) const;

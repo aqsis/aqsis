@@ -55,7 +55,7 @@ CqPolygonGeneral2D& CqPolygonGeneral2D::operator=( const CqPolygonGeneral2D& Fro
 
 	m_pVertices = From.m_pVertices;
 	if ( m_pVertices )
-		m_pVertices->AddRef();
+		ADDREF( m_pVertices );
 
 	return ( *this );
 }

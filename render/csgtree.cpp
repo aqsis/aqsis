@@ -48,7 +48,7 @@ CqCSGTreeNode::~CqCSGTreeNode()
 	while ( pChild )
 	{
 		CqCSGTreeNode * pNext = pChild->pNext();
-		pChild->Release();
+		RELEASEREF( pChild );
 		pChild = pNext;
 	}
 }
@@ -228,11 +228,11 @@ void CqCSGTreeNode::ProcessSampleList( std::vector<SqImageSample>& samples )
 			if ( NULL != this->pParent() )
 			{
 				i->m_pCSGNode = this;
-				AddRef();
+				ADDREF( this );
 			}
 			else
 				i->m_pCSGNode = NULL;
-			poldnode->Release();
+			RELEASEREF( poldnode );
 			i++;
 		}
 	}
@@ -256,7 +256,7 @@ void CqCSGNodePrimitive::ProcessSampleList( std::vector<SqImageSample>& samples 
 		if ( i->m_pCSGNode == this )
 		{
 			i->m_pCSGNode = NULL;
-			Release();
+			RELEASEREF( this );
 		}
 	}
 }

@@ -213,7 +213,7 @@ CqOptions::~CqOptions()
 	TqInt i = m_aOptions.size();
 	while ( i-- > 0 )
 	{
-		m_aOptions[ i ] ->Release();
+		RELEASEREF( m_aOptions[ i ] );
 		m_aOptions[ i ] = 0;
 	}
 
@@ -239,7 +239,7 @@ CqOptions& CqOptions::operator=( const CqOptions& From )
 	TqInt i = m_aOptions.size();
 	while ( i-- > 0 )
 	{
-		m_aOptions[ i ] ->Release();
+		RELEASEREF( m_aOptions[ i ] );
 		m_aOptions[ i ] = 0;
 	}
 
@@ -251,7 +251,7 @@ CqOptions& CqOptions::operator=( const CqOptions& From )
 	while ( i-- > 0 )
 	{
 		m_aOptions[ i ] = From.m_aOptions[ i ];
-		m_aOptions[ i ] ->AddRef();
+		ADDREF( m_aOptions[ i ] );
 	}
 
 	return ( *this );
@@ -315,7 +315,7 @@ void CqOptions::InitialiseDefaultOptions()
 	ADD_SYSTEM_PARAM( FOV, TqFloat, TqFloat, type_float, 90.0f );
 	ADD_SYSTEM_PARAM( SqrtGridSize, TqFloat, TqFloat, type_float, 16.0f );					// Grid size square root.
 
-	pdefopts->AddRef();
+	ADDREF( pdefopts );
 	AddOption( pdefopts );
 
 	pdefopts = new CqNamedParameterList( "Quantize" );
@@ -323,7 +323,7 @@ void CqOptions::InitialiseDefaultOptions()
 	ADD_SYSTEM_PARAM4( Color, TqFloat, TqFloat, type_float, 255.0f, 0.0f, 255.0f, 0.5f );
 	ADD_SYSTEM_PARAM4( Depth, TqFloat, TqFloat, type_float,   0.0f, 0.0f,   0.0f, 0.0f );
 
-	pdefopts->AddRef();
+	ADDREF( pdefopts );
 	AddOption( pdefopts );
 }
 

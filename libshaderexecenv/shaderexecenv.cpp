@@ -149,8 +149,8 @@ CqShaderExecEnv::~CqShaderExecEnv()
 	for ( i = 0; i < EnvVars_Last; i++ )
 		delete( m_apVariables[ i ] );
 
-	if ( m_pAttributes ) m_pAttributes->Release();
-	if ( m_pTransform ) m_pTransform->Release();
+	if ( m_pAttributes ) RELEASEREF( m_pAttributes );
+	if ( m_pTransform ) RELEASEREF( m_pTransform );
 }
 
 //---------------------------------------------------------------------
@@ -169,8 +169,8 @@ void CqShaderExecEnv::Initialise( const TqInt uGridRes, const TqInt vGridRes, Iq
 	{
 		m_pAttributes = const_cast<IqAttributes*>( pSurface->pAttributes() );
 		m_pTransform = const_cast<IqTransform*>( pSurface->pTransform() );
-		m_pAttributes->AddRef();
-		m_pTransform->AddRef();
+		ADDREF( m_pAttributes );
+		ADDREF( m_pTransform );
 	}
 	else
 	{

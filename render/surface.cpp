@@ -43,10 +43,10 @@ CqBasicSurface::CqBasicSurface() : CqListEntry<CqBasicSurface>(), m_fDiceable( T
 {
 	// Set a refernce with the current attributes.
 	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
-	m_pAttributes->AddRef();
+	ADDREF( m_pAttributes );
 
 	m_pTransform = const_cast<CqTransform*>( QGetRenderContext() ->ptransCurrent() );
-	m_pTransform->AddRef();
+	ADDREF( m_pTransform );
 
 	m_CachedBound = TqFalse;
 
@@ -57,7 +57,7 @@ CqBasicSurface::CqBasicSurface() : CqListEntry<CqBasicSurface>(), m_fDiceable( T
 		if ( pSolid->pCSGNode() ->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive )
 		{
 			m_pCSGNode = pSolid->pCSGNode();
-			m_pCSGNode->AddRef();
+			ADDREF( m_pCSGNode );
 		}
 		else
 			CqAttributeError error( RIE_BADSOLID, Severity_Normal, "Primitive defined when not in 'Primitive' solid block", m_pAttributes, TqTrue );
@@ -75,10 +75,10 @@ CqBasicSurface::CqBasicSurface( const CqBasicSurface& From ) : m_fDiceable( TqTr
 
 	// Set a reference with the donors attributes.
 	m_pAttributes = From.m_pAttributes;
-	m_pAttributes->AddRef();
+	ADDREF( m_pAttributes );
 
 	m_pTransform = From.m_pTransform;
-	m_pTransform->AddRef();
+	ADDREF( m_pTransform );
 
 	m_CachedBound = From.m_CachedBound;
 	m_Bound = From.m_Bound;
@@ -108,19 +108,19 @@ CqBasicSurface& CqBasicSurface::operator=( const CqBasicSurface& From )
 void CqBasicSurface::SetSurfaceParameters( const CqBasicSurface& From )
 {
 	// If we already have attributes, unreference them now as we don't need them anymore.
-	if ( m_pAttributes ) m_pAttributes->Release();
-	if ( m_pTransform ) m_pTransform->Release();
-	if ( m_pCSGNode ) m_pCSGNode->Release();
+	if ( m_pAttributes ) RELEASEREF( m_pAttributes );
+	if ( m_pTransform ) RELEASEREF( m_pTransform );
+	if ( m_pCSGNode ) RELEASEREF( m_pCSGNode );
 
 	// Now store and reference our new attributes.
 	m_pAttributes = From.m_pAttributes;
-	m_pAttributes->AddRef();
+	ADDREF( m_pAttributes );
 
 	m_pTransform = From.m_pTransform;
-	m_pTransform->AddRef();
+	ADDREF( m_pTransform );
 
 	m_pCSGNode = From.m_pCSGNode;
-	if ( m_pCSGNode ) m_pCSGNode->AddRef();
+	if ( m_pCSGNode ) ADDREF( m_pCSGNode );
 }
 
 
@@ -532,13 +532,13 @@ TqInt CqSurface::Split( std::vector<CqBasicSurface*>& aSplits )
 	aSplits[ 0 ] ->SetSplitDir( ( SplitDir() == SplitDir_U ) ? SplitDir_V : SplitDir_U );
 	aSplits[ 0 ] ->SetEyeSplitCount( EyeSplitCount() );
 	aSplits[ 0 ] ->m_fDiceable = TqTrue;
-	aSplits[ 0 ] ->AddRef();
+	ADDREF( aSplits[ 0 ] );
 
 	aSplits[ 1 ] ->SetSurfaceParameters( *this );
 	aSplits[ 1 ] ->SetSplitDir( ( SplitDir() == SplitDir_U ) ? SplitDir_V : SplitDir_U );
 	aSplits[ 1 ] ->SetEyeSplitCount( EyeSplitCount() );
 	aSplits[ 1 ] ->m_fDiceable = TqTrue;
-	aSplits[ 1 ] ->AddRef();
+	ADDREF( aSplits[ 1 ] );
 
 	// Iterate through any use parameters subdividing and storing the second value in the target surface.
 	std::vector<CqParameter*>::iterator iUP;
@@ -562,8 +562,8 @@ TqInt CqSurface::Split( std::vector<CqBasicSurface*>& aSplits )
 		cSplits = aSplits[ 0 ] ->Split( aSplits0 );
 		cSplits += aSplits[ 1 ] ->Split( aSplits1 );
 		// Release the old ones.
-		aSplits[ 0 ] ->Release();
-		aSplits[ 1 ] ->Release();
+		RELEASEREF( aSplits[ 0 ] );
+		RELEASEREF( aSplits[ 1 ] );
 
 		aSplits.clear();
 		aSplits.swap( aSplits0 );

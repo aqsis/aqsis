@@ -432,7 +432,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 	TqInt lUses;
 	CqSurfacePatchMeshBicubic* pSurface = new CqSurfacePatchMeshBicubic( 13, 10, RI_TRUE, RI_TRUE );
 	lUses = pSurface->Uses();
-	pSurface->AddRef();
+	ADDREF( pSurface );
 
 
 	// Fill in default values for all primitive variables not explicitly specified.
@@ -459,7 +459,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
 	pSurface = new CqSurfacePatchMeshBicubic( 13, 7, RI_TRUE, RI_TRUE );
 	lUses = pSurface->Uses();
-	pSurface->AddRef();
+	ADDREF( pSurface );
 
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
@@ -483,7 +483,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
 	pSurface = new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE );
 	lUses = pSurface->Uses();
-	pSurface->AddRef();
+	ADDREF( pSurface );
 
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
@@ -507,7 +507,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
 	pSurface = new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE );
 	lUses = pSurface->Uses();
-	pSurface->AddRef();
+	ADDREF( pSurface );
 
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
@@ -531,7 +531,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
 	pSurface = new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE );
 	lUses = pSurface->Uses();
-	pSurface->AddRef();
+	ADDREF( pSurface );
 
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
@@ -555,7 +555,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 
 	pSurface = new CqSurfacePatchMeshBicubic( 4, 7, RI_TRUE, RI_TRUE );
 	lUses = pSurface->Uses();
-	pSurface->AddRef();
+	ADDREF( pSurface );
 
 	// Fill in default values for all primitive variables not explicitly specified.
 	// Fill in primitive variables specified.
@@ -582,7 +582,7 @@ CqTeapot::CqTeapot( TqBool addCrowBase ) : m_CrowBase( addCrowBase )
 	{
 		pSurface = new CqSurfacePatchMeshBicubic( 13, 4, RI_TRUE, RI_TRUE );
 		lUses = pSurface->Uses();
-		pSurface->AddRef();
+		ADDREF( pSurface );
 
 		// Fill in default values for all primitive variables not explicitly specified.
 		// Fill in primitive variables specified.

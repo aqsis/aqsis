@@ -398,12 +398,12 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 				m_pPoints( pPoints ),
 				m_Index( index )
 		{
-			m_pPoints->AddRef();
+			ADDREF( m_pPoints );
 		}
 		CqSurfacePointsPolygon( const CqSurfacePointsPolygon& From );
 		virtual	~CqSurfacePointsPolygon()
 		{
-			m_pPoints->Release();
+			RELEASEREF( m_pPoints );
 		}
 
 		CqSurfacePointsPolygon& operator=( const CqSurfacePointsPolygon& From );

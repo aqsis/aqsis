@@ -48,15 +48,15 @@ DEFINE_STATIC_MEMORYPOOL( CqMovingMicroPolygonKeyPoints, 512 );
 
 void CqPointsKDTreeData::SetpPoints( CqPoints* pPoints )
 {
-	pPoints->AddRef();
+	ADDREF( pPoints );
 	if( NULL != m_pPointsSurface )
-		m_pPointsSurface->Release();
+		RELEASEREF( m_pPointsSurface );
 	m_pPointsSurface = pPoints;
 }
 
 void CqPointsKDTreeData::FreePoints()
 {
-	m_pPointsSurface->Release();
+	RELEASEREF( m_pPointsSurface );
 }
 
 bool CqPointsKDTreeData::CqPointsKDTreeDataComparator::operator()(TqInt a, TqInt b)	
@@ -83,7 +83,7 @@ CqPoints::CqPoints( TqInt nvertices, CqPolygonPoints* pPoints ) : CqMotionSpec<C
 	if( pPoints )
 	{
 		// Store the reference to our points.
-		pPoints->AddRef();
+		ADDREF( pPoints );
 		AddTimeSlot( 0, pPoints );
 	}
 
@@ -115,7 +115,7 @@ CqPoints&	CqPoints::operator=( const CqPoints& From )
 	{
 		CqPolygonPoints* pTimePoints = From.GetMotionObject( From.Time( i ) );
 		AddTimeSlot( From.Time( i ), pTimePoints );
-		pTimePoints->AddRef();
+		ADDREF( pTimePoints );
 	}
 
 	m_widthParamIndex = From.m_widthParamIndex;
@@ -350,8 +350,8 @@ TqInt CqPoints::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	KDTree().Subdivide( pA->KDTree(), pB->KDTree() );
 
-	pA->AddRef();
-	pB->AddRef();
+	ADDREF( pA );
+	ADDREF( pB );
 
 	aSplits.push_back( pA );
 	aSplits.push_back( pB );
@@ -379,8 +379,8 @@ TqInt CqPoints::CopySplit( std::vector<CqBasicSurface*>& aSplits, CqPoints* pFro
 	pA->KDTree() = pFrom1->KDTree();
 	pB->KDTree() = pFrom2->KDTree();
 
-	pA->AddRef();
-	pB->AddRef();
+	ADDREF( pA );
+	ADDREF( pB );
 
 	aSplits.push_back( pA );
 	aSplits.push_back( pB );
@@ -444,7 +444,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 
 	TqInt cu = uGridRes();	// Only need cu, as we know cv is 1.
 
-	AddRef();
+	ADDREF( this );
 
 	CqMatrix matCameraToObject0 = QGetRenderContext() ->matSpaceToSpace( "camera", "object", CqMatrix(), pSurface()->pTransform()->matObjectToWorld() );
 	CqMatrix matObjectToCamera = QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pSurface()->pTransform()->matObjectToWorld() );
@@ -618,7 +618,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 		}
 	}
 
-	Release();
+	RELEASEREF( this );
 }
 
 
@@ -640,7 +640,7 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, l
 
 	assert(NULL != pGridA->P() );
 
-	pGridA->AddRef();
+	ADDREF( pGridA );
 
 	TqInt cu = pGridA->uGridRes();	// Only need cu, as we know cv is 1.
 
@@ -757,14 +757,14 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, l
 		pImage->AddMPG( pNew );
 	}
 
-	pGridA->Release();
+	RELEASEREF( pGridA );
 
 	// Delete the donor motion grids, as their work is done.
 	for ( iTime = 1; iTime < cTimes(); iTime++ )
 	{
 		CqMicroPolyGrid* pg = static_cast<CqMicroPolyGrid*>( GetMotionObject( Time( iTime ) ) );
 		if ( NULL != pg )
-			pg->Release();
+			RELEASEREF( pg );
 	}
 	//		delete( GetMotionObject( Time( iTime ) ) );
 }

@@ -124,7 +124,7 @@ CqRenderer::~CqRenderer()
 	while ( m_pconCurrent != 0 )
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
-		m_pconCurrent->Release();
+		RELEASEREF( m_pconCurrent );
 		m_pconCurrent = pconParent;
 	}
 	if ( m_pImageBuffer )
@@ -143,6 +143,12 @@ CqRenderer::~CqRenderer()
 	// Delete log & message table
 	delete m_theLog;
 	delete m_theTable;
+
+#ifdef _DEBUG
+	// Print information about any un-released CqRefCount objects
+	report_refcounts();
+#endif
+
 }
 
 
@@ -156,7 +162,7 @@ CqModeBlock*	CqRenderer::BeginMainModeBlock()
 	if ( m_pconCurrent == 0 )
 	{
 		m_pconCurrent = new CqMainModeBlock();
-		m_pconCurrent->AddRef();
+		ADDREF( m_pconCurrent );
 		return ( m_pconCurrent );
 	}
 	else
@@ -177,7 +183,7 @@ CqModeBlock*	CqRenderer::BeginFrameModeBlock()
 		CqModeBlock * pconNew = m_pconCurrent->BeginFrameModeBlock();
 		if ( pconNew != 0 )
 		{
-			pconNew->AddRef();
+			ADDREF( pconNew );
 			m_pconCurrent = pconNew;
 			return ( pconNew );
 		}
@@ -201,7 +207,7 @@ CqModeBlock*	CqRenderer::BeginWorldModeBlock()
 		CqModeBlock * pconNew = m_pconCurrent->BeginWorldModeBlock();
 		if ( pconNew != 0 )
 		{
-			pconNew->AddRef();
+			ADDREF( pconNew );
 			m_pconCurrent = pconNew;
 			return ( pconNew );
 		}
@@ -224,7 +230,7 @@ CqModeBlock*	CqRenderer::BeginAttributeModeBlock()
 		CqModeBlock * pconNew = m_pconCurrent->BeginAttributeModeBlock();
 		if ( pconNew != 0 )
 		{
-			pconNew->AddRef();
+			ADDREF( pconNew );
 			m_pconCurrent = pconNew;
 			return ( pconNew );
 		}
@@ -248,7 +254,7 @@ CqModeBlock*	CqRenderer::BeginTransformModeBlock()
 		CqModeBlock * pconNew = m_pconCurrent->BeginTransformModeBlock();
 		if ( pconNew != 0 )
 		{
-			pconNew->AddRef();
+			ADDREF( pconNew );
 			m_pconCurrent = pconNew;
 			return ( pconNew );
 		}
@@ -272,7 +278,7 @@ CqModeBlock*	CqRenderer::BeginSolidModeBlock( CqString& type )
 		CqModeBlock * pconNew = m_pconCurrent->BeginSolidModeBlock( type );
 		if ( pconNew != 0 )
 		{
-			pconNew->AddRef();
+			ADDREF( pconNew );
 			m_pconCurrent = pconNew;
 			return ( pconNew );
 		}
@@ -296,7 +302,7 @@ CqModeBlock*	CqRenderer::BeginObjectModeBlock()
 		CqModeBlock * pconNew = m_pconCurrent->BeginObjectModeBlock();
 		if ( pconNew != 0 )
 		{
-			pconNew->AddRef();
+			ADDREF( pconNew );
 			m_pconCurrent = pconNew;
 			return ( pconNew );
 		}
@@ -320,7 +326,7 @@ CqModeBlock*	CqRenderer::BeginMotionModeBlock( TqInt N, TqFloat times[] )
 		CqModeBlock * pconNew = m_pconCurrent->BeginMotionModeBlock( N, times );
 		if ( pconNew != 0 )
 		{
-			pconNew->AddRef();
+			ADDREF( pconNew );
 			m_pconCurrent = pconNew;
 			return ( pconNew );
 		}
@@ -342,7 +348,7 @@ void	CqRenderer::EndMainModeBlock()
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndMainModeBlock();
-		m_pconCurrent->Release();
+		RELEASEREF( m_pconCurrent );
 		m_pconCurrent = pconParent;
 	}
 }
@@ -358,7 +364,7 @@ void	CqRenderer::EndFrameModeBlock()
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndFrameModeBlock();
-		m_pconCurrent->Release();
+		RELEASEREF( m_pconCurrent );
 		m_pconCurrent = pconParent;
 	}
 }
@@ -374,7 +380,7 @@ void	CqRenderer::EndWorldModeBlock()
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndWorldModeBlock();
-		m_pconCurrent->Release();
+		RELEASEREF( m_pconCurrent );
 		m_pconCurrent = pconParent;
 	}
 }
@@ -390,7 +396,7 @@ void	CqRenderer::EndAttributeModeBlock()
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndAttributeModeBlock();
-		m_pconCurrent->Release();
+		RELEASEREF( m_pconCurrent );
 		m_pconCurrent = pconParent;
 	}
 }
@@ -408,7 +414,7 @@ void	CqRenderer::EndTransformModeBlock()
 		// Copy the current state of the attributes UP the stack as a TransformBegin/End doesn't store them
 		pconParent->m_pattrCurrent = m_pconCurrent->m_pattrCurrent;
 		m_pconCurrent->EndTransformModeBlock();
-		m_pconCurrent->Release();
+		RELEASEREF( m_pconCurrent );
 		m_pconCurrent = pconParent;
 	}
 }
@@ -424,7 +430,7 @@ void	CqRenderer::EndSolidModeBlock()
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndSolidModeBlock();
-		m_pconCurrent->Release();
+		RELEASEREF( m_pconCurrent );
 		m_pconCurrent = pconParent;
 	}
 }
@@ -440,7 +446,7 @@ void	CqRenderer::EndObjectModeBlock()
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndObjectModeBlock();
-		m_pconCurrent->Release();
+		RELEASEREF( m_pconCurrent );
 		m_pconCurrent = pconParent;
 	}
 }
@@ -459,7 +465,7 @@ void	CqRenderer::EndMotionModeBlock()
 		pconParent->m_pattrCurrent = m_pconCurrent->m_pattrCurrent;
 		pconParent->m_ptransCurrent = m_pconCurrent->m_ptransCurrent;
 		m_pconCurrent->EndMotionModeBlock();
-		m_pconCurrent->Release();
+		RELEASEREF( m_pconCurrent );
 		m_pconCurrent = pconParent;
 	}
 }
