@@ -343,7 +343,7 @@ RendermanInterface::RtVoid Stream::RiQuantize( RtToken type, RtInt one, RtInt mi
 }
 RendermanInterface::RtVoid Stream::RiReadArchive( RtToken data, RtArchiveCallback callback )
 {
-	::RiReadArchive( data , callback);
+	m_Stream << "RiReadArchive()" << std::endl;
 }
 RendermanInterface::RtVoid Stream::RiRelativeDetail( RtFloat relativedetail )
 {

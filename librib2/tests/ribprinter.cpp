@@ -44,7 +44,7 @@ int main( int argc, char* argv[] )
 
 		librib2stream::Stream stream( std::cout );
 		librib::StandardDeclarations( stream );
-		if ( !librib::Parse( file, argv[ i ], stream, std::cerr ) )
+		if ( !librib::Parse( file, argv[ i ], stream, std::cerr, NULL ) )
 		{
 			fclose( file );
 			return 3;
