@@ -117,8 +117,6 @@ SqDDMessageFormatResponse frmt(DataFormat_Signed32);
 
 TqInt Query(SOCKET s,SqDDMessageBase* pMsgB)
 {
-std::cout << "Query()" << std::endl;
-
 	switch(pMsgB->m_MessageID)
 	{
 		case MessageID_FormatQuery:
