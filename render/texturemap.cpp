@@ -470,7 +470,7 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 	QGetRenderContext() ->Stats().IncTextureMisses( 0 );
 
 	/* look if the last item return by this function was ok */
-	if ( size == m_TextureMap_Cache.size() )
+	if ( size == static_cast<int>( m_TextureMap_Cache.size() ) )
 		if ( ( previous ) && ( previous->m_strName == strName ) )
 		{
 			QGetRenderContext() ->Stats().IncTextureHits( 0, 0 );
@@ -590,7 +590,7 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 	QGetRenderContext() ->Stats().IncTextureMisses( 1 );
 
 	/* look if the last item return by this function was ok */
-	if ( size == m_TextureMap_Cache.size() )
+	if ( size == static_cast<int>( m_TextureMap_Cache.size() ) )
 		if ( ( previous ) && ( previous->m_strName == strName ) )
 		{
 			QGetRenderContext() ->Stats().IncTextureHits( 0, 1 );
@@ -664,7 +664,7 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 
 	QGetRenderContext() ->Stats().IncTextureMisses( 3 );
 
-	if ( size == m_TextureMap_Cache.size() )
+	if ( size == static_cast<int>( m_TextureMap_Cache.size() ) )
 		if ( ( previous ) && ( previous->m_strName == strName ) )
 		{
 			QGetRenderContext() ->Stats().IncTextureHits( 0, 3 );
@@ -723,7 +723,7 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 	static CqTextureMap *previous = NULL;
 	QGetRenderContext() ->Stats().IncTextureMisses( 2 );
 
-	if ( size == m_TextureMap_Cache.size() )
+	if ( size == static_cast<int>( m_TextureMap_Cache.size() ) )
 		if ( previous && ( previous->m_strName == strName ) )
 		{
 			QGetRenderContext() ->Stats().IncTextureHits( 0, 2 );
@@ -792,7 +792,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 
 
 	/* look if the last item return by this function was ok */
-	if ( ( size == m_apSegments.size() ) && previous && ( name == m_strName ) )
+	if ( ( size == static_cast<TqInt>( m_apSegments.size() ) ) && previous && ( name == m_strName ) )
 		if ( previous->IsValid( s, t, directory ) )
 		{
 			QGetRenderContext() ->Stats().IncTextureHits( 0, 4 );

@@ -243,7 +243,7 @@ class CqShaderStack
 			m_Stack[ m_iTop ].m_Data = pv;
 			m_Stack[ m_iTop ].m_IsTemp = TqTrue;
 			m_iTop ++;
-			m_maxsamples = MAX(m_maxsamples, m_iTop);
+			m_maxsamples = MAX(m_maxsamples, static_cast<TqInt>( m_iTop ));
 		}
 
 		//----------------------------------------------------------------------
@@ -262,7 +262,7 @@ class CqShaderStack
 			m_Stack[ m_iTop ].m_Data = pv;
 			m_Stack[ m_iTop ].m_IsTemp = TqFalse;
 			m_iTop ++;
-			m_maxsamples = MAX(m_maxsamples, m_iTop);
+			m_maxsamples = MAX(m_maxsamples, static_cast<TqInt>( m_iTop ));
 		}
 
 		//----------------------------------------------------------------------

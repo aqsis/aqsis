@@ -314,6 +314,12 @@ void CqPolygonBase::CreatePhantomData( CqParameter* pParam )
 				pTParam->pValue( 3 ) [ 0 ] = ( pTParam->pValue( 1 ) [ 0 ] - pTParam->pValue( 0 ) [ 0 ] ) + pTParam->pValue( 2 ) [ 0 ];
 				break;
 			}
+
+			default:
+			{
+				// left blank to avoid compiler warnings about unhandled types
+				break;
+			}
 	}
 }
 

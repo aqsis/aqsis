@@ -316,12 +316,12 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		}
 		virtual	const	T*	pValue( const TqInt Index ) const
 		{
-			assert( Index < m_aValues.size() );
+			assert( Index < static_cast<TqInt>( m_aValues.size() ) );
 			return ( &m_aValues[ Index ] );
 		}
 		virtual	T*	pValue( const TqInt Index )
 		{
-			assert( Index < m_aValues.size() );
+			assert( Index < static_cast<TqInt>( m_aValues.size() ) );
 			return ( &m_aValues[ Index ] );
 		}
 
@@ -331,7 +331,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		 */
 		const	T&	operator[] ( const TqInt Index ) const
 		{
-			assert( Index < m_aValues.size() );
+			assert( Index < static_cast<TqInt>( m_aValues.size() ) );
 			return( m_aValues[ Index ] );
 		}
 		/** Indexed access to values.
@@ -339,7 +339,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		 */
 		T&	operator[] ( const TqInt Index )
 		{
-			assert( Index < m_aValues.size() );
+			assert( Index < static_cast<TqInt>( m_aValues.size() ) );
 			return( m_aValues[ Index ] );
 		}
 
@@ -808,13 +808,13 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		}
 		virtual	const	T*	pValue( const TqInt Index ) const
 		{
-			assert( Index < m_aValues.size() );
+			assert( Index < static_cast<TqInt>( m_aValues.size() ) );
 			assert( 0 < m_aValues[0].size() );
 			return ( &m_aValues[ Index ][ 0 ] );
 		}
 		virtual	T*	pValue( const TqInt Index )
 		{
-			assert( Index < m_aValues.size() );
+			assert( Index < static_cast<TqInt>( m_aValues.size() ) );
 			assert( 0 < m_aValues[0].size() );
 			return ( &m_aValues[ Index ][ 0 ] );
 		}

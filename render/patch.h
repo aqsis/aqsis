@@ -80,7 +80,7 @@ class CqSurfacePatchBicubic : public CqSurface
 				for ( iu = 0; iu <= uSize; iu++ )
 				{
 					T vec = uFD0.GetValue();
-					TqInt igrid = ( iv * ( uSize + 1 ) ) + iu;
+					TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
 					pData->SetValue( static_cast<SLT>( vec ), igrid );
 				}
 			}
@@ -100,14 +100,14 @@ class CqSurfacePatchBicubic : public CqSurface
 				{
 					TqUint ivo = ( iv * 4 );
 					pTResult1->pValue() [ ivo + 0 ] = pTParam->pValue() [ ivo + 0 ];
-					pTResult1->pValue() [ ivo + 1 ] = ( pTParam->pValue() [ ivo + 0 ] + pTParam->pValue() [ ivo + 1 ] ) / 2.0f;
-					pTResult1->pValue() [ ivo + 2 ] = pTResult1->pValue() [ ivo + 1 ] / 2.0f + ( pTParam->pValue() [ ivo + 1 ] + pTParam->pValue() [ ivo + 2 ] ) / 4.0f;
+					pTResult1->pValue() [ ivo + 1 ] = static_cast<T>( ( pTParam->pValue() [ ivo + 0 ] + pTParam->pValue() [ ivo + 1 ] ) / 2.0f );
+					pTResult1->pValue() [ ivo + 2 ] = static_cast<T>( pTResult1->pValue() [ ivo + 1 ] / 2.0f + ( pTParam->pValue() [ ivo + 1 ] + pTParam->pValue() [ ivo + 2 ] ) / 4.0f );
 
 					pTResult2->pValue() [ ivo + 3 ] = pTParam->pValue() [ ivo + 3 ];
-					pTResult2->pValue() [ ivo + 2 ] = ( pTParam->pValue() [ ivo + 2 ] + pTParam->pValue() [ ivo + 3 ] ) / 2.0f;
-					pTResult2->pValue() [ ivo + 1 ] = pTResult2->pValue() [ ivo + 2 ] / 2.0f + ( pTParam->pValue() [ ivo + 1 ] + pTParam->pValue() [ ivo + 2 ] ) / 4.0f;
+					pTResult2->pValue() [ ivo + 2 ] = static_cast<T>( ( pTParam->pValue() [ ivo + 2 ] + pTParam->pValue() [ ivo + 3 ] ) / 2.0f );
+					pTResult2->pValue() [ ivo + 1 ] = static_cast<T>( pTResult2->pValue() [ ivo + 2 ] / 2.0f + ( pTParam->pValue() [ ivo + 1 ] + pTParam->pValue() [ ivo + 2 ] ) / 4.0f );
 
-					pTResult1->pValue() [ ivo + 3 ] = ( pTResult1->pValue() [ ivo + 2 ] + pTResult2->pValue() [ ivo + 1 ] ) / 2.0f;
+					pTResult1->pValue() [ ivo + 3 ] = static_cast<T>( ( pTResult1->pValue() [ ivo + 2 ] + pTResult2->pValue() [ ivo + 1 ] ) / 2.0f );
 					pTResult2->pValue() [ ivo + 0 ] = pTResult1->pValue() [ ivo + 3 ];
 				}
 			}
@@ -116,14 +116,14 @@ class CqSurfacePatchBicubic : public CqSurface
 				for ( iu = 0; iu < 4; iu++ )
 				{
 					pTResult1->pValue() [ 0 + iu ] = pTParam->pValue() [ 0 + iu ];
-					pTResult1->pValue() [ 4 + iu ] = ( pTParam->pValue() [ 0 + iu ] + pTParam->pValue() [ 4 + iu ] ) / 2.0f;
-					pTResult1->pValue() [ 8 + iu ] = pTResult1->pValue() [ 4 + iu ] / 2.0f + ( pTParam->pValue() [ 4 + iu ] + pTParam->pValue() [ 8 + iu ] ) / 4.0f;
+					pTResult1->pValue() [ 4 + iu ] = static_cast<T>( ( pTParam->pValue() [ 0 + iu ] + pTParam->pValue() [ 4 + iu ] ) / 2.0f );
+					pTResult1->pValue() [ 8 + iu ] = static_cast<T>( pTResult1->pValue() [ 4 + iu ] / 2.0f + ( pTParam->pValue() [ 4 + iu ] + pTParam->pValue() [ 8 + iu ] ) / 4.0f );
 
 					pTResult2->pValue() [ 12 + iu ] = pTParam->pValue() [ 12 + iu ];
-					pTResult2->pValue() [ 8 + iu ] = ( pTParam->pValue() [ 8 + iu ] + pTParam->pValue() [ 12 + iu ] ) / 2.0f;
-					pTResult2->pValue() [ 4 + iu ] = pTResult2->pValue() [ 8 + iu ] / 2.0f + ( pTParam->pValue() [ 4 + iu ] + pTParam->pValue() [ 8 + iu ] ) / 4.0f;
+					pTResult2->pValue() [ 8 + iu ] = static_cast<T>( ( pTParam->pValue() [ 8 + iu ] + pTParam->pValue() [ 12 + iu ] ) / 2.0f );
+					pTResult2->pValue() [ 4 + iu ] = static_cast<T>( pTResult2->pValue() [ 8 + iu ] / 2.0f + ( pTParam->pValue() [ 4 + iu ] + pTParam->pValue() [ 8 + iu ] ) / 4.0f );
 
-					pTResult1->pValue() [ 12 + iu ] = ( pTResult1->pValue() [ 8 + iu ] + pTResult2->pValue() [ 4 + iu ] ) / 2.0f;
+					pTResult1->pValue() [ 12 + iu ] = static_cast<T>( ( pTResult1->pValue() [ 8 + iu ] + pTResult2->pValue() [ 4 + iu ] ) / 2.0f );
 					pTResult2->pValue() [ 0 + iu ] = pTResult1->pValue() [ 12 + iu ];
 				}
 			}

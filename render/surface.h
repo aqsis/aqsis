@@ -635,7 +635,7 @@ class CqSurface : public CqBasicSurface
 				{
 					TqFloat u = ( 1.0f / uSize ) * iu;
 					T vec = BilinearEvaluate( pParam->pValue() [ 0 ], pParam->pValue() [ 1 ], pParam->pValue() [ 2 ], pParam->pValue() [ 3 ], u, v );
-					TqInt igrid = ( iv * ( uSize + 1 ) ) + iu;
+					TqInt igrid = static_cast<TqInt>( ( iv * ( uSize + 1 ) ) + iu );
 					pData->SetValue( static_cast<SLT>( vec ), igrid );
 				}
 			}

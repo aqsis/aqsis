@@ -151,6 +151,12 @@ void CqSurfacePatchBicubic::NaturalSubdivide( CqParameter* pParam, CqParameter* 
 				//			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
 				//			break;
 			}
+
+			default:
+			{
+				// left blank to avoid compiler warnings about unhandled types
+				break;
+			}
 	}
 }
 
@@ -239,6 +245,12 @@ void CqSurfacePatchBicubic::NaturalDice( CqParameter* pParameter, TqInt uDiceSiz
 			{
 				CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParameter );
 				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+				break;
+			}
+
+			default:
+			{
+				// left blank to avoid compiler warnings about unhandled types
 				break;
 			}
 	}

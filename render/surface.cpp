@@ -369,6 +369,12 @@ void CqSurface::NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqP
 				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
 				break;
 			}
+			
+			default:
+			{
+				// blank to avoid compiler warnings about unhandled cases
+				break;
+			}
 	}
 }
 
@@ -425,6 +431,12 @@ void CqSurface::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDi
 			{
 				CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParameter );
 				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+				break;
+			}
+
+			default:
+			{
+				// left blank to avoid compiler warnings about unhandled types
 				break;
 			}
 	}

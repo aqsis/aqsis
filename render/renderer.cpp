@@ -987,6 +987,12 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 						Decl.m_pCreate = gVariableCreateFuncsFaceVarying[ ILType ];
 				}
 				break;
+
+				default:
+				{
+					// left blank to avoid compiler warnings about unhandled types
+					break;
+				}
 		}
 		return ( Decl );
 	}
@@ -1283,6 +1289,8 @@ TqInt CqRenderer::RegisterOutputData( const char* name )
 			case type_string:
 				throw("Error: String not valid as an output type");
 				break;
+			default:
+				break;	// left blank to avoid compiler warnings about unhandled types
 		}
 		
 		DataEntry.m_Offset = m_OutputDataOffset;

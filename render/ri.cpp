@@ -4973,6 +4973,9 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 					case class_facevarying:
 					cValues = pSurface->cFaceVarying();
 					break;
+
+					default:  // left blank to avoid compiler warnings about unhandled types
+					break;
 			}
 			pNewParam->SetSize( cValues );
 
@@ -5068,6 +5071,12 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 								                                                            );
 					}
 					break;
+
+					default:
+					{
+						// left blank to avoid compiler warnings about unhandled types
+						break;
+					}
 			}
 			pSurface->AddPrimitiveVariable( pNewParam );
 		}

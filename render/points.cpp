@@ -273,6 +273,12 @@ void CqPoints::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDic
 				TypedNaturalDice( pTParam, pData );
 				break;
 			}
+
+			default:
+			{
+				// left blank to avoid compiler warnings about unhandled types
+				break;
+			}
 	}
 }
 

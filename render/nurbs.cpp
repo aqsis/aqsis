@@ -394,7 +394,7 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 	if ( u <= m_auKnots[ k ] )
 	{
 		s = 1;
-		for ( i = k; i > uDegree(); i-- )
+		for ( i = k; i > static_cast<TqInt>( uDegree() ); i-- )
 		{
 			if ( m_auKnots[ i ] <= m_auKnots[ i - 1 ] )
 				s++;
@@ -481,7 +481,9 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 								case type_integer:
 								{
 									CqParameterTyped<TqInt, TqFloat>* pTR = static_cast<CqParameterTyped<TqInt, TqFloat>*>( R );
-									( *pTR->pValue( i ) ) = alpha * ( *pTR->pValue( i + 1 ) ) + ( 1.0 - alpha ) * ( *pTR->pValue( i ) );
+									( *pTR->pValue( i ) ) = static_cast<TqInt> (
+										alpha * ( *pTR->pValue( i + 1 ) ) + ( 1.0 - alpha ) * ( *pTR->pValue( i ) )
+									);
 									break;
 								}
 
@@ -523,6 +525,12 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 								{
 									CqParameterTyped<CqMatrix, CqMatrix>* pTR = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( R );
 									( *pTR->pValue( i ) ) = alpha * ( *pTR->pValue( i + 1 ) ) + ( 1.0 - alpha ) * ( *pTR->pValue( i ) );
+									break;
+								}
+								
+								default:
+								{
+									// left blank to avoid compiler warnings about unhandled types in the switch
 									break;
 								}
 						}
@@ -577,7 +585,7 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 	if ( v <= m_avKnots[ k ] )
 	{
 		s = 1;
-		for ( i = k; i > vDegree(); i-- )
+		for ( i = k; i > static_cast<TqInt>( vDegree() ); i-- )
 		{
 			if ( m_avKnots[ i ] <= m_avKnots[ i - 1 ] )
 				s++;
@@ -629,7 +637,7 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 				for ( i = 0; i <= k - p; i++ )
 					// Qw[col][i] = Pw[col][i]
 					( *iUP ) ->SetValue( pHold, ( i * m_cuVerts ) + col, ( i * m_cuVerts ) + col );
-				for ( i = k - s; i < m; i++ )
+				for ( i = k - s; i < static_cast<TqInt>( m ); i++ )
 					// Qw[col][i+r] = Pw[col][i]
 					( *iUP ) ->SetValue( pHold, ( ( i + r ) * m_cuVerts ) + col, ( i * m_cuVerts ) + col );
 				for ( i = 0; i <= p - s; i++ )
@@ -658,7 +666,9 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 								case type_integer:
 								{
 									CqParameterTyped<TqInt, TqFloat>* pTR = static_cast<CqParameterTyped<TqInt, TqFloat>*>( R );
-									( *pTR->pValue( i ) ) = alpha * ( *pTR->pValue( i + 1 ) ) + ( 1.0 - alpha ) * ( *pTR->pValue( i ) );
+									( *pTR->pValue( i ) ) = static_cast<TqInt> (
+										alpha * ( *pTR->pValue( i + 1 ) ) + ( 1.0 - alpha ) * ( *pTR->pValue( i ) )
+									);
 									break;
 								}
 
@@ -700,6 +710,12 @@ TqUint CqSurfaceNURBS::InsertKnotV( TqFloat v, TqInt r )
 								{
 									CqParameterTyped<CqMatrix, CqMatrix>* pTR = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( R );
 									( *pTR->pValue( i ) ) = alpha * ( *pTR->pValue( i + 1 ) ) + ( 1.0 - alpha ) * ( *pTR->pValue( i ) );
+									break;
+								}
+
+								default:
+								{
+									// left blank to avoid compiler warnings about unhandled types
 									break;
 								}
 						}
@@ -837,7 +853,10 @@ void CqSurfaceNURBS::RefineKnotU( const std::vector<TqFloat>& X )
 								{
 									CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
 									for ( row = 0; row < static_cast<TqInt>( m_cvVerts ); row++ )
-										pTParam->pValue( ( row * m_cuVerts ) + ind - 1 ) [ 0 ] = alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ];
+										pTParam->pValue( ( row * m_cuVerts ) + ind - 1 ) [ 0 ] = 
+											static_cast<TqInt>(
+												alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ]
+											);
 									break;
 								}
 
@@ -886,6 +905,12 @@ void CqSurfaceNURBS::RefineKnotU( const std::vector<TqFloat>& X )
 									CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
 									for ( row = 0; row < static_cast<TqInt>( m_cvVerts ); row++ )
 										pTParam->pValue( ( row * m_cuVerts ) + ind - 1 ) [ 0 ] = alpha * pTParam->pValue() [ ( row * m_cuVerts ) + ind - 1 ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( row * m_cuVerts ) + ind ];
+									break;
+								}
+
+								default:
+								{
+									// left blank to avoid compiler warnings about unhandled types
 									break;
 								}
 						}
@@ -1001,7 +1026,9 @@ void CqSurfaceNURBS::RefineKnotV( const std::vector<TqFloat>& X )
 								{
 									CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( ( *iUP ) );
 									for ( col = 0; col < static_cast<TqInt>( m_cuVerts ); col++ )
-										pTParam->pValue() [ ( ( ind - 1 ) * m_cuVerts ) + col ] = alpha * pTParam->pValue() [ ( ( ind - 1 ) * m_cuVerts ) + col ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( ind * m_cuVerts ) + col ];
+										pTParam->pValue() [ ( ( ind - 1 ) * m_cuVerts ) + col ] = static_cast<TqInt>(
+												alpha * pTParam->pValue() [ ( ( ind - 1 ) * m_cuVerts ) + col ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( ind * m_cuVerts ) + col ]
+												);
 									break;
 								}
 
@@ -1050,6 +1077,12 @@ void CqSurfaceNURBS::RefineKnotV( const std::vector<TqFloat>& X )
 									CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
 									for ( col = 0; col < static_cast<TqInt>( m_cuVerts ); col++ )
 										pTParam->pValue() [ ( ( ind - 1 ) * m_cuVerts ) + col ] = alpha * pTParam->pValue() [ ( ( ind - 1 ) * m_cuVerts ) + col ] + ( 1.0f - alpha ) * pTParam->pValue() [ ( ind * m_cuVerts ) + col ];
+									break;
+								}
+
+								default:
+								{
+									// left blank to avoid compiler warnings about unhandled types
 									break;
 								}
 						}
@@ -1408,6 +1441,12 @@ void CqSurfaceNURBS::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqIn
 					{
 						CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParameter );
 						pData->SetValue( Evaluate( su, sv, pTParam ), igrid );
+						break;
+					}
+
+					default:
+					{
+						// left blank to avoid compiler warnings about unhandled types
 						break;
 					}
 			}

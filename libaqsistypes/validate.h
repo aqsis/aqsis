@@ -65,3 +65,4 @@ bool CheckMinMax( const T& val, const T& min, const T& max, CqRangeCheckCallback
 }
 
 #endif
+

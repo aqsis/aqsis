@@ -78,7 +78,7 @@ CqSubdivision2::~CqSubdivision2()
  */
 CqLath* CqSubdivision2::pFacet(TqInt iIndex)
 {
-	assert(iIndex < m_apFacets.size());
+	assert(iIndex < static_cast<TqInt>(m_apFacets.size()));
 	return(m_apFacets[iIndex]);
 }
 
@@ -95,7 +95,7 @@ CqLath* CqSubdivision2::pFacet(TqInt iIndex)
  */
 CqLath* CqSubdivision2::pVertex(TqInt iIndex)
 {
-	assert(iIndex < m_aapVertices.size() && m_aapVertices[iIndex].size() >= 1);
+	assert(iIndex < static_cast<TqInt>(m_aapVertices.size()) && m_aapVertices[iIndex].size() >= 1);
 	return(m_aapVertices[iIndex][0]);
 }
 
@@ -191,6 +191,12 @@ TqInt CqSubdivision2::AddVertex(CqLath* pVertex)
 						//CreateVertex( pParam, pVertex, iIndex );
 					}
 					break;
+
+					default:
+					{
+						// left blank to avoid compiler warnings about unhandled types
+					}
+					break;
 			}
 
 		}
@@ -277,6 +283,12 @@ TqInt CqSubdivision2::AddEdgeVertex(CqLath* pVertex)
 						//CreateEdgeVertex( pParam, pVertex, iIndex );
 					}
 					break;
+
+					default:
+					{
+						// left blank to avoid compiler warnings about unhandled types
+					}
+					break;
 			}
 
 		}
@@ -361,6 +373,12 @@ TqInt CqSubdivision2::AddFaceVertex(CqLath* pVertex)
 					{
 						//CqParameterTyped<CqMatrix, CqMatrix>* pParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( ( *iUP ) );
 						//CreateFaceVertex( pParam, pVertex, iIndex );
+					}
+					break;
+
+					default:
+					{
+						// left blank to avoid compiler warnings about unhandled types
 					}
 					break;
 			}
@@ -754,7 +772,7 @@ void CqSubdivision2::OutputMesh(const char* fname, std::vector<CqLath*>* paFaces
 	if( NULL != paFaces)
 	{
 		file << "g CurrentFace" << std::endl;
-		for(i = 0; i < paFaces->size(); i++)
+		for(i = 0; i < static_cast<TqInt>( paFaces->size() ); i++)
 		{
 			(*paFaces)[i]->Qfv(aQfv);
 			TqUint j;
@@ -1066,6 +1084,12 @@ static void StoreDiceAPVar( IqShader* pShader, CqParameter* pParam, TqUint ivA, 
 			{
 				CqParameterTyped<CqMatrix, CqMatrix>* pNParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
 				pArg->SetValue( *pNParam->pValue( ivA ), indexA );
+			}
+			break;
+
+			default:
+			{
+				// left blank to avoid compiler warnings about unhandled types
 			}
 			break;
 		}

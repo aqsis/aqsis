@@ -395,14 +395,14 @@ class CqCubicCurveSegment : public CqCurve
 			CqParameterTyped<T, SLT>* pTResult2 = static_cast<CqParameterTyped<T, SLT>*>( pResult2 );
 
 			pTResult1->pValue() [ 0 ] = pTParam->pValue() [ 0 ];
-			pTResult1->pValue() [ 1 ] = ( pTParam->pValue() [ 0 ] + pTParam->pValue() [ 1 ] ) / 2.0f;
-			pTResult1->pValue() [ 2 ] = pTResult1->pValue() [ 1 ] / 2.0f + ( pTParam->pValue() [ 1 ] + pTParam->pValue() [ 2 ] ) / 4.0f;
+			pTResult1->pValue() [ 1 ] = static_cast<T>( ( pTParam->pValue() [ 0 ] + pTParam->pValue() [ 1 ] ) / 2.0f );
+			pTResult1->pValue() [ 2 ] = static_cast<T>( pTResult1->pValue() [ 1 ] / 2.0f + ( pTParam->pValue() [ 1 ] + pTParam->pValue() [ 2 ] ) / 4.0f );
 
 			pTResult2->pValue() [ 3 ] = pTParam->pValue() [ 3 ];
-			pTResult2->pValue() [ 2 ] = ( pTParam->pValue() [ 2 ] + pTParam->pValue() [ 3 ] ) / 2.0f;
-			pTResult2->pValue() [ 1 ] = pTResult2->pValue() [ 2 ] / 2.0f + ( pTParam->pValue() [ 1 ] + pTParam->pValue() [ 2 ] ) / 4.0f;
+			pTResult2->pValue() [ 2 ] = static_cast<T>( ( pTParam->pValue() [ 2 ] + pTParam->pValue() [ 3 ] ) / 2.0f );
+			pTResult2->pValue() [ 1 ] = static_cast<T>( pTResult2->pValue() [ 2 ] / 2.0f + ( pTParam->pValue() [ 1 ] + pTParam->pValue() [ 2 ] ) / 4.0f );
 
-			pTResult1->pValue() [ 3 ] = ( pTResult1->pValue() [ 2 ] + pTResult2->pValue() [ 1 ] ) / 2.0f;
+			pTResult1->pValue() [ 3 ] = static_cast<T>( ( pTResult1->pValue() [ 2 ] + pTResult2->pValue() [ 1 ] ) / 2.0f );
 			pTResult2->pValue() [ 0 ] = pTResult1->pValue() [ 3 ];
 		}
 

@@ -67,7 +67,7 @@ class CqKDTree
 					{
 						m_pDataInterface->SortElements( m_aLeaves, m_Dim );
 
-						TqInt median = aLeaves().size() / 2.0f;
+						TqInt median = static_cast<TqInt>( aLeaves().size() / 2.0f );
 
 						side1.aLeaves().assign( aLeaves().begin(), aLeaves().begin() + median );
 						side2.aLeaves().assign( aLeaves().begin() + median, aLeaves().end() );

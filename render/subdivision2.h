@@ -172,7 +172,7 @@ public:
 								
 								// Get the current vertex;
 								S = pParam->pValue( pVertex->VertexIndex() )[0];
-								pParam->pValue( iIndex )[0] = ( R + ( S * 6.0f ) ) / 8.0f;
+								pParam->pValue( iIndex )[0] = static_cast<TypeA>( ( R + ( S * 6.0f ) ) / 8.0f );
 							}
 						}
 						else
@@ -247,7 +247,7 @@ public:
 									TypeA Val = TypeA(0.0f);
 									for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
 										Val += pParam->pValue( (*iV)->VertexIndex() )[0];
-									Val /= static_cast<TqFloat>( aQfv.size() );
+									Val = static_cast<TypeA>( Val / static_cast<TqFloat>( aQfv.size() ) );
 									Q += Val;
 								}
 								Q /= aQvf.size();
@@ -260,15 +260,15 @@ public:
 								for( iE = aQve.begin(); iE != aQve.end(); iE++ )
 								{
 									B = pParam->pValue( (*iE)->ccf()->VertexIndex() )[0];
-									R += (A+B)/2.0f;
+									R += static_cast<TypeA>( (A+B)/2.0f );
 								}
-								R *= 2.0f;
+								R = static_cast<TypeA>( R * 2.0f );
 								R /= n;
 								R /= n;
 
 								// Get the current vertex;
 								S = pParam->pValue( pVertex->VertexIndex() )[0];
-								S *= static_cast<TqFloat>(n-3);
+								S = static_cast<TypeA>( S * static_cast<TqFloat>(n-3) );
 								S /= n;
 
 								//pParam->pValue( iIndex )[0] = Q+R+S;
@@ -283,7 +283,7 @@ public:
 
 									// Get the current vertex;
 									S = pParam->pValue( pVertex->VertexIndex() )[0];
-									semiSharpPos =  ( R + ( S * 6.0f ) ) / 8.0f;
+									semiSharpPos = static_cast<TypeA>( ( R + ( S * 6.0f ) ) / 8.0f );
 								}
 
 								sharpPos = pParam->pValue( pVertex->VertexIndex() )[0];
@@ -292,9 +292,9 @@ public:
 								TypeA Pos;
 								float h2 = hardEdge2 != NULL ? EdgeSharpness(hardEdge2) : 0.0f;
 								float h3 = hardEdge3 != NULL ? EdgeSharpness(hardEdge3) : 0.0f;
-								Pos = (1.0f - h2)*softPos;
-								Pos = Pos + (h2 - h3)*semiSharpPos;
-								Pos = Pos + h3*sharpPos;
+								Pos = static_cast<TypeA>( (1.0f - h2)*softPos );
+								Pos = static_cast<TypeA>( Pos + (h2 - h3)*semiSharpPos );
+								Pos = static_cast<TypeA>( Pos + h3*sharpPos );
 								pParam->pValue( iIndex )[0] = Pos;
 							}
 						}
@@ -329,30 +329,30 @@ public:
 								TypeA Val = TypeA(0.0f);
 								for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
 									Val += pParam->pValue( (*iV)->VertexIndex() )[0];
-								Val/=static_cast<TqFloat>( aQfv.size() );
+								Val = static_cast<TypeA>( Val / static_cast<TqFloat>( aQfv.size() ) );
 								C += Val;
 							}
-							C /= static_cast<TqFloat>(aQef.size());
+							C = static_cast<TypeA>( C / static_cast<TqFloat>(aQef.size()) );
 
 							A = pParam->pValue( pEdge->VertexIndex() )[0];
 							B = pParam->pValue( pEdge->ccf()->VertexIndex() )[0];
 
 							float h = EdgeSharpness( pEdge );
-							A = ((1.0f+h)*(A+B)) / 2.0f;
-							A = (A + (1.0f-h)*C) / 2.0f;
+							A = static_cast<TypeA>( ((1.0f+h)*(A+B)) / 2.0f );
+							A = static_cast<TypeA>( (A + (1.0f-h)*C) / 2.0f );
 						}
 						else
 						{
 							A = pParam->pValue( pEdge->VertexIndex() )[0];
 							B = pParam->pValue( pEdge->ccf()->VertexIndex() )[0];
-							A = (A+B)/2.0f;
+							A = static_cast<TypeA>( (A+B)/2.0f );
 						}
 					}
 					else
 					{
 						A = pParam->pValue( pEdge->VertexIndex() )[0];
 						B = pParam->pValue( pEdge->ccf()->VertexIndex() )[0];
-						A = (A+B)/2.0f;
+						A = static_cast<TypeA>( (A+B)/2.0f );
 					}
 					pParam->pValue( iIndex )[0] = A;
 				}
@@ -367,7 +367,7 @@ public:
 					TypeA Val = TypeA(0.0f);
 					for( iV = aQfv.begin(); iV != aQfv.end(); iV++ )
 						Val += pParam->pValue( (*iV)->VertexIndex() )[0];
-					Val/=static_cast<TqFloat>( aQfv.size() );
+					Val = static_cast<TypeA>( Val / static_cast<TqFloat>( aQfv.size() ) );
 					pParam->pValue( iIndex )[0] = Val;
 				}
 

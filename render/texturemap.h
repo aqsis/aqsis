@@ -179,7 +179,7 @@ class CqTextureMapBuffer
 		{
 			TqInt iv = y * ( m_Width * ElemSize() );
 			TqInt iu = x * ElemSize();
-			m_pBufferData[ iv + iu + sample ] = value * 256.0f;
+			m_pBufferData[ iv + iu + sample ] = static_cast<TqUchar>( value * 256.0f );
 		}
 		/** Get the origin of this buffer segment.
 		 */

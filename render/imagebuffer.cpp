@@ -958,6 +958,10 @@ inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2
 					val[ entry->second.m_Offset + 15] = pElements[15];
 					break;
 				}
+				default:
+					// left blank to avoid compiler warnings about unhandled
+					//  types
+					break;
 			}
 		}
 	}

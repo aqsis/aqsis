@@ -257,8 +257,8 @@ class CqSurfaceNURBS : public CqSurface
 				T temp = T();
 				TqUint vind = vspan - vDegree() + l;
 				for ( k = 0; k <= uDegree(); k++ )
-					temp = temp + Nu[ k ] * ( *pParam->pValue( ( vind * m_cuVerts ) + uind + k ) );
-				S = S + Nv[ l ] * temp;
+					temp = static_cast<T>( temp + Nu[ k ] * ( *pParam->pValue( ( vind * m_cuVerts ) + uind + k ) ) );
+				S = static_cast<T>( S + Nv[ l ] * temp );
 			}
 			return ( S );
 		}

@@ -64,11 +64,10 @@ class CqForwardDiffBezier
 		void CalcForwardDiff( T& A, T& B, T& C, T& D )
 		{
 			f = A;                             // STORE THE START VALUE
-			df = A * M20 + B * M21 + C * M22 + D * M23; // CALC CHANGE IN START
-			ddf = A * M10 + B * M11 + C * M12 + D * M13; // CALC CHANGE IN "CHANGE IN START"
-			dddf = A * M00 + B * M01 + C * M02 + D * M03; // CALC CHANGE IN CHANGE IN "CHANGE IN START"
-		}
-		;
+			df = static_cast<T>( A * M20 + B * M21 + C * M22 + D * M23 ); // CALC CHANGE IN START
+			ddf = static_cast<T>( A * M10 + B * M11 + C * M12 + D * M13 ); // CALC CHANGE IN "CHANGE IN START"
+			dddf = static_cast<T>( A * M00 + B * M01 + C * M02 + D * M03 ); // CALC CHANGE IN CHANGE IN "CHANGE IN START"
+		};
 
 		/**
 		 * Returns the current value (f). Increments to the next step.

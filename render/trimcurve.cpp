@@ -4,8 +4,8 @@
  *	@author	Paul Gregory
  *	@brief	Implementation of trimcurce functionality.
  *
- *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/11/15 10:00:19 $
+ *	Last change by:		$Author: jpgrad $
+ *	Last change date:	$Date: 2003/06/23 04:06:39 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ void CqTrimCurve::BasisFunctions( TqFloat u, TqUint span, std::vector<TqFloat>& 
 	register double omega;
 
 	BasisVals[ 0 ] = 1.0;
-	for ( r = 2; r <= m_Order; r++ )
+	for ( r = 2; r <= static_cast<TqInt>( m_Order ); r++ )
 	{
 		i = span - r + 1;
 		BasisVals[ r - 1 ] = 0.0;
@@ -298,10 +298,10 @@ void CqTrimCurve::Clamp()
 		m_cVerts -= n1 + n2;
 		TqUint i;
 		TqInt size = nS.m_aKnots.size() - n2;
-		for ( i = n1; i < size; i++ )
+		for ( i = n1; i < static_cast<TqUint>( size ); i++ )
 			m_aKnots[ i - n1 ] = nS.m_aKnots[ i ];
 		size = nS.m_cVerts - n2;
-		for ( i = n1; i < size; i++ )
+		for ( i = n1; i < static_cast<TqUint>( size ); i++ )
 			CP( i - n1 ) = nS.CP( i );
 	}
 }
