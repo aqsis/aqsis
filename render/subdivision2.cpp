@@ -1176,17 +1176,31 @@ static void StoreDiceAPVar( IqShader* pShader, CqParameter* pParam, TqUint ivA, 
 void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoints* pPoints, TqInt iParam, TqInt iFVParam, TqInt iData)
 {
     TqInt lUses = Uses();
+    TqInt lDone = 0;
 
     if ( USES( lUses, EnvVars_P ) )
         pGrid->pVar(EnvVars_P) ->SetPoint( pPoints->P()->pValue( iParam )[0], iData );
 
-    if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->pVar(EnvVars_s) ) )
+    // Special cases for s and t if "st" exists, it should override s and t.
+    CqParameter* pParam;
+    if( ( pParam = pPoints->FindUserParam("st") ) != NULL )
+    {
+		CqParameterTyped<TqFloat, TqFloat>* pSTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pParam);
+        if ( !isDONE( lDone, EnvVars_s ) && USES( lUses, EnvVars_s ) && ( NULL != pGrid->pVar(EnvVars_s) ) )
+            pGrid->pVar( EnvVars_s )->SetFloat( pSTParam->pValue( iParam )[0], iData);
+        if ( !isDONE( lDone, EnvVars_t ) && USES( lUses, EnvVars_t ) && ( NULL != pGrid->pVar(EnvVars_t) ) )
+            pGrid->pVar( EnvVars_t )->SetFloat( pSTParam->pValue( iParam )[1], iData);
+        DONE( lDone, EnvVars_s);
+        DONE( lDone, EnvVars_t);
+    }
+
+    if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->pVar(EnvVars_s) ) && !isDONE(lDone, EnvVars_s ) )
     {
         if( pPoints->bHasVar(EnvVars_s) )
             pGrid->pVar(EnvVars_s) ->SetFloat( pPoints->s()->pValue( iParam )[0], iData );
     }
 
-    if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->pVar(EnvVars_t) ) )
+    if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->pVar(EnvVars_t) ) && !isDONE(lDone, EnvVars_t ) )
     {
         if( pPoints->bHasVar(EnvVars_t) )
             pGrid->pVar(EnvVars_t) ->SetFloat( pPoints->t()->pValue( iParam )[0], iData );
