@@ -811,7 +811,7 @@ RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 
     if( !valid )
     {
-        std::cerr << error << "Invalid RiFrameAspectRatio, aborting" << std::endl;
+        std::cerr << error << "Invalid RiCropWindow, aborting" << std::endl;
         throw( "INVALID_VALUE" );
         return;
     }
