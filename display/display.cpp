@@ -45,6 +45,7 @@ using namespace Aqsis;
 #include <memory>
 #include <sstream>
 #include <string>
+#include <fstream>
 
 #ifdef	AQSIS_SYSTEM_WIN32
 #pragma warning(disable : 4275 4251)
@@ -85,6 +86,13 @@ using namespace Aqsis;
 #include "base64.h"
 #include "xmlmessages.h"
 #include "argparse.h"
+
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+#define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
+#else // AQSIS_SYSTEM_WIN32
+#define ZFILE_HEADER "Aqsis ZFile" VERSION
+#endif // !AQSIS_SYSTEM_WIN32
+#define	SHADOWMAP_HEADER	"Shadow"
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #include	<version.h>
@@ -129,6 +137,9 @@ TqInt	g_BucketsPerCol, g_BucketsPerRow;
 TqInt	g_BucketWidthMax, g_BucketHeightMax;
 TqBool	g_RenderWholeFrame = TqFalse;
 TqInt	g_ImageType;
+TqInt	g_append = 0;
+TqFloat	g_matWorldToCamera[ 4 ][ 4 ];
+TqFloat	g_matWorldToScreen[ 4 ][ 4 ];
 
 unsigned char* g_byteData;
 float*	g_floatData;
@@ -202,12 +213,143 @@ const std::string AppendPath(const std::string& LHS, const std::string& RHS)
     return LHS + PATH_SEPARATOR + RHS;
 }
 
+
+void SaveAsShadowMap(const std::string& filename)
+{
+    TqChar version[ 80 ];
+    TqInt twidth = 32;
+    TqInt tlength = 32;
+
+    const char* mode = (g_append)? "a" : "w";
+
+    // Save the shadowmap to a binary file.
+    if ( filename.compare( "" ) != 0 )
+    {
+        TIFF * pshadow = TIFFOpen( filename.c_str(), mode );
+		if( pshadow != NULL )
+		{
+			// Set common tags
+			TqInt XRes = ( g_CWXmax - g_CWXmin );
+			TqInt YRes = ( g_CWYmax - g_CWYmin );
+
+			TIFFCreateDirectory( pshadow );
+
+	#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+			sprintf( version, "%s %s", STRNAME, VERSION_STR );
+	#else
+			sprintf( version, "%s %s", STRNAME, VERSION );
+	#endif
+			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
+			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, g_matWorldToCamera );
+			TIFFSetField( pshadow, TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, g_matWorldToScreen );
+			TIFFSetField( pshadow, TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER );
+			TIFFSetField( pshadow, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK );
+
+			// Write the floating point image to the directory.
+		#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+			sprintf( version, "%s %s", STRNAME, VERSION_STR );
+		#else
+			sprintf( version, "%s %s", STRNAME, VERSION );
+		#endif
+			TIFFSetField( pshadow, TIFFTAG_SOFTWARE, ( uint32 ) version );
+			TIFFSetField( pshadow, TIFFTAG_IMAGEWIDTH, XRes );
+			TIFFSetField( pshadow, TIFFTAG_IMAGELENGTH, YRes );
+			TIFFSetField( pshadow, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG );
+			TIFFSetField( pshadow, TIFFTAG_BITSPERSAMPLE, 32 );
+			TIFFSetField( pshadow, TIFFTAG_SAMPLESPERPIXEL, g_Channels );
+			TIFFSetField( pshadow, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT );
+			TIFFSetField( pshadow, TIFFTAG_TILEWIDTH, twidth );
+			TIFFSetField( pshadow, TIFFTAG_TILELENGTH, tlength );
+			TIFFSetField( pshadow, TIFFTAG_SAMPLEFORMAT, SAMPLEFORMAT_IEEEFP );
+			TIFFSetField( pshadow, TIFFTAG_COMPRESSION, g_Compression );
+
+
+			TqInt tsize = twidth * tlength;
+			TqInt tperrow = ( XRes + twidth - 1 ) / twidth;
+			TqFloat* ptile = static_cast<TqFloat*>( _TIFFmalloc( tsize * g_Channels * sizeof( TqFloat ) ) );
+
+			if ( ptile != NULL )
+			{
+				TqInt ctiles = tperrow * ( ( YRes + tlength - 1 ) / tlength );
+				TqInt itile;
+				for ( itile = 0; itile < ctiles; itile++ )
+				{
+					TqInt x = ( itile % tperrow ) * twidth;
+					TqInt y = ( itile / tperrow ) * tlength;
+					TqFloat* ptdata = g_floatData + ( ( y * XRes ) + x ) * g_Channels;
+					// Clear the tile to black.
+					memset( ptile, 0, tsize * g_Channels * sizeof( TqFloat ) );
+					for ( TqUlong i = 0; i < tlength; i++ )
+					{
+						for ( TqUlong j = 0; j < twidth; j++ )
+						{
+							if ( ( x + j ) < XRes && ( y + i ) < YRes )
+							{
+								TqInt ii;
+								for ( ii = 0; ii < g_Channels; ii++ )
+									ptile[ ( i * twidth * g_Channels ) + ( ( ( j * g_Channels ) + ii ) ) ] = ptdata[ ( ( j * g_Channels ) + ii ) ];
+							}
+						}
+						ptdata += ( XRes * g_Channels );
+					}
+					TIFFWriteTile( pshadow, ptile, x, y, 0, 0 );
+				}
+				TIFFWriteDirectory( pshadow );
+
+			}
+
+			TIFFClose( pshadow );
+		}
+    }
+}
+
+
 void WriteTIFF(const std::string& filename)
 {
     uint16 photometric = PHOTOMETRIC_RGB;
     uint16 config = PLANARCONFIG_CONTIG;
 
-    TIFF* pOut = TIFFOpen( filename.c_str(), "w" );
+    // Set common tags
+	TqInt XRes = ( g_CWXmax - g_CWXmin );
+	TqInt YRes = ( g_CWYmax - g_CWYmin );
+
+    // If in "shadowmap" mode, write as a shadowmap.
+	if( g_ImageType == Type_Shadowmap )
+	{
+		SaveAsShadowMap(filename);
+		return;
+	}
+    else if( g_ImageType == Type_ZFile )
+    {
+        std::ofstream ofile( filename.c_str(), std::ios::out | std::ios::binary );
+        if ( ofile.is_open() )
+        {
+            // Save a file type and version marker
+            ofile << ZFILE_HEADER;
+
+            // Save the xres and yres.
+            ofile.write( reinterpret_cast<char* >( &XRes ), sizeof( XRes ) );
+            ofile.write( reinterpret_cast<char* >( &YRes ), sizeof( XRes ) );
+
+            // Save the transformation matrices.
+            ofile.write( reinterpret_cast<char*>( g_matWorldToCamera[ 0 ] ), sizeof( g_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+            ofile.write( reinterpret_cast<char*>( g_matWorldToCamera[ 1 ] ), sizeof( g_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+            ofile.write( reinterpret_cast<char*>( g_matWorldToCamera[ 2 ] ), sizeof( g_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+            ofile.write( reinterpret_cast<char*>( g_matWorldToCamera[ 3 ] ), sizeof( g_matWorldToCamera[ 0 ][ 0 ] ) * 4 );
+
+            ofile.write( reinterpret_cast<char*>( g_matWorldToScreen[ 0 ] ), sizeof( g_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+            ofile.write( reinterpret_cast<char*>( g_matWorldToScreen[ 1 ] ), sizeof( g_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+            ofile.write( reinterpret_cast<char*>( g_matWorldToScreen[ 2 ] ), sizeof( g_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+            ofile.write( reinterpret_cast<char*>( g_matWorldToScreen[ 3 ] ), sizeof( g_matWorldToScreen[ 0 ][ 0 ] ) * 4 );
+
+            // Now output the depth values
+            ofile.write( reinterpret_cast<char*>( g_floatData ), sizeof( TqFloat ) * ( XRes * YRes ) );
+            ofile.close();
+        }
+		return;
+    }
+	
+	TIFF* pOut = TIFFOpen( filename.c_str(), "w" );
 
     if ( pOut )
     {
@@ -223,10 +365,6 @@ void WriteTIFF(const std::string& filename)
 #endif
 
         bool use_logluv = false;
-
-        // Set common tags
-		TqInt XRes = ( g_CWXmax - g_CWXmin );
-		TqInt YRes = ( g_CWYmax - g_CWYmin );
 
         TIFFSetField( pOut, TIFFTAG_SOFTWARE, ( uint32 ) version );
         TIFFSetField( pOut, TIFFTAG_IMAGEWIDTH, ( uint32 ) XRes );
@@ -458,12 +596,36 @@ void BucketFunction()
 		}
 		free(resp);
 	}
-	if(g_ImageType == Type_File || g_ImageType == Type_ZFile)
+	if(g_ImageType == Type_File || g_ImageType == Type_ZFile || g_ImageType == Type_Shadowmap )
 	{
 		WriteTIFF(g_filename);
 	}
 
 	CloseSocket(g_Socket);
+}
+
+
+void ReadXMLMatrix(TiXmlElement* pmatrixElem, TqFloat mat[4][4])
+{
+	// Read the row elements one at a time, processing each column element, translating its text to a float
+	// entry in the matrix.
+	TqInt row, col;
+	TiXmlHandle rowHandle = pmatrixElem->FirstChildElement("aqsis:matr");
+	TiXmlElement* rowElem = rowHandle.Element();
+	for( row = 0; row < 4 && rowElem; row++, rowElem=rowElem->NextSiblingElement("aqsis:matr") )
+	{
+		TiXmlHandle colHandle = rowElem->FirstChildElement("aqsis:matc");
+		TiXmlElement* colElem = colHandle.Element();
+		for( col = 0; col < 4 && colElem; col++, colElem=colElem->NextSiblingElement("aqsis:matc") )
+		{
+			TiXmlHandle valHandle = colElem->FirstChild();
+			TiXmlText* val = valHandle.Text();
+			if( val )
+				mat[row][col] = atof(val->Value());
+			else
+				mat[row][col] = 0.0f;
+		}
+	}
 }
 
 
@@ -547,7 +709,6 @@ void ProcessFormat()
 				TiXmlNode* pappliedquant_node = pdataelem->FirstChildElement("aqsis:appliedquant");
 				if( pappliedquant_node )
 				{
-					std::cout << "Found quantisation" << std::endl;
 					TiXmlElement* pappliedquant = pappliedquant_node->ToElement();
 
 					double temp;
@@ -559,8 +720,6 @@ void ProcessFormat()
 					g_appliedQuantizeMaxVal = temp;
 					pappliedquant->QueryDoubleAttribute("dither", &temp);
 					g_appliedQuantizeDitherVal = temp;
-
-					std::cout << g_appliedQuantizeOneVal << std::endl;
 				}
 
 				break;
@@ -569,6 +728,19 @@ void ProcessFormat()
 		}
 		if(!found)
 			std::cout << "Could not find element " << g_mode.c_str() << std::endl;
+
+		// Read out the matrices for world to camera and  world to screen
+		TiXmlHandle matricesListHandle = formatHandle.FirstChildElement("aqsis:matrixlist");
+		TiXmlElement* pmatrixElem = matricesListHandle.FirstChildElement("aqsis:matrix").Element();
+		for( pmatrixElem; pmatrixElem; pmatrixElem=pmatrixElem->NextSiblingElement("aqsis:matrix") )
+		{
+			const char* type = pmatrixElem->Attribute("type");
+			// Check the type
+			if(type && strcmp(type, "worldtocamera")==0)
+				ReadXMLMatrix(pmatrixElem, g_matWorldToCamera);
+			else if(type && strcmp(type, "worldtoscreen")==0)
+				ReadXMLMatrix(pmatrixElem, g_matWorldToScreen);
+		}
 
 		g_PixelsProcessed = 0;
 
@@ -651,6 +823,8 @@ int main( int argc, char** argv )
 		g_ImageType = Type_ZFile;
 	else if(g_type.compare("zframebuffer")==0)
 		g_ImageType = Type_ZFramebuffer;
+	else if(g_type.compare("shadow")==0)
+		g_ImageType = Type_Shadowmap;
 	
 	// If rendering to a framebuffer, default to showing the whole frame and render to the clip window.
 	if(g_ImageType == Type_Framebuffer)
@@ -703,6 +877,11 @@ int main( int argc, char** argv )
                 g_Quality = g_paramInts[intsindex];
                 g_Quality = CLAMP(g_Quality, 0, 100);
 			}
+            else if( i->compare("append") == 0 )
+            {
+				assert( g_paramCounts[countsindex] == 1 && g_paramCounts[countsindex+1] == 0 && g_paramCounts[countsindex+2] == 0 );
+                g_append = g_paramInts[intsindex];
+            }
 			intsindex += g_paramCounts[countsindex++];
 			floatsindex += g_paramCounts[countsindex++];
 			stringsindex += g_paramCounts[countsindex++];

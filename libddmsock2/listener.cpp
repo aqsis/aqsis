@@ -211,6 +211,24 @@ CqSender::CqSender(int socket, CqDDManager* manager)
 	m_pManager = manager;
 }
 
+
+static void CreateXMLMatrix(CqMatrix& mat, TiXmlElement& matElem)
+{
+	TqInt row, col;
+	for(row=0; row<4; row++)
+	{
+		TiXmlElement rowElem("aqsis:matr");
+		for(col=0; col<4; col++)
+		{
+			TiXmlElement colElem("aqsis:matc");
+			TiXmlText t(ToString(mat[row][col]));
+			colElem.InsertEndChild(t);
+			rowElem.InsertEndChild(colElem);
+		}
+		matElem.InsertEndChild(rowElem);
+	}
+}
+
 //---------------------------------------------------------------------
 /** Set up the thread to wait for client connection requests.
  */
@@ -248,37 +266,37 @@ void CqSender::operator()()
 			TiXmlElement datalist("aqsis:datalist");
 
 			// Add the default "rgbaz" entry.
-			TiXmlElement* pdataelem = new TiXmlElement("aqsis:dataelement");
-			pdataelem->SetAttribute("name", "rgba");
-			pdataelem->SetAttribute("size", 4);
+			TiXmlElement dataelem("aqsis:dataelement");
+			dataelem.SetAttribute("name", "rgba");
+			dataelem.SetAttribute("size", 4);
 			// Record the applied color quantization.
 	        const TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Color" );
 			if( pQuant )
 			{
-				TiXmlElement* pappliedquant = new TiXmlElement("aqsis:appliedquant");
-				pappliedquant->SetDoubleAttribute("one", pQuant[0]);
-				pappliedquant->SetDoubleAttribute("min", pQuant[1]);
-				pappliedquant->SetDoubleAttribute("max", pQuant[2]);
-				pappliedquant->SetDoubleAttribute("dither", pQuant[3]);
-				pdataelem->InsertEndChild(*pappliedquant);
+				TiXmlElement appliedquant("aqsis:appliedquant");
+				appliedquant.SetDoubleAttribute("one", pQuant[0]);
+				appliedquant.SetDoubleAttribute("min", pQuant[1]);
+				appliedquant.SetDoubleAttribute("max", pQuant[2]);
+				appliedquant.SetDoubleAttribute("dither", pQuant[3]);
+				dataelem.InsertEndChild(appliedquant);
 			}
-			datalist.InsertEndChild(*pdataelem);
+			datalist.InsertEndChild(dataelem);
 			// Add default depth entry
-			pdataelem = new TiXmlElement("aqsis:dataelement");
-			pdataelem->SetAttribute("name", "z");
-			pdataelem->SetAttribute("size", 1);
+			TiXmlElement dataelemZ("aqsis:dataelement");
+			dataelemZ.SetAttribute("name", "z");
+			dataelemZ.SetAttribute("size", 1);
 			// Record the applied depth quantization.
 	        pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Depth" );
 			if( pQuant )
 			{
-				TiXmlElement* pappliedquant = new TiXmlElement("aqsis:appliedquant");
-				pappliedquant->SetDoubleAttribute("one", pQuant[0]);
-				pappliedquant->SetDoubleAttribute("min", pQuant[1]);
-				pappliedquant->SetDoubleAttribute("max", pQuant[2]);
-				pappliedquant->SetDoubleAttribute("dither", pQuant[3]);
-				pdataelem->InsertEndChild(*pappliedquant);
+				TiXmlElement appliedquant("aqsis:appliedquant");
+				appliedquant.SetDoubleAttribute("one", pQuant[0]);
+				appliedquant.SetDoubleAttribute("min", pQuant[1]);
+				appliedquant.SetDoubleAttribute("max", pQuant[2]);
+				appliedquant.SetDoubleAttribute("dither", pQuant[3]);
+				dataelemZ.InsertEndChild(appliedquant);
 			}
-			datalist.InsertEndChild(*pdataelem);
+			datalist.InsertEndChild(dataelemZ);
 
 			// Add entries for any AOV values specified.
 			TqInt datasize = 5;
@@ -286,29 +304,45 @@ void CqSender::operator()()
 			std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator iAOVEntry;
 			for(iAOVEntry = mapAOV.begin(); iAOVEntry!=mapAOV.end(); iAOVEntry++)
 			{
-				TiXmlElement* pdataelem = new TiXmlElement("aqsis:dataelement");
-				pdataelem->SetAttribute("name", iAOVEntry->first);
-				pdataelem->SetAttribute("size", iAOVEntry->second.m_NumSamples);
+				TiXmlElement dataelem("aqsis:dataelement");
+				dataelem.SetAttribute("name", iAOVEntry->first);
+				dataelem.SetAttribute("size", iAOVEntry->second.m_NumSamples);
 				datasize += iAOVEntry->second.m_NumSamples;
 				// Record any applied quantization for this data type.
 				pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", iAOVEntry->first.c_str() );
 				if( pQuant )
 				{
-					TiXmlElement* pappliedquant = new TiXmlElement("aqsis:appliedquant");
-					pappliedquant->SetDoubleAttribute("one", pQuant[0]);
-					pappliedquant->SetDoubleAttribute("min", pQuant[1]);
-					pappliedquant->SetDoubleAttribute("max", pQuant[2]);
-					pappliedquant->SetDoubleAttribute("dither", pQuant[3]);
-					pdataelem->InsertEndChild(*pappliedquant);
+					TiXmlElement appliedquant("aqsis:appliedquant");
+					appliedquant.SetDoubleAttribute("one", pQuant[0]);
+					appliedquant.SetDoubleAttribute("min", pQuant[1]);
+					appliedquant.SetDoubleAttribute("max", pQuant[2]);
+					appliedquant.SetDoubleAttribute("dither", pQuant[3]);
+					dataelem.InsertEndChild(appliedquant);
 				}
-				datalist.InsertEndChild(*pdataelem);
+				datalist.InsertEndChild(dataelem);
 			}
 			format.SetAttribute("elementsize", ToString(datasize).c_str());
 			format.InsertEndChild(datalist);
+			// Add elements for the matrices for shadow map storage
+	        CqMatrix matWorldToCamera = QGetRenderContext() ->matSpaceToSpace( "world", "camera", CqMatrix(), CqMatrix(), QGetRenderContextI()->Time() );
+	        CqMatrix matWorldToScreen = QGetRenderContext() ->matSpaceToSpace( "world", "screen", CqMatrix(), CqMatrix(), QGetRenderContextI()->Time() );
+		    if ( matWorldToCamera.fIdentity() ) matWorldToCamera.Identity();
+			if ( matWorldToScreen.fIdentity() ) matWorldToScreen.Identity();
+			TiXmlElement matrixList("aqsis:matrixlist");
+			TiXmlElement matWtoCElement("aqsis:matrix");
+			CreateXMLMatrix(matWorldToCamera, matWtoCElement);
+			matWtoCElement.SetAttribute("type", "worldtocamera");
+			matrixList.InsertEndChild(matWtoCElement);
+			TiXmlElement matWtoSElement("aqsis:matrix");
+			CreateXMLMatrix(matWorldToScreen, matWtoSElement);
+			matWtoSElement.SetAttribute("type", "worldtoscreen");
+			matrixList.InsertEndChild(matWtoSElement);
+			format.InsertEndChild(matrixList);
+			
 			root.InsertEndChild(format);
 			doc.InsertEndChild(root);
 
-			//doc.Print(stdout);
+			// doc.Print(stdout);
 
 			std::ostringstream strFormat;
 			strFormat << doc;
