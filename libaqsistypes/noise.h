@@ -64,7 +64,7 @@ class CqNoise
 public:
     CqNoise()
     {
-        init( 665 );
+        init( 665);
     }
     ~CqNoise()
     {}
@@ -73,37 +73,49 @@ public:
     static	TqFloat	FGNoise2( TqFloat x, TqFloat y );
     static	TqFloat	FGNoise3( const CqVector3D& v )
     {
-        return ( FGNoise3( v.x(), v.y(), v.z() ) );
+	TqFloat a, b, c;
+	a = v.x();
+	b = v.y();
+	c = v.z();
+        return ( FGNoise3( a, b, c));
     }
     static	TqFloat	FGNoise3( TqFloat x, TqFloat y, TqFloat z );
 
     static	CqVector3D	PGNoise1( TqFloat x )
     {
-        CqVector3D res(
-            FGNoise1( x + P1x ),
-            FGNoise1( x + P2x ),
-            FGNoise1( x + P3x ) );
-        return ( res );
+	TqFloat a, b, c;
+        a = FGNoise1( x + P1x );
+        b = FGNoise1( x + P2x );
+        c = FGNoise1( x + P3x );
+
+        return (CqVector3D(a,b,c));
     }
     static	CqVector3D	PGNoise2( TqFloat x, TqFloat y )
     {
-        CqVector3D res(
-            FGNoise2( x + P1x, y + P1y ),
-            FGNoise2( x + P2x, y + P2y ),
-            FGNoise2( x + P3x, y + P3y ) );
-        return ( res );
+	TqFloat a, b, c;
+        a = FGNoise2( x + P1x , y + P1y);
+        b = FGNoise2( x + P2x , y + P2y);
+        c = FGNoise2( x + P3x , y + P3y);
+
+        return (CqVector3D(a,b,c));
     }
     static	CqVector3D	PGNoise3( const CqVector3D& v )
     {
-        return ( PGNoise3( v.x(), v.y(), v.z() ) );
+	TqFloat a, b, c;
+	a = v.x();
+	b = v.y();
+	c = v.z();
+
+        return ( PGNoise3( a, b, c));
     }
     static	CqVector3D	PGNoise3( TqFloat x, TqFloat y, TqFloat z )
     {
-        CqVector3D res(
-            FGNoise3( x + P1x, y + P1y, z + P1z ),
-            FGNoise3( x + P2x, y + P2y, z + P2z ),
-            FGNoise3( x + P3x, y + P3y, z + P3z ) );
-        return ( res );
+	TqFloat a,b,c;
+        a = FGNoise3( x + P1x, y + P1y, z + P1z );
+        b = FGNoise3( x + P2x, y + P2y, z + P2z );
+        c = FGNoise3( x + P3x, y + P3y, z + P3z );
+
+        return (CqVector3D (a,b,c));
     }
 
     static	CqColor	CGNoise1( TqFloat x )
@@ -116,7 +128,12 @@ public:
     }
     static	CqColor	CGNoise3( const CqVector3D& v )
     {
-        return ( CGNoise3( v.x(), v.y(), v.z() ) );
+	TqFloat a,b,c;
+        a = v.x();
+        b = v.y();
+        c = v.z();
+
+        return ( CGNoise3( a, b, c));
     }
     static	CqColor	CGNoise3( TqFloat x, TqFloat y, TqFloat z )
     {

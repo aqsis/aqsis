@@ -59,7 +59,7 @@ TqFloat	CqNoise::m_g1[ NOISE_B + NOISE_B + 2 ];
 /*
  * table of random numbers 
  */
-static TqFloat randtable[] = {
+static TqDouble randtable[] = {
                                  0.80874050111, 0.19330423902, 0.56358531449, 0.00125125889,
                                  0.89596240120, 0.35029145177, 0.47987304300, 0.58500930815,
                                  0.85894344920, 0.17410809656, 0.74660481582, 0.82284005249,
@@ -739,13 +739,11 @@ TqFloat CqNoise::FGNoise3( TqFloat x, TqFloat y, TqFloat z )
 void CqNoise::init( TqInt seed )
 {
     TqInt i, j, k, result;
-    CqRandom m_random;
 
 
     if ( erp == 0 )
     {
-        m_random.Reseed( seed );
-        result = sizeof( randtable ) / sizeof( float );
+        result = sizeof( randtable ) / sizeof( TqDouble );
         erp = result - 1;
 
         for ( i = 0; i < NOISE_B; i++ )

@@ -86,6 +86,8 @@ TqBool	ValidateState(...);
 //	Renderman Interface SPECification (C) 1988 Pixar.
 //
 
+CqRandom worldrand;
+
 //---------------------------------------------------------------------
 // Interface parameter token strings.
 
@@ -502,6 +504,10 @@ RtVoid	RiFrameBegin( RtInt number )
     QGetRenderContext() ->BeginFrameModeBlock();
     QGetRenderContext() ->SetCurrentFrame( number );
     CqCSGTreeNode::SetRequired( TqFalse );
+
+
+    worldrand.Reseed('a'+'q'+'s'+'i'+'s');
+
     return ;
 }
 
@@ -601,6 +607,8 @@ RtVoid	RiWorldBegin()
 
     QGetRenderContext() ->optCurrent().InitialiseCamera();
     QGetRenderContext() ->pImage() ->SetImage();
+
+    worldrand.Reseed('a'+'q'+'s'+'i'+'s');
 
     return ;
 }
