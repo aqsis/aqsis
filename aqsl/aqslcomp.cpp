@@ -62,9 +62,9 @@ ArgParse::apstringvec g_undefines; // Filled in with strings to pass to the prep
 void version( std::ostream& Stream )
 {
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-	Stream << "aqslcomp version " << VERSION_STR << std::endl;
+	Stream << "aqsl version " << VERSION_STR << std::endl;
 #else
-	Stream << "aqslcomp version " << VERSION << std::endl;
+	Stream << "aqsl version " << VERSION << std::endl;
 #endif
 }
 
@@ -89,7 +89,7 @@ int main( int argc, const char** argv )
 	CqCodeGenVM codegen; // Should be a pointer determined by what we want to generate
 	bool error = false; ///! Couldn't compile shader
 
-	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options]" );
+	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] <filename>" );
 	ap.argString( "o", " %s \aspecify output filename", &g_stroutname );
 	ap.argStrings( "i", "%s \aSet path for #include files.", &g_includes );
 	ap.argStrings( "I", "%s \aSet path for #include files.", &g_includes );
