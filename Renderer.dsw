@@ -138,9 +138,6 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name librib2
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name librib2ri
     End Project Dependency
     Begin Project Dependency
@@ -157,6 +154,9 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libshaderexecenv
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name librib_shared
     End Project Dependency
 }}}
 
@@ -384,7 +384,7 @@ Package=<4>
     Project_Dep_Name librib2ri
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name librib2
+    Project_Dep_Name librib_shared
     End Project Dependency
 }}}
 
@@ -490,6 +490,18 @@ Package=<4>
 ###############################################################################
 
 Project: "librib2stream"=.\librib2stream\librib2stream.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "librib_shared"=.\LIBRIB2\librib_shared.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

@@ -124,8 +124,11 @@ class Engine :
 		virtual	RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[] );
 		virtual	RtVoid	RiWorldBegin();
 		virtual	RtVoid	RiWorldEnd();
-};
 
+		virtual RtFilterFunc	GetFilterFunction(RtToken type);
+		virtual RtBasis*		GetBasisMatrix(RtToken type);
+		virtual	RtFunc			GetProceduralFunction(RtToken type);
+	};
 }
 ; // namespace librib2ri
 

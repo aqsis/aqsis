@@ -450,41 +450,20 @@ RendermanInterface::RtVoid Stream::RiWorldEnd()
 	m_Stream << "RiWorldEnd()" << std::endl;
 }
 
+RendermanInterface::RtFilterFunc Stream::GetFilterFunction(RtToken type)
+{
+	m_Stream << "Filter: " << type << std::endl;
+	return(NULL);
 }
-; // namespace librib2stream
+RendermanInterface::RtBasis* Stream::GetBasisMatrix(RtToken type)
+{
+	m_Stream << "Filter: " << type << std::endl;
+	return(NULL);
+}
+RendermanInterface::RtFunc Stream::GetProceduralFunction(RtToken type)
+{
+	m_Stream << "Filter: " << type << std::endl;
+	return(NULL);
+}
 
-
-RtFloat RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
-{
-	return ( 0.0 );
 }
-RtFloat RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
-{
-	return ( 0.0 );
-}
-RtFloat RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
-{
-	return ( 0.0 );
-}
-RtFloat RiDiskFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
-{
-	return ( 0.0 );
-}
-RtFloat RiGaussianFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
-{
-	return ( 0.0 );
-}
-RtFloat RiSincFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
-{
-	return ( 0.0 );
-}
-RtFloat RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
-{
-	return ( 0.0 );
-}
-RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
-{}
-RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
-{}
-RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
-{}

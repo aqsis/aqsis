@@ -125,6 +125,10 @@ class Stream :
 		virtual	RtVoid	RiWorldBegin();
 		virtual	RtVoid	RiWorldEnd();
 
+		virtual RtFilterFunc	GetFilterFunction(RtToken type) = 0;
+		virtual RtBasis*		GetBasisMatrix(RtToken type) = 0;
+		virtual	RtFunc			GetProceduralFunction(RtToken type) = 0;
+
 	private:
 		std::ostream& m_Stream;
 		unsigned int m_CurrentLightHandle;

@@ -34,7 +34,6 @@ namespace librib
 {
 
 void ParserDeclare(librib::RendermanInterface& CallbackInterface, const std::string Name, const std::string Type);
-void ParserBasisFromName( RtBasis*& b, const char* name);
 extern std::string ParseStreamName;
 extern RendermanInterface* ParseCallbackInterface;
 extern std::ostream* ParseErrorStream;
@@ -378,14 +377,7 @@ complete_request
 			{ ParseCallbackInterface->RiPixelSamples($2, $3); }
 	|	pixelfilter string float float
 			{
-				RendermanInterface::RtFilterFunc pFilter=RiGaussianFilter;
-				// TODO: names shoudl be stored elsewhere.
-				if(strcmp($2,"box")==0)		pFilter=RiBoxFilter;
-				if(strcmp($2,"triangle")==0)	pFilter=RiTriangleFilter;
-				if(strcmp($2,"sinc")==0)		pFilter=RiSincFilter;
-				if(strcmp($2,"catmull-rom")==0) pFilter=RiCatmullRomFilter;
-				if(strcmp($2,"disk")==0)		pFilter=RiDiskFilter;
-				if(strcmp($2,"bessel")==0)		pFilter=RiBesselFilter;
+				RendermanInterface::RtFilterFunc pFilter=ParseCallbackInterface->GetFilterFunction($2);
 				ParseCallbackInterface->RiPixelFilter(pFilter, $3, $4);
 
 				DiscardStringValue($2);
@@ -780,12 +772,8 @@ complete_request
 		    
 		        if($4->Count() != 6)
 		           yyerror("Expecting 6 Values");
-                if (strcmp($2, "RunProgram") == 0)
-                   ParseCallbackInterface->RiProcedural($3, &(*$4)[0], (void (*)(void ) ) RiProcRunProgram, NULL);
-		        if (strcmp($2, "DelayedReadArchive") == 0)
-                   ParseCallbackInterface->RiProcedural($3, &(*$4)[0], (void (*)(void ) ) RiProcDelayedReadArchive, NULL);
-		        if (strcmp($2, "DynamicLoad") == 0)
-                   ParseCallbackInterface->RiProcedural($3, &(*$4)[0], (void (*)(void ) ) RiProcDynamicLoad, NULL);
+                RendermanInterface::RtFunc pFunc = ParseCallbackInterface->GetProceduralFunction($2);
+				ParseCallbackInterface->RiProcedural($3, &(*$4)[0], (void (*)(void ) ) pFunc, NULL);
                 DiscardStringValue($2);
                 DiscardStringValue($3);
                 DiscardArrayValue($4); 
@@ -824,9 +812,8 @@ complete_request
 	|	basis string integer string integer
 			{
 
-				RendermanInterface::RtBasis *u = &RiBezierBasis, *v = &RiBezierBasis;
-				ParserBasisFromName(u, $2);
-				ParserBasisFromName(v, $4);
+				RendermanInterface::RtBasis *u=ParseCallbackInterface->GetBasisMatrix($2);
+				RendermanInterface::RtBasis *v=ParseCallbackInterface->GetBasisMatrix($4);
 				ParseCallbackInterface->RiBasis(*u, $3, *v, $5);
 				DiscardStringValue($2);
 				DiscardStringValue($4);
@@ -837,13 +824,13 @@ complete_request
 
 				if($4->Count() == 16)
 					{
-						RtBasis *u,v;
+						RtBasis v;
 						int i,j;
 						for(i=0; i<4; i++)
 							for(j=0; j<4; j++)
 								v[i][j]=(*$4)[(i*4)+j];
 
-						ParserBasisFromName(u, $2);
+						RendermanInterface::RtBasis *u=ParseCallbackInterface->GetBasisMatrix($2);
 						ParseCallbackInterface->RiBasis(*u, $3,v, $5);
 					}
 				else
@@ -860,13 +847,13 @@ complete_request
 				if($2->Count() == 16)
 					{
 
-						RtBasis u,*v;
+						RtBasis u;
 						int i,j;
 						for(i=0; i<4; i++)
 							for(j=0; j<4; j++)
 								u[i][j]=(*$2)[(i*4)+j];
 
-						ParserBasisFromName(v, $4);
+						RendermanInterface::RtBasis *v=ParseCallbackInterface->GetBasisMatrix($4);
 						ParseCallbackInterface->RiBasis(u, $3,*v, $5);
 					}
 				else
@@ -1017,57 +1004,25 @@ complete_request
 			{ ParseCallbackInterface->RiMotionEnd(); }
 	|	maketexture	string string string string string float float opttvpairs
 			{
-				RendermanInterface::RtFilterFunc pFilter=RiGaussianFilter;
-				// TODO: names shoudl be stored elsewhere.
-				if(strcmp($6,"box")==0)		pFilter=RiBoxFilter;
-				if(strcmp($6,"triangle")==0)	pFilter=RiTriangleFilter;
-				if(strcmp($6,"sinc")==0)		pFilter=RiSincFilter;
-				if(strcmp($6,"catmull-rom")==0) pFilter=RiCatmullRomFilter;
-				if(strcmp($6,"disk")==0)		pFilter=RiDiskFilter;
-				if(strcmp($6,"bessel")==0)		pFilter=RiBesselFilter;
-
+				RendermanInterface::RtFilterFunc pFilter=ParseCallbackInterface->GetFilterFunction($6);
 				ParseCallbackInterface->RiMakeTextureV((char*)($2), (char*)($3), (char*)($4), (char*)($5), pFilter, $7, $8,
 														$9->Count(), $9->Tokens(), $9->Values());
 			}
 	|	makebump string string string string string float float opttvpairs
 			{
-				RendermanInterface::RtFilterFunc pFilter=RiGaussianFilter;
-				// TODO: names shoudl be stored elsewhere.
-				if(strcmp($6,"box")==0)			pFilter=RiBoxFilter;
-				if(strcmp($6,"triangle")==0)	pFilter=RiTriangleFilter;
-				if(strcmp($6,"sinc")==0)		pFilter=RiSincFilter;
-				if(strcmp($6,"catmull-rom")==0) pFilter=RiCatmullRomFilter;
-				if(strcmp($6,"disk")==0) pFilter=RiDiskFilter;
-				if(strcmp($6,"bessel")==0) pFilter=RiBesselFilter;
-
+				RendermanInterface::RtFilterFunc pFilter=ParseCallbackInterface->GetFilterFunction($6);
 				ParseCallbackInterface->RiMakeBumpV((char*)($2), (char*)($3),(char*)($4), (char*)($5),pFilter,$7, $8,
 													$9->Count(), $9->Tokens(), $9->Values());
 			}
 	|	makelatlongenvironment string string string float float opttvpairs
 			{
-				RendermanInterface::RtFilterFunc pFilter=RiGaussianFilter;
-				// TODO: names shoudl be stored elsewhere.
-				if(strcmp($4,"box")==0)		pFilter=RiBoxFilter;
-				if(strcmp($4,"triangle")==0)	pFilter=RiTriangleFilter;
-				if(strcmp($4,"sinc")==0)		pFilter=RiSincFilter;
-				if(strcmp($4,"catmull-rom")==0) pFilter=RiCatmullRomFilter;
-				if(strcmp($4,"disk")==0)		pFilter=RiDiskFilter;
-				if(strcmp($4,"bessel")==0)		pFilter=RiBesselFilter;
-
+				RendermanInterface::RtFilterFunc pFilter=ParseCallbackInterface->GetFilterFunction($4);
 				ParseCallbackInterface->RiMakeLatLongEnvironmentV((char*)($2), (char*)($3),pFilter,$5, $6,
 																$7->Count(), $7->Tokens(), $7->Values());
 			}
 	|	makecubefaceenvironment	string string string string string string string float string float float opttvpairs
 			{
-				RendermanInterface::RtFilterFunc pFilter=RiGaussianFilter;
-				// TODO: names should be stored elsewhere.
-				if(strcmp($10,"box")==0)		pFilter=RiBoxFilter;
-				if(strcmp($10,"triangle")==0)	pFilter=RiTriangleFilter;
-				if(strcmp($10,"sinc")==0)		pFilter=RiSincFilter;
-				if(strcmp($10,"catmull-rom")==0) pFilter=RiCatmullRomFilter;
-				if(strcmp($10,"disk")==0)		pFilter=RiDiskFilter;
-				if(strcmp($10,"bessel")==0)		pFilter=RiBesselFilter;
-
+				RendermanInterface::RtFilterFunc pFilter=ParseCallbackInterface->GetFilterFunction($10);
 				ParseCallbackInterface->RiMakeCubeFaceEnvironmentV(
 							 (char*)($2), (char*)($3),
 							 (char*)($4), (char*)($5),
@@ -1804,16 +1759,6 @@ void ParserDeclare(librib::RendermanInterface& CallbackInterface, const std::str
 		yyerror("RiDeclare: Unknown type [" + Name + ", " + Type + "]");
 		
 	CallbackInterface.RiDeclare(Name.c_str(), Type.c_str());
-}
-
-void ParserBasisFromName( RtBasis*& b, const char* name)
-{
-	// TODO: names should be stored elsewhere.
-	if(strcmp(name,"bezier")==0)			b=&RiBezierBasis;
-	else if(strcmp(name,"b-spline")==0)		b=&RiBSplineBasis;
-	else if(strcmp(name,"catmull-rom")==0)	b=&RiCatmullRomBasis;
-	else if(strcmp(name,"hermite")==0)		b=&RiHermiteBasis;
-	else if(strcmp(name,"power")==0)		b=&RiPowerBasis;
 }
 
 }; // namespace librib

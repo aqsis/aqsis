@@ -34,9 +34,9 @@ class CqRIBParserState
 };
 
 /// Retrieve the current state of the parser internal variables
-CqRIBParserState GetParserState();
+_qShareM CqRIBParserState GetParserState();
 /// Retrieve the current state of the parser internal variables
-void SetParserState( CqRIBParserState& state);
+_qShareM void SetParserState( CqRIBParserState& state);
 
 }
 
