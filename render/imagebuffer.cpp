@@ -384,21 +384,7 @@ TqBool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqBasicSurfa
         if ( ( nextBucket < cXBuckets() ) &&
                 ( RasterBound.vecMax().x() >= pos.x() ) )
         {
-            // Here, pSurface is unlinked from the list in the
-            //  current bucket, and then added to the list in
-            //  the next bucket.  When pSurface is added to the
-            //  next bucket, it gets a new reference (with
-            //  ADDREF()), so its original bucket reference
-            //  needs to be removed.  However, this original
-            //  reference must be removed *after* the new one
-            //  has been added to stop the surface from being
-            //  deleted. - Jonathan Merritt.
-            CqString objname( "unnamed" );
-            const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
-            if( pattrName )	objname = *pattrName;
-            std::cerr << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
-            Bucket( nextBucket, CurrentBucketRow() ).AddGPrim( pSurface );
-            STATS_INC( GPR_culled );
+			Bucket( nextBucket, CurrentBucketRow() ).AddGPrim( pSurface );
             return TqTrue;
         }
 
@@ -413,17 +399,11 @@ TqBool CqImageBuffer::OcclusionCullSurface( const boost::shared_ptr<CqBasicSurfa
                 ( nextBucket  < cYBuckets() ) &&
                 ( RasterBound.vecMax().y() >= pos.y() ) )
         {
-            // See above for comments... - Jonathan Merritt.
-            CqString objname( "unnamed" );
-            const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
-            if( pattrName )	objname = *pattrName;
-            std::cerr << info << "GPrim: \"" << objname << "\" occlusion culled" << std::endl;
             Bucket( nextBucketX, nextBucket ).AddGPrim( pSurface );
-            STATS_INC( GPR_culled );
             return TqTrue;
         }
 
-        // Bound covers no more buckets
+        // Bound covers no more buckets therefore we can delete the surface completely.
         CqString objname( "unnamed" );
         const CqString* pattrName = pSurface->pAttributes() ->GetStringAttribute( "identifier", "name" );
         if( pattrName )	objname = *pattrName;
@@ -1137,14 +1117,20 @@ inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2
 
 void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
 {
-    TqBool bIsEmpty = IsCurrentBucketEmpty();
+	TqBool bIsEmpty = IsCurrentBucketEmpty();
 
     // Render any waiting micro polygon grids.
     QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
     RenderMPGs( xmin, xmax, ymin, ymax );
     QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
 
-    CqBucket& Bucket = CurrentBucket();
+    QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
+    // Update our occlusion hierarchy after drawing.
+    if ( !bIsEmpty )
+        CqOcclusionBox::Update();
+    QGetRenderContext() ->Stats().OcclusionCullTimer().Stop();
+
+	CqBucket& Bucket = CurrentBucket();
 
     // Render any waiting subsurfaces.
     boost::shared_ptr<CqBasicSurface> pSurface = Bucket.pTopSurface();
