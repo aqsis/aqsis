@@ -56,7 +56,7 @@ enum EqState
 class CqStatTimer
 {
 	public:
-		CqStatTimer() : m_timeStart( 0 ), m_timeTotal( 0 ), m_fStarted( TqFalse )
+		CqStatTimer() : m_timeStart( 0 ), m_timeTotal( 0 ), m_cStarted( 0 )
 		{}
 		~CqStatTimer()
 		{}
@@ -73,33 +73,33 @@ class CqStatTimer
 		 */
 		void	Start()
 		{
-			assert( !m_fStarted );
-			m_timeStart = clock();
-			m_fStarted = TqTrue;
+			if( m_cStarted == 0)
+				m_timeStart = clock();
+			m_cStarted++;
 		}
 
 		/** Stop the timer and update the total time for this timer. Asserts that the timer was actually running.
 		 */
 		void	Stop()
 		{
-			assert( m_fStarted );
-			m_timeTotal += clock() - m_timeStart;
-			m_fStarted = TqFalse;
+			assert( m_cStarted > 0 );
+			m_cStarted--;
+			if( m_cStarted == 0 )
+				m_timeTotal += clock() - m_timeStart;
 		}
 
 		/** Reset the total time for this timer, asserts that the timer is not running.
 		 */
 		void	Reset()
 		{
-			assert( !m_fStarted );
 			m_timeTotal = 0;
-			m_fStarted = TqFalse;
+			m_cStarted = 0;
 		}
 
 	private:
 		clock_t	m_timeStart;		///< Time at which the current interval started.
 		clock_t	m_timeTotal;		///< Total time recorded by this timer.
-		TqBool	m_fStarted;			///< Flag indicating whether this timer is recording an interval.
+		TqInt	m_cStarted;		///< Count of how many times the timer has been started.
 }
 ;
 
