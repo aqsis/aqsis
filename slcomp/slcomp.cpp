@@ -34,7 +34,6 @@
 
 #include	"parsenode.h"
 #include	"ri.h"
-#include	"shadervariable.h"
 #include	"version.h"
 #include	"vmoutput.h"
 #include	"sstring.h"
@@ -65,7 +64,7 @@ int main(int argc, char* argv[])
 	}
 	strcpy(iName,argv[i]);
 
-	std::cout << "Compiling : " << iName << std::endl;
+	std::cout << "Compiling : " << iName;
 
 	// Call slpp to preprocess the source file.
 	PROCESS_INFORMATION ProcInf;
@@ -98,13 +97,11 @@ int main(int argc, char* argv[])
 
 	if(result)
 	{
-//		char oName[256];
-//		strcpy(oName,static_cast<CqParseNodeShader*>(theCompiler.pParseTree())->strName());
-//		strcat(oName,RI_SHADER_EXTENSION);
 		CqString oName(iName);
-		oName.substr(0,oName.find_last_of('.'));
+		oName=oName.substr(0,oName.find_last_of('.'));
 		oName.append(RI_SHADER_EXTENSION);
 		std::ofstream ofile(oName.c_str());
+		std::cout << " --> " << oName.c_str() << std::endl;
 
 		OutputTree(GetParseTree(),ofile);
 	}

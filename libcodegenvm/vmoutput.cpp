@@ -29,6 +29,7 @@
 #include	"vmoutput.h"
 
 #include	"parsenode.h"
+#include	"version.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -207,7 +208,7 @@ void OutputTreeNode(const IqParseNode* pNode, std::ostream& out)
 		out << pS->strShaderType() << std::endl;
 
 		// Output version information.
-		out << "AQSIS_V " << /*VERSION_STR <<*/ std::endl;
+		out << "AQSIS_V " << VERSION_STR << std::endl;
 
 		out << std::endl << std::endl << "segment Data" << std::endl;
 
