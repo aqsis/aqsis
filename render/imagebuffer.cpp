@@ -482,7 +482,27 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 	// If the bucket is less than the current, see if it fits in the current bucket, this
 	// should allow for trimmed u-polys that lie on a bucket boundary, as is the case with
 	// bilinear patches with 3 points.
+
 	if ( iBkt < iCurrentBucket() )
+	{
+		CqVector2D BucketMin = Position( iCurrentBucket() );
+		CqVector2D BucketMax = BucketMin + Size( iCurrentBucket() );
+		if ((( B.vecMax().x() >= BucketMin.x() ) &&
+			 ( B.vecMax().y() >= BucketMin.y() )) ||
+			 ( B.vecMax().y() >= BucketMax.y() ) )
+
+		{
+			if ( PushMPGDown( pmpgNew, iBkt ) ) STATS_INC( MPG_pushed_down );
+			if (B.vecMax().x() < BucketMin.x()) 
+			{
+				RELEASEREF( pmpgNew );
+				return ;
+			}
+			iBkt = iCurrentBucket();
+			pmpgNew->MarkPushedForward();
+		}
+	} 
+/*	if ( iBkt < iCurrentBucket() )
 	{
 		CqVector2D BucketMin = Position( iCurrentBucket() );
 		CqVector2D BucketMax = BucketMin + Size( iCurrentBucket() );
@@ -500,7 +520,7 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 			RELEASEREF( pmpgNew );
 			return ;
 		}
-	}
+	}*/
 
 	assert( iBkt >= iCurrentBucket() );
 	if ( ( iBkt >= iCurrentBucket() ) && ( iBkt < ( m_cXBuckets * m_cYBuckets ) ) )
