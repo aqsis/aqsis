@@ -75,11 +75,7 @@ CqRenderer::CqRenderer() :
 	m_aCoordSystems[CoordSystem_NDC]	.m_strName="NDC";
 	m_aCoordSystems[CoordSystem_Raster]	.m_strName="raster";
 
-#ifdef	AQSIS_SYSTEM_WIN32
-	m_pDDManager = new CqDDManager;
-#else // AQSIS_SYSTEM_WIN32
 	m_pDDManager = CreateDisplayDriverManager(); 
-#endif // !AQSIS_SYSTEM_WIN32
 	m_pDDManager->Initialise();
 }
 
