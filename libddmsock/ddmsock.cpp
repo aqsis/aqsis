@@ -42,6 +42,8 @@
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
+#include <errno.h>
 
 static const int INVALID_SOCKET = -1;
 static const int SD_BOTH = 2;
@@ -61,6 +63,21 @@ typedef sockaddr* PSOCKADDR;
 
 
 START_NAMESPACE( Aqsis )
+
+#ifdef AQSIS_SYSTEM_POSIX
+
+/// Handle cleanup of child processes
+void sig_chld(int signo)
+{
+	pid_t pid;
+	int stat;
+
+	while ((pid = waitpid(-1, &stat, WNOHANG)) > 0);
+
+	return;
+}
+
+#endif // AQSIS_SYSTEM_POSIX
 
 /// Required function that implements Class Factory design pattern for DDManager libraries
 IqDDManager* CreateDisplayDriverManager()
