@@ -42,6 +42,7 @@
 #include	"ishaderdata.h"
 #include	"motion.h"
 #include	"csgtree.h"
+#include	"refcount.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -100,7 +101,7 @@ class CqMicroPolyGridBase
  * Class which stores a grid of micropolygons.
  */
 
-class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqShaderExecEnv
+class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 {
 	public:
 		CqMicroPolyGrid();
@@ -137,23 +138,6 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqShaderExecEnv
 		
 		void	Initialise( TqInt cu, TqInt cv, CqSurface* pSurface );
 
-		/** Increase the count of references to this grid.
-		 */
-		void	AddRef()
-		{
-			m_cReferences++;
-		}
-		/** Decrease the count of references to this grid. Delete it if no more references.
-		 */
-		void	Release()
-		{
-			assert( m_cReferences > 0 );
-			m_cReferences--;
-			if ( m_cReferences == 0 )
-				delete( this );
-
-		}
-
 		// Overrides from CqMicroPolyGridBase
 		virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
 		virtual void	Project();
@@ -164,7 +148,8 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqShaderExecEnv
 		 */
 		virtual CqSurface*	pSurface() const
 		{
-			return ( CqShaderExecEnv::pSurface() );
+			assert( NULL != m_pShaderExecEnv );
+			return ( m_pShaderExecEnv->pSurface() );
 		}
 		virtual	CqAttributes* pAttributes() const
 		{
@@ -175,12 +160,50 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqShaderExecEnv
 			return ( m_pCSGNode );
 		}
 
+		TqBool	vfCulled() const
+		{
+			return(m_vfCulled);
+		}
+
+		// Redirect acces via IqShaderExecEnv
+		virtual	TqInt	uGridRes() const	{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->uGridRes() ); }
+		virtual	TqInt	vGridRes() const	{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->vGridRes() ); }
+		virtual	TqInt	GridSize() const	{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->GridSize() ); }
+		virtual	const CqMatrix&	matObjectToWorld() const { assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->matObjectToWorld() ); }
+		virtual	IqShaderData* Cs()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Cs() ); }
+		virtual	IqShaderData* Os()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Os() ); }
+		virtual	IqShaderData* Ng()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Ng() ); }
+		virtual	IqShaderData* du()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->du() ); }
+		virtual	IqShaderData* dv()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->dv() ); }
+		virtual	IqShaderData* L()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->L() ); }
+		virtual	IqShaderData* Cl()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Cl() ); }
+		virtual IqShaderData* Ol()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Ol() ); }
+		virtual IqShaderData* P()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->P() ); }
+		virtual IqShaderData* dPdu()		{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->dPdu() ); }
+		virtual IqShaderData* dPdv()		{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->dPdv() ); }
+		virtual IqShaderData* N()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->N() ); }
+		virtual IqShaderData* u()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->u() ); }
+		virtual IqShaderData* v()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->v() ); }
+		virtual IqShaderData* s()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->s() ); }
+		virtual IqShaderData* t()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->t() ); }
+		virtual IqShaderData* I()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->I() ); }
+		virtual IqShaderData* Ci()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Ci() ); }
+		virtual IqShaderData* Oi()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Oi() ); }
+		virtual IqShaderData* Ps()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Ps() ); }
+		virtual IqShaderData* E()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->E() ); }
+		virtual IqShaderData* ncomps()		{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->ncomps() ); }
+		virtual IqShaderData* time()		{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->time() ); }
+		virtual IqShaderData* alpha()		{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->alpha() ); }
+		
+
 	private:
 		TqBool	m_bShadingNormals;		///< Flag indicating shading normals have been filled in and don't need to be calculated during shading.
 		TqBool	m_bGeometricNormals;	///< Flag indicating geometric normals have been filled in and don't need to be calculated during shading.
-		TqInt	m_cReferences;		///< Count of references to this grid.
 		CqAttributes* m_pAttributes;	///< Pointer to the attributes for this grid.
 		CqCSGTreeNode* m_pCSGNode;	///< Pointer to the CSG tree node this grid belongs to, NULL if not part of a solid.
+		IqShaderExecEnv* m_pShaderExecEnv;	///< Pointer to the shader execution environment for this grid.
+	protected:
+		TqBool	m_vfCulled;			///< Shader variable indicating whether the individual micropolys are culled.
 }
 ;
 

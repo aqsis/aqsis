@@ -37,7 +37,8 @@ START_NAMESPACE( Aqsis )
 
 CqImagersource::CqImagersource( IqShader* pShader, TqBool fActive ) :
 		m_pShader( pShader ),
-		m_pAttributes( 0 )
+		m_pAttributes( NULL ),
+		m_pShaderExecEnv( NULL )
 {
 
 	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
@@ -54,6 +55,10 @@ CqImagersource::~CqImagersource()
 	if ( m_pAttributes )
 		m_pAttributes->Release();
 	m_pAttributes = 0;
+
+	/// \note This should delete through the interface that created it.
+	if( NULL != m_pShaderExecEnv )	
+		delete( m_pShaderExecEnv );
 }
 
 //---------------------------------------------------------------------
@@ -85,7 +90,13 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 	components = mode & ModeZ ? 1 : components;
 
 	TqInt Uses = ( 1 << EnvVars_P ) | ( 1 << EnvVars_Ci ) | ( 1 << EnvVars_Oi | ( 1 << EnvVars_ncomps ) | ( 1 << EnvVars_time ) | ( 1 << EnvVars_alpha ) );
-	CqShaderExecEnv::Initialise( uGridRes, vGridRes, 0, m_pShader, Uses );
+
+	/// \note This should delete through the interface that created it.
+	if( NULL != m_pShaderExecEnv )	
+		delete( m_pShaderExecEnv );
+
+	m_pShaderExecEnv = new CqShaderExecEnv;
+	m_pShaderExecEnv->Initialise( uGridRes, vGridRes, 0, m_pShader, Uses );
 
 	// Initialise the geometric parameters in the shader exec env.
 
@@ -103,7 +114,7 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 	time()->SetFloat( shuttertime );
 
 
-	m_pShader->Initialise( uGridRes, vGridRes, this );
+	m_pShader->Initialise( uGridRes, vGridRes, m_pShaderExecEnv );
 	for ( j = 0; j < vGridRes; j++ )
 		for ( i = 0; i < uGridRes; i++ )
 		{
@@ -116,7 +127,7 @@ void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
 	// Execute the Shader VM
 	if ( m_pShader )
 	{
-		m_pShader->Evaluate( this );
+		m_pShader->Evaluate( m_pShaderExecEnv );
 		alpha()->SetFloat( 1.0f ); /* by default 3delight/bmrt set it to 1.0 */
 	}
 

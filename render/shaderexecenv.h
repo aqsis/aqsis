@@ -42,6 +42,7 @@
 #include	"ishader.h"
 #include	"ishaderexecenv.h"
 #include	"matrix.h"
+#include	"refcount.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -119,7 +120,7 @@ class CqSurface;
  * Standard shader execution environment. Contains standard variables, and provides SIMD functionality.
  */
 
-class CqShaderExecEnv : public IqShaderExecEnv
+class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 {
 	public:
 		CqShaderExecEnv();
@@ -376,8 +377,6 @@ class CqShaderExecEnv : public IqShaderExecEnv
 		TqInt	m_LocalIndex;			///< Local cached variable index to speed repeated access to the same local variable.
 
 	public:
-		TqInt	m_vfCulled;	///< Shader variable indicating whether the individual micropolys are culled.
-
 		virtual	TqBool	SO_init_illuminance();
 		virtual	TqBool	SO_advance_illuminance();
 
