@@ -30,6 +30,7 @@
 #include	<iostream>
 
 #include	"aqsis.h"
+#include	"vector3d.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -214,6 +215,275 @@ protected:
 ;
 
 //-----------------------------------------------------------------------
+
+//---------------------------------------------------------------------
+/** Copy constructor from 3D Vector.
+ */
+
+inline CqVector4D::CqVector4D( const CqVector3D &From )
+{
+    *this = From;
+}
+
+//---------------------------------------------------------------------
+/** Return magnitude squared of this vector.
+ */
+
+inline TqFloat CqVector4D::Magnitude2() const
+{
+    if ( m_h == 1.0 )
+        return ( ( m_x * m_x ) + ( m_y * m_y ) + ( m_z * m_z ) );
+    else
+        return ( ( ( m_x * m_x ) + ( m_y * m_y ) + ( m_z * m_z ) ) / ( m_h * m_h ) );
+}
+
+//---------------------------------------------------------------------
+/** Return magnitude of this vector.
+ */
+
+inline TqFloat CqVector4D::Magnitude() const
+{
+    return ( sqrt( Magnitude2() ) );
+}
+
+
+//---------------------------------------------------------------------
+/** Add a vector to this vector.
+ */
+
+inline CqVector4D &CqVector4D::operator+=( const CqVector4D &From )
+{
+    TqFloat Hom = m_h / From.m_h;
+
+    m_x += From.m_x * Hom;
+    m_y += From.m_y * Hom;
+    m_z += From.m_z * Hom;
+
+    return ( *this );
+}
+
+
+
+//---------------------------------------------------------------------
+/** Subtract a vector from this vector.
+ */
+
+inline CqVector4D &CqVector4D::operator-=( const CqVector4D &From )
+{
+    TqFloat Hom = m_h / From.m_h;
+
+    m_x -= From.m_x * Hom;
+    m_y -= From.m_y * Hom;
+    m_z -= From.m_z * Hom;
+
+    return ( *this );
+}
+
+//---------------------------------------------------------------------
+/** Dot product of two vectors.
+ */
+
+inline TqFloat operator*( const CqVector4D &a, const CqVector4D &From )
+{
+    CqVector4D	A( a );
+    CqVector4D	B( From );
+
+    A.Homogenize();
+    B.Homogenize();
+
+    return ( ( A.m_x * B.m_x ) +
+             ( A.m_y * B.m_y ) +
+             ( A.m_z * B.m_z ) );
+}
+
+
+//---------------------------------------------------------------------
+/** Cross product of two vectors.
+ */
+
+inline CqVector4D operator%( const CqVector4D &a, const CqVector4D &From )
+{
+    CqVector4D Temp( a );
+    Temp %= From;
+    return ( Temp );
+}
+
+
+//---------------------------------------------------------------------
+/** Sets this vector to be the cross product of itself and another vector.
+ */
+
+inline CqVector4D &CqVector4D::operator%=( const CqVector4D &From )
+{
+    CqVector4D	A( *this );
+    CqVector4D	B( From );
+
+    A.Homogenize();
+    B.Homogenize();
+
+    m_x = ( A.m_y * B.m_z ) - ( A.m_z * B.m_y );
+    m_y = ( A.m_z * B.m_x ) - ( A.m_x * B.m_z );
+    m_z = ( A.m_x * B.m_y ) - ( A.m_y * B.m_x );
+
+    return ( *this );
+}
+
+
+//---------------------------------------------------------------------
+/** Copy from specified 3D vector.
+ */
+
+inline CqVector4D &CqVector4D::operator=( const CqVector3D &From )
+{
+    m_x = From.x();
+    m_y = From.y();
+    m_z = From.z();
+    m_h = 1.0;
+
+    return ( *this );
+}
+
+
+//---------------------------------------------------------------------
+/** Scale this vector by the specifed scale factor.
+ */
+
+inline CqVector4D &CqVector4D::operator*=( const TqFloat Scale )
+{
+/*	if(Scale != 0.0)
+	{
+	    m_h /= Scale;
+	}
+	else
+	{
+		m_x = m_y = m_z = 0.0;
+	}
+*/
+
+	m_x *= Scale;
+	m_z *= Scale;
+	m_y *= Scale;
+
+    return ( *this );
+}
+
+
+
+//---------------------------------------------------------------------
+/** Divide this vector by the specifed scale factor.
+ */
+
+inline CqVector4D &CqVector4D::operator/=( const TqFloat Scale )
+{
+    m_h *= Scale;
+
+    return ( *this );
+}
+
+
+//---------------------------------------------------------------------
+/** Compare two vectors for equality.
+ */
+
+inline TqBool CqVector4D::operator==( const CqVector4D &Cmp ) const
+{
+/*    TqFloat Hom = m_h / Cmp.m_h;
+
+    return ( ( m_x == ( Cmp.m_x * Hom ) ) &&
+             ( m_y == ( Cmp.m_y * Hom ) ) &&
+             ( m_z == ( Cmp.m_z * Hom ) ) );
+*/
+
+	// exact equality of floats isn't actually very useful because of slight
+	// differences due to rounding errors. a fuzzy compare is generally more useful.
+	// if the vectors have different h values the above is unlikely to
+	// return true, so we might as well just test for exact equality of each component.
+	return ((m_x == Cmp.m_x) &&
+			(m_y == Cmp.m_y) &&
+			(m_z == Cmp.m_z) &&
+			(m_h == Cmp.m_h));
+}
+
+
+//---------------------------------------------------------------------
+/** Compare two vectors for inequality.
+ */
+
+inline TqBool CqVector4D::operator!=( const CqVector4D &Cmp ) const
+{
+    return ( !( *this == Cmp ) );
+}
+
+
+//---------------------------------------------------------------------
+/** Compare two vectors for greater than or equal.
+ */
+
+inline TqBool CqVector4D::operator>=( const CqVector4D &Cmp ) const
+{
+    TqFloat Hom = m_h / Cmp.m_h;
+
+    return ( ( m_x >= ( Cmp.m_x * Hom ) ) &&
+             ( m_y >= ( Cmp.m_y * Hom ) ) &&
+             ( m_z >= ( Cmp.m_z * Hom ) ) );
+}
+
+
+//---------------------------------------------------------------------
+/** Compare two vectors for less than or equal.
+ */
+
+inline TqBool CqVector4D::operator<=( const CqVector4D &Cmp ) const
+{
+    TqFloat Hom = m_h / Cmp.m_h;
+
+    return ( ( m_x <= ( Cmp.m_x * Hom ) ) &&
+             ( m_y <= ( Cmp.m_y * Hom ) ) &&
+             ( m_z <= ( Cmp.m_z * Hom ) ) );
+}
+
+
+//---------------------------------------------------------------------
+/** Compare two vectors for greater than.
+ */
+
+inline TqBool CqVector4D::operator>( const CqVector4D &Cmp ) const
+{
+    TqFloat Hom = m_h / Cmp.m_h;
+
+    return ( ( m_x > ( Cmp.m_x * Hom ) ) &&
+             ( m_y > ( Cmp.m_y * Hom ) ) &&
+             ( m_z > ( Cmp.m_z * Hom ) ) );
+}
+
+
+//---------------------------------------------------------------------
+/** Compare two vectors for less than.
+ */
+
+inline TqBool CqVector4D::operator<( const CqVector4D &Cmp ) const
+{
+    TqFloat Hom = m_h / Cmp.m_h;
+
+    return ( ( m_x < ( Cmp.m_x * Hom ) ) &&
+             ( m_y < ( Cmp.m_y * Hom ) ) &&
+             ( m_z < ( Cmp.m_z * Hom ) ) );
+}
+
+
+//----------------------------------------------------------------------
+/** Outputs a vector to an output stream.
+ * \param Stream Stream to output the matrix to.
+ * \param Vector The vector to output.
+ * \return The new state of Stream.
+ */
+
+inline std::ostream &operator<<( std::ostream &Stream, const CqVector4D &Vector )
+{
+    Stream << Vector.m_x << "," << Vector.m_y << "," << Vector.m_z << "," << Vector.m_h;
+    return ( Stream );
+}
+
 
 END_NAMESPACE( Aqsis )
 
