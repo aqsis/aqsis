@@ -36,6 +36,9 @@ Package=<4>
     Project_Dep_Name slpp
     End Project Dependency
     Begin Project Dependency
+    Project_Dep_Name texer
+    End Project Dependency
+    Begin Project Dependency
     Project_Dep_Name filebuffer
     End Project Dependency
     Begin Project Dependency
@@ -54,22 +57,10 @@ Package=<4>
     Project_Dep_Name shadowmap
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name teqser
+    Project_Dep_Name framebuffer_glut
     End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "Release Archive"=".\Release Archive\Release Archive.dsp" - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
     Begin Project Dependency
-    Project_Dep_Name All
+    Project_Dep_Name framebuffer_glut_z
     End Project Dependency
 }}}
 
@@ -371,27 +362,6 @@ Package=<5>
 
 Package=<4>
 {{{
-}}}
-
-###############################################################################
-
-Project: "teqser"=.\teqser\teqser.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name libaqsis
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libaqsistypes
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libddmsimple
-    End Project Dependency
 }}}
 
 ###############################################################################
