@@ -1654,7 +1654,9 @@ RtVoid RiArchiveRecord (RtToken type, char *format, ...)
 	}
 	std::string i(buffer);
 	delete[](buffer);
+	#ifdef  AQSIS_COMPILER_MSVC6
 	i+="/n";
+	#endif
 
 	va_end(args);
 	context.current().RiArchiveRecord(type, i);
