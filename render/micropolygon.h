@@ -458,7 +458,7 @@ public:
     }
     /** Release this micropolys reference to the donor grid.
      */
-    void	Detatch()
+    void	Detach()
     {
         if ( m_pGrid != 0 )
         {
@@ -757,14 +757,14 @@ private:
 
 
 //----------------------------------------------------------------------
-/** \class CqDetatchedMicroPolygon
- * Derivation of the CqMicroPolygon class, that doesn't refer to a grid for it's points.
+/** \class CqDetachedMicroPolygon
+ * Derivation of the CqMicroPolygon class, that doesn't refer to a grid for its points.
  */
 
-class CqDetatchedMicroPolygon : public CqMicroPolygon
+class CqDetachedMicroPolygon : public CqMicroPolygon
 {
 public:
-    CqDetatchedMicroPolygon( CqMicroPolygon* pMPG, TqFloat time ) 
+    CqDetachedMicroPolygon( CqMicroPolygon* pMPG, TqFloat time ) 
     {
 		CqMicroPolygon::operator=(*pMPG);
         if( pMPG->IsMoving() )
@@ -821,7 +821,7 @@ public:
 			m_IsDegenerate = pMPG->IsDegenerate();
 		}
     }
-    ~CqDetatchedMicroPolygon()
+    ~CqDetachedMicroPolygon()
     {}
 
     virtual const CqVector3D& PointA() const

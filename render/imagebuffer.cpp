@@ -929,7 +929,7 @@ void CqImageBuffer::RenderMPG_MBOrDof( CqMicroPolygon* pMPG,
 								continue;
 							}
 
-							CqDetatchedMicroPolygon mp(pMPG, time);
+							CqDetachedMicroPolygon mp(pMPG, time);
 							// check if sample lies inside mpg bounding box.
 							if ( UsingDof )
 							{
