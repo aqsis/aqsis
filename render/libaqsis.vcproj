@@ -44,13 +44,13 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libz.lib libtiff.lib ws2_32.lib"
-				OutputFile="..\bin\Profile/aqsis.dll"
+				OutputFile=".\..\bin\Profile/libaqsis.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\lib\Profile,..\bin\Profile,..\..\win32libs\lib"
 				ModuleDefinitionFile=".\libaqsis.def"
 				GenerateDebugInformation="TRUE"
-				ImportLibrary=".\..\bin\Profile/aqsis.lib"
+				ImportLibrary=".\..\bin\Profile/libaqsis.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"

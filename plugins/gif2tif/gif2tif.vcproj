@@ -12,7 +12,7 @@
 	<Configurations>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\..\procedures\Profile"
+			OutputDirectory=".\..\..\bin\profile"
 			IntermediateDirectory=".\..\Object\Profile\plugins\gif2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
@@ -42,12 +42,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libtiff.lib"
-				OutputFile=".\..\..\procedures\Profile/gif2tif.dll"
+				OutputFile=".\..\..\bin\profile/gif2tif.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib,..\..\..\win32libs\lib"
 				GenerateDebugInformation="TRUE"
-				ImportLibrary=".\..\..\procedures\Profile/gif2tif.lib"
+				ImportLibrary=".\..\..\bin\profile/gif2tif.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -55,7 +55,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\procedures\Profile/gif2tif.tlb"
+				TypeLibraryName=".\..\..\bin\profile/gif2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -80,7 +80,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\..\procedures"
+			OutputDirectory=".\..\..\bin\debug"
 			IntermediateDirectory=".\..\..\Object\Debug\plugins\gif2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
@@ -113,8 +113,8 @@
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib,..\..\..\win32libs\lib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\..\procedures/gif2tif_d.pdb"
-				ImportLibrary=".\..\..\procedures/gif2tif_d.lib"
+				ProgramDatabaseFile=".\..\..\bin\debug/gif2tif_d.pdb"
+				ImportLibrary=".\..\..\bin\debug/gif2tif_d.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -122,7 +122,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\procedures/gif2tif.tlb"
+				TypeLibraryName=".\..\..\bin\debug/gif2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -147,7 +147,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\..\procedures"
+			OutputDirectory=".\..\..\bin"
 			IntermediateDirectory=".\..\..\Object\Release\plugins\gif2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
@@ -176,12 +176,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libtiff.lib"
-				OutputFile=".\..\..\procedures/gif2tif.dll"
+				OutputFile=".\..\..\bin/gif2tif.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib,..\..\..\win32libs\lib"
-				ProgramDatabaseFile=".\..\..\procedures/gif2tif.pdb"
-				ImportLibrary=".\..\..\procedures/gif2tif.lib"
+				ProgramDatabaseFile=".\..\..\bin/gif2tif.pdb"
+				ImportLibrary=".\..\..\bin/gif2tif.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -189,7 +189,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\procedures/gif2tif.tlb"
+				TypeLibraryName=".\..\..\bin/gif2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>

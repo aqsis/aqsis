@@ -12,7 +12,7 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\..\procedures"
+			OutputDirectory=".\..\..\bin"
 			IntermediateDirectory=".\..\..\Object\Release\plugins\tga2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
@@ -41,12 +41,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libtiff.lib"
-				OutputFile=".\..\..\procedures/tga2tif.dll"
+				OutputFile=".\..\..\bin/tga2tif.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\..\win32libs\lib"
-				ProgramDatabaseFile=".\..\..\procedures/tga2tif.pdb"
-				ImportLibrary=".\..\..\procedures/tga2tif.lib"
+				ProgramDatabaseFile=".\..\..\bin/tga2tif.pdb"
+				ImportLibrary=".\..\..\bin/tga2tif.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -54,7 +54,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\procedures/tga2tif.tlb"
+				TypeLibraryName=".\..\..\bin/tga2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -79,7 +79,7 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\..\procedures\Profile"
+			OutputDirectory=".\..\..\bin\profile"
 			IntermediateDirectory=".\..\Object\Profile\plugins\tga2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
@@ -109,12 +109,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libtiff.lib"
-				OutputFile=".\..\..\procedures\Profile/tga2tif.dll"
+				OutputFile=".\..\..\bin\profile/tga2tif.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\..\win32libs\lib"
 				GenerateDebugInformation="TRUE"
-				ImportLibrary=".\..\..\procedures\Profile/tga2tif.lib"
+				ImportLibrary=".\..\..\bin\profile/tga2tif.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -122,7 +122,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\procedures\Profile/tga2tif.tlb"
+				TypeLibraryName=".\..\..\bin\profile/tga2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -147,7 +147,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\..\procedures"
+			OutputDirectory=".\..\..\bin\debug"
 			IntermediateDirectory=".\..\..\Object\Debug\plugins\tga2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
@@ -180,8 +180,8 @@
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\..\win32libs\lib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\..\procedures/tga2tif_d.pdb"
-				ImportLibrary=".\..\..\procedures/tga2tif_d.lib"
+				ProgramDatabaseFile=".\..\..\bin\debug/tga2tif_d.pdb"
+				ImportLibrary=".\..\..\bin\debug/tga2tif_d.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -189,7 +189,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\procedures/tga2tif.tlb"
+				TypeLibraryName=".\..\..\bin\debug/tga2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>

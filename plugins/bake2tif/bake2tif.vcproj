@@ -12,7 +12,7 @@
 	<Configurations>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\..\procedures\Profile"
+			OutputDirectory=".\..\..\bin\profile"
 			IntermediateDirectory=".\..\Object\Profile\plugins\bake2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
@@ -42,12 +42,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libtiff.lib"
-				OutputFile=".\..\..\procedures\Profile/bake2tif.dll"
+				OutputFile=".\..\..\bin\profile/bake2tif.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib,..\..\..\win32libs\lib"
 				GenerateDebugInformation="TRUE"
-				ImportLibrary=".\..\..\procedures\Profile/bake2tif.lib"
+				ImportLibrary=".\..\..\bin\profile/bake2tif.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -55,7 +55,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\procedures\Profile/bake2tif.tlb"
+				TypeLibraryName=".\..\..\bin\profile/bake2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -80,7 +80,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\..\procedures"
+			OutputDirectory=".\..\..\bin\debug"
 			IntermediateDirectory=".\..\..\Object\Debug\plugins\bake2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
@@ -113,8 +113,8 @@
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib,..\..\..\win32libs\lib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\..\procedures/bake2tif_d.pdb"
-				ImportLibrary=".\..\..\procedures/bake2tif_d.lib"
+				ProgramDatabaseFile=".\..\..\bin\debug/bake2tif_d.pdb"
+				ImportLibrary=".\..\..\bin\debug/bake2tif_d.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -122,7 +122,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\procedures/bake2tif.tlb"
+				TypeLibraryName=".\..\..\bin\debug/bake2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -147,7 +147,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\..\procedures"
+			OutputDirectory=".\..\..\bin"
 			IntermediateDirectory=".\..\..\Object\Release\plugins\bake2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
@@ -176,12 +176,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libtiff.lib"
-				OutputFile=".\..\..\procedures/bake2tif.dll"
+				OutputFile=".\..\..\bin/bake2tif.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib,..\..\..\win32libs\lib"
-				ProgramDatabaseFile=".\..\..\procedures/bake2tif.pdb"
-				ImportLibrary=".\..\..\procedures/bake2tif.lib"
+				ProgramDatabaseFile=".\..\..\bin/bake2tif.pdb"
+				ImportLibrary=".\..\..\bin/bake2tif.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -189,7 +189,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\procedures/bake2tif.tlb"
+				TypeLibraryName=".\..\..\bin/bake2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>

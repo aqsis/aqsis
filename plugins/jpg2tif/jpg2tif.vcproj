@@ -12,7 +12,7 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\..\procedures"
+			OutputDirectory=".\..\..\bin"
 			IntermediateDirectory=".\..\..\Object\Release\plugins\jpg2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
@@ -41,12 +41,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libjpeg.lib libtiff.lib"
-				OutputFile=".\..\..\procedures/jpg2tif.dll"
+				OutputFile=".\..\..\bin/jpg2tif.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib,..\..\..\win32libs\lib"
-				ProgramDatabaseFile=".\..\..\procedures/jpg2tif.pdb"
-				ImportLibrary=".\..\..\procedures/jpg2tif.lib"
+				ProgramDatabaseFile=".\..\..\bin/jpg2tif.pdb"
+				ImportLibrary=".\..\..\bin/jpg2tif.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -54,7 +54,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\procedures/jpg2tif.tlb"
+				TypeLibraryName=".\..\..\bin/jpg2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -79,7 +79,7 @@
 		</Configuration>
 		<Configuration
 			Name="Profile|Win32"
-			OutputDirectory=".\..\..\procedures\Profile"
+			OutputDirectory=".\..\..\bin\profile"
 			IntermediateDirectory=".\..\Object\Profile\plugins\jpg2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
@@ -109,12 +109,12 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="libjpeg.lib libtiff.lib"
-				OutputFile=".\..\..\procedures\Profile/jpg2tif.dll"
+				OutputFile=".\..\..\bin\profile/jpg2tif.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib,..\..\..\win32libs\lib"
 				GenerateDebugInformation="TRUE"
-				ImportLibrary=".\..\..\procedures\Profile/jpg2tif.lib"
+				ImportLibrary=".\..\..\bin\profile/jpg2tif.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -122,7 +122,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\procedures\Profile/jpg2tif.tlb"
+				TypeLibraryName=".\..\..\bin\profile/jpg2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
@@ -147,7 +147,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\..\procedures"
+			OutputDirectory=".\..\..\bin\debug"
 			IntermediateDirectory=".\..\..\Object\Debug\plugins\jpg2tif"
 			ConfigurationType="2"
 			UseOfMFC="0"
@@ -180,8 +180,8 @@
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\win32libs\lib,..\..\..\win32libs\lib"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\..\procedures/jpg2tif_d.pdb"
-				ImportLibrary=".\..\..\procedures/jpg2tif_d.lib"
+				ProgramDatabaseFile=".\..\..\bin\debug/jpg2tif_d.pdb"
+				ImportLibrary=".\..\..\bin\debug/jpg2tif_d.lib"
 				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -189,7 +189,7 @@
 				MkTypLibCompatible="TRUE"
 				SuppressStartupBanner="TRUE"
 				TargetEnvironment="1"
-				TypeLibraryName=".\..\..\procedures/jpg2tif.tlb"
+				TypeLibraryName=".\..\..\bin\debug/jpg2tif.tlb"
 				HeaderFileName=""/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
