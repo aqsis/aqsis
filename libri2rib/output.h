@@ -140,29 +140,29 @@ public:
 
     /* RenderMan State machine */
     RtVoid RiBegin( RtToken name );
-    RtVoid RiEnd( RtVoid );
+    RtVoid RiEnd( );
 
     RtVoid RiFrameBegin( RtInt frame );
-    RtVoid RiFrameEnd( RtVoid );
+    RtVoid RiFrameEnd( );
 
-    RtVoid RiWorldBegin( RtVoid );
-    RtVoid RiWorldEnd( RtVoid );
+    RtVoid RiWorldBegin( );
+    RtVoid RiWorldEnd( );
 
-    RtObjectHandle RiObjectBegin( RtVoid );
-    RtVoid RiObjectEnd( RtVoid );
+    RtObjectHandle RiObjectBegin( );
+    RtVoid RiObjectEnd( );
     RtVoid RiObjectInstance( RtObjectHandle handle );
 
-    RtVoid RiAttributeBegin( RtVoid );
-    RtVoid RiAttributeEnd( RtVoid );
+    RtVoid RiAttributeBegin( );
+    RtVoid RiAttributeEnd( );
 
-    RtVoid RiTransformBegin( RtVoid );
-    RtVoid RiTransformEnd( RtVoid );
+    RtVoid RiTransformBegin( );
+    RtVoid RiTransformEnd( );
 
     RtVoid RiSolidBegin( RtToken operation );
-    RtVoid RiSolidEnd( RtVoid );
+    RtVoid RiSolidEnd( );
 
     RtVoid RiMotionBeginV( RtInt n, RtFloat times[] );
-    RtVoid RiMotionEnd( RtVoid );
+    RtVoid RiMotionEnd( );
 
 
     /* CAMERA OPTIONS */
@@ -220,12 +220,12 @@ public:
                         RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[],
                         RtFloat u[], RtFloat v[], RtFloat w[] );
     RtVoid RiOrientation( RtToken orientation );
-    RtVoid RiReverseOrientation( RtVoid );
+    RtVoid RiReverseOrientation( );
     RtVoid RiSides( RtInt sides );
     RtVoid RiDisplacementV( const char *name, RtInt n, RtToken tokens[], RtPointer parms[] );
 
     /* TRANSFORMATIONS */
-    RtVoid RiIdentity( RtVoid );
+    RtVoid RiIdentity( );
     RtVoid RiTransform( RtMatrix transform );
     RtVoid RiConcatTransform( RtMatrix transform );
     RtVoid RiPerspective( RtFloat fov );

@@ -5,6 +5,7 @@ AM_CFLAGS=@AQSIS_CFLAGS@
 
 
 libddmsock_la_SOURCES = ddmsock.cpp ddmsock.h displaydriver.h
+libddmsock_la_LIBADD = $(NET_LIBS)
 
 sysconf_DATA = ddmsock.ini
 

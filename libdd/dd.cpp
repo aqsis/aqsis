@@ -37,6 +37,7 @@
 #else // AQSIS_SYSTEM_WIN32
 
 #include <stdlib.h>
+#include <errno.h>
 #include <unistd.h>
 #include <netdb.h>
 #include <netinet/in.h>

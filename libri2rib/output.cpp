@@ -223,7 +223,7 @@ RtVoid CqOutput::RiBegin( RtToken name )
     printHeader();
 }
 
-RtVoid CqOutput::RiEnd( RtVoid )
+RtVoid CqOutput::RiEnd( )
 {
     out->flushFile();
 }
@@ -238,7 +238,7 @@ RtVoid CqOutput::RiFrameBegin( RtInt frame )
     push();
 }
 
-RtVoid CqOutput::RiFrameEnd( RtVoid )
+RtVoid CqOutput::RiFrameEnd( )
 {
     m_IndentLevel--;
     if ( m_IndentLevel < 0 ) m_IndentLevel = 0;
@@ -248,7 +248,7 @@ RtVoid CqOutput::RiFrameEnd( RtVoid )
     EOL;
 }
 
-RtVoid CqOutput::RiWorldBegin( RtVoid )
+RtVoid CqOutput::RiWorldBegin( )
 {
     PR( "WorldBegin", WorldBegin );
     EOL;
@@ -257,7 +257,7 @@ RtVoid CqOutput::RiWorldBegin( RtVoid )
     push();
 }
 
-RtVoid CqOutput::RiWorldEnd( RtVoid )
+RtVoid CqOutput::RiWorldEnd( )
 {
     m_IndentLevel--;
     if ( m_IndentLevel < 0 ) m_IndentLevel = 0;
@@ -267,7 +267,7 @@ RtVoid CqOutput::RiWorldEnd( RtVoid )
     EOL;
 }
 
-RtObjectHandle CqOutput::RiObjectBegin( RtVoid )
+RtObjectHandle CqOutput::RiObjectBegin( )
 {
     PR( "ObjectBegin", ObjectBegin ); S;
     PI( ( RtInt ) m_ObjectHandle );
@@ -278,7 +278,7 @@ RtObjectHandle CqOutput::RiObjectBegin( RtVoid )
     return ( RtObjectHandle ) m_ObjectHandle++;
 }
 
-RtVoid CqOutput::RiObjectEnd( RtVoid )
+RtVoid CqOutput::RiObjectEnd( )
 {
     m_IndentLevel--;
     if ( m_IndentLevel < 0 ) m_IndentLevel = 0;
@@ -295,7 +295,7 @@ RtVoid CqOutput::RiObjectInstance( RtObjectHandle handle )
     EOL;
 }
 
-RtVoid CqOutput::RiAttributeBegin( RtVoid )
+RtVoid CqOutput::RiAttributeBegin( )
 {
     PR( "AttributeBegin", AttributeBegin );
     EOL;
@@ -304,7 +304,7 @@ RtVoid CqOutput::RiAttributeBegin( RtVoid )
     push();
 }
 
-RtVoid CqOutput::RiAttributeEnd( RtVoid )
+RtVoid CqOutput::RiAttributeEnd( )
 {
     m_IndentLevel--;
     if ( m_IndentLevel < 0 ) m_IndentLevel = 0;
@@ -314,7 +314,7 @@ RtVoid CqOutput::RiAttributeEnd( RtVoid )
     EOL;
 }
 
-RtVoid CqOutput::RiTransformBegin( RtVoid )
+RtVoid CqOutput::RiTransformBegin( )
 {
     PR( "TransformBegin", TransformBegin );
     EOL;
@@ -322,7 +322,7 @@ RtVoid CqOutput::RiTransformBegin( RtVoid )
     m_IndentLevel++;
 }
 
-RtVoid CqOutput::RiTransformEnd( RtVoid )
+RtVoid CqOutput::RiTransformEnd( )
 {
     m_IndentLevel--;
     if ( m_IndentLevel < 0 ) m_IndentLevel = 0;
@@ -341,7 +341,7 @@ RtVoid CqOutput::RiSolidBegin( RtToken operation )
     push();
 }
 
-RtVoid CqOutput::RiSolidEnd( RtVoid )
+RtVoid CqOutput::RiSolidEnd( )
 {
     m_IndentLevel--;
     if ( m_IndentLevel < 0 ) m_IndentLevel = 0;
@@ -360,7 +360,7 @@ RtVoid CqOutput::RiMotionBeginV( RtInt n, RtFloat times[] )
     m_IndentLevel++;
 }
 
-RtVoid CqOutput::RiMotionEnd( RtVoid )
+RtVoid CqOutput::RiMotionEnd( )
 {
     m_IndentLevel--;
     if ( m_IndentLevel < 0 ) m_IndentLevel = 0;
@@ -781,7 +781,7 @@ RtVoid CqOutput::RiOrientation( RtToken o )
     EOL;
 }
 
-RtVoid CqOutput::RiReverseOrientation( RtVoid )
+RtVoid CqOutput::RiReverseOrientation( )
 {
     PR( "ReverseOrientation", ReverseOrientation );
     EOL;
@@ -807,7 +807,7 @@ RtVoid CqOutput::RiDisplacementV( const char *name, RtInt n, RtToken tokens[], R
 // ***************************************************************
 // ******* ******* ******* TRANSFORMATIONS ******* ******* *******
 // ***************************************************************
-RtVoid CqOutput::RiIdentity( RtVoid )
+RtVoid CqOutput::RiIdentity( )
 {
     PR( "Identity", Identity );
     EOL;

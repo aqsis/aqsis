@@ -575,7 +575,7 @@ static TqFloat randtable[] = {
                              };
 
 
-static	TqInt rp = 0, erp = 0;;
+static	TqInt rp = 0, erp = 0;
 
 static TqUint randinx()
 {

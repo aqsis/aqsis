@@ -86,6 +86,12 @@ if test x$have_glut = xno ; then
 	AC_MSG_WARN([*** Could not find GLUT, glut based framebuffer devices will not be built ***]);
 fi
 
+dnl Socket libraries
+NET_LIBS=""
+AC_CHECK_LIB(socket, socket, NET_LIBS="-lsocket $NET_LIBS",)
+AC_CHECK_LIB(nsl, gethostbyname, NET_LIBS="-lnsl $NET_LIBS",)
+AC_SUBST(NET_LIBS)
+
 dnl TIFF library
 saveCFLAGS=$CFLAGS
 saveLIBS=$LIBS

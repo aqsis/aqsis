@@ -650,7 +650,7 @@ void CqImageBuffer::RenderMPGs( long xmin, long xmax, long ymin, long ymax )
    \see CqBucket, CqImagePixel
  */
 
-inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax )
+void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, long xmax, long ymin, long ymax )
 {
     CqBucket & Bucket = CurrentBucket();
     CqStats& theStats = QGetRenderContext() ->Stats();
@@ -972,7 +972,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, long xmin, lon
 
 
 
-inline void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt m, TqInt n, TqFloat D )
+void CqImageBuffer::StoreSample( CqMicroPolygon* pMPG, CqImagePixel* pie2, TqInt m, TqInt n, TqFloat D )
 {
     static SqImageSample ImageVal( QGetRenderContext() ->GetOutputDataTotalSize() );
     ImageVal.SetDepth( D );
