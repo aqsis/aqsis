@@ -543,6 +543,8 @@ public:
     virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
     virtual TqBool	Diceable();
 
+    virtual	CqMicroPolyGridBase* DiceExtract();
+
     /** Determine whether the passed surface is valid to be used as a
      *  frame in motion blur for this surface.
      */
@@ -552,6 +554,7 @@ public:
     }
 
     void StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoints* pPoints, TqInt iParam, TqInt iFVParam, TqInt iVData);
+	CqSubdivision2* Extract( TqInt iTime );
 
 private:
     CqSubdivision2*	m_pTopology;

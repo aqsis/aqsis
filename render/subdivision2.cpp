@@ -919,12 +919,43 @@ CqBound	CqSurfaceSubdivisionPatch::Bound() const
 }
 
 
+CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
+{
+	CqSubdivision2* pSurface;
+    std::vector<CqMicroPolyGridBase*> apGrids;
+
+    TqInt iTime;
+    for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
+    {
+		pSurface = Extract(iTime);
+		CqSurfaceSubdivisionPatch* pPatch = new CqSurfaceSubdivisionPatch(pSurface, pSurface->pFacet(0));
+		ADDREF(pPatch);
+		pPatch->m_uDiceSize = m_uDiceSize;
+		pPatch->m_vDiceSize = m_vDiceSize;
+		CqMicroPolyGridBase* pGrid = pPatch->DiceExtract();
+		apGrids.push_back( pGrid );
+		RELEASEREF(pPatch);
+	}
+
+    if( apGrids.size() == 1 )
+        return( apGrids[ 0 ] );
+    else
+    {
+        CqMotionMicroPolyGrid * pGrid = new CqMotionMicroPolyGrid;
+        TqInt i;
+        for ( i = 0; i < pTopology()->cTimes(); i++ )
+            pGrid->AddTimeSlot( pTopology()->Time( i ), apGrids[ i ] );
+        return( pGrid );
+    }
+}
+
+
 /** Dice the patch this primitive represents.
  * Subdivide recursively the appropriate number of times, then extract the information into 
  * a MPG structure.
  */
 
-CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
+CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::DiceExtract()
 {
 	// Dice rate table			  0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16
     static TqInt aDiceSizes[] = { 0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4 };
@@ -944,7 +975,6 @@ CqMicroPolyGridBase* CqSurfaceSubdivisionPatch::Dice()
     for( iTime = 0; iTime < pTopology()->cTimes(); iTime++ )
     {
         CqMicroPolyGrid* pGrid = new CqMicroPolyGrid( dicesize, dicesize, pTopology()->pPoints() );
-
         CqPolygonPoints* pMotionPoints = pTopology()->pPoints( iTime );
 
         TqInt isd;
@@ -1682,6 +1712,115 @@ TqInt CqSurfaceSubdivisionMesh::Split( std::vector<CqBasicSurface*>& aSplits )
     // !Guard
     RELEASEREF( this );
     return( CreatedPolys );
+}
+
+
+CqSubdivision2* CqSurfaceSubdivisionPatch::Extract( TqInt iTime )
+{
+    assert( NULL != pTopology() );
+    assert( NULL != pTopology()->pPoints() );
+    assert( NULL != pFace() );
+
+    // Find the point indices for the polygons surrounding this one.
+	// Use a map to ensure that shared vertices are only counted once.
+    std::map<TqInt, TqInt> Vertices;
+	TqInt cVerts=0;
+    std::vector<TqInt>	FVertices;
+
+    std::vector<CqLath*> aQff;
+    std::vector<CqLath*> apSubFaces2;
+    pFace()->Qff( aQff );
+    std::vector<CqLath*>::iterator iF;
+    for( iF = aQff.begin(); iF != aQff.end(); iF++ )
+	{
+		std::vector<CqLath*> aQfv;
+		(*iF)->Qfv( aQfv );
+		std::vector<CqLath*>::reverse_iterator iV;
+		for( iV = aQfv.rbegin(); iV != aQfv.rend(); iV++ )
+		{
+			if( Vertices.find((*iV)->VertexIndex()) == Vertices.end() )
+			{
+				Vertices[(*iV)->VertexIndex()] = cVerts;
+				cVerts++;
+			}
+			FVertices.push_back( (*iV)->FaceVertexIndex() );
+		}
+	}
+	TqInt cFaceVerts = FVertices.size();
+	TqInt cFaces = aQff.size();
+
+    // Create a storage class for all the points.
+    CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, aQff.size(), FVertices.size() );
+    // Fill in default values for all primitive variables not explicitly specified.
+    pPointsClass->SetSurfaceParameters( *pTopology()->pPoints( iTime ) );
+
+    CqSubdivision2* pSurface = new CqSubdivision2( pPointsClass );
+    pSurface->Prepare( cVerts );
+
+    std::vector<CqParameter*>::iterator iUP;
+    std::vector<CqParameter*>::iterator end = pTopology()->pPoints( iTime)->aUserParams().end();
+    for ( iUP = pTopology()->pPoints( iTime )->aUserParams().begin(); iUP != end; iUP++ )
+    {
+        if ( ( *iUP ) ->Class() == class_vertex || ( *iUP ) ->Class() == class_varying )
+        {
+            // Copy any 'vertex' or 'varying' class primitive variables.
+            CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+            pNewUP->SetSize( cVerts );
+            std::map<TqInt, TqInt>::iterator i;
+            for( i = Vertices.begin(); i != Vertices.end(); i++ )
+                pNewUP->SetValue( ( *iUP ), (*i).second, (*i).first );
+            pSurface->pPoints()->AddPrimitiveVariable( pNewUP );
+        }
+        else if ( ( *iUP ) ->Class() == class_facevarying )
+        {
+            // Copy any 'facevarying' class primitive variables.
+            CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+            pNewUP->SetSize( FVertices.size() );
+            std::vector<TqInt>::iterator i;
+			TqInt iv = 0;
+            for( i = FVertices.begin(); i != FVertices.end(); i++, iv++ )
+                pNewUP->SetValue( ( *iUP ), iv, (*i) );
+            pSurface->pPoints()->AddPrimitiveVariable( pNewUP );
+        }
+        else if ( ( *iUP ) ->Class() == class_uniform )
+        {
+            // Copy any 'uniform' class primitive variables.
+            CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+            pNewUP->SetSize( pSurface->pPoints()->cUniform() );
+            pNewUP->SetValue( ( *iUP ), 0, 0 );
+            pSurface->pPoints()->AddPrimitiveVariable( pNewUP );
+        }
+        else if ( ( *iUP ) ->Class() == class_constant )
+        {
+            // Copy any 'constant' class primitive variables.
+            CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+            pNewUP->SetSize( 1 );
+            pNewUP->SetValue( ( *iUP ), 0, 0 );
+            pSurface->pPoints()->AddPrimitiveVariable( pNewUP );
+        }
+    }
+
+    // Need to get rid of any 'h' values added to the "P" variables during multiplication.
+    TqUint i;
+    for( i = 0; i < cVerts; i++ )
+        pSurface->pPoints()->P()->pValue(i)[0] = static_cast<CqVector3D>( pSurface->pPoints()->P()->pValue(i)[0] );
+
+    TqInt iUses = Uses();
+
+	TqInt iP = 0;
+    for( iF = aQff.begin(); iF != aQff.end(); iF++ )
+	{
+		std::vector<TqInt> vertices;
+		std::vector<CqLath*> aQfv;
+		(*iF)->Qfv( aQfv );
+		std::vector<CqLath*>::reverse_iterator iV;
+		for( iV = aQfv.rbegin(); iV != aQfv.rend(); ++iV )
+			vertices.push_back( Vertices[(*iV)->VertexIndex()] );
+		pSurface->AddFacet( vertices.size(), &vertices[ 0 ], iP );
+		iP += vertices.size();
+    }
+    pSurface->Finalise();
+    return(pSurface);
 }
 
 
