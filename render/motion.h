@@ -53,7 +53,7 @@ class CqMotionSpec
 						 */
 						CqMotionSpec(const T& a){
 													m_DefObject=a;
-													AddTimeSlot(0.0f, a);
+													//AddTimeSlot(0.0f, a);
 												}
 						/** Copy constructor.
 						 */
@@ -101,8 +101,12 @@ class CqMotionSpec
 													}
 													else
 													{
-														m_aTimes.push_back(time);
-														m_aObjects.push_back(Object);
+														// Insert the timeslot at the proper place.
+														std::vector<TqFloat>::iterator itime = m_aTimes.begin();
+														std::vector<T>::iterator iobj = m_aObjects.begin();
+														while(itime != m_aTimes.end() && *itime < time)	itime++, iobj++;
+														m_aTimes.insert(itime, time);
+														m_aObjects.insert(iobj, Object);
 													}
 												}
 						/** Combine the specified motion object with any existing one at the specified time.
@@ -112,8 +116,6 @@ class CqMotionSpec
 						 */
 				void	ConcatTimeSlot(TqFloat time, const T& Object)
 												{
-													assert(time>=0.0f);
-													
 													TqInt iIndex;
 													if(TimeSlotExists(time,iIndex))
 														m_aObjects[iIndex]=ConcatMotionObjects(m_aObjects[iIndex], Object);
@@ -166,7 +168,6 @@ class CqMotionSpec
 				TqBool	GetTimeSlot(TqFloat time, TqInt& iIndex, TqFloat& Fraction) const
 												{
 													assert(cTimes()>0);
-													assert(time>=0.0f);
 
 													if(time>=m_aTimes.back())
 													{
@@ -196,11 +197,11 @@ class CqMotionSpec
 				TqBool	TimeSlotExists(TqFloat time, TqInt& iIndex) const
 												{
 													assert(cTimes()>0);
-													assert(time>=0.0f);
+													//assert(time>=0.0f);
 
 													// Find the appropriate time span.
 													iIndex=0;
-													while(time!=m_aTimes[iIndex] && iIndex<cTimes())
+													while(iIndex<cTimes() && time!=m_aTimes[iIndex])
 														iIndex+=1;
 													return(iIndex<cTimes());
 												}
