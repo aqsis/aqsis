@@ -7,7 +7,6 @@ AM_CFLAGS=@AQSIS_CFLAGS@
 lib_LTLIBRARIES = libslxargs.la
 
 libslxargs_la_SOURCES = slx.cpp slx.h rcdummy.cpp
-libslxargs_la_LDFLAGS = -rpath $(libdir)
 
 pkginclude_HEADERS = slx.h
 

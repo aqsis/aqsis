@@ -9,7 +9,6 @@ INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I$
 
 libraytrace_la_SOURCES = raytrace.cpp raytrace.h
 libraytrace_la_LIBADD = $(top_builddir)/libaqsistypes/posix/libplatform.la
-libraytrace_la_LDFLAGS = -rpath $(libdir) 
 
 pkginclude_HEADERS =
 

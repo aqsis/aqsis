@@ -7,7 +7,6 @@ AM_CFLAGS=@AQSIS_CFLAGS@
 lib_LTLIBRARIES =  librib2ri.la
 
 librib2ri_la_SOURCES = librib2ri.cpp librib2ri.h
-librib2ri_la_LDFLAGS = -rpath $(libdir)
 
 pkginclude_HEADERS = librib2ri.h
 

@@ -7,7 +7,6 @@ AM_CFLAGS=@AQSIS_CFLAGS@
 lib_LTLIBRARIES =  librib2stream.la
 
 librib2stream_la_SOURCES = librib2stream.cpp librib2stream.h
-librib2stream_la_LDFLAGS = -rpath $(libdir)
 
 pkginclude_HEADERS = librib2stream.h
 
