@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/01/11 14:58:56 $
+ *	Last change date:	$Date: 2003/02/15 15:12:00 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -18,6 +18,14 @@
 #ifdef AQSIS_SYSTEM_MACOSX
 #include	"macosx/valarray"
 #else
+#ifdef	AQSIS_COMPILER_MSVC6
+#ifdef	min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#endif
 #include	<valarray>
 #include	<map>
 #endif

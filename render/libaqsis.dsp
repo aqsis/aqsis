@@ -269,6 +269,10 @@ SOURCE=.\iddmanager.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\idsoshadeops.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\ilightsource.h
 # End Source File
 # Begin Source File
@@ -378,6 +382,10 @@ SOURCE=.\ri.h
 # Begin Source File
 
 SOURCE=.\rifile.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\shadeop.h
 # End Source File
 # Begin Source File
 

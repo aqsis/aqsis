@@ -555,54 +555,54 @@ STD_SOIMPL	CqShaderExecEnv::SO_cmax( COLORVAL a, COLORVAL b, DEFPARAMVARIMPL )
 	END_VARYING_SECTION
 }
 
-STD_SOIMPL	CqShaderExecEnv::SO_clamp( FLOATVAL a, FLOATVAL min, FLOATVAL max, DEFPARAMIMPL )
+STD_SOIMPL	CqShaderExecEnv::SO_clamp( FLOATVAL a, FLOATVAL _min, FLOATVAL _max, DEFPARAMIMPL )
 {
 	INIT_SO
 
 	CHECKVARY( a )
-	CHECKVARY( min )
-	CHECKVARY( max )
+	CHECKVARY( _min )
+	CHECKVARY( _max )
 	CHECKVARY( Result )
 
 	BEGIN_VARYING_SECTION
 	GETFLOAT( a );
-	GETFLOAT( min );
-	GETFLOAT( max );
-	SETFLOAT( Result, CLAMP( FLOAT( a ), FLOAT( min ), FLOAT( max ) ) );
+	GETFLOAT( _min );
+	GETFLOAT( _max );
+	SETFLOAT( Result, CLAMP( FLOAT( a ), FLOAT( _min ), FLOAT( _max ) ) );
 	END_VARYING_SECTION
 }
 
-STD_SOIMPL	CqShaderExecEnv::SO_pclamp( POINTVAL a, POINTVAL min, POINTVAL max, DEFPARAMIMPL )
+STD_SOIMPL	CqShaderExecEnv::SO_pclamp( POINTVAL a, POINTVAL _min, POINTVAL _max, DEFPARAMIMPL )
 {
 	INIT_SO
 
 	CHECKVARY( a )
-	CHECKVARY( min )
-	CHECKVARY( max )
+	CHECKVARY( _min )
+	CHECKVARY( _max )
 	CHECKVARY( Result )
 
 	BEGIN_VARYING_SECTION
 	GETPOINT( a );
-	GETPOINT( min );
-	GETPOINT( max );
-	SETPOINT( Result, VCLAMP( POINT( a ), POINT( min ), POINT( max ) ) );
+	GETPOINT( _min );
+	GETPOINT( _max );
+	SETPOINT( Result, VCLAMP( POINT( a ), POINT( _min ), POINT( _max ) ) );
 	END_VARYING_SECTION
 }
 
-STD_SOIMPL	CqShaderExecEnv::SO_cclamp( COLORVAL a, COLORVAL min, COLORVAL max, DEFPARAMIMPL )
+STD_SOIMPL	CqShaderExecEnv::SO_cclamp( COLORVAL a, COLORVAL _min, COLORVAL _max, DEFPARAMIMPL )
 {
 	INIT_SO
 
 	CHECKVARY( a )
-	CHECKVARY( min )
-	CHECKVARY( max )
+	CHECKVARY( _min )
+	CHECKVARY( _max )
 	CHECKVARY( Result )
 
 	BEGIN_VARYING_SECTION
 	GETCOLOR( a );
-	GETCOLOR( min );
-	GETCOLOR( max );
-	SETCOLOR( Result, CCLAMP( COLOR( a ), COLOR( min ), COLOR( max ) ) );
+	GETCOLOR( _min );
+	GETCOLOR( _max );
+	SETCOLOR( Result, CCLAMP( COLOR( a ), COLOR( _min ), COLOR( _max ) ) );
 	END_VARYING_SECTION
 }
 
@@ -646,44 +646,44 @@ STD_SOIMPL	CqShaderExecEnv::SO_round( FLOATVAL x, DEFPARAMIMPL )
 	END_VARYING_SECTION
 }
 
-STD_SOIMPL	CqShaderExecEnv::SO_step( FLOATVAL min, FLOATVAL value, DEFPARAMIMPL )
+STD_SOIMPL	CqShaderExecEnv::SO_step( FLOATVAL _min, FLOATVAL value, DEFPARAMIMPL )
 {
 	INIT_SO
 
-	CHECKVARY( min )
+	CHECKVARY( _min )
 	CHECKVARY( value )
 	CHECKVARY( Result )
 
 	BEGIN_VARYING_SECTION
-	GETFLOAT( min );
+	GETFLOAT( _min );
 	GETFLOAT( value );
-	SETFLOAT( Result, ( FLOAT( value ) < FLOAT( min ) ) ? 0.0f : 1.0f );
+	SETFLOAT( Result, ( FLOAT( value ) < FLOAT( _min ) ) ? 0.0f : 1.0f );
 	END_VARYING_SECTION
 }
 
 
 //----------------------------------------------------------------------
-// smoothstep(min,max,value)
-STD_SOIMPL	CqShaderExecEnv::SO_smoothstep( FLOATVAL min, FLOATVAL max, FLOATVAL value, DEFPARAMIMPL )
+// smoothstep(_min,_max,value)
+STD_SOIMPL	CqShaderExecEnv::SO_smoothstep( FLOATVAL _min, FLOATVAL _max, FLOATVAL value, DEFPARAMIMPL )
 {
 	INIT_SO
 
 	CHECKVARY( value )
-	CHECKVARY( min )
-	CHECKVARY( max )
+	CHECKVARY( _min )
+	CHECKVARY( _max )
 	CHECKVARY( Result )
 
 	BEGIN_VARYING_SECTION
-	GETFLOAT( min );
-	GETFLOAT( max );
+	GETFLOAT( _min );
+	GETFLOAT( _max );
 	GETFLOAT( value );
-	if ( FLOAT( value ) < FLOAT( min ) )
+	if ( FLOAT( value ) < FLOAT( _min ) )
 		SETFLOAT( Result, 0.0f );
-	else if ( FLOAT( value ) >= FLOAT( max ) )
+	else if ( FLOAT( value ) >= FLOAT( _max ) )
 		SETFLOAT( Result, 1.0f );
 	else
 	{
-		TqFloat v = ( FLOAT( value ) - FLOAT( min ) ) / ( FLOAT( max ) - FLOAT( min ) );
+		TqFloat v = ( FLOAT( value ) - FLOAT( _min ) ) / ( FLOAT( _max ) - FLOAT( _min ) );
 		SETFLOAT( Result, v * v * ( 3.0f - 2.0f * v ) );
 	}
 	END_VARYING_SECTION
@@ -5152,12 +5152,17 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 	INIT_SO
 
 	CHECKVARY(Result);
-	for (int p=0;p<cParams;p++){
+	int p;
+	for (p=0;p<cParams;p++){
 		CHECKVARY(apParams[p]);
 	};
 
 	int dso_argc = cParams + 1; // dso_argv[0] is used for the return value
+	#ifdef	AQSIS_COMPILER_MSVC6
+	void **dso_argv = new void*[dso_argc] ;
+	#else
 	void **dso_argv = new (void*)[dso_argc] ;
+	#endif
 
 	// create storage for the returned value
 	switch(Result->Type()){
@@ -5169,7 +5174,11 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 		case type_triple:
 		case type_vector:
 		case type_normal: 
+			#ifdef	AQSIS_COMPILER_MSVC6
+			dso_argv[0]=(void*) new TqFloat[3]; break;
+			#else
 			dso_argv[0]=(void*) new (TqFloat)[3]; break;
+			#endif
 		case type_string:
 			break;
 		case type_matrix:
@@ -5183,7 +5192,7 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 	};
 
 	// Allocate space for the arguments
-	for(int p=1;p<=cParams;p++){
+	for(p=1;p<=cParams;p++){
 
 		switch(apParams[p-1]->Type()){
 			case type_float:
@@ -5211,7 +5220,7 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 	BEGIN_VARYING_SECTION
 
 	// Convert the arguments to the required format for the DSO
-	for(int p=1;p<=cParams;p++){
+	for(p=1;p<=cParams;p++){
 
 		switch(apParams[p-1]->Type()){
 			case type_float:
@@ -5312,7 +5321,7 @@ STD_SOIMPL CqShaderExecEnv::SO_external(DSOMethod method, void *initData, DEFPAR
 
 
 	// Set the values that were altered by the Shadeop
-	for(int p=1;p<=cParams;p++){
+	for(p=1;p<=cParams;p++){
 		switch(apParams[p-1]->Type()){
 			case type_float:{
 				TqFloat val = *((float*)dso_argv[p]) ;

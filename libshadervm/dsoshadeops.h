@@ -21,12 +21,12 @@
 #ifndef DSOSHADEOPS_H
 #define DSOSHADEOPS_H
 
+#include	"aqsis.h"
+
 #include	<stack>
 #include	<vector>
 #include	<list>
 #include	<map>
-
-#include	"aqsis.h"
 
 #include	"vector3d.h"
 #include	"vector4d.h"

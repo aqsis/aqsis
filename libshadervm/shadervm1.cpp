@@ -23,12 +23,13 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include	"aqsis.h"
+
 #include	<iostream>
 #include	<sstream>
 
 #include	<ctype.h>
 
-#include	"aqsis.h"
 #include	"shadervm.h"
 
 START_NAMESPACE( Aqsis )
