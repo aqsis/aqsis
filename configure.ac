@@ -99,10 +99,12 @@ AC_C_BIGENDIAN
 
 AQSIS_CHECK_FLTK
 
+AQSIS_WITH_OPENEXR
+
 dnl TIFF library
 saveCFLAGS=$CFLAGS
 saveLIBS=$LIBS
-HAVE_LIBTIFF_ARGS
+AQSIS_LIBTIFF_ARGS
 CFLAGS=$TIFF_INC
 LIBS=$TIFF_FLAGS
 AC_CHECK_HEADER(tiff.h)
@@ -117,7 +119,7 @@ fi
 dnl ZLIB library
 saveCFLAGS=$CFLAGS
 saveLIBS=$LIBS
-HAVE_LIBZ_ARGS
+AQSIS_LIBZ_ARGS
 CFLAGS=$ZLIB_INC
 LIBS=$ZLIB_FLAGS
 AC_CHECK_HEADER(zlib.h)
@@ -131,7 +133,7 @@ fi
 dnl JPEG library
 saveCFLAGS=$CFLAGS
 saveLIBS=$LIBS
-HAVE_LIBJPEG_ARGS
+AQSIS_LIBJPEG_ARGS
 CFLAGS=$JPEG_INC
 LIBS=$JPEG_FLAGS
 AC_CHECK_HEADER(jpeglib.h)
@@ -326,6 +328,7 @@ plugins/pcx2tif/Makefile \
 plugins/ppm2tif/Makefile \
 plugins/tga2tif/Makefile \
 plugins/bmp2tif/Makefile \
+plugins/exr2tif/Makefile \
 render/Makefile \
 ribfiles/Makefile \
 shaders/Makefile \
