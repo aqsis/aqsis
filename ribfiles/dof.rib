@@ -3,6 +3,7 @@ Format 320 240 1
 PixelSamples 4 4
 ShadingRate 1.0
 PixelFilter "gaussian" 2 2
+Option "searchpath" "shader" ["../shaders:&"]
 
 DepthOfField 1 100 970
 

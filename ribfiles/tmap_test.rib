@@ -1,4 +1,5 @@
 version 3.03
+Option "searchpath" "shader" ["../shaders:&"]
 Display "tmap_test.tif" "file" "rgba"
 Display "+tmap_test.tif" "framebuffer" "rgba"
 Format 400 300 1

@@ -4,6 +4,7 @@ PixelSamples 3 3
 ShadingRate 1.0
 PixelFilter "gaussian" 2 2
 Option "statistics" "endofframe" [1]
+Option "searchpath" "shader" ["../shaders:&"]
 
 FrameBegin 0
 

@@ -1,4 +1,5 @@
 version 3.03
+Option "searchpath" "shader" ["../shaders:&"]
 
 Option "limits" "eyesplits" [10]
 

@@ -1,7 +1,8 @@
+Option "searchpath" "shader" ["../shaders:&"]
+
 Display "cellnoise.tif" "file" "rgba"
 Display "+cellnoise.tif" "framebuffer" "rgba"
 
-#Display "cellnoise.tif" "framebuffer" "rgba" 
 Format 256 256 1
 Projection "perspective" 
 Translate 0 0 1

@@ -2,6 +2,7 @@
 version 3.03
 Format 320 240 -1
 Projection "perspective" "fov" [10]
+Option "searchpath" "shader" ["../shaders:&"]
 
 Display "trim_test.tif" "file" "rgba"
 Display "+trim_test" "framebuffer" "rgba"

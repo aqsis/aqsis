@@ -2,6 +2,7 @@ version 3.03
 ShadingRate 2
 PixelSamples 1 1
 Format 200 150 -1
+Option "searchpath" "shader" ["../shaders:&"]
 Display "bucket_test.tif" "file" "rgba"
 Display "+bucket_test.tif" "framebuffer" "rgba"
 

@@ -1,12 +1,13 @@
 version 3.03
+Option "searchpath" "shader" ["../shaders:&"]
+Option "searchpath" "shader" ["./:&"]
+Option "searchpath" "texture" ["../images:&"]
 
 Display "env_test.tif" "file" "rgba"
 Display "+env_test.tif" "framebuffer" "rgba"
 
 Format 200 150 1
 ShadingRate 1
-
-Option "searchpath" "shader" ["./:&"]
 
 Projection "perspective" "fov" 45
 Translate 0 0 6
@@ -15,7 +16,7 @@ Rotate -20 1 0 0
 Option "limits" "eyesplits" [3]
 Sides 1
 
-MakeCubeFaceEnvironment "..\images\px.tif" "..\images\nx.tif" "..\images\py.tif" "..\images\ny.tif" "..\images\pz.tif" "..\images\nz.tif" "test.env" 90 "box" 1 1 
+MakeCubeFaceEnvironment "px.tif" "nx.tif" "py.tif" "ny.tif" "pz.tif" "nz.tif" "test.env" 90 "box" 1 1 
 
 WorldBegin
       

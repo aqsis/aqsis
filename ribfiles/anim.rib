@@ -3,6 +3,7 @@ Format 320 240 1
 PixelSamples 1 1
 ShadingRate 2.0
 
+Option "searchpath" "shader" ["../shaders:&"]
 Option "statistics" "endofframe" [1]
 
 # Camera name: "Kamera01"

@@ -1,5 +1,6 @@
 ##RenderMan RIB-Structure 1.0
 version 3.03
+Option "searchpath" "shader" ["../shaders:&"]
 
 Display "simple.tif" "file" "rgba"
 Display "+simple.tif" "framebuffer" "rgba"

@@ -1,4 +1,5 @@
 Orientation "lh"
+Option "searchpath" "shader" ["../shaders:&"]
 Format 320 240 1
 PixelSamples 1 1
 ShadingRate 1.0

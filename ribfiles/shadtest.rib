@@ -1,10 +1,11 @@
 version 3.03
 
 Option "limits" "eyesplits" [10]
+Option "searchpath" "shader" ["../shaders:&"]
 
 # Output Z data only
 Display "shadow.z" "zfile" "z"
-Display "+shadow.z" "zframebuffer" "z"
+#Display "+zfb" "zframebuffer" "z"
 
 Clipping 0.0001 10
 

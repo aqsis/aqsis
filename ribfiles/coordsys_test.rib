@@ -1,4 +1,5 @@
 version 3.03
+Option "searchpath" "shader" ["../shaders:&"]
 
 Display "coordsys_test.tif" "file" "rgba"
 Display "+coordsys_test.tif" "framebuffer" "rgba"

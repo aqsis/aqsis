@@ -1,4 +1,5 @@
 version 3.03
+Option "searchpath" "shader" ["../shaders:&"]
 
 Display "orient_test.tif" "file" "rgba"
 Display "+orient_test.tif" "framebuffer" "rgba"

@@ -3,6 +3,7 @@ Format 320 240 1
 PixelSamples 1 1
 ShadingRate 1.0
 Option "statistics" "endofframe" [1]
+Option "searchpath" "shader" ["../shaders:&"]
 
 FrameBegin 0
 Display "teapot.tif" "file" "rgba"

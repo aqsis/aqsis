@@ -1,4 +1,5 @@
 version 3.03
+Option "searchpath" "shader" ["../shaders:&"]
 
 Display "poly_test.tif" "file" "rgba"
 Display "+poly_test.tif" "framebuffer" "rgba"

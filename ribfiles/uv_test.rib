@@ -1,4 +1,5 @@
 version 3.03
+Option "searchpath" "shader" ["../shaders:&"]
 Display "uv_test.tif" "file" "rgba"
 Display "+uv_test.tif" "framebuffer" "rgba"
 Format 640 480 1

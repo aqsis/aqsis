@@ -1,3 +1,4 @@
+Option "searchpath" "shader" ["../shaders:&"]
 Display "skewtest.tif" "file" "rgba"
 Display "+skewtest.tif" "framebuffer" "rgba"
 

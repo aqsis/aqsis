@@ -2,6 +2,7 @@ Orientation "lh"
 Format 320 240 1
 PixelSamples 1 1
 ShadingRate 1.0
+Option "searchpath" "shader" ["../shaders:&"]
 
 FrameBegin 0
 Display "subdiv2.tif" "file" "rgba"

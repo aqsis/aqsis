@@ -1,4 +1,5 @@
 version 3.03
+Option "searchpath" "shader" ["../shaders:&"]
 Display "colpervertex_test.tif" "file" "rgba"
 Display "+colpervertex_test.tif" "framebuffer" "rgba"
 

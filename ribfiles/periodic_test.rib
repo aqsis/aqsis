@@ -1,4 +1,5 @@
 version 3.03
+Option "searchpath" "shader" ["../shaders:&"]
 
 Display "periodic_test.tif" "file" "rgba"
 Display "+periodic_test.tif" "framebuffer" "rgba"

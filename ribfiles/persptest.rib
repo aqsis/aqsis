@@ -1,3 +1,4 @@
+Option "searchpath" "shader" ["../shaders:&"]
 Display "persptest.tif" "file" "rgba"
 Display "+persptest.tif" "framebuffer" "rgba"
 

@@ -1,4 +1,5 @@
 version 3.03
+Option "searchpath" "shader" ["../shaders:&"]
 ShadingRate 2
 Sides 2
 Format 200 150 -1
