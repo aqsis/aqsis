@@ -391,7 +391,7 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 		//CqBasicError( ErrorID_DisplayDriver, Severity_Normal, str.c_str() );
 		QGetRenderContext() ->Logger() ->error( str );
 		error = 1;
-		m_aDisplayRequests.erase( &m_aDisplayRequests.back() );
+		m_aDisplayRequests.pop_back();
 	}
 	return ( error );
 }
