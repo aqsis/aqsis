@@ -546,7 +546,11 @@ variable_definitions
 										CqVarDef* pVar=CqVarDef::GetVariablePtr(var);
 										// Check if the declaration marked it as an arry
 										if(pVar->Type()&Type_Array)
+										{
 											Type=(TqInt)(Type|Type_Array);
+											if( pVar->ArrayLength() <= 0 )
+												yyerror("Array length must be specified.");
+										}
 
 										pVar->SetType(Type);
 										// Create a variable node, in the case of local variable definition, these nodes will be removed, 
@@ -701,6 +705,13 @@ def_expression
 								CqVarDef::AddVariable(vardef);
 								$$->AddLastChild($5);
 							}
+	|	IDENTIFIER '[' ']' {
+								// Create a new variable declaration based on the specified name.
+								$$=new CqParseNodeDeclaration($1->c_str());
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								CqVarDef vardef(Type_Array, (strNameSpace()+*$1).c_str(), 0);
+								CqVarDef::AddVariable(vardef);
+							}
 	|	SYMBOL def_init		{
 								// Create a new declaration based on the name.
 								// TODO: Should warn about duplicate declarations.
@@ -746,6 +757,16 @@ def_expression
 								CqVarDef vardef(Type_Array, (strNameSpace()+strName).c_str(), static_cast<TqInt>($3));
 								CqVarDef::AddVariable(vardef);
 								$$->AddLastChild($5);
+							}
+	|	SYMBOL '[' ']' {
+								CqString strName("");
+								if($1.eType&1)	strName=CqVarDef::GetVariablePtr($1.VarRef)->strName();
+								else			strName=CqFuncDef::GetFunctionPtr($1.FuncRef)->strName();
+
+								$$=new CqParseNodeDeclaration(strName.c_str());
+								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
+								CqVarDef vardef(Type_Array, (strNameSpace()+strName).c_str(), 0);
+								CqVarDef::AddVariable(vardef);
 							}
 	;
 
