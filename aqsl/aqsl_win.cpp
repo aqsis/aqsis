@@ -39,9 +39,9 @@ void compile_file(const char* sl_file)
 	std::strstream slppcommand;
         
 #ifdef AQSIS_SYSTEM_MACOSX
-	slppcommand << "./slpp -d PI=3.141592654 -d AQSIS -c6 " << sl_file << std::ends;
+	slppcommand << "${AQSIS_BASE_PATH}/slpp -d PI=3.141592654 -d AQSIS -c6 " << sl_file << std::ends;
 	hPipeRead = popen(slppcommand.str(),"r");
-	hPipeWrite = popen("./aqslcomp","w");
+	hPipeWrite = popen("${AQSIS_BASE_PATH}/aqslcomp","w");
 #else
 	slppcommand << "slpp.exe -d PI=3.141592654 -d AQSIS -c6 " << sl_file << std::ends;
 	hPipeRead=_popen(slppcommand.str(),"r");
