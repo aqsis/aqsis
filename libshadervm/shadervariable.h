@@ -359,6 +359,7 @@ public:
     }
     virtual IqShaderData*	ArrayEntry( TqInt i )
     {
+		assert( i < this->ArrayLength() );
         return ( ( *this ) [ i ] );
     }
 
