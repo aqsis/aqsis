@@ -132,24 +132,12 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
  */
 TqInt CqTextureMap::Convert( CqString &strName )
 {
-
     const CqString extension = strName.substr(strName.rfind(".")).substr(1);
-#ifdef	AQSIS_SYSTEM_POSIX
-    const CqString plugin_path = DEFAULT_PLUGIN_PATH "/" + extension + "2tif.so";
-#elif	AQSIS_SYSTEM_WIN32
-	char acPath[256];
-	if ( GetModuleFileName( NULL, acPath, 256 ) != 0) 
-	{
-		// guaranteed file name of at least one character after path
-		*( strrchr( acPath, '\\' ) + 1 ) = '\0';
-	}
-    CqString plugin_path = acPath;
-	plugin_path.append( CqString("/" + extension + "2tif.dll") );
-#endif
+    const CqString plugin_path = extension + "2tif." + SHARED_LIBRARY_SUFFIX;
     const CqString plugin_function = extension + "2tif";
 
     TqInt result = 0;
-    CqConverter* const plug = new CqConverter( "", const_cast<char*>(plugin_path.c_str()), const_cast<char*>(plugin_function.c_str()) );
+    CqConverter* const plug = new CqConverter( "plugin", const_cast<char*>(plugin_path.c_str()), const_cast<char*>(plugin_function.c_str()) );
     char * ( *convert ) ( const char * );
     if ( ( convert = ( char * ( * ) (const  char * s ) ) plug->Function() ) != NULL )
     {
