@@ -41,6 +41,7 @@ extern unsigned int ParseLineNumber;
 extern bool ParseSucceeded;
 extern bool fRequest;
 extern bool fParams;
+extern RtArchiveCallback pArchiveCallback;
 
 bool fRecovering;
 
@@ -92,6 +93,7 @@ static RendermanInterface::RtInt ColorSamples = 3;
 %token <ftype> FLOAT_TOKEN
 %token <itype> INTEGER_TOKEN
 %token <stype> STRING_TOKEN
+%token <stype> COMMENT
 %type <itype> integer
 %type <ftype> float
 %type <stype> string
@@ -337,6 +339,20 @@ request : complete_request
 complete_request
 	:	version float
 			{  }
+	|	COMMENT
+			{
+				if( pArchiveCallback != NULL )
+				{
+					// RISpec 3.2 isn't very clear, not sure if stripping the '#'s is right or not
+					if( $1[0] == '#' && $1[1] == '#' ) // Structure comment
+					{
+						pArchiveCallback(RI_STRUCTURE, "%s", &( $1[2]) ); 
+					} else {  // User Data Record comment
+						pArchiveCallback(RI_COMMENT, "%s", &( $1[1]) ); 
+					};
+				};
+				DiscardStringValue($1);
+			}
 	|	declare string string
 			{
 				ParserDeclare(*ParseCallbackInterface, $2, $3);

@@ -4145,14 +4145,13 @@ RtVoid	RiProcFree( RtPointer data )
 
 
 //----------------------------------------------------------------------
-// RiProcDynamicLoad()
+// RiProcDynamicLoad() subdivide function
 //
 RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 {
+/*
 	// TODO: We need a custom class for handling RiProcDunamicLoad
-	CqConverter * pConvertParameters;
-	CqConverter *pFree;
-	CqConverter *pSubdivide;
+	CqPluginBase *plugin = new CqPluginBase;
 	void *( *pvfcts ) ( char * );
 	void ( *vfctpvf ) ( void *, float );
 	void ( *vfctpv ) ( void * );
@@ -4164,13 +4163,6 @@ RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 	// the reset is passed as such to ConvertParameters function later on
 	strcpy( dsoname, (( char** ) data)[0] );
 	strcpy( opdata, (( char** ) data)[1] );
-	for ( int i = 0; i < strlen( dsoname ); i++ )
-		if ( isspace( dsoname[ i ] ) )
-        	{
-			strcpy( opdata, &dsoname[ i + 1 ] );
-			dsoname[ i ] = '\0';
-			break;
-        	}
 
 	// As the first parameters is empty I relied on the fullpath name for the .dll/.so
 	// or hopefully relies on the fact the dll/.so is local to this .rib file
@@ -4200,12 +4192,10 @@ RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 	if ( pSubdivide ) pSubdivide->Close();
 	if ( pFree ) pFree->Close();
 
-	delete pSubdivide;
-	delete pConvertParameters;
-	delete pFree;
+	delete plugin;
+ */
+} 
 
-	return;
-}
 
 
 //----------------------------------------------------------------------
@@ -4290,7 +4280,7 @@ RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
 }
 
 
-RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback, PARAMETERLIST )
+RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback archcallback, PARAMETERLIST )
 {
 	CqRiFile	fileArchive( name, "archive" );
 	if ( fileArchive.IsValid() )
@@ -4302,7 +4292,7 @@ RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback, PARAMETERLIST )
 		{
 			CqRIBParserState currstate = librib::GetParserState();
 			if (currstate.m_pParseCallbackInterface == NULL) currstate.m_pParseCallbackInterface = new librib2ri::Engine;
-			librib::Parse( file, name, *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream) );
+			librib::Parse( file, name, *(currstate.m_pParseCallbackInterface), *(currstate.m_pParseErrorStream), archcallback );
 			librib::SetParserState( currstate );
 			fclose(file);
 		}

@@ -25,6 +25,7 @@ class CqRIBParserState
         unsigned int m_ParseLineNumber;
         std::string m_ArchivePath;
 
+	RtArchiveCallback m_pArchiveCallback;
         bool m_ParseSucceeded;
         bool m_fRequest;
         bool m_fParams;

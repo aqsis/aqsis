@@ -90,7 +90,7 @@ array_end		\]
 		fParams=false;
 	}
 
-{comment}				{  }
+{comment}			{ lvalp->stype = new char[strlen(yytext)+1]; strcpy(lvalp->stype, yytext); return COMMENT; }
 {eol}							{ ParseLineNumber++; }
 {whitespace}			{  }
 

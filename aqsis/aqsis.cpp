@@ -433,7 +433,7 @@ void RenderFile( FILE* file, const char* name )
 		FILE * cfgfile = fopen( g_config.c_str(), "rb" );
 		if ( cfgfile != NULL )
 		{
-			librib::Parse( cfgfile, "config", *renderengine, std::cerr );
+			librib::Parse( cfgfile, "config", *renderengine, std::cerr, NULL );
 			fclose( cfgfile );
 		}
 		else if ( g_environment )
@@ -454,7 +454,7 @@ void RenderFile( FILE* file, const char* name )
 
 		}
 	}
-	librib::Parse( file, name, *renderengine, std::cerr );
+	librib::Parse( file, name, *renderengine, std::cerr, NULL );
 
 	RiEnd();
 

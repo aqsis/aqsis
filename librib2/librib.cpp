@@ -60,6 +60,9 @@ std::ostream* ParseErrorStream = &std::cerr;
 unsigned int ParseLineNumber;
 bool ParseSucceeded = true;
 
+// ReadArchive callback function
+RtArchiveCallback pArchiveCallback;
+
 // From the parser itself
 extern bool    fRecovering;
 
@@ -145,6 +148,7 @@ CqRIBParserState GetParserState()
 	state.m_ParseStreamName = ParseStreamName;
 	state.m_pBinaryDecoder = BinaryDecoder;
 	state.m_pParseErrorStream = ParseErrorStream;
+	state.m_pArchiveCallback = pArchiveCallback;
 
 	state.m_pParseCallbackInterface = ParseCallbackInterface;
 	state.m_ParseLineNumber = ParseLineNumber;
@@ -166,6 +170,7 @@ void SetParserState( CqRIBParserState& state)
 	ParseStreamName = state.m_ParseStreamName;
 	BinaryDecoder = state.m_pBinaryDecoder;
 	ParseErrorStream = state.m_pParseErrorStream;
+	pArchiveCallback = state.m_pArchiveCallback;
 
 	ParseCallbackInterface = state.m_pParseCallbackInterface;
 	ParseLineNumber = state.m_ParseLineNumber;
@@ -178,7 +183,7 @@ void SetParserState( CqRIBParserState& state)
 	yy_switch_to_buffer( (struct yy_buffer_state*) state.m_pYY_STATE ) ;
 };
 
-bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream )
+bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream, RtArchiveCallback callback)
 {
 	ParseInputFile = InputStream;
 	ParseStreamName = StreamName;
@@ -189,6 +194,7 @@ bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface&
 	fRequest = false;
  	fRecovering = false;
 	fParams = false;
+	pArchiveCallback = callback;
 
 	BinaryDecoder = new CqRibBinaryDecoder( InputStream );
 	// 16384 is knicked from flex, in reality since we read via BinaryDecoder, this is not used
