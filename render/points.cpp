@@ -54,6 +54,11 @@ void CqPointsKDTreeData::SetpPoints( CqPoints* pPoints )
 	m_pPointsSurface = pPoints;
 }
 
+void CqPointsKDTreeData::FreePoints()
+{
+	m_pPointsSurface->Release();
+}
+
 bool CqPointsKDTreeData::CqPointsKDTreeDataComparator::operator()(TqInt a, TqInt b)	
 {  
 	return( ( ( *m_pPointsSurface->pPoints()->P() )[ a ][m_Dim] ) < ( ( *m_pPointsSurface->pPoints()->P() )[ b ][m_Dim] ) ); 
@@ -347,6 +352,35 @@ TqInt CqPoints::Split( std::vector<CqBasicSurface*>& aSplits )
 	pB->SetSurfaceParameters( *this );
 
 	KDTree().Subdivide( pA->KDTree(), pB->KDTree() );
+
+	pA->AddRef();
+	pB->AddRef();
+
+	aSplits.push_back( pA );
+	aSplits.push_back( pB );
+
+	return( 2 );
+}
+
+
+//---------------------------------------------------------------------
+/** Split the points, taking the split information from the specified donor points surfaces.
+ */
+
+TqInt CqPoints::CopySplit( std::vector<CqBasicSurface*>& aSplits, CqPoints* pFrom1, CqPoints* pFrom2 )
+{
+	// Split the KDTree and create two new primitives containing the split points set.
+	CqPoints* pA = new CqPoints( *this );
+	CqPoints* pB = new CqPoints( *this );
+
+	pA->m_nVertices = pFrom1->m_nVertices;
+	pB->m_nVertices = pFrom2->m_nVertices;
+
+	pA->SetSurfaceParameters( *this );
+	pB->SetSurfaceParameters( *this );
+
+	pA->KDTree() = pFrom1->KDTree();
+	pB->KDTree() = pFrom2->KDTree();
 
 	pA->AddRef();
 	pB->AddRef();

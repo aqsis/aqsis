@@ -76,6 +76,7 @@ class CqPointsKDTreeData : public IqKDTreeData<TqInt>
 		virtual TqInt Dimensions() const	{return(3);}
 
 				void	SetpPoints( CqPoints* pPoints );
+				void	FreePoints();
 
 	private:
 		CqPoints*	m_pPointsSurface;
@@ -126,6 +127,11 @@ class CqPoints : public CqSurface, public CqMotionSpec<CqPolygonPoints*>
 		virtual	CqMicroPolyGridBase* Dice();
 		virtual TqBool	Diceable();
 
+		virtual void	RenderComplete()
+		{
+			ClearKDTree();
+			CqBasicSurface::RenderComplete();
+		}
 		/** Determine whether the passed surface is valid to be used as a 
 		 *  frame in motion blur for this surface.
 		 */
@@ -157,6 +163,7 @@ class CqPoints : public CqSurface, public CqMotionSpec<CqPolygonPoints*>
 		{
 			return ( pPoints()->aUserParams() );
 		}
+		TqInt CopySplit( std::vector<CqBasicSurface*>& aSplits, CqPoints* pFrom1, CqPoints* pFrom2 );
 
 		/** Returns a const reference to the "constantwidth" parameter, or
 		 * NULL if the parameter is not present. */
@@ -229,6 +236,11 @@ class CqPoints : public CqSurface, public CqMotionSpec<CqPolygonPoints*>
 		/// Accessor function for the KDTree
 		CqKDTree<TqInt>&	KDTree()			{return( m_KDTree); }
 		const CqKDTree<TqInt>&	KDTree() const	{return( m_KDTree); }
+	
+		void ClearKDTree()
+		{
+			m_KDTreeData.FreePoints();
+		}
 
 		/// Initialise the KDTree to point to the whole points list.
 		void	InitialiseKDTree();
@@ -479,8 +491,15 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 			aaMotionSplits.resize( cTimes() );
 			TqInt cSplits = 0;
 			TqInt i;
-			for ( i = 0; i < cTimes(); i++ )
-				cSplits = GetMotionObject( Time( i ) ) ->Split( aaMotionSplits[ i ] );
+			CqPoints* pFrom1, *pFrom2;
+			cSplits = GetMotionObject( Time( 0 ) ) ->Split( aaMotionSplits[ 0 ] );
+			pFrom1 = static_cast<CqPoints*>(aaMotionSplits[ 0 ][ 0 ]);
+			pFrom2 = static_cast<CqPoints*>(aaMotionSplits[ 0 ][ 1 ]);
+			
+			// Now we have the appropriate split information, use this to make sure the rest 
+			// of the keyframes split at the same point.
+			for ( i = 1; i < cTimes(); i++ )
+				cSplits = static_cast<CqPoints*>(GetMotionObject( Time( i ) )) ->CopySplit( aaMotionSplits[ i ], pFrom1, pFrom2 );
 
 			// Now build motion surfaces from the splits and pass them back.
 			for ( i = 0; i < cSplits; i++ )
@@ -495,6 +514,16 @@ class CqDeformingPointsSurface : public CqDeformingSurface
 				aSplits.push_back( pNewMotion );
 			}
 			return ( cSplits );
+		}
+		virtual void	RenderComplete()
+		{
+			TqInt i;
+			for ( i = 0; i < cTimes(); i++ )
+			{
+				CqPoints* Points = static_cast<CqPoints*>( GetMotionObject( Time( i ) ) );
+				Points->ClearKDTree();
+			}
+			CqBasicSurface::RenderComplete();
 		}
 	protected:
 };

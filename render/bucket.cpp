@@ -597,6 +597,7 @@ void CqBucket::AddGPrim( CqBasicSurface* pGPrim )
 		}
 	}
 	m_aGPrims.LinkFirst( pGPrim );
+	pGPrim->AddRef();
 }
 
 

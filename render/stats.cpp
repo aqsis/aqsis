@@ -99,8 +99,7 @@ void CqStats::InitialiseFrame()
 	m_cTextureMemory = 0;
 	memset( m_cTextureMisses, '\0', sizeof( m_cTextureMisses ) );
 	memset( m_cTextureHits, '\0', sizeof( m_cTextureHits ) );
-//	m_timeTotalFrame = 0;
-//	m_frameTimerRunning = TqFalse;
+	m_timeTotalFrame.Reset();
 	m_timeSurface.Reset();
 	m_timeDisplacement.Reset();
 	m_timeImager.Reset();

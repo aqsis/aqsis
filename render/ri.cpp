@@ -2489,6 +2489,7 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 		{
 			// Cull this geometry for LOD reasons
 			pSurface->Release();
+			pPointsClass->Release();
 			return ;
 		}
 
@@ -2505,15 +2506,15 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 			if( ( pMS = pMMB->GetDeformingSurface() ) == NULL )
 			{
 				CqDeformingPointsSurface* pNewMS = new CqDeformingPointsSurface( pSurface );
-				pSurface->AddRef();
 				pNewMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
-				pNewMS->AddRef();
+				pSurface->AddRef();
+				
 				pMMB->SetDeformingSurface( pNewMS );
 			}
 			else
 			{
-				pSurface->AddRef();
 				pMS->AddTimeSlot( QGetRenderContext()->Time(), pSurface );
+				pSurface->AddRef();
 			}
 			QGetRenderContext() ->AdvanceTime();
 		}
@@ -2524,6 +2525,7 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 		}
 	
 		pPointsClass->Release();
+		pSurface->Release();
 	}
 	else
 	{
@@ -4866,6 +4868,7 @@ RtVoid	CreateGPrim( CqBasicSurface* pSurface )
 		pSurface->PrepareTrimCurve();
 		QGetRenderContext() ->pImage() ->PostSurface( pSurface );
 		QGetRenderContext() ->Stats().IncGPrims();
+		pSurface->Release();
 	}
 
 	return ;

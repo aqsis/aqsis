@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/04/27 21:41:34 $
+ *	Last change date:	$Date: 2003/05/09 16:06:44 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___isurface_Loaded___
@@ -100,6 +100,9 @@ struct IqSurface
 	/** Perform any post cleanup after dicing.
 	 */
 	virtual void	PostSubdivide( std::vector<CqBasicSurface*>& aSplits ) = 0;
+	/** The main processing loop is finished with this surface now, so clean up any data it doesn't need anymore.
+	 */
+	virtual void	RenderComplete() = 0;
 };
 
 

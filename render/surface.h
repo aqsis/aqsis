@@ -115,6 +115,11 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		{}
 		virtual void	PostSubdivide(std::vector<CqBasicSurface*>& aSplits)
 		{}
+		virtual void	RenderComplete()
+		{
+			UnLink();
+			Release();
+		}
 		/** Prepare the trim curve once the surface has been completed.
 		 */
 		virtual	void	PrepareTrimCurve()
@@ -842,7 +847,6 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<CqBasicSur
 		{
 			return ( GetMotionObject( Time( 0 ) ) ->cFaceVarying() );
 		}
-
 		// Overrides from CqMotionSpec
 		virtual	void	ClearMotionObject( CqBasicSurface*& A ) const
 			{}

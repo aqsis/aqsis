@@ -946,8 +946,7 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 			QGetRenderContext() ->Stats().SplitsTimer().Stop();
 		}
 
-		pSurface->UnLink();
-		pSurface->Release();
+		pSurface->RenderComplete();
 		pSurface = Bucket.pTopSurface();
 		// Render any waiting micro polygon grids.
 		QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
