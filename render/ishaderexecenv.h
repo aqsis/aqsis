@@ -533,51 +533,15 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
     assert( NULL != Var );
 
     R Retu, Retv;
-    TqInt uRes = ps->uGridRes();
-    TqInt vRes = ps->vGridRes();
-    TqInt GridX = i % ( uRes + 1 );
-    TqInt GridY = ( i / ( uRes + 1 ) );
+	float u,v;
 
-    R v1, v2;
-    TqFloat u = 1.0f, v = 1.0f;
-
-    // Calculate deriviative in u
-    if ( GridX < uRes )
-    {
-        Var->GetValue( v1, i + 1 );
-        Var->GetValue( v2, i );
-        if ( NULL != den )
-            den->GetValue( u, i );
-        Retu = ( v1 - v2 ) / u;
-    }
-    else
-    {
-        Var->GetValue( v1, i );
-        Var->GetValue( v2, i - 1 );
-        if ( NULL != den )
-            den->GetValue( u, i );
-        Retu = ( v2 - v1 ) / u;
-    }
-
-    // Calculate deriviative in v
-    if ( GridY < vRes )
-    {
-        Var->GetValue( v1, i + uRes + 1 );
-        Var->GetValue( v2, i );
-        if ( NULL != den )
-            den->GetValue( v, i );
-        Retv = ( v1 - v2 ) / v;
-    }
-    else
-    {
-        Var->GetValue( v1, i );
-        Var->GetValue( v2, i - ( uRes - 1 ) );
-        if ( NULL != den )
-            den->GetValue( v, i );
-        Retv = ( v2 - v1 ) / v;
-    }
-
-    return ( Retu + Retv );
+	Retu = SO_DuType(Var, i, ps, Retu);
+	Retv = SO_DvType(Var, i, ps, Retv);
+	u = SO_DuType(den, i, ps, u);
+	v = SO_DvType(den, i, ps, v);
+	Retu/=u;
+	Retv/=v;
+	return(Retu+Retv);
 }
 
 
