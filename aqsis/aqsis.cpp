@@ -1,6 +1,11 @@
 #include "ri.h"
 #include "librib.h"
 #include "librib2ri.h"
+#include "aqsis.h"
+
+#ifdef	AQSIS_SYSTEM_WIN32
+#include "version.h"
+#endif
 
 #include <argparse.h>
 
@@ -27,7 +32,11 @@ ArgParse::apstring g_base_path="";
 
 void version(std::ostream& Stream)
 {
+  #ifdef	AQSIS_SYSTEM_WIN32
+  Stream << "aqsis version " << VERSION_STR << std::endl;
+  #else
   Stream << "aqsis version " << VERSION << std::endl;
+  #endif
 }
 
 int main(int argc, const char** argv)
@@ -35,7 +44,8 @@ int main(int argc, const char** argv)
   ArgParse ap;
   ap.usageHeader(ArgParse::apstring("Usage: ") + argv[0] + " [options] files(s) to render");
   ap.argFlag("help", "\aprint this help and exit", &g_help);
-  ap.argFlag("version", "\aprint version information and exit", &g_version);	ap.argFlag("pause", "\await for a keypress on completion", &g_pause);
+  ap.argFlag("version", "\aprint version information and exit", &g_version);	
+  ap.argFlag("pause", "\await for a keypress on completion", &g_pause);
   ap.argInt("endofframe", "=integer\aequivalent to \"endofframe\" option", &g_endofframe);
   ap.argFlag("nostandard", "\adisables declaration of standard RenderMan parameter types", &g_nostandard);
   ap.argFlag("verbose", "\aoutput environment information", &g_verbose);
@@ -116,7 +126,7 @@ void GetOptions()
 	  {
 	    g_config=env;
 	    g_config.append("/.aqsisrc");
-	    ifstream cfgfile(g_config.c_str());
+	    std::ifstream cfgfile(g_config.c_str());
 	    if(!cfgfile.is_open())
 	      {
 		g_config=g_base_path;
