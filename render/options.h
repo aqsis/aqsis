@@ -93,6 +93,13 @@ class CqOptions
 		 */
 		void	ClearOptions()
 		{
+			// unreference the options before clearing the list
+			TqInt i = m_aOptions.size();
+			while ( i-- > 0 )
+			{
+				RELEASEREF( m_aOptions[ i ] );
+				m_aOptions[ i ] = 0;
+			}
 			m_aOptions.clear();
 			InitialiseDefaultOptions();
 		}
