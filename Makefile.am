@@ -12,11 +12,11 @@ devicedriver = $(bindir)/ddmsock.ini
 
 install-data-local:
 	cat /dev/null > $(devicedriver)
-	echo "file	@bindir@/filebuffer$(exeext)" >> $(devicedriver)
-	echo "tiff	@bindir@/filebuffer$(exeext)" >> $(devicedriver)
-	echo "framebuffer	@bindir@/aqsis_framebuffer_glut$(exeext)" >> $(devicedriver)	
-	echo "framebufferz	@bindir@/aqsis_framebuffer_glut_z$(exeext)" >> $(devicedriver)
-	echo "zfile	@bindir@/shadowmap$(exeext)" >> $(devicedriver)
-	echo "shadow	@bindir@/shadowmap$(exeext)" >> $(devicedriver)
+	echo "file	@bindir@/filebuffer@EXEEXT@" >> $(devicedriver)
+	echo "tiff	@bindir@/filebuffer@EXEEXT@" >> $(devicedriver)
+	echo "framebuffer	@bindir@/aqsis_framebuffer_glut@EXEEXT@" >> $(devicedriver)	
+	echo "framebufferz	@bindir@/aqsis_framebuffer_glut_z@EXEEXT@" >> $(devicedriver)
+	echo "zfile	@bindir@/shadowmap@EXEEXT@" >> $(devicedriver)
+	echo "shadow	@bindir@/shadowmap@EXEEXT@" >> $(devicedriver)
 
 
