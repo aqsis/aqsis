@@ -305,5 +305,7 @@ libshadervm/Makefile \
 libshaderexecenv/Makefile \
 libargparse/Makefile \
 dsotest/Makefile \
+thirdparty/Makefile \
+thirdparty/tinyxml/Makefile \
 Makefile )
 
