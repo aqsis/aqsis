@@ -35,6 +35,8 @@ CqMessageTable::CqMessageTable()
 {
 	m_cTable = -1;
 	m_cError = -1;
+	m_cacheHits = 0;
+	m_errorCount = 0;
 
 	// Basic errors
 	m_Be.insert(i_s::value_type( 0, "BasicError: Unknown error" ));
@@ -83,8 +85,11 @@ const char* CqMessageTable::getError( int table, int error_id )
 	m_errorCount++;
 	// Return cached result if possible
 	if ( ( table == m_cTable ) && ( error_id == m_cError ) )
+	{
+		m_cacheHits++;
 		return m_cErrorText.c_str();
-	
+	}
+
 	switch ( table )
 	{
 		case BASIC_ERROR_TABLE:

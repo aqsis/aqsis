@@ -55,11 +55,21 @@ class CqMessageTable
 
 		const char* getError( int table, int error_id );
 		void insert( int table, i_s::value_type data );
+		
+		int getErrorCount()
+		{
+			return m_errorCount;
+		}
 
+		int getCacheHits()
+		{
+			return m_cacheHits;
+		}
 		
 	private:
 		// Stats
 		int m_errorCount;
+		int m_cacheHits;
 
 		// Cache
 		int m_cTable;
