@@ -24,6 +24,10 @@
         \author Jonathan Merritt (j.merritt@pgrad.unimelb.edu.au)
 */
 
+#ifdef	WIN32
+#pragma warning(disable : 4786)
+#endif
+
 #include <stdio.h>
 #include <string.h>
 #include <list>
@@ -261,6 +265,7 @@ extern "C" RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
 // TODO: This is far from ideal, we need to parse directly from the popene'd 
 // process.
 
+#ifndef	AQSIS_SYSTEM_WIN32
 class CqRiProceduralRunProgram
 {
 	public:
@@ -271,6 +276,7 @@ class CqRiProceduralRunProgram
 };
 
 static std::map<std::string, CqRiProceduralRunProgram*> ActiveProcRP;
+#endif
 
 extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 {
