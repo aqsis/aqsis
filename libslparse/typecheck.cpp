@@ -383,6 +383,22 @@ TqInt	CqParseNodeVariableArray::TypeCheck( TqInt* pTypes, TqInt Count, TqBool Ch
         return ( Type_Nil );
     }
 
+	// Check if the variable is an array.
+	CqVarDef* pVar=CqVarDef::GetVariablePtr(m_VarRef);
+	// Check if the declaration marked it as an arry
+	if(!(pVar->Type()&Type_Array))
+	{
+        TqInt	myType = ( ResType() & Type_Mask );
+        CqString strErr( strFileName() );
+        strErr += " : ";
+        strErr += LineNo();
+        strErr += " : ";
+        strErr += "Attempt to access array member of non-array type : ";
+        strErr += CqParseNode::TypeName( myType );
+        throw( strErr );
+        return ( Type_Nil );
+	}
+
     return ( CqParseNodeVariable::TypeCheck( pTypes, Count, CheckOnly ) );
 }
 

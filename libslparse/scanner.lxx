@@ -208,7 +208,12 @@ TqInt check_type()
 	{
 		yylval.m_pSymbol.VarRef=var;
 		yylval.m_pSymbol.eType=1;
-		Ret=SYMBOL;
+		CqVarDef* pVar=CqVarDef::GetVariablePtr(var);
+		// Check if the declaration marked it as an arry
+		if(pVar->Type()&Type_Array)
+			Ret=ARRAY_SYMBOL;
+		else
+			Ret=SYMBOL;
 	}
 
 	// Check the type against global variables.
@@ -217,7 +222,12 @@ TqInt check_type()
 	{
 		yylval.m_pSymbol.VarRef=var;
 		yylval.m_pSymbol.eType=1;
-		Ret=SYMBOL;
+		CqVarDef* pVar=CqVarDef::GetVariablePtr(var);
+		// Check if the declaration marked it as an arry
+		if(pVar->Type()&Type_Array)
+			Ret=ARRAY_SYMBOL;
+		else
+			Ret=SYMBOL;
 	}
 
 	// Check the type against known functions.

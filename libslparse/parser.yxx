@@ -1,6 +1,6 @@
 /* -------------- declaration section -------------- */
 
-%expect 24
+%expect 23
 
 %{
 #ifdef	WIN32
@@ -38,6 +38,7 @@ extern CqString ParseStreamName;
 extern std::ostream* ParseErrorStream;
 extern TqInt ParseLineNumber;
 extern TqBool ParseSucceeded;
+extern TqInt	iArrayAccess;
 CqParseNode*	ParseTreePointer;
 std::vector<CqString>	ParseNameSpaceStack;
 std::vector<TqInt>		FunctionReturnCountStack;
@@ -81,7 +82,7 @@ static void yyerror(const CqString Message);
 
 
 %token <m_Identifier>	IDENTIFIER 
-%token <m_pSymbol>		SYMBOL
+%token <m_pSymbol>		SYMBOL ARRAY_SYMBOL
 
 %token <m_tok>	TYPE_FLOAT TYPE_POINT TYPE_STRING TYPE_COLOR TYPE_NORMAL TYPE_VECTOR TYPE_VOID TYPE_MATRIX
 %token <m_tok>	TYPE_UNIFORM TYPE_VARYING
@@ -95,6 +96,7 @@ static void yyerror(const CqString Message);
 %token <m_tok>	TEXTUREMAP ENVIRONMENT BUMP SHADOW OCCLUSION
 
 %token <m_tok>	SETXCOMP SETYCOMP SETZCOMP SETCOMP
+
 
 /* NOTE: These are priorities in ascending precedence, operators on the same line have the same precedence. */
 %right	<m_tok>	'=' ADD_ASSIGN SUB_ASSIGN MUL_ASSIGN DIV_ASSIGN
@@ -1200,7 +1202,7 @@ loop_mod
 	;
 
 expression
-	:	primary				
+	:	primary
 	|	expression '.' expression
 							{
 								std::vector<SqFuncRef> func;
@@ -1346,7 +1348,7 @@ primary
 								$$=new CqParseNodeVariable($1.VarRef);	
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
-	|	SYMBOL '[' expression ']' {
+	|	ARRAY_SYMBOL '[' expression ']' {
 								$$=new CqParseNodeVariableArray($1.VarRef);
 								$$->AddLastChild($3);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
@@ -1497,14 +1499,14 @@ assignexpression
 
 								$$->AddLastChild(pFunc);
 							}
-	|	SYMBOL '[' expression ']' '=' expression
+	|	ARRAY_SYMBOL '[' expression ']' '=' expression
 							{
 								$$=new CqParseNodeAssignArray($1.VarRef);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 								$$->AddLastChild($6);
 								$$->AddLastChild($3);
 							}
-	|	SYMBOL  '[' expression ']' ADD_ASSIGN expression
+	|	ARRAY_SYMBOL  '[' expression ']' ADD_ASSIGN expression
 							{
 								$$=new CqParseNodeAssignArray($1.VarRef);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
@@ -1522,7 +1524,7 @@ assignexpression
 								$$->AddLastChild(pFunc);
 								$$->AddLastChild($3);
 							}
-	|	SYMBOL  '[' expression ']' SUB_ASSIGN expression
+	|	ARRAY_SYMBOL  '[' expression ']' SUB_ASSIGN expression
 							{
 								$$=new CqParseNodeAssignArray($1.VarRef);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
@@ -1540,7 +1542,7 @@ assignexpression
 								$$->AddLastChild(pFunc);
 								$$->AddLastChild($3);
 							}
-	|	SYMBOL  '[' expression ']' MUL_ASSIGN expression
+	|	ARRAY_SYMBOL  '[' expression ']' MUL_ASSIGN expression
 							{
 								$$=new CqParseNodeAssignArray($1.VarRef);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
@@ -1558,7 +1560,7 @@ assignexpression
 								$$->AddLastChild(pFunc);
 								$$->AddLastChild($3);
 							}
-	|	SYMBOL  '[' expression ']' DIV_ASSIGN expression
+	|	ARRAY_SYMBOL  '[' expression ']' DIV_ASSIGN expression
 							{
 								$$=new CqParseNodeAssignArray($1.VarRef);
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
@@ -1730,7 +1732,7 @@ texture_type
 	;
 
 texture_filename
-	:	primary				{	
+	:	expression				{	
 								$$=$1;	
 								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
 							}
