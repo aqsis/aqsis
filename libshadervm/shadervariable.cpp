@@ -23,9 +23,10 @@
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
+#include	"aqsis.h"
+
 #include	<iostream>
 
-#include	"aqsis.h"
 #include	"shadervariable.h"
 #include	"shadervm.h"
 #include	"irenderer.h"
