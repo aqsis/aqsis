@@ -103,19 +103,16 @@ CqDSORepository::SetDSOPath(const CqString* pPath)
 			// Here, if element points to a directory, we can add each library in the
 			// named directory which is not already in the path list 
 
-			std::cout << "Checking Element: " << *element << std::endl ;
 			struct stat s;
 			if (!stat( element->c_str(), &s ))
 			{
 				if ( S_ISDIR(s.st_mode) ) 
 				{
 					// We have a directory, list all the libraries in that directory and add them to the path
-					std::cout << "Checking Directory: " << *element << std::endl ;
-					CqString wild = *element + CqString( "/*" ) + CqString ( SHARED_LIBRARY_SUFFIX );
+					CqString wild = *element + CqString( DIRSEP ) + CqString( "*" ) + CqString ( SHARED_LIBRARY_SUFFIX );
 					std::list<CqString*> files = Aqsis::CqFile::Glob(wild);
 					if ( !files.empty() )
 					{
-						std::cout << "Found " << files.size() << "DSOs" << std::endl ;
 						m_pDSOPathList.splice(m_pDSOPathList.end(), files);
 					}
 				}else{

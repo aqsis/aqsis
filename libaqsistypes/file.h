@@ -39,6 +39,13 @@
 
 START_NAMESPACE( Aqsis )
 
+ // This should'nt really be in here, but for now it will do
+#ifdef AQSIS_SYSTEM_WIN32
+#define DIRSEP "\\"
+#else
+#define DIRSEP "/"
+#endif
+
 //----------------------------------------------------------------------
 /** \class CqFile
  * Standard handling of all file types utilising the searchpath options.
