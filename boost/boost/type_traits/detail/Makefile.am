@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/type_traits/detail
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 bool_trait_def.hpp \
 bool_trait_undef.hpp \
 cv_traits_impl.hpp \

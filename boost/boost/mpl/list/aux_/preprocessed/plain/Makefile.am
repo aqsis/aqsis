@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/mpl/list/aux_/preprocessed/plain
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 list10.hpp \
 list10_c.hpp \
 list20.hpp \

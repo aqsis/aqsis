@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/mpl/aux_/config
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 bind.hpp \
 compiler.hpp \
 ctps.hpp \

@@ -1,8 +1,7 @@
 SUBDIRS = . aux_
 
-k3ddir = $(pkgincludedir)/boost/boost/mpl/list
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 list0.hpp \
 list0_c.hpp \
 list10.hpp \

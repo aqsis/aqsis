@@ -1,8 +1,7 @@
 SUBDIRS = . detail
 
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/control
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 deduce_d.hpp \
 expr_if.hpp \
 expr_iif.hpp \

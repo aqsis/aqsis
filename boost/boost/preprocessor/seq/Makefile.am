@@ -1,8 +1,7 @@
 SUBDIRS = . detail
 
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/seq
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 cat.hpp \
 elem.hpp \
 enum.hpp \

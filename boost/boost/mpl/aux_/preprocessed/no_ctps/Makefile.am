@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/mpl/aux_/preprocessed/no_ctps
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 advance_backward.hpp \
 advance_forward.hpp \
 and.hpp \

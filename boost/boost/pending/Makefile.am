@@ -1,8 +1,7 @@
 SUBDIRS = . detail
 
-k3ddir = $(pkgincludedir)/boost/boost/pending
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 bucket_sorter.hpp \
 container_traits.hpp \
 cstddef.hpp \

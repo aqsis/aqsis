@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/selection
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 max.hpp \
 min.hpp
 

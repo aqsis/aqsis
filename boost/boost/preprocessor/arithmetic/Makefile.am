@@ -1,8 +1,7 @@
 SUBDIRS = . detail
 
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/arithmetic
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 add.hpp \
 dec.hpp \
 div.hpp \

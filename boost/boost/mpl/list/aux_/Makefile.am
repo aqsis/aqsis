@@ -1,8 +1,7 @@
 SUBDIRS = . preprocessed
 
-k3ddir = $(pkgincludedir)/boost/boost/mpl/list/aux_
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 O1_size.hpp \
 begin_end.hpp \
 clear.hpp \

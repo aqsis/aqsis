@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/spirit/symbols/impl
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 symbols.ipp \
 tst.ipp
 

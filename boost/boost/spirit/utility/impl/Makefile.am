@@ -1,8 +1,7 @@
 SUBDIRS = . chset
 
-k3ddir = $(pkgincludedir)/boost/boost/spirit/utility/impl
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 chset.ipp \
 chset_operators.ipp \
 confix.ipp \

@@ -1,8 +1,7 @@
 SUBDIRS = .
 
-k3ddir = $(pkgincludedir)/boost/boost/multi_array
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 algorithm.hpp \
 base.hpp \
 collection_concept.hpp \

@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/mpl/limits
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 arity.hpp \
 list.hpp \
 unrolling.hpp \

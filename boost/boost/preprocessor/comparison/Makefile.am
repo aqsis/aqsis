@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/comparison
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 equal.hpp \
 greater.hpp \
 greater_equal.hpp \

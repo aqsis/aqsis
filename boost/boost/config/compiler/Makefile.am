@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/config/compiler
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 borland.hpp \
 comeau.hpp \
 common_edg.hpp \

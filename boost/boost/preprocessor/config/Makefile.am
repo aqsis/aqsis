@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/config
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 config.hpp \
 limits.hpp
 

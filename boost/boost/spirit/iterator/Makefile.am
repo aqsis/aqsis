@@ -1,8 +1,7 @@
 SUBDIRS = . impl
 
-k3ddir = $(pkgincludedir)/boost/boost/spirit/iterator
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 file_iterator.hpp \
 fixed_size_queue.hpp \
 multi_pass.hpp \

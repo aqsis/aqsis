@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/detail
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 algorithm.hpp \
 allocator.hpp \
 atomic_count.hpp \

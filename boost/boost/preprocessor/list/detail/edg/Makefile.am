@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/list/detail/edg
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 fold_left.hpp \
 fold_right.hpp
 

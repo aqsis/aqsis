@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/detail
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 auto_rec.hpp \
 check.hpp \
 is_binary.hpp \

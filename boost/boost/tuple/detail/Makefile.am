@@ -1,8 +1,7 @@
 SUBDIRS = . 
 
-k3ddir = $(pkgincludedir)/boost/boost/tuple/detail
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 tuple_basic.hpp \
 tuple_basic_no_partial_spec.hpp
 

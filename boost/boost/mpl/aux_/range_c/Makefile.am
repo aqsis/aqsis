@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/mpl/aux_/range_c
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 O1_size.hpp \
 back.hpp \
 begin_end.hpp \

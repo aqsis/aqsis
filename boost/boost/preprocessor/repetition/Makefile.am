@@ -1,8 +1,7 @@
 SUBDIRS = . detail
 
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/repetition
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 deduce_r.hpp \
 deduce_z.hpp \
 enum.hpp \

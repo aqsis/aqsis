@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/logical
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 and.hpp \
 bitand.hpp \
 bitnor.hpp \

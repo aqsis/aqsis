@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/iteration/detail/bounds
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 lower1.hpp \
 lower2.hpp \
 lower3.hpp \

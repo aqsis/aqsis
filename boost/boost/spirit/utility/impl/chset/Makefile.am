@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/spirit/utility/impl/chset
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 basic_chset.hpp \
 basic_chset.ipp \
 range_run.hpp \

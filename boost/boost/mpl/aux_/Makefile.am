@@ -1,8 +1,7 @@
 SUBDIRS = . config preprocessed preprocessor range_c
 
-k3ddir = $(pkgincludedir)/boost/boost/mpl/aux_
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 O1_size_impl.hpp \
 advance_backward.hpp \
 advance_forward.hpp \

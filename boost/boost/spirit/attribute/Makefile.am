@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/spirit/attribute
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 closure.hpp \
 closure_context.hpp \
 parametric.hpp

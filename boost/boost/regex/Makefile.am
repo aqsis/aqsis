@@ -1,8 +1,7 @@
 SUBDIRS = . v3
 
-k3ddir = $(pkgincludedir)/boost/boost/regex
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 config.hpp \
 pattern_except.hpp \
 regex_traits.hpp \

@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/regex/v3
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 cregex.hpp \
 fileiter.hpp \
 instances.hpp \

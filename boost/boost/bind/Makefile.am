@@ -1,8 +1,7 @@
 SUBDIRS = .
 
-k3ddir = $(pkgincludedir)/boost/boost/bind
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 apply.hpp \
 arg.hpp \
 bind_cc.hpp \

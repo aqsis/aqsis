@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/spirit/iterator/impl
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 file_iterator.ipp
 
 EXTRA_DIST = \

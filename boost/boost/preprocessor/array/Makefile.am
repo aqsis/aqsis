@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/array
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 data.hpp \
 elem.hpp \
 insert.hpp \

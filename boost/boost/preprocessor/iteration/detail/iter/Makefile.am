@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/iteration/detail/iter
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 forward1.hpp \
 forward2.hpp \
 forward3.hpp \

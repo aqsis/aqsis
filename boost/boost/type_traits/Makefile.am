@@ -1,8 +1,7 @@
 SUBDIRS = . detail
 
-k3ddir = $(pkgincludedir)/boost/boost/type_traits
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 add_const.hpp \
 add_cv.hpp \
 add_pointer.hpp \

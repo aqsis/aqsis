@@ -1,8 +1,7 @@
 SUBDIRS = . detail
 
-k3ddir = $(pkgincludedir)/boost/boost/random
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 additive_combine.hpp \
 bernoulli_distribution.hpp \
 binomial_distribution.hpp \

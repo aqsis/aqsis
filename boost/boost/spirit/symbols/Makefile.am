@@ -1,8 +1,7 @@
 SUBDIRS = . impl
 
-k3ddir = $(pkgincludedir)/boost/boost/spirit/symbols
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 symbols.hpp
 
 EXTRA_DIST = \

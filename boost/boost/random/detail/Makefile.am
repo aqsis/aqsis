@@ -1,8 +1,7 @@
 SUBDIRS = .
 
-k3ddir = $(pkgincludedir)/boost/boost/random/detail
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 const_mod.hpp \
 iterator_mixin.hpp \
 signed_unsigned_compare.hpp

@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/config/stdlib
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 dinkumware.hpp \
 libcomo.hpp \
 libstdcpp3.hpp \

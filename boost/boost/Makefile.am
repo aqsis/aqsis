@@ -1,8 +1,6 @@
 SUBDIRS = . bind config detail filesystem mpl multi_array pending pool preprocessor random regex spirit tuple type_traits utility
 
-k3ddir = $(pkgincludedir)/boost/boost
-
-k3d_HEADERS = \
+noinst_HEADERS = \
 any.hpp \
 array.hpp \
 assert.hpp \

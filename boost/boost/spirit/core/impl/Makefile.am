@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/spirit/core/impl
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 borland.hpp \
 match.ipp \
 msvc.hpp \

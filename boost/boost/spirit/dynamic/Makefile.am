@@ -1,8 +1,7 @@
 SUBDIRS = . impl
 
-k3ddir = $(pkgincludedir)/boost/boost/spirit/dynamic
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 for.hpp \
 if.hpp \
 while.hpp

@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/facilities
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 apply.hpp \
 empty.hpp \
 expand.hpp \

@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/mpl/vector/aux_/preprocessed/no_ctps
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 vector10.hpp \
 vector10_c.hpp \
 vector20.hpp \

@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/spirit/phoenix
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 actor.hpp \
 binders.hpp \
 casts.hpp \

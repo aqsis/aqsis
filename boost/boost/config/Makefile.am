@@ -1,8 +1,7 @@
 SUBDIRS = . compiler platform stdlib
 
-k3ddir = $(pkgincludedir)/boost/boost/config
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 posix_features.hpp \
 select_compiler_config.hpp \
 select_platform_config.hpp \

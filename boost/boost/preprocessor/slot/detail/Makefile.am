@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/slot/detail
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 def.hpp \
 shared.hpp \
 slot1.hpp \

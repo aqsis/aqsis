@@ -1,8 +1,7 @@
 SUBDIRS = impl .
 
-k3ddir = $(pkgincludedir)/boost/boost/spirit/core/composite
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 actions.hpp \
 composite.hpp \
 directives.hpp \

@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/filesystem
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 convenience.hpp \
 exception.hpp \
 fstream.hpp \

@@ -1,8 +1,7 @@
 SUBDIRS = . impl
 
-k3ddir = $(pkgincludedir)/boost/boost/spirit/tree
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 ast.hpp \
 common.hpp \
 parse_tree.hpp \

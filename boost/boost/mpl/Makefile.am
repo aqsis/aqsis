@@ -1,8 +1,7 @@
 SUBDIRS = . aux_ limits list math vector
 
-k3ddir = $(pkgincludedir)/boost/boost/mpl
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 O1_size.hpp \
 O1_size_fwd.hpp \
 advance.hpp \

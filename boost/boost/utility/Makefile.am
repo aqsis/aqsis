@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/utility
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 addressof.hpp \
 base_from_member.hpp \
 value_init.hpp

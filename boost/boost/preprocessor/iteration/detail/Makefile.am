@@ -1,8 +1,7 @@
 SUBDIRS = . bounds iter
 
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/iteration/detail
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 finish.hpp \
 local.hpp \
 rlocal.hpp \

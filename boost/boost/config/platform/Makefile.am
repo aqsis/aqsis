@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/config/platform
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 aix.hpp \
 amigaos.hpp \
 beos.hpp \

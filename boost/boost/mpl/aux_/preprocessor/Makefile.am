@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/mpl/aux_/preprocessor
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 add.hpp \
 def_params_tail.hpp \
 default_params.hpp \

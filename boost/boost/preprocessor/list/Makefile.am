@@ -1,8 +1,7 @@
 SUBDIRS = . detail
 
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor/list
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 adt.hpp \
 append.hpp \
 at.hpp \

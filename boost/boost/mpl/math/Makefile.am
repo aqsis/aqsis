@@ -1,6 +1,5 @@
-k3ddir = $(pkgincludedir)/boost/boost/mpl/math
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 fixed_c.hpp \
 is_even.hpp \
 rational_c.hpp

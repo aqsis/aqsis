@@ -1,8 +1,7 @@
 SUBDIRS = . arithmetic array comparison config control debug detail facilities iteration list logical punctuation repetition selection seq slot tuple
 
-k3ddir = $(pkgincludedir)/boost/boost/preprocessor
 
-k3d_HEADERS = \
+noinst_HEADERS = \
 arithmetic.hpp \
 array.hpp \
 assert_msg.hpp \
