@@ -28,6 +28,15 @@
 #define AQSIS_COMPILER_H_INCLUDED 1
 
 
+/** Define the system being compiled on.
+ */
+#define	AQSIS_SYSTEM_WIN32	1
+
+/** Define the compiler.
+ */
+#define	AQSIS_COMPILER_MINGW	1
+
+
 #pragma	warning (disable : 4786)
 
 #endif // AQSIS_COMPILER_H_INCLUDED
