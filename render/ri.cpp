@@ -2536,13 +2536,12 @@ RtVoid	RiTrimCurve(RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[],
 			for(i=0; i<o+cverts; i++)	Curve.aKnots()[i]=knot[iknot++];
 
 			// Copy the vertices from the u,v,w arrays.
-			CqVector4D vec(0,0,0,1);
+			CqVector3D vec(0,0,1);
 			for(i=0; i<cverts; i++)
 			{
 				vec.x(u[ivert  ]);
 				vec.y(v[ivert  ]);
-				vec.z(0.0f      );
-				vec.h(w[ivert++]);
+				vec.z(w[ivert++]);
 				Curve.CP(i)=vec;
 			}
 			Loop.aCurves().push_back(Curve);
