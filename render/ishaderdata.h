@@ -5,7 +5,7 @@
  *	@brief	Decares the interface to generic shader variables.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/04/24 16:08:57 $
+ *	Last change date:	$Date: 2002/05/02 23:33:08 $
  */
 //------------------------------------------------------------------------------
 
@@ -71,6 +71,8 @@ enum EqVariableType
 
 struct IqShaderData
 {
+		/// Virtual destructor so that derived classes get cleaned up properly.
+		virtual	~IqShaderData()	{}
 		///	Get the data as a float..
 		virtual void GetFloat( TqFloat& res, TqInt index  = 0) const = 0;
 		///	Get the data as a boolean value..

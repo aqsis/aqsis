@@ -10,6 +10,10 @@
 #include "version.h"
 #endif
 
+#if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
+#include <crtdbg.h>
+#endif
+
 #include <argparse.h>
 
 #include <iostream>
@@ -187,6 +191,10 @@ int main( int argc, const char** argv )
 			}
 		}
 	}
+
+#if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
+	_CrtDumpMemoryLeaks();
+#endif
 
 	return ( 0 );
 }
