@@ -1170,8 +1170,12 @@ RtVoid CqOutput::RiHyperboloidV( RtPoint point1, RtPoint point2, RtFloat tmax,
                                  RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     PR( "Hyperboloid", Hyperboloid ); S;
-    printArray( 3, point1 ); S;
-    printArray( 3, point2 ); S;
+    PF( point1[0] ); S;
+    PF( point1[1] ); S;
+    PF( point1[2] ); S;
+    PF( point2[0] ); S;
+    PF( point2[1] ); S;
+    PF( point2[2] ); S;
     PF( tmax ); S;
     printPL( n, tokens, parms, 4, 4 );
 }
