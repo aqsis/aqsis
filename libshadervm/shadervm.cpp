@@ -1244,9 +1244,9 @@ void CqShaderVM::SO_ipushv()
 	TqInt i;
 	for ( i = 0; i < ext; i++ )
 	{
-		TqFloat _A;
-		A.GetFloat( _A, i );
-		Result.SetValueFromVariable( pVar->ArrayEntry( static_cast<unsigned int>( _A ) ), i );
+		TqFloat _aq_A;
+		A.GetFloat( _aq_A, i );
+		Result.SetValueFromVariable( pVar->ArrayEntry( static_cast<unsigned int>( _aq_A ) ), i );
 	}
 	Push( Result );
 }
@@ -1305,13 +1305,13 @@ void CqShaderVM::SO_mergef()
 	TqInt i;
 	for ( i = 0; i < m_pEnv->GridSize(); i++ )
 	{
-		TqBool _A;
-		TqFloat _T, _F;
-		A.GetBool( _A, i );
-		T.GetFloat( _T, i );
-		F.GetFloat( _F, i );
-		if ( _A ) Result.SetValue( _T, i );
-		else	Result.SetValue( _F, i );
+		TqBool _aq_A;
+		TqFloat _aq_T, _aq_F;
+		A.GetBool( _aq_A, i );
+		T.GetFloat( _aq_T, i );
+		F.GetFloat( _aq_F, i );
+		if ( _aq_A ) Result.SetValue( _aq_T, i );
+		else	Result.SetValue( _aq_F, i );
 	}
 	Push( Result );
 }
@@ -1327,13 +1327,13 @@ void CqShaderVM::SO_merges()
 	TqInt i;
 	for ( i = 0; i < m_pEnv->GridSize(); i++ )
 	{
-		TqBool _A;
-		CqString _T, _F;
-		A.GetBool( _A, i );
-		T.GetString( _T, i );
-		F.GetString( _F, i );
-		if ( _A ) Result.SetValue( _T, i );
-		else	Result.SetValue( _F, i );
+		TqBool _aq_A;
+		CqString _aq_T, _aq_F;
+		A.GetBool( _aq_A, i );
+		T.GetString( _aq_T, i );
+		F.GetString( _aq_F, i );
+		if ( _aq_A ) Result.SetValue( _aq_T, i );
+		else	Result.SetValue( _aq_F, i );
 	}
 	Push( Result );
 }
@@ -1349,13 +1349,13 @@ void CqShaderVM::SO_mergep()
 	TqInt i;
 	for ( i = 0; i < m_pEnv->GridSize(); i++ )
 	{
-		TqBool _A;
-		CqVector3D _T, _F;
-		A.GetBool( _A, i );
-		T.GetPoint( _T, i );
-		F.GetPoint( _F, i );
-		if ( _A ) Result.SetValue( _T, i );
-		else	Result.SetValue( _F, i );
+		TqBool _aq_A;
+		CqVector3D _aq_T, _aq_F;
+		A.GetBool( _aq_A, i );
+		T.GetPoint( _aq_T, i );
+		F.GetPoint( _aq_F, i );
+		if ( _aq_A ) Result.SetValue( _aq_T, i );
+		else	Result.SetValue( _aq_F, i );
 	}
 	Push( Result );
 }
@@ -1371,13 +1371,13 @@ void CqShaderVM::SO_mergec()
 	TqInt i;
 	for ( i = m_pEnv->GridSize() - 1; i >= 0; i-- )
 	{
-		TqBool _A;
-		CqColor _T, _F;
-		A.GetBool( _A, i );
-		T.GetColor( _T, i );
-		F.GetColor( _F, i );
-		if ( _A ) Result.SetValue( _T, i );
-		else	Result.SetValue( _F, i );
+		TqBool _aq_A;
+		CqColor _aq_T, _aq_F;
+		A.GetBool( _aq_A, i );
+		T.GetColor( _aq_T, i );
+		F.GetColor( _aq_F, i );
+		if ( _aq_A ) Result.SetValue( _aq_T, i );
+		else	Result.SetValue( _aq_F, i );
 	}
 	Push( Result );
 }
@@ -1509,9 +1509,9 @@ void CqShaderVM::SO_S_GET()
 	{
 		if ( m_pEnv->RunningState().Value( i ) )
 		{
-			TqBool _A;
-			A.GetBool( _A, i );
-			m_pEnv->CurrentState().SetValue( i, _A );
+			TqBool _aq_A;
+			A.GetBool( _aq_A, i );
+			m_pEnv->CurrentState().SetValue( i, _aq_A );
 		}
 	}
 }
