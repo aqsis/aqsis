@@ -138,14 +138,13 @@ void CqMicroPolyGrid::CalcNormals()
 	// the coordinate system specified, to check for normal flipping.
 	//	EqOrientation CSO=pSurface()->pAttributes()->eCoordsysOrientation();
 	TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
-	CqVector3D* vecMP[ 4 ];
+	const CqVector3D* vecMP[ 4 ];
 	CqVector3D	vecN, vecTemp;
 	CqVector3D	vecLastN( 0, 0, 0 );
 	
-	CqVector3D* pP;
+	const CqVector3D* pP;
 	P()->GetPointPtr( pP );
-	CqVector3D* pNg;
-	Ng()->GetPointPtr( pNg );
+	IqShaderData* pNg = Ng();
 
 	// Calculate each normal from the top left, top right and bottom left points.
 	register TqInt ur = uGridRes();
@@ -190,18 +189,18 @@ void CqMicroPolyGrid::CalcNormals()
 				//assert(false);
 				vecN = vecLastN;
 			}
-			pNg[ igrid ] = vecN;
+			pNg->SetNormal( vecN, igrid );
 			igrid++;
 			// If we are at the last row, last row normal to the same.
 			if ( iv == vr - 1 ) 
-				pNg[ ( vr * ( ur + 1 ) ) + iu ] = vecN;
+				pNg->SetNormal(vecN, ( vr * ( ur + 1 ) ) + iu );
 		}
 		// Set the last one on the row to the same.
-		pNg[ igrid ] = vecN;
+		pNg->SetNormal( vecN, igrid );
 		igrid++;
 	}
 	// Set the very last corner value to the last normal calculated.
-	pNg[ ( vr + 1 ) * ( ur + 1 ) - 1 ] = vecN;
+	pNg->SetNormal( vecN, ( vr + 1 ) * ( ur + 1 ) - 1 );
 }
 
 
@@ -230,15 +229,14 @@ void CqMicroPolyGrid::Shade()
 	long cCulled = 0;
 
 
-	CqVector3D* pP;
+	const CqVector3D* pP;
 	P()->GetPointPtr( pP );
-	CqColor* pOs = NULL;
+	const CqColor* pOs = NULL;
 	if(USES( lUses, EnvVars_Os))	Os()->GetColorPtr( pOs );
-	CqColor* pCs = NULL;
+	const CqColor* pCs = NULL;
 	if(USES( lUses, EnvVars_Cs))	Cs()->GetColorPtr( pCs );
-	CqVector3D* pI = NULL;
-	if(USES( lUses, EnvVars_I))		I()->GetVectorPtr( pI );
-	CqVector3D* pN = NULL;
+	IqShaderData* pI = I();
+	const CqVector3D* pN = NULL;
 	if(USES( lUses, EnvVars_N))		N()->GetNormalPtr( pN );
 
 	// Calculate geometric normals if not specified by the surface.
@@ -275,7 +273,7 @@ void CqMicroPolyGrid::Shade()
 
 	// Setup varying variables.
 	for( i = GridSize() - 1; i >= 0; i-- )
-		pI[ i ] = pP[ i ];
+		pI->SetVector( pP[ i ], i );
 
 
 	if ( USES( lUses, EnvVars_dPdu ) ) 

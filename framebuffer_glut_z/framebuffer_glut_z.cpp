@@ -79,8 +79,8 @@ static TqInt g_SamplesPerElement = 0;
 static int g_Window = 0;
 static GLubyte* g_Image = 0;
 static TqFloat* g_Data = 0;
-static g_CWXmin, g_CWYmin;
-static g_CWXmax, g_CWYmax;
+static TqInt g_CWXmin, g_CWYmin;
+static TqInt g_CWXmax, g_CWYmax;
 
 void display( void )
 {

@@ -5,7 +5,7 @@
  *	@brief	Decares the interface to generic shader variables.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/07/19 15:11:45 $
+ *	Last change date:	$Date: 2002/07/23 15:36:48 $
  */
 //------------------------------------------------------------------------------
 
@@ -109,6 +109,23 @@ struct IqShaderData
 		///	Get a const pointer to the data as a matrix..
 		virtual void GetMatrixPtr( const CqMatrix*& res ) const = 0;
 
+		///	Get a pointer to the data as a float..
+		virtual void GetFloatPtr( TqFloat*& res ) = 0;
+		///	Get a pointer to the data as a boolean value..
+		virtual void GetBoolPtr( TqBool*& res ) = 0;
+		///	Get a pointer to the data as a string..
+		virtual void GetStringPtr( CqString*& res ) = 0;
+		///	Get a pointer to the data as a point..
+		virtual void GetPointPtr( CqVector3D*& res ) = 0;
+		///	Get a pointer to the data as a vector..
+		virtual void GetVectorPtr( CqVector3D*& res ) = 0;
+		///	Get a pointer to the data as a normal..
+		virtual void GetNormalPtr( CqVector3D*& res ) = 0;
+		///	Get a pointer to the data as a color..
+		virtual void GetColorPtr( CqColor*& res ) = 0;
+		///	Get a pointer to the data as a matrix..
+		virtual void GetMatrixPtr( CqMatrix*& res ) = 0;
+		
 		///	Set the value to the specified float.
 		virtual void SetFloat( const TqFloat& val ) = 0;
 		///	Set the value to the specified boolean value.
@@ -157,6 +174,13 @@ struct IqShaderData
 		void GetValuePtr( const CqVector3D*& p ) const			{ GetPointPtr( p ); }
 		void GetValuePtr( const CqColor*& c ) const				{ GetColorPtr( c ); }
 		void GetValuePtr( const CqMatrix*& m ) const			{ GetMatrixPtr( m ); } 
+
+		void GetValuePtr( TqFloat*& f ) 				{ GetFloatPtr( f ); }
+		void GetValuePtr( TqBool*& b ) 				{ GetBoolPtr( b ); }
+		void GetValuePtr( CqString*& s ) 			{ GetStringPtr( s ); }
+		void GetValuePtr( CqVector3D*& p ) 			{ GetPointPtr( p ); }
+		void GetValuePtr( CqColor*& c ) 				{ GetColorPtr( c ); }
+		void GetValuePtr( CqMatrix*& m ) 			{ GetMatrixPtr( m ); } 
 
 		void SetValue( const TqFloat& f )		{ SetFloat( f ); }
 		void SetValue( const TqInt& i )			{ SetFloat( static_cast<TqFloat>( i ) ); }
