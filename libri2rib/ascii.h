@@ -40,8 +40,8 @@ private:
     CqDictionary dictionary;
 
     RtInt colorNComps;
-    RtInt lastObjectHandle;
-    RtInt lastLightHandle;
+    RtInt ObjectHandle;
+    RtInt LightHandle;
 
     struct Steps
     {

@@ -30,7 +30,7 @@ using namespace libri2rib;
 using std::endl;
 
 
-CqASCII::CqASCII() : colorNComps(3), lastObjectHandle(0), lastLightHandle(0)
+CqASCII::CqASCII() : colorNComps(3), ObjectHandle(0), LightHandle(0)
 {
     Steps a={RI_BEZIERSTEP,RI_BEZIERSTEP};
     steps.push(a);
@@ -72,6 +72,7 @@ void CqASCII::printPL(RtInt n, RtToken tokens[], RtPointer parms[],
 
     RtInt i;
     TqUint j;
+    TqUint sz;
     for (i=0; i<n ; i++) {
 	try {
 	    id=dictionary.getTokenId(std::string(tokens[i]));
@@ -79,33 +80,36 @@ void CqASCII::printPL(RtInt n, RtToken tokens[], RtPointer parms[],
 	    r.manage();
 	    continue;
 	}
-	tt=dictionary.getType(id);
 
-	out << "\"" << std::string(tokens[i])<< "\" ";
+	printToken(tokens[i]);
+
 	out << "[ ";
-
-	for (j=0; j<(dictionary.allocSize(id, vertex, varying, uniform)); j++ ) {
-	    switch (tt) {
-	    case FLOAT:
-	    case POINT:
-	    case VECTOR:
-	    case NORMAL:
-	    case COLOR:
-	    case MATRIX:
-	    case HPOINT:
-		flt=static_cast<RtFloat *> (parms[i]);
+	tt=dictionary.getType(id);
+	sz=dictionary.allocSize(id, vertex, varying, uniform);
+	
+	switch (tt) {
+	case FLOAT:
+	case POINT:
+	case VECTOR:
+	case NORMAL:
+	case COLOR:
+	case MATRIX:
+	case HPOINT:
+	    flt=static_cast<RtFloat *> (parms[i]);
+	    for (j=0; j<sz; j++)
 		out << flt[j] <<" ";
-		break;
-	    case STRING:
-		cp=static_cast<char **> (parms[i]);
-		out <<"\""<< std::string(cp[j]) <<"\" ";
-		break;
-	    case INTEGER:
-		nt=static_cast<RtInt *> (parms[i]);
+	    break;
+	case STRING:
+	    cp=static_cast<char **> (parms[i]);
+	    for (j=0; j<sz; j++)
+		printCharP(cp[j]);
+	    break;
+	case INTEGER:
+	    nt=static_cast<RtInt *> (parms[i]);
+	    for (j=0; j<sz; j++)
 		out << nt[j] << " ";
-		break;
-	    }
-	}
+	    break;
+	}	
 	out << "] ";
     }
     out << endl;
@@ -140,13 +144,13 @@ void CqASCII::printArray (RtInt n, RtFloat *p)
 
 std::string CqASCII::getFilterFuncName(RtFilterFunc filterfunc, std::string message)
 {
-    if (filterfunc==RiBoxFilter) return "box ";
-    else if (filterfunc==RiTriangleFilter) return "triangle ";
-    else if (filterfunc==RiCatmullRomFilter) return "catmull-rom ";
-    else if (filterfunc==RiSincFilter) return "sinc ";
-    else if (filterfunc==RiGaussianFilter) return "gaussian ";
-    else if (filterfunc==RiDiskFilter) return "disk ";
-    else if (filterfunc==RiBesselFilter) return "bessel ";
+    if (filterfunc==RiBoxFilter) return "\"box\" ";
+    else if (filterfunc==RiTriangleFilter) return "\"triangle\" ";
+    else if (filterfunc==RiCatmullRomFilter) return "\"catmull-rom\" ";
+    else if (filterfunc==RiSincFilter) return "\"sinc\" ";
+    else if (filterfunc==RiGaussianFilter) return "\"gaussian\" ";
+    else if (filterfunc==RiDiskFilter) return "\"disk\" ";
+    else if (filterfunc==RiBesselFilter) return "\"bessel\" ";
     else {
 	std::string st("Unknown RiFilterFunc. ");
 	st+=message; st.append(" function skipped.");
@@ -214,13 +218,11 @@ RtVoid CqASCII::RiWorldEnd(RtVoid)
 }
 RtObjectHandle CqASCII::RiObjectBegin(RtVoid)
 {
-    out <<"ObjectBegin"<<endl;
-
+    out <<"ObjectBegin ";
+    out << (RtInt) ObjectHandle << endl; 
     push();
 
-    RtInt t=lastObjectHandle;
-    lastObjectHandle+=1;
-    return (RtObjectHandle) t;
+    return (RtObjectHandle) ObjectHandle++;
 }
 RtVoid CqASCII::RiObjectEnd(RtVoid)
 {
@@ -425,27 +427,21 @@ RtVoid  CqASCII::RiTextureCoordinates(RtFloat s1, RtFloat t1, RtFloat s2, RtFloa
 RtLightHandle CqASCII::RiLightSourceV(const char *name, RtInt n, RtToken tokens[], RtPointer parms[])
 {
     out <<"LightSource ";
-	printCharP(name);
-    
+    printCharP(name);
+    out << (RtInt) LightHandle << " ";
+    printPL(n, tokens, parms);
 
-    RtInt t=lastLightHandle;
-    lastLightHandle+=1;
-	out <<(RtInt) lastLightHandle <<" ";
-	printPL(n, tokens, parms);
-    return (RtLightHandle) t;
+    return (RtLightHandle) LightHandle++;
 }
 RtLightHandle CqASCII::RiAreaLightSourceV(const char *name,
 					  RtInt n, RtToken tokens[], RtPointer parms[])
 {
     out <<"AreaLightSource ";
-	printCharP(name);
-    
+    printCharP(name);
+    out << (RtInt) LightHandle << " ";
+    printPL(n, tokens, parms);
 
-    RtInt t=lastLightHandle;
-    lastLightHandle+=1;
-	out <<(RtInt) lastLightHandle <<" ";
-	printPL(n, tokens, parms);
-    return (RtLightHandle) t;
+    return (RtLightHandle) LightHandle++;
 }
 RtVoid  CqASCII::RiIlluminate(RtLightHandle light, RtBoolean onoff)
 {
@@ -1018,13 +1014,13 @@ RtVoid  CqASCII::RiProcedural(RtPointer data, RtBound bound,
     std::string sf;
     RtInt a;
     if (subdivfunc==RiProcDelayedReadArchive) {
-	sf="DelayedReadArchive";
+	sf="\"DelayedReadArchive\"";
 	a=1;
     } else if (subdivfunc==RiProcRunProgram) {
-	sf="ReadProgram";
+	sf="\"ReadProgram\"";
 	a=2;
     } else if (subdivfunc==RiProcDynamicLoad) {
-	sf="DynamicLoad";
+	sf="\"DynamicLoad\"";
 	a=3;
     } else {
 	throw CqError(RIE_SYNTAX, RIE_ERROR, "Unknow procedural function.",TqTrue);
@@ -1034,23 +1030,27 @@ RtVoid  CqASCII::RiProcedural(RtPointer data, RtBound bound,
     RtInt i;
 	switch (a) {
     case 1:
-	out << sf <<" [ "<< std::string(&((char *) data)[0]) <<" ] [ "; 
+	out << sf <<" [ ";
+	printCharP(((RtString *) data)[0]);
+	out <<"] [ "; 
 	for (i=0; i<6 ; i++)
 	    out << bound[i] <<" ";
 	out << "]" << endl;
 	break;
     case 2:
 	out << sf <<" [ ";
-	out << std::string(&((char *) data)[0]) <<" ";
-	out << std::string(&((char *) data)[1]) <<" ] [ ";
+	printCharP(((RtString *) data)[0]);
+	printCharP(((RtString *) data)[1]);
+	out <<"] [ ";
 	for (i=0; i<6 ; i++)
 	    out << bound[i] <<" ";
 	out << "]" << endl;
 	break;
     case 3:
 	out << sf <<" [ ";
-	out << std::string(&((char *) data)[0]) <<" ";
-	out << std::string(&((char *) data)[1]) <<" ] [ ";
+	printCharP(((RtString *) data)[0]);
+	printCharP(((RtString *) data)[1]);
+	out <<"] [ ";
 	for (i=0; i<6 ; i++)
 	    out << bound[i] <<" ";
 	out << "]" << endl;
