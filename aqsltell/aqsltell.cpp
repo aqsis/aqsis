@@ -29,22 +29,19 @@
 #pragma warning(disable : 4786 )
 #endif //AQSIS_COMPILER_MSVC6
 
+#include "argparse.h"
+#include "aqsis.h"
+#include "file.h"
+#include "slx.h"
+#include "version.h"
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 #include <string>
 #include <vector>
 
-#include "aqsis.h"
-#include "file.h"
-
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-#include "version.h"
-#endif
-
 #include <stdio.h>
-#include "slx.h"
-#include <argparse.h>
 
 
 namespace Aqsis
@@ -53,31 +50,22 @@ struct IqRenderer;
 extern IqRenderer* QGetRenderContextI();
 }
 
-bool g_pause = 0;
-bool g_help = 0;
-bool g_version = 0;
+std::string g_shader_path = DEFAULT_SHADER_PATH;
 
+bool g_cl_pause = 0;
+bool g_cl_help = 0;
+bool g_cl_version = 0;
+ArgParse::apstring g_cl_shader_path = "";
 
-void version( std::ostream& Stream )
-{
-#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-    Stream << "aqsltell version " << VERSION_STR << std::endl;
-#else
-    Stream << "aqsltell version " << VERSION << std::endl;
-#endif
-}
-
-/*
- *
- */
 int main( int argc, const char** argv )
 {
     Aqsis::QGetRenderContextI();
     ArgParse ap;
     ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " <shadername>" );
-    ap.argFlag( "help", "\aprint this help and exit", &g_help );
-    ap.argFlag( "version", "\aprint version information and exit", &g_version );
-    ap.argFlag( "pause", "\await for a keypress on completion", &g_pause );
+    ap.argFlag( "help", "\aprint this help and exit", &g_cl_help );
+    ap.argFlag( "version", "\aprint version information and exit", &g_cl_version );
+    ap.argFlag( "pause", "\await for a keypress on completion", &g_cl_pause );
+    ap.argString( "shaders", "=string\aoverride the default shader searchpath", &g_cl_shader_path );
 
     if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
     {
@@ -85,17 +73,25 @@ int main( int argc, const char** argv )
         exit( 1 );
     }
 
-    if ( g_help )
+    if ( g_cl_help )
     {
         std::cout << ap.usagemsg();
         exit( 0 );
     }
 
-    if ( g_version )
+    if ( g_cl_version )
     {
-        version( std::cout );
+    	std::cout << "aqsltell version " << VERSION_STR << std::endl;
         exit( 0 );
     }
+
+    // Apply environment-variable overrides to default paths ...
+    if(getenv("AQSIS_SHADER_PATH"))
+	g_shader_path = getenv("AQSIS_SHADER_PATH");
+
+    // Apply command-line overrides to default paths ...
+    if(!g_cl_shader_path.empty())
+        g_shader_path = g_cl_shader_path;
 
     // Any leftovers are presumed to be shader names.
     if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
@@ -107,10 +103,7 @@ int main( int argc, const char** argv )
     {
         for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
         {
-            std::string shaderpath;
-            shaderpath = Aqsis::CqFile::GetSystemSetting( "shaders" );
-
-            SLX_SetPath( const_cast<char*>( shaderpath.c_str() ) );
+            SLX_SetPath( const_cast<char*>( g_shader_path.c_str() ) );
 
             if ( SLX_SetShader( ( char* ) e->c_str() ) == 0 )
             {

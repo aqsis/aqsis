@@ -151,7 +151,7 @@ fi
 AC_SUBST(AQSIS_CPPFLAGS)
 AC_SUBST(AQSIS_CXXFLAGS)
 AC_SUBST(AQSIS_CFLAGS)
-AQSIS_CPPFLAGS="-DBASE_PATH=\\\"\"\${pkgdatadir}\\\"\" -DCONFIG_PATH=\\\"\"$sysconfdir\\\"\""
+AQSIS_CPPFLAGS=""
 AQSIS_CXXFLAGS="$DEBUG_FLAGS $OPT_FLAGS $PTHREAD_CFLAGS"
 AQSIS_CFLAGS="$DEBUG_FLAGS $OPT_FLAGS $PTHREAD_CFLAGS"
 
@@ -315,6 +315,8 @@ libshaderexecenv/Makefile \
 libshadervm/Makefile \
 libslparse/Makefile \
 libslxargs/Makefile \
+man/aqsis.1 \
+man/Makefile \
 plugins/Makefile \
 plugins/bake2tif/Makefile \
 plugins/common/Makefile \

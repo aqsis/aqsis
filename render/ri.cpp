@@ -437,28 +437,6 @@ RtVoid	RiBegin( RtToken name )
         param++;
     };
 
-    // Setup default paths
-    const char* popt[ 1 ];
-    CqString strSetting;
-    strSetting = Aqsis::CqFile::GetSystemSetting( "shaders" );
-    popt[ 0 ] = strSetting.c_str();
-    RiOption( "searchpath", "shader", &popt, RI_NULL );
-    strSetting = Aqsis::CqFile::GetSystemSetting( "archives" );
-    popt[ 0 ] = strSetting.c_str();
-    RiOption( "searchpath", "archive", &popt, RI_NULL );
-    strSetting = Aqsis::CqFile::GetSystemSetting( "textures" );
-    popt[ 0 ] = strSetting.c_str();
-    RiOption( "searchpath", "texture", &popt, RI_NULL );
-    strSetting = Aqsis::CqFile::GetSystemSetting( "displays" );
-    popt[ 0 ] = strSetting.c_str();
-    RiOption( "searchpath", "display", &popt, RI_NULL );
-    strSetting = Aqsis::CqFile::GetSystemSetting( "dsolibs" );
-    popt[ 0 ] = strSetting.c_str();
-    RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
-    strSetting = Aqsis::CqFile::GetSystemSetting( "procedurals" );
-    popt[ 0 ] = strSetting.c_str();
-    RiOption( "searchpath", "procedural", &popt, RI_NULL );
-
     // Setup a default Display
     RiDisplay( "ri.pic", "file", "rgba", NULL );
 

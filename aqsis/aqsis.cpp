@@ -1,108 +1,136 @@
-// Aqsis main executable
+// Aqsis
+// Copyright 1997 - 2001, Paul C. Gregory
+//
+// Contact: pgregory@aqsis.com
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public
+// License as published by the Free Software Foundation; either
+// version 2 of the License, or (at your option) any later version.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public
+// License along with this library; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-// Includes
-#include <time.h>
-
-#include "ri.h"
+#include "aqsis.h"
+#include "argparse.h"
+#include "file.h"
 #include "librib.h"
 #include "librib2ri.h"
-#include "aqsis.h"
-#include "file.h"
 #include "logging.h"
 #include "logging_streambufs.h"
-
-#ifdef	_DEBUG
-#ifdef	AQSIS_SYSTEM_WIN32
-extern "C" __declspec(dllimport) void report_refcounts();
-#else
-extern "C" void report_refcounts();
-#endif // AQSIS_SYSTEM_WIN32
-#endif // _DEBUG
-
-#if defined(AQSIS_SYSTEM_WIN32)
-#include <windows.h>
-#endif
-
+#include "ri.h"
 #include "version.h"
-
-#if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
-#include <crtdbg.h>
-#endif
-
-// Include libargparse
-#include <argparse.h>
 
 #include <iostream>
 #include <iomanip>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <strstream>
-
 #include <stdio.h>
+#include <time.h>
 
+#ifdef AQSIS_SYSTEM_WIN32
+  #include <windows.h>
+  #ifdef _DEBUG
+    #include <crtdbg.h>
+    extern "C" __declspec(dllimport) void report_refcounts();
+  #endif // _DEBUG
+#endif // !AQSIS_SYSTEM_WIN32
 
-void RenderFile( FILE* file, std::string& name );
-void GetOptions();
-void ReleaseOptions();
+#if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
 
-bool g_pause;
-// Set verbose stats if in debug mode
-#ifdef	_DEBUG
-int g_endofframe = 3;
+#define StartMemoryDebugging() \
+    std::ostringstream __buffer; \
+    __buffer << 0; \
+    _CrtMemState __initialState; \
+    _CrtMemCheckpoint(&__initialState);
+
+#define StopMemoryDebugging() \
+    _CrtMemDumpAllObjectsSince(&__initialState); \
+    MEMORY_BASIC_INFORMATION mbi; \
+    DWORD dwMemUsed = 0; \
+    PVOID pvAddress = 0; \
+    SYSTEM_INFO SystemInfo; \
+    memset( &SystemInfo, 0, sizeof( SYSTEM_INFO ) ); \
+    GetSystemInfo( &SystemInfo ); \
+    memset( &mbi, 0, sizeof( MEMORY_BASIC_INFORMATION ) ); \
+    while ( VirtualQuery( pvAddress, &mbi, sizeof( MEMORY_BASIC_INFORMATION ) ) == sizeof( MEMORY_BASIC_INFORMATION ) ) \
+    { \
+        if ( mbi.State == MEM_COMMIT && mbi.Type == MEM_PRIVATE ) \
+        dwMemUsed += mbi.RegionSize; \
+        pvAddress = ( ( BYTE* ) mbi.BaseAddress ) + mbi.RegionSize; \
+    } \
+    std::cout << "Peak Memory Used " << dwMemUsed << std::endl; \
+    report_refcounts();
+
 #else
-int g_endofframe = -1;
+
+#define StartMemoryDebugging()
+#define StopMemoryDebugging()
+
 #endif
 
-// Declare vars used by argparse
-bool g_nostandard = 0;
-bool g_help = 0;
-bool g_version = 0;
-bool g_environment = 0;
-bool g_fb = 0;
-bool g_progress = 0;
-bool g_Progress = 0;
-bool g_rinfo = 0;
-bool g_no_color = 0;
-int g_verbose = 1;
-ArgParse::apfloatvec g_cropWindow;
+// Set default resource paths ...
+std::string g_rc_path = DEFAULT_RC_PATH;
+std::string g_shader_path = DEFAULT_SHADER_PATH;
+std::string g_archive_path = DEFAULT_ARCHIVE_PATH;
+std::string g_texture_path = DEFAULT_TEXTURE_PATH;
+std::string g_display_path = DEFAULT_DISPLAY_PATH;
+std::string g_dso_path = DEFAULT_DSO_PATH;
+std::string g_procedural_path = DEFAULT_PROCEDURAL_PATH;
 
-// Define strings used by argparse
-ArgParse::apstring g_config = "";
-ArgParse::apstring g_shaders = "";
-ArgParse::apstring g_archives = "";
-ArgParse::apstring g_textures = "";
-ArgParse::apstring g_displays = "";
-ArgParse::apstring g_base_path = "";
-ArgParse::apstring g_dso_libs = "";
-ArgParse::apstring g_procedurals = "";
-ArgParse::apstring g_type = "";
-ArgParse::apstring g_addtype = "";
-ArgParse::apstring g_mode = "rgba";
-ArgParse::apstring g_strprogress = "Frame (%f) %p%% complete [ %s secs / %S left ]";
+// Forward declarations
+void RenderFile( FILE* file, std::string& name );
+
+// Command-line arguments
+bool g_cl_pause;
+// Set verbose stats if in debug mode
+#ifdef	_DEBUG
+int g_cl_endofframe = 3;
+#else
+int g_cl_endofframe = -1;
+#endif
+bool g_cl_nostandard = 0;
+bool g_cl_help = 0;
+bool g_cl_version = 0;
+bool g_cl_fb = 0;
+bool g_cl_progress = 0;
+bool g_cl_Progress = 0;
+bool g_cl_rinfo = 0;
+bool g_cl_no_color = 0;
+int g_cl_verbose = 1;
+ArgParse::apfloatvec g_cl_cropWindow;
+ArgParse::apstring g_cl_rc_path = "";
+ArgParse::apstring g_cl_shader_path = "";
+ArgParse::apstring g_cl_archive_path = "";
+ArgParse::apstring g_cl_texture_path = "";
+ArgParse::apstring g_cl_display_path = "";
+ArgParse::apstring g_cl_dso_path = "";
+ArgParse::apstring g_cl_procedural_path = "";
+ArgParse::apstring g_cl_type = "";
+ArgParse::apstring g_cl_addtype = "";
+ArgParse::apstring g_cl_mode = "rgba";
+ArgParse::apstring g_cl_strprogress = "Frame (%f) %p%% complete [ %s secs / %S left ]";
 
 #ifdef	AQSIS_SYSTEM_POSIX
-bool g_syslog = 0;
+bool g_cl_syslog = 0;
 #endif	// AQSIS_SYSTEM_POSIX
 
-/** Function to print out the version to a std::ostream
- */
-void version( std::ostream& Stream )
-{
-    Stream << "aqsis version " << VERSION_STR << std::endl;
-}
-
-
-/** Function to print the progress of the render.
-	Used as the callback function to a RiProgressHandler call.
- */
+/// Function to print the progress of the render.  Used as the callback function to a RiProgressHandler call.
 RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
 {
-    if ( ( g_progress == 0 ) && ( g_Progress == 0 ) )
+    if ( ( g_cl_progress == 0 ) && ( g_cl_Progress == 0 ) )
         return ;
 
     // If g_Progress is set, 100% have to be reported. In all other cases the 100% are not displayed
-    if ( percent >= 100 && !g_Progress )
+    if ( percent >= 100 && !g_cl_Progress )
     {
         std::cout << "                                                                              \r" << std::flush;
         return ;
@@ -141,21 +169,21 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
     std::string strProgress;
 
     static int last_percent = 0;  // So we can skip instead of printing the same twice
-    if ( g_Progress )  // Override the outputformat
+    if ( g_cl_Progress )  // Override the outputformat
     {
         strProgress = "R90000%p%%";
         percent = static_cast<int>( percent );
         if ( last_percent == percent )
-          return;
+            return;
         else
-          last_percent = percent;
+            last_percent = static_cast<int>(percent);
     }
     else			// Use the default style
     {
-        strProgress = g_strprogress;
+        strProgress = g_cl_strprogress;
     }
 
-    std::ostrstream strOutput;
+    std::ostringstream strOutput;
     strOutput.setf( std::ios::fixed );
     while ( 1 )
     {
@@ -224,17 +252,16 @@ RtVoid PrintProgress( RtFloat percent, RtInt FrameNo )
             break;
     }
     // Pad to the end of the line.
-    while ( strOutput.pcount() < 79 )
+    while ( strOutput.str().size() < 79 )
         strOutput << " ";
 
-    std::cout << std::string( strOutput.str(), strOutput.pcount() ).c_str();
+    std::cout << strOutput.str();
 
-    if ( g_Progress )
+    if ( g_cl_Progress )
         std::cout << "\n";
     else
         std::cout << "\r";
 
-    strOutput.freeze( false );
     std:: cout << std::flush;
 }
 
@@ -248,272 +275,202 @@ RtVoid PreWorld( ... )
 RtVoid PreWorld()
 #endif
 {
-    if ( g_fb )
+    if ( g_cl_fb )
     {
-        char * type = "framebuffer", *mode = "rgb";
-        RiDisplay( "aqsis", type, mode, NULL );
+        RiDisplay( "aqsis", "framebuffer", "rgb", NULL );
     }
-    else if ( g_type.compare( "" ) != 0 )
+    else if ( !g_cl_type.empty() )
     {
-        char type[ 256 ], mode[ 256 ];
-        strcpy( type, g_type.c_str() );
-        strcpy( mode, g_mode.c_str() );
-        RiDisplay( "aqsis", type, mode, NULL );
+        RiDisplay( "aqsis", const_cast<char*>(g_cl_type.c_str()), const_cast<char*>(g_cl_mode.c_str()), NULL );
     }
-    else if ( g_addtype.compare( "" ) != 0 )
+    else if ( !g_cl_addtype.empty() )
     {
-        char type[ 256 ], mode[ 256 ];
-        strcpy( type, g_addtype.c_str() );
-        strcpy( mode, g_mode.c_str() );
-        RiDisplay( "+aqsis", type, mode, NULL );
-    }
-    
-	// Pass the statistics option onto Aqsis.
-	if ( g_endofframe >= 0 )
-    {
-        RiOption( "statistics", "endofframe", &g_endofframe, RI_NULL );
+        RiDisplay( "+aqsis", const_cast<char*>(g_cl_addtype.c_str()), const_cast<char*>(g_cl_mode.c_str()), NULL );
     }
 
-	// Pass the crop window onto Aqsis.
-	if( g_cropWindow.size() == 4 )
-	{
-		RiCropWindow(g_cropWindow[0], g_cropWindow[1], g_cropWindow[2], g_cropWindow[3]);
-	}
+    // Pass the statistics option onto Aqsis.
+    if ( g_cl_endofframe >= 0 )
+    {
+        RiOption( "statistics", "endofframe", &g_cl_endofframe, RI_NULL );
+    }
+
+    // Pass the crop window onto Aqsis.
+    if( g_cl_cropWindow.size() == 4 )
+    {
+        RiCropWindow(g_cl_cropWindow[0], g_cl_cropWindow[1], g_cl_cropWindow[2], g_cl_cropWindow[3]);
+    }
     return ;
 }
 
 
 int main( int argc, const char** argv )
 {
-#if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
-	std::ostringstream __buffer;
-    __buffer << 0;
-	_CrtMemState __initialState;
-	_CrtMemCheckpoint(&__initialState);
-#endif
-	{
-
-    ArgParse ap;
-    ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] files(s) to render" );
-    ap.argFlag( "help", "\aprint this help and exit", &g_help );
-    ap.argFlag( "version", "\aprint version information and exit", &g_version );
-    ap.argFlag( "pause", "\await for a keypress on completion", &g_pause );
-    ap.argFlag( "progress", "\aprint progress information", &g_progress );
-    ap.argFlag( "Progress", "\aprogress message matching prman \n\a(not influenced by progressformat)", &g_Progress );
-    ap.argString( "progressformat", "\astring representing the format of the progress message", &g_strprogress );
-    ap.argInt( "endofframe", "=integer\aequivalent to \"endofframe\" option", &g_endofframe );
-    ap.argFlag( "nostandard", "\adisable declaration of standard RenderMan parameters", &g_nostandard );
-    ap.argInt( "verbose", "\acontrol the output of messages.\n"
-						   "\a0 = errors\n"
-						   "\a1 = warnings (default)\n"
-						   "\a2 = information\n"
-						   "\a3 = debug", &g_verbose );
-    ap.alias( "verbose", "v" );
-    ap.argFlag( "renderinfo", "\aPrint out infos about base rendering settings", &g_rinfo );
-    ap.argFlag( "environment", "\aoutput environment information", &g_environment );
-    ap.argString( "type", "=string\aspecify a display device type to use", &g_type );
-    ap.argString( "addtype", "=string\aspecify a display device type to add", &g_addtype );
-    ap.argString( "mode", "=string\aspecify a display device mode to use", &g_mode );
-    ap.argFlag( "fb", "\aequivalent to --type=\"framebuffer\" --mode=\"rgb\"", &g_fb );
-    ap.alias( "fb", "d" );
-	ap.argFloats( "crop", " x1 x2 y1 y2\aSpecify a crop window, values are in screen space.", &g_cropWindow, ArgParse::SEP_ARGV, 4);
-    ap.argString( "config", "=string\aspecify a configuration file to load", &g_config );
-    ap.argString( "base", "=string\aspecify a default base path", &g_base_path );
-    ap.argString( "shaders", "=string\aspecify a default shaders searchpath", &g_shaders );
-    ap.argString( "archives", "=string\aspecify a default archives searchpath", &g_archives );
-    ap.argString( "textures", "=string\aspecify a default textures searchpath", &g_textures );
-    ap.argString( "displays", "=string\aspecify a default displays searchpath", &g_displays );
-    ap.argString( "dsolibs", "=string\aspecify default DSO libraries", &g_dso_libs );
-    ap.argString( "procedurals", "=string\aspecify default searchpath for procedurals", &g_procedurals );
-    ap.argFlag( "nocolor", "\adisable colored output [color output not supported on Windows]", &g_no_color );
-    ap.alias( "nocolor", "nc" );
+    StartMemoryDebugging();
+    {
+        ArgParse ap;
+        ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options] [RIB file...]" );
+        ap.argFlag( "help", "\aPrint this help and exit", &g_cl_help );
+	ap.alias( "help" , "h" );
+        ap.argFlag( "version", "\aPrint version information and exit", &g_cl_version );
+        ap.argFlag( "pause", "\aWait for a keypress on completion", &g_cl_pause );
+        ap.argFlag( "progress", "\aPrint progress information", &g_cl_progress );
+        ap.argFlag( "Progress", "\aPrint prman-compatible progress information (ignores -progressformat)", &g_cl_Progress );
+        ap.argString( "progressformat", "=string\aprintf-style format string for -progress", &g_cl_strprogress );
+        ap.argInt( "endofframe", "=integer\aEquivalent to \"endofframe\" RIB option", &g_cl_endofframe );
+        ap.argFlag( "nostandard", "\aDo not declare standard RenderMan parameters", &g_cl_nostandard );
+        ap.argInt( "verbose", "=integer\aSet log output level\n"
+                   "\a0 = errors\n"
+                   "\a1 = warnings (default)\n"
+                   "\a2 = information\n"
+                   "\a3 = debug", &g_cl_verbose );
+        ap.alias( "verbose", "v" );
+        ap.argFlag( "renderinfo", "\aPrint out infos about base rendering settings", &g_cl_rinfo );
+        ap.argString( "type", "=string\aSpecify a display device type to use", &g_cl_type );
+        ap.argString( "addtype", "=string\aSpecify a display device type to add", &g_cl_addtype );
+        ap.argString( "mode", "=string\aSpecify a display device mode to use", &g_cl_mode );
+        ap.argFlag( "fb", "\aSame as --type=\"framebuffer\" --mode=\"rgb\"", &g_cl_fb );
+        ap.alias( "fb", "d" );
+        ap.argFloats( "crop", " x1 x2 y1 y2\aSpecify a crop window, values are in screen space.", &g_cl_cropWindow, ArgParse::SEP_ARGV, 4);
+        ap.argString( "rc", "=string\aOverride the default RIB configuration file [" + g_rc_path + "]", &g_cl_rc_path );
+        ap.argString( "shaders", "=string\aOverride the default shader searchpath(s) [" + g_shader_path + "]", &g_cl_shader_path );
+        ap.argString( "archives", "=string\aOverride the default archive searchpath(s) [" + g_archive_path + "]", &g_cl_archive_path );
+        ap.argString( "textures", "=string\aOverride the default texture searchpath(s) [" + g_texture_path + "]", &g_cl_texture_path );
+        ap.argString( "displays", "=string\aOverride the default display searchpath(s) [" + g_display_path + "]", &g_cl_display_path );
+        ap.argString( "dsolibs", "=string\aOverride the default dso searchpath(s) [" + g_dso_path + "]", &g_cl_dso_path );
+        ap.argString( "procedurals", "=string\aOverride the default procedural searchpath(s) [" + g_procedural_path + "]", &g_cl_procedural_path );
+        ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
+        ap.alias( "nocolor", "nc" );
 #ifdef	AQSIS_SYSTEM_POSIX
-    ap.argFlag( "syslog", "\alog messages to syslog", &g_syslog );
+        ap.argFlag( "syslog", "\aLog messages to syslog", &g_cl_syslog );
 #endif	// AQSIS_SYSTEM_POSIX
-    ap.allowUnrecognizedOptions();
+        ap.allowUnrecognizedOptions();
 
-    //_crtBreakAlloc = 1305;
+        //_crtBreakAlloc = 1305;
 
-    if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
-    {
-        std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
-        exit( 1 );
-    }
+        if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
+        {
+            std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
+            exit( 1 );
+        }
 
-	// Check that the number of arguments to crop are valid if specified.
-	if ( g_cropWindow.size() > 0 && g_cropWindow.size() != 4 )
-	{
-		std::cout << "Error: invalid number of arguments to -crop, expected 4, got " << g_cropWindow.size() << std::endl;
-		g_help = true;
-	}
+        // Check that the number of arguments to crop are valid if specified.
+        if ( g_cl_cropWindow.size() > 0 && g_cl_cropWindow.size() != 4 )
+        {
+            std::cout << "Error: invalid number of arguments to -crop, expected 4, got " << g_cl_cropWindow.size() << std::endl;
+            g_cl_help = true;
+        }
 
-    if ( g_help )
-    {
-        std::cout << ap.usagemsg();
-        exit( 0 );
-    }
+        if ( g_cl_help )
+        {
+            std::cout << ap.usagemsg();
+            exit( 0 );
+        }
 
-    if ( g_version )
-    {
-        version( std::cout );
-        std::cout << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
-        exit( 0 );
-    }
+        if ( g_cl_version )
+        {
+            std::cout << "aqsis version " << VERSION_STR << std::endl;
+            std::cout << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
+            exit( 0 );
+        }
 
-    GetOptions();
+        // Apply environment-variable overrides to default paths ...
+	if(getenv("AQSIS_RC_PATH"))
+		g_rc_path = getenv("AQSIS_RC_PATH");
+	if(getenv("AQSIS_SHADER_PATH"))
+		g_shader_path = getenv("AQSIS_SHADER_PATH");
+	if(getenv("AQSIS_ARCHIVE_PATH"))
+		g_archive_path = getenv("AQSIS_ARCHIVE_PATH");
+	if(getenv("AQSIS_TEXTURE_PATH"))
+		g_texture_path = getenv("AQSIS_TEXTURE_PATH");
+	if(getenv("AQSIS_DISPLAY_PATH"))
+		g_display_path = getenv("AQSIS_DISPLAY_PATH");
+	if(getenv("AQSIS_DSO_PATH"))
+		g_dso_path = getenv("AQSIS_DSO_PATH");
+	if(getenv("AQSIS_PROCEDURAL_PATH"))
+		g_procedural_path = getenv("AQSIS_PROCEDURAL_PATH");
 
-    if ( g_environment )
-    {
-        std::cout << "config:   " << g_config.c_str() << std::endl;
-        std::cout << "base:     " << g_base_path.c_str() << std::endl;
-        std::cout << "shaders:  " << g_shaders.c_str() << std::endl;
-        std::cout << "archives: " << g_archives.c_str() << std::endl;
-        std::cout << "textures: " << g_textures.c_str() << std::endl;
-        std::cout << "displays: " << g_displays.c_str() << std::endl;
-        std::cout << "dsolibs: " << g_dso_libs.c_str() << std::endl;
-        std::cout << "procedurals: " << g_procedurals.c_str() << std::endl;
-    }
+        // Apply command-line overrides to default paths ...
+        if(!g_cl_rc_path.empty())
+            g_rc_path = g_cl_rc_path;
+        if(!g_cl_shader_path.empty())
+            g_shader_path = g_cl_shader_path;
+        if(!g_cl_archive_path.empty())
+            g_archive_path = g_cl_archive_path;
+        if(!g_cl_texture_path.empty())
+            g_texture_path = g_cl_texture_path;
+        if(!g_cl_display_path.empty())
+            g_display_path = g_cl_display_path;
+        if(!g_cl_dso_path.empty())
+            g_dso_path = g_cl_dso_path;
+        if(!g_cl_procedural_path.empty())
+            g_procedural_path = g_cl_procedural_path;
 
 #ifdef	AQSIS_SYSTEM_WIN32
-	std::auto_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(std::cerr) );
+        std::auto_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(std::cerr) );
 #endif
-    std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(std::cerr) );
-    std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(std::cerr) );
-    std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(std::cerr) );
-    std::auto_ptr<std::streambuf> color_level;
-    if(!g_no_color)
-	{
-		std::auto_ptr<std::streambuf> temp_color_level( new Aqsis::color_level_buf(std::cerr) );
-    	color_level = temp_color_level;
-	}
-    std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
-    Aqsis::log_level_t level = Aqsis::ERROR;
-	if( g_verbose > 0 )	level = Aqsis::WARNING;
-	if( g_verbose > 1 )	level = Aqsis::INFO;
-	if( g_verbose > 2 )	level = Aqsis::DEBUG;
-	std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(level, std::cerr) );
+        std::auto_ptr<std::streambuf> reset_level( new Aqsis::reset_level_buf(std::cerr) );
+        std::auto_ptr<std::streambuf> show_timestamps( new Aqsis::timestamp_buf(std::cerr) );
+        std::auto_ptr<std::streambuf> fold_duplicates( new Aqsis::fold_duplicates_buf(std::cerr) );
+        std::auto_ptr<std::streambuf> color_level;
+        if(!g_cl_no_color)
+        {
+            std::auto_ptr<std::streambuf> temp_color_level( new Aqsis::color_level_buf(std::cerr) );
+            color_level = temp_color_level;
+        }
+        std::auto_ptr<std::streambuf> show_level( new Aqsis::show_level_buf(std::cerr) );
+        Aqsis::log_level_t level = Aqsis::ERROR;
+        if( g_cl_verbose > 0 )	level = Aqsis::WARNING;
+        if( g_cl_verbose > 1 )	level = Aqsis::INFO;
+        if( g_cl_verbose > 2 )	level = Aqsis::DEBUG;
+        std::auto_ptr<std::streambuf> filter_level( new Aqsis::filter_by_level_buf(level, std::cerr) );
 #ifdef	AQSIS_SYSTEM_POSIX
-    if( g_syslog )
-        std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );
+        if( g_cl_syslog )
+            std::auto_ptr<std::streambuf> use_syslog( new Aqsis::syslog_buf(std::cerr) );
 #endif	// AQSIS_SYSTEM_POSIX
 
-    if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
-    {
-        std::string name("stdin");
-		RenderFile( stdin, name );
-    }
-    else
-    {
-        for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
+	    std::cerr << Aqsis::info << "rc path: " << g_rc_path << std::endl;
+	    std::cerr << Aqsis::info << "shader path(s): " << g_shader_path << std::endl;
+	    std::cerr << Aqsis::info << "archive path(s): " << g_archive_path << std::endl;
+	    std::cerr << Aqsis::info << "texture path(s): " << g_texture_path << std::endl;
+	    std::cerr << Aqsis::info << "display path(s): " << g_display_path << std::endl;
+	    std::cerr << Aqsis::info << "dso path(s): " << g_dso_path << std::endl;
+	    std::cerr << Aqsis::info << "procedural path(s): " << g_procedural_path << std::endl;
+
+        if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
         {
-            FILE *file = fopen( e->c_str(), "rb" );
-            if ( file != NULL )
+            std::string name("stdin");
+            RenderFile( stdin, name );
+        }
+        else
+        {
+            for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
             {
-                std::string name(*e);
-				RenderFile( file, name );
-                fclose( file );
-            }
-            else
-            {
-                std::cout << "Warning: Cannot open file \"" << *e << "\"" << std::endl;
+                FILE *file = fopen( e->c_str(), "rb" );
+                if ( file != NULL )
+                {
+                    std::string name(*e);
+                    RenderFile( file, name );
+                    fclose( file );
+                }
+                else
+                {
+                    std::cout << "Warning: Cannot open file \"" << *e << "\"" << std::endl;
+                }
             }
         }
+
     }
 
-	ReleaseOptions();
+    StopMemoryDebugging();
 
-	}
-#if defined(AQSIS_SYSTEM_WIN32) && defined(_DEBUG)
-    //_CrtDumpMemoryLeaks();
-	_CrtMemDumpAllObjectsSince(&__initialState);
-#endif
-
-#if defined(AQSIS_SYSTEM_WIN32)
-
+    if(g_cl_pause)
     {
-        MEMORY_BASIC_INFORMATION mbi;
-        DWORD dwMemUsed = 0;
-        PVOID pvAddress = 0;
-        SYSTEM_INFO SystemInfo;
-
-        memset( &SystemInfo, 0, sizeof( SYSTEM_INFO ) );
-        GetSystemInfo(
-            &SystemInfo  // system information
-        );
-        memset( &mbi, 0, sizeof( MEMORY_BASIC_INFORMATION ) );
-        while ( VirtualQuery( pvAddress, &mbi, sizeof( MEMORY_BASIC_INFORMATION ) ) == sizeof( MEMORY_BASIC_INFORMATION ) )
-        {
-            if ( mbi.State == MEM_COMMIT && mbi.Type == MEM_PRIVATE )
-                dwMemUsed += mbi.RegionSize;
-            pvAddress = ( ( BYTE* ) mbi.BaseAddress ) + mbi.RegionSize;
-        }
-        std::cout << "Peak Memory Used " << dwMemUsed << std::endl;
-
+        std::cout << "Press any key..." << std::ends;
+        std::cin.ignore(std::cin.rdbuf()->in_avail() + 1);
     }
-#endif
-
-#ifdef _DEBUG
-    report_refcounts();
-#endif
-
-	if(g_pause)
-	{
-		std::cout << "Press any key..." << std::ends;
-		std::cin.ignore(std::cin.rdbuf()->in_avail() + 1);
-	}
 
     return ( 0 );
 }
-
-
-void GetOptions()
-{
-    // If --base not specified, check for env.
-    if ( g_base_path.compare( "" ) == 0 )
-        g_base_path = Aqsis::CqFile::GetSystemSetting( "base" );
-
-    // If --config not specified try to locate the config file.
-    if ( g_config.compare( "" ) == 0 )
-        g_config = Aqsis::CqFile::GetSystemSetting( "config" );
-
-    // if --shaders is not specified, try and get a default shaders searchpath.
-    if ( g_shaders.compare( "" ) == 0 )
-        g_shaders = Aqsis::CqFile::GetSystemSetting( "shaders" );
-
-    // if --archives is not specified, try and get a default archives searchpath.
-    if ( g_archives.compare( "" ) == 0 )
-        g_archives = Aqsis::CqFile::GetSystemSetting( "archives" );
-
-    // if --textures is not specified, try and get a default textures searchpath.
-    if ( g_textures.compare( "" ) == 0 )
-        g_textures = Aqsis::CqFile::GetSystemSetting( "textures" );
-
-    // if --displays is not specified, try and get a default displays searchpath.
-    if ( g_displays.compare( "" ) == 0 )
-        g_displays = Aqsis::CqFile::GetSystemSetting( "displays" );
-
-    // if --displays is not specified, try and get a default dso libraries.
-    if ( g_dso_libs.compare( "" ) == 0 )
-        g_dso_libs = Aqsis::CqFile::GetSystemSetting( "dsolibs" );
-
-    // if --displays is not specified, try and get a default procedurals searchpath.
-    if ( g_procedurals.compare( "" ) == 0 )
-        g_procedurals = Aqsis::CqFile::GetSystemSetting( "procedurals" );
-}
-
-
-void ReleaseOptions()
-{
-	g_base_path = "";
-	g_config = "";
-	g_shaders = "";
-	g_archives = "";
-	g_textures = "";
-	g_displays = "";
-	g_dso_libs = "";
-	g_procedurals = "";
-}
-
 
 void RenderFile( FILE* file, std::string&  name )
 {
@@ -521,62 +478,44 @@ void RenderFile( FILE* file, std::string&  name )
 
     RiBegin( "CRIBBER" );
 
-    if ( !g_nostandard )
+    if ( !g_cl_nostandard )
         librib::StandardDeclarations( *renderengine );
 
-    if ( g_rinfo )
+    if ( g_cl_rinfo )
     {
-        RiOption( "statistics", "renderinfo", &g_rinfo, RI_NULL );
+        RiOption( "statistics", "renderinfo", &g_cl_rinfo, RI_NULL );
     }
 
     const char* popt[ 1 ];
-    popt[ 0 ] = g_shaders.c_str();
+    popt[ 0 ] = g_shader_path.c_str();
     RiOption( "searchpath", "shader", &popt, RI_NULL );
-    popt[ 0 ] = g_archives.c_str();
+    popt[ 0 ] = g_archive_path.c_str();
     RiOption( "searchpath", "archive", &popt, RI_NULL );
-    popt[ 0 ] = g_textures.c_str();
+    popt[ 0 ] = g_texture_path.c_str();
     RiOption( "searchpath", "texture", &popt, RI_NULL );
-    popt[ 0 ] = g_displays.c_str();
+    popt[ 0 ] = g_display_path.c_str();
     RiOption( "searchpath", "display", &popt, RI_NULL );
-    popt[ 0 ] = g_dso_libs.c_str();
+    popt[ 0 ] = g_dso_path.c_str();
     RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
-    popt[ 0 ] = g_procedurals.c_str();
+    popt[ 0 ] = g_procedural_path.c_str();
     RiOption( "searchpath", "procedural", &popt, RI_NULL );
 
     RiProgressHandler( &PrintProgress );
     RiPreWorldFunction( &PreWorld );
 
-    if ( g_config.compare( "" ) )
+    std::cerr << Aqsis::info << "Loading config file " << g_rc_path << std::endl;
+    FILE* rcfile = fopen( g_rc_path.c_str(), "rb" );
+    if (rcfile != NULL )
     {
-        FILE * cfgfile = fopen( g_config.c_str(), "rb" );
-        if ( cfgfile != NULL )
-        {
-            librib::Parse( cfgfile, "config", *renderengine, std::cerr, NULL );
-            fclose( cfgfile );
-        }
-        else if ( g_environment )
-        {
-#ifdef  AQSIS_SYSTEM_WIN32
-            std::cout << "Warning: Config file not found in" << std::endl <<
-            "%AQSIS_CONFIG%" << std::endl <<
-            "%AQSIS_BASE_PATH%/.aqsisrc" << std::endl <<
-            "%HOME%/.aqsisrc" << std::endl <<
-            ".aqsisrc" << std::endl;
-#else
-            std::cout << "Warning: Config file not found in" << std::endl <<
-            "$AQSIS_CONFIG" << std::endl <<
-            "$AQSIS_BASE_PATH/.aqsisrc" << std::endl <<
-            "$HOME/.aqsisrc" << std::endl <<
-            "/etc/.aqsisrc" << std::endl;
-#endif
-
-        }
+	librib::Parse( rcfile, "config", *renderengine, std::cerr, NULL );
+	fclose( rcfile );
     }
+
     librib::Parse( file, name, *renderengine, std::cerr, NULL );
 
     RiEnd();
 
-    if ( !g_nostandard )
+    if ( !g_cl_nostandard )
         librib::CleanupDeclarations( *renderengine );
 
     librib2ri::DestroyRIBEngine( renderengine );

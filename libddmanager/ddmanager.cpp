@@ -489,6 +489,7 @@ void CqDDManager::CloseDisplayLibrary( SqDisplayRequest& req )
 
 void CqDDManager::InitialiseDisplayNameMap()
 {
+/*
     // Read in the configuration file.
     // Find the config file in the same place as the display drivers.
 #ifdef AQSIS_SYSTEM_POSIX
@@ -517,7 +518,14 @@ void CqDDManager::InitialiseDisplayNameMap()
     CqString strConfigFile = ddmsock_path;
 #else
     CqString strConfigFile = "displays.ini";
-#endif /* AQSIS_SYSTEM_POSIX */
+#endif // AQSIS_SYSTEM_POSIX 
+*/
+
+
+    CqString strConfigFile("displays.ini");
+    const CqString* displays = QGetRenderContext()->optCurrent().GetStringOption( "searchpath", "displays" );
+    if( displays )
+                strConfigFile = displays[ 0 ] + "/" + strConfigFile;
 
     std::cerr << info << "Loading display configuration from file \"" << strConfigFile << "\"" << std::endl;
 

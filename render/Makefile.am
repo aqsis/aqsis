@@ -1,6 +1,6 @@
 SUBDIRS = macosx .
 AM_CXXFLAGS=@AQSIS_CXXFLAGS@
-AM_CPPFLAGS=@AQSIS_CPPFLAGS@
+AM_CPPFLAGS=@AQSIS_CPPFLAGS@ -DDEFAULT_PLUGIN_PATH=\"$(pkglibdir)\"
 AM_CFLAGS=@AQSIS_CFLAGS@
 
 EXTRA_DIST = libaqsis.dsp libaqsis.def apicache.xsl apiheader.xsl apivalidate.xsl api.xml 

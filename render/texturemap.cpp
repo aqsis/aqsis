@@ -132,63 +132,17 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
  */
 TqInt CqTextureMap::Convert( CqString &strName )
 {
+
+    const CqString extension = strName.substr(strName.rfind(".")).substr(1);
+    const CqString plugin_path = DEFAULT_PLUGIN_PATH "/" + extension + "2tif.so";
+    const CqString plugin_function = extension + "2tif";
+
     TqInt result = 0;
-    TqInt lenght = 0;
-    TqChar library[ 1024 ];
-    TqChar function[ 1024 ];
+    CqConverter* const plug = new CqConverter( "", const_cast<char*>(plugin_path.c_str()), const_cast<char*>(plugin_function.c_str()) );
     char * ( *convert ) ( const char * );
-    char *ext = NULL;
-    char *tiff = NULL;
-
-    convert = NULL;
-
-    char *aqsis_home = getenv( "AQSIS_BASE_PATH" );
-
-    if ( aqsis_home == NULL )
-#if defined(AQSIS_SYSTEM_POSIX) && !defined(AQSIS_SYSTEM_MACOSX)
-        aqsis_home = BASE_PATH;
-#else
-        aqsis_home = ".";
-#endif
-
-    ext = ( TqPchar ) strName.c_str();
-    if ( ext && *ext )
-        lenght = strlen( ext );
-
-    if ( lenght > 4 )
-    {
-
-        /* find the extension in the string
-         * than try to match which extension goes with which dll 
-         **/
-        ext = strstr( &ext[ lenght - 5 ], "." );
-        if ( ext == NULL ) return 0;
-        ext++;
-    }
-    else
-    {
-        return 0;
-    }
-
-    sprintf( function, "%s2tif", ext );
-#ifdef AQSIS_SYSTEM_WIN32
-    /*********************************/
-    /* Get the dynamic library on NT */
-    /*********************************/
-    sprintf( library, "%s\\procedures\\%s.dll", aqsis_home, function );
-#else
-    /***********************************/
-    /* Get the shared library on UNIX  */
-    /***********************************/
-    sprintf( library, "%s/lib/lib%s.so", aqsis_home, function );
-#endif
-    CqConverter *plug = new CqConverter( "", library, function );
     if ( ( convert = ( char * ( * ) (const  char * s ) ) plug->Function() ) != NULL )
     {
-
-#ifdef DEBUG
-        std::cout << "strName: " << strName.c_str() << std::endl;
-#endif
+	char* tiff = 0;
         if ( ( tiff = convert (  strName.c_str() ) ) != NULL )
         {
             strName = tiff;
@@ -931,7 +885,7 @@ void CqTextureMap::Open()
 
         /* Second test; is it containing enough directories for us */
         TqInt min = MIN(m_XRes, m_YRes );
-        TqInt directory = (TqInt)  log((double) min)/log((double) 2.0);
+        TqInt directory = static_cast<TqInt>(log((double) min)/log((double) 2.0));
         bMipMap &= TIFFSetDirectory(m_pImage, directory - 1);
 
 
@@ -939,7 +893,7 @@ void CqTextureMap::Open()
 
 
         /* Support for 3delight, AIR, BMRT, RDC, PIXIE MipMap files.
-         * Aqsis is not bound to have exact multiples of 2 on height, lenght.
+         * Aqsis is not bound to have exact multiples of 2 on height, length.
          * The Format of 3Delight, AIR, BMRT and RDC is more "Plain Texture"/MipMap.
          * What is preventing us to load their files was the format description file as 
          * MipMap differ from our format description not the way they store their information.

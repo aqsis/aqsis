@@ -1,4 +1,4 @@
-EXTRA_DIST = display.dsp
+EXTRA_DIST = display.dsp displays.ini
 
 AM_CXXFLAGS=@AQSIS_CXXFLAGS@
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@
@@ -15,3 +15,9 @@ libdisplay_la_LIBADD = @AQSIS_FLTK_LIBS@ @TIFF_FLAGS@
 
 INCLUDES = -I$(top_srcdir)/libaqsistypes -I$(top_srcdir)/libaqsistypes/posix -I$(top_srcdir)/boost -I$(top_srcdir)/libddmanager -I$(top_srcdir)/render @AQSIS_FLTK_CFLAGS@ @TIFF_INC@
 
+configdir = $(pkglibdir)
+config_DATA = displays.ini
+
+check-local:
+	rm -f $(top_srcdir)/display/libdisplay.so
+	ln -s $(top_builddir)/display/.libs/libdisplay.so $(top_srcdir)/display/libdisplay.so
