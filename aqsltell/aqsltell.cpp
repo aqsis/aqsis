@@ -167,14 +167,14 @@ int main( int argc, const char** argv )
 										break;
 										case SLX_TYPE_POINT:
 										std::cout << "[" << symPtr->svd_default.pointval[ arrayIndex ].xval << ", " <<
-										symPtr->svd_default.pointval[ arrayIndex ].xval << ", " <<
-										symPtr->svd_default.pointval[ arrayIndex ].xval <<
+										symPtr->svd_default.pointval[ arrayIndex ].yval << ", " <<
+										symPtr->svd_default.pointval[ arrayIndex ].zval <<
 										"]" << std::endl;
 										break;
 										case SLX_TYPE_COLOR:
 										std::cout << "[" << symPtr->svd_default.pointval[ arrayIndex ].xval << ", " <<
-										symPtr->svd_default.pointval[ arrayIndex ].xval << ", " <<
-										symPtr->svd_default.pointval[ arrayIndex ].xval <<
+										symPtr->svd_default.pointval[ arrayIndex ].yval << ", " <<
+										symPtr->svd_default.pointval[ arrayIndex ].zval <<
 										"]" << std::endl;
 										break;
 										case SLX_TYPE_SCALAR:
