@@ -29,6 +29,7 @@
 #include <fstream>
 #include <stack>
 #include <string>
+#include <sstream>
 #include "aqsis.h"
 #include "ri.h"
 #include "dictionary.h"
@@ -67,6 +68,11 @@ protected:
                       SubdivisionMesh, Procedural, Geometry, MakeTexture,
                       MakeBump, MakeLatLongEnvironment, MakeCubeFaceEnvironment, MakeShadow,
                       ArchiveRecord, ReadArchive, ErrorHandler, LAST_Function };
+    // block types (used to check context nesting)
+    enum EqBlocks{
+        B_Ri, B_Frame, B_World, B_Attribute, B_Transform, B_Solid, B_Object, 
+        B_Motion
+    };
 private:
     CqDictionary m_Dictionary;
 
@@ -80,6 +86,11 @@ private:
         RtInt vStep;
     };
     std::stack<SqSteps> m_Steps;
+
+    std::vector<EqBlocks> m_nesting;
+    bool beginNesting(EqBlocks type);
+    bool endNesting(EqBlocks type);
+    bool nestingContains(EqBlocks type) const;
 
     void push();
     void pop();
