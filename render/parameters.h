@@ -100,6 +100,14 @@ class CqParameter
 		 */
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 ) = 0;
 
+		/** Pure virtual, dice a single array element of the value into a grid using appropriate interpolation for the class.
+		 * \param u Integer dice count for the u direction.
+		 * \param v Integer dice count for the v direction.
+		 * \param pResult Pointer to storage for the result.
+		 * \param pSurface Pointer to the surface we are processing used for vertex class variables to perform natural interpolation.
+		 */
+		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 ) = 0;
+
 		/** Pure virtual, set an indexed value from another parameter (must be the same type).
 		 * \param pFrom Pointer to parameter to get values from.
 		 * \param idxTarget Index of value to set,
@@ -302,6 +310,12 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		}
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 );
 
+		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
+		{
+			assert( TqFalse );
+			return;
+		}
+
 		// Overridden from CqParameterTyped<T>
 
 		virtual	const	T*	pValue() const
@@ -448,6 +462,12 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 				pResult->SetValue( m_aValues[ 0 ], i );
 		}
 
+		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
+		{
+			assert( TqFalse );
+			return;
+		}
+
 		// Overridden from CqParameterTyped<T>
 		virtual	const	T*	pValue() const
 		{
@@ -563,6 +583,11 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 				pResult->SetValue( m_Value, i );
 		}
 
+		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
+		{
+			assert( TqFalse );
+			return;
+		}
 
 		// Overridden from CqParameterTyped<T>
 		virtual	const	T*	pValue() const
@@ -650,6 +675,12 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			pSurface->NaturalDice( this, u, v, pResult );
+		}
+
+		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
+		{
+			assert( TqFalse );
+			return;
 		}
 
 		/** Static constructor, to allow type free parameter construction.
@@ -777,21 +808,30 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 			{
 				if ( u )
 				{
-					pTResult2->pValue( 1 ) [ 0 ] = pValue( 1 ) [ 0 ];
-					pTResult2->pValue( 3 ) [ 0 ] = pValue( 3 ) [ 0 ];
-					pTResult1->pValue( 1 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pValue( 0 ) [ 0 ] + pValue( 1 ) [ 0 ] ) * 0.5 );
-					pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 2 ) [ 0 ] = static_cast<T>( ( pValue( 2 ) [ 0 ] + pValue( 3 ) [ 0 ] ) * 0.5 );
+					TqInt index;
+					for( index = Count()-1; index >= 0; index-- )
+					{
+						pTResult2->pValue( 1 ) [ index ] = pValue( 1 ) [ index ];
+						pTResult2->pValue( 3 ) [ index ] = pValue( 3 ) [ index ];
+						pTResult1->pValue( 1 ) [ index ] = pTResult2->pValue( 0 ) [ index ] = static_cast<T>( ( pValue( 0 ) [ index ] + pValue( 1 ) [ index ] ) * 0.5 );
+						pTResult1->pValue( 3 ) [ index ] = pTResult2->pValue( 2 ) [ index ] = static_cast<T>( ( pValue( 2 ) [ index ] + pValue( 3 ) [ index ] ) * 0.5 );
+					}
 				}
 				else
 				{
-					pTResult2->pValue( 2 ) [ 0 ] = pValue( 2 ) [ 0 ];
-					pTResult2->pValue( 3 ) [ 0 ] = pValue( 3 ) [ 0 ];
-					pTResult1->pValue( 2 ) [ 0 ] = pTResult2->pValue( 0 ) [ 0 ] = static_cast<T>( ( pValue( 0 ) [ 0 ] + pValue( 2 ) [ 0 ] ) * 0.5 );
-					pTResult1->pValue( 3 ) [ 0 ] = pTResult2->pValue( 1 ) [ 0 ] = static_cast<T>( ( pValue( 1 ) [ 0 ] + pValue( 3 ) [ 0 ] ) * 0.5 );
+					TqInt index;
+					for( index = Count()-1; index >= 0; index-- )
+					{
+						pTResult2->pValue( 2 ) [ index ] = pValue( 2 ) [ index ];
+						pTResult2->pValue( 3 ) [ index ] = pValue( 3 ) [ index ];
+						pTResult1->pValue( 2 ) [ index ] = pTResult2->pValue( 0 ) [ index ] = static_cast<T>( ( pValue( 0 ) [ index ] + pValue( 2 ) [ index ] ) * 0.5 );
+						pTResult1->pValue( 3 ) [ index ] = pTResult2->pValue( 1 ) [ index ] = static_cast<T>( ( pValue( 1 ) [ index ] + pValue( 3 ) [ index ] ) * 0.5 );
+					}
 				}
 			}
 		}
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 );
+		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 );
 
 		// Overridden from CqParameterTyped<T>
 		virtual	const	T*	pValue() const
@@ -837,6 +877,19 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		{
 			assert( Index < m_aValues.size() );
 			return( m_aValues[ Index ] );
+		}
+
+		virtual	void	SetValue( CqParameter* pFrom, TqInt idxTarget, TqInt idxSource )
+		{
+			assert( pFrom->Type() == Type() );
+			assert( pFrom->Count() == Count() );
+
+			CqParameterTyped<T, SLT>* pFromTyped = static_cast<CqParameterTyped<T, SLT>*>( pFrom );
+			TqInt index;
+			T* pTargetValues = pValue( idxTarget );
+			T* pSourceValues = pFromTyped->pValue( idxSource );
+			for( index = 0; index < Count(); index++ )
+				pTargetValues[ index ] = pSourceValues[ index ];
 		}
 
 		/** Assignment operator.
@@ -932,6 +985,19 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 			TqUint max = ( MAX( (TqUint)u * (TqUint) v, pResult->Size() ) );
 			for ( i = 0; i < max; i++ )
 				pResult->SetValue( pValue( 0 ) [ 0 ], i );
+		}
+
+		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
+		{
+			// Just promote the uniform value to varying by duplication.
+			assert( pResult->Type() == Type() );
+			assert( Count() > ArrayIndex );
+			// Note it is assumed that the variable has been
+			// initialised to the correct size prior to calling.
+			TqUint i;
+			TqUint max = ( MAX( (TqUint)u * (TqUint) v, pResult->Size() ) );
+			for ( i = 0; i < max; i++ )
+				pResult->SetValue( pValue( 0 ) [ ArrayIndex ], i );
 		}
 
 		// Overridden from CqParameterTyped<T>
@@ -1044,6 +1110,19 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 				pResult->SetValue( pValue( 0 ) [ 0 ], i );
 		}
 
+		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
+		{
+			// Just promote the constant value to varying by duplication.
+			assert( pResult->Type() == Type() );
+			assert( Count() > ArrayIndex );
+			// Note it is assumed that the variable has been
+			// initialised to the correct size prior to calling.
+			TqUint i;
+			TqUint max = ( MAX( (TqUint) u * (TqUint) v, pResult->Size() ) );
+			for ( i = 0; i < max; i++ )
+				pResult->SetValue( pValue( 0 ) [ ArrayIndex ], i );
+		}
+
 		// Overridden from CqParameterTyped<T>
 		virtual	const	T*	pValue() const
 		{
@@ -1129,6 +1208,12 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SL
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			pSurface->NaturalDice( this, u, v, pResult );
+		}
+		
+		virtual	void	DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0, TqInt ArrayIndex = 0 )
+		{
+			/// \note: Need to work out how to do this...
+			return;
 		}
 
 		/** Static constructor, to allow type free parameter construction.
@@ -1286,6 +1371,62 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 	{
                 TqInt iv;
 		res = pValue( 0 ) [ 0 ];
+		for ( iv = 0; iv <= v; iv++ )
+		{
+			TqInt iu;
+			for ( iu = 0; iu <= u; iu++ )
+				( *pResData++ ) = res;
+		}
+	}
+}
+
+
+/** Dice the value into a grid using bilinear interpolation.
+ * \param u Integer dice count for the u direction.
+ * \param v Integer dice count for the v direction.
+ * \param pResult Pointer to storage for the result.
+ * \param pSurface Pointer to the surface to which this parameter belongs. Used if the surface type has special handling for parameter dicing.
+ */
+
+template <class T, EqVariableType I, class SLT>
+void CqParameterTypedVaryingArray<T, I, SLT>::DiceOne( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface, TqInt ArrayIndex )
+{
+	assert( pResult->Type() == Type() );
+	assert( pResult->Class() == class_varying );
+	assert( Count() > ArrayIndex );
+
+	T res;
+
+	SLT* pResData;
+	pResult->GetValuePtr( pResData );
+	assert( NULL != pResData );
+
+	// Check if a valid 4 point quad, do nothing if not.
+	if ( m_aValues.size() == 4 )
+	{
+		// Note it is assumed that the variable has been
+		// initialised to the correct size prior to calling.
+		TqFloat diu = 1.0 / u;
+		TqFloat div = 1.0 / v;
+		TqInt iv;
+		for ( iv = 0; iv <= v; iv++ )
+		{
+			TqInt iu;
+			for ( iu = 0; iu <= u; iu++ )
+			{
+				res = BilinearEvaluate<T>( pValue( 0 ) [ ArrayIndex ],
+				                           pValue( 1 ) [ ArrayIndex ],
+				                           pValue( 2 ) [ ArrayIndex ],
+				                           pValue( 3 ) [ ArrayIndex ],
+				                           iu * diu, iv * div );
+				( *pResData++ ) = res;
+			}
+		}
+	}
+	else
+	{
+                TqInt iv;
+		res = pValue( 0 ) [ ArrayIndex ];
 		for ( iv = 0; iv <= v; iv++ )
 		{
 			TqInt iu;

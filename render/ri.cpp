@@ -2956,10 +2956,10 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 	// Create a storage class for all the points.
 	CqPolygonPoints* pPointsClass = new CqPolygonPoints( cVerts, npolys );
 	ADDREF( pPointsClass );
+	CqSurfacePointsPolygons* pPsPs = new CqSurfacePointsPolygons(pPointsClass, npolys, nverts, verts );
 	// Process any specified primitive variables
-	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
+	if ( ProcessPrimitiveVariables( pPsPs, count, tokens, values ) )
 	{
-		CqSurfacePointsPolygons* pPsPs = new CqSurfacePointsPolygons(pPointsClass, npolys, nverts, verts );
 		ADDREF( pPsPs );
 		TqFloat time = QGetRenderContext()->Time();
 		// Transform the points into camera space for processing,
@@ -2969,6 +2969,8 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 		CreateGPrim(pPsPs);
 		RELEASEREF( pPsPs );
 	}
+	else
+		RELEASEREF( pPsPs );	
 	RELEASEREF( pPointsClass );
 
 	return ;

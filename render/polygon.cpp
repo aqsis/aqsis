@@ -126,10 +126,17 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		//ADDREF( pNew );
 		pNew->SetSurfaceParameters( Surface() );
 
+		// Get the indices for varying variables.
 		TqInt iUPA = PolyIndex( indexA );
 		TqInt iUPB = PolyIndex( indexB );
 		TqInt iUPC = PolyIndex( indexC );
 		TqInt iUPD = PolyIndex( indexD );
+
+		// Get the indices for facevarying variables.
+		TqInt iUPAf = FaceVaryingIndex( indexA );
+		TqInt iUPBf = FaceVaryingIndex( indexB );
+		TqInt iUPCf = FaceVaryingIndex( indexC );
+		TqInt iUPDf = FaceVaryingIndex( indexD );
 
 		// Copy any user specified primitive variables.
 		std::vector<CqParameter*>::iterator iUP;
@@ -157,6 +164,16 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 			{
 				pNewUP->SetSize( 1 );
 				pNewUP->SetValue( ( *iUP ), 0, 0 );
+			}
+			else if ( pNewUP->Class() == class_facevarying )
+			{
+				pNewUP->SetSize( pNew->cVarying() );
+				pNewUP->SetValue( ( *iUP ), 0, iUPAf );
+				pNewUP->SetValue( ( *iUP ), 1, iUPBf );
+				pNewUP->SetValue( ( *iUP ), 2, iUPDf );
+				pNewUP->SetValue( ( *iUP ), 3, iUPCf );
+				if ( indexC == indexD )
+					CreatePhantomData( pNewUP );
 			}
 
 			pNew->AddPrimitiveVariable( pNewUP );
@@ -410,6 +427,7 @@ CqSurfacePointsPolygon& CqSurfacePointsPolygon::operator=( const CqSurfacePoints
 	CqPolygonPoints*	pOldPoints = m_pPoints;
 	m_pPoints = From.m_pPoints;
 	m_Index = From.m_Index;
+	m_FaceVaryingIndex = From.m_FaceVaryingIndex;
 	ADDREF( m_pPoints );
 	if ( pOldPoints ) RELEASEREF( pOldPoints );
 
@@ -452,7 +470,7 @@ TqInt CqSurfacePointsPolygons::Split( std::vector<CqBasicSurface*>& aSplits )
 	for ( poly = 0; poly < m_NumPolys; poly++ )
 	{
 		// Create a surface polygon
-		CqSurfacePointsPolygon*	pSurface = new CqSurfacePointsPolygon( m_pPoints, poly );
+		CqSurfacePointsPolygon*	pSurface = new CqSurfacePointsPolygon( m_pPoints, poly, iP );
 		//ADDREF( pSurface );
 		RtBoolean fValid = RI_TRUE;
 

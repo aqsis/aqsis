@@ -304,7 +304,7 @@ class CqSurface : public CqBasicSurface
 
 		/** Get a reference the to P default parameter.
 		 */
-		CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>* P()
+		virtual CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>* P()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_P ] >= 0 )
 				return ( static_cast<CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_P ] ] ) );
@@ -313,7 +313,7 @@ class CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to N default parameter.
 		 */
-		CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* N()
+		virtual CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* N()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_N ] >= 0 )
 				return ( static_cast<CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_N ] ] ) );
@@ -322,7 +322,7 @@ class CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to Cq default parameter.
 		 */
-		CqParameterTypedVarying<CqColor, type_color, CqColor>* Cs()
+		virtual CqParameterTypedVarying<CqColor, type_color, CqColor>* Cs()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_Cs ] >= 0 )
 				return ( static_cast<CqParameterTypedVarying<CqColor, type_color, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Cs ] ] ) );
@@ -331,7 +331,7 @@ class CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to Os default parameter.
 		 */
-		CqParameterTypedVarying<CqColor, type_color, CqColor>* Os()
+		virtual CqParameterTypedVarying<CqColor, type_color, CqColor>* Os()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_Os ] >= 0 )
 				return ( static_cast<CqParameterTypedVarying<CqColor, type_color, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Os ] ] ) );
@@ -340,7 +340,7 @@ class CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to s default parameter.
 		 */
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* s()
+		virtual CqParameterTypedVarying<TqFloat, type_float, TqFloat>* s()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_s ] >= 0 )
 				return ( static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_s ] ] ) );
@@ -349,7 +349,7 @@ class CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to t default parameter.
 		 */
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* t()
+		virtual CqParameterTypedVarying<TqFloat, type_float, TqFloat>* t()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_t ] >= 0 )
 				return ( static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_t ] ] ) );
@@ -358,7 +358,7 @@ class CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to u default parameter.
 		 */
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* u()
+		virtual CqParameterTypedVarying<TqFloat, type_float, TqFloat>* u()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_u ] >= 0 )
 				return ( static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_u ] ] ) );
@@ -367,7 +367,7 @@ class CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to v default parameter.
 		 */
-		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* v()
+		virtual CqParameterTypedVarying<TqFloat, type_float, TqFloat>* v()
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_v ] >= 0 )
 				return ( static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_v ] ] ) );
@@ -377,7 +377,7 @@ class CqSurface : public CqBasicSurface
 
 		/** Get a reference the to P default parameter.
 		 */
-		const	CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>* P() const
+		virtual const	CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>* P() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_P ] >= 0 )
 				return ( static_cast<const CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_P ] ] ) );
@@ -386,7 +386,7 @@ class CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to N default parameter.
 		 */
-		const	CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* N() const
+		virtual const	CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* N() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_N ] >= 0 )
 				return ( static_cast<const CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_N ] ] ) );
@@ -395,7 +395,7 @@ class CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to Cq default parameter.
 		 */
-		const	CqParameterTypedVarying<CqColor, type_color, CqColor>* Cs() const
+		virtual const	CqParameterTypedVarying<CqColor, type_color, CqColor>* Cs() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_Cs ] >= 0 )
 				return ( static_cast<const CqParameterTypedVarying<CqColor, type_color, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Cs ] ] ) );
@@ -404,7 +404,7 @@ class CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to Os default parameter.
 		 */
-		const	CqParameterTypedVarying<CqColor, type_color, CqColor>* Os() const
+		virtual const	CqParameterTypedVarying<CqColor, type_color, CqColor>* Os() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_Os ] >= 0 )
 				return ( static_cast<const CqParameterTypedVarying<CqColor, type_color, CqColor>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_Os ] ] ) );
@@ -413,7 +413,7 @@ class CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to s default parameter.
 		 */
-		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* s() const
+		virtual const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* s() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_s ] >= 0 )
 				return ( static_cast<const CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_s ] ] ) );
@@ -422,7 +422,7 @@ class CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to t default parameter.
 		 */
-		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* t() const
+		virtual const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* t() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_t ] >= 0 )
 				return ( static_cast<const CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_t ] ] ) );
@@ -431,7 +431,7 @@ class CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to u default parameter.
 		 */
-		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* u() const
+		virtual const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* u() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_u ] >= 0 )
 				return ( static_cast<const CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_u ] ] ) );
@@ -440,7 +440,7 @@ class CqSurface : public CqBasicSurface
 		}
 		/** Get a reference the to v default parameter.
 		 */
-		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* v() const
+		virtual const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* v() const
 		{
 			if ( m_aiStdPrimitiveVars[ EnvVars_v ] >= 0 )
 				return ( static_cast<const CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>( m_aUserParams[ m_aiStdPrimitiveVars[ EnvVars_v ] ] ) );
@@ -450,60 +450,62 @@ class CqSurface : public CqBasicSurface
 
 		/** Determine whether this surface has per vertex normals.
 		 */
-		const	TqBool	bHasN() const
+		virtual const	TqBool	bHasN() const
 		{
 			return ( m_aiStdPrimitiveVars[ EnvVars_N ] >= 0 );
 		}
 		/** Determine whether this surface has per vertex colors.
 		 */
-		const	TqBool	bHasCs() const
+		virtual const	TqBool	bHasCs() const
 		{
 			return ( m_aiStdPrimitiveVars[ EnvVars_Cs ] >= 0 );
 		}
 		/** Determine whether this surface has per vertex opacities.
 		 */
-		const	TqBool	bHasOs() const
+		virtual const	TqBool	bHasOs() const
 		{
 			return ( m_aiStdPrimitiveVars[ EnvVars_Os ] >= 0 );
 		}
 		/** Determine whether this surface has per vertex s cordinates.
 		 */
-		const	TqBool	bHass() const
+		virtual const	TqBool	bHass() const
 		{
 			return ( m_aiStdPrimitiveVars[ EnvVars_s ] >= 0 );
 		}
 		/** Determine whether this surface has per vertex t coordinates.
 		 */
-		const	TqBool	bHast() const
+		virtual const	TqBool	bHast() const
 		{
 			return ( m_aiStdPrimitiveVars[ EnvVars_t ] >= 0 );
 		}
 		/** Determine whether this surface has per vertex u coordinates.
 		 */
-		const	TqBool	bHasu() const
+		virtual const	TqBool	bHasu() const
 		{
 			return ( m_aiStdPrimitiveVars[ EnvVars_u ] >= 0 );
 		}
 		/** Determine whether this surface has per vertex v coordinates.
 		 */
-		const	TqBool	bHasv() const
+		virtual const	TqBool	bHasv() const
 		{
 			return ( m_aiStdPrimitiveVars[ EnvVars_v ] >= 0 );
 		}
 
 		/** Get a reference to the user parameter variables array
 		 */
-		const std::vector<CqParameter*>& aUserParams() const
+		virtual const std::vector<CqParameter*>& aUserParams() const
 		{
 			return ( m_aUserParams );
 		}
 
 		/** Get a reference to the user parameter variables array
 		 */
-		std::vector<CqParameter*>& aUserParams()
+		virtual std::vector<CqParameter*>& aUserParams()
 		{
 			return ( m_aUserParams );
 		}
+
+		virtual CqParameter* FindUserParam( const char* strName );
 
 		/* From IqSurface.
 		 */

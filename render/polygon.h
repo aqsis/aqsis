@@ -93,6 +93,10 @@ class CqPolygonBase
 		 * \param i Integer index in of the vertex in question.
 		 */
 		virtual	const	TqInt PolyIndex( TqInt i ) const = 0;
+		/** Get the real index into the points list translated from the polygon vertex index for facevarying variables.
+		 * \param i Integer index in of the vertex in question.
+		 */
+		virtual	const	TqInt FaceVaryingIndex( TqInt i ) const = 0;
 
 		/** Get the number of vertices in this polygon.
 		 */
@@ -245,6 +249,10 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 		virtual	const	TqInt PolyIndex( TqInt i ) const
 		{
 			return ( i );
+		}
+		virtual	const	TqInt FaceVaryingIndex( TqInt i ) const
+		{
+			return( i );
 		}
 
 		virtual	const	TqBool	bHasN() const
@@ -402,9 +410,10 @@ class CqPolygonPoints : public CqSurface
 class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 {
 	public:
-		CqSurfacePointsPolygon( CqPolygonPoints* pPoints, TqInt index ) : CqBasicSurface(),
+		CqSurfacePointsPolygon( CqPolygonPoints* pPoints, TqInt index, TqInt FaceVaryingIndex  ) : CqBasicSurface(),
 				m_pPoints( pPoints ),
-				m_Index( index )
+				m_Index( index ),
+				m_FaceVaryingIndex( FaceVaryingIndex )
 		{
 			ADDREF( m_pPoints );
 		}
@@ -518,6 +527,10 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		{
 			return ( ( (TqUint) i < m_aIndices.size() ) ? m_aIndices[ i ] : m_aIndices.back() );
 		}
+		virtual	const	TqInt FaceVaryingIndex( TqInt i ) const
+		{
+			return ( m_FaceVaryingIndex + i );
+		}
 
 		virtual	TqInt	NumVertices() const
 		{
@@ -582,12 +595,18 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 			return ( m_Index );
 		}
 
-
+		/** Get the start index in arrays of favevarying variables for this face.
+		 */
+		TqInt FaceVaryingIndex() const
+		{
+			return( m_FaceVaryingIndex );
+		}
 
 	protected:
 		std::vector<TqInt>	m_aIndices;		///< Array of indices into the associated vertex list.
 		CqPolygonPoints*	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
 		TqInt	m_Index;		/// Polygon index, used for looking up Uniform values.
+		TqInt	m_FaceVaryingIndex;
 };
 
 //----------------------------------------------------------------------
@@ -605,8 +624,10 @@ class CqSurfacePointsPolygons : public CqSurface
 			ADDREF( m_pPoints );
 			m_PointCounts.resize( NumPolys );
 			TqInt i,vindex=0;
+			m_sumnVerts = 0;
 			for( i = 0; i < NumPolys; i++ )
 			{
+				m_sumnVerts += nverts[ i ];
 				m_PointCounts[i] = nverts[i];
 				TqInt polyvertex;
 				for( polyvertex = 0; polyvertex < nverts[i]; polyvertex++ )
@@ -667,12 +688,204 @@ class CqSurfacePointsPolygons : public CqSurface
 		}
 		virtual	TqUint	cFaceVarying() const
 		{
-			/// \todo Must work out what this value should be.
-			return ( 1 );
+			return ( m_sumnVerts );
+		}
+
+		virtual void AddPrimitiveVariable( CqParameter* pParam )
+		{
+			assert( NULL != m_pPoints );
+			m_pPoints->AddPrimitiveVariable( pParam );
+		}
+
+		/** Get a reference the to P default parameter.
+		 */
+		CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>* P()
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->P( ) );
+		}
+		/** Get a reference the to N default parameter.
+		 */
+		CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* N()
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->N( ) );
+		}
+		/** Get a reference the to Cq default parameter.
+		 */
+		CqParameterTypedVarying<CqColor, type_color, CqColor>* Cs()
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->Cs( ) );
+		}
+		/** Get a reference the to Os default parameter.
+		 */
+		CqParameterTypedVarying<CqColor, type_color, CqColor>* Os()
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->Os( ) );
+		}
+		/** Get a reference the to s default parameter.
+		 */
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* s()
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->s( ) );
+		}
+		/** Get a reference the to t default parameter.
+		 */
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* t()
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->t( ) );
+		}
+		/** Get a reference the to u default parameter.
+		 */
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* u()
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->u( ) );
+		}
+		/** Get a reference the to v default parameter.
+		 */
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* v()
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->v( ) );
+		}
+
+		/** Get a reference the to P default parameter.
+		 */
+		const	CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>* P() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->P( ) );
+		}
+		/** Get a reference the to N default parameter.
+		 */
+		const	CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* N() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->N( ) );
+		}
+		/** Get a reference the to Cq default parameter.
+		 */
+		const	CqParameterTypedVarying<CqColor, type_color, CqColor>* Cs() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->Cs( ) );
+		}
+		/** Get a reference the to Os default parameter.
+		 */
+		const	CqParameterTypedVarying<CqColor, type_color, CqColor>* Os() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->Os( ) );
+		}
+		/** Get a reference the to s default parameter.
+		 */
+		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* s() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->s( ) );
+		}
+		/** Get a reference the to t default parameter.
+		 */
+		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* t() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->t( ) );
+		}
+		/** Get a reference the to u default parameter.
+		 */
+		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* u() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->u( ) );
+		}
+		/** Get a reference the to v default parameter.
+		 */
+		const	CqParameterTypedVarying<TqFloat, type_float, TqFloat>* v() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->v( ) );
+		}
+
+		/** Determine whether this surface has per vertex normals.
+		 */
+		const	TqBool	bHasN() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->bHasN( ) );
+		}
+		/** Determine whether this surface has per vertex colors.
+		 */
+		const	TqBool	bHasCs() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->bHasCs( ) );
+		}
+		/** Determine whether this surface has per vertex opacities.
+		 */
+		const	TqBool	bHasOs() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->bHasOs( ) );
+		}
+		/** Determine whether this surface has per vertex s cordinates.
+		 */
+		const	TqBool	bHass() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->bHass( ) );
+		}
+		/** Determine whether this surface has per vertex t coordinates.
+		 */
+		const	TqBool	bHast() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->bHast( ) );
+		}
+		/** Determine whether this surface has per vertex u coordinates.
+		 */
+		const	TqBool	bHasu() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->bHasu( ) );
+		}
+		/** Determine whether this surface has per vertex v coordinates.
+		 */
+		const	TqBool	bHasv() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->bHasv( ) );
+		}
+
+		/** Get a reference to the user parameter variables array
+		 */
+		const std::vector<CqParameter*>& aUserParams() const
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->aUserParams( ) );
+		}
+
+		/** Get a reference to the user parameter variables array
+		 */
+		std::vector<CqParameter*>& aUserParams()
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->aUserParams( ) );
+		}
+
+		CqParameter* FindUserParam( const char* strName )
+		{
+			assert( NULL != m_pPoints );
+			return( m_pPoints->FindUserParam( strName ) );
 		}
 
 	private:
 		TqInt	m_NumPolys;
+		TqInt	m_sumnVerts;
 		CqPolygonPoints*	m_pPoints;		///< Pointer to the associated CqPolygonPoints class.
 		std::vector<TqInt>	m_PointCounts;
 		std::vector<TqInt>	m_PointIndices;

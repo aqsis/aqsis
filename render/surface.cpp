@@ -487,11 +487,23 @@ CqMicroPolyGridBase* CqSurface::Dice()
 			pGrid->Os() ->SetColor( CqColor( 1, 1, 1 ) );
 	}
 
-	if ( !isDONE( lDone, EnvVars_s ) && USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && bHass() )
-		s() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->s(), this );
+	if ( !isDONE( lDone, EnvVars_s ) && USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) )
+	{
+		CqParameter* pParam;
+		if( ( pParam = FindUserParam("st") ) != NULL )
+			pParam ->DiceOne( m_uDiceSize, m_vDiceSize, pGrid->s(), this, 0 );
+		else if( bHass() )
+			s() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->s(), this );
+	}
 
-	if ( !isDONE( lDone, EnvVars_t ) && USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && bHast() )
-		t() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->t(), this );
+	if ( !isDONE( lDone, EnvVars_t ) && USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) )
+	{
+		CqParameter* pParam;
+		if( ( pParam = FindUserParam("st") ) != NULL )
+			pParam ->DiceOne( m_uDiceSize, m_vDiceSize, pGrid->t(), this, 1 );
+		else if( bHast() )
+			t() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->t(), this );
+	}
 
 	if ( !isDONE( lDone, EnvVars_u ) && USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && bHasu() )
 		u() ->Dice( m_uDiceSize, m_vDiceSize, pGrid->u(), this );
@@ -677,6 +689,24 @@ void	CqSurface::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const
 		}
 	}
 }
+
+
+
+/** Find out if a named user parameter exists on this surface.
+ */
+CqParameter* CqSurface::FindUserParam( const char* name )
+{
+	CqString strName( name );
+	std::vector<CqParameter*>::iterator iUP;
+	std::vector<CqParameter*>::iterator end = m_aUserParams.end();
+	for ( iUP = m_aUserParams.begin(); iUP != end ; iUP++ )
+	{
+		if( ( *iUP )->strName() == strName )
+			return( *iUP );
+	}
+	return( NULL );
+}
+
 
 //---------------------------------------------------------------------
 
