@@ -125,6 +125,7 @@ public:
     }
 
     static	TqBool	FindVariable( const char* strName, SqVarRef& Ref );
+    static	TqBool	FindStandardVariable( const char* strName, SqVarRef& Ref );
     static	CqVarDef*	GetVariablePtr( const SqVarRef& Ref );
     static	TqInt	AddVariable( CqVarDef& Def );
 

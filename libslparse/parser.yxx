@@ -623,6 +623,11 @@ variable_definitions
 											i++;
 										}
 									}
+									if(!fve)
+									{
+										// If not found in the namespaces defined in the code, check the global namespace.
+										fve=CqVarDef::FindStandardVariable(pDecl->strName(), varExtern);
+									}
 
 									// If we found a candidate...
 									if(fve && fvl)

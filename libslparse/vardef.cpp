@@ -143,6 +143,29 @@ TqBool CqVarDef::FindVariable( const char* strName, SqVarRef& Ref )
 }
 
 
+
+///---------------------------------------------------------------------
+/// CqVarDef::FindStandardVariable
+/// Find a variable definition by searching the standard definitions list.
+
+TqBool CqVarDef::FindStandardVariable( const char* strName, SqVarRef& Ref )
+{
+    // Search the standard definitions only.
+    TqInt i;
+	for ( i = 0; i < gcStandardVars; i++ )
+    {
+        if ( gStandardVars[ i ].m_strName == strName )
+        {
+            Ref.m_Type = VarTypeStandard;
+            Ref.m_Index = i;
+            return ( TqTrue );
+        }
+    }
+
+    return ( TqFalse );
+}
+
+
 ///---------------------------------------------------------------------
 /// CqVarDef::GetVariablePointer
 /// Return a temporary pointer to a variable definition..
