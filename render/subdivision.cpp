@@ -86,8 +86,7 @@ TqBool CqWEdge::IsValid()
 /** Create a new WVertex for this edge taking into account its sharpness, and that of its neighbours.
  */
 
-CqWVert* CqWEdge::CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pPoints, CqWVert* pV, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-                                        TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os )
+CqWVert* CqWEdge::CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pPoints, CqWVert* pV )
 {
 	TqUint index = pV->iVertex();
 	m_pvSubdivide = pV;
@@ -169,8 +168,7 @@ void CqWEdge::Subdivide( CqSubdivider* pSurf )
 /** Create a new WVertex as the centroid of this face.
  */
 
-CqWVert* CqWFace::CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pPoints, CqWVert* pV, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-                                        TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os )
+CqWVert* CqWFace::CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pPoints, CqWVert* pV )
 {
 	TqUint index = pV->iVertex();
 	m_pvSubdivide = pV;
@@ -341,15 +339,6 @@ void CqSubdivider::Subdivide()
 	static CqVector3D vecT;
 
 	TqInt lUses = Uses();
-	TqBool uses_s = USES( lUses, EnvVars_s );
-	TqBool uses_t = USES( lUses, EnvVars_t );
-	TqBool uses_Cs = USES( lUses, EnvVars_Cs );
-	TqBool uses_Os = USES( lUses, EnvVars_Os );
-
-	TqBool has_s = bHass();
-	TqBool has_t = bHast();
-	TqBool has_Cs = bHasCs();
-	TqBool has_Os = bHasOs();
 
 	// Create an array big enough to hold all the additional points to be created.
 	TqInt newcVerts = cVerts();
@@ -367,11 +356,11 @@ void CqSubdivider::Subdivide()
 	TqInt ieT = cEdges();
 
 	// Create face points.
-	CreateFacePoints( index, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+	CreateFacePoints( index );
 	// Create edge points.
-	CreateEdgePoints( index, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+	CreateEdgePoints( index );
 	// Smooth vertex points
-	SmoothVertexPoints( oldcVerts, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+	SmoothVertexPoints( oldcVerts );
 
 	// Create new edges.
 	for ( i = 0; i < ieT; i++ )
@@ -461,20 +450,6 @@ void CqSubdivider::DiceSubdivide()
 	static CqVector3D vecT;
 
 	TqInt lUses = Uses();
-	TqBool uses_s = USES( lUses, EnvVars_s );
-	TqBool uses_t = USES( lUses, EnvVars_t );
-	TqBool uses_Cs = USES( lUses, EnvVars_Cs );
-	TqBool uses_Os = USES( lUses, EnvVars_Os );
-
-	TqBool has_s = bHass();
-	TqBool has_t = bHast();
-	TqBool has_Cs = bHasCs();
-	TqBool has_Os = bHasOs();
-
-	// NOTE: Not entirely happy about this method, would prefer a more efficient approach!
-	// Must create this array here, to ensure we only store the old points, not the subdivided ones.
-	std::vector<CqVector3D> aVertices;
-	aVertices.resize( cVerts() );
 
 	// Create an array big enough to hold all the additional points to be created.
 	TqInt newcVerts = cVerts();
@@ -493,11 +468,11 @@ void CqSubdivider::DiceSubdivide()
 	TqInt ieT = cEdges();
 
 	// Create face points.
-	CreateFacePoints( index, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+	CreateFacePoints( index );
 	// Create edge points.
-	CreateEdgePoints( index, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+	CreateEdgePoints( index );
 	// Smooth vertex points
-	SmoothVertexPoints( oldcVerts, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+	SmoothVertexPoints( oldcVerts );
 
 
 	// Create new edges.
@@ -693,9 +668,7 @@ void StoreDiceAPVar( IqShader* pShader, CqParameter* pParam, TqUint ivA, TqUint 
 
 
 void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoints,
-                              TqInt uOff, TqInt vOff, TqInt cuv, CqMicroPolyGrid* pGrid,
-                              TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-                              TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os )
+                              TqInt uOff, TqInt vOff, TqInt cuv, CqMicroPolyGrid* pGrid )
 {
 	CqWFace * pF;
 	CqWReference rE;
@@ -705,8 +678,10 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 	TqUint indexC = ( ( vOff + 1 ) * cuv ) + uOff + 1;
 	TqUint indexD = ( ( vOff + 1 ) * cuv ) + uOff;
 
+	TqInt lUses = Uses();
+
 	if ( Level > 1 )
-		StoreDice( Level - 1, iFace, pPoints, uOff, vOff, cuv, pGrid, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+		StoreDice( Level - 1, iFace, pPoints, uOff, vOff, cuv, pGrid );
 	else
 	{
 		pF = pFace( iFace++ );
@@ -723,6 +698,39 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 			pGrid->P()->SetPoint( (*pPoints->P())[ ivC ], indexC );
 			pGrid->P()->SetPoint( (*pPoints->P())[ ivD ], indexD );
 		}
+
+		if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && bHass() ) 
+		{
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivA ], indexA );
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivB ], indexB );
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivC ], indexC );
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivD ], indexD );
+		}
+
+		if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && bHast() ) 
+		{
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivA ], indexA );
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivB ], indexB );
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivC ], indexC );
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivD ], indexD );
+		}
+
+		if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && bHasu() ) 
+		{
+			pGrid->u()->SetFloat( (*pPoints->u())[ ivA ], indexA );
+			pGrid->u()->SetFloat( (*pPoints->u())[ ivB ], indexB );
+			pGrid->u()->SetFloat( (*pPoints->u())[ ivC ], indexC );
+			pGrid->u()->SetFloat( (*pPoints->u())[ ivD ], indexD );
+		}
+
+		if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && bHasv() ) 
+		{
+			pGrid->v()->SetFloat( (*pPoints->v())[ ivA ], indexA );
+			pGrid->v()->SetFloat( (*pPoints->v())[ ivB ], indexB );
+			pGrid->v()->SetFloat( (*pPoints->v())[ ivC ], indexC );
+			pGrid->v()->SetFloat( (*pPoints->v())[ ivD ], indexD );
+		}
+
 
 		// Now lets store the diced user specified primitive variables.
 		std::vector<CqParameter*>::iterator iUP;
@@ -759,7 +767,7 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 	indexB = ( ( vOff ) * cuv ) + uOff + 1;
 	indexC = ( ( vOff + 1 ) * cuv ) + uOff + 1;
 	if ( Level > 1 )
-		StoreDice( Level - 1, iFace, pPoints, uOff, vOff, cuv, pGrid, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+		StoreDice( Level - 1, iFace, pPoints, uOff, vOff, cuv, pGrid );
 	else
 	{
 		pF = pFace( iFace++ );
@@ -771,6 +779,30 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		{
 			pGrid->P()->SetPoint( (*pPoints->P())[ ivB ], indexB );
 			pGrid->P()->SetPoint( (*pPoints->P())[ ivC ], indexC );
+		}
+
+		if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && bHass() ) 
+		{
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivB ], indexB );
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivC ], indexC );
+		}
+
+		if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && bHast() ) 
+		{
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivB ], indexB );
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivC ], indexC );
+		}
+
+		if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && bHasu() ) 
+		{
+			pGrid->u()->SetFloat( (*pPoints->u())[ ivB ], indexB );
+			pGrid->u()->SetFloat( (*pPoints->u())[ ivC ], indexC );
+		}
+
+		if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && bHasv() ) 
+		{
+			pGrid->v()->SetFloat( (*pPoints->v())[ ivB ], indexB );
+			pGrid->v()->SetFloat( (*pPoints->v())[ ivC ], indexC );
 		}
 
 		// Now lets store the diced user specified primitive variables.
@@ -802,7 +834,7 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 	indexC = ( ( vOff + 1 ) * cuv ) + uOff + 1;
 	indexD = ( ( vOff + 1 ) * cuv ) + uOff;
 	if ( Level > 1 )
-		StoreDice( Level - 1, iFace, pPoints, uOff, vOff, cuv, pGrid, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+		StoreDice( Level - 1, iFace, pPoints, uOff, vOff, cuv, pGrid );
 	else
 	{
 		pF = pFace( iFace++ );
@@ -814,6 +846,30 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 		{
 			pGrid->P()->SetPoint( (*pPoints->P())[ ivC ], indexC );
 			pGrid->P()->SetPoint( (*pPoints->P())[ ivD ], indexD );
+		}
+
+		if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && bHass() ) 
+		{
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivC ], indexC );
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivD ], indexD );
+		}
+
+		if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && bHast() ) 
+		{
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivC ], indexC );
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivD ], indexD );
+		}
+
+		if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && bHasu() ) 
+		{
+			pGrid->u()->SetFloat( (*pPoints->u())[ ivC ], indexC );
+			pGrid->u()->SetFloat( (*pPoints->u())[ ivD ], indexD );
+		}
+
+		if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && bHasv() ) 
+		{
+			pGrid->v()->SetFloat( (*pPoints->v())[ ivC ], indexC );
+			pGrid->v()->SetFloat( (*pPoints->v())[ ivD ], indexD );
 		}
 
 		// Now lets store the diced user specified primitive variables.
@@ -844,7 +900,7 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 	uOff -= 1 << ( Level - 1 );
 	indexD = ( ( vOff + 1 ) * cuv ) + uOff;
 	if ( Level > 1 )
-		StoreDice( Level - 1, iFace, pPoints, uOff, vOff, cuv, pGrid, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+		StoreDice( Level - 1, iFace, pPoints, uOff, vOff, cuv, pGrid );
 	else
 	{
 		pF = pFace( iFace++ );
@@ -853,6 +909,18 @@ void CqSubdivider::StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoint
 
 		if( USES( Uses(), EnvVars_P ) )
 			pGrid->P()->SetPoint( (*pPoints->P())[ ivD ], indexD );
+
+		if ( USES( lUses, EnvVars_s ) && ( NULL != pGrid->s() ) && bHass() ) 
+			pGrid->s()->SetFloat( (*pPoints->s())[ ivD ], indexD );
+
+		if ( USES( lUses, EnvVars_t ) && ( NULL != pGrid->t() ) && bHast() ) 
+			pGrid->t()->SetFloat( (*pPoints->t())[ ivD ], indexD );
+
+		if ( USES( lUses, EnvVars_u ) && ( NULL != pGrid->u() ) && bHasu() ) 
+			pGrid->u()->SetFloat( (*pPoints->u())[ ivD ], indexD );
+
+		if ( USES( lUses, EnvVars_v ) && ( NULL != pGrid->v() ) && bHasv() ) 
+			pGrid->v()->SetFloat( (*pPoints->v())[ ivD ], indexD );
 
 		// Now lets store the diced user specified primitive variables.
 		std::vector<CqParameter*>::iterator iUP;
@@ -890,7 +958,7 @@ CqWSurf::~CqWSurf()
 /** Create the midpoint vertices for all facets on this mesh.
  */
 
-void CqWSurf::CreateFacePoints( TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os )
+void CqWSurf::CreateFacePoints( TqInt& iStartIndex )
 {
 	// Create face points.
 	TqInt i;
@@ -898,7 +966,7 @@ void CqWSurf::CreateFacePoints( TqInt& iStartIndex, TqBool uses_s, TqBool uses_t
 	{
 		CqWVert* pV = new CqWVert( iStartIndex++ );
 		AddVert( pV );
-		pFace( i ) ->CreateSubdividePoint( this, m_pPoints, pV, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+		pFace( i ) ->CreateSubdividePoint( this, m_pPoints, pV );
 	}
 }
 
@@ -907,7 +975,7 @@ void CqWSurf::CreateFacePoints( TqInt& iStartIndex, TqBool uses_s, TqBool uses_t
 /** Create the midpoint vertices for all edges on this mesh.
  */
 
-void CqWSurf::CreateEdgePoints( TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os )
+void CqWSurf::CreateEdgePoints( TqInt& iStartIndex )
 {
 	// Create edge points.
 	TqInt i;
@@ -915,7 +983,7 @@ void CqWSurf::CreateEdgePoints( TqInt& iStartIndex, TqBool uses_s, TqBool uses_t
 	{
 		CqWVert* pV = new CqWVert( iStartIndex++ );
 		AddVert( pV );
-		pEdge( i ) ->CreateSubdividePoint( this, m_pPoints, pV, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+		pEdge( i ) ->CreateSubdividePoint( this, m_pPoints, pV );
 	}
 }
 
@@ -940,8 +1008,7 @@ struct SqVData
 #pragma CC_OPT_OFF
 #endif
 
-void CqWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-                                  TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os )
+void CqWSurf::SmoothVertexPoints( TqInt oldcVerts )
 {
 	static CqVector3D vecT;
 	static TqFloat fT;
@@ -1038,13 +1105,14 @@ TqInt CqWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	if ( !m_fSubdivided )
 	{
-		Subdivide();
+		//Subdivide();
 		cE = cFaces();
+		m_fSubdivided = TqTrue;
 
 		int i;
 		for ( i = 0; i < cE; i++ )
 		{
-			CqWSurf* pNew = new CqWSurf( this, i );
+			CqBasicSurface* pNew = ExtractFace( i );
 			pNew->AddRef();
 			pNew->SetSurfaceParameters( *m_pPoints );
 			pNew->m_fDiceable = TqTrue;
@@ -1056,26 +1124,68 @@ TqInt CqWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 	{
 		cE = m_apFaces[ 0 ] ->cEdges();
 
-		_OutputMesh( "subdiv1.raw" );
 		Subdivide();
-		_OutputMesh( "subdiv1.raw" );
+		m_fSubdivided = TqTrue;
 
 		int i;
 		for ( i = 0; i < cE; i++ )
 		{
-			CqWSurf* pNew = new CqWSurf( this, i );
+			CqBasicSurface* pNew = ExtractFace( i );
 			pNew->AddRef();
 			pNew->SetSurfaceParameters( *m_pPoints );
 			pNew->m_fDiceable = TqTrue;
 			pNew->m_EyeSplitCount = m_EyeSplitCount;
 			aSplits.push_back( pNew );
-			pNew->_OutputMesh( "subdiv1.raw" );
 		}
 	}
 
 	return ( cE );
 }
 
+
+CqBasicSurface* CqWSurf::ExtractFace( TqInt index)
+{
+	CqWFace* pThisFace = pFace( index );
+
+//	if( pThisFace->cEdges() == 4 &&
+//		pThisFace->pEdge(0)->pvHead()->cEdges() == 4 &&
+//		pThisFace->pEdge(1)->pvHead()->cEdges() == 4 &&
+//		pThisFace->pEdge(2)->pvHead()->cEdges() == 4 &&
+//		pThisFace->pEdge(3)->pvHead()->cEdges() == 4 )
+//	{
+		// This is a pure quad based face, so just extract it as a b-spline mesh
+//	}
+//	else
+	{
+		CqWSurf* pNew = new CqWSurf(this, index);
+
+		TqInt MyUses = Uses();
+
+		// If the shaders need u/v or s/t and they are not specified, then we need to put them in as defaults.
+		if( USES( MyUses, EnvVars_u ) && !bHasu() )
+		{
+			pNew->pPoints()->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
+			pNew->pPoints()->u()->SetSize(4);
+			pNew->pPoints()->u()->pValue( 0 )[0] = 0.0f;
+			pNew->pPoints()->u()->pValue( 1 )[0] = 1.0f;
+			pNew->pPoints()->u()->pValue( 2 )[0] = 0.0f;
+			pNew->pPoints()->u()->pValue( 3 )[0] = 1.0f;
+		}
+
+		// If the shaders need u/v or s/t and they are not specified, then we need to put them in as defaults.
+		if( USES( MyUses, EnvVars_v ) && !bHasv() )
+		{
+			pNew->pPoints()->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
+			pNew->pPoints()->v()->SetSize(4);
+			pNew->pPoints()->v()->pValue( 0 )[0] = 0.0f;
+			pNew->pPoints()->v()->pValue( 1 )[0] = 0.0f;
+			pNew->pPoints()->v()->pValue( 2 )[0] = 1.0f;
+			pNew->pPoints()->v()->pValue( 3 )[0] = 1.0f;
+		}
+
+		return( pNew );
+	}
+}
 
 //---------------------------------------------------------------------
 /** Create a new C4D polygonobject from this winged edge surface.
@@ -1400,7 +1510,7 @@ void CqWReference::SetpeHeadHeadRight( CqWEdge* pe )
 
 CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
 {
-	m_fSubdivided = TqTrue;
+	m_fSubdivided = pSurf->m_fSubdivided;
 
 	InterpolateBoundary( pSurf->bInterpolateBoundary() );
 
@@ -1411,15 +1521,6 @@ CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
 	pPointsClass->AddRef();
 
 	TqInt lUses = pSurf->Uses();
-	TqBool uses_s = USES( lUses, EnvVars_s );
-	TqBool uses_t = USES( lUses, EnvVars_t );
-	TqBool uses_Cs = USES( lUses, EnvVars_Cs );
-	TqBool uses_Os = USES( lUses, EnvVars_Os );
-
-	TqBool has_s = pSurf->bHass();
-	TqBool has_t = pSurf->bHast();
-	TqBool has_Cs = pSurf->bHasCs();
-	TqBool has_Os = pSurf->bHasOs();
 
 	// Copy the donor face and all of its neghbours into our local face storage.
 	CqWFace* pF = pSurf->pFace( iFace );
@@ -1440,8 +1541,8 @@ CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
 	apEdges.resize( pF->cEdges() );
 	for ( i = 0; i < pF->cEdges(); i++ )
 	{
-		CqWVert* pvA = TransferVert( pSurf, rEdge.pvHead() ->iVertex(), uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
-		CqWVert* pvB = TransferVert( pSurf, rEdge.pvTail() ->iVertex(), uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+		CqWVert* pvA = TransferVert( pSurf, rEdge.pvHead() ->iVertex() );
+		CqWVert* pvB = TransferVert( pSurf, rEdge.pvTail() ->iVertex() );
 
 		apEdges[ i ] = AddEdge( pvA, pvB );
 		apEdges[ i ] ->SetSharpness( rEdge.peCurrent() ->Sharpness() );
@@ -1473,8 +1574,8 @@ CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
 					TqInt e;
 					for ( e = 0; e < pF2->cEdges(); e++ )
 					{
-						CqWVert* pvA = TransferVert( pSurf, rEdge2.pvHead() ->iVertex(), uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
-						CqWVert* pvB = TransferVert( pSurf, rEdge2.pvTail() ->iVertex(), uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+						CqWVert* pvA = TransferVert( pSurf, rEdge2.pvHead() ->iVertex() );
+						CqWVert* pvB = TransferVert( pSurf, rEdge2.pvTail() ->iVertex() );
 
 						apEdges[ e ] = AddEdge( pvA, pvB );
 						apEdges[ e ] ->SetSharpness( rEdge2.peCurrent() ->Sharpness() );
@@ -1496,8 +1597,7 @@ CqWSurf::CqWSurf( CqWSurf* pSurf, TqInt iFace )
 /** Transfer vertex information between surfaces.
  */
 
-CqWVert* CqWSurf::TransferVert( CqWSurf* pSurf, TqInt iVert, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-                                TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os )
+CqWVert* CqWSurf::TransferVert( CqWSurf* pSurf, TqInt iVert )
 {
 	CqWVert * pNew = GetpWVert( m_pPoints, (*pSurf->pPoints() ->P()) [ iVert ] );
 	TqUint iV = pNew->iVertex();
@@ -1506,6 +1606,7 @@ CqWVert* CqWSurf::TransferVert( CqWSurf* pSurf, TqInt iVert, TqBool uses_s, TqBo
 	for( iUP = pSurf->pPoints()->aUserParams().begin(), iTUP = m_pPoints->aUserParams().begin(); iUP != pSurf->pPoints()->aUserParams().end(); iUP++, iTUP++ )
 	{
 		if ( (*iTUP)->Size() <= iV ) (*iTUP)->SetSize( iV + 1 );
+		CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pTT = static_cast<CqParameterTypedVarying<TqFloat, type_float, TqFloat>*>((*iUP));
 		(*iTUP)->SetValue( (*iUP), iV, iVert );
 	}
 
@@ -1634,22 +1735,13 @@ CqMicroPolyGridBase* CqWSurf::Dice()
 	CqMicroPolyGrid* pGrid = new CqMicroPolyGrid( cuv, cuv, m_pPoints );
 
 	TqInt lUses = Uses();
-	TqBool uses_s = USES( lUses, EnvVars_s );
-	TqBool uses_t = USES( lUses, EnvVars_t );
-	TqBool uses_Cs = USES( lUses, EnvVars_Cs );
-	TqBool uses_Os = USES( lUses, EnvVars_Os );
-
-	TqBool has_s = bHass();
-	TqBool has_t = bHast();
-	TqBool has_Cs = bHasCs();
-	TqBool has_Os = bHasOs();
 
 	// Dice the primitive variables.
 
 	DiceSubdivide( m_DiceCount );
 
 	TqInt iFace = 0;
-	StoreDice( m_DiceCount, iFace, m_pPoints, 0, 0, cuv + 1, pGrid, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+	StoreDice( m_DiceCount, iFace, m_pPoints, 0, 0, cuv + 1, pGrid );
 
 	// If the color and opacity are not defined, use the system values.
 	if ( USES( lUses, EnvVars_Cs ) && !bHasCs() ) 
@@ -1688,6 +1780,22 @@ CqMicroPolyGridBase* CqWSurf::Dice()
 
 
 //---------------------------------------------------------------------
+/** Destructor
+ */
+
+CqMotionWSurf::~CqMotionWSurf()
+{
+	TqInt i;
+	for ( i = 0; i < cTimes(); i++ )
+	{
+		CqPolygonPoints* pPts;
+		if( NULL != ( pPts = GetMotionObject( Time( i ) ) ) )
+			pPts->Release();
+	}
+}
+
+
+//---------------------------------------------------------------------
 /** Get the bound of this GPrim.
  */
 
@@ -1718,14 +1826,14 @@ TqInt CqMotionWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	if ( !m_fSubdivided )
 	{
-		Subdivide();
-
+		//Subdivide();
 		cE = cFaces();
+		m_fSubdivided = TqTrue;
 
 		int i;
 		for ( i = 0; i < cE; i++ )
 		{
-			CqMotionWSurf* pNew = new CqMotionWSurf( this, i );
+			CqBasicSurface* pNew = ExtractFace( i );
 			pNew->AddRef();
 			pNew->SetSurfaceParameters( *GetMotionObject( Time( 0 ) ) );
 			pNew->m_fDiceable = TqTrue;
@@ -1742,7 +1850,7 @@ TqInt CqMotionWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 		int i;
 		for ( i = 0; i < cE; i++ )
 		{
-			CqMotionWSurf* pNew = new CqMotionWSurf( this, i );
+			CqBasicSurface* pNew = ExtractFace( i );
 			pNew->AddRef();
 			pNew->SetSurfaceParameters( *GetMotionObject( Time( 0 ) ) );
 			pNew->m_fDiceable = TqTrue;
@@ -1752,6 +1860,57 @@ TqInt CqMotionWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 	}
 
 	return ( cE );
+}
+
+
+CqBasicSurface* CqMotionWSurf::ExtractFace( TqInt index)
+{
+	CqWFace* pThisFace = pFace( index );
+
+//	if( pThisFace->cEdges() == 4 &&
+//		pThisFace->pEdge(0)->pvHead()->cEdges() == 4 &&
+//		pThisFace->pEdge(1)->pvHead()->cEdges() == 4 &&
+//		pThisFace->pEdge(2)->pvHead()->cEdges() == 4 &&
+//		pThisFace->pEdge(3)->pvHead()->cEdges() == 4 )
+//	{
+		// This is a pure quad based face, so just extract it as a b-spline mesh
+//	}
+//	else
+	{
+		CqMotionWSurf* pNew = new CqMotionWSurf(this, index);
+
+		TqInt MyUses = Uses();
+
+		TqInt i;
+		for( i = 0; i < pNew->cTimes(); i++ )
+		{
+			CqPolygonPoints* pPoints = pNew->GetMotionObject( pNew->Time( i ) );
+
+			// If the shaders need u/v or s/t and they are not specified, then we need to put them in as defaults.
+			if( USES( MyUses, EnvVars_u ) && !bHasu() )
+			{
+				pPoints->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
+				pPoints->u()->SetSize(4);
+				pPoints->u()->pValue( 0 )[0] = 0.0f;
+				pPoints->u()->pValue( 1 )[0] = 1.0f;
+				pPoints->u()->pValue( 2 )[0] = 0.0f;
+				pPoints->u()->pValue( 3 )[0] = 1.0f;
+			}
+
+			// If the shaders need u/v or s/t and they are not specified, then we need to put them in as defaults.
+			if( USES( MyUses, EnvVars_v ) && !bHasv() )
+			{
+				pPoints->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
+				pPoints->v()->SetSize(4);
+				pPoints->v()->pValue( 0 )[0] = 0.0f;
+				pPoints->v()->pValue( 1 )[0] = 0.0f;
+				pPoints->v()->pValue( 2 )[0] = 1.0f;
+				pPoints->v()->pValue( 3 )[0] = 1.0f;
+			}
+		}
+
+		return( pNew );
+	}
 }
 
 
@@ -1768,6 +1927,8 @@ TqInt CqMotionWSurf::Split( std::vector<CqBasicSurface*>& aSplits )
 
 TqBool CqMotionWSurf::Diceable()
 {
+	if( !m_fSubdivided )	return( TqFalse );
+	
 	// Fail if not a quad patch
 	TqInt iF;
 	for ( iF = 0; iF < cFaces(); iF++ )
@@ -1826,15 +1987,6 @@ CqMicroPolyGridBase* CqMotionWSurf::Dice()
 	TqInt cuv = ( 1 << m_DiceCount );
 
 	TqInt lUses = Uses();
-	TqBool uses_s = USES( lUses, EnvVars_s );
-	TqBool uses_t = USES( lUses, EnvVars_t );
-	TqBool uses_Cs = USES( lUses, EnvVars_Cs );
-	TqBool uses_Os = USES( lUses, EnvVars_Os );
-
-	TqBool has_s = bHass();
-	TqBool has_t = bHast();
-	TqBool has_Cs = bHasCs();
-	TqBool has_Os = bHasOs();
 
 	// Dice Subdivide at all time slots.
 	DiceSubdivide( m_DiceCount );
@@ -1864,7 +2016,7 @@ CqMicroPolyGridBase* CqMotionWSurf::Dice()
 		}
 
 		TqInt iFace = 0;
-		StoreDice( m_DiceCount, iFace, pPoints, 0, 0, cuv + 1, pGrid2, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+		StoreDice( m_DiceCount, iFace, pPoints, 0, 0, cuv + 1, pGrid2 );
 		pGrid->AddTimeSlot( Time( i ), pGrid2 );
 	}
 	return ( pGrid );
@@ -1875,7 +2027,7 @@ CqMicroPolyGridBase* CqMotionWSurf::Dice()
 /** Create the midpoint vertices for all facets on this mesh.
  */
 
-void CqMotionWSurf::CreateFacePoints( TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os )
+void CqMotionWSurf::CreateFacePoints( TqInt& iStartIndex )
 {
 	// Create face points.
 	TqInt i;
@@ -1886,7 +2038,7 @@ void CqMotionWSurf::CreateFacePoints( TqInt& iStartIndex, TqBool uses_s, TqBool 
 
 		TqInt j;
 		for ( j = 0; j < cTimes(); j++ )
-			pFace( i ) ->CreateSubdividePoint( this, GetMotionObject( Time( j ) ), pV, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+			pFace( i ) ->CreateSubdividePoint( this, GetMotionObject( Time( j ) ), pV );
 	}
 }
 
@@ -1895,7 +2047,7 @@ void CqMotionWSurf::CreateFacePoints( TqInt& iStartIndex, TqBool uses_s, TqBool 
 /** Create the midpoint vertices for all edges on this mesh.
  */
 
-void CqMotionWSurf::CreateEdgePoints( TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os )
+void CqMotionWSurf::CreateEdgePoints( TqInt& iStartIndex )
 {
 	// Create edge points.
 	TqInt i;
@@ -1905,22 +2057,16 @@ void CqMotionWSurf::CreateEdgePoints( TqInt& iStartIndex, TqBool uses_s, TqBool 
 		AddVert( pV );
 		TqInt j;
 		for ( j = 0; j < cTimes(); j++ )
-			pEdge( i ) ->CreateSubdividePoint( this, GetMotionObject( Time( j ) ), pV, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+			pEdge( i ) ->CreateSubdividePoint( this, GetMotionObject( Time( j ) ), pV );
 	}
 }
 
 
-void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-                                        TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os )
+void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts )
 {
 	static CqVector3D vecT;
 	static TqFloat fT;
 	static CqColor colT;
-
-	// NOTE: Not entirely happy about this method, would prefer a more efficient approach!
-	// Must create this array here, to ensure we only store the old points, not the subdivided ones.
-	std::vector<SqVData> aVertices;
-	aVertices.resize( oldcVerts );
 
 	TqInt iTime;
 
@@ -2004,18 +2150,11 @@ void CqMotionWSurf::SmoothVertexPoints( TqInt oldcVerts, TqBool uses_s, TqBool u
 
 CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec<CqPolygonPoints*>( 0 )
 {
-	m_fSubdivided = TqTrue;
+	m_fSubdivided = pSurf->m_fSubdivided;
+
+	InterpolateBoundary( pSurf->bInterpolateBoundary() );
 
 	TqInt lUses = pSurf->Uses();
-	TqBool uses_s = USES( lUses, EnvVars_s );
-	TqBool uses_t = USES( lUses, EnvVars_t );
-	TqBool uses_Cs = USES( lUses, EnvVars_Cs );
-	TqBool uses_Os = USES( lUses, EnvVars_Os );
-
-	TqBool has_s = pSurf->bHass();
-	TqBool has_t = pSurf->bHast();
-	TqBool has_Cs = pSurf->bHasCs();
-	TqBool has_Os = pSurf->bHasOs();
 
 	// Allocate a new points class for points storage.
 	TqInt i;
@@ -2027,14 +2166,15 @@ CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec
 		AddTimeSlot( pSurf->Time( i ), pPointsClass );
 
 		CqPolygonPoints* pSurfPoints = pSurf->GetMotionObject( pSurf->Time( i ) );
-		pPointsClass->ClonePrimitiveVariables( *pSurfPoints );
 
-//		pPointsClass->AddPrimitiveVariable(new CqParameterTypedVarying<CqVector4D, type_hpoint, CqVector3D>("P") );
-
-//		if( has_s && uses_s )	pPointsClass->AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
-//		if( has_t && uses_t )	pPointsClass->AddPrimitiveVariable(new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
-//		if( has_Cs && uses_Cs )	pPointsClass->AddPrimitiveVariable(new CqParameterTypedVarying<CqColor, type_color, CqColor>("Cs") );
-//		if( has_Os && uses_Os )	pPointsClass->AddPrimitiveVariable(new CqParameterTypedVarying<CqColor, type_color, CqColor>("Os") );
+		// Clone any primitive variables.
+		std::vector<CqParameter*>::const_iterator iUP;
+		for( iUP = pSurfPoints->aUserParams().begin(); iUP != pSurfPoints->aUserParams().end(); iUP++ )
+		{
+			CqParameter* pNewPV = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
+			pNewPV->Clear();
+			pPointsClass->AddPrimitiveVariable( pNewPV );
+		}
 	}
 
 
@@ -2047,8 +2187,8 @@ CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec
 	apEdges.resize( pF->cEdges() );
 	for ( i = 0; i < pF->cEdges(); i++ )
 	{
-		CqWVert* pvA = TransferVert( pSurf, rEdge.pvHead() ->iVertex(), uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
-		CqWVert* pvB = TransferVert( pSurf, rEdge.pvTail() ->iVertex(), uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+		CqWVert* pvA = TransferVert( pSurf, rEdge.pvHead() ->iVertex() );
+		CqWVert* pvB = TransferVert( pSurf, rEdge.pvTail() ->iVertex() );
 
 		apEdges[ i ] = AddEdge( pvA, pvB );
 		apEdges[ i ] ->SetSharpness( rEdge.peCurrent() ->Sharpness() );
@@ -2080,8 +2220,8 @@ CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec
 					TqInt e;
 					for ( e = 0; e < pF2->cEdges(); e++ )
 					{
-						CqWVert* pvA = TransferVert( pSurf, rEdge2.pvHead() ->iVertex(), uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
-						CqWVert* pvB = TransferVert( pSurf, rEdge2.pvTail() ->iVertex(), uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os );
+						CqWVert* pvA = TransferVert( pSurf, rEdge2.pvHead() ->iVertex() );
+						CqWVert* pvB = TransferVert( pSurf, rEdge2.pvTail() ->iVertex() );
 
 						apEdges[ e ] = AddEdge( pvA, pvB );
 						apEdges[ e ] ->SetSharpness( rEdge2.peCurrent() ->Sharpness() );
@@ -2099,8 +2239,7 @@ CqMotionWSurf::CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace ) : CqMotionSpec
 }
 
 
-CqWVert* CqMotionWSurf::TransferVert( CqMotionWSurf* pSurf, TqInt iVert, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-                                      TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os )
+CqWVert* CqMotionWSurf::TransferVert( CqMotionWSurf* pSurf, TqInt iVert )
 {
 	// Check if the point exists, at time 0, if so it should be available at all times.
 	CqWVert * pNew = GetpWVert( GetMotionObject( Time( 0 ) ), (*pSurf->GetMotionObject( Time( 0 ) ) ->P()) [ iVert ] );

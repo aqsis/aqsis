@@ -373,8 +373,7 @@ class CqWFace : public CqPoolable<CqWFace>
 			return ( m_pvSubdivide );
 		}
 
-		CqWVert*	CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pPoints, CqWVert* pV, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-		                               TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os );
+		CqWVert*	CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pPoints, CqWVert* pV );
 
 		/** Perform the subdivision arithmetic on a paramter type.
 		 * \param t Temp of the template type to overcome the VC++ problem with template functions.
@@ -708,8 +707,7 @@ class CqWEdge : public CqPoolable<CqWEdge>
 
 		TqBool	IsBoundary();
 		TqBool	IsValid();
-		CqWVert*	CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pPoints, CqWVert* pV, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-		                               TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os );
+		CqWVert*	CreateSubdividePoint( CqSubdivider* pSurf, CqPolygonPoints* pPoints, CqWVert* pV );
 		void	Subdivide( CqSubdivider* pSurf );
 		/** Get a pointer to the calculated midpoint of this edge.
 		 * \return A CqWVert pointer.
@@ -886,9 +884,7 @@ class CqSubdivider
 			m_DiceCount = c;
 		}
 		void	StoreDice( TqInt Level, TqInt& iFace, CqPolygonPoints* pPoints,
-		                TqInt uOff, TqInt vOff, TqInt cuv, CqMicroPolyGrid* pGrid,
-		                TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-		                TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os );
+		                TqInt uOff, TqInt vOff, TqInt cuv, CqMicroPolyGrid* pGrid );
 
 		/** Get the flag indicating whethe to interpolate two edge vertices as corners.
 		 */
@@ -906,9 +902,9 @@ class CqSubdivider
 
 		virtual	TqInt	Uses() const = 0;
 
-		virtual	void	CreateFacePoints( TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os ) = 0;
-		virtual	void	CreateEdgePoints( TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os ) = 0;
-		virtual	void	SmoothVertexPoints( TqInt cOldVerts, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os ) = 0;
+		virtual	void	CreateFacePoints( TqInt& iStartIndex ) = 0;
+		virtual	void	CreateEdgePoints( TqInt& iStartIndex ) = 0;
+		virtual	void	SmoothVertexPoints( TqInt cOldVerts ) = 0;
 
 		/** Determine whether this surface has per vertex normals.
 		 */
@@ -973,8 +969,7 @@ class CqWSurf : public CqSubdivider, public CqBasicSurface
 			return ( m_pPoints );
 		}
 		void	_OutputMesh( char* pname );
-		CqWVert*	TransferVert( CqWSurf* pSurf, TqInt iVert, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-		                       TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os );
+		CqWVert*	TransferVert( CqWSurf* pSurf, TqInt iVert );
 		CqWVert*	GetpWVert( CqPolygonPoints* pPoints, const CqVector4D& V );
 
 		// Overridden from CqBasicSurface
@@ -1010,9 +1005,9 @@ class CqWSurf : public CqSubdivider, public CqBasicSurface
 			return ( CqBasicSurface::Uses() );
 		}
 
-		virtual	void	CreateFacePoints( TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os );
-		virtual	void	CreateEdgePoints( TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os );
-		virtual	void	SmoothVertexPoints( TqInt cOldVerts, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os );
+		virtual	void	CreateFacePoints( TqInt& iStartIndex );
+		virtual	void	CreateEdgePoints( TqInt& iStartIndex );
+		virtual	void	SmoothVertexPoints( TqInt cOldVerts );
 
 		virtual	TqBool	bHasN() const
 		{
@@ -1042,6 +1037,7 @@ class CqWSurf : public CqSubdivider, public CqBasicSurface
 		{
 			return ( m_pPoints->bHasv() );
 		}
+		CqBasicSurface* ExtractFace( TqInt index);
 
 	protected:
 		CqPolygonPoints*	m_pPoints;			///> Pointer to the CqSurface class with the surface vertices on.
@@ -1070,11 +1066,9 @@ class CqMotionWSurf : public CqSubdivider, public CqBasicSurface, public CqMotio
 				CqMotionSpec<CqPolygonPoints*>( pVertices )
 		{}
 		CqMotionWSurf( CqMotionWSurf* pSurf, TqInt iFace );
-		virtual	~CqMotionWSurf()
-		{}
+		virtual	~CqMotionWSurf();
 
-		CqWVert*	TransferVert( CqMotionWSurf* pSurf, TqInt iVert, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
-		                       TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os );
+		CqWVert*	TransferVert( CqMotionWSurf* pSurf, TqInt iVert );
 		CqWVert*	GetpWVert( CqPolygonPoints* pPoints, const CqVector4D& V );
 
 		// Overridden from CqBasicSurface
@@ -1111,9 +1105,9 @@ class CqMotionWSurf : public CqSubdivider, public CqBasicSurface, public CqMotio
 		{
 			return ( CqBasicSurface::Uses() );
 		}
-		virtual	void	CreateFacePoints( TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os );
-		virtual	void	CreateEdgePoints( TqInt& iStartIndex, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os );
-		virtual	void	SmoothVertexPoints( TqInt cOldVerts, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os, TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os );
+		virtual	void	CreateFacePoints( TqInt& iStartIndex );
+		virtual	void	CreateEdgePoints( TqInt& iStartIndex );
+		virtual	void	SmoothVertexPoints( TqInt cOldVerts );
 
 		virtual	TqBool	bHasN() const
 		{
@@ -1156,6 +1150,7 @@ class CqMotionWSurf : public CqSubdivider, public CqBasicSurface, public CqMotio
 		{
 			return ( A );
 		}
+		CqBasicSurface* ExtractFace( TqInt index);
 };
 
 

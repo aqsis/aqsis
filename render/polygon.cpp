@@ -494,51 +494,6 @@ CqSurfacePolygon& CqSurfacePolygon::operator=( const CqSurfacePolygon& From )
 }
 
 
-
-//---------------------------------------------------------------------
-/** Transfer x,y points to s,t and u,v if required.
- */
-
-void CqSurfacePolygon::TransferDefaultSurfaceParameters()
-{
-	// If the shader needs s/t or u/v, and s/t is not specified, then at this point store the object space x,y coordinates.
-/*	if( NULL == P() )	return;
-	TqInt i;
-	TqInt iUses = PolyUses();
-	if ( USES( iUses, EnvVars_s ) && !bHass() )
-	{
-		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
-		s()->SetSize( NumVertices() );
-		for ( i = 0; i < NumVertices(); i++ )
-			(*s())[ i ] = (*P()) [ i ].x();
-	}
-
-	if ( USES( iUses, EnvVars_t ) && !bHast() )
-	{
-		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
-		t()->SetSize( NumVertices() );
-		for ( i = 0; i < NumVertices(); i++ )
-			(*t())[ i ] = (*P()) [ i ].y();
-	}
-
-	if ( USES( iUses, EnvVars_u ) )
-	{
-		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
-		u()->SetSize( NumVertices() );
-		for ( i = 0; i < NumVertices(); i++ )
-			(*u())[ i ] = (*P()) [ i ].x();
-	}
-
-	if ( USES( iUses, EnvVars_v ) )
-	{
-		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
-		v()->SetSize( NumVertices() );
-		for ( i = 0; i < NumVertices(); i++ )
-			(*v())[ i ] = (*P()) [ i ].y();
-	}*/
-}
-
-
 //---------------------------------------------------------------------
 /** Copy constructor.
  */
@@ -586,50 +541,6 @@ void	CqPolygonPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx,
 	CqSurface::Transform( matTx, matITTx, matRTx );
 
 	m_Transformed = TqTrue;
-}
-
-
-//---------------------------------------------------------------------
-/** Transfer x,y points to s,t and u,v if required.
- */
-
-void CqPolygonPoints::TransferDefaultSurfaceParameters()
-{
-	// If the shader needs s/t or u/v, and s/t is not specified, then at this point store the object space x,y coordinates.
-/*	if( NULL == P() )	return;
-	TqInt i;
-	TqInt iUses = Uses();
-	if ( USES( iUses, EnvVars_s ) && !bHass() )
-	{
-		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
-		s()->SetSize( NumVertices() );
-		for ( i = 0; i < NumVertices(); i++ )
-			(*s())[ i ] = (*P()) [ i ].x();
-	}
-
-	if ( USES( iUses, EnvVars_t ) && !bHast() )
-	{
-		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
-		t()->SetSize( NumVertices() );
-		for ( i = 0; i < NumVertices(); i++ )
-			(*t())[ i ] = (*P()) [ i ].y();
-	}
-
-	if ( USES( iUses, EnvVars_u ) )
-	{
-		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
-		u()->SetSize( NumVertices() );
-		for ( i = 0; i < NumVertices(); i++ )
-			(*u())[ i ] = (*P()) [ i ].x();
-	}
-
-	if ( USES( iUses, EnvVars_v ) )
-	{
-		AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
-		v()->SetSize( NumVertices() );
-		for ( i = 0; i < NumVertices(); i++ )
-			(*v())[ i ] = (*P()) [ i ].y();
-	}*/
 }
 
 

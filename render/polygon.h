@@ -286,8 +286,6 @@ class CqSurfacePolygon : public CqSurface, public CqPolygonBase
 			return ( CqSurface::pTransform() );
 		}
 
-		void	TransferDefaultSurfaceParameters();
-
 	protected:
 		TqInt	m_cVertices;	///< Count of vertices in this polygon.
 }
@@ -364,7 +362,6 @@ class CqPolygonPoints : public CqSurface
 			return ( 1 );
 		}
 
-		void	TransferDefaultSurfaceParameters();
 		/** Get the number of vertices in the list.
 		 */
 		virtual	TqInt	NumVertices() const

@@ -2147,11 +2147,7 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 	if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 	{
 		if ( !pSurface->CheckDegenerate() )
-		{
-			// Check if s/t, u/v are needed and not specified, and if so get them from the object space points.
-			pSurface->TransferDefaultSurfaceParameters();
 			CreateGPrim( pSurface );
-		}
 		else
 		{
 			CqBasicError( ErrorID_InvalidData, Severity_Normal, "Degenerate polygon found" );
@@ -2495,9 +2491,6 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 	// Process any specified primitive variables
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
-		// Check if s/t, u/v are needed and not specified, and if so get them from the object space points.
-		pPointsClass->TransferDefaultSurfaceParameters();
-
 		if ( QGetRenderContext() ->ptransCurrent() ->cTimes() <= 1 )
 		{
 			// Transform the points into "current" space,
@@ -4054,9 +4047,6 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 	// Process any specified primitive variables
 	if ( ProcessPrimitiveVariables( pPointsClass, count, tokens, values ) )
 	{
-		// Check if s/t, u/v are needed and not specified, and if so get them from the object space points.
-		pPointsClass->TransferDefaultSurfaceParameters();
-
 		if ( QGetRenderContext() ->ptransCurrent() ->cTimes() <= 1 )
 		{
 			// Transform the points into camera space for processing,
@@ -4448,7 +4438,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 					TqInt iArrayIndex;
 					for( i = 0; i < cValues; )
 						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pFloatParam->pValue( i )[iArrayIndex] = pValue[ i++ ];
+							pFloatParam->pValue( i )[iArrayIndex] = pValue[ i ];
 				}
 				break;
 
@@ -4524,7 +4514,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 				}
 				break;
 			}
-			pSurface->aUserParams().push_back(pNewParam);
+			pSurface->AddPrimitiveVariable(pNewParam);
 		}
 	}
 
