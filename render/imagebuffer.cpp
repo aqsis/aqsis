@@ -243,6 +243,20 @@ void CqImagePixel::Combine()
 	m_colColor = gColBlack;
 	m_Depth = 0;
 	m_Coverage = 0;
+	TqInt depthfilter = 0;
+
+	const CqString* pstrDepthFilter = QGetRenderContext() ->optCurrent().GetStringOption( "Hider", "depthfilter" );
+
+	if ( NULL != pstrDepthFilter )
+	{
+		if ( !pstrDepthFilter[ 0 ].compare( "midpoint" ) )
+			depthfilter = 1;
+		else if ( !pstrDepthFilter[ 0 ].compare( "max" ) )
+			depthfilter = 2;
+		else if ( !pstrDepthFilter[ 0 ].compare( "average" ) )
+			depthfilter = 3;
+	}
+	
 
 	TqUint samplecount = 0;
 	TqUint numsamples = XSamples() * YSamples();
@@ -311,11 +325,10 @@ void CqImagePixel::Combine()
 		{
 			samples->begin() ->m_colColor = samplecolor;
 			samples->begin() ->m_colOpacity = sampleopacity;
-
-			const CqString* pstrDepthFilter = QGetRenderContext() ->optCurrent().GetStringOption( "Hider", "depthfilter" );
-			if ( NULL != pstrDepthFilter )
+		
+			if ( depthfilter != 0)
 			{
-				if ( !pstrDepthFilter[ 0 ].compare( "midpoint" ) )
+				if ( depthfilter == 1 )
 				{
 					// Use midpoint for depth
 					if ( samples->size() > 1 )
@@ -323,11 +336,11 @@ void CqImagePixel::Combine()
 					else
 						( *samples ) [ 0 ].m_Depth = FLT_MAX;
 				}
-				else if ( !pstrDepthFilter[ 0 ].compare( "max" ) )
+				else if ( depthfilter == 2)
 				{
 					( *samples ) [ 0 ].m_Depth = samples->back().m_Depth;
 				}
-				else if ( !pstrDepthFilter[ 0 ].compare( "average" ) )
+				else if ( depthfilter == 3 )
 				{
 					std::vector<SqImageSample>::iterator sample;
 					TqFloat totDepth = 0.0f;

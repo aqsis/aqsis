@@ -116,17 +116,44 @@ class CqParameter
 		}
 		static  TqLong	hash(const char *strName) 
 		{
-			TqLong retval = 0;
+			TqInt retval = 0;
+                        
 			if (strName) 
 			{
-				TqLong size = strlen(strName);
-				TqLong sum =0;
-				for (TqInt j=0; j < size; j++) sum += strName[j];
-				retval = ((sum << 16)&0xffff0000) | size;
-			}
-			return retval;
-		}
+				TqInt length = strlen(strName); /* < 2^18, or carry can overflow */
+				/* ints are assumed to be 32 bits */
+				TqUshort *sbuf;
+				TqUint hi, lo, hicarry, locarry;
+				TqInt len, remain, i;
 
+				
+				sbuf = (TqUshort *) strName;
+				len = 2*(length / 4);   /* make sure it's even */
+				remain = length % 4;    /* add odd bytes below */
+
+				hi = (retval >> 16);
+				lo = (retval << 16) >> 16;
+				for (i=0; i < len; i+=2) {
+				    hi += sbuf[i];
+				    lo += sbuf[i+1];
+				}
+				if (remain >= 1) hi += strName[2*len] * 0x100;
+				if (remain >= 2) hi += strName[2*len+1];
+				if (remain == 3) lo += strName[2*len+2] * 0x100;
+
+				hicarry = hi >> 16;     /* fold carry bits in */
+				locarry = lo >> 16;
+				while (hicarry || locarry) {
+				    hi = (hi & 0xFFFF) + locarry;
+				    lo = (lo & 0xFFFF) + hicarry;
+				    hicarry = hi >> 16;
+				    locarry = lo >> 16;
+				}
+				retval = (hi << 16) + lo;
+				
+			}
+			return (TqLong) retval;
+		}
 		/** Get the array size.
 		 */
 		TqInt	Count() const

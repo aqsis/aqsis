@@ -82,7 +82,9 @@ void	CqQuadric::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const
 void CqQuadric::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
 {
 	// Special case for "P", else normal bilinear dice for all others.
-	if ( pData->strName().compare( "P" ) == 0 )
+
+	TqLong hash = CqParameter::hash(pData->strName().c_str());
+	if ( hash == CqParameter::hash("P") )
 	{
 		CqVector3D	P;
 		int v, u;
