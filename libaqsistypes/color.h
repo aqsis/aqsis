@@ -41,7 +41,8 @@ START_NAMESPACE( Aqsis )
 
 
 //-----------------------------------------------------------------------
-/** Class to store and manipulate three component color information.
+/** \class CqColor
+ * Class to store and manipulate three component color information.
  */
 
 class _qShareC	CqColor

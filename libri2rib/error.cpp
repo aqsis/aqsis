@@ -25,12 +25,16 @@
 #include <stdlib.h>
 #include "error.h"
 
+/// Storage for the last error number reported.
 RtInt RiLastError;
 
+/// Default implementation of ignore error handler.
 RtVoid RiErrorIgnore( RtInt cd, RtInt sev, const char *msg )
 {}
+/// Default implementation of print error handler.
 RtVoid RiErrorPrint( RtInt cd, RtInt sev, const char *msg )
 {}
+/// Default implementation of abort error handler.
 RtVoid RiErrorAbort( RtInt cd, RtInt sev, const char *msg )
 {}
 

@@ -48,6 +48,9 @@ enum EqDataFormat
     DataFormat_Signed8,
 };
 
+/** \enum EqDDMessageIDs
+ *  IDs of the possible messages which can be sent to a display device from the sockets based display manager. 
+ */
 enum EqDDMessageIDs
 {
     MessageID_String = 0,
@@ -144,7 +147,7 @@ struct SqDDMessageClose : public SqDDMessageBase
 
 
 //---------------------------------------------------------------------
-/** \struct SqDDMessageClose
+/** \struct SqDDMessageAcknowledge
  * Message containing data issued when an image is being closed after rendering is complete.
  */
 

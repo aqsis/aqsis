@@ -22,8 +22,9 @@ START_NAMESPACE( Aqsis )
 
 
 ///----------------------------------------------------------------------
-/// CqFuncDef
-/// Class storing information about functions.
+/** \class CqFuncDef
+ * Class storing information about functions.
+ */
 
 class CqFuncDef : public IqFuncDef
 {

@@ -46,7 +46,7 @@ OUTPUT_LANGUAGE        = English
 # Private class members and static file members will be hidden unless 
 # the EXTRACT_PRIVATE and EXTRACT_STATIC tags are set to YES 
 
-EXTRACT_ALL            = NO
+EXTRACT_ALL            = YES
 
 # If the EXTRACT_PRIVATE tag is set to YES all private members of a class 
 # will be included in the documentation. 
@@ -127,7 +127,7 @@ SOURCE_BROWSER         = YES
 # Setting the INLINE_SOURCES tag to YES will include the body 
 # of functions and classes directly in the documentation. 
 
-INLINE_SOURCES         = YES
+INLINE_SOURCES         = NO
 
 # Setting the STRIP_CODE_COMMENTS tag to YES (the default) will instruct 
 # doxygen to hide any special comment blocks from generated source code 
@@ -280,7 +280,7 @@ WARN_IF_UNDOCUMENTED   = YES
 # tags, which will be replaced by the file and line number from which the 
 # warning originated and the warning text. 
 
-WARN_FORMAT            = "$file:$line: $text"
+WARN_FORMAT            = "$file($line) : $text"
 
 # The WARN_LOGFILE tag can be used to specify a file to which warning 
 # and error messages should be written. If left blank the output is written 
@@ -300,7 +300,8 @@ WARN_LOGFILE           =
 INPUT                  = ./aqsis ./aqsl ./filebuffer ./framebuffer_glut ./framebuffer_glut_z 
 INPUT				  += ./libaqsistypes ./libaqsistypes/win32/intel ./libcodegenvm ./libdd 
 INPUT				  += ./libddmsimple ./libddmsock ./librib2 ./librib2ri ./librib2stream 
-INPUT				  += ./libslparse ./render ./shadowmap ./teqser
+INPUT				  += ./libslparse ./render ./shadowmap ./teqser ./libshadervm ./libshaderexecenv
+INPUT				  += ./libri2rib ./libslxargs
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
@@ -382,7 +383,7 @@ COLS_IN_ALPHA_INDEX    = 5
 # The IGNORE_PREFIX tag can be used to specify one or more prefixes that 
 # should be ignored while generating the index headers. 
 
-IGNORE_PREFIX          = 
+IGNORE_PREFIX          = Cq Iq Sq
 
 #---------------------------------------------------------------------------
 # configuration options related to the HTML output

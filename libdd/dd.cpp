@@ -59,10 +59,20 @@ static const int SD_BOTH = 2;
 
 using namespace Aqsis;
 
+/** External function to handle a query message, must be provided by linking application.
+ */
 TqInt Query( SOCKET s, SqDDMessageBase* pMsg );
+/** External function to handle an open message, must be provided by linking application.
+ */
 TqInt Open( SOCKET s, SqDDMessageBase* pMsg );
+/** External function to handle a data message, must be provided by linking application.
+ */
 TqInt Data( SOCKET s, SqDDMessageBase* pMsg );
+/** External function to handle a close message, must be provided by linking application.
+ */
 TqInt Close( SOCKET s, SqDDMessageBase* pMsg );
+/** External function to handle a general message, must be provided by linking application.
+ */
 TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsg );
 
 START_NAMESPACE( Aqsis )
@@ -157,11 +167,11 @@ TqInt DDSendMsg( TqInt s, SqDDMessageBase* pMsg )
 }
 
 
+static SOCKET g_Socket = INVALID_SOCKET;
+
 //----------------------------------------------------------------------
 /** Enter a loop processing messages from the server.
  */
-
-static SOCKET g_Socket = INVALID_SOCKET;
 
 TqInt DDInitialise( const TqChar* phostname, TqInt port )
 {
@@ -397,6 +407,8 @@ TqInt DDProcessMessages()
 	}
 }
 
+/** Close the given socket.
+ */
 static void CloseSocket( SOCKET& Socket )
 {
 #ifdef AQSIS_SYSTEM_WIN32

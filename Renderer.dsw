@@ -95,6 +95,9 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libslxargs
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name doxygen
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -212,6 +215,18 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libaqsistypes
     End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "doxygen"=.\doxygen.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
 }}}
 
 ###############################################################################

@@ -33,8 +33,8 @@ static char* gVariableTypeNames[] =
 static TqInt gcVariableTypeNames = sizeof( gVariableTypeNames ) / sizeof( gVariableTypeNames[ 0 ] );
 
 
-///---------------------------------------------------------------------
-/// Static data on CqParseNode
+//---------------------------------------------------------------------
+// Static data on CqParseNode
 
 TqInt	CqParseNode::m_cLabels = 0;
 TqInt	CqParseNode::m_aaTypePriorities[ Type_Last ][ Type_Last ] =
@@ -99,8 +99,8 @@ const EqParseNodeType IqParseNodeMessagePassingFunction::m_ID = ParseNode_Messag
 
 
 ///---------------------------------------------------------------------
-/// CqParseNode::TypeIdentifier
-/// Return a string type identifier for the specified type.
+/** Return a string type identifier for the specified type.
+ */
 
 char* CqParseNode::TypeIdentifier( int Type )
 {
@@ -109,8 +109,8 @@ char* CqParseNode::TypeIdentifier( int Type )
 
 
 ///---------------------------------------------------------------------
-/// CqParseNode::TypeFromIdentifier
-/// Return a type for the specified type identifier.
+/** Return a type for the specified type identifier.
+ */
 
 TqInt CqParseNode::TypeFromIdentifier( char Id )
 {
@@ -130,8 +130,8 @@ TqInt CqParseNode::TypeFromIdentifier( char Id )
 
 
 ///---------------------------------------------------------------------
-/// CqParseNode::TypeName
-/// Return a string type name for the specified type.
+/** Return a string type name for the specified type.
+ */
 
 char* CqParseNode::TypeName( int Type )
 {
@@ -140,8 +140,8 @@ char* CqParseNode::TypeName( int Type )
 
 
 ///---------------------------------------------------------------------
-/// CqParseNode::FindCast
-/// Find a valid cast type from the list of available options.
+/** Find a valid cast type from the list of available options.
+ */
 
 TqInt	CqParseNode::FindCast( TqInt CurrType, TqInt* pTypes, TqInt Count )
 {

@@ -36,7 +36,7 @@ START_NAMESPACE( Aqsis )
 
 typedef unsigned char	bit;
 
-//#define	CHAR_BIT sizeof(unsigned char)
+/// Define the number of bits in a char
 #define	CHAR_BIT	8
 
 //----------------------------------------------------------------------

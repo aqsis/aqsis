@@ -48,15 +48,26 @@ typedef int SOCKET;
 
 using namespace Aqsis;
 
+/// Static response message for a format query.
 SqDDMessageFormatResponse frmt( 2 );
+/// Static response message close message.
 SqDDMessageCloseAcknowledge closeack;
 
+/** Handle a query message from the manager.
+ */
 TqInt Query( SOCKET s, SqDDMessageBase* pMsg );
+/** Handle an open message from the handler.
+ */
 TqInt Open( SOCKET s, SqDDMessageBase* pMsg );
+/** Handle a data message from the manager.
+ */
 TqInt Data( SOCKET s, SqDDMessageBase* pMsg );
+/** Handle a close message from the manager.
+ */
 TqInt Close( SOCKET s, SqDDMessageBase* pMsg );
 
 
+/// Main loop,, just cycle handling any recieved messages.
 int main( int argc, char* argv[] )
 {
 	if ( DDInitialise( NULL, -1 ) == 0 )
@@ -72,6 +83,7 @@ TqInt	SamplesPerElement;
 unsigned char* pByteData;
 TIFF*	pOut;
 TqInt	CWXMin, CWYMin;
+/// Storage for the output file name.
 std::string	strFilename( "output.tif" );
 
 TqInt Query( SOCKET s, SqDDMessageBase* pMsgB )
@@ -189,6 +201,8 @@ TqInt Close( SOCKET s, SqDDMessageBase* pMsgB )
 }
 
 
+/** Handle a general message from the manager.
+ */
 TqInt HandleMessage( SOCKET s, SqDDMessageBase* pMsgB )
 {
 	switch ( pMsgB->m_MessageID )

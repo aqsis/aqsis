@@ -5,7 +5,7 @@
  *	@brief	Declare the interface which all shaders must implement.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/05/09 07:14:09 $
+ *	Last change date:	$Date: 2002/05/14 03:53:13 $
  */
 //------------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ enum EqShaderType
 struct IqShaderExecEnv;
 
 //----------------------------------------------------------------------
-/** \class CqShader
+/** \struct IqShader
  * Abstract base class from which all shaders must be defined.
  */
 

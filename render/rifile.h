@@ -39,7 +39,7 @@
 START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
-/** \class CqFile
+/** \class CqRiFile
  * Standard handling of all file types utilising the searchpath options.
  */
 

@@ -289,21 +289,27 @@ class CqStats
 			m_cMissedMPGs++;
 		}
 
-		//@}
+		/** Increase the texture memory used.
+		 */
 		void	IncTextureMemory( TqInt n = 0 )
 		{
 			m_cTextureMemory += n;
 		}
+
+		/** Get the texture memory used.
+		 */
 		TqInt GetTextureMemory()
 		{
 			return m_cTextureMemory;
 		}
-		//@}
 
 
-		/// \name Timer methods
-		//@{
+		/** Start the current frame timer.
+		 */
 		void StartFrameTimer();
+
+		/** Start the current frame timer.
+		 */
 		void StopFrameTimer();
 
 		/** Get the surface timer.

@@ -313,7 +313,9 @@ void CqDDClient::Receive( void* buffer, TqInt len )
 }
 
 
+/// Global map of display names to display devices, initialised from ddmsock.ini
 std::map<std::string, std::string>	g_mapDisplayNames;
+/// Flag indicating whether g_mapDisplayNames has been successfully initialised.
 TqBool	g_fDisplayMapInitialised = false;
 
 CqDDManager::CqDDManager()

@@ -38,22 +38,29 @@ START_NAMESPACE( Aqsis )
 std::vector<CqAttributes*>	Attribute_stack;
 
 
-//---------------------------------------------------------------------
-/** Constructor.
+/** A macro to take care of adding a system attribute given a name.
+ *  Creates a new CqParameter derived class, initialises it to the given default value and 
+ *  adds it to the default attributes member.
  */
-
-
 #define	ADD_SYSTEM_ATTR(name, type, id, def) \
 	CqParameterTypedUniform<type,id>* p##name = new CqParameterTypedUniform<type,id>(#name); \
 	p##name->pValue()[0] = ( def ); \
 	pdefattrs->AddParameter(p##name);
 
+/** A macro to take care of adding a system attribute given a name.
+ *  Creates a new CqParameter derived class, initialises it to the given default value and 
+ *  adds it to the default attributes member.
+ */
 #define	ADD_SYSTEM_ATTR2(name, type, id, def0, def1) \
 	CqParameterTypedUniformArray<type,id>* p##name = new CqParameterTypedUniformArray<type,id>(#name,2); \
 	p##name->pValue()[0] = ( def0 ); \
 	p##name->pValue()[1] = ( def1 ); \
 	pdefattrs->AddParameter(p##name);
 
+/** A macro to take care of adding a system attribute given a name.
+ *  Creates a new CqParameter derived class, initialises it to the given default value and 
+ *  adds it to the default attributes member.
+ */
 #define	ADD_SYSTEM_ATTR4(name, type, id, def0, def1, def2, def3) \
 	CqParameterTypedUniformArray<type,id>* p##name = new CqParameterTypedUniformArray<type,id>(#name,4); \
 	p##name->pValue()[0] = ( def0 ); \
@@ -62,6 +69,10 @@ std::vector<CqAttributes*>	Attribute_stack;
 	p##name->pValue()[3] = ( def3 ); \
 	pdefattrs->AddParameter(p##name);
 
+/** A macro to take care of adding a system attribute given a name.
+ *  Creates a new CqParameter derived class, initialises it to the given default value and 
+ *  adds it to the default attributes member.
+ */
 #define	ADD_SYSTEM_ATTR8(name, type, id, def0, def1, def2, def3, def4, def5, def6, def7) \
 	CqParameterTypedUniformArray<type,id>* p##name = new CqParameterTypedUniformArray<type,id>(#name,8); \
 	p##name->pValue()[0] = ( def0 ); \
@@ -74,6 +85,9 @@ std::vector<CqAttributes*>	Attribute_stack;
 	p##name->pValue()[7] = ( def7 ); \
 	pdefattrs->AddParameter(p##name);
 
+//---------------------------------------------------------------------
+/** Constructor.
+ */
 
 CqAttributes::CqAttributes() : 
 				m_pshadDisplacement( 0 ),

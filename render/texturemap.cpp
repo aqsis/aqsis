@@ -700,7 +700,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
  *  RiMakeTextureV() for downsampling/filter the tif file
  *
  **/
-void CqTextureMap::Interpreted( char *mode )
+void CqTextureMap::Interpreted( TqPchar mode )
 {
 	TqChar filter[ 80 ];
 	TqChar smode[ 80 ];
@@ -2008,7 +2008,7 @@ void CqTextureMap::WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlo
  * as unsigned char values
  */
 
-void CqTextureMap::WriteTileImage( TIFF* ptex, unsigned char *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples )
+void CqTextureMap::WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples )
 {
 	TqChar version[ 80 ];
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
@@ -2068,7 +2068,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, unsigned char *raster, TqUlong wi
  * as unsigned char values
  */
 
-void CqTextureMap::WriteImage( TIFF* ptex, unsigned char *raster, TqUlong width, TqUlong length, TqInt samples )
+void CqTextureMap::WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples )
 {
 	TqChar version[ 80 ];
 	TIFFCreateDirectory( ptex );

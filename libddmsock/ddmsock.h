@@ -48,7 +48,7 @@ START_NAMESPACE( Aqsis )
 struct SqDDMessageBase;
 
 //---------------------------------------------------------------------
-/** \class CqDDServer
+/** \class CqDDClient
  * Class encapsulating the display driver server thread.
  */
 

@@ -23,8 +23,9 @@
 START_NAMESPACE( Aqsis )
 
 ///----------------------------------------------------------------------
-/// CqParseNode
-/// Abstract base class from which all parse nodes are define.
+/** \class CqParseNode
+ * Abstract base class from which all parse nodes are define.
+ */
 
 class CqParseNode : public CqListEntry<CqParseNode>, public IqParseNode
 {

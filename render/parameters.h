@@ -710,8 +710,7 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I>
 
 
 
-/** \fn void CqParameterTypedVarying<T,I>::BilinearDice
- * Dice the value into a grid using bilinear interpolation.
+/** Dice the value into a grid using bilinear interpolation.
  * \param u Integer dice count for the u direction.
  * \param v Integer dice count for the v direction.
  * \param pResult Pointer to storage for the result.
@@ -767,8 +766,7 @@ void CqParameterTypedVarying<T, I>::BilinearDice( TqInt u, TqInt v, IqShaderData
 }
 
 
-/** \fn void CqParameterTypedVaryingArray<T,I>::BilinearDice
- * Dice the value into a grid using bilinear interpolation.
+/** Dice the value into a grid using bilinear interpolation.
  * \param u Integer dice count for the u direction.
  * \param v Integer dice count for the v direction.
  * \param pResult Pointer to storage for the result.

@@ -314,8 +314,8 @@ std::vector<CqFuncDef>	gLocalFuncs;
 
 
 ///---------------------------------------------------------------------
-/// CqFuncDef::CqFuncDef
-/// Constructor.
+/** Constructor.
+ */
 
 CqFuncDef::CqFuncDef( TqInt Type, const char* strName, const char* strVMName, const char* strParams, CqParseNode* pDef, CqParseNode* pArgs ) :
 		m_Type( Type ),
@@ -336,8 +336,8 @@ CqFuncDef::CqFuncDef( TqInt Type, const char* strName, const char* strVMName, co
 
 
 ///---------------------------------------------------------------------
-/// CqFuncDef::FindFunction
-/// Find a function definition by searchin the standard and user definitions lists.
+/** Find a function definition by searchin the standard and user definitions lists.
+ */
 
 TqBool CqFuncDef::FindFunction( const char* strName, std::vector<SqFuncRef>& Refs )
 {
@@ -373,8 +373,8 @@ TqBool CqFuncDef::FindFunction( const char* strName, std::vector<SqFuncRef>& Ref
 
 
 ///---------------------------------------------------------------------
-/// CqFuncDef::AddFunction
-/// Add a new local function.
+/** Add a new local function.
+ */
 
 TqInt CqFuncDef::AddFunction( CqFuncDef& Def )
 {
@@ -384,8 +384,8 @@ TqInt CqFuncDef::AddFunction( CqFuncDef& Def )
 
 
 ///---------------------------------------------------------------------
-/// CqParseNode::TypeArray
-/// Fill in an array of types from a typespec string.
+/** Fill in an array of types from a typespec string.
+ */
 
 int CqFuncDef::TypeArray()
 {
@@ -471,8 +471,8 @@ const IqParseNode* CqFuncDef::pDef() const
 
 
 ///---------------------------------------------------------------------
-/// CqFuncDef::GetFunctionPtr
-/// Return a temporary pointer to a function definition..
+/** Return a temporary pointer to a function definition..
+ */
 
 CqFuncDef* CqFuncDef::GetFunctionPtr( const SqFuncRef& Ref )
 {

@@ -5,7 +5,7 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/05/07 22:33:50 $
+ *	Last change date:	$Date: 2002/05/14 03:53:13 $
  */
 //------------------------------------------------------------------------------
 #ifndef	___isurface_Loaded___
@@ -21,7 +21,7 @@ struct IqTransform;
 
 
 //----------------------------------------------------------------------
-/** \class CqBasicSurface
+/** \struct IqSurface
  * Abstract base surface class, which provides interfaces to geometry.  
  */
 

@@ -73,11 +73,6 @@ class CqImagersource : public CqListEntry<CqImagersource>
 			return ( m_pShader );
 		}
 
-		/** Initialise the shader execution environment & execute the
-		 *  shader code.
-		 * \param uGridRes,vGridRes Integer grid size.
-		 * \param x,y Floating value about the Origin of the bucket.
-		 */
 		void	Initialise( TqInt uGridRes, TqInt vGridRes,
 		                 TqFloat x, TqFloat y,
 		                 CqColor *color, CqColor *opacity,

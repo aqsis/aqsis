@@ -313,6 +313,7 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 }
 ;
 
+/// Global attribute stack.
 extern std::vector<CqAttributes*>	Attribute_stack;
 
 

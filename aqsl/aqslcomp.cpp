@@ -38,6 +38,8 @@
 
 using namespace Aqsis;
 
+/** Process the sl file from stdin and produce an slx bytestream.
+ */
 int main( int argc, char* argv[] )
 {
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)

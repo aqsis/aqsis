@@ -74,7 +74,7 @@ CqImagersource::~CqImagersource()
  * \param coverage Initial value "alpha"
  */
 void CqImagersource::Initialise( TqInt uGridRes, TqInt vGridRes,
-                                 float x, float y,
+                                 TqFloat x, TqFloat y,
                                  CqColor *color, CqColor *opacity,
                                  TqFloat *depth, TqFloat *coverage )
 {

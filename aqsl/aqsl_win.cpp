@@ -31,6 +31,8 @@
 #endif /* AQSIS_SYSTEM_MACOSX */
 
 
+/** Compile the give sl file into an slx bytestream.
+ */
 void compile_file( const char* sl_file )
 {
 	FILE * hPipeRead;
@@ -66,6 +68,9 @@ void compile_file( const char* sl_file )
 }
 
 
+/** The main loop prcesses any arguments into a single string
+ *  looking for -help, and then passes them directly onto the compiler command.
+ */
 int main( int argc, char** argv )
 {
 	int i;
