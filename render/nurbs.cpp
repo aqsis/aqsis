@@ -1200,8 +1200,9 @@ void CqSurfaceNURBS::SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqB
 
 void CqSurfaceNURBS::uSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB )
 {
-	pnrbA = new CqSurfaceNURBS( *this );
-	pnrbB = new CqSurfaceNURBS( *this );
+	pnrbA = new CqSurfaceNURBS();
+	pnrbB = new CqSurfaceNURBS();
+
 	SplitNURBS( *pnrbA, *pnrbB, TqTrue );
 
 	// Subdivide the normals
@@ -1221,8 +1222,9 @@ void CqSurfaceNURBS::uSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 
 void CqSurfaceNURBS::vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB )
 {
-	pnrbA = new CqSurfaceNURBS( *this );
-	pnrbB = new CqSurfaceNURBS( *this );
+	pnrbA = new CqSurfaceNURBS();
+	pnrbB = new CqSurfaceNURBS();
+
 	SplitNURBS( *pnrbA, *pnrbB, TqFalse );
 
 	// Subdivide the normals
@@ -1393,6 +1395,7 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 		for( i = 0; i < S.size(); i++ )
 		{
 			S[ i ]->SetSurfaceParameters( *this );
+			S[ i ]->TrimLoops() = TrimLoops();
 			S[ i ]->m_fDiceable = TqTrue;
 			S[ i ]->m_SplitDir = m_SplitDir;
 			S[ i ]->m_EyeSplitCount = m_EyeSplitCount;
@@ -1415,6 +1418,8 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
+	pNew1->TrimLoops() = TrimLoops();
+	pNew2->TrimLoops() = TrimLoops();
 	pNew1->m_fDiceable = TqTrue;
 	pNew2->m_fDiceable = TqTrue;
 	pNew1->m_SplitDir = m_SplitDir;
