@@ -396,7 +396,6 @@ RtVoid	RiWorldEnd()
 
 	// ...and print the statistics.
 	QGetRenderContext()->Stats().PrintStats(verbosity);
-
 	return;
 }
 
@@ -3048,20 +3047,43 @@ RtVoid RiMakeTexture (const char *pic, const char *tex, RtToken swrap, RtToken t
 //
 RtVoid	RiMakeTextureV(const char *pic, const char *tex, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST)
 {
+	char modes[1024];
 	assert(pic!=0 && tex!=0 && swrap!=0 && twrap!=0 && filterfunc!=0);
 
 	// Get the wrap modes first.
-	enum EqWrapMode smode=WrapMode_Black;
+	enum EqWrapMode smode=WrapMode_Clamp;
 	if(strcmp(swrap,RI_PERIODIC)==0)
 		smode=WrapMode_Periodic;
 	else if(strcmp(swrap,RI_CLAMP)==0)
 		smode=WrapMode_Clamp;
+	else if(strcmp(swrap,RI_BLACK)==0)
+		smode=WrapMode_Black;
 
-	enum EqWrapMode tmode=WrapMode_Black;
+	enum EqWrapMode tmode=WrapMode_Clamp;
 	if(strcmp(twrap,RI_PERIODIC)==0)
 		tmode=WrapMode_Periodic;
 	else if(strcmp(twrap,RI_CLAMP)==0)
 		tmode=WrapMode_Clamp;
+	else if(strcmp(twrap,RI_BLACK)==0)
+		tmode=WrapMode_Black;
+
+
+	sprintf(modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth);
+	if (filterfunc == RiGaussianFilter)
+		sprintf(modes, "%s %s %s %f %f", swrap, twrap, "gaussian", swidth, twidth);
+    if (filterfunc == RiBoxFilter)
+		sprintf(modes, "%s %s %s %f %f", swrap, twrap, "box", swidth, twidth);
+    if (filterfunc == RiTriangleFilter)
+		sprintf(modes, "%s %s %s %f %f", swrap, twrap, "triangle", swidth, twidth);
+    if (filterfunc == RiCatmullRomFilter)
+		sprintf(modes, "%s %s %s %f %f", swrap, twrap, "catmull-rom", swidth, twidth);
+    if (filterfunc == RiSincFilter)
+		sprintf(modes, "%s %s %s %f %f", swrap, twrap, "sinc", swidth, twidth);
+    if (filterfunc == RiDiskFilter)
+		sprintf(modes, "%s %s %s %f %f", swrap, twrap, "disk", swidth, twidth);
+    if (filterfunc == RiBesselFilter)
+		sprintf(modes, "%s %s %s %f %f", swrap, twrap, "bessel", swidth, twidth);
+	
 
 	// Now load the original image.
 	CqTextureMap Source(pic);
@@ -3072,12 +3094,13 @@ RtVoid	RiMakeTextureV(const char *pic, const char *tex, RtToken swrap, RtToken t
 		// Hopefully CqTextureMap will take care of closing the tiff file after
 		// it has SAT mapped it so we can overwrite if needs be.
 		// Create a new image.
-	    Source.CreateSATMap();
+	        Source.CreateSATMap();
 		TIFF* ptex=TIFFOpen(tex,"w");
 
 		TIFFCreateDirectory(ptex);
 		TIFFSetField(ptex,TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
 		TIFFSetField(ptex,TIFFTAG_PIXAR_TEXTUREFORMAT, SATMAP_HEADER);
+		TIFFSetField(ptex,TIFFTAG_PIXAR_WRAPMODES,modes);
 		// Write the floating point image to the directory.
 		CqTextureMapBuffer* pBuffer=Source.GetBuffer(0,0);
 		WriteTileImage(ptex,pBuffer->pBufferData(),Source.XRes(),Source.YRes(),64,64,Source.SamplesPerPixel());
@@ -3085,7 +3108,6 @@ RtVoid	RiMakeTextureV(const char *pic, const char *tex, RtToken swrap, RtToken t
 	}
 
 	Source.Close();
-	return;
 }
 
 

@@ -85,6 +85,7 @@ std::vector<CqTextureMap*>	CqTextureMap::m_TextureMap_Cache;
 float* CqTextureMapBuffer::AllocSegment(unsigned long width, unsigned long height, int samples)
 {
 	// TODO: Implement proper global cache handling.
+    QGetRenderContext()->Stats().IncTextureMemory( width * height * samples * sizeof(float));
 	return(static_cast<float*>(calloc((width*height)*samples, sizeof(float))));
 }
 
@@ -96,6 +97,7 @@ float* CqTextureMapBuffer::AllocSegment(unsigned long width, unsigned long heigh
 void	CqTextureMapBuffer::FreeSegment(float* pBufferData, unsigned long width, unsigned long height, int samples)
 {
 	// TODO: Implement proper global cache handling.
+	//QGetRenderContext()->Stats().IncTextureMemory( -width * height * samples * sizeof(float));
 	free(pBufferData);
 }
 
@@ -130,6 +132,9 @@ CqTextureMap::~CqTextureMap()
 
 void CqTextureMap::Open()
 {
+	char swrap[80], twrap[80], filterfunc[80];
+	float swidth, twidth;
+
 	m_IsValid=TqFalse;
 	// Find the file required.
 	CqRiFile	fileImage(m_strName.c_str(),"texture");
@@ -148,12 +153,71 @@ void CqTextureMap::Open()
 	if(m_pImage)
 	{
 		char*pFormat=0;
+		char*pModes=0;
 
 		TIFFGetField(m_pImage, TIFFTAG_IMAGEWIDTH, &m_XRes);
 		TIFFGetField(m_pImage, TIFFTAG_IMAGELENGTH, &m_YRes);
 		TIFFGetField(m_pImage, TIFFTAG_PLANARCONFIG, &m_PlanarConfig);
 		TIFFGetField(m_pImage, TIFFTAG_SAMPLESPERPIXEL, &m_SamplesPerPixel);
 		TIFFGetField(m_pImage,  TIFFTAG_PIXAR_TEXTUREFORMAT, &pFormat);
+        	TIFFGetField(m_pImage,  TIFFTAG_PIXAR_WRAPMODES, &pModes);
+
+		if (pModes) 
+		{
+          	  sscanf(pModes, "%s %s %s %f %f", swrap, twrap, filterfunc, &swidth, &twidth);
+
+		  /// smode
+		  if (strcmp(swrap, RI_PERIODIC) == 0)
+		  {
+			  m_smode = WrapMode_Periodic;
+		  } else if (strcmp(swrap, RI_BLACK) == 0)
+		  {
+			  m_smode = WrapMode_Black;
+		  } else if (strcmp(swrap, RI_CLAMP) == 0)
+		  {
+			  m_smode = WrapMode_Clamp;
+		  }
+
+		  /// t mode
+		  if (strcmp(twrap, RI_PERIODIC) == 0)
+		  {
+			  m_tmode = WrapMode_Periodic;
+		  } else if (strcmp(twrap, RI_BLACK) == 0)
+		  {
+			  m_tmode = WrapMode_Black;
+		  } else if (strcmp(twrap, RI_CLAMP) == 0)
+		  {
+			  m_tmode = WrapMode_Clamp;
+		  }
+		  /// Pixel's Filter
+		  if (strcmp(filterfunc, "gaussian") == 0)
+		  {
+			  m_FilterFunc = RiGaussianFilter;
+		  } else if (strcmp(filterfunc, "box") == 0)
+		  {
+			  m_FilterFunc = RiBoxFilter;
+		  } else if (strcmp(filterfunc, "triangle") == 0)
+		  {
+			  m_FilterFunc = RiTriangleFilter;
+		  } else if (strcmp(filterfunc, "catmull-rom") == 0)
+		  {
+			  m_FilterFunc = RiCatmullRomFilter;
+		  } else if (strcmp(filterfunc, "sinc") == 0)
+		  {
+			  m_FilterFunc = RiSincFilter;
+		  } else if (strcmp(filterfunc, "disk") == 0)
+		  {
+			  m_FilterFunc = RiDiskFilter;
+		  } else if (strcmp(filterfunc, "bessel") == 0)
+		  {
+			  m_FilterFunc = RiBesselFilter;
+		  }
+
+		  /// Pixel's Filter x,y 
+		  m_swrap = swidth;
+		  m_twrap = twidth;
+		}
+
 
 		if(pFormat && strcmp(pFormat, SATMAP_HEADER)==0 ||
 		   pFormat && strcmp(pFormat, CUBEENVMAP_HEADER)==0)
@@ -446,7 +510,21 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, 
 	val3 = 0.0f;
 	val4 = 0.0f;
 
-	// TODO: This is effectively 'clamp' mode, should implement this as modes, and set the mode as clamp in the env map.
+	
+
+	if (m_smode == WrapMode_Periodic) 
+	{
+		while(ss1<0)	ss1+=m_XRes;
+		while(ss1>static_cast<long>(m_XRes-1))	ss1-=m_XRes;
+		while(ss2<0)	ss2+=m_XRes;
+		while(ss2>static_cast<long>(m_XRes-1))	ss2-=m_XRes;
+	} 
+	if (m_tmode == WrapMode_Periodic) {
+		while(tt1<0)	tt1+=m_YRes;
+		while(tt1>static_cast<long>(m_YRes-1))	tt1-=m_YRes;
+		while(tt2<0)	tt2+=m_YRes;
+		while(tt2>static_cast<long>(m_YRes-1))	tt2-=m_YRes;
+	}
 	if(Type()==MapType_Environment)
 	{
 		if(ss1<0)	ss1=0;
@@ -454,16 +532,19 @@ void CqTextureMap::SampleSATMap(float s1, float t1, float swidth, float twidth, 
 		if(ss2>static_cast<long>(m_XRes-1))	ss2=(m_XRes-1);
 		if(tt2>static_cast<long>(m_YRes-1))	tt2=(m_YRes-1);
 	}
-	else
-	{
-		while(ss1<0)	ss1+=m_XRes;
-		while(tt1<0)	tt1+=m_YRes;
-		while(ss2<0)	ss2+=m_XRes;
-		while(tt2<0)	tt2+=m_YRes;
-		while(ss1>static_cast<long>(m_XRes-1))	ss1-=m_XRes;
-		while(tt1>static_cast<long>(m_YRes-1))	tt1-=m_YRes;
-		while(ss2>static_cast<long>(m_XRes-1))	ss2-=m_XRes;
-		while(tt2>static_cast<long>(m_YRes-1))	tt2-=m_YRes;
+
+	// TODO: This is effectively 'clamp' mode, by default
+	if (m_smode == WrapMode_Clamp) {
+		if (ss1<0) ss1=0;
+		if (ss2<0) ss2=0;
+		if(ss2>static_cast<long>(m_XRes-1))	ss2=(m_XRes-1);
+		if(ss1>static_cast<long>(m_XRes-1))	ss1=(m_XRes-1);
+	}
+	if (m_tmode == WrapMode_Clamp) {
+		if (tt1<0) tt1=0;
+		if (tt2<0) tt2=0;
+		if(tt2>static_cast<long>(m_YRes-1))	tt2=(m_YRes-1);
+		if(tt1>static_cast<long>(m_YRes-1))	tt1=(m_YRes-1);
 	}
 
 	// If no boundaries are crossed, just do a single sample (the most common case)
@@ -1155,9 +1236,10 @@ void CqShadowMap::LoadZFile()
 		{
 			// Save a file type and version marker
 			char* strHeader=new char[strlen(ZFILE_HEADER)];
+            char* origHeader=ZFILE_HEADER;
 			file.read(strHeader, strlen(ZFILE_HEADER));
 			// Check validity of shadow map.
-			if(strncmp(strHeader,ZFILE_HEADER,strlen(ZFILE_HEADER))!=0)
+			if(strncmp(strHeader,origHeader,strlen(origHeader))!=0)
 			{
 				CqString strErr("Error : Invalid shadowmap format - ");
 				strErr+=m_strName;
@@ -1204,6 +1286,8 @@ void CqShadowMap::LoadZFile()
 
 void CqShadowMap::SaveShadowMap(const char* strShadowName)
 {
+	char version[80];
+
 	// Save the shadowmap to a binary file.
 	if(m_strName!="")
 	{
@@ -1224,7 +1308,12 @@ void CqShadowMap::SaveShadowMap(const char* strShadowName)
 					matWorldToScreen[(r*4)+c]=m_matWorldToScreen[r][c];
 				}
 			}
-			
+#ifdef  AQSIS_SYSTEM_WIN32
+			sprintf(version, "%s %s",STRNAME, VERSION_STR);
+#else
+			sprintf(version, "%s %s",STRNAME, VERSION);
+#endif	
+			TIFFSetField(pshadow,TIFFTAG_SOFTWARE, (uint32)version);
 			TIFFSetField(pshadow,TIFFTAG_PIXAR_MATRIX_WORLDTOCAMERA, matWorldToCamera);
 			TIFFSetField(pshadow,TIFFTAG_PIXAR_MATRIX_WORLDTOSCREEN, matWorldToScreen);
 			TIFFSetField(pshadow,TIFFTAG_PIXAR_TEXTUREFORMAT, SHADOWMAP_HEADER);
@@ -1276,6 +1365,13 @@ void CqShadowMap::ReadMatrices()
 void WriteTileImage(TIFF* ptex, float *raster, unsigned long width, unsigned long length, unsigned long twidth, unsigned long tlength, int samples)
 { 
 //	TIFFCreateDirectory(ptex);
+	char version[80];
+#ifdef  AQSIS_SYSTEM_WIN32
+	sprintf(version, "%s %s",STRNAME, VERSION_STR);
+#else
+	sprintf(version, "%s %s",STRNAME, VERSION);
+#endif
+	TIFFSetField(ptex,TIFFTAG_SOFTWARE, (uint32)version);
 	TIFFSetField(ptex,TIFFTAG_IMAGEWIDTH, width);
 	TIFFSetField(ptex,TIFFTAG_IMAGELENGTH, length);
 	TIFFSetField(ptex,TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
@@ -1322,8 +1418,16 @@ void WriteTileImage(TIFF* ptex, float *raster, unsigned long width, unsigned lon
 
 
 void WriteImage(TIFF* ptex, float *raster, unsigned long width, unsigned long length, int samples)
-{ 
+{ 	
+	char version[80];
 	TIFFCreateDirectory(ptex);
+
+#ifdef  AQSIS_SYSTEM_WIN32
+	sprintf(version, "%s %s",STRNAME, VERSION_STR);
+#else
+	sprintf(version, "%s %s",STRNAME, VERSION);
+#endif
+	TIFFSetField(ptex,TIFFTAG_SOFTWARE, (uint32)version);
 	TIFFSetField(ptex,TIFFTAG_IMAGEWIDTH, width);
 	TIFFSetField(ptex,TIFFTAG_IMAGELENGTH, length);
 	TIFFSetField(ptex,TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);

@@ -207,6 +207,8 @@ class _qShareC CqTextureMapBuffer
 			unsigned long	m_Height;		///< Height of segment.
 			int				m_Samples;		///< Number of samples per pixel.
 			int				m_Directory;	///< TIFF directory index. Used for multi image textures, i.e. cubeface environment.
+			
+						
 };
 
 //----------------------------------------------------------------------
@@ -225,7 +227,12 @@ class _qShareC CqTextureMap
 									m_Format(TexFormat_Plain),
 									m_strName(strName),
 									m_pImage(0),
-									m_IsValid(TqTrue)
+									m_IsValid(TqTrue),
+									m_smode(WrapMode_Clamp), 
+						    		m_tmode(WrapMode_Clamp),
+							    	m_FilterFunc(RiBoxFilter),
+								    m_swrap(1.0), m_twrap(1.0) 
+						
 									{}
 	_qShareM	virtual	~CqTextureMap();
 
@@ -307,7 +314,10 @@ static	std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loade
 				CqString	m_strName;			///< Name of the image.
 				TIFF*		m_pImage;			///< Pointer to an opened TIFF image.
 				TqBool		m_IsValid;			///< Indicate whether this image has been successfully opened.
-
+				enum EqWrapMode m_smode;        ///< Periodic, black, clamp
+				enum EqWrapMode m_tmode;        ///< Periodic, black, clamp
+				RtFilterFunc    m_FilterFunc;       ///< Catmull-Rom, sinc, disk, ... pixelfilter
+				float           m_swrap, m_twrap;   ///< for the pixel's filter
 				std::vector<CqTextureMapBuffer*>	m_apSegments;	///< Array of cache segments related to this image.
 };
 
