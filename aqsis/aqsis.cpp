@@ -87,7 +87,7 @@ void version( std::ostream& Stream )
  */
 RtVoid PrintProgress( RtFloat percent )
 {
-	if ( (g_progress == 0) && (g_Progress == 0) )
+	if ( ( g_progress == 0 ) && ( g_Progress == 0 ) )
 		return ;
 
 	if ( percent > 100 )
@@ -128,10 +128,10 @@ RtVoid PrintProgress( RtFloat percent )
 
 	std::string strProgress;
 
-	if( g_Progress ) // Override the outputformat
+	if ( g_Progress )  // Override the outputformat
 	{
 		strProgress = "%p%%";
-		percent = static_cast<int>(percent);
+		percent = static_cast<int>( percent );
 	}
 	else			// Use the default style
 	{
@@ -206,13 +206,13 @@ RtVoid PrintProgress( RtFloat percent )
 		strOutput << " ";
 
 	std::cout << std::string( strOutput.str(), strOutput.pcount() ).c_str();
-	
+
 	if ( g_Progress )
 		std::cout << "\n";
 	else
 		std::cout << "\r";
 
-	strOutput.freeze(false);
+	strOutput.freeze( false );
 	std:: cout << std::flush;
 }
 
@@ -285,7 +285,7 @@ int main( int argc, const char** argv )
 	ap.allowUnrecognizedOptions();
 
 	//_crtBreakAlloc = 1305;
-	
+
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
 	{
 		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
@@ -301,7 +301,7 @@ int main( int argc, const char** argv )
 	if ( g_version )
 	{
 		version( std::cout );
-		std::cout << "compiled " << __DATE__ << " " << __TIME__  << std::endl;
+		std::cout << "compiled " << __DATE__ << " " << __TIME__ << std::endl;
 		exit( 0 );
 	}
 
@@ -319,7 +319,7 @@ int main( int argc, const char** argv )
 		std::cout << "procedurals: " << g_procedurals.c_str() << std::endl;
 	}
 
-	if ( ap.leftovers().size() == 0 )    // If no files specified, take input from stdin.
+	if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
 	{
 		RenderFile( stdin, "stdin" );
 	}
@@ -345,6 +345,7 @@ int main( int argc, const char** argv )
 #endif
 
 #if defined(AQSIS_SYSTEM_WIN32)
+
 	{
 		MEMORY_BASIC_INFORMATION mbi;
 		DWORD dwMemUsed = 0;
@@ -375,40 +376,40 @@ void GetOptions()
 {
 	// If --base not specified, check for env.
 	if ( g_base_path.compare( "" ) == 0 )
-		g_base_path = Aqsis::CqFile::GetSystemSetting("base");
+		g_base_path = Aqsis::CqFile::GetSystemSetting( "base" );
 
 	// If --config not specified try to locate the config file.
 	if ( g_config.compare( "" ) == 0 )
-		g_config = Aqsis::CqFile::GetSystemSetting("config");
+		g_config = Aqsis::CqFile::GetSystemSetting( "config" );
 
 	// if --shaders is not specified, try and get a default shaders searchpath.
 	if ( g_shaders.compare( "" ) == 0 )
-		g_shaders = Aqsis::CqFile::GetSystemSetting("shaders");
+		g_shaders = Aqsis::CqFile::GetSystemSetting( "shaders" );
 
 	// if --archives is not specified, try and get a default archives searchpath.
 	if ( g_archives.compare( "" ) == 0 )
-		g_archives = Aqsis::CqFile::GetSystemSetting("archives");
+		g_archives = Aqsis::CqFile::GetSystemSetting( "archives" );
 
 	// if --textures is not specified, try and get a default textures searchpath.
 	if ( g_textures.compare( "" ) == 0 )
-		g_textures = Aqsis::CqFile::GetSystemSetting("textures");
+		g_textures = Aqsis::CqFile::GetSystemSetting( "textures" );
 
 	// if --displays is not specified, try and get a default displays searchpath.
 	if ( g_displays.compare( "" ) == 0 )
-		g_displays = Aqsis::CqFile::GetSystemSetting("displays");
+		g_displays = Aqsis::CqFile::GetSystemSetting( "displays" );
 
 	// if --displays is not specified, try and get a default dso libraries.
 	if ( g_dso_libs.compare( "" ) == 0 )
-		g_dso_libs = Aqsis::CqFile::GetSystemSetting("dsolibs");
+		g_dso_libs = Aqsis::CqFile::GetSystemSetting( "dsolibs" );
 
 	// if --displays is not specified, try and get a default procedurals searchpath.
 	if ( g_procedurals.compare( "" ) == 0 )
-		g_procedurals = Aqsis::CqFile::GetSystemSetting("procedurals");
+		g_procedurals = Aqsis::CqFile::GetSystemSetting( "procedurals" );
 }
 
 void RenderFile( FILE* file, const char* name )
 {
-	librib::RendermanInterface* renderengine = librib2ri::CreateRIBEngine();
+	librib::RendermanInterface * renderengine = librib2ri::CreateRIBEngine();
 
 	RiBegin( "CRIBBER" );
 
@@ -467,5 +468,5 @@ void RenderFile( FILE* file, const char* name )
 
 	RiEnd();
 
-	librib2ri::DestroyRIBEngine(renderengine);
+	librib2ri::DestroyRIBEngine( renderengine );
 }

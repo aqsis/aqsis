@@ -53,9 +53,9 @@ struct IqRenderer;
 extern IqRenderer* QGetRenderContextI();
 }
 
-bool g_pause=0;
-bool g_help=0;
-bool g_version=0;
+bool g_pause = 0;
+bool g_help = 0;
+bool g_version = 0;
 
 
 void version( std::ostream& Stream )
@@ -98,7 +98,7 @@ int main( int argc, const char** argv )
 	}
 
 	// Any leftovers are presumed to be shader names.
-	if ( ap.leftovers().size() == 0 )    // If no files specified, take input from stdin.
+	if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
 	{
 		std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
 		exit( 1 );
@@ -108,9 +108,9 @@ int main( int argc, const char** argv )
 		for ( ArgParse::apstringvec::const_iterator e = ap.leftovers().begin(); e != ap.leftovers().end(); e++ )
 		{
 			std::string shaderpath;
-			shaderpath = Aqsis::CqFile::GetSystemSetting("shaders");
+			shaderpath = Aqsis::CqFile::GetSystemSetting( "shaders" );
 
-			SLX_SetPath( const_cast<char*>(shaderpath.c_str()) );
+			SLX_SetPath( const_cast<char*>( shaderpath.c_str() ) );
 
 			if ( SLX_SetShader( ( char* ) e->c_str() ) == 0 )
 			{
@@ -121,9 +121,9 @@ int main( int argc, const char** argv )
 
 				char* currpath = SLX_GetPath();
 				std::cout << SLX_TypetoStr( SLX_GetType() ) << " \"" << currpath;
-				if( strlen(currpath) > 0 && 
-						(currpath[ strlen( currpath ) - 1 ] != '/') &&
-						(currpath[ strlen( currpath ) - 1 ] != '\\') ) 
+				if ( strlen( currpath ) > 0 &&
+				        ( currpath[ strlen( currpath ) - 1 ] != '/' ) &&
+				        ( currpath[ strlen( currpath ) - 1 ] != '\\' ) )
 					std::cout << "/";
 				std::cout << SLX_GetName() << "\"" << std::endl;
 				nArgs = SLX_GetNArgs();
