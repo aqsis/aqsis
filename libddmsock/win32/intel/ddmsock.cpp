@@ -173,6 +173,9 @@ CqDDServer::~CqDDServer()
 
 void CqDDClient::SendData(void* buffer, TqInt len)
 {
+	if(m_Socket==INVALID_SOCKET)
+		return;
+
 	TqInt tot=0,need=len;
 	while(need>0)
 	{
@@ -406,6 +409,8 @@ void CqDDManager::LoadDisplayLibrary(CqDDClient& dd)
 		else
 			CqBasicError(0,0,"Error loading display driver");
 	}
+	else
+		CqBasicError(0,0,"Error loading display driver");
 }
 
 
