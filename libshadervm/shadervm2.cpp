@@ -1197,7 +1197,7 @@ void CqShaderVM::SO_external()
 	AUTOFUNC;
 	SqDSOExternalCall *pCall = ReadNext().m_pExtCall;
 
-	RESULT(pCall->return_type, __fVarying?class_varying:class_uniform);
+	RESULT(pCall->return_type, class_varying);
 
 	IqShaderData **arg_data = new IqShaderData*[pCall->arg_types.size()];
 	for (int x = 0 ; x < pCall->arg_types.size();x++){
