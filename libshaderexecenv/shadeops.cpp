@@ -2111,7 +2111,9 @@ STD_SOIMPL CqShaderExecEnv::SO_calculatenormal( POINTVAL p, DEFPARAMIMPL )
     INIT_SO
 
     // Find out if the orientation is inverted.
-    TqInt O = m_pAttributes ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
+    TqInt O = OrientationLH;
+	if( m_pAttributes )
+		O = m_pAttributes ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
     TqFloat neg = 1;
     if ( O != OrientationLH ) neg = -1;
 
@@ -5246,9 +5248,15 @@ STD_SOIMPL	CqShaderExecEnv::SO_shadername2( STRINGVAL shader, DEFPARAMIMPL )
 
     CqString strName( "" );
     CqString strShader;
-    IqShader* pSurface = m_pAttributes ->pshadSurface();
-    IqShader* pDisplacement = m_pAttributes ->pshadDisplacement();
-    IqShader* pAtmosphere = m_pAttributes ->pshadAtmosphere();
+	IqShader* pSurface = 0;
+	IqShader* pDisplacement = 0;
+	IqShader* pAtmosphere = 0;
+    if( m_pAttributes )
+	{
+		pSurface = m_pAttributes ->pshadSurface();
+		pDisplacement = m_pAttributes ->pshadDisplacement();
+		pAtmosphere = m_pAttributes ->pshadAtmosphere();
+	}
 
     CHECKVARY( Result )
 
