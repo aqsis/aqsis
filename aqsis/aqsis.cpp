@@ -77,6 +77,10 @@
 
 #endif
 
+#if defined(AQSIS_SYSTEM_MACOSX)
+#include "Carbon/Carbon.h"
+#endif
+
 // Storage for the actual resource paths that we will use at runtime
 std::string g_rc_path;
 std::string g_shader_path;
@@ -85,6 +89,7 @@ std::string g_texture_path;
 std::string g_display_path;
 std::string g_dso_path;
 std::string g_procedural_path;
+std::string g_plugin_path;
 
 // Forward declarations
 void RenderFile( FILE* file, std::string& name );
@@ -114,6 +119,7 @@ ArgParse::apstring g_cl_texture_path = "";
 ArgParse::apstring g_cl_display_path = "";
 ArgParse::apstring g_cl_dso_path = "";
 ArgParse::apstring g_cl_procedural_path = "";
+ArgParse::apstring g_cl_plugin_path = "";
 ArgParse::apstring g_cl_type = "";
 ArgParse::apstring g_cl_addtype = "";
 ArgParse::apstring g_cl_mode = "rgba";
@@ -324,6 +330,7 @@ int main( int argc, const char** argv )
 	g_display_path = rootPath;
 	g_dso_path = rootPath;
 	g_procedural_path = rootPath;
+	g_plugin_path = rootPath;
 
 	g_shader_path.append( "shaders" );
 	g_archive_path.append( "archives" );
@@ -331,6 +338,28 @@ int main( int argc, const char** argv )
 	g_display_path.append( "bin" );
 	g_dso_path.append( "dsos" );
 	g_procedural_path.append( "procedures" );
+	g_plugin_path.append( "plugins" );
+#elif AQSIS_SYSTEM_MACOSX
+    CFURLRef pluginRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+    CFStringRef macPath = CFURLCopyFileSystemPath(pluginRef, kCFURLPOSIXPathStyle);
+    const char *pathPtr = "/User/pgregory/aqsis/renderer/build"; //CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+
+	g_rc_path = pathPtr;
+	g_shader_path = pathPtr;
+	g_archive_path = pathPtr;
+	g_texture_path = pathPtr;
+	g_display_path = pathPtr;
+	g_dso_path = pathPtr;
+	g_procedural_path = pathPtr;
+	g_plugin_path = pathPtr;
+
+	g_shader_path.append( "/shaders" );
+	g_archive_path.append( "/archives" );
+	g_texture_path.append( "/textures" );
+//	g_display_path.append( "bin" );
+	g_dso_path.append( "/dsos" );
+	g_procedural_path.append( "/procedures" );
+	g_plugin_path.append( "/plugins" );
 #else
 	g_rc_path = DEFAULT_RC_PATH;
 	g_shader_path = DEFAULT_SHADER_PATH;
@@ -339,6 +368,7 @@ int main( int argc, const char** argv )
 	g_display_path = DEFAULT_DISPLAY_PATH;
 	g_dso_path = DEFAULT_DSO_PATH;
 	g_procedural_path = DEFAULT_PROCEDURAL_PATH;
+	g_plugin_path = DEFAULT_PLUGIN_PATH;
 #endif
 
     StartMemoryDebugging();
@@ -374,6 +404,7 @@ int main( int argc, const char** argv )
         ap.argString( "displays", "=string\aOverride the default display searchpath(s) [" + g_display_path + "]", &g_cl_display_path );
         ap.argString( "dsolibs", "=string\aOverride the default dso searchpath(s) [" + g_dso_path + "]", &g_cl_dso_path );
         ap.argString( "procedurals", "=string\aOverride the default procedural searchpath(s) [" + g_procedural_path + "]", &g_cl_procedural_path );
+        ap.argString( "plugins", "=string\aOverride the default plugin searchpath(s) [" + g_plugin_path + "]", &g_cl_plugin_path );
         ap.argFlag( "nocolor", "\aDisable colored output", &g_cl_no_color );
         ap.alias( "nocolor", "nc" );
 #ifdef	AQSIS_SYSTEM_POSIX
@@ -424,6 +455,8 @@ int main( int argc, const char** argv )
 		g_dso_path = getenv("AQSIS_DSO_PATH");
 	if(getenv("AQSIS_PROCEDURAL_PATH"))
 		g_procedural_path = getenv("AQSIS_PROCEDURAL_PATH");
+	if(getenv("AQSIS_PLUGIN_PATH"))
+		g_procedural_path = getenv("AQSIS_PLUGIN_PATH");
 
         // Apply command-line overrides to default paths ...
         if(!g_cl_rc_path.empty())
@@ -440,6 +473,8 @@ int main( int argc, const char** argv )
             g_dso_path = g_cl_dso_path;
         if(!g_cl_procedural_path.empty())
             g_procedural_path = g_cl_procedural_path;
+        if(!g_cl_plugin_path.empty())
+            g_plugin_path = g_cl_plugin_path;
 
 #ifdef	AQSIS_SYSTEM_WIN32
         std::auto_ptr<std::streambuf> ansi( new Aqsis::ansi_buf(std::cerr) );
@@ -471,6 +506,7 @@ int main( int argc, const char** argv )
 	    std::cerr << Aqsis::info << "display path(s): " << g_display_path << std::endl;
 	    std::cerr << Aqsis::info << "dso path(s): " << g_dso_path << std::endl;
 	    std::cerr << Aqsis::info << "procedural path(s): " << g_procedural_path << std::endl;
+	    std::cerr << Aqsis::info << "plugin path(s): " << g_plugin_path << std::endl;
 
         if ( ap.leftovers().size() == 0 )     // If no files specified, take input from stdin.
         {
@@ -535,6 +571,8 @@ void RenderFile( FILE* file, std::string&  name )
     RiOption( "searchpath", "dsolibs", &popt, RI_NULL );
     popt[ 0 ] = g_procedural_path.c_str();
     RiOption( "searchpath", "procedural", &popt, RI_NULL );
+    popt[ 0 ] = g_plugin_path.c_str();
+    RiOption( "searchpath", "plugin", &popt, RI_NULL );
 
     RiProgressHandler( &PrintProgress );
     RiPreWorldFunction( &PreWorld );
