@@ -2271,7 +2271,7 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminance(POINTVAL P, VECTORVAL Axis, FLOATVAL 
 			// Check if its within the cone.
 			CqVector3D nL=L();	nL.Unit();
 			TqFloat cosangle=nL*VECTOR(Axis);
-			if(acos(fabs(cosangle))>FLOAT(Angle))
+			if(acos(cosangle)>FLOAT(Angle))
 				m_CurrentState.SetValue(i,TqFalse);
 			else
 				m_CurrentState.SetValue(i,TqTrue);
@@ -2307,7 +2307,7 @@ STD_SOIMPL CqShaderExecEnv::SO_illuminate(POINTVAL P, VECTORVAL Axis, FLOATVAL A
 			// Check if its within the cone.
 			CqVector3D nL=L();	nL.Unit();
 			TqFloat cosangle=nL*VECTOR(Axis);
-			if(acos(fabs(cosangle))>FLOAT(Angle))
+			if(acos(cosangle)>FLOAT(Angle))
 			{
 				// Make sure we set the light color to zero in the areas that won't be lit.
 				Cl()[i] = CqColor(0,0,0);
@@ -2326,8 +2326,8 @@ STD_SOIMPL	CqShaderExecEnv::SO_illuminate(POINTVAL P, DEFVOIDPARAMIMPL)
 	static CqVMStackEntry Axis;
 	static CqVMStackEntry Angle;
 
-	Axis=CqVector3D(0,0,0);
-	Angle=(TqFloat)RI_PI;
+	Axis=CqVector3D(0,1,0);
+	Angle=RI_PI;
 
 	SO_illuminate(P, Axis, Angle, pShader);
 }
