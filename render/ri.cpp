@@ -394,9 +394,6 @@ RtVoid	RiWorldEnd()
 	if(poptEndofframe!=0)
 		verbosity=poptEndofframe[0];
 
-	// Flush the shader cache.
-	QGetRenderContext()->FlushShaders();
-
 	// ...and print the statistics.
 	QGetRenderContext()->Stats().PrintStats(verbosity);
 
@@ -1654,6 +1651,22 @@ RtVoid	RiSides(RtInt nsides)
 RtVoid	RiIdentity()
 {
 	QGetRenderContext()->ptransWriteCurrent()->SetCurrentTransform(QGetRenderContext()->Time(),CqMatrix());
+	
+	// Make sure the orientations are correct after the matrix update.
+	// We get the camera matrix and see if that is going to alter the default orientation, note
+	// that this should still work if we get a call to identity before the WorldBegin, as then the 
+	// camera transform will be identity, and the behaviour will be correct.
+	if(QGetRenderContext()->matWorldToCamera().Determinant()<0)
+	{
+		QGetRenderContext()->pattrWriteCurrent()->SeteCoordsysOrientation(OrientationRH);
+		QGetRenderContext()->pattrWriteCurrent()->SeteOrientation(OrientationRH);
+	}
+	else
+	{
+		QGetRenderContext()->pattrWriteCurrent()->SeteCoordsysOrientation(OrientationLH);
+		QGetRenderContext()->pattrWriteCurrent()->SeteOrientation(OrientationLH);
+	}
+	
 	QGetRenderContext()->AdvanceTime();
 	return;
 }
@@ -1665,6 +1678,12 @@ RtVoid	RiIdentity()
 RtVoid	RiTransform(RtMatrix transform)
 {
 	// TODO: Determine if this matrix requires a change in orientation.
+	CqMatrix matTrans(transform);
+	if(matTrans.Determinant()<0)
+	{
+		QGetRenderContext()->pattrWriteCurrent()->FlipeOrientation(QGetRenderContext()->Time());
+		QGetRenderContext()->pattrWriteCurrent()->FlipeCoordsysOrientation(QGetRenderContext()->Time());
+	}
 	QGetRenderContext()->ptransWriteCurrent()->SetCurrentTransform(QGetRenderContext()->Time(),CqMatrix(transform));
 	QGetRenderContext()->AdvanceTime();
 
