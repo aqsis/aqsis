@@ -909,7 +909,12 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 	if ( pReg != 0 )
 	{
 		IqShader * pShader = pReg->Create();
-		RegisterShader( strName, type, pShader );
+		/* 
+                 * 
+                 * Doesn't need to register since it is already in the cache
+                 * 
+                 * RegisterShader( strName, type, pShader );
+                 */
 		return ( pShader );
 	}
 	else
