@@ -5083,10 +5083,17 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 //
 RtVoid	CreateGPrim( CqBasicSurface* pSurface )
 {
+
 	if ( QGetRenderContext() ->pattrCurrent() ->GetFloatAttribute( "System", "LevelOfDetailBounds" ) [ 1 ] < 0.0f )
 	{
-		// Cull this geometry for LOD reasons
-		RELEASEREF( pSurface );
+		// Cull this geometry for LOD reasons.
+		// NB: The surface does not need to be released - it is simply *not* added to
+		//     a bucket.  The buckets keep references to the surfaces and the surfaces
+		//     should be released once the buckets have finished with them.  Hence,
+		//     needing to release a surface at this point is a Bad Thing (TM) because
+		//     it means that reference counts for non-culled surfaces will never reach
+		//     zero.
+		//RELEASEREF( pSurface );
 		return ;
 	}
 
