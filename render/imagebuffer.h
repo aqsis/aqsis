@@ -43,9 +43,6 @@
 #include    "imagepixel.h"
 #include    "bucket.h"
 
-#define		_qShareName	CORE
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 
@@ -72,10 +69,10 @@ START_NAMESPACE( Aqsis )
   \see CqBucket, CqBasicSurface, CqRenderer
  */
 
-class _qShareC	CqImageBuffer
+class CqImageBuffer
 {
 	public:
-		_qShareM	CqImageBuffer() :
+		CqImageBuffer() :
 				m_fQuit( TqFalse ),
 				m_fDone( TqTrue ),
 				m_iXRes( 0 ),
@@ -95,179 +92,181 @@ class _qShareC	CqImageBuffer
 				m_CropWindowYMax( 0 ),
 				m_DisplayMode( ModeRGB )
 		{}
-		_qShareM	virtual	~CqImageBuffer();
+		virtual	~CqImageBuffer();
 
-		_qShareM	TqInt	Bucket( TqInt X, TqInt Y, TqInt& Xb, TqInt& Yb ) const;
-		_qShareM	TqInt	Bucket( TqInt X, TqInt Y ) const;
-		_qShareM	CqVector2D	Position( TqInt iBucket ) const;
-		_qShareM	CqVector2D	Size( TqInt iBucket ) const;
+		TqInt	Bucket( TqInt X, TqInt Y, TqInt& Xb, TqInt& Yb ) const;
+		TqInt	Bucket( TqInt X, TqInt Y ) const;
+		CqVector2D	Position( TqInt iBucket ) const;
+		CqVector2D	Size( TqInt iBucket ) const;
 
 		/** Get the horizontal resolution of this image.
 		 * \return Integer horizontal resolution.
 		 */
-		_qShareM	TqInt	iXRes() const
+		TqInt	iXRes() const
 		{
 			return ( m_iXRes );
 		}
 		/** Get the vertical resolution of this image.
 		 * \return Integer vertical resolution.
 		 */
-		_qShareM	TqInt	iYRes() const
+		TqInt	iYRes() const
 		{
 			return ( m_iYRes );
 		}
 		/** Get the minimum horizontal pixel to render.
 		 * \return Integer minimum pixel index.
 		 */
-		_qShareM	TqInt	CropWindowXMin() const
+		TqInt	CropWindowXMin() const
 		{
 			return ( m_CropWindowXMin );
 		}
 		/** Get the minimum vertical pixel to render.
 		 * \return Integer minimum pixel index.
 		 */
-		_qShareM	TqInt	CropWindowYMin() const
+		TqInt	CropWindowYMin() const
 		{
 			return ( m_CropWindowYMin );
 		}
 		/** Get the maximum horizontal pixel to render.
 		 * \return Integer maximum pixel index.
 		 */
-		_qShareM	TqInt	CropWindowXMax() const
+		TqInt	CropWindowXMax() const
 		{
 			return ( m_CropWindowXMax );
 		}
 		/** Get the maximum vertical pixel to render.
 		 * \return Integer maximum pixel index.
 		 */
-		_qShareM	TqInt	CropWindowYMax() const
+		TqInt	CropWindowYMax() const
 		{
 			return ( m_CropWindowYMax );
 		}
 		/** Get the number of buckets in the horizontal direction.
 		 * \return Integer horizontal bucket count.
 		 */
-		_qShareM	TqInt	cXBuckets() const
+		TqInt	cXBuckets() const
 		{
 			return ( m_cXBuckets );
 		}
 		/** Get the number of buckets in the vertical direction.
 		 * \return Integer vertical bucket count.
 		 */
-		_qShareM	TqInt	cYBuckets() const
+		TqInt	cYBuckets() const
 		{
 			return ( m_cYBuckets );
 		}
 		/** Get the horizontal bucket size.
 		 * \return Integer horizontal bucket size.
 		 */
-		_qShareM	TqInt	XBucketSize() const
+		TqInt	XBucketSize() const
 		{
 			return ( m_XBucketSize );
 		}
 		/** Get the vertical bucket size.
 		 * \return Integer vertical bucket size.
 		 */
-		_qShareM	TqInt	YBucketSize() const
+		TqInt	YBucketSize() const
 		{
 			return ( m_YBucketSize );
 		}
 		/** Get the number of horizontal samples per pixel.
 		 * \return Integer sample count.
 		 */
-		_qShareM	TqInt	PixelXSamples() const
+		TqInt	PixelXSamples() const
 		{
 			return ( m_PixelXSamples );
 		}
 		/** Get the number of vertical samples per pixel.
 		 * \return Integer sample count.
 		 */
-		_qShareM	TqInt	PixelYSamples() const
+		TqInt	PixelYSamples() const
 		{
 			return ( m_PixelYSamples );
 		}
 		/** Get the width of the pixel filter in the horizontal direction.
 		 * \return Integer filter width, in pixels.
 		 */
-		_qShareM	TqInt	FilterXWidth() const
+		TqInt	FilterXWidth() const
 		{
 			return ( m_FilterXWidth );
 		}
 		/** Get the width of the pixel filter in the vertical direction.
 		 * \return Integer filter width, in pixels.
 		 */
-		_qShareM	TqInt	FilterYWidth() const
+		TqInt	FilterYWidth() const
 		{
 			return ( m_FilterYWidth );
 		}
 		/** Get the near clipping distance.
 		 * \return Float distance from the camera that objects must be to be visible.
 		 */
-		_qShareM	TqFloat	ClippingNear() const
+		TqFloat	ClippingNear() const
 		{
 			return ( m_ClippingNear );
 		}
 		/** Get the far clipping distance.
 		 * \return Float distance from the camera that objects will be clipped from view.
 		 */
-		_qShareM	TqFloat	ClippingFar() const
+		TqFloat	ClippingFar() const
 		{
 			return ( m_ClippingFar );
 		}
 		/** Get the display.
 		 * \return Integer display mode as a member of enum Mode.
 		 */
-		_qShareM	TqInt	DisplayMode() const
+		TqInt	DisplayMode() const
 		{
 			return ( m_DisplayMode );
 		}
 		/** Get the index of the bucket currently being processed.
 		 * \return Integer bucket index.
 		 */
-		_qShareM	TqInt	iCurrentBucket() const
+		TqInt	iCurrentBucket() const
 		{
 			return ( m_iCurrentBucket );
 		}
 		/** Set the current bucket index.
 		 * \param iBucket Integer index of the bucket being processed.
 		 */
-		_qShareM	void	SetiCurrentBucket( TqInt iBucket )
+		void	SetiCurrentBucket( TqInt iBucket )
 		{
 			m_iCurrentBucket = iBucket;
 		}
 
-		_qShareM	void	DeleteImage();
-		_qShareM	void	SaveImage( const char* strName );
+		void	DeleteImage();
+		void	SaveImage( const char* strName );
 
-		_qShareM	void	PostSurface( CqBasicSurface* pSurface );
-		_qShareM	TqBool	CullSurface( CqBound& Bound, CqBasicSurface* pSurface );
-		_qShareM	TqBool	OcclusionCullSurface( TqInt iBucket, CqBasicSurface* pSurface );
-		_qShareM	void	AddMPG( CqMicroPolygonBase* pmpgNew );
-		_qShareM	void	RenderMPGs( TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
-		_qShareM	void	RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
-		_qShareM	void	RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
-		_qShareM	void	RenderImage();
+		void	PostSurface( CqBasicSurface* pSurface );
+		TqBool	CullSurface( CqBound& Bound, CqBasicSurface* pSurface );
+		TqBool	OcclusionCullSurface( TqInt iBucket, CqBasicSurface* pSurface );
+		void	AddMPG( CqMicroPolygon* pmpgNew );
+		TqBool	PushMPGForward( CqMicroPolygon* pmpg );
+		TqBool	PushMPGDown( CqMicroPolygon*, TqInt );
+		void	RenderMPGs( TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
+		void	RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
+		void	RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
+		void	RenderImage();
 		/** Get completion status of this rendered image.
 		 * \return bool indicating finished or not.
 		 */
-		_qShareM	TqBool	fDone() const
+		TqBool	fDone() const
 		{
 			return ( m_fDone );
 		}
 
-		_qShareM	virtual	void	SetImage();
-		_qShareM	virtual	void	Quit();
-		_qShareM	virtual	void	Release();
+		virtual	void	SetImage();
+		virtual	void	Quit();
+		virtual	void	Release();
 
 
 		// Callbacks to overridden image buffer class to allow display/processing etc.
-		_qShareM	virtual	void	BucketComplete( TqInt iBucket )
+		virtual	void	BucketComplete( TqInt iBucket )
 		{
 			
 		}
-		_qShareM	virtual	void	ImageComplete()
+		virtual	void	ImageComplete()
 		{}
-		_qShareM	virtual	TqBool	IsEmpty(TqInt iBucket );
+		virtual	TqBool	IsEmpty(TqInt iBucket );
 
 	private:
 		TqBool	m_fQuit;			///< Set by system if a quit has been requested.

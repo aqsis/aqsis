@@ -281,7 +281,7 @@ int main( int argc, const char** argv )
 	ap.argString( "displays", "=string\aspecify a default displays searchpath", &g_displays );
 	ap.argString( "dsolibs", "=string\aspecify default DSO libraries", &g_dso_libs );
 
-	//_crtBreakAlloc = 845;
+	//_crtBreakAlloc = 1305;
 	
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
 	{

@@ -190,6 +190,24 @@ class CqStats
 			m_cMPGsDeallocated++;
 			m_cMPGsCurrent--;
 		}
+		/** Increase the number of micropolygons pushed forward.
+		 */
+		void	IncMPGsPushedForward()
+		{
+			m_cMPGsPushedForward++;
+		}
+		/** Increase the number of micropolygons pushed down.
+		 */
+		void	IncMPGsPushedDown()
+		{
+			m_cMPGsPushedDown++;
+		}
+		/** Increase the number of micropolygons pushed down more than 1 row.
+		 */
+		void	IncMPGsPushedFarDown()
+		{
+			m_cMPGsPushedFarDown++;
+		}
 		/** Increase the sample count by 1.
 		 */
 		void	IncSamples()
@@ -464,6 +482,19 @@ class CqStats
 			return ( m_cGridsDeallocated );
 		}
 
+		TqInt GetCurrentParametersAllocated() const
+		{
+			return ( m_cParametersCurrent );
+		}
+		TqInt GetParametersAllocated() const
+		{
+			return ( m_cParametersAllocated );
+		}
+		TqInt GetParametersDeallocated() const
+		{
+			return ( m_cParametersDeallocated );
+		}
+
 		//@}
 
 		void PrintStats( TqInt level ) const;
@@ -480,6 +511,9 @@ class CqStats
 		TqInt	m_cMPGsDeallocated;				///< Count of microplygons dallocated.
 		TqInt	m_cMPGsCurrent;					///< Current count of allocated MPGs.
 		TqInt	m_cMPGsPeak;					///< Peak count of allocated MPGs.
+		TqInt	m_cMPGsPushedForward;			///< Number of micropolygons pushed forward in the bucket list.
+		TqInt	m_cMPGsPushedDown;				///< Number of micropolygons pushed down in the bucket list.
+		TqInt	m_cMPGsPushedFarDown;			///< Number of micropolygons pushed down additional rows in the bucket list.
 		TqInt	m_cSamples;						///< Count of samples tested.
 		TqInt	m_cSampleBoundHits;				///< Count of sample boundary hits.
 		TqInt	m_cSampleHits;					///< Count of sample micropolygon hits.

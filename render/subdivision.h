@@ -36,9 +36,6 @@
 #include "ishaderdata.h"
 #include "memorypool.h"
 
-#define		_qShareName	CORE
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 

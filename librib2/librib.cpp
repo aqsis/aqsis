@@ -132,6 +132,7 @@ void StandardDeclarations( RendermanInterface& CallbackInterface )
 	ParserDeclare( CallbackInterface, "width", "varying float" );
 	ParserDeclare( CallbackInterface, "constantwidth", "constant float" );
 	ParserDeclare( CallbackInterface, "dsolibs", "uniform string" );
+	ParserDeclare( CallbackInterface, "binary", "uniform integer" );
 }
 
 

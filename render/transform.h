@@ -37,9 +37,6 @@
 #include	"options.h"
 #include	"itransform.h"
 
-#define		_qShareName	CORE
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 
@@ -48,17 +45,17 @@ START_NAMESPACE( Aqsis )
  * Container class for the transform definitions of the graphics state.
  */
 
-class _qShareC	CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount, public IqTransform
+class CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount, public IqTransform
 {
 	public:
-		_qShareM	CqTransform();
-		_qShareM	CqTransform( const CqTransform& From );
-		_qShareM	virtual	~CqTransform();
+		CqTransform();
+		CqTransform( const CqTransform& From );
+		virtual	~CqTransform();
 
 		/** Get a writable copy of this, if the reference count is greater than 1
 		 * create a new copy and retirn that.
 		 */
-		_qShareM CqTransform* Write()
+		CqTransform* Write()
 		{
 			// We are about to write to this attribute,so clone if references exist.
 			if ( RefCount() > 1 )
@@ -72,25 +69,25 @@ class _qShareC	CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount, p
 				return ( this );
 		}
 
-		_qShareM virtual	CqTransform& operator=( const CqTransform& From );
+		virtual	CqTransform& operator=( const CqTransform& From );
 
 		/** Get a duplicate of this transform.
 		 */
-		_qShareM CqTransform*	Clone() const
+		CqTransform*	Clone() const
 		{
 			return ( new CqTransform( *this ) );
 		}
 
-		_qShareM virtual	void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
-		_qShareM virtual	void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
+		virtual	void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
+		virtual	void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
 
-		_qShareM virtual	const CqMatrix&	matObjectToWorld( TqFloat time = 0.0f ) const;
+		virtual	const CqMatrix&	matObjectToWorld( TqFloat time = 0.0f ) const;
 
-		_qShareM virtual	TqFloat	Time( TqInt index ) const
+		virtual	TqFloat	Time( TqInt index ) const
 		{
 			return( CqMotionSpec<CqMatrix>::Time( index ) );
 		}
-		_qShareM virtual	TqInt	cTimes() const
+		virtual	TqInt	cTimes() const
 		{
 			return( CqMotionSpec<CqMatrix>::cTimes() );
 		}
@@ -104,9 +101,9 @@ class _qShareC	CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount, p
 			CqRefCount::AddRef();
 		}
 
-		_qShareM	virtual	void	ClearMotionObject( CqMatrix& A ) const;
-		_qShareM	virtual	CqMatrix	ConcatMotionObjects( const CqMatrix& A, const CqMatrix& B ) const;
-		_qShareM	virtual	CqMatrix	LinearInterpolateMotionObjects( TqFloat Fraction, const CqMatrix& A, const CqMatrix& B ) const;
+		virtual	void	ClearMotionObject( CqMatrix& A ) const;
+		virtual	CqMatrix	ConcatMotionObjects( const CqMatrix& A, const CqMatrix& B ) const;
+		virtual	CqMatrix	LinearInterpolateMotionObjects( TqFloat Fraction, const CqMatrix& A, const CqMatrix& B ) const;
 
 	private:
 		TqInt	m_cReferences;		///< Number of references to this transform.

@@ -32,8 +32,6 @@
 #include        "surface.h"
 #include        "vector4d.h"
 #include        "patch.h"
-#define         _qShareName	CORE
-#include        "share.h"
 
 START_NAMESPACE( Aqsis )
 

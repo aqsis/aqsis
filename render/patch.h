@@ -35,9 +35,6 @@
 #include	"bilinear.h"
 #include	"forwarddiff.h"
 
-#define		_qShareName	CORE
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 
@@ -184,7 +181,7 @@ class CqSurfacePatchBicubic : public CqSurface
  * Bilinear spline patch
  */
 
-class _qShareC CqSurfacePatchBilinear : public CqSurface
+class CqSurfacePatchBilinear : public CqSurface
 {
 	public:
 		CqSurfacePatchBilinear();

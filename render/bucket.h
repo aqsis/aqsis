@@ -41,9 +41,6 @@
 #include	"vector2d.h"
 #include    "imagepixel.h"
 
-#define		_qShareName	CORE
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 //-----------------------------------------------------------------------
@@ -136,11 +133,11 @@ class CqBucket : public IqBucket
 
 		/** Add an MPG to the list of deferred MPGs.
 		 */
-		void	AddMPG( CqMicroPolygonBase* pmpgNew )
+		void	AddMPG( CqMicroPolygon* pmpgNew )
 		{
 #ifdef _DEBUG
-			std::vector<CqMicroPolygonBase*>::iterator end = m_ampgWaiting.end();
-			for (std::vector<CqMicroPolygonBase*>::iterator i = m_ampgWaiting.begin(); i != end; i++)
+			std::vector<CqMicroPolygon*>::iterator end = m_ampgWaiting.end();
+			for (std::vector<CqMicroPolygon*>::iterator i = m_ampgWaiting.begin(); i != end; i++)
 				if ((*i) == pmpgNew) 
 					assert( TqFalse );
 #endif
@@ -166,7 +163,7 @@ class CqBucket : public IqBucket
 		}
 		/** Get a reference to the vetor of deferred MPGs.
 		 */
-		std::vector<CqMicroPolygonBase*>& aMPGs()
+		std::vector<CqMicroPolygon*>& aMPGs()
 		{
 			return ( m_ampgWaiting );
 		}
@@ -191,7 +188,7 @@ class CqBucket : public IqBucket
 		static	std::vector<CqImagePixel>	m_aieImage;
 		static	std::vector<TqFloat>	m_aFilterValues;				///< Vector of filter weights precalculated.
 
-		std::vector<CqMicroPolygonBase*> m_ampgWaiting;			///< Vector of vectors of waiting micropolygons in this bucket
+		std::vector<CqMicroPolygon*> m_ampgWaiting;			///< Vector of vectors of waiting micropolygons in this bucket
 		std::vector<CqMicroPolyGridBase*> m_agridWaiting;		///< Vector of vectors of waiting micropolygrids in this bucket
 		CqList<CqBasicSurface>	m_aGPrims;						///< Vector of lists of split surfaces for this bucket.
 }

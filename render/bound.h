@@ -32,9 +32,6 @@
 #include	"ri.h"
 #include	"matrix.h"
 
-#define		_qShareName	CORE
-#include	"share.h"
-
 #include <vector>
 
 START_NAMESPACE( Aqsis )

@@ -45,7 +45,6 @@ std::list<CqString*> CqFile::Glob (const CqString& strFileGlob)
 {
 	_finddata_t     c_file;
 	long            hFile;
-	char            name[1024];
 	const char *pt = strFileGlob.c_str();
 
 	std::list<CqString*> result;

@@ -33,9 +33,6 @@
 #include	"file.h"
 #include	"renderer.h"
 
-#define		_qShareName	CORE
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
@@ -43,32 +40,32 @@ START_NAMESPACE( Aqsis )
  * Standard handling of all file types utilising the searchpath options.
  */
 
-class _qShareC CqRiFile : public CqFile
+class CqRiFile : public CqFile
 {
 	public:
 		/** Default constructor
 		 */
-		_qShareM	CqRiFile() : CqFile( 0 )
+		CqRiFile() : CqFile( 0 )
 		{}
 		/** Constructor taking an open stream pointer and a name.
 		 * \param Stream a pointer to an already opened input stream to attach this object to.
 		 * \param strRealName the name of the file associated with this stream.
 		 */
-		_qShareM	CqRiFile( std::istream* Stream, const char* strRealName ) :
+		CqRiFile( std::istream* Stream, const char* strRealName ) :
 				CqFile( Stream, strRealName )
 		{}
-		_qShareM	CqRiFile( const char* strFilename, const char* strSearchPathOption = "" )
+		CqRiFile( const char* strFilename, const char* strSearchPathOption = "" )
 		{
 			//									std::cout << "CqRiFile::CqRiFile() " << strFilename << " - " << strSearchPathOption << std::endl;
 			Open( strFilename, strSearchPathOption );
 		}
 		/** Destructor. Takes care of closing the stream if the constructor opened it.
 		 */
-		_qShareM	virtual	~CqRiFile()
+		virtual	~CqRiFile()
 		{}
 
 
-		_qShareM	void	Open( const char* strFilename, const char* strSearchPathOption = "", std::ios::openmode mode = std::ios::in )
+		void	Open( const char* strFilename, const char* strSearchPathOption = "", std::ios::openmode mode = std::ios::in )
 		{
 			CqString SearchPath( "" );
 			if ( strSearchPathOption != "" )

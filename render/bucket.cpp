@@ -429,7 +429,6 @@ void CqBucket::FilterBucket()
 	delete[] ( pOpacs );
 	delete[] ( pDepths );
 	delete[] ( pCoverages );
-
 }
 
 

@@ -138,25 +138,7 @@ Package=<5>
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name librib2ri
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libaqsistypes
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name libaqsis
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libddmsock
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libshadervm
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libshaderexecenv
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name librib_shared
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libargparse

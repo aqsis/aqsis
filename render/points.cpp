@@ -485,7 +485,7 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 				CqVector3D p3( Point.x() + radius, Point.y() + radius, Point.z() );
 				CqVector3D p4( Point.x() - radius, Point.y() + radius, Point.z() );
 				
-				pNew->Initialise( p1, p2, p3, p4, pSurface()->pTransform()->Time( iTime ) );
+				pNew->AppendKey( p1, p2, p3, p4, pSurface()->pTransform()->Time( iTime ) );
 			}
 			pNew->GetTotalBound( TqTrue );
 			pImage->AddMPG( pNew );
@@ -535,10 +535,10 @@ void CqMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, long xm
 			CqVector3D p3( Point.x() + radius, Point.y() + radius, Point.z() );
 			CqVector3D p4( Point.x() - radius, Point.y() + radius, Point.z() );
 			
-			CqMicroPolygonStatic *pNew = new CqMicroPolygonStatic();
+			CqMicroPolygon *pNew = new CqMicroPolygon();
 			pNew->SetGrid( this );
 			pNew->SetIndex( iu );
-			pNew->Initialise( p1, p2, p3, p4 );
+			pNew->Initialise();
 			pNew->GetTotalBound( TqTrue );
 
 			pImage->AddMPG( pNew );
@@ -640,7 +640,7 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, l
 			CqVector3D p3( Point.x() + radius, Point.y() + radius, Point.z() );
 			CqVector3D p4( Point.x() - radius, Point.y() + radius, Point.z() );
 			
-			pNew->Initialise( p1, p2, p3, p4, Time( iTime ) );
+			pNew->AppendKey( p1, p2, p3, p4, Time( iTime ) );
 		}
 
 		pNew->GetTotalBound( TqTrue );

@@ -46,9 +46,6 @@
 #include	"irenderer.h"
 #include	"log.h"
 
-#define		_qShareName	CORE
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 class CqImageBuffer;
@@ -98,8 +95,8 @@ enum EqRenderMode
  */
 
 class CqRenderer;
-_qShareM extern CqRenderer* pCurrRenderer;
-_qShareM extern CqOptions	goptDefault;					///< Default options.
+extern CqRenderer* pCurrRenderer;
+extern CqOptions	goptDefault;					///< Default options.
 
 class CqRenderer : public IqRenderer
 {
@@ -359,7 +356,7 @@ inline CqRenderer* QGetRenderContext()
 }
 
 
-_qShareM	void	QSetRenderContext( CqRenderer* pRenderer );
+void	QSetRenderContext( CqRenderer* pRenderer );
 
 
 //-----------------------------------------------------------------------

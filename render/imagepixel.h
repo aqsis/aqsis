@@ -39,9 +39,6 @@
 #include	"color.h"
 #include	"vector2d.h"
 
-#define		_qShareName	CORE
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 //-----------------------------------------------------------------------
@@ -83,38 +80,38 @@ struct SqImageSample
 /** Storage class for all data relating to a single pixel in the image.
  */
 
-class _qShareC	CqImagePixel
+class CqImagePixel
 {
 	public:
-		_qShareM	CqImagePixel();
-		_qShareM	CqImagePixel( const CqImagePixel& ieFrom );
-		_qShareM	virtual	~CqImagePixel();
+		CqImagePixel();
+		CqImagePixel( const CqImagePixel& ieFrom );
+		virtual	~CqImagePixel();
 
 		/** Get the number of horizontal samples in this pixel
 		 * \return The number of samples as an integer.
 		 */
-		_qShareM	TqInt	XSamples() const
+		TqInt	XSamples() const
 		{
 			return ( m_XSamples );
 		}
 		/** Get the number of vertical samples in this pixel
 		 * \return The number of samples as an integer.
 		 */
-		_qShareM	TqInt	YSamples() const
+		TqInt	YSamples() const
 		{
 			return ( m_YSamples );
 		}
-		_qShareM	void	AllocateSamples( TqInt XSamples, TqInt YSamples );
-		_qShareM	void	InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter = TqTrue );
+		void	AllocateSamples( TqInt XSamples, TqInt YSamples );
+		void	InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter = TqTrue );
 	
 		/** Get the approximate coverage of this pixel.
 		 * \return Float fraction of the pixel covered.
 		 */
-		_qShareM	TqFloat	Coverage()
+		TqFloat	Coverage()
 		{
 			return ( m_Coverage );
 		}
-		_qShareM	void	SetCoverage( TqFloat c )
+		void	SetCoverage( TqFloat c )
 		{
 			m_Coverage = c;
 		}
@@ -122,7 +119,7 @@ class _qShareC	CqImagePixel
 		 * \return A color representing the averaged color at this pixel.
 		 * \attention Only call this after already calling FilterBucket().
 		 */
-		_qShareM	CqColor&	Color()
+		CqColor&	Color()
 		{
 			return ( m_colColor );
 		}
@@ -130,7 +127,7 @@ class _qShareC	CqImagePixel
 		 * \return A color representing the averaged opacity at this pixel.
 		 * \attention Only call this after already calling FilterBucket().
 		 */
-		_qShareM	CqColor&	Opacity()
+		CqColor&	Opacity()
 		{
 			return ( m_colOpacity );
 		}
@@ -138,83 +135,83 @@ class _qShareC	CqImagePixel
 		 * \return A float representing the averaged depth at this pixel.
 		 * \attention Only call this after already calling FilterBucket().
 		 */
-		_qShareM	TqFloat	Depth()
+		TqFloat	Depth()
 		{
 			return ( m_Depth );
 		}
-		_qShareM	void	SetDepth( TqFloat d )
+		void	SetDepth( TqFloat d )
 		{
 			m_Depth = d;
 		}
 		/** Get the maximum depth of this pixel
 		 * \return A float representing the maximum depth at this pixel.
 		 */
-		_qShareM	TqFloat	MaxDepth()
+		TqFloat	MaxDepth()
 		{
 			return ( m_MaxDepth );
 		}
-		_qShareM	void	SetMaxDepth( TqFloat d )
+		void	SetMaxDepth( TqFloat d )
 		{
 			m_MaxDepth = d;
 		}
 		/** Get the minimum depth of this pixel
 		 * \return A float representing the minimum depth at this pixel.
 		 */
-		_qShareM	TqFloat	MinDepth()
+		TqFloat	MinDepth()
 		{
 			return ( m_MinDepth );
 		}
-		_qShareM	void	SetMinDepth( TqFloat d )
+		void	SetMinDepth( TqFloat d )
 		{
 			m_MinDepth = d;
 		}
 		/** Get the id of the occlusion box that covers this pixel
 		 * \return The covering occlusion box's id.
 		 */
-		_qShareM	TqInt	OcclusionBoxId()
+		TqInt	OcclusionBoxId()
 		{
 			return ( m_OcclusionBoxId );
 		}
-		_qShareM	void	SetOcclusionBoxId( TqInt id )
+		void	SetOcclusionBoxId( TqInt id )
 		{
 			m_OcclusionBoxId = id;
 		}
 		/** Mark this pixel as needing its min and max Z  values recalculating
 		*/
-		_qShareM	void	MarkForZUpdate()
+		void	MarkForZUpdate()
 		{
 			m_NeedsZUpdate = true;
 		}
-		_qShareM	bool	NeedsZUpdating()
+		bool	NeedsZUpdating()
 		{
 			return m_NeedsZUpdate;
 		}
 		/** Scan through all the samples to find the min and max z values
 		*/
-		_qShareM	void	UpdateZValues();
+		void	UpdateZValues();
 
 		/** Clear all sample information from this pixel.
 		 */
-		_qShareM	void	Clear();
+		void	Clear();
 		/** Get a reference to the array of values for the specified sample.
 		 * \param m The horizontal index of the required sample point.
 		 * \param n The vertical index of the required sample point.
 		 * \return A Reference to a vector of SqImageSample data.
 		 */
-		_qShareM	std::vector<SqImageSample>&	Values( TqInt m, TqInt n )
+		std::vector<SqImageSample>&	Values( TqInt m, TqInt n )
 		{
 			assert( m < m_XSamples );
 			assert( n < m_YSamples );
 			return ( m_aValues[ n * m_XSamples + m ] );
 		}
-		_qShareM	void	Combine();
+		void	Combine();
 		/** Get the 2D sample position of the specified sample index.
 		 * \param m The horizontal index of the required sample point.
 		 * \param n The vertical index of the required sample point.
 		 * \return A 2d vector representing the sample position. 
 		 *  The position is in pixels and fractions thereof indexed from 0,0 at the top left of the image.
 		 */
-		_qShareM	CqVector2D&	SamplePoint( TqInt m, TqInt n )
+		CqVector2D&	SamplePoint( TqInt m, TqInt n )
 		{
 			assert( m < m_XSamples );
 			assert( n < m_YSamples );
@@ -227,7 +224,7 @@ class _qShareC	CqImagePixel
 		 * \return The integer index of the subcell.
 		 *  The position is in pixels and fractions thereof indexed from 0,0 at the top left of the image.
 		 */
-		_qShareM	TqInt	SubCellIndex( TqInt m, TqInt n )
+		TqInt	SubCellIndex( TqInt m, TqInt n )
 		{
 			assert( m < m_XSamples );
 			assert( n < m_YSamples );
@@ -238,7 +235,7 @@ class _qShareC	CqImagePixel
 		 * \param n The vertical index of the required sample point.
 		 * \return A float time between the shutter open and close times.
 		 */
-		_qShareM	TqFloat	SampleTime( TqInt m, TqInt n )
+		TqFloat	SampleTime( TqInt m, TqInt n )
 		{
 			assert( m < m_XSamples );
 			assert( n < m_YSamples );
@@ -249,15 +246,12 @@ class _qShareC	CqImagePixel
 		 * \param n The vertical index of the required sample point.
 		 * \return A float detail level.
 		 */
-		_qShareM	TqFloat	SampleLevelOfDetail( TqInt m, TqInt n )
+		TqFloat	SampleLevelOfDetail( TqInt m, TqInt n )
 		{
 			assert( m < m_XSamples );
 			assert( n < m_YSamples );
 			return ( m_aDetailLevels[ n * m_XSamples + m ] );
 		}
-
-		
-		//	_qShareM	CqImagePixel&	operator=(const CqImagePixel& ieFrom);
 
 	private:
 		TqInt	m_XSamples;						///< The number of samples in the horizontal direction.

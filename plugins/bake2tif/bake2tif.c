@@ -104,7 +104,7 @@ float ratio = 1.0;
     if (x == minx) return miny;
 	if (maxx == minx) return miny;
 	else 
-		ratio = 1.0 - (float) (maxx - x) / (float) (maxx - minx);
+		ratio = 1.0f - (float) (maxx - x) / (float) (maxx - minx);
 	result = miny + (int) (ratio * (maxy - miny));
 
 	
@@ -139,14 +139,14 @@ static char *bake_open( FILE *bakefile, char *tiffname )
 
 		// When we have some collision ? What should be nice
 		// to accumulate the RGB values instead ?
-		x = ( s * ( size - 1 ) );
-		y = ( t * ( size - 1 ) );
+		x = (int)( s * ( size - 1 ) );
+		y = (int)( t * ( size - 1 ) );
 		n = ( y * size ) + x;
 		n *= 3;
 
-		pixels [ n ] = r1 * 255;
-		pixels [ n + 1 ] = g1 * 255;
-		pixels [ n + 2 ] = b1 * 255;
+		pixels [ n ] = (int)(r1 * 255);
+		pixels [ n + 1 ] = (int)(g1 * 255);
+		pixels [ n + 2 ] = (int)(b1 * 255);
 
 	}
 

@@ -72,6 +72,9 @@ void CqStats::InitialiseFrame()
 	m_cMPGsDeallocated = 0;
 	m_cMPGsCurrent	= 0;
 	m_cMPGsPeak = 0;
+	m_cMPGsPushedForward = 0;
+	m_cMPGsPushedDown = 0;
+	m_cMPGsPushedFarDown = 0;
 	m_cSamples = 0;
 	m_cSampleBoundHits = 0;
 	m_cSampleHits = 0;
@@ -289,6 +292,7 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "Grids:    \t" << m_cGridsAllocated << " created" << std::endl;
 
 		MSG << "Micropolygons: \t" << m_cMPGsAllocated << " created" << " (" << m_cCulledMPGs << " culled)" << std::endl;
+		MSG << "               \t" << m_cMPGsPushedForward << " pushed forward, " << m_cMPGsPushedDown << " pushed down, " << m_cMPGsPushedFarDown << " pushed far down" << std::endl;
 
 		MSG << "Sampling: \t" << m_cSamples << " samples" << std::endl;
 
@@ -322,6 +326,7 @@ void CqStats::PrintStats( TqInt level ) const
 			MSG << " (** " << m_cMissedMPGs << " missed **)" << std::endl;
 		else
 			MSG << std::endl;
+		MSG << "               \t" << m_cMPGsPushedForward << " pushed forward, " << m_cMPGsPushedDown << " pushed down, " << m_cMPGsPushedFarDown << " pushed far down" << std::endl;
 
 		MSG << "Sampling: \t" << m_cSamples << " samples" << std::endl;
 		MSG << "          \t" << m_cSampleBoundHits << " bound hits (";

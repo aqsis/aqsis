@@ -37,10 +37,6 @@
 
 #include	"ri.h"
 
-#define		_qShareName	CORE
-#include	"share.h"
-
-
 START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
@@ -50,56 +46,56 @@ START_NAMESPACE( Aqsis )
  * polygon support, with holes, to be triangulated on request.
  */
 
-class _qShareC	CqPolygonGeneral2D
+class CqPolygonGeneral2D
 {
 	public:
-		_qShareM	CqPolygonGeneral2D() :
+		CqPolygonGeneral2D() :
 				m_Orientation( Orientation_Unknown )
 		{}
-		_qShareM	CqPolygonGeneral2D( const CqPolygonGeneral2D& From );
-		_qShareM	~CqPolygonGeneral2D()
+		CqPolygonGeneral2D( const CqPolygonGeneral2D& From );
+		~CqPolygonGeneral2D()
 		{
 			if ( m_pVertices )
 				m_pVertices->Release();
 		}
 
-		_qShareM	std::vector<TqInt>&	aiVertices()
+		std::vector<TqInt>&	aiVertices()
 		{
 			return ( m_aiVertices );
 		}
-		_qShareM	TqInt	cVertices() const
+		TqInt	cVertices() const
 		{
 			return ( m_aiVertices.size() );
 		}
-		_qShareM	TqInt	Orientation() const
+		TqInt	Orientation() const
 		{
 			return ( m_Orientation );
 		}
-		_qShareM	TqInt	Axis() const
+		TqInt	Axis() const
 		{
 			return ( m_Axis );
 		}
-		_qShareM	void	SetAxis( TqInt axis )
+		void	SetAxis( TqInt axis )
 		{
 			m_Axis = axis;
 		}
-		_qShareM	void	SetpVertices( CqSurface* pVertices )
+		void	SetpVertices( CqSurface* pVertices )
 		{
 			m_pVertices = pVertices;
 			pVertices->AddRef();
 		}
 
-		_qShareM	void	SwapDirection();
-		_qShareM	TqInt	CalcOrientation();
-		_qShareM	TqInt	CalcDeterminant( TqInt i1, TqInt i2, TqInt i3 ) const;
-		_qShareM	TqBool	NoneInside( TqInt P1, TqInt P2, TqInt P3, std::vector<TqInt>& iList ) const;
-		_qShareM	void	EliminateDuplicatePoints();
+		void	SwapDirection();
+		TqInt	CalcOrientation();
+		TqInt	CalcDeterminant( TqInt i1, TqInt i2, TqInt i3 ) const;
+		TqBool	NoneInside( TqInt P1, TqInt P2, TqInt P3, std::vector<TqInt>& iList ) const;
+		void	EliminateDuplicatePoints();
 
-		_qShareM	TqBool	Contains( CqPolygonGeneral2D& polyCheck );
-		_qShareM	void	Combine( CqPolygonGeneral2D& polyFrom );
-		_qShareM	void	Triangulate( std::vector<TqInt>& aiList ) const;
+		TqBool	Contains( CqPolygonGeneral2D& polyCheck );
+		void	Combine( CqPolygonGeneral2D& polyFrom );
+		void	Triangulate( std::vector<TqInt>& aiList ) const;
 
-		_qShareM	CqVector2D	operator[] ( TqInt index ) const
+		CqVector2D	operator[] ( TqInt index ) const
 		{
 			switch ( m_Axis )
 			{
@@ -117,16 +113,16 @@ class _qShareC	CqPolygonGeneral2D
 			}
 			return ( CqVector2D( 0, 0 ) );
 		}
-		_qShareM	CqPolygonGeneral2D& operator=( const CqPolygonGeneral2D& From );
+		CqPolygonGeneral2D& operator=( const CqPolygonGeneral2D& From );
 
-		_qShareM	enum	EssOrientation
+		enum	EssOrientation
 		{
 		    Orientation_Unknown,
 
 		    Orientation_Clockwise,
 		    Orientation_AntiClockwise,
 	};
-		_qShareM	enum	EssAxis
+		enum	EssAxis
 		{
 		    Axis_Unknown,
 

@@ -72,9 +72,6 @@ class CqMicroPolyGridBase
 		 * \param ymax The maximum y pixel, taking into account clipping etc.
 		 */
 		virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax ) = 0;
-		/** Pure virtual, project the grid into raster space.
-		 */
-//		virtual void	Project() = 0;
 		/** Pure virtual, shade the grid.
 		 */
 		virtual	void	Shade() = 0;
@@ -82,10 +79,6 @@ class CqMicroPolyGridBase
 		 * Delete all the variables per grid 
 		 */
 		virtual void DeleteVariables( TqBool all ) = 0;
-		/** Pure virtual, get the bound of the grid.
-		 * \return CqBound class representing the conservative boundary.
-		 */
-//		virtual CqBound	Bound() = 0;
 		/** Pure virtual, get a pointer to the surface this grid belongs.
 		 * \return Pointer to surface, only valid during grid shading.
 		 */
@@ -162,10 +155,8 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 
 		// Overrides from CqMicroPolyGridBase
 		virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
-//		virtual void	Project();
 		virtual	void	Shade();
 
-//		virtual CqBound	Bound();
 		/** Get a pointer to the surface which this grid belongs.
 		 * \return Surface pointer, only valid during shading.
 		 */
@@ -329,13 +320,11 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 
 
 		virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
-//		virtual void	Project();
 		virtual	void	Shade();
 		void DeleteVariables( TqBool all )
 		{}
 
 
-//		virtual CqBound	Bound();
 		/** Get a pointer to the surface which this grid belongs.
 		 * Actually returns the surface pointer from the first timeslot.
 		 * \return Surface pointer, only valid during shading.
@@ -375,15 +364,38 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 
 
 //----------------------------------------------------------------------
-/** \class CqMicroPolygonBase
+/** \class CqMicroPolygon
  * Abstract base class from which static and motion micropolygons are derived.
  */
 
-class CqMicroPolygonBase
+class CqMicroPolygon : public CqRefCount, public CqPoolable<CqMicroPolygon, 512>
 {
 	public:
-		CqMicroPolygonBase();
-		virtual	~CqMicroPolygonBase();
+		CqMicroPolygon();
+		virtual	~CqMicroPolygon();
+		/** Assigment operator, copies contents of donor micropoly while safely deleting old contents.
+		 * \param From Donor micropoly.
+		 */
+		CqMicroPolygon& operator=( const CqMicroPolygon& From )
+		{
+			if ( m_pGrid != NULL ) m_pGrid->Release();
+			m_pGrid = From.m_pGrid;
+			m_pGrid->AddRef();
+			m_Index = From.m_Index;
+			m_IndexCode = From.m_IndexCode;
+			m_BoundCode = From.m_BoundCode;
+			m_Flags = From.m_Flags;
+
+			return ( *this );
+		}
+
+	private:
+		enum EqMicroPolyFlags
+		{
+			MicroPolyFlags_Trimmed			= 0x0001,
+			MicroPolyFlags_Hit				= 0x0002,
+			MicroPolyFlags_PushedForward	= 0x0004,
+		};
 
 	public:
 		/** Set up the pointer to the grid this micropoly came from.
@@ -420,20 +432,6 @@ class CqMicroPolygonBase
 				m_pGrid = 0;
 			}
 		}
-		/** Increment the reference count on this micropoly.
-		 */
-		void	AddRef()
-		{
-			m_RefCount++;
-		}
-		/** Decrement the reference count on this micropoly. Delete it if no longer referenced.
-		 */
-		void	Release()
-		{
-			m_RefCount--;
-			if ( m_RefCount <= 0 )
-				delete( this );
-		}
 		/** Get the color of this micropoly.
 		 * \return CqColor reference.
 		 */
@@ -453,182 +451,163 @@ class CqMicroPolygonBase
 			return ( colRes );
 		}
 
-		/** Assigment operator, copies contents of donor micropoly while safely deleting old contents.
-		 * \param From Donor micropoly.
-		 */
-		CqMicroPolygonBase& operator=( const CqMicroPolygonBase& From )
-		{
-			if ( m_pGrid != NULL ) m_pGrid->Release();
-			m_pGrid = From.m_pGrid;
-			m_pGrid->AddRef();
-			m_Index = From.m_Index;
 
-			return ( *this );
-		}
 		// Overridables
-		/** Pure virtual, get the bound of the micropoly.
+		/** Get the bound of the micropoly.
 		 * \param fForce Flag indicating do not get the stored bound, but recalculate it.
 		 * \return CqBound representing the conservative bound.
 		 */
-		virtual	CqBound&	GetTotalBound( TqBool fForce = TqFalse ) = 0;
-		/** Pure virtual, get the bound of the micropoly.
+		virtual	CqBound			GetTotalBound( TqBool fForce = TqFalse );
+		/** Get the bound of the micropoly.
 		 * \return CqBound representing the conservative bound.
 		 */
-		virtual const CqBound&	GetTotalBound() const = 0;
-		virtual	TqInt	cSubBounds() = 0;
-		virtual	CqBound&	SubBound( TqInt iIndex, TqFloat& time ) = 0;
+		virtual const CqBound	GetTotalBound() const
+		{
+			return ( GetTotalBound() );
+		}
+		virtual	TqInt			cSubBounds()
+		{
+			return ( 1 );
+		}
+		virtual	CqBound			SubBound( TqInt iIndex, TqFloat& time )
+		{
+			time = 0.0f;
+			return ( GetTotalBound() );
+		}
 
-		/** Pure virtual, check if the sample point is within the micropoly.
+		/** Check if the sample point is within the micropoly.
 		 * \param vecSample 2D sample point.
 		 * \param time The frame time at which to check.
 		 * \param D storage to put the depth at the sample point if success.
 		 * \return Boolean success.
 		 */
-		virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time ) = 0;
+		virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
 
+		/** Query if the micropolygon has been successfully hit by a pixel sample.
+		 */
+		TqBool IsHit() const
+		{
+			return( ( m_Flags & MicroPolyFlags_Hit ) != 0 );
+		}
 		/** Set the flag to state that the MPG has eben hit by a sample point.
 		 */
-		void BeenHit()
+		void MarkHit()
 		{
-			m_bHit = TqTrue;
+			m_Flags |= MicroPolyFlags_Hit;
+		}
+		/** Get the flag indicating if the micropoly has already beed pushed forward to the next bucket.
+		 */
+		TqBool	IsPushedForward() const
+		{
+			return( ( m_Flags & MicroPolyFlags_PushedForward ) != 0 );
+		}
+		/** Set the flag indicating if the micropoly has already beed pushed forward to the next bucket.
+		 */
+		void	MarkPushedForward()
+		{
+			m_Flags |= MicroPolyFlags_PushedForward;
+		}
+		virtual void	MarkTrimmed()
+		{
+			m_Flags |= MicroPolyFlags_Trimmed;
+		}
+		virtual TqBool	IsTrimmed() const
+		{
+			return( ( m_Flags & MicroPolyFlags_Trimmed ) != 0 );
+		}
+
+
+		virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
+		void	Initialise();
+		CqVector2D ReverseBilinear( const CqVector2D& v );
+
+		const CqVector3D& PointA() const
+		{
+			CqVector3D* pP;
+			m_pGrid->P()->GetPointPtr( pP );
+			return( pP[ GetCodedIndex( m_IndexCode, 0 ) ] );
+		}
+		const CqVector3D& PointB() const
+		{
+			CqVector3D* pP;
+			m_pGrid->P()->GetPointPtr( pP );
+			return( pP[ GetCodedIndex( m_IndexCode, 1 ) ] );
+		}
+		const CqVector3D& PointC() const
+		{
+			CqVector3D* pP;
+			m_pGrid->P()->GetPointPtr( pP );
+			return( pP[ GetCodedIndex( m_IndexCode, 2 ) ] );
+		}
+		const CqVector3D& PointD() const
+		{
+			CqVector3D* pP;
+			m_pGrid->P()->GetPointPtr( pP );
+			return( pP[ GetCodedIndex( m_IndexCode, 3 ) ] );
+		}
+		const TqBool IsDegenerate() const
+		{
+			return( ( m_IndexCode & 0x8000 ) != 0 );
 		}
 
 	protected:
+		TqInt GetCodedIndex( TqShort code, TqShort shift ) const
+		{
+			switch( ( ( code >> ( shift<<1) ) & 0x3 ) )
+			{	
+				case 1:
+					return( m_Index + 1 );
+				case 2:
+					return( m_Index + m_pGrid->uGridRes() + 2 );
+				case 3:
+					return( m_Index + m_pGrid->uGridRes() + 1 );
+				default:
+					return( m_Index );
+			}
+		}
+		TqShort				m_IndexCode;
+		TqShort				m_BoundCode;
 		CqMicroPolyGrid*	m_pGrid;		///< Pointer to the donor grid.
-		TqInt	m_Index;		///< Index within the donor grid.
-		TqInt	m_RefCount;		///< Number of references to this micropoly.
-		TqBool	m_bHit;			///< Flag indicating the MPG has been sampled.
+		TqInt				m_Index;		///< Index within the donor grid.
+
+		TqShort				m_Flags;		///< Bitvector of general flags, using EqMicroPolyFlags as bitmasks.
 
 	private:
-		CqMicroPolygonBase( const CqMicroPolygonBase& From )	{}
+		CqMicroPolygon( const CqMicroPolygon& From )	{}
 }
 ;
 
 
 //----------------------------------------------------------------------
-/** \class CqMicroPolygonStaticBase
+/** \class CqMovingMicroPolygonKey
  * Base lass for static micropolygons. Stores point information about the geometry of the micropoly.
  */
 
-class CqMicroPolygonStaticBase
+class CqMovingMicroPolygonKey : public CqPoolable<CqMovingMicroPolygonKey, 512>
 {
 	public:
-		CqMicroPolygonStaticBase()
+		CqMovingMicroPolygonKey()
 		{}
-		CqMicroPolygonStaticBase( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD )
+		CqMovingMicroPolygonKey( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD )
 		{
 			Initialise( vA, vB, vC, vD );
 		}
-		CqMicroPolygonStaticBase( const CqMicroPolygonStaticBase& From )
-		{
-			*this = From;
-		}
-		//	protected:
-		// Private destructor, as destruction should be via Release()
-		virtual	~CqMicroPolygonStaticBase()
+		~CqMovingMicroPolygonKey()
 		{}
 
 	public:
-		virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
+		TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
 
-		CqMicroPolygonStaticBase& operator=( const CqMicroPolygonStaticBase& From )
-		{
-			m_vecPoints[ 0 ] = From.m_vecPoints[ 0 ];
-			m_vecPoints[ 1 ] = From.m_vecPoints[ 1 ];
-			m_vecPoints[ 2 ] = From.m_vecPoints[ 2 ];
-			m_vecPoints[ 3 ] = From.m_vecPoints[ 3 ];
-			m_vecN = From.m_vecN;
-			m_D = From.m_D;
-			return ( *this );
-		}
-		/** Get a pointer to the array of points.
-		 */
-		CqVector3D* GetpPoints()
-		{
-			return( m_vecPoints );
-		}
-		/** Get a constant pointer to the array of points.
-		 */
-		const CqVector3D* GetpPoints() const
-		{
-			return( m_vecPoints );
-		}
-		/** Get a reference to the normal vector for this MPG.
-		 */
-		CqVector3D& GetN()
-		{
-			return( m_vecN );
-		}
-		/** Get a constant reference to the normal vector for this MPG.
-		 */
-		const CqVector3D& GetN() const
-		{
-			return( m_vecN );
-		}
-		/** Get the D value for this MPG.
-		 */
-		TqFloat GetD() const
-		{
-			return( m_D );
-		}
 		CqBound	GetTotalBound() const;
 		void	Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD );
-		CqMicroPolygonStaticBase&	LinearInterpolate( TqFloat Fraction, const CqMicroPolygonStaticBase& MPA, const CqMicroPolygonStaticBase& MPB );
 		CqVector2D ReverseBilinear( const CqVector2D& v );
 
-	protected:
-		CqVector3D	m_vecPoints[ 4 ];		///< Array of 4 3D vectors representing the micropoly.
-		CqVector3D	m_vecN;				///< The normal to the micropoly.
+		CqVector3D	m_Point0;
+		CqVector3D	m_Point1;
+		CqVector3D	m_Point2;
+		CqVector3D	m_Point3;
+		CqVector3D	m_N;			///< The normal to the micropoly.
 		TqFloat	m_D;				///< Distance of the plane from the origin, used for calculating sample depth.
-}
-;
-
-
-//----------------------------------------------------------------------
-/** \class CqMicroPolygonStatic
- * Class which stores a single static micropolygon.
- */
-
-class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonStaticBase , public CqPoolable<CqMicroPolygonStatic, 512>
-{
-	public:
-		CqMicroPolygonStatic() : CqMicroPolygonBase(), CqMicroPolygonStaticBase(), m_fTrimmed( TqFalse )
-		{}
-		virtual	~CqMicroPolygonStatic()	{}
-
-		// overrides from CqMicroPolygonBase
-
-
-		virtual	CqBound&	GetTotalBound( TqBool fForce = TqFalse );
-		/** Pure virtual, get the bound of the micropoly.
-		 * \return CqBound representing the conservative bound.
-		 */
-		virtual const CqBound&	GetTotalBound() const
-		{
-			return ( m_Bound );
-		}
-		virtual	TqInt	cSubBounds()
-		{
-			return ( 1 );
-		}
-		virtual	CqBound&	SubBound( TqInt iIndex, TqFloat& time )
-		{
-			time = 0.0f;
-			return ( m_Bound );
-		}
-
-		virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
-
-		virtual void	MarkTrimmed()
-		{
-			m_fTrimmed = TqTrue;
-		}
-
-	private:
-		CqBound	m_Bound;		///< Stored bound.
-		TqBool	m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
-
-		CqMicroPolygonStatic( const CqMicroPolygonStatic& From ) {}
 }
 ;
 
@@ -638,43 +617,36 @@ class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonSta
  * Class which stores a single moving micropolygon.
  */
 
-class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMicroPolygonStaticBase>
+class CqMicroPolygonMotion : public CqMicroPolygon
 {
 	public:
-		CqMicroPolygonMotion() : CqMicroPolygonBase(), CqMotionSpec<CqMicroPolygonStaticBase>( CqMicroPolygonStaticBase() ), m_BoundReady( TqFalse )
+		CqMicroPolygonMotion() : CqMicroPolygon(), m_BoundReady( TqFalse )
 		{ }
 		virtual	~CqMicroPolygonMotion()
-		{}
-
-	public:
-		CqMicroPolygonMotion& operator=( const CqMicroPolygonMotion& From )
 		{
-			CqMotionSpec<CqMicroPolygonStaticBase>::operator=( From );
-			return ( *this );
+			std::vector<CqMovingMicroPolygonKey*>::iterator	ikey;
+			for( ikey = m_Keys.begin(); ikey != m_Keys.end(); ikey++ )
+				delete( (*ikey) );
 		}
 
-		void	ExpandBound( const CqMicroPolygonStaticBase& MP );
-		void	Initialise( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD, TqFloat time );
-		void DeleteVariables( TqBool all )
-		{}
+	public:
+		void	AppendKey( const CqVector3D& vA, const CqVector3D& vB, const CqVector3D& vC, const CqVector3D& vD, TqFloat time );
+		void	DeleteVariables( TqBool all )	{}
 
-		// Overrides from CqMicroPolygonBase
+		// Overrides from CqMicroPolygon
 		virtual TqBool	fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloat time = 0.0f ) const;
-		virtual	CqBound&	GetTotalBound( TqBool fForce = TqFalse );
-		/** Pure virtual, get the bound of the micropoly.
-		 * \return CqBound representing the conservative bound.
-		 */
-		virtual const CqBound&	GetTotalBound() const
+		virtual	CqBound			GetTotalBound( TqBool fForce = TqFalse );
+		virtual const CqBound	GetTotalBound() const
 		{
 			return ( m_Bound );
 		}
-		virtual	TqInt	cSubBounds()
+		virtual	TqInt			cSubBounds()
 		{
 			if ( !m_BoundReady )
 				BuildBoundList();
 			return ( m_BoundList.Size() );
 		}
-		virtual	CqBound&	SubBound( TqInt iIndex, TqFloat& time )
+		virtual	CqBound			SubBound( TqInt iIndex, TqFloat& time )
 		{
 			if ( !m_BoundReady )
 				BuildBoundList();
@@ -686,33 +658,19 @@ class CqMicroPolygonMotion : public CqMicroPolygonBase, public CqMotionSpec<CqMi
 
 		virtual	TqBool	Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat time );
 
-		// Overrides from CqMotionSpec
-		void	ClearMotionObject( CqMicroPolygonStaticBase& A ) const
-		{}
-		/** Overridden from CqMotionSpec, does nothing.
-		 */
-		virtual	CqMicroPolygonStaticBase	ConcatMotionObjects( const CqMicroPolygonStaticBase& A, const CqMicroPolygonStaticBase& B ) const
+		virtual void	MarkTrimmed()
 		{
-			return ( B );
+			m_fTrimmed = TqTrue;
 		}
-		/** Overridden from CqMotionSpec, get the position of the micropoly linearly interpolated between the two extremes.
-		 * \param Fraction The fractional distance between the two micropolys 0-1.
-		 * \param A The start position.
-		 * \param B The end position.
-		 * \return a new micropoly at the requested position.
-		 */
-		virtual	CqMicroPolygonStaticBase	LinearInterpolateMotionObjects( TqFloat Fraction, const CqMicroPolygonStaticBase& A, const CqMicroPolygonStaticBase& B ) const
-		{
-			CqMicroPolygonStaticBase MP;
-			return ( MP.LinearInterpolate( Fraction, A, B ) );
-		}
-
 	private:
-		CqBound	m_Bound;		///< Stored bound.
-		CqBoundList	m_BoundList;	///< List of bounds to get a tighter fit.
-		TqBool	m_BoundReady;	///< Flag indicating the boundary has been initialised.
+		CqBound	m_Bound;					///< Stored bound.
+		CqBoundList	m_BoundList;			///< List of bounds to get a tighter fit.
+		TqBool	m_BoundReady;				///< Flag indicating the boundary has been initialised.
+		std::vector<TqFloat> m_Times;
+		std::vector<CqMovingMicroPolygonKey*>	m_Keys;
+		TqBool	m_fTrimmed;		///< Flag indicating that the MPG spans a trim curve.
 
-		CqMicroPolygonMotion( const CqMicroPolygonMotion& From ) : CqMotionSpec<CqMicroPolygonStaticBase>( From )	{}
+		CqMicroPolygonMotion( const CqMicroPolygonMotion& From ) {}
 }
 ;
 

@@ -43,9 +43,6 @@
 #include	"trimcurve.h"
 #include	"iattributes.h"
 
-#define		_qShareName	CORE
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 struct IqShader;
 class	CqLightsource;
@@ -57,18 +54,18 @@ class	CqLightsource;
 */
 
 
-class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
+class CqAttributes : public CqRefCount, public IqAttributes
 {
 	public:
-		_qShareM	CqAttributes();
-		_qShareM	CqAttributes( const CqAttributes& From );
-		_qShareM	virtual	~CqAttributes();
+		CqAttributes();
+		CqAttributes( const CqAttributes& From );
+		virtual	~CqAttributes();
 
 		/** Get a pointer to this attribute state suitable for writing.
 		 * I the external references count is greater than 1, then create a copy on the stack and return that.
 		 * \return a pointer to these attribute safe to write into.
 		 */
-		_qShareM	CqAttributes* Write()
+		CqAttributes* Write()
 		{
 			// We are about to write to this attribute,so clone if references exist.
 			if ( RefCount() > 1 )
@@ -82,12 +79,12 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 				return ( this );
 		}
 
-		_qShareM	CqAttributes& operator=( const CqAttributes& From );
+		CqAttributes& operator=( const CqAttributes& From );
 
 		/** Add a new user defined attribute.
 		 * \param pAttribute a pointer to the new user defined attribute.
 		 */
-		_qShareM	void	AddAttribute( CqNamedParameterList* pAttribute )
+		void	AddAttribute( CqNamedParameterList* pAttribute )
 		{
 			m_aAttributes.Add( pAttribute );
 		}

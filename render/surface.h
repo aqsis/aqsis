@@ -43,9 +43,6 @@
 #include	"csgtree.h"
 #include	"isurface.h"
 
-#define		_qShareName	CORE
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
@@ -308,7 +305,7 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
  * Abstract base surface class, which provides interfaces to a geometric surface.  
  */
 
-class _qShareC CqSurface : public CqBasicSurface
+class CqSurface : public CqBasicSurface
 {
 	public:
 		CqSurface();

@@ -34,9 +34,6 @@
 #include	"sstring.h"
 #include	"iattributes.h"
 
-#define		_qShareName	CORE
-#include	"share.h"
-
 START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
@@ -119,16 +116,16 @@ class CqBasicError;
  * Storage class for the errors which have been reported, used to avoid repeated error messages.
  */
 
-class _qShareC CqReportedErrors
+class CqReportedErrors
 {
 	public:
-		_qShareM	CqReportedErrors()
+		CqReportedErrors()
 		{}
-		_qShareM	~CqReportedErrors();
+		~CqReportedErrors();
 
-		_qShareM	void	SetReported( CqBasicError* pError );
-		_qShareM	TqBool	CheckReport( CqBasicError* pError );
-		_qShareM	void	ClearReported();
+		void	SetReported( CqBasicError* pError );
+		TqBool	CheckReport( CqBasicError* pError );
+		void	ClearReported();
 	private:
 		std::vector<CqBasicError*>	m_aReportedErrors;	///< Array of reported errors.
 }
@@ -183,36 +180,36 @@ struct SqMessage
  * Base error class from which all errors are derived. Also serves as the simplest error, not linked to anything.
  */
 
-class _qShareC CqBasicError
+class CqBasicError
 {
 	public:
 		/** Constructor taking just a code.
 		 * \param code The error code from EqErrorID or EqWarningID.
 		 */
-		_qShareM	CqBasicError( TqInt code ) : m_Code( code )
+		CqBasicError( TqInt code ) : m_Code( code )
 		{}
-		_qShareM	CqBasicError( TqInt code, TqInt severity, const char* Message, TqBool OncePer = TqFalse );
+		CqBasicError( TqInt code, TqInt severity, const char* Message, TqBool OncePer = TqFalse );
 		/** Copy constructor.
 		 * \param From The error to copy.
 		 */
-		_qShareM	CqBasicError( CqBasicError* From )
+		CqBasicError( CqBasicError* From )
 		{
 			m_Code = From->m_Code;
 		}
 		/** Get the error code.
 		 * \return Integer error code.
 		 */
-		_qShareM virtual	~CqBasicError()
+		virtual	~CqBasicError()
 		{}
 
-		_qShareM virtual	TqInt Code()
+		virtual	TqInt Code()
 		{
 			return ( m_Code );
 		}
 		/** Check if the spcified error from the reported list matches sufficiently to not report it again.
 		 * \return Boolean match.
 		 */
-		_qShareM virtual	TqBool	CheckReport( CqBasicError* from )
+		virtual	TqBool	CheckReport( CqBasicError* from )
 		{
 			if ( from->m_Code == m_Code )
 				return ( true );
@@ -231,25 +228,25 @@ class _qShareC CqBasicError
  * Error directly related to an attribute state.
  */
 
-class _qShareC CqAttributeError : public CqBasicError
+class CqAttributeError : public CqBasicError
 {
 	public:
-		_qShareM	CqAttributeError( TqInt code, TqInt severity, const char* Message, const IqAttributes* pAttributes, TqBool OncePer = TqFalse );
+		CqAttributeError( TqInt code, TqInt severity, const char* Message, const IqAttributes* pAttributes, TqBool OncePer = TqFalse );
 		/** Copy constructor
 		 * \param From Error to copy.
 		 */
-		_qShareM	CqAttributeError( CqAttributeError& From ) :
+		CqAttributeError( CqAttributeError& From ) :
 				CqBasicError( From )
 		{
 			m_pAttributes = From.m_pAttributes;
 		}
-		_qShareM virtual	~CqAttributeError()
+		virtual	~CqAttributeError()
 		{}
 
 		/** Check if the spcified error from the reported list matches sufficiently to not report it again.
 		 * \return Boolean match.
 		 */
-		_qShareM virtual	TqBool	CheckReport( CqBasicError* From )
+		virtual	TqBool	CheckReport( CqBasicError* From )
 		{
 			if ( From->Code() == Code() )
 			{
