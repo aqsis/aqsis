@@ -1153,10 +1153,10 @@ TqBool CqMicroPolygon::fContains( const CqVector2D& vecP, TqFloat& Depth, TqFloa
 		// this is so every sample point lies on exactly one side of the edge,
 		// ie if it is exactly coincident with the edge it can't be on both
 		// or neither sides.
-//		if(e & 2)
-		if( m_pHitTestCache->m_Y[e] > m_pHitTestCache->m_Y[prev] ||
-			( m_pHitTestCache->m_Y[e] == m_pHitTestCache->m_Y[prev] &&
-			  m_pHitTestCache->m_X[e] > m_pHitTestCache->m_X[prev] ) )
+		if(e & 2)
+//		if( m_pHitTestCache->m_Y[e] > m_pHitTestCache->m_Y[prev] ||
+//			( m_pHitTestCache->m_Y[e] == m_pHitTestCache->m_Y[prev] &&
+//			  m_pHitTestCache->m_X[e] > m_pHitTestCache->m_X[prev] ) )
 		{
 			if( (( y - m_pHitTestCache->m_Y[e]) * m_pHitTestCache->m_YMultiplier[e] ) -
 					(( x - m_pHitTestCache->m_X[e]) * m_pHitTestCache->m_XMultiplier[e] ) < 0)
