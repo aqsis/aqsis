@@ -1289,6 +1289,1156 @@
 			settings = {
 			};
 		};
+		7153688206BEF74C00BA5CC0 = {
+			buildActionMask = 2147483647;
+			files = (
+				7153693806BEF9FF00BA5CC0,
+				7153693906BEF9FF00BA5CC0,
+				7153693A06BEF9FF00BA5CC0,
+				7153693B06BEF9FF00BA5CC0,
+				7153693C06BEF9FF00BA5CC0,
+				7153693D06BEF9FF00BA5CC0,
+				7153693E06BEF9FF00BA5CC0,
+				7153693F06BEF9FF00BA5CC0,
+				7153694006BEF9FF00BA5CC0,
+				7153694106BEF9FF00BA5CC0,
+				7153694206BEF9FF00BA5CC0,
+				7153694306BEF9FF00BA5CC0,
+				7153694406BEF9FF00BA5CC0,
+				7153694506BEF9FF00BA5CC0,
+				7153694606BEF9FF00BA5CC0,
+				7153694706BEF9FF00BA5CC0,
+				7153694806BEF9FF00BA5CC0,
+				7153694906BEF9FF00BA5CC0,
+				7153694A06BEF9FF00BA5CC0,
+				7153694B06BEF9FF00BA5CC0,
+				7153694C06BEF9FF00BA5CC0,
+				7153694D06BEF9FF00BA5CC0,
+				7153694E06BEF9FF00BA5CC0,
+				7153694F06BEF9FF00BA5CC0,
+				7153695006BEF9FF00BA5CC0,
+				7153695106BEF9FF00BA5CC0,
+				7153695206BEF9FF00BA5CC0,
+				7153695306BEF9FF00BA5CC0,
+				7153695406BEF9FF00BA5CC0,
+				7153695506BEF9FF00BA5CC0,
+				7153695606BEF9FF00BA5CC0,
+				7153695706BEF9FF00BA5CC0,
+				7153695806BEF9FF00BA5CC0,
+				7153695906BEF9FF00BA5CC0,
+				7153695A06BEF9FF00BA5CC0,
+				7153695B06BEF9FF00BA5CC0,
+				7153695C06BEF9FF00BA5CC0,
+				7153695D06BEF9FF00BA5CC0,
+				7153692206BEF92600BA5CC0,
+			);
+			isa = PBXSourcesBuildPhase;
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7153688306BEF74C00BA5CC0 = {
+			buildPhases = (
+				7153688206BEF74C00BA5CC0,
+			);
+			buildRules = (
+				7153691B06BEF82900BA5CC0,
+			);
+			buildSettings = {
+				GCC_WARN_FOUR_CHARACTER_CONSTANTS = NO;
+				GCC_WARN_UNKNOWN_PRAGMAS = NO;
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = STATIC;
+				OPTIMIZATION_CFLAGS = "";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = shaders;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = "-Wmost";
+			};
+			dependencies = (
+				7153692706BEF93E00BA5CC0,
+			);
+			isa = PBXNativeTarget;
+			name = shaders;
+			productName = shaders;
+			productReference = 7153688406BEF74C00BA5CC0;
+			productType = "com.apple.product-type.library.static";
+		};
+		7153688406BEF74C00BA5CC0 = {
+			explicitFileType = archive.ar;
+			includeInIndex = 0;
+			isa = PBXFileReference;
+			path = libshaders.a;
+			refType = 3;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		7153688906BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = ambientlight.sl;
+			path = shaders/ambientlight.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153688A06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = background.sl;
+			path = shaders/background.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153688B06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = bluescreen.sl;
+			path = shaders/bluescreen.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153688C06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = borg_metal.sl;
+			path = shaders/borg_metal.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153688D06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = brickbump.sl;
+			path = shaders/brickbump.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153688E06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = bumpy.sl;
+			path = shaders/bumpy.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153688F06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = cellnoisetest.sl;
+			path = shaders/cellnoisetest.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689006BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = constant.sl;
+			path = shaders/constant.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689106BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = curvetube.sl;
+			path = shaders/curvetube.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689206BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = debug.sl;
+			path = shaders/debug.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689306BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = dented.sl;
+			path = shaders/dented.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689406BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = depthcue.sl;
+			path = shaders/depthcue.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689506BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = distantlight.sl;
+			path = shaders/distantlight.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689606BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = dpbluemarble.sl;
+			path = shaders/dpbluemarble.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689706BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = expensive.sl;
+			path = shaders/expensive.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689806BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = exposure.sl;
+			path = shaders/exposure.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689906BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = face_plastic.sl;
+			path = shaders/face_plastic.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689A06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = fakesky.sl;
+			path = shaders/fakesky.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689B06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = fog.sl;
+			path = shaders/fog.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689C06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = gradient.sl;
+			path = shaders/gradient.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689D06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = iramp.sl;
+			path = shaders/iramp.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689E06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = matte.sl;
+			path = shaders/matte.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153689F06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = metal.sl;
+			path = shaders/metal.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368A006BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = paintedplastic.sl;
+			path = shaders/paintedplastic.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368A106BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = plastic.sl;
+			path = shaders/plastic.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368A206BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = pointlight.sl;
+			path = shaders/pointlight.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368A306BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = randgrid.sl;
+			path = shaders/randgrid.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368A406BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = shadowdistant.sl;
+			path = shaders/shadowdistant.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368A506BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = shadowpoint.sl;
+			path = shaders/shadowpoint.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368A606BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = shadowspot.sl;
+			path = shaders/shadowspot.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368A706BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = shinymetal.sl;
+			path = shaders/shinymetal.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368A806BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = show_N.sl;
+			path = shaders/show_N.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368A906BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = show_st.sl;
+			path = shaders/show_st.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368AA06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = showuser.sl;
+			path = shaders/showuser.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368AB06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = spacetest.sl;
+			path = shaders/spacetest.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368AC06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = spotlight.sl;
+			path = shaders/spotlight.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368AD06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = sticky_texture.sl;
+			path = shaders/sticky_texture.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368AE06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = uvtest.sl;
+			path = shaders/uvtest.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715368AF06BEF79900BA5CC0 = {
+			fileEncoding = 30;
+			isa = PBXFileReference;
+			lastKnownFileType = text;
+			name = wavy.sl;
+			path = shaders/wavy.sl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153691B06BEF82900BA5CC0 = {
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.sl";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			isa = PBXBuildRule;
+			outputFiles = (
+				"$(INPUT_FILE_DIR)/$(INPUT_FILE_BASE).slx",
+			);
+			script = "$(TARGET_BUILD_DIR)/aqsl $(INPUT_FILE_PATH)";
+		};
+		7153692206BEF92600BA5CC0 = {
+			fileRef = 7153688906BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153692606BEF93E00BA5CC0 = {
+			containerPortal = 71DE6C710691FA5900145266;
+			isa = PBXContainerItemProxy;
+			proxyType = 1;
+			remoteGlobalIDString = 715FC18806AEFC620052FAB7;
+			remoteInfo = aqsl;
+		};
+		7153692706BEF93E00BA5CC0 = {
+			isa = PBXTargetDependency;
+			target = 715FC18806AEFC620052FAB7;
+			targetProxy = 7153692606BEF93E00BA5CC0;
+		};
+		7153693806BEF9FF00BA5CC0 = {
+			fileRef = 7153688A06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153693906BEF9FF00BA5CC0 = {
+			fileRef = 7153688B06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153693A06BEF9FF00BA5CC0 = {
+			fileRef = 7153688C06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153693B06BEF9FF00BA5CC0 = {
+			fileRef = 7153688D06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153693C06BEF9FF00BA5CC0 = {
+			fileRef = 7153688E06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153693D06BEF9FF00BA5CC0 = {
+			fileRef = 7153688F06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153693E06BEF9FF00BA5CC0 = {
+			fileRef = 7153689006BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153693F06BEF9FF00BA5CC0 = {
+			fileRef = 7153689106BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694006BEF9FF00BA5CC0 = {
+			fileRef = 7153689206BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694106BEF9FF00BA5CC0 = {
+			fileRef = 7153689306BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694206BEF9FF00BA5CC0 = {
+			fileRef = 7153689406BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694306BEF9FF00BA5CC0 = {
+			fileRef = 7153689506BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694406BEF9FF00BA5CC0 = {
+			fileRef = 7153689606BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694506BEF9FF00BA5CC0 = {
+			fileRef = 7153689706BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694606BEF9FF00BA5CC0 = {
+			fileRef = 7153689806BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694706BEF9FF00BA5CC0 = {
+			fileRef = 7153689906BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694806BEF9FF00BA5CC0 = {
+			fileRef = 7153689A06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694906BEF9FF00BA5CC0 = {
+			fileRef = 7153689B06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694A06BEF9FF00BA5CC0 = {
+			fileRef = 7153689C06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694B06BEF9FF00BA5CC0 = {
+			fileRef = 7153689D06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694C06BEF9FF00BA5CC0 = {
+			fileRef = 7153689E06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694D06BEF9FF00BA5CC0 = {
+			fileRef = 7153689F06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694E06BEF9FF00BA5CC0 = {
+			fileRef = 715368A006BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153694F06BEF9FF00BA5CC0 = {
+			fileRef = 715368A106BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153695006BEF9FF00BA5CC0 = {
+			fileRef = 715368A206BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153695106BEF9FF00BA5CC0 = {
+			fileRef = 715368A306BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153695206BEF9FF00BA5CC0 = {
+			fileRef = 715368A406BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153695306BEF9FF00BA5CC0 = {
+			fileRef = 715368A506BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153695406BEF9FF00BA5CC0 = {
+			fileRef = 715368A606BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153695506BEF9FF00BA5CC0 = {
+			fileRef = 715368A706BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153695606BEF9FF00BA5CC0 = {
+			fileRef = 715368A806BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153695706BEF9FF00BA5CC0 = {
+			fileRef = 715368A906BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153695806BEF9FF00BA5CC0 = {
+			fileRef = 715368AA06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153695906BEF9FF00BA5CC0 = {
+			fileRef = 715368AB06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153695A06BEF9FF00BA5CC0 = {
+			fileRef = 715368AC06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153695B06BEF9FF00BA5CC0 = {
+			fileRef = 715368AD06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153695C06BEF9FF00BA5CC0 = {
+			fileRef = 715368AE06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153695D06BEF9FF00BA5CC0 = {
+			fileRef = 715368AF06BEF79900BA5CC0;
+			isa = PBXBuildFile;
+			settings = {
+			};
+		};
+		7153696606BEFB5300BA5CC0 = {
+			children = (
+				7153688906BEF79900BA5CC0,
+				7153688A06BEF79900BA5CC0,
+				7153688B06BEF79900BA5CC0,
+				7153688C06BEF79900BA5CC0,
+				7153688D06BEF79900BA5CC0,
+				7153688E06BEF79900BA5CC0,
+				7153688F06BEF79900BA5CC0,
+				7153689006BEF79900BA5CC0,
+				7153689106BEF79900BA5CC0,
+				7153689206BEF79900BA5CC0,
+				7153689306BEF79900BA5CC0,
+				7153689406BEF79900BA5CC0,
+				7153689506BEF79900BA5CC0,
+				7153689606BEF79900BA5CC0,
+				7153689706BEF79900BA5CC0,
+				7153689806BEF79900BA5CC0,
+				7153689906BEF79900BA5CC0,
+				7153689A06BEF79900BA5CC0,
+				7153689B06BEF79900BA5CC0,
+				7153689C06BEF79900BA5CC0,
+				7153689D06BEF79900BA5CC0,
+				7153689E06BEF79900BA5CC0,
+				7153689F06BEF79900BA5CC0,
+				715368A006BEF79900BA5CC0,
+				715368A106BEF79900BA5CC0,
+				715368A206BEF79900BA5CC0,
+				715368A306BEF79900BA5CC0,
+				715368A406BEF79900BA5CC0,
+				715368A506BEF79900BA5CC0,
+				715368A606BEF79900BA5CC0,
+				715368A706BEF79900BA5CC0,
+				715368A806BEF79900BA5CC0,
+				715368A906BEF79900BA5CC0,
+				715368AA06BEF79900BA5CC0,
+				715368AB06BEF79900BA5CC0,
+				715368AC06BEF79900BA5CC0,
+				715368AD06BEF79900BA5CC0,
+				715368AE06BEF79900BA5CC0,
+				715368AF06BEF79900BA5CC0,
+			);
+			isa = PBXGroup;
+			name = Shaders;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153697206BEFB7900BA5CC0 = {
+			children = (
+				71AB553B06BAE8CE0074427F,
+				71AB553C06BAE8CE0074427F,
+				71AB553D06BAE8CE0074427F,
+			);
+			isa = PBXGroup;
+			name = display;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153698006BEFB8B00BA5CC0 = {
+			children = (
+				71DCDDAE0692941B00CDDB8A,
+				71DCDDAF0692941B00CDDB8A,
+				71DCDDB00692941B00CDDB8A,
+				71DCDDB10692941B00CDDB8A,
+				71DCDDB20692941B00CDDB8A,
+				71DCDDB30692941B00CDDB8A,
+				71DCDDB40692941B00CDDB8A,
+				71DCDDB50692941B00CDDB8A,
+				71DCDDB60692941B00CDDB8A,
+				71DCDDB70692941B00CDDB8A,
+				71DCDDB80692941B00CDDB8A,
+				71DCDDB90692941B00CDDB8A,
+				71DCDDBA0692941B00CDDB8A,
+				71DCDDBB0692941B00CDDB8A,
+				71DCDDBC0692941B00CDDB8A,
+				71DCDDBD0692941B00CDDB8A,
+				71DCDDBE0692941B00CDDB8A,
+				71DCDDBF0692941B00CDDB8A,
+				71DCDDC00692941B00CDDB8A,
+				71DCDDC10692941B00CDDB8A,
+				71DCDDC20692941B00CDDB8A,
+				71DCDDC30692941B00CDDB8A,
+				71DCDDC40692941B00CDDB8A,
+				71DCDDC50692941B00CDDB8A,
+				71DCDDC60692941B00CDDB8A,
+				71DCDDC70692941B00CDDB8A,
+				71DCDDC80692941B00CDDB8A,
+				71DCDDC90692941B00CDDB8A,
+				71DCDDCA0692941B00CDDB8A,
+				71DCDDCB0692941B00CDDB8A,
+				71DCDDCC0692941B00CDDB8A,
+				71DCDDCD0692941B00CDDB8A,
+				71DCDDCE0692941B00CDDB8A,
+				71DCDDCF0692941B00CDDB8A,
+				71DCDDD00692941B00CDDB8A,
+				71DCDDD10692941B00CDDB8A,
+				71DCDDD20692941B00CDDB8A,
+				71DCDDD30692941B00CDDB8A,
+				71DCDDD40692941B00CDDB8A,
+				71DCDDD50692941B00CDDB8A,
+				71DCDDD60692941B00CDDB8A,
+				71DCDDD70692941B00CDDB8A,
+				71DCDDD80692941B00CDDB8A,
+				71DCDDD90692941B00CDDB8A,
+				71DCDDDA0692941B00CDDB8A,
+				71DCDDDB0692941B00CDDB8A,
+				71DCDDDC0692941B00CDDB8A,
+				71DCDDDD0692941B00CDDB8A,
+				71DCDDDE0692941B00CDDB8A,
+				71DCDDDF0692941B00CDDB8A,
+				71DCDDE00692941B00CDDB8A,
+				71DCDDE10692941B00CDDB8A,
+				71DCDDE20692941B00CDDB8A,
+				71DCDDE30692941B00CDDB8A,
+				71DCDDE40692941B00CDDB8A,
+				71DCDDE50692941B00CDDB8A,
+				71DCDDE60692941B00CDDB8A,
+				71DCDDE70692941B00CDDB8A,
+				71DCDD57069293BD00CDDB8A,
+				71DCDD58069293BD00CDDB8A,
+				71DCDD59069293BD00CDDB8A,
+				71DCDD5A069293BD00CDDB8A,
+				71DCDD5B069293BD00CDDB8A,
+				71DCDD5C069293BD00CDDB8A,
+				71DCDD5D069293BD00CDDB8A,
+				71DCDD5E069293BD00CDDB8A,
+				71DCDD5F069293BD00CDDB8A,
+				71DCDD60069293BD00CDDB8A,
+				71DCDD61069293BD00CDDB8A,
+				71DCDD62069293BD00CDDB8A,
+				71DCDD63069293BD00CDDB8A,
+				71DCDD64069293BD00CDDB8A,
+				71DCDD65069293BD00CDDB8A,
+				71DCDD66069293BD00CDDB8A,
+				71DCDD67069293BD00CDDB8A,
+				71DCDD68069293BD00CDDB8A,
+				71DCDD69069293BD00CDDB8A,
+				71DCDD6A069293BD00CDDB8A,
+				71DCDD6B069293BD00CDDB8A,
+				71DCDD6C069293BD00CDDB8A,
+				71DCDD6D069293BD00CDDB8A,
+				71DCDD6E069293BD00CDDB8A,
+				71DCDD6F069293BD00CDDB8A,
+				71DCDD70069293BD00CDDB8A,
+				71DCDD71069293BD00CDDB8A,
+				71DCDD2A0692933E00CDDB8A,
+				71DCDD2B0692933E00CDDB8A,
+				71DCDD2C0692933E00CDDB8A,
+				71DCDD2D0692933E00CDDB8A,
+				71DCDD2E0692933E00CDDB8A,
+				71DCDD2F0692933E00CDDB8A,
+				71DCDD300692933E00CDDB8A,
+				71DCDD310692933E00CDDB8A,
+				71DCDD320692933E00CDDB8A,
+				71DCDD330692933E00CDDB8A,
+				71DCDD340692933E00CDDB8A,
+				71DCDD350692933E00CDDB8A,
+				71DCDD360692933E00CDDB8A,
+			);
+			isa = PBXGroup;
+			name = render;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153698706BEFC0500BA5CC0 = {
+			children = (
+				715FC3CF06B071870052FAB7,
+			);
+			isa = PBXGroup;
+			name = teqser;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153698D06BEFC1300BA5CC0 = {
+			children = (
+				7144F720069211CD007CCB15,
+				7144F721069211CD007CCB15,
+				7144F722069211CD007CCB15,
+				7144F723069211CD007CCB15,
+				7144F724069211CD007CCB15,
+				7144F725069211CD007CCB15,
+				7144F726069211CD007CCB15,
+				7144F727069211CD007CCB15,
+			);
+			isa = PBXGroup;
+			name = librib2;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153699206BEFC1E00BA5CC0 = {
+			children = (
+				7144F81806922313007CCB15,
+				7144F81906922313007CCB15,
+			);
+			isa = PBXGroup;
+			name = librib2ri;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		7153699706BEFC2500BA5CC0 = {
+			children = (
+				715FC39406B070CB0052FAB7,
+				715FC37F06B070CB0052FAB7,
+				715FC38006B070CB0052FAB7,
+				715FC38106B070CB0052FAB7,
+				715FC38206B070CB0052FAB7,
+				715FC38306B070CB0052FAB7,
+				715FC38406B070CB0052FAB7,
+				715FC38506B070CB0052FAB7,
+				715FC38606B070CB0052FAB7,
+				715FC38706B070CB0052FAB7,
+				715FC38806B070CB0052FAB7,
+				715FC38906B070CB0052FAB7,
+				715FC38A06B070CB0052FAB7,
+				715FC38B06B070CB0052FAB7,
+				715FC38C06B070CB0052FAB7,
+				715FC38D06B070CB0052FAB7,
+				715FC38E06B070CB0052FAB7,
+				715FC38F06B070CB0052FAB7,
+				715FC39006B070CB0052FAB7,
+				715FC39106B070CB0052FAB7,
+				715FC39206B070CB0052FAB7,
+			);
+			isa = PBXGroup;
+			name = libri2rib;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715369C506BEFC7F00BA5CC0 = {
+			children = (
+				715FC2CE06B0699D0052FAB7,
+			);
+			isa = PBXGroup;
+			name = aqsltell;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715369D206BEFD1000BA5CC0 = {
+			children = (
+				715FC2B506B069330052FAB7,
+				715FC2B606B069330052FAB7,
+				715FC2B706B069330052FAB7,
+			);
+			isa = PBXGroup;
+			name = libslxargs;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		715369FB06BEFDC800BA5CC0 = {
+			children = (
+				715FC18F06AEFC7D0052FAB7,
+			);
+			isa = PBXGroup;
+			name = aqsl;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		71536A0806BEFDE900BA5CC0 = {
+			children = (
+				715FC15D06AEFB260052FAB7,
+				715FC15E06AEFB260052FAB7,
+				715FC15F06AEFB260052FAB7,
+				715FC16006AEFB260052FAB7,
+				715FC16106AEFB260052FAB7,
+				715FC16206AEFB260052FAB7,
+				715FC16306AEFB260052FAB7,
+				715FC16406AEFB260052FAB7,
+				715FC16506AEFB260052FAB7,
+				715FC16606AEFB260052FAB7,
+			);
+			isa = PBXGroup;
+			name = slpp;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		71536A1506BEFDF700BA5CC0 = {
+			children = (
+				715FC13D06AEFA8D0052FAB7,
+				715FC13E06AEFA8D0052FAB7,
+				715FC13F06AEFA8D0052FAB7,
+				715FC14006AEFA8D0052FAB7,
+				715FC14106AEFA8D0052FAB7,
+				715FC14206AEFA8D0052FAB7,
+			);
+			isa = PBXGroup;
+			name = libcodegenvm;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		71536A2E06BEFE2400BA5CC0 = {
+			children = (
+				710231B806AEF18E0066ED4D,
+				710231B906AEF18E0066ED4D,
+				710231BA06AEF18E0066ED4D,
+				710231BB06AEF18E0066ED4D,
+				710231BC06AEF18E0066ED4D,
+				710231BD06AEF18E0066ED4D,
+				710231BE06AEF18E0066ED4D,
+				710231BF06AEF18E0066ED4D,
+				710231C006AEF18E0066ED4D,
+				710231C106AEF18E0066ED4D,
+				710231C206AEF18E0066ED4D,
+				710231C306AEF18E0066ED4D,
+				710231C406AEF18E0066ED4D,
+				710231C506AEF18E0066ED4D,
+				710231C606AEF18E0066ED4D,
+				710231C706AEF18E0066ED4D,
+			);
+			isa = PBXGroup;
+			name = libslparse;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		71536A4906BEFE4700BA5CC0 = {
+			children = (
+				71DCE0E206AC495100CDDB8A,
+				71DCE0E306AC495100CDDB8A,
+				71DCE0E406AC495100CDDB8A,
+			);
+			isa = PBXGroup;
+			name = libddmanager;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		71536A5A06BEFE5500BA5CC0 = {
+			children = (
+				71DCE09706960B6900CDDB8A,
+			);
+			isa = PBXGroup;
+			name = aqsis;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		71536A6506BEFE5F00BA5CC0 = {
+			children = (
+				71DCE06E069609AD00CDDB8A,
+				71DCE06F069609AD00CDDB8A,
+			);
+			isa = PBXGroup;
+			name = libraytrace;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		71536A7606BEFF0200BA5CC0 = {
+			children = (
+				71DCE053069608CC00CDDB8A,
+				71DCE054069608CC00CDDB8A,
+				71DCE055069608CC00CDDB8A,
+			);
+			isa = PBXGroup;
+			name = libshaderexecenv;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		71536A8606BEFF1500BA5CC0 = {
+			children = (
+				71DCE024069607B000CDDB8A,
+				71DCE025069607B000CDDB8A,
+				71DCE026069607B000CDDB8A,
+				71DCE027069607B000CDDB8A,
+				71DCE028069607B000CDDB8A,
+				71DCE029069607B000CDDB8A,
+				71DCE02A069607B000CDDB8A,
+				71DCE02B069607B000CDDB8A,
+				71DCE02C069607B000CDDB8A,
+				71DCE02D069607B000CDDB8A,
+			);
+			isa = PBXGroup;
+			name = libshadervm;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		71536A9F06BEFF4300BA5CC0 = {
+			children = (
+				71DCE0050696070000CDDB8A,
+				71DCE0060696070000CDDB8A,
+				71DCE0070696070000CDDB8A,
+				71DCE0080696070000CDDB8A,
+				71DCE0090696070000CDDB8A,
+				71DCDFE7069606E300CDDB8A,
+				71DCDFE8069606E300CDDB8A,
+				71DCDFE9069606E300CDDB8A,
+				71DCDFEA069606E300CDDB8A,
+				71DCDFEB069606E300CDDB8A,
+				71DCDFEC069606E300CDDB8A,
+				71DCDFED069606E300CDDB8A,
+				71DCDFEE069606E300CDDB8A,
+				71DCDFC6069606BF00CDDB8A,
+				71DCDFC7069606BF00CDDB8A,
+				71DCDFC8069606BF00CDDB8A,
+				71DCDFC9069606BF00CDDB8A,
+				71DCDFCA069606BF00CDDB8A,
+				71DCDFCB069606BF00CDDB8A,
+				71DCDFCC069606BF00CDDB8A,
+				71DCDFCD069606BF00CDDB8A,
+				71DCDFCE069606BF00CDDB8A,
+			);
+			isa = PBXGroup;
+			name = thread;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		71536ADA06BF00C500BA5CC0 = {
+			children = (
+				7144F6960691FD43007CCB15,
+				7144F6970691FD43007CCB15,
+				7144F6880691FCB4007CCB15,
+				7144F6890691FCB4007CCB15,
+				7144F68A0691FCB4007CCB15,
+				7144F68B0691FCB4007CCB15,
+				7144F68C0691FCB4007CCB15,
+				7144F68D0691FCB4007CCB15,
+				7144F66C0691FC9F007CCB15,
+				7144F66D0691FC9F007CCB15,
+				7144F66E0691FC9F007CCB15,
+				7144F66F0691FC9F007CCB15,
+				7144F6700691FC9F007CCB15,
+				7144F6710691FC9F007CCB15,
+				7144F6720691FC9F007CCB15,
+				7144F6730691FC9F007CCB15,
+				7144F6740691FC9F007CCB15,
+				7144F6750691FC9F007CCB15,
+				7144F6760691FC9F007CCB15,
+				7144F6770691FC9F007CCB15,
+				7144F6780691FC9F007CCB15,
+				7144F6580691FC73007CCB15,
+				7144F6590691FC73007CCB15,
+				7144F65A0691FC73007CCB15,
+				7144F65B0691FC73007CCB15,
+				7144F65C0691FC73007CCB15,
+				7144F65D0691FC73007CCB15,
+				7144F65E0691FC73007CCB15,
+				7144F65F0691FC73007CCB15,
+				7144F6600691FC73007CCB15,
+				7144F6440691FC4E007CCB15,
+				7144F6450691FC4E007CCB15,
+				7144F6460691FC4E007CCB15,
+				7144F6470691FC4E007CCB15,
+				7144F6480691FC4E007CCB15,
+				7144F6490691FC4E007CCB15,
+				7144F64A0691FC4E007CCB15,
+				7144F64B0691FC4E007CCB15,
+				7144F64C0691FC4E007CCB15,
+			);
+			isa = PBXGroup;
+			name = libaqsistypes;
+			refType = 4;
+			sourceTree = "<group>";
+		};
+		71536AE706BF00D900BA5CC0 = {
+			children = (
+				71DE6C840691FAC500145266,
+				71DE6C850691FAC500145266,
+			);
+			isa = PBXGroup;
+			name = libargparse;
+			refType = 4;
+			sourceTree = "<group>";
+		};
 		715FC13706AEFA670052FAB7 = {
 			buildActionMask = 2147483647;
 			files = (
@@ -1731,37 +2881,9 @@
 		715FC1C406AEFFA20052FAB7 = {
 			isa = PBXFileReference;
 			lastKnownFileType = text.plist.xml;
-			name = "display-Info.plist";
-			path = "/Users/pgregory/aqsis/renderer/display-Info.plist";
-			refType = 0;
-			sourceTree = "<absolute>";
-		};
-		715FC1C706AEFFDE0052FAB7 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = display.cpp;
-			path = display/display.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC1C806AEFFDE0052FAB7 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = display.h;
-			path = display/display.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		715FC1C906AEFFDE0052FAB7 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.c;
-			name = displayhelpers.c;
-			path = display/displayhelpers.c;
-			refType = 4;
-			sourceTree = "<group>";
+			path = "display-Info.plist";
+			refType = 2;
+			sourceTree = SOURCE_ROOT;
 		};
 		715FC26506B03E190052FAB7 = {
 			buildActionMask = 2147483647;
@@ -2145,7 +3267,6 @@
 				715FC3A306B070CB0052FAB7,
 				715FC3A506B070CB0052FAB7,
 				715FC3A706B070CB0052FAB7,
-				715FC3A906B070CB0052FAB7,
 			);
 			isa = PBXHeadersBuildPhase;
 			runOnlyForDeploymentPostprocessing = 0;
@@ -2383,15 +3504,6 @@
 			refType = 4;
 			sourceTree = "<group>";
 		};
-		715FC39306B070CB0052FAB7 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = ri.h;
-			path = libri2rib/ri.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
 		715FC39406B070CB0052FAB7 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -2517,12 +3629,6 @@
 		};
 		715FC3A806B070CB0052FAB7 = {
 			fileRef = 715FC39206B070CB0052FAB7;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
-		715FC3A906B070CB0052FAB7 = {
-			fileRef = 715FC39306B070CB0052FAB7;
 			isa = PBXBuildFile;
 			settings = {
 			};
@@ -4696,258 +5802,6 @@
 			target = 7144F814069222D2007CCB15;
 			targetProxy = 71DCDEAC0695F99D00CDDB8A;
 		};
-		71DCDF080696046200CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = tinystr.cpp;
-			path = thirdparty/tinyxml/tinystr.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF090696046200CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = tinystr.h;
-			path = thirdparty/tinyxml/tinystr.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF0A0696046200CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = tinyxml.cpp;
-			path = thirdparty/tinyxml/tinyxml.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF0B0696046200CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = tinyxml.h;
-			path = thirdparty/tinyxml/tinyxml.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF0C0696046200CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = tinyxmlerror.cpp;
-			path = thirdparty/tinyxml/tinyxmlerror.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF0D0696046200CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = tinyxmlparser.cpp;
-			path = thirdparty/tinyxml/tinyxmlparser.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF2E0696050500CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = condition.cpp;
-			path = boost/libs/thread/src/condition.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF2F0696050500CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = exceptions.cpp;
-			path = boost/libs/thread/src/exceptions.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF300696050500CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = mutex.cpp;
-			path = boost/libs/thread/src/mutex.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF310696050500CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = once.cpp;
-			path = boost/libs/thread/src/once.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF320696050500CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = recursive_mutex.cpp;
-			path = boost/libs/thread/src/recursive_mutex.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF330696050500CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = thread.cpp;
-			path = boost/libs/thread/src/thread.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF340696050500CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = threadmon.cpp;
-			path = boost/libs/thread/src/threadmon.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF350696050500CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = tss.cpp;
-			path = boost/libs/thread/src/tss.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF360696050500CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = xtime.cpp;
-			path = boost/libs/thread/src/xtime.cpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF4F0696053C00CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = condition.hpp;
-			path = boost/boost/thread/condition.hpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF500696053C00CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = exceptions.hpp;
-			path = boost/boost/thread/exceptions.hpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF510696053C00CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = mutex.hpp;
-			path = boost/boost/thread/mutex.hpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF520696053C00CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = once.hpp;
-			path = boost/boost/thread/once.hpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF530696053C00CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = recursive_mutex.hpp;
-			path = boost/boost/thread/recursive_mutex.hpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF540696053C00CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = thread.hpp;
-			path = boost/boost/thread/thread.hpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF550696053C00CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = tss.hpp;
-			path = boost/boost/thread/tss.hpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF560696053C00CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = xtime.hpp;
-			path = boost/boost/thread/xtime.hpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF760696059000CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = config.hpp;
-			path = boost/boost/thread/detail/config.hpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF770696059000CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = force_cast.hpp;
-			path = boost/boost/thread/detail/force_cast.hpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF780696059000CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = lock.hpp;
-			path = boost/boost/thread/detail/lock.hpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF790696059000CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = singleton.hpp;
-			path = boost/boost/thread/detail/singleton.hpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
-		71DCDF7A0696059000CDDB8A = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.h;
-			name = threadmon.hpp;
-			path = boost/boost/thread/detail/threadmon.hpp;
-			refType = 4;
-			sourceTree = "<group>";
-		};
 		71DCDFC00696069000CDDB8A = {
 			buildActionMask = 2147483647;
 			files = (
@@ -5990,291 +6844,28 @@
 		};
 		71DE6C6D0691FA5900145266 = {
 			children = (
-				71AB553B06BAE8CE0074427F,
-				71AB553C06BAE8CE0074427F,
-				71AB553D06BAE8CE0074427F,
-				715FC3CF06B071870052FAB7,
-				715FC37F06B070CB0052FAB7,
-				715FC38006B070CB0052FAB7,
-				715FC38106B070CB0052FAB7,
-				715FC38206B070CB0052FAB7,
-				715FC38306B070CB0052FAB7,
-				715FC38406B070CB0052FAB7,
-				715FC38506B070CB0052FAB7,
-				715FC38606B070CB0052FAB7,
-				715FC38706B070CB0052FAB7,
-				715FC38806B070CB0052FAB7,
-				715FC38906B070CB0052FAB7,
-				715FC38A06B070CB0052FAB7,
-				715FC38B06B070CB0052FAB7,
-				715FC38C06B070CB0052FAB7,
-				715FC38D06B070CB0052FAB7,
-				715FC38E06B070CB0052FAB7,
-				715FC38F06B070CB0052FAB7,
-				715FC39006B070CB0052FAB7,
-				715FC39106B070CB0052FAB7,
-				715FC39206B070CB0052FAB7,
-				715FC39306B070CB0052FAB7,
-				715FC39406B070CB0052FAB7,
-				715FC2CE06B0699D0052FAB7,
-				715FC2B506B069330052FAB7,
-				715FC2B606B069330052FAB7,
-				715FC2B706B069330052FAB7,
-				715FC1C706AEFFDE0052FAB7,
-				715FC1C806AEFFDE0052FAB7,
-				715FC1C906AEFFDE0052FAB7,
-				715FC18F06AEFC7D0052FAB7,
-				715FC15D06AEFB260052FAB7,
-				715FC15E06AEFB260052FAB7,
-				715FC15F06AEFB260052FAB7,
-				715FC16006AEFB260052FAB7,
-				715FC16106AEFB260052FAB7,
-				715FC16206AEFB260052FAB7,
-				715FC16306AEFB260052FAB7,
-				715FC16406AEFB260052FAB7,
-				715FC16506AEFB260052FAB7,
-				715FC16606AEFB260052FAB7,
-				715FC13D06AEFA8D0052FAB7,
-				715FC13E06AEFA8D0052FAB7,
-				715FC13F06AEFA8D0052FAB7,
-				715FC14006AEFA8D0052FAB7,
-				715FC14106AEFA8D0052FAB7,
-				715FC14206AEFA8D0052FAB7,
-				710231B806AEF18E0066ED4D,
-				710231B906AEF18E0066ED4D,
-				710231BA06AEF18E0066ED4D,
-				710231BB06AEF18E0066ED4D,
-				710231BC06AEF18E0066ED4D,
-				710231BD06AEF18E0066ED4D,
-				710231BE06AEF18E0066ED4D,
-				710231BF06AEF18E0066ED4D,
-				710231C006AEF18E0066ED4D,
-				710231C106AEF18E0066ED4D,
-				710231C206AEF18E0066ED4D,
-				710231C306AEF18E0066ED4D,
-				710231C406AEF18E0066ED4D,
-				710231C506AEF18E0066ED4D,
-				710231C606AEF18E0066ED4D,
-				710231C706AEF18E0066ED4D,
+				71536AE706BF00D900BA5CC0,
+				71536ADA06BF00C500BA5CC0,
+				71536A9F06BEFF4300BA5CC0,
+				71536A8606BEFF1500BA5CC0,
+				71536A7606BEFF0200BA5CC0,
+				71536A6506BEFE5F00BA5CC0,
+				71536A5A06BEFE5500BA5CC0,
+				71536A4906BEFE4700BA5CC0,
+				71536A2E06BEFE2400BA5CC0,
+				71536A1506BEFDF700BA5CC0,
+				71536A0806BEFDE900BA5CC0,
+				715369FB06BEFDC800BA5CC0,
+				715369D206BEFD1000BA5CC0,
+				715369C506BEFC7F00BA5CC0,
+				7153699706BEFC2500BA5CC0,
+				7153699206BEFC1E00BA5CC0,
+				7153698D06BEFC1300BA5CC0,
+				7153698706BEFC0500BA5CC0,
+				7153698006BEFB8B00BA5CC0,
+				7153697206BEFB7900BA5CC0,
+				7153696606BEFB5300BA5CC0,
 				7102313B06ACFE560066ED4D,
-				71DCE0E206AC495100CDDB8A,
-				71DCE0E306AC495100CDDB8A,
-				71DCE0E406AC495100CDDB8A,
-				71DCE09706960B6900CDDB8A,
-				71DCE06E069609AD00CDDB8A,
-				71DCE06F069609AD00CDDB8A,
-				71DCE053069608CC00CDDB8A,
-				71DCE054069608CC00CDDB8A,
-				71DCE055069608CC00CDDB8A,
-				71DCE024069607B000CDDB8A,
-				71DCE025069607B000CDDB8A,
-				71DCE026069607B000CDDB8A,
-				71DCE027069607B000CDDB8A,
-				71DCE028069607B000CDDB8A,
-				71DCE029069607B000CDDB8A,
-				71DCE02A069607B000CDDB8A,
-				71DCE02B069607B000CDDB8A,
-				71DCE02C069607B000CDDB8A,
-				71DCE02D069607B000CDDB8A,
-				71DCE0050696070000CDDB8A,
-				71DCE0060696070000CDDB8A,
-				71DCE0070696070000CDDB8A,
-				71DCE0080696070000CDDB8A,
-				71DCE0090696070000CDDB8A,
-				71DCDFE7069606E300CDDB8A,
-				71DCDFE8069606E300CDDB8A,
-				71DCDFE9069606E300CDDB8A,
-				71DCDFEA069606E300CDDB8A,
-				71DCDFEB069606E300CDDB8A,
-				71DCDFEC069606E300CDDB8A,
-				71DCDFED069606E300CDDB8A,
-				71DCDFEE069606E300CDDB8A,
-				71DCDFC6069606BF00CDDB8A,
-				71DCDFC7069606BF00CDDB8A,
-				71DCDFC8069606BF00CDDB8A,
-				71DCDFC9069606BF00CDDB8A,
-				71DCDFCA069606BF00CDDB8A,
-				71DCDFCB069606BF00CDDB8A,
-				71DCDFCC069606BF00CDDB8A,
-				71DCDFCD069606BF00CDDB8A,
-				71DCDFCE069606BF00CDDB8A,
-				71DCDF760696059000CDDB8A,
-				71DCDF770696059000CDDB8A,
-				71DCDF780696059000CDDB8A,
-				71DCDF790696059000CDDB8A,
-				71DCDF7A0696059000CDDB8A,
-				71DCDF4F0696053C00CDDB8A,
-				71DCDF500696053C00CDDB8A,
-				71DCDF510696053C00CDDB8A,
-				71DCDF520696053C00CDDB8A,
-				71DCDF530696053C00CDDB8A,
-				71DCDF540696053C00CDDB8A,
-				71DCDF550696053C00CDDB8A,
-				71DCDF560696053C00CDDB8A,
-				71DCDF2E0696050500CDDB8A,
-				71DCDF2F0696050500CDDB8A,
-				71DCDF300696050500CDDB8A,
-				71DCDF310696050500CDDB8A,
-				71DCDF320696050500CDDB8A,
-				71DCDF330696050500CDDB8A,
-				71DCDF340696050500CDDB8A,
-				71DCDF350696050500CDDB8A,
-				71DCDF360696050500CDDB8A,
-				71DCDF080696046200CDDB8A,
-				71DCDF090696046200CDDB8A,
-				71DCDF0A0696046200CDDB8A,
-				71DCDF0B0696046200CDDB8A,
-				71DCDF0C0696046200CDDB8A,
-				71DCDF0D0696046200CDDB8A,
-				71DCDDAE0692941B00CDDB8A,
-				71DCDDAF0692941B00CDDB8A,
-				71DCDDB00692941B00CDDB8A,
-				71DCDDB10692941B00CDDB8A,
-				71DCDDB20692941B00CDDB8A,
-				71DCDDB30692941B00CDDB8A,
-				71DCDDB40692941B00CDDB8A,
-				71DCDDB50692941B00CDDB8A,
-				71DCDDB60692941B00CDDB8A,
-				71DCDDB70692941B00CDDB8A,
-				71DCDDB80692941B00CDDB8A,
-				71DCDDB90692941B00CDDB8A,
-				71DCDDBA0692941B00CDDB8A,
-				71DCDDBB0692941B00CDDB8A,
-				71DCDDBC0692941B00CDDB8A,
-				71DCDDBD0692941B00CDDB8A,
-				71DCDDBE0692941B00CDDB8A,
-				71DCDDBF0692941B00CDDB8A,
-				71DCDDC00692941B00CDDB8A,
-				71DCDDC10692941B00CDDB8A,
-				71DCDDC20692941B00CDDB8A,
-				71DCDDC30692941B00CDDB8A,
-				71DCDDC40692941B00CDDB8A,
-				71DCDDC50692941B00CDDB8A,
-				71DCDDC60692941B00CDDB8A,
-				71DCDDC70692941B00CDDB8A,
-				71DCDDC80692941B00CDDB8A,
-				71DCDDC90692941B00CDDB8A,
-				71DCDDCA0692941B00CDDB8A,
-				71DCDDCB0692941B00CDDB8A,
-				71DCDDCC0692941B00CDDB8A,
-				71DCDDCD0692941B00CDDB8A,
-				71DCDDCE0692941B00CDDB8A,
-				71DCDDCF0692941B00CDDB8A,
-				71DCDDD00692941B00CDDB8A,
-				71DCDDD10692941B00CDDB8A,
-				71DCDDD20692941B00CDDB8A,
-				71DCDDD30692941B00CDDB8A,
-				71DCDDD40692941B00CDDB8A,
-				71DCDDD50692941B00CDDB8A,
-				71DCDDD60692941B00CDDB8A,
-				71DCDDD70692941B00CDDB8A,
-				71DCDDD80692941B00CDDB8A,
-				71DCDDD90692941B00CDDB8A,
-				71DCDDDA0692941B00CDDB8A,
-				71DCDDDB0692941B00CDDB8A,
-				71DCDDDC0692941B00CDDB8A,
-				71DCDDDD0692941B00CDDB8A,
-				71DCDDDE0692941B00CDDB8A,
-				71DCDDDF0692941B00CDDB8A,
-				71DCDDE00692941B00CDDB8A,
-				71DCDDE10692941B00CDDB8A,
-				71DCDDE20692941B00CDDB8A,
-				71DCDDE30692941B00CDDB8A,
-				71DCDDE40692941B00CDDB8A,
-				71DCDDE50692941B00CDDB8A,
-				71DCDDE60692941B00CDDB8A,
-				71DCDDE70692941B00CDDB8A,
-				71DCDD57069293BD00CDDB8A,
-				71DCDD58069293BD00CDDB8A,
-				71DCDD59069293BD00CDDB8A,
-				71DCDD5A069293BD00CDDB8A,
-				71DCDD5B069293BD00CDDB8A,
-				71DCDD5C069293BD00CDDB8A,
-				71DCDD5D069293BD00CDDB8A,
-				71DCDD5E069293BD00CDDB8A,
-				71DCDD5F069293BD00CDDB8A,
-				71DCDD60069293BD00CDDB8A,
-				71DCDD61069293BD00CDDB8A,
-				71DCDD62069293BD00CDDB8A,
-				71DCDD63069293BD00CDDB8A,
-				71DCDD64069293BD00CDDB8A,
-				71DCDD65069293BD00CDDB8A,
-				71DCDD66069293BD00CDDB8A,
-				71DCDD67069293BD00CDDB8A,
-				71DCDD68069293BD00CDDB8A,
-				71DCDD69069293BD00CDDB8A,
-				71DCDD6A069293BD00CDDB8A,
-				71DCDD6B069293BD00CDDB8A,
-				71DCDD6C069293BD00CDDB8A,
-				71DCDD6D069293BD00CDDB8A,
-				71DCDD6E069293BD00CDDB8A,
-				71DCDD6F069293BD00CDDB8A,
-				71DCDD70069293BD00CDDB8A,
-				71DCDD71069293BD00CDDB8A,
-				71DCDD2A0692933E00CDDB8A,
-				71DCDD2B0692933E00CDDB8A,
-				71DCDD2C0692933E00CDDB8A,
-				71DCDD2D0692933E00CDDB8A,
-				71DCDD2E0692933E00CDDB8A,
-				71DCDD2F0692933E00CDDB8A,
-				71DCDD300692933E00CDDB8A,
-				71DCDD310692933E00CDDB8A,
-				71DCDD320692933E00CDDB8A,
-				71DCDD330692933E00CDDB8A,
-				71DCDD340692933E00CDDB8A,
-				71DCDD350692933E00CDDB8A,
-				71DCDD360692933E00CDDB8A,
-				7144F81806922313007CCB15,
-				7144F81906922313007CCB15,
-				7144F720069211CD007CCB15,
-				7144F721069211CD007CCB15,
-				7144F722069211CD007CCB15,
-				7144F723069211CD007CCB15,
-				7144F724069211CD007CCB15,
-				7144F725069211CD007CCB15,
-				7144F726069211CD007CCB15,
-				7144F727069211CD007CCB15,
-				7144F6960691FD43007CCB15,
-				7144F6970691FD43007CCB15,
-				7144F6880691FCB4007CCB15,
-				7144F6890691FCB4007CCB15,
-				7144F68A0691FCB4007CCB15,
-				7144F68B0691FCB4007CCB15,
-				7144F68C0691FCB4007CCB15,
-				7144F68D0691FCB4007CCB15,
-				7144F66C0691FC9F007CCB15,
-				7144F66D0691FC9F007CCB15,
-				7144F66E0691FC9F007CCB15,
-				7144F66F0691FC9F007CCB15,
-				7144F6700691FC9F007CCB15,
-				7144F6710691FC9F007CCB15,
-				7144F6720691FC9F007CCB15,
-				7144F6730691FC9F007CCB15,
-				7144F6740691FC9F007CCB15,
-				7144F6750691FC9F007CCB15,
-				7144F6760691FC9F007CCB15,
-				7144F6770691FC9F007CCB15,
-				7144F6780691FC9F007CCB15,
-				7144F6580691FC73007CCB15,
-				7144F6590691FC73007CCB15,
-				7144F65A0691FC73007CCB15,
-				7144F65B0691FC73007CCB15,
-				7144F65C0691FC73007CCB15,
-				7144F65D0691FC73007CCB15,
-				7144F65E0691FC73007CCB15,
-				7144F65F0691FC73007CCB15,
-				7144F6600691FC73007CCB15,
-				7144F6440691FC4E007CCB15,
-				7144F6450691FC4E007CCB15,
-				7144F6460691FC4E007CCB15,
-				7144F6470691FC4E007CCB15,
-				7144F6480691FC4E007CCB15,
-				7144F6490691FC4E007CCB15,
-				7144F64A0691FC4E007CCB15,
-				7144F64B0691FC4E007CCB15,
-				7144F64C0691FC4E007CCB15,
-				71DE6C840691FAC500145266,
-				71DE6C850691FAC500145266,
 				71DE6C7C0691FA7400145266,
 				715FC1C406AEFFA20052FAB7,
 			);
@@ -6339,6 +6930,7 @@
 				715FC37B06B070910052FAB7,
 				715FC3CA06B0712D0052FAB7,
 				71AB553706BAE8A10074427F,
+				7153688306BEF74C00BA5CC0,
 			);
 		};
 		71DE6C780691FA7400145266 = {
@@ -6414,6 +7006,7 @@
 				715FC37C06B070910052FAB7,
 				715FC3CB06B0712D0052FAB7,
 				71AB553806BAE8A10074427F,
+				7153688406BEF74C00BA5CC0,
 			);
 			isa = PBXGroup;
 			name = Products;
