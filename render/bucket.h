@@ -137,12 +137,13 @@ class CqBucket : public IqBucket
 		 */
 		void	AddMPG( CqMicroPolygon* pmpgNew )
 		{
-#ifdef _DEBUG
+//#ifdef _DEBUG
 			std::vector<CqMicroPolygon*>::iterator end = m_ampgWaiting.end();
 			for (std::vector<CqMicroPolygon*>::iterator i = m_ampgWaiting.begin(); i != end; i++)
 				if ((*i) == pmpgNew) 
-					assert( TqFalse );
-#endif
+//					assert( TqFalse );
+					std::cout << pmpgNew << "Added more than once!" << std::endl;
+//#endif
 			m_ampgWaiting.push_back( pmpgNew );
 		}
 		/** Add a Micropoly grid to the list of deferred grids.

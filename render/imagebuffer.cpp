@@ -490,7 +490,13 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 			 ( B.vecMax().y() >= BucketMax.y() ) )
 
 		{
-			if ( PushMPGDown( pmpgNew, iBkt ) ) STATS_INC( MPG_pushed_down );
+			// Make sure it is pushed down from the appropriate column but this row, just in case the
+			// bound extends into previous rows as well.
+			TqInt BucketRow = iCurrentBucket() / m_cXBuckets;
+			TqInt BucketCol = iBkt % m_cXBuckets;
+			TqInt NextBucketDown = ( BucketRow * m_cXBuckets ) + BucketCol;
+
+			if ( PushMPGDown( pmpgNew, NextBucketDown ) ) STATS_INC( MPG_pushed_down );
 			if (B.vecMax().x() < BucketMin.x()) 
 			{
 				RELEASEREF( pmpgNew );
@@ -499,26 +505,15 @@ void CqImageBuffer::AddMPG( CqMicroPolygon* pmpgNew )
 			iBkt = iCurrentBucket();
 			pmpgNew->MarkPushedForward();
 		}
-	} 
-/*	if ( iBkt < iCurrentBucket() )
-	{
-		CqVector2D BucketMin = Position( iCurrentBucket() );
-		CqVector2D BucketMax = BucketMin + Size( iCurrentBucket() );
-		if ( !( ( B.vecMin().x() > BucketMax.x() ) ||
-		        ( B.vecMin().y() > BucketMax.y() ) ||
-		        ( B.vecMax().x() < BucketMin.x() ) ||
-		        ( B.vecMax().y() < BucketMin.y() ) ) )
-		{
-			iBkt = iCurrentBucket();
-		}
-		// I'm not sure if this should be here.  I've added it because I kept
-		// hitting the assert() below.  Jonathan Merritt, 20030612.
-		else
+		// This can be hit if the grid was occluded in the previous bucket, then diced in this one. 
+		// There may be some MP's that when busted belong in the previous bucket, but we have already 
+		// determined that they can play no real part in that bucket, so discard them.
+		else if (B.vecMax().x() < BucketMin.x()) 
 		{
 			RELEASEREF( pmpgNew );
 			return ;
 		}
-	}*/
+	} 
 
 	assert( iBkt >= iCurrentBucket() );
 	if ( ( iBkt >= iCurrentBucket() ) && ( iBkt < ( m_cXBuckets * m_cYBuckets ) ) )
