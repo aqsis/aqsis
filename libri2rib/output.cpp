@@ -1343,7 +1343,7 @@ RtVoid CqOutput::RiSubdivisionMeshV( RtToken mask, RtInt nf, RtInt nverts[],
         if ( psize < verts[ i ] )
             psize = verts[ i ];
     }
-    printPL( n, tokens, parms, psize + 1, psize + 1, nf );
+    printPL( n, tokens, parms, psize + 1, psize + 1, nf, vsize );
 }
 
 RtVoid CqOutput::RiProcedural( RtPointer data, RtBound bound,
