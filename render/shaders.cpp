@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -30,7 +30,7 @@
 #include	"shaders.h"
 #include	"file.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 
 
@@ -44,28 +44,28 @@ START_NAMESPACE(Aqsis)
 /** Set the instance variables on this shader.
  */
 
-void CqShaderSurfaceConstant::SetValue(const char* name, TqPchar val)
-{
-}
+void CqShaderSurfaceConstant::SetValue( const char* name, TqPchar val )
+{}
 
 //---------------------------------------------------------------------
 /** Evaluate the shader function based on the values in the variables.
  */
 
-void CqShaderSurfaceConstant::Evaluate(CqShaderExecEnv& Env)
+void CqShaderSurfaceConstant::Evaluate( CqShaderExecEnv& Env )
 {
 	Env.Reset();
 	do
 	{
-		Env.Ci()=Env.Os()*Env.Cs();
-		Env.Oi()=Env.Os();
-	}while(Env.Advance());
+		Env.Ci() = Env.Os() * Env.Cs();
+		Env.Oi() = Env.Os();
+	}
+	while ( Env.Advance() );
 }
 
 
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )
 
 

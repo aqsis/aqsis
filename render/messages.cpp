@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -29,30 +29,30 @@
 #include	"renderer.h"
 #include	"imagebuffer.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 
 
 CqReportedErrors	gReportedErrors;
 
-char* gstrMessageType[MessageType_Last]=
-{
-	"Message",
-	"Warning",
-	"Error"
-};
+char* gstrMessageType[ MessageType_Last ] =
+    {
+        "Message",
+        "Warning",
+        "Error"
+    };
 
 //---------------------------------------------------------------------
 /** Destructor
  */
 
-CqReportedErrors::~CqReportedErrors()	
+CqReportedErrors::~CqReportedErrors()
 {
-	// We know that items are only ever added to our list via SetReported, 
+	// We know that items are only ever added to our list via SetReported,
 	// so need to be deleted here.
-	for(std::vector<CqBasicError*>::iterator i=m_aReportedErrors.begin(); i!=m_aReportedErrors.end(); i++)
-		if((*i)!=0)
-			delete(*i);
+	for ( std::vector<CqBasicError*>::iterator i = m_aReportedErrors.begin(); i != m_aReportedErrors.end(); i++ )
+		if ( ( *i ) != 0 )
+			delete( *i );
 }
 
 
@@ -61,9 +61,9 @@ CqReportedErrors::~CqReportedErrors()
  * \param pError Pointer to error message to add to list.
  */
 
-void CqReportedErrors::SetReported(CqBasicError* pError)
+void CqReportedErrors::SetReported( CqBasicError* pError )
 {
-	m_aReportedErrors.push_back(pError);
+	m_aReportedErrors.push_back( pError );
 }
 
 
@@ -72,12 +72,12 @@ void CqReportedErrors::SetReported(CqBasicError* pError)
  * \param pError Pointer to error to check.
  */
 
-TqBool CqReportedErrors::CheckReport(CqBasicError* pError)
+TqBool CqReportedErrors::CheckReport( CqBasicError* pError )
 {
-	for(std::vector<CqBasicError*>::iterator i=m_aReportedErrors.begin(); i!=m_aReportedErrors.end(); i++)
-		if((*i)->CheckReport(pError))
-			return(false);
-	return(true);
+	for ( std::vector<CqBasicError*>::iterator i = m_aReportedErrors.begin(); i != m_aReportedErrors.end(); i++ )
+		if ( ( *i ) ->CheckReport( pError ) )
+			return ( false );
+	return ( true );
 }
 
 
@@ -87,8 +87,8 @@ TqBool CqReportedErrors::CheckReport(CqBasicError* pError)
 
 void CqReportedErrors::ClearReported()
 {
-	for(std::vector<CqBasicError*>::iterator i=m_aReportedErrors.begin(); i!=m_aReportedErrors.end(); i++)
-		delete((*i));
+	for ( std::vector<CqBasicError*>::iterator i = m_aReportedErrors.begin(); i != m_aReportedErrors.end(); i++ )
+		delete( ( *i ) );
 	m_aReportedErrors.clear();
 }
 
@@ -101,14 +101,14 @@ void CqReportedErrors::ClearReported()
  * \param onceper Flag indicating the message should only be show once.
  */
 
-CqBasicError::CqBasicError(TqInt code, TqInt severity, const char* message, TqBool onceper) :	
-m_Code(code)
+CqBasicError::CqBasicError( TqInt code, TqInt severity, const char* message, TqBool onceper ) :
+		m_Code( code )
 {
-	if(gReportedErrors.CheckReport(this))
+	if ( gReportedErrors.CheckReport( this ) )
 	{
-		(*QGetRenderContext()->optCurrent().pErrorHandler())(code, severity, message);
-		if(onceper)
-			gReportedErrors.SetReported(new CqBasicError(*this));
+		( *QGetRenderContext() ->optCurrent().pErrorHandler() ) ( code, severity, message );
+		if ( onceper )
+			gReportedErrors.SetReported( new CqBasicError( *this ) );
 	}
 }
 
@@ -120,27 +120,27 @@ m_Code(code)
  * \param pAttributes Pointer to CqAttributes class to associate message with.
  * \param onceper Flag indicating the message should only be show once.
  */
-CqAttributeError::CqAttributeError(TqInt code, TqInt severity, const char* message, const CqAttributes* pAttributes, TqBool onceper) : 
-CqBasicError(code),
-m_pAttributes(pAttributes)
+CqAttributeError::CqAttributeError( TqInt code, TqInt severity, const char* message, const CqAttributes* pAttributes, TqBool onceper ) :
+		CqBasicError( code ),
+		m_pAttributes( pAttributes )
 {
-	if(gReportedErrors.CheckReport(this))
+	if ( gReportedErrors.CheckReport( this ) )
 	{
 		// TODO: This needs tidying up.
 		CqString strMessage;
-		const CqString* pattrName=pAttributes->GetStringAttribute("identifier","name");
-		CqString strName("<unnamed>");
-		if(pattrName!=0)	strName=pattrName[0];
-		strMessage=message;
-		strMessage+=" : ";
-		strMessage+=strName;
-		(*QGetRenderContext()->optCurrent().pErrorHandler())(code, severity, (char*)strMessage.c_str());
-		if(onceper)
-			gReportedErrors.SetReported(new CqAttributeError(*this));
+		const CqString* pattrName = pAttributes->GetStringAttribute( "identifier", "name" );
+		CqString strName( "<unnamed>" );
+		if ( pattrName != 0 ) strName = pattrName[ 0 ];
+		strMessage = message;
+		strMessage += " : ";
+		strMessage += strName;
+		( *QGetRenderContext() ->optCurrent().pErrorHandler() ) ( code, severity, ( char* ) strMessage.c_str() );
+		if ( onceper )
+			gReportedErrors.SetReported( new CqAttributeError( *this ) );
 	}
 }
 
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )

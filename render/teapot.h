@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -21,7 +21,7 @@
 /** \file
 		\brief Implements RiGeometry "teapot" option.
 		\author T. Burge (tburge@affine.org)
-*/
+*/ 
 /*    References:
  *          [CROW87]  Crow, F. C. The Origins of the Teapot. 
  *                    IEEE Computer Graphics and Applications, 
@@ -43,7 +43,7 @@
 #include	"ri.h"
 #include	"vector3d.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
 /** \class CqTeapot
@@ -53,44 +53,58 @@ START_NAMESPACE(Aqsis)
 class CqTeapot : public CqSurface
 {
 	public:
-				CqTeapot(TqBool addCrowBase);
-				CqTeapot(const CqTeapot& From)	{*this=From;}
-	virtual		~CqTeapot()	{}
+		CqTeapot( TqBool addCrowBase );
+		CqTeapot( const CqTeapot& From )
+		{
+			*this = From;
+		}
+		virtual	~CqTeapot()
+		{}
 
-	virtual void		Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx);
-						/** Get the number of uniform values for this GPrim.
-						 */
-	virtual	TqUint		cUniform() const					{return(1);}
-						/** Get the number of varying values for this GPrim.
-						 */
-	virtual	TqUint		cVarying() const					{return(4);}
-						/** Get the number of vertex values for this GPrim.
-						 */
-	virtual	TqUint		cVertex() const						{return(16);}
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx );
+		/** Get the number of uniform values for this GPrim.
+		 */
+		virtual	TqUint	cUniform() const
+		{
+			return ( 1 );
+		}
+		/** Get the number of varying values for this GPrim.
+		 */
+		virtual	TqUint	cVarying() const
+		{
+			return ( 4 );
+		}
+		/** Get the number of vertex values for this GPrim.
+		 */
+		virtual	TqUint	cVertex() const
+		{
+			return ( 16 );
+		}
 
-	CqSurface           *pPatchMeshBicubic[7];
-    TqInt               cNbrPatchMeshBicubic;
+		CqSurface *pPatchMeshBicubic[ 7 ];
+		TqInt cNbrPatchMeshBicubic;
 
-	// Overrides from CqSurface
-	virtual	CqMicroPolyGridBase* Dice();
-	virtual TqBool		Diceable();
+		// Overrides from CqSurface
+		virtual	CqMicroPolyGridBase* Dice();
+		virtual TqBool	Diceable();
 
-	virtual	CqBound		Bound() const;
-	virtual	TqInt		Split(std::vector<CqBasicSurface*>& aSplits);
-	
-			CqTeapot&	operator=(const CqTeapot& From);
+		virtual	CqBound	Bound() const;
+		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
+
+		CqTeapot&	operator=( const CqTeapot& From );
 
 	private:
-			TqBool			m_CrowBase;			///< Utah teapot was missing a bottom.  F. Crow added one.
+		TqBool	m_CrowBase;			///< Utah teapot was missing a bottom.  F. Crow added one.
 
-    protected:
-			CqMatrix		m_matTx;		///< Transformation matrix from object to camera.
-			CqMatrix		m_matITTx;		///< Inverse transpose transformation matrix, for transforming normals.
-};
+	protected:
+		CqMatrix	m_matTx;		///< Transformation matrix from object to camera.
+		CqMatrix	m_matITTx;		///< Inverse transpose transformation matrix, for transforming normals.
+}
+;
 
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )
 
 #endif	// !TEAPOT_H_INCLUDED

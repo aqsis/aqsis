@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -28,7 +28,7 @@
 
 extern int yyparse();
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 
 
@@ -44,24 +44,24 @@ std::ostream* ParseErrorStream = &std::cerr;
 TqInt ParseLineNumber;
 TqBool ParseSucceeded = true;
 
-TqBool Parse(std::istream& InputStream, const CqString StreamName, std::ostream& ErrorStream)
+TqBool Parse( std::istream& InputStream, const CqString StreamName, std::ostream& ErrorStream )
 {
 	ParseInputStream = &InputStream;
 	ParseStreamName = StreamName;
 	ParseErrorStream = &ErrorStream;
 	ParseLineNumber = 1;
 	ParseSucceeded = true;
-	
+
 	InitStandardNamespace();
-	
+
 	yyparse();
 	TypeCheck();
 	Optimise();
 
 	std::vector<CqVarDef>::iterator iv;
-	for(iv=gLocalVars.begin(); iv!=gLocalVars.end(); iv++)
-		if(iv->pDefValue())	iv->pDefValue()->Optimise();
-	
+	for ( iv = gLocalVars.begin(); iv != gLocalVars.end(); iv++ )
+		if ( iv->pDefValue() ) iv->pDefValue() ->Optimise();
+
 	return ParseSucceeded;
 }
 
@@ -77,9 +77,9 @@ void ResetParser()
 
 IqParseNode* GetParseTree()
 {
-	return(ParseTreePointer);
+	return ( ParseTreePointer );
 }
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )
 
 //-------------------------------------------------------------

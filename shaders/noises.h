@@ -1,12 +1,12 @@
 /************************************************************************
- * noises.h - various noise-based patterns
- *
- * Author: Larry Gritz (gritzl@acm.org), though they're obvious to any
- *         experience shader writer.
- *
- * $Revision: 1.1 $    $Date: 2001/06/07 18:46:13 $
- *
- ************************************************************************/
+* noises.h - various noise-based patterns
+*
+* Author: Larry Gritz (gritzl@acm.org), though they're obvious to any
+*         experience shader writer.
+*
+* $Revision: 1.2 $    $Date: 2002/03/01 18:00:39 $
+*
+************************************************************************/
 
 
 
@@ -31,7 +31,7 @@
 
 
 
-#ifndef snoise
+#ifndef snoise 
 /*
  * Signed noise -- the original Perlin kind with range (-1,1) We prefer
  * signed noise to regular noise mostly because its average is zero.
@@ -55,20 +55,21 @@
 
 
 /* Having filteredsnoise leads easily to an antialiased version of fBm. */
-float fBm (point p; float filtwidth;
-           uniform float maxoctaves, lacunarity, gain)
+float fBm ( point p; float filtwidth;
+            uniform float maxoctaves, lacunarity, gain )
 {
-    uniform float i;
-    uniform float amp = 1;
-    varying point pp = p;
-    varying float sum = 0, fw = filtwidth;
+	uniform float i;
+	uniform float amp = 1;
+	varying point pp = p;
+	varying float sum = 0, fw = filtwidth;
 
-    for (i = 0;  i < maxoctaves && fw < 1.0;  i += 1) {
+	for ( i = 0; i < maxoctaves && fw < 1.0; i += 1 )
+	{
 #pragma nolint
-	sum += amp * filteredsnoise (pp, fw);
-	amp *= gain;  pp *= lacunarity;  fw *= lacunarity;
-    }
-    return sum;
+		sum += amp * filteredsnoise ( pp, fw );
+		amp *= gain; pp *= lacunarity; fw *= lacunarity;
+	}
+	return sum;
 }
 
 
@@ -81,20 +82,21 @@ float fBm (point p; float filtwidth;
 
 /* A vector-valued antialiased fBm. */
 vector
-vfBm (point p; float filtwidth;
-      uniform float maxoctaves, lacunarity, gain)
+vfBm ( point p; float filtwidth;
+       uniform float maxoctaves, lacunarity, gain )
 {
-    uniform float i;
-    uniform float amp = 1;
-    varying point pp = p;
-    varying vector sum = 0;
-    varying float fw = filtwidth;
+	uniform float i;
+	uniform float amp = 1;
+	varying point pp = p;
+	varying vector sum = 0;
+	varying float fw = filtwidth;
 
-    for (i = 0;  i < maxoctaves && fw < 1.0;  i += 1) {
-	sum += amp * filteredvsnoise (pp, fw);
-	amp *= gain;  pp *= lacunarity;  fw *= lacunarity;
-    }
-    return sum;
+	for ( i = 0; i < maxoctaves && fw < 1.0; i += 1 )
+	{
+		sum += amp * filteredvsnoise ( pp, fw );
+		amp *= gain; pp *= lacunarity; fw *= lacunarity;
+	}
+	return sum;
 }
 
 
@@ -110,21 +112,22 @@ vfBm (point p; float filtwidth;
 
 
 float
-VLfBm (point p; float filtwidth;
-       uniform float maxoctaves, lacunarity, gain, scale)
+VLfBm ( point p; float filtwidth;
+        uniform float maxoctaves, lacunarity, gain, scale )
 {
-    uniform float i;
-    uniform float amp = 1;
-    varying point pp = p;
-    varying float sum = 0;
-    varying float fw = filtwidth;
+	uniform float i;
+	uniform float amp = 1;
+	varying point pp = p;
+	varying float sum = 0;
+	varying float fw = filtwidth;
 
-    for (i = 0;  i < maxoctaves && fw < 1.0;  i += 1) {
+	for ( i = 0; i < maxoctaves && fw < 1.0; i += 1 )
+	{
 #pragma nolint
-	sum += amp * filteredVLNoise (pp, fw, scale);
-	amp *= gain;  pp *= lacunarity;  fw *= lacunarity;
-    }
-    return sum;
+		sum += amp * filteredVLNoise ( pp, fw, scale );
+		amp *= gain; pp *= lacunarity; fw *= lacunarity;
+	}
+	return sum;
 }
 
 
@@ -137,20 +140,21 @@ VLfBm (point p; float filtwidth;
 /* Antialiased turbulence.  Watch out -- the abs() call introduces infinite
  * frequency content, which makes our antialiasing efforts much trickier!
  */
-float turbulence (point p; float filtwidth;
-                  uniform float maxoctaves, lacunarity, gain)
+float turbulence ( point p; float filtwidth;
+                   uniform float maxoctaves, lacunarity, gain )
 {
-    uniform float i;
-    uniform float amp = 1;
-    varying point pp = p;
-    varying float sum = 0, fw = filtwidth;
+	uniform float i;
+	uniform float amp = 1;
+	varying point pp = p;
+	varying float sum = 0, fw = filtwidth;
 
-    for (i = 0;  i < maxoctaves && fw < 1.0;  i += 1) {
+	for ( i = 0; i < maxoctaves && fw < 1.0; i += 1 )
+	{
 #pragma nolint
-	sum += amp * abs(filteredsnoise (pp, fw));
-	amp *= gain;  pp *= lacunarity;  fw *= lacunarity;
-    }
-    return sum;
+		sum += amp * abs( filteredsnoise ( pp, fw ) );
+		amp *= gain; pp *= lacunarity; fw *= lacunarity;
+	}
+	return sum;
 }
 
 

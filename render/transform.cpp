@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -28,7 +28,7 @@
 #include	"renderer.h"
 #include	"imagebuffer.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 
 
@@ -36,19 +36,19 @@ START_NAMESPACE(Aqsis)
 /** Constructor.
  */
 
-CqTransform::CqTransform() : CqMotionSpec<CqMatrix>(CqMatrix()), m_cReferences(0), m_StackIndex(0)
+CqTransform::CqTransform() : CqMotionSpec<CqMatrix>( CqMatrix() ), m_cReferences( 0 ), m_StackIndex( 0 )
 {
-	if(QGetRenderContext()!=0)
+	if ( QGetRenderContext() != 0 )
 	{
-		QGetRenderContext()->TransformStack().push_back(this);
-		m_StackIndex=QGetRenderContext()->TransformStack().size()-1;
+		QGetRenderContext() ->TransformStack().push_back( this );
+		m_StackIndex = QGetRenderContext() ->TransformStack().size() - 1;
 	}
 	// Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
 	// if the previous level has motion specification, the value will be interpolated.
 	CqMatrix matOtoWLast;
-	if(m_StackIndex>0)
-		matOtoWLast=QGetRenderContext()->TransformStack()[m_StackIndex-1]->matObjectToWorld();
-	SetDefaultObject(matOtoWLast);
+	if ( m_StackIndex > 0 )
+		matOtoWLast = QGetRenderContext() ->TransformStack() [ m_StackIndex - 1 ] ->matObjectToWorld();
+	SetDefaultObject( matOtoWLast );
 }
 
 
@@ -56,20 +56,20 @@ CqTransform::CqTransform() : CqMotionSpec<CqMatrix>(CqMatrix()), m_cReferences(0
 /** Copy constructor.
  */
 
-CqTransform::CqTransform(const CqTransform& From) : CqMotionSpec<CqMatrix>(From), m_cReferences(0), m_StackIndex(-1)
+CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<CqMatrix>( From ), m_cReferences( 0 ), m_StackIndex( -1 )
 {
-	*this=From;
-	
+	*this = From;
+
 	// Register ourself with the global transform stack.
-	QGetRenderContext()->TransformStack().push_back(this);
-	m_StackIndex=QGetRenderContext()->TransformStack().size()-1;
+	QGetRenderContext() ->TransformStack().push_back( this );
+	m_StackIndex = QGetRenderContext() ->TransformStack().size() - 1;
 
 	// Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
 	// if the previous level has motion specification, the value will be interpolated.
 	CqMatrix matOtoWLast;
-	if(m_StackIndex>0)
-		matOtoWLast=QGetRenderContext()->TransformStack()[m_StackIndex-1]->matObjectToWorld();
-	SetDefaultObject(matOtoWLast);
+	if ( m_StackIndex > 0 )
+		matOtoWLast = QGetRenderContext() ->TransformStack() [ m_StackIndex - 1 ] ->matObjectToWorld();
+	SetDefaultObject( matOtoWLast );
 }
 
 
@@ -79,20 +79,20 @@ CqTransform::CqTransform(const CqTransform& From) : CqMotionSpec<CqMatrix>(From)
 
 CqTransform::~CqTransform()
 {
-	assert(RefCount()==0);
+	assert( RefCount() == 0 );
 
-	if(m_StackIndex>=0 && m_StackIndex<static_cast<TqInt>(QGetRenderContext()->TransformStack().size()))
+	if ( m_StackIndex >= 0 && m_StackIndex < static_cast<TqInt>( QGetRenderContext() ->TransformStack().size() ) )
 	{
 		// Remove ourself from the stack
-		std::vector<CqTransform*>::iterator p=QGetRenderContext()->TransformStack().begin();
-		p+=m_StackIndex;
-		std::vector<CqTransform*>::iterator p2=p;
-		while(p2!=QGetRenderContext()->TransformStack().end())
+		std::vector<CqTransform*>::iterator p = QGetRenderContext() ->TransformStack().begin();
+		p += m_StackIndex;
+		std::vector<CqTransform*>::iterator p2 = p;
+		while ( p2 != QGetRenderContext() ->TransformStack().end() )
 		{
-			(*p2)->m_StackIndex--;
+			( *p2 ) ->m_StackIndex--;
 			p2++;
 		}
-		QGetRenderContext()->TransformStack().erase(p);
+		QGetRenderContext() ->TransformStack().erase( p );
 	}
 }
 
@@ -100,11 +100,11 @@ CqTransform::~CqTransform()
 /** Copy function.
  */
 
-CqTransform& CqTransform::operator=(const CqTransform& From)
+CqTransform& CqTransform::operator=( const CqTransform& From )
 {
-	CqMotionSpec<CqMatrix>::operator=(From);
+	CqMotionSpec<CqMatrix>::operator=( From );
 
-	return(*this);
+	return ( *this );
 }
 
 
@@ -112,9 +112,9 @@ CqTransform& CqTransform::operator=(const CqTransform& From)
 /** Set the transformation at the specified time.
  */
 
-void CqTransform::SetCurrentTransform(TqFloat time, const CqMatrix& matTrans)
+void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 {
-	AddTimeSlot(time,matTrans);
+	AddTimeSlot( time, matTrans );
 }
 
 
@@ -122,14 +122,14 @@ void CqTransform::SetCurrentTransform(TqFloat time, const CqMatrix& matTrans)
 /** Modify the transformation at the specified time.
  */
 
-void CqTransform::ConcatCurrentTransform(TqFloat time, const CqMatrix& matTrans)
+void CqTransform::ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 {
 	// If we are actually in a motion block, concatenate this transform with the existing one at that time slot,
 	// else apply this transform at all time slots.
-	if(QGetRenderContext()->pconCurrent()->fMotionBlock())
-		ConcatTimeSlot(time,matTrans);
+	if ( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
+		ConcatTimeSlot( time, matTrans );
 	else
-		ConcatAllTimeSlots(matTrans);
+		ConcatAllTimeSlots( matTrans );
 }
 
 
@@ -137,9 +137,9 @@ void CqTransform::ConcatCurrentTransform(TqFloat time, const CqMatrix& matTrans)
 /** Get the transformation at the specified time.
  */
 
-const CqMatrix& CqTransform::matObjectToWorld(TqFloat time)	const
+const CqMatrix& CqTransform::matObjectToWorld( TqFloat time ) const
 {
-	return(GetMotionObject(time));
+	return ( GetMotionObject( time ) );
 }
 
 
@@ -147,22 +147,21 @@ const CqMatrix& CqTransform::matObjectToWorld(TqFloat time)	const
 //---------------------------------------------------------------------
 // Overrides from CqMotionSpec reequired for any object subject to motion specification.
 
-void CqTransform::ClearMotionObject(CqMatrix& A) const
+void CqTransform::ClearMotionObject( CqMatrix& A ) const
+	{}
+
+CqMatrix CqTransform::ConcatMotionObjects( const CqMatrix& A, const CqMatrix& B ) const
 {
+	return ( A * B );
 }
 
-CqMatrix CqTransform::ConcatMotionObjects(const CqMatrix& A, const CqMatrix& B) const
-{
-	return(A*B);
-}
-
-CqMatrix CqTransform::LinearInterpolateMotionObjects(TqFloat Fraction, const CqMatrix& A, const CqMatrix& B) const
+CqMatrix CqTransform::LinearInterpolateMotionObjects( TqFloat Fraction, const CqMatrix& A, const CqMatrix& B ) const
 {
 	// TODO: Should we do anything with this???
-	return(A);
+	return ( A );
 }
 
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )

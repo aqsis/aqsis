@@ -7,7 +7,7 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-//  
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -30,22 +30,24 @@
 #include "error.h"
 #include "ascii.h"
 
-namespace libri2rib {
+namespace libri2rib
+{
 
 class CqContext
 {
-private:
-    std::list<CqASCII *> chl;
-    CqASCII *active;
-public:
-    CqContext();
-    ~CqContext() {}
+	private:
+		std::list<CqASCII *> chl;
+		CqASCII *active;
+	public:
+		CqContext();
+		~CqContext()
+		{}
 
-    void            addContext();
-    RtContextHandle getContext();
-    CqASCII       & current();
-    void            switchTo (RtContextHandle);
-    void            removeCurrent();
+		void addContext();
+		RtContextHandle getContext();
+		CqASCII & current();
+		void switchTo ( RtContextHandle );
+		void removeCurrent();
 };
 
 } /* namespace libri2rib */

@@ -7,7 +7,7 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-//  
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -29,20 +29,28 @@
 #include <vector>
 #include "ri.h"
 
-namespace libri2rib {
+namespace libri2rib
+{
 
 class CqPLStore
 {
-public:
-    CqPLStore (va_list args);
-    ~CqPLStore () {}
-private:
-    std::vector<RtToken> tk;
-    std::vector<RtPointer> pr;
-public:
-    RtInt n;
-    RtToken *tokens() { return &tk[0]; };
-    RtPointer *parms() { return &pr[0]; };
+	public:
+		CqPLStore ( va_list args );
+		~CqPLStore ()
+		{}
+	private:
+		std::vector<RtToken> tk;
+		std::vector<RtPointer> pr;
+	public:
+		RtInt n;
+		RtToken *tokens()
+		{
+			return & tk[ 0 ];
+		};
+		RtPointer *parms()
+		{
+			return & pr[ 0 ];
+		};
 };
 
 } /* namespace libri2rib */

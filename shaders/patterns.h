@@ -1,13 +1,13 @@
 /**************************************************************************
- * patterns.h - various "helper" routines for making patterns, including
- *              antialiased versions of some useful functions.
- *
- * Author: Larry Gritz (gritzl@acm.org), though most are obvious to any
- *         experienced shader writer.
- *
- * $Revision: 1.1 $    $Date: 2001/06/07 18:46:13 $
- *
- **************************************************************************/
+* patterns.h - various "helper" routines for making patterns, including
+*              antialiased versions of some useful functions.
+*
+* Author: Larry Gritz (gritzl@acm.org), though most are obvious to any
+*         experienced shader writer.
+*
+* $Revision: 1.2 $    $Date: 2002/03/01 18:00:39 $
+*
+**************************************************************************/
 
 
 #ifndef PATTERNS_H
@@ -31,9 +31,9 @@
 
 
 /* A 1-D pulse pattern:  return 1 if edge0 <= x <= edge1, otherwise 0 */
-float pulse (float edge0, edge1, x)
+float pulse ( float edge0, edge1, x )
 {
-    return step(edge0,x) - step(edge1,x);
+	return step( edge0, x ) - step( edge1, x );
 }
 
 
@@ -41,11 +41,11 @@ float pulse (float edge0, edge1, x)
  * the convolution of pulse, above, with a box filter of a particular
  * width.  Derivation is left to the reader.
  */
-float filteredpulse (float edge0, edge1, x, width)
+float filteredpulse ( float edge0, edge1, x, width )
 {
-    float x0 = x - width*0.5;
-    float x1 = x0 + width;
-    return max (0, (min(x1,edge1)-max(x0,edge0)) / width);
+	float x0 = x - width * 0.5;
+	float x1 = x0 + width;
+	return max ( 0, ( min( x1, edge1 ) - max( x0, edge0 ) ) / width );
 }
 
 
@@ -54,9 +54,9 @@ float filteredpulse (float edge0, edge1, x, width)
 /* A pulse train: a signal that repeats with a given period, and is
  * 0 when 0 <= mod(x,period) < edge, and 1 when mod(x,period) > edge.
  */
-float pulsetrain (float period, duty, x)
+float pulsetrain ( float period, duty, x )
 {
-    return pulse (duty*period, 1, mod(x,period));
+	return pulse ( duty * period, 1, mod( x, period ) );
 }
 
 
@@ -67,18 +67,18 @@ float pulsetrain (float period, duty, x)
  * Strategy: consider the function INTFPT, which is the integral of the
  * train from 0 to x.  Just subtract!
  */
-float filteredpulsetrain (float period, duty, x, width)
+float filteredpulsetrain ( float period, duty, x, width )
 {
-    /* First, normalize so period == 1 and our domain of interest is > 0 */
-    float w = width/period;
-    float x0 = x/period - w/2;
-    float x1 = x0+w;
-    /* Now we want to integrate the normalized pulsetrain over [x0,x1] where
-     * 0 <= x0 < 1 and x0 < x1. 
-     */
+	/* First, normalize so period == 1 and our domain of interest is > 0 */
+	float w = width / period;
+	float x0 = x / period - w / 2;
+	float x1 = x0 + w;
+	/* Now we want to integrate the normalized pulsetrain over [x0,x1] where
+	 * 0 <= x0 < 1 and x0 < x1. 
+	 */
 #define INTFPT(x) ((1-duty)*floor(x) + max(0,x-floor(x)-duty))
-    return (INTFPT(x1) - INTFPT(x0)) / (x1-x0);
-#undef INTFPT    
+	return ( INTFPT( x1 ) - INTFPT( x0 ) ) / ( x1 - x0 );
+#undef INTFPT
 }
 
 
@@ -97,35 +97,36 @@ float filteredpulsetrain (float period, duty, x, width)
  *      row, column             index which tile the sample is in
  *      xtile, ytile            position within this tile (0-1)
  */
-void basictile (float x, y;
-		uniform float tilewidth, tileheight;
-		uniform float rowstagger, rowstaggervary;
-		uniform float jaggedfreq, jaggedamp;
-		output float column, row;
-		output float xtile, ytile;
-    )
+void basictile ( float x, y;
+                 uniform float tilewidth, tileheight;
+                 uniform float rowstagger, rowstaggervary;
+                 uniform float jaggedfreq, jaggedamp;
+                 output float column, row;
+                 output float xtile, ytile;
+               )
 {
-    point PP;
-    float scoord = x, tcoord = y;
+	point PP;
+	float scoord = x, tcoord = y;
 
-    if (jaggedamp != 0.0) {
-	/* Make the shapes of the bricks vary just a bit */
-	PP = point noise (x*jaggedfreq/tilewidth, y*jaggedfreq/tileheight);
-	scoord += jaggedamp * xcomp (PP);
-	tcoord += jaggedamp * ycomp (PP);
-    }
+	if ( jaggedamp != 0.0 )
+	{
+		/* Make the shapes of the bricks vary just a bit */
+		PP = point noise ( x * jaggedfreq / tilewidth, y * jaggedfreq / tileheight );
+		scoord += jaggedamp * xcomp ( PP );
+		tcoord += jaggedamp * ycomp ( PP );
+	}
 
-    xtile = scoord / tilewidth;
-    ytile = tcoord / tileheight;
-    row = floor (ytile);   /* which brick row? */
+	xtile = scoord / tilewidth;
+	ytile = tcoord / tileheight;
+	row = floor ( ytile );   /* which brick row? */
 
-    /* Shift the columns randomly by row */
-    xtile += mod (rowstagger * row, 1);
-    xtile += rowstaggervary * (noise (row+0.5) - 0.5);
+	/* Shift the columns randomly by row */
+	xtile += mod ( rowstagger * row, 1 );
+	xtile += rowstaggervary * ( noise ( row + 0.5 ) - 0.5 );
 
-    column = floor (xtile);
-    xtile -= column;
-    ytile -= row;
+	column = floor ( xtile );
+	xtile -= column;
+	ytile -= row;
 }
 
 

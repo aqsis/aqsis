@@ -8,7 +8,7 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-//  
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -40,74 +40,74 @@ extern int yyparse();
 namespace librib
 {
 
-extern void ParserDeclare(RendermanInterface& CallbackInterface, const std::string Name, const std::string Type);
+extern void ParserDeclare( RendermanInterface& CallbackInterface, const std::string Name, const std::string Type );
 
 FILE *ParseInputFile = stdin;
-CqRibBinaryDecoder *BinaryDecoder=0;
+CqRibBinaryDecoder *BinaryDecoder = 0;
 std::string ParseStreamName = "stdin";
 RendermanInterface* ParseCallbackInterface = 0;
 std::ostream* ParseErrorStream = &std::cerr;
 unsigned int ParseLineNumber;
 bool ParseSucceeded = true;
 
-void StandardDeclarations(RendermanInterface& CallbackInterface)
+void StandardDeclarations( RendermanInterface& CallbackInterface )
 {
 	// Declare standard arguments
-	ParserDeclare(CallbackInterface, "Ka", "uniform float");
-	ParserDeclare(CallbackInterface, "Kd", "uniform float");
-	ParserDeclare(CallbackInterface, "Ks", "uniform float");
-	ParserDeclare(CallbackInterface, "Ka", "uniform float");
-	ParserDeclare(CallbackInterface, "Kd", "uniform float");
-	ParserDeclare(CallbackInterface, "Ks", "uniform float");
-	ParserDeclare(CallbackInterface, "Kr", "uniform float");
-	ParserDeclare(CallbackInterface, "roughness", "uniform float");
-	ParserDeclare(CallbackInterface, "texturename", "uniform string");
-	ParserDeclare(CallbackInterface, "specularcolor", "uniform color");
-	ParserDeclare(CallbackInterface, "intensity", "uniform float");
-	ParserDeclare(CallbackInterface, "lightcolor", "uniform color");
-	ParserDeclare(CallbackInterface, "from", "uniform point");
-	ParserDeclare(CallbackInterface, "to", "uniform point");
-	ParserDeclare(CallbackInterface, "coneangle", "uniform float");
-	ParserDeclare(CallbackInterface, "conedeltaangle", "uniform float");
-	ParserDeclare(CallbackInterface, "beamdistribution", "uniform float");
-	ParserDeclare(CallbackInterface, "mindistance", "uniform float");
-	ParserDeclare(CallbackInterface, "maxdistance", "uniform float");
-	ParserDeclare(CallbackInterface, "distance", "uniform float");
-	ParserDeclare(CallbackInterface, "background", "uniform color");
-	ParserDeclare(CallbackInterface, "fov", "uniform float");
-	ParserDeclare(CallbackInterface, "P", "vertex point");
-	ParserDeclare(CallbackInterface, "Pz", "vertex point");
-	ParserDeclare(CallbackInterface, "Pw", "vertex hpoint");
-	ParserDeclare(CallbackInterface, "N", "varying normal");
-	ParserDeclare(CallbackInterface, "Np", "uniform normal");
-	ParserDeclare(CallbackInterface, "Cs", "varying color");
-	ParserDeclare(CallbackInterface, "Os", "varying color");
-	ParserDeclare(CallbackInterface, "s", "varying float");
-	ParserDeclare(CallbackInterface, "t", "varying float");
-	ParserDeclare(CallbackInterface, "st", "varying float");
-	ParserDeclare(CallbackInterface, "gridsize", "uniform integer");
-	ParserDeclare(CallbackInterface, "texturememory", "uniform integer");
-	ParserDeclare(CallbackInterface, "bucketsize", "uniform integer[2]");
-	ParserDeclare(CallbackInterface, "eyesplits", "uniform integer");
-	ParserDeclare(CallbackInterface, "shader", "uniform string");
-	ParserDeclare(CallbackInterface, "archive", "uniform string");
-	ParserDeclare(CallbackInterface, "texture", "uniform string");
-	ParserDeclare(CallbackInterface, "display", "uniform string");
-	ParserDeclare(CallbackInterface, "auto_shadows", "uniform string");
-	ParserDeclare(CallbackInterface, "endofframe", "uniform integer");
-	ParserDeclare(CallbackInterface, "sphere", "uniform float");
-	ParserDeclare(CallbackInterface, "coordinatesystem", "uniform string");
-	ParserDeclare(CallbackInterface, "shadows", "uniform string");
-	ParserDeclare(CallbackInterface, "shadowmapsize", "uniform integer[2]");
-	ParserDeclare(CallbackInterface, "shadowangle", "uniform float");
-	ParserDeclare(CallbackInterface, "shadowmapname", "uniform string");
-	ParserDeclare(CallbackInterface, "shadow_shadingrate", "uniform float");
-	ParserDeclare(CallbackInterface, "name", "uniform string");
-	ParserDeclare(CallbackInterface, "shadinggroup", "uniform string");
-	ParserDeclare(CallbackInterface, "sense", "uniform string");
+	ParserDeclare( CallbackInterface, "Ka", "uniform float" );
+	ParserDeclare( CallbackInterface, "Kd", "uniform float" );
+	ParserDeclare( CallbackInterface, "Ks", "uniform float" );
+	ParserDeclare( CallbackInterface, "Ka", "uniform float" );
+	ParserDeclare( CallbackInterface, "Kd", "uniform float" );
+	ParserDeclare( CallbackInterface, "Ks", "uniform float" );
+	ParserDeclare( CallbackInterface, "Kr", "uniform float" );
+	ParserDeclare( CallbackInterface, "roughness", "uniform float" );
+	ParserDeclare( CallbackInterface, "texturename", "uniform string" );
+	ParserDeclare( CallbackInterface, "specularcolor", "uniform color" );
+	ParserDeclare( CallbackInterface, "intensity", "uniform float" );
+	ParserDeclare( CallbackInterface, "lightcolor", "uniform color" );
+	ParserDeclare( CallbackInterface, "from", "uniform point" );
+	ParserDeclare( CallbackInterface, "to", "uniform point" );
+	ParserDeclare( CallbackInterface, "coneangle", "uniform float" );
+	ParserDeclare( CallbackInterface, "conedeltaangle", "uniform float" );
+	ParserDeclare( CallbackInterface, "beamdistribution", "uniform float" );
+	ParserDeclare( CallbackInterface, "mindistance", "uniform float" );
+	ParserDeclare( CallbackInterface, "maxdistance", "uniform float" );
+	ParserDeclare( CallbackInterface, "distance", "uniform float" );
+	ParserDeclare( CallbackInterface, "background", "uniform color" );
+	ParserDeclare( CallbackInterface, "fov", "uniform float" );
+	ParserDeclare( CallbackInterface, "P", "vertex point" );
+	ParserDeclare( CallbackInterface, "Pz", "vertex point" );
+	ParserDeclare( CallbackInterface, "Pw", "vertex hpoint" );
+	ParserDeclare( CallbackInterface, "N", "varying normal" );
+	ParserDeclare( CallbackInterface, "Np", "uniform normal" );
+	ParserDeclare( CallbackInterface, "Cs", "varying color" );
+	ParserDeclare( CallbackInterface, "Os", "varying color" );
+	ParserDeclare( CallbackInterface, "s", "varying float" );
+	ParserDeclare( CallbackInterface, "t", "varying float" );
+	ParserDeclare( CallbackInterface, "st", "varying float" );
+	ParserDeclare( CallbackInterface, "gridsize", "uniform integer" );
+	ParserDeclare( CallbackInterface, "texturememory", "uniform integer" );
+	ParserDeclare( CallbackInterface, "bucketsize", "uniform integer[2]" );
+	ParserDeclare( CallbackInterface, "eyesplits", "uniform integer" );
+	ParserDeclare( CallbackInterface, "shader", "uniform string" );
+	ParserDeclare( CallbackInterface, "archive", "uniform string" );
+	ParserDeclare( CallbackInterface, "texture", "uniform string" );
+	ParserDeclare( CallbackInterface, "display", "uniform string" );
+	ParserDeclare( CallbackInterface, "auto_shadows", "uniform string" );
+	ParserDeclare( CallbackInterface, "endofframe", "uniform integer" );
+	ParserDeclare( CallbackInterface, "sphere", "uniform float" );
+	ParserDeclare( CallbackInterface, "coordinatesystem", "uniform string" );
+	ParserDeclare( CallbackInterface, "shadows", "uniform string" );
+	ParserDeclare( CallbackInterface, "shadowmapsize", "uniform integer[2]" );
+	ParserDeclare( CallbackInterface, "shadowangle", "uniform float" );
+	ParserDeclare( CallbackInterface, "shadowmapname", "uniform string" );
+	ParserDeclare( CallbackInterface, "shadow_shadingrate", "uniform float" );
+	ParserDeclare( CallbackInterface, "name", "uniform string" );
+	ParserDeclare( CallbackInterface, "shadinggroup", "uniform string" );
+	ParserDeclare( CallbackInterface, "sense", "uniform string" );
 }
 
-bool Parse(FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream)
+bool Parse( FILE *InputStream, const std::string StreamName, RendermanInterface& CallbackInterface, std::ostream& ErrorStream )
 {
 	ParseInputFile = InputStream;
 	ParseStreamName = StreamName;
@@ -116,10 +116,10 @@ bool Parse(FILE *InputStream, const std::string StreamName, RendermanInterface& 
 	ParseLineNumber = 1;
 	ParseSucceeded = true;
 
-	BinaryDecoder= new CqRibBinaryDecoder(InputStream);
+	BinaryDecoder = new CqRibBinaryDecoder( InputStream );
 	yyparse();
 	delete BinaryDecoder;
-	
+
 	return ParseSucceeded;
 }
 
@@ -133,4 +133,5 @@ void ResetParser()
 	ParseSucceeded = true;
 }
 
-}; // namespace librib
+}
+; // namespace librib

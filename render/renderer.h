@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -24,7 +24,7 @@
 */
 
 //? Is renderer.h included already?
-#ifndef RENDERER_H_INCLUDED
+#ifndef RENDERER_H_INCLUDED 
 //{
 #define RENDERER_H_INCLUDED 1
 
@@ -48,18 +48,19 @@
 #define		_qShareName	CORE
 #include	"share.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 class CqImageBuffer;
 
 struct SqCoordSys
 {
-	SqCoordSys(const char* strName, const CqMatrix& matToWorld, const CqMatrix& matWorldTo) :
-					m_matWorldTo(matWorldTo),
-					m_matToWorld(matToWorld),
-					m_strName(strName)
-					{}
-	SqCoordSys()	{}
+	SqCoordSys( const char* strName, const CqMatrix& matToWorld, const CqMatrix& matWorldTo ) :
+			m_matWorldTo( matWorldTo ),
+			m_matToWorld( matToWorld ),
+			m_strName( strName )
+	{}
+	SqCoordSys()
+	{}
 
 	CqMatrix	m_matWorldTo;
 	CqMatrix	m_matToWorld;
@@ -68,22 +69,22 @@ struct SqCoordSys
 
 enum EqCoordSystems
 {
-	CoordSystem_Camera=0,
-	CoordSystem_Current,
-	CoordSystem_World,
-	CoordSystem_Screen,
-	CoordSystem_NDC,
-	CoordSystem_Raster,
+    CoordSystem_Camera = 0,
+    CoordSystem_Current,
+    CoordSystem_World,
+    CoordSystem_Screen,
+    CoordSystem_NDC,
+    CoordSystem_Raster,
 
-	CoordSystem_Last,
+    CoordSystem_Last,
 };
 
 enum EqRenderMode
 {
-	RenderMode_Image=0,
+    RenderMode_Image = 0,
 
-	RenderMode_Shadows,
-	RenderMode_Reflection,
+    RenderMode_Shadows,
+    RenderMode_Reflection,
 };
 
 
@@ -100,188 +101,223 @@ _qShareM extern CqRenderer* pCurrRenderer;
 class CqRenderer
 {
 	public:
-						CqRenderer();
-				virtual	~CqRenderer();
+		CqRenderer();
+		virtual	~CqRenderer();
 
-				virtual	CqContext*	CreateMainContext();
-				virtual	CqContext*	CreateFrameContext();
-				virtual	CqContext*	CreateWorldContext();
-				virtual	CqContext*	CreateAttributeContext();
-				virtual	CqContext*	CreateTransformContext();
-				virtual	CqContext*	CreateSolidContext(CqString& type);
-				virtual	CqContext*	CreateObjectContext();
-				virtual	CqContext*	CreateMotionContext(TqInt N, TqFloat times[]);
+		virtual	CqContext*	CreateMainContext();
+		virtual	CqContext*	CreateFrameContext();
+		virtual	CqContext*	CreateWorldContext();
+		virtual	CqContext*	CreateAttributeContext();
+		virtual	CqContext*	CreateTransformContext();
+		virtual	CqContext*	CreateSolidContext( CqString& type );
+		virtual	CqContext*	CreateObjectContext();
+		virtual	CqContext*	CreateMotionContext( TqInt N, TqFloat times[] );
 
-				virtual	void		DeleteMainContext();
-				virtual	void		DeleteFrameContext();
-				virtual	void		DeleteWorldContext();
-				virtual	void		DeleteAttributeContext();
-				virtual	void		DeleteTransformContext();
-				virtual	void		DeleteSolidContext();
-				virtual	void		DeleteObjectContext();
-				virtual	void		DeleteMotionContext();
+		virtual	void	DeleteMainContext();
+		virtual	void	DeleteFrameContext();
+		virtual	void	DeleteWorldContext();
+		virtual	void	DeleteAttributeContext();
+		virtual	void	DeleteTransformContext();
+		virtual	void	DeleteSolidContext();
+		virtual	void	DeleteObjectContext();
+		virtual	void	DeleteMotionContext();
 
-				virtual	CqOptions&		optCurrent();
-				virtual	const CqAttributes*	pattrCurrent();
-				virtual	CqAttributes*	pattrWriteCurrent();
-				virtual	const CqTransform*	ptransCurrent();
-				virtual	CqTransform*	ptransWriteCurrent();
+		virtual	CqOptions&	optCurrent();
+		virtual	const CqAttributes*	pattrCurrent();
+		virtual	CqAttributes*	pattrWriteCurrent();
+		virtual	const CqTransform*	ptransCurrent();
+		virtual	CqTransform*	ptransWriteCurrent();
 
-				virtual	TqFloat		Time() const;
-				virtual	void		AdvanceTime();
-	
-						/** Get a pointer to the current context.
-						 * \return Pointer to a CqContext derived class.
-						 */
-				virtual	CqContext*	pconCurrent()			{return(m_pconCurrent);}
-						/** Get a erad only pointer to the current context.
-						 * \return Pointer to a CqContext derived class.
-						 */
-				virtual const	CqContext*	pconCurrent() const		{return(m_pconCurrent);}
-						/** Get a pointer to the current image buffer.
-						 * \return A CqImageBuffer pointer.
-						 */
-				virtual CqImageBuffer* pImage()				{return(m_pImageBuffer);}
-						/** Set the pointer to the current image buffer.
-						 */
-				virtual	void		SetImage(CqImageBuffer* pImage)
-															{m_pImageBuffer=pImage;}
-	// Handle various coordinate system transformation requirements.
-				virtual	CqMatrix	matSpaceToSpace			(const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld=CqMatrix(), const CqMatrix& matObjectToWorld=CqMatrix());
-				virtual	CqMatrix	matVSpaceToSpace		(const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld=CqMatrix(), const CqMatrix& matObjectToWorld=CqMatrix());
-				virtual	CqMatrix	matNSpaceToSpace		(const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld=CqMatrix(), const CqMatrix& matObjectToWorld=CqMatrix());
-	
-						/** Get a read only reference to the current transformation matrix.
-						 * \return A constant reference to a CqMatrix.
-						 */
-				virtual const	CqMatrix&	matCurrent(TqFloat time=0.0f) const		{return(pconCurrent()->matCurrent(time));}
+		virtual	TqFloat	Time() const;
+		virtual	void	AdvanceTime();
 
-				virtual	TqBool	SetCoordSystem(const char* strName, const CqMatrix& matToWorld);
+		/** Get a pointer to the current context.
+		 * \return Pointer to a CqContext derived class.
+		 */
+		virtual	CqContext*	pconCurrent()
+		{
+			return ( m_pconCurrent );
+		}
+		/** Get a erad only pointer to the current context.
+		 * \return Pointer to a CqContext derived class.
+		 */
+		virtual const	CqContext*	pconCurrent() const
+		{
+			return ( m_pconCurrent );
+		}
+		/** Get a pointer to the current image buffer.
+		 * \return A CqImageBuffer pointer.
+		 */
+		virtual CqImageBuffer* pImage()
+		{
+			return ( m_pImageBuffer );
+		}
+		/** Set the pointer to the current image buffer.
+		 */
+		virtual	void	SetImage( CqImageBuffer* pImage )
+		{
+			m_pImageBuffer = pImage;
+		}
+		// Handle various coordinate system transformation requirements.
+		virtual	CqMatrix	matSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix() );
+		virtual	CqMatrix	matVSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix() );
+		virtual	CqMatrix	matNSpaceToSpace	( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld = CqMatrix(), const CqMatrix& matObjectToWorld = CqMatrix() );
 
-	// Function which can be overridden by the derived class.
-				virtual	void		Initialise();
-				virtual	void		RenderWorld();
+		/** Get a read only reference to the current transformation matrix.
+		 * \return A constant reference to a CqMatrix.
+		 */
+		virtual const	CqMatrix&	matCurrent( TqFloat time = 0.0f ) const
+		{
+			return ( pconCurrent() ->matCurrent( time ) );
+		}
 
-				virtual	void		AddDisplayRequest(const TqChar* name, const TqChar* type, const TqChar* mode);
-				virtual	void		ClearDisplayRequests();
-				virtual	IqDDManager*	pDDmanager()	{return(m_pDDManager);}
+		virtual	TqBool	SetCoordSystem( const char* strName, const CqMatrix& matToWorld );
 
-				virtual	void		Quit();
-				virtual	void		UpdateStatus()		{}
-						/** Get the global statistics class.
-						 * \return A reference to the CqStats class on this renderer.
-						 */
-				virtual	CqStats&	Stats()				{return(m_Stats);}
-						/** Print a message to stdout, along with any relevant message codes.
-						 * \param msg A SqMessage structure to print.
-						 */
-				virtual	void		PrintMessage(const SqMessage& msg)
-															{ 
-																if(msg.Code()>0)
-																	std::cout << msg.Code() << " : " << 
-																				 msg.Severity() << " : ";
-																std::cout << msg.strMessage().c_str() << std::endl; 
-															}
-	// Contect change callbacks
-				virtual	SqParameterDeclaration FindParameterDecl(const char* strDecl);
-				virtual	void		AddParameterDecl(const char* strName, const char* strType);
-				virtual	void		ClearSymbolTable()	{m_Symbols.clear();}
+		// Function which can be overridden by the derived class.
+		virtual	void	Initialise();
+		virtual	void	RenderWorld();
 
-						/** Get the list of currently registered shaders.
-						 * \return A reference to a list of CqShaderRegister classes.
-						 */
-				virtual	CqShader* CreateShader(const char* strName, EqShaderType type);
+		virtual	void	AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode );
+		virtual	void	ClearDisplayRequests();
+		virtual	IqDDManager*	pDDmanager()
+		{
+			return ( m_pDDManager );
+		}
 
-						/** Flush any registered shaders.
-						 */
-				virtual	void		FlushShaders()			{
-																while(m_Shaders.pFirst()!=0)	
-																	delete(m_Shaders.pFirst());
-															}
+		virtual	void	Quit();
+		virtual	void	UpdateStatus()
+		{}
+		/** Get the global statistics class.
+		 * \return A reference to the CqStats class on this renderer.
+		 */
+		virtual	CqStats&	Stats()
+		{
+			return ( m_Stats );
+		}
+		/** Print a message to stdout, along with any relevant message codes.
+		 * \param msg A SqMessage structure to print.
+		 */
+		virtual	void	PrintMessage( const SqMessage& msg )
+		{
+			if ( msg.Code() > 0 )
+				std::cout << msg.Code() << " : " <<
+				msg.Severity() << " : ";
+			std::cout << msg.strMessage().c_str() << std::endl;
+		}
+		// Contect change callbacks
+		virtual	SqParameterDeclaration FindParameterDecl( const char* strDecl );
+		virtual	void	AddParameterDecl( const char* strName, const char* strType );
+		virtual	void	ClearSymbolTable()
+		{
+			m_Symbols.clear();
+		}
 
-						/** Get a reference to the current transformation matrix.
-						 * \return A reference to a CqMatrix.
-						 */
-				virtual	CqMatrix&	matWorldToCamera()		{return(m_aCoordSystems[CoordSystem_Camera].m_matWorldTo);}
-						/** Set the world to screen matrix.
-						 * \param mat The new matrix to use as the world to screen transformation.
-						 */
-				virtual	void		SetmatScreen(const CqMatrix& mat)	{
-																	m_aCoordSystems[CoordSystem_Screen].m_matWorldTo=mat;
-																}
-						/** Set the world to NDC matrix.
-						 * \param mat The new matrix to use as the world to NDC transformation.
-						 */
-				virtual	void		SetmatNDC(const CqMatrix& mat)	{
-																	m_aCoordSystems[CoordSystem_NDC].m_matWorldTo=mat;
-																}
-						/** Set the world to raster matrix.
-						 * \param mat The new matrix to use as the world to raster transformation.
-						 */
-				virtual	void		SetmatRaster(const CqMatrix& mat)	{
-																	m_aCoordSystems[CoordSystem_Raster].m_matWorldTo=mat;
-																}
-						/** Set the world to camera matrix.
-						 * \param mat The new matrix to use as the world to camera transformation.
-						 */
-				virtual	void		SetmatCamera(const CqMatrix& mat)
-																{
-																	m_aCoordSystems[CoordSystem_Camera] .m_matWorldTo=
-																	m_aCoordSystems[CoordSystem_Current].m_matWorldTo=mat;
-																	m_aCoordSystems[CoordSystem_Camera] .m_matToWorld=
-																	m_aCoordSystems[CoordSystem_Current].m_matToWorld=mat.Inverse();
-																}
-							/** Get the current transformation stack.
-							 * \return A reference to a vector of CqTransform class pointers.
-							 */
-				virtual std::vector<CqTransform*>&	TransformStack()	{return(m_TransformStack);}
+		/** Get the list of currently registered shaders.
+		 * \return A reference to a list of CqShaderRegister classes.
+		 */
+		virtual	CqShader* CreateShader( const char* strName, EqShaderType type );
 
-						/** Set the locally stored render time.
-						 * \param time System time value representing the seconds taken to render.
-						 */
-//						void	SettimeTaken(time_t time)	{m_timeTaken=time;}
-						/** Get the time taken to complete the last render in seconds.
-						 */
-//						time_t	timeTaken() const			{return(m_timeTaken);}
+		/** Flush any registered shaders.
+		 */
+		virtual	void	FlushShaders()
+		{
+			while ( m_Shaders.pFirst() != 0 )
+				delete( m_Shaders.pFirst() );
+		}
 
-//						void		PrintStats(TqInt level);
+		/** Get a reference to the current transformation matrix.
+		 * \return A reference to a CqMatrix.
+		 */
+		virtual	CqMatrix&	matWorldToCamera()
+		{
+			return ( m_aCoordSystems[ CoordSystem_Camera ].m_matWorldTo );
+		}
+		/** Set the world to screen matrix.
+		 * \param mat The new matrix to use as the world to screen transformation.
+		 */
+		virtual	void	SetmatScreen( const CqMatrix& mat )
+		{
+			m_aCoordSystems[ CoordSystem_Screen ].m_matWorldTo = mat;
+		}
+		/** Set the world to NDC matrix.
+		 * \param mat The new matrix to use as the world to NDC transformation.
+		 */
+		virtual	void	SetmatNDC( const CqMatrix& mat )
+		{
+			m_aCoordSystems[ CoordSystem_NDC ].m_matWorldTo = mat;
+		}
+		/** Set the world to raster matrix.
+		 * \param mat The new matrix to use as the world to raster transformation.
+		 */
+		virtual	void	SetmatRaster( const CqMatrix& mat )
+		{
+			m_aCoordSystems[ CoordSystem_Raster ].m_matWorldTo = mat;
+		}
+		/** Set the world to camera matrix.
+		 * \param mat The new matrix to use as the world to camera transformation.
+		 */
+		virtual	void	SetmatCamera( const CqMatrix& mat )
+		{
+			m_aCoordSystems[ CoordSystem_Camera ] .m_matWorldTo =
+			    m_aCoordSystems[ CoordSystem_Current ].m_matWorldTo = mat;
+			m_aCoordSystems[ CoordSystem_Camera ] .m_matToWorld =
+			    m_aCoordSystems[ CoordSystem_Current ].m_matToWorld = mat.Inverse();
+		}
+		/** Get the current transformation stack.
+		 * \return A reference to a vector of CqTransform class pointers.
+		 */
+		virtual std::vector<CqTransform*>&	TransformStack()
+		{
+			return ( m_TransformStack );
+		}
+
+		/** Set the locally stored render time.
+		 * \param time System time value representing the seconds taken to render.
+		 */ 
+		//						void	SettimeTaken(time_t time)	{m_timeTaken=time;}
+		/** Get the time taken to complete the last render in seconds.
+		 */ 
+		//						time_t	timeTaken() const			{return(m_timeTaken);}
+
+		//						void		PrintStats(TqInt level);
 
 	private:
-			void			RegisterShader(const char* strName, EqShaderType type, CqShader* pShader);
-			CqShaderRegister* FindShader(const char* strName, EqShaderType type);
-		
+		void	RegisterShader( const char* strName, EqShaderType type, CqShader* pShader );
+		CqShaderRegister* FindShader( const char* strName, EqShaderType type );
 
-			CqContext*		m_pconCurrent;					///< Pointer to the current context.
-			CqStats			m_Stats;						///< Global statistics.
-			CqOptions		m_optDefault;					///< Default options.
-			CqAttributes	m_attrDefault;					///< Default attributes.
-			CqTransform		m_transDefault;					///< Default transformation.
-			CqImageBuffer*	m_pImageBuffer;					///< Pointer to the current image buffer.
 
-			IqDDManager*	m_pDDManager;
+		CqContext*	m_pconCurrent;					///< Pointer to the current context.
+		CqStats	m_Stats;						///< Global statistics.
+		CqOptions	m_optDefault;					///< Default options.
+		CqAttributes	m_attrDefault;					///< Default attributes.
+		CqTransform	m_transDefault;					///< Default transformation.
+		CqImageBuffer*	m_pImageBuffer;					///< Pointer to the current image buffer.
 
-			EqRenderMode	m_Mode;							
-			CqList<CqShaderRegister> m_Shaders;				///< List of registered shaders.
-			TqBool			m_fSaveGPrims;
-			std::vector<CqTransform*>	m_TransformStack;	///< The global transformation stack.
-			std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
+		IqDDManager*	m_pDDManager;
+
+		EqRenderMode	m_Mode;
+		CqList<CqShaderRegister> m_Shaders;				///< List of registered shaders.
+		TqBool	m_fSaveGPrims;
+		std::vector<CqTransform*>	m_TransformStack;	///< The global transformation stack.
+		std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
 
 	public:
-			std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.
-};
+		std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.
+}
+;
 
 
 inline CqRenderer* QGetRenderContext()
 {
-	return(pCurrRenderer);
+	return ( pCurrRenderer );
 }
 
-_qShareM	void		QSetRenderContext(CqRenderer* pRenderer);
+_qShareM	void	QSetRenderContext( CqRenderer* pRenderer );
 
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )
 
 //}  // End of #ifdef RENDERER_H_INCLUDED
 #endif

@@ -7,7 +7,7 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-//  
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -29,21 +29,24 @@
 #include "aqsis.h"
 #include "ri.h"
 
-namespace libri2rib {
+namespace libri2rib
+{
 
 class CqError
 {
-private:
-    RtInt  code;
-    RtInt  severity;
-    std::string message;
-    TqBool to_rib;
+	private:
+		RtInt code;
+		RtInt severity;
+		std::string message;
+		TqBool to_rib;
 
-public:
-    CqError(RtInt cd, RtInt sev, std::string msg, TqBool tr)
-	: code(cd), severity(sev), message(msg), to_rib(tr) {}
-    ~CqError() {}
-    RtVoid manage();
+	public:
+		CqError( RtInt cd, RtInt sev, std::string msg, TqBool tr )
+				: code( cd ), severity( sev ), message( msg ), to_rib( tr )
+		{}
+		~CqError()
+		{}
+		RtVoid manage();
 };
 
 } /* namespace libri2rib */

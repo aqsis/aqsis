@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -28,7 +28,7 @@
 #include	"patch.h"
 #include	"imagebuffer.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 
 //---------------------------------------------------------------------
@@ -37,23 +37,23 @@ START_NAMESPACE(Aqsis)
 
 CqBound CqPolygonBase::Bound() const
 {
-	CqVector3D	vecA(FLT_MAX, FLT_MAX, FLT_MAX);
-	CqVector3D	vecB(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
+	CqVector3D	vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
 	TqInt i;
-	for(i=0; i<NumVertices(); i++)
+	for ( i = 0; i < NumVertices(); i++ )
 	{
-		CqVector3D	vecV=PolyP(i);
-		if(vecV.x()<vecA.x())	vecA.x(vecV.x());
-		if(vecV.y()<vecA.y())	vecA.y(vecV.y());
-		if(vecV.x()>vecB.x())	vecB.x(vecV.x());
-		if(vecV.y()>vecB.y())	vecB.y(vecV.y());
-		if(vecV.z()<vecA.z())	vecA.z(vecV.z());
-		if(vecV.z()>vecB.z())	vecB.z(vecV.z());
+		CqVector3D	vecV = PolyP( i );
+		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
+		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
+		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
+		if ( vecV.y() > vecB.y() ) vecB.y( vecV.y() );
+		if ( vecV.z() < vecA.z() ) vecA.z( vecV.z() );
+		if ( vecV.z() > vecB.z() ) vecB.z( vecV.z() );
 	}
 	CqBound	B;
-	B.vecMin()=vecA;
-	B.vecMax()=vecB;
-	return(B);
+	B.vecMin() = vecA;
+	B.vecMax() = vecB;
+	return ( B );
 }
 
 
@@ -64,29 +64,29 @@ CqBound CqPolygonBase::Bound() const
 TqBool CqPolygonBase::Diceable()
 {
 	// Get the bound in camera space.
-/*	CqBound B=Bound();
-	// Convert it to screen space
-	B.Transform(QGetRenderContext()->matSpaceToSpace("camera","raster"));
-
-	// Get the appropriate shading rate.
-	float ShadingRate=pAttributes()->fEffectiveShadingRate();
-//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
-//	{
-//		const TqFloat* pattrShadowShadingRate=pAttributes()->GetFloatAttribute("render","shadow_shadingrate");
-//		if(pattrShadowShadingRate!=0)
-//			ShadingRate=pattrShadowShadingRate[0];
-//	}	
-
-	ShadingRate=static_cast<float>(sqrt(ShadingRate));
-
-	// Calculate the screen area to decide whether to dice or not.
-	TqFloat sx=(B.vecMax().x()-B.vecMin().x())/ShadingRate;
-	TqFloat sy=(B.vecMax().y()-B.vecMin().y())/ShadingRate;
-	TqFloat area=sx*sy;
-
-	if(area>256)	return(TqFalse);
-	else			return(TqTrue);*/
-	return(TqFalse);
+	/*	CqBound B=Bound();
+		// Convert it to screen space
+		B.Transform(QGetRenderContext()->matSpaceToSpace("camera","raster"));
+	 
+		// Get the appropriate shading rate.
+		float ShadingRate=pAttributes()->fEffectiveShadingRate();
+	//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
+	//	{
+	//		const TqFloat* pattrShadowShadingRate=pAttributes()->GetFloatAttribute("render","shadow_shadingrate");
+	//		if(pattrShadowShadingRate!=0)
+	//			ShadingRate=pattrShadowShadingRate[0];
+	//	}	
+	 
+		ShadingRate=static_cast<float>(sqrt(ShadingRate));
+	 
+		// Calculate the screen area to decide whether to dice or not.
+		TqFloat sx=(B.vecMax().x()-B.vecMin().x())/ShadingRate;
+		TqFloat sy=(B.vecMax().y()-B.vecMin().y())/ShadingRate;
+		TqFloat area=sx*sy;
+	 
+		if(area>256)	return(TqFalse);
+		else			return(TqTrue);*/ 
+	return ( TqFalse );
 }
 
 
@@ -96,145 +96,145 @@ TqBool CqPolygonBase::Diceable()
 
 CqMicroPolyGridBase* CqPolygonBase::Dice()
 {
-	return(0);
-/*	TqInt	iA,iB,iC,iD;
-	TqFloat sA,tA,sB,tB,sC,tC,sD,tD;
-	TqFloat uA,vA,uB,vB,uC,vC,uD,vD;
-
-	const CqMatrix& matObjToRaster=QGetRenderContext()->matSpaceToSpace("camera","raster");
-
-	TqBool	bhasN=bHasN();
-	TqBool	bhass=bHass();
-	TqBool	bhast=bHast();
-	TqBool	bhasu=bHasu();
-	TqBool	bhasv=bHasv();
-	TqBool	bhasCs=bHasCs();
-	TqBool	bhasOs=bHasOs();
-
-	TqInt iUses=PolyUses();
-
-	// Get the appropriate shading rate.
-	float ShadingRate=pAttributes()->fEffectiveShadingRate();
-//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
-//	{
-//		const TqFloat* pattrShadowShadingRate=pAttributes()->GetFloatAttribute("render","shadow_shadingrate");
-//		if(pattrShadowShadingRate!=0)
-//			ShadingRate=pattrShadowShadingRate[0];
-//	}	
-
-	ShadingRate=static_cast<float>(sqrt(ShadingRate));
-
-	// Get the first two vertices
-	iA=0;
-	iB=1;
-
-	TqInt i=2;
-	while(i<NumVertices())
-	{
-		iC=iD=i;
-		i++;
-		if(i<NumVertices())
+	return ( 0 );
+	/*	TqInt	iA,iB,iC,iD;
+		TqFloat sA,tA,sB,tB,sC,tC,sD,tD;
+		TqFloat uA,vA,uB,vB,uC,vC,uD,vD;
+	 
+		const CqMatrix& matObjToRaster=QGetRenderContext()->matSpaceToSpace("camera","raster");
+	 
+		TqBool	bhasN=bHasN();
+		TqBool	bhass=bHass();
+		TqBool	bhast=bHast();
+		TqBool	bhasu=bHasu();
+		TqBool	bhasv=bHasv();
+		TqBool	bhasCs=bHasCs();
+		TqBool	bhasOs=bHasOs();
+	 
+		TqInt iUses=PolyUses();
+	 
+		// Get the appropriate shading rate.
+		float ShadingRate=pAttributes()->fEffectiveShadingRate();
+	//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
+	//	{
+	//		const TqFloat* pattrShadowShadingRate=pAttributes()->GetFloatAttribute("render","shadow_shadingrate");
+	//		if(pattrShadowShadingRate!=0)
+	//			ShadingRate=pattrShadowShadingRate[0];
+	//	}	
+	 
+		ShadingRate=static_cast<float>(sqrt(ShadingRate));
+	 
+		// Get the first two vertices
+		iA=0;
+		iB=1;
+	 
+		TqInt i=2;
+		while(i<NumVertices())
 		{
-			iD=i;
+			iC=iD=i;
 			i++;
-		}
-		// Now we have the four indices, do a basic bilinear interpolation of the values.
-		// First of all get the screen space coordinates to caluclate an approximate u,v dicing level,
-		CqVector3D PA=PolyP(iA);
-		CqVector3D PB=PolyP(iB);
-		CqVector3D PC=PolyP(iC);
-		CqVector3D PD=PolyP(iD);
-
-		if(bhass)
-		{
-			sA=Polys(iA);
-			sB=Polys(iB);
-			sC=Polys(iC);
-			sD=Polys(iD);
-		}
-
-		if(bhast)
-		{
-			tA=Polyt(iA);
-			tB=Polyt(iB);
-			tC=Polyt(iC);
-			tD=Polyt(iD);
-		}
-
-		if(bhasu)
-		{
-			uA=Polyu(iA);
-			uB=Polyu(iB);
-			uC=Polyu(iC);
-			uD=Polyu(iD);
-		}
-
-		if(bhasv)
-		{
-			vA=Polyv(iA);
-			vB=Polyv(iB);
-			vC=Polyv(iC);
-			vD=Polyv(iD);
-		}
-
-		PA=matObjToRaster*PA;
-		PB=matObjToRaster*PB;
-		PC=matObjToRaster*PC;
-		PD=matObjToRaster*PD;
-
-		TqFloat ab=CqVector3D(PB-PA).Magnitude();
-		TqFloat bc=CqVector3D(PC-PB).Magnitude();
-		TqFloat cd=CqVector3D(PD-PC).Magnitude();
-		TqFloat da=CqVector3D(PA-PD).Magnitude();
-		TqFloat uLen=MAX(ab,cd);
-		TqFloat vLen=MAX(ab,cd);
-
-		// Make sure to take into account the appropriate shading rate when calculating the dice size.
-		uLen=uLen/ShadingRate;
-		vLen=vLen/ShadingRate;
-
-		TqInt ucount=static_cast<TqInt>(MAX(1,uLen));
-		TqInt vcount=static_cast<TqInt>(MAX(1,vLen));
-
-		TqFloat diu=1.0f/ucount;
-		TqFloat div=1.0f/vcount;
-		TqInt iu;
-		TqInt iv;
-
-		CqMicroPolyGrid* pGrid=new CqMicroPolyGrid(ucount, vcount, &Surface());
-
-		if(bhasN)	pGrid->SetNormals(TqTrue);
-
-		// Need to copy a single Cq & Os if used, but not defined.
-		if(USES(iUses,EnvVars_Cs) && !bhasCs)	pGrid->Cs().SetValue(pAttributes()->colColor());
-		if(USES(iUses,EnvVars_Os) && !bhasOs)	pGrid->Os().SetValue(pAttributes()->colOpacity());
-
-		pGrid->Reset();
-		for(iv=0; iv<=vcount; iv++)
-		{
-			for(iu=0; iu<=ucount; iu++)
+			if(i<NumVertices())
 			{
-				pGrid->P()=BilinearEvaluate<CqVector4D>(PolyP(iA),PolyP(iB),PolyP(iD),PolyP(iC),iu*diu,iv*div);
-				if(bhasN && USES(iUses,EnvVars_N))	pGrid->N()=BilinearEvaluate<CqVector3D>(PolyN(iA),PolyN(iB),PolyN(iD),PolyN(iC),iu*diu,iv*div);
-				if(USES(iUses,EnvVars_s))
-					pGrid->s()=BilinearEvaluate<TqFloat>(sA,sB,sD,sC,iu*diu,iv*div);
-
-				if(USES(iUses,EnvVars_t))
-					pGrid->t()=BilinearEvaluate<TqFloat>(tA,tB,tD,tC,iu*diu,iv*div);
-
-				if(USES(iUses,EnvVars_u))
-					pGrid->u()=BilinearEvaluate<TqFloat>(uA,uB,uD,uC,iu*diu,iv*div);
-				
-				if(USES(iUses,EnvVars_v))
-					pGrid->v()=BilinearEvaluate<TqFloat>(vA,vB,vD,vC,iu*diu,iv*div);
-
-				if(bhasCs && USES(iUses,EnvVars_Cs))	pGrid->Cs()=BilinearEvaluate<CqColor>(PolyCs(iA),PolyCs(iB),PolyCs(iD),PolyCs(iC),iu*diu,iv*div);
-				if(bhasOs && USES(iUses,EnvVars_Os))	pGrid->Os()=BilinearEvaluate<CqColor>(PolyOs(iA),PolyOs(iB),PolyOs(iD),PolyOs(iC),iu*diu,iv*div);
-				pGrid->Advance();
+				iD=i;
+				i++;
 			}
-		}
-		pGrid->Split(QGetRenderContext()->pImage());
-	}*/
+			// Now we have the four indices, do a basic bilinear interpolation of the values.
+			// First of all get the screen space coordinates to caluclate an approximate u,v dicing level,
+			CqVector3D PA=PolyP(iA);
+			CqVector3D PB=PolyP(iB);
+			CqVector3D PC=PolyP(iC);
+			CqVector3D PD=PolyP(iD);
+	 
+			if(bhass)
+			{
+				sA=Polys(iA);
+				sB=Polys(iB);
+				sC=Polys(iC);
+				sD=Polys(iD);
+			}
+	 
+			if(bhast)
+			{
+				tA=Polyt(iA);
+				tB=Polyt(iB);
+				tC=Polyt(iC);
+				tD=Polyt(iD);
+			}
+	 
+			if(bhasu)
+			{
+				uA=Polyu(iA);
+				uB=Polyu(iB);
+				uC=Polyu(iC);
+				uD=Polyu(iD);
+			}
+	 
+			if(bhasv)
+			{
+				vA=Polyv(iA);
+				vB=Polyv(iB);
+				vC=Polyv(iC);
+				vD=Polyv(iD);
+			}
+	 
+			PA=matObjToRaster*PA;
+			PB=matObjToRaster*PB;
+			PC=matObjToRaster*PC;
+			PD=matObjToRaster*PD;
+	 
+			TqFloat ab=CqVector3D(PB-PA).Magnitude();
+			TqFloat bc=CqVector3D(PC-PB).Magnitude();
+			TqFloat cd=CqVector3D(PD-PC).Magnitude();
+			TqFloat da=CqVector3D(PA-PD).Magnitude();
+			TqFloat uLen=MAX(ab,cd);
+			TqFloat vLen=MAX(ab,cd);
+	 
+			// Make sure to take into account the appropriate shading rate when calculating the dice size.
+			uLen=uLen/ShadingRate;
+			vLen=vLen/ShadingRate;
+	 
+			TqInt ucount=static_cast<TqInt>(MAX(1,uLen));
+			TqInt vcount=static_cast<TqInt>(MAX(1,vLen));
+	 
+			TqFloat diu=1.0f/ucount;
+			TqFloat div=1.0f/vcount;
+			TqInt iu;
+			TqInt iv;
+	 
+			CqMicroPolyGrid* pGrid=new CqMicroPolyGrid(ucount, vcount, &Surface());
+	 
+			if(bhasN)	pGrid->SetNormals(TqTrue);
+	 
+			// Need to copy a single Cq & Os if used, but not defined.
+			if(USES(iUses,EnvVars_Cs) && !bhasCs)	pGrid->Cs().SetValue(pAttributes()->colColor());
+			if(USES(iUses,EnvVars_Os) && !bhasOs)	pGrid->Os().SetValue(pAttributes()->colOpacity());
+	 
+			pGrid->Reset();
+			for(iv=0; iv<=vcount; iv++)
+			{
+				for(iu=0; iu<=ucount; iu++)
+				{
+					pGrid->P()=BilinearEvaluate<CqVector4D>(PolyP(iA),PolyP(iB),PolyP(iD),PolyP(iC),iu*diu,iv*div);
+					if(bhasN && USES(iUses,EnvVars_N))	pGrid->N()=BilinearEvaluate<CqVector3D>(PolyN(iA),PolyN(iB),PolyN(iD),PolyN(iC),iu*diu,iv*div);
+					if(USES(iUses,EnvVars_s))
+						pGrid->s()=BilinearEvaluate<TqFloat>(sA,sB,sD,sC,iu*diu,iv*div);
+	 
+					if(USES(iUses,EnvVars_t))
+						pGrid->t()=BilinearEvaluate<TqFloat>(tA,tB,tD,tC,iu*diu,iv*div);
+	 
+					if(USES(iUses,EnvVars_u))
+						pGrid->u()=BilinearEvaluate<TqFloat>(uA,uB,uD,uC,iu*diu,iv*div);
+					
+					if(USES(iUses,EnvVars_v))
+						pGrid->v()=BilinearEvaluate<TqFloat>(vA,vB,vD,vC,iu*diu,iv*div);
+	 
+					if(bhasCs && USES(iUses,EnvVars_Cs))	pGrid->Cs()=BilinearEvaluate<CqColor>(PolyCs(iA),PolyCs(iB),PolyCs(iD),PolyCs(iC),iu*diu,iv*div);
+					if(bhasOs && USES(iUses,EnvVars_Os))	pGrid->Os()=BilinearEvaluate<CqColor>(PolyOs(iA),PolyOs(iB),PolyOs(iD),PolyOs(iC),iu*diu,iv*div);
+					pGrid->Advance();
+				}
+			}
+			pGrid->Split(QGetRenderContext()->pImage());
+		}*/
 }
 
 
@@ -242,217 +242,229 @@ CqMicroPolyGridBase* CqPolygonBase::Dice()
 /** Split the polygon into bilinear patches.
  */
 
-TqInt CqPolygonBase::Split(std::vector<CqBasicSurface*>& aSplits)
+TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 {
-	CqVector3D	vecA,vecB,vecC,vecD;
-	CqVector3D	vecNA,vecNB,vecNC,vecND;
+	CqVector3D	vecA, vecB, vecC, vecD;
+	CqVector3D	vecNA, vecNB, vecNC, vecND;
 
-	TqFloat		uA,uB,uC,uD,vA,vB,vC,vD;
-	TqFloat		sA,sB,sC,sD,tA,tB,tC,tD;
+	TqFloat	uA = 0.0f, uB = 0.0f, uC = 0.0f, uD = 0.0f, vA = 0.0f, vB = 0.0f, vC = 0.0f, vD = 0.0f;
+	TqFloat	sA = 0.0f, sB = 0.0f, sC = 0.0f, sD = 0.0f, tA = 0.0f, tB = 0.0f, tC = 0.0f, tD = 0.0f;
 
-	CqColor	colA,colB,colC,colD;
-	CqColor	opaA,opaB,opaC,opaD;
+	CqColor	colA, colB, colC, colD;
+	CqColor	opaA, opaB, opaC, opaD;
 
-	TqBool	bhasN=bHasN();
-	TqBool	bhass=bHass();
-	TqBool	bhast=bHast();
-	TqBool	bhasu=bHasu();
-	TqBool	bhasv=bHasv();
-	TqBool	bhasCs=bHasCs();
-	TqBool	bhasOs=bHasOs();
+	TqBool	bhasN = bHasN();
+	TqBool	bhass = bHass();
+	TqBool	bhast = bHast();
+	TqBool	bhasu = bHasu();
+	TqBool	bhasv = bHasv();
+	TqBool	bhasCs = bHasCs();
+	TqBool	bhasOs = bHasOs();
 
-	TqInt iUses=PolyUses();
+	TqInt iUses = PolyUses();
 
-	// We need to take into account Orientation here, even though most other 
+	// We need to take into account Orientation here, even though most other
 	// primitives leave it up to the CalcNormals function on the MPGrid, because we
 	// are forcing N to be setup here, so clockwise nature is important.
-	EqOrientation O=pAttributes()->eOrientation();
-	float neg=1;
-	if(O!=OrientationLH)	neg=-1;
+	EqOrientation O = pAttributes() ->eOrientation();
+	float neg = 1;
+	if ( O != OrientationLH ) neg = -1;
 
 	// Start by splitting the polygon into 4 point patches.
-	vecA=PolyP(0);
-	vecB=PolyP(1);
+	vecA = PolyP( 0 );
+	vecB = PolyP( 1 );
 
 	// Get the normals, or calculate the facet normal if not specified.
-	if(bhasN)
+	if ( bhasN )
 	{
-		vecNA=PolyN(0);
-		vecNB=PolyN(1);
+		vecNA = PolyN( 0 );
+		vecNB = PolyN( 1 );
 	}
 	else
 	{
 		// Find two suitable vectors, and produce a geometric normal to use.
-		TqInt i=1;
+		TqInt i = 1;
 		CqVector3D	vecN0, vecN1;
-		while(i<NumVertices())
+		while ( i < NumVertices() )
 		{
-			vecN0=static_cast<CqVector3D>(PolyP(i))-vecA;
-			if(vecN0.Magnitude()>FLT_EPSILON)
+			vecN0 = static_cast<CqVector3D>( PolyP( i ) ) - vecA;
+			if ( vecN0.Magnitude() > FLT_EPSILON )
 				break;
 			i++;
 		}
 		i++;
-		while(i<NumVertices())
+		while ( i < NumVertices() )
 		{
-			vecN1=static_cast<CqVector3D>(PolyP(i))-vecA;
-			if(vecN1.Magnitude()>FLT_EPSILON && vecN1!=vecN0)
+			vecN1 = static_cast<CqVector3D>( PolyP( i ) ) - vecA;
+			if ( vecN1.Magnitude() > FLT_EPSILON && vecN1 != vecN0 )
 				break;
 			i++;
 		}
-		vecNA=vecN0%vecN1;
-		vecNA*=neg;
+		vecNA = vecN0 % vecN1;
+		vecNA *= neg;
 		vecNA.Unit();
-		vecNB=vecNC=vecND=vecNA;
-	}
-	
-	
-	if(bhasu)
-	{
-		uA=Polyu(0);
-		uB=Polyu(1);
+		vecNB = vecNC = vecND = vecNA;
 	}
 
-	if(bhasv)
+
+	if ( bhasu )
 	{
-		vA=Polyv(0);
-		vB=Polyv(1);
+		uA = Polyu( 0 );
+		uB = Polyu( 1 );
+	}
+
+	if ( bhasv )
+	{
+		vA = Polyv( 0 );
+		vB = Polyv( 1 );
 	}
 
 	// Get the texture coordinates, or use the parameter space values if not specified.
-	if(bhass)
+	if ( bhass )
 	{
-		sA=Polys(0);
-		sB=Polys(1);
+		sA = Polys( 0 );
+		sB = Polys( 1 );
 	}
 
-	if(bhast)
+	if ( bhast )
 	{
-		tA=Polyt(0);
-		tB=Polyt(1);
+		tA = Polyt( 0 );
+		tB = Polyt( 1 );
 	}
 
 	// Get any specified per vertex colors and opacities.
-	if(bhasCs)
+	if ( bhasCs )
 	{
-		colA=PolyCs(0);
-		colB=PolyCs(1);
+		colA = PolyCs( 0 );
+		colB = PolyCs( 1 );
 	}
 	else
-		colA=pAttributes()->colColor();
+		colA = pAttributes() ->colColor();
 
-	if(bhasOs)
+	if ( bhasOs )
 	{
-		opaA=PolyOs(0);
-		opaB=PolyOs(1);
+		opaA = PolyOs( 0 );
+		opaB = PolyOs( 1 );
 	}
 	else
-		opaA=pAttributes()->colOpacity();
+		opaA = pAttributes() ->colOpacity();
 
-	TqInt cNew=0;
+	TqInt cNew = 0;
 	TqInt i;
-	for(i=2; i<NumVertices(); i+=2)
+	for ( i = 2; i < NumVertices(); i += 2 )
 	{
-		vecC=vecD=PolyP(i);
-		if(NumVertices()>i+1)	vecD=PolyP(i+1);
+		vecC = vecD = PolyP( i );
+		if ( NumVertices() > i + 1 ) vecD = PolyP( i + 1 );
 
-		if(bhasu)
+		if ( bhasu )
 		{
-			uC=uD=Polyu(i);
-			if(NumVertices()>i+1)	uD=Polyu(i+1);
+			uC = uD = Polyu( i );
+			if ( NumVertices() > i + 1 ) uD = Polyu( i + 1 );
 		}
 
-		if(bhasv)
+		if ( bhasv )
 		{
-			vC=vD=Polyv(i);
-			if(NumVertices()>i+1)	vD=Polyv(i+1);
+			vC = vD = Polyv( i );
+			if ( NumVertices() > i + 1 ) vD = Polyv( i + 1 );
 		}
 
-		if(bhasN)
+		if ( bhasN )
 		{
-			vecNC=vecND=PolyN(i);
-			if(NumVertices()>i+1)	vecND=PolyN(i+1);
+			vecNC = vecND = PolyN( i );
+			if ( NumVertices() > i + 1 ) vecND = PolyN( i + 1 );
 		}
 		else
-			vecNC=vecND=vecNA;
-		
-		if(bhass)
+			vecNC = vecND = vecNA;
+
+		if ( bhass )
 		{
-			sC=sD=Polys(i);
-			if(NumVertices()>i+1)	sD=Polys(i+1);
+			sC = sD = Polys( i );
+			if ( NumVertices() > i + 1 ) sD = Polys( i + 1 );
 		}
 
-		if(bhast)
+		if ( bhast )
 		{
-			tC=tD=Polyt(i);
-			if(NumVertices()>i+1)	tD=Polyt(i+1);
+			tC = tD = Polyt( i );
+			if ( NumVertices() > i + 1 ) tD = Polyt( i + 1 );
 		}
 
 		// Get any specified per vertex colors and opacities.
-		if(bhasCs)
+		if ( bhasCs )
 		{
-			colC=colD=PolyCs(i);
-			if(NumVertices()>i+1)	colD=PolyCs(i+1);
+			colC = colD = PolyCs( i );
+			if ( NumVertices() > i + 1 ) colD = PolyCs( i + 1 );
 		}
 
-		if(bhasOs)
+		if ( bhasOs )
 		{
-			opaC=opaD=PolyOs(i);
-			if(NumVertices()>i+1)	opaD=PolyOs(i+1);
+			opaC = opaD = PolyOs( i );
+			if ( NumVertices() > i + 1 ) opaD = PolyOs( i + 1 );
 		}
 
 		// Create bilinear patches
-		CqSurfacePatchBilinear* pNew=new CqSurfacePatchBilinear();
+		CqSurfacePatchBilinear* pNew = new CqSurfacePatchBilinear();
 		pNew->AddRef();
-		pNew->SetSurfaceParameters(Surface());
+		pNew->SetSurfaceParameters( Surface() );
 		pNew->SetDefaultPrimitiveVariables();
 
-		pNew->P().SetSize(4); pNew->N().SetSize(4); 
-		pNew->P()[0]=vecA; pNew->P()[1]=vecB; pNew->P()[2]=vecD;	pNew->P()[3]=vecC;
-		pNew->N()[0]=vecNA; pNew->N()[1]=vecNB; pNew->N()[2]=vecND; pNew->N()[3]=vecNC;
-		if(USES(iUses,EnvVars_u))	{pNew->u()[0]=uA;	pNew->u()[1]=uB; pNew->u()[2]=uD; pNew->u()[3]=uC;}
-		if(USES(iUses,EnvVars_v))	{pNew->v()[0]=vA;	pNew->v()[1]=vB; pNew->v()[2]=vD; pNew->v()[3]=vC;}
-		if(USES(iUses,EnvVars_s))	{pNew->s()[0]=sA;	pNew->s()[1]=sB; pNew->s()[2]=sD; pNew->s()[3]=sC;}
-		if(USES(iUses,EnvVars_t))	{pNew->t()[0]=tA;	pNew->t()[1]=tB; pNew->t()[2]=tD; pNew->t()[3]=tC;}
-		if(USES(iUses,EnvVars_Cs))
+		pNew->P().SetSize( 4 ); pNew->N().SetSize( 4 );
+		pNew->P() [ 0 ] = vecA; pNew->P() [ 1 ] = vecB; pNew->P() [ 2 ] = vecD;	pNew->P() [ 3 ] = vecC;
+		pNew->N() [ 0 ] = vecNA; pNew->N() [ 1 ] = vecNB; pNew->N() [ 2 ] = vecND; pNew->N() [ 3 ] = vecNC;
+		if ( USES( iUses, EnvVars_u ) )
 		{
-			if(bhasCs)
-			{
-				pNew->Cs().SetSize(4);
-				pNew->Cs()[0]=colA;
-				pNew->Cs()[1]=colB;
-				pNew->Cs()[2]=colD;
-				pNew->Cs()[3]=colC;
-			}
-			else
-				pNew->Cs()[0]=colA;
+			pNew->u() [ 0 ] = uA;	pNew->u() [ 1 ] = uB; pNew->u() [ 2 ] = uD; pNew->u() [ 3 ] = uC;
 		}
-		if(USES(iUses,EnvVars_Os))
+		if ( USES( iUses, EnvVars_v ) )
 		{
-			if(bhasOs)
+			pNew->v() [ 0 ] = vA;	pNew->v() [ 1 ] = vB; pNew->v() [ 2 ] = vD; pNew->v() [ 3 ] = vC;
+		}
+		if ( USES( iUses, EnvVars_s ) )
+		{
+			pNew->s() [ 0 ] = sA;	pNew->s() [ 1 ] = sB; pNew->s() [ 2 ] = sD; pNew->s() [ 3 ] = sC;
+		}
+		if ( USES( iUses, EnvVars_t ) )
+		{
+			pNew->t() [ 0 ] = tA;	pNew->t() [ 1 ] = tB; pNew->t() [ 2 ] = tD; pNew->t() [ 3 ] = tC;
+		}
+		if ( USES( iUses, EnvVars_Cs ) )
+		{
+			if ( bhasCs )
 			{
-				pNew->Os().SetSize(4);
-				pNew->Os()[0]=opaA;
-				pNew->Os()[1]=opaB;
-				pNew->Os()[2]=opaD;
-				pNew->Os()[3]=opaC;
+				pNew->Cs().SetSize( 4 );
+				pNew->Cs() [ 0 ] = colA;
+				pNew->Cs() [ 1 ] = colB;
+				pNew->Cs() [ 2 ] = colD;
+				pNew->Cs() [ 3 ] = colC;
 			}
 			else
-				pNew->Os()[0]=opaA;
+				pNew->Cs() [ 0 ] = colA;
+		}
+		if ( USES( iUses, EnvVars_Os ) )
+		{
+			if ( bhasOs )
+			{
+				pNew->Os().SetSize( 4 );
+				pNew->Os() [ 0 ] = opaA;
+				pNew->Os() [ 1 ] = opaB;
+				pNew->Os() [ 2 ] = opaD;
+				pNew->Os() [ 3 ] = opaC;
+			}
+			else
+				pNew->Os() [ 0 ] = opaA;
 		}
 
-		aSplits.push_back(pNew);
+		aSplits.push_back( pNew );
 		cNew++;
 
 		// Move onto the next quad
-		vecB=vecD;
-		vecNB=vecND;
-		uB=uD; vB=vD;
-		sB=sD; tB=tD;
-		colB=colD;
-		opaB=opaD;
+		vecB = vecD;
+		vecNB = vecND;
+		uB = uD; vB = vD;
+		sB = sD; tB = tD;
+		colB = colD;
+		opaB = opaD;
 	}
-	return(cNew);
+	return ( cNew );
 }
 
 
@@ -460,19 +472,18 @@ TqInt CqPolygonBase::Split(std::vector<CqBasicSurface*>& aSplits)
 /** Default constructor.
  */
 
-CqSurfacePolygon::CqSurfacePolygon(TqInt cVertices) :	CqSurface(),
-														m_cVertices(cVertices)
-{
-}
+CqSurfacePolygon::CqSurfacePolygon( TqInt cVertices ) : CqSurface(),
+		m_cVertices( cVertices )
+{}
 
 
 //---------------------------------------------------------------------
 /** Copy constructor.
  */
 
-CqSurfacePolygon::CqSurfacePolygon(const CqSurfacePolygon& From)
+CqSurfacePolygon::CqSurfacePolygon( const CqSurfacePolygon& From )
 {
-	*this=From;
+	*this = From;
 }
 
 
@@ -481,8 +492,7 @@ CqSurfacePolygon::CqSurfacePolygon(const CqSurfacePolygon& From)
  */
 
 CqSurfacePolygon::~CqSurfacePolygon()
-{
-}
+{}
 
 
 //---------------------------------------------------------------------
@@ -492,24 +502,24 @@ CqSurfacePolygon::~CqSurfacePolygon()
 TqBool CqSurfacePolygon::CheckDegenerate() const
 {
 	// Check if all points are within a minute distance of each other.
-	TqBool	fDegen=TqTrue;
+	TqBool	fDegen = TqTrue;
 	TqInt i;
-	for(i=1; i<NumVertices(); i++)
+	for ( i = 1; i < NumVertices(); i++ )
 	{
-		if((PolyP(i)-PolyP(i-1)).Magnitude()>FLT_EPSILON)
-			fDegen=TqFalse;
+		if ( ( PolyP( i ) - PolyP( i - 1 ) ).Magnitude() > FLT_EPSILON )
+			fDegen = TqFalse;
 	}
-	return(fDegen);
+	return ( fDegen );
 }
 
 //---------------------------------------------------------------------
 /** Assignment operator.
  */
 
-CqSurfacePolygon& CqSurfacePolygon::operator=(const CqSurfacePolygon& From)
+CqSurfacePolygon& CqSurfacePolygon::operator=( const CqSurfacePolygon& From )
 {
-	CqSurface::operator=(From);
-	return(*this);
+	CqSurface::operator=( From );
+	return ( *this );
 }
 
 
@@ -518,16 +528,16 @@ CqSurfacePolygon& CqSurfacePolygon::operator=(const CqSurfacePolygon& From)
 /** Transform the polygon by the specified matrix.
  */
 
-void	CqSurfacePolygon::Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx)
+void	CqSurfacePolygon::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
 {
 	// Tansform the points by the specified matrix.
 	TqInt i;
-	for(i=P().Size()-1; i>=0; i--)
-		P()[i]=matTx*P()[i];
+	for ( i = P().Size() - 1; i >= 0; i-- )
+		P() [ i ] = matTx * P() [ i ];
 
 	// Tansform the normals by the specified matrix.
-	for(i=N().Size()-1; i>=0; i--)
-		N()[i]=matITTx*N()[i];
+	for ( i = N().Size() - 1; i >= 0; i-- )
+		N() [ i ] = matITTx * N() [ i ];
 }
 
 
@@ -539,33 +549,33 @@ void CqSurfacePolygon::TransferDefaultSurfaceParameters()
 {
 	// If the shader needs s/t or u/v, and s/t is not specified, then at this point store the object space x,y coordinates.
 	TqInt i;
-	TqInt iUses=PolyUses();
-	if(USES(iUses,EnvVars_s) && !bHass())
+	TqInt iUses = PolyUses();
+	if ( USES( iUses, EnvVars_s ) && !bHass() )
 	{
-		s().SetSize(NumVertices());
-		for(i=0; i<NumVertices(); i++)
-			s()[i]=P()[i].x();
+		s().SetSize( NumVertices() );
+		for ( i = 0; i < NumVertices(); i++ )
+			s() [ i ] = P() [ i ].x();
 	}
 
-	if(USES(iUses,EnvVars_t) && !bHast())
+	if ( USES( iUses, EnvVars_t ) && !bHast() )
 	{
-		t().SetSize(NumVertices());
-		for(i=0; i<NumVertices(); i++)
-			t()[i]=P()[i].y();
+		t().SetSize( NumVertices() );
+		for ( i = 0; i < NumVertices(); i++ )
+			t() [ i ] = P() [ i ].y();
 	}
 
-	if(USES(iUses,EnvVars_u))
+	if ( USES( iUses, EnvVars_u ) )
 	{
-		u().SetSize(NumVertices());
-		for(i=0; i<NumVertices(); i++)
-			u()[i]=P()[i].x();
+		u().SetSize( NumVertices() );
+		for ( i = 0; i < NumVertices(); i++ )
+			u() [ i ] = P() [ i ].x();
 	}
 
-	if(USES(iUses,EnvVars_v))
+	if ( USES( iUses, EnvVars_v ) )
 	{
-		v().SetSize(NumVertices());
-		for(i=0; i<NumVertices(); i++)
-			v()[i]=P()[i].y();
+		v().SetSize( NumVertices() );
+		for ( i = 0; i < NumVertices(); i++ )
+			v() [ i ] = P() [ i ].y();
 	}
 }
 
@@ -574,9 +584,9 @@ void CqSurfacePolygon::TransferDefaultSurfaceParameters()
 /** Copy constructor.
  */
 
-CqSurfacePointsPolygon::CqSurfacePointsPolygon(const CqSurfacePointsPolygon& From) : m_pPoints(0)
+CqSurfacePointsPolygon::CqSurfacePointsPolygon( const CqSurfacePointsPolygon& From ) : m_pPoints( 0 )
 {
-	*this=From;
+	*this = From;
 }
 
 
@@ -584,22 +594,22 @@ CqSurfacePointsPolygon::CqSurfacePointsPolygon(const CqSurfacePointsPolygon& Fro
 /** Assignment operator.
  */
 
-CqSurfacePointsPolygon& CqSurfacePointsPolygon::operator=(const CqSurfacePointsPolygon& From)	
+CqSurfacePointsPolygon& CqSurfacePointsPolygon::operator=( const CqSurfacePointsPolygon& From )
 {
 	TqInt i;
-	m_aIndices.resize(From.m_aIndices.size());
-	for(i=From.m_aIndices.size()-1; i>=0; i--)
-		m_aIndices[i]=From.m_aIndices[i];
+	m_aIndices.resize( From.m_aIndices.size() );
+	for ( i = From.m_aIndices.size() - 1; i >= 0; i-- )
+		m_aIndices[ i ] = From.m_aIndices[ i ];
 
 	// Store the old points array pointer, as we must reference first then
 	// unreference to avoid accidental deletion if they are the same and we are the
 	// last reference.
-	CqPolygonPoints*	pOldPoints=m_pPoints;
-	m_pPoints=From.m_pPoints;
+	CqPolygonPoints*	pOldPoints = m_pPoints;
+	m_pPoints = From.m_pPoints;
 	m_pPoints->AddRef();
-	if(pOldPoints)		pOldPoints->Release();	
+	if ( pOldPoints ) pOldPoints->Release();
 
-	return(*this);
+	return ( *this );
 }
 
 
@@ -609,20 +619,20 @@ CqSurfacePointsPolygon& CqSurfacePointsPolygon::operator=(const CqSurfacePointsP
 /** Transform the points by the specified matrix.
  */
 
-void	CqPolygonPoints::Transform(const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx)
+void	CqPolygonPoints::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx )
 {
-	if(m_Transformed)	return;
-	
+	if ( m_Transformed ) return ;
+
 	// Tansform the points by the specified matrix.
 	TqInt i;
-	for(i=P().Size()-1; i>=0; i--)
-		P()[i]=matTx*P()[i];
+	for ( i = P().Size() - 1; i >= 0; i-- )
+		P() [ i ] = matTx * P() [ i ];
 
 	// Tansform the normals by the specified matrix.
-	for(i=N().Size()-1; i>=0; i--)
-		N()[i]=matITTx*N()[i];
+	for ( i = N().Size() - 1; i >= 0; i-- )
+		N() [ i ] = matITTx * N() [ i ];
 
-	m_Transformed=TqTrue;
+	m_Transformed = TqTrue;
 }
 
 
@@ -634,33 +644,33 @@ void CqPolygonPoints::TransferDefaultSurfaceParameters()
 {
 	// If the shader needs s/t or u/v, and s/t is not specified, then at this point store the object space x,y coordinates.
 	TqInt i;
-	TqInt iUses=Uses();
-	if(USES(iUses,EnvVars_s) && !bHass())
+	TqInt iUses = Uses();
+	if ( USES( iUses, EnvVars_s ) && !bHass() )
 	{
-		s().SetSize(NumVertices());
-		for(i=0; i<NumVertices(); i++)
-			s()[i]=P()[i].x();
+		s().SetSize( NumVertices() );
+		for ( i = 0; i < NumVertices(); i++ )
+			s() [ i ] = P() [ i ].x();
 	}
 
-	if(USES(iUses,EnvVars_t) && !bHast())
+	if ( USES( iUses, EnvVars_t ) && !bHast() )
 	{
-		t().SetSize(NumVertices());
-		for(i=0; i<NumVertices(); i++)
-			t()[i]=P()[i].y();
+		t().SetSize( NumVertices() );
+		for ( i = 0; i < NumVertices(); i++ )
+			t() [ i ] = P() [ i ].y();
 	}
 
-	if(USES(iUses,EnvVars_u))
+	if ( USES( iUses, EnvVars_u ) )
 	{
-		u().SetSize(NumVertices());
-		for(i=0; i<NumVertices(); i++)
-			u()[i]=P()[i].x();
+		u().SetSize( NumVertices() );
+		for ( i = 0; i < NumVertices(); i++ )
+			u() [ i ] = P() [ i ].x();
 	}
 
-	if(USES(iUses,EnvVars_v))
+	if ( USES( iUses, EnvVars_v ) )
 	{
-		v().SetSize(NumVertices());
-		for(i=0; i<NumVertices(); i++)
-			v()[i]=P()[i].y();
+		v().SetSize( NumVertices() );
+		for ( i = 0; i < NumVertices(); i++ )
+			v() [ i ] = P() [ i ].y();
 	}
 }
 
@@ -672,15 +682,15 @@ void CqPolygonPoints::TransferDefaultSurfaceParameters()
 
 CqBound	CqMotionSurfacePointsPolygon::Bound() const
 {
-	CqMotionSurfacePointsPolygon* pthis=const_cast<CqMotionSurfacePointsPolygon*>(this);
-	CqBound B(FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX);
+	CqMotionSurfacePointsPolygon * pthis = const_cast<CqMotionSurfacePointsPolygon*>( this );
+	CqBound B( FLT_MAX, FLT_MAX, FLT_MAX, -FLT_MAX, -FLT_MAX, -FLT_MAX );
 	TqInt i;
-	for(i=0; i<cTimes(); i++)
+	for ( i = 0; i < cTimes(); i++ )
 	{
-		pthis->m_CurrTimeIndex=i;
-		B=B.Combine(CqPolygonBase::Bound());
+		pthis->m_CurrTimeIndex = i;
+		B = B.Combine( CqPolygonBase::Bound() );
 	}
-	return(B);
+	return ( B );
 }
 
 
@@ -690,15 +700,15 @@ CqBound	CqMotionSurfacePointsPolygon::Bound() const
 
 CqMicroPolyGridBase* CqMotionSurfacePointsPolygon::Dice()
 {
-	CqMotionMicroPolyGrid* pGrid=new CqMotionMicroPolyGrid;
+	CqMotionMicroPolyGrid * pGrid = new CqMotionMicroPolyGrid;
 	TqInt i;
-	for(i=0; i<cTimes(); i++)
+	for ( i = 0; i < cTimes(); i++ )
 	{
-		m_CurrTimeIndex=i;
-		CqMicroPolyGridBase* pGrid2=CqPolygonBase::Dice();
-		pGrid->AddTimeSlot(Time(i),pGrid2);
+		m_CurrTimeIndex = i;
+		CqMicroPolyGridBase* pGrid2 = CqPolygonBase::Dice();
+		pGrid->AddTimeSlot( Time( i ), pGrid2 );
 	}
-	return(pGrid);
+	return ( pGrid );
 }
 
 
@@ -706,31 +716,31 @@ CqMicroPolyGridBase* CqMotionSurfacePointsPolygon::Dice()
 /** Split this GPrim into smaller GPrims.
  */
 
-TqInt CqMotionSurfacePointsPolygon::Split(std::vector<CqBasicSurface*>& aSplits)
+TqInt CqMotionSurfacePointsPolygon::Split( std::vector<CqBasicSurface*>& aSplits )
 {
 	std::vector<std::vector<CqBasicSurface*> > aaMotionSplits;
-	aaMotionSplits.resize(cTimes());
-	TqInt cSplits;
+	aaMotionSplits.resize( cTimes() );
+	TqInt cSplits = 0;
 	TqInt i;
-	for(i=0; i<cTimes(); i++)
+	for ( i = 0; i < cTimes(); i++ )
 	{
-		m_CurrTimeIndex=i;
-		cSplits=CqPolygonBase::Split(aaMotionSplits[i]);
+		m_CurrTimeIndex = i;
+		cSplits = CqPolygonBase::Split( aaMotionSplits[ i ] );
 	}
 
 	// Now build motion surfaces from the splits and pass them back.
-	for(i=0; i<cSplits; i++)
+	for ( i = 0; i < cSplits; i++ )
 	{
-		CqMotionSurface<CqBasicSurface*>* pNewMotion=new CqMotionSurface<CqBasicSurface*>(0);
+		CqMotionSurface<CqBasicSurface*>* pNewMotion = new CqMotionSurface<CqBasicSurface*>( 0 );
 		pNewMotion->AddRef();
-		pNewMotion->m_fDiceable=TqTrue;
-		pNewMotion->m_EyeSplitCount=m_EyeSplitCount;
+		pNewMotion->m_fDiceable = TqTrue;
+		pNewMotion->m_EyeSplitCount = m_EyeSplitCount;
 		TqInt j;
-		for(j=0; j<cTimes(); j++)
-			pNewMotion->AddTimeSlot(Time(j),aaMotionSplits[j][i]);
-		aSplits.push_back(pNewMotion);
+		for ( j = 0; j < cTimes(); j++ )
+			pNewMotion->AddTimeSlot( Time( j ), aaMotionSplits[ j ][ i ] );
+		aSplits.push_back( pNewMotion );
 	}
-	return(cSplits);
+	return ( cSplits );
 }
 
 
@@ -741,10 +751,10 @@ TqInt CqMotionSurfacePointsPolygon::Split(std::vector<CqBasicSurface*>& aSplits)
 
 TqBool CqMotionSurfacePointsPolygon::Diceable()
 {
-	TqBool f=GetMotionObject(Time(0))->Diceable();
-	return(f);
+	TqBool f = GetMotionObject( Time( 0 ) ) ->Diceable();
+	return ( f );
 }
 
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

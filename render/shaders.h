@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -37,7 +37,7 @@
 #include "list.h"
 #include "shadervm.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
 /** \class CqShaderRegister
@@ -47,31 +47,44 @@ START_NAMESPACE(Aqsis)
 class CqShaderRegister : public CqListEntry<CqShaderRegister>
 {
 	public:
-					CqShaderRegister(const char* strName, EqShaderType type, CqShader* pShader) :
-										m_strName(strName),
-										m_Type(type),
-										m_pShader(pShader)
-										{}
-		virtual		~CqShaderRegister()	{delete(m_pShader);}
+		CqShaderRegister( const char* strName, EqShaderType type, CqShader* pShader ) :
+				m_strName( strName ),
+				m_Type( type ),
+				m_pShader( pShader )
+		{}
+		virtual	~CqShaderRegister()
+		{
+			delete( m_pShader );
+		}
 
-						/** Get the name of the shader.
-						 * \return Constant CqString reference containing the name.
-						 */
-		const CqString& strName()		{return(m_strName);}
-						/** Get the shader type.
-						 * \return Shader type as a member of EqShaderType.
-						 */
-		EqShaderType	Type()			{return(m_Type);}
-						/** Create an instance of this shader.
-						 * \return A pointer to the new instance of the shader.
-						 */
-		CqShader*		Create()		{return(m_pShader->Clone());}
+		/** Get the name of the shader.
+		 * \return Constant CqString reference containing the name.
+		 */
+		const CqString& strName()
+		{
+			return ( m_strName );
+		}
+		/** Get the shader type.
+		 * \return Shader type as a member of EqShaderType.
+		 */
+		EqShaderType	Type()
+		{
+			return ( m_Type );
+		}
+		/** Create an instance of this shader.
+		 * \return A pointer to the new instance of the shader.
+		 */
+		CqShader*	Create()
+		{
+			return ( m_pShader->Clone() );
+		}
 
 	private:
 		CqString	m_strName;		///< The registered name of the shader.
 		EqShaderType m_Type;		///< The type of the shader from EqShaderType.
 		CqShader*	m_pShader;		///< Pointer to the shader class.
-};
+}
+;
 
 //---------------------------------------------------------------------
 //---------------------------------------------------------------------
@@ -87,12 +100,17 @@ class CqShaderRegister : public CqListEntry<CqShaderRegister>
 class CqShaderSurfaceConstant : public CqShader
 {
 	public:
-					CqShaderSurfaceConstant()	{}
-	virtual			~CqShaderSurfaceConstant()	{}
+		CqShaderSurfaceConstant()
+		{}
+		virtual	~CqShaderSurfaceConstant()
+		{}
 
-	virtual	void	Evaluate(CqShaderExecEnv& Env);
-	virtual	void	SetValue(const char* name, TqPchar val);
-	virtual CqShader* Clone() const	{return(new CqShaderSurfaceConstant);}
+		virtual	void	Evaluate( CqShaderExecEnv& Env );
+		virtual	void	SetValue( const char* name, TqPchar val );
+		virtual CqShader* Clone() const
+		{
+			return ( new CqShaderSurfaceConstant );
+		}
 
 	private:
 };
@@ -101,7 +119,7 @@ class CqShaderSurfaceConstant : public CqShader
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE(Sappire)
+END_NAMESPACE( Sappire )
 
 //}  // End of #ifdef SHADERS_H_INCLUDED
 #endif

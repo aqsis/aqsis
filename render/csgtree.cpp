@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -28,7 +28,7 @@
 #include	"csgtree.h"
 #include	"imagebuffer.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 /** Static empty children list for use by primitive node type.
  */
@@ -43,12 +43,12 @@ CqList<CqCSGTreeNode>	CqCSGNodePrimitive::m_lDefPrimChildren;
  */
 CqCSGTreeNode::~CqCSGTreeNode()
 {
-	CqCSGTreeNode* pChild = m_lChildren.pFirst();
-	while(pChild)
+	CqCSGTreeNode * pChild = m_lChildren.pFirst();
+	while ( pChild )
 	{
-		CqCSGTreeNode* pNext = pChild->pNext();
+		CqCSGTreeNode * pNext = pChild->pNext();
 		pChild->Release();
-		pChild=pNext;
+		pChild = pNext;
 	}
 }
 
@@ -63,18 +63,18 @@ CqCSGTreeNode::~CqCSGTreeNode()
  *
  *	@return			Pointer to the new node.
  */
-CqCSGTreeNode* CqCSGTreeNode::CreateNode(CqString& type)
+CqCSGTreeNode* CqCSGTreeNode::CreateNode( CqString& type )
 {
-	if(type == "primitive")
-		return(new CqCSGNodePrimitive);
-	else if(type == "union")
-		return(new CqCSGNodeUnion);
-	else if(type == "intersection")
-		return(new CqCSGNodeIntersection);
-	else if(type == "difference")
-		return(new CqCSGNodeDifference);
+	if ( type == "primitive" )
+		return ( new CqCSGNodePrimitive );
+	else if ( type == "union" )
+		return ( new CqCSGNodeUnion );
+	else if ( type == "intersection" )
+		return ( new CqCSGNodeIntersection );
+	else if ( type == "difference" )
+		return ( new CqCSGNodeDifference );
 	else
-		return(NULL);
+		return ( NULL );
 }
 
 
@@ -88,17 +88,17 @@ CqCSGTreeNode* CqCSGTreeNode::CreateNode(CqString& type)
  *
  *	@return			Index of the node in the children list, or -1.
  */
-TqInt CqCSGTreeNode::isChild(const CqCSGTreeNode* pNode)
+TqInt CqCSGTreeNode::isChild( const CqCSGTreeNode* pNode )
 {
 	TqInt iChild = 0;
 	CqCSGTreeNode* pChild = lChildren().pFirst();
-	while(pChild)
+	while ( pChild )
 	{
-		if(pChild == pNode)	return(iChild);
+		if ( pChild == pNode ) return ( iChild );
 		pChild = pChild->pNext();
 		iChild++;
 	}
-	return(-1);
+	return ( -1 );
 }
 
 
@@ -113,12 +113,12 @@ TqInt CqCSGTreeNode::cChildren()
 {
 	TqInt c = 0;
 	CqCSGTreeNode* pChild = lChildren().pFirst();
-	while(pChild)
+	while ( pChild )
 	{
 		c++;
 		pChild = pChild->pNext();
 	}
-	return(c);
+	return ( c );
 }
 
 
@@ -130,14 +130,14 @@ TqInt CqCSGTreeNode::cChildren()
  *
  *	@param	samples	Array of samples to pass through the CSG tree.
  */
-void CqCSGTreeNode::ProcessTree(std::vector<SqImageSample>& samples)
+void CqCSGTreeNode::ProcessTree( std::vector<SqImageSample>& samples )
 {
 	// Follow the tree back up to the top, then process the list from there
-	CqCSGTreeNode* pTop = this;
-	while(NULL != pTop->pParent())
+	CqCSGTreeNode * pTop = this;
+	while ( NULL != pTop->pParent() )
 		pTop = pTop->pParent();
 
-	pTop->ProcessSampleList(samples);
+	pTop->ProcessSampleList( samples );
 }
 
 
@@ -150,34 +150,34 @@ void CqCSGTreeNode::ProcessTree(std::vector<SqImageSample>& samples)
  *
  *	@param	samples	Array of samples to process.
  */
-void CqCSGTreeNode::ProcessSampleList(std::vector<SqImageSample>& samples)
+void CqCSGTreeNode::ProcessSampleList( std::vector<SqImageSample>& samples )
 {
 	// First process any children nodes.
 	// Process all nodes depth first.
-	CqCSGTreeNode* pChild = lChildren().pFirst();
-	while(NULL!=pChild)
+	CqCSGTreeNode * pChild = lChildren().pFirst();
+	while ( NULL != pChild )
 	{
-		pChild->ProcessSampleList(samples);
+		pChild->ProcessSampleList( samples );
 		pChild = pChild->pNext();
 	}
 
 	// \todo First find out the initial state
 	std::vector<TqBool> abChildState;
-	abChildState.resize(cChildren());
+	abChildState.resize( cChildren() );
 	TqInt iChild;
-	for(iChild=0; iChild<cChildren(); iChild++)	abChildState[iChild] = TqFalse;
+	for ( iChild = 0; iChild < cChildren(); iChild++ ) abChildState[ iChild ] = TqFalse;
 
 	TqBool bCurrentI = TqFalse;
-	
+
 	// Now go through samples, clearing any where the state doesn't change, and
 	// promoting any where it does to this node.
 	std::vector<SqImageSample>::iterator i;
-	for(i=samples.begin(); i!=samples.end();)
+	for ( i = samples.begin(); i != samples.end(); )
 	{
 		// Find out if sample is in out children nodes, if so are we entering or leaving.
 		TqInt iChild;
-		if((iChild = isChild(i->m_pCSGNode)) >= 0)
-			abChildState[iChild] = !abChildState[iChild];
+		if ( ( iChild = isChild( i->m_pCSGNode ) ) >= 0 )
+			abChildState[ iChild ] = !abChildState[ iChild ];
 		else
 		{
 			i++;
@@ -185,17 +185,17 @@ void CqCSGTreeNode::ProcessSampleList(std::vector<SqImageSample>& samples)
 		}
 
 		// Work out the new state
-		TqBool bNewI = EvaluateState(abChildState);
+		TqBool bNewI = EvaluateState( abChildState );
 
 		// If it hasn't changed, remove the sample.
-		if(bNewI == bCurrentI)
-			i = samples.erase(i);
+		if ( bNewI == bCurrentI )
+			i = samples.erase( i );
 		else
-		// Otherwise promote it to this node unless we are a the top.
+			// Otherwise promote it to this node unless we are a the top.
 		{
 			bCurrentI = bNewI;
 			CqCSGTreeNode* poldnode = i->m_pCSGNode;
-			if(NULL != this->pParent())
+			if ( NULL != this->pParent() )
 			{
 				i->m_pCSGNode = this;
 				AddRef();
@@ -221,16 +221,16 @@ void CqCSGTreeNode::ProcessSampleList(std::vector<SqImageSample>& samples)
  *
  *	@return					Boolean indicating in or out for the resulting solid.
  */
-TqBool CqCSGNodeUnion::EvaluateState(std::vector<TqBool>& abChildStates)
+TqBool CqCSGNodeUnion::EvaluateState( std::vector<TqBool>& abChildStates )
 {
 	// Work out the new state
 	std::vector<TqBool>::iterator iChildState;
-	for(iChildState = abChildStates.begin(); iChildState!=abChildStates.end(); iChildState++)
+	for ( iChildState = abChildStates.begin(); iChildState != abChildStates.end(); iChildState++ )
 	{
-		if(*iChildState)
-			return(TqTrue);
+		if ( *iChildState )
+			return ( TqTrue );
 	}
-	return(TqFalse);
+	return ( TqFalse );
 }
 
 
@@ -246,16 +246,16 @@ TqBool CqCSGNodeUnion::EvaluateState(std::vector<TqBool>& abChildStates)
  *
  *	@return					Boolean indicating in or out for the resulting solid.
  */
-TqBool CqCSGNodeIntersection::EvaluateState(std::vector<TqBool>& abChildStates)
+TqBool CqCSGNodeIntersection::EvaluateState( std::vector<TqBool>& abChildStates )
 {
 	// Work out the new state
 	std::vector<TqBool>::iterator iChildState;
-	for(iChildState = abChildStates.begin(); iChildState!=abChildStates.end(); iChildState++)
+	for ( iChildState = abChildStates.begin(); iChildState != abChildStates.end(); iChildState++ )
 	{
-		if(!(*iChildState))
-			return(TqFalse);
+		if ( !( *iChildState ) )
+			return ( TqFalse );
 	}
-	return(TqTrue);
+	return ( TqTrue );
 }
 
 
@@ -271,25 +271,25 @@ TqBool CqCSGNodeIntersection::EvaluateState(std::vector<TqBool>& abChildStates)
  *
  *	@return					Boolean indicating in or out for the resulting solid.
  */
-TqBool CqCSGNodeDifference::EvaluateState(std::vector<TqBool>& abChildStates)
+TqBool CqCSGNodeDifference::EvaluateState( std::vector<TqBool>& abChildStates )
 {
 	// Work out the new state
-	if(abChildStates[0])
+	if ( abChildStates[ 0 ] )
 	{
 		std::vector<TqBool>::iterator iChildState;
 		iChildState = abChildStates.begin();
 		iChildState++;
-		for(; iChildState!=abChildStates.end(); iChildState++)
+		for ( ; iChildState != abChildStates.end(); iChildState++ )
 		{
-			if(*iChildState)
-				return(TqFalse);
+			if ( *iChildState )
+				return ( TqFalse );
 		}
-		return(TqTrue);
+		return ( TqTrue );
 	}
-	return(TqFalse);
+	return ( TqFalse );
 }
 
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )

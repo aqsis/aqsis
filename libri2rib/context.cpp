@@ -7,7 +7,7 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-//  
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -31,50 +31,55 @@ using namespace libri2rib;
 
 CqContext::CqContext()
 {
-    active=(CqASCII *)RI_NULL;
+	active = ( CqASCII * ) RI_NULL;
 }
 
-void  CqContext::addContext()
+void CqContext::addContext()
 {
-    active=new CqASCII; 
-    chl.push_back(active);
+	active = new CqASCII;
+	chl.push_back( active );
 }
 
 RtContextHandle CqContext::getContext()
 {
-    return (RtContextHandle) active;
+	return ( RtContextHandle ) active;
 }
 
 CqASCII & CqContext::current()
 {
-    if (active==((CqASCII *) RI_NULL)) {
-	throw CqError(RIE_BUG, RIE_SEVERE, "No active context", TqFalse);
-    }
-    return *active;
+	if ( active == ( ( CqASCII * ) RI_NULL ) )
+	{
+		throw CqError( RIE_BUG, RIE_SEVERE, "No active context", TqFalse );
+	}
+	return *active;
 }
 
-void CqContext::switchTo(RtContextHandle ch)
+void CqContext::switchTo( RtContextHandle ch )
 {
-    std::list<CqASCII *>::iterator first=chl.begin();
-    CqASCII *r=(CqASCII *)ch;
-    for (;first!=chl.end();first++) {
-	if (*first==r) { 
-	    active=r;
-	    return;
+	std::list<CqASCII *>::iterator first = chl.begin();
+	CqASCII *r = ( CqASCII * ) ch;
+	for ( ;first != chl.end();first++ )
+	{
+		if ( *first == r )
+		{
+			active = r;
+			return ;
+		}
 	}
-    }
-    throw CqError (RIE_BUG, RIE_SEVERE, "Invalid Context Handle", TqFalse);
+	throw CqError ( RIE_BUG, RIE_SEVERE, "Invalid Context Handle", TqFalse );
 }
 
 void CqContext::removeCurrent()
 {
-    std::list<CqASCII *>::iterator first=chl.begin();
-    for (;first!=chl.end();first++) {
-	if (*first==active) {
-	    delete *first;
-	    chl.erase(first);
-	    active = (CqASCII *)RI_NULL;
-	    return;
+	std::list<CqASCII *>::iterator first = chl.begin();
+	for ( ;first != chl.end();first++ )
+	{
+		if ( *first == active )
+		{
+			delete * first;
+			chl.erase( first );
+			active = ( CqASCII * ) RI_NULL;
+			return ;
+		}
 	}
-    } 
 }

@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -29,7 +29,7 @@
 
 #include	"aqsis.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 //---------------------------------------------------------------------
 /** Bilinearly evalute the four specified values at the specified intervals.
@@ -43,47 +43,47 @@ START_NAMESPACE(Aqsis)
  * \return the interpolated value.
  */
 
-template<class T>
-T BilinearEvaluate(const T& A, const T& B, const T& C, const T& D, TqFloat s, TqFloat t)
+template <class T>
+T BilinearEvaluate( const T& A, const T& B, const T& C, const T& D, TqFloat s, TqFloat t )
 {
 	T AB, CD;
 	// Work out where the u points are first, then linear interpolate the v value.
-	if(s<=0.0)
+	if ( s <= 0.0 )
 	{
-		AB=A;
-		CD=C;
+		AB = A;
+		CD = C;
 	}
 	else
 	{
-		if(s>=1.0)
+		if ( s >= 1.0 )
 		{
-			AB=B;
-			CD=D;
+			AB = B;
+			CD = D;
 		}
 		else
 		{
-			AB=static_cast<T>((B-A)*s+A);
-			CD=static_cast<T>((D-C)*s+C);
+			AB = static_cast<T>( ( B - A ) * s + A );
+			CD = static_cast<T>( ( D - C ) * s + C );
 		}
 	}
 
 	T R;
-	if(t<=0.0)
-		R=AB;
+	if ( t <= 0.0 )
+		R = AB;
 	else
 	{
-		if(t>=1.0)
-			R=CD;
+		if ( t >= 1.0 )
+			R = CD;
 		else
-			R=static_cast<T>((CD-AB)*t+AB);
+			R = static_cast<T>( ( CD - AB ) * t + AB );
 	}
-	
-	return(R);
+
+	return ( R );
 }
 
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )
 
 #endif	// !BILINEAR_H_INCLUDED

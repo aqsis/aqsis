@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -38,35 +38,35 @@
 #include	"transform.h"
 #include	"rifile.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 extern IqDDManager* CreateDisplayDriverManager();
 
-CqRenderer* pCurrRenderer=0;
+CqRenderer* pCurrRenderer = 0;
 
 //---------------------------------------------------------------------
 /** Default constructor for the main renderer class. Initialises current state.
  */
 
 CqRenderer::CqRenderer() :
-	m_pImageBuffer(0),
-	m_Mode(RenderMode_Image),
-	m_fSaveGPrims(TqFalse)
+		m_pImageBuffer( 0 ),
+		m_Mode( RenderMode_Image ),
+		m_fSaveGPrims( TqFalse )
 {
-	m_pconCurrent=0;
-	m_pImageBuffer=new	CqImageBuffer();
+	m_pconCurrent = 0;
+	m_pImageBuffer = new	CqImageBuffer();
 
 	// Initialise the array of coordinate systems.
-	m_aCoordSystems.resize(CoordSystem_Last);
+	m_aCoordSystems.resize( CoordSystem_Last );
 
-	m_aCoordSystems[CoordSystem_Camera]	.m_strName="camera";
-	m_aCoordSystems[CoordSystem_Current].m_strName="current";
-	m_aCoordSystems[CoordSystem_World]	.m_strName="world";
-	m_aCoordSystems[CoordSystem_Screen]	.m_strName="screen";
-	m_aCoordSystems[CoordSystem_NDC]	.m_strName="NDC";
-	m_aCoordSystems[CoordSystem_Raster]	.m_strName="raster";
+	m_aCoordSystems[ CoordSystem_Camera ]	.m_strName = "camera";
+	m_aCoordSystems[ CoordSystem_Current ].m_strName = "current";
+	m_aCoordSystems[ CoordSystem_World ]	.m_strName = "world";
+	m_aCoordSystems[ CoordSystem_Screen ]	.m_strName = "screen";
+	m_aCoordSystems[ CoordSystem_NDC ]	.m_strName = "NDC";
+	m_aCoordSystems[ CoordSystem_Raster ]	.m_strName = "raster";
 
-	m_pDDManager = CreateDisplayDriverManager(); 
+	m_pDDManager = CreateDisplayDriverManager();
 	m_pDDManager->Initialise();
 }
 
@@ -77,16 +77,16 @@ CqRenderer::CqRenderer() :
 CqRenderer::~CqRenderer()
 {
 	// Delete the current context, should be main, unless render has been aborted.
-	while(m_pconCurrent!=0)
+	while ( m_pconCurrent != 0 )
 	{
-		CqContext* pconParent=m_pconCurrent->pconParent();
-		delete(m_pconCurrent);
-		m_pconCurrent=pconParent;
+		CqContext * pconParent = m_pconCurrent->pconParent();
+		delete( m_pconCurrent );
+		m_pconCurrent = pconParent;
 	}
-	if(m_pImageBuffer)
+	if ( m_pImageBuffer )
 	{
 		m_pImageBuffer->Release();
-		m_pImageBuffer=0;
+		m_pImageBuffer = 0;
 	}
 	FlushShaders();
 
@@ -102,37 +102,37 @@ CqRenderer::~CqRenderer()
 
 CqContext*	CqRenderer::CreateMainContext()
 {
-	if(m_pconCurrent==0)
+	if ( m_pconCurrent == 0 )
 	{
-		m_pconCurrent=new CqMainContext();
-		return(m_pconCurrent);
+		m_pconCurrent = new CqMainContext();
+		return ( m_pconCurrent );
 	}
 	else
-		return(0);
+		return ( 0 );
 }
 
 
 //---------------------------------------------------------------------
-/** Create a new Frame context, should only be called when the current 
+/** Create a new Frame context, should only be called when the current
  * context is a Main context, but the internal context handling deals
  * with it so I don't need to worry.
  */
 
 CqContext*	CqRenderer::CreateFrameContext()
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext* pconNew=m_pconCurrent->CreateFrameContext();
-		if(pconNew!=0)
+		CqContext * pconNew = m_pconCurrent->CreateFrameContext();
+		if ( pconNew != 0 )
 		{
-			m_pconCurrent=pconNew;
-			return(pconNew);
+			m_pconCurrent = pconNew;
+			return ( pconNew );
 		}
 		else
-			return(0);
+			return ( 0 );
 	}
 	else
-		return(0);
+		return ( 0 );
 }
 
 
@@ -143,19 +143,19 @@ CqContext*	CqRenderer::CreateFrameContext()
 
 CqContext*	CqRenderer::CreateWorldContext()
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext* pconNew=m_pconCurrent->CreateWorldContext();
-		if(pconNew!=0)
+		CqContext * pconNew = m_pconCurrent->CreateWorldContext();
+		if ( pconNew != 0 )
 		{
-			m_pconCurrent=pconNew;
-			return(pconNew);
+			m_pconCurrent = pconNew;
+			return ( pconNew );
 		}
 		else
-			return(0);
+			return ( 0 );
 	}
 	else
-		return(0);
+		return ( 0 );
 }
 
 
@@ -165,19 +165,19 @@ CqContext*	CqRenderer::CreateWorldContext()
 
 CqContext*	CqRenderer::CreateAttributeContext()
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext* pconNew=m_pconCurrent->CreateAttributeContext();
-		if(pconNew!=0)
+		CqContext * pconNew = m_pconCurrent->CreateAttributeContext();
+		if ( pconNew != 0 )
 		{
-			m_pconCurrent=pconNew;
-			return(pconNew);
+			m_pconCurrent = pconNew;
+			return ( pconNew );
 		}
 		else
-			return(0);
+			return ( 0 );
 	}
 	else
-		return(0);
+		return ( 0 );
 }
 
 
@@ -188,19 +188,19 @@ CqContext*	CqRenderer::CreateAttributeContext()
 
 CqContext*	CqRenderer::CreateTransformContext()
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext* pconNew=m_pconCurrent->CreateTransformContext();
-		if(pconNew!=0)
+		CqContext * pconNew = m_pconCurrent->CreateTransformContext();
+		if ( pconNew != 0 )
 		{
-			m_pconCurrent=pconNew;
-			return(pconNew);
+			m_pconCurrent = pconNew;
+			return ( pconNew );
 		}
 		else
-			return(0);
+			return ( 0 );
 	}
 	else
-		return(0);
+		return ( 0 );
 }
 
 
@@ -209,21 +209,21 @@ CqContext*	CqRenderer::CreateTransformContext()
 /** Create a new solid context.
  */
 
-CqContext*	CqRenderer::CreateSolidContext(CqString& type)
+CqContext*	CqRenderer::CreateSolidContext( CqString& type )
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext* pconNew=m_pconCurrent->CreateSolidContext(type);
-		if(pconNew!=0)
+		CqContext * pconNew = m_pconCurrent->CreateSolidContext( type );
+		if ( pconNew != 0 )
 		{
-			m_pconCurrent=pconNew;
-			return(pconNew);
+			m_pconCurrent = pconNew;
+			return ( pconNew );
 		}
 		else
-			return(0);
+			return ( 0 );
 	}
 	else
-		return(0);
+		return ( 0 );
 }
 
 
@@ -234,19 +234,19 @@ CqContext*	CqRenderer::CreateSolidContext(CqString& type)
 
 CqContext*	CqRenderer::CreateObjectContext()
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext* pconNew=m_pconCurrent->CreateObjectContext();
-		if(pconNew!=0)
+		CqContext * pconNew = m_pconCurrent->CreateObjectContext();
+		if ( pconNew != 0 )
 		{
-			m_pconCurrent=pconNew;
-			return(pconNew);
+			m_pconCurrent = pconNew;
+			return ( pconNew );
 		}
 		else
-			return(0);
+			return ( 0 );
 	}
 	else
-		return(0);
+		return ( 0 );
 }
 
 
@@ -255,21 +255,21 @@ CqContext*	CqRenderer::CreateObjectContext()
 /** Create a new motion context.
  */
 
-CqContext*	CqRenderer::CreateMotionContext(TqInt N, TqFloat times[])
+CqContext*	CqRenderer::CreateMotionContext( TqInt N, TqFloat times[] )
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext* pconNew=m_pconCurrent->CreateMotionContext(N, times);
-		if(pconNew!=0)
+		CqContext * pconNew = m_pconCurrent->CreateMotionContext( N, times );
+		if ( pconNew != 0 )
 		{
-			m_pconCurrent=pconNew;
-			return(pconNew);
+			m_pconCurrent = pconNew;
+			return ( pconNew );
 		}
 		else
-			return(0);
+			return ( 0 );
 	}
 	else
-		return(0);
+		return ( 0 );
 }
 
 
@@ -279,11 +279,11 @@ CqContext*	CqRenderer::CreateMotionContext(TqInt N, TqFloat times[])
 
 void	CqRenderer::DeleteMainContext()
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext*	pconParent=m_pconCurrent->pconParent();
+		CqContext * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->DeleteMainContext();
-		m_pconCurrent=pconParent;
+		m_pconCurrent = pconParent;
 	}
 }
 
@@ -294,11 +294,11 @@ void	CqRenderer::DeleteMainContext()
 
 void	CqRenderer::DeleteFrameContext()
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext*	pconParent=m_pconCurrent->pconParent();
+		CqContext * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->DeleteFrameContext();
-		m_pconCurrent=pconParent;
+		m_pconCurrent = pconParent;
 	}
 }
 
@@ -309,11 +309,11 @@ void	CqRenderer::DeleteFrameContext()
 
 void	CqRenderer::DeleteWorldContext()
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext*	pconParent=m_pconCurrent->pconParent();
+		CqContext * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->DeleteWorldContext();
-		m_pconCurrent=pconParent;
+		m_pconCurrent = pconParent;
 	}
 }
 
@@ -324,11 +324,11 @@ void	CqRenderer::DeleteWorldContext()
 
 void	CqRenderer::DeleteAttributeContext()
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext*	pconParent=m_pconCurrent->pconParent();
+		CqContext * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->DeleteAttributeContext();
-		m_pconCurrent=pconParent;
+		m_pconCurrent = pconParent;
 	}
 }
 
@@ -339,13 +339,13 @@ void	CqRenderer::DeleteAttributeContext()
 
 void	CqRenderer::DeleteTransformContext()
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext*	pconParent=m_pconCurrent->pconParent();
+		CqContext * pconParent = m_pconCurrent->pconParent();
 		// Copy the current state of the attributes UP the stack as a TransformBegin/End doesn't store them
-		pconParent->m_pattrCurrent=m_pconCurrent->m_pattrCurrent;
+		pconParent->m_pattrCurrent = m_pconCurrent->m_pattrCurrent;
 		m_pconCurrent->DeleteTransformContext();
-		m_pconCurrent=pconParent;
+		m_pconCurrent = pconParent;
 	}
 }
 
@@ -356,11 +356,11 @@ void	CqRenderer::DeleteTransformContext()
 
 void	CqRenderer::DeleteSolidContext()
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext*	pconParent=m_pconCurrent->pconParent();
+		CqContext * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->DeleteSolidContext();
-		m_pconCurrent=pconParent;
+		m_pconCurrent = pconParent;
 	}
 }
 
@@ -371,11 +371,11 @@ void	CqRenderer::DeleteSolidContext()
 
 void	CqRenderer::DeleteObjectContext()
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext*	pconParent=m_pconCurrent->pconParent();
+		CqContext * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->DeleteObjectContext();
-		m_pconCurrent=pconParent;
+		m_pconCurrent = pconParent;
 	}
 }
 
@@ -386,14 +386,14 @@ void	CqRenderer::DeleteObjectContext()
 
 void	CqRenderer::DeleteMotionContext()
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 	{
-		CqContext*	pconParent=m_pconCurrent->pconParent();
+		CqContext * pconParent = m_pconCurrent->pconParent();
 		// Copy the current state of the attributes UP the stack as a TransformBegin/End doesn't store them
-		pconParent->m_pattrCurrent=m_pconCurrent->m_pattrCurrent;
-		pconParent->m_ptransCurrent=m_pconCurrent->m_ptransCurrent;
+		pconParent->m_pattrCurrent = m_pconCurrent->m_pattrCurrent;
+		pconParent->m_ptransCurrent = m_pconCurrent->m_ptransCurrent;
 		m_pconCurrent->DeleteMotionContext();
-		m_pconCurrent=pconParent;
+		m_pconCurrent = pconParent;
 	}
 }
 
@@ -405,10 +405,10 @@ void	CqRenderer::DeleteMotionContext()
 
 TqFloat	CqRenderer::Time() const
 {
-	if(m_pconCurrent!=0)
-		return(m_pconCurrent->Time());
+	if ( m_pconCurrent != 0 )
+		return ( m_pconCurrent->Time() );
 	else
-		return(0);
+		return ( 0 );
 }
 
 //----------------------------------------------------------------------
@@ -417,7 +417,7 @@ TqFloat	CqRenderer::Time() const
 
 void CqRenderer::AdvanceTime()
 {
-	if(m_pconCurrent!=0)
+	if ( m_pconCurrent != 0 )
 		m_pconCurrent->AdvanceTime();
 }
 
@@ -428,10 +428,10 @@ void CqRenderer::AdvanceTime()
 
 CqOptions& CqRenderer::optCurrent()
 {
-	if(m_pconCurrent!=0)
-		return(m_pconCurrent->optCurrent());
+	if ( m_pconCurrent != 0 )
+		return ( m_pconCurrent->optCurrent() );
 	else
-		return(m_optDefault);
+		return ( m_optDefault );
 }
 
 
@@ -441,10 +441,10 @@ CqOptions& CqRenderer::optCurrent()
 
 const CqAttributes* CqRenderer::pattrCurrent()
 {
-	if(m_pconCurrent!=0)
-		return(m_pconCurrent->pattrCurrent());
+	if ( m_pconCurrent != 0 )
+		return ( m_pconCurrent->pattrCurrent() );
 	else
-		return(&m_attrDefault);
+		return ( &m_attrDefault );
 }
 
 
@@ -454,10 +454,10 @@ const CqAttributes* CqRenderer::pattrCurrent()
 
 CqAttributes* CqRenderer::pattrWriteCurrent()
 {
-	if(m_pconCurrent!=0)
-		return(m_pconCurrent->pattrWriteCurrent());
+	if ( m_pconCurrent != 0 )
+		return ( m_pconCurrent->pattrWriteCurrent() );
 	else
-		return(&m_attrDefault);
+		return ( &m_attrDefault );
 }
 
 
@@ -467,10 +467,10 @@ CqAttributes* CqRenderer::pattrWriteCurrent()
 
 const CqTransform* CqRenderer::ptransCurrent()
 {
-	if(m_pconCurrent!=0)
-		return(m_pconCurrent->ptransCurrent());
+	if ( m_pconCurrent != 0 )
+		return ( m_pconCurrent->ptransCurrent() );
 	else
-		return(&m_transDefault);
+		return ( &m_transDefault );
 }
 
 
@@ -480,10 +480,10 @@ const CqTransform* CqRenderer::ptransCurrent()
 
 CqTransform* CqRenderer::ptransWriteCurrent()
 {
-	if(m_pconCurrent!=0)
-		return(m_pconCurrent->ptransWriteCurrent());
+	if ( m_pconCurrent != 0 )
+		return ( m_pconCurrent->ptransWriteCurrent() );
 	else
-		return(&m_transDefault);
+		return ( &m_transDefault );
 }
 
 
@@ -494,32 +494,32 @@ CqTransform* CqRenderer::ptransWriteCurrent()
 void CqRenderer::RenderWorld()
 {
 	// Check we have a valid Image buffer
-	if(pImage()==0)
-		SetImage(new CqImageBuffer);
-	
+	if ( pImage() == 0 )
+		SetImage( new CqImageBuffer );
+
 	// Store the time at start.
-//	m_timeTaken=time(0);
+	//	m_timeTaken=time(0);
 
 	// Print to the defined output what we are rendering.
-//	CqString strMsg("Rendering - ");
-//	strMsg+=optCurrent().strDisplayName();
-//	CqBasicError(0,Severity_Normal,strMsg.c_str());
+	//	CqString strMsg("Rendering - ");
+	//	strMsg+=optCurrent().strDisplayName();
+	//	CqBasicError(0,Severity_Normal,strMsg.c_str());
 
 	m_pDDManager->OpenDisplays();
 
-	pImage()->RenderImage();
+	pImage() ->RenderImage();
 
 	// Calculate the time taken.
-//	m_timeTaken=time(0)-m_timeTaken;
+	//	m_timeTaken=time(0)-m_timeTaken;
 
-/* moved the following code into RiWorldEnd()
-	TqInt verbosity=0;
-	const TqInt* poptEndofframe=optCurrent().GetIntegerOption("statistics","endofframe");
-	if(poptEndofframe!=0)
-		verbosity=poptEndofframe[0];
-
-	Stats().PrintStats(verbosity);
-	*/
+	/* moved the following code into RiWorldEnd()
+		TqInt verbosity=0;
+		const TqInt* poptEndofframe=optCurrent().GetIntegerOption("statistics","endofframe");
+		if(poptEndofframe!=0)
+			verbosity=poptEndofframe[0];
+	 
+		Stats().PrintStats(verbosity);
+		*/
 
 	m_pDDManager->CloseDisplays();
 }
@@ -532,7 +532,7 @@ void CqRenderer::RenderWorld()
 
 void CqRenderer::Quit()
 {
-	if(m_pImageBuffer)
+	if ( m_pImageBuffer )
 	{
 		// Ask the image buffer to quit.
 		m_pImageBuffer->Quit();
@@ -550,20 +550,20 @@ void CqRenderer::Initialise()
 	FlushShaders();
 
 	// Register built in shaders.
-	RegisterShader("builtin_constant", Type_Surface, new CqShaderSurfaceConstant());
+	RegisterShader( "builtin_constant", Type_Surface, new CqShaderSurfaceConstant() );
 
 	// Register standard lightsource shaders.
-	RegisterShader("ambientlight", Type_Lightsource, new CqShaderLightsourceAmbient());
+	RegisterShader( "ambientlight", Type_Lightsource, new CqShaderLightsourceAmbient() );
 
-	CqShaderRegister* pFirst=m_Shaders.pFirst();
+	CqShaderRegister* pFirst = m_Shaders.pFirst();
 	pFirst->Create();
 
-	// Initialise the matrices for this camera according to the 
+	// Initialise the matrices for this camera according to the
 	// status of the camera attributes.
 	optCurrent().InitialiseCamera();
 
 	// Truncate the array of named coordinate systems to just the standard ones.
-	m_aCoordSystems.resize(CoordSystem_Last);
+	m_aCoordSystems.resize( CoordSystem_Last );
 }
 
 
@@ -571,24 +571,24 @@ void CqRenderer::Initialise()
 /** Get the matrix to convert between the specified coordinate systems.
  */
 
-CqMatrix	CqRenderer::matSpaceToSpace(const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld)
+CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld )
 {
 	CqMatrix	matResult, matA, matB;
 	// Get the two component matrices.
 	// First check for special cases.
-	if(strcmp(strFrom,"object")==0)	matA=matObjectToWorld;
-	else if(strcmp(strFrom,"shader")==0)	matA=matShaderToWorld;
-	if(strcmp(strTo,  "object")==0)	matB=matObjectToWorld.Inverse();
-	else if(strcmp(strTo,  "shader")==0)	matB=matShaderToWorld.Inverse();
+	if ( strcmp( strFrom, "object" ) == 0 ) matA = matObjectToWorld;
+	else if ( strcmp( strFrom, "shader" ) == 0 ) matA = matShaderToWorld;
+	if ( strcmp( strTo, "object" ) == 0 ) matB = matObjectToWorld.Inverse();
+	else if ( strcmp( strTo, "shader" ) == 0 ) matB = matShaderToWorld.Inverse();
 	TqInt i;
-	for(i=m_aCoordSystems.size()-1; i>=0; i--)
+	for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
 	{
-		if(m_aCoordSystems[i].m_strName==strFrom)	matA=m_aCoordSystems[i].m_matToWorld;
-		if(m_aCoordSystems[i].m_strName==strTo  )	matB=m_aCoordSystems[i].m_matWorldTo;
+		if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+		if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
 	}
-	matResult=matB*matA;
+	matResult = matB * matA;
 
-	return(matResult);
+	return ( matResult );
 }
 
 
@@ -596,27 +596,27 @@ CqMatrix	CqRenderer::matSpaceToSpace(const char* strFrom, const char* strTo, con
 /** Get the matrix to convert vectors between the specified coordinate systems.
  */
 
-CqMatrix	CqRenderer::matVSpaceToSpace(const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld)
+CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld )
 {
 	CqMatrix	matResult, matA, matB;
 	// Get the two component matrices.
 	// First check for special cases.
-	if(strcmp(strFrom,"object")==0)	matA=matObjectToWorld;
-	else if(strcmp(strFrom,"shader")==0)	matA=matShaderToWorld;
-	if(strcmp(strTo,  "object")==0)	matB=matObjectToWorld.Inverse();
-	else if(strcmp(strTo,  "shader")==0)	matB=matShaderToWorld.Inverse();
+	if ( strcmp( strFrom, "object" ) == 0 ) matA = matObjectToWorld;
+	else if ( strcmp( strFrom, "shader" ) == 0 ) matA = matShaderToWorld;
+	if ( strcmp( strTo, "object" ) == 0 ) matB = matObjectToWorld.Inverse();
+	else if ( strcmp( strTo, "shader" ) == 0 ) matB = matShaderToWorld.Inverse();
 	TqInt i;
-	for(i=m_aCoordSystems.size()-1; i>=0; i--)
+	for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
 	{
-		if(m_aCoordSystems[i].m_strName==strFrom)	matA=m_aCoordSystems[i].m_matToWorld;
-		if(m_aCoordSystems[i].m_strName==strTo  )	matB=m_aCoordSystems[i].m_matWorldTo;
+		if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+		if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
 	}
-	matResult=matB*matA;
+	matResult = matB * matA;
 
-	matResult[3][0]=matResult[3][1]=matResult[3][2]=matResult[0][3]=matResult[1][3]=matResult[2][3]=0.0;
-	matResult[3][3]=1.0;
+	matResult[ 3 ][ 0 ] = matResult[ 3 ][ 1 ] = matResult[ 3 ][ 2 ] = matResult[ 0 ][ 3 ] = matResult[ 1 ][ 3 ] = matResult[ 2 ][ 3 ] = 0.0;
+	matResult[ 3 ][ 3 ] = 1.0;
 
-	return(matResult);
+	return ( matResult );
 }
 
 
@@ -624,29 +624,29 @@ CqMatrix	CqRenderer::matVSpaceToSpace(const char* strFrom, const char* strTo, co
 /** Get the matrix to convert normals between the specified coordinate systems.
  */
 
-CqMatrix	CqRenderer::matNSpaceToSpace(const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld)
+CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, const CqMatrix& matShaderToWorld, const CqMatrix& matObjectToWorld )
 {
 	CqMatrix	matResult, matA, matB;
 	// Get the two component matrices.
 	// First check for special cases.
-	if(strcmp(strFrom,"object")==0)	matA=matObjectToWorld;
-	else if(strcmp(strFrom,"shader")==0)	matA=matShaderToWorld;
-	if(strcmp(strTo,  "object")==0)	matB=matObjectToWorld.Inverse();
-	else if(strcmp(strTo,  "shader")==0)	matB=matShaderToWorld.Inverse();
+	if ( strcmp( strFrom, "object" ) == 0 ) matA = matObjectToWorld;
+	else if ( strcmp( strFrom, "shader" ) == 0 ) matA = matShaderToWorld;
+	if ( strcmp( strTo, "object" ) == 0 ) matB = matObjectToWorld.Inverse();
+	else if ( strcmp( strTo, "shader" ) == 0 ) matB = matShaderToWorld.Inverse();
 	TqInt i;
-	for(i=m_aCoordSystems.size()-1; i>=0; i--)
+	for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
 	{
-		if(m_aCoordSystems[i].m_strName==strFrom)	matA=m_aCoordSystems[i].m_matToWorld;
-		if(m_aCoordSystems[i].m_strName==strTo  )	matB=m_aCoordSystems[i].m_matWorldTo;
+		if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+		if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
 	}
-	matResult=matB*matA;
+	matResult = matB * matA;
 
-	matResult[3][0]=matResult[3][1]=matResult[3][2]=matResult[0][3]=matResult[1][3]=matResult[2][3]=0.0;
-	matResult[3][3]=1.0;
-	matResult.Inverse();	
+	matResult[ 3 ][ 0 ] = matResult[ 3 ][ 1 ] = matResult[ 3 ][ 2 ] = matResult[ 0 ][ 3 ] = matResult[ 1 ][ 3 ] = matResult[ 2 ][ 3 ] = 0.0;
+	matResult[ 3 ][ 3 ] = 1.0;
+	matResult.Inverse();
 	matResult.Transpose();
 
-	return(matResult);
+	return ( matResult );
 }
 
 
@@ -655,22 +655,22 @@ CqMatrix	CqRenderer::matNSpaceToSpace(const char* strFrom, const char* strTo, co
  * with the same name. Returns TqTrue if system already exists.
  */
 
-TqBool	CqRenderer::SetCoordSystem(const char* strName, const CqMatrix& matToWorld)
+TqBool	CqRenderer::SetCoordSystem( const char* strName, const CqMatrix& matToWorld )
 {
 	// Search for the same named system in the current list.
-	for(TqUint i=0; i<m_aCoordSystems.size(); i++)
+	for ( TqUint i = 0; i < m_aCoordSystems.size(); i++ )
 	{
-		if(m_aCoordSystems[i].m_strName==strName)
+		if ( m_aCoordSystems[ i ].m_strName == strName )
 		{
-			m_aCoordSystems[i].m_matToWorld=matToWorld;
-			m_aCoordSystems[i].m_matWorldTo=matToWorld.Inverse();
-			return(TqTrue);
+			m_aCoordSystems[ i ].m_matToWorld = matToWorld;
+			m_aCoordSystems[ i ].m_matWorldTo = matToWorld.Inverse();
+			return ( TqTrue );
 		}
 	}
 
 	// If we got here, it didn't exists.
-	m_aCoordSystems.push_back(SqCoordSys(strName, matToWorld, matToWorld.Inverse()));
-	return(TqFalse);
+	m_aCoordSystems.push_back( SqCoordSys( strName, matToWorld, matToWorld.Inverse() ) );
+	return ( TqFalse );
 }
 
 
@@ -679,103 +679,103 @@ TqBool	CqRenderer::SetCoordSystem(const char* strName, const CqMatrix& matToWorl
  * \param strDecl Character pointer to the name of the declaration to find.
  */
 
-SqParameterDeclaration CqRenderer::FindParameterDecl(const char* strDecl)
+SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 {
-	TqInt Count=1;
-	CqString strName("");
-	EqVariableType ILType=Type_Nil;
-	
+	TqInt Count = 1;
+	CqString strName( "" );
+	EqVariableType ILType = Type_Nil;
+
 	// First check if the declaration has embedded type information.
-	CqString strLocalDecl(strDecl);
+	CqString strLocalDecl( strDecl );
 	TqInt i;
-	for(i=0; i<gcVariableStorageNames; i++)
+	for ( i = 0; i < gcVariableStorageNames; i++ )
 	{
-		if(strLocalDecl.find(gVariableStorageNames[i])!=CqString::npos)
+		if ( strLocalDecl.find( gVariableStorageNames[ i ] ) != CqString::npos )
 		{
-			ILType=(EqVariableType)(ILType|(0x01<<(Storage_Shift+i))&Storage_Mask);
+			ILType = ( EqVariableType ) ( ILType | ( 0x01 << ( Storage_Shift + i ) ) & Storage_Mask );
 			break;
 		}
 	}
 
-	for(i=0; i<gcVariableTypeNames; i++)
+	for ( i = 0; i < gcVariableTypeNames; i++ )
 	{
-		if(strLocalDecl.find(gVariableTypeNames[i])!=CqString::npos)
+		if ( strLocalDecl.find( gVariableTypeNames[ i ] ) != CqString::npos )
 		{
-			ILType=(EqVariableType)(ILType|(i&Type_Mask));
+			ILType = ( EqVariableType ) ( ILType | ( i & Type_Mask ) );
 			break;
 		}
 	}
 
 	// Now search for an array specifier.
-	TqUint s,e;
-	if((s=strLocalDecl.find('['))!=CqString::npos)
+	TqUint s, e;
+	if ( ( s = strLocalDecl.find( '[' ) ) != CqString::npos )
 	{
-		if((e=strLocalDecl.find(']'))!=CqString::npos && e>s)
+		if ( ( e = strLocalDecl.find( ']' ) ) != CqString::npos && e > s )
 		{
-			Count=static_cast<TqInt>(atoi(strLocalDecl.substr(s+1,e-(s+1)).c_str()));
-			ILType=(EqVariableType)(ILType|Type_Array);
+			Count = static_cast<TqInt>( atoi( strLocalDecl.substr( s + 1, e - ( s + 1 ) ).c_str() ) );
+			ILType = ( EqVariableType ) ( ILType | Type_Array );
 		}
 	}
-	
-	// Copy the token to the name.
-	s=strLocalDecl.find_last_of(' ');
-	if(s!=CqString::npos)	strName=strLocalDecl.substr(s+1);
-	else						strName=strLocalDecl;
 
-	if((ILType&Type_Mask)!=Type_Nil)
+	// Copy the token to the name.
+	s = strLocalDecl.find_last_of( ' ' );
+	if ( s != CqString::npos ) strName = strLocalDecl.substr( s + 1 );
+	else	strName = strLocalDecl;
+
+	if ( ( ILType & Type_Mask ) != Type_Nil )
 	{
 		// Default to uniform if no storage specified
-		if((ILType&Storage_Mask)==Type_Nil)
-			ILType=(EqVariableType)(ILType|Type_Uniform);
+		if ( ( ILType & Storage_Mask ) == Type_Nil )
+			ILType = ( EqVariableType ) ( ILType | Type_Uniform );
 
 		SqParameterDeclaration Decl;
-		Decl.m_strName=strName;
-		Decl.m_Count=Count;
-		Decl.m_Type=ILType;
-		Decl.m_strSpace="";
-		
+		Decl.m_strName = strName;
+		Decl.m_Count = Count;
+		Decl.m_Type = ILType;
+		Decl.m_strSpace = "";
+
 		// Get the creation function.
-		switch(ILType&Storage_Mask)
+		switch ( ILType & Storage_Mask )
 		{
-			case Type_Uniform:
-			{
-				if(ILType&Type_Array)
-					Decl.m_pCreate=gVariableCreateFuncsUniformArray[ILType&Type_Mask];
-				else
-					Decl.m_pCreate=gVariableCreateFuncsUniform[ILType&Type_Mask];
-			}
-			break;
+				case Type_Uniform:
+				{
+					if ( ILType & Type_Array )
+						Decl.m_pCreate = gVariableCreateFuncsUniformArray[ ILType & Type_Mask ];
+					else
+						Decl.m_pCreate = gVariableCreateFuncsUniform[ ILType & Type_Mask ];
+				}
+				break;
 
-			case Type_Varying:
-			{
-				if(ILType&Type_Array)
-					Decl.m_pCreate=gVariableCreateFuncsVaryingArray[ILType&Type_Mask];
-				else				
-					Decl.m_pCreate=gVariableCreateFuncsVarying[ILType&Type_Mask];
-			}	
-			break;
+				case Type_Varying:
+				{
+					if ( ILType & Type_Array )
+						Decl.m_pCreate = gVariableCreateFuncsVaryingArray[ ILType & Type_Mask ];
+					else
+						Decl.m_pCreate = gVariableCreateFuncsVarying[ ILType & Type_Mask ];
+				}
+				break;
 
-			case Type_Vertex:
-			{
-				if(ILType&Type_Array)
-					Decl.m_pCreate=gVariableCreateFuncsVertexArray[ILType&Type_Mask];
-				else
-					Decl.m_pCreate=gVariableCreateFuncsVertex[ILType&Type_Mask];
-			}	
-			break;
+				case Type_Vertex:
+				{
+					if ( ILType & Type_Array )
+						Decl.m_pCreate = gVariableCreateFuncsVertexArray[ ILType & Type_Mask ];
+					else
+						Decl.m_pCreate = gVariableCreateFuncsVertex[ ILType & Type_Mask ];
+				}
+				break;
 		}
-		return(Decl);
+		return ( Decl );
 	}
-	
-	strName=strDecl;
+
+	strName = strDecl;
 	// Search the local parameter declaration list.
 	std::vector<SqParameterDeclaration>::const_iterator is;
-	for(is=m_Symbols.begin(); is!=m_Symbols.end(); is++)
+	for ( is = m_Symbols.begin(); is != m_Symbols.end(); is++ )
 	{
-		if(strName==is->m_strName)
-			return(*is);
+		if ( strName == is->m_strName )
+			return ( *is );
 	}
-	return(SqParameterDeclaration("",Type_Nil,0,0,""));
+	return ( SqParameterDeclaration( "", Type_Nil, 0, 0, "" ) );
 }
 
 
@@ -785,15 +785,15 @@ SqParameterDeclaration CqRenderer::FindParameterDecl(const char* strDecl)
  * \param strType Character pointer to string containing the type identifier.
  */
 
-void CqRenderer::AddParameterDecl(const char* strName, const char* strType)
+void CqRenderer::AddParameterDecl( const char* strName, const char* strType )
 {
-	CqString strDecl(strType);
-	strDecl+=" ";
-	strDecl+=strName;
-	SqParameterDeclaration Decl=FindParameterDecl(strDecl.c_str());
+	CqString strDecl( strType );
+	strDecl += " ";
+	strDecl += strName;
+	SqParameterDeclaration Decl = FindParameterDecl( strDecl.c_str() );
 
 	// Put new declaration at the top to make it take priority over pervious
-	m_Symbols.insert(m_Symbols.begin(),Decl);
+	m_Symbols.insert( m_Symbols.begin(), Decl );
 }
 
 
@@ -801,10 +801,10 @@ void CqRenderer::AddParameterDecl(const char* strName, const char* strType)
 /** Register a shader of the specified type with the specified name.
  */
 
-void CqRenderer::RegisterShader(const char* strName, EqShaderType type, CqShader* pShader)
-{ 
-	assert(pShader);
-	m_Shaders.LinkLast(new CqShaderRegister(strName, type, pShader));
+void CqRenderer::RegisterShader( const char* strName, EqShaderType type, CqShader* pShader )
+{
+	assert( pShader );
+	m_Shaders.LinkLast( new CqShaderRegister( strName, type, pShader ) );
 }
 
 
@@ -812,18 +812,18 @@ void CqRenderer::RegisterShader(const char* strName, EqShaderType type, CqShader
 /** Find a shader of the specified type with the specified name.
  */
 
-CqShaderRegister* CqRenderer::FindShader(const char* strName, EqShaderType type)
+CqShaderRegister* CqRenderer::FindShader( const char* strName, EqShaderType type )
 {
 	// Search the register list.
-	CqShaderRegister* pShaderRegister=m_Shaders.pFirst();
-	while(pShaderRegister)
+	CqShaderRegister * pShaderRegister = m_Shaders.pFirst();
+	while ( pShaderRegister )
 	{
-		if(pShaderRegister->strName()==strName && pShaderRegister->Type()==type)
-			return(pShaderRegister);
+		if ( pShaderRegister->strName() == strName && pShaderRegister->Type() == type )
+			return ( pShaderRegister );
 
-		pShaderRegister=pShaderRegister->pNext();
+		pShaderRegister = pShaderRegister->pNext();
 	}
-	return(0);
+	return ( 0 );
 }
 
 
@@ -832,37 +832,37 @@ CqShaderRegister* CqRenderer::FindShader(const char* strName, EqShaderType type)
  * If not found, try and load one.
  */
 
-CqShader* CqRenderer::CreateShader(const char* strName, EqShaderType type)
+CqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 {
-	CqShaderRegister* pReg=FindShader(strName, type);
-	if(pReg!=0)
+	CqShaderRegister * pReg = FindShader( strName, type );
+	if ( pReg != 0 )
 	{
-		CqShader* pShader=pReg->Create();
-		RegisterShader(strName,type,pShader);
-		return(pShader);
+		CqShader * pShader = pReg->Create();
+		RegisterShader( strName, type, pShader );
+		return ( pShader );
 	}
 	else
 	{
 		// Search in the current directory first.
-		CqString strFilename(strName);
-		strFilename+=RI_SHADER_EXTENSION;
-		CqRiFile SLXFile(strFilename.c_str(),"shader");
-		if(SLXFile.IsValid())
+		CqString strFilename( strName );
+		strFilename += RI_SHADER_EXTENSION;
+		CqRiFile SLXFile( strFilename.c_str(), "shader" );
+		if ( SLXFile.IsValid() )
 		{
-			CqShaderVM* pShader=new CqShaderVM();
-			pShader->LoadProgram(SLXFile);
-                        pShader->SetstrName(strName);
-			RegisterShader(strName,type,pShader);
-			return(pShader);
+			CqShaderVM * pShader = new CqShaderVM();
+			pShader->LoadProgram( SLXFile );
+			pShader->SetstrName( strName );
+			RegisterShader( strName, type, pShader );
+			return ( pShader );
 		}
 		else
 		{
-			CqString strError("Shader \"");
-			strError+=strName;
-			strError+="\" not found";
+			CqString strError( "Shader \"" );
+			strError += strName;
+			strError += "\" not found";
 			//strError.Format("Shader \"%s\" not found",strName.String());
-			CqBasicError(ErrorID_FileNotFound,Severity_Normal,strError.c_str());
-			return(0);
+			CqBasicError( ErrorID_FileNotFound, Severity_Normal, strError.c_str() );
+			return ( 0 );
 		}
 	}
 }
@@ -873,9 +873,9 @@ CqShader* CqRenderer::CreateShader(const char* strName, EqShaderType type)
 /** Add a new requested display driver to the list.
  */
 
-void CqRenderer::AddDisplayRequest(const TqChar* name, const TqChar* type, const TqChar* mode)
+void CqRenderer::AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode )
 {
-	m_pDDManager->AddDisplay(name, type, mode);
+	m_pDDManager->AddDisplay( name, type, mode );
 }
 
 
@@ -890,11 +890,11 @@ void CqRenderer::ClearDisplayRequests()
 }
 
 
-void QSetRenderContext(CqRenderer* pRend)
+void QSetRenderContext( CqRenderer* pRend )
 {
-	pCurrRenderer=pRend;
+	pCurrRenderer = pRend;
 }
 
 //---------------------------------------------------------------------
- 
-END_NAMESPACE(Aqsis)
+
+END_NAMESPACE( Aqsis )

@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -36,9 +36,9 @@
  */
 
 CqCriticalSection::CqCriticalSection() :
-	m_hMutex(CreateMutex(NULL, FALSE, NULL))
+		m_hMutex( CreateMutex( NULL, FALSE, NULL ) )
 {
-	assert(m_hMutex != NULL);
+	assert( m_hMutex != NULL );
 }
 
 
@@ -48,7 +48,7 @@ CqCriticalSection::CqCriticalSection() :
 
 CqCriticalSection::~CqCriticalSection()
 {
-	CloseHandle(m_hMutex);
+	CloseHandle( m_hMutex );
 }
 
 
@@ -56,25 +56,25 @@ CqCriticalSection::~CqCriticalSection()
 /** Constructor.
  */
 
-CqEnterCriticalSection::CqEnterCriticalSection(CqCriticalSection* pCriticalSection) :
-	m_pCriticalSection(pCriticalSection)
+CqEnterCriticalSection::CqEnterCriticalSection( CqCriticalSection* pCriticalSection ) :
+		m_pCriticalSection( pCriticalSection )
 {
-	while(true)
+	while ( true )
 	{
-		DWORD dwReason = MsgWaitForMultipleObjects(1, &(m_pCriticalSection->m_hMutex),
-			FALSE, INFINITE, QS_SENDMESSAGE);
-		if(dwReason == WAIT_OBJECT_0)
+		DWORD dwReason = MsgWaitForMultipleObjects( 1, &( m_pCriticalSection->m_hMutex ),
+		                 FALSE, INFINITE, QS_SENDMESSAGE );
+		if ( dwReason == WAIT_OBJECT_0 )
 		{
-			return;
+			return ;
 		}
 		else
 		{
-			assert(dwReason == (WAIT_OBJECT_0 + 1));
+			assert( dwReason == ( WAIT_OBJECT_0 + 1 ) );
 
 			// There are sent messages waiting call PeekMessage so they can be delivered
 			// PeekMessage causes a yield to occur according to the MSDN docs.
 			MSG msg;
-			PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
+			PeekMessage( &msg, NULL, 0, 0, PM_NOREMOVE );
 		}
 	}
 }
@@ -86,5 +86,5 @@ CqEnterCriticalSection::CqEnterCriticalSection(CqCriticalSection* pCriticalSecti
 
 CqEnterCriticalSection::~CqEnterCriticalSection()
 {
-	ReleaseMutex(m_pCriticalSection->m_hMutex);
+	ReleaseMutex( m_pCriticalSection->m_hMutex );
 }

@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -31,53 +31,53 @@
 #include	"renderer.h"
 #include	"imagebuffer.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
-char* gVariableTypeNames[]=
-{
-	"invalid",
-	"float",
-	"integer",
-	"point",
-	"string",
-	"color",
-	"triple",
-	"hpoint",
-	"normal",
-	"vector",
-	"void",
-	"matrix",
-	"hextuple",
-};
-TqInt gcVariableTypeNames=sizeof(gVariableTypeNames)/sizeof(gVariableTypeNames[0]);
+char* gVariableTypeNames[] =
+    {
+        "invalid",
+        "float",
+        "integer",
+        "point",
+        "string",
+        "color",
+        "triple",
+        "hpoint",
+        "normal",
+        "vector",
+        "void",
+        "matrix",
+        "hextuple",
+    };
+TqInt gcVariableTypeNames = sizeof( gVariableTypeNames ) / sizeof( gVariableTypeNames[ 0 ] );
 
-char* gVariableStorageNames[]=
-{
-	"invalid",
-	"vertex",
-	"varying",
-	"uniform",
-};
-TqInt gcVariableStorageNames=sizeof(gVariableStorageNames)/sizeof(gVariableStorageNames[0]);
+char* gVariableStorageNames[] =
+    {
+        "invalid",
+        "vertex",
+        "varying",
+        "uniform",
+    };
+TqInt gcVariableStorageNames = sizeof( gVariableStorageNames ) / sizeof( gVariableStorageNames[ 0 ] );
 
-CqShaderVariable::CqShaderVariable() 	
+CqShaderVariable::CqShaderVariable()
 {
-	QGetRenderContext()->Stats().IncVariablesAllocated();
+	QGetRenderContext() ->Stats().IncVariablesAllocated();
 }
 
-CqShaderVariable::CqShaderVariable(const char* strName) : m_strName(strName)
+CqShaderVariable::CqShaderVariable( const char* strName ) : m_strName( strName )
 {
-	QGetRenderContext()->Stats().IncVariablesAllocated();
+	QGetRenderContext() ->Stats().IncVariablesAllocated();
 }
 
-CqShaderVariable::CqShaderVariable(const CqShaderVariable& From) : m_strName(From.m_strName)
+CqShaderVariable::CqShaderVariable( const CqShaderVariable& From ) : m_strName( From.m_strName )
 {
-	QGetRenderContext()->Stats().IncVariablesAllocated();
+	QGetRenderContext() ->Stats().IncVariablesAllocated();
 }
 
 CqShaderVariable::~CqShaderVariable()
 {
-	QGetRenderContext()->Stats().IncVariablesDeallocated();
+	QGetRenderContext() ->Stats().IncVariablesDeallocated();
 }
 
 
@@ -85,10 +85,10 @@ CqShaderVariable::~CqShaderVariable()
 /** Outputs a variable type to an output stream.
  */
 
-std::ostream &operator<<(std::ostream &Stream, EqVariableType t)
+std::ostream &operator<<( std::ostream &Stream, EqVariableType t )
 {
-	Stream << gVariableTypeNames[t&Type_Mask];
-	return(Stream);
+	Stream << gVariableTypeNames[ t & Type_Mask ];
+	return ( Stream );
 }
 
 
@@ -98,10 +98,10 @@ std::ostream &operator<<(std::ostream &Stream, EqVariableType t)
 
 CqShaderVariable* CqShaderVariableArray::Clone() const
 {
-	CqShaderVariableArray* pNew=new CqShaderVariableArray(*this);
-	return(pNew);
+	CqShaderVariableArray * pNew = new CqShaderVariableArray( *this );
+	return ( pNew );
 }
 
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

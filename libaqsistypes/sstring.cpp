@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -31,7 +31,7 @@
 #include	"aqsis.h"
 #include	"sstring.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 //---------------------------------------------------------------------
 /**	Expands characters which require escape sequences.
@@ -40,60 +40,60 @@ START_NAMESPACE(Aqsis)
 
 CqString CqString::ExpandEscapes() const
 {
-	CqString		strResult;
-	const TqChar*	str=c_str();
+	CqString	strResult;
+	const TqChar*	str = c_str();
 
-	if(str!=NULL)
-	{	
-		TqChar c=*str++;
+	if ( str != NULL )
+	{
+		TqChar c = *str++;
 
-		while(c!=0)
+		while ( c != 0 )
 		{
-			if(c>=' ')
+			if ( c >= ' ' )
 			{
-				switch(c)
+				switch ( c )
 				{
-					case '\\':	strResult+='\\'+'\\';	break;
-					case '\'':	strResult+='\\'+'\'';	break;
-					case '\"':	strResult+='\\'+'\"';	break;
-					default:	strResult+=c;				break;
+						case '\\': strResult += '\\' + '\\';	break;
+						case '\'': strResult += '\\' + '\'';	break;
+						case '\"': strResult += '\\' + '\"';	break;
+						default: strResult += c;	break;
 				}
 			}
 			else
 			{
-				strResult+='\\';
+				strResult += '\\';
 
-				switch(c)
+				switch ( c )
 				{
-					case '\a':	strResult+='a';	break;
-					case '\b':	strResult+='b';	break;
-					case '\n':	strResult+='n';	break;
-					case '\r':	strResult+='r';	break;
-					case '\t':	strResult+='t';	break;
-					case '\0':	strResult+='0';	break;
+						case '\a': strResult += 'a';	break;
+						case '\b': strResult += 'b';	break;
+						case '\n': strResult += 'n';	break;
+						case '\r': strResult += 'r';	break;
+						case '\t': strResult += 't';	break;
+						case '\0': strResult += '0';	break;
 
-					default:
-					{
-						strResult+='x';
-						TqInt i;
-						for(i=0;i<4;i++)
+						default:
 						{
-							TqInt Value=((c>>12) & 0x0F);	// Get high nibble;
-							c<<=4;
+							strResult += 'x';
+							TqInt i;
+							for ( i = 0;i < 4;i++ )
+							{
+								TqInt Value = ( ( c >> 12 ) & 0x0F );	// Get high nibble;
+								c <<= 4;
 
-							if(Value<=9)
-								strResult+='0'+Value;
-							else
-								strResult+='a'+Value;
+								if ( Value <= 9 )
+									strResult += '0' + Value;
+								else
+									strResult += 'a' + Value;
+							}
 						}
-					}
-					break;
+						break;
 				}
 			}
-			c=*str++;
+			c = *str++;
 		}
 	}
-	return(strResult);
+	return ( strResult );
 }
 
 
@@ -102,81 +102,81 @@ CqString CqString::ExpandEscapes() const
  * \return A string in which escape characters are translated.
  */
 
-CqString CqString::TranslateEqcapes()	const
+CqString CqString::TranslateEqcapes() const
 {
-	CqString		strResult;
-	const TqChar*	str=c_str();
-	
-	if(str!=NULL)
+	CqString	strResult;
+	const TqChar*	str = c_str();
+
+	if ( str != NULL )
 	{
-		TqChar c=*str++;
+		TqChar c = *str++;
 
-		while(c!=0)
+		while ( c != 0 )
 		{
-			if(c=='\\')
+			if ( c == '\\' )
 			{
-				c=*str++;
+				c = *str++;
 
-				switch(c)
+				switch ( c )
 				{
-					case 'a':	strResult+='\a';			break;
-					case 'b':	strResult+='\b';			break;
-					case 'n':	strResult+='\n';			break;
-					case 'r':	strResult+='\r';			break;
-					case 't':	strResult+='\t';			break;
-					
-					case '0':	
-					{
-						TqChar Value=0;
-												
-						while((c>='0' && c<='7'))
+						case 'a': strResult += '\a';	break;
+						case 'b': strResult += '\b';	break;
+						case 'n': strResult += '\n';	break;
+						case 'r': strResult += '\r';	break;
+						case 't': strResult += '\t';	break;
+
+						case '0':
 						{
-							Value=Value*8+c-'0';
-							c=*str++;
+							TqChar Value = 0;
+
+							while ( ( c >= '0' && c <= '7' ) )
+							{
+								Value = Value * 8 + c - '0';
+								c = *str++;
+							}
+							strResult += Value;
+							str--;
 						}
-						strResult+=Value;
-						str--;
-					}
-					break;
+						break;
 
-					case 'x':	
-					{
-						TqChar Value=0;
-												
-						c=*str++;
-
-						while((c>='0' && c<='9')||(c>='A' && c<='F')||(c>='a' && c<='f'))
+						case 'x':
 						{
-							Value*=16;
-							if(c>='0' && c<='9')
-								Value+=c-'0';
-							else
-							if(c>='A' && c<='F')
-								Value+=c-'A'+10;
-							else
-							if(c>='a' && c<='f')
-								Value+=c-'a'+10;
+							TqChar Value = 0;
 
-							c=*str++;
+							c = *str++;
+
+							while ( ( c >= '0' && c <= '9' ) || ( c >= 'A' && c <= 'F' ) || ( c >= 'a' && c <= 'f' ) )
+							{
+								Value *= 16;
+								if ( c >= '0' && c <= '9' )
+									Value += c - '0';
+								else
+									if ( c >= 'A' && c <= 'F' )
+										Value += c - 'A' + 10;
+									else
+										if ( c >= 'a' && c <= 'f' )
+											Value += c - 'a' + 10;
+
+								c = *str++;
+							}
+							strResult += Value;
+							str--;
 						}
-						strResult+=Value;
-						str--;
-					}
-					break;
+						break;
 
-					default:	
-						strResult+=c;	
+						default:
+						strResult += c;
 						break;
 				}
 			}
 			else
-				strResult+=c;
-		
-			c=*str++;
-		}
-	}	
+				strResult += c;
 
-	return(strResult);
+			c = *str++;
+		}
+	}
+
+	return ( strResult );
 }
 
 
@@ -184,113 +184,113 @@ CqString CqString::TranslateEqcapes()	const
 /** Format a string printf style
  */
 
-CqString& CqString::Format(const TqChar* strFmt, ...)
+CqString& CqString::Format( const TqChar* strFmt, ... )
 {
 	va_list marker;
-	va_start(marker,strFmt);
+	va_start( marker, strFmt );
 
-	*this="";
+	*this = "";
 
-	TqInt i=0;
-	while(strFmt[i]!='\0')
+	TqInt i = 0;
+	while ( strFmt[ i ] != '\0' )
 	{
-		switch(strFmt[i])
+		switch ( strFmt[ i ] )
 		{
-			case '%':
-			{
-				i++;
-				switch(strFmt[i])
+				case '%':
 				{
-					case 'f':
+					i++;
+					switch ( strFmt[ i ] )
 					{
-						TqFloat val=static_cast<TqFloat>(va_arg(marker,double));
+							case 'f':
+							{
+								TqFloat val = static_cast<TqFloat>( va_arg( marker, double ) );
 
-						std::strstream strVal;
-						strVal << val << std::ends;
-						*this+=strVal.str();
-						strVal.freeze(false);
+								std::strstream strVal;
+								strVal << val << std::ends;
+								*this += strVal.str();
+								strVal.freeze( false );
+							}
+							break;
+
+							case 'd':
+							case 'i':
+							{
+								TqInt val = va_arg( marker, TqInt );
+
+								std::strstream strVal;
+								strVal << val << std::ends;
+								*this += strVal.str();
+								strVal.freeze( false );
+							}
+							break;
+
+							case 'x':
+							{
+								TqInt val = va_arg( marker, TqInt );
+
+								std::strstream strVal;
+								strVal << val << std::ends;
+								*this += strVal.str();
+								strVal.freeze( false );
+							}
+							break;
+
+							case 's':
+							*this += va_arg( marker, TqChar* );
+							break;
 					}
-					break;
-
-					case 'd':
-					case 'i':
-					{
-						TqInt val=va_arg(marker,TqInt);
-
-						std::strstream strVal;
-						strVal << val << std::ends;
-						*this+=strVal.str();
-						strVal.freeze(false);
-					}
-					break;
-
-					case 'x':
-					{ 
-						TqInt val=va_arg(marker,TqInt);
-
-						std::strstream strVal;
-						strVal << val << std::ends;
-						*this+=strVal.str();
-						strVal.freeze(false);
-					}
-					break;
-
-					case 's':
-						*this+=va_arg(marker,TqChar*);
-					break;
 				}
-			}
-			break;
+				break;
 
-			default:
-				*this+=strFmt[i];
-			break;
+				default:
+				*this += strFmt[ i ];
+				break;
 		}
 		i++;
-	}	
+	}
 
-	va_end(marker);
-	return(*this);
+	va_end( marker );
+	return ( *this );
 }
 
 
-CqString& CqString::operator+=(const CqString& str)
+CqString& CqString::operator+=( const CqString& str )
 {
-	CqStringBase::operator+=(str);
-	return(*this);
+	CqStringBase::operator+=( str );
+	return ( *this );
 }
 
-CqString& CqString::operator+=(const TqChar* str)
+CqString& CqString::operator+=( const TqChar* str )
 {
-	CqStringBase::operator+=(str);
-	return(*this);
+	CqStringBase::operator+=( str );
+	return ( *this );
 }
 
-CqString& CqString::operator+=(TqChar c)
+CqString& CqString::operator+=( TqChar c )
 {
-	CqStringBase::operator+=(c);
-	return(*this);
+	CqStringBase::operator+=( c );
+	return ( *this );
 }
 
-CqString& CqString::operator+=(TqInt i)
+CqString& CqString::operator+=( TqInt i )
 {
 	std::strstream val;
 	val << i << std::ends;
 	*this += val.str();
-	val.freeze(false);
-	
+	val.freeze( false );
+
 	return *this;
 }
 
-CqString& CqString::operator+=(TqFloat f)
+CqString& CqString::operator+=( TqFloat f )
 {
-	char buf[5];
-	#ifdef	AQSIS_COMPILER_MSVC6
-	_snprintf(buf,5,"%f",f);
-	#else
-	snprintf(buf,5,"%f",f);
-	#endif
-	return (*this+=buf);
+	char buf[ 5 ];
+#ifdef	AQSIS_COMPILER_MSVC6
+	_snprintf( buf, 5, "%f", f );
+#else
+	snprintf( buf, 5, "%f", f );
+#endif
+	return ( *this += buf );
 }
 
 
@@ -298,11 +298,11 @@ CqString& CqString::operator+=(TqFloat f)
 /** Concatenate two strings
  */
 
-CqString operator+(const CqString& strAdd1, const CqString& strAdd2)
+CqString operator+( const CqString& strAdd1, const CqString& strAdd2 )
 {
-	CqString strRes(strAdd1);
-	strRes+=strAdd2;
-	return(strRes);
+	CqString strRes( strAdd1 );
+	strRes += strAdd2;
+	return ( strRes );
 }
 
 
@@ -310,11 +310,11 @@ CqString operator+(const CqString& strAdd1, const CqString& strAdd2)
 /** Concatenate two strings
  */
 
-CqString operator+(const TqChar* strAdd1, const CqString& strAdd2)
+CqString operator+( const TqChar* strAdd1, const CqString& strAdd2 )
 {
-	CqString strRes(strAdd1);
-	strRes+=strAdd2;
-	return(strRes);
+	CqString strRes( strAdd1 );
+	strRes += strAdd2;
+	return ( strRes );
 }
 
 
@@ -322,11 +322,11 @@ CqString operator+(const TqChar* strAdd1, const CqString& strAdd2)
 /** Concatenate two strings
  */
 
-CqString operator+(const CqString& strAdd1, const TqChar* strAdd2)
+CqString operator+( const CqString& strAdd1, const TqChar* strAdd2 )
 {
-	CqString strRes(strAdd1);
-	strRes+=strAdd2;
-	return(strRes);
+	CqString strRes( strAdd1 );
+	strRes += strAdd2;
+	return ( strRes );
 }
 
 
@@ -334,11 +334,11 @@ CqString operator+(const CqString& strAdd1, const TqChar* strAdd2)
 /** Append charater to end of string
  */
 
-CqString operator+(const CqString& strAdd1, TqChar ch)
+CqString operator+( const CqString& strAdd1, TqChar ch )
 {
-	CqString strRes(strAdd1);
-	strRes+=ch;
-	return(strRes);
+	CqString strRes( strAdd1 );
+	strRes += ch;
+	return ( strRes );
 }
 
 
@@ -346,11 +346,11 @@ CqString operator+(const CqString& strAdd1, TqChar ch)
 /** Prepend character to string
  */
 
-CqString operator+(TqChar ch, const CqString& strAdd2)
+CqString operator+( TqChar ch, const CqString& strAdd2 )
 {
-	CqString strRes(ch);
-	strRes+=strAdd2;
-	return(strRes);
+	CqString strRes( ch );
+	strRes += strAdd2;
+	return ( strRes );
 }
 
 
@@ -358,9 +358,9 @@ CqString operator+(TqChar ch, const CqString& strAdd2)
 /** Not really useful but needed for the templatised operation of the render engine.
  */
 
-CqString operator-(const CqString& strAdd1, const CqString& strAdd2)
+CqString operator-( const CqString& strAdd1, const CqString& strAdd2 )
 {
-	return(strAdd1);
+	return ( strAdd1 );
 }
 
 
@@ -368,9 +368,9 @@ CqString operator-(const CqString& strAdd1, const CqString& strAdd2)
 /** Not really useful but needed for the templatised operation of the render engine.
  */
 
-CqString operator/(const CqString&strAdd1, const CqString&strAdd2)
+CqString operator/( const CqString&strAdd1, const CqString&strAdd2 )
 {
-	return(strAdd1);
+	return ( strAdd1 );
 }
 
 
@@ -378,9 +378,9 @@ CqString operator/(const CqString&strAdd1, const CqString&strAdd2)
 /** Not really useful but needed for the templatised operation of the render engine.
  */
 
-CqString operator*(const CqString& strAdd1, const CqString& strAdd2)
+CqString operator*( const CqString& strAdd1, const CqString& strAdd2 )
 {
-	return(strAdd1);
+	return ( strAdd1 );
 }
 
 
@@ -388,13 +388,13 @@ CqString operator*(const CqString& strAdd1, const CqString& strAdd2)
 /** Not really useful but needed for the templatised operation of the render engine.
  */
 
-CqString operator*(const CqString& strAdd1, TqFloat f)
+CqString operator*( const CqString& strAdd1, TqFloat f )
 {
-	return(strAdd1);
+	return ( strAdd1 );
 }
 
 
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )

@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -27,23 +27,23 @@
 #ifndef	AQSIS_TYPES_INCLUDED
 #define	AQSIS_TYPES_INCLUDED
 
-typedef	char			TqChar;
+typedef	char	TqChar;
 typedef	unsigned char	TqUchar;
-typedef	char*			TqPchar;
+typedef	char*	TqPchar;
 typedef	unsigned char*	TqPuchar;
 
-typedef	int				TqInt;
+typedef	int	TqInt;
 typedef	unsigned int	TqUint;
-typedef	long			TqLong;
+typedef	long	TqLong;
 typedef	unsigned long	TqUlong;
 
-typedef	short			TqShort;
+typedef	short	TqShort;
 typedef	unsigned short	TqUshort;
 
-typedef	float			TqFloat;
-typedef	double			TqDouble;
+typedef	float	TqFloat;
+typedef	double	TqDouble;
 
-typedef	bool			TqBool;
+typedef	bool	TqBool;
 #define	TqTrue			true
 #define	TqFalse			false
 
@@ -61,26 +61,26 @@ typedef	bool			TqBool;
 #define DEG(a)				(((a)/180.0f)*RI_PI)
 
 
-inline TqUint LOWEST_BIT(TqUint x)
+inline TqUint LOWEST_BIT( TqUint x )
 {
-	return(x & ((~x)+1));
+	return ( x & ( ( ~x ) + 1 ) );
 }
 
-inline TqBool IS_POW2(TqUint x)
+inline TqBool IS_POW2( TqUint x )
 {
-	return(x != 0 && x == LOWEST_BIT(x));
+	return ( x != 0 && x == LOWEST_BIT( x ) );
 }
 
-inline TqUint CEIL_POW2_MINUS1(TqUint x)
+inline TqUint CEIL_POW2_MINUS1( TqUint x )
 {
-	for(TqUint i=1; i; i <<= 1)
+	for ( TqUint i = 1; i; i <<= 1 )
 		x |= x >> i;
-	return(x);
+	return ( x );
 }
 
-inline TqUint CEIL_POW2(TqUint x)
+inline TqUint CEIL_POW2( TqUint x )
 {
-	return(CEIL_POW2_MINUS1(x)+1);
+	return ( CEIL_POW2_MINUS1( x ) + 1 );
 }
 
 

@@ -7,7 +7,7 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-//  
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -27,25 +27,30 @@
 
 RtInt RiLastError;
 
-RtVoid RiErrorIgnore( RtInt cd, RtInt sev, const char *msg) {}
-RtVoid RiErrorPrint( RtInt cd, RtInt sev, const char *msg) {}
-RtVoid RiErrorAbort( RtInt cd, RtInt sev, const char *msg) {}
+RtVoid RiErrorIgnore( RtInt cd, RtInt sev, const char *msg )
+{}
+RtVoid RiErrorPrint( RtInt cd, RtInt sev, const char *msg )
+{}
+RtVoid RiErrorAbort( RtInt cd, RtInt sev, const char *msg )
+{}
 
 using namespace libri2rib;
 
 RtVoid CqError::manage ()
 {
-    RiLastError=code;
-    std::cerr <<"RI2RIB: "<< message << std::endl;
-    if (severity==RIE_SEVERE) exit(EXIT_FAILURE);
+	RiLastError = code;
+	std::cerr << "RI2RIB: " << message << std::endl;
+	if ( severity == RIE_SEVERE ) exit( EXIT_FAILURE );
 
-    if (to_rib==TqTrue) {
-	switch (severity) {
-	case RIE_INFO: message.insert(0,"INFO: "); break;
-	case RIE_WARNING: message.insert(0, "WARNING: "); break;
-	case RIE_ERROR: message.insert(0, "ERROR: "); break;
-	default: break;
+	if ( to_rib == TqTrue )
+	{
+		switch ( severity )
+		{
+				case RIE_INFO: message.insert( 0, "INFO: " ); break;
+				case RIE_WARNING: message.insert( 0, "WARNING: " ); break;
+				case RIE_ERROR: message.insert( 0, "ERROR: " ); break;
+				default: break;
+		}
+		RiArchiveRecord( RI_COMMENT, const_cast<char *> ( message.c_str() ) );
 	}
-	RiArchiveRecord(RI_COMMENT, const_cast<char *> (message.c_str()));
-    }
 }

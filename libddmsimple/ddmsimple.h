@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -29,7 +29,7 @@
 
 #include	"aqsis.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 
 //---------------------------------------------------------------------
@@ -39,21 +39,22 @@ START_NAMESPACE(Aqsis)
 
 struct SqDDevice
 {
-	SqDDevice()	{}
-	SqDDevice(const TqChar* name, const TqChar* type, const TqChar* mode) :
-				m_strName(name),
-				m_strType(type),
-				m_strMode(mode),
-				m_pData(0)
-				{}
+	SqDDevice()
+	{}
+	SqDDevice( const TqChar* name, const TqChar* type, const TqChar* mode ) :
+			m_strName( name ),
+			m_strType( type ),
+			m_strMode( mode ),
+			m_pData( 0 )
+	{}
 
 	CqString	m_strName;
 	CqString	m_strType;
 	CqString	m_strMode;
 	unsigned char*	m_pData;
-	TqInt		m_XRes;
-	TqInt		m_YRes;
-	TqInt		m_SamplesPerElement;
+	TqInt	m_XRes;
+	TqInt	m_YRes;
+	TqInt	m_SamplesPerElement;
 };
 
 
@@ -65,24 +66,29 @@ struct SqDDevice
 class CqDDManagerSimple : public IqDDManager
 {
 	public:
-				CqDDManagerSimple()	{}
-				virtual ~CqDDManagerSimple()	{}
+		CqDDManagerSimple()
+		{}
+		virtual ~CqDDManagerSimple()
+		{}
 
-	// Overridden from IqDDManager
-	virtual	TqInt	Initialise();
-	virtual	TqInt	Shutdown();
-	virtual	TqInt	AddDisplay(const TqChar* name, const TqChar* type, const TqChar* mode);
-	virtual	TqInt	ClearDisplays();
-	virtual	TqInt	OpenDisplays();
-	virtual	TqInt	CloseDisplays();
-	virtual	TqInt	DisplayBucket(IqBucket* pBucket);
+		// Overridden from IqDDManager
+
+
+		virtual	TqInt	Initialise();
+		virtual	TqInt	Shutdown();
+		virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode );
+		virtual	TqInt	ClearDisplays();
+		virtual	TqInt	OpenDisplays();
+		virtual	TqInt	CloseDisplays();
+		virtual	TqInt	DisplayBucket( IqBucket* pBucket );
 
 	private:
 		std::vector<SqDDevice>	m_aDisplayRequests;		///< Array of requested display drivers.
-};
+}
+;
 
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )
 
 #endif	// DDSERVER_H_INCLUDED
 

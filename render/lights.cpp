@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -27,7 +27,7 @@
 #include	"lights.h"
 #include	"file.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 CqList<CqLightsource>	Lightsource_stack;
 
@@ -35,18 +35,18 @@ CqList<CqLightsource>	Lightsource_stack;
 /** Default constructor.
  */
 
-CqLightsource::CqLightsource(CqShader* pShader, TqBool fActive) :
-										m_pShader(pShader),
-										m_pAttributes(0)
+CqLightsource::CqLightsource( CqShader* pShader, TqBool fActive ) :
+		m_pShader( pShader ),
+		m_pAttributes( 0 )
 {
 	// Set a refernce with the current attributes.
-	m_pAttributes=const_cast<CqAttributes*>(QGetRenderContext()->pattrCurrent());
+	m_pAttributes = const_cast<CqAttributes*>( QGetRenderContext() ->pattrCurrent() );
 	m_pAttributes->AddRef();
-//	m_matLightToWorld=QGetRenderContext()->matCurrent();
-//	m_matWorldToLight=QGetRenderContext()->matCurrent().Inverse();
+	//	m_matLightToWorld=QGetRenderContext()->matCurrent();
+	//	m_matWorldToLight=QGetRenderContext()->matCurrent().Inverse();
 
 	// Link into the lightsource stack.
-	Lightsource_stack.LinkFirst(this);
+	Lightsource_stack.LinkFirst( this );
 }
 
 
@@ -57,9 +57,9 @@ CqLightsource::CqLightsource(CqShader* pShader, TqBool fActive) :
 CqLightsource::~CqLightsource()
 {
 	// Release our reference on the current attributes.
-	if(m_pAttributes)
+	if ( m_pAttributes )
 		m_pAttributes->Release();
-	m_pAttributes=0;
+	m_pAttributes = 0;
 
 	// Unlink from the stack.
 	UnLink();
@@ -71,27 +71,27 @@ CqLightsource::~CqLightsource()
  * \param iGridRes Integer grid resolution.
  * \param iGridRes Integer grid resolution.
  */
-void CqLightsource::Initialise(TqInt uGridRes, TqInt vGridRes)
+void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
 {
-	if(m_pShader)
-		m_pShader->Initialise(uGridRes, vGridRes, *this);
+	if ( m_pShader )
+		m_pShader->Initialise( uGridRes, vGridRes, *this );
 
-	TqInt Uses=gDefLightUses;
-	if(m_pShader)	Uses|=m_pShader->Uses();
-	CqShaderExecEnv::Initialise(uGridRes, vGridRes, 0, Uses);
-	
-	L().Initialise(uGridRes, vGridRes, GridI());
-	Cl().Initialise(uGridRes, vGridRes, GridI());
+	TqInt Uses = gDefLightUses;
+	if ( m_pShader ) Uses |= m_pShader->Uses();
+	CqShaderExecEnv::Initialise( uGridRes, vGridRes, 0, Uses );
+
+	L().Initialise( uGridRes, vGridRes, GridI() );
+	Cl().Initialise( uGridRes, vGridRes, GridI() );
 
 	// Initialise the geometric parameters in the shader exec env.
-	P().SetValue(QGetRenderContext()->matSpaceToSpace("shader", "current", m_pShader->matCurrent())*CqVector3D(0.0f,0.0f,0.0f));
-	if(USES(Uses,EnvVars_u))	u().SetValue(0.0f);
-	if(USES(Uses,EnvVars_v))	v().SetValue(0.0f);
-	if(USES(Uses,EnvVars_du))	du().SetValue(0.0f);
-	if(USES(Uses,EnvVars_du))	dv().SetValue(0.0f);
-	if(USES(Uses,EnvVars_s))	s().SetValue(0.0f);
-	if(USES(Uses,EnvVars_t))	t().SetValue(0.0f);
-	if(USES(Uses,EnvVars_N))	N().SetValue(CqVector3D(0.0f,0.0f,0.0f));
+	P().SetValue( QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->matCurrent() ) * CqVector3D( 0.0f, 0.0f, 0.0f ) );
+	if ( USES( Uses, EnvVars_u ) ) u().SetValue( 0.0f );
+	if ( USES( Uses, EnvVars_v ) ) v().SetValue( 0.0f );
+	if ( USES( Uses, EnvVars_du ) ) du().SetValue( 0.0f );
+	if ( USES( Uses, EnvVars_du ) ) dv().SetValue( 0.0f );
+	if ( USES( Uses, EnvVars_s ) ) s().SetValue( 0.0f );
+	if ( USES( Uses, EnvVars_t ) ) t().SetValue( 0.0f );
+	if ( USES( Uses, EnvVars_N ) ) N().SetValue( CqVector3D( 0.0f, 0.0f, 0.0f ) );
 }
 
 
@@ -102,7 +102,7 @@ void CqLightsource::Initialise(TqInt uGridRes, TqInt vGridRes)
 /*void CqLightsource::GenerateShadowMap(const char* strShadowName)
 {
 	if(m_pShader->fAmbient())	return;
-
+ 
 	// Store the current renderer state.
 	CqOptions	Options=QGetRenderContext()->optCurrent();
 	CqImageBuffer* pBuffer=QGetRenderContext()->pImage();
@@ -111,7 +111,7 @@ void CqLightsource::Initialise(TqInt uGridRes, TqInt vGridRes)
 	CqMatrix	matNDC(QGetRenderContext()->matSpaceToSpace("world","NDC"));
 	CqMatrix	matRaster(QGetRenderContext()->matSpaceToSpace("world","raster"));
 	CqMatrix	matCamera(QGetRenderContext()->matSpaceToSpace("world","camera"));
-
+ 
 	// Get the attributes from the lightsource describing the shadowmap.	
 	TqInt ShadowXSize=256;
 	TqInt ShadowYSize=256;
@@ -126,7 +126,7 @@ void CqLightsource::Initialise(TqInt uGridRes, TqInt vGridRes)
 	const TqFloat* pattrShadowAngle=m_pAttributes->GetFloatAttribute("light","shadowangle");
 	if(pattrShadowAngle!=0)
 		ShadowAngle=pattrShadowAngle[0];
-
+ 
 	
 	// Set up the shadow render options through the Ri interfaces.
 	RiFormat(ShadowXSize,ShadowYSize,1);
@@ -136,11 +136,11 @@ void CqLightsource::Initialise(TqInt uGridRes, TqInt vGridRes)
 	RiScreenWindow(-1,1,-1,1);
 	RiProjection("perspective","fov",&ShadowAngle,RI_NULL);
 	RiDisplay(strShadowName,"shadowmap",RI_Z,RI_NULL);
-
+ 
 	// Equivalent to RiWorldBegin
 	QGetRenderContext()->SetmatCamera(m_matWorldToLight);
 	QGetRenderContext()->optCurrent().InitialiseCamera();
-
+ 
 	QGetRenderContext()->SetfSaveGPrims(TqTrue);
 	
 	// Equivalent to RiWorldEnd
@@ -149,7 +149,7 @@ void CqLightsource::Initialise(TqInt uGridRes, TqInt vGridRes)
 	QGetRenderContext()->pImage()->RenderImage();
 	RiMakeShadow(strShadowName, strShadowName);
 	QGetRenderContext()->pImage()->DeleteImage();
-
+ 
 	// Restore renderer options.
 	QGetRenderContext()->optCurrent()=Options;
 	QGetRenderContext()->SetImage(pBuffer);
@@ -157,7 +157,7 @@ void CqLightsource::Initialise(TqInt uGridRes, TqInt vGridRes)
 	QGetRenderContext()->SetmatNDC(matNDC);
 	QGetRenderContext()->SetmatRaster(matRaster);
 	QGetRenderContext()->SetmatCamera(matCamera);
-
+ 
 	QGetRenderContext()->SetfSaveGPrims(TqFalse);
 }
 */
@@ -169,23 +169,23 @@ void CqLightsource::Initialise(TqInt uGridRes, TqInt vGridRes)
 // These are the built in shaders, they will be registered as "builtin_<name>"
 // these should be used where speed is an issue.
 
-void CqShaderLightsourceAmbient::SetValue(const char* name, TqPchar val)
+void CqShaderLightsourceAmbient::SetValue( const char* name, TqPchar val )
 {
-	if(strcmp(name,"intensity")==0)	intensity=*reinterpret_cast<TqFloat*>(val);
+	if ( strcmp( name, "intensity" ) == 0 ) intensity = *reinterpret_cast<TqFloat*>( val );
 	else
-	if(strcmp(name,"lightcolor")==0)	lightcolor=reinterpret_cast<TqFloat*>(val);
+		if ( strcmp( name, "lightcolor" ) == 0 ) lightcolor = reinterpret_cast<TqFloat*>( val );
 }
 
 
-void CqShaderLightsourceAmbient::Evaluate(CqShaderExecEnv& Env)
+void CqShaderLightsourceAmbient::Evaluate( CqShaderExecEnv& Env )
 {
-	Env.Cl().SetValue(lightcolor*intensity);
+	Env.Cl().SetValue( lightcolor * intensity );
 }
 
 
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )
 
 

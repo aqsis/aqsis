@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -38,24 +38,24 @@
 
 using namespace Aqsis;
 
-int main(int argc, char* argv[])
+int main( int argc, char* argv[] )
 {
-	#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
-	std::cout << argv[0] << " V" << VERSION_STR << std::endl;
-	#else
-	std::cout << argv[0] << " V" << VERSION << std::endl;
-	#endif
+#if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
+	std::cout << argv[ 0 ] << " V" << VERSION_STR << std::endl;
+#else
+	std::cout << argv[ 0 ] << " V" << VERSION << std::endl;
+#endif
 
-	if(argc != 1)
-		{
-			std::cout << "Usage: " << argv[0] << " [options]" << std::endl;
-			std::cout << "" << std::endl;
-			
-			return 1;
-		}
+	if ( argc != 1 )
+	{
+		std::cout << "Usage: " << argv[ 0 ] << " [options]" << std::endl;
+		std::cout << "" << std::endl;
 
-	if(Parse(std::cin, "stdin", std::cerr))
-		OutputTree(GetParseTree());
+		return 1;
+	}
+
+	if ( Parse( std::cin, "stdin", std::cerr ) )
+		OutputTree( GetParseTree() );
 
 	return 0;
 }

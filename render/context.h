@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -41,7 +41,7 @@
 #define		_qShareName	CORE
 #include	"share.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 class CqLightsource;
 
@@ -53,117 +53,170 @@ class CqLightsource;
 class CqContext
 {
 	public:
-						/** Default constructor
-						 * \param pconParent a pointer to the previous context.
-						 */
-						CqContext(CqContext* pconParent=0);
-	virtual				~CqContext() {}
+		/** Default constructor
+		 * \param pconParent a pointer to the previous context.
+		 */
+		CqContext( CqContext* pconParent = 0 );
+		virtual	~CqContext()
+		{}
 
-	virtual				CqContext*	CreateMainContext();
-	virtual				CqContext*	CreateFrameContext();
-	virtual				CqContext*	CreateWorldContext();
-	virtual				CqContext*	CreateAttributeContext();
-	virtual				CqContext*	CreateTransformContext();
-	virtual				CqContext*	CreateSolidContext(CqString& type);
-	virtual				CqContext*	CreateObjectContext();
-	virtual				CqContext*	CreateMotionContext(TqInt N, TqFloat times[]);
+		virtual	CqContext*	CreateMainContext();
+		virtual	CqContext*	CreateFrameContext();
+		virtual	CqContext*	CreateWorldContext();
+		virtual	CqContext*	CreateAttributeContext();
+		virtual	CqContext*	CreateTransformContext();
+		virtual	CqContext*	CreateSolidContext( CqString& type );
+		virtual	CqContext*	CreateObjectContext();
+		virtual	CqContext*	CreateMotionContext( TqInt N, TqFloat times[] );
 
-						/** Delete the main context, overridable per derived class.
-						 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
-						 */
-	virtual				void		DeleteMainContext()	{CqBasicError(0,Severity_Fatal,"Invalid Context Nesting");}
-						/** Delete the main context, overridable per derived class.
-						 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
-						 */
-	virtual				void		DeleteFrameContext() {CqBasicError(0,Severity_Fatal,"Invalid Context Nesting");}
-						/** Delete the main context, overridable per derived class.
-						 * \warning If caled at this level it is an error, as only the appropriate context can delete itself.
-						 */
-	virtual				void		DeleteWorldContext() {CqBasicError(0,Severity_Fatal,"Invalid Context Nesting");}
-						/** Delete the main context, overridable per derived class.
-						 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
-						 */
-	virtual				void		DeleteAttributeContext() {CqBasicError(0,Severity_Fatal,"Invalid Context Nesting");}
-						/** Delete the main context, overridable per derived class.
-						 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
-						 */
-	virtual				void		DeleteTransformContext() {CqBasicError(0,Severity_Fatal,"Invalid Context Nesting");}
-						/** Delete the main context, overridable per derived class.
-						 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
-						 */
-	virtual				void		DeleteSolidContext() {CqBasicError(0,Severity_Fatal,"Invalid Context Nesting");}
-						/** Delete the main context, overridable per derived class.
-						 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
-						 */
-	virtual				void		DeleteObjectContext() {CqBasicError(0,Severity_Fatal,"Invalid Context Nesting");}
-						/** Delete the main context, overridable per derived class.
-						 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
-						 */
-	virtual				void		DeleteMotionContext() {CqBasicError(0,Severity_Fatal,"Invalid Context Nesting");}
+		/** Delete the main context, overridable per derived class.
+		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
+		 */
+		virtual	void	DeleteMainContext()
+		{
+			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
+		}
+		/** Delete the main context, overridable per derived class.
+		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
+		 */
+		virtual	void	DeleteFrameContext()
+		{
+			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
+		}
+		/** Delete the main context, overridable per derived class.
+		 * \warning If caled at this level it is an error, as only the appropriate context can delete itself.
+		 */
+		virtual	void	DeleteWorldContext()
+		{
+			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
+		}
+		/** Delete the main context, overridable per derived class.
+		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
+		 */
+		virtual	void	DeleteAttributeContext()
+		{
+			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
+		}
+		/** Delete the main context, overridable per derived class.
+		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
+		 */
+		virtual	void	DeleteTransformContext()
+		{
+			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
+		}
+		/** Delete the main context, overridable per derived class.
+		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
+		 */
+		virtual	void	DeleteSolidContext()
+		{
+			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
+		}
+		/** Delete the main context, overridable per derived class.
+		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
+		 */
+		virtual	void	DeleteObjectContext()
+		{
+			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
+		}
+		/** Delete the main context, overridable per derived class.
+		 * \warning If called at this level it is an error, as only the appropriate context can delete itself.
+		 */
+		virtual	void	DeleteMotionContext()
+		{
+			CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
+		}
 
-	virtual				CqOptions&		optCurrent()=0;
-						/** Get a read only pointer to the current attributes.
-						 * \return a pointer to the current attributes.
-						 */
-	virtual	const	CqAttributes*	pattrCurrent() const {return(m_pattrCurrent);}
-						/** Get a pointer to the current attributes suitable for writing.
-						 * \return an attribute pointer.
-						 */
-	virtual			CqAttributes*	pattrWriteCurrent()	{
-															m_pattrCurrent=m_pattrCurrent->Write();
-															return(m_pattrCurrent);
-														}
-						/** Get a read only pointer to the current transform.
-						 * \return a pointer to the current transform.
-						 */
-	virtual	const	CqTransform*	ptransCurrent()	const {return(m_ptransCurrent);}
-						/** Get a pointer to the current transform suitable for writing.
-						 * \return a transform pointer.
-						 */
-	virtual			CqTransform*	ptransWriteCurrent()	{
-															m_ptransCurrent=m_ptransCurrent->Write();
-															return(m_ptransCurrent);
-														}
-						/** Get the current time, used only within Motion blocks, all other contexts return 0.
-						 * \return the current frame time as a float.
-						 */
-	virtual			TqFloat			Time() const		{return(0.0f);}
-						/// Advance the current frame time to the next specified time.
-	virtual			void			AdvanceTime()		{}
-						/** Is this a motion block, should be overridden per derived class.
-						 * \return boolean indicating whether this is a motion block.
-						 */
-	virtual			TqBool		fMotionBlock() const{return(TqFalse);}
+		virtual	CqOptions&	optCurrent() = 0;
+		/** Get a read only pointer to the current attributes.
+		 * \return a pointer to the current attributes.
+		 */
+		virtual	const	CqAttributes*	pattrCurrent() const
+		{
+			return ( m_pattrCurrent );
+		}
+		/** Get a pointer to the current attributes suitable for writing.
+		 * \return an attribute pointer.
+		 */
+		virtual	CqAttributes*	pattrWriteCurrent()
+		{
+			m_pattrCurrent = m_pattrCurrent->Write();
+			return ( m_pattrCurrent );
+		}
+		/** Get a read only pointer to the current transform.
+		 * \return a pointer to the current transform.
+		 */
+		virtual	const	CqTransform*	ptransCurrent() const
+		{
+			return ( m_ptransCurrent );
+		}
+		/** Get a pointer to the current transform suitable for writing.
+		 * \return a transform pointer.
+		 */
+		virtual	CqTransform*	ptransWriteCurrent()
+		{
+			m_ptransCurrent = m_ptransCurrent->Write();
+			return ( m_ptransCurrent );
+		}
+		/** Get the current time, used only within Motion blocks, all other contexts return 0.
+		 * \return the current frame time as a float.
+		 */
+		virtual	TqFloat	Time() const
+		{
+			return ( 0.0f );
+		}
+		/// Advance the current frame time to the next specified time.
+		virtual	void	AdvanceTime()
+		{}
+		/** Is this a motion block, should be overridden per derived class.
+		 * \return boolean indicating whether this is a motion block.
+		 */
+		virtual	TqBool	fMotionBlock() const
+		{
+			return ( TqFalse );
+		}
 
-						/** Get a pointer to the previuos context.
-						 * \return a context pointer.
-						 */
-						CqContext*	pconParent()		{return(m_pconParent);}
-						/** Get a reference to the current transformation matrix, the result of combining all transformations up to this point.
-						 * \return a matrix reference.
-						 */
-				const	CqMatrix&	matCurrent(TqFloat time=0.0f) const	{return(ptransCurrent()->matObjectToWorld(time));}
+		/** Get a pointer to the previuos context.
+		 * \return a context pointer.
+		 */
+		CqContext*	pconParent()
+		{
+			return ( m_pconParent );
+		}
+		/** Get a reference to the current transformation matrix, the result of combining all transformations up to this point.
+		 * \return a matrix reference.
+		 */
+		const	CqMatrix&	matCurrent( TqFloat time = 0.0f ) const
+		{
+			return ( ptransCurrent() ->matObjectToWorld( time ) );
+		}
 
-	virtual		void	AddContextLightSource(CqLightsource* pLS)	
-														{
-															if(pconParent())
-																pconParent()->AddContextLightSource(pLS);
-														}
+		virtual	void	AddContextLightSource( CqLightsource* pLS )
+		{
+			if ( pconParent() )
+				pconParent() ->AddContextLightSource( pLS );
+		}
 
-	virtual		TqBool	isSolid()						{return((NULL!=pconParent())?pconParent()->isSolid():TqFalse);}
-						/** Get a pointer to the CSG tree node related to this context.
-						 * \return an options reference.
-						 */
-	virtual		CqCSGTreeNode*	pCSGNode()				{return((NULL!=pconParent())?pconParent()->pCSGNode():NULL);}
+		virtual	TqBool	isSolid()
+		{
+			return ( ( NULL != pconParent() ) ? pconParent() ->isSolid() : TqFalse );
+		}
+		/** Get a pointer to the CSG tree node related to this context.
+		 * \return an options reference.
+		 */
+		virtual	CqCSGTreeNode*	pCSGNode()
+		{
+			return ( ( NULL != pconParent() ) ? pconParent() ->pCSGNode() : NULL );
+		}
 
 	public:
-	static	CqList<CqCSGTreeNode>	m_lCSGTrees;
+		static	CqList<CqCSGTreeNode>	m_lCSGTrees;
 	public:
-			CqAttributes* m_pattrCurrent;		///< The current attributes.
-			CqTransform*  m_ptransCurrent;		///< The current transformation.
+		CqAttributes* m_pattrCurrent;		///< The current attributes.
+		CqTransform* m_ptransCurrent;		///< The current transformation.
 	private:
-			CqContext*	m_pconParent;			///< The previous context.
-};
+		CqContext*	m_pconParent;			///< The previous context.
+}
+;
 
 
 //----------------------------------------------------------------------
@@ -173,27 +226,37 @@ class CqContext
 class CqMainContext : public CqContext
 {
 	public:
-						CqMainContext(CqContext* pconParent=0);
-	virtual				~CqMainContext();
+		CqMainContext( CqContext* pconParent = 0 );
+		virtual	~CqMainContext();
 
-						/** Create a main context.
-						 * \warning It is an error to call this within a main context block.
-						 */
-	virtual	CqContext*	CreateMainContext()	{return(0);}		// Error
+		/** Create a main context.
+		 * \warning It is an error to call this within a main context block.
+		 */
+		virtual	CqContext*	CreateMainContext()
+		{
+			return ( 0 );
+		}		// Error
 
-						/** Delete the main context.
-						 * \attention This is the only valid context deletion from within this block.
-						 */
-	virtual	void		DeleteMainContext()	{delete(this);}
+		/** Delete the main context.
+		 * \attention This is the only valid context deletion from within this block.
+		 */
+		virtual	void	DeleteMainContext()
+		{
+			delete( this );
+		}
 
-						/** Get a reference to the currently stored options.
-						 * \return an options reference.
-						 */
-	virtual			CqOptions&		optCurrent()		{return(m_optCurrent);}
- 
+		/** Get a reference to the currently stored options.
+		 * \return an options reference.
+		 */
+		virtual	CqOptions&	optCurrent()
+		{
+			return ( m_optCurrent );
+		}
+
 	private:
-		CqOptions		m_optCurrent;	///< Current graphics environment options.
-};
+		CqOptions	m_optCurrent;	///< Current graphics environment options.
+}
+;
 
 
 //----------------------------------------------------------------------
@@ -203,35 +266,51 @@ class CqMainContext : public CqContext
 class CqFrameContext : public CqContext
 {
 	public:
-						CqFrameContext(CqContext* pconParent=0);
-	virtual				~CqFrameContext();
+		CqFrameContext( CqContext* pconParent = 0 );
+		virtual	~CqFrameContext();
 
-						/** Create a main context.
-						 * \warning It is an error to call this within a frame context.
-						 */
-	virtual	CqContext*	CreateMainContext()	 {return(0);}	// Error
-						/** Create a frame context.
-						 * \warning It is an error to call this within a frame context.
-						 */
-	virtual	CqContext*	CreateFrameContext() {return(0);}	// Error
-						/** Create a solid context.
-						 * \warning It is an error to call this within a frame context.
-						 */
-	virtual	CqContext*	CreateSolidContext(CqString& type) {return(0);}	// Error
+		/** Create a main context.
+		 * \warning It is an error to call this within a frame context.
+		 */
+		virtual	CqContext*	CreateMainContext()
+		{
+			return ( 0 );
+		}	// Error
+		/** Create a frame context.
+		 * \warning It is an error to call this within a frame context.
+		 */
+		virtual	CqContext*	CreateFrameContext()
+		{
+			return ( 0 );
+		}	// Error
+		/** Create a solid context.
+		 * \warning It is an error to call this within a frame context.
+		 */
+		virtual	CqContext*	CreateSolidContext( CqString& type )
+		{
+			return ( 0 );
+		}	// Error
 
-						/** Delete the frame context.
-						 * \attention This is the only valid context deletion from within this block.
-						 */
-	virtual	void		DeleteFrameContext()	{delete(this);}
+		/** Delete the frame context.
+		 * \attention This is the only valid context deletion from within this block.
+		 */
+		virtual	void	DeleteFrameContext()
+		{
+			delete( this );
+		}
 
-						/** Get a reference to the currently stored options.
-						 * \return an options reference.
-						 */
-	virtual			CqOptions&		optCurrent()		{return(m_optCurrent);}
- 
+		/** Get a reference to the currently stored options.
+		 * \return an options reference.
+		 */
+		virtual	CqOptions&	optCurrent()
+		{
+			return ( m_optCurrent );
+		}
+
 	private:
-		CqOptions		m_optCurrent;	///< Current graphics environment components
-};
+		CqOptions	m_optCurrent;	///< Current graphics environment components
+}
+;
 
 
 //----------------------------------------------------------------------
@@ -241,36 +320,51 @@ class CqFrameContext : public CqContext
 class CqWorldContext : public CqContext
 {
 	public:
-						CqWorldContext(CqContext* pconParent=0);
-	virtual				~CqWorldContext();
+		CqWorldContext( CqContext* pconParent = 0 );
+		virtual	~CqWorldContext();
 
-						/** Create a main context.
-						 * \warning It is an error to call this within a world context.
-						 */
-	virtual	CqContext*	CreateMainContext()	 {return(0);}	// Error
-						/** Create a frame context.
-						 * \warning It is an error to call this within a world context.
-						 */
-	virtual	CqContext*	CreateFrameContext() {return(0);}	// Error
-						/** Create a world context.
-						 * \warning It is an error to call this within a world context.
-						 */
-	virtual	CqContext*	CreateWorldContext() {return(0);}	// Error
+		/** Create a main context.
+		 * \warning It is an error to call this within a world context.
+		 */
+		virtual	CqContext*	CreateMainContext()
+		{
+			return ( 0 );
+		}	// Error
+		/** Create a frame context.
+		 * \warning It is an error to call this within a world context.
+		 */
+		virtual	CqContext*	CreateFrameContext()
+		{
+			return ( 0 );
+		}	// Error
+		/** Create a world context.
+		 * \warning It is an error to call this within a world context.
+		 */
+		virtual	CqContext*	CreateWorldContext()
+		{
+			return ( 0 );
+		}	// Error
 
-						/** Delete the world context.
-						 * \attention This is the only valid context deletion from within this block.
-						 */
-	virtual	void		DeleteWorldContext()	{delete(this);}
+		/** Delete the world context.
+		 * \attention This is the only valid context deletion from within this block.
+		 */
+		virtual	void	DeleteWorldContext()
+		{
+			delete( this );
+		}
 
-						/** Get a reference to the options at the parent context, as world context doesn't store options.
-						 * \return an options reference.
-						 */
-	virtual			CqOptions&		optCurrent()		{return(pconParent()->optCurrent());}
+		/** Get a reference to the options at the parent context, as world context doesn't store options.
+		 * \return an options reference.
+		 */
+		virtual	CqOptions&	optCurrent()
+		{
+			return ( pconParent() ->optCurrent() );
+		}
 
-	virtual		void	AddContextLightSource(CqLightsource* pLS)
-														{
-															m_apWorldLights.push_back(pLS);
-														}
+		virtual	void	AddContextLightSource( CqLightsource* pLS )
+		{
+			m_apWorldLights.push_back( pLS );
+		}
 
 	private:
 		std::vector<CqLightsource*>	m_apWorldLights;
@@ -284,32 +378,47 @@ class CqWorldContext : public CqContext
 class CqAttributeContext : public CqContext
 {
 	public:
-						CqAttributeContext(CqContext* pconParent=0);
-	virtual				~CqAttributeContext();
+		CqAttributeContext( CqContext* pconParent = 0 );
+		virtual	~CqAttributeContext();
 
-						/** Create a main context.
-						 * \warning It is an error to call this within a attribute context.
-						 */
-	virtual	CqContext*	CreateMainContext()	 {return(0);}	// Error
-						/** Create a frame context.
-						 * \warning It is an error to call this within a attribute context.
-						 */
-	virtual	CqContext*	CreateFrameContext() {return(0);}	// Error
-						/** Create a world context.
-						 * \warning It is an error to call this within a attribute context.
-						 */
-	virtual	CqContext*	CreateWorldContext() {return(0);}	// Error
+		/** Create a main context.
+		 * \warning It is an error to call this within a attribute context.
+		 */
+		virtual	CqContext*	CreateMainContext()
+		{
+			return ( 0 );
+		}	// Error
+		/** Create a frame context.
+		 * \warning It is an error to call this within a attribute context.
+		 */
+		virtual	CqContext*	CreateFrameContext()
+		{
+			return ( 0 );
+		}	// Error
+		/** Create a world context.
+		 * \warning It is an error to call this within a attribute context.
+		 */
+		virtual	CqContext*	CreateWorldContext()
+		{
+			return ( 0 );
+		}	// Error
 
-						/** Delete the attribute context.
-						 * \attention This is the only valid context deletion from within this block.
-						 */
-	virtual	void		DeleteAttributeContext()	{delete(this);}
+		/** Delete the attribute context.
+		 * \attention This is the only valid context deletion from within this block.
+		 */
+		virtual	void	DeleteAttributeContext()
+		{
+			delete( this );
+		}
 
-						/** Get a reference to the options at the parent context, as attribute context doesn't store options.
-						 * \return an options reference.
-						 */
-	virtual			CqOptions&		optCurrent()		{return(pconParent()->optCurrent());}
- 
+		/** Get a reference to the options at the parent context, as attribute context doesn't store options.
+		 * \return an options reference.
+		 */
+		virtual	CqOptions&	optCurrent()
+		{
+			return ( pconParent() ->optCurrent() );
+		}
+
 	private:
 };
 
@@ -321,32 +430,47 @@ class CqAttributeContext : public CqContext
 class CqTransformContext : public CqContext
 {
 	public:
-						CqTransformContext(CqContext* pconParent=0);
-	virtual				~CqTransformContext();
+		CqTransformContext( CqContext* pconParent = 0 );
+		virtual	~CqTransformContext();
 
-						/** Create a main context.
-						 * \warning It is an error to call this within a transform context.
-						 */
-	virtual	CqContext*	CreateMainContext()	 {return(0);}	// Error
-						/** Create a frame context.
-						 * \warning It is an error to call this within a transform context.
-						 */
-	virtual	CqContext*	CreateFrameContext() {return(0);}	// Error
-						/** Create a world context.
-						 * \warning It is an error to call this within a transform context.
-						 */
-	virtual	CqContext*	CreateWorldContext() {return(0);}	// Error
+		/** Create a main context.
+		 * \warning It is an error to call this within a transform context.
+		 */
+		virtual	CqContext*	CreateMainContext()
+		{
+			return ( 0 );
+		}	// Error
+		/** Create a frame context.
+		 * \warning It is an error to call this within a transform context.
+		 */
+		virtual	CqContext*	CreateFrameContext()
+		{
+			return ( 0 );
+		}	// Error
+		/** Create a world context.
+		 * \warning It is an error to call this within a transform context.
+		 */
+		virtual	CqContext*	CreateWorldContext()
+		{
+			return ( 0 );
+		}	// Error
 
-						/** Delete the transform context.
-						 * \attention This is the only valid context deletion from within this block.
-						 */
-	virtual	void		DeleteTransformContext()	{delete(this);}
+		/** Delete the transform context.
+		 * \attention This is the only valid context deletion from within this block.
+		 */
+		virtual	void	DeleteTransformContext()
+		{
+			delete( this );
+		}
 
-						/** Get a reference to the options at the parent context, as transform context doesn't store options.
-						 * \return an options reference.
-						 */
-	virtual			CqOptions&		optCurrent()		{return(pconParent()->optCurrent());}
- 
+		/** Get a reference to the options at the parent context, as transform context doesn't store options.
+		 * \return an options reference.
+		 */
+		virtual	CqOptions&	optCurrent()
+		{
+			return ( pconParent() ->optCurrent() );
+		}
+
 	private:
 };
 
@@ -358,39 +482,61 @@ class CqTransformContext : public CqContext
 class CqSolidContext : public CqContext
 {
 	public:
-						CqSolidContext(CqString& type, CqContext* pconParent=0);
-	virtual				~CqSolidContext();
+		CqSolidContext( CqString& type, CqContext* pconParent = 0 );
+		virtual	~CqSolidContext();
 
-						/** Create a main context.
-						 * \warning It is an error to call this within a solid context.
-						 */
-	virtual	CqContext*	CreateMainContext()	 {return(0);}	// Error
-						/** Create a frame context.
-						 * \warning It is an error to call this within a solid context.
-						 */
-	virtual	CqContext*	CreateFrameContext() {return(0);}	// Error
-						/** Create a world context.
-						 * \warning It is an error to call this within a solid context.
-						 */
-	virtual	CqContext*	CreateWorldContext() {return(0);}	// Error
+		/** Create a main context.
+		 * \warning It is an error to call this within a solid context.
+		 */
+		virtual	CqContext*	CreateMainContext()
+		{
+			return ( 0 );
+		}	// Error
+		/** Create a frame context.
+		 * \warning It is an error to call this within a solid context.
+		 */
+		virtual	CqContext*	CreateFrameContext()
+		{
+			return ( 0 );
+		}	// Error
+		/** Create a world context.
+		 * \warning It is an error to call this within a solid context.
+		 */
+		virtual	CqContext*	CreateWorldContext()
+		{
+			return ( 0 );
+		}	// Error
 
-						/** Delete the solid context.
-						 * \attention This is the only valid context deletion from within this block.
-						 */
-	virtual	void		DeleteSolidContext()	{delete(this);}
+		/** Delete the solid context.
+		 * \attention This is the only valid context deletion from within this block.
+		 */
+		virtual	void	DeleteSolidContext()
+		{
+			delete( this );
+		}
 
-						/** Get a reference to the options at the parent context, as solid context doesn't store options.
-						 * \return an options reference.
-						 */
-	virtual			CqOptions&		optCurrent()		{return(pconParent()->optCurrent());}
- 
-			
-	virtual		TqBool	isSolid()						{return(TqTrue);}
-	virtual		CqCSGTreeNode*	pCSGNode()				{return(m_pCSGNode);}
+		/** Get a reference to the options at the parent context, as solid context doesn't store options.
+		 * \return an options reference.
+		 */
+		virtual	CqOptions&	optCurrent()
+		{
+			return ( pconParent() ->optCurrent() );
+		}
+
+
+		virtual	TqBool	isSolid()
+		{
+			return ( TqTrue );
+		}
+		virtual	CqCSGTreeNode*	pCSGNode()
+		{
+			return ( m_pCSGNode );
+		}
 
 	private:
-			CqCSGTreeNode*	m_pCSGNode;			///< Pointer to the node in the CSG tree for this level in the solid definition.
-};
+		CqCSGTreeNode*	m_pCSGNode;			///< Pointer to the node in the CSG tree for this level in the solid definition.
+}
+;
 
 
 //----------------------------------------------------------------------
@@ -400,40 +546,61 @@ class CqSolidContext : public CqContext
 class CqObjectContext : public CqContext
 {
 	public:
-						CqObjectContext(CqContext* pconParent=0);
-	virtual				~CqObjectContext();
+		CqObjectContext( CqContext* pconParent = 0 );
+		virtual	~CqObjectContext();
 
-						/** Create a main context.
-						 * \warning It is an error to call this within an object context.
-						 */
-	virtual	CqContext*	CreateMainContext()	{return(0);}		// Error
-						/** Create a frame context.
-						 * \warning It is an error to call this within an object context.
-						 */
-	virtual	CqContext*	CreateFrameContext() {return(0);}		// Error
-						/** Create a world context.
-						 * \warning It is an error to call this within an object context.
-						 */
-	virtual	CqContext*	CreateWorldContext() {return(0);}		// Error
+		/** Create a main context.
+		 * \warning It is an error to call this within an object context.
+		 */
+		virtual	CqContext*	CreateMainContext()
+		{
+			return ( 0 );
+		}		// Error
+		/** Create a frame context.
+		 * \warning It is an error to call this within an object context.
+		 */
+		virtual	CqContext*	CreateFrameContext()
+		{
+			return ( 0 );
+		}		// Error
+		/** Create a world context.
+		 * \warning It is an error to call this within an object context.
+		 */
+		virtual	CqContext*	CreateWorldContext()
+		{
+			return ( 0 );
+		}		// Error
 
-						/** Delete the object context.
-						 * \attention This is the only valid context deletion from within this block.
-						 */
-	virtual	void		DeleteObjectContext()	{delete(this);}
+		/** Delete the object context.
+		 * \attention This is the only valid context deletion from within this block.
+		 */
+		virtual	void	DeleteObjectContext()
+		{
+			delete( this );
+		}
 
-						/** Get a reference to the options at the parent context, as object context doesn't store options.
-						 * \return an options reference.
-						 */
-	virtual			CqOptions&		optCurrent()		{return(pconParent()->optCurrent());}
-						/** Get a pointer suitable for writing to the attributes at the parent context, as object context doesn't store attributes.
-						 * \return an attributes pointer.
-						 */
-	virtual	const	CqAttributes*	pattrCurrent()		{return(pconParent()->pattrCurrent());}
-						/** Get a pointer to the attributes at the parent context, as object context doesn't store attributes.
-						 * \return an attributes pointer.
-						 */
-	virtual			CqAttributes*	pattrWriteCurrent()	{assert(TqFalse); return(0);}	// Illegal to change attributes here.
- 
+		/** Get a reference to the options at the parent context, as object context doesn't store options.
+		 * \return an options reference.
+		 */
+		virtual	CqOptions&	optCurrent()
+		{
+			return ( pconParent() ->optCurrent() );
+		}
+		/** Get a pointer suitable for writing to the attributes at the parent context, as object context doesn't store attributes.
+		 * \return an attributes pointer.
+		 */
+		virtual	const	CqAttributes*	pattrCurrent()
+		{
+			return ( pconParent() ->pattrCurrent() );
+		}
+		/** Get a pointer to the attributes at the parent context, as object context doesn't store attributes.
+		 * \return an attributes pointer.
+		 */
+		virtual	CqAttributes*	pattrWriteCurrent()
+		{
+			assert( TqFalse ); return ( 0 );
+		}	// Illegal to change attributes here.
+
 	private:
 };
 
@@ -445,72 +612,110 @@ class CqObjectContext : public CqContext
 class CqMotionContext : public CqContext
 {
 	public:
-						CqMotionContext(TqInt N, TqFloat times[], CqContext* pconParent=0);
-	virtual				~CqMotionContext();
+		CqMotionContext( TqInt N, TqFloat times[], CqContext* pconParent = 0 );
+		virtual	~CqMotionContext();
 
-						/** Create a main context.
-						 * \warning It is an error to call this within a motion context.
-						 */
-	virtual	CqContext*	CreateMainContext()	{return(0);}		// Error
-						/** Create a frame context.
-						 * \warning It is an error to call this within a motion context.
-						 */
-	virtual	CqContext*	CreateFrameContext() {return(0);}		// Error
-						/** Create a world context.
-						 * \warning It is an error to call this within a motion context.
-						 */
-	virtual	CqContext*	CreateWorldContext() {return(0);}		// Error
-						/** Create a attribute context.
-						 * \warning It is an error to call this within a motion context.
-						 */
-	virtual	CqContext*	CreateAttributeContext() {return(0);}	// Error
-						/** Create a transform context.
-						 * \warning It is an error to call this within a motion context.
-						 */
-	virtual	CqContext*	CreateTransformContext() {return(0);}	// Error
-						/** Create a solid context.
-						 * \warning It is an error to call this within a motion context.
-						 */
-	virtual	CqContext*	CreateSolidContext(CqString& type) {return(0);}		// Error
-						/** Create a object context.
-						 * \warning It is an error to call this within a motion context.
-						 */
-	virtual	CqContext*	CreateObjectContext() {return(0);}		// Error
-						/** Create a motion context.
-						 * \warning It is an error to call this within a motion context.
-						 */
-	virtual	CqContext*	CreateMotionContext(TqInt N, TqFloat times[]) {return(0);}		// Error
+		/** Create a main context.
+		 * \warning It is an error to call this within a motion context.
+		 */
+		virtual	CqContext*	CreateMainContext()
+		{
+			return ( 0 );
+		}		// Error
+		/** Create a frame context.
+		 * \warning It is an error to call this within a motion context.
+		 */
+		virtual	CqContext*	CreateFrameContext()
+		{
+			return ( 0 );
+		}		// Error
+		/** Create a world context.
+		 * \warning It is an error to call this within a motion context.
+		 */
+		virtual	CqContext*	CreateWorldContext()
+		{
+			return ( 0 );
+		}		// Error
+		/** Create a attribute context.
+		 * \warning It is an error to call this within a motion context.
+		 */
+		virtual	CqContext*	CreateAttributeContext()
+		{
+			return ( 0 );
+		}	// Error
+		/** Create a transform context.
+		 * \warning It is an error to call this within a motion context.
+		 */
+		virtual	CqContext*	CreateTransformContext()
+		{
+			return ( 0 );
+		}	// Error
+		/** Create a solid context.
+		 * \warning It is an error to call this within a motion context.
+		 */
+		virtual	CqContext*	CreateSolidContext( CqString& type )
+		{
+			return ( 0 );
+		}		// Error
+		/** Create a object context.
+		 * \warning It is an error to call this within a motion context.
+		 */
+		virtual	CqContext*	CreateObjectContext()
+		{
+			return ( 0 );
+		}		// Error
+		/** Create a motion context.
+		 * \warning It is an error to call this within a motion context.
+		 */
+		virtual	CqContext*	CreateMotionContext( TqInt N, TqFloat times[] )
+		{
+			return ( 0 );
+		}		// Error
 
-						/** Delete the object context.
-						 * \attention This is the only valid context deletion from within this block.
-						 */
-	virtual	void		DeleteMotionContext()	{delete(this);}
+		/** Delete the object context.
+		 * \attention This is the only valid context deletion from within this block.
+		 */
+		virtual	void	DeleteMotionContext()
+		{
+			delete( this );
+		}
 
-						/** Get a reference to the options at the parent context, as motion context doesn't store options.
-						 * \return an options reference.
-						 */
-	virtual			CqOptions&		optCurrent()		{return(pconParent()->optCurrent());}
+		/** Get a reference to the options at the parent context, as motion context doesn't store options.
+		 * \return an options reference.
+		 */
+		virtual	CqOptions&	optCurrent()
+		{
+			return ( pconParent() ->optCurrent() );
+		}
 
-						/** Get the current time, as specified at initialisation of the block.
-						 * \return the current time as a float, or if beyond the last time specified, 0.
-						 */
-	virtual			TqFloat			Time() const		{
-															if(m_iTime<m_aTimes.size())
-																return(m_aTimes[m_iTime]);
-															else
-																return(0.0f);
-														}
-						/// Advance the current time to the next specified time.
-	virtual			void			AdvanceTime()		{m_iTime++;}
-						/** Indicate that this is a motion block.
-						 * \return boolean indicating whether this is a motion block.
-						 */
-	virtual			TqBool		fMotionBlock() const{return(TqTrue);}
- 
+		/** Get the current time, as specified at initialisation of the block.
+		 * \return the current time as a float, or if beyond the last time specified, 0.
+		 */
+		virtual	TqFloat	Time() const
+		{
+			if ( m_iTime < m_aTimes.size() )
+				return ( m_aTimes[ m_iTime ] );
+			else
+				return ( 0.0f );
+		}
+		/// Advance the current time to the next specified time.
+		virtual	void	AdvanceTime()
+		{
+			m_iTime++;
+		}
+		/** Indicate that this is a motion block.
+		 * \return boolean indicating whether this is a motion block.
+		 */
+		virtual	TqBool	fMotionBlock() const
+		{
+			return ( TqTrue );
+		}
+
 	private:
-			TqUint					m_iTime;		///< The index of the current frame time.
-			std::vector<TqFloat>	m_aTimes;		///< An array of specified frame times.
-};
+		TqUint	m_iTime;		///< The index of the current frame time.
+		std::vector<TqFloat>	m_aTimes;		///< An array of specified frame times.
+}
+;
 
 
 //***
@@ -524,8 +729,8 @@ class CqMotionContext : public CqContext
  */
 
 inline CqContext* CqContext::CreateMainContext()
-{ 
-	return(new CqMainContext(this));
+{
+	return ( new CqMainContext( this ) );
 }
 
 
@@ -535,8 +740,8 @@ inline CqContext* CqContext::CreateMainContext()
  */
 
 inline CqContext* CqContext::CreateFrameContext()
-{ 
-	return(new CqFrameContext(this));
+{
+	return ( new CqFrameContext( this ) );
 }
 
 
@@ -546,8 +751,8 @@ inline CqContext* CqContext::CreateFrameContext()
  */
 
 inline CqContext* CqContext::CreateWorldContext()
-{ 
-	return(new CqWorldContext(this));
+{
+	return ( new CqWorldContext( this ) );
 }
 
 
@@ -557,8 +762,8 @@ inline CqContext* CqContext::CreateWorldContext()
  */
 
 inline CqContext* CqContext::CreateAttributeContext()
-{ 
-	return(new CqAttributeContext(this));
+{
+	return ( new CqAttributeContext( this ) );
 }
 
 
@@ -568,8 +773,8 @@ inline CqContext* CqContext::CreateAttributeContext()
  */
 
 inline CqContext* CqContext::CreateTransformContext()
-{ 
-	return(new CqTransformContext(this));
+{
+	return ( new CqTransformContext( this ) );
 }
 
 
@@ -578,9 +783,9 @@ inline CqContext* CqContext::CreateTransformContext()
  * \return a pointer to the new context.
  */
 
-inline CqContext* CqContext::CreateSolidContext(CqString& type)
-{ 
-	return(new CqSolidContext(type, this));
+inline CqContext* CqContext::CreateSolidContext( CqString& type )
+{
+	return ( new CqSolidContext( type, this ) );
 }
 
 
@@ -590,8 +795,8 @@ inline CqContext* CqContext::CreateSolidContext(CqString& type)
  */
 
 inline CqContext* CqContext::CreateObjectContext()
-{ 
-	return(new CqObjectContext(this));
+{
+	return ( new CqObjectContext( this ) );
 }
 
 
@@ -600,13 +805,13 @@ inline CqContext* CqContext::CreateObjectContext()
  * \return a pointer to the new context.
  */
 
-inline CqContext* CqContext::CreateMotionContext(TqInt N, TqFloat times[])
-{ 
-	return(new CqMotionContext(N,times, this));
+inline CqContext* CqContext::CreateMotionContext( TqInt N, TqFloat times[] )
+{
+	return ( new CqMotionContext( N, times, this ) );
 }
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )
 
 #endif

@@ -17,7 +17,7 @@
 #include	"sstring.h"
 #include	"ivardef.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 
 struct IqParseNode;
@@ -28,71 +28,103 @@ struct IqParseNode;
 /// Class storing information about variables.
 
 class CqParseNode;
-class CqVarDef :  public IqVarDef
+class CqVarDef : public IqVarDef
 {
 	public:
-					CqVarDef() :
-								m_Type(Type_Nil),
-								m_fExtern(TqFalse),
-								m_strName(""),
-								m_pDefValue(0),
-								m_UseCount(0),
-								m_ArrayLength(0)
-									{}
-					CqVarDef(const CqVarDef& from);
-					CqVarDef(TqInt Type, const char* strName, TqInt Length=0) :
-								m_Type(Type),
-								m_fExtern(TqFalse),
-								m_strName(strName),
-								m_pDefValue(0),
-								m_UseCount(0),
-								m_ArrayLength(Length)
-									{}
-					virtual ~CqVarDef();
+		CqVarDef() :
+				m_Type( Type_Nil ),
+				m_fExtern( TqFalse ),
+				m_strName( "" ),
+				m_pDefValue( 0 ),
+				m_UseCount( 0 ),
+				m_ArrayLength( 0 )
+		{}
+		CqVarDef( const CqVarDef& from );
+		CqVarDef( TqInt Type, const char* strName, TqInt Length = 0 ) :
+				m_Type( Type ),
+				m_fExtern( TqFalse ),
+				m_strName( strName ),
+				m_pDefValue( 0 ),
+				m_UseCount( 0 ),
+				m_ArrayLength( Length )
+		{}
+		virtual ~CqVarDef();
 
-					// Overridden from IqVarDef
-	virtual const IqParseNode*	pInitialiser() const;
-	virtual	TqInt				Type() const	{return(m_Type);}
-	virtual	const char*			strName() const	{return(m_strName.c_str());}
-	virtual	void				IncUseCount()	{m_UseCount++;}
-	virtual	TqInt				UseCount() const{return(m_UseCount);}
-	virtual	TqInt				ArrayLength() const{return(m_ArrayLength);}
-	virtual	TqBool				fExtern() const	{return(m_fExtern);}
-	virtual	SqVarRef			vrExtern() const{return(m_vrExtern);}
-	virtual	void				SetParam(TqBool fParam=TqTrue) {m_Type=(m_Type&~Type_Param)|(fParam?Type_Param:0);}
-	virtual	void				SetDefaultStorage(TqInt Storage)		
-									{
-										// If no storage has been explicitly specified, default to the
-										// passed value.
-										if((m_Type&Storage_Mask)==0)
-											m_Type=(m_Type|(Storage&Storage_Mask));
-									}
+		// Overridden from IqVarDef
+		virtual const IqParseNode*	pInitialiser() const;
+		virtual	TqInt	Type() const
+		{
+			return ( m_Type );
+		}
+		virtual	const char*	strName() const
+		{
+			return ( m_strName.c_str() );
+		}
+		virtual	void	IncUseCount()
+		{
+			m_UseCount++;
+		}
+		virtual	TqInt	UseCount() const
+		{
+			return ( m_UseCount );
+		}
+		virtual	TqInt	ArrayLength() const
+		{
+			return ( m_ArrayLength );
+		}
+		virtual	TqBool	fExtern() const
+		{
+			return ( m_fExtern );
+		}
+		virtual	SqVarRef	vrExtern() const
+		{
+			return ( m_vrExtern );
+		}
+		virtual	void	SetParam( TqBool fParam = TqTrue )
+		{
+			m_Type = ( m_Type & ~Type_Param ) | ( fParam ? Type_Param : 0 );
+		}
+		virtual	void	SetDefaultStorage( TqInt Storage )
+		{
+			// If no storage has been explicitly specified, default to the
+			// passed value.
+			if ( ( m_Type & Storage_Mask ) == 0 )
+				m_Type = ( m_Type | ( Storage & Storage_Mask ) );
+		}
 
 
-		CqVarDef&		operator=(const CqVarDef& from);
+		CqVarDef&	operator=( const CqVarDef& from );
 
-		void			SetType(const TqInt Type)		{m_Type=Type;}
-		CqParseNode*	pDefValue()	{return(m_pDefValue);}
-		void			SetpDefValue(CqParseNode* pDefValue)
-									{m_pDefValue=pDefValue;}
-		void			SetExtern(TqBool f, SqVarRef vrExtern)
-									{
-										m_fExtern=f;
-										m_vrExtern=vrExtern;
-									}
-	
-	static	TqBool		FindVariable(const char* strName, SqVarRef& Ref);
-	static	CqVarDef*	GetVariablePtr(const SqVarRef& Ref);
-	static	TqInt		AddVariable(CqVarDef& Def);
+		void	SetType( const TqInt Type )
+		{
+			m_Type = Type;
+		}
+		CqParseNode*	pDefValue()
+		{
+			return ( m_pDefValue );
+		}
+		void	SetpDefValue( CqParseNode* pDefValue )
+		{
+			m_pDefValue = pDefValue;
+		}
+		void	SetExtern( TqBool f, SqVarRef vrExtern )
+		{
+			m_fExtern = f;
+			m_vrExtern = vrExtern;
+		}
+
+		static	TqBool	FindVariable( const char* strName, SqVarRef& Ref );
+		static	CqVarDef*	GetVariablePtr( const SqVarRef& Ref );
+		static	TqInt	AddVariable( CqVarDef& Def );
 
 	protected:
-		TqInt			m_Type;
-		TqBool			m_fExtern;
-		SqVarRef		m_vrExtern;
-		CqString		m_strName;
+		TqInt	m_Type;
+		TqBool	m_fExtern;
+		SqVarRef	m_vrExtern;
+		CqString	m_strName;
 		CqParseNode*	m_pDefValue;
-		TqInt			m_UseCount;
-		TqInt			m_ArrayLength;
+		TqInt	m_UseCount;
+		TqInt	m_ArrayLength;
 
 };
 
@@ -101,6 +133,6 @@ extern CqVarDef	gStandardVars[];
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )
 
 #endif	// !VARDEF_H_INCLUDED

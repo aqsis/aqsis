@@ -7,7 +7,7 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-//  
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
@@ -25,18 +25,19 @@
 
 using namespace libri2rib;
 
-CqPLStore::CqPLStore (va_list args)
+CqPLStore::CqPLStore ( va_list args )
 {
-    RtToken t;
-    RtPointer p;
-    n=0;
-    t=va_arg(args,RtToken);
-    while (t!=RI_NULL) {
-	tk.push_back(t);
-	p=va_arg(args,RtPointer);
-	pr.push_back(p);
+	RtToken t;
+	RtPointer p;
+	n = 0;
+	t = va_arg( args, RtToken );
+	while ( t != RI_NULL )
+	{
+		tk.push_back( t );
+		p = va_arg( args, RtPointer );
+		pr.push_back( p );
 
-	n++;
-	t=va_arg(args,RtToken);
-    }
+		n++;
+		t = va_arg( args, RtToken );
+	}
 }

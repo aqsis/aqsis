@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -37,7 +37,7 @@
 #define		_qShareName	CORE
 #include	"share.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
 /** \enum EqErrorType
@@ -46,8 +46,8 @@ START_NAMESPACE(Aqsis)
 
 enum EqErrorType
 {
-	ErrorType_Basic,			///< Basic error message.
-	ErrorType_Attribute,		///< Error linked to an attribute state,
+    ErrorType_Basic,  			///< Basic error message.
+    ErrorType_Attribute,  		///< Error linked to an attribute state,
 };
 
 
@@ -58,20 +58,20 @@ enum EqErrorType
 
 enum EqErrorID
 {
-	ErrorID_MaxEyeSplits=1,				///< Max eyeplits exceeded
-	ErrorID_InvalidPixel,				///< Invalid pixel requested in image buffer.
-	ErrorID_InvalidShadowMap,			///< Shadow map not of supported format.
-	ErrorID_FileNotFound,				///< Generic file not found.
-	ErrorID_NoShadowName,				///< No shadow or lightource name supplied to use for shadowmap name.
-	ErrorID_DisplayDriver,				///< Error loading display driver.
-	ErrorID_System,						///< Generic system error.
-	ErrorID_UnknownSymbol,				///< Unknown synbol fuond parsing RIB file.
-	ErrorID_InvalidType,				///< Generic invalid type.
-	ErrorID_InvalidData,				///< Generic invalid data.
-	ErrorID_InvalidShader,				///< Shader not of correct type.
-	ErrorID_NonmanifoldSubdivision,		///< Geometry used in subdivision surface is non-manifold.
-	ErrorID_OcclusionMaxEyeSplits,		///< Geometry gets culled too many times       
-}; 
+    ErrorID_MaxEyeSplits = 1,  				///< Max eyeplits exceeded
+    ErrorID_InvalidPixel,  				///< Invalid pixel requested in image buffer.
+    ErrorID_InvalidShadowMap,  			///< Shadow map not of supported format.
+    ErrorID_FileNotFound,  				///< Generic file not found.
+    ErrorID_NoShadowName,  				///< No shadow or lightource name supplied to use for shadowmap name.
+    ErrorID_DisplayDriver,  				///< Error loading display driver.
+    ErrorID_System,  						///< Generic system error.
+    ErrorID_UnknownSymbol,  				///< Unknown synbol fuond parsing RIB file.
+    ErrorID_InvalidType,  				///< Generic invalid type.
+    ErrorID_InvalidData,  				///< Generic invalid data.
+    ErrorID_InvalidShader,  				///< Shader not of correct type.
+    ErrorID_NonmanifoldSubdivision,  		///< Geometry used in subdivision surface is non-manifold.
+    ErrorID_OcclusionMaxEyeSplits,  		///< Geometry gets culled too many times
+};
 
 
 //----------------------------------------------------------------------
@@ -81,8 +81,8 @@ enum EqErrorID
 
 enum EqWarningID
 {
-	WarningID_NoDisplacementBound=1,	///< No displacement bound specified on displaced surface.
-}; 
+    WarningID_NoDisplacementBound = 1,  	///< No displacement bound specified on displaced surface.
+};
 
 //----------------------------------------------------------------------
 /** \enum EqMessageType
@@ -90,12 +90,12 @@ enum EqWarningID
  */
 enum EqMessageType
 {
-	MessageType_Message=0,	///< Just an informational message.
+    MessageType_Message = 0,  	///< Just an informational message.
 
-	MessageType_Warning,	///< Non fatal warning.
-	MessageType_Error,		///< Fatal error.
+    MessageType_Warning,  	///< Non fatal warning.
+    MessageType_Error,  		///< Fatal error.
 
-	MessageType_Last
+    MessageType_Last
 };
 
 //----------------------------------------------------------------------
@@ -104,11 +104,11 @@ enum EqMessageType
  */
 enum EqSeverity
 {
-	Severity_Normal=0,			///< Normal error.
-	Importance_Normal=0,		///< Normal warning.
+    Severity_Normal = 0,  			///< Normal error.
+    Importance_Normal = 0,  		///< Normal warning.
 
-	Severity_Fatal=255,			///< Fatal error.
-	Importance_Imperative=255,	///< Important warning.
+    Severity_Fatal = 255,  			///< Fatal error.
+    Importance_Imperative = 255,  	///< Important warning.
 };
 
 
@@ -122,15 +122,17 @@ class CqBasicError;
 class _qShareC CqReportedErrors
 {
 	public:
-	_qShareM	CqReportedErrors()	{}
-	_qShareM	~CqReportedErrors();
+		_qShareM	CqReportedErrors()
+		{}
+		_qShareM	~CqReportedErrors();
 
-	_qShareM	void	SetReported(CqBasicError* pError);
-	_qShareM	TqBool	CheckReport(CqBasicError* pError);
-	_qShareM	void	ClearReported();
+		_qShareM	void	SetReported( CqBasicError* pError );
+		_qShareM	TqBool	CheckReport( CqBasicError* pError );
+		_qShareM	void	ClearReported();
 	private:
 		std::vector<CqBasicError*>	m_aReportedErrors;	///< Array of reported errors.
-};
+}
+;
 
 extern CqReportedErrors	gReportedErrors;	///< Global reported errors instance.
 
@@ -141,29 +143,39 @@ extern CqReportedErrors	gReportedErrors;	///< Global reported errors instance.
  */
 struct SqMessage
 {
-				SqMessage(TqInt code, TqInt severity, const char* strMessage)	:
-							m_strMessage(strMessage),
-							m_Code(code),
-							m_Severity(severity)
-					{}
+	SqMessage( TqInt code, TqInt severity, const char* strMessage ) :
+			m_strMessage( strMessage ),
+			m_Code( code ),
+			m_Severity( severity )
+	{}
 
-					/** Get a pointer to the message text
-					 * \return Contant CqStrign reference.
-					 */
-	const CqString& strMessage() const	{return(m_strMessage);}
-					/** Get the error/warning code.
-					 * \return Integer code.
-					 */
-	TqInt			Code() const		{return(m_Code);}
-					/** Get the error/warning severity.
-					 * \return Integer severity code.
-					 */
-	TqInt			Severity() const	{return(m_Severity);}
+	/** Get a pointer to the message text
+	 * \return Contant CqStrign reference.
+	 */
+	const CqString& strMessage() const
+	{
+		return ( m_strMessage );
+	}
+	/** Get the error/warning code.
+	 * \return Integer code.
+	 */
+	TqInt	Code() const
+	{
+		return ( m_Code );
+	}
+	/** Get the error/warning severity.
+	 * \return Integer severity code.
+	 */
+	TqInt	Severity() const
+	{
+		return ( m_Severity );
+	}
 
-	CqString		m_strMessage;		///< Message text.
-	TqInt			m_Code;				///< Message code, from EqErrorID or EqWarningID.
-	TqInt			m_Severity;			///< Message severity, from EqSeverity.
-};
+	CqString	m_strMessage;		///< Message text.
+	TqInt	m_Code;				///< Message code, from EqErrorID or EqWarningID.
+	TqInt	m_Severity;			///< Message severity, from EqSeverity.
+}
+;
 
 
 //----------------------------------------------------------------------
@@ -174,39 +186,44 @@ struct SqMessage
 class _qShareC CqBasicError
 {
 	public:
-					/** Constructor taking just a code.
-					 * \param code The error code from EqErrorID or EqWarningID.
-					 */
-	_qShareM		CqBasicError(TqInt code) : m_Code(code)
-							{}
-	_qShareM		CqBasicError(TqInt code, TqInt severity, const char* Message, TqBool OncePer=TqFalse);
-					/** Copy constructor.
-					 * \param From The error to copy.
-					 */
-	_qShareM		CqBasicError(CqBasicError* From)
-							{
-								m_Code=From->m_Code;
-							}
-					/** Get the error code.
-					 * \return Integer error code.
-					 */
-	_qShareM virtual	~CqBasicError()	{}
+		/** Constructor taking just a code.
+		 * \param code The error code from EqErrorID or EqWarningID.
+		 */
+		_qShareM	CqBasicError( TqInt code ) : m_Code( code )
+		{}
+		_qShareM	CqBasicError( TqInt code, TqInt severity, const char* Message, TqBool OncePer = TqFalse );
+		/** Copy constructor.
+		 * \param From The error to copy.
+		 */
+		_qShareM	CqBasicError( CqBasicError* From )
+		{
+			m_Code = From->m_Code;
+		}
+		/** Get the error code.
+		 * \return Integer error code.
+		 */
+		_qShareM virtual	~CqBasicError()
+		{}
 
-	_qShareM virtual	TqInt Code()	{return(m_Code);}
-					/** Check if the spcified error from the reported list matches sufficiently to not report it again.
-					 * \return Boolean match.
-					 */
-	_qShareM virtual	TqBool	CheckReport(CqBasicError* from)
-							{
-								if(from->m_Code==m_Code)
-									return(true);
-								else
-									return(false);
-							}
+		_qShareM virtual	TqInt Code()
+		{
+			return ( m_Code );
+		}
+		/** Check if the spcified error from the reported list matches sufficiently to not report it again.
+		 * \return Boolean match.
+		 */
+		_qShareM virtual	TqBool	CheckReport( CqBasicError* from )
+		{
+			if ( from->m_Code == m_Code )
+				return ( true );
+			else
+				return ( false );
+		}
 
 	protected:
-			TqInt		m_Code;		///< The error code from EqErrorID or EqWarningID.
-};
+		TqInt	m_Code;		///< The error code from EqErrorID or EqWarningID.
+}
+;
 
 
 //----------------------------------------------------------------------
@@ -217,42 +234,43 @@ class _qShareC CqBasicError
 class _qShareC CqAttributeError : public CqBasicError
 {
 	public:
-	_qShareM		CqAttributeError(TqInt code, TqInt severity, const char* Message, const CqAttributes* pAttributes, TqBool OncePer=TqFalse);
-					/** Copy constructor
-					 * \param From Error to copy.
-					 */
-	_qShareM		CqAttributeError(CqAttributeError& From) :
-							CqBasicError(From)
-							{
-								m_pAttributes=From.m_pAttributes;
-							}
-	_qShareM virtual	~CqAttributeError()	
-							{}
+		_qShareM	CqAttributeError( TqInt code, TqInt severity, const char* Message, const CqAttributes* pAttributes, TqBool OncePer = TqFalse );
+		/** Copy constructor
+		 * \param From Error to copy.
+		 */
+		_qShareM	CqAttributeError( CqAttributeError& From ) :
+				CqBasicError( From )
+		{
+			m_pAttributes = From.m_pAttributes;
+		}
+		_qShareM virtual	~CqAttributeError()
+		{}
 
-					/** Check if the spcified error from the reported list matches sufficiently to not report it again.
-					 * \return Boolean match.
-					 */
-	_qShareM virtual	TqBool	CheckReport(CqBasicError* From)
-							{
-								if(From->Code()==Code())
-								{
-									if(CqBasicError::CheckReport(From) && 
-									   static_cast<CqAttributeError*>(From)->m_pAttributes==m_pAttributes)
-										return(true);
-									else
-										return(false);
-								}
-								return(false);
-							}
+		/** Check if the spcified error from the reported list matches sufficiently to not report it again.
+		 * \return Boolean match.
+		 */
+		_qShareM virtual	TqBool	CheckReport( CqBasicError* From )
+		{
+			if ( From->Code() == Code() )
+			{
+				if ( CqBasicError::CheckReport( From ) &&
+				        static_cast<CqAttributeError*>( From ) ->m_pAttributes == m_pAttributes )
+					return ( true );
+				else
+					return ( false );
+			}
+			return ( false );
+		}
 
 	protected:
-			const CqAttributes* m_pAttributes;		///< Pointer to the attributes state this error is linked to.
-};
+		const CqAttributes* m_pAttributes;		///< Pointer to the attributes state this error is linked to.
+}
+;
 
 #define	MSG_COUNT	50
 
 //-----------------------------------------------------------------------
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )
 
 #endif	// !MESSAGES_H_INCLUDED

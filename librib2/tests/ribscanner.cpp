@@ -7,14 +7,13 @@ namespace librib
 extern CqRibBinaryDecoder* BinaryDecoder;
 };
 
-int main(int argc, char* argv[])
+int main( int argc, char* argv[] )
 {
-	librib::BinaryDecoder = new librib::CqRibBinaryDecoder(stdin);
-	while(yylex())
-		{
-		}
-	
-	delete(librib::BinaryDecoder);
+	librib::BinaryDecoder = new librib::CqRibBinaryDecoder( stdin );
+	while ( yylex() )
+	{}
+
+	delete( librib::BinaryDecoder );
 	return 0;
 }
 

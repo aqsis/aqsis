@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -27,7 +27,7 @@
 
 #include "bitvector.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
 /** Return a new bitvector which is the intersection of the current one and the one specified.
@@ -35,19 +35,19 @@ START_NAMESPACE(Aqsis)
  * \param from CqBitVector reference to perform the operation with.
  */
 
-CqBitVector&	CqBitVector::Intersect(CqBitVector& from)
+CqBitVector&	CqBitVector::Intersect( CqBitVector& from )
 {
-	TqInt size=(from.m_cLength<m_cLength)?from.m_cLength:m_cLength;
-	SetSize(size);
-	TqInt numints=NumberOfInts(size);
+	TqInt size = ( from.m_cLength < m_cLength ) ? from.m_cLength : m_cLength;
+	SetSize( size );
+	TqInt numints = NumberOfInts( size );
 
 	TqInt i;
-	for(i=0; i<numints; i++)
-		m_aBits[i]=(m_aBits[i]&from.m_aBits[i]);
-	
+	for ( i = 0; i < numints; i++ )
+		m_aBits[ i ] = ( m_aBits[ i ] & from.m_aBits[ i ] );
+
 	Canonize();
 
-	return(*this);
+	return ( *this );
 }
 
 
@@ -57,20 +57,20 @@ CqBitVector&	CqBitVector::Intersect(CqBitVector& from)
  * \param from CqBitVector reference to perform the operation with.
  */
 
-CqBitVector&	CqBitVector::Union(CqBitVector& from)
+CqBitVector&	CqBitVector::Union( CqBitVector& from )
 {
-	TqInt size=(from.m_cLength>m_cLength)?from.m_cLength:m_cLength;
-	TqInt ssize=(from.m_cLength<m_cLength)?from.m_cLength:m_cLength;
-	SetSize(size);
-	TqInt numints=NumberOfInts(ssize);
+	TqInt size = ( from.m_cLength > m_cLength ) ? from.m_cLength : m_cLength;
+	TqInt ssize = ( from.m_cLength < m_cLength ) ? from.m_cLength : m_cLength;
+	SetSize( size );
+	TqInt numints = NumberOfInts( ssize );
 
 	TqInt i;
-	for(i=0; i<numints; i++)
-		m_aBits[i]=(m_aBits[i]|from.m_aBits[i]);
+	for ( i = 0; i < numints; i++ )
+		m_aBits[ i ] = ( m_aBits[ i ] | from.m_aBits[ i ] );
 
 	Canonize();
 
-	return(*this);
+	return ( *this );
 }
 
 
@@ -80,20 +80,20 @@ CqBitVector&	CqBitVector::Union(CqBitVector& from)
  * \param from CqBitVector reference to perform the operation with.
  */
 
-CqBitVector&	CqBitVector::Difference(CqBitVector& from)
+CqBitVector&	CqBitVector::Difference( CqBitVector& from )
 {
-	TqInt size=(from.m_cLength>m_cLength)?from.m_cLength:m_cLength;
-	TqInt ssize=(from.m_cLength<m_cLength)?from.m_cLength:m_cLength;
-	SetSize(size);
-	TqInt numints=NumberOfInts(ssize);
+	TqInt size = ( from.m_cLength > m_cLength ) ? from.m_cLength : m_cLength;
+	TqInt ssize = ( from.m_cLength < m_cLength ) ? from.m_cLength : m_cLength;
+	SetSize( size );
+	TqInt numints = NumberOfInts( ssize );
 
 	TqInt i;
-	for(i=0; i<numints; i++)
-		m_aBits[i]=(m_aBits[i]^from.m_aBits[i]);
+	for ( i = 0; i < numints; i++ )
+		m_aBits[ i ] = ( m_aBits[ i ] ^ from.m_aBits[ i ] );
 
 	Canonize();
 
-	return(*this);
+	return ( *this );
 }
 
 
@@ -103,29 +103,32 @@ CqBitVector&	CqBitVector::Difference(CqBitVector& from)
 
 TqInt CqBitVector::Count()
 {
-	register     TqInt count; 
-	register     TqInt  i;     
+	register TqInt count;
+	register TqInt i;
 
-	static const unsigned bitcount[256] = {0, 1, 1, 2, 1, 2, 2, 3, 1, \
-	2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, \
-	4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, \
-	3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 1, 2, 2, 3, 2, \
-	3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, \
-	4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, \
-	5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 1, \
-	2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, \
-	4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, \
-	4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, \
-	6, 6, 7, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, \
-	4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 3, 4, 4, 5, 4, \
-	5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, \
-	6, 6, 7, 6, 7, 7, 8};
+	static const unsigned bitcount[ 256 ] =
+	    {
+	        0, 1, 1, 2, 1, 2, 2, 3, 1, \
+	        2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, \
+	        4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, \
+	        3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 1, 2, 2, 3, 2, \
+	        3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, \
+	        4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, \
+	        5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 1, \
+	        2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, \
+	        4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5, 3, \
+	        4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, \
+	        6, 6, 7, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, \
+	        4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 3, 4, 4, 5, 4, \
+	        5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7, 4, 5, 5, 6, 5, 6, 6, 7, 5, \
+	        6, 6, 7, 6, 7, 7, 8
+	    };
 
-	for(count=0L, i=0; i<m_cNumInts; i++)
-		count+=bitcount[m_aBits[i]];
-	return(count);
+	for ( count = 0L, i = 0; i < m_cNumInts; i++ )
+		count += bitcount[ m_aBits[ i ] ];
+	return ( count );
 }
 
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

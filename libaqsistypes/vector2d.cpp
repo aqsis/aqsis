@@ -7,12 +7,12 @@
 // modify it under the terms of the GNU General Public
 // License as published by the Free Software Foundation; either
 // version 2 of the License, or (at your option) any later version.
-// 
+//
 // This library is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 // General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public
 // License along with this library; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -30,27 +30,26 @@
 #include	"vector3d.h"
 #include	"vector4d.h"
 
-START_NAMESPACE(Aqsis)
+START_NAMESPACE( Aqsis )
 
 //---------------------------------------------------------------------
 /** Copy constructor from 3D Vector.
  */
 
-CqVector2D::CqVector2D(const CqVector3D &From)
-	: m_x(From.x()), m_y(From.y())
-{
-}
+CqVector2D::CqVector2D( const CqVector3D &From )
+		: m_x( From.x() ), m_y( From.y() )
+{}
 
 //---------------------------------------------------------------------
 /** Copy from specified 3D vector.
  */
 
-CqVector2D &CqVector2D::operator=(const CqVector3D &From)
+CqVector2D &CqVector2D::operator=( const CqVector3D &From )
 {
-	m_x=From.x();
-	m_y=From.y();
+	m_x = From.x();
+	m_y = From.y();
 
-	return(*this);
+	return ( *this );
 }
 
 
@@ -58,23 +57,23 @@ CqVector2D &CqVector2D::operator=(const CqVector3D &From)
 /** Copy from specified 4D vector.
  */
 
-CqVector2D &CqVector2D::operator=(const CqVector4D &From)
+CqVector2D &CqVector2D::operator=( const CqVector4D &From )
 {
-	if(From.h()!=1.0)
+	if ( From.h() != 1.0 )
 	{
-		m_x=From.x()/From.h();
-		m_y=From.y()/From.h();
+		m_x = From.x() / From.h();
+		m_y = From.y() / From.h();
 	}
 	else
 	{
-		m_x=From.x();
-		m_y=From.y();
+		m_x = From.x();
+		m_y = From.y();
 	}
 
-	return(*this);
+	return ( *this );
 }
 
 
 //---------------------------------------------------------------------
 
-END_NAMESPACE(Aqsis)
+END_NAMESPACE( Aqsis )
