@@ -174,8 +174,6 @@ void CqShaderLightsourceAmbient::SetValue(const char* name, TqPchar val)
 	if(strcmp(name,"intensity")==0)	intensity=*reinterpret_cast<TqFloat*>(val);
 	else
 	if(strcmp(name,"lightcolor")==0)	lightcolor=reinterpret_cast<TqFloat*>(val);
-	else
-	assert(TqFalse);	// TODO: Report error.
 }
 
 
