@@ -1605,8 +1605,9 @@ STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, 
 	TqFloat fpara2 = ( SQR( SQR( 1.0f / feta ) * cos_theta - fu2sqrt ) + SQR( -fv2sqrt ) ) /
 	                 ( SQR( SQR( 1.0f / feta ) * cos_theta + fu2sqrt ) + SQR( fv2sqrt ) );
 
-	SETFLOAT( Kr, 0.5f * ( fperp2 + fpara2 ) );
-	SETFLOAT( Kt, 1.0f - FLOAT( Kr ) );
+	TqFloat __Kr = 0.5f * ( fperp2 + fpara2 );
+	SETFLOAT( Kr, __Kr );
+	SETFLOAT( Kt, 1.0f - __Kr );
 	END_VARYING_SECTION
 }
 
@@ -1643,8 +1644,9 @@ STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, 
 	TqFloat fperp2 = ( SQR( cos_theta - fu2sqrt ) + fv2 ) / ( SQR( cos_theta + fu2sqrt ) + fv2 );
 	TqFloat fpara2 = ( SQR( SQR( 1.0f / feta ) * cos_theta - fu2sqrt ) + SQR( -fv2sqrt ) ) /
 	                 ( SQR( SQR( 1.0f / feta ) * cos_theta + fu2sqrt ) + SQR( fv2sqrt ) );
-	SETFLOAT( Kr, 0.5f * ( fperp2 + fpara2 ) );
-	SETFLOAT( Kt, 1.0f - FLOAT( Kr ) );
+	TqFloat __Kr = 0.5f * ( fperp2 + fpara2 );
+	SETFLOAT( Kr, __Kr );
+	SETFLOAT( Kt, 1.0f - __Kr );
 	END_VARYING_SECTION
 
 	SO_reflect( I, N, R );
