@@ -37,7 +37,8 @@ copy ..\..\library\release\tga2tif.dll .
 
 cd ..
 
-copy \Libraries\tiff-v3.5.7\libtiff\libtiff.dll .
+copy \Apps\GnuWin32\bin\libtiff.dll .
+copy \Apps\GnuWin32\bin\zlib.dll .
 
 copy ..\ribber.cfg .
 
@@ -64,4 +65,4 @@ copy ..\..\libaqsistypes\win32\intel\share.h .
 
 cd ..\..\
 erase /f /q Aqsis_Win32.zip
-wzzip -a -r -p Aqsis_Win32.zip binary-archive\*.* 
+chzip -a -e9 -r Aqsis_Win32.zip binary-archive\*.* 
