@@ -219,6 +219,7 @@ CqSurface& CqSurface::operator=( const CqSurface& From )
 	m_v = From.m_v;
 
 	// Clone any user parameters.
+	m_aUserParams.clear();
 	std::vector<CqParameter*>::const_iterator iUP;
 	for( iUP = From.m_aUserParams.begin(); iUP != From.m_aUserParams.end(); iUP++ )
 		m_aUserParams.push_back( (*iUP)->Clone() );
@@ -313,7 +314,7 @@ CqMicroPolyGridBase* CqSurface::Dice()
 	if ( USES( lUses, EnvVars_t ) ) t().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->t() );
 	if ( USES( lUses, EnvVars_Cs ) ) Cs().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Cs() );
 	if ( USES( lUses, EnvVars_Os ) ) Os().BilinearDice( m_uDiceSize, m_vDiceSize, pGrid->Os() );
-	if ( USES( lUses, EnvVars_P ) ) NaturalInterpolate( &P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
+	NaturalInterpolate( &P(), m_uDiceSize, m_vDiceSize, pGrid->P() );
 
 	// If the shaders need N and they have been explicitly specified, then bilinearly interpolate them.
 	if ( USES( lUses, EnvVars_N ) )
@@ -325,7 +326,7 @@ CqMicroPolyGridBase* CqSurface::Dice()
 		}
 	}
 
-	if( CanGenerateNormals() )
+	if( CanGenerateNormals() && USES( lUses, EnvVars_N ) )
 	{
 		GenerateGeometricNormals( m_uDiceSize, m_vDiceSize, pGrid->Ng() );
 		pGrid->SetbGeometricNormals( TqTrue );

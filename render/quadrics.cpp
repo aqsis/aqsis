@@ -451,6 +451,8 @@ TqInt CqCone::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().uSubdivide( &pNew2->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
+
+		pNew1->uSubdivideUserParameters( pNew2 );
 	}
 	else
 	{
@@ -464,6 +466,8 @@ TqInt CqCone::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().vSubdivide( &pNew2->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
+
+		pNew1->vSubdivideUserParameters( pNew2 );
 	}
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
@@ -600,6 +604,8 @@ TqInt CqCylinder::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().uSubdivide( &pNew2->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
+
+		pNew1->uSubdivideUserParameters( pNew2 );
 	}
 	else
 	{
@@ -613,6 +619,8 @@ TqInt CqCylinder::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().vSubdivide( &pNew2->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
+
+		pNew1->vSubdivideUserParameters( pNew2 );
 	}
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
@@ -749,6 +757,8 @@ TqInt CqHyperboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().uSubdivide( &pNew2->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
+
+		pNew1->uSubdivideUserParameters( pNew2 );
 	}
 	else
 	{
@@ -762,6 +772,8 @@ TqInt CqHyperboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().vSubdivide( &pNew2->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
+
+		pNew1->vSubdivideUserParameters( pNew2 );
 	}
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
@@ -912,6 +924,8 @@ TqInt CqParaboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().uSubdivide( &pNew2->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
+
+		pNew1->uSubdivideUserParameters( pNew2 );
 	}
 	else
 	{
@@ -926,6 +940,8 @@ TqInt CqParaboloid::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().vSubdivide( &pNew2->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
+
+		pNew1->vSubdivideUserParameters( pNew2 );
 	}
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
@@ -1061,6 +1077,8 @@ TqInt CqTorus::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().uSubdivide( &pNew2->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
+
+		pNew1->uSubdivideUserParameters( pNew2 );
 	}
 	else
 	{
@@ -1074,6 +1092,8 @@ TqInt CqTorus::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew1->t().vSubdivide( &pNew2->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
+
+		pNew1->vSubdivideUserParameters( pNew2 );
 	}
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );
@@ -1209,6 +1229,8 @@ TqInt CqDisk::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew2->t().uSubdivide( &pNew1->t() );
 		pNew1->Cs().uSubdivide( &pNew2->Cs() );
 		pNew1->Os().uSubdivide( &pNew2->Os() );
+
+		pNew1->uSubdivideUserParameters( pNew2 );
 	}
 	else
 	{
@@ -1222,6 +1244,8 @@ TqInt CqDisk::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew2->t().vSubdivide( &pNew1->t() );
 		pNew1->Cs().vSubdivide( &pNew2->Cs() );
 		pNew1->Os().vSubdivide( &pNew2->Os() );
+
+		pNew1->vSubdivideUserParameters( pNew2 );
 	}
 	pNew1->SetSurfaceParameters( *this );
 	pNew2->SetSurfaceParameters( *this );

@@ -249,6 +249,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	TqFloat	uA = 0.0f, uB = 0.0f, uC = 0.0f, uD = 0.0f, vA = 0.0f, vB = 0.0f, vC = 0.0f, vD = 0.0f;
 	TqFloat	sA = 0.0f, sB = 0.0f, sC = 0.0f, sD = 0.0f, tA = 0.0f, tB = 0.0f, tC = 0.0f, tD = 0.0f;
+	TqInt indexA, indexB, indexC, indexD;
 
 	CqColor	colA, colB, colC, colD;
 	CqColor	opaA, opaB, opaC, opaD;
@@ -268,15 +269,18 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 	// are forcing N to be setup here, so clockwise nature is important.
 	TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
 
+	indexA = 0;
+	indexB = 1;
+
 	// Start by splitting the polygon into 4 point patches.
-	vecA = PolyP( 0 );
-	vecB = PolyP( 1 );
+	vecA = PolyP( indexA );
+	vecB = PolyP( indexB );
 
 	// Get the normals, or calculate the facet normal if not specified.
 	if ( bhasN )
 	{
-		vecNA = PolyN( 0 );
-		vecNB = PolyN( 1 );
+		vecNA = PolyN( indexA );
+		vecNB = PolyN( indexB );
 	}
 	else
 	{
@@ -307,42 +311,42 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	if ( bhasu )
 	{
-		uA = Polyu( 0 );
-		uB = Polyu( 1 );
+		uA = Polyu( indexA );
+		uB = Polyu( indexB );
 	}
 
 	if ( bhasv )
 	{
-		vA = Polyv( 0 );
-		vB = Polyv( 1 );
+		vA = Polyv( indexA );
+		vB = Polyv( indexB );
 	}
 
 	// Get the texture coordinates, or use the parameter space values if not specified.
 	if ( bhass )
 	{
-		sA = Polys( 0 );
-		sB = Polys( 1 );
+		sA = Polys( indexA );
+		sB = Polys( indexB );
 	}
 
 	if ( bhast )
 	{
-		tA = Polyt( 0 );
-		tB = Polyt( 1 );
+		tA = Polyt( indexA );
+		tB = Polyt( indexB );
 	}
 
 	// Get any specified per vertex colors and opacities.
 	if ( bhasCs )
 	{
-		colA = PolyCs( 0 );
-		colB = PolyCs( 1 );
+		colA = PolyCs( indexA );
+		colB = PolyCs( indexB );
 	}
 	else
 		colA = pAttributes() ->GetColorAttribute("System", "Color")[0];
 
 	if ( bhasOs )
 	{
-		opaA = PolyOs( 0 );
-		opaB = PolyOs( 1 );
+		opaA = PolyOs( indexA );
+		opaB = PolyOs( indexB );
 	}
 	else
 		opaA = pAttributes() ->GetColorAttribute("System", "Opacity")[0];
@@ -351,52 +355,64 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 	TqInt i;
 	for ( i = 2; i < NumVertices(); i += 2 )
 	{
-		vecC = vecD = PolyP( i );
-		if ( NumVertices() > i + 1 ) vecD = PolyP( i + 1 );
+		indexC = indexD = i;
+		vecC = vecD = PolyP( indexC );
+		if ( NumVertices() > i + 1 ) 
+		{
+			indexD = i + 1;
+			vecD = PolyP( indexD );
+		}
 
 		if ( bhasu )
 		{
-			uC = uD = Polyu( i );
-			if ( NumVertices() > i + 1 ) uD = Polyu( i + 1 );
+			uC = uD = Polyu( indexC );
+			if ( NumVertices() > i + 1 ) 
+				uD = Polyu( indexD );
 		}
 
 		if ( bhasv )
 		{
-			vC = vD = Polyv( i );
-			if ( NumVertices() > i + 1 ) vD = Polyv( i + 1 );
+			vC = vD = Polyv( indexC );
+			if ( NumVertices() > i + 1 ) 
+				vD = Polyv( indexD );
 		}
 
 		if ( bhasN )
 		{
-			vecNC = vecND = PolyN( i );
-			if ( NumVertices() > i + 1 ) vecND = PolyN( i + 1 );
+			vecNC = vecND = PolyN( indexC );
+			if ( NumVertices() > i + 1 ) 
+				vecND = PolyN( indexD );
 		}
 		else
 			vecNC = vecND = vecNA;
 
 		if ( bhass )
 		{
-			sC = sD = Polys( i );
-			if ( NumVertices() > i + 1 ) sD = Polys( i + 1 );
+			sC = sD = Polys( indexC );
+			if ( NumVertices() > i + 1 ) 
+				sD = Polys( indexD );
 		}
 
 		if ( bhast )
 		{
-			tC = tD = Polyt( i );
-			if ( NumVertices() > i + 1 ) tD = Polyt( i + 1 );
+			tC = tD = Polyt( indexC );
+			if ( NumVertices() > i + 1 ) 
+				tD = Polyt( indexD );
 		}
 
 		// Get any specified per vertex colors and opacities.
 		if ( bhasCs )
 		{
-			colC = colD = PolyCs( i );
-			if ( NumVertices() > i + 1 ) colD = PolyCs( i + 1 );
+			colC = colD = PolyCs( indexC );
+			if ( NumVertices() > i + 1 ) 
+				colD = PolyCs( indexD );
 		}
 
 		if ( bhasOs )
 		{
-			opaC = opaD = PolyOs( i );
-			if ( NumVertices() > i + 1 ) opaD = PolyOs( i + 1 );
+			opaC = opaD = PolyOs( indexC );
+			if ( NumVertices() > i + 1 ) 
+				opaD = PolyOs( indexD );
 		}
 
 		// Create bilinear patches
@@ -451,10 +467,102 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 				pNew->Os() [ 0 ] = opaA;
 		}
 
+		// Copy any user specified primitive variables.
+		std::vector<CqParameter*>::iterator iUP;
+		for( iUP = Surface().aUserParams().begin(); iUP != Surface().aUserParams().end(); iUP++ )
+		{
+			CqParameter* pNewUP = (*iUP)->Clone();
+			pNewUP->Clear();
+			pNewUP->SetSize(4);
+			switch( (*iUP)->Type() )
+			{
+				case type_float:
+				{
+					CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(*iUP);
+					CqParameterTyped<TqFloat, TqFloat>* pTNewUP = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pNewUP);
+					pTNewUP->pValue(0)[0] = pTParam->pValue(indexA)[0];
+					pTNewUP->pValue(1)[0] = pTParam->pValue(indexB)[0];
+					pTNewUP->pValue(2)[0] = pTParam->pValue(indexD)[0];
+					pTNewUP->pValue(3)[0] = pTParam->pValue(indexC)[0];
+				}
+				break;
+
+				case type_integer:
+				{
+					CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>(*iUP);
+					CqParameterTyped<TqInt, TqFloat>* pTNewUP = static_cast<CqParameterTyped<TqInt, TqFloat>*>(pNewUP);
+					pTNewUP->pValue(0)[0] = pTParam->pValue(indexA)[0];
+					pTNewUP->pValue(1)[0] = pTParam->pValue(indexB)[0];
+					pTNewUP->pValue(2)[0] = pTParam->pValue(indexD)[0];
+					pTNewUP->pValue(3)[0] = pTParam->pValue(indexC)[0];
+				}
+				break;
+
+				case type_point:
+				case type_normal:
+				case type_vector:
+				{
+					CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(*iUP);
+					CqParameterTyped<CqVector3D, CqVector3D>* pTNewUP = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(pNewUP);
+					pTNewUP->pValue(0)[0] = pTParam->pValue(indexA)[0];
+					pTNewUP->pValue(1)[0] = pTParam->pValue(indexB)[0];
+					pTNewUP->pValue(2)[0] = pTParam->pValue(indexD)[0];
+					pTNewUP->pValue(3)[0] = pTParam->pValue(indexC)[0];
+				}
+				break;
+
+				case type_hpoint:
+				{
+					CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(*iUP);
+					CqParameterTyped<CqVector4D, CqVector3D>* pTNewUP = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pNewUP);
+					pTNewUP->pValue(0)[0] = pTParam->pValue(indexA)[0];
+					pTNewUP->pValue(1)[0] = pTParam->pValue(indexB)[0];
+					pTNewUP->pValue(2)[0] = pTParam->pValue(indexD)[0];
+					pTNewUP->pValue(3)[0] = pTParam->pValue(indexC)[0];
+				}
+				break;
+
+				case type_color:
+				{
+					CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>(*iUP);
+					CqParameterTyped<CqColor, CqColor>* pTNewUP = static_cast<CqParameterTyped<CqColor, CqColor>*>(pNewUP);
+					pTNewUP->pValue(0)[0] = pTParam->pValue(indexA)[0];
+					pTNewUP->pValue(1)[0] = pTParam->pValue(indexB)[0];
+					pTNewUP->pValue(2)[0] = pTParam->pValue(indexD)[0];
+					pTNewUP->pValue(3)[0] = pTParam->pValue(indexC)[0];
+				}
+				break;
+
+				case type_string:
+				{
+					CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>(*iUP);
+					CqParameterTyped<CqString, CqString>* pTNewUP = static_cast<CqParameterTyped<CqString, CqString>*>(pNewUP);
+					pTNewUP->pValue(0)[0] = pTParam->pValue(indexA)[0];
+					pTNewUP->pValue(1)[0] = pTParam->pValue(indexB)[0];
+					pTNewUP->pValue(2)[0] = pTParam->pValue(indexD)[0];
+					pTNewUP->pValue(3)[0] = pTParam->pValue(indexC)[0];
+				}
+				break;
+
+				case type_matrix:
+				{
+					CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(*iUP);
+					CqParameterTyped<CqMatrix, CqMatrix>* pTNewUP = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(pNewUP);
+					pTNewUP->pValue(0)[0] = pTParam->pValue(indexA)[0];
+					pTNewUP->pValue(1)[0] = pTParam->pValue(indexB)[0];
+					pTNewUP->pValue(2)[0] = pTParam->pValue(indexD)[0];
+					pTNewUP->pValue(3)[0] = pTParam->pValue(indexC)[0];
+				}
+				break;
+			}
+			pNew->aUserParams().push_back(pNewUP);
+		}
+
 		aSplits.push_back( pNew );
 		cNew++;
 
 		// Move onto the next quad
+		indexB = indexD;
 		vecB = vecD;
 		vecNB = vecND;
 		uB = uD; vB = vD;

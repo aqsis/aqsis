@@ -1216,6 +1216,8 @@ void CqSurfaceNURBS::uSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 	// Subdivide the colors
 	if ( USES( Uses(), EnvVars_Cs ) ) pnrbA->Cs().uSubdivide( &pnrbB->Cs() );
 	if ( USES( Uses(), EnvVars_Os ) ) pnrbA->Os().uSubdivide( &pnrbB->Os() );
+
+	pnrbA->uSubdivideUserParameters( pnrbB );
 }
 
 
@@ -1243,6 +1245,8 @@ void CqSurfaceNURBS::vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB 
 	// Subdivide the colors
 	if ( USES( Uses(), EnvVars_Cs ) ) pnrbA->Cs().vSubdivide( &pnrbB->Cs() );
 	if ( USES( Uses(), EnvVars_Os ) ) pnrbA->Os().vSubdivide( &pnrbB->Os() );
+
+	pnrbA->vSubdivideUserParameters( pnrbB );
 }
 
 

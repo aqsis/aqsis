@@ -1,56 +1,45 @@
 version 3.03
+
+Option "limits" "eyesplits" [10]
 Option "searchpath" "shader" ["../shaders:&"]
-Display "test.tif" "file" "rgba"
-Display "+test.tif" "framebuffer" "rgba"
+
+#
+#
+# Now render the scene using the shadow map just calculated.
+#
+#
+
+Display "shadtest.tif" "file" "rgba"
+
 Format 200 150 1
-ShadingRate 2
-PixelSamples 1 1
-PixelFilter "box" 2 2
+
+PixelSamples 2 2
+PixelFilter "gaussian" 2 2
+Clipping 0.2 10
+ShadingRate 1
+
+FrameBegin 2
 
 Projection "perspective" "fov" 45
-Rotate -40 1 0 0
-Translate 0 -4 5
+Translate 0 0 5
+Rotate -20 1 0 0
 
-Option "limits" "eyesplits" [3]
-Option "statistics" "endofframe" [3]
-Option "searchpath" "shader" ["./:&"]
-Sides 2
+Declare "shadowname" "uniform string"
+Declare "MyP" " varying point[5]"
 
 WorldBegin
-      
-	LightSource "ambientlight" 0 "intensity" [1]
+  LightSource "ambientlight" 0 "intensity" [0.2]
+  LightSource "shadowspot" 1 "intensity" [75] "from" [5 5 -5] "to" [0 0 0] "coneangle" [0.5] 
 
-	Color [1 1 0]
-	Surface "matte"
+  Color [1 1 1]
+  Surface "matte"
+  Sphere 1 -1 1 360
 
-	AttributeBegin
-		Attribute "identifier" "name" ["bicubic patch"]
-		TransformBegin
-			Translate 2 0 0
-			Patch "bicubic" "P" [
-								-1 -1 1
-								-0.5 -1 1
-								0.5 -1 1
-								1 -1 1
-
-								-1 -1 0.5
-								-0.5 -1 0.5
-								0.5 -1 0.5
-								1 -1 0.5
-
-								-1 -1 -0.5
-								-0.5 -1 -0.5
-								0.5 -1 -0.5
-								1 -1 -0.5
-
-								-1 -1 -1
-								-0.5 -1 -1
-								0.5 -1 -1
-								1 -1 -1
-								]
-		TransformEnd
-	AttributeEnd
-
-
+  Orientation "rh"
+  Patch "bilinear" "P" [-10 -1 -10
+                         10 -1 -10
+                        -10 -1  10
+                         10 -1  10]
 WorldEnd
 
+FrameEnd
