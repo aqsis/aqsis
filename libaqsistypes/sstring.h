@@ -32,8 +32,6 @@
 
 #include "aqsis.h"
 
-#include "ri.h"
-
 #define	 _qShareName	CORE
 #include "share.h"
 

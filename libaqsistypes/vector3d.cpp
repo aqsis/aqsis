@@ -27,8 +27,8 @@
 
 #include	"aqsis.h"
 #include	"vector3d.h"
-#include	"shaderstack.h"
 #include	"vector4d.h"
+#include	"color.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -114,12 +114,6 @@ CqVector3D &CqVector3D::operator=(const CqColor &From)
 	return(*this);
 }
 
-
-CqVector3D& CqVector3D::operator=(const SqVMStackEntry* pVal)
-{
-	*this=pVal->m_Point;
-	return(*this);
-}
 
 //---------------------------------------------------------------------
 

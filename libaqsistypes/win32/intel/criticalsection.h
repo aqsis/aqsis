@@ -26,7 +26,6 @@
 #ifndef CRITICALSECTION_H_INCLUDED
 #define CRITICALSECTION_H_INCLUDED 
 
-#include "ri.h"
 
 //--------------------------------------------------------------------------
 /** Provide an encapsulation around the system critical section implementation. 

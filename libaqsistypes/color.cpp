@@ -28,9 +28,7 @@
 #include	"aqsis.h"
 
 #include	"color.h"
-#include	"shaderstack.h"
 #include	"matrix.h"
-#include	"ri.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -40,17 +38,6 @@ CqColor	gColBlack(0,0,0);
 CqColor	gColRed(1,0,0);
 CqColor	gColGreen(0,1,0);
 CqColor	gColBlue(0,0,1);
-
-//---------------------------------------------------------------------
-/** Assignment operator.
- */
-
-CqColor& CqColor::operator=(const SqVMStackEntry* pVal)
-{
-	*this=pVal->m_Color;
-	return(*this);
-}
-
 
 #define	UNDEFINED -1
 

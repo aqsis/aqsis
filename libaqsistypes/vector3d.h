@@ -29,7 +29,6 @@
 
 #include	"aqsis.h"
 
-#include	"ri.h"
 #include	"vector2d.h"
 
 #define		_qShareName	CORE
@@ -41,7 +40,6 @@ START_NAMESPACE(Aqsis)
 
 class CqVector4D;
 class CqColor;
-struct SqVMStackEntry;
 
 //----------------------------------------------------------------------
 /** \class CqVector3D
@@ -125,7 +123,6 @@ class _qShareC CqVector3D
 
 		_qShareM	CqVector3D& operator= (const CqVector4D &From);
 		_qShareM	CqVector3D& operator= (const CqColor &From);
-		_qShareM	CqVector3D&	operator= (const SqVMStackEntry* pVal);
 								/** Addition assignment operator.
 								 */
 		_qShareM	CqVector3D& operator+=(const CqVector3D &From)		{m_x+=From.m_x;	m_y+=From.m_y;	m_z+=From.m_z;	return(*this);	}

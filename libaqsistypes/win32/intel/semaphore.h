@@ -26,7 +26,6 @@
 #ifndef SEMAPHORE_H_INCLUDED
 #define SEMAPHORE_H_INCLUDED
 
-#include "ri.h"
 
 //--------------------------------------------------------------------------
 /** \class CqSemaphore

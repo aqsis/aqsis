@@ -25,7 +25,7 @@ CFG=slcomp - Win32 Debug
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName "slcomp"
 # PROP Scc_LocalPath ".."
-CPP=xicl6.exe
+CPP=cl.exe
 RSC=rc.exe
 
 !IF  "$(CFG)" == "slcomp - Win32 Release"
@@ -42,16 +42,16 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /c
-# ADD CPP /nologo /MD /W3 /GX /Zi /O2 /I "..\Object\Release\slcomp" /I "..\Render" /I "..\Render\win32\intel" /D "NDEBUG" /D SLCOMP=1 /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "__HAVE_NO_ALLOCA" /D _qBUILDING=SLCOMP /FR /FD /c
+# ADD CPP /nologo /MD /W3 /GX /Zi /O2 /I "..\Object\Release\slcomp" /I "..\Render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /D "NDEBUG" /D SLCOMP=1 /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "__HAVE_NO_ALLOCA" /D _qBUILDING=SLCOMP /FR /FD /c
 # SUBTRACT CPP /YX /Yc /Yu
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=xilink6.exe
+LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 libddmsimple.lib libtiff_i.lib libaqsis.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /libpath:"..\Library\Release"
+# ADD LINK32 libddmsimple.lib libtiff_i.lib libaqsistypes.lib libaqsis.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386 /libpath:"..\Library\Release"
 # SUBTRACT LINK32 /debug
 
 !ELSEIF  "$(CFG)" == "slcomp - Win32 Debug"
@@ -68,16 +68,16 @@ LINK32=xilink6.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\Object\Debug\slcomp" /I "..\Render" /I "..\Render\win32\intel" /D "_DEBUG" /D SLCOMP=2 /D ssVALIDATE=1 /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "__HAVE_NO_ALLOCA" /D _qBUILDING=SLCOMP /FR /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\Object\Debug\slcomp" /I "..\Render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /D "_DEBUG" /D SLCOMP=2 /D ssVALIDATE=1 /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "__HAVE_NO_ALLOCA" /D _qBUILDING=SLCOMP /FR /FD /GZ /c
 # SUBTRACT CPP /YX /Yc /Yu
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=xilink6.exe
+LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 libddmsimple.lib libtiff_i.lib libaqsis.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /libpath:"..\Library\Debug"
+# ADD LINK32 libddmsimple.lib libtiff_i.lib libaqsistypes.lib libaqsis.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /libpath:"..\Library\Debug"
 
 !ENDIF 
 

@@ -31,7 +31,6 @@
 #include	"aqsis.h"
 
 #include	"file.h"
-#include	"renderer.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -39,19 +38,19 @@ START_NAMESPACE(Aqsis)
 /** Constructor
  */
 
-CqFile::CqFile(const char* strFilename, const char* strSearchPathName) : m_pStream(0)
+CqFile::CqFile(const char* strFilename, const char* strSearchPath) : m_pStream(0)
 {
-	Open(strFilename,strSearchPathName);
+	Open(strFilename,strSearchPath);
 }
 
 
 //---------------------------------------------------------------------
 /** Attach this CqFile object to a new file if we can find it.
  * \param strFileName Character pointer to the filename.
- * \param strSearchPathName Character pointer to name of RI "searchpath" option to use as the searchpath.
+ * \param strSearchPath Character pointer to name of RI "searchpath" option to use as the searchpath.
  */
 
-void CqFile::Open(const char* strFilename, const char* strSearchPathName, std::ios::open_mode mode)
+void CqFile::Open(const char* strFilename, const char* strSearchPath, std::ios::open_mode mode)
 {
 	// Search in the current directory first.
 	m_strRealName=strFilename;
@@ -60,48 +59,43 @@ void CqFile::Open(const char* strFilename, const char* strSearchPathName, std::i
 	if(!pFStream->is_open())
 	{
 		// If a searchpath option name was specified, use it.
-		if(strSearchPathName!="")
+		if(strcmp(strSearchPath,"")!=0)
 		{
 			// if not found there, search in the specified option searchpath.
-			CqString SearchPath("");
-			const CqString* poptShader=QGetRenderContext()->optCurrent().GetStringOption("searchpath", strSearchPathName);
-			if(poptShader!=0)
+			CqString SearchPath(strSearchPath);
+			// Search each specified path in the search path (separated by ':' or ';')
+			unsigned int start=0;
+			while(1)
 			{
-				SearchPath=poptShader[0];
-				// Search each specified path in the search path (separated by ':' or ';')
-				unsigned int start=0;
-				while(1)
-				{
-					// Find the next search path in the spec.
-					unsigned int len=SearchPath.find_first_of(";:",start)-start;
-					// Check if it is realy meant as a drive spec.
-					if(len==1 && isalpha(SearchPath[start]))
-						len+=strcspn(&SearchPath[start+2],";:")+1;
-					CqString strPath=SearchPath.substr(start, len);
-					if(strPath=="")	break;
+				// Find the next search path in the spec.
+				unsigned int len=SearchPath.find_first_of(";:",start)-start;
+				// Check if it is realy meant as a drive spec.
+				if(len==1 && isalpha(SearchPath[start]))
+					len+=strcspn(&SearchPath[start+2],";:")+1;
+				CqString strPath=SearchPath.substr(start, len);
+				if(strPath=="")	break;
 
-					// See if the shader can be found in this directory
-					CqString strAlternativeFilename=strPath;
-					// Check the path is correctly terminated
-					if(strAlternativeFilename[strAlternativeFilename.size()-1]!='/' &&
-					   strAlternativeFilename[strAlternativeFilename.size()-1]!='\\')
-						strAlternativeFilename+="\\";
-					strAlternativeFilename+=strFilename;
-					
-					// Clear the previous error first.
-					pFStream->clear();
-					pFStream->open(strAlternativeFilename.c_str(), std::ios::in);
-					if(pFStream->is_open())
-					{
-						m_pStream=pFStream;
-						m_strRealName=strAlternativeFilename;
-						break;
-					}
-					if(len<strlen(&SearchPath[start]))
-						start+=len+1;
-					else
-						break;
+				// See if the shader can be found in this directory
+				CqString strAlternativeFilename=strPath;
+				// Check the path is correctly terminated
+				if(strAlternativeFilename[strAlternativeFilename.size()-1]!='/' &&
+				   strAlternativeFilename[strAlternativeFilename.size()-1]!='\\')
+					strAlternativeFilename+="\\";
+				strAlternativeFilename+=strFilename;
+				
+				// Clear the previous error first.
+				pFStream->clear();
+				pFStream->open(strAlternativeFilename.c_str(), std::ios::in);
+				if(pFStream->is_open())
+				{
+					m_pStream=pFStream;
+					m_strRealName=strAlternativeFilename;
+					break;
 				}
+				if(len<strlen(&SearchPath[start]))
+					start+=len+1;
+				else
+					break;
 			}
 		}
 	}

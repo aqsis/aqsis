@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "..\Object\Release\libaqsis"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I ".\win32\intel" /I "..\render" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /YX /FD /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "..\Object\Debug\libaqsis"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I ".\win32\intel" /I "..\render" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\libaqsistypes\win32\intel" /I "..\libaqsistypes" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D _qBUILDING=CORE /D CORE=1 /YX /FD /GZ /c
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
 # ADD RSC /l 0x809 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -89,10 +89,6 @@ SOURCE=.\attributes.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\bitvector.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\bound.cpp
 # End Source File
 # Begin Source File
@@ -101,19 +97,7 @@ SOURCE=.\cellnoise.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\color.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\context.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\win32\intel\criticalsection.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\file.cpp
 # End Source File
 # Begin Source File
 
@@ -122,10 +106,6 @@ SOURCE=.\imagebuffer.cpp
 # Begin Source File
 
 SOURCE=.\lights.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\matrix.cpp
 # End Source File
 # Begin Source File
 
@@ -177,10 +157,6 @@ SOURCE=.\ri.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\intel\semaphore.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\shadeops.cpp
 # End Source File
 # Begin Source File
@@ -209,10 +185,6 @@ SOURCE=.\spline.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\sstring.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\stats.cpp
 # End Source File
 # Begin Source File
@@ -235,34 +207,10 @@ SOURCE=.\texturemap.cpp
 
 SOURCE=.\transform.cpp
 # End Source File
-# Begin Source File
-
-SOURCE=.\vector2d.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\vector3d.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\vector4d.cpp
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
-# Begin Source File
-
-SOURCE=.\aqsis.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\win32\intel\aqsis_compiler.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\aqsis_types.h
-# End Source File
 # Begin Source File
 
 SOURCE=.\attributes.h
@@ -270,10 +218,6 @@ SOURCE=.\attributes.h
 # Begin Source File
 
 SOURCE=.\bilinear.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\bitvector.h
 # End Source File
 # Begin Source File
 
@@ -285,19 +229,7 @@ SOURCE=.\cellnoise.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\color.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\Context.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\win32\intel\criticalsection.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\file.h
 # End Source File
 # Begin Source File
 
@@ -310,18 +242,6 @@ SOURCE=.\ImageBuffer.h
 # Begin Source File
 
 SOURCE=.\lights.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\List.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\matrix.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\memorypool.h
 # End Source File
 # Begin Source File
 
@@ -365,10 +285,6 @@ SOURCE=.\quadrics.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\random.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\render.h
 # End Source File
 # Begin Source File
@@ -381,7 +297,7 @@ SOURCE=.\ri.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\win32\intel\semaphore.h
+SOURCE=.\rifile.h
 # End Source File
 # Begin Source File
 
@@ -413,10 +329,6 @@ SOURCE=.\spline.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\sstring.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\stats.h
 # End Source File
 # Begin Source File
@@ -438,18 +350,6 @@ SOURCE=.\texturemap.h
 # Begin Source File
 
 SOURCE=.\transform.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\vector2d.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\vector3d.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\vector4d.h
 # End Source File
 # Begin Source File
 

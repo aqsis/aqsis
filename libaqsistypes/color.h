@@ -30,7 +30,6 @@
 
 #include	"aqsis.h"
 
-#include	"ri.h"
 #include	"vector3d.h"
 
 #define		_qShareName	CORE
@@ -38,7 +37,6 @@
 
 START_NAMESPACE(Aqsis)
 
-struct SqVMStackEntry;
 
 //-----------------------------------------------------------------------
 /** Class to store and manipulate three component color information.
@@ -160,11 +158,6 @@ class _qShareC	CqColor
 													else if(i==1)	return(m_fGreen);
 													else			return(m_fBlue);
 												}
-								/** Copy value from a stackentry.
-								 * \param pVal the stackentry to get the color from.
-								 * \return a reference to this color.
-								 */
-	_qShareM	CqColor&		operator=(const SqVMStackEntry* pVal);
 								/** Copy value from a 3D vector.
 								 * \param From the vector to get the color cmoponents from.
 								 * \return a reference to this color.
