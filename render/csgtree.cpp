@@ -176,23 +176,31 @@ void CqCSGTreeNode::ProcessSampleList( std::vector<SqImageSample>& samples )
 		pChild = pChild->pNext();
 	}
 
-	// \todo First find out the initial state
-	std::vector<TqBool> abChildState;
-	abChildState.resize( cChildren() );
+	std::vector<TqBool> abChildState( cChildren() );
+	std::vector<TqInt> aChildIndex( samples.size() );
 	TqInt iChild;
 	for ( iChild = 0; iChild < cChildren(); iChild++ ) abChildState[ iChild ] = TqFalse;
 
-	TqBool bCurrentI = TqFalse;
+	// Find out if the camera is starting inside a solid. This is the case if you
+	// see an odd number of walls for that solid when looking out.
+	std::vector<SqImageSample>::iterator i;
+	TqInt j = 0;
+	for ( i = samples.begin(); i != samples.end(); ++i, ++j )
+	{
+		if ( ( aChildIndex[j] = isChild( i->m_pCSGNode ) ) >= 0 )
+			abChildState[ aChildIndex[j] ] = !abChildState[ aChildIndex[j] ];
+	}
+
+	// Now get the initial state
+	TqBool bCurrentI = EvaluateState( abChildState );
 
 	// Now go through samples, clearing any where the state doesn't change, and
 	// promoting any where it does to this node.
-	std::vector<SqImageSample>::iterator i;
-	for ( i = samples.begin(); i != samples.end(); )
+	for ( i = samples.begin(), j = 0; i != samples.end(); ++j )
 	{
 		// Find out if sample is in out children nodes, if so are we entering or leaving.
-		TqInt iChild;
-		if ( ( iChild = isChild( i->m_pCSGNode ) ) >= 0 )
-			abChildState[ iChild ] = !abChildState[ iChild ];
+		if ( aChildIndex[j] >= 0 )
+			abChildState[ aChildIndex[j] ] = !abChildState[ aChildIndex[j] ];
 		else
 		{
 			i++;
