@@ -63,4 +63,4 @@ copy ..\..\content\test\noshadows.rib .
 copy ..\..\content\test\autoshadows.rib .
 
 cd ..\..\
-wzzip -a -r -p Aqsis-0.4.4003.zip Install\*.*
+wzzip -a -r -p Aqsis-0.4.4003.zip binary-archive\*.*
