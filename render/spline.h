@@ -74,7 +74,7 @@ class _qShareC CqSplineCubic
 	_qShareM			void		SetmatBasis(const char* name)		
 														{
 															RtBasis b;
-															if(BasisFromName(b,name))
+															if(BasisFromName(&b,name))
 																{
 																	CqMatrix m(b);
 																	SetmatBasis(m);
@@ -86,7 +86,7 @@ class _qShareC CqSplineCubic
 	_qShareM			void		SetmatBasis(const CqString& name)		
 														{
 															RtBasis b;
-															if(BasisFromName(b,name.c_str()))
+															if(BasisFromName(&b,name.c_str()))
 																{
 																	CqMatrix m(b);
 																	SetmatBasis(m);

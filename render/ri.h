@@ -27,7 +27,7 @@ extern	"C"
 
 		/* Definitions of Abstract Types Used in RI */
 
-typedef	bool		RtBoolean;
+typedef	short		RtBoolean;
 typedef	int			RtInt;
 typedef	float		RtFloat;
 
@@ -40,20 +40,24 @@ typedef	RtFloat		RtBasis[4][4];
 typedef	RtFloat		RtBound[6];
 typedef	char		*RtString;
 
-typedef	char		*RtPointer;
-typedef	int			RtVoid;
+typedef	void		*RtPointer;
+typedef	void		RtVoid;
+
 typedef	RtFloat		(*RtFilterFunc)(RtFloat,RtFloat,RtFloat,RtFloat);
 typedef	RtFloat		(*RtFloatFunc)();
 typedef	RtVoid		(*RtFunc)();
 typedef	RtVoid		(*RtErrorFunc)(RtInt code, RtInt severity, const char* message);
 
+typedef	RtVoid		(*RtArchiveCallback)(RtToken, char *, ...);
+
 typedef	RtPointer	RtObjectHandle;
 typedef	RtPointer	RtLightHandle;
+typedef	RtPointer	RtContextHandle;
 
 		/* Extern Declarations for Predefined RI Data Structures */
 
-#define	RI_FALSE	false
-#define	RI_TRUE		true
+#define	RI_FALSE	0
+#define	RI_TRUE		1
 #define	RI_INFINITY	FLT_MAX
 #define	RI_EPSILON	FLT_EPSILON
 #define	RI_NULL		((RtToken)0)
@@ -80,11 +84,11 @@ _qShare	extern	RtToken		RI_INTENSITY, RI_LIGHTCOLOR, RI_FROM, RI_TO,
 								RI_CONEANGLE, RI_CONEDELTAANGLE,
 								RI_BEAMDISTRIBUTION;
 _qShare	extern	RtToken		RI_MATTE, RI_METAL, RI_PLASTIC;
-_qShare	extern	RtToken		RI_KA, RI_KD, RI_KS, RI_ROUGHNESS,
-								RI_SPECULARCOLOR;
+_qShare	extern	RtToken		RI_KA, RI_KD, RI_KS, RI_ROUGHNESS, RI_KR,
+								RI_TEXTURENAME, RI_SPECULARCOLOR;
 _qShare	extern	RtToken		RI_DEPTHCUE, RI_FOG;
-_qShare	extern	RtToken		RI_MINDISTANCE, RI_MAXDISTANCE,
-								RI_BACKGROUND, RI_DISTANCE;
+_qShare	extern	RtToken		RI_MINDISTANCE, RI_MAXDISTANCE, RI_BACKGROUND,
+								RI_DISTANCE, RI_AMPLITUDE;
 
 _qShare	extern	RtToken		RI_RASTER, RI_SCREEN, RI_CAMERA, RI_WORLD,
 								RI_OBJECT;
@@ -92,11 +96,14 @@ _qShare	extern	RtToken		RI_INSIDE, RI_OUTSIDE, RI_LH, RI_RH;
 _qShare	extern	RtToken		RI_P, RI_PZ, RI_PW, RI_N, RI_NP, RI_CS, RI_OS,
 								RI_S, RI_T, RI_ST;
 _qShare	extern	RtToken		RI_BILINEAR, RI_BICUBIC;
+_qShare	extern	RtToken		RI_LINEAR, RI_CUBIC;
 _qShare	extern	RtToken		RI_PRIMITIVE, RI_INTERSECTION, RI_UNION,
 								RI_DIFFERENCE;
 _qShare	extern	RtToken		RI_WRAP, RI_NOWRAP, RI_PERIODIC, RI_NONPERIODIC, RI_CLAMP,
 								RI_BLACK;
 _qShare	extern	RtToken		RI_IGNORE, RI_PRINT, RI_ABORT, RI_HANDLER;
+_qShare	extern	RtToken		RI_COMMENT, RI_STRUCTURE, RI_VERBATIM;
+_qShare	extern	RtToken		RI_WIDTH, RI_CONSTANTWIDTH;
 
 _qShare	extern	RtBasis		RiBezierBasis, RiBSplineBasis, RiCatmullRomBasis,
 								RiHermiteBasis, RiPowerBasis;
@@ -272,19 +279,35 @@ _qShare	RtVoid			RiErrorHandler(RtErrorFunc handler);
 _qShare	RtVoid			RiErrorIgnore(RtInt code, RtInt severity, const char* message);
 _qShare	RtVoid			RiErrorPrint(RtInt code, RtInt severity, const char* message);
 _qShare	RtVoid			RiErrorAbort(RtInt code, RtInt severity, const char* message);
+_qShare	RtVoid			RiArchiveRecord(RtToken type, char *, ...);
 
 // ---Additional to spec. v3.1---
+_qShare	RtContextHandle		RiGetContext(void);
+_qShare	RtVoid			RiContext(RtContextHandle);
+_qShare	RtVoid			RiClippingPlane(RtFloat, RtFloat, RtFloat, RtFloat, RtFloat, RtFloat);
 _qShare	RtVoid			RiCoordSysTransform(RtToken space);
+_qShare	RtVoid			RiBlobby(RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], ...);
+_qShare	RtVoid			RiBlobbyV(RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], PARAMETERLIST);
+_qShare	RtVoid			RiPoints(RtInt npoints, ...);
+_qShare	RtVoid			RiPointsV(RtInt npoints, PARAMETERLIST);
+_qShare	RtVoid			RiCurves(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, ...);
+_qShare	RtVoid			RiCurvesV(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, PARAMETERLIST);
 _qShare	RtVoid			RiSubdivisionMesh(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], ...);
 _qShare	RtVoid			RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt vertices[], RtInt ntags, RtToken tags[], RtInt nargs[], RtInt intargs[], RtFloat floatargs[], PARAMETERLIST);
 
+_qShare	RtVoid			RiReadArchive(RtToken name, RtArchiveCallback, ...);
+_qShare	RtVoid			RiReadArchiveV(RtToken name, RtArchiveCallback, PARAMETERLIST);
+
+_qShare	RtVoid			RiProcDelayedReadArchive(RtPointer data, RtFloat detail);
+_qShare	RtVoid			RiProcRunProgram(RtPointer data, RtFloat detail);
+_qShare	RtVoid			RiProcDynamicLoad(RtPointer data, RtFloat detail);
 
 
 // Specific to Aqsis
 
 typedef	RtVoid		(*RtProgressFunc)(RtFloat PercentComplete);
 
-_qShare	RtBoolean		BasisFromName(RtBasis& b, const char* strName);
+_qShare	RtBoolean		BasisFromName(RtBasis* b, const char* strName);
 _qShare RtVoid			RiProgressHandler(RtProgressFunc handler);
 _qShare	RtFunc			RiPreRenderFunction(RtFunc function);
 
@@ -292,6 +315,55 @@ _qShare	RtFunc			RiPreRenderFunction(RtFunc function);
 }
 #endif
 
+/*
+  Error Codes
+  
+   1 - 10         System and File Errors
+  11 - 20         Program Limitations
+  21 - 40         State Errors
+  41 - 60         Parameter and Protocol Errors
+  61 - 80         Execution Errors
+*/
+#define RIE_NOERROR     ((RtInt)0)
+
+#define RIE_NOMEM       ((RtInt)1)      /* Out of memory */
+#define RIE_SYSTEM      ((RtInt)2)      /* Miscellaneous system error */
+#define RIE_NOFILE      ((RtInt)3)      /* File nonexistent */
+#define RIE_BADFILE     ((RtInt)4)      /* Bad file format */
+#define RIE_VERSION     ((RtInt)5)      /* File version mismatch */
+#define RIE_DISKFULL    ((RtInt)6)      /* Target disk is full */
+
+#define RIE_INCAPABLE   ((RtInt)11)     /* Optional RI feature */
+#define RIE_UNIMPLEMENT ((RtInt)12)     /* Unimplemented feature */
+#define RIE_LIMIT       ((RtInt)13)     /* Arbitrary program limit */
+#define RIE_BUG         ((RtInt)14)     /* Probably a bug in renderer */
+
+#define RIE_NOTSTARTED  ((RtInt)23)     /* RiBegin not called */
+#define RIE_NESTING     ((RtInt)24)     /* Bad begin-end nesting */
+#define RIE_NOTOPTIONS  ((RtInt)25)     /* Invalid state for options */
+#define RIE_NOTATTRIBS  ((RtInt)26)     /* Invalid state for attribs */
+#define RIE_NOTPRIMS    ((RtInt)27)     /* Invalid state for primitives */
+#define RIE_ILLSTATE    ((RtInt)28)     /* Other invalid state */
+#define RIE_BADMOTION   ((RtInt)29)     /* Badly formed motion block */
+#define RIE_BADSOLID    ((RtInt)30)     /* Badly formed solid block */
+
+#define RIE_BADTOKEN    ((RtInt)41)     /* Invalid token for request */
+#define RIE_RANGE       ((RtInt)42)     /* Parameter out of range */
+#define RIE_CONSISTENCY ((RtInt)43)     /* Parameters inconsistent */
+#define RIE_BADHANDLE   ((RtInt)44)     /* Bad object/light handle */
+#define RIE_NOSHADER    ((RtInt)45)     /* Can't load requested shader */
+#define RIE_MISSINGDATA ((RtInt)46)     /* Required parameters not provided */
+#define RIE_SYNTAX      ((RtInt)47)     /* Declare type syntax error */
+
+#define RIE_MATH        ((RtInt)61)     /* Zerodivide, noninvert matrix, etc. */
+
+/* Error severity levels */
+#define RIE_INFO        ((RtInt)0)      /* Rendering stats and other info */
+#define RIE_WARNING     ((RtInt)1)      /* Something seems wrong, maybe okay */
+#define RIE_ERROR       ((RtInt)2)      /* Problem. Results may be wrong */
+#define RIE_SEVERE      ((RtInt)3)      /* So bad you should probably abort */ 
+
 
 //}  // End of #ifdef RI_H_INCLUDED
 #endif
+

@@ -56,7 +56,7 @@ void version(std::ostream& Stream)
 RtVoid PrintProgress(RtFloat percent)
 {
 	std::cout << std::setw(6) << std::setfill(' ') << std::setprecision(4) << percent << "% Complete\r" << std::flush;
-	return(0);
+	return;
 }
 
 
@@ -79,7 +79,7 @@ RtVoid PreRender()
 		strcpy(mode,g_mode.c_str());
 		RiDisplay("+aqsis",type,mode,NULL);
 	}
-	return(0);
+	return;
 }
 
 
