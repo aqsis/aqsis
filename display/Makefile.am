@@ -4,7 +4,7 @@ AM_CXXFLAGS=@AQSIS_CXXFLAGS@
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@
 AM_CFLAGS=@AQSIS_CFLAGS@
 
-lib_LTLIBRARIES = libdisplay.la
+pkglib_LTLIBRARIES = libdisplay.la
 
 libdisplay_la_SOURCES = \
 display.cpp \
