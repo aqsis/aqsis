@@ -427,15 +427,6 @@
 			target = 715FC3CA06B0712D0052FAB7;
 			targetProxy = 712AE08D06B5833300285781;
 		};
-		7144F6440691FC4E007CCB15 = {
-			fileEncoding = 30;
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = aqerror.h;
-			path = libaqsistypes/aqerror.h;
-			refType = 4;
-			sourceTree = "<group>";
-		};
 		7144F6450691FC4E007CCB15 = {
 			fileEncoding = 30;
 			isa = PBXFileReference;
@@ -507,15 +498,6 @@
 			path = libaqsistypes/color.h;
 			refType = 4;
 			sourceTree = "<group>";
-		};
-		7144F64D0691FC4E007CCB15 = {
-			fileRef = 7144F6440691FC4E007CCB15;
-			isa = PBXBuildFile;
-			settings = {
-				ATTRIBUTES = (
-					Public,
-				);
-			};
 		};
 		7144F64E0691FC4E007CCB15 = {
 			fileRef = 7144F6450691FC4E007CCB15;
@@ -2414,7 +2396,6 @@
 				7144F65E0691FC73007CCB15,
 				7144F65F0691FC73007CCB15,
 				7144F6600691FC73007CCB15,
-				7144F6440691FC4E007CCB15,
 				7144F6450691FC4E007CCB15,
 				7144F6460691FC4E007CCB15,
 				7144F6470691FC4E007CCB15,
@@ -7046,7 +7027,6 @@
 		71DE6C8A0691FB0700145266 = {
 			buildActionMask = 2147483647;
 			files = (
-				7144F64D0691FC4E007CCB15,
 				7144F64E0691FC4E007CCB15,
 				7144F64F0691FC4E007CCB15,
 				7144F6510691FC4E007CCB15,
