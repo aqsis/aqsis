@@ -110,7 +110,7 @@ LIB32=link.exe -lib
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "..\lib"
-# PROP Intermediate_Dir "..\Object\Release\libri2rib"
+# PROP Intermediate_Dir "..\Object\Release\libri2rib\Release_Static_MT"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GR /GX /O2 /I "..\renderer" /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\..\win32libs\include" /D "_MBCS" /D "_LIB" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRI2RIB /D BUILD_LIBRI2RIB=1 /D "NDEBUG" /D "PLUGINS" /D "WIN32" /D "NO_SYSLOG" /FR /YX /FD /c
 # ADD CPP /nologo /MT /W3 /GR /GX /O2 /I "..\renderer" /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\..\win32libs\include" /D "_MBCS" /D "_LIB" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRI2RIB /D BUILD_LIBRI2RIB=1 /D "NDEBUG" /D "PLUGINS" /D "WIN32" /D "NO_SYSLOG" /FR /YX /FD /c
@@ -133,7 +133,7 @@ LIB32=link.exe -lib
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir "..\lib\Debug"
-# PROP Intermediate_Dir "..\Object\Debug\libri2rib"
+# PROP Intermediate_Dir "..\Object\Debug\libri2rib\Debug_Static_MT"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\..\win32libs\include" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRI2RIB /D BUILD_LIBRI2RIB=1 /D "WIN32" /D "NO_SYSLOG" /FR /YX /FD /GZ /c
 # ADD CPP /nologo /MTd /W3 /Gm /GR /GX /ZI /Od /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\..\win32libs\include" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "AQSIS_DYNAMIC_LINK" /D _qBUILDING=BUILD_LIBRI2RIB /D BUILD_LIBRI2RIB=1 /D "WIN32" /D "NO_SYSLOG" /FR /YX /FD /GZ /c

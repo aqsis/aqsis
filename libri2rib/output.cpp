@@ -925,7 +925,7 @@ RtVoid CqOutput::RiAttributeV( const char *name, RtInt n, RtToken tokens[], RtPo
 RtVoid CqOutput::RiPolygonV( RtInt nverts, RtInt n, RtToken tokens[], RtPointer parms[] )
 {
     PR( "Polygon", Polygon ); S;
-    printPL( n, tokens, parms, nverts, nverts );
+    printPL( n, tokens, parms, nverts, nverts, nverts );
 }
 
 RtVoid CqOutput::RiGeneralPolygonV( RtInt nloops, RtInt nverts[],
@@ -939,7 +939,7 @@ RtVoid CqOutput::RiGeneralPolygonV( RtInt nloops, RtInt nverts[],
 
     PR( "GeneralPolygon", GeneralPolygon ); S;
     printArray( nloops, nverts ); S;
-    printPL( n, tokens, parms, nbpts, nbpts );
+    printPL( n, tokens, parms, nbpts, nbpts, nbpts );
 }
 
 RtVoid CqOutput::RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[],
@@ -962,7 +962,7 @@ RtVoid CqOutput::RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[],
         if ( psize < verts[ i ] )
             psize = verts[ i ];
     }
-    printPL( n, tokens, parms, psize + 1, psize + 1, npolys );
+    printPL( n, tokens, parms, psize + 1, psize + 1, npolys, nbpts );
 }
 
 RtVoid CqOutput::RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[],
@@ -1323,10 +1323,7 @@ RtVoid CqOutput::RiSubdivisionMeshV( RtToken mask, RtInt nf, RtInt nverts[],
     }
     printArray( vsize, verts ); S;
 
-    for ( i = 0; i < ntags; i++ )
-    {
-        printToken( tags[ i ] ); S;
-    }
+	printArray( ntags, tags ); S;
     printArray( ntags * 2, numargs ); S;
 
     RtInt isize = 0, fsize = 0;

@@ -113,6 +113,22 @@ void CqASCII::printArray ( RtInt n, RtFloat *p )
     }
 }
 
+
+void CqASCII::printArray ( RtInt n, RtToken *p )
+{
+    if( n > 0 )
+    {
+        OUT << "[ ";
+        for ( RtInt i = 0; i < n; i++ )
+        {
+            printToken(p[ i ]);
+			OUT << ' ';
+        }
+        OUT << ']';
+    }
+}
+
+
 void CqASCII::printToken( RtToken t )
 {
     OUT << '"' << t << '"';

@@ -121,6 +121,8 @@ protected:
     {}
     virtual void printArray ( RtInt n, RtFloat *p )
     {}
+    virtual void printArray ( RtInt n, RtToken *p )
+    {}
     virtual void printToken ( RtToken t )
     {}
     virtual void printCharP ( const char *c )

@@ -55,6 +55,7 @@ protected:
 
     void printArray ( RtInt n, RtInt *p );
     void printArray ( RtInt n, RtFloat *p );
+    void printArray ( RtInt n, RtToken *p );
     void printToken ( RtToken t );
     void printCharP ( const char *c );
     void print ( const char *c );

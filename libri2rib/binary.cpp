@@ -253,6 +253,14 @@ void CqBinary::printArray ( RtInt n, RtFloat *p )
     }
 }
 
+void CqBinary::printArray ( RtInt n, RtToken *p )
+{
+    OUT << '[';
+    for ( TqInt i = 0; i < n;i++ )
+        printToken( p[ i ] );
+    OUT << ']';
+}
+
 void CqBinary::printCharP ( const char *c )
 {
     std::string s( c );
