@@ -151,7 +151,7 @@ class CqShader : public IqShader
 		{
 			return( NULL );
 		}
-		virtual IqShaderData* CreateTemporaryStorage()
+		virtual IqShaderData* CreateTemporaryStorage(EqVariableType type, EqVariableClass _class)
 		{
 			return( NULL );
 		}

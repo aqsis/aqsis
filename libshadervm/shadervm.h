@@ -70,9 +70,6 @@ struct SqOpCodeTrans
 _qShareM	extern char*	gShaderTypeNames[];
 _qShareM	extern TqInt	gcShaderTypeNames;
 
-extern	CqVMStackEntry	gUniformResult;	///< Global stackentry for storing the result of an opcode prior to putting it onto the stack.
-extern	CqVMStackEntry	gVaryingResult; ///< Global stackentry for storing the result of an opcode prior to putting it onto the stack.
-
 class CqShaderVM;
 union UsProgramElement;
 
@@ -109,57 +106,59 @@ union UsProgramElement
 // Macros used in the VM shadeops
 //
 
-#define	POPV(A)			CqVMStackEntry* A=Pop(__fVarying)
+#define	POPV(A)			IqShaderData* A=Pop(__fVarying)
 #define	POP				Pop(__fVarying)
-#define	RESULT			CqVMStackEntry& Result=__fVarying?gVaryingResult:gUniformResult;
+//#define	RESULT			CqVMStackEntry& Result=__fVarying?gVaryingResult:gUniformResult;
+#define	RESULT(t,c)		IqShaderData* pResult=GetNextTemp(t,c); \
+						pResult->Initialise(m_uGridRes, m_vGridRes)
 
 #define	VARFUNC			TqBool __fVarying=TqTrue;
 #define	AUTOFUNC		TqBool __fVarying=TqFalse;
 
-#define	FUNC(Func)		RESULT; \
-						Func(&Result,this); \
-						Push(Result);
-#define	FUNC1(Func)		POPV(ValA); \
-						RESULT; \
-						Func(ValA,&Result,this); \
-						Push(Result);
-#define	FUNC2(Func)		POPV(ValA); \
+#define	FUNC(t,Func)	RESULT(t,__fVarying?class_varying:class_uniform); \
+						Func(pResult,this); \
+						Push(pResult);
+#define	FUNC1(t,Func)	POPV(ValA); \
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						Func(ValA,pResult,this); \
+						Push(pResult);
+#define	FUNC2(t,Func)	POPV(ValA); \
 						POPV(ValB); \
-						RESULT; \
-						Func(ValA,ValB,&Result,this); \
-						Push(Result);
-#define	FUNC3(Func)		POPV(ValA); \
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						Func(ValA,ValB,pResult,this); \
+						Push(pResult);
+#define	FUNC3(t,Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
-						RESULT; \
-						Func(ValA,ValB,ValC,&Result,this); \
-						Push(Result);
-#define	FUNC4(Func)		POPV(ValA); \
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						Func(ValA,ValB,ValC,pResult,this); \
+						Push(pResult);
+#define	FUNC4(t,Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						POPV(ValD); \
-						RESULT; \
-						Func(ValA,ValB,ValC,ValD,&Result,this); \
-						Push(Result);
-#define	FUNC5(Func)		POPV(ValA); \
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						Func(ValA,ValB,ValC,ValD,pResult,this); \
+						Push(pResult);
+#define	FUNC5(t,Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						POPV(ValD); \
 						POPV(ValE); \
-						RESULT; \
-						Func(ValA,ValB,ValC,ValD,ValE,&Result,this); \
-						Push(Result);
-#define	FUNC7(Func)		POPV(ValA); \
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						Func(ValA,ValB,ValC,ValD,ValE,pResult,this); \
+						Push(pResult);
+#define	FUNC7(t,Func)	POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
 						POPV(ValD); \
 						POPV(ValE); \
 						POPV(ValF); \
 						POPV(ValG); \
-						RESULT; \
-						Func(ValA,ValB,ValC,ValD,ValE,ValF,ValG,&Result,this); \
-						Push(Result);
-#define FUNC1PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						Func(ValA,ValB,ValC,ValD,ValE,ValF,ValG,pResult,this); \
+						Push(pResult);
+#define FUNC1PLUS(t,Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						/* Read all the additional values. */ \
 						TqFloat fc; \
@@ -168,10 +167,10 @@ union UsProgramElement
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=POP; \
-						RESULT; \
-						Func(a,&Result,this, cParams, aParams); \
-						Push(Result);
-#define FUNC2PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						Func(a,pResult,this, cParams, aParams); \
+						Push(pResult);
+#define FUNC2PLUS(t,Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						POPV(b);		/* second value */ \
 						/* Read all the additional values. */ \
@@ -181,10 +180,10 @@ union UsProgramElement
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=POP; \
-						RESULT; \
-						Func(a,b,&Result,this, cParams, aParams); \
-						Push(Result);
-#define FUNC3PLUS(Func)	POPV(count);	/* Count of additional values.*/ \
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						Func(a,b,pResult,this, cParams, aParams); \
+						Push(pResult);
+#define FUNC3PLUS(t,Func)	POPV(count);	/* Count of additional values.*/ \
 						POPV(a);		/* first value */ \
 						POPV(b);		/* second value */ \
 						POPV(c);		/* third value */ \
@@ -195,9 +194,9 @@ union UsProgramElement
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=POP; \
-						RESULT; \
-						Func(a,b,c,&Result,this, cParams, aParams); \
-						Push(Result);
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						Func(a,b,c,pResult,this, cParams, aParams); \
+						Push(pResult);
 
 
 #define	VOIDFUNC(Func)	Func(this);
@@ -240,7 +239,7 @@ union UsProgramElement
 						while(iP!=cParams)	aParams[iP++]=POP; \
 						Func(a,this, cParams, aParams);
 
-#define	SPLINE(func)	POPV(count);	\
+#define	SPLINE(t,func)	POPV(count);	\
 						POPV(value); \
 						POPV(vala);	\
 						POPV(valb);	\
@@ -257,11 +256,11 @@ union UsProgramElement
 						TqInt iSP; \
 						for(iSP=4; iSP<cParams; iSP++) \
 							apSplinePoints[iSP]=POP; \
-						RESULT; \
-						func(value,&Result,this,cParams,apSplinePoints); \
-						Push(Result);
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						func(value,pResult,this,cParams,apSplinePoints); \
+						Push(pResult);
 
-#define	SSPLINE(func)	POPV(count); \
+#define	SSPLINE(t,func)	POPV(count); \
 						POPV(basis); \
 						POPV(value); \
 						POPV(vala);	\
@@ -279,11 +278,11 @@ union UsProgramElement
 						TqInt iSP; \
 						for(iSP=4; iSP<cParams; iSP++) \
 							apSplinePoints[iSP]=POP; \
-						RESULT; \
-						func(basis,value,&Result,this,cParams,apSplinePoints); \
-						Push(Result);
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						func(basis,value,pResult,this,cParams,apSplinePoints); \
+						Push(pResult);
 
-#define	TEXTURE(func)	POPV(count); /* additional parameter count */\
+#define	TEXTURE(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
 						TqFloat fc; \
@@ -292,10 +291,10 @@ union UsProgramElement
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=POP; \
-						RESULT; \
-						func(name,channel,&Result,this,cParams,aParams); \
-						Push(Result);
-#define	TEXTURE1(func)	POPV(count); /* additional parameter count */\
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						func(name,channel,pResult,this,cParams,aParams); \
+						Push(pResult);
+#define	TEXTURE1(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
 						POPV(R); /* point */\
@@ -305,24 +304,24 @@ union UsProgramElement
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=POP; \
-						RESULT; \
-						func(name,channel,R,&Result,this, cParams, aParams); \
-						Push(Result);
-#define	TEXTURE2(func)	POPV(count); /* additional parameter count */\
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						func(name,channel,R,pResult,this, cParams, aParams); \
+						Push(pResult);
+#define	TEXTURE2(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
-						POPV(s); /* s */\
-						POPV(t); /* t */\
+						POPV(s1); /* s */\
+						POPV(t1); /* t */\
 						TqFloat fc; \
 						count->GetFloat( fc ); \
 						TqInt cParams=static_cast<TqInt>( fc ); \
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=POP; \
-						RESULT; \
-						func(name,channel,s,t,&Result,this, cParams, aParams); \
-						Push(Result);
-#define	TEXTURE4(func)	POPV(count); /* additional parameter count */\
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						func(name,channel,s1,t1,pResult,this, cParams, aParams); \
+						Push(pResult);
+#define	TEXTURE4(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
 						POPV(R1); /* R1 */\
@@ -335,10 +334,10 @@ union UsProgramElement
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=POP; \
-						RESULT; \
-						func(name,channel,R1,R2,R3,R4,&Result,this,cParams,aParams); \
-						Push(Result);
-#define	TEXTURE8(func)	POPV(count); /* additional parameter count */\
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						func(name,channel,R1,R2,R3,R4,pResult,this,cParams,aParams); \
+						Push(pResult);
+#define	TEXTURE8(t,func)	POPV(count); /* additional parameter count */\
 						POPV(name); /* texture name */\
 						POPV(channel); /* channel */\
 						POPV(s1); /* s1 */\
@@ -355,22 +354,21 @@ union UsProgramElement
 						IqShaderData** aParams=new IqShaderData*[cParams]; \
 						TqInt iP=0; \
 						while(iP!=cParams)	aParams[iP++]=POP; \
-						RESULT; \
-						func(name,channel,s1,t1,s2,t2,s3,t3,s4,t4,&Result,this,cParams,aParams); \
-						Push(Result);
+						RESULT(t,__fVarying?class_varying:class_uniform); \
+						func(name,channel,s1,t1,s2,t2,s3,t3,s4,t4,pResult,this,cParams,aParams); \
+						Push(pResult);
 
 #define	TRIPLE(T)		POPV(ValA); \
 						POPV(ValB); \
 						POPV(ValC); \
-						RESULT; \
-						Result.OpTRIPLE_C(*ValA,*ValB,*ValC); \
-						Push(Result);
+						RESULT(type_color,__fVarying?class_varying:class_uniform); \
+						pResult->OpTRIPLE_C(*ValA,*ValB,*ValC); \
+						Push(pResult);
 
-//static TqFloat temp_float;
+static TqFloat	temp_float;
 static CqVector3D temp_point;
 static CqColor temp_color;
 static CqString temp_string;
-//static bool temp_bool;
 static CqMatrix temp_matrix;
 
 //----------------------------------------------------------------------
@@ -440,7 +438,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		}
 		virtual IqShaderData* CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fArgument = TqFalse);
 		virtual IqShaderData* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fParameter = TqFalse );
-		virtual IqShaderData* CreateTemporaryStorage();
+		virtual	IqShaderData* CreateTemporaryStorage(EqVariableType type, EqVariableClass _class);
 		virtual void DeleteTemporaryStorage( IqShaderData* pData );
 
 
@@ -469,6 +467,8 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		std::vector<IqShaderData*>		m_LocalVars;		///< Array of local variables.
 		std::vector<UsProgramElement>	m_ProgramInit;		///< Bytecodes of the intialisation program.
 		std::vector<UsProgramElement>	m_Program;			///< Bytecodes of the main program.
+		TqInt				m_uGridRes;
+		TqInt				m_vGridRes;
 		UsProgramElement*	m_PC;							///< Current program pointer.
 		TqInt	m_PO;							///< Current program offset.
 		TqInt	m_PE;							///< Offset of the end of the program.

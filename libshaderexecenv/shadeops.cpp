@@ -39,7 +39,6 @@ START_NAMESPACE( Aqsis )
 
 IqRenderer* QGetRenderContextI();
 
-static	TqFloat	temp_float;
 
 //----------------------------------------------------------------------
 // SO_sprintf
@@ -2884,9 +2883,9 @@ STD_SOIMPL CqShaderExecEnv::SO_phong( NORMALVAL N, VECTORVAL V, FLOATVAL size, D
 {
 	INIT_SO
 
-	IqShaderData* pnV = m_pAttributes->pshadSurface()->CreateTemporaryStorage();
-	IqShaderData* pnN = m_pAttributes->pshadSurface()->CreateTemporaryStorage();
-	IqShaderData* pR = m_pAttributes->pshadSurface()->CreateTemporaryStorage();
+	IqShaderData* pnV = m_pAttributes->pshadSurface()->CreateTemporaryStorage(type_vector, class_varying);
+	IqShaderData* pnN = m_pAttributes->pshadSurface()->CreateTemporaryStorage(type_normal, class_varying);
+	IqShaderData* pR = m_pAttributes->pshadSurface()->CreateTemporaryStorage(type_vector, class_varying);
 
 	SO_normalize( V, pnV );
 	SO_normalize( N, pnN );

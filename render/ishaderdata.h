@@ -5,7 +5,7 @@
  *	@brief	Decares the interface to generic shader variables.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/07/19 06:27:08 $
+ *	Last change date:	$Date: 2002/07/19 15:11:45 $
  */
 //------------------------------------------------------------------------------
 
@@ -60,6 +60,7 @@ enum EqVariableType
     type_void,
     type_matrix,
     type_sixteentuple,
+	type_bool,
 
 	type_last,
 };

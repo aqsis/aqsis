@@ -30,17 +30,5 @@
 START_NAMESPACE( Aqsis )
 
 
-CqString CqVMStackEntry::m_strName = CqString("__temporary__");
-
-
-CqVMStackEntry::CqVMStackEntry( TqInt size )
-{
-	if ( size > 1 )
-		m_aValues.resize( 512 );
-
-	m_Size = size;
-}
-
-
 END_NAMESPACE( Aqsis )
 //---------------------------------------------------------------------

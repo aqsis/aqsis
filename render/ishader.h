@@ -5,7 +5,7 @@
  *	@brief	Declare the interface which all shaders must implement.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/05/14 03:53:13 $
+ *	Last change date:	$Date: 2002/07/19 15:11:45 $
  */
 //------------------------------------------------------------------------------
 
@@ -103,7 +103,7 @@ struct IqShader
 		virtual IqShaderData* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fArgument = TqFalse) = 0;
 		/** Function to create some temporary storage which complies to the IqShaderData interface.
 		 */
-		virtual IqShaderData* CreateTemporaryStorage() = 0;
+		virtual IqShaderData* CreateTemporaryStorage(EqVariableType type, EqVariableClass _class) = 0;
 		/** Function to destroy temporary storage created with CreateTemporaryStorage.
 		 */
 		virtual void DeleteTemporaryStorage( IqShaderData* pData ) = 0;
