@@ -34,6 +34,7 @@
 using namespace Aqsis;
 
 #include <iomanip>
+#include <ios>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -99,6 +100,13 @@ TqFloat g_QuantizeOneVal = 0.0f;
 TqFloat g_QuantizeMinVal = 0.0f;
 TqFloat g_QuantizeMaxVal = 0.0f;
 TqFloat g_QuantizeDitherVal = 0.0f;
+
+TqFloat g_MousePosX, g_MousePosY;
+TqFloat g_ClipStartX, g_ClipStartY;
+TqFloat g_ClipEndX, g_ClipEndY;
+TqBool g_ShowPositionInfo = TqFalse;
+TqBool g_ClipWindowInfo = TqFalse;
+TqBool g_ClipWindowInfoMode = TqFalse;
 
 std::string g_TextPrompt;
 std::string g_TextInput;
@@ -199,6 +207,9 @@ void Display()
     GLint imagex, imagey = 0;
     GetImageOffset(imagex, imagey);
 
+    double viewport[4];
+    glGetDoublev(GL_VIEWPORT, viewport);
+
     glDisable(GL_BLEND);
     glRasterPos2i( imagex, imagey );
     glDrawPixels( g_ImageWidth, g_ImageHeight, GL_RGB, GL_UNSIGNED_BYTE, g_Image );
@@ -206,9 +217,6 @@ void Display()
     // Prompt the user for input ...
     if(!g_TextPrompt.empty())
     {
-        double viewport[4];
-        glGetDoublev(GL_VIEWPORT, viewport);
-
         glEnable(GL_BLEND);
         glColor4d(0, 0, 0.5, 0.5);
         glRectd(viewport[0], viewport[3] / 2 + 20, viewport[2], viewport[3] / 2 - 10);
@@ -219,6 +227,55 @@ void Display()
         DrawText(g_TextInput);
         DrawText("_");
     }
+
+	if(g_ShowPositionInfo)
+	{
+		// Draw the mouse position
+		glEnable(GL_BLEND);
+		std::string::const_iterator c;
+
+		std::stringstream strPos;
+		strPos << g_MousePosX << ", " << g_MousePosY;
+		glColor4d(1, 1, 1, 0.5);
+		glRasterPos2d(viewport[0] + 5, viewport[3] - 12);
+		std::string stringPos = strPos.str();
+		for(c = stringPos.begin(); c != stringPos.end(); ++c)
+			glutBitmapCharacter(GLUT_BITMAP_8_BY_13, *c);
+
+		if( g_ClipWindowInfo )
+		{
+			glColor4d(1, 1, 0, 0.5);
+
+			std::stringstream strClpW;
+			strClpW << "RiCropWindow [";
+			strClpW.setf(std::ios_base::fixed, std::ios_base::floatfield);
+			strClpW.setf(std::ios_base::right, std::ios_base::adjustfield);
+			strClpW.width(8);
+			strClpW.precision(6);
+			strClpW << MIN(g_ClipStartX, g_ClipEndX)/g_ImageWidth << ", " << MAX(g_ClipStartX, g_ClipEndX)/g_ImageWidth;
+			std::string stringClip = strClpW.str();
+			glRasterPos2d(viewport[0] + 5, viewport[3] - 24);
+			for(c = stringClip.begin(); c != stringClip.end(); ++c)
+				glutBitmapCharacter(GLUT_BITMAP_8_BY_13, *c);
+
+			std::stringstream strClpW2;
+			strClpW2 << "- ";
+			strClpW2.setf(std::ios_base::fixed, std::ios_base::floatfield);
+			strClpW2.setf(std::ios_base::right, std::ios_base::adjustfield);
+			strClpW2.width(8);
+			strClpW2.precision(6);
+			strClpW2 << MIN(g_ClipStartY, g_ClipEndY)/g_ImageHeight << ", " << MAX(g_ClipStartY, g_ClipEndY)/g_ImageHeight;
+			strClpW2.width(0);
+			strClpW2 << "]";
+			std::string stringClip2 = strClpW2.str();
+			glRasterPos2d(viewport[0] + 5 + (33*8), viewport[3] - 24);
+			for(c = stringClip2.begin(); c != stringClip2.end(); ++c)
+				glutBitmapCharacter(GLUT_BITMAP_8_BY_13, *c);
+
+			glColor4d(0.5, 0.5, 0.5, 0.5);
+			glRectd(g_ClipStartX, viewport[3] - g_ClipStartY, g_ClipEndX, viewport[3] - g_ClipEndY);
+		}
+	}
 
     // Note ... calling glutSwapBuffers() implicitly calls glFlush(),
     // and is safe for single-buffered windows
@@ -318,7 +375,58 @@ void OnMenu(int value)
     case 1:
         TextPrompt("Save TIFF: ", AppendPath(GetCurrentWorkingDirectory(), g_Filename), &WriteTIFF);
         break;
+
+    case 2:
+        g_ShowPositionInfo = !g_ShowPositionInfo;
+        break;
+
+    case 3:
+        g_ClipWindowInfo = TqFalse;
+        break;
     }
+}
+
+
+void OnMouseMove(int x, int y)
+{
+	g_MousePosX = x;
+	g_MousePosY = y;
+	glutPostRedisplay();
+}
+
+void OnMouseDrag(int x, int y)
+{
+	g_MousePosX = x;
+	g_MousePosY = y;
+
+	if( g_ClipWindowInfoMode )
+	{
+		g_ClipEndX = static_cast<TqFloat>(x);
+		g_ClipEndY = static_cast<TqFloat>(y);
+	}
+
+	glutPostRedisplay();
+}
+
+void OnMouseButton(int button, int state, int x, int y)
+{
+	g_MousePosX = x;
+	g_MousePosY = y;
+	if(button == GLUT_LEFT_BUTTON)
+	{
+		if(state == GLUT_DOWN && g_ShowPositionInfo)
+		{
+			g_ClipWindowInfo = TqTrue;
+			g_ClipWindowInfoMode = TqTrue;
+			g_ClipStartX = g_ClipEndX = static_cast<TqFloat>(x);
+			g_ClipStartY = g_ClipEndY = static_cast<TqFloat>(y);
+		}
+		else if( g_ShowPositionInfo )	// GLUT_UP
+		{
+			g_ClipWindowInfoMode = TqFalse;
+		}
+	}
+	glutPostRedisplay();
 }
 
 } // namespace
@@ -363,7 +471,12 @@ int main( int argc, char** argv )
     glutIdleFunc( OnIdle );
     glutCreateMenu(OnMenu);
     glutAddMenuEntry("Write TIFF file", 1);
+    glutAddMenuEntry("Toggle Position Info", 2);
+    glutAddMenuEntry("Hide Crop Window", 3);
     glutAttachMenu(GLUT_RIGHT_BUTTON);
+	glutPassiveMotionFunc( OnMouseMove );
+	glutMouseFunc( OnMouseButton );
+	glutMotionFunc( OnMouseDrag );
 
     // Setup GL context.
     glClearColor( 0.0, 0.0, 0.0, 0.0 );
