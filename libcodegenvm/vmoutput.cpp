@@ -37,48 +37,13 @@
 
 START_NAMESPACE( Aqsis )
 
-void OutputLocalVariable( const IqVarDef* pVar, std::ostream& out, std::string strOutName );
-void OutputFunctionCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::ostream& out, std::string strOutName );
-void OutputUnresolvedCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::ostream& out, std::string strOutName );
-
-
-static char* gVariableTypeNames[] =
-    {
-        "invalid",
-        "float",
-        "integer",
-        "point",
-        "string",
-        "color",
-        "triple",
-        "hpoint",
-        "normal",
-        "vector",
-        "void",
-        "matrix",
-        "hextuple",
-    };
-//static TqUint gcVariableTypeNames = sizeof( gVariableTypeNames ) / sizeof( gVariableTypeNames[ 0 ] );
-
-static TqUint gInternalFunctionUsage = 0;
-
-
-///---------------------------------------------------------------------
-/// Global stack of translation tables
-
-std::vector<std::vector<SqVarRefTranslator>*>	saTransTable;
-
-
-void OutputTree( const IqParseNode* pNode, std::string strOutName )
+void CqCodeGenVM::OutputTree( const IqParseNode* pNode, std::string strOutName )
 {
 	if ( pNode )
 		OutputTreeNode( pNode, std::cout, strOutName );
 }
 
-TqInt	gcLabels = 0;
-
-
-const char* MathOpName( TqInt op )
+const char* CqCodeGenVM::MathOpName( TqInt op )
 {
 	// Output this nodes operand name.
 	switch ( op )
@@ -182,7 +147,7 @@ const char* MathOpName( TqInt op )
 }
 
 
-void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string strOutName )
+void CqCodeGenVM::OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string strOutName )
 {
 	TqUint i;
 	IqParseNodeShader* pS;
@@ -233,13 +198,13 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string st
 		// Do a first pass output to find out which variables are used.
 		if ( pNode )
 		{
-			gInternalFunctionUsage = 0;
+			m_gInternalFunctionUsage = 0;
 			std::ostrstream strNull;
 			OutputTreeNode( pNode->pChild(), strNull, strOutName );
 		}
 
 		// Now that we have this information, work out which standard vars are used.
-		TqInt Use = gInternalFunctionUsage;
+		TqInt Use = m_gInternalFunctionUsage;
 		for ( i = 0; i < EnvVars_Last; i++ )
 		{
 			if ( gStandardVars[ i ].UseCount() > 0 )
@@ -277,7 +242,7 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string st
 
 		// If it is a builtin function, lets just check its standard variable usage.
 		if ( !pFunc->fLocal() )
-			gInternalFunctionUsage |= pFunc->InternalUsage();
+			m_gInternalFunctionUsage |= pFunc->InternalUsage();
 	}
 	else if ( pNode->GetInterface( ParseNode_UnresolvedCall, ( void** ) & pUC ) )
 	{
@@ -384,8 +349,8 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string st
 	}
 	else if ( pNode->GetInterface( ParseNode_WhileConstruct, ( void** ) & pWC ) )
 	{
-		TqInt iLabelA = gcLabels++;
-		TqInt iLabelB = gcLabels++;
+		TqInt iLabelA = m_gcLabels++;
+		TqInt iLabelB = m_gcLabels++;
 
 		IqParseNode* pArg = pNode->pChild();
 		assert( pArg != 0 );
@@ -409,8 +374,8 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string st
 	}
 	else if ( pNode->GetInterface( ParseNode_IlluminateConstruct, ( void** ) & pIC ) )
 	{
-		TqInt iLabelA = gcLabels++;
-		TqInt iLabelB = gcLabels++;
+		TqInt iLabelA = m_gcLabels++;
+		TqInt iLabelB = m_gcLabels++;
 
 		IqParseNode* pArg = pNode->pChild();
 		assert( pArg != 0 );
@@ -431,9 +396,9 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string st
 	}
 	else if ( pNode->GetInterface( ParseNode_IlluminanceConstruct, ( void** ) & pIC2 ) )
 	{
-		TqInt iLabelA = gcLabels++;
-		TqInt iLabelB = gcLabels++;
-		TqInt iLabelC = gcLabels++;
+		TqInt iLabelA = m_gcLabels++;
+		TqInt iLabelB = m_gcLabels++;
+		TqInt iLabelC = m_gcLabels++;
 
 		IqParseNode* pArg = pNode->pChild();
 		assert( pArg != 0 );
@@ -463,8 +428,8 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string st
 	}
 	else if ( pNode->GetInterface( ParseNode_SolarConstruct, ( void** ) & pSC ) )
 	{
-		TqInt iLabelA = gcLabels++;
-		TqInt iLabelB = gcLabels++;
+		TqInt iLabelA = m_gcLabels++;
+		TqInt iLabelB = m_gcLabels++;
 		IqParseNode* pStmtInc = NULL;
 		IqParseNode* pArg = pNode->pChild();
 		assert( pArg != 0 );
@@ -488,7 +453,7 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string st
 	}
 	else if ( pNode->GetInterface( ParseNode_Conditional, ( void** ) & pCond ) )
 	{
-		TqInt iLabelA = gcLabels++;
+		TqInt iLabelA = m_gcLabels++;
 		TqInt iLabelB = iLabelA;
 
 		IqParseNode* pArg = pNode->pChild();
@@ -504,7 +469,7 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string st
 		out << "\tRS_GET" << std::endl;			// get current state to running state
 		if ( pFalseStmt )
 		{
-			iLabelB = gcLabels++;
+			iLabelB = m_gcLabels++;
 			out << "\tRS_JZ " << iLabelB << std::endl; // skip true statement if all false
 		}
 		else
@@ -673,18 +638,18 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string st
 
 
 
-IqVarDef* pTranslatedVariable( SqVarRef& Ref )
+IqVarDef* CqCodeGenVM::pTranslatedVariable( SqVarRef& Ref )
 {
 	SqVarRef RealRef = Ref;
 	// Firstly see if the top translation table knows about this variable.
 
-	if ( !saTransTable.empty() )
+	if ( !m_saTransTable.empty() )
 	{
 		std::vector<SqVarRefTranslator>* pTransTable = 0;
-		std::vector<std::vector<SqVarRefTranslator>*>::reverse_iterator iTable = saTransTable.rbegin();
+		std::vector<std::vector<SqVarRefTranslator>*>::reverse_iterator iTable = m_saTransTable.rbegin();
 
 		int i = 0;
-		while ( iTable != saTransTable.rend() )
+		while ( iTable != m_saTransTable.rend() )
 		{
 			pTransTable = *iTable;
 			if ( pTransTable != 0 )
@@ -713,9 +678,9 @@ IqVarDef* pTranslatedVariable( SqVarRef& Ref )
 /// PushTransTable
 /// Push a new variable reference translation table onto the stack.
 
-void PushTransTable( std::vector<SqVarRefTranslator>* pTransTable )
+void CqCodeGenVM::PushTransTable( std::vector<SqVarRefTranslator>* pTransTable )
 {
-	saTransTable.push_back( pTransTable );
+	m_saTransTable.push_back( pTransTable );
 }
 
 
@@ -723,16 +688,16 @@ void PushTransTable( std::vector<SqVarRefTranslator>* pTransTable )
 /// PopTransTable
 /// Pop the previous variable reference translation table from the stack.
 
-std::vector<SqVarRefTranslator>* PopTransTable()
+std::vector<SqVarRefTranslator>* CqCodeGenVM::PopTransTable()
 {
-	std::vector<SqVarRefTranslator>* pRes = saTransTable.back();
-	saTransTable.erase( saTransTable.end() - 1 );
+	std::vector<SqVarRefTranslator>* pRes = m_saTransTable.back();
+	m_saTransTable.erase( m_saTransTable.end() - 1 );
 	return ( pRes );
 }
 
 
 
-CqString StorageSpec( TqInt Type )
+CqString CqCodeGenVM::StorageSpec( TqInt Type )
 {
 	CqString strSpec( "" );
 
@@ -747,7 +712,7 @@ CqString StorageSpec( TqInt Type )
 /// OutputLocalVariable
 /// Output details of this local variable.
 
-void OutputLocalVariable( const IqVarDef* pVar, std::ostream& out, std::string strOutName )
+void CqCodeGenVM::OutputLocalVariable( const IqVarDef* pVar, std::ostream& out, std::string strOutName )
 {
 	if ( pVar->UseCount() > 0 || ( pVar->Type() & Type_Param ) )
 	{
@@ -762,7 +727,7 @@ void OutputLocalVariable( const IqVarDef* pVar, std::ostream& out, std::string s
 }
 
 
-void OutputFunctionCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::ostream& out, std::string strOutName )
+void CqCodeGenVM::OutputFunctionCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::ostream& out, std::string strOutName )
 {
 	if ( !pFunc->fLocal() )
 	{
@@ -843,7 +808,7 @@ void OutputFunctionCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::o
 }
 
 
-void OutputUnresolvedCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::ostream& out, std::string strOutName )
+void CqCodeGenVM::OutputUnresolvedCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::ostream& out, std::string strOutName )
 {
 
 	// Output parameters in reverse order, so that the function can pop them as expected

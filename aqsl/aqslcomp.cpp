@@ -30,6 +30,7 @@
 #include	<fstream>
 
 #include	"libslparse.h"
+#include	"icodegen.h"
 #include	"vmoutput.h"
 #include	"argparse.h"
 
@@ -60,6 +61,7 @@ void version( std::ostream& Stream )
 int main( int argc, const char** argv )
 {
 	ArgParse ap;
+	CqCodeGenVM codegen; // Should be a pointer determined by what we want to generate
 
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options]" );
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
@@ -85,7 +87,7 @@ int main( int argc, const char** argv )
 	}
 
 	if ( Parse( std::cin, "stdin", std::cerr ) )
-		OutputTree( GetParseTree(), g_stroutname );
+		codegen.OutputTree( GetParseTree(), g_stroutname );
 
 	return 0;
 }

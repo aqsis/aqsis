@@ -34,27 +34,35 @@
 #include	"iparsenode.h"
 #include	"ivardef.h"
 #include	"ifuncdef.h"
+#include	"icodegen.h"
 
 START_NAMESPACE( Aqsis )
 
 
 #define	VM_SHADER_EXTENSION	".slx"
 
-///----------------------------------------------------------------------
-/// SqVarRefTranslator
-/// Structure storing a variable reference translation.
-
-struct SqVarRefTranslator
+class CqCodeGenVM : private IqCodeGen 
 {
-	SqVarRef	m_From;
-	SqVarRef	m_To;
-};
+	protected:
+	void OutputLocalVariable( const IqVarDef*, std::ostream&, std::string );
+	void OutputFunctionCall( const IqFuncDef*, IqParseNode*, std::ostream&, std::string );
+	void OutputUnresolvedCall( const IqFuncDef*, IqParseNode*, std::ostream&, std::string );
+	const char* MathOpName( TqInt );
+	CqString StorageSpec( TqInt );
+	virtual std::vector<SqVarRefTranslator>* PopTransTable();
+	virtual void PushTransTable( std::vector<SqVarRefTranslator>* );
+	virtual IqVarDef* pTranslatedVariable( SqVarRef& );
 
-void OutputTree( const IqParseNode* pNode, std::string strOutName = "" );
-void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string strOutName = "" );
-IqVarDef* pTranslatedVariable( SqVarRef& Ref );
-void PushTransTable( std::vector<SqVarRefTranslator>* paTransTable );
-std::vector<SqVarRefTranslator>*	PopTransTable();
+	std::vector<std::vector<SqVarRefTranslator>*> m_saTransTable;
+	TqInt m_gcLabels;
+	TqUint m_gInternalFunctionUsage;
+
+	public:
+	CqCodeGenVM() : m_gcLabels(0), m_gInternalFunctionUsage(0) {};
+	virtual void OutputTree( const IqParseNode*, std::string);
+	virtual void OutputTreeNode( const IqParseNode*, std::ostream&, std::string);
+
+};
 
 //-----------------------------------------------------------------------
 
