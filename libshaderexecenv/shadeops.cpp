@@ -3419,7 +3419,10 @@ STD_SOIMPL CqShaderExecEnv::SO_atmosphere( STRINGVAL name, IqShaderData* pV, DEF
 {
 	INIT_SO
 
-	IqShader * pAtmosphere = m_pAttributes ->pshadAtmosphere();
+	IqShader * pAtmosphere = NULL;
+
+	if( NULL != m_pAttributes && NULL != m_pAttributes ->pshadAtmosphere() )
+		pAtmosphere = m_pAttributes ->pshadAtmosphere();
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -3439,7 +3442,10 @@ STD_SOIMPL CqShaderExecEnv::SO_displacement( STRINGVAL name, IqShaderData* pV, D
 {
 	INIT_SO
 
-	IqShader * pDisplacement = m_pAttributes ->pshadDisplacement();
+	IqShader * pDisplacement = NULL;
+
+	if( NULL != m_pAttributes && NULL != m_pAttributes ->pshadDisplacement() )
+		pDisplacement = m_pAttributes ->pshadDisplacement();
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
@@ -3482,7 +3488,10 @@ STD_SOIMPL CqShaderExecEnv::SO_surface( STRINGVAL name, IqShaderData* pV, DEFPAR
 {
 	INIT_SO
 
-	IqShader * pSurface = m_pAttributes ->pshadSurface();
+	IqShader * pSurface = NULL;
+
+	if( NULL != m_pAttributes && NULL != m_pAttributes ->pshadSurface() )
+		pSurface = m_pAttributes ->pshadSurface();
 
 	BEGIN_UNIFORM_SECTION
 	GETSTRING( name );
