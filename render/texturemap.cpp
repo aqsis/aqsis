@@ -2161,7 +2161,7 @@ void CqShadowMap::LoadZFile()
 			//CqString strErr( "Shadow map not found " );
 			//strErr += m_strName;
 			//CqBasicError( ErrorID_FileNotFound, Severity_Normal, strErr.c_str() );
-			QGetRenderContextI() ->Logger() ->error( "Shadow map \"%s\" not found", m_strName.c_str();
+			QGetRenderContextI() ->Logger() ->error( "Shadow map \"%s\" not found", m_strName.c_str());
 		}
 	}
 }
