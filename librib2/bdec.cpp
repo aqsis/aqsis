@@ -28,6 +28,12 @@
     \author Lionel J. Lacour (intuition01@online.fr)
 */
 
+#ifdef	WIN32
+#pragma warning(disable : 4786)
+#endif
+
+#include <iostream>
+
 #include <stdio.h>
 #include "bdec.h"
 
@@ -256,7 +262,6 @@ void CqRibBinaryDecoder::readString (TqChar c, std::strstream &str)
 void CqRibBinaryDecoder::getNext ()
 {
     TqChar c, b1, b2, b3, b4;
-    TqInt i;
     TqUint ui; 
     TqFloat f;
     TqPchar cp;
@@ -435,7 +440,7 @@ void CqRibBinaryDecoder::getNext ()
 	GET1;
 	ui=ctui(b1);
 	gc(c);
-	readString(c,str); str << ends;
+	readString(c,str); str << std::ends;
 	tmpstr=str.str();
 	ritab[ui]=tmpstr;
 	str.freeze(false);
@@ -446,7 +451,7 @@ void CqRibBinaryDecoder::getNext ()
 	GET1;
 	ui=ctui(b1);
 	gc(c);
-	str << "\""; readString(c,str); str << "\"" << ends;
+	str << "\""; readString(c,str); str << "\"" << std::ends;
 	if (stringtab.size() <= ui) stringtab.resize(ui+1);
 	tmpstr=str.str();
 	stringtab[ui]=tmpstr;
@@ -457,7 +462,7 @@ void CqRibBinaryDecoder::getNext ()
 	GET2;
 	ui=ctui(b1,b2);
 	gc(c);
-	str << "\""; readString(c,str); str << "\"" << ends;
+	str << "\""; readString(c,str); str << "\"" << std::ends;
 	if (stringtab.size() <= ui) stringtab.resize(ui+1);
 	tmpstr=str.str();
 	stringtab[ui]=tmpstr;
@@ -526,7 +531,7 @@ TqInt CqRibBinaryDecoder::read(TqPchar buffer, TqUint size)
 	    getNext();
 	}
     } catch (std::string &s) {
-	if (s!="") std::cerr << s << endl;
+	if (s!="") std::cerr << s << std::endl;
     }
 
     return writeToBuffer(buffer,size);

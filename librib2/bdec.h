@@ -42,7 +42,7 @@ private:
     std::vector<TqChar> cv;
 
     std::string ritab[256];
-    std::vector<string> stringtab;
+    std::vector<std::string> stringtab;
 
     // Convert To Signed Integer
     TqInt ctsi(TqChar);
