@@ -57,6 +57,8 @@ librib2ri/Makefile \
 librib2stream/Makefile \
 libslparse/Makefile \
 render/Makefile \
+render/macosx/Makefile \
+render/macosx/std/Makefile \
 ribfiles/Makefile \
 shaders/Makefile \
 shadowmap/Makefile \

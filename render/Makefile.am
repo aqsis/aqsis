@@ -1,3 +1,4 @@
+SUBDIRS = macosx .
 EXTRA_DIST = Render.dsp libaqsis.dsp
 
 lib_LTLIBRARIES = libaqsis.la
