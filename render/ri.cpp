@@ -749,13 +749,26 @@ RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat dither
 		pColorQuantize [ 2 ] = static_cast<TqFloat>( max );
 		pColorQuantize [ 3 ] = static_cast<TqFloat>( ditheramplitude );
 	}
-	else
+	else if ( strcmp( type, "z" ) == 0 )
 	{
 		TqFloat* pDepthQuantize = QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "Quantize", "Depth" );
 		pDepthQuantize [ 0 ] = static_cast<TqFloat>( one );
 		pDepthQuantize [ 1 ] = static_cast<TqFloat>( min );
 		pDepthQuantize [ 2 ] = static_cast<TqFloat>( max );
 		pDepthQuantize [ 3 ] = static_cast<TqFloat>( ditheramplitude );
+	}
+	else
+	{
+		CqNamedParameterList* pOption = QGetRenderContext() ->optCurrent().pOptionWrite( "Quantize" );
+		if( NULL != pOption )
+		{
+			CqParameterTypedUniformArray<TqFloat,type_float,TqFloat>* pQuant = new CqParameterTypedUniformArray<TqFloat,type_float,TqFloat>(type,4); \
+			pQuant->pValue()[0] = static_cast<TqFloat>( one );
+			pQuant->pValue()[1] = static_cast<TqFloat>( min );
+			pQuant->pValue()[2] = static_cast<TqFloat>( max );
+			pQuant->pValue()[3] = static_cast<TqFloat>( ditheramplitude );
+			pOption->AddParameter( pQuant );
+		}
 	}
 
 	return ;
@@ -795,26 +808,32 @@ RtVoid	RiDisplayV( const char *name, RtToken type, RtToken mode, PARAMETERLIST )
 	// Append the display mode to the current setting.
 	TqInt eValue = 0;
 	TqInt index = 0;
+	TqInt dataOffset = 0;
+	TqInt dataSize = 0;
 	if ( strncmp( mode, RI_RGB, strlen(RI_RGB) ) == 0 )
 	{
 		eValue |= ModeRGB;
+		dataSize += 3;
 		index += strlen( RI_RGB );
 	}
 	if ( strncmp( &mode[index], RI_A, strlen( RI_A ) ) == 0 )
 	{
 		eValue |= ModeA;
+		dataSize += 1;
 		index += strlen( RI_A );
 	}
 	if ( strncmp( &mode[index], RI_Z, strlen( RI_Z ) ) == 0 )
 	{
 		eValue |= ModeZ;
+		dataSize += 1;
 		index += strlen( RI_Z );
 	}
 
 	// If none of the standard "rgbaz" strings match, then it is an alternative 'arbitrary output variable'
-	if( eValue == 0 || index <= strlen( mode ) )
+	if( eValue == 0 )
 	{
-		QGetRenderContext()->RegisterOutputData( mode );
+		dataOffset = QGetRenderContext()->RegisterOutputData( mode );
+		dataSize = QGetRenderContext()->OutputDataSamples( mode );
 	}
 
 	// Check if the request is to use different tiff's compression
@@ -833,7 +852,7 @@ RtVoid	RiDisplayV( const char *name, RtToken type, RtToken mode, PARAMETERLIST )
 		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = eValue ;
 	}
 	// Add a display driver to the list of requested drivers.
-	QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode, compression, quality );
+	QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode, compression, quality, eValue, dataOffset, dataSize );
 
 	return ;
 }

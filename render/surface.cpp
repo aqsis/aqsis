@@ -145,7 +145,7 @@ CqString CqBasicSurface::strName() const
 
 TqInt CqBasicSurface::Uses() const
 {
-	TqInt Uses = gDefUses;
+	TqInt Uses = gDefUses | QGetRenderContext()->pDDmanager()->Uses();
 	IqShader* pshadSurface = pAttributes() ->pshadSurface();
 	IqShader* pshadDisplacement = pAttributes() ->pshadDisplacement();
 	IqShader* pshadAtmosphere = pAttributes() ->pshadAtmosphere();

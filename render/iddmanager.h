@@ -97,7 +97,7 @@ struct IqDDManager
 	virtual	TqInt	Shutdown() = 0;
 	/** Add a display request to the managers list.
 	 */
-	virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality ) = 0;
+	virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality, TqInt modeID, TqInt dataOffset, TqInt dataSize ) = 0;
 	/** Clear all display requests from the managers list.
 	 */
 	virtual	TqInt	ClearDisplays() = 0;
@@ -113,6 +113,9 @@ struct IqDDManager
 	/** Determine if any of the displays need the named shader variable.
 	 */
 	virtual TqBool	fDisplayNeeds( const TqChar* var) = 0;
+	/** Determine if any of the displays need the named shader variable.
+	 */
+	virtual TqInt	Uses( ) = 0;
 };
 
 

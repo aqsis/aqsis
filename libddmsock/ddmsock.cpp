@@ -264,11 +264,14 @@ TqBool CqDDServer::Accept( CqDDClient& dd )
 //////////////////////////// CqDDClient ///////////////////////////////
 
 
-CqDDClient::CqDDClient( const TqChar* name, const TqChar* type, const TqChar* mode ) :
+CqDDClient::CqDDClient( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataOffset, TqInt dataSize ) :
 		m_Socket( INVALID_SOCKET ),
 		m_strName( name ),
 		m_strType( type ),
-		m_strMode( mode )
+		m_strMode( mode ),
+		m_modeID( modeID ),
+		m_dataOffset( dataOffset ),
+		m_dataSize( dataSize )
 {
 	m_hMode = CqParameter::hash( mode );
 }
@@ -387,9 +390,9 @@ TqInt CqDDManager::Shutdown()
 	return ( 0 );
 }
 
-TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality )
+TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality, TqInt modeID, TqInt dataOffset, TqInt dataSize )
 {
-	m_aDisplayRequests.push_back( CqDDClient( name, type, mode ) );
+	m_aDisplayRequests.push_back( CqDDClient( name, type, mode, modeID, dataOffset, dataSize ) );
 	m_aDisplayCompression.push_back( compression );
 	m_aDisplayQuality.push_back( quality );
 	return ( 0 );
@@ -456,17 +459,9 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 
 	for ( std::vector<CqDDClient>::iterator i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
 	{
-		RtInt mode = 0;
-		if ( strstr( i->strMode().c_str(), RI_RGB ) != NULL )
-			mode |= ModeRGB;
-		if ( strstr( i->strMode().c_str(), RI_A ) != NULL )
-			mode |= ModeA;
-		if ( strstr( i->strMode().c_str(), RI_Z ) != NULL )
-			mode |= ModeZ;
+		TqInt mode = i->GetmodeID();
+		TqInt samples = i->GetdataSize();
 
-		TqInt	samples = mode & ModeRGB ? 3 : 0;
-		samples += mode & ModeA ? 1 : 0;
-		samples = mode & ModeZ ? 1 : samples;
 		TqInt	elementsize = samples * sizeof( TqFloat );
 		TqInt	datalen = xsize * ysize * elementsize;
 
@@ -474,7 +469,6 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 
 		TqInt	linelen = xsize * samples;
 
-		SqImageSample val( QGetRenderContext()->GetOutputDataTotalSize() );
 		TqInt y;
 		for ( y = 0; y < ysize; y++ )
 		{
@@ -492,23 +486,35 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 				}
 				else
 				{
-					if ( samples >= 3 )
+					if ( mode & ModeRGB )
 					{
 						const TqFloat* pSamples = pBucket->Data( sx, sy );
 						pData[ so + 0 ] = pSamples[0];
 						pData[ so + 1 ] = pSamples[1];
 						pData[ so + 2 ] = pSamples[2];
-						if ( samples == 4 )
+						if ( mode & ModeA )
 						{
 							TqFloat a = ( pSamples[3] + pSamples[4] + pSamples[5] ) / 3.0f;
 							pData[ so + 3 ] = a * pBucket->Coverage( sx, sy );
 						}
 					}
-					else if ( samples == 1 )
+					else if ( mode & ModeA )
 					{
 						const TqFloat* pSamples = pBucket->Data( sx, sy );
 						TqFloat a = ( pSamples[3] + pSamples[4] + pSamples[5] ) / 3.0f;
 						pData[ so + 0 ] = a * pBucket->Coverage( sx, sy );
+					}
+					else
+					{
+						// If not any of the standard modes, then check for AOV.
+						TqInt ioffset = i->GetdataOffset();
+						if( i->GetdataSize() != 0 )
+						{
+							const TqFloat* pSamples = pBucket->Data( sx, sy );
+							TqInt idata;
+							for( idata = 0; idata < i->GetdataSize(); idata++ )
+								pData[ so + idata ] = pSamples[ ioffset + idata ];
+						}
 					}
 				}
 			}
@@ -542,9 +548,25 @@ TqBool CqDDManager::fDisplayNeeds( const TqChar* var )
 			return ( TqTrue );
 		else if ( ( i->hMode() == htoken ) )
 			return ( TqTrue );
-
 	}
 	return ( TqFalse );
+}
+
+
+TqInt CqDDManager::Uses()
+{
+	TqInt Uses = 0;
+	std::vector<CqDDClient>::iterator i;
+	for ( i = m_aDisplayRequests.begin(); i != m_aDisplayRequests.end(); i++ )
+	{
+		TqInt ivar;
+		for( ivar = 0; ivar < EnvVars_Last; ivar++ )
+		{
+			if( i->hMode() == gVariableTokens[ ivar ] )
+				Uses |= 1 << ivar;
+		}
+	}
+	return ( Uses );
 }
 
 /**
@@ -675,16 +697,7 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 		dd.SendMsg( &msgnp );
 
 		// Send the open message..
-		RtInt mode = 0;
-		if ( strstr( dd.strMode().c_str(), RI_RGB ) != NULL )
-			mode |= ModeRGB;
-		if ( strstr( dd.strMode().c_str(), RI_A ) != NULL )
-			mode |= ModeA;
-		if ( strstr( dd.strMode().c_str(), RI_Z ) != NULL )
-			mode |= ModeZ;
-		TqInt SamplesPerElement = mode & ModeRGB ? 3 : 0;
-		SamplesPerElement += mode & ModeA ? 1 : 0;
-		SamplesPerElement = mode & ModeZ ? 1 : SamplesPerElement;
+		TqInt SamplesPerElement = dd.GetdataSize();
 		TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "Quantize", "Color" );
 		TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
 		TqInt min = static_cast<TqInt>( pQuant [ 1 ] );

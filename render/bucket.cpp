@@ -540,7 +540,7 @@ void CqBucket::QuantizeBucket()
 		TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
 		TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
 		TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
-		TqFloat ditheramplitude = pQuant [ 3 ];
+		double ditheramplitude = pQuant [ 3 ];
 
 		// If settings are 0,0,0,0 then leave as floating point and we will save an FP tiff.
 		if ( one == 0 && min == 0 && max == 0 )
@@ -586,7 +586,8 @@ void CqBucket::QuantizeBucket()
 			pie += nextx;
 		}
 	}
-	else
+	
+	if ( QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeZ )
 	{
 		const TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", "Depth" );
 		TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
@@ -611,6 +612,44 @@ void CqBucket::QuantizeBucket()
 				pie2++;
 			}
 			pie += nextx;
+		}
+	}
+
+	// Now go through the other AOV's and quantize those if necessary.
+	std::map<std::string, CqRenderer::SqOutputDataEntry>& DataMap = QGetRenderContext()->GetMapOfOutputDataEntries();
+	std::map<std::string, CqRenderer::SqOutputDataEntry>::iterator entry;
+	for( entry = DataMap.begin(); entry != DataMap.end(); entry++ )
+	{
+		const TqFloat* pQuant = QGetRenderContext() ->optCurrent().GetFloatOption( "Quantize", entry->first.c_str() );
+		if( NULL != pQuant )
+		{
+			TqInt startindex = entry->second.m_Offset;
+			TqInt endindex = startindex + entry->second.m_NumSamples;
+			TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
+			TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
+			TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
+			double ditheramplitude = pQuant [ 3 ];
+
+			CqImagePixel* pie;
+			ImageElement( XOrigin(), YOrigin(), pie );
+			TqInt x, y;
+			for ( y = 0; y < endy; y++ )
+			{
+				CqImagePixel* pie2 = pie;
+				for ( x = 0; x < endx; x++ )
+				{
+					TqInt sampleindex;
+					for( sampleindex = startindex; sampleindex < endindex; sampleindex++ )
+					{
+						double d;
+						if ( modf( one * pie2->GetPixelSample().m_Data[sampleindex] + ditheramplitude * random.RandomFloat(), &d ) > 0.5 ) d += 1.0f;
+						d = CLAMP( d, min, max );
+						pie2->GetPixelSample().m_Data[sampleindex] = d;
+					}
+					pie2++;
+				}
+				pie += nextx;
+			}
 		}
 	}
 }

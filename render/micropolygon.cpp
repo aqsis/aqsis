@@ -122,6 +122,7 @@ void CqMicroPolyGrid::Initialise( TqInt cu, TqInt cv, CqSurface* pSurface )
 		m_pCSGNode = pSurface->pCSGNode();
 		if ( m_pCSGNode ) m_pCSGNode->AddRef();
 	}
+	lUses |= QGetRenderContext()->pDDmanager()->Uses();
 
 	/// \note This should delete through the interface that created it.
 

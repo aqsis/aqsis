@@ -56,7 +56,7 @@ struct SqDDMessageBase;
 class CqDDClient
 {
 	public:
-		CqDDClient( const TqChar* name, const TqChar* type, const TqChar* mode );
+		CqDDClient( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt modeID, TqInt dataoffset = 0, TqInt datasize = 0 );
 		~CqDDClient();
 
 		/** Close the socket this client is associated with.
@@ -110,12 +110,27 @@ class CqDDClient
 		{
 			m_strMode = mode;
 		}
+		TqInt GetdataOffset() const
+		{
+			return( m_dataOffset );
+		}
+		TqInt GetdataSize() const
+		{
+			return( m_dataSize );
+		}
+		TqInt GetmodeID() const
+		{
+			return( m_modeID );
+		}
 
 	private:
 		SOCKET	m_Socket;			///< Socket ID of the client.
 		CqString	m_strName;			///< Display name.
 		CqString	m_strType;			///< Display type.
 		CqString	m_strMode;			///< Display mode.
+		TqInt		m_modeID;
+		TqInt		m_dataOffset;
+		TqInt		m_dataSize;
 		TqUlong m_hMode;
 }
 ;
@@ -180,12 +195,13 @@ class CqDDManager : public IqDDManager
 		// Overridden from IqDDManager
 		virtual	TqInt	Initialise();
 		virtual	TqInt	Shutdown();
-		virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality );
+		virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality, TqInt modeID, TqInt dataOffset, TqInt dataSize );
 		virtual	TqInt	ClearDisplays();
 		virtual	TqInt	OpenDisplays();
 		virtual	TqInt	CloseDisplays();
 		virtual	TqInt	DisplayBucket( IqBucket* pBucket );
 		virtual TqBool	fDisplayNeeds( const TqChar* var );
+		virtual TqInt	Uses();
 
 		void	LoadDisplayLibrary( CqDDClient& dd );
 		void	InitialiseDisplayNameMap();
