@@ -1,0 +1,17 @@
+Aqsis Renderer - An open source RenderMan compliant rendering system.
+
+The following people have contributed to the development of Aqsis Renderer
+
+    1998 Paul C. Gregory  Originator and primary developer, pgregory@aqsis.com
+	2001 Timothy M. Shead  Linux port.
+	2001 Joseph Lacour  Linux port Lionel.
+	2001 Patrick Mauritz  Linux port.
+	2001 Patrick Pelletier  Supplied libargparse and general development.
+	2001 Kelly Brock  General development and optimisation.
+	2001 Matthias Baas  General development and optimisation.
+	2001 Michel Joron  General development.
+	2001 Kirk Bailey  Supplied PP C preprocessor.
+
+
+	If anyone is missing from this list, please contact me at pgregory@aqsis.com.
+
