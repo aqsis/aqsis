@@ -35,6 +35,7 @@ START_NAMESPACE(Aqsis)
 extern CqParseNode* ParseTreePointer;
 extern void TypeCheck();
 extern void Optimise();
+extern void InitStandardNamespace();
 
 
 std::istream* ParseInputStream = &std::cin;
@@ -51,9 +52,15 @@ TqBool Parse(std::istream& InputStream, const CqString StreamName, std::ostream&
 	ParseLineNumber = 1;
 	ParseSucceeded = true;
 	
+	InitStandardNamespace();
+	
 	yyparse();
 	TypeCheck();
 	Optimise();
+
+	std::vector<CqVarDef>::iterator iv;
+	for(iv=gLocalVars.begin(); iv!=gLocalVars.end(); iv++)
+		if(iv->pDefValue())	iv->pDefValue()->Optimise();
 	
 	return ParseSucceeded;
 }
