@@ -440,6 +440,12 @@ int main( int argc, const char** argv )
     report_refcounts();
 #endif
 
+	if(g_pause)
+	{
+		std::cout << "Press any key..." << std::ends;
+		std::cin.ignore(std::cin.rdbuf()->in_avail() + 1);
+	}
+
     return ( 0 );
 }
 
