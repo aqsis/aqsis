@@ -12,11 +12,11 @@ Engine::Engine()
 Engine::~Engine()
 {}
 
-RendermanInterface::RtLightHandle Engine::RiAreaLightSourceV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtLightHandle Engine::RiAreaLightSourceV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     return ::RiAreaLightSourceV( name, count, tokens, values );
 }
-RendermanInterface::RtVoid Engine::RiAtmosphereV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiAtmosphereV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiAtmosphereV( name, count, tokens, values );
 }
@@ -28,7 +28,7 @@ RendermanInterface::RtVoid Engine::RiAttributeEnd()
 {
     ::RiAttributeEnd();
 }
-RendermanInterface::RtVoid Engine::RiAttributeV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiAttributeV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiAttributeV( name, count, tokens, values );
 }
@@ -96,11 +96,11 @@ RendermanInterface::RtVoid Engine::RiCylinderV( RtFloat radius, RtFloat zmin, Rt
 {
     ::RiCylinderV( radius, zmin, zmax, thetamax, count, tokens, values );
 }
-RendermanInterface::RtToken Engine::RiDeclare( const char *name, const char *declaration )
+RendermanInterface::RtToken Engine::RiDeclare( RtString name, RtString declaration )
 {
     return ::RiDeclare( name, declaration );
 }
-RendermanInterface::RtVoid Engine::RiDeformationV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiDeformationV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiDeformationV( name, count, tokens, values );
 }
@@ -124,11 +124,11 @@ RendermanInterface::RtVoid Engine::RiDiskV( RtFloat height, RtFloat radius, RtFl
 {
     ::RiDiskV( height, radius, thetamax, count, tokens, values );
 }
-RendermanInterface::RtVoid Engine::RiDisplacementV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiDisplacementV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiDisplacementV( name, count, tokens, values );
 }
-RendermanInterface::RtVoid Engine::RiDisplayV( const char *name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiDisplayV( RtToken name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiDisplayV( name, type, mode, count, tokens, values );
 }
@@ -136,16 +136,16 @@ RendermanInterface::RtVoid Engine::RiEnd()
 {
     ::RiEnd();
 }
-RendermanInterface::RtVoid Engine::RiErrorAbort( RtInt code, RtInt severity, const char* message )
+RendermanInterface::RtVoid Engine::RiErrorAbort( RtInt code, RtInt severity, RtString message )
 {
     ::RiErrorAbort( code, severity, message );
 }
 //RendermanInterface::RtVoid Engine::RiErrorHandler(RtErrorFunc handler) { ::RiErrorHandler(handler); }
-RendermanInterface::RtVoid Engine::RiErrorIgnore( RtInt code, RtInt severity, const char* message )
+RendermanInterface::RtVoid Engine::RiErrorIgnore( RtInt code, RtInt severity, RtString message )
 {
     ::RiErrorIgnore( code, severity, message );
 }
-RendermanInterface::RtVoid Engine::RiErrorPrint( RtInt code, RtInt severity, const char* message )
+RendermanInterface::RtVoid Engine::RiErrorPrint( RtInt code, RtInt severity, RtString message )
 {
     ::RiErrorPrint( code, severity, message );
 }
@@ -153,7 +153,7 @@ RendermanInterface::RtVoid Engine::RiExposure( RtFloat gain, RtFloat gamma )
 {
     ::RiExposure( gain, gamma );
 }
-RendermanInterface::RtVoid Engine::RiExteriorV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiExteriorV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiExteriorV( name, count, tokens, values );
 }
@@ -205,39 +205,39 @@ RendermanInterface::RtVoid Engine::RiIlluminate( RtLightHandle light, RtBoolean 
 {
     ::RiIlluminate( light, onoff );
 }
-RendermanInterface::RtVoid Engine::RiImagerV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiImagerV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiImagerV( name, count, tokens, values );
 }
-RendermanInterface::RtVoid Engine::RiInteriorV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiInteriorV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiInteriorV( name, count, tokens, values );
 }
-RendermanInterface::RtLightHandle Engine::RiLightSourceV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtLightHandle Engine::RiLightSourceV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     return ::RiLightSourceV( name, count, tokens, values );
 }
-RendermanInterface::RtVoid Engine::RiMakeBumpV( const char *imagefile, const char *bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiMakeBumpV( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiMakeBumpV( imagefile, bumpfile, swrap, twrap, filterfunc, swidth, twidth, count, tokens, values );
 }
-RendermanInterface::RtVoid Engine::RiMakeCubeFaceEnvironmentV( const char *px, const char *nx, const char *py, const char *ny, const char *pz, const char *nz, const char *reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiMakeCubeFaceEnvironmentV( px, nx, py, ny, pz, nz, reflfile, fov, filterfunc, swidth, twidth, count, tokens, values );
 }
-RendermanInterface::RtVoid Engine::RiMakeLatLongEnvironmentV( const char *imagefile, const char *reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiMakeLatLongEnvironmentV( imagefile, reflfile, filterfunc, swidth, twidth, count, tokens, values );
 }
-RendermanInterface::RtVoid Engine::RiMakeShadowV( const char *picfile, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiMakeShadowV( RtString picfile, RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiMakeShadowV( picfile, shadowfile, count, tokens, values );
 }
-RendermanInterface::RtVoid Engine::RiMakeOcclusionV( RtInt npics, const char **picfile, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiMakeOcclusionV( RtInt npics, RtString picfile[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiMakeOcclusionV( npics, picfile, shadowfile, count, tokens, values );
 }
-RendermanInterface::RtVoid Engine::RiMakeTextureV( const char *imagefile, const char *texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiMakeTextureV( imagefile, texturefile, swrap, twrap, filterfunc, swidth, twidth, count, tokens, values );
 }
@@ -273,7 +273,7 @@ RendermanInterface::RtVoid Engine::RiOpacity( RtColor Os )
 {
     ::RiOpacity( Os );
 }
-RendermanInterface::RtVoid Engine::RiOptionV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiOptionV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiOptionV( name, count, tokens, values );
 }
@@ -336,7 +336,7 @@ RendermanInterface::RtVoid Engine::RiProcedural( RtPointer data, RtBound bound, 
 {
     ::RiProcedural( data, bound, ( RtProcSubdivFunc ) refineproc, ( RtProcFreeFunc ) freeproc );
 }
-RendermanInterface::RtVoid Engine::RiProjectionV( const char * name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiProjectionV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiProjectionV( name, count, tokens, values );
 }
@@ -408,7 +408,7 @@ RendermanInterface::RtVoid Engine::RiSubdivisionMeshV( RtToken scheme, RtInt nfa
 {
     ::RiSubdivisionMeshV( scheme, nfaces, nvertices, vertices, ntags, tags, nargs, intargs, floatargs, count, tokens, values );
 }
-RendermanInterface::RtVoid Engine::RiSurfaceV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Engine::RiSurfaceV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     ::RiSurfaceV( name, count, tokens, values );
 }

@@ -1,25 +1,25 @@
 # Microsoft Developer Studio Project File - Name="libaqsis" - Package Owner=<4>
 # Microsoft Developer Studio Generated Build File, Format Version 6.00
-# ** NICHT BEARBEITEN **
+# ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Dynamic-Link Library" 0x0102
 
 CFG=libaqsis - Win32 Debug
-!MESSAGE Dies ist kein gültiges Makefile. Zum Erstellen dieses Projekts mit NMAKE
-!MESSAGE verwenden Sie den Befehl "Makefile exportieren" und führen Sie den Befehl
+!MESSAGE This is not a valid makefile. To build this project using NMAKE,
+!MESSAGE use the Export Makefile command and run
 !MESSAGE 
 !MESSAGE NMAKE /f "libaqsis.mak".
 !MESSAGE 
-!MESSAGE Sie können beim Ausführen von NMAKE eine Konfiguration angeben
-!MESSAGE durch Definieren des Makros CFG in der Befehlszeile. Zum Beispiel:
+!MESSAGE You can specify a configuration when running NMAKE
+!MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
 !MESSAGE NMAKE /f "libaqsis.mak" CFG="libaqsis - Win32 Debug"
 !MESSAGE 
-!MESSAGE Für die Konfiguration stehen zur Auswahl:
+!MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "libaqsis - Win32 Release" (basierend auf  "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "libaqsis - Win32 Debug" (basierend auf  "Win32 (x86) Dynamic-Link Library")
-!MESSAGE "libaqsis - Win32 Profile" (basierend auf  "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "libaqsis - Win32 Release" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "libaqsis - Win32 Debug" (based on "Win32 (x86) Dynamic-Link Library")
+!MESSAGE "libaqsis - Win32 Profile" (based on "Win32 (x86) Dynamic-Link Library")
 !MESSAGE 
 
 # Begin Project
@@ -182,10 +182,6 @@ SOURCE=.\libaqsis.def
 # Begin Source File
 
 SOURCE=.\lights.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\messages.cpp
 # End Source File
 # Begin Source File
 
@@ -398,10 +394,6 @@ SOURCE=.\lath.h
 # Begin Source File
 
 SOURCE=.\lights.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\messages.h
 # End Source File
 # Begin Source File
 

@@ -32,6 +32,8 @@
 #include	"renderer.h"
 #include	"shaders.h"
 #include	"nurbs.h"
+#include	"points.h"
+#include	"lath.h"
 #include	"render.h"
 #include	"transform.h"
 #include	"rifile.h"
@@ -174,11 +176,10 @@ CqRenderer::~CqRenderer()
         m_pTransCamera = NULL;
     }
 
-	// Make sure the attribute stack is cleaned up.
-	std::vector<CqAttributes*>::iterator i;
-	for( i=Attribute_stack.begin(); i!=Attribute_stack.end(); i++ )
-		delete( (*i) );
-	Attribute_stack.clear();
+	// Clear up the MicroPolygon memory pool.
+	CqMicroPolygon::Flush();
+	CqMovingMicroPolygonKeyPoints::Flush();
+	CqLath::Flush();
 
 #ifdef _DEBUG
     // Print information about any un-released CqRefCount objects

@@ -1118,7 +1118,7 @@ complete_request
 			}
 	|	makeocclusion string_array string opttvpairs
 			{
-				ParseCallbackInterface->RiMakeOcclusionV($2->Count(), (const char**)&(*$2)[0], $3, $4->Count(), $4->Tokens(), $4->Values());
+				ParseCallbackInterface->RiMakeOcclusionV($2->Count(), (RtString*)&(*$2)[0], $3, $4->Count(), $4->Tokens(), $4->Values());
 			}
 	|	errorhandler string
 			{
@@ -1866,7 +1866,13 @@ void ParserDeclare(librib::RendermanInterface& CallbackInterface, const std::str
 	if(Type_Unknown == DeclareParameterType(Name, Type))
 		yyerror("RiDeclare: Unknown type [" + Name + ", " + Type + "]");
 		
-	CallbackInterface.RiDeclare(Name.c_str(), Type.c_str());
+	char *_name = new char[Name.length()+1];
+	strcpy(_name, Name.c_str());
+	char *_type = new char[Type.length()+1];
+	strcpy(_type, Type.c_str());
+	CallbackInterface.RiDeclare(_name, _type);
+	delete[](_name);
+	delete[](_type);
 }
 
 void ClearDeclarations()

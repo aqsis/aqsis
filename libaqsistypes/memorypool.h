@@ -48,14 +48,14 @@ template <class T, long S = MEMORYPOOL_DEFAULTBLOCKSIZE>
 class CqMemoryPool
 {
 public:
-    CqMemoryPool() : m_pHead( 0 )
+    CqMemoryPool() : m_pHead( 0 ), m_pFirstBlock( 0 )
     {}
     virtual	~CqMemoryPool()
     {
         // Delete any remaining objects.
         // Note if this happens and anyone is pointing to the
         // allocated objects, you're in trouble.
-
+		Flush();
     }
 
     /** Allocate a block from the pool.
@@ -78,7 +78,23 @@ public:
         {
             // The free list is empty. Allocate a block of memory
             // big enough hold S objects
-            T* newBlock = static_cast<T*>( ::operator new( S*sizeof( T ) ) );
+            char* p_newBlock = static_cast<char*>( ::operator new( S*sizeof( T ) + sizeof(char*) ) );
+            T* newBlock = reinterpret_cast<T*>( p_newBlock + sizeof(char*) );
+
+			// Either initialise, or continue the linked list of blocks.
+			if( m_pFirstBlock != NULL )
+			{
+				void* pLastBlock = m_pFirstBlock;
+				while( static_cast<void**>( pLastBlock )[0] != 0 )
+					pLastBlock = static_cast<void**>( pLastBlock )[0];
+				static_cast<void**>( pLastBlock )[0] = p_newBlock;
+				reinterpret_cast<void**>( p_newBlock )[0] = 0;
+			}
+			else
+			{
+				reinterpret_cast<void**>( p_newBlock )[0] = 0;
+				m_pFirstBlock = p_newBlock;
+			}
 
             // form a new free list by linking the memory chunks
             // together; skip the zeroth element, because you'll
@@ -117,8 +133,24 @@ public:
         m_pHead = carcass;
     }
 
+	/** Flush the pool block allocations.
+	 */
+	void	Flush()
+	{
+		void* p_Block = m_pFirstBlock;
+		while( p_Block )
+		{
+			void* p_nextBlock = static_cast<void**>( p_Block )[0];
+			delete( p_Block );
+			p_Block = p_nextBlock;
+		}
+		m_pFirstBlock = 0;
+		m_pHead = 0;
+	}
+
 private:
     T*	m_pHead;		///< Pointer to the first free block in the pool.
+	void*	m_pFirstBlock;
 }
 ;
 
@@ -154,6 +186,7 @@ public:
     T*	m_pNext;	///< Pointer to the next object.
 
     static	CqMemoryPool<T, S>	m_thePool;	///< Static pool to allocated micropolys from.
+    static void Flush()	{	m_thePool.Flush();	}
 }
 ;
 

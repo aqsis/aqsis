@@ -300,7 +300,7 @@ private:
 // RiDeclare
 // Declare a new variable to be recognised by the system.
 //
-RtToken	RiDeclare( const char *name, const char *declaration )
+RtToken	RiDeclare( RtString name, RtString declaration )
 {
     CqString strName( name ), strDecl( declaration );
     QGetRenderContext() ->AddParameterDecl( strName.c_str(), strDecl.c_str() );
@@ -684,7 +684,7 @@ RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 // RiProjection
 // Set the camera projection to be used.
 //
-RtVoid	RiProjection( const char *name, ... )
+RtVoid	RiProjection( RtToken name, ... )
 {
     va_list	pArgs;
     va_start( pArgs, name );
@@ -701,7 +701,7 @@ RtVoid	RiProjection( const char *name, ... )
 // RiProjectionV
 // List mode version of above.
 //
-RtVoid	RiProjectionV( const char *name, PARAMETERLIST )
+RtVoid	RiProjectionV( RtToken name, PARAMETERLIST )
 {
     if ( strcmp( name, RI_PERSPECTIVE ) == 0 )
         QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "Projection" ) [ 0 ] = ProjectionPerspective ;
@@ -939,7 +939,7 @@ RtVoid	RiExposure( RtFloat gain, RtFloat gamma )
 // RiImager
 // Specify a prepocessing imager shader.
 //
-RtVoid	RiImager( const char *name, ... )
+RtVoid	RiImager( RtToken name, ... )
 {
     va_list	pArgs;
     va_start( pArgs, name );
@@ -956,7 +956,7 @@ RtVoid	RiImager( const char *name, ... )
 // RiImagerV
 // List based version of above.
 //
-RtVoid	RiImagerV( const char *name, PARAMETERLIST )
+RtVoid	RiImagerV( RtToken name, PARAMETERLIST )
 {
     RtInt i;
 
@@ -1021,7 +1021,7 @@ RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat dither
 // RiDisplay
 // Set the final output name and type.
 //
-RtVoid	RiDisplay( const char *name, RtToken type, RtToken mode, ... )
+RtVoid	RiDisplay( RtToken name, RtToken type, RtToken mode, ... )
 {
     va_list	pArgs;
     va_start( pArgs, mode );
@@ -1038,7 +1038,7 @@ RtVoid	RiDisplay( const char *name, RtToken type, RtToken mode, ... )
 // RiDisplayV
 // List based version of above.
 //
-RtVoid	RiDisplayV( const char *name, RtToken type, RtToken mode, PARAMETERLIST )
+RtVoid	RiDisplayV( RtToken name, RtToken type, RtToken mode, PARAMETERLIST )
 {
     CqString strName( name );
     CqString strType( type );
@@ -1359,7 +1359,7 @@ RtFloat	RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 // RiHider
 // Specify a hidden surface calculation mode.
 //
-RtVoid	RiHider( const char *name, ... )
+RtVoid	RiHider( RtToken name, ... )
 {
     va_list	pArgs;
     va_start( pArgs, name );
@@ -1376,7 +1376,7 @@ RtVoid	RiHider( const char *name, ... )
 // RiHiderV
 // List based version of above.
 //
-RtVoid	RiHiderV( const char *name, PARAMETERLIST )
+RtVoid	RiHiderV( RtToken name, PARAMETERLIST )
 {
     if ( !strcmp( name, "hidden" ) || !strcmp( name, "painter" ) )
     {
@@ -1440,7 +1440,7 @@ RtVoid	RiRelativeDetail( RtFloat relativedetail )
 // RiOption
 // Specify system specific option.
 //
-RtVoid	RiOption( const char *name, ... )
+RtVoid	RiOption( RtToken name, ... )
 {
     va_list	pArgs;
     va_start( pArgs, name );
@@ -1457,7 +1457,7 @@ RtVoid	RiOption( const char *name, ... )
 // RiOptionV
 // List based version of above.
 //
-RtVoid	RiOptionV( const char *name, PARAMETERLIST )
+RtVoid	RiOptionV( RtToken name, PARAMETERLIST )
 {
     // Find the parameter on the current options.
     CqNamedParameterList * pOpt = QGetRenderContext() ->optCurrent().pOptionWrite( name );
@@ -1692,7 +1692,7 @@ RtVoid	RiTextureCoordinates( RtFloat s1, RtFloat t1,
 // RiLightSource
 // Create a new light source at the current transformation.
 //
-RtLightHandle	RiLightSource( const char *name, ... )
+RtLightHandle	RiLightSource( RtToken name, ... )
 {
     va_list	pArgs;
     va_start( pArgs, name );
@@ -1709,7 +1709,7 @@ RtLightHandle	RiLightSource( const char *name, ... )
 // RiLightSourceV
 // List based version of above.
 //
-RtLightHandle	RiLightSourceV( const char *name, PARAMETERLIST )
+RtLightHandle	RiLightSourceV( RtToken name, PARAMETERLIST )
 {
     // Find the lightsource shader.
     IqShader * pShader = static_cast<CqShader*>( QGetRenderContext() ->CreateShader( name, Type_Lightsource ) );
@@ -1749,7 +1749,7 @@ RtLightHandle	RiLightSourceV( const char *name, PARAMETERLIST )
 // geometric primitives until the next RiAttributeEnd, become part of this
 // area light source.
 //
-RtLightHandle	RiAreaLightSource( const char *name, ... )
+RtLightHandle	RiAreaLightSource( RtToken name, ... )
 {
     va_list	pArgs;
     va_start( pArgs, name );
@@ -1766,7 +1766,7 @@ RtLightHandle	RiAreaLightSource( const char *name, ... )
 // RiAreaLightSourceV
 // List based version of above.
 //
-RtLightHandle	RiAreaLightSourceV( const char *name, PARAMETERLIST )
+RtLightHandle	RiAreaLightSourceV( RtToken name, PARAMETERLIST )
 {
     std::cerr << warning << "RiAreaLightSource not supported, will produce a point light" << std::endl;
 
@@ -1794,7 +1794,7 @@ RtVoid	RiIlluminate( RtLightHandle light, RtBoolean onoff )
 // RiSurface
 // Set the current surface shader, used by geometric primitives.
 //
-RtVoid	RiSurface( const char *name, ... )
+RtVoid	RiSurface( RtToken name, ... )
 {
     va_list	pArgs;
     va_start( pArgs, name );
@@ -1811,7 +1811,7 @@ RtVoid	RiSurface( const char *name, ... )
 // RiSurfaceV
 // List based version of above.
 //
-RtVoid	RiSurfaceV( const char *name, PARAMETERLIST )
+RtVoid	RiSurfaceV( RtToken name, PARAMETERLIST )
 {
     // Find the shader.
     IqShader * pshadSurface = QGetRenderContext() ->CreateShader( name, Type_Surface );
@@ -1840,7 +1840,7 @@ RtVoid	RiSurfaceV( const char *name, PARAMETERLIST )
 // RiAtmosphere
 // Set the current atrmospheric shader.
 //
-RtVoid	RiAtmosphere( const char *name, ... )
+RtVoid	RiAtmosphere( RtToken name, ... )
 {
     va_list	pArgs;
     va_start( pArgs, name );
@@ -1857,7 +1857,7 @@ RtVoid	RiAtmosphere( const char *name, ... )
 // RiAtmosphereV
 // List based version of above.
 //
-RtVoid	RiAtmosphereV( const char *name, PARAMETERLIST )
+RtVoid	RiAtmosphereV( RtToken name, PARAMETERLIST )
 {
     // Find the shader.
     IqShader * pshadAtmosphere = QGetRenderContext() ->CreateShader( name, Type_Volume );
@@ -1887,7 +1887,7 @@ RtVoid	RiAtmosphereV( const char *name, PARAMETERLIST )
 // RiInterior
 // Set the current interior volumetric shader.
 //
-RtVoid	RiInterior( const char *name, ... )
+RtVoid	RiInterior( RtToken name, ... )
 {
     std::cerr << warning << "RiInterior not supported" << std::endl;
     return ;
@@ -1898,7 +1898,7 @@ RtVoid	RiInterior( const char *name, ... )
 // RiInteriorV
 // List based version of above.
 //
-RtVoid	RiInteriorV( const char *name, PARAMETERLIST )
+RtVoid	RiInteriorV( RtToken name, PARAMETERLIST )
 {
     std::cerr << warning << "RiInterior not supported" << std::endl;
     return ;
@@ -1909,7 +1909,7 @@ RtVoid	RiInteriorV( const char *name, PARAMETERLIST )
 // RiExterior
 // Set the current exterior volumetric shader.
 //
-RtVoid	RiExterior( const char *name, ... )
+RtVoid	RiExterior( RtToken name, ... )
 {
     std::cerr << warning << "RiExterior not supported" << std::endl;
     return ;
@@ -1920,7 +1920,7 @@ RtVoid	RiExterior( const char *name, ... )
 // RiExteriorV
 // List based version of above.
 //
-RtVoid	RiExteriorV( const char *name, PARAMETERLIST )
+RtVoid	RiExteriorV( RtToken name, PARAMETERLIST )
 {
     std::cerr << warning << "ExInterior not supported" << std::endl;
     return ;
@@ -2309,7 +2309,7 @@ RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
 // RiDeformation
 // Specify a deformation shader to be included into the current transformation.
 //
-RtVoid	RiDeformation( const char *name, ... )
+RtVoid	RiDeformation( RtToken name, ... )
 {
     std::cerr << warning << "RiDeformation not supported" << std::endl;
     return ;
@@ -2320,7 +2320,7 @@ RtVoid	RiDeformation( const char *name, ... )
 // RiDeformationV
 // List based version of above.
 //
-RtVoid	RiDeformationV( const char *name, PARAMETERLIST )
+RtVoid	RiDeformationV( RtToken name, PARAMETERLIST )
 {
     std::cerr << warning << "RiDeformation not supported" << std::endl;
     return ;
@@ -2331,7 +2331,7 @@ RtVoid	RiDeformationV( const char *name, PARAMETERLIST )
 // RiDisplacement
 // Specify the current displacement shade used by geometric primitives.
 //
-RtVoid	RiDisplacement( const char *name, ... )
+RtVoid	RiDisplacement( RtToken name, ... )
 {
     va_list	pArgs;
     va_start( pArgs, name );
@@ -2348,7 +2348,7 @@ RtVoid	RiDisplacement( const char *name, ... )
 // RiDisplacementV
 // List based version of above.
 //
-RtVoid	RiDisplacementV( const char *name, PARAMETERLIST )
+RtVoid	RiDisplacementV( RtToken name, PARAMETERLIST )
 {
     // Find the shader.
     IqShader * pshadDisplacement = QGetRenderContext() ->CreateShader( name, Type_Displacement );
@@ -2442,7 +2442,7 @@ RtVoid	RiTransformEnd()
 // RiAttribute
 // Set a system specific attribute.
 //
-RtVoid	RiAttribute( const char *name, ... )
+RtVoid	RiAttribute( RtToken name, ... )
 {
     va_list	pArgs;
     va_start( pArgs, name );
@@ -2459,7 +2459,7 @@ RtVoid	RiAttribute( const char *name, ... )
 // RiAttributeV
 // List based version of above.
 //
-RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
+RtVoid	RiAttributeV( RtToken name, PARAMETERLIST )
 {
     // Find the parameter on the current options.
     CqNamedParameterList * pAttr = QGetRenderContext() ->pattrWriteCurrent() ->pAttributeWrite( name );
@@ -4120,7 +4120,7 @@ RtVoid	RiMotionEnd()
 // RiMakeTexture
 // Convert a picture to a texture.
 //
-RtVoid RiMakeTexture ( const char * pic, const char * tex, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
+RtVoid RiMakeTexture ( RtString pic, RtString tex, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
     va_list	pArgs;
     va_start( pArgs, twidth );
@@ -4138,7 +4138,7 @@ RtVoid RiMakeTexture ( const char * pic, const char * tex, RtToken swrap, RtToke
 // RiMakeTextureV
 // List based version of above.
 //
-RtVoid	RiMakeTextureV( const char * pic, const char * tex, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
+RtVoid	RiMakeTextureV( RtString pic, RtString tex, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
     char modes[ 1024 ];
     assert( pic != 0 && tex != 0 && swrap != 0 && twrap != 0 && filterfunc != 0 );
@@ -4226,7 +4226,7 @@ RtVoid	RiMakeTextureV( const char * pic, const char * tex, RtToken swrap, RtToke
 // RiMakeBump
 // Convert a picture to a bump map.
 //
-RtVoid	RiMakeBump( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
+RtVoid	RiMakeBump( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
     std::cerr << warning << "RiMakeBump not supported" << std::endl;
     return ;
@@ -4237,7 +4237,7 @@ RtVoid	RiMakeBump( const char * imagefile, const char * bumpfile, RtToken swrap,
 // RiMakeBumpV
 // List based version of above.
 //
-RtVoid	RiMakeBumpV( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
+RtVoid	RiMakeBumpV( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
     std::cerr << warning << "RiMakeBump not supported" << std::endl;
     return ;
@@ -4248,7 +4248,7 @@ RtVoid	RiMakeBumpV( const char * imagefile, const char * bumpfile, RtToken swrap
 // RiMakeLatLongEnvironment
 // Convert a picture to an environment map.
 //
-RtVoid	RiMakeLatLongEnvironment( const char * imagefile, const char * reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
+RtVoid	RiMakeLatLongEnvironment( RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
     va_list	pArgs;
     va_start( pArgs, twidth );
@@ -4266,7 +4266,7 @@ RtVoid	RiMakeLatLongEnvironment( const char * imagefile, const char * reflfile, 
 // RiMakeLatLongEnvironmentV
 // List based version of above.
 //
-RtVoid	RiMakeLatLongEnvironmentV( const char * pic, const char * tex, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
+RtVoid	RiMakeLatLongEnvironmentV( RtString pic, RtString tex, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
     char modes[ 1024 ];
     char *swrap = "periodic";
@@ -4341,7 +4341,7 @@ RtVoid	RiMakeLatLongEnvironmentV( const char * pic, const char * tex, RtFilterFu
 // RiMakeCubeFaceEnvironment
 // Convert a picture to a cubical environment map.
 //
-RtVoid	RiMakeCubeFaceEnvironment( const char * px, const char * nx, const char * py, const char * ny, const char * pz, const char * nz, const char * reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
+RtVoid	RiMakeCubeFaceEnvironment( RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
     va_list	pArgs;
     va_start( pArgs, twidth );
@@ -4358,7 +4358,7 @@ RtVoid	RiMakeCubeFaceEnvironment( const char * px, const char * nx, const char *
 // RiMakeCubeFaceEnvironment
 // List based version of above.
 //
-RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char * py, const char * ny, const char * pz, const char * nz, const char * reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
+RtVoid	RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
     QGetRenderContext() ->Stats().MakeEnvTimer().Start();
     assert( px != 0 && nx != 0 && py != 0 && ny != 0 && pz != 0 && nz != 0 &&
@@ -4464,7 +4464,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char 
 // RiMakeShadow
 // Convert a depth map file to a shadow map.
 //
-RtVoid	RiMakeShadow( const char * picfile, const char * shadowfile, ... )
+RtVoid	RiMakeShadow( RtString picfile, RtString shadowfile, ... )
 {
     va_list	pArgs;
     va_start( pArgs, shadowfile );
@@ -4481,7 +4481,7 @@ RtVoid	RiMakeShadow( const char * picfile, const char * shadowfile, ... )
 // RiMakeShadowV
 // List based version of above.
 //
-RtVoid	RiMakeShadowV( const char * picfile, const char * shadowfile, PARAMETERLIST )
+RtVoid	RiMakeShadowV( RtString picfile, RtString shadowfile, PARAMETERLIST )
 {
     QGetRenderContext() ->Stats().MakeShadowTimer().Start();
     CqShadowMap ZFile( picfile );
@@ -4502,7 +4502,7 @@ RtVoid	RiMakeShadowV( const char * picfile, const char * shadowfile, PARAMETERLI
 // RiMakeOcclusion
 // Convert a series of depth maps to an occlusion map.
 //
-RtVoid	RiMakeOcclusion( RtInt npics, const char **picfiles, const char *shadowfile, ... )
+RtVoid	RiMakeOcclusion( RtInt npics, RtString picfiles[], RtString shadowfile, ... )
 {
     va_list	pArgs;
     va_start( pArgs, shadowfile );
@@ -4519,7 +4519,7 @@ RtVoid	RiMakeOcclusion( RtInt npics, const char **picfiles, const char *shadowfi
 // RiMakeOcclusionV
 // List based version of above.
 //
-RtVoid	RiMakeOcclusionV( RtInt npics, const char **picfiles, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
+RtVoid	RiMakeOcclusionV( RtInt npics, RtString picfiles[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     QGetRenderContext() ->Stats().MakeShadowTimer().Start();
 
@@ -4556,7 +4556,7 @@ RtVoid	RiErrorHandler( RtErrorFunc handler )
 // RiErrorIgnore
 // Function used by RiErrorHandler to continue after errors.
 //
-RtVoid	RiErrorIgnore( RtInt code, RtInt severity, const char * message )
+RtVoid	RiErrorIgnore( RtInt code, RtInt severity, RtString message )
 {
     return ;
 }
@@ -4566,7 +4566,7 @@ RtVoid	RiErrorIgnore( RtInt code, RtInt severity, const char * message )
 // RiErrorPrint
 // Function used by RiErrorHandler to print an error message to stdout and continue.
 //
-RtVoid	RiErrorPrint( RtInt code, RtInt severity, const char * message )
+RtVoid	RiErrorPrint( RtInt code, RtInt severity, RtString message )
 {
     // Don't use this!
     std::cerr << error << "RiError: " << code << " : " << severity << " : " << message << std::endl;
@@ -4578,7 +4578,7 @@ RtVoid	RiErrorPrint( RtInt code, RtInt severity, const char * message )
 // RiErrorAbort
 // Function used by RiErrorHandler to print and error and stop.
 //
-RtVoid	RiErrorAbort( RtInt code, RtInt severity, const char * message )
+RtVoid	RiErrorAbort( RtInt code, RtInt severity, RtString message )
 {
     return ;
 }

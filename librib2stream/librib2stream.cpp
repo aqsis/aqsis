@@ -12,11 +12,11 @@ Stream::Stream( std::ostream& Stream ) :
 Stream::~Stream()
 {}
 
-RendermanInterface::RtLightHandle Stream::RiAreaLightSourceV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtLightHandle Stream::RiAreaLightSourceV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiAreaLightSourceV()" << std::endl; return reinterpret_cast<RtLightHandle>( m_CurrentLightHandle++ );
 }
-RendermanInterface::RtVoid Stream::RiAtmosphereV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiAtmosphereV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiAtmosphereV()" << std::endl;
 }
@@ -28,7 +28,7 @@ RendermanInterface::RtVoid Stream::RiAttributeEnd()
 {
     m_Stream << "RiAttributeEnd()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiAttributeV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiAttributeV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiAttributeV()" << std::endl;
 }
@@ -92,11 +92,11 @@ RendermanInterface::RtVoid Stream::RiCylinderV( RtFloat radius, RtFloat zmin, Rt
 {
     m_Stream << "RiCylinderV()" << std::endl;
 }
-RendermanInterface::RtToken Stream::RiDeclare( const char *name, const char *declaration )
+RendermanInterface::RtToken Stream::RiDeclare( RtString name, RtString declaration )
 {
     m_Stream << "RiDeclare(" << name << ", " << declaration << ")" << std::endl; return 0;
 }
-RendermanInterface::RtVoid Stream::RiDeformationV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiDeformationV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiDeformationV()" << std::endl;
 }
@@ -120,11 +120,11 @@ RendermanInterface::RtVoid Stream::RiDiskV( RtFloat height, RtFloat radius, RtFl
 {
     m_Stream << "RiDiskV()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiDisplacementV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiDisplacementV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiDisplacementV()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiDisplayV( const char *name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiDisplayV( RtToken name, RtToken type, RtToken mode, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiDisplayV(" << name << ", " << type << ", " << mode << ", " << count << ")" << std::endl;
 }
@@ -149,7 +149,7 @@ RendermanInterface::RtVoid Stream::RiExposure( RtFloat gain, RtFloat gamma )
 {
     m_Stream << "RiExposure()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiExteriorV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiExteriorV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiExteriorV()" << std::endl;
 }
@@ -201,39 +201,39 @@ RendermanInterface::RtVoid Stream::RiIlluminate( RtLightHandle light, RtBoolean 
 {
     m_Stream << "RiIlluminate()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiImagerV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiImagerV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiImagerV()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiInteriorV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiInteriorV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiInteriorV()" << std::endl;
 }
-RendermanInterface::RtLightHandle Stream::RiLightSourceV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtLightHandle Stream::RiLightSourceV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiLightSourceV()" << std::endl; return reinterpret_cast<RtLightHandle>( m_CurrentLightHandle++ );
 }
-RendermanInterface::RtVoid Stream::RiMakeBumpV( const char *imagefile, const char *bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiMakeBumpV( RtString imagefile, RtString bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiMakeBumpV()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiMakeCubeFaceEnvironmentV( const char *px, const char *nx, const char *py, const char *ny, const char *pz, const char *nz, const char *reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiMakeCubeFaceEnvironmentV( RtString px, RtString nx, RtString py, RtString ny, RtString pz, RtString nz, RtString reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiMakeCubeFaceEnvironmentV()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiMakeLatLongEnvironmentV( const char *imagefile, const char *reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiMakeLatLongEnvironmentV( RtString imagefile, RtString reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiMakeLatLongEnvironmentV()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiMakeShadowV( const char *picfile, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiMakeShadowV( RtString picfile, RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiMakeShadowV()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiMakeTextureV( const char *imagefile, const char *texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiMakeTextureV( RtString imagefile, RtString texturefile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiMakeTextureV()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiMakeOcclusionV( int picount, const char **picfile, const char *shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiMakeOcclusionV( RtInt picount, RtString picfile[], RtString shadowfile, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiMakeOcclusionV()" << std::endl;
 }
@@ -269,7 +269,7 @@ RendermanInterface::RtVoid Stream::RiOpacity( RtColor Os )
 {
     m_Stream << "RiOpacity()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiOptionV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiOptionV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiOptionV()" << std::endl;
 }
@@ -337,7 +337,7 @@ RendermanInterface::RtVoid Stream::RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt co
 {
     m_Stream << "RiBlobbyV()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiProjectionV( const char * name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiProjectionV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiProjectionV()" << std::endl;
 }
@@ -409,7 +409,7 @@ RendermanInterface::RtVoid Stream::RiSubdivisionMeshV( RtToken scheme, RtInt nfa
 {
     m_Stream << "RiSubdivisionMeshV()" << std::endl;
 }
-RendermanInterface::RtVoid Stream::RiSurfaceV( const char *name, RtInt count, RtToken tokens[], RtPointer values[] )
+RendermanInterface::RtVoid Stream::RiSurfaceV( RtToken name, RtInt count, RtToken tokens[], RtPointer values[] )
 {
     m_Stream << "RiSurfaceV()" << std::endl;
 }
