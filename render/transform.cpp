@@ -244,8 +244,12 @@ void CqTransform::ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans
 
 const CqMatrix& CqTransform::matObjectToWorld( TqFloat time ) const
 {
+	static CqMatrix matInt;
 	if( m_IsMoving )
-		return ( GetMotionObject( time ).m_matTransform );
+	{
+		matInt = GetMotionObjectInterpolated( time ).m_matTransform;
+		return ( matInt );
+	}
 	else
 		return ( m_StaticMatrix );
 }

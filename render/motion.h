@@ -202,7 +202,7 @@ public:
      */
     TqBool	TimeSlotExists( TqFloat time, TqInt& iIndex ) const
     {
-        assert( cTimes() > 0 );
+        //assert( cTimes() > 0 );
         //assert(time>=0.0f);
 
         // Find the appropriate time span.
