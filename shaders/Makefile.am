@@ -1,6 +1,6 @@
 SHADER_INCLUDES = $(wildcard $(srcdir)/*.h)
 SHADERS = $(wildcard $(srcdir)/*.sl)
-COMPILED_SHADERS = $(SHADERS:.sl=.slx)
+COMPILED_SHADERS = $(addprefix $(top_builddir)/shaders/,$(notdir $(SHADERS:.sl=.slx)))
 
 .sl.slx:
 	$(top_builddir)/aqsl/aqsl $< -o $@

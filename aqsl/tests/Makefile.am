@@ -3,7 +3,7 @@ AM_CXXFLAGS=@AQSIS_CXXFLAGS@
 AM_CPPFLAGS=@AQSIS_CPPFLAGS@
 AM_CFLAGS=@AQSIS_CFLAGS@
 
-aqsl=$(top_srcdir)/aqsl/aqsl
+aqsl=$(top_builddir)/aqsl/aqsl
 
 check-local:
 	rm -f *.slx
