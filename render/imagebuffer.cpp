@@ -738,12 +738,12 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygon* pMPG, TqInt iBucket,
 			ad = pMPG->PointA().z() + pMPG->PointB().z() + pMPG->PointC().z() + pMPG->PointD().z();
 			ad /= 4;
 			dc = CircleOfConfusion( dofdata, ad );
-
+			/*
 			CqVector4D dct( dc, dc, 0.0 );
 
 			dct = QGetRenderContext() -> GetDepthOfFieldTMatrix() * dct;
 
-			dc = dct.Magnitude();
+			dc = dct.Magnitude();*/
 		}
 
 		TqInt nextx = Bucket.XSize() + Bucket.XFWidth();
