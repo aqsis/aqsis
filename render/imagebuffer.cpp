@@ -349,9 +349,14 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 		XMinb = CLAMP( XMinb, 0, cXBuckets() );
 		YMinb = CLAMP( YMinb, 0, cYBuckets() );
 
-		// Sanity check we are not putting into a bucket that has already been processed.
-		assert( !Bucket(XMinb, YMinb).IsProcessed() );
+		if( Bucket(XMinb, YMinb).IsProcessed() )
+		{
+			XMinb = CurrentBucketX();
+			YMinb = CurrentBucketY();
+		}
 	}
+	// Sanity check we are not putting into a bucket that has already been processed.
+	assert( !Bucket(XMinb, YMinb).IsProcessed() );
 	Bucket(XMinb, YMinb).AddGPrim( pSurface );
 
 	// Release the reference acquired for the surface for this method.
