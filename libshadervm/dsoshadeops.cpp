@@ -22,17 +22,16 @@
 
 #include	"aqsis.h"
 #include	"sstring.h"
-#include	"ilog.h"
 #include	"irenderer.h"
 #include	"ishaderdata.h"
 #include	"dsoshadeops.h"
 #include	"file.h"
+#include	"logging.h"
 
 #include	"share.h"
 
 START_NAMESPACE( Aqsis )
 
-static  IqLog *pLogger = NULL;
 //---------------------------------------------------------------------
 /** This does replicate effort from CqFile and at present doesnt handle NT either 
  ** There is a distinction in that we would like to handle directories here which CqFile doesnt
@@ -143,16 +142,6 @@ CqDSORepository::SetDSOPath(const CqString* pPath)
 std::list<SqDSOExternalCall*>*
 CqDSORepository::getShadeOpMethods(CqString* pShadeOpName)
 {
-	if( !pLogger )
-	{
-		if( QGetRenderContextI() ) 
-		{
-			pLogger = QGetRenderContextI()->Logger();
-		}else{
-			pLogger = CreateLogger();
-		};
-	};
-
 	CqString strTableSymbol = *pShadeOpName + "_shadeops" ;
 
 	std::list<SqDSOExternalCall*>* oplist = new (std::list<SqDSOExternalCall*>);
@@ -188,7 +177,7 @@ CqDSORepository::getShadeOpMethods(CqString* pShadeOpName)
 		else 
 		{
 			CqString strError = DLError();
-			pLogger->error("DLOpen: %s\n" , strError.c_str() );
+			std::cerr << error << "DLOpen: " << strError.c_str() << std::endl;
 		};
 	};
 	return ( oplist->empty() ? NULL : oplist );
@@ -203,15 +192,6 @@ CqDSORepository::getShadeOpMethods(CqString* pShadeOpName)
 SqDSOExternalCall*
 CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 	
-	if( !pLogger )
-	{
-		if( QGetRenderContextI() ) 
-		{
-			pLogger = QGetRenderContextI()->Logger();
-		}else{
-			pLogger = CreateLogger();
-		};
-	};
 	TqInt length = strlen(pShadeOpEntry->m_opspec)+1;
 	char temp[1024];
 	strncpy(temp, pShadeOpEntry->m_opspec,length);
@@ -233,7 +213,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 	// ERROR if we cant find this types name;
 	if (m_itTypeNameMap == m_TypeNameMap.end())
 	{
-	  	pLogger->warn( "Discarding DSO Table entry due to unsupported return type: \"%s\"" , strRetType.c_str() );
+		std::cerr << warning << "Discarding DSO Table entry due to unsupported return type: \"" << strRetType.c_str() << "\"" << std::endl;
 		return NULL;
 	}
 	EqVariableType rettype = (*m_itTypeNameMap).second;
@@ -247,7 +227,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 	DSOMethod method = (DSOMethod) DLSym (handle,&s);
 	if(method == NULL) 
 	{
-	  	pLogger->warn( "Discarding DSO Table entry due to unknown symbol for method: \"%s\"" , strMethodName.c_str());
+		std::cerr << warning << "Discarding DSO Table entry due to unknown symbol for method: \"" << strMethodName.c_str() << "\"" << std::endl;
 	 	return NULL;
 	};
 	
@@ -268,7 +248,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 		// ERROR if we cant find this arguments type name;
 		if (m_itTypeNameMap == m_TypeNameMap.end())
 		{
-	  		pLogger->warn( "Discarding DSO Table entry due to unsupported argument type: \"%s\"", strArgType.c_str());
+			std::cerr << warning << "Discarding DSO Table entry due to unsupported argument type: \"" << strArgType.c_str() << "\"" << std::endl;
 			return NULL;
 		}; 
 		arglist.push_back((*m_itTypeNameMap).second);
@@ -283,7 +263,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 		initfunc = (DSOInit) DLSym(handle,&strInit);
 		if (initfunc == NULL)
 		{
-	  		pLogger->warn( "Discarding DSO Table entry due to unknown symbol for init: \"%s\"" , strInit.c_str()); 
+			std::cerr << warning << "Discarding DSO Table entry due to unknown symbol for init: \"" << strInit.c_str() << "\"" << std::endl;
 			return NULL; // ERROR ;
 		};
 	} 
@@ -296,7 +276,7 @@ CqDSORepository::parseShadeOpTableEntry(void* handle, SqShadeOp* pShadeOpEntry){
 		shutdownfunc = (DSOShutdown) DLSym(handle,&strShutdown);
 		if (shutdownfunc == NULL)
 		{
- 			pLogger->warn( "Discarding DSO Table entry due to unknown symbol for shutdown: \"%s\"" , strShutdown.c_str()); 
+			std::cerr << warning << "Discarding DSO Table entry due to unknown symbol for shutdown: \"" << strShutdown.c_str() << "\"" << std::endl;
 			return NULL; // ERROR ;
 		};
 	};

@@ -497,7 +497,7 @@ TqInt CqSurfacePointsPolygons::Split( std::vector<CqBasicSurface*>& aSplits )
 				CqString objname( "unnamed" );
 				const CqString* pattrName = pSurface->pAttributes()->GetStringAttribute( "identifier", "name" );
 				if ( pattrName != 0 ) objname = pattrName[ 0 ];
-				QGetRenderContext() ->Logger() ->warn( "Invalid PointsPolygon index in object \"%s\"", objname.c_str()  );
+				std::cerr << warning << "Invalid PointsPolygon index in object \"" << objname.c_str() << "\"" << std::endl;
 			
 				break;
 			}

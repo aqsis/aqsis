@@ -36,8 +36,6 @@ extern CqParseNode* ParseTreePointer;
 extern void TypeCheck();
 extern void Optimise();
 extern void InitStandardNamespace();
-extern void SLCreateLogger();
-extern void SLDeleteLogger();
 
 
 std::istream* ParseInputStream = &std::cin;
@@ -55,7 +53,6 @@ TqBool Parse( std::istream& InputStream, const CqString StreamName, std::ostream
 	ParseSucceeded = true;
 
 	InitStandardNamespace();
-	SLCreateLogger();
 
 	try
 	{
@@ -74,8 +71,6 @@ TqBool Parse( std::istream& InputStream, const CqString StreamName, std::ostream
 	std::vector<CqVarDef>::iterator iv;
 	for ( iv = gLocalVars.begin(); iv != gLocalVars.end(); iv++ )
 		if ( iv->pDefValue() ) iv->pDefValue() ->Optimise();
-
-	SLDeleteLogger();
 
 	return ParseSucceeded;
 }

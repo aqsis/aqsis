@@ -90,7 +90,6 @@ class CqModeBlock : public CqRefCount
 		 */
 		virtual	void	EndMainModeBlock()
 		{
-			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 			logInvalidNesting();
 		}
 		/** Delete the main context, overridable per derived class.
@@ -98,7 +97,6 @@ class CqModeBlock : public CqRefCount
 		 */
 		virtual	void	EndFrameModeBlock()
 		{
-			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 			logInvalidNesting();
 		}
 		/** Delete the main context, overridable per derived class.
@@ -106,7 +104,6 @@ class CqModeBlock : public CqRefCount
 		 */
 		virtual	void	EndWorldModeBlock()
 		{
-			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 			logInvalidNesting();
 		}
 		/** Delete the main context, overridable per derived class.
@@ -114,7 +111,6 @@ class CqModeBlock : public CqRefCount
 		 */
 		virtual	void	EndAttributeModeBlock()
 		{
-			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 			logInvalidNesting();
 		}
 		/** Delete the main context, overridable per derived class.
@@ -122,7 +118,6 @@ class CqModeBlock : public CqRefCount
 		 */
 		virtual	void	EndTransformModeBlock()
 		{
-			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 			logInvalidNesting();
 		}
 		/** Delete the main context, overridable per derived class.
@@ -130,7 +125,6 @@ class CqModeBlock : public CqRefCount
 		 */
 		virtual	void	EndSolidModeBlock()
 		{
-			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 			logInvalidNesting();
 		}
 		/** Delete the main context, overridable per derived class.
@@ -138,7 +132,6 @@ class CqModeBlock : public CqRefCount
 		 */
 		virtual	void	EndObjectModeBlock()
 		{
-			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 			logInvalidNesting();
 		}
 		/** Delete the main context, overridable per derived class.
@@ -146,7 +139,6 @@ class CqModeBlock : public CqRefCount
 		 */
 		virtual	void	EndMotionModeBlock()
 		{
-			//CqBasicError( 0, Severity_Fatal, "Invalid Context Nesting" );
 			logInvalidNesting();
 		}
 

@@ -23,18 +23,13 @@ namespace std
 #include <cassert>
 
 #include	"parsenode.h"
-#include	"ilog.h"
-#include	"log.h"
+#include	"logging.h"
 
 # define YYMAXDEPTH 100000
 # define YYINITDEPTH  2000
 
 using namespace Aqsis;
 
-namespace
-{
-IqLog* pLogger();
-} // namespace
 
 namespace Aqsis
 {
@@ -1548,8 +1543,8 @@ procedurecall
 unresolvedcall
 	:	IDENTIFIER '(' proc_arguments ')'
 							{
-								pLogger()->warn("Hit unresolved call to function: %s\n", $1->c_str() );
-								pLogger()->warn("We will attempt to resolve this with a DSO at runtime\n ");
+								std::cerr << warning << "Hit unresolved call to function: " << $1->c_str() << 
+														"We will attempt to resolve this with a DSO at runtime" << std::endl;
 								CqParseNode* pArgs=$3;
 								CqString strArgTypes("");
 								if(pArgs)
@@ -1575,8 +1570,8 @@ unresolvedcall
 								// This should in theory be the eaiest case to handle
 								// since there are no arguments that might need casting
 								// later.
-								pLogger()->warn("Hit unresolved call to function: %s\n", $1->c_str() );
-								pLogger()->warn("We will attempt to resolve this with a DSO at runtime\n ");
+								std::cerr << warning << "Hit unresolved call to function: " << $1->c_str() << 
+														"We will attempt to resolve this with a DSO at runtime" << std::endl;
 								CqFuncDef func_spec(Type_Nil, $1->c_str(), "unresolved","");
 								CqParseNodeUnresolvedCall* pUFunc=new CqParseNodeUnresolvedCall(func_spec);
 								pUFunc->SetPos(ParseLineNumber,ParseStreamName.c_str());
@@ -1912,32 +1907,8 @@ void ProcessShaderArguments( CqParseNode* pArgs )
 	}
 }
 
-static IqLog* g_ptheLog = NULL;
-
-void SLCreateLogger()
-{
-	delete( g_ptheLog );
-	g_ptheLog = CreateLogger();
-}
-
-void SLDeleteLogger()
-{
-	DeleteLogger( g_ptheLog );
-	g_ptheLog = NULL;
-}
 
 } // End Namespace
-
-namespace
-{
-
-IqLog* pLogger()
-{
-	assert( NULL != g_ptheLog );
-	return( g_ptheLog );
-}
-
-} // namespace
 
 static void yyerror(const CqString Message)
 {

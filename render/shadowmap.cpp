@@ -33,6 +33,7 @@
 #include	"random.h"
 #include	"version.h"
 #include	"renderer.h"
+#include	"logging.h"
 
 #ifndef		AQSIS_SYSTEM_WIN32
 #include	"unistd.h"
@@ -139,10 +140,7 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        strcmp( ptexfmt, SHADOWMAP_HEADER ) != 0 )
 	{
-		//CqString strError( strName );
-		//strError += " not a shadow map, use RiMakeShadow";
-		//CqBasicError( 0, Severity_Normal, strError.c_str() );
-		QGetRenderContextI() ->Logger() ->error( "Map \"%s\" is not a valid shadow map, use RiMakeShadow", strName.c_str() );
+		std::cerr << error << "Map \"" << strName.c_str() << "\" is not a valid shadow map, use RiMakeShadow" << std::endl;
 		pNew->SetInvalid();
 	}
 	else
@@ -175,10 +173,7 @@ void CqShadowMap::LoadZFile()
 			// Check validity of shadow map.
 			if ( strncmp( strHeader, origHeader, headerLength ) != 0 )
 			{
-				//CqString strErr( "Error : Invalid shadowmap format - " );
-				//strErr += m_strName;
-				//CqBasicError( ErrorID_InvalidShadowMap, Severity_Normal, strErr.c_str() );
-				QGetRenderContextI() ->Logger() ->error( "Invalid shadow map format \"%s\"", m_strName.c_str() );
+				std::cerr << error << "Invalid shadow map format \"" << m_strName.c_str() << "\"" << std::endl;
 				return ;
 			}
 
@@ -210,10 +205,7 @@ void CqShadowMap::LoadZFile()
 		}
 		else
 		{
-			//CqString strErr( "Shadow map not found " );
-			//strErr += m_strName;
-			//CqBasicError( ErrorID_FileNotFound, Severity_Normal, strErr.c_str() );
-			QGetRenderContextI() ->Logger() ->error( "Shadow map \"%s\" not found", m_strName.c_str());
+			std::cerr << error << "Shadow map \"" << m_strName.c_str() << "\" not found" << std::endl;
 		}
 	}
 }

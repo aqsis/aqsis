@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libdd" /I "..\libddmsock" /I "..\..\win32libs\include" /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "AQSIS_DYNAMIC_LINK" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libdd" /I "..\libddmsock" /I "..\..\win32libs\include" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "AQSIS_DYNAMIC_LINK" /D "WIN32" /D "NO_SYSLOG" /YX /FD /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -67,7 +67,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libdd" /I "..\libddmsock" /I "..\..\win32libs\include" /D "_DEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "AQSIS_DYNAMIC_LINK" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GR /GX /ZI /Od /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libdd" /I "..\libddmsock" /I "..\..\win32libs\include" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "AQSIS_DYNAMIC_LINK" /D "WIN32" /D "NO_SYSLOG" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x809 /d "_DEBUG"
 # ADD RSC /l 0x809 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -91,7 +91,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libdd" /I "..\libddmsock" /I "..\..\win32libs\include" /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "AQSIS_DYNAMIC_LINK" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\render" /I "..\libaqsistypes" /I "..\libaqsistypes\win32\intel" /I "..\libdd" /I "..\libddmsock" /I "..\..\win32libs\include" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "AQSIS_DYNAMIC_LINK" /D "WIN32" /D "NO_SYSLOG" /YX /FD /c
 # ADD BASE RSC /l 0x809 /d "NDEBUG"
 # ADD RSC /l 0x809 /d "NDEBUG"
 BSC32=bscmake.exe

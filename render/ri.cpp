@@ -64,8 +64,6 @@
 #include	"ri.h"
 
 #include	"sstring.h"
-#include	"mtable.h"
-#include	"ilog.h"
 
 //#include	"share.h"
 #include	"validate.h"
@@ -265,6 +263,7 @@ RtInt BuildParameterList( va_list pArgs, RtToken*& pTokens, RtPointer*& pValues 
 	return ( count );
 }
 
+
 //----------------------------------------------------------------------
 //	CqRangeCheckCallback implentation
 //	Use this with CheckMinMax
@@ -272,16 +271,8 @@ RtInt BuildParameterList( va_list pArgs, RtToken*& pTokens, RtPointer*& pValues 
 class	CqLogRangeCheckCallback	: public CqRangeCheckCallback
 {
     public: 
-        CqLogRangeCheckCallback( IqLog* str ) 
-        { 
-            m_log = str; 
-        } 
-
-		void set( const char* name, const char*	priority )
-		{
-			m_name = name;
-			m_prio = priority;
-		}
+        CqLogRangeCheckCallback() 
+        { } 
 
 		void set( const char* name )
 		{
@@ -294,12 +285,12 @@ class	CqLogRangeCheckCallback	: public CqRangeCheckCallback
 			{
 				case CqRangeCheckCallback::UPPER_BOUND_HIT:
 				{
-					m_log->log( m_prio, "Invalid Value for %s. Value exceeded upper limit", m_name );
+					std::cerr << error << "Invalid Value for " << m_name << ". Value exceeded upper limit" << std::endl;
 				}
 
 				case CqRangeCheckCallback::LOWER_BOUND_HIT:
 				{
-					m_log->log( m_prio, "Invalid Value for %s. Value is below lower limit", m_name );
+					std::cerr << error << "Invalid Value for " << m_name << ". Value exceeded lower limit" << std::endl;
 				}
 
 				default:
@@ -309,11 +300,8 @@ class	CqLogRangeCheckCallback	: public CqRangeCheckCallback
 
 
 	private:
-		IqLog*	m_log;
 		const char*	m_name;
-		const char* m_prio;
 };
-
 
 //----------------------------------------------------------------------
 // RiDeclare
@@ -603,11 +591,11 @@ RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio 
 //
 RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 {
-	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+	CqLogRangeCheckCallback rc;
 
 	bool valid = true;
 
-	rc.set( "frameratio", "ERROR" );
+	rc.set( "frameratio");
 	if( !CheckMinMax( frameratio, 0.0f, RI_INFINITY, &rc ) )
 	{
 		valid = false;
@@ -615,7 +603,7 @@ RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 	
 	if( !valid )
 	{
-		QGetRenderContext() ->Logger()->error( "RiFrameAspectRatio: Invalid RiFrameAspectRatio, aborting" );
+		std::cerr << error << "RiFrameAspectRatio: Invalid RiFrameAspectRatio, aborting" << std::endl;
 		throw( "INVALID_VALUE" );
 		return;
 	}
@@ -655,11 +643,11 @@ RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top 
 //
 RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 {
-	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+	CqLogRangeCheckCallback rc;
 
 	bool valid = true;
 
-	rc.set( "left", "ERROR" );
+	rc.set( "left");
 	if( !CheckMinMax( left, 0.0f, 1.0f, &rc ) )
 	{
 		valid = false;
@@ -685,7 +673,7 @@ RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 	
 	if( !valid )
 	{
-		QGetRenderContext() ->Logger()->error( "Invalid RiFrameAspectRatio, aborting" );
+		std::cerr << error << "Invalid RiFrameAspectRatio, aborting" << std::endl;
 		throw( "INVALID_VALUE" );
 		return;
 	}
@@ -728,7 +716,7 @@ RtVoid	RiProjectionV( const char *name, PARAMETERLIST )
 		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "Projection" ) [ 0 ] = ProjectionOrthographic ;
 	else if( name != RI_NULL )
 	{
-		QGetRenderContext() ->Logger() ->error( "RiProjection: Invalid projection: \"%s\"", name );
+		std::cerr << error << "RiProjection: Invalid projection: \"" << name << "\"" << std::endl;
 		return ;
 	}
 
@@ -754,11 +742,11 @@ RtVoid	RiProjectionV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 {
-	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+	CqLogRangeCheckCallback rc;
 
 	bool valid = true;
 
-	rc.set( "near", "WARN" );
+	rc.set( "near");
 	if( !CheckMinMax( cnear, RI_EPSILON, cfar, &rc ) )
 	{
 		valid = false;
@@ -772,7 +760,7 @@ RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 
 	if( !valid )
 	{
-		QGetRenderContext() ->Logger()->error( "RiClipping: Invalid RiClipping, clipping planes set to RI_EPSILON, RI_INFINITY" );
+		std::cerr << error << "RiClipping: Invalid RiClipping, clipping planes set to RI_EPSILON, RI_INFINITY" << std::endl;
 		cnear	= RI_EPSILON;
 		cfar	= RI_INFINITY;
 	}
@@ -790,11 +778,11 @@ RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 //
 RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance )
 {
-	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+	CqLogRangeCheckCallback rc;
 
 	bool valid = true;
 
-	rc.set( "fstop", "WARN" );
+	rc.set( "fstop" );
 	if( !CheckMinMax( fstop, 0.0f, RI_INFINITY, &rc ) )
 	{
 		valid = false;
@@ -814,7 +802,7 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 
 	if( !valid )
 	{
-		QGetRenderContext() ->Logger()->warn( "RiDepthOfField: Invalid DepthOfField, DepthOfField ignored" );
+		std::cerr << warning << "RiDepthOfField: Invalid DepthOfField, DepthOfField ignored" << std::endl;
 		return;
 	}
 
@@ -832,11 +820,11 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 //
 RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 {
-	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+	CqLogRangeCheckCallback rc;
 
 	bool valid = true;
 
-	rc.set( "opentime", "WARN" );
+	rc.set( "opentime" );
 	if( !CheckMinMax( opentime, 0.0f, RI_INFINITY, &rc ) )
 	{
 		valid = false;
@@ -850,7 +838,7 @@ RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 
 	if( !valid )
 	{
-		QGetRenderContext() ->Logger()->warn( "Invalid Shutter, shutter set to 0, 1" );
+		std::cerr << warning << "Invalid Shutter, shutter set to 0, 1" << std::endl;
 		opentime = 0;
 		closetime = 1;
 	}
@@ -869,11 +857,11 @@ RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 //
 RtVoid	RiPixelVariance( RtFloat variance )
 {
-	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+	CqLogRangeCheckCallback rc;
 
 	bool valid = true;
 
-	rc.set( "variance", "WARN" );
+	rc.set( "variance" );
 	if( !CheckMinMax( variance, 0.0f, RI_INFINITY, &rc ) )
 	{
 		valid = false;
@@ -881,7 +869,7 @@ RtVoid	RiPixelVariance( RtFloat variance )
 
 	if( !valid )
 	{
-		QGetRenderContext() ->Logger()->warn( "RiPixelVariance: Invalid PixelVariance, PixelVariance set to 0" );
+		std::cerr << warning << "RiPixelVariance: Invalid PixelVariance, PixelVariance set to 0" << std::endl;
 		variance = 0;
 	}
 
@@ -897,11 +885,11 @@ RtVoid	RiPixelVariance( RtFloat variance )
 //
 RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 {
-	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+	CqLogRangeCheckCallback rc;
 
 	bool valid = true;
 
-	rc.set( "xsamples", "WARN" );
+	rc.set( "xsamples" );
 	if( !CheckMinMax( xsamples, 1.0f, RI_INFINITY, &rc ) )
 	{
 		valid = false;
@@ -915,7 +903,7 @@ RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 
 	if( !valid )
 	{
-		QGetRenderContext() ->Logger()->warn( "RiPixelSamples: Invalid PixelSamples, PixelSamples set to 1, 1" );
+		std::cerr << warning << "RiPixelSamples: Invalid PixelSamples, PixelSamples set to 1, 1" << std::endl;
 		xsamples = 1;
 		ysamples = 1;
 	}
@@ -1413,7 +1401,7 @@ RtVoid	RiHiderV( const char *name, PARAMETERLIST )
 		}
 		catch( XqException e )
 		{
-			QGetRenderContext()->Logger()->error( e.strReason() );
+			std::cerr << error << e.strReason().c_str() << std::endl;
 			continue;
 		}
 		if ( Decl.m_strName.compare( "depthfilter" ) == 0 )
@@ -1432,7 +1420,7 @@ RtVoid	RiHiderV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiColorSamples( RtInt N, RtFloat *nRGB, RtFloat *RGBn )
 {
-	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_COLOR_SAMPLES_INVALID );
+	std::cerr << warning << "RiColorSamples not supported" << std::endl;
 	return ;
 }
 
@@ -1445,7 +1433,7 @@ RtVoid	RiRelativeDetail( RtFloat relativedetail )
 {
 	if ( relativedetail < 0.0f )
 	{
-		QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_RELATIVE_DETAIL_INVALID );
+		std::cerr << error << "RiRelativeDetail < 0.0" << std::endl;
 	}
 	else
 	{
@@ -1496,7 +1484,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 		}
 		catch( XqException e )
 		{
-			QGetRenderContext()->Logger()->error( e.strReason() );
+			std::cerr << error << e.strReason().c_str() << std::endl;
 			continue;
 		}
 		TqInt Type = Decl.m_Type;
@@ -1513,9 +1501,9 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 			else
 			{
 				if ( Decl.m_strName == "" )
-					QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_UNKNOWN_SYMBOL );
+					std::cerr << warning << "Unrecognised declaration : " << token << std::endl;
 				else
-					QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_ONLY_UNIFORM_OPTIONS );
+					std::cerr << warning << "Options can only be uniform [" << token << "]" << std::endl;
 				return ;
 			}
 		}
@@ -1787,7 +1775,7 @@ RtLightHandle	RiAreaLightSource( const char *name, ... )
 //
 RtLightHandle	RiAreaLightSourceV( const char *name, PARAMETERLIST )
 {
-	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_AREA_LIGHT_UNSUPPORTED );
+	std::cerr << warning << "RiAreaLightSource not supported, will produce a point light" << std::endl;
 	
 	return ( RiLightSourceV( name, count, tokens, values ) );
 }
@@ -1908,7 +1896,7 @@ RtVoid	RiAtmosphereV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiInterior( const char *name, ... )
 {
-	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_INTERIOR_UNSUPPORTED );
+	std::cerr << warning << "RiInterior not supported" << std::endl;
 	return ;
 }
 
@@ -1919,7 +1907,7 @@ RtVoid	RiInterior( const char *name, ... )
 //
 RtVoid	RiInteriorV( const char *name, PARAMETERLIST )
 {
-	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_INTERIOR_UNSUPPORTED );
+	std::cerr << warning << "RiInterior not supported" << std::endl;
 	return ;
 }
 
@@ -1930,7 +1918,7 @@ RtVoid	RiInteriorV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiExterior( const char *name, ... )
 {
-	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_EXTERIOR_UNSUPPORTED );
+	std::cerr << warning << "RiExterior not supported" << std::endl;
 	return ;
 }
 
@@ -1941,7 +1929,7 @@ RtVoid	RiExterior( const char *name, ... )
 //
 RtVoid	RiExteriorV( const char *name, PARAMETERLIST )
 {
-	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_EXTERIOR_UNSUPPORTED );
+	std::cerr << warning << "ExInterior not supported" << std::endl;
 	return ;
 }
 
@@ -1952,11 +1940,11 @@ RtVoid	RiExteriorV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiShadingRate( RtFloat size )
 {
-	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+	CqLogRangeCheckCallback rc;
 
 	bool valid = true;
 
-	rc.set( "size", "WARN" );
+	rc.set( "size" );
 	if( !CheckMinMax( size, 0.0f, RI_INFINITY, &rc ) )
 	{
 		valid = false;
@@ -1964,7 +1952,7 @@ RtVoid	RiShadingRate( RtFloat size )
 
 	if( !valid )
 	{
-		QGetRenderContext() ->Logger()->warn( "Invalid ShadingRate, ShadingRate set to 1" );
+		std::cerr << warning << "Invalid ShadingRate, ShadingRate set to 1" << std::endl;
 		size = 1;
 	}
 
@@ -1988,7 +1976,7 @@ RtVoid	RiShadingInterpolation( RtToken type )
 		if ( strcmp( type, RI_SMOOTH ) == 0 )
 			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingSmooth;
 		else
-			QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_INVALID_SHADING_INTERPOLATION );
+			std::cerr << error << "RiShadingInterpolation unrecognised value \"" << type << "\"" << std::endl;
 
 	QGetRenderContext() ->AdvanceTime();
 	return ;
@@ -2048,7 +2036,7 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 {
 	if ( offlow > onlow || onhigh > offhigh )
 	{
-		QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_DETAIL_RANGE_INVALID );
+		std::cerr << error << "RiDetailRange invalid range" << std::endl;
 		return ;
 	}
 
@@ -2093,7 +2081,7 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 //
 RtVoid	RiGeometricApproximation( RtToken type, RtFloat value )
 {
-	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_GEOMETRIC_APPROX_UNSUPPORTED );
+	std::cerr << warning << "RiGeometricApproximation not supported" << std::endl;
 	return ;
 }
 
@@ -2223,7 +2211,7 @@ RtVoid	RiPerspective( RtFloat f )
 {
 	if ( f <= 0 )
 	{
-		QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_PERSPECTIVE_BAD_FOV );
+		std::cerr << error << "RiPerspective invalid FOV" << std::endl;
 		return ;
 	}
 
@@ -2330,7 +2318,7 @@ RtVoid	RiSkew( RtFloat angle, RtFloat dx1, RtFloat dy1, RtFloat dz1,
 //
 RtVoid	RiDeformation( const char *name, ... )
 {
-	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_DEFORMATION_UNSUPPORTED );
+	std::cerr << warning << "RiDeformation not supported" << std::endl;
 	return ;
 }
 
@@ -2341,7 +2329,7 @@ RtVoid	RiDeformation( const char *name, ... )
 //
 RtVoid	RiDeformationV( const char *name, PARAMETERLIST )
 {
-	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_DEFORMATION_UNSUPPORTED );
+	std::cerr << warning << "RiDeformation not supported" << std::endl;
 	return ;
 }
 
@@ -2428,7 +2416,7 @@ RtVoid	RiCoordSysTransform( RtToken space )
 //
 RtPoint*	RiTransformPoints( RtToken fromspace, RtToken tospace, RtInt npoints, RtPoint points[] )
 {
-	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_TRANSFORM_POINTS_UNSUPPORTED );
+	std::cerr << warning << "RiTransformPoints not supported" << std::endl;
 	return ( 0 );
 }
 
@@ -2504,7 +2492,7 @@ RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 			}
 			catch( XqException e )
 			{
-				QGetRenderContext()->Logger()->error( e.strReason() );
+				std::cerr << error << e.strReason().c_str() << std::endl;
 				continue;
 			}
 			if ( Decl.m_strName != "" && Decl.m_Class == class_uniform )
@@ -2518,9 +2506,9 @@ RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 			else
 			{
 				if ( Decl.m_strName == "" )
-					QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_UNKNOWN_SYMBOL );
+					std::cerr << warning << "Unrecognised declaration \"" << token << "\"" << std::endl;
 				else
-					QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_ONLY_UNIFORM_ATTRIBUTES );
+					std::cerr << warning << "Attributes can only be uniform" << std::endl;
 				return ;
 			}
 		}
@@ -2628,7 +2616,7 @@ RtVoid	RiPolygonV( RtInt nvertices, PARAMETERLIST )
 		}
 		else
 		{
-			QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_DEGENRATE_POLYGON );
+			std::cerr << error << "Found degenerate polygon" << std::endl;
 			RELEASEREF( pSurface );
 		}
 	}
@@ -2795,7 +2783,7 @@ RtVoid RiBlobbyV( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFlo
                   RtInt nstrings, RtString strings[], PARAMETERLIST )
 {
 
-	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_BLOBBY_V_UNSUPPORTED );
+	std::cerr << warning << "RiBlobby not supported" << std::endl;
 
 	return ;
 }
@@ -2943,7 +2931,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 	else
 	{
 		// the wrap mode was neither "periodic" nor "nonperiodic"
-	    QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_CURVES_V_UNKNOWN_WRAP_MODE );
+		std::cerr << error << "RiCurves invalid wrap mode \"" << wrap << "\"" << std::endl;
 	}
 
 	// handle creation of linear and cubic curve groups separately
@@ -2991,7 +2979,7 @@ RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, 
 	else
 	{
 		// the type of curve was neither "linear" nor "cubic"
-	    QGetRenderContext() ->Logger()->getError( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_CURVES_V_UNKNOWN_TYPE );
+		std::cerr << error << "RiCurves invalid type \"" << type << "\"" << std::endl;
 	}
 }
 
@@ -3409,7 +3397,7 @@ RtVoid	RiPatchV( RtToken type, PARAMETERLIST )
 	}
 	else
 	{
-		QGetRenderContext() ->Logger() ->error( "RiPatch: Invalid patch type: %s", type );
+		std::cerr << error << "RiPatch invalid patch type \"" << type << "\"" << std::endl;
 	}
 
 	return ;
@@ -3441,10 +3429,10 @@ RtVoid	RiPatchMesh( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwrap, PARAMETERLIST )
 {
 	if( strcmp( uwrap, RI_PERIODIC ) && strcmp( uwrap, RI_NONPERIODIC ) )
-		QGetRenderContext() ->Logger() ->error( "RiPatchMesh: Invalid u-wrap type: \"%s\"", type );
+		std::cerr << error << "RiPatchMesh invalid u-wrap type: \"" << uwrap << "\"" << std::endl;
 
 	if( strcmp( vwrap, RI_PERIODIC ) && strcmp( vwrap, RI_NONPERIODIC ) )
-		QGetRenderContext() ->Logger() ->error( "RiPatchMesh: Invalid v-wrap type: \"%s\"", type );
+		std::cerr << error << "RiPatchMesh invalid v-wrap type: \"" << vwrap << "\"" << std::endl;
 	
 	if ( strcmp( type, RI_BICUBIC ) == 0 )
 	{
@@ -3503,7 +3491,7 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 	}
 	else
 	{
-		QGetRenderContext() ->Logger() ->error( "RiPatchMesh: Invalid patch type: \"%s\"", type );
+		std::cerr << error << "RiPatchMesh invalid type \"" << type << "\"" << std::endl;
 	}
 
 	return ;
@@ -3643,11 +3631,11 @@ RtVoid	RiSphere( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, .
 //
 RtVoid	RiSphereV( RtFloat radius, RtFloat zmin, RtFloat zmax, RtFloat thetamax, PARAMETERLIST )
 {
-	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+	CqLogRangeCheckCallback rc;
 
-	rc.set( "sphere zmin", "WARN" );
+	rc.set( "sphere zmin" );
 	CheckMinMax( zmin, -radius, radius, &rc );
-	rc.set( "sphere zmax", "WARN" );
+	rc.set( "sphere zmax" );
 	CheckMinMax( zmax, -radius, radius, &rc );
 
 	// Create a sphere
@@ -4018,7 +4006,7 @@ RtVoid	RiGeometryV( RtToken type, PARAMETERLIST )
 	}
 	else
 	{
-		QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_GEOMETRY_V_UNKNOWN );
+		std::cerr << warning << "RiGeometry unrecognised type \"" << type << "\"" << std::endl;
 	}
 
 	return ;
@@ -4055,7 +4043,7 @@ RtVoid	RiSolidEnd()
 //
 RtObjectHandle	RiObjectBegin()
 {
-	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_OBJECT_BEGIN_UNSUPPORTED );
+	std::cerr << warning << "RiObjectBegin not supported" << std::endl;
 	QGetRenderContext() ->BeginObjectModeBlock();
 
 	return ( 0 );
@@ -4080,7 +4068,7 @@ RtVoid	RiObjectEnd()
 //
 RtVoid	RiObjectInstance( RtObjectHandle handle )
 {
-	QGetRenderContext() ->Logger()->warn( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_OBJECT_END_UNSUPPORTED );
+	std::cerr << warning << "RiObjectInstance not supported" << std::endl;
 	return ;
 }
 
@@ -4242,7 +4230,7 @@ RtVoid	RiMakeTextureV( const char * pic, const char * tex, RtToken swrap, RtToke
 //
 RtVoid	RiMakeBump( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
-	QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_MAKE_BUMP_UNSUPPORTED );
+	std::cerr << warning << "RiMakeBump not supported" << std::endl;
 	return ;
 }
 
@@ -4253,7 +4241,7 @@ RtVoid	RiMakeBump( const char * imagefile, const char * bumpfile, RtToken swrap,
 //
 RtVoid	RiMakeBumpV( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
-	QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_MAKE_BUMP_UNSUPPORTED );
+	std::cerr << warning << "RiMakeBump not supported" << std::endl;
 	return ;
 }
 
@@ -4409,7 +4397,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char 
 
 		if ( !fValid )
 		{
-			QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_MAKE_CUBE_ENV_WRONG_SIZE );
+			std::cerr << error << "RiMakeCubeFaceEnvironment all images must be the same size" << std::endl;
 			return ;
 		}
 
@@ -4583,7 +4571,7 @@ RtVoid	RiErrorIgnore( RtInt code, RtInt severity, const char * message )
 RtVoid	RiErrorPrint( RtInt code, RtInt severity, const char * message )
 {
 	// Don't use this!
-	QGetRenderContext() ->Logger() ->error( "RiError: %i : %i : %s", code, severity, message );
+	std::cerr << error << "RiError: " << code << " : " << severity << " : " << message << std::endl;
 	return ;
 }
 
@@ -4741,7 +4729,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			}
 			else
 			{
-				QGetRenderContext() ->Logger()->error( CqMessageTable::RI_ERROR_TABLE, CqMessageTable::RI_SDS_NONMANIFOLD );
+				std::cerr << error << "RiSubdivisionMesh contains non-manifold data" << std::endl;
 				// Invalid mesh, delete it.
 				RELEASEREF( pPointsClass );
 				RELEASEREF( pSubd2 );
@@ -4749,7 +4737,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		}
 		else
 		{
-			QGetRenderContext() ->Logger() ->error( "RiSubdivisionMesh: Invalid scheme: \"%s\"", scheme );
+			std::cerr << error << "RiSubdivisionMesh invalid scheme \"" << scheme << "\"" << std::endl;
 		}
 	}
 
@@ -4784,7 +4772,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		 {
 			 if ( poptVerbose )
 			 {
-				QGetRenderContext() ->Logger() ->info( "RiReadArchive: Reading archive \"%s\"", strRealName.c_str() );
+				std::cerr << info << "RiReadArchive: Reading archive \"" << strRealName.c_str() << "\"" << std::endl;
 			 }
 			 CqRIBParserState currstate = librib::GetParserState();
 			 if (currstate.m_pParseCallbackInterface == NULL) currstate.m_pParseCallbackInterface = new librib2ri::Engine;
@@ -4903,7 +4891,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			}
 			catch( XqException e )
 			{
-				QGetRenderContext()->Logger()->error( e.strReason() );
+				std::cerr << error << e.strReason().c_str() << std::endl;
 				continue;
 			}
 
@@ -5168,7 +5156,7 @@ void SetShaderArgument( IqShader * pShader, const char * name, TqPchar val )
 	}
 	catch( XqException e )
 	{
-		QGetRenderContext()->Logger()->error( e.strReason() );
+		std::cerr << error << e.strReason().c_str() << std::endl;
 		return;
 	}
 

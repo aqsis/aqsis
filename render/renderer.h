@@ -44,7 +44,6 @@
 #include	"symbols.h"
 #include	"iddmanager.h"
 #include	"irenderer.h"
-#include	"ilog.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -230,14 +229,6 @@ class CqRenderer : public IqRenderer
 			return ( m_Stats );
 		}
 
-		/**	Get the global log class instance
-		 * @return	The pointer to IqLog
-		 */
-		virtual	IqLog*	Logger()
-		{
-			return( m_theLog );
-		}
-
 		// Contect change callbacks
 		virtual	SqParameterDeclaration FindParameterDecl( const char* strDecl );
 		virtual	void	AddParameterDecl( const char* strName, const char* strType );
@@ -401,8 +392,6 @@ class CqRenderer : public IqRenderer
 		void WhichMatWorldTo(CqMatrix &a, TqUlong thash);
 		void WhichMatToWorld(CqMatrix &b, TqUlong thash);
 
-		IqLog*			m_theLog;	///< Pointer to the global log.
-		IqMessageTable*	m_theTable;	///< Pointer to the global message table, used by the log. 
 		std::map<std::string, SqOutputDataEntry>	m_OutputDataEntries;
 		TqInt	m_OutputDataOffset;
 		TqInt	m_OutputDataTotalSize;

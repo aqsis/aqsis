@@ -237,7 +237,7 @@ TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 			CqString curobj = objname.c_str();
 			if ( curobj != oldobj )
 			{
-				QGetRenderContext() ->Logger() ->warn( "Max eyesplits for object \"%s\" exceeded", curobj.c_str() );
+				std::cerr << warning << "Max eyesplits for object \"" << curobj.c_str() << "\" exceeded" << std::endl;
 				oldobj = curobj;
 			}
 		}
@@ -1194,7 +1194,7 @@ void CqImageBuffer::RenderSurfaces( long xmin, long xmax, long ymin, long ymax )
 						CqString objname( "unnamed" );
 						const CqString* pattrName = pSurface ->pAttributes() ->GetStringAttribute( "identifier", "name" );
 						if ( pattrName != 0 ) objname = pattrName[ 0 ];
-						QGetRenderContext() ->Logger() ->warn( "Primitive \"%s\" gets culled too many times", objname.c_str() );
+						std::cerr << warning << "Primitive \"" << objname.c_str() << "\" gets culled too many times" << std::endl;
 
 						counter = 0;
 						pSurface->UnLink();

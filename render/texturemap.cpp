@@ -36,6 +36,7 @@
 #include	"version.h"
 #include	"renderer.h"
 #include	"converter.h"
+#include	"logging.h"
 
 #ifndef		AQSIS_SYSTEM_WIN32
 #include	"unistd.h"
@@ -106,8 +107,7 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 		//         more - limit );
 		if ( report )
 		{
-			//RiErrorPrint( 0, 1, warnings );
-			QGetRenderContextI() ->Logger() ->warn( "Exceeding allocated texture memory by %d", more - limit );
+			std::cerr << warning << "Exceeding allocated texture memory by " << more - limit << std::endl;
 		}
 		
 		report = 0;
@@ -117,7 +117,7 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 #ifdef _DEBUG
 	if ( ( more > MEG1 ) && ( ( more / ( 1024 * 1024 ) ) > megs ) )
 	{
-		QGetRenderContextI() ->Logger() ->debug( "Texturememory is more than %d megs", megs );
+		std::cerr << debug << "Texturememory is more than " << megs << " megs" << std::endl;
 		megs += 10;
 	}
 #endif
@@ -262,7 +262,7 @@ void CqTextureMap::CriticalMeasure()
 	if ( now - current )
 	{
 		///! \todo Review this debug message
-		QGetRenderContextI() ->Logger() ->info( "I was forced to zap the tile segment buffers for %dK", ( now - current ) / 1024 );
+		std::cerr << info << "I was forced to zap the tile segment buffers for " << (int)( now - current ) / 1024 << "K" << std::endl;
 	}
 #endif
 
@@ -293,7 +293,7 @@ TqBool CqTextureMap::CreateMIPMAP( TqBool fProtectBuffers )
 		TqInt ret = TIFFGetField( m_pImage, TIFFTAG_TILEWIDTH, &tsx );
 		if( ret )
 		{
-		   QGetRenderContext()->Logger()->error("Cannot MIPMAP a tiled image (%s)", m_strName.c_str() );
+		   std::cerr << error << "Cannot MIPMAP a tiled image \"" << m_strName.c_str() << "\"" << std::endl;
 			return( TqFalse );
 		}
 		// Read the whole image into a buffer.
@@ -375,11 +375,7 @@ CqTextureMap::~CqTextureMap()
 #ifdef ALLOCSEGMENTSTATUS
 	{
 		// We count each allocation/free at the end they should match
-		//TqChar report[ 200 ];
-
-		//sprintf( report, "alloc/free %d %d\n Memory Usage %d", alloc_cnt, free_cnt, QGetRenderContext() ->Stats().GetTextureMemory() );
-		//RiErrorPrint( 0, 1, report );
-		QGetRenderContextI() ->Logger() ->info( "alloc/free %d %d\n Memory usage %d", alloc_cnt, free_cnt, QGetRenderContext() ->Stats().GetTextureMemory() );
+		std::cerr << "alloc/free " << alloc_cnt << " " << free_cnt << " - Memory usage " << QGetRenderContext() ->Stats().GetTextureMemory() << std::endl;
 	}
 #endif
 }
@@ -440,7 +436,7 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 		CqRiFile	fileImage( m_strName.c_str(), "texture" );
 		if ( !fileImage.IsValid() )
 		{
-			QGetRenderContextI() ->Logger() ->error( "Cannot open texture file \"%s\"", m_strName.c_str() );
+			std::cerr << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
 			return pTMB;
 		}
 		CqString strRealName( fileImage.strRealName() );
@@ -548,14 +544,10 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 	/* cannot find anything than goodbye */
 	if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
 	{
-		//TqChar warnings[ 400 ];
 		for ( c = 0; c < m_SamplesPerPixel; c++ )
 			val[ c ] = 1.0f;
 
-		//sprintf( warnings, "Cannot find value for either pTMPB[a,b,c,d]" );
-		//RiErrorPrint( 0, 1, warnings );
-		///! \todo what do we want to say here?
-		QGetRenderContextI() ->Logger() ->error( "Cannot find value for either pTMPB[a,b,c,d]" );
+		std::cerr << error << "Cannot find value for either pTMPB[a,b,c,d]" << std::endl;
 		return ;
 	}
 
@@ -624,13 +616,8 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		/* cannot find anything than goodbye */
 		if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
 		{
-			//TqChar warnings[ 400 ];
-
 			val = m_low_color;
-			//sprintf( warnings, "Cannot find value for either pTMPB[a,b,c,d]" );
-			//RiErrorPrint( 0, 1, warnings );
-			///! \todo what do we want to say here?
-			QGetRenderContextI() ->Logger() ->error( "Cannot find value for either pTMPB[a,b,c,d]" );
+			std::cerr << error << "Cannot find value for either pTMPB[a,b,c,d]" << std::endl;
 			return ;
 		}
 
@@ -869,10 +856,7 @@ void CqTextureMap::Open()
 	CqRiFile	fileImage( m_strName.c_str(), "texture" );
 	if ( !fileImage.IsValid() )
 	{
-		//CqString strErr( "Cannot open texture file : " );
-		//strErr += m_strName;
-		//CqBasicError( 1, Severity_Fatal, strErr.c_str() );
-		QGetRenderContextI() ->Logger() ->error( "Cannot open texture file \"%s\"", m_strName.c_str() );
+		std::cerr << error << "Cannot open texture file \"" << m_strName.c_str() << "\"" << std::endl;
 		return ;
 	}
 	CqString strRealName( fileImage.strRealName() );

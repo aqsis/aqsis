@@ -29,7 +29,6 @@
 
 #include	<vector>
 
-#include	"ilog.h"
 #include	"aqsis.h"
 
 #include	"bitvector.h"
@@ -512,9 +511,9 @@ static CqMatrix temp_matrix;
 class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 {
 	public:
-		CqShaderVM() : CqShaderStack(), m_logger( NULL ), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue ) 
+		CqShaderVM() : CqShaderStack(), m_Uses( 0xFFFFFFFF ), m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue ) 
 		{}
-		CqShaderVM( const CqShaderVM& From ) : m_logger( NULL ), m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
+		CqShaderVM( const CqShaderVM& From ) : m_LocalIndex( 0 ), m_pEnv( 0 ), m_PC( 0 ), m_fAmbient( TqTrue )
 		{
 			*this = From;
 		}
@@ -598,19 +597,7 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		 */
 		CqShaderVM&	operator=( const CqShaderVM& From );
 
-		void SetLogger (IqLog *logger) 
-		{
-			m_logger = logger;
-		};
-
-		// Get the log, this should have been set by CqRenderer::CreateShader
-		IqLog* Logger()
-		{
-			return m_logger;
-		}
-
 	private:
-		IqLog	*m_logger;
 		TqInt	m_Uses;			///< Bit vector representing the system variables used by this shader.
 		CqMatrix	m_matCurrent;	///< Transformation matrix to world coordinates in effect at the time this shader was instantiated.
 		CqString	m_strName;		///< The name of this shader.

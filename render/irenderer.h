@@ -5,7 +5,7 @@
  *	@brief	Declare the common interface structure for a Renderer core class.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/07/21 06:46:40 $
+ *	Last change date:	$Date: 2003/12/09 18:22:03 $
  */ 
 //------------------------------------------------------------------------------
 #ifndef	___irenderer_Loaded___
@@ -16,7 +16,6 @@
 START_NAMESPACE( Aqsis )
 
 struct IqTextureMap;
-struct IqLog;
 
 struct IqRenderer
 {
@@ -64,8 +63,6 @@ struct IqRenderer
 
 
 	virtual	TqBool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name ) = 0;
-
-	virtual IqLog* Logger() = 0;
 
 	virtual TqInt	RegisterOutputData( const char* name ) = 0;
 	virtual TqInt	OutputDataIndex( const char* name ) = 0;

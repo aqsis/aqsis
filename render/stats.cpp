@@ -868,18 +868,18 @@ void CqStats::PrintInfo() const
 	else
 		gs = 256;
 
-	QGetRenderContext() ->Logger()->info( "Image settings:" );
-	QGetRenderContext() ->Logger()->info( "	Resolution: %d %d", resX, resY );
-	QGetRenderContext() ->Logger()->info( "	PixelAspectRatio: %f", pratio );
-	QGetRenderContext() ->Logger()->info( "	Exposure:" );
-	QGetRenderContext() ->Logger()->info( "		Gain: %f", gain );
-	QGetRenderContext() ->Logger()->info( "		Gamma: %f", gamma );
-	QGetRenderContext() ->Logger()->info( "Shading:" );
-	QGetRenderContext() ->Logger()->info( "	Bucket size: [ %d %d ]", bX, bY );
-	QGetRenderContext() ->Logger()->info( "	Gridsize: %d", gs );
-	QGetRenderContext() ->Logger()->info( "Anti-aliasing settings: " );
-	QGetRenderContext() ->Logger()->info( "	PixelSamples: %d %d", psX, psY );
-	QGetRenderContext() ->Logger()->info( "	FilterWidth: %d %d", fX, fY );
+	std::cerr << info << "Image settings:" << std::endl;
+	std::cerr << info << "	Resolution: " << resX << " " << resY << std::endl;
+	std::cerr << info << "	PixelAspectRatio: " << pratio << std::endl;
+	std::cerr << info << "	Exposure:" << std::endl;
+	std::cerr << info << "		Gain: " << gain << std::endl;
+	std::cerr << info << "		Gamma: " << gamma << std::endl;
+	std::cerr << info << "Shading:" << std::endl;
+	std::cerr << info << "	Bucket size: [ " << bX << " " << bY << "]" << std::endl;
+	std::cerr << info << "	Gridsize: " << gs << std::endl;
+	std::cerr << info << "Anti-aliasing settings: " << std::endl;
+	std::cerr << info << "	PixelSamples: " << psX << " " << psY << std::endl;
+	std::cerr << info << "	FilterWidth: " << fX << " " << fY << std::endl;
 
 }
 

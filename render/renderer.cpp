@@ -37,8 +37,6 @@
 #include	"rifile.h"
 #include	"texturemap.h"
 #include	"shadervm.h"
-#include	"log.h"
-#include	"mtable.h"
 #include	"inlineparse.h"
 #include	"tiffio.h"
 
@@ -120,13 +118,6 @@ CqRenderer::CqRenderer() :
 	if ( chash == 0 ) chash = CqParameter::hash( "camera" );
 	if ( cuhash == 0 ) cuhash = CqParameter::hash( "current" );
 
-	// Create the log on the heap, delete it in the destructor
-	m_theLog = new CqLog;
-	m_theTable = new CqMessageTable;
-
-	// Connect the message table with the log
-	m_theLog->setMessageTable( m_theTable );
-
 	// Set the TIFF Error/Warn handler
 	TIFFSetErrorHandler( &TIFF_ErrorHandler );
 	TIFFSetWarningHandler( &TIFF_WarnHandler );
@@ -157,10 +148,6 @@ CqRenderer::~CqRenderer()
 
 	// Close down the Display device manager.
 	m_pDDManager->Shutdown();
-
-	// Delete log & message table
-	delete m_theLog;
-	delete m_theTable;
 
 	// Delete the default options
 	if ( m_pOptDefault )
@@ -993,7 +980,7 @@ void CqRenderer::AddParameterDecl( const char* strName, const char* strType )
 	}
 	catch( XqException e )
 	{
-		QGetRenderContext()->Logger()->error( e.strReason() );
+		std::cerr << error << e.strReason().c_str() << std::endl;
 		return;
 	}
 
@@ -1068,13 +1055,12 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 			CqShaderVM * pShader = new CqShaderVM();
 			const CqString *poptDSOPath = QGetRenderContext()->optCurrent().GetStringOption( "searchpath","dsolibs" );
 			pShader->SetDSOPath( poptDSOPath );
-			pShader->SetLogger( m_theLog );
 			
 			const TqInt* poptVerbose = QGetRenderContext() ->optCurrent().GetIntegerOption( "statistics", "verbose" );
 	 		CqString strRealName( SLXFile.strRealName() );
 			if ( poptVerbose )
 			{
-				QGetRenderContext() ->Logger() ->info( "Loading shader \"%s\" from file \"%s\"", strName, strRealName.c_str() );
+				std::cerr << info << "Loading shader \"" << strName << "\" from file \"" << strRealName.c_str() << "\"" << std::endl;
 			}
 
 			pShader->SetstrName( strName );
@@ -1086,9 +1072,9 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 		{
 			if ( strcmp( strName, "null" ) != 0 )
 			{
-				//strError.Format("Shader \"%s\" not found",strName.String());
-				//CqBasicError( ErrorID_FileNotFound, Severity_Normal, strError.c_str() );
-				QGetRenderContext() ->Logger() ->error( "Shader \"%s\" not found", strName ? strName : "" );
+				CqString strError;
+				strError.Format( "Shader \"%s\" not found", strName ? strName : "" );
+				std::cerr << error << strError.c_str() << std::endl;
 			}
 			if( type == Type_Surface )
 			{
@@ -1244,7 +1230,7 @@ TqInt CqRenderer::RegisterOutputData( const char* name )
 	}
 	catch( XqException e )
 	{
-		QGetRenderContext()->Logger()->error( e.strReason() );
+		std::cerr << error << e.strReason().c_str() << std::endl;
 		return(-1);
 	}
 	if( Decl.m_Type != type_invalid )
@@ -1303,7 +1289,7 @@ TqInt CqRenderer::OutputDataIndex( const char* name )
 	}
 	catch( XqException e )
 	{
-		QGetRenderContext()->Logger()->error( e.strReason() );
+		std::cerr << error << e.strReason().c_str() << std::endl;
 		return(-1);
 	}
 	if( Decl.m_Type != type_invalid )
@@ -1324,7 +1310,7 @@ TqInt CqRenderer::OutputDataSamples( const char* name )
 	}
 	catch( XqException e )
 	{
-		QGetRenderContext()->Logger()->error( e.strReason() );
+		std::cerr << error << e.strReason().c_str() << std::endl;
 		return(-1);
 	}
 	if( Decl.m_Type != type_invalid )
@@ -1341,7 +1327,7 @@ void TIFF_ErrorHandler(const char* mdl, const char* fmt, va_list va)
 {
 	char err_string[384];
 	vsprintf( err_string, fmt, va ); 
-	QGetRenderContextI() ->Logger() ->error( "%s in file: \"%s\"", err_string, mdl );
+	std::cerr << error << err_string << " in file: \"" << mdl << "\"" << std::endl;
 }
 
 void TIFF_WarnHandler(const char* mdl, const char* fmt, va_list va)

@@ -42,6 +42,7 @@
 #include	"micropolygon.h"
 #include	"csgtree.h"
 #include	"isurface.h"
+#include	"logging.h"
 
 START_NAMESPACE( Aqsis )
 
@@ -242,8 +243,7 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		{
 			if ( m_CachedBound == TqFalse && m_fDiceable )
 			{
-				//CqBasicError( 0, Severity_Fatal, "Bug in Renderer; No cached bound available" );
-				QGetRenderContext() ->Logger() ->fatal( "No cached bound available" );
+				std::cerr << critical << "No cached bound available" << std::endl;
 			}
 
 			return m_Bound;

@@ -33,6 +33,7 @@
 #include	"random.h"
 #include	"version.h"
 #include	"renderer.h"
+#include	"logging.h"
 
 #ifndef		AQSIS_SYSTEM_WIN32
 #include	"unistd.h"
@@ -128,10 +129,7 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        strcmp( ptexfmt, LATLONG_HEADER ) != 0 )
 	{
-		//CqString strError( strName );
-		//strError += " not an environment map, use RiMakeLatLongEnvironment";
-		//CqBasicError( 0, Severity_Normal, strError.c_str() );
-		QGetRenderContextI() ->Logger() ->error( "Map \"%s\" is not an environment map, use RiMakeLatLongEnvironment", strName.c_str() );
+		std::cerr << error << "Map \"" << strName.c_str() << "\" is not an environment map, use RiMakeLatLongEnvironment" << std::endl;
 		
 		pNew->SetInvalid();
 	}
@@ -193,10 +191,7 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        ( strcmp( ptexfmt, CUBEENVMAP_HEADER ) != 0 ) && ( strcmp( ptexfmt, LATLONG_HEADER ) != 0 ) )
 	{
-		//CqString strError( strName );
-		//strError += " not an environment map, use RiMakeCubeFaceEnvironment";
-		//CqBasicError( 0, Severity_Normal, strError.c_str() );
-		QGetRenderContextI() ->Logger() ->error( "Map \"%s\" is not an environment map, use RiMakeCubeFaceEnvironment", strName.c_str() );
+		std::cerr << error << "Map \"" << strName.c_str() << "\" is not an environment map, use RiMakeCubeFaceEnvironment" << std::endl;
 		pNew->SetInvalid();
 		delete pNew;
 		pNew = NULL;

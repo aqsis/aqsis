@@ -163,8 +163,7 @@ TqBool CqDDServer::Open()
 #ifdef AQSIS_SYSTEM_WIN32
 		TqInt err = WSAGetLastError();
 #endif // AQSIS_SYSTEM_WIN32
-		//CqBasicError( 0, 0, "Error opening DD server socket" );
-		QGetRenderContext() ->Logger() ->error( "Could not open DD server socket" );
+		std::cerr << error << "Error opening DD server socket" << std::endl;
 		return ( TqFalse );
 	}
 
@@ -206,8 +205,7 @@ TqBool CqDDServer::Bind( TqInt port )
 		}
 		else
 		{
-			//CqBasicError( 0, 0, "Error binding to DD socket" );
-			QGetRenderContext() ->Logger() ->error( "Could not bind to DD socket" );
+			std::cerr << error << "Error binding to DD socket" << std::endl;
 			Close();
 			return ( TqFalse );
 		}
@@ -225,8 +223,7 @@ TqBool CqDDServer::Listen()
 {
 	if ( listen( m_Socket, SOMAXCONN ) == SOCKET_ERROR )
 	{
-		//CqBasicError( 0, 0, "Error listening to DD socket" );
-		QGetRenderContext() ->Logger() ->error( "Could not listen to DD socket" );
+		std::cerr << error << "Error listening to DD socket" << std::endl;
 		Close();
 		return ( TqFalse );
 	}
@@ -390,8 +387,7 @@ TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqC
 	}
 	catch( CqString str )
 	{
-		//CqBasicError( ErrorID_DisplayDriver, Severity_Normal, str.c_str() );
-		QGetRenderContext() ->Logger() ->error( str );
+		std::cerr << error << str.c_str() << std::endl;
 		error = 1;
 		m_aDisplayRequests.pop_back();
 	}
@@ -496,8 +492,7 @@ TqInt CqDDManager::CloseDisplays()
 				continue;
 			else
 			{
-				//CqBasicError( ErrorID_DisplayDriver, Severity_Normal, "Failed to close display device" );
-				QGetRenderContext() ->Logger() ->error( "Failed to close display device" );
+				std::cerr << error << "Failed to close display device" << std::endl;
 			}
 		}
 	}
@@ -819,8 +814,7 @@ void CqDDManager::InitialiseDisplayNameMap()
 	}
 	else
 	{
-		//CqBasicError( ErrorID_DisplayDriver, Severity_Normal, "Could not find ddmsock.ini file." );
-		QGetRenderContext() ->Logger() ->error( "Could not find ddmsock.ini file" );
+		std::cerr << error << "Could not find ddmsock.ini file." << std::endl;
 	}
 }
 
@@ -900,7 +894,7 @@ void SendUserParameters( std::map<std::string, void*>& mapParams, CqDDClient* cl
 		}
 		catch( XqException e )
 		{
-			QGetRenderContext()->Logger()->error( e.strReason() );
+			std::cerr << error << e.strReason().c_str() << std::endl;
 			return;
 		}
 

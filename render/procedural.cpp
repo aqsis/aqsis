@@ -238,8 +238,7 @@ extern "C" RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 	
 	if( !plugin->IsValid() )
 	{
-		QGetRenderContext() ->Logger()->error( CqString("Problem loading Procedural DSO:") );
-		QGetRenderContext() ->Logger()->error( CqString(plugin->Error()) );
+		std::cerr << error << "Problem loading Procedural DSO: [" << plugin->Error().c_str() << "]" << std::endl;
 		return;
 	}
 
@@ -429,7 +428,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 		if (! CreatePipe(&hChildStdoutRd, &hChildStdoutWr, NULL, 0) ||
 			! CreatePipe(&hChildStdinRd,  &hChildStdinWr,  NULL, 0)) 
 		{
-			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram: Stdout pipe creation failed" );
+			std::cerr << error << "RiProcRunProgram: Stdout pipe creation failed" << std::endl;
 			return;
 		}
 
@@ -458,7 +457,7 @@ extern "C" RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
    
 		if (bFuncRetn == 0) 
 		{
-			QGetRenderContextI() ->Logger() ->error( "RiProcRunProgram: CreateProcess failed" );
+			std::cerr << error << "RiProcRunProgram: CreateProcess failed" << std::endl;
 			return;
 		} 
 

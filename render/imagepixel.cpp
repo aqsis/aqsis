@@ -34,6 +34,7 @@
 #include	"renderer.h"
 #include    "random.h"
 #include	"imagepixel.h"
+#include	"logging.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -333,7 +334,7 @@ void CqImagePixel::Combine()
 		else if ( !pstrDepthFilter[ 0 ].compare( "average" ) )
 			depthfilter = 3;
 		else
-			QGetRenderContext() ->Logger() ->warn( "Invalid depthfilter \"%s\", depthfilter set to \"min\"", pstrDepthFilter[ 0 ].c_str() );
+			std::cerr << warning << "Invalid depthfilter \"" << pstrDepthFilter[ 0 ].c_str() << "\", depthfilter set to \"min\"" << std::endl;
 	}
 
 	

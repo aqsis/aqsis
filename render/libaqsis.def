@@ -9,7 +9,6 @@ EXPORTS
 	??0CqColor@Aqsis@@QAE@XZ
 	??0CqFile@Aqsis@@QAE@PBD0@Z
 	??0CqFile@Aqsis@@QAE@XZ
-	??0CqLog@Aqsis@@QAE@PAD_N@Z
 	??0CqMatrix@Aqsis@@QAE@ABV01@@Z
 	??0CqMatrix@Aqsis@@QAE@ABVCqVector3D@1@@Z
 	??0CqMatrix@Aqsis@@QAE@MMM@Z
@@ -19,7 +18,6 @@ EXPORTS
 	??0CqMatrix@Aqsis@@QAE@QAM@Z
 	??0CqMatrix@Aqsis@@QAE@QAY03M@Z
 	??0CqMatrix@Aqsis@@QAE@XZ
-	??0CqMessageTable@Aqsis@@QAE@XZ
 	??0CqSplineCubic@Aqsis@@QAE@H@Z
 	??0CqString@Aqsis@@QAE@ABV01@@Z
 	??0CqString@Aqsis@@QAE@PBD@Z
@@ -37,9 +35,7 @@ EXPORTS
 	??1CqBitVector@Aqsis@@QAE@XZ
 	??1CqColor@Aqsis@@QAE@XZ
 	??1CqFile@Aqsis@@UAE@XZ
-	??1CqLog@Aqsis@@UAE@XZ
 	??1CqMatrix@Aqsis@@QAE@XZ
-	??1CqMessageTable@Aqsis@@UAE@XZ
 	??1CqPluginBase@Aqsis@@UAE@XZ
 	??1CqSplineCubic@Aqsis@@UAE@XZ
 	??1CqVector2D@Aqsis@@QAE@XZ
@@ -169,12 +165,6 @@ EXPORTS
 	?XYZtorgb@CqColor@Aqsis@@QBE?AV12@XZ
 	?YIQtorgb@CqColor@Aqsis@@QBE?AV12@XZ
 	?cSections@CqSplineCubic@Aqsis@@UBEHXZ
-	?critical@CqLog@Aqsis@@UAAXPBDZZ
-	?critical@CqLog@Aqsis@@UAEXABVCqString@2@@Z
-	?critical@CqLog@Aqsis@@UAEXHH@Z
-	?error@CqLog@Aqsis@@UAAXPBDZZ
-	?error@CqLog@Aqsis@@UAEXABVCqString@2@@Z
-	?error@CqLog@Aqsis@@UAEXHH@Z
 	?gBSplineBasis@Aqsis@@3PAY03MA
 	?gBezierBasis@Aqsis@@3PAY03MA
 	?gCatmullRomBasis@Aqsis@@3PAY03MA
@@ -185,31 +175,14 @@ EXPORTS
 	?gColWhite@Aqsis@@3VCqColor@1@A
 	?gHermiteBasis@Aqsis@@3PAY03MA
 	?gPowerBasis@Aqsis@@3PAY03MA
-	?getError@CqLog@Aqsis@@UAEPBDHH@Z
-	?getError@CqMessageTable@Aqsis@@UAEPBDHH@Z
-	?getMessageTable@CqLog@Aqsis@@UAEPAUIqMessageTable@2@XZ
 	?hsltorgb@CqColor@Aqsis@@QBE?AV12@XZ
 	?hsvtorgb@CqColor@Aqsis@@QBE?AV12@XZ
-	?info@CqLog@Aqsis@@UAAXPBDZZ
-	?info@CqLog@Aqsis@@UAEXABVCqString@2@@Z
-	?info@CqLog@Aqsis@@UAEXHH@Z
 	?init@CqNoise@Aqsis@@SAXH@Z
-	?insert@CqMessageTable@Aqsis@@QAEXHU?$pair@$$CBHV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@std@@@Z
-	?log@CqLog@Aqsis@@UAAXPBD0ZZ
-	?log@CqLog@Aqsis@@UAEXPBDABVCqString@2@@Z
-	?notice@CqLog@Aqsis@@UAAXPBDZZ
-	?notice@CqLog@Aqsis@@UAEXABVCqString@2@@Z
-	?notice@CqLog@Aqsis@@UAEXHH@Z
-	?removeFileLog@CqLog@Aqsis@@UAEXV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
 	?rgbtoXYZ@CqColor@Aqsis@@QBE?AV12@XZ
 	?rgbtoYIQ@CqColor@Aqsis@@QBE?AV12@XZ
 	?rgbtohsl@CqColor@Aqsis@@QBE?AV12@XZ
 	?rgbtohsv@CqColor@Aqsis@@QBE?AV12@XZ
 	?rgbtoxyY@CqColor@Aqsis@@QBE?AV12@XZ
-	?setMessageTable@CqLog@Aqsis@@UAEXPAUIqMessageTable@2@@Z
-	?warn@CqLog@Aqsis@@UAAXPBDZZ
-	?warn@CqLog@Aqsis@@UAEXABVCqString@2@@Z
-	?warn@CqLog@Aqsis@@UAEXHH@Z
 	?xyYtorgb@CqColor@Aqsis@@QBE?AV12@XZ
 	
 	?parseShadeOpTableEntry@CqDSORepository@Aqsis@@MAEPAUSqDSOExternalCall@2@PAXPAUSqShadeOp@@@Z

@@ -235,11 +235,10 @@ CqSolidModeBlock::CqSolidModeBlock( CqString& type, CqModeBlock* pconParent ) : 
 		// Check if we are linking under a Primitive node, if so warn, and link at the top.
 		if ( pParentSolid->pCSGNode() ->NodeType() == CqCSGTreeNode::CSGNodeType_Primitive )
 		{
-			//CqAttributeError error( RIE_BADSOLID, Severity_Normal, "Cannot add solid block under 'Primitive' solid block", m_pattrCurrent, TqTrue );
 			CqString objname( "unnamed" );
 			const CqString* pattrName = m_pattrCurrent->GetStringAttribute( "identifier", "name" );
 			if ( pattrName != 0 ) objname = pattrName[ 0 ];
-			QGetRenderContext() ->Logger() ->warn( "Cannot add solid block under 'Primitive' \"%s\" solid block", objname.c_str()  );
+			std::cerr << warning << "Cannot add solid block under 'Primitive' \"" << objname.c_str() << "\" solid block" << std::endl;
 
 			m_lCSGTrees.LinkLast( m_pCSGNode );
 		}
@@ -356,7 +355,7 @@ void CqMotionModeBlock::SetDeformingSurface( CqDeformingSurface* pDeformingSurfa
 
 void CqModeBlock::logInvalidNesting() const
 {
-	QGetRenderContext() ->Logger() ->fatal( "Invalid context nesting" );
+	std::cerr << critical << "Invalid context nesting" << std::endl;
 }
 
 
