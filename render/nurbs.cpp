@@ -1270,7 +1270,7 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 {
 	TqInt cSplits = 0;
 
-	if( fPatchMesh() )
+	if( fPatchMesh() && ( cuSegments() > 1 || cvSegments() > 1 ) )
 	{
 		std::vector<CqSurfaceNURBS*> S;
 
@@ -1312,6 +1312,8 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 	pNew2->m_EyeSplitCount = m_EyeSplitCount;
 	pNew1->AddRef();
 	pNew2->AddRef();
+	pNew1->SetfPatchMesh( TqFalse );
+	pNew2->SetfPatchMesh( TqFalse );
 
 	if ( !m_fDiceable )
 	{
@@ -1331,6 +1333,8 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew4->m_EyeSplitCount = m_EyeSplitCount;
 		pNew3->AddRef();
 		pNew4->AddRef();
+		pNew3->SetfPatchMesh( TqFalse );
+		pNew4->SetfPatchMesh( TqFalse );
 
 		aSplits.push_back( pNew3 );
 		aSplits.push_back( pNew4 );
@@ -1350,6 +1354,8 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew4->m_EyeSplitCount = m_EyeSplitCount;
 		pNew3->AddRef();
 		pNew4->AddRef();
+		pNew3->SetfPatchMesh( TqFalse );
+		pNew4->SetfPatchMesh( TqFalse );
 
 		aSplits.push_back( pNew3 );
 		aSplits.push_back( pNew4 );
@@ -1406,8 +1412,14 @@ TqBool	CqSurfaceNURBS::Diceable()
 	else
 		gridsize = static_cast<TqInt>( m_XBucketSize * m_XBucketSize / ShadingRate );
 
+	const CqMatrix& matCtoR = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), pTransform() ->matObjectToWorld() );
 	for ( i = 0; i < m_cuVerts*m_cvVerts; i++ )
-		avecHull[ i ] = QGetRenderContext() ->matSpaceToSpace( "camera", "raster", CqMatrix(), pTransform() ->matObjectToWorld() ) * (*P()) [ i ];
+	{
+		CqVector4D vT =  (*P())[i];
+		vT.h(1.0f);
+		vT = matCtoR * vT;
+		avecHull[ i ] = vT;
+	}
 
 	// Now work out the longest continuous line in raster space for u and v.
 	TqFloat uLen = 0;
@@ -1434,7 +1446,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 		vLen = 0;
 	}
 
-	if ( MaxvLen > 255 || MaxuLen > 255 )
+	if ( MaxvLen > gridsize || MaxuLen > gridsize )
 	{
 		m_SplitDir = ( MaxuLen > MaxvLen ) ? SplitDir_U : SplitDir_V;
 		delete[] ( avecHull );
