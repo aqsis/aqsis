@@ -56,7 +56,13 @@ static const int SOCKET_ERROR = -1;
 
 using namespace Aqsis;
 
+#ifdef AQSIS_SYSTEM_MACOSX
+#include <GLUT/glut.h>
+#include <GLUT/macxglut_utilities.h>
+#include <ApplicationServices/ApplicationServices.h>
+#else
 #include <GL/glut.h>
+#endif //!AQSIS_SYSTEM_MACOSX
 
 #ifndef AQSIS_SYSTEM_WIN32
 typedef int SOCKET;
