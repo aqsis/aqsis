@@ -179,6 +179,12 @@ CqRenderer::~CqRenderer()
         m_pTransCamera = NULL;
     }
 
+	if( m_pRaytracer )	// MGC: MEMLEAK_FIX
+	{
+		delete m_pRaytracer;
+		m_pRaytracer = 0;	// MGC: or better NULL?
+	}
+
 	// Clear up the MicroPolygon memory pool.
 	CqMicroPolygon::Flush();
 	CqMovingMicroPolygonKeyPoints::Flush();
