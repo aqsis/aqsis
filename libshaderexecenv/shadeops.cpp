@@ -1568,13 +1568,15 @@ STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, 
 	GETFLOAT( Kt );
 	TqFloat cos_theta = -VECTOR( I ) * NORMAL( N );
 	TqFloat fuvA = SQR( 1.0f / FLOAT( eta ) ) - ( 1.0f - SQR( cos_theta ) );
-	TqFloat fuvB = sqrt( SQR( fuvA ) );
+	TqFloat fuvB = fabs( fuvA );
 	TqFloat fu2 = ( fuvA + fuvB ) / 2;
 	TqFloat fv2 = ( -fuvA + fuvB ) / 2;
-	TqFloat fperp2 = ( SQR( cos_theta - sqrt( fu2 ) ) + fv2 ) / ( SQR( cos_theta + sqrt( fu2 ) ) + fv2 );
+	TqFloat fv2sqrt = ( fv2 == 0.0f )? 0.0f : sqrt( fabs( fv2 ) );
+	TqFloat fu2sqrt = ( fu2 == 0.0f )? 0.0f : sqrt( fabs( fu2 ) );
+	TqFloat fperp2 = ( SQR( cos_theta - fu2sqrt ) + fv2 ) / ( SQR( cos_theta + fu2sqrt ) + fv2 );
 	TqFloat feta = FLOAT( eta );
-	TqFloat fpara2 = ( SQR( SQR( 1.0f / feta ) * cos_theta - sqrt( fu2 ) ) + SQR( -sqrt( fv2 ) ) ) /
-	                 ( SQR( SQR( 1.0f / feta ) * cos_theta + sqrt( fu2 ) ) + SQR( sqrt( fv2 ) ) );
+	TqFloat fpara2 = ( SQR( SQR( 1.0f / feta ) * cos_theta - fu2sqrt ) + SQR( -fv2sqrt ) ) /
+	                 ( SQR( SQR( 1.0f / feta ) * cos_theta + fu2sqrt ) + SQR( fv2sqrt ) );
 
 	SETFLOAT( Kr, 0.5f * ( fperp2 + fpara2 ) );
 	SETFLOAT( Kt, 1.0f - FLOAT( Kr ) );
@@ -1605,13 +1607,15 @@ STD_SOIMPL CqShaderExecEnv::SO_fresnel( VECTORVAL I, NORMALVAL N, FLOATVAL eta, 
 	GETVECTOR( T );
 	TqFloat cos_theta = -VECTOR( I ) * NORMAL( N );
 	TqFloat fuvA = SQR( 1.0f / FLOAT( eta ) ) - ( 1.0f - SQR( cos_theta ) );
-	TqFloat fuvB = sqrt( SQR( fuvA ) );
+	TqFloat fuvB = fabs( fuvA );
 	TqFloat fu2 = ( fuvA + fuvB ) / 2;
 	TqFloat fv2 = ( -fuvA + fuvB ) / 2;
 	TqFloat feta = FLOAT( eta );
-	TqFloat fperp2 = ( SQR( cos_theta - sqrt( fu2 ) ) + fv2 ) / ( SQR( cos_theta + sqrt( fu2 ) ) + fv2 );
-	TqFloat fpara2 = ( SQR( SQR( 1.0f / feta ) * cos_theta - sqrt( fu2 ) ) + SQR( -sqrt( fv2 ) ) ) /
-	                 ( SQR( SQR( 1.0f / feta ) * cos_theta + sqrt( fu2 ) ) + SQR( sqrt( fv2 ) ) );
+	TqFloat fv2sqrt = ( fv2 == 0.0f )? 0.0f : sqrt( fabs( fv2 ) );
+	TqFloat fu2sqrt = ( fu2 == 0.0f )? 0.0f : sqrt( fabs( fu2 ) );
+	TqFloat fperp2 = ( SQR( cos_theta - fu2sqrt ) + fv2 ) / ( SQR( cos_theta + fu2sqrt ) + fv2 );
+	TqFloat fpara2 = ( SQR( SQR( 1.0f / feta ) * cos_theta - fu2sqrt ) + SQR( -fv2sqrt ) ) /
+	                 ( SQR( SQR( 1.0f / feta ) * cos_theta + fu2sqrt ) + SQR( fv2sqrt ) );
 	SETFLOAT( Kr, 0.5f * ( fperp2 + fpara2 ) );
 	SETFLOAT( Kt, 1.0f - FLOAT( Kr ) );
 	END_VARYING_SECTION
