@@ -316,15 +316,18 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 
 					if ( m_aLists[ i ].empty() )
 						return ( 0 );
+					
 
 					std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
 					if ( iEntry == m_aLists[ i ].end() )
 						return ( *iEntry );
 					else
 					{
+						TqLong hash;
+						hash = CqParameter::hash(pname);
 						while ( iEntry != m_aLists[ i ].end() )
 						{
-							if ( ( *iEntry ) ->strName().compare( pname ) == 0 )
+							if ( ( *iEntry ) ->hash() == hash )
 								return ( *iEntry );
 							iEntry++;
 						}
@@ -339,15 +342,19 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 
 					if ( m_aLists[ i ].empty() )
 						return ( 0 );
+				
 
 					std::list<CqNamedParameterList*>::const_iterator iEntry = m_aLists[ i ].begin();
 					if ( iEntry == m_aLists[ i ].end() )
 						return ( *iEntry );
 					else
 					{
+						TqLong hash;
+
+						hash = CqParameter::hash(pname);
 						while ( iEntry != m_aLists[ i ].end() )
 						{
-							if ( ( *iEntry ) ->strName().compare( pname ) == 0 )
+							if ( ( *iEntry ) ->hash() == hash )
 								return ( *iEntry );
 							iEntry++;
 						}

@@ -39,8 +39,9 @@ CqBound CqPolygonBase::Bound() const
 {
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
 	CqVector3D	vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
-	TqInt i;
-	for ( i = 0; i < NumVertices(); i++ )
+	TqInt i,n;
+	n = NumVertices();
+	for ( i = 0; i < n; i++ )
 	{
 		CqVector3D	vecV = PolyP( i );
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
@@ -256,6 +257,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 	indexB = 1;
 
 	TqInt iUses = PolyUses();
+	TqInt n = NumVertices();
 
 	// Get the normals, or calculate the facet normal if not specified.
 	if ( !bHasN() )
@@ -264,7 +266,8 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		// Find two suitable vectors, and produce a geometric normal to use.
 		TqInt i = 1;
 		CqVector3D	vecN0, vecN1;
-		while ( i < NumVertices() )
+		
+		while ( i < n)
 		{
 			vecN0 = static_cast<CqVector3D>( PolyP( i ) ) - vecA;
 			if ( vecN0.Magnitude() > FLT_EPSILON )
@@ -272,7 +275,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 			i++;
 		}
 		i++;
-		while ( i < NumVertices() )
+		while ( i < n )
 		{
 			vecN1 = static_cast<CqVector3D>( PolyP( i ) ) - vecA;
 			if ( vecN1.Magnitude() > FLT_EPSILON && vecN1 != vecN0 )
@@ -289,10 +292,10 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	TqInt cNew = 0;
 	TqInt i;
-	for ( i = 2; i < NumVertices(); i += 2 )
+	for ( i = 2; i < n; i += 2 )
 	{
 		indexC = indexD = i;
-		if ( NumVertices() > i + 1 )
+		if ( n > i + 1 )
 			indexD = i + 1;
 
 		// Create bilinear patches
@@ -463,8 +466,9 @@ TqBool CqSurfacePolygon::CheckDegenerate() const
 {
 	// Check if all points are within a minute distance of each other.
 	TqBool	fDegen = TqTrue;
-	TqInt i;
-	for ( i = 1; i < NumVertices(); i++ )
+	TqInt i,n;
+	n = NumVertices();
+	for ( i = 1; i < n; i++ )
 	{
 		if ( ( PolyP( i ) - PolyP( i - 1 ) ).Magnitude() > FLT_EPSILON )
 			fDegen = TqFalse;

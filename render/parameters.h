@@ -110,6 +110,23 @@ class CqParameter
 		{
 			return ( m_strName );
 		}
+		const   TqLong hash() const
+		{
+			return m_hash;
+		}
+		static  TqLong	hash(const char *strName) 
+		{
+			TqLong retval = 0;
+			if (strName) 
+			{
+				TqLong size = strlen(strName);
+				TqLong sum =0;
+				for (TqInt j=0; j < size; j++) sum += strName[j];
+				retval = ((sum << 16)&0xffff0000) | size;
+			}
+			return retval;
+		}
+
 		/** Get the array size.
 		 */
 		TqInt	Count() const
@@ -119,7 +136,9 @@ class CqParameter
 
 	protected:
 		CqString	m_strName;		///< String name of the parameter.
-		TqInt	m_Count;		///< Array size of value.
+		TqInt		m_Count;		///< Array size of value.
+		TqLong      m_hash;
+		
 }
 ;
 
@@ -1218,7 +1237,10 @@ class CqNamedParameterList : public CqRefCount
 {
 	public:
 		CqNamedParameterList( const char* strName ) : m_strName( strName )
-		{}
+		{
+			m_hash = CqParameter::hash(strName);
+			
+		}
 		CqNamedParameterList( const CqNamedParameterList& From );
 		~CqNamedParameterList()
 		{
@@ -1239,10 +1261,9 @@ class CqNamedParameterList : public CqRefCount
 		 */
 		void	AddParameter( const CqParameter* pParameter )
 		{
-			// Look to see if one already exists
 			for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
 			{
-				if ( ( *i ) ->strName().compare( pParameter->strName() ) == 0 )
+				if ( ( *i ) ->hash() == pParameter->hash() )
 				{
 					delete( *i );
 					( *i ) = const_cast<CqParameter*>( pParameter );
@@ -1258,8 +1279,10 @@ class CqNamedParameterList : public CqRefCount
 		 */
 		const	CqParameter* pParameter( const char* strName ) const
 		{
+			TqLong hash;
+			hash = CqParameter::hash(strName);
 			for ( std::vector<CqParameter*>::const_iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
-				if ( ( *i ) ->strName().compare( strName ) == 0 ) return ( *i );
+				if ( ( *i ) ->hash() == hash ) return ( *i );
 			return ( 0 );
 		}
 		/** Get a pointer to a named parameter.
@@ -1268,13 +1291,20 @@ class CqNamedParameterList : public CqRefCount
 		 */
 		CqParameter* pParameter( const char* strName )
 		{
+			TqLong hash;
+			hash = CqParameter::hash(strName);
 			for ( std::vector<CqParameter*>::iterator i = m_aParameters.begin(); i != m_aParameters.end(); i++ )
-				if ( ( *i ) ->strName().compare( strName ) == 0 ) return ( *i );
+				if ( ( *i ) ->hash() == hash ) return ( *i );
 			return ( 0 );
+		}
+		TqLong hash()
+		{
+			return m_hash;
 		}
 	private:
 		CqString	m_strName;			///< The name of this parameter list.
 		std::vector<CqParameter*>	m_aParameters;		///< A vector of name/value parameters.
+        TqLong  m_hash;
 }
 ;
 

@@ -47,13 +47,15 @@ CqParameter::CqParameter( const char* strName, TqInt Count ) :
 	/// \note Had to remove this as paramters are now created as part of the Renderer construction, so the
 	///		  renderer context isn't ready yet.
 	//	QGetRenderContext() ->Stats().IncParametersAllocated();
+	m_hash = hash(strName);
 }
 
 /** Copy constructor
  */
 CqParameter::CqParameter( const CqParameter& From ) :
 		m_strName( From.m_strName ),
-		m_Count( From.m_Count )
+		m_Count( From.m_Count ),
+		m_hash(From.m_hash)
 {
 	/// \note Had to remove this as paramters are now created as part of the Renderer construction, so the
 	///		  renderer context isn't ready yet.
@@ -258,7 +260,8 @@ CqParameter* ( *gVariableCreateFuncsFaceVaryingArray[] ) ( const char* strName, 
  */
 
 CqNamedParameterList::CqNamedParameterList( const CqNamedParameterList& From ) :
-		m_strName( From.m_strName )
+		m_strName( From.m_strName ),
+		m_hash( From.m_hash)
 {
 	TqInt i = From.m_aParameters.size();
 	while ( i-- > 0 )

@@ -1004,6 +1004,10 @@ void CqTextureMap::CreateMIPMAP()
 void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, TqFloat sblur, TqFloat tblur,
                               std::valarray<TqFloat>& val )
 {
+	// Check the memory and make sure we don't abuse it
+	CriticalMeasure();
+
+
 	// T(s2,t2)-T(s2,t1)-T(s1,t2)+T(s1,t1)
 	TqInt i;
 
@@ -1202,10 +1206,7 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 	iv = iv % vmapsize;		/// \todo This is wrap mode periodic.
 	iv_n = iv_n % vmapsize;	/// \todo This is wrap mode periodic.
 
-	// Check the memory and make sure we don't abuse it
-	CriticalMeasure();
-
-
+	
 	// Read in the relevant texture tiles.
 	CqTextureMapBuffer* pTMBa = GetBuffer( iu, iv, id );		// Val00
 	CqTextureMapBuffer* pTMBb = GetBuffer( iu, iv_n, id );	// Val01
@@ -1276,9 +1277,6 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		iv = iv % vmapsize;		/// \todo This is wrap mode periodic.
 		iv_n = iv_n % vmapsize;	/// \todo This is wrap mode periodic.
 
-		// Check the memory and make sure we don't abuse it
-		CriticalMeasure();
-
 		// Read in the relevant texture tiles.
 		CqTextureMapBuffer* pTMBa = GetBuffer( iu, iv, id + 1 );		// Val00
 		CqTextureMapBuffer* pTMBb = GetBuffer( iu, iv_n, id + 1 );		// Val01
@@ -1336,9 +1334,7 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 
 
 	}
-	// Check the memory and make sure we don't abuse it
-	CriticalMeasure();
-
+	
 }
 
 //----------------------------------------------------------------------
@@ -1374,6 +1370,7 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, Tq
 void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur,
                                   std::valarray<TqFloat>& val )
 {
+	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
 
 	if ( m_pImage != 0 )
@@ -1774,7 +1771,10 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 
 void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const CqVector3D& R3, const CqVector3D& R4, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val, TqFloat& depth )
 {
+	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
+
+
 
 	// If no map defined, not in shadow.
 	val.resize( 1 );

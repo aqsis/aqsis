@@ -107,8 +107,9 @@ class CqOptions
 		 */
 		const	CqNamedParameterList* pOption( const char* strName ) const
 		{
+			TqLong hash = CqParameter::hash(strName);
 			for ( std::vector<CqNamedParameterList*>::const_iterator i = m_aOptions.begin(); i != m_aOptions.end(); i++ )
-				if ( ( *i ) ->strName().compare( strName ) == 0 ) return ( *i );
+				if ( ( *i ) ->hash() == hash ) return ( *i );
 			return ( 0 );
 		}
 		/** Get a pointer to a named user option.
@@ -117,9 +118,11 @@ class CqOptions
 		 */
 		CqNamedParameterList* pOptionWrite( const char* strName )
 		{
+			TqLong hash = CqParameter::hash(strName);
+
 			for ( std::vector<CqNamedParameterList*>::iterator i = m_aOptions.begin(); i != m_aOptions.end(); i++ )
 			{
-				if ( ( *i ) ->strName().compare( strName ) == 0 )
+				if ( ( *i ) ->hash()  == hash )
 				{
 					if ( ( *i ) ->RefCount() == 1 )
 						return ( *i );

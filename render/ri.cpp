@@ -2594,8 +2594,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 		RtInt v;
 		for ( v = 0; v < nverts[ poly ]; v++ )
 		{
-			if ( ( ( *pVerts ) + 1 ) > cVerts )
-				cVerts = ( *pVerts ) + 1;
+			cVerts = MAX( ((*pVerts ) + 1 ), cVerts );
 			pVerts++;
 		}
 	}
@@ -2749,8 +2748,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 			TqInt v;
 			for ( v = 0; v < nverts[ igloop ]; v++ )
 			{
-				if ( ( ( *pVerts ) + 1 ) > cVerts )
-					cVerts = ( *pVerts ) + 1;
+				cVerts = MAX( ((*pVerts ) + 1 ), cVerts );
 				pVerts++;
 			}
 		}
@@ -4162,8 +4160,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 		RtInt v;
 		for ( v = 0; v < nvertices[ face ]; v++ )
 		{
-			if ( ( ( *pVerts ) + 1 ) > cVerts )
-				cVerts = ( *pVerts ) + 1;
+			cVerts = MAX( ((*pVerts ) + 1 ), cVerts );
 			pVerts++;
 		}
 	}
