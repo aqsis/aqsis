@@ -319,7 +319,7 @@ extern	char	typetab[];
 #endif	/* HOST == H_CPM */
 
 #define FILESTACKSIZE	14		/* Max depth of #include	*/
-#define MACROSIZE	4000		/* Max length of #define	*/
+#define MACROSIZE	40000		/* Max length of #define	*/
 #define TOKENSIZE	510		/* Max token length		*/
 #define NUMBUCKETS	64		/* # of buckets (power of 2)	*/
 #define	IFSTACKSIZE	32		/* #ifxx nesting		*/
