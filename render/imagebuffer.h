@@ -206,7 +206,7 @@ class _qShareC	CqImagePixel
 		_qShareM	std::vector<SqImageSample>&	Values( TqInt m, TqInt n )
 		{
 			assert( m < m_XSamples );
-			assert( n < m_XSamples );
+			assert( n < m_YSamples );
 			return ( m_aValues[ n * m_XSamples + m ] );
 		}
 		_qShareM	void	Combine();

@@ -1407,7 +1407,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 	const TqFloat* LodBounds = pMPG->pGrid()->pAttributes()->GetFloatAttribute("System", "LevelOfDetailBounds");
 	TqBool UsingLevelOfDetail = LodBounds[0] >= 0.0f;
 
-	TqBool IsMatte = pMPG->pGrid()->pAttributes()->GetIntegerAttribute("System", "Matte")[0];
+	TqBool IsMatte = (TqBool) (pMPG->pGrid()->pAttributes()->GetIntegerAttribute("System", "Matte")[0] == 1);
 
 	for ( TqInt bound_num = 0; bound_num < pMPG->cSubBounds(); bound_num++ )
 	{
