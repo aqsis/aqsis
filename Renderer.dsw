@@ -62,6 +62,18 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name framebuffer_glut_z
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name aqslcomp
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name libcodegenvm
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name librib2stream
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name teqser
+    End Project Dependency
 }}}
 
 ###############################################################################
