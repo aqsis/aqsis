@@ -18,12 +18,15 @@
 		\author Tristan Colgate <tristan@inuxtech.co.uk>
 */
 
+#include <sys/stat.h>
+
 #include	"aqsis.h"
 #include	"sstring.h"
 #include	"ilog.h"
 #include	"irenderer.h"
 #include	"ishaderdata.h"
 #include	"dsoshadeops.h"
+#include	"file.h"
 
 
 START_NAMESPACE( Aqsis )
@@ -92,18 +95,38 @@ CqDSORepository::SetDSOPath(const CqString* pPath)
 	// Split the string up into the components of the path;
 	while(iRight <= pPath->length())
 	{
-	  	if ( ( *pPath)[iRight] == ';' || ( ( *pPath)[iRight] == ':' && ( iRight - iLeft ) > 1) )
-		{
-	  		CqString *element = new CqString(pPath->substr(iLeft, iRight - iLeft));
-			m_pDSOPathList.push_back(element);
-			iLeft = iRight + 1  ; 
-		} else if ( iRight+1 > pPath->length() && iLeft != iRight) 
+	  	if (    ( *pPath)[iRight] == ';' ||  // completed a path element with ';'
+		  	( ( *pPath)[iRight] == ':' && ( iRight - iLeft ) > 1) || // completed a path element ':'
+			( iRight+1 > pPath->length() && iLeft != iRight) ) // hit end of list
 		{
 			CqString *element = new CqString(pPath->substr(iLeft,iRight - iLeft));
 			// Here, if element points to a directory, we can add each library in the
 			// named directory which is not already in the path list 
-			m_pDSOPathList.push_back(element);
+
+			std::cout << "Checking Element: " << *element << std::endl ;
+			struct stat s;
+			if (!stat( element->c_str(), &s ))
+			{
+				if ( S_ISDIR(s.st_mode) ) 
+				{
+					// We have a directory, list all the libraries in that directory and add them to the path
+					std::cout << "Checking Directory: " << *element << std::endl ;
+					CqString wild = *element + CqString( "/*" ) + CqString ( SHARED_LIBRARY_SUFFIX );
+					std::list<CqString*> files = Aqsis::CqFile::Glob(wild);
+					if ( !files.empty() )
+					{
+						std::cout << "Found " << files.size() << "DSOs" << std::endl ;
+						m_pDSOPathList.splice(m_pDSOPathList.end(), files);
+					}
+				}else{
+					m_pDSOPathList.push_back(element);
+				};
+			};
 		} ;
+
+	  	if (    ( *pPath)[iRight] == ';' ||  // completed a path element with ';'
+		  	( ( *pPath)[iRight] == ':' && ( iRight - iLeft ) > 1) ) // completed a path element ':'
+			iLeft = iRight + 1  ; 
 		iRight ++ ;
 	};
 };
