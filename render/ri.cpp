@@ -4722,6 +4722,13 @@ RtVoid	RiReadArchiveV( RtToken name, RtArchiveCallback archcallback, PARAMETERLI
 			fclose(file);
 		}
 	}
+	else
+	{
+		CqString strError( "Cannot load file '" );
+		strError += name;
+		strError += "'";
+		QGetRenderContext() ->Logger()->error( strError.c_str() );
+	}
 }
 
 
