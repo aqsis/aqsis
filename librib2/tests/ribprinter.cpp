@@ -14,16 +14,21 @@ int main(int argc, char* argv[])
 
 	for(int i = 1; i < argc; i++)
 		{
-			std::ifstream file(argv[i]);
-			if(!file.good())
+			FILE* file = fopen(argv[i],"rb");
+			if(NULL == file)
 				{
 					std::cerr << argv[0] << ": error opening " << argv[i] << ", aborting." << std::endl;
 					return 2;
 				}
 
 			librib2stream::Stream stream(std::cout);
+			librib::StandardDeclarations(stream);
 			if(!librib::Parse(file, argv[i], stream, std::cerr))
+			{
+				fclose(file);
 				return 3;
+			}
+			fclose(file);
 		}
 
 	return 0;

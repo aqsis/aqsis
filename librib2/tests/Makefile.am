@@ -16,6 +16,6 @@ INCLUDES = -I$(top_srcdir)/librib2 -I$(top_srcdir)/librib2stream -I$(top_srcdir)
 
 test: check 
 	for file in $$(find $(top_srcdir)/ribfiles -name "*.rib" | sort); do echo "Scanning $$file ..."; $(top_builddir)/librib2/tests/ribscanner < $$file; done
-	for file in $$(find $(top_srcdir)/ribfiles -name "*.rib" | sort); do echo "Parsing $$file ..."; $(top_builddir)/librib2/tests/ribprinter $(top_srcdir)/ribber.cfg $$file; done
+	for file in $$(find $(top_srcdir)/ribfiles -name "*.rib" | sort); do echo "Parsing $$file ..."; $(top_builddir)/librib2/tests/ribprinter $$file; done
 
 .PHONY: test-shaders test
