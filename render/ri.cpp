@@ -54,6 +54,7 @@
 #include	"librib.h"
 #include	"libribtypes.h"
 #include	"parserstate.h"
+#include	"procedural.h"
 
 #include	"subdivision2.h"
 
@@ -3347,6 +3348,8 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 	FILE *chkdsk;
 	FILE *file;
 	char *pt, atmpname[ 1024 ];
+	CqBound B(bound);
+	CqProcDelayedReadArchive *pProc ;
 
 
 
@@ -3354,9 +3357,11 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 
 	if ( refineproc == RiProcDelayedReadArchive )
 	{
-		QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_PROC_DELAYED_READ_ARCHIVE_UNSUPPORTED );
-		printf( "ReadArchive %s\n", ( const char * ) data );
-		RiReadArchive( ( char* ) data, NULL, NULL );
+//		QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_PROC_DELAYED_READ_ARCHIVE_UNSUPPORTED );
+//		printf( "ReadArchive %s\n", ( const char * ) data );
+//		RiReadArchive( ( char* ) data, NULL, NULL );
+		CqString filename((char *)data);
+		pProc = new CqProcDelayedReadArchive(B, filename);
 
 	}
 	else if ( refineproc == RiProcRunProgram )
@@ -3409,6 +3414,8 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 		RiReadArchive( atmpname, NULL, NULL );
 #endif
 		unlink( atmpname );
+
+		return;
 	}
 	else if ( refineproc == RiProcDynamicLoad )
 	{
@@ -3473,13 +3480,17 @@ RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc,
 		delete pConvertParameters;
 		delete pFree;
 
+		return;
 	}
 	else
 	{
 		QGetRenderContext() ->Logger()->warn( CqLog::RI_ERROR_TABLE, CqLog::RI_PROCEDURAL_UNKNOWN_SUBDIV );
+		return;
 	}
 
 
+	pProc->AddRef();
+	CreateGPrim( pProc );
 
 	return ;
 }

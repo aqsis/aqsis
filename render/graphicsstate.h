@@ -50,7 +50,7 @@ class CqLightsource;
  * stores information about the current scoping and previous contexts.
  */
 
-class CqModeBlock
+class CqModeBlock : public CqRefCount
 {
 	public:
 		/** Default constructor
@@ -134,6 +134,15 @@ class CqModeBlock
 		{
 			return ( m_pattrCurrent );
 		}
+		/** Set the current set of attributes
+		 * \return a pointer to the old attributes.
+		 */
+		virtual	const	CqAttributes*	pattrCurrent(CqAttributes* newattrs)
+		{
+			CqAttributes *prev = m_pattrCurrent;
+			m_pattrCurrent = newattrs;
+			return ( prev );
+		}
 		/** Get a pointer to the current attributes suitable for writing.
 		 * \return an attribute pointer.
 		 */
@@ -148,6 +157,15 @@ class CqModeBlock
 		virtual	const	CqTransform*	ptransCurrent() const
 		{
 			return ( m_ptransCurrent );
+		}
+		/** Set the current transform.
+		 * \return a pointer to the old transform.
+		 */
+		virtual	const	CqTransform*	ptransCurrent(CqTransform* newtrans)
+		{
+			CqTransform *prev = m_ptransCurrent;
+			m_ptransCurrent = newtrans;
+			return ( prev );
 		}
 		/** Get a pointer to the current transform suitable for writing.
 		 * \return a transform pointer.
@@ -242,7 +260,6 @@ class CqMainModeBlock : public CqModeBlock
 		 */
 		virtual	void	EndMainModeBlock()
 		{
-			delete( this );
 		}
 
 		/** Get a reference to the currently stored options.
@@ -296,7 +313,6 @@ class CqFrameModeBlock : public CqModeBlock
 		 */
 		virtual	void	EndFrameModeBlock()
 		{
-			delete( this );
 		}
 
 		/** Get a reference to the currently stored options.
@@ -350,7 +366,6 @@ class CqWorldModeBlock : public CqModeBlock
 		 */
 		virtual	void	EndWorldModeBlock()
 		{
-			delete( this );
 		}
 
 		/** Get a reference to the options at the parent context, as world context doesn't store options.
@@ -405,7 +420,6 @@ class CqAttributeModeBlock : public CqModeBlock
 		 */
 		virtual	void	EndAttributeModeBlock()
 		{
-			delete( this );
 		}
 
 		/** Get a reference to the options at the parent context, as attribute context doesn't store options.
@@ -457,7 +471,6 @@ class CqTransformModeBlock : public CqModeBlock
 		 */
 		virtual	void	EndTransformModeBlock()
 		{
-			delete( this );
 		}
 
 		/** Get a reference to the options at the parent context, as transform context doesn't store options.
@@ -509,7 +522,6 @@ class CqSolidModeBlock : public CqModeBlock
 		 */
 		virtual	void	EndSolidModeBlock()
 		{
-			delete( this );
 		}
 
 		/** Get a reference to the options at the parent context, as solid context doesn't store options.
@@ -573,7 +585,6 @@ class CqObjectModeBlock : public CqModeBlock
 		 */
 		virtual	void	EndObjectModeBlock()
 		{
-			delete( this );
 		}
 
 		/** Get a reference to the options at the parent context, as object context doesn't store options.
@@ -674,7 +685,6 @@ class CqMotionModeBlock : public CqModeBlock
 		 */
 		virtual	void	EndMotionModeBlock()
 		{
-			delete( this );
 		}
 
 		/** Get a reference to the options at the parent context, as motion context doesn't store options.

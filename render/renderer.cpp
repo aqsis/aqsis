@@ -116,7 +116,7 @@ CqRenderer::~CqRenderer()
 	while ( m_pconCurrent != 0 )
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
-		delete( m_pconCurrent );
+		m_pconCurrent->Release();
 		m_pconCurrent = pconParent;
 	}
 	if ( m_pImageBuffer )
@@ -148,6 +148,7 @@ CqModeBlock*	CqRenderer::BeginMainModeBlock()
 	if ( m_pconCurrent == 0 )
 	{
 		m_pconCurrent = new CqMainModeBlock();
+		m_pconCurrent->AddRef();
 		return ( m_pconCurrent );
 	}
 	else
@@ -168,6 +169,8 @@ CqModeBlock*	CqRenderer::BeginFrameModeBlock()
 		CqModeBlock * pconNew = m_pconCurrent->BeginFrameModeBlock();
 		if ( pconNew != 0 )
 		{
+			pconNew->AddRef();
+			m_pconCurrent->AddRef();
 			m_pconCurrent = pconNew;
 			return ( pconNew );
 		}
@@ -191,6 +194,8 @@ CqModeBlock*	CqRenderer::BeginWorldModeBlock()
 		CqModeBlock * pconNew = m_pconCurrent->BeginWorldModeBlock();
 		if ( pconNew != 0 )
 		{
+			pconNew->AddRef();
+			m_pconCurrent->AddRef();
 			m_pconCurrent = pconNew;
 			return ( pconNew );
 		}
@@ -213,6 +218,8 @@ CqModeBlock*	CqRenderer::BeginAttributeModeBlock()
 		CqModeBlock * pconNew = m_pconCurrent->BeginAttributeModeBlock();
 		if ( pconNew != 0 )
 		{
+			pconNew->AddRef();
+			m_pconCurrent->AddRef();
 			m_pconCurrent = pconNew;
 			return ( pconNew );
 		}
@@ -236,6 +243,8 @@ CqModeBlock*	CqRenderer::BeginTransformModeBlock()
 		CqModeBlock * pconNew = m_pconCurrent->BeginTransformModeBlock();
 		if ( pconNew != 0 )
 		{
+			pconNew->AddRef();
+			m_pconCurrent->AddRef();
 			m_pconCurrent = pconNew;
 			return ( pconNew );
 		}
@@ -259,6 +268,8 @@ CqModeBlock*	CqRenderer::BeginSolidModeBlock( CqString& type )
 		CqModeBlock * pconNew = m_pconCurrent->BeginSolidModeBlock( type );
 		if ( pconNew != 0 )
 		{
+			pconNew->AddRef();
+			m_pconCurrent->AddRef();
 			m_pconCurrent = pconNew;
 			return ( pconNew );
 		}
@@ -282,6 +293,8 @@ CqModeBlock*	CqRenderer::BeginObjectModeBlock()
 		CqModeBlock * pconNew = m_pconCurrent->BeginObjectModeBlock();
 		if ( pconNew != 0 )
 		{
+			pconNew->AddRef();
+			m_pconCurrent->AddRef();
 			m_pconCurrent = pconNew;
 			return ( pconNew );
 		}
@@ -305,6 +318,8 @@ CqModeBlock*	CqRenderer::BeginMotionModeBlock( TqInt N, TqFloat times[] )
 		CqModeBlock * pconNew = m_pconCurrent->BeginMotionModeBlock( N, times );
 		if ( pconNew != 0 )
 		{
+			pconNew->AddRef();
+			m_pconCurrent->AddRef();
 			m_pconCurrent = pconNew;
 			return ( pconNew );
 		}
@@ -326,6 +341,8 @@ void	CqRenderer::EndMainModeBlock()
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndMainModeBlock();
+		if(m_pconCurrent->pconParent()) m_pconCurrent->pconParent()->Release();
+		m_pconCurrent->Release();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -341,6 +358,8 @@ void	CqRenderer::EndFrameModeBlock()
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndFrameModeBlock();
+		if(m_pconCurrent->pconParent()) m_pconCurrent->pconParent()->Release();
+		m_pconCurrent->Release();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -356,6 +375,8 @@ void	CqRenderer::EndWorldModeBlock()
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndWorldModeBlock();
+		if(m_pconCurrent->pconParent()) m_pconCurrent->pconParent()->Release();
+		m_pconCurrent->Release();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -371,6 +392,8 @@ void	CqRenderer::EndAttributeModeBlock()
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndAttributeModeBlock();
+		if(m_pconCurrent->pconParent()) m_pconCurrent->pconParent()->Release();
+		m_pconCurrent->Release();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -388,6 +411,8 @@ void	CqRenderer::EndTransformModeBlock()
 		// Copy the current state of the attributes UP the stack as a TransformBegin/End doesn't store them
 		pconParent->m_pattrCurrent = m_pconCurrent->m_pattrCurrent;
 		m_pconCurrent->EndTransformModeBlock();
+		if(m_pconCurrent->pconParent()) m_pconCurrent->pconParent()->Release();
+		m_pconCurrent->Release();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -403,6 +428,8 @@ void	CqRenderer::EndSolidModeBlock()
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndSolidModeBlock();
+		if(m_pconCurrent->pconParent()) m_pconCurrent->pconParent()->Release();
+		m_pconCurrent->Release();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -418,6 +445,8 @@ void	CqRenderer::EndObjectModeBlock()
 	{
 		CqModeBlock * pconParent = m_pconCurrent->pconParent();
 		m_pconCurrent->EndObjectModeBlock();
+		if(m_pconCurrent->pconParent()) m_pconCurrent->pconParent()->Release();
+		m_pconCurrent->Release();
 		m_pconCurrent = pconParent;
 	}
 }
@@ -436,6 +465,8 @@ void	CqRenderer::EndMotionModeBlock()
 		pconParent->m_pattrCurrent = m_pconCurrent->m_pattrCurrent;
 		pconParent->m_ptransCurrent = m_pconCurrent->m_ptransCurrent;
 		m_pconCurrent->EndMotionModeBlock();
+		if(m_pconCurrent->pconParent()) m_pconCurrent->pconParent()->Release();
+		m_pconCurrent->Release();
 		m_pconCurrent = pconParent;
 	}
 }

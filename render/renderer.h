@@ -134,6 +134,16 @@ class CqRenderer : public IqRenderer
 		virtual	TqFloat	Time() const;
 		virtual	void	AdvanceTime();
 
+		/** Set a pointer to the current context.
+		 * Primarily for Procedural objects
+		 * \return Pointer to a previous CqModeBlock.
+		 */
+		virtual	CqModeBlock*	pconCurrent(CqModeBlock* pcon )
+		{
+			CqModeBlock* prev = m_pconCurrent;
+			m_pconCurrent = pcon;
+			return ( prev );
+		}
 		/** Get a pointer to the current context.
 		 * \return Pointer to a CqModeBlock derived class.
 		 */
