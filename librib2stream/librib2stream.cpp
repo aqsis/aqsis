@@ -478,3 +478,12 @@ RtFloat RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 {
 	return ( 0.0 );
 }
+RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
+{
+}
+RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
+{
+}
+RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
+{
+}
