@@ -1663,34 +1663,16 @@ CqCubicCurvesGroup::~CqCubicCurvesGroup()
 TqUint CqCubicCurvesGroup::cVarying() const
 {
 
-    TqInt nsegments = 0;
-    TqInt vStep =
-        pAttributes() ->GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
-    TqInt i;
-    if ( m_periodic )
-    {
-        for ( i = 0; i < m_ncurves; i++ )
-        {
-            nsegments += m_nvertices[ i ] / vStep;
-        }
-    }
-    else
-    {
-        for ( i = 0; i < m_ncurves; i++ )
-        {
-            nsegments += ( m_nvertices[ i ] - 4 ) / vStep + 1;
-        }
-    }
+    TqInt vStep = pAttributes() ->GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
+    TqUint varying_count = 0;
 
-    if ( m_periodic )
-    {
-        return nsegments;
-    }
-    else
-    {
-        return nsegments + 1;
-    }
+    for(TqInt i = 0; i < m_ncurves; ++i)
+    	{
+		const TqUint segment_count = m_periodic ? (m_nvertices[i] / vStep) : ((m_nvertices[i] - 4) / vStep + 1);
+		varying_count += m_periodic ? segment_count : segment_count + 1;
+	}
 
+    return varying_count;
 }
 
 
@@ -1950,7 +1932,7 @@ void CqCubicCurvesGroup::Transform(
     PopulateWidth();
 
     // number of points to skip between curves
-    TqInt vStep =
+    const TqInt vStep =
         pAttributes() ->GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
 
 
