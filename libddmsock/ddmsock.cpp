@@ -507,6 +507,9 @@ void CqDDManager::LoadDisplayLibrary(CqDDClient& dd)
 				CqMatrix matWorldToCamera=QGetRenderContext()->matSpaceToSpace("world","camera");
 				CqMatrix matWorldToScreen=QGetRenderContext()->matSpaceToSpace("world","screen");
 
+				if(matWorldToCamera.fIdentity())	matWorldToCamera.Identity();
+				if(matWorldToScreen.fIdentity())	matWorldToScreen.Identity();
+
 				SqDDMessageNl msgnl(matWorldToCamera.pElements());
 				dd.SendMsg(&msgnl);
 
