@@ -1149,6 +1149,7 @@ TqBool CqMicroPolygon::Sample( const CqVector2D& vecSample, TqFloat& D, TqFloat 
 
 TqBool CqMicroPolygon::SampleDof( const CqVector2D& vecSample, TqFloat time, const TqFloat* DofParameters, const CqVector2D& LensPosition, TqFloat& D )
 {
+	/*
 	TqFloat C;
 
 	C = CircleOfConfusion( DofParameters, PointA().z() );
@@ -1181,7 +1182,15 @@ TqBool CqMicroPolygon::SampleDof( const CqVector2D& vecSample, TqFloat time, con
 
 	CqMovingMicroPolygonKey newpoly( p0, p1, p2, p3 );
 	//return newpoly.fContains( vecSample, D );
-	return fContains( vecSample, D );
+	*/
+
+	TqFloat ad; // Average depth
+	ad = PointA().z() + PointB().z() + PointC().z() + PointD().z();
+	ad /= 4;
+
+	TqFloat dc = CircleOfConfusion( DofParameters, ad );
+
+	return fContains( vecSample + dc * LensPosition, D );
 }
 
 

@@ -91,6 +91,7 @@ void CqImagePixel::AllocateSamples( TqInt XSamples, TqInt YSamples )
 	{
 		m_aValues.resize( numSamples );
 		m_avecSamples.resize( numSamples);
+		m_aDoFSamples.resize( numSamples );
 		m_aSubCellIndex.resize( numSamples);
 		m_aTimes.resize( numSamples );
 		// XXX TODO: Compute this lazily
@@ -213,13 +214,15 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 		}
 
 
-		// Fill in the sample times for motion blur, detail levels for LOD.
+		// Fill in the sample times for motion blur, detail levels for LOD and DoF.
 		
 		TqFloat time = 0;
 		TqInt nSamples = m_XSamples*m_YSamples;
 		TqFloat dtime = 1.0f / nSamples;
 		TqFloat lod = 0;
 		TqFloat dlod = dtime;
+		TqFloat r, theta; // DoF related stuff
+		TqFloat dx, dy; // DoF sample postions
 
 		for ( i = 0; i < nSamples; i++ )
 		{
@@ -228,8 +231,17 @@ void CqImagePixel::InitialiseSamples( CqVector2D& vecPixel, TqBool fJitter )
 			m_aDetailLevels[ i ] = lod + random.RandomFloat( dlod );
 			lod += dlod;
 
-		}
+			r = random.RandomFloat();
+			theta = random.RandomFloat( 2 * PI );
 
+			r = sqrt(r);
+			dx = r * sin(theta);
+			dy = r * cos(theta);
+
+			m_aDoFSamples[ i ].x( dx );
+			m_aDoFSamples[ i ].y( dy );
+
+		}
 
 	}
 }

@@ -224,7 +224,7 @@ class CqImagePixel
 		{
 			assert( m < m_XSamples );
 			assert( n < m_YSamples );
-			return ( m_avecSamples[ n * m_XSamples + m ] );
+			return ( m_aDoFSamples[ n * m_XSamples + m ] );
 		}
 		/** Get the filter weight index of the appropriate subcell.
 		 * Subcell dimensions are inverted subpixel dimensions, producing a square subcell matrix.
@@ -267,6 +267,7 @@ class CqImagePixel
 		TqInt	m_YSamples;						///< The number of samples in the vertical direction.
 		std::vector<std::vector<SqImageSample> > m_aValues;	///< Vector of vectors of sample point data.
 		std::vector<CqVector2D>	m_avecSamples;				///< Vector of sample positions.
+		std::vector<CqVector2D> m_aDoFSamples;				///< Vector of dof lens positions
 		std::vector<TqInt>	m_aSubCellIndex;				///< Vector of subcell indices.
 		std::vector<TqFloat> m_aTimes;						///< A vector of float sample times for the sample points.
 		std::vector<TqFloat> m_aDetailLevels;					///< A vector of float level-of-detail samples for the sample points.
