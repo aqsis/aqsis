@@ -33,22 +33,22 @@ class CqVarDef :  public IqVarDef
 	public:
 					CqVarDef() :
 								m_Type(Type_Nil),
+								m_fExtern(TqFalse),
 								m_strName(""),
 								m_pDefValue(0),
 								m_UseCount(0),
-								m_fExtern(TqFalse),
 								m_ArrayLength(0)
 									{}
 					CqVarDef(const CqVarDef& from);
 					CqVarDef(TqInt Type, const char* strName, TqInt Length=0) :
 								m_Type(Type),
+								m_fExtern(TqFalse),
 								m_strName(strName),
 								m_pDefValue(0),
 								m_UseCount(0),
-								m_fExtern(TqFalse),
 								m_ArrayLength(Length)
 									{}
-					~CqVarDef();
+					virtual ~CqVarDef();
 
 					// Overridden from IqVarDef
 	virtual const IqParseNode*	pInitialiser() const;

@@ -51,7 +51,7 @@ enum EqFuncType
 struct SqFuncRef
 {
 	EqFuncType	m_Type;
-	TqInt		m_Index;
+	TqUint		m_Index;
 };
 
 

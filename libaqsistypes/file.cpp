@@ -80,7 +80,11 @@ void CqFile::Open(const char* strFilename, const char* strSearchPath, std::ios::
 				// Check the path is correctly terminated
 				if(strAlternativeFilename[strAlternativeFilename.size()-1]!='/' &&
 				   strAlternativeFilename[strAlternativeFilename.size()-1]!='\\')
+#ifdef AQSIS_SYSTEM_WIN32
 					strAlternativeFilename+="\\";
+#else // AQSIS_SYSTEM_WIN32
+					strAlternativeFilename+="/";
+#endif // !AQSIS_SYSTEM_WIN32
 				strAlternativeFilename+=strFilename;
 				
 				// Clear the previous error first.

@@ -26,11 +26,12 @@
 #include	<strstream>
 #include	<fstream>
 
+#ifdef AQSIS_SYSTEM_WIN32
 #include	"version.h"
+#endif // AQSIS_SYSTEM_WIN32
 #include	"vmoutput.h"
 
 #include	"parsenode.h"
-#include	"version.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -54,9 +55,9 @@ static char* gVariableTypeNames[]=
 	"matrix",
 	"hextuple",
 };
-static TqInt gcVariableTypeNames=sizeof(gVariableTypeNames)/sizeof(gVariableTypeNames[0]);
+static TqUint gcVariableTypeNames=sizeof(gVariableTypeNames)/sizeof(gVariableTypeNames[0]);
 
-static TqInt gInternalFunctionUsage=0;
+static TqUint gInternalFunctionUsage=0;
 
 
 ///---------------------------------------------------------------------
@@ -67,8 +68,6 @@ std::vector<std::vector<SqVarRefTranslator>*>	saTransTable;
 
 void OutputTree(const IqParseNode* pNode)
 {
-	TqInt i=0;
-
 	if(pNode)
 		OutputTreeNode(pNode, std::cout);
 }
@@ -182,7 +181,7 @@ const char* MathOpName(TqInt op)
 
 void OutputTreeNode(const IqParseNode* pNode, std::ostream& out)
 {
-	TqInt i;
+	TqUint i;
 	IqParseNodeShader* pS;
 	IqParseNodeFunctionCall* pFC;
 	IqParseNodeVariable* pV;
@@ -215,7 +214,11 @@ void OutputTreeNode(const IqParseNode* pNode, std::ostream& out)
 		slxFile << pS->strShaderType() << std::endl;
 
 		// Output version information.
+#ifdef AQSIS_SYSTEM_WIN32
 		slxFile << "AQSIS_V " << VERSION_STR << std::endl;
+#else // AQSIS_SYSTEM_WIN32
+		slxFile << "AQSIS_V " << VERSION << std::endl;
+#endif // !AQSIS_SYSTEM_WIN32
 
 		slxFile << std::endl << std::endl << "segment Data" << std::endl;
 
@@ -290,7 +293,8 @@ void OutputTreeNode(const IqParseNode* pNode, std::ostream& out)
 				out << "\tpop ";
 
 			// Output a pop for this variable.
-			IqVarDef* pVD=pTranslatedVariable(pV->VarRef());
+			SqVarRef temp(pV->VarRef());
+			IqVarDef* pVD=pTranslatedVariable(temp);
 			if(pVD)
 			{
 				pVD->IncUseCount();
@@ -307,7 +311,8 @@ void OutputTreeNode(const IqParseNode* pNode, std::ostream& out)
 			else
 				out << "\tpushv ";
 
-			IqVarDef* pVD=pTranslatedVariable(pV->VarRef());
+			SqVarRef temp(pV->VarRef());
+			IqVarDef* pVD=pTranslatedVariable(temp);
 			if(pVD)
 			{
 				pVD->IncUseCount();
@@ -630,7 +635,8 @@ void OutputTreeNode(const IqParseNode* pNode, std::ostream& out)
 				break;
 		}
 		// Output the comm function.
-		IqVarDef* pVD=pTranslatedVariable(pMessagePassingFunction->VarRef());
+		SqVarRef temp(pMessagePassingFunction->VarRef());
+		IqVarDef* pVD=pTranslatedVariable(temp);
 		if(pVD)
 		{
 			pVD->IncUseCount();
@@ -657,7 +663,7 @@ IqVarDef* pTranslatedVariable(SqVarRef& Ref)
 			pTransTable=*iTable;
 			if(pTransTable!=0)
 			{
-				TqInt i;
+				TqUint i;
 				for(i=0; i<pTransTable->size(); i++)
 				{
 					if((*pTransTable)[i].m_From==RealRef)

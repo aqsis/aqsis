@@ -1,4 +1,4 @@
-SUBDIRS = libaqsistypes librib2 librib2stream librib2ri libddmsimple libddmsock render aqsis 
+SUBDIRS = libaqsistypes librib2 librib2stream librib2ri libslparse libcodegenvm libddmsimple libddmsock render aqsl aqsis 
 
 EXTRA_DIST = ribber.cfg
 

@@ -237,16 +237,14 @@ class CqParseNodeFunctionCall : public CqParseNode, public IqParseNodeFunctionCa
 								CqParseNode(from)
 								{
 									m_aFuncRef.resize(from.m_aFuncRef.size());
-									TqInt i;
-									for(i=0; i<m_aFuncRef.size(); i++)
+									for(TqUint i=0; i<m_aFuncRef.size(); i++)
 										m_aFuncRef[i]=from.m_aFuncRef[i];
 								}
 				CqParseNodeFunctionCall(std::vector<SqFuncRef>& aFuncRef) : 
 								CqParseNode()
 								{
 									m_aFuncRef.resize(aFuncRef.size());
-									TqInt i;
-									for(i=0; i<m_aFuncRef.size(); i++)
+									for(TqUint i=0; i<m_aFuncRef.size(); i++)
 										m_aFuncRef[i]=aFuncRef[i];
 								}
 	virtual		~CqParseNodeFunctionCall()	

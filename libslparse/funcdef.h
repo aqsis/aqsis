@@ -48,16 +48,16 @@ class CqFuncDef : public IqFuncDef
 								m_strName(strName),
 								m_strVMName(strVMName),
 								m_strParamTypes(strParams),
-								m_InternalUses(InternalUses),
 								m_fLocal(TqFalse),
 								m_pDef(0),
+								m_InternalUses(InternalUses),
 								m_fVarying(TqFalse)
 									{
 										// Build the type array.
 										TypeArray();
 									}
 					CqFuncDef(TqInt Type, const char* strName, const char* strVMName, const char* strParams, CqParseNode* pDef, CqParseNode* pArgs);
-					~CqFuncDef()	{}
+					virtual ~CqFuncDef()	{}
 
 						// Overridden from IqFuncDef
 	virtual	TqInt		Type() const	{return(m_Type);}

@@ -305,7 +305,8 @@ CqFuncDef	gStandardFuncs[]={
 			CqFuncDef(Type_String, "shadername", "shadername2", "s"),
 			CqFuncDef(Type_String, "shadername", "shadername", ""),
 };
-TqInt		gcStandardFuncs=sizeof(gStandardFuncs)/sizeof(gStandardFuncs[0]);
+
+TqUint		gcStandardFuncs = sizeof(gStandardFuncs) / sizeof(gStandardFuncs[0]);
 
 
 
@@ -345,7 +346,7 @@ TqBool CqFuncDef::FindFunction(const char* strName, std::vector<SqFuncRef>& Refs
 	Refs.clear();
 
 	// Search the standard definitions first.
-	TqInt i;
+	TqUint i;
 	for(i=0; i<gcStandardFuncs; i++)
 	{
 		if(gStandardFuncs[i].m_strName==strName)
@@ -389,7 +390,7 @@ TqInt CqFuncDef::AddFunction(CqFuncDef& Def)
 int CqFuncDef::TypeArray()
 {
 	// Go through the type string parsing the types.
-	int j=0,cvars=0;
+	unsigned int j=0,cvars=0;
 
 	while(j<m_strParamTypes.size())
 	{

@@ -21,6 +21,9 @@ librib2/tests/test_003 \
 librib2/tests/test_004 \
 librib2stream/Makefile \
 librib2ri/Makefile \
+libslparse/Makefile \
+libcodegenvm/Makefile \
+aqsl/Makefile \
 aqsis/Makefile \
 Makefile )
 
