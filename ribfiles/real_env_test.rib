@@ -40,7 +40,6 @@ FrameBegin 3
 	Projection "perspective" "fov" [91]
 	Clipping 0.1 100000
 	Rotate -90 1 0 0
-	Translate 0 0.1 0
 	WorldBegin 
 		ReadArchive "real_env_lights"
 		ReadArchive "real_env_world"
@@ -56,7 +55,6 @@ FrameBegin 4
 	Projection "perspective" "fov" [91]
 	Clipping 0.1 100000
 	Rotate 90 1 0 0
-	Translate 0.1 0.1 0.1
 	WorldBegin 
 		ReadArchive "real_env_lights"
 		ReadArchive "real_env_world"
@@ -72,7 +70,6 @@ FrameBegin 5
 	Projection "perspective" "fov" [91]
 	Clipping 0.1 100000
 	Rotate 180 0 1 0
-	Translate 0.1 0.1 0.1
 	WorldBegin 
 		ReadArchive "real_env_lights"
 		ReadArchive "real_env_world"
@@ -87,7 +84,6 @@ FrameBegin 6
 	Display "pz.tif" "file" "rgba" 
 	Projection "perspective" "fov" [91]
 	Clipping 0.1 100000
-	Translate 0.1 0.1 0.1
 	WorldBegin 
 		ReadArchive "real_env_lights"
 		ReadArchive "real_env_world"
