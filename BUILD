@@ -26,6 +26,11 @@ Requirements:
 						nmake -f makefile.vc libtiff.dll
 					Add libtiff to your include paths under tools/options.
 					Add libtiff to your library paths under tools/options.
+		libjpeg		6b or later	(http://sourceforge.net/projects/gnuwin32/)
+					From within the libtiff directory type
+						nmake -f makefile.vc
+					Add libjpeg/src to your include paths under tools/options.
+					Add libjpeg/src to your library paths under tools/options.
 		zlib		1.1.3 or later	(http://www.info-zip.org/pub/infozip/zlib/)
 					From the install directory type
 						nmake -f Makefile.nt
