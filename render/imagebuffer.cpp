@@ -898,8 +898,8 @@ void	CqImageBuffer::SetImage()
 	m_CropWindowYMax=static_cast<TqInt>(CLAMP(CEIL(m_iYRes*QGetRenderContext()->optCurrent().fCropWindowYMax()  ),0,m_iYRes));
 	m_cXBuckets=(m_iXRes/m_XBucketSize)+1;
 	m_cYBuckets=(m_iYRes/m_YBucketSize)+1;
-	m_PixelXSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelXSamples());
-	m_PixelYSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelYSamples());
+	m_PixelXSamples=QGetRenderContext()->optCurrent().PixelXSamples();
+	m_PixelYSamples=QGetRenderContext()->optCurrent().PixelYSamples();
 	m_FilterXWidth=static_cast<TqInt>(QGetRenderContext()->optCurrent().fFilterXWidth());
 	m_FilterYWidth=static_cast<TqInt>(QGetRenderContext()->optCurrent().fFilterYWidth());
 	m_DisplayMode=QGetRenderContext()->optCurrent().iDisplayMode();
@@ -1278,47 +1278,46 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 		}
 
 		// Now go across all pixels touched by the micropolygon bound.
-		// The first pixel position is at (initX, initY), the last one
+		// The first pixel position is at (sX, sY), the last one
 		// at (eX, eY).
-		long eX=static_cast<TqInt>(CEIL(bmaxx));
-		long eY=static_cast<TqInt>(CEIL(bmaxy));
-		if(eX>=xmax)	eX=xmax-1;
-		if(eY>=ymax)	eY=ymax-1;
+		TqInt eX=CEIL(bmaxx);
+		TqInt eY=CEIL(bmaxy);
+		if(eX>=xmax)	eX=xmax;
+		if(eY>=ymax)	eY=ymax;
+
+		TqInt sX=FLOOR(bminx);
+		TqInt sY=FLOOR(bminy);
+		if(sY<ymin)	sY=ymin;
+		if(sX<xmin)	sX=xmin;
 
 		CqImagePixel* pie;
-	
-		long initY=static_cast<long>(FLOOR(Bound.vecMin().y()));
-		if(initY<ymin)	initY=ymin;
-	
-		long initX=static_cast<long>(FLOOR(Bound.vecMin().x()));
-		if(initX<xmin)	initX=xmin;
 
-		TqInt iXSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelXSamples());
-		TqInt iYSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelYSamples());
+		TqInt iXSamples=QGetRenderContext()->optCurrent().PixelXSamples();
+		TqInt iYSamples=QGetRenderContext()->optCurrent().PixelYSamples();
 	
-		TqInt im=static_cast<TqInt>((bminx<initX)?0:FLOOR((bminx-initX)*iXSamples));
-		TqInt in=static_cast<TqInt>((bminy<initY)?0:FLOOR((bminy-initY)*iYSamples));
-		TqInt em=static_cast<TqInt>((bmaxx>eX)?iXSamples:CEIL((bmaxx-eX)*iXSamples));
-		TqInt en=static_cast<TqInt>((bmaxy>eY)?iYSamples:CEIL((bmaxy-eY)*iYSamples));
+		TqInt im=(bminx<sX)?0:FLOOR((bminx-sX)*iXSamples);
+		TqInt in=(bminy<sY)?0:FLOOR((bminy-sY)*iYSamples);
+		TqInt em=(bmaxx>eX)?iXSamples:CEIL((bmaxx-(eX-1))*iXSamples);
+		TqInt en=(bmaxy>eY)?iYSamples:CEIL((bmaxy-(eY-1))*iYSamples);
 
-		register long iY=initY;
+		register long iY=sY;
 	
-		while(iY<=eY)
+		while(iY<eY)
 		{
-			register long iX=initX;
+			register long iX=sX;
 
 			Bucket.ImageElement(iX,iY,pie);
 	
-			while(iX<=eX)
+			while(iX<eX)
 			{
 				// Now sample the micropolygon at several subsample positions
 				// within the pixel. The subsample indices range from (start_m, n)
 				// to (end_m-1, end_n-1).
 			  	register int m,n;
-				n=(iY==initY)?in:0;
-				int end_n=(iY==eY)?en:iYSamples;
-				int start_m=(iX==initX)?im:0;
-				int end_m=(iX==eX)?em:iXSamples;
+				n=(iY==sY)?in:0;
+				int end_n=(iY==(eY-1))?en:iYSamples;
+				int start_m=(iX==sX)?im:0;
+				int end_m=(iX==(eX-1))?em:iXSamples;
 				TqBool brkVert=TqFalse;
 				for(; n<end_n && !brkVert; n++)
 				{
@@ -1328,12 +1327,6 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 						CqVector2D vecP(pie->SamplePoint(m,n));
 						QGetRenderContext()->Stats().IncSamples();
 	
-						if(vecP.x()>bmaxx)
-						{
-							brkHoriz=TqTrue;
-							break;
-						}
-
 						TqFloat t=pie->SampleTime(m,n);
 						// First, check if the subsample point lies within the micropoly bound
 						if(t>=time0 && t<=time1 && Bound.Contains2D(vecP))
@@ -1400,6 +1393,8 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 						{
 							if(vecP.y()>bmaxy)
 								brkVert=TqTrue;
+							if(vecP.x()>bmaxx)
+								brkHoriz=TqTrue;
 						}
 					}
 				}

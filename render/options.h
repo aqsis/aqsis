@@ -129,8 +129,8 @@ enum EqDisplayMode
 class CqDisplay
 {
 	public:
-						CqDisplay() :	m_fPixelXSamples(2.0),
-										m_fPixelYSamples(2.0),
+						CqDisplay() :	m_PixelXSamples(2),
+										m_PixelYSamples(2),
 										m_funcFilter(RiGaussianFilter),
 										m_fFilterXWidth(2.0),
 										m_fFilterYWidth(2.0),
@@ -161,20 +161,20 @@ class CqDisplay
 												{m_fPixelVariance=fValue;}
 						/** Get the number of pixel samples in x.
 						 */
-			TqFloat		fPixelXSamples() const	{return(m_fPixelXSamples);}
+			TqInt		PixelXSamples() const	{return(m_PixelXSamples);}
 						/** Set the number of pixel samples in x.
 						 * \param fValue the new pixel sample count in x.
 						 */
-			void		SetfPixelXSamples(const TqFloat fValue)
-												{m_fPixelXSamples=fValue;}
+			void		SetPixelXSamples(const TqInt Value)
+												{m_PixelXSamples=Value;}
 						/** Get the number of pixel samples in y.
 						 */
-			TqFloat		fPixelYSamples() const	{return(m_fPixelYSamples);}
+			TqInt		PixelYSamples() const	{return(m_PixelYSamples);}
 						/** Set the number of pixel samples in y.
 						 * \param fValue the new pixel sample count in y.
 						 */
-			void		SetfPixelYSamples(const TqFloat fValue)
-												{m_fPixelYSamples=fValue;}
+			void		SetPixelYSamples(const TqInt Value)
+												{m_PixelYSamples=Value;}
 						/** Get a pointer to the pixel filter function.
 						 */
 			RtFilterFunc funcFilter() const		{return(m_funcFilter);}
@@ -321,8 +321,8 @@ class CqDisplay
 
 	private:
 			TqFloat		m_fPixelVariance;					///< Pixel variance (not used).
-			TqFloat		m_fPixelXSamples,					///< Pixel samples in x.
-						m_fPixelYSamples;					///< Pixel samples in y.
+			TqFloat		m_PixelXSamples,					///< Pixel samples in x.
+						m_PixelYSamples;					///< Pixel samples in y.
 			RtFilterFunc m_funcFilter;						///< Pointer to the pixel filter function.
 			TqFloat		m_fFilterXWidth,					///< Pixel filter width in x.
 						m_fFilterYWidth;					///< Pixel filter width in y.

@@ -574,8 +574,8 @@ RtVoid	RiPixelVariance(RtFloat variance)
 //
 RtVoid	RiPixelSamples(RtFloat xsamples, RtFloat ysamples)
 {
-	QGetRenderContext()->optCurrent().SetfPixelXSamples(xsamples);
-	QGetRenderContext()->optCurrent().SetfPixelYSamples(ysamples);
+	QGetRenderContext()->optCurrent().SetPixelXSamples(xsamples);
+	QGetRenderContext()->optCurrent().SetPixelYSamples(ysamples);
 
 	return;
 }
