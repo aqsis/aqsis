@@ -307,7 +307,8 @@ CqMotionModeBlock::CqMotionModeBlock( TqInt N, TqFloat times[], CqModeBlock* pco
         m_ptransCurrent = pconParent->m_ptransCurrent;
         // Set the default 'new time slot' matrix to the current 0 time matrix, this
         // takes care of the case of moving from non-Motion to Motion.
-        m_ptransCurrent->SetDefaultObject( m_ptransCurrent->GetMotionObject( m_ptransCurrent->Time( 0 ) ) );
+        //m_ptransCurrent->SetDefaultObject( m_ptransCurrent->GetMotionObject( m_ptransCurrent->Time( 0 ) ) );
+		m_ptransCurrent->SetDefaultObject( m_ptransCurrent->matObjectToWorld( m_ptransCurrent->Time( 0 ) ) );
     }
     else
     {

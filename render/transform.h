@@ -93,7 +93,10 @@ public:
     }
     virtual	TqInt	cTimes() const
     {
-        return( CqMotionSpec<CqMatrix>::cTimes() );
+		if(m_IsMoving)
+			return( CqMotionSpec<CqMatrix>::cTimes() );
+		else
+			return( 1 );
     }
 
 #ifndef _DEBUG
@@ -123,6 +126,8 @@ public:
 private:
     TqInt	m_cReferences;		///< Number of references to this transform.
     TqInt	m_StackIndex;		///< Index in the transform stack of this transform.
+	TqBool	m_IsMoving;			///< Flag indicating this transformation describes a changing transform.
+	CqMatrix	m_StaticMatrix;	///< Matrix storing the transformation should there be no motion involved.
 }
 ;
 

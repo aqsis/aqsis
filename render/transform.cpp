@@ -36,7 +36,7 @@ START_NAMESPACE( Aqsis )
 /** Constructor.
  */
 
-CqTransform::CqTransform() : CqMotionSpec<CqMatrix>( CqMatrix() ), m_cReferences( 0 ), m_StackIndex( 0 )
+CqTransform::CqTransform() : CqMotionSpec<CqMatrix>( CqMatrix() ), m_cReferences( 0 ), m_StackIndex( 0 ), m_IsMoving(TqFalse)
 {
     if ( QGetRenderContext() != 0 )
     {
@@ -56,7 +56,7 @@ CqTransform::CqTransform() : CqMotionSpec<CqMatrix>( CqMatrix() ), m_cReferences
 /** Copy constructor.
  */
 
-CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<CqMatrix>( From ), m_cReferences( 0 ), m_StackIndex( -1 )
+CqTransform::CqTransform( const CqTransform& From ) : CqMotionSpec<CqMatrix>( From ), m_cReferences( 0 ), m_StackIndex( -1 ), m_IsMoving(TqFalse)
 {
     *this = From;
 
@@ -104,6 +104,9 @@ CqTransform& CqTransform::operator=( const CqTransform& From )
 {
     CqMotionSpec<CqMatrix>::operator=( From );
 
+	m_IsMoving = From.m_IsMoving;
+	m_StaticMatrix = From.m_StaticMatrix;
+
     return ( *this );
 }
 
@@ -114,7 +117,15 @@ CqTransform& CqTransform::operator=( const CqTransform& From )
 
 void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 {
-    AddTimeSlot( time, matTrans );
+    if ( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
+	{
+		AddTimeSlot( time, matTrans );
+		m_IsMoving = TqTrue;
+	}
+	else
+	{
+		m_StaticMatrix = matTrans;
+	}
 }
 
 
@@ -124,12 +135,27 @@ void CqTransform::SetCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 
 void CqTransform::ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans )
 {
-    // If we are actually in a motion block, concatenate this transform with the existing one at that time slot,
-    // else apply this transform at all time slots.
+    // If we are actually in a motion block, and we already describe a moving transform,
+	// concatenate this transform with the existing one at that time slot,
     if ( QGetRenderContext() ->pconCurrent() ->fMotionBlock() )
-        ConcatTimeSlot( time, matTrans );
+	{
+		if( m_IsMoving )
+			ConcatTimeSlot( time, matTrans );
+		else
+		{
+			AddTimeSlot( time, m_StaticMatrix );
+			ConcatTimeSlot( time, matTrans );
+			m_IsMoving = TqTrue;
+		}
+	}
     else
-        ConcatAllTimeSlots( matTrans );
+    // else, if we are moving, apply this transform at all time slots, otherwise apply to static matrix.
+	{
+		if( m_IsMoving )
+			ConcatAllTimeSlots( matTrans );
+		else
+			m_StaticMatrix = m_StaticMatrix * matTrans;
+	}
 }
 
 
@@ -139,7 +165,10 @@ void CqTransform::ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans
 
 const CqMatrix& CqTransform::matObjectToWorld( TqFloat time ) const
 {
-    return ( GetMotionObject( time ) );
+	if( m_IsMoving )
+		return ( GetMotionObject( time ) );
+	else
+		return ( m_StaticMatrix );
 }
 
 

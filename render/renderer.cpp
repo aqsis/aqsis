@@ -689,7 +689,8 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
     if ( fhash == ohash ) matA = matObjectToWorld;
     else if ( fhash == shash ) matA = matShaderToWorld;
     else if ( ( fhash == chash ) || ( fhash == cuhash ) )
-        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
+//        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
+        matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
     else
     {
         WhichMatToWorld( matA, fhash );
@@ -699,7 +700,8 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
     if ( thash == ohash ) matB = matObjectToWorld.Inverse();
     else if ( thash == shash ) matB = matShaderToWorld.Inverse();
     else if ( ( thash == chash ) || ( thash == cuhash ) )
-        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
+//        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
+        matB = m_pTransCamera->matObjectToWorld( time );
     else
     {
         WhichMatWorldTo( matB, thash );
@@ -731,7 +733,8 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
     if ( fhash == ohash ) matA = matObjectToWorld;
     else if ( fhash == shash ) matA = matShaderToWorld;
     else if ( ( fhash == chash ) || ( fhash == cuhash ) )
-        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
+//        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
+		matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
     else
     {
         WhichMatToWorld ( matA, fhash );
@@ -740,7 +743,8 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
     if ( thash == ohash ) matB = matObjectToWorld.Inverse();
     else if ( thash == shash ) matB = matShaderToWorld.Inverse();
     else if ( ( thash == chash ) || ( thash == cuhash ) )
-        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
+//        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
+        matB = m_pTransCamera->matObjectToWorld( time );
     else
     {
         WhichMatWorldTo ( matB, thash );
@@ -784,7 +788,8 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
     if ( fhash == ohash ) matA = matObjectToWorld;
     else if ( fhash == shash ) matA = matShaderToWorld;
     else if ( ( fhash == chash ) || ( fhash == cuhash ) )
-        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
+//        matA = m_pTransCamera->GetMotionObjectInterpolated( time ).Inverse();
+        matA = m_pTransCamera->matObjectToWorld( time ).Inverse();
     else
     {
         WhichMatToWorld ( matA, fhash );
@@ -793,7 +798,8 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
     if ( thash == ohash ) matB = matObjectToWorld.Inverse();
     else if ( thash == shash ) matB = matShaderToWorld.Inverse();
     else if ( ( thash == chash ) || ( thash == cuhash ) )
-        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
+//        matB = m_pTransCamera->GetMotionObjectInterpolated( time );
+        matB = m_pTransCamera->matObjectToWorld( time );
     else
     {
         WhichMatWorldTo ( matB, thash );
