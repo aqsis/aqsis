@@ -25,7 +25,15 @@ test-shaders:
 	PATH=$$PATH:$(top_builddir)/aqsl; for file in $$(find $(top_srcdir) -name "*.sl" | sort); do $(top_builddir)/aqsl/aqsl $$file; done	
 
 test: check test-clean test-shaders
-	for file in $$(find $(top_srcdir)/ribfiles -name "*.rib" | sort); do echo "Rendering $$file ..."; $(top_builddir)/aqsis/aqsis $$file; done
+	cat /dev/null > ./ddmsock.ini
+	echo "file	@top_builddir@filebuffer/filebuffer@EXEEXT@" >> ./ddmsock.ini 
+	echo "tiff	@top_builddir@filebuffer/filebuffer@EXEEXT@" >> ./ddmsock.ini
+	echo "framebuffer	@top_builddir@framebuffer_glut/aqsis_framebuffer_glut@EXEEXT@" >> ./ddmsock.ini	
+	echo "zframebuffer	@top_builddir@framebuffer_glut_z/aqsis_framebuffer_glut_z@EXEEXT@" >> ./ddmsock.ini
+	echo "zfile	@top_builddir@shadowmap/shadowmap@EXEEXT@" >> ./ddmsock.ini
+	echo "shadow	@top_builddir@shadowmap/shadowmap@EXEEXT@" >> ./ddmsock.ini
+	for file in $$(find $(top_srcdir)/ribfiles -name "*.rib" | sort); do echo "Rendering $$file ..."; export AQSIS_CONFIG_PATH=./; $(top_builddir)/aqsis/aqsis $$file; done
+	rm ./ddmsock.ini
 
 .PHONY: test-clean test-shaders test
 
