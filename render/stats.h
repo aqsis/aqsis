@@ -227,6 +227,8 @@ class CqStats
 			void	IncCulledMPGs(TqInt n=1)	{ m_cCulledMPGs+=n; }
 
 			//@}
+			void	IncTextureMemory(TqInt n=0)	{ m_cTextureMemory         +=n; }
+			//@}
 
 
 			/// \name Timer methods
@@ -293,10 +295,12 @@ class CqStats
 			TqInt	m_cGridsCurrent;				///< Current count of grids allocated.
 			TqInt	m_cGridsPeak;					///< Peak count of grids allocated.
 			TqInt	m_cGPrims;						///< Count of GPrims.
+
 			TqInt	m_cTotalGPrims;					///< Count of total GPrims (including gprims resulting from splits).
 			TqInt	m_cCulledGPrims;				///< Count of culled GPrims.
 			TqInt	m_cCulledGrids;					///< Count of culled micro poly grids.
 			TqInt	m_cCulledMPGs;					///< Count of culled micro polys.
+                        TqInt m_cTextureMemory;     ///< Count of the memory used by texturemap.cpp
 
 			time_t	m_timeTotal;					///< Total time spent on the entire animation.
 			time_t  m_timeTotalFrame;				///< Time spent on processing one individual frame.
@@ -310,6 +314,7 @@ class CqStats
 			CqStatTimer m_timeRenderMPGs;			///< Time spent on rendering MPGs.
 			CqStatTimer m_timeOcclusionCull;		///< Time spent on occlusion culling.
 			CqStatTimer m_timeDiceable;				///< Time spent on diceable checking.
+
 };
 
 
