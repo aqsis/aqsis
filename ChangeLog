@@ -1,3 +1,7 @@
+2003-03-17  minty
+	* configure.in 1.61:
+		Tweak to make sure we disable C99 asserts for normal builds
+
 2003-03-16  minty
 	* libri2rib/Makefile.am 1.9:
 	* librib2stream/Makefile.am 1.9:
@@ -24,6 +28,15 @@
 	* teqser/teqser.cpp 1.15:
 		Lots of small changes to try to achive (and maintain) direct
 		MacOSX compatibility.
+
+	* libri2rib/libri2rib.dsp 1.8:
+	* libri2rib/ri.h 1.2:
+		Update ri.h to not need _qShare macros, this can now be
+		delivered with the rib client library.
+
+	* libri2rib/context.cpp 1.9:
+		Eliminate C4786 warnings (symbol length truncated in debug
+		browse info) in MSVC.
 
 2003-03-15  minty
 	* librib2/tests/ribscanner.cpp 1.5:
