@@ -85,8 +85,8 @@ class CqQuadric : public CqSurface
 			CqMatrix	m_matTx;		///< Transformation matrix from object to camera.
 			CqMatrix	m_matITTx;		///< Inverse transpose transformation matrix, for transforming normals.
 
-			TqInt		m_uDiceSize;	///< Calculated dice size in u direction.
-			TqInt		m_vDiceSize;	///< Calculated dice size in v direction.
+//			TqInt		m_uDiceSize;	///< Calculated dice size in u direction.
+//			TqInt		m_vDiceSize;	///< Calculated dice size in v direction.
 };
 
 
