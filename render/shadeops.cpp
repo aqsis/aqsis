@@ -1958,10 +1958,10 @@ STD_SOIMPL CqShaderExecEnv::SO_shadow(STRINGVAL name, FLOATVAL channel, POINTVAL
 		FOR_EACHR
 			CqVector3D swidth=0.0f,twidth=0.0f;
 			
-			//swidth=SO_DerivType<CqVector3D>(P,den,m_GridI,*this);
-			//twidth=SO_DerivType<CqVector3D>(P,den,m_GridI,*this);
-			swidth=0.0f;
-			twidth=0.0f;
+			swidth=SO_DerivType<CqVector3D>(P,den,m_GridI,*this);
+			twidth=SO_DerivType<CqVector3D>(P,den,m_GridI,*this);
+			//swidth=1.0f;
+			//twidth=1.0f;
 
 			swidth*=_pswidth;
 			twidth*=_ptwidth;

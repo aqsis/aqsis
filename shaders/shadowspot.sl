@@ -21,6 +21,6 @@ light shadowspot(
         atten *= smoothstep(cosoutside, cosinside, cosangle);
         Cl = atten * intensity * lightcolor;
         if (shadowname != "")
-            Cl *= 1 - shadow(shadowname, Ps);
+            Cl *= 1 - shadow(shadowname, Ps, "width", width);
     }
 }
