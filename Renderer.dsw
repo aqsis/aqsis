@@ -180,6 +180,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "framebuffer_glut"=.\framebuffer_glut\framebuffer_glut.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "libaqsis"=.\render\libaqsis.dsp - Package Owner=<4>
 
 Package=<5>
