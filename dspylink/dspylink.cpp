@@ -101,8 +101,10 @@ void* g_DriverHandle = NULL;
 PtDspyImageHandle g_ImageHandle;
 PtFlagStuff g_Flags;
 CqSimplePlugin g_DspyDriver;
-PtDspyDevFormat	g_Formats[1];
+PtDspyDevFormat	g_Formats[3];
 CqString g_strName( "" );
+/// Storage for the output file name.
+std::string	strFilename( "output.tif" );
 
 
 /// Main loop,, just cycle handling any recieved messages.
@@ -129,19 +131,17 @@ int main( int argc, char* argv[] )
 	return 0;
 }
 
-/// Storage for the output file name.
-std::string	strFilename( "output.tif" );
 
 TqInt Query( SOCKET s, SqDDMessageBase* pMsgB )
 {
 	switch ( pMsgB->m_MessageID )
 	{
-			case MessageID_FormatQuery:
-			{
-				if ( DDSendMsg( s, &frmt ) <= 0 )
-					return ( -1 );
-			}
-			break;
+		case MessageID_FormatQuery:
+		{
+			if ( DDSendMsg( s, &frmt ) <= 0 )
+				return ( -1 );
+		}
+		break;
 	}
 	return ( 0 );
 }
@@ -160,7 +160,6 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 	g_CWXmax = pMsg->m_CropWindowXMax;
 	g_CWYmax = pMsg->m_CropWindowYMax;
 
-
 	g_DriverHandle = g_DspyDriver.SimpleDLOpen( &g_strName );
 	if( g_DriverHandle != NULL )
 	{
@@ -174,8 +173,14 @@ TqInt Open( SOCKET s, SqDDMessageBase* pMsgB )
 	if( NULL != g_OpenMethod )
 	{
 		// \todo: need to pass the proper mode string.
-		g_Formats[0].name = "rgba";
-		PtDspyError err = (*g_OpenMethod)(&g_ImageHandle, "", strFilename.c_str(), XRes, YRes, 0, NULL, 1, g_Formats, &g_Flags);
+		g_Formats[0].name = "r";
+		g_Formats[0].type = PkDspyUnsigned8;
+		g_Formats[1].name = "g";
+		g_Formats[1].type = PkDspyUnsigned8;
+		g_Formats[2].name = "b";
+		g_Formats[2].type = PkDspyUnsigned8;
+		std::cout << strFilename.c_str() << std::endl;
+		PtDspyError err = (*g_OpenMethod)(&g_ImageHandle, "sdchwnd", strFilename.c_str(), XRes, YRes, 0, NULL, 3, g_Formats, &g_Flags);
 		PtDspySizeInfo size;
 		err = (*g_QueryMethod)(g_ImageHandle, PkSizeQuery, sizeof(size), &size);
 		PtDspyOverwriteInfo owinfo;
@@ -217,7 +222,6 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 	else
 		return(-1);
 	
-
 	TqInt y;
 	for ( y = ymin; y < ymaxp1; y++ )
 	{
@@ -254,6 +258,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 			pBucket += pMsg->m_ElementSize;
 		}
 	}
+
 
 	// Pass the data onto the dspy driver.
 	if( NULL != g_DataMethod )

@@ -243,22 +243,7 @@ TqBool CqDDServer::Accept( CqDDClient& dd )
 	if ( ( c = accept( Socket(), NULL, NULL ) ) != INVALID_SOCKET )
 	{
 		dd.SetSocket( c );
-
-		// Issue a format request so that we know what data to send to the client.
-		SqDDMessageBase msg;
-		SqDDMessageFormatResponse frmt;
-
-		msg.m_MessageID = MessageID_FormatQuery;
-		msg.m_MessageLength = sizeof( SqDDMessageBase );
-		dd.SendMsg( &msg );
-		dd.Receive( &frmt, sizeof( frmt ) );
-
-		// Confirm the message returned is as expected.
-		if ( frmt.m_MessageID == MessageID_FormatResponse &&
-		        frmt.m_MessageLength == sizeof( frmt ) )
-			return ( TqTrue );
-		else
-			dd.Close();
+		return( TqTrue );
 	}
 	return ( TqFalse );
 }
@@ -449,6 +434,20 @@ TqInt CqDDManager::OpenDisplays()
 		                         QGetRenderContext() ->pImage() ->CropWindowYMin(),
 		                         QGetRenderContext() ->pImage() ->CropWindowYMax() );
 		dd.SendMsg( &msgopen );
+
+		// Issue a format request so that we know what data to send to the client.
+		SqDDMessageBase msg;
+		SqDDMessageFormatResponse frmt;
+
+		msg.m_MessageID = MessageID_FormatQuery;
+		msg.m_MessageLength = sizeof( SqDDMessageBase );
+		dd.SendMsg( &msg );
+		dd.Receive( &frmt, sizeof( frmt ) );
+
+		// Confirm the message returned is as expected.
+		if ( frmt.m_MessageID != MessageID_FormatResponse ||
+		     frmt.m_MessageLength != sizeof( frmt ) )
+			dd.Close();
 	}
 
 	return ( 0 );
