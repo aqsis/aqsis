@@ -41,6 +41,12 @@
 #include <argparse.h>
 
 
+namespace Aqsis
+{
+struct IqRenderer;
+extern IqRenderer* QGetRenderContextI();
+}
+
 bool g_pause;
 bool g_help;
 bool g_version;
@@ -60,6 +66,7 @@ void version( std::ostream& Stream )
  */
 int main( int argc, const char** argv )
 {
+	Aqsis::QGetRenderContextI();
 	ArgParse ap;
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " <shadername>" );
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
