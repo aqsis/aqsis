@@ -57,6 +57,7 @@ class _qShareC CqRiFile : public CqFile
 														{}
 		_qShareM				CqRiFile(const char* strFilename, const char* strSearchPathOption="")
 								{
+//									std::cout << "CqRiFile::CqRiFile() " << strFilename << " - " << strSearchPathOption << std::endl;									
 									Open(strFilename,strSearchPathOption);
 								}
 								/** Destructor. Takes care of closing the stream if the constructor opened it.
@@ -73,6 +74,8 @@ class _qShareC CqRiFile : public CqFile
 										const CqString* poptShader=QGetRenderContext()->optCurrent().GetStringOption("searchpath", strSearchPathOption);
 										if(poptShader!=0)
 											SearchPath=poptShader[0];
+
+//										std::cout << "\t" << SearchPath.c_str() << std::endl;
 									}
 									CqFile::Open(strFilename, SearchPath.c_str(), mode);
 								}

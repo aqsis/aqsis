@@ -50,6 +50,6 @@ ribfiles/Makefile \
 shaders/Makefile \
 shadowmap/Makefile \
 slpp/Makefile \
-texer/Makefile \
+teqser/Makefile \
 Makefile )
 

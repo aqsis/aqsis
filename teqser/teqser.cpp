@@ -1,10 +1,10 @@
 // teqser.cpp : Defines the entry point for the console application.
 //
 
-#include	<conio.h>
 #include	<stdio.h>
 
 #ifdef	AQSIS_SYSTEM_WIN32
+#include	<conio.h>
 #pragma warning (disable : 4100)
 #endif // AQSIS_SYSTEM_WIN32
 
@@ -22,7 +22,11 @@ static void arg_filename(int argc, char**argv);
 
 int main(int argc, const char** argv)
 {
+#ifdef AQSIS_SYSTEM_WIN32
 	std::cout << "teqser version " << VERSION_STR << " - Copyright 2000 Paul C. Gregory" << std::endl;
+#else // AQSIS_SYSTEM_WIN32
+	std::cout << "teqser version " << VERSION << " - Copyright 2000 Paul C. Gregory" << std::endl;
+#endif // !AQSIS_SYSTEM_WIN32
 	std::cout << "All Rights Reserved" << std::endl;
 
 	ArgParse ap;
