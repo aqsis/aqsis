@@ -5631,6 +5631,19 @@ STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, P
 	if ( pMap != 0 && pMap->IsValid() )
 	{
 		std::valarray<TqFloat> fv;
+		// Generate normal conversion matrices to save time.
+		std::vector<CqMatrix> matITTx;
+		TqInt i;
+		for( i = 0; i < pMap->NumPages(); i++ )
+		{
+			// Check if the lightsource is behind the sample.
+			CqMatrix matCameraToLight = pMap->GetMatrix(0, i) * QGetRenderContextI() ->matSpaceToSpace( "camera", "world" );
+			matCameraToLight[ 3 ][ 0 ] = matCameraToLight[ 3 ][ 1 ] = matCameraToLight[ 3 ][ 2 ] = matCameraToLight[ 0 ][ 3 ] = matCameraToLight[ 1 ][ 3 ] = matCameraToLight[ 2 ][ 3 ] = 0.0;
+			matCameraToLight[ 3 ][ 3 ] = 1.0;
+			matCameraToLight.Inverse();
+			matCameraToLight.Transpose();
+			matITTx.push_back( matCameraToLight );
+		}
 
 		BEGIN_VARYING_SECTION
 		// Storage for the final combined occlusion value.
@@ -5642,14 +5655,21 @@ STD_SOIMPL CqShaderExecEnv::SO_occlusion( STRINGVAL occlmap, FLOATVAL channel, P
 		twidth = SO_DerivType<CqVector3D>( P, NULL, __iGrid, this );
 
 		GETPOINT( P );
-		TqInt i;
+		GETNORMAL( N );
+		TqInt numValidMaps = 0;
 		for( i = 0; i < pMap->NumPages(); i++ )
 		{
+			// Check if the lightsource is behind the sample.
+			CqVector3D Nl = matITTx[i] * NORMAL( N );
+			if( ( CqVector3D(0,0,-1) * Nl ) < 0.0f )
+				continue;
+
 			fv = 0.0f;
 			pMap->SampleMap( POINT( P ), swidth, twidth, fv, paramMap, i );
 			finalocclusion += fv[0];
+			numValidMaps++;
 		}
-		finalocclusion /= static_cast<TqFloat>(pMap->NumPages());
+		finalocclusion /= static_cast<TqFloat>(numValidMaps);
 		SETFLOAT( Result, finalocclusion);
 		END_VARYING_SECTION
 	}

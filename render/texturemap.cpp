@@ -1958,7 +1958,7 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 	TqInt nt, ns;
 	if ( samples > 0 )
 	{
-		nt = ns = static_cast<TqInt>( sqrt( samples ) );
+		nt = ns = static_cast<TqInt>( CEIL( sqrt( samples ) ) );
 	}
 	else
 	{
