@@ -239,7 +239,10 @@ class CqBasicSurface : public CqListEntry<CqBasicSurface>, public CqRefCount, pu
 		CqBound	GetCachedRasterBound()
 		{
 			if ( m_CachedBound == TqFalse && m_fDiceable )
-				CqBasicError( 0, Severity_Fatal, "Bug in Renderer; No cached bound available" );
+			{
+				//CqBasicError( 0, Severity_Fatal, "Bug in Renderer; No cached bound available" );
+				QGetRenderContext() ->Logger() ->fatal( "No cached bound available" );
+			}
 
 			return m_Bound;
 		}

@@ -133,10 +133,14 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 		// For now, we will just warn the user the texturememory's demand will exceed the
 		// request number.
 
-		sprintf( warnings, "Exceeding the allocated texturememory by %d",
-		         more - limit );
+		//sprintf( warnings, "Exceeding the allocated texturememory by %d",
+		//         more - limit );
 		if ( report )
-			RiErrorPrint( 0, 1, warnings );
+		{
+			//RiErrorPrint( 0, 1, warnings );
+			QGetRenderContextI() ->Logger() ->warn( "Exceeding allocated texture memory by %d", more - limit );
+		}
+		
 		report = 0;
 		m_critical = TqTrue;
 	}
@@ -144,8 +148,9 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 #ifdef _DEBUG
 	if ( ( more > MEG1 ) && ( ( more / ( 1024 * 1024 ) ) > megs ) )
 	{
-		sprintf( warnings, "Texturememory is more than %d Megs", megs );
-		RiErrorPrint( 0, 1, warnings );
+		//sprintf( warnings, "Texturememory is more than %d Megs", megs );
+		//RiErrorPrint( 0, 1, warnings );
+		QGetRenderContextI() ->Logger() ->debug( "Texturememory is more than %d megs", megs );
 		megs += 10;
 	}
 #endif
@@ -213,10 +218,11 @@ CqTextureMap::~CqTextureMap()
 #ifdef ALLOCSEGMENTSTATUS
 	{
 		// We count each allocation/free at the end they should match
-		TqChar report[ 200 ];
+		//TqChar report[ 200 ];
 
-		sprintf( report, "alloc/free %d %d\n Memory Usage %d", alloc_cnt, free_cnt, QGetRenderContext() ->Stats().GetTextureMemory() );
-		RiErrorPrint( 0, 1, report );
+		//sprintf( report, "alloc/free %d %d\n Memory Usage %d", alloc_cnt, free_cnt, QGetRenderContext() ->Stats().GetTextureMemory() );
+		//RiErrorPrint( 0, 1, report );
+		QGetRenderContextI() ->Logger() ->info( "alloc/free %d %d\n Memory usage %d", alloc_cnt, free_cnt, QGetRenderContext() ->Stats().GetTextureMemory() );
 	}
 #endif
 }
@@ -313,9 +319,10 @@ void CqTextureMap::Open()
 	CqRiFile	fileImage( m_strName.c_str(), "texture" );
 	if ( !fileImage.IsValid() )
 	{
-		CqString strErr( "Cannot open texture file : " );
-		strErr += m_strName;
-		CqBasicError( 1, Severity_Fatal, strErr.c_str() );
+		//CqString strErr( "Cannot open texture file : " );
+		//strErr += m_strName;
+		//CqBasicError( 1, Severity_Fatal, strErr.c_str() );
+		QGetRenderContextI() ->Logger() ->error( "Cannot open texture file \"%s\"", m_strName.c_str() );
 		return ;
 	}
 	CqString strRealName( fileImage.strRealName() );
@@ -629,9 +636,10 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        ( strcmp( ptexfmt, CUBEENVMAP_HEADER ) != 0 ) && ( strcmp( ptexfmt, LATLONG_HEADER ) != 0 ) )
 	{
-		CqString strError( strName );
-		strError += " not an environment map, use RiMakeCubeFaceEnvironment";
-		CqBasicError( 0, Severity_Normal, strError.c_str() );
+		//CqString strError( strName );
+		//strError += " not an environment map, use RiMakeCubeFaceEnvironment";
+		//CqBasicError( 0, Severity_Normal, strError.c_str() );
+		QGetRenderContextI() ->Logger() ->error( "Map \"%s\" is not an environment map, use RiMakeCubeFaceEnvironment", strName.c_str() );
 		pNew->SetInvalid();
 		delete pNew;
 		pNew = NULL;
@@ -700,9 +708,10 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        strcmp( ptexfmt, SHADOWMAP_HEADER ) != 0 )
 	{
-		CqString strError( strName );
-		strError += " not a shadow map, use RiMakeShadow";
-		CqBasicError( 0, Severity_Normal, strError.c_str() );
+		//CqString strError( strName );
+		//strError += " not a shadow map, use RiMakeShadow";
+		//CqBasicError( 0, Severity_Normal, strError.c_str() );
+		QGetRenderContextI() ->Logger() ->error( "Map \"%s\" is not a valid shadow map, use RiMakeShadow", strName.c_str() );
 		pNew->SetInvalid();
 	}
 	else
@@ -764,9 +773,11 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 	        TIFFGetField( pNew->m_pImage, TIFFTAG_PIXAR_TEXTUREFORMAT, &ptexfmt ) != 1 ||
 	        strcmp( ptexfmt, LATLONG_HEADER ) != 0 )
 	{
-		CqString strError( strName );
-		strError += " not an environment map, use RiMakeLatLongEnvironment";
-		CqBasicError( 0, Severity_Normal, strError.c_str() );
+		//CqString strError( strName );
+		//strError += " not an environment map, use RiMakeLatLongEnvironment";
+		//CqBasicError( 0, Severity_Normal, strError.c_str() );
+		QGetRenderContextI() ->Logger() ->error( "Map \"%s\" is not an environment map, use RiMakeLatLongEnvironment", strName.c_str() );
+		
 		pNew->SetInvalid();
 	}
 
@@ -822,9 +833,10 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 		CqRiFile	fileImage( m_strName.c_str(), "texture" );
 		if ( !fileImage.IsValid() )
 		{
-			CqString strErr( "Cannot open texture file : " );
-			strErr += m_strName;
-			CqBasicError( 1, Severity_Fatal, strErr.c_str() );
+			//CqString strErr( "Cannot open texture file : " );
+			//strErr += m_strName;
+			//CqBasicError( 1, Severity_Fatal, strErr.c_str() );
+			QGetRenderContextI() ->Logger() ->error( "Cannot open texture file \"%s\"", m_strName.c_str() );
 			return pTMB;
 		}
 		CqString strRealName( fileImage.strRealName() );
@@ -1220,10 +1232,14 @@ void CqTextureMap::CriticalMeasure()
 
 #ifdef _DEBUG
 
-	sprintf( warnings, "I was forced to zap the tile segment buffers for %dK",
-	         ( now - current ) / 1024 );
+	//sprintf( warnings, "I was forced to zap the tile segment buffers for %dK",
+	//         ( now - current ) / 1024 );
 	if ( now - current )
-		RiErrorPrint( 0, 1, warnings );
+	{
+		//	RiErrorPrint( 0, 1, warnings );
+		///! \todo Review this debug message
+		QGetRenderContextI() ->Logger() ->debug( "I was forced to zap the tile segment buffers for %dK", ( now - current ) / 1024 );
+	}
 #endif
 
 }
@@ -1283,12 +1299,14 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 	/* cannot find anything than goodbye */
 	if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
 	{
-		TqChar warnings[ 400 ];
+		//TqChar warnings[ 400 ];
 		for ( c = 0; c < m_SamplesPerPixel; c++ )
 			val[ c ] = 1.0f;
 
-		sprintf( warnings, "Cannot find value for either pTMPB[a,b,c,d]" );
-		RiErrorPrint( 0, 1, warnings );
+		//sprintf( warnings, "Cannot find value for either pTMPB[a,b,c,d]" );
+		//RiErrorPrint( 0, 1, warnings );
+		///! \todo what do we want to say here?
+		QGetRenderContextI() ->Logger() ->error( "Cannot find value for either pTMPB[a,b,c,d]" );
 		return ;
 	}
 
@@ -1357,11 +1375,13 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		/* cannot find anything than goodbye */
 		if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
 		{
-			TqChar warnings[ 400 ];
+			//TqChar warnings[ 400 ];
 
 			val = m_low_color;
-			sprintf( warnings, "Cannot find value for either pTMPB[a,b,c,d]" );
-			RiErrorPrint( 0, 1, warnings );
+			//sprintf( warnings, "Cannot find value for either pTMPB[a,b,c,d]" );
+			//RiErrorPrint( 0, 1, warnings );
+			///! \todo what do we want to say here?
+			QGetRenderContextI() ->Logger() ->error( "Cannot find value for either pTMPB[a,b,c,d]" );
 			return ;
 		}
 
@@ -2103,9 +2123,10 @@ void CqShadowMap::LoadZFile()
 			// Check validity of shadow map.
 			if ( strncmp( strHeader, origHeader, headerLength ) != 0 )
 			{
-				CqString strErr( "Error : Invalid shadowmap format - " );
-				strErr += m_strName;
-				CqBasicError( ErrorID_InvalidShadowMap, Severity_Normal, strErr.c_str() );
+				//CqString strErr( "Error : Invalid shadowmap format - " );
+				//strErr += m_strName;
+				//CqBasicError( ErrorID_InvalidShadowMap, Severity_Normal, strErr.c_str() );
+				QGetRenderContextI() ->Logger() ->error( "Invalid shadow map format \"%s\"", m_strName.c_str() );
 				return ;
 			}
 
@@ -2137,9 +2158,10 @@ void CqShadowMap::LoadZFile()
 		}
 		else
 		{
-			CqString strErr( "Shadow map not found " );
-			strErr += m_strName;
-			CqBasicError( ErrorID_FileNotFound, Severity_Normal, strErr.c_str() );
+			//CqString strErr( "Shadow map not found " );
+			//strErr += m_strName;
+			//CqBasicError( ErrorID_FileNotFound, Severity_Normal, strErr.c_str() );
+			QGetRenderContextI() ->Logger() ->error( "Shadow map \"%s\" not found", m_strName.c_str();
 		}
 	}
 }

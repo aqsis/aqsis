@@ -34,6 +34,7 @@
 #include	"stats.h"
 #include	"messages.h"
 #include	"imagebuffer.h"
+#include	<iostream>
 
 START_NAMESPACE( Aqsis )
 
@@ -354,7 +355,8 @@ void CqStats::PrintStats( TqInt level ) const
 
 	CqString strMSG( MSG.str() );
 	MSG.freeze(false);
-	CqBasicError( 0, Severity_Normal, strMSG.c_str() );
+	//CqBasicError( 0, Severity_Normal, strMSG.c_str() );
+	std::cout << strMSG.c_str();
 }
 
 

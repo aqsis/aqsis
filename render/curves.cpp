@@ -1302,12 +1302,13 @@ CqLinearCurvesGroup::CqLinearCurvesGroup(
 		m_nTotalVerts += nvertices[ i ];
 		if ( ( nvertices[ i ] <= 2 ) && m_periodic )
 		{
-			CqBasicError(
-			    0, Severity_Normal,
-			    "Encountered a periodic group of " \
-			    "linear curves with at least one " \
-			    "curve that has only two vertices."
-			);
+			//CqBasicError(
+			//    0, Severity_Normal,
+			//    "Encountered a periodic group of " \
+			//    "linear curves with at least one " \
+			//    "curve that has only two vertices.");
+			///! \todo: This error message should be changed, too long
+			QGetRenderContext() ->Logger() ->error( "Encountered a periodic group of linear curves with at least one curve that has only two vertices." );
 		}
 	}
 

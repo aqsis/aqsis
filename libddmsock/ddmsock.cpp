@@ -164,7 +164,8 @@ TqBool CqDDServer::Open()
 #ifdef AQSIS_SYSTEM_WIN32
 		TqInt err = WSAGetLastError();
 #endif // AQSIS_SYSTEM_WIN32
-		CqBasicError( 0, 0, "Error opening DD server socket" );
+		//CqBasicError( 0, 0, "Error opening DD server socket" );
+		QGetRenderContext() ->Logger() ->error( "Could not open DD server socket" );
 		return ( TqFalse );
 	}
 
@@ -206,7 +207,8 @@ TqBool CqDDServer::Bind( TqInt port )
 		}
 		else
 		{
-			CqBasicError( 0, 0, "Error binding to DD socket" );
+			//CqBasicError( 0, 0, "Error binding to DD socket" );
+			QGetRenderContext() ->Logger() ->error( "Could not bind to DD socket" );
 			Close();
 			return ( TqFalse );
 		}
@@ -224,7 +226,8 @@ TqBool CqDDServer::Listen()
 {
 	if ( listen( m_Socket, SOMAXCONN ) == SOCKET_ERROR )
 	{
-		CqBasicError( 0, 0, "Error listening to DD socket" );
+		//CqBasicError( 0, 0, "Error listening to DD socket" );
+		QGetRenderContext() ->Logger() ->error( "Could not listen to DD socket" );
 		Close();
 		return ( TqFalse );
 	}
@@ -493,7 +496,10 @@ TqInt CqDDManager::CloseDisplays()
 			        ack.m_MessageLength == sizeof( ack ) )
 				continue;
 			else
-				CqBasicError( ErrorID_DisplayDriver, Severity_Normal, "Failed to close display device" );
+			{
+				//CqBasicError( ErrorID_DisplayDriver, Severity_Normal, "Failed to close display device" );
+				QGetRenderContext() ->Logger() ->error( "Failed to close display device" );
+			}
 		}
 	}
 	return ( 0 );
