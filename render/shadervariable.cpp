@@ -70,22 +70,22 @@ TqInt gcVariableUsageNames=sizeof(gVariableUsageNames)/sizeof(gVariableUsageName
 
 CqShaderVariable::CqShaderVariable() 	
 {
-	QGetRenderContext()->Stats().cVariablesAllocated()++;
+	QGetRenderContext()->Stats().IncVariablesAllocated();
 }
 
 CqShaderVariable::CqShaderVariable(const char* strName) : m_strName(strName)
 {
-	QGetRenderContext()->Stats().cVariablesAllocated()++;
+	QGetRenderContext()->Stats().IncVariablesAllocated();
 }
 
 CqShaderVariable::CqShaderVariable(const CqShaderVariable& From) : m_strName(From.m_strName)
 {
-	QGetRenderContext()->Stats().cVariablesAllocated()++;
+	QGetRenderContext()->Stats().IncVariablesAllocated();
 }
 
 CqShaderVariable::~CqShaderVariable()
 {
-	QGetRenderContext()->Stats().cVariablesDeallocated()++;
+	QGetRenderContext()->Stats().IncVariablesDeallocated();
 }
 
 

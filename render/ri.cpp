@@ -281,6 +281,15 @@ RtVoid	RiEnd()
 //
 RtVoid	RiFrameBegin(RtInt number)
 {
+  // Initialise the statistics variables. If the RIB doesn't contain
+	// a Frame-block the initialisation was previously done in CqStats::Initilise()
+	// which has to be called before a rendering session.
+  QGetRenderContext()->Stats().InitialiseFrame();
+	// Start the timer. Note: The corresponding call of StopFrameTimer() is
+	// done in WorldEnd (!) not FrameEnd since it can happen that there is
+	// not FrameEnd (and usually there's not much between WorldEnd and FrameEnd).
+  QGetRenderContext()->Stats().StartFrameTimer();
+
 	QGetRenderContext()->CreateFrameContext();
 	return(0);
 }
@@ -304,6 +313,10 @@ RtVoid	RiFrameEnd()
 //
 RtVoid	RiWorldBegin()
 {
+  // Start the frame timer (just in case there was no FrameBegin block. If there
+	// was, nothing happens)
+  QGetRenderContext()->Stats().StartFrameTimer();
+
 	// Now that the options have all been set, setup any undefined camera parameters.
 	if(!QGetRenderContext()->optCurrent().FrameAspectRatioCalled())
 	{
@@ -357,6 +370,18 @@ RtVoid	RiWorldEnd()
 	// Render the world
 	QGetRenderContext()->RenderWorld();
 	QGetRenderContext()->DeleteWorldContext();
+
+  // Stop the frame timer
+  QGetRenderContext()->Stats().StopFrameTimer();
+
+  // Get the verbosity level from the options...
+	TqInt verbosity=0;
+	const TqInt* poptEndofframe=QGetRenderContext()->optCurrent().GetIntegerOption("statistics","endofframe");
+	if(poptEndofframe!=0)
+		verbosity=poptEndofframe[0];
+
+  // ...and print the statistics.
+  QGetRenderContext()->Stats().PrintStats(verbosity);
 
 	return(0);
 }
@@ -2059,7 +2084,7 @@ RtVoid	RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERL
 				if(fValid)
 					QGetRenderContext()->pImage()->PostSurface(pSurface);
 			}
-			QGetRenderContext()->Stats().cGPrims()++;
+			QGetRenderContext()->Stats().IncGPrims();
 		}
 		else
 		{
@@ -2117,7 +2142,7 @@ RtVoid	RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERL
 					QGetRenderContext()->pImage()->PostSurface(pSurface);
 				}
 			}
-			QGetRenderContext()->Stats().cGPrims()++;
+			QGetRenderContext()->Stats().IncGPrims();
 		}
 	}
 	else
@@ -3136,7 +3161,7 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 			iPStart=iP;
 		}
 		QGetRenderContext()->pImage()->PostSurface(pSubdivision);
-		QGetRenderContext()->Stats().cGPrims()++;
+		QGetRenderContext()->Stats().IncGPrims();
 	}
 	else
 		delete(pSubdivision);
@@ -3341,7 +3366,7 @@ RtVoid	CreateGPrim(T* pSurface)
 							QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
 
 		QGetRenderContext()->pImage()->PostSurface(pSurface);
-		QGetRenderContext()->Stats().cGPrims()++;
+		QGetRenderContext()->Stats().IncGPrims();
 	}
 	else
 	{
@@ -3366,7 +3391,7 @@ RtVoid	CreateGPrim(T* pSurface)
 							QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
 							QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
 		QGetRenderContext()->pImage()->PostSurface(pMotionSurface);
-		QGetRenderContext()->Stats().cGPrims()++;
+		QGetRenderContext()->Stats().IncGPrims();
 	}
 
 	return(0);

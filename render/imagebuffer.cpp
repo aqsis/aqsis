@@ -1094,17 +1094,17 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 				for(m=start_m; m<end_m && !brkHoriz; m++)
 				{
 					CqVector2D vecP(pie->SamplePoint(m,n));
-					QGetRenderContext()->Stats().cSamples()++;
+					QGetRenderContext()->Stats().IncSamples();
 					// First, check if the subsample point lies within the micropoly bound
 					if(Bound.Contains2D(vecP))
 					{
-						QGetRenderContext()->Stats().cSampleBoundHits()++;
+						QGetRenderContext()->Stats().IncSampleBoundHits();
 
 						TqFloat t=pie->SampleTime(m,n);
 						// Now check if the subsample hits the micropoly
 						if(pMPG->Sample(vecP,t,ImageVal.m_Depth))
 						{									
-							QGetRenderContext()->Stats().cSampleHits()++;
+							QGetRenderContext()->Stats().IncSampleHits();
 							// Sort the color/opacity into the visible point list
 							std::vector<SqImageValue>& aValues=pie->Values(m,n);
 							int i=0;

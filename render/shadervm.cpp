@@ -55,7 +55,7 @@ CqParameter::CqParameter(const char* strName, TqInt Count) :
 					m_strName(strName),
 					m_Count(Count)
 {
-	QGetRenderContext()->Stats().cParametersAllocated()++;
+	QGetRenderContext()->Stats().IncParametersAllocated();
 }
 
 /** Copy constructor
@@ -64,12 +64,12 @@ CqParameter::CqParameter(const CqParameter& From) :
 					m_strName(From.m_strName),
 					m_Count(From.m_Count)
 {
-	QGetRenderContext()->Stats().cParametersAllocated()++;
+	QGetRenderContext()->Stats().IncParametersAllocated();
 }
 
 CqParameter::~CqParameter()
 {
-	QGetRenderContext()->Stats().cParametersDeallocated()++;
+	QGetRenderContext()->Stats().IncParametersDeallocated();
 }
 
 
