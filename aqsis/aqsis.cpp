@@ -379,7 +379,7 @@ int main( int argc, const char** argv )
 				dwMemUsed += mbi.RegionSize;
 			pvAddress = ( ( BYTE* ) mbi.BaseAddress ) + mbi.RegionSize;
 		}
-		std::cout << "Peek Memory Used " << dwMemUsed << std::endl;
+		std::cout << "Peak Memory Used " << dwMemUsed << std::endl;
 
 	}
 #endif
