@@ -13,6 +13,7 @@ LightSource "ambientlight" 2 "intensity" [0.3]
 Rotate -0 1 0 0 
 Rotate 30 0 1 0 
 Skew 45 1 0 0 0 1 0
+Surface "constant"
 Hyperboloid -1 -1 -2  3 1 2 300
 WorldEnd
 
