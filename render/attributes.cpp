@@ -47,7 +47,7 @@ CqShadingAttributes::CqShadingAttributes() :
 					m_pshadAtmosphere(0),
 					m_pshadInteriorVolume(0),
 					m_pshadExteriorVolume(0),
-					m_fEffectiveShadingRate(0.25),
+					m_fEffectiveShadingRate(1.0),
 					m_eShadingInterpolation(ShadingConstant),
 					m_bMatteSurfaceFlag(TqFalse)
 {
