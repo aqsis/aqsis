@@ -592,7 +592,9 @@ void CqBucket::QuantizeBucket()
 		TqInt one = static_cast<TqInt>( pQuant [ 0 ] );
 		TqInt min = static_cast<TqInt>( pQuant [ 1 ] );
 		TqInt max = static_cast<TqInt>( pQuant [ 2 ] );
-		TqFloat ditheramplitude = pQuant [ 3 ];
+		double ditheramplitude = pQuant [ 3 ];
+		if( ditheramplitude == 0.0f && one == 0 && min == 0 && max == 0 )
+			return;
 
 		CqImagePixel* pie;
 		ImageElement( XOrigin(), YOrigin(), pie );

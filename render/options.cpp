@@ -320,7 +320,7 @@ void CqOptions::InitialiseDefaultOptions()
 	pdefopts = new CqNamedParameterList( "Quantize" );
 
 	ADD_SYSTEM_PARAM4( Color, TqFloat, TqFloat, type_float, 255.0f, 0.0f, 255.0f, 0.5f );
-	ADD_SYSTEM_PARAM4( Depth, TqFloat, TqFloat, type_float,   0.0f, 0.0f, 255.0f, 0.0f );
+	ADD_SYSTEM_PARAM4( Depth, TqFloat, TqFloat, type_float,   0.0f, 0.0f,   0.0f, 0.0f );
 
 	pdefopts->AddRef();
 	AddOption( pdefopts );
