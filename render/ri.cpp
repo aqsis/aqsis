@@ -257,6 +257,7 @@ RtVoid	RiBegin( RtToken name )
 	QGetRenderContext() ->Initialise();
 	QGetRenderContext() ->CreateMainContext();
 	QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), CqMatrix() );
+	QGetRenderContext() ->SetmatCamera( QGetRenderContext() ->ptransCurrent() );
 	// Clear the lightsources stack.
 	CqLightsource* pL = Lightsource_stack.pFirst();
 	while ( pL )
