@@ -30,23 +30,24 @@
 #include	"shadervariable.h"
 #include	"shadervm.h"
 #include	"irenderer.h"
+#include	"renderer.h"
 
 START_NAMESPACE( Aqsis )
 
 
 CqShaderVariable::CqShaderVariable() : m_fParameter( TqFalse )
 {
-	//QGetRenderContext() ->Stats().IncVariablesAllocated();
+	QGetRenderContext() ->Stats().IncVariablesAllocated();
 }
 
 CqShaderVariable::CqShaderVariable( const char* strName, TqBool fParameter ) : m_strName( strName ), m_fParameter( fParameter )
 {
-	//QGetRenderContext() ->Stats().IncVariablesAllocated();
+	QGetRenderContext() ->Stats().IncVariablesAllocated();
 }
 
 CqShaderVariable::~CqShaderVariable()
 {
-	//QGetRenderContext() ->Stats().IncVariablesDeallocated();
+	QGetRenderContext() ->Stats().IncVariablesDeallocated();
 }
 
 
