@@ -283,6 +283,12 @@ bool DDProcessMessage()
 				if ( 0 != Close( g_Socket, message ) )
 				{
 					CloseSocket( g_Socket );
+    
+#ifdef DD_EXIT_AT_CLOSE
+                    // Define DD_EXIT_AT_CLOSE for display device exit when rendering done 
+                    exit( 0 );
+#endif
+
 					return false;
 				}
 			}
@@ -376,6 +382,12 @@ TqInt DDProcessMessages()
 						if ( ( ret = Close( g_Socket, pMsg ) ) != 0 )
 						{
 							CloseSocket( g_Socket );
+    
+#ifdef DD_EXIT_AT_CLOSE
+                            // Define DD_EXIT_AT_CLOSE for display device exit when rendering done 
+                            exit( 0 );
+#endif
+
 							return ( ret );
 						}
 					}
