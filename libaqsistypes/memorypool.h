@@ -197,9 +197,14 @@ public:
 
 // the first line is the _explicit instantiation_ of m_thePool
 // the second line is the _definition_ of m_thePool
+#ifndef	AQSIS_SYSTEM_WIN32
 #define	DEFINE_STATIC_MEMORYPOOL(A, S) \
 	template CqMemoryPool<A, S> CqPoolable<A, S>::m_thePool; \
 	template<> CqMemoryPool<A, S> CqPoolable<A, S>::m_thePool
+#else
+#define	DEFINE_STATIC_MEMORYPOOL(A, S) \
+	CqMemoryPool<A, S> CqPoolable<A, S>::m_thePool
+#endif
 
 //-----------------------------------------------------------------------
 
