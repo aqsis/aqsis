@@ -1590,7 +1590,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 		CqColor colMPGColor( 1.0f,1.0f,1.0f );
 		CqColor colMPGOpacity( 1.0f,1.0f,1.0f );
 		// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
-		if( QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Oi" ) )
+		if( QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Ci" ) )
 			colMPGColor = pMPG->colColor();
 		// Must check if opacity is needed, as if not, the variable will have been deleted from the grid.
 		if( QGetRenderContext() ->pDDmanager()->fDisplayNeeds( "Oi" ) )
