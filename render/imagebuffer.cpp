@@ -462,7 +462,7 @@ TqBool CqBucket::ImageElement( TqInt iXPos, TqInt iYPos, CqImagePixel*& pie )
 	}
 	else
 	{
-		std::cerr << "CqBucket::ImageElement() outside bucket boundary!" << std::endl;
+		std::cerr << "CqBucket::ImageElement() outside bucket boundary!\n";
 		return ( TqFalse );
 	}
 }
@@ -1809,7 +1809,7 @@ void CqImageBuffer::RenderImage()
 		if ( poptModulo != 0 )
 		{
 			bucketmodulo = poptModulo[ 0 ];
-			printf( "Number of Buckets per line %d\n", m_cXBuckets );
+			std::cout << "Number of Buckets per line " << m_cXBuckets << "\n";
 		}
 		if ( bucketmodulo <= 0 ) bucketmodulo = m_cXBuckets;
 	}
