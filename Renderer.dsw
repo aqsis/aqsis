@@ -7,6 +7,10 @@ Project: "All"=.\All\All.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    All
+    .\all
+    end source code control
 }}}
 
 Package=<4>
@@ -61,6 +65,10 @@ Project: "Content"=.\Content\Content.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    Content
+    .\content
+    end source code control
 }}}
 
 Package=<4>
@@ -79,6 +87,10 @@ Project: "Shaders"=.\Shaders\shaders.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    Shaders
+    .
+    end source code control
 }}}
 
 Package=<4>
@@ -97,6 +109,10 @@ Project: "cribber"=.\cribber\cribber.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    cribber
+    .\cribber
+    end source code control
 }}}
 
 Package=<4>
@@ -124,6 +140,10 @@ Project: "filebuffer"=.\filebuffer\filebuffer.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    filebuffer
+    .\filebuffer
+    end source code control
 }}}
 
 Package=<4>
@@ -139,6 +159,10 @@ Project: "framebuffer"=.\framebuffer\win32\intel\framebuffer.dsp - Package Owner
 
 Package=<5>
 {{{
+    begin source code control
+    framebuffer
+    .\framebuffer\win32\intel
+    end source code control
 }}}
 
 Package=<4>
@@ -154,6 +178,10 @@ Project: "libaqsis"=.\render\libaqsis.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    libaqsis
+    .\render
+    end source code control
 }}}
 
 Package=<4>
@@ -163,6 +191,22 @@ Package=<4>
 ###############################################################################
 
 Project: "libaqsistypes"=.\libaqsistypes\libaqsistypes.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    libaqsistypes
+    .\libaqsistypes
+    end source code control
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libcodegenvm"=.\libcodegenvm\libcodegenvm.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -178,6 +222,10 @@ Project: "libdd"=.\libdd\libdd.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    libdd
+    .\libdd
+    end source code control
 }}}
 
 Package=<4>
@@ -190,6 +238,10 @@ Project: "libddmsimple"=.\libddmsimple\libddmsimple.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    libddmsimple
+    ..\libddmsimple
+    end source code control
 }}}
 
 Package=<4>
@@ -202,6 +254,10 @@ Project: "libddmsock"=.\libddmsock\win32\intel\libddmsock.dsp - Package Owner=<4
 
 Package=<5>
 {{{
+    begin source code control
+    libddmsock
+    .\libddmsock
+    end source code control
 }}}
 
 Package=<4>
@@ -214,6 +270,10 @@ Project: "librib"=.\librib\librib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    librib
+    .
+    end source code control
 }}}
 
 Package=<4>
@@ -226,6 +286,10 @@ Project: "librib2"=.\librib2\librib2.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    librib2
+    .
+    end source code control
 }}}
 
 Package=<4>
@@ -238,6 +302,10 @@ Project: "librib2ri"=.\librib2ri\librib2ri.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    librib2ri
+    .\librib2ri
+    end source code control
 }}}
 
 Package=<4>
@@ -250,6 +318,26 @@ Project: "librib2stream"=.\librib2stream\librib2stream.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    librib2stream
+    .\librib2stream
+    end source code control
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "libslparse"=.\libslparse\libslparse.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+    begin source code control
+    libslparse
+    .
+    end source code control
 }}}
 
 Package=<4>
@@ -262,6 +350,10 @@ Project: "shadowmap"=.\shadowmap\shadowmap.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    shadowmap
+    .\shadowmap
+    end source code control
 }}}
 
 Package=<4>
@@ -277,18 +369,22 @@ Project: "slcomp"=.\slcomp\slcomp.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    slcomp
+    .
+    end source code control
 }}}
 
 Package=<4>
 {{{
     Begin Project Dependency
-    Project_Dep_Name slpp
+    Project_Dep_Name libslparse
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name libaqsis
+    Project_Dep_Name libcodegenvm
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name libddmsimple
+    Project_Dep_Name libaqsistypes
     End Project Dependency
 }}}
 
@@ -298,6 +394,10 @@ Project: "slpp"=.\slpp\slpp.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    slpp
+    .\slpp
+    end source code control
 }}}
 
 Package=<4>
@@ -310,6 +410,10 @@ Project: "texer"=.\texer\texer.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
+    begin source code control
+    texer
+    .\texer
+    end source code control
 }}}
 
 Package=<4>
