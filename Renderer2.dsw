@@ -281,18 +281,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name thread
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name tinyxml
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libdd2
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libargparse
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -477,7 +465,7 @@ Package=<4>
     Project_Dep_Name libraytrace
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name libddmsock2
+    Project_Dep_Name libddmanager
     End Project Dependency
 }}}
 
@@ -534,7 +522,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "libdd2"=.\libdd2\libdd2.dsp - Package Owner=<4>
+Project: "libddmanager"=.\libddmanager\libddmanager.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -569,12 +557,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name thread
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name tinyxml
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -587,15 +569,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name thread
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name tinyxml
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libdd2
-    End Project Dependency
 }}}
 
 ###############################################################################
@@ -820,30 +793,6 @@ Package=<4>
 ###############################################################################
 
 Project: "tga2tif"=.\plugins\tga2tif\tga2tif.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "thread"=.\BOOST\LIBS\thread\thread.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
-Project: "tinyxml"=.\thirdparty\tinyxml\tinyxml_lib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

@@ -67,6 +67,23 @@ public:
         *this += f;
     }
 
+
+    static TqLong	hash( const char *strName )
+    {
+        TqInt retval = 0;
+		const char *p = strName;
+		retval = *p;
+
+	    if(retval) 
+		{
+			for (p += 1; *p != '\0'; p++)
+			{
+				retval = (retval << 5) - retval + *p;
+			}
+		}
+		return (TqLong) retval;
+	}
+
     // Format a string printf style.
     CqString&	Format( const TqChar* Format, ... );
     CqString	ExpandEscapes() const;

@@ -48,45 +48,8 @@ using namespace Aqsis;
 #include <fstream>
 #include <float.h>
 
-#ifdef	AQSIS_SYSTEM_WIN32
-#pragma warning(disable : 4275 4251)
-#endif
+#include "ndspy.h"
 
-#include <boost/thread.hpp>
-
-#ifdef AQSIS_SYSTEM_WIN32
-
-	#include <locale>
-	#include <direct.h>
-	#include <algorithm>
-
-	#define getcwd _getcwd
-	#define PATH_SEPARATOR "\\"
-#else // !AQSIS_SYSTEM_WIN32
-
-	#include <stdio.h>
-	#include <stdlib.h>
-	#include <unistd.h>
-	#include <netdb.h>
-	#include <netinet/in.h>
-	#include <sys/types.h>
-	#include <sys/socket.h>
-
-	typedef int SOCKET;
-	typedef sockaddr_in SOCKADDR_IN;
-	typedef sockaddr* PSOCKADDR;
-
-	static const int INVALID_SOCKET = -1;
-	static const int SOCKET_ERROR = -1;
-
-	#define PATH_SEPARATOR "/"
-
-#endif // !AQSIS_SYSTEM_WIN32
-
-#include "tinyxml.h"
-#include "base64.h"
-#include "xmlmessages.h"
-#include "argparse.h"
 
 #if defined(AQSIS_SYSTEM_WIN32) || defined(AQSIS_SYSTEM_MACOSX)
 #define	ZFILE_HEADER		"Aqsis ZFile" VERSION_STR
@@ -105,15 +68,6 @@ using namespace Aqsis;
 #define INT_PRELERP(p, q, a, t) ( (p) + (q) - INT_MULT( a, p, t) )
 
 START_NAMESPACE( Aqsis )
-
-enum EqDisplayTypes 
-{
-	Type_File = 0,
-	Type_Framebuffer,
-	Type_ZFile,
-	Type_ZFramebuffer,
-	Type_Shadowmap,
-};
 
 
 TqInt g_ImageWidth = 0;
@@ -148,71 +102,6 @@ float*	g_floatData;
 Fl_Window *g_theWindow;
 Fl_FrameBuffer_Widget *g_uiImageWidget;
 Fl_RGB_Image* g_uiImage;
-
-// Command line arguments 
-ArgParse::apstring g_type("file");
-ArgParse::apstring g_mode("rgba");
-ArgParse::apstring g_filename("output.tif");
-ArgParse::apstring g_hostname;
-ArgParse::apstring g_port;
-ArgParse::apstringvec g_paramNames;
-ArgParse::apintvec g_paramCounts;
-ArgParse::apintvec g_paramInts;
-ArgParse::apfloatvec g_paramFloats;
-ArgParse::apstringvec g_paramStrings;
-bool g_help = 0;
-
-/// Hides incompatibilities between sockets and WinSock
-void InitializeSockets()
-{
-#ifdef AQSIS_SYSTEM_WIN32
-	WSADATA wsaData;
-	WSAStartup( MAKEWORD( 2, 0 ), &wsaData );
-#endif // AQSIS_SYSTEM_WIN32
-}
-
-/// Hides incompatibilities amongst platforms
-hostent* GetHostByName(const std::string& HostName)
-{
-#ifdef AQSIS_SYSTEM_MACOSX
-	// Remove this conditional section and use gethostbyname() if Apple ever
-	// fixes the problem of resolving localhost without a connection to a DNS server
-	return gethostent();	// assumes localhost defined first in /etc/hosts
-#else // AQSIS_SYSTEM_MACOSX
-	return gethostbyname( HostName.c_str() );
-#endif // !AQSIS_SYSTEM_MACOSX
-}
-
-static void CloseSocket( SOCKET& Socket )
-{
-    int x = 1;
-    linger ling;
-    ling.l_onoff = 1;
-    ling.l_linger = 10;
-    setsockopt( Socket, SOL_SOCKET, SO_LINGER, reinterpret_cast<const char*>( &ling ), sizeof( ling ) );
-    shutdown( Socket, SHUT_RDWR );
-#ifndef	AQSIS_SYSTEM_WIN32
-	close( Socket );
-#else	// AQSIS_SYSTEM_WIN32
-	closesocket( Socket );
-#endif	// AQSIS_SYSTEM_WIN32
-
-    Socket = INVALID_SOCKET;
-}
-
-const std::string GetCurrentWorkingDirectory()
-{
-    std::string result(1024, '\0');
-    getcwd(const_cast<char*>(result.c_str()), result.size());
-    result.resize(strlen(result.c_str()));
-
-    return result;
-}
-
-const std::string AppendPath(const std::string& LHS, const std::string& RHS)
-{
-    return LHS + PATH_SEPARATOR + RHS;
-}
 
 
 void SaveAsShadowMap(const std::string& filename)
@@ -465,12 +354,9 @@ void WriteTIFF(const std::string& filename)
 }
 
 
-SOCKET g_Socket;
-
-
 void BucketFunction()
 {
-    TqInt	linelen = g_ImageWidth * g_Channels ;
+/*    TqInt	linelen = g_ImageWidth * g_Channels ;
     TqInt	flinelen = g_ImageWidth * 3;
 	TqInt	dataLenMax = g_BucketWidthMax * g_BucketHeightMax * g_ElementSize;
 	std::vector<TqFloat> dataBin(dataLenMax);
@@ -655,7 +541,7 @@ void BucketFunction()
 		std::cerr << info << g_Filename << " maximum depth: " << maxdepth << std::endl;
 		std::cerr << info << g_Filename << " dynamic range: " << dynamicrange << std::endl;
 		std::cerr << info << g_Filename << " average depth: " << totaldepth / static_cast<TqFloat>( samples ) << std::endl;
-*/
+
 		const TqInt linelength = g_ImageWidth * 3;
 		for ( TqInt y = 0; y < g_ImageHeight; y++ )
 		{
@@ -682,380 +568,109 @@ void BucketFunction()
 	}
 
 	CloseSocket(g_Socket);
+*/
 }
 
-
-void ReadXMLMatrix(TiXmlElement* pmatrixElem, TqFloat mat[4][4])
-{
-	// Read the row elements one at a time, processing each column element, translating its text to a float
-	// entry in the matrix.
-	TqInt row, col;
-	TiXmlHandle rowHandle = pmatrixElem->FirstChildElement("aqsis:matr");
-	TiXmlElement* rowElem = rowHandle.Element();
-	for( row = 0; row < 4 && rowElem; row++, rowElem=rowElem->NextSiblingElement("aqsis:matr") )
-	{
-		TiXmlHandle colHandle = rowElem->FirstChildElement("aqsis:matc");
-		TiXmlElement* colElem = colHandle.Element();
-		for( col = 0; col < 4 && colElem; col++, colElem=colElem->NextSiblingElement("aqsis:matc") )
-		{
-			TiXmlHandle valHandle = colElem->FirstChild();
-			TiXmlText* val = valHandle.Text();
-			if( val )
-				mat[row][col] = atof(val->Value());
-			else
-				mat[row][col] = 0.0f;
-		}
-	}
-}
-
-
-void ProcessFormat()
-{
-	// Request the image format.
-	TiXmlDocument doc, respDoc;
-	TiXmlElement root("aqsis:request");
-	TiXmlElement format("aqsis:format");
-	root.InsertEndChild(format);
-	doc.InsertEndChild(root);
-	std::ostringstream strReq;
-	strReq << doc;
-
-	sendXMLMessage(g_Socket, strReq.str().c_str());
-
-	// Wait for a response.
-	char* resp = receiveXMLMessage(g_Socket);
-
-	// Parse the response
-	respDoc.Parse(resp);
-	
-	free(resp);
-	
-	// Extract the format attributes.
-	TiXmlHandle respHandle(&respDoc);
-	TiXmlHandle formatHandle = respHandle.FirstChildElement("aqsis:response").FirstChildElement("aqsis:format");
-	TiXmlElement* formatElement = formatHandle.Element();
-	if( formatElement )
-	{
-		TiXmlAttribute* pAttr = formatElement->FirstAttribute();
-		formatElement->QueryIntAttribute("xres", &g_ImageWidth);
-		formatElement->QueryIntAttribute("yres", &g_ImageHeight);
-		formatElement->QueryIntAttribute("cropxmin", &g_CWXmin);
-		formatElement->QueryIntAttribute("cropymin", &g_CWYmin);
-		formatElement->QueryIntAttribute("cropxmax", &g_CWXmax);
-		formatElement->QueryIntAttribute("cropymax", &g_CWYmax);
-		formatElement->QueryIntAttribute("bucketsperrow", &g_BucketsPerRow);
-		formatElement->QueryIntAttribute("bucketspercol", &g_BucketsPerCol);
-		formatElement->QueryIntAttribute("bucketwidthmax", &g_BucketWidthMax);
-		formatElement->QueryIntAttribute("bucketheightmax", &g_BucketHeightMax);
-		formatElement->QueryIntAttribute("elementsize", &g_ElementSize);
-
-		// Find the appropriate data if using AOV.
-		std::string dataName("rgba");
-		if(g_mode.compare("rgb")!=0 && g_mode.compare("rgba")!=0 && g_mode.compare("a")!=0)
-			dataName = g_mode;
-		else
-		{
-			// Choose out of "rgb", "rgba", and "a"
-			if(g_mode.find("rgb")!=g_mode.npos)
-			{
-				g_Channels=3;
-				if(g_mode.find("a")!=g_mode.npos)
-					g_Channels=4;
-			}
-			else
-			{
-				g_offset = 3;
-				g_Channels = 1;
-			}
-		}
-
-		TiXmlHandle dataListHandle = formatHandle.FirstChildElement("aqsis:datalist");
-		TiXmlElement* pdataelem = dataListHandle.FirstChildElement("aqsis:dataelement").Element();
-		int offset = 0;
-		TqBool found = TqFalse;
-		// Loop through available data, looking for the chosen data.
-		for( pdataelem; pdataelem; pdataelem=pdataelem->NextSiblingElement("aqsis:dataelement") )
-		{
-			const char* pname = pdataelem->Attribute("name");
-			int size;
-			pdataelem->QueryIntAttribute("size", &size);
-			if(pname!=0 && dataName.compare(pname)==0)
-			{
-				found = TqTrue;
-				g_offset = offset;
-				g_Channels = size;
-
-				// Read quantization data if specified to determine the output format.
-				TiXmlNode* pappliedquant_node = pdataelem->FirstChildElement("aqsis:appliedquant");
-				if( pappliedquant_node )
-				{
-					TiXmlElement* pappliedquant = pappliedquant_node->ToElement();
-
-					double temp;
-					pappliedquant->QueryDoubleAttribute("one", &temp);
-					g_appliedQuantizeOneVal = temp;
-					pappliedquant->QueryDoubleAttribute("min", &temp);
-					g_appliedQuantizeMinVal = temp;
-					pappliedquant->QueryDoubleAttribute("max", &temp);
-					g_appliedQuantizeMaxVal = temp;
-					pappliedquant->QueryDoubleAttribute("dither", &temp);
-					g_appliedQuantizeDitherVal = temp;
-				}
-
-				break;
-			}
-			offset += size;
-		}
-		if(!found)
-			std::cout << "Could not find element " << g_mode.c_str() << std::endl;
-
-		// Read out the matrices for world to camera and  world to screen
-		TiXmlHandle matricesListHandle = formatHandle.FirstChildElement("aqsis:matrixlist");
-		TiXmlElement* pmatrixElem = matricesListHandle.FirstChildElement("aqsis:matrix").Element();
-		for( pmatrixElem; pmatrixElem; pmatrixElem=pmatrixElem->NextSiblingElement("aqsis:matrix") )
-		{
-			const char* type = pmatrixElem->Attribute("type");
-			// Check the type
-			if(type && strcmp(type, "worldtocamera")==0)
-				ReadXMLMatrix(pmatrixElem, g_matWorldToCamera);
-			else if(type && strcmp(type, "worldtoscreen")==0)
-				ReadXMLMatrix(pmatrixElem, g_matWorldToScreen);
-		}
-
-		g_PixelsProcessed = 0;
-
-		// Create and initialise a byte array if rendering 8bit image, or we are in framebuffer mode
-		if(g_appliedQuantizeOneVal == 255 || g_ImageType == Type_Framebuffer || g_ImageType == Type_ZFramebuffer)
-		{
-			// For a normal image, allocate the same size as the number of channels.
-	        if(g_ImageType != Type_ZFramebuffer)
-			{
-				g_byteData = new unsigned char[ g_ImageWidth * g_ImageHeight * g_Channels ];
-				memset(g_byteData, 0, g_ImageWidth * g_ImageHeight * g_Channels);
-			}
-			else
-			// For a depth framebuffer, always allocate 3 channels, for rgb.
-			{
-				g_byteData = new unsigned char[ g_ImageWidth * g_ImageHeight * 3 ];
-				memset(g_byteData, 0, g_ImageWidth * g_ImageHeight * 3);
-			}
-
-			// If working as a framebuffer, initialise the display to a checkerboard to show alpha
-			if(g_ImageType == Type_Framebuffer)
-			{
-				for (TqInt i = g_CWYmin; i < g_CWYmax; i ++) 
-				{
-					for (TqInt j=g_CWXmin; j < g_CWXmax; j++)
-					{
-						int     t       = 0;
-						unsigned char d = 255;
-
-						if ( ( (g_ImageHeight - 1 - i) & 31 ) < 16 ) t ^= 1;
-						if ( ( j & 31 ) < 16 ) t ^= 1;
-
-						if ( t )
-						{
-							d      = 128;
-						}
-						g_byteData[g_Channels * (i*g_ImageWidth + j) ] = d;
-						g_byteData[g_Channels * (i*g_ImageWidth + j) + 1] = d;
-						g_byteData[g_Channels * (i*g_ImageWidth + j) + 2] = d;
-					}
-				}
-			}
-			// If rendering a depth framebuffer, we will need a float buffer too.
-			else if(g_ImageType == Type_ZFramebuffer)
-	            g_floatData = new float[ g_ImageWidth * g_ImageHeight * g_Channels ];
-		}
-        else
-            g_floatData = new float[ g_ImageWidth * g_ImageHeight * g_Channels ];
-	}
-	else
-	{
-		std::cerr << "Error: Invalid response from Aqsis" << std::endl;
-	}
-}
 
 
 END_NAMESPACE( Aqsis )
 
-int main( int argc, char** argv )
+
+PtDspyError DspyImageOpen(PtDspyImageHandle * image,
+								   const char *drivername,
+								   const char *filename,
+								   int width,
+								   int height,
+								   int paramCount,
+								   const UserParameter *parameters,
+								   int iFormatCount,
+								   PtDspyDevFormat *format,
+								   PtFlagStuff *flagstuff)
 {
-    ArgParse ap;
-    ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options]" );
-    ap.argFlag( "help", "\aprint this help and exit", &g_help );
-    ap.argString( "type", "=string\adefine the type of display", &g_type );
-    ap.argString( "mode", "=string\adefine the data that the display will process", &g_mode );
-    ap.argString( "name", "=string\athe name of the file to save", &g_filename );
-    ap.argString( "hostname", "=string\ahostname of the machine to connect to", &g_hostname );
-    ap.argString( "port", "=string\aport to connect to", &g_port );
-    ap.argStrings( "paramnames", "=string array\n\aarray of custom parameter names, separated with ','", &g_paramNames, ',' );
-    ap.argInts( "paramcounts", "=int array\acustom parameter counts. \n\aThree per parameter, number of ints, \n\anumber of floats and \n\anumber of strings, separated with ','", &g_paramCounts, ',' );
-    ap.argInts( "paramints", "=int array\acustom parameter integer values, separated with ','", &g_paramInts, ',' );
-    ap.argFloats( "paramfloats", "=float array\acustom parameter float values, separated with ','", &g_paramFloats, ',' );
-    ap.argStrings( "paramstrings", "=string array\acustom parameter string values, separated with ','", &g_paramStrings, ',' );
-    ap.allowUnrecognizedOptions();
-
-    if ( argc > 1 && !ap.parse( argc - 1, const_cast<const char**>(argv + 1) ) )
-    {
-        std::cerr << ap.errmsg() << std::endl << ap.usagemsg();
-        exit( 1 );
-    }
-
-    if ( g_help )
-    {
-        std::cout << ap.usagemsg();
-        exit( 0 );
-    }
-
-	// Determine the display type from the list that we support.
-	if(g_type.compare("file")==0 || g_type.compare("tiff")==0)
-		g_ImageType = Type_File;
-	else if(g_type.compare("framebuffer")==0)
-		g_ImageType = Type_Framebuffer;
-	else if(g_type.compare("zfile")==0)
-		g_ImageType = Type_ZFile;
-	else if(g_type.compare("zframebuffer")==0)
-		g_ImageType = Type_ZFramebuffer;
-	else if(g_type.compare("shadow")==0)
-		g_ImageType = Type_Shadowmap;
+	SqDisplayInstance* pImage;
 	
-	// If rendering to a framebuffer, default to showing the whole frame and render to the clip window.
-	if(g_ImageType == Type_Framebuffer || g_ImageType == Type_Framebuffer)
-		g_RenderWholeFrame = TqTrue;
+	pImage = new SqDisplayInstance;	
 
-	// Extract the recognised custom parameters
-	if( g_paramNames.size() > 0 )
+	if(pImage)
 	{
-		// Must have three counts per parameter.
-		assert(g_paramCounts.size() >= g_paramNames.size()*3);
+		// Store the instance information so that on re-entry we know which display is being referenced.
+		pImage->m_ImageHeight = height;
+		pImage->m_ImageWidth = width;
+		// Determine the display type from the list that we support.
+		if(strcmp(drivername, "file")==0 || strcmp(drivername, "tiff")==0)
+			pImage->m_ImageType = Type_File;
+		else if(strcmp(drivername, "framebuffer")==0)
+			pImage->m_ImageType = Type_Framebuffer;
+		else if(strcmp(drivername, "zfile")==0)
+			pImage->m_ImageType = Type_ZFile;
+		else if(strcmp(drivername, "zframebuffer")==0)
+			pImage->m_ImageType = Type_ZFramebuffer;
+		else if(strcmp(drivername, "shadow")==0)
+			pImage->m_ImageType = Type_Shadowmap;
+		pImage->m_Channels = iFormatCount;
 
-		ArgParse::apstringvec::iterator i;
-		TqInt countsindex = 0;
-		TqInt intsindex = 0;
-		TqInt floatsindex = 0;
-		TqInt stringsindex = 0;
-		for(i = g_paramNames.begin(); i!=g_paramNames.end(); i++)
+		*image = pImage;
+
+		// Scan the formats table to see what the widest channel format specified is.
+		TqInt widestFormat = PkDspySigned8;
+		TqInt i;
+		for(i=0; i<iFormatCount; i++)
+			if(format[i].type < widestFormat)
+				widestFormat = format[i].type;
+
+		if(widestFormat == PkDspySigned8) widestFormat = PkDspyUnsigned8;
+		else if(widestFormat == PkDspySigned16) widestFormat = PkDspyUnsigned16;
+		else if(widestFormat == PkDspySigned32)	widestFormat = PkDspyUnsigned32;
+
+		// Create and initialise a byte array if rendering 8bit image, or we are in framebuffer mode
+		if(pImage->m_ImageType == Type_Framebuffer)
 		{
-			if( i->compare("quantize") == 0 )
+			pImage->m_Data = new unsigned char[ pImage->m_ImageWidth * pImage->m_ImageHeight * pImage->m_Channels ];
+
+			// Initialise the display to a checkerboard to show alpha
+			for (TqInt i = 0; i < pImage->m_ImageHeight; i ++) 
 			{
-				assert( g_paramCounts[countsindex] == 0 && g_paramCounts[countsindex+1] == 4 && g_paramCounts[countsindex+2] == 0 );
-				g_QuantizeZeroVal = g_paramFloats[floatsindex];
-				g_QuantizeOneVal = g_paramFloats[floatsindex+1];
-				g_QuantizeMinVal = g_paramFloats[floatsindex+2];
-				g_QuantizeMaxVal = g_paramFloats[floatsindex+3];
+				for (TqInt j = 0; j < pImage->m_ImageWidth; j++)
+				{
+					int     t       = 0;
+					unsigned char d = 255;
+
+					if ( ( (pImage->m_ImageHeight - 1 - i) & 31 ) < 16 ) t ^= 1;
+					if ( ( j & 31 ) < 16 ) t ^= 1;
+
+					if ( t )
+					{
+						d      = 128;
+					}
+					reinterpret_cast<unsigned char*>(pImage->m_Data)[pImage->m_Channels * (i*pImage->m_ImageWidth + j) ] = d;
+					reinterpret_cast<unsigned char*>(pImage->m_Data)[pImage->m_Channels * (i*pImage->m_ImageWidth + j) + 1] = d;
+					reinterpret_cast<unsigned char*>(pImage->m_Data)[pImage->m_Channels * (i*pImage->m_ImageWidth + j) + 2] = d;
+				}
 			}
-			else if( i->compare("dither") == 0 )
+		}
+        else
+		{
+			// Determine the appropriate format to save into.
+			if(widestFormat == PkDspyUnsigned8)
 			{
-				assert( g_paramCounts[countsindex] == 0 && g_paramCounts[countsindex+1] == 1 && g_paramCounts[countsindex+2] == 0 );
-				g_QuantizeDitherVal = g_paramFloats[floatsindex];
+				pImage->m_Data = malloc( g_ImageWidth * g_ImageHeight * g_Channels * sizeof(unsigned char));
 			}
-			else if( i->compare("compression") == 0 )
+			else if(widestFormat == PkDspyUnsigned16)
 			{
-				assert( g_paramCounts[countsindex] == 0 && g_paramCounts[countsindex+1] == 0 && g_paramCounts[countsindex+2] == 1 );
-                ArgParse::apstring comp = g_paramStrings[stringsindex];
-				if ( comp.compare("none") == 0 )
-                    g_Compression = COMPRESSION_NONE;
-				else if ( comp.compare("lzw") == 0 )
-                    g_Compression = COMPRESSION_LZW;
-				else if ( comp.compare("deflate") == 0 )
-                    g_Compression = COMPRESSION_DEFLATE;
-				else if ( comp.compare("jpeg") == 0 )
-                    g_Compression = COMPRESSION_JPEG;
-				else if ( comp.compare("packbits") == 0 )
-                    g_Compression = COMPRESSION_PACKBITS;
-            }
-            else if( i->compare("quality") == 0 )
-            {
-				assert( g_paramCounts[countsindex] == 1 && g_paramCounts[countsindex+1] == 0 && g_paramCounts[countsindex+2] == 0 );
-                g_Quality = g_paramInts[intsindex];
-                g_Quality = CLAMP(g_Quality, 0, 100);
+				pImage->m_Data = malloc( g_ImageWidth * g_ImageHeight * g_Channels * sizeof(unsigned short));
 			}
-            else if( i->compare("append") == 0 )
-            {
-				assert( g_paramCounts[countsindex] == 1 && g_paramCounts[countsindex+1] == 0 && g_paramCounts[countsindex+2] == 0 );
-                g_append = g_paramInts[intsindex];
-            }
-			intsindex += g_paramCounts[countsindex++];
-			floatsindex += g_paramCounts[countsindex++];
-			stringsindex += g_paramCounts[countsindex++];
+			else if(widestFormat == PkDspyUnsigned32)
+			{
+				pImage->m_Data = malloc( g_ImageWidth * g_ImageHeight * g_Channels * sizeof(unsigned long));
+			}
+			else if(widestFormat == PkDspyFloat32)
+			{
+				pImage->m_Data = malloc( g_ImageWidth * g_ImageHeight * g_Channels * sizeof(float));
+			}
 		}
 	}
-
-    /// Port is defined as the value passed into the -port= command line argument.
-	/// if that is empty, then the value stored in the environment variable AQSIS_DD_PORT,
-	/// if that is not available, then the fallback is 2774 ('A', 'Q', 'S', 'I' 'S' on phone keypad)
-	int port = 27747;
-	if(g_port.empty())
-	{
-	    const char* port_string_env = getenv( "AQSIS_DD_PORT" );
-		if( port_string_env )
-			port = atoi(port_string_env);
-	}
 	else
-		port = atoi(g_port.c_str());
+		return(PkDspyErrorNoMemory);
 
-	InitializeSockets();
-
-	// Open a socket.
-	g_Socket = socket( AF_INET, SOCK_STREAM, 0 );
-	if ( g_Socket == INVALID_SOCKET )
-	{
-		std::cerr << "Aqsis display: Error creating socket" << std::endl;
-		return -1;
-	}
-
-    /// Host name is the value passed into the -host= command line argument,
-	/// or the local host.
-	if(g_hostname.empty())
-	{
-		g_hostname.resize(256);
-		gethostname( &g_hostname[0], g_hostname.size() );
-	}
-		
-    hostent* const pHost = GetHostByName(g_hostname);
-
-    SOCKADDR_IN saTemp;
-    memset( &saTemp, 0, sizeof( saTemp ) );
-    saTemp.sin_family = AF_INET;
-        
-    saTemp.sin_port = htons( port );
-    memcpy( &saTemp.sin_addr, pHost->h_addr, pHost->h_length );
-
-	if(SOCKET_ERROR == connect( g_Socket, PSOCKADDR(&saTemp), sizeof(saTemp)))
-	{
-		int error = WSAGetLastError();
-		std::cerr << "Connecting to " << g_hostname.c_str() << ":" << port << " ... " << error << std::endl;
-		CloseSocket(g_Socket);
-		return -1;
-	}
-
-	// Request and process image format information.
-	ProcessFormat();
-
-	if(g_ImageType == Type_Framebuffer || g_ImageType == Type_ZFramebuffer)
-	{
-		g_theWindow = new Fl_Window(g_ImageWidth,g_ImageHeight);
-		g_uiImageWidget = new Fl_FrameBuffer_Widget(0,0, g_ImageWidth, g_ImageHeight, (g_ImageType == Type_ZFramebuffer)?3:g_Channels, g_byteData);
-		g_theWindow->resizable(g_uiImageWidget);
-		g_theWindow->end();
-		g_theWindow->show();
-	}
-
-	// Create a thread to request buckets from Aqsis
-	boost::thread thrd(&BucketFunction);
-
-	if(g_ImageType == Type_Framebuffer || g_ImageType == Type_ZFramebuffer)
-	{
-		// Open and run the window.
-		Fl::run();
-	}
-
-	thrd.join();
-
-	delete[] ( g_byteData );
-	delete[] ( g_floatData );
-
-    return 0;
+	return(PkDspyErrorNone);	
 }
-
