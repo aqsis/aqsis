@@ -1484,7 +1484,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_setcomp( COLORVAL p, FLOATVAL index, FLOATVAL v, 
     GETCOLOR( p );
     GETFLOAT( index );
     GETFLOAT( v );
-    COLOR( p ) [ FLOAT( index ) ] = FLOAT( v );
+    COLOR( p ) [ static_cast<int>( FLOAT( index ) ) ] = FLOAT( v );
     SETCOLOR( p, COLOR( p ) );
     END_VARYING_SECTION
 }

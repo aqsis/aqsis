@@ -171,18 +171,27 @@ TqInt CqDDManager::DisplayBucket( IqBucket* pBucket )
 							pdata += sizeof(float);
 							break;
 						case PkDspyUnsigned32:
+							reinterpret_cast<unsigned long*>(pdata)[0] = static_cast<unsigned long>( value );
+							pdata += sizeof(unsigned long);
+							break;
 						case PkDspySigned32:
-							reinterpret_cast<long*>(pdata)[0] = value;
+							reinterpret_cast<long*>(pdata)[0] = static_cast<long>( value );
 							pdata += sizeof(long);
 							break;
 						case PkDspyUnsigned16:
+							reinterpret_cast<unsigned short*>(pdata)[0] = static_cast<unsigned short>( value );
+							pdata += sizeof(unsigned short);
+							break;
 						case PkDspySigned16:
-							reinterpret_cast<short*>(pdata)[0] = value;
+							reinterpret_cast<short*>(pdata)[0] = static_cast<short>( value );
 							pdata += sizeof(short);
 							break;
 						case PkDspyUnsigned8:
+							reinterpret_cast<unsigned char*>(pdata)[0] = static_cast<unsigned char>( value );
+							pdata += sizeof(unsigned char);
+							break;
 						case PkDspySigned8:
-							reinterpret_cast<char*>(pdata)[0] = value;
+							reinterpret_cast<char*>(pdata)[0] = static_cast<char>( value );
 							pdata += sizeof(char);
 							break;
 					}
@@ -294,7 +303,7 @@ void CqDDManager::LoadDisplayLibrary( SqDisplayRequest& req )
 				fmt.type = PkDspyUnsigned8;
 			else if( colorQuantOne == 65535 )
 				fmt.type = PkDspyUnsigned16;
-			else if( colorQuantOne == 4294967295 )
+			else if( colorQuantOne == 4294967295u )
 				fmt.type = PkDspyUnsigned32;
 			else fmt.type = PkDspyFloat32;
 			if(req.m_modeID & ModeA)
