@@ -25,7 +25,7 @@
 
 /* TO DO:
  *  1 - Set svd_arraylen and svd_spacename in SLX_VISSYMDEF records.  Currently set to 0 and NULL respectively.
- *  2 - Implement SLX_GetArgByName() and SLX_GetArrayArgElement().
+ *  2 - Implement SLX_GetArrayArgElement().
  *  3 - Implement libshadervm and use it instead of libaqsis.  Eliminate other unnecessary libs.
  */
 
@@ -58,7 +58,7 @@ static char *currentShaderFilePath = NULL;
 
 static SLX_TYPE currentShaderType = SLX_TYPE_UNKNOWN;
 static int currentShaderNArgs = 0;
-static SLX_VISSYMDEF * currentShaderArgArray = NULL;
+static SLX_VISSYMDEF * currentShaderArgsArray = NULL;
 
 static char * SLX_TYPE_UNKNOWN_STR = "unknown";
 static char * SLX_TYPE_POINT_STR = "point";
@@ -85,7 +85,7 @@ static char * SLX_DETAIL_UNIFORM_STR = "uniform";
 
 
 /*
- * Open shader file specified in currentShaderFile path, return file pointer
+ * Open shader file specified in global 'currentShaderFile', return file pointer
  */
 static FILE * OpenCurrentShader()
 {
@@ -100,7 +100,7 @@ static FILE * OpenCurrentShader()
 
 
 /*
- * Close shaderInputFile
+ * Close specified shaderInputFile
  */
 static int CloseCurrentShader(FILE * shaderInputFile)
 {
@@ -111,9 +111,9 @@ static int CloseCurrentShader(FILE * shaderInputFile)
 
 
 /*
- * Return a pointer to an indexed record in a shader argument array
+ * Return a pointer to record specified by index from a shader argument array
  */
-SLX_VISSYMDEF * GetShaderArgRec(SLX_VISSYMDEF * theShaderArgArray, int argIdx)
+SLX_VISSYMDEF * GetShaderArgRecAt(SLX_VISSYMDEF * theShaderArgArray, int argIdx)
 {
     long unsigned int arrayPtr;
     long unsigned int arrayOffset;
@@ -127,7 +127,49 @@ SLX_VISSYMDEF * GetShaderArgRec(SLX_VISSYMDEF * theShaderArgArray, int argIdx)
 
 
 /*
- * Free storage allocated in shader argument array for default values
+ * Return a pointer to record specified by index from a shader argument array
+ */
+SLX_VISSYMDEF * GetShaderArgRecByName(SLX_VISSYMDEF * theShaderArgArray, 
+        int theShaderNArgs, char * name)
+{
+    //long unsigned int arrayPtr;
+    //long unsigned int arrayOffset;
+    SLX_VISSYMDEF * recPtr;
+    SLX_VISSYMDEF * result;
+    bool doLoop;
+    int argIdx;
+    
+    result = NULL;
+    doLoop = true;
+    argIdx = 0;
+
+    while (doLoop == true)
+    {
+        recPtr = GetShaderArgRecAt(theShaderArgArray, argIdx);
+        if (recPtr != NULL)
+        {
+            if (strcmp(name, recPtr->svd_name) == 0)
+            {
+                result = recPtr;	// Success
+                doLoop = false;
+            }
+            else
+            {
+                argIdx++;
+                if (argIdx >= theShaderNArgs) doLoop = false;
+            }
+        }
+        else
+        {
+            doLoop = false;
+        }
+    }
+    return result;
+}
+
+
+/*
+ * Free storage allocated in records of shader argument array
  */
 static void FreeArgRecStorage(SLX_VISSYMDEF * theShaderArgArray, int theShaderNArgs)
 {
@@ -135,7 +177,7 @@ static void FreeArgRecStorage(SLX_VISSYMDEF * theShaderArgArray, int theShaderNA
     for (argIdx = 0; argIdx < currentShaderNArgs; argIdx++)
     {
         SLX_VISSYMDEF * theShaderArgRec;
-        theShaderArgRec = GetShaderArgRec(currentShaderArgArray, argIdx);
+        theShaderArgRec = GetShaderArgRecAt(currentShaderArgsArray, argIdx);
        
         if (theShaderArgRec->svd_name != NULL)
         {
@@ -159,15 +201,15 @@ static void FreeArgRecStorage(SLX_VISSYMDEF * theShaderArgArray, int theShaderNA
 
 
 /*
- * Store shader arg record, allocating storage for fields reference by pointer
- */
-static RtInt StoreShaderArgDef(int argArrayIdx, char * varName, SLX_TYPE varType, 
-        char * spacename, char * defaultVal)
+ * Store info in the shader arg record specified by index
+*/
+static RtInt StoreShaderArgDef(SLX_VISSYMDEF * theArgsArray, int argsArrayIdx, 
+        char * varName, SLX_TYPE varType, char * spacename, char * defaultVal)
 {
-    SLX_TYPE theType;
+    //SLX_TYPE theType;
     SLX_VISSYMDEF * theShaderArgRec;
 
-    theShaderArgRec = GetShaderArgRec(currentShaderArgArray, argArrayIdx);
+    theShaderArgRec = GetShaderArgRecAt(theArgsArray, argsArrayIdx);
 
     theShaderArgRec->svd_name = varName;
     
@@ -186,7 +228,7 @@ static RtInt StoreShaderArgDef(int argArrayIdx, char * varName, SLX_TYPE varType
 /*
  * Allocate storage for array of shader arg records
  */
-static RtInt AllocateShaderArgArray(int varCount)
+static RtInt AllocateShaderArgsArray(int varCount, SLX_VISSYMDEF ** newArray)
 {
     SLX_VISSYMDEF * arrayStorage;
     RtInt result;
@@ -200,7 +242,7 @@ static RtInt AllocateShaderArgArray(int varCount)
         int i;
         for (i = 0; i < varCount; i++)
         {
-            theShaderArgRec = GetShaderArgRec(arrayStorage, i);
+            theShaderArgRec = GetShaderArgRecAt(arrayStorage, i);
             theShaderArgRec->svd_name = NULL;
             theShaderArgRec->svd_type = SLX_TYPE_UNKNOWN;
             theShaderArgRec->svd_storage = SLX_STOR_UNKNOWN;
@@ -209,7 +251,7 @@ static RtInt AllocateShaderArgArray(int varCount)
             theShaderArgRec->svd_arraylen = 0;
             theShaderArgRec->svd_default.stringval = NULL;
         }
-        currentShaderArgArray = arrayStorage;
+        *newArray = arrayStorage;
     }
     else
     {
@@ -220,9 +262,10 @@ static RtInt AllocateShaderArgArray(int varCount)
 
 
 /*
- * Extract an indexed shader variable from a CqShaderVM object
+ * Extract a shader variable from a CqShaderVM object by index
  */
-static void AddShaderVar(CqShaderVM * pShader, int i)
+static void AddShaderVar(CqShaderVM * pShader, int i, 
+        SLX_VISSYMDEF * theArgsArray, int *theNArgs)
 {
     CqShaderVariable * shaderVar;
     EqVariableType	theType;
@@ -260,10 +303,9 @@ static void AddShaderVar(CqShaderVM * pShader, int i)
                     defaultValLength = sizeof(RtFloat);
                     defaultVal = (char *)malloc(defaultValLength);
                     memcpy(defaultVal, &aRtFloat, defaultValLength);
-                    StoreShaderArgDef(i, theVarNameStr, slxType, spacename, defaultVal);
-                    StoreShaderArgDef(currentShaderNArgs, theVarNameStr, slxType, 
+                    StoreShaderArgDef(theArgsArray, *theNArgs, theVarNameStr, slxType, 
                             spacename, defaultVal);
-                    currentShaderNArgs++;
+                    (*theNArgs)++;
                 }
                 break;
             case Type_UniformStringVariable:
@@ -276,10 +318,9 @@ static void AddShaderVar(CqShaderVM * pShader, int i)
                     defaultValLength = strlen(aCString) + 1;
                     defaultVal = (char *)malloc(defaultValLength);
                     strcpy(defaultVal, aCString);
-                    StoreShaderArgDef(i, theVarNameStr, slxType, spacename, defaultVal);
-                    StoreShaderArgDef(currentShaderNArgs, theVarNameStr, slxType, 
+                    StoreShaderArgDef(theArgsArray, *theNArgs, theVarNameStr, slxType, 
                             spacename, defaultVal);
-                    currentShaderNArgs++;
+                    (*theNArgs)++;
                 }
                 break;
             case Type_UniformPointVariable:
@@ -294,10 +335,9 @@ static void AddShaderVar(CqShaderVM * pShader, int i)
                     defaultValLength = sizeof(RtPoint);
                     defaultVal = (char *)malloc(defaultValLength);
                     memcpy(defaultVal, &aRtPoint, defaultValLength);
-                    StoreShaderArgDef(i, theVarNameStr, slxType, spacename, defaultVal);
-                    StoreShaderArgDef(currentShaderNArgs, theVarNameStr, slxType, 
+                    StoreShaderArgDef(theArgsArray, *theNArgs, theVarNameStr, slxType, 
                             spacename, defaultVal);
-                    currentShaderNArgs++;
+                    (*theNArgs)++;
                 }
                 break;
             case Type_UniformColorVariable:
@@ -312,9 +352,9 @@ static void AddShaderVar(CqShaderVM * pShader, int i)
                     defaultValLength = sizeof(RtColor);
                     defaultVal = (char *)malloc(defaultValLength);
                     memcpy(defaultVal, &aRtColor, defaultValLength);
-                    StoreShaderArgDef(currentShaderNArgs, theVarNameStr, slxType, 
+                    StoreShaderArgDef(theArgsArray, *theNArgs, theVarNameStr, slxType, 
                             spacename, defaultVal);
-                    currentShaderNArgs++;
+                    (*theNArgs)++;
                 }
                 break;
             default:
@@ -325,8 +365,8 @@ static void AddShaderVar(CqShaderVM * pShader, int i)
 
 
 /*
- * Read shader file, set these global variables -
- *    currentShaderType, currentShaderNArgs, currentShaderArgArray.
+ * Read shader info from , set these global variables -
+ *    currentShaderType, currentShaderNArgs, currentShaderArgsArray.
  */
 static RtInt GetCurrentShaderInfo(char * strName)
 {
@@ -334,13 +374,20 @@ static RtInt GetCurrentShaderInfo(char * strName)
     int i;
     int varCount;
     EqShaderType aShaderType;
+    SLX_VISSYMDEF * newArray;
+    int theNArgs;
+    SLX_TYPE theShaderType;
 
-    librib2ri::Engine renderengine;
+    // establish a rendering context -
+    // (This step should not be necessary after the Aqsis shaderVM is
+    //  moved to a separate libray.)
+    librib2ri::Engine renderengine;	
     RiBegin("CRIBBER");
     
     CqString strFilename(strName);
     CqRiFile SLXFile(strFilename.c_str(),"");
     result = RIE_NOERROR;
+    theNArgs = 0;
 
     if(SLXFile.IsValid())
     {
@@ -351,36 +398,43 @@ static RtInt GetCurrentShaderInfo(char * strName)
  
         varCount = pShader->GetShaderVarCount();
         
-        AllocateShaderArgArray(varCount);
+        AllocateShaderArgsArray(varCount, &newArray);
         
-        currentShaderType = SLX_TYPE_UNKNOWN;
+        theShaderType = SLX_TYPE_UNKNOWN;
         aShaderType = pShader->Type();
         switch (aShaderType)
         {
             case Type_Surface:
-                currentShaderType = SLX_TYPE_SURFACE;
+                theShaderType = SLX_TYPE_SURFACE;
                 break;
             case Type_Lightsource:
-                currentShaderType = SLX_TYPE_LIGHT;
+                theShaderType = SLX_TYPE_LIGHT;
                 break;
             case Type_Volume:
-                currentShaderType = SLX_TYPE_VOLUME;
+                theShaderType = SLX_TYPE_VOLUME;
                 break;
             case Type_Displacement:
-                currentShaderType = SLX_TYPE_DISPLACEMENT;
+                theShaderType = SLX_TYPE_DISPLACEMENT;
                 break;
             case Type_Transformation:
-                currentShaderType = SLX_TYPE_TRANSFORMATION;
+                theShaderType = SLX_TYPE_TRANSFORMATION;
                 break;
             case Type_Imager:            
-                currentShaderType = SLX_TYPE_IMAGER;
+                theShaderType = SLX_TYPE_IMAGER;
                 break;
         }
         
+        // Iterate through list of shader variables and build array of SLX_VISSYMDEF shader argument records.
+        // N.B. Not all shader variables are shader arguments, so NArgs may be less than varCount;
         for(i = 0; i<varCount; i++)
         {
-            AddShaderVar(pShader, i);
+            AddShaderVar(pShader, i, newArray, &theNArgs);
         }
+        
+        // Store shader info and arguments array in global storage
+        currentShaderArgsArray = newArray;
+        currentShaderNArgs = theNArgs;
+        currentShaderType = theShaderType;
        
         delete pShader;
     }
@@ -430,7 +484,7 @@ static int GetSearchPathListCount()
 
 
 /*
- * Extract indexed entry from search path list
+ * Extract indexed entry from search path list, set global currentShaderSearchPath
  */
 static int GetSearchPathEntryAtIndex(int pathIdx)
 {
@@ -491,9 +545,9 @@ static int GetSearchPathEntryAtIndex(int pathIdx)
 
 
 /*
- * Attempt to open shader file using search path entries
+ * Attempt to open shader file using entries from the search path list and shader name
  */
-static bool FindShader (char *name)
+static bool LoadShaderInfo (char *name)
 {
     bool result;
     int stringLength;
@@ -585,7 +639,7 @@ void SLX_SetPath (char *path)
 
 
 /*
- * Return the type of the current shader, enumarated in SLX_TYPE.
+ * Return the type of the current shader, enumerated in SLX_TYPE.
  */
 char *SLX_GetPath (void)
 {
@@ -629,7 +683,7 @@ int SLX_SetShader (char *name)
     
     if (SlxLastError == RIE_NOERROR)
     {
-        if (FindShader(name) == false)
+        if (LoadShaderInfo(name) == false)
                 SlxLastError = RIE_NOFILE;
     }
 
@@ -723,13 +777,13 @@ SLX_VISSYMDEF *SLX_GetArgById (int id)
     SlxLastError = RIE_NOERROR;
     result = NULL;
     
-    if (currentShaderArgArray != NULL)
+    if (currentShaderArgsArray != NULL)
     {
         if (id < currentShaderNArgs)
         {
             if (id >= 0)
             {
-                result = GetShaderArgRec(currentShaderArgArray, id);
+                result = GetShaderArgRecAt(currentShaderArgsArray, id);
             }
         }
 	}
@@ -747,8 +801,21 @@ SLX_VISSYMDEF *SLX_GetArgById (int id)
  */
 SLX_VISSYMDEF *SLX_GetArgByName (char *name)
 {
-    // Not yet implemented
+    SLX_VISSYMDEF * result;
     SlxLastError = RIE_NOERROR;
+    result = NULL;
+    
+    if (currentShaderArgsArray != NULL)
+    {
+        result = GetShaderArgRecByName(currentShaderArgsArray, 
+                currentShaderNArgs, name);
+	}
+    
+    if (result == NULL)
+    {
+        SlxLastError = RIE_NOMEM;    
+    }
+    return result;
 }
 
 
@@ -787,12 +854,12 @@ void SLX_EndShader (void)
         currentShaderSearchPath = NULL;
     }
 
-    FreeArgRecStorage(currentShaderArgArray, currentShaderNArgs);
+    FreeArgRecStorage(currentShaderArgsArray, currentShaderNArgs);
 
-    if (currentShaderArgArray != NULL)
+    if (currentShaderArgsArray != NULL)
     {
-        free(currentShaderArgArray);
-        currentShaderArgArray = NULL;
+        free(currentShaderArgsArray);
+        currentShaderArgsArray = NULL;
     }
 
     currentShaderNArgs = 0;
