@@ -101,6 +101,10 @@ SOURCE=.\csgtree.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\curves.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\genpoly.cpp
 # End Source File
 # Begin Source File
@@ -226,6 +230,10 @@ SOURCE=.\Context.h
 # Begin Source File
 
 SOURCE=.\csgtree.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\curves.h
 # End Source File
 # Begin Source File
 
