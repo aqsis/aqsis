@@ -341,6 +341,7 @@ struct SqVMStackEntry
 		res[3][1] = m_Value.m_matrix[13];
 		res[3][2] = m_Value.m_matrix[14];
 		res[3][3] = m_Value.m_matrix[15];
+		res.SetfIdentity( TqFalse );
 	}
 
 
@@ -437,7 +438,7 @@ struct SqVMStackEntry
 		m_Value.m_matrix[8 ] = m[2][0];
 		m_Value.m_matrix[9 ] = m[2][1];
 		m_Value.m_matrix[10] = m[2][2];
-		m_Value.m_matrix[11] = m[3][3];
+		m_Value.m_matrix[11] = m[2][3];
 		m_Value.m_matrix[12] = m[3][0];
 		m_Value.m_matrix[13] = m[3][1];
 		m_Value.m_matrix[14] = m[3][2];
@@ -1377,6 +1378,7 @@ class CqVMStackEntry : public IqShaderData
 					      b1, b2, b3, b4,
 					      c1, c2, c3, c4,
 					      d1, d2, d3, d4);
+					tt.SetfIdentity( TqFalse );
 					SetValue( tt, ii );
 				}
 			}
