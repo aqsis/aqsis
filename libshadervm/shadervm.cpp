@@ -1164,6 +1164,21 @@ void CqShaderVM::SetArgument( CqParameter* pParam )
 
 
 //---------------------------------------------------------------------
+/** Set the instance variables on this shader, used for varying variables which will be set from a parameter in the surface.
+ */
+
+IqShaderData* CqShaderVM::FindArgument( const CqString& name )
+{
+	// Find the relevant variable.
+	TqInt i = FindLocalVarIndex( name.c_str() );
+	if ( i >= 0 )
+		return( m_LocalVars[ i ] );
+	else
+		return( NULL );
+}
+
+
+//---------------------------------------------------------------------
 /** Get a value from an instance variable on this shader, and fill in the passed variable reference.
  */
 

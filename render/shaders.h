@@ -118,6 +118,10 @@ class CqShader : public IqShader
 		{}
 		virtual	void	SetArgument( CqParameter* pParam )
 		{}
+		virtual	IqShaderData*	FindArgument( const CqString& name )
+		{
+			return( NULL );
+		}
 		virtual	TqBool	GetValue( const char* name, IqShaderData* res )
 		{
 			return ( TqFalse );

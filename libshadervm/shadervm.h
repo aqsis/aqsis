@@ -419,6 +419,7 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		}
 		virtual	void	SetArgument( const CqString& name, EqVariableType type, const CqString& space, void* val );
 		virtual	void	SetArgument( CqParameter* pParam );
+		virtual	IqShaderData*	FindArgument( const CqString& name );
 		virtual	TqBool	GetValue( const char* name, IqShaderData* res );
 		virtual	void	Evaluate( IqShaderExecEnv* pEnv )
 		{

@@ -5,7 +5,7 @@
  *	@brief	Declare the interface which all shaders must implement.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/08/04 23:26:34 $
+ *	Last change date:	$Date: 2002/08/10 15:31:46 $
  */
 //------------------------------------------------------------------------------
 
@@ -67,6 +67,11 @@ struct IqShader
 		 * \param pParam Pointer to the surface parameter which needs to be diced across the surface.
 		 */
 		virtual	void	SetArgument( CqParameter* pParam ) = 0;
+		/** Find a named argument.
+		 * \param name Character pointer to argument name.
+		 * \return A pointer to the argument data if it exists, NULL otherwise.
+		 */
+		virtual	IqShaderData*	FindArgument( const CqString& name ) = 0;
 		/** Get the value of a named shader paramter.
 		 * \param name The name of the shader paramter.
 		 * \param res IqShaderData pointer to store the result in, will be typechecked for suitability.

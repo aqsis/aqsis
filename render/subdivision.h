@@ -394,8 +394,11 @@ class CqWFace : public CqPoolable<CqWFace>
 			CqParameterTyped<A, B>* pNTarget  = static_cast<CqParameterTyped<A, B>*>(pTarget); \
 			A val = *pNCurrent->pValue( pvHead() ->iVertex() ); \
 			val += *pNCurrent->pValue( pvTail() ->iVertex() ); \
+			/* Check for forced mipoint interpolation, used for 'varying' primitive variables. */ \
+			if( bForceMidpoint ) \
+				val *= 0.5f; \
 			/* Check for sharp edges. */ \
-			if ( IsBoundary() == TqTrue || m_Sharpness > 0 )  		/* Boundary check. */ \
+			else if ( IsBoundary() == TqTrue || m_Sharpness > 0 )  		/* Boundary check. */ \
 			{ \
 				if ( m_Sharpness < 1 && IsBoundary() == TqFalse )  	/* Infinitely sharp? */ \
 				{ \
@@ -722,7 +725,7 @@ class CqWEdge : public CqPoolable<CqWEdge>
 		 * \param F A pointer to a function to get indexed values of the appropriate type.
 		 * \param pSurf Pointer to the CqWSurf on which we are working. 
 		 */
-		void CreateSubdivideScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex );
+		void CreateSubdivideScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex, TqBool bForceMidpoint = TqFalse);
 
 	private:
 		CqWVert	*m_pvHead,  				///< Pointer to the head vertex.
@@ -833,7 +836,7 @@ class CqSubdivider
 		}
 
 		CqWEdge*	FindEdge( CqWEdge* pE );
-		CqWVert*	FindVertex( CqPolygonPoints* pPoints, const CqVector3D& V );
+		CqWVert*	FindVertex( CqPolygonPoints* pPoints, const CqVector4D& V );
 
 		CqWEdge*	AddEdge( CqWVert* pA, CqWVert* pB );
 		/** Add an edge to the list.
@@ -972,7 +975,7 @@ class CqWSurf : public CqSubdivider, public CqBasicSurface
 		void	_OutputMesh( char* pname );
 		CqWVert*	TransferVert( CqWSurf* pSurf, TqInt iVert, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
 		                       TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os );
-		CqWVert*	GetpWVert( CqPolygonPoints* pPoints, const CqVector3D& V );
+		CqWVert*	GetpWVert( CqPolygonPoints* pPoints, const CqVector4D& V );
 
 		// Overridden from CqBasicSurface
 		virtual	CqBound	Bound() const;
@@ -1069,7 +1072,7 @@ class CqMotionWSurf : public CqSubdivider, public CqBasicSurface, public CqMotio
 
 		CqWVert*	TransferVert( CqMotionWSurf* pSurf, TqInt iVert, TqBool uses_s, TqBool uses_t, TqBool uses_Cs, TqBool uses_Os,
 		                       TqBool has_s, TqBool has_t, TqBool has_Cs, TqBool has_Os );
-		CqWVert*	GetpWVert( CqPolygonPoints* pPoints, const CqVector3D& V );
+		CqWVert*	GetpWVert( CqPolygonPoints* pPoints, const CqVector4D& V );
 
 		// Overridden from CqBasicSurface
 		virtual	CqBound	Bound() const;
