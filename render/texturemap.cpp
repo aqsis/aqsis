@@ -38,6 +38,9 @@
 #include	"renderer.h"
 #include	"plugins.h"
 
+#ifndef		AQSIS_SYSTEM_WIN32
+#include	"unistd.h"
+#endif
 
 START_NAMESPACE( Aqsis )
 
@@ -180,7 +183,7 @@ CqTextureMap::~CqTextureMap()
         std::vector<CqString*>::iterator j;
 	for ( j = m_ConvertString_Cache.begin(); j != m_ConvertString_Cache.end(); j++ )
 	{
-		if (j) 
+		if (*j) 
 		{
 			unlink((*j)->c_str() );
 			delete( *j );

@@ -40,10 +40,15 @@
 
 #ifdef AQSIS_SYSTEM_MACOSX
 extern "C" {
-#include "<dlfcn.h>                /* dlopen() */
+#include <dlfcn.h>                /* dlopen() */
 }
 #endif /* AQSIS_SYSTEM_MACOSX */
 
+#ifdef AQSIS_SYSTEM_POSIX
+extern "C" {
+#include <dlfcn.h>                /* dlopen() */
+}
+#endif /* AQSIS_SYSTEM_POSIX */
 
 #include "plugins.h"
 

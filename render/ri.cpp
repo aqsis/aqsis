@@ -45,6 +45,9 @@
 #include	"genpoly.h"
 #include	"points.h"
 #include    "plugins.h"
+#ifndef	AQSIS_SYSTEM_WIN32
+#include	"unistd.h"
+#endif
 
 #include	"ri.h"
 
@@ -2329,7 +2332,7 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 		{
 			pSurface->AddRef();
 
-			CqSurfacePolygon **iE;
+			std::vector<CqSurfacePolygon*>::iterator iE;
 
 			for ( iE = pSurface->m_pPolygons.begin(); iE != pSurface->m_pPolygons.end(); iE++ )
 			{
@@ -3254,7 +3257,7 @@ char *pt, atmpname[1024];
    if( (chkdsk = _popen( (const char *)data, "rt" )) != NULL ) {
        file = fopen(atmpname, "wt");
 #else
-   if( (chkdsk = popen( (const char *)data, "r" )) != NULL ) {'
+   if( (chkdsk = popen( (const char *)data, "r" )) != NULL ) {
 	     file = fopen(atmpname, "w");
 #endif
      
