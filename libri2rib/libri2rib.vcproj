@@ -23,7 +23,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\renderer,..\render,..\libaqsistypes,..\libaqsistypes\win32\intel,..\..\win32libs\include"
-				PreprocessorDefinitions="_LIB;AQSIS_DYNAMIC_LINK;_qBUILDING=BUILD_LIBRI2RIB;BUILD_LIBRI2RIB=1;NDEBUG;PLUGINS;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="NDEBUG;PLUGINS;_LIB;AQSIS_STATIC_LINK;_qBUILDING=BUILD_LIBRI2RIB;BUILD_LIBRI2RIB=1;WIN32;NO_SYSLOG"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
@@ -76,7 +76,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\render,..\libaqsistypes,..\libaqsistypes\win32\intel,..\..\win32libs\include"
-				PreprocessorDefinitions="_DEBUG;_LIB;AQSIS_DYNAMIC_LINK;_qBUILDING=BUILD_LIBRI2RIB;BUILD_LIBRI2RIB=1;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="_DEBUG;_LIB;AQSIS_STATIC_LINK;_qBUILDING=BUILD_LIBRI2RIB;BUILD_LIBRI2RIB=1;WIN32;NO_SYSLOG"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
 				RuntimeTypeInfo="TRUE"
@@ -129,7 +129,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\render,..\libaqsistypes,..\libaqsistypes\win32\intel,..\..\win32libs\include"
-				PreprocessorDefinitions="_DEBUG;_LIB;AQSIS_DYNAMIC_LINK;_qBUILDING=BUILD_LIBRI2RIB;BUILD_LIBRI2RIB=1;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="_DEBUG;_LIB;AQSIS_STATIC_LINK;_qBUILDING=BUILD_LIBRI2RIB;BUILD_LIBRI2RIB=1;WIN32;NO_SYSLOG"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
 				RuntimeTypeInfo="TRUE"
@@ -183,7 +183,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\renderer,..\render,..\libaqsistypes,..\libaqsistypes\win32\intel,..\..\win32libs\include"
-				PreprocessorDefinitions="NDEBUG;_LIB;AQSIS_DYNAMIC_LINK;_qBUILDING=BUILD_LIBRI2RIB;BUILD_LIBRI2RIB=1;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="NDEBUG;_LIB;AQSIS_STATIC_LINK;_qBUILDING=BUILD_LIBRI2RIB;BUILD_LIBRI2RIB=1;WIN32;NO_SYSLOG"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
@@ -238,7 +238,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\renderer,..\render,..\libaqsistypes,..\libaqsistypes\win32\intel,..\..\win32libs\include"
-				PreprocessorDefinitions="_LIB;AQSIS_DYNAMIC_LINK;_qBUILDING=BUILD_LIBRI2RIB;BUILD_LIBRI2RIB=1;NDEBUG;PLUGINS;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="NDEBUG;PLUGINS;_LIB;AQSIS_STATIC_LINK;_qBUILDING=BUILD_LIBRI2RIB;BUILD_LIBRI2RIB=1;WIN32;NO_SYSLOG"
 				StringPooling="TRUE"
 				RuntimeLibrary="4"
 				EnableFunctionLevelLinking="TRUE"
@@ -291,7 +291,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\render,..\libaqsistypes,..\libaqsistypes\win32\intel,..\..\win32libs\include"
-				PreprocessorDefinitions="_DEBUG;_LIB;AQSIS_DYNAMIC_LINK;_qBUILDING=BUILD_LIBRI2RIB;BUILD_LIBRI2RIB=1;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="_DEBUG;_LIB;AQSIS_STATIC_LINK;_qBUILDING=BUILD_LIBRI2RIB;BUILD_LIBRI2RIB=1;WIN32;NO_SYSLOG"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
@@ -345,7 +345,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\renderer,..\render,..\libaqsistypes,..\libaqsistypes\win32\intel,..\..\win32libs\include"
-				PreprocessorDefinitions="_LIB;AQSIS_DYNAMIC_LINK;_qBUILDING=BUILD_LIBRI2RIB;BUILD_LIBRI2RIB=1;NDEBUG;PLUGINS;WIN32;NO_SYSLOG"
+				PreprocessorDefinitions="NDEBUG;PLUGINS;_LIB;AQSIS_STATIC_LINK;_qBUILDING=BUILD_LIBRI2RIB;BUILD_LIBRI2RIB=1;WIN32;NO_SYSLOG"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
@@ -1185,9 +1185,6 @@
 			</File>
 			<File
 				RelativePath="plstore.h">
-			</File>
-			<File
-				RelativePath="ri.h">
 			</File>
 		</Filter>
 	</Files>
