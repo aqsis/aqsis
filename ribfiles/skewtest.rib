@@ -1,0 +1,15 @@
+Display "rgba.tif" "framebuffer" "rgba"
+Format 200 200 1
+Clipping 0.001 1000
+PixelFilter "sinc" 4 4
+Projection "perspective"
+Translate 0 0 5
+WorldBegin
+LightSource "distantlight" 1 "intensity" [1.0]
+LightSource "ambientlight" 2 "intensity" [0.3]
+Rotate -0 1 0 0 
+Rotate 30 0 1 0 
+Skew 45 1 0 0 0 1 0
+Hyperboloid -1 -1 -2  3 1 2 300
+WorldEnd
+
