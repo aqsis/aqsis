@@ -334,6 +334,8 @@ class CqTextureMap : public IqTextureMap
 {
 	public:
 		CqTextureMap( const CqString& strName ) :
+				m_Compression( COMPRESSION_NONE ),
+				m_Quality( 70 ),
 				m_MinZ( RI_FLOATMAX ),
 				m_XRes( 0 ),
 				m_YRes( 0 ),
@@ -346,9 +348,7 @@ class CqTextureMap : public IqTextureMap
 				m_smode( WrapMode_Black ),
 				m_tmode( WrapMode_Black ),
 				m_FilterFunc( RiBoxFilter ),
-				m_swidth( 1.0 ), m_twidth( 1.0 ),
-				m_Compression( COMPRESSION_NONE ),
-				m_Quality( 70 )
+				m_swidth( 1.0 ), m_twidth( 1.0 )
 
 		{
 			m_tempval1.resize( m_SamplesPerPixel );

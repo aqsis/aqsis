@@ -313,6 +313,7 @@ void CqOptions::InitialiseDefaultOptions()
 	ADD_SYSTEM_PARAM3( DepthOfField, TqFloat, TqFloat, type_float, FLT_MAX, FLT_MAX, FLT_MAX );
 	ADD_SYSTEM_PARAM2( Shutter, TqFloat, TqFloat, type_float, 0.0f, 1.0f );
 	ADD_SYSTEM_PARAM( FOV, TqFloat, TqFloat, type_float, 90.0f );
+	ADD_SYSTEM_PARAM( SqrtGridSize, TqFloat, TqFloat, type_float, 16.0f );					// Grid size square root.
 
 	pdefopts->AddRef();
 	AddOption( pdefopts );
@@ -630,7 +631,6 @@ CqColor CqOptions::GetOpacityImager( TqFloat x, TqFloat y )
 void CqOptions::LoadImager( const CqString& strName )
 {
 	DeleteImager();
-	TqFloat dummy = 0.0;
 
 	IqShader* pShader = static_cast<IqShader*>( QGetRenderContext() ->CreateShader( strName.c_str(), Type_Imager ) );
 

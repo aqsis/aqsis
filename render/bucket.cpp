@@ -87,7 +87,7 @@ void CqBucket::InitialiseBucket( TqInt xorigin, TqInt yorigin, TqInt xsize, TqIn
 
 	// Allocate the image element storage for a single bucket if it different 
 	// but from bucket to bucket it will be the same size all the times.
-	if (m_aieImage.size() != (xwidth1 * ywidth1) )
+	if (m_aieImage.size() != ((TqUint)xwidth1 * (TqUint)ywidth1) )
 		m_aieImage.resize( xwidth1 * ywidth1);
 
 	// Initialise the samples for this bucket.
@@ -120,7 +120,7 @@ void CqBucket::InitialiseFilterValues()
 	TqInt numsubpixels = ( m_XPixelSamples * m_YPixelSamples );
 	TqInt numperpixel = numsubpixels * numsubpixels;
 
-	TqInt numvalues = static_cast<TqInt>( ( ( m_XFWidth + 1 ) * ( m_YFWidth + 1 ) ) * ( numperpixel ) );
+	TqUint numvalues = static_cast<TqUint>( ( ( m_XFWidth + 1 ) * ( m_YFWidth + 1 ) ) * ( numperpixel ) );
 
 	if (m_aFilterValues.size() != numvalues)
 	{
@@ -134,7 +134,6 @@ void CqBucket::InitialiseFilterValues()
 	TqFloat xfwo2 = m_XFWidth * 0.5f;
 	TqFloat yfwo2 = m_YFWidth * 0.5f;
 	TqFloat xfw = m_XFWidth;
-	TqFloat yfw = m_YFWidth;
 	
 	TqFloat subcellwidth = 1.0f / numsubpixels;
 	TqFloat subcellcentre = subcellwidth * 0.5f;
@@ -327,10 +326,8 @@ void CqBucket::FilterBucket()
 {
 	CqImagePixel * pie;
 	
-	std::valarray<TqFloat>* pDatas = new std::valarray<TqFloat>[ XSize() * YSize() ];
-	TqInt idata;
-	for( idata = XSize() * YSize() - 1; idata >= 0; idata-- )
-		pDatas[idata].resize( QGetRenderContext()->GetOutputDataTotalSize() );
+	TqInt datasize = QGetRenderContext()->GetOutputDataTotalSize();
+	TqFloat* pDatas = new TqFloat[ datasize * XSize() * YSize() ];
 	TqFloat* pCoverages = new TqFloat[ XSize() * YSize() ];
 
 	TqInt xmax = static_cast<TqInt>( CEIL( ( XFWidth() - 1 ) * 0.5f ) );
@@ -347,7 +344,6 @@ void CqBucket::FilterBucket()
 
 	TqInt x, y;
 	TqInt i = 0;
-	TqFloat total = numsubpixels;
 
 	TqBool fImager = ( QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) [ 0 ] != "null" );
 
@@ -362,7 +358,7 @@ void CqBucket::FilterBucket()
 			TqFloat xcent = x + 0.5f;
 			TqFloat gTot = 0.0;
 			SampleCount = 0;
-			std::valarray<TqFloat> samples( 0.0f, QGetRenderContext()->GetOutputDataTotalSize() );
+			std::valarray<TqFloat> samples( 0.0f, datasize);
 
 			TqInt fx, fy;
 			// Get the element at the upper left corner of the filter area.
@@ -404,7 +400,8 @@ void CqBucket::FilterBucket()
 			if ( SampleCount <= 0 )
 				samples[ 6 ] = FLT_MAX;
 
-			pDatas[ i ] = samples / gTot;
+                        for ( TqInt k = 0; k < datasize; k ++)
+				pDatas[ i*datasize + k ] = samples[k] / gTot;
 
 			if ( SampleCount >= numsubpixels)
 				pCoverages[ i ] = 1.0;
@@ -425,7 +422,8 @@ void CqBucket::FilterBucket()
 		CqImagePixel* pie2 = pie;
 		for ( x = 0; x < endx; x++ )
 		{
-			pie2->GetPixelSample().m_Data = pDatas[ i ];
+			for (TqInt k=0; k < datasize; k++)
+				pie2->GetPixelSample().m_Data[k] = pDatas[ i * datasize + k ];
 			pie2->SetCoverage( pCoverages[ i++ ] );
 			pie2++;
 		}

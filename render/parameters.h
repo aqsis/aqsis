@@ -352,7 +352,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 
 			m_aValues.resize( size );
 
-			for ( TqUint j = 0; j < size; j++ )
+			for ( TqUint j = 0; j < (TqUint) size; j++ )
 			{
 				m_aValues[ j ] = From.m_aValues[ j ];
 			}
@@ -442,8 +442,8 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 			// initialised to the correct size prior to calling.
 			// Also note that the only time a Uniform value is diced is when it is on a single element, i.e. the patchmesh
 			// has been split into isngle patches, or the polymesh has been split into polys.
-			TqInt i;
-			TqInt max = MAX( u * v, pResult->Size() );
+			TqUint i;
+			TqUint max = MAX( (TqUint)u * (TqUint)v, pResult->Size() );
 			for ( i = 0; i < max; i++ )
 				pResult->SetValue( m_aValues[ 0 ], i );
 		}
@@ -557,8 +557,9 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 			assert( pResult->Type() == Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
-			TqInt i;
-			for ( i = 0; i < ( MAX( u * v, pResult->Size() ) ); i++ )
+			TqUint i;
+                        TqUint max = MAX( (TqUint) u * (TqUint) v, pResult->Size() );
+			for ( i = 0; i < max ; i++ )
 				pResult->SetValue( m_Value, i );
 		}
 
@@ -750,8 +751,8 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		virtual	void	SetSize( TqInt size )
 		{
 			m_aValues.resize( size );
-			TqInt j;
-			for ( j = 0; j < size; j++ )
+			TqUint j;
+			for ( j = 0; j < (TqUint) size; j++ )
 				m_aValues[ j ].resize( m_Count );
 		}
 		virtual	TqUint	Size() const
@@ -847,8 +848,8 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 			for ( j = 0; j < m_aValues.size(); j++ )
 			{
 				m_aValues[ j ].resize( m_Count );
-				TqInt i;
-				for ( i = 0; i < m_Count; i++ )
+				TqUint i;
+				for ( i = 0; i < (TqUint) m_Count; i++ )
 					m_aValues[ j ][ i ] = From.m_aValues[ j ][ i ];
 			}
 			return ( *this );
@@ -887,8 +888,8 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 				CqParameterTyped<T, SLT>( From )
 		{
 			m_aValues.resize( From.m_Count );
-			TqInt i;
-			for ( i = 0; i < From.m_Count; i++ )
+			TqUint i;
+			for ( i = 0; i < (TqUint)From.m_Count; i++ )
 				m_aValues[ i ] = From.m_aValues[ i ];
 		}
 		virtual	~CqParameterTypedUniformArray()
@@ -927,8 +928,8 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 			assert( pResult->Type() == Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
-			TqInt i;
-			TqInt max = ( MAX( u * v, pResult->Size() ) );
+			TqUint i;
+			TqUint max = ( MAX( (TqUint)u * (TqUint) v, pResult->Size() ) );
 			for ( i = 0; i < max; i++ )
 				pResult->SetValue( pValue( 0 ) [ 0 ], i );
 		}
@@ -1037,8 +1038,8 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 			assert( pResult->Type() == Type() );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
-			TqInt i;
-			TqInt max = ( MAX( u * v, pResult->Size() ) );
+			TqUint i;
+			TqUint max = ( MAX( (TqUint) u * (TqUint) v, pResult->Size() ) );
 			for ( i = 0; i < max; i++ )
 				pResult->SetValue( pValue( 0 ) [ 0 ], i );
 		}
@@ -1228,8 +1229,7 @@ void CqParameterTypedVarying<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* p
 	}
 	else
 	{
-		TqInt i = 0;
-		TqInt iv;
+                TqInt iv;
 		res = pValue( 0 ) [ 0 ];
 		for ( iv = 0; iv <= v; iv++ )
 		{
@@ -1284,8 +1284,7 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 	}
 	else
 	{
-		TqInt i = 0;
-		TqInt iv;
+                TqInt iv;
 		res = pValue( 0 ) [ 0 ];
 		for ( iv = 0; iv <= v; iv++ )
 		{

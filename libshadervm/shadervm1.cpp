@@ -118,7 +118,7 @@ void CqShaderVM::SO_pop()
 	AUTOFUNC;
 	IqShaderData* pV = GetVar( ReadNext().m_iVariable );
 	POPV( Val );
-	TqInt ext = MAX( m_pEnv->GridSize(), pV->Size() );
+	TqUint ext = MAX( m_pEnv->GridSize(), pV->Size() );
 	TqBool fVarying = ext > 1;
 	TqInt i;
 	CqBitVector& RS = m_pEnv->RunningState();
@@ -145,7 +145,7 @@ void CqShaderVM::SO_ipop()
 	POPV( A );
 	POPV( Val );
 	//TqInt ext=__fVarying?m_pEnv->GridSize():1;
-	TqInt ext = MAX( m_pEnv->GridSize(), pV->Size() );
+	TqUint ext = MAX( m_pEnv->GridSize(), pV->Size() );
 	TqBool fVarying = ext > 1;
 	TqInt i;
 	CqBitVector& RS = m_pEnv->RunningState();

@@ -720,8 +720,12 @@ class CqDeformingSurface : public CqBasicSurface, public CqMotionSpec<CqBasicSur
 			cSplits = GetMotionObject( Time( 0 ) ) ->Split( aaMotionSplits[ 0 ] );
 			for ( i = 1; i < cTimes(); i++ )
 			{
+#ifdef _DEBUG
 				TqInt numsplits = GetMotionObject( Time( i ) ) ->Split( aaMotionSplits[ i ] );
 				assert( numsplits == cSplits);
+#else
+                                GetMotionObject( Time( i ) ) ->Split( aaMotionSplits[ i ] );
+#endif
 			}
 
 			// Now build motion surfaces from the splits and pass them back.

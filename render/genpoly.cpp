@@ -327,7 +327,7 @@ void CqPolygonGeneral2D::Combine( CqPolygonGeneral2D& polyFrom )
 		avecNew.push_back( polyFrom.m_aiVertices[ i ] );
 
 	// Now copy the new list of vertices to this new polygon.
-	TqInt size = avecNew.size();
+	TqUint size = (TqUint) avecNew.size();
 	m_aiVertices.resize( size );
 	TqUint ivert;
 	for ( ivert = 0; ivert < size; ivert++ )

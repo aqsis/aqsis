@@ -504,7 +504,7 @@ class CqSurfacePointsPolygon : public CqBasicSurface, public CqPolygonBase
 		}
 		virtual	const	TqInt PolyIndex( TqInt i ) const
 		{
-			return ( ( i < m_aIndices.size() ) ? m_aIndices[ i ] : m_aIndices.back() );
+			return ( ( (TqUint) i < m_aIndices.size() ) ? m_aIndices[ i ] : m_aIndices.back() );
 		}
 
 		virtual	TqInt	NumVertices() const

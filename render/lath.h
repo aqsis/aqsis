@@ -44,11 +44,9 @@ class CqLath : public CqPoolable<CqLath, 512>
 {
 public:
 	///	Constructor.
-	CqLath()	 : m_pClockwiseVertex(NULL), m_pClockwiseFacet(NULL), m_VertexIndex(0),
-				   m_pParentFacet(NULL), m_pChildVertex(NULL), m_pMidVertex(NULL), m_pFaceVertex(NULL)
+	CqLath()	 : m_pClockwiseVertex(NULL), m_pClockwiseFacet(NULL),  m_pParentFacet(NULL), m_pChildVertex(NULL), m_pMidVertex(NULL), m_pFaceVertex(NULL), m_VertexIndex(0)
 				   {}
-	CqLath( TqInt iV ) : m_pClockwiseVertex(NULL), m_pClockwiseFacet(NULL), m_VertexIndex( iV ),
-				   m_pParentFacet(NULL), m_pChildVertex(NULL), m_pMidVertex(NULL), m_pFaceVertex(NULL)
+	CqLath( TqInt iV ) : m_pClockwiseVertex(NULL), m_pClockwiseFacet(NULL),m_pParentFacet(NULL), m_pChildVertex(NULL), m_pMidVertex(NULL), m_pFaceVertex(NULL), m_VertexIndex( iV )
 				   {}
 
 	///	Destructor.

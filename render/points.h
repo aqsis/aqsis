@@ -265,7 +265,7 @@ class CqPoints : public CqSurface, public CqMotionSpec<CqPolygonPoints*>
 		template <class T, class SLT>
 		void	TypedNaturalDice( CqParameterTyped<T, SLT>* pParam, IqShaderData* pData )
 		{
-			TqInt i;
+			TqUint i;
 			for ( i = 0; i < nVertices(); i++ )
 				pData->SetValue( static_cast<SLT>( pParam->pValue() [ m_KDTree.aLeaves()[ i ] ] ), i );
 		}

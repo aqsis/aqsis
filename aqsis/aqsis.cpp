@@ -105,10 +105,10 @@ RtVoid PrintProgress( RtFloat percent )
 	time( &now );
 
 	// Calculate the various values for putting in the string.
-#ifdef	AQSIS_SYSTEM_POSIX
-	TqFloat total_secs = ( RtFloat ) 1000000.0f * ( ( RtFloat ) ( now - tick ) / ( float ) CLOCKS_PER_SEC );
-#elif AQSIS_SYSTEM_MACOSX
+#ifdef AQSIS_SYSTEM_MACOSX
 	TqFloat total_secs = ( RtFloat ) 100.0f * ( ( RtFloat ) ( now - tick ) / ( float ) CLOCKS_PER_SEC );
+#elif	AQSIS_SYSTEM_POSIX
+	TqFloat total_secs = ( RtFloat ) 1000000.0f * ( ( RtFloat ) ( now - tick ) / ( float ) CLOCKS_PER_SEC );
 #else
 	TqFloat total_secs = ( RtFloat ) 1000.0f * ( ( RtFloat ) ( now - tick ) / ( float ) CLOCKS_PER_SEC );
 #endif
@@ -141,7 +141,7 @@ RtVoid PrintProgress( RtFloat percent )
 	std::ostrstream strOutput;
 	while ( 1 )
 	{
-		TqInt itag;
+		TqUint itag;
 		itag = strProgress.find( '%', ipos );
 		if ( itag == std::string::npos )
 		{

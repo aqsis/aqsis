@@ -1194,7 +1194,7 @@ class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, 
 		}
 		virtual	void	SetFloat( const TqFloat& f )
 		{
-			TqInt i;
+			TqUint i;
 			for ( i = 0; i < Size(); i++ )
 				m_aValue[ i ] = f;
 		}
@@ -1203,7 +1203,7 @@ class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, 
 		 */
 		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
-			TqInt i;
+			TqUint i;
 			if ( pVal->Size() > 1 )
 			{
 				const TqFloat * pData;
@@ -1225,7 +1225,7 @@ class CqShaderVariableVaryingFloat : public CqShaderVariableVarying<type_float, 
 		}
 		virtual void	SetBool( const TqBool& val )
 		{
-			TqInt i;
+			TqUint i;
 			for ( i = 0; i < Size(); i++ )
 				m_aValue[ i ] = val;
 		}
@@ -1275,7 +1275,7 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 		}
 		virtual	void	SetString( const CqString& s )
 		{
-			TqInt i;
+			TqUint i;
 			for ( i = 0; i < Size(); i++ )
 				m_aValue[ i ] = s;
 		}
@@ -1284,7 +1284,7 @@ class CqShaderVariableVaryingString : public CqShaderVariableVarying<type_string
 		 */
 		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
-			TqInt i;
+			TqUint i;
 			if ( pVal->Size() > 1 )
 			{
 				const CqString * pData;
@@ -1346,7 +1346,7 @@ class CqShaderVariableVaryingPoint : public CqShaderVariableVarying<type_point, 
 		}
 		virtual	void	SetPoint( const CqVector3D& p )
 		{
-			TqInt i;
+			TqUint i;
 			for ( i = 0; i < Size(); i++ )
 				m_aValue[ i ] = p;
 		}
@@ -1399,7 +1399,7 @@ class CqShaderVariableVaryingPoint : public CqShaderVariableVarying<type_point, 
 		 */
 		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
-			TqInt i;
+			TqUint i;
 			if ( pVal->Size() > 1 )
 			{
 				const CqVector3D * pData;
@@ -1457,7 +1457,7 @@ class CqShaderVariableVaryingVector : public CqShaderVariableVarying<type_vector
 		}
 		virtual	void	SetPoint( const CqVector3D& p )
 		{
-			TqInt i;
+			TqUint i;
 			for ( i = 0; i < Size(); i++ )
 				m_aValue[ i ] = p;
 		}
@@ -1510,7 +1510,7 @@ class CqShaderVariableVaryingVector : public CqShaderVariableVarying<type_vector
 		 */
 		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
-			TqInt i;
+			TqUint i;
 			if ( pVal->Size() > 1 )
 			{
 				const CqVector3D * pData;
@@ -1568,7 +1568,7 @@ class CqShaderVariableVaryingNormal : public CqShaderVariableVarying<type_normal
 		}
 		virtual	void	SetPoint( const CqVector3D& p )
 		{
-			TqInt i;
+			TqUint i;
 			for ( i = 0; i < Size(); i++ )
 				m_aValue[ i ] = p;
 		}
@@ -1621,7 +1621,7 @@ class CqShaderVariableVaryingNormal : public CqShaderVariableVarying<type_normal
 		 */
 		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
-			TqInt i;
+			TqUint i;
 			if ( pVal->Size() > 1 )
 			{
 				const CqVector3D * pData;
@@ -1679,7 +1679,7 @@ class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, 
 		}
 		virtual	void	SetColor( const CqColor& c )
 		{
-			TqInt i;
+			TqUint i;
 			for ( i = 0; i < Size(); i++ )
 				m_aValue[ i ] = c;
 		}
@@ -1688,7 +1688,7 @@ class CqShaderVariableVaryingColor : public CqShaderVariableVarying<type_color, 
 		 */
 		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
-			TqInt i;
+			TqUint i;
 			if ( pVal->Size() > 1 )
 			{
 				const CqColor * pData;
@@ -1750,7 +1750,7 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 		}
 		virtual	void	SetMatrix( const CqMatrix& m )
 		{
-			TqInt i;
+			TqUint i;
 			for ( i = 0; i < Size(); i++ )
 				m_aValue[ i ] = m;
 		}
@@ -1759,7 +1759,7 @@ class CqShaderVariableVaryingMatrix : public CqShaderVariableVarying<type_matrix
 		 */
 		virtual	void	SetValueFromVariable( const IqShaderData* pVal )
 		{
-			TqInt i;
+			TqUint i;
 			if ( pVal->Size() > 1 )
 			{
 				const CqMatrix * pData;

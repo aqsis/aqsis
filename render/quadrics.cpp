@@ -1250,9 +1250,7 @@ CqBound CqQuadric::RevolveForBound( const std::vector<CqVector3D>& profile, cons
 		}*/
 	dtheta = theta / static_cast<TqFloat>( narcs );
 
-	TqUint n = 2 * narcs + 1;					// n control points ;
-
-	std::vector<TqFloat> cosines( narcs + 1 );
+        std::vector<TqFloat> cosines( narcs + 1 );
 	std::vector<TqFloat> sines( narcs + 1 );
 
 	angle = 0.0;

@@ -46,7 +46,7 @@ START_NAMESPACE( Aqsis )
 /** Constructor.
  */
 
-CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface(), m_cuVerts( 0 ), m_cvVerts( 0 ), m_uOrder( 0 ), m_vOrder( 0 ), m_umin( 0.0f ), m_umax( 1.0f ), m_vmin( 0.0f ), m_vmax( 1.0f ), m_fPatchMesh( TqFalse )
+CqSurfaceNURBS::CqSurfaceNURBS() : CqSurface(), m_uOrder( 0 ), m_vOrder( 0 ), m_cuVerts( 0 ), m_cvVerts( 0 ), m_umin( 0.0f ), m_umax( 1.0f ), m_vmin( 0.0f ), m_vmax( 1.0f ), m_fPatchMesh( TqFalse )
 {
 	TrimLoops() = static_cast<const CqAttributes*>( pAttributes() ) ->TrimLoops();
 }
@@ -223,7 +223,7 @@ void CqSurfaceNURBS::DersBasisFunctions( TqFloat u, TqUint i, std::vector<TqFloa
 	a[ 0 ].resize( k );
 	a[ 1 ].resize( k );
 
-	TqUint p = k - 1;
+	TqInt p = k - 1;
 
 	ndu[ 0 ][ 0 ] = 1.0f;
 	for ( j = 1; j <= p; j++ )
@@ -373,7 +373,7 @@ TqUint CqSurfaceNURBS::InsertKnotU( TqFloat u, TqInt r )
 	TqInt k = m_auKnots.size() - 1, s = 0;
 	TqInt i, j;
 	TqInt p = uDegree();
-	TqInt mp = m_auKnots.size() + p + 1;
+	
 
 	// If the specified u value falls outside the current range, then fail.
 	if ( u < m_auKnots[ uDegree() ] || u > m_auKnots[ m_cuVerts ] )
@@ -1465,7 +1465,7 @@ TqInt CqSurfaceNURBS::Split( std::vector<CqBasicSurface*>& aSplits )
 		std::vector<CqSurfaceNURBS*> S;
 
 		SubdivideSegments( S );
-		TqInt i = 0;
+		TqUint i;
 		for ( i = 0; i < S.size(); i++ )
 		{
 			S[ i ] ->SetSurfaceParameters( *this );
@@ -1562,7 +1562,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 	if( NULL != poptGridSize )
 		gs = poptGridSize[0];
 	
-	TqInt gridsize = 1.0;
+	TqFloat gridsize = 1.0;
 
         if (gs >= 1.0) gridsize = gs * gs;
 
@@ -2099,7 +2099,7 @@ void CqSurfaceNURBS::SubdivideSegments( std::vector<CqSurfaceNURBS*>& S )
 			}
 
 			// Copy the knot vectors
-			TqInt iuK, ivK;
+			TqUint iuK, ivK;
 			for ( iuK = 0; iuK < S[ iS ] ->uOrder() + S[ iS ] ->cuVerts(); iuK++ )
 				S[ iS ] ->auKnots() [ iuK ] = auKnots() [ uOffset + iuK ];
 			for ( ivK = 0; ivK < S[ iS ] ->vOrder() + S[ iS ] ->cvVerts(); ivK++ )

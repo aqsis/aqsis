@@ -39,7 +39,11 @@
 #define	__old_max__ max
 #undef max
 #endif
+#ifndef AQSIS_SYSTEM_MACOSX
 #include	<valarray>
+#else
+#include        "macosx/valarray"
+#endif
 #ifdef	__old_min__
 #define	min __old_min__
 #undef __old_min__
@@ -52,7 +56,7 @@
 #include	"bitvector.h"
 
 #include	"renderer.h"
-#include    "csgtree.h"
+#include        "csgtree.h"
 #include	"color.h"
 #include	"vector2d.h"
 

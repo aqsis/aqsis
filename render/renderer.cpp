@@ -816,7 +816,7 @@ CqColor*	CqRenderer::GetColorOptionWrite( const char* strName, const char* strPa
 TqBool	CqRenderer::SetCoordSystem( const char* strName, const CqMatrix& matToWorld )
 {
 	// Search for the same named system in the current list.
-	TqLong hash = CqParameter::hash( strName );
+	TqUlong hash = CqParameter::hash( strName );
 	for ( TqUint i = 0; i < m_aCoordSystems.size(); i++ )
 	{
 		if ( m_aCoordSystems[ i ].m_hash == hash )

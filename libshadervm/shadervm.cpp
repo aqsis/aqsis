@@ -53,7 +53,7 @@ static struct shader_types
 {
 	char *name;
 	EqShaderType type;
-	TqLong hash;
+	TqUlong hash;
 }
 gShaderTypeNames[] =
     {
@@ -442,20 +442,20 @@ TqInt CqShaderVM::m_cTransSize = sizeof( m_TransTable ) / sizeof( m_TransTable[ 
  * Private hash keys for "Data", "Init", "Code", "segment", "param", 
  *          "varying", "uniform", "USES"
  */
-static TqLong dhash = 0;
-static TqLong ihash = 0;
-static TqLong chash = 0;
-static TqLong shash = 0;
-static TqLong phash = 0;
-static TqLong vhash = 0;
-static TqLong uhash = 0;
-static TqLong ushash = 0;
-static TqLong ehash = 0;
-static TqLong ohash = 0;
+static TqUlong dhash = 0;
+static TqUlong ihash = 0;
+static TqUlong chash = 0;
+static TqUlong shash = 0;
+static TqUlong phash = 0;
+static TqUlong vhash = 0;
+static TqUlong uhash = 0;
+static TqUlong ushash = 0;
+static TqUlong ehash = 0;
+static TqUlong ohash = 0;
 /*
  * Private hash key for the data types supported by the shaders
  */
-static TqLong *itypes = NULL;
+static TqUlong *itypes = NULL;
 
 
 
@@ -799,7 +799,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 	std::vector<TqInt>	aLabels;
 	CqShaderExecEnv	StdEnv;
 	TqInt	array_count = 0;
-	TqLong  htoken, i;
+	TqUlong  htoken, i;
 
 	IqLog *logger ;
 	if (QGetRenderContextI() != NULL)
@@ -834,7 +834,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 
 	if (!itypes)
 	{
-		itypes = (TqLong *) malloc(gcVariableTypeNames * sizeof(TqLong));
+		itypes = (TqUlong *) malloc(gcVariableTypeNames * sizeof(TqUlong));
 		for(i = 0; i<gcVariableTypeNames; i++)
 			itypes[i] = CqParameter::hash(gVariableTypeNames[i]);
 	}
@@ -1035,7 +1035,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							};
 
 							*pFile >> strArgTypes;
-							for ( int x=1; x < strArgTypes.length()-1; x++ )
+							for ( TqUint x=1; x < strArgTypes.length()-1; x++ )
 							{
 								m_itTypeIdMap = m_TypeIdMap.find( strArgTypes[x] );
 								if ( m_itTypeIdMap != m_TypeIdMap.end() )
@@ -1516,13 +1516,13 @@ TqInt CqShaderVM::GetShaderVarCount()
  *
  */
 
-IqShaderData * CqShaderVM::GetShaderVarAt(int varIndex)
+IqShaderData * CqShaderVM::GetShaderVarAt(TqInt varIndex)
 {
 	IqShaderData * result;
 	result = NULL;
 	if (varIndex >= 0)
 	{
-		if (varIndex < m_LocalVars.size())
+		if ((TqUint) varIndex < m_LocalVars.size())
 		{
 			result = m_LocalVars[varIndex];
 		}

@@ -128,7 +128,7 @@ void CqSubdivision2::Prepare(TqInt cVerts)
  */
 TqInt CqSubdivision2::AddVertex(CqLath* pVertex)
 {
-	TqInt iIndex;
+	TqInt iIndex=0;
 
 	std::vector<CqParameter*>::iterator iUP;
 	TqInt iTime;
@@ -300,7 +300,7 @@ TqInt CqSubdivision2::AddEdgeVertex(CqLath* pVertex)
  */
 TqInt CqSubdivision2::AddFaceVertex(CqLath* pVertex)
 {
-	TqInt iIndex;
+	TqInt iIndex=0;
 
 	std::vector<CqParameter*>::iterator iUP;
 	TqInt iTime;
@@ -731,7 +731,7 @@ void CqSubdivision2::OutputMesh(const char* fname, std::vector<CqLath*>* paFaces
 	std::ofstream file(fname);
 	std::vector<CqLath*> aQfv;
 
-	TqInt i;
+	TqUint i;
 	for( i = 0; i < cVertices(); i++ )
 	{
 		CqVector3D vec = pPoints()->P()->pValue()[ pVertex( i )->VertexIndex() ];
@@ -744,7 +744,7 @@ void CqSubdivision2::OutputMesh(const char* fname, std::vector<CqLath*>* paFaces
 		if( NULL == pFacet(i)->pFaceVertex())
 		{
 			pFacet(i)->Qfv(aQfv);
-			TqInt j;
+			TqUint j;
 			file << "f ";
 			for( j = 0; j < aQfv.size(); j++ )
 				file << aQfv[j]->VertexIndex()+1 << " ";
@@ -758,7 +758,7 @@ void CqSubdivision2::OutputMesh(const char* fname, std::vector<CqLath*>* paFaces
 		for(i = 0; i < paFaces->size(); i++)
 		{
 			(*paFaces)[i]->Qfv(aQfv);
-			TqInt j;
+			TqUint j;
 			file << "f ";
 			for( j = 0; j < aQfv.size(); j++ )
 				file << aQfv[j]->VertexIndex()+1 << " ";
@@ -780,7 +780,7 @@ void CqSubdivision2::OutputInfo(const char* fname, std::vector<CqLath*>* paFaces
 	if( NULL == paLaths )
 		paLaths = &m_apFacets;
 	
-	for(TqInt i = 0; i < paLaths->size(); i++)
+	for(TqUint i = 0; i < paLaths->size(); i++)
 	{
 		CqLath* pL = (*paLaths)[i];
 		file << i << " - 0x" << pL << " - "	<<
@@ -1136,7 +1136,6 @@ void CqSurfaceSubdivisionPatch::StoreDice( CqMicroPolyGrid* pGrid, CqPolygonPoin
 }
 
 
-static TqInt cPatches = 0;
 TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 {
 	assert( NULL != pTopology() );
@@ -1215,7 +1214,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 					// Copy any 'vertex' class primitive variables.
 					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( pSurface->cVertex() );
-					TqInt i;
+					TqUint i;
 					for( i = 0; i < pSurface->cVertex(); i++ )
 						pNewUP->SetValue( ( *iUP ), i, aiVertices[i] );
 					pSurface->AddPrimitiveVariable( pNewUP );
@@ -1239,7 +1238,7 @@ TqInt CqSurfaceSubdivisionPatch::Split( std::vector<CqBasicSurface*>& aSplits )
 			}
 
 			// Need to get rid of any 'h' values added to the "P" variables during multiplication.
-			TqInt i;
+			TqUint i;
 			for( i = 0; i < pSurface->cVertex(); i++ )
 				( *pSurface->P() ) [i] = static_cast<CqVector3D>( ( *pSurface->P() ) [i] );
 
@@ -1517,7 +1516,6 @@ TqInt CqSurfaceSubdivisionMesh::Split( std::vector<CqBasicSurface*>& aSplits )
 				// Add a patch surface to the bucket queue
 				CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( m_pTopology, m_pTopology->pFacet( face ) );
 				pNew->AddRef();
-				TqFloat time = QGetRenderContext()->Time();
 				aSplits.push_back( pNew );
 				CreatedPolys++;
 			}

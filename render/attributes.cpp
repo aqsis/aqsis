@@ -134,7 +134,6 @@ CqAttributes::CqAttributes() :
 	ADD_SYSTEM_ATTR( Sides, TqInt, TqFloat, type_integer, 2 );		// the number of visible sides associated primitives have.
 	ADD_SYSTEM_ATTR( LevelOfDetailRulerSize, TqFloat, TqFloat, type_float, FLT_MAX );		// current LOD ruler size
 	ADD_SYSTEM_ATTR2( LevelOfDetailBounds, TqFloat, TqFloat, type_float, 0.0f, 1.0f );	// relative importance bounds for this LOD representation
-	ADD_SYSTEM_ATTR( SqrtGridSize, TqFloat, TqFloat, type_float, 16.0f );					// Grid size square root.
 
 	AddAttribute( pdefattrs );
 }

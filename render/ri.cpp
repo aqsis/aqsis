@@ -2839,7 +2839,7 @@ RtVoid RiCurves( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, .
 RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, PARAMETERLIST )
 {
 	// find out whether the curve is periodic or non-periodic
-	TqBool periodic;
+	TqBool periodic = TqFalse;
 	if ( strcmp( wrap, RI_PERIODIC ) == 0 )
 	{
 		periodic = TqTrue;
@@ -4459,7 +4459,6 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 					}
 					else if ( strcmp( tags [ i ], "corner" ) == 0 )
 					{
-						TqFloat cornerSharpness = floatargs[ floatargIndex ];
 						TqInt iVertex = 0;
 						while ( iVertex < nargs[ argcIndex ] )
 						{
@@ -4775,7 +4774,6 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 	RtInt i;
 	for ( i = 0; i < count; i++ )
 	{
-		RtToken	token = tokens[ i ];
 		TqUlong htoken = CqParameter::hash( tokens[ i ] );
 		RtPointer	value = values[ i ];
 
@@ -4840,7 +4838,7 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST 
 	{
 		pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 0 ) );
 		pSurface->P() ->SetSize( pSurface->cVertex() );
-		TqInt i;
+		TqUint i;
 		switch ( fP )
 		{
 				case RIL_P:

@@ -265,7 +265,7 @@ void CqMicroPolyGrid::Shade()
 
 	static CqVector3D	vecE( 0, 0, 0 );
 	static CqVector3D	Defvec( 0, 0, 0 );
-	static TqFloat	DefFloat = 0.0f;
+	
 
 	CqStats& theStats = QGetRenderContext() ->Stats();
 
@@ -439,7 +439,7 @@ void CqMicroPolyGrid::Shade()
 			{
 				cCulled++;
 				m_CulledPolys.SetValue( i, TqTrue );
-			}
+			} else break;
 		}
 		theStats.OcclusionCullTimer().Stop();
 
@@ -660,8 +660,6 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, lo
 
 	// Determine whether we need to bother with trimming or not.
 	TqBool bCanBeTrimmed = pSurface() ->bCanBeTrimmed() && NULL != u() && NULL != v();
-
-	CqStats& theStats = QGetRenderContext() ->Stats();
 
 	AddRef();
 
@@ -1187,8 +1185,7 @@ CqBound CqMicroPolygon::GetTotalBound( TqBool fForce )
 	if ( fForce )
 	{
 		// Calculate the boundary, and store the indexes in the cache.
-		const CqVector3D& A = pP[ m_Index ];
-		const CqVector3D& B = pP[ m_Index + 1 ];
+            	const CqVector3D& B = pP[ m_Index + 1 ];
 		const CqVector3D& C = pP[ m_Index + m_pGrid->uGridRes() + 2 ];
 		const CqVector3D& D = pP[ m_Index + m_pGrid->uGridRes() + 1 ];
 
@@ -1282,8 +1279,7 @@ CqBound CqMicroPolygonMotion::GetTotalBound( TqBool fForce )
 void CqMicroPolygonMotion::BuildBoundList()
 {
 	m_BoundList.Clear();
-	TqInt cBounds = 4;
-
+	
 	assert( NULL != m_Keys[ 0 ] );
 
 	CqBound start = m_Keys[ 0 ] ->GetTotalBound();

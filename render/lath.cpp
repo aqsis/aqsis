@@ -395,7 +395,6 @@ TqInt CqLath::cQfv() const
 {
 	// Laths representing the edges of the associated facet are obtained by following
 	// clockwise links around the face.
-	const CqLath *pTmpLath = this;
 	TqInt c = 1;	// Start with this one.
 
 	CqLath* pNext = cf();
@@ -422,8 +421,6 @@ TqInt CqLath::cQvv() const
 	TqInt c = 1; // Start with this
 	// Laths representing the edges that radiate from the associated vertex are obtained by 
 	// following the clockwise vertex links around the vertex. 
-	const CqLath *pTmpLath = this;
-
 	CqLath* pNext = cv();
 	const CqLath* pLast = this;
 	while(NULL != pNext && this != pNext)

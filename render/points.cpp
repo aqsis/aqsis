@@ -282,7 +282,7 @@ void CqPoints::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDic
 
 TqBool	CqPoints::Diceable()
 {
-	TqInt gridsize;
+	TqInt gridsize = 256;
 
 	const TqInt* poptGridSize = QGetRenderContext() ->optCurrent().GetIntegerOption( "limits", "gridsize" );
 
@@ -299,8 +299,6 @@ TqBool	CqPoints::Diceable()
 
 	if ( poptGridSize )
 		gridsize = poptGridSize[ 0 ];
-	else
-		gridsize = static_cast<TqInt>( m_XBucketSize * m_XBucketSize / ShadingRate );
 
 	if( nVertices() > gridsize )
 		return ( TqFalse );
@@ -685,13 +683,6 @@ void CqMotionMicroPolyGridPoints::Split( CqImageBuffer* pImage, TqInt iBucket, l
 
 		CqMicroPolyGridPoints* pGridT = static_cast<CqMicroPolyGridPoints*>( GetMotionObject( Time( iTime ) ) );
 
-		// Get a pointer to the surface, so that we can interrogate the "width" parameters.
-		CqPoints* pPoints = static_cast<CqPoints*>( pGridT->pSurface() );
-		CqParameterTyped<CqVector4D, CqVector3D>* pPParam = pPoints->pPoints( iTime )->P();
-		assert( NULL != pPParam );
-
-		const CqParameterTypedConstant<TqFloat, type_float, TqFloat>* pConstantWidthParam = pPoints->constantwidth( );
-
 		CqVector3D* pP;
 		pGridT->P() ->GetPointPtr( pP );
 
@@ -807,7 +798,6 @@ CqBound CqMicroPolygonMotionPoints::GetTotalBound( TqBool fForce )
 void CqMicroPolygonMotionPoints::BuildBoundList()
 {
 	m_BoundList.Clear();
-	TqInt cBounds = 4;
 
 	assert( NULL != m_Keys[0] );
 
@@ -917,7 +907,6 @@ TqBool CqMicroPolygonMotionPoints::fContains( const CqVector2D& vecP, TqFloat& D
 	}
 	else
 	{
-		TqFloat F1 = 1.0f - Fraction;
 		CqMovingMicroPolygonKeyPoints* pMP1 = m_Keys[ iIndex ];
 		CqMovingMicroPolygonKeyPoints* pMP2 = m_Keys[ iIndex + 1 ];
 		// Check against each line of the quad, if outside any then point is outside MPG, therefore early exit.

@@ -58,11 +58,11 @@ class CqShaderVM;
 
 struct SqOpCodeTrans
 {
-	char*	m_strName;					///< Name of the opcode.
-	TqLong	m_hash;						///< Hash key of the optcode.
+	char*	m_strName;			///< Name of the opcode.
+	TqUlong	m_hash;				///< Hash key of the opcode.
 	void (CqShaderVM::*m_pCommand ) ();	//< Member pointer to the function.
-	TqInt	m_cParams;					///< Number of expected parameters.
-	TqInt	m_aParamTypes[10];				///< Array of parameter types (up to ten, can be extended if required).
+	TqInt	m_cParams;			///< Number of expected parameters.
+	TqInt	m_aParamTypes[10];		///< Array of parameter types (up to ten, can be extended if required).
 }
 ;
 
@@ -476,7 +476,7 @@ union UsProgramElement
 						RELEASE(ValB): \
 						RELEASE(ValC): 
 
-static TqFloat	temp_float;
+static TqFloat    temp_float;
 static CqVector3D temp_point;
 static CqColor temp_color;
 static CqString temp_string;
@@ -637,7 +637,7 @@ class CqShaderVM : public CqShaderStack, public IqShader, public CqDSORepository
 		 */
 		TqInt	FindLocalVarIndex( const char* strName )
 		{
-			TqInt tmp = m_LocalIndex;
+			TqUint tmp = m_LocalIndex;
 
 			for ( ; m_LocalIndex < m_LocalVars.size(); m_LocalIndex++ )
 				if ( m_LocalVars[ m_LocalIndex ] ->strName().compare( strName ) == 0 ) return ( m_LocalIndex );
