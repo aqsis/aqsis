@@ -193,9 +193,9 @@ bool CqOutput::endNesting(EqBlocks type)
                 //  the stack
                 std::stringstream strBuf;
                 strBuf << "Bad nesting: Attempting to close block of type "
-                       << blockNames[curBlock]
-                       << " within a "
                        << blockNames[type]
+                       << " within a "
+                       << blockNames[curBlock]
                        << " block." << std::ends;
                 throw CqError(blockErrors[curBlock], RIE_SEVERE,
                         &strBuf.str()[0], TqFalse);
