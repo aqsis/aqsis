@@ -33,21 +33,24 @@
 
 /** Compile the give sl file into an slx bytestream.
  */
-void compile_file( const char* sl_file )
+void compile_file( std::string slppargs, std::string aqslcompargs )
 {
 	FILE * hPipeRead;
 	FILE* hPipeWrite;
 
 	std::strstream slppcommand;
+	std::strstream aqslcompcommand;
 
 #ifdef AQSIS_SYSTEM_MACOSX
-	slppcommand << "${AQSIS_BASE_PATH}/slpp -d PI=3.141592654 -d AQSIS -c6 " << sl_file << std::ends;
+	slppcommand << "${AQSIS_BASE_PATH}/slpp -d PI=3.141592654 -d AQSIS -c6 " << slppargs.c_str() << std::ends;
+	aqslcompcommand << "${AQSIS_BASE_PATH}/aqslcomp " << aqslcompargs.c_str() << std::ends;
 	hPipeRead = popen( slppcommand.str(), "r" );
-	hPipeWrite = popen( "${AQSIS_BASE_PATH}/aqslcomp", "w" );
+	hPipeWrite = popen( aqslcompcommand.str(), "w" );
 #else
-	slppcommand << "slpp.exe -d PI=3.141592654 -d AQSIS -c6 " << sl_file << std::ends;
+	slppcommand << "slpp -d PI=3.141592654 -d AQSIS -c6 " << slppargs.c_str() << std::ends;
+	aqslcompcommand << "aqslcomp " << aqslcompargs.c_str() << std::ends;
 	hPipeRead = _popen( slppcommand.str(), "r" );
-	hPipeWrite = _popen( "aqslcomp.exe", "w" );
+	hPipeWrite = _popen( aqslcompcommand.str(), "w" );
 #endif /* AQSIS_SYSTEM_MACOSX */
 
 	char psBuffer[ 128 ];
@@ -74,21 +77,26 @@ void compile_file( const char* sl_file )
 int main( int argc, char** argv )
 {
 	int i;
-	char* pargs = new char[255];
-	pargs[0] = '\0';
+	std::string slppargs = "";
+	std::string aqslcompargs = "";
 	for ( i = 1; i < argc; i++ )
 	{
-		if ( strstr( argv[ i ], "-help" ) )
+		if ( strstr( argv[ i ], "-help" ) || 
+			 strstr( argv[ i ], "-version" ) ||
+			 strstr( argv[ i ], "-o" ) )
 		{
-			printf( "Usage: %s [options] yourshader.sl\n", argv[ 0 ] );
-			printf( "all options will be passed directly to slpp\n" );
-			exit( 2 );
+			aqslcompargs.append( argv[i] );
+			aqslcompargs.append(" ");
 		}
-		strcat( pargs, argv[ i] );
-		strcat( pargs, " " );
+		else
+		{
+			slppargs.append(argv[i]);
+			slppargs.append(" ");
+		}
 	}
-	compile_file( pargs );
+	std::cout << "slpp -- " << slppargs.c_str() << std::endl;
+	std::cout << "aqslcomp -- " << aqslcompargs.c_str() << std::endl;
+	compile_file( slppargs, aqslcompargs );
 
-	delete[](pargs);
 	return ( 0 );
 }

@@ -37,8 +37,8 @@
 
 START_NAMESPACE( Aqsis )
 
-void OutputLocalVariable( const IqVarDef* pVar, std::ostream& out );
-void OutputFunctionCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::ostream& out );
+void OutputLocalVariable( const IqVarDef* pVar, std::ostream& out, std::string strOutName );
+void OutputFunctionCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::ostream& out, std::string strOutName );
 
 
 static char* gVariableTypeNames[] =
@@ -68,10 +68,10 @@ static TqUint gInternalFunctionUsage = 0;
 std::vector<std::vector<SqVarRefTranslator>*>	saTransTable;
 
 
-void OutputTree( const IqParseNode* pNode )
+void OutputTree( const IqParseNode* pNode, std::string strOutName )
 {
 	if ( pNode )
-		OutputTreeNode( pNode, std::cout );
+		OutputTreeNode( pNode, std::cout, strOutName );
 }
 
 TqInt	gcLabels = 0;
@@ -181,7 +181,7 @@ const char* MathOpName( TqInt op )
 }
 
 
-void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
+void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string strOutName)
 {
 	TqUint i;
 	IqParseNodeShader* pS;
@@ -208,10 +208,14 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 	if ( pNode->GetInterface( IqParseNodeShader::m_ID, ( void** ) & pS ) )
 	{
 		// Create a new file for this shader
-		CqString slxName( pS->strName() );
-		slxName.append( VM_SHADER_EXTENSION );
-		std::ofstream slxFile( slxName.c_str() );
-		std::cout << "... " << slxName.c_str() << std::endl;
+		if( strOutName.compare("") == 0)
+		{
+			strOutName = pS->strName();
+			strOutName.append( VM_SHADER_EXTENSION );
+		}
+		
+		std::ofstream slxFile( strOutName.c_str() );
+		std::cout << "... " << strOutName.c_str() << std::endl;
 
 		slxFile << pS->strShaderType() << std::endl;
 
@@ -229,7 +233,7 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		{
 			gInternalFunctionUsage = 0;
 			std::ostrstream strNull;
-			OutputTreeNode( pNode->pChild(), strNull );
+			OutputTreeNode( pNode->pChild(), strNull, strOutName );
 		}
 
 		// Now that we have this information, work out which standard vars are used.
@@ -243,21 +247,21 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 
 		// Output any declared variables.
 		for ( i = 0; i < gLocalVars.size(); i++ )
-			OutputLocalVariable( &gLocalVars[ i ], slxFile );
+			OutputLocalVariable( &gLocalVars[ i ], slxFile, strOutName );
 
 		slxFile << std::endl << std::endl << "segment Init" << std::endl;
 		for ( i = 0; i < gLocalVars.size(); i++ )
 		{
 			IqVarDef* pVar = &gLocalVars[ i ];
 			if ( pVar->Type() & Type_Param && pVar->pInitialiser() != 0 )
-				OutputTreeNode( pVar->pInitialiser(), slxFile );
+				OutputTreeNode( pVar->pInitialiser(), slxFile, strOutName );
 		}
 
 		slxFile << std::endl << std::endl << "segment Code" << std::endl;
 		IqParseNode* pNext = pNode->pChild();
 		while ( pNext )
 		{
-			OutputTreeNode( pNext, slxFile );
+			OutputTreeNode( pNext, slxFile, strOutName );
 			pNext = pNext->pNextSibling();
 		}
 		slxFile.close();
@@ -267,7 +271,7 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		// Output the function name.
 		const IqFuncDef * pFunc = pFC->pFuncDef();
 		// TODO: Better handling of local functions.
-		OutputFunctionCall( pFunc, pNode->pChild(), out );
+		OutputFunctionCall( pFunc, pNode->pChild(), out, strOutName );
 
 		// If it is a builtin function, lets just check its standard variable usage.
 		if ( !pFunc->fLocal() )
@@ -279,7 +283,7 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		{
 			// Output the assignment expression
 			IqParseNode * pExpr = pNode->pChild();
-			if ( pExpr != 0 ) OutputTreeNode( pExpr, out );
+			if ( pExpr != 0 ) OutputTreeNode( pExpr, out, strOutName );
 
 			// Output a dup so that the result remains on the stack.
 			if ( !pVA->fDiscardResult() )
@@ -288,7 +292,7 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 			if ( pNode->GetInterface( ParseNode_ArrayVariableAssign, ( void** ) & pAVA ) )
 			{
 				IqParseNode * pIndex = pExpr->pNextSibling();
-				OutputTreeNode( pIndex, out );
+				OutputTreeNode( pIndex, out, strOutName );
 				out << "\tipop ";
 			}
 			else
@@ -307,7 +311,7 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		{
 			if ( pNode->GetInterface( ParseNode_ArrayVariable, ( void** ) & pAV ) )
 			{
-				OutputTreeNode( pNode->pChild(), out );
+				OutputTreeNode( pNode->pChild(), out, strOutName );
 				out << "\tipushv ";
 			}
 			else
@@ -332,8 +336,8 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		char* pstrBType = "";
 		if ( pOperandB ) pstrBType = gVariableTypeIdentifiers[ pOperandB->ResType() & Type_Mask ];
 
-		if ( pOperandA ) OutputTreeNode( pOperandA, out );
-		if ( pOperandB ) OutputTreeNode( pOperandB, out );
+		if ( pOperandA ) OutputTreeNode( pOperandA, out, strOutName );
+		if ( pOperandB ) OutputTreeNode( pOperandB, out, strOutName );
 		out << "\t" << MathOpName( pO->Operator() );
 		if ( pNode->NodeType() != ParseNode_LogicalOp )
 		{
@@ -347,7 +351,7 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		IqParseNode * pNext = pNode->pChild();
 		while ( pNext )
 		{
-			OutputTreeNode( pNext, out );
+			OutputTreeNode( pNext, out, strOutName );
 			pNext = pNext->pNextSibling();
 		}
 	}
@@ -356,7 +360,7 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		IqParseNode * pNext = pNode->pChild();
 		while ( pNext )
 		{
-			OutputTreeNode( pNext, out );
+			OutputTreeNode( pNext, out, strOutName );
 			pNext = pNext->pNextSibling();
 		}
 		out << "\tdrop" << std::endl;
@@ -382,14 +386,14 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 
 		out << ":" << iLabelA << std::endl;		// loop back label
 		out << "\tS_CLEAR" << std::endl;			// clear current state
-		OutputTreeNode( pArg, out );				// relation
+		OutputTreeNode( pArg, out, strOutName );				// relation
 		out << "\tS_GET" << std::endl;			// Get the current state by popping the t[ value off the stack
 		out << "\tS_JZ " << iLabelB << std::endl;	// exit if false
 		out << "\tRS_PUSH" << std::endl;			// push running state
 		out << "\tRS_GET" << std::endl;			// get current state to running state
-		OutputTreeNode( pStmt, out );				// statement
+		OutputTreeNode( pStmt, out, strOutName );				// statement
 		if ( pStmtInc )
-			OutputTreeNode( pStmtInc, out );		// incrementor
+			OutputTreeNode( pStmtInc, out, strOutName );		// incrementor
 		out << "\tRS_POP" << std::endl;			// Pop the running state
 		out << "\tjmp " << iLabelA << std::endl; // loop back jump
 		out << ":" << iLabelB << std::endl;		// completion label
@@ -405,13 +409,13 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		assert( pStmt != 0 );
 		out << ":" << iLabelA << std::endl;		// loop back label
 		out << "\tS_CLEAR" << std::endl;			// clear current state
-		OutputTreeNode( pArg, out );
+		OutputTreeNode( pArg, out, strOutName );
 		if ( pIC->fHasAxisAngle() ) out << "\tilluminate2" << std::endl;
 		else	out << "\tilluminate" << std::endl;
 		out << "\tS_JZ " << iLabelB << std::endl;	// exit loop if false
 		out << "\tRS_PUSH" << std::endl;			// Push running state
 		out << "\tRS_GET" << std::endl;			// Get state
-		OutputTreeNode( pStmt, out );				// statement
+		OutputTreeNode( pStmt, out, strOutName );				// statement
 		out << "\tRS_POP" << std::endl;			// Pop the running state
 		out << "\tjmp " << iLabelA << std::endl; // loop back jump
 		out << ":" << iLabelB << std::endl;		// completion label
@@ -430,18 +434,18 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		// The last child of the arg node is the Point to be illuminated, see Parser.y for confirmation.
 		IqParseNode* pInitArg = pArg->pChild();
 		while ( pInitArg->pNextSibling() != 0 ) pInitArg = pInitArg->pNextSibling();
-		OutputTreeNode( pInitArg, out );
+		OutputTreeNode( pInitArg, out, strOutName );
 		out << "\tinit_illuminance" << std::endl;
 		out << "\tjz " << iLabelB << std::endl;	// Jump if no lightsources.
 		out << ":" << iLabelA << std::endl;		// loop back label
 		out << "\tS_CLEAR" << std::endl;			// clear current state
-		OutputTreeNode( pArg, out );
+		OutputTreeNode( pArg, out, strOutName );
 		if ( pIC2->fHasAxisAngle() ) out << "\tilluminance2" << std::endl;
 		else	out << "\tilluminance" << std::endl;
 		out << "\tS_JZ " << iLabelC << std::endl;	// skip processing of statement if light has no influence
 		out << "\tRS_PUSH" << std::endl;			// Push running state
 		out << "\tRS_GET" << std::endl;			// Get state
-		OutputTreeNode( pStmt, out );				// statement
+		OutputTreeNode( pStmt, out, strOutName );				// statement
 		out << "\tRS_POP" << std::endl;			// Pop the running state
 		out << ":" << iLabelC << std::endl;		// continuation label
 		out << "\tadvance_illuminance" << std::endl;
@@ -462,13 +466,13 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 
 		out << ":" << iLabelA << std::endl;		// loop back label
 		out << "\tS_CLEAR" << std::endl;		// clear current state
-		OutputTreeNode( pArg, out );
+		OutputTreeNode( pArg, out, strOutName );
 		if ( pSC->fHasAxisAngle() ) out << "\tsolar2" << std::endl;
 		else	out << "\tsolar" << std::endl;
 		out << "\tS_JZ " << iLabelB << std::endl;	// exit loop if false
 		out << "\tRS_PUSH" << std::endl;		// Push running state
 		out << "\tRS_GET" << std::endl;			// set running state
-		if ( pStmt ) OutputTreeNode( pStmt, out );				// statement
+		if ( pStmt ) OutputTreeNode( pStmt, out, strOutName );				// statement
 		out << "\tRS_POP" << std::endl;			// Pop the running state
 		out << "\tjmp " << iLabelA << std::endl; // loop back jump
 		out << ":" << iLabelB << std::endl;		// completion label
@@ -485,7 +489,7 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		IqParseNode* pFalseStmt = pTrueStmt->pNextSibling();
 
 		out << "\tS_CLEAR" << std::endl;		// clear current state
-		OutputTreeNode( pArg, out );				// relation
+		OutputTreeNode( pArg, out, strOutName );				// relation
 		out << "\tS_GET" << std::endl;			// Get the current state by popping the top value off the stack
 		out << "\tRS_PUSH" << std::endl;		// push the running state
 		out << "\tRS_GET" << std::endl;			// get current state to running state
@@ -496,13 +500,13 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		}
 		else
 			out << "\tRS_JZ " << iLabelA << std::endl; // exit if all false
-		OutputTreeNode( pTrueStmt, out );			// true statement
+		OutputTreeNode( pTrueStmt, out, strOutName );			// true statement
 		if ( pFalseStmt )
 		{
 			out << ":" << iLabelB << std::endl;	// false part label
 			out << "\tRS_JNZ " << iLabelA << std::endl;	// exit if all true
 			out << "\tRS_INVERSE" << std::endl;	// Invert result
-			OutputTreeNode( pFalseStmt, out );		// false statement
+			OutputTreeNode( pFalseStmt, out, strOutName );		// false statement
 		}
 		out << ":" << iLabelA << std::endl;		// conditional exit point
 		out << "\tRS_POP" << std::endl;			// pop running state
@@ -518,9 +522,9 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		TqInt typeT = static_cast<TqInt>( pTrueStmt->ResType() & Type_Mask );
 		char* pstrTType = gVariableTypeIdentifiers[ typeT ];
 
-		OutputTreeNode( pTrueStmt, out );			// true statement
-		OutputTreeNode( pFalseStmt, out );			// false statement
-		OutputTreeNode( pArg, out );				// relation
+		OutputTreeNode( pTrueStmt, out, strOutName );			// true statement
+		OutputTreeNode( pFalseStmt, out, strOutName );			// false statement
+		OutputTreeNode( pArg, out, strOutName );				// relation
 		out << "\tmerge" << pstrTType << std::endl;
 	}
 	else if ( pNode->GetInterface( ParseNode_TypeCast, ( void** ) & pCast ) )
@@ -531,7 +535,7 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		TqInt typeA = pOperand->ResType() & Type_Mask;
 		TqInt typeB = pCast->CastTo() & Type_Mask;
 		// No need to output a cast for the triple or h types.
-		OutputTreeNode( pOperand, out );
+		OutputTreeNode( pOperand, out, strOutName );
 		if ( !( ( typeA == Type_Point || typeA == Type_Normal || typeA == Type_Vector ) &&
 		        ( typeB == Type_Point || typeB == Type_Normal || typeB == Type_Vector ) ) )
 		{
@@ -550,9 +554,9 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		assert( pC != 0 );
 
 		// Output the 'push'es in reverse, so that Red/X ec is first off the stack when doing a 'sett?' instruction.
-		OutputTreeNode( pC, out );
-		OutputTreeNode( pB, out );
-		OutputTreeNode( pA, out );
+		OutputTreeNode( pC, out, strOutName );
+		OutputTreeNode( pB, out, strOutName );
+		OutputTreeNode( pA, out, strOutName );
 	}
 	else if ( pNode->GetInterface( ParseNode_SixteenTuple, ( void** ) & pSixteenTuple ) )
 	{
@@ -576,28 +580,28 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out )
 		IqParseNode* p32 = p31->pNextSibling();	assert( p32 != 0 );
 		IqParseNode* p33 = p32->pNextSibling();	assert( p33 != 0 );
 
-		OutputTreeNode( p00, out );
-		OutputTreeNode( p01, out );
-		OutputTreeNode( p02, out );
-		OutputTreeNode( p03, out );
-		OutputTreeNode( p10, out );
-		OutputTreeNode( p11, out );
-		OutputTreeNode( p12, out );
-		OutputTreeNode( p13, out );
-		OutputTreeNode( p20, out );
-		OutputTreeNode( p21, out );
-		OutputTreeNode( p22, out );
-		OutputTreeNode( p23, out );
-		OutputTreeNode( p30, out );
-		OutputTreeNode( p31, out );
-		OutputTreeNode( p32, out );
-		OutputTreeNode( p33, out );
+		OutputTreeNode( p00, out, strOutName );
+		OutputTreeNode( p01, out, strOutName );
+		OutputTreeNode( p02, out, strOutName );
+		OutputTreeNode( p03, out, strOutName );
+		OutputTreeNode( p10, out, strOutName );
+		OutputTreeNode( p11, out, strOutName );
+		OutputTreeNode( p12, out, strOutName );
+		OutputTreeNode( p13, out, strOutName );
+		OutputTreeNode( p20, out, strOutName );
+		OutputTreeNode( p21, out, strOutName );
+		OutputTreeNode( p22, out, strOutName );
+		OutputTreeNode( p23, out, strOutName );
+		OutputTreeNode( p30, out, strOutName );
+		OutputTreeNode( p31, out, strOutName );
+		OutputTreeNode( p32, out, strOutName );
+		OutputTreeNode( p33, out, strOutName );
 	}
 	else if ( pNode->GetInterface( ParseNode_MessagePassingFunction, ( void** ) & pMessagePassingFunction ) )
 	{
 		IqParseNode * pExpr = pNode->pChild();
 
-		OutputTreeNode( pExpr, out );
+		OutputTreeNode( pExpr, out, strOutName );
 
 		CqString strCommType( "surface" );
 		switch ( pMessagePassingFunction->CommType() )
@@ -734,7 +738,7 @@ CqString StorageSpec( TqInt Type )
 /// OutputLocalVariable
 /// Output details of this local variable.
 
-void OutputLocalVariable( const IqVarDef* pVar, std::ostream& out )
+void OutputLocalVariable( const IqVarDef* pVar, std::ostream& out, std::string strOutName )
 {
 	if ( pVar->UseCount() > 0 || ( pVar->Type() & Type_Param ) )
 	{
@@ -749,7 +753,7 @@ void OutputLocalVariable( const IqVarDef* pVar, std::ostream& out )
 }
 
 
-void OutputFunctionCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::ostream& out )
+void OutputFunctionCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::ostream& out, std::string strOutName )
 {
 	if ( !pFunc->fLocal() )
 	{
@@ -761,7 +765,7 @@ void OutputFunctionCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::o
 			while ( pArg != 0 )
 			{
 				// Push the argument...
-				OutputTreeNode( pArg, out );
+				OutputTreeNode( pArg, out, strOutName );
 				pArg = pArg->pPrevSibling();
 			}
 		}
@@ -779,7 +783,7 @@ void OutputFunctionCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::o
 			}
 			// Not happy about this!!
 			CqParseNodeFloatConst C( static_cast<TqFloat>( abs( iAdd ) ) );
-			OutputTreeNode( &C, out );
+			OutputTreeNode( &C, out, strOutName );
 		}
 
 		out << "\t" << pFunc->strVMName() << std::endl;
@@ -812,11 +816,11 @@ void OutputFunctionCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::o
 				else
 				{
 					// Push the argument...
-					OutputTreeNode( pArg, out );
+					OutputTreeNode( pArg, out, strOutName );
 					// ...and pop the parameter
 					CqParseNodeAssign Pop( static_cast<CqParseNodeVariable*>( pParam ) );
 					Pop.NoDup();
-					OutputTreeNode( &Pop, out );
+					OutputTreeNode( &Pop, out, strOutName );
 				}
 				pParam = pParam->pNextSibling();
 				pArg = pArg->pNextSibling();
@@ -824,7 +828,7 @@ void OutputFunctionCall( const IqFuncDef* pFunc, IqParseNode* pArguments, std::o
 		}
 		// Output the function body.
 		PushTransTable( &aTransTable );
-		OutputTreeNode( pFunc->pDef(), out );
+		OutputTreeNode( pFunc->pDef(), out, strOutName );
 		PopTransTable();
 	}
 }
