@@ -2153,7 +2153,7 @@ STD_SOIMPL CqShaderExecEnv::SO_calculatenormal( POINTVAL p, DEFPARAMIMPL )
     {
         p->GetValue( v1, __iGrid );
         p->GetValue( v2, __iGrid - ( uRes + 1 ) );
-        Ret = ( v1 - v2 );
+        Ret2 = ( v1 - v2 );
     }
 
     CqVector3D N = Ret % Ret2;
