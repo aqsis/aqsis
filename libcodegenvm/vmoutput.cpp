@@ -181,7 +181,7 @@ const char* MathOpName( TqInt op )
 }
 
 
-void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string strOutName)
+void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string strOutName )
 {
 	TqUint i;
 	IqParseNodeShader* pS;
@@ -208,12 +208,12 @@ void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string st
 	if ( pNode->GetInterface( IqParseNodeShader::m_ID, ( void** ) & pS ) )
 	{
 		// Create a new file for this shader
-		if( strOutName.compare("") == 0)
+		if ( strOutName.compare( "" ) == 0 )
 		{
 			strOutName = pS->strName();
 			strOutName.append( VM_SHADER_EXTENSION );
 		}
-		
+
 		std::ofstream slxFile( strOutName.c_str() );
 		std::cout << "... " << strOutName.c_str() << std::endl;
 

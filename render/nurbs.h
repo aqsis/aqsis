@@ -111,7 +111,7 @@ class CqSurfaceNURBS : public CqSurface
 		}
 		/** Set the minimum u value of the surface.
 		 */
-		void	Setumin(TqFloat umin)
+		void	Setumin( TqFloat umin )
 		{
 			m_umin = umin;
 		}
@@ -123,7 +123,7 @@ class CqSurfaceNURBS : public CqSurface
 		}
 		/** Set the minimum v value of the surface.
 		 */
-		void	Setvmin(TqFloat vmin)
+		void	Setvmin( TqFloat vmin )
 		{
 			m_vmin = vmin;
 		}
@@ -135,7 +135,7 @@ class CqSurfaceNURBS : public CqSurface
 		}
 		/** Set the maximum u value of the surface.
 		 */
-		void	Setumax(TqFloat umax)
+		void	Setumax( TqFloat umax )
 		{
 			m_umax = umax;
 		}
@@ -147,7 +147,7 @@ class CqSurfaceNURBS : public CqSurface
 		}
 		/** Set the maximum v value of the surface.
 		 */
-		void	Setvmax(TqFloat vmax)
+		void	Setvmax( TqFloat vmax )
 		{
 			m_vmax = vmax;
 		}
@@ -167,23 +167,23 @@ class CqSurfaceNURBS : public CqSurface
 		 */
 		TqInt cuSegments() const
 		{
-			return(1 + m_cuVerts - m_uOrder );
+			return ( 1 + m_cuVerts - m_uOrder );
 		}
 		/** Determine how many segments in v for this surface patch.
 		 */
 		TqInt cvSegments() const
 		{
-			return(1 + m_cvVerts - m_vOrder );
+			return ( 1 + m_cvVerts - m_vOrder );
 		}
 		/** Determine whether this surface is a mesh, and needs to be split into segments before continuing.
 		 */
 		TqBool fPatchMesh() const
 		{
-			return( m_fPatchMesh );
+			return ( m_fPatchMesh );
 		}
 		/** Mark this mesh as being part of a mesh or not.
 		 */
-		void SetfPatchMesh( TqBool fPatchMesh = TqTrue)
+		void SetfPatchMesh( TqBool fPatchMesh = TqTrue )
 		{
 			m_fPatchMesh = fPatchMesh;
 		}
@@ -198,7 +198,7 @@ class CqSurfaceNURBS : public CqSurface
 		 */
 		CqVector4D&	CP( const TqUint u, TqUint v )
 		{
-			return ( (*P()) [ ( v * m_cuVerts ) + u ] );
+			return ( ( *P() ) [ ( v * m_cuVerts ) + u ] );
 		}
 		/** Get the control point at the specified u,v index.
 		 * \param u Index in the u direction.
@@ -207,7 +207,7 @@ class CqSurfaceNURBS : public CqSurface
 		 */
 		const	CqVector4D&	CP( const TqUint u, TqUint v ) const
 		{
-			return ( (*P()) [ ( v * m_cuVerts ) + u ] );
+			return ( ( *P() ) [ ( v * m_cuVerts ) + u ] );
 		}
 
 		/** Initialise the NURBS structures to take a NURBS surfafe of the specified dimensions.
@@ -231,9 +231,9 @@ class CqSurfaceNURBS : public CqSurface
 		TqUint	FindSpanV( TqFloat v ) const;
 		void	BasisFunctions( TqFloat u, TqUint span, std::vector<TqFloat>& aKnots, TqInt k, std::vector<TqFloat>& BasisVals );
 		void	DersBasisFunctions( TqFloat u, TqUint i, std::vector<TqFloat>& U, TqInt k, TqInt n, std::vector<std::vector<TqFloat> >& ders );
-		
-		template<class T, class SLT>
-		T	Evaluate( TqFloat u, TqFloat v, CqParameterTyped<T,SLT>* pParam )
+
+		template <class T, class SLT>
+		T	Evaluate( TqFloat u, TqFloat v, CqParameterTyped<T, SLT>* pParam )
 		{
 			std::vector<TqFloat> Nu( m_uOrder );
 			std::vector<TqFloat> Nv( m_vOrder );
@@ -248,20 +248,20 @@ class CqSurfaceNURBS : public CqSurface
 
 			T S = T();
 			TqUint l, k;
-			for( l = 0; l <= vDegree(); l++)
+			for ( l = 0; l <= vDegree(); l++ )
 			{
 				T temp = T();
 				TqUint vind = vspan - vDegree() + l;
-				for( k = 0; k <= uDegree(); k++ )
-					temp = temp + Nu[ k ] * ( *pParam->pValue( ( vind * m_cuVerts) + uind + k ) );
+				for ( k = 0; k <= uDegree(); k++ )
+					temp = temp + Nu[ k ] * ( *pParam->pValue( ( vind * m_cuVerts ) + uind + k ) );
 				S = S + Nv[ l ] * temp;
 			}
-			return(S);
+			return ( S );
 		}
 
 		CqVector4D	EvaluateWithNormal( TqFloat u, TqFloat v, CqVector4D& P );
 		void	SplitNURBS( CqSurfaceNURBS& nrbA, CqSurfaceNURBS& nrbB, TqBool dirflag );
-		void	SubdivideSegments(std::vector<CqSurfaceNURBS*>& Array);
+		void	SubdivideSegments( std::vector<CqSurfaceNURBS*>& Array );
 		void	RefineKnotU( const std::vector<TqFloat>& X );
 		void	RefineKnotV( const std::vector<TqFloat>& X );
 		TqUint	InsertKnotU( TqFloat u, TqInt r );
@@ -291,9 +291,9 @@ class CqSurfaceNURBS : public CqSurface
 		// Function from CqSurface
 		virtual void uSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB );
 		virtual void vSubdivide( CqSurfaceNURBS*& pnrbA, CqSurfaceNURBS*& pnrbB );
-		virtual void NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
+		virtual void NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
 		//virtual TqBool		CanGenerateNormals() const	{ return( TqTrue ); }
-		virtual	void		GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
+		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 		virtual	CqBound	Bound() const;
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
@@ -305,16 +305,16 @@ class CqSurfaceNURBS : public CqSurface
 		 */
 		virtual	TqUint cUniform() const
 		{
-			TqInt nuSegments = (1 + m_cuVerts - m_uOrder );
-			TqInt nvSegments = (1 + m_cvVerts - m_vOrder );
+			TqInt nuSegments = ( 1 + m_cuVerts - m_uOrder );
+			TqInt nvSegments = ( 1 + m_cvVerts - m_vOrder );
 			return ( nuSegments * nvSegments );
 		}
 		/** Get the number of varying variables for a NURBS surface.
 		 */
 		virtual	TqUint cVarying() const
 		{
-			TqInt nuSegments = (1 + m_cuVerts - m_uOrder );
-			TqInt nvSegments = (1 + m_cvVerts - m_vOrder );
+			TqInt nuSegments = ( 1 + m_cuVerts - m_uOrder );
+			TqInt nvSegments = ( 1 + m_cvVerts - m_vOrder );
 			return ( ( nuSegments + 1 ) * ( nvSegments + 1 ) );
 		}
 		/** Get the number of vertex variables for a NURBS surface.

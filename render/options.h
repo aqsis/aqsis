@@ -122,9 +122,9 @@ class CqSystemOption : public CqRefCount
  */
 enum EqDisplayMode
 {
-    ModeNone = 0x0000, 	///< Invalid.
-    ModeRGB = 0x0001, 		///< Red Green and Blue channels.
-    ModeA = 0x0002, 		///< Alpha channel.
+    ModeNone = 0x0000,  	///< Invalid.
+    ModeRGB = 0x0001,  		///< Red Green and Blue channels.
+    ModeA = 0x0002,  		///< Alpha channel.
     ModeZ = 0x0004		///< Depth channel.
 };
 
@@ -135,7 +135,7 @@ enum EqDisplayMode
  */
 enum EqProjection
 {
-    ProjectionOrthographic, 		///< Orthographic projection.
+    ProjectionOrthographic,  		///< Orthographic projection.
     ProjectionPerspective		///< Perspective projection.
 };
 
@@ -145,7 +145,7 @@ enum EqProjection
  * Storage for the graphics state options.
  */
 
-class CqOptions 
+class CqOptions
 {
 	public:
 		CqOptions();
@@ -320,24 +320,24 @@ class CqOptions
 			m_funcFilter = fValue;
 		}
 		/** Get the name of the Imager shader.
-		 */
-//		CqString	Get_imager() const
-//		{
-//			if( NULL == m_pParameters[ option_imager ] )	return( "null" );
-//			
-//			return(*static_cast<CqParameterTyped<CqString>*>(m_pParameters[option_imager])->pValue());
-//		}
+		 */ 
+		//		CqString	Get_imager() const
+		//		{
+		//			if( NULL == m_pParameters[ option_imager ] )	return( "null" );
+		//
+		//			return(*static_cast<CqParameterTyped<CqString>*>(m_pParameters[option_imager])->pValue());
+		//		}
 		/** Set the name of the Imager shader.
 		 * \param strValue Character pointer to name of Imager shader.
-		 */
-//		void	Set_imager( const CqString& value )
-//		{
-//			if( NULL == m_pParameters[ option_imager ] ) 
-//				m_pParameters[ option_imager ] = new CqParameterTypedUniform<CqString, type_string>("imager"); 
-//			*static_cast<CqParameterTyped<CqString>*>(m_pParameters[ option_imager ])->pValue() = value; 
-//			
-//			LoadImager( value );
-//		}
+		 */ 
+		//		void	Set_imager( const CqString& value )
+		//		{
+		//			if( NULL == m_pParameters[ option_imager ] )
+		//				m_pParameters[ option_imager ] = new CqParameterTypedUniform<CqString, type_string>("imager");
+		//			*static_cast<CqParameterTyped<CqString>*>(m_pParameters[ option_imager ])->pValue() = value;
+		//
+		//			LoadImager( value );
+		//		}
 		void	LoadImager( const CqString& strValue );
 		void	DeleteImager();
 		void	SetValueImager( char *token, char *value );
@@ -366,8 +366,8 @@ class CqOptions
 		RtFilterFunc m_funcFilter;						///< Pointer to the pixel filter function.
 		CqImagersource* m_pshadImager;		///< Pointer to the imager shader.
 
-		TqBool	m_bFrameAspectRatioCalled, 		///< Indicate RiFrameAspectRatio has been called. Calculation of the screen geometry is reliant on which of these have been called.
-		m_bScreenWindowCalled, 			///< Indicate RiScreenWindow has been called. Calculation of the screen geometry is reliant on which of these have been called.
+		TqBool	m_bFrameAspectRatioCalled,  		///< Indicate RiFrameAspectRatio has been called. Calculation of the screen geometry is reliant on which of these have been called.
+		m_bScreenWindowCalled,  			///< Indicate RiScreenWindow has been called. Calculation of the screen geometry is reliant on which of these have been called.
 		m_bFormatCalled;				///< Indicate RiFormat has been called. Calculation of the screen geometry is reliant on which of these have been called.
 }
 ;

@@ -179,15 +179,15 @@ class CqRenderer : public IqRenderer
 
 		virtual	void	PrintString( const char* str )
 		{
-			PrintMessage( SqMessage( 0,0, str ) );
+			PrintMessage( SqMessage( 0, 0, str ) );
 		}
 
-		virtual	IqTextureMap* GetTextureMap(const CqString& strFileName);
-		virtual	IqTextureMap* GetEnvironmentMap(const CqString& strFileName);
-		virtual	IqTextureMap* GetShadowMap(const CqString& strFileName);
-		virtual	IqTextureMap* GetLatLongMap(const CqString& strFileName);
+		virtual	IqTextureMap* GetTextureMap( const CqString& strFileName );
+		virtual	IqTextureMap* GetEnvironmentMap( const CqString& strFileName );
+		virtual	IqTextureMap* GetShadowMap( const CqString& strFileName );
+		virtual	IqTextureMap* GetLatLongMap( const CqString& strFileName );
 
-		virtual	TqBool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name); 
+		virtual	TqBool	GetBasisMatrix( CqMatrix& matBasis, const CqString& name );
 
 
 		/** Get a read only reference to the current transformation matrix.
@@ -204,7 +204,7 @@ class CqRenderer : public IqRenderer
 		virtual	void	Initialise();
 		virtual	void	RenderWorld();
 
-		virtual	void	AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality);
+		virtual	void	AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality );
 		virtual	void	ClearDisplayRequests();
 		virtual	IqDDManager*	pDDmanager()
 		{
@@ -280,9 +280,9 @@ class CqRenderer : public IqRenderer
 		{
 			m_transCamera = *ptrans;
 			//m_aCoordSystems[ CoordSystem_Camera ] .m_matWorldTo =
-		    //m_aCoordSystems[ CoordSystem_Current ].m_matWorldTo = ptrans->GetMotionObjectInterpolated(0);
+			//m_aCoordSystems[ CoordSystem_Current ].m_matWorldTo = ptrans->GetMotionObjectInterpolated(0);
 			//m_aCoordSystems[ CoordSystem_Camera ] .m_matToWorld =
-		    //m_aCoordSystems[ CoordSystem_Current ].m_matToWorld = ptrans->GetMotionObjectInterpolated(0).Inverse();
+			//m_aCoordSystems[ CoordSystem_Current ].m_matToWorld = ptrans->GetMotionObjectInterpolated(0).Inverse();
 		}
 		/** Get the current transformation stack.
 		 * \return A reference to a vector of CqTransform class pointers.
@@ -318,7 +318,7 @@ class CqRenderer : public IqRenderer
 		CqList<CqShaderRegister> m_Shaders;				///< List of registered shaders.
 		TqBool	m_fSaveGPrims;
 		std::vector<CqTransform*>	m_TransformStack;	///< The global transformation stack.
-		CqTransform		m_transCamera;					///< The camera transform.
+		CqTransform	m_transCamera;					///< The camera transform.
 		std::vector<SqParameterDeclaration>	m_Symbols;	///< Symbol table.
 
 	public:

@@ -990,7 +990,7 @@ CqMatrix CqMatrix::Inverse() const
 		TqInt i1;
 
 		// Loop over cols of a from left to right, eliminating above and below diag
-		for ( j = 0; j < 4; j++ )  	// Find largest pivot in column j among rows j..3
+		for ( j = 0; j < 4; j++ )   	// Find largest pivot in column j among rows j..3
 		{
 			i1 = j;
 			for ( i = j + 1; i < 4; i++ )
@@ -1183,7 +1183,7 @@ TqFloat CqMatrix::Determinant() const
 
 std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix )
 {
-	if( !Matrix.fIdentity() )
+	if ( !Matrix.fIdentity() )
 	{
 		Stream << "|" << Matrix.m_aaElement[ 0 ][ 0 ] <<
 		"," << Matrix.m_aaElement[ 0 ][ 1 ] <<
@@ -1204,7 +1204,7 @@ std::ostream &operator<<( std::ostream &Stream, CqMatrix &Matrix )
 	}
 	else
 	{
-		Stream << 
+		Stream <<
 		"|" << 1.0f << "," << 0.0f << "," << 0.0f << "," << 0.0f << "|" << std::endl <<
 		"|" << 0.0f << "," << 1.0f << "," << 0.0f << "," << 0.0f << "|" << std::endl <<
 		"|" << 0.0f << "," << 0.0f << "," << 1.0f << "," << 0.0f << "|" << std::endl <<

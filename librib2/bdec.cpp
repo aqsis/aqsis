@@ -310,46 +310,46 @@ void CqRibBinaryDecoder::getNext ()
 	switch ( c )
 	{
 			/* Decode integers */
-			case '\200':   //0x80 B
+			case '\200':    //0x80 B
 			GET1;
 			ostr << " " << ctsi( b1 ) << " ";
 			break;
 
-			case '\201':   //0x81 BB
+			case '\201':    //0x81 BB
 			GET2;
 			ostr << " " << ctsi( b1, b2 ) << " ";
 			break;
 
-			case '\202':   //0x82 BBB
+			case '\202':    //0x82 BBB
 			GET3;
 			ostr << " " << ctsi( b1, b2, b3 ) << " ";
 			break;
 
-			case '\203':   //0x83 BBBB
+			case '\203':    //0x83 BBBB
 			GET4;
 			ostr << " " << ctsi( b1, b2, b3, b4 ) << " ";
 			break;
 
 			/* Decode fixed point numbers */
-			case '\204':   //0x84 .B
+			case '\204':    //0x84 .B
 			GET1;
 			f = ctui( b1 ); f /= 256;
 			ostr << " " << f << " ";
 			break;
 
-			case '\205':   //0x85 B.B
+			case '\205':    //0x85 B.B
 			GET2;
 			f = ctui( b2 ); f /= 256; f += ctsi( b1 );
 			ostr << " " << f << " ";
 			break;
 
-			case '\206':   //0x86 BB.B
+			case '\206':    //0x86 BB.B
 			GET3;
 			f = ctui( b3 ); f /= 256; f += ctsi( b1, b2 );
 			ostr << " " << f << " ";
 			break;
 
-			case '\207':   //0x87 BBB.B
+			case '\207':    //0x87 BBB.B
 			GET4;
 			f = b4; f /= 256; f += ctsi( b1, b2, b3 );
 			ostr << " " << f << " ";
@@ -357,19 +357,19 @@ void CqRibBinaryDecoder::getNext ()
 
 			case '\210': break; // -
 
-			case '\211':   //0x89 .BB
+			case '\211':    //0x89 .BB
 			GET2;
 			f = ctui( b1, b2 ); f /= 65536;
 			ostr << " " << f << " ";
 			break;
 
-			case '\212':   //0x8A B.BB
+			case '\212':    //0x8A B.BB
 			GET3;
 			f = ctui( b2, b3 ); f /= 65536; f += ctsi( b1 );
 			ostr << " " << f << " ";
 			break;
 
-			case '\213':   //0x8B BB.BB
+			case '\213':    //0x8B BB.BB
 			GET4;
 			f = ctui( b3, b4 ); f /= 65536; f += ctsi( b1, b2 );
 			ostr << " " << f << " ";
@@ -378,13 +378,13 @@ void CqRibBinaryDecoder::getNext ()
 			case '\214': break; // -
 			case '\215': break; // -
 
-			case '\216':   // 0x8E .BBB
+			case '\216':    // 0x8E .BBB
 			GET3;
 			f = ctui( b1, b2, b3 ); f /= 16777216;
 			ostr << " " << f << " ";
 			break;
 
-			case '\217':   // 0x8F B.BBB
+			case '\217':    // 0x8F B.BBB
 			GET4;
 			f = ctui( b2, b3, b4 ); f /= 16777216; f += ctsi( b1 );
 			ostr << " " << f << " ";
@@ -421,7 +421,7 @@ void CqRibBinaryDecoder::getNext ()
 			case '\245': sendDouble( ostr ); break;  // 0xA5
 
 			/* Decode a RI request previously declared */
-			case '\246':   // 0xA6
+			case '\246':    // 0xA6
 			GET1;
 			ui = ctui( b1 );
 			ostr << "\n" << ritab[ ui ] << " ";
@@ -437,7 +437,7 @@ void CqRibBinaryDecoder::getNext ()
 			break;
 
 			/* Decode arrays of single precision floating point values */
-			case '\310':   // 0xC8 L
+			case '\310':    // 0xC8 L
 			GET1;
 			ui = ctui( b1 );
 			ostr << "[";
@@ -446,7 +446,7 @@ void CqRibBinaryDecoder::getNext ()
 			ostr << "]";
 			break;
 
-			case '\311':   // 0xC9 LL
+			case '\311':    // 0xC9 LL
 			GET2;
 			ui = ctui( b1, b2 );
 			ostr << "[";
@@ -455,7 +455,7 @@ void CqRibBinaryDecoder::getNext ()
 			ostr << "]";
 			break;
 
-			case '\312':   // 0xCA LLL
+			case '\312':    // 0xCA LLL
 			GET3;
 			ui = ctui( b1, b2, b3 );
 			ostr << "[";
@@ -464,7 +464,7 @@ void CqRibBinaryDecoder::getNext ()
 			ostr << "]";
 			break;
 
-			case '\313':   // 0xCB LLLL
+			case '\313':    // 0xCB LLLL
 			GET4;
 			ui = ctui( b1, b2, b3, b4 );
 			ostr << "[";
@@ -474,7 +474,7 @@ void CqRibBinaryDecoder::getNext ()
 			break;
 
 			/* Declare a RI request */
-			case '\314':   // 0xCC B <string>
+			case '\314':    // 0xCC B <string>
 			GET1;
 			ui = ctui( b1 );
 			gc( c );
@@ -485,7 +485,7 @@ void CqRibBinaryDecoder::getNext ()
 			break;
 
 			/* Declare strings */
-			case '\315':   // 0xCD L
+			case '\315':    // 0xCD L
 			GET1;
 			ui = ctui( b1 );
 			gc( c );
@@ -496,7 +496,7 @@ void CqRibBinaryDecoder::getNext ()
 			str.freeze( false );
 			break;
 
-			case '\316':   // 0xCE LL
+			case '\316':    // 0xCE LL
 			GET2;
 			ui = ctui( b1, b2 );
 			gc( c );
@@ -508,13 +508,13 @@ void CqRibBinaryDecoder::getNext ()
 			break;
 
 			/* Decode previously declared strings */
-			case '\317':   // 0xCF L
+			case '\317':    // 0xCF L
 			GET1;
 			ui = ctui( b1 );
 			ostr << " " << stringtab[ ui ] << " ";
 			break;
 
-			case '\320':  // 0xD0 LL
+			case '\320':   // 0xD0 LL
 			GET2;
 			ui = ctui( b1, b2 );
 			ostr << " " << stringtab[ ui ] << " ";

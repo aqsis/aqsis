@@ -5,7 +5,7 @@
  *	@brief	Declare a reference counting class.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/03/01 18:00:33 $
+ *	Last change date:	$Date: 2002/10/31 11:51:14 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -22,6 +22,7 @@ class CqRefCount
 		CqRefCount() : m_cReferences( 0 )
 		{}
 		/// Copy Constructor, does not copy reference count.
+
 
 
 		CqRefCount( const CqRefCount& From )

@@ -302,13 +302,13 @@ RendermanInterface::RtVoid Stream::RiPixelVariance( RtFloat variance )
 	m_Stream << "RiPixelVariance()" << std::endl;
 }
 
-RendermanInterface::RtVoid Stream::RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc)
+RendermanInterface::RtVoid Stream::RiProcedural( RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc )
 {
 	m_Stream << "RiProcedural()" << std::endl;
 }
 
 RendermanInterface::RtVoid Stream::RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap,
-						   RtInt n, RtToken tokens[], RtPointer values[])
+        RtInt n, RtToken tokens[], RtPointer values[] )
 {
 	m_Stream << "RiCurvesV()" << std::endl;
 }
@@ -483,11 +483,8 @@ RtFloat RiTriangleFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth )
 	return ( 0.0 );
 }
 RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
-{
-}
+{}
 RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
-{
-}
+{}
 RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
-{
-}
+{}

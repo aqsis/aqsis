@@ -162,7 +162,7 @@ void CqStats::PrintStats( TqInt level ) const
 
 	std::strstream MSG;
 
-	
+
 	TqFloat timeSurface = static_cast<TqFloat>( m_timeSurface.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeDisplacement = static_cast<TqFloat>( m_timeDisplacement.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeImager = static_cast<TqFloat>( m_timeImager.TimeTotal() ) / CLOCKS_PER_SEC;
@@ -177,18 +177,18 @@ void CqStats::PrintStats( TqInt level ) const
 	TqFloat timeMakeEnv = static_cast<TqFloat>( m_timeMakeEnv.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeTM = static_cast<TqFloat>( m_timeTM.TimeTotal() ) / CLOCKS_PER_SEC;
 	TqFloat timeFB = static_cast<TqFloat>( m_timeFB.TimeTotal() - m_timeImager.TimeTotal() ) / CLOCKS_PER_SEC;
-	TqFloat timeDB = static_cast<TqFloat>( m_timeDB.TimeTotal()) / CLOCKS_PER_SEC;
-	TqFloat timeParse = static_cast<TqFloat>( m_timeParse.TimeTotal()) / CLOCKS_PER_SEC;
-	TqFloat timeProject = static_cast<TqFloat>( m_timeProject.TimeTotal()) / CLOCKS_PER_SEC;
-	TqFloat timeCombine = static_cast<TqFloat>( m_timeCombine.TimeTotal()) / CLOCKS_PER_SEC;
+	TqFloat timeDB = static_cast<TqFloat>( m_timeDB.TimeTotal() ) / CLOCKS_PER_SEC;
+	TqFloat timeParse = static_cast<TqFloat>( m_timeParse.TimeTotal() ) / CLOCKS_PER_SEC;
+	TqFloat timeProject = static_cast<TqFloat>( m_timeProject.TimeTotal() ) / CLOCKS_PER_SEC;
+	TqFloat timeCombine = static_cast<TqFloat>( m_timeCombine.TimeTotal() ) / CLOCKS_PER_SEC;
 
-	//! level >= 0 
+	//! level >= 0
 	MSG << "Total render time   : ";
 	TimeToString( MSG, m_timeTotal ) << std::endl;
 	MSG << "Last frame          : ";
 	TimeToString( MSG, m_timeTotalFrame ) << std::endl;
 
-	if (level >= 1)
+	if ( level >= 1 )
 	{
 		MSG << "Imager shading      : ";
 		TimeToString( MSG, timeImager ) << " (" << 100.0f * timeImager / m_timeTotalFrame << "%)" << std::endl;
@@ -212,12 +212,12 @@ void CqStats::PrintStats( TqInt level ) const
 
 		MSG << std::endl;
 
-	} 
+	}
 	//! Most important informations
-	if (level == 2)
+	if ( level == 2 )
 	{
 		MSG << "GPrims: \t" << m_cGPrims << std::endl;
-		MSG << "Total GPrims:\t" << m_cTotalGPrims << " (" << m_cCulledGPrims << " culled)"<< std::endl;
+		MSG << "Total GPrims:\t" << m_cTotalGPrims << " (" << m_cCulledGPrims << " culled)" << std::endl;
 
 		MSG << "Grids:    \t" << m_cGridsAllocated << " created" << std::endl;
 
@@ -241,8 +241,8 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "SampleTexture check:\t"; TimeToString( MSG, timeTM ) << " (" << 100.0f * timeTM / m_timeTotalFrame << "%)" << std::endl;
 		MSG << "FilterBucket check:\t"; TimeToString( MSG, timeFB ) << " (" << 100.0f * timeFB / m_timeTotalFrame << "%)" << std::endl;
 
-	} 
-	if (level == 3)
+	}
+	if ( level == 3 )
 	{
 		MSG << "GPrims: \t" << m_cGPrims << std::endl;
 		MSG << "Total GPrims:\t" << m_cTotalGPrims << " (" << m_cCulledGPrims << " culled)" << std::endl;
@@ -290,8 +290,8 @@ void CqStats::PrintStats( TqInt level ) const
 		MSG << "Parsing check:\t"; TimeToString( MSG, timeParse ) << " (" << 100.0f * timeParse / m_timeTotalFrame << "%)" << std::endl;
 		MSG << "Project check:\t"; TimeToString( MSG, timeProject ) << " (" << 100.0f * timeProject / m_timeTotalFrame << "%)" << std::endl;
 	}
-		
-	
+
+
 	MSG << std::ends;
 
 	CqString strMSG( MSG.str() );

@@ -129,6 +129,7 @@ class CqCSGNodePrimitive : public CqCSGTreeNode
 		///	Destructor.
 
 
+
 		virtual ~CqCSGNodePrimitive()
 		{}
 
@@ -171,6 +172,7 @@ class CqCSGNodeUnion : public CqCSGTreeNode
 		///	Destructor.
 
 
+
 		virtual ~CqCSGNodeUnion()
 		{}
 
@@ -198,6 +200,7 @@ class CqCSGNodeIntersection : public CqCSGTreeNode
 		///	Destructor.
 
 
+
 		virtual ~CqCSGNodeIntersection()
 		{}
 
@@ -223,6 +226,7 @@ class CqCSGNodeDifference : public CqCSGTreeNode
 		CqCSGNodeDifference() : CqCSGTreeNode()
 		{}
 		///	Destructor.
+
 
 
 		virtual ~CqCSGNodeDifference()

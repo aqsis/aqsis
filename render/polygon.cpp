@@ -36,7 +36,7 @@ inline long CountMemUsage()
 	MEMORY_BASIC_INFORMATION mbi;
 	DWORD      dwMemUsed = 0;
 	PVOID      pvAddress = 0;
-
+ 
 	memset(&mbi, 0, sizeof(MEMORY_BASIC_INFORMATION));
 	while(VirtualQuery(pvAddress, &mbi, sizeof(MEMORY_BASIC_INFORMATION)) == sizeof(MEMORY_BASIC_INFORMATION))
 	{
@@ -267,7 +267,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 	// We need to take into account Orientation here, even though most other
 	// primitives leave it up to the CalcNormals function on the MPGrid, because we
 	// are forcing N to be setup here, so clockwise nature is important.
-	TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
+	TqInt O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
 
 	indexA = 0;
 	indexB = 1;
@@ -297,7 +297,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 			i++;
 		}
 		vecN = vecN0 % vecN1;
-		vecN = (O==OrientationLH)? vecN : -vecN;
+		vecN = ( O == OrientationLH ) ? vecN : -vecN;
 		vecN.Unit();
 	}
 
@@ -309,7 +309,7 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 	for ( i = 2; i < NumVertices(); i += 2 )
 	{
 		indexC = indexD = i;
-		if ( NumVertices() > i + 1 ) 
+		if ( NumVertices() > i + 1 )
 			indexD = i + 1;
 
 		// Create bilinear patches
@@ -317,112 +317,112 @@ TqInt CqPolygonBase::Split( std::vector<CqBasicSurface*>& aSplits )
 		pNew->AddRef();
 		pNew->SetSurfaceParameters( Surface() );
 
-		TqInt iUPA = PolyIndex(indexA);
-		TqInt iUPB = PolyIndex(indexB);
-		TqInt iUPC = PolyIndex(indexC);
-		TqInt iUPD = PolyIndex(indexD);
+		TqInt iUPA = PolyIndex( indexA );
+		TqInt iUPB = PolyIndex( indexB );
+		TqInt iUPC = PolyIndex( indexC );
+		TqInt iUPD = PolyIndex( indexD );
 
 		// Copy any user specified primitive variables.
 		std::vector<CqParameter*>::iterator iUP;
-		for( iUP = Surface().aUserParams().begin(); iUP != Surface().aUserParams().end(); iUP++ )
+		for ( iUP = Surface().aUserParams().begin(); iUP != Surface().aUserParams().end(); iUP++ )
 		{
-			CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
-			
-			if( pNewUP->Class() == class_varying || pNewUP->Class() == class_vertex )
+			CqParameter* pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
+
+			if ( pNewUP->Class() == class_varying || pNewUP->Class() == class_vertex )
 			{
 				pNewUP->SetSize( pNew->cVarying() );
-				pNewUP->SetValue( (*iUP), 0, iUPA );
-				pNewUP->SetValue( (*iUP), 1, iUPB );
-				pNewUP->SetValue( (*iUP), 2, iUPD );
-				pNewUP->SetValue( (*iUP), 3, iUPC );
+				pNewUP->SetValue( ( *iUP ), 0, iUPA );
+				pNewUP->SetValue( ( *iUP ), 1, iUPB );
+				pNewUP->SetValue( ( *iUP ), 2, iUPD );
+				pNewUP->SetValue( ( *iUP ), 3, iUPC );
 			}
-			else if( pNewUP->Class() == class_uniform )
+			else if ( pNewUP->Class() == class_uniform )
 			{
 				pNewUP->SetSize( pNew->cUniform() );
-				pNewUP->SetValue( (*iUP), 0, MeshIndex() );
+				pNewUP->SetValue( ( *iUP ), 0, MeshIndex() );
 			}
-			else if( pNewUP->Class() == class_constant )
+			else if ( pNewUP->Class() == class_constant )
 			{
 				pNewUP->SetSize( 1 );
-				pNewUP->SetValue( (*iUP), 0, 0 );
+				pNewUP->SetValue( ( *iUP ), 0, 0 );
 			}
 
 			pNew->AddPrimitiveVariable( pNewUP );
 		}
 
 		// If there are no smooth normals specified, then fill in the facet normal at each vertex.
-		if( !bHasN() && USES( iUses, EnvVars_N ) )
+		if ( !bHasN() && USES( iUses, EnvVars_N ) )
 		{
-			CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* pNewUP = new CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>("N",0);
+			CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>* pNewUP = new CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>( "N", 0 );
 			pNewUP->SetSize( pNew->cVarying() );
 
-			pNewUP->pValue()[ 0 ] = vecN;
-			pNewUP->pValue()[ 1 ] = vecN;
-			pNewUP->pValue()[ 2 ] = vecN;
-			pNewUP->pValue()[ 3 ] = vecN;
+			pNewUP->pValue() [ 0 ] = vecN;
+			pNewUP->pValue() [ 1 ] = vecN;
+			pNewUP->pValue() [ 2 ] = vecN;
+			pNewUP->pValue() [ 3 ] = vecN;
 
 			pNew->AddPrimitiveVariable( pNewUP );
 		}
 
 		// If the shader needs s/t or u/v, and s/t is not specified, then at this point store the object space x,y coordinates.
-		if( USES( iUses, EnvVars_s ) || USES( iUses, EnvVars_t ) || USES( iUses, EnvVars_u ) || USES( iUses, EnvVars_v ) )
+		if ( USES( iUses, EnvVars_s ) || USES( iUses, EnvVars_t ) || USES( iUses, EnvVars_u ) || USES( iUses, EnvVars_v ) )
 		{
-			CqVector3D PA,PB,PC,PD;
+			CqVector3D PA, PB, PC, PD;
 			CqMatrix matID;
-			const CqMatrix& matCurrentToWorld = QGetRenderContext() ->matSpaceToSpace( "current", "object", matID, Surface().pTransform()->matObjectToWorld() );
+			const CqMatrix& matCurrentToWorld = QGetRenderContext() ->matSpaceToSpace( "current", "object", matID, Surface().pTransform() ->matObjectToWorld() );
 			PA = matCurrentToWorld * PolyP( indexA );
 			PB = matCurrentToWorld * PolyP( indexB );
 			PC = matCurrentToWorld * PolyP( indexC );
 			PD = matCurrentToWorld * PolyP( indexD );
-			
+
 			if ( USES( iUses, EnvVars_s ) && !bHass() )
 			{
-				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s");
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" );
 				pNewUP->SetSize( pNew->cVarying() );
 
-				pNewUP->pValue()[ 0 ] = PA.x();
-				pNewUP->pValue()[ 1 ] = PB.x();
-				pNewUP->pValue()[ 2 ] = PD.x();
-				pNewUP->pValue()[ 3 ] = PC.x();
+				pNewUP->pValue() [ 0 ] = PA.x();
+				pNewUP->pValue() [ 1 ] = PB.x();
+				pNewUP->pValue() [ 2 ] = PD.x();
+				pNewUP->pValue() [ 3 ] = PC.x();
 
 				pNew->AddPrimitiveVariable( pNewUP );
 			}
 
 			if ( USES( iUses, EnvVars_t ) && !bHast() )
 			{
-				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t");
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" );
 				pNewUP->SetSize( pNew->cVarying() );
 
-				pNewUP->pValue()[ 0 ] = PA.y();
-				pNewUP->pValue()[ 1 ] = PB.y();
-				pNewUP->pValue()[ 2 ] = PD.y();
-				pNewUP->pValue()[ 3 ] = PC.y();
+				pNewUP->pValue() [ 0 ] = PA.y();
+				pNewUP->pValue() [ 1 ] = PB.y();
+				pNewUP->pValue() [ 2 ] = PD.y();
+				pNewUP->pValue() [ 3 ] = PC.y();
 
 				pNew->AddPrimitiveVariable( pNewUP );
 			}
 
 			if ( USES( iUses, EnvVars_u ) )
 			{
-				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u");
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "u" );
 				pNewUP->SetSize( pNew->cVarying() );
 
-				pNewUP->pValue()[ 0 ] = PA.x();
-				pNewUP->pValue()[ 1 ] = PB.x();
-				pNewUP->pValue()[ 2 ] = PD.x();
-				pNewUP->pValue()[ 3 ] = PC.x();
+				pNewUP->pValue() [ 0 ] = PA.x();
+				pNewUP->pValue() [ 1 ] = PB.x();
+				pNewUP->pValue() [ 2 ] = PD.x();
+				pNewUP->pValue() [ 3 ] = PC.x();
 
 				pNew->AddPrimitiveVariable( pNewUP );
 			}
 
 			if ( USES( iUses, EnvVars_v ) )
 			{
-				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v");
+				CqParameterTypedVarying<TqFloat, type_float, TqFloat>* pNewUP = new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "v" );
 				pNewUP->SetSize( pNew->cVarying() );
 
-				pNewUP->pValue()[ 0 ] = PA.y();
-				pNewUP->pValue()[ 1 ] = PB.y();
-				pNewUP->pValue()[ 2 ] = PD.y();
-				pNewUP->pValue()[ 3 ] = PC.y();
+				pNewUP->pValue() [ 0 ] = PA.y();
+				pNewUP->pValue() [ 1 ] = PB.y();
+				pNewUP->pValue() [ 2 ] = PD.y();
+				pNewUP->pValue() [ 3 ] = PC.y();
 
 				pNew->AddPrimitiveVariable( pNewUP );
 			}

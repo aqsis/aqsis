@@ -56,11 +56,11 @@ SqDDMessageCloseAcknowledge closeack;
 int main( int argc, char* argv[] )
 {
 	int port = -1;
-	char *portStr = getenv("AQSIS_DD_PORT");
+	char *portStr = getenv( "AQSIS_DD_PORT" );
 
-	if (portStr != NULL)
+	if ( portStr != NULL )
 	{
-		port = atoi(portStr);
+		port = atoi( portStr );
 	}
 
 	if ( DDInitialise( NULL, port ) == 0 )

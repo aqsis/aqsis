@@ -53,9 +53,9 @@ class RendermanInterface
 		virtual	RtVoid	RiBegin( RtToken name ) = 0;
 		virtual	RtFloat RiBesselFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth ) = 0;
 		virtual RtVoid RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[],
-		                  RtInt nflt, RtFloat flt[],
-		                  RtInt nstr, RtToken str[],
-		                  RtInt n, RtToken tokens[], RtPointer parms[] ) = 0;
+		                          RtInt nflt, RtFloat flt[],
+		                          RtInt nstr, RtToken str[],
+		                          RtInt n, RtToken tokens[], RtPointer parms[] ) = 0;
 		virtual	RtVoid	RiBound( RtBound bound ) = 0;
 		virtual	RtFloat RiBoxFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth ) = 0;
 		virtual	RtFloat RiCatmullRomFilter( RtFloat x, RtFloat y, RtFloat xwidth, RtFloat ywidth ) = 0;
@@ -122,12 +122,12 @@ class RendermanInterface
 		virtual	RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples ) = 0;
 		virtual	RtVoid	RiPixelVariance( RtFloat variance ) = 0;
 		virtual	RtVoid	RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap,
-						   RtInt n, RtToken tokens[], RtPointer values[]) = 0;
+		                          RtInt n, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiPointsV( RtInt vertices, RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiPolygonV( RtInt nvertices, RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
-		virtual	RtVoid	RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc) = 0;
+		virtual	RtVoid	RiProcedural( RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc ) = 0;
 		virtual	RtVoid	RiProjectionV( const char * name, RtInt count, RtToken tokens[], RtPointer values[] ) = 0;
 		virtual	RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat ditheramplitude ) = 0;
 		virtual	RtVoid	RiRelativeDetail( RtFloat relativedetail ) = 0;
@@ -157,7 +157,7 @@ class RendermanInterface
 		virtual	RtVoid	RiTrimCurve( RtInt nloops, RtInt ncurves[], RtInt order[], RtFloat knot[], RtFloat min[], RtFloat max[], RtInt n[], RtFloat u[], RtFloat v[], RtFloat w[] ) = 0;
 		virtual	RtVoid	RiWorldBegin() = 0;
 		virtual	RtVoid	RiWorldEnd() = 0;
-		
+
 };
 
 }

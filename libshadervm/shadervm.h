@@ -62,7 +62,7 @@ struct SqOpCodeTrans
 	char*	m_strName;					///< Name of the opcode.
 	void( CqShaderVM::*m_pCommand ) ();	//< Member pointer to the function.
 	TqInt	m_cParams;					///< Number of expected parameters.
-	TqInt   m_aParamTypes[ 10 ];	///< Array of parameter types (up to ten, can be extended if required).
+	TqInt m_aParamTypes[ 10 ];	///< Array of parameter types (up to ten, can be extended if required).
 }
 ;
 
@@ -107,7 +107,7 @@ union UsProgramElement
 //
 
 #define	POPV(A)			IqShaderData* A=Pop(__fVarying)
-#define	POP				Pop(__fVarying)
+#define	POP				Pop(__fVarying) 
 //#define	RESULT			CqVMStackEntry& Result=__fVarying?gVaryingResult:gUniformResult;
 #define	RESULT(t,c)		IqShaderData* pResult=GetNextTemp(t,c); \
 						pResult->SetSize(( m_uGridRes + 1 ) * ( m_vGridRes + 1 ))
@@ -449,9 +449,9 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		{
 			return ( m_Uses );
 		}
-		virtual IqShaderData* CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fArgument = TqFalse);
-		virtual IqShaderData* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fParameter = TqFalse );
-		virtual	IqShaderData* CreateTemporaryStorage(EqVariableType type, EqVariableClass _class);
+		virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fArgument = TqFalse );
+		virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fParameter = TqFalse );
+		virtual	IqShaderData* CreateTemporaryStorage( EqVariableType type, EqVariableClass _class );
 		virtual void DeleteTemporaryStorage( IqShaderData* pData );
 		virtual void DefaultSurface();
 
@@ -460,28 +460,31 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		void	ExecuteInit();
 
 
-        TqInt			GetShaderVarCount();				// for libslxargs
-        IqShaderData*	GetShaderVarAt(int varIndex);  		// for libslxargs     
-        EqShaderType	Type()			{return(m_Type);}	// for libslxargs
-        
+		TqInt	GetShaderVarCount();				// for libslxargs
+		IqShaderData*	GetShaderVarAt( int varIndex );  		// for libslxargs
+		EqShaderType	Type()
+		{
+			return ( m_Type );
+		}	// for libslxargs
+
 
 		/** Assignment operator.
 		 */
 		CqShaderVM&	operator=( const CqShaderVM& From );
 
 	private:
-		TqInt		m_Uses;			///< Bit vector representing the system variables used by this shader.
+		TqInt	m_Uses;			///< Bit vector representing the system variables used by this shader.
 		CqMatrix	m_matCurrent;	///< Transformation matrix to world coordinates in effect at the time this shader was instantiated.
 		CqString	m_strName;		///< The name of this shader.
 
-        EqShaderType 		m_Type;							///< Shader type for libslxargs
-		TqUint				m_LocalIndex;                   ///<  Local Index to speed up
+		EqShaderType m_Type;							///< Shader type for libslxargs
+		TqUint	m_LocalIndex;                   ///<  Local Index to speed up
 		IqShaderExecEnv*	m_pEnv;							///< Pointer to the current excution environment.
-		std::vector<IqShaderData*>		m_LocalVars;		///< Array of local variables.
+		std::vector<IqShaderData*>	m_LocalVars;		///< Array of local variables.
 		std::vector<UsProgramElement>	m_ProgramInit;		///< Bytecodes of the intialisation program.
 		std::vector<UsProgramElement>	m_Program;			///< Bytecodes of the main program.
-		TqInt				m_uGridRes;
-		TqInt				m_vGridRes;
+		TqInt	m_uGridRes;
+		TqInt	m_vGridRes;
 		UsProgramElement*	m_PC;							///< Current program pointer.
 		TqInt	m_PO;							///< Current program offset.
 		TqInt	m_PE;							///< Offset of the end of the program.
@@ -525,11 +528,11 @@ class _qShareC CqShaderVM : public CqShaderStack, public IqShader
 		TqInt	FindLocalVarIndex( const char* strName )
 		{
 			TqInt tmp = m_LocalIndex;
-			
+
 			for ( ; m_LocalIndex < m_LocalVars.size(); m_LocalIndex++ )
 				if ( m_LocalVars[ m_LocalIndex ] ->strName().compare( strName ) == 0 ) return ( m_LocalIndex );
 
-			for (m_LocalIndex=0; m_LocalIndex < tmp; m_LocalIndex++ )
+			for ( m_LocalIndex = 0; m_LocalIndex < tmp; m_LocalIndex++ )
 				if ( m_LocalVars[ m_LocalIndex ] ->strName().compare( strName ) == 0 ) return ( m_LocalIndex );
 			return ( -1 );
 		}

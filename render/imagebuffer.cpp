@@ -55,10 +55,10 @@ CqImagePixel::CqImagePixel() :
 		//				m_aValues(0),
 		//				m_avecSamples(0),
 		m_colColor( 0, 0, 0 ),
-		m_MaxDepth(FLT_MAX),
-		m_MinDepth(FLT_MAX),
-		m_OcclusionBoxId(-1),
-		m_NeedsZUpdate(false)
+		m_MaxDepth( FLT_MAX ),
+		m_MinDepth( FLT_MAX ),
+		m_OcclusionBoxId( -1 ),
+		m_NeedsZUpdate( false )
 {}
 
 
@@ -270,20 +270,20 @@ void CqImagePixel::Combine()
 				if ( sample->m_flags & SqImageSample::Flag_Occludes )
 				{
 					// Optimise common case
-					samplecolor   = gColBlack;
+					samplecolor = gColBlack;
 					sampleopacity = gColBlack;
 				}
 				else
 				{
 					samplecolor.SetColorRGB(
-						LERP(sample->m_colOpacity.fRed(), samplecolor.fRed(), 0),
-						LERP(sample->m_colOpacity.fGreen(), samplecolor.fGreen(), 0),
-						LERP(sample->m_colOpacity.fBlue(), samplecolor.fBlue(), 0)
+					    LERP( sample->m_colOpacity.fRed(), samplecolor.fRed(), 0 ),
+					    LERP( sample->m_colOpacity.fGreen(), samplecolor.fGreen(), 0 ),
+					    LERP( sample->m_colOpacity.fBlue(), samplecolor.fBlue(), 0 )
 					);
 					sampleopacity.SetColorRGB(
-						LERP(sample->m_colOpacity.fRed(), sampleopacity.fRed(), 0),
-						LERP(sample->m_colOpacity.fGreen(), sampleopacity.fGreen(), 0),
-						LERP(sample->m_colOpacity.fBlue(), sampleopacity.fBlue(), 0)
+					    LERP( sample->m_colOpacity.fRed(), sampleopacity.fRed(), 0 ),
+					    LERP( sample->m_colOpacity.fGreen(), sampleopacity.fGreen(), 0 ),
+					    LERP( sample->m_colOpacity.fBlue(), sampleopacity.fBlue(), 0 )
 					);
 				}
 			}
@@ -307,30 +307,30 @@ void CqImagePixel::Combine()
 			samples->begin() ->m_colColor = samplecolor;
 			samples->begin() ->m_colOpacity = sampleopacity;
 
-			const CqString* pstrDepthFilter = QGetRenderContext() ->optCurrent().GetStringOption("Hider", "depthfilter");
-			if( NULL != pstrDepthFilter )
+			const CqString* pstrDepthFilter = QGetRenderContext() ->optCurrent().GetStringOption( "Hider", "depthfilter" );
+			if ( NULL != pstrDepthFilter )
 			{
-				if( !pstrDepthFilter[0].compare("midpoint") )
+				if ( !pstrDepthFilter[ 0 ].compare( "midpoint" ) )
 				{
 					// Use midpoint for depth
-					if( samples->size() > 1 )
-						(*samples)[0].m_Depth = ( (*samples)[0].m_Depth + (*samples)[1].m_Depth ) * 0.5f;
+					if ( samples->size() > 1 )
+						( *samples ) [ 0 ].m_Depth = ( ( *samples ) [ 0 ].m_Depth + ( *samples ) [ 1 ].m_Depth ) * 0.5f;
 					else
-						(*samples)[0].m_Depth = FLT_MAX;
+						( *samples ) [ 0 ].m_Depth = FLT_MAX;
 				}
-				else if( !pstrDepthFilter[0].compare("max") )
+				else if ( !pstrDepthFilter[ 0 ].compare( "max" ) )
 				{
-					(*samples)[0].m_Depth = samples->back().m_Depth;
+					( *samples ) [ 0 ].m_Depth = samples->back().m_Depth;
 				}
-				else if( !pstrDepthFilter[0].compare("average") )
+				else if ( !pstrDepthFilter[ 0 ].compare( "average" ) )
 				{
 					std::vector<SqImageSample>::iterator sample;
 					TqFloat totDepth = 0.0f;
-					for( sample = samples->begin(); sample != samples->end(); sample++ )
+					for ( sample = samples->begin(); sample != samples->end(); sample++ )
 						totDepth += sample->m_Depth;
 					totDepth /= samples->size();
 
-					(*samples)[0].m_Depth = totDepth;
+					( *samples ) [ 0 ].m_Depth = totDepth;
 				}
 				// Default to "min"
 			}
@@ -664,8 +664,8 @@ void CqBucket::FilterBucket()
 	CqColor* pCols = new CqColor[ XSize() * YSize() ];
 	CqColor* pOpacs = new CqColor[ XSize() * YSize() ];
 	TqFloat* pDepths = new TqFloat[ XSize() * YSize() ];
-	TqFloat* pCoverages=new TqFloat[XSize()*YSize()];
-	
+	TqFloat* pCoverages = new TqFloat[ XSize() * YSize() ];
+
 	TqInt xmax = static_cast<TqInt>( CEIL( ( XFWidth() - 1 ) * 0.5f ) );
 	TqInt ymax = static_cast<TqInt>( CEIL( ( YFWidth() - 1 ) * 0.5f ) );
 	TqFloat xfwo2 = XFWidth() * 0.5f;
@@ -675,14 +675,14 @@ void CqBucket::FilterBucket()
 	TqInt numperpixel = numsubpixels * numsubcells;
 	TqInt	xlen = XSize() + XFWidth();
 
-    TqInt SampleCount=0;
-    CqColor imager;
+	TqInt SampleCount = 0;
+	CqColor imager;
 
 	TqInt x, y;
 	TqInt i = 0;
 	TqFloat total = numsubpixels;
 
-	TqBool fImager = (QGetRenderContext()->optCurrent().GetStringOption("System", "Imager")[0] != "null");
+	TqBool fImager = ( QGetRenderContext() ->optCurrent().GetStringOption( "System", "Imager" ) [ 0 ] != "null" );
 
 	for ( y = YOrigin(); y < YOrigin() + YSize(); y++ )
 	{
@@ -736,30 +736,30 @@ void CqBucket::FilterBucket()
 			pCols[ i ] = c / gTot;
 			pOpacs[ i ] = o / gTot;
 
-			if (SampleCount> m_YPixelSamples * m_XPixelSamples)
-	            pCoverages[i] = 1.0;
+			if ( SampleCount > m_YPixelSamples * m_XPixelSamples )
+				pCoverages[ i ] = 1.0;
 			else
-				pCoverages[i] = (TqFloat) SampleCount/ (TqFloat)( m_YPixelSamples * m_XPixelSamples);
+				pCoverages[ i ] = ( TqFloat ) SampleCount / ( TqFloat ) ( m_YPixelSamples * m_XPixelSamples );
 
-			if( NULL != QGetRenderContext()->optCurrent().pshadImager() && NULL != QGetRenderContext()->optCurrent().pshadImager()->pShader())
+			if ( NULL != QGetRenderContext() ->optCurrent().pshadImager() && NULL != QGetRenderContext() ->optCurrent().pshadImager() ->pShader() )
 			{
 				// Init & Execute the imager shader
-				QGetRenderContext()->optCurrent().InitialiseColorImager(1, 1, 
-																x, y, 
-																&pCols[i], &pOpacs[i], 
-																&pDepths[i], &pCoverages[i]);
+				QGetRenderContext() ->optCurrent().InitialiseColorImager( 1, 1,
+				        x, y,
+				        &pCols[ i ], &pOpacs[ i ],
+				        &pDepths[ i ], &pCoverages[ i ] );
 
-				if (fImager)
+				if ( fImager )
 				{
-					imager = QGetRenderContext()->optCurrent().GetColorImager( x , y ); 
-					// Normal case will be to poke the alpha from the image shader and 
-					// multiply imager color with it... but after investigation alpha is always 
+					imager = QGetRenderContext() ->optCurrent().GetColorImager( x , y );
+					// Normal case will be to poke the alpha from the image shader and
+					// multiply imager color with it... but after investigation alpha is always
 					// == 1 after a call to imager shader in 3delight and BMRT.
 					// Therefore I did not ask for alpha value and set directly the pCols[i]
-					// with imager value. see imagers.cpp 
-					pCols[i] = imager;
-					imager =  QGetRenderContext()->optCurrent().GetOpacityImager( x , y);
-					pOpacs[i] = imager;
+					// with imager value. see imagers.cpp
+					pCols[ i ] = imager;
+					imager = QGetRenderContext() ->optCurrent().GetOpacityImager( x , y );
+					pOpacs[ i ] = imager;
 				}
 			}
 
@@ -787,8 +787,8 @@ void CqBucket::FilterBucket()
 	delete[] ( pCols );
 	delete[] ( pOpacs );
 	delete[] ( pDepths );
-	delete[](pCoverages);
-	
+	delete[] ( pCoverages );
+
 }
 
 
@@ -798,16 +798,16 @@ void CqBucket::FilterBucket()
 
 void CqBucket::ExposeBucket()
 {
-	if ( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Exposure")[0] == 1.0 &&
-	        QGetRenderContext() ->optCurrent().GetFloatOption("System", "Exposure")[1] == 1.0 )
+	if ( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Exposure" ) [ 0 ] == 1.0 &&
+	        QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Exposure" ) [ 1 ] == 1.0 )
 		return ;
 	else
 	{
 		CqImagePixel* pie;
 		ImageElement( XOrigin(), YOrigin(), pie );
 		TqInt x, y;
-		TqFloat exposegain = QGetRenderContext() ->optCurrent().GetFloatOption("System", "Exposure")[0];
-		TqFloat exposegamma = QGetRenderContext() ->optCurrent().GetFloatOption("System", "Exposure")[1];
+		TqFloat exposegain = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Exposure" ) [ 0 ];
+		TqFloat exposegamma = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Exposure" ) [ 1 ];
 		TqFloat oneovergamma = 1.0f / exposegamma;
 		for ( y = 0; y < YSize(); y++ )
 		{
@@ -840,16 +840,16 @@ void CqBucket::QuantizeBucket()
 {
 	CqRandom random;
 
-	if ( QGetRenderContext() ->optCurrent().GetIntegerOption("System", "DisplayMode")[0] & ModeRGB )
+	if ( QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB )
 	{
-		double ditheramplitude = QGetRenderContext() ->optCurrent().GetFloatOption("System", "ColorQuantizeDitherAmplitude")[0];
-		TqInt one = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "ColorQuantizeOne")[0];
-		TqInt min = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "ColorQuantizeMin")[0];
-		TqInt max = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "ColorQuantizeMax")[0];
+		double ditheramplitude = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "ColorQuantizeDitherAmplitude" ) [ 0 ];
+		TqInt one = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeOne" ) [ 0 ];
+		TqInt min = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeMin" ) [ 0 ];
+		TqInt max = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeMax" ) [ 0 ];
 
 		// If settings are 0,0,0,0 then leave as floating point and we will save an FP tiff.
-		if( one == 0 && min == 0 && max == 0 )
-			return;
+		if ( one == 0 && min == 0 && max == 0 )
+			return ;
 
 		CqImagePixel* pie;
 		ImageElement( XOrigin(), YOrigin(), pie );
@@ -888,11 +888,11 @@ void CqBucket::QuantizeBucket()
 	}
 	else
 	{
-		double ditheramplitude = QGetRenderContext() ->optCurrent().GetFloatOption("System", "DepthQuantizeDitherAmplitude")[0];
+		double ditheramplitude = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "DepthQuantizeDitherAmplitude" ) [ 0 ];
 		if ( ditheramplitude == 0 ) return ;
-		TqInt one = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "DepthQuantizeOne")[0];
-		TqInt min = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "DepthQuantizeMin")[0];
-		TqInt max = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "DepthQuantizeMax")[0];
+		TqInt one = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DepthQuantizeOne" ) [ 0 ];
+		TqInt min = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DepthQuantizeMin" ) [ 0 ];
+		TqInt max = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DepthQuantizeMax" ) [ 0 ];
 
 		CqImagePixel* pie;
 		ImageElement( XOrigin(), YOrigin(), pie );
@@ -1039,28 +1039,28 @@ void	CqImageBuffer::SetImage()
 		m_YBucketSize = poptBucketSize[ 1 ];
 	}
 
-	m_iXRes = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "Resolution")[0];
-	m_iYRes = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "Resolution")[1];
-	m_CropWindowXMin = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[0] ), 0, m_iXRes ) );
-	m_CropWindowXMax = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[1] ), 0, m_iXRes ) );
-	m_CropWindowYMin = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[2] ), 0, m_iYRes ) );
-	m_CropWindowYMax = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->optCurrent().GetFloatOption("System", "CropWindow")[3] ), 0, m_iYRes ) );
+	m_iXRes = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 0 ];
+	m_iYRes = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 1 ];
+	m_CropWindowXMin = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 0 ] ), 0, m_iXRes ) );
+	m_CropWindowXMax = static_cast<TqInt>( CLAMP( CEIL( m_iXRes * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 1 ] ), 0, m_iXRes ) );
+	m_CropWindowYMin = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 2 ] ), 0, m_iYRes ) );
+	m_CropWindowYMax = static_cast<TqInt>( CLAMP( CEIL( m_iYRes * QGetRenderContext() ->optCurrent().GetFloatOption( "System", "CropWindow" ) [ 3 ] ), 0, m_iYRes ) );
 	m_cXBuckets = ( m_iXRes / m_XBucketSize ) + 1;
 	m_cYBuckets = ( m_iYRes / m_YBucketSize ) + 1;
-	m_PixelXSamples = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "PixelSamples")[0];
-	m_PixelYSamples = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "PixelSamples")[1];
-	m_FilterXWidth = static_cast<TqInt>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "FilterWidth")[0] );
-	m_FilterYWidth = static_cast<TqInt>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "FilterWidth")[1] );
-	m_ClippingNear = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[0] );
-	m_ClippingFar = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[1] );
-	m_DisplayMode = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "DisplayMode")[0];
+	m_PixelXSamples = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 0 ];
+	m_PixelYSamples = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "PixelSamples" ) [ 1 ];
+	m_FilterXWidth = static_cast<TqInt>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 0 ] );
+	m_FilterYWidth = static_cast<TqInt>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FilterWidth" ) [ 1 ] );
+	m_ClippingNear = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 0 ] );
+	m_ClippingFar = static_cast<TqFloat>( QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 1 ] );
+	m_DisplayMode = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ];
 
 	m_aBuckets.resize( m_cXBuckets * m_cYBuckets );
 
 
 	TqBool	fJitter = (
-	                     ( ( QGetRenderContext() ->optCurrent().GetIntegerOption("System", "DisplayMode")[0] & ModeRGB ) != 0 ) &&
-	                     ( QGetRenderContext() ->optCurrent().GetStringOption("System", "Hider")[0] != "painter" ) );
+	                     ( ( QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] & ModeRGB ) != 0 ) &&
+	                     ( QGetRenderContext() ->optCurrent().GetStringOption( "System", "Hider" ) [ 0 ] != "painter" ) );
 
 	CqBucket::InitialiseBucket( 0, 0, m_XBucketSize, m_YBucketSize, m_FilterXWidth, m_FilterYWidth, m_PixelXSamples, m_PixelXSamples, fJitter );
 	CqBucket::InitialiseFilterValues();
@@ -1111,8 +1111,8 @@ void	CqImageBuffer::Release()
 TqBool CqImageBuffer::CullSurface( CqBound& Bound, CqBasicSurface* pSurface )
 {
 	// If the primitive is completely outside of the hither-yon z range, cull it.
-	if ( Bound.vecMin().z() >= QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[1] ||
-	        Bound.vecMax().z() <= QGetRenderContext() ->optCurrent().GetFloatOption("System", "Clipping")[0] )
+	if ( Bound.vecMin().z() >= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 1 ] ||
+	        Bound.vecMax().z() <= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "Clipping" ) [ 0 ] )
 		return ( TqTrue );
 
 	// If the primitive spans the epsilon plane and the hither plane and can be split,
@@ -1181,11 +1181,11 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 	if ( pattrDispclacementBound != 0 ) db = pattrDispclacementBound[ 0 ];
 	if ( pattrCoordinateSystem != 0 ) strCoordinateSystem = pattrCoordinateSystem[ 0 ];
 
-	if( db != 0.0f )
+	if ( db != 0.0f )
 	{
 		CqVector3D	vecDB( db, 0, 0 );
 		CqMatrix matShaderToWorld;
-		if( NULL != pSurface->pAttributes() ->pshadSurface() )
+		if ( NULL != pSurface->pAttributes() ->pshadSurface() )
 			matShaderToWorld = pSurface->pAttributes() ->pshadSurface() ->matCurrent();
 		vecDB = QGetRenderContext() ->matVSpaceToSpace( strCoordinateSystem.c_str(), "camera", matShaderToWorld, pSurface->pTransform() ->matObjectToWorld() ) * vecDB;
 		db = vecDB.Magnitude();
@@ -1207,8 +1207,8 @@ void CqImageBuffer::PostSurface( CqBasicSurface* pSurface )
 	// bucket index from it as the projection of the bound would cross the camera plane and therefore give a false
 	// result, so just put it back in the current bucket for further splitting.
 	TqInt iBucket = iCurrentBucket();
-	if(	!pSurface->IsUndiceable() )
-	{	
+	if ( !pSurface->IsUndiceable() )
+	{
 		// Find out which bucket(s) the surface belongs to.
 		TqInt XMinb, YMinb;
 		if ( Bound.vecMin().x() < 0 ) Bound.vecMin().x( 0.0f );
@@ -1246,7 +1246,7 @@ TqBool CqImageBuffer::OcclusionCullSurface( TqInt iBucket, CqBasicSurface* pSurf
 	if ( pSurface->pCSGNode() != NULL )
 		return ( TqFalse );
 
-	if(CqOcclusionBox::CanCull(&RasterBound))
+	if ( CqOcclusionBox::CanCull( &RasterBound ) )
 	{
 		// pSurface is behind everying in this bucket but it may be
 		// visible in other buckets it overlaps.
@@ -1404,10 +1404,10 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 	CqBucket& Bucket = m_aBuckets[ iBucket ];
 	CqStats& theStats = QGetRenderContext() ->Stats();
 
-	const TqFloat* LodBounds = pMPG->pGrid()->pAttributes()->GetFloatAttribute("System", "LevelOfDetailBounds");
-	TqBool UsingLevelOfDetail = LodBounds[0] >= 0.0f;
+	const TqFloat* LodBounds = pMPG->pGrid() ->pAttributes() ->GetFloatAttribute( "System", "LevelOfDetailBounds" );
+	TqBool UsingLevelOfDetail = LodBounds[ 0 ] >= 0.0f;
 
-	TqBool IsMatte = (TqBool) (pMPG->pGrid()->pAttributes()->GetIntegerAttribute("System", "Matte")[0] == 1);
+	TqBool IsMatte = ( TqBool ) ( pMPG->pGrid() ->pAttributes() ->GetIntegerAttribute( "System", "Matte" ) [ 0 ] == 1 );
 
 	for ( TqInt bound_num = 0; bound_num < pMPG->cSubBounds(); bound_num++ )
 	{
@@ -1436,7 +1436,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 
 		// If the micropolygon is outside the hither-yon range, cull it.
 		if ( Bound.vecMin().z() > ClippingFar() ||
-		     Bound.vecMax().z() < ClippingNear() )
+		        Bound.vecMax().z() < ClippingNear() )
 		{
 			if ( bound_num == pMPG->cSubBounds() - 1 )
 			{
@@ -1511,7 +1511,7 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 							if ( UsingLevelOfDetail )
 							{
 								TqFloat LevelOfDetail = pie->SampleLevelOfDetail( m, n );
-								if ( LodBounds[0] > LevelOfDetail || LevelOfDetail >= LodBounds[1] )
+								if ( LodBounds[ 0 ] > LevelOfDetail || LevelOfDetail >= LodBounds[ 1 ] )
 								{
 									continue;
 								}
@@ -1542,14 +1542,14 @@ inline void CqImageBuffer::RenderMicroPoly( CqMicroPolygonBase* pMPG, TqInt iBuc
 								TqBool Occludes = colMPGOpacity >= gColWhite;
 
 								// Update max depth values
-								if( !(DisplayMode() & ModeZ) && Occludes )
+								if ( !( DisplayMode() & ModeZ ) && Occludes )
 								{
-									CqOcclusionBox::MarkForUpdate(pie->OcclusionBoxId());
+									CqOcclusionBox::MarkForUpdate( pie->OcclusionBoxId() );
 									pie->MarkForZUpdate();
 								}
-							
 
-								// Now that we have updated the samples, set the 
+
+								// Now that we have updated the samples, set the
 								ImageVal.m_colColor = colMPGColor;
 								ImageVal.m_colOpacity = colMPGOpacity;
 								ImageVal.m_pCSGNode = pMPG->pGrid() ->pCSGNode();
@@ -1648,7 +1648,7 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 		if ( fDiceable )
 		{
 			//Cull surface if it's hidden
-			if( !(DisplayMode() & ModeZ) )
+			if ( !( DisplayMode() & ModeZ ) )
 			{
 				QGetRenderContext() ->Stats().OcclusionCullTimer().Start();
 				TqBool fCull = OcclusionCullSurface( iBucket, pSurface );
@@ -1713,7 +1713,7 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 		QGetRenderContext() ->Stats().RenderMPGsTimer().Start();
 		RenderMPGs( iBucket, xmin, xmax, ymin, ymax );
 		QGetRenderContext() ->Stats().RenderMPGsTimer().Stop();
-		
+
 		// Update our occlusion hierarchy after each grid that gets drawn.
 		CqOcclusionBox::Update();
 	}
@@ -1721,17 +1721,17 @@ void CqImageBuffer::RenderSurfaces( TqInt iBucket, long xmin, long xmax, long ym
 	// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
 	if ( m_fQuit ) return ;
 
-	QGetRenderContext()->Stats().MakeCombine().Start();
+	QGetRenderContext() ->Stats().MakeCombine().Start();
 	CqBucket::CombineElements();
-	QGetRenderContext()->Stats().MakeCombine().Stop();
+	QGetRenderContext() ->Stats().MakeCombine().Stop();
 
-	QGetRenderContext()->Stats().MakeFilterBucket().Start();
+	QGetRenderContext() ->Stats().MakeFilterBucket().Start();
 
 	Bucket.FilterBucket();
 	Bucket.ExposeBucket();
 	Bucket.QuantizeBucket();
-        
-        QGetRenderContext()->Stats().MakeFilterBucket().Stop();
+
+	QGetRenderContext() ->Stats().MakeFilterBucket().Stop();
 
 	BucketComplete( iBucket );
 	QGetRenderContext() ->Stats().MakeDisplayBucket().Start();
@@ -1754,8 +1754,8 @@ void CqImageBuffer::RenderImage()
 	m_fDone = TqFalse;
 
 	// Setup the hierarchy of boxes for occlusion culling
-	CqOcclusionBox::CreateHierarchy(m_XBucketSize, m_YBucketSize, m_FilterXWidth, m_FilterYWidth);
-	
+	CqOcclusionBox::CreateHierarchy( m_XBucketSize, m_YBucketSize, m_FilterXWidth, m_FilterYWidth );
+
 	TqInt iBucket;
 	for ( iBucket = 0; iBucket < m_cXBuckets*m_cYBuckets; iBucket++ )
 	{
@@ -1782,7 +1782,7 @@ void CqImageBuffer::RenderImage()
 		if ( xmax > CropWindowXMax() + m_FilterXWidth / 2 ) xmax = CropWindowXMax() + m_FilterXWidth / 2;
 		if ( ymax > CropWindowYMax() + m_FilterYWidth / 2 ) ymax = CropWindowYMax() + m_FilterYWidth / 2;
 
-		CqOcclusionBox::SetupHierarchy(&m_aBuckets[ iBucket ], xmin, ymin, xmax, ymax);
+		CqOcclusionBox::SetupHierarchy( &m_aBuckets[ iBucket ], xmin, ymin, xmax, ymax );
 
 		// Inform the status class how far we have got, and update UI.
 		float Complete = ( m_cXBuckets * m_cYBuckets );
@@ -1810,7 +1810,7 @@ void CqImageBuffer::RenderImage()
 	}
 
 	ImageComplete();
-	
+
 	CqOcclusionBox::DeleteHierarchy();
 	// Pass >100 through to progress to allow it to indicate completion.
 	RtProgressFunc pProgressHandler;

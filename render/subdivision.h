@@ -584,16 +584,16 @@ class CqWEdge : public CqPoolable<CqWEdge>
 		 * \param F A pointer to a function to get indexed values of the appropriate type.
 		 * \param pSurf Pointer to the CqWSurf on which we are working. 
 		 */
-		void CreateSubdivideScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex, TqBool bForceMidpoint = TqFalse);
+		void CreateSubdivideScalar( CqParameter* pCurrent, CqParameter* pTarget, TqUint trgIndex, TqBool bForceMidpoint = TqFalse );
 
 	private:
-		CqWVert	*m_pvHead,  				///< Pointer to the head vertex.
+		CqWVert	*m_pvHead,   				///< Pointer to the head vertex.
 		*m_pvTail;				///< Pointer to the tail vertex.
-		CqWEdge	*m_peHeadRight,  			///< Pointer to the edge to the right of the head vertex.
+		CqWEdge	*m_peHeadRight,   			///< Pointer to the edge to the right of the head vertex.
 		*m_peHeadLeft;			///< Pointer to the edge to the left of the head vertex.
-		CqWEdge	*m_peTailRight,  			///< Pointer to the edge to the right of the tail vertex.
+		CqWEdge	*m_peTailRight,   			///< Pointer to the edge to the right of the tail vertex.
 		*m_peTailLeft;			///< Pointer to the edge to the left of the tail vertex.
-		CqWFace	*m_pfLeft,  				///< Pointer to the face to the left of the edge.
+		CqWFace	*m_pfLeft,   				///< Pointer to the face to the left of the edge.
 		*m_pfRight;				///< Pointer to the face to the right of the edge.
 		CqWEdge	*m_peHeadHalf;			///< Pointer to the subdivided edge a the head end, set by Subdivide.
 		CqWEdge	*m_peTailHalf;			///< Pointer to the subdivided edge a the tail end, set by Subdivide.
@@ -898,7 +898,7 @@ class CqWSurf : public CqSubdivider, public CqBasicSurface
 		{
 			return ( m_pPoints->bHasv() );
 		}
-		CqBasicSurface* ExtractFace( TqInt index);
+		CqBasicSurface* ExtractFace( TqInt index );
 
 	protected:
 		CqPolygonPoints*	m_pPoints;			///> Pointer to the CqSurface class with the surface vertices on.
@@ -1011,7 +1011,7 @@ class CqMotionWSurf : public CqSubdivider, public CqBasicSurface, public CqMotio
 		{
 			return ( A );
 		}
-		CqBasicSurface* ExtractFace( TqInt index);
+		CqBasicSurface* ExtractFace( TqInt index );
 };
 
 

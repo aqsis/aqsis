@@ -21,7 +21,7 @@
 /** \file
 		\brief Implements CqPoints primitives using regular polygon (first try).
 		\author M. Joron (joron@sympatico.ca)
-*/ 
+*/
 
 
 //? Is .h included already?
@@ -47,8 +47,8 @@ START_NAMESPACE( Aqsis )
 class CqPoints : public CqSurface
 {
 	public:
-		
-		CqPoints( TqInt n, TqFloat *origins,TqFloat *sizes, TqFloat constantwidth);
+
+		CqPoints( TqInt n, TqFloat *origins, TqFloat *sizes, TqFloat constantwidth );
 		CqPoints( const CqPoints& From )
 		{
 			*this = From;
@@ -84,20 +84,20 @@ class CqPoints : public CqSurface
 		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
 
 		CqPoints&	operator=( const CqPoints& From );
-		
+
 		virtual	TqUint	n() const
 		{
 			return ( m_n );
 		}
-		
-		
+
+
 		std::vector <CqSurfacePolygon*> m_pPolygons;
-		
-		
+
+
 	private:
-	
-		TqInt				  m_n;
-		
+
+		TqInt	m_n;
+
 	protected:
 		CqMatrix	m_matTx;		///< Transformation matrix from object to camera.
 		CqMatrix	m_matITTx;		///< Inverse transpose transformation matrix, for transforming normals.

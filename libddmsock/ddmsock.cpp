@@ -67,14 +67,14 @@ START_NAMESPACE( Aqsis )
 #ifdef AQSIS_SYSTEM_POSIX
 
 /// Handle cleanup of child processes
-void sig_chld(int signo)
+void sig_chld( int signo )
 {
 	pid_t pid;
 	int stat;
 
-	while ((pid = waitpid(-1, &stat, WNOHANG)) > 0);
+	while ( ( pid = waitpid( -1, &stat, WNOHANG ) ) > 0 );
 
-	return;
+	return ;
 }
 
 #endif // AQSIS_SYSTEM_POSIX
@@ -191,9 +191,9 @@ TqBool CqDDServer::Bind( TqInt port )
 	{
 #ifdef AQSIS_SYSTEM_WIN32
 		TqInt iE = WSAGetLastError();
-		if (errno == WSAEADDRINUSE)
+		if ( errno == WSAEADDRINUSE )
 #else // AQSIS_SYSTEM_WIN32
-		if (errno == EADDRINUSE)
+		if ( errno == EADDRINUSE )
 #endif // AQSIS_SYSTEM_WIN32
 		{
 			port++;
@@ -378,8 +378,8 @@ TqInt CqDDManager::Shutdown()
 TqInt CqDDManager::AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality )
 {
 	m_aDisplayRequests.push_back( CqDDClient( name, type, mode ) );
-	m_aDisplayCompression.push_back(compression);
-	m_aDisplayQuality.push_back(quality);
+	m_aDisplayCompression.push_back( compression );
+	m_aDisplayQuality.push_back( quality );
 	return ( 0 );
 }
 
@@ -406,11 +406,11 @@ TqInt CqDDManager::CloseDisplays()
 
 	std::vector<CqDDClient>::iterator i;
 	std::vector<TqInt>::iterator j;
-    std::vector<TqInt>::iterator k;
+	std::vector<TqInt>::iterator k;
 
 	i = m_aDisplayRequests.begin();
 	j = m_aDisplayCompression.begin();
-	k = m_aDisplayQuality.begin(); 
+	k = m_aDisplayQuality.begin();
 
 	for ( ; i != m_aDisplayRequests.end(); i++, j++, k++ )
 	{
@@ -536,18 +536,18 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 	CqRiFile fileDriver( strDriverFile.c_str(), "display" );
 	if ( fileDriver.IsValid() )
 	{
-		char envBuffer[32];
+		char envBuffer[ 32 ];
 #ifdef AQSIS_SYSTEM_WIN32
-		_snprintf(envBuffer, 32, "%d", m_DDServer.getPort());
-		SetEnvironmentVariable("AQSIS_DD_PORT", envBuffer);
+		_snprintf( envBuffer, 32, "%d", m_DDServer.getPort() );
+		SetEnvironmentVariable( "AQSIS_DD_PORT", envBuffer );
 		const TqInt ProcHandle = _spawnl( _P_NOWAITO, fileDriver.strRealName().c_str(), strDriverFile.c_str() , NULL );
 		if ( ProcHandle < 0 )
 		{
 			CqBasicError( 0, 0, "Error spawning display driver process" );
 		}
 #else // AQSIS_SYSTEM_WIN32
-		snprintf(envBuffer, 32, "%d", m_DDServer.getPort());
-		setenv("AQSIS_DD_PORT", envBuffer, 1);
+		snprintf( envBuffer, 32, "%d", m_DDServer.getPort() );
+		setenv( "AQSIS_DD_PORT", envBuffer, 1 );
 		const int forkresult = fork();
 		if ( 0 == forkresult )
 		{
@@ -591,14 +591,14 @@ void CqDDManager::LoadDisplayLibrary( CqDDClient& dd )
 				TqInt SamplesPerElement = mode & ModeRGB ? 3 : 0;
 				SamplesPerElement += mode & ModeA ? 1 : 0;
 				SamplesPerElement = mode & ModeZ ? 1 : SamplesPerElement;
-				TqInt one = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "ColorQuantizeOne")[0];
-				TqInt min = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "ColorQuantizeMin")[0];
-				TqInt max = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "ColorQuantizeMax")[0];
-				TqInt BitsPerSample = ( one == 0 && min == 0 && max == 0 )? 32:8;
+				TqInt one = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeOne" ) [ 0 ];
+				TqInt min = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeMin" ) [ 0 ];
+				TqInt max = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "ColorQuantizeMax" ) [ 0 ];
+				TqInt BitsPerSample = ( one == 0 && min == 0 && max == 0 ) ? 32 : 8;
 				SqDDMessageOpen msgopen( QGetRenderContext() ->pImage() ->iXRes(),
 				                         QGetRenderContext() ->pImage() ->iYRes(),
 				                         SamplesPerElement,
-										 BitsPerSample,	// Bits per sample.
+				                         BitsPerSample, 	// Bits per sample.
 				                         QGetRenderContext() ->pImage() ->CropWindowXMin(),
 				                         QGetRenderContext() ->pImage() ->CropWindowXMax(),
 				                         QGetRenderContext() ->pImage() ->CropWindowYMin(),

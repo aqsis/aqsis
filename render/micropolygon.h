@@ -126,15 +126,15 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 		 */
 		TqBool bShadingNormals() const
 		{
-			return(m_bShadingNormals);
+			return ( m_bShadingNormals );
 		}
 		/** Query whether geometric (Ng) normals have been filled in by the surface at dice time.
 		 */
 		TqBool bGeometricNormals() const
 		{
-			return(m_bGeometricNormals);
+			return ( m_bGeometricNormals );
 		}
-		
+
 		void	Initialise( TqInt cu, TqInt cv, CqSurface* pSurface );
 
 		// Overrides from CqMicroPolyGridBase
@@ -161,39 +161,123 @@ class CqMicroPolyGrid : public CqMicroPolyGridBase, public CqRefCount
 
 		TqBool	vfCulled() const
 		{
-			return(m_vfCulled);
+			return ( m_vfCulled );
 		}
 
 		// Redirect acces via IqShaderExecEnv
-		virtual	TqInt	uGridRes() const	{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->uGridRes() ); }
-		virtual	TqInt	vGridRes() const	{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->vGridRes() ); }
-		virtual	TqInt	GridSize() const	{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->GridSize() ); }
-		virtual	const CqMatrix&	matObjectToWorld() const { assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->matObjectToWorld() ); }
-		virtual	IqShaderData* Cs()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Cs() ); }
-		virtual	IqShaderData* Os()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Os() ); }
-		virtual	IqShaderData* Ng()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Ng() ); }
-		virtual	IqShaderData* du()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->du() ); }
-		virtual	IqShaderData* dv()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->dv() ); }
-		virtual	IqShaderData* L()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->L() ); }
-		virtual	IqShaderData* Cl()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Cl() ); }
-		virtual IqShaderData* Ol()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Ol() ); }
-		virtual IqShaderData* P()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->P() ); }
-		virtual IqShaderData* dPdu()		{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->dPdu() ); }
-		virtual IqShaderData* dPdv()		{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->dPdv() ); }
-		virtual IqShaderData* N()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->N() ); }
-		virtual IqShaderData* u()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->u() ); }
-		virtual IqShaderData* v()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->v() ); }
-		virtual IqShaderData* s()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->s() ); }
-		virtual IqShaderData* t()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->t() ); }
-		virtual IqShaderData* I()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->I() ); }
-		virtual IqShaderData* Ci()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Ci() ); }
-		virtual IqShaderData* Oi()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Oi() ); }
-		virtual IqShaderData* Ps()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->Ps() ); }
-		virtual IqShaderData* E()			{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->E() ); }
-		virtual IqShaderData* ncomps()		{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->ncomps() ); }
-		virtual IqShaderData* time()		{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->time() ); }
-		virtual IqShaderData* alpha()		{ assert( NULL != m_pShaderExecEnv ); return( m_pShaderExecEnv->alpha() ); }
-		
+		virtual	TqInt	uGridRes() const
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->uGridRes() );
+		}
+		virtual	TqInt	vGridRes() const
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->vGridRes() );
+		}
+		virtual	TqInt	GridSize() const
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->GridSize() );
+		}
+		virtual	const CqMatrix&	matObjectToWorld() const
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->matObjectToWorld() );
+		}
+		virtual	IqShaderData* Cs()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Cs() );
+		}
+		virtual	IqShaderData* Os()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Os() );
+		}
+		virtual	IqShaderData* Ng()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ng() );
+		}
+		virtual	IqShaderData* du()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->du() );
+		}
+		virtual	IqShaderData* dv()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dv() );
+		}
+		virtual	IqShaderData* L()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->L() );
+		}
+		virtual	IqShaderData* Cl()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Cl() );
+		}
+		virtual IqShaderData* Ol()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ol() );
+		}
+		virtual IqShaderData* P()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->P() );
+		}
+		virtual IqShaderData* dPdu()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dPdu() );
+		}
+		virtual IqShaderData* dPdv()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->dPdv() );
+		}
+		virtual IqShaderData* N()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->N() );
+		}
+		virtual IqShaderData* u()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->u() );
+		}
+		virtual IqShaderData* v()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->v() );
+		}
+		virtual IqShaderData* s()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->s() );
+		}
+		virtual IqShaderData* t()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->t() );
+		}
+		virtual IqShaderData* I()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->I() );
+		}
+		virtual IqShaderData* Ci()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ci() );
+		}
+		virtual IqShaderData* Oi()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Oi() );
+		}
+		virtual IqShaderData* Ps()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->Ps() );
+		}
+		virtual IqShaderData* E()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->E() );
+		}
+		virtual IqShaderData* ncomps()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->ncomps() );
+		}
+		virtual IqShaderData* time()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->time() );
+		}
+		virtual IqShaderData* alpha()
+		{
+			assert( NULL != m_pShaderExecEnv ); return ( m_pShaderExecEnv->alpha() );
+		}
+
 
 	private:
 		TqBool	m_bShadingNormals;		///< Flag indicating shading normals have been filled in and don't need to be calculated during shading.
@@ -221,6 +305,7 @@ class CqMotionMicroPolyGrid : public CqMicroPolyGridBase, public CqMotionSpec<Cq
 		{}
 
 		// Overrides from CqMicroPolyGridBase
+
 
 
 		virtual	void	Split( CqImageBuffer* pImage, TqInt iBucket, long xmin, long xmax, long ymin, long ymax );
@@ -332,7 +417,7 @@ class CqMicroPolygonBase
 		const	CqColor	colColor() const
 		{
 			CqColor colRes;
-			m_pGrid->Ci()->GetColor( colRes, m_Index );
+			m_pGrid->Ci() ->GetColor( colRes, m_Index );
 			return ( colRes );
 		}
 		/** Get the opacity of this micropoly.
@@ -341,7 +426,7 @@ class CqMicroPolygonBase
 		const	CqColor	colOpacity() const
 		{
 			CqColor colRes;
-			m_pGrid->Oi()->GetColor( colRes, m_Index );
+			m_pGrid->Oi() ->GetColor( colRes, m_Index );
 			return ( colRes );
 		}
 
@@ -380,7 +465,10 @@ class CqMicroPolygonBase
 
 		/** Set the flag to state that the MPG has eben hit by a sample point.
 		 */
-		void BeenHit()	{ m_bHit = TqTrue; }
+		void BeenHit()
+		{
+			m_bHit = TqTrue;
+		}
 
 	protected:
 		CqMicroPolyGrid*	m_pGrid;		///< Pointer to the donor grid.
@@ -458,6 +546,7 @@ class CqMicroPolygonStatic : public CqMicroPolygonBase, public CqMicroPolygonSta
 		{}
 
 		// overrides from CqMicroPolygonBase
+
 
 
 		virtual	CqBound&	GetTotalBound( TqBool fForce = TqFalse );

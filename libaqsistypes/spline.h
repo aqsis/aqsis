@@ -91,16 +91,16 @@ class _qShareC CqSplineCubic
 		 */
 		_qShareM	void	SetmatBasis( const CqString& strName )
 		{
-			__Basis* pVals = 0;
-			if ( strName.compare("bezier") == 0 )
+			__Basis * pVals = 0;
+			if ( strName.compare( "bezier" ) == 0 )
 				pVals = &gBezierBasis;
-			else if ( strName.compare("bspline") == 0 )
+			else if ( strName.compare( "bspline" ) == 0 )
 				pVals = &gBSplineBasis;
-			else if ( strName.compare("catmull-rom") == 0 )
+			else if ( strName.compare( "catmull-rom" ) == 0 )
 				pVals = &gCatmullRomBasis;
-			else if ( strName.compare("hermite") == 0 )
+			else if ( strName.compare( "hermite" ) == 0 )
 				pVals = &gHermiteBasis;
-			else if ( strName.compare("power") == 0 )
+			else if ( strName.compare( "power" ) == 0 )
 				pVals = &gPowerBasis;
 
 			if ( pVals )
@@ -108,10 +108,10 @@ class _qShareC CqSplineCubic
 				CqMatrix m;
 				m = *pVals;
 				SetmatBasis( m );
-//				TqInt i, j;
-//				for ( i = 0; i < 4; i++ )
-//					for ( j = 0; j < 4; j++ )
-//						( *b ) [ i ][ j ] = ( *pVals ) [ i ][ j ];
+				//				TqInt i, j;
+				//				for ( i = 0; i < 4; i++ )
+				//					for ( j = 0; j < 4; j++ )
+				//						( *b ) [ i ][ j ] = ( *pVals ) [ i ][ j ];
 			}
 		}
 

@@ -5,8 +5,8 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/05/07 22:33:50 $
- */
+ *	Last change date:	$Date: 2002/10/31 11:51:12 $
+ */ 
 //------------------------------------------------------------------------------
 #ifndef	___itransform_Loaded___
 #define	___itransform_Loaded___
@@ -17,7 +17,8 @@ START_NAMESPACE( Aqsis )
 
 struct IqTransform
 {
-	virtual	~IqTransform()	{}
+	virtual	~IqTransform()
+	{}
 
 	/** Get a writable copy of this, if the reference count is greater than 1
 	 * create a new copy and retirn that.

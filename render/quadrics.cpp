@@ -79,10 +79,10 @@ void	CqQuadric::Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const
 /** Dice the quadric into a grid of MPGs for rendering.
  */
 
-void CqQuadric::NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
+void CqQuadric::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
 {
 	// Special case for "P", else normal bilinear dice for all others.
-	if( pData->strName().compare("P") == 0)
+	if ( pData->strName().compare( "P" ) == 0 )
 	{
 		CqVector3D	P;
 		int v, u;
@@ -114,8 +114,8 @@ void CqQuadric::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqSh
 		{
 			TqInt igrid = ( v * ( uDiceSize + 1 ) ) + u;
 			DicePoint( u, v, N );
-			TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
-			N = (O==OrientationLH)? N : -N;
+			TqInt O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
+			N = ( O == OrientationLH ) ? N : -N;
 			pNormals->SetNormal( m_matITTx * N, igrid );
 		}
 	}
@@ -144,16 +144,16 @@ TqBool	CqQuadric::Diceable()
 		m_XBucketSize = poptBucketSize[ 0 ];
 		m_YBucketSize = poptBucketSize[ 1 ];
 	}
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute("System", "ShadingRate")[0];
+	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
 
 	if ( poptGridSize )
 		gridsize = poptGridSize[ 0 ];
 	else
-		gridsize = static_cast<TqInt>(m_XBucketSize * m_XBucketSize / ShadingRate);
+		gridsize = static_cast<TqInt>( m_XBucketSize * m_XBucketSize / ShadingRate );
 
 	EstimateGridSize();
 
-	m_SplitDir = ( m_uDiceSize > m_vDiceSize )? SplitDir_U : SplitDir_V;
+	m_SplitDir = ( m_uDiceSize > m_vDiceSize ) ? SplitDir_U : SplitDir_V;
 
 	// if the gridsize is not set the computation of gridsize assuming
 	// a minimum of 0.4 shadingrate
@@ -161,7 +161,7 @@ TqBool	CqQuadric::Diceable()
 	if ( esize <= gridsize )
 		return ( TqTrue );
 
-	return( TqFalse );
+	return ( TqFalse );
 
 }
 
@@ -207,14 +207,14 @@ void CqQuadric::EstimateGridSize()
 	maxusize = sqrt( maxusize );
 	maxvsize = sqrt( maxvsize );
 
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute("System", "ShadingRate")[0];
+	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
 
 	m_uDiceSize = MAX( 4, ROUND( ESTIMATEGRIDSIZE * maxusize / ( ShadingRate ) ) );
 	m_vDiceSize = MAX( 4, ROUND( ESTIMATEGRIDSIZE * maxvsize / ( ShadingRate ) ) );
 
 	// Ensure power of 2 to avoid cracking
-	m_uDiceSize = CEIL_POW2(m_uDiceSize);
-	m_vDiceSize = CEIL_POW2(m_vDiceSize);
+	m_uDiceSize = CEIL_POW2( m_uDiceSize );
+	m_vDiceSize = CEIL_POW2( m_vDiceSize );
 }
 
 
@@ -259,15 +259,15 @@ CqBound	CqSphere::Bound() const
 	std::vector<CqVector3D> curve;
 	CqVector3D vA( 0, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 );
 	Circle( vA, vB, vC, m_Radius, phimin, phimax, curve );
-	
-	CqMatrix matRot( RAD ( m_ThetaMin ), vC );
-	for( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
-		*i = matRot*(*i);
 
-	CqBound	B( RevolveForBound(curve, vA, vC, RAD( m_ThetaMax - m_ThetaMin ) ) );
+	CqMatrix matRot( RAD ( m_ThetaMin ), vC );
+	for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
+		*i = matRot * ( *i );
+
+	CqBound	B( RevolveForBound( curve, vA, vC, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
-	
-	return( B );
+
+	return ( B );
 }
 
 
@@ -294,9 +294,9 @@ TqInt CqSphere::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 		pNew2->m_ZMin = zcent;
 	}
 
-	aSplits.push_back(pNew1);
-	aSplits.push_back(pNew2);
-	
+	aSplits.push_back( pNew1 );
+	aSplits.push_back( pNew2 );
+
 	return ( 2 );
 }
 
@@ -380,12 +380,12 @@ CqBound	CqCone::Bound() const
 	curve.push_back( vA );
 	curve.push_back( vB );
 	CqMatrix matRot( RAD ( m_ThetaMin ), vD );
-	for( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
-		*i = matRot*(*i);
-	CqBound	B( RevolveForBound(curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin) ) );
+	for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
+		*i = matRot * ( *i );
+	CqBound	B( RevolveForBound( curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
-	
-	return( B );
+
+	return ( B );
 }
 
 
@@ -413,8 +413,8 @@ TqInt CqCone::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 		pNew2->m_ZMin = zcent;
 	}
 
-	aSplits.push_back(pNew1);
-	aSplits.push_back(pNew2);
+	aSplits.push_back( pNew1 );
+	aSplits.push_back( pNew2 );
 
 	return ( 2 );
 }
@@ -447,7 +447,7 @@ CqVector3D CqCone::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqCone::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	return( DicePoint( u, v ) );
+	return ( DicePoint( u, v ) );
 }
 
 
@@ -492,12 +492,12 @@ CqBound	CqCylinder::Bound() const
 	curve.push_back( vA );
 	curve.push_back( vB );
 	CqMatrix matRot( RAD ( m_ThetaMin ), vD );
-	for( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
-		*i = matRot*(*i);
-	CqBound	B( RevolveForBound(curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin ) ) );
+	for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
+		*i = matRot * ( *i );
+	CqBound	B( RevolveForBound( curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
 
-	return( B );
+	return ( B );
 }
 
 
@@ -524,8 +524,8 @@ TqInt CqCylinder::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u 
 		pNew2->m_ZMin = zcent;
 	}
 
-	aSplits.push_back(pNew1);
-	aSplits.push_back(pNew2);
+	aSplits.push_back( pNew1 );
+	aSplits.push_back( pNew2 );
 
 	return ( 2 );
 }
@@ -569,10 +569,10 @@ CqVector3D CqCylinder::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 /** Constructor.
  */
 
-CqHyperboloid::CqHyperboloid(  ) 
+CqHyperboloid::CqHyperboloid( )
 {
-	m_Point1 = CqVector3D(0.0f, 0.0f, 0.0f);
-	m_Point2 = CqVector3D(0.0f, 0.0f, 1.0f);
+	m_Point1 = CqVector3D( 0.0f, 0.0f, 0.0f );
+	m_Point2 = CqVector3D( 0.0f, 0.0f, 1.0f );
 	m_ThetaMin = 0.0f;
 	m_ThetaMax = 1.0f;
 }
@@ -616,12 +616,12 @@ CqBound	CqHyperboloid::Bound() const
 	curve.push_back( m_Point2 );
 	CqVector3D vA( 0, 0, 0 ), vB( 0, 0, 1 );
 	CqMatrix matRot( RAD ( m_ThetaMin ), vB );
-	for( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
-		*i = matRot*(*i);
-	CqBound	B( RevolveForBound(curve, vA, vB, RAD( m_ThetaMax - m_ThetaMin ) ) );
+	for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
+		*i = matRot * ( *i );
+	CqBound	B( RevolveForBound( curve, vA, vB, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
-	
-	return( B );
+
+	return ( B );
 }
 
 
@@ -637,7 +637,7 @@ TqInt CqHyperboloid::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool
 	CqHyperboloid* pNew1 = new CqHyperboloid( *this );
 	CqHyperboloid* pNew2 = new CqHyperboloid( *this );
 
-	if ( u)
+	if ( u )
 	{
 		pNew1->m_ThetaMax = arccent;
 		pNew2->m_ThetaMin = arccent;
@@ -648,8 +648,8 @@ TqInt CqHyperboloid::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool
 		pNew2->m_Point1 = midpoint;
 	}
 
-	aSplits.push_back(pNew1);
-	aSplits.push_back(pNew2);
+	aSplits.push_back( pNew1 );
+	aSplits.push_back( pNew2 );
 
 	return ( 2 );
 }
@@ -683,7 +683,7 @@ CqVector3D CqHyperboloid::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqHyperboloid::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	return( DicePoint( u, v ) );
+	return ( DicePoint( u, v ) );
 }
 
 
@@ -775,8 +775,8 @@ TqInt CqParaboloid::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool 
 		pNew2->m_ZMin = zcent;
 	}
 
-	aSplits.push_back(pNew1);
-	aSplits.push_back(pNew2);
+	aSplits.push_back( pNew1 );
+	aSplits.push_back( pNew2 );
 
 	return ( 2 );
 }
@@ -808,7 +808,7 @@ CqVector3D CqParaboloid::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqParaboloid::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	return( DicePoint( u, v ) );
+	return ( DicePoint( u, v ) );
 }
 
 
@@ -854,12 +854,12 @@ CqBound	CqTorus::Bound() const
 	CqVector3D vA( m_MajorRadius, 0, 0 ), vB( 1, 0, 0 ), vC( 0, 0, 1 ), vD( 0, 0, 0 );
 	Circle( vA, vB, vC, m_MinorRadius, RAD( m_PhiMin ), RAD( m_PhiMax ), curve );
 	CqMatrix matRot( RAD ( m_ThetaMin ), vC );
-	for( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
-		*i = matRot*(*i);
-	CqBound	B( RevolveForBound(curve, vD, vC, RAD( m_ThetaMax - m_ThetaMin ) ) );
+	for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
+		*i = matRot * ( *i );
+	CqBound	B( RevolveForBound( curve, vD, vC, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
-	
-	return( B );
+
+	return ( B );
 }
 
 
@@ -886,8 +886,8 @@ TqInt CqTorus::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 		pNew2->m_PhiMin = zcent;
 	}
 
-	aSplits.push_back(pNew1);
-	aSplits.push_back(pNew2);
+	aSplits.push_back( pNew1 );
+	aSplits.push_back( pNew2 );
 
 	return ( 2 );
 }
@@ -920,7 +920,7 @@ CqVector3D CqTorus::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqTorus::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	return( DicePoint( u, v ) );
+	return ( DicePoint( u, v ) );
 }
 
 
@@ -965,12 +965,12 @@ CqBound	CqDisk::Bound() const
 	curve.push_back( vA );
 	curve.push_back( vB );
 	CqMatrix matRot( RAD ( m_ThetaMin ), vD );
-	for( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
-		*i = matRot*(*i);
-	CqBound	B( RevolveForBound(curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin ) ) );
+	for ( std::vector<CqVector3D>::iterator i = curve.begin(); i != curve.end(); i++ )
+		*i = matRot * ( *i );
+	CqBound	B( RevolveForBound( curve, vC, vD, RAD( m_ThetaMax - m_ThetaMin ) ) );
 	B.Transform( m_matTx );
-	
-	return( B );
+
+	return ( B );
 }
 
 
@@ -997,8 +997,8 @@ TqInt CqDisk::PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u )
 		pNew2->m_MajorRadius = zcent;
 	}
 
-	aSplits.push_back(pNew1);
-	aSplits.push_back(pNew2);
+	aSplits.push_back( pNew1 );
+	aSplits.push_back( pNew2 );
 
 	return ( 2 );
 }
@@ -1028,8 +1028,8 @@ CqVector3D CqDisk::DicePoint( TqInt u, TqInt v )
 
 CqVector3D CqDisk::DicePoint( TqInt u, TqInt v, CqVector3D& Normal )
 {
-	Normal = CqVector3D( 0, 0, m_ThetaMax>0?1:-1 );
-	return( DicePoint( u, v ) );
+	Normal = CqVector3D( 0, 0, m_ThetaMax > 0 ? 1 : -1 );
+	return ( DicePoint( u, v ) );
 }
 
 
@@ -1058,27 +1058,27 @@ void CqQuadric::Circle( const CqVector3D& O, const CqVector3D& X, const CqVector
 		ae += 2 * RI_PI;
 
 	theta = ae - as;
-/*	if ( theta <= RI_PIO2 )
-		narcs = 1;
-	else
-	{
-		if ( theta <= RI_PI )
-			narcs = 2;
+	/*	if ( theta <= RI_PIO2 )
+			narcs = 1;
 		else
 		{
-			if ( theta <= 1.5 * RI_PI )
-				narcs = 3;
-			else*/
-				narcs = 4;
-/*		}
-	}*/
+			if ( theta <= RI_PI )
+				narcs = 2;
+			else
+			{
+				if ( theta <= 1.5 * RI_PI )
+					narcs = 3;
+				else*/
+	narcs = 4;
+	/*		}
+		}*/
 	dtheta = theta / static_cast<TqFloat>( narcs );
 	TqUint n = 2 * narcs + 1;				// n control points ;
 
 	CqVector3D P0, T0, P2, T2, P1;
 	P0 = O + r * cos( as ) * X + r * sin( as ) * Y;
 	T0 = -sin( as ) * X + cos( as ) * Y;		// initialize start values
-	
+
 	points.resize( n );
 
 	points[ 0 ] = P0;
@@ -1121,20 +1121,20 @@ CqBound CqQuadric::RevolveForBound( const std::vector<CqVector3D>& profile, cons
 			theta = 2.0 * RI_PI;
 	}
 
-/*	if ( fabs( theta ) <= RI_PIO2 )
-		narcs = 1;
-	else
-	{
-		if ( fabs( theta ) <= RI_PI )
-			narcs = 2;
+	/*	if ( fabs( theta ) <= RI_PIO2 )
+			narcs = 1;
 		else
 		{
-			if ( fabs( theta ) <= 1.5 * RI_PI )
-				narcs = 3;
-			else*/
-				narcs = 4;
-/*		}
-	}*/
+			if ( fabs( theta ) <= RI_PI )
+				narcs = 2;
+			else
+			{
+				if ( fabs( theta ) <= 1.5 * RI_PI )
+					narcs = 3;
+				else*/
+	narcs = 4;
+	/*		}
+		}*/
 	dtheta = theta / static_cast<TqFloat>( narcs );
 
 	TqUint n = 2 * narcs + 1;					// n control points ;
@@ -1166,7 +1166,7 @@ CqBound CqQuadric::RevolveForBound( const std::vector<CqVector3D>& profile, cons
 
 		if ( r < 1e-7 )
 		{
-			bound.Encapsulate(O);
+			bound.Encapsulate( O );
 			continue;
 		}
 
@@ -1175,17 +1175,17 @@ CqBound CqQuadric::RevolveForBound( const std::vector<CqVector3D>& profile, cons
 		Y.Unit();
 
 		P0 = profile[ j ];
-		bound.Encapsulate(P0);
+		bound.Encapsulate( P0 );
 
 		T0 = Y;
 		for ( i = 1; i <= narcs; ++i )
 		{
 			angle = dtheta * static_cast<TqFloat>( i );
 			P2 = O + r * cosines[ i ] * X + r * sines[ i ] * Y;
-			bound.Encapsulate(P2);
+			bound.Encapsulate( P2 );
 			T2 = -sines[ i ] * X + cosines[ i ] * Y;
 			IntersectLine( P0, T0, P2, T2, P1 );
-			bound.Encapsulate(P1);
+			bound.Encapsulate( P1 );
 			if ( i < narcs )
 			{
 				P0 = P2;
@@ -1193,7 +1193,7 @@ CqBound CqQuadric::RevolveForBound( const std::vector<CqVector3D>& profile, cons
 			}
 		}
 	}
-	return(bound);
+	return ( bound );
 }
 
 

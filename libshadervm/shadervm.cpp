@@ -402,118 +402,118 @@ SqOpCodeTrans CqShaderVM::m_TransTable[] =
 TqInt CqShaderVM::m_cTransSize = sizeof( m_TransTable ) / sizeof( m_TransTable[ 0 ] );
 
 
-IqShaderData* CqShaderVM::CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fParameter )
+IqShaderData* CqShaderVM::CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fParameter )
 {
 	// Create a VM specific shader variable, which implements the IqShaderData interface,
 	// based on the type and class specified.
-	switch(Type)
+	switch ( Type )
 	{
-	    case type_bool: /* abviously they are missing here */
-		case type_integer:
-		case type_float:
-		{
-			switch(Class)
+			case type_bool:    /* abviously they are missing here */
+			case type_integer:
+			case type_float:
 			{
-				case class_varying:
-					return(new CqShaderVariableVaryingFloat( name.c_str(), fParameter ) );
-				case class_uniform:
-					return(new CqShaderVariableUniformFloat( name.c_str(), fParameter ) );
+				switch ( Class )
+				{
+						case class_varying:
+						return ( new CqShaderVariableVaryingFloat( name.c_str(), fParameter ) );
+						case class_uniform:
+						return ( new CqShaderVariableUniformFloat( name.c_str(), fParameter ) );
+				}
+				assert( TqFalse );	// If we get here, something is wrong with the request.
+				return ( NULL );
 			}
-			assert(TqFalse);	// If we get here, something is wrong with the request.
-			return(NULL);
-		}
 
-		case type_point:
-		{
-			switch(Class)
+			case type_point:
 			{
-				case class_varying:
-					return(new CqShaderVariableVaryingPoint( name.c_str(), fParameter ) );
-				case class_uniform:
-					return(new CqShaderVariableUniformPoint( name.c_str(), fParameter ) );
+				switch ( Class )
+				{
+						case class_varying:
+						return ( new CqShaderVariableVaryingPoint( name.c_str(), fParameter ) );
+						case class_uniform:
+						return ( new CqShaderVariableUniformPoint( name.c_str(), fParameter ) );
+				}
+				assert( TqFalse );	// If we get here, something is wrong with the request.
+				return ( NULL );
 			}
-			assert(TqFalse);	// If we get here, something is wrong with the request.
-			return(NULL);
-		}
 
-		case type_normal:
-		{
-			switch(Class)
+			case type_normal:
 			{
-				case class_varying:
-					return(new CqShaderVariableVaryingNormal( name.c_str(), fParameter ) );
-				case class_uniform:
-					return(new CqShaderVariableUniformNormal( name.c_str(), fParameter ) );
+				switch ( Class )
+				{
+						case class_varying:
+						return ( new CqShaderVariableVaryingNormal( name.c_str(), fParameter ) );
+						case class_uniform:
+						return ( new CqShaderVariableUniformNormal( name.c_str(), fParameter ) );
+				}
+				assert( TqFalse );	// If we get here, something is wrong with the request.
+				return ( NULL );
 			}
-			assert(TqFalse);	// If we get here, something is wrong with the request.
-			return(NULL);
-		}
 
-		case type_vector:
-		{
-			switch(Class)
+			case type_vector:
 			{
-				case class_varying:
-					return(new CqShaderVariableVaryingVector( name.c_str(), fParameter ) );
-				case class_uniform:
-					return(new CqShaderVariableUniformVector( name.c_str(), fParameter ) );
+				switch ( Class )
+				{
+						case class_varying:
+						return ( new CqShaderVariableVaryingVector( name.c_str(), fParameter ) );
+						case class_uniform:
+						return ( new CqShaderVariableUniformVector( name.c_str(), fParameter ) );
+				}
+				assert( TqFalse );	// If we get here, something is wrong with the request.
+				return ( NULL );
 			}
-			assert(TqFalse);	// If we get here, something is wrong with the request.
-			return(NULL);
-		}
-		
-		case type_string:
-		{
-			switch(Class)
-			{
-				case class_varying:
-					return(new CqShaderVariableVaryingString( name.c_str(), fParameter ) );
-				case class_uniform:
-					return(new CqShaderVariableUniformString( name.c_str(), fParameter ) );
-			}
-			assert(TqFalse);	// If we get here, something is wrong with the request.
-			return(NULL);
-		}
 
-		case type_color:
-		{
-			switch(Class)
+			case type_string:
 			{
-				case class_varying:
-					return(new CqShaderVariableVaryingColor( name.c_str(), fParameter ) );
-				case class_uniform:
-					return(new CqShaderVariableUniformColor( name.c_str(), fParameter ) );
+				switch ( Class )
+				{
+						case class_varying:
+						return ( new CqShaderVariableVaryingString( name.c_str(), fParameter ) );
+						case class_uniform:
+						return ( new CqShaderVariableUniformString( name.c_str(), fParameter ) );
+				}
+				assert( TqFalse );	// If we get here, something is wrong with the request.
+				return ( NULL );
 			}
-			assert(TqFalse);	// If we get here, something is wrong with the request.
-			return(NULL);
-		}
 
-		case type_triple:
-		case type_hpoint:
-		case type_void:
-			assert(TqFalse);	// We don't support triples in the engine as variables.
-			return(NULL);
-
-		case type_matrix:
-		{
-			switch(Class)
+			case type_color:
 			{
-				case class_varying:
-					return(new CqShaderVariableVaryingMatrix( name.c_str(), fParameter ) );
-				case class_uniform:
-					return(new CqShaderVariableUniformMatrix( name.c_str(), fParameter ) );
+				switch ( Class )
+				{
+						case class_varying:
+						return ( new CqShaderVariableVaryingColor( name.c_str(), fParameter ) );
+						case class_uniform:
+						return ( new CqShaderVariableUniformColor( name.c_str(), fParameter ) );
+				}
+				assert( TqFalse );	// If we get here, something is wrong with the request.
+				return ( NULL );
 			}
-			assert(TqFalse);	// If we get here, something is wrong with the request.
-			return(NULL);
-		}
+
+			case type_triple:
+			case type_hpoint:
+			case type_void:
+			assert( TqFalse );	// We don't support triples in the engine as variables.
+			return ( NULL );
+
+			case type_matrix:
+			{
+				switch ( Class )
+				{
+						case class_varying:
+						return ( new CqShaderVariableVaryingMatrix( name.c_str(), fParameter ) );
+						case class_uniform:
+						return ( new CqShaderVariableUniformMatrix( name.c_str(), fParameter ) );
+				}
+				assert( TqFalse );	// If we get here, something is wrong with the request.
+				return ( NULL );
+			}
 	}
-	assert(TqFalse);	// If we get here, something is wrong with the request.
-	return(NULL);
+	assert( TqFalse );	// If we get here, something is wrong with the request.
+	return ( NULL );
 }
 
 
 
-IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariableClass VarClass, const CqString& name, TqInt Count, TqBool fParameter)
+IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariableClass VarClass, const CqString& name, TqInt Count, TqBool fParameter )
 {
 	IqShaderData * pVar = 0;
 	switch ( VarType )
@@ -577,10 +577,10 @@ IqShaderData* CqShaderVM::CreateVariableArray( EqVariableType VarType, EqVariabl
 }
 
 
-IqShaderData* CqShaderVM::CreateTemporaryStorage(EqVariableType type, EqVariableClass _class)
+IqShaderData* CqShaderVM::CreateTemporaryStorage( EqVariableType type, EqVariableClass _class )
 {
-	static CqString strName("__temporary__");
-	return( CreateVariable(type, _class, strName) );
+	static CqString strName( "__temporary__" );
+	return ( CreateVariable( type, _class, strName ) );
 }
 
 
@@ -593,43 +593,43 @@ void CqShaderVM::DeleteTemporaryStorage( IqShaderData* pData )
 void CqShaderVM::DefaultSurface()
 {
 	char	pDefSurfaceShader[] = " \
-surface \
-segment Data \
-USES 460803 \
-param uniform  float Kd \
-param uniform  float Ka \
-varying  float d \
-segment Init \
-	pushif 0.8 \
-	pop Kd \
-	pushif 0.2 \
-	pop Ka \
-segment Code \
-	pushv N \
-	normalize \
-	pushv I \
-	normalize \
-	dotpp \
-	pop d \
-	pushv d \
-	pushv d \
-	pushv Kd \
-	mulff \
-	mulff \
-	pushv Ka \
-	addff \
-	setfc \
-	pushv Cs \
-	mulcc \
-	pop Ci \
-	pushv Os \
-	pop Oi \
-	pushv Oi \
-	pushv Ci \
-	mulcc \
-	pop Ci \
-	";
-	
+	                           surface \
+	                           segment Data \
+	                           USES 460803 \
+	                           param uniform  float Kd \
+	                           param uniform  float Ka \
+	                           varying  float d \
+	                           segment Init \
+	                           pushif 0.8 \
+	                           pop Kd \
+	                           pushif 0.2 \
+	                           pop Ka \
+	                           segment Code \
+	                           pushv N \
+	                           normalize \
+	                           pushv I \
+	                           normalize \
+	                           dotpp \
+	                           pop d \
+	                           pushv d \
+	                           pushv d \
+	                           pushv Kd \
+	                           mulff \
+	                           mulff \
+	                           pushv Ka \
+	                           addff \
+	                           setfc \
+	                           pushv Cs \
+	                           mulcc \
+	                           pop Ci \
+	                           pushv Os \
+	                           pop Oi \
+	                           pushv Oi \
+	                           pushv Ci \
+	                           mulcc \
+	                           pop Ci \
+	                           ";
+
 	std::stringstream defStream(pDefSurfaceShader);
 
 	LoadProgram(&defStream);
@@ -637,7 +637,7 @@ segment Code \
 
 //---------------------------------------------------------------------
 /** Load a token from a compiled slx file.
- */
+*/
 
 void CqShaderVM::GetToken( char* token, TqInt l, std::istream* pFile )
 {
@@ -662,7 +662,7 @@ void CqShaderVM::GetToken( char* token, TqInt l, std::istream* pFile )
 
 //---------------------------------------------------------------------
 /** Load a program from a compiled slc file.
- */
+*/
 
 void CqShaderVM::LoadProgram( std::istream* pFile )
 {
@@ -693,25 +693,25 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 				if ( strcmp( token, gShaderTypeNames[ i ] ) == 0 )
 				{
 					// TODO: Should store the type so that it can be checked.
-                    
-                    /* Begin changes to store shader type for libslxargs */
-                    // Symbolic references for the tokens would be better than literal strings,
-                    // but we will use literals for now.
-                    // m_Type = Type_Unknown;
-                    if(strcmp(token,"surface")==0) 
-                            m_Type = Type_Surface;
-                    else if(strcmp(token,"lightsource")==0)
-                            m_Type = Type_Lightsource;
-                    else if(strcmp(token,"volume")==0)
-                            m_Type = Type_Volume;
-                    else if(strcmp(token,"displacement")==0)
-                            m_Type = Type_Displacement;
-                    else if(strcmp(token,"transformation")==0)
-                            m_Type = Type_Transformation;
-                    else if(strcmp(token,"imager")==0)
-                            m_Type = Type_Imager;
-                    /* End changes to store shader type for libslxargs */
-                    
+
+					/* Begin changes to store shader type for libslxargs */
+					// Symbolic references for the tokens would be better than literal strings,
+					// but we will use literals for now.
+					// m_Type = Type_Unknown;
+					if(strcmp(token,"surface")==0)
+						m_Type = Type_Surface;
+					else if(strcmp(token,"lightsource")==0)
+						m_Type = Type_Lightsource;
+					else if(strcmp(token,"volume")==0)
+						m_Type = Type_Volume;
+					else if(strcmp(token,"displacement")==0)
+						m_Type = Type_Displacement;
+					else if(strcmp(token,"transformation")==0)
+						m_Type = Type_Transformation;
+					else if(strcmp(token,"imager")==0)
+						m_Type = Type_Imager;
+					/* End changes to store shader type for libslxargs */
+
 					fShaderSpec = TqTrue;
 					break;
 				}
@@ -779,7 +779,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							VarClass = class_varying;
 						else if ( strcmp( token, "uniform" ) == 0 )
 							VarClass = class_uniform;
-						else 
+						else
 						{
 							TqInt itype = 0;
 							for(itype = 0; itype<type_last; itype++)
@@ -809,7 +809,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 					}
 					// Check if there is a valid variable specifier
 					if ( VarType == type_invalid ||
-					     VarClass == class_invalid )
+					        VarClass == class_invalid )
 						continue;
 
 					if ( fVarArray )
@@ -842,14 +842,14 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 							if ( m_TransTable[ i ].m_pCommand == 0 )
 								break;
 
-							// If this is an 'illuminate' or 'solar' statement, then we can safely say this 
+							// If this is an 'illuminate' or 'solar' statement, then we can safely say this
 							// is not an ambient light.
 							if( &CqShaderVM::SO_illuminate == m_TransTable[ i ].m_pCommand ||
-							    &CqShaderVM::SO_illuminate2 == m_TransTable[ i ].m_pCommand ||
-								&CqShaderVM::SO_solar == m_TransTable[ i ].m_pCommand ||
-								&CqShaderVM::SO_solar2 == m_TransTable[ i ].m_pCommand )
+							        &CqShaderVM::SO_illuminate2 == m_TransTable[ i ].m_pCommand ||
+							        &CqShaderVM::SO_solar == m_TransTable[ i ].m_pCommand ||
+							        &CqShaderVM::SO_solar2 == m_TransTable[ i ].m_pCommand )
 								m_fAmbient = TqFalse;
-							
+
 							// Add this opcode to the program segment.
 							AddCommand( m_TransTable[ i ].m_pCommand, pProgramArea );
 							// Process this opcodes parameters.
@@ -945,7 +945,7 @@ void CqShaderVM::LoadProgram( std::istream* pFile )
 
 //---------------------------------------------------------------------
 /**	Ready the shader for execution.
- */
+*/
 
 void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShaderExecEnv* pEnv )
 {
@@ -965,7 +965,7 @@ void CqShaderVM::Initialise( const TqInt uGridRes, const TqInt vGridRes, IqShade
 
 //---------------------------------------------------------------------
 /**	Assignment operator.
- */
+*/
 
 CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 {
@@ -994,7 +994,7 @@ CqShaderVM&	CqShaderVM::operator=( const CqShaderVM& From )
 
 //---------------------------------------------------------------------
 /**	Execute a series of shader language bytecodes.
- */
+*/
 
 void CqShaderVM::Execute( IqShaderExecEnv* pEnv )
 {
@@ -1025,7 +1025,7 @@ void CqShaderVM::Execute( IqShaderExecEnv* pEnv )
 
 //---------------------------------------------------------------------
 /**	Execute the program segment which initialises the default values of instance variables.
- */
+*/
 
 void CqShaderVM::ExecuteInit()
 {
@@ -1035,7 +1035,7 @@ void CqShaderVM::ExecuteInit()
 
 	// Fake an environment
 	IqShaderExecEnv* pOldEnv = m_pEnv;
-	
+
 	CqShaderExecEnv	Env;
 	Env.Initialise( 1, 1, 0, this, m_Uses );
 	Initialise( 1, 1, &Env );
@@ -1061,7 +1061,7 @@ void CqShaderVM::ExecuteInit()
 
 //---------------------------------------------------------------------
 /** Set the instance variables on this shader.
- */
+*/
 
 void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, const CqString& strSpace, void* pval )
 {
@@ -1085,66 +1085,66 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 			IqShaderData* pVMVal = CreateTemporaryStorage(type, class_uniform);
 			switch ( m_LocalVars[ i ] ->Type() )
 			{
-				case	type_float:
-				{
-					pVMVal->SetFloat(reinterpret_cast<TqFloat*>( pval ) [ index++ ] );
-				}
-				break;
+					case	type_float:
+					{
+						pVMVal->SetFloat(reinterpret_cast<TqFloat*>( pval ) [ index++ ] );
+					}
+					break;
 
-				case	type_point:
-				{
-					TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-					pVMVal->SetPoint( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
-					index += 3;
-				}
-				break;
+					case	type_point:
+					{
+						TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+						pVMVal->SetPoint( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
+						index += 3;
+					}
+					break;
 
-				case	type_normal:
-				{
-					TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-					pVMVal->SetNormal( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
-					index += 3;
-				}
-				break;
+					case	type_normal:
+					{
+						TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+						pVMVal->SetNormal( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
+						index += 3;
+					}
+					break;
 
-				case	type_vector:
-				{
-					TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-					pVMVal->SetVector( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
-					index += 3;
-				}
-				break;
+					case	type_vector:
+					{
+						TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+						pVMVal->SetVector( CqVector3D( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
+						index += 3;
+					}
+					break;
 
-				case	type_color:
-				{
-					TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-					pVMVal->SetColor( CqColor( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
-					index += 3;
-				}
-				break;
+					case	type_color:
+					{
+						TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+						pVMVal->SetColor( CqColor( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ] ) );
+						index += 3;
+					}
+					break;
 
-				case	type_matrix:
-				{
-					TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
-					pVMVal->SetMatrix( CqMatrix( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ], pvecval[ index + 3 ],
-												 pvecval[ index + 4 ], pvecval[ index + 5 ], pvecval[ index + 6 ], pvecval[ index + 7 ],
-												 pvecval[ index + 8 ], pvecval[ index + 9 ], pvecval[ index + 10 ], pvecval[ index + 11 ],
-												 pvecval[ index + 12 ], pvecval[ index + 13 ], pvecval[ index + 14 ], pvecval[ index + 15 ] ) );
-					index += 16;
-				}
-				break;
+					case	type_matrix:
+					{
+						TqFloat* pvecval = reinterpret_cast<TqFloat*>( pval );
+						pVMVal->SetMatrix( CqMatrix( pvecval[ index + 0 ], pvecval[ index + 1 ], pvecval[ index + 2 ], pvecval[ index + 3 ],
+						                             pvecval[ index + 4 ], pvecval[ index + 5 ], pvecval[ index + 6 ], pvecval[ index + 7 ],
+						                             pvecval[ index + 8 ], pvecval[ index + 9 ], pvecval[ index + 10 ], pvecval[ index + 11 ],
+						                             pvecval[ index + 12 ], pvecval[ index + 13 ], pvecval[ index + 14 ], pvecval[ index + 15 ] ) );
+						index += 16;
+					}
+					break;
 
-				case	type_string:
-				{
-					pVMVal->SetString( reinterpret_cast<char**>( pval ) [ index++ ] );
-				}
-				break;
+					case	type_string:
+					{
+						pVMVal->SetString( reinterpret_cast<char**>( pval ) [ index++ ] );
+					}
+					break;
 			}
 
 			CqMatrix matObjectToWorld = matCurrent();
 			if( NULL != m_pEnv )
 				matObjectToWorld = m_pEnv->pTransform()->matObjectToWorld();
-			
+
 			// If it is a color or a point, ensure it is the correct 'space'
 			if ( m_LocalVars[ i ] ->Type() == type_point || m_LocalVars[ i ] ->Type() == type_hpoint )
 			{
@@ -1183,7 +1183,7 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 				pVMVal->SetMatrix( QGetRenderContextI() ->matVSpaceToSpace( _strSpace.c_str(), "camera", matCurrent(), matObjectToWorld ) * m );
 			}
 
-			if ( pArray ) 
+			if ( pArray )
 				pArray->ArrayEntry( arrayindex++ ) ->SetValueFromVariable( pVMVal );
 			else
 				m_LocalVars[ i ] ->SetValueFromVariable( pVMVal );
@@ -1196,7 +1196,7 @@ void CqShaderVM::SetArgument( const CqString& strName, EqVariableType type, cons
 
 //---------------------------------------------------------------------
 /** Set the instance variables on this shader, used for varying variables which will be set from a parameter in the surface.
- */
+*/
 
 void CqShaderVM::SetArgument( CqParameter* pParam, IqSurface* pSurface )
 {
@@ -1213,7 +1213,7 @@ void CqShaderVM::SetArgument( CqParameter* pParam, IqSurface* pSurface )
 
 //---------------------------------------------------------------------
 /** Set the instance variables on this shader, used for varying variables which will be set from a parameter in the surface.
- */
+*/
 
 IqShaderData* CqShaderVM::FindArgument( const CqString& name )
 {
@@ -1228,7 +1228,7 @@ IqShaderData* CqShaderVM::FindArgument( const CqString& name )
 
 //---------------------------------------------------------------------
 /** Get a value from an instance variable on this shader, and fill in the passed variable reference.
- */
+*/
 
 TqBool CqShaderVM::GetValue( const char* name, IqShaderData* res )
 {
@@ -1246,21 +1246,21 @@ TqBool CqShaderVM::GetValue( const char* name, IqShaderData* res )
 /* Begin changes to add accessors for libslxargs */
 int CqShaderVM::GetShaderVarCount()
 {
-    return m_LocalVars.size();
+	return m_LocalVars.size();
 }
 
 IqShaderData * CqShaderVM::GetShaderVarAt(int varIndex)
 {
-    IqShaderData * result;
-    result = NULL;
-    if (varIndex >= 0)
-    {
-        if (varIndex < m_LocalVars.size())
-        {
-            result = m_LocalVars[varIndex];
-        }
-    }
-    return result;
+	IqShaderData * result;
+	result = NULL;
+	if (varIndex >= 0)
+	{
+		if (varIndex < m_LocalVars.size())
+		{
+			result = m_LocalVars[varIndex];
+		}
+	}
+	return result;
 }
 /* End changes to add accessors for libslxargs */
 
@@ -1977,7 +1977,7 @@ void CqShaderVM::SO_addpp()
 
 void CqShaderVM::SO_subpp()
 {
-	AUTOFUNC; 
+	AUTOFUNC;
 	POPV( A );
 	POPV( B );
 	RESULT(type_point, __fVarying?class_varying:class_uniform);
@@ -2066,7 +2066,7 @@ void CqShaderVM::SO_crscc()
 
 void CqShaderVM::SO_dotcc()
 {
-	AUTOFUNC; 
+	AUTOFUNC;
 	POPV( A );
 	POPV( B );
 	RESULT(type_float, __fVarying?class_varying:class_uniform);

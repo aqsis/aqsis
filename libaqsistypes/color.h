@@ -449,8 +449,8 @@ class _qShareC	CqColor
 		}
 
 	private:
-		TqFloat	m_fRed,  				///< the red component 0.0-1.0
-		m_fGreen,  			///< the green component 0.0-1.0
+		TqFloat	m_fRed,   				///< the red component 0.0-1.0
+		m_fGreen,   			///< the green component 0.0-1.0
 		m_fBlue;			///< the blue component 0.0-1.0
 }
 ;

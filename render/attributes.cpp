@@ -92,34 +92,34 @@ const TqInt CqAttributes::CqHashTable::tableSize = 127;
 /** Constructor.
  */
 
-CqAttributes::CqAttributes() : 
-				m_pshadDisplacement( 0 ),
-				m_pshadAreaLightSource( 0 ),
-				m_pshadSurface( 0 ),
-				m_pshadAtmosphere( 0 ),
-				m_pshadInteriorVolume( 0 ),
-				m_pshadExteriorVolume( 0 )
+CqAttributes::CqAttributes() :
+		m_pshadDisplacement( 0 ),
+		m_pshadAreaLightSource( 0 ),
+		m_pshadSurface( 0 ),
+		m_pshadAtmosphere( 0 ),
+		m_pshadInteriorVolume( 0 ),
+		m_pshadExteriorVolume( 0 )
 {
 	Attribute_stack.push_back( this );
 	m_StackIndex = Attribute_stack.size() - 1;
 
-	CqSystemOption*  pdefattrs = new CqSystemOption("System");
+	CqSystemOption* pdefattrs = new CqSystemOption( "System" );
 
-	ADD_SYSTEM_ATTR(Color, CqColor, CqColor, type_color, CqColor(1.0f,1.0f,1.0f));		// the current color attribute.
-	ADD_SYSTEM_ATTR(Opacity, CqColor, CqColor, type_color, CqColor(1.0f,1.0f,1.0f));	// the current opacity attribute.
-	ADD_SYSTEM_ATTR8(TextureCoordinates, TqFloat, TqFloat, type_float, 0.0f,0.0f,1.0f,0.0f,0.0f,1.0f,1.0f,1.0f);	// an array of 2D vectors representing the coordinate space.
-	ADD_SYSTEM_ATTR(ShadingRate, TqFloat, TqFloat, type_float, 1.0f);					// the current effective shading rate.
-	ADD_SYSTEM_ATTR(ShadingInterpolation, TqFloat, TqInt, type_integer, ShadingConstant);	// the current shading interpolation mode.
-	ADD_SYSTEM_ATTR(Matte, TqInt, TqFloat, type_integer, 0);				// the current state of the matte flag.
-	ADD_SYSTEM_ATTR4(DetailRange, TqFloat, TqFloat, type_float, 0.0f, 0.0f, FLT_MAX, FLT_MAX);	// the detail range minimum visible distance.
-	ADD_SYSTEM_ATTR2(Basis, CqMatrix, CqMatrix, type_matrix, RiBezierBasis, RiBezierBasis);	// the basis matrix for the u direction.
-	ADD_SYSTEM_ATTR2(BasisStep, TqInt, TqFloat, type_integer, 3, 3);	// the steps to advance the evaluation window in the u direction.
-	ADD_SYSTEM_ATTR2(Orientation, TqInt, TqFloat, type_integer, OrientationLH, OrientationLH);	// the orientation associated primitives are described in.
-	ADD_SYSTEM_ATTR(Sides, TqInt, TqFloat, type_integer, 2);		// the number of visible sides associated primitives have.
-	ADD_SYSTEM_ATTR(LevelOfDetailRulerSize, TqFloat, TqFloat, type_float, FLT_MAX);		// current LOD ruler size
-	ADD_SYSTEM_ATTR2(LevelOfDetailBounds, TqFloat, TqFloat, type_float, 0.0f, 1.0f);	// relative importance bounds for this LOD representation
+	ADD_SYSTEM_ATTR( Color, CqColor, CqColor, type_color, CqColor( 1.0f, 1.0f, 1.0f ) );		// the current color attribute.
+	ADD_SYSTEM_ATTR( Opacity, CqColor, CqColor, type_color, CqColor( 1.0f, 1.0f, 1.0f ) );	// the current opacity attribute.
+	ADD_SYSTEM_ATTR8( TextureCoordinates, TqFloat, TqFloat, type_float, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f );	// an array of 2D vectors representing the coordinate space.
+	ADD_SYSTEM_ATTR( ShadingRate, TqFloat, TqFloat, type_float, 1.0f );					// the current effective shading rate.
+	ADD_SYSTEM_ATTR( ShadingInterpolation, TqFloat, TqInt, type_integer, ShadingConstant );	// the current shading interpolation mode.
+	ADD_SYSTEM_ATTR( Matte, TqInt, TqFloat, type_integer, 0 );				// the current state of the matte flag.
+	ADD_SYSTEM_ATTR4( DetailRange, TqFloat, TqFloat, type_float, 0.0f, 0.0f, FLT_MAX, FLT_MAX );	// the detail range minimum visible distance.
+	ADD_SYSTEM_ATTR2( Basis, CqMatrix, CqMatrix, type_matrix, RiBezierBasis, RiBezierBasis );	// the basis matrix for the u direction.
+	ADD_SYSTEM_ATTR2( BasisStep, TqInt, TqFloat, type_integer, 3, 3 );	// the steps to advance the evaluation window in the u direction.
+	ADD_SYSTEM_ATTR2( Orientation, TqInt, TqFloat, type_integer, OrientationLH, OrientationLH );	// the orientation associated primitives are described in.
+	ADD_SYSTEM_ATTR( Sides, TqInt, TqFloat, type_integer, 2 );		// the number of visible sides associated primitives have.
+	ADD_SYSTEM_ATTR( LevelOfDetailRulerSize, TqFloat, TqFloat, type_float, FLT_MAX );		// current LOD ruler size
+	ADD_SYSTEM_ATTR2( LevelOfDetailBounds, TqFloat, TqFloat, type_float, 0.0f, 1.0f );	// relative importance bounds for this LOD representation
 
-	AddAttribute(pdefattrs);
+	AddAttribute( pdefattrs );
 }
 
 
@@ -146,12 +146,12 @@ CqAttributes::~CqAttributes()
 	assert( RefCount() == 0 );
 
 	// Unreference the system attributes.
-//	TqInt i = m_aAttributes.size();
-//	while ( i-- > 0 )
-//	{
-//		m_aAttributes[ i ] ->Release();
-//		m_aAttributes[ i ] = 0;
-//	}
+	//	TqInt i = m_aAttributes.size();
+	//	while ( i-- > 0 )
+	//	{
+	//		m_aAttributes[ i ] ->Release();
+	//		m_aAttributes[ i ] = 0;
+	//	}
 
 	// Remove ourself from the stack
 	std::vector<CqAttributes*>::iterator p = Attribute_stack.begin();
@@ -172,13 +172,13 @@ CqAttributes::~CqAttributes()
 CqAttributes& CqAttributes::operator=( const CqAttributes& From )
 {
 	// Copy the system attributes.
-//	m_aAttributes.resize( From.m_aAttributes.size() );
-//	TqInt i = From.m_aAttributes.size();
-//	while ( i-- > 0 )
-//	{
-//		m_aAttributes[ i ] = From.m_aAttributes[ i ];
-//		m_aAttributes[ i ] ->AddRef();
-//	}
+	//	m_aAttributes.resize( From.m_aAttributes.size() );
+	//	TqInt i = From.m_aAttributes.size();
+	//	while ( i-- > 0 )
+	//	{
+	//		m_aAttributes[ i ] = From.m_aAttributes[ i ];
+	//		m_aAttributes[ i ] ->AddRef();
+	//	}
 	m_aAttributes = From.m_aAttributes;
 
 	// Copy the lightsource list.
@@ -315,7 +315,7 @@ CqVector3D* CqAttributes::GetPointAttributeWrite( const char* strName, const cha
 
 CqVector3D* CqAttributes::GetVectorAttributeWrite( const char* strName, const char* strParam )
 {
-	return( GetPointAttributeWrite(strName, strParam) );
+	return ( GetPointAttributeWrite( strName, strParam ) );
 }
 
 
@@ -328,7 +328,7 @@ CqVector3D* CqAttributes::GetVectorAttributeWrite( const char* strName, const ch
 
 CqVector3D* CqAttributes::GetNormalAttributeWrite( const char* strName, const char* strParam )
 {
-	return( GetPointAttributeWrite(strName, strParam) );
+	return ( GetPointAttributeWrite( strName, strParam ) );
 }
 
 
@@ -443,7 +443,7 @@ const CqVector3D* CqAttributes::GetPointAttribute( const char* strName, const ch
 
 const CqVector3D* CqAttributes::GetVectorAttribute( const char* strName, const char* strParam ) const
 {
-	return( GetPointAttribute(strName, strParam) );
+	return ( GetPointAttribute( strName, strParam ) );
 }
 
 
@@ -456,7 +456,7 @@ const CqVector3D* CqAttributes::GetVectorAttribute( const char* strName, const c
 
 const CqVector3D* CqAttributes::GetNormalAttribute( const char* strName, const char* strParam ) const
 {
-	return( GetPointAttribute(strName, strParam) );
+	return ( GetPointAttribute( strName, strParam ) );
 }
 
 
@@ -494,9 +494,9 @@ const CqMatrix* CqAttributes::GetMatrixAttribute( const char* strName, const cha
 }
 
 
-IqLightsource*	CqAttributes::pLight(TqInt index)
+IqLightsource*	CqAttributes::pLight( TqInt index )
 {
-	return( m_apLightsources[index] ); 
+	return ( m_apLightsources[ index ] );
 }
 
 //---------------------------------------------------------------------

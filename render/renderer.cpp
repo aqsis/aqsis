@@ -571,17 +571,17 @@ CqMatrix	CqRenderer::matSpaceToSpace( const char* strFrom, const char* strTo, co
 	// First check for special cases.
 	if ( strcmp( strFrom, "object" ) == 0 ) matA = matObjectToWorld;
 	else if ( strcmp( strFrom, "shader" ) == 0 ) matA = matShaderToWorld;
-	else if ( (strcmp( strFrom, "camera" ) == 0) || (strcmp( strFrom, "current" ) == 0) ) 
-		matA = m_transCamera.GetMotionObjectInterpolated(time).Inverse();
+	else if ( ( strcmp( strFrom, "camera" ) == 0 ) || ( strcmp( strFrom, "current" ) == 0 ) )
+		matA = m_transCamera.GetMotionObjectInterpolated( time ).Inverse();
 	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-		if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+			if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
 
 	if ( strcmp( strTo, "object" ) == 0 ) matB = matObjectToWorld.Inverse();
 	else if ( strcmp( strTo, "shader" ) == 0 ) matB = matShaderToWorld.Inverse();
-	else if ( (strcmp( strTo, "camera" ) == 0) || (strcmp( strTo, "current" ) == 0) ) 
-		matB = m_transCamera.GetMotionObjectInterpolated(time);
+	else if ( ( strcmp( strTo, "camera" ) == 0 ) || ( strcmp( strTo, "current" ) == 0 ) )
+		matB = m_transCamera.GetMotionObjectInterpolated( time );
 	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-		if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
+			if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
 
 	matResult = matB * matA;
 
@@ -601,17 +601,17 @@ CqMatrix	CqRenderer::matVSpaceToSpace( const char* strFrom, const char* strTo, c
 	// First check for special cases.
 	if ( strcmp( strFrom, "object" ) == 0 ) matA = matObjectToWorld;
 	else if ( strcmp( strFrom, "shader" ) == 0 ) matA = matShaderToWorld;
-	else if ( (strcmp( strFrom, "camera" ) == 0) || (strcmp( strFrom, "current" ) == 0) ) 
-		matA = m_transCamera.GetMotionObjectInterpolated(time).Inverse();
+	else if ( ( strcmp( strFrom, "camera" ) == 0 ) || ( strcmp( strFrom, "current" ) == 0 ) )
+		matA = m_transCamera.GetMotionObjectInterpolated( time ).Inverse();
 	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-		if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+			if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
 
 	if ( strcmp( strTo, "object" ) == 0 ) matB = matObjectToWorld.Inverse();
 	else if ( strcmp( strTo, "shader" ) == 0 ) matB = matShaderToWorld.Inverse();
-	else if ( (strcmp( strTo, "camera" ) == 0) || (strcmp( strTo, "current" ) == 0) ) 
-		matB = m_transCamera.GetMotionObjectInterpolated(time);
+	else if ( ( strcmp( strTo, "camera" ) == 0 ) || ( strcmp( strTo, "current" ) == 0 ) )
+		matB = m_transCamera.GetMotionObjectInterpolated( time );
 	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-		if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
+			if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
 
 	matResult = matB * matA;
 
@@ -634,17 +634,17 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
 	// First check for special cases.
 	if ( strcmp( strFrom, "object" ) == 0 ) matA = matObjectToWorld;
 	else if ( strcmp( strFrom, "shader" ) == 0 ) matA = matShaderToWorld;
-	else if ( (strcmp( strFrom, "camera" ) == 0) || (strcmp( strFrom, "current" ) == 0) ) 
-		matA = m_transCamera.GetMotionObjectInterpolated(time).Inverse();
+	else if ( ( strcmp( strFrom, "camera" ) == 0 ) || ( strcmp( strFrom, "current" ) == 0 ) )
+		matA = m_transCamera.GetMotionObjectInterpolated( time ).Inverse();
 	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-		if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
+			if ( m_aCoordSystems[ i ].m_strName == strFrom ) matA = m_aCoordSystems[ i ].m_matToWorld;
 
 	if ( strcmp( strTo, "object" ) == 0 ) matB = matObjectToWorld.Inverse();
 	else if ( strcmp( strTo, "shader" ) == 0 ) matB = matShaderToWorld.Inverse();
-	else if ( (strcmp( strTo, "camera" ) == 0) || (strcmp( strTo, "current" ) == 0) ) 
-		matB = m_transCamera.GetMotionObjectInterpolated(time);
+	else if ( ( strcmp( strTo, "camera" ) == 0 ) || ( strcmp( strTo, "current" ) == 0 ) )
+		matB = m_transCamera.GetMotionObjectInterpolated( time );
 	else for ( i = m_aCoordSystems.size() - 1; i >= 0; i-- )
-		if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
+			if ( m_aCoordSystems[ i ].m_strName == strTo ) matB = m_aCoordSystems[ i ].m_matWorldTo;
 
 	matResult = matB * matA;
 
@@ -659,53 +659,53 @@ CqMatrix	CqRenderer::matNSpaceToSpace( const char* strFrom, const char* strTo, c
 
 const	TqFloat*	CqRenderer::GetFloatOption( const char* strName, const char* strParam ) const
 {
-	return(optCurrent().GetFloatOption( strName, strParam ) );
+	return ( optCurrent().GetFloatOption( strName, strParam ) );
 }
 
-const	TqInt*		CqRenderer::GetIntegerOption( const char* strName, const char* strParam ) const
+const	TqInt*	CqRenderer::GetIntegerOption( const char* strName, const char* strParam ) const
 {
-	return(optCurrent().GetIntegerOption( strName, strParam ) );
+	return ( optCurrent().GetIntegerOption( strName, strParam ) );
 }
 
 const	CqString*	CqRenderer::GetStringOption( const char* strName, const char* strParam ) const
 {
-	return(optCurrent().GetStringOption( strName, strParam ) );
+	return ( optCurrent().GetStringOption( strName, strParam ) );
 }
 
 const	CqVector3D*	CqRenderer::GetPointOption( const char* strName, const char* strParam ) const
 {
-	return(optCurrent().GetPointOption( strName, strParam ) );
+	return ( optCurrent().GetPointOption( strName, strParam ) );
 }
 
 const	CqColor*	CqRenderer::GetColorOption( const char* strName, const char* strParam ) const
 {
-	return(optCurrent().GetColorOption( strName, strParam ) );
+	return ( optCurrent().GetColorOption( strName, strParam ) );
 }
 
 
-TqFloat*			CqRenderer::GetFloatOptionWrite( const char* strName, const char* strParam )
+TqFloat*	CqRenderer::GetFloatOptionWrite( const char* strName, const char* strParam )
 {
-	return(optCurrent().GetFloatOptionWrite( strName, strParam ) );
+	return ( optCurrent().GetFloatOptionWrite( strName, strParam ) );
 }
 
-TqInt*				CqRenderer::GetIntegerOptionWrite( const char* strName, const char* strParam )
+TqInt*	CqRenderer::GetIntegerOptionWrite( const char* strName, const char* strParam )
 {
-	return(optCurrent().GetIntegerOptionWrite( strName, strParam ) );
+	return ( optCurrent().GetIntegerOptionWrite( strName, strParam ) );
 }
 
-CqString*			CqRenderer::GetStringOptionWrite( const char* strName, const char* strParam )
+CqString*	CqRenderer::GetStringOptionWrite( const char* strName, const char* strParam )
 {
-	return(optCurrent().GetStringOptionWrite( strName, strParam ) );
+	return ( optCurrent().GetStringOptionWrite( strName, strParam ) );
 }
 
-CqVector3D*			CqRenderer::GetPointOptionWrite( const char* strName, const char* strParam )
+CqVector3D*	CqRenderer::GetPointOptionWrite( const char* strName, const char* strParam )
 {
-	return(optCurrent().GetPointOptionWrite( strName, strParam ) );
+	return ( optCurrent().GetPointOptionWrite( strName, strParam ) );
 }
 
-CqColor*			CqRenderer::GetColorOptionWrite( const char* strName, const char* strParam )
+CqColor*	CqRenderer::GetColorOptionWrite( const char* strName, const char* strParam )
 {
-	return(optCurrent().GetColorOptionWrite( strName, strParam ) );
+	return ( optCurrent().GetColorOptionWrite( strName, strParam ) );
 }
 
 
@@ -750,9 +750,9 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 	CqString strLocalDecl( strDecl );
 	TqInt i;
 	/// \note Go backwards through the type names to make sure facevarying is matched before varying.
-	for ( i = gcVariableClassNames-1; i >= 0; i-- )
+	for ( i = gcVariableClassNames - 1; i >= 0; i-- )
 	{
-		if ( strLocalDecl.find( gVariableClassNames[ i ]) != CqString::npos )
+		if ( strLocalDecl.find( gVariableClassNames[ i ] ) != CqString::npos )
 		{
 			ILClass = static_cast< EqVariableClass > ( i );
 			break;
@@ -760,7 +760,7 @@ SqParameterDeclaration CqRenderer::FindParameterDecl( const char* strDecl )
 	}
 
 	/// \note Go backwards through the type names to make sure hpoint is matched before point.
-	for ( i = gcVariableTypeNames-1; i >= 0; i-- )
+	for ( i = gcVariableTypeNames - 1; i >= 0; i-- )
 	{
 		if ( strLocalDecl.find( gVariableTypeNames[ i ] ) != CqString::npos )
 		{
@@ -920,12 +920,12 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 	if ( pReg != 0 )
 	{
 		IqShader * pShader = pReg->Create();
-		/* 
-                 * 
-                 * Doesn't need to register since it is already in the cache
-                 * 
-                 * RegisterShader( strName, type, pShader );
-                 */
+		/*
+		               * 
+		               * Doesn't need to register since it is already in the cache
+		               * 
+		               * RegisterShader( strName, type, pShader );
+		               */ 
 		return ( pShader );
 	}
 	else
@@ -944,7 +944,7 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 		}
 		else
 		{
-			if( strcmp(strName, "null" ) != 0 )
+			if ( strcmp( strName, "null" ) != 0 )
 			{
 				CqString strError( "Shader \"" );
 				strError += strName;
@@ -969,7 +969,7 @@ IqShader* CqRenderer::CreateShader( const char* strName, EqShaderType type )
 
 void CqRenderer::AddDisplayRequest( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality )
 {
-	m_pDDManager->AddDisplay( name, type, mode, compression, quality);
+	m_pDDManager->AddDisplay( name, type, mode, compression, quality );
 }
 
 
@@ -995,38 +995,38 @@ IqRenderer* QGetRenderContextI()
 }
 
 
-IqTextureMap* CqRenderer::GetTextureMap(const CqString& strFileName)
+IqTextureMap* CqRenderer::GetTextureMap( const CqString& strFileName )
 {
-	return( CqTextureMap::GetTextureMap( strFileName ) );
+	return ( CqTextureMap::GetTextureMap( strFileName ) );
 }
 
-IqTextureMap* CqRenderer::GetEnvironmentMap(const CqString& strFileName)
+IqTextureMap* CqRenderer::GetEnvironmentMap( const CqString& strFileName )
 {
-	return( CqTextureMap::GetEnvironmentMap( strFileName ) );
+	return ( CqTextureMap::GetEnvironmentMap( strFileName ) );
 }
 
-IqTextureMap* CqRenderer::GetShadowMap(const CqString& strFileName)
+IqTextureMap* CqRenderer::GetShadowMap( const CqString& strFileName )
 {
-	return( CqTextureMap::GetShadowMap( strFileName ) );
+	return ( CqTextureMap::GetShadowMap( strFileName ) );
 }
 
-IqTextureMap* CqRenderer::GetLatLongMap(const CqString& strFileName)
+IqTextureMap* CqRenderer::GetLatLongMap( const CqString& strFileName )
 {
-	return( CqTextureMap::GetLatLongMap( strFileName ) );
+	return ( CqTextureMap::GetLatLongMap( strFileName ) );
 }
 
 
-TqBool	CqRenderer::GetBasisMatrix( CqMatrix& matBasis, const CqString& name)
+TqBool	CqRenderer::GetBasisMatrix( CqMatrix& matBasis, const CqString& name )
 {
 	RtBasis basis;
-	if( BasisFromName( &basis, name.c_str() ) )
+	if ( BasisFromName( &basis, name.c_str() ) )
 	{
 		matBasis = basis;
-		return(TqTrue);
+		return ( TqTrue );
 	}
 	else
-		return(TqFalse);
-} 
+		return ( TqFalse );
+}
 
 //---------------------------------------------------------------------
 

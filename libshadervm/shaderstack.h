@@ -192,7 +192,7 @@ START_NAMESPACE( Aqsis )
 				pB->GetValue( vB ); \
 				pRes->SetValue( vA OP vB ); \
 			} \
-		} 
+		}
 
 //----------------------------------------------------------------------
 /** \class CqShaderStack
@@ -223,9 +223,9 @@ class _qShareC CqShaderStack
 			m_aVMPool.resize( 48 );
 
 			TqInt i;
-			for( i = 0; i < type_last; i++ )
+			for ( i = 0; i < type_last; i++ )
 				m_iUPoolTops[ i ] = 0;
-			for( i = 0; i < type_last; i++ )
+			for ( i = 0; i < type_last; i++ )
 				m_iVPoolTops[ i ] = 0;
 		}
 		virtual _qShareM ~CqShaderStack()
@@ -250,104 +250,104 @@ class _qShareC CqShaderStack
 		}
 
 
-		IqShaderData* GetNextTemp(EqVariableType type, EqVariableClass _class)
+		IqShaderData* GetNextTemp( EqVariableType type, EqVariableClass _class )
 		{
-			switch( type )
+			switch ( type )
 			{
-				case type_point:
-					if( _class == class_uniform)
+					case type_point:
+					if ( _class == class_uniform )
 					{
-						if ( m_iUPoolTops[type_point] >= m_aUPPool.size() )
+						if ( m_iUPoolTops[ type_point ] >= m_aUPPool.size() )
 							m_aUPPool.resize( m_aUPPool.size() + 1 );
 						return ( &m_aUPPool[ m_iUPoolTops[ type_point ] ] );
 					}
 					else
 					{
-						if ( m_iVPoolTops[type_point] >= m_aVPPool.size() )
+						if ( m_iVPoolTops[ type_point ] >= m_aVPPool.size() )
 							m_aVPPool.resize( m_aVPPool.size() + 1 );
 						return ( &m_aVPPool[ m_iVPoolTops[ type_point ] ] );
 					}
 
-				case type_string:
-					if( _class == class_uniform)
+					case type_string:
+					if ( _class == class_uniform )
 					{
-						if ( m_iUPoolTops[type_string] >= m_aUSPool.size() )
+						if ( m_iUPoolTops[ type_string ] >= m_aUSPool.size() )
 							m_aUSPool.resize( m_aUSPool.size() + 1 );
 						return ( &m_aUSPool[ m_iUPoolTops[ type_string ] ] );
 					}
 					else
 					{
-						if ( m_iVPoolTops[type_string] >= m_aVSPool.size() )
+						if ( m_iVPoolTops[ type_string ] >= m_aVSPool.size() )
 							m_aVSPool.resize( m_aVSPool.size() + 1 );
 						return ( &m_aVSPool[ m_iVPoolTops[ type_string ] ] );
 					}
 
-				case type_color:
-					if( _class == class_uniform)
+					case type_color:
+					if ( _class == class_uniform )
 					{
-						if ( m_iUPoolTops[type_color] >= m_aUCPool.size() )
+						if ( m_iUPoolTops[ type_color ] >= m_aUCPool.size() )
 							m_aUCPool.resize( m_aUCPool.size() + 1 );
 						return ( &m_aUCPool[ m_iUPoolTops[ type_color ] ] );
 					}
 					else
 					{
-						if ( m_iVPoolTops[type_color] >= m_aVCPool.size() )
+						if ( m_iVPoolTops[ type_color ] >= m_aVCPool.size() )
 							m_aVCPool.resize( m_aVCPool.size() + 1 );
 						return ( &m_aVCPool[ m_iVPoolTops[ type_color ] ] );
 					}
 
-				case type_normal:
-					if( _class == class_uniform)
+					case type_normal:
+					if ( _class == class_uniform )
 					{
-						if ( m_iUPoolTops[type_normal] >= m_aUNPool.size() )
+						if ( m_iUPoolTops[ type_normal ] >= m_aUNPool.size() )
 							m_aUNPool.resize( m_aUNPool.size() + 1 );
 						return ( &m_aUNPool[ m_iUPoolTops[ type_normal ] ] );
 					}
 					else
 					{
-						if ( m_iVPoolTops[type_normal] >= m_aVNPool.size() )
+						if ( m_iVPoolTops[ type_normal ] >= m_aVNPool.size() )
 							m_aVNPool.resize( m_aVNPool.size() + 1 );
 						return ( &m_aVNPool[ m_iVPoolTops[ type_normal ] ] );
 					}
 
-				case type_vector:
-					if( _class == class_uniform)
+					case type_vector:
+					if ( _class == class_uniform )
 					{
-						if ( m_iUPoolTops[type_vector] >= m_aUVPool.size() )
+						if ( m_iUPoolTops[ type_vector ] >= m_aUVPool.size() )
 							m_aUVPool.resize( m_aUVPool.size() + 1 );
 						return ( &m_aUVPool[ m_iUPoolTops[ type_vector ] ] );
 					}
 					else
 					{
-						if ( m_iVPoolTops[type_vector] >= m_aVVPool.size() )
+						if ( m_iVPoolTops[ type_vector ] >= m_aVVPool.size() )
 							m_aVVPool.resize( m_aVVPool.size() + 1 );
 						return ( &m_aVVPool[ m_iVPoolTops[ type_vector ] ] );
 					}
 
-				case type_matrix:
-					if( _class == class_uniform)
+					case type_matrix:
+					if ( _class == class_uniform )
 					{
-						if ( m_iUPoolTops[type_matrix] >= m_aUMPool.size() )
+						if ( m_iUPoolTops[ type_matrix ] >= m_aUMPool.size() )
 							m_aUMPool.resize( m_aUMPool.size() + 1 );
 						return ( &m_aUMPool[ m_iUPoolTops[ type_matrix ] ] );
 					}
 					else
 					{
-						if ( m_iVPoolTops[type_matrix] >= m_aVMPool.size() )
+						if ( m_iVPoolTops[ type_matrix ] >= m_aVMPool.size() )
 							m_aVMPool.resize( m_aVMPool.size() + 1 );
 						return ( &m_aVMPool[ m_iVPoolTops[ type_matrix ] ] );
 					}
 
-				default:
-					if( _class == class_uniform)
+					default:
+					if ( _class == class_uniform )
 					{
-						if ( m_iUPoolTops[type_float] >= m_aUFPool.size() )
+						if ( m_iUPoolTops[ type_float ] >= m_aUFPool.size() )
 							m_aUFPool.resize( m_aUFPool.size() + 1 );
 						return ( &m_aUFPool[ m_iUPoolTops[ type_float ] ] );
 					}
 					else
 					{
-						if ( m_iVPoolTops[type_float] >= m_aVFPool.size() )
+						if ( m_iVPoolTops[ type_float ] >= m_aVFPool.size() )
 							m_aVFPool.resize( m_aVFPool.size() + 1 );
 						return ( &m_aVFPool[ m_iVPoolTops[ type_float ] ] );
 					}
@@ -363,10 +363,10 @@ class _qShareC CqShaderStack
 				m_Stack.resize( m_Stack.size() + 1 );
 
 			m_Stack[ m_iTop++ ] = pv;
-			if( pv->Class() == class_uniform)
-				m_iUPoolTops[ pv->Type() ]++;
+			if ( pv->Class() == class_uniform )
+				m_iUPoolTops[ pv->Type() ] ++;
 			else
-				m_iVPoolTops[ pv->Type() ]++;
+				m_iVPoolTops[ pv->Type() ] ++;
 		}
 		/** Pop the top stack entry.
 		 * \param f Boolean value to update if this is varying. If not varying, leaves f unaltered.
@@ -376,17 +376,17 @@ class _qShareC CqShaderStack
 		{
 			if ( m_iTop ) m_iTop--;
 			IqShaderData* pVal = m_Stack[ m_iTop ];
-			
+
 			f = pVal->Size() > 1 || f;
 
-			if( pVal->Class() == class_uniform)
+			if ( pVal->Class() == class_uniform )
 			{
-				m_iUPoolTops[ pVal->Type() ]--;
+				m_iUPoolTops[ pVal->Type() ] --;
 				assert( m_iUPoolTops[ pVal->Type() ] >= 0 );
 			}
 			else
 			{
-				m_iVPoolTops[ pVal->Type() ]--;
+				m_iVPoolTops[ pVal->Type() ] --;
 				assert( m_iVPoolTops[ pVal->Type() ] >= 0 );
 			}
 
@@ -397,9 +397,9 @@ class _qShareC CqShaderStack
 		void	Dup()
 		{
 			TqInt iTop = m_iTop;
-			
-			IqShaderData* s = GetNextTemp(m_Stack[ iTop ]->Type(), m_Stack[ iTop ]->Class());
-			s->SetValueFromVariable(m_Stack[ iTop ]);
+
+			IqShaderData* s = GetNextTemp( m_Stack[ iTop ] ->Type(), m_Stack[ iTop ] ->Class() );
+			s->SetValueFromVariable( m_Stack[ iTop ] );
 			Push( s );
 		}
 		/** Drop the top stack entry.
@@ -407,10 +407,10 @@ class _qShareC CqShaderStack
 		void	Drop()
 		{
 			TqBool f = TqFalse;
-			Pop(f);
+			Pop( f );
 		}
 	protected:
-		std::vector<IqShaderData*>		m_Stack;
+		std::vector<IqShaderData*>	m_Stack;
 		TqUint	m_iTop;										///< Index of the top entry.
 
 
@@ -440,8 +440,8 @@ class _qShareC CqShaderStack
 		std::vector<CqShaderVariableVaryingMatrix>	m_aVMPool;
 		// SixteenTuple
 
-		TqInt	m_iUPoolTops[type_last];
-		TqInt	m_iVPoolTops[type_last];
+		TqInt	m_iUPoolTops[ type_last ];
+		TqInt	m_iVPoolTops[ type_last ];
 }
 ;
 
@@ -456,7 +456,7 @@ class _qShareC CqShaderStack
  * \param Res The stack entry to store the result in.
  * \param RunningState The current SIMD state.
  */
-OpABRS(<,LSS)
+OpABRS( < , LSS )
 /** Templatised greater than operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
@@ -465,7 +465,7 @@ OpABRS(<,LSS)
  * \param Res The stack entry to store the result in.
  * \param RunningState The current SIMD state.
  */
-OpABRS(>,GRT)
+OpABRS( > , GRT )
 /** Templatised less than or equal to operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
@@ -474,7 +474,7 @@ OpABRS(>,GRT)
  * \param Res The stack entry to store the result in.
  * \param RunningState The current SIMD state.
  */
-OpABRS(<=,LE)
+OpABRS( <= , LE )
 /** Templatised greater than or equal to operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
@@ -483,7 +483,7 @@ OpABRS(<=,LE)
  * \param Res The stack entry to store the result in.
  * \param RunningState The current SIMD state.
  */
-OpABRS(>=,GE)
+OpABRS( >= , GE )
 /** Templatised equality operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
@@ -492,7 +492,7 @@ OpABRS(>=,GE)
  * \param Res The stack entry to store the result in.
  * \param RunningState The current SIMD state.
  */
-OpABRS(==,EQ)
+OpABRS( == , EQ )
 /** Templatised inequality operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
@@ -501,7 +501,7 @@ OpABRS(==,EQ)
  * \param Res The stack entry to store the result in.
  * \param RunningState The current SIMD state.
  */
-OpABRS(!=,NE)
+OpABRS( != , NE )
 /** Templatised multiplication operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
@@ -510,7 +510,7 @@ OpABRS(!=,NE)
  * \param Res The stack entry to store the result in.
  * \param RunningState The current SIMD state.
  */
-OpABRS(*,MUL)
+OpABRS( *, MUL )
 /** Special case vector multiplication operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param Comp The stack entry to use as the second operand.
@@ -526,62 +526,62 @@ inline void	OpMULV( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBi
 
 	TqBool fAVar = pA->Size() > 1;
 	TqBool fBVar = pB->Size() > 1;
-	
-	if( fAVar && fBVar )
-	{ 
-		/* Both are varying, must go accross all processing each element. */ 
-		pA->GetValuePtr( pdA ); 
-		pB->GetValuePtr( pdB ); 
-		ii = pA->Size(); 
-		for ( i = 0; i < ii; i++ ) 
-		{ 
-			if ( RunningState.Value( i ) ) 
+
+	if ( fAVar && fBVar )
+	{
+		/* Both are varying, must go accross all processing each element. */
+		pA->GetValuePtr( pdA );
+		pB->GetValuePtr( pdB );
+		ii = pA->Size();
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState.Value( i ) )
 				pRes->SetValue( CqVector3D( pdA->x() * pdB->x(),
-											pdA->y() * pdB->y(),
-											pdA->z() * pdB->z() ), i ); 
-			pdA++; 
-			pdB++; 
-		} 
-	} 
-	else if( !fBVar && fAVar) 
-	{ 
-		/* A is varying, can just get B's value once. */ 
-		ii = pA->Size(); 
-		pA->GetValuePtr( pdA ); 
-		pB->GetValue( vB ); 
-		for ( i = 0; i < ii; i++ ) 
-		{ 
-			if ( RunningState.Value( i ) ) 
+				                            pdA->y() * pdB->y(),
+				                            pdA->z() * pdB->z() ), i );
+			pdA++;
+			pdB++;
+		}
+	}
+	else if ( !fBVar && fAVar )
+	{
+		/* A is varying, can just get B's value once. */
+		ii = pA->Size();
+		pA->GetValuePtr( pdA );
+		pB->GetValue( vB );
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState.Value( i ) )
 				pRes->SetValue( CqVector3D( pdA->x() * vB.x(),
-											pdA->y() * vB.y(),
-											pdA->z() * vB.z() ), i ); 
-			pdA++; 
-		} 
-	} 
-	else if( !fAVar && fBVar) \
-	{ 
-		/* B is varying, can just get A's value once. */ 
-		ii = pB->Size(); 
-		pB->GetValuePtr( pdB ); 
-		pA->GetValue( vA ); 
-		for ( i = 0; i < ii; i++ ) 
-		{ 
-			if ( RunningState.Value( i ) ) 
+				                            pdA->y() * vB.y(),
+				                            pdA->z() * vB.z() ), i );
+			pdA++;
+		}
+	}
+	else if ( !fAVar && fBVar ) \
+	{
+		/* B is varying, can just get A's value once. */
+		ii = pB->Size();
+		pB->GetValuePtr( pdB );
+		pA->GetValue( vA );
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState.Value( i ) )
 				pRes->SetValue( CqVector3D( vA.x() * pdB->x(),
-											vA.y() * pdB->y(),
-											vA.z() * pdB->z() ), i ); 
-			pdB++; 
-		} 
-	} 
-	else 
-	{ 
-		/* Both are uniform, simple one shot case. */ 
-		pA->GetValue( vA ); 
-		pB->GetValue( vB ); 
+				                            vA.y() * pdB->y(),
+				                            vA.z() * pdB->z() ), i );
+			pdB++;
+		}
+	}
+	else
+	{
+		/* Both are uniform, simple one shot case. */
+		pA->GetValue( vA );
+		pB->GetValue( vB );
 		pRes->SetValue( CqVector3D( vA.x() * vB.x(),
-									vA.y() * vB.y(),
-									vA.z() * vB.z() ) ); 
-	} 
+		                            vA.y() * vB.y(),
+		                            vA.z() * vB.z() ) );
+	}
 }
 /** Templatised division operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -591,7 +591,7 @@ inline void	OpMULV( IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes, CqBi
  * \param Res The stack entry to store the result in.
  * \param RunningState The current SIMD state.
  */
-OpABRS(/,DIV)
+OpABRS( / , DIV )
 /** Templatised addition operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
@@ -600,7 +600,7 @@ OpABRS(/,DIV)
  * \param Res The stack entry to store the result in.
  * \param RunningState The current SIMD state.
  */
-OpABRS(+,ADD)
+OpABRS( + , ADD )
 /** Templatised subtraction operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
@@ -609,7 +609,7 @@ OpABRS(+,ADD)
  * \param Res The stack entry to store the result in.
  * \param RunningState The current SIMD state.
  */
-OpABRS(-,SUB)
+OpABRS( -, SUB )
 /** Templatised dot operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
@@ -619,7 +619,7 @@ OpABRS(-,SUB)
  * \param RunningState The current SIMD state.
  * \attention Should only ever be called with vector based operands.
  */
-OpABRS(*,DOT)
+OpABRS( *, DOT )
 /** Templatised cross product operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
@@ -629,7 +629,7 @@ OpABRS(*,DOT)
  * \param RunningState The current SIMD state.
  * \attention Should only ever be called with vector based operands.
  */
-OpABRS(%,CRS)
+OpABRS( % , CRS )
 /** Templatised logical AND operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
@@ -638,7 +638,7 @@ OpABRS(%,CRS)
  * \param Res The stack entry to store the result in.
  * \param RunningState The current SIMD state.
  */
-OpABRS(&&,LAND)
+OpABRS( && , LAND )
 /** Templatised logical OR operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
@@ -647,7 +647,7 @@ OpABRS(&&,LAND)
  * \param Res The stack entry to store the result in.
  * \param RunningState The current SIMD state.
  */
-OpABRS(||,LOR)
+OpABRS( || , LOR )
 /** Templatised negation operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
  * \param a The type of the first operand, used to determine templateisation, needed by VC++..
@@ -664,25 +664,25 @@ inline void	OpNEG( A& a, IqShaderData* pA, IqShaderData* pRes, CqBitVector& Runn
 	TqInt i, ii;
 
 	TqBool fAVar = pA->Size() > 1;
-	
-	if( fAVar )
-	{ 
-		/* Varying, must go accross all processing each element. */ 
-		pA->GetValuePtr( pdA ); 
-		ii = pA->Size(); 
-		for ( i = 0; i < ii; i++ ) 
-		{ 
-			if ( RunningState.Value( i ) ) 
-				pRes->SetValue( -(*pdA), i ); 
-			pdA++; 
-		} 
-	} 
-	else 
-	{ 
-		/* Uniform, simple one shot case. */ 
-		pA->GetValue( vA ); 
-		pRes->SetValue( -vA ); 
-	} 
+
+	if ( fAVar )
+	{
+		/* Varying, must go accross all processing each element. */
+		pA->GetValuePtr( pdA );
+		ii = pA->Size();
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState.Value( i ) )
+				pRes->SetValue( -( *pdA ), i );
+			pdA++;
+		}
+	}
+	else
+	{
+		/* Uniform, simple one shot case. */
+		pA->GetValue( vA );
+		pRes->SetValue( -vA );
+	}
 }
 /** Templatised cast operator, cast the current stack entry to the spcified type.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -700,25 +700,25 @@ inline void	OpCAST( A& a, B& b, IqShaderData* pA, IqShaderData* pRes, CqBitVecto
 	TqInt i, ii;
 
 	TqBool fAVar = pA->Size() > 1;
-	
-	if( fAVar )
-	{ 
-		/* Varying, must go accross all processing each element. */ 
-		pA->GetValuePtr( pdA ); 
-		ii = pA->Size(); 
-		for ( i = 0; i < ii; i++ ) 
-		{ 
-			if ( RunningState.Value( i ) ) 
-				pRes->SetValue( static_cast<B>(*pdA), i ); 
-			pdA++; 
-		} 
-	} 
-	else 
-	{ 
-		/* Uniform, simple one shot case. */ 
-		pA->GetValue( vA ); 
-		pRes->SetValue( static_cast<B>(vA) ); 
-	} 
+
+	if ( fAVar )
+	{
+		/* Varying, must go accross all processing each element. */
+		pA->GetValuePtr( pdA );
+		ii = pA->Size();
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState.Value( i ) )
+				pRes->SetValue( static_cast<B>( *pdA ), i );
+			pdA++;
+		}
+	}
+	else
+	{
+		/* Uniform, simple one shot case. */
+		pA->GetValue( vA );
+		pRes->SetValue( static_cast<B>( vA ) );
+	}
 }
 /** Templatised cast three operands to a single triple type (vector/normal/color etc.) and store the result in this stack entry
  * \param z The type to combine the float values into.
@@ -730,7 +730,7 @@ inline void	OpCAST( A& a, B& b, IqShaderData* pA, IqShaderData* pRes, CqBitVecto
 template <class A>
 inline void	OpTRIPLE( A&, IqShaderData* pRes, IqShaderData* pA, IqShaderData* pB, IqShaderData* pC, CqBitVector& RunningState )
 {
-	TqFloat x,y,z;
+	TqFloat x, y, z;
 
 	TqInt i = MAX( MAX( pA->Size(), pB->Size() ), pC->Size() ) - 1;
 	TqBool __fVarying = i > 0;
@@ -750,16 +750,16 @@ inline void	OpTRIPLE( A&, IqShaderData* pRes, IqShaderData* pA, IqShaderData* pB
  */
 template <class A>
 inline void	OpHEXTUPLE( A& z, IqShaderData* pRes,
-						  IqShaderData* pA, IqShaderData* pB, IqShaderData* pC, IqShaderData* pD,
-						  IqShaderData* pE, IqShaderData* pF, IqShaderData* pG, IqShaderData* pH,
-						  IqShaderData* pI, IqShaderData* pJ, IqShaderData* pK, IqShaderData* pL,
-						  IqShaderData* pM, IqShaderData* pN, IqShaderData* pO, IqShaderData* pP, CqBitVector& RunningState )
+                        IqShaderData* pA, IqShaderData* pB, IqShaderData* pC, IqShaderData* pD,
+                        IqShaderData* pE, IqShaderData* pF, IqShaderData* pG, IqShaderData* pH,
+                        IqShaderData* pI, IqShaderData* pJ, IqShaderData* pK, IqShaderData* pL,
+                        IqShaderData* pM, IqShaderData* pN, IqShaderData* pO, IqShaderData* pP, CqBitVector& RunningState )
 {
-	TqFloat a1,a2,a3,a4;
-	TqFloat b1,b2,b3,b4;
-	TqFloat c1,c2,c3,c4;
-	TqFloat d1,d2,d3,d4;
-	
+	TqFloat a1, a2, a3, a4;
+	TqFloat b1, b2, b3, b4;
+	TqFloat c1, c2, c3, c4;
+	TqFloat d1, d2, d3, d4;
+
 	TqInt ii1 = MAX( MAX( MAX( pA->Size(), pB->Size() ), pC->Size() ), pD->Size() );
 	TqInt ii2 = MAX( MAX( MAX( pE->Size(), pF->Size() ), pG->Size() ), pH->Size() );
 	TqInt ii3 = MAX( MAX( MAX( pI->Size(), pJ->Size() ), pK->Size() ), pL->Size() );
@@ -775,9 +775,9 @@ inline void	OpHEXTUPLE( A& z, IqShaderData* pRes,
 			pI->GetValue( c1, ii );	pJ->GetValue( c2, ii );	pK->GetValue( c3, ii );	pL->GetValue( c4, ii );
 			pM->GetValue( d1, ii );	pN->GetValue( d2, ii );	pO->GetValue( d3, ii );	pP->GetValue( d4, ii );
 			A tt( a1, a2, a3, a4,
-				  b1, b2, b3, b4,
-				  c1, c2, c3, c4,
-				  d1, d2, d3, d4);
+			      b1, b2, b3, b4,
+			      c1, c2, c3, c4,
+			      d1, d2, d3, d4 );
 			tt.SetfIdentity( TqFalse );
 			pRes->SetValue( tt, ii );
 		}
@@ -798,25 +798,25 @@ inline void	OpCOMP( A& z, IqShaderData* pA, int index, IqShaderData* pRes, CqBit
 	TqInt i, ii;
 
 	TqBool fAVar = pA->Size() > 1;
-	
-	if( fAVar )
-	{ 
-		/* Varying, must go accross all processing each element. */ 
-		pA->GetValuePtr( pdA ); 
-		ii = pA->Size(); 
-		for ( i = 0; i < ii; i++ ) 
-		{ 
-			if ( RunningState.Value( i ) ) 
-				pRes->SetValue( (*pdA)[ index ], i ); 
-			pdA++; 
-		} 
-	} 
-	else 
-	{ 
-		/* Uniform, simple one shot case. */ 
-		pA->GetValue( vA ); 
-		pRes->SetValue( vA[ index ] ); 
-	} 
+
+	if ( fAVar )
+	{
+		/* Varying, must go accross all processing each element. */
+		pA->GetValuePtr( pdA );
+		ii = pA->Size();
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState.Value( i ) )
+				pRes->SetValue( ( *pdA ) [ index ], i );
+			pdA++;
+		}
+	}
+	else
+	{
+		/* Uniform, simple one shot case. */
+		pA->GetValue( vA );
+		pRes->SetValue( vA[ index ] );
+	}
 }
 /** Templatised component access operator.
  * The template classes decide the cast used, there must be an appropriate operator between the two types.
@@ -836,56 +836,56 @@ inline void	OpCOMP( A& z, IqShaderData* pA, IqShaderData* pB, IqShaderData* pRes
 
 	TqBool fAVar = pA->Size() > 1;
 	TqBool fBVar = pB->Size() > 1;
-	
-	if( fAVar && fBVar )
-	{ 
-		/* Both are varying, must go accross all processing each element. */ 
-		pA->GetValuePtr( pdA ); 
-		pB->GetValuePtr( pdB ); 
-		ii = pA->Size(); 
-		for ( i = 0; i < ii; i++ ) 
-		{ 
-			if ( RunningState.Value( i ) ) 
-				pRes->SetValue( (*pdA)[ static_cast<TqInt>(*pdB) ], i ); 
-			pdA++; 
-			pdB++; 
-		} 
-	} 
-	else if( !fBVar && fAVar) 
-	{ 
-		/* A is varying, can just get B's value once. */ 
-		ii = pA->Size(); 
-		pA->GetValuePtr( pdA ); 
-		pB->GetValue( vB ); 
-		TqInt index = static_cast<TqInt>(vB);
-		for ( i = 0; i < ii; i++ ) 
-		{ 
-			if ( RunningState.Value( i ) ) 
-				pRes->SetValue( (*pdA)[ index ], i ); 
-			pdA++; 
-		} 
-	} 
-	else if( !fAVar && fBVar) \
-	{ 
-		/* B is varying, can just get A's value once. */ 
-		ii = pB->Size(); 
-		pB->GetValuePtr( pdB ); 
-		pA->GetValue( vA ); 
-		for ( i = 0; i < ii; i++ ) 
-		{ 
-			if ( RunningState.Value( i ) ) 
-				pRes->SetValue( vA[ static_cast<TqInt>(*pdB) ], i ); 
-			pdB++; 
-		} 
-	} 
-	else 
-	{ 
-		/* Both are uniform, simple one shot case. */ 
-		pA->GetValue( vA ); 
-		pB->GetValue( vB ); 
-		TqInt index = static_cast<TqInt>(vB);
-		pRes->SetValue( vA[ index ] ); 
-	} 
+
+	if ( fAVar && fBVar )
+	{
+		/* Both are varying, must go accross all processing each element. */
+		pA->GetValuePtr( pdA );
+		pB->GetValuePtr( pdB );
+		ii = pA->Size();
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState.Value( i ) )
+				pRes->SetValue( ( *pdA ) [ static_cast<TqInt>( *pdB ) ], i );
+			pdA++;
+			pdB++;
+		}
+	}
+	else if ( !fBVar && fAVar )
+	{
+		/* A is varying, can just get B's value once. */
+		ii = pA->Size();
+		pA->GetValuePtr( pdA );
+		pB->GetValue( vB );
+		TqInt index = static_cast<TqInt>( vB );
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState.Value( i ) )
+				pRes->SetValue( ( *pdA ) [ index ], i );
+			pdA++;
+		}
+	}
+	else if ( !fAVar && fBVar ) \
+	{
+		/* B is varying, can just get A's value once. */
+		ii = pB->Size();
+		pB->GetValuePtr( pdB );
+		pA->GetValue( vA );
+		for ( i = 0; i < ii; i++ )
+		{
+			if ( RunningState.Value( i ) )
+				pRes->SetValue( vA[ static_cast<TqInt>( *pdB ) ], i );
+			pdB++;
+		}
+	}
+	else
+	{
+		/* Both are uniform, simple one shot case. */
+		pA->GetValue( vA );
+		pB->GetValue( vB );
+		TqInt index = static_cast<TqInt>( vB );
+		pRes->SetValue( vA[ index ] );
+	}
 }
 /** Templatised component set operator.
  * \param z The type to cast this to.

@@ -97,7 +97,7 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		 */
 		const	CqSystemOption* pAttribute( const char* strName ) const
 		{
-			return( m_aAttributes.Find( strName ) );
+			return ( m_aAttributes.Find( strName ) );
 			//for ( std::vector<CqSystemOption*>::const_iterator i = m_aAttributes.begin(); i != m_aAttributes.end(); i++ )
 			//	if ( ( *i ) ->strName().compare( strName ) == 0 ) return ( *i );
 			//return ( 0 );
@@ -110,41 +110,41 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		 */
 		CqSystemOption* pAttributeWrite( const char* strName )
 		{
-			CqSystemOption* pAttr = m_aAttributes.Find( strName );
-			if( NULL != pAttr)
+			CqSystemOption * pAttr = m_aAttributes.Find( strName );
+			if ( NULL != pAttr )
 			{
-				if( pAttr->RefCount() == 1 )
-					return( pAttr );
+				if ( pAttr->RefCount() == 1 )
+					return ( pAttr );
 				else
 				{
 					CqSystemOption* pNew = new CqSystemOption( *pAttr );
 					m_aAttributes.Remove( pAttr );
 					m_aAttributes.Add( pNew );
 					pNew->AddRef();
-					return(pNew);
+					return ( pNew );
 				}
 			}
-/*			for ( std::vector<CqSystemOption*>::iterator i = m_aAttributes.begin(); i != m_aAttributes.end(); i++ )
-			{
-				if ( ( *i ) ->strName().compare( strName ) == 0 )
-				{
-					if ( ( *i ) ->RefCount() == 1 )
-						return ( *i );
-					else
-					{
-						( *i ) ->Release();
-						( *i ) = new CqSystemOption( *( *i ) );
-						( *i ) ->AddRef();
-						return ( *i );
-					}
-				}
-			}*/
+			/*			for ( std::vector<CqSystemOption*>::iterator i = m_aAttributes.begin(); i != m_aAttributes.end(); i++ )
+						{
+							if ( ( *i ) ->strName().compare( strName ) == 0 )
+							{
+								if ( ( *i ) ->RefCount() == 1 )
+									return ( *i );
+								else
+								{
+									( *i ) ->Release();
+									( *i ) = new CqSystemOption( *( *i ) );
+									( *i ) ->AddRef();
+									return ( *i );
+								}
+							}
+						}*/ 
 			//m_aAttributes.push_back( new CqSystemOption( strName ) );
 			//m_aAttributes.back() ->AddRef();
 			//return ( m_aAttributes.back() );
 			CqSystemOption* pNew = new CqSystemOption( strName );
 			m_aAttributes.Add( pNew );
-			return( pNew );
+			return ( pNew );
 		}
 
 		/** Add a lightsource to the current available list.
@@ -205,8 +205,8 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		 */
 		void	FlipeOrientation( TqFloat time = 0.0f )
 		{
-			TqInt co = GetIntegerAttribute("System", "Orientation")[0];
-			GetIntegerAttributeWrite("System", "Orientation")[0] = ( co == OrientationLH ) ? OrientationRH : OrientationLH;
+			TqInt co = GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
+			GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = ( co == OrientationLH ) ? OrientationRH : OrientationLH;
 		}
 
 		/** Flip the orientation of the coordinate system between left and right handed.
@@ -214,8 +214,8 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		 */
 		void	FlipeCoordsysOrientation( TqFloat time = 0.0f )
 		{
-			TqInt co = GetIntegerAttribute("System", "Orientation")[1];
-			GetIntegerAttributeWrite("System", "Orientation")[1] = ( co == OrientationLH ) ? OrientationRH : OrientationLH;
+			TqInt co = GetIntegerAttribute( "System", "Orientation" ) [ 1 ];
+			GetIntegerAttributeWrite( "System", "Orientation" ) [ 1 ] = ( co == OrientationLH ) ? OrientationRH : OrientationLH;
 		}
 
 		virtual IqShader*	pshadDisplacement( TqFloat time = 0.0f ) const
@@ -311,11 +311,20 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 		virtual CqColor*	GetColorAttributeWrite( const char* strName, const char* strParam );
 		virtual CqMatrix*	GetMatrixAttributeWrite( const char* strName, const char* strParam );
 
-		virtual	TqInt	cLights() const		{ return( apLights().size() ); }
-		virtual	IqLightsource*	pLight(TqInt index);
+		virtual	TqInt	cLights() const
+		{
+			return ( apLights().size() );
+		}
+		virtual	IqLightsource*	pLight( TqInt index );
 
-		virtual	void	Release()	{ CqRefCount::Release(); }
-		virtual	void	AddRef()	{ CqRefCount::AddRef(); }
+		virtual	void	Release()
+		{
+			CqRefCount::Release();
+		}
+		virtual	void	AddRef()
+		{
+			CqRefCount::AddRef();
+		}
 
 	private:
 		class CqHashTable
@@ -324,87 +333,87 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 				static const TqInt tableSize;
 
 			public:
-				CqHashTable()	
+				CqHashTable()
 				{
-					m_aLists.resize(tableSize);
+					m_aLists.resize( tableSize );
 				}
-				virtual	~CqHashTable()	
+				virtual	~CqHashTable()
 				{
 					// Release all the system options we have a handle on.
 					std::vector<std::list<CqSystemOption*> >::iterator i;
-					for( i = m_aLists.begin(); i != m_aLists.end(); i++ )
+					for ( i = m_aLists.begin(); i != m_aLists.end(); i++ )
 					{
 						std::list<CqSystemOption*>::iterator i2;
-						for( i2 = (*i).begin(); i2 != (*i).end(); i2++ )
-							(*i2)->Release();
+						for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
+							( *i2 ) ->Release();
 					}
 				}
 
-				const CqSystemOption*	Find(const TqChar* pname) const
+				const CqSystemOption*	Find( const TqChar* pname ) const
 				{
-					TqInt i = _hash(pname);
+					TqInt i = _hash( pname );
 
-					if( m_aLists[i].empty() )
-						return( 0 );
-					
-					std::list<CqSystemOption*>::const_iterator iEntry = m_aLists[i].begin();
-					if( iEntry == m_aLists[i].end() )
-						return( *iEntry );
+					if ( m_aLists[ i ].empty() )
+						return ( 0 );
+
+					std::list<CqSystemOption*>::const_iterator iEntry = m_aLists[ i ].begin();
+					if ( iEntry == m_aLists[ i ].end() )
+						return ( *iEntry );
 					else
 					{
-						while( iEntry != m_aLists[i].end() )
+						while ( iEntry != m_aLists[ i ].end() )
 						{
-							if( ( *iEntry )->strName().compare( pname ) == 0 )
-								return( *iEntry );
+							if ( ( *iEntry ) ->strName().compare( pname ) == 0 )
+								return ( *iEntry );
 							iEntry++;
 						}
 					}
-					
-					return( 0 );
+
+					return ( 0 );
 				}
 
-				CqSystemOption*	Find(const TqChar* pname)
+				CqSystemOption*	Find( const TqChar* pname )
 				{
-					TqInt i = _hash(pname);
-					
-					if( m_aLists[i].empty() )
-						return( 0 );
+					TqInt i = _hash( pname );
 
-					std::list<CqSystemOption*>::const_iterator iEntry = m_aLists[i].begin();
-					if( iEntry == m_aLists[i].end() )
-						return( *iEntry );
+					if ( m_aLists[ i ].empty() )
+						return ( 0 );
+
+					std::list<CqSystemOption*>::const_iterator iEntry = m_aLists[ i ].begin();
+					if ( iEntry == m_aLists[ i ].end() )
+						return ( *iEntry );
 					else
 					{
-						while( iEntry != m_aLists[i].end() )
+						while ( iEntry != m_aLists[ i ].end() )
 						{
-							if( ( *iEntry )->strName().compare( pname ) == 0 )
-								return( *iEntry );
+							if ( ( *iEntry ) ->strName().compare( pname ) == 0 )
+								return ( *iEntry );
 							iEntry++;
 						}
 					}
-					
-					return( 0 );
+
+					return ( 0 );
 				}
 
 				void Add( CqSystemOption* pOption )
 				{
 					TqInt i = _hash( pOption->strName().c_str() );
-					m_aLists[i].push_back( pOption );
+					m_aLists[ i ].push_back( pOption );
 					pOption->AddRef();
 				}
 
 				void Remove( CqSystemOption* pOption )
 				{
 					TqInt i = _hash( pOption->strName().c_str() );
-					
-					std::list<CqSystemOption*>::iterator iEntry = m_aLists[i].begin();
-					while( iEntry != m_aLists[i].end() )
+
+					std::list<CqSystemOption*>::iterator iEntry = m_aLists[ i ].begin();
+					while ( iEntry != m_aLists[ i ].end() )
 					{
-						if( ( *iEntry ) == pOption )
+						if ( ( *iEntry ) == pOption )
 						{
 							pOption->Release();
-							m_aLists[i].remove(*iEntry);
-							return;
+							m_aLists[ i ].remove( *iEntry );
+							return ;
 						}
 						iEntry++;
 					}
@@ -413,30 +422,30 @@ class _qShareC	CqAttributes : public CqRefCount, public IqAttributes
 				CqHashTable& operator=( const CqHashTable& From )
 				{
 					std::vector<std::list<CqSystemOption*> >::const_iterator i;
-					for( i = From.m_aLists.begin(); i != From.m_aLists.end(); i++ )
+					for ( i = From.m_aLists.begin(); i != From.m_aLists.end(); i++ )
 					{
 						std::list<CqSystemOption*>::const_iterator i2;
-						for( i2 = (*i).begin(); i2 != (*i).end(); i2++ )
+						for ( i2 = ( *i ).begin(); i2 != ( *i ).end(); i2++ )
 							Add( *i2 );
 					}
-					return( *this );
+					return ( *this );
 				}
 
 			private:
 				TqInt _hash( const TqChar* string ) const
 				{
-					assert (string != 0 && string[0] != 0);
+					assert ( string != 0 && string[ 0 ] != 0 );
 
-					TqUchar h = string[0];
-					for(TqInt i = 1; string[i] != 0; ++i)
-						h = (h << 4) + string[i];
-					
-					return(h % tableSize); // remainder				
+					TqUchar h = string[ 0 ];
+					for ( TqInt i = 1; string[ i ] != 0; ++i )
+						h = ( h << 4 ) + string[ i ];
+
+					return ( h % tableSize ); // remainder
 				}
 
 				std::vector<std::list<CqSystemOption*> >	m_aLists;
 		};
-		
+
 		CqHashTable	m_aAttributes;					///< a vector of user defined attribute pointers.
 
 		CqBound	m_Bound;							///< the bound used for any associated primitives.

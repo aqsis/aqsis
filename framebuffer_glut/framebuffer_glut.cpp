@@ -118,13 +118,13 @@ void keyboard( unsigned char key, int x, int y )
 int main( int argc, char** argv )
 {
 	int port = -1;
-	char *portStr = getenv("AQSIS_DD_PORT");
+	char *portStr = getenv( "AQSIS_DD_PORT" );
 
-	if (portStr != NULL)
+	if ( portStr != NULL )
 	{
-		port = atoi(portStr);
+		port = atoi( portStr );
 	}
-	
+
 	if ( -1 == DDInitialise( NULL, port ) )
 	{
 		std::cerr << "Unable to open socket" << std::endl;
@@ -220,10 +220,10 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 	char* bucket = reinterpret_cast<char*>( &message->m_Data );
 
 	// CHeck if the beck is not at all within the crop window.
-	if( message->m_XMin > g_CWXmax || message->m_XMaxPlus1 < g_CWXmin ||
-	    message->m_YMin > g_CWYmax || message->m_YMaxPlus1 < g_CWYmin )
-		return( 0 );
-	
+	if ( message->m_XMin > g_CWXmax || message->m_XMaxPlus1 < g_CWXmin ||
+	        message->m_YMin > g_CWYmax || message->m_YMaxPlus1 < g_CWYmin )
+		return ( 0 );
+
 	for ( TqInt y = message->m_YMin - g_CWYmin; y < message->m_YMaxPlus1 - g_CWYmin; y++ )
 	{
 		for ( TqInt x = message->m_XMin - g_CWXmin; x < message->m_XMaxPlus1 - g_CWXmin; x++ )
@@ -234,12 +234,12 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 
 				TqFloat quantize = 1;
 				// If we are displaying an FP image we will need to quantize ourselves.
-				if( g_BitsPerSample != 8 )
+				if ( g_BitsPerSample != 8 )
 					quantize = 255;
 
 				if ( g_SamplesPerElement >= 3 )
 				{
-					g_Image[ so + 0 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 0 ] * quantize);
+					g_Image[ so + 0 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 0 ] * quantize );
 					g_Image[ so + 1 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 1 ] * quantize );
 					g_Image[ so + 2 ] = static_cast<char>( reinterpret_cast<TqFloat*>( bucket ) [ 2 ] * quantize );
 				}
@@ -257,7 +257,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 
 	//std::cerr << message->m_XMin << ", " << message->m_YMin << " - " << message->m_XMaxPlus1 << ", " << message->m_YMaxPlus1 << std::endl;
 
-	const TqInt BucketX = message->m_XMin  - g_CWXmin;
+	const TqInt BucketX = message->m_XMin - g_CWXmin;
 	const TqInt BucketY = g_ImageHeight - ( message->m_YMaxPlus1 - g_CWYmin );
 	const TqInt BucketW = message->m_XMaxPlus1 - message->m_XMin;
 	const TqInt BucketH = message->m_YMaxPlus1 - message->m_YMin;

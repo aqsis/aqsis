@@ -5,8 +5,8 @@
  *	@brief	Declare the interface class for common attributes access.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/08/12 14:27:09 $
- */
+ *	Last change date:	$Date: 2002/10/31 11:51:12 $
+ */ 
 //------------------------------------------------------------------------------
 
 
@@ -26,14 +26,14 @@ START_NAMESPACE( Aqsis )
 /// The options for the orientation of a coordinate system.
 enum EqOrientation
 {
-    OrientationLH,   	///< Left hand coordinate system.
-    OrientationRH,   	///< Right and coordinate system.
+    OrientationLH,    	///< Left hand coordinate system.
+    OrientationRH,    	///< Right and coordinate system.
 };
 
 enum	ShadingInterpolation
 {
-	ShadingConstant,   	///< use constant shading, i.e. one value per micropoly.
-	ShadingSmooth,   		///< use smooth shading, i.e. interpolate the values at the corners of a micropoly.
+    ShadingConstant,    	///< use constant shading, i.e. one value per micropoly.
+    ShadingSmooth,    		///< use smooth shading, i.e. interpolate the values at the corners of a micropoly.
 };
 
 
@@ -42,7 +42,8 @@ struct IqShader;
 
 struct IqAttributes
 {
-	virtual ~IqAttributes()	{}
+	virtual ~IqAttributes()
+	{}
 
 	/** Get a named float attribute as read only
 	 */
@@ -161,7 +162,7 @@ struct IqAttributes
 	virtual	void	SetpshadInteriorVolume( IqShader* pshadInteriorVolume, TqFloat time = 0.0f ) = 0;
 
 	virtual	TqInt	cLights() const	= 0;
-	virtual	IqLightsource*	pLight(TqInt index) = 0;
+	virtual	IqLightsource*	pLight( TqInt index ) = 0;
 	virtual	void	AddRef() = 0;
 	virtual	void	Release() = 0;
 };

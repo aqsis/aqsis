@@ -52,12 +52,12 @@ CqOcclusionBox::CqOcclusionBox()
 	m_MinY = 0;
 	m_MaxX = 0;
 	m_MaxY = 0;
-	
+
 	m_MinZ = FLT_MAX;
 	m_MaxZ = FLT_MAX;
-	
+
 	m_Id = -1; // Start off uninitialised
-	
+
 	m_NeedsUpdating = false;
 }
 
@@ -67,8 +67,7 @@ CqOcclusionBox::CqOcclusionBox()
 */
 
 CqOcclusionBox::~CqOcclusionBox()
-{
-}
+{}
 
 
 //----------------------------------------------------------------------
@@ -80,34 +79,34 @@ CqOcclusionBox::~CqOcclusionBox()
  *\param YFWidth  filter width in y
 */
 
-void CqOcclusionBox::CreateHierarchy(TqInt bucketXSize, TqInt bucketYSize, TqInt XFWidth, TqInt YFWidth)
+void CqOcclusionBox::CreateHierarchy( TqInt bucketXSize, TqInt bucketYSize, TqInt XFWidth, TqInt YFWidth )
 {
 	// Make sure this hasn't been called more than once;
-	assert(m_Hierarchy == NULL);
-	assert(m_LevelStartId == NULL);
+	assert( m_Hierarchy == NULL );
+	assert( m_LevelStartId == NULL );
 
-	int xdivisions = (int)(log10(bucketXSize + XFWidth) / log10(2.0));
-	int ydivisions = (int)(log10(bucketYSize + YFWidth) / log10(2.0));
+	int xdivisions = ( int ) ( log10( bucketXSize + XFWidth ) / log10( 2.0 ) );
+	int ydivisions = ( int ) ( log10( bucketYSize + YFWidth ) / log10( 2.0 ) );
 
-	m_HierarchyLevels = MIN(xdivisions, ydivisions);
-	
-	m_LevelStartId = new int[m_HierarchyLevels + 1];
-	m_LevelStartId[0] = 0;
+	m_HierarchyLevels = MIN( xdivisions, ydivisions );
+
+	m_LevelStartId = new int[ m_HierarchyLevels + 1 ];
+	m_LevelStartId[ 0 ] = 0;
 	int numBoxes = 1;
 	TqInt i;
-	for(i=1; i<m_HierarchyLevels; i++)
+	for ( i = 1; i < m_HierarchyLevels; i++ )
 	{
-		m_LevelStartId[i] = numBoxes;
-		numBoxes = numBoxes*4 + 1;
+		m_LevelStartId[ i ] = numBoxes;
+		numBoxes = numBoxes * 4 + 1;
 	}
-	m_LevelStartId[m_HierarchyLevels] = numBoxes;
+	m_LevelStartId[ m_HierarchyLevels ] = numBoxes;
 	m_TotalBoxes = numBoxes;
-	
-	m_Hierarchy = new CqOcclusionBox[numBoxes];
 
-	for(i=0; i<numBoxes; i++)
+	m_Hierarchy = new CqOcclusionBox[ numBoxes ];
+
+	for ( i = 0; i < numBoxes; i++ )
 	{
-		m_Hierarchy[i].m_Id = i;
+		m_Hierarchy[ i ].m_Id = i;
 	}
 }
 
@@ -118,9 +117,9 @@ void CqOcclusionBox::CreateHierarchy(TqInt bucketXSize, TqInt bucketYSize, TqInt
 void CqOcclusionBox::DeleteHierarchy()
 {
 	// make sure this isn't being called out of turn.
-	assert(m_Hierarchy);
-	assert(m_LevelStartId);
-	
+	assert( m_Hierarchy );
+	assert( m_LevelStartId );
+
 	delete [] m_Hierarchy;
 	m_Hierarchy = NULL;
 	delete [] m_LevelStartId;
@@ -138,14 +137,14 @@ void CqOcclusionBox::DeleteHierarchy()
  *\param yMax: Bottom edge of this bucket
 */
 
-void CqOcclusionBox::SetupHierarchy(CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax)
+void CqOcclusionBox::SetupHierarchy( CqBucket* bucket, TqInt xMin, TqInt yMin, TqInt xMax, TqInt yMax )
 {
-	assert(bucket);
+	assert( bucket );
 	m_Bucket = bucket;
-	
-	m_Hierarchy[0].SetBounds(xMin, yMin, xMax, yMax);
-	m_Hierarchy[0].SetupChildren();
-	m_Hierarchy[0].Clear();
+
+	m_Hierarchy[ 0 ].SetBounds( xMin, yMin, xMax, yMax );
+	m_Hierarchy[ 0 ].SetupChildren();
+	m_Hierarchy[ 0 ].Clear();
 }
 
 
@@ -155,34 +154,34 @@ void CqOcclusionBox::SetupHierarchy(CqBucket* bucket, TqInt xMin, TqInt yMin, Tq
 
 void CqOcclusionBox::SetupChildren()
 {
-	int firstChildId = m_Id*4 + 1;
-	if(firstChildId >= m_TotalBoxes)
+	int firstChildId = m_Id * 4 + 1;
+	if ( firstChildId >= m_TotalBoxes )
 	{
 		// bottom of tree. setup the pixels we cover
-		for(int j=m_MinY; j<m_MaxY; j++)
+		for ( int j = m_MinY; j < m_MaxY; j++ )
 		{
-			for(int i=m_MinX; i<m_MaxX; i++)
+			for ( int i = m_MinX; i < m_MaxX; i++ )
 			{
 				CqImagePixel* pie;
-				m_Bucket->ImageElement(i, j, pie);
-				pie->SetOcclusionBoxId(m_Id);
+				m_Bucket->ImageElement( i, j, pie );
+				pie->SetOcclusionBoxId( m_Id );
 			}
-		}		
+		}
 	}
 	else
 	{
-		TqInt midX = (m_MaxX - m_MinX)/2 + m_MinX;
-		TqInt midY = (m_MaxY - m_MinY)/2 + m_MinY;
-	
-		m_Hierarchy[firstChildId].SetBounds(m_MinX, m_MinY, midX, midY);
-		m_Hierarchy[firstChildId+1].SetBounds(midX, m_MinY, m_MaxX, midY);
-		m_Hierarchy[firstChildId+2].SetBounds(m_MinX, midY, midX, m_MaxY);
-		m_Hierarchy[firstChildId+3].SetBounds(midX, midY, m_MaxX, m_MaxY);
-	
-		m_Hierarchy[firstChildId].SetupChildren();
-		m_Hierarchy[firstChildId+1].SetupChildren();
-		m_Hierarchy[firstChildId+2].SetupChildren();
-		m_Hierarchy[firstChildId+3].SetupChildren();
+		TqInt midX = ( m_MaxX - m_MinX ) / 2 + m_MinX;
+		TqInt midY = ( m_MaxY - m_MinY ) / 2 + m_MinY;
+
+		m_Hierarchy[ firstChildId ].SetBounds( m_MinX, m_MinY, midX, midY );
+		m_Hierarchy[ firstChildId + 1 ].SetBounds( midX, m_MinY, m_MaxX, midY );
+		m_Hierarchy[ firstChildId + 2 ].SetBounds( m_MinX, midY, midX, m_MaxY );
+		m_Hierarchy[ firstChildId + 3 ].SetBounds( midX, midY, m_MaxX, m_MaxY );
+
+		m_Hierarchy[ firstChildId ].SetupChildren();
+		m_Hierarchy[ firstChildId + 1 ].SetupChildren();
+		m_Hierarchy[ firstChildId + 2 ].SetupChildren();
+		m_Hierarchy[ firstChildId + 3 ].SetupChildren();
 	}
 }
 
@@ -195,29 +194,29 @@ void CqOcclusionBox::SetupChildren()
 
 void CqOcclusionBox::UpdateLevel( int level )
 {
-	assert(level < m_HierarchyLevels && level >= 0);
+	assert( level < m_HierarchyLevels && level >= 0 );
 
-	int firstBox = m_LevelStartId[level];
-	int lastBox = m_LevelStartId[level+1] - 1;
+	int firstBox = m_LevelStartId[ level ];
+	int lastBox = m_LevelStartId[ level + 1 ] - 1;
 
 	bool updateNextLevel = false;
-	for(int i = firstBox; i <= lastBox; i++)
+	for ( int i = firstBox; i <= lastBox; i++ )
 	{
 		// only update if it's been marked as needing it
-		if(m_Hierarchy[i].NeedsUpdating())
+		if ( m_Hierarchy[ i ].NeedsUpdating() )
 		{
 			// only mark parent for update if we actually change
-			if(m_Hierarchy[i].UpdateZValues())
+			if ( m_Hierarchy[ i ].UpdateZValues() )
 			{
-				m_Hierarchy[i/4].MarkForUpdate();
+				m_Hierarchy[ i / 4 ].MarkForUpdate();
 				updateNextLevel = true;
 			}
 		}
 	}
 
 	// move up a level
-	if(updateNextLevel && level > 0)
-		UpdateLevel(level - 1);
+	if ( updateNextLevel && level > 0 )
+		UpdateLevel( level - 1 );
 }
 
 
@@ -225,7 +224,7 @@ void CqOcclusionBox::UpdateLevel( int level )
 /** Set the screen pixel bounds of this box
 */
 
-void CqOcclusionBox::SetBounds(TqInt x0, TqInt y0, TqInt x1, TqInt y1)
+void CqOcclusionBox::SetBounds( TqInt x0, TqInt y0, TqInt x1, TqInt y1 )
 {
 	m_MinX = x0;
 	m_MinY = y0;
@@ -243,13 +242,13 @@ void CqOcclusionBox::Clear()
 	m_MinZ = FLT_MAX;
 	m_MaxZ = FLT_MAX;
 	m_NeedsUpdating = false;
-	
-	int firstChildId = m_Id*4 + 1;
-	if(firstChildId >= m_TotalBoxes)
-		return; // bottom of tree. we have no children
 
-	for(int i=0; i<4; i++)
-		m_Hierarchy[firstChildId+i].Clear();
+	int firstChildId = m_Id * 4 + 1;
+	if ( firstChildId >= m_TotalBoxes )
+		return ; // bottom of tree. we have no children
+
+	for ( int i = 0; i < 4; i++ )
+		m_Hierarchy[ firstChildId + i ].Clear();
 }
 
 
@@ -259,37 +258,37 @@ void CqOcclusionBox::Clear()
  * \return true if the bound lies behind everything in this box
 */
 
-bool CqOcclusionBox::IsCullable(CqBound* bound)
+bool CqOcclusionBox::IsCullable( CqBound* bound )
 {
 	CqVector3D vecMin = bound->vecMin();
 	CqVector3D vecMax = bound->vecMax();
 	float zVal = vecMin.z();
 
-	if(zVal > m_MaxZ)
+	if ( zVal > m_MaxZ )
 	{
 		// bound totally hidden by box
 		return true;
 	}
-	else if(zVal < m_MinZ)
+	else if ( zVal < m_MinZ )
 	{
-		// bound totally visible 
+		// bound totally visible
 		return false;
 	}
 
-	int firstChildId = m_Id*4 + 1;
-	if(firstChildId >= m_TotalBoxes)
+	int firstChildId = m_Id * 4 + 1;
+	if ( firstChildId >= m_TotalBoxes )
 	{
 		// no children; check pixels directly
-		TqInt x0 = MAX(m_MinX, static_cast<TqInt>(vecMin.x()));
-		TqInt y0 = MAX(m_MinY, static_cast<TqInt>(vecMin.y()));
-		TqInt x1 = MIN(m_MaxX, static_cast<TqInt>(vecMax.x()));
-		TqInt y1 = MIN(m_MaxY, static_cast<TqInt>(vecMax.y()));
+		TqInt x0 = MAX( m_MinX, static_cast<TqInt>( vecMin.x() ) );
+		TqInt y0 = MAX( m_MinY, static_cast<TqInt>( vecMin.y() ) );
+		TqInt x1 = MIN( m_MaxX, static_cast<TqInt>( vecMax.x() ) );
+		TqInt y1 = MIN( m_MaxY, static_cast<TqInt>( vecMax.y() ) );
 
-		for(int j=y0; j<y1; j++)
+		for ( int j = y0; j < y1; j++ )
 		{
-			for(int i=x0; i<x1; i++)
+			for ( int i = x0; i < x1; i++ )
 			{
-				if(zVal < m_Bucket->MaxDepth(i, j))
+				if ( zVal < m_Bucket->MaxDepth( i, j ) )
 					return false;
 			}
 		}
@@ -297,11 +296,11 @@ bool CqOcclusionBox::IsCullable(CqBound* bound)
 	else
 	{
 		// recursively test children. return true if bound is hidden in all children.
-		for(int i=0; i<4; i++)
+		for ( int i = 0; i < 4; i++ )
 		{
-			if(m_Hierarchy[firstChildId + i].Overlaps(bound))
+			if ( m_Hierarchy[ firstChildId + i ].Overlaps( bound ) )
 			{
-				if(!m_Hierarchy[firstChildId + i].IsCullable(bound))
+				if ( !m_Hierarchy[ firstChildId + i ].IsCullable( bound ) )
 					return false;
 			}
 		}
@@ -321,26 +320,26 @@ bool CqOcclusionBox::UpdateZValues()
 	float currentMaxZ = -FLT_MAX;
 	float currentMinZ = m_MinZ;
 
-	int firstChildId = m_Id*4 + 1;
-	if(firstChildId >= m_TotalBoxes)
+	int firstChildId = m_Id * 4 + 1;
+	if ( firstChildId >= m_TotalBoxes )
 	{
 		// we don't have any children so check pixel depths directly
-		for(int j=m_MinY; j<m_MaxY; j++)
+		for ( int j = m_MinY; j < m_MaxY; j++ )
 		{
-			for(int i=m_MinX; i<m_MaxX; i++)
+			for ( int i = m_MinX; i < m_MaxX; i++ )
 			{
 				CqImagePixel* pie;
-				m_Bucket->ImageElement(i, j, pie);
+				m_Bucket->ImageElement( i, j, pie );
 				// only update if it's been marked as needing it
-				if(pie->NeedsZUpdating())
+				if ( pie->NeedsZUpdating() )
 				{
 					pie->UpdateZValues();
 				}
-				if(pie->MaxDepth() > currentMaxZ)
+				if ( pie->MaxDepth() > currentMaxZ )
 				{
 					currentMaxZ = pie->MaxDepth();
 				}
-				if(pie->MinDepth() < currentMinZ)
+				if ( pie->MinDepth() < currentMinZ )
 				{
 					currentMinZ = pie->MinDepth();
 				}
@@ -349,25 +348,25 @@ bool CqOcclusionBox::UpdateZValues()
 	}
 	else
 	{
-		for(int i=0; i<4; i++)
+		for ( int i = 0; i < 4; i++ )
 		{
-			if(m_Hierarchy[firstChildId+i].m_MaxZ > currentMaxZ)
+			if ( m_Hierarchy[ firstChildId + i ].m_MaxZ > currentMaxZ )
 			{
-				currentMaxZ = m_Hierarchy[firstChildId+i].m_MaxZ;
+				currentMaxZ = m_Hierarchy[ firstChildId + i ].m_MaxZ;
 			}
-			if(m_Hierarchy[firstChildId+i].m_MinZ < currentMinZ)
+			if ( m_Hierarchy[ firstChildId + i ].m_MinZ < currentMinZ )
 			{
-				currentMinZ = m_Hierarchy[firstChildId+i].m_MinZ;
+				currentMinZ = m_Hierarchy[ firstChildId + i ].m_MinZ;
 			}
 		}
 	}
 
-	if(currentMaxZ < m_MaxZ)
+	if ( currentMaxZ < m_MaxZ )
 	{
 		m_MaxZ = currentMaxZ;
 		madeUpdate = true;
 	}
-	if(currentMinZ < m_MinZ)
+	if ( currentMinZ < m_MinZ )
 	{
 		m_MinZ = currentMinZ;
 		madeUpdate = true;
@@ -384,16 +383,16 @@ bool CqOcclusionBox::UpdateZValues()
  * \return true if the bound overlaps.
 */
 
-bool CqOcclusionBox::Overlaps(CqBound* bound)
+bool CqOcclusionBox::Overlaps( CqBound* bound )
 {
-	if(	bound->vecMin().x() > m_MaxX ||
-		bound->vecMin().y() > m_MaxY ||
-		bound->vecMax().x() < m_MinX ||
-		bound->vecMax().y() < m_MinY )
+	if ( bound->vecMin().x() > m_MaxX ||
+	        bound->vecMin().y() > m_MaxY ||
+	        bound->vecMax().x() < m_MinX ||
+	        bound->vecMax().y() < m_MinY )
 	{
 		return false;
 	}
-	
+
 	return true;
 }
 

@@ -69,104 +69,104 @@ void version( std::ostream& Stream )
  */
 RtVoid PrintProgress( RtFloat percent )
 {
-	if(g_progress == 0)	
-		return;
+	if ( g_progress == 0 )
+		return ;
 
-	if(percent > 100)
+	if ( percent > 100 )
 	{
 		std::cout << "                                                                              \r" << std::flush;
-		return;
+		return ;
 	}
 
-	static long tick=0;
+	static long tick = 0;
 	long now;
-    
-	if (tick == 0) 
-		time(&tick);
 
-	time(&now);
-	
+	if ( tick == 0 )
+		time( &tick );
+
+	time( &now );
+
 	// Calculate the various values for putting in the string.
-	TqFloat total_secs = (RtFloat) 1000.0f * ((RtFloat)(now - tick) / (float)CLOCKS_PER_SEC);
+	TqFloat total_secs = ( RtFloat ) 1000.0f * ( ( RtFloat ) ( now - tick ) / ( float ) CLOCKS_PER_SEC );
 	TqFloat total_mins = total_secs / 60.0f;
 	TqFloat total_hrs = total_mins / 60.0f;
-    TqFloat sub_secs = total_secs - ((TqInt)total_mins * 60.0f);
-    TqFloat sub_mins = total_mins - ((TqInt)total_hrs * 60.0f);
-	
-	TqFloat total_secsleft = (((RtFloat) 100 / percent) * total_secs) - total_secs;    
+	TqFloat sub_secs = total_secs - ( ( TqInt ) total_mins * 60.0f );
+	TqFloat sub_mins = total_mins - ( ( TqInt ) total_hrs * 60.0f );
+
+	TqFloat total_secsleft = ( ( ( RtFloat ) 100 / percent ) * total_secs ) - total_secs;
 	TqFloat total_minsleft = total_secsleft / 60.0f;
 	TqFloat total_hrsleft = total_minsleft / 60.0f;
-    TqFloat sub_secsleft = total_secsleft - ((TqInt)total_minsleft * 60.0f);
-    TqFloat sub_minsleft = total_minsleft - ((TqInt)total_hrsleft * 60.0f);
+	TqFloat sub_secsleft = total_secsleft - ( ( TqInt ) total_minsleft * 60.0f );
+	TqFloat sub_minsleft = total_minsleft - ( ( TqInt ) total_hrsleft * 60.0f );
 
 	// Now print the line with substitution.
 	TqInt ipos = 0;
-	std::string strProgress(g_strprogress);
+	std::string strProgress( g_strprogress );
 	std::ostrstream strOutput;
-	while(1)
+	while ( 1 )
 	{
 		TqInt itag;
-		itag = strProgress.find('%', ipos);
-		if( itag == std::string::npos )
+		itag = strProgress.find( '%', ipos );
+		if ( itag == std::string::npos )
 		{
-			strOutput << strProgress.substr(ipos).c_str();
+			strOutput << strProgress.substr( ipos ).c_str();
 			break;
 		}
 		else
 		{
-			if( ipos != itag )
-				strOutput << strProgress.substr(ipos, itag - ipos).c_str();
+			if ( ipos != itag )
+				strOutput << strProgress.substr( ipos, itag - ipos ).c_str();
 
-			switch( strProgress[itag+1] )
+			switch ( strProgress[ itag + 1 ] )
 			{
-				case 'p':
-					strOutput << std::setw(6) << std::setfill( ' ' ) << std::setprecision(4) << percent;
+					case 'p':
+					strOutput << std::setw( 6 ) << std::setfill( ' ' ) << std::setprecision( 4 ) << percent;
 					break;
 
-				case 's':
-					strOutput << std::setprecision(0) << (TqInt)total_secs;
+					case 's':
+					strOutput << std::setprecision( 0 ) << ( TqInt ) total_secs;
 					break;
 
-				case 'S':
-					strOutput << std::setprecision(0) << (TqInt)total_secsleft;
+					case 'S':
+					strOutput << std::setprecision( 0 ) << ( TqInt ) total_secsleft;
 					break;
 
-				case 'm':
-					strOutput << std::setprecision(0) << (TqInt)total_mins;
+					case 'm':
+					strOutput << std::setprecision( 0 ) << ( TqInt ) total_mins;
 					break;
 
-				case 'M':
-					strOutput << std::setprecision(0) << (TqInt)total_minsleft;
+					case 'M':
+					strOutput << std::setprecision( 0 ) << ( TqInt ) total_minsleft;
 					break;
 
-				case 'h':
-					strOutput << std::setprecision(0) << (TqInt)total_hrs;
+					case 'h':
+					strOutput << std::setprecision( 0 ) << ( TqInt ) total_hrs;
 					break;
 
-				case 'H':
-					strOutput << std::setprecision(0) << (TqInt)total_hrsleft;
+					case 'H':
+					strOutput << std::setprecision( 0 ) << ( TqInt ) total_hrsleft;
 					break;
 
-				case 't':
-					strOutput << std::setprecision(0) << (TqInt)total_hrs << ":" << (TqInt)sub_mins << ":" << (TqInt)sub_secs;
+					case 't':
+					strOutput << std::setprecision( 0 ) << ( TqInt ) total_hrs << ":" << ( TqInt ) sub_mins << ":" << ( TqInt ) sub_secs;
 					break;
 
-				case 'T':
-					strOutput << std::setprecision(0) << (TqInt)total_hrsleft << ":" << (TqInt)sub_minsleft << ":" << (TqInt)sub_secsleft;
+					case 'T':
+					strOutput << std::setprecision( 0 ) << ( TqInt ) total_hrsleft << ":" << ( TqInt ) sub_minsleft << ":" << ( TqInt ) sub_secsleft;
 					break;
 
-				case '%':
+					case '%':
 					strOutput << '%';
 					break;
 			}
-			ipos = itag+2;
+			ipos = itag + 2;
 		}
 
-		if( ipos >= strProgress.size() )
+		if ( ipos >= strProgress.size() )
 			break;
 	}
 	// Pad to the end of the line.
-	while( strOutput.pcount() < 79 )	
+	while ( strOutput.pcount() < 79 )
 		strOutput << " ";
 	std::cout << std::string( strOutput.str(), strOutput.pcount() ).c_str() << "\r";
 	std:: cout << std::flush;
@@ -258,7 +258,7 @@ int main( int argc, const char** argv )
 		std::cout << "displays: " << g_displays.c_str() << std::endl;
 	}
 
-	if ( ap.leftovers().size() == 0 )   // If no files specified, take input from stdin.
+	if ( ap.leftovers().size() == 0 )    // If no files specified, take input from stdin.
 	{
 		RenderFile( stdin, "stdin" );
 	}
@@ -299,6 +299,7 @@ void GetOptions()
 		else
 			g_base_path = BASE_PATH;
 #endif
+
 	}
 
 	// If --config not specified try to locate the config file.

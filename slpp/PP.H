@@ -207,7 +207,7 @@
 #define	C_L		0x01	/* Letter (A-Zz-z)			*/
 #define	C_D		0x02	/* Digit (0-9)				*/
 #define	C_X		0x04	/* Hex digit (0-9 a-f|A-F)		*/
-#define	C_W		0x08	/* White space (ht, sp, etc.)		*/
+#define	C_W		0x08	/* White space (ht, sp, etc.)		*/ 
 /*			0x10	   Not used				*/
 #define	C_C		0x20	/* Special processing inside gchbuf()	*/
 #define	C_M		0x40	/* A META token (see gettoken())	*/
@@ -215,67 +215,67 @@
 
 #if	PP
 #define	istype(c,v)	((typetab+1)[(c)]&(v))
-extern	int		gchfile();
+extern	int	gchfile();
 #else	/* !PP */
-extern	int		istype();
+extern	int	istype();
 #endif	/* PP */
 
 #ifdef	MAIN
 char	typetab[] =
-	{
-(char) (C_C|C_N),					     /* EOF         */
-0,		0,		0,		0,	     /* ^@ ^A ^B ^C */
-0,		0,		0,		0,	     /* ^D ^E ^F ^G */
-0,		C_W,		C_C,		0,	     /* ^H ^I ^J ^K */
+    {
+        ( char ) ( C_C | C_N ), 					     /* EOF         */
+        0, 0, 0, 0, 	     /* ^@ ^A ^B ^C */
+        0, 0, 0, 0, 	     /* ^D ^E ^F ^G */
+        0, C_W, C_C, 0, 	     /* ^H ^I ^J ^K */
 #if	HOST == H_MPW
-C_W,		C_C,		0,		0,	     /* ^L ^M ^N ^O */
+        C_W, C_C, 0, 0, 	     /* ^L ^M ^N ^O */
 #else	/* ! H_MPW */
-C_W,		C_W|C_C,	0,		0,	     /* ^L ^M ^N ^O */
+		C_W, C_W | C_C, 0, 0, 	     /* ^L ^M ^N ^O */
 #endif	/* HOST == H_MPW */
-0,		0,		0,		0,	     /* ^P ^Q ^R ^S */
-0,		0,		0,		0,	     /* ^T ^U ^V ^W */
+        0, 0, 0, 0, 	     /* ^P ^Q ^R ^S */
+        0, 0, 0, 0, 	     /* ^T ^U ^V ^W */
 #if	HOST == H_CPM
-0,		0,		C_C,		0,	     /* ^X ^Y ^Z ESC*/
+        0, 0, C_C, 0, 	     /* ^X ^Y ^Z ESC*/
 #else	/* ! H_CPM */
-0,		0,		0,		0,	     /* ^X ^Y ^Z ESC*/
+		0, 0, 0, 0, 	     /* ^X ^Y ^Z ESC*/
 #endif	/* HOST == H_CPM */
-0,		0,		0,		0,	     /* FS GS RS VS */
-C_W,		0,		0,		0,	     /* Sp !  "  #  */
-0,		0,		0,		0,	     /* $  %  &  '  */
-0,		0,		0,		0,	     /* (  )  *  +  */
-0,		0,		0,		0,	     /* ,  -  .  /  */
-C_D|C_X,	C_D|C_X,	C_D|C_X,	C_D|C_X,     /* 0  1  2  3  */
-C_D|C_X,	C_D|C_X,	C_D|C_X,	C_D|C_X,     /* 4  5  6  7  */
-C_D|C_X,	C_D|C_X,	0,		0,	     /* 8  9  :  ;  */
-0,		0,		0,		0,	     /* <  =  >  ?  */
-0,		C_L|C_X,	C_L|C_X,	C_L|C_X,     /* @  A  B  C  */
-C_L|C_X,	C_L|C_X,	C_L|C_X,	C_L,	     /* D  E  F  G  */
-C_L,		C_L,		C_L,		C_L,	     /* H  I  J  K  */
-C_L,		C_L,		C_L,		C_L,	     /* L  M  N  O  */
-C_L,		C_L,		C_L,		C_L,	     /* P  Q  R  S  */
-C_L,		C_L,		C_L,		C_L,	     /* T  U  V  W  */
-C_L,		C_L,		C_L,		0,	     /* X  Y  Z  [  */
-C_C,		0,		0,		C_L,	     /* \  ]  ^  _  */
-0,		C_L|C_X,	C_L|C_X,	C_L|C_X,     /* `  a  b  c  */
-C_L|C_X,	C_L|C_X,	C_L|C_X,	C_L,	     /* d  e  f  g  */
-C_L,		C_L,		C_L,		C_L,	     /* h  i  j  k  */
-C_L,		C_L,		C_L,		C_L,	     /* l  m  n  o  */
-C_L,		C_L,		C_L,		C_L,	     /* p  q  r  s  */
-C_L,		C_L,		C_L,		C_L,	     /* t  u  v  w  */
-C_L,		C_L,		C_L,		0,	     /* x  y  z  {  */
-0,		0,		0,		0,	     /* |  }  ~  Rub*/
-/* Special token chars 0x80 - 0x??	*/
-(char) (C_M|C_N),					/* END_MACRO token */
-(char) (C_M|C_N),					/* END_ARG token   */
-(char) (C_M|C_N),					/* TOGGLE_EXPAND   */
-(char) (C_M|C_N),					/* __LINE__ token  */
-(char) (C_M|C_N),					/* __FILE__ token  */
-(char) (C_M|C_N),					/* __TIME__ token  */
-(char) (C_M|C_N),					/* __DATE__ token  */
-(char) (C_M|C_N),					/* __NOW__ token   */
-(char) (C_M|C_N),					/* __NEXT__ token  */
-(char) (C_M|C_N)					/* __PREV__ token  */
-	};
+        0, 0, 0, 0, 	     /* FS GS RS VS */
+        C_W, 0, 0, 0, 	     /* Sp !  "  #  */
+        0, 0, 0, 0, 	     /* $  %  &  '  */
+        0, 0, 0, 0, 	     /* (  )  *  +  */
+        0, 0, 0, 0, 	     /* ,  -  .  /  */
+        C_D | C_X, C_D | C_X, C_D | C_X, C_D | C_X,      /* 0  1  2  3  */
+        C_D | C_X, C_D | C_X, C_D | C_X, C_D | C_X,      /* 4  5  6  7  */
+        C_D | C_X, C_D | C_X, 0, 0, 	     /* 8  9  :  ;  */
+        0, 0, 0, 0, 	     /* <  =  >  ?  */
+        0, C_L | C_X, C_L | C_X, C_L | C_X,      /* @  A  B  C  */
+        C_L | C_X, C_L | C_X, C_L | C_X, C_L, 	     /* D  E  F  G  */
+        C_L, C_L, C_L, C_L, 	     /* H  I  J  K  */
+        C_L, C_L, C_L, C_L, 	     /* L  M  N  O  */
+        C_L, C_L, C_L, C_L, 	     /* P  Q  R  S  */
+        C_L, C_L, C_L, C_L, 	     /* T  U  V  W  */
+        C_L, C_L, C_L, 0, 	     /* X  Y  Z  [  */
+        C_C, 0, 0, C_L, 	     /* \  ]  ^  _  */
+        0, C_L | C_X, C_L | C_X, C_L | C_X,      /* `  a  b  c  */
+        C_L | C_X, C_L | C_X, C_L | C_X, C_L, 	     /* d  e  f  g  */
+        C_L, C_L, C_L, C_L, 	     /* h  i  j  k  */
+        C_L, C_L, C_L, C_L, 	     /* l  m  n  o  */
+        C_L, C_L, C_L, C_L, 	     /* p  q  r  s  */
+        C_L, C_L, C_L, C_L, 	     /* t  u  v  w  */
+        C_L, C_L, C_L, 0, 	     /* x  y  z  {  */
+        0, 0, 0, 0, 	     /* |  }  ~  Rub*/
+        /* Special token chars 0x80 - 0x??	*/
+        ( char ) ( C_M | C_N ), 					/* END_MACRO token */
+        ( char ) ( C_M | C_N ), 					/* END_ARG token   */
+        ( char ) ( C_M | C_N ), 					/* TOGGLE_EXPAND   */
+        ( char ) ( C_M | C_N ), 					/* __LINE__ token  */
+        ( char ) ( C_M | C_N ), 					/* __FILE__ token  */
+        ( char ) ( C_M | C_N ), 					/* __TIME__ token  */
+        ( char ) ( C_M | C_N ), 					/* __DATE__ token  */
+        ( char ) ( C_M | C_N ), 					/* __NOW__ token   */
+        ( char ) ( C_M | C_N ), 					/* __NEXT__ token  */
+        ( char ) ( C_M | C_N ) 					/* __PREV__ token  */
+    };
 #else
 extern	char	typetab[];
 #endif	/* MAIN */
@@ -336,40 +336,40 @@ EXTERN	struct	pbbuf	*Pbbufp	I_ZERO;
 EXTERN	struct	pbbuf	*Pbbuf	I_ZERO;
 
 struct pbbuf
-	{
+{
 	char	pb_type;
 #define	PB_CHAR		0	/* pb_val.pb_char is character		*/
 #define	PB_STRING	1	/* pb_val.pb_str is ptr to string 	*/
 #define	PB_TOS		2	/* Top of pushback buffer stack		*/
 	union
-		{
+	{
 		char	*pb_str;
 		int	pb_char;
-		}
+	}
 	pb_val;
-	};
+};
 
 EXTERN	FILE	*Output	I_ZERO;	/* Output file				*/
 
 struct file
-	{
-	int		f_line;	/* Line number				*/
+{
+	int	f_line;	/* Line number				*/
 #if	HOST == H_CPM		/* Path names for #includes		*/
-	int		f_disk;	/* Disk number				*/
-	int		f_user;	/* User number (< 0 if default)		*/
+	int	f_disk;	/* Disk number				*/
+	int	f_user;	/* User number (< 0 if default)		*/
 #endif	/* HOST == H_CPM */
 #ifdef	PP_SYSIO		/* If to use direct I/O system calls?	*/
-	int		f_fd;	/* A file descriptor			*/
+	int	f_fd;	/* A file descriptor			*/
 #else	/* !PP_SYSIO */
-	FILE		*f_file;/* FILE pointer				*/
+	FILE	*f_file; /* FILE pointer				*/
 #endif	/* PP_SYSIO */
-	char		*f_bufp;/* Pointer into buffer			*/
-	int		f_bufc;	/* Number of chars left			*/
-	int		f_eof;	/* Flag that's non-zero if in last blk	*/
-	char		f_lasteol;	/* TRUE if last char was EOL	*/
-	char		f_buf[BUFFERSIZE];	/* Buffer for file	*/
-	char		f_name[FILENAMESIZE + 1];	/* File name	*/
-	};
+	char	*f_bufp; /* Pointer into buffer			*/
+	int	f_bufc;	/* Number of chars left			*/
+	int	f_eof;	/* Flag that's non-zero if in last blk	*/
+	char	f_lasteol;	/* TRUE if last char was EOL	*/
+	char	f_buf[ BUFFERSIZE ];	/* Buffer for file	*/
+	char	f_name[ FILENAMESIZE + 1 ];	/* File name	*/
+};
 
 /*
  *	Define static vars that are a bit more efficient to access.
@@ -379,52 +379,52 @@ EXTERN	int	Bufc	I_ZERO;	/* Current file char count		*/
 EXTERN	char	*Bufp	I_ZERO;	/* Current file char ptr 		*/
 EXTERN	int	Lasteol	I_ZERO;	/* True if last char processed was EOL	*/
 EXTERN	int	LLine	I_ZERO;	/* Last line number			*/
-EXTERN	int 		(*Nextch)();	/* Next char function		*/
+EXTERN	int ( *Nextch ) ();	/* Next char function		*/
 #define	nextch		(*Nextch)	/* Macro to rd chars via Nextch	*/
 
-EXTERN	struct	file	*Filestack[FILESTACKSIZE + 1] I_BRZERO;
-EXTERN	int		Filelevel I_ZERO;	/* Include level	*/
-EXTERN	int		Do_name	I_ZERO;	/* True to put name on #line	*/
+EXTERN	struct	file	*Filestack[ FILESTACKSIZE + 1 ] I_BRZERO;
+EXTERN	int	Filelevel I_ZERO;	/* Include level	*/
+EXTERN	int	Do_name	I_ZERO;	/* True to put name on #line	*/
 
-EXTERN	char		Outfile[FILENAMESIZE + 1] I_BRZERO;
-EXTERN	char		Token[TOKENSIZE + 1] I_BRZERO;	/* Token buffer	*/
+EXTERN	char	Outfile[ FILENAMESIZE + 1 ] I_BRZERO;
+EXTERN	char	Token[ TOKENSIZE + 1 ] I_BRZERO;	/* Token buffer	*/
 EXTERN	unsigned int	Tokenline I_ZERO;	/* Line # token began	*/
 EXTERN	unsigned int	Tokenfile I_ZERO;	/* File # token began	*/
-EXTERN	int		Lastnl	I_ZERO;	/* Last token processed was \n	*/
+EXTERN	int	Lastnl	I_ZERO;	/* Last token processed was \n	*/
 
 /*
  *	Macro proto pointers.
  */
 
 struct	symtab
-	{
-	struct	symtab	*s_link;/* Next in list for this chain		*/
-	char		disable;/* TRUE to disable recognition for now	*/
-	char		*s_body;/* Body of definition			*/
+{
+	struct	symtab	*s_link; /* Next in list for this chain		*/
+	char	disable; /* TRUE to disable recognition for now	*/
+	char	*s_body; /* Body of definition			*/
 	struct	param	*s_params;	/* List of parameters		*/
-	char		s_name[1];	/* Name is appended to structure*/
-	};
+	char	s_name[ 1 ];	/* Name is appended to structure*/
+};
 
 struct	param
-	{
-	struct	param	*p_link;/* Next in list				*/
-	char		p_flags;/* Flags:				*/
+{
+	struct	param	*p_link; /* Next in list				*/
+	char	p_flags; /* Flags:				*/
 #define	PF_RQUOTES	0x01	/* Remove "" chars from parameter	*/
 #define	PF_PNLINES	0x02	/* Preserve '\n' char in parameter	*/
-	char		p_name[1];	/* Name is appended to struct	*/
-	};
+	char	p_name[ 1 ];	/* Name is appended to struct	*/
+};
 
 /*
  *	Predefined symbol entry.
  */
 
 struct	ppdir
-	{
-	char		*pp_name;	/* #function name		*/
-	char		pp_ifif;	/* FALSE if ! to do on false #if*/
-	void		(*pp_func)();	/* Address of function		*/
-	int		pp_arg;		/* Argument to function		*/
-	};
+{
+	char	*pp_name;	/* #function name		*/
+	char	pp_ifif;	/* FALSE if ! to do on false #if*/
+	void	( *pp_func ) ();	/* Address of function		*/
+	int	pp_arg;		/* Argument to function		*/
+};
 
 /*
  *	Predefined symbols.
@@ -455,30 +455,34 @@ extern void doundef();
 
 #ifdef	MAIN			/* If in main() module			*/
 struct	ppdir	pptab[] =
-	{
-	/*	 Directive	Do within	Procedure	Arg to	  */
-	/*	   name		FALSE #ifxx	name		function  */
-	/* --------------	-----------	----------	--------  */
+    {
+	    /*	 Directive	Do within	Procedure	Arg to	  */
+	    /*	   name		FALSE #ifxx	name		function  */
+	    /* --------------	-----------	----------	--------  */
 #if	(TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX)
-		{"asm",		NO,		doasm,		TRUE	},
+
+	    {"asm", NO, doasm, TRUE
+	    },
 #endif	/* (TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX) */
-		{"define",	NO,		dodefine,	FALSE	},
-		{"elif",	YES,		doelse,		TRUE	},
-		{"else",	YES,		doelse,		FALSE	},
+	    {"define", NO, dodefine, FALSE	},
+	    {"elif", YES, doelse, TRUE	},
+	    {"else", YES, doelse, FALSE	},
 #if	(TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX)
-		{"endasm",	NO,		doasm,		FALSE	},
+
+	    {"endasm", NO, doasm, FALSE
+	    },
 #endif	/* (TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX) */
-		{"endif",	YES,		doendif, 	EMPTY	},
-		{"error",	NO,		doerror,	EMPTY	},
-		{"if",		YES,		doif,		EMPTY	},
-		{"ifdef",	YES,		doifs,		TRUE	},
-		{"ifndef",	YES,		doifs,		FALSE	},
-		{"include",	NO,		doinclude,	EMPTY	},
-		{"line",	NO,		doline,		EMPTY	},
-    		{"undef",	NO,		doundef, 	EMPTY	},
-		{"pragma",	YES,		dopragma,	EMPTY	},
-		{NULL}	/* The end */
-	};
+	    {"endif", YES, doendif, EMPTY	},
+	    {"error", NO, doerror, EMPTY	},
+	    {"if", YES, doif, EMPTY	},
+	    {"ifdef", YES, doifs, TRUE	},
+	    {"ifndef", YES, doifs, FALSE	},
+	    {"include", NO, doinclude, EMPTY	},
+	    {"line", NO, doline, EMPTY	},
+	    {"undef", NO, doundef, EMPTY	},
+	    {"pragma", YES, dopragma, EMPTY	},
+	    {NULL}	/* The end */
+    };
 
 #if	(TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX)
 extern	void	pragasm();
@@ -494,100 +498,104 @@ extern	void	pragvalue();
  *	Pragma keyword table.
  */
 struct	ppdir	pragtab[] =
-	{
-	/*	 Keyword	Do within	Procedure	Arg to	  */
-	/*	   name		FALSE #ifxx	name		function  */
-	/* ------------------	-----------	----------	--------  */
-		{"arg_string",	NO,		pragopt,	EMPTY	},
+    {
+	    /*	 Keyword	Do within	Procedure	Arg to	  */
+	    /*	   name		FALSE #ifxx	name		function  */
+	    /* ------------------	-----------	----------	--------  */
+	    {"arg_string", NO, pragopt, EMPTY	},
 #if	(TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX)
-		{"asm",		NO,		pragasm,	TRUE	},
-		{"asm_expand",	NO,		pragopt,	EMPTY	},
+
+	    {"asm", NO, pragasm, TRUE
+	    },
+	    {"asm_expand", NO, pragopt, EMPTY	},
 #endif	/* (TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX) */
-		{"comment_recurse",NO,		pragopt,	EMPTY	},
-		{"define",	NO,		dodefine,	FALSE	},
-		{"elif",	YES,		doelse,		TRUE	},
-		{"else",	YES,		doelse,		FALSE	},
+	    {"comment_recurse", NO, pragopt, EMPTY	},
+	    {"define", NO, dodefine, FALSE	},
+	    {"elif", YES, doelse, TRUE	},
+	    {"else", YES, doelse, FALSE	},
 #if	(TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX)
-		{"endasm",	NO,		pragasm,	FALSE	},
+
+	    {"endasm", NO, pragasm, FALSE
+	    },
 #endif	/* (TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX) */
-		{"endif",	YES,		doendif, 	EMPTY	},
-		{"endmacro",	NO,		pragendm,	EMPTY	},
-		{"error",	NO,		pragerror,	FALSE	},
-		{"if",		YES,		doif,		EMPTY	},
-		{"ifdef",	YES,		doifs,		TRUE	},
-		{"ifndef",	YES,		doifs,		FALSE	},
-		{"macro",	NO,		dodefine,	TRUE	},
-		{"macro_rescan",NO,		pragopt,	EMPTY	},
-		{"macro_stack",	NO,		pragopt,	EMPTY	},
-		{"message",	NO,		pragmsg,	EMPTY	},
-		{"trigraph",	NO,		pragopt,	EMPTY	},
-    		{"undef",	NO,		doundef, 	EMPTY	},
-		{"value",	NO,		pragvalue,	EMPTY	},
-		{NULL}	/* The end */
-	};
-	
+	    {"endif", YES, doendif, EMPTY	},
+	    {"endmacro", NO, pragendm, EMPTY	},
+	    {"error", NO, pragerror, FALSE	},
+	    {"if", YES, doif, EMPTY	},
+	    {"ifdef", YES, doifs, TRUE	},
+	    {"ifndef", YES, doifs, FALSE	},
+	    {"macro", NO, dodefine, TRUE	},
+	    {"macro_rescan", NO, pragopt, EMPTY	},
+	    {"macro_stack", NO, pragopt, EMPTY	},
+	    {"message", NO, pragmsg, EMPTY	},
+	    {"trigraph", NO, pragopt, EMPTY	},
+	    {"undef", NO, doundef, EMPTY	},
+	    {"value", NO, pragvalue, EMPTY	},
+	    {NULL}	/* The end */
+    };
+
 #else	/* !MAIN */
 extern	struct	ppdir	pptab[];
 extern	struct	ppdir	pragtab[];
 #endif	/* MAIN */
 
-EXTERN	int		A_astring I_ZERO;	/* TRUE/args in strings	*/
-EXTERN	int		A_crecurse I_ZERO;	/* TRUE/comments nest	*/
-EXTERN	int		A_eolcomment I_ZERO;	/* TRUE/eol comments OK	*/
-EXTERN	int		A_rescan I_ZERO;/* TRUE/direct. from macro's	*/
-EXTERN	int		A_stack	I_ZERO;	/* TRUE/macro def's stack	*/
-EXTERN	int		A_trigraph I_ZERO;	/* TRUE/trigraphs active*/
+EXTERN	int	A_astring I_ZERO;	/* TRUE/args in strings	*/
+EXTERN	int	A_crecurse I_ZERO;	/* TRUE/comments nest	*/
+EXTERN	int	A_eolcomment I_ZERO;	/* TRUE/eol comments OK	*/
+EXTERN	int	A_rescan I_ZERO; /* TRUE/direct. from macro's	*/
+EXTERN	int	A_stack	I_ZERO;	/* TRUE/macro def's stack	*/
+EXTERN	int	A_trigraph I_ZERO;	/* TRUE/trigraphs active*/
 
-EXTERN	struct	symtab *Macros[NUMBUCKETS] I_BRZERO; /* Ptr/macro chains*/
-EXTERN	int		Nsyms	I_ZERO;	/* Number of symbols in table	*/
-EXTERN	int		Maxsyms	I_ZERO;	/* Max number of symbols used	*/
+EXTERN	struct	symtab *Macros[ NUMBUCKETS ] I_BRZERO; /* Ptr/macro chains*/
+EXTERN	int	Nsyms	I_ZERO;	/* Number of symbols in table	*/
+EXTERN	int	Maxsyms	I_ZERO;	/* Max number of symbols used	*/
 
 #define	NO_PARAMS 	(struct param *)NULL	/* For sbind of 0 params*/
 
 struct	ifstk
-	{
-	char		i_state;/* The ifstack state:			*/
+{
+	char	i_state; /* The ifstack state:			*/
 #define	IFTRUE		0	/* True - include code within #ifxx	*/
 #define	IFFALSE		1	/* False - no code within #ifxx		*/
 #define	IFNEVER		2	/* Treat as false forever after		*/
-	char		i_else;	/* True if encountered an #else		*/
-	};
+	char	i_else;	/* True if encountered an #else		*/
+};
 
-EXTERN	struct	ifstk	Ifstack[IFSTACKSIZE + 1] I_BRZERO;
-EXTERN	int		Iflevel	I_ZERO;	/* Index into Ifstack		*/
-EXTERN	int		Ifstate	I_ZERO;	/* Current state of #if		*/
+EXTERN	struct	ifstk	Ifstack[ IFSTACKSIZE + 1 ] I_BRZERO;
+EXTERN	int	Iflevel	I_ZERO;	/* Index into Ifstack		*/
+EXTERN	int	Ifstate	I_ZERO;	/* Current state of #if		*/
 
 #if	DEBUG
-EXTERN	int		Debug I_ZERO;	/* -z flag			*/
+EXTERN	int	Debug I_ZERO;	/* -z flag			*/
 #endif	/* DEBUG */
 
-EXTERN	int		Lineopt;/* True if producing #line directives	*/
+EXTERN	int	Lineopt; /* True if producing #line directives	*/
 #define	LINE_EXP	1	/* If to expand to #line directives	*/
 #define	LINE_ABR	2	/* If to abbreviate to # n "file"	*/
 
-EXTERN	int		Outline	I_ZERO;	/* Line # of current output file*/
-EXTERN	int		Errors	I_ZERO;	/* Total errors detected	*/
-EXTERN	int		Eflag	I_ZERO;	/* True if to ignore errors	*/
+EXTERN	int	Outline	I_ZERO;	/* Line # of current output file*/
+EXTERN	int	Errors	I_ZERO;	/* Total errors detected	*/
+EXTERN	int	Eflag	I_ZERO;	/* True if to ignore errors	*/
 #if	DEBUG
-EXTERN	int		Stats	I_ZERO;	/* True to print stats at end	*/
+EXTERN	int	Stats	I_ZERO;	/* True to print stats at end	*/
 #endif	/* DEBUG */
-EXTERN	char		Date[12] I_BRZERO;	/* Date str for __DATE__*/
-EXTERN	char		_Time[9] I_BRZERO;	/* Time str for __TIME__*/
+EXTERN	char	Date[ 12 ] I_BRZERO;	/* Date str for __DATE__*/
+EXTERN	char	_Time[ 9 ] I_BRZERO;	/* Time str for __TIME__*/
 EXTERN	unsigned int	Unique	I_ZERO;	/* Unique # for __NOW__/__NEXT__*/
-EXTERN	int		Verbose	I_ZERO;	/* True to print verbose mess	*/
+EXTERN	int	Verbose	I_ZERO;	/* True to print verbose mess	*/
 #if	(TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX)
-EXTERN	int		Do_asm	I_ZERO;	/* True if in asm/endasm body	*/
-EXTERN	int		Macexpand	I_ZERO;	/* True/macro expand on	*/
-EXTERN	int		Asmexpand	I_ZERO;	/* Set Macexpand in asm	*/
+EXTERN	int	Do_asm	I_ZERO;	/* True if in asm/endasm body	*/
+EXTERN	int	Macexpand	I_ZERO;	/* True/macro expand on	*/
+EXTERN	int	Asmexpand	I_ZERO;	/* Set Macexpand in asm	*/
 #endif	/* (TARGET == T_QC) OR (TARGET == T_QCX) OR (TARGET == T_TCX) */
 
 #define	NIPATHS		10	/* Up to 10 -i pathnames		*/
-EXTERN	char		*Ipath[NIPATHS+1] I_BRZERO;	/* -i path list	*/
-EXTERN	int		Ipcnt I_ZERO;	/* Count of -i parameters	*/
+EXTERN	char	*Ipath[ NIPATHS + 1 ] I_BRZERO;	/* -i path list	*/
+EXTERN	int	Ipcnt I_ZERO;	/* Count of -i parameters	*/
 
 #if	HOST == H_CPM
-EXTERN	int		Orig_user I_ZERO;	/* Original user	*/
-EXTERN	int		Orig_disk I_ZERO;	/* Original disk	*/
+EXTERN	int	Orig_user I_ZERO;	/* Original user	*/
+EXTERN	int	Orig_disk I_ZERO;	/* Original disk	*/
 #endif	/* HOST == H_CPM */
 
 /*

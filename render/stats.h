@@ -42,10 +42,10 @@ START_NAMESPACE( Aqsis )
 
 enum EqState
 {
-    State_Parsing, 		///< Parsing a RIB file.
-    State_Shadows, 		///< Processing shadows.
-    State_Rendering, 	///< Rendering image.
-    State_Complete, 		///< Rendering complete.
+    State_Parsing,  		///< Parsing a RIB file.
+    State_Shadows,  		///< Processing shadows.
+    State_Rendering,  	///< Rendering image.
+    State_Complete,  		///< Rendering complete.
 };
 
 
@@ -73,7 +73,7 @@ class CqStatTimer
 		 */
 		void	Start()
 		{
-			if( m_cStarted == 0)
+			if ( m_cStarted == 0 )
 				m_timeStart = clock();
 			m_cStarted++;
 		}
@@ -84,7 +84,7 @@ class CqStatTimer
 		{
 			assert( m_cStarted > 0 );
 			m_cStarted--;
-			if( m_cStarted == 0 )
+			if ( m_cStarted == 0 )
 				m_timeTotal += clock() - m_timeStart;
 		}
 

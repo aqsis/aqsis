@@ -79,9 +79,10 @@ class CqDDManagerSimple : public IqDDManager
 		// Overridden from IqDDManager
 
 
+
 		virtual	TqInt	Initialise();
 		virtual	TqInt	Shutdown();
-		virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality  );
+		virtual	TqInt	AddDisplay( const TqChar* name, const TqChar* type, const TqChar* mode, TqInt compression, TqInt quality );
 		virtual	TqInt	ClearDisplays();
 		virtual	TqInt	OpenDisplays();
 		virtual	TqInt	CloseDisplays();

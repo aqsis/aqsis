@@ -64,7 +64,7 @@ int main( int argc, const char** argv )
 	ap.usageHeader( ArgParse::apstring( "Usage: " ) + argv[ 0 ] + " [options]" );
 	ap.argFlag( "help", "\aprint this help and exit", &g_help );
 	ap.argFlag( "version", "\aprint version information and exit", &g_version );
-	ap.argString( "o", "=string \aspecify output filename", &g_stroutname);
+	ap.argString( "o", "=string \aspecify output filename", &g_stroutname );
 
 	if ( argc > 1 && !ap.parse( argc - 1, argv + 1 ) )
 	{

@@ -40,10 +40,10 @@
 
 #include	"aqsis.h"
 
-#include	"tiffio.h" 
+#include	"tiffio.h"
 
 #include	"sstring.h"
-#include	"color.h"
+#include	"color.h" 
 //#include	"lights.h"
 #include	"matrix.h"
 #include	"itexturemap.h"
@@ -231,16 +231,16 @@ class _qShareC CqTextureMap : public IqTextureMap
 				m_tmode( WrapMode_Clamp ),
 				m_FilterFunc( RiBoxFilter ),
 				m_swidth( 1.0 ), m_twidth( 1.0 ),
-				m_Compression(COMPRESSION_NONE), 
-				m_Quality(70)
+				m_Compression( COMPRESSION_NONE ),
+				m_Quality( 70 )
 
 		{
-			m_tempval1.resize(m_SamplesPerPixel);		
-			m_tempval2.resize(m_SamplesPerPixel);		
-			m_tempval3.resize(m_SamplesPerPixel);		
-			m_tempval4.resize(m_SamplesPerPixel);
-			m_low_color.resize(m_SamplesPerPixel);
-			m_high_color.resize(m_SamplesPerPixel);
+			m_tempval1.resize( m_SamplesPerPixel );
+			m_tempval2.resize( m_SamplesPerPixel );
+			m_tempval3.resize( m_SamplesPerPixel );
+			m_tempval4.resize( m_SamplesPerPixel );
+			m_low_color.resize( m_SamplesPerPixel );
+			m_high_color.resize( m_SamplesPerPixel );
 		}
 		_qShareM	virtual	~CqTextureMap();
 
@@ -282,29 +282,29 @@ class _qShareC CqTextureMap : public IqTextureMap
 
 		_qShareM virtual	TqInt Compression() const
 		{
-			return(m_Compression);
+			return ( m_Compression );
 		}
 
-		_qShareM virtual	void SetCompression(TqInt Compression)
+		_qShareM virtual	void SetCompression( TqInt Compression )
 		{
 			m_Compression = Compression;
 		}
 
 		_qShareM virtual	TqInt Quality() const
 		{
-			return(m_Quality);
+			return ( m_Quality );
 		}
 
-		_qShareM virtual	void SetQuality(TqInt Quality)
+		_qShareM virtual	void SetQuality( TqInt Quality )
 		{
 			m_Quality = Quality;
 		}
-		
-		_qShareM CqMatrix& GetMatrix(TqInt which)
+
+		_qShareM CqMatrix& GetMatrix( TqInt which )
 		{
-				return ( m_matWorldToScreen );
+			return ( m_matWorldToScreen );
 		}
-	
+
 		/** Get the image type.
 		 */
 		_qShareM	virtual	EqMapType	Type() const
@@ -345,16 +345,16 @@ class _qShareC CqTextureMap : public IqTextureMap
 		void	CreateMIPMAP();
 
 		_qShareM	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, TqFloat sblur, TqFloat tblur,
-		                                    std::valarray<TqFloat>& val );
+		                                 std::valarray<TqFloat>& val );
 		_qShareM	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
-		                                    TqFloat sblur, TqFloat tblur,
-		                                    std::valarray<TqFloat>& val );
+		                                 TqFloat sblur, TqFloat tblur,
+		                                 std::valarray<TqFloat>& val );
 		_qShareM	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur,
-		                                    std::valarray<TqFloat>& val )
+		                                 std::valarray<TqFloat>& val )
 		{}
 		_qShareM	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-		                                    TqFloat sblur, TqFloat tblur,
-		                                    std::valarray<TqFloat>& val )
+		                                 TqFloat sblur, TqFloat tblur,
+		                                 std::valarray<TqFloat>& val )
 		{}
 
 		_qShareM	virtual	void	GetSample( TqFloat ss1, TqFloat tt1, TqFloat ss2, TqFloat tt2, std::valarray<TqFloat>& val );
@@ -379,18 +379,18 @@ class _qShareC CqTextureMap : public IqTextureMap
 			m_TextureMap_Cache.clear();
 
 		}
-		_qShareM   void CriticalMeasure();
+		_qShareM void CriticalMeasure();
 
 		_qShareM static void WriteImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );
 		_qShareM static void WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality );
 		_qShareM static void WriteImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqInt samples, TqInt compression, TqInt quality );
 		_qShareM static void WriteTileImage( TIFF* ptex, TqPuchar raster, TqUlong width, TqUlong length, TqUlong twidth, TqUlong tlength, TqInt samples, TqInt compression, TqInt quality );
 
-		
-		
+
+
 	protected:
 		static	std::vector<CqTextureMap*>	m_TextureMap_Cache;	///< Static array of loaded textures.
-		static  std::vector<CqString*>		m_ConvertString_Cache; ///< Static array of filename (after conversion)
+		static std::vector<CqString*>	m_ConvertString_Cache; ///< Static array of filename (after conversion)
 
 		TqInt m_Compression;            ///< TIFF Compression model
 		TqInt m_Quality;                ///< If Jpeg compression is used than its overall quality
@@ -415,12 +415,12 @@ class _qShareC CqTextureMap : public IqTextureMap
 		CqMatrix	m_matWorldToScreen;		///< Matrix to convert points from world space to screen space.
 
 		// Temporary values used during sampling.
-		std::valarray<TqFloat>		m_tempval1;
-		std::valarray<TqFloat>		m_tempval2;
-		std::valarray<TqFloat>		m_tempval3;
-		std::valarray<TqFloat>		m_tempval4;
-		std::valarray<TqFloat>		m_low_color;
-		std::valarray<TqFloat>		m_high_color;
+		std::valarray<TqFloat>	m_tempval1;
+		std::valarray<TqFloat>	m_tempval2;
+		std::valarray<TqFloat>	m_tempval3;
+		std::valarray<TqFloat>	m_tempval4;
+		std::valarray<TqFloat>	m_low_color;
+		std::valarray<TqFloat>	m_high_color;
 }
 ;
 
@@ -446,23 +446,24 @@ class _qShareC CqEnvironmentMap : public CqTextureMap
 		}
 
 		_qShareM	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur,
-		                                    std::valarray<TqFloat>& val );
+		                                 std::valarray<TqFloat>& val );
 		_qShareM	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-		                                    TqFloat sblur, TqFloat tblur,
-		                                    std::valarray<TqFloat>& val );
-		
-		_qShareM CqMatrix& CqEnvironmentMap::GetMatrix(TqInt which)
+		                                 TqFloat sblur, TqFloat tblur,
+		                                 std::valarray<TqFloat>& val );
+
+		_qShareM CqMatrix& CqEnvironmentMap::GetMatrix( TqInt which )
 		{
-			
-				return ( m_matWorldToScreen );
+
+			return ( m_matWorldToScreen );
 		}
-					
+
 
 	private:
 		void	Getst( CqVector3D& R, TqUlong fullwidth, TqUlong fulllength, TqFloat& s, TqFloat& t );
 		CqMatrix	m_matWorldToScreen;		///< Matrix to convert points from world space to screen space.
 
-};
+}
+;
 
 //----------------------------------------------------------------------
 /** \class CqLatLongMap
@@ -483,7 +484,7 @@ class _qShareC CqLatLongMap : public CqEnvironmentMap
 		{
 			return ( IsValid() ? MapType_LatLong : MapType_Invalid );
 		}
-        
+
 
 };
 
@@ -520,7 +521,7 @@ class _qShareC CqShadowMap : public CqTextureMap
 			return ( m_matWorldToScreen );
 		}
 
-		
+
 
 		_qShareM	void	AllocateMap( TqInt XRes, TqInt YRes );
 		_qShareM	TqFloat	Sample( const CqVector3D&	vecPoint );
@@ -534,11 +535,11 @@ class _qShareC CqShadowMap : public CqTextureMap
 
 
 		_qShareM	virtual	void	SampleMap( const CqVector3D& R1, const CqVector3D& R2, const CqVector3D& R3, const CqVector3D& R4, TqFloat sblur, TqFloat tblur, std::valarray<TqFloat>& val, TqFloat& depth );
-        _qShareM CqMatrix& CqShadowMap::GetMatrix(TqInt which)
+		_qShareM CqMatrix& CqShadowMap::GetMatrix( TqInt which )
 		{
-				if (which == 0) return m_matWorldToCamera;
-				else if (which == 1) return m_matWorldToScreen;
-				return ( m_matWorldToCamera );
+			if ( which == 0 ) return m_matWorldToCamera;
+			else if ( which == 1 ) return m_matWorldToScreen;
+			return ( m_matWorldToCamera );
 		}
 
 

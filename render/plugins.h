@@ -21,7 +21,7 @@
 /** \file
 		\brief Implements CqPlugins class.
 		\author M. Joron (joron@sympatico.ca)
-*/ 
+*/
 
 
 //? Is .h included already?
@@ -45,17 +45,17 @@ START_NAMESPACE( Aqsis )
  *  
  */
 
-class CqPlugins 
+class CqPlugins
 {
 	public:
 
-        	CqPlugins(char *searchpath, char *library, char *function);
-        	void Close();
-        	void *Function();
+		CqPlugins( char *searchpath, char *library, char *function );
+		void Close();
+		void *Function();
 		TqChar * ErrorLog();
 
 	private:
-	
+
 	protected:
 		void *handle;
 		void *function;

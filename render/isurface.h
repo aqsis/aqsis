@@ -5,8 +5,8 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/09/09 07:47:05 $
- */
+ *	Last change date:	$Date: 2002/10/31 11:51:12 $
+ */ 
 //------------------------------------------------------------------------------
 #ifndef	___isurface_Loaded___
 #define	___isurface_Loaded___
@@ -34,7 +34,8 @@ class CqBasicSurface;
 
 struct IqSurface
 {
-	virtual	~IqSurface() {}
+	virtual	~IqSurface()
+	{}
 	/** Transform this GPrim using the specified matrices.
 	 * \param matTx Reference to the transformation matrix.
 	 * \param matITTx Reference to the inverse transpose of the transformation matrix, used to transform normals.
@@ -69,11 +70,11 @@ struct IqSurface
 	 *  \param uDiceSize Size that the surface will be diced to in u.
 	 *  \param vDiceSize Size that the surface will be diced to in u.
 	 */
-	virtual void	PreDice(TqInt uDiceSize, TqInt vDiceSize) = 0;
+	virtual void	PreDice( TqInt uDiceSize, TqInt vDiceSize ) = 0;
 	/** Interpolate the specified value using the natural interpolation method for the surface.
 	 *  Fills in the given shader data with the resulting data.
 	 */
-	virtual void	NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData) = 0;
+	virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData ) = 0;
 	/** Perform any post cleanup after dicing.
 	 */
 	virtual void	PostDice() = 0;
@@ -81,14 +82,14 @@ struct IqSurface
 	/** Perform any precalculation required before subdividing.
 	 *  \param u Flag indicating if we are subdividing in u, if false we are doing v.
 	 */
-	virtual TqInt	PreSubdivide(std::vector<CqBasicSurface*>& aSplits, TqBool u) = 0;
+	virtual TqInt	PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u ) = 0;
 	/** Interpolate the specified value using the natural interpolation method for the surface.
 	 *  \param pParam Pointer to the primitive variable we are subdividing.
 	 *  \param pParam1 Pointer to the new primitive variable to store the first half.
 	 *  \param pParam2 Pointer to the new primitive variable to store the second half.
 	 *  \param u Flag indicating if we are subdividing in u, if false we are doing v.
 	 */
-	virtual void	NaturalSubdivide(CqParameter* pParam,CqParameter* pParam1, CqParameter* pParam2, TqBool u) = 0;
+	virtual void	NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u ) = 0;
 	/** Perform any post cleanup after dicing.
 	 */
 	virtual void	PostSubdivide() = 0;

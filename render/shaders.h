@@ -102,6 +102,7 @@ class CqShader : public IqShader
 		{}
 
 		// Overidden from IqShader
+
 		virtual CqMatrix&	matCurrent()
 		{
 			return ( m_matCurrent );
@@ -120,7 +121,7 @@ class CqShader : public IqShader
 		{}
 		virtual	IqShaderData*	FindArgument( const CqString& name )
 		{
-			return( NULL );
+			return ( NULL );
 		}
 		virtual	TqBool	GetValue( const char* name, IqShaderData* res )
 		{
@@ -149,31 +150,30 @@ class CqShader : public IqShader
 		{
 			return ( m_Uses );
 		}
-		virtual IqShaderData* CreateVariable(EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fArgument = TqFalse)
+		virtual IqShaderData* CreateVariable( EqVariableType Type, EqVariableClass Class, const CqString& name, TqBool fArgument = TqFalse )
 		{
-			return( NULL );
+			return ( NULL );
 		}
-		virtual IqShaderData* CreateVariableArray(EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fArgument = TqFalse)
+		virtual IqShaderData* CreateVariableArray( EqVariableType Type, EqVariableClass Class, const CqString& name, TqInt Count, TqBool fArgument = TqFalse )
 		{
-			return( NULL );
+			return ( NULL );
 		}
-		virtual IqShaderData* CreateTemporaryStorage(EqVariableType type, EqVariableClass _class)
+		virtual IqShaderData* CreateTemporaryStorage( EqVariableType type, EqVariableClass _class )
 		{
-			return( NULL );
+			return ( NULL );
 		}
 		virtual void DeleteTemporaryStorage( IqShaderData* pData )
-		{
-		}
+		{}
 		virtual void DefaultSurface()
-		{
-		}
+		{}
 
 	protected:
-		TqInt		m_Uses;			///< Bit vector representing the system variables used by this shader.
+		TqInt	m_Uses;			///< Bit vector representing the system variables used by this shader.
 	private:
 		CqMatrix	m_matCurrent;	///< Transformation matrix to world coordinates in effect at the time this shader was instantiated.
 		CqString	m_strName;		///< The name of this shader.
-};
+}
+;
 
 
 //---------------------------------------------------------------------

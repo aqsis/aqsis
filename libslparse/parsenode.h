@@ -246,6 +246,7 @@ class CqParseNodeShader : public CqParseNode, public IqParseNodeShader
 		// Overridden from IqParseNodeShader
 
 
+
 		virtual	const char*	strName() const
 		{
 			return ( m_strName.c_str() );
@@ -307,6 +308,7 @@ class CqParseNodeFunctionCall : public CqParseNode, public IqParseNodeFunctionCa
 		// Overridden from IqParseNodeFunctionCall
 
 
+
 		virtual	const char*	strName() const;
 		virtual	const IqFuncDef* pFuncDef() const;
 
@@ -362,6 +364,7 @@ class CqParseNodeVariable : public CqParseNode, public IqParseNodeVariable
 		{}
 
 		// Overridden from IqParseNodeVariable
+
 
 
 		virtual	const char*	strName() const;
@@ -441,6 +444,7 @@ class CqParseNodeVariableArray : public CqParseNodeVariable, public IqParseNodeA
 		// Overridden from IqParseNode
 
 
+
 		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
 		{
 			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeArrayVariable>( this, type ) ) != 0 ) return ( TqTrue );
@@ -486,6 +490,7 @@ class CqParseNodeAssign : public CqParseNodeVariable, public IqParseNodeVariable
 		{}
 
 		// Overridden from IqParseNodeVariableAssign
+
 
 
 		virtual	TqBool	fDiscardResult() const
@@ -561,6 +566,7 @@ class CqParseNodeAssignArray : public CqParseNodeAssign, public IqParseNodeArray
 		// Overridden from IqParseNode
 
 
+
 		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
 		{
 			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeArrayVariableAssign>( this, type ) ) != 0 ) return ( TqTrue );
@@ -603,6 +609,7 @@ class CqParseNodeOp : public CqParseNode, public IqParseNodeOperator
 		// Overridden from IqParseNode
 
 
+
 		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
 		{
 			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeOperator>( this, type ) ) != 0 ) return ( TqTrue );
@@ -636,6 +643,7 @@ class CqParseNodeMathOp : public CqParseNodeOp, public IqParseNodeMathOp
 		{}
 
 		// Overridden from IqParseNodeOperator
+
 
 
 		virtual	TqInt	Operator() const
@@ -708,6 +716,7 @@ class CqParseNodeRelOp : public CqParseNodeOp, public IqParseNodeRelationalOp
 		// Overridden from IqParseNodeOperator
 
 
+
 		virtual	TqInt	Operator() const
 		{
 			return ( m_Operator );
@@ -763,6 +772,7 @@ class CqParseNodeUnaryOp : public CqParseNodeOp, public IqParseNodeUnaryOp
 		// Overridden from IqParseNodeOperator
 
 
+
 		virtual	TqInt	Operator() const
 		{
 			return ( m_Operator );
@@ -812,6 +822,7 @@ class CqParseNodeLogicalOp : public CqParseNodeOp, public IqParseNodeLogicalOp
 		{}
 
 		// Overridden from IqParseNodeOperator
+
 
 
 		virtual	TqInt	Operator() const
@@ -864,6 +875,7 @@ class CqParseNodeDrop : public CqParseNode, public IqParseNodeDiscardResult
 		{}
 
 		// Overridden from IqParseNode
+
 
 
 		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
@@ -931,6 +943,7 @@ class CqParseNodeFloatConst : public CqParseNodeConst, public IqParseNodeConstan
 		// Overridden from IqParseNodeConstantFloat
 
 
+
 		virtual	TqFloat	Value() const
 		{
 			return ( m_Value );
@@ -985,6 +998,7 @@ class CqParseNodeStringConst : public CqParseNodeConst, public IqParseNodeConsta
 		// Overridden from IqParseNodeConstantString
 
 
+
 		virtual	const char*	strValue() const
 		{
 			return ( m_Value.c_str() );
@@ -1037,6 +1051,7 @@ class CqParseNodeWhileConstruct : public CqParseNode, public IqParseNodeWhileCon
 		// Overridden fromIqParseNode
 
 
+
 		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
 		{
 			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeWhileConstruct>( this, type ) ) != 0 ) return ( TqTrue );
@@ -1079,6 +1094,7 @@ class CqParseNodeIlluminateConstruct : public CqParseNode, public IqParseNodeIll
 		{}
 
 		// Overridden from IqParseNode
+
 
 
 		virtual	TqBool	fHasAxisAngle() const
@@ -1131,6 +1147,7 @@ class CqParseNodeIlluminanceConstruct : public CqParseNode, public IqParseNodeIl
 		// Overridden from IqParseNode
 
 
+
 		virtual	TqBool	fHasAxisAngle() const
 		{
 			return ( m_fAxisAngle );
@@ -1181,6 +1198,7 @@ class CqParseNodeSolarConstruct : public CqParseNode, public IqParseNodeSolarCon
 		// Overridden from IqParseNode
 
 
+
 		virtual	TqBool	fHasAxisAngle() const
 		{
 			return ( m_fAxisAngle );
@@ -1228,6 +1246,7 @@ class CqParseNodeConditional : public CqParseNode, public IqParseNodeConditional
 
 
 		// Overridden from IqParseNode
+
 
 
 		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
@@ -1291,6 +1310,7 @@ class CqParseNodeQCond : public CqParseNode, public IqParseNodeConditionalExpres
 		// Overridden from IqParseNode
 
 
+
 		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
 		{
 			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeConditionalExpression>( this, type ) ) != 0 ) return ( TqTrue );
@@ -1336,6 +1356,7 @@ class CqParseNodeCast : public CqParseNode, public IqParseNodeTypeCast
 
 
 		// Overridden from IqParseNodeTypeCast
+
 
 
 		virtual	TqInt	CastTo() const
@@ -1391,6 +1412,7 @@ class CqParseNodeTriple : public CqParseNode, public IqParseNodeTriple
 		// Overridden from IqParseNode
 
 
+
 		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
 		{
 			if ( ( *pNode = ( void* ) QueryNodeType<IqParseNodeTriple>( this, type ) ) != 0 ) return ( TqTrue );
@@ -1436,6 +1458,7 @@ class CqParseNodeHexTuple : public CqParseNode, public IqParseNodeSixteenTuple
 		{}
 
 		// Overridden from IqParseNode
+
 
 
 		virtual	TqBool	GetInterface( EqParseNodeType type, void** pNode ) const
@@ -1496,6 +1519,7 @@ class CqParseNodeCommFunction : public CqParseNode, public IqParseNodeMessagePas
 		{}
 
 		// Overridden from IqParseNodeMessagePassingFunction
+
 
 
 		virtual	SqVarRef	VarRef() const

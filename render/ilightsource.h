@@ -5,8 +5,8 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/08/12 14:27:09 $
- */
+ *	Last change date:	$Date: 2002/10/31 11:51:12 $
+ */ 
 //------------------------------------------------------------------------------
 
 
@@ -28,7 +28,8 @@ struct IqShaderData;
 
 struct IqLightsource
 {
-	virtual	~IqLightsource() {}
+	virtual	~IqLightsource()
+	{}
 
 	/** Get a pointer to the associated lightsource shader.
 	 * \return a pointer to a IqShader derived class.

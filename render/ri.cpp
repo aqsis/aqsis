@@ -62,7 +62,7 @@
 using namespace Aqsis;
 
 static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST );
-static void ProcessCompression(TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values);
+static void ProcessCompression( TqInt *compress, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values );
 template <class T>
 RtVoid	CreateGPrim( T* pSurface );
 void SetShaderArgument( IqShader* pShader, const char* name, TqPchar val );
@@ -220,7 +220,7 @@ RtInt BuildParameterList( va_list pArgs, RtToken*& pTokens, RtPointer*& pValues 
 	RtPointer pValue;
 	aTokens.clear();
 	aValues.clear();
-	while ( pToken != 0 && pToken != RI_NULL )       	// While not RI_NULL
+	while ( pToken != 0 && pToken != RI_NULL )        	// While not RI_NULL
 	{
 		aTokens.push_back( pToken );
 		pValue = va_arg( pArgs, RtPointer );
@@ -355,29 +355,29 @@ RtVoid	RiWorldBegin()
 	if ( !QGetRenderContext() ->optCurrent().FrameAspectRatioCalled() )
 	{
 		// Derive the FAR from the resolution and pixel aspect ratio.
-		RtFloat PAR = QGetRenderContext() ->optCurrent().GetFloatOption("System", "PixelAspectRatio")[0];
-		RtFloat resH = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "Resolution")[0];
-		RtFloat resV = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "Resolution")[1];
-		QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "FrameAspectRatio")[0] =  ( resH * PAR ) / resV ;
+		RtFloat PAR = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "PixelAspectRatio" ) [ 0 ];
+		RtFloat resH = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 0 ];
+		RtFloat resV = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "Resolution" ) [ 1 ];
+		QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "FrameAspectRatio" ) [ 0 ] = ( resH * PAR ) / resV ;
 	}
 
 	if ( !QGetRenderContext() ->optCurrent().ScreenWindowCalled() )
 	{
-		RtFloat fFAR = QGetRenderContext() ->optCurrent().GetFloatOption("System", "FrameAspectRatio")[0];
+		RtFloat fFAR = QGetRenderContext() ->optCurrent().GetFloatOption( "System", "FrameAspectRatio" ) [ 0 ];
 
 		if ( fFAR >= 1.0 )
 		{
-			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindow")[0] =  -fFAR ;
-			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindow")[1] =  + fFAR ;
-			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindow")[2] =  + 1 ;
-			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindow")[3] =  -1 ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ScreenWindow" ) [ 0 ] = -fFAR ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ScreenWindow" ) [ 1 ] = + fFAR ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ScreenWindow" ) [ 2 ] = + 1 ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ScreenWindow" ) [ 3 ] = -1 ;
 		}
 		else
 		{
-			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindow")[0] =  -1 ;
-			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindow")[1] =  + 1 ;
-			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindow")[2] =  + 1.0 / fFAR ;
-			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindow")[3] =  -1.0 / fFAR ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ScreenWindow" ) [ 0 ] = -1 ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ScreenWindow" ) [ 1 ] = + 1 ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ScreenWindow" ) [ 2 ] = + 1.0 / fFAR ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ScreenWindow" ) [ 3 ] = -1.0 / fFAR ;
 		}
 	}
 
@@ -387,8 +387,8 @@ RtVoid	RiWorldBegin()
 	QGetRenderContext() ->SetmatCamera( QGetRenderContext() ->ptransCurrent() );
 	// and then reset the current matrix to identity, ready for object transformations.
 	TqInt i;
-	for(i = 0; i < QGetRenderContext() ->ptransWriteCurrent()->cTimes(); i++)
-		QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->ptransWriteCurrent() ->Time(i), CqMatrix() );
+	for ( i = 0; i < QGetRenderContext() ->ptransWriteCurrent() ->cTimes(); i++ )
+		QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->ptransWriteCurrent() ->Time( i ), CqMatrix() );
 
 	QGetRenderContext() ->optCurrent().InitialiseCamera();
 	QGetRenderContext() ->pImage() ->SetImage();
@@ -408,7 +408,7 @@ RtVoid	RiWorldEnd()
 	if ( QGetRenderContext() ->optCurrent().pPreRenderFunction() != NULL )
 		( *QGetRenderContext() ->optCurrent().pPreRenderFunction() ) ();
 
-        // Stop the parsing counter
+	// Stop the parsing counter
 	QGetRenderContext() ->Stats().MakeParse().Stop();
 
 	// Render the world
@@ -438,9 +438,9 @@ RtVoid	RiWorldEnd()
 //
 RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio )
 {
-	QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "Resolution")[0] =  xresolution ;
-	QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "Resolution")[1] =  yresolution ;
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "PixelAspectRatio")[0] =  ( pixelaspectratio < 0.0 ) ? 1.0 : pixelaspectratio ;
+	QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "Resolution" ) [ 0 ] = xresolution ;
+	QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "Resolution" ) [ 1 ] = yresolution ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "PixelAspectRatio" ) [ 0 ] = ( pixelaspectratio < 0.0 ) ? 1.0 : pixelaspectratio ;
 
 	// Inform the system that RiFormat has been called, as this takes priority.
 	QGetRenderContext() ->optCurrent().CallFormat();
@@ -455,7 +455,7 @@ RtVoid	RiFormat( RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio 
 //
 RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 {
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "FrameAspectRatio")[0] =  frameratio ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "FrameAspectRatio" ) [ 0 ] = frameratio ;
 
 	// Inform the system that RiFrameAspectRatio has been called, as this takes priority.
 	QGetRenderContext() ->optCurrent().CallFrameAspectRatio();
@@ -471,10 +471,10 @@ RtVoid	RiFrameAspectRatio( RtFloat frameratio )
 //
 RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top )
 {
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindow")[0] =  left ;
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindow")[1] =  right ;
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindow")[2] =  top ;
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ScreenWindow")[3] =  bottom ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ScreenWindow" ) [ 0 ] = left ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ScreenWindow" ) [ 1 ] = right ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ScreenWindow" ) [ 2 ] = top ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ScreenWindow" ) [ 3 ] = bottom ;
 
 	// Inform the system that RiScreenWindow has been called, as this takes priority.
 	QGetRenderContext() ->optCurrent().CallScreenWindow();
@@ -490,10 +490,10 @@ RtVoid	RiScreenWindow( RtFloat left, RtFloat right, RtFloat bottom, RtFloat top 
 //
 RtVoid	RiCropWindow( RtFloat left, RtFloat right, RtFloat top, RtFloat bottom )
 {
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "CropWindow")[0] =  left ;
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "CropWindow")[1] =  right ;
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "CropWindow")[2] =  top ;
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "CropWindow")[3] =  bottom ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "CropWindow" ) [ 0 ] = left ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "CropWindow" ) [ 1 ] = right ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "CropWindow" ) [ 2 ] = top ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "CropWindow" ) [ 3 ] = bottom ;
 
 	return ;
 }
@@ -523,9 +523,9 @@ RtVoid	RiProjection( const char *name, ... )
 RtVoid	RiProjectionV( const char *name, PARAMETERLIST )
 {
 	if ( strcmp( name, RI_PERSPECTIVE ) == 0 )
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "Projection")[0] =  ProjectionPerspective ;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "Projection" ) [ 0 ] = ProjectionPerspective ;
 	else
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "Projection")[0] =  ProjectionOrthographic ;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "Projection" ) [ 0 ] = ProjectionOrthographic ;
 
 	RtInt i;
 	for ( i = 0; i < count; i++ )
@@ -534,7 +534,7 @@ RtVoid	RiProjectionV( const char *name, PARAMETERLIST )
 		RtPointer	value = values[ i ];
 
 		if ( strcmp( token, RI_FOV ) == 0 )
-			QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "FOV")[0] =  *( reinterpret_cast<RtFloat*>( value ) ) ;
+			QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "FOV" ) [ 0 ] = *( reinterpret_cast<RtFloat*>( value ) ) ;
 	}
 	// TODO: need to get the current transformation so that it can be added to the screen transformation.
 	QGetRenderContext() ->ptransWriteCurrent() ->SetCurrentTransform( QGetRenderContext() ->Time(), CqMatrix() );
@@ -549,8 +549,8 @@ RtVoid	RiProjectionV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 {
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "Clipping")[0] =  cnear ;
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "Clipping")[1] =  cfar ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Clipping" ) [ 0 ] = cnear ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Clipping" ) [ 1 ] = cfar ;
 
 	return ;
 }
@@ -562,9 +562,9 @@ RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 //
 RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance )
 {
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "DepthOfField")[0] =  fstop ;
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "DepthOfField")[1] =  focallength ;
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "DepthOfField")[2] =  focaldistance ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "DepthOfField" ) [ 0 ] = fstop ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "DepthOfField" ) [ 1 ] = focallength ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "DepthOfField" ) [ 2 ] = focaldistance ;
 
 	return ;
 }
@@ -576,8 +576,8 @@ RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance
 //
 RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 {
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "Shutter")[0] =  opentime ;
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "Shutter")[1] =  closetime ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 0 ] = opentime ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Shutter" ) [ 1 ] = closetime ;
 
 	return ;
 }
@@ -590,7 +590,7 @@ RtVoid	RiShutter( RtFloat opentime, RtFloat closetime )
 //
 RtVoid	RiPixelVariance( RtFloat variance )
 {
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "PixelVariance")[0] =  variance ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "PixelVariance" ) [ 0 ] = variance ;
 
 	return ;
 }
@@ -602,8 +602,8 @@ RtVoid	RiPixelVariance( RtFloat variance )
 //
 RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 {
-	QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "PixelSamples")[0] =  static_cast<TqInt>( xsamples ) ;
-	QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "PixelSamples")[1] =  static_cast<TqInt>( ysamples ) ;
+	QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "PixelSamples" ) [ 0 ] = static_cast<TqInt>( xsamples ) ;
+	QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "PixelSamples" ) [ 1 ] = static_cast<TqInt>( ysamples ) ;
 
 	return ;
 }
@@ -616,8 +616,8 @@ RtVoid	RiPixelSamples( RtFloat xsamples, RtFloat ysamples )
 RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 {
 	QGetRenderContext() ->optCurrent().SetfuncFilter( function );
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "FilterWidth")[0] =  xwidth ;
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "FilterWidth")[1] =  ywidth ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "FilterWidth" ) [ 0 ] = xwidth ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "FilterWidth" ) [ 1 ] = ywidth ;
 
 	return ;
 }
@@ -629,8 +629,8 @@ RtVoid	RiPixelFilter( RtFilterFunc function, RtFloat xwidth, RtFloat ywidth )
 //
 RtVoid	RiExposure( RtFloat gain, RtFloat gamma )
 {
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "Exposure")[0] =  gain ;
-	QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "Exposure")[1] =  gamma ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Exposure" ) [ 0 ] = gain ;
+	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "Exposure" ) [ 1 ] = gamma ;
 
 	return ;
 }
@@ -663,8 +663,8 @@ RtVoid	RiImagerV( const char *name, PARAMETERLIST )
 
 	if ( strlen( name ) )
 	{
-		QGetRenderContext() ->optCurrent().GetStringOptionWrite("System", "Imager")[0] =  name ;
-		QGetRenderContext() ->optCurrent().LoadImager(name);
+		QGetRenderContext() ->optCurrent().GetStringOptionWrite( "System", "Imager" ) [ 0 ] = name ;
+		QGetRenderContext() ->optCurrent().LoadImager( name );
 		for ( i = 0; i < count; i++ )
 		{
 			RtToken	token = tokens[ i ];
@@ -686,17 +686,17 @@ RtVoid	RiQuantize( RtToken type, RtInt one, RtInt min, RtInt max, RtFloat dither
 {
 	if ( strcmp( type, "rgba" ) == 0 )
 	{
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "ColorQuantizeOne")[0] =  one ;
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "ColorQuantizeMin")[0] =  min ;
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "ColorQuantizeMax")[0] =  max ;
-		QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "ColorQuantizeDitherAmplitude")[0] =  ditheramplitude ;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "ColorQuantizeOne" ) [ 0 ] = one ;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "ColorQuantizeMin" ) [ 0 ] = min ;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "ColorQuantizeMax" ) [ 0 ] = max ;
+		QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "ColorQuantizeDitherAmplitude" ) [ 0 ] = ditheramplitude ;
 	}
 	else
 	{
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "DepthQuantizeOne")[0] =  one ;
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "DepthQuantizeMin")[0] =  min ;
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "DepthQuantizeMax")[0] =  max ;
-		QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "DepthQuantizeDitherAmplitude")[0] =  ditheramplitude ;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "DepthQuantizeOne" ) [ 0 ] = one ;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "DepthQuantizeMin" ) [ 0 ] = min ;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "DepthQuantizeMax" ) [ 0 ] = max ;
+		QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "DepthQuantizeDitherAmplitude" ) [ 0 ] = ditheramplitude ;
 	}
 
 	return ;
@@ -730,8 +730,8 @@ RtVoid	RiDisplayV( const char *name, RtToken type, RtToken mode, PARAMETERLIST )
 	CqString strName( name );
 	CqString strType( type );
 
-	QGetRenderContext() ->optCurrent().GetStringOptionWrite("System", "DisplayName")[0] =  strName.c_str() ;
-	QGetRenderContext() ->optCurrent().GetStringOptionWrite("System", "DisplayType")[0] =  strType.c_str() ;
+	QGetRenderContext() ->optCurrent().GetStringOptionWrite( "System", "DisplayName" ) [ 0 ] = strName.c_str() ;
+	QGetRenderContext() ->optCurrent().GetStringOptionWrite( "System", "DisplayType" ) [ 0 ] = strType.c_str() ;
 
 	// Append the display mode to the current setting.
 	RtInt eValue = 0;
@@ -743,22 +743,22 @@ RtVoid	RiDisplayV( const char *name, RtToken type, RtToken mode, PARAMETERLIST )
 		eValue |= ModeZ;
 
 	// Check if the request is to use different tiff's compression
-	ProcessCompression(&compression, &quality, count, tokens, values);
+	ProcessCompression( &compression, &quality, count, tokens, values );
 
 	// Check if the request is to add a display driver.
 	if ( strName[ 0 ] == '+' )
 	{
-		TqInt iMode = QGetRenderContext() ->optCurrent().GetIntegerOption("System", "DisplayMode")[0] | eValue;
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "DisplayMode")[0] = iMode;
+		TqInt iMode = QGetRenderContext() ->optCurrent().GetIntegerOption( "System", "DisplayMode" ) [ 0 ] | eValue;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = iMode;
 		strName = strName.substr( 1 );
 	}
 	else
 	{
 		QGetRenderContext() ->ClearDisplayRequests();
-		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite("System", "DisplayMode")[0] =  eValue ;
+		QGetRenderContext() ->optCurrent().GetIntegerOptionWrite( "System", "DisplayMode" ) [ 0 ] = eValue ;
 	}
 	// Add a display driver to the list of requested drivers.
-	QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode, compression, quality);
+	QGetRenderContext() ->AddDisplayRequest( strName.c_str(), strType.c_str(), mode, compression, quality );
 
 	return ;
 }
@@ -1042,17 +1042,17 @@ RtVoid	RiHiderV( const char *name, PARAMETERLIST )
 {
 	if ( !strcmp( name, "hidden" ) || !strcmp( name, "painter" ) )
 	{
-		QGetRenderContext() ->optCurrent().GetStringOptionWrite("System", "Hider")[0] =  name ;
+		QGetRenderContext() ->optCurrent().GetStringOptionWrite( "System", "Hider" ) [ 0 ] = name ;
 	}
 
 	// Check options.
 	TqInt i;
-	for( i=0; i<count; i++ )
+	for ( i = 0; i < count; i++ )
 	{
-		if( !strcmp( tokens[i], "depthfilter" ) )
-			RiOption( "Hider", "depthfilter", (RtToken)values[i], NULL );
-		else if( !strcmp( tokens[i], "jitter" ) )
-			RiOption( "Hider", "jitter", (RtFloat*)values[i], NULL );
+		if ( !strcmp( tokens[ i ], "depthfilter" ) )
+			RiOption( "Hider", "depthfilter", ( RtToken ) values[ i ], NULL );
+		else if ( !strcmp( tokens[ i ], "jitter" ) )
+			RiOption( "Hider", "jitter", ( RtFloat* ) values[ i ], NULL );
 	}
 
 	return ;
@@ -1079,13 +1079,13 @@ RtVoid	RiRelativeDetail( RtFloat relativedetail )
 	if ( relativedetail < 0.0f )
 	{
 		CqBasicError(
-			ErrorID_InvalidData, Severity_Normal, 
-			"RiRelativeDetail (invalid scaling factor)"
+		    ErrorID_InvalidData, Severity_Normal,
+		    "RiRelativeDetail (invalid scaling factor)"
 		);
 	}
 	else
 	{
-		QGetRenderContext() ->optCurrent().GetFloatOptionWrite("System", "RelativeDetail")[0] = relativedetail;
+		QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "RelativeDetail" ) [ 0 ] = relativedetail;
 	}
 	return ;
 }
@@ -1128,7 +1128,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 		SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( token );
 		TqInt Type = Decl.m_Type;
 		TqInt Class = Decl.m_Class;
-		TqBool bArray = Decl.m_Count>1;
+		TqBool bArray = Decl.m_Count > 1;
 		CqParameter* pParam = pOpt->pParameter( token );
 		if ( pParam == 0 )
 		{
@@ -1150,7 +1150,7 @@ RtVoid	RiOptionV( const char *name, PARAMETERLIST )
 		{
 			Type = pParam->Type();
 			Class = pParam->Class();
-			bArray = pParam->Count()>0;
+			bArray = pParam->Count() > 0;
 		}
 
 		switch ( Type )
@@ -1289,7 +1289,7 @@ RtVoid	RiAttributeEnd()
 //
 RtVoid	RiColor( RtColor Cq )
 {
-	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite("System", "Color")[0] = CqColor( Cq );
+	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite( "System", "Color" ) [ 0 ] = CqColor( Cq );
 	QGetRenderContext() ->AdvanceTime();
 	return ;
 }
@@ -1301,7 +1301,7 @@ RtVoid	RiColor( RtColor Cq )
 //
 RtVoid	RiOpacity( RtColor Os )
 {
-	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite("System", "Opacity")[0] = CqColor( Os );
+	QGetRenderContext() ->pattrWriteCurrent() ->GetColorAttributeWrite( "System", "Opacity" ) [ 0 ] = CqColor( Os );
 	QGetRenderContext() ->AdvanceTime();
 	return ;
 }
@@ -1316,18 +1316,18 @@ RtVoid	RiTextureCoordinates( RtFloat s1, RtFloat t1,
                              RtFloat s3, RtFloat t3,
                              RtFloat s4, RtFloat t4 )
 {
-	TqFloat* pTC = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "TextureCoordinates");
-	
-	assert( NULL !=pTC );
-	
-	pTC[0] = s1;
-	pTC[1] = t1;
-	pTC[2] = s2;
-	pTC[3] = t2;
-	pTC[4] = s3;
-	pTC[5] = t3;
-	pTC[6] = s4;
-	pTC[7] = t4;
+	TqFloat * pTC = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "TextureCoordinates" );
+
+	assert( NULL != pTC );
+
+	pTC[ 0 ] = s1;
+	pTC[ 1 ] = t1;
+	pTC[ 2 ] = s2;
+	pTC[ 3 ] = t2;
+	pTC[ 4 ] = s3;
+	pTC[ 5 ] = t3;
+	pTC[ 6 ] = s4;
+	pTC[ 7 ] = t4;
 	QGetRenderContext() ->AdvanceTime();
 
 	return ;
@@ -1578,7 +1578,7 @@ RtVoid	RiExteriorV( const char *name, PARAMETERLIST )
 //
 RtVoid	RiShadingRate( RtFloat size )
 {
-	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "ShadingRate")[0] = size;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "ShadingRate" ) [ 0 ] = size;
 	QGetRenderContext() ->AdvanceTime();
 
 	return ;
@@ -1592,10 +1592,10 @@ RtVoid	RiShadingRate( RtFloat size )
 RtVoid	RiShadingInterpolation( RtToken type )
 {
 	if ( strcmp( type, RI_CONSTANT ) == 0 )
-		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "ShadingInterpolation")[0] = ShadingConstant;
+		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingConstant;
 	else
 		if ( strcmp( type, RI_SMOOTH ) == 0 )
-			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "ShadingInterpolation")[0] = ShadingSmooth;
+			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "ShadingInterpolation" ) [ 0 ] = ShadingSmooth;
 		else
 			CqBasicError( ErrorID_InvalidData, Severity_Normal, "Invald shading interpolation" );
 
@@ -1610,7 +1610,7 @@ RtVoid	RiShadingInterpolation( RtToken type )
 //
 RtVoid	RiMatte( RtBoolean onoff )
 {
-	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Matte")[0] = onoff != 0;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Matte" ) [ 0 ] = onoff != 0;
 	QGetRenderContext() ->AdvanceTime();
 	return ;
 }
@@ -1635,15 +1635,15 @@ RtVoid	RiBound( RtBound bound )
 //
 RtVoid	RiDetail( RtBound bound )
 {
-	CqBound Bound(bound);
+	CqBound Bound( bound );
 
 	Bound.Transform( QGetRenderContext() ->matSpaceToSpace( "object", "raster", CqMatrix(), QGetRenderContext() ->matCurrent( QGetRenderContext() ->Time() ) ) );
 
 	TqFloat ruler = fabs( MAX( Bound.vecMax().x() - Bound.vecMin().x(), Bound.vecMax().y() - Bound.vecMin().y() ) );
 
-	ruler *= QGetRenderContext() ->optCurrent().GetFloatOption("System", "RelativeDetail")[0];
+	ruler *= QGetRenderContext() ->optCurrent().GetFloatOption( "System", "RelativeDetail" ) [ 0 ];
 
-	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "LevelOfDetailRulerSize")[0] = ruler;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "LevelOfDetailRulerSize" ) [ 0 ] = ruler;
 	QGetRenderContext() ->AdvanceTime();
 	return ;
 }
@@ -1658,32 +1658,32 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 	if ( offlow > onlow || onhigh > offhigh )
 	{
 		CqBasicError(
-			ErrorID_InvalidData, Severity_Normal, 
-			"RiDetailRange (invalid levels of detail)"
+		    ErrorID_InvalidData, Severity_Normal,
+		    "RiDetailRange (invalid levels of detail)"
 		);
 		return ;
 	}
 
-	TqFloat ruler = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "LevelOfDetailRulerSize")[0];
+	TqFloat ruler = QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "LevelOfDetailRulerSize" ) [ 0 ];
 
 	TqFloat minImportance;
-	if (onlow == offlow)
+	if ( onlow == offlow )
 	{
 		minImportance = ruler < onlow ? 1.0f : 0.0f;
 	}
 	else
 	{
-		minImportance = CLAMP((onlow - ruler) / (onlow - offlow), 0, 1);
+		minImportance = CLAMP( ( onlow - ruler ) / ( onlow - offlow ), 0, 1 );
 	}
 
 	TqFloat maxImportance;
-	if (onhigh == offhigh)
+	if ( onhigh == offhigh )
 	{
 		maxImportance = ruler < onhigh ? 1.0f : 0.0f;
 	}
 	else
 	{
-		maxImportance = CLAMP((offhigh - ruler) / (offhigh - onhigh), 0, 1);
+		maxImportance = CLAMP( ( offhigh - ruler ) / ( offhigh - onhigh ), 0, 1 );
 	}
 
 	if ( minImportance >= maxImportance )
@@ -1692,8 +1692,8 @@ RtVoid	RiDetailRange( RtFloat offlow, RtFloat onlow, RtFloat onhigh, RtFloat off
 		minImportance = maxImportance = -1.0f;
 	}
 
-	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "LevelOfDetailBounds")[0] = minImportance;
-	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "LevelOfDetailBounds")[1] = maxImportance;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "LevelOfDetailBounds" ) [ 0 ] = minImportance;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "LevelOfDetailBounds" ) [ 1 ] = maxImportance;
 	QGetRenderContext() ->AdvanceTime();
 	return ;
 }
@@ -1719,16 +1719,16 @@ RtVoid	RiOrientation( RtToken orientation )
 	if ( orientation != 0 )
 	{
 		if ( strstr( orientation, RI_LH ) != 0 )
-			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[0] = OrientationLH;
+			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationLH;
 		if ( strstr( orientation, RI_RH ) != 0 )
-			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[0] = OrientationRH;
+			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationRH;
 		if ( strstr( orientation, RI_INSIDE ) != 0 )
 		{
-			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[0] = QGetRenderContext() ->pattrCurrent() ->GetIntegerAttribute("System", "Orientation")[1];
+			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = QGetRenderContext() ->pattrCurrent() ->GetIntegerAttribute( "System", "Orientation" ) [ 1 ];
 			QGetRenderContext() ->pattrWriteCurrent() ->FlipeOrientation();
 		}
 		if ( strstr( orientation, RI_OUTSIDE ) != 0 )
-			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[0] = QGetRenderContext() ->pattrCurrent() ->GetIntegerAttribute("System", "Orientation")[1];
+			QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = QGetRenderContext() ->pattrCurrent() ->GetIntegerAttribute( "System", "Orientation" ) [ 1 ];
 	}
 	QGetRenderContext() ->AdvanceTime();
 	return ;
@@ -1753,7 +1753,7 @@ RtVoid	RiReverseOrientation()
 //
 RtVoid	RiSides( RtInt nsides )
 {
-	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Sides")[0] = nsides;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Sides" ) [ 0 ] = nsides;
 	QGetRenderContext() ->AdvanceTime();
 
 	return ;
@@ -1772,15 +1772,15 @@ RtVoid	RiIdentity()
 	// We get the camera matrix and see if that is going to alter the default orientation, note
 	// that this should still work if we get a call to identity before the WorldBegin, as then the
 	// camera transform will be identity, and the behaviour will be correct.
-	if ( QGetRenderContext() ->matSpaceToSpace("world", "camera").Determinant() < 0 )
+	if ( QGetRenderContext() ->matSpaceToSpace( "world", "camera" ).Determinant() < 0 )
 	{
-		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[1] = OrientationRH;
-		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[0] = OrientationRH;
+		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 1 ] = OrientationRH;
+		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationRH;
 	}
 	else
 	{
-		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[1] = OrientationLH;
-		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "Orientation")[0] = OrientationLH;
+		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 1 ] = OrientationLH;
+		QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "Orientation" ) [ 0 ] = OrientationLH;
 	}
 
 	QGetRenderContext() ->AdvanceTime();
@@ -2115,7 +2115,7 @@ RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 				pParam = Decl.m_pCreate( Decl.m_strName.c_str(), Decl.m_Count );
 				Type = Decl.m_Type;
 				Class = Decl.m_Class;
-				bArray = Decl.m_Count>0;
+				bArray = Decl.m_Count > 0;
 				pAttr->AddParameter( pParam );
 			}
 			else
@@ -2131,7 +2131,7 @@ RtVoid	RiAttributeV( const char *name, PARAMETERLIST )
 		{
 			Type = pParam->Type();
 			Class = pParam->Class();
-			bArray = pParam->Count()>0;
+			bArray = pParam->Count() > 0;
 		}
 
 		switch ( Type )
@@ -2275,15 +2275,15 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 		TqFloat	MinX, MaxX;
 		TqFloat	MinY, MaxY;
 		TqFloat	MinZ, MaxZ;
-		CqVector3D	vecTemp = (*pPointsClass->P()) [ 0 ];
+		CqVector3D	vecTemp = ( *pPointsClass->P() ) [ 0 ];
 		MinX = MaxX = vecTemp.x();
 		MinY = MaxY = vecTemp.y();
 		MinZ = MaxZ = vecTemp.z();
 
 		TqUint iVert;
-		for ( iVert = 1; iVert < pPointsClass->P()->Size(); iVert++ )
+		for ( iVert = 1; iVert < pPointsClass->P() ->Size(); iVert++ )
 		{
-			vecTemp = (*pPointsClass->P()) [ iVert ];
+			vecTemp = ( *pPointsClass->P() ) [ iVert ];
 			MinX = ( MinX < vecTemp.x() ) ? MinX : vecTemp.x();
 			MinY = ( MinY < vecTemp.y() ) ? MinY : vecTemp.y();
 			MinZ = ( MinZ < vecTemp.z() ) ? MinZ : vecTemp.z();
@@ -2314,7 +2314,7 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 			TqInt ivert;
 			for ( ivert = 0; ivert < nverts[ iloop ]; ivert++ )
 			{
-				assert( ipoint < pPointsClass->P()->Size() );
+				assert( ipoint < pPointsClass->P() ->Size() );
 				polya.aiVertices().push_back( ipoint++ );
 			}
 			if ( iloop == 0 )
@@ -2346,8 +2346,8 @@ RtVoid	RiGeneralPolygonV( RtInt nloops, RtInt nverts[], PARAMETERLIST )
 	return ;
 }
 
-RtVoid RiBlobby(RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloat floats[],
-					 RtInt nstrings, RtString strings[], ...)
+RtVoid RiBlobby( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloat floats[],
+                 RtInt nstrings, RtString strings[], ... )
 {
 
 	va_list	pArgs;
@@ -2358,10 +2358,10 @@ RtVoid RiBlobby(RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloat
 	RtInt count = BuildParameterList( pArgs, pTokens, pValues );
 
 	RiBlobbyV( nleaf, ncodes, codes, nfloats, floats, nstrings, strings, count, pTokens, pValues );
-	
+
 	return ;
 
-	return;
+	return ;
 }
 
 //----------------------------------------------------------------------
@@ -2369,14 +2369,14 @@ RtVoid RiBlobby(RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloat
  *  
  *\return	nothing
  **/
-RtVoid RiBlobbyV(RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloat floats[],
-					 RtInt nstrings, RtString strings[], PARAMETERLIST)
+RtVoid RiBlobbyV( RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloat floats[],
+                  RtInt nstrings, RtString strings[], PARAMETERLIST )
 {
 
 	CqBasicError( 0, Severity_Normal, "RiBlobbyV not supported" );
 
 
-	return;
+	return ;
 }
 
 
@@ -2385,7 +2385,7 @@ RtVoid RiBlobbyV(RtInt nleaf, RtInt ncodes, RtInt codes[], RtInt nfloats, RtFloa
  *  
  *\return	nothing
  **/
-RtVoid	RiPoints( RtInt nvertices,...)
+RtVoid	RiPoints( RtInt nvertices, ... )
 {
 	va_list	pArgs;
 	va_start( pArgs, nvertices );
@@ -2395,7 +2395,7 @@ RtVoid	RiPoints( RtInt nvertices,...)
 	RtInt count = BuildParameterList( pArgs, pTokens, pValues );
 
 	RiPointsV( nvertices, count, pTokens, pValues );
-	
+
 	return ;
 }
 
@@ -2408,44 +2408,45 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 {
 
 	TqInt n = nvertices;
-	
+
 	RtFloat*	pOrigins = 0;
 	RtFloat*	pSizes = 0;
-	RtFloat     constantwidth= 1.0f;
-	
-	
+	RtFloat constantwidth = 1.0f;
+
+
 	RtToken	token;
 	RtPointer	value;
 
 	RtInt i;
-	
+
 	for ( i = 0; i < count; i++ )
 	{
 		token = tokens[ i ];
 		value = values[ i ];
 
-		
-		if ( strcmp( token, "width" ) == 0)
+
+		if ( strcmp( token, "width" ) == 0 )
 		{
 			pSizes = ( RtFloat* ) value;
 		}
-		
+
 		else if ( strcmp( token, RI_P ) == 0 )
 		{
-		
+
 			pOrigins = ( RtFloat* ) value;
-		} else if ( strstr( token, "constantwidth" ))
+		}
+		else if ( strstr( token, "constantwidth" ) )
 		{
 			constantwidth = *( RtFloat* ) value;
 		}
 	}
-	
-	
-	if ((n != 0) && (pOrigins)) 
-	{
-		CqPoints* pSurface = new CqPoints( n, pOrigins , pSizes, constantwidth );
 
-		if (pSurface) 
+
+	if ( ( n != 0 ) && ( pOrigins ) )
+	{
+		CqPoints * pSurface = new CqPoints( n, pOrigins , pSizes, constantwidth );
+
+		if ( pSurface )
 		{
 			pSurface->AddRef();
 
@@ -2453,7 +2454,7 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 
 			for ( iE = pSurface->m_pPolygons.begin(); iE != pSurface->m_pPolygons.end(); iE++ )
 			{
-				CreateGPrim( ( CqSurfacePolygon* ) (*iE) );
+				CreateGPrim( ( CqSurfacePolygon* ) ( *iE ) );
 			}
 			pSurface->Release();
 		}
@@ -2463,7 +2464,7 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
 }
 
 //----------------------------------------------------------------------
-/** Specify a small line primitives 
+/** Specify a small line primitives
  *  
  *\param	type could be "linear" "bicubic"
  *\param	ncurves : number of vertices
@@ -2472,7 +2473,7 @@ RtVoid	RiPointsV( RtInt nvertices, PARAMETERLIST )
  *\return	nothing
  **/
 
-RtVoid RiCurves(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, ...)
+RtVoid RiCurves( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, ... )
 {
 	va_list	pArgs;
 	va_start( pArgs, wrap );
@@ -2482,7 +2483,7 @@ RtVoid RiCurves(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, ..
 	RtInt count = BuildParameterList( pArgs, pTokens, pValues );
 
 	RiCurvesV( type, ncurves, nvertices, wrap, count, pTokens, pValues );
-	
+
 	return ;
 }
 
@@ -2491,73 +2492,73 @@ RtVoid RiCurves(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, ..
  *  
  *\return	nothing
  **/
-RtVoid RiCurvesV(RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, PARAMETERLIST)
+RtVoid RiCurvesV( RtToken type, RtInt ncurves, RtInt nvertices[], RtToken wrap, PARAMETERLIST )
 {
-        // find out whether the curve is periodic or non-periodic
-        TqBool periodic;
-        if (strcmp(wrap, RI_PERIODIC) == 0) 
-        {
-                periodic = TqTrue;
-        } 
-        else if (strcmp(wrap, RI_NONPERIODIC) == 0) 
-        {
-                periodic = TqFalse;
-        } 
-        else 
-        {
-                // the wrap mode was neither "periodic" nor "nonperiodic"
-                CqBasicError(
-                        0, Severity_Normal, 
-                        "RiCurvesV (unknown wrap mode: must be \"periodic\" or \"nonperiodic\")"
-                );
-        }
-        
-        // handle creation of linear and cubic curve groups separately
-        if (strcmp(type, RI_CUBIC) == 0) 
-        {
-                // create a new group of cubic curves
-                CqCubicCurvesGroup* pSurface =
-                        new CqCubicCurvesGroup(ncurves, nvertices, periodic);
-                pSurface->AddRef();
-                // set the default primitive variables
-                pSurface->SetDefaultPrimitiveVariables();
-                // read in the parameter list
-                if (ProcessPrimitiveVariables(pSurface, count, tokens, values))
-                {
-                        CreateGPrim(pSurface);
-                }
-                else
-                {
-                        pSurface->Release();
-                }
-        } 
-        else if (strcmp(type, RI_LINEAR) == 0) 
-        {
-                // create a new group of linear curves
-                CqLinearCurvesGroup* pSurface =
-                        new CqLinearCurvesGroup(ncurves, nvertices, periodic);
-                
-                pSurface->AddRef();
-                // set the default primitive variables
-                pSurface->SetDefaultPrimitiveVariables();
-                // read in the parameter list
-                if (ProcessPrimitiveVariables(pSurface, count, tokens, values))
-                {
-                        CreateGPrim(pSurface);
-                }
-                else
-                {
-                        pSurface->Release();
-                }
-        } 
-        else 
-        {
-                // the type of curve was neither "linear" nor "cubic"
-                CqBasicError(
-                        0, Severity_Normal, 
-                        "RiCurvesV (unknown type: must be \"linear\" or \"cubic\")"
-                );
-        }
+	// find out whether the curve is periodic or non-periodic
+	TqBool periodic;
+	if ( strcmp( wrap, RI_PERIODIC ) == 0 )
+	{
+		periodic = TqTrue;
+	}
+	else if ( strcmp( wrap, RI_NONPERIODIC ) == 0 )
+	{
+		periodic = TqFalse;
+	}
+	else
+	{
+		// the wrap mode was neither "periodic" nor "nonperiodic"
+		CqBasicError(
+		    0, Severity_Normal,
+		    "RiCurvesV (unknown wrap mode: must be \"periodic\" or \"nonperiodic\")"
+		);
+	}
+
+	// handle creation of linear and cubic curve groups separately
+	if ( strcmp( type, RI_CUBIC ) == 0 )
+	{
+		// create a new group of cubic curves
+		CqCubicCurvesGroup * pSurface =
+		    new CqCubicCurvesGroup( ncurves, nvertices, periodic );
+		pSurface->AddRef();
+		// set the default primitive variables
+		pSurface->SetDefaultPrimitiveVariables();
+		// read in the parameter list
+		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
+		{
+			CreateGPrim( pSurface );
+		}
+		else
+		{
+			pSurface->Release();
+		}
+	}
+	else if ( strcmp( type, RI_LINEAR ) == 0 )
+	{
+		// create a new group of linear curves
+		CqLinearCurvesGroup * pSurface =
+		    new CqLinearCurvesGroup( ncurves, nvertices, periodic );
+
+		pSurface->AddRef();
+		// set the default primitive variables
+		pSurface->SetDefaultPrimitiveVariables();
+		// read in the parameter list
+		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
+		{
+			CreateGPrim( pSurface );
+		}
+		else
+		{
+			pSurface->Release();
+		}
+	}
+	else
+	{
+		// the type of curve was neither "linear" nor "cubic"
+		CqBasicError(
+		    0, Severity_Normal,
+		    "RiCurvesV (unknown type: must be \"linear\" or \"cubic\")"
+		);
+	}
 }
 
 
@@ -2625,7 +2626,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 
 				pSurface->aIndices().resize( nverts[ poly ] );
 				RtInt i;
-				for ( i = 0; i < nverts[ poly ]; i++ )       	// Fill in the points
+				for ( i = 0; i < nverts[ poly ]; i++ )        	// Fill in the points
 				{
 					if ( verts[ iP ] >= cVerts )
 					{
@@ -2674,7 +2675,7 @@ RtVoid	RiPointsPolygonsV( RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETER
 
 				pSurface->aIndices().resize( nverts[ poly ] );
 				RtInt i;
-				for ( i = 0; i < nverts[ poly ]; i++ )       	// Fill in the points
+				for ( i = 0; i < nverts[ poly ]; i++ )        	// Fill in the points
 				{
 					if ( verts[ iP ] >= cVerts )
 					{
@@ -2743,10 +2744,10 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 
 	// Calculate how many points overall.
 	RtInt* pVerts = verts;
-	for( ipoly = 0; ipoly < npolys; ipoly++ )
+	for ( ipoly = 0; ipoly < npolys; ipoly++ )
 	{
 		for ( iloop = 0; iloop < nloops[ ipoly ]; iloop++, igloop++ )
-		{	
+		{
 			TqInt v;
 			for ( v = 0; v < nverts[ igloop ]; v++ )
 			{
@@ -2770,7 +2771,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 		TqUint ctris = 0;
 		std::vector<TqInt>	aiTriangles;
 
-		for( ipoly = 0; ipoly < npolys; ipoly++ )
+		for ( ipoly = 0; ipoly < npolys; ipoly++ )
 		{
 			// Create a general 2D polygon using the points in each loop.
 			CqPolygonGeneral2D poly;
@@ -2780,7 +2781,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 				TqFloat	MinX, MaxX;
 				TqFloat	MinY, MaxY;
 				TqFloat	MinZ, MaxZ;
-				CqVector3D	vecTemp = (*pPointsClass->P()) [ verts[ igvert ] ];
+				CqVector3D	vecTemp = ( *pPointsClass->P() ) [ verts[ igvert ] ];
 				MinX = MaxX = vecTemp.x();
 				MinY = MaxY = vecTemp.y();
 				MinZ = MaxZ = vecTemp.z();
@@ -2791,10 +2792,10 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 				for ( ivert = 0; ivert < nverts[ igloop ]; ivert++, igvert++ )
 				{
 					ipoint = verts[ igvert ];
-					assert( ipoint < pPointsClass->P()->Size() );
+					assert( ipoint < pPointsClass->P() ->Size() );
 					polya.aiVertices().push_back( ipoint );
 
-					vecTemp = (*pPointsClass->P()) [ verts[ igvert ] ];
+					vecTemp = ( *pPointsClass->P() ) [ verts[ igvert ] ];
 					MinX = ( MinX < vecTemp.x() ) ? MinX : vecTemp.x();
 					MinY = ( MinY < vecTemp.y() ) ? MinY : vecTemp.y();
 					MinZ = ( MinZ < vecTemp.z() ) ? MinZ : vecTemp.z();
@@ -2802,7 +2803,7 @@ RtVoid	RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], R
 					MaxY = ( MaxY > vecTemp.y() ) ? MaxY : vecTemp.y();
 					MaxZ = ( MaxZ > vecTemp.z() ) ? MaxZ : vecTemp.z();
 				}
-				
+
 				// Work out which plane to project to.
 				TqFloat	DiffX = MaxX - MinX;
 				TqFloat	DiffY = MaxY - MinY;
@@ -2892,10 +2893,10 @@ RtVoid	RiBasis( RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep )
 	u.SetfIdentity( TqFalse );
 	v.SetfIdentity( TqFalse );
 
-	QGetRenderContext() ->pattrWriteCurrent() ->GetMatrixAttributeWrite("System", "Basis")[0] = u;
-	QGetRenderContext() ->pattrWriteCurrent() ->GetMatrixAttributeWrite("System", "Basis")[1] = v;
-	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "BasisStep")[0] = ustep;
-	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite("System", "BasisStep")[1] = vstep;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetMatrixAttributeWrite( "System", "Basis" ) [ 0 ] = u;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetMatrixAttributeWrite( "System", "Basis" ) [ 1 ] = v;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "BasisStep" ) [ 0 ] = ustep;
+	QGetRenderContext() ->pattrWriteCurrent() ->GetIntegerAttributeWrite( "System", "BasisStep" ) [ 1 ] = vstep;
 	QGetRenderContext() ->AdvanceTime();
 	return ;
 }
@@ -2995,12 +2996,12 @@ RtVoid	RiPatchMeshV( RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vw
 		if ( ProcessPrimitiveVariables( pSurface, count, tokens, values ) )
 		{
 			std::vector<CqBasicSurface*> aSplits;
-			pSurface->Split(aSplits);
+			pSurface->Split( aSplits );
 			std::vector<CqBasicSurface*>::iterator iSS;
-			for( iSS = aSplits.begin(); iSS != aSplits.end(); iSS++ )
+			for ( iSS = aSplits.begin(); iSS != aSplits.end(); iSS++ )
 			{
-				static_cast<CqSurfacePatchBicubic*>(*iSS)->ConvertToBezierBasis();
-				CreateGPrim( static_cast<CqSurfacePatchBicubic*>(*iSS) );
+				static_cast<CqSurfacePatchBicubic*>( *iSS ) ->ConvertToBezierBasis();
+				CreateGPrim( static_cast<CqSurfacePatchBicubic*>( *iSS ) );
 			}
 		}
 		else
@@ -3051,10 +3052,10 @@ RtVoid	RiNuPatch( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat
 RtVoid	RiNuPatchV( RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat umax,
                    RtInt nv, RtInt vorder, RtFloat vknot[], RtFloat vmin, RtFloat vmax, PARAMETERLIST )
 {
-//	static cNURBS = 0;
+	//	static cNURBS = 0;
 
-//	cNURBS++;
-//	if(!( cNURBS > 70 && cNURBS < 100 ) )	return;
+	//	cNURBS++;
+	//	if(!( cNURBS > 70 && cNURBS < 100 ) )	return;
 
 	// Create a NURBS patch
 	CqSurfaceNURBS * pSurface = new CqSurfaceNURBS();
@@ -3392,136 +3393,143 @@ RtVoid	RiTorusV( RtFloat majorrad, RtFloat minorrad, RtFloat phimin, RtFloat phi
 //
 RtVoid	RiProcedural( RtPointer data, RtBound bound, RtProcSubdivFunc refineproc, RtProcFreeFunc freeproc )
 {
-char   psBuffer[128];
-FILE   *chkdsk;
-FILE *file;
-char *pt, atmpname[1024];
+	char psBuffer[ 128 ];
+	FILE *chkdsk;
+	FILE *file;
+	char *pt, atmpname[ 1024 ];
 
-    
+
 
 	//printf("bound(%f %f %f %f %f %f)\n", bound[0], bound[1], bound[2], bound[3], bound[4], bound[5]);
 
-	if (refineproc == RiProcDelayedReadArchive)
+	if ( refineproc == RiProcDelayedReadArchive )
 	{
 		CqBasicError( 0, Severity_Normal, "RiProcDelayedReadArchive not supported" );
-		printf("ReadArchive %s\n", (const char *) data);
-		RiReadArchive((char*)data, NULL, NULL);
-			
-	} else if (refineproc == RiProcRunProgram)
+		printf( "ReadArchive %s\n", ( const char * ) data );
+		RiReadArchive( ( char* ) data, NULL, NULL );
+
+	}
+	else if ( refineproc == RiProcRunProgram )
 	{
-	
+
 		CqBasicError( 0, Severity_Normal, "RiProcRunProgram not supported" );
-		
 
-   /* Your program must writes its output to a pipe. Open this
-    * pipe with read text attribute so that we can read it 
-    * like a text file. 
-    */
-	pt =  tempnam( "", "aqsis" );
-	sprintf(atmpname, "%s.rib", pt);
+
+		/* Your program must writes its output to a pipe. Open this
+		 * pipe with read text attribute so that we can read it 
+		 * like a text file. 
+		 */
+		pt = tempnam( "", "aqsis" );
+		sprintf( atmpname, "%s.rib", pt );
 
 #ifdef AQSIS_SYSTEM_WIN32
-   if( (chkdsk = _popen( (const char *)data, "rt" )) != NULL ) {
-       file = fopen(atmpname, "wt");
+		if ( ( chkdsk = _popen( ( const char * ) data, "rt" ) ) != NULL )
+		{
+			file = fopen( atmpname, "wt" );
 #else
-   if( (chkdsk = popen( (const char *)data, "r" )) != NULL ) {
-	     file = fopen(atmpname, "w");
+		if ( ( chkdsk = popen( ( const char * ) data, "r" ) ) != NULL )
+		{
+			file = fopen( atmpname, "w" );
 #endif
-     
-   } else 
-   {
-      return;
-   }
 
-   /* Read pipe until end of file. End of file indicates that 
-    * CHKDSK closed its standard out (probably meaning it 
-    * terminated).
-    */
-   while( !feof( chkdsk ) )
-   {
-      if( fgets( psBuffer, 128, chkdsk ) != NULL )
-         fprintf(file, "%s", psBuffer );
-   }
-   fclose (file);
-   
-
-   /* Close pipe and print return value of CHKDSK. */
-#ifdef AQSIS_SYSTEM_WIN32
-   printf( "\nProcess returned %d\n", _pclose( chkdsk ) );
-   RiReadArchive(atmpname, NULL, NULL);
-#else
-   printf( "\nProcess returned %d\n", pclose( chkdsk ) );
-   RiReadArchive(atmpname, NULL, NULL);
-#endif
-    unlink(atmpname);
-	} else if (refineproc == RiProcDynamicLoad )
-	{
-
-CqPlugins *pConvertParameters;
-CqPlugins *pFree;
-CqPlugins *pSubdivide;
-void *(*pvfcts)(char *);
-void (*vfctpvf)(void *, float);
-void (*vfctpv)(void *);
-void *priv;
-char dsoname[1024];
-char opdata[4096];
-
-   
-	CqBasicError( 0, Severity_Normal, "RiProcDynamicLoad not supported" );
-
-	// take the first filename is saved to be the name of the .dll/.so
-	// the reset is passed as such to ConvertParameters function later on
-	strcpy(dsoname, (char*) data);
-	strcpy(opdata, (char*) data);
-	for (int i=0; i < strlen(dsoname); i++) 
-		if (isspace(dsoname[i])) { 
-			strcpy(opdata, &dsoname[i+1]);
-			dsoname[i] = '\0';
-			break;
+		}
+		else
+		{
+			return ;
 		}
 
-	// As the first parameters is empty I relied on the fullpath name for the .dll/.so
-	// or hopefully relies on the fact the dll/.so is local to this .rib file
-	// later it should use the "searchpath" "procedure" standard options
+		/* Read pipe until end of file. End of file indicates that
+		 * CHKDSK closed its standard out (probably meaning it 
+		 * terminated).
+		 */
+		while ( !feof( chkdsk ) )
+		{
+			if ( fgets( psBuffer, 128, chkdsk ) != NULL )
+				fprintf( file, "%s", psBuffer );
+		}
+		fclose ( file );
 
-	pConvertParameters = new CqPlugins("", dsoname, "ConvertParameters");
-	pSubdivide = new CqPlugins("", dsoname, "Free");
-	pFree = new CqPlugins("", dsoname, "Subdivide");
 
-	if ((pvfcts = (void*(*)(char *))pConvertParameters->Function()) == NULL)	
-		CqBasicError( 0, Severity_Normal, pConvertParameters->ErrorLog() );
+		/* Close pipe and print return value of CHKDSK. */
+#ifdef AQSIS_SYSTEM_WIN32
+		printf( "\nProcess returned %d\n", _pclose( chkdsk ) );
+		RiReadArchive( atmpname, NULL, NULL );
+#else
+		printf( "\nProcess returned %d\n", pclose( chkdsk ) );
+		RiReadArchive( atmpname, NULL, NULL );
+#endif
+		unlink( atmpname );
+	}
+	else if ( refineproc == RiProcDynamicLoad )
+	{
+
+		CqPlugins * pConvertParameters;
+		CqPlugins *pFree;
+		CqPlugins *pSubdivide;
+		void *( *pvfcts ) ( char * );
+		void ( *vfctpvf ) ( void *, float );
+		void ( *vfctpv ) ( void * );
+		void *priv;
+		char dsoname[ 1024 ];
+		char opdata[ 4096 ];
+
+
+		CqBasicError( 0, Severity_Normal, "RiProcDynamicLoad not supported" );
+
+		// take the first filename is saved to be the name of the .dll/.so
+		// the reset is passed as such to ConvertParameters function later on
+		strcpy( dsoname, ( char* ) data );
+		strcpy( opdata, ( char* ) data );
+		for ( int i = 0; i < strlen( dsoname ); i++ )
+			if ( isspace( dsoname[ i ] ) )
+			{
+				strcpy( opdata, &dsoname[ i + 1 ] );
+				dsoname[ i ] = '\0';
+				break;
+			}
+
+		// As the first parameters is empty I relied on the fullpath name for the .dll/.so
+		// or hopefully relies on the fact the dll/.so is local to this .rib file
+		// later it should use the "searchpath" "procedure" standard options
+
+		pConvertParameters = new CqPlugins( "", dsoname, "ConvertParameters" );
+		pSubdivide = new CqPlugins( "", dsoname, "Free" );
+		pFree = new CqPlugins( "", dsoname, "Subdivide" );
+
+		if ( ( pvfcts = ( void * ( * ) ( char * ) ) pConvertParameters->Function() ) == NULL )
+			CqBasicError( 0, Severity_Normal, pConvertParameters->ErrorLog() );
+		else
+			priv = ( *pvfcts ) ( opdata );
+
+		if ( ( vfctpvf = ( void ( * ) ( void *, float ) ) pSubdivide->Function() ) == NULL )
+			CqBasicError( 0, Severity_Normal, pSubdivide->ErrorLog() );
+		else
+			( *vfctpvf ) ( priv, 1.0 );
+
+		if ( ( vfctpv = ( void ( * ) ( void * ) ) pFree->Function() ) == NULL )
+			CqBasicError( 0, Severity_Normal, pFree->ErrorLog() );
+		else
+			( *vfctpv ) ( priv );
+
+
+		// Unload all function/all dlls
+		if ( pConvertParameters ) pConvertParameters->Close();
+		if ( pSubdivide ) pSubdivide->Close();
+		if ( pFree ) pFree->Close();
+
+		//
+		delete pSubdivide;
+		delete pConvertParameters;
+		delete pFree;
+
+	}
 	else
-		priv = (*pvfcts)(opdata);
-
-	if ((vfctpvf = (void (*)(void *, float))pSubdivide->Function()) == NULL)		
-		CqBasicError( 0, Severity_Normal, pSubdivide->ErrorLog());
-	else 
-		(*vfctpvf)(priv, 1.0);
-
-	if ((vfctpv = (void (*)(void *)) pFree->Function()) == NULL)	
-		CqBasicError( 0, Severity_Normal, pFree->ErrorLog());
-	else
-		(*vfctpv)(priv);
-
-
-	// Unload all function/all dlls
-	if (pConvertParameters) pConvertParameters->Close();
-	if (pSubdivide) pSubdivide->Close();
-	if (pFree) pFree->Close();
-
-	//
-	delete pSubdivide;
-	delete pConvertParameters;
-	delete pFree;
-
-	} else 
 	{
 		CqBasicError( 0, Severity_Normal, "RiProcedural Unknown SubdivFunc type" );
 	}
-	
-	
-	
+
+
+
 	return ;
 }
 
@@ -3706,7 +3714,7 @@ RtVoid	RiMotionEnd()
 // RiMakeTexture
 // Convert a picture to a texture.
 //
-RtVoid RiMakeTexture ( const char *pic, const char *tex, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
+RtVoid RiMakeTexture ( const char * pic, const char * tex, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
 	va_list	pArgs;
 	va_start( pArgs, twidth );
@@ -3724,7 +3732,7 @@ RtVoid RiMakeTexture ( const char *pic, const char *tex, RtToken swrap, RtToken 
 // RiMakeTextureV
 // List based version of above.
 //
-RtVoid	RiMakeTextureV( const char *pic, const char *tex, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
+RtVoid	RiMakeTextureV( const char * pic, const char * tex, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
 	char modes[ 1024 ];
 	assert( pic != 0 && tex != 0 && swrap != 0 && twrap != 0 && filterfunc != 0 );
@@ -3769,9 +3777,9 @@ RtVoid	RiMakeTextureV( const char *pic, const char *tex, RtToken swrap, RtToken 
 	CqTextureMap Source( pic );
 	Source.Open();
 	TqInt comp, qual;
-	ProcessCompression(&comp, &qual, count, tokens, values);
-	Source.SetCompression(comp);
-	Source.SetQuality(qual);
+	ProcessCompression( &comp, &qual, count, tokens, values );
+	Source.SetCompression( comp );
+	Source.SetQuality( qual );
 
 	if ( Source.IsValid() && Source.Format() == TexFormat_Plain )
 	{
@@ -3788,7 +3796,7 @@ RtVoid	RiMakeTextureV( const char *pic, const char *tex, RtToken swrap, RtToken 
 		TIFFSetField( ptex, TIFFTAG_PIXAR_WRAPMODES, modes );
 		TIFFSetField( ptex, TIFFTAG_SAMPLESPERPIXEL, Source.SamplesPerPixel() );
 		TIFFSetField( ptex, TIFFTAG_BITSPERSAMPLE, 8 );
- 		TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
+		TIFFSetField( ptex, TIFFTAG_COMPRESSION, Source.Compression() ); /* COMPRESSION_DEFLATE */
 		int log2 = MIN( Source.XRes(), Source.YRes() );
 		log2 = ( int ) ( log( log2 ) / log( 2.0 ) );
 
@@ -3812,7 +3820,7 @@ RtVoid	RiMakeTextureV( const char *pic, const char *tex, RtToken swrap, RtToken 
 // RiMakeBump
 // Convert a picture to a bump map.
 //
-RtVoid	RiMakeBump( const char *imagefile, const char *bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
+RtVoid	RiMakeBump( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
 	CqBasicError( 0, Severity_Normal, "RiMakeBump not supported" );
 	return ;
@@ -3823,7 +3831,7 @@ RtVoid	RiMakeBump( const char *imagefile, const char *bumpfile, RtToken swrap, R
 // RiMakeBumpV
 // List based version of above.
 //
-RtVoid	RiMakeBumpV( const char *imagefile, const char *bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
+RtVoid	RiMakeBumpV( const char * imagefile, const char * bumpfile, RtToken swrap, RtToken twrap, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
 	CqBasicError( 0, Severity_Normal, "RiMakeBump not supported" );
 	return ;
@@ -3834,7 +3842,7 @@ RtVoid	RiMakeBumpV( const char *imagefile, const char *bumpfile, RtToken swrap, 
 // RiMakeLatLongEnvironment
 // Convert a picture to an environment map.
 //
-RtVoid	RiMakeLatLongEnvironment( const char *imagefile, const char *reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
+RtVoid	RiMakeLatLongEnvironment( const char * imagefile, const char * reflfile, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
 	va_list	pArgs;
 	va_start( pArgs, twidth );
@@ -3852,7 +3860,7 @@ RtVoid	RiMakeLatLongEnvironment( const char *imagefile, const char *reflfile, Rt
 // RiMakeLatLongEnvironmentV
 // List based version of above.
 //
-RtVoid	RiMakeLatLongEnvironmentV( const char *pic, const char *tex, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
+RtVoid	RiMakeLatLongEnvironmentV( const char * pic, const char * tex, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
 	char modes[ 1024 ];
 	char *swrap = "periodic";
@@ -3883,9 +3891,9 @@ RtVoid	RiMakeLatLongEnvironmentV( const char *pic, const char *tex, RtFilterFunc
 	CqTextureMap Source( pic );
 	Source.Open();
 	TqInt comp, qual;
-	ProcessCompression(&comp, &qual, count, tokens, values);
-	Source.SetCompression(comp);
-	Source.SetQuality(qual);
+	ProcessCompression( &comp, &qual, count, tokens, values );
+	Source.SetCompression( comp );
+	Source.SetQuality( qual );
 
 	if ( Source.IsValid() && Source.Format() == TexFormat_Plain )
 	{
@@ -3927,7 +3935,7 @@ RtVoid	RiMakeLatLongEnvironmentV( const char *pic, const char *tex, RtFilterFunc
 // RiMakeCubeFaceEnvironment
 // Convert a picture to a cubical environment map.
 //
-RtVoid	RiMakeCubeFaceEnvironment( const char *px, const char *nx, const char *py, const char *ny, const char *pz, const char *nz, const char *reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
+RtVoid	RiMakeCubeFaceEnvironment( const char * px, const char * nx, const char * py, const char * ny, const char * pz, const char * nz, const char * reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, ... )
 {
 	va_list	pArgs;
 	va_start( pArgs, twidth );
@@ -3944,7 +3952,7 @@ RtVoid	RiMakeCubeFaceEnvironment( const char *px, const char *nx, const char *py
 // RiMakeCubeFaceEnvironment
 // List based version of above.
 //
-RtVoid	RiMakeCubeFaceEnvironmentV( const char *px, const char *nx, const char *py, const char *ny, const char *pz, const char *nz, const char *reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
+RtVoid	RiMakeCubeFaceEnvironmentV( const char * px, const char * nx, const char * py, const char * ny, const char * pz, const char * nz, const char * reflfile, RtFloat fov, RtFilterFunc filterfunc, RtFloat swidth, RtFloat twidth, PARAMETERLIST )
 {
 	QGetRenderContext() ->Stats().MakeEnvTimer().Start();
 	assert( px != 0 && nx != 0 && py != 0 && ny != 0 && pz != 0 && nz != 0 &&
@@ -4049,7 +4057,7 @@ RtVoid	RiMakeCubeFaceEnvironmentV( const char *px, const char *nx, const char *p
 // RiMakeShadow
 // Convert a depth map file to a shadow map.
 //
-RtVoid	RiMakeShadow( const char *picfile, const char *shadowfile, ... )
+RtVoid	RiMakeShadow( const char * picfile, const char * shadowfile, ... )
 {
 	va_list	pArgs;
 	va_start( pArgs, shadowfile );
@@ -4066,16 +4074,16 @@ RtVoid	RiMakeShadow( const char *picfile, const char *shadowfile, ... )
 // RiMakeShadowV
 // List based version of above.
 //
-RtVoid	RiMakeShadowV( const char *picfile, const char *shadowfile, PARAMETERLIST )
+RtVoid	RiMakeShadowV( const char * picfile, const char * shadowfile, PARAMETERLIST )
 {
 	QGetRenderContext() ->Stats().MakeShadowTimer().Start();
 	CqShadowMap ZFile( picfile );
 	ZFile.LoadZFile();
 
 	TqInt comp, qual;
-	ProcessCompression(&comp, &qual, count, tokens, values);
-	ZFile.SetCompression(comp);
-	ZFile.SetQuality(qual);
+	ProcessCompression( &comp, &qual, count, tokens, values );
+	ZFile.SetCompression( comp );
+	ZFile.SetQuality( qual );
 
 	ZFile.SaveShadowMap( shadowfile );
 	QGetRenderContext() ->Stats().MakeShadowTimer().Stop();
@@ -4098,7 +4106,7 @@ RtVoid	RiErrorHandler( RtErrorFunc handler )
 // RiErrorIgnore
 // Function used by RiErrorHandler to continue after errors.
 //
-RtVoid	RiErrorIgnore( RtInt code, RtInt severity, const char* message )
+RtVoid	RiErrorIgnore( RtInt code, RtInt severity, const char * message )
 {
 	return ;
 }
@@ -4108,7 +4116,7 @@ RtVoid	RiErrorIgnore( RtInt code, RtInt severity, const char* message )
 // RiErrorPrint
 // Function used by RiErrorHandler to print an error message to stdout and continue.
 //
-RtVoid	RiErrorPrint( RtInt code, RtInt severity, const char* message )
+RtVoid	RiErrorPrint( RtInt code, RtInt severity, const char * message )
 {
 	QGetRenderContext() ->PrintMessage( SqMessage( code, severity, message ) );
 	return ;
@@ -4119,7 +4127,7 @@ RtVoid	RiErrorPrint( RtInt code, RtInt severity, const char* message )
 // RiErrorAbort
 // Function used by RiErrorHandler to print and error and stop.
 //
-RtVoid	RiErrorAbort( RtInt code, RtInt severity, const char* message )
+RtVoid	RiErrorAbort( RtInt code, RtInt severity, const char * message )
 {
 	return ;
 }
@@ -4225,7 +4233,7 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 			// Create a surface face
 			RtBoolean fValid = RI_TRUE;
 			RtInt i;
-			for ( i = 0; i < nvertices[ face ]; i++ )       	// Fill in the points
+			for ( i = 0; i < nvertices[ face ]; i++ )        	// Fill in the points
 			{
 				if ( vertices[ iP ] >= cVerts )
 				{
@@ -4301,19 +4309,19 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 	{
 		if ( strcmp( tags[ i ], "interpolateboundary" ) == 0 )
 			pSubdivider->InterpolateBoundary( TqTrue );
-		else if( strcmp( tags [ i ], "crease" ) == 0 )
+		else if ( strcmp( tags [ i ], "crease" ) == 0 )
 		{
 			TqInt iEdge = 0;
-			while( iEdge < nargs[ argcIndex ] - 1 )
+			while ( iEdge < nargs[ argcIndex ] - 1 )
 			{
-				if( intargs[ iEdge+intargIndex   ] < pSubdivision->cVerts() &&
-					intargs[ iEdge+intargIndex+1 ] < pSubdivision->cVerts() )
+				if ( intargs[ iEdge + intargIndex ] < pSubdivision->cVerts() &&
+				        intargs[ iEdge + intargIndex + 1 ] < pSubdivision->cVerts() )
 				{
-					CqWEdge edge( pSubdivision->pVert( intargs[ iEdge+intargIndex   ] ), 
-								  pSubdivision->pVert( intargs[ iEdge+intargIndex+1 ] ) );
+					CqWEdge edge( pSubdivision->pVert( intargs[ iEdge + intargIndex ] ),
+					              pSubdivision->pVert( intargs[ iEdge + intargIndex + 1 ] ) );
 					CqWEdge* pSharpEdge = NULL;
-					if( ( pSharpEdge = pSubdivision->FindEdge( &edge ) ) != NULL )
-						pSharpEdge->SetSharpness(RI_INFINITY);
+					if ( ( pSharpEdge = pSubdivision->FindEdge( &edge ) ) != NULL )
+						pSharpEdge->SetSharpness( RI_INFINITY );
 				}
 				iEdge++;
 			}
@@ -4336,10 +4344,10 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 // Process and fill in any primitive variables.
 // return	:	RI_TRUE if position specified, RI_FALSE otherwise.
 
-static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
+static RtBoolean ProcessPrimitiveVariables( CqSurface * pSurface, PARAMETERLIST )
 {
 	std::vector<TqInt>	aUserParams;
-	
+
 	// Read recognised parameter values.
 	RtInt	fP = RIL_NONE;
 	RtInt	fN = RIL_NONE;
@@ -4412,35 +4420,35 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 		}
 		else
 		{
-			aUserParams.push_back(i);
+			aUserParams.push_back( i );
 		}
 	}
 
 	// Fill in the position variable according to type.
 	if ( fP != RIL_NONE )
 	{
-		pSurface->AddPrimitiveVariable(  new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>("P",0) );
-		pSurface->P()->SetSize( pSurface->cVertex() );
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVertex<CqVector4D, type_hpoint, CqVector3D>( "P", 0 ) );
+		pSurface->P() ->SetSize( pSurface->cVertex() );
 		TqInt i;
 		switch ( fP )
 		{
 				case RIL_P:
 				for ( i = 0; i < pSurface->cVertex(); i++ )
-					(*pSurface->P()) [ i ] = CqVector3D( pPoints[ ( i * 3 ) ], pPoints[ ( i * 3 ) + 1 ], pPoints[ ( i * 3 ) + 2 ] );
+					( *pSurface->P() ) [ i ] = CqVector3D( pPoints[ ( i * 3 ) ], pPoints[ ( i * 3 ) + 1 ], pPoints[ ( i * 3 ) + 2 ] );
 				break;
 
 				case RIL_Pz:
 				for ( i = 0; i < pSurface->cVertex(); i++ )
-				{	
-					CqVector3D vecP = pSurface->SurfaceParametersAtVertex(i);
-					vecP.z(pPoints[ i ]);
-					(*pSurface->P()) [ i ] = vecP;
+				{
+					CqVector3D vecP = pSurface->SurfaceParametersAtVertex( i );
+					vecP.z( pPoints[ i ] );
+					( *pSurface->P() ) [ i ] = vecP;
 				}
 				break;
 
 				case RIL_Pw:
 				for ( i = 0; i < pSurface->cVertex(); i++ )
-					(*pSurface->P()) [ i ] = CqVector4D( pPoints[ ( i * 4 ) ], pPoints[ ( i * 4 ) + 1 ], pPoints[ ( i * 4 ) + 2 ], pPoints[ ( i * 4 ) + 3 ] );
+					( *pSurface->P() ) [ i ] = CqVector4D( pPoints[ ( i * 4 ) ], pPoints[ ( i * 4 ) + 1 ], pPoints[ ( i * 4 ) + 2 ], pPoints[ ( i * 4 ) + 3 ] );
 				break;
 		}
 	}
@@ -4449,19 +4457,19 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 	// Fill in the normal variable according to type.
 	if ( fN != RIL_NONE )
 	{
-		pSurface->AddPrimitiveVariable(  new CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>("N",0) );
-		pSurface->N()->SetSize( pSurface->cVarying() );
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqVector3D, type_normal, CqVector3D>( "N", 0 ) );
+		pSurface->N() ->SetSize( pSurface->cVarying() );
 		TqUint i;
 		switch ( fN )
 		{
 				case RIL_N:
 				for ( i = 0; i < pSurface->cVarying(); i++ )
-					(*pSurface->N()) [ i ] = CqVector3D( pNormals[ ( i * 3 ) ], pNormals[ ( i * 3 ) + 1 ], pNormals[ ( i * 3 ) + 2 ] );
+					( *pSurface->N() ) [ i ] = CqVector3D( pNormals[ ( i * 3 ) ], pNormals[ ( i * 3 ) + 1 ], pNormals[ ( i * 3 ) + 2 ] );
 				break;
 
 				case RIL_Np:
 				for ( i = 0; i < pSurface->cUniform(); i++ )
-					(*pSurface->N()) [ i ] = CqVector3D( pNormals[ ( i * 3 ) ], pNormals[ ( i * 3 ) + 1 ], pNormals[ ( i * 3 ) + 2 ] );
+					( *pSurface->N() ) [ i ] = CqVector3D( pNormals[ ( i * 3 ) ], pNormals[ ( i * 3 ) + 1 ], pNormals[ ( i * 3 ) + 2 ] );
 				break;
 		}
 	}
@@ -4477,18 +4485,18 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 				{
 					if ( pTextures_s != 0 )
 					{
-						pSurface->AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
-						pSurface->s()->SetSize( pSurface->cVarying() );
+						pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" ) );
+						pSurface->s() ->SetSize( pSurface->cVarying() );
 						for ( i = 0; i < pSurface->cVarying(); i++ )
-							(*pSurface->s())[ i ] = pTextures_s[ i ];
+							( *pSurface->s() ) [ i ] = pTextures_s[ i ];
 					}
 
 					if ( pTextures_t != 0 )
 					{
-						pSurface->AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
-						pSurface->t()->SetSize( pSurface->cVarying() );
+						pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" ) );
+						pSurface->t() ->SetSize( pSurface->cVarying() );
 						for ( i = 0; i < pSurface->cVarying(); i++ )
-							(*pSurface->t())[ i ] = pTextures_t[ i ];
+							( *pSurface->t() ) [ i ] = pTextures_t[ i ];
 					}
 				}
 				break;
@@ -4496,14 +4504,14 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 				case RIL_st:
 				{
 					assert( pTextures_st != 0 );
-					pSurface->AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
-					pSurface->AddPrimitiveVariable(  new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
-					pSurface->s()->SetSize( pSurface->cVarying() );
-					pSurface->t()->SetSize( pSurface->cVarying() );
+					pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" ) );
+					pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" ) );
+					pSurface->s() ->SetSize( pSurface->cVarying() );
+					pSurface->t() ->SetSize( pSurface->cVarying() );
 					for ( i = 0; i < pSurface->cVarying(); i++ )
 					{
-						(*pSurface->s())[ i ] = pTextures_st[ ( i * 2 ) ];
-						(*pSurface->t())[ i ] = pTextures_st[ ( i * 2 ) + 1 ];
+						( *pSurface->s() ) [ i ] = pTextures_st[ ( i * 2 ) ];
+						( *pSurface->t() ) [ i ] = pTextures_st[ ( i * 2 ) + 1 ];
 					}
 				}
 				break;
@@ -4513,147 +4521,147 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 	// Copy any specified varying color values to the surface
 	if ( fCs )
 	{
-		pSurface->AddPrimitiveVariable(  new CqParameterTypedVarying<CqColor, type_color, CqColor>("Cs") );
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Cs" ) );
 		TqUint i;
-		pSurface->Cs()->SetSize( pSurface->cVarying() );
+		pSurface->Cs() ->SetSize( pSurface->cVarying() );
 		for ( i = 0; i < pSurface->cVarying(); i++ )
-			(*pSurface->Cs())[ i ] = CqColor( pCs[ ( i * 3 ) ], pCs[ ( i * 3 ) + 1 ], pCs[ ( i * 3 ) + 2 ] );
+			( *pSurface->Cs() ) [ i ] = CqColor( pCs[ ( i * 3 ) ], pCs[ ( i * 3 ) + 1 ], pCs[ ( i * 3 ) + 2 ] );
 	}
 
 	if ( fOs )
 	{
-		pSurface->AddPrimitiveVariable(  new CqParameterTypedVarying<CqColor, type_color, CqColor>("Os") );
+		pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<CqColor, type_color, CqColor>( "Os" ) );
 		TqUint i;
-		pSurface->Os()->SetSize( pSurface->cVarying() );
+		pSurface->Os() ->SetSize( pSurface->cVarying() );
 		for ( i = 0; i < pSurface->cVarying(); i++ )
-			(*pSurface->Os())[ i ] = CqColor( pOs[ ( i * 3 ) ], pOs[ ( i * 3 ) + 1 ], pOs[ ( i * 3 ) + 2 ] );
+			( *pSurface->Os() ) [ i ] = CqColor( pOs[ ( i * 3 ) ], pOs[ ( i * 3 ) + 1 ], pOs[ ( i * 3 ) + 2 ] );
 	}
 
 	// Now process any user defined paramter variables.
-	if(aUserParams.size()>0)
+	if ( aUserParams.size() > 0 )
 	{
 		std::vector<TqInt>::iterator iUserParam;
-		for( iUserParam = aUserParams.begin(); iUserParam!=aUserParams.end(); iUserParam++ )
+		for ( iUserParam = aUserParams.begin(); iUserParam != aUserParams.end(); iUserParam++ )
 		{
 			SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( tokens[ *iUserParam ] );
 
-			CqParameter* pNewParam = (*Decl.m_pCreate)(Decl.m_strName.c_str(), Decl.m_Count);
+			CqParameter* pNewParam = ( *Decl.m_pCreate ) ( Decl.m_strName.c_str(), Decl.m_Count );
 			// Now go across all values and fill in the parameter variable.
 			TqInt cValues = 1;
-			switch( Decl.m_Class )
+			switch ( Decl.m_Class )
 			{
-				case class_uniform:
+					case class_uniform:
 					cValues = pSurface->cUniform();
 					break;
 
-				case class_varying:
+					case class_varying:
 					cValues = pSurface->cVarying();
 					break;
 
-				case class_vertex:
+					case class_vertex:
 					cValues = pSurface->cVertex();
 					break;
 
-				case class_facevarying:
+					case class_facevarying:
 					cValues = pSurface->cFaceVarying();
 					break;
 			}
-			pNewParam->SetSize(cValues);
+			pNewParam->SetSize( cValues );
 
 			TqInt i;
-			switch( Decl.m_Type )
+			switch ( Decl.m_Type )
 			{
-				case type_float:
-				{
-					CqParameterTyped<TqFloat, TqFloat>* pFloatParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pNewParam);
-					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
-					TqInt iArrayIndex, iValIndex;
-					i=0;
-					for( iValIndex = 0; iValIndex < cValues; iValIndex++)
-						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pFloatParam->pValue( iValIndex )[iArrayIndex] = pValue[ i ];
-				}
-				break;
+					case type_float:
+					{
+						CqParameterTyped<TqFloat, TqFloat>* pFloatParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pNewParam );
+						TqFloat* pValue = reinterpret_cast<TqFloat*>( values[ *iUserParam ] );
+						TqInt iArrayIndex, iValIndex;
+						i = 0;
+						for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
+							for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+								pFloatParam->pValue( iValIndex ) [ iArrayIndex ] = pValue[ i ];
+					}
+					break;
 
-				case type_integer:
-				{
-					CqParameterTyped<TqInt, TqFloat>* pIntParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>(pNewParam);
-					TqInt* pValue = reinterpret_cast<TqInt*>(values[ *iUserParam ]);
-					TqInt iArrayIndex, iValIndex;
-					i=0;
-					for( iValIndex = 0; iValIndex < cValues; iValIndex++)
-						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pIntParam->pValue( iValIndex )[iArrayIndex] = pValue[ i ];
-				}
-				break;
+					case type_integer:
+					{
+						CqParameterTyped<TqInt, TqFloat>* pIntParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pNewParam );
+						TqInt* pValue = reinterpret_cast<TqInt*>( values[ *iUserParam ] );
+						TqInt iArrayIndex, iValIndex;
+						i = 0;
+						for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
+							for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+								pIntParam->pValue( iValIndex ) [ iArrayIndex ] = pValue[ i ];
+					}
+					break;
 
-				case type_point:
-				case type_normal:
-				case type_vector:
-				{
-					CqParameterTyped<CqVector3D, CqVector3D>* pVectorParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(pNewParam);
-					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
-					TqInt iArrayIndex, iValIndex;
-					i=0;
-					for( iValIndex = 0; iValIndex < cValues; iValIndex++)
-						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pVectorParam->pValue( iValIndex )[iArrayIndex] = CqVector3D( pValue[ (i*3) ], pValue[ (i*3)+1 ], pValue[ (i*3)+2 ] );
-				}
-				break;
+					case type_point:
+					case type_normal:
+					case type_vector:
+					{
+						CqParameterTyped<CqVector3D, CqVector3D>* pVectorParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pNewParam );
+						TqFloat* pValue = reinterpret_cast<TqFloat*>( values[ *iUserParam ] );
+						TqInt iArrayIndex, iValIndex;
+						i = 0;
+						for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
+							for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+								pVectorParam->pValue( iValIndex ) [ iArrayIndex ] = CqVector3D( pValue[ ( i * 3 ) ], pValue[ ( i * 3 ) + 1 ], pValue[ ( i * 3 ) + 2 ] );
+					}
+					break;
 
-				case type_string:
-				{
-					CqParameterTyped<CqString, CqString>* pStringParam = static_cast<CqParameterTyped<CqString, CqString>*>(pNewParam);
-					char** pValue = reinterpret_cast<char**>(values[ *iUserParam ]);
-					TqInt iArrayIndex, iValIndex;
-					i=0;
-					for( iValIndex = 0; iValIndex < cValues; iValIndex++)
-						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pStringParam->pValue( iValIndex )[iArrayIndex] = CqString( pValue[ i ] );
-				}
-				break;
+					case type_string:
+					{
+						CqParameterTyped<CqString, CqString>* pStringParam = static_cast<CqParameterTyped<CqString, CqString>*>( pNewParam );
+						char** pValue = reinterpret_cast<char**>( values[ *iUserParam ] );
+						TqInt iArrayIndex, iValIndex;
+						i = 0;
+						for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
+							for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+								pStringParam->pValue( iValIndex ) [ iArrayIndex ] = CqString( pValue[ i ] );
+					}
+					break;
 
-				case type_color:
-				{
-					CqParameterTyped<CqColor, CqColor>* pColorParam = static_cast<CqParameterTyped<CqColor, CqColor>*>(pNewParam);
-					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
-					TqInt iArrayIndex, iValIndex;
-					i=0;
-					for( iValIndex = 0; iValIndex < cValues; iValIndex++)
-						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pColorParam->pValue( iValIndex )[iArrayIndex] = CqColor( pValue[ (i*3) ], pValue[ (i*3)+1 ], pValue[ (i*3)+2 ] );
-				}
-				break;
+					case type_color:
+					{
+						CqParameterTyped<CqColor, CqColor>* pColorParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pNewParam );
+						TqFloat* pValue = reinterpret_cast<TqFloat*>( values[ *iUserParam ] );
+						TqInt iArrayIndex, iValIndex;
+						i = 0;
+						for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
+							for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+								pColorParam->pValue( iValIndex ) [ iArrayIndex ] = CqColor( pValue[ ( i * 3 ) ], pValue[ ( i * 3 ) + 1 ], pValue[ ( i * 3 ) + 2 ] );
+					}
+					break;
 
-				case type_hpoint:
-				{
-					CqParameterTyped<CqVector4D, CqVector3D>* pVectorParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pNewParam);
-					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
-					TqInt iArrayIndex, iValIndex;
-					i=0;
-					for( iValIndex = 0; iValIndex < cValues; iValIndex++)
-						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pVectorParam->pValue( iValIndex )[iArrayIndex] = CqVector4D( pValue[ (i*4) ], pValue[ (i*4)+1 ], pValue[ (i*4)+2 ], pValue[ (i*4)+3 ] );
-				}
-				break;
+					case type_hpoint:
+					{
+						CqParameterTyped<CqVector4D, CqVector3D>* pVectorParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pNewParam );
+						TqFloat* pValue = reinterpret_cast<TqFloat*>( values[ *iUserParam ] );
+						TqInt iArrayIndex, iValIndex;
+						i = 0;
+						for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
+							for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+								pVectorParam->pValue( iValIndex ) [ iArrayIndex ] = CqVector4D( pValue[ ( i * 4 ) ], pValue[ ( i * 4 ) + 1 ], pValue[ ( i * 4 ) + 2 ], pValue[ ( i * 4 ) + 3 ] );
+					}
+					break;
 
-				case type_matrix:
-				{
-					CqParameterTyped<CqMatrix, CqMatrix>* pMatrixParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(pNewParam);
-					TqFloat* pValue = reinterpret_cast<TqFloat*>(values[ *iUserParam ]);
-					TqInt iArrayIndex, iValIndex;
-					i=0;
-					for( iValIndex = 0; iValIndex < cValues; iValIndex++)
-						for( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
-							pMatrixParam->pValue( iValIndex )[iArrayIndex] = CqMatrix( pValue[ (i*16)    ], pValue[ (i*16)+1  ], pValue[ (i*16)+2  ], pValue[ (i*16)+3  ],
-																			   pValue[ (i*16)+4  ], pValue[ (i*16)+5  ], pValue[ (i*16)+6  ], pValue[ (i*16)+7  ],
-																			   pValue[ (i*16)+8  ], pValue[ (i*16)+9  ], pValue[ (i*16)+10 ], pValue[ (i*16)+11 ],
-																			   pValue[ (i*16)+12 ], pValue[ (i*16)+13 ], pValue[ (i*16)+14 ], pValue[ (i*16)+15 ]
-																			 );
-				}
-				break;
+					case type_matrix:
+					{
+						CqParameterTyped<CqMatrix, CqMatrix>* pMatrixParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pNewParam );
+						TqFloat* pValue = reinterpret_cast<TqFloat*>( values[ *iUserParam ] );
+						TqInt iArrayIndex, iValIndex;
+						i = 0;
+						for ( iValIndex = 0; iValIndex < cValues; iValIndex++ )
+							for ( iArrayIndex = 0; iArrayIndex < Decl.m_Count; iArrayIndex++, i++ )
+								pMatrixParam->pValue( iValIndex ) [ iArrayIndex ] = CqMatrix( pValue[ ( i * 16 ) ], pValue[ ( i * 16 ) + 1 ], pValue[ ( i * 16 ) + 2 ], pValue[ ( i * 16 ) + 3 ],
+								        pValue[ ( i * 16 ) + 4 ], pValue[ ( i * 16 ) + 5 ], pValue[ ( i * 16 ) + 6 ], pValue[ ( i * 16 ) + 7 ],
+								        pValue[ ( i * 16 ) + 8 ], pValue[ ( i * 16 ) + 9 ], pValue[ ( i * 16 ) + 10 ], pValue[ ( i * 16 ) + 11 ],
+								        pValue[ ( i * 16 ) + 12 ], pValue[ ( i * 16 ) + 13 ], pValue[ ( i * 16 ) + 14 ], pValue[ ( i * 16 ) + 15 ]
+								                                                            );
+					}
+					break;
 			}
-			pSurface->AddPrimitiveVariable(pNewParam);
+			pSurface->AddPrimitiveVariable( pNewParam );
 		}
 	}
 
@@ -4666,13 +4674,13 @@ static RtBoolean ProcessPrimitiveVariables( CqSurface* pSurface, PARAMETERLIST )
 // Create and register a GPrim according to the current attributes/transform
 //
 template <class T>
-RtVoid	CreateGPrim( T* pSurface )
+RtVoid	CreateGPrim( T * pSurface )
 {
-	if ( QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite("System", "LevelOfDetailBounds")[1] < 0.0f )
+	if ( QGetRenderContext() ->pattrWriteCurrent() ->GetFloatAttributeWrite( "System", "LevelOfDetailBounds" ) [ 1 ] < 0.0f )
 	{
 		// Cull this geometry for LOD reasons
 		pSurface->Release();
-		return;
+		return ;
 	}
 
 	if ( QGetRenderContext() ->ptransCurrent() ->cTimes() <= 1 )
@@ -4726,7 +4734,7 @@ RtVoid	CreateGPrim( T* pSurface )
  * \return Boolean indicating the basis is valid.
  */
 
-RtBoolean	BasisFromName( RtBasis* b, const char* strName )
+RtBoolean	BasisFromName( RtBasis * b, const char * strName )
 {
 	RtBasis * pVals = 0;
 	if ( !strcmp( strName, "bezier" ) )
@@ -4782,7 +4790,7 @@ RtFunc	RiPreRenderFunction( RtFunc function )
 
 
 
-void SetShaderArgument( IqShader* pShader, const char* name, TqPchar val )
+void SetShaderArgument( IqShader * pShader, const char * name, TqPchar val )
 {
 	// Find the relevant variable.
 	SqParameterDeclaration Decl = QGetRenderContext() ->FindParameterDecl( name );
@@ -4803,40 +4811,44 @@ void SetShaderArgument( IqShader* pShader, const char* name, TqPchar val )
 	\return	nothing
  */
 
-static void ProcessCompression(TqInt *compression, TqInt *quality, TqInt count, RtToken *tokens, RtPointer *values)
+static void ProcessCompression( TqInt * compression, TqInt * quality, TqInt count, RtToken * tokens, RtPointer * values )
 {
-   *compression = COMPRESSION_NONE;
-   *quality = 70;
+	*compression = COMPRESSION_NONE;
+	*quality = 70;
 
-    for (int i = 0; i < count; i++ ) {
-	RtToken	token = tokens[ i ];
-	RtString *value = (RtString *) values[ i ];
+	for ( int i = 0; i < count; i++ )
+	{
+		RtToken	token = tokens[ i ];
+		RtString *value = ( RtString * ) values[ i ];
 
-		if ( strstr( token, "compression" ) != 0 ) {
+		if ( strstr( token, "compression" ) != 0 )
+		{
 
-			if ( strstr(*value, "none" ) != 0 )
-				*compression = COMPRESSION_NONE;
-			
-			else if ( strstr(*value, "lzw" ) != 0 )
-				*compression = COMPRESSION_LZW;
-			
-			else if ( strstr(*value, "deflate" ) != 0 )
-				*compression = COMPRESSION_DEFLATE;
-			
+			if ( strstr( *value, "none" ) != 0 )
+				* compression = COMPRESSION_NONE;
+
+			else if ( strstr( *value, "lzw" ) != 0 )
+				* compression = COMPRESSION_LZW;
+
+			else if ( strstr( *value, "deflate" ) != 0 )
+				* compression = COMPRESSION_DEFLATE;
+
 			else if ( strstr( *value, "jpeg" ) != 0 )
-				*compression = COMPRESSION_JPEG;
-			
+				* compression = COMPRESSION_JPEG;
+
 			else if ( strstr( *value, "packbits" ) != 0 )
-				*compression = COMPRESSION_PACKBITS;
-			
-		
-		} else if ( strstr( token, "quality" ) != 0 ) {
-		
-			*quality = (int) *(float *)value;
-			if (*quality < 0) *quality = 0;
-			if (*quality > 100) *quality = 100;
+				* compression = COMPRESSION_PACKBITS;
+
+
 		}
-    }
+		else if ( strstr( token, "quality" ) != 0 )
+		{
+
+			*quality = ( int ) * ( float * ) value;
+			if ( *quality < 0 ) * quality = 0;
+			if ( *quality > 100 ) * quality = 100;
+		}
+	}
 }
 
 
@@ -4846,7 +4858,7 @@ static void ProcessCompression(TqInt *compression, TqInt *quality, TqInt count, 
 RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 {
 
-   CqBasicError( 0, Severity_Normal, "RiProcDynamicLoad()" );
+	CqBasicError( 0, Severity_Normal, "RiProcDynamicLoad()" );
 }
 
 
@@ -4856,7 +4868,7 @@ RtVoid	RiProcDynamicLoad( RtPointer data, RtFloat detail )
 RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
 {
 
-   CqBasicError( 0, Severity_Normal, "RiProcDelayedReadArchive()" );
+	CqBasicError( 0, Severity_Normal, "RiProcDelayedReadArchive()" );
 
 }
 
@@ -4867,18 +4879,18 @@ RtVoid	RiProcDelayedReadArchive( RtPointer data, RtFloat detail )
 RtVoid	RiProcRunProgram( RtPointer data, RtFloat detail )
 {
 
-   CqBasicError( 0, Severity_Normal, "RiProcRunProgram()" );
+	CqBasicError( 0, Severity_Normal, "RiProcRunProgram()" );
 }
 
-RtVoid RiReadArchive(RtToken name, RtArchiveCallback callback, ...)
+RtVoid RiReadArchive( RtToken name, RtArchiveCallback callback, ... )
 {
 	CqRiFile	fileArchive( name, "texture" );
 	if ( !fileArchive.IsValid() )
-	{		
+	{
 		CqString strRealName( fileArchive.strRealName() );
 		fileArchive.Close();
 		FILE *file;
-		if ((file = fopen(strRealName.c_str(), "rb")) != NULL)
+		if ( ( file = fopen( strRealName.c_str(), "rb" ) ) != NULL )
 		{
 			librib2ri::Engine renderengine;
 			librib::Parse( file, name, renderengine, std::cerr );

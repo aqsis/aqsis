@@ -33,12 +33,12 @@
 START_NAMESPACE( Aqsis )
 
 
-CqShaderVariable::CqShaderVariable() : m_fParameter(TqFalse)
+CqShaderVariable::CqShaderVariable() : m_fParameter( TqFalse )
 {
 	//QGetRenderContext() ->Stats().IncVariablesAllocated();
 }
 
-CqShaderVariable::CqShaderVariable( const char* strName, TqBool fParameter ) : m_strName( strName ),  m_fParameter(fParameter)
+CqShaderVariable::CqShaderVariable( const char* strName, TqBool fParameter ) : m_strName( strName ), m_fParameter( fParameter )
 {
 	//QGetRenderContext() ->Stats().IncVariablesAllocated();
 }

@@ -81,7 +81,7 @@ TqFloat	uv[ max_no ][ 2 ];	// Stores the values of this projection for a given f
 
 TqInt	CqShadowMap::m_rand_index = 0;
 TqFloat	CqShadowMap::m_aRand_no[ 256 ];
-static TqBool  m_critical = TqFalse;
+static TqBool m_critical = TqFalse;
 static CqTextureMapBuffer *previous = NULL;
 
 //---------------------------------------------------------------------
@@ -89,7 +89,7 @@ static CqTextureMapBuffer *previous = NULL;
  */
 
 std::vector<CqTextureMap*>	CqTextureMap::m_TextureMap_Cache;
-std::vector<CqString*>      CqTextureMap::m_ConvertString_Cache;
+std::vector<CqString*> CqTextureMap::m_ConvertString_Cache;
 
 #undef ALLOCSEGMENTSTATUS
 
@@ -123,7 +123,7 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 	TqInt more = QGetRenderContext() ->Stats().GetTextureMemory() + demand;
 
 
-	if ( more > limit)
+	if ( more > limit )
 	{
 
 		// Critical level of memory will be reached;
@@ -133,16 +133,17 @@ TqPuchar CqTextureMapBuffer::AllocSegment( TqUlong width, TqUlong height, TqInt 
 		// request number.
 
 		sprintf( warnings, "Exceeding the allocated texturememory by %d",
-			     more - limit );
-		if (report)
+		         more - limit );
+		if ( report )
 			RiErrorPrint( 0, 1, warnings );
 		report = 0;
 		m_critical = TqTrue;
 	}
 
 #ifdef _DEBUG
-	if ( (more > MEG1) && ((more / (1024 * 1024) )> megs ) ) {
-		sprintf( warnings, "Texturememory is more than %d Megs", megs);
+	if ( ( more > MEG1 ) && ( ( more / ( 1024 * 1024 ) ) > megs ) )
+	{
+		sprintf( warnings, "Texturememory is more than %d Megs", megs );
 		RiErrorPrint( 0, 1, warnings );
 		megs += 10;
 	}
@@ -188,17 +189,17 @@ CqTextureMap::~CqTextureMap()
 		}
 	}
 
-        std::vector<CqString*>::iterator j;
+	std::vector<CqString*>::iterator j;
 	for ( j = m_ConvertString_Cache.begin(); j != m_ConvertString_Cache.end(); j++ )
 	{
-		if (*j) 
+		if ( *j )
 		{
-			unlink((*j)->c_str() );
+			unlink( ( *j ) ->c_str() );
 			delete( *j );
 		}
 	}
-   
-	m_ConvertString_Cache.resize(0);
+
+	m_ConvertString_Cache.resize( 0 );
 
 	// Delete any held cache buffer segments.
 	std::vector<CqTextureMapBuffer*>::iterator s;
@@ -228,9 +229,9 @@ TqInt CqTextureMap::Convert( CqString &strName )
 {
 	TqInt result = 0;
 	TqInt lenght = 0;
-    TqChar library[ 1024 ];
+	TqChar library[ 1024 ];
 	TqChar function[ 1024 ];
-	char * (*convert)(char *);
+	char * ( *convert ) ( char * );
 	char *ext = NULL;
 	char *tiff = NULL;
 
@@ -240,7 +241,7 @@ TqInt CqTextureMap::Convert( CqString &strName )
 
 	if ( aqsis_home == NULL )
 #ifdef	AQSIS_SYSTEM_POSIX
-	    aqsis_home = BASE_PATH;
+		aqsis_home = BASE_PATH;
 #else
 		aqsis_home = ".";
 #endif
@@ -276,16 +277,16 @@ TqInt CqTextureMap::Convert( CqString &strName )
 	/***********************************/
 	sprintf( library, "%s/lib/lib%s.so", aqsis_home, function );
 #endif
-    CqPlugins *plug = new CqPlugins("", library, function);
-	if (( convert =  (char * (*) (char *s)) plug->Function() ) != NULL)
+	CqPlugins *plug = new CqPlugins( "", library, function );
+	if ( ( convert = ( char * ( * ) ( char * s ) ) plug->Function() ) != NULL )
 	{
-		
-		if ( (tiff = (*convert)((char *) strName.c_str() )) != NULL)
+
+		if ( ( tiff = ( *convert ) ( ( char * ) strName.c_str() ) ) != NULL )
 		{
 			strName = tiff;
 			result = 1; // success
 		}
-        plug->Close();
+		plug->Close();
 	}
 	delete plug;
 	return result;
@@ -318,11 +319,11 @@ void CqTextureMap::Open()
 
 	// Now try to converted first to tif file
 	wasconverted = Convert( strRealName );
-	if (wasconverted)
+	if ( wasconverted )
 	{
-            CqString *strnew = new CqString(strRealName);
-            m_ConvertString_Cache.push_back( strnew );
-        }
+		CqString * strnew = new CqString( strRealName );
+		m_ConvertString_Cache.push_back( strnew );
+	}
 
 	// Now open it as a tiff file.
 	m_pImage = TIFFOpen( strRealName.c_str(), "r" );
@@ -465,8 +466,8 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 	static CqTextureMap *previous = NULL;
 
 	/* look if the last item return by this function was ok */
-	if (size == m_TextureMap_Cache.size()) 
-		if ((previous) && (previous->m_strName == strName) ) 
+	if ( size == m_TextureMap_Cache.size() )
+		if ( ( previous ) && ( previous->m_strName == strName ) )
 			return previous;
 
 	// First search the texture map cache
@@ -509,14 +510,14 @@ CqTextureMap* CqTextureMap::GetTextureMap( const CqString& strName )
 
 CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 {
-        static int size = -1;
+	static int size = -1;
 	static CqTextureMap *previous = NULL;
 
 	/* look if the last item return by this function was ok */
-	if (size == m_TextureMap_Cache.size()) 
-		if ((previous) && (previous->m_strName == strName))
+	if ( size == m_TextureMap_Cache.size() )
+		if ( ( previous ) && ( previous->m_strName == strName ) )
 			return previous;
-		
+
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
 	{
@@ -539,7 +540,7 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 	m_TextureMap_Cache.push_back( pNew );
 	pNew->Open();
 
-	TqPchar ptexfmt= 0;
+	TqPchar ptexfmt = 0;
 
 	// Invalid if the m_pImage is not there or it is not cube or latlong env. map file
 	if ( pNew->m_pImage == 0 ||
@@ -552,7 +553,7 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 		pNew->SetInvalid();
 		delete pNew;
 		pNew = NULL;
-		
+
 	}
 
 	// remove from the list a LatLong env. map since in shadeops.cpp we will cope with it.
@@ -573,12 +574,12 @@ CqTextureMap* CqTextureMap::GetEnvironmentMap( const CqString& strName )
 
 CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 {
-        static int size = -1;
+	static int size = -1;
 	static CqTextureMap *previous = NULL;
 
-	if (size == m_TextureMap_Cache.size()) 
-		if ( (previous) && (previous->m_strName == strName) )
-			 return previous;
+	if ( size == m_TextureMap_Cache.size() )
+		if ( ( previous ) && ( previous->m_strName == strName ) )
+			return previous;
 
 	// First search the texture map cache
 	for ( std::vector<CqTextureMap*>::iterator i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
@@ -624,11 +625,11 @@ CqTextureMap* CqTextureMap::GetShadowMap( const CqString& strName )
 
 CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 {
-        static int size = -1;
+	static int size = -1;
 	static CqTextureMap *previous = NULL;
 
-	if (size == m_TextureMap_Cache.size()) 
-		if ( previous && (previous->m_strName == strName) ) 
+	if ( size == m_TextureMap_Cache.size() )
+		if ( previous && ( previous->m_strName == strName ) )
 			return previous;
 
 	// First search the texture map cache
@@ -677,21 +678,21 @@ CqTextureMap* CqTextureMap::GetLatLongMap( const CqString& strName )
 
 CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directory )
 {
-    static TqInt    size = -1;	
+	static TqInt size = -1;
 	static CqString name = "";
-	
+
 
 	/* look if the last item return by this function was ok */
-	if ((size == m_apSegments.size()) && previous && (name == m_strName) ) 
-		if ( previous->IsValid( s, t, directory )  ) 
+	if ( ( size == m_apSegments.size() ) && previous && ( name == m_strName ) )
+		if ( previous->IsValid( s, t, directory ) )
 			return previous;
 
 
 	// Search already cached segments first.
 	for ( std::vector<CqTextureMapBuffer*>::iterator i = m_apSegments.begin(); i != m_apSegments.end(); i++ )
-		if ( ( *i ) ->IsValid( s, t, directory ) ) 
+		if ( ( *i ) ->IsValid( s, t, directory ) )
 		{
-			previous = (*i);
+			previous = ( *i );
 			name = m_strName;
 			size = m_apSegments.size();
 			return ( *i );
@@ -741,9 +742,9 @@ CqTextureMapBuffer* CqTextureMap::GetBuffer( TqUlong s, TqUlong t, TqInt directo
 		}
 		else
 		{
-			TqUlong sizef = TIFFScanlineSize(m_pImage);
-                        TqBool infloat = (Type() == MapType_Shadow) || (sizef == (m_SamplesPerPixel * sizeof( TqFloat ) * m_XRes ));
-			if ( infloat)
+			TqUlong sizef = TIFFScanlineSize( m_pImage );
+			TqBool infloat = ( Type() == MapType_Shadow ) || ( sizef == ( m_SamplesPerPixel * sizeof( TqFloat ) * m_XRes ) );
+			if ( infloat )
 				pTMB = new CqTextureMapBuffer( 0, 0, sizeof( TqFloat ) * m_XRes, m_YRes, m_SamplesPerPixel, directory );
 			else
 				pTMB = new CqTextureMapBuffer( 0, 0, m_XRes, m_YRes, m_SamplesPerPixel, directory );
@@ -864,9 +865,9 @@ TqUlong CqTextureMap::ImageFilterVal( uint32* p, TqInt x, TqInt y, TqInt directo
 
 		/* restore the byte from the floating values RGB */
 		/* this is assuming tiff decoding is using shifting operations */
-		val = ( static_cast<TqUint>( accum[ 0 ] * 255.0 ) & 0xff ) +        /* R */
-		      ( ( static_cast<TqUint>( accum[ 1 ] * 255.0 ) << 8 ) & 0x0ff00 ) +       /* G */
-		      ( ( static_cast<TqUint>( accum[ 2 ] * 255.0 ) << 16 ) & 0x0ff0000 ) +       /* B */
+		val = ( static_cast<TqUint>( accum[ 0 ] * 255.0 ) & 0xff ) +         /* R */
+		      ( ( static_cast<TqUint>( accum[ 1 ] * 255.0 ) << 8 ) & 0x0ff00 ) +        /* G */
+		      ( ( static_cast<TqUint>( accum[ 2 ] * 255.0 ) << 16 ) & 0x0ff0000 ) +        /* B */
 		      ( ( static_cast<TqUint>( accum[ 3 ] * 255.0 ) << 24 ) & 0x0ff000000 ); /* A */
 
 
@@ -885,7 +886,7 @@ TqUlong CqTextureMap::ImageFilterVal( uint32* p, TqInt x, TqInt y, TqInt directo
 
 void CqTextureMap::CreateMIPMAP()
 {
-	
+
 
 	if ( m_pImage != 0 )
 	{
@@ -895,7 +896,7 @@ void CqTextureMap::CreateMIPMAP()
 		TqInt m_yres = m_YRes;
 		TqInt directory = 0;
 
-		
+
 		do
 		{
 
@@ -940,16 +941,16 @@ void CqTextureMap::CreateMIPMAP()
 
 		}
 		while ( ( m_xres > 2 ) && ( m_yres > 2 ) ) ;
-		
+
 		_TIFFfree( pImage );
 
 	}
-	
+
 }
 
 
 void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, TqFloat sblur, TqFloat tblur,
-                                 std::valarray<TqFloat>& val )
+                              std::valarray<TqFloat>& val )
 {
 	// T(s2,t2)-T(s2,t1)-T(s1,t2)+T(s1,t1)
 	TqInt i;
@@ -973,16 +974,16 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 	if ( m_smode == WrapMode_Periodic )
 	{
 		ss1 = fmod( ss1, 1.0f );
-		if( ss1 < 0 )	ss1 += 1.0f;
+		if ( ss1 < 0 ) ss1 += 1.0f;
 		ss2 = fmod( ss2, 1.0f );
-		if( ss2 < 0 )	ss2 += 1.0f;
+		if ( ss2 < 0 ) ss2 += 1.0f;
 	}
 	if ( m_tmode == WrapMode_Periodic )
 	{
 		tt1 = fmod( tt1, 1.0f );
-		if( tt1 < 0 )	tt1 += 1.0f;
+		if ( tt1 < 0 ) tt1 += 1.0f;
 		tt2 = fmod( tt2, 1.0f );
-		if( tt2 < 0 )	tt2 += 1.0f;
+		if ( tt2 < 0 ) tt2 += 1.0f;
 	}
 
 	if ( m_smode == WrapMode_Black )
@@ -1051,7 +1052,7 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 		val[ i ] = CLAMP( val[ i ], 0.0f, 1.0f );
 }
 //----------------------------------------------------------------------
-/** this is used for remove any memory exceed the command Option "limits" "texturememory" 
+/** this is used for remove any memory exceed the command Option "limits" "texturememory"
   * directive
   *   
   * It zaps the m_apSegments for this TextureMap object completely.
@@ -1061,13 +1062,13 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat tw
 
 void CqTextureMap::CriticalMeasure()
 {
-const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
+	const TqInt * poptMem = QGetRenderContextI() ->GetIntegerOption( "limits", "texturememory" );
 #ifdef _DEBUG
-TqChar warnings[ 400 ];
+	TqChar warnings[ 400 ];
 #endif
-TqInt current, limit, now;
-std::vector<CqTextureMap*>::iterator i;
-std::vector<CqTextureMapBuffer*>::iterator j;
+	TqInt current, limit, now;
+	std::vector<CqTextureMap*>::iterator i;
+	std::vector<CqTextureMapBuffer*>::iterator j;
 
 	limit = MEG1;
 	if ( poptMem )
@@ -1075,40 +1076,41 @@ std::vector<CqTextureMapBuffer*>::iterator j;
 
 	now = QGetRenderContext() ->Stats().GetTextureMemory();
 
-	if (m_critical)  
+	if ( m_critical )
 	{
 
-		 /* Extreme case no more memory to play */
-		
-		/* It is time to delete some tile's memory associated with 
-                 * texturemap objects.
+		/* Extreme case no more memory to play */
+
+		/* It is time to delete some tile's memory associated with
+		               * texturemap objects.
 		 *
 		 * In principle the oldest texturemaps are freed first 
-                 * (regardless of their current usage. Therefore this method 
-                 * could only be 
-                 * called at a place where the fact of release 
-                 * texturemapbuffer will not impact the subsequent 
-                 * GetBuffer() calls.
+		               * (regardless of their current usage. Therefore this method 
+		               * could only be 
+		               * called at a place where the fact of release 
+		               * texturemapbuffer will not impact the subsequent 
+		               * GetBuffer() calls.
 		 *
 		 */
-		for (  i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ ) {
-			for (  j = (*i)->m_apSegments.begin(); j != (*i)->m_apSegments.end(); j++ )
-				(*j)->Release();
-			(*i)->m_apSegments.resize(0);
+		for ( i = m_TextureMap_Cache.begin(); i != m_TextureMap_Cache.end(); i++ )
+		{
+			for ( j = ( *i ) ->m_apSegments.begin(); j != ( *i ) ->m_apSegments.end(); j++ )
+				( *j ) ->Release();
+			( *i ) ->m_apSegments.resize( 0 );
 			current = QGetRenderContext() ->Stats().GetTextureMemory();
-			if ((now-current) > (limit/4)) break;
+			if ( ( now - current ) > ( limit / 4 ) ) break;
 		}
 		previous = NULL;
 	}
 	current = QGetRenderContext() ->Stats().GetTextureMemory();
-	
+
 	m_critical = TqFalse;
-	
+
 #ifdef _DEBUG
 
 	sprintf( warnings, "I was forced to zap the tile segment buffers for %dK",
-								(now - current)/ 1024 );
-	if (now-current) 
+	         ( now - current ) / 1024 );
+	if ( now - current )
 		RiErrorPrint( 0, 1, warnings );
 #endif
 
@@ -1148,7 +1150,7 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
 
-	
+
 	// Read in the relevant texture tiles.
 	CqTextureMapBuffer* pTMBa = GetBuffer( iu, iv, id );		// Val00
 	CqTextureMapBuffer* pTMBb = GetBuffer( iu, iv_n, id );	// Val01
@@ -1157,10 +1159,10 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 
 
 	/* cannot find anything than goodbye */
-	if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd ) 
+	if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
 	{
-        return;
-    }
+		return ;
+	}
 
 	// all the tile are using the same size therefore the number is ok
 	long rowlen = pTMBa->Width() * m_SamplesPerPixel;
@@ -1229,14 +1231,14 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		CqTextureMapBuffer* pTMBd = GetBuffer( iu_n, iv_n, id + 1 );	// Val11
 
 		/* cannot find anything than goodbye */
-		if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd ) 
+		if ( !pTMBa || !pTMBb || !pTMBc || !pTMBd )
 		{
 			TqChar warnings[ 400 ];
 
 			val = m_low_color;
-			sprintf( warnings, "Cannot find value for either pTMPB[a,b,c,d]");
+			sprintf( warnings, "Cannot find value for either pTMPB[a,b,c,d]" );
 			RiErrorPrint( 0, 1, warnings );
-			return;
+			return ;
 		}
 
 		// all the tile are using the same size therefore the number is ok
@@ -1276,8 +1278,8 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
 		for ( c = 0; c < m_SamplesPerPixel; c++ )
 			val[ c ] = m_low_color[ c ] + dinterp * ( m_high_color[ c ] - m_low_color[ c ] );
 
-	
-		
+
+
 	}
 	// Check the memory and make sure we don't abuse it
 	CriticalMeasure();
@@ -1289,8 +1291,8 @@ void CqTextureMap::GetSample( TqFloat u1, TqFloat v1, TqFloat u2, TqFloat v2, st
  */
 
 void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
-                                 TqFloat sblur, TqFloat tblur,
-                                 std::valarray<TqFloat>& val )
+                              TqFloat sblur, TqFloat tblur,
+                              std::valarray<TqFloat>& val )
 {
 	// Work out the width and height
 	TqFloat ss1, tt1, ss2, tt2;
@@ -1315,7 +1317,7 @@ void CqTextureMap::SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, Tq
  */
 
 void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur,
-                                     std::valarray<TqFloat>& val )
+                                  std::valarray<TqFloat>& val )
 {
 	CriticalMeasure();
 
@@ -1353,7 +1355,7 @@ void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& swidth, CqVector3D
  */
 
 void CqEnvironmentMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4, TqFloat sblur, TqFloat tblur,
-                                     std::valarray<TqFloat>& val )
+                                  std::valarray<TqFloat>& val )
 {
 	if ( m_pImage != 0 )
 	{
@@ -1471,7 +1473,7 @@ static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, TqInt* fa
 	TqFloat t;
 
 	// Test nz direction
-	if ( n.z() < 0 )      	// Test intersection with nz
+	if ( n.z() < 0 )       	// Test intersection with nz
 	{
 		t = -0.5 / n.z();
 		pt->x( n.x() * t );
@@ -1483,7 +1485,7 @@ static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, TqInt* fa
 			return ;
 		}
 	}
-	else if ( n.z() > 0 )      	// Test intersection with pz
+	else if ( n.z() > 0 )       	// Test intersection with pz
 	{
 		t = 0.5 / n.z();
 		pt->x( n.x() * t );
@@ -1498,7 +1500,7 @@ static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, TqInt* fa
 
 
 	// Test ny direction
-	if ( n.y() < 0 )      	// Test intersection with ny
+	if ( n.y() < 0 )       	// Test intersection with ny
 	{
 		t = -0.5 / n.y();
 		pt->x( n.x() * t );
@@ -1510,7 +1512,7 @@ static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, TqInt* fa
 			return ;
 		}
 	}
-	else if ( n.y() > 0 )      	// Test intersection with py
+	else if ( n.y() > 0 )       	// Test intersection with py
 	{
 		t = 0.5 / n.y();
 		pt->x( n.x() * t );
@@ -1524,7 +1526,7 @@ static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, TqInt* fa
 	}
 
 	// Test nx direction
-	if ( n.x() < 0 )      	// Test intersection with nx
+	if ( n.x() < 0 )       	// Test intersection with nx
 	{
 		t = -0.5 / n.x();
 		pt->x( n.x() * t );
@@ -1536,7 +1538,7 @@ static void get_face_intersection( CqVector3D *normal, CqVector3D *pt, TqInt* fa
 			return ;
 		}
 	}
-	else if ( n.x() > 0 )      	// Test intersection with px
+	else if ( n.x() > 0 )       	// Test intersection with px
 	{
 		t = 0.5 / n.x();
 		pt->x( n.x() * t );
@@ -1675,43 +1677,43 @@ void	CqShadowMap::SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqV
 {
 	TqFloat depth;
 	SampleMap( R1, R2, R3, R4, sblur, tblur, val, depth );
-/*	TqFloat previousdepth;
-	std::valarray<TqFloat> coverage;
-	coverage.resize(m_SamplesPerPixel);
-	val.resize(m_SamplesPerPixel);
-
-	// get coverage and average depth
-	SampleMap( R1, R2, R3, R4, sblur, tblur, coverage, depth );
-	previousdepth = depth;
-
-	if ( sblur != 0 || tblur != 0 )
-	{
-		TqInt maxiterations = 5; // cap the no of times we go round in case we get stuck in a loop
-		TqInt iterations = 0;
-		while ( depth != 0.0 && iterations < maxiterations )
+	/*	TqFloat previousdepth;
+		std::valarray<TqFloat> coverage;
+		coverage.resize(m_SamplesPerPixel);
+		val.resize(m_SamplesPerPixel);
+	 
+		// get coverage and average depth
+		SampleMap( R1, R2, R3, R4, sblur, tblur, coverage, depth );
+		previousdepth = depth;
+	 
+		if ( sblur != 0 || tblur != 0 )
 		{
-			// resize the filter
-			sblur *= 1 - depth;
-			tblur *= 1 - depth;
-
-			// get coverage and average depth again
-			SampleMap( R1, R2, R3, R4, sblur, tblur, coverage, depth );
-
-			// stop if we get roughly the same answer twice
-			if ( fabs( depth - previousdepth ) < 0.05 )
-				break;
-
-			previousdepth = depth;
-			iterations++;
+			TqInt maxiterations = 5; // cap the no of times we go round in case we get stuck in a loop
+			TqInt iterations = 0;
+			while ( depth != 0.0 && iterations < maxiterations )
+			{
+				// resize the filter
+				sblur *= 1 - depth;
+				tblur *= 1 - depth;
+	 
+				// get coverage and average depth again
+				SampleMap( R1, R2, R3, R4, sblur, tblur, coverage, depth );
+	 
+				// stop if we get roughly the same answer twice
+				if ( fabs( depth - previousdepth ) < 0.05 )
+					break;
+	 
+				previousdepth = depth;
+				iterations++;
+			}
+			val = coverage;
 		}
-		val = coverage;
-	}
-	else
-	{
-		// get coverage and average depth again
-		//SampleMap( R1, R2, R3, R4, sblur, tblur, val, depth );
-		val = coverage;
-	}*/
+		else
+		{
+			// get coverage and average depth again
+			//SampleMap( R1, R2, R3, R4, sblur, tblur, val, depth );
+			val = coverage;
+		}*/
 }
 
 
@@ -1721,7 +1723,7 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 
 	// If no map defined, not in shadow.
 	val.resize( 1 );
-	val[0] = 0.0f;
+	val[ 0 ] = 0.0f;
 	depth = 0.0f;
 
 	CqVector3D	vecR1l, vecR2l, vecR3l, vecR4l;
@@ -1738,19 +1740,19 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 	if ( poptBias != 0 )
 		bias1 = poptBias[ 0 ];
 
-	static CqRandom random(42);
+	static CqRandom random( 42 );
 	TqFloat bias;
-	
-	
-	if (bias1 >= bias0) 
+
+
+	if ( bias1 >= bias0 )
 	{
-		bias = random.RandomFloat(bias1 - bias0) + bias0;
-		if (bias > bias1) bias = bias1;
+		bias = random.RandomFloat( bias1 - bias0 ) + bias0;
+		if ( bias > bias1 ) bias = bias1;
 	}
-	else 
+	else
 	{
-		bias = random.RandomFloat(bias0 - bias1) + bias1;
-		if (bias > bias0) bias = bias0;
+		bias = random.RandomFloat( bias0 - bias1 ) + bias1;
+		if ( bias > bias0 ) bias = bias0;
 	}
 	CqVector3D vecBias( 0, 0, bias );
 	// Generate a matrix to transform points from camera space into the space of the light source used in the
@@ -1833,8 +1835,8 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 	}
 
 	// Setup jitter variables
-	TqFloat ds =      /*2.0f**/sres / ns;
-	TqFloat dt =      /*2.0f**/tres / nt;
+	TqFloat ds =       /*2.0f**/sres / ns;
+	TqFloat dt =       /*2.0f**/tres / nt;
 	TqFloat js = ds * 0.5f;
 	TqFloat jt = dt * 0.5f;
 
@@ -1877,7 +1879,7 @@ void	CqShadowMap::SampleMap( const CqVector3D& R1, const CqVector3D& R2, const C
 		s = s + ds;
 	}
 
-	val[0] = ( static_cast<TqFloat>( inshadow ) / ( ns * nt ) );
+	val[ 0 ] = ( static_cast<TqFloat>( inshadow ) / ( ns * nt ) );
 
 	// get the average depth of occluded samples
 	TqFloat lightdistance = MAX( MAX( MAX( vecR1l.Magnitude(), vecR2l.Magnitude() ), vecR3l.Magnitude() ), vecR4l.Magnitude() );
@@ -2139,7 +2141,7 @@ void CqTextureMap::WriteTileImage( TIFF* ptex, TqFloat *raster, TqUlong width, T
 				}
 				ptdata += ( width * samples );
 			}
-			TIFFWriteTile( ptex, ptile, x, y, 0, 0);
+			TIFFWriteTile( ptex, ptile, x, y, 0, 0 );
 		}
 		TIFFWriteDirectory( ptex );
 

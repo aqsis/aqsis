@@ -31,9 +31,9 @@
  */
 namespace Aqsis
 {
-	struct IqRenderer;
-	IqRenderer* QGetRenderContextI()
-	{
-		return(0);
-	}
+struct IqRenderer;
+IqRenderer* QGetRenderContextI()
+{
+	return ( 0 );
+}
 }

@@ -64,6 +64,7 @@ class CqFuncDef : public IqFuncDef
 		// Overridden from IqFuncDef
 
 
+
 		virtual	TqInt	Type() const
 		{
 			return ( m_Type );

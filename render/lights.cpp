@@ -88,18 +88,18 @@ void CqLightsource::Initialise( TqInt uGridRes, TqInt vGridRes )
 	if ( m_pShader )
 		m_pShader->Initialise( uGridRes, vGridRes, m_pShaderExecEnv );
 
-	L()->Initialise( uGridRes, vGridRes );
-	Cl()->Initialise( uGridRes, vGridRes );
+	L() ->Initialise( uGridRes, vGridRes );
+	Cl() ->Initialise( uGridRes, vGridRes );
 
 	// Initialise the geometric parameters in the shader exec env.
-	P()->SetPoint( QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->matCurrent() ) * CqVector3D( 0.0f, 0.0f, 0.0f ) );
-	if ( USES( Uses, EnvVars_u ) ) u()->SetFloat( 0.0f );
-	if ( USES( Uses, EnvVars_v ) ) v()->SetFloat( 0.0f );
-	if ( USES( Uses, EnvVars_du ) ) du()->SetFloat( 0.0f );
-	if ( USES( Uses, EnvVars_du ) ) dv()->SetFloat( 0.0f );
-	if ( USES( Uses, EnvVars_s ) ) s()->SetFloat( 0.0f );
-	if ( USES( Uses, EnvVars_t ) ) t()->SetFloat( 0.0f );
-	if ( USES( Uses, EnvVars_N ) ) N()->SetNormal( CqVector3D( 0.0f, 0.0f, 0.0f ) );
+	P() ->SetPoint( QGetRenderContext() ->matSpaceToSpace( "shader", "current", m_pShader->matCurrent() ) * CqVector3D( 0.0f, 0.0f, 0.0f ) );
+	if ( USES( Uses, EnvVars_u ) ) u() ->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_v ) ) v() ->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_du ) ) du() ->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_du ) ) dv() ->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_s ) ) s() ->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_t ) ) t() ->SetFloat( 0.0f );
+	if ( USES( Uses, EnvVars_N ) ) N() ->SetNormal( CqVector3D( 0.0f, 0.0f, 0.0f ) );
 }
 
 

@@ -46,7 +46,7 @@ RendermanInterface::RtFloat Engine::RiBesselFilter( RtFloat x, RtFloat y, RtFloa
 }
 RendermanInterface::RtVoid Engine::RiBlobbyV( RtInt nleaf, RtInt ncode, RtInt code[], RtInt nflt, RtFloat flt[], RtInt nstr, RtToken str[], RtInt count, RtToken tokens[], RtPointer values[] )
 {
-	::RiBlobbyV( nleaf, ncode, code, nflt, flt, nstr, str, count, tokens,values );
+	::RiBlobbyV( nleaf, ncode, code, nflt, flt, nstr, str, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiBound( RtBound bound )
 {
@@ -307,14 +307,14 @@ RendermanInterface::RtVoid Engine::RiPixelVariance( RtFloat variance )
 }
 
 RendermanInterface::RtVoid Engine::RiCurvesV( RtToken type, RtInt ncurves,
-                                                   RtInt nvertices[], RtToken wrap,
-                                                   RtInt n, RtToken tokens[], RtPointer values[] )
+        RtInt nvertices[], RtToken wrap,
+        RtInt n, RtToken tokens[], RtPointer values[] )
 {
-	::RiCurvesV( type, ncurves,nvertices,wrap,n,tokens,values);
+	::RiCurvesV( type, ncurves, nvertices, wrap, n, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiPointsV( RtInt vertices, RtInt count, RtToken tokens[], RtPointer values[] )
 {
-	::RiPointsV( vertices, count, tokens, values);
+	::RiPointsV( vertices, count, tokens, values );
 }
 RendermanInterface::RtVoid Engine::RiPointsGeneralPolygonsV( RtInt npolys, RtInt nloops[], RtInt nverts[], RtInt verts[], RtInt count, RtToken tokens[], RtPointer values[] )
 {
@@ -328,8 +328,9 @@ RendermanInterface::RtVoid Engine::RiPolygonV( RtInt nvertices, RtInt count, RtT
 {
 	::RiPolygonV( nvertices, count, tokens, values );
 }
-RendermanInterface::RtVoid Engine::RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc) { 
-	::RiProcedural(data, bound, (RtProcSubdivFunc) refineproc, (RtProcFreeFunc) freeproc); 
+RendermanInterface::RtVoid Engine::RiProcedural( RtPointer data, RtBound bound, RtFunc refineproc, RtFunc freeproc )
+{
+	::RiProcedural( data, bound, ( RtProcSubdivFunc ) refineproc, ( RtProcFreeFunc ) freeproc );
 }
 RendermanInterface::RtVoid Engine::RiProjectionV( const char * name, RtInt count, RtToken tokens[], RtPointer values[] )
 {

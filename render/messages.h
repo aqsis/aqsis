@@ -46,8 +46,8 @@ START_NAMESPACE( Aqsis )
 
 enum EqErrorType
 {
-    ErrorType_Basic,  			///< Basic error message.
-    ErrorType_Attribute,  		///< Error linked to an attribute state,
+    ErrorType_Basic,   			///< Basic error message.
+    ErrorType_Attribute,   		///< Error linked to an attribute state,
 };
 
 
@@ -58,19 +58,19 @@ enum EqErrorType
 
 enum EqErrorID
 {
-    ErrorID_MaxEyeSplits = 1,  				///< Max eyeplits exceeded
-    ErrorID_InvalidPixel,  				///< Invalid pixel requested in image buffer.
-    ErrorID_InvalidShadowMap,  			///< Shadow map not of supported format.
-    ErrorID_FileNotFound,  				///< Generic file not found.
-    ErrorID_NoShadowName,  				///< No shadow or lightource name supplied to use for shadowmap name.
-    ErrorID_DisplayDriver,  				///< Error loading display driver.
-    ErrorID_System,  						///< Generic system error.
-    ErrorID_UnknownSymbol,  				///< Unknown synbol fuond parsing RIB file.
-    ErrorID_InvalidType,  				///< Generic invalid type.
-    ErrorID_InvalidData,  				///< Generic invalid data.
-    ErrorID_InvalidShader,  				///< Shader not of correct type.
-    ErrorID_NonmanifoldSubdivision,  		///< Geometry used in subdivision surface is non-manifold.
-    ErrorID_OcclusionMaxEyeSplits,  		///< Geometry gets culled too many times
+    ErrorID_MaxEyeSplits = 1,   				///< Max eyeplits exceeded
+    ErrorID_InvalidPixel,   				///< Invalid pixel requested in image buffer.
+    ErrorID_InvalidShadowMap,   			///< Shadow map not of supported format.
+    ErrorID_FileNotFound,   				///< Generic file not found.
+    ErrorID_NoShadowName,   				///< No shadow or lightource name supplied to use for shadowmap name.
+    ErrorID_DisplayDriver,   				///< Error loading display driver.
+    ErrorID_System,   						///< Generic system error.
+    ErrorID_UnknownSymbol,   				///< Unknown synbol fuond parsing RIB file.
+    ErrorID_InvalidType,   				///< Generic invalid type.
+    ErrorID_InvalidData,   				///< Generic invalid data.
+    ErrorID_InvalidShader,   				///< Shader not of correct type.
+    ErrorID_NonmanifoldSubdivision,   		///< Geometry used in subdivision surface is non-manifold.
+    ErrorID_OcclusionMaxEyeSplits,   		///< Geometry gets culled too many times
 };
 
 
@@ -81,7 +81,7 @@ enum EqErrorID
 
 enum EqWarningID
 {
-    WarningID_NoDisplacementBound = 1,  	///< No displacement bound specified on displaced surface.
+    WarningID_NoDisplacementBound = 1,   	///< No displacement bound specified on displaced surface.
 };
 
 //----------------------------------------------------------------------
@@ -90,10 +90,10 @@ enum EqWarningID
  */
 enum EqMessageType
 {
-    MessageType_Message = 0,  	///< Just an informational message.
+    MessageType_Message = 0,   	///< Just an informational message.
 
-    MessageType_Warning,  	///< Non fatal warning.
-    MessageType_Error,  		///< Fatal error.
+    MessageType_Warning,   	///< Non fatal warning.
+    MessageType_Error,   		///< Fatal error.
 
     MessageType_Last
 };
@@ -104,11 +104,11 @@ enum EqMessageType
  */
 enum EqSeverity
 {
-    Severity_Normal = 0,  			///< Normal error.
-    Importance_Normal = 0,  		///< Normal warning.
+    Severity_Normal = 0,   			///< Normal error.
+    Importance_Normal = 0,   		///< Normal warning.
 
-    Severity_Fatal = 255,  			///< Fatal error.
-    Importance_Imperative = 255,  	///< Important warning.
+    Severity_Fatal = 255,   			///< Fatal error.
+    Importance_Imperative = 255,   	///< Important warning.
 };
 
 

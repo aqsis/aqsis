@@ -72,22 +72,28 @@ class _qShareC	CqTransform : public CqMotionSpec<CqMatrix>, public CqRefCount, p
 				return ( this );
 		}
 
-		_qShareM  virtual	CqTransform& operator=( const CqTransform& From );
+		_qShareM virtual	CqTransform& operator=( const CqTransform& From );
 
 		/** Get a duplicate of this transform.
 		 */
-		_qShareM  CqTransform*	Clone() const
+		_qShareM CqTransform*	Clone() const
 		{
 			return ( new CqTransform( *this ) );
 		}
 
-		_qShareM  virtual	void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
-		_qShareM  virtual	void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
+		_qShareM virtual	void	SetCurrentTransform( TqFloat time, const CqMatrix& matTrans );
+		_qShareM virtual	void	ConcatCurrentTransform( TqFloat time, const CqMatrix& matTrans );
 
-		_qShareM  virtual	const CqMatrix&	matObjectToWorld( TqFloat time = 0.0f ) const;
+		_qShareM virtual	const CqMatrix&	matObjectToWorld( TqFloat time = 0.0f ) const;
 
-		virtual	void	Release()	{ CqRefCount::Release(); }
-		virtual	void	AddRef()	{ CqRefCount::AddRef(); }
+		virtual	void	Release()
+		{
+			CqRefCount::Release();
+		}
+		virtual	void	AddRef()
+		{
+			CqRefCount::AddRef();
+		}
 
 		_qShareM	virtual	void	ClearMotionObject( CqMatrix& A ) const;
 		_qShareM	virtual	CqMatrix	ConcatMotionObjects( const CqMatrix& A, const CqMatrix& B ) const;

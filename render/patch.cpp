@@ -81,75 +81,75 @@ CqSurfacePatchBicubic& CqSurfacePatchBicubic::operator=( const CqSurfacePatchBic
 
 
 
-void CqSurfacePatchBicubic::NaturalSubdivide(CqParameter* pParam,CqParameter* pParam1, CqParameter* pParam2, TqBool u)
+void CqSurfacePatchBicubic::NaturalSubdivide( CqParameter* pParam, CqParameter* pParam1, CqParameter* pParam2, TqBool u )
 {
-	switch( pParam->Type() )
+	switch ( pParam->Type() )
 	{
-		case type_float:
-		{
-			CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
-			CqParameterTyped<TqFloat, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam1 );
-			CqParameterTyped<TqFloat, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam2 );
-			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-			break;
-		}
+			case type_float:
+			{
+				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam );
+				CqParameterTyped<TqFloat, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam1 );
+				CqParameterTyped<TqFloat, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParam2 );
+				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
 
-		case type_integer:
-		{
-			CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
-			CqParameterTyped<TqInt, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam1 );
-			CqParameterTyped<TqInt, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam2 );
-			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-			break;
-		}
+			case type_integer:
+			{
+				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam );
+				CqParameterTyped<TqInt, TqFloat>* pTResult1 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam1 );
+				CqParameterTyped<TqInt, TqFloat>* pTResult2 = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParam2 );
+				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
 
-		case type_point:
-		case type_vector:
-		case type_normal:
-		{
-			CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
-			CqParameterTyped<CqVector3D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam1 );
-			CqParameterTyped<CqVector3D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam2 );
-			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-			break;
-		}
+			case type_point:
+			case type_vector:
+			case type_normal:
+			{
+				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam );
+				CqParameterTyped<CqVector3D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam1 );
+				CqParameterTyped<CqVector3D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParam2 );
+				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
 
-		case type_hpoint:
-		{
-			CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
-			CqParameterTyped<CqVector4D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam1 );
-			CqParameterTyped<CqVector4D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam2 );
-			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-			break;
-		}
+			case type_hpoint:
+			{
+				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam );
+				CqParameterTyped<CqVector4D, CqVector3D>* pTResult1 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam1 );
+				CqParameterTyped<CqVector4D, CqVector3D>* pTResult2 = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParam2 );
+				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
 
 
-		case type_color:
-		{
-			CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
-			CqParameterTyped<CqColor, CqColor>* pTResult1 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam1 );
-			CqParameterTyped<CqColor, CqColor>* pTResult2 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam2 );
-			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-			break;
-		}
+			case type_color:
+			{
+				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam );
+				CqParameterTyped<CqColor, CqColor>* pTResult1 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam1 );
+				CqParameterTyped<CqColor, CqColor>* pTResult2 = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParam2 );
+				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
 
-		case type_string:
-		{
-			CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
-			CqParameterTyped<CqString, CqString>* pTResult1 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam1 );
-			CqParameterTyped<CqString, CqString>* pTResult2 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam2 );
-			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-			break;
-		}
+			case type_string:
+			{
+				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParam );
+				CqParameterTyped<CqString, CqString>* pTResult1 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam1 );
+				CqParameterTyped<CqString, CqString>* pTResult2 = static_cast<CqParameterTyped<CqString, CqString>*>( pParam2 );
+				TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				break;
+			}
 
-		case type_matrix:
-		{
-//			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
-//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam1 );
-//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam2 );
-//			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
-//			break;
-		}
+			case type_matrix:
+			{
+				//			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam );
+				//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult1 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam1 );
+				//			CqParameterTyped<CqMatrix, CqMatrix>* pTResult2 = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParam2 );
+				//			TypedNaturalSubdivide( pTParam, pTResult1, pTResult2, u );
+				//			break;
+			}
 	}
 }
 
@@ -166,7 +166,7 @@ CqBound CqSurfacePatchBicubic::Bound() const
 	TqInt i;
 	for ( i = 0; i < 16; i++ )
 	{
-		CqVector3D	vecV = (*P()) [ i ];
+		CqVector3D	vecV = ( *P() ) [ i ];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -186,60 +186,60 @@ CqBound CqSurfacePatchBicubic::Bound() const
  */
 
 
-void CqSurfacePatchBicubic::NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData)
+void CqSurfacePatchBicubic::NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData )
 {
-	switch( pParameter->Type() )
+	switch ( pParameter->Type() )
 	{
-		case type_float:
-		{
-			CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>(pParameter);
-			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-			break;
-		}
+			case type_float:
+			{
+				CqParameterTyped<TqFloat, TqFloat>* pTParam = static_cast<CqParameterTyped<TqFloat, TqFloat>*>( pParameter );
+				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+				break;
+			}
 
-		case type_integer:
-		{
-			CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>(pParameter);
-			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-			break;
-		}
+			case type_integer:
+			{
+				CqParameterTyped<TqInt, TqFloat>* pTParam = static_cast<CqParameterTyped<TqInt, TqFloat>*>( pParameter );
+				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+				break;
+			}
 
-		case type_point:
-		case type_vector:
-		case type_normal:
-		{
-			CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>(pParameter);
-			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-			break;
-		}
+			case type_point:
+			case type_vector:
+			case type_normal:
+			{
+				CqParameterTyped<CqVector3D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector3D, CqVector3D>*>( pParameter );
+				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+				break;
+			}
 
-		case type_hpoint:
-		{
-			CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>(pParameter);
-			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-			break;
-		}
+			case type_hpoint:
+			{
+				CqParameterTyped<CqVector4D, CqVector3D>* pTParam = static_cast<CqParameterTyped<CqVector4D, CqVector3D>*>( pParameter );
+				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+				break;
+			}
 
-		case type_color:
-		{
-			CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>(pParameter);
-			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-			break;
-		}
+			case type_color:
+			{
+				CqParameterTyped<CqColor, CqColor>* pTParam = static_cast<CqParameterTyped<CqColor, CqColor>*>( pParameter );
+				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+				break;
+			}
 
-		case type_string:
-		{
-			CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>(pParameter);
-			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-			break;
-		}
+			case type_string:
+			{
+				CqParameterTyped<CqString, CqString>* pTParam = static_cast<CqParameterTyped<CqString, CqString>*>( pParameter );
+				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+				break;
+			}
 
-		case type_matrix:
-		{
-			CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>(pParameter);
-			TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
-			break;
-		}
+			case type_matrix:
+			{
+				CqParameterTyped<CqMatrix, CqMatrix>* pTParam = static_cast<CqParameterTyped<CqMatrix, CqMatrix>*>( pParameter );
+				TypedNaturalDice( uDiceSize, vDiceSize, pTParam, pData );
+				break;
+			}
 	}
 }
 
@@ -285,13 +285,13 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 		m_XBucketSize = poptBucketSize[ 0 ];
 		m_YBucketSize = poptBucketSize[ 1 ];
 	}
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute("System", "ShadingRate")[0];
+	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
 	if ( poptGridSize )
 		gridsize = poptGridSize[ 0 ];
 	else
 		gridsize = static_cast<TqInt>( m_XBucketSize * m_XBucketSize / ShadingRate );
 	for ( i = 0; i < 16; i++ )
-		avecHull[ i ] = matCtoR * (*P()) [ i ];
+		avecHull[ i ] = matCtoR * ( *P() ) [ i ];
 
 	// First check flatness, a curve which is too far off flat will
 	// produce unreliable results when the length is approximated below.
@@ -383,8 +383,8 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 	m_vDiceSize = static_cast<TqInt>( MAX( ROUND( vLen ), 1 ) );
 
 	// Ensure power of 2 to avoid cracking
-	m_uDiceSize = CEIL_POW2(m_uDiceSize);
-	m_vDiceSize = CEIL_POW2(m_vDiceSize);
+	m_uDiceSize = CEIL_POW2( m_uDiceSize );
+	m_vDiceSize = CEIL_POW2( m_vDiceSize );
 
 	TqFloat Area = m_uDiceSize * m_vDiceSize;
 
@@ -409,8 +409,8 @@ void CqSurfacePatchBicubic::ConvertToBezierBasis()
 {
 	static CqMatrix matMim1;
 	TqInt i, j;
-	
-	if(matMim1.fIdentity())
+
+	if ( matMim1.fIdentity() )
 	{
 		for ( i = 0; i < 4; i++ )
 			for ( j = 0; j < 4; j++ )
@@ -430,10 +430,10 @@ void CqSurfacePatchBicubic::ConvertToBezierBasis()
 	{
 		for ( j = 0; j < 4; j++ )
 		{
-			matCPx[ i ][ j ] = CP(i,j).x();
-			matCPy[ i ][ j ] = CP(i,j).y();
-			matCPz[ i ][ j ] = CP(i,j).z();
-			matCPh[ i ][ j ] = CP(i,j).h();
+			matCPx[ i ][ j ] = CP( i, j ).x();
+			matCPy[ i ][ j ] = CP( i, j ).y();
+			matCPz[ i ][ j ] = CP( i, j ).z();
+			matCPh[ i ][ j ] = CP( i, j ).h();
 		}
 	}
 	matCPx.SetfIdentity( TqFalse );
@@ -450,10 +450,10 @@ void CqSurfacePatchBicubic::ConvertToBezierBasis()
 	{
 		for ( j = 0; j < 4; j++ )
 		{
-			CP(i,j).x(matCPx[ i ][ j ]);
-			CP(i,j).y(matCPy[ i ][ j ]);
-			CP(i,j).z(matCPz[ i ][ j ]);
-			CP(i,j).h(matCPh[ i ][ j ]);
+			CP( i, j ).x( matCPx[ i ][ j ] );
+			CP( i, j ).y( matCPy[ i ][ j ] );
+			CP( i, j ).z( matCPz[ i ][ j ] );
+			CP( i, j ).h( matCPh[ i ][ j ] );
 		}
 	}
 }
@@ -504,18 +504,18 @@ CqSurfacePatchBilinear& CqSurfacePatchBilinear::operator=( const CqSurfacePatchB
 
 void CqSurfacePatchBilinear::GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals )
 {
-	assert( NULL != P() && P()->Size() == 4 );
+	assert( NULL != P() && P() ->Size() == 4 );
 
 	// Get the handedness of the coordinate system (at the time of creation) and
 	// the coordinate system specified, to check for normal flipping.
-	TqInt O = pAttributes() ->GetIntegerAttribute("System", "Orientation")[0];
+	TqInt O = pAttributes() ->GetIntegerAttribute( "System", "Orientation" ) [ 0 ];
 
 	// For each of the four points, calculate the normal as the cross product of its
 	// two vectors.
-	CqVector3D N1 = ( (*P()) [ 1 ] - (*P()) [ 0 ] ) % ( (*P()) [ 2 ] - (*P()) [ 0 ] );
-	CqVector3D N2 = ( (*P()) [ 3 ] - (*P()) [ 1 ] ) % ( (*P()) [ 0 ] - (*P()) [ 1 ] );
-	CqVector3D N3 = ( (*P()) [ 0 ] - (*P()) [ 2 ] ) % ( (*P()) [ 3 ] - (*P()) [ 2 ] );
-	CqVector3D N4 = ( (*P()) [ 2 ] - (*P()) [ 3 ] ) % ( (*P()) [ 1 ] - (*P()) [ 3 ] );
+	CqVector3D N1 = ( ( *P() ) [ 1 ] - ( *P() ) [ 0 ] ) % ( ( *P() ) [ 2 ] - ( *P() ) [ 0 ] );
+	CqVector3D N2 = ( ( *P() ) [ 3 ] - ( *P() ) [ 1 ] ) % ( ( *P() ) [ 0 ] - ( *P() ) [ 1 ] );
+	CqVector3D N3 = ( ( *P() ) [ 0 ] - ( *P() ) [ 2 ] ) % ( ( *P() ) [ 3 ] - ( *P() ) [ 2 ] );
+	CqVector3D N4 = ( ( *P() ) [ 2 ] - ( *P() ) [ 3 ] ) % ( ( *P() ) [ 1 ] - ( *P() ) [ 3 ] );
 
 	CqVector3D	N;
 	TqInt v, u;
@@ -524,7 +524,7 @@ void CqSurfacePatchBilinear::GenerateGeometricNormals( TqInt uDiceSize, TqInt vD
 		for ( u = 0; u <= uDiceSize; u++ )
 		{
 			N = BilinearEvaluate( N1, N2, N3, N4, u, v );
-			N = ( O == OrientationLH )? N : -N;
+			N = ( O == OrientationLH ) ? N : -N;
 			pNormals->SetNormal( N, ( v * ( uDiceSize + 1 ) ) + u );
 		}
 	}
@@ -545,7 +545,7 @@ CqBound CqSurfacePatchBilinear::Bound() const
 	TqInt i;
 	for ( i = 0; i < 4; i++ )
 	{
-		CqVector3D	vecV = (*P()) [ i ];
+		CqVector3D	vecV = ( *P() ) [ i ];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -581,7 +581,7 @@ TqInt CqSurfacePatchBilinear::PreSubdivide( std::vector<CqBasicSurface*>& aSplit
 TqBool	CqSurfacePatchBilinear::Diceable()
 {
 	assert( NULL != P() );
-	
+
 	// If the cull check showed that the primitive cannot be diced due to crossing the e and hither planes,
 	// then we can return immediately.
 	if ( !m_fDiceable )
@@ -604,13 +604,13 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 		m_XBucketSize = poptBucketSize[ 0 ];
 		m_YBucketSize = poptBucketSize[ 1 ];
 	}
-	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute("System", "ShadingRate")[0];
+	TqFloat ShadingRate = pAttributes() ->GetFloatAttribute( "System", "ShadingRate" ) [ 0 ];
 	if ( poptGridSize )
 		gridsize = poptGridSize[ 0 ];
 	else
 		gridsize = static_cast<TqInt>( m_XBucketSize * m_XBucketSize / ShadingRate );
 	for ( i = 0; i < 4; i++ )
-		avecHull[ i ] = matCtoR * (*P()) [ i ];
+		avecHull[ i ] = matCtoR * ( *P() ) [ i ];
 
 	TqFloat uLen = 0;
 	TqFloat vLen = 0;
@@ -637,8 +637,8 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 	m_vDiceSize = static_cast<TqInt>( vLen );
 
 	// Ensure power of 2 to avoid cracking
-	m_uDiceSize = CEIL_POW2(m_uDiceSize);
-	m_vDiceSize = CEIL_POW2(m_vDiceSize);
+	m_uDiceSize = CEIL_POW2( m_uDiceSize );
+	m_vDiceSize = CEIL_POW2( m_vDiceSize );
 
 	if ( uLen < FLT_EPSILON || vLen < FLT_EPSILON )
 	{
@@ -704,9 +704,9 @@ CqBound CqSurfacePatchMeshBicubic::Bound() const
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
 	CqVector3D	vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
 	TqUint i;
-	for ( i = 0; i < P()->Size(); i++ )
+	for ( i = 0; i < P() ->Size(); i++ )
 	{
-		CqVector3D	vecV = (*P()) [ i ];
+		CqVector3D	vecV = ( *P() ) [ i ];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -734,19 +734,19 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 
 	CqVector4D vecPoint;
 	TqInt iP = 0;
-	TqInt uStep = pAttributes() ->GetIntegerAttribute("System", "BasisStep")[0];
-	TqInt vStep = pAttributes() ->GetIntegerAttribute("System", "BasisStep")[1];
+	TqInt uStep = pAttributes() ->GetIntegerAttribute( "System", "BasisStep" ) [ 0 ];
+	TqInt vStep = pAttributes() ->GetIntegerAttribute( "System", "BasisStep" ) [ 1 ];
 
 	TqInt nvaryingu = ( m_uPeriodic ) ? m_uPatches : m_uPatches + 1;
 	TqInt nvaryingv = ( m_vPeriodic ) ? m_vPatches : m_vPatches + 1;
 
 	TqInt MyUses = Uses();
 
-	const TqFloat* pTC = pAttributes() ->GetFloatAttribute("System", "TextureCoordinates");
-	CqVector2D st1( pTC[0], pTC[1]);
-	CqVector2D st2( pTC[2], pTC[3]);
-	CqVector2D st3( pTC[4], pTC[5]);
-	CqVector2D st4( pTC[6], pTC[7]);
+	const TqFloat* pTC = pAttributes() ->GetFloatAttribute( "System", "TextureCoordinates" );
+	CqVector2D st1( pTC[ 0 ], pTC[ 1 ] );
+	CqVector2D st2( pTC[ 2 ], pTC[ 3 ] );
+	CqVector2D st3( pTC[ 4 ], pTC[ 5 ] );
+	CqVector2D st4( pTC[ 6 ], pTC[ 7 ] );
 
 	// Fill in the variables.
 	TqInt i;
@@ -776,97 +776,97 @@ TqInt CqSurfacePatchMeshBicubic::Split( std::vector<CqBasicSurface*>& aSplits )
 			TqFloat u1 = ( 1.0f / m_uPatches ) * ( j + 1 );
 
 			std::vector<CqParameter*>::iterator iUP;
-			for( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
+			for ( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
 			{
-				if( (*iUP)->Class() == class_varying )
+				if ( ( *iUP ) ->Class() == class_varying )
 				{
 					// Copy any 'varying' class primitive variables.
-					CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( pSurface->cVarying() );
 
-					pNewUP->SetValue( (*iUP), 0, iTa );
-					pNewUP->SetValue( (*iUP), 1, iTb );
-					pNewUP->SetValue( (*iUP), 2, iTc );
-					pNewUP->SetValue( (*iUP), 3, iTd );
-					pSurface->AddPrimitiveVariable(pNewUP);
+					pNewUP->SetValue( ( *iUP ), 0, iTa );
+					pNewUP->SetValue( ( *iUP ), 1, iTb );
+					pNewUP->SetValue( ( *iUP ), 2, iTc );
+					pNewUP->SetValue( ( *iUP ), 3, iTd );
+					pSurface->AddPrimitiveVariable( pNewUP );
 				}
-				else if( (*iUP)->Class() == class_vertex )
+				else if ( ( *iUP ) ->Class() == class_vertex )
 				{
 					// Copy any 'vertex' class primitive variables.
-					CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->Clear();
 					pNewUP->SetSize( pSurface->cVertex() );
 
 					for ( v = 0; v < 4; v++ )
 					{
 						iP = PatchCoord( vRow + v, uCol );
-						pNewUP->SetValue( (*iUP), ( v * 4 ), iP );
+						pNewUP->SetValue( ( *iUP ), ( v * 4 ), iP );
 						iP = PatchCoord( vRow + v, uCol + 1 );
-						pNewUP->SetValue( (*iUP), ( v * 4 ) + 1, iP );
+						pNewUP->SetValue( ( *iUP ), ( v * 4 ) + 1, iP );
 						iP = PatchCoord( vRow + v, uCol + 2 );
-						pNewUP->SetValue( (*iUP), ( v * 4 ) + 2, iP );
+						pNewUP->SetValue( ( *iUP ), ( v * 4 ) + 2, iP );
 						iP = PatchCoord( vRow + v, uCol + 3 );
-						pNewUP->SetValue( (*iUP), ( v * 4 ) + 3, iP );
+						pNewUP->SetValue( ( *iUP ), ( v * 4 ) + 3, iP );
 					}
-					pSurface->AddPrimitiveVariable(pNewUP);
+					pSurface->AddPrimitiveVariable( pNewUP );
 				}
-				else if( (*iUP)->Class() == class_uniform )
+				else if ( ( *iUP ) ->Class() == class_uniform )
 				{
 					// Copy any 'uniform' class primitive variables.
-					CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( pSurface->cUniform() );
-					pNewUP->SetValue( (*iUP), 0, j );
-					pSurface->AddPrimitiveVariable(pNewUP);
+					pNewUP->SetValue( ( *iUP ), 0, j );
+					pSurface->AddPrimitiveVariable( pNewUP );
 				}
-				else if( (*iUP)->Class() == class_constant )
+				else if ( ( *iUP ) ->Class() == class_constant )
 				{
 					// Copy any 'constant' class primitive variables.
-					CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( 1 );
-					pNewUP->SetValue( (*iUP), 0, 0 );
-					pSurface->AddPrimitiveVariable(pNewUP);
+					pNewUP->SetValue( ( *iUP ), 0, 0 );
+					pSurface->AddPrimitiveVariable( pNewUP );
 				}
 			}
 
 			// If the shaders need u/v or s/t and they are not specified, then we need to put them in as defaults.
-			if( USES( MyUses, EnvVars_u ) && !bHasu() )
+			if ( USES( MyUses, EnvVars_u ) && !bHasu() )
 			{
-				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
-				pSurface->u()->SetSize(4);
-				pSurface->u()->pValue( 0 )[0] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u0, v0 );
-				pSurface->u()->pValue( 1 )[0] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u1, v0 );
-				pSurface->u()->pValue( 2 )[0] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u0, v1 );
-				pSurface->u()->pValue( 3 )[0] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u1, v1 );
+				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "u" ) );
+				pSurface->u() ->SetSize( 4 );
+				pSurface->u() ->pValue( 0 ) [ 0 ] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u0, v0 );
+				pSurface->u() ->pValue( 1 ) [ 0 ] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u1, v0 );
+				pSurface->u() ->pValue( 2 ) [ 0 ] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u0, v1 );
+				pSurface->u() ->pValue( 3 ) [ 0 ] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u1, v1 );
 			}
 
-			if( USES( MyUses, EnvVars_v ) && !bHasv() )
+			if ( USES( MyUses, EnvVars_v ) && !bHasv() )
 			{
-				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
-				pSurface->v()->SetSize(4);
-				pSurface->v()->pValue( 0 )[0] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u0, v0 );
-				pSurface->v()->pValue( 1 )[0] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u1, v0 );
-				pSurface->v()->pValue( 2 )[0] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u0, v1 );
-				pSurface->v()->pValue( 3 )[0] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u1, v1 );
+				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "v" ) );
+				pSurface->v() ->SetSize( 4 );
+				pSurface->v() ->pValue( 0 ) [ 0 ] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u0, v0 );
+				pSurface->v() ->pValue( 1 ) [ 0 ] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u1, v0 );
+				pSurface->v() ->pValue( 2 ) [ 0 ] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u0, v1 );
+				pSurface->v() ->pValue( 3 ) [ 0 ] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u1, v1 );
 			}
 
-			if( USES( MyUses, EnvVars_s ) && !bHass() )
+			if ( USES( MyUses, EnvVars_s ) && !bHass() )
 			{
-				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
-				pSurface->s()->SetSize(4);
-				pSurface->s()->pValue( 0 )[0] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u0, v0 );
-				pSurface->s()->pValue( 1 )[0] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u1, v0 );
-				pSurface->s()->pValue( 2 )[0] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u0, v1 );
-				pSurface->s()->pValue( 3 )[0] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u1, v1 );
+				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" ) );
+				pSurface->s() ->SetSize( 4 );
+				pSurface->s() ->pValue( 0 ) [ 0 ] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u0, v0 );
+				pSurface->s() ->pValue( 1 ) [ 0 ] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u1, v0 );
+				pSurface->s() ->pValue( 2 ) [ 0 ] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u0, v1 );
+				pSurface->s() ->pValue( 3 ) [ 0 ] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u1, v1 );
 			}
 
-			if( USES( MyUses, EnvVars_t ) && !bHast() )
+			if ( USES( MyUses, EnvVars_t ) && !bHast() )
 			{
-				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
-				pSurface->t()->SetSize(4);
-				pSurface->t()->pValue( 0 )[0] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u0, v0 );
-				pSurface->t()->pValue( 1 )[0] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u1, v0 );
-				pSurface->t()->pValue( 2 )[0] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u0, v1 );
-				pSurface->t()->pValue( 3 )[0] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u1, v1 );
+				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" ) );
+				pSurface->t() ->SetSize( 4 );
+				pSurface->t() ->pValue( 0 ) [ 0 ] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u0, v0 );
+				pSurface->t() ->pValue( 1 ) [ 0 ] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u1, v0 );
+				pSurface->t() ->pValue( 2 ) [ 0 ] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u0, v1 );
+				pSurface->t() ->pValue( 3 ) [ 0 ] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u1, v1 );
 			}
 
 			aSplits.push_back( pSurface );
@@ -928,9 +928,9 @@ CqBound CqSurfacePatchMeshBilinear::Bound() const
 	CqVector3D	vecA( FLT_MAX, FLT_MAX, FLT_MAX );
 	CqVector3D	vecB( -FLT_MAX, -FLT_MAX, -FLT_MAX );
 	TqUint i;
-	for ( i = 0; i < P()->Size(); i++ )
+	for ( i = 0; i < P() ->Size(); i++ )
 	{
-		CqVector3D	vecV = (*P()) [ i ];
+		CqVector3D	vecV = ( *P() ) [ i ];
 		if ( vecV.x() < vecA.x() ) vecA.x( vecV.x() );
 		if ( vecV.y() < vecA.y() ) vecA.y( vecV.y() );
 		if ( vecV.x() > vecB.x() ) vecB.x( vecV.x() );
@@ -960,14 +960,14 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 	RtInt iP = 0;
 	TqInt MyUses = Uses();
 
-	const TqFloat* pTC = pAttributes() ->GetFloatAttribute("System", "TextureCoordinates");
-	CqVector2D st1( pTC[0], pTC[1]);
-	CqVector2D st2( pTC[2], pTC[3]);
-	CqVector2D st3( pTC[4], pTC[5]);
-	CqVector2D st4( pTC[6], pTC[7]);
+	const TqFloat* pTC = pAttributes() ->GetFloatAttribute( "System", "TextureCoordinates" );
+	CqVector2D st1( pTC[ 0 ], pTC[ 1 ] );
+	CqVector2D st2( pTC[ 2 ], pTC[ 3 ] );
+	CqVector2D st3( pTC[ 4 ], pTC[ 5 ] );
+	CqVector2D st4( pTC[ 6 ], pTC[ 7 ] );
 
 	TqInt i;
-	for ( i = 0; i < m_vPatches; i++ )  
+	for ( i = 0; i < m_vPatches; i++ )
 	{
 		TqFloat v0 = ( 1.0f / m_vPatches ) * i;
 		TqFloat v1 = ( 1.0f / m_vPatches ) * ( i + 1 );
@@ -988,96 +988,96 @@ TqInt CqSurfacePatchMeshBilinear::Split( std::vector<CqBasicSurface*>& aSplits )
 
 			// Copy any primitive variables.
 			std::vector<CqParameter*>::iterator iUP;
-			for( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
+			for ( iUP = aUserParams().begin(); iUP != aUserParams().end(); iUP++ )
 			{
-				if( (*iUP)->Class() == class_varying )
+				if ( ( *iUP ) ->Class() == class_varying )
 				{
 					// Copy any 'varying' class primitive variables.
-					CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( pSurface->cVarying() );
 
-					pNewUP->SetValue( (*iUP), 0, iTa );
-					pNewUP->SetValue( (*iUP), 1, iTb );
-					pNewUP->SetValue( (*iUP), 2, iTc );
-					pNewUP->SetValue( (*iUP), 3, iTd );
+					pNewUP->SetValue( ( *iUP ), 0, iTa );
+					pNewUP->SetValue( ( *iUP ), 1, iTb );
+					pNewUP->SetValue( ( *iUP ), 2, iTc );
+					pNewUP->SetValue( ( *iUP ), 3, iTd );
 
-					pSurface->AddPrimitiveVariable(pNewUP);
+					pSurface->AddPrimitiveVariable( pNewUP );
 				}
-				else if( (*iUP)->Class() == class_vertex )
+				else if ( ( *iUP ) ->Class() == class_vertex )
 				{
 					// Copy any 'vertex' class primitive variables.
-					CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( pSurface->cVertex() );
 
 					iP = PatchCoord( i, j );
-					pNewUP->SetValue( (*iUP), 0, iP );
+					pNewUP->SetValue( ( *iUP ), 0, iP );
 					iP = PatchCoord( i, j + 1 );
-					pNewUP->SetValue( (*iUP), 1, iP );
+					pNewUP->SetValue( ( *iUP ), 1, iP );
 					iP = PatchCoord( i + 1, j );
-					pNewUP->SetValue( (*iUP), 2, iP );
+					pNewUP->SetValue( ( *iUP ), 2, iP );
 					iP = PatchCoord( i + 1, j + 1 );
-					pNewUP->SetValue( (*iUP), 3, iP );
+					pNewUP->SetValue( ( *iUP ), 3, iP );
 
-					pSurface->AddPrimitiveVariable(pNewUP);
+					pSurface->AddPrimitiveVariable( pNewUP );
 				}
-				else if( (*iUP)->Class() == class_uniform )
+				else if ( ( *iUP ) ->Class() == class_uniform )
 				{
 					// Copy any 'uniform' class primitive variables.
-					CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( pSurface->cUniform() );
-					pNewUP->SetValue( (*iUP), 0, j );
-					pSurface->AddPrimitiveVariable(pNewUP);
+					pNewUP->SetValue( ( *iUP ), 0, j );
+					pSurface->AddPrimitiveVariable( pNewUP );
 				}
-				else if( (*iUP)->Class() == class_constant )
+				else if ( ( *iUP ) ->Class() == class_constant )
 				{
 					// Copy any 'constant' class primitive variables.
-					CqParameter* pNewUP = (*iUP)->CloneType( (*iUP)->strName().c_str(), (*iUP)->Count() );
+					CqParameter * pNewUP = ( *iUP ) ->CloneType( ( *iUP ) ->strName().c_str(), ( *iUP ) ->Count() );
 					pNewUP->SetSize( 1 );
 
-					pNewUP->SetValue( (*iUP), 0, 0 );
-					pSurface->AddPrimitiveVariable(pNewUP);
+					pNewUP->SetValue( ( *iUP ), 0, 0 );
+					pSurface->AddPrimitiveVariable( pNewUP );
 				}
 			}
 
 			// If the shaders need u/v or s/t and they are not specified, then we need to put them in as defaults.
-			if( USES( MyUses, EnvVars_u ) && !bHasu() )
+			if ( USES( MyUses, EnvVars_u ) && !bHasu() )
 			{
-				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("u") );
-				pSurface->u()->SetSize(4);
-				pSurface->u()->pValue( 0 )[0] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u0, v0 );
-				pSurface->u()->pValue( 1 )[0] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u1, v0 );
-				pSurface->u()->pValue( 2 )[0] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u0, v1 );
-				pSurface->u()->pValue( 3 )[0] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u1, v1 );
+				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "u" ) );
+				pSurface->u() ->SetSize( 4 );
+				pSurface->u() ->pValue( 0 ) [ 0 ] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u0, v0 );
+				pSurface->u() ->pValue( 1 ) [ 0 ] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u1, v0 );
+				pSurface->u() ->pValue( 2 ) [ 0 ] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u0, v1 );
+				pSurface->u() ->pValue( 3 ) [ 0 ] = BilinearEvaluate( 0.0f, 1.0f, 0.0f, 1.0f, u1, v1 );
 			}
 
-			if( USES( MyUses, EnvVars_v ) && !bHasv() )
+			if ( USES( MyUses, EnvVars_v ) && !bHasv() )
 			{
-				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("v") );
-				pSurface->v()->SetSize(4);
-				pSurface->v()->pValue( 0 )[0] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u0, v0 );
-				pSurface->v()->pValue( 1 )[0] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u1, v0 );
-				pSurface->v()->pValue( 2 )[0] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u0, v1 );
-				pSurface->v()->pValue( 3 )[0] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u1, v1 );
+				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "v" ) );
+				pSurface->v() ->SetSize( 4 );
+				pSurface->v() ->pValue( 0 ) [ 0 ] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u0, v0 );
+				pSurface->v() ->pValue( 1 ) [ 0 ] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u1, v0 );
+				pSurface->v() ->pValue( 2 ) [ 0 ] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u0, v1 );
+				pSurface->v() ->pValue( 3 ) [ 0 ] = BilinearEvaluate( 0.0f, 0.0f, 1.0f, 1.0f, u1, v1 );
 			}
 
-			if( USES( MyUses, EnvVars_s ) && !bHass() )
+			if ( USES( MyUses, EnvVars_s ) && !bHass() )
 			{
-				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("s") );
-				pSurface->s()->SetSize(4);
-				pSurface->s()->pValue( 0 )[0] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u0, v0 );
-				pSurface->s()->pValue( 1 )[0] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u1, v0 );
-				pSurface->s()->pValue( 2 )[0] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u0, v1 );
-				pSurface->s()->pValue( 3 )[0] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u1, v1 );
+				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "s" ) );
+				pSurface->s() ->SetSize( 4 );
+				pSurface->s() ->pValue( 0 ) [ 0 ] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u0, v0 );
+				pSurface->s() ->pValue( 1 ) [ 0 ] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u1, v0 );
+				pSurface->s() ->pValue( 2 ) [ 0 ] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u0, v1 );
+				pSurface->s() ->pValue( 3 ) [ 0 ] = BilinearEvaluate( st1.x(), st2.x(), st3.x(), st4.x(), u1, v1 );
 			}
 
-			if( USES( MyUses, EnvVars_t ) && !bHast() )
+			if ( USES( MyUses, EnvVars_t ) && !bHast() )
 			{
-				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>("t") );
-				pSurface->t()->SetSize(4);
-				pSurface->t()->pValue( 0 )[0] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u0, v0 );
-				pSurface->t()->pValue( 1 )[0] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u1, v0 );
-				pSurface->t()->pValue( 2 )[0] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u0, v1 );
-				pSurface->t()->pValue( 3 )[0] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u1, v1 );
+				pSurface->AddPrimitiveVariable( new CqParameterTypedVarying<TqFloat, type_float, TqFloat>( "t" ) );
+				pSurface->t() ->SetSize( 4 );
+				pSurface->t() ->pValue( 0 ) [ 0 ] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u0, v0 );
+				pSurface->t() ->pValue( 1 ) [ 0 ] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u1, v0 );
+				pSurface->t() ->pValue( 2 ) [ 0 ] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u0, v1 );
+				pSurface->t() ->pValue( 3 ) [ 0 ] = BilinearEvaluate( st1.y(), st2.y(), st3.y(), st4.y(), u1, v1 );
 			}
 
 			aSplits.push_back( pSurface );

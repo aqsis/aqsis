@@ -69,11 +69,11 @@ struct SqImageSample
 	{}
 
 	enum {
-		Flag_Occludes = 0x0001,
-		Flag_Matte    = 0x0002
+	    Flag_Occludes = 0x0001,
+	    Flag_Matte = 0x0002
 	};
 
-	TqInt   m_flags;
+	TqInt m_flags;
 	CqColor	m_colColor;		///< The color at this sample point.
 	CqColor	m_colOpacity;		///< The opacity value of this sample point.
 	TqFloat	m_Depth;			///< The depth of the sample point.
@@ -194,7 +194,7 @@ class _qShareC	CqImagePixel
 		/** Scan through all the samples to find the min and max z values
 		*/
 		_qShareM	void	UpdateZValues();
-		
+
 		/** Clear all sample information from this pixel.
 		 */
 		_qShareM	void	Clear();

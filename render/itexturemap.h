@@ -5,8 +5,8 @@
  *	@brief	Brief description of the file contents
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2002/10/23 21:13:30 $
- */
+ *	Last change date:	$Date: 2002/10/31 11:51:11 $
+ */ 
 //------------------------------------------------------------------------------
 
 
@@ -32,10 +32,10 @@ enum	EqMapType
 {
     MapType_Invalid = 0,
 
-    MapType_Texture = 1,  		///< Plain texture map.
-    MapType_Environment,  	///< Cube face environment map.
-    MapType_Bump,  			///< Bump map (not used).
-    MapType_Shadow,  			///< Shadow map.
+    MapType_Texture = 1,   		///< Plain texture map.
+    MapType_Environment,   	///< Cube face environment map.
+    MapType_Bump,   			///< Bump map (not used).
+    MapType_Shadow,   			///< Shadow map.
     MapType_LatLong
 };
 
@@ -45,9 +45,9 @@ enum	EqMapType
  */
 enum	EqWrapMode
 {
-    WrapMode_Black = 0,  		///< Return black.
-    WrapMode_Periodic,  		///< Wrap round to the opposite side.
-    WrapMode_Clamp,  			///< Clamp to in range.
+    WrapMode_Black = 0,   		///< Return black.
+    WrapMode_Periodic,   		///< Wrap round to the opposite side.
+    WrapMode_Clamp,   			///< Clamp to in range.
 };
 
 
@@ -56,8 +56,8 @@ enum	EqWrapMode
  */
 enum EqTexFormat
 {
-    TexFormat_Plain = 0,  		///< Plain TIFF image.
-    TexFormat_MIPMAP = 1,  		///< Aqsis MIPMAP format.
+    TexFormat_Plain = 0,   		///< Plain TIFF image.
+    TexFormat_MIPMAP = 1,   		///< Aqsis MIPMAP format.
 };
 
 
@@ -70,7 +70,8 @@ enum EqTexFormat
 
 struct IqTextureMap
 {
-	virtual	~IqTextureMap()	{}
+	virtual	~IqTextureMap()
+	{}
 
 	/** Get the horizontal resolution of this image.
 	 */
@@ -98,16 +99,16 @@ struct IqTextureMap
 	virtual bool	IsValid() const = 0;
 
 	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat swidth, TqFloat twidth, TqFloat sblur, TqFloat tblur,
-		                                std::valarray<TqFloat>& val ) = 0;
+	                        std::valarray<TqFloat>& val ) = 0;
 	virtual	void	SampleMap( TqFloat s1, TqFloat t1, TqFloat s2, TqFloat t2, TqFloat s3, TqFloat t3, TqFloat s4, TqFloat t4,
-		                                TqFloat sblur, TqFloat tblur,
-		                                std::valarray<TqFloat>& val ) = 0;
+	                        TqFloat sblur, TqFloat tblur,
+	                        std::valarray<TqFloat>& val ) = 0;
 	virtual	void	SampleMap( CqVector3D& R, CqVector3D& swidth, CqVector3D& twidth, TqFloat sblur, TqFloat tblur,
-		                                std::valarray<TqFloat>& val ) = 0;
+	                        std::valarray<TqFloat>& val ) = 0;
 	virtual	void	SampleMap( CqVector3D& R1, CqVector3D& R2, CqVector3D& R3, CqVector3D& R4,
-		                                TqFloat sblur, TqFloat tblur,
-		                                std::valarray<TqFloat>& val ) = 0;
-	virtual CqMatrix&  GetMatrix(TqInt which)  =  0;
+	                        TqFloat sblur, TqFloat tblur,
+	                        std::valarray<TqFloat>& val ) = 0;
+	virtual CqMatrix& GetMatrix( TqInt which ) = 0;
 
 };
 

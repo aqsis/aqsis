@@ -54,7 +54,7 @@ class CqParameter
 		/** Pure virtual, clone function, which only creates a new parameter with matching type, no data.
 		 * \return A pointer to a new parameter with the same type.
 		 */
-		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const = 0;
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const = 0;
 		/** Pure virtual, duplicate function.
 		 * \return A pointer to a new parameter with the same name and value.
 		 */
@@ -158,7 +158,7 @@ class CqParameterTyped : public CqParameter
 		{
 			assert( pFrom->Type() == Type() );
 
-			CqParameterTyped<T,SLT>* pFromTyped = static_cast<CqParameterTyped<T, SLT>*>(pFrom);
+			CqParameterTyped<T, SLT>* pFromTyped = static_cast<CqParameterTyped<T, SLT>*>( pFrom );
 			*pValue( idxTarget ) = *pFromTyped->pValue( idxSource );
 		}
 
@@ -191,7 +191,8 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		// Overrridden from CqParameter
 
 
-		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
+
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedVarying<T, I, SLT>( Name, Count ) );
 		}
@@ -222,7 +223,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
 			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
-					pResult1->Class() == Class() && pResult1->Class() == Class());
+			        pResult1->Class() == Class() && pResult1->Class() == Class() );
 
 			CqParameterTypedVarying<T, I, SLT>* pTResult1 = static_cast<CqParameterTypedVarying<T, I, SLT>*>( pResult1 );
 			CqParameterTypedVarying<T, I, SLT>* pTResult2 = static_cast<CqParameterTypedVarying<T, I, SLT>*>( pResult2 );
@@ -231,7 +232,7 @@ class CqParameterTypedVarying : public CqParameterTyped<T, SLT>
 			// Check if a valid 4 point quad, do nothing if not.
 			if ( m_aValues.size() == 4 )
 			{
-				if( u )
+				if ( u )
 				{
 					pTResult2->pValue( 1 ) [ 0 ] = pValue( 1 ) [ 0 ];
 					pTResult2->pValue( 3 ) [ 0 ] = pValue( 3 ) [ 0 ];
@@ -323,7 +324,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 		CqParameterTypedUniform( const char* strName, TqInt Count = 1 ) :
 				CqParameterTyped<T, SLT>( strName, Count )
 		{
-			m_aValues.resize(1);
+			m_aValues.resize( 1 );
 		}
 		CqParameterTypedUniform( const CqParameterTypedUniform<T, I, SLT>& From ) :
 				CqParameterTyped<T, SLT>( From )
@@ -333,7 +334,7 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 		virtual	~CqParameterTypedUniform()
 		{}
 
-		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedUniform<T, I, SLT>( Name, Count ) );
 		}
@@ -365,11 +366,11 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
 			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
-					pResult1->Class() == Class() && pResult1->Class() == Class());
+			        pResult1->Class() == Class() && pResult1->Class() == Class() );
 
-			CqParameterTypedUniform<T,I,SLT>* pTResult1 = static_cast<CqParameterTypedUniform<T,I,SLT>*>( pResult1 );
-			CqParameterTypedUniform<T,I,SLT>* pTResult2 = static_cast<CqParameterTypedUniform<T,I,SLT>*>( pResult2 );
-			(*pTResult1) = (*pTResult2) = (*this);
+			CqParameterTypedUniform<T, I, SLT>* pTResult1 = static_cast<CqParameterTypedUniform<T, I, SLT>*>( pResult1 );
+			CqParameterTypedUniform<T, I, SLT>* pTResult2 = static_cast<CqParameterTypedUniform<T, I, SLT>*>( pResult2 );
+			( *pTResult1 ) = ( *pTResult2 ) = ( *this );
 		}
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
@@ -380,26 +381,26 @@ class CqParameterTypedUniform : public CqParameterTyped<T, SLT>
 			// Also note that the only time a Uniform value is diced is when it is on a single element, i.e. the patchmesh
 			// has been split into isngle patches, or the polymesh has been split into polys.
 			TqInt i;
-			for ( i = 0; i < (MAX(u*v,pResult->Size())); i++ )
-				pResult->SetValue( m_aValues[0], i );
+			for ( i = 0; i < ( MAX( u * v, pResult->Size() ) ); i++ )
+				pResult->SetValue( m_aValues[ 0 ], i );
 		}
 
 		// Overridden from CqParameterTyped<T>
 		virtual	const	T*	pValue() const
 		{
-			return ( &m_aValues[0] );
+			return ( &m_aValues[ 0 ] );
 		}
 		virtual	T*	pValue()
 		{
-			return ( &m_aValues[0] );
+			return ( &m_aValues[ 0 ] );
 		}
 		virtual	const	T*	pValue( const TqInt Index ) const
 		{
-			return ( &m_aValues[Index] );
+			return ( &m_aValues[ Index ] );
 		}
 		virtual	T*	pValue( const TqInt Index )
 		{
-			return ( &m_aValues[Index] );
+			return ( &m_aValues[ Index ] );
 		}
 
 
@@ -449,7 +450,7 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 		virtual	~CqParameterTypedConstant()
 		{}
 
-		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedConstant<T, I, SLT>( Name, Count ) );
 		}
@@ -477,11 +478,11 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
 			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
-					pResult1->Class() == Class() && pResult1->Class() == Class());
+			        pResult1->Class() == Class() && pResult1->Class() == Class() );
 
-			CqParameterTypedConstant<T,I,SLT>* pTResult1 = static_cast<CqParameterTypedConstant<T,I,SLT>*>( pResult1 );
-			CqParameterTypedConstant<T,I,SLT>* pTResult2 = static_cast<CqParameterTypedConstant<T,I,SLT>*>( pResult2 );
-			(*pTResult1) = (*pTResult2) = (*this);
+			CqParameterTypedConstant<T, I, SLT>* pTResult1 = static_cast<CqParameterTypedConstant<T, I, SLT>*>( pResult1 );
+			CqParameterTypedConstant<T, I, SLT>* pTResult2 = static_cast<CqParameterTypedConstant<T, I, SLT>*>( pResult2 );
+			( *pTResult1 ) = ( *pTResult2 ) = ( *this );
 		}
 		virtual	void	Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface = 0 )
 		{
@@ -490,7 +491,7 @@ class CqParameterTypedConstant : public CqParameterTyped<T, SLT>
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqInt i;
-			for ( i = 0; i < (MAX(u*v,pResult->Size())); i++ )
+			for ( i = 0; i < ( MAX( u * v, pResult->Size() ) ); i++ )
 				pResult->SetValue( m_Value, i );
 		}
 
@@ -554,7 +555,7 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 		virtual	~CqParameterTypedVertex()
 		{}
 
-		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedVertex<T, I, SLT>( Name, Count ) );
 		}
@@ -569,7 +570,7 @@ class CqParameterTypedVertex : public CqParameterTypedVarying<T, I, SLT>
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
 			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
-					pResult1->Class() == Class() && pResult1->Class() == Class());
+			        pResult1->Class() == Class() && pResult1->Class() == Class() );
 
 			pSurface->NaturalSubdivide( this, pResult1, pResult2, u );
 		}
@@ -614,7 +615,7 @@ class CqParameterTypedFaceVarying : public CqParameterTypedVarying<T, I, SLT>
 		virtual	~CqParameterTypedFaceVarying()
 		{}
 
-		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedFaceVarying<T, I, SLT>( Name, Count ) );
 		}
@@ -663,7 +664,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		virtual	~CqParameterTypedVaryingArray()
 		{}
 
-		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedVaryingArray<T, I, SLT>( Name, Count ) );
 		}
@@ -697,7 +698,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 		virtual void	Subdivide( CqParameter* pResult1, CqParameter* pResult2, TqBool u, IqSurface* pSurface = 0 )
 		{
 			assert( pResult1->Type() == Type() && pResult1->Type() == Type() &&
-					pResult1->Class() == Class() && pResult1->Class() == Class());
+			        pResult1->Class() == Class() && pResult1->Class() == Class() );
 
 			CqParameterTypedVaryingArray<T, I, SLT>* pTResult1 = static_cast<CqParameterTypedVaryingArray<T, I, SLT>*>( pResult1 );
 			CqParameterTypedVaryingArray<T, I, SLT>* pTResult2 = static_cast<CqParameterTypedVaryingArray<T, I, SLT>*>( pResult2 );
@@ -706,7 +707,7 @@ class CqParameterTypedVaryingArray : public CqParameterTyped<T, SLT>
 			// Check if a valid 4 point quad, do nothing if not.
 			if ( m_aValues.size() == 4 )
 			{
-				if( u )
+				if ( u )
 				{
 					pTResult2->pValue( 1 ) [ 0 ] = pValue( 1 ) [ 0 ];
 					pTResult2->pValue( 3 ) [ 0 ] = pValue( 3 ) [ 0 ];
@@ -816,7 +817,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 		virtual	~CqParameterTypedUniformArray()
 	{}
 
-		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedUniformArray<T, I, SLT>( Name, Count ) );
 		}
@@ -850,7 +851,7 @@ class CqParameterTypedUniformArray : public CqParameterTyped<T, SLT>
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqInt i;
-			for ( i = 0; i < (MAX(u*v,pResult->Size())); i++ )
+			for ( i = 0; i < ( MAX( u * v, pResult->Size() ) ); i++ )
 				pResult->SetValue( pValue( 0 ) [ 0 ], i );
 		}
 
@@ -921,7 +922,7 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 		virtual	~CqParameterTypedConstantArray()
 	{}
 
-		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedConstantArray<T, I, SLT>( Name, Count ) );
 		}
@@ -955,7 +956,7 @@ class CqParameterTypedConstantArray : public CqParameterTyped<T, SLT>
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
 			TqInt i;
-			for ( i = 0; i < (MAX(u*v,pResult->Size())); i++ )
+			for ( i = 0; i < ( MAX( u * v, pResult->Size() ) ); i++ )
 				pResult->SetValue( pValue( 0 ) [ 0 ], i );
 		}
 
@@ -1020,7 +1021,7 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SL
 		virtual	~CqParameterTypedVertexArray()
 		{}
 
-		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedVertexArray<T, I, SLT>( Name, Count ) );
 		}
@@ -1039,7 +1040,7 @@ class CqParameterTypedVertexArray : public CqParameterTypedVaryingArray<T, I, SL
 			assert( NULL != pSurface );
 			// Note it is assumed that the variable has been
 			// initialised to the correct size prior to calling.
-			pSurface->NaturalDice( this, u,v, pResult );
+			pSurface->NaturalDice( this, u, v, pResult );
 		}
 
 		/** Static constructor, to allow type free parameter construction.
@@ -1073,7 +1074,7 @@ class CqParameterTypedFaceVaryingArray : public CqParameterTypedVaryingArray<T, 
 		virtual	~CqParameterTypedFaceVaryingArray()
 		{}
 
-		virtual	CqParameter* CloneType(const char* Name, TqInt Count = 1 ) const
+		virtual	CqParameter* CloneType( const char* Name, TqInt Count = 1 ) const
 		{
 			return ( new CqParameterTypedFaceVaryingArray<T, I, SLT>( Name, Count ) );
 		}
@@ -1110,7 +1111,7 @@ template <class T, EqVariableType I, class SLT>
 void CqParameterTypedVarying<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* pResult, IqSurface* pSurface )
 {
 	T res;
-	
+
 	SLT* pResData;
 	pResult->GetValuePtr( pResData );
 	assert( NULL != pResData );
@@ -1129,11 +1130,11 @@ void CqParameterTypedVarying<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* p
 			for ( iu = 0; iu <= u; iu++ )
 			{
 				res = BilinearEvaluate<T>( pValue( 0 ) [ 0 ],
-				                          pValue( 1 ) [ 0 ],
-				                          pValue( 2 ) [ 0 ],
-				                          pValue( 3 ) [ 0 ],
-				                          iu * diu, iv * div );
-				(*pResData++) = res;
+				                           pValue( 1 ) [ 0 ],
+				                           pValue( 2 ) [ 0 ],
+				                           pValue( 3 ) [ 0 ],
+				                           iu * diu, iv * div );
+				( *pResData++ ) = res;
 			}
 		}
 	}
@@ -1146,7 +1147,7 @@ void CqParameterTypedVarying<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderData* p
 		{
 			TqInt iu;
 			for ( iu = 0; iu <= u; iu++ )
-				(*pResData++) = res;
+				( *pResData++ ) = res;
 		}
 	}
 }
@@ -1163,7 +1164,7 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 {
 	assert( pResult->Type() == Type() );
 	assert( pResult->Class() == class_varying );
-	
+
 	T res;
 
 	SLT* pResData;
@@ -1184,11 +1185,11 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 			for ( iu = 0; iu <= u; iu++ )
 			{
 				res = BilinearEvaluate<T>( pValue( 0 ) [ 0 ],
-				                          pValue( 1 ) [ 0 ],
-				                          pValue( 2 ) [ 0 ],
-				                          pValue( 3 ) [ 0 ],
-				                          iu * diu, iv * div );
-				(*pResData++) = res;
+				                           pValue( 1 ) [ 0 ],
+				                           pValue( 2 ) [ 0 ],
+				                           pValue( 3 ) [ 0 ],
+				                           iu * diu, iv * div );
+				( *pResData++ ) = res;
 			}
 		}
 	}
@@ -1201,7 +1202,7 @@ void CqParameterTypedVaryingArray<T, I, SLT>::Dice( TqInt u, TqInt v, IqShaderDa
 		{
 			TqInt iu;
 			for ( iu = 0; iu <= u; iu++ )
-				(*pResData++) = res;
+				( *pResData++ ) = res;
 		}
 	}
 }

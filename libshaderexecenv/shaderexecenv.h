@@ -191,12 +191,12 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		virtual IqShaderData* FindStandardVar( char* pname )
 		{
 			TqInt tmp = m_LocalIndex;
-			for (; m_LocalIndex < EnvVars_Last; m_LocalIndex++ )
+			for ( ; m_LocalIndex < EnvVars_Last; m_LocalIndex++ )
 			{
 				if ( strcmp( m_apVariableNames[ m_LocalIndex ], pname ) == 0 )
 					return ( m_apVariables[ m_LocalIndex ] );
 			}
-			
+
 			for ( m_LocalIndex = 0; m_LocalIndex < tmp; m_LocalIndex++ )
 			{
 				if ( strcmp( m_apVariableNames[ m_LocalIndex ], pname ) == 0 )
@@ -212,7 +212,7 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 				if ( strcmp( m_apVariableNames[ m_LocalIndex ], pname ) == 0 )
 					return ( m_LocalIndex );
 			}
-			
+
 			for ( m_LocalIndex = 0; m_LocalIndex < tmp; m_LocalIndex++ )
 			{
 				if ( strcmp( m_apVariableNames[ m_LocalIndex ], pname ) == 0 )
@@ -233,7 +233,7 @@ class CqShaderExecEnv : public IqShaderExecEnv, CqRefCount
 		{
 			return ( m_apVariables[ EnvVars_Cs ] );
 		}
-		virtual IqShaderData* 	Os()
+		virtual IqShaderData* Os()
 		{
 			return ( m_apVariables[ EnvVars_Os ] );
 		}
@@ -588,13 +588,13 @@ R SO_DuType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
 	R Ret;
 	TqInt uRes = ps->uGridRes();
 	TqInt GridX = i % ( uRes + 1 );
-	
-	TqFloat fdu;
-	ps->du()->GetFloat( fdu );
 
-	if(fdu == 0)	return(Def);
-	
-	R v1,v2;
+	TqFloat fdu;
+	ps->du() ->GetFloat( fdu );
+
+	if ( fdu == 0 ) return ( Def );
+
+	R v1, v2;
 	if ( GridX < uRes )
 	{
 		Var->GetValue( v1, i + 1 );
@@ -622,11 +622,11 @@ R SO_DvType( IqShaderData* Var, TqInt i, IqShaderExecEnv* ps, R& Def )
 	TqInt GridY = ( i / ( uRes + 1 ) );
 
 	TqFloat fdv;
-	ps->dv()->GetFloat( fdv );
+	ps->dv() ->GetFloat( fdv );
 
-	if(fdv == 0)	return(Def);
+	if ( fdv == 0 ) return ( Def );
 
-	R v1,v2;
+	R v1, v2;
 	if ( GridY < vRes )
 	{
 		Var->GetValue( v1, i + uRes + 1 );
@@ -649,7 +649,7 @@ template <class R>
 R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* ps )
 {
 	assert( NULL != Var );
-	
+
 	R Retu, Retv;
 	TqInt uRes = ps->uGridRes();
 	TqInt vRes = ps->vGridRes();
@@ -662,9 +662,9 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 	// Calculate deriviative in u
 	if ( GridX < uRes )
 	{
-		Var->GetValue( v1, i + 1);
+		Var->GetValue( v1, i + 1 );
 		Var->GetValue( v2, i );
-		if( NULL != den )	
+		if ( NULL != den )
 			den->GetValue( u, i );
 		Retu = ( v1 - v2 ) / u;
 	}
@@ -672,7 +672,7 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 	{
 		Var->GetValue( v1, i );
 		Var->GetValue( v2, i - 1 );
-		if( NULL != den )	
+		if ( NULL != den )
 			den->GetValue( u, i );
 		Retu = ( v1 - v2 ) / u;
 	}
@@ -682,7 +682,7 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 	{
 		Var->GetValue( v1, i + uRes + 1 );
 		Var->GetValue( v2, i );
-		if( NULL != den )	
+		if ( NULL != den )
 			den->GetValue( v, i );
 		Retv = ( v1 - v2 ) / v;
 	}
@@ -690,7 +690,7 @@ R SO_DerivType( IqShaderData* Var, IqShaderData* den, TqInt i, IqShaderExecEnv* 
 	{
 		Var->GetValue( v1, i );
 		Var->GetValue( v2, i - ( uRes - 1 ) );
-		if( NULL != den )	
+		if ( NULL != den )
 			den->GetValue( v, i );
 		Retv = ( v1 - v2 ) / v;
 	}

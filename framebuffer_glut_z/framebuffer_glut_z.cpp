@@ -195,12 +195,12 @@ void keyboard( unsigned char key, int x, int y )
 
 int main( int argc, char** argv )
 {
-        int port = -1;
-	char *portStr = getenv("AQSIS_DD_PORT");
-	
-	if (portStr != NULL)
+	int port = -1;
+	char *portStr = getenv( "AQSIS_DD_PORT" );
+
+	if ( portStr != NULL )
 	{
-		port = atoi(portStr);
+		port = atoi( portStr );
 	}
 
 	if ( -1 == DDInitialise( NULL, port ) )
@@ -303,9 +303,9 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 	char* bucket = reinterpret_cast<char*>( &message->m_Data );
 
 	// CHeck if the beck is not at all within the crop window.
-	if( message->m_XMin > g_CWXmax || message->m_XMaxPlus1 < g_CWXmin ||
-	    message->m_YMin > g_CWYmax || message->m_YMaxPlus1 < g_CWYmin )
-		return( 0 );
+	if ( message->m_XMin > g_CWXmax || message->m_XMaxPlus1 < g_CWXmin ||
+	        message->m_YMin > g_CWYmax || message->m_YMaxPlus1 < g_CWYmin )
+		return ( 0 );
 
 	for ( TqInt y = message->m_YMin - g_CWYmin; y < message->m_YMaxPlus1 - g_CWYmin; y++ )
 	{
@@ -324,7 +324,7 @@ TqInt Data( SOCKET s, SqDDMessageBase* pMsgB )
 		}
 	}
 
-	const TqInt BucketX = message->m_XMin  - g_CWXmin;
+	const TqInt BucketX = message->m_XMin - g_CWXmin;
 	const TqInt BucketY = g_ImageHeight - ( message->m_YMaxPlus1 - g_CWYmin );
 	const TqInt BucketW = message->m_XMaxPlus1 - message->m_XMin;
 	const TqInt BucketH = message->m_YMaxPlus1 - message->m_YMin;

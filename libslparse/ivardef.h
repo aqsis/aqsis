@@ -155,41 +155,41 @@ enum EqVariableType
 
 enum EqShaderType
 {
-    Type_Surface,  			///< Surface shader
-    Type_Lightsource,  		///< Lightsource shader.
-    Type_Volume,  			///< Volume shader.
-    Type_Displacement,  		///< Displacement shader.
-    Type_Transformation,  	///< Transformation shader.
-    Type_Imager,  			///< Image shader.
+    Type_Surface,   			///< Surface shader
+    Type_Lightsource,   		///< Lightsource shader.
+    Type_Volume,   			///< Volume shader.
+    Type_Displacement,   		///< Displacement shader.
+    Type_Transformation,   	///< Transformation shader.
+    Type_Imager,   			///< Image shader.
 };
 
 
 enum EqEnvVars
 {
-    EnvVars_Cs,  		///< Surface color.
-    EnvVars_Os,  		///< Surface opacity.
-    EnvVars_Ng,  		///< Geometric normal.
-    EnvVars_du,  		///< First derivative in u.
-    EnvVars_dv,  		///< First derivative in v.
-    EnvVars_L,  		///< Incoming light direction.
-    EnvVars_Cl,  		///< Light color.
-    EnvVars_Ol,  		///< Light opacity.
-    EnvVars_P,  		///< Point being shaded.
-    EnvVars_dPdu,  	///< Change in P with respect to change in u.
-    EnvVars_dPdv,  	///< Change in P with respect to change in v.
-    EnvVars_N,  		///< Surface normal.
-    EnvVars_u,  		///< Surface u coordinate.
-    EnvVars_v,  		///< Surface v coordinate.
-    EnvVars_s,  		///< Texture s coordinate.
-    EnvVars_t,  		///< Texture t coordinate.
-    EnvVars_I,  		///< Incident ray direction.
-    EnvVars_Ci,  		///< Incident color.
-    EnvVars_Oi,  		///< Incident opacity.
-    EnvVars_Ps,  		///< Point being lit.
-    EnvVars_E,  		///< Viewpoint position.
-    EnvVars_ncomps,  	///< Number of color components.
-    EnvVars_time,  	///< Frame time.
-    EnvVars_alpha,  	///< Fractional pixel coverage.
+    EnvVars_Cs,   		///< Surface color.
+    EnvVars_Os,   		///< Surface opacity.
+    EnvVars_Ng,   		///< Geometric normal.
+    EnvVars_du,   		///< First derivative in u.
+    EnvVars_dv,   		///< First derivative in v.
+    EnvVars_L,   		///< Incoming light direction.
+    EnvVars_Cl,   		///< Light color.
+    EnvVars_Ol,   		///< Light opacity.
+    EnvVars_P,   		///< Point being shaded.
+    EnvVars_dPdu,   	///< Change in P with respect to change in u.
+    EnvVars_dPdv,   	///< Change in P with respect to change in v.
+    EnvVars_N,   		///< Surface normal.
+    EnvVars_u,   		///< Surface u coordinate.
+    EnvVars_v,   		///< Surface v coordinate.
+    EnvVars_s,   		///< Texture s coordinate.
+    EnvVars_t,   		///< Texture t coordinate.
+    EnvVars_I,   		///< Incident ray direction.
+    EnvVars_Ci,   		///< Incident color.
+    EnvVars_Oi,   		///< Incident opacity.
+    EnvVars_Ps,   		///< Point being lit.
+    EnvVars_E,   		///< Viewpoint position.
+    EnvVars_ncomps,   	///< Number of color components.
+    EnvVars_time,   	///< Frame time.
+    EnvVars_alpha,   	///< Fractional pixel coverage.
 
     EnvVars_Last
 };

@@ -81,17 +81,17 @@ int main( int argc, char** argv )
 	std::string aqslcompargs = "";
 	for ( i = 1; i < argc; i++ )
 	{
-		if ( strstr( argv[ i ], "-help" ) || 
-			 strstr( argv[ i ], "-version" ) ||
-			 strstr( argv[ i ], "-o" ) )
+		if ( strstr( argv[ i ], "-help" ) ||
+		        strstr( argv[ i ], "-version" ) ||
+		        strstr( argv[ i ], "-o" ) )
 		{
-			aqslcompargs.append( argv[i] );
-			aqslcompargs.append(" ");
+			aqslcompargs.append( argv[ i ] );
+			aqslcompargs.append( " " );
 		}
 		else
 		{
-			slppargs.append(argv[i]);
-			slppargs.append(" ");
+			slppargs.append( argv[ i ] );
+			slppargs.append( " " );
 		}
 	}
 	std::cout << "slpp -- " << slppargs.c_str() << std::endl;

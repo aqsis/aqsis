@@ -96,8 +96,8 @@ class CqQuadric : public CqSurface
 		CqQuadric&	operator=( const CqQuadric& From );
 
 		// Derived from CqSurface
-		virtual void		NaturalDice(CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData);
-		virtual	void		GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
+		virtual void	NaturalDice( CqParameter* pParameter, TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pData );
+		virtual	void	GenerateGeometricNormals( TqInt uDiceSize, TqInt vDiceSize, IqShaderData* pNormals );
 
 	protected:
 		CqMatrix	m_matTx;		///< Transformation matrix from object to camera.
@@ -128,7 +128,10 @@ class CqSphere : public CqQuadric
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
-		virtual TqBool		CanGenerateNormals() const	{ return( TqTrue ); }
+		virtual TqBool	CanGenerateNormals() const
+		{
+			return ( TqTrue );
+		}
 
 		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 
@@ -341,7 +344,10 @@ class CqDisk : public CqQuadric
 
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v );
 		virtual	CqVector3D	DicePoint( TqInt u, TqInt v, CqVector3D& Normal );
-		virtual TqBool		CanGenerateNormals() const	{ return( TqTrue ); }
+		virtual TqBool	CanGenerateNormals() const
+		{
+			return ( TqTrue );
+		}
 
 		virtual	TqInt PreSubdivide( std::vector<CqBasicSurface*>& aSplits, TqBool u );
 

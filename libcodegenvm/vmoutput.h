@@ -51,7 +51,7 @@ struct SqVarRefTranslator
 };
 
 void OutputTree( const IqParseNode* pNode, std::string strOutName = "" );
-void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string strOutName = "");
+void OutputTreeNode( const IqParseNode* pNode, std::ostream& out, std::string strOutName = "" );
 IqVarDef* pTranslatedVariable( SqVarRef& Ref );
 void PushTransTable( std::vector<SqVarRefTranslator>* paTransTable );
 std::vector<SqVarRefTranslator>*	PopTransTable();
