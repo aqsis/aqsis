@@ -29,14 +29,14 @@
 
 #include	<stack>
 
+#include	"aqsis.h"
+
 #include	"vector3d.h"
 #include	"vector4d.h"
 #include	"color.h"
 #include	"sstring.h"
 #include	"matrix.h"
 #include	"shadervariable.h"
-
-#include	"specific.h"	// Needed for namespace macros.
 
 START_NAMESPACE(Aqsis)
 

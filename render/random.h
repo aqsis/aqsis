@@ -29,7 +29,7 @@
 
 #include	<stdlib.h>
 
-#include	"specific.h"
+#include	"aqsis.h"
 
 #include	"ri.h"
 

@@ -26,7 +26,7 @@
 #include	"aqsis.h"
 
 #include	"attributes.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 #include	"shaders.h"
 
 START_NAMESPACE(Aqsis)

@@ -30,6 +30,8 @@
 
 #include	<vector>
 
+#include	"aqsis.h"
+
 #include "ri.h"
 #include "color.h"
 #include "list.h"
@@ -39,8 +41,6 @@
 #include "vector4d.h"
 #include "imagebuffer.h"
 #include "version.h"
-
-#include "specific.h"
 
 #define		_qShareName	CORE
 #include	"share.h"

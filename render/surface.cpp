@@ -24,7 +24,7 @@
 */
 
 #include	"aqsis.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 #include	"micropolygon.h"
 #include	"surface.h"
 #include	"vector2d.h"
@@ -40,10 +40,10 @@ CqBasicSurface::CqBasicSurface()	:	CqListEntry<CqBasicSurface>(), m_fDiceable(Tq
 										m_pAttributes(0), m_pTransform(0), m_SplitDir(SplitDir_U)
 {
 	// Set a refernce with the current attributes.
-	m_pAttributes=const_cast<CqAttributes*>(pCurrentRenderer()->pattrCurrent());
+	m_pAttributes=const_cast<CqAttributes*>(QGetRenderContext()->pattrCurrent());
 	m_pAttributes->Reference();
 
-	m_pTransform=const_cast<CqTransform*>(pCurrentRenderer()->ptransCurrent());
+	m_pTransform=const_cast<CqTransform*>(QGetRenderContext()->ptransCurrent());
 	m_pTransform->Reference();
 }
 
@@ -153,12 +153,12 @@ void CqBasicSurface::ExpandBoundForMotion(CqBound& Bound)
 		{
 			TqFloat time=pTransform()->Time(i);
 			CqBound B2=Bound;
-			B2.Transform(pCurrentRenderer()->matSpaceToSpace("camera","object",CqMatrix(),pTransform()->matObjectToWorld()));
+			B2.Transform(QGetRenderContext()->matSpaceToSpace("camera","object",CqMatrix(),pTransform()->matObjectToWorld()));
 			// Transform to world coordinates at the correct time.
 			B2.Transform(pTransform()->matObjectToWorld(time));
 			B1=B1.Combine(B2);
 		}
-		B1.Transform(pCurrentRenderer()->matSpaceToSpace("world","camera"));
+		B1.Transform(QGetRenderContext()->matSpaceToSpace("world","camera"));
 		Bound=B1;
 	}
 }

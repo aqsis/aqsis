@@ -31,6 +31,8 @@
 					}
 %define DEBUG 1
 %header{
+#include	"sstring.h"
+
 using namespace Aqsis;
 
 #include	"shadervariable.h"
@@ -1310,7 +1312,7 @@ tvpair	:	string INTEGER_TOKEN {
 									$$.value=0;
 
 									// Find token in the list of declared tokens
-									SqParameterDeclaration Decl=pCurrentRenderer()->FindParameterDecl($1->c_str());
+									SqParameterDeclaration Decl=QGetRenderContext()->FindParameterDecl($1->c_str());
 									if(Decl.m_strName.compare(""))
 									{
 										if((Decl.m_Type&Type_Mask)==Type_Float)
@@ -1343,7 +1345,7 @@ tvpair	:	string INTEGER_TOKEN {
 								}
 	|		string FLOAT_TOKEN	{
 									// Find token in the list of declared tokens
-									SqParameterDeclaration Decl=pCurrentRenderer()->FindParameterDecl($1->c_str());
+									SqParameterDeclaration Decl=QGetRenderContext()->FindParameterDecl($1->c_str());
 									if(Decl.m_strName.compare(""))
 									{
 										if((Decl.m_Type&Type_Mask)==Type_Float)
@@ -1377,7 +1379,7 @@ tvpair	:	string INTEGER_TOKEN {
 								}
 	|		string STRING_TOKEN	{
 									// Find token in the list of declared tokens
-									SqParameterDeclaration Decl=pCurrentRenderer()->FindParameterDecl($1->c_str());
+									SqParameterDeclaration Decl=QGetRenderContext()->FindParameterDecl($1->c_str());
 									if(Decl.m_strName.compare(""))
 									{
 										if((Decl.m_Type&Type_Mask)==Type_String)
@@ -1556,7 +1558,7 @@ char* RIBParser::CheckParameterArrayType(const char* strname, struct yy_RIBParse
 	char* ret=0;
 	
 	// Find token in the list of declared tokens
-	SqParameterDeclaration Decl=pCurrentRenderer()->FindParameterDecl(strname);
+	SqParameterDeclaration Decl=QGetRenderContext()->FindParameterDecl(strname);
 	if(Decl.m_strName.compare(""))
 	{
 		// First check if the types match, and build the array as appropriate

@@ -27,7 +27,7 @@
 #include	"stats.h"
 #include	"imagebuffer.h"
 #include	"micropolygon.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 #include	"surface.h"
 #include	"lights.h"
 #include	"shaders.h"
@@ -44,7 +44,7 @@ CqMemoryPool<CqMicroPolygonStatic>	CqMicroPolygonStatic::m_thePool;
 
 CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(), m_fNormals(TqFalse), m_cReferences(0)
 {
-	pCurrentRenderer()->Stats().cGridsAllocated()++;
+	QGetRenderContext()->Stats().cGridsAllocated()++;
 }
 
 
@@ -55,7 +55,7 @@ CqMicroPolyGrid::CqMicroPolyGrid() : CqMicroPolyGridBase(), m_fNormals(TqFalse),
 CqMicroPolyGrid::~CqMicroPolyGrid()	
 {
 	assert(m_cReferences==0);
-	pCurrentRenderer()->Stats().cGridsDeallocated()++;
+	QGetRenderContext()->Stats().cGridsDeallocated()++;
 }
 
 //---------------------------------------------------------------------
@@ -64,7 +64,7 @@ CqMicroPolyGrid::~CqMicroPolyGrid()
 
 CqMicroPolyGrid::CqMicroPolyGrid(TqInt cu, TqInt cv, CqSurface* pSurface) : m_fNormals(TqFalse), m_cReferences(0)
 {
-	pCurrentRenderer()->Stats().cGridsAllocated()++;
+	QGetRenderContext()->Stats().cGridsAllocated()++;
 	// Initialise the shader execution environment
 	Initialise(cu,cv,pSurface);
 }
@@ -282,7 +282,7 @@ void CqMicroPolyGrid::Shade()
 
 void CqMicroPolyGrid::Project()
 {
-	CqMatrix matCameraToRaster=pCurrentRenderer()->matSpaceToSpace("camera", "raster");
+	CqMatrix matCameraToRaster=QGetRenderContext()->matSpaceToSpace("camera", "raster");
 	// Transform the whole grid to hybrid camera/raster space
 	Reset();
 	do
@@ -366,7 +366,7 @@ void CqMicroPolyGrid::Split(CqImageBuffer* pImage, TqInt iBucket, long xmin, lon
 
 void CqMotionMicroPolyGrid::Project()
 {
-	CqMatrix matCameraToRaster=pCurrentRenderer()->matSpaceToSpace("camera", "raster");
+	CqMatrix matCameraToRaster=QGetRenderContext()->matSpaceToSpace("camera", "raster");
 	// Transform all grids to hybrid camera/raster space
 	TqInt iTime;
 	for(iTime=0; iTime<cTimes(); iTime++)
@@ -462,7 +462,7 @@ void CqMotionMicroPolyGrid::Split(CqImageBuffer* pImage, TqInt iBucket, long xmi
 
 CqMicroPolygonBase::CqMicroPolygonBase() : m_pGrid(0), m_RefCount(0)
 { 
-	pCurrentRenderer()->Stats().cMPGsAllocated()++; 
+	QGetRenderContext()->Stats().cMPGsAllocated()++; 
 }
 
 
@@ -472,7 +472,7 @@ CqMicroPolygonBase::CqMicroPolygonBase() : m_pGrid(0), m_RefCount(0)
 
 CqMicroPolygonBase::CqMicroPolygonBase(const CqMicroPolygonBase& From)
 {
-	pCurrentRenderer()->Stats().cMPGsAllocated()++;
+	QGetRenderContext()->Stats().cMPGsAllocated()++;
 	*this=From;
 }
 
@@ -484,7 +484,7 @@ CqMicroPolygonBase::CqMicroPolygonBase(const CqMicroPolygonBase& From)
 CqMicroPolygonBase::~CqMicroPolygonBase()	
 {
 	if(m_pGrid)	m_pGrid->Release(); 
-	pCurrentRenderer()->Stats().cMPGsDeallocated()++;
+	QGetRenderContext()->Stats().cMPGsDeallocated()++;
 }
 
 
@@ -604,7 +604,7 @@ TqBool CqMicroPolygonStatic::Sample(CqVector2D& vecSample, TqFloat time, TqFloat
 {
 	if(fContains(vecSample, D))
 	{
-		pCurrentRenderer()->Stats().cSampleHits()++;
+		QGetRenderContext()->Stats().cSampleHits()++;
 		return(TqTrue);
 	}
 	else
@@ -656,7 +656,7 @@ TqBool CqMicroPolygonMotion::Sample(CqVector2D& vecSample, TqFloat time, TqFloat
 	CqMicroPolygonStaticBase MP=GetMotionObjectInterpolated(time);
 	if(MP.fContains(vecSample, D))
 	{
-		pCurrentRenderer()->Stats().cSampleHits()++;
+		QGetRenderContext()->Stats().cSampleHits()++;
 		return(TqTrue);
 	}
 	else

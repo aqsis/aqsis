@@ -19,7 +19,7 @@
 
 
 /** \file
-		\brief Declares IsRIBCompiler interface to the RIB parser.
+		\brief Declares IqRIBCompiler interface to the RIB parser.
 		\author Paul C. Gregory (pgregory@aqsis.com)
 */
 
@@ -28,28 +28,22 @@
 #define IRIBCOMPILER_H_INCLUDED 1
 
 #include	<vector>
-#include	"file.h"
-
-START_NAMESPACE(Aqsis)
 
 //----------------------------------------------------------------------
-/** \struct IsRIBCompiler
+/** \struct IqRIBCompiler
  * Interface to an ascii RIB compiler.
  */
 
-struct IsRIBCompiler
+struct IqRIBCompiler
 {
 	public:
-	virtual		void	SetFile(CqFile& file)=0;
-	virtual		TqInt	Parse()=0;
+	virtual		void	SetFile(std::istream& file, const char* name)=0;
+	virtual		int		Parse()=0;
 	virtual		void	Destroy()=0;
 
-	static		IsRIBCompiler* Create();
+	static		IqRIBCompiler* Create();
 };
 
 //-----------------------------------------------------------------------
-
-
-END_NAMESPACE(Aqsis)
 
 #endif	// !IRIBCOMPILER_H_INCLUDED

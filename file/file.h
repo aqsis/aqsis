@@ -10,9 +10,9 @@
 #ifndef IBUFFER_H_INCLUDED
 #define IBUFFER_H_INCLUDED 1
 
-#include	"ImageBuffer.h"
+#include	"aqsis.h"
 
-#include	"specific.h"	// Needed for namespace macros.
+#include	"ImageBuffer.h"
 #include	"tiffio.h"
 
 #define		_qShareName	FILEBUFFER

@@ -27,10 +27,10 @@
 #ifndef BOUND_H_INCLUDED
 #define BOUND_H_INCLUDED 1
 
-#include	"ri.h"
+#include	"aqsis.h"
 
+#include	"ri.h"
 #include	"matrix.h"
-#include	"specific.h"
 
 #define		_qShareName	CORE
 #include	"share.h"

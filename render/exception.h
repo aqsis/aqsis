@@ -28,8 +28,9 @@
 //{
 #define EXCEPTION_H_INCLUDED 1
 
+#include	"aqsis.h"
+
 #include	"sstring.h"
-#include	"specific.h"
 
 #define		_qShareName	CORE
 #include	"share.h"

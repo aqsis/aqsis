@@ -95,7 +95,7 @@ CqMicroPolyGridBase* CqQuadric::Dice()
 	}
 	pGrid->SetNormals(TqFalse);
 	// Only shade if the ImageBuffer mode is at least RGB
-	if(pCurrentRenderer()->optCurrent().iDisplayMode()&ModeRGB)
+	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
 		pGrid->Shade();
 
 	return(pGrid);
@@ -123,7 +123,7 @@ void CqQuadric::EqtimateGridSize()
 	TqFloat maxusize,maxvsize;
 	maxusize=maxvsize=0;
 
-	CqMatrix matTx=pCurrentRenderer()->matSpaceToSpace("camera","raster")*m_matTx;
+	CqMatrix matTx=QGetRenderContext()->matSpaceToSpace("camera","raster")*m_matTx;
 
 	m_uDiceSize=m_vDiceSize=ESTIMATEGRIDSIZE;
 
@@ -156,7 +156,7 @@ void CqQuadric::EqtimateGridSize()
 	maxvsize=sqrt(maxvsize);
 
 	float rate=pAttributes()->fEffectiveShadingRate();
-//	if(pCurrentRenderer()->Mode()==RenderMode_Shadows)
+//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
 //	{
 //		const TqFloat* pattrShadowShadingRate=m_pAttributes->GetFloatAttribute("render","shadow_shadingrate");
 //		if(pattrShadowShadingRate!=0)

@@ -29,10 +29,10 @@
 
 #include	<iostream>
 
+#include	"aqsis.h"
+
 #include	"ri.h"
 #include	"sstring.h"
-
-#include	"specific.h"	// Needed for namespace macros.
 
 #define		_qShareName	CORE
 #include	"share.h"

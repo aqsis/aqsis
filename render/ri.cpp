@@ -29,7 +29,7 @@
 #include	"aqsis.h"
 #include	"imagebuffer.h"
 #include	"lights.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 #include	"scene.h"
 #include	"patch.h"
 #include	"polygon.h"
@@ -213,10 +213,10 @@ RtInt BuildParameterList(va_list pArgs, RtToken*& pTokens, RtPointer*& pValues)
 // RiDeclare
 // Declare a new variable to be recognised by the system.
 //
- RtToken	RiDeclare(const char *name, const char *declaration)
+RtToken	RiDeclare(const char *name, const char *declaration)
 {
 	CqString strName(name), strDecl(declaration);
-	pCurrentRenderer()->AddParameterDecl(strName.c_str(),strDecl.c_str());
+	QGetRenderContext()->AddParameterDecl(strName.c_str(),strDecl.c_str());
 	return(0);
 }
 
@@ -226,11 +226,14 @@ RtInt BuildParameterList(va_list pArgs, RtToken*& pTokens, RtPointer*& pValues)
 //
 RtVoid	RiBegin(RtToken name)
 {
-	pCurrentRenderer()->Initialise();
-	pCurrentRenderer()->CreateMainContext();
-	pCurrentRenderer()->ptransWriteCurrent()->SetCurrentTransform(pCurrentRenderer()->Time(),CqMatrix());
+	// Create a new renderer
+	QSetRenderContext(new CqRenderer);
+
+	QGetRenderContext()->Initialise();
+	QGetRenderContext()->CreateMainContext();
+	QGetRenderContext()->ptransWriteCurrent()->SetCurrentTransform(QGetRenderContext()->Time(),CqMatrix());
 	// Clear the scene objects.
-	pCurrentRenderer()->Scene().ClearScene();
+	QGetRenderContext()->Scene().ClearScene();
 	// Clear the lightsources stack.
 	CqLightsource* pL=Lightsource_stack.pFirst();
 	while(pL)
@@ -240,7 +243,7 @@ RtVoid	RiBegin(RtToken name)
 	}
 
 	// Clear any options.
-	pCurrentRenderer()->optCurrent().ClearOptions();
+	QGetRenderContext()->optCurrent().ClearOptions();
 
 	// Set the default search path for shaders to the shaders directory under the executable directory.
 	// Read config file name out of the ini file.
@@ -256,9 +259,6 @@ RtVoid	RiBegin(RtToken name)
 	char* pValue=strShaderPath;
 	RiOption("searchpath", (RtPointer)strShaderOpt, (RtPointer)&pValue, NULL);
 
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnBegin();
-
 	return(0);
 }
 
@@ -268,10 +268,10 @@ RtVoid	RiBegin(RtToken name)
 //
 RtVoid	RiEnd()
 {
-	pCurrentRenderer()->DeleteMainContext();
+	QGetRenderContext()->DeleteMainContext();
 
 	// Flush the shader cache.
-	pCurrentRenderer()->FlushShaders();
+	QGetRenderContext()->FlushShaders();
 
 	// Flush the image cache.
 	CqTextureMap::FlushCache();
@@ -284,8 +284,10 @@ RtVoid	RiEnd()
 		pL=Lightsource_stack.pFirst();
 	}
 
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnEnd();
+	// Delete the renderer
+	delete(QGetRenderContext());
+	QSetRenderContext(0);
+
 	return(0);
 }
 
@@ -296,9 +298,7 @@ RtVoid	RiEnd()
 //
 RtVoid	RiFrameBegin(RtInt number)
 {
-	pCurrentRenderer()->CreateFrameContext();
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnFrameBegin();
+	QGetRenderContext()->CreateFrameContext();
 	return(0);
 }
 
@@ -309,12 +309,9 @@ RtVoid	RiFrameBegin(RtInt number)
 //
 RtVoid	RiFrameEnd()
 {
-	pCurrentRenderer()->DeleteFrameContext();
+	QGetRenderContext()->DeleteFrameContext();
 	// Delete the scene
-	pCurrentRenderer()->Scene().ClearScene();
-
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnFrameEnd();
+	QGetRenderContext()->Scene().ClearScene();
 
 	return(0);
 }
@@ -327,43 +324,40 @@ RtVoid	RiFrameEnd()
 RtVoid	RiWorldBegin()
 {
 	// Now that the options have all been set, setup any undefined camera parameters.
-	if(!pCurrentRenderer()->optCurrent().FrameAspectRatioCalled())
+	if(!QGetRenderContext()->optCurrent().FrameAspectRatioCalled())
 	{
 		// Derive the FAR from the resolution and pixel aspect ratio.
-		RtFloat PAR=pCurrentRenderer()->optCurrent().fPixelAspectRatio();
-		RtFloat resH=pCurrentRenderer()->optCurrent().iXResolution();
-		RtFloat resV=pCurrentRenderer()->optCurrent().iYResolution();
-		pCurrentRenderer()->optCurrent().SetfFrameAspectRatio((resH*PAR)/resV);
+		RtFloat PAR=QGetRenderContext()->optCurrent().fPixelAspectRatio();
+		RtFloat resH=QGetRenderContext()->optCurrent().iXResolution();
+		RtFloat resV=QGetRenderContext()->optCurrent().iYResolution();
+		QGetRenderContext()->optCurrent().SetfFrameAspectRatio((resH*PAR)/resV);
 	}
 	
-	if(!pCurrentRenderer()->optCurrent().ScreenWindowCalled())
+	if(!QGetRenderContext()->optCurrent().ScreenWindowCalled())
 	{
-		RtFloat fFAR=pCurrentRenderer()->optCurrent().fFrameAspectRatio();
+		RtFloat fFAR=QGetRenderContext()->optCurrent().fFrameAspectRatio();
 
 		if(fFAR>=1.0)
 		{
-			pCurrentRenderer()->optCurrent().SetfScreenWindowLeft(-fFAR);
-			pCurrentRenderer()->optCurrent().SetfScreenWindowRight(+fFAR);
-			pCurrentRenderer()->optCurrent().SetfScreenWindowBottom(-1);
-			pCurrentRenderer()->optCurrent().SetfScreenWindowTop(+1);
+			QGetRenderContext()->optCurrent().SetfScreenWindowLeft(-fFAR);
+			QGetRenderContext()->optCurrent().SetfScreenWindowRight(+fFAR);
+			QGetRenderContext()->optCurrent().SetfScreenWindowBottom(-1);
+			QGetRenderContext()->optCurrent().SetfScreenWindowTop(+1);
 		}
 		else
 		{
-			pCurrentRenderer()->optCurrent().SetfScreenWindowLeft(-1);
-			pCurrentRenderer()->optCurrent().SetfScreenWindowRight(+1);
-			pCurrentRenderer()->optCurrent().SetfScreenWindowBottom(-1.0/fFAR);
-			pCurrentRenderer()->optCurrent().SetfScreenWindowTop(+1.0/fFAR);
+			QGetRenderContext()->optCurrent().SetfScreenWindowLeft(-1);
+			QGetRenderContext()->optCurrent().SetfScreenWindowRight(+1);
+			QGetRenderContext()->optCurrent().SetfScreenWindowBottom(-1.0/fFAR);
+			QGetRenderContext()->optCurrent().SetfScreenWindowTop(+1.0/fFAR);
 		}
 	}
 	
-	pCurrentRenderer()->CreateWorldContext();
+	QGetRenderContext()->CreateWorldContext();
 	// Set the world to camera transformation matrix to the current matrix.
-	pCurrentRenderer()->SetmatCamera(pCurrentRenderer()->matCurrent(pCurrentRenderer()->Time()));
+	QGetRenderContext()->SetmatCamera(QGetRenderContext()->matCurrent(QGetRenderContext()->Time()));
 	// and then reset the current matrix to identity, ready for object transformations.
-	pCurrentRenderer()->ptransWriteCurrent()->SetCurrentTransform(pCurrentRenderer()->Time(),CqMatrix());
-
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnWorldBegin();
+	QGetRenderContext()->ptransWriteCurrent()->SetCurrentTransform(QGetRenderContext()->Time(),CqMatrix());
 
 	return(0);
 }
@@ -377,11 +371,8 @@ RtVoid	RiWorldBegin()
 RtVoid	RiWorldEnd()
 {
 	// Render the world
-	pCurrentRenderer()->RenderWorld();
-	pCurrentRenderer()->DeleteWorldContext();
-
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnWorldEnd();
+	QGetRenderContext()->RenderWorld();
+	QGetRenderContext()->DeleteWorldContext();
 
 	return(0);
 }
@@ -393,12 +384,12 @@ RtVoid	RiWorldEnd()
 //
 RtVoid	RiFormat(RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio)
 {
-	pCurrentRenderer()->optCurrent().SetiXResolution(xresolution);
-	pCurrentRenderer()->optCurrent().SetiYResolution(yresolution);
-	pCurrentRenderer()->optCurrent().SetfPixelAspectRatio((pixelaspectratio<0.0)?1.0:pixelaspectratio);
+	QGetRenderContext()->optCurrent().SetiXResolution(xresolution);
+	QGetRenderContext()->optCurrent().SetiYResolution(yresolution);
+	QGetRenderContext()->optCurrent().SetfPixelAspectRatio((pixelaspectratio<0.0)?1.0:pixelaspectratio);
 
 	// Inform the system that RiFormat has been called, as this takes priority.
-	pCurrentRenderer()->optCurrent().CallFormat();
+	QGetRenderContext()->optCurrent().CallFormat();
 	
 	return(0);
 }
@@ -410,10 +401,10 @@ RtVoid	RiFormat(RtInt xresolution, RtInt yresolution, RtFloat pixelaspectratio)
 //
 RtVoid	RiFrameAspectRatio(RtFloat frameratio)
 {
-	pCurrentRenderer()->optCurrent().SetfFrameAspectRatio(frameratio);
+	QGetRenderContext()->optCurrent().SetfFrameAspectRatio(frameratio);
 
 	// Inform the system that RiFrameAspectRatio has been called, as this takes priority.
-	pCurrentRenderer()->optCurrent().CallFrameAspectRatio();
+	QGetRenderContext()->optCurrent().CallFrameAspectRatio();
 
 	return(0);
 }
@@ -426,13 +417,13 @@ RtVoid	RiFrameAspectRatio(RtFloat frameratio)
 //
 RtVoid	RiScreenWindow(RtFloat left, RtFloat right, RtFloat bottom, RtFloat top)
 {
-	pCurrentRenderer()->optCurrent().SetfScreenWindowLeft(left);
-	pCurrentRenderer()->optCurrent().SetfScreenWindowRight(right);
-	pCurrentRenderer()->optCurrent().SetfScreenWindowBottom(bottom);
-	pCurrentRenderer()->optCurrent().SetfScreenWindowTop(top);
+	QGetRenderContext()->optCurrent().SetfScreenWindowLeft(left);
+	QGetRenderContext()->optCurrent().SetfScreenWindowRight(right);
+	QGetRenderContext()->optCurrent().SetfScreenWindowBottom(bottom);
+	QGetRenderContext()->optCurrent().SetfScreenWindowTop(top);
 
 	// Inform the system that RiScreenWindow has been called, as this takes priority.
-	pCurrentRenderer()->optCurrent().CallScreenWindow();
+	QGetRenderContext()->optCurrent().CallScreenWindow();
 
 	return(0);
 }
@@ -445,10 +436,10 @@ RtVoid	RiScreenWindow(RtFloat left, RtFloat right, RtFloat bottom, RtFloat top)
 //
 RtVoid	RiCropWindow(RtFloat left, RtFloat right, RtFloat top, RtFloat bottom)
 {
-	pCurrentRenderer()->optCurrent().SetfCropWindowXMin(left);
-	pCurrentRenderer()->optCurrent().SetfCropWindowXMax(right);
-	pCurrentRenderer()->optCurrent().SetfCropWindowYMin(top);
-	pCurrentRenderer()->optCurrent().SetfCropWindowYMax(bottom);
+	QGetRenderContext()->optCurrent().SetfCropWindowXMin(left);
+	QGetRenderContext()->optCurrent().SetfCropWindowXMax(right);
+	QGetRenderContext()->optCurrent().SetfCropWindowYMin(top);
+	QGetRenderContext()->optCurrent().SetfCropWindowYMax(bottom);
 
 	return(0);
 }
@@ -478,9 +469,9 @@ RtVoid	RiProjection(const char *name, ...)
 RtVoid	RiProjectionV(const char *name, PARAMETERLIST)
 {
 	if(strcmp(name,RI_PERSPECTIVE)==0)
-		pCurrentRenderer()->optCurrent().SeteCameraProjection(ProjectionPerspective);
+		QGetRenderContext()->optCurrent().SeteCameraProjection(ProjectionPerspective);
 	else
-		pCurrentRenderer()->optCurrent().SeteCameraProjection(ProjectionOrthographic);
+		QGetRenderContext()->optCurrent().SeteCameraProjection(ProjectionOrthographic);
 
 	RtInt i;
 	for(i=0; i<count; i++)
@@ -489,10 +480,10 @@ RtVoid	RiProjectionV(const char *name, PARAMETERLIST)
 		RtPointer	value=values[i];
 
 		if(strcmp(token, RI_FOV)==0)
-			pCurrentRenderer()->optCurrent().SetfFOV(*(reinterpret_cast<RtFloat*>(value)));
+			QGetRenderContext()->optCurrent().SetfFOV(*(reinterpret_cast<RtFloat*>(value)));
 	}
 	// TODO: need to get the current transformation so that it can be added to the screen transformation.
-	pCurrentRenderer()->ptransWriteCurrent()->SetCurrentTransform(pCurrentRenderer()->Time(),CqMatrix());
+	QGetRenderContext()->ptransWriteCurrent()->SetCurrentTransform(QGetRenderContext()->Time(),CqMatrix());
 	
 	return(0);
 }
@@ -504,8 +495,8 @@ RtVoid	RiProjectionV(const char *name, PARAMETERLIST)
 //
 RtVoid	RiClipping(RtFloat cnear, RtFloat cfar)
 {
-	pCurrentRenderer()->optCurrent().SetfClippingPlaneNear(cnear);
-	pCurrentRenderer()->optCurrent().SetfClippingPlaneFar(cfar);
+	QGetRenderContext()->optCurrent().SetfClippingPlaneNear(cnear);
+	QGetRenderContext()->optCurrent().SetfClippingPlaneFar(cfar);
 
 	return(0);
 }
@@ -517,9 +508,9 @@ RtVoid	RiClipping(RtFloat cnear, RtFloat cfar)
 //
 RtVoid	RiDepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focaldistance)
 {
-	pCurrentRenderer()->optCurrent().SetffStop(fstop);
-	pCurrentRenderer()->optCurrent().SetfFocalLength(focallength);
-	pCurrentRenderer()->optCurrent().SetfFocalDistance(focaldistance);
+	QGetRenderContext()->optCurrent().SetffStop(fstop);
+	QGetRenderContext()->optCurrent().SetfFocalLength(focallength);
+	QGetRenderContext()->optCurrent().SetfFocalDistance(focaldistance);
 
 	return(0);
 }
@@ -531,8 +522,8 @@ RtVoid	RiDepthOfField(RtFloat fstop, RtFloat focallength, RtFloat focaldistance)
 //
 RtVoid	RiShutter(RtFloat opentime, RtFloat closetime)
 {
-	pCurrentRenderer()->optCurrent().SetfShutterOpen(opentime);
-	pCurrentRenderer()->optCurrent().SetfShutterClose(closetime);
+	QGetRenderContext()->optCurrent().SetfShutterOpen(opentime);
+	QGetRenderContext()->optCurrent().SetfShutterClose(closetime);
 
 	return(0);
 }
@@ -545,7 +536,7 @@ RtVoid	RiShutter(RtFloat opentime, RtFloat closetime)
 //
 RtVoid	RiPixelVariance(RtFloat variance)
 {
-	pCurrentRenderer()->optCurrent().SetfPixelVariance(variance);
+	QGetRenderContext()->optCurrent().SetfPixelVariance(variance);
 
 	return(0);
 }
@@ -557,8 +548,8 @@ RtVoid	RiPixelVariance(RtFloat variance)
 //
 RtVoid	RiPixelSamples(RtFloat xsamples, RtFloat ysamples)
 {
-	pCurrentRenderer()->optCurrent().SetfPixelXSamples(xsamples);
-	pCurrentRenderer()->optCurrent().SetfPixelYSamples(ysamples);
+	QGetRenderContext()->optCurrent().SetfPixelXSamples(xsamples);
+	QGetRenderContext()->optCurrent().SetfPixelYSamples(ysamples);
 
 	return(0);
 }
@@ -570,9 +561,9 @@ RtVoid	RiPixelSamples(RtFloat xsamples, RtFloat ysamples)
 //
 RtVoid	RiPixelFilter(RtFilterFunc function, RtFloat xwidth, RtFloat ywidth)
 {
-	pCurrentRenderer()->optCurrent().SetfuncFilter(function);
-	pCurrentRenderer()->optCurrent().SetfFilterXWidth(xwidth);
-	pCurrentRenderer()->optCurrent().SetfFilterYWidth(ywidth);
+	QGetRenderContext()->optCurrent().SetfuncFilter(function);
+	QGetRenderContext()->optCurrent().SetfFilterXWidth(xwidth);
+	QGetRenderContext()->optCurrent().SetfFilterYWidth(ywidth);
 
 	return(0);
 }
@@ -584,8 +575,8 @@ RtVoid	RiPixelFilter(RtFilterFunc function, RtFloat xwidth, RtFloat ywidth)
 //
 RtVoid	RiExposure(RtFloat gain, RtFloat gamma)
 {
-	pCurrentRenderer()->optCurrent().SetfExposureGain(gain);
-	pCurrentRenderer()->optCurrent().SetfExposureGamma(gamma);
+	QGetRenderContext()->optCurrent().SetfExposureGain(gain);
+	QGetRenderContext()->optCurrent().SetfExposureGamma(gamma);
 
 	return(0);
 }
@@ -621,17 +612,17 @@ RtVoid	RiQuantize(RtToken type, RtInt one, RtInt min, RtInt max, RtFloat dithera
 {
 	if(strcmp(type, "rgba")==0)
 	{
-		pCurrentRenderer()->optCurrent().SetiColorQuantizeOne(one);
-		pCurrentRenderer()->optCurrent().SetiColorQuantizeMin(min);
-		pCurrentRenderer()->optCurrent().SetiColorQuantizeMax(max);
-		pCurrentRenderer()->optCurrent().SetfColorQuantizeDitherAmplitude(ditheramplitude);
+		QGetRenderContext()->optCurrent().SetiColorQuantizeOne(one);
+		QGetRenderContext()->optCurrent().SetiColorQuantizeMin(min);
+		QGetRenderContext()->optCurrent().SetiColorQuantizeMax(max);
+		QGetRenderContext()->optCurrent().SetfColorQuantizeDitherAmplitude(ditheramplitude);
 	}
 	else
 	{
-		pCurrentRenderer()->optCurrent().SetiDepthQuantizeOne(one);
-		pCurrentRenderer()->optCurrent().SetiDepthQuantizeMin(min);
-		pCurrentRenderer()->optCurrent().SetiDepthQuantizeMax(max);
-		pCurrentRenderer()->optCurrent().SetfDepthQuantizeDitherAmplitude(ditheramplitude);
+		QGetRenderContext()->optCurrent().SetiDepthQuantizeOne(one);
+		QGetRenderContext()->optCurrent().SetiDepthQuantizeMin(min);
+		QGetRenderContext()->optCurrent().SetiDepthQuantizeMax(max);
+		QGetRenderContext()->optCurrent().SetfDepthQuantizeDitherAmplitude(ditheramplitude);
 	}
 
 	return(0);
@@ -664,8 +655,8 @@ RtVoid	RiDisplayV(const char *name, RtToken type, RtToken mode, PARAMETERLIST)
 	CqString strName(name);
 	CqString strType(type);
 
-	pCurrentRenderer()->optCurrent().SetstrDisplayName(strName.c_str());
-	pCurrentRenderer()->optCurrent().SetstrDisplayType(strType.c_str());
+	QGetRenderContext()->optCurrent().SetstrDisplayName(strName.c_str());
+	QGetRenderContext()->optCurrent().SetstrDisplayType(strType.c_str());
 	
 	RtInt eValue=0;
 	if(strstr(mode, RI_RGB)!=NULL)
@@ -674,8 +665,8 @@ RtVoid	RiDisplayV(const char *name, RtToken type, RtToken mode, PARAMETERLIST)
 		eValue+=ModeA;
 	if(strstr(mode, RI_Z)!=NULL)
 		eValue+=ModeZ;
-	pCurrentRenderer()->optCurrent().SetiDisplayMode(eValue);
-	pCurrentRenderer()->LoadDisplayLibrary();
+	QGetRenderContext()->optCurrent().SetiDisplayMode(eValue);
+	QGetRenderContext()->LoadDisplayLibrary();
 
 	return(0);
 }
@@ -901,7 +892,7 @@ RtVoid	RiOption(const char *name, ...)
 RtVoid	RiOptionV(const char *name, PARAMETERLIST)
 {
 	// Find the parameter on the current options.
-	CqSystemOption* pOpt=pCurrentRenderer()->optCurrent().pOptionWrite(name);
+	CqSystemOption* pOpt=QGetRenderContext()->optCurrent().pOptionWrite(name);
 
 	RtInt i;
 	for(i=0; i<count; i++)
@@ -911,7 +902,7 @@ RtVoid	RiOptionV(const char *name, PARAMETERLIST)
 
 		// Search for the parameter in the declarations.
 		// Note Options can only be uniform.
-		SqParameterDeclaration Decl=pCurrentRenderer()->FindParameterDecl(token);
+		SqParameterDeclaration Decl=QGetRenderContext()->FindParameterDecl(token);
 		RtInt Type=Decl.m_Type;
 		CqParameter* pParam=pOpt->pParameter(token);
 		if(pParam==0)
@@ -1045,9 +1036,8 @@ RtVoid	RiOptionV(const char *name, PARAMETERLIST)
 //
 RtVoid	RiAttributeBegin()
 {
-	pCurrentRenderer()->CreateAttributeContext();
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnAttributeBegin();
+	QGetRenderContext()->CreateAttributeContext();
+
 	return(0);
 }
 
@@ -1058,10 +1048,7 @@ RtVoid	RiAttributeBegin()
 //
 RtVoid	RiAttributeEnd()
 {
-	pCurrentRenderer()->DeleteAttributeContext();
-
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnAttributeEnd();
+	QGetRenderContext()->DeleteAttributeContext();
 
 	return(0);
 }
@@ -1073,8 +1060,8 @@ RtVoid	RiAttributeEnd()
 //
 RtVoid	RiColor(RtColor Cq)
 {
-	pCurrentRenderer()->pattrWriteCurrent()->SetcolColor(CqColor(Cq),pCurrentRenderer()->Time());
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->pattrWriteCurrent()->SetcolColor(CqColor(Cq),QGetRenderContext()->Time());
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 
@@ -1085,8 +1072,8 @@ RtVoid	RiColor(RtColor Cq)
 //
 RtVoid	RiOpacity(RtColor Os)
 {
-	pCurrentRenderer()->pattrWriteCurrent()->SetcolOpacity(CqColor(Os),pCurrentRenderer()->Time());
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->pattrWriteCurrent()->SetcolOpacity(CqColor(Os),QGetRenderContext()->Time());
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 
@@ -1100,11 +1087,11 @@ RtVoid	RiTextureCoordinates(RtFloat s1, RtFloat t1,
 							 RtFloat s3, RtFloat t3, 
 							 RtFloat s4, RtFloat t4)
 {
-	pCurrentRenderer()->pattrWriteCurrent()->aTextureCoordinates(pCurrentRenderer()->Time())[0]=CqVector2D(s1,t1);
-	pCurrentRenderer()->pattrWriteCurrent()->aTextureCoordinates(pCurrentRenderer()->Time())[1]=CqVector2D(s2,t2);
-	pCurrentRenderer()->pattrWriteCurrent()->aTextureCoordinates(pCurrentRenderer()->Time())[2]=CqVector2D(s3,t3);
-	pCurrentRenderer()->pattrWriteCurrent()->aTextureCoordinates(pCurrentRenderer()->Time())[3]=CqVector2D(s4,t4);
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->pattrWriteCurrent()->aTextureCoordinates(QGetRenderContext()->Time())[0]=CqVector2D(s1,t1);
+	QGetRenderContext()->pattrWriteCurrent()->aTextureCoordinates(QGetRenderContext()->Time())[1]=CqVector2D(s2,t2);
+	QGetRenderContext()->pattrWriteCurrent()->aTextureCoordinates(QGetRenderContext()->Time())[2]=CqVector2D(s3,t3);
+	QGetRenderContext()->pattrWriteCurrent()->aTextureCoordinates(QGetRenderContext()->Time())[3]=CqVector2D(s4,t4);
+	QGetRenderContext()->AdvanceTime();
 
 	return(0);
 }
@@ -1134,12 +1121,12 @@ RtLightHandle	RiLightSource(const char *name, ...)
 RtLightHandle	RiLightSourceV(const char *name, PARAMETERLIST)
 {
 	// Find the lightsource shader.
-	CqShader* pShader=static_cast<CqShader*>(CqShader::CreateShader(name, Type_Lightsource));
+	CqShader* pShader=static_cast<CqShader*>(QGetRenderContext()->CreateShader(name, Type_Lightsource));
 
 	// TODO: Report error.
 	if(pShader==0)	return(0);
 
-	pShader->matCurrent()=pCurrentRenderer()->matCurrent();
+	pShader->matCurrent()=QGetRenderContext()->matCurrent();
 	CqLightsource* pNew=new CqLightsource(pShader,RI_TRUE);
 
 	// Execute the intiialisation code here, as we now have our shader context complete.
@@ -1155,7 +1142,7 @@ RtLightHandle	RiLightSourceV(const char *name, PARAMETERLIST)
 
 			pShader->SetValue(token,value);
 		}
-		pCurrentRenderer()->pattrWriteCurrent()->AddLightsource(pNew);
+		QGetRenderContext()->pattrWriteCurrent()->AddLightsource(pNew);
 		return(reinterpret_cast<RtLightHandle>(pNew));
 	}
 	return(0);
@@ -1201,9 +1188,9 @@ RtVoid	RiIlluminate(RtLightHandle light, RtBoolean onoff)
 	// Check if we are turning the light on or off.
 	if(light==NULL)	return(0);
 	if(onoff)
-		pCurrentRenderer()->pattrWriteCurrent()->AddLightsource(reinterpret_cast<CqLightsource*>(light));
+		QGetRenderContext()->pattrWriteCurrent()->AddLightsource(reinterpret_cast<CqLightsource*>(light));
 	else
-		pCurrentRenderer()->pattrWriteCurrent()->RemoveLightsource(reinterpret_cast<CqLightsource*>(light));
+		QGetRenderContext()->pattrWriteCurrent()->RemoveLightsource(reinterpret_cast<CqLightsource*>(light));
 	return(0);
 }
 
@@ -1232,11 +1219,11 @@ RtVoid	RiSurface(const char *name, ...)
 RtVoid	RiSurfaceV(const char *name, PARAMETERLIST)
 {
 	// Find the shader.
-	CqShader* pshadSurface=CqShader::CreateShader(name, Type_Surface);
+	CqShader* pshadSurface=QGetRenderContext()->CreateShader(name, Type_Surface);
 
 	if(pshadSurface!=0)
 	{
-		pshadSurface->matCurrent()=pCurrentRenderer()->matCurrent();
+		pshadSurface->matCurrent()=QGetRenderContext()->matCurrent();
 		// Execute the intiialisation code here, as we now have our shader context complete.
 		pshadSurface->PrepareDefArgs();
 		RtInt i;
@@ -1247,9 +1234,9 @@ RtVoid	RiSurfaceV(const char *name, PARAMETERLIST)
 
 			pshadSurface->SetValue(token,value);
 		}
-		pCurrentRenderer()->pattrWriteCurrent()->SetpshadSurface(pshadSurface,pCurrentRenderer()->Time());
+		QGetRenderContext()->pattrWriteCurrent()->SetpshadSurface(pshadSurface,QGetRenderContext()->Time());
 	}
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 
@@ -1278,11 +1265,11 @@ RtVoid	RiAtmosphere(const char *name, ...)
 RtVoid	RiAtmosphereV(const char *name, PARAMETERLIST)
 {
 	// Find the shader.
-	CqShader* pshadAtmosphere=CqShader::CreateShader(name, Type_Volume);
+	CqShader* pshadAtmosphere=QGetRenderContext()->CreateShader(name, Type_Volume);
 
 	if(pshadAtmosphere!=0)
 	{
-		pshadAtmosphere->matCurrent()=pCurrentRenderer()->matCurrent();
+		pshadAtmosphere->matCurrent()=QGetRenderContext()->matCurrent();
 		// Execute the intiialisation code here, as we now have our shader context complete.
 		pshadAtmosphere->PrepareDefArgs();
 		RtInt i;
@@ -1295,8 +1282,8 @@ RtVoid	RiAtmosphereV(const char *name, PARAMETERLIST)
 		}
 	}
 
-	pCurrentRenderer()->pattrWriteCurrent()->SetpshadAtmosphere(pshadAtmosphere,pCurrentRenderer()->Time());
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->pattrWriteCurrent()->SetpshadAtmosphere(pshadAtmosphere,QGetRenderContext()->Time());
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 
@@ -1351,8 +1338,8 @@ RtVoid	RiExteriorV(const char *name, PARAMETERLIST)
 //
 RtVoid	RiShadingRate(RtFloat size)
 {
-	pCurrentRenderer()->pattrWriteCurrent()->SetfEffectiveShadingRate(size,pCurrentRenderer()->Time());
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->pattrWriteCurrent()->SetfEffectiveShadingRate(size,QGetRenderContext()->Time());
+	QGetRenderContext()->AdvanceTime();
 
 	return(0);
 }
@@ -1365,14 +1352,14 @@ RtVoid	RiShadingRate(RtFloat size)
 RtVoid	RiShadingInterpolation(RtToken type)
 {
 	if(strcmp(type, RI_CONSTANT)==0)
-		pCurrentRenderer()->pattrWriteCurrent()->SeteShadingInterpolation(CqShadingAttributes::ShadingConstant,pCurrentRenderer()->Time());
+		QGetRenderContext()->pattrWriteCurrent()->SeteShadingInterpolation(CqShadingAttributes::ShadingConstant,QGetRenderContext()->Time());
 	else
 		if(strcmp(type, RI_SMOOTH)==0)
-			pCurrentRenderer()->pattrWriteCurrent()->SeteShadingInterpolation(CqShadingAttributes::ShadingSmooth,pCurrentRenderer()->Time());
+			QGetRenderContext()->pattrWriteCurrent()->SeteShadingInterpolation(CqShadingAttributes::ShadingSmooth,QGetRenderContext()->Time());
 		else
 			CqBasicError(ErrorID_InvalidData,Severity_Normal,"Invald shading interpolation");
 
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 
@@ -1384,8 +1371,8 @@ RtVoid	RiShadingInterpolation(RtToken type)
 RtVoid	RiMatte(RtBoolean onoff)
 {
 	CqBasicError(0,Severity_Normal,"RiMatte not supported");
-	pCurrentRenderer()->pattrWriteCurrent()->SetbMatteSurfaceFlag(onoff,pCurrentRenderer()->Time());
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->pattrWriteCurrent()->SetbMatteSurfaceFlag(onoff,QGetRenderContext()->Time());
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 
@@ -1396,8 +1383,8 @@ RtVoid	RiMatte(RtBoolean onoff)
 //
 RtVoid	RiBound(RtBound bound)
 {
-	pCurrentRenderer()->pattrWriteCurrent()->SetBound(CqBound(bound));
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->pattrWriteCurrent()->SetBound(CqBound(bound));
+	QGetRenderContext()->AdvanceTime();
 
 	return(0);
 }
@@ -1445,18 +1432,18 @@ RtVoid	RiOrientation(RtToken orientation)
 	if(orientation!=0)
 	{
 		if(strstr(orientation, RI_LH)!=0)
-			pCurrentRenderer()->pattrWriteCurrent()->SeteOrientation(OrientationLH,pCurrentRenderer()->Time());
+			QGetRenderContext()->pattrWriteCurrent()->SeteOrientation(OrientationLH,QGetRenderContext()->Time());
 		if(strstr(orientation, RI_RH)!=0)
-			pCurrentRenderer()->pattrWriteCurrent()->SeteOrientation(OrientationRH,pCurrentRenderer()->Time());
+			QGetRenderContext()->pattrWriteCurrent()->SeteOrientation(OrientationRH,QGetRenderContext()->Time());
 		if(strstr(orientation, RI_INSIDE)!=0)
 		{
-			pCurrentRenderer()->pattrWriteCurrent()->SeteOrientation(pCurrentRenderer()->pattrCurrent()->eCoordsysOrientation(),pCurrentRenderer()->Time());
-			pCurrentRenderer()->pattrWriteCurrent()->FlipeOrientation();
+			QGetRenderContext()->pattrWriteCurrent()->SeteOrientation(QGetRenderContext()->pattrCurrent()->eCoordsysOrientation(),QGetRenderContext()->Time());
+			QGetRenderContext()->pattrWriteCurrent()->FlipeOrientation();
 		}
 		if(strstr(orientation, RI_OUTSIDE)!=0)
-			pCurrentRenderer()->pattrWriteCurrent()->SeteOrientation(pCurrentRenderer()->pattrCurrent()->eCoordsysOrientation(),pCurrentRenderer()->Time());
+			QGetRenderContext()->pattrWriteCurrent()->SeteOrientation(QGetRenderContext()->pattrCurrent()->eCoordsysOrientation(),QGetRenderContext()->Time());
 	}
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 
@@ -1467,8 +1454,8 @@ RtVoid	RiOrientation(RtToken orientation)
 //
 RtVoid	RiReverseOrientation()
 {
-	pCurrentRenderer()->pattrWriteCurrent()->FlipeOrientation(pCurrentRenderer()->Time());
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->pattrWriteCurrent()->FlipeOrientation(QGetRenderContext()->Time());
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 
@@ -1479,8 +1466,8 @@ RtVoid	RiReverseOrientation()
 //
 RtVoid	RiSides(RtInt nsides)
 {
-	pCurrentRenderer()->pattrWriteCurrent()->SetiNumberOfSides(nsides,pCurrentRenderer()->Time());
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->pattrWriteCurrent()->SetiNumberOfSides(nsides,QGetRenderContext()->Time());
+	QGetRenderContext()->AdvanceTime();
 
 	return(0);
 }
@@ -1492,8 +1479,8 @@ RtVoid	RiSides(RtInt nsides)
 //
 RtVoid	RiIdentity()
 {
-	pCurrentRenderer()->ptransWriteCurrent()->SetCurrentTransform(pCurrentRenderer()->Time(),CqMatrix());
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->ptransWriteCurrent()->SetCurrentTransform(QGetRenderContext()->Time(),CqMatrix());
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 
@@ -1504,8 +1491,8 @@ RtVoid	RiIdentity()
 RtVoid	RiTransform(RtMatrix transform)
 {
 	// TODO: Determine if this matrix requires a change in orientation.
-	pCurrentRenderer()->ptransWriteCurrent()->SetCurrentTransform(pCurrentRenderer()->Time(),CqMatrix(transform));
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->ptransWriteCurrent()->SetCurrentTransform(QGetRenderContext()->Time(),CqMatrix(transform));
+	QGetRenderContext()->AdvanceTime();
 
 	return(0);
 }
@@ -1521,12 +1508,12 @@ RtVoid	RiConcatTransform(RtMatrix transform)
 	CqMatrix matTrans(transform);
 	if(matTrans.Determinant()<0)
 	{
-		pCurrentRenderer()->pattrWriteCurrent()->FlipeOrientation(pCurrentRenderer()->Time());
-		pCurrentRenderer()->pattrWriteCurrent()->FlipeCoordsysOrientation(pCurrentRenderer()->Time());
+		QGetRenderContext()->pattrWriteCurrent()->FlipeOrientation(QGetRenderContext()->Time());
+		QGetRenderContext()->pattrWriteCurrent()->FlipeCoordsysOrientation(QGetRenderContext()->Time());
 	}
 
-	pCurrentRenderer()->ptransWriteCurrent()->ConcatCurrentTransform(pCurrentRenderer()->Time(),CqMatrix(transform));
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->ptransWriteCurrent()->ConcatCurrentTransform(QGetRenderContext()->Time(),CqMatrix(transform));
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 
@@ -1552,12 +1539,12 @@ RtVoid	RiTranslate(RtFloat dx, RtFloat dy, RtFloat dz)
 	// Check if this transformation results in a change in orientation.
 	if(matTrans.Determinant()<0)
 	{
-		pCurrentRenderer()->pattrWriteCurrent()->FlipeOrientation(pCurrentRenderer()->Time());
-		pCurrentRenderer()->pattrWriteCurrent()->FlipeCoordsysOrientation(pCurrentRenderer()->Time());
+		QGetRenderContext()->pattrWriteCurrent()->FlipeOrientation(QGetRenderContext()->Time());
+		QGetRenderContext()->pattrWriteCurrent()->FlipeCoordsysOrientation(QGetRenderContext()->Time());
 	}
 
-	pCurrentRenderer()->ptransWriteCurrent()->ConcatCurrentTransform(pCurrentRenderer()->Time(),matTrans);
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->ptransWriteCurrent()->ConcatCurrentTransform(QGetRenderContext()->Time(),matTrans);
+	QGetRenderContext()->AdvanceTime();
 
 	return(0);
 }
@@ -1573,12 +1560,12 @@ RtVoid	RiRotate(RtFloat angle, RtFloat dx, RtFloat dy, RtFloat dz)
 	// Check if this transformation results in a change in orientation.
 	if(matRot.Determinant()<0)
 	{
-		pCurrentRenderer()->pattrWriteCurrent()->FlipeOrientation(pCurrentRenderer()->Time());
-		pCurrentRenderer()->pattrWriteCurrent()->FlipeCoordsysOrientation(pCurrentRenderer()->Time());
+		QGetRenderContext()->pattrWriteCurrent()->FlipeOrientation(QGetRenderContext()->Time());
+		QGetRenderContext()->pattrWriteCurrent()->FlipeCoordsysOrientation(QGetRenderContext()->Time());
 	}
 
-	pCurrentRenderer()->ptransWriteCurrent()->ConcatCurrentTransform(pCurrentRenderer()->Time(),matRot);
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->ptransWriteCurrent()->ConcatCurrentTransform(QGetRenderContext()->Time(),matRot);
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 
@@ -1593,12 +1580,12 @@ RtVoid	RiScale(RtFloat sx, RtFloat sy, RtFloat sz)
 	// Check if this transformation results in a change in orientation.
 	if(matScale.Determinant()<0)
 	{
-		pCurrentRenderer()->pattrWriteCurrent()->FlipeOrientation(pCurrentRenderer()->Time());
-		pCurrentRenderer()->pattrWriteCurrent()->FlipeCoordsysOrientation(pCurrentRenderer()->Time());
+		QGetRenderContext()->pattrWriteCurrent()->FlipeOrientation(QGetRenderContext()->Time());
+		QGetRenderContext()->pattrWriteCurrent()->FlipeCoordsysOrientation(QGetRenderContext()->Time());
 	}
 
-	pCurrentRenderer()->ptransWriteCurrent()->ConcatCurrentTransform(pCurrentRenderer()->Time(),matScale);
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->ptransWriteCurrent()->ConcatCurrentTransform(QGetRenderContext()->Time(),matScale);
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 
@@ -1661,11 +1648,11 @@ RtVoid	RiDisplacement(const char *name, ...)
 RtVoid	RiDisplacementV(const char *name, PARAMETERLIST)
 {
 	// Find the shader.
-	CqShader* pshadDisplacement=CqShader::CreateShader(name, Type_Displacement);
+	CqShader* pshadDisplacement=QGetRenderContext()->CreateShader(name, Type_Displacement);
 
 	if(pshadDisplacement!=0)
 	{
-		pshadDisplacement->matCurrent()=pCurrentRenderer()->matCurrent();
+		pshadDisplacement->matCurrent()=QGetRenderContext()->matCurrent();
 		// Execute the intiialisation code here, as we now have our shader context complete.
 		pshadDisplacement->PrepareDefArgs();
 		RtInt i;
@@ -1678,8 +1665,8 @@ RtVoid	RiDisplacementV(const char *name, PARAMETERLIST)
 		}
 	}
 
-	pCurrentRenderer()->pattrWriteCurrent()->SetpshadDisplacement(pshadDisplacement,pCurrentRenderer()->Time());
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->pattrWriteCurrent()->SetpshadDisplacement(pshadDisplacement,QGetRenderContext()->Time());
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 
@@ -1691,8 +1678,8 @@ RtVoid	RiDisplacementV(const char *name, PARAMETERLIST)
 RtVoid	RiCoordinateSystem(RtToken space)
 {
 	// Insert the named coordinate system into the list help on the renderer.
-	pCurrentRenderer()->SetCoordSystem(space,pCurrentRenderer()->matCurrent(pCurrentRenderer()->Time()));
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->SetCoordSystem(space,QGetRenderContext()->matCurrent(QGetRenderContext()->Time()));
+	QGetRenderContext()->AdvanceTime();
 
 	return(0);
 }
@@ -1706,8 +1693,8 @@ RtVoid	RiCoordinateSystem(RtToken space)
 RtVoid	RiCoordSysTransform(RtToken space)
 {
 	// Insert the named coordinate system into the list help on the renderer.
-	pCurrentRenderer()->ptransWriteCurrent()->SetCurrentTransform(pCurrentRenderer()->Time(),pCurrentRenderer()->matSpaceToSpace(space, "world"));
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->ptransWriteCurrent()->SetCurrentTransform(QGetRenderContext()->Time(),QGetRenderContext()->matSpaceToSpace(space, "world"));
+	QGetRenderContext()->AdvanceTime();
 
 	return(0);
 }
@@ -1730,9 +1717,8 @@ RtVoid	RiCoordSysTransform(RtToken space)
 //
 RtVoid	RiTransformBegin()
 {
-	pCurrentRenderer()->CreateTransformContext();
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnTransformBegin();
+	QGetRenderContext()->CreateTransformContext();
+
 	return(0);
 }
 
@@ -1743,10 +1729,7 @@ RtVoid	RiTransformBegin()
 //
 RtVoid	RiTransformEnd()
 {
-	pCurrentRenderer()->DeleteTransformContext();
-
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnTransformEnd();
+	QGetRenderContext()->DeleteTransformContext();
 
 	return(0);
 }
@@ -1776,7 +1759,7 @@ RtVoid	RiAttribute(const char *name, ...)
 RtVoid	RiAttributeV(const char *name, PARAMETERLIST)
 {
 	// Find the parameter on the current options.
-	CqSystemOption* pAttr=pCurrentRenderer()->pattrWriteCurrent()->pAttributeWrite(name);
+	CqSystemOption* pAttr=QGetRenderContext()->pattrWriteCurrent()->pAttributeWrite(name);
 
 	RtInt i;
 	for(i=0; i<count; i++)
@@ -1790,7 +1773,7 @@ RtVoid	RiAttributeV(const char *name, PARAMETERLIST)
 		{
 			// Search for the parameter in the declarations.
 			// Note attributes can only be uniform.
-			SqParameterDeclaration Decl=pCurrentRenderer()->FindParameterDecl(token);
+			SqParameterDeclaration Decl=QGetRenderContext()->FindParameterDecl(token);
 			if(Decl.m_strName!="" && (Decl.m_Type&Storage_Mask)==Type_Uniform)
 			{
 				pParam=Decl.m_pCreate(Decl.m_strName.c_str(), Decl.m_Count);
@@ -1889,9 +1872,9 @@ RtVoid	RiPolygonV(RtInt nvertices, PARAMETERLIST)
 {
 	CqMotionSurface<CqSurfacePolygon*>* pMotionSurface=new CqMotionSurface<CqSurfacePolygon*>(0);
 	RtInt i;
-	for(i=0; i<pCurrentRenderer()->ptransCurrent()->cTimes(); i++)
+	for(i=0; i<QGetRenderContext()->ptransCurrent()->cTimes(); i++)
 	{
-		RtFloat time=pCurrentRenderer()->ptransCurrent()->Time(i);
+		RtFloat time=QGetRenderContext()->ptransCurrent()->Time(i);
 		// Create a new polygon surface primitive.
 		CqSurfacePolygon*	pSurface=new CqSurfacePolygon(nvertices);
 
@@ -1905,9 +1888,9 @@ RtVoid	RiPolygonV(RtInt nvertices, PARAMETERLIST)
 				pSurface->TransferDefaultSurfaceParameters();
 
 				// Transform the points into "current" space,
-				pSurface->Transform(pCurrentRenderer()->matSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
-									pCurrentRenderer()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
-									pCurrentRenderer()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
+				pSurface->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
+									QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
+									QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
 			}
 			else
 			{
@@ -1919,7 +1902,7 @@ RtVoid	RiPolygonV(RtInt nvertices, PARAMETERLIST)
 		else
 			delete(pSurface);
 	}
-	pCurrentRenderer()->Scene().AddSurface(pMotionSurface);
+	QGetRenderContext()->Scene().AddSurface(pMotionSurface);
 
 	return(0);
 }
@@ -2005,9 +1988,9 @@ RtVoid	RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERL
 		pPointsClass->TransferDefaultSurfaceParameters();
 
 		// Transform the points into "current" space,
-		pPointsClass->Transform(pCurrentRenderer()->matSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()),
-								pCurrentRenderer()->matNSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()),
-								pCurrentRenderer()->matVSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()));
+		pPointsClass->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()),
+								QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()),
+								QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pPointsClass->pTransform()->matObjectToWorld()));
 		
 		// For each polygon specified create a primitive.
 		RtInt	iP=0;
@@ -2031,7 +2014,7 @@ RtVoid	RiPointsPolygonsV(RtInt npolys, RtInt nverts[], RtInt verts[], PARAMETERL
 				iP++;
 			}
 			if(fValid)
-				pCurrentRenderer()->Scene().AddSurface(pSurface);
+				QGetRenderContext()->Scene().AddSurface(pSurface);
 		}
 	}
 	else
@@ -2083,11 +2066,11 @@ RtVoid	RiBasis(RtBasis ubasis, RtInt ustep, RtBasis vbasis, RtInt vstep)
 		}
 	}
 
-	pCurrentRenderer()->pattrWriteCurrent()->SetmatuBasis(u,pCurrentRenderer()->Time());
-	pCurrentRenderer()->pattrWriteCurrent()->SetmatvBasis(v,pCurrentRenderer()->Time());
-	pCurrentRenderer()->pattrWriteCurrent()->SetuSteps(ustep,pCurrentRenderer()->Time());
-	pCurrentRenderer()->pattrWriteCurrent()->SetvSteps(vstep,pCurrentRenderer()->Time());
-	pCurrentRenderer()->AdvanceTime();
+	QGetRenderContext()->pattrWriteCurrent()->SetmatuBasis(u,QGetRenderContext()->Time());
+	QGetRenderContext()->pattrWriteCurrent()->SetmatvBasis(v,QGetRenderContext()->Time());
+	QGetRenderContext()->pattrWriteCurrent()->SetuSteps(ustep,QGetRenderContext()->Time());
+	QGetRenderContext()->pattrWriteCurrent()->SetvSteps(vstep,QGetRenderContext()->Time());
+	QGetRenderContext()->AdvanceTime();
 	return(0);
 }
 
@@ -2242,8 +2225,8 @@ RtVoid	RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 
 		CqVector4D vecPoint;
 		RtInt iP=0;
-		RtInt uStep=pCurrentRenderer()->pattrCurrent()->uSteps();
-		RtInt vStep=pCurrentRenderer()->pattrCurrent()->vSteps();
+		RtInt uStep=QGetRenderContext()->pattrCurrent()->uSteps();
+		RtInt vStep=QGetRenderContext()->pattrCurrent()->vSteps();
 		
 		RtInt upatches=(uPeriodic)?nu/uStep:((nu-4)/uStep)+1;
 		RtInt vpatches=(vPeriodic)?nv/vStep:((nv-4)/vStep)+1;
@@ -2255,10 +2238,10 @@ RtVoid	RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 		RtFloat dv=1.0/vpatches;
 
 		CqVector2D st1,st2,st3,st4;
-		st1=pCurrentRenderer()->pattrCurrent()->aTextureCoordinates()[0];
-		st2=pCurrentRenderer()->pattrCurrent()->aTextureCoordinates()[1];
-		st3=pCurrentRenderer()->pattrCurrent()->aTextureCoordinates()[2];
-		st4=pCurrentRenderer()->pattrCurrent()->aTextureCoordinates()[3];
+		st1=QGetRenderContext()->pattrCurrent()->aTextureCoordinates()[0];
+		st2=QGetRenderContext()->pattrCurrent()->aTextureCoordinates()[1];
+		st3=QGetRenderContext()->pattrCurrent()->aTextureCoordinates()[2];
+		st4=QGetRenderContext()->pattrCurrent()->aTextureCoordinates()[3];
 		
 		vp=0;
 		// Fill in the points
@@ -2434,10 +2417,10 @@ RtVoid	RiPatchMeshV(RtToken type, RtInt nu, RtToken uwrap, RtInt nv, RtToken vwr
 		RtFloat dv=1.0/vpatches;
 
 		CqVector2D st1,st2,st3,st4;
-		st1=pCurrentRenderer()->pattrCurrent()->aTextureCoordinates()[0];
-		st2=pCurrentRenderer()->pattrCurrent()->aTextureCoordinates()[1];
-		st3=pCurrentRenderer()->pattrCurrent()->aTextureCoordinates()[2];
-		st4=pCurrentRenderer()->pattrCurrent()->aTextureCoordinates()[3];
+		st1=QGetRenderContext()->pattrCurrent()->aTextureCoordinates()[0];
+		st2=QGetRenderContext()->pattrCurrent()->aTextureCoordinates()[1];
+		st3=QGetRenderContext()->pattrCurrent()->aTextureCoordinates()[2];
+		st4=QGetRenderContext()->pattrCurrent()->aTextureCoordinates()[3];
 		
 		vp=0;
 		for(i=0; i<vpatches; i++)	// Fill in the points
@@ -2638,10 +2621,10 @@ RtVoid	RiNuPatchV(RtInt nu, RtInt uorder, RtFloat uknot[], RtFloat umin, RtFloat
 		pSurface->Clamp();
 
 		// Transform the points into camera space for processing,
-		pSurface->Transform(pCurrentRenderer()->matSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
-							pCurrentRenderer()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
-							pCurrentRenderer()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
-		pCurrentRenderer()->Scene().AddSurface(pSurface);
+		pSurface->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
+							QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
+							QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
+		QGetRenderContext()->Scene().AddSurface(pSurface);
 	}
 	else
 		delete(pSurface);
@@ -2922,9 +2905,8 @@ RtVoid	RiProcedural(RtPointer data, RtBound bound, RtFunc refineproc, RtFunc fre
 RtVoid	RiSolidBegin(RtToken type)
 {
 	CqBasicError(0,Severity_Normal,"RiSolidBegin, CSG not supported");
-	pCurrentRenderer()->CreateSolidContext();
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnSolidBegin();
+	QGetRenderContext()->CreateSolidContext();
+
 	return(0);
 }
 
@@ -2935,10 +2917,7 @@ RtVoid	RiSolidBegin(RtToken type)
 //
 RtVoid	RiSolidEnd()
 {
-	pCurrentRenderer()->DeleteSolidContext();
-
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnSolidEnd();
+	QGetRenderContext()->DeleteSolidContext();
 
 	return(0);
 }
@@ -2951,9 +2930,8 @@ RtVoid	RiSolidEnd()
  RtObjectHandle	RiObjectBegin()
 {
 	CqBasicError(0,Severity_Normal,"RiObjectBegin, instances not supported");
-	pCurrentRenderer()->CreateObjectContext();
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnObjectBegin();
+	QGetRenderContext()->CreateObjectContext();
+
 	return(0);
 }
 
@@ -2964,10 +2942,7 @@ RtVoid	RiSolidEnd()
 //
 RtVoid	RiObjectEnd()
 {
-	pCurrentRenderer()->DeleteObjectContext();
-
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnObjectEnd();
+	QGetRenderContext()->DeleteObjectContext();
 
 	return(0);
 }
@@ -3011,9 +2986,8 @@ RtVoid	RiMotionBegin(RtInt N, ...)
 //
 RtVoid	RiMotionBeginV(RtInt N, RtFloat times[])
 {
-	pCurrentRenderer()->CreateMotionContext(N,times);
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnMotionBegin();
+	QGetRenderContext()->CreateMotionContext(N,times);
+
 	return(0);
 }
 
@@ -3024,10 +2998,7 @@ RtVoid	RiMotionBeginV(RtInt N, RtFloat times[])
 //
 RtVoid	RiMotionEnd()
 {
-	pCurrentRenderer()->DeleteMotionContext();
-
-	// Call the renderer callback, which can be overridden for system specific setup.	
-	pCurrentRenderer()->OnMotionEnd();
+	QGetRenderContext()->DeleteMotionContext();
 
 	return(0);
 }
@@ -3265,7 +3236,7 @@ RtVoid	RiMakeShadowV(const char *picfile, const char *shadowfile, PARAMETERLIST)
 //
 RtVoid	RiErrorHandler(RtErrorFunc handler)
 {
-	pCurrentRenderer()->optCurrent().SetpErrorHandler(handler);
+	QGetRenderContext()->optCurrent().SetpErrorHandler(handler);
 	return(0);
 }
 
@@ -3286,7 +3257,7 @@ RtVoid	RiErrorIgnore(RtInt code, RtInt severity, const char* message)
 //
 RtVoid	RiErrorPrint(RtInt code, RtInt severity, const char* message)
 {
-	pCurrentRenderer()->PrintMessage(SqMessage(code, severity, message));
+	QGetRenderContext()->PrintMessage(SqMessage(code, severity, message));
 	return(0);
 }
 
@@ -3346,9 +3317,9 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 	if(ProcessPrimitiveVariables(pSubdivision,count,tokens,values))
 	{
 		// Transform the points into camera space for processing,
-		pSubdivision->Transform(pCurrentRenderer()->matSpaceToSpace("object","camera",CqMatrix(),pSubdivision->pTransform()->matObjectToWorld()),
-								pCurrentRenderer()->matNSpaceToSpace("object","camera",CqMatrix(),pSubdivision->pTransform()->matObjectToWorld()),
-								pCurrentRenderer()->matVSpaceToSpace("object","camera",CqMatrix(),pSubdivision->pTransform()->matObjectToWorld()));
+		pSubdivision->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pSubdivision->pTransform()->matObjectToWorld()),
+								QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pSubdivision->pTransform()->matObjectToWorld()),
+								QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSubdivision->pTransform()->matObjectToWorld()));
 		
 		// Intitialise the vertices of the hull
 		int i;
@@ -3408,7 +3379,7 @@ RtVoid	RiSubdivisionMeshV(RtToken scheme, RtInt nfaces, RtInt nvertices[], RtInt
 			apEdges.clear();
 			iPStart=iP;
 		}
-		pCurrentRenderer()->Scene().AddSurface(pSubdivision);
+		QGetRenderContext()->Scene().AddSurface(pSubdivision);
 	}
 	else
 		delete(pSubdivision);
@@ -3605,38 +3576,38 @@ static RtBoolean ProcessPrimitiveVariables(CqSurface* pSurface, PARAMETERLIST)
 template<class T>
 RtVoid	CreateGPrim(T* pSurface)
 {
-	if(pCurrentRenderer()->ptransCurrent()->cTimes()<=1)
+	if(QGetRenderContext()->ptransCurrent()->cTimes()<=1)
 	{
 		// Transform the points into camera space for processing,
-		pSurface->Transform(pCurrentRenderer()->matSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
-							pCurrentRenderer()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
-							pCurrentRenderer()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
+		pSurface->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
+							QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
+							QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
 
-		pCurrentRenderer()->Scene().AddSurface(pSurface);
+		QGetRenderContext()->Scene().AddSurface(pSurface);
 	}
 	else
 	{
 		CqMotionSurface<T*>* pMotionSurface=new CqMotionSurface<T*>(0);
 		// Add the provided surface as time 0, we will transform it later.
-		pMotionSurface->AddTimeSlot(pCurrentRenderer()->ptransCurrent()->Time(0),pSurface);
+		pMotionSurface->AddTimeSlot(QGetRenderContext()->ptransCurrent()->Time(0),pSurface);
 		RtInt i;
-		for(i=1; i<pCurrentRenderer()->ptransCurrent()->cTimes(); i++)
+		for(i=1; i<QGetRenderContext()->ptransCurrent()->cTimes(); i++)
 		{
-			RtFloat time=pCurrentRenderer()->ptransCurrent()->Time(i);
+			RtFloat time=QGetRenderContext()->ptransCurrent()->Time(i);
 
 			T* pTimeSurface=new T(*pSurface);
 			pMotionSurface->AddTimeSlot(time,pTimeSurface);
 
 			// Transform the points into camera space for processing,
-			pTimeSurface->Transform(pCurrentRenderer()->matSpaceToSpace("object","camera",CqMatrix(),pTimeSurface->pTransform()->matObjectToWorld(time)),
-									pCurrentRenderer()->matNSpaceToSpace("object","camera",CqMatrix(),pTimeSurface->pTransform()->matObjectToWorld(time)),
-									pCurrentRenderer()->matVSpaceToSpace("object","camera",CqMatrix(),pTimeSurface->pTransform()->matObjectToWorld(time)));
+			pTimeSurface->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pTimeSurface->pTransform()->matObjectToWorld(time)),
+									QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pTimeSurface->pTransform()->matObjectToWorld(time)),
+									QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pTimeSurface->pTransform()->matObjectToWorld(time)));
 		}
 		// Transform the points into camera space for processing,
-		pSurface->Transform(pCurrentRenderer()->matSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
-							pCurrentRenderer()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
-							pCurrentRenderer()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
-		pCurrentRenderer()->Scene().AddSurface(pMotionSurface);
+		pSurface->Transform(QGetRenderContext()->matSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
+							QGetRenderContext()->matNSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()),
+							QGetRenderContext()->matVSpaceToSpace("object","camera",CqMatrix(),pSurface->pTransform()->matObjectToWorld()));
+		QGetRenderContext()->Scene().AddSurface(pMotionSurface);
 	}
 
 	return(0);

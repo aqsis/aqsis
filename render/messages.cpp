@@ -26,7 +26,7 @@
 #include	"aqsis.h"
 
 #include	"messages.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -108,7 +108,7 @@ m_Code(code)
 {
 	if(gReportedErrors.CheckReport(this))
 	{
-		(*pCurrentRenderer()->optCurrent().pErrorHandler())(code, severity, message);
+		(*QGetRenderContext()->optCurrent().pErrorHandler())(code, severity, message);
 		if(onceper)
 			gReportedErrors.SetReported(new CqBasicError(*this));
 	}
@@ -136,7 +136,7 @@ m_pAttributes(pAttributes)
 		strMessage=message;
 		strMessage+=" : ";
 		strMessage+=strName;
-		(*pCurrentRenderer()->optCurrent().pErrorHandler())(code, severity, (char*)strMessage.c_str());
+		(*QGetRenderContext()->optCurrent().pErrorHandler())(code, severity, (char*)strMessage.c_str());
 		if(onceper)
 			gReportedErrors.SetReported(new CqAttributeError(*this));
 	}

@@ -28,7 +28,7 @@
 //{
 #define COLOR_H_INCLUDED 1
 
-#include	"specific.h"
+#include	"aqsis.h"
 
 #include	"ri.h"
 #include	"vector3d.h"

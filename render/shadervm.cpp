@@ -30,7 +30,7 @@
 #include	"aqsis.h"
 #include	"shadervm.h"
 #include	"symbols.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 #include	"version.h"
 #include	"sstring.h"
 
@@ -102,7 +102,7 @@ CqParameter::CqParameter(const char* strName, TqInt Count) :
 					m_strName(strName),
 					m_Count(Count)
 {
-	pCurrentRenderer()->Stats().cParametersAllocated()++;
+	QGetRenderContext()->Stats().cParametersAllocated()++;
 }
 
 /** Copy constructor
@@ -111,12 +111,12 @@ CqParameter::CqParameter(const CqParameter& From) :
 					m_strName(From.m_strName),
 					m_Count(From.m_Count)
 {
-	pCurrentRenderer()->Stats().cParametersAllocated()++;
+	QGetRenderContext()->Stats().cParametersAllocated()++;
 }
 
 CqParameter::~CqParameter()
 {
-	pCurrentRenderer()->Stats().cParametersDeallocated()++;
+	QGetRenderContext()->Stats().cParametersDeallocated()++;
 }
 
 
@@ -984,7 +984,7 @@ void CqShaderVM::ExecuteInit()
 void CqShaderVM::SetValue(const char* name, TqPchar val)
 {
 	// Find the relevant variable.
-	SqParameterDeclaration Decl=pCurrentRenderer()->FindParameterDecl(name);
+	SqParameterDeclaration Decl=QGetRenderContext()->FindParameterDecl(name);
 	TqInt i=FindLocalVarIndex(Decl.m_strName.c_str());
 	if(i>=0)
 	{
@@ -1043,7 +1043,7 @@ void CqShaderVM::SetValue(const char* name, TqPchar val)
 				CqVector3D p;
 				if(Decl.m_strName!="" && Decl.m_strSpace!="")
 					strSpace=Decl.m_strSpace;
-				VMVal=pCurrentRenderer()->matSpaceToSpace(strSpace.c_str(), "camera", matCurrent(), pCurrentRenderer()->matCurrent())*VMVal.Value(p,0);
+				VMVal=QGetRenderContext()->matSpaceToSpace(strSpace.c_str(), "camera", matCurrent(), QGetRenderContext()->matCurrent())*VMVal.Value(p,0);
 			}
 			else if((m_LocalVars[i]->Type()&Type_Mask)==Type_Normal)
 			{
@@ -1051,7 +1051,7 @@ void CqShaderVM::SetValue(const char* name, TqPchar val)
 				CqVector3D p;
 				if(Decl.m_strName!="" && Decl.m_strSpace!="")
 					strSpace=Decl.m_strSpace;
-				VMVal=pCurrentRenderer()->matNSpaceToSpace(strSpace.c_str(), "camera", matCurrent(), pCurrentRenderer()->matCurrent())*VMVal.Value(p,0);
+				VMVal=QGetRenderContext()->matNSpaceToSpace(strSpace.c_str(), "camera", matCurrent(), QGetRenderContext()->matCurrent())*VMVal.Value(p,0);
 			}
 			else if((m_LocalVars[i]->Type()&Type_Mask)==Type_Vector)
 			{
@@ -1059,7 +1059,7 @@ void CqShaderVM::SetValue(const char* name, TqPchar val)
 				CqVector3D p;
 				if(Decl.m_strName!="" && Decl.m_strSpace!="")
 					strSpace=Decl.m_strSpace;
-				VMVal=pCurrentRenderer()->matVSpaceToSpace(strSpace.c_str(), "camera", matCurrent(), pCurrentRenderer()->matCurrent())*VMVal.Value(p,0);
+				VMVal=QGetRenderContext()->matVSpaceToSpace(strSpace.c_str(), "camera", matCurrent(), QGetRenderContext()->matCurrent())*VMVal.Value(p,0);
 			}
 			else if((m_LocalVars[i]->Type()&Type_Mask)==Type_Matrix)
 			{
@@ -1067,7 +1067,7 @@ void CqShaderVM::SetValue(const char* name, TqPchar val)
 				CqMatrix m;
 				if(Decl.m_strName!="" && Decl.m_strSpace!="")
 					strSpace=Decl.m_strSpace;
-				VMVal=pCurrentRenderer()->matVSpaceToSpace(strSpace.c_str(), "camera", matCurrent(), pCurrentRenderer()->matCurrent())*VMVal.Value(m,0);
+				VMVal=QGetRenderContext()->matVSpaceToSpace(strSpace.c_str(), "camera", matCurrent(), QGetRenderContext()->matCurrent())*VMVal.Value(m,0);
 			}
 
 			if(pArray)	(*pArray)[arrayindex++]->SetValue(VMVal);

@@ -25,7 +25,7 @@
 
 #include	"aqsis.h"
 #include	"transform.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -37,16 +37,16 @@ START_NAMESPACE(Aqsis)
 
 CqTransform::CqTransform() : m_cReferences(0), CqMotionSpec<CqMatrix>(CqMatrix()), m_StackIndex(0)
 {
-	if(pCurrentRenderer()!=0)
+	if(QGetRenderContext()!=0)
 	{
-		pCurrentRenderer()->TransformStack().push_back(this);
-		m_StackIndex=pCurrentRenderer()->TransformStack().size()-1;
+		QGetRenderContext()->TransformStack().push_back(this);
+		m_StackIndex=QGetRenderContext()->TransformStack().size()-1;
 	}
 	// Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
 	// if the previous level has motion specification, the value will be interpolated.
 	CqMatrix matOtoWLast;
 	if(m_StackIndex>0)
-		matOtoWLast=pCurrentRenderer()->TransformStack()[m_StackIndex-1]->matObjectToWorld();
+		matOtoWLast=QGetRenderContext()->TransformStack()[m_StackIndex-1]->matObjectToWorld();
 	SetDefaultObject(matOtoWLast);
 }
 
@@ -60,14 +60,14 @@ CqTransform::CqTransform(const CqTransform& From) : m_cReferences(0), CqMotionSp
 	*this=From;
 	
 	// Register ourself with the global transform stack.
-	pCurrentRenderer()->TransformStack().push_back(this);
-	m_StackIndex=pCurrentRenderer()->TransformStack().size()-1;
+	QGetRenderContext()->TransformStack().push_back(this);
+	m_StackIndex=QGetRenderContext()->TransformStack().size()-1;
 
 	// Get the state of the transformation at the last stack entry, and use this as the default value for new timeslots.
 	// if the previous level has motion specification, the value will be interpolated.
 	CqMatrix matOtoWLast;
 	if(m_StackIndex>0)
-		matOtoWLast=pCurrentRenderer()->TransformStack()[m_StackIndex-1]->matObjectToWorld();
+		matOtoWLast=QGetRenderContext()->TransformStack()[m_StackIndex-1]->matObjectToWorld();
 	SetDefaultObject(matOtoWLast);
 }
 
@@ -78,18 +78,18 @@ CqTransform::CqTransform(const CqTransform& From) : m_cReferences(0), CqMotionSp
 
 CqTransform::~CqTransform()
 {
-	if(m_StackIndex>=0 && m_StackIndex<pCurrentRenderer()->TransformStack().size())
+	if(m_StackIndex>=0 && m_StackIndex<QGetRenderContext()->TransformStack().size())
 	{
 		// Remove ourself from the stack
-		std::vector<CqTransform*>::iterator p=pCurrentRenderer()->TransformStack().begin();
+		std::vector<CqTransform*>::iterator p=QGetRenderContext()->TransformStack().begin();
 		p+=m_StackIndex;
 		std::vector<CqTransform*>::iterator p2=p;
-		while(p2!=pCurrentRenderer()->TransformStack().end())
+		while(p2!=QGetRenderContext()->TransformStack().end())
 		{
 			(*p2)->m_StackIndex--;
 			p2++;
 		}
-		pCurrentRenderer()->TransformStack().erase(p);
+		QGetRenderContext()->TransformStack().erase(p);
 	}
 }
 
@@ -123,7 +123,7 @@ void CqTransform::ConcatCurrentTransform(TqFloat time, const CqMatrix& matTrans)
 {
 	// If we are actually in a motion block, concatenate this transform with the existing one at that time slot,
 	// else apply this transform at all time slots.
-	if(pCurrentRenderer()->pconCurrent()->fMotionBlock())
+	if(QGetRenderContext()->pconCurrent()->fMotionBlock())
 		ConcatTimeSlot(time,matTrans);
 	else
 		ConcatAllTimeSlots(matTrans);

@@ -28,7 +28,7 @@
 #include	"aqsis.h"
 #include	"imagebuffer.h"
 #include	"micropolygon.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 #include	"patch.h"
 #include	"vector2d.h"
 
@@ -503,7 +503,7 @@ CqMicroPolyGridBase* CqSurfacePatchBicubic::Dice()
 		AdvanceFD(matDDx,matDDy,matDDz,DDxA,DDyA,DDzA);
 	}
 	// Only shade if the ImageBuffer mode is at least RGB
-	if(pCurrentRenderer()->optCurrent().iDisplayMode()&ModeRGB)
+	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
 		pGrid->Shade();
 
 	return(pGrid);
@@ -543,7 +543,7 @@ TqInt CqSurfacePatchBicubic::Split(std::vector<CqBasicSurface*>& aSplits)
 
 TqBool	CqSurfacePatchBicubic::Diceable()
 {
-	const CqMatrix& matCtoR=pCurrentRenderer()->matSpaceToSpace("camera","raster");
+	const CqMatrix& matCtoR=QGetRenderContext()->matSpaceToSpace("camera","raster");
 	
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[16];
@@ -630,7 +630,7 @@ TqBool	CqSurfacePatchBicubic::Diceable()
 	}
 
 	float ShadingRate=pAttributes()->fEffectiveShadingRate();
-//	if(pCurrentRenderer()->Mode()==RenderMode_Shadows)
+//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
 //	{
 //		const TqFloat* pattrShadowShadingRate=m_pAttributes->GetFloatAttribute("render","shadow_shadingrate");
 //		if(pattrShadowShadingRate!=0)
@@ -926,7 +926,7 @@ CqMicroPolyGridBase* CqSurfacePatchBilinear::Dice()
 	}
 
 	// Only shade if the ImageBuffer mode is at least RGB
-	if(pCurrentRenderer()->optCurrent().iDisplayMode()&ModeRGB)
+	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
 		pGrid->Shade();
 
 	return(pGrid);
@@ -968,7 +968,7 @@ TqInt CqSurfacePatchBilinear::Split(std::vector<CqBasicSurface*>& aSplits)
 
 TqBool	CqSurfacePatchBilinear::Diceable()
 {
-	const CqMatrix& matCtoR=pCurrentRenderer()->matSpaceToSpace("camera","raster");
+	const CqMatrix& matCtoR=QGetRenderContext()->matSpaceToSpace("camera","raster");
 
 	// Convert the control hull to raster space.
 	CqVector2D	avecHull[4];
@@ -988,7 +988,7 @@ TqBool	CqSurfacePatchBilinear::Diceable()
 	vLen=(Vec1.Magnitude2()>Vec2.Magnitude2())?Vec1.Magnitude2():Vec2.Magnitude2();
 
 	float ShadingRate=pAttributes()->fEffectiveShadingRate();
-//	if(pCurrentRenderer()->Mode()==RenderMode_Shadows)
+//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
 //	{
 //		const TqFloat* pattrShadowShadingRate=m_pAttributes->GetFloatAttribute("render","shadow_shadingrate");
 //		if(pattrShadowShadingRate!=0)

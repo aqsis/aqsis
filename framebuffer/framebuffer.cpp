@@ -13,7 +13,7 @@
 #include	"aqsis.h"
 #include	"resource.h"
 #include	"framebuffer.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 #include	"sstring.h"
 
 #define MAX_LOADSTRING 100

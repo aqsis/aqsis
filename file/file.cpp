@@ -8,7 +8,7 @@
 
 #include	"aqsis.h"
 #include	"file.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 #include	"sstring.h"
 
 HINSTANCE	hInst;

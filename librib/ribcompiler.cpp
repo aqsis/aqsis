@@ -68,7 +68,7 @@ void CqRIBCompiler::yyerror(const char *m)
 	String+=" : ";
 	String+=yylloc.last_line;
 	String+=" : ";
-	String+=CqString(m_Scanner.m_pfile->strRealName());
+	String+=CqString(m_Scanner.m_FileNameStack.top());
 	std::cerr << String.c_str() << std::endl;	
 }
 
@@ -83,11 +83,12 @@ void CqRIBCompiler::yydebugout(const char *m)
 }
 
 
-IsRIBCompiler* IsRIBCompiler::Create()
+END_NAMESPACE(Aqsis)
+
+IqRIBCompiler* IqRIBCompiler::Create()
 {
 	return(new CqRIBCompiler);
 }
 
-END_NAMESPACE(Aqsis)
 
 //---------------------------------------------------------------------

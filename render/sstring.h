@@ -31,7 +31,6 @@
 #include <iostream>
 
 #include "aqsis.h"
-#include "specific.h"
 
 #include "ri.h"
 

@@ -34,8 +34,9 @@
 
 #include	<vector>
 #include	<iostream>
-
 #include	<time.h>
+
+#include	"aqsis.h"
 
 #include	"ri.h"
 #include	"context.h"
@@ -44,9 +45,9 @@
 #include	"semaphore.h"
 #include	"messages.h"
 #include	"scene.h"
-#include	"specific.h"
 #include	"shaders.h"
-#include	"irenderer.h"
+#include	"renderer.h"
+#include	"symbols.h"
 
 #define		_qShareName	CORE
 #include	"share.h"
@@ -98,13 +99,11 @@ enum EqRenderMode
 class CqRenderer;
 extern CqRenderer* pCurrRenderer;
 
-class CqRenderer : public IsRenderer
+class CqRenderer
 {
 	public:
 						CqRenderer();
 				virtual	~CqRenderer();
-
-				virtual	void		Destroy()	{delete(this);}
 
 				virtual	CqContext*	CreateMainContext();
 				virtual	CqContext*	CreateFrameContext();
@@ -186,23 +185,6 @@ class CqRenderer : public IsRenderer
 																std::cout << msg.strMessage().data() << std::endl; 
 															}
 	// Contect change callbacks
-				virtual	void		OnBegin()			{}
-				virtual	void		OnFrameBegin()		{}
-				virtual	void		OnWorldBegin()		{}
-				virtual	void		OnAttributeBegin()	{}
-				virtual	void		OnTransformBegin()	{}
-				virtual	void		OnSolidBegin()		{}
-				virtual	void		OnObjectBegin()		{}
-				virtual	void		OnMotionBegin()		{}
-				virtual	void		OnEnd()				{}
-				virtual	void		OnFrameEnd()		{}
-				virtual	void		OnWorldEnd()		{}
-				virtual	void		OnAttributeEnd()	{}
-				virtual	void		OnTransformEnd()	{}
-				virtual	void		OnSolidEnd()		{}
-				virtual	void		OnObjectEnd()		{}
-				virtual	void		OnMotionEnd()		{}
-
 				virtual	SqParameterDeclaration FindParameterDecl(const char* strDecl);
 				virtual	void		AddParameterDecl(const char* strName, const char* strType);
 				virtual	void		ClearSymbolTable()	{m_Symbols.clear();}
@@ -210,7 +192,7 @@ class CqRenderer : public IsRenderer
 						/** Get the list of currently registered shaders.
 						 * \return A reference to a list of CqShaderRegister classes.
 						 */
-				virtual	CqList<CqShaderRegister>& Shaders()	{return(m_Shaders);}
+				virtual	CqShader* CreateShader(const char* strName, EqShaderType type);
 
 						/** Flush any registered shaders.
 						 */
@@ -282,8 +264,12 @@ class CqRenderer : public IsRenderer
 			CqSemaphore		m_semDisplayDriverFinished;		///< Semaphore used to check for safe close down of a display driver.
 	
 	private:
+			void			RegisterShader(const char* strName, EqShaderType type, CqShader* pShader);
+			CqShaderRegister* FindShader(const char* strName, EqShaderType type);
+		
+
 			CqContext*		m_pconCurrent;					///< Pointer to the current context.
-			CqStats		m_Stats;						///< Global statistics.
+			CqStats			m_Stats;						///< Global statistics.
 			CqOptions		m_optDefault;					///< Default options.
 			CqAttributes	m_attrDefault;					///< Default attributes.
 			CqTransform		m_transDefault;					///< Default transformation.
@@ -302,6 +288,10 @@ class CqRenderer : public IsRenderer
 	public:
 			std::vector<SqCoordSys>	m_aCoordSystems;		///< List of reistered coordinate systems.
 };
+
+
+_qShareM	CqRenderer* QGetRenderContext();
+_qShareM	void		QSetRenderContext(CqRenderer* pRenderer);
 
 
 //-----------------------------------------------------------------------

@@ -28,7 +28,6 @@
 #define BITVECTOR_H_INCLUDED 1
 
 #include	"aqsis.h"
-#include	"specific.h"	// Needed for namespace macros.
 
 #define  _qShareName CORE
 #include	"share.h"

@@ -30,11 +30,11 @@
 #include	<vector>
 #include	<iostream>
 
+#include	"aqsis.h"
+
 #include	"bitvector.h"
 #include	"sstring.h"
 #include	"stats.h"
-
-#include	"specific.h"	// Needed for namespace macros.
 
 START_NAMESPACE(Aqsis)
 

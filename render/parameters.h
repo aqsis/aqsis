@@ -29,7 +29,8 @@
 
 #include	<vector>
 
-#include	"specific.h"	// Needed for namespace macros.
+#include	"aqsis.h"
+
 #include	"shadervariable.h"
 #include	"bilinear.h"
 

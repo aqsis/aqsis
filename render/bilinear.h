@@ -27,7 +27,7 @@
 #ifndef BILINEAR_H_INCLUDED
 #define BILINEAR_H_INCLUDED 1
 
-#include	"specific.h"	// Needed for namespace macros.
+#include	"aqsis.h"
 
 START_NAMESPACE(Aqsis)
 

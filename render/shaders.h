@@ -27,6 +27,8 @@
 #ifndef SHADERS_H_INCLUDED
 #define SHADERS_H_INCLUDED 1
 
+#include	"aqsis.h"
+
 #include "color.h"
 #include "exception.h"
 #include "matrix.h"
@@ -34,8 +36,6 @@
 #include "vector3d.h"
 #include "list.h"
 #include "shadervm.h"
-
-#include "specific.h"
 
 START_NAMESPACE(Aqsis)
 

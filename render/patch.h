@@ -27,12 +27,12 @@
 #ifndef PATCH_H_INCLUDED
 #define PATCH_H_INCLUDED 1
 
+#include	"aqsis.h"
+
 #include	"matrix.h"
 #include	"surface.h"
 #include	"vector4d.h"
 #include	"bilinear.h"
-
-#include	"specific.h"	// Needed for namespace macros.
 
 #define		_qShareName	CORE
 #include	"share.h"

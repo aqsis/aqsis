@@ -30,6 +30,8 @@
 #include	<vector>
 #include	<stack>
 
+#include	"aqsis.h"
+
 #include	"bitvector.h"
 #include	"color.h"
 #include	"noise.h"
@@ -39,8 +41,6 @@
 #include	"shadervariable.h"
 #include	"matrix.h"
 #include	"shaderstack.h"
-
-#include	"specific.h"	// Needed for namespace macros.
 
 START_NAMESPACE(Aqsis)
 

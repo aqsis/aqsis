@@ -30,7 +30,7 @@
 
 #include	<vector>
 
-#include	"specific.h"
+#include	"aqsis.h"
 
 #include	"color.h"
 #include	"ri.h"

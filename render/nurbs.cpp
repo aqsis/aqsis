@@ -30,7 +30,7 @@
 #include	"aqsis.h"
 #include	"nurbs.h"
 #include	"micropolygon.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 #include	"vector3d.h"
 #include	"imagebuffer.h"
 #include	"bilinear.h"
@@ -1303,7 +1303,7 @@ CqMicroPolyGridBase* CqSurfaceNURBS::Dice()
 		}
 	}
 	// Only shade if the ImageBuffer mode is at least RGB
-	if(pCurrentRenderer()->optCurrent().iDisplayMode()&ModeRGB)
+	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
 		pGrid->Shade();
 
 	return(pGrid);
@@ -1347,7 +1347,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 	CqVector2D*	avecHull=new CqVector2D[m_cuVerts*m_cvVerts];
 	TqInt i;
 	for(i=0; i<m_cuVerts*m_cvVerts; i++)
-		avecHull[i]=pCurrentRenderer()->matSpaceToSpace("camera","raster",CqMatrix(),pTransform()->matObjectToWorld())*P()[i];
+		avecHull[i]=QGetRenderContext()->matSpaceToSpace("camera","raster",CqMatrix(),pTransform()->matObjectToWorld())*P()[i];
 	
 	// Now work out the longest continuous line in raster space for u and v.
 	TqFloat uLen=0;
@@ -1390,7 +1390,7 @@ TqBool	CqSurfaceNURBS::Diceable()
 	
 	// TODO: Should ensure powers of half to prevent cracking.
 	float ShadingRate=pAttributes()->fEffectiveShadingRate();
-//	if(pCurrentRenderer()->Mode()==RenderMode_Shadows)
+//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
 //	{
 //		const TqFloat* pattrShadowShadingRate=m_pAttributes->GetFloatAttribute("render","shadow_shadingrate");
 //		if(pattrShadowShadingRate!=0)

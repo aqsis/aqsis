@@ -31,7 +31,7 @@
 #include	"aqsis.h"
 
 #include	"file.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -64,7 +64,7 @@ void CqFile::Open(const char* strFilename, const char* strSearchPathName)
 		{
 			// if not found there, search in the specified option searchpath.
 			CqString SearchPath("");
-			const CqString* poptShader=pCurrentRenderer()->optCurrent().GetStringOption("searchpath", strSearchPathName);
+			const CqString* poptShader=QGetRenderContext()->optCurrent().GetStringOption("searchpath", strSearchPathName);
 			if(poptShader!=0)
 			{
 				SearchPath=poptShader[0];

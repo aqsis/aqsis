@@ -29,7 +29,7 @@
 
 #include	<vector>
 
-#include	"specific.h"	// Needed for namespace macros.
+#include	"aqsis.h"
 
 #include	"ri.h"
 #include	"bitvector.h"
@@ -101,9 +101,6 @@ class _qShareC  CqShader
 			_qShareM 	CqShader() : m_Uses(0xFFFFFFFF)	{}
 	virtual	_qShareM 	~CqShader()	{}
 
-	static	_qShareM 	void	RegisterShader(const char* strName, EqShaderType type, CqShader* pShader);
-	static	_qShareM 	CqShaderRegister* FindShader(const char* strName, EqShaderType type);
-	static	_qShareM 	CqShader* CreateShader(const char* strName, EqShaderType type);
 						/** Get the shader matrix, the transformation at the time this shader was instantiated.
 						 */
 			_qShareM 	CqMatrix&	matCurrent()	{return(m_matCurrent);}

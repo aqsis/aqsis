@@ -11,7 +11,6 @@
 #define	RI_H_INCLUDED 1
 
 #include	"float.h"
-//#include	"specific.h"
 
 #define		_qShareName	CORE
 #include	"share.h"

@@ -28,7 +28,7 @@
 #include	"aqsis.h"
 #include	"shadervariable.h"
 #include	"shadervm.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -89,22 +89,22 @@ TqInt gcVariableTypeIdentifiers=sizeof(gVariableTypeIdentifiers)/sizeof(gVariabl
 
 CqShaderVariable::CqShaderVariable() 	
 {
-	pCurrentRenderer()->Stats().cVariablesAllocated()++;
+	QGetRenderContext()->Stats().cVariablesAllocated()++;
 }
 
 CqShaderVariable::CqShaderVariable(const char* strName) : m_strName(strName)
 {
-	pCurrentRenderer()->Stats().cVariablesAllocated()++;
+	QGetRenderContext()->Stats().cVariablesAllocated()++;
 }
 
 CqShaderVariable::CqShaderVariable(const CqShaderVariable& From) : m_strName(From.m_strName)
 {
-	pCurrentRenderer()->Stats().cVariablesAllocated()++;
+	QGetRenderContext()->Stats().cVariablesAllocated()++;
 }
 
 CqShaderVariable::~CqShaderVariable()
 {
-	pCurrentRenderer()->Stats().cVariablesDeallocated()++;
+	QGetRenderContext()->Stats().cVariablesDeallocated()++;
 }
 
 

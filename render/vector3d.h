@@ -27,9 +27,9 @@
 #ifndef VECTOR3D_H_INCLUDED
 #define VECTOR3D_H_INCLUDED 1
 
-#include	"ri.h"
+#include	"aqsis.h"
 
-#include	"specific.h"
+#include	"ri.h"
 #include	"vector2d.h"
 
 #define		_qShareName	CORE

@@ -27,9 +27,9 @@
 #ifndef VECTOR4D_H_INCLUDED
 #define VECTOR4D_H_INCLUDED 1
 
-#include	"ri.h"
+#include	"aqsis.h"
 
-#include	"specific.h"
+#include	"ri.h"
 
 #define		_qShareName	CORE
 #include	"share.h"

@@ -12,7 +12,8 @@
 
 #include	<vector>
 
-#include	"specific.h"	// Needed for namespace macros.
+#include	"aqsis.h"
+
 #include	"sstring.h"
 #include	"shaders.h"
 

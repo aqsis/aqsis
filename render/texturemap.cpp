@@ -31,7 +31,7 @@
 #include	"texturemap.h"
 #include	"file.h"
 #include	"exception.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -909,8 +909,8 @@ void	CqShadowMap::SampleMap(const CqVector3D& R1, const CqVector3D& R2,const CqV
 	CqVector3D	vecR1l,vecR2l,vecR3l,vecR4l;
 	CqVector3D	vecR1s,vecR2s,vecR3s,vecR4s;
 
-	CqMatrix matCameraToScreen=m_matWorldToScreen*pCurrentRenderer()->matSpaceToSpace("camera","world");
-	CqMatrix matCameraToLight=m_matWorldToCamera*pCurrentRenderer()->matSpaceToSpace("camera","world");
+	CqMatrix matCameraToScreen=m_matWorldToScreen*QGetRenderContext()->matSpaceToSpace("camera","world");
+	CqMatrix matCameraToLight=m_matWorldToCamera*QGetRenderContext()->matSpaceToSpace("camera","world");
 
 	vecR1l=matCameraToLight*R1;
 	vecR2l=matCameraToLight*R2;
@@ -1041,8 +1041,8 @@ void CqShadowMap::SetImage()
 	AllocateMap((CropWindowXMax()-CropWindowXMin()),(CropWindowYMax()-CropWindowYMin()));
 
 	// Set up the transformation matrices.
-	m_matWorldToCamera=pCurrentRenderer()->matSpaceToSpace("world","camera");
-	m_matWorldToScreen=pCurrentRenderer()->matSpaceToSpace("world","raster");
+	m_matWorldToCamera=QGetRenderContext()->matSpaceToSpace("world","camera");
+	m_matWorldToScreen=QGetRenderContext()->matSpaceToSpace("world","raster");
 }
 
 

@@ -33,14 +33,14 @@
 #include	<vector>
 #include	<valarray>
 
+#include	"aqsis.h"
+
 #include	"tiffio.h"
 //#include	"tiffiop.h"
 
 #include	"sstring.h"
 #include	"color.h"
 #include	"lights.h"
-
-#include	"specific.h"	// Needed for namespace macros.
 
 #define		_qShareName	CORE
 #include	"share.h"

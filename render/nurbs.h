@@ -27,9 +27,9 @@
 #ifndef NURBS_H_INCLUDED
 #define NURBS_H_INCLUDED 1
 
-#include	"specific.h"	// Needed for namespace macros.
-
 #include	<vector>
+
+#include	"aqsis.h"
 
 #include	"ri.h"
 #include	"vector4d.h"

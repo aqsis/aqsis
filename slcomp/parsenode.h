@@ -13,7 +13,7 @@
 #include	<ostream>
 #include	<vector>
 
-#include	"specific.h"	// Needed for namespace macros.
+#include	"aqsis.h"
 
 #include	"list.h"
 #include	"sstring.h"

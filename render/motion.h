@@ -29,7 +29,7 @@
 
 #include	<vector>
 
-#include	"specific.h"
+#include	"aqsis.h"
 
 #include	"ri.h"
 

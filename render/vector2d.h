@@ -29,8 +29,9 @@
 
 #include	<math.h>
 
+#include	"aqsis.h"
+
 #include	"ri.h"
-#include	"specific.h"
 
 #define		_qShareName	CORE
 #include	"share.h"

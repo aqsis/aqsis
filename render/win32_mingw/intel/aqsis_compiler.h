@@ -36,7 +36,21 @@
  */
 #define	AQSIS_COMPILER_MINGW	1
 
+///----------------------------------------------------------------------
+///
+/// Namespace macros for those cases where they aren't supported
+/// by the host compiler. These can also be disabled by setting
+/// /D NO_NAMESPACES in the compiler options.
 
-#pragma	warning (disable : 4786)
+#ifdef  NO_NAMESPACES
+#define START_NAMESPACE(x)	/* start disabled namespace x */
+#define END_NAMESPACE(x)	/* end disabled namespace x */
+#define USING_NAMESPACE(x)  /* using disabled namespace x */
+#else
+#define START_NAMESPACE(x)	namespace x {
+#define END_NAMESPACE(x)	}
+#define USING_NAMESPACE(x)  using namespace x;
+#endif
+
 
 #endif // AQSIS_COMPILER_H_INCLUDED

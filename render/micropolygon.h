@@ -29,10 +29,9 @@
 
 #include	"ri.h"
 
-#include	"specific.h"	// Needed for namespace macros.
+#include	"aqsis.h"
 
 #include	"memorypool.h"
-
 #include	"color.h"
 #include	"list.h"
 #include	"bound.h"

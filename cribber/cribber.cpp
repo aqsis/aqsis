@@ -1,6 +1,9 @@
 // cribber.cpp : Defines the entry point for the console application.
 //
 
+#include	<iostream>
+#include	<fstream>
+
 #include	<windows.h>
 
 #include	<conio.h>
@@ -8,17 +11,11 @@
 
 #pragma warning (disable : 4100)
 
-#include	"aqsis.h"
-#include	"file.h"
 #include	"ri.h"
 #include	"arg.h"
-#include	"share.h"
 #include	"iribcompiler.h"
-#include	"irenderer.h"
 
-using namespace Aqsis;
-
-void RenderFile(CqFile& file);
+void RenderFile(std::istream& file, const char* name);
 static void arg_filename(int argc, char**argv);
 
 int g_nowait;
@@ -41,8 +38,7 @@ int main(int argc, char* argv[])
 
 	if(g_cFiles==0)	// If no files specified, take input from stdin.
 	{
-		CqFile file(&std::cin, "stdin");
-		RenderFile(file);
+		RenderFile(std::cin, "stdin");
 	}
 
 	// Wait for a keypress
@@ -57,66 +53,49 @@ int main(int argc, char* argv[])
 }
 
 
-void RenderFile(CqFile& file)
+void RenderFile(std::istream& file, const char* name)
 {
-	IsRIBCompiler* pRibber=IsRIBCompiler::Create();
-	IsRenderer* pRenderer=IsRenderer::Create();
+	IqRIBCompiler* pRibber=IqRIBCompiler::Create();
 
 	// Store the current working directory for later use
 	char strCurrWD[255];
 	GetCurrentDirectory(255,strCurrWD);
 
-	if(file.IsValid())
+	RiBegin("CRIBBER");
+
+	// Read config file name out of the ini file.
+	char strExe[255];
+	char strDrive[10];
+	char strPath[255];
+	char strCFGFile[255];
+	GetModuleFileName(NULL, strExe, 255);
+	_splitpath(strExe,strDrive,strPath,NULL,NULL);
+	_makepath(strCFGFile,strDrive,strPath,"ribber",".cfg");
+
+	std::ifstream cfgfile(strCFGFile);
+	if(cfgfile.is_open())
 	{
-		RiBegin("CRIBBER");
-
-		// Read config file name out of the ini file.
-		char strExe[255];
-		char strDrive[10];
-		char strPath[255];
-		char strCFGFile[255];
-		GetModuleFileName(NULL, strExe, 255);
-		_splitpath(strExe,strDrive,strPath,NULL,NULL);
-		_makepath(strCFGFile,strDrive,strPath,"ribber",".cfg");
-
-		CqString strCFG(strCFGFile);
-
-		CqFile cfgfile(strCFG.c_str());
-		if(cfgfile.IsValid())
-		{
-			char tbuffer[256];
-			tbuffer[0]='\0';
-			bool ff=static_cast<std::istream*>(cfgfile)->eof();
-			static_cast<std::istream*>(cfgfile)->getline(tbuffer,255);
-			pRibber->SetFile(cfgfile);
-			pRibber->Parse();
-			cfgfile.Close();
-		}
-		else
-		{
-			CqString strErr("Config file not found");
-			strErr+=strCFGFile;
-			std::cerr << strErr.c_str() << std::endl;
-		}
-	
-		char strDir[255];
-		_splitpath(file.strRealName().c_str(),strDrive,strPath,NULL,NULL);
-		_makepath(strDir, strDrive, strPath, NULL, NULL);
-		SetCurrentDirectory(strDir);
-
-
-		if(g_Verbose!=0)	RiOption("statistics", "endofframe", &g_Verbose, RI_NULL);
-
-		pRibber->SetFile(file);
-
+		pRibber->SetFile(cfgfile, "config gile");
 		pRibber->Parse();
-		SetCurrentDirectory(strCurrWD);
-
-		RiEnd();
-
+		cfgfile.close();
 	}
+	else
+		std::cerr << "Config file not found " << strCFGFile << std::endl;
+
+	char strDir[255];
+	_splitpath(name,strDrive,strPath,NULL,NULL);
+	_makepath(strDir, strDrive, strPath, NULL, NULL);
+	SetCurrentDirectory(strDir);
+
+	RiOption("statistics", "endofframe", &g_Verbose, RI_NULL);
+	pRibber->SetFile(file,name);
+	pRibber->Parse();
+
+	SetCurrentDirectory(strCurrWD);
+
+	RiEnd();
+
 	pRibber->Destroy();
-	pRenderer->Destroy();
 }
 
 static void arg_filename(int argc, char**argv)
@@ -126,9 +105,7 @@ static void arg_filename(int argc, char**argv)
 
 	for(i=0; i<argc; i++)
 	{
-	    CqString strFname(argv[i]);
-		CqFile file;
-		file.Open(strFname.c_str());
-		RenderFile(file);
+		std::ifstream file(argv[i]);
+		RenderFile(file,argv[i]);
 	}
 }

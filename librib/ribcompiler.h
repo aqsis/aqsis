@@ -29,12 +29,12 @@
 
 #include	<vector>
 
-#include	"string.h"
-#include	"file.h"
-#include	"parser.h"
-#include	"scanner.h"
+#include	"aqsis.h"
 
 #include	"iribcompiler.h"
+
+#include	"parser.h"
+#include	"scanner.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -43,7 +43,7 @@ START_NAMESPACE(Aqsis)
  * Class encapsulating an ascii RIB compiler.
  */
 
-class CqRIBCompiler : public RIBParser, public IsRIBCompiler
+class CqRIBCompiler : public RIBParser, public IqRIBCompiler
 {
 	public:
 			CqRIBCompiler()			{}							
@@ -54,30 +54,26 @@ class CqRIBCompiler : public RIBParser, public IsRIBCompiler
 						/** Set the file to use for parsing.
 						 * \param file An open valid CqFile object.
 						 */				
-	virtual	void	SetFile(CqFile& file)	{m_Scanner.SetFile(file);}
+			void	SetFile(std::istream& file, const char* name)	{m_Scanner.SetFile(file,name);}
 						/** Parse the RIB file.
 						 * \return Integer error code.
 						 */
-	virtual	TqInt	Parse()					{return(yyparse());}
+			TqInt	Parse()					{return(yyparse());}
 						/** Destroy this RIBCompiler, called through the interface to clean up.
 						 */
-	virtual	void	Destroy()				{delete(this);}
+			void	Destroy()				{delete(this);}
 	
-	// Local functions
-	TqInt	yyparse();
-	TqInt	yylex();
-	void	yyerror(const TqChar *m);
-	void	yydebugout(const TqChar *m);
-
-	// Functions overridden from RIBParser
-						/** Pass status information through to the scanner.
-						 */
-	void	ExpectRequest()			{m_Scanner.ExpectRequest();}
-						/** Pass status information through to the scanner.
-						 */
-	void	ExpectParams()			{m_Scanner.ExpectParams();}
-
 	private:
+		// Local functions
+			TqInt	yyparse();
+			TqInt	yylex();
+			void	yyerror(const TqChar *m);
+			void	yydebugout(const TqChar *m);
+
+		// Functions overridden from RIBParser
+		void	ExpectRequest()			{m_Scanner.ExpectRequest();}
+		void	ExpectParams()			{m_Scanner.ExpectParams();}
+
 			RIBScanner	m_Scanner;		///< Instance of the flex scanner.
 };
 

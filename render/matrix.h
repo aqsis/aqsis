@@ -30,7 +30,7 @@
 #include	<iostream>
 
 #include	"aqsis.h"
-#include	"specific.h"
+
 #include	"vector3d.h"
 #include	"vector4d.h"
 

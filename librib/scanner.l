@@ -3,29 +3,29 @@
 
 %define	IOSTREAM
 %define LEX_PARAM YY_RIBParser_STYPE *val,YY_RIBParser_LTYPE *loc
-%define MEMBERS public: int m_Line; CqFile* m_pfile; long m_Len;\
+%define MEMBERS public: int m_Line; long m_Len;\
 						TqBool m_fRequest, m_fParams; \
-						YY_BUFFER_STATE m_ArchiveBufferStack[MAX_INCLUDE_DEPTH]; \
-						CqFile*	m_ArchiveFileStack[MAX_INCLUDE_DEPTH]; \
-						int m_ArchiveStackPtr; \
-						void	SetFile(CqFile& file)	\
+						std::stack<YY_BUFFER_STATE> m_BufferStack; \
+						std::stack<std::istream>	m_FileStack; \
+						std::stack<std::string>		m_FileNameStack; \
+						void	SetFile(std::istream& file, const char* name)	\
 								{ \
 									yy_initialize(); \
-									m_pfile=&file; \
+									m_FileStack.push(file); \
+									m_FileNameStack.push(std::string(name)); \
 									m_Len=-1; \
-									yyin=static_cast<std::istream*>(file); \
+									yyin=&file; \
 									m_Line=1; \
-									m_ArchiveStackPtr=0; \
 									m_fRequest=TqTrue; \
 								} \
 						void	ExpectRequest()				{m_fRequest=TqTrue;} \
 						void	ExpectParams()				{m_fParams=TqTrue;} 
-%define CONSTRUCTOR_INIT : m_Line(1),m_pfile(0),m_ArchiveStackPtr(0),m_Len(-1)
+%define CONSTRUCTOR_INIT : m_Line(1),m_Len(-1)
 %define	CONSTRUCTOR_PARAM	
 %define	CONSTRUCTOR_CODE	
-%define INPUT_CODE	m_Len=m_pfile->Length(); \
-					float pos=(100.0f/m_Len)*m_pfile->Position(); \
-					pCurrentRenderer()->Stats().SetComplete(pos); \
+%define INPUT_CODE	/*m_Len=m_FileStack.top().Length();*/ \
+					/*float pos=(100.0f/m_Len)*m_FileStack.top().Position(); */\
+					/*QGetRenderContext()->Stats().SetComplete(pos); */\
 					\
 					if(YY_RIBScanner_IN->eof())  \
 						result=0; \
@@ -40,7 +40,7 @@
 					return result;
 %define DEBUG 0
 %header{ 
-#define	MAX_INCLUDE_DEPTH 10
+#include	<stack>
 
 using namespace Aqsis;
 %}
@@ -199,45 +199,38 @@ ReadArchive				{BEGIN(incl);}
 .						{return(yytext[0]);}
 <incl>[ \t]*			
 <incl>{string}			{
-							if(m_ArchiveStackPtr>=MAX_INCLUDE_DEPTH)
+							TqInt l=strcspn((char*)yytext+1, "\"");
+							CqString strFilename((char*)yytext);
+							CqFile* pnewFile=new CqFile(strFilename.substr(1,l).c_str(),"archive");
+							if(pnewFile->IsValid())
 							{
-								// TODO: Report include nesting error.
+								m_BufferStack.push(YY_CURRENT_BUFFER);
+								m_FileStack.push(*pnewFile);			
+								m_FileNameStack.push(pnewFile->strRealName());
+								yyin=*pnewFile;
+								yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
 							}
 							else
 							{
-								TqInt l=strcspn((char*)yytext+1, "\"");
-								CqString strFilename((char*)yytext);
-								CqFile* pnewFile=new CqFile(strFilename.substr(1,l).c_str(),"archive");
-								if(pnewFile->IsValid())
-								{
-									m_ArchiveBufferStack[m_ArchiveStackPtr]=YY_CURRENT_BUFFER;
-									m_ArchiveFileStack[m_ArchiveStackPtr++]=m_pfile;
-									yyin=*pnewFile;
-									m_pfile=pnewFile;
-									yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
-								}
-								else
-								{
-									CqString strErr("Cannot find archive file ");
-									strErr+=strFilename;
-									CqBasicError(0,Severity_Normal,strErr.c_str());
-								}
-
-								BEGIN(INITIAL);
+								CqString strErr("Cannot find archive file ");
+								strErr+=strFilename;
+								CqBasicError(0,Severity_Normal,strErr.c_str());
 							}
+
+							BEGIN(INITIAL);
 						}
 <<EOF>>					{
-							if(--m_ArchiveStackPtr<0)
+							if(m_BufferStack.empty())
 							{
-								m_ArchiveStackPtr=0;
 								yyterminate();
 								return(RIBParser::EOF_TOKEN);
 							}
 							else
 							{
-								delete(m_pfile);
-								m_pfile=m_ArchiveFileStack[m_ArchiveStackPtr];
-								yy_switch_to_buffer(m_ArchiveBufferStack[m_ArchiveStackPtr]);
+								m_FileStack.pop();
+								m_FileNameStack.pop();
+								yy_switch_to_buffer(m_BufferStack.top());
+								m_BufferStack.pop();
 							}
 						}
 %%

@@ -28,7 +28,6 @@
 #endif
 
 #include	"aqsis.h"
-#include	"specific.h"
 
 #include "criticalsection.h"
 

@@ -25,7 +25,7 @@ CFG=Render - Win32 Debug
 # PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName "Render"
 # PROP Scc_LocalPath "."
-CPP=xicl6.exe
+CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
 
@@ -52,7 +52,7 @@ RSC=rc.exe
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=xilink6.exe
+LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /machine:I386
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib libtiff_i.lib zlib.lib winmm.lib /nologo /subsystem:windows /dll /map /debug /machine:I386 /nodefaultlib:"LIBCM" /nodefaultlib:"libc" /libpath:"..\Library\Release" /fixed:no
 # SUBTRACT LINK32 /pdb:none
@@ -76,7 +76,7 @@ PostBuild_Cmds=copy ..\aqsis.ini ..\library\release
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\Object\Debug\Render" /I "..\Render" /I "..\Render\win32\intel" /I "..\tiff-v3.5.2\libtiff" /I ".\win32\intel" /D "_DEBUG" /D ssVALIDATE=1 /D "WIN32" /D "_WINDOWS" /D _qBUILDING=CORE /D CORE=1 /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\Object\Debug\Render" /I "..\Render" /I "..\Render\win32\intel" /I "..\tiff-v3.5.2\libtiff" /I ".\win32\intel" /D "_DEBUG" /D ssVALIDATE=1 /D "WIN32" /D "_WINDOWS" /D _qBUILDING=CORE /D CORE=1 /FR /FD /c
 # SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
@@ -85,7 +85,7 @@ PostBuild_Cmds=copy ..\aqsis.ini ..\library\release
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-LINK32=xilink6.exe
+LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /dll /debug /machine:I386 /pdbtype:sept
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib libtiff_i.lib zlib.lib winmm.lib /nologo /subsystem:windows /dll /profile /map /debug /machine:I386 /nodefaultlib:"LIBCMTD" /nodefaultlib:"libcd" /libpath:"..\Library\Debug"
 # Begin Special Build Tool

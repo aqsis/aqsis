@@ -1246,7 +1246,7 @@ STD_SOIMPL CqShaderExecEnv::SO_transform(STRINGVAL fromspace, STRINGVAL tospace,
 {
 	assert(pShader!=0);
 
-	const CqMatrix& mat=pCurrentRenderer()->matSpaceToSpace(fromspace.Value(temp_string,0).c_str(), tospace.Value(temp_string,0).c_str(), pShader->matCurrent(), matObjectToWorld());
+	const CqMatrix& mat=QGetRenderContext()->matSpaceToSpace(fromspace.Value(temp_string,0).c_str(), tospace.Value(temp_string,0).c_str(), pShader->matCurrent(), matObjectToWorld());
 	INIT_SOR
 	CHECKVARY(p)
 	CHECKVARY(Result)
@@ -1262,7 +1262,7 @@ STD_SOIMPL CqShaderExecEnv::SO_transform(STRINGVAL tospace, POINTVAL p, DEFPARAM
 {
 	assert(pShader!=0);
 
-	const CqMatrix& mat=pCurrentRenderer()->matSpaceToSpace("current", tospace.Value(temp_string,0).c_str(), pShader->matCurrent(), matObjectToWorld());
+	const CqMatrix& mat=QGetRenderContext()->matSpaceToSpace("current", tospace.Value(temp_string,0).c_str(), pShader->matCurrent(), matObjectToWorld());
 	INIT_SOR
 	CHECKVARY(p)
 	CHECKVARY(Result)
@@ -1294,7 +1294,7 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransform(STRINGVAL fromspace, STRINGVAL tospace
 {
 	assert(pShader!=0);
 
-	const CqMatrix& mat=pCurrentRenderer()->matVSpaceToSpace(fromspace.Value(temp_string,0).c_str(), tospace.Value(temp_string,0).c_str(), pShader->matCurrent(), matObjectToWorld());
+	const CqMatrix& mat=QGetRenderContext()->matVSpaceToSpace(fromspace.Value(temp_string,0).c_str(), tospace.Value(temp_string,0).c_str(), pShader->matCurrent(), matObjectToWorld());
 	INIT_SOR
 	CHECKVARY(p)
 	CHECKVARY(Result)
@@ -1310,7 +1310,7 @@ STD_SOIMPL CqShaderExecEnv::SO_vtransform(STRINGVAL tospace, VECTORVAL p, DEFPAR
 {
 	assert(pShader!=0);
 
-	const CqMatrix& mat=pCurrentRenderer()->matVSpaceToSpace("current", tospace.Value(temp_string,0).c_str(), pShader->matCurrent(), matObjectToWorld());
+	const CqMatrix& mat=QGetRenderContext()->matVSpaceToSpace("current", tospace.Value(temp_string,0).c_str(), pShader->matCurrent(), matObjectToWorld());
 	INIT_SOR
 	CHECKVARY(p)
 	CHECKVARY(Result)
@@ -1342,7 +1342,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransform(STRINGVAL fromspace, STRINGVAL tospace
 {
 	assert(pShader!=0);
 
-	const CqMatrix& mat=pCurrentRenderer()->matNSpaceToSpace(fromspace.Value(temp_string,0).c_str(), tospace.Value(temp_string,0).c_str(), pShader->matCurrent(), matObjectToWorld());
+	const CqMatrix& mat=QGetRenderContext()->matNSpaceToSpace(fromspace.Value(temp_string,0).c_str(), tospace.Value(temp_string,0).c_str(), pShader->matCurrent(), matObjectToWorld());
 	INIT_SOR
 	CHECKVARY(p)
 	CHECKVARY(Result)
@@ -1358,7 +1358,7 @@ STD_SOIMPL CqShaderExecEnv::SO_ntransform(STRINGVAL tospace, NORMALVAL p, DEFPAR
 {
 	assert(pShader!=0);
 
-	const CqMatrix& mat=pCurrentRenderer()->matNSpaceToSpace("current", tospace.Value(temp_string,0).c_str(), pShader->matCurrent(), matObjectToWorld());
+	const CqMatrix& mat=QGetRenderContext()->matNSpaceToSpace("current", tospace.Value(temp_string,0).c_str(), pShader->matCurrent(), matObjectToWorld());
 	INIT_SOR
 	CHECKVARY(p)
 	CHECKVARY(Result)
@@ -1393,8 +1393,8 @@ STD_SOIMPL CqShaderExecEnv::SO_depth(POINTVAL p, DEFPARAMIMPL)
 	CHECKVARY(Result)
 	FOR_EACHR
 		TqFloat d=POINT(p).z();
-		d=(d-pCurrentRenderer()->optCurrent().fClippingPlaneNear())/
-			(pCurrentRenderer()->optCurrent().fClippingPlaneFar()-pCurrentRenderer()->optCurrent().fClippingPlaneNear());
+		d=(d-QGetRenderContext()->optCurrent().fClippingPlaneNear())/
+			(QGetRenderContext()->optCurrent().fClippingPlaneFar()-QGetRenderContext()->optCurrent().fClippingPlaneNear());
 		Result.SetValue(i,d);
 	END_FORR
 }
@@ -2319,7 +2319,7 @@ STD_SOIMPL	CqShaderExecEnv::SO_printf(STRINGVAL str, DEFVOIDPARAMVARIMPL)
 	for(ii=0; ii<cParams; ii++)	CHECKVARY(*apParams[ii]);
 	FOR_EACHR
 		CqString strA=SO_sprintf(STRING(str).c_str(),cParams,apParams,i);
-		pCurrentRenderer()->PrintMessage(SqMessage(0,0,strA.c_str()));
+		QGetRenderContext()->PrintMessage(SqMessage(0,0,strA.c_str()));
 	END_FORR
 }
 
@@ -2669,11 +2669,11 @@ STD_SOIMPL CqShaderExecEnv::SO_option(STRINGVAL name, CqShaderVariable* pV, DEFP
 			CqShaderVariableArray* paV=static_cast<CqShaderVariableArray*>(pV);
 			if(paV->ArrayLength()>=3)
 			{
-				se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().iXResolution());
+				se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().iXResolution());
 				(*paV)[0]->SetValue(se);
-				se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().iYResolution());
+				se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().iYResolution());
 				(*paV)[1]->SetValue(se);
-				se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().fPixelAspectRatio());
+				se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().fPixelAspectRatio());
 				(*paV)[2]->SetValue(se);
 				Ret=1.0f;
 			}
@@ -2687,13 +2687,13 @@ STD_SOIMPL CqShaderExecEnv::SO_option(STRINGVAL name, CqShaderVariable* pV, DEFP
 			CqShaderVariableArray* paV=static_cast<CqShaderVariableArray*>(pV);
 			if(paV->ArrayLength()>=4)
 			{
-				se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().fCropWindowXMin());
+				se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().fCropWindowXMin());
 				(*paV)[0]->SetValue(se);
-				se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().fCropWindowXMax());
+				se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().fCropWindowXMax());
 				(*paV)[1]->SetValue(se);
-				se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().fCropWindowYMin());
+				se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().fCropWindowYMin());
 				(*paV)[2]->SetValue(se);
-				se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().fCropWindowYMax());
+				se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().fCropWindowYMax());
 				(*paV)[3]->SetValue(se);
 				Ret=1.0f;
 			}
@@ -2703,7 +2703,7 @@ STD_SOIMPL CqShaderExecEnv::SO_option(STRINGVAL name, CqShaderVariable* pV, DEFP
 	{
 		if((pV->Type()&Type_Mask)==Type_Float)
 		{
-			se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().fFrameAspectRatio());
+			se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().fFrameAspectRatio());
 			pV->SetValue(se);
 			Ret=1.0f;
 		}
@@ -2716,11 +2716,11 @@ STD_SOIMPL CqShaderExecEnv::SO_option(STRINGVAL name, CqShaderVariable* pV, DEFP
 			CqShaderVariableArray* paV=static_cast<CqShaderVariableArray*>(pV);
 			if(paV->ArrayLength()>=3)
 			{
-				se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().ffStop());
+				se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().ffStop());
 				(*paV)[0]->SetValue(se);
-				se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().fFocalLength());
+				se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().fFocalLength());
 				(*paV)[1]->SetValue(se);
-				se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().fFocalDistance());
+				se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().fFocalDistance());
 				(*paV)[2]->SetValue(se);
 				Ret=1.0f;
 			}
@@ -2734,9 +2734,9 @@ STD_SOIMPL CqShaderExecEnv::SO_option(STRINGVAL name, CqShaderVariable* pV, DEFP
 			CqShaderVariableArray* paV=static_cast<CqShaderVariableArray*>(pV);
 			if(paV->ArrayLength()>=2)
 			{
-				se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().fShutterOpen());
+				se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().fShutterOpen());
 				(*paV)[0]->SetValue(se);
-				se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().fShutterClose());
+				se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().fShutterClose());
 				(*paV)[1]->SetValue(se);
 				Ret=1.0f;
 			}
@@ -2750,9 +2750,9 @@ STD_SOIMPL CqShaderExecEnv::SO_option(STRINGVAL name, CqShaderVariable* pV, DEFP
 			CqShaderVariableArray* paV=static_cast<CqShaderVariableArray*>(pV);
 			if(paV->ArrayLength()>=2)
 			{
-				se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().fClippingPlaneNear());
+				se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().fClippingPlaneNear());
 				(*paV)[0]->SetValue(se);
-				se=static_cast<TqFloat>(pCurrentRenderer()->optCurrent().fClippingPlaneFar());
+				se=static_cast<TqFloat>(QGetRenderContext()->optCurrent().fClippingPlaneFar());
 				(*paV)[1]->SetValue(se);
 				Ret=1.0f;
 			}
@@ -2765,7 +2765,7 @@ STD_SOIMPL CqShaderExecEnv::SO_option(STRINGVAL name, CqShaderVariable* pV, DEFP
 		{
 			CqString strParam=strName.substr(iColon+1,strName.size()-iColon-1);
 			strName=strName.substr(0,iColon);
-			const CqParameter* pParam=pCurrentRenderer()->optCurrent().pParameter(strName.c_str(), strParam.c_str());
+			const CqParameter* pParam=QGetRenderContext()->optCurrent().pParameter(strName.c_str(), strParam.c_str());
 			if(pParam!=0)
 			{
 				// Should only be able to query uniform parameters here, varying ones should be handled

@@ -40,10 +40,10 @@ CqLightsource::CqLightsource(CqShader* pShader, TqBool fActive) :
 										m_pAttributes(0)
 {
 	// Set a refernce with the current attributes.
-	m_pAttributes=const_cast<CqAttributes*>(pCurrentRenderer()->pattrCurrent());
+	m_pAttributes=const_cast<CqAttributes*>(QGetRenderContext()->pattrCurrent());
 	m_pAttributes->Reference();
-//	m_matLightToWorld=pCurrentRenderer()->matCurrent();
-//	m_matWorldToLight=pCurrentRenderer()->matCurrent().Inverse();
+//	m_matLightToWorld=QGetRenderContext()->matCurrent();
+//	m_matWorldToLight=QGetRenderContext()->matCurrent().Inverse();
 
 	// Link into the lightsource stack.
 	Lightsource_stack.LinkFirst(this);
@@ -84,7 +84,7 @@ void CqLightsource::Initialise(TqInt uGridRes, TqInt vGridRes)
 	Cl().Initialise(uGridRes, vGridRes, GridI());
 
 	// Initialise the geometric parameters in the shader exec env.
-	P()=pCurrentRenderer()->matSpaceToSpace("shader", "current", m_pShader->matCurrent())*CqVector3D(0.0f,0.0f,0.0f);
+	P()=QGetRenderContext()->matSpaceToSpace("shader", "current", m_pShader->matCurrent())*CqVector3D(0.0f,0.0f,0.0f);
 	if(USES(Uses,EnvVars_u))	u()=0.0f;
 	if(USES(Uses,EnvVars_v))	v()=0.0f;
 	if(USES(Uses,EnvVars_du))	du()=0.0f;
@@ -104,13 +104,13 @@ void CqLightsource::Initialise(TqInt uGridRes, TqInt vGridRes)
 	if(m_pShader->fAmbient())	return;
 
 	// Store the current renderer state.
-	CqOptions	Options=pCurrentRenderer()->optCurrent();
-	CqImageBuffer* pBuffer=pCurrentRenderer()->pImage();
-	pCurrentRenderer()->SetImage(0);
-	CqMatrix	matScreen(pCurrentRenderer()->matSpaceToSpace("world","screen"));
-	CqMatrix	matNDC(pCurrentRenderer()->matSpaceToSpace("world","NDC"));
-	CqMatrix	matRaster(pCurrentRenderer()->matSpaceToSpace("world","raster"));
-	CqMatrix	matCamera(pCurrentRenderer()->matSpaceToSpace("world","camera"));
+	CqOptions	Options=QGetRenderContext()->optCurrent();
+	CqImageBuffer* pBuffer=QGetRenderContext()->pImage();
+	QGetRenderContext()->SetImage(0);
+	CqMatrix	matScreen(QGetRenderContext()->matSpaceToSpace("world","screen"));
+	CqMatrix	matNDC(QGetRenderContext()->matSpaceToSpace("world","NDC"));
+	CqMatrix	matRaster(QGetRenderContext()->matSpaceToSpace("world","raster"));
+	CqMatrix	matCamera(QGetRenderContext()->matSpaceToSpace("world","camera"));
 
 	// Get the attributes from the lightsource describing the shadowmap.	
 	TqInt ShadowXSize=256;
@@ -138,27 +138,27 @@ void CqLightsource::Initialise(TqInt uGridRes, TqInt vGridRes)
 	RiDisplay(strShadowName,"shadowmap",RI_Z,RI_NULL);
 
 	// Equivalent to RiWorldBegin
-	pCurrentRenderer()->SetmatCamera(m_matWorldToLight);
-	pCurrentRenderer()->optCurrent().InitialiseCamera();
+	QGetRenderContext()->SetmatCamera(m_matWorldToLight);
+	QGetRenderContext()->optCurrent().InitialiseCamera();
 
-	pCurrentRenderer()->SetfSaveGPrims(TqTrue);
+	QGetRenderContext()->SetfSaveGPrims(TqTrue);
 	
 	// Equivalent to RiWorldEnd
-	pCurrentRenderer()->pImage()->SetImage();
-	pCurrentRenderer()->pImage()->InitialiseSurfaces(pCurrentRenderer()->Scene());
-	pCurrentRenderer()->pImage()->RenderImage();
+	QGetRenderContext()->pImage()->SetImage();
+	QGetRenderContext()->pImage()->InitialiseSurfaces(QGetRenderContext()->Scene());
+	QGetRenderContext()->pImage()->RenderImage();
 	RiMakeShadow(strShadowName, strShadowName);
-	pCurrentRenderer()->pImage()->DeleteImage();
+	QGetRenderContext()->pImage()->DeleteImage();
 
 	// Restore renderer options.
-	pCurrentRenderer()->optCurrent()=Options;
-	pCurrentRenderer()->SetImage(pBuffer);
-	pCurrentRenderer()->SetmatScreen(matScreen);
-	pCurrentRenderer()->SetmatNDC(matNDC);
-	pCurrentRenderer()->SetmatRaster(matRaster);
-	pCurrentRenderer()->SetmatCamera(matCamera);
+	QGetRenderContext()->optCurrent()=Options;
+	QGetRenderContext()->SetImage(pBuffer);
+	QGetRenderContext()->SetmatScreen(matScreen);
+	QGetRenderContext()->SetmatNDC(matNDC);
+	QGetRenderContext()->SetmatRaster(matRaster);
+	QGetRenderContext()->SetmatCamera(matCamera);
 
-	pCurrentRenderer()->SetfSaveGPrims(TqFalse);
+	QGetRenderContext()->SetfSaveGPrims(TqFalse);
 }
 */
 

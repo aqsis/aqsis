@@ -29,7 +29,7 @@
 
 #include	"ri.h"
 
-#include	"specific.h"	// Needed for namespace macros.
+#include	"aqsis.h"
 
 START_NAMESPACE(Aqsis)
 

@@ -27,7 +27,7 @@
 
 #include	"aqsis.h"
 #include	"options.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 
 #include	"ri.h"
 
@@ -191,10 +191,10 @@ void CqCamera::InitialiseCamera()
 			break;
 		}
 	}
-	CqMatrix matWorldToCamera(pCurrentRenderer()->matWorldToCamera());
-	pCurrentRenderer()->SetmatScreen(matCameraToScreen*matWorldToCamera);
-	pCurrentRenderer()->SetmatNDC(matScreenToNDC*matCameraToScreen*matWorldToCamera);
-	pCurrentRenderer()->SetmatRaster(matNDCToRaster*matScreenToNDC*matCameraToScreen*matWorldToCamera);
+	CqMatrix matWorldToCamera(QGetRenderContext()->matWorldToCamera());
+	QGetRenderContext()->SetmatScreen(matCameraToScreen*matWorldToCamera);
+	QGetRenderContext()->SetmatNDC(matScreenToNDC*matCameraToScreen*matWorldToCamera);
+	QGetRenderContext()->SetmatRaster(matNDCToRaster*matScreenToNDC*matCameraToScreen*matWorldToCamera);
 
 	// Set some additional information about the clip range.
 	m_fClippingRange=fClippingPlaneFar()-fClippingPlaneNear();

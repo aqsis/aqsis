@@ -27,10 +27,10 @@
 #ifndef POLYGON_H_INCLUDED
 #define POLYGON_H_INCLUDED 1
 
+#include	"aqsis.h"
+
 #include	"surface.h"
 #include	"vector4d.h"
-
-#include	"specific.h"	// Needed for namespace macros.
 
 START_NAMESPACE(Aqsis)
 

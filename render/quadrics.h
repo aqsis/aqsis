@@ -27,10 +27,10 @@
 #ifndef QUADRICS_H_INCLUDED
 #define QUADRICS_H_INCLUDED 1
 
+#include	"aqsis.h"
+
 #include	"surface.h"
 #include	"micropolygon.h"
-
-#include	"specific.h"	// Needed for namespace macros.
 
 START_NAMESPACE(Aqsis)
 

@@ -29,7 +29,7 @@
 #include	"stats.h"
 #include	"imagebuffer.h"
 #include	"options.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 #include	"surface.h"
 #include	"shadervm.h"
 #include	"micropolygon.h"
@@ -361,26 +361,26 @@ void	CqImageBuffer::SetImage()
 
 	m_XBucketSize=16;
 	m_YBucketSize=16;
-	const TqInt* poptBucketSize=pCurrentRenderer()->optCurrent().GetIntegerOption("limits","bucketsize");
+	const TqInt* poptBucketSize=QGetRenderContext()->optCurrent().GetIntegerOption("limits","bucketsize");
 	if(poptBucketSize!=0)
 	{
 		m_XBucketSize=poptBucketSize[0];
 		m_YBucketSize=poptBucketSize[1];
 	}
 
-	m_iXRes=pCurrentRenderer()->optCurrent().iXResolution();
-	m_iYRes=pCurrentRenderer()->optCurrent().iYResolution();
-	m_CropWindowXMin=static_cast<TqInt>(CLAMP(ceil(m_iXRes*pCurrentRenderer()->optCurrent().fCropWindowXMin()  ),0,m_iXRes));
-	m_CropWindowXMax=static_cast<TqInt>(CLAMP(ceil(m_iXRes*pCurrentRenderer()->optCurrent().fCropWindowXMax()  ),0,m_iXRes));
-	m_CropWindowYMin=static_cast<TqInt>(CLAMP(ceil(m_iYRes*pCurrentRenderer()->optCurrent().fCropWindowYMin()  ),0,m_iYRes));
-	m_CropWindowYMax=static_cast<TqInt>(CLAMP(ceil(m_iYRes*pCurrentRenderer()->optCurrent().fCropWindowYMax()  ),0,m_iYRes));
+	m_iXRes=QGetRenderContext()->optCurrent().iXResolution();
+	m_iYRes=QGetRenderContext()->optCurrent().iYResolution();
+	m_CropWindowXMin=static_cast<TqInt>(CLAMP(ceil(m_iXRes*QGetRenderContext()->optCurrent().fCropWindowXMin()  ),0,m_iXRes));
+	m_CropWindowXMax=static_cast<TqInt>(CLAMP(ceil(m_iXRes*QGetRenderContext()->optCurrent().fCropWindowXMax()  ),0,m_iXRes));
+	m_CropWindowYMin=static_cast<TqInt>(CLAMP(ceil(m_iYRes*QGetRenderContext()->optCurrent().fCropWindowYMin()  ),0,m_iYRes));
+	m_CropWindowYMax=static_cast<TqInt>(CLAMP(ceil(m_iYRes*QGetRenderContext()->optCurrent().fCropWindowYMax()  ),0,m_iYRes));
 	m_cXBuckets=(m_iXRes/m_XBucketSize)+1;
 	m_cYBuckets=(m_iYRes/m_YBucketSize)+1;
-	m_PixelXSamples=static_cast<TqInt>(pCurrentRenderer()->optCurrent().fPixelXSamples());
-	m_PixelYSamples=static_cast<TqInt>(pCurrentRenderer()->optCurrent().fPixelYSamples());
-	m_FilterXWidth=static_cast<TqInt>(pCurrentRenderer()->optCurrent().fFilterXWidth());
-	m_FilterYWidth=static_cast<TqInt>(pCurrentRenderer()->optCurrent().fFilterYWidth());
-	m_DisplayMode=pCurrentRenderer()->optCurrent().iDisplayMode();
+	m_PixelXSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelXSamples());
+	m_PixelYSamples=static_cast<TqInt>(QGetRenderContext()->optCurrent().fPixelYSamples());
+	m_FilterXWidth=static_cast<TqInt>(QGetRenderContext()->optCurrent().fFilterXWidth());
+	m_FilterYWidth=static_cast<TqInt>(QGetRenderContext()->optCurrent().fFilterYWidth());
+	m_DisplayMode=QGetRenderContext()->optCurrent().iDisplayMode();
 
 	// Allocate the image element storage for a single bucket
 	m_pieImage=new CqImageElement[(m_XBucketSize+m_FilterXWidth)*(m_YBucketSize+m_FilterYWidth)];
@@ -397,7 +397,7 @@ void	CqImageBuffer::SetImage()
 
 	// Allocate and fill in the filter values array for each pixel.
 	RtFilterFunc pFilter;
-	pFilter=pCurrentRenderer()->optCurrent().funcFilter();
+	pFilter=QGetRenderContext()->optCurrent().funcFilter();
 	m_aaFilterValues.resize(m_XBucketSize*m_YBucketSize);
 	CqImageElement* pie;
 	TqInt NumFilterValues=((m_FilterYWidth+1)*(m_FilterXWidth+1));//*(m_PixelXSamples*m_PixelYSamples);
@@ -453,7 +453,7 @@ void CqImageBuffer::AllocateSamples()
 
 void CqImageBuffer::InitialiseSamples(TqInt iBucket)
 {
-	TqBool fJitter=(pCurrentRenderer()->optCurrent().iDisplayMode()&ModeRGB);
+	TqBool fJitter=(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB);
 
 	CqVector2D	bPos=Position(iBucket);
 	TqInt i;
@@ -611,18 +611,18 @@ void CqImageBuffer::FilterPixel(TqInt X, TqInt Y, TqInt iBucket, SqImageValue& V
 
 void CqImageBuffer::ExposePixel(SqImageValue& Pixel)
 {
-	if(pCurrentRenderer()->optCurrent().fExposureGain()==1.0 &&
-	   pCurrentRenderer()->optCurrent().fExposureGamma()==1.0)
+	if(QGetRenderContext()->optCurrent().fExposureGain()==1.0 &&
+	   QGetRenderContext()->optCurrent().fExposureGamma()==1.0)
 		return;
 	else
 	{
 		// color=(color*gain)^1/gamma
-		if(pCurrentRenderer()->optCurrent().fExposureGain()!=1.0)
-			Pixel.m_colColor*=pCurrentRenderer()->optCurrent().fExposureGain();
+		if(QGetRenderContext()->optCurrent().fExposureGain()!=1.0)
+			Pixel.m_colColor*=QGetRenderContext()->optCurrent().fExposureGain();
 
-		if(pCurrentRenderer()->optCurrent().fExposureGamma()!=1.0)
+		if(QGetRenderContext()->optCurrent().fExposureGamma()!=1.0)
 		{
-			TqFloat oneovergamma=1.0f/pCurrentRenderer()->optCurrent().fExposureGamma();
+			TqFloat oneovergamma=1.0f/QGetRenderContext()->optCurrent().fExposureGamma();
 			Pixel.m_colColor.SetfRed  (pow(Pixel.m_colColor.fRed  (),oneovergamma));
 			Pixel.m_colColor.SetfGreen(pow(Pixel.m_colColor.fGreen(),oneovergamma));
 			Pixel.m_colColor.SetfBlue (pow(Pixel.m_colColor.fBlue (),oneovergamma));
@@ -640,13 +640,13 @@ void CqImageBuffer::QuantizePixel(SqImageValue& Pixel)
 {
 	static CqRandom random;
 
-	if(pCurrentRenderer()->optCurrent().iDisplayMode()&ModeRGB)
+	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
 	{
-		double ditheramplitude=pCurrentRenderer()->optCurrent().fColorQuantizeDitherAmplitude();
+		double ditheramplitude=QGetRenderContext()->optCurrent().fColorQuantizeDitherAmplitude();
 		if(ditheramplitude==0)	return;
-		TqInt one=pCurrentRenderer()->optCurrent().iColorQuantizeOne();
-		TqInt min=pCurrentRenderer()->optCurrent().iColorQuantizeMin();
-		TqInt max=pCurrentRenderer()->optCurrent().iColorQuantizeMax();
+		TqInt one=QGetRenderContext()->optCurrent().iColorQuantizeOne();
+		TqInt min=QGetRenderContext()->optCurrent().iColorQuantizeMin();
+		TqInt max=QGetRenderContext()->optCurrent().iColorQuantizeMax();
 
 		double r,g,b,a;
 		double s=random.RandomFloat();
@@ -665,11 +665,11 @@ void CqImageBuffer::QuantizePixel(SqImageValue& Pixel)
 	}
 	else
 	{
-		double ditheramplitude=pCurrentRenderer()->optCurrent().fDepthQuantizeDitherAmplitude();
+		double ditheramplitude=QGetRenderContext()->optCurrent().fDepthQuantizeDitherAmplitude();
 		if(ditheramplitude==0)	return;
-		TqInt one=pCurrentRenderer()->optCurrent().iDepthQuantizeOne();
-		TqInt min=pCurrentRenderer()->optCurrent().iDepthQuantizeMin();
-		TqInt max=pCurrentRenderer()->optCurrent().iDepthQuantizeMax();
+		TqInt one=QGetRenderContext()->optCurrent().iDepthQuantizeOne();
+		TqInt min=QGetRenderContext()->optCurrent().iDepthQuantizeMin();
+		TqInt max=QGetRenderContext()->optCurrent().iDepthQuantizeMax();
 
 		double d;
 		if(modf(one*Pixel.m_Depth+ditheramplitude*random.RandomFloat(),&d)>0.5)	d+=1;
@@ -688,8 +688,8 @@ void CqImageBuffer::QuantizePixel(SqImageValue& Pixel)
 TqBool CqImageBuffer::CullSurface(CqBound& Bound, CqBasicSurface* pSurface)
 {
 	// If the primitive is completely outside of the hither-yon z range, cull it.
-	if(Bound.vecMin().z()>=pCurrentRenderer()->optCurrent().fClippingPlaneFar() ||
-	   Bound.vecMax().z()<=pCurrentRenderer()->optCurrent().fClippingPlaneNear())
+	if(Bound.vecMin().z()>=QGetRenderContext()->optCurrent().fClippingPlaneFar() ||
+	   Bound.vecMax().z()<=QGetRenderContext()->optCurrent().fClippingPlaneNear())
 		return(TqTrue);
 
 	// If the primitive spans the epsilon plane and the hither plane and can be split,
@@ -698,7 +698,7 @@ TqBool CqImageBuffer::CullSurface(CqBound& Bound, CqBasicSurface* pSurface)
 		// Mark the primitive as not dicable.
 		pSurface->ForceUndiceable();
 		TqInt MaxEyeSplits=10;
-		const TqInt* poptEyeSplits=pCurrentRenderer()->optCurrent().GetIntegerOption("limits","eyesplits");
+		const TqInt* poptEyeSplits=QGetRenderContext()->optCurrent().GetIntegerOption("limits","eyesplits");
 		if(poptEyeSplits!=0)
 			MaxEyeSplits=poptEyeSplits[0];
 
@@ -711,7 +711,7 @@ TqBool CqImageBuffer::CullSurface(CqBound& Bound, CqBasicSurface* pSurface)
 	}
 
 	// Convert the bounds to screen space.
-	Bound.Transform(pCurrentRenderer()->matSpaceToSpace("camera","raster"));
+	Bound.Transform(QGetRenderContext()->matSpaceToSpace("camera","raster"));
 	Bound.vecMin().x(Bound.vecMin().x()-m_FilterXWidth/2);
 	Bound.vecMin().y(Bound.vecMin().y()-m_FilterYWidth/2);
 	Bound.vecMax().x(Bound.vecMax().x()+m_FilterXWidth/2);
@@ -753,7 +753,7 @@ void CqImageBuffer::AddSurfacePointer(CqBasicSurface* pSurface)
 		CqAttributeError(WarningID_NoDisplacementBound, Severity_Normal,"Using displacement shader without specifying displacementbound option, may cause rendering problems", pSurface->pAttributes(), TqTrue);
 
 	CqVector3D	vecDB(db,0,0);
-	vecDB=pCurrentRenderer()->matVSpaceToSpace(strCoordinateSystem.c_str(),"camera",pSurface->pAttributes()->pshadSurface()->matCurrent(),pSurface->pTransform()->matObjectToWorld())*vecDB;
+	vecDB=QGetRenderContext()->matVSpaceToSpace(strCoordinateSystem.c_str(),"camera",pSurface->pAttributes()->pshadSurface()->matCurrent(),pSurface->pTransform()->matObjectToWorld())*vecDB;
 	db=vecDB.Magnitude();
 
 	Bound.vecMax()+=db;
@@ -800,7 +800,7 @@ void CqImageBuffer::PostSurface(CqBasicSurface* pSurface)
 	if(pattrCoordinateSystem!=0)	strCoordinateSystem=pattrCoordinateSystem[0];
 
 	CqVector3D	vecDB(db,0,0);
-	vecDB=pCurrentRenderer()->matVSpaceToSpace(strCoordinateSystem.c_str(),"camera",pSurface->pAttributes()->pshadSurface()->matCurrent(),pSurface->pTransform()->matObjectToWorld())*vecDB;
+	vecDB=QGetRenderContext()->matVSpaceToSpace(strCoordinateSystem.c_str(),"camera",pSurface->pAttributes()->pshadSurface()->matCurrent(),pSurface->pTransform()->matObjectToWorld())*vecDB;
 	db=vecDB.Magnitude();
 
 	Bound.vecMax()+=db;
@@ -943,8 +943,8 @@ void CqImageBuffer::RenderMPGs(TqInt iBucket, long xmin, long xmax, long ymin, l
 	
 	if(m_aampgWaiting[iBucket].empty())	return;
 
-	TqFloat farplane=pCurrentRenderer()->optCurrent().fClippingPlaneFar();
-	TqFloat nearplane=pCurrentRenderer()->optCurrent().fClippingPlaneNear();
+	TqFloat farplane=QGetRenderContext()->optCurrent().fClippingPlaneFar();
+	TqFloat nearplane=QGetRenderContext()->optCurrent().fClippingPlaneNear();
 	
 	register long iY=ymin;
 
@@ -987,8 +987,8 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 		return;
 
 	// If the micropolygon is outside the hither-yon range, cull it.
-	if(Bound.vecMin().z()>pCurrentRenderer()->optCurrent().fClippingPlaneFar() ||
-	   Bound.vecMax().z()<pCurrentRenderer()->optCurrent().fClippingPlaneNear())
+	if(Bound.vecMin().z()>QGetRenderContext()->optCurrent().fClippingPlaneFar() ||
+	   Bound.vecMax().z()<QGetRenderContext()->optCurrent().fClippingPlaneNear())
 		return;
 
 	// Now go across all pixels touched by the micropolygon bound.
@@ -1005,8 +1005,8 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 	long initX=static_cast<long>(floor(Bound.vecMin().x()));
 	if(initX<xmin)	initX=xmin;
 
-	TqInt iXSamples=pCurrentRenderer()->optCurrent().fPixelXSamples();
-	TqInt iYSamples=pCurrentRenderer()->optCurrent().fPixelYSamples();
+	TqInt iXSamples=QGetRenderContext()->optCurrent().fPixelXSamples();
+	TqInt iYSamples=QGetRenderContext()->optCurrent().fPixelYSamples();
 	
 	TqInt im=(bminx<initX)?0:floor((bminx-initX)*iXSamples);
 	TqInt in=(bminy<initY)?0:floor((bminy-initY)*iYSamples);
@@ -1032,12 +1032,12 @@ inline void CqImageBuffer::RenderMicroPoly(CqMicroPolygonBase* pMPG, TqInt iBuck
 			{
 				for(m=start_m; m<end_m; m++)
 				{
-					pCurrentRenderer()->Stats().cSamples()++;
+					QGetRenderContext()->Stats().cSamples()++;
 					CqVector2D vecP(pie->SamplePoint(m,n));
 
 					if(Bound.Contains2D(vecP))
 					{
-						pCurrentRenderer()->Stats().cSampleBoundHits()++;
+						QGetRenderContext()->Stats().cSampleBoundHits()++;
 
 						TqFloat t=pie->SampleTime(m,n);
 						if(pMPG->Sample(vecP,t,ImageVal.m_Depth))
@@ -1183,7 +1183,7 @@ void CqImageBuffer::RenderSurfaces(TqInt iBucket,long xmin, long xmax, long ymin
 	
 	// Now combine the colors at each pixel sample for any micropolygons rendered to that pixel.
 	if(m_fQuit)	return;
-	if(pCurrentRenderer()->optCurrent().iDisplayMode()&ModeRGB)
+	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
 	{
 		CqImageElement* ie=m_pieImage;
 		TqInt i;
@@ -1232,13 +1232,13 @@ void CqImageBuffer::RenderImage()
 		float Complete=(m_cXBuckets*m_cYBuckets);
 		Complete/=iBucket;
 		Complete=100.0f/Complete;
-		pCurrentRenderer()->Stats().SetComplete(Complete);
+		QGetRenderContext()->Stats().SetComplete(Complete);
 
 		RenderSurfaces(iBucket,xmin,xmax,ymin,ymax);
 		if(m_fQuit)
 		{
 			m_fDone=TqTrue;
-			pCurrentRenderer()->SignalDisplayDriverFinished(-1);
+			QGetRenderContext()->SignalDisplayDriverFinished(-1);
 			return;
 		}
 
@@ -1247,7 +1247,7 @@ void CqImageBuffer::RenderImage()
 		ClearBucket();
 	}
 	ImageComplete();
-	pCurrentRenderer()->SignalDisplayDriverFinished(0);
+	QGetRenderContext()->SignalDisplayDriverFinished(0);
 	m_fDone=TqTrue;
 }
 

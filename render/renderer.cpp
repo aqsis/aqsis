@@ -36,6 +36,7 @@
 #include	"render.h"
 #include	"shadervm.h"
 #include	"transform.h"
+#include	"file.h"
 
 START_NAMESPACE(Aqsis)
 
@@ -713,10 +714,10 @@ void CqRenderer::Initialise()
 	RiDeclare("name","uniform string");
 	
 	// Register built in shaders.
-	CqShader::RegisterShader("builtin_constant", Type_Surface, new CqShaderSurfaceConstant());
+	RegisterShader("builtin_constant", Type_Surface, new CqShaderSurfaceConstant());
 
 	// Register standard lightsource shaders.
-	CqShader::RegisterShader("ambientlight", Type_Lightsource, new CqShaderLightsourceAmbient());
+	RegisterShader("ambientlight", Type_Lightsource, new CqShaderLightsourceAmbient());
 
 	CqShaderRegister* pFirst=m_Shaders.pFirst();
 	pFirst->Create();
@@ -820,10 +821,10 @@ CqMatrix	CqRenderer::matNSpaceToSpace(const char* strFrom, const char* strTo, co
 DWORD WINAPI DisplayDriverThread(void* dummy)
 {
 	// Release any current display driver.
-	if(pCurrentRenderer()->pImage()!=0)
+	if(QGetRenderContext()->pImage()!=0)
 	{
-		pCurrentRenderer()->pImage()->Release();
-		pCurrentRenderer()->SetImage(0);
+		QGetRenderContext()->pImage()->Release();
+		QGetRenderContext()->SetImage(0);
 	}
 
 	// Load the requested display library accroding to the specified mode in the RiDisplay command.
@@ -835,7 +836,7 @@ DWORD WINAPI DisplayDriverThread(void* dummy)
 	TqInt i;
 	for(i=0; i<gaDisplayMap.size(); i++)
 	{
-		if(pCurrentRenderer()->optCurrent().strDisplayType().compare(gaDisplayMap[i].m_strName)==0)
+		if(QGetRenderContext()->optCurrent().strDisplayType().compare(gaDisplayMap[i].m_strName)==0)
 		{
 			strDriverFile=gaDisplayMap[i].m_strLocation;
 			bFound=TqTrue;
@@ -846,9 +847,9 @@ DWORD WINAPI DisplayDriverThread(void* dummy)
 	if(!bFound)
 	{
 		CqString strErr("Cannot find display driver ");
-		strErr+=pCurrentRenderer()->optCurrent().strDisplayType().c_str();
+		strErr+=QGetRenderContext()->optCurrent().strDisplayType().c_str();
 		strErr+=" : defaulting to framebuffer";
-		//strErr.Format("Cannot find display driver %s : defaulting to framebuffer", pCurrentRenderer()->optCurrent().strDisplayType().String());
+		//strErr.Format("Cannot find display driver %s : defaulting to framebuffer", QGetRenderContext()->optCurrent().strDisplayType().String());
 		CqBasicError(ErrorID_DisplayDriver,Severity_Normal,strErr.c_str());
 	}
 
@@ -858,8 +859,8 @@ DWORD WINAPI DisplayDriverThread(void* dummy)
 		CqImageBuffer*(*pCreateImage)(const char*)=reinterpret_cast<CqImageBuffer*(*)(const char*)>(GetProcAddress(hImage, "CreateImage"));
 		if(pCreateImage!=0)
 		{
-			CqImageBuffer* pDisplay=(*pCreateImage)(pCurrentRenderer()->optCurrent().strDisplayName().c_str());
-			pCurrentRenderer()->SetImage(pDisplay);
+			CqImageBuffer* pDisplay=(*pCreateImage)(QGetRenderContext()->optCurrent().strDisplayName().c_str());
+			QGetRenderContext()->SetImage(pDisplay);
 		}
 		void(*pMessageLoop)(void)=reinterpret_cast<void(*)(void)>(GetProcAddress(hImage, "MessageLoop"));
 		pCurrRenderer->m_semDisplayDriverReady.Signal();
@@ -1028,17 +1029,86 @@ void CqRenderer::AddParameterDecl(const char* strName, const char* strType)
 }
 
 
+//---------------------------------------------------------------------
+/** Register a shader of the specified type with the specified name.
+ */
 
-IsRenderer* pCurrentRenderer()
+void CqRenderer::RegisterShader(const char* strName, EqShaderType type, CqShader* pShader)
+{ 
+	assert(pShader);
+	m_Shaders.LinkLast(new CqShaderRegister(strName, type, pShader));
+}
+
+
+//---------------------------------------------------------------------
+/** Find a shader of the specified type with the specified name.
+ */
+
+CqShaderRegister* CqRenderer::FindShader(const char* strName, EqShaderType type)
+{
+	// Search the register list.
+	CqShaderRegister* pShaderRegister=m_Shaders.pFirst();
+	while(pShaderRegister)
+	{
+		if(pShaderRegister->strName()==strName && pShaderRegister->Type()==type)
+			return(pShaderRegister);
+
+		pShaderRegister=pShaderRegister->pNext();
+	}
+	return(0);
+}
+
+
+//---------------------------------------------------------------------
+/** Find a shader of the specified type with the specified name.
+ * If not found, try and load one.
+ */
+
+CqShader* CqRenderer::CreateShader(const char* strName, EqShaderType type)
+{
+	CqShaderRegister* pReg=FindShader(strName, type);
+	if(pReg!=0)
+	{
+		CqShader* pShader=pReg->Create();
+		RegisterShader(strName,type,pShader);
+		return(pShader);
+	}
+	else
+	{
+		// Search in the current directory first.
+		CqString strFilename(strName);
+		strFilename+=RI_SHADER_EXTENSION;
+		CqFile SLXFile(strFilename.c_str(),"shader");
+		if(SLXFile.IsValid())
+		{
+			CqShaderVM* pShader=new CqShaderVM();
+			pShader->LoadProgram(SLXFile);
+			RegisterShader(strName,type,pShader);
+			return(pShader);
+		}
+		else
+		{
+			CqString strError("Shader \"");
+			strError+=strName;
+			strError+="\" not found";
+			//strError.Format("Shader \"%s\" not found",strName.String());
+			CqBasicError(ErrorID_FileNotFound,Severity_Normal,strError.c_str());
+			return(0);
+		}
+	}
+}
+
+
+
+CqRenderer* QGetRenderContext()
 {
 	return(pCurrRenderer);
 }
 
 
-IsRenderer* IsRenderer::Create()	
+void QSetRenderContext(CqRenderer* pRend)
 {
-	pCurrRenderer=new CqRenderer;
-	return(pCurrRenderer);
+	pCurrRenderer=pRend;
 }
 
 //---------------------------------------------------------------------

@@ -27,7 +27,7 @@
 #ifndef NOISE_H_INCLUDED
 #define NOISE_H_INCLUDED 1
 
-#include	"specific.h"	// Needed for namespace macros.
+#include	"aqsis.h"
 
 #include	"random.h"
 #include	"ri.h"

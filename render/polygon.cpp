@@ -66,11 +66,11 @@ TqBool CqPolygonBase::Diceable()
 	// Get the bound in camera space.
 /*	CqBound B=Bound();
 	// Convert it to screen space
-	B.Transform(pCurrentRenderer()->matSpaceToSpace("camera","raster"));
+	B.Transform(QGetRenderContext()->matSpaceToSpace("camera","raster"));
 
 	// Get the appropriate shading rate.
 	float ShadingRate=pAttributes()->fEffectiveShadingRate();
-//	if(pCurrentRenderer()->Mode()==RenderMode_Shadows)
+//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
 //	{
 //		const TqFloat* pattrShadowShadingRate=pAttributes()->GetFloatAttribute("render","shadow_shadingrate");
 //		if(pattrShadowShadingRate!=0)
@@ -101,7 +101,7 @@ CqMicroPolyGridBase* CqPolygonBase::Dice()
 	TqFloat sA,tA,sB,tB,sC,tC,sD,tD;
 	TqFloat uA,vA,uB,vB,uC,vC,uD,vD;
 
-	const CqMatrix& matObjToRaster=pCurrentRenderer()->matSpaceToSpace("camera","raster");
+	const CqMatrix& matObjToRaster=QGetRenderContext()->matSpaceToSpace("camera","raster");
 
 	TqBool	bhasN=bHasNormals();
 	TqBool	bhass=bHass();
@@ -115,7 +115,7 @@ CqMicroPolyGridBase* CqPolygonBase::Dice()
 
 	// Get the appropriate shading rate.
 	float ShadingRate=pAttributes()->fEffectiveShadingRate();
-//	if(pCurrentRenderer()->Mode()==RenderMode_Shadows)
+//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
 //	{
 //		const TqFloat* pattrShadowShadingRate=pAttributes()->GetFloatAttribute("render","shadow_shadingrate");
 //		if(pattrShadowShadingRate!=0)
@@ -234,10 +234,10 @@ CqMicroPolyGridBase* CqPolygonBase::Dice()
 			}
 		}
 		// Only shade if the ImageBuffer mode is at least RGB
-		if(pCurrentRenderer()->optCurrent().iDisplayMode()&ModeRGB)
+		if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
 			pGrid->Shade();
 
-		pGrid->Split(pCurrentRenderer()->pImage());
+		pGrid->Split(QGetRenderContext()->pImage());
 	}*/
 }
 

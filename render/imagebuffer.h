@@ -30,11 +30,11 @@
 
 #include	<vector>
 
-#include	"specific.h"
+#include	"aqsis.h"
 
 #include	"bitvector.h"
 #include	"micropolygon.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 #include	"ri.h"
 #include	"sstring.h"
 #include	"scene.h"

@@ -28,14 +28,14 @@
 //{
 #define SURFACE_H_INCLUDED 1
 
-#include	"ri.h"
+#include	"aqsis.h"
 
+#include	"ri.h"
 #include	"attributes.h"
 #include	"transform.h"
 #include	"list.h"
 #include	"matrix.h"
 #include	"parameters.h"
-#include	"specific.h"
 #include	"bound.h"
 #include	"micropolygon.h"
 

@@ -29,7 +29,6 @@
 #define LIST_H_INCLUDED 1
 
 #include	"aqsis.h"
-#include	"specific.h"
 
 START_NAMESPACE(Aqsis)
 

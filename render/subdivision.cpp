@@ -27,7 +27,7 @@
 
 #include	"aqsis.h"
 #include	"subdivision.h"
-#include	"irenderer.h"
+#include	"renderer.h"
 #include	"micropolygon.h"
 #include	"imagebuffer.h"
 
@@ -1333,7 +1333,7 @@ TqBool CqSubdivisionPatch::Diceable()
 	for(iF=0; iF<cFaces(); iF++)
 		if(pFace(iF)->cEdges()!=4)	return(TqFalse);
 
-	const CqMatrix& matCtoR=pCurrentRenderer()->matSpaceToSpace("camera","raster");
+	const CqMatrix& matCtoR=QGetRenderContext()->matSpaceToSpace("camera","raster");
 
 	// Get the sides of the main quad (the first if everything goes according to plan.
 	CqVector3D vecA=SubdP(pFace(0)->pEdge(0)->pvHead()->iVertex());
@@ -1357,7 +1357,7 @@ TqBool CqSubdivisionPatch::Diceable()
 
 	// Get the shading rate.
 	float ShadingRate=pAttributes()->fEffectiveShadingRate();
-//	if(pCurrentRenderer()->Mode()==RenderMode_Shadows)
+//	if(QGetRenderContext()->Mode()==RenderMode_Shadows)
 //	{
 //		const TqFloat* pattrShadowShadingRate=m_pAttributes->GetFloatAttribute("render","shadow_shadingrate");
 //		if(pattrShadowShadingRate!=0)
@@ -1432,7 +1432,7 @@ CqMicroPolyGridBase* CqSubdivisionPatch::Dice()
 	TqInt iFace=0;
 	StoreDice(m_DiceCount, iFace, 0, 0, cuv+1, pGrid, uses_s, uses_t, uses_Cs, uses_Os, has_s, has_t, has_Cs, has_Os);
 	// Only shade if the ImageBuffer mode is at least RGB
-	if(pCurrentRenderer()->optCurrent().iDisplayMode()&ModeRGB)
+	if(QGetRenderContext()->optCurrent().iDisplayMode()&ModeRGB)
 		pGrid->Shade();
 
 	return(pGrid);
