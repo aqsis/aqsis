@@ -242,7 +242,7 @@ void Display()
 		for(c = stringPos.begin(); c != stringPos.end(); ++c)
 			glutBitmapCharacter(GLUT_BITMAP_8_BY_13, *c);
 
-		if( g_ClipWindowInfo )
+		if( g_ClipWindowInfo && ( g_ClipStartX != g_ClipEndX ) && ( g_ClipStartY != g_ClipEndY ) )
 		{
 			glColor4d(1, 1, 0, 0.5);
 
