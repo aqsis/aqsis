@@ -40,7 +40,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define	_qShareName	ppm2tif
+#define	_qShareName	BUILD_PPM2TIF
 #include	"share.h"
 
 

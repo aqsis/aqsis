@@ -62,7 +62,7 @@
 
 #include "../common/pixelsave.h"
 
-#define	_qShareName	tga2tif
+#define	_qShareName	BUILD_TGA2TIF
 #include	"share.h"
 
 

@@ -42,7 +42,7 @@
 
 #include "../common/pixelsave.h"
 
-#define	_qShareName	pcx2tif
+#define	_qShareName	BUILD_PCX2TIF
 #include	"share.h"
 
 

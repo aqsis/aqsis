@@ -45,7 +45,7 @@
 
 #include "../common/pixelsave.h"
 
-#define	_qShareName	jpg2tif
+#define	_qShareName	BUILD_JPG2TIF
 #include	"share.h"
 
 

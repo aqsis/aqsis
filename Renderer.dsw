@@ -87,9 +87,6 @@ Package=<4>
     Project_Dep_Name libslxargs
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name doxygen
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name aqsltell
     End Project Dependency
     Begin Project Dependency

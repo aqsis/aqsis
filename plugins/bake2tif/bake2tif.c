@@ -41,7 +41,7 @@
 
 #include "../common/pixelsave.h"
 
-#define	_qShareName	bake2tif
+#define	_qShareName	BUILD_BAKE2TIF
 #include	"share.h"
 
 static char *bake_open( FILE *bakefile, char *tiffname );
