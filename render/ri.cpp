@@ -67,6 +67,7 @@
 #include	"mtable.h"
 #include	"ilog.h"
 #include	"share.h"
+#include	"aqerror.h"
 
 using namespace Aqsis;
 
@@ -262,6 +263,51 @@ RtInt BuildParameterList( va_list pArgs, RtToken*& pTokens, RtPointer*& pValues 
 	pValues = &aValues[ 0 ];
 	return ( count );
 }
+
+//----------------------------------------------------------------------
+//	CqRangeCheckCallback implentation
+//	Use this with CheckMinMax
+//
+class	CqLogRangeCheckCallback	: public CqRangeCheckCallback
+{
+    public: 
+        CqLogRangeCheckCallback( IqLog* str ) 
+        { 
+            m_log = str; 
+        } 
+
+		void set( const char* name, const char*	priority )
+		{
+			m_name = name;
+			m_prio = priority;
+		}
+
+        virtual void operator()( int res )
+        { 
+            switch( res )
+			{
+				case CqRangeCheckCallback::UPPER_BOUND_HIT:
+				{
+					m_log->log( m_prio, "Invalid Value for %s. Value exceeded upper limit", m_name );
+				}
+
+				case CqRangeCheckCallback::LOWER_BOUND_HIT:
+				{
+					m_log->log( m_prio, "Invalid Value for %s. Value is below lower limit", m_name );
+				}
+
+				default:
+					;
+			}
+        } 
+
+
+	private:
+		IqLog*	m_log;
+		const char*	m_name;
+		const char* m_prio;
+};
+
 
 //----------------------------------------------------------------------
 // RiDeclare
@@ -619,23 +665,34 @@ RtVoid	RiClipping( RtFloat cnear, RtFloat cfar )
 //
 RtVoid	RiDepthOfField( RtFloat fstop, RtFloat focallength, RtFloat focaldistance )
 {
-	if( fstop < 0 )
+	CqLogRangeCheckCallback rc( QGetRenderContext() ->Logger() );
+
+	bool valid = true;
+
+	rc.set( "fstop", "WARN" );
+	if( !CheckMinMax( fstop, 0.0f, RI_INFINITY, &rc ) )
 	{
-		QGetRenderContext() ->Logger()->warn( "Negative fstop: %f, DepthOfField ignored", fstop );
-		return;
+		valid = false;
 	}
 	
-	if( focallength < 0 )
+	rc.set( "focallength", "WARN" );
+	if( !CheckMinMax( focallength, 0.0f, RI_INFINITY, &rc ) )
 	{
-		QGetRenderContext() ->Logger()->warn( "Negative focallength: %f, DepthOfField ignored", focallength );
+		valid = false;
+	}
+
+	rc.set( "focaldistance", "WARN" );
+	if( !CheckMinMax( focaldistance, 0.0f, RI_INFINITY, &rc ) )
+	{
+		valid = false;
+	}
+
+	if( !valid )
+	{
+		QGetRenderContext() ->Logger()->warn( "Invalid DepthOfField, DepthOfField ignored" );
 		return;
 	}
-	
-	if( focaldistance < 0 )
-	{
-		QGetRenderContext() ->Logger()->warn( "Negative focaldistance: %f, DepthOfField ignored", focaldistance );
-		return;
-	}
+
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "DepthOfField" ) [ 0 ] = fstop ;
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "DepthOfField" ) [ 1 ] = focallength ;
 	QGetRenderContext() ->optCurrent().GetFloatOptionWrite( "System", "DepthOfField" ) [ 2 ] = focaldistance ;
