@@ -36,9 +36,6 @@ Package=<4>
     Project_Dep_Name slpp
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name texer
-    End Project Dependency
-    Begin Project Dependency
     Project_Dep_Name filebuffer
     End Project Dependency
     Begin Project Dependency
@@ -58,6 +55,21 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name teqser
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "Release Archive"=".\Release Archive\Release Archive.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name All
     End Project Dependency
 }}}
 
@@ -379,27 +391,6 @@ Package=<4>
     End Project Dependency
     Begin Project Dependency
     Project_Dep_Name libddmsimple
-    End Project Dependency
-}}}
-
-###############################################################################
-
-Project: "texer"=.\texer\texer.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-    Begin Project Dependency
-    Project_Dep_Name libaqsis
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libddmsimple
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name libaqsistypes
     End Project Dependency
 }}}
 

@@ -37,4 +37,4 @@ cd ..\examples
 copy ..\..\ribfiles\*.rib .
 
 cd ..\..\
-wzzip -a -r -p Aqsis-0.5.2000.zip binary-archive\*.* 
+wzzip -a -r -p Aqsis_Win32.zip binary-archive\*.* 

@@ -64,27 +64,5 @@ PostBuild_Cmds=REM call ..\prep_install.bat
 
 # Name "All - Win32 Release"
 # Name "All - Win32 Debug"
-# Begin Source File
-
-SOURCE=..\prep_install.bat
-
-!IF  "$(CFG)" == "All - Win32 Release"
-
-# PROP Intermediate_Dir "\projects\renderer\Install"
-# PROP Ignore_Default_Tool 1
-# Begin Custom Build - Building archive
-OutDir=\projects\renderer\Install
-InputPath=..\prep_install.bat
-
-"$(OutDir)\render.dll" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	call ..\prep_install.bat
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "All - Win32 Debug"
-
-!ENDIF 
-
-# End Source File
 # End Target
 # End Project
