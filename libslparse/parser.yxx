@@ -58,6 +58,7 @@ void	ProcessShaderArguments( CqParseNode* pArgs );
 
 
 %union{
+	CqParseNode::Pos m_Pos;
 	CqParseNode*	m_pParseNode;
 	TqInt			m_VarType;
 	EqShaderType	m_ShaderType;
@@ -159,6 +160,7 @@ static void yyerror(const CqString Message);
 %type  <m_FloatConst>	number
 %type  <m_CommType>		comm_type
 %type  <m_pParseNode>	comm_function
+%type  <m_Pos>          get_filepos
 
 %start file
 %%
@@ -174,52 +176,60 @@ definitions
 	|	function_definition
 	;
 
+get_filepos
+	:
+		{
+			$$.m_LineNo = ParseLineNumber;
+			$$.m_strFileName = ParseStreamName.c_str();
+		}
+	;
+
 shader_definition
-	:	shader_type IDENTIFIER '(' formals ')' '{' statements '}'
+	:	shader_type IDENTIFIER get_filepos '(' formals ')' '{' statements '}'
 							{
 								// Store a pointer to the actual shader.
 								$$=new CqParseNodeShader($2->c_str(),$1);
-								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
-								$$->AddLastChild($7);
+								$$->SetPos($3);
+								$$->AddLastChild($8);
 
 								// Now copy any initialisers from the formals list to their respective
 								// local variable definitions.
-								CqParseNode* pArgs=$4;
+								CqParseNode* pArgs=$5;
 								ProcessShaderArguments( pArgs );
-								$$->AddLastChild( $4 );
+								$$->AddLastChild( $5 );
 							}
-	|	shader_type SYMBOL '(' formals ')' '{' statements '}'
+	|	shader_type SYMBOL get_filepos '(' formals ')' '{' statements '}'
 							{
 								// Store a pointer to the actual shader.
 								CqString strName;
 								if($2.eType&1)	strName=CqVarDef::GetVariablePtr($2.VarRef)->strName();
 								else			strName=CqFuncDef::GetFunctionPtr($2.FuncRef)->strName();
 								$$=new CqParseNodeShader(strName.c_str(),$1);
-								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
-								$$->AddLastChild($7);
+								$$->SetPos($3);
+								$$->AddLastChild($8);
 
 								// Now copy any initialisers from the formals list to their respective
 								// local variable definitions.
-								CqParseNode* pArgs=$4;
+								CqParseNode* pArgs=$5;
 								ProcessShaderArguments( pArgs );
-								$$->AddLastChild( $4 );
+								$$->AddLastChild( $5 );
 							}
-	|	shader_type IDENTIFIER '(' ')' '{' statements '}'
+	|	shader_type IDENTIFIER get_filepos '(' ')' '{' statements '}'
 							{
 								// Store a pointer to the actual shader.
 								$$=new CqParseNodeShader($2->c_str(), $1);
-								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
-								$$->AddLastChild($6);
+								$$->SetPos($3);
+								$$->AddLastChild($7);
 							}
-	|	shader_type SYMBOL '(' ')' '{' statements '}'
+	|	shader_type SYMBOL get_filepos '(' ')' '{' statements '}'
 							{
 								// Store a pointer to the actual shader.
 								CqString strName;
 								if($2.eType&1)	strName=CqVarDef::GetVariablePtr($2.VarRef)->strName();
 								else			strName=CqFuncDef::GetFunctionPtr($2.FuncRef)->strName();
 								$$=new CqParseNodeShader(strName.c_str(),$1);
-								$$->SetPos(ParseLineNumber,ParseStreamName.c_str());
-								$$->AddLastChild($6);
+								$$->SetPos($3);
+								$$->AddLastChild($7);
 							}
 	;
  

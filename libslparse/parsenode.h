@@ -34,6 +34,13 @@ class CqParseNodeShader;
 class CqParseNode : public CqListEntry<CqParseNode>, public IqParseNode
 {
 public:
+    struct Pos
+    {
+	TqInt m_LineNo;
+	const char* m_strFileName;
+    };
+
+
     CqParseNode() : m_pChild( 0 ), m_pParent( 0 ), m_fVarying( TqFalse ), m_LineNo( -1 )
     {}
     virtual	~CqParseNode()
@@ -170,6 +177,11 @@ public:
     {
         m_LineNo = LineNo;
         m_strFileName = strFileName;
+    }
+    void	SetPos( const Pos& pos )
+    {
+        m_LineNo = pos.m_LineNo;
+        m_strFileName = pos.m_strFileName;
     }
 
     virtual	TqBool	Optimise();
