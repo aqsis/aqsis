@@ -351,6 +351,10 @@ public:
     {
         return ( m_TrimLoops.TrimPoint( p ) );
     }
+    virtual const TqBool bIsLineIntersecting( const CqVector2D& v1, const CqVector2D& v2 ) const
+    {
+        return ( m_TrimLoops.LineIntersects( v1, v2 ) );
+    }
     virtual	TqInt	TrimDecimation( const CqTrimCurve& Curve );
     virtual	void	PrepareTrimCurve()
     {

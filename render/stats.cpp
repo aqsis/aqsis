@@ -457,7 +457,7 @@ void CqStats::PrintStats( TqInt level ) const
 
         MSG << "Micropolygons:\n\t"
         << STATS_INT_GETI( MPG_allocated ) << " created (" << STATS_INT_GETI( MPG_culled ) << " culled)\n"
-        << "\t" <<STATS_INT_GETI( MPG_peak ) << " peak, " << STATS_INT_GETI( MPG_trimmed ) << " trimmed, " << STATS_INT_GETI( MPG_missed ) << " missed (" << _mpg_m_q << "%)\n\t"
+        << "\t" <<STATS_INT_GETI( MPG_peak ) << " peak, " << STATS_INT_GETI( MPG_trimmed ) << " trimmed, ( " << STATS_INT_GETI( MPG_trimmedout ) << " completely ) " << STATS_INT_GETI( MPG_missed ) << " missed (" << _mpg_m_q << "%)\n\t"
         << "\n\tMPG Area:\t" <<STATS_INT_GETF( MPG_average_area ) / STATS_INT_GETI( MPG_allocated ) << " average \n\t\t\t"
         << STATS_INT_GETF( MPG_min_area ) << " min\n\t\t\t"
         << STATS_INT_GETF( MPG_max_area ) << " max\n\t"

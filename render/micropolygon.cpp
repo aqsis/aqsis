@@ -713,19 +713,26 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
             TqBool fTrimmed = TqFalse;
             if ( bCanBeTrimmed )
             {
-                TqFloat fu, fv;
-                pVar(EnvVars_u) ->GetFloat( fu, iIndex );
-                pVar(EnvVars_v) ->GetFloat( fv, iIndex );
-                TqBool fTrimA = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-                pVar(EnvVars_u) ->GetFloat( fu, iIndex + 1 );
-                pVar(EnvVars_v) ->GetFloat( fv, iIndex + 1 );
-                TqBool fTrimB = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-                pVar(EnvVars_u) ->GetFloat( fu, iIndex + cu + 2 );
-                pVar(EnvVars_v) ->GetFloat( fv, iIndex + cu + 2 );
-                TqBool fTrimC = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-                pVar(EnvVars_u) ->GetFloat( fu, iIndex + cu + 1 );
-                pVar(EnvVars_v) ->GetFloat( fv, iIndex + cu + 1 );
-                TqBool fTrimD = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
+                TqFloat u1, v1, u2, v2, u3, v3, u4, v4;
+
+                pVar(EnvVars_u) ->GetFloat( u1, iIndex );
+                pVar(EnvVars_v) ->GetFloat( v1, iIndex );
+                pVar(EnvVars_u) ->GetFloat( u2, iIndex + 1 );
+                pVar(EnvVars_v) ->GetFloat( v2, iIndex + 1 );
+                pVar(EnvVars_u) ->GetFloat( u3, iIndex + cu + 2 );
+                pVar(EnvVars_v) ->GetFloat( v3, iIndex + cu + 2 );
+                pVar(EnvVars_u) ->GetFloat( u4, iIndex + cu + 1 );
+                pVar(EnvVars_v) ->GetFloat( v4, iIndex + cu + 1 );
+                
+				CqVector2D vecA(u1, v1);
+				CqVector2D vecB(u2, v2);
+				CqVector2D vecC(u3, v3);
+				CqVector2D vecD(u4, v4);
+
+				TqBool fTrimA = pSurface() ->bIsPointTrimmed( vecA );
+                TqBool fTrimB = pSurface() ->bIsPointTrimmed( vecB );
+                TqBool fTrimC = pSurface() ->bIsPointTrimmed( vecC );
+                TqBool fTrimD = pSurface() ->bIsPointTrimmed( vecD );
 
                 if ( bOutside )
                 {
@@ -735,9 +742,19 @@ void CqMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, long y
                     fTrimD = !fTrimD;
                 }
 
-                // If al points are trimmed discard the MPG
+                // If all points are trimmed, need to check if the MP spans the trim curve at all, if not, then
+				// we can discard it altogether.
                 if ( fTrimA && fTrimB && fTrimC && fTrimD )
-                    continue;
+				{
+					if(!pSurface()->bIsLineIntersecting(vecA, vecB) && 
+					   !pSurface()->bIsLineIntersecting(vecB, vecC) && 
+					   !pSurface()->bIsLineIntersecting(vecC, vecD) && 
+					   !pSurface()->bIsLineIntersecting(vecD, vecA) )
+					{
+						STATS_INC( MPG_trimmedout );
+						continue;
+					}
+				}
 
                 // If any points are trimmed mark the MPG as needing to be trim checked.
                 //fTrimmed = fTrimA || fTrimB || fTrimC || fTrimD;
@@ -928,19 +945,26 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
             TqBool fTrimmed = TqFalse;
             if ( bCanBeTrimmed )
             {
-                TqFloat fu, fv;
-                pGridA->pVar(EnvVars_u) ->GetFloat( fu, iIndex );
-                pGridA->pVar(EnvVars_v) ->GetFloat( fv, iIndex );
-                TqBool fTrimA = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-                pGridA->pVar(EnvVars_u) ->GetFloat( fu, iIndex + 1 );
-                pGridA->pVar(EnvVars_v) ->GetFloat( fv, iIndex + 1 );
-                TqBool fTrimB = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-                pGridA->pVar(EnvVars_u) ->GetFloat( fu, iIndex + cu + 2 );
-                pGridA->pVar(EnvVars_v) ->GetFloat( fv, iIndex + cu + 2 );
-                TqBool fTrimC = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
-                pGridA->pVar(EnvVars_u) ->GetFloat( fu, iIndex + cu + 1 );
-                pGridA->pVar(EnvVars_v) ->GetFloat( fv, iIndex + cu + 1 );
-                TqBool fTrimD = pSurface() ->bIsPointTrimmed( CqVector2D( fu, fv ) );
+                TqFloat u1, v1, u2, v2, u3, v3, u4, v4;
+
+                pGridA->pVar(EnvVars_u) ->GetFloat( u1, iIndex );
+                pGridA->pVar(EnvVars_v) ->GetFloat( v1, iIndex );
+                pGridA->pVar(EnvVars_u) ->GetFloat( u2, iIndex + 1 );
+                pGridA->pVar(EnvVars_v) ->GetFloat( v2, iIndex + 1 );
+                pGridA->pVar(EnvVars_u) ->GetFloat( u3, iIndex + cu + 2 );
+                pGridA->pVar(EnvVars_v) ->GetFloat( v3, iIndex + cu + 2 );
+                pGridA->pVar(EnvVars_u) ->GetFloat( u4, iIndex + cu + 1 );
+                pGridA->pVar(EnvVars_v) ->GetFloat( v4, iIndex + cu + 1 );
+                
+				CqVector2D vecA(u1, v1);
+				CqVector2D vecB(u2, v2);
+				CqVector2D vecC(u3, v3);
+				CqVector2D vecD(u4, v4);
+
+				TqBool fTrimA = pSurface() ->bIsPointTrimmed( vecA );
+                TqBool fTrimB = pSurface() ->bIsPointTrimmed( vecB );
+                TqBool fTrimC = pSurface() ->bIsPointTrimmed( vecC );
+                TqBool fTrimD = pSurface() ->bIsPointTrimmed( vecD );
 
                 if ( bOutside )
                 {
@@ -950,9 +974,19 @@ void CqMotionMicroPolyGrid::Split( CqImageBuffer* pImage, long xmin, long xmax, 
                     fTrimD = !fTrimD;
                 }
 
-                // If al points are trimmed discard the MPG
+                // If all points are trimmed, need to check if the MP spans the trim curve at all, if not, then
+				// we can discard it altogether.
                 if ( fTrimA && fTrimB && fTrimC && fTrimD )
-                    continue;
+				{
+					if(!pSurface()->bIsLineIntersecting(vecA, vecB) && 
+					   !pSurface()->bIsLineIntersecting(vecB, vecC) && 
+					   !pSurface()->bIsLineIntersecting(vecC, vecD) && 
+					   !pSurface()->bIsLineIntersecting(vecD, vecA) )
+					{
+						STATS_INC( MPG_trimmedout );
+						continue;
+					}
+				}
 
                 // If any points are trimmed mark the MPG as needing to be trim checked.
                 //fTrimmed = fTrimA || fTrimB || fTrimC || fTrimD;

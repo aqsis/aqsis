@@ -5,7 +5,7 @@
  *	@brief	Implementation of trimcurce functionality.
  *
  *	Last change by:		$Author: pgregory $
- *	Last change date:	$Date: 2003/12/28 18:26:23 $
+ *	Last change date:	$Date: 2004/07/27 22:48:06 $
  */ 
 //------------------------------------------------------------------------------
 
@@ -134,22 +134,68 @@ void CqTrimLoop::Prepare( CqSurface* pSurface )
     }
 }
 
+/** This works by checking line segements in turn, and finding the ones
+    that span the sample point in y. For those line segments, a test is 
+	made to see which side of the line segment the point lies, and on which side
+	of the sample point the intersection with the line segment is.
+	For each crossing on the same side of the sample point, a state flag is flipped.
+	If the state is inside at the end, then the sample is inside the polygon.
+	See http://www.alienryderflex.com/polygon/
+ */
 
 const TqInt	CqTrimLoop::TrimPoint( const CqVector2D& v ) const
 {
     TqFloat x = v.x();
     TqFloat y = v.y();
-    TqInt i, j, c = 0;
+    TqInt i, j;
+	TqBool oddNodes = TqFalse;
     TqInt size = m_aCurvePoints.size();
     for ( i = 0, j = size - 1; i < size; j = i++ )
     {
-        if ( ( ( ( m_aCurvePoints[ i ].y() <= y ) && ( y < m_aCurvePoints[ j ].y() ) ) ||
-                ( ( m_aCurvePoints[ j ].y() <= y ) && ( y < m_aCurvePoints[ i ].y() ) ) ) &&
-                ( x < ( m_aCurvePoints[ j ].x() - m_aCurvePoints[ i ].x() ) * ( y - m_aCurvePoints[ i ].y() ) /
-                  ( m_aCurvePoints[ j ].y() - m_aCurvePoints[ i ].y() ) + m_aCurvePoints[ i ].x() ) )
-            c++;
+		TqFloat ax = m_aCurvePoints[ i ].x();
+		TqFloat ay = m_aCurvePoints[ i ].y();
+		TqFloat bx = m_aCurvePoints[ j ].x();
+		TqFloat by = m_aCurvePoints[ j ].y();
+		// Does this line segment span the point in y?
+        if ( ( ( ( ay < y ) && ( by >= y ) ) ||
+               ( ( by < y ) && ( ay >= y ) ) ) )
+		{
+			// Does the horizontal intersection lie on the right side of the point?
+			if( ax + ( y - ay ) / ( by - ay ) * ( bx - ax ) < x )
+				// Then flip the state.
+				oddNodes = ! oddNodes;
+		}
     }
-    return ( c );
+    return ( oddNodes );
+}
+
+
+const TqBool CqTrimLoop::LineIntersects(const CqVector2D& v1, const CqVector2D& v2) const
+{
+	TqFloat x1 = v1.x();
+	TqFloat y1 = v1.y();
+	TqFloat x2 = v2.x();
+	TqFloat y2 = v2.y();
+
+	TqInt i, j;
+    TqInt size = m_aCurvePoints.size();
+    for ( i = 0, j = size - 1; i < size; j = i++ )
+    {
+		TqFloat x3 = m_aCurvePoints[ i ].x();
+		TqFloat y3 = m_aCurvePoints[ i ].y();
+		TqFloat x4 = m_aCurvePoints[ j ].x();
+		TqFloat y4 = m_aCurvePoints[ j ].y();
+
+		TqFloat d = (x2-x1)*(y4-y3) - (y2-y1)*(x4-x3);
+		if(d == 0.0f)
+			continue;
+
+		TqFloat r = ((y1-y3)*(x4-x3) - (x1-x3)*(y4-y3)) / d;
+		TqFloat s = ((y1-y3)*(x2-x1) - (x1-x3)*(y2-y1)) / d;
+		if( (r >= 0.0f) && (s >= 0.0f) && (r <= 1.0f) && (s <= 1.0f))
+			return(TqTrue);
+	}
+	return(TqFalse);
 }
 
 
@@ -174,9 +220,27 @@ const TqBool	CqTrimLoopArray::TrimPoint( const CqVector2D& v ) const
     std::vector<CqTrimLoop>::const_iterator iLoop;
     std::vector<CqTrimLoop>::const_iterator iEnd = m_aLoops.end();
     for ( iLoop = m_aLoops.begin(); iLoop != iEnd; iLoop++ )
-        cCrosses += iLoop->TrimPoint( v );
+        cCrosses += iLoop->TrimPoint( v )? 1 : 0;
 
-    return ( !( cCrosses & 1 ) );
+	return ( !( cCrosses & 1 ) );
+}
+
+
+const TqBool	CqTrimLoopArray::LineIntersects( const CqVector2D& v1, const CqVector2D& v2 ) const
+{
+    // Early out if no trim loops at all.
+    if ( m_aLoops.size() == 0 )
+        return ( TqFalse );
+
+    TqInt	cCrosses = 0;
+
+    std::vector<CqTrimLoop>::const_iterator iLoop;
+    std::vector<CqTrimLoop>::const_iterator iEnd = m_aLoops.end();
+    for ( iLoop = m_aLoops.begin(); iLoop != iEnd; iLoop++ )
+        if(iLoop->LineIntersects( v1, v2 ))
+			return(TqTrue);
+
+	return ( TqFalse );
 }
 
 

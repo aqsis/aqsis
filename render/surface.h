@@ -558,6 +558,12 @@ public:
     {
         return ( TqFalse );
     }
+    /** Determine if the specified edge crosses the trimming curves.
+     */
+    virtual	const	TqBool	bIsLineIntersecting( const CqVector2D& v1, const CqVector2D& v2 ) const
+    {
+        return ( TqFalse );
+    }
     /** Determine the level at which to split a trim curve according
      * to its screen size after application to the surface paramters of this
      * surface.
