@@ -156,6 +156,7 @@ class CqDisplay
 										m_fDepthQuantizeDitherAmplitude(0),
 										m_strDisplayType("file"),
 										m_strDisplayName("ri.pic"),
+										m_cBackground(0.0, 0.0, 0.0),
 										m_iDisplayMode(ModeRGB)	{}
 	virtual				~CqDisplay()	{}
 
@@ -321,6 +322,11 @@ class CqDisplay
 						 */
 			void		SetiDisplayMode(const TqInt iValue)
 												{m_iDisplayMode=iValue;}
+			            /** Set/Get the background color.
+						 * 
+						 */
+			void        SetBkColorImager(CqColor background) {m_cBackground = background;}
+            CqColor     GetBkColorImager() { return m_cBackground;}
 
 	private:
 			TqFloat		m_fPixelVariance;					///< Pixel variance (not used).
@@ -343,6 +349,7 @@ class CqDisplay
 			CqString	m_strDisplayType;					///< Name of the display type to use.
 			CqString	m_strDisplayName;					///< Name of the display.
 			TqInt		m_iDisplayMode;						///< Display mode, from EqDisplayMode.
+			CqColor     m_cBackground;                      ///< Background color for imager "background"
 };
 
 
