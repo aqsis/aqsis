@@ -4213,29 +4213,9 @@ RtVoid	RiSubdivisionMeshV( RtToken scheme, RtInt nfaces, RtInt nvertices[], RtIn
 					floatargIndex += nargs[ argcIndex++ ];
 				}
 
-				pSubd2->AddRef();
-				for ( face = 0; face < nfaces; face++ )
-				{
-					// Don't add faces which are on the boundary, unless "interpolateboundary" is specified.
-					if( ( !pSubd2->pFacet( face )->isBoundaryFacet() ) || ( pSubd2->isInterpolateBoundary() ) )
-					{
-						// Don't add "hole" faces
-						if( !pSubd2->isHoleFace( face ) )
-						{
-							// Add a patch surface to the bucket queue
-							CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( pSubd2, pSubd2->pFacet( face ) );
-							pNew->AddRef();
-							TqFloat time = QGetRenderContext()->Time();
-							// Transform the points into camera space for processing,
-							pNew->Transform( QGetRenderContext() ->matSpaceToSpace( "object", "camera", CqMatrix(), pNew->pTransform() ->matObjectToWorld(time) ),
-											 QGetRenderContext() ->matNSpaceToSpace( "object", "camera", CqMatrix(), pNew->pTransform() ->matObjectToWorld(time) ),
-											 QGetRenderContext() ->matVSpaceToSpace( "object", "camera", CqMatrix(), pNew->pTransform() ->matObjectToWorld(time) ) );
-							CreateGPrim( pNew );
-						}
-					}
-				}
-				pSubd2->Release();
-				pPointsClass->Release();
+				CqSurfaceSubdivisionMesh* pMesh = new CqSurfaceSubdivisionMesh(pSubd2, nfaces );
+				pMesh->AddRef();
+				CreateGPrim(pMesh);
 			}
 			else
 			{

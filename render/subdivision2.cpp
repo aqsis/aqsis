@@ -1457,4 +1457,46 @@ TqBool CqSubdivision2::CanUsePatch( CqLath* pFace )
 	return( TqTrue );
 }
 
+
+CqBound	CqSurfaceSubdivisionMesh::Bound() const
+{
+	CqBound B;
+	if( NULL != m_pTopology && NULL != m_pTopology->pPoints() && NULL != m_pTopology->pPoints()->P() ) 
+	{
+		TqInt PointIndex;
+		for( PointIndex = m_pTopology->pPoints()->P()->Size()-1; PointIndex >= 0; PointIndex-- )
+			B.Encapsulate( m_pTopology->pPoints()->P()->pValue()[PointIndex] );
+	}
+	return(B);
+}
+
+TqInt CqSurfaceSubdivisionMesh::Split( std::vector<CqBasicSurface*>& aSplits )
+{
+	TqInt	CreatedPolys = 0;
+	TqInt	face;
+	// Guard
+	AddRef();
+	for ( face = 0; face < m_NumFaces; face++ )
+	{
+		// Don't add faces which are on the boundary, unless "interpolateboundary" is specified.
+		if( ( !m_pTopology->pFacet( face )->isBoundaryFacet() ) || ( m_pTopology->isInterpolateBoundary() ) )
+		{
+			// Don't add "hole" faces
+			if( !m_pTopology->isHoleFace( face ) )
+			{
+				// Add a patch surface to the bucket queue
+				CqSurfaceSubdivisionPatch* pNew = new CqSurfaceSubdivisionPatch( m_pTopology, m_pTopology->pFacet( face ) );
+				pNew->AddRef();
+				TqFloat time = QGetRenderContext()->Time();
+				aSplits.push_back( pNew );
+				CreatedPolys++;
+			}
+		}
+	}
+	// !Guard
+	Release();
+	return( CreatedPolys );
+}
+
+
 END_NAMESPACE( Aqsis )

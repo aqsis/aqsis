@@ -496,6 +496,87 @@ class CqSurfaceSubdivisionPatch : public CqBasicSurface
 		CqLath*			m_pFace;
 };
 
+//----------------------------------------------------------------------
+/** \class CqSurfacePointsPolygons
+ * Container surface to store the polygons making up a RiPointsPolygons surface.
+ */
+
+class CqSurfaceSubdivisionMesh : public CqSurface
+{
+	public:	
+		CqSurfaceSubdivisionMesh(CqSubdivision2* pTopology, TqInt NumFaces) : 
+			m_NumFaces(NumFaces),
+			m_pTopology( pTopology )
+		{
+			assert( NULL != m_pTopology );
+			m_pTopology->AddRef();
+		}
+		virtual	~CqSurfaceSubdivisionMesh()
+		{
+			m_pTopology->Release();
+		}
+
+		/** Get the gemoetric bound of this GPrim.
+		 */
+		virtual	CqBound	Bound() const;
+		/** Dice this GPrim.
+		 * \return A pointer to a new micropolygrid..
+		 */
+		virtual	CqMicroPolyGridBase* Dice()
+		{
+			return(NULL);
+		}
+		/** Split this GPrim into a number of other GPrims.
+		 * \param aSplits A reference to a CqBasicSurface array to fill in with the new GPrim pointers.
+		 * \return Integer count of new GPrims created.
+		 */
+		virtual	TqInt	Split( std::vector<CqBasicSurface*>& aSplits );
+		/** Determine whether this GPrim is diceable at its current size.
+		 */
+		virtual TqBool	Diceable()
+		{
+			return( TqFalse );
+		}
+
+		virtual void	Transform( const CqMatrix& matTx, const CqMatrix& matITTx, const CqMatrix& matRTx, TqInt iTime = 0 )
+		{
+			assert( NULL != m_pTopology );
+			m_pTopology->pPoints()->Transform( matTx, matITTx, matRTx, iTime );
+		}
+
+		virtual TqBool	IsMotionBlurMatch( CqBasicSurface* pSurf )
+		{
+			return( TqFalse );
+		}
+
+		virtual	TqUint	cUniform() const
+		{
+			return ( m_NumFaces );
+		}
+		virtual	TqUint	cVarying() const
+		{
+			assert( NULL != m_pTopology );
+			assert( NULL != m_pTopology->pPoints() );
+			return ( m_pTopology->pPoints()->cVarying() );
+		}
+		virtual	TqUint	cVertex() const
+		{
+			assert( NULL != m_pTopology );
+			assert( NULL != m_pTopology->pPoints() );
+			return ( m_pTopology->pPoints()->cVarying() );
+		}
+		virtual	TqUint	cFaceVarying() const
+		{
+			/// \todo Must work out what this value should be.
+			return ( 1 );
+		}
+
+	private:
+		TqInt	m_NumFaces;
+		CqSubdivision2*	m_pTopology;		///< Pointer to the associated CqPolygonPoints class.
+};
+
+
 END_NAMESPACE( Aqsis )
 
 #endif	//	SUBDIVISION2_H_LOADED
