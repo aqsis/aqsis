@@ -56,7 +56,7 @@ extern void gStats_setF( TqInt index, TqFloat value );
 
 //----------------------------------------------------------------------
 /** \class CqStatTimer
- * Class to handle timing of rendering processes as intervals.
+ * \brief Class to handle timing of rendering processes as intervals.
  */
 class CqStatTimer
 {
@@ -126,7 +126,7 @@ private:
 
 //----------------------------------------------------------------------
 /** \class CqStats
-   Class containing statistics information.
+   \brief Class containing statistics information.
  
    Before a rendering session the method Initialise() has to be called
 	 (it is also called by the constructor). Before each individual frame 
@@ -164,31 +164,37 @@ public:
         m_Complete = complete;
     }
 
+	//! Increase an integer specified by an EqIntIndex value by one
     static void IncI( const TqInt index )
     {
         m_intVars[ index ]++;
     }
 
+	//! Decrease an integer specified by an EqIntIndex value by one
     static void DecI( const TqInt index )
     {
         m_intVars[ index ]--;
     }
 
+    //! Set an integer specified by an EqIntIndex value to value
     static void setI( const TqInt index, const TqInt value )
     {
         m_intVars[ index ] = value;
     }
 
+    //! Get an integer specified by an EqIntIndex value
     static TqInt getI( const TqInt index )
     {
         return m_intVars[ index ];
     }
 
+    //! Set a float specified by an EqfloatIndex value to value
     static void setF( const TqInt index, const TqFloat value )
     {
         m_floatVars[ index ] = value;
     }
 
+    //! Get a float specified by an EqfloatIndex value
     static TqFloat getF( const TqInt index )
     {
         return m_floatVars[ index ];
@@ -219,6 +225,7 @@ public:
         return c;
     }
 
+	//! Enum to index the float array
     enum {	_First_float,
 
            // MPG stats
@@ -228,6 +235,8 @@ public:
            MPG_max_area,
 
            _Last_float } EqFloatIndex;
+
+	//! Enum to index the integer array
     enum {	_First_int,
 
            // GPrim stats
@@ -696,8 +705,7 @@ public:
 private:
     std::ostream& TimeToString( std::ostream& os, TqFloat t, TqFloat tot ) const;
 
-private:
-    TqFloat	m_Complete;						///< Current percentage complete.
+	TqFloat	m_Complete;						///< Current percentage complete.
 
     static TqFloat	 m_floatVars[ _Last_float ];		///< Float variables
     static TqInt		m_intVars[ _Last_int ];			///< Int variables

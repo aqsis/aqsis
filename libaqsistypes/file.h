@@ -45,9 +45,8 @@ START_NAMESPACE( Aqsis )
 
 //----------------------------------------------------------------------
 /** \class CqFile
- * Standard handling of all file types utilising the searchpath options.
+ *  \brief Standard handling of all file types utilising the searchpath options.
  */
-
 class CqFile
 {
 public:

@@ -42,7 +42,7 @@ class CqColor;
 
 //----------------------------------------------------------------------
 /** \class CqVector3D
- * Define class structure for 3D vector.
+ * \brief Define class structure for 3D vector.
  */
 
 class CqVector3D

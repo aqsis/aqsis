@@ -42,7 +42,7 @@ class CqVector4D;
 
 //----------------------------------------------------------------------
 /** \class CqVector2D
- * Define class structure for 2D vector.
+ * \brief Define class structure for 2D vector.
  */
 
 class CqVector2D

@@ -26,6 +26,13 @@
 #ifndef AQERROR_H_INCLUDED
 #define AQERROR_H_INCLUDED 1
 
+//! A callback/functor class to perform range checks
+/**
+ * This class is an abstract base class. In order to use the range check
+ * class, you need to derive a class from this (see CqLogRangeCheckCallback in ri.cpp)
+ * The function call takes an argument which is the result of a CheckMinMax function call.
+*/
+
 class CqRangeCheckCallback
 {
 public:
@@ -40,10 +47,12 @@ public:
            VALID	}	EqRangeCheck;
 };
 
+//! Range check funtion using CqRangeCheckCallback
 /**
  *	Do the range check
  *
- *	Calls a CqRangeCheckCallback functor class, which is responsible for the output
+ *	Calls a CqRangeCheckCallback functor class, which is responsible for the output.
+ *  \return A boolean indicating whether the variable val is inside the range [min,max]
  */
 template<class T>
 bool CheckMinMax( const T& val, const T& min, const T& max, CqRangeCheckCallback* callBack)

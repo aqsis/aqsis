@@ -39,7 +39,7 @@ class CqVector3D;
 
 //----------------------------------------------------------------------
 /** \class CqVector4D
- * Define class structure for 4D homogeneous vector.
+ * \brief Define class structure for 4D homogeneous vector.
  */
 
 class CqVector4D
