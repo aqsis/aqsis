@@ -11,6 +11,7 @@
 #include	"aqsis.h"
 #include	"version.h"
 #include	"argparse.h"
+#include	"ri.h"
 
 bool				g_envcube;
 ArgParse::apstring	g_swrap="black";

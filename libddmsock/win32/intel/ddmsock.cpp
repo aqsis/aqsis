@@ -33,7 +33,7 @@
 #include	"displaydriver.h"
 #include	"ddmsock.h"
 #include	"imagebuffer.h"
-#include	"file.h"
+#include	"rifile.h"
 
 
 START_NAMESPACE(Aqsis)
@@ -362,7 +362,7 @@ void CqDDManager::LoadDisplayLibrary(CqDDClient& dd)
 		CqBasicError(ErrorID_DisplayDriver,Severity_Normal,strErr.c_str());
 	}
 
-	CqFile fileDriver(strDriverFile.c_str(), "display");
+	CqRiFile fileDriver(strDriverFile.c_str(), "display");
 	if(fileDriver.IsValid())
 	{
 		TqInt ProcHandle=_spawnl(_P_NOWAITO, fileDriver.strRealName().c_str(), strDriverFile.c_str() ,NULL);

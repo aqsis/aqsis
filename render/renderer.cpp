@@ -36,7 +36,7 @@
 #include	"render.h"
 #include	"shadervm.h"
 #include	"transform.h"
-#include	"file.h"
+#include	"rifile.h"
 
 #ifdef	AQSIS_SYSTEM_WIN32
 void InitialiseINIData();
@@ -910,7 +910,7 @@ CqShader* CqRenderer::CreateShader(const char* strName, EqShaderType type)
 		// Search in the current directory first.
 		CqString strFilename(strName);
 		strFilename+=RI_SHADER_EXTENSION;
-		CqFile SLXFile(strFilename.c_str(),"shader");
+		CqRiFile SLXFile(strFilename.c_str(),"shader");
 		if(SLXFile.IsValid())
 		{
 			CqShaderVM* pShader=new CqShaderVM();

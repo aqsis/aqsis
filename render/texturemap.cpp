@@ -29,7 +29,7 @@
 
 #include	"aqsis.h"
 #include	"texturemap.h"
-#include	"file.h"
+#include	"rifile.h"
 #include	"exception.h"
 #include	"renderer.h"
 
@@ -132,7 +132,7 @@ void CqTextureMap::Open()
 {
 	m_IsValid=TqFalse;
 	// Find the file required.
-	CqFile	fileImage(m_strName.c_str(),"texture");
+	CqRiFile	fileImage(m_strName.c_str(),"texture");
 	if(!fileImage.IsValid())
 	{
 		CqString strErr("Cannot open texture file : ");
